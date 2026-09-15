@@ -1,0 +1,84 @@
+# =====================================================================
+#  TN-C  版本控制忽略规则
+# =====================================================================
+#  原则：**只跟踪"我们自己写的东西"**。
+#  整合包本体（280 个第三方 mod、几 MB 的 config、女仆模型包）不进版本库 ——
+#  体积大、是别人的版权内容、而且我们从不改它们。
+#
+#  仓库里应该有的：Java mod 源码、设计文档、工具脚本、以及我们往整合包里加的
+#  kubejs 数据 / openloader 覆盖层。朋友拿仓库 + 自己那份基础整合包 = 完整环境。
+# =====================================================================
+
+# ---------- eclipse ----------
+bin
+*.launch
+.settings
+.metadata
+.classpath
+.project
+
+# ---------- idea ----------
+out
+*.ipr
+*.iws
+*.iml
+.idea
+
+# ---------- gradle / 构建产物 ----------
+build
+.gradle
+
+# ---------- 运行环境（dev 服务器、世界存档、日志）----------
+run
+modpack/*/logs/
+modpack/*/crash-reports/
+modpack/*/saves/
+modpack/*/screenshots/
+
+# ---------- 第三方二进制不进库 ----------
+# libs/ 里那两个是 Sinytra Connector 重映射过的 SpellEngine jar（别人的版权内容）。
+# 需要编译时用这个脚本从本地整合包取回来：
+#   powershell -NoProfile -ExecutionPolicy Bypass -File tools\fetch-libs.ps1
+libs/*.jar
+
+# ---------- 整合包工作区：只保留我们的改动 ----------
+# 整合包原样内容（体积大 / 第三方）
+modpack/archive/
+modpack/*/mods/
+modpack/*/tlm_custom_pack/
+modpack/*/vaultpatcher/
+modpack/*/defaultconfigs/
+modpack/*/resourcepacks/
+modpack/*/shaderpacks/
+modpack/*/_archive/
+
+# config 下 99% 是整合包自带的，我们只加了 openloader 覆盖层（法术图标）。
+# 注意：**不能直接写 `modpack/*/config/`** —— 一旦整个目录被排除，
+# git 就不会进去看，后面的 `!` 放行规则全部失效。
+# 必须"排除子项、再放行子路径"：
+modpack/*/config/*
+!modpack/*/config/openloader/
+modpack/*/config/openloader/*
+!modpack/*/config/openloader/resources/
+modpack/*/config/openloader/resources/*
+!modpack/*/config/openloader/resources/TN-C/
+
+# ---------- 整合包压缩包 ----------
+# 仓库根目录常常放着整合包原包（元素觉醒...zip，1.5 GB）。
+# 它是"素材来源"，不是工程内容 —— 一旦被 git add -A 收进去，
+# .git 会直接涨到 1.5 GB，推都推不上去。
+*.zip
+*.7z
+*.rar
+
+# ---------- dev 夹具的编译产物 ----------
+# tools\dev-fixtures\ 里的桩引擎是**脚本生成**的（build-stub-engine.ps1），
+# 源码在 stub-engine\ 里，产物不该进库。
+tools/dev-fixtures/*.jar
+tools/dev-fixtures/build/
+
+# ---------- 杂项 ----------
+forge*changelog.txt
+*.bak
+*.tmp
+~$*

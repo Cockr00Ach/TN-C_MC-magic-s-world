@@ -1,0 +1,34 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="dev fixture, not for distribution"
+issueTrackerURL="https://example.invalid/"
+
+[[mods]]
+modId="spell_engine"
+version="0.0.0-devstub"
+displayName="SpellEngine DEV STUB"
+description='''
+【开发用桩，不是真引擎】
+
+只提供 net.spell_engine.internals.SpellHelper 和 SpellCast.Attempt 这两个类，
+让 TN-C 的 Mixin 在 dev 环境里也有注入目标，从而验证：
+  1. mixin 配置能被加载
+  2. 方法描述符和引擎一致（否则注入静默失败）
+  3. 注入真的执行到了 TN-C 的 ManaGate
+
+真引擎（Fabric mod，经 Sinytra Connector 跑）只在整合包里。
+'''
+
+[[dependencies.spell_engine]]
+modId="forge"
+mandatory=true
+versionRange="[47,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.spell_engine]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1,1.21)"
+ordering="NONE"
+side="BOTH"

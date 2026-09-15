@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "kubejs:aoshuqianghua_scroll",
+    "kubejs:huoyanqianghua_scroll",
+    "kubejs:bingshuangqianghua_scroll",
+    "kubejs:dadiqianghua_scroll",
+    "kubejs:haiyangqianghua_scroll",
+    "kubejs:kongqiqianghua_scroll",
+    "kubejs:shandianqianghua_scroll",
+    "kubejs:shejiqianghua_scroll",
+    "kubejs:shenshengqianghua_scroll",
+    "kubejs:wuliqianghua_scroll"
+  ]
+}

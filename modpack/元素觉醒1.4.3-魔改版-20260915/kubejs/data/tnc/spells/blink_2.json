@@ -1,0 +1,65 @@
+{
+  "school": "ARCANE",
+  "range": 0,
+  "learn": {
+    "tier": 2,
+    "level_cost_per_tier": 1,
+    "level_requirement_per_tier": 3
+  },
+  "cast": {
+    "duration": 0,
+    "animation": "spell_engine:one_handed_area_release",
+    "sound": {
+      "id": "minecraft:entity.enderman.teleport"
+    }
+  },
+  "release": {
+    "target": {
+      "type": "SELF"
+    },
+    "animation": "spell_engine:one_handed_area_release",
+    "sound": {
+      "id": "minecraft:entity.enderman.teleport"
+    }
+  },
+  "impact": [
+    {
+      "action": {
+        "type": "TELEPORT",
+        "teleport": {
+          "mode": "FORWARD",
+          "required_clearance_block_y": 2,
+          "forward": {
+            "distance": 16.0
+          },
+          "depart_particles": [
+            {
+              "particle_id": "minecraft:portal",
+              "shape": "SPHERE",
+              "origin": "CENTER",
+              "count": 45.0,
+              "pre_spawn_travel": 1,
+              "min_speed": 0.1,
+              "max_speed": 0.35
+            }
+          ],
+          "arrive_particles": [
+            {
+              "particle_id": "minecraft:reverse_portal",
+              "shape": "SPHERE",
+              "origin": "CENTER",
+              "count": 45.0,
+              "pre_spawn_travel": 1,
+              "min_speed": 0.1,
+              "max_speed": 0.35
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "cost": {
+    "exhaust": 0.3,
+    "cooldown_duration": 9
+  }
+}

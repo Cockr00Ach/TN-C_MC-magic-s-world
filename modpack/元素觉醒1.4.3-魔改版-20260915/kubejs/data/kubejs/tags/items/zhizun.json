@@ -1,0 +1,16 @@
+{
+  "replace": false,
+  "values": [
+    "kubejs:heidong_scroll",
+    "kubejs:huoyun_gaojie_scroll",
+    "kubejs:bingdongfazhen_scroll",
+    "kubejs:malkuth_giant_sword_slash_scroll",
+    "kubejs:mikaerzhufu_gao_scroll",
+    "kubejs:haiyangjiejie_scroll",
+    "kubejs:tianxing_scroll",
+    "kubejs:fengshenzhishi_scroll",
+    "kubejs:lingyuleiji_scroll",
+    "kubejs:jianyu_gaojie_scroll",
+    "kubejs:wangzhibaoku_scroll"
+  ]
+}

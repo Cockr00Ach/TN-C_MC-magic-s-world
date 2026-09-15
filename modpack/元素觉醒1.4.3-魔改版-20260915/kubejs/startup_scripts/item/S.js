@@ -1,0 +1,65 @@
+StartupEvents.registry('item', event => {
+  const entityIds = [
+    'cataclysm:maledictus',
+    'cataclysm:scylla',
+    'cataclysm:ancient_remnant',
+    'block_factorys_bosses:kraken',
+    'block_factorys_bosses:underworld_knight',
+    'block_factorys_bosses:yeti',
+    'block_factorys_bosses:sandworm',
+    'block_factorys_bosses:infernal_dragon',
+    'aquamirae:captain_cornelia',
+    'cataclysm:ignis',
+    'cataclysm:ender_guardian',
+    'cataclysm:the_leviathan',
+    'eeeabsmobs:realm_warden',
+    'eeeabsmobs:immortal',
+    'eeeabsmobs:nameless_guardian',
+    'soulsweapons:chaos_monarch',
+    'soulsweapons:moonknight',
+    'soulsweapons:returning_knight',
+    'soulsweapons:night_prowler',
+    'mebahelcreaturesdraugr:draugr_overlord',
+    'legendary_monsters:cloud_golem',
+    'legendary_monsters:the_obliterator',
+    'legendary_monsters:posessed_paladin',
+    'illageandspillage:magispeller',
+    'hadean_breathe:hadean_smasher',
+    'mutantmore:mutant_wither_skeleton',
+    'soulsweapons:day_stalker',
+    'bossesunleashed:celestial_jellyfish',
+    'torchesbecomesunlight:red',
+    'jerotesvillage:corrosiver',
+    'jerotesvillage:purple_sand_hag',
+    'jerotesvillage:gemstone_malignasaur',
+    'jerotesvillage:bright_land_beast',
+    'jerotesvillage:serpon_combat_executer',
+    'jerotesvillage:celestial_coilvine',
+    'jerotesvillage:tyrant_of_the_mountain_realm',
+    'jerotesvillage:second_rounder_golem',
+    'cataclysm:netherite_monstrosity',
+    'torchesbecomesunlight:rosmontis',
+    'torchesbecomesunlight:frost_nova',
+    'cataclysm:the_harbinger',
+    'minecraft:wither',
+    'torchesbecomesunlight:patriot',
+    'minecraft:ender_dragon',
+    'abyssal_corrupter:abyssal_corrupter',
+    'torchesbecomesunlight:gravestone',
+    'torchesbecomesunlight:gun_knight_patriot',
+    'twilightforest:hydra',
+    'twilightforest:snow_queen',
+    'illageandspillage:freakager',
+    'illageandspillage:spiritcaller',
+    'soulsweapons:draugr_boss',
+    'rpg_style_more_bosses:the_exoframe',
+    'mutantmore:mutant_blaze'
+  ]
+
+  entityIds.forEach(entityId => {
+  const id = entityId.split(':')[1]
+  event.create(`${id}_zhaohuan3`)
+    .texture('kubejs:item/1')
+    .rarity('epic')
+  })
+})

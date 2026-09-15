@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "kubejs:air_zhiguo",
+    "kubejs:arcane_zhiguo",
+    "kubejs:earth_zhiguo",
+    "kubejs:fire_zhiguo",
+    "kubejs:frost_zhiguo",
+    "kubejs:healing_zhiguo",
+    "kubejs:lightning_zhiguo",
+    "kubejs:water_zhiguo",
+    "kubejs:wuli_zhiguo",
+    "kubejs:youxia_zhiguo"
+  ]
+}

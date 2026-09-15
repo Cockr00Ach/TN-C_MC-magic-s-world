@@ -1,0 +1,135 @@
+{
+  "school": "LIGHTNING",
+  "group": "primary",
+  "range": 32.0,
+  "learn": {
+    "tier": 5,
+    "level_cost_per_tier": 15,
+    "level_requirement_per_tier": 20
+  },
+  "cast": {
+    "duration": 2.5,
+    "animation": "spell_engine:one_handed_sky_charge",
+    "sound": {
+      "id": "spell_engine:generic_lightning_casting",
+      "volume": 1.2,
+      "randomness": 0
+    },
+    "particles": [
+      {
+        "particle_id": "spell_engine:electric_arc_b",
+        "shape": "SPHERE",
+        "origin": "CENTER",
+        "count": 30.0,
+        "min_speed": 0.3,
+        "max_speed": 1.5
+      }
+    ]
+  },
+  "release": {
+    "target": {
+      "type": "METEOR",
+      "meteor": {
+        "launch_height": 30,
+        "launch_properties": {
+          "velocity": 3.0,
+          "extra_launch_count": 4,
+          "extra_launch_delay": 6
+        },
+        "projectile": {
+          "homing_angle": 1.0,
+          "divergence": 4.0,
+          "client_data": {
+            "travel_particles": [
+              {
+                "particle_id": "spell_engine:electric_arc_a",
+                "shape": "CIRCLE",
+                "rotation": "LOOK",
+                "origin": "CENTER",
+                "count": 12.0,
+                "min_speed": 0.1,
+                "max_speed": 0.4
+              }
+            ],
+            "model": {
+              "model_id": "berserker_rpg:projectile/lightning_bolt",
+              "light_emission": "RADIATE",
+              "scale": 5.0
+            }
+          }
+        }
+      }
+    },
+    "animation": "spell_engine:one_handed_area_release",
+    "sound": {
+      "id": "entity.lightning_bolt.thunder",
+      "volume": 1.0
+    }
+  },
+  "impact": [
+    {
+      "action": {
+        "type": "DAMAGE",
+        "damage": {
+          "spell_power_coefficient": 2.2,
+          "knockback": 1.0
+        }
+      },
+      "particles": [
+        {
+          "particle_id": "spell_engine:electric_arc_a",
+          "shape": "CIRCLE",
+          "origin": "CENTER",
+          "count": 60.0,
+          "min_speed": 1.0,
+          "max_speed": 4.0
+        }
+      ],
+      "sound": {
+        "id": "item.trident.thunder",
+        "volume": 1.0
+      }
+    },
+    {
+      "action": {
+        "type": "FIRE",
+        "fire": {
+          "duration": 4
+        }
+      }
+    }
+  ],
+  "area_impact": {
+    "radius": 6.0,
+    "area": {
+      "distance_dropoff": "SQUARED"
+    },
+    "particles": [
+      {
+        "particle_id": "spell_engine:electric_arc_b",
+        "shape": "CIRCLE",
+        "origin": "CENTER",
+        "count": 120.0,
+        "min_speed": 1.5,
+        "max_speed": 6.0
+      },
+      {
+        "particle_id": "spell_engine:smoke_medium",
+        "shape": "SPHERE",
+        "origin": "CENTER",
+        "count": 60.0,
+        "min_speed": 0.2,
+        "max_speed": 0.8
+      }
+    ],
+    "sound": {
+      "id": "entity.lightning_bolt.impact",
+      "volume": 1.0
+    }
+  },
+  "cost": {
+    "exhaust": 1.0,
+    "cooldown_duration": 0.5,
+    "cooldown_haste_affected": false
+  }
+}

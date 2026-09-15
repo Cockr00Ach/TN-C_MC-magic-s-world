@@ -1,0 +1,25 @@
+StartupEvents.registry('item', event => {
+  event.create('dilaohuizhang')
+    .displayName('地牢徽章')
+    .texture('kubejs:item/dilaohuizhang')
+    .rarity('epic')
+    .fireResistant()
+
+  event.create('dilaohuizhang_atomic')
+    .displayName('atomic地牢徽章')
+    .texture('kubejs:item/dilaohuizhang')
+    .rarity('epic')
+    .fireResistant()
+
+  event.create('dilaohuizhang_explosion')
+    .displayName('爆裂魔法地牢徽章')
+    .texture('kubejs:item/dilaohuizhang')
+    .rarity('epic')
+    .fireResistant()
+
+  event.create('dilaohuizhang_xushici')
+    .displayName('虚式茈地牢徽章')
+    .texture('kubejs:item/dilaohuizhang')
+    .rarity('epic')
+    .fireResistant()
+})

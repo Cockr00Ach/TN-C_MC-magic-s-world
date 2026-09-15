@@ -1,0 +1,111 @@
+{
+  "school": "LIGHTNING",
+  "group": "primary",
+  "range": 0.0,
+  "learn": {
+    "tier": 4,
+    "level_cost_per_tier": 10,
+    "level_requirement_per_tier": 15
+  },
+  "cast": {
+    "duration": 2.0,
+    "animation": "spell_engine:two_handed_channeling",
+    "sound": {
+      "id": "spell_engine:generic_lightning_casting",
+      "randomness": 0
+    },
+    "particles": [
+      {
+        "particle_id": "spell_engine:electric_arc_b",
+        "shape": "CIRCLE",
+        "origin": "FEET",
+        "count": 20.0,
+        "min_speed": 0.2,
+        "max_speed": 1.0
+      }
+    ]
+  },
+  "release": {
+    "target": {
+      "type": "CLOUD",
+      "cloud": {
+        "volume": {
+          "radius": 8.0,
+          "area": {
+            "vertical_range_multiplier": 0.6
+          },
+          "sound": {
+            "id": "entity.lightning_bolt.thunder",
+            "volume": 0.7
+          }
+        },
+        "impact_tick_interval": 15,
+        "time_to_live_seconds": 10,
+        "client_data": {
+          "particles": [
+            {
+              "particle_id": "spell_engine:electric_arc_b",
+              "shape": "CIRCLE",
+              "origin": "FEET",
+              "count": 10.0,
+              "min_speed": 0.4,
+              "max_speed": 1.6
+            },
+            {
+              "particle_id": "spell_engine:smoke_medium",
+              "shape": "SPHERE",
+              "origin": "CENTER",
+              "count": 6.0,
+              "min_speed": 0.05,
+              "max_speed": 0.3
+            }
+          ]
+        }
+      }
+    },
+    "sound": {
+      "id": "spell_engine:generic_lightning_release"
+    }
+  },
+  "impact": [
+    {
+      "action": {
+        "type": "DAMAGE",
+        "damage": {
+          "spell_power_coefficient": 0.7,
+          "knockback": 0.2
+        }
+      },
+      "particles": [
+        {
+          "particle_id": "spell_engine:electric_arc_a",
+          "shape": "PIPE",
+          "origin": "FEET",
+          "count": 16.0,
+          "min_speed": 0.5,
+          "max_speed": 2.5
+        }
+      ],
+      "sound": {
+        "id": "item.trident.thunder",
+        "volume": 0.5
+      }
+    },
+    {
+      "action": {
+        "type": "STATUS_EFFECT",
+        "status_effect": {
+          "effect_id": "minecraft:weakness",
+          "duration": 3.0,
+          "amplifier": 0,
+          "apply_mode": "SET",
+          "show_particles": false
+        }
+      }
+    }
+  ],
+  "cost": {
+    "exhaust": 0.8,
+    "cooldown_duration": 0.5
+  }
+}

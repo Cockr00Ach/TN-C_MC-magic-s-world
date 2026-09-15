@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "kubejs:blink_1_scroll",
+    "kubejs:blink_2_scroll",
+    "kubejs:blink_3_scroll",
+    "kubejs:tnc_spark_scroll",
+    "kubejs:tnc_lightning_field_scroll",
+    "kubejs:tnc_lightning_strike_scroll",
+    "kubejs:tnc_lightning_storm_scroll",
+    "kubejs:tnc_heavenly_thunder_scroll"
+  ]
+}

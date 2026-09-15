@@ -1,0 +1,46 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.songzhikun",
+        "texture_width": 64,
+        "texture_height": 64,
+        "visible_bounds_width": 3,
+        "visible_bounds_height": 5,
+        "visible_bounds_offset": [0, 2, 0]
+      },
+      "bones": [
+        { "name": "Root", "pivot": [0, 0, 0] },
+        { "name": "AllBody", "parent": "Root", "pivot": [0, 0, 0] },
+
+        { "name": "UpBody", "parent": "AllBody", "pivot": [0, 17.135, 0] },
+
+        { "name": "Arm", "parent": "UpBody", "pivot": [0, 24.985, 0] },
+        { "name": "LeftArm", "parent": "Arm", "pivot": [4.485, 25.185, 0] },
+        { "name": "LeftForeArm", "parent": "LeftArm", "pivot": [4.485, 20.585, 0] },
+        { "name": "LeftHand", "parent": "LeftForeArm", "pivot": [4.77769, 15.99353, 0] },
+        { "name": "LeftHandLocator", "parent": "LeftHand", "pivot": [4.62124, 13.95979, 0.575] },
+        { "name": "RightArm", "parent": "Arm", "pivot": [-4.485, 25.185, 0] },
+        { "name": "RightForeArm", "parent": "RightArm", "pivot": [-4.485, 20.585, 0] },
+        { "name": "RightHand", "parent": "RightForeArm", "pivot": [-4.77769, 15.99353, 0] },
+        { "name": "RightHandLocator", "parent": "RightHand", "pivot": [-4.62124, 13.95979, 0.575] },
+
+        { "name": "AllHead", "parent": "UpBody", "pivot": [0, 27.485, 0] },
+        { "name": "Head", "parent": "AllHead", "pivot": [0, 27.485, 0] },
+
+        { "name": "waist_wear", "parent": "UpBody", "pivot": [0, 21.735, 0] },
+        { "name": "ElytraLocator", "parent": "UpBody", "pivot": [0, 26, 1.5] },
+        { "name": "RifleLocator", "parent": "UpBody", "pivot": [0, 22, 2] },
+        { "name": "PistolLocator", "parent": "UpBody", "pivot": [-3, 18.25, 0] },
+
+        { "name": "DownBody", "parent": "AllBody", "pivot": [0, 17.135, 0] },
+        { "name": "Leg", "parent": "DownBody", "pivot": [0, 17.135, 0] },
+        { "name": "LeftLeg", "parent": "Leg", "pivot": [2.0125, 15.41, 0] },
+        { "name": "LeftLowerLeg", "parent": "LeftLeg", "pivot": [1.86777, 9.2, -0.15144] },
+        { "name": "RightLeg", "parent": "Leg", "pivot": [-2.0125, 15.41, 0] },
+        { "name": "RightLowerLeg", "parent": "RightLeg", "pivot": [-1.86777, 9.2, -0.15144] }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,353 @@
+# TN-C mod jar verifier
+#
+#   Checks the built mod jar BEFORE the game is started, so that a
+#   "compiles fine but silently does nothing" mistake cannot slip through.
+#
+#   Checks:
+#     A. build artifact exists
+#     B. META-INF/mods.toml carries the expected mod id / version / version ranges
+#     C. all expected classes are inside the jar
+#     D. @Mod.EventBusSubscriber is present on the classes that rely on it
+#        (this is exactly the bug we hit: the event handlers compile, but are
+#         never registered, so the capability silently never attaches)
+#     E. class file bytecode version (61 = Java 17, 65 = Java 21)
+#     F. the copy installed in the modpack is byte-identical to the build output
+#
+# Usage:
+#   powershell -NoProfile -ExecutionPolicy Bypass -File verify_mod_jar.ps1
+#
+# Exit code 0 = pass, 1 = problems found.
+
+param(
+    [string]$WorkPack = '',
+    [string]$JarPath  = ''
+)
+
+$ErrorActionPreference = 'Stop'
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+
+# repo root / modpack / libs / live-instance discovery (no hardcoded D:\ModTest)
+. (Join-Path $PSScriptRoot '_common.ps1')
+
+if ([string]::IsNullOrWhiteSpace($WorkPack)) {
+    $WorkPack = Find-TncWorkPack
+    if (-not $WorkPack) { exit 1 }
+}
+
+if ([string]::IsNullOrWhiteSpace($JarPath)) {
+    $jars = @(Get-ChildItem $TncBuildLibs -Filter 'tnc-*.jar' -ErrorAction SilentlyContinue |
+              Where-Object { $_.Name -notmatch 'sources|javadoc' } | Sort-Object LastWriteTime -Descending)
+    if ($jars.Count -eq 0) { Write-Host "PROBLEM: no build artifact in $TncBuildLibs"; exit 1 }
+    $JarPath = $jars[0].FullName
+}
+
+$problems = 0
+function Fail([string]$message) { Write-Host "  [PROBLEM] $message"; $script:problems++ }
+function Ok([string]$message)   { Write-Host "  [ok]      $message" }
+
+Write-Host "jar: $JarPath"
+if (-not (Test-Path $JarPath)) { Write-Host "PROBLEM: jar not found"; exit 1 }
+Ok ("artifact present ({0:N0} bytes)" -f (Get-Item $JarPath).Length)
+
+$zip = [System.IO.Compression.ZipFile]::OpenRead($JarPath)
+try {
+    # ---------------- B. mods.toml ----------------
+    $tomlEntry = $zip.Entries | Where-Object { $_.FullName -eq 'META-INF/mods.toml' }
+    if (-not $tomlEntry) {
+        Fail "META-INF/mods.toml missing"
+    } else {
+        $reader = New-Object System.IO.StreamReader($tomlEntry.Open(), [System.Text.Encoding]::UTF8)
+        $toml = $reader.ReadToEnd(); $reader.Close()
+
+        foreach ($expected in @('modId="tnc"', 'loaderVersion="[47,)"', 'versionRange="[1.20.1,1.21)"')) {
+            if ($toml -match [regex]::Escape($expected)) { Ok "mods.toml contains $expected" }
+            else { Fail "mods.toml is missing $expected" }
+        }
+        if ($toml -match 'authors="YourNameHere') { Write-Host "  [note]    mods.toml still has the MDK placeholder author" }
+    }
+
+    # ---------------- C. expected classes ----------------
+    $expectedClasses = @(
+        'com/tnc/tnc/TNMod.class',
+        'com/tnc/tnc/Config.class',
+        'com/tnc/tnc/magic/Element.class',
+        'com/tnc/tnc/magic/MagicStoneData.class',
+        'com/tnc/tnc/magic/MagicStone.class',
+        'com/tnc/tnc/magic/MagicStone$Provider.class',
+        'com/tnc/tnc/magic/MagicStone$Registration.class',
+        'com/tnc/tnc/magic/SpellCatalog.class',
+        'com/tnc/tnc/magic/SpellCatalog$Entry.class',
+        'com/tnc/tnc/magic/MagicStoneLearning.class',
+        'com/tnc/tnc/magic/MagicStoneSelfTest.class',
+        'com/tnc/tnc/magic/MagicStoneDiagnostics.class',
+        'com/tnc/tnc/magic/ManaGate.class',
+        'com/tnc/tnc/mixin/SpellHelperManaGateMixin.class',
+        'com/tnc/tnc/magic/compat/SpellEngineBridge.class',
+        'com/tnc/tnc/magic/compat/SpellEngineManaHook.class',
+        'com/tnc/tnc/magic/compat/ManaGateProbe.class',
+        'com/tnc/tnc/magic/compat/ManaGateProbe$Impl.class',
+        'com/tnc/tnc/magic/compat/SpellEngineCaster.class',
+        'com/tnc/tnc/network/MagicStoneNetwork.class',
+        'com/tnc/tnc/network/MagicStoneClientSync.class',
+        'com/tnc/tnc/network/MagicStoneActionPacket.class',
+        'com/tnc/tnc/command/MagicStoneCommand.class',
+        'com/tnc/tnc/client/MagicStoneButton.class',
+        'com/tnc/tnc/client/MagicStoneScreen.class',
+        'com/tnc/tnc/client/MagicStoneClientEvents.class'
+    )
+    function Get-ClassText([string]$entryName) {
+        $entry = $zip.Entries | Where-Object { $_.FullName -eq $entryName }
+        if (-not $entry) { return $null }
+        $ms = New-Object System.IO.MemoryStream
+        $s = $entry.Open(); $s.CopyTo($ms); $s.Close()
+        $bytes = $ms.ToArray(); $ms.Dispose()
+        return [System.Text.Encoding]::ASCII.GetString($bytes)
+    }
+
+    foreach ($class in $expectedClasses) {
+        if ($zip.Entries | Where-Object { $_.FullName -eq $class }) { Ok "class present: $class" }
+        else { Fail "class missing from jar: $class" }
+    }
+
+    # ---------------- C2. the magic wand's data + assets ----------------
+    # The wand is what makes casting possible now ("hold a wand, press a number key"),
+    # and every one of these is a SILENT failure if missing:
+    #   * no spell pool  -> the wand's container references a pool that does not exist
+    #   * no item model  -> the item renders as the purple/black missing model
+    #   * no lang entry  -> the item shows its raw translation key
+    foreach ($res in @('data/tnc/spell_pools/tnc_lightning.json',
+                       'data/tnc/spell_assignments/magic_wand.json',
+                       'assets/tnc/models/item/magic_wand.json',
+                       'assets/tnc/textures/item/magic_wand.png')) {
+        if ($zip.Entries | Where-Object { $_.FullName -eq $res }) { Ok "resource present: $res" }
+        else { Fail "resource missing from jar: $res" }
+    }
+
+    # The assignment file is what tells the engine (BOTH sides) that this item is a
+    # spell holder: SpellRegistry.loadContainers() reads data/<ns>/spell_assignments/
+    # <item>.json into `containers`, and containerForItem() looks it up.
+    # Without it the client never shows the spell hotbar / number keys, SILENTLY.
+    # (This is exactly what happened: the wand existed and had NBT, but no assignment.)
+    $assignEntry = $zip.Entries | Where-Object { $_.FullName -eq 'data/tnc/spell_assignments/magic_wand.json' }
+    if ($assignEntry) {
+        $ar = New-Object System.IO.StreamReader($assignEntry.Open(), [System.Text.Encoding]::UTF8)
+        $assignText = $ar.ReadToEnd(); $ar.Close()
+        if ($assignText -match '"is_proxy"\s*:\s*true') {
+            Ok "wand assignment is a proxy container (same shape as the working mod's staffs)"
+        } else {
+            Fail "wand assignment should set is_proxy:true (SpellContainer.isValid() short-circuits on proxy)"
+        }
+        $missing2 = @()
+        foreach ($spell in @('tnc:spark', 'tnc:lightning_field', 'tnc:lightning_strike',
+                             'tnc:lightning_storm', 'tnc:heavenly_thunder')) {
+            if ($assignText -notmatch [regex]::Escape($spell)) { $missing2 += $spell }
+        }
+        if ($missing2.Count -eq 0) { Ok "wand assignment lists all 5 TN-C spells" }
+        else { Fail ("wand assignment is missing: " + ($missing2 -join ', ')) }
+    }
+
+    # our own pool must list exactly the 5 TN-C lightning spells (not the author's)
+    $poolEntry = $zip.Entries | Where-Object { $_.FullName -eq 'data/tnc/spell_pools/tnc_lightning.json' }
+    if ($poolEntry) {
+        $pr = New-Object System.IO.StreamReader($poolEntry.Open(), [System.Text.Encoding]::UTF8)
+        $poolText = $pr.ReadToEnd(); $pr.Close()
+        $missing = @()
+        foreach ($spell in @('tnc:spark', 'tnc:lightning_field', 'tnc:lightning_strike',
+                             'tnc:lightning_storm', 'tnc:heavenly_thunder')) {
+            if ($poolText -notmatch [regex]::Escape($spell)) { $missing += $spell }
+        }
+        if ($missing.Count -eq 0) { Ok "wand pool lists all 5 TN-C spells" }
+        else { Fail ("wand pool is missing: " + ($missing -join ', ')) }
+    }
+
+    # the wand item must be registered (its id appears in TNMod's constant pool)
+    $tnmodText = Get-ClassText 'com/tnc/tnc/TNMod.class'
+    if ($tnmodText -and $tnmodText.Contains('magic_wand')) {
+        Ok "TNMod registers the magic_wand item"
+    } else {
+        Fail "TNMod does not register magic_wand - /tnc wand would have nothing to give"
+    }
+
+    # ---------------- D. event bus annotations ----------------
+    # Without this annotation the class' @SubscribeEvent methods are never
+    # registered - the mod loads, compiles and simply does nothing at runtime.
+    $annotation = 'Lnet/minecraftforge/fml/common/Mod$EventBusSubscriber;'
+    foreach ($class in @('com/tnc/tnc/magic/MagicStone.class',
+                         'com/tnc/tnc/magic/MagicStone$Registration.class',
+                         'com/tnc/tnc/magic/MagicStoneDiagnostics.class',
+                         'com/tnc/tnc/Config.class',
+                         'com/tnc/tnc/command/MagicStoneCommand.class',
+                         'com/tnc/tnc/client/MagicStoneClientEvents.class')) {
+        $text = Get-ClassText $class
+        if ($null -eq $text) { continue }
+        if ($text.Contains($annotation)) { Ok "has @Mod.EventBusSubscriber: $class" }
+        else { Fail "MISSING @Mod.EventBusSubscriber on $class (its event handlers will never run!)" }
+    }
+
+    # capability provider should really implement ICapabilitySerializable
+    # (in the constant pool an implemented interface is stored as the plain
+    #  internal name, without the L...; descriptor wrapper)
+    $providerText = Get-ClassText 'com/tnc/tnc/magic/MagicStone$Provider.class'
+    if ($providerText -and $providerText.Contains('net/minecraftforge/common/capabilities/ICapabilitySerializable')) {
+        Ok "MagicStone Provider implements ICapabilitySerializable"
+    } else {
+        Fail "MagicStone Provider does not implement ICapabilitySerializable"
+    }
+
+    # ---------------- D1b. namespaced id arguments ----------------
+    # Brigadier's StringArgumentType.string() only reads unquoted chars from
+    # [0-9a-zA-Z_.+-] - ':' is NOT allowed, so "/tnc learn tnc:spark" fails with
+    # "Expected whitespace to end one argument, but found trailing data".
+    # Namespaced ids must go through ResourceLocationArgument.id().
+    # This actually shipped once and broke /tnc learn | forget | gatetest.
+    $cmdText = Get-ClassText 'com/tnc/tnc/command/MagicStoneCommand.class'
+    if ($cmdText -and $cmdText.Contains('net/minecraft/commands/arguments/ResourceLocationArgument')) {
+        Ok "command ids use ResourceLocationArgument (':' parses correctly)"
+    } else {
+        Fail "MagicStoneCommand does not use ResourceLocationArgument - namespaced ids like tnc:spark will fail to parse"
+    }
+
+    # ---------------- D2. mixin wiring ----------------
+    # Forge discovers mixin configs through the MixinConfigs manifest attribute,
+    # so a missing attribute silently disables every mixin we write.
+    if ($zip.Entries | Where-Object { $_.FullName -eq 'tnc.mixins.json' }) {
+        Ok "resource present: tnc.mixins.json"
+        # Two traps that both fail SILENTLY at runtime, so guard them here:
+        #  - a "plugin" entry: a mixin plugin runs during Mixin config prepare,
+        #    where ModList is still null -> NPE -> InvalidMixinException ->
+        #    "[net.minecraft.server.Main/FATAL]: Failed to start the minecraft server"
+        #    (this actually happened once; dev never reproduces it)
+        #  - "required": true: then a mismatch on a future engine version turns
+        #    from "the gate stops working" into "the game will not start"
+        $cfgEntry = $zip.Entries | Where-Object { $_.FullName -eq 'tnc.mixins.json' }
+        $cfgReader = New-Object System.IO.StreamReader($cfgEntry.Open(), [System.Text.Encoding]::UTF8)
+        $cfg = $cfgReader.ReadToEnd(); $cfgReader.Close()
+        if ($cfg -match '"plugin"') {
+            Fail "tnc.mixins.json declares a plugin - that crashes the server at startup (ModList is null during mixin prepare)"
+        } else {
+            Ok "tnc.mixins.json declares no plugin (the startup-crash trap)"
+        }
+        if ($cfg -match '"required"\s*:\s*false') {
+            Ok "tnc.mixins.json is required:false (engine mismatch degrades instead of crashing)"
+        } else {
+            Fail "tnc.mixins.json is not required:false - an engine update would stop the game from starting"
+        }
+        # defaultRequire:0 => an injector that fails to match is a WARNING, not an
+        # error. Belt and braces on top of required:false: the game must always
+        # start. Silent failure is acceptable *because* /tnc gatetest and the
+        # startup probe now report it loudly every launch.
+        # (Matches ysjxteams in this very pack - a working Forge mod that injects
+        #  into a Connector-loaded net.spell_engine class with the same setup.)
+        if ($cfg -match '"defaultRequire"\s*:\s*0') {
+            Ok "tnc.mixins.json uses defaultRequire:0 (a non-matching injector warns, never crashes)"
+        } else {
+            Fail "tnc.mixins.json should use defaultRequire:0 so a failed injection cannot break startup"
+        }
+    } else {
+        Fail "tnc.mixins.json missing from the jar"
+    }
+    $manifestEntry = $zip.Entries | Where-Object { $_.FullName -eq 'META-INF/MANIFEST.MF' }
+    if ($manifestEntry) {
+        $reader = New-Object System.IO.StreamReader($manifestEntry.Open(), [System.Text.Encoding]::UTF8)
+        $manifest = $reader.ReadToEnd(); $reader.Close()
+        if ($manifest -match 'MixinConfigs:\s*tnc\.mixins\.json') {
+            Ok "manifest declares MixinConfigs: tnc.mixins.json"
+        } else {
+            Fail "manifest has no MixinConfigs attribute (mixins would never load!)"
+        }
+    } else {
+        Fail "META-INF/MANIFEST.MF missing from the jar"
+    }
+
+    # ---------------- D3. mixin injection targets match the engine ----------------
+    # A single wrong character in a mixin method descriptor means the injection
+    # silently never happens. So: pull the descriptors out of our mixin class and
+    # compare them against javap of the real engine jar.
+    $engineJar = Get-ChildItem $TncLibsDir -Filter 'spell_engine-*.jar' -ErrorAction SilentlyContinue | Select-Object -First 1
+    $mixinText = Get-ClassText 'com/tnc/tnc/mixin/SpellHelperManaGateMixin.class'
+    if (-not $engineJar) {
+        Write-Host "  [note]    $TncLibsDir\spell_engine-*.jar not found, skipping mixin target check"
+        Write-Host "  [note]    run tools\fetch-libs.ps1 to fetch it from the modpack"
+    } elseif (-not $mixinText) {
+        Write-Host "  [note]    mana gate mixin class not in jar, skipping mixin target check"
+    } else {
+        $ours = [regex]::Matches($mixinText, 'attemptCasting\([^()]*\)Lnet/spell_engine/internals/casting/SpellCast\$Attempt;') |
+                ForEach-Object { $_.Value } | Sort-Object -Unique
+
+        # The 3-arg attemptCasting is a pure forwarder (bytecode: iconst_1 +
+        # invokestatic of the 4-arg), so injecting the 4-arg alone covers every
+        # caller. The config is required:false + defaultRequire:1, which means
+        # EVERY extra injection point is another way for the whole config to fail
+        # silently. So pin the count at exactly one.
+        $injectCount = ([regex]::Matches($mixinText, 'Lorg/spongepowered/asm/mixin/injection/Inject;')).Count
+        if ($injectCount -eq 1) {
+            Ok "mixin has exactly 1 @Inject (one silent-failure path, covers all callers)"
+        } else {
+            Fail "mixin has $injectCount @Inject annotations, expected exactly 1 (each extra one can silently disable the whole gate)"
+        }
+
+        $spellPower = Get-ChildItem $TncLibsDir -Filter 'spell_power-*.jar' -ErrorAction SilentlyContinue | Select-Object -First 1
+        # javap comes from whatever JDK is around (JAVA_HOME / the launcher's bundled
+        # runtime / PATH) - it used to be hardcoded to one user's folder.
+        $javapExe = Find-TncJdkTool -Name 'javap.exe'
+        if (-not $javapExe) {
+            Write-Host "  [note]    javap.exe not found (set JAVA_HOME), skipping mixin target check"
+        } else {
+        $cp = if ($spellPower) { "$($engineJar.FullName);$($spellPower.FullName)" } else { $engineJar.FullName }
+        $engineDump = & $javapExe -p -s -classpath $cp 'net.spell_engine.internals.SpellHelper' 2>&1 | Out-String
+
+        if ($ours.Count -eq 0) {
+            Fail "could not find any attemptCasting descriptor inside our mixin class"
+        }
+        foreach ($descriptor in $ours) {
+            # javap -s prints "descriptor: (...)...;" without the method name,
+            # so compare the descriptor body only.
+            $body = $descriptor.Substring('attemptCasting'.Length)
+            if ($engineDump.Contains($body)) {
+                Ok "mixin target matches engine: $descriptor"
+            } else {
+                Fail "mixin target NOT found in engine (injection would silently do nothing): $descriptor"
+            }
+        }
+        }
+    }
+    # ---------------- E. bytecode version ----------------
+    $tnmod = $zip.Entries | Where-Object { $_.FullName -eq 'com/tnc/tnc/TNMod.class' }
+    if ($tnmod) {
+        $ms = New-Object System.IO.MemoryStream
+        $s = $tnmod.Open(); $s.CopyTo($ms); $s.Close()
+        $bytes = $ms.ToArray(); $ms.Dispose()
+        $major = ($bytes[6] -shl 8) -bor $bytes[7]
+        $name = switch ($major) { 61 { 'Java 17' } 65 { 'Java 21' } default { "unknown ($major)" } }
+        Ok "bytecode major version $major ($name)"
+    }
+} finally {
+    $zip.Dispose()
+}
+
+# ---------------- F. installed copy ----------------
+# mods\ is never synced into the workspace copy, so the installed jar has to be
+# looked up in the live game instance. That instance is discovered (its folder
+# name is non-ASCII and every launcher nests it differently) instead of hardcoded.
+$livePack = Find-TncLivePack -WorkPack $WorkPack
+$installed = if ($livePack) { Join-Path $livePack ("mods\" + (Split-Path $JarPath -Leaf)) } else { $null }
+if (-not $livePack) {
+    Fail "live game instance not found (searched the usual launcher folders for '$(Split-Path $WorkPack -Leaf)')"
+    Write-Host "  [note]    pass -WorkPack explicitly, or just ignore this when only building"
+} elseif (-not (Test-Path $installed)) {
+    Fail "not installed into the live game instance: $installed"
+} else {
+    if ((Get-FileHash $JarPath).Hash -eq (Get-FileHash $installed).Hash) {
+        Ok "installed copy is identical to the build output"
+    } else {
+        Fail "installed copy differs from the build output (rebuild + copy again)"
+    }
+}
+if ($livePack -and (Test-Path (Join-Path $livePack 'mods'))) {
+    $modCount = (Get-ChildItem (Join-Path $livePack 'mods') -File -Filter *.jar).Count
+    Ok "live instance mods\ now holds $modCount jars"
+}
+
+Write-Host ''
+if ($problems -gt 0) { Write-Host "$problems problem(s) found."; exit 1 }
+Write-Host "mod jar verification passed."

@@ -1,0 +1,95 @@
+{
+  "school": "LIGHTNING",
+  "group": "primary",
+  "range": 16.0,
+  "learn": {
+    "tier": 3,
+    "level_cost_per_tier": 8,
+    "level_requirement_per_tier": 10
+  },
+  "cast": {
+    "duration": 1.5,
+    "animation": "spell_engine:one_handed_sky_charge",
+    "sound": {
+      "id": "spell_engine:generic_lightning_casting",
+      "randomness": 0
+    },
+    "particles": [
+      {
+        "particle_id": "spell_engine:white_spark_mini",
+        "shape": "CIRCLE",
+        "origin": "CENTER",
+        "count": 10.0,
+        "min_speed": 0.2,
+        "max_speed": 0.8
+      }
+    ]
+  },
+  "release": {
+    "target": {
+      "type": "CURSOR"
+    },
+    "animation": "spell_engine:one_handed_area_release",
+    "sound": {
+      "id": "entity.lightning_bolt.thunder",
+      "volume": 0.5
+    }
+  },
+  "impact": [
+    {
+      "action": {
+        "type": "DAMAGE",
+        "damage": {
+          "spell_power_coefficient": 1.4,
+          "knockback": 0.6
+        }
+      },
+      "particles": [
+        {
+          "particle_id": "spell_engine:electric_arc_a",
+          "shape": "PIPE",
+          "origin": "CENTER",
+          "count": 20.0,
+          "min_speed": 0.3,
+          "max_speed": 1.2
+        }
+      ],
+      "sound": {
+        "id": "item.trident.thunder",
+        "volume": 0.6
+      }
+    }
+  ],
+  "area_impact": {
+    "radius": 2.5,
+    "area": {
+      "distance_dropoff": "SQUARED"
+    },
+    "particles": [
+      {
+        "particle_id": "spell_engine:electric_arc_b",
+        "shape": "CIRCLE",
+        "origin": "CENTER",
+        "count": 30.0,
+        "min_speed": 0.5,
+        "max_speed": 2.0
+      },
+      {
+        "particle_id": "spell_engine:smoke_medium",
+        "shape": "SPHERE",
+        "origin": "CENTER",
+        "count": 10.0,
+        "min_speed": 0.05,
+        "max_speed": 0.2
+      }
+    ],
+    "sound": {
+      "id": "entity.lightning_bolt.impact",
+      "volume": 0.3
+    }
+  },
+  "cost": {
+    "exhaust": 0.5,
+    "cooldown_duration": 0.5
+  }
+}
