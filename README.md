@@ -39,12 +39,49 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\fetch-libs.ps1
 #    如果脚本找不到整合包，就显式指路：
 #    ... -File tools\fetch-libs.ps1 -PackDir "X:\...\<整合包>\mods\.connector"
 
-# 2) 编译
+# 2) ★ 开启「提交守卫」（每个 clone 只需一次）
+git config core.hooksPath tools/git-hooks
+
+# 3) 编译
 .\gradlew.bat build
 
-# 3) 校验产物（会检查一堆"编译通过但运行时静默失效"的坑）
+# 4) 校验产物（会检查一堆"编译通过但运行时静默失效"的坑）
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\verify_mod_jar.ps1
 ```
+
+### ★ 提交守卫：防止把 mod / 大文件提交进去
+
+**为什么需要它**：这仓库曾经在**第一次提交**时就被 `git add -A` 吞掉了根目录那个
+**1547 MB 的整合包 zip**，`.git` 直接涨到 1545 MB。`.gitignore` 只在"有人记得写规则"时有用，
+所以改成**机械拦截**：用 git 的 pre-commit 钩子，在提交发生前就拒绝。
+
+开了之后，只要你提交里含下面任何一类，提交会**直接被拒**（并告诉你为什么、怎么撤销）：
+
+| 拒绝的东西 | 原因 |
+|---|---|
+| `mods/*.jar` | 第三方 mod（版权 + 体积） |
+| `*.zip` / `*.7z` / `*.rar` | 压缩包（整合包 zip 就 1.5 GB） |
+| `libs/*.jar` | 第三方编译用 jar（由 `fetch-libs.ps1` 取） |
+| `tlm_custom_pack/`、`.connector/` | 第三方内容 |
+| `build/` `run/` `.gradle/` | 构建产物 / 世界存档 |
+| `*.class` `.dll` `.so` | 编译二进制 |
+| **任何 > 2 MB 的文件** | 兜底：大文件一律先问清楚 |
+
+被拒了怎么处理：
+```powershell
+git reset HEAD <那个文件>     # 只是取消暂存，文件还在磁盘上
+# 然后在 .gitignore 里加一条规则，别用 git add -f 硬塞
+```
+确实需要临时绕过：`git commit --no-verify`（**别养成习惯**）。
+
+想手动查一遍暂存区（不提交也能跑）：
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\check-staged.ps1
+# 正常输出类似： check-staged: 309 file(s), 1.55 MB - ok
+```
+
+> **健康基线：约 309 个文件 / 约 1.6 MB。** 每次 `git add -A` 后扫一眼文件数 ——
+> 数量级不对就是有大件混进来了。
 
 ### 装进游戏并验证
 

@@ -86,6 +86,25 @@ if ($copied -eq 0) { Write-Host 'ERROR: nothing copied.'; exit 1 }
 Write-Host ''
 Write-Host "libs\ now holds:"
 Get-ChildItem $libsDir -Filter '*.jar' | ForEach-Object { Write-Host ("  {0}  ({1:N0} bytes)" -f $_.Name, $_.Length) }
+
+# ---- one-time per-clone setup: enable the commit guard ----
+# The guard lives in the repo (tools/git-hooks/) but git only uses it when
+# core.hooksPath points there, and that setting is per-clone. Without it a stray
+# `git add -A` can swallow a 1.5 GB file - which actually happened once.
+$hooksPath = & git -C $repoRoot config core.hooksPath 2>$null
+Write-Host ''
+if ($hooksPath -ne 'tools/git-hooks') {
+    Write-Host '--------------------------------------------------------------'
+    Write-Host ' ONE MORE STEP - enable the commit guard (once per clone):'
+    Write-Host ''
+    Write-Host '   git config core.hooksPath tools/git-hooks'
+    Write-Host ''
+    Write-Host ' It rejects commits containing mod jars / archives / big files.'
+    Write-Host '--------------------------------------------------------------'
+} else {
+    Write-Host 'commit guard: enabled (core.hooksPath = tools/git-hooks)'
+}
+
 Write-Host ''
 Write-Host 'Now run:  .\gradlew.bat build'
 exit 0
