@@ -1,4 +1,4 @@
-﻿# Sync workspace copy <-> live modpack
+# Sync workspace copy <-> live modpack
 #
 #   sync.cmd init <packname>  create the workspace copy from the live pack
 #   sync.cmd diff             list differing files (default)
@@ -23,11 +23,59 @@ param(
 
     [string]$PackName = '',
 
-    [switch]$Force
+    [switch]$Force,
+
+    # Explicit path to the launcher's ".minecraft\versions" folder.
+    # Omit it and the script auto-detects (see Find-LiveVersionsRoot below).
+    [string]$LiveRoot = ''
 )
 
 $wsRoot   = $PSScriptRoot
-$liveRoot = "E:\download\正式版 2.12.6.1\.minecraft\versions"
+
+# ---- locate the live game instance's versions folder ----
+# Used to be hardcoded to "E:\download\正式版 2.12.6.1\.minecraft\versions",
+# which only works on one machine. Now it is discovered:
+#   1. -LiveRoot <path>                       (explicit wins)
+#   2. $env:TNC_LIVE_ROOT                     (env override, handy for a second PC)
+#   3. the usual launcher folders, looking for <root>\*\.minecraft\versions
+#      or <root>\.minecraft\versions
+function Find-LiveVersionsRoot {
+    param([string]$Explicit)
+
+    if (-not [string]::IsNullOrWhiteSpace($Explicit)) {
+        if (Test-Path $Explicit) { return $Explicit }
+        Write-Host "ERROR: -LiveRoot does not exist: $Explicit"; exit 1
+    }
+    if (-not [string]::IsNullOrWhiteSpace($env:TNC_LIVE_ROOT)) {
+        if (Test-Path $env:TNC_LIVE_ROOT) { return $env:TNC_LIVE_ROOT }
+        Write-Host "ERROR: TNC_LIVE_ROOT does not exist: $env:TNC_LIVE_ROOT"; exit 1
+    }
+
+    $roots = @(
+        'E:\download', 'D:\download', 'C:\download',
+        "$env:USERPROFILE\AppData\Roaming\.minecraft",
+        "$env:APPDATA\.minecraft"
+    )
+    foreach ($root in $roots) {
+        if (-not (Test-Path $root)) { continue }
+        $direct = Join-Path $root '.minecraft\versions'
+        if (Test-Path $direct) { return $direct }
+        foreach ($sub in Get-ChildItem $root -Directory -ErrorAction SilentlyContinue) {
+            $cand = Join-Path $sub.FullName '.minecraft\versions'
+            if (Test-Path $cand) { return $cand }
+        }
+    }
+    return $null
+}
+
+$liveRoot = Find-LiveVersionsRoot -Explicit $LiveRoot
+if (-not $liveRoot) {
+    Write-Host "ERROR: could not find a .minecraft\versions folder."
+    Write-Host "       Pass it explicitly:  sync.cmd diff -LiveRoot `"X:\...\.minecraft\versions`""
+    Write-Host "       or set the environment variable TNC_LIVE_ROOT."
+    exit 1
+}
+Write-Host "live versions root: $liveRoot"
 
 # Only these editable dirs are synced.
 # mods / saves / logs / backups / xaero / resourcepacks are never touched.

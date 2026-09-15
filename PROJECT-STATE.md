@@ -1454,3 +1454,94 @@ PCL 日志写着「当前剩余内存：3.1G」→ 就只给了 **3.1 GB**。
 3. PCL2 启动 元素觉醒1.4.3-魔改版-20260915 测试
 ```
 **IntelliJ 不能运行整合包** —— 整合包只能由 PCL2 启动。
+
+---
+
+# 九、版本控制与协作（2026-09-16 建立）
+
+远端：`https://github.com/Cockr00Ach/TN-C_MC-magic-s-world`（公开）
+本地：`D:\ModTest`，分支 `main`。**仓库只有 1.55 MB / 309 个文件**，clone 秒级。
+
+## 9.1 核心原则：**只跟踪我们自己写的东西**
+
+`.gitignore` 是这个工程的命脉。整合包里绝大多数是第三方内容，进版本库有三个问题：
+**版权（公开仓库二次分发 mod 会被投诉）、体积（GB 级）、而且我们从不改它们。**
+
+| 进仓库 | 不进仓库 |
+|---|---|
+| `src/` `design/` `tools/` `model-source/` | `modpack/*/mods/`（280 个 jar） |
+| `modpack/*/kubejs/`（211 个文件，含作者脚本） | `modpack/*/config/`（45.9 MB，只保留我们的 openloader 覆盖层 6 个文件） |
+| `modpack/*/config/openloader/resources/TN-C/` | `modpack/*/tlm_custom_pack/`（37.4 MB 女仆模型包） |
+| 根目录配置 / README / 本文档 | `build/` `run/` `.gradle/` `libs/*.jar` `*.zip` |
+
+> ⚠️ **`config` 那段不能直接写 `modpack/*/config/`** —— 一旦整个目录被排除，
+> git 就不进去看，后面用 `!` 放行的规则**全部失效**。必须"排除子项、再放行子路径"（见 .gitignore 注释）。
+
+## 9.2 朋友怎么拿到完整环境
+
+```
+基础整合包 zip（1.5 GB，网盘发）      ← 279 个 mod + config + 女仆模型包
+        ＋
+git clone（1.55 MB）                  ← 我们的代码 + kubejs + 法术图标
+        ＋
+额外两个 jar（见下）                   ← 基础包缺 / 构建产物
+        ＝ 完整可运行环境
+```
+
+**⚠️ 基础包里缺 `touhoulittlemaid-1.5.2-forge+mc1.20.1.jar`**（作者没写进说明，我们当初也是手工补的）。
+对比过：zip 里 **279** 个 jar，好的实例里是 **280** 个。朋友用同一个包会一模一样地缺，必须单独发。
+`tnc-1.0.0.jar` 他自己 `gradlew build` 就有，不必发。
+
+朋友的步骤（已在 `README.md` 里）：
+```powershell
+git clone https://github.com/Cockr00Ach/TN-C_MC-magic-s-world.git
+cd TN-C_MC-magic-s-world
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\fetch-libs.ps1   # 取回编译用 jar
+.\gradlew.bat build
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\install-to-pack.ps1 -Wait
+```
+
+## 9.3 踩过的三个坑
+
+**① 首次提交时 `.git` 悄悄涨到 1545 MB。**
+仓库根目录放着整合包原包 `元素觉醒1.4.3-魔改版-20260915.zip`（1547 MB），
+`git add -A` 把它收了进去。发现得早（只有一个提交、还没配远端）→ **删掉 `.git` 重建**最干净。
+现在 `.gitignore` 挡了 `*.zip / *.7z / *.rar`。
+
+> **铁律：`git add -A` 之后一定看一眼文件数。** 健康值 ~309 个文件 / ~1.6 MB；
+> 哪天变成几十 MB 或几百个文件，就是有大件混进来了。
+
+**② GitHub 直连被墙。**
+`github.com:443` TCP 四次全失败（DNS 解析正常）。但机器上跑着 Clash（内核 `ninja-mihomo`）
+在 `127.0.0.1:6789`，系统代理也是开的 —— **而 git 默认不用 Windows 系统代理**。
+所以只给 github 配了代理（不影响别的站点）：
+```
+git config --global http.https://github.com.proxy http://127.0.0.1:6789
+```
+⚠️ **Clash 没开时 git 连 GitHub 会报 `Connection was reset`** —— 那是代理没开，不是仓库坏了。
+
+**③ 工具脚本里一堆硬编码绝对路径。**
+`verify_mod_jar.ps1` 等 6 个脚本写死了 `D:\ModTest\`、`E:\download\...`，
+甚至 `C:\Users\FDCX\...\javap.exe`；`modpack\sync.ps1` 写死了
+`E:\download\正式版 2.12.6.1\.minecraft\versions`。
+**朋友克隆到别的路径就全废。** 已全部改成自动推断：
+- `tools\_common.ps1`：统一的仓库根 / 整合包 / 实时实例 / java 进程分类 / GBK 日志读取
+- `Find-TncJdkTool`：javap/javac/jar 从 `JAVA_HOME` → 启动器自带 runtime → PATH 里找
+- `sync.ps1` 支持 `-LiveRoot <路径>` 或环境变量 `TNC_LIVE_ROOT`，否则自动搜索
+
+## 9.4 日常协作流程
+
+```powershell
+git pull                       # 动手前先拉
+git checkout -b 你的分支名       # 一人一分支，别都往 main 直接写
+# ...改代码... 至少保证 .\gradlew.bat build 能过
+git add -A ; git status        # ★ 确认文件数还是 ~309
+git commit -m "做了什么"
+git push -u origin 你的分支名
+# 再到 GitHub 发 Pull Request，另一个人看过再合进 main
+```
+
+**最容易冲突的三个文件**，改之前互相说一声：
+`PROJECT-STATE.md`（两人都在记）、`kubejs/data/tnc/spells/*.json`（同一批数值）、
+`Config.java` / `SpellCatalog.java`（数值表与法术目录）。
+
