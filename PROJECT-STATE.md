@@ -1545,3 +1545,37 @@ git push -u origin 你的分支名
 `PROJECT-STATE.md`（两人都在记）、`kubejs/data/tnc/spells/*.json`（同一批数值）、
 `Config.java` / `SpellCatalog.java`（数值表与法术目录）。
 
+## 9.5 ★ 提交守卫：机械拦截 mod / 大文件（2026-09-16）
+
+**9.3 的坑①不能靠记性防**（`.gitignore` 只在"有人记得写规则"时有用），所以做了自动化：
+
+```
+tools/git-hooks/pre-commit   ← git 的 pre-commit 钩子壳
+tools/check-staged.ps1       ← 真正的检查（也可手动跑）
+```
+
+**每个 clone 要开一次**（`core.hooksPath` 是 per-clone 的）：
+```
+git config core.hooksPath tools/git-hooks
+```
+`tools\fetch-libs.ps1` 结尾会检查并提示这一条 —— 但**不会擅自改你的 git 配置**。
+
+**拒绝规则**：`mods/*.jar`、`*.zip|7z|rar`、`libs/*.jar`、`tlm_custom_pack/`、`.connector/`、
+`build/` `run/` `.gradle/`、`*.class|dll|so`、以及**任何 > 2 MB 的文件**（兜底）。
+被拒时退出码 1，并打印原因 + 撤销方法（`git reset HEAD <file>`）。
+
+**实测**（不是写完就交）：塞入 3 MB 文件 + 用 `git add -f` 强行暂存一个 `mods/*.jar`
+→ 提交被拒，两类问题都列出（`[forbidden]` / `[too big]`）；清理后正常提交放行，
+钩子自己打印 `check-staged: 4 file(s), 0.02 MB - ok`。
+
+**踩到的一个坑（值得记）**：钩子输出里原本每行都被包成
+`System.Management.Automation.RemoteException`，看着像钩子坏了。
+根因是 **empty-string 输出**（`Write-Host ''` / `Write-Output ''`）在
+"MSYS sh → powershell" 这条路上会被转成异常对象。
+**用 `Write-Output ' '`（一个空格）代替空行就干净了。**
+（注意：在 pwsh 里直接跑复现不出来，只在 git 钩子这条路上出现。）
+
+> **健康基线：约 311 个文件 / 约 1.6 MB。** 钩子是兜底，习惯仍是第一道：
+> `git add -A` 之后扫一眼 `git status` 的文件数。
+
+

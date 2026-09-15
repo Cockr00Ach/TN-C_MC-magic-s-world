@@ -32,7 +32,10 @@ if ($LASTEXITCODE -ne 0) {
     Write-Output 'check-staged: not a git repository (or git not on PATH) - skipping.'
     exit 0
 }
-if ($staged.Count -eq 0) { exit 0 }
+if ($staged.Count -eq 0) {
+    Write-Output 'check-staged: nothing staged (working tree matches HEAD) - ok'
+    exit 0
+}
 
 # ---------------------------------------------------------------- path rules
 # Anything matching one of these must never be committed. Each entry is
