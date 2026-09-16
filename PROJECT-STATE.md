@@ -1432,6 +1432,82 @@ private WriteMaskStateShard writeMaskState = COLOR_DEPTH_WRITE;   // ← 还写�
 
 ---
 
+### 4.20 雷系三条链（10 个新法术，2026-09-16）
+
+用户定的两条新链路，加上原有主链 —— 雷系现在是 **3 条链 x 5 级 = 15 个法术**：
+
+| 链 | 1 级 | 2 级 | 3 级 | 4 级 | 5 级 |
+|---|---|---|---|---|---|
+| **主链 CORE** | 小闪电 | 雷场 | 雷击 | 雷暴 | 天打五雷轰 |
+| **雷球 ORB** | 雷球 | 大雷球 | 环绕雷球 | 爆炸雷球 | 天降超级无敌大雷球 |
+| **雷速 SPEED** | 雷速 | 闪电移位 | 极速雷风 | 闪电降低冷却 | 闪电登神 |
+
+#### 4.20.1 两条规则（用户拍板）
+
+1. **每条链独立进度**。以前是"每元素一个进度"，三条链共用会把整个元素卡死在 1 级
+   （学了雷球 1 级后，`progress+1` 规则让三条链的 2 级全都学不了）。
+   现在存的是 `progress[元素][链]`。
+2. **高阶替换低阶**：法杖上每条链<b>只挂已经解锁的最高那一级</b>。
+   学了「大雷球」以后法杖上就没有「雷球」了。
+   见 `SpellCatalog.effectiveIds(data)`，四个同步点（登录 / learn 命令 / wand 命令 / 界面解锁包）都喂它。
+
+> 这条规则顺带解决了引擎的**热键栏硬上限 9 格、不能翻页**的问题
+> （`Keybindings.spell_hotbar_1..9`，第 10 个法术格子照画但按键是 null）：
+> 三链满级时法杖上只有 3 个法术。
+
+存档兼容：`Progress` 字段继续写（只写主链，老版本/老存档都能读），
+新格式 `ChainProgress` 按**链名**做 key（加链、改枚举顺序都不会串位）。
+老存档读进来主链进度原样保留、新链从 0 开始。
+
+#### 4.20.2 每条法术怎么落地的（引擎能力边界实测）
+
+反编译 `spell_engine-0.15.12` + 抽了 519 个真实法术 JSON 之后确定的边界：
+
+| 想要的效果 | 落地方式 |
+|---|---|
+| 雷球 / 大雷球 / 爆炸雷球（飞行 + 命中/范围爆炸） | 纯 JSON：`release.target.type=PROJECTILE` + 顶层 `area_impact` |
+| 天降超级无敌大雷球 | 纯 JSON：`target.type=METEOR`（`launch_height/launch_radius/extra_launch_count`）+ 大 `area_impact.radius` |
+| 闪电移位 | 纯 JSON：`TELEPORT{mode:"FORWARD", forward{distance}}` |
+| 雷速 +25% / 极速雷风 +70% | **自定义效果**：原版速度效果每级固定 +20%，拿不到 25%/70% |
+| 环绕雷球（绕圈 + 电击） | **Java**：引擎没有"绕玩家旋转"的字段，`SpellCloud` 也不会跟随 |
+| 极速雷风（雷电伤害拖尾） | **Java**：没有"沿路留伤害"的字段 |
+| 闪电降低冷却（回一半蓝） | **Java**：引擎压根没有 mana 池，我们才是 mana 的所有者 |
+| 闪电登神（无冷却） | **Java**：`cooldown_duration` 只能靠 haste 做除法，**永远到不了 0**，只能代码清 |
+
+#### 4.20.3 代码结构
+
+- `SpellCatalog`：加了 `Chain` 枚举（CORE/ORB/SPEED）+ 15 条记录；
+  `chainsOf` / `of(element, chain)` / `topLearned` / `effective` / `effectiveIds`。
+- `TNEffects`：4 个自定义效果（`tnc:lightning_haste` +25%、`tnc:lightning_wind` +70%、
+  `tnc:orbiting_thunder_orb` 标记、`tnc:lightning_ascension` 增伤 30%）。
+  用 `addAttributeModifier` 给精确数值；`MobEffectInstance` 会按 `(amplifier+1)` 放大，
+  所以**雷速一个效果同时覆盖 +25%（amp0）和 +50%（amp1）**。
+  ⚠️ 1.20.1 的 `addAttributeModifier` 收的是 **UUID 字符串**，不是 UUID 对象。
+- `TnSpellMechanics`：光环 / 拖尾 / 回蓝 / 清冷却。
+  粒子一律用原版 `ELECTRIC_SPARK`（不依赖任何 mod 的粒子注册，少一个会崩的点）；
+  清冷却走 `SpellCasterEntity.getCooldownManager()`，而且必须用 `remove()`
+  —— 它会把清除**同步给客户端**，不然客户端那边还在冷却、法术根本按不出去。
+  引擎类全包在 try/catch 里（软依赖）。
+- 界面：魔法石面板加宽到 520，法术目录**按链分三列**（15 个挤一列会跑出面板）。
+
+#### 4.20.4 文件都放哪（改东西时看这张表）
+
+| 内容 | 位置 |
+|---|---|
+| 法术本体（数值/伤害/冷却/粒子） | 整合包 `kubejs/data/tnc/spells/*.json`（**唯一事实来源**，直接改） |
+| 法术图标 16x16 / 效果图标 18x18 / 投射物模型与贴图 | 整合包 `config/openloader/resources/TN-C/assets/tnc/...` |
+| 法术池 + 法杖 assignment（15 个 id） | mod 的 `src/main/resources/data/tnc/...` |
+| 效果数值（+25%/+70%/增伤） | `TNEffects` |
+| 光环/拖尾的半径、间隔、伤害 | `TnSpellMechanics` 顶部的常量 |
+| 生成脚本（一次性，纯 ASCII） | `tools/gen_tnc_spells.ps1`、`tools/gen_tnc_spell_assets.ps1` |
+
+> ⚠️ 又一次踩到 UTF-8/GBK 的坑：`tools/*.ps1` 里写中文注释，
+> Windows PowerShell 按 GBK 读会把多字节序列末尾的换行一起吃掉，
+> 于是"注释行"和下一行合并 —— 表现是 here-string 没打开、整段 JSON 被当代码解析。
+> **工具脚本保持纯 ASCII 是有原因的，别再犯**（两个生成脚本现在都是 0 个非 ASCII 字节）。
+
+---
+
 # 五、核心技术知识库
 
 > 这一节是花了一整晚用 `javap` 读编译类、拆 jar、试错换来的。别重复踩。
