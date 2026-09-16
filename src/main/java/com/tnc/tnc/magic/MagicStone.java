@@ -97,7 +97,10 @@ public class MagicStone {
         });
     }
 
-    /** 魔力恢复：每秒回一次，回多少 = 固定值 + 上限百分比（见 Config.manaRegenFor）。 */
+    /**
+     * 魔力恢复：每 {@link com.tnc.tnc.Config#manaRegenIntervalTicks} tick 回一次
+     * （默认 40 tick = 2 秒），每次回多少见 {@link com.tnc.tnc.Config#manaRegenFor}。
+     */
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
         if (event.phase != TickEvent.Phase.END) {
@@ -107,7 +110,8 @@ public class MagicStone {
         if (player.level().isClientSide()) {
             return;
         }
-        if (player.tickCount % 20 != 0) {
+        int interval = Math.max(1, Config.manaRegenIntervalTicks);
+        if (player.tickCount % interval != 0) {
             return;
         }
         // 用模式匹配拿到 ServerPlayer：既免了类型转换，也比单单 isClientSide() 更严谨

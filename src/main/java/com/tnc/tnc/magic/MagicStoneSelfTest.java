@@ -136,10 +136,13 @@ public final class MagicStoneSelfTest {
                 "mana=" + manaData.getMana() + " / " + manaData.getMaxMana()));
 
         // 11. 魔力恢复为正、且随上限增长（不然高级法术永远放不出来）
-        int regenSmall = Config.manaRegenFor(210);
-        int regenBig = Config.manaRegenFor(2100);
+        //     显示的是**每秒**真实速度（= 每周期回的量 × 20 ÷ 周期）。
+        //     直接打印 manaRegenFor 会把"每周期回多少"说成"/s"，误导人。
+        double regenSmall = Config.manaRegenPerSecondFor(210);
+        double regenBig = Config.manaRegenPerSecondFor(2100);
         checks.add(new Check("mana regen positive & scales", regenSmall > 0 && regenBig >= regenSmall,
-                "上限 210 → " + regenSmall + "/s，上限 2100 → " + regenBig + "/s"));
+                String.format("上限 210 → %.1f/s，上限 2100 → %.1f/s（周期 %d tick）",
+                        regenSmall, regenBig, Config.manaRegenIntervalTicks)));
 
         // 12. 每一级法术都放得起（最贵的法术不能超过初始魔力上限）
         int worst = 0;

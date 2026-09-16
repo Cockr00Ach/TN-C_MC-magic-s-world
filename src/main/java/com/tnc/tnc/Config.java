@@ -83,6 +83,13 @@ public class Config {
                     "所以法杖丢了不该等于法术丢了。关掉的话就用 /tnc wand 手动补。")
             .define("restoreWandOnLogin", true);
 
+    private static final ForgeConfigSpec.IntValue MANA_REGEN_INTERVAL_TICKS = BUILDER
+            .comment("每多少 tick 回一次魔。20 tick = 1 秒。",
+                    "回魔速度 = 每次回的量 ÷ 这个周期。所以把它从 20 改成 40，速度就正好减半。",
+                    "为什么用周期而不是直接把量减半：魔力值是整数，11 减半成 5.5 会被取整成 5 或 6，",
+                    "而周期翻倍是精确的（11 点 / 2 秒 = 5.5 点/秒）。")
+            .defineInRange("manaRegenIntervalTicks", 40, 1, 1200);
+
     static final ForgeConfigSpec SPEC = BUILDER.build();
 
     // ---------------- 运行时字段（读一次缓存到这里） ----------------
@@ -99,6 +106,7 @@ public class Config {
     public static boolean requireLearnedToCast;
     public static boolean requireWandToCast;
     public static boolean restoreWandOnLogin;
+    public static int manaRegenIntervalTicks;
 
     @SubscribeEvent
     static void onLoad(final ModConfigEvent event) {
@@ -114,6 +122,7 @@ public class Config {
         requireLearnedToCast = REQUIRE_LEARNED_TO_CAST.get();
         requireWandToCast = REQUIRE_WAND_TO_CAST.get();
         restoreWandOnLogin = RESTORE_WAND_ON_LOGIN.get();
+        manaRegenIntervalTicks = MANA_REGEN_INTERVAL_TICKS.get();
     }
 
     /** 第 tier 级（1..5）法术需要投多少魔法点数。 */
@@ -127,15 +136,22 @@ public class Config {
     }
 
     /**
-     * 每秒恢复多少魔力 = 固定值 + 上限的百分比。
+     * <b>每回一次</b>恢复多少魔力 = 固定值 + 上限的百分比。
      *
-     * <p>例：上限 210、固定 1、百分比 5 → 1 + 10 = 11/秒 → 回满约 19 秒，
-     * 神级法术（160）约 15 秒回一发。
+     * <p>实际速度还要除以周期 {@link #manaRegenIntervalTicks}。
+     * 例：上限 210、固定 1、百分比 5 → 每次 1 + 10 = 11；
+     * 周期 20 → 11/秒；周期 40（默认）→ 5.5/秒，回满约 38 秒。
      */
     public static int manaRegenFor(int maxMana) {
         int flat = Math.max(0, manaRegenPerSecond);
         int percent = (int) Math.floor(Math.max(0, maxMana) * Math.max(0.0D, manaRegenPercentPerSecond) / 100.0D);
         return flat + percent;
+    }
+
+    /** 实际每秒恢复多少（给自检/界面显示用，含周期换算）。 */
+    public static double manaRegenPerSecondFor(int maxMana) {
+        int interval = Math.max(1, manaRegenIntervalTicks);
+        return manaRegenFor(maxMana) * 20.0D / interval;
     }
 
     private static int valueForTier(List<? extends Integer> table, int tier, int fallback) {

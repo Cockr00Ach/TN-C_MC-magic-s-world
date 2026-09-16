@@ -51,16 +51,21 @@ public final class MagicStoneHud {
     /** 图标底边距屏幕底部：58 = 魔力条（49）再往上让开，压不到任何东西。 */
     private static final int ICON_BOTTOM_MARGIN = 58;
 
-    /** 魔力条：紧贴在血条正上方。 */
-    private static final int MANA_BAR_HEIGHT = 5;
-    private static final int MANA_BAR_BOTTOM_MARGIN = STATUS_ROW_MARGIN + 10;
+    /** 魔力条：紧贴在血条正上方。高度 10 是为了把数字塞进条子里。 */
+    private static final int MANA_BAR_HEIGHT = 10;
+    private static final int MANA_BAR_TOP_MARGIN = STATUS_ROW_MARGIN + 10;
 
     // ---------------- 配色（奥术紫，和魔法石界面一致） ----------------
+    //
+    // ⚠️ 全部刻意<b>提亮过</b>：原来用的深紫（0xFF2E2A6B 描边 / 0xFF171232 底），
+    // 在"半透明暗色盖上来"的场合（比如开着聊天框）会糊成一团黑，看起来像整条消失了。
+    // 现在描边和文字都够亮，被暗色蒙住也还读得出来。
 
-    private static final int COLOR_OUTLINE = 0xFF2E2A6B;
-    private static final int COLOR_EMPTY = 0xFF171232;
-    private static final int COLOR_FILL = 0xFF7C5CE0;
-    private static final int COLOR_FILL_TOP = 0xFFB9A7FF;
+    private static final int COLOR_BORDER = 0xFF6C5AC8;
+    private static final int COLOR_EMPTY = 0xFF2A2154;
+    private static final int COLOR_FILL = 0xFF8E77E0;
+    private static final int COLOR_FILL_TOP = 0xFFCFC2FF;
+    private static final int COLOR_TEXT = 0xFFFFFFFF;
 
     private MagicStoneHud() {
     }
@@ -83,7 +88,7 @@ public final class MagicStoneHud {
         drawStone(graphics, width / 2 - ICON_SIZE / 2, height - ICON_BOTTOM_MARGIN, false);
     }
 
-    /** 画魔力条；拿不到数据（还没同步过来）就什么都不画。 */
+    /** 画魔力条 + 条上的数字；拿不到数据（还没同步过来）就什么都不画。 */
     private static void drawManaBar(Minecraft minecraft, GuiGraphics graphics, int left, int height) {
         MagicStoneData data = MagicStone.getOrNull(minecraft.player);
         if (data == null || data.getMaxMana() <= 0) {
@@ -93,16 +98,16 @@ public final class MagicStoneHud {
         int max = data.getMaxMana();
 
         int x = left;
-        int y = height - MANA_BAR_BOTTOM_MARGIN;
+        int y = height - MANA_BAR_TOP_MARGIN;
         int w = STATUS_ROW_WIDTH;
         int h = MANA_BAR_HEIGHT;
 
         // 底 + 边框
         graphics.fill(x, y, x + w, y + h, COLOR_EMPTY);
-        graphics.fill(x, y, x + w, y + 1, COLOR_OUTLINE);             // 上
-        graphics.fill(x, y + h - 1, x + w, y + h, COLOR_OUTLINE);     // 下
-        graphics.fill(x, y, x + 1, y + h, COLOR_OUTLINE);             // 左
-        graphics.fill(x + w - 1, y, x + w, y + h, COLOR_OUTLINE);     // 右
+        graphics.fill(x, y, x + w, y + 1, COLOR_BORDER);              // 上
+        graphics.fill(x, y + h - 1, x + w, y + h, COLOR_BORDER);      // 下
+        graphics.fill(x, y, x + 1, y + h, COLOR_BORDER);              // 左
+        graphics.fill(x + w - 1, y, x + w, y + h, COLOR_BORDER);      // 右
 
         // 按比例填充（内区宽 w-2）
         int inner = w - 2;
@@ -112,6 +117,14 @@ public final class MagicStoneHud {
             // 顶部一条亮线，让条子看起来有厚度（血条里的心也有明暗）
             graphics.fill(x + 1, y + 1, x + 1 + filled, y + 2, COLOR_FILL_TOP);
         }
+
+        // 数字：画在条子正中间，白字带阴影 ——
+        // 阴影很关键：填充区是紫色、空区是深紫，白字在两种底上都清晰。
+        String text = mana + "/" + max;
+        var font = minecraft.font;
+        int textX = x + (w - font.width(text)) / 2;
+        int textY = y + (h - font.lineHeight) / 2 + 1;
+        graphics.drawString(font, text, textX, textY, COLOR_TEXT, true);
     }
 
     /**
@@ -129,7 +142,7 @@ public final class MagicStoneHud {
 
         for (int dy = -half + 1; dy <= half - 1; dy++) {
             int w = (half - 1) - Math.abs(dy);
-            graphics.fill(cx - w, cy + dy, cx + w, cy + dy + 1, COLOR_OUTLINE);
+            graphics.fill(cx - w, cy + dy, cx + w, cy + dy + 1, COLOR_BORDER);
         }
         for (int dy = -half + 2; dy <= half - 2; dy++) {
             int w = (half - 2) - Math.abs(dy);
