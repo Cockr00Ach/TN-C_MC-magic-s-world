@@ -1508,6 +1508,34 @@ private WriteMaskStateShard writeMaskState = COLOR_DEPTH_WRITE;   // ← 还写�
 
 ---
 
+#### 4.20.5 离线验证：dev 服务器自检（2026-09-16 22:30）
+
+在 dev 环境（有 Forge、**没装 SpellEngine**）跑 `gradlew runServer`，启动自检 **28/28 全过**，
+其中新链路的四条直接证明了模型是对的：
+
+```
+[ok] catalog = 3 chains x 5 tiers : chains=3 total=15 [主链=5 雷球=5 雷速=5]
+[ok] chains are independent : CORE=1 ORB=0 直接学 大雷球 -> OUT_OF_ORDER
+[ok] high tier replaces low (wand content) : 已学 ORB 1+2 级 -> 法杖内容=[great_thunder_orb]
+[ok] mana cost scales with max mana : 上限 210 → 20，上限 620 → 59（占上限 9.5%）
+TN-C effects registered: [tnc:lightning_haste, tnc:lightning_wind, tnc:orbiting_thunder_orb, tnc:lightning_ascension]
+```
+
+- 第三条是这次的核心规则（**高阶替换低阶**）：学了雷球 1+2 级，法杖内容只剩大雷球。
+- 最后一行是 mod 启动时主动打的（`TNMod.commonSetup`）—— 把"效果漏注册/改名"
+  这种静默失败变成日志里一眼能看到的一行。
+- 另外还做过一次**字段名对表**：把 10 个法术 JSON 里用到的每个键
+  （`release.target.projectile.launch_properties.velocity`、`meteor.launch_height`、
+  `area_impact.extra_radius.power_coefficient`、`action.teleport.forward.distance`、
+  `cost.cooldown_duration`、粒子批次的 7 个键……）逐个和 `javap` 出来的
+  `Spell$*` 内部类真实字段核对 —— 全部对得上。
+  **Gson 遇到不认识的键是静默丢弃的**，写错一个字母 = 数值用默认值且毫无报错。
+
+> ⚠️ dev 环境没有 SpellEngine，所以**硬拦截探针会跳过**，
+> 投射物 / 光环 / 拖尾 / 清冷却这些依赖引擎的行为也测不到 —— 那部分只能在整合包里实测。
+
+---
+
 # 五、核心技术知识库
 
 > 这一节是花了一整晚用 `javap` 读编译类、拆 jar、试错换来的。别重复踩。

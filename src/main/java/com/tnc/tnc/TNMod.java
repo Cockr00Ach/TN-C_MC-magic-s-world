@@ -116,6 +116,10 @@ public class TNMod
     {
         LOGGER.info("TN-C common setup complete, {} item(s) registered", ITEMS.getEntries().size());
         LOGGER.info("TN-C magic stone data layer ready (affinity/mana/points/progress/learned spells)");
+        // 把注册到的效果 id 打出来：法术 JSON 是按 id 引用它们的，
+        // 哪天改名/漏注册，"效果不生效"至少能在日志里一眼看到，而不是静默失败
+        LOGGER.info("TN-C effects registered: {}", com.tnc.tnc.magic.TNEffects.EFFECTS.getEntries().stream()
+                .map(entry -> entry.getId().toString()).toList());
 
         // 有 SpellEngine 就挂上"施法扣魔力"的钩子；没有就安静跳过（dev 环境）
         com.tnc.tnc.magic.compat.SpellEngineManaHook.register();
