@@ -29,13 +29,23 @@ import net.minecraftforge.fml.common.Mod;
  * 我们一开始按原版算，条子画在"高-49"，结果<b>正好横在血条身上把它全盖住了</b>。
  * 现在是往上一行（"高-61"，也就是包内护甲条那一行的右半边，那里空着）。
  *
- * <h3>聊天框那层暗底（另一个坑）</h3>
- * 原版聊天框最下面一行的暗底是 GUI 的 {@code 高-49 .. 高-40}（见
- * {@code ChatComponent.render}：{@code fill(-4, i1-9, 宽, i1)}，其中
- * {@code i1 = (高-40)/缩放}）。血条/饱食度正好长在这条带子里，所以一有聊天消息
- * 它们就会被压暗 —— 我们挪到"高-61"以后就<b>整条都在带子外面</b>了，干干净净。
- * 聊天消息多了带子会往上长，那时我们照旧会被压暗（但不会消失），
- * 这和血条的待遇一致、也正是原版的规矩。
+ * <h3>聊天框那块暗底：真正的坑不是"压暗"，是"整块被丢掉"</h3>
+ * 原版聊天框每行消息都铺一条暗底，最新一条的底边在 GUI {@code 高-40}、
+ * 一条 9 像素高（见 {@code ChatComponent.render}：{@code fill(-4, i1-9, 宽+8, i1)}，
+ * 其中 {@code i1 = (高-40)/缩放}）。血条/饱食度正好长在这条带子里，所以一有聊天消息
+ * 它们就会变暗。我们把条子挪到"高-61"（护甲条那一行的右半边）以后，条子整条都在带子
+ * 外面（带宽最多到 {@code 宽/2+12} 左右），干干净净。
+ *
+ * <p>但<b>发光有 1 像素重叠也会出事</b>，而且出事的样子很吓人：
+ * 落在带子里的像素不是变暗，是<b>整个消失</b>。原因是深度缓冲 ——
+ * 聊天框暗底画在 {@code z=+50}、文字画在 {@code z=+100}，而 GUI 的渲染类型
+ * 既做深度测试又写深度；我们挂在 {@code RenderGuiEvent.Post}（聊天框之后）用默认
+ * {@code z=0} 画，深度测试直接失败、被丢掉。所以现在整体抬到 {@code z=+75}：
+ * 压过暗底、仍低于文字。详见 {@link #HUD_Z}。
+ *
+ * <p>历史教训：之前用户报"魔法石被遮住了一半、就少了一半"，
+ * 少掉的那半正好是落进暗底矩形的那半 —— 当时误判成"配色不够亮"，
+ * 其实跟颜色毫无关系。
  *
  * <h2>为什么是"条"而不是"一排宝石"</h2>
  * 血条是 10 颗心，因为它固定是 20 点。魔力上限会从 210 一路涨到上千，
@@ -83,6 +93,29 @@ public final class MagicStoneHud {
 
     /** 图标底边距：让菱形中心正好落在魔力条的中线上（高-56）。 */
     private static final int ICON_BOTTOM_MARGIN = (MANA_BAR_TOP_MARGIN - TEX_H / 2) + ICON_SIZE / 2;
+
+    /**
+     * 我们这一层画在 z = +75。
+     *
+     * <p>⚠️ 这是"魔法石被聊天框吃掉"的真正原因，非常反直觉，别再踩：
+     * <ol>
+     *   <li>原版聊天框的<b>暗底画在 z = +50</b>、<b>聊天文字画在 z = +100</b>
+     *       （{@code ChatComponent.render} 里连着两次 {@code pose().translate(0, 0, 50)}）。</li>
+     *   <li>GUI 用的渲染类型是 <b>带深度测试 + 还会写深度</b>的：
+     *       {@code RenderType.GUI} 显式设了 {@code LEQUAL_DEPTH_TEST}，
+     *       而 {@code CompositeState} 的默认写入掩码就是 {@code COLOR_DEPTH_WRITE}。</li>
+     *   <li>我们挂在 {@code RenderGuiEvent.Post} 上，也就是聊天框<b>之后</b>才画，
+     *       如果按默认的 z = 0 画，凡是落进聊天框暗底矩形里的像素都会
+     *       <b>深度测试失败直接被丢掉</b> —— 不是"被压暗"，是<b>整块消失</b>。</li>
+     * </ol>
+     * 用户看到的就是"中心的魔法石被遮住了"，而且之前是"被遮到了一半、就少了一半"
+     * —— 少的那一半正好是落在暗底矩形里的那一半。
+     *
+     * <p>所以抬到 75：<b>压过暗底（50），但仍低于聊天文字（100）</b>。
+     * 结果就是条子和宝石永远看得见，而聊天文字也永远不会被我们挡住
+     * （文字比我们更靠前，它要盖我们就盖）。位置一动都不用改。
+     */
+    private static final float HUD_Z = 75.0F;
 
     // ---------------- 贴图 ----------------
     //
@@ -132,11 +165,18 @@ public final class MagicStoneHud {
         int width = minecraft.getWindow().getGuiScaledWidth();
         int height = minecraft.getWindow().getGuiScaledHeight();
 
+        // 抬到聊天框暗底之上（见 HUD_Z 的注释）。不抬的话，落在聊天框那块矩形里的
+        // 像素会被深度测试直接丢掉 —— 表现就是魔法石"被遮住/少了一半"。
+        graphics.pose().pushPose();
+        graphics.pose().translate(0.0F, 0.0F, HUD_Z);
+
         // 右半边：和饱食度同宽、同右边界，摆在它正上方一行
         drawManaBar(minecraft, graphics, width / 2 + MANA_BAR_X_OFFSET, height);
 
         // 魔法石入口图标（画法复用物品栏那颗，避免两处各画一份）
         drawStone(graphics, width / 2 - ICON_SIZE / 2, height - ICON_BOTTOM_MARGIN, false);
+
+        graphics.pose().popPose();
     }
 
     /** 画魔力条 + 条上的数字；拿不到数据（还没同步过来）就什么都不画。 */
