@@ -24,6 +24,9 @@ public class MagicStoneNetwork {
 
     private static final String PROTOCOL_VERSION = "1";
 
+    private static final org.slf4j.Logger LOGGER =
+            com.mojang.logging.LogUtils.getLogger();
+
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "main"),
             () -> PROTOCOL_VERSION,
@@ -59,8 +62,13 @@ public class MagicStoneNetwork {
 
     /** 把某个玩家的魔法石数据推给他自己。 */
     public static void syncTo(ServerPlayer player) {
-        MagicStone.get(player).ifPresent(data ->
-                CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new SyncMagicStone(data)));
+        MagicStone.get(player).ifPresent(data -> {
+            // 【临时诊断】HUD 不跟着变时，这一行能立刻分辨是"服务端根本没发"
+            // 还是"发了但客户端没收/没画"。定位完就删（搜 [diag] 能找到全部）。
+            LOGGER.info("TN-C: [diag] sync -> {} mana={}/{}",
+                    player.getName().getString(), data.getMana(), data.getMaxMana());
+            CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new SyncMagicStone(data));
+        });
     }
 
     /** 服务端 → 客户端的整包数据。 */
