@@ -120,7 +120,9 @@ try {
     foreach ($res in @('data/tnc/spell_pools/tnc_lightning.json',
                        'data/tnc/spell_assignments/magic_wand.json',
                        'assets/tnc/models/item/magic_wand.json',
-                       'assets/tnc/textures/item/magic_wand.png')) {
+                       'assets/tnc/textures/item/magic_wand.png',
+                       'assets/tnc/textures/gui/mana_bar/mana_empty.png',
+                       'assets/tnc/textures/gui/mana_bar/mana_fill.png')) {
         if ($zip.Entries | Where-Object { $_.FullName -eq $res }) { Ok "resource present: $res" }
         else { Fail "resource missing from jar: $res" }
     }
