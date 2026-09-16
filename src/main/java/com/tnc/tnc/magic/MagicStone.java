@@ -110,11 +110,20 @@ public class MagicStone {
         if (player.tickCount % 20 != 0) {
             return;
         }
-        get(player).ifPresent(data -> {
+        // 用模式匹配拿到 ServerPlayer：既免了类型转换，也比单单 isClientSide() 更严谨
+        // （syncTo 要的就是 ServerPlayer）
+        if (!(player instanceof ServerPlayer serverPlayer)) {
+            return;
+        }
+        get(serverPlayer).ifPresent(data -> {
             if (data.getMana() < data.getMaxMana()) {
                 int regen = Config.manaRegenFor(data.getMaxMana());
                 if (regen > 0) {
                     data.addMana(regen);
+                    // ★ 必须同步给客户端，否则客户端的魔力值会一直停在旧值上 ——
+                    //   HUD 的魔力条就永远不会回涨（玩家会以为回魔坏了）。
+                    //   只在真的变了的时候发（每秒最多一次，满了就不发）。
+                    MagicStoneNetwork.syncTo(serverPlayer);
                 }
             }
         });
