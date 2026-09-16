@@ -190,6 +190,19 @@ public final class MagicStoneHud {
     private static final int COLOR_FILL_TOP = 0xFFE4DCFF;
     private static final int COLOR_TEXT = 0xFFFFFFFF;
 
+    /**
+     * 条上数字的缩放 —— 想调字号就改这一个数。
+     *
+     * <p>为什么默认 0.5：<b>包内血条/饱食度的数字也是缩过的</b>。量过它们的数字高度
+     * （GUI 缩放 3 的截图里）只有 10~13 物理像素，而原版字体 1.0 倍的数字是 7 GUI 像素高
+     * = 21 物理像素 —— 反推回去大约就是 0.5 倍。所以 1.0 会明显比上下两条的字号大一圈，
+     * 0.5 才和它们一致。
+     *
+     * <p>常用值：{@code 0.5}（和包内一致）、{@code 0.75}（更清楚）、{@code 1.0}（原版字号，
+     * 会撑满整条）。数字是用 pose 缩放画的，非整数倍会略微发虚，0.5/1.0 最锐利。
+     */
+    private static final float TEXT_SCALE = 0.5F;
+
     private MagicStoneHud() {
     }
 
@@ -258,12 +271,18 @@ public final class MagicStoneHud {
         // 3) 数字：压在轨道正中间，白字带阴影 ——
         //    轨道底色是紫的，白字在任何填充比例下都清晰。
         //    中线按**贴图坐标**算再除以 2，比先用 0.5 倍取整更准。
+        //    字号由 TEXT_SCALE 控制：先把原点挪到轨道中线，再缩放，最后以原点为中心画，
+        //    这样改缩放不用重算坐标。
         String text = mana + "/" + max;
         var font = minecraft.font;
         int trackCx = x + (TRACK_U + TRACK_W / 2) / 2;
         int trackCy = y + (TRACK_V + TRACK_H / 2) / 2;
-        graphics.drawString(font, text, trackCx - font.width(text) / 2,
-                trackCy - font.lineHeight / 2 + 1, COLOR_TEXT, true);
+        graphics.pose().pushPose();
+        graphics.pose().translate(trackCx, trackCy, 0.0F);
+        graphics.pose().scale(TEXT_SCALE, TEXT_SCALE, 1.0F);
+        graphics.drawString(font, text, -font.width(text) / 2, -font.lineHeight / 2 + 1,
+                COLOR_TEXT, true);
+        graphics.pose().popPose();
     }
 
     /**
