@@ -96,21 +96,25 @@ public final class MagicStoneHud {
     private static final int BAR_H = TEX_H / 2;
 
     /**
-     * 贴图里"真正会涨的那一段轨道"的范围（逐像素量出来的）：
-     * {@code u 42..148, v 14..19}。
+     * 贴图里"真正会涨的那一段轨道"的范围。
      *
-     * <p>左边 0..41 是宝石和金框、右边 149+ 是闪电，那两段永远不动；
-     * 按比例裁剪时必须只裁中间这段，否则一裁剪就把宝石/闪电也切掉了。
+     * <p>这张图里 {@code empty} 和 {@code fill} <b>只差轨道那一块</b>，
+     * 所以最可靠的量法是把两张图逐像素相减、差异像素的包围盒就是轨道：
+     * <b>u 46..164, v 13..18</b>（119 x 6 贴图像素）。
+     *
+     * <p>左边 0..26 是魔法石（27x26）、再往右到 45 是金框和翅膀，那两段永远不动；
+     * 轨道最左端（u 46..48）只有 v=18 一行，是画成尖头的引导边 ——
+     * 按比例裁剪时必须整段一起裁，否则会把尖头切掉。
      */
-    private static final int TRACK_U = 42;
-    private static final int TRACK_V = 14;
-    private static final int TRACK_W = 107;
+    private static final int TRACK_U = 46;
+    private static final int TRACK_V = 13;
+    private static final int TRACK_W = 119;
     private static final int TRACK_H = 6;
 
     /** 上面那段轨道换算到游戏坐标（0.5 倍）后在条子里的位置和大小。 */
-    private static final int TRACK_DX = TRACK_U / 2;          // 21
-    private static final int TRACK_DY = TRACK_V / 2;          // 7
-    private static final int TRACK_DW = TRACK_W / 2;          // 53
+    private static final int TRACK_DX = TRACK_U / 2;          // 23
+    private static final int TRACK_DY = TRACK_V / 2;          // 6
+    private static final int TRACK_DW = TRACK_W / 2;          // 59
 
     /** 原版血条/饱食度那一行的锚点（以屏幕底部为基准）。 */
     private static final int STATUS_ROW_MARGIN = 39;
@@ -253,10 +257,11 @@ public final class MagicStoneHud {
 
         // 3) 数字：压在轨道正中间，白字带阴影 ——
         //    轨道底色是紫的，白字在任何填充比例下都清晰。
+        //    中线按**贴图坐标**算再除以 2，比先用 0.5 倍取整更准。
         String text = mana + "/" + max;
         var font = minecraft.font;
-        int trackCx = x + TRACK_DX + TRACK_DW / 2;
-        int trackCy = y + TRACK_DY + (TRACK_H / 2) / 2;
+        int trackCx = x + (TRACK_U + TRACK_W / 2) / 2;
+        int trackCy = y + (TRACK_V + TRACK_H / 2) / 2;
         graphics.drawString(font, text, trackCx - font.width(text) / 2,
                 trackCy - font.lineHeight / 2 + 1, COLOR_TEXT, true);
     }
