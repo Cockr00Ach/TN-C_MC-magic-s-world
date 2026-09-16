@@ -449,10 +449,20 @@ public class MagicStoneData {
                 prog.append(" ");
             }
             aff.append(e.cn()).append(":").append(getAffinity(e));
-            prog.append(e.cn()).append(":").append(getProgress(e));
+            prog.append(e.cn()).append(":");
+            // 每条链各一个数字，链之间用 / 隔开（雷系现在有主链/雷球/雷速三条）
+            for (int c = 0; c < CHAIN_COUNT; c++) {
+                if (c > 0) {
+                    prog.append("/");
+                }
+                prog.append(progress[e.ordinal()][c]);
+            }
         }
         lines.add("亲和力   " + aff);
-        lines.add("元素进度 " + prog);
+        lines.add("链进度   " + prog + "（每元素按 "
+                + java.util.Arrays.stream(SpellCatalog.Chain.values()).map(SpellCatalog.Chain::cn)
+                        .collect(java.util.stream.Collectors.joining("/"))
+                + " 的顺序）");
         lines.add("魔力     " + mana + " / " + maxMana);
         lines.add("点数     " + getPointsAvailable(thresholds) + " 可用（总 " + getPointsTotal(thresholds)
                 + (bonusPoints > 0 ? " + 赠送 " + bonusPoints : "")

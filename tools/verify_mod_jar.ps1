@@ -128,6 +128,55 @@ try {
         else { Fail "resource missing from jar: $res" }
     }
 
+    # ---------------- D1b2. the two new lightning chains (orb / speed) ----------------
+    # 15 spells live on 3 chains. Two silent failures to guard:
+    #  * a spell id missing from the pool/assignment -> the wand can never hold it;
+    #  * the spell JSON / icon missing from the PACK -> the spell does not exist
+    #    (they live in the modpack's kubejs + its TN-C resource pack, not in the jar).
+    foreach ($cls in @('com/tnc/tnc/magic/TNEffects.class',
+                       'com/tnc/tnc/magic/TnSpellMechanics.class')) {
+        if ($zip.Entries | Where-Object { $_.FullName -eq $cls }) { Ok "class present: $cls" }
+        else { Fail "class missing from jar: $cls" }
+    }
+
+    $spellIds = @('tnc:spark', 'tnc:lightning_field', 'tnc:lightning_strike', 'tnc:lightning_storm',
+                  'tnc:heavenly_thunder', 'tnc:thunder_orb', 'tnc:great_thunder_orb',
+                  'tnc:orbiting_thunder_orb', 'tnc:explosive_thunder_orb', 'tnc:cataclysm_thunder_orb',
+                  'tnc:lightning_haste', 'tnc:lightning_blink', 'tnc:lightning_wind',
+                  'tnc:lightning_recharge', 'tnc:lightning_ascension')
+    foreach ($asset in @('data/tnc/spell_pools/tnc_lightning.json',
+                         'data/tnc/spell_assignments/magic_wand.json')) {
+        $entry = $zip.Entries | Where-Object { $_.FullName -eq $asset }
+        if (-not $entry) { Fail "missing from jar: $asset"; continue }
+        $reader = New-Object System.IO.StreamReader($entry.Open())
+        $text = $reader.ReadToEnd()
+        $reader.Close()
+        $missing = @($spellIds | Where-Object { $text -notmatch [regex]::Escape($_) })
+        if ($missing.Count -eq 0) { Ok "$asset lists all 15 spells" }
+        else { Fail ("$asset is missing: " + ($missing -join ', ')) }
+    }
+
+    # pack side: the spell JSONs and icons must actually be synced, or the spells
+    # simply do not exist in game (and the icons show as the missing-texture square)
+    $packForSpells = Find-TncLivePack -WorkPack $WorkPack
+    if ($packForSpells) {
+        $spellDir = Join-Path $packForSpells 'kubejs\data\tnc\spells'
+        $iconDir = Join-Path $packForSpells 'config\openloader\resources\TN-C\assets\tnc\textures\spell'
+        $missingSpells = @()
+        $missingIcons = @()
+        foreach ($id in $spellIds) {
+            $path = $id.Substring(4)     # strip the "tnc:" prefix
+            if (-not (Test-Path (Join-Path $spellDir "$path.json"))) { $missingSpells += $path }
+            if (-not (Test-Path (Join-Path $iconDir "$path.png"))) { $missingIcons += $path }
+        }
+        if ($missingSpells.Count -eq 0) { Ok 'pack has all 15 spell json files' }
+        else { Fail ('pack is missing spell json: ' + ($missingSpells -join ', ')) }
+        if ($missingIcons.Count -eq 0) { Ok 'pack has all 15 spell icons' }
+        else { Fail ('pack is missing spell icon: ' + ($missingIcons -join ', ')) }
+    } else {
+        Write-Host '  [note]    live pack not found - skipped the pack-side spell checks'
+    }
+
     # ---------------- D1c. HUD entry point + its keybind ----------------
     # Nothing HUD-side can be clicked (no cursor while playing), so the keybind IS
     # the entry. RegisterKeyMappingsEvent lives on the MOD bus - registering it on

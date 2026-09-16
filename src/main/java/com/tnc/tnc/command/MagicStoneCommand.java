@@ -102,10 +102,13 @@ public class MagicStoneCommand {
                         .then(Commands.literal("set")
                                 .then(Commands.argument("element", StringArgumentType.word())
                                         .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(ELEMENT_IDS, builder))
-                                        .then(Commands.argument("tier", IntegerArgumentType.integer(0, 5))
-                                                .executes(ctx -> progressSet(ctx,
-                                                        StringArgumentType.getString(ctx, "element"),
-                                                        IntegerArgumentType.getInteger(ctx, "tier")))))))
+                                        .then(Commands.argument("chain", StringArgumentType.word())
+                                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(chainIds(), builder))
+                                                .then(Commands.argument("tier", IntegerArgumentType.integer(0, 5))
+                                                        .executes(ctx -> progressSet(ctx,
+                                                                StringArgumentType.getString(ctx, "element"),
+                                                                StringArgumentType.getString(ctx, "chain"),
+                                                                IntegerArgumentType.getInteger(ctx, "tier"))))))))
                 .then(Commands.literal("spells")
                         .executes(MagicStoneCommand::spells))
                 .then(Commands.literal("learn")
@@ -203,17 +206,41 @@ public class MagicStoneCommand {
         });
     }
 
-    private static int progressSet(CommandContext<CommandSourceStack> ctx, String elementId, int tier)
+    private static int progressSet(CommandContext<CommandSourceStack> ctx, String elementId, String chainId, int tier)
             throws CommandSyntaxException {
         Element element = Element.byId(elementId);
         if (element == null) {
             ctx.getSource().sendFailure(Component.literal("未知元素：" + elementId + "（可用：" + Element.allIds() + "）"));
             return 0;
         }
+        com.tnc.tnc.magic.SpellCatalog.Chain chain = chainById(chainId);
+        if (chain == null) {
+            ctx.getSource().sendFailure(Component.literal(
+                    "未知链：" + chainId + "（可用：" + chainIds() + "）"));
+            return 0;
+        }
         return mutate(ctx, (player, data) -> {
-            data.setProgress(element, tier);
-            return element.cn() + " 进度设为 " + Element.tierName(tier);
+            data.setProgress(element, chain, tier);
+            return element.cn() + " · " + chain.cn() + " 链进度设为 " + Element.tierName(tier);
         });
+    }
+
+    /** 链 id（= 枚举名小写）→ 枚举。 */
+    private static com.tnc.tnc.magic.SpellCatalog.Chain chainById(String id) {
+        for (com.tnc.tnc.magic.SpellCatalog.Chain chain : com.tnc.tnc.magic.SpellCatalog.Chain.values()) {
+            if (chain.name().equalsIgnoreCase(id) || chain.cn().equals(id)) {
+                return chain;
+            }
+        }
+        return null;
+    }
+
+    private static List<String> chainIds() {
+        List<String> ids = new java.util.ArrayList<>();
+        for (com.tnc.tnc.magic.SpellCatalog.Chain chain : com.tnc.tnc.magic.SpellCatalog.Chain.values()) {
+            ids.add(chain.name().toLowerCase(java.util.Locale.ROOT));
+        }
+        return ids;
     }
 
     /** 列出法术目录和每个法术当前的状态（可解锁 / 已学 / 差什么）。 */
