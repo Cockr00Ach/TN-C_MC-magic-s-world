@@ -24,9 +24,20 @@ public final class SpellCatalog {
             return displayName + "（" + element.cn() + " · " + Element.tierName(tier) + "）";
         }
 
-        /** 施放一次消耗多少魔力（数值在配置里）。 */
+        /** 施放一次消耗多少魔力（消耗表里的原始值，= 基准上限下的消耗）。 */
         public int manaCost() {
             return com.tnc.tnc.Config.manaCostForTier(tier);
+        }
+
+        /**
+         * 这一级法术在<b>某个魔力上限</b>下实际要花多少魔力。
+         *
+         * <p>消耗随上限等比放大（见 {@link com.tnc.tnc.Config#manaCostForTier(int, int)}）——
+         * 判定、扣费、界面显示都必须走这一个口径，不然会出现
+         * "提示说 20、实际扣 59" 这种对不上的情况。
+         */
+        public int manaCostFor(int maxMana) {
+            return com.tnc.tnc.Config.manaCostForTier(tier, maxMana);
         }
 
         /** 解锁要投多少魔法点数。 */

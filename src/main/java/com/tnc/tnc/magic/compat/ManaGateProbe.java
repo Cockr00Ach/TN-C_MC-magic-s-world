@@ -129,7 +129,6 @@ public final class ManaGateProbe {
 
             int cost = entry.manaCost();
             List<Step> steps = new ArrayList<>();
-
             // ---- 第 0 步：施法钩子到底挂上引擎了没有 ----
             // 注册那一步包在 try/catch 里（软依赖），所以"字段改名/签名对不上"会被静默吞掉，
             // 表现就是"施法不扣魔力"而毫无提示。这条断言把那个静默失败变成可见的 FAIL。
@@ -138,10 +137,11 @@ public final class ManaGateProbe {
                             ? "SPELL_CAST 监听器已挂上（施法会按消耗扣魔力）"
                             : "没挂上 —— 施法不会扣魔力，多半是引擎 API 变了"));
 
-            // 假玩家的数据是内存里的一次性对象，随便改；同时把上限抬高，免得 setMana 被夹到 0。
-            // （不这么做的话：新假玩家 maxMana = 0 → setMana(cost) 会被夹成 0，第二步就永远"魔力不足"。）
-            data.setMaxMana(Math.max(cost * 2, 100));
+            // 假玩家的上限设成消耗表的基准上限：这样"实际消耗"就等于表里的值，
+            // 后面几条按表里的数字写的断言才成立（消耗会随上限等比放大）
+            data.setMaxMana(Math.max(cost * 2, com.tnc.tnc.Config.manaCostBaselineMaxMana));
             data.forget(entry.id());
+            cost = entry.manaCostFor(data.getMaxMana());
 
             // ---- 第 1 步：没拿法杖 → 拦住 ----
             // 这一条必须先测：不然后面"魔力够就该放行"会被"没法杖"这个原因拦掉，

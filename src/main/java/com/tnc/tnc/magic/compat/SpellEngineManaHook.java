@@ -146,7 +146,7 @@ public final class SpellEngineManaHook {
                 return;
             }
 
-            int cost = entry.manaCost();
+            int cost = entry.manaCostFor(data.getMaxMana());
 
             if (args.action() == net.spell_engine.internals.casting.SpellCast.Action.CHANNEL) {
                 // 起手阶段：不够就先警告（只在进度刚开始时提示一次，避免刷屏）
@@ -159,6 +159,8 @@ public final class SpellEngineManaHook {
 
             // 真正放出去了：数值怎么变交给纯逻辑层（ManaCharge），这里只负责提示与同步
             ManaCharge.Result result = ManaCharge.apply(data, entry);
+            // 记下这次施法：接下来几秒不回魔，好让玩家在 HUD 上看得见刚扣掉的那一截
+            MagicStone.markCast(player);
             if (result.exhausted()) {
                 player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, EXHAUST_TICKS, 0));
                 player.sendSystemMessage(Component.literal("§c[TN-C] " + ManaCharge.describe(result, entry)));

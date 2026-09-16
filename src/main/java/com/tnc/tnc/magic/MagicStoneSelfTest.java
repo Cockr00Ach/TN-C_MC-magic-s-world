@@ -152,6 +152,17 @@ public final class MagicStoneSelfTest {
         checks.add(new Check("every tier affordable at 210", worst <= 210,
                 "最贵 " + worst + " 魔力 vs 初始上限 210"));
 
+        // 12b. 消耗随上限等比放大 —— 不然等级一高法术就几乎不要钱，HUD 上看不出条子动过
+        int costAtBaseline = Config.manaCostForTier(1, Config.manaCostBaselineMaxMana);
+        int costAt620 = Config.manaCostForTier(1, 620);
+        boolean costScales = costAtBaseline == Config.manaCostForTier(1) && costAt620 > costAtBaseline;
+        // "看得见"的判据：一级法术至少要让条子动 5%（59 像素的条子 ≈ 3 像素）
+        boolean costVisible = costAt620 * 100 >= 620 * 5;
+        checks.add(new Check("mana cost scales with max mana", costScales && costVisible,
+                "上限 " + Config.manaCostBaselineMaxMana + " → " + costAtBaseline
+                        + "，上限 620 → " + costAt620
+                        + "（占上限 " + String.format("%.1f", costAt620 * 100.0 / 620) + "%）"));
+
         // 13/14. 拦截判定（纯逻辑，不碰玩家数据）
         MagicStoneData gateData = new MagicStoneData();
         gateData.assignDefaultAffinities(3);

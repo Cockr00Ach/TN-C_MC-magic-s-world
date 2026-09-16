@@ -143,10 +143,11 @@ public class MagicStoneScreen extends Screen {
             graphics.drawString(this.font, entry.displayName(), left + LIST_X, spellY + 4, stateColor(state), false);
             graphics.drawString(this.font, stateText(state, entry), left + LIST_X + 66, spellY + 4, COLOR_DIM, false);
             if (isHovering(left + LIST_X, spellY, 176, 16, mouseX, mouseY)) {
+                // 消耗要按玩家自己的上限算（随上限等比放大），不然提示和实际扣费对不上
                 graphics.renderTooltip(this.font,
                         Component.literal(entry.fullName()
                                 + "\n§7解锁消耗 " + entry.learnCost() + " 点"
-                                + "\n§7施放消耗 " + entry.manaCost() + " 魔力"),
+                                + "\n§7施放消耗 " + entry.manaCostFor(data.getMaxMana()) + " 魔力"),
                         mouseX, mouseY);
             }
             spellY += ROW_H;

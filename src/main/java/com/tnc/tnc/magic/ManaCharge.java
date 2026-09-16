@@ -43,7 +43,7 @@ public final class ManaCharge {
 
     /** 够不够放这一发（CHANNEL 阶段用来提前警告）。 */
     public static boolean canAfford(MagicStoneData data, SpellCatalog.Entry entry) {
-        return data.getMana() >= entry.manaCost();
+        return data.getMana() >= entry.manaCostFor(data.getMaxMana());
     }
 
     /**
@@ -56,7 +56,9 @@ public final class ManaCharge {
      * @return 这次变化的明细（调用方拿去发提示）
      */
     public static Result apply(MagicStoneData data, SpellCatalog.Entry entry) {
-        int cost = entry.manaCost();
+        // 消耗随上限等比放大 —— 和 ManaGate 的判定必须用同一个口径，
+        // 否则会出现"拦截说够、扣费说不够"或者反过来
+        int cost = entry.manaCostFor(data.getMaxMana());
         int before = data.getMana();
 
         if (before >= cost) {

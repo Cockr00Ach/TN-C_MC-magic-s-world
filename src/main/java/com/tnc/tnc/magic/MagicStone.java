@@ -98,6 +98,20 @@ public class MagicStone {
     }
 
     /**
+     * 最近一次施法的游戏刻（只服务端用）。
+     *
+     * <p>用来实现"施法后短暂不回魔"：回魔是「每次 1 + 上限的 5%」，上限 620 时每 2 秒回 32，
+     * 而一级法术只花 20 —— 不暂停的话扣完不到一个周期就回满，玩家在 HUD 上什么都看不见。
+     */
+    private static final java.util.Map<java.util.UUID, Long> LAST_CAST =
+            new java.util.concurrent.ConcurrentHashMap<>();
+
+    /** 记一次施法（由 SPELL_CAST 钩子扣完魔力后调用）。 */
+    public static void markCast(ServerPlayer player) {
+        LAST_CAST.put(player.getUUID(), player.level().getGameTime());
+    }
+
+    /**
      * 魔力恢复：每 {@link com.tnc.tnc.Config#manaRegenIntervalTicks} tick 回一次
      * （默认 40 tick = 2 秒），每次回多少见 {@link com.tnc.tnc.Config#manaRegenFor}。
      */
@@ -118,6 +132,14 @@ public class MagicStone {
         // （syncTo 要的就是 ServerPlayer）
         if (!(player instanceof ServerPlayer serverPlayer)) {
             return;
+        }
+        // 刚放完法术先停一会儿：让玩家在 HUD 上看得见扣掉的那一截（默认 3 秒）
+        int castDelay = Config.manaRegenDelayAfterCastTicks;
+        if (castDelay > 0) {
+            Long last = LAST_CAST.get(serverPlayer.getUUID());
+            if (last != null && serverPlayer.level().getGameTime() - last < castDelay) {
+                return;
+            }
         }
         get(serverPlayer).ifPresent(data -> {
             if (data.getMana() < data.getMaxMana()) {

@@ -71,7 +71,7 @@ public final class ManaGate {
         if (requireLearned && !data.hasLearned(entry.id())) {
             return Decision.NOT_LEARNED;
         }
-        if (data.getMana() < entry.manaCost()) {
+        if (data.getMana() < entry.manaCostFor(data.getMaxMana())) {
             return Decision.NOT_ENOUGH_MANA;
         }
         return Decision.ALLOW;
@@ -176,9 +176,10 @@ public final class ManaGate {
             serverPlayer.displayClientMessage(Component.literal(
                     "§c[TN-C] 手上要拿着法杖才能施法"), true);
         } else {
-            lastBlockedSpell = spellId + "（" + data.getMana() + " / " + entry.manaCost() + "）";
+            int cost = entry.manaCostFor(data.getMaxMana());
+            lastBlockedSpell = spellId + "（" + data.getMana() + " / " + cost + "）";
             serverPlayer.displayClientMessage(Component.literal(
-                    "§c[TN-C] 魔力不足（" + data.getMana() + " / " + entry.manaCost() + "），施法失败"), true);
+                    "§c[TN-C] 魔力不足（" + data.getMana() + " / " + cost + "），施法失败"), true);
         }
         return true;
     }

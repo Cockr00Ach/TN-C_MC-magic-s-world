@@ -12,9 +12,6 @@ import net.minecraft.nbt.CompoundTag;
  */
 public final class MagicStoneClientSync {
 
-    private static final org.slf4j.Logger LOGGER =
-            com.mojang.logging.LogUtils.getLogger();
-
     private MagicStoneClientSync() {
     }
 
@@ -27,15 +24,7 @@ public final class MagicStoneClientSync {
             return;
         }
         MagicStone.get(player).ifPresent(data -> {
-            int beforeMana = data.getMana();
-            int beforeMax = data.getMaxMana();
             data.deserializeNBT(tag);
-            // 【临时诊断】只在真的变了的时候打一行：和上面的服务端 [diag] 一对照，
-            // 就能看出是"没发"、"发了没收"还是"收了没画"。定位完就删。
-            if (beforeMana != data.getMana() || beforeMax != data.getMaxMana()) {
-                LOGGER.info("TN-C: [diag] client mana {} / {} -> {} / {}",
-                        beforeMana, beforeMax, data.getMana(), data.getMaxMana());
-            }
             // 界面开着就让它按新数据重排（解锁成功后按钮要消失）
             if (Minecraft.getInstance().screen instanceof com.tnc.tnc.client.MagicStoneScreen screen) {
                 screen.refreshFromServer();
