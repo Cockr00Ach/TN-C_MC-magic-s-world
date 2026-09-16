@@ -117,12 +117,13 @@ try {
     #   * no spell pool  -> the wand's container references a pool that does not exist
     #   * no item model  -> the item renders as the purple/black missing model
     #   * no lang entry  -> the item shows its raw translation key
+    #   * no mana bar art -> the HUD bar draws as missing-texture black/purple
     foreach ($res in @('data/tnc/spell_pools/tnc_lightning.json',
                        'data/tnc/spell_assignments/magic_wand.json',
                        'assets/tnc/models/item/magic_wand.json',
                        'assets/tnc/textures/item/magic_wand.png',
-                       'assets/tnc/textures/gui/mana_bar/mana_empty.png',
-                       'assets/tnc/textures/gui/mana_bar/mana_fill.png')) {
+                       'assets/tnc/textures/gui/mana_bar/thundermagicbar_empty.png',
+                       'assets/tnc/textures/gui/mana_bar/thundermagicbar_fill.png')) {
         if ($zip.Entries | Where-Object { $_.FullName -eq $res }) { Ok "resource present: $res" }
         else { Fail "resource missing from jar: $res" }
     }
