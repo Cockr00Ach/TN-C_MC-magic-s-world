@@ -135,5 +135,17 @@ public class TNMod
         {
             LOGGER.info("TN-C client setup, player = {}", Minecraft.getInstance().getUser().getName());
         }
+
+        /**
+         * 注册 TN-C 的按键（HUD 上按 V 开魔法石界面）。
+         *
+         * <p>必须走 MOD 总线 —— {@code RegisterKeyMappingsEvent} 是 mod 生命周期事件，
+         * 挂到 FORGE 总线上根本不会被调用，按键会静默不生效。
+         */
+        @SubscribeEvent
+        public static void onRegisterKeyMappings(net.minecraftforge.client.event.RegisterKeyMappingsEvent event)
+        {
+            com.tnc.tnc.client.MagicStoneKeys.register(event);
+        }
     }
 }

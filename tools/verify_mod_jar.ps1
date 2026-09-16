@@ -93,7 +93,9 @@ try {
         'com/tnc/tnc/command/MagicStoneCommand.class',
         'com/tnc/tnc/client/MagicStoneButton.class',
         'com/tnc/tnc/client/MagicStoneScreen.class',
-        'com/tnc/tnc/client/MagicStoneClientEvents.class'
+        'com/tnc/tnc/client/MagicStoneClientEvents.class',
+        'com/tnc/tnc/client/MagicStoneHud.class',
+        'com/tnc/tnc/client/MagicStoneKeys.class'
     )
     function Get-ClassText([string]$entryName) {
         $entry = $zip.Entries | Where-Object { $_.FullName -eq $entryName }
@@ -122,6 +124,48 @@ try {
         if ($zip.Entries | Where-Object { $_.FullName -eq $res }) { Ok "resource present: $res" }
         else { Fail "resource missing from jar: $res" }
     }
+
+    # ---------------- D1c. HUD entry point + its keybind ----------------
+    # The HUD stone cannot be clicked (no cursor while playing), so the keybind IS
+    # the entry. RegisterKeyMappingsEvent lives on the MOD bus - registering it on
+    # the FORGE bus compiles fine and the key simply never appears in Options.
+    # Guard both halves: the subscription exists, and the lang keys exist.
+    # NOTE: the handler lives in the NESTED class TNMod$ClientModEvents, so that is
+    # the class file that carries the reference - checking TNMod.class alone gives a
+    # false alarm (which it did, once).
+    $tnmodForKeys = Get-ClassText 'com/tnc/tnc/TNMod$ClientModEvents.class'
+    if ($tnmodForKeys -and $tnmodForKeys.Contains('net/minecraftforge/client/event/RegisterKeyMappingsEvent')) {
+        Ok "TNMod subscribes to RegisterKeyMappingsEvent (HUD keybind is registered)"
+    } else {
+        Fail "TNMod does not subscribe to RegisterKeyMappingsEvent - the HUD hotkey would silently never appear"
+    }
+
+    $keyText = Get-ClassText 'com/tnc/tnc/client/MagicStoneKeys.class'
+    if ($keyText -and $keyText.Contains('key.tnc.open_magic_stone')) {
+        Ok "MagicStoneKeys declares the open_magic_stone key mapping"
+    } else {
+        Fail "MagicStoneKeys does not declare the key mapping"
+    }
+
+    # a keybind with no lang entry shows its raw translation key in Options
+    $langEntry = $zip.Entries | Where-Object { $_.FullName -eq 'assets/tnc/lang/zh_cn.json' }
+    if ($langEntry) {
+        $lr = New-Object System.IO.StreamReader($langEntry.Open(), [System.Text.Encoding]::UTF8)
+        $langText = $lr.ReadToEnd(); $lr.Close()
+        foreach ($k in @('key.tnc.open_magic_stone', 'key.categories.tnc')) {
+            if ($langText -match [regex]::Escape($k)) { Ok "lang has $k" }
+            else { Fail "lang is missing $k (Options would show a raw translation key)" }
+        }
+    }
+
+    # The HUD must be a FORGE-bus subscriber; RenderGuiEvent is a game event.
+    $hudAnno = Get-ClassText 'com/tnc/tnc/client/MagicStoneHud.class'
+    if ($hudAnno -and $hudAnno.Contains('Lnet/minecraftforge/fml/common/Mod$EventBusSubscriber;')) {
+        Ok "MagicStoneHud has @Mod.EventBusSubscriber"
+    } else {
+        Fail "MagicStoneHud is missing @Mod.EventBusSubscriber - the HUD icon would never render"
+    }
+
 
     # The assignment file is what tells the engine (BOTH sides) that this item is a
     # spell holder: SpellRegistry.loadContainers() reads data/<ns>/spell_assignments/
