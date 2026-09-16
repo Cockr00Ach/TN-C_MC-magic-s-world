@@ -82,10 +82,13 @@ public class MagicStoneActionPacket {
         if (result == MagicStoneLearning.Result.OK || result == MagicStoneLearning.Result.ALREADY_LEARNED) {
             // 解锁成功 = 把"已解锁集合"同步进法杖（玩家看不到卷轴/法术书/注册台）。
             // 魔法石是权威数据，法杖只是它的一个投影。
+            // ⚠️ 用 effectiveIds：每条链只挂最高级（学了高阶就把低阶顶下去）
+            java.util.List<ResourceLocation> effective =
+                    com.tnc.tnc.magic.SpellCatalog.effectiveIds(data);
             SpellEngineBridge.WandResult synced =
-                    SpellEngineBridge.ensureWand(player, data.getLearned());
+                    SpellEngineBridge.ensureWand(player, effective);
             player.sendSystemMessage(Component.literal("§7[TN-C] 法杖："
-                    + SpellEngineBridge.describeWand(synced, data.getLearned().size())));
+                    + SpellEngineBridge.describeWand(synced, effective.size())));
         }
         // 无论成功失败都同步一次：成功要刷新点数/已学，失败也能让界面显示最新状态
         MagicStoneNetwork.syncTo(player);

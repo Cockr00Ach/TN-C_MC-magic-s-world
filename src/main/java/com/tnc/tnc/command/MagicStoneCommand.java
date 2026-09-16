@@ -253,11 +253,13 @@ public class MagicStoneCommand {
         ctx.getSource().sendSuccess(() -> MagicStoneLearning.describe(result, entry, data), false);
         if (result == MagicStoneLearning.Result.OK || result == MagicStoneLearning.Result.ALREADY_LEARNED) {
             // 解锁后同步法杖内容（已经学过也同步一次 —— 相当于顺手修好丢了内容的法杖）
+            // ⚠️ 喂进去的是 effectiveIds：学了高阶就把低阶顶下去（高阶替换低阶）
+            java.util.List<ResourceLocation> effective = com.tnc.tnc.magic.SpellCatalog.effectiveIds(data);
             com.tnc.tnc.magic.compat.SpellEngineBridge.WandResult synced =
-                    com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(player, data.getLearned());
+                    com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(player, effective);
             ctx.getSource().sendSuccess(() -> Component.literal(
                     "§7[TN-C] 法杖：" + com.tnc.tnc.magic.compat.SpellEngineBridge.describeWand(
-                            synced, data.getLearned().size())), false);
+                            synced, effective.size())), false);
         }
         MagicStone.refreshMaxMana(player, data);
         MagicStoneNetwork.syncTo(player);
@@ -381,12 +383,13 @@ public class MagicStoneCommand {
         if (data == null) {
             return 0;
         }
-        int learned = data.getLearned().size();
+        // 法杖内容 = 每条链的最高级（高阶替换低阶），不是"学过的全部"
+        java.util.List<ResourceLocation> effective = com.tnc.tnc.magic.SpellCatalog.effectiveIds(data);
         com.tnc.tnc.magic.compat.SpellEngineBridge.WandResult result =
-                com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(player, data.getLearned());
+                com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(player, effective);
         MagicStoneNetwork.syncTo(player);
         ctx.getSource().sendSuccess(() -> Component.literal("§b[TN-C] §r"
-                + com.tnc.tnc.magic.compat.SpellEngineBridge.describeWand(result, learned)), false);
+                + com.tnc.tnc.magic.compat.SpellEngineBridge.describeWand(result, effective.size())), false);
         return result == com.tnc.tnc.magic.compat.SpellEngineBridge.WandResult.FAILED ? 0 : 1;
     }
 

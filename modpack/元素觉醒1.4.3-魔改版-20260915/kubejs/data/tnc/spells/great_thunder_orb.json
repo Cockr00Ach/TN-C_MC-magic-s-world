@@ -1,0 +1,37 @@
+{
+  "school": "LIGHTNING",
+  "group": "orb",
+  "range": 40.0,
+  "learn": { "tier": 2 },
+  "cast": {
+    "duration": 0.7,
+    "animation": "spell_engine:one_handed_projectile_charge",
+    "sound": { "id": "spell_engine:generic_lightning_casting", "randomness": 0 },
+    "particles": [ { "particle_id": "spell_engine:electric_arc_b", "shape": "PIPE", "origin": "FEET", "count": 1.0, "min_speed": 0.05, "max_speed": 0.1 } ]
+  },
+  "release": {
+    "target": {
+      "type": "PROJECTILE",
+      "projectile": {
+        "launch_properties": { "velocity": 1.1 },
+        "projectile": {
+          "homing_angle": 0.8,
+          "client_data": {
+            "travel_particles": [ { "particle_id": "spell_engine:electric_arc_a", "shape": "CIRCLE", "rotation": "LOOK", "origin": "CENTER", "count": 4.0, "min_speed": 0.0, "max_speed": 0.15 } ],
+            "model": { "model_id": "tnc:projectile/thunder_orb", "scale": 1.4 }
+          }
+        }
+      }
+    },
+    "animation": "spell_engine:one_handed_projectile_release",
+    "sound": { "id": "spell_engine:generic_lightning_release" }
+  },
+  "impact": [
+    {
+      "action": { "type": "DAMAGE", "damage": { "spell_power_coefficient": 1.8, "knockback": 0.4 } },
+      "particles": [ { "particle_id": "spell_engine:electric_arc_b", "shape": "SPHERE", "origin": "CENTER", "count": 40.0, "min_speed": 0.2, "max_speed": 0.8 } ],
+      "sound": { "id": "entity.lightning_bolt.impact", "volume": 0.6 }
+    }
+  ],
+  "cost": { "exhaust": 0.0, "cooldown_duration": 2.0 }
+}

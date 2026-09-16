@@ -35,7 +35,8 @@ public final class MagicStoneLearning {
         if (entry.tier() > data.maxTierFor(entry.element())) {
             return Result.AFFINITY_TOO_LOW;
         }
-        if (entry.tier() > data.getProgress(entry.element()) + 1) {
+        // 不能跳级：看的是**同一条链**的进度（三条链各自算）
+        if (entry.tier() > data.getProgress(entry.element(), entry.chain()) + 1) {
             return Result.OUT_OF_ORDER;
         }
         if (data.getPointsAvailable(Config.pointThresholds) < Config.learnCostForTier(entry.tier())) {
@@ -52,7 +53,8 @@ public final class MagicStoneLearning {
         }
         data.spendPoints(Config.learnCostForTier(entry.tier()));
         data.learn(entry.id());
-        data.setProgress(entry.element(), Math.max(data.getProgress(entry.element()), entry.tier()));
+        data.setProgress(entry.element(), entry.chain(),
+                Math.max(data.getProgress(entry.element(), entry.chain()), entry.tier()));
         return Result.OK;
     }
 
@@ -66,8 +68,9 @@ public final class MagicStoneLearning {
             case AFFINITY_TOO_LOW -> Component.literal("§c[TN-C] " + entry.element().cn() + "系亲和力不足："
                     + entry.displayName() + " 需要" + Element.tierName(entry.tier())
                     + "，你现在只能学到" + Element.tierName(Math.max(1, data.maxTierFor(entry.element()))));
-            case OUT_OF_ORDER -> Component.literal("§c[TN-C] 不能跳级：先把" + entry.element().cn() + "系上一级学了"
-                    + "（当前进度 " + Element.tierName(data.getProgress(entry.element())) + "）");
+            case OUT_OF_ORDER -> Component.literal("§c[TN-C] 不能跳级：先把"
+                    + entry.element().cn() + "系「" + entry.chain().cn() + "」链的上一级学了"
+                    + "（这条链当前进度 " + Element.tierName(data.getProgress(entry.element(), entry.chain())) + "）");
             case NOT_ENOUGH_POINTS -> Component.literal("§c[TN-C] 魔法点数不够：需要 " + cost
                     + " 点，当前可用 " + data.getPointsAvailable(Config.pointThresholds) + " 点");
         };

@@ -65,9 +65,17 @@ public final class MagicStoneSelfTest {
         checks.add(new Check("points total = 2 @310", data.getPointsTotal(Config.pointThresholds) == 2,
                 "total=" + data.getPointsTotal(Config.pointThresholds) + " thresholds=" + Config.pointThresholds));
 
-        // 4. 法术目录
-        checks.add(new Check("catalog has 5 spells", SpellCatalog.all().size() == 5,
-                "size=" + SpellCatalog.all().size()));
+        // 4. 法术目录：雷系三条链，每条 5 级
+        int chains = SpellCatalog.chainsOf(Element.LIGHTNING).size();
+        boolean chainsOk = chains == 3;
+        StringBuilder chainSizes = new StringBuilder();
+        for (SpellCatalog.Chain chain : SpellCatalog.chainsOf(Element.LIGHTNING)) {
+            int size = SpellCatalog.of(Element.LIGHTNING, chain).size();
+            chainSizes.append(chain.cn()).append('=').append(size).append(' ');
+            chainsOk = chainsOk && size == 5;
+        }
+        checks.add(new Check("catalog = 3 chains x 5 tiers", chainsOk && SpellCatalog.all().size() == 15,
+                "chains=" + chains + " total=" + SpellCatalog.all().size() + " [" + chainSizes.toString().trim() + "]"));
 
         // 5. 门槛顺序（全部在临时数据上跑）
         MagicStoneData fresh = new MagicStoneData();
@@ -101,6 +109,29 @@ public final class MagicStoneSelfTest {
         checks.add(new Check("tier2 now only lacks points", afterUnlock == MagicStoneLearning.Result.NOT_ENOUGH_POINTS,
                 "available=" + fresh.getPointsAvailable(Config.pointThresholds)
                         + " cost=" + Config.learnCostForTier(2) + " -> " + afterUnlock.name()));
+
+        // 7b. 三条链互不影响：主链学了 1 级，不该推进雷球链的进度
+        SpellCatalog.Entry orbT1 = SpellCatalog.of(Element.LIGHTNING, SpellCatalog.Chain.ORB).get(0);
+        SpellCatalog.Entry orbT2 = SpellCatalog.of(Element.LIGHTNING, SpellCatalog.Chain.ORB).get(1);
+        boolean independent = fresh.getProgress(Element.LIGHTNING, SpellCatalog.Chain.ORB) == 0
+                && MagicStoneLearning.check(fresh, orbT2) == MagicStoneLearning.Result.OUT_OF_ORDER;
+        checks.add(new Check("chains are independent", independent,
+                "CORE=" + fresh.getProgress(Element.LIGHTNING, SpellCatalog.Chain.CORE)
+                        + " ORB=" + fresh.getProgress(Element.LIGHTNING, SpellCatalog.Chain.ORB)
+                        + " 直接学 " + orbT2.displayName() + " -> " + MagicStoneLearning.check(fresh, orbT2).name()));
+
+        // 7c. **高阶替换低阶**：同一链学了 2 级，法杖里就只剩 2 级（不是两个都挂）
+        MagicStoneData chainData = new MagicStoneData();
+        chainData.assignDefaultAffinities(5);
+        chainData.recomputeMaxMana(0, 10, 10, 0);
+        chainData.addBonusPoints(50);
+        MagicStoneLearning.unlock(chainData, orbT1);
+        MagicStoneLearning.unlock(chainData, orbT2);
+        java.util.List<net.minecraft.resources.ResourceLocation> effective = SpellCatalog.effectiveIds(chainData);
+        boolean replaced = effective.contains(orbT2.id()) && !effective.contains(orbT1.id());
+        checks.add(new Check("high tier replaces low (wand content)", replaced,
+                "已学 ORB 1+2 级 -> 法杖内容="
+                        + effective.stream().map(net.minecraft.resources.ResourceLocation::getPath).toList()));
 
         // 8. NBT 往返
         MagicStoneData copy = new MagicStoneData();

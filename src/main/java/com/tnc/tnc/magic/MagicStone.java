@@ -85,9 +85,10 @@ public class MagicStone {
             refreshMaxMana(player, data);
             // 魔法石才是权威数据：登录时把法杖内容对齐到"已解锁"的集合。
             // 法杖丢了/内容少了都能在这里修回来 —— 否则丢了法杖就等于法术白解锁了。
+            // ⚠️ 喂进去的是 effectiveIds：**每条链只取最高级**（高阶替换低阶）。
             if (Config.restoreWandOnLogin) {
                 com.tnc.tnc.magic.compat.SpellEngineBridge.WandResult synced =
-                        com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(player, data.getLearned());
+                        com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(player, SpellCatalog.effectiveIds(data));
                 if (synced == com.tnc.tnc.magic.compat.SpellEngineBridge.WandResult.GAVE_NEW_WAND) {
                     player.sendSystemMessage(net.minecraft.network.chat.Component.literal(
                             "§b[TN-C] §r没找到你的法杖，已按魔法石记录补发一根"));

@@ -4,6 +4,16 @@
     "tnc:lightning_field",
     "tnc:lightning_strike",
     "tnc:lightning_storm",
-    "tnc:heavenly_thunder"
+    "tnc:heavenly_thunder",
+    "tnc:thunder_orb",
+    "tnc:great_thunder_orb",
+    "tnc:orbiting_thunder_orb",
+    "tnc:explosive_thunder_orb",
+    "tnc:cataclysm_thunder_orb",
+    "tnc:lightning_haste",
+    "tnc:lightning_blink",
+    "tnc:lightning_wind",
+    "tnc:lightning_recharge",
+    "tnc:lightning_ascension"
   ]
 }

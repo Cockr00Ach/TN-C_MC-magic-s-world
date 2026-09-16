@@ -32,6 +32,9 @@ public class MagicStoneData {
 
     public static final int ELEMENT_COUNT = Element.values().length;
 
+    /** 一个元素下有几条链（雷系现在有主链/雷球/雷速三条）。 */
+    public static final int CHAIN_COUNT = SpellCatalog.Chain.values().length;
+
     /** 亲和力下限 / 上限（设计文档第二节：1–6）。 */
     public static final int MIN_AFFINITY = 1;
     public static final int MAX_AFFINITY = 6;
@@ -39,8 +42,15 @@ public class MagicStoneData {
     // ---------------- 持久化字段 ----------------
 
     private final int[] affinity = new int[ELEMENT_COUNT];
-    /** 每元素已学到的等级 0–5（0 = 还没学）。 */
-    private final int[] progress = new int[ELEMENT_COUNT];
+
+    /**
+     * 每元素<b>每条链</b>各自已学到的等级 0–5（0 = 这条链还没学）。
+     *
+     * <p>为什么不是"每元素一个进度"：雷系有三条互相独立的链，
+     * 若共用一条进度就会出现"学了雷球 1 级以后，三条链的 2 级全都学不了"的死锁
+     * （{@code progress+1} 的规则会把整条元素卡在 1 级）。
+     */
+    private final int[][] progress = new int[ELEMENT_COUNT][CHAIN_COUNT];
     private final Set<ResourceLocation> learned = new LinkedHashSet<>();
 
     private int mana;
@@ -65,7 +75,9 @@ public class MagicStoneData {
     public MagicStoneData() {
         for (int i = 0; i < ELEMENT_COUNT; i++) {
             affinity[i] = 0;
-            progress[i] = 0;
+            for (int c = 0; c < CHAIN_COUNT; c++) {
+                progress[i][c] = 0;
+            }
         }
         this.mana = 0;
         this.maxMana = 0;
@@ -223,7 +235,9 @@ public class MagicStoneData {
             learned.remove(spell);
             refund += 1; // 具体退多少等做遗忘药水时再按真实花费算
         }
-        progress[element.ordinal()] = 0;
+        for (int c = 0; c < CHAIN_COUNT; c++) {
+            progress[element.ordinal()][c] = 0;
+        }
         pointsSpent = Math.max(0, pointsSpent - refund);
         return refund;
     }
@@ -240,17 +254,38 @@ public class MagicStoneData {
     //  进度与已学法术
     // ------------------------------------------------------------------
 
+    /** 进度：**主链**的已学等级（兼容旧调用）。 */
     public int getProgress(Element element) {
-        return progress[element.ordinal()];
+        return getProgress(element, SpellCatalog.Chain.CORE);
     }
 
+    /** 进度：某元素某条链的已学等级 0–5。 */
+    public int getProgress(Element element, SpellCatalog.Chain chain) {
+        return progress[element.ordinal()][chain.ordinal()];
+    }
+
+    /** 设置：**主链**的进度（兼容旧调用）。 */
     public void setProgress(Element element, int value) {
-        progress[element.ordinal()] = clamp(value, 0, 5);
+        setProgress(element, SpellCatalog.Chain.CORE, value);
     }
 
-    /** 能不能学这个元素这个等级的法术：等级 ≤ 亲和力允许的上限，且不能跳级。 */
-    public boolean canLearnTier(Element element, int tier) {
-        return tier >= 1 && tier <= maxTierFor(element) && tier <= getProgress(element) + 1;
+    /** 设置：某元素某条链的进度。 */
+    public void setProgress(Element element, SpellCatalog.Chain chain, int value) {
+        progress[element.ordinal()][chain.ordinal()] = clamp(value, 0, SpellCatalog.maxTier());
+    }
+
+    /** 这条链里已经解锁的最高等级（跨该元素的**所有链**取最大，界面/命令展示用）。 */
+    public int getProgressMax(Element element) {
+        int max = 0;
+        for (int c = 0; c < CHAIN_COUNT; c++) {
+            max = Math.max(max, progress[element.ordinal()][c]);
+        }
+        return max;
+    }
+
+    /** 能不能学这个元素这条链这个等级的法术：等级 ≤ 亲和力允许的上限，且不能跳级。 */
+    public boolean canLearnTier(Element element, SpellCatalog.Chain chain, int tier) {
+        return tier >= 1 && tier <= maxTierFor(element) && tier <= getProgress(element, chain) + 1;
     }
 
     public Set<ResourceLocation> getLearned() {
@@ -275,7 +310,9 @@ public class MagicStoneData {
 
     public void copyFrom(MagicStoneData other) {
         System.arraycopy(other.affinity, 0, this.affinity, 0, ELEMENT_COUNT);
-        System.arraycopy(other.progress, 0, this.progress, 0, ELEMENT_COUNT);
+        for (int i = 0; i < ELEMENT_COUNT; i++) {
+            System.arraycopy(other.progress[i], 0, this.progress[i], 0, CHAIN_COUNT);
+        }
         this.learned.clear();
         this.learned.addAll(other.learned);
         this.mana = other.mana;
@@ -298,11 +335,23 @@ public class MagicStoneData {
         }
         tag.put("Affinity", affinityList);
 
-        ListTag progressList = new ListTag();
-        for (int value : progress) {
-            progressList.add(net.minecraft.nbt.IntTag.valueOf(value));
+        // 旧字段：只写主链，保持向后兼容（老版本读到它也不会出错）
+        int[] coreTiers = new int[ELEMENT_COUNT];
+        for (int e = 0; e < ELEMENT_COUNT; e++) {
+            coreTiers[e] = progress[e][SpellCatalog.Chain.CORE.ordinal()];
         }
-        tag.put("Progress", progressList);
+        tag.put("Progress", toList(coreTiers));
+
+        // 新字段：每条链一个数组。链名当 key，加新链/改顺序都不会串位。
+        CompoundTag chainTag = new CompoundTag();
+        for (SpellCatalog.Chain chain : SpellCatalog.Chain.values()) {
+            int[] tiers = new int[ELEMENT_COUNT];
+            for (int e = 0; e < ELEMENT_COUNT; e++) {
+                tiers[e] = progress[e][chain.ordinal()];
+            }
+            chainTag.put(chain.name(), toList(tiers));
+        }
+        tag.put("ChainProgress", chainTag);
 
         ListTag learnedList = new ListTag();
         for (ResourceLocation spell : learned) {
@@ -320,7 +369,30 @@ public class MagicStoneData {
 
     public void deserializeNBT(CompoundTag tag) {
         readIntArray(tag.getList("Affinity", Tag.TAG_INT), affinity);
-        readIntArray(tag.getList("Progress", Tag.TAG_INT), progress);
+
+        // 先清零，再按"新格式优先、旧格式兜底"读
+        for (int e = 0; e < ELEMENT_COUNT; e++) {
+            for (int c = 0; c < CHAIN_COUNT; c++) {
+                progress[e][c] = 0;
+            }
+        }
+        if (tag.contains("ChainProgress", Tag.TAG_COMPOUND)) {
+            CompoundTag chainTag = tag.getCompound("ChainProgress");
+            for (SpellCatalog.Chain chain : SpellCatalog.Chain.values()) {
+                int[] tiers = new int[ELEMENT_COUNT];
+                readIntArray(chainTag.getList(chain.name(), Tag.TAG_INT), tiers);
+                for (int e = 0; e < ELEMENT_COUNT; e++) {
+                    progress[e][chain.ordinal()] = tiers[e];
+                }
+            }
+        } else {
+            // 老存档只有主链进度：读进主链，新链从 0 开始（正是我们想要的）
+            int[] coreTiers = new int[ELEMENT_COUNT];
+            readIntArray(tag.getList("Progress", Tag.TAG_INT), coreTiers);
+            for (int e = 0; e < ELEMENT_COUNT; e++) {
+                progress[e][SpellCatalog.Chain.CORE.ordinal()] = coreTiers[e];
+            }
+        }
 
         learned.clear();
         ListTag learnedList = tag.getList("Learned", Tag.TAG_STRING);
@@ -342,6 +414,15 @@ public class MagicStoneData {
         for (int i = 0; i < target.length && i < list.size(); i++) {
             target[i] = list.getInt(i);
         }
+    }
+
+    /** 每元素一个 int 打成 NBT 列表。 */
+    private static ListTag toList(int[] values) {
+        ListTag list = new ListTag();
+        for (int value : values) {
+            list.add(net.minecraft.nbt.IntTag.valueOf(value));
+        }
+        return list;
     }
 
     // ------------------------------------------------------------------

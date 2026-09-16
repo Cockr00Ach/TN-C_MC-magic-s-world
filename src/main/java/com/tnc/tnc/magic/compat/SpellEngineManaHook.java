@@ -161,6 +161,8 @@ public final class SpellEngineManaHook {
             ManaCharge.Result result = ManaCharge.apply(data, entry);
             // 记下这次施法：接下来几秒不回魔，好让玩家在 HUD 上看得见刚扣掉的那一截
             MagicStone.markCast(player);
+            // 数据层表达不出来的那几条（回蓝 / 光环 / 拖尾 / 无冷却）交给机制层
+            com.tnc.tnc.magic.TnSpellMechanics.onSpellCast(player, spellId, data);
             if (result.exhausted()) {
                 player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, EXHAUST_TICKS, 0));
                 player.sendSystemMessage(Component.literal("§c[TN-C] " + ManaCharge.describe(result, entry)));

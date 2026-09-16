@@ -13,6 +13,8 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
+import java.util.List;
+
 /**
  * 魔法石界面（设计文档第九节：这是 TN-C <b>唯一</b>的功能性 GUI）。
  *
@@ -21,7 +23,7 @@ import net.minecraft.network.chat.Component;
  */
 public class MagicStoneScreen extends Screen {
 
-    private static final int PANEL_W = 336;
+    private static final int PANEL_W = 520;   // 变宽了：法术目录要按链分三列
     private static final int PANEL_H = 224;
     private static final int ROW_H = 22;
 
@@ -135,22 +137,31 @@ public class MagicStoneScreen extends Screen {
         graphics.drawString(this.font, "已学 " + data.getLearned().size() + " 个法术",
                 left + 12, y + 6, COLOR_DIM, false);
 
-        // 右列：法术目录 + 状态
-        graphics.drawString(this.font, "雷系法术", left + LIST_X, top + LIST_Y, COLOR_TITLE, false);
-        int spellY = top + LIST_Y + 16;
-        for (SpellCatalog.Entry entry : SpellCatalog.all()) {
-            MagicStoneLearning.Result state = MagicStoneLearning.check(data, entry);
-            graphics.drawString(this.font, entry.displayName(), left + LIST_X, spellY + 4, stateColor(state), false);
-            graphics.drawString(this.font, stateText(state, entry), left + LIST_X + 66, spellY + 4, COLOR_DIM, false);
-            if (isHovering(left + LIST_X, spellY, 176, 16, mouseX, mouseY)) {
-                // 消耗要按玩家自己的上限算（随上限等比放大），不然提示和实际扣费对不上
-                graphics.renderTooltip(this.font,
-                        Component.literal(entry.fullName()
-                                + "\n§7解锁消耗 " + entry.learnCost() + " 点"
-                                + "\n§7施放消耗 " + entry.manaCostFor(data.getMaxMana()) + " 魔力"),
-                        mouseX, mouseY);
+        // 法术目录：**每条链一列**（雷系现在有主链/雷球/雷速三条，15 个法术挤一列会跑出面板）
+        List<SpellCatalog.Chain> chains = SpellCatalog.chainsOf(Element.LIGHTNING);
+        int colW = (PANEL_W - LIST_X - 12) / Math.max(1, chains.size());
+        graphics.drawString(this.font, "雷系法术（每条链独立进度，高级自动替换低级）",
+                left + LIST_X, top + LIST_Y - 14, COLOR_TITLE, false);
+        int chainIndex = 0;
+        for (SpellCatalog.Chain chain : chains) {
+            int colX = left + LIST_X + chainIndex * colW;
+            graphics.drawString(this.font, chain.cn(), colX, top + LIST_Y, COLOR_TITLE, false);
+            int spellY = top + LIST_Y + 16;
+            for (SpellCatalog.Entry entry : SpellCatalog.of(Element.LIGHTNING, chain)) {
+                MagicStoneLearning.Result state = MagicStoneLearning.check(data, entry);
+                graphics.drawString(this.font, entry.displayName(), colX, spellY + 4, stateColor(state), false);
+                if (isHovering(colX, spellY, colW - 6, 16, mouseX, mouseY)) {
+                    // 消耗要按玩家自己的上限算（随上限等比放大），不然提示和实际扣费对不上
+                    graphics.renderTooltip(this.font,
+                            Component.literal(entry.fullName()
+                                    + "\n§7解锁消耗 " + entry.learnCost() + " 点"
+                                    + "\n§7施放消耗 " + entry.manaCostFor(data.getMaxMana()) + " 魔力"
+                                    + "\n§7状态 " + stateText(state, entry)),
+                            mouseX, mouseY);
+                }
+                spellY += ROW_H;
             }
-            spellY += ROW_H;
+            chainIndex++;
         }
 
         super.render(graphics, mouseX, mouseY, partialTick);
