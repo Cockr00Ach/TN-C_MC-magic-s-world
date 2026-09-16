@@ -173,6 +173,66 @@ try {
         else { Fail ('pack is missing spell json: ' + ($missingSpells -join ', ')) }
         if ($missingIcons.Count -eq 0) { Ok 'pack has all 15 spell icons' }
         else { Fail ('pack is missing spell icon: ' + ($missingIcons -join ', ')) }
+
+        # ---- structural checks: valid json can still be a broken spell ----
+        # Every one of these fails SILENTLY in game:
+        #   * Gson drops unknown keys -> a typo'd field name just uses the default
+        #   * an effect_id that is not registered -> the buff simply never applies
+        #   * a model_id without a file -> the projectile renders as missing texture
+        $registered = @('tnc:lightning_haste', 'tnc:lightning_wind',
+                        'tnc:orbiting_thunder_orb', 'tnc:lightning_ascension')
+        $badShape = @()
+        $badTier = @()
+        $badEffect = @()
+        $badModel = @()
+        foreach ($id in $spellIds) {
+            $path = $id.Substring(4)
+            $file = Join-Path $spellDir "$path.json"
+            if (-not (Test-Path $file)) { continue }
+            $spell = $null
+            try { $spell = ConvertFrom-Json ([System.IO.File]::ReadAllText($file)) }
+            catch { $badShape += "$path(parse)"; continue }
+
+            if ("$($spell.school)" -ne 'LIGHTNING') { $badShape += "$path(school)" }
+            if (-not $spell.release -or -not $spell.release.target -or -not $spell.release.target.type) {
+                $badShape += "$path(release.target.type)"
+            }
+            if (-not $spell.impact -and -not $spell.area_impact) { $badShape += "$path(no impact)" }
+
+            $jsonId = $spell.learn.tier
+            if ($null -eq $jsonId) { $badTier += "$path(no learn.tier)" }
+            elseif ($jsonId -lt 1 -or $jsonId -gt 5) { $badTier += "$path(tier=$jsonId)" }
+
+            foreach ($impact in @($spell.impact)) {
+                $eff = "$($impact.action.status_effect.effect_id)"
+                # 只管 tnc: 自己的效果：别的命名空间是原版（minecraft:slowness）或别的 mod 的，
+                # 我们既不该管也管不着
+                if ($eff -like 'tnc:*' -and ($registered -notcontains $eff)) {
+                    $badEffect += "$path -> $eff"
+                }
+            }
+
+            $modelId = $null
+            if ($spell.release.target.projectile) {
+                $modelId = "$($spell.release.target.projectile.projectile.client_data.model.model_id)"
+            } elseif ($spell.release.target.meteor) {
+                $modelId = "$($spell.release.target.meteor.projectile.client_data.model.model_id)"
+            }
+            # 同理：只检查我们自己资源包里的模型（老法术用的是别的 mod 的模型）
+            if ($modelId -like 'tnc:*') {
+                $rel = $modelId -replace '^tnc:', ''
+                $modelFile = Join-Path $packForSpells "config\openloader\resources\TN-C\assets\tnc\models\$rel.json"
+                if (-not (Test-Path $modelFile)) { $badModel += "$path -> $modelId" }
+            }
+        }
+        if ($badShape.Count -eq 0) { Ok 'spell json shape ok (school / release.target / impact)' }
+        else { Fail ('spell json shape broken: ' + ($badShape -join ', ')) }
+        if ($badTier.Count -eq 0) { Ok 'spell json tiers all in 1..5' }
+        else { Fail ('spell json bad tier: ' + ($badTier -join ', ')) }
+        if ($badEffect.Count -eq 0) { Ok 'spell json effect ids all registered by TNEffects' }
+        else { Fail ('spell references an unregistered effect: ' + ($badEffect -join ', ')) }
+        if ($badModel.Count -eq 0) { Ok 'spell json projectile models exist in the pack' }
+        else { Fail ('spell references a missing model: ' + ($badModel -join ', ')) }
     } else {
         Write-Host '  [note]    live pack not found - skipped the pack-side spell checks'
     }
