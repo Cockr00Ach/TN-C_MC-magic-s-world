@@ -1196,6 +1196,92 @@ data/ysjx_weapons/spell_assignments/lightning_staff.json
 
 ---
 
+### 4.17 魔力条 HUD 版面：按**包内实际坐标**重排（2026-09-16）
+
+用户反馈两条：「聊天框的暗底把紫色那条占了」「魔力条把血条完全挡住了」。
+两条都不是审美问题，是**坐标算错了** + **一个多余的 return**。
+
+#### 4.17.1 这个包的状态条不在原版位置（实测）
+
+包里的血条/饱食度被 `whisperingstatusbar-1.3.jar` 换成了 11 像素高的贴图条，
+于是整条往上长了一行。**拿用户截图逐像素扫出来的**（截图 856x512 = GUI 428x256，
+GUI 缩放 2，所以 GUI y = 物理 y / 2）：
+
+| GUI y | 画的是什么 | 是谁画的 |
+|---|---|---|
+| `高-61 .. 高-51` | 护甲条（**左半边**，右半边空着） | 包（whisperingstatusbar） |
+| `高-50 .. 高-40` | 血条（左）/ 饱食度（右） | 包 |
+| `高-49 .. 高-40` | **聊天框最下面一行的暗底** | 原版 `ChatComponent` |
+| `高-39` | 原版血条锚点（这个包里没人用） | —— |
+| `高-22` | 快捷栏 | 原版 |
+
+**教训**：原版血条在 `高-39`，但这个包把它画到了 `高-50`。
+我们原来按原版算，把魔力条画在 `高-49` —— 正好横在血条身上，**全盖住了**。
+所以现在摆在 `高-61`（饱食度正上方一行 = 护甲条那一行的右半边，那里本来就是空的），
+和**饱食度**同宽（80）同右边界（`宽/2 + 91`）。
+
+#### 4.17.2 聊天框暗底是"一条横带"，正好压在血条那一行
+
+从 `ChatComponent.render` 读出来的（不是猜的）：
+
+```java
+int l  = guiHeight();                        // 256
+int i1 = Mth.floor((l - 40) / scale);        // = 216
+// 每行消息（j2 = 0 是最新那条）：
+int i4 = i1 - j2 * lineHeight;               // 最新一行 i4 = 216，lineHeight = 9
+pose.translate(4, 0, 0);                     // 整块往右挪 4
+fill(-4, i4 - 9, getWidth() + 8, i4, k3 << 24);   // => GUI x 0..332, y 207..216
+```
+
+所以**最新那条消息的暗底 = GUI `x 0..332`、`y 207..216`，而且是全屏宽度**
+（`getWidth()` 默认 320，`chatWidth` 选项拉满时更宽）。
+血条/饱食度（`206..216`）正好长在带子里 —— 这就是为什么一有聊天消息它们会变暗；
+而护甲条（`195..205`）在带子**外面**，所以它一直不暗。
+
+魔力条挪到 `高-61`（= `195..205`）以后，**整条都在带子外面**，
+一条消息时干干净净；消息堆多了带子会往上长，那时照旧会被压暗（但不会消失），
+和血条的待遇一致 —— 这正是原版的规矩。
+
+> 预览图：`docs\previews\mana_bar_layout.png`（拿用户截图合成的前后对比）
+
+#### 4.17.3 🔴 真正的 bug：`if (minecraft.screen != null) return;`
+
+用户说"血条、饱食度一直看得见、就是半透明，只有魔力条整条没了"。
+原因就是我们自己写的那个判断。**原版开着界面时照样画 HUD**：
+
+```java
+// GameRenderer.render
+if (!this.minecraft.options.hideGui || this.minecraft.screen != null) {
+    this.minecraft.gui.render(guigraphics, p_109094_);   // ← HUD（含我们的条、含聊天框）
+}
+...
+} else if (this.minecraft.screen != null) {
+    ForgeHooksClient.drawScreen(this.minecraft.screen, ...);   // ← 界面在这之后才画上去
+}
+```
+
+顺序是：`Gui.render`（我们的 `RenderGuiEvent.Post` 在这里面，**在聊天框之后** ——
+`chat.render` 是 `Gui.render` 的倒数第二件事）→ 然后才画界面。
+所以：
+
+- 按 T 开聊天框时，血条/饱食度被"聊天框自己那张暗底"压暗，但**一直在**；
+- 我们写了 `screen != null` 就 return，于是**全场只有魔力条消失**，
+  玩家一眼就看出是 bug。
+
+**改法**：删掉 `screen != null` 判断，只留 `hideGui`（F1）。
+界面本来就会盖在我们上面，不用我们操心。
+
+#### 4.17.4 顺便记住的两条
+
+1. **HUD 是画在界面底下的，不是不画**（`hideGui || screen != null` 都要画）。
+   想让自己的东西"永远在最上面、界面都盖不住"，那是做不到的（除非挂 `ScreenEvent.Render.Post`，
+   但那样会**挡住聊天文字**，反而更糟）。
+2. 改条子位置只需动 `MagicStoneHud` 顶部那几个常量：
+   `PACK_BAR_ROW_HEIGHT`（步长 11）、`HUNGER_ROW_TOP_MARGIN`、`MANA_BAR_TOP_MARGIN`、
+   `MANA_BAR_X_OFFSET`、`ICON_BOTTOM_MARGIN`。
+
+---
+
 # 五、核心技术知识库
 
 > 这一节是花了一整晚用 `javap` 读编译类、拆 jar、试错换来的。别重复踩。

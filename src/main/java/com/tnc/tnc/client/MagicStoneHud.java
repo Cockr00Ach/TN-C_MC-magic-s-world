@@ -14,15 +14,28 @@ import net.minecraftforge.fml.common.Mod;
 /**
  * HUD：<b>魔力条</b> + 「魔法石」入口图标。
  *
- * <h2>版面（全部依据原版 HUD 的实际布局）</h2>
+ * <h2>版面（按<b>这个整合包实际画出来的</b>位置摆，不是按原版）</h2>
  * <pre>
- *   高-58 :              ◆ 魔法石图标（居中，按 V 打开界面）
- *   高-49 : [████░░░░]   魔力条（和血条同宽、同左边界）
- *   高-39 : ♥♥♥♥♥♥♥♥♥♥   血条（左）        🍗🍗🍗🍗🍗🍗🍗🍗🍗🍗 饱食度（右）
- *   高-22 : [  快捷栏  ]
+ *   高-64 :            ◆ 魔法石图标（居中，按 V 打开界面）
+ *   高-61 : 护甲条(左) [████ 魔力 ████](右)   ← 魔力条就摆这一行
+ *   高-50 : 血条(左)                饱食度(右)
+ *   高-22 : [            快捷栏            ]
  * </pre>
- * 魔力条和血条是<b>同一个左边界、同一个宽度</b>（{@code 宽/2 - 91}，80 像素），
- * 所以看上去就是"血条上面又长了一条"。
+ * 魔力条和<b>饱食度</b>同宽（80）同右边界（{@code 宽/2 + 91}），就贴在饱食度正上方一行。
+ *
+ * <h3>为什么不跟血条叠在一起（踩过的坑）</h3>
+ * 这个包把血条/饱食度从原版的心/鸡腿换成了 11 像素高的贴图条
+ * （{@code whisperingstatusbar}），于是它们比原版的"高-39"整整高了一行。
+ * 我们一开始按原版算，条子画在"高-49"，结果<b>正好横在血条身上把它全盖住了</b>。
+ * 现在是往上一行（"高-61"，也就是包内护甲条那一行的右半边，那里空着）。
+ *
+ * <h3>聊天框那层暗底（另一个坑）</h3>
+ * 原版聊天框最下面一行的暗底是 GUI 的 {@code 高-49 .. 高-40}（见
+ * {@code ChatComponent.render}：{@code fill(-4, i1-9, 宽, i1)}，其中
+ * {@code i1 = (高-40)/缩放}）。血条/饱食度正好长在这条带子里，所以一有聊天消息
+ * 它们就会被压暗 —— 我们挪到"高-61"以后就<b>整条都在带子外面</b>了，干干净净。
+ * 聊天消息多了带子会往上长，那时我们照旧会被压暗（但不会消失），
+ * 这和血条的待遇一致、也正是原版的规矩。
  *
  * <h2>为什么是"条"而不是"一排宝石"</h2>
  * 血条是 10 颗心，因为它固定是 20 点。魔力上限会从 210 一路涨到上千，
@@ -44,14 +57,32 @@ public final class MagicStoneHud {
     /** 图标边长。 */
     static final int ICON_SIZE = 16;
 
-    /** 原版 HUD 里各种东西的位置（以屏幕底部为基准）。 */
-    private static final int STATUS_ROW_MARGIN = 39;   // 血条/饱食度那一行
+    /** 魔力条贴图尺寸 —— 必须和 tools\mana_bar_texture_gen.ps1 里的 $W / $H 一致。 */
+    private static final int TEX_W = 80;
+    private static final int TEX_H = 10;
 
-    /** 图标底边距屏幕底部：58 = 魔力条（49）再往上让开，压不到任何东西。 */
-    private static final int ICON_BOTTOM_MARGIN = 58;
+    /** 原版血条/饱食度那一行的锚点（以屏幕底部为基准）。 */
+    private static final int STATUS_ROW_MARGIN = 39;
 
-    /** 魔力条：紧贴在血条正上方，和血条同左边界、同宽度。 */
-    private static final int MANA_BAR_TOP_MARGIN = STATUS_ROW_MARGIN + 10;
+    /**
+     * 这个包的状态条一行有多高（实测 11 像素：条子本体 + 边框）。
+     *
+     * <p>包里的血条/饱食度被换成了贴图条，一行行往上码：护甲在 {@code 高-61}、
+     * 血条和饱食度在 {@code 高-50}。这个 11 就是"往上挪一行"的步长。
+     */
+    private static final int PACK_BAR_ROW_HEIGHT = 11;
+
+    /** 饱食度那一行的上沿（实测 高-50）。 */
+    private static final int HUNGER_ROW_TOP_MARGIN = STATUS_ROW_MARGIN + PACK_BAR_ROW_HEIGHT;
+
+    /** 魔力条：摆在饱食度正上方那一行（高-61），底边压不到饱食度的边框。 */
+    private static final int MANA_BAR_TOP_MARGIN = HUNGER_ROW_TOP_MARGIN + PACK_BAR_ROW_HEIGHT;
+
+    /** 魔力条左边界相对屏幕中心的偏移：右端和饱食度对齐（{@code 宽/2 + 91}）。 */
+    private static final int MANA_BAR_X_OFFSET = 91 - TEX_W;
+
+    /** 图标底边距：让菱形中心正好落在魔力条的中线上（高-56）。 */
+    private static final int ICON_BOTTOM_MARGIN = (MANA_BAR_TOP_MARGIN - TEX_H / 2) + ICON_SIZE / 2;
 
     // ---------------- 贴图 ----------------
     //
@@ -67,19 +98,13 @@ public final class MagicStoneHud {
     private static final ResourceLocation MANA_BAR_FILL =
             ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "textures/gui/mana_bar/mana_fill.png");
 
-    /** 贴图尺寸 —— 必须和 tools\mana_bar_texture_gen.ps1 里的 $W / $H 一致。 */
-    private static final int TEX_W = 80;
-    private static final int TEX_H = 10;
-
     // ---------------- 配色（只给代码画的部分用：魔法石图标、条上的数字） ----------------
     //
-    // ⚠️ 这些颜色是按"要能扛住一层半透明暗色"选的，不是随便挑的好看色。
-    // 聊天框（按 T）的暗底最下面一行底边正好在「高-39」= 血条上沿，
-    // 而魔力条和图标正好长在那条带子里（血条在带子下沿之外，所以它一直看得见）。
-    // 血条鲜红蒙上去只是"暗一点"，深紫近黑蒙上去就直接融成黑色、看着像消失了。
-    // 所以描边/数字都取中高亮度。
+    // ⚠️ 条子本体已经改用贴图了，这几个颜色现在只管「魔法石菱形」和「条上的数字」。
+    // 数字要白字带阴影：条子底色是紫色，白字在任何填充比例下都清楚。
+    // 菱形取中高亮度，是因为它可能要压在聊天框暗底上，深紫蒙一层就糊成黑色了。
 
-    /** 描边要够亮 —— 被暗色盖住时，它是"这里还有个东西"的最后依据。 */
+    /** 菱形的外描边。 */
     private static final int COLOR_BORDER = 0xFFB9A7FF;
     private static final int COLOR_FILL = 0xFF9C86F5;
     private static final int COLOR_FILL_TOP = 0xFFE4DCFF;
@@ -91,23 +116,31 @@ public final class MagicStoneHud {
     @SubscribeEvent
     public static void onRenderGui(RenderGuiEvent.Post event) {
         Minecraft minecraft = Minecraft.getInstance();
-        // 开着界面时不画（原版这时本来也不画 HUD）；F1 隐藏 HUD 时也不画
-        if (minecraft.screen != null || minecraft.options.hideGui || minecraft.player == null) {
+        // F1（hideGui）时整体隐藏，别的什么都不挡。
+        //
+        // ⚠️ 这里**故意不判 minecraft.screen** —— 这是之前一个 bug 的根：
+        //    原版开着界面时照样画 HUD（GameRenderer：
+        //    `if (!hideGui || screen != null) gui.render(...)`，界面在这之后才画上去），
+        //    所以按 T 开聊天框时，血条、饱食度、快捷栏都还在、只是被压暗一点。
+        //    我们原先写了 `screen != null` 就 return，结果全场只有魔力条整条消失，
+        //    玩家一眼就看出是 bug（"血条饱食度半透明还在，魔力条没了"）。
+        //    现在跟原版一致：照画，界面自己会盖在上面，该压暗就压暗。
+        if (minecraft.options.hideGui || minecraft.player == null) {
             return;
         }
         GuiGraphics graphics = event.getGuiGraphics();
         int width = minecraft.getWindow().getGuiScaledWidth();
         int height = minecraft.getWindow().getGuiScaledHeight();
-        int left = width / 2 - 91;      // 和血条同一个左边界
 
-        drawManaBar(minecraft, graphics, left, height);
+        // 右半边：和饱食度同宽、同右边界，摆在它正上方一行
+        drawManaBar(minecraft, graphics, width / 2 + MANA_BAR_X_OFFSET, height);
 
         // 魔法石入口图标（画法复用物品栏那颗，避免两处各画一份）
         drawStone(graphics, width / 2 - ICON_SIZE / 2, height - ICON_BOTTOM_MARGIN, false);
     }
 
     /** 画魔力条 + 条上的数字；拿不到数据（还没同步过来）就什么都不画。 */
-    private static void drawManaBar(Minecraft minecraft, GuiGraphics graphics, int left, int height) {
+    private static void drawManaBar(Minecraft minecraft, GuiGraphics graphics, int x, int height) {
         MagicStoneData data = MagicStone.getOrNull(minecraft.player);
         if (data == null || data.getMaxMana() <= 0) {
             return;     // 避免除以 0：数据还没同步到客户端时 maxMana 是 0
@@ -115,7 +148,6 @@ public final class MagicStoneHud {
         int mana = Math.max(0, Math.min(data.getMana(), data.getMaxMana()));
         int max = data.getMaxMana();
 
-        int x = left;
         int y = height - MANA_BAR_TOP_MARGIN;
 
         // 1) 空槽：整张铺上
