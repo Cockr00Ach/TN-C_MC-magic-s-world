@@ -57,14 +57,21 @@ public final class MagicStoneHud {
 
     // ---------------- 配色（奥术紫，和魔法石界面一致） ----------------
     //
-    // ⚠️ 全部刻意<b>提亮过</b>：原来用的深紫（0xFF2E2A6B 描边 / 0xFF171232 底），
-    // 在"半透明暗色盖上来"的场合（比如开着聊天框）会糊成一团黑，看起来像整条消失了。
-    // 现在描边和文字都够亮，被暗色蒙住也还读得出来。
+    // ⚠️ 这些颜色是**按"要能扛住一层半透明暗色"来选的**，不是随便挑的好看色。
+    //
+    // 背景：铁匠聊天框（按 T 打开）的暗底是逐行画的，最下面那一行的底边正好在
+    // 「高-39」—— 也就是血条的上沿。而魔力条在 高-49..高-39、图标在 高-58..高-42，
+    // **正好长在那条暗底带子里**（血条在带子下沿之外，所以它一直看得见）。
+    // 于是：血条鲜红 → 蒙上去只是"暗一点"；我们原来的深紫近黑 → 蒙上去直接融成黑色，看着像消失了。
+    //
+    // 所以这里全部取**中高亮度**：被一层 50% 黑盖住之后仍然认得出。
 
-    private static final int COLOR_BORDER = 0xFF6C5AC8;
-    private static final int COLOR_EMPTY = 0xFF2A2154;
-    private static final int COLOR_FILL = 0xFF8E77E0;
-    private static final int COLOR_FILL_TOP = 0xFFCFC2FF;
+    /** 描边要够亮 —— 它是被暗色盖住时最后还能辨认出"这里有个东西"的依据。 */
+    private static final int COLOR_BORDER = 0xFFB9A7FF;
+    /** 空槽。比原来亮很多：原来的 #171232 在暗色下和黑色没区别。 */
+    private static final int COLOR_EMPTY = 0xFF3A2F6E;
+    private static final int COLOR_FILL = 0xFF9C86F5;
+    private static final int COLOR_FILL_TOP = 0xFFE4DCFF;
     private static final int COLOR_TEXT = 0xFFFFFFFF;
 
     private MagicStoneHud() {
