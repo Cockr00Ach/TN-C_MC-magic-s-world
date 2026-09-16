@@ -1281,7 +1281,7 @@ if (!this.minecraft.options.hideGui || this.minecraft.screen != null) {
    能做到也应该做，见 4.17.5。）
 2. 改条子位置只需动 `MagicStoneHud` 顶部那几个常量：
    `PACK_BAR_ROW_HEIGHT`（步长 11）、`HUNGER_ROW_TOP_MARGIN`、`MANA_BAR_TOP_MARGIN`、
-   `MANA_BAR_X_OFFSET`、`ICON_BOTTOM_MARGIN`。
+   `MANA_BAR_X_OFFSET`、`TRACK_U/V/W/H`（轨道在贴图里的位置）。
 
 ---
 
@@ -1377,11 +1377,13 @@ private WriteMaskStateShard writeMaskState = COLOR_DEPTH_WRITE;   // ← 还写�
 > 上一版自己画的 `mana_empty.png` / `mana_fill.png` 和生成脚本 `tools\mana_bar_texture_gen.ps1`
 > 都留着了，想改回代码画的那版只需把 `MANA_BAR_EMPTY/FILL` 两个路径换回去。
 
-> ⚠️ **授权待确认**：这两张图是从 `D:\查看\whisperingstatusbar-贴图\` 拿来的，
-> 和 `whisperingstatusbar`（`All Rights Reserved`）那套贴图**同规格、同风格**；
-> 但扫遍整合包所有 mod jar，**没有任何 mod 自带 `thundermagicbar*` 这两个文件名**
-> （所以也可能是用户自己画/从别处拿的）。如果它确实出自那个 mod，放进我们这个**公开仓库**
-> 就等于转发 ARR 素材 —— 需要用户确认来源；不行的话用自己的生成脚本画一套等价替换。
+#### 4.18.3 顺带去掉的东西
+
+- **居中的魔法石图标去掉了**（原来 HUD 正中还有一颗，按 V 的提示）。
+  现在条子贴图左边自己就画着一颗，再画一颗是重复的 —— 用户确认后删掉了
+  `onRenderGui` 里那行 `drawStone(...)`。石头画法本身留着给物品栏界面的入口按钮用
+  （`MagicStoneButton` → `MagicStoneHud.drawStone`），HUD 打开界面仍然靠快捷键 V。
+- 授权：这两张贴图是**用户自己画的**（已确认），没有第三方素材问题。
 
 ---
 

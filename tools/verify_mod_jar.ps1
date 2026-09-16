@@ -129,7 +129,7 @@ try {
     }
 
     # ---------------- D1c. HUD entry point + its keybind ----------------
-    # The HUD stone cannot be clicked (no cursor while playing), so the keybind IS
+    # Nothing HUD-side can be clicked (no cursor while playing), so the keybind IS
     # the entry. RegisterKeyMappingsEvent lives on the MOD bus - registering it on
     # the FORGE bus compiles fine and the key simply never appears in Options.
     # Guard both halves: the subscription exists, and the lang keys exist.
@@ -166,7 +166,7 @@ try {
     if ($hudAnno -and $hudAnno.Contains('Lnet/minecraftforge/fml/common/Mod$EventBusSubscriber;')) {
         Ok "MagicStoneHud has @Mod.EventBusSubscriber"
     } else {
-        Fail "MagicStoneHud is missing @Mod.EventBusSubscriber - the HUD icon would never render"
+        Fail "MagicStoneHud is missing @Mod.EventBusSubscriber - the mana bar would never render"
     }
 
 

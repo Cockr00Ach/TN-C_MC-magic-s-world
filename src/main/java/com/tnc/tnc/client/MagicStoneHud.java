@@ -12,11 +12,10 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 /**
- * HUD：<b>魔力条</b> + 「魔法石」入口图标。
+ * HUD：<b>魔力条</b>（魔法石图标已经并进条子贴图里了，见下）。
  *
  * <h2>版面（按<b>这个整合包实际画出来的</b>位置摆，不是按原版）</h2>
  * <pre>
- *   高-65 :            ◆ 魔法石图标（居中，按 V 打开界面）
  *   高-63 : 护甲条(左) [▓◆████ 魔力 ████⚡▓](右)   ← 魔力条就摆这一行
  *   高-50 : 血条(左)                饱食度(右)
  *   高-22 : [            快捷栏            ]
@@ -26,9 +25,13 @@ import net.minecraftforge.fml.common.Mod;
  * 于是它正好落在包内<b>护甲条那一行的右半边</b>（那里本来就是空的）。
  *
  * <h3>条子长什么样</h3>
- * 整条都是贴图（{@code thundermagicbar_empty/fill.png}）：
+ * 整条都是贴图（{@code thundermagicbar_empty/fill.png}，用户自己画的）：
  * 左边一颗魔法石、中间一条轨道、右边一道闪电，外面套着和血条同款的金框。
  * 代码只干两件事：<b>按魔力比例把中间那段轨道填起来</b>、把数字压上去。
+ *
+ * <p>因为贴图自己就带着魔法石，所以原来那个<b>居中单独画的魔法石图标已经去掉了</b>
+ * （重复）。{@link #drawStone} 还留着，给物品栏界面那个入口按钮用
+ * （{@link MagicStoneButton}）；HUD 上打开界面靠快捷键 V（{@link MagicStoneKeys}）。
  *
  * <h3>为什么不跟血条叠在一起（踩过的坑）</h3>
  * 这个包把血条/饱食度从原版的心/鸡腿换成了 13 像素高的贴图条
@@ -63,15 +66,15 @@ import net.minecraftforge.fml.common.Mod;
  * 所以服务端在<b>任何改变魔力</b>的地方都必须发包，否则条子会停在旧值上 ——
  * 施法、命令、以及每秒回魔都发了（见 {@code MagicStone.onPlayerTick}）。
  *
- * <p>HUD 图标本身<b>点不了</b>（游戏里鼠标被锁定、没有光标），所以打开界面靠快捷键
- * {@link MagicStoneKeys}（默认 V）。详见 {@link MagicStoneHud} 类注释里的说明。
+ * <p>HUD 上的东西<b>点不了</b>（游戏里鼠标被锁定、没有光标），所以打开界面靠快捷键
+ * {@link MagicStoneKeys}（默认 V）；物品栏界面里那个按钮是另一个入口（可以点）。
  */
 @Mod.EventBusSubscriber(modid = TNMod.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class MagicStoneHud {
 
     // ---------------- 版面常量（想挪位置改这里） ----------------
 
-    /** 图标边长。 */
+    /** 魔法石图标的边长（只给物品栏那个入口按钮用，见 {@link #drawStone}）。 */
     static final int ICON_SIZE = 16;
 
     /**
@@ -132,9 +135,6 @@ public final class MagicStoneHud {
 
     /** 魔力条左边界相对屏幕中心的偏移：左端和饱食度的贴图框对齐（{@code 宽/2 + 11}）。 */
     private static final int MANA_BAR_X_OFFSET = 11;
-
-    /** 图标底边距：让菱形中心正好落在魔力条贴图框的中线上（高-56.5）。 */
-    private static final int ICON_BOTTOM_MARGIN = (MANA_BAR_TOP_MARGIN - BAR_H / 2) + ICON_SIZE / 2;
 
     /**
      * 我们这一层画在 z = +75。
@@ -213,11 +213,13 @@ public final class MagicStoneHud {
         graphics.pose().pushPose();
         graphics.pose().translate(0.0F, 0.0F, HUD_Z);
 
-        // 右半边：和饱食度同宽、同右边界，摆在它正上方一行
+        // 右半边：和饱食度同一套贴图规格，紧贴它正上方
         drawManaBar(minecraft, graphics, width / 2 + MANA_BAR_X_OFFSET, height);
 
-        // 魔法石入口图标（画法复用物品栏那颗，避免两处各画一份）
-        drawStone(graphics, width / 2 - ICON_SIZE / 2, height - ICON_BOTTOM_MARGIN, false);
+        // 这里原来还画一颗居中的魔法石图标（HUD 入口的提示）。
+        // 现在条子贴图自己左边就带着一颗魔法石，再画一颗是重复的，所以去掉了。
+        // 石头本身的画法还留着给物品栏那个按钮用（MagicStoneButton），
+        // HUD 打开界面仍然靠快捷键 V（见 MagicStoneKeys）。
 
         graphics.pose().popPose();
     }
@@ -262,9 +264,10 @@ public final class MagicStoneHud {
     /**
      * 画一颗菱形宝石（由外到内三层，越里面越亮）。
      *
-     * <p>和物品栏界面里那颗是同一个画法 —— 物品栏的入口保留了，两处共用这一份。
+     * <p>现在只有<b>物品栏界面</b>那个入口按钮在用它（HUD 上那颗已经去掉了：
+     * 条子贴图左边本来就画着一颗，再画一颗是重复的）。
      *
-     * @param hovered 高亮（HUD 上用不到；物品栏那个按钮用得上）
+     * @param hovered 高亮（鼠标悬停时更亮，物品栏那个按钮用得上）
      */
     static void drawStone(GuiGraphics graphics, int x, int y, boolean hovered) {
         int size = ICON_SIZE;
