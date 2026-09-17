@@ -13,9 +13,10 @@
     "target": {
       "type": "PROJECTILE",
       "projectile": {
-        "launch_properties": { "velocity": 1.5 },
+        "launch_properties": { "velocity": 1.5, "extra_launch_count": 2, "extra_launch_delay": 2 },
         "projectile": {
           "homing_angle": 0.0,
+          "divergence": 45.0,
           "perks": { "pierce": 2 },
           "client_data": {
             "travel_particles": [ { "particle_id": "flame", "shape": "CIRCLE", "rotation": "LOOK", "origin": "CENTER", "count": 4.0, "min_speed": 0.0, "max_speed": 0.1 } ],
