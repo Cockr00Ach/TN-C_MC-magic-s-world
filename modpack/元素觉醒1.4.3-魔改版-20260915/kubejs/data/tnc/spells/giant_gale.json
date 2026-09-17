@@ -1,0 +1,73 @@
+{
+  "school": "AIR",
+  "group": "gale",
+  "range": 26.0,
+  "learn": { "tier": 4 },
+  "cast": {
+    "duration": 0.5,
+    "animation": "spell_engine:one_handed_projectile_charge",
+    "sound": { "id": "spell_engine:generic_wind_charging", "randomness": 0 },
+    "particles": [ { "particle_id": "cloud", "shape": "PIPE", "origin": "FEET", "count": 6.0, "min_speed": 0.1, "max_speed": 0.5 } ]
+  },
+  "release": {
+    "target": {
+      "type": "PROJECTILE",
+      "projectile": {
+        "launch_properties": { "velocity": 1.3, "extra_launch_count": 0, "extra_launch_delay": 2 },
+        "projectile": {
+          "homing_angle": 0.0,
+          "divergence": 12.0,
+          "perks": { "pierce": 0 },
+          "client_data": {
+            "travel_particles": [ { "particle_id": "sweep_attack", "shape": "CIRCLE", "rotation": "LOOK", "origin": "CENTER", "count": 3.0, "min_speed": 0.0, "max_speed": 0.1 } ],
+            "model": { "model_id": "tnc:projectile/fire_ray", "scale": 1.2 }
+          }
+        }
+      }
+    },
+    "animation": "spell_engine:one_handed_projectile_release",
+    "sound": { "id": "spell_engine:generic_wind_charging" }
+  },
+  "impact": [
+    {
+      "action": { "type": "DAMAGE", "damage": { "spell_power_coefficient": 2.2, "knockback": 0.2 } },
+      "particles": [ { "particle_id": "cloud", "shape": "SPHERE", "origin": "CENTER", "count": 40.0, "min_speed": 0.3, "max_speed": 1.2 } ],
+      "sound": { "id": "spell_engine:generic_wind_charging", "volume": 0.6 }
+    },
+    {
+      "action": {
+        "type": "STATUS_EFFECT",
+        "apply_to_caster": false,
+        "status_effect": {
+          "effect_id": "tnc:gale_slow",
+          "duration": 30,
+          "amplifier": 0,
+          "apply_mode": "SET",
+          "show_particles": true
+        }
+      },
+      "particles": [ { "particle_id": "sweep_attack", "shape": "CIRCLE", "rotation": "LOOK", "origin": "CENTER", "count": 3.0, "min_speed": 0.0, "max_speed": 0.1 } ]
+    },
+    {
+      "action": {
+        "type": "STATUS_EFFECT",
+        "apply_to_caster": true,
+        "status_effect": {
+          "effect_id": "tnc:gale_haste",
+          "duration": 30,
+          "amplifier": 0,
+          "apply_mode": "SET",
+          "show_particles": false
+        }
+      },
+      "particles": [ { "particle_id": "cloud", "shape": "PIPE", "origin": "FEET", "count": 6.0, "min_speed": 0.1, "max_speed": 0.5 } ]
+    }
+  ],
+  "area_impact": {
+    "radius": 6,
+    "area": { "distance_dropoff": "SQUARED" },
+    "particles": [ { "particle_id": "cloud", "shape": "SPHERE", "origin": "CENTER", "count": 40.0, "min_speed": 0.3, "max_speed": 1.2 } ],
+    "sound": { "id": "spell_engine:generic_wind_charging", "volume": 0.9 }
+  },
+  "cost": { "exhaust": 0.0, "cooldown_duration": 7 }
+}

@@ -71,6 +71,40 @@ public final class TNWindMechanics {
     /** 风伤 +100%（4、5 级）。 */
     public static final RegistryObject<MobEffect> WIND_POWER_II = windPower("wind_power_ii", 1.00D);
 
+    // ---- 链3 范围风：给敌人减速、给自己加速 ----
+
+    /** 范围风：周围怪物 -25% 速度（有害）。 */
+    public static final RegistryObject<MobEffect> GALE_SLOW = WIND_EFFECTS.register(
+            "gale_slow", () -> new GaleSlowEffect());
+
+    /** 范围风：自己 +25% 速度（"队友加速"目前只作用于施法者，见类注释）。 */
+    public static final RegistryObject<MobEffect> GALE_HASTE = WIND_EFFECTS.register(
+            "gale_haste", () -> new GaleHasteEffect());
+
+    /** 减速 25%（有害效果，颜色用暗一点的青）。 */
+    private static final class GaleSlowEffect extends MobEffect {
+        GaleSlowEffect() {
+            super(MobEffectCategory.HARMFUL, 0x4A7A8A);
+            Attribute speed = net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED;
+            addAttributeModifier(speed, uuidFor("gale_slow"), -0.25D,
+                    AttributeModifier.Operation.MULTIPLY_BASE);
+        }
+    }
+
+    /** 加速 25%。 */
+    private static final class GaleHasteEffect extends MobEffect {
+        GaleHasteEffect() {
+            super(MobEffectCategory.BENEFICIAL, COLOR_WIND);
+            Attribute speed = net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED;
+            addAttributeModifier(speed, uuidFor("gale_haste"), 0.25D,
+                    AttributeModifier.Operation.MULTIPLY_BASE);
+        }
+    }
+
+    private static String uuidFor(String key) {
+        return UUID.nameUUIDFromBytes(("tnc:wind:" + key).getBytes(StandardCharsets.UTF_8)).toString();
+    }
+
     // ---------------- 机制常量 ----------------
 
     /** 从几级开始"解锁即永久飞行"。 */
