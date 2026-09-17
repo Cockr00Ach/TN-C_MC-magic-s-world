@@ -105,6 +105,91 @@ public final class TNWindMechanics {
         return UUID.nameUUIDFromBytes(("tnc:wind:" + key).getBytes(StandardCharsets.UTF_8)).toString();
     }
 
+    // ---------------- 链2 风球/风灵（绕身球版） ----------------
+    //
+    // 用户说"风灵最好是独立的，不过可以先做绕身球" —— 所以这一版是：
+    // 法术给自己一个标记效果，Java 每 tick 在玩家周围画 N 个球，
+    // 每 ORB_ZAP_INTERVAL tick 打一下最近的敌人（并把它往你这边拽一点 = 牵引）。
+    //
+    // 简化掉的部分（都是"独立实体"才有的东西）：球不会自己飞出去、
+    // 不会被攻击、不会寻路。风灵 3/4 级的"自主召唤"这里表现为球更多、
+    // 打得更疼（同一个机制，不同参数）。
+
+    /** 三个风球。 */
+    public static final RegistryObject<MobEffect> WIND_ORB_THREE = WIND_EFFECTS.register(
+            "wind_orb_three", MarkerEffect::new);
+    /** 五个风球。 */
+    public static final RegistryObject<MobEffect> WIND_ORB_FIVE = WIND_EFFECTS.register(
+            "wind_orb_five", MarkerEffect::new);
+    /** 风灵（更强的一档：球更多、打得更疼）。 */
+    public static final RegistryObject<MobEffect> WIND_SPIRIT = WIND_EFFECTS.register(
+            "wind_spirit", MarkerEffect::new);
+
+    /** 球离玩家多远。 */
+    private static final double ORB_RADIUS = 1.6D;
+    /** 每隔几 tick 打一次。 */
+    private static final int ORB_ZAP_INTERVAL = 10;
+    /** 打多远内的敌人。 */
+    private static final double ORB_RANGE = 5.0D;
+    /** 每次伤害。 */
+    private static final float ORB_DAMAGE = 4.0F;
+    /** 风灵档的额外倍率。 */
+    private static final float SPIRIT_DAMAGE_MULTIPLIER = 2.0F;
+    /** 牵引：把敌人往玩家这边拽多少（每 tick）。 */
+    private static final double ORB_PULL = 0.12D;
+
+    /** 玩家现在有几个球（0 = 没有）。 */
+    private static int orbCount(ServerPlayer player) {
+        if (has(player, WIND_SPIRIT)) {
+            return 5;
+        }
+        if (has(player, WIND_ORB_FIVE)) {
+            return 5;
+        }
+        if (has(player, WIND_ORB_THREE)) {
+            return 3;
+        }
+        return 0;
+    }
+
+    private static boolean has(ServerPlayer player, RegistryObject<MobEffect> effect) {
+        return effect.isPresent() && player.hasEffect(effect.get());
+    }
+
+    /** 绕身球：画球 + 定期打最近的敌人（含牵引）。 */
+    private static void tickOrbs(ServerPlayer player, long time) {
+        int count = orbCount(player);
+        if (count == 0) {
+            return;
+        }
+        boolean spirit = has(player, WIND_SPIRIT);
+        for (int i = 0; i < count; i++) {
+            double angle = (time % 80) / 80.0 * Math.PI * 2.0 + i * (Math.PI * 2.0 / count);
+            double x = player.getX() + Math.cos(angle) * ORB_RADIUS;
+            double z = player.getZ() + Math.sin(angle) * ORB_RADIUS;
+            player.serverLevel().sendParticles(net.minecraft.core.particles.ParticleTypes.CLOUD,
+                    x, player.getY() + 1.0D, z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+        }
+        if (time % ORB_ZAP_INTERVAL != 0) {
+            return;
+        }
+        net.minecraft.world.phys.AABB box = player.getBoundingBox().inflate(ORB_RANGE);
+        java.util.List<net.minecraft.world.entity.LivingEntity> targets =
+                player.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, box,
+                        e -> e != player && !(e instanceof net.minecraft.world.entity.player.Player));
+        for (net.minecraft.world.entity.LivingEntity target : targets) {
+            float damage = spirit ? ORB_DAMAGE * SPIRIT_DAMAGE_MULTIPLIER : ORB_DAMAGE;
+            target.hurt(player.damageSources().indirectMagic(player, player), damage);
+            // 牵引：往玩家方向拽一点（"风球的攻击有牵引效果"）
+            net.minecraft.world.phys.Vec3 pull = player.position().subtract(target.position()).normalize().scale(ORB_PULL);
+            target.push(pull.x, 0.0D, pull.z);
+            target.hurtMarked = true;
+            player.serverLevel().sendParticles(net.minecraft.core.particles.ParticleTypes.SWEEP_ATTACK,
+                    target.getX(), target.getY() + 1.0D, target.getZ(), 1, 0.0D, 0.0D, 0.0D, 0.0D);
+            break;                                  // 一次只打一个，和"球在打人"的感觉一致
+        }
+    }
+
     // ---------------- 机制常量 ----------------
 
     /** 从几级开始"解锁即永久飞行"。 */
@@ -172,6 +257,16 @@ public final class TNWindMechanics {
             player.getAbilities().flying = false;
         }
         player.onUpdateAbilities();
+    }
+
+    /** 链2：绕身球（另开一个 tick 处理，逻辑上互不影响）。 */
+    @SubscribeEvent
+    public static void onPlayerTickOrbs(TickEvent.PlayerTickEvent event) {
+        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)
+                || player.level().isClientSide()) {
+            return;
+        }
+        tickOrbs(player, player.level().getGameTime());
     }
 
     /** 是否已经学会"解锁即永久飞行"（风速链进度 ≥ 4）。 */
