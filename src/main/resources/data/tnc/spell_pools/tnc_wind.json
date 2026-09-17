@@ -1,0 +1,9 @@
+{
+  "spell_ids": [
+    "tnc:wind_field",
+    "tnc:wind_speed",
+    "tnc:greater_wind_speed",
+    "tnc:super_wind_speed",
+    "tnc:wind_god_descent"
+  ]
+}

@@ -108,5 +108,7 @@ public final class TNEffects {
         // 火系燃烧线那 5 个效果在自己的类里（TNFireMechanics），一并挂上：
         // DeferredRegister 必须在模组构造期挂到总线上，晚一步就注册不进去了
         TNFireMechanics.register(modEventBus);
+        // 风系的效果与飞行机制同理
+        TNWindMechanics.register(modEventBus);
     }
 }

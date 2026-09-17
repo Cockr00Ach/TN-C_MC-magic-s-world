@@ -31,5 +31,11 @@
     "tnc:blaze_burn",
     "tnc:inferno_burn",
     "tnc:total_burn"
+,
+    "tnc:wind_field",
+    "tnc:wind_speed",
+    "tnc:greater_wind_speed",
+    "tnc:super_wind_speed",
+    "tnc:wind_god_descent"
   ]
 }
