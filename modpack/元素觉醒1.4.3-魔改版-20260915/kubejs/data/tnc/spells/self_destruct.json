@@ -1,0 +1,32 @@
+{
+  "school": "FIRE",
+  "group": "ball",
+  "range": 7.0,
+  "learn": { "tier": 4 },
+  "cast": {
+    "duration": 1.2,
+    "animation": "spell_engine:one_handed_area_charge",
+    "sound": { "id": "spell_engine:generic_fire_casting", "randomness": 0 },
+    "particles": [ { "particle_id": "flame", "shape": "SPHERE", "origin": "FEET", "count": 30.0, "min_speed": 0.2, "max_speed": 0.8 } ]
+  },
+  "release": {
+    "target": {
+      "type": "AREA",
+      "area": { "include_caster": false, "distance_dropoff": "SQUARED" }
+    },
+    "animation": "spell_engine:one_handed_area_release",
+    "sound": { "id": "spell_engine:generic_fire_release" }
+  },
+  "impact": [
+    {
+      "action": { "type": "DAMAGE", "damage": { "spell_power_coefficient": 4.0, "knockback": 1.5 } },
+      "particles": [ { "particle_id": "lava", "shape": "SPHERE", "origin": "CENTER", "count": 80.0, "min_speed": 0.6, "max_speed": 3.0 } ],
+      "sound": { "id": "entity.generic.explode", "volume": 1.5 }
+    },
+    {
+      "action": { "type": "FIRE", "fire": { "burn_time": 8.0 } },
+      "particles": [ { "particle_id": "flame", "shape": "SPHERE", "origin": "CENTER", "count": 40.0, "min_speed": 0.3, "max_speed": 1.5 } ]
+    }
+  ],
+  "cost": { "exhaust": 0.0, "cooldown_duration": 30.0 }
+}
