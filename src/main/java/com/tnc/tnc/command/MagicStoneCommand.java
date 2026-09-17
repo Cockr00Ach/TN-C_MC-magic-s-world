@@ -525,6 +525,11 @@ public class MagicStoneCommand {
         String message = edit.apply(player, data);
         MagicStone.refreshMaxMana(player, data);
         MagicStoneNetwork.syncTo(player);
+        // ⚠️ 必须同时重写法杖内容：forget / reset 会改变"每条链的最高级"，
+        // 不重写的话被遗忘的法术还挂在槽位里（用户实测到的 bug）。
+        // 学习 / 解锁 / 登录三条路都做了这一步，这里当初漏了。
+        com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(
+                player, com.tnc.tnc.magic.SpellCatalog.effectiveIds(data));
         ctx.getSource().sendSuccess(() -> Component.literal("§a[TN-C] §r" + message), false);
         return 1;
     }
