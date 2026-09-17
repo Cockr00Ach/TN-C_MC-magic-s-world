@@ -143,9 +143,20 @@ try {
                   'tnc:heavenly_thunder', 'tnc:thunder_orb', 'tnc:great_thunder_orb',
                   'tnc:orbiting_thunder_orb', 'tnc:explosive_thunder_orb', 'tnc:cataclysm_thunder_orb',
                   'tnc:lightning_haste', 'tnc:lightning_blink', 'tnc:lightning_wind',
-                  'tnc:lightning_recharge', 'tnc:lightning_ascension')
-    foreach ($asset in @('data/tnc/spell_pools/tnc_lightning.json',
-                         'data/tnc/spell_assignments/magic_wand.json')) {
+                  'tnc:lightning_recharge', 'tnc:lightning_ascension',
+                  # fire 15 (ray 5 + ball 5 + burn 5)
+                  'tnc:fire_ray', 'tnc:thick_fire_ray', 'tnc:triple_fire_ray',
+                  'tnc:explosive_fire_ray', 'tnc:cataclysm_fire_ray',
+                  'tnc:fireball', 'tnc:great_fireball', 'tnc:giant_fireball',
+                  'tnc:self_destruct', 'tnc:meteor_fireball',
+                  'tnc:fire_aspect', 'tnc:ember_burn', 'tnc:blaze_burn',
+                  'tnc:inferno_burn', 'tnc:total_burn',
+                  # wind chain 1 (the other 10 wind spells get added when their json exists)
+                  'tnc:wind_field', 'tnc:wind_speed', 'tnc:greater_wind_speed',
+                  'tnc:super_wind_speed', 'tnc:wind_god_descent')
+    # only the wand assignment must list everything; pools are per element and are
+    # checked separately in the pack-side block below
+    foreach ($asset in @('data/tnc/spell_assignments/magic_wand.json')) {
         $entry = $zip.Entries | Where-Object { $_.FullName -eq $asset }
         if (-not $entry) { Fail "missing from jar: $asset"; continue }
         $reader = New-Object System.IO.StreamReader($entry.Open())
@@ -180,7 +191,13 @@ try {
         #   * an effect_id that is not registered -> the buff simply never applies
         #   * a model_id without a file -> the projectile renders as missing texture
         $registered = @('tnc:lightning_haste', 'tnc:lightning_wind',
-                        'tnc:orbiting_thunder_orb', 'tnc:lightning_ascension')
+                        'tnc:orbiting_thunder_orb', 'tnc:lightning_ascension',
+                        # fire (registered in TNFireMechanics)
+                        'tnc:fire_aspect', 'tnc:ember_burn', 'tnc:blaze_burn',
+                        'tnc:inferno_burn', 'tnc:total_burn',
+                        # wind (registered in TNWindMechanics)
+                        'tnc:wind_flight', 'tnc:wind_speed_i', 'tnc:wind_speed_ii',
+                        'tnc:wind_speed_iii', 'tnc:wind_power_i', 'tnc:wind_power_ii')
         $badShape = @()
         $badTier = @()
         $badEffect = @()
