@@ -35,7 +35,16 @@ public final class SpellCatalog {
         ORB("雷球", "会飞出去的雷球"),
 
         /** 雷速线：加速、位移、以及"以雷的速度"带来的各种强化。 */
-        SPEED("雷速", "加速与位移");
+        SPEED("雷速", "加速与位移"),
+
+        /** 火射线线：从一条穿透射线，到三条齐发，再到命中就炸。 */
+        RAY("火射线", "穿透的火焰射线"),
+
+        /** 火球线：从一颗火球，到砸地范围伤害，到自爆与陨石。 */
+        BALL("火球", "会飞的火球"),
+
+        /** 燃烧线：拿血量换伤害，越烧越强，烧到尽头能原地复活。 */
+        BURN("燃烧", "以血换伤");
 
         private final String cn;
         private final String desc;
@@ -106,7 +115,29 @@ public final class SpellCatalog {
             entry("lightning_blink", Chain.SPEED, 2, "闪电移位"),
             entry("lightning_wind", Chain.SPEED, 3, "极速雷风"),
             entry("lightning_recharge", Chain.SPEED, 4, "闪电降低冷却"),
-            entry("lightning_ascension", Chain.SPEED, 5, "闪电登神")
+            entry("lightning_ascension", Chain.SPEED, 5, "闪电登神"),
+
+            // ---- 火射线线：1 穿透 → 2 更粗 → 3 三向齐发 → 4 命中爆炸 → 5 巨大爆炸 ----
+            fireEntry("fire_ray", Chain.RAY, 1, "火射线"),
+            fireEntry("thick_fire_ray", Chain.RAY, 2, "粗火射线"),
+            fireEntry("triple_fire_ray", Chain.RAY, 3, "三条火射线"),
+            fireEntry("explosive_fire_ray", Chain.RAY, 4, "爆炸射线"),
+            fireEntry("cataclysm_fire_ray", Chain.RAY, 5, "巨大爆炸射线"),
+
+            // ---- 火球线：1 火球 → 2 大火球 → 3 巨大火球(砸地) → 4 自爆 → 5 天降陨石 ----
+            fireEntry("fireball", Chain.BALL, 1, "火球"),
+            fireEntry("great_fireball", Chain.BALL, 2, "大火球"),
+            fireEntry("giant_fireball", Chain.BALL, 3, "巨大火球"),
+            fireEntry("self_destruct", Chain.BALL, 4, "自爆"),
+            fireEntry("meteor_fireball", Chain.BALL, 5, "天降陨石火球"),
+
+            // ---- 燃烧线：1 附着(+10%) → 2 初级(+25%) → 3 中级(+75%,15s复活)
+            //              → 4 高级(+150%,20s复活) → 5 完全燃烧(血1+无敌15s+200%) ----
+            fireEntry("fire_aspect", Chain.BURN, 1, "火附着"),
+            fireEntry("ember_burn", Chain.BURN, 2, "初级燃烧"),
+            fireEntry("blaze_burn", Chain.BURN, 3, "中级燃烧"),
+            fireEntry("inferno_burn", Chain.BURN, 4, "高级燃烧"),
+            fireEntry("total_burn", Chain.BURN, 5, "完全燃烧")
     );
 
     private SpellCatalog() {
@@ -114,6 +145,11 @@ public final class SpellCatalog {
 
     private static Entry entry(String path, Chain chain, int tier, String name) {
         return new Entry(ResourceLocation.fromNamespaceAndPath(TNMod.MODID, path), Element.LIGHTNING, chain, tier, name);
+    }
+
+    /** 火系记录（同一个 Entry，只是元素不同）。 */
+    private static Entry fireEntry(String path, Chain chain, int tier, String name) {
+        return new Entry(ResourceLocation.fromNamespaceAndPath(TNMod.MODID, path), Element.FIRE, chain, tier, name);
     }
 
     /** 目录里的全部法术。 */
@@ -199,10 +235,13 @@ public final class SpellCatalog {
      */
     public static List<Entry> effective(MagicStoneData data) {
         List<Entry> result = new ArrayList<>();
-        for (Chain chain : Chain.values()) {
-            Entry top = topLearned(data, Element.LIGHTNING, chain);
-            if (top != null) {
-                result.add(top);
+        // 遍历"元素 x 链"：写死 LIGHTNING 的话，加了火系以后法杖永远拿不到火法术
+        for (Element element : Element.values()) {
+            for (Chain chain : chainsOf(element)) {
+                Entry top = topLearned(data, element, chain);
+                if (top != null) {
+                    result.add(top);
+                }
             }
         }
         return result;
