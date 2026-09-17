@@ -44,7 +44,16 @@ public final class SpellCatalog {
         BALL("火球", "会飞的火球"),
 
         /** 燃烧线：拿血量换伤害，越烧越强，烧到尽头能原地复活。 */
-        BURN("燃烧", "以血换伤");
+        BURN("燃烧", "以血换伤"),
+
+        /** 风速线：从短时起飞，到 4 级起解锁即永久飞行。 */
+        FLIGHT("风速", "起飞与加速"),
+
+        /** 风球线：召唤会自己打人的风球，再召唤能召唤风球的风灵。 */
+        SUMMON("风球", "召唤物"),
+
+        /** 范围风线：大范围减速敌人/加速队友，并甩出风刃。 */
+        GALE("范围风", "大范围风场与风刃");
 
         private final String cn;
         private final String desc;
@@ -137,7 +146,31 @@ public final class SpellCatalog {
             fireEntry("ember_burn", Chain.BURN, 2, "初级燃烧"),
             fireEntry("blaze_burn", Chain.BURN, 3, "中级燃烧"),
             fireEntry("inferno_burn", Chain.BURN, 4, "高级燃烧"),
-            fireEntry("total_burn", Chain.BURN, 5, "完全燃烧")
+            fireEntry("total_burn", Chain.BURN, 5, "完全燃烧"),
+
+            // ---- 风速线：1 起飞5s → 2 起飞5s+速100% → 3 起飞15s+速150%+风伤50%
+            //              → 4 永久起飞+速300%30s+风伤100% → 5 再加无冷却+蓝耗减半 ----
+            windEntry("wind_field", Chain.FLIGHT, 1, "风场"),
+            windEntry("wind_speed", Chain.FLIGHT, 2, "风速"),
+            windEntry("greater_wind_speed", Chain.FLIGHT, 3, "顶级风速"),
+            windEntry("super_wind_speed", Chain.FLIGHT, 4, "超级风速"),
+            windEntry("wind_god_descent", Chain.FLIGHT, 5, "风神降临"),
+
+            // ---- 风球线：1 三个风球 → 2 五个风球 → 3 风灵 → 4 三个风灵
+            //              → 5 用户还没定，先占位（名字/效果待确认） ----
+            windEntry("wind_orb", Chain.SUMMON, 1, "召唤风球"),
+            windEntry("wind_orb_swarm", Chain.SUMMON, 2, "召唤五个风球"),
+            windEntry("wind_spirit", Chain.SUMMON, 3, "召唤风灵"),
+            windEntry("triple_wind_spirit", Chain.SUMMON, 4, "召唤三个风灵"),
+            windEntry("wind_spirit_lord", Chain.SUMMON, 5, "风灵之主"),
+
+            // ---- 范围风线：1 范围风+小风刃 → 2 大范围20s+中风刃 → 3 超大30s+大风刃
+            //              → 4 超大30s+巨型风刃 → 5 三个巨型风刃+无视防御 ----
+            windEntry("gale", Chain.GALE, 1, "范围风"),
+            windEntry("great_gale", Chain.GALE, 2, "大范围风"),
+            windEntry("vast_gale", Chain.GALE, 3, "超大范围风"),
+            windEntry("giant_gale", Chain.GALE, 4, "巨型风刃风暴"),
+            windEntry("wind_god_gale", Chain.GALE, 5, "风神风暴")
     );
 
     private SpellCatalog() {
@@ -150,6 +183,11 @@ public final class SpellCatalog {
     /** 火系记录（同一个 Entry，只是元素不同）。 */
     private static Entry fireEntry(String path, Chain chain, int tier, String name) {
         return new Entry(ResourceLocation.fromNamespaceAndPath(TNMod.MODID, path), Element.FIRE, chain, tier, name);
+    }
+
+    /** 风系记录。 */
+    private static Entry windEntry(String path, Chain chain, int tier, String name) {
+        return new Entry(ResourceLocation.fromNamespaceAndPath(TNMod.MODID, path), Element.WIND, chain, tier, name);
     }
 
     /** 目录里的全部法术。 */
