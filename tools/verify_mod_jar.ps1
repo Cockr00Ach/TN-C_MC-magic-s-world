@@ -210,7 +210,12 @@ try {
             try { $spell = ConvertFrom-Json ([System.IO.File]::ReadAllText($file)) }
             catch { $badShape += "$path(parse)"; continue }
 
-            if ("$($spell.school)" -ne 'LIGHTNING') { $badShape += "$path(school)" }
+            # school must be one of the engine's real school names.
+            # NOTE: wind is "AIR", not "WIND" (verified against the pack's real spells)
+            $school = "$($spell.school)"
+            if ($school -notin @('LIGHTNING', 'FIRE', 'AIR', 'WATER', 'EARTH', 'LIGHT', 'DARK')) {
+                $badShape += "$path(school=$school)"
+            }
             if (-not $spell.release -or -not $spell.release.target -or -not $spell.release.target.type) {
                 $badShape += "$path(release.target.type)"
             }
