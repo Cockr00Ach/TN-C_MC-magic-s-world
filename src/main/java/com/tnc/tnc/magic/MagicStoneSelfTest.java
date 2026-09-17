@@ -65,17 +65,31 @@ public final class MagicStoneSelfTest {
         checks.add(new Check("points total = 2 @310", data.getPointsTotal(Config.pointThresholds) == 2,
                 "total=" + data.getPointsTotal(Config.pointThresholds) + " thresholds=" + Config.pointThresholds));
 
-        // 4. 法术目录：雷系三条链，每条 5 级
-        int chains = SpellCatalog.chainsOf(Element.LIGHTNING).size();
-        boolean chainsOk = chains == 3;
+        // 4. 法术目录：**每个有法术的元素**都应该是"3 条链 x 5 级"
+        //    （原来写死雷系 + 总数 15，加火系以后那条会误报失败）
+        int elementCount = 0;
+        boolean chainsOk = true;
         StringBuilder chainSizes = new StringBuilder();
-        for (SpellCatalog.Chain chain : SpellCatalog.chainsOf(Element.LIGHTNING)) {
-            int size = SpellCatalog.of(Element.LIGHTNING, chain).size();
-            chainSizes.append(chain.cn()).append('=').append(size).append(' ');
-            chainsOk = chainsOk && size == 5;
+        for (Element element : Element.values()) {
+            List<SpellCatalog.Chain> chains = SpellCatalog.chainsOf(element);
+            if (chains.isEmpty()) {
+                continue;
+            }
+            elementCount++;
+            chainsOk = chainsOk && chains.size() == 3;
+            chainSizes.append(element.cn()).append("(");
+            for (SpellCatalog.Chain chain : chains) {
+                int size = SpellCatalog.of(element, chain).size();
+                chainSizes.append(chain.cn()).append('=').append(size).append(' ');
+                chainsOk = chainsOk && size == SpellCatalog.maxTier();
+            }
+            chainSizes.append(") ");
         }
-        checks.add(new Check("catalog = 3 chains x 5 tiers", chainsOk && SpellCatalog.all().size() == 15,
-                "chains=" + chains + " total=" + SpellCatalog.all().size() + " [" + chainSizes.toString().trim() + "]"));
+        int expected = elementCount * 3 * SpellCatalog.maxTier();
+        checks.add(new Check("every element = 3 chains x 5 tiers",
+                chainsOk && elementCount > 0 && SpellCatalog.all().size() == expected,
+                "elements=" + elementCount + " total=" + SpellCatalog.all().size()
+                        + " expected=" + expected + " [" + chainSizes.toString().trim() + "]"));
 
         // 5. 门槛顺序（全部在临时数据上跑）
         MagicStoneData fresh = new MagicStoneData();
