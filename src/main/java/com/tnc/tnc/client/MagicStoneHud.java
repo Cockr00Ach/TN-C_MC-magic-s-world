@@ -135,10 +135,41 @@ public final class MagicStoneHud {
      * 贴图框本身是 13 高，包里的框就是紧挨着码的（量过护甲框 297..310、
      * 饱食度框 310..323）。所以我们的框正好落在**护甲条那一行的右半边**。
      */
-    private static final int MANA_BAR_TOP_MARGIN = HUNGER_ROW_TOP_MARGIN + BAR_H;
+    /** 磨砺条贴图框：**上面那一行**（高-63..高-50）—— 用户定的版面是"磨砺条右上"。 */
+    private static final int TEMPERING_BAR_TOP_MARGIN = HUNGER_ROW_TOP_MARGIN + BAR_H;
+
+    /** 魔力条贴图框：**下面那一行**（高-50..高-37）—— 用户定的版面是"魔力条右下"。 */
+    private static final int MANA_BAR_TOP_MARGIN = HUNGER_ROW_TOP_MARGIN;
 
     /** 魔力条左边界相对屏幕中心的偏移：左端和饱食度的贴图框对齐（{@code 宽/2 + 11}）。 */
     private static final int MANA_BAR_X_OFFSET = 11;
+
+    // ---------------- 磨砺条（护甲条，用户起的名字：Temperingbar） ----------------
+    //
+    // 用户画的 Temperingbar：一把剑 —— 剑柄/护手是左侧装饰，剑身是轨道。
+    //
+    // ⚠️ 这条**本来是 whisperingstatusbar 画的**（左上角那个 7/20）。我们没有去引它的内部
+    // 实现（那是第三方 All Rights Reserved 的 mod，也不该依赖它的类），而是自己按
+    // **实测出来的同一行、左右对称的位置**画一条盖上去：
+    //   · 行 = 和魔力条同一行（高-63..高-50，包里护甲就在这一行的左半边）
+    //   · 左边 = 宽/2 - 95（魔力条是 宽/2 + 11，正好镜像）
+    // 如果哪天看到"两条护甲条"，那就是位置差了几像素，调 TEMPERING_BAR_X_OFFSET 就行。
+    private static final ResourceLocation TEMPERING_BAR_EMPTY =
+            ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "textures/gui/armor_bar/temperingbar_empty.png");
+    private static final ResourceLocation TEMPERING_BAR_FILL =
+            ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "textures/gui/armor_bar/temperingbar_fill.png");
+
+    /** 剑身（轨道）在贴图里的范围：量出来的 u 65..166 / v 14..21，左边 0..64 是剑柄护手。 */
+    private static final int TEMPERING_TRACK_U = 65;
+    private static final int TEMPERING_TRACK_V = 14;
+    private static final int TEMPERING_TRACK_W = 102;
+    private static final int TEMPERING_TRACK_H = 8;
+
+    /** 护甲条左边界相对屏幕中心的偏移（和魔力条的 +11 左右对称）。 */
+    private static final int TEMPERING_BAR_X_OFFSET = 11;   // 和魔力条一样贴右半边
+
+    /** 原版护甲满值（10 颗图标 x 2 点）。超过就按实际值当上限。 */
+    private static final int VANILLA_ARMOR_MAX = 20;
 
     /**
      * 我们这一层画在 z = +75。
@@ -230,6 +261,9 @@ public final class MagicStoneHud {
         graphics.pose().pushPose();
         graphics.pose().translate(0.0F, 0.0F, HUD_Z);
 
+        // 左半边：护甲条（用户的 Temperingbar 剑）——盖在包内护甲条原来的位置上
+        drawTemperingBar(minecraft, graphics, width / 2 + TEMPERING_BAR_X_OFFSET, height);
+
         // 右半边：和饱食度同一套贴图规格，紧贴它正上方
         drawManaBar(minecraft, graphics, width / 2 + MANA_BAR_X_OFFSET, height);
 
@@ -241,8 +275,49 @@ public final class MagicStoneHud {
         graphics.pose().popPose();
     }
 
-    /** 画魔力条 + 条上的数字；拿不到数据（还没同步过来）就什么都不画。 */
-    private static void drawManaBar(Minecraft minecraft, GuiGraphics graphics, int x, int height) {
+    /**
+     * 画护甲条（用户的 Temperingbar：一把剑，剑身按护甲值填充）。
+     *
+     * <p>护甲 0 就不画 —— 原版和包内也都是"没穿护甲就不显示"，画一条空剑反而碍眼。
+     * 数值直接取原版护甲值；上限按 20 算，超过 20 的（模组护甲）就按实际值当上限。
+     */
+    private static void drawTemperingBar(Minecraft minecraft, GuiGraphics graphics, int x, int height) {
+        if (minecraft.player == null) {
+            return;
+        }
+        int armor = minecraft.player.getArmorValue();
+        if (armor <= 0) {
+            return;
+        }
+        int max = Math.max(VANILLA_ARMOR_MAX, armor);
+        int y = height - TEMPERING_BAR_TOP_MARGIN;   // 上面那一行
+
+        // 整条（含剑柄、护手、边框）：168x26 -> 84x13
+        graphics.blit(TEMPERING_BAR_EMPTY, x, y, BAR_W, BAR_H, 0.0F, 0.0F, TEX_W, TEX_H, TEX_W, TEX_H);
+
+        // 剑身按比例从左往右填（只裁 u 65..166 那一段，别把剑柄切了）
+        int filled = (int) Math.round((TEMPERING_TRACK_W / 2) * (double) armor / max);
+        if (filled > 0) {
+            graphics.blit(TEMPERING_BAR_FILL,
+                    x + TEMPERING_TRACK_U / 2, y + TEMPERING_TRACK_V / 2,
+                    filled, TEMPERING_TRACK_H / 2,
+                    TEMPERING_TRACK_U, TEMPERING_TRACK_V, filled * 2, TEMPERING_TRACK_H,
+                    TEX_W, TEX_H);
+        }
+
+        // 数字压在剑身上（和魔力条同一套做法：先挪到中线再缩放）
+        String text = armor + "/" + max;
+        var font = minecraft.font;
+        int trackCx = x + (TEMPERING_TRACK_U + TEMPERING_TRACK_W / 2) / 2;
+        int trackCy = y + (TEMPERING_TRACK_V + TEMPERING_TRACK_H / 2) / 2;
+        graphics.pose().pushPose();
+        graphics.pose().translate(trackCx, trackCy, 0.0F);
+        graphics.pose().scale(TEXT_SCALE, TEXT_SCALE, 1.0F);
+        graphics.drawString(font, text, -font.width(text) / 2, -font.lineHeight / 2 + 1, COLOR_TEXT, true);
+        graphics.pose().popPose();
+    }
+
+    /** 画魔力条 + 条上的数字；拿不到数据（还没同步过来）就什么都不画。 */    private static void drawManaBar(Minecraft minecraft, GuiGraphics graphics, int x, int height) {
         MagicStoneData data = MagicStone.getOrNull(minecraft.player);
         if (data == null || data.getMaxMana() <= 0) {
             return;     // 避免除以 0：数据还没同步到客户端时 maxMana 是 0

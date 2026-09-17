@@ -4,7 +4,8 @@
   "package": "com.tnc.tnc.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "SpellHelperManaGateMixin"
+    "SpellHelperManaGateMixin",
+    "StatusBarBarsMixin"
   ],
   "injectors": {
     "defaultRequire": 0
