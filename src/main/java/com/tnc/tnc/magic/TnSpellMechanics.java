@@ -72,6 +72,9 @@ public final class TnSpellMechanics {
     public static void onSpellCast(ServerPlayer player, ResourceLocation spellId, MagicStoneData data) {
         String path = spellId.getPath();
 
+        // 火系那几条（自爆扣最大生命 10%）在自己的类里
+        TNFireMechanics.onSpellCast(player, spellId, data);
+
         // 闪电降低冷却：恢复一半蓝量（上限的一半）
         if (path.equals("lightning_recharge")) {
             int half = Math.max(1, data.getMaxMana() / 2);

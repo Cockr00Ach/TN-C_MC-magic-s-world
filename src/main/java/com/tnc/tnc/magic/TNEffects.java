@@ -105,5 +105,8 @@ public final class TNEffects {
     /** MOD 总线上的注册（由 {@link TNMod} 的构造器调用一次）。 */
     public static void register(net.minecraftforge.eventbus.api.IEventBus modEventBus) {
         EFFECTS.register(modEventBus);
+        // 火系燃烧线那 5 个效果在自己的类里（TNFireMechanics），一并挂上：
+        // DeferredRegister 必须在模组构造期挂到总线上，晚一步就注册不进去了
+        TNFireMechanics.register(modEventBus);
     }
 }
