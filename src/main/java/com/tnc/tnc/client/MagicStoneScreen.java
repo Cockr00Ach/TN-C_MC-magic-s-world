@@ -44,6 +44,9 @@ public class MagicStoneScreen extends Screen {
      */
     private boolean syncRequested;
 
+    /** 界面当前显示哪个元素的法术（底部的雷/火切换按钮改它）。 */
+    private Element shownElement = Element.LIGHTNING;
+
     public MagicStoneScreen() {
         super(Component.literal("魔法石"));
     }
@@ -81,18 +84,36 @@ public class MagicStoneScreen extends Screen {
         if (data == null) {
             return;
         }
+        // 元素切换：每个"有法术的元素"一个按钮（目前是雷 / 火）。
+        // 加新元素时这里不用动 —— 遍历 Element.values() 自动多一个。
+        int tabX = left() + 12;
+        for (Element element : Element.values()) {
+            if (SpellCatalog.chainsOf(element).isEmpty()) {
+                continue;
+            }
+            final Element target = element;
+            Button tab = Button.builder(Component.literal(element.cn()), clicked -> {
+                        shownElement = target;
+                        rebuildWidgets();
+                    })
+                    .bounds(tabX, top() + PANEL_H - 24, 40, 16)
+                    .build();
+            tab.active = element != shownElement;   // 当前元素灰掉
+            addRenderableWidget(tab);
+            tabX += 44;
+        }
         // 每个法术一行按钮，**按链分列**排。
         //
         // 以前是"名字文本 + 右侧单独一个「解锁 N点」按钮"，所有按钮排在同一列往下叠：
         // 5 个法术时没问题，15 个法术（三条链）就会排到面板外面、跑到屏幕外点不到，
         // 而且那一列还压住了第三条链的名字。现在按钮就是整行（列宽），三个链并排。
-        List<SpellCatalog.Chain> chains = SpellCatalog.chainsOf(Element.LIGHTNING);
+        List<SpellCatalog.Chain> chains = SpellCatalog.chainsOf(shownElement);
         int colW = columnWidth(chains.size());
         int chainIndex = 0;
         for (SpellCatalog.Chain chain : chains) {
             int colX = left() + LIST_X + chainIndex * colW;
             int rowY = top() + LIST_Y + 16;
-            for (SpellCatalog.Entry entry : SpellCatalog.of(Element.LIGHTNING, chain)) {
+            for (SpellCatalog.Entry entry : SpellCatalog.of(shownElement, chain)) {
                 final SpellCatalog.Entry target = entry;
                 MagicStoneLearning.Result state = MagicStoneLearning.check(data, entry);
                 // 点不了的按钮全都灰着，光看按钮分不清"已学"还是"点数不足" ——
@@ -185,9 +206,9 @@ public class MagicStoneScreen extends Screen {
 
         // 法术目录：**每条链一列**（雷系现在有主链/雷球/雷速三条，15 个法术挤一列会跑出面板）
         // 每行的按钮在 init() 里创建（名字就是按钮的标签），这里只画表头和悬停提示。
-        List<SpellCatalog.Chain> chains = SpellCatalog.chainsOf(Element.LIGHTNING);
+        List<SpellCatalog.Chain> chains = SpellCatalog.chainsOf(shownElement);
         int colW = columnWidth(chains.size());
-        graphics.drawString(this.font, "雷系法术（每条链独立进度，高级自动替换低级）",
+        graphics.drawString(this.font, shownElement.cn() + "系法术（每条链独立进度，高级自动替换低级）",
                 left + LIST_X, top + LIST_Y - 14, COLOR_TITLE, false);
         int chainIndex = 0;
         for (SpellCatalog.Chain chain : chains) {
@@ -204,7 +225,7 @@ public class MagicStoneScreen extends Screen {
         for (SpellCatalog.Chain chain : chains) {
             int colX = left + LIST_X + chainIndex2 * colW;
             int spellY = top + LIST_Y + 16;
-            for (SpellCatalog.Entry entry : SpellCatalog.of(Element.LIGHTNING, chain)) {
+            for (SpellCatalog.Entry entry : SpellCatalog.of(shownElement, chain)) {
                 if (isHovering(colX, spellY, colW - 8, 16, mouseX, mouseY)) {
                     MagicStoneLearning.Result state = MagicStoneLearning.check(data, entry);
                     // 消耗要按玩家自己的上限算（随上限等比放大），不然提示和实际扣费对不上
