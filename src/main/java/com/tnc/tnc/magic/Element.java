@@ -48,7 +48,7 @@ public enum Element {
     public static String tierName(int tier) {
         return switch (tier) {
             case 1 -> "冒险者级";
-            case 2 -> "精英级";
+            case 2 -> "勇者级";   // 设计文档里的二级叫"勇者"
             case 3 -> "王级";
             case 4 -> "传说级";
             case 5 -> "神级";
