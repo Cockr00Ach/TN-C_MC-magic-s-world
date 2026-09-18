@@ -275,6 +275,61 @@ public final class SpellCatalog {
         return new Entry(ResourceLocation.fromNamespaceAndPath(TNMod.MODID, path), Element.WIND, chain, tier, name);
     }
 
+    // ------------------------------------------------------------------
+    //  特殊魔法（领域魔法）—— 设计总纲 §12.F
+    // ------------------------------------------------------------------
+
+    /**
+     * 一条领域魔法。
+     *
+     * <p>和 {@link Entry} 的关键区别（文档 §12.F 的三条硬规则）：
+     * <ul>
+     *   <li><b>无法升级</b>：没有 1~5 级，学会就是学会 —— 所以它**不是链**
+     *       （塞进 {@link Chain} 会破坏自检里"每条链 5 级"的断言 ✗）。</li>
+     *   <li><b>获得路线即获得</b>：一次性解锁，不逐级买点。</li>
+     *   <li><b>强度只与亲和力有关</b>：不看等级、不看装备，只看该元素亲和力。</li>
+     * </ul>
+     *
+     * @param name 占位名 —— 文档只定了 S/M 的光暗领域，七个元素各自的领域内容还没定，
+     *             所以这里先按"<元素>领域"命名，等用户给了正式名字改这一行即可。
+     */
+    public record Special(ResourceLocation id, Element element, String name) {
+
+        /** 界面/提示里的完整名字。 */
+        public String fullName() {
+            return name + "（" + element.cn() + " · 领域魔法）";
+        }
+    }
+
+    /** 七个元素各一条领域魔法（暂时都是占位名，法术本体也还没做）。 */
+    private static final List<Special> SPECIALS = List.of(
+            special(Element.LIGHTNING, "lightning_domain", "雷霆领域"),
+            special(Element.FIRE, "fire_domain", "焚天领域"),
+            special(Element.WIND, "wind_domain", "风神领域"),
+            special(Element.WATER, "water_domain", "深海领域"),
+            special(Element.EARTH, "earth_domain", "大地领域"),
+            special(Element.LIGHT, "light_domain", "圣光领域"),
+            special(Element.DARK, "dark_domain", "暗黑领域"));
+
+    private static Special special(Element element, String path, String name) {
+        return new Special(ResourceLocation.fromNamespaceAndPath(TNMod.MODID, path), element, name);
+    }
+
+    /** 全部领域魔法（每个元素一条）。 */
+    public static List<Special> specials() {
+        return SPECIALS;
+    }
+
+    /** 某个元素的领域魔法。 */
+    public static Special specialOf(Element element) {
+        for (Special s : SPECIALS) {
+            if (s.element() == element) {
+                return s;
+            }
+        }
+        return null;
+    }
+
     /** 水/土/暗三系（骨架先铺，法术 JSON 逐步补；名字全照设计文档）。 */
     private static Entry of(Element element, String path, Chain chain, int tier, String name) {
         return new Entry(ResourceLocation.fromNamespaceAndPath(TNMod.MODID, path), element, chain, tier, name);
