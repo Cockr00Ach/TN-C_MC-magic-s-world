@@ -115,9 +115,18 @@ public final class TNWindMechanics {
     // 不会被攻击、不会寻路。风灵 3/4 级的"自主召唤"这里表现为球更多、
     // 打得更疼（同一个机制，不同参数）。
 
+    /**
+     * 风神降临（5 级）专属标记：只由那一个法术发出。
+     *
+     * <p>为什么需要它：5 级的"技能无冷却 / 蓝耗减半"只该属于这一级，
+     * 而速度/风伤那几个效果是 4 级和 5 级共用的 —— 拿它们当判断依据会让
+     * 4 级也吃到神级待遇（当前就是这样，等这个标记接上去就修正）。 *
+     */
+    public static final RegistryObject<MobEffect> WIND_GOD = WIND_EFFECTS.register(
+            "wind_god", MarkerEffect::new);
+
     /** 三个风球。 */
-    public static final RegistryObject<MobEffect> WIND_ORB_THREE = WIND_EFFECTS.register(
-            "wind_orb_three", MarkerEffect::new);
+    public static final RegistryObject<MobEffect> WIND_ORB_THREE = WIND_EFFECTS.register(            "wind_orb_three", MarkerEffect::new);
     /** 五个风球。 */
     public static final RegistryObject<MobEffect> WIND_ORB_FIVE = WIND_EFFECTS.register(
             "wind_orb_five", MarkerEffect::new);
