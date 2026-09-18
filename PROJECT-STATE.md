@@ -2062,3 +2062,57 @@ Spawn spawn;                        // { sound, particles[] }（生成瞬间）
 但 **风系只有 `generic_wind_charging`**（没有 casting/release ✗）。
 其余可直接用原版音效（`entity.wither.shoot`、`entity.general.splash`、
 `block.stone.break`、`weather.rain.above` 等）。
+
+---
+
+## 七、这几轮补充的方法论（都踩过）
+
+### 7.1 通用机制可以借，元素专属的数值加成不能借
+
+| 借用 | 对不对 | 理由 |
+|---|---|---|
+| 水缚 / 土泥 借风系的 `gale_slow` | ✅ 对 | 减速是通用机制，和元素无关 |
+| 暗系借火系的"燃血"效果 | ✅ 对 | 自伤换力量是通用机制 |
+| **暗系借火系的"火伤加成"** | ❌ **错** | 加的是 `spell_power:fire`，暗系法术吃的是 `soul` ✗ —— 等于白扣血 |
+| **暗系借原版 `strength`** | ❌ **错** | 只加近战，法术伤害走 `spell_power` ✗ |
+
+**判据**：借之前先问"这个效果加的是什么属性/机制" ✓ —— **元素专属的数值加成必须自己写** ✓（于是有了 `dark_power`）。
+
+### 7.2 加枚举值前必须先全项目搜它的 switch
+
+`MagicStoneLearning.Result` 加一个值，我以为只有 2 处 switch，**实际全项目 4 处** ✗：
+`MagicStoneScreen.shortState` / `MagicStoneScreen.stateText` / `MagicStoneLearning.describe` / `MagicStoneCommand.stateText`。
+漏一处就是"枚举不穷尽"编译失败 ✗（我真的提交过一个编译不过的版本 ✗）。
+
+**正确流程**：`grep` 出所有 `switch (该枚举)` → 一起改 → 才有资格提交 ✓。
+**更保险的做法**：先给各处 switch 加 `default` 兜底（一次改动、两个提交），再加枚举值 ✓ —— 把"必须一次改对 4 处"拆成两步低风险改动 ✓。
+
+### 7.3 生成出来的文件，要改就改生成器
+
+直接手改 JSON：只改到 1/5 个文件 ✗、拼出多余的空效果项 ✗、下次重跑生成器还会被覆盖 ✗。
+改生成器再重跑：5 个文件全对 ✓、格式统一 ✓、以后改一处就能全部重生成 ✓。
+
+### 7.4 命令里必须带"编译失败就不提交 / 自动回滚"
+
+这轮之前，我有过**编译不过还提交**的事故 ✗。现在的命令模板：
+
+```powershell
+$out = & .\gradlew.bat build --console=plain 2>&1
+$bad = ($out | Select-String -Pattern 'BUILD FAILED|error:').Count
+if ($bad -gt 0) { git checkout -- <改动的文件>; exit 1 }   # 回滚，保住可编译状态
+git commit ...
+```
+
+加上之后**再没有过坏提交** ✓，而且它当场拦住了 4 次编译失败 ✓。
+
+### 7.5 "观感不对"先查字段，别急着重画美术
+
+"射线像火球"折腾了几轮美术 ✗，真正原因是投射物模型**缺 `orientation` 字段** ✗ ——
+长轴没对齐弹道，横着糊成一坨。加一行 `"orientation": "TOWARDS_MOTION"` 就解决了 ✓。
+
+**顺序**：先问"是不是缺字段 / 值不对 / 资源没生效"，再考虑美术 ✓。
+
+### 7.6 不要用文件名/印象去数东西
+
+- 用文件名正则数"水系有几个法术"→ 得出 14 个（真实 15 个）✗ —— 要**解析 JSON** ✓
+- 凭记忆数 switch / 调用点 → 漏改、编译不过 ✗ —— 要 **grep** ✓
