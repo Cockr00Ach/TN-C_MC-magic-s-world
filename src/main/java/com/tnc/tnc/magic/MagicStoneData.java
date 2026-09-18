@@ -517,6 +517,17 @@ public class MagicStoneData {
                 + (bonusPoints > 0 ? " + 赠送 " + bonusPoints : "")
                 + "，已投 " + pointsSpent + "）");
         lines.add("已学法术 " + (learned.isEmpty() ? "（无）" : joinSpells()));
+        // 领域魔法（§12.F）：只列"已获得"的，没获得的不刷屏
+        List<Element> domains = specialElements();
+        StringBuilder domainText = new StringBuilder();
+        for (Element element : domains) {
+            if (domainText.length() > 0) {
+                domainText.append(" ");
+            }
+            SpellCatalog.Special special = SpellCatalog.specialOf(element);
+            domainText.append(special != null ? special.name() : element.cn() + "领域");
+        }
+        lines.add("领域魔法 " + (domains.isEmpty() ? "（无）" : domainText.toString()));
         return lines;
     }
 
