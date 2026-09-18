@@ -61,6 +61,34 @@ public class MagicStoneData {
      */
     private final Set<String> specials = new LinkedHashSet<>();
 
+    // ---- 领域魔法（§12.F）对外方法 ----
+
+    /** 有没有获得这个元素的领域魔法。 */
+    public boolean hasSpecial(Element element) {
+        return element != null && specials.contains(element.id());
+    }
+
+    /** 获得（重复获得返回 false）。 */
+    public boolean grantSpecial(Element element) {
+        return element != null && specials.add(element.id());
+    }
+
+    /** 撤销（本来就没有返回 false）。 */
+    public boolean revokeSpecial(Element element) {
+        return element != null && specials.remove(element.id());
+    }
+
+    /** 已获得的领域魔法对应的元素（界面/命令用）。 */
+    public List<Element> specialElements() {
+        List<Element> result = new ArrayList<>();
+        for (Element element : Element.values()) {
+            if (hasSpecial(element)) {
+                result.add(element);
+            }
+        }
+        return result;
+    }
+
     private int mana;
     private int maxMana;
     private int pointsSpent;
