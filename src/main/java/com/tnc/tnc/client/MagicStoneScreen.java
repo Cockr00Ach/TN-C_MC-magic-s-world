@@ -118,10 +118,11 @@ public class MagicStoneScreen extends Screen {
                 MagicStoneLearning.Result state = MagicStoneLearning.check(data, entry);
                 // 点不了的按钮全都灰着，光看按钮分不清"已学"还是"点数不足" ——
                 // 所以把短状态直接写进标签，完整原因还是在悬停提示里
-                String short_ = shortState(state);
-                String label = short_.isEmpty()
+                // 重新排版：按钮上只放"图标 + 名字"，短状态不再挤在标签里（悬停提示里有完整的）
+                // 未学会的法术：名字显示成乱码，图标也不画（用户要求"不要显示"）
+                String label = data.hasLearned(entry.id())
                         ? entry.displayName()
-                        : entry.displayName() + " · " + short_;
+                        : garble(entry.displayName());
                 Button button = Button.builder(Component.literal(fitLabel(label, colW - 34)),
                                 clicked -> MagicStoneNetwork.requestUnlock(target.id()))
                         .bounds(colX, rowY, colW - 8, 16)
@@ -132,6 +133,21 @@ public class MagicStoneScreen extends Screen {
             }
             chainIndex++;
         }
+    }
+
+    /**
+     * 未学会的法术名字显示成乱码。
+     *
+     * <p>用<b>名字本身</b>推出乱码，所以同一个法术每次打开界面乱码都一样 ✓（不会闪 ✗）；
+     * 学完之后立刻变回真名 ✓。
+     */
+    private static String garble(String name) {
+        final String glyphs = "\u2593\u2592\u2591\u2588\u259a\u259e\u2573\u203B\u2261\u25A0";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < name.length(); i++) {
+            sb.append(glyphs.charAt(Math.floorMod(name.charAt(i) * 31 + i * 7, glyphs.length())));
+        }
+        return sb.toString();
     }
 
     /** 法术目录每列多宽（渲染和按钮布局必须用同一个算法，否则又会对不上）。 */
