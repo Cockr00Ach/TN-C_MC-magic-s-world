@@ -65,9 +65,9 @@ public final class MagicStoneSelfTest {
         checks.add(new Check("points total = 2 @310", data.getPointsTotal(Config.pointThresholds) == 2,
                 "total=" + data.getPointsTotal(Config.pointThresholds) + " thresholds=" + Config.pointThresholds));
 
-        // 4. 法术目录：**每个有法术的元素**都应该是"3 条链 x 5 级"
-        //    （原来写死雷系 + 总数 15，加火系以后那条会误报失败）
+        // 4. 法术目录：每个有法术的元素都是"每条链 5 级"（链数按文档要求 >= 3，现在水/土/暗是 4）
         int elementCount = 0;
+        int chainTotal = 0;
         boolean chainsOk = true;
         StringBuilder chainSizes = new StringBuilder();
         for (Element element : Element.values()) {
@@ -76,7 +76,9 @@ public final class MagicStoneSelfTest {
                 continue;
             }
             elementCount++;
-            chainsOk = chainsOk && chains.size() == 3;
+            chainTotal += chains.size();
+            // 链数不再写死 3：文档里水/土/暗都是 4 条，雷/火/风暂时 3 条
+            chainsOk = chainsOk && chains.size() >= 3;
             chainSizes.append(element.cn()).append("(");
             for (SpellCatalog.Chain chain : chains) {
                 int size = SpellCatalog.of(element, chain).size();
@@ -85,11 +87,12 @@ public final class MagicStoneSelfTest {
             }
             chainSizes.append(") ");
         }
-        int expected = elementCount * 3 * SpellCatalog.maxTier();
-        checks.add(new Check("every element = 3 chains x 5 tiers",
+        int expected = chainTotal * SpellCatalog.maxTier();
+        checks.add(new Check("chains are 5 tiers each (>=3 chains per element)",
                 chainsOk && elementCount > 0 && SpellCatalog.all().size() == expected,
-                "elements=" + elementCount + " total=" + SpellCatalog.all().size()
-                        + " expected=" + expected + " [" + chainSizes.toString().trim() + "]"));
+                "elements=" + elementCount + " chains=" + chainTotal
+                        + " total=" + SpellCatalog.all().size() + " expected=" + expected
+                        + " [" + chainSizes.toString().trim() + "]"));
 
         // 5. 门槛顺序（全部在临时数据上跑）
         MagicStoneData fresh = new MagicStoneData();
