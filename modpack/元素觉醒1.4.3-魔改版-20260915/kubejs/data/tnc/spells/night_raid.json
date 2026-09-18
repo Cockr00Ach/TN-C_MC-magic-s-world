@@ -1,0 +1,57 @@
+{
+  "school": "SOUL",
+  "group": "dark_hand",
+  "range": 34.0,
+  "learn": { "tier": 2 },
+  "cast": {
+    "duration": 0.6,
+    "animation": "spell_engine:one_handed_projectile_charge",
+    "sound": { "id": "spell_engine:generic_soul_casting", "randomness": 0 },
+    "particles": [ { "particle_id": "soul_fire_flame", "shape": "CIRCLE", "origin": "FEET", "count": 14.0, "min_speed": 0.1, "max_speed": 0.4 } ]
+  },
+  "release": {
+    "target": {
+      "type": "PROJECTILE",
+      "projectile": {
+        "launch_properties": { "velocity": 1.3, "extra_launch_count": 2, "extra_launch_delay": 3 },
+        "projectile": {
+          "homing_angle": 0.5,
+          "client_data": {
+            "travel_particles": [ { "particle_id": "soul", "shape": "CIRCLE", "rotation": "LOOK", "origin": "CENTER", "count": 4.0, "min_speed": 0.0, "max_speed": 0.1 } ],
+            "model": { "model_id": "tnc:projectile/fire_ball", "scale": 0.9 }
+          }
+        }
+      }
+    },
+    "animation": "spell_engine:one_handed_projectile_release",
+    "sound": { "id": "spell_engine:generic_soul_release" }
+  },
+  "impact": [
+    {
+      "action": { "type": "DAMAGE", "damage": { "spell_power_coefficient": 1.5, "knockback": 0.2 } },
+      "particles": [ { "particle_id": "smoke", "shape": "SPHERE", "origin": "CENTER", "count": 35.0, "min_speed": 0.2, "max_speed": 1.0 } ],
+      "sound": { "id": "entity.wither.shoot", "volume": 0.7 }
+    },
+    {
+      "action": {
+        "type": "STATUS_EFFECT",
+        "apply_to_caster": false,
+        "status_effect": {
+          "effect_id": "minecraft:blindness",
+          "duration": 4,
+          "amplifier": 0,
+          "apply_mode": "SET",
+          "show_particles": true
+        }
+      },
+      "particles": [ { "particle_id": "soul", "shape": "CIRCLE", "rotation": "LOOK", "origin": "CENTER", "count": 4.0, "min_speed": 0.0, "max_speed": 0.1 } ]
+    }
+  ],
+  "area_impact": {
+    "radius": 2.5,
+    "area": { "distance_dropoff": "SQUARED" },
+    "particles": [ { "particle_id": "smoke", "shape": "SPHERE", "origin": "CENTER", "count": 35.0, "min_speed": 0.2, "max_speed": 1.0 } ],
+    "sound": { "id": "entity.wither.shoot", "volume": 1.0 }
+  },
+  "cost": { "exhaust": 0.0, "cooldown_duration": 3 }
+}
