@@ -122,7 +122,7 @@ public class MagicStoneScreen extends Screen {
                 String label = short_.isEmpty()
                         ? entry.displayName()
                         : entry.displayName() + " · " + short_;
-                Button button = Button.builder(Component.literal(fitLabel(label, colW - 16)),
+                Button button = Button.builder(Component.literal(fitLabel(label, colW - 34)),
                                 clicked -> MagicStoneNetwork.requestUnlock(target.id()))
                         .bounds(colX, rowY, colW - 8, 16)
                         .build();
@@ -191,18 +191,19 @@ public class MagicStoneScreen extends Screen {
         graphics.fill(left + 8, top + 54, left + panelWidth() - 8, top + 55, 0x40FFFFFF);
         graphics.fill(left + LIST_X - 8, top + 58, left + LIST_X - 7, top + PANEL_H - 8, 0x40FFFFFF);
 
-        // 左列：七元素亲和力与进度
-        graphics.drawString(this.font, "元素亲和 / 进度", left + 12, top + 62, COLOR_TITLE, false);
-        int y = top + 78;
+        // 左列：元素亲和度 —— 用户画的水晶贴图 + 42 个亲和力点（点位由用户标注，见 AffinityWidget）
+        // 原来的"亲和 X 进度 Y 上限 Z"文字行已按用户要求删除 ✗
+        AffinityWidget.render(graphics, left + 12, top + 60, data::getAffinity);
+        graphics.drawString(this.font, "元素亲和", left + 12, top + 100, COLOR_TITLE, false);
+        // 每个元素一行极短状态：亲和点数（小字，够用且不抢水晶的视觉）
+        int y = top + 112;
+        StringBuilder affLine = new StringBuilder();
         for (Element element : Element.values()) {
-            String line = element.cn() + "  亲和 " + data.getAffinity(element)
-                    + "  进度 " + tierShort(data.getProgress(element))
-                    + "  上限 " + Element.tierName(Math.max(1, data.maxTierFor(element)));
-            graphics.drawString(this.font, line, left + 12, y, COLOR_TEXT, false);
-            y += 12;
+            affLine.append(element.cn()).append(data.getAffinity(element)).append(' ');
         }
+        graphics.drawString(this.font, affLine.toString().trim(), left + 12, y, COLOR_DIM, false);
         graphics.drawString(this.font, "已学 " + data.getLearned().size() + " 个法术",
-                left + 12, y + 6, COLOR_DIM, false);
+                left + 12, y + 14, COLOR_DIM, false);
 
         // 法术目录：**每条链一列**（雷系现在有主链/雷球/雷速三条，15 个法术挤一列会跑出面板）
         // 每行的按钮在 init() 里创建（名字就是按钮的标签），这里只画表头和悬停提示。
@@ -226,13 +227,20 @@ public class MagicStoneScreen extends Screen {
             int colX = left + LIST_X + chainIndex2 * colW;
             int spellY = top + LIST_Y + 16;
             for (SpellCatalog.Entry entry : SpellCatalog.of(shownElement, chain)) {
+                // 法术图标画在按钮左边（super.render 之后画，否则被按钮盖住）
+                drawSpellIcon(graphics, entry, colX + 2, spellY + 1);
                 if (isHovering(colX, spellY, colW - 8, 16, mouseX, mouseY)) {
                     MagicStoneLearning.Result state = MagicStoneLearning.check(data, entry);
                     // 消耗要按玩家自己的上限算（随上限等比放大），不然提示和实际扣费对不上
                     graphics.renderTooltip(this.font,
                             Component.literal(entry.fullName()
+                                    + "\n§b效果 §r" + effectSummary(entry)
                                     + "\n§7解锁消耗 " + entry.learnCost() + " 点"
                                     + "\n§7施放消耗 " + entry.manaCostFor(data.getMaxMana()) + " 魔力"
+                                    + "\n§7亲和力要求 " + Element.tierName(entry.tier())
+                                    + "（当前上限 " + Element.tierName(Math.max(1, data.maxTierFor(entry.element()))) + "）"
+                                    + "\n§7前置 " + (entry.tier() <= 1 ? "无（链的第 1 级）"
+                                            : "先学本链第 " + (entry.tier() - 1) + " 级")
                                     + "\n§7状态 " + stateText(state, entry)),
                             mouseX, mouseY);
                 }
@@ -240,6 +248,23 @@ public class MagicStoneScreen extends Screen {
             }
             chainIndex2++;
         }
+    }
+
+    /** 把法术图标画在按钮左边（16x16，贴图路径 = assets/tnc/textures/spell/<id>.png）。 */
+    private static void drawSpellIcon(net.minecraft.client.gui.GuiGraphics graphics,
+                                      SpellCatalog.Entry entry, int x, int y) {
+        net.minecraft.resources.ResourceLocation icon = net.minecraft.resources.ResourceLocation
+                .fromNamespaceAndPath("tnc", "textures/spell/" + entry.id().getPath() + ".png");
+        graphics.blit(icon, x, y, 0.0F, 0.0F, 16, 16, 16, 16);
+    }
+
+    /**
+     * 效果摘要：由目录数据自动生成（不手写 105 条描述 ✗）。
+     * 想要更文学化的描述，就得在目录里给每条法术加一个 desc 字段 —— 那是后话 ✓
+     */
+    private static String effectSummary(SpellCatalog.Entry entry) {
+        return entry.element().cn() + "系 · " + entry.chain().cn() + "链 · 第 " + entry.tier() + " 级 · "
+                + entry.chain().desc();
     }
 
     private static boolean isHovering(int x, int y, int w, int h, int mouseX, int mouseY) {
