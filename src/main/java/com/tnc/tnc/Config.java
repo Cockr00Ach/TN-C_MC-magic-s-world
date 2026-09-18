@@ -75,7 +75,7 @@ public class Config {
                     "上限 210 时一级法术花 20（9.5%，HUD 上看得很清楚），",
                     "上限 620 时还是 20（3.2%，条子上只有 2 像素，而且一个回魔周期就回满了）。",
                     "关掉 = 退回固定消耗（对照/调试用）。")
-            .define("manaCostScalesWithMaxMana", true);
+            .define("manaCostScalesWithMaxMana", false);
 
     private static final ForgeConfigSpec.IntValue MANA_COST_BASELINE_MAX_MANA = BUILDER
             .comment("上面那张消耗表对应的魔力上限基准值。",
