@@ -83,6 +83,19 @@ function Summon-Spell($name, $tier, $orbEffect, $seconds, $cooldown, $extraEffec
       },
       "particles": [ $castFx ]
     },
+    {
+      "action": {
+        "type": "STATUS_EFFECT",
+        "status_effect": {
+          "effect_id": "tnc:dark_orb",
+          "duration": $seconds,
+          "amplifier": 0,
+          "apply_mode": "SET",
+          "show_particles": false
+        }
+      },
+      "particles": [ $castFx ]
+    },
 $extraImpact
     {
       "action": { "type": "FIRE", "fire": { "burn_time": 0.0 } },

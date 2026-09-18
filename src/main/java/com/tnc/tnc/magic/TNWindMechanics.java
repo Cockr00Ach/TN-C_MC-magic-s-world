@@ -125,6 +125,16 @@ public final class TNWindMechanics {
     public static final RegistryObject<MobEffect> WIND_GOD = WIND_EFFECTS.register(
             "wind_god", MarkerEffect::new);
 
+    /**
+     * 暗系召唤的标记：暗系的"召唤"链复用绕身球机制，但要看起来像暗影而不是白雾。
+     *
+     * <p>为什么用标记而不是新机制：绕身球的逻辑（绕圈、打最近的敌人、牵引）是通用且
+     * 已实测的，只有粒子颜色是风系专属的。加一个标记让 tickOrbs 换粒子，
+     * 比复制一整套逻辑划算得多。
+     */
+    public static final RegistryObject<MobEffect> DARK_ORB = WIND_EFFECTS.register(
+            "dark_orb", MarkerEffect::new);
+
     /** 三个风球。 */
     public static final RegistryObject<MobEffect> WIND_ORB_THREE = WIND_EFFECTS.register(            "wind_orb_three", MarkerEffect::new);
     /** 五个风球。 */
@@ -172,11 +182,16 @@ public final class TNWindMechanics {
             return;
         }
         boolean spirit = has(player, WIND_SPIRIT);
+        // 暗系召唤用的是同一套绕身球，只是粒子要换成暗影感的 —— 有 dark_orb 标记就是暗系
+        boolean dark = has(player, DARK_ORB);
+        net.minecraft.core.particles.SimpleParticleType orbParticle = dark
+                ? net.minecraft.core.particles.ParticleTypes.SOUL_FIRE_FLAME
+                : net.minecraft.core.particles.ParticleTypes.CLOUD;
         for (int i = 0; i < count; i++) {
             double angle = (time % 80) / 80.0 * Math.PI * 2.0 + i * (Math.PI * 2.0 / count);
             double x = player.getX() + Math.cos(angle) * ORB_RADIUS;
             double z = player.getZ() + Math.sin(angle) * ORB_RADIUS;
-            player.serverLevel().sendParticles(net.minecraft.core.particles.ParticleTypes.CLOUD,
+            player.serverLevel().sendParticles(orbParticle,
                     x, player.getY() + 1.0D, z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
         }
         if (time % ORB_ZAP_INTERVAL != 0) {

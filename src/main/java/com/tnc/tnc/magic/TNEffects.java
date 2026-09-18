@@ -63,6 +63,29 @@ public final class TNEffects {
     public static final RegistryObject<MobEffect> LIGHTNING_ASCENSION =
             EFFECTS.register("lightning_ascension", () -> AscensionEffect.create());
 
+    /**
+     * 暗系专属增伤：只加 {@code spell_power:soul}，每级 +50%。
+     *
+     * <p>为什么需要它：暗系的"以伤换伤 / 燃血 / 献祭 / 夺舍"要的是"烧血换暗属性强度"，
+     * 而之前临时借用了火系那 5 个效果 —— 那些加的是 {@code spell_power:fire} ✗，
+     * 暗系法术根本吃不到。有了这个，暗系那条线才算真的成立。
+     *
+     * <p>用原版那套"amplifier 递增"就够：MobEffectInstance 会按 (amplifier+1) 放大，
+     * 所以一个效果就能覆盖 +50% / +100% / +150% / +200%（amp 0~3），
+     * 不必像火系那样写 5 个效果类。
+     */
+    public static final RegistryObject<MobEffect> DARK_POWER = EFFECTS.register("dark_power",
+            () -> {
+                Attribute soul = ForgeRegistries.ATTRIBUTES.getValue(
+                        net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("spell_power", "soul"));
+                // 没装 spell_power 时退化成一个空标记，至少不崩
+                if (soul == null) {
+                    return new AttributeBuff(0x6A3FA0, Attributes.ATTACK_DAMAGE, 0.0D,
+                            AttributeModifier.Operation.MULTIPLY_BASE);
+                }
+                return new AttributeBuff(0x6A3FA0, soul, 0.50D, AttributeModifier.Operation.MULTIPLY_BASE);
+            });
+
     private TNEffects() {
     }
 
