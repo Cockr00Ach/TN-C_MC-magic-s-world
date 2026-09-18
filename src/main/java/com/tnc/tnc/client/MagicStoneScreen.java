@@ -254,6 +254,9 @@ public class MagicStoneScreen extends Screen {
             case AFFINITY_TOO_LOW -> "亲和力不够";
             case OUT_OF_ORDER -> "需前置";
             case NOT_ENOUGH_POINTS -> "点数不足";
+            // default 是故意留的：以后给 Result 加新值（例如"尚未实装"）时，
+            // 这里不会因为枚举不穷尽而编译不过 —— 分两步改就不用一次动三个文件。
+            default -> "";
         };
     }
 
@@ -264,6 +267,7 @@ public class MagicStoneScreen extends Screen {
             case AFFINITY_TOO_LOW -> "亲和力不足";
             case OUT_OF_ORDER -> "需先学上一级";
             case NOT_ENOUGH_POINTS -> "点数不足";
+            default -> "尚未实装";
         };
     }
 
