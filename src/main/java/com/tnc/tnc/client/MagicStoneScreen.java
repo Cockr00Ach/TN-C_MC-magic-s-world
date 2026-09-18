@@ -199,7 +199,7 @@ public class MagicStoneScreen extends Screen {
 
         // 左列：元素亲和度 —— 用户画的水晶贴图 + 42 个亲和力点（点位由用户标注，见 AffinityWidget）
         // 用户要求：等比例放大到占满左下框约 80%，且**不要任何文字** ✗
-        AffinityWidget.render(graphics, left + 16, top + 56, 3, data::getAffinity);   // 3 倍 = 99x111，贴合左侧框（4 倍会超出高度 ✗）
+        AffinityWidget.render(graphics, left + 43, top + 71, 3, data::getAffinity);   // 3 倍 = 99x111；位置 = 左框(可用区 x:8..178, y:58..196)居中
 
         // 法术目录：**每条链一列**（雷系现在有主链/雷球/雷速三条，15 个法术挤一列会跑出面板）
         // 每行的按钮在 init() 里创建（名字就是按钮的标签），这里只画表头和悬停提示。
