@@ -227,6 +227,13 @@ public final class SpellEngineBridge {
             entries.sort((a, b) -> Integer.compare(a.tier(), b.tier()));
             List<String> ids = new ArrayList<>(entries.size());
             for (SpellCatalog.Entry entry : entries) {
+                // ⚠️ 防呆闸门：只把"引擎真的认识"的法术写进法杖。
+                // 目录里有、引擎里没有的法术（比如还没写 JSON 的骨架）会让槽位空白 ✗
+                // —— 用户实测遇到过（风系当时目录 15 条、JSON 只有 5 个）。
+                // 这里直接过滤掉，法杖就永远不会出现"学得到但放不出"的空格。
+                if (net.spell_engine.internals.SpellRegistry.getSpell(entry.id()) == null) {
+                    continue;
+                }
                 ids.add(entry.id().toString());
             }
             return ids;
