@@ -70,7 +70,7 @@ function Sacrifice-Spell($name, $tier, $burnEffect, $seconds, $strengthAmp, $coo
       "action": {
         "type": "STATUS_EFFECT",
         "status_effect": {
-          "effect_id": "minecraft:strength",
+          "effect_id": "tnc:dark_power",
           "duration": $seconds,
           "amplifier": $strengthAmp,
           "apply_mode": "SET",

@@ -32,7 +32,7 @@
       "action": {
         "type": "STATUS_EFFECT",
         "status_effect": {
-          "effect_id": "minecraft:strength",
+          "effect_id": "tnc:dark_power",
           "duration": 20,
           "amplifier": 0,
           "apply_mode": "SET",
