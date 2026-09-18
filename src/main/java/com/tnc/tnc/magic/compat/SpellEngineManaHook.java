@@ -159,6 +159,18 @@ public final class SpellEngineManaHook {
 
             // 真正放出去了：数值怎么变交给纯逻辑层（ManaCharge），这里只负责提示与同步
             ManaCharge.Result result = ManaCharge.apply(data, entry);
+            // 风神降临（5 级）：蓝耗减半。
+            // 做法是"扣完之后返还一半"，而不是去改 ManaCharge 的签名 ——
+            // 那边只有数据、拿不到玩家，改签名会牵动自检里 4 处调用，
+            // 而且"减半"和"返还一半"在数值上完全等价。
+            if (result.outcome() == ManaCharge.Outcome.DEDUCTED
+                    && com.tnc.tnc.magic.TNWindMechanics.WIND_GOD.isPresent()
+                    && player.hasEffect(com.tnc.tnc.magic.TNWindMechanics.WIND_GOD.get())) {
+                int fullCost = entry.manaCostFor(data.getMaxMana());
+                data.setMana(Math.min(data.getMaxMana(), data.getMana() + fullCost / 2));
+                player.displayClientMessage(Component.literal(
+                        "§b[TN-C] 风神降临：蓝耗减半 §7(-" + (fullCost - fullCost / 2) + ")"), true);
+            }
             // 记下这次施法：接下来几秒不回魔，好让玩家在 HUD 上看得见刚扣掉的那一截
             MagicStone.markCast(player);
             // 数据层表达不出来的那几条（回蓝 / 光环 / 拖尾 / 无冷却）交给机制层
