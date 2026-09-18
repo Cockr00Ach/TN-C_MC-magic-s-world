@@ -27,11 +27,11 @@ public class MagicStoneScreen extends Screen {
     private static final int PANEL_H = 224;
     private static final int ROW_H = 22;
 
-    private static final int COLOR_PANEL = 0xE6101018;
-    private static final int COLOR_BORDER = 0xFF8E77E0;
-    private static final int COLOR_TITLE = 0xFFE8DEFF;
-    private static final int COLOR_TEXT = 0xFFCFCFD6;
-    private static final int COLOR_DIM = 0xFF8A8A93;
+    private static final int COLOR_PANEL = 0xE62A1F16;   // dark brown
+    private static final int COLOR_BORDER = 0xFF8A6A42;  // brown-gold border
+    private static final int COLOR_TITLE = 0xFFF2DFC4;    // warm cream
+    private static final int COLOR_TEXT = 0xFFDCC9B0;      // light tan
+    private static final int COLOR_DIM = 0xFF9A8570;        // muted brown
     private static final int COLOR_OK = 0xFF6BE06B;
     private static final int COLOR_BAD = 0xFFE06B6B;
 
@@ -188,8 +188,8 @@ public class MagicStoneScreen extends Screen {
                         + "（总 " + data.getPointsTotal(Config.pointThresholds)
                         + " · 已投 " + data.getPointsSpent() + "）",
                 left + 12, top + 41, COLOR_TEXT, false);
-        graphics.fill(left + 8, top + 54, left + panelWidth() - 8, top + 55, 0x40FFFFFF);
-        graphics.fill(left + LIST_X - 8, top + 58, left + LIST_X - 7, top + PANEL_H - 8, 0x40FFFFFF);
+        graphics.fill(left + 8, top + 54, left + panelWidth() - 8, top + 55, 0x40E0C39A);
+        graphics.fill(left + LIST_X - 8, top + 58, left + LIST_X - 7, top + PANEL_H - 8, 0x40E0C39A);
 
         // 左列：元素亲和度 —— 用户画的水晶贴图 + 42 个亲和力点（点位由用户标注，见 AffinityWidget）
         // 用户要求：等比例放大到占满左下框约 80%，且**不要任何文字** ✗
