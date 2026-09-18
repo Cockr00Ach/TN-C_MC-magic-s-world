@@ -86,7 +86,7 @@ Wind-Spell 'wind_speed'          2 20.0 @(@('wind_flight', 5.0), @('wind_speed_i
 Wind-Spell 'greater_wind_speed'  3 30.0 @(@('wind_flight', 15.0), @('wind_speed_ii', 15.0), @('wind_power_i', 15.0))
 # 4/5  wind_flight >= 4  Java 
 Wind-Spell 'super_wind_speed'    4 45.0 @(@('wind_speed_iii', 30.0), @('wind_power_ii', 30.0))
-Wind-Spell 'wind_god_descent'    5 90.0 @(@('wind_speed_iii', 30.0), @('wind_power_ii', 30.0))
+Wind-Spell 'wind_god_descent'    5 90.0 @(@('wind_speed_iii', 30.0), @('wind_power_ii', 30.0), @('wind_god', 30.0))
 
 Write-Output ''
 Write-Output ('done -> ' + $dest)
