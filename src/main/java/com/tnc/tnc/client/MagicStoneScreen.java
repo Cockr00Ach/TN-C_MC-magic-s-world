@@ -119,10 +119,10 @@ public class MagicStoneScreen extends Screen {
                 // 点不了的按钮全都灰着，光看按钮分不清"已学"还是"点数不足" ——
                 // 所以把短状态直接写进标签，完整原因还是在悬停提示里
                 // 重新排版：按钮上只放"图标 + 名字"，短状态不再挤在标签里（悬停提示里有完整的）
-                // 未学会的法术：名字显示成乱码，图标也不画（用户要求"不要显示"）
-                String label = data.hasLearned(entry.id())
-                        ? entry.displayName()
-                        : garble(entry.displayName());
+                // 未学会的名字要不要遮：只有**王级(3)及以上**才乱码 ✗
+                // —— 冒险者(1)、勇者(2) 是基础，未学也照样显示真名 ✓（用户要求）
+                boolean hideName = !data.hasLearned(entry.id()) && entry.tier() >= 3;
+                String label = hideName ? garble(entry.displayName()) : entry.displayName();
                 Button button = Button.builder(Component.literal(fitLabel(label, colW - 34)),
                                 clicked -> MagicStoneNetwork.requestUnlock(target.id()))
                         .bounds(colX, rowY, colW - 8, 16)
