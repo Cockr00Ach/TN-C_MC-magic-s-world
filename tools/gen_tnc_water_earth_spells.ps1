@@ -28,7 +28,7 @@ $trailFx = '{ "particle_id": "bubble", "shape": "CIRCLE", "rotation": "LOOK", "o
 $boomFx = '{ "particle_id": "splash", "shape": "SPHERE", "origin": "CENTER", "count": 45.0, "min_speed": 0.3, "max_speed": 1.5 }'
 $dustFx = '{ "particle_id": "crit", "shape": "SPHERE", "origin": "CENTER", "count": 25.0, "min_speed": 0.2, "max_speed": 1.0 }'
 
-# ---------------- 水缚线：范围减速（控制）----------------
+# ---------------- ----------------
 function Bind-Spell($name, $tier, $range, $coef, $seconds, $cooldown) {
     Write-Json $name @"
 {
@@ -82,7 +82,7 @@ Bind-Spell 'water_burial'    3 5.5 1.3 6.0 6.0
 Bind-Spell 'abyss'           4 6.5 1.6 7.0 8.0
 Bind-Spell 'sea_god_crypt'   5 8.0 2.0 9.0 12.0
 
-# ---------------- 土弹线：投射物（输出）----------------
+# ---------------- ----------------
 function Earth-Spell($name, $tier, $velocity, $coef, $scale, $radius, $cooldown, $launches) {
     Write-Json $name @"
 {
