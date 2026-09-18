@@ -300,6 +300,7 @@ public class MagicStoneCommand {
             case AFFINITY_TOO_LOW -> "亲和力不足";
             case OUT_OF_ORDER -> "需先学上一级";
             case NOT_ENOUGH_POINTS -> "点数不足";
+            case NOT_IMPLEMENTED -> "尚未实装";
         };
     }
 

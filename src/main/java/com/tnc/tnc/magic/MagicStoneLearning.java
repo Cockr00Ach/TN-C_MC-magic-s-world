@@ -81,6 +81,8 @@ public final class MagicStoneLearning {
                     + "（这条链当前进度 " + Element.tierName(data.getProgress(entry.element(), entry.chain())) + "）");
             case NOT_ENOUGH_POINTS -> Component.literal("§c[TN-C] 魔法点数不够：需要 " + cost
                     + " 点，当前可用 " + data.getPointsAvailable(Config.pointThresholds) + " 点");
+            case NOT_IMPLEMENTED -> Component.literal("§e[TN-C] " + entry.displayName()
+                    + " 尚未实装 §7（目录里有、法术本体还没做，学不了）");
         };
     }
 }
