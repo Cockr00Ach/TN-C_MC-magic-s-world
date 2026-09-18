@@ -53,6 +53,14 @@ public class MagicStoneData {
     private final int[][] progress = new int[ELEMENT_COUNT][CHAIN_COUNT];
     private final Set<ResourceLocation> learned = new LinkedHashSet<>();
 
+    /**
+     * 已获得的「领域魔法」（设计总纲 §12.F 特殊魔法）。
+     *
+     * <p>和 learned 的区别：领域魔法**无法升级**（没有 1~5 级）、**获得路线即获得**。
+     * 存元素名而不是法术 id —— 每个元素只有一条领域魔法，用元素当键最直观。
+     */
+    private final Set<String> specials = new LinkedHashSet<>();
+
     private int mana;
     private int maxMana;
     private int pointsSpent;
@@ -314,7 +322,10 @@ public class MagicStoneData {
             System.arraycopy(other.progress[i], 0, this.progress[i], 0, CHAIN_COUNT);
         }
         this.learned.clear();
+        this.specials.clear();
         this.learned.addAll(other.learned);
+        this.specials.clear();
+        this.specials.addAll(other.specials);
         this.mana = other.mana;
         this.maxMana = other.maxMana;
         this.pointsSpent = other.pointsSpent;
@@ -358,6 +369,12 @@ public class MagicStoneData {
             learnedList.add(StringTag.valueOf(spell.toString()));
         }
         tag.put("Learned", learnedList);
+        // 领域魔法（§12.F）：存元素 id 字符串集合；老存档没有这个键 → 读出来是空集 ✓
+        ListTag specialList = new ListTag();
+        for (String element : specials) {
+            specialList.add(StringTag.valueOf(element));
+        }
+        tag.put("Specials", specialList);
 
         tag.putInt("Mana", mana);
         tag.putInt("MaxMana", maxMana);
@@ -395,6 +412,10 @@ public class MagicStoneData {
         }
 
         learned.clear();
+        specials.clear();
+        for (Tag entry : tag.getList("Specials", Tag.TAG_STRING)) {
+            specials.add(entry.getAsString());
+        }
         ListTag learnedList = tag.getList("Learned", Tag.TAG_STRING);
         for (int i = 0; i < learnedList.size(); i++) {
             ResourceLocation id = ResourceLocation.tryParse(learnedList.getString(i));
