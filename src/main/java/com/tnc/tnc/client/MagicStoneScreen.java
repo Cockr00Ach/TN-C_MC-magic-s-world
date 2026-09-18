@@ -224,7 +224,9 @@ public class MagicStoneScreen extends Screen {
             int spellY = top + LIST_Y + 16;
             for (SpellCatalog.Entry entry : SpellCatalog.of(shownElement, chain)) {
                 // 法术图标画在按钮左边（super.render 之后画，否则被按钮盖住）
-                drawSpellIcon(graphics, entry, colX + 2, spellY + 1);
+                if (data.hasLearned(entry.id())) {   // 未学会：名字/图标都不给看（名字显示成乱码，见 init）
+                    drawSpellIcon(graphics, entry, colX + 2, spellY + 1);
+                }
                 if (isHovering(colX, spellY, colW - 8, 16, mouseX, mouseY)) {
                     MagicStoneLearning.Result state = MagicStoneLearning.check(data, entry);
                     // 消耗要按玩家自己的上限算（随上限等比放大），不然提示和实际扣费对不上
