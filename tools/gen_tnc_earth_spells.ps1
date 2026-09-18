@@ -43,8 +43,19 @@ function Mud-Spell($name, $tier, $range, $coef, $seconds, $cooldown) {
   },
   "release": {
     "target": {
-      "type": "AREA",
-      "area": { "include_caster": false, "distance_dropoff": "SQUARED" }
+      "type": "CLOUD",
+      "cloud": {
+        "volume": {
+          "radius": $range,
+          "area": { "distance_dropoff": "SQUARED" }
+        },
+        "time_to_live_seconds": 12.0,
+        "impact_tick_interval": 20,
+        "delay_ticks": 5,
+        "presence_sound": { "id": "block.mud.ambient", "volume": 0.3 },
+        "client_data": { "particles": [ $dustFx ] },
+        "spawn": { "particles": [ $dustFx ], "sound": { "id": "block.mud.place", "volume": 1.0 } }
+      }
     },
     "animation": "spell_engine:one_handed_area_release",
     "sound": { "id": "block.mud.place", "volume": 1.0 }
