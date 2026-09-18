@@ -86,7 +86,7 @@ public class MagicStoneScreen extends Screen {
         }
         // 元素切换：每个"有法术的元素"一个按钮（目前是雷 / 火）。
         // 加新元素时这里不用动 —— 遍历 Element.values() 自动多一个。
-        int tabX = left() + 12;
+        int tabX = left() + LIST_X;   // 元素按钮从法术区左边界开始 —— 不再伸到左下框里
         for (Element element : Element.values()) {
             if (SpellCatalog.chainsOf(element).isEmpty()) {
                 continue;
@@ -192,18 +192,8 @@ public class MagicStoneScreen extends Screen {
         graphics.fill(left + LIST_X - 8, top + 58, left + LIST_X - 7, top + PANEL_H - 8, 0x40FFFFFF);
 
         // 左列：元素亲和度 —— 用户画的水晶贴图 + 42 个亲和力点（点位由用户标注，见 AffinityWidget）
-        // 原来的"亲和 X 进度 Y 上限 Z"文字行已按用户要求删除 ✗
-        AffinityWidget.render(graphics, left + 12, top + 60, data::getAffinity);
-        graphics.drawString(this.font, "元素亲和", left + 12, top + 100, COLOR_TITLE, false);
-        // 每个元素一行极短状态：亲和点数（小字，够用且不抢水晶的视觉）
-        int y = top + 112;
-        StringBuilder affLine = new StringBuilder();
-        for (Element element : Element.values()) {
-            affLine.append(element.cn()).append(data.getAffinity(element)).append(' ');
-        }
-        graphics.drawString(this.font, affLine.toString().trim(), left + 12, y, COLOR_DIM, false);
-        graphics.drawString(this.font, "已学 " + data.getLearned().size() + " 个法术",
-                left + 12, y + 14, COLOR_DIM, false);
+        // 用户要求：等比例放大到占满左下框约 80%，且**不要任何文字** ✗
+        AffinityWidget.render(graphics, left + 16, top + 62, 4, data::getAffinity);
 
         // 法术目录：**每条链一列**（雷系现在有主链/雷球/雷速三条，15 个法术挤一列会跑出面板）
         // 每行的按钮在 init() 里创建（名字就是按钮的标签），这里只画表头和悬停提示。

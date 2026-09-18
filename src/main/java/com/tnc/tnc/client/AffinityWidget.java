@@ -64,8 +64,20 @@ public final class AffinityWidget {
      * @param affinityOf 取某个元素当前亲和力的函数（0~6）
      */
     public static void render(GuiGraphics graphics, int x, int y, java.util.function.ToIntFunction<Element> affinityOf) {
+        render(graphics, x, y, 1, affinityOf);
+    }
+
+    /**
+     * 按缩放倍率画（用户要求"等比例放大，占满左下框 80%"）。
+     *
+     * <p>贴图整体放大 {@code scale} 倍，42 个点位的坐标也**同步乘以 scale** ——
+     * 所以点位表不用改，放大缩小都自动对齐 ✓
+     */
+    public static void render(GuiGraphics graphics, int x, int y, int scale,
+                              java.util.function.ToIntFunction<Element> affinityOf) {
+        int s = Math.max(1, scale);
         // 先把整张底图画上去（水晶 + 用户画好的 6 点彩色阶）
-        graphics.blit(TEXTURE, x, y, 0.0F, 0.0F, TEX_W, TEX_H, TEX_W, TEX_H);
+        graphics.blit(TEXTURE, x, y, TEX_W * s, TEX_H * s, 0.0F, 0.0F, TEX_W, TEX_H, TEX_W, TEX_H);
 
         // 再把"没点亮的点"压暗。逐点画 1x1，坐标严格照用户标注的表
         for (Element element : Element.values()) {
@@ -80,7 +92,7 @@ public final class AffinityWidget {
                 }
                 int px = pips[i * 2];
                 int py = pips[i * 2 + 1];
-                graphics.fill(x + px, y + py, x + px + 1, y + py + 1, dimColor(element, i));
+                graphics.fill(x + px * s, y + py * s, x + px * s + s, y + py * s + s, dimColor(element, i));
             }
         }
     }
