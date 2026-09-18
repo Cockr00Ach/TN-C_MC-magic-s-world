@@ -109,6 +109,17 @@ public class MagicStoneCommand {
                                                                 StringArgumentType.getString(ctx, "element"),
                                                                 StringArgumentType.getString(ctx, "chain"),
                                                                 IntegerArgumentType.getInteger(ctx, "tier"))))))))
+                .then(Commands.literal("special")
+                        .then(Commands.literal("grant")
+                                .then(Commands.argument("element", StringArgumentType.word())
+                                        .executes(ctx -> specialSet(ctx,
+                                                StringArgumentType.getString(ctx, "element"), true))))
+                        .then(Commands.literal("revoke")
+                                .then(Commands.argument("element", StringArgumentType.word())
+                                        .executes(ctx -> specialSet(ctx,
+                                                StringArgumentType.getString(ctx, "element"), false))))
+                        .then(Commands.literal("list")
+                                .executes(MagicStoneCommand::specialList)))
                 .then(Commands.literal("spells")
                         .executes(MagicStoneCommand::spells))
                 .then(Commands.literal("learn")
@@ -244,6 +255,51 @@ public class MagicStoneCommand {
     }
 
     /** 列出法术目录和每个法术当前的状态（可解锁 / 已学 / 差什么）。 */
+    /** /tnc special grant|revoke <元素> —— 领域魔法（§12.F）：获得路线即获得，不能升级。 */
+    private static int specialSet(CommandContext<CommandSourceStack> ctx, String elementId, boolean grant)
+            throws CommandSyntaxException {
+        Element element = elementById(elementId);
+        if (element == null) {
+            ctx.getSource().sendFailure(Component.literal("没有这个元素：" + elementId));
+            return 0;
+        }
+        SpellCatalog.Special special = SpellCatalog.specialOf(element);
+        String name = special != null ? special.name() : element.cn() + "领域";
+        return mutate(ctx, (player, data) -> {
+            boolean changed = grant ? data.grantSpecial(element) : data.revokeSpecial(element);
+            String verb = grant ? "获得" : "撤销";
+            return (changed ? "已" + verb : "本来就" + (grant ? "没有" : "没有")) + "：" + name + "（" + element.cn() + " · 领域魔法）";
+        });
+    }
+
+    /** /tnc special list */
+    private static int specialList(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        MagicStoneData data = require(player, ctx);
+        if (data == null) {
+            return 0;
+        }
+        StringBuilder sb = new StringBuilder("§b=== TN-C 领域魔法 ===§r  ");
+        for (SpellCatalog.Special special : SpellCatalog.specials()) {
+            boolean has = data.hasSpecial(special.element());
+            sb.append(has ? "§a" : "§8").append(special.name())
+              .append("§7(").append(special.element().cn()).append(")§r  ");
+        }
+        final String line = sb.toString();
+        ctx.getSource().sendSuccess(() -> Component.literal(line), false);
+        return 1;
+    }
+
+    /** 按 id 找元素（命令参数用）。 */
+    private static Element elementById(String id) {
+        for (Element element : Element.values()) {
+            if (element.id().equalsIgnoreCase(id) || element.name().equalsIgnoreCase(id) || element.cn().equals(id)) {
+                return element;
+            }
+        }
+        return null;
+    }
+
     private static int spells(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         MagicStoneData data = require(player, ctx);
