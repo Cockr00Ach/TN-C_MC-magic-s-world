@@ -170,7 +170,13 @@ public class MagicStoneScreen extends Screen {
         int top = top();
         int panelW = panelWidth();
 
-        graphics.fill(left - 2, top - 2, left + panelW + 2, top + PANEL_H + 2, COLOR_BORDER);
+        // 面板外框：模仿法术按钮那种"多层金框"（按钮是整合包资源包给的斜面风格）
+        // 由外到内四层：深棕 -> 亮金 -> 中金 -> 面板底色，看起来和按钮是一套的 ✓
+        int bx0 = left - 4, by0 = top - 4, bx1 = left + panelW + 4, by1 = top + PANEL_H + 4;
+        graphics.fill(bx0, by0, bx1, by1, 0xFF2A1B0E);                 // 最外层深棕描边
+        graphics.fill(bx0 + 1, by0 + 1, bx1 - 1, by1 - 1, 0xFFF2D48A); // 亮金高光
+        graphics.fill(bx0 + 2, by0 + 2, bx1 - 2, by1 - 2, 0xFFB98A46); // 中金
+        graphics.fill(bx0 + 3, by0 + 3, bx1 - 3, by1 - 3, 0xFF6E4A22); // 内层暗金
         graphics.fill(left, top, left + panelW, top + PANEL_H, COLOR_PANEL);
         graphics.drawCenteredString(this.font, this.title, left + panelW / 2, top + 8, COLOR_TITLE);
 
@@ -188,8 +194,8 @@ public class MagicStoneScreen extends Screen {
                         + "（总 " + data.getPointsTotal(Config.pointThresholds)
                         + " · 已投 " + data.getPointsSpent() + "）",
                 left + 12, top + 41, COLOR_TEXT, false);
-        graphics.fill(left + 8, top + 54, left + panelWidth() - 8, top + 55, 0x40E0C39A);
-        graphics.fill(left + LIST_X - 8, top + 58, left + LIST_X - 7, top + PANEL_H - 8, 0x40E0C39A);
+        graphics.fill(left + 8, top + 54, left + panelWidth() - 8, top + 55, 0x50C9A063);
+        graphics.fill(left + LIST_X - 8, top + 58, left + LIST_X - 7, top + PANEL_H - 8, 0x50C9A063);
 
         // 左列：元素亲和度 —— 用户画的水晶贴图 + 42 个亲和力点（点位由用户标注，见 AffinityWidget）
         // 用户要求：等比例放大到占满左下框约 80%，且**不要任何文字** ✗
