@@ -107,7 +107,15 @@ public final class TnSpellMechanics {
         if (has(player, TNEffects.LIGHTNING_WIND)) {
             windTrail(player, time);
         }
-        if (has(player, TNEffects.LIGHTNING_ASCENSION) && time % ASCENSION_CLEAR_INTERVAL == 0) {
+        // 无冷却：雷系"闪电登神"与风系"风神降临"都给 —— 两者都是神级，
+        // 文档/用户都写着"技能无冷却"。
+        // ⚠️ 临时用 wind_speed_iii 当标记：它是 4 级"超级风速"和 5 级"风神降临"
+        //    共用的速度效果，所以**4 级也会吃到无冷却**（比设计宽了一点 ✗）。
+        //    下一轮给"风神降临"单独加一个标记效果，然后换成判断它。
+        boolean windGod = TNWindMechanics.WIND_SPEED_III.isPresent()
+                && player.hasEffect(TNWindMechanics.WIND_SPEED_III.get());
+        boolean noCooldown = has(player, TNEffects.LIGHTNING_ASCENSION) || windGod;
+        if (noCooldown && time % ASCENSION_CLEAR_INTERVAL == 0) {
             clearOurCooldowns(player);
         }
     }
