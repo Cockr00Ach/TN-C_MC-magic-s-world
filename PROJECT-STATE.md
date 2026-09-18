@@ -1981,3 +1981,84 @@ git config core.hooksPath tools/git-hooks
 > `git add -A` 之后扫一眼 `git status` 的文件数。
 
 
+
+---
+
+# 六、引擎能力补充（2026-09-18 铺六系时挖到的）
+
+> 这一节是"查一次省十次"的发现，写代码前先看这里，别重复挖。
+
+## 6.1 三种法术模板（铺骨架时反复用到）
+
+| 模板 | 结构 | 用在哪 | 特点 |
+|---|---|---|---|
+| **投射物** | `release.target.type=PROJECTILE` + `launch_properties` + `projectile.client_data` + 顶层 `area_impact` | 火球/水球/土弹/暗夜之手/火射线/风刃 | 飞出去 + 命中爆炸 |
+| **持续场** | `release.target.type=CLOUD` + `cloud.volume.radius` + `time_to_live_seconds` + **`impact_tick_interval`** | 土泥/黑雾/雨滴/土动 | **留在场上，每 N tick 重新施加 impact** |
+| **自身增益** | `release.target.type=SELF` + `impact[].action.type=STATUS_EFFECT` | 燃烧/风速/以伤换伤/土环/风球 | 纯 buff，零 Java |
+
+**判据**：文档里写"持续 / 在其中 / 区域内"→ 用 **CLOUD** ✗ 别用 AREA（AREA 只打一发 ✗）。
+
+## 6.2 `CLOUD` 的字段（javap：`Spell$Release$Target$Cloud`）
+
+```java
+String entity_type_id;              // 可选，用实体承载
+AreaImpact volume;                  // ★ 半径在这里（volume.radius + extra_radius）
+float time_to_live_seconds;         // 存在多久
+int impact_tick_interval;           // ★ 每 N tick 重新施加 impact 列表
+int delay_ticks;                    // 生成延迟
+EntityPlacement placement;          // 放哪
+Sound presence_sound;               // 存在时的循环音
+ClientData client_data;             // { light_level, particles[], model }
+Spawn spawn;                        // { sound, particles[] }（生成瞬间）
+```
+
+真实样例：`archers` 的 `entangling_roots.json`（radius 3.5 + interval 15 + 状态效果）。
+
+## 6.3 `AREA` 目标：半径是**顶层 `range`**
+
+`Spell$Release$Target$Area` 里**没有 radius** —— 半径读的是法术顶层的 `range` ✓
+（对照 `elemental_wizards_rpg` 的 `aqua_springwater`：`range: 6` + `type: AREA`）。
+
+## 6.4 `BEAM` 没被采用（但字段已知）
+
+`Spell$Release$Target$Beam`：`texture_id`（要自带光束贴图！）、`color_rgba`、`width`、`flow`、
+`block_hit_particles[]`。当时因为"要自备贴图 + 穿透语义没验证"改用了穿透投射物；
+以后要做真光束可以回来用。
+
+## 6.5 投射物模型的朝向：**"射线像火球"的真正原因**
+
+`Spell$ProjectileModel`：`model_id` / `scale` / `light_emission` / `rotate_degrees_per_tick` /
+`rotate_degrees_offset` / `use_held_item` / **`orientation`**。
+
+`Orientation` 三个值：`TOWARDS_CAMERA`、`TOWARDS_MOTION`、`ALONG_MOTION`。
+
+**细长模型（射线/长矛）必须指定 orientation** ✗ 否则长轴不对齐弹道 → 横着糊成一坨 →
+看起来"像火球" ✗。真实样例（`spellbladenext` 的 `rebuke` 长矛）用 `TOWARDS_MOTION` ✓。
+
+## 6.6 原版效果优先（省掉一堆自定义效果类）
+
+实测可用的原版效果：`absorption`（护盾）、`resistance`（减伤）、`regeneration`（回血）、
+`blindness`（致盲）、`slowness`（减速）、`speed`（加速）、`strength`（增伤）、`wither`（自伤）、
+`hunger`、`fire_resistance`、`night_vision`、`glowing`、`levitation`、`weakness`。
+
+**只有"精确数值的自定义增益"才必须写效果类** ✓（例如风 +300% 速度、火 +200% 火伤，
+原版效果都是固定 20%/级，拿不到这些值）。
+
+## 6.7 学派名对照（写错就静默不生效 ✗）
+
+| 我们的元素 | 引擎 school | 属性 |
+|---|---|---|
+| 雷 | `LIGHTNING` | `spell_power:lightning` |
+| 火 | `FIRE` | `spell_power:fire` |
+| **风** | **`AIR`**（不是 WIND ✗）| `spell_power:air` |
+| 水 | `WATER` | `spell_power:water` |
+| 土 | `EARTH` | `spell_power:earth` |
+| 光 | `HEALING` | `spell_power:healing` |
+| **暗** | **`SOUL`**（不是 DARK ✗）| `spell_power:soul` |
+
+## 6.8 音效 id（写错就是静音 ✗）
+
+引擎自带一套 `spell_engine:generic_<school>_casting` / `_release`，
+但 **风系只有 `generic_wind_charging`**（没有 casting/release ✗）。
+其余可直接用原版音效（`entity.wither.shoot`、`entity.general.splash`、
+`block.stone.break`、`weather.rain.above` 等）。
