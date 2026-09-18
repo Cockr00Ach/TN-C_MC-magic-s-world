@@ -21,7 +21,9 @@ public final class MagicStoneLearning {
         ALREADY_LEARNED,
         AFFINITY_TOO_LOW,
         OUT_OF_ORDER,
-        NOT_ENOUGH_POINTS
+        NOT_ENOUGH_POINTS,
+        /** 目录里有这个法术，但引擎还没实装（缺 JSON）——不能解锁，否则白花点数 ✗ */
+        NOT_IMPLEMENTED
     }
 
     private MagicStoneLearning() {
@@ -31,6 +33,12 @@ public final class MagicStoneLearning {
     public static Result check(MagicStoneData data, SpellCatalog.Entry entry) {
         if (data.hasLearned(entry.id())) {
             return Result.ALREADY_LEARNED;
+        }
+        // ⚠️ 防呆闸门：引擎里没有这个法术就一律不给学。
+        // 目录允许先铺骨架（名字照文档），但"学得到却放不出"会让玩家白花点数 ✗、
+        // 法杖还多一个空槽 ✗（用户实测到过）。所以这里先问引擎。
+        if (!com.tnc.tnc.magic.compat.SpellEngineBridge.hasSpell(entry.id())) {
+            return Result.NOT_IMPLEMENTED;
         }
         if (entry.tier() > data.maxTierFor(entry.element())) {
             return Result.AFFINITY_TOO_LOW;

@@ -20,7 +20,7 @@
           "perks": { "pierce": 2 },
           "client_data": {
             "travel_particles": [ { "particle_id": "flame", "shape": "CIRCLE", "rotation": "LOOK", "origin": "CENTER", "count": 4.0, "min_speed": 0.0, "max_speed": 0.1 } ],
-            "model": { "model_id": "tnc:projectile/fire_ray", "scale": 0.8 }
+            "model": { "model_id": "tnc:projectile/fire_ray", "orientation": "TOWARDS_MOTION", "scale": 0.8 }
           }
         }
       }
