@@ -137,8 +137,19 @@ function Fog-Spell($name, $tier, $range, $coef, $slowSec, $blindSec, $cooldown, 
   },
   "release": {
     "target": {
-      "type": "AREA",
-      "area": { "include_caster": false, "distance_dropoff": "SQUARED" }
+      "type": "CLOUD",
+      "cloud": {
+        "volume": {
+          "radius": $range,
+          "area": { "distance_dropoff": "SQUARED" }
+        },
+        "time_to_live_seconds": 15.0,
+        "impact_tick_interval": 20,
+        "delay_ticks": 5,
+        "presence_sound": { "id": "entity.wither.ambient", "volume": 0.25 },
+        "client_data": { "particles": [ $smokeFx ] },
+        "spawn": { "particles": [ $smokeFx ], "sound": { "id": "entity.wither.ambient", "volume": 1.0 } }
+      }
     },
     "animation": "spell_engine:one_handed_area_release",
     "sound": { "id": "entity.wither.ambient", "volume": 1.0 }
