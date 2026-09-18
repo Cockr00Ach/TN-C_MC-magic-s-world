@@ -294,6 +294,29 @@ public final class MagicStoneSelfTest {
                             + (applied ? "" : "（false = 注入没成功，硬拦截失效）")));
         }
 
+
+        // 4b. 领域魔法（§12.F）：七个元素各一条，且 NBT 往返不丢
+        boolean specialsOk = SpellCatalog.specials().size() == Element.values().length;
+        StringBuilder specialNames = new StringBuilder();
+        for (SpellCatalog.Special special : SpellCatalog.specials()) {
+            specialNames.append(special.element().cn()).append(' ');
+        }
+        checks.add(new Check("special magic: one domain per element",
+                specialsOk, "count=" + SpellCatalog.specials().size()
+                        + " elements=" + Element.values().length
+                        + " [" + specialNames.toString().trim() + "]"));
+
+        MagicStoneData specialData = new MagicStoneData();
+        specialData.grantSpecial(Element.LIGHTNING);
+        specialData.grantSpecial(Element.DARK);
+        MagicStoneData reloaded = new MagicStoneData();
+        reloaded.deserializeNBT(specialData.serializeNBT());
+        boolean specialNbtOk = reloaded.hasSpecial(Element.LIGHTNING)
+                && reloaded.hasSpecial(Element.DARK)
+                && !reloaded.hasSpecial(Element.FIRE)
+                && reloaded.specialElements().size() == 2;
+        checks.add(new Check("special magic survives NBT round-trip",
+                specialNbtOk, "granted=2 reloaded=" + reloaded.specialElements().size()));
         return checks;
     }
 
