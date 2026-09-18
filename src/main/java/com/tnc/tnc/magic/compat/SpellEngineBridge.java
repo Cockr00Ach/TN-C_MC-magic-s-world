@@ -146,9 +146,23 @@ public final class SpellEngineBridge {
         return Impl.ensureWand(player, learned);
     }
 
+    /**
+     * 引擎认识这个法术吗？（防呆闸门用）
+     *
+     * <p>目录里可以存在"还没写 JSON 的骨架"法术，但那种法术**学得到却放不出** ✗，
+     * 法杖里还会多一个空槽 ✗（用户实测遇到过）。所以学之前先问这一句。
+     *
+     * <p>没装引擎时返回 {@code true}（dev 环境不该因为缺引擎就什么都学不了）。
+     */
+    public static boolean hasSpell(ResourceLocation spellId) {
+        if (!enginePresent()) {
+            return true;
+        }
+        return Impl.hasSpell(spellId);
+    }
+
     /** 给玩家看的一句话说明。 */
-    public static String describeWand(WandResult result, int learnedCount) {
-        return switch (result) {
+    public static String describeWand(WandResult result, int learnedCount) {        return switch (result) {
             case NOTHING_LEARNED -> "还没解锁任何法术，先不用拿法杖";
             case ALREADY_COMPLETE -> "法杖已经是最新的（" + learnedCount + " 个已解锁法术都在里面）";
             case UPDATED -> "法杖内容已同步（" + learnedCount + " 个已解锁法术）";
@@ -237,6 +251,15 @@ public final class SpellEngineBridge {
                 ids.add(entry.id().toString());
             }
             return ids;
+        }
+
+        /** 引擎的法术注册表里有没有这个 id（null = 没有）。 */
+        static boolean hasSpell(ResourceLocation spellId) {
+            try {
+                return net.spell_engine.internals.SpellRegistry.getSpell(spellId) != null;
+            } catch (Throwable t) {
+                return true;                     // 出错时放行，别把玩家卡死
+            }
         }
 
         /** 只在这个物品上写 container。 */
