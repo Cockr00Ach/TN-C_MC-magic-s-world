@@ -197,7 +197,10 @@ try {
                         'tnc:inferno_burn', 'tnc:total_burn',
                         # wind (registered in TNWindMechanics)
                         'tnc:wind_flight', 'tnc:wind_speed_i', 'tnc:wind_speed_ii',
-                        'tnc:wind_speed_iii', 'tnc:wind_power_i', 'tnc:wind_power_ii')
+                        'tnc:wind_speed_iii', 'tnc:wind_power_i', 'tnc:wind_power_ii',
+                        'tnc:wind_god',            # 风神降临 5 级专属标记
+                        'tnc:gale_slow', 'tnc:gale_haste',
+                        'tnc:wind_orb_three', 'tnc:wind_orb_five', 'tnc:wind_spirit')
         $badShape = @()
         $badTier = @()
         $badEffect = @()
