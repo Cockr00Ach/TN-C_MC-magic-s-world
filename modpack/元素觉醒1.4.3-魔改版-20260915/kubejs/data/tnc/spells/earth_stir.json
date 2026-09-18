@@ -1,0 +1,53 @@
+{
+  "school": "EARTH",
+  "group": "earth_move",
+  "range": 16.0,
+  "learn": { "tier": 1 },
+  "cast": {
+    "duration": 0.7,
+    "animation": "spell_engine:one_handed_area_charge",
+    "sound": { "id": "spell_engine:generic_arcane_casting", "randomness": 0 },
+    "particles": [ { "particle_id": "crit", "shape": "CIRCLE", "origin": "FEET", "count": 12.0, "min_speed": 0.1, "max_speed": 0.4 } ]
+  },
+  "release": {
+    "target": {
+      "type": "CLOUD",
+      "cloud": {
+        "volume": {
+          "radius": 4,
+          "area": { "distance_dropoff": "SQUARED" }
+        },
+        "time_to_live_seconds": 8,
+        "impact_tick_interval": 20,
+        "delay_ticks": 4,
+        "presence_sound": { "id": "block.stone.step", "volume": 0.3 },
+        "client_data": { "particles": [ { "particle_id": "crit", "shape": "SPHERE", "origin": "CENTER", "count": 20.0, "min_speed": 0.2, "max_speed": 0.9 } ] },
+        "spawn": { "particles": [ { "particle_id": "crit", "shape": "SPHERE", "origin": "CENTER", "count": 20.0, "min_speed": 0.2, "max_speed": 0.9 } ], "sound": { "id": "block.stone.break", "volume": 1.0 } }
+      }
+    },
+    "animation": "spell_engine:one_handed_area_release",
+    "sound": { "id": "block.stone.break", "volume": 1.0 }
+  },
+  "impact": [
+    {
+      "action": { "type": "DAMAGE", "damage": { "spell_power_coefficient": 0.7, "knockback": 0.5 } },
+      "particles": [ { "particle_id": "crit", "shape": "SPHERE", "origin": "CENTER", "count": 20.0, "min_speed": 0.2, "max_speed": 0.9 } ],
+      "sound": { "id": "block.stone.break", "volume": 0.7 }
+    },
+    {
+      "action": {
+        "type": "STATUS_EFFECT",
+        "apply_to_caster": false,
+        "status_effect": {
+          "effect_id": "minecraft:slowness",
+          "duration": 3,
+          "amplifier": 0,
+          "apply_mode": "SET",
+          "show_particles": true
+        }
+      },
+      "particles": [ { "particle_id": "crit", "shape": "CIRCLE", "origin": "FEET", "count": 12.0, "min_speed": 0.1, "max_speed": 0.4 } ]
+    }
+  ],
+  "cost": { "exhaust": 0.0, "cooldown_duration": 3 }
+}
