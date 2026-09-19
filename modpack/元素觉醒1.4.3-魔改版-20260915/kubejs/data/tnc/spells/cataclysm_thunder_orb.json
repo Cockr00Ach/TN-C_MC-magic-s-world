@@ -23,7 +23,7 @@
         "projectile": {
           "client_data": {
             "travel_particles": [ { "particle_id": "spell_engine:electric_arc_a", "shape": "CIRCLE", "rotation": "LOOK", "origin": "CENTER", "count": 4.0, "min_speed": 0.0, "max_speed": 0.15 } ],
-            "model": { "model_id": "tnc:projectile/thunder_orb", "scale": 2.6 }
+            "model": { "model_id": "tnc:projectile/thunder_ball", "scale": 3.0 }
           }
         }
       }
@@ -42,7 +42,7 @@
     "radius": 6,
     "extra_radius": { "power_coefficient": 0.5 },
     "area": { "distance_dropoff": "SQUARED" },
-    "particles": [ { "particle_id": "spell_engine:electric_arc_b", "shape": "SPHERE", "origin": "CENTER", ${1}120, "min_speed": 0.2, ${1}1.2 } ],
+    "particles": [ { "particle_id": "spell_engine:electric_arc_b", "shape": "SPHERE", "origin": "CENTER", 120.0, "min_speed": 0.2, 1.2 } ],
     "sound": { "id": "entity.lightning_bolt.thunder", "volume": 1.5 }
   },
   "cost": { "exhaust": 0.0, "cooldown_duration": 12.0 }
