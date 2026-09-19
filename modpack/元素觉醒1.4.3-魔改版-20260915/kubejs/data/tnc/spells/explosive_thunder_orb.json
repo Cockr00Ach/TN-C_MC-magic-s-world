@@ -33,7 +33,7 @@
     }
   ],
   "area_impact": {
-    "radius": 5,
+    "radius": 10,
     "area": { "distance_dropoff": "SQUARED" },
     "particles": [ { "particle_id": "spell_engine:electric_arc_b", "shape": "SPHERE", "origin": "CENTER", "count": 120.0, "min_speed": 0.2, "max_speed": 1.2 } ],
     "sound": { "id": "entity.lightning_bolt.thunder", "volume": 0.8 }
