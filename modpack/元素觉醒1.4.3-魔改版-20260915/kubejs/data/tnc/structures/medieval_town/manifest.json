@@ -1,21 +1,38 @@
 {
-  "source": "medieval-town-intermediate.schem",
+  "source_world": "Medieval Town",
+  "source_data_version": 3105,
+  "source_bounds": {
+    "x": [
+      -820,
+      -540
+    ],
+    "y": [
+      32,
+      191
+    ],
+    "z": [
+      32,
+      368
+    ]
+  },
   "dimensions": [
     281,
-    136,
-    241
+    160,
+    337
   ],
   "piece_size": 48,
-  "non_air_blocks": 35325,
+  "non_air_blocks": 4654379,
+  "block_entities": 2194,
   "pieces": [
     {
-      "file": "piece_0_0_2.nbt",
+      "name": "piece_0_0_0",
       "offset": [
         0,
         0,
-        96
+        0
       ],
-      "blocks": 227,
+      "blocks": 100054,
+      "block_entities": 0,
       "size": [
         48,
         48,
@@ -23,13 +40,44 @@
       ]
     },
     {
-      "file": "piece_0_0_3.nbt",
+      "name": "piece_0_0_1",
+      "offset": [
+        0,
+        0,
+        48
+      ],
+      "blocks": 105659,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_0_0_2",
+      "offset": [
+        0,
+        0,
+        96
+      ],
+      "blocks": 109904,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_0_0_3",
       "offset": [
         0,
         0,
         144
       ],
-      "blocks": 5,
+      "blocks": 110582,
+      "block_entities": 0,
       "size": [
         48,
         48,
@@ -37,13 +85,194 @@
       ]
     },
     {
-      "file": "piece_1_0_0.nbt",
+      "name": "piece_0_0_4",
+      "offset": [
+        0,
+        0,
+        192
+      ],
+      "blocks": 103847,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_0_0_5",
+      "offset": [
+        0,
+        0,
+        240
+      ],
+      "blocks": 89974,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_0_0_6",
+      "offset": [
+        0,
+        0,
+        288
+      ],
+      "blocks": 75904,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_0_0_7",
+      "offset": [
+        0,
+        0,
+        336
+      ],
+      "blocks": 1195,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        1
+      ]
+    },
+    {
+      "name": "piece_0_1_0",
+      "offset": [
+        0,
+        48,
+        0
+      ],
+      "blocks": 11794,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_0_1_1",
+      "offset": [
+        0,
+        48,
+        48
+      ],
+      "blocks": 39140,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_0_1_2",
+      "offset": [
+        0,
+        48,
+        96
+      ],
+      "blocks": 27069,
+      "block_entities": 150,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_0_1_3",
+      "offset": [
+        0,
+        48,
+        144
+      ],
+      "blocks": 16539,
+      "block_entities": 122,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_0_1_4",
+      "offset": [
+        0,
+        48,
+        192
+      ],
+      "blocks": 2230,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_0_1_5",
+      "offset": [
+        0,
+        48,
+        240
+      ],
+      "blocks": 49,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_0_1_6",
+      "offset": [
+        0,
+        48,
+        288
+      ],
+      "blocks": 263,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_0_2_2",
+      "offset": [
+        0,
+        96,
+        96
+      ],
+      "blocks": 20,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_1_0_0",
       "offset": [
         48,
         0,
         0
       ],
-      "blocks": 515,
+      "blocks": 106785,
+      "block_entities": 0,
       "size": [
         48,
         48,
@@ -51,13 +280,14 @@
       ]
     },
     {
-      "file": "piece_1_0_1.nbt",
+      "name": "piece_1_0_1",
       "offset": [
         48,
         0,
         48
       ],
-      "blocks": 63,
+      "blocks": 106847,
+      "block_entities": 0,
       "size": [
         48,
         48,
@@ -65,13 +295,44 @@
       ]
     },
     {
-      "file": "piece_1_0_4.nbt",
+      "name": "piece_1_0_2",
+      "offset": [
+        48,
+        0,
+        96
+      ],
+      "blocks": 109532,
+      "block_entities": 7,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_1_0_3",
+      "offset": [
+        48,
+        0,
+        144
+      ],
+      "blocks": 107630,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_1_0_4",
       "offset": [
         48,
         0,
         192
       ],
-      "blocks": 138,
+      "blocks": 103231,
+      "block_entities": 11,
       "size": [
         48,
         48,
@@ -79,13 +340,194 @@
       ]
     },
     {
-      "file": "piece_2_0_0.nbt",
+      "name": "piece_1_0_5",
+      "offset": [
+        48,
+        0,
+        240
+      ],
+      "blocks": 95036,
+      "block_entities": 27,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_1_0_6",
+      "offset": [
+        48,
+        0,
+        288
+      ],
+      "blocks": 88163,
+      "block_entities": 9,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_1_0_7",
+      "offset": [
+        48,
+        0,
+        336
+      ],
+      "blocks": 1775,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        1
+      ]
+    },
+    {
+      "name": "piece_1_1_0",
+      "offset": [
+        48,
+        48,
+        0
+      ],
+      "blocks": 41922,
+      "block_entities": 2,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_1_1_1",
+      "offset": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 59715,
+      "block_entities": 4,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_1_1_2",
+      "offset": [
+        48,
+        48,
+        96
+      ],
+      "blocks": 21725,
+      "block_entities": 97,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_1_1_3",
+      "offset": [
+        48,
+        48,
+        144
+      ],
+      "blocks": 9724,
+      "block_entities": 100,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_1_1_4",
+      "offset": [
+        48,
+        48,
+        192
+      ],
+      "blocks": 8709,
+      "block_entities": 135,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_1_1_5",
+      "offset": [
+        48,
+        48,
+        240
+      ],
+      "blocks": 2877,
+      "block_entities": 29,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_1_1_6",
+      "offset": [
+        48,
+        48,
+        288
+      ],
+      "blocks": 888,
+      "block_entities": 13,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_1_2_0",
+      "offset": [
+        48,
+        96,
+        0
+      ],
+      "blocks": 251,
+      "block_entities": 4,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_1_2_4",
+      "offset": [
+        48,
+        96,
+        192
+      ],
+      "blocks": 16,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_2_0_0",
       "offset": [
         96,
         0,
         0
       ],
-      "blocks": 5545,
+      "blocks": 101480,
+      "block_entities": 0,
       "size": [
         48,
         48,
@@ -93,13 +535,14 @@
       ]
     },
     {
-      "file": "piece_2_0_1.nbt",
+      "name": "piece_2_0_1",
       "offset": [
         96,
         0,
         48
       ],
-      "blocks": 473,
+      "blocks": 105288,
+      "block_entities": 0,
       "size": [
         48,
         48,
@@ -107,13 +550,44 @@
       ]
     },
     {
-      "file": "piece_2_0_4.nbt",
+      "name": "piece_2_0_2",
+      "offset": [
+        96,
+        0,
+        96
+      ],
+      "blocks": 92277,
+      "block_entities": 103,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_2_0_3",
+      "offset": [
+        96,
+        0,
+        144
+      ],
+      "blocks": 84556,
+      "block_entities": 68,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_2_0_4",
       "offset": [
         96,
         0,
         192
       ],
-      "blocks": 205,
+      "blocks": 73298,
+      "block_entities": 217,
       "size": [
         48,
         48,
@@ -121,13 +595,59 @@
       ]
     },
     {
-      "file": "piece_3_0_0.nbt",
+      "name": "piece_2_0_5",
       "offset": [
-        144,
+        96,
         0,
+        240
+      ],
+      "blocks": 81899,
+      "block_entities": 56,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_2_0_6",
+      "offset": [
+        96,
+        0,
+        288
+      ],
+      "blocks": 79119,
+      "block_entities": 7,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_2_0_7",
+      "offset": [
+        96,
+        0,
+        336
+      ],
+      "blocks": 1666,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        1
+      ]
+    },
+    {
+      "name": "piece_2_1_0",
+      "offset": [
+        96,
+        48,
         0
       ],
-      "blocks": 6,
+      "blocks": 54953,
+      "block_entities": 77,
       "size": [
         48,
         48,
@@ -135,13 +655,14 @@
       ]
     },
     {
-      "file": "piece_3_0_1.nbt",
+      "name": "piece_2_1_1",
       "offset": [
-        144,
-        0,
+        96,
+        48,
         48
       ],
-      "blocks": 1076,
+      "blocks": 64040,
+      "block_entities": 0,
       "size": [
         48,
         48,
@@ -149,27 +670,14 @@
       ]
     },
     {
-      "file": "piece_4_0_0.nbt",
+      "name": "piece_2_1_2",
       "offset": [
-        192,
-        0,
-        0
-      ],
-      "blocks": 1368,
-      "size": [
+        96,
         48,
-        48,
-        48
-      ]
-    },
-    {
-      "file": "piece_4_0_1.nbt",
-      "offset": [
-        192,
-        0,
-        48
+        96
       ],
       "blocks": 5792,
+      "block_entities": 22,
       "size": [
         48,
         48,
@@ -177,13 +685,359 @@
       ]
     },
     {
-      "file": "piece_4_0_2.nbt",
+      "name": "piece_2_1_3",
+      "offset": [
+        96,
+        48,
+        144
+      ],
+      "blocks": 2962,
+      "block_entities": 59,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_2_1_4",
+      "offset": [
+        96,
+        48,
+        192
+      ],
+      "blocks": 3869,
+      "block_entities": 28,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_2_1_5",
+      "offset": [
+        96,
+        48,
+        240
+      ],
+      "blocks": 1160,
+      "block_entities": 23,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_2_2_0",
+      "offset": [
+        96,
+        96,
+        0
+      ],
+      "blocks": 3759,
+      "block_entities": 154,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_2_2_1",
+      "offset": [
+        96,
+        96,
+        48
+      ],
+      "blocks": 4,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_2_2_4",
+      "offset": [
+        96,
+        96,
+        192
+      ],
+      "blocks": 51,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_3_0_0",
+      "offset": [
+        144,
+        0,
+        0
+      ],
+      "blocks": 98404,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_3_0_1",
+      "offset": [
+        144,
+        0,
+        48
+      ],
+      "blocks": 103420,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_3_0_2",
+      "offset": [
+        144,
+        0,
+        96
+      ],
+      "blocks": 86576,
+      "block_entities": 92,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_3_0_3",
+      "offset": [
+        144,
+        0,
+        144
+      ],
+      "blocks": 77995,
+      "block_entities": 64,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_3_0_4",
+      "offset": [
+        144,
+        0,
+        192
+      ],
+      "blocks": 72116,
+      "block_entities": 3,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_3_0_5",
+      "offset": [
+        144,
+        0,
+        240
+      ],
+      "blocks": 71404,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_3_0_6",
+      "offset": [
+        144,
+        0,
+        288
+      ],
+      "blocks": 71493,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_3_0_7",
+      "offset": [
+        144,
+        0,
+        336
+      ],
+      "blocks": 1478,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        1
+      ]
+    },
+    {
+      "name": "piece_3_1_0",
+      "offset": [
+        144,
+        48,
+        0
+      ],
+      "blocks": 39969,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_3_1_1",
+      "offset": [
+        144,
+        48,
+        48
+      ],
+      "blocks": 54859,
+      "block_entities": 2,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_3_1_2",
+      "offset": [
+        144,
+        48,
+        96
+      ],
+      "blocks": 9865,
+      "block_entities": 21,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_3_1_3",
+      "offset": [
+        144,
+        48,
+        144
+      ],
+      "blocks": 593,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_3_1_4",
+      "offset": [
+        144,
+        48,
+        192
+      ],
+      "blocks": 569,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_3_1_5",
+      "offset": [
+        144,
+        48,
+        240
+      ],
+      "blocks": 96,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_3_2_1",
+      "offset": [
+        144,
+        96,
+        48
+      ],
+      "blocks": 689,
+      "block_entities": 4,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_4_0_0",
+      "offset": [
+        192,
+        0,
+        0
+      ],
+      "blocks": 107135,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_4_0_1",
+      "offset": [
+        192,
+        0,
+        48
+      ],
+      "blocks": 92066,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_4_0_2",
       "offset": [
         192,
         0,
         96
       ],
-      "blocks": 1905,
+      "blocks": 102423,
+      "block_entities": 0,
       "size": [
         48,
         48,
@@ -191,13 +1045,224 @@
       ]
     },
     {
-      "file": "piece_5_0_0.nbt",
+      "name": "piece_4_0_3",
+      "offset": [
+        192,
+        0,
+        144
+      ],
+      "blocks": 81049,
+      "block_entities": 54,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_4_0_4",
+      "offset": [
+        192,
+        0,
+        192
+      ],
+      "blocks": 75903,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_4_0_5",
+      "offset": [
+        192,
+        0,
+        240
+      ],
+      "blocks": 83849,
+      "block_entities": 2,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_4_0_6",
+      "offset": [
+        192,
+        0,
+        288
+      ],
+      "blocks": 79418,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_4_0_7",
+      "offset": [
+        192,
+        0,
+        336
+      ],
+      "blocks": 1691,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        1
+      ]
+    },
+    {
+      "name": "piece_4_1_0",
+      "offset": [
+        192,
+        48,
+        0
+      ],
+      "blocks": 70715,
+      "block_entities": 8,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_4_1_1",
+      "offset": [
+        192,
+        48,
+        48
+      ],
+      "blocks": 67224,
+      "block_entities": 41,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_4_1_2",
+      "offset": [
+        192,
+        48,
+        96
+      ],
+      "blocks": 58525,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_4_1_3",
+      "offset": [
+        192,
+        48,
+        144
+      ],
+      "blocks": 941,
+      "block_entities": 5,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_4_1_6",
+      "offset": [
+        192,
+        48,
+        288
+      ],
+      "blocks": 121,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_4_1_7",
+      "offset": [
+        192,
+        48,
+        336
+      ],
+      "blocks": 1,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        1
+      ]
+    },
+    {
+      "name": "piece_4_2_0",
+      "offset": [
+        192,
+        96,
+        0
+      ],
+      "blocks": 460,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_4_2_1",
+      "offset": [
+        192,
+        96,
+        48
+      ],
+      "blocks": 2515,
+      "block_entities": 17,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_4_2_2",
+      "offset": [
+        192,
+        96,
+        96
+      ],
+      "blocks": 392,
+      "block_entities": 0,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_5_0_0",
       "offset": [
         240,
         0,
         0
       ],
-      "blocks": 1152,
+      "blocks": 91424,
+      "block_entities": 3,
       "size": [
         41,
         48,
@@ -205,13 +1270,14 @@
       ]
     },
     {
-      "file": "piece_5_0_1.nbt",
+      "name": "piece_5_0_1",
       "offset": [
         240,
         0,
         48
       ],
-      "blocks": 11115,
+      "blocks": 87277,
+      "block_entities": 0,
       "size": [
         41,
         48,
@@ -219,13 +1285,14 @@
       ]
     },
     {
-      "file": "piece_5_0_2.nbt",
+      "name": "piece_5_0_2",
       "offset": [
         240,
         0,
         96
       ],
-      "blocks": 5723,
+      "blocks": 81354,
+      "block_entities": 0,
       "size": [
         41,
         48,
@@ -233,13 +1300,224 @@
       ]
     },
     {
-      "file": "piece_5_1_1.nbt",
+      "name": "piece_5_0_3",
+      "offset": [
+        240,
+        0,
+        144
+      ],
+      "blocks": 65874,
+      "block_entities": 61,
+      "size": [
+        41,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_5_0_4",
+      "offset": [
+        240,
+        0,
+        192
+      ],
+      "blocks": 65487,
+      "block_entities": 11,
+      "size": [
+        41,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_5_0_5",
+      "offset": [
+        240,
+        0,
+        240
+      ],
+      "blocks": 69975,
+      "block_entities": 2,
+      "size": [
+        41,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_5_0_6",
+      "offset": [
+        240,
+        0,
+        288
+      ],
+      "blocks": 76998,
+      "block_entities": 2,
+      "size": [
+        41,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_5_0_7",
+      "offset": [
+        240,
+        0,
+        336
+      ],
+      "blocks": 1613,
+      "block_entities": 0,
+      "size": [
+        41,
+        48,
+        1
+      ]
+    },
+    {
+      "name": "piece_5_1_0",
+      "offset": [
+        240,
+        48,
+        0
+      ],
+      "blocks": 54662,
+      "block_entities": 0,
+      "size": [
+        41,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_5_1_1",
       "offset": [
         240,
         48,
         48
       ],
-      "blocks": 17,
+      "blocks": 69336,
+      "block_entities": 43,
+      "size": [
+        41,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_5_1_2",
+      "offset": [
+        240,
+        48,
+        96
+      ],
+      "blocks": 49898,
+      "block_entities": 9,
+      "size": [
+        41,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_5_1_3",
+      "offset": [
+        240,
+        48,
+        144
+      ],
+      "blocks": 933,
+      "block_entities": 18,
+      "size": [
+        41,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_5_1_4",
+      "offset": [
+        240,
+        48,
+        192
+      ],
+      "blocks": 144,
+      "block_entities": 1,
+      "size": [
+        41,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_5_1_6",
+      "offset": [
+        240,
+        48,
+        288
+      ],
+      "blocks": 166,
+      "block_entities": 0,
+      "size": [
+        41,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_5_1_7",
+      "offset": [
+        240,
+        48,
+        336
+      ],
+      "blocks": 2,
+      "block_entities": 0,
+      "size": [
+        41,
+        48,
+        1
+      ]
+    },
+    {
+      "name": "piece_5_2_0",
+      "offset": [
+        240,
+        96,
+        0
+      ],
+      "blocks": 410,
+      "block_entities": 0,
+      "size": [
+        41,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_5_2_1",
+      "offset": [
+        240,
+        96,
+        48
+      ],
+      "blocks": 7394,
+      "block_entities": 153,
+      "size": [
+        41,
+        48,
+        48
+      ]
+    },
+    {
+      "name": "piece_5_2_2",
+      "offset": [
+        240,
+        96,
+        96
+      ],
+      "blocks": 2256,
+      "block_entities": 54,
       "size": [
         41,
         48,

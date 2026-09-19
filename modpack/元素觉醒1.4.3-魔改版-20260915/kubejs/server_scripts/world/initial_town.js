@@ -1,98 +1,150 @@
-// Reliable one-time Medieval Town placement near the randomized Overworld spawn.
+// Generate the complete Medieval Town once near the randomized Overworld spawn.
 
-const TOWN_GENERATION_VERSION = 2
 const TOWN_VERSION_KEY = 'tnc_initial_town_generation_version'
 const PLAYER_ARRIVAL_VERSION_KEY = 'tnc_initial_town_arrival_version'
 const TOWN_LOG = '[TN-C Town]'
-
-// The exported structure bounding box is 281 x 136 x 241. Its minimum corner
-// is kept close to spawn, while the arrival point targets the dense main build.
-const TOWN_ORIGIN_OFFSET = { x: 20, z: 8 }
-const TOWN_CENTER_LOCAL = { x: 153, z: 127 }
-const TOWN_ARRIVAL_LOCAL = { x: 247, y: 21, z: 84 }
-
-const TOWN_PIECES = [
-  ['piece_0_0_2', 0, 0, 96],
-  ['piece_0_0_3', 0, 0, 144],
-  ['piece_1_0_0', 48, 0, 0],
-  ['piece_1_0_1', 48, 0, 48],
-  ['piece_1_0_4', 48, 0, 192],
-  ['piece_2_0_0', 96, 0, 0],
-  ['piece_2_0_1', 96, 0, 48],
-  ['piece_2_0_4', 96, 0, 192],
-  ['piece_3_0_0', 144, 0, 0],
-  ['piece_3_0_1', 144, 0, 48],
-  ['piece_4_0_0', 192, 0, 0],
-  ['piece_4_0_1', 192, 0, 48],
-  ['piece_4_0_2', 192, 0, 96],
-  ['piece_5_0_0', 240, 0, 0],
-  ['piece_5_0_1', 240, 0, 48],
-  ['piece_5_0_2', 240, 0, 96],
-  ['piece_5_1_1', 240, 48, 48]
-]
-
-// Force-load only the sparse 48x48 horizontal cells that actually contain
-// structure pieces. The full 281x241 bounding box can cover 288 chunks and
-// exceed vanilla's 256 forced-chunk limit; these cells use at most 187.
-const TOWN_FORCELOAD_AREAS = [
-  [0, 96, 47, 143],
-  [0, 144, 47, 191],
-  [48, 0, 95, 47],
-  [48, 48, 95, 95],
-  [48, 192, 95, 239],
-  [96, 0, 143, 47],
-  [96, 48, 143, 95],
-  [96, 192, 143, 239],
-  [144, 0, 191, 47],
-  [144, 48, 191, 95],
-  [192, 0, 239, 47],
-  [192, 48, 239, 95],
-  [192, 96, 239, 143],
-  [240, 0, 280, 47],
-  [240, 48, 280, 95],
-  [240, 96, 280, 143]
-]
+const TOWN_CANDIDATE_DISTANCE = 384
+const TOWN_SAMPLE_STEP = 48
+const $HeightmapTypes = Java.loadClass('net.minecraft.world.level.levelgen.Heightmap$Types')
+const $BlockPos = Java.loadClass('net.minecraft.core.BlockPos')
 
 let townGenerationPending = false
+let townActiveForceArea = null
+
+function townManifest() {
+  return global.TNC_TOWN_MANIFEST
+}
+
+function townVersion() {
+  var manifest = townManifest()
+  return manifest ? manifest.version : 4
+}
 
 function townCommand(server, command) {
   return server.runCommandSilent(`execute in minecraft:overworld run ${command}`)
 }
 
-function townLayout(overworld) {
-  const spawn = overworld.getSharedSpawnPos()
-  const originX = spawn.x + TOWN_ORIGIN_OFFSET.x
-  const originY = spawn.y - 1
-  const originZ = spawn.z + TOWN_ORIGIN_OFFSET.z
+function sampleTownCandidate(overworld, originX, originZ, manifest) {
+  var minimumHeight = 320
+  var maximumHeight = -64
+  var waterSamples = 0
+  var sampleCount = 0
 
+  for (var localX = 0; localX < manifest.dimensions[0]; localX += TOWN_SAMPLE_STEP) {
+    for (var localZ = 0; localZ < manifest.dimensions[2]; localZ += TOWN_SAMPLE_STEP) {
+      var sampleX = originX + localX
+      var sampleZ = originZ + localZ
+      var surfaceAirY = overworld.getHeight($HeightmapTypes.MOTION_BLOCKING_NO_LEAVES, sampleX, sampleZ)
+      var groundY = surfaceAirY - 1
+      minimumHeight = Math.min(minimumHeight, groundY)
+      maximumHeight = Math.max(maximumHeight, groundY)
+      sampleCount++
+
+      var fluid = overworld.getFluidState(new $BlockPos(sampleX, groundY, sampleZ))
+      if (!fluid.isEmpty()) waterSamples++
+    }
+  }
+
+  // Sample the far edge when the dimensions are not a multiple of 48.
+  var edgeX = originX + manifest.dimensions[0] - 1
+  var edgeZ = originZ + manifest.dimensions[2] - 1
+  var edgeAirY = overworld.getHeight($HeightmapTypes.MOTION_BLOCKING_NO_LEAVES, edgeX, edgeZ)
+  var edgeGroundY = edgeAirY - 1
+  minimumHeight = Math.min(minimumHeight, edgeGroundY)
+  maximumHeight = Math.max(maximumHeight, edgeGroundY)
+  sampleCount++
+  var edgeFluid = overworld.getFluidState(new $BlockPos(edgeX, edgeGroundY, edgeZ))
+  if (!edgeFluid.isEmpty()) waterSamples++
+
+  var heightRange = maximumHeight - minimumHeight
   return {
     originX: originX,
-    originY: originY,
     originZ: originZ,
-    centerX: originX + TOWN_CENTER_LOCAL.x,
-    centerY: originY,
-    centerZ: originZ + TOWN_CENTER_LOCAL.z,
-    arrivalX: originX + TOWN_ARRIVAL_LOCAL.x,
-    arrivalY: originY + TOWN_ARRIVAL_LOCAL.y,
-    arrivalZ: originZ + TOWN_ARRIVAL_LOCAL.z
+    minimumHeight: minimumHeight,
+    maximumHeight: maximumHeight,
+    heightRange: heightRange,
+    waterSamples: waterSamples,
+    sampleCount: sampleCount,
+    score: heightRange * 20 + waterSamples * 50
   }
 }
 
-function setTownChunksForced(server, layout, forced) {
-  for (const area of TOWN_FORCELOAD_AREAS) {
-    const [x0, z0, x1, z1] = area
-    const action = forced ? 'add' : 'remove'
-    const result = townCommand(
-      server,
-      `forceload ${action} ${layout.originX + x0} ${layout.originZ + z0} ${layout.originX + x1} ${layout.originZ + z1}`
-    )
-    console.info(`${TOWN_LOG} forceload ${action} area ${x0},${z0} -> ${x1},${z1}: result=${result}`)
+function townLayout(overworld, manifest) {
+  var spawn = overworld.getSharedSpawnPos()
+  var centerLocal = manifest.centerLocal
+  var offsets = [
+    [TOWN_CANDIDATE_DISTANCE, 0],
+    [-TOWN_CANDIDATE_DISTANCE, 0],
+    [0, TOWN_CANDIDATE_DISTANCE],
+    [0, -TOWN_CANDIDATE_DISTANCE],
+    [TOWN_CANDIDATE_DISTANCE, TOWN_CANDIDATE_DISTANCE],
+    [TOWN_CANDIDATE_DISTANCE, -TOWN_CANDIDATE_DISTANCE],
+    [-TOWN_CANDIDATE_DISTANCE, TOWN_CANDIDATE_DISTANCE],
+    [-TOWN_CANDIDATE_DISTANCE, -TOWN_CANDIDATE_DISTANCE]
+  ]
+  var best = null
+  var minimumBuildHeight = overworld.getMinBuildHeight()
+  var maximumBuildHeight = overworld.getMaxBuildHeight()
+
+  for (var candidateIndex = 0; candidateIndex < offsets.length; candidateIndex++) {
+    var candidateOffset = offsets[candidateIndex]
+    var candidateOriginX = spawn.x + candidateOffset[0] - centerLocal[0]
+    var candidateOriginZ = spawn.z + candidateOffset[1] - centerLocal[2]
+    var candidate = sampleTownCandidate(overworld, candidateOriginX, candidateOriginZ, manifest)
+    var candidateOriginY = candidate.maximumHeight - manifest.sourceGroundLocalY
+    var candidateTopY = candidateOriginY + manifest.dimensions[1] - 1
+    candidate.buildHeightValid = candidateOriginY >= minimumBuildHeight && candidateTopY < maximumBuildHeight
+    if (!candidate.buildHeightValid) candidate.score += 1000000
+    console.info(`${TOWN_LOG} candidate ${candidateIndex + 1}/${offsets.length} origin=${candidate.originX},${candidateOriginY},${candidate.originZ} top=${candidateTopY} height=${candidate.minimumHeight}..${candidate.maximumHeight} water=${candidate.waterSamples}/${candidate.sampleCount} valid=${candidate.buildHeightValid} score=${candidate.score}`)
+    if (best == null || candidate.score < best.score) best = candidate
+  }
+
+  if (!best.buildHeightValid) {
+    throw new Error(`no candidate fits build height ${minimumBuildHeight}..${maximumBuildHeight - 1}`)
+  }
+
+  var originY = best.maximumHeight - manifest.sourceGroundLocalY
+  return {
+    originX: best.originX,
+    originY: originY,
+    originZ: best.originZ,
+    centerX: best.originX + manifest.centerLocal[0],
+    centerY: originY + manifest.centerLocal[1],
+    centerZ: best.originZ + manifest.centerLocal[2],
+    arrivalX: best.originX + manifest.arrivalLocal[0],
+    arrivalY: originY + manifest.arrivalLocal[1],
+    arrivalZ: best.originZ + manifest.arrivalLocal[2],
+    terrainRange: best.heightRange,
+    waterSamples: best.waterSamples,
+    sampleCount: best.sampleCount
   }
 }
 
-function saveTownCoordinates(server, layout) {
-  const data = server.persistentData
-  data.putInt(TOWN_VERSION_KEY, TOWN_GENERATION_VERSION)
+function forceTownArea(server, layout, operation, forced) {
+  var localX = operation[1]
+  var localZ = operation[2]
+  var sizeX = operation[3]
+  var sizeZ = operation[4]
+  var x0 = layout.originX + localX
+  var z0 = layout.originZ + localZ
+  var x1 = x0 + sizeX - 1
+  var z1 = z0 + sizeZ - 1
+  var action = forced ? 'add' : 'remove'
+  var result = townCommand(server, `forceload ${action} ${x0} ${z0} ${x1} ${z1}`)
+  console.info(`${TOWN_LOG} forceload ${action} ${x0},${z0} -> ${x1},${z1}: result=${result}`)
+  townActiveForceArea = forced ? operation : null
+}
+
+function releaseActiveTownArea(server, layout) {
+  if (townActiveForceArea != null) {
+    forceTownArea(server, layout, townActiveForceArea, false)
+    townActiveForceArea = null
+  }
+}
+
+function saveTownCoordinates(server, layout, manifest) {
+  var data = server.persistentData
+  data.putInt(TOWN_VERSION_KEY, manifest.version)
   data.putInt('tnc_initial_town_x', layout.centerX)
   data.putInt('tnc_initial_town_y', layout.centerY)
   data.putInt('tnc_initial_town_z', layout.centerZ)
@@ -101,135 +153,167 @@ function saveTownCoordinates(server, layout) {
   data.putInt('tnc_initial_town_arrival_z', layout.arrivalZ)
 }
 
-function placeTown(server, layout) {
-  const failed = []
-
-  for (const piece of TOWN_PIECES) {
-    const [name, x, y, z] = piece
-    const px = layout.originX + x
-    const py = layout.originY + y
-    const pz = layout.originZ + z
-    const result = townCommand(server, `place template tnc:medieval_town/${name} ${px} ${py} ${pz}`)
-    console.info(`${TOWN_LOG} place ${name} at ${px} ${py} ${pz}: result=${result}`)
-    if (result <= 0) failed.push(name)
-  }
-
-  if (failed.length > 0) {
-    console.error(`${TOWN_LOG} generation failed: ${failed.join(', ')}`)
-    return failed
-  }
-
-  // Guarantee a safe 3x3 landing point in the main structure cluster.
-  townCommand(server, `fill ${layout.arrivalX - 1} ${layout.arrivalY - 1} ${layout.arrivalZ - 1} ${layout.arrivalX + 1} ${layout.arrivalY - 1} ${layout.arrivalZ + 1} minecraft:stone_bricks`)
-  townCommand(server, `fill ${layout.arrivalX - 1} ${layout.arrivalY} ${layout.arrivalZ - 1} ${layout.arrivalX + 1} ${layout.arrivalY + 2} ${layout.arrivalZ + 1} minecraft:air`)
-
-  saveTownCoordinates(server, layout)
-  console.info(`${TOWN_LOG} generation complete; center=${layout.centerX},${layout.centerY},${layout.centerZ}; arrival=${layout.arrivalX},${layout.arrivalY},${layout.arrivalZ}`)
-  return []
-}
-
 function tellTownCoordinates(player, server) {
-  const data = server.persistentData
-  const centerX = data.getInt('tnc_initial_town_x')
-  const centerY = data.getInt('tnc_initial_town_y')
-  const centerZ = data.getInt('tnc_initial_town_z')
-  const arrivalX = data.getInt('tnc_initial_town_arrival_x')
-  const arrivalY = data.getInt('tnc_initial_town_arrival_y')
-  const arrivalZ = data.getInt('tnc_initial_town_arrival_z')
+  var data = server.persistentData
+  var centerX = data.getInt('tnc_initial_town_x')
+  var centerY = data.getInt('tnc_initial_town_y')
+  var centerZ = data.getInt('tnc_initial_town_z')
+  var arrivalX = data.getInt('tnc_initial_town_arrival_x')
+  var arrivalY = data.getInt('tnc_initial_town_arrival_y')
+  var arrivalZ = data.getInt('tnc_initial_town_arrival_z')
 
   player.tell(`新手村中心坐标：X ${centerX} / Y ${centerY} / Z ${centerZ}`)
-  player.tell(`新手村传送点：X ${arrivalX} / Y ${arrivalY} / Z ${arrivalZ}`)
+  player.tell(`新手村南门坐标：X ${arrivalX} / Y ${arrivalY} / Z ${arrivalZ}`)
 }
 
 function sendPlayerToTown(player, server) {
   tellTownCoordinates(player, server)
+  if (player.persistentData.getInt(PLAYER_ARRIVAL_VERSION_KEY) >= townVersion()) return
 
-  if (player.persistentData.getInt(PLAYER_ARRIVAL_VERSION_KEY) >= TOWN_GENERATION_VERSION) return
+  var data = server.persistentData
+  var x = data.getInt('tnc_initial_town_arrival_x')
+  var y = data.getInt('tnc_initial_town_arrival_y')
+  var z = data.getInt('tnc_initial_town_arrival_z')
+  var username = player.profile.name
 
-  const data = server.persistentData
-  const x = data.getInt('tnc_initial_town_arrival_x')
-  const y = data.getInt('tnc_initial_town_arrival_y')
-  const z = data.getInt('tnc_initial_town_arrival_z')
-  const username = player.profile.name
-
-  player.teleportTo('minecraft:overworld', x + 0.5, y, z + 0.5, 0, 0)
-  const spawnResult = server.runCommandSilent(`spawnpoint ${username} ${x} ${y} ${z}`)
-  player.persistentData.putInt(PLAYER_ARRIVAL_VERSION_KEY, TOWN_GENERATION_VERSION)
-  player.tell(`已传送至新手村，并设置重生点。spawnpoint result=${spawnResult}`)
+  player.teleportTo('minecraft:overworld', x + 0.5, y, z + 0.5, 180, 0)
+  var spawnResult = server.runCommandSilent(`spawnpoint ${username} ${x} ${y} ${z}`)
+  player.persistentData.putInt(PLAYER_ARRIVAL_VERSION_KEY, townVersion())
+  player.tell(`已传送至完整新手村南门，并设置重生点。spawnpoint result=${spawnResult}`)
   console.info(`${TOWN_LOG} sent ${username} to ${x},${y},${z}; spawnpoint result=${spawnResult}`)
 }
 
 function tellOnlinePlayers(server, message) {
-  for (const onlinePlayer of server.players) {
+  var players = server.players
+  for (var playerIndex = 0; playerIndex < players.size(); playerIndex++) {
     try {
-      onlinePlayer.tell(message)
-    } catch (error) {
-      console.error(`${TOWN_LOG} could not notify an online player: ${error}`)
+      players.get(playerIndex).tell(message)
+    } catch (notifyError) {
+      console.error(`${TOWN_LOG} could not notify an online player: ${notifyError}`)
     }
   }
 }
 
 function sendOnlinePlayersToTown(server) {
-  for (const onlinePlayer of server.players) {
+  var players = server.players
+  for (var playerIndex = 0; playerIndex < players.size(); playerIndex++) {
     try {
-      sendPlayerToTown(onlinePlayer, server)
-    } catch (error) {
-      console.error(`${TOWN_LOG} could not send an online player to town: ${error}`)
+      sendPlayerToTown(players.get(playerIndex), server)
+    } catch (arrivalError) {
+      console.error(`${TOWN_LOG} could not send an online player to town: ${arrivalError}`)
     }
   }
 }
 
-PlayerEvents.loggedIn(event => {
-  const server = event.server
-  const player = event.player
+function failTownGeneration(server, layout, message, error) {
+  console.error(`${TOWN_LOG} ${message}: ${error}`)
+  tellOnlinePlayers(server, `完整新手村生成失败：${error}。未写入成功标记，下次进入会重试。`)
+  releaseActiveTownArea(server, layout)
+  townGenerationPending = false
+}
 
-  if (server.persistentData.getInt(TOWN_VERSION_KEY) >= TOWN_GENERATION_VERSION) {
+function finishTownGeneration(server, layout, manifest) {
+  releaseActiveTownArea(server, layout)
+  townCommand(server, `fill ${layout.arrivalX - 1} ${layout.arrivalY - 1} ${layout.arrivalZ - 1} ${layout.arrivalX + 1} ${layout.arrivalY - 1} ${layout.arrivalZ + 1} minecraft:grass_block`)
+  townCommand(server, `fill ${layout.arrivalX - 1} ${layout.arrivalY} ${layout.arrivalZ - 1} ${layout.arrivalX + 1} ${layout.arrivalY + 2} ${layout.arrivalZ + 1} minecraft:air`)
+
+  saveTownCoordinates(server, layout, manifest)
+  townGenerationPending = false
+  console.info(`${TOWN_LOG} generation complete; pieces=${manifest.pieceCount}; blocks=${manifest.nonAirBlocks}; blockEntities=${manifest.blockEntities}; center=${layout.centerX},${layout.centerY},${layout.centerZ}; arrival=${layout.arrivalX},${layout.arrivalY},${layout.arrivalZ}`)
+  tellOnlinePlayers(server, `完整新手村 ${manifest.pieceCount} 个结构分块已全部生成成功。`)
+  sendOnlinePlayersToTown(server)
+}
+
+function runTownOperation(server, layout, manifest, operationIndex, placedPieces, lastProgress) {
+  if (operationIndex >= manifest.operations.length) {
+    finishTownGeneration(server, layout, manifest)
+    return
+  }
+
+  try {
+    var operation = manifest.operations[operationIndex]
+    var kind = operation[0]
+    var nextPlacedPieces = placedPieces
+    var nextProgress = lastProgress
+
+    if (kind == 'load') {
+      forceTownArea(server, layout, operation, true)
+    } else if (kind == 'wait') {
+      server.scheduleInTicks(operation[1], scheduledWait => {
+        runTownOperation(server, layout, manifest, operationIndex + 1, nextPlacedPieces, nextProgress)
+      })
+      return
+    } else if (kind == 'clear') {
+      var clearResult = townCommand(server, `fill ${layout.originX + operation[1]} ${layout.originY + operation[2]} ${layout.originZ + operation[3]} ${layout.originX + operation[4]} ${layout.originY + operation[5]} ${layout.originZ + operation[6]} minecraft:air`)
+      console.info(`${TOWN_LOG} clear ${operationIndex + 1}/${manifest.operations.length}: result=${clearResult}`)
+    } else if (kind == 'place') {
+      var pieceName = operation[1]
+      var pieceX = layout.originX + operation[2]
+      var pieceY = layout.originY + operation[3]
+      var pieceZ = layout.originZ + operation[4]
+      var placeResult = townCommand(server, `place template tnc:medieval_town/${pieceName} ${pieceX} ${pieceY} ${pieceZ}`)
+      nextPlacedPieces++
+      console.info(`${TOWN_LOG} place ${nextPlacedPieces}/${manifest.pieceCount} ${pieceName} at ${pieceX} ${pieceY} ${pieceZ}: result=${placeResult}`)
+      if (placeResult <= 0) {
+        failTownGeneration(server, layout, `piece ${pieceName} failed`, `command result=${placeResult}`)
+        return
+      }
+      var progress = Math.floor(nextPlacedPieces * 10 / manifest.pieceCount) * 10
+      if (progress > nextProgress && progress < 100) {
+        tellOnlinePlayers(server, `完整新手村生成进度：${progress}%（${nextPlacedPieces}/${manifest.pieceCount}）`)
+        nextProgress = progress
+      }
+    } else if (kind == 'unload') {
+      forceTownArea(server, layout, operation, false)
+    } else {
+      failTownGeneration(server, layout, 'unknown operation', kind)
+      return
+    }
+
+    server.scheduleInTicks(1, scheduledStep => {
+      runTownOperation(server, layout, manifest, operationIndex + 1, nextPlacedPieces, nextProgress)
+    })
+  } catch (operationError) {
+    failTownGeneration(server, layout, `operation ${operationIndex + 1} failed`, operationError)
+  }
+}
+
+PlayerEvents.loggedIn(event => {
+  var server = event.server
+  var player = event.player
+  var manifest = townManifest()
+
+  if (!manifest || !manifest.operations || manifest.pieceCount <= 0) {
+    player.tell('完整新手村生成失败：运行清单未加载。请完整重启客户端后重试。')
+    console.error(`${TOWN_LOG} runtime manifest is unavailable`)
+    return
+  }
+
+  if (server.persistentData.getInt(TOWN_VERSION_KEY) >= manifest.version) {
     sendPlayerToTown(player, server)
     return
   }
 
   if (townGenerationPending) {
-    player.tell('新手村正在生成，请稍候；完成后会显示精确坐标。')
+    player.tell('完整新手村正在生成，请稍候；完成后会显示精确坐标。')
     return
   }
 
-  const overworld = server.getLevel('minecraft:overworld')
+  var overworld = server.getLevel('minecraft:overworld')
   if (!overworld) {
-    player.tell('新手村生成失败：主世界尚未加载。请重新进入世界重试。')
+    player.tell('完整新手村生成失败：主世界尚未加载。请重新进入世界重试。')
     console.error(`${TOWN_LOG} generation aborted: Overworld is unavailable`)
     return
   }
 
-  const layout = townLayout(overworld)
-  townGenerationPending = true
   try {
-    setTownChunksForced(server, layout, true)
-    player.tell('正在加载新手村区域并放置 17 个结构分块，请稍候……')
-
-    // KubeJS 2001.6.5 exposes scheduleInTicks(ticks, callback).
-    // Give forced chunks two seconds to finish loading before placement.
-    server.scheduleInTicks(40, callback => {
-      try {
-        const failed = placeTown(server, layout)
-        if (failed.length > 0) {
-          tellOnlinePlayers(server, `新手村生成失败，未成功放置：${failed.join(', ')}。未写入成功标记，下次进入会重试。`)
-          return
-        }
-
-        tellOnlinePlayers(server, '新手村 17 个结构分块已全部生成成功。')
-        sendOnlinePlayersToTown(server)
-      } catch (error) {
-        console.error(`${TOWN_LOG} unexpected generation error: ${error}`)
-        tellOnlinePlayers(server, `新手村生成发生异常：${error}。未写入成功标记，下次进入会重试。`)
-      } finally {
-        setTownChunksForced(server, layout, false)
-        townGenerationPending = false
-      }
-    })
-  } catch (error) {
-    console.error(`${TOWN_LOG} could not schedule generation: ${error}`)
-    tellOnlinePlayers(server, `新手村生成任务启动失败：${error}。请重新进入世界重试。`)
-    setTownChunksForced(server, layout, false)
-    townGenerationPending = false
+    var layout = townLayout(overworld, manifest)
+    townGenerationPending = true
+    player.tell(`正在分批生成完整新手村：${manifest.pieceCount} 个结构分块、${manifest.nonAirBlocks} 个方块，预计约 40 秒。`)
+    player.tell(`已选择附近地形：高度差 ${layout.terrainRange}，水面采样 ${layout.waterSamples}/${layout.sampleCount}。`)
+    console.info(`${TOWN_LOG} generation start; version=${manifest.version}; origin=${layout.originX},${layout.originY},${layout.originZ}; operations=${manifest.operations.length}`)
+    runTownOperation(server, layout, manifest, 0, 0, 0)
+  } catch (startError) {
+    failTownGeneration(server, { originX: 0, originY: 0, originZ: 0 }, 'could not start generation', startError)
   }
 })
