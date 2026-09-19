@@ -16,14 +16,14 @@
         "launch_height": 14,
         "launch_radius": 5,
         "launch_properties": {
-          "velocity": 0.9,
+          "velocity": 0.45,
           "extra_launch_count": 8,
           "extra_launch_delay": 4
         },
         "projectile": {
           "client_data": {
             "travel_particles": [ { "particle_id": "spell_engine:electric_arc_a", "shape": "CIRCLE", "rotation": "LOOK", "origin": "CENTER", "count": 4.0, "min_speed": 0.0, "max_speed": 0.15 } ],
-            "model": { "model_id": "tnc:projectile/thunder_ball", "scale": 3.0 }
+            "model": { "model_id": "tnc:projectile/thunder_ball", "scale": 6.0 }
           }
         }
       }
