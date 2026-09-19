@@ -54,6 +54,15 @@ function Find-TncLivePack {
         [string[]]$LauncherRoots = @()
     )
     $name = Split-Path $WorkPack -Leaf
+
+    # Allow callers to point directly at a launcher's versions directory.
+    # This is needed for portable PCL installations that do not live under
+    # one of the conventional .minecraft roots below.
+    if ($env:TNC_LIVE_ROOT) {
+        $explicit = Join-Path $env:TNC_LIVE_ROOT $name
+        if (Test-Path $explicit) { return $explicit }
+    }
+
     if ($LauncherRoots.Count -eq 0) {
         $LauncherRoots = @(
             'E:\download', 'D:\download', 'C:\download',
