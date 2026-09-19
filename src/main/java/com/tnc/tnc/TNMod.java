@@ -28,29 +28,7 @@ import org.slf4j.Logger;
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(TNMod.MODID)
 public class TNMod
-
 {
-
-    static {
-        // 投射物模型登记 —— 必须早于"客户端资源重载/模型烘焙"。
-        // 实测时序（logs/latest.log）：22:19:38 Reloading ResourceManager（模型此刻烘焙）
-        //                            22:19:50 onClientSetup（之前放这里，太晚 ✗）
-        // 根因（反编译 SpellEngine 0.15.12）：渲染投射物时直接查已烘焙模型
-        //   getModelManager().getModel(modelId)；而 MC 只烘焙被 blockstate/item 引用过的模型，
-        //   我们独立的 models/projectile/*.json 无人引用 -> 从不烘焙 -> 查不到 -> 紫黑方块。
-        // SpellEngine 公开 API CustomModels.registerModelIds(...) 把模型号登记进它的表，
-        //   资源重载时一起烘焙。静态块在类加载时执行，早于一切资源重载。
-        if (net.minecraftforge.fml.loading.FMLEnvironment.dist.isClient()) {
-            try {
-                net.spell_engine.api.render.CustomModels.registerModelIds(java.util.List.of(
-                        net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(MODID, "projectile/lightingball"),
-                        net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(MODID, "projectile/thunder_ball")));
-                LOGGER.info("TN-C: registered 2 projectile model ids to SpellEngine (static init)");
-            } catch (Throwable t) {
-                LOGGER.warn("TN-C: projectile model registration skipped ({})", t.toString());
-            }
-        }
-    }
     // Define mod id in a common place for everything to reference
     public static final String MODID = "tnc";
     // Directly reference a slf4j logger
@@ -163,7 +141,21 @@ public class TNMod
         {
             LOGGER.info("TN-C client setup, player = {}", Minecraft.getInstance().getUser().getName());
 
-
+            // ★ 关键一步：把我们的投射物模型【登记】给 SpellEngine。
+            //   原因（反编译 SpellEngine 0.15.12 得到）：
+            //     SpellEngine 渲染投射物时直接查"已烘焙的模型"(ModelManager.getModel(modelId))，
+            //     而 Minecraft 只烘焙被 blockstate/item 引用过的模型 —— 我们那个独立的
+            //     models/projectile/*.json 没人引用，从未被烘焙 → 查不到 → 渲染成紫黑方块。
+            //     别人的模组能用，是因为它们初始化时调用过这个 API 把自己的模型号登记进去。
+            //   登记后即可使用【我们自己的】路径，不影响任何别人的法术。
+            try {
+                net.spell_engine.api.render.CustomModels.registerModelIds(java.util.List.of(
+                        net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(MODID, "projectile/lightingball"),
+                        net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(MODID, "projectile/thunder_ball")));
+                LOGGER.info("TN-C: registered 2 projectile model id(s) to SpellEngine");
+            } catch (Throwable t) {
+                LOGGER.warn("TN-C: projectile model registration skipped ({})", t.toString());
+            }
         }
 
         /**
