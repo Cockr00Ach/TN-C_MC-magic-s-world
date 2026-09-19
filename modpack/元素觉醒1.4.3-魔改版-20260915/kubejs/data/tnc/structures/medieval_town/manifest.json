@@ -1,0 +1,250 @@
+{
+  "source": "medieval-town-intermediate.schem",
+  "dimensions": [
+    281,
+    136,
+    241
+  ],
+  "piece_size": 48,
+  "non_air_blocks": 35325,
+  "pieces": [
+    {
+      "file": "piece_0_0_2.nbt",
+      "offset": [
+        0,
+        0,
+        96
+      ],
+      "blocks": 227,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "file": "piece_0_0_3.nbt",
+      "offset": [
+        0,
+        0,
+        144
+      ],
+      "blocks": 5,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "file": "piece_1_0_0.nbt",
+      "offset": [
+        48,
+        0,
+        0
+      ],
+      "blocks": 515,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "file": "piece_1_0_1.nbt",
+      "offset": [
+        48,
+        0,
+        48
+      ],
+      "blocks": 63,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "file": "piece_1_0_4.nbt",
+      "offset": [
+        48,
+        0,
+        192
+      ],
+      "blocks": 138,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "file": "piece_2_0_0.nbt",
+      "offset": [
+        96,
+        0,
+        0
+      ],
+      "blocks": 5545,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "file": "piece_2_0_1.nbt",
+      "offset": [
+        96,
+        0,
+        48
+      ],
+      "blocks": 473,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "file": "piece_2_0_4.nbt",
+      "offset": [
+        96,
+        0,
+        192
+      ],
+      "blocks": 205,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "file": "piece_3_0_0.nbt",
+      "offset": [
+        144,
+        0,
+        0
+      ],
+      "blocks": 6,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "file": "piece_3_0_1.nbt",
+      "offset": [
+        144,
+        0,
+        48
+      ],
+      "blocks": 1076,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "file": "piece_4_0_0.nbt",
+      "offset": [
+        192,
+        0,
+        0
+      ],
+      "blocks": 1368,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "file": "piece_4_0_1.nbt",
+      "offset": [
+        192,
+        0,
+        48
+      ],
+      "blocks": 5792,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "file": "piece_4_0_2.nbt",
+      "offset": [
+        192,
+        0,
+        96
+      ],
+      "blocks": 1905,
+      "size": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "file": "piece_5_0_0.nbt",
+      "offset": [
+        240,
+        0,
+        0
+      ],
+      "blocks": 1152,
+      "size": [
+        41,
+        48,
+        48
+      ]
+    },
+    {
+      "file": "piece_5_0_1.nbt",
+      "offset": [
+        240,
+        0,
+        48
+      ],
+      "blocks": 11115,
+      "size": [
+        41,
+        48,
+        48
+      ]
+    },
+    {
+      "file": "piece_5_0_2.nbt",
+      "offset": [
+        240,
+        0,
+        96
+      ],
+      "blocks": 5723,
+      "size": [
+        41,
+        48,
+        48
+      ]
+    },
+    {
+      "file": "piece_5_1_1.nbt",
+      "offset": [
+        240,
+        48,
+        48
+      ],
+      "blocks": 17,
+      "size": [
+        41,
+        48,
+        48
+      ]
+    }
+  ]
+}
