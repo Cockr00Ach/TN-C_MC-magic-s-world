@@ -1,6 +1,7 @@
 {
   "credit": "TN-C A/B test",
-  "textures": { "0": "tnc:spell_projectile/thunder_ball", "particle": "tnc:spell_projectile/thunder_ball" },
+  "texture_size": [64, 64],
+  "textures": { "0": "tnc:projectile/thunder_ball", "particle": "tnc:projectile/thunder_ball" },
   "elements": [
     {
       "name": "probe",
