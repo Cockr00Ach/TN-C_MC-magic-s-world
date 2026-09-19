@@ -309,7 +309,7 @@ PlayerEvents.loggedIn(event => {
   try {
     var layout = townLayout(overworld, manifest)
     townGenerationPending = true
-    player.tell(`正在分批生成完整新手村：${manifest.pieceCount} 个结构分块、${manifest.nonAirBlocks} 个方块，预计约 40 秒。`)
+    player.tell(`正在分批生成完整新手村：${manifest.pieceCount} 个结构分块、${manifest.nonAirBlocks} 个方块，预计约 40 秒，配置较低时可能需要数分钟。`)
     player.tell(`已选择附近地形：高度差 ${layout.terrainRange}，水面采样 ${layout.waterSamples}/${layout.sampleCount}。`)
     console.info(`${TOWN_LOG} generation start; version=${manifest.version}; origin=${layout.originX},${layout.originY},${layout.originZ}; operations=${manifest.operations.length}`)
     runTownOperation(server, layout, manifest, 0, 0, 0)
