@@ -5,11 +5,13 @@ const PLAYER_ARRIVAL_VERSION_KEY = 'tnc_initial_town_arrival_version'
 const TOWN_LOG = '[TN-C Town]'
 const TOWN_CANDIDATE_DISTANCE = 384
 const TOWN_SAMPLE_STEP = 48
+const TOWN_SURVEY_WAIT_TICKS = 40
 const $HeightmapTypes = Java.loadClass('net.minecraft.world.level.levelgen.Heightmap$Types')
 const $BlockPos = Java.loadClass('net.minecraft.core.BlockPos')
 
 let townGenerationPending = false
 let townActiveForceArea = null
+let townSurveyForcePositions = []
 
 function townManifest() {
   return global.TNC_TOWN_MANIFEST
@@ -24,6 +26,54 @@ function townCommand(server, command) {
   return server.runCommandSilent(`execute in minecraft:overworld run ${command}`)
 }
 
+function townSamplePositions(originX, originZ, manifest) {
+  var positions = []
+  var seenChunks = {}
+
+  function addPosition(x, z) {
+    var chunkX = Math.floor(x / 16)
+    var chunkZ = Math.floor(z / 16)
+    var key = `${chunkX},${chunkZ}`
+    if (seenChunks[key]) return
+    seenChunks[key] = true
+    positions.push([x, z])
+  }
+
+  for (var localX = 0; localX < manifest.dimensions[0]; localX += TOWN_SAMPLE_STEP) {
+    for (var localZ = 0; localZ < manifest.dimensions[2]; localZ += TOWN_SAMPLE_STEP) {
+      addPosition(originX + localX, originZ + localZ)
+    }
+  }
+
+  // Include the far corner when the dimensions are not multiples of the sample step.
+  addPosition(originX + manifest.dimensions[0] - 1, originZ + manifest.dimensions[2] - 1)
+  return positions
+}
+
+function forceTownSurveyPositions(server, positions, forced) {
+  var action = forced ? 'add' : 'remove'
+  if (forced) townSurveyForcePositions = []
+  for (var positionIndex = 0; positionIndex < positions.length; positionIndex++) {
+    var position = positions[positionIndex]
+    var result = townCommand(server, `forceload ${action} ${position[0]} ${position[1]}`)
+    if (forced && result <= 0) {
+      throw new Error(`could not load survey chunk at ${position[0]},${position[1]} (result=${result})`)
+    }
+    if (forced) townSurveyForcePositions.push(position)
+  }
+  if (!forced) townSurveyForcePositions = []
+}
+
+function releaseTownSurveyPositions(server) {
+  if (townSurveyForcePositions.length <= 0) return
+  var positions = townSurveyForcePositions
+  townSurveyForcePositions = []
+  for (var positionIndex = 0; positionIndex < positions.length; positionIndex++) {
+    var position = positions[positionIndex]
+    townCommand(server, `forceload remove ${position[0]} ${position[1]}`)
+  }
+}
+
 function sampleTownCandidate(overworld, originX, originZ, manifest) {
   var minimumHeight = 320
   var maximumHeight = -64
@@ -34,6 +84,9 @@ function sampleTownCandidate(overworld, originX, originZ, manifest) {
     for (var localZ = 0; localZ < manifest.dimensions[2]; localZ += TOWN_SAMPLE_STEP) {
       var sampleX = originX + localX
       var sampleZ = originZ + localZ
+      // getHeight returns the minimum build height for an unloaded chunk. The survey
+      // force-loads first; getChunk is a final synchronous guard before reading it.
+      overworld.getChunk(Math.floor(sampleX / 16), Math.floor(sampleZ / 16))
       var surfaceAirY = overworld.getHeight($HeightmapTypes.MOTION_BLOCKING_NO_LEAVES, sampleX, sampleZ)
       var groundY = surfaceAirY - 1
       minimumHeight = Math.min(minimumHeight, groundY)
@@ -48,6 +101,7 @@ function sampleTownCandidate(overworld, originX, originZ, manifest) {
   // Sample the far edge when the dimensions are not a multiple of 48.
   var edgeX = originX + manifest.dimensions[0] - 1
   var edgeZ = originZ + manifest.dimensions[2] - 1
+  overworld.getChunk(Math.floor(edgeX / 16), Math.floor(edgeZ / 16))
   var edgeAirY = overworld.getHeight($HeightmapTypes.MOTION_BLOCKING_NO_LEAVES, edgeX, edgeZ)
   var edgeGroundY = edgeAirY - 1
   minimumHeight = Math.min(minimumHeight, edgeGroundY)
@@ -69,7 +123,7 @@ function sampleTownCandidate(overworld, originX, originZ, manifest) {
   }
 }
 
-function townLayout(overworld, manifest) {
+function townCandidates(overworld, manifest) {
   var spawn = overworld.getSharedSpawnPos()
   var centerLocal = manifest.centerLocal
   var offsets = [
@@ -82,23 +136,20 @@ function townLayout(overworld, manifest) {
     [-TOWN_CANDIDATE_DISTANCE, TOWN_CANDIDATE_DISTANCE],
     [-TOWN_CANDIDATE_DISTANCE, -TOWN_CANDIDATE_DISTANCE]
   ]
-  var best = null
-  var minimumBuildHeight = overworld.getMinBuildHeight()
-  var maximumBuildHeight = overworld.getMaxBuildHeight()
-
+  var candidates = []
   for (var candidateIndex = 0; candidateIndex < offsets.length; candidateIndex++) {
     var candidateOffset = offsets[candidateIndex]
-    var candidateOriginX = spawn.x + candidateOffset[0] - centerLocal[0]
-    var candidateOriginZ = spawn.z + candidateOffset[1] - centerLocal[2]
-    var candidate = sampleTownCandidate(overworld, candidateOriginX, candidateOriginZ, manifest)
-    var candidateOriginY = candidate.maximumHeight - manifest.sourceGroundLocalY
-    var candidateTopY = candidateOriginY + manifest.dimensions[1] - 1
-    candidate.buildHeightValid = candidateOriginY >= minimumBuildHeight && candidateTopY < maximumBuildHeight
-    if (!candidate.buildHeightValid) candidate.score += 1000000
-    console.info(`${TOWN_LOG} candidate ${candidateIndex + 1}/${offsets.length} origin=${candidate.originX},${candidateOriginY},${candidate.originZ} top=${candidateTopY} height=${candidate.minimumHeight}..${candidate.maximumHeight} water=${candidate.waterSamples}/${candidate.sampleCount} valid=${candidate.buildHeightValid} score=${candidate.score}`)
-    if (best == null || candidate.score < best.score) best = candidate
+    candidates.push({
+      originX: spawn.x + candidateOffset[0] - centerLocal[0],
+      originZ: spawn.z + candidateOffset[1] - centerLocal[2]
+    })
   }
+  return candidates
+}
 
+function finishTownSurvey(overworld, manifest, best) {
+  var minimumBuildHeight = overworld.getMinBuildHeight()
+  var maximumBuildHeight = overworld.getMaxBuildHeight()
   if (!best.buildHeightValid) {
     throw new Error(`no candidate fits build height ${minimumBuildHeight}..${maximumBuildHeight - 1}`)
   }
@@ -118,6 +169,47 @@ function townLayout(overworld, manifest) {
     waterSamples: best.waterSamples,
     sampleCount: best.sampleCount
   }
+}
+
+function surveyTownCandidates(server, overworld, manifest, candidates, candidateIndex, best, onComplete) {
+  if (candidateIndex >= candidates.length) {
+    try {
+      onComplete(finishTownSurvey(overworld, manifest, best))
+    } catch (surveyFinishError) {
+      failTownGeneration(server, { originX: 0, originY: 0, originZ: 0 }, 'could not finish terrain survey', surveyFinishError)
+    }
+    return
+  }
+
+  var definition = candidates[candidateIndex]
+  var positions = townSamplePositions(definition.originX, definition.originZ, manifest)
+  try {
+    forceTownSurveyPositions(server, positions, true)
+  } catch (loadError) {
+    releaseTownSurveyPositions(server)
+    throw loadError
+  }
+
+  server.scheduleInTicks(TOWN_SURVEY_WAIT_TICKS, scheduledSurvey => {
+    try {
+      var candidate = sampleTownCandidate(overworld, definition.originX, definition.originZ, manifest)
+      var minimumBuildHeight = overworld.getMinBuildHeight()
+      var maximumBuildHeight = overworld.getMaxBuildHeight()
+      var candidateOriginY = candidate.maximumHeight - manifest.sourceGroundLocalY
+      var candidateTopY = candidateOriginY + manifest.dimensions[1] - 1
+      candidate.buildHeightValid = candidateOriginY >= minimumBuildHeight && candidateTopY < maximumBuildHeight
+      if (!candidate.buildHeightValid) candidate.score += 1000000
+      console.info(`${TOWN_LOG} candidate ${candidateIndex + 1}/${candidates.length} origin=${candidate.originX},${candidateOriginY},${candidate.originZ} top=${candidateTopY} height=${candidate.minimumHeight}..${candidate.maximumHeight} water=${candidate.waterSamples}/${candidate.sampleCount} valid=${candidate.buildHeightValid} score=${candidate.score}`)
+      if (best == null || candidate.score < best.score) best = candidate
+      releaseTownSurveyPositions(server)
+      server.scheduleInTicks(1, scheduledNextCandidate => {
+        surveyTownCandidates(server, overworld, manifest, candidates, candidateIndex + 1, best, onComplete)
+      })
+    } catch (surveyError) {
+      releaseTownSurveyPositions(server)
+      failTownGeneration(server, { originX: 0, originY: 0, originZ: 0 }, `candidate ${candidateIndex + 1} survey failed`, surveyError)
+    }
+  })
 }
 
 function forceTownArea(server, layout, operation, forced) {
@@ -208,6 +300,7 @@ function sendOnlinePlayersToTown(server) {
 function failTownGeneration(server, layout, message, error) {
   console.error(`${TOWN_LOG} ${message}: ${error}`)
   tellOnlinePlayers(server, `完整新手村生成失败：${error}。未写入成功标记，下次进入会重试。`)
+  releaseTownSurveyPositions(server)
   releaseActiveTownArea(server, layout)
   townGenerationPending = false
 }
@@ -306,13 +399,20 @@ PlayerEvents.loggedIn(event => {
     return
   }
 
+  townGenerationPending = true
+  player.tell('正在加载并勘测出生点附近的新手村候选地形，请稍候约 20 秒。')
   try {
-    var layout = townLayout(overworld, manifest)
-    townGenerationPending = true
-    player.tell(`正在分批生成完整新手村：${manifest.pieceCount} 个结构分块、${manifest.nonAirBlocks} 个方块，预计约 40 秒，配置较低时可能需要数分钟。`)
-    player.tell(`已选择附近地形：高度差 ${layout.terrainRange}，水面采样 ${layout.waterSamples}/${layout.sampleCount}。`)
-    console.info(`${TOWN_LOG} generation start; version=${manifest.version}; origin=${layout.originX},${layout.originY},${layout.originZ}; operations=${manifest.operations.length}`)
-    runTownOperation(server, layout, manifest, 0, 0, 0)
+    var candidates = townCandidates(overworld, manifest)
+    surveyTownCandidates(server, overworld, manifest, candidates, 0, null, layout => {
+      try {
+        player.tell(`正在分批生成完整新手村：${manifest.pieceCount} 个结构分块、${manifest.nonAirBlocks} 个方块，预计约 40 秒，配置较低时可能需要数分钟。`)
+        player.tell(`已选择附近地形：高度差 ${layout.terrainRange}，水面采样 ${layout.waterSamples}/${layout.sampleCount}。`)
+        console.info(`${TOWN_LOG} generation start; version=${manifest.version}; origin=${layout.originX},${layout.originY},${layout.originZ}; operations=${manifest.operations.length}`)
+        runTownOperation(server, layout, manifest, 0, 0, 0)
+      } catch (generationStartError) {
+        failTownGeneration(server, layout, 'could not start generation after survey', generationStartError)
+      }
+    })
   } catch (startError) {
     failTownGeneration(server, { originX: 0, originY: 0, originZ: 0 }, 'could not start generation', startError)
   }

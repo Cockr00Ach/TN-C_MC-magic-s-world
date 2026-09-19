@@ -14,6 +14,7 @@ const commands = []
 const errors = []
 const messages = []
 const teleports = []
+const forcedSurveyChunks = new Set()
 
 class BlockPos {
   constructor(x, y, z) {
@@ -44,7 +45,14 @@ const overworld = {
   getSharedSpawnPos: () => ({ x: 100, y: 70, z: -40 }),
   getMinBuildHeight: () => -64,
   getMaxBuildHeight: () => 320,
-  getHeight: (_type, x, z) => 70 + Math.abs((x * 7 + z * 11) % 5),
+  getChunk: (x, z) => {
+    const key = `${x},${z}`
+    if (!forcedSurveyChunks.has(key)) throw new Error(`sampled unloaded chunk ${key}`)
+    return { x, z }
+  },
+  getHeight: (_type, x, z) => forcedSurveyChunks.has(`${Math.floor(x / 16)},${Math.floor(z / 16)}`)
+    ? 70 + Math.abs((x * 7 + z * 11) % 5)
+    : -64,
   getFluidState: _pos => ({ isEmpty: () => true })
 }
 const server = {
@@ -53,6 +61,12 @@ const server = {
   getLevel: id => id === 'minecraft:overworld' ? overworld : null,
   runCommandSilent: command => {
     commands.push(command)
+    const surveyForce = command.match(/forceload (add|remove) (-?\d+) (-?\d+)$/)
+    if (surveyForce) {
+      const key = `${Math.floor(Number(surveyForce[2]) / 16)},${Math.floor(Number(surveyForce[3]) / 16)}`
+      if (surveyForce[1] === 'add') forcedSurveyChunks.add(key)
+      else forcedSurveyChunks.delete(key)
+    }
     if (failedPlaceNumber > 0 && command.includes('place template tnc:medieval_town/')) {
       const attemptedPlaces = commands.filter(item => item.includes('place template tnc:medieval_town/')).length
       if (attemptedPlaces === failedPlaceNumber) return 0
@@ -98,6 +112,8 @@ const places = commands.filter(command => command.includes('place template tnc:m
 const pieceNames = new Set(places.map(command => command.match(/medieval_town\/(\S+)/)[1]))
 const loads = commands.filter(command => command.includes('forceload add'))
 const unloads = commands.filter(command => command.includes('forceload remove'))
+const buildLoads = loads.filter(command => /forceload add -?\d+ -?\d+ -?\d+ -?\d+$/.test(command))
+const buildUnloads = unloads.filter(command => /forceload remove -?\d+ -?\d+ -?\d+ -?\d+$/.test(command))
 const clears = commands.filter(command => command.includes(' run fill ') && command.endsWith(' minecraft:air'))
 const manifest = sandbox.global.TNC_TOWN_MANIFEST
 
@@ -113,8 +129,10 @@ const checks = failedPlaceNumber > 0 ? [
   [errors.length === 0, `runtime errors: ${errors.join('; ')}`],
   [places.length === manifest.pieceCount, `places=${places.length}, expected=${manifest.pieceCount}`],
   [pieceNames.size === manifest.pieceCount, `unique pieces=${pieceNames.size}`],
-  [loads.length === manifest.operationCounts.load, `loads=${loads.length}`],
-  [unloads.length === manifest.operationCounts.unload, `unloads=${unloads.length}`],
+  [buildLoads.length === manifest.operationCounts.load, `build loads=${buildLoads.length}`],
+  [buildUnloads.length === manifest.operationCounts.unload, `build unloads=${buildUnloads.length}`],
+  [loads.length === unloads.length, `force-load leak: loads=${loads.length}, unloads=${unloads.length}`],
+  [forcedSurveyChunks.size === 0, `survey force-load leak: ${forcedSurveyChunks.size} chunk(s)`],
   [clears.length === manifest.operationCounts.clear + 1, `air fills=${clears.length}`],
   [serverData.getInt('tnc_initial_town_generation_version') === manifest.version, 'generation version was not saved'],
   [teleports.length === 1, `teleports=${teleports.length}`],
