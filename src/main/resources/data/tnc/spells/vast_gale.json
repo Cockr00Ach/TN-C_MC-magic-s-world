@@ -20,7 +20,7 @@
           "perks": { "pierce": 0 },
           "client_data": {
             "travel_particles": [ { "particle_id": "sweep_attack", "shape": "CIRCLE", "rotation": "LOOK", "origin": "CENTER", "count": 3.0, "min_speed": 0.0, "max_speed": 0.1 } ],
-            "model": { "model_id": "tnc:projectile/fire_ray", "orientation": "TOWARDS_MOTION", "scale": 0.9 }
+            "model": { "model_id": "tnc:projectile/lightingball", "orientation": "TOWARDS_MOTION", "scale": 0.9 }
           }
         }
       }
