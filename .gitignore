@@ -82,3 +82,8 @@ forge*changelog.txt
 *.bak
 *.tmp
 ~$*
+
+# 稳定的 JDK（构建用，体积大，不进仓库）
+.jdk17/
+.dsh-tmp/
+*.log.gz
