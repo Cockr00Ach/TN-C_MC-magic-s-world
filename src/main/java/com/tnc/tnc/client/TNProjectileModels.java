@@ -53,10 +53,15 @@ public final class TNProjectileModels {
     private static void register() {
         try {
             net.spell_engine.api.render.CustomModels.registerModelIds(java.util.List.of(
-                    ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/lightingball"),
-                    ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/thunder_ball"),
-                    ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/thunder_orb")));
-            LOGGER.info("TN-C: registered 3 projectile model id(s) to SpellEngine");
+                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/fire_ball"),
+                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/fire_ray"),
+                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/bolt_copy"),
+                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/thunder_ball"),
+                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/thunder_ball_min"),
+                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/thunder_orb"),
+                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/thunder_probe2"),
+                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/lightingball")));
+            LOGGER.info("TN-C: registered TN-C projectile model id(s) to SpellEngine");
         } catch (Throwable t) {
             LOGGER.warn("TN-C: projectile model registration skipped ({})", t.toString());
         }
