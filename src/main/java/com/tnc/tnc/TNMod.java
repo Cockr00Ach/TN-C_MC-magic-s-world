@@ -28,6 +28,27 @@ import org.slf4j.Logger;
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(TNMod.MODID)
 public class TNMod
+
+    static {
+        // 投射物模型登记 —— 必须早于"客户端资源重载/模型烘焙"。
+        // 实测时序（logs/latest.log）：22:19:38 Reloading ResourceManager（模型此刻烘焙）
+        //                            22:19:50 onClientSetup（之前放这里，太晚 ✗）
+        // 根因（反编译 SpellEngine 0.15.12）：渲染投射物时直接查已烘焙模型
+        //   getModelManager().getModel(modelId)；而 MC 只烘焙被 blockstate/item 引用过的模型，
+        //   我们独立的 models/projectile/*.json 无人引用 -> 从不烘焙 -> 查不到 -> 紫黑方块。
+        // SpellEngine 公开 API CustomModels.registerModelIds(...) 会把模型号登记进它的表，
+        //   资源重载时一起烘焙。静态块在类加载时执行，早于一切资源重载。
+        if (net.minecraftforge.fml.loading.FMLEnvironment.dist.isClient()) {
+            try {
+                net.spell_engine.api.render.CustomModels.registerModelIds(java.util.List.of(
+                        net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(MODID, "projectile/lightingball"),
+                        net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(MODID, "projectile/thunder_ball")));
+                LOGGER.info("TN-C: registered 2 projectile model id(s) to SpellEngine (static init)");
+            } catch (Throwable t) {
+                LOGGER.warn("TN-C: projectile model registration skipped ({})", t.toString());
+            }
+        }
+    }
 {
     // Define mod id in a common place for everything to reference
     public static final String MODID = "tnc";
