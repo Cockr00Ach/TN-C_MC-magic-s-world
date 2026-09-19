@@ -24,7 +24,7 @@
           "homing_angle": 0.0,
           "client_data": {
             "travel_particles": [ { "particle_id": "spell_engine:electric_arc_a", "shape": "CIRCLE", "rotation": "LOOK", "origin": "CENTER", "count": 4.0, "min_speed": 0.0, "max_speed": 0.15 } ],
-            "model": { "model_id": "tnc:projectile/lightingball", "light_emission": "RADIATE", "scale": 5.0 }
+            "model": { "model_id": "loot_n_explore:projectile/small_avalanche", "light_emission": "RADIATE", "scale": 5.0 }
           }
         }
       }

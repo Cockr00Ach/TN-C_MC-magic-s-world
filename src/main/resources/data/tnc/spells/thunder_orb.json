@@ -17,7 +17,7 @@
         "projectile": {
           "homing_angle": 0.5,
           "client_data": {
-              "model": { "model_id": "tnc:projectile/lightingball", "scale": 0.8 },
+              "model": { "model_id": "loot_n_explore:projectile/small_avalanche", "scale": 0.8 },
             "travel_particles": [ { "particle_id": "spell_engine:electric_arc_a", "shape": "SPHERE", "rotation": "LOOK", "origin": "CENTER", "count": 18.0, "min_speed": 0.05, "max_speed": 0.35 } ]
           }
         }

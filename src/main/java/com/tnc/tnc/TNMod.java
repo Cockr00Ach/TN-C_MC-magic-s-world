@@ -140,6 +140,22 @@ public class TNMod
         public static void onClientSetup(FMLClientSetupEvent event)
         {
             LOGGER.info("TN-C client setup, player = {}", Minecraft.getInstance().getUser().getName());
+
+            // ★ 关键一步：把我们的投射物模型【登记】给 SpellEngine。
+            //   原因（反编译 SpellEngine 0.15.12 得到）：
+            //     SpellEngine 渲染投射物时直接查"已烘焙的模型"(ModelManager.getModel(modelId))，
+            //     而 Minecraft 只烘焙被 blockstate/item 引用过的模型 —— 我们那个独立的
+            //     models/projectile/*.json 没人引用，从未被烘焙 → 查不到 → 渲染成紫黑方块。
+            //     别人的模组能用，是因为它们初始化时调用过这个 API 把自己的模型号登记进去。
+            //   登记后即可使用【我们自己的】路径，不影响任何别人的法术。
+            try {
+                net.spell_engine.api.render.CustomModels.registerModelIds(java.util.List.of(
+                        net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(MODID, "projectile/lightingball"),
+                        net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(MODID, "projectile/thunder_ball")));
+                LOGGER.info("TN-C: registered 2 projectile model id(s) to SpellEngine");
+            } catch (Throwable t) {
+                LOGGER.warn("TN-C: projectile model registration skipped ({})", t.toString());
+            }
         }
 
         /**
