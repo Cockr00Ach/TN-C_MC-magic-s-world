@@ -19,7 +19,7 @@
           "perks": { "pierce": 1 },
           "client_data": {
             "travel_particles": [ { "particle_id": "bubble", "shape": "CIRCLE", "rotation": "LOOK", "origin": "CENTER", "count": 3.0, "min_speed": 0.0, "max_speed": 0.1 } ],
-            "model": { "model_id": "tnc:projectile/lightingball", "scale": 0.9 }
+            "model": { "model_id": "tnc:projectile/waterball", "scale": 0.9 }
           }
         }
       }

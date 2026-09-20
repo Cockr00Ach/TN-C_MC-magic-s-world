@@ -38,6 +38,12 @@ public final class TNProjectileModels {
     private static final Logger LOGGER = LogManager.getLogger("TN-C/models");
 
     static {
+        // 先注册"模型载体物品"（投射物用物品 id 兜底渲染，见 TNProjectileCarriers 的说明）
+        try {
+            com.tnc.tnc.magic.TNProjectileCarriers.register();
+        } catch (Throwable t) {
+            LOGGER.warn("TN-C: carrier item registration skipped ({})", t.toString());
+        }
         register();
     }
 
@@ -60,7 +66,9 @@ public final class TNProjectileModels {
                     net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/thunder_ball_min"),
                     net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/thunder_orb"),
                     net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/thunder_probe2"),
-                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/lightingball")));
+                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/fireball"),
+                    ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/waterball"),
+                    ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/lightingball")));
             LOGGER.info("TN-C: registered TN-C projectile model id(s) to SpellEngine");
         } catch (Throwable t) {
             LOGGER.warn("TN-C: projectile model registration skipped ({})", t.toString());

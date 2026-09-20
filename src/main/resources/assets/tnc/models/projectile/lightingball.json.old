@@ -2,8 +2,8 @@
 	"format_version": "1.9.0",
 	"credit": "Made with Blockbench",
 	"textures": {
-		"0": "tnc:spell_projectile/thunder_orb",
-		"particle": "tnc:spell_projectile/thunder_orb"
+		"0": "tnc:spell_projectile/lightingball",
+		"particle": "tnc:spell_projectile/lightingball"
 	},
 	"elements": [
 		{

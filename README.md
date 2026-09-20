@@ -3,12 +3,61 @@
 Minecraft 1.20.1 / Forge 47.4.22 的魔改工程。给整合包 **元素觉醒 1.4.3** 加一套自研的
 **魔法石 + 法杖** 体系，取代原来"卷轴 + 法术注册台"那一套。
 
-当前阶段：**雷系 5 个法术已可用**（小闪电 / 雷场 / 雷击 / 雷暴 / 天打五雷轰），
-魔力值真正参与施法（施法前硬拦截，不是事后补扣）。
+当前阶段：**六系 108 个法术已可用**（雷/火/风各 3 条链、水/土/暗各 4 条链），
+魔法石界面 + 法杖施法已跑通，魔力值真正参与施法（施法前硬拦截，不是事后补扣）。
+**原作者的任务内容已全部清空** ✅（2026-09-21，范围 B）：工作区与游戏实例的 `chapters\` 均为空，
+FTB 任务界面**没有任何残留**；玩家可见的任务将**只有我们写的**。
+剧情文本以 `剧情总纲.md` 为准，任务正文由 **任务系统BBB** 实施。
+
+### 📢 待办派单（2026-09-21 · 编剧系统 AAA 提出 → 交 任务系统BBB 执行）✅ 已执行完毕
+
+> **用户决定：原作者的任务内容彻底删干净（范围 B）。** 流程记录：编剧系统 AAA 先查证并请示 →
+> 用户选定「6 章图鉴类 + `archive/author-quest-content/` 归档 **全删**」且指定「由任务系统BBB 动手」。
+> 编剧系统 AAA 只产文本、不实现，故在此派单 ✓。
+> **执行结果**：5 条全部完成 ✅ —— 见下方"执行记录"。
+
+| # | 动作 | 目标 | 备注 |
+|---|---|---|---|
+| 1 | 删工作区 6 章 | `modpack\<包>\config\ftbquests\quests\chapters\` 下 `3061DAB8FCCB715B`(食物列表统计) `boss`(Boss分类) `37C8437D5B9D0F18`(冠军词条) `500552A3129FF14C`(驯龙指南) `2032E61CAD845DDF`(鸣谢名单) `e`(注意事项) | 删后 FTB 任务界面应**为空** |
+| 2 | 删游戏实例同样 6 章 | `E:\...\versions\元素觉醒1.4.3-魔改版-20260915\config\ftbquests\quests\chapters\` | ⚠️ `config/` 不在 sync 范围，**必须手删**，否则游戏里还能看见 |
+| 3 | 删整个归档 | `archive/author-quest-content/`（14 文件，已进 git）| ~~🔴 **不可逆**：原始 zip 内 0 个 ftbquests 章节，别处再无副本~~ → **见下方更正 ✗** |
+| 4 | 补 `.gitignore` 例外 | 撤销 `!archive/author-quest-content/` 这条唯一例外 | 归档没了，例外就是死规则 |
+| 5 | 收尾核对 | 分组文件、悬空引用 | 4 个分组里若 `世界地图`/`挑战目录`/`休闲分类` 因此变空，一并处理；检查有无指向已删章节的 NPC 绑定 |
+
+> #### ✗ 第 3 条前提错误 —— 已由任务系统BBB 实测更正（2026-09-21）
+>
+> 原文写「原始 zip 内 **0 个** ftbquests 章节 …… 别处再无副本」，**与事实相反**。
+> 实测（`tar -tf` 原始包 + 逐文件 MD5 比对）：
+>
+> - `元素觉醒1.4.3-魔改版-20260915.zip`（1.6 GB / **8399 条目**，本地保留、未删）里
+>   **完整带着 `config/ftbquests/quests/`**：全部 **16 个章节** + `chapter_groups.snbt` +
+>   `data.snbt` + 3 张 `reward_tables` + `config/whisperingquests/ftbq_bindings.json` + `config/p1nero_dl-client.toml`。
+> - 我们把**被删的全部 16 章**逐一从 zip 解出与手上副本比对：**16/16 哈希一致，0 失败**。
+> - 结论：**删这份归档并不是"不可逆"** —— 随时能从本地 zip 重新解出来，信息不会丢。
+>
+> 只是因为用户已确认按范围 B 全删，第 3 条**照原样执行**了 ✓。
+> （`Medieval Town.rar` 那条线索无关：它是存档，里面没有任务章节 ✓）
+
+> #### ✅ 执行记录（任务系统BBB，2026-09-21）
+>
+> | # | 结果 |
+> |---|---|
+> | 1 | 工作区 `chapters\` **0 章** ✓ |
+> | 2 | 游戏实例 `chapters\` **0 章** ✓（手删，`sync` 不负责删）|
+> | 3 | 归档已删 ✓（删前已完成 16/16 可还原性验证，见上）|
+> | 4 | `.gitignore` 例外已撤销 ✓ |
+> | 5 | `chapter_groups.snbt` → `chapter_groups: [ ]`；`ftbq_bindings.json` → `bindings: {}`（原剩 3 条所绑任务全在已删章节里）；两文件已 `sync push` 到实例并**哈希核对一致** ✓；两个存档的 `ftbquests` 进度已清 ✓ |
+>
+> **验收**：工作区与游戏实例的 `chapters\` 目录**均为空** ✓
 
 > 📌 **每天开工前先看 [`docs/daily-workflow.md`](docs/daily-workflow.md)** ——
 > 里面有一次性设置、日常命令、提交推送流程、以及"出问题对照表"，
 > 可以直接复制粘贴，也可以打印出来贴屏幕上。
+>
+> 📌 **现在做到哪了** → [`docs/当前状态.md`](docs/当前状态.md)（技术唯一事实来源，法术系统YYY 维护）。
+> 📌 **故事是什么、任务怎么写** → [`剧情总纲.md`](剧情总纲.md)（剧情唯一事实来源，**编剧系统 AAA** 维护）。
+> 📌 **任务系统的坑与流程** → [`docs/任务系统_交接.md`](docs/任务系统_交接.md)（**任务系统BBB** 维护）。
+> 　　各文档首行都写明**维护者与归属**，改别人负责的文件前先打招呼。
 
 ---
 
@@ -155,3 +204,29 @@ git push -u origin 你的分支名
 以及每条结论是怎么验证出来的**。改代码前值得先扫一遍 ——
 里面记录了好几个"编译通过但运行时静默失效"的陷阱（mixin / spell_assignments /
 客户端-服务端同步），照着它走能省很多时间。
+
+---
+
+## 多专题协作约定
+
+- **法术系统YYY**：docs/当前状态.md、docs/法术专题_交接.md、docs/投射物模型_配方.md、docs/法术制作与测试.md、docs/特殊魔法_设计.md、docs/法术总表_按设计文档.md、docs/美术资产清单.md、docs/实施进度.md、docs/项目交接.md、docs/验收表.md、docs/导图_全法术.png、src/main/java/com/tnc/tnc/magic/**、src/main/java/com/tnc/tnc/client/**、src/main/resources/data/tnc/spells/**、src/main/resources/assets/tnc/**、tools/gen_tnc_*.ps1、tools/verify_mod_jar.ps1、tools/install-to-pack.ps1。
+- **编剧系统 AAA**（agent dsh · 会话主题「文书」）：剧情唯一事实来源 `剧情总纲.md`。**只产文本，不实现** —— 新机制/新物品写「需求单」。
+- **地图/结构专题**：docs/地图接入进度.md、地图生成/结构资产相关文件。
+- **任务系统BBB**（agent dsh · 会话主题「任务系统BBB」）：`docs/任务系统_交接.md`、`config/ftbquests/quests/chapters/**`、`config/ftbquests/quests/chapter_groups.snbt`、`config/whisperingquests/ftbq_bindings.json`、`archive/author-quest-content/**`。
+  - **职责**：把编剧系统 AAA 的剧情文本**实施**成 FTB 任务正文（`剧情总纲.md` §零 写明"把任务写进 `config/ftbquests/` —— 队友实施"）。
+  - **不碰**：法术/数值/美术（法术系统YYY）、剧情设定与文案（编剧系统 AAA）、地图与结构资产（地图专题）。
+- 每份文档都应带**维护者署名头** ✓；全局状态**只维护 docs/当前状态.md 一页** ✓。
+
+### ⚠️ 任务系统专题的一条基建缺口（2026-09-21，任务系统BBB 提出）
+
+`.gitignore` 里的 `modpack/*/config/*` **把 `config/ftbquests/` 整个排除了** →
+**我们新写的 FTB 章节不会进版本库**：换机就丢、也没法和队友共享，只能手工搬进整合包。
+
+作者原有的章节就是这个下场（见下），别再让我们的正文重演：
+
+- 2026-09-21 按计划把作者原有的**剧情/教学类 10 章**移出工作区，移走后才确认
+  **它们从未进过 git**，`git checkout` 也救不回来 → 现唯一副本是
+  `archive/author-quest-content/`（已为它开了 `.gitignore` 唯一例外，提交 `b707a43`）。
+- **需求（待拍板）**：给 `config/ftbquests/quests/` 也放开一个例外，纳入版本控制。
+  不做的话，任务系统的产出就是"**不在仓库里的仓库内容**" ✓。
+
