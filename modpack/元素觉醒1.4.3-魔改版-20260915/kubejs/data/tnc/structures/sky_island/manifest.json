@@ -1,0 +1,5511 @@
+{
+  "version": 5,
+  "data_version": 3105,
+  "seed": 92695113714521,
+  "dimensions": [
+    520,
+    220,
+    520
+  ],
+  "world_origin_y": 90,
+  "surface_local_y": 84,
+  "town_offset": [
+    120,
+    53,
+    92
+  ],
+  "town_center_local": [
+    240,
+    90,
+    260
+  ],
+  "arrival_local": [
+    209,
+    90,
+    424
+  ],
+  "root_tips": [
+    [
+      382,
+      4,
+      302
+    ],
+    [
+      349,
+      6,
+      382
+    ],
+    [
+      303,
+      24,
+      350
+    ],
+    [
+      238,
+      9,
+      413
+    ],
+    [
+      81,
+      26,
+      364
+    ],
+    [
+      34,
+      17,
+      303
+    ],
+    [
+      136,
+      17,
+      195
+    ],
+    [
+      212,
+      9,
+      24
+    ],
+    [
+      314,
+      27,
+      113
+    ],
+    [
+      366,
+      28,
+      164
+    ]
+  ],
+  "portal_templates": {
+    "ground_portal": "tnc:sky_island/portal/ground_portal",
+    "island_portal": "tnc:sky_island/portal/island_portal"
+  },
+  "piece_count": 301,
+  "non_air_blocks": 6923333,
+  "block_entities": 2183,
+  "layer_counts": {
+    "shell": 131,
+    "town": 100,
+    "detail": 70
+  },
+  "pieces": [
+    {
+      "layer": "shell",
+      "name": "shell_0_0_6",
+      "resource": "tnc:sky_island/shell/shell_0_0_6",
+      "offset": [
+        0,
+        0,
+        288
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 1866,
+      "block_entities": 0,
+      "sha256": "5070db1498efd4016b89512a1a0afccc91ee166656da8a749d11b74389003ec0"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_1_0_7",
+      "resource": "tnc:sky_island/shell/shell_1_0_7",
+      "offset": [
+        48,
+        0,
+        336
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 1407,
+      "block_entities": 0,
+      "sha256": "09a53228ca8ac600241e1a51381087e95145539e171b069be1679ed5130723f6"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_1_0_8",
+      "resource": "tnc:sky_island/shell/shell_1_0_8",
+      "offset": [
+        48,
+        0,
+        384
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 31,
+      "block_entities": 0,
+      "sha256": "5ff9b838878eea46fd0faab66c99fb6a47e55567bac5cab9a41f8fd219e115dc"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_2_0_3",
+      "resource": "tnc:sky_island/shell/shell_2_0_3",
+      "offset": [
+        96,
+        0,
+        144
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 2461,
+      "block_entities": 0,
+      "sha256": "36139449e14f4ab52bd3cdd4b8d8ebef2e9459c8dc661a06b4203df266265454"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_2_0_4",
+      "resource": "tnc:sky_island/shell/shell_2_0_4",
+      "offset": [
+        96,
+        0,
+        192
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 154,
+      "block_entities": 0,
+      "sha256": "6c565452cdc8ffecc24a90ec0f371a0bbcd37134057960c06049fbc0206d4d30"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_4_0_0",
+      "resource": "tnc:sky_island/shell/shell_4_0_0",
+      "offset": [
+        192,
+        0,
+        0
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 2327,
+      "block_entities": 0,
+      "sha256": "b6a052f95443285ce9427ad86a643e50b40082b29b7fc2a8fb82470dd5335a87"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_4_0_7",
+      "resource": "tnc:sky_island/shell/shell_4_0_7",
+      "offset": [
+        192,
+        0,
+        336
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 6,
+      "block_entities": 0,
+      "sha256": "c78a893545a6a2500d07ff0cf6b17f98161f3b29165bab530e6a0b42f1377090"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_4_0_8",
+      "resource": "tnc:sky_island/shell/shell_4_0_8",
+      "offset": [
+        192,
+        0,
+        384
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 5979,
+      "block_entities": 0,
+      "sha256": "2a25fd059a2b5131ad630a788a40ef6326f81b4a8ae6fc85026841a46b3f81f4"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_5_0_8",
+      "resource": "tnc:sky_island/shell/shell_5_0_8",
+      "offset": [
+        240,
+        0,
+        384
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 92,
+      "block_entities": 0,
+      "sha256": "151883879d2c9606a51be90e662a431cb773a321a6b35c87180e40a11369778e"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_6_0_1",
+      "resource": "tnc:sky_island/shell/shell_6_0_1",
+      "offset": [
+        288,
+        0,
+        48
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 2080,
+      "block_entities": 0,
+      "sha256": "5c9a751e519df781e0eaec1998ae388d717e7a4f081a16c791eb24202364e9fe"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_6_0_2",
+      "resource": "tnc:sky_island/shell/shell_6_0_2",
+      "offset": [
+        288,
+        0,
+        96
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 890,
+      "block_entities": 0,
+      "sha256": "f86ca1177e2217c5406a659b4e9886827862a4f185aecac94f8f3216c7588fa6"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_6_0_7",
+      "resource": "tnc:sky_island/shell/shell_6_0_7",
+      "offset": [
+        288,
+        0,
+        336
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 2700,
+      "block_entities": 0,
+      "sha256": "3ac4f0191670cf7fb7395890665065b36df2ccadfb20a77c9a5b3ff8c5f49a9a"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_6_0_8",
+      "resource": "tnc:sky_island/shell/shell_6_0_8",
+      "offset": [
+        288,
+        0,
+        384
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 1945,
+      "block_entities": 0,
+      "sha256": "6e0e40c9de7c4eb3d65f850a7617d25a857d91efe9a845ea13f3f0c248440bff"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_7_0_3",
+      "resource": "tnc:sky_island/shell/shell_7_0_3",
+      "offset": [
+        336,
+        0,
+        144
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 583,
+      "block_entities": 0,
+      "sha256": "dbb1c859295cb47902436cf302c6ea42e3c3c1b736f7c09fe35e55660bd5f2cf"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_7_0_6",
+      "resource": "tnc:sky_island/shell/shell_7_0_6",
+      "offset": [
+        336,
+        0,
+        288
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 135,
+      "block_entities": 0,
+      "sha256": "673bf7182be6281623b4e1184c35897d5350163e4ae7bf4ecc6b904fdfb83d11"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_7_0_7",
+      "resource": "tnc:sky_island/shell/shell_7_0_7",
+      "offset": [
+        336,
+        0,
+        336
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 2105,
+      "block_entities": 0,
+      "sha256": "bc7598e120d09ccdd4515285ee45fecae35920238658430fbc6486860c363543"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_7_0_8",
+      "resource": "tnc:sky_island/shell/shell_7_0_8",
+      "offset": [
+        336,
+        0,
+        384
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 3523,
+      "block_entities": 0,
+      "sha256": "e9d244370d4026d927231abf7118e81099e44f981f484b49ca074e625b335de4"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_8_0_3",
+      "resource": "tnc:sky_island/shell/shell_8_0_3",
+      "offset": [
+        384,
+        0,
+        144
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 1078,
+      "block_entities": 0,
+      "sha256": "2704d9325a2afaef17107a8a494389902013d30419fc1fc1231837328d2a33db"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_8_0_5",
+      "resource": "tnc:sky_island/shell/shell_8_0_5",
+      "offset": [
+        384,
+        0,
+        240
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 682,
+      "block_entities": 0,
+      "sha256": "b29bdedc0aa57fb163261245827d3a5e2aa8e08e329edaedc652cce603a08ae0"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_8_0_6",
+      "resource": "tnc:sky_island/shell/shell_8_0_6",
+      "offset": [
+        384,
+        0,
+        288
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 4848,
+      "block_entities": 0,
+      "sha256": "77c859cf372b2ead57eae00fa2cc47ef133b18c2a8353152fc8f9dddfad4f10a"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_8_0_7",
+      "resource": "tnc:sky_island/shell/shell_8_0_7",
+      "offset": [
+        384,
+        0,
+        336
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 1158,
+      "block_entities": 0,
+      "sha256": "c1b69d03fff8f7f4aa5747c6ac6ced6867187dbee343e6feabf2386e5a476d08"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_8_0_8",
+      "resource": "tnc:sky_island/shell/shell_8_0_8",
+      "offset": [
+        384,
+        0,
+        384
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 694,
+      "block_entities": 0,
+      "sha256": "0b4644326fb1ddb00912661375f66ef91c00c157347304098b4f355a1a0e0bd5"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_0_1_2",
+      "resource": "tnc:sky_island/shell/shell_0_1_2",
+      "offset": [
+        0,
+        48,
+        96
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 2012,
+      "block_entities": 0,
+      "sha256": "c865aae72c4f4af291b32fb4d244575e3953856f5782a26eac7446db589b8d12"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_0_1_3",
+      "resource": "tnc:sky_island/shell/shell_0_1_3",
+      "offset": [
+        0,
+        48,
+        144
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 16357,
+      "block_entities": 0,
+      "sha256": "4a0a5336a8b3ce30086ceaca9329271ee4933fff3fe0d6a2af578470c97f9250"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_0_1_4",
+      "resource": "tnc:sky_island/shell/shell_0_1_4",
+      "offset": [
+        0,
+        48,
+        192
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 26447,
+      "block_entities": 0,
+      "sha256": "6806776328dd3ba7023b523bf4c595b1f1bead9a1221d95febd309d6c4755c9c"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_0_1_5",
+      "resource": "tnc:sky_island/shell/shell_0_1_5",
+      "offset": [
+        0,
+        48,
+        240
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 29602,
+      "block_entities": 0,
+      "sha256": "33b43d2fab192cf2ae5717ef025fb0d4a510163ab9cc71b1ed99927333caa742"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_0_1_6",
+      "resource": "tnc:sky_island/shell/shell_0_1_6",
+      "offset": [
+        0,
+        48,
+        288
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 28400,
+      "block_entities": 0,
+      "sha256": "06e7cd91fdd38d9befcd352e0b3f8478316ed54a6457437a0b93bae8c8eebfeb"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_0_1_7",
+      "resource": "tnc:sky_island/shell/shell_0_1_7",
+      "offset": [
+        0,
+        48,
+        336
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 16830,
+      "block_entities": 0,
+      "sha256": "84d2f394118698c7f61b7e73eecde3910447dc65961dfe06d362c1f2fadce0d2"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_0_1_8",
+      "resource": "tnc:sky_island/shell/shell_0_1_8",
+      "offset": [
+        0,
+        48,
+        384
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 1805,
+      "block_entities": 0,
+      "sha256": "a48d408b29914d730861804ec7cde1c44746016af3b7bb04b3ed9b7c4cea0a76"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_1_1_1",
+      "resource": "tnc:sky_island/shell/shell_1_1_1",
+      "offset": [
+        48,
+        48,
+        48
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 6506,
+      "block_entities": 0,
+      "sha256": "a08f92fde2da8653e454f4ac96a77e117d691632a733bf369276fc643b02fe85"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_1_1_2",
+      "resource": "tnc:sky_island/shell/shell_1_1_2",
+      "offset": [
+        48,
+        48,
+        96
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 30515,
+      "block_entities": 0,
+      "sha256": "84a1701d8b7c560ce26f5763986a13ce7ae473ff3b92e037316cebd11758ef3a"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_1_1_3",
+      "resource": "tnc:sky_island/shell/shell_1_1_3",
+      "offset": [
+        48,
+        48,
+        144
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 37358,
+      "block_entities": 0,
+      "sha256": "63c71636fa50b4bb973008fdfeda3188a8e9e214c4fa2d3e0865379cb1dc3fb1"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_1_1_4",
+      "resource": "tnc:sky_island/shell/shell_1_1_4",
+      "offset": [
+        48,
+        48,
+        192
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 38447,
+      "block_entities": 0,
+      "sha256": "0c25bc062b6d9b19f085940be4310cce31b731c3dc8c4443dcbe88ffbe2ce4ee"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_1_1_5",
+      "resource": "tnc:sky_island/shell/shell_1_1_5",
+      "offset": [
+        48,
+        48,
+        240
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 38830,
+      "block_entities": 0,
+      "sha256": "0ecbabca97009105622c3e35a1e6e4c9989d4deadb6585c11e9db89ce8a9a4b5"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_1_1_6",
+      "resource": "tnc:sky_island/shell/shell_1_1_6",
+      "offset": [
+        48,
+        48,
+        288
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 40475,
+      "block_entities": 0,
+      "sha256": "041c2ac2f56367191d0c7656060c072130c9adb3963d1baebc6fc713cc3c522e"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_1_1_7",
+      "resource": "tnc:sky_island/shell/shell_1_1_7",
+      "offset": [
+        48,
+        48,
+        336
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 38963,
+      "block_entities": 0,
+      "sha256": "272192229d37c7050c5cfab5da485b5050ac23a7803760f8e427219fc99a0170"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_1_1_8",
+      "resource": "tnc:sky_island/shell/shell_1_1_8",
+      "offset": [
+        48,
+        48,
+        384
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 29207,
+      "block_entities": 0,
+      "sha256": "a0f85edade7d6b636d465c50d35898bb9e53113d9472efa4ae9fdac56f756fe4"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_1_1_9",
+      "resource": "tnc:sky_island/shell/shell_1_1_9",
+      "offset": [
+        48,
+        48,
+        432
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 4380,
+      "block_entities": 0,
+      "sha256": "1d1e672f307099b6f7ec424d616d2b4af8785be6f1a1751b210599e0809a6f0a"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_2_1_0",
+      "resource": "tnc:sky_island/shell/shell_2_1_0",
+      "offset": [
+        96,
+        48,
+        0
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 3459,
+      "block_entities": 0,
+      "sha256": "2e14e4dccbd6f8f7c13078e952d473540c00602805ee7cd091dfbab1f00da53f"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_2_1_1",
+      "resource": "tnc:sky_island/shell/shell_2_1_1",
+      "offset": [
+        96,
+        48,
+        48
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 30192,
+      "block_entities": 0,
+      "sha256": "4d8506157c752bf2c3a2dbd095351757894504ca7cf4ca173868fa1168ed09d3"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_2_1_2",
+      "resource": "tnc:sky_island/shell/shell_2_1_2",
+      "offset": [
+        96,
+        48,
+        96
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 39419,
+      "block_entities": 0,
+      "sha256": "ab74186c0e64885e718bac635cc3bca60b73fd91131a8dd82f1386804020d34d"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_2_1_3",
+      "resource": "tnc:sky_island/shell/shell_2_1_3",
+      "offset": [
+        96,
+        48,
+        144
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 46683,
+      "block_entities": 0,
+      "sha256": "af5600a47b97657b6c0a9530646a85a538c98e550bdb4077766ae89dc8e63e98"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_2_1_4",
+      "resource": "tnc:sky_island/shell/shell_2_1_4",
+      "offset": [
+        96,
+        48,
+        192
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 46290,
+      "block_entities": 0,
+      "sha256": "059376fdfb654ab318cb7095a80004ebcb727cf8f2a1e716c41c91118562ef80"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_2_1_5",
+      "resource": "tnc:sky_island/shell/shell_2_1_5",
+      "offset": [
+        96,
+        48,
+        240
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 46631,
+      "block_entities": 0,
+      "sha256": "840fa1811a5d4426ddc973e350515329838d8d437d4deaeb4a742b8612fb0c67"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_2_1_6",
+      "resource": "tnc:sky_island/shell/shell_2_1_6",
+      "offset": [
+        96,
+        48,
+        288
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 46749,
+      "block_entities": 0,
+      "sha256": "011a33fc2a8b356e4e21d801a1a614f638732307a0a6827631d20dc873b72aec"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_2_1_7",
+      "resource": "tnc:sky_island/shell/shell_2_1_7",
+      "offset": [
+        96,
+        48,
+        336
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 46571,
+      "block_entities": 0,
+      "sha256": "fa0532741ba32418808ef1b5d8993a840f9b498d9c069f06dfa54af15110f3ff"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_2_1_8",
+      "resource": "tnc:sky_island/shell/shell_2_1_8",
+      "offset": [
+        96,
+        48,
+        384
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 39226,
+      "block_entities": 0,
+      "sha256": "86c7bad6eb0a8fbc4824b7a5271b3dc7178a030c52061b43cf22c4f910ebdd2a"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_2_1_9",
+      "resource": "tnc:sky_island/shell/shell_2_1_9",
+      "offset": [
+        96,
+        48,
+        432
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 27350,
+      "block_entities": 0,
+      "sha256": "c6466d219d419599223c888cd6729987eb07edf6ec765ae187ce3d974ca89295"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_2_1_10",
+      "resource": "tnc:sky_island/shell/shell_2_1_10",
+      "offset": [
+        96,
+        48,
+        480
+      ],
+      "size": [
+        48,
+        48,
+        40
+      ],
+      "blocks": 1086,
+      "block_entities": 0,
+      "sha256": "450fa9d5316f189b97f4dcff95a63d0833fa4a9162bd1ab2d12623da5af16942"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_3_1_0",
+      "resource": "tnc:sky_island/shell/shell_3_1_0",
+      "offset": [
+        144,
+        48,
+        0
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 19191,
+      "block_entities": 0,
+      "sha256": "be5987e2ddc031729cd5cc545943b40120bbb955ad795974574eb220d41d26f4"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_3_1_1",
+      "resource": "tnc:sky_island/shell/shell_3_1_1",
+      "offset": [
+        144,
+        48,
+        48
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 38318,
+      "block_entities": 0,
+      "sha256": "985e54303d4206ad262ac1a1b0ad13bb88f57794e4c0e1e44d74ec826470108a"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_3_1_2",
+      "resource": "tnc:sky_island/shell/shell_3_1_2",
+      "offset": [
+        144,
+        48,
+        96
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 47104,
+      "block_entities": 0,
+      "sha256": "a6f27e5f7a34935d42b54fd70c32ffc9a622e9dba74ba2d70ca960785f38ebe9"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_3_1_3",
+      "resource": "tnc:sky_island/shell/shell_3_1_3",
+      "offset": [
+        144,
+        48,
+        144
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 52917,
+      "block_entities": 0,
+      "sha256": "9a176fa6aff1d81a9bfb4a29bb2b444379d95dbc235725898ab98b1691f05265"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_3_1_4",
+      "resource": "tnc:sky_island/shell/shell_3_1_4",
+      "offset": [
+        144,
+        48,
+        192
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 56216,
+      "block_entities": 0,
+      "sha256": "089d4e9b851aa4872901cba860b4b6171cf3cff96cb96a71f2f97e1bffc84af6"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_3_1_5",
+      "resource": "tnc:sky_island/shell/shell_3_1_5",
+      "offset": [
+        144,
+        48,
+        240
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 57886,
+      "block_entities": 0,
+      "sha256": "c89e426d7ebb08a3b267e7ca921e62c835b53b95dcf07bf94aedc0ff30dd5741"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_3_1_6",
+      "resource": "tnc:sky_island/shell/shell_3_1_6",
+      "offset": [
+        144,
+        48,
+        288
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 57271,
+      "block_entities": 0,
+      "sha256": "1b416b4ea232e79ddb1af87fbe6e1e24d5a803e4f4244b24772fd3837727534d"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_3_1_7",
+      "resource": "tnc:sky_island/shell/shell_3_1_7",
+      "offset": [
+        144,
+        48,
+        336
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 53912,
+      "block_entities": 0,
+      "sha256": "3ec16ad89d5b8f39434d14afacde5d18e55343ca553916712fa9d78879a89a5d"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_3_1_8",
+      "resource": "tnc:sky_island/shell/shell_3_1_8",
+      "offset": [
+        144,
+        48,
+        384
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 47221,
+      "block_entities": 0,
+      "sha256": "ca816fb75c919ff67bf8c8376de123c6845deab5a4bbb8c31c41cc8d3255043e"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_3_1_9",
+      "resource": "tnc:sky_island/shell/shell_3_1_9",
+      "offset": [
+        144,
+        48,
+        432
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 38299,
+      "block_entities": 0,
+      "sha256": "a119de997cb2ac7e70f9b3331ed6219864c5e41305ac39191f21b04acc22943a"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_3_1_10",
+      "resource": "tnc:sky_island/shell/shell_3_1_10",
+      "offset": [
+        144,
+        48,
+        480
+      ],
+      "size": [
+        48,
+        48,
+        40
+      ],
+      "blocks": 13209,
+      "block_entities": 0,
+      "sha256": "0df170343cf0aa723a6e1db4bca620f5b02eaea7c27b2ff66a5145df59e276f0"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_4_1_0",
+      "resource": "tnc:sky_island/shell/shell_4_1_0",
+      "offset": [
+        192,
+        48,
+        0
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 30018,
+      "block_entities": 0,
+      "sha256": "c566c3861e1b6456d161e8d2ca00ba7020db8dcaec6b333f0e91fb53662f59a7"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_4_1_1",
+      "resource": "tnc:sky_island/shell/shell_4_1_1",
+      "offset": [
+        192,
+        48,
+        48
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 43846,
+      "block_entities": 0,
+      "sha256": "20fe7ac86802d885bd4b515b46983d4d15ea3f62b83251d11272861c0cdf7ae1"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_4_1_2",
+      "resource": "tnc:sky_island/shell/shell_4_1_2",
+      "offset": [
+        192,
+        48,
+        96
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 51649,
+      "block_entities": 0,
+      "sha256": "28021e8a5185f79884a2adab3d0177610f9eddd4f95417023ab66575f5a31b54"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_4_1_3",
+      "resource": "tnc:sky_island/shell/shell_4_1_3",
+      "offset": [
+        192,
+        48,
+        144
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 59672,
+      "block_entities": 0,
+      "sha256": "221f30ce635b6f11ae8c74ff2c62f16cbace8eeaac7637ea1d9a070402821ecd"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_4_1_4",
+      "resource": "tnc:sky_island/shell/shell_4_1_4",
+      "offset": [
+        192,
+        48,
+        192
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 62422,
+      "block_entities": 0,
+      "sha256": "974fc23f1c5534181436555a936e0540d5de313fdec76b285d2952b86a897716"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_4_1_5",
+      "resource": "tnc:sky_island/shell/shell_4_1_5",
+      "offset": [
+        192,
+        48,
+        240
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 62208,
+      "block_entities": 0,
+      "sha256": "98a53845af9931f219816177f027810cbd5a98436b88d0007e12fe3881994629"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_4_1_6",
+      "resource": "tnc:sky_island/shell/shell_4_1_6",
+      "offset": [
+        192,
+        48,
+        288
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 63439,
+      "block_entities": 0,
+      "sha256": "138067b960d60c27dec09e5c44c9e0037dacc318e022148dd2cf7b1905031c3e"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_4_1_7",
+      "resource": "tnc:sky_island/shell/shell_4_1_7",
+      "offset": [
+        192,
+        48,
+        336
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 61587,
+      "block_entities": 0,
+      "sha256": "743a04788e8bf447f3fc1fc736f765bca77f52439dbd532b15b62dbd03181799"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_4_1_8",
+      "resource": "tnc:sky_island/shell/shell_4_1_8",
+      "offset": [
+        192,
+        48,
+        384
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 54302,
+      "block_entities": 0,
+      "sha256": "5bbb77df4f21dcdb67161effcb3a8f010d44befea83d1701c4252bb61c6e0c0d"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_4_1_9",
+      "resource": "tnc:sky_island/shell/shell_4_1_9",
+      "offset": [
+        192,
+        48,
+        432
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 41120,
+      "block_entities": 0,
+      "sha256": "fdc6e56a8ce6868943428c817ed5802e7b45c1127a08493cececcf2368da747d"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_4_1_10",
+      "resource": "tnc:sky_island/shell/shell_4_1_10",
+      "offset": [
+        192,
+        48,
+        480
+      ],
+      "size": [
+        48,
+        48,
+        40
+      ],
+      "blocks": 22331,
+      "block_entities": 0,
+      "sha256": "a8283083bfe4e5125558d2aa896d5740c40d3e19c121f75b720da5317bade094"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_5_1_0",
+      "resource": "tnc:sky_island/shell/shell_5_1_0",
+      "offset": [
+        240,
+        48,
+        0
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 28477,
+      "block_entities": 0,
+      "sha256": "872bc164cfd2e0bef1cbf4a8b8bf6c013a9526d745b25ce7d80ad0b2d3d8d806"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_5_1_1",
+      "resource": "tnc:sky_island/shell/shell_5_1_1",
+      "offset": [
+        240,
+        48,
+        48
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 40072,
+      "block_entities": 0,
+      "sha256": "b628d33cf824c5bef83e8c33386d6b935b00894ddaa599bda00bf59b61eda040"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_5_1_2",
+      "resource": "tnc:sky_island/shell/shell_5_1_2",
+      "offset": [
+        240,
+        48,
+        96
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 50052,
+      "block_entities": 0,
+      "sha256": "7e8ca9cbb452214b8819feabd658f9981b521ae0fb32c6b869807276d2787761"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_5_1_3",
+      "resource": "tnc:sky_island/shell/shell_5_1_3",
+      "offset": [
+        240,
+        48,
+        144
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 58952,
+      "block_entities": 0,
+      "sha256": "94f2b13a9b5445f64e63da389ca5cbe71fd0d2db250a28756ac0c050f34d178a"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_5_1_4",
+      "resource": "tnc:sky_island/shell/shell_5_1_4",
+      "offset": [
+        240,
+        48,
+        192
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 61437,
+      "block_entities": 0,
+      "sha256": "a0ff26425d69dd0969e0735b10bcd51dc04efcd620e886aabdf506d35f8d7c7f"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_5_1_5",
+      "resource": "tnc:sky_island/shell/shell_5_1_5",
+      "offset": [
+        240,
+        48,
+        240
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 60769,
+      "block_entities": 0,
+      "sha256": "c7325a9b89dc98b6337282bb4bb94b64c4b9cfe8fdcb534abf8693d5477ad2e6"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_5_1_6",
+      "resource": "tnc:sky_island/shell/shell_5_1_6",
+      "offset": [
+        240,
+        48,
+        288
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 62120,
+      "block_entities": 0,
+      "sha256": "c11b57638ebca510af82583f97017e19c239c8c9b907447707b08ebef9ad5a82"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_5_1_7",
+      "resource": "tnc:sky_island/shell/shell_5_1_7",
+      "offset": [
+        240,
+        48,
+        336
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 58439,
+      "block_entities": 0,
+      "sha256": "5ac7e3d390699aa217460f940e394ead3392ef6799fd2fa3ddfc74564c5becf6"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_5_1_8",
+      "resource": "tnc:sky_island/shell/shell_5_1_8",
+      "offset": [
+        240,
+        48,
+        384
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 49607,
+      "block_entities": 0,
+      "sha256": "ba3d70855b941012b5ce3da977306a980a9b5dedd1512c55b3ce2776e5a7926b"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_5_1_9",
+      "resource": "tnc:sky_island/shell/shell_5_1_9",
+      "offset": [
+        240,
+        48,
+        432
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 39042,
+      "block_entities": 0,
+      "sha256": "573bc9d90b6b9be9e2be2c6e4fb3ee80de71afd3f06e45b94891dc81f0d527fc"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_5_1_10",
+      "resource": "tnc:sky_island/shell/shell_5_1_10",
+      "offset": [
+        240,
+        48,
+        480
+      ],
+      "size": [
+        48,
+        48,
+        40
+      ],
+      "blocks": 22468,
+      "block_entities": 0,
+      "sha256": "2b14b52f895337c5b28d3fba761a74e039dbc004f23f75253e845da288b17851"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_6_1_0",
+      "resource": "tnc:sky_island/shell/shell_6_1_0",
+      "offset": [
+        288,
+        48,
+        0
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 22250,
+      "block_entities": 0,
+      "sha256": "904fc5844b67ba79c63367fb8f04402357f9f8e2a61b1369b6ce2231b46db929"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_6_1_1",
+      "resource": "tnc:sky_island/shell/shell_6_1_1",
+      "offset": [
+        288,
+        48,
+        48
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 41320,
+      "block_entities": 0,
+      "sha256": "fed92ae2f49133a0b20f026fb8e5e42ef2718683dcf5f9aa1816281eea9ccc3a"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_6_1_2",
+      "resource": "tnc:sky_island/shell/shell_6_1_2",
+      "offset": [
+        288,
+        48,
+        96
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 47393,
+      "block_entities": 0,
+      "sha256": "8b4e644a93f3f1e7a9e4d11c2b398491b936b99cc5e5709cf63b7aee762ae2c7"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_6_1_3",
+      "resource": "tnc:sky_island/shell/shell_6_1_3",
+      "offset": [
+        288,
+        48,
+        144
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 56024,
+      "block_entities": 0,
+      "sha256": "5970bb7177c5941ee59d6d89d03c5a0d2c676b46e167341094fdeb87fdb161c7"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_6_1_4",
+      "resource": "tnc:sky_island/shell/shell_6_1_4",
+      "offset": [
+        288,
+        48,
+        192
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 59599,
+      "block_entities": 0,
+      "sha256": "fc2020b1dd8a23ed1650e5150bbecaaedb6e3118da6131df9601907a75289176"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_6_1_5",
+      "resource": "tnc:sky_island/shell/shell_6_1_5",
+      "offset": [
+        288,
+        48,
+        240
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 59904,
+      "block_entities": 0,
+      "sha256": "3896f082c4e1652a3307c1ee3442ec9fa7a884b7fda33a2d64f4b9bf8359ebcd"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_6_1_6",
+      "resource": "tnc:sky_island/shell/shell_6_1_6",
+      "offset": [
+        288,
+        48,
+        288
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 59742,
+      "block_entities": 0,
+      "sha256": "9b9293c25ef409c0dcbfd69bb8dc32961b22803c115c3821a499ea0e5fdd9200"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_6_1_7",
+      "resource": "tnc:sky_island/shell/shell_6_1_7",
+      "offset": [
+        288,
+        48,
+        336
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 55866,
+      "block_entities": 0,
+      "sha256": "ddb76392b98bb0ae23b814b67f13f904b4b073a13c3800eff5efb0951955a04d"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_6_1_8",
+      "resource": "tnc:sky_island/shell/shell_6_1_8",
+      "offset": [
+        288,
+        48,
+        384
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 49811,
+      "block_entities": 0,
+      "sha256": "b0602943836d17ce96695de9becf0eeb2a0abdb7dfb7281161c053f0c04b8565"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_6_1_9",
+      "resource": "tnc:sky_island/shell/shell_6_1_9",
+      "offset": [
+        288,
+        48,
+        432
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 35852,
+      "block_entities": 0,
+      "sha256": "c351f3391b1cd03c81f927a028ac067d46e180ceacbae3285dbec4fc1b3ead93"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_6_1_10",
+      "resource": "tnc:sky_island/shell/shell_6_1_10",
+      "offset": [
+        288,
+        48,
+        480
+      ],
+      "size": [
+        48,
+        48,
+        40
+      ],
+      "blocks": 16456,
+      "block_entities": 0,
+      "sha256": "8cc6c6c75794561dc870d53fa8b2abd9fe91531c307f3eb4cac384a44eaa80f3"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_7_1_0",
+      "resource": "tnc:sky_island/shell/shell_7_1_0",
+      "offset": [
+        336,
+        48,
+        0
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 13542,
+      "block_entities": 0,
+      "sha256": "9f0c941d89759c1719b29428cc61ae32b6e48799336d48fbedb4f2c622e73880"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_7_1_1",
+      "resource": "tnc:sky_island/shell/shell_7_1_1",
+      "offset": [
+        336,
+        48,
+        48
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 36558,
+      "block_entities": 0,
+      "sha256": "2d1be816725d869d9cdb142679bbf9df0f05f77936e64a3ae72917bd017413e8"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_7_1_2",
+      "resource": "tnc:sky_island/shell/shell_7_1_2",
+      "offset": [
+        336,
+        48,
+        96
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 46064,
+      "block_entities": 0,
+      "sha256": "4cbeec97ded8c9b54b851435d40a366b38479cd9428570891e6ae34705dc1e3b"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_7_1_3",
+      "resource": "tnc:sky_island/shell/shell_7_1_3",
+      "offset": [
+        336,
+        48,
+        144
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 54485,
+      "block_entities": 0,
+      "sha256": "a004ce1901484035832dd8d7b9a55387af5dbffbd856d54929d189e9c8bc4573"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_7_1_4",
+      "resource": "tnc:sky_island/shell/shell_7_1_4",
+      "offset": [
+        336,
+        48,
+        192
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 56613,
+      "block_entities": 0,
+      "sha256": "1b3ea134d8097c0939be0b15e91639b7c736731551dfe37c5409ed42057f62a5"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_7_1_5",
+      "resource": "tnc:sky_island/shell/shell_7_1_5",
+      "offset": [
+        336,
+        48,
+        240
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 57123,
+      "block_entities": 0,
+      "sha256": "5e7f0f798b2a850f8bd5a6e8202911e7ca43ccbbbe58e07af723bb66ceb29954"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_7_1_6",
+      "resource": "tnc:sky_island/shell/shell_7_1_6",
+      "offset": [
+        336,
+        48,
+        288
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 56229,
+      "block_entities": 0,
+      "sha256": "8d1d1e0078698b47c9e865cc949b92ec5b6baf552b10fb7c7c497a2f35c94751"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_7_1_7",
+      "resource": "tnc:sky_island/shell/shell_7_1_7",
+      "offset": [
+        336,
+        48,
+        336
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 55830,
+      "block_entities": 0,
+      "sha256": "f25b7c28585350fc1bcb277fca8015fdbd012766b6b63337589d67dff45e3169"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_7_1_8",
+      "resource": "tnc:sky_island/shell/shell_7_1_8",
+      "offset": [
+        336,
+        48,
+        384
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 45056,
+      "block_entities": 0,
+      "sha256": "005b78246190ca652bbf396e3f5789f7802a623eda02f06c9601cbf97864d34f"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_7_1_9",
+      "resource": "tnc:sky_island/shell/shell_7_1_9",
+      "offset": [
+        336,
+        48,
+        432
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 34691,
+      "block_entities": 0,
+      "sha256": "fe1f16aac02be0afda17e8f6d647bcdb923c74fe24ae14b42ec06ef18003b253"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_7_1_10",
+      "resource": "tnc:sky_island/shell/shell_7_1_10",
+      "offset": [
+        336,
+        48,
+        480
+      ],
+      "size": [
+        48,
+        48,
+        40
+      ],
+      "blocks": 7841,
+      "block_entities": 0,
+      "sha256": "86076bd602a7faf408465f840a5e365c0ed9ed72801c195c589e9718851cf1fa"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_8_1_0",
+      "resource": "tnc:sky_island/shell/shell_8_1_0",
+      "offset": [
+        384,
+        48,
+        0
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 1190,
+      "block_entities": 0,
+      "sha256": "209a625200a362bef3e0274b7baeb5cafa10776ea20def19eeb1112f9ae4b63f"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_8_1_1",
+      "resource": "tnc:sky_island/shell/shell_8_1_1",
+      "offset": [
+        384,
+        48,
+        48
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 29803,
+      "block_entities": 0,
+      "sha256": "f84b3d549e027964d3351909a493c1f9f5a56e9b77b2f0eb0c625929c9781445"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_8_1_2",
+      "resource": "tnc:sky_island/shell/shell_8_1_2",
+      "offset": [
+        384,
+        48,
+        96
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 42486,
+      "block_entities": 0,
+      "sha256": "3b2cc913852e2599f3d63b047d3b90ab2807cbc147bd5d3d07618e3f24a51ab3"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_8_1_3",
+      "resource": "tnc:sky_island/shell/shell_8_1_3",
+      "offset": [
+        384,
+        48,
+        144
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 49222,
+      "block_entities": 0,
+      "sha256": "2a6fd2321ecf10eb46cd26a9982920e806418d48e62a30297e833d93745600c0"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_8_1_4",
+      "resource": "tnc:sky_island/shell/shell_8_1_4",
+      "offset": [
+        384,
+        48,
+        192
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 49800,
+      "block_entities": 0,
+      "sha256": "1d7414392f1d0bfb8fd8db81847599e51d51595c4a83122dffb77a7a294bab5a"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_8_1_5",
+      "resource": "tnc:sky_island/shell/shell_8_1_5",
+      "offset": [
+        384,
+        48,
+        240
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 51591,
+      "block_entities": 0,
+      "sha256": "1e03031521c166ed29556f281d8f13d15226d6a3bb05ecc4cefe12144ff06d4b"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_8_1_6",
+      "resource": "tnc:sky_island/shell/shell_8_1_6",
+      "offset": [
+        384,
+        48,
+        288
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 52936,
+      "block_entities": 0,
+      "sha256": "ab4bb619c115639d32b26f462e89939df570701214f57bbc36ff265cf026462e"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_8_1_7",
+      "resource": "tnc:sky_island/shell/shell_8_1_7",
+      "offset": [
+        384,
+        48,
+        336
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 47385,
+      "block_entities": 0,
+      "sha256": "0f8d5abc995f5c28ad9650d045b1bf92ca25bbde6f460d4ee15c958fed3385b8"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_8_1_8",
+      "resource": "tnc:sky_island/shell/shell_8_1_8",
+      "offset": [
+        384,
+        48,
+        384
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 40696,
+      "block_entities": 0,
+      "sha256": "289de85752fe6832616b7cd24868263bb8090432e44c2912ed6af533e029985f"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_8_1_9",
+      "resource": "tnc:sky_island/shell/shell_8_1_9",
+      "offset": [
+        384,
+        48,
+        432
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 24510,
+      "block_entities": 0,
+      "sha256": "3ed1f1fe620c1074b0de2d267e2cbd4be3b23734439a626657b992b17eaba895"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_8_1_10",
+      "resource": "tnc:sky_island/shell/shell_8_1_10",
+      "offset": [
+        384,
+        48,
+        480
+      ],
+      "size": [
+        48,
+        48,
+        40
+      ],
+      "blocks": 52,
+      "block_entities": 0,
+      "sha256": "329147441ab0653bf3fb026b736590aa55e8b6ed07d4e7fc201318c8c3453506"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_9_1_1",
+      "resource": "tnc:sky_island/shell/shell_9_1_1",
+      "offset": [
+        432,
+        48,
+        48
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 4319,
+      "block_entities": 0,
+      "sha256": "dc63730c2c846637eb37ce1e100c38b67b555bb1483931cd2c991659819eac38"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_9_1_2",
+      "resource": "tnc:sky_island/shell/shell_9_1_2",
+      "offset": [
+        432,
+        48,
+        96
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 29297,
+      "block_entities": 0,
+      "sha256": "5e53d74d2eb4192e0a602b1a03ae8cf5834aa42e1a8682331b808164d36a85ec"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_9_1_3",
+      "resource": "tnc:sky_island/shell/shell_9_1_3",
+      "offset": [
+        432,
+        48,
+        144
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 38441,
+      "block_entities": 0,
+      "sha256": "97ce5c53b083ddd7420e0f9060b39d25a529f2323774102d12664c557ff900af"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_9_1_4",
+      "resource": "tnc:sky_island/shell/shell_9_1_4",
+      "offset": [
+        432,
+        48,
+        192
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 39589,
+      "block_entities": 0,
+      "sha256": "d8874bbd21102e7f9847e73f04f17a63b82abb647a0d9badbff0f4f0222b42f9"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_9_1_5",
+      "resource": "tnc:sky_island/shell/shell_9_1_5",
+      "offset": [
+        432,
+        48,
+        240
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 39078,
+      "block_entities": 0,
+      "sha256": "ee3c3246bd73d8e8deece4579c97f40e69b4315b6a50aea984417f465364c1cb"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_9_1_6",
+      "resource": "tnc:sky_island/shell/shell_9_1_6",
+      "offset": [
+        432,
+        48,
+        288
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 39029,
+      "block_entities": 0,
+      "sha256": "23f82e3397e1037ea11cf2b23fe7f1501f51f7d3b00a54370572c132287319b4"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_9_1_7",
+      "resource": "tnc:sky_island/shell/shell_9_1_7",
+      "offset": [
+        432,
+        48,
+        336
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 37299,
+      "block_entities": 0,
+      "sha256": "98ad40cc285261f796d54688751d06af64ba3b384f09eae702cc37e6c5667a74"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_9_1_8",
+      "resource": "tnc:sky_island/shell/shell_9_1_8",
+      "offset": [
+        432,
+        48,
+        384
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 26871,
+      "block_entities": 0,
+      "sha256": "065cf55fcaa2f905caccfe17e56a96b4a016554d2714cbb87d92affb0c9b6735"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_9_1_9",
+      "resource": "tnc:sky_island/shell/shell_9_1_9",
+      "offset": [
+        432,
+        48,
+        432
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 2577,
+      "block_entities": 0,
+      "sha256": "80a1176513ae69bdb0509758689010445d8f7164f33f0ae58ce0dff735bbe765"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_10_1_2",
+      "resource": "tnc:sky_island/shell/shell_10_1_2",
+      "offset": [
+        480,
+        48,
+        96
+      ],
+      "size": [
+        40,
+        48,
+        48
+      ],
+      "blocks": 702,
+      "block_entities": 0,
+      "sha256": "c79a04a241a513159ead471248f3d81e1c9385c4f17e62fb66dd640b1b55a5bc"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_10_1_3",
+      "resource": "tnc:sky_island/shell/shell_10_1_3",
+      "offset": [
+        480,
+        48,
+        144
+      ],
+      "size": [
+        40,
+        48,
+        48
+      ],
+      "blocks": 11656,
+      "block_entities": 0,
+      "sha256": "0ed51f82e9654e4451904682d6453b85a322411bee0342636353c4e9f8b9b131"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_10_1_4",
+      "resource": "tnc:sky_island/shell/shell_10_1_4",
+      "offset": [
+        480,
+        48,
+        192
+      ],
+      "size": [
+        40,
+        48,
+        48
+      ],
+      "blocks": 19713,
+      "block_entities": 0,
+      "sha256": "46fbcd0e2173e9600ba31e6b04de58bcd553f84d3d64b17f2f730505e2a131fa"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_10_1_5",
+      "resource": "tnc:sky_island/shell/shell_10_1_5",
+      "offset": [
+        480,
+        48,
+        240
+      ],
+      "size": [
+        40,
+        48,
+        48
+      ],
+      "blocks": 22175,
+      "block_entities": 0,
+      "sha256": "1af6cfbf44d63755e40f581d5ee7c715fafb2caf615435dd71f374c251c86fd3"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_10_1_6",
+      "resource": "tnc:sky_island/shell/shell_10_1_6",
+      "offset": [
+        480,
+        48,
+        288
+      ],
+      "size": [
+        40,
+        48,
+        48
+      ],
+      "blocks": 20060,
+      "block_entities": 0,
+      "sha256": "8a36d43a617f8d0e900b51624d07bd4292f9968c407997488da013256e0187eb"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_10_1_7",
+      "resource": "tnc:sky_island/shell/shell_10_1_7",
+      "offset": [
+        480,
+        48,
+        336
+      ],
+      "size": [
+        40,
+        48,
+        48
+      ],
+      "blocks": 11900,
+      "block_entities": 0,
+      "sha256": "88900fadfc702778d329bbcf915510b0ba79b4dcf30058cb7d67870a5076898a"
+    },
+    {
+      "layer": "shell",
+      "name": "shell_10_1_8",
+      "resource": "tnc:sky_island/shell/shell_10_1_8",
+      "offset": [
+        480,
+        48,
+        384
+      ],
+      "size": [
+        40,
+        48,
+        48
+      ],
+      "blocks": 651,
+      "block_entities": 0,
+      "sha256": "d54ce7a927a6251f57ffa6c4d7f30135175fd82c99da78b67e34c9017bda33ee"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_0_0_0",
+      "resource": "tnc:sky_island/town/town_piece_0_0_0",
+      "offset": [
+        120,
+        53,
+        92
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 57191,
+      "block_entities": 0,
+      "sha256": "1b6224085d1dad5c5bfa5de1e2e53b558bc0e001f2a4087b90afad926b692c0b"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_0_0_1",
+      "resource": "tnc:sky_island/town/town_piece_0_0_1",
+      "offset": [
+        120,
+        53,
+        140
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 60519,
+      "block_entities": 0,
+      "sha256": "fed99e54fe027f17244be6dfb3758d634981cf2bd436c23a76b0f665074c94b7"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_0_0_2",
+      "resource": "tnc:sky_island/town/town_piece_0_0_2",
+      "offset": [
+        120,
+        53,
+        188
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 64509,
+      "block_entities": 0,
+      "sha256": "c1f6446bad3330f085ea67d409fee4202b71ddcef830ca4de47f7cfedff5333f"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_0_0_3",
+      "resource": "tnc:sky_island/town/town_piece_0_0_3",
+      "offset": [
+        120,
+        53,
+        236
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 64502,
+      "block_entities": 0,
+      "sha256": "4e5a468ca2406f58cd649f61282074bb36ce4211ab711b25626f67c943fd0e3d"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_0_0_4",
+      "resource": "tnc:sky_island/town/town_piece_0_0_4",
+      "offset": [
+        120,
+        53,
+        284
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 57773,
+      "block_entities": 0,
+      "sha256": "788cb0d72a9592bf9895b6569090ea5b75f448a6aea3403db650176406d9d921"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_0_0_5",
+      "resource": "tnc:sky_island/town/town_piece_0_0_5",
+      "offset": [
+        120,
+        53,
+        332
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 48817,
+      "block_entities": 0,
+      "sha256": "bac96a50914615fd3ac44d60504b5081713cc3664e165dfefad46762b16dcf6f"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_0_0_6",
+      "resource": "tnc:sky_island/town/town_piece_0_0_6",
+      "offset": [
+        120,
+        53,
+        380
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 44010,
+      "block_entities": 0,
+      "sha256": "00572679ef33652ebca252d47275aca2db8249648a1025085a245bbe3aaf0a5e"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_0_0_7",
+      "resource": "tnc:sky_island/town/town_piece_0_0_7",
+      "offset": [
+        120,
+        53,
+        428
+      ],
+      "size": [
+        48,
+        48,
+        1
+      ],
+      "blocks": 744,
+      "block_entities": 0,
+      "sha256": "bbfe8cd0a576f10e0390fde8179ab110d4a64e92c530ef804c75ffb0b5029158"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_1_0_0",
+      "resource": "tnc:sky_island/town/town_piece_1_0_0",
+      "offset": [
+        168,
+        53,
+        92
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 61034,
+      "block_entities": 0,
+      "sha256": "c73b060404148c2d66450ce1cb59ebf0fefcc12fd91860e9bbee0593021b730c"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_1_0_1",
+      "resource": "tnc:sky_island/town/town_piece_1_0_1",
+      "offset": [
+        168,
+        53,
+        140
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 61953,
+      "block_entities": 0,
+      "sha256": "fbd024562beb564a79399e5b901239235edffd3a2a43902e7262b00e3eac33fb"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_1_0_2",
+      "resource": "tnc:sky_island/town/town_piece_1_0_2",
+      "offset": [
+        168,
+        53,
+        188
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 63452,
+      "block_entities": 7,
+      "sha256": "25ee97a62d82fd58294fb00d46affd35a019130a1ea8a1273261b1502d38b285"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_1_0_3",
+      "resource": "tnc:sky_island/town/town_piece_1_0_3",
+      "offset": [
+        168,
+        53,
+        236
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 61750,
+      "block_entities": 0,
+      "sha256": "aec7cbb02264c173d7145700719e98ccac4b836599f1e6f1722a8310f412922a"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_1_0_4",
+      "resource": "tnc:sky_island/town/town_piece_1_0_4",
+      "offset": [
+        168,
+        53,
+        284
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 58232,
+      "block_entities": 11,
+      "sha256": "270a095f22aacf0e29d5b25596bcb7be5d6c1bc2ebb1cd1b937b6df6a6b88b68"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_1_0_5",
+      "resource": "tnc:sky_island/town/town_piece_1_0_5",
+      "offset": [
+        168,
+        53,
+        332
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 49233,
+      "block_entities": 27,
+      "sha256": "0a08094df2a6dee8dcedbf4bd5512510bf2518409af5791fb6fea5d0791db12a"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_1_0_6",
+      "resource": "tnc:sky_island/town/town_piece_1_0_6",
+      "offset": [
+        168,
+        53,
+        380
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 42151,
+      "block_entities": 9,
+      "sha256": "4d5480fe76ef172d25d89846dbdf4c96c9d17c9777fb8d59cd713d0c4263b2d6"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_1_0_7",
+      "resource": "tnc:sky_island/town/town_piece_1_0_7",
+      "offset": [
+        168,
+        53,
+        428
+      ],
+      "size": [
+        48,
+        48,
+        1
+      ],
+      "blocks": 820,
+      "block_entities": 0,
+      "sha256": "04cf834dbebf3fd6e7f70a4df2d84288c0059b4f67a91125c4eb6a6402852281"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_2_0_0",
+      "resource": "tnc:sky_island/town/town_piece_2_0_0",
+      "offset": [
+        216,
+        53,
+        92
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 59904,
+      "block_entities": 0,
+      "sha256": "e05076c882bfad6d8b3e3bcd774655053e2d3367429d3718b17c942ab9cdf201"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_2_0_1",
+      "resource": "tnc:sky_island/town/town_piece_2_0_1",
+      "offset": [
+        216,
+        53,
+        140
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 61463,
+      "block_entities": 0,
+      "sha256": "fac331cee54035d632cc195f59a4e3de8478195a0c2d898b1b9c2ce505bfa5c1"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_2_0_2",
+      "resource": "tnc:sky_island/town/town_piece_2_0_2",
+      "offset": [
+        216,
+        53,
+        188
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 46351,
+      "block_entities": 103,
+      "sha256": "68a138bba4a98e15ec1c1b783ff77a3bf518e9b766b30bbd6cbc06d6c0eb1438"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_2_0_3",
+      "resource": "tnc:sky_island/town/town_piece_2_0_3",
+      "offset": [
+        216,
+        53,
+        236
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 41977,
+      "block_entities": 68,
+      "sha256": "d092b26615cb833049ea68fee9f1a79708a781a24c3d7eb8c1c13cb2dd92c7e3"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_2_0_4",
+      "resource": "tnc:sky_island/town/town_piece_2_0_4",
+      "offset": [
+        216,
+        53,
+        284
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 37114,
+      "block_entities": 206,
+      "sha256": "d0620ef12e008f93ae1c9bf8c97bc23e86366427c19de9973555de69b352bb8f"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_2_0_5",
+      "resource": "tnc:sky_island/town/town_piece_2_0_5",
+      "offset": [
+        216,
+        53,
+        332
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 36088,
+      "block_entities": 56,
+      "sha256": "223e2a010fda856e11cd3367113d7d1eef15c050399a89dd7721823a1f8d6fcb"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_2_0_6",
+      "resource": "tnc:sky_island/town/town_piece_2_0_6",
+      "offset": [
+        216,
+        53,
+        380
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 33799,
+      "block_entities": 7,
+      "sha256": "211d5697c11b0c621786c338ea56329769beb6bed8deeb7eb2d1ba4266d7f8b0"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_2_0_7",
+      "resource": "tnc:sky_island/town/town_piece_2_0_7",
+      "offset": [
+        216,
+        53,
+        428
+      ],
+      "size": [
+        48,
+        48,
+        1
+      ],
+      "blocks": 739,
+      "block_entities": 0,
+      "sha256": "4e5dd70d5471a31f3059cf995f9f41b5610b65c69d4a692d4a2e305890d752f3"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_3_0_0",
+      "resource": "tnc:sky_island/town/town_piece_3_0_0",
+      "offset": [
+        264,
+        53,
+        92
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 55074,
+      "block_entities": 0,
+      "sha256": "d20f86edb8c422c89db5c7e82f1baa004a7097a02635c880c680147c08ac438e"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_3_0_1",
+      "resource": "tnc:sky_island/town/town_piece_3_0_1",
+      "offset": [
+        264,
+        53,
+        140
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 57832,
+      "block_entities": 0,
+      "sha256": "03325ee9988088b4657aa71afbc0400adcf439a0aeb046913ee6bc516616155b"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_3_0_2",
+      "resource": "tnc:sky_island/town/town_piece_3_0_2",
+      "offset": [
+        264,
+        53,
+        188
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 43668,
+      "block_entities": 92,
+      "sha256": "a88c0f4c40f69822f674474e8dd9577e644da74bb74e9e54f766970f0fcdd9cf"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_3_0_3",
+      "resource": "tnc:sky_island/town/town_piece_3_0_3",
+      "offset": [
+        264,
+        53,
+        236
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 34067,
+      "block_entities": 64,
+      "sha256": "3dddd62a498e24980d9c740e6959979d4cfe9f51febc3117fc511375581e5248"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_3_0_4",
+      "resource": "tnc:sky_island/town/town_piece_3_0_4",
+      "offset": [
+        264,
+        53,
+        284
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 26695,
+      "block_entities": 3,
+      "sha256": "45d4be69c6bc5afdbb0c95119c5273f775dbc5e974228874e1202b3afbad6d84"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_3_0_5",
+      "resource": "tnc:sky_island/town/town_piece_3_0_5",
+      "offset": [
+        264,
+        53,
+        332
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 25424,
+      "block_entities": 0,
+      "sha256": "f65a8da6232c0ed7730c6abb7a091ca89da3789095e0dfde7d17349c7e45f851"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_3_0_6",
+      "resource": "tnc:sky_island/town/town_piece_3_0_6",
+      "offset": [
+        264,
+        53,
+        380
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 25553,
+      "block_entities": 0,
+      "sha256": "3cbb8d95e18ea82ac577197b5a6e864d370e33fdcfb6aeacb10ddc59b00f2809"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_3_0_7",
+      "resource": "tnc:sky_island/town/town_piece_3_0_7",
+      "offset": [
+        264,
+        53,
+        428
+      ],
+      "size": [
+        48,
+        48,
+        1
+      ],
+      "blocks": 528,
+      "block_entities": 0,
+      "sha256": "652356cd343022daaaeffbce7b7fb2e7db6337f8c38dba5e14ff882d14db28df"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_4_0_0",
+      "resource": "tnc:sky_island/town/town_piece_4_0_0",
+      "offset": [
+        312,
+        53,
+        92
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 62428,
+      "block_entities": 0,
+      "sha256": "1c5ebb6c9af284710afcb21e036947f27e7f32c40d192ad069d1f66124e70649"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_4_0_1",
+      "resource": "tnc:sky_island/town/town_piece_4_0_1",
+      "offset": [
+        312,
+        53,
+        140
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 47795,
+      "block_entities": 0,
+      "sha256": "3613c44a315e7a19ac405d764c430a920e74b443ae50dcf07c9b7c120ef40be5"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_4_0_2",
+      "resource": "tnc:sky_island/town/town_piece_4_0_2",
+      "offset": [
+        312,
+        53,
+        188
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 57743,
+      "block_entities": 0,
+      "sha256": "96280a12937d4f45351aa1170119f346ab5c08a6bdd537cc0a744d5ef14e891f"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_4_0_3",
+      "resource": "tnc:sky_island/town/town_piece_4_0_3",
+      "offset": [
+        312,
+        53,
+        236
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 35974,
+      "block_entities": 54,
+      "sha256": "fb70b705b05eae2e6da2551629f0d4ff064584fa65aee8a41326d9e8a06bfdc4"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_4_0_4",
+      "resource": "tnc:sky_island/town/town_piece_4_0_4",
+      "offset": [
+        312,
+        53,
+        284
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 30244,
+      "block_entities": 0,
+      "sha256": "e89794913d113573881abd0ac0806646c702cd75ec013bcd2f950507400deff6"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_4_0_5",
+      "resource": "tnc:sky_island/town/town_piece_4_0_5",
+      "offset": [
+        312,
+        53,
+        332
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 38081,
+      "block_entities": 2,
+      "sha256": "4449dfcd28fd163f6d4c8b5372015011df18c426c622ad69352767fcffc94e48"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_4_0_6",
+      "resource": "tnc:sky_island/town/town_piece_4_0_6",
+      "offset": [
+        312,
+        53,
+        380
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 34245,
+      "block_entities": 0,
+      "sha256": "d51555e3c396a6124a763046c49e43c7e25806ec52ada85e38dc43a6fa542cfa"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_4_0_7",
+      "resource": "tnc:sky_island/town/town_piece_4_0_7",
+      "offset": [
+        312,
+        53,
+        428
+      ],
+      "size": [
+        48,
+        48,
+        1
+      ],
+      "blocks": 755,
+      "block_entities": 0,
+      "sha256": "853cc46366189e4fffa4768163cba377547dc17e1170a10d03a4f97adb7ec7c6"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_5_0_0",
+      "resource": "tnc:sky_island/town/town_piece_5_0_0",
+      "offset": [
+        360,
+        53,
+        92
+      ],
+      "size": [
+        41,
+        48,
+        48
+      ],
+      "blocks": 53506,
+      "block_entities": 3,
+      "sha256": "df47bbb457dec2243e96003d866c586ab7d4e722130cc7491f0ab1bb157a7c34"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_5_0_1",
+      "resource": "tnc:sky_island/town/town_piece_5_0_1",
+      "offset": [
+        360,
+        53,
+        140
+      ],
+      "size": [
+        41,
+        48,
+        48
+      ],
+      "blocks": 48409,
+      "block_entities": 0,
+      "sha256": "6b126cf9f83498b77ef5b94dcab6e0bd0f3e16e9176d85d7ed2b9bb19029b75b"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_5_0_2",
+      "resource": "tnc:sky_island/town/town_piece_5_0_2",
+      "offset": [
+        360,
+        53,
+        188
+      ],
+      "size": [
+        41,
+        48,
+        48
+      ],
+      "blocks": 44554,
+      "block_entities": 0,
+      "sha256": "a94311faa7ee899dedd95ba510f1322739a6b8479df2532233959e7cb10aeb7c"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_5_0_3",
+      "resource": "tnc:sky_island/town/town_piece_5_0_3",
+      "offset": [
+        360,
+        53,
+        236
+      ],
+      "size": [
+        41,
+        48,
+        48
+      ],
+      "blocks": 31632,
+      "block_entities": 61,
+      "sha256": "3b7e257fe06c5b1b2c289c4af176b0b7b423f0bafcfccdb96e01e630ce256f40"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_5_0_4",
+      "resource": "tnc:sky_island/town/town_piece_5_0_4",
+      "offset": [
+        360,
+        53,
+        284
+      ],
+      "size": [
+        41,
+        48,
+        48
+      ],
+      "blocks": 28354,
+      "block_entities": 11,
+      "sha256": "b448c08844a910ebccba4990c7f98e23c0112e0c2a42abe7e1fdac63200f8cf2"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_5_0_5",
+      "resource": "tnc:sky_island/town/town_piece_5_0_5",
+      "offset": [
+        360,
+        53,
+        332
+      ],
+      "size": [
+        41,
+        48,
+        48
+      ],
+      "blocks": 34618,
+      "block_entities": 2,
+      "sha256": "8b9bd74b5ea005658619706a510dfc39add3bb3e5d9d40d3eff53556684770ec"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_5_0_6",
+      "resource": "tnc:sky_island/town/town_piece_5_0_6",
+      "offset": [
+        360,
+        53,
+        380
+      ],
+      "size": [
+        41,
+        48,
+        48
+      ],
+      "blocks": 38633,
+      "block_entities": 2,
+      "sha256": "7ebe91ceb8a16fa7dfbad6e6626b4653263a70272988dbe9002559213042f61f"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_5_0_7",
+      "resource": "tnc:sky_island/town/town_piece_5_0_7",
+      "offset": [
+        360,
+        53,
+        428
+      ],
+      "size": [
+        41,
+        48,
+        1
+      ],
+      "blocks": 793,
+      "block_entities": 0,
+      "sha256": "2a7c7305b83bd873b3907dab3132125146c318a2c3cd4bcf150e1248f23da75f"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_0_1_0",
+      "resource": "tnc:sky_island/town/town_piece_0_1_0",
+      "offset": [
+        120,
+        101,
+        92
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 11794,
+      "block_entities": 0,
+      "sha256": "eaabeffb75b18f883b9dc4b50907852d2391e2a0163449d9d1a71b73704d3b74"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_0_1_1",
+      "resource": "tnc:sky_island/town/town_piece_0_1_1",
+      "offset": [
+        120,
+        101,
+        140
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 39140,
+      "block_entities": 0,
+      "sha256": "68e01f4a0d54e6388d9dae03486b370da87e43609598a214f0c954a1e78d3b96"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_0_1_2",
+      "resource": "tnc:sky_island/town/town_piece_0_1_2",
+      "offset": [
+        120,
+        101,
+        188
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 27069,
+      "block_entities": 150,
+      "sha256": "a1e4d2cac014a68a7fd8f715adaa6fd3d6b671986f21fd42138f6bc3c796ebf6"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_0_1_3",
+      "resource": "tnc:sky_island/town/town_piece_0_1_3",
+      "offset": [
+        120,
+        101,
+        236
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 16539,
+      "block_entities": 122,
+      "sha256": "e17d2de47dbb634c0c08efb1291891cc105a5c075124166ecc45efe4533ea233"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_0_1_4",
+      "resource": "tnc:sky_island/town/town_piece_0_1_4",
+      "offset": [
+        120,
+        101,
+        284
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 2230,
+      "block_entities": 0,
+      "sha256": "84b177310b243c1bfcba4d8f7fa527c8b236bd02eb7155773cf7cd3303858119"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_0_1_5",
+      "resource": "tnc:sky_island/town/town_piece_0_1_5",
+      "offset": [
+        120,
+        101,
+        332
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 49,
+      "block_entities": 0,
+      "sha256": "86e8a79f121887b59603527e9cf85df5372f33416d70a9c03747602af8b3ab7a"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_0_1_6",
+      "resource": "tnc:sky_island/town/town_piece_0_1_6",
+      "offset": [
+        120,
+        101,
+        380
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 263,
+      "block_entities": 0,
+      "sha256": "24aaf4c21729845d6b00569a0aaac5675442a328aaad65d671f390ab7bdd830b"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_1_1_0",
+      "resource": "tnc:sky_island/town/town_piece_1_1_0",
+      "offset": [
+        168,
+        101,
+        92
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 41922,
+      "block_entities": 2,
+      "sha256": "304423723d362ba61681219b76f6a09abcf321a208b4b1bd023bdf01401758cd"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_1_1_1",
+      "resource": "tnc:sky_island/town/town_piece_1_1_1",
+      "offset": [
+        168,
+        101,
+        140
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 59715,
+      "block_entities": 4,
+      "sha256": "a9ec1669e6477f5233d39434a6102cada0fc9b6e1f032625e2e12e1d318c6306"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_1_1_2",
+      "resource": "tnc:sky_island/town/town_piece_1_1_2",
+      "offset": [
+        168,
+        101,
+        188
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 21725,
+      "block_entities": 97,
+      "sha256": "3ddcf40daa02a96eb0e2131aa99f7b811fd68d92df12693d31b1f19684711747"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_1_1_3",
+      "resource": "tnc:sky_island/town/town_piece_1_1_3",
+      "offset": [
+        168,
+        101,
+        236
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 9724,
+      "block_entities": 100,
+      "sha256": "02d789d005ebdf57845e4f68f6adc7604ad773e11083ba68dae48d222efae797"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_1_1_4",
+      "resource": "tnc:sky_island/town/town_piece_1_1_4",
+      "offset": [
+        168,
+        101,
+        284
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 8709,
+      "block_entities": 135,
+      "sha256": "2e1bb9469f4fd2f9a8bfb2ea939c299258ec7b39ed1301a48f531f826e5f6067"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_1_1_5",
+      "resource": "tnc:sky_island/town/town_piece_1_1_5",
+      "offset": [
+        168,
+        101,
+        332
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 2877,
+      "block_entities": 29,
+      "sha256": "97dd790f04c9394094e65ea4b669e972e1b96e82de7f8549a6c9855f7e10ab73"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_1_1_6",
+      "resource": "tnc:sky_island/town/town_piece_1_1_6",
+      "offset": [
+        168,
+        101,
+        380
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 888,
+      "block_entities": 13,
+      "sha256": "be69fecb1278ac82e1a8258580a5418dacf9ec98604f97498e7faf1774fa0492"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_2_1_0",
+      "resource": "tnc:sky_island/town/town_piece_2_1_0",
+      "offset": [
+        216,
+        101,
+        92
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 54953,
+      "block_entities": 77,
+      "sha256": "a9c7d9b9dd74ba2a3b6bdd621facbd456087fd88770e49a252339c3ce5bfe278"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_2_1_1",
+      "resource": "tnc:sky_island/town/town_piece_2_1_1",
+      "offset": [
+        216,
+        101,
+        140
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 64040,
+      "block_entities": 0,
+      "sha256": "2e61f989e61b81feca9178a08a084de348abd645a5ac2d87a7b7df1d9d654d8e"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_2_1_2",
+      "resource": "tnc:sky_island/town/town_piece_2_1_2",
+      "offset": [
+        216,
+        101,
+        188
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 5792,
+      "block_entities": 22,
+      "sha256": "9f12a04153441b7a8765f256abd6090b431cdee8ae206cd81a93897dc322ce48"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_2_1_3",
+      "resource": "tnc:sky_island/town/town_piece_2_1_3",
+      "offset": [
+        216,
+        101,
+        236
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 2962,
+      "block_entities": 59,
+      "sha256": "cf8e78cf86cfbb7004ce70536f0edcf5ed7a15bc3dc60d01d941756d2f1c8422"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_2_1_4",
+      "resource": "tnc:sky_island/town/town_piece_2_1_4",
+      "offset": [
+        216,
+        101,
+        284
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 3869,
+      "block_entities": 28,
+      "sha256": "69976328b2216091827fac8f15afa81c2dfe71dad57fa5ccd8601055b0a49e8d"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_2_1_5",
+      "resource": "tnc:sky_island/town/town_piece_2_1_5",
+      "offset": [
+        216,
+        101,
+        332
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 1160,
+      "block_entities": 23,
+      "sha256": "788bb03ce0e3e127da96d7d0463fff874c8d90ed5681905db1d0bb7d655ece8a"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_3_1_0",
+      "resource": "tnc:sky_island/town/town_piece_3_1_0",
+      "offset": [
+        264,
+        101,
+        92
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 39969,
+      "block_entities": 0,
+      "sha256": "976bd98cb438194ed4b2a881a5fa1cc4d03c4ed5cb64fa3ab2139da14e37b72b"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_3_1_1",
+      "resource": "tnc:sky_island/town/town_piece_3_1_1",
+      "offset": [
+        264,
+        101,
+        140
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 54859,
+      "block_entities": 2,
+      "sha256": "0d94a8bb21b7cc52d81fd2aa77f7c59e6e3ae95e0f91d5c04ad7efa61f29a3bf"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_3_1_2",
+      "resource": "tnc:sky_island/town/town_piece_3_1_2",
+      "offset": [
+        264,
+        101,
+        188
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 9865,
+      "block_entities": 21,
+      "sha256": "d51b87e2605a255db58e7890363298a43cd0cbd884eedf28eead94c72c0b8690"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_3_1_3",
+      "resource": "tnc:sky_island/town/town_piece_3_1_3",
+      "offset": [
+        264,
+        101,
+        236
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 593,
+      "block_entities": 0,
+      "sha256": "efe5921038ba911ef40179f1497a2d8fb8d2b26c67005a37331d341b271278e4"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_3_1_4",
+      "resource": "tnc:sky_island/town/town_piece_3_1_4",
+      "offset": [
+        264,
+        101,
+        284
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 569,
+      "block_entities": 0,
+      "sha256": "81b9ca4603ed8f0c4880b82b5c9fb1f0b3bcaee0608741cffeb9e84e34406252"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_3_1_5",
+      "resource": "tnc:sky_island/town/town_piece_3_1_5",
+      "offset": [
+        264,
+        101,
+        332
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 96,
+      "block_entities": 0,
+      "sha256": "97e6447c0ae1b22f99ae3a1b74c24d87bc6a083351e770bd97a604689d6e8356"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_4_1_0",
+      "resource": "tnc:sky_island/town/town_piece_4_1_0",
+      "offset": [
+        312,
+        101,
+        92
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 70715,
+      "block_entities": 8,
+      "sha256": "a55251f2b8e318575f5144dcf83a321ebc579d9a36a5246875b028a1d3b719b1"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_4_1_1",
+      "resource": "tnc:sky_island/town/town_piece_4_1_1",
+      "offset": [
+        312,
+        101,
+        140
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 67224,
+      "block_entities": 41,
+      "sha256": "9ede059aa45e99eb193b5a72a6c46864e5162e19552db153fa2aa1ea7b59fd52"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_4_1_2",
+      "resource": "tnc:sky_island/town/town_piece_4_1_2",
+      "offset": [
+        312,
+        101,
+        188
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 58525,
+      "block_entities": 0,
+      "sha256": "451b4b2f24a1848e5a3430a7a620d0820d3e92d15debd174bc21658683eeb593"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_4_1_3",
+      "resource": "tnc:sky_island/town/town_piece_4_1_3",
+      "offset": [
+        312,
+        101,
+        236
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 941,
+      "block_entities": 5,
+      "sha256": "5bf0ad7b876efda2a18f3525539d9e56aae152cf10939a662bbd4425b8d49799"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_4_1_6",
+      "resource": "tnc:sky_island/town/town_piece_4_1_6",
+      "offset": [
+        312,
+        101,
+        380
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 121,
+      "block_entities": 0,
+      "sha256": "1145ef09d4876a515c4ec586233b332ff9afda0f1d839f7b61ec401b5c724a63"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_4_1_7",
+      "resource": "tnc:sky_island/town/town_piece_4_1_7",
+      "offset": [
+        312,
+        101,
+        428
+      ],
+      "size": [
+        48,
+        48,
+        1
+      ],
+      "blocks": 1,
+      "block_entities": 0,
+      "sha256": "51c0c80cf6b1fa4aed1aac4409e9d132f097fc82c9b9c7155a7392cb9eaddba3"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_5_1_0",
+      "resource": "tnc:sky_island/town/town_piece_5_1_0",
+      "offset": [
+        360,
+        101,
+        92
+      ],
+      "size": [
+        41,
+        48,
+        48
+      ],
+      "blocks": 54662,
+      "block_entities": 0,
+      "sha256": "de8e268bb4862218de637284ffc7e2778e792ab4a0763b9f8d1c2fc8ae947462"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_5_1_1",
+      "resource": "tnc:sky_island/town/town_piece_5_1_1",
+      "offset": [
+        360,
+        101,
+        140
+      ],
+      "size": [
+        41,
+        48,
+        48
+      ],
+      "blocks": 69336,
+      "block_entities": 43,
+      "sha256": "2aceb1885aff7d27d9c3013b5972fc23b968124250e3e5c4ffd7bc8502b3c041"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_5_1_2",
+      "resource": "tnc:sky_island/town/town_piece_5_1_2",
+      "offset": [
+        360,
+        101,
+        188
+      ],
+      "size": [
+        41,
+        48,
+        48
+      ],
+      "blocks": 49898,
+      "block_entities": 9,
+      "sha256": "2528b9aadde7088b80dae28e93b303dc3c9b199038e57f2b4826999805363822"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_5_1_3",
+      "resource": "tnc:sky_island/town/town_piece_5_1_3",
+      "offset": [
+        360,
+        101,
+        236
+      ],
+      "size": [
+        41,
+        48,
+        48
+      ],
+      "blocks": 933,
+      "block_entities": 18,
+      "sha256": "d83f0c52aa9b1118cbcaa3d0b5ae326c8c3d3b4940605d4b64bd3e80eb2b26da"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_5_1_4",
+      "resource": "tnc:sky_island/town/town_piece_5_1_4",
+      "offset": [
+        360,
+        101,
+        284
+      ],
+      "size": [
+        41,
+        48,
+        48
+      ],
+      "blocks": 144,
+      "block_entities": 1,
+      "sha256": "9040b3df7c5a083c86b52b267f435414d08d53a996c60d4c072ffaf652d973b2"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_5_1_6",
+      "resource": "tnc:sky_island/town/town_piece_5_1_6",
+      "offset": [
+        360,
+        101,
+        380
+      ],
+      "size": [
+        41,
+        48,
+        48
+      ],
+      "blocks": 166,
+      "block_entities": 0,
+      "sha256": "e5066cebaee1dbfa2efaa6da4073e74874f8a1b55131da2bf2d7e30b1d3c94bc"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_5_1_7",
+      "resource": "tnc:sky_island/town/town_piece_5_1_7",
+      "offset": [
+        360,
+        101,
+        428
+      ],
+      "size": [
+        41,
+        48,
+        1
+      ],
+      "blocks": 2,
+      "block_entities": 0,
+      "sha256": "f1ccaa6572fb737101872ec2298405d904d6039e3a7ddc82537d37f1f3dee5dc"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_0_2_2",
+      "resource": "tnc:sky_island/town/town_piece_0_2_2",
+      "offset": [
+        120,
+        149,
+        188
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 20,
+      "block_entities": 0,
+      "sha256": "2866ec2456a9cb184612502b783a69000415f88625217ef4185d3de1ac8551e6"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_1_2_0",
+      "resource": "tnc:sky_island/town/town_piece_1_2_0",
+      "offset": [
+        168,
+        149,
+        92
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 251,
+      "block_entities": 4,
+      "sha256": "a70cacc0931df1e57517621566199b2f84db237bc95d83043af1d6bd89d6d94f"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_1_2_4",
+      "resource": "tnc:sky_island/town/town_piece_1_2_4",
+      "offset": [
+        168,
+        149,
+        284
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 16,
+      "block_entities": 0,
+      "sha256": "e4344dbd022024d6b7b70fcd75b37472c5040710869c7afd5c536020a2f84b38"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_2_2_0",
+      "resource": "tnc:sky_island/town/town_piece_2_2_0",
+      "offset": [
+        216,
+        149,
+        92
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 3759,
+      "block_entities": 154,
+      "sha256": "9d71ac052a12ffdb3431d5604d53efee3db88d4d90379b5c84c454b635d68697"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_2_2_1",
+      "resource": "tnc:sky_island/town/town_piece_2_2_1",
+      "offset": [
+        216,
+        149,
+        140
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 4,
+      "block_entities": 0,
+      "sha256": "5241337ca506ed0fef19e2a5f81c617896fc63a25b8de570d1ca85eaac8246e0"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_2_2_4",
+      "resource": "tnc:sky_island/town/town_piece_2_2_4",
+      "offset": [
+        216,
+        149,
+        284
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 51,
+      "block_entities": 0,
+      "sha256": "cad9c5a1d3d9e493377da12db0982540ce3249e5713bb34d6185683072c914a1"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_3_2_1",
+      "resource": "tnc:sky_island/town/town_piece_3_2_1",
+      "offset": [
+        264,
+        149,
+        140
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 689,
+      "block_entities": 4,
+      "sha256": "ddd547623532558bf1e72e04f720b14955237baee24a03e8857f0ebc1b253e58"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_4_2_0",
+      "resource": "tnc:sky_island/town/town_piece_4_2_0",
+      "offset": [
+        312,
+        149,
+        92
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 460,
+      "block_entities": 0,
+      "sha256": "5e5f6d15daf60d3d95c397cecd4ea88ac25b0912a2ccf9fcd1890b7a310d4418"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_4_2_1",
+      "resource": "tnc:sky_island/town/town_piece_4_2_1",
+      "offset": [
+        312,
+        149,
+        140
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 2515,
+      "block_entities": 17,
+      "sha256": "bb702c6c848d81ea0ecacda8c5678f6689673bc099c8a99e2fe22de98d4cb520"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_4_2_2",
+      "resource": "tnc:sky_island/town/town_piece_4_2_2",
+      "offset": [
+        312,
+        149,
+        188
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 392,
+      "block_entities": 0,
+      "sha256": "b49907bf87959ed388a37c7db24b6a4794ff803c63f42b12cd7213cc9c4185e8"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_5_2_0",
+      "resource": "tnc:sky_island/town/town_piece_5_2_0",
+      "offset": [
+        360,
+        149,
+        92
+      ],
+      "size": [
+        41,
+        48,
+        48
+      ],
+      "blocks": 410,
+      "block_entities": 0,
+      "sha256": "a115f6d9ea26e25d9a3086ab4d1ad02338589aa79f0cc2fd854b06259e5370c2"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_5_2_1",
+      "resource": "tnc:sky_island/town/town_piece_5_2_1",
+      "offset": [
+        360,
+        149,
+        140
+      ],
+      "size": [
+        41,
+        48,
+        48
+      ],
+      "blocks": 7394,
+      "block_entities": 153,
+      "sha256": "eb576f441fea496183f6f5763eeb4b1a56afcb52c886a4786d6db76b25641889"
+    },
+    {
+      "layer": "town",
+      "name": "town_piece_5_2_2",
+      "resource": "tnc:sky_island/town/town_piece_5_2_2",
+      "offset": [
+        360,
+        149,
+        188
+      ],
+      "size": [
+        41,
+        48,
+        48
+      ],
+      "blocks": 2256,
+      "block_entities": 54,
+      "sha256": "efc58496bfe701ba842709b1e815e8f8e990c344e281404c9e24f34f4a4a6e5a"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_0_1_3",
+      "resource": "tnc:sky_island/detail/detail_0_1_3",
+      "offset": [
+        0,
+        48,
+        144
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 108,
+      "block_entities": 0,
+      "sha256": "ff8534fab30ad7361ea1009613700f546f079d95e5d817d75c1fd6ff7f431626"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_0_1_4",
+      "resource": "tnc:sky_island/detail/detail_0_1_4",
+      "offset": [
+        0,
+        48,
+        192
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 468,
+      "block_entities": 0,
+      "sha256": "1e07358650c482516ba127db1ae7a62f23f23ceed487292022ce08d5ba9fe99a"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_0_1_5",
+      "resource": "tnc:sky_island/detail/detail_0_1_5",
+      "offset": [
+        0,
+        48,
+        240
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 386,
+      "block_entities": 0,
+      "sha256": "5764757ecb1b6512fda7a1c68a29b03c54b723aeb2931f68ea784c9c09797833"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_0_1_6",
+      "resource": "tnc:sky_island/detail/detail_0_1_6",
+      "offset": [
+        0,
+        48,
+        288
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 231,
+      "block_entities": 0,
+      "sha256": "c9ef096119639f824b81ddade30bdece26ccaf003ddd848bc167db3699bf3284"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_0_1_7",
+      "resource": "tnc:sky_island/detail/detail_0_1_7",
+      "offset": [
+        0,
+        48,
+        336
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 145,
+      "block_entities": 0,
+      "sha256": "726fd53503d642d6e8f2e6d7dec9278c8b2f9679a7a4f8c4e1adad40ca0024dc"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_0_1_8",
+      "resource": "tnc:sky_island/detail/detail_0_1_8",
+      "offset": [
+        0,
+        48,
+        384
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 101,
+      "block_entities": 0,
+      "sha256": "b0bca895c95b25d04002b1696ccddce13b3e33a48d9655116040410449c6e92f"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_1_1_1",
+      "resource": "tnc:sky_island/detail/detail_1_1_1",
+      "offset": [
+        48,
+        48,
+        48
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 79,
+      "block_entities": 0,
+      "sha256": "12af239f7d7618d62b1cf09acc0ed847f816b381295a4a0d0802a64d3ce19855"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_1_1_2",
+      "resource": "tnc:sky_island/detail/detail_1_1_2",
+      "offset": [
+        48,
+        48,
+        96
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 353,
+      "block_entities": 0,
+      "sha256": "09ebe1ff67d6cff7316e3021e52ba15d63c904aafc73630b81f97153aca89be4"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_1_1_3",
+      "resource": "tnc:sky_island/detail/detail_1_1_3",
+      "offset": [
+        48,
+        48,
+        144
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 405,
+      "block_entities": 0,
+      "sha256": "3335676780c7f787b4dceaeafc67507995a276e2e78ad532e76a68ec411ce1aa"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_1_1_4",
+      "resource": "tnc:sky_island/detail/detail_1_1_4",
+      "offset": [
+        48,
+        48,
+        192
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 728,
+      "block_entities": 0,
+      "sha256": "11f310ea55f4096346e2d25a78c7d0cce8081ab9d6cb4ac28af77f27c3597581"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_1_1_5",
+      "resource": "tnc:sky_island/detail/detail_1_1_5",
+      "offset": [
+        48,
+        48,
+        240
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 352,
+      "block_entities": 0,
+      "sha256": "6fe17a84d1eedb910e0b7c2c79c0ad5648bb9c39e38746582a1384825ae715cd"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_1_1_6",
+      "resource": "tnc:sky_island/detail/detail_1_1_6",
+      "offset": [
+        48,
+        48,
+        288
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 307,
+      "block_entities": 0,
+      "sha256": "20ee546d15ab72acb0030ea2b1629ba4285414b196e93f9c151d57c226709e49"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_1_1_7",
+      "resource": "tnc:sky_island/detail/detail_1_1_7",
+      "offset": [
+        48,
+        48,
+        336
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 424,
+      "block_entities": 0,
+      "sha256": "81c1e40cbd2b46faad0bac59971a7a40e5eb8a56523aceb25d2ceb7163ac8013"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_1_1_8",
+      "resource": "tnc:sky_island/detail/detail_1_1_8",
+      "offset": [
+        48,
+        48,
+        384
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 200,
+      "block_entities": 0,
+      "sha256": "3eaf7c5c6dbd517f121c973b39629943c8c7b5e1ac7bc54073d7fd03f8f46aa6"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_1_1_9",
+      "resource": "tnc:sky_island/detail/detail_1_1_9",
+      "offset": [
+        48,
+        48,
+        432
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 14,
+      "block_entities": 0,
+      "sha256": "55794100411f1265af25adcc0e55b08ec0d341c605275098413db9f2c5d2b756"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_2_1_1",
+      "resource": "tnc:sky_island/detail/detail_2_1_1",
+      "offset": [
+        96,
+        48,
+        48
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 453,
+      "block_entities": 0,
+      "sha256": "d3a781725de1db1aca9425f97df86f08d2533b07bb0b6d6fe23335e8cd000356"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_2_1_2",
+      "resource": "tnc:sky_island/detail/detail_2_1_2",
+      "offset": [
+        96,
+        48,
+        96
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 122,
+      "block_entities": 0,
+      "sha256": "a48870049c218d0abe270728e06a86b2238d8dc21f8294c8a3d2522a6e0c8142"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_2_1_4",
+      "resource": "tnc:sky_island/detail/detail_2_1_4",
+      "offset": [
+        96,
+        48,
+        192
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 398,
+      "block_entities": 0,
+      "sha256": "50fc01c3fe6cdbca05c51181537f57f4b1cdfc6832f57b32a2f387cb4a43f5a5"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_2_1_5",
+      "resource": "tnc:sky_island/detail/detail_2_1_5",
+      "offset": [
+        96,
+        48,
+        240
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 190,
+      "block_entities": 0,
+      "sha256": "0551bc9664389e0b4713e004eac46e6c4797a9c2137b5c65a4c02bb32567df13"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_2_1_6",
+      "resource": "tnc:sky_island/detail/detail_2_1_6",
+      "offset": [
+        96,
+        48,
+        288
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 118,
+      "block_entities": 0,
+      "sha256": "5b97924659af9ca118757e502feb14ec58a3d0851d9cb5f20932fbc3ffeeb4ab"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_2_1_7",
+      "resource": "tnc:sky_island/detail/detail_2_1_7",
+      "offset": [
+        96,
+        48,
+        336
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 183,
+      "block_entities": 0,
+      "sha256": "82aa2005a0690853bd17e1575227c8f02edd3562ba4bbf0459e5ac09dbf12b86"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_2_1_9",
+      "resource": "tnc:sky_island/detail/detail_2_1_9",
+      "offset": [
+        96,
+        48,
+        432
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 352,
+      "block_entities": 0,
+      "sha256": "57bdb962cc9fdd53e3553029f83c788fc4b4ffdc6d9951aa90a801ad7cff580e"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_3_1_0",
+      "resource": "tnc:sky_island/detail/detail_3_1_0",
+      "offset": [
+        144,
+        48,
+        0
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 100,
+      "block_entities": 0,
+      "sha256": "05598c7faa4d6eaa0444c9fce6cfa415a1d8c9fdc851884ab1c5cc5beae0d9eb"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_3_1_1",
+      "resource": "tnc:sky_island/detail/detail_3_1_1",
+      "offset": [
+        144,
+        48,
+        48
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 244,
+      "block_entities": 0,
+      "sha256": "4ea40df749c0c25552b578e04509363790dbdbf0c2dc2906486e853e921e3da9"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_3_1_9",
+      "resource": "tnc:sky_island/detail/detail_3_1_9",
+      "offset": [
+        144,
+        48,
+        432
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 315,
+      "block_entities": 0,
+      "sha256": "70f9f58740c3ca5c9670deb9c1217fd2f92493f39e452cfeac9c73b2d7e5b418"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_3_1_10",
+      "resource": "tnc:sky_island/detail/detail_3_1_10",
+      "offset": [
+        144,
+        48,
+        480
+      ],
+      "size": [
+        48,
+        48,
+        40
+      ],
+      "blocks": 157,
+      "block_entities": 0,
+      "sha256": "80d3002b179672cb94f5c6ef67c7ce64b29e2cda43527e526009e4a6bedb4f5a"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_4_1_0",
+      "resource": "tnc:sky_island/detail/detail_4_1_0",
+      "offset": [
+        192,
+        48,
+        0
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 238,
+      "block_entities": 0,
+      "sha256": "55c38816395445f8ff8a92ed6239202f59310ac1f2198a2366c76ce927e89e3a"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_4_1_1",
+      "resource": "tnc:sky_island/detail/detail_4_1_1",
+      "offset": [
+        192,
+        48,
+        48
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 526,
+      "block_entities": 0,
+      "sha256": "23b19281b6f8b6e33f68bceee7887a03a9a501d30fa3d0094dbe55263c41b5ae"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_4_1_9",
+      "resource": "tnc:sky_island/detail/detail_4_1_9",
+      "offset": [
+        192,
+        48,
+        432
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 388,
+      "block_entities": 0,
+      "sha256": "1f974d93fb6f7b8f61a463abe0b5689d2e2adb2393c8ccc7c6143c0039335263"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_4_1_10",
+      "resource": "tnc:sky_island/detail/detail_4_1_10",
+      "offset": [
+        192,
+        48,
+        480
+      ],
+      "size": [
+        48,
+        48,
+        40
+      ],
+      "blocks": 254,
+      "block_entities": 0,
+      "sha256": "0acdfa5abc05a4a53f183fa17f839c3d9cfb8913390b18f345bb7370e094ac6f"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_5_1_0",
+      "resource": "tnc:sky_island/detail/detail_5_1_0",
+      "offset": [
+        240,
+        48,
+        0
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 432,
+      "block_entities": 0,
+      "sha256": "54492351a266fd18673f474ab96758fca669205938a8a16af9e193687a4c662e"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_5_1_1",
+      "resource": "tnc:sky_island/detail/detail_5_1_1",
+      "offset": [
+        240,
+        48,
+        48
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 353,
+      "block_entities": 0,
+      "sha256": "f5933c724b27f6f75126e086021744caa3fab3f7caebbc9bb30c6c2c17d478d0"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_5_1_9",
+      "resource": "tnc:sky_island/detail/detail_5_1_9",
+      "offset": [
+        240,
+        48,
+        432
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 118,
+      "block_entities": 0,
+      "sha256": "2627d452628e81c8bfacc2b62f6368c951e291aa609592a7f6d37fa7cecaa1d3"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_5_1_10",
+      "resource": "tnc:sky_island/detail/detail_5_1_10",
+      "offset": [
+        240,
+        48,
+        480
+      ],
+      "size": [
+        48,
+        48,
+        40
+      ],
+      "blocks": 351,
+      "block_entities": 0,
+      "sha256": "38b41b799e2b6f62d7a4d536616a304dc7e00eba7bb2a3b762f54f7d0af2ba73"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_6_1_0",
+      "resource": "tnc:sky_island/detail/detail_6_1_0",
+      "offset": [
+        288,
+        48,
+        0
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 319,
+      "block_entities": 0,
+      "sha256": "11c67f94e100860eac78e3bb590708c0c0ddc8f55436d0173d33073ada0a679c"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_6_1_1",
+      "resource": "tnc:sky_island/detail/detail_6_1_1",
+      "offset": [
+        288,
+        48,
+        48
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 415,
+      "block_entities": 0,
+      "sha256": "c56e79fe1e7c60e5f2ed1c9a1ecb974b002412274f2459e9628811cd1563f12f"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_6_1_9",
+      "resource": "tnc:sky_island/detail/detail_6_1_9",
+      "offset": [
+        288,
+        48,
+        432
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 564,
+      "block_entities": 0,
+      "sha256": "38575e584247978f69ace244492d5ef942a18df4e5fb8348d6c24a9a1bb8be77"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_6_1_10",
+      "resource": "tnc:sky_island/detail/detail_6_1_10",
+      "offset": [
+        288,
+        48,
+        480
+      ],
+      "size": [
+        48,
+        48,
+        40
+      ],
+      "blocks": 19,
+      "block_entities": 0,
+      "sha256": "8cabfa3e2067735556619295061d6ba057dfc3fb615493caf31d991637c3c709"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_7_1_0",
+      "resource": "tnc:sky_island/detail/detail_7_1_0",
+      "offset": [
+        336,
+        48,
+        0
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 50,
+      "block_entities": 0,
+      "sha256": "3d169505e5f35f658ca7d65df69808510db8a22003d212dc4b24c0e6a2e3606a"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_7_1_1",
+      "resource": "tnc:sky_island/detail/detail_7_1_1",
+      "offset": [
+        336,
+        48,
+        48
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 524,
+      "block_entities": 0,
+      "sha256": "e368c0b9d5aa5cb84b406b163d88314d93a72d724a069fe5f8c4daad2c9fb094"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_7_1_9",
+      "resource": "tnc:sky_island/detail/detail_7_1_9",
+      "offset": [
+        336,
+        48,
+        432
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 115,
+      "block_entities": 0,
+      "sha256": "96bf93abb32623b2153927ef9f14c319574f12b0e4d904bf26f07a7c2305d5fa"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_8_1_1",
+      "resource": "tnc:sky_island/detail/detail_8_1_1",
+      "offset": [
+        384,
+        48,
+        48
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 173,
+      "block_entities": 0,
+      "sha256": "da19be55e8e9e1d680fd9a3d1337a0cbadb48e1c309f1cd95f35c465051903dc"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_8_1_2",
+      "resource": "tnc:sky_island/detail/detail_8_1_2",
+      "offset": [
+        384,
+        48,
+        96
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 146,
+      "block_entities": 0,
+      "sha256": "bdc3a5e5fc422ddba6b83186fe6ecb953faa158c981839eae5c72b2e4779a553"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_8_1_4",
+      "resource": "tnc:sky_island/detail/detail_8_1_4",
+      "offset": [
+        384,
+        48,
+        192
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 146,
+      "block_entities": 0,
+      "sha256": "19added7c2d89e7b3f0e6d63c5f91444cc5b46a1428c5a6fd57af8f6d420fced"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_8_1_5",
+      "resource": "tnc:sky_island/detail/detail_8_1_5",
+      "offset": [
+        384,
+        48,
+        240
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 217,
+      "block_entities": 0,
+      "sha256": "e672930779d2823f88a423d4407cc9934aff34553affe6448d8e7f408f59a250"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_8_1_6",
+      "resource": "tnc:sky_island/detail/detail_8_1_6",
+      "offset": [
+        384,
+        48,
+        288
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 264,
+      "block_entities": 0,
+      "sha256": "46206fec4d9de8920811fde299dff69c93d2eab7bb8dc34e63c1d5463e35b7df"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_8_1_7",
+      "resource": "tnc:sky_island/detail/detail_8_1_7",
+      "offset": [
+        384,
+        48,
+        336
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 102,
+      "block_entities": 0,
+      "sha256": "b428d34f75c17d002c47c7fe2fb088356ed5a4d60c20c0f4449c15eded01f45f"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_8_1_9",
+      "resource": "tnc:sky_island/detail/detail_8_1_9",
+      "offset": [
+        384,
+        48,
+        432
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 157,
+      "block_entities": 0,
+      "sha256": "7d16e028d540328f6cc17eef30c594cf7fc0574a9b5b70dc13e3789c8e94bc81"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_9_1_2",
+      "resource": "tnc:sky_island/detail/detail_9_1_2",
+      "offset": [
+        432,
+        48,
+        96
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 152,
+      "block_entities": 0,
+      "sha256": "8ef7f812996436834527821c88c08c9593d702d5519f7c3d40d635fe4f5da99e"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_9_1_3",
+      "resource": "tnc:sky_island/detail/detail_9_1_3",
+      "offset": [
+        432,
+        48,
+        144
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 209,
+      "block_entities": 0,
+      "sha256": "baa09d8b5a788b6ac2c3b6237b6eedc203185b1610d5f4b952554fb577aa2f4e"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_9_1_4",
+      "resource": "tnc:sky_island/detail/detail_9_1_4",
+      "offset": [
+        432,
+        48,
+        192
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 688,
+      "block_entities": 0,
+      "sha256": "860ccc9edec2bbeb09c4cd1e3bb8b6f5798142269f4d0710ec262f90049a3d19"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_9_1_5",
+      "resource": "tnc:sky_island/detail/detail_9_1_5",
+      "offset": [
+        432,
+        48,
+        240
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 534,
+      "block_entities": 0,
+      "sha256": "d712558b8dc5d3f7daa4b525f2583b567ec86e5c54819b409f6592b993b773b0"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_9_1_6",
+      "resource": "tnc:sky_island/detail/detail_9_1_6",
+      "offset": [
+        432,
+        48,
+        288
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 399,
+      "block_entities": 0,
+      "sha256": "bc7bf17118e2705b20e618d0556db4e0c90e247ba5c8c5aa6be89be4bba025bd"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_9_1_7",
+      "resource": "tnc:sky_island/detail/detail_9_1_7",
+      "offset": [
+        432,
+        48,
+        336
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 628,
+      "block_entities": 0,
+      "sha256": "7cc94bb3d2f37a92f8f7b8aeff58d04eb28c80d8090a226c4c770343c40ca594"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_9_1_8",
+      "resource": "tnc:sky_island/detail/detail_9_1_8",
+      "offset": [
+        432,
+        48,
+        384
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 367,
+      "block_entities": 0,
+      "sha256": "b37d503e331b22c544f829d0f44bb5a2bf7138ae27f5b53035bfc4da58f40d9a"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_9_1_9",
+      "resource": "tnc:sky_island/detail/detail_9_1_9",
+      "offset": [
+        432,
+        48,
+        432
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 57,
+      "block_entities": 0,
+      "sha256": "f8a0dfcc77fa3031c3b505d68e4c3df896597fc8be6191300849eab4c7f38828"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_10_1_3",
+      "resource": "tnc:sky_island/detail/detail_10_1_3",
+      "offset": [
+        480,
+        48,
+        144
+      ],
+      "size": [
+        40,
+        48,
+        48
+      ],
+      "blocks": 27,
+      "block_entities": 0,
+      "sha256": "835a142c8cb6491ac6fe0843ce1bace716fa9a6cbd4651c4f88ea19ac38e86ec"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_10_1_4",
+      "resource": "tnc:sky_island/detail/detail_10_1_4",
+      "offset": [
+        480,
+        48,
+        192
+      ],
+      "size": [
+        40,
+        48,
+        48
+      ],
+      "blocks": 120,
+      "block_entities": 0,
+      "sha256": "cf52a29bb280bdd1a7ef63d4e6ea0c2dae13448937c33e3e9c825789280656dd"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_10_1_5",
+      "resource": "tnc:sky_island/detail/detail_10_1_5",
+      "offset": [
+        480,
+        48,
+        240
+      ],
+      "size": [
+        40,
+        48,
+        48
+      ],
+      "blocks": 341,
+      "block_entities": 0,
+      "sha256": "04ac1675924ff893a9c69322f6d076c5cd01a3179180bc9949cc6d0a2cc6ae94"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_10_1_6",
+      "resource": "tnc:sky_island/detail/detail_10_1_6",
+      "offset": [
+        480,
+        48,
+        288
+      ],
+      "size": [
+        40,
+        48,
+        48
+      ],
+      "blocks": 308,
+      "block_entities": 0,
+      "sha256": "e400c29faf6bdd4fd3e1714f74ecc0203a5841801889a81b2a8dbd99ff799139"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_10_1_7",
+      "resource": "tnc:sky_island/detail/detail_10_1_7",
+      "offset": [
+        480,
+        48,
+        336
+      ],
+      "size": [
+        40,
+        48,
+        48
+      ],
+      "blocks": 67,
+      "block_entities": 0,
+      "sha256": "a25fae1e63757865d4e5c07f38681dd9bbca4df80b82d2357a681a6c443197ed"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_0_2_6",
+      "resource": "tnc:sky_island/detail/detail_0_2_6",
+      "offset": [
+        0,
+        96,
+        288
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 62,
+      "block_entities": 0,
+      "sha256": "c59569fe096b4b0c5bef7944b3356f4039d96bef5fe76ac86d589d7119ecaa65"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_1_2_5",
+      "resource": "tnc:sky_island/detail/detail_1_2_5",
+      "offset": [
+        48,
+        96,
+        240
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 41,
+      "block_entities": 0,
+      "sha256": "7091fc073d422df5ce4c0cca03ad78f248d0ffb50e6f5fc0e28c42a49550796f"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_1_2_6",
+      "resource": "tnc:sky_island/detail/detail_1_2_6",
+      "offset": [
+        48,
+        96,
+        288
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 20,
+      "block_entities": 0,
+      "sha256": "10945cbe4ce09e028b047611070abd4dbf6f0b65841d17133697e8885fe445d2"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_4_2_0",
+      "resource": "tnc:sky_island/detail/detail_4_2_0",
+      "offset": [
+        192,
+        96,
+        0
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 38,
+      "block_entities": 0,
+      "sha256": "3e2549d2dcd3c5552eaacb61e0a7621de41e6c5e272c86840ed8d008890a9509"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_5_2_0",
+      "resource": "tnc:sky_island/detail/detail_5_2_0",
+      "offset": [
+        240,
+        96,
+        0
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 27,
+      "block_entities": 0,
+      "sha256": "be7eed0646816b902dcd2ca8991c2c2fa40c8feb476ef6bc1f32fd2fe94a59c0"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_5_2_1",
+      "resource": "tnc:sky_island/detail/detail_5_2_1",
+      "offset": [
+        240,
+        96,
+        48
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 38,
+      "block_entities": 0,
+      "sha256": "030fb29f0edc8740273aad80ff58461458dfedebdfba7357848456287bbcfe53"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_8_2_1",
+      "resource": "tnc:sky_island/detail/detail_8_2_1",
+      "offset": [
+        384,
+        96,
+        48
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 9,
+      "block_entities": 0,
+      "sha256": "6e0f38ed364d8b20514775bb8ebbde45149343bb3171b2395534e02cfc031e1b"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_9_2_5",
+      "resource": "tnc:sky_island/detail/detail_9_2_5",
+      "offset": [
+        432,
+        96,
+        240
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 18,
+      "block_entities": 0,
+      "sha256": "4cfed97f2bf4422cc97394ed8a69a28234af0562cf018b10f3c5b15c980b6d29"
+    },
+    {
+      "layer": "detail",
+      "name": "detail_9_2_7",
+      "resource": "tnc:sky_island/detail/detail_9_2_7",
+      "offset": [
+        432,
+        96,
+        336
+      ],
+      "size": [
+        48,
+        48,
+        48
+      ],
+      "blocks": 9,
+      "block_entities": 0,
+      "sha256": "fab7dc56410044f8041ffa11016de3c1928f650a4f04873555a1720c0c7ff5d7"
+    }
+  ]
+}
