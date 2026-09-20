@@ -38,6 +38,12 @@ public final class TNProjectileModels {
     private static final Logger LOGGER = LogManager.getLogger("TN-C/models");
 
     static {
+        // 先注册"模型载体物品"（投射物用物品 id 兜底渲染，见 TNProjectileCarriers 的说明）
+        try {
+            com.tnc.tnc.magic.TNProjectileCarriers.register();
+        } catch (Throwable t) {
+            LOGGER.warn("TN-C: carrier item registration skipped ({})", t.toString());
+        }
         register();
     }
 
