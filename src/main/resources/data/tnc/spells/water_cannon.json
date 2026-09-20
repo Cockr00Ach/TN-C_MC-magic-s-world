@@ -1,0 +1,44 @@
+{
+  "school": "WATER",
+  "group": "water_ball",
+  "range": 40.0,
+  "learn": { "tier": 2 },
+  "cast": {
+    "duration": 0.6,
+    "animation": "spell_engine:one_handed_projectile_charge",
+    "sound": { "id": "spell_engine:generic_arcane_casting", "randomness": 0 },
+    "particles": [ { "particle_id": "splash", "shape": "CIRCLE", "origin": "FEET", "count": 10.0, "min_speed": 0.1, "max_speed": 0.4 } ]
+  },
+  "release": {
+    "target": {
+      "type": "PROJECTILE",
+      "projectile": {
+        "launch_properties": { "velocity": 1.7, "extra_launch_count": 0, "extra_launch_delay": 3 },
+        "projectile": {
+          "homing_angle": 0.3,
+          "perks": { "pierce": 1 },
+          "client_data": {
+            "travel_particles": [ { "particle_id": "bubble", "shape": "CIRCLE", "rotation": "LOOK", "origin": "CENTER", "count": 3.0, "min_speed": 0.0, "max_speed": 0.1 } ],
+            "model": { "model_id": "tnc:projectile/lightingball", "scale": 0.9 }
+          }
+        }
+      }
+    },
+    "animation": "spell_engine:one_handed_projectile_release",
+    "sound": { "id": "spell_engine:generic_arcane_release" }
+  },
+  "impact": [
+    {
+      "action": { "type": "DAMAGE", "damage": { "spell_power_coefficient": 1.6, "knockback": 0.3 } },
+      "particles": [ { "particle_id": "splash", "shape": "SPHERE", "origin": "CENTER", "count": 45.0, "min_speed": 0.3, "max_speed": 1.5 } ],
+      "sound": { "id": "entity.generic.splash", "volume": 0.8 }
+    }
+  ],
+  "area_impact": {
+    "radius": 2.5,
+    "area": { "distance_dropoff": "SQUARED" },
+    "particles": [ { "particle_id": "splash", "shape": "SPHERE", "origin": "CENTER", "count": 45.0, "min_speed": 0.3, "max_speed": 1.5 } ],
+    "sound": { "id": "entity.generic.splash", "volume": 1.0 }
+  },
+  "cost": { "exhaust": 0.0, "cooldown_duration": 2.5 }
+}

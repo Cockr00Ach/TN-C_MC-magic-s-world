@@ -1,0 +1,43 @@
+{
+  "school": "FIRE",
+  "group": "ball",
+  "range": 40.0,
+  "learn": { "tier": 1 },
+  "cast": {
+    "duration": 0.5,
+    "animation": "spell_engine:one_handed_projectile_charge",
+    "sound": { "id": "spell_engine:generic_fire_casting", "randomness": 0 },
+    "particles": [ { "particle_id": "flame", "shape": "PIPE", "origin": "FEET", "count": 1.0, "min_speed": 0.05, "max_speed": 0.1 } ]
+  },
+  "release": {
+    "target": {
+      "type": "PROJECTILE",
+      "projectile": {
+        "launch_properties": { "velocity": 1.2 },
+        "projectile": {
+          "homing_angle": 0.4,
+          "client_data": {
+            "travel_particles": [ { "particle_id": "flame", "shape": "CIRCLE", "rotation": "LOOK", "origin": "CENTER", "count": 4.0, "min_speed": 0.0, "max_speed": 0.1 } ],
+            "model": { "model_id": "tnc:projectile/lightingball", "scale": 0.8 }
+          }
+        }
+      }
+    },
+    "animation": "spell_engine:one_handed_projectile_release",
+    "sound": { "id": "spell_engine:generic_fire_release" }
+  },
+  "impact": [
+    {
+      "action": { "type": "DAMAGE", "damage": { "spell_power_coefficient": 1, "knockback": 0.4 } },
+      "particles": [ { "particle_id": "flame", "shape": "SPHERE", "origin": "CENTER", "count": 40.0, "min_speed": 0.2, "max_speed": 0.8 } ],
+      "sound": { "id": "entity.blaze.shoot", "volume": 0.6 }
+    }
+  ],
+  "area_impact": {
+    "radius": 2,
+    "area": { "distance_dropoff": "SQUARED" },
+    "particles": [ { "particle_id": "lava", "shape": "SPHERE", "origin": "CENTER", "count": 60.0, "min_speed": 0.5, "max_speed": 2.5 } ],
+    "sound": { "id": "entity.generic.explode", "volume": 0.9 }
+  },
+  "cost": { "exhaust": 0.0, "cooldown_duration": 1.5 }
+}

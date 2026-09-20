@@ -126,6 +126,8 @@ public class MagicStoneCommand {
                         .then(Commands.argument("spell", ResourceLocationArgument.id())
                                 .suggests(MagicStoneCommand::suggestSpells)
                                 .executes(ctx -> learn(ctx, ResourceLocationArgument.getId(ctx, "spell")))))
+                .then(Commands.literal("forgetall")
+                        .executes(MagicStoneCommand::forgetAll))
                 .then(Commands.literal("forget")
                         .then(Commands.argument("spell", ResourceLocationArgument.id())
                                 .suggests(MagicStoneCommand::suggestSpells)
@@ -358,6 +360,25 @@ public class MagicStoneCommand {
             case NOT_ENOUGH_POINTS -> "点数不足";
             case NOT_IMPLEMENTED -> "尚未实装";
         };
+    }
+
+    /**
+     * /tnc forgetall —— 遗忘**全部**已学法术。
+     *
+     * <p>亲和力、魔法点数、每条链的进度都**保留** —— 忘完可以马上重新学，方便反复测试
+     * （想连进度一起清就用 /tnc reset）。走 mutate() 所以法杖槽位会同步清空。
+     */
+    private static int forgetAll(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        return mutate(ctx, (player, data) -> {
+            java.util.List<ResourceLocation> ids = new java.util.ArrayList<>(data.getLearned());
+            int removed = 0;
+            for (ResourceLocation id : ids) {
+                if (data.forget(id)) {
+                    removed++;
+                }
+            }
+            return "已遗忘全部 " + removed + " 个法术（亲和力 / 点数 / 链进度都保留）";
+        });
     }
 
     private static int forget(CommandContext<CommandSourceStack> ctx, ResourceLocation spell)
