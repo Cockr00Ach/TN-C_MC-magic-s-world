@@ -100,6 +100,7 @@ public class TNMod
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
+        com.tnc.tnc.world.stonecrest.TNStructures.register(modEventBus);
         // 我们自己的状态效果（雷速 / 极速雷风 / 环绕雷球 / 闪电登神）—— 法术 JSON 按 id 引用
         com.tnc.tnc.magic.TNEffects.register(modEventBus);
 

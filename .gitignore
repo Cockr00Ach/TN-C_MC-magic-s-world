@@ -45,6 +45,11 @@ libs/*.jar
 # 整合包原样内容（体积大 / 第三方）
 modpack/archive/
 modpack/*/mods/
+# 基础 280 个模组只作为本地运行环境保留；仅跟踪本项目明确新增的两个模组。
+!modpack/*/mods/
+modpack/*/mods/*
+!modpack/*/mods/touhoulittlemaid-1.5.2-forge+mc1.20.1.jar
+!modpack/*/mods/tnc-1.0.0.jar
 modpack/*/tlm_custom_pack/
 modpack/*/vaultpatcher/
 modpack/*/defaultconfigs/

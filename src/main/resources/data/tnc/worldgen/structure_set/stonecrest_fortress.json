@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "tnc:stonecrest_fortress",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 17620311,
+    "spacing": 24,
+    "separation": 16
+  }
+}
