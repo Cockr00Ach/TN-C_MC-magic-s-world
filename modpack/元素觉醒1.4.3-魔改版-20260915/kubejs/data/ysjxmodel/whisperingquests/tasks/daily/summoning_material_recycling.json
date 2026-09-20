@@ -1,0 +1,45 @@
+{
+  "id": "ysjxmodel:daily/summoning_material_recycling",
+  "enabled": false,
+  "weight": 6,
+  "category": "daily",
+  "repeatable": true,
+  "sync_with_team": false,
+  "title": "§e召唤素材回收§r",
+  "short_description": "提交骨头、火药和腐肉",
+  "description": "神圣竞技场正在回收制作基础召唤凭证所需的怪物素材。提交 12 个骨头、8 个火药和 12 个腐肉即可完成任务。",
+  "refresh_pool": "daily",
+  "objectives": [
+    {
+      "type": "item",
+      "id": "submit_bones",
+      "text": "提交 12 个骨头",
+      "item": "minecraft:bone",
+      "amount": 12,
+      "consume": true
+    },
+    {
+      "type": "item",
+      "id": "submit_gunpowder",
+      "text": "提交 8 个火药",
+      "item": "minecraft:gunpowder",
+      "amount": 8,
+      "consume": true
+    },
+    {
+      "type": "item",
+      "id": "submit_rotten_flesh",
+      "text": "提交 12 个腐肉",
+      "item": "minecraft:rotten_flesh",
+      "amount": 12,
+      "consume": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "ysjxspells:jinbi",
+      "count": 1
+    }
+  ]
+}

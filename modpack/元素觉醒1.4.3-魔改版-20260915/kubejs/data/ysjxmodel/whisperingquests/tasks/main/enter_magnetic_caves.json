@@ -1,0 +1,38 @@
+{
+  "id": "ysjxmodel:main/enter_magnetic_caves",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_one",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【踏入磁力洞穴】§r",
+  "short_description": "激活传送门并进入磁力洞穴",
+  "description": "使用「磁力洞穴传送水晶」激活地下室中的传送门，进入充斥着异常磁场的磁力洞穴。\n\n进入后务必保持警惕。受到虚空裂缝影响，那里的生物已经变得异常狂暴。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "dimension",
+      "id": "enter_magnetic_caves",
+      "text": "进入磁力洞穴",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "alex_caves_dimensions:magnetic_caves"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 30,
+      "count": 1
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/uncontrolled_teletors",
+    "ysjxmodel:main/elemental_dragon_lightning"
+  ]
+}

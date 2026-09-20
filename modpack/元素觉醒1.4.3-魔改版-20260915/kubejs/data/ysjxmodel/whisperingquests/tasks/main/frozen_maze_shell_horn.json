@@ -1,0 +1,44 @@
+{
+  "id": "ysjxmodel:main/frozen_maze_shell_horn",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_two",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b获得贝壳号角§r",
+  "short_description": "探索寒冰迷宫并获得贝壳号角",
+  "description": "传闻船长曾拥有一枚能够呼唤亡魂的贝壳号角。\n\n探索寒冰迷宫群系中的建筑与遗迹，找到「贝壳号角」。在冰冻深海群系的水边吹响它，便能召唤船长科妮莉亚的亡魂。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "obtain_shell_horn",
+      "text": "获得贝壳号角 ×1",
+      "amount": 1,
+      "consume": false,
+      "item": "aquamirae:shell_horn",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 2,
+      "item": "ysjxspells:jinbi"
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:max_health_food"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/frozen_maze_cornelia"
+  ]
+}

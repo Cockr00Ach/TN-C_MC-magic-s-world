@@ -1,0 +1,103 @@
+{
+  "id": "ysjxmodel:main/mechanical_nest_investigation",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_two",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【在天上的机械城？】§r",
+  "short_description": "前往机械巢穴调查不明能量反应",
+  "description": "霜星：\n\n我们在天境的地图上发现了一座规模巨大的机械遗迹。\n\n从侦测结果来看，那里的机械结构依然保持着运转，内部还存在大量不明能量反应。我已经将相关坐标同步给你了，需要你前往现场调查一下。\n\n你可以使用探险家指南针搜索【机械巢穴】。\n\n§1§l【搜索提示】§r\n§0如果指南针未能找到目标，说明当前位置周围§4 10,000 格§0范围内没有生成该建筑。\n§0请前往更远的区域，再次使用指南针进行搜索。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "structure",
+      "id": "reach_mechanical_nest",
+      "text": "抵达机械巢穴",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "structure": "dungeons_arise:mechanical_nest"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 30,
+      "count": 1
+    },
+    {
+      "type": "choice",
+      "amount": 0,
+      "count": 1,
+      "rewards": [
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 30,
+          "item": "minecraft:bread"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "minecraft:arrow"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "runes:arcane_stone"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "runes:fire_stone"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "runes:frost_stone"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "runes:healing_stone"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "runes:lightning_stone"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "more_rpg_classes:aqua_stone"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "more_rpg_classes:terra_stone"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "more_rpg_classes:storm_stone"
+        }
+      ],
+      "choose": 1,
+      "pool_name": "符文组自选"
+    }
+  ]
+}

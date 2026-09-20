@@ -1,0 +1,35 @@
+{
+  "id": "ysjxmodel:main/craft_magnetic_badge",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_one",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【磁力徽章】§r",
+  "short_description": "制作一枚磁力徽章",
+  "description": "在深入调查磁力洞穴之前，先制作一枚「磁力徽章」。\n\n佩戴或携带这枚徽章后，在磁力洞穴中击杀生物时，可以获得额外的特殊奖励。它会为接下来的探索带来不少帮助。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "obtain_magnetic_badge",
+      "text": "制作磁力徽章",
+      "amount": 1,
+      "consume": false,
+      "item": "whispering:magnetic_badge",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "alex_caves_dimensions:magnetic_caves_key"
+    }
+  ]
+}

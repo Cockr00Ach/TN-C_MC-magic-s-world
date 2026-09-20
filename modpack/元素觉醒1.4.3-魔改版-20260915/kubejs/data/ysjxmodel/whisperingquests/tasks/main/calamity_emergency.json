@@ -1,0 +1,57 @@
+{
+  "id": "ysjxmodel:main/calamity_emergency",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_five",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§4【紧急事件·天灾】§r",
+  "short_description": "立即返回魔法协会寻找迷迭香",
+  "description": "立即返回魔法协会，寻找迷迭香了解世界法则异常与天灾级生物的紧急情况。\n\n§2§l【追踪提示】§r§7点击任务页面中的§3「开始追踪」§7，即可显示目标所在的具体坐标。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "location",
+      "id": "reach_rosmontis_for_calamity_emergency",
+      "text": "立即返回魔法协会寻找迷迭香",
+      "amount": 1,
+      "consume": false,
+      "position": {
+        "x": 291,
+        "y": 101,
+        "z": 235
+      },
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "ysjx_dimension:magic_association"
+    },
+    {
+      "type": "dialogue",
+      "id": "talk_to_rosmontis_about_calamity",
+      "text": "与迷迭香交谈",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 100,
+      "count": 1
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjx_dimension:abandoned_city_teleporter"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/explore_abandoned_city"
+  ]
+}

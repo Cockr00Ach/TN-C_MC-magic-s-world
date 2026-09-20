@@ -1,0 +1,40 @@
+{
+  "id": "ysjxmodel:side/ancient_labyrinth",
+  "enabled": false,
+  "weight": 1,
+  "category": "side",
+  "repeatable": false,
+  "sync_with_team": true,
+  "title": "§6【支线】古代迷宫§r",
+  "short_description": "访问古代遗迹【迷宫】",
+  "description": "协会的遗迹档案中记载着一座规模庞大的古代迷宫。其内部道路错综复杂，无数探索者进入其中后便失去了踪迹。\n\n前往迷宫进行调查，并记录这座古代遗迹的具体位置。\n\n你可以使用探险家指南针搜索【迷宫】。\n\n§1§l【搜索提示】§r\n§0如果指南针未能找到目标，说明当前位置周围§4 10,000 格§0范围内没有生成该建筑。\n§0请前往更远的区域，再次使用指南针进行搜索。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "structure",
+      "id": "visit_ancient_labyrinth",
+      "text": "访问古代遗迹【迷宫】",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "structure": "dungeonnowloading:labyrinth"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 3,
+      "item": "ysjxspells:max_health_food"
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 2,
+      "item": "ysjxspells:zuanshibi"
+    }
+  ]
+}

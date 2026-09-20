@@ -1,0 +1,108 @@
+{
+  "id": "ysjxmodel:main/demon_lord_aura",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_two",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§c【魔王种的气息】§r",
+  "short_description": "前往多云神庙击败湫渃云魔",
+  "description": "迷迭香：\n\n生物个体检测系统在天境「多云神庙」附近捕捉到了魔王种的能量波动。\n\n根据气息判断，目标应该是名为「湫渃云魔」的生物。它目前散发出的力量远低于其他魔王种，或许正处于重伤或进化尚未稳定的状态。\n\n这是讨伐它的最佳时机。立刻前往多云神庙，在它恢复力量之前将其击败！",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "defeat_cloud_golem",
+      "text": "获取大气符文 ×1",
+      "amount": 1,
+      "consume": false,
+      "item": "legendary_monsters:air_rune",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 5,
+      "item": "minecraft:netherite_ingot"
+    },
+    {
+      "type": "choice",
+      "amount": 0,
+      "count": 1,
+      "rewards": [
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 3,
+          "item": "ysjxspells:arcane_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 3,
+          "item": "ysjxspells:fire_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 3,
+          "item": "ysjxspells:frost_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 3,
+          "item": "ysjxspells:healing_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 3,
+          "item": "ysjxspells:water_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 3,
+          "item": "ysjxspells:earth_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 3,
+          "item": "ysjxspells:air_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 3,
+          "item": "ysjxspells:lightning_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 3,
+          "item": "ysjxspells:attack_power_food"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 3,
+          "item": "ysjxspells:ranged_damage_fruit"
+        }
+      ],
+      "choose": 1,
+      "pool_name": "职业属性果实"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/demon_lord_world_voice_report",
+    "ysjxmodel:main/frozen_maze_briefing"
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "id": "ysjxmodel:main/explore_second_round_world",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_five",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【前往二轮世界】§r",
+  "short_description": "前往二轮世界",
+  "description": "进入二轮世界，调查这个异界维度中的情况。\n\n§7传送门框架可前往§3冰霜酒狐商店§7购买。完成搭建后，需要使用§5「二轮世界钥匙」§7激活传送门。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "dimension",
+      "id": "reach_second_round_world",
+      "text": "前往二轮世界",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "jerotesvillage:second_round_world"
+    },
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "obtain_second_round_world_key",
+      "text": "获得二轮世界钥匙 ×1",
+      "amount": 1,
+      "consume": false,
+      "item": "jerotesvillage:second_round_world_key",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 100,
+      "count": 1
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/second_round_corrosiver",
+    "ysjxmodel:main/second_round_sediment_lord"
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "id": "ysjxmodel:main/uncontrolled_teletors",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_one",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【失控的磁流灵】§r",
+  "short_description": "清除附近失控的磁流灵",
+  "description": "这些机械生物真的疯了……它们正在磁场中四处游荡，并攻击一切靠近的目标。\n\n清除附近失控的磁流灵，确保接下来的调查能够顺利进行。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "kill",
+      "id": "defeat_teletors",
+      "text": "击杀 3 只磁流灵",
+      "amount": 3,
+      "consume": false,
+      "entity": "alexscaves:teletor",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 2,
+      "item": "ysjxspells:jinbi"
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 2,
+      "item": "ysjxspells:max_health_food"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/foundry_investigation"
+  ]
+}

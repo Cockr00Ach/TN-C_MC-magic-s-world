@@ -1,0 +1,42 @@
+{
+  "id": "ysjxmodel:daily/arena_cleanup",
+  "enabled": false,
+  "weight": 6,
+  "category": "daily",
+  "repeatable": true,
+  "sync_with_team": false,
+  "title": "§e竞技场清剿§r",
+  "short_description": "击杀僵尸、骷髅和蜘蛛",
+  "description": "完成一轮基础战斗训练，分别击杀 2 只僵尸、2 只骷髅和 2 只蜘蛛。",
+  "refresh_pool": "daily",
+  "objectives": [
+    {
+      "type": "kill",
+      "id": "kill_zombies",
+      "text": "击杀 2 只僵尸",
+      "entity": "minecraft:zombie",
+      "amount": 2
+    },
+    {
+      "type": "kill",
+      "id": "kill_skeletons",
+      "text": "击杀 2 只骷髅",
+      "entity": "minecraft:skeleton",
+      "amount": 2
+    },
+    {
+      "type": "kill",
+      "id": "kill_spiders",
+      "text": "击杀 2 只蜘蛛",
+      "entity": "minecraft:spider",
+      "amount": 2
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "ysjxspells:jinbi",
+      "count": 1
+    }
+  ]
+}

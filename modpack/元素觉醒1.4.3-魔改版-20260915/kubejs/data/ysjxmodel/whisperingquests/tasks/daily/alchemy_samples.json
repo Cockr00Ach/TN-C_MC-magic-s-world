@@ -1,0 +1,37 @@
+{
+  "id": "ysjxmodel:daily/alchemy_samples",
+  "enabled": false,
+  "weight": 6,
+  "category": "daily",
+  "repeatable": true,
+  "sync_with_team": false,
+  "title": "§e炼金生物样本§r",
+  "short_description": "提交蜘蛛眼和黏液球",
+  "description": "七星需要一批用于炼金实验的生物样本。提交 6 个蜘蛛眼和 6 个黏液球即可完成任务。",
+  "refresh_pool": "daily",
+  "objectives": [
+    {
+      "type": "item",
+      "id": "submit_spider_eyes",
+      "text": "提交 6 个蜘蛛眼",
+      "item": "minecraft:spider_eye",
+      "amount": 6,
+      "consume": true
+    },
+    {
+      "type": "item",
+      "id": "submit_slime_balls",
+      "text": "提交 6 个黏液球",
+      "item": "minecraft:slime_ball",
+      "amount": 6,
+      "consume": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "ysjxspells:jinbi",
+      "count": 1
+    }
+  ]
+}

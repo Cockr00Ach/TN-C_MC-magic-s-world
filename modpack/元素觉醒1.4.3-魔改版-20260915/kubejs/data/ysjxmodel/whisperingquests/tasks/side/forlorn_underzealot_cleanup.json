@@ -1,0 +1,34 @@
+{
+  "id": "ysjxmodel:side/forlorn_underzealot_cleanup",
+  "enabled": false,
+  "weight": 1,
+  "category": "side",
+  "repeatable": false,
+  "sync_with_team": true,
+  "title": "§6【支线任务】清理地底异教徒§r",
+  "short_description": "击杀 5 只地底异教徒",
+  "description": "一种形似“鼹鼠人”的古怪智慧生物，正成群游荡于异寂空谷的黑暗之中。\n\n根据分子生物学鉴定，地底异教徒似乎是由某种鼹科动物演化而来的智慧种族。进一步解剖发现，在黑暗力量的长期影响下，它们约有一半的身体已经转化为具现化的黑暗。\n\n神秘学家认为，地底异教徒在漫长岁月中建立了一套以黑暗力量为核心的神话体系，并通过仪式将这些信仰具现于现实。\n\n它们对黑暗之外的事物几乎毫无兴趣。可正是这份近乎疯狂的崇拜，逐渐将异寂空谷塑造成了如今的模样。\n\n——摘自物种记载书《四方生灵·洞穴奇记》\n守护者 Novic\n\n清理附近的地底异教徒，阻止它们继续举行黑暗仪式。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "kill",
+      "id": "defeat_underzealots",
+      "text": "击杀地底异教徒 ×5",
+      "amount": 5,
+      "consume": false,
+      "entity": "alexscaves:underzealot",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 2,
+      "item": "ysjxspells:max_health_food"
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "id": "ysjxmodel:main/craft_ember_core",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_two",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【制作烬灭之核】§r",
+  "short_description": "制作一枚蕴藏灼热力量的烬灭之核",
+  "description": "收集原始洞穴中的特殊资源，制作一枚蕴藏灼热力量的「烬灭之核」。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "obtain_ember_core",
+      "text": "制作烬灭之核",
+      "amount": 1,
+      "consume": false,
+      "item": "whispering:ember_core",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 50,
+      "count": 1
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "alex_caves_dimensions:primordial_caves_key"
+    }
+  ]
+}

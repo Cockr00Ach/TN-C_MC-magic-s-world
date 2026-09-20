@@ -1,0 +1,132 @@
+{
+  "id": "ysjxmodel:main/spell_scroll_crafting",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/tutorial",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§5法术卷轴§r",
+  "short_description": "前往武器商铺咨询安德鲁，并合成法术卷轴",
+  "description": "前往魔法协会的武器商铺向安德鲁咨询法术卷轴的制作方法，随后使用锻造台，将卷轴、不死图腾和与你职业对应的元素水晶合成为唤魔尖牙法术卷轴。\n\n【法术水晶可以在FTB任务注意事项里领取】\n\n§2§l【追踪提示】§r§7点击任务页面中的§3「开始追踪」§7，即可显示目标所在的具体坐标。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "location",
+      "id": "reach_andrew_for_scroll",
+      "text": "前往武器商铺",
+      "amount": 1,
+      "consume": false,
+      "position": {
+        "x": -39,
+        "y": 72,
+        "z": 18
+      },
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "ysjx_dimension:magic_association"
+    },
+    {
+      "type": "dialogue",
+      "id": "consult_andrew_about_scroll",
+      "text": "与安德鲁对话",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    },
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "obtain_evoker_scroll",
+      "text": "合成唤魔尖牙法术卷轴",
+      "amount": 1,
+      "consume": false,
+      "item_tag": "ysjxmodel:evoker_scrolls",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "choice",
+      "amount": 0,
+      "count": 1,
+      "rewards": [
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:fire_crystal"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:earth_crystal"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:water_crystal"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:air_crystal"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:arcane_crystal"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:frost_crystal"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:healing_crystal"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:lightning_crystal"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:wuli_crystal"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:sheshou_crystal"
+        }
+      ],
+      "choose": 1,
+      "pool_name": "职业元素水晶"
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:chujishuijing"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/spell_anvil_materials",
+    "ysjxmodel:main/tutorial_completion"
+  ]
+}

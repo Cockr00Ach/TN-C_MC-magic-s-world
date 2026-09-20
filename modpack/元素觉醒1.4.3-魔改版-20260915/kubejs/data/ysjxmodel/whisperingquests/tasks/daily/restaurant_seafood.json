@@ -1,0 +1,37 @@
+{
+  "id": "ysjxmodel:daily/restaurant_seafood",
+  "enabled": false,
+  "weight": 8,
+  "category": "daily",
+  "repeatable": true,
+  "sync_with_team": false,
+  "title": "§e森罗餐厅海鲜采购§r",
+  "short_description": "提交生鳕鱼和生鲑鱼",
+  "description": "森罗餐厅准备推出新的海鲜料理。提交 8 个生鳕鱼和 4 个生鲑鱼即可完成任务。",
+  "refresh_pool": "daily",
+  "objectives": [
+    {
+      "type": "item",
+      "id": "submit_cod",
+      "text": "提交 8 个生鳕鱼",
+      "item": "minecraft:cod",
+      "amount": 8,
+      "consume": true
+    },
+    {
+      "type": "item",
+      "id": "submit_salmon",
+      "text": "提交 4 个生鲑鱼",
+      "item": "minecraft:salmon",
+      "amount": 4,
+      "consume": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "ysjxspells:tiebi",
+      "count": 2
+    }
+  ]
+}

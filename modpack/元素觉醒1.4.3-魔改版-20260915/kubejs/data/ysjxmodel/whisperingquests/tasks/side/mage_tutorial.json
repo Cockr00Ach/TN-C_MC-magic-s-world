@@ -1,0 +1,201 @@
+{
+  "id": "ysjxmodel:side/mage_tutorial",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/tutorial",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【新手指引·法师】§r",
+  "short_description": "制作原初魔典",
+  "description": "获得任意一本指定职业法术书后，制作原初魔典，完成法师职业的基础准备。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "obtain_original_grimoire",
+      "text": "制作原初魔典 ×1",
+      "amount": 1,
+      "consume": false,
+      "item": "ysjx_weapons:original",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "choice",
+      "amount": 0,
+      "count": 1,
+      "rewards": [
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "runes:arcane_stone"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "runes:fire_stone"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "runes:frost_stone"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "runes:healing_stone"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "runes:lightning_stone"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "more_rpg_classes:aqua_stone"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "more_rpg_classes:terra_stone"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "more_rpg_classes:storm_stone"
+        }
+      ],
+      "choose": 1,
+      "pool_name": "法师符文自选"
+    },
+    {
+      "type": "choice",
+      "amount": 0,
+      "count": 1,
+      "rewards": [
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:arcane_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:fire_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:frost_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:healing_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:water_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:earth_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:air_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:lightning_fruit"
+        }
+      ],
+      "choose": 1,
+      "pool_name": "法师元素果实"
+    }
+  ],
+  "start_triggers": [
+    {
+      "type": "item",
+      "action": "start",
+      "amount": 1,
+      "value": 1.0,
+      "item": "ysjx_weapons:lightning_spell_book"
+    },
+    {
+      "type": "item",
+      "action": "start",
+      "amount": 1,
+      "value": 1.0,
+      "item": "elemental_wizards_rpg:wind_spell_book"
+    },
+    {
+      "type": "item",
+      "action": "start",
+      "amount": 1,
+      "value": 1.0,
+      "item": "elemental_wizards_rpg:terra_spell_book"
+    },
+    {
+      "type": "item",
+      "action": "start",
+      "amount": 1,
+      "value": 1.0,
+      "item": "elemental_wizards_rpg:aqua_spell_book"
+    },
+    {
+      "type": "item",
+      "action": "start",
+      "amount": 1,
+      "value": 1.0,
+      "item": "paladins:priest_spell_book"
+    },
+    {
+      "type": "item",
+      "action": "start",
+      "amount": 1,
+      "value": 1.0,
+      "item": "wizards:frost_spell_book"
+    },
+    {
+      "type": "item",
+      "action": "start",
+      "amount": 1,
+      "value": 1.0,
+      "item": "wizards:fire_spell_book"
+    },
+    {
+      "type": "item",
+      "action": "start",
+      "amount": 1,
+      "value": 1.0,
+      "item": "wizards:arcane_spell_book"
+    }
+  ]
+}

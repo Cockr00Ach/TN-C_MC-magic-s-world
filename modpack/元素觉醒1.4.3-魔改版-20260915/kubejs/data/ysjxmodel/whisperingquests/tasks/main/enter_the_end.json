@@ -1,0 +1,50 @@
+{
+  "id": "ysjxmodel:main/enter_the_end",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_five",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§5【前往末地】§r",
+  "short_description": "前往末地并击败末影龙",
+  "description": "§r§7末影龙受到§3「世界之声」§7的影响，已经突破至§5觉醒魔王级§7。\n\n§7它正在逐渐掌控足以撼动整个末地的元素力量。必须趁它尚未完全适应这股力量之前，将其彻底击败！\n\n§6§l【传送门激活条件】\n§r§7前往末地之前，需要先收集§6十二颗不同的眼睛§7，才能激活末地传送门。\n\n§7点击§3「查看攻略」§7即可跳转并查看十二颗眼睛的获取方式。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "dimension",
+      "id": "enter_the_end",
+      "text": "进入末地",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "minecraft:the_end"
+    },
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "defeat_ender_dragon",
+      "text": "获取末影龙鳞片 ×1",
+      "amount": 1,
+      "consume": false,
+      "item": "loot_n_explore:ender_dragon_scales",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 3,
+      "item": "ysjxspells:max_health_food"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/calamity_emergency",
+    "ysjxmodel:main/end_abandoned_fortress",
+    "ysjxmodel:main/celestial_jellyfish"
+  ]
+}

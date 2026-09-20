@@ -1,0 +1,45 @@
+{
+  "id": "ysjxmodel:main/enter_primordial_caves",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_two",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【前往原始洞穴】§r",
+  "short_description": "进入被遗忘于时间之外的原始世界",
+  "description": "使用巫女酒狐提供的「原始洞穴传送水晶」激活传送门，进入这片被遗忘于时间之外的原始世界。\n\n探索原始洞穴，并寻找美食节所需的珍稀远古食材。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "dimension",
+      "id": "reach_primordial_caves",
+      "text": "进入原始洞穴",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "alex_caves_dimensions:primordial_caves"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 50,
+      "count": 1
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:max_health_food"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/senluo_restaurant_primordial_ingredients",
+    "ysjxmodel:main/craft_ember_core",
+    "ysjxmodel:main/elemental_dragon_fire"
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "id": "ysjxmodel:main/forlorn_hollows_briefing",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_two",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【污秽之地的教徒居所】§r",
+  "short_description": "前往魔法协会寻找霜星",
+  "description": "协会准备对异寂空谷深处的一处教徒居所展开勘察。返回魔法协会寻找霜星，了解此次委托的详细情况。\n\n§2§l【追踪提示】§r§7点击任务页面中的§3「开始追踪」§7，即可显示目标所在的具体坐标。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "location",
+      "id": "reach_frost_nova_for_forlorn_hollows",
+      "text": "前往魔法协会寻找霜星",
+      "amount": 1,
+      "consume": false,
+      "position": {
+        "x": -36,
+        "y": 68,
+        "z": 56
+      },
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "ysjx_dimension:magic_association"
+    },
+    {
+      "type": "dialogue",
+      "id": "talk_to_frost_nova_about_forlorn_hollows",
+      "text": "与霜星交谈",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "kubejs:forlorn_teleport_crystal"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/enter_forlorn_hollows"
+  ]
+}

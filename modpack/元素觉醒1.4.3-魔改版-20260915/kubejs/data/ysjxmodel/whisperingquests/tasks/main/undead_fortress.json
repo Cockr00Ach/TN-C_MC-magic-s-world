@@ -1,0 +1,37 @@
+{
+  "id": "ysjxmodel:main/undead_fortress",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_four",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【前往亡灵维度】§r",
+  "short_description": "前往亡灵维度",
+  "description": "使用亡灵堡垒传送器进入亡灵维度，与协会讨伐队会合，并调查堡垒中出现的虚空裂缝。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "dimension",
+      "id": "reach_undead_fortress",
+      "text": "前往亡灵维度",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "ysjx_dimension:undead_fortress"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 30,
+      "count": 1
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/undead_rift_node_1"
+  ]
+}

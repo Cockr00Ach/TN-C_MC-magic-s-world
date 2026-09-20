@@ -1,0 +1,28 @@
+{
+  "id": "ysjxmodel:daily/village_guard",
+  "enabled": false,
+  "weight": 10,
+  "category": "daily",
+  "repeatable": true,
+  "sync_with_team": false,
+  "title": "§e村庄护卫§r",
+  "short_description": "击杀 5 只掠夺者",
+  "description": "附近的掠夺者正在威胁村庄安全。击杀 5 只掠夺者即可完成任务。",
+  "refresh_pool": "daily",
+  "objectives": [
+    {
+      "type": "kill",
+      "id": "kill_pillagers",
+      "text": "击杀 5 只掠夺者",
+      "entity": "minecraft:pillager",
+      "amount": 5
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "ysjxspells:jinbi",
+      "count": 1
+    }
+  ]
+}

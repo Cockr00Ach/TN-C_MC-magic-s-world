@@ -1,0 +1,35 @@
+{
+  "id": "ysjxmodel:main/end_abandoned_fortress",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_five",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§5【废弃堡垒】§r",
+  "short_description": "调查废弃堡垒并取得虚空之眼",
+  "description": "生物个体检测系统在一座废弃堡垒中发现了魔王级生物的能量信号。\n\n目标疑似为盘踞其中的「末影守卫」。前往废弃堡垒完成讨伐，并带回能够证明任务完成的「虚空之眼」。\n\n你可以使用探险家指南针搜索【废弃堡垒】。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "obtain_void_eye",
+      "text": "获得虚空之眼 ×1",
+      "amount": 1,
+      "consume": false,
+      "item": "cataclysm:void_eye",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:fashuhexin"
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "id": "ysjxmodel:main/abandoned_city_leviathan",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/final_chapter",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§4【击败利维坦】§r",
+  "short_description": "前往目标区域并击败利维坦",
+  "description": "废弃都市深处传来了一股庞大而古老的生命波动。\n\n目标确认为深渊巨兽「利维坦」。前往指定位置，在它造成更大的破坏之前将其消灭。\n\n前往中心祭坛，使用「深渊祭品」即可召唤利维坦。\n\n§2§l【追踪提示】§r§7点击任务页面中的§3「开始追踪」§7，即可显示目标所在的具体坐标。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "location",
+      "id": "reach_abandoned_city_target",
+      "text": "前往利维坦所在区域",
+      "amount": 1,
+      "consume": false,
+      "position": {
+        "x": 1893,
+        "y": -7,
+        "z": -1780
+      },
+      "radius": 20,
+      "waypoint_requires_tracking": true,
+      "dimension": "ysjx_dimension:abandoned_city"
+    },
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "defeat_abandoned_city_target",
+      "text": "获取深渊之眼 ×1",
+      "amount": 1,
+      "consume": false,
+      "item": "cataclysm:abyss_eye",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:fashuhexin"
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 4,
+      "item": "ysjxspells:max_health_food"
+    }
+  ]
+}

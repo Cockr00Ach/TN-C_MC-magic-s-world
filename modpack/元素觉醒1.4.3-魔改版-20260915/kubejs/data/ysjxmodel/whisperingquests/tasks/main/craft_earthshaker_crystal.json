@@ -1,0 +1,40 @@
+{
+  "id": "ysjxmodel:main/craft_earthshaker_crystal",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_two",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【制作撼地源晶】§r",
+  "short_description": "制作一枚蕴含大地力量的撼地源晶",
+  "description": "根据七星提供的制作方法，完成一枚「撼地源晶」。\n\n这枚源晶凝聚着撼动大地的力量，或许能为接下来的毒化洞穴探索提供帮助。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "obtain_earthshaker_crystal",
+      "text": "制作撼地源晶",
+      "amount": 1,
+      "consume": false,
+      "item": "whispering:earthshaker_crystal",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 50,
+      "count": 1
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "alex_caves_dimensions:toxic_caves_key"
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "id": "ysjxmodel:main/missing_nether_expedition",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_four",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【失联的讨伐队】§r",
+  "short_description": "前往下界调查失联事件",
+  "description": "协会派往下界讨伐凋灵的队伍已经失去联络，就连后续派出的搜救队也杳无音讯。\n\n立即前往下界，寻找两支队伍留下的踪迹，并调查此次失联事件。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "dimension",
+      "id": "enter_nether_for_missing_expedition",
+      "text": "进入下界",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "minecraft:the_nether"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 50,
+      "count": 1
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/trace_wither",
+    "ysjxmodel:main/gauntlet_arena",
+    "ysjxmodel:main/netherite_monstrosity_hunt",
+    "ysjxmodel:main/underworld_knight_hunt"
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "id": "ysjxmodel:daily/alex_magnetic_cleanup",
+  "enabled": false,
+  "weight": 2,
+  "category": "daily",
+  "repeatable": true,
+  "sync_with_team": false,
+  "title": "§e磁力洞穴清剿§r",
+  "short_description": "击杀 4 只磁流灵",
+  "description": "磁力洞穴中的机械生物再次出现失控迹象。前往磁力洞穴，击杀 4 只磁流灵即可完成任务。",
+  "refresh_pool": "daily",
+  "required_completed": [
+    "ysjxmodel:main/enter_magnetic_caves"
+  ],
+  "objectives": [
+    {
+      "type": "kill",
+      "id": "kill_teletors",
+      "text": "击杀 4 只磁流灵",
+      "entity": "alexscaves:teletor",
+      "amount": 4
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "ysjxspells:jinbi",
+      "count": 3
+    }
+  ]
+}

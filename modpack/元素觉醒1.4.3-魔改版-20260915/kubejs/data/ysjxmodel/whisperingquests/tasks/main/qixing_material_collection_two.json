@@ -1,0 +1,45 @@
+{
+  "id": "ysjxmodel:main/qixing_material_collection_two",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_two",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【七星的材料收集（二）】§r",
+  "short_description": "提交毒化洞穴中的特殊研究材料",
+  "description": "毒化洞穴中存在着一些由高温、毒素与生化污染共同形成的特殊物质。\n\n收集七星指定的研究材料，并将它们带回魔法协会。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "item",
+      "id": "submit_charred_remnants",
+      "text": "提交 5 个焦化残骸",
+      "amount": 5,
+      "consume": true,
+      "item": "alexscaves:charred_remnant",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    },
+    {
+      "type": "item",
+      "id": "submit_toxic_paste",
+      "text": "提交 5 个毒化烂泥",
+      "amount": 5,
+      "consume": true,
+      "item": "alexscaves:toxic_paste",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:zuanshibi"
+    }
+  ]
+}

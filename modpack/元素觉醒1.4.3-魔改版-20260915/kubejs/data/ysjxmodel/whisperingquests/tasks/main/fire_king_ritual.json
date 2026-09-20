@@ -1,0 +1,49 @@
+{
+  "id": "ysjxmodel:main/fire_king_ritual",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_four",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§c【火焰的王者】§r",
+  "short_description": "取得炽燃余烬并激活烈焰竞技场祭坛",
+  "description": "生物个体检测系统在烈焰竞技场中捕捉到了一股觉醒魔王级的火元素波动。\n\n目标被称为「焰魔」，但它尚未完全降临。想要开启讨伐，必须先击败竞技场中的炽燃遗魂，夺取它所守护的「炽燃余烬」。\n\n获得炽燃余烬后，使用它激活竞技场中心的古老祭坛，召唤火焰的王者。\n\n你可以使用探险家指南针搜索【烈焰竞技场】。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "kill",
+      "id": "defeat_ignited_revenant",
+      "text": "击败炽燃遗魂 ×1",
+      "amount": 1,
+      "consume": false,
+      "entity": "cataclysm:ignited_revenant",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    },
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "obtain_burning_ashes",
+      "text": "获得炽燃余烬 ×1",
+      "amount": 1,
+      "consume": false,
+      "item": "cataclysm:burning_ashes",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 3,
+      "item": "ysjxspells:max_health_food"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/defeat_fire_king",
+    "ysjxmodel:main/awakened_fallen_king"
+  ]
+}

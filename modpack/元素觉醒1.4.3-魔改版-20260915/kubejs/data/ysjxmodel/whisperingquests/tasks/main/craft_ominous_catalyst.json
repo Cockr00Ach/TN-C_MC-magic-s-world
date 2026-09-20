@@ -1,0 +1,43 @@
+{
+  "id": "ysjxmodel:main/craft_ominous_catalyst",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_two",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b制作灾厄触媒§r",
+  "short_description": "制作一枚用于唤醒暝煌龙的灾厄触媒",
+  "description": "生物个体检测系统发现了一只达到灾害级的远古巨兽——「暝煌龙」。\n\n它沉睡于火山深处，普通手段无法将其唤醒。根据现有资料，必须先制作一枚「灾厄触媒」，才能引出这只远古巨兽。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "obtain_ominous_catalyst",
+      "text": "制作灾厄触媒 ×1",
+      "amount": 1,
+      "consume": false,
+      "item": "alexscaves:ominous_catalyst",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:max_health_food"
+    },
+    {
+      "type": "experience",
+      "amount": 50,
+      "count": 1
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/defeat_luxtructosaurus"
+  ]
+}

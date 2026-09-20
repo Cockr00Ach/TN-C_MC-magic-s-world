@@ -1,0 +1,37 @@
+{
+  "id": "ysjxmodel:daily/weapon_maintenance",
+  "enabled": false,
+  "weight": 8,
+  "category": "daily",
+  "repeatable": true,
+  "sync_with_team": false,
+  "title": "§e武器保养物资§r",
+  "short_description": "提交铁锭和皮革",
+  "description": "武器商店需要补充日常维护装备所用的材料。提交 8 个铁锭和 4 个皮革即可完成任务。",
+  "refresh_pool": "daily",
+  "objectives": [
+    {
+      "type": "item",
+      "id": "submit_iron_ingots",
+      "text": "提交 8 个铁锭",
+      "item": "minecraft:iron_ingot",
+      "amount": 8,
+      "consume": true
+    },
+    {
+      "type": "item",
+      "id": "submit_leather",
+      "text": "提交 4 个皮革",
+      "item": "minecraft:leather",
+      "amount": 4,
+      "consume": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "ysjxspells:tiebi",
+      "count": 2
+    }
+  ]
+}

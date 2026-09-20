@@ -1,0 +1,107 @@
+{
+  "id": "ysjxmodel:main/forlorn_dark_parade",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_two",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b黑暗游行§r",
+  "short_description": "目睹地底异教徒完成献祭仪式",
+  "description": "§5被诸界共同列为禁忌的黑暗仪式，与深渊中扭曲的邪物相互交融，最终孕育出污秽至极的亵渎凶煞——§4「遗弃者」§5。\n\n§7亲眼见证地底异教徒举行献祭仪式，调查它们究竟如何利用夜行蝠创造遗弃者。\n\n§6§l【仪式目标】\n\n§r§7目睹§6地底异教徒§7向伪神献祭一只§3夜行蝠§7，使其变异为§4遗弃者§7。\n\n§2§l【调查提示】\n\n§r§7完成§6【支线任务·击杀幽暗蛾】§7后，可以使用获得的§6铁链§7牵引夜行蝠，将其带到地底异教徒附近。\n\n§8夜行蝠通常倒挂在洞穴顶部，探索时记得抬头寻找。\n\n§4§l【仪式条件】\n\n§r§7一次完整的召唤仪式通常需要§6四只地底异教徒§7共同参与。\n\n§4仪式开始后可能会出现危险生物，请提前做好战斗准备。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "advancement",
+      "id": "witness_underzealot_sacrifice",
+      "text": "目睹一次完整的地底异教徒献祭仪式",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "advancement": "alexscaves:alexscaves/underzealot_sacrifice"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:max_health_food"
+    },
+    {
+      "type": "choice",
+      "amount": 0,
+      "count": 1,
+      "rewards": [
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:arcane_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:fire_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:frost_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:healing_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:water_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:earth_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:air_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:lightning_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:attack_power_food"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:ranged_damage_fruit"
+        }
+      ],
+      "choose": 1,
+      "pool_name": "职业属性果实"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/forlorn_forsaken_hunt"
+  ]
+}

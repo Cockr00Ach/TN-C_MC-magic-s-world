@@ -1,0 +1,44 @@
+{
+  "id": "ysjxmodel:main/enter_candy_cavity",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_two",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【前往糖果龋洞】§r",
+  "short_description": "进入遍布糖果与甜品材料的奇异世界",
+  "description": "接受奥术酒狐的委托，进入遍布糖果与甜品材料的奇异世界。\n\n糖果龋洞看似甜蜜梦幻，其中却栖息着不少危险生物。进入该维度，为接下来的材料收集做好准备。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "dimension",
+      "id": "reach_candy_cavity",
+      "text": "进入糖果龋洞",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "alex_caves_dimensions:candy_cavity"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 50,
+      "count": 1
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:max_health_food"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/senluo_tavern_dessert_materials",
+    "ysjxmodel:main/craft_candy_heart"
+  ]
+}

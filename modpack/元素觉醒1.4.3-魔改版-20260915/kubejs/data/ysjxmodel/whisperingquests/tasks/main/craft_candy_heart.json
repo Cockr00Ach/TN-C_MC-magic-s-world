@@ -1,0 +1,35 @@
+{
+  "id": "ysjxmodel:main/craft_candy_heart",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_two",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【制作糖果心】§r",
+  "short_description": "制作一颗蕴含糖果龋洞力量的糖果心",
+  "description": "制作一颗蕴含糖果龋洞力量的「糖果心」。\n\n拥有糖果心后，可以提高你在糖果龋洞中获得特殊战利品的概率，为接下来的探索与材料收集提供帮助。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "obtain_candy_heart",
+      "text": "制作糖果心",
+      "amount": 1,
+      "consume": false,
+      "item": "whispering:candy_heart",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "alex_caves_dimensions:candy_cavity_key"
+    }
+  ]
+}

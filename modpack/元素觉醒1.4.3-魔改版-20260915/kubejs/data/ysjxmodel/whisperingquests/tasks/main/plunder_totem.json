@@ -1,0 +1,35 @@
+{
+  "id": "ysjxmodel:main/plunder_totem",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_three",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【劫掠图腾】§r",
+  "short_description": "制作并佩戴劫掠图腾",
+  "description": "制作并佩戴饰品「劫掠图腾」。它能在掠夺都市中提供额外帮助，让接下来的探索与战斗更加顺利。\n\n获得劫掠图腾后任务将自动完成，无需提交物品。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "obtain_plunder_totem",
+      "text": "获得劫掠图腾 ×1",
+      "amount": 1,
+      "consume": false,
+      "item": "whispering:plunder_totem",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 2,
+      "item": "ysjxspells:tiebi"
+    }
+  ]
+}

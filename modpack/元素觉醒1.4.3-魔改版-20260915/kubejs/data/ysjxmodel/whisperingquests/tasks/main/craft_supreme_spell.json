@@ -1,0 +1,44 @@
+{
+  "id": "ysjxmodel:main/craft_supreme_spell",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_four",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§d【制作至尊法术】§r",
+  "short_description": "制作任意一本至尊法术",
+  "description": "使用凋灵掉落的「凋灵脊」以及对应的职业材料，制作一本属于你的至尊法术。\n\n至尊法术拥有仅次于超阶法术的强大威力，将成为你面对高阶生物时的重要力量。\n\n你可以通过 JEI 搜索【至尊法术】，查看适合当前职业的制作配方。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "obtain_supreme_spell",
+      "text": "制作任意至尊法术 ×1",
+      "amount": 1,
+      "consume": false,
+      "item_tag": "kubejs:zhizun",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:gaojishuijing"
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 5,
+      "item": "ysjxspells:yuansushuijing"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/undead_fortress_briefing"
+  ]
+}

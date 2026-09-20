@@ -1,0 +1,98 @@
+{
+  "id": "ysjxmodel:side/warrior_tutorial",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/tutorial",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【新手指引·战士】§r",
+  "short_description": "制作盾牌",
+  "description": "获得任意一本指定战士职业法术书后，制作一面盾牌，完成战士职业的基础准备。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "obtain_shield",
+      "text": "制作盾牌 ×1",
+      "amount": 1,
+      "consume": false,
+      "item": "minecraft:shield",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 2,
+      "item": "ysjxspells:max_health_food"
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 30,
+      "item": "minecraft:bread"
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:attack_power_food"
+    }
+  ],
+  "start_triggers": [
+    {
+      "type": "item",
+      "action": "start",
+      "amount": 1,
+      "value": 1.0,
+      "item": "berserker_rpg:berserker_spell_book"
+    },
+    {
+      "type": "item",
+      "action": "start",
+      "amount": 1,
+      "value": 1.0,
+      "item": "paladins:paladin_spell_book"
+    },
+    {
+      "type": "item",
+      "action": "start",
+      "amount": 1,
+      "value": 1.0,
+      "item": "rogues:rogue_spell_book"
+    },
+    {
+      "type": "item",
+      "action": "start",
+      "amount": 1,
+      "value": 1.0,
+      "item": "rogues:warrior_spell_book"
+    },
+    {
+      "type": "item",
+      "action": "start",
+      "amount": 1,
+      "value": 1.0,
+      "item": "spellbladenext:frost_battlemage_spell_book"
+    },
+    {
+      "type": "item",
+      "action": "start",
+      "amount": 1,
+      "value": 1.0,
+      "item": "spellbladenext:fire_battlemage_spell_book"
+    },
+    {
+      "type": "item",
+      "action": "start",
+      "amount": 1,
+      "value": 1.0,
+      "item": "spellbladenext:arcane_battlemage_spell_book"
+    }
+  ]
+}

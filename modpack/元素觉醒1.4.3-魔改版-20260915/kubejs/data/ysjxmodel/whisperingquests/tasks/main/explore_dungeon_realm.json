@@ -1,0 +1,42 @@
+{
+  "id": "ysjxmodel:main/explore_dungeon_realm",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/independent_commissions",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b探索副本地牢§r",
+  "short_description": "进入未知的副本地牢维度",
+  "description": "地图装置已经成功启动，并锁定了一个充满未知房间、怪物与宝藏的副本维度。\n\n携带归家珍珠进入副本地牢，调查其内部结构。面对无法战胜的敌人时，及时撤离。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "dimension",
+      "id": "enter_dungeon_realm",
+      "text": "进入副本地牢维度",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "dungeon_realm:dungeon"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 50,
+      "count": 1
+    }
+  ],
+  "next": [
+    "ysjxmodel:side/dungeon_boss_mutant_wither_skeleton",
+    "ysjxmodel:side/dungeon_boss_nameless_guardian",
+    "ysjxmodel:side/dungeon_boss_black_gold_marshal",
+    "ysjxmodel:side/dungeon_boss_ignathos",
+    "ysjxmodel:side/dungeon_boss_patriot",
+    "ysjxmodel:side/dungeon_realm_conqueror"
+  ]
+}

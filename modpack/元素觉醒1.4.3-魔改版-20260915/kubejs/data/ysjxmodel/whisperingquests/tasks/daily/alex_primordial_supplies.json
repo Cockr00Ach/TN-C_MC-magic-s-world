@@ -1,0 +1,40 @@
+{
+  "id": "ysjxmodel:daily/alex_primordial_supplies",
+  "enabled": false,
+  "weight": 2,
+  "category": "daily",
+  "repeatable": true,
+  "sync_with_team": false,
+  "title": "§e原始洞穴食材§r",
+  "short_description": "提交三叶虾尾和恐龙肉排",
+  "description": "森罗餐厅需要继续收集原始洞穴中的远古食材。提交 6 个三叶虾尾和 10 个恐龙肉排即可完成任务。",
+  "refresh_pool": "daily",
+  "required_completed": [
+    "ysjxmodel:main/enter_primordial_caves"
+  ],
+  "objectives": [
+    {
+      "type": "item",
+      "id": "submit_trilocaris_tails",
+      "text": "提交 6 个三叶虾尾",
+      "item": "alexscaves:trilocaris_tail",
+      "amount": 6,
+      "consume": true
+    },
+    {
+      "type": "item",
+      "id": "submit_dinosaur_chops",
+      "text": "提交 10 个恐龙肉排",
+      "item": "alexscaves:dinosaur_chop",
+      "amount": 10,
+      "consume": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "ysjxspells:jinbi",
+      "count": 3
+    }
+  ]
+}

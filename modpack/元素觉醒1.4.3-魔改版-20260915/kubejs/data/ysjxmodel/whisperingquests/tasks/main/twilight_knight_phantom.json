@@ -1,0 +1,35 @@
+{
+  "id": "ysjxmodel:main/twilight_knight_phantom",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_three",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【击杀幻影骑士】§r",
+  "short_description": "获取幻影骑士战利品",
+  "description": "击败目标首领并获得对应战利品。战利品进入背包后任务将自动完成，无需提交，也不会消耗物品。\n\n结构名：【骑士要塞】\n可在七星的传送商店购买对应的传送珍珠。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "obtain_boss_trophy",
+      "text": "获取幻影骑士战利品",
+      "amount": 1,
+      "consume": false,
+      "item": "twilightforest:knight_phantom_trophy",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 2,
+      "item": "ysjxspells:jinbi"
+    }
+  ]
+}

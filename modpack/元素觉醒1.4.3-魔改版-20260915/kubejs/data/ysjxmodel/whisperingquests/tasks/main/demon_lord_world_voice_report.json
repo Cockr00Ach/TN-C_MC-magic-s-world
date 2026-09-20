@@ -1,0 +1,63 @@
+{
+  "id": "ysjxmodel:main/demon_lord_world_voice_report",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_two",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【返回协会汇报】§r",
+  "short_description": "返回魔法协会寻找伊蕾娜",
+  "description": "湫渃云魔已经被击败。返回魔法协会寻找伊蕾娜，汇报天境的调查结果。\n\n§2§l【追踪提示】§r§7点击任务页面中的§3「开始追踪」§7，即可显示目标所在的具体坐标。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "location",
+      "id": "reach_yileina_for_world_voice_report",
+      "text": "返回魔法协会寻找伊蕾娜",
+      "amount": 1,
+      "consume": false,
+      "position": {
+        "x": 2,
+        "y": 81,
+        "z": -115
+      },
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "ysjx_dimension:magic_association"
+    },
+    {
+      "type": "dialogue",
+      "id": "talk_to_yileina_about_world_voice",
+      "text": "与伊蕾娜交谈",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 50,
+      "count": 1
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "minecraft:nether_star"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/defeat_harbinger",
+    "ysjxmodel:main/demon_lord_yeti",
+    "ysjxmodel:main/demon_lord_kraken",
+    "ysjxmodel:main/demon_lord_ancient_hero",
+    "ysjxmodel:main/demon_lord_frostmaw",
+    "ysjxmodel:main/demon_lord_umvuthi",
+    "ysjxmodel:main/twilight_forest_briefing"
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "id": "ysjxmodel:main/village_patrol",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/tutorial",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b村庄巡逻§r",
+  "short_description": "前往平原村庄调查异常能量波动",
+  "description": "平原村庄附近检测到了虚空裂缝的能量波动，需要你前去查看一下。\n\n§1§l【搜索提示】§r\n§0如果指南针未能找到目标，说明当前位置周围§4 10,000 格§0范围内没有生成该建筑。\n§0请前往更远的区域，再次使用指南针进行搜索。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "structure",
+      "id": "reach_plains_village",
+      "text": "前往平原村庄",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "structure": "minecraft:village_plains"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:chujishuijing"
+    },
+    {
+      "type": "choice",
+      "amount": 0,
+      "count": 1,
+      "rewards": [
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 30,
+          "item": "minecraft:bread"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "minecraft:arrow"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "runes:arcane_stone"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "runes:fire_stone"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "runes:frost_stone"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "runes:healing_stone"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "runes:lightning_stone"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "more_rpg_classes:aqua_stone"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "more_rpg_classes:terra_stone"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "more_rpg_classes:storm_stone"
+        }
+      ],
+      "choose": 1,
+      "pool_name": "符文组自选"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/patrol_mission"
+  ]
+}

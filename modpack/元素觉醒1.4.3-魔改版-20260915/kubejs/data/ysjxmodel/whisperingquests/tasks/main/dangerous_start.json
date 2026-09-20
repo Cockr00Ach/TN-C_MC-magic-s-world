@@ -1,0 +1,54 @@
+{
+  "id": "ysjxmodel:main/dangerous_start",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/tutorial",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§c危险的起点§r",
+  "short_description": "前往主世界传送点侦查",
+  "description": "前往主世界传送点侦查",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "dimension",
+      "id": "reach_overworld",
+      "text": "前往主世界",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "minecraft:overworld"
+    },
+    {
+      "type": "item",
+      "id": "submit_logs",
+      "text": "提交 10 个原木",
+      "amount": 10,
+      "consume": true,
+      "item_tag": "minecraft:logs",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 2,
+      "item": "kubejs:jihuo"
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 2,
+      "item": "ysjxspells:tiebi"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/space_repair"
+  ]
+}

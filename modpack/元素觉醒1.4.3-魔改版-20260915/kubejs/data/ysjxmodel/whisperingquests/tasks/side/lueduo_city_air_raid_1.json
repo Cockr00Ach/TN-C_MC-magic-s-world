@@ -1,0 +1,54 @@
+{
+  "id": "ysjxmodel:side/lueduo_city_air_raid_1",
+  "enabled": false,
+  "weight": 1,
+  "category": "side",
+  "repeatable": false,
+  "sync_with_team": true,
+  "title": "§6【掠夺都市】空袭1§r",
+  "short_description": "前往空袭区域",
+  "description": "前往掠夺都市中的目标区域，调查正在发生的异常事件。到达后击败引发此次袭击的首领。\n\n§2§l【追踪提示】§r§7点击任务页面中的§3「开始追踪」§7，即可显示目标所在的具体坐标。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "location",
+      "id": "reach_lueduo_city_target",
+      "text": "前往空袭区域",
+      "amount": 1,
+      "consume": false,
+      "position": {
+        "x": 282,
+        "y": 64,
+        "z": -249
+      },
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "ysjx_dimension:lueduodushi"
+    },
+    {
+      "type": "kill",
+      "id": "defeat_raid_leader",
+      "text": "击杀 2 个掠夺者飞艇",
+      "amount": 2,
+      "consume": false,
+      "entity": "raidsenhanced:raid_blimp",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 2,
+      "item": "ysjxspells:max_health_food"
+    },
+    {
+      "type": "experience",
+      "amount": 50,
+      "count": 1
+    }
+  ]
+}

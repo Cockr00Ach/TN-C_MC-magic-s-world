@@ -1,0 +1,37 @@
+{
+  "id": "ysjxmodel:daily/association_lighting",
+  "enabled": false,
+  "weight": 8,
+  "category": "daily",
+  "repeatable": true,
+  "sync_with_team": false,
+  "title": "§e协会照明维护§r",
+  "short_description": "提交火把和灯笼",
+  "description": "魔法协会需要更换一批老化的照明设施。提交 32 个火把和 4 个灯笼即可完成任务。",
+  "refresh_pool": "daily",
+  "objectives": [
+    {
+      "type": "item",
+      "id": "submit_torches",
+      "text": "提交 32 个火把",
+      "item": "minecraft:torch",
+      "amount": 32,
+      "consume": true
+    },
+    {
+      "type": "item",
+      "id": "submit_lanterns",
+      "text": "提交 4 个灯笼",
+      "item": "minecraft:lantern",
+      "amount": 4,
+      "consume": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "ysjxspells:tiebi",
+      "count": 2
+    }
+  ]
+}

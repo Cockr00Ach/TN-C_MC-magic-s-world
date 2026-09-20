@@ -1,0 +1,29 @@
+{
+  "id": "ysjxmodel:daily/yileina_bread",
+  "enabled": false,
+  "weight": 10,
+  "category": "daily",
+  "repeatable": true,
+  "sync_with_team": false,
+  "title": "§e伊蕾娜的委托§r",
+  "short_description": "提交 10 个面包",
+  "description": "伊蕾娜需要一些便于携带的食物。提交 10 个面包即可完成委托。",
+  "refresh_pool": "daily",
+  "objectives": [
+    {
+      "type": "item",
+      "id": "submit_bread",
+      "text": "提交 10 个面包",
+      "item": "minecraft:bread",
+      "amount": 10,
+      "consume": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "ysjxspells:tiebi",
+      "count": 1
+    }
+  ]
+}

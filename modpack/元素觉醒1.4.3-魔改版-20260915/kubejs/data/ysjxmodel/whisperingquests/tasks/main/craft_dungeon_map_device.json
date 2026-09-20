@@ -1,0 +1,48 @@
+{
+  "id": "ysjxmodel:main/craft_dungeon_map_device",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/independent_commissions",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b制作地图装置§r",
+  "short_description": "制作地图装置与归家珍珠",
+  "description": "根据迷迭香提供的图纸，制作一台能够定位未知地牢维度的「地图装置」。\n\n同时准备一枚「归家珍珠」，为进入情况不明的副本地牢做好撤离准备。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "obtain_dungeon_map_device",
+      "text": "制作地图装置 ×1",
+      "amount": 1,
+      "consume": false,
+      "item": "dungeon_realm:map_device",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    },
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "obtain_dungeon_home_pearl",
+      "text": "制作归家珍珠 ×1",
+      "amount": 1,
+      "consume": false,
+      "item": "dungeon_realm:home_pearl",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:max_health_food"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/explore_dungeon_realm"
+  ]
+}

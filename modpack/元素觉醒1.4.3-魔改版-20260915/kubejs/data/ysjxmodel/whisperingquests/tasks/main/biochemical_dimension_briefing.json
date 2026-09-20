@@ -1,0 +1,52 @@
+{
+  "id": "ysjxmodel:main/biochemical_dimension_briefing",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_two",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【生化维度】§r",
+  "short_description": "前往魔法协会，寻找七星对话",
+  "description": "返回魔法协会寻找炼金术师七星，了解毒化洞穴中出现的大量异常生命信号。\n\n§2§l【追踪提示】§r§7点击任务页面中的§3「开始追踪」§7，即可显示目标所在的具体坐标。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "location",
+      "id": "reach_qixing_for_toxic_commission",
+      "text": "前往七星所在位置",
+      "amount": 1,
+      "consume": false,
+      "position": {
+        "x": 87,
+        "y": 71,
+        "z": -9
+      },
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "ysjx_dimension:magic_association"
+    },
+    {
+      "type": "dialogue",
+      "id": "talk_to_qixing_about_toxic_caves",
+      "text": "与七星对话",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "kubejs:toxic_teleport_crystal"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/enter_toxic_caves"
+  ]
+}

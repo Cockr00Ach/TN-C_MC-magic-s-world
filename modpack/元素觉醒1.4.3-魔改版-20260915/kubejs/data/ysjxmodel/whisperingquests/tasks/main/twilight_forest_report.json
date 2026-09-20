@@ -1,0 +1,53 @@
+{
+  "id": "ysjxmodel:main/twilight_forest_report",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_three",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【暮色森林任务汇报】§r",
+  "short_description": "返回魔法协会向伊蕾娜汇报",
+  "description": "返回魔法协会，寻找伊蕾娜汇报暮色森林的调查结果。\n\n§2§l【追踪提示】§r§7点击任务页面中的§3「开始追踪」§7，即可显示目标所在的具体坐标。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "location",
+      "id": "reach_yileina_for_twilight_report",
+      "text": "返回魔法协会寻找伊蕾娜",
+      "amount": 1,
+      "consume": false,
+      "position": {
+        "x": 2,
+        "y": 81,
+        "z": -115
+      },
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "ysjx_dimension:magic_association"
+    },
+    {
+      "type": "dialogue",
+      "id": "talk_to_yileina_about_twilight_forest",
+      "text": "与伊蕾娜交谈",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjx_dimension:lueduodushi_teleporter"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/lueduo_city",
+    "ysjxmodel:main/plunder_totem"
+  ]
+}

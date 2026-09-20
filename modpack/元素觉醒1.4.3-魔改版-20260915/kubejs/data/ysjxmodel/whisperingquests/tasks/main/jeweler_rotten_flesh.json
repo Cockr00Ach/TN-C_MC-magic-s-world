@@ -1,0 +1,34 @@
+{
+  "id": "ysjxmodel:main/jeweler_rotten_flesh",
+  "enabled": false,
+  "weight": 1,
+  "category": "side",
+  "repeatable": false,
+  "sync_with_team": true,
+  "title": "§6驱赶危险生物的材料§r",
+  "short_description": "为饰品商人收集并提交 10 份腐肉",
+  "description": "饰品商人需要腐肉制作驱赶危险生物的道具。收集 10 份腐肉后，在任务页面提交物品并领取报酬。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "item",
+      "id": "submit_rotten_flesh",
+      "text": "提交 10 份腐肉",
+      "amount": 10,
+      "consume": true,
+      "item": "minecraft:rotten_flesh",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "artifacts:night_vision_goggles"
+    }
+  ]
+}

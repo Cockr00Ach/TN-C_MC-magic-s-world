@@ -1,0 +1,50 @@
+{
+  "id": "ysjxmodel:main/catastrophe_creature",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/final_chapter",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§4【天灾级生物】§r",
+  "short_description": "前往末地讨伐湮灭构造体",
+  "description": "迷迭香：\n\n紧急情况！生物个体检测系统在末地捕捉到了天灾级生命信号。\n\n一只末地生物已经突破了原有界限，正式进化至天灾级。我已经将目标所在的位置发送给你了。\n\n受末地空间乱流影响，协会暂时无法派遣人员支援。\n\n只能靠你了，旅行者。\n\n你可以使用探险家指南针搜索【湮灭空间站】。\n\n§1§l【搜索提示】§r\n§0如果指南针未能找到目标，说明当前位置周围§4 10,000 格§0范围内没有生成该建筑。\n§0请前往更远的区域，再次使用指南针进行搜索。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "dimension",
+      "id": "enter_the_end_for_obliterator",
+      "text": "前往末地",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "minecraft:the_end"
+    },
+    {
+      "type": "structure",
+      "id": "reach_space_station",
+      "text": "抵达湮灭空间站",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "structure": "legendary_monsters:space_station"
+    },
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "defeat_the_obliterator",
+      "text": "获取传送门碎片 ×1",
+      "amount": 1,
+      "consume": false,
+      "item": "legendary_monsters:portal_shard",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/catastrophe_creature_report"
+  ]
+}

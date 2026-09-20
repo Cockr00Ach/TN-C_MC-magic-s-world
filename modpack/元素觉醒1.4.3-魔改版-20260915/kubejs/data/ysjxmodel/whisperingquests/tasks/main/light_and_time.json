@@ -1,0 +1,40 @@
+{
+  "id": "ysjxmodel:main/light_and_time",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/final_chapter",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§6【光阴与时刻】§r",
+  "short_description": "制作最终召唤仪式所需的两件道具",
+  "description": "为了召唤引发诸界异变的天灾级生物，必须先制作仪式所需的两件特殊道具——「光阴」与「时刻」。\n\n通过 JEI 查看它们的获取方式，为最后的决战做好准备。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "obtain_light",
+      "text": "获得光阴 ×1",
+      "amount": 1,
+      "consume": false,
+      "item": "torchesbecomesunlight:light",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    },
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "obtain_time",
+      "text": "获得时刻 ×1",
+      "amount": 1,
+      "consume": false,
+      "item": "torchesbecomesunlight:time",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/final_gun_knight_patriot"
+  ]
+}

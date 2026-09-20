@@ -1,0 +1,45 @@
+{
+  "id": "ysjxmodel:daily/arrow_material_shortage",
+  "enabled": false,
+  "weight": 8,
+  "category": "daily",
+  "repeatable": true,
+  "sync_with_team": false,
+  "title": "§e箭矢材料短缺§r",
+  "short_description": "提交燧石、羽毛和木棍",
+  "description": "材料商店的箭矢原料不足。提交 12 个燧石、12 个羽毛和 12 个木棍即可完成任务。",
+  "refresh_pool": "daily",
+  "objectives": [
+    {
+      "type": "item",
+      "id": "submit_flint",
+      "text": "提交 12 个燧石",
+      "item": "minecraft:flint",
+      "amount": 12,
+      "consume": true
+    },
+    {
+      "type": "item",
+      "id": "submit_feathers",
+      "text": "提交 12 个羽毛",
+      "item": "minecraft:feather",
+      "amount": 12,
+      "consume": true
+    },
+    {
+      "type": "item",
+      "id": "submit_sticks",
+      "text": "提交 12 个木棍",
+      "item": "minecraft:stick",
+      "amount": 12,
+      "consume": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "ysjxspells:tiebi",
+      "count": 2
+    }
+  ]
+}
