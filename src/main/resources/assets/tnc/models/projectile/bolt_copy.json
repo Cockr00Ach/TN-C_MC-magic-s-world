@@ -1,8 +1,8 @@
 {
 	"credit": "Made with Blockbench",
 	"textures": {
-		"1": "tnc:spell_projectile/lightning_texture",
-		"particle": "lightning_texture"
+		"1": "tnc:spell_projectile/bolt_copy",
+		"particle": "tnc:spell_projectile/bolt_copy"
 	},
 	"elements": [
 		{
