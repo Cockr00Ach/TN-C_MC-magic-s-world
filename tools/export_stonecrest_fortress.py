@@ -30,7 +30,7 @@ DEFAULT_WORLD = Path(
 # The main fortress fits inside Minecraft's eight-chunk structure-reference
 # radius when centred on this 256x256 source box.  The eastern town and the
 # southern landscaped plaza are deliberately outside this first export.
-DEFAULT_BOUNDS = (2144, 2399, 560, 831)
+DEFAULT_BOUNDS = (2128, 2399, 560, 831)
 DEFAULT_Y = (144, 223)
 DEFAULT_ANCHOR = (2264, 696)
 TILE_SIZE = 32
@@ -323,6 +323,16 @@ def build_mask(reader: WorldReader, bounds: tuple[int, int, int, int], y_bounds:
         (anchor[0] - x0, anchor[1] - z0),
     )
     selected_seeds = seeds & connected
+    # Layout decision for the first release: retain the complete palace mass,
+    # but drop the detached western outbuildings, northern garden ornaments,
+    # and the southern ceremonial garden/round plaza.  The wider 272-square
+    # read window leaves enough empty source space for a full 24-block feather
+    # around the retained architecture instead of clipping the blend at an
+    # extraction edge.
+    selected_seeds = {
+        (x, z) for x, z in selected_seeds
+        if 24 <= x <= 247 and 16 <= z <= 232
+    }
     # The template mask hugs actual architecture.  A separate, wider terrain
     # mask is used at runtime for the feathered local-ground transition.
     building_mask = fill_small_holes(dilate(selected_seeds, 2, width, depth), width, depth)
@@ -356,6 +366,11 @@ def export(args: argparse.Namespace) -> dict:
     if args.analyze_only:
         return report
 
+    template_dir = args.output / "data" / "tnc" / "structures" / "stonecrest"
+    if template_dir.exists():
+        for old_piece in template_dir.glob("piece_*.nbt"):
+            old_piece.unlink()
+
     pieces = []
     total_blocks = 0
     replacement_counts: Counter[str] = Counter()
@@ -380,7 +395,7 @@ def export(args: argparse.Namespace) -> dict:
                 if not blocks:
                     continue
                 name = f"piece_{tile_x // TILE_SIZE}_{tile_y // TILE_SIZE}_{tile_z // TILE_SIZE}"
-                path = args.output / "data" / "tnc" / "structures" / "stonecrest" / f"{name}.nbt"
+                path = template_dir / f"{name}.nbt"
                 write_template(path, (sx, sy, sz), blocks)
                 pieces.append({
                     "resource": f"tnc:stonecrest/{name}",

@@ -3,5 +3,5 @@
   "biomes": "#tnc:has_structure/stonecrest_fortress",
   "step": "surface_structures",
   "spawn_overrides": {},
-  "terrain_adaptation": "beard_thin"
+  "terrain_adaptation": "none"
 }

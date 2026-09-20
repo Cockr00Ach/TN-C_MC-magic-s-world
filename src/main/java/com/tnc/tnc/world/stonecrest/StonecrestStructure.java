@@ -41,10 +41,10 @@ public final class StonecrestStructure extends Structure {
                 int worldZ = originZ + z;
                 int height = context.chunkGenerator().getFirstOccupiedHeight(worldX, worldZ,
                         Heightmap.Types.WORLD_SURFACE_WG, context.heightAccessor(), context.randomState());
-                heights.add(height - 1);
+                heights.add(height);
                 NoiseColumn column = context.chunkGenerator().getBaseColumn(worldX, worldZ,
                         context.heightAccessor(), context.randomState());
-                BlockState surface = column.getBlock(Math.max(context.heightAccessor().getMinBuildHeight(), height - 1));
+                BlockState surface = column.getBlock(Math.max(context.heightAccessor().getMinBuildHeight(), height));
                 if (!surface.getFluidState().isEmpty()) wetSamples++;
             }
         }
