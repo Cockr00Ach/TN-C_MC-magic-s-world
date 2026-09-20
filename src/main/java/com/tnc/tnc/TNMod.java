@@ -2,6 +2,7 @@ package com.tnc.tnc;
 
 import com.mojang.logging.LogUtils;
 import com.tnc.tnc.network.MagicStoneNetwork;
+import com.tnc.tnc.world.SkyIslandEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.CreativeModeTab;
@@ -104,6 +105,7 @@ public class TNMod
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
+        MinecraftForge.EVENT_BUS.register(new SkyIslandEvents());
 
         // Register our mod's ForgeConfigSpec so that Forge can create and load the config file for us
         context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);

@@ -1,4 +1,6 @@
-// Generate the complete Medieval Town once near the randomized Overworld spawn.
+// Legacy v4 ground-town generator. Java v5 owns generation now; keep this file only as a
+// migration reference so an older world can still be diagnosed without running both systems.
+const TNC_LEGACY_TOWN_DISABLED = true
 
 const TOWN_VERSION_KEY = 'tnc_initial_town_generation_version'
 const PLAYER_ARRIVAL_VERSION_KEY = 'tnc_initial_town_arrival_version'
@@ -372,6 +374,7 @@ function runTownOperation(server, layout, manifest, operationIndex, placedPieces
 }
 
 PlayerEvents.loggedIn(event => {
+  if (TNC_LEGACY_TOWN_DISABLED) return
   var server = event.server
   var player = event.player
   var manifest = townManifest()
