@@ -1,0 +1,108 @@
+{
+  "id": "ysjxmodel:main/ancient_demon_wither",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_four",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§c【古老魔王·凋灵】§r",
+  "short_description": "召唤并击败凋灵",
+  "description": "所有线索最终都指向了那位沉睡于死亡之中的古老魔王——凋灵。\n\n搜集召唤仪式所需的材料，将凋灵召唤至现世，并在它造成更大灾难之前完成讨伐。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "defeat_wither",
+      "text": "获取凋灵脊 ×1",
+      "amount": 1,
+      "consume": false,
+      "item": "kubejs:diaolingji",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "choice",
+      "amount": 0,
+      "count": 1,
+      "rewards": [
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:fire_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:earth_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:water_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:air_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:arcane_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:frost_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:bealing_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:lightning_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:wuli_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:sheshou_baoshi"
+        }
+      ],
+      "choose": 1,
+      "pool_name": "职业宝石自选"
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:gaojishuijing"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/nether_mission_report",
+    "ysjxmodel:side/otherworld_fighter"
+  ]
+}

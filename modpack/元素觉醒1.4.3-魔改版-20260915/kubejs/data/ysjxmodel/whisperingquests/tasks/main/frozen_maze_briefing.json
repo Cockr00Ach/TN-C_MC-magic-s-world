@@ -1,0 +1,52 @@
+{
+  "id": "ysjxmodel:main/frozen_maze_briefing",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_two",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b探索寒冰迷宫§r",
+  "short_description": "前往武器商铺寻找安德鲁对话",
+  "description": "返回魔法协会的武器商铺，寻找安德鲁了解主世界中流传的寒冰迷宫传闻。\n\n§2§l【追踪提示】§r§7点击任务页面中的§3「开始追踪」§7，即可显示目标所在的具体坐标。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "location",
+      "id": "reach_arms_merchant_for_frozen_maze",
+      "text": "前往武器商铺",
+      "amount": 1,
+      "consume": false,
+      "position": {
+        "x": -39,
+        "y": 72,
+        "z": 19
+      },
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "ysjx_dimension:magic_association"
+    },
+    {
+      "type": "dialogue",
+      "id": "talk_to_arms_merchant_about_frozen_maze",
+      "text": "与武器商人安德鲁对话",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:zuanshibi"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/frozen_maze_ship"
+  ]
+}

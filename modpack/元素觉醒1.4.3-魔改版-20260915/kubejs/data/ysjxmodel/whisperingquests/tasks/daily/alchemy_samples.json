@@ -1,0 +1,29 @@
+{
+  "id": "ysjxmodel:daily/alchemy_samples",
+  "enabled": true,
+  "weight": 1,
+  "category": "main",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "实验C · 借作者id",
+  "short_description": "TN-C 实验",
+  "description": "变体C：借用作者已有 id —— 若显示这句，说明我们的文件确实被读到了",
+  "icon": "minecraft:zombie_head",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "kill",
+      "id": "tnc_kill_zombie",
+      "text": "击杀 1 只僵尸",
+      "amount": 1,
+      "consume": false,
+      "entity": "minecraft:zombie",
+      "radius": 10,
+      "waypoint_requires_tracking": false
+    }
+  ],
+  "rewards": [
+    { "type": "item", "amount": 0, "count": 3, "item": "minecraft:bread" }
+  ]
+}

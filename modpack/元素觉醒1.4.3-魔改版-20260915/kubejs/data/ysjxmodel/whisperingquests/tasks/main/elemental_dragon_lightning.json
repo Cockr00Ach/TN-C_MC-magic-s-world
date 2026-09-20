@@ -1,0 +1,115 @@
+{
+  "id": "ysjxmodel:main/elemental_dragon_lightning",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_one",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【元素龙·电龙】§r",
+  "short_description": "提交 3 颗电龙心脏",
+  "description": "迷迭香：\n听巫女说，你已经去过磁力洞穴维度了？考察团还曾在那里发现过驾驭雷霆的元素龙——电龙。\n\n它们的心脏中凝聚着极为强大的雷电元素，对协会的元素研究十分重要。旅行者，请帮我带回三颗电龙心脏。\n\n§1§l【探索提示】§r\n§0电龙可能生成在§4磁力洞穴维度§0的地表或地下区域。\n§4§l注意：§r§0龙巢不会在维度出生点附近生成，请远离初始区域后再进行搜索。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "item",
+      "id": "submit_dragon_heart",
+      "text": "提交电龙心脏 ×3",
+      "amount": 3,
+      "consume": true,
+      "item": "iceandfire:lightning_dragon_heart",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 2,
+      "item": "ysjxspells:max_health_food"
+    },
+    {
+      "type": "experience",
+      "amount": 50,
+      "count": 1
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:jinbi"
+    },
+    {
+      "type": "choice",
+      "amount": 0,
+      "count": 1,
+      "rewards": [
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:arcane_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:fire_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:frost_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:healing_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:water_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:earth_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:air_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:lightning_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:attack_power_food"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:ranged_damage_fruit"
+        }
+      ],
+      "choose": 1,
+      "pool_name": "职业属性果实"
+    }
+  ]
+}

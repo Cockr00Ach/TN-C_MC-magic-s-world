@@ -1,0 +1,35 @@
+{
+  "id": "ysjxmodel:main/pioneer_core",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_two",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【先驱能核】§r",
+  "short_description": "使用机械融合砧制作先驱能核",
+  "description": "先驱者遗留下来的古代材料中，依然残存着强大的机械能量。\n\n借助机械融合砧与古文明技术，将这些材料重新融合，制作出能够稳定驱动古代机械的「先驱能核」。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "obtain_pioneer_core",
+      "text": "制作先驱能核 ×1",
+      "amount": 1,
+      "consume": false,
+      "item": "whispering:pioneer_core",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 64,
+      "item": "create:andesite_alloy"
+    }
+  ]
+}

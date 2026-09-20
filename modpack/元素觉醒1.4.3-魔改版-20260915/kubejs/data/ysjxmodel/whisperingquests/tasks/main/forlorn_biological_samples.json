@@ -1,0 +1,108 @@
+{
+  "id": "ysjxmodel:main/forlorn_biological_samples",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_two",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b收集生物信息§r",
+  "short_description": "提交异寂空谷中的生物样本",
+  "description": "七星：\n这里的气味简直让人无法忍受……\n\n不过，异寂空谷中的生物样本拥有很高的研究价值。麻烦你替我收集一些「夜行蝠翼」和当地的粪便样本，我们需要利用它们分析这里的生态变化。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "item",
+      "id": "submit_vesper_wings",
+      "text": "提交夜行蝠翼 ×10",
+      "amount": 10,
+      "consume": true,
+      "item": "alexscaves:vesper_wing",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    },
+    {
+      "type": "item",
+      "id": "submit_guano",
+      "text": "提交粪便 ×5",
+      "amount": 5,
+      "consume": true,
+      "item": "alexscaves:guano",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "choice",
+      "amount": 0,
+      "count": 1,
+      "rewards": [
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:arcane_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:fire_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:frost_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:healing_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:water_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:earth_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:air_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:lightning_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:attack_power_food"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:ranged_damage_fruit"
+        }
+      ],
+      "choose": 1,
+      "pool_name": "职业属性果实"
+    }
+  ]
+}

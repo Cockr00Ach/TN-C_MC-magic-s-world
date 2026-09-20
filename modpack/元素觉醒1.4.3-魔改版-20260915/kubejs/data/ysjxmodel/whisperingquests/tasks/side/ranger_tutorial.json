@@ -1,0 +1,50 @@
+{
+  "id": "ysjxmodel:side/ranger_tutorial",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/tutorial",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【新手指引·游侠】§r",
+  "short_description": "制作自动放箭钩",
+  "description": "获得游侠法术书后，制作自动放箭钩，完成游侠职业的基础准备。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "obtain_auto_fire_hook",
+      "text": "制作自动放箭钩 ×1",
+      "amount": 1,
+      "consume": false,
+      "item": "archers:auto_fire_hook",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 64,
+      "item": "minecraft:arrow"
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:ranged_damage_fruit"
+    }
+  ],
+  "start_triggers": [
+    {
+      "type": "item",
+      "action": "start",
+      "amount": 1,
+      "value": 1.0,
+      "item": "archers:archer_spell_book"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "id": "ysjxmodel:main/frozen_maze_ship",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_two",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b前往寒冰迷宫§r",
+  "short_description": "寻找寒冰迷宫中的搁浅舰船",
+  "description": "前往被冰霜与时间封冻的寒冰迷宫，寻找传闻中那艘残破的搁浅舰船。\n\n船长留下的宝藏或许仍被埋藏在船舱深处，但冰层之下同样潜伏着未知的危险。\n\n定位方式：\n使用探险家指南针搜索【搁浅舰船】。\n\n§1§l【搜索提示】§r\n§0如果指南针未能找到目标，说明当前位置周围§4 10,000 格§0范围内没有生成该建筑。\n§0请前往更远的区域，再次使用指南针进行搜索。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "structure",
+      "id": "reach_stranded_ship",
+      "text": "抵达搁浅舰船",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "structure": "aquamirae:ship"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 50,
+      "count": 1
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:max_health_food"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/frozen_maze_shell_horn"
+  ]
+}

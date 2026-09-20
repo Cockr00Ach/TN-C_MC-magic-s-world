@@ -1,0 +1,45 @@
+{
+  "id": "ysjxmodel:main/final_gun_knight_patriot",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/final_chapter",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§4【最终任务】击溃天灾·博卓卡斯替§r",
+  "short_description": "完成召唤仪式并击败博卓卡斯替",
+  "description": "召唤仪式所需的道具已经准备完毕。\n\n前往废弃都市中的召唤祭坛，分别使用「光阴」与「时刻」右键祭坛中心的钟，完成召唤仪式。\n\n击败引发诸界入侵的罪魁祸首——天灾级生物「博卓卡斯替·圣卫铳骑」，结束这场席卷世界的灾难。\n\n召唤方式：\n使用「光阴」右键钟一次\n使用「时刻」右键钟一次\n\n§2§l【追踪提示】§r§7点击任务页面中的§3「开始追踪」§7，即可显示目标所在的具体坐标。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "location",
+      "id": "reach_patriot_summoning_altar",
+      "text": "前往废弃都市召唤祭坛",
+      "amount": 1,
+      "consume": false,
+      "position": {
+        "x": -393,
+        "y": 77,
+        "z": 47
+      },
+      "radius": 20,
+      "waypoint_requires_tracking": true,
+      "dimension": "ysjx_dimension:abandoned_city"
+    },
+    {
+      "type": "kill",
+      "id": "defeat_gun_knight_patriot",
+      "text": "召唤并击败博卓卡斯替·圣卫铳骑 ×1",
+      "amount": 1,
+      "consume": false,
+      "entity": "torchesbecomesunlight:gun_knight_patriot",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/world_order_restoration"
+  ]
+}

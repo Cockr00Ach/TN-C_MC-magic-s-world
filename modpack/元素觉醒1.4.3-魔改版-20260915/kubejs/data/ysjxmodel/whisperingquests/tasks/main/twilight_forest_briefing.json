@@ -1,0 +1,51 @@
+{
+  "id": "ysjxmodel:main/twilight_forest_briefing",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_three",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【亘古不变的永恒夜空维度】§r",
+  "short_description": "返回魔法协会与霜星交谈",
+  "description": "生物个体检测系统在暮色森林中捕捉到了魔王级生物的能量波动。返回魔法协会，与霜星交谈并了解详细情况。\n\n§2§l【追踪提示】§r§7点击任务页面中的§3「开始追踪」§7，即可显示目标所在的具体坐标。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "location",
+      "id": "reach_frost_nova_for_twilight_forest",
+      "text": "返回魔法协会寻找霜星",
+      "amount": 1,
+      "consume": false,
+      "position": {
+        "x": -36,
+        "y": 68,
+        "z": 56
+      },
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "ysjx_dimension:magic_association"
+    },
+    {
+      "type": "dialogue",
+      "id": "talk_to_frost_nova_about_twilight_forest",
+      "text": "与霜星交谈",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 50,
+      "count": 1
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/explore_twilight_forest"
+  ]
+}

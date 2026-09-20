@@ -1,0 +1,117 @@
+{
+  "id": "ysjxmodel:side/otherworld_fighter",
+  "enabled": false,
+  "weight": 1,
+  "category": "side",
+  "repeatable": false,
+  "sync_with_team": true,
+  "title": "§6【分支】异世界格斗家§r",
+  "short_description": "调查传送门基地并击败异世界格斗家",
+  "description": "考察团队在异寂空谷中发现了一座来源不明的传送装置。\n\n装置另一端不断传来强烈的生命波动，似乎连接着某个不属于当前世界的神秘区域。旅行者，请前往传送门基地展开调查，并清除潜藏其中的威胁。\n\n你可以使用探险家指南针搜索【传送门基地】。\n\n§1§l【搜索提示】§r\n§0如果指南针未能找到目标，说明当前位置周围§4 10,000 格§0范围内没有生成该建筑。\n§0请前往更远的区域，再次使用指南针进行搜索。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "structure",
+      "id": "reach_exoframe_portal_base",
+      "text": "找到传送门基地",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "structure": "rpg_style_more_bosses:portal_base"
+    },
+    {
+      "type": "dimension",
+      "id": "enter_exoframe_dimension",
+      "text": "进入传送装置",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "rpg_style_more_bosses:second_dimention"
+    },
+    {
+      "type": "kill",
+      "id": "defeat_otherworld_fighter",
+      "text": "击败异世界格斗家 ×1",
+      "amount": 1,
+      "consume": false,
+      "entity": "rpg_style_more_bosses:the_exoframe",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "choice",
+      "amount": 0,
+      "count": 1,
+      "rewards": [
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 2,
+          "item": "ysjxspells:arcane_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 2,
+          "item": "ysjxspells:fire_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 2,
+          "item": "ysjxspells:frost_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 2,
+          "item": "ysjxspells:healing_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 2,
+          "item": "ysjxspells:water_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 2,
+          "item": "ysjxspells:earth_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 2,
+          "item": "ysjxspells:air_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 2,
+          "item": "ysjxspells:lightning_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 2,
+          "item": "ysjxspells:attack_power_food"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 2,
+          "item": "ysjxspells:ranged_damage_fruit"
+        }
+      ],
+      "choose": 1,
+      "pool_name": "职业属性果实"
+    }
+  ]
+}

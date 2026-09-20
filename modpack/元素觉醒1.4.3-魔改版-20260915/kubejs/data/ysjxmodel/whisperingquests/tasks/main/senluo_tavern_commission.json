@@ -1,0 +1,64 @@
+{
+  "id": "ysjxmodel:main/senluo_tavern_commission",
+  "enabled": false,
+  "weight": 1,
+  "category": "side",
+  "repeatable": false,
+  "sync_with_team": true,
+  "title": "§6【森罗餐厅的委托】§r",
+  "short_description": "为巫女酒狐收集烹饪所需的食材",
+  "description": "虚空裂缝阻断了森罗餐厅的部分食材供应。前往主世界收集巫女酒狐需要的食材，并在任务页面全部提交。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "item",
+      "id": "submit_cabbage",
+      "text": "提交 5 个卷心菜",
+      "amount": 5,
+      "consume": true,
+      "item": "farmersdelight:cabbage",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    },
+    {
+      "type": "item",
+      "id": "submit_flour",
+      "text": "提交 5 个面粉",
+      "amount": 5,
+      "consume": true,
+      "item": "kaleidoscope_cookery:flour",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    },
+    {
+      "type": "item",
+      "id": "submit_onion",
+      "text": "提交 3 个洋葱",
+      "amount": 3,
+      "consume": true,
+      "item": "farmersdelight:onion",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    },
+    {
+      "type": "item",
+      "id": "submit_raw_pork_belly",
+      "text": "提交 10 个生五花肉",
+      "amount": 10,
+      "consume": true,
+      "item": "kaleidoscope_cookery:raw_pork_belly",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "whispering:yuzhili"
+    }
+  ]
+}

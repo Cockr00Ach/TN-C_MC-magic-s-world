@@ -1,0 +1,61 @@
+{
+  "id": "ysjxmodel:main/woodland_mansion_investigation",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_one",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【调查林地府邸】§r",
+  "short_description": "前往林地府邸调查空间异常",
+  "description": "协会在林地府邸附近监测到了异常的空间波动。根据现有情报，那里似乎出现了一道通往「掠夺都市」的裂缝传送门。\n\n前往林地府邸展开调查，并清除盘踞在附近的掠夺者。\n\n你可以使用探险家指南针搜索【林地府邸】。\n\n§1§l【搜索提示】§r\n§0如果指南针未能找到目标，说明当前位置周围§4 10,000 格§0范围内没有生成该建筑。\n§0请前往更远的区域，再次使用指南针进行搜索。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "structure",
+      "id": "reach_target_structure",
+      "text": "到达林地府邸",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "structure": "minecraft:mansion"
+    },
+    {
+      "type": "kill",
+      "id": "defeat_hostile_creatures",
+      "text": "击杀 8 名掠夺者",
+      "amount": 8,
+      "consume": false,
+      "entity": "minecraft:pillager",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "beyonddimensions:net_creater"
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:jinbi"
+    },
+    {
+      "type": "experience",
+      "amount": 50,
+      "count": 1
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/ancient_stronghold_investigation",
+    "ysjxmodel:side/desert_occupied_village_investigation",
+    "ysjxmodel:side/abandoned_village_investigation"
+  ]
+}

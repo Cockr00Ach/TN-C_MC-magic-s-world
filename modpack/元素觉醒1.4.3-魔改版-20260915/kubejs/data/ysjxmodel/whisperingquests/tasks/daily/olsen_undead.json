@@ -1,0 +1,35 @@
+{
+  "id": "ysjxmodel:daily/olsen_undead",
+  "enabled": false,
+  "weight": 10,
+  "category": "daily",
+  "repeatable": true,
+  "sync_with_team": false,
+  "title": "§e奥尔森的委托§r",
+  "short_description": "击杀 3 只僵尸和 3 只骷髅",
+  "description": "奥尔森正在清理附近的亡灵。击杀 3 只僵尸和 3 只骷髅即可完成委托。",
+  "refresh_pool": "daily",
+  "objectives": [
+    {
+      "type": "kill",
+      "id": "kill_zombies",
+      "text": "击杀 3 只僵尸",
+      "entity": "minecraft:zombie",
+      "amount": 3
+    },
+    {
+      "type": "kill",
+      "id": "kill_skeletons",
+      "text": "击杀 3 只骷髅",
+      "entity": "minecraft:skeleton",
+      "amount": 3
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "ysjxspells:jinbi",
+      "count": 1
+    }
+  ]
+}

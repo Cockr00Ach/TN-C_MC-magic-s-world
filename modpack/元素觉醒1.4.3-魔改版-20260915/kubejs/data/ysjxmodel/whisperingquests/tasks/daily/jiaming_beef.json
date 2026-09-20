@@ -1,0 +1,29 @@
+{
+  "id": "ysjxmodel:daily/jiaming_beef",
+  "enabled": false,
+  "weight": 10,
+  "category": "daily",
+  "repeatable": true,
+  "sync_with_team": false,
+  "title": "§e贾铭的委托§r",
+  "short_description": "提交 5 个生牛肉",
+  "description": "贾铭需要补充一批食材。提交 5 个生牛肉即可完成委托。",
+  "refresh_pool": "daily",
+  "objectives": [
+    {
+      "type": "item",
+      "id": "submit_beef",
+      "text": "提交 5 个生牛肉",
+      "item": "minecraft:beef",
+      "amount": 5,
+      "consume": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "ysjxspells:tiebi",
+      "count": 1
+    }
+  ]
+}

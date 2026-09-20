@@ -1,0 +1,116 @@
+{
+  "id": "ysjxmodel:main/abandoned_city_infernal_dragon",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/final_chapter",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§4【炼狱飞龙】§r",
+  "short_description": "前往目标区域并获得龙之心",
+  "description": "协会检测到一只驾驭炼狱之火的巨龙。它所释放的高温正在不断破坏周围区域。\n\n前往指定区域，讨伐炼狱飞龙。\n\n§2§l【追踪提示】§r§7点击任务页面中的§3「开始追踪」§7，即可显示目标所在的具体坐标。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "location",
+      "id": "reach_abandoned_city_target",
+      "text": "前往炼狱飞龙所在区域",
+      "amount": 1,
+      "consume": false,
+      "position": {
+        "x": 2695,
+        "y": 155,
+        "z": 439
+      },
+      "radius": 20,
+      "waypoint_requires_tracking": true,
+      "dimension": "ysjx_dimension:abandoned_city"
+    },
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "obtain_infernal_dragon_heart",
+      "text": "获得龙之心 ×1",
+      "amount": 1,
+      "consume": false,
+      "item": "whispering:long_zhi_xin",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "choice",
+      "amount": 0,
+      "count": 1,
+      "rewards": [
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:arcane_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:fire_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:frost_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:healing_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:water_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:earth_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:air_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:lightning_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:attack_power_food"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:ranged_damage_fruit"
+        }
+      ],
+      "choose": 1,
+      "pool_name": "职业属性果实"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/abandoned_city_leviathan"
+  ]
+}

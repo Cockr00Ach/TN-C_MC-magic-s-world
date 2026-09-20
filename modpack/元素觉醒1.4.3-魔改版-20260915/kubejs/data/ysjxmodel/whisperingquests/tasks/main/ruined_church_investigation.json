@@ -1,0 +1,55 @@
+{
+  "id": "ysjxmodel:main/ruined_church_investigation",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_one",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【调查废弃教堂】§r",
+  "short_description": "前往废弃教堂调查亡灵异动",
+  "description": "据附近村民反映，废弃教堂一带时常传出令人不安的亡灵嚎叫。协会怀疑那里已经被某种亡灵生物占据。\n\n前往废弃教堂调查异常，并消灭游荡在附近的尸鬼。\n\n你可以使用探险家指南针搜索【废弃教堂】。\n\n§1§l【搜索提示】§r\n§0如果指南针未能找到目标，说明当前位置周围§4 10,000 格§0范围内没有生成该建筑。\n§0请前往更远的区域，再次使用指南针进行搜索。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "structure",
+      "id": "reach_target_structure",
+      "text": "到达废弃教堂",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "structure": "mebahelcreaturesdraugr:ruined_church"
+    },
+    {
+      "type": "kill",
+      "id": "defeat_hostile_creatures",
+      "text": "击杀 5 只尸鬼",
+      "amount": 5,
+      "consume": false,
+      "entity": "mebahelcreaturesdraugr:draugr",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:jinbi"
+    },
+    {
+      "type": "experience",
+      "amount": 50,
+      "count": 1
+    }
+  ],
+  "next": [
+    "ysjxmodel:side/draugr_bastion_investigation",
+    "ysjxmodel:side/draugr_crypt_exploration",
+    "ysjxmodel:side/draugr_fort_investigation"
+  ]
+}

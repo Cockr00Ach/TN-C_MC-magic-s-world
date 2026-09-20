@@ -1,0 +1,43 @@
+{
+  "id": "ysjxmodel:main/enter_forlorn_hollows",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_two",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【掩藏于污秽之地的教徒居所】§r",
+  "short_description": "进入异寂空谷",
+  "description": "异寂空谷是一片被黑暗与污秽吞没的区域。这里缺乏植被和光照，栖息其中的生物大多是目盲而残忍的捕食者。\n\n冒险者工会在空谷深处发现了一处古老的教徒居所。根据残留档案记载，此地摩尔人所信仰的“神灵”可能与「混沌」存在某种联系。\n\n前往异寂空谷，找到教徒居所，并调查其中尚未完成的古老仪式。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "dimension",
+      "id": "enter_forlorn_hollows",
+      "text": "进入异寂空谷",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "alex_caves_dimensions:forlorn_hollows"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 2,
+      "item": "ysjxspells:max_health_food"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/craft_forlorn_totem",
+    "ysjxmodel:main/forlorn_biological_samples",
+    "ysjxmodel:side/forlorn_gloomoth_hunt",
+    "ysjxmodel:main/forlorn_dark_parade",
+    "ysjxmodel:side/forlorn_underzealot_cleanup",
+    "ysjxmodel:main/elemental_dragon_ice"
+  ]
+}

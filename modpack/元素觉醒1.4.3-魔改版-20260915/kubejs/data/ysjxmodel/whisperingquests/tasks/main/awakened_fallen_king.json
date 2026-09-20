@@ -1,0 +1,45 @@
+{
+  "id": "ysjxmodel:main/awakened_fallen_king",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_four",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§4【魔王级·陨落的王者】§r",
+  "short_description": "召唤并击败陨落王者",
+  "description": "生物个体检测系统在复生大教堂中发现了一股魔王级气息。\n\n一位早已陨落的古代王者正在死亡之力的影响下逐渐复苏。前往复生大教堂，使用「日暮精粹」完成召唤，并让这位陨落的王者再次归于沉眠。\n\n你可以使用探险家指南针搜索【复生大教堂】。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "obtain_essence_of_eventide",
+      "text": "获得日暮精粹",
+      "amount": 1,
+      "consume": false,
+      "item": "soulsweapons:essence_of_eventide",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    },
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "defeat_moonknight",
+      "text": "获取王的灵魂 ×1",
+      "amount": 1,
+      "consume": false,
+      "item": "soulsweapons:lord_soul_white",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:gaojishuijing"
+    }
+  ]
+}

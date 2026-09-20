@@ -1,0 +1,114 @@
+{
+  "id": "ysjxmodel:main/day_and_night",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_three",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§5【昼与夜】§r",
+  "short_description": "获取昼夜两枚王之灵魂",
+  "description": "§7生物个体检测系统在§5暮色森林§7深处捕捉到了两股彼此共鸣、却又截然相反的强大生命信号。\n\n§7一者沐浴于烈日之下，驾驭灼热的§6昼光§7；一者潜藏于永夜之中，支配幽邃的§5夜幕§7。它们如同昼夜的两面，唯有取得二者留下的§d「王之灵魂」§7，才能证明这股异常波动已经彻底终结。\n\n§6§l【目标结构】\n§r§7前往暮色森林中的§e「终极城堡」§7。\n\n§7你可以前往§b七星的传送商店§7，购买通往终极城堡的§e传送珍珠§7。\n\n§c§l【召唤提示】\n§r§7抵达终极城堡后，将会触发§5虚空裂缝§7生成。你也可以制作§e「昼夜召唤器」§7，直接召唤昼从者与夜伏者。\n\n§8昼夜召唤器的制作方法与具体用途可在 JEI 中查看。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "obtain_lord_soul_day_stalker",
+      "text": "获取王之灵魂（昼） ×1",
+      "amount": 1,
+      "consume": false,
+      "item": "soulsweapons:lord_soul_day_stalker",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    },
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "obtain_lord_soul_night_prowler",
+      "text": "获取王之灵魂（夜） ×1",
+      "amount": 1,
+      "consume": false,
+      "item": "soulsweapons:lord_soul_night_prowler",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:zuanshibi"
+    },
+    {
+      "type": "choice",
+      "amount": 0,
+      "count": 1,
+      "rewards": [
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 2,
+          "item": "ysjxspells:arcane_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 2,
+          "item": "ysjxspells:fire_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 2,
+          "item": "ysjxspells:frost_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 2,
+          "item": "ysjxspells:healing_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 2,
+          "item": "ysjxspells:water_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 2,
+          "item": "ysjxspells:earth_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 2,
+          "item": "ysjxspells:air_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 2,
+          "item": "ysjxspells:lightning_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 2,
+          "item": "ysjxspells:attack_power_food"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 2,
+          "item": "ysjxspells:ranged_damage_fruit"
+        }
+      ],
+      "choose": 1,
+      "pool_name": "职业属性果实"
+    }
+  ]
+}

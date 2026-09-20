@@ -1,0 +1,40 @@
+{
+  "id": "ysjxmodel:daily/alex_toxic_samples",
+  "enabled": false,
+  "weight": 2,
+  "category": "daily",
+  "repeatable": true,
+  "sync_with_team": false,
+  "title": "§e毒化洞穴样本§r",
+  "short_description": "提交焦黑残骸和剧毒膏体",
+  "description": "七星需要继续研究毒化洞穴中的污染物质。提交 4 个焦黑残骸和 4 个剧毒膏体即可完成任务。",
+  "refresh_pool": "daily",
+  "required_completed": [
+    "ysjxmodel:main/enter_toxic_caves"
+  ],
+  "objectives": [
+    {
+      "type": "item",
+      "id": "submit_charred_remnants",
+      "text": "提交 4 个焦黑残骸",
+      "item": "alexscaves:charred_remnant",
+      "amount": 4,
+      "consume": true
+    },
+    {
+      "type": "item",
+      "id": "submit_toxic_paste",
+      "text": "提交 4 个剧毒膏体",
+      "item": "alexscaves:toxic_paste",
+      "amount": 4,
+      "consume": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "ysjxspells:jinbi",
+      "count": 3
+    }
+  ]
+}

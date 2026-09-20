@@ -1,0 +1,62 @@
+{
+  "id": "ysjxmodel:main/mechanical_fusion_anvil",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_two",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【机械融合砧】§r",
+  "short_description": "与安德鲁交谈并制作机械融合砧",
+  "description": "击败先驱者后，返回魔法协会与安德鲁交谈，了解古文明装置「机械融合砧」的用途与制作方式。\n\n完成对话后，根据同步的图纸制作一台机械融合砧。将光标停留在「机械融合砧」上并按下 U 键，即可查看它能够参与制作的物品。\n\n§2§l【追踪提示】§r§7点击任务页面中的§3「开始追踪」§7，即可显示目标所在的具体坐标。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "location",
+      "id": "reach_andrew_for_mechanical_fusion_anvil",
+      "text": "前往武器商铺",
+      "amount": 1,
+      "consume": false,
+      "position": {
+        "x": -39,
+        "y": 72,
+        "z": 19
+      },
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "ysjx_dimension:magic_association"
+    },
+    {
+      "type": "dialogue",
+      "id": "talk_to_andrew_about_mechanical_fusion_anvil",
+      "text": "与安德鲁对话",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    },
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "obtain_mechanical_fusion_anvil",
+      "text": "制作机械融合砧 ×1",
+      "amount": 1,
+      "consume": false,
+      "item": "cataclysm:mechanical_fusion_anvil",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:zhongjishuijing"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/pioneer_core"
+  ]
+}

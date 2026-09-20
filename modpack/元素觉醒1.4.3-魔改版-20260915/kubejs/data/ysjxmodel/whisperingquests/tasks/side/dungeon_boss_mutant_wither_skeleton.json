@@ -1,0 +1,103 @@
+{
+  "id": "ysjxmodel:side/dungeon_boss_mutant_wither_skeleton",
+  "enabled": false,
+  "weight": 1,
+  "category": "side",
+  "repeatable": false,
+  "sync_with_team": true,
+  "title": "§6【支线任务】击败副本 Boss·变异凋灵骷髅§r",
+  "short_description": "击败副本 Boss·变异凋灵骷髅",
+  "description": "一只受到未知力量影响的凋灵骷髅发生了严重变异，正盘踞在副本深处。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "kill",
+      "id": "defeat_dungeon_boss",
+      "text": "击败变异凋灵骷髅 ×1",
+      "amount": 1,
+      "consume": false,
+      "entity": "mutantmore:mutant_wither_skeleton",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "choice",
+      "amount": 0,
+      "count": 1,
+      "rewards": [
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:arcane_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:fire_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:frost_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:healing_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:water_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:earth_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:air_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:lightning_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:attack_power_food"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:ranged_damage_fruit"
+        }
+      ],
+      "choose": 1,
+      "pool_name": "职业属性果实"
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 2,
+      "item": "ysjxspells:max_health_food"
+    }
+  ]
+}

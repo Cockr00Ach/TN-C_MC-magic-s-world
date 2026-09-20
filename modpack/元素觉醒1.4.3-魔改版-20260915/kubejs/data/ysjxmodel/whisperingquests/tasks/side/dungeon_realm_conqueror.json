@@ -1,0 +1,170 @@
+{
+  "id": "ysjxmodel:side/dungeon_realm_conqueror",
+  "enabled": false,
+  "weight": 1,
+  "category": "side",
+  "repeatable": false,
+  "sync_with_team": true,
+  "title": "§6【支线】副本地牢征服者§r",
+  "short_description": "击败副本地牢中的全部首领",
+  "description": "迷迭香：\n地图装置记录到了多股强大的生物波动。这些首领盘踞在副本地牢的不同区域，只有将它们全部击败，才能彻底稳定这个维度。\n\n旅行者，清除地牢中的所有首领，结束这场漫长的讨伐吧。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "kill",
+      "id": "defeat_mutant_wither_skeleton",
+      "text": "击败变异凋灵骷髅 ×1",
+      "amount": 1,
+      "consume": false,
+      "entity": "mutantmore:mutant_wither_skeleton",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    },
+    {
+      "type": "kill",
+      "id": "defeat_nameless_guardian",
+      "text": "击败无名守卫者 ×1",
+      "amount": 1,
+      "consume": false,
+      "entity": "eeeabsmobs:nameless_guardian",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    },
+    {
+      "type": "kill",
+      "id": "defeat_black_gold_marshal",
+      "text": "击败黑金军主 ×1",
+      "amount": 1,
+      "consume": false,
+      "entity": "blackgoldalliance:the_black_gold_marshal",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    },
+    {
+      "type": "kill",
+      "id": "defeat_ignathos",
+      "text": "击败伊格纳托斯 ×1",
+      "amount": 1,
+      "consume": false,
+      "entity": "monsterexpansion:ignathos",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    },
+    {
+      "type": "kill",
+      "id": "defeat_patriot",
+      "text": "击败爱国者 ×1",
+      "amount": 1,
+      "consume": false,
+      "entity": "torchesbecomesunlight:patriot",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 2,
+      "item": "ysjxspells:fashuhexin"
+    },
+    {
+      "type": "choice",
+      "amount": 0,
+      "count": 1,
+      "rewards": [
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:fire_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:earth_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:water_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:air_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:arcane_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:frost_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:bealing_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:lightning_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:wuli_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:sheshou_baoshi"
+        }
+      ],
+      "choose": 1,
+      "pool_name": "职业宝石自选"
+    },
+    {
+      "type": "choice",
+      "amount": 0,
+      "count": 1,
+      "rewards": [
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "kubejs:dilaohuizhang_atomic"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "kubejs:dilaohuizhang_explosion"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "kubejs:dilaohuizhang_xushici"
+        }
+      ],
+      "choose": 1,
+      "pool_name": "地牢徽章自选"
+    }
+  ]
+}

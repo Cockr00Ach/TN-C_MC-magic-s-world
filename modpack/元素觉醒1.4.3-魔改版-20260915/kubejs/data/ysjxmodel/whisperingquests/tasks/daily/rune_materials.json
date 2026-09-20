@@ -1,0 +1,45 @@
+{
+  "id": "ysjxmodel:daily/rune_materials",
+  "enabled": false,
+  "weight": 6,
+  "category": "daily",
+  "repeatable": true,
+  "sync_with_team": false,
+  "title": "§e符文基材§r",
+  "short_description": "提交青金石、红石和荧石粉",
+  "description": "符文商店需要补充制作基础符文所用的材料。提交 8 个青金石、4 个红石和 2 个荧石粉即可完成任务。",
+  "refresh_pool": "daily",
+  "objectives": [
+    {
+      "type": "item",
+      "id": "submit_lapis",
+      "text": "提交 8 个青金石",
+      "item": "minecraft:lapis_lazuli",
+      "amount": 8,
+      "consume": true
+    },
+    {
+      "type": "item",
+      "id": "submit_redstone",
+      "text": "提交 4 个红石",
+      "item": "minecraft:redstone",
+      "amount": 4,
+      "consume": true
+    },
+    {
+      "type": "item",
+      "id": "submit_glowstone_dust",
+      "text": "提交 2 个荧石粉",
+      "item": "minecraft:glowstone_dust",
+      "amount": 2,
+      "consume": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "ysjxspells:tiebi",
+      "count": 3
+    }
+  ]
+}

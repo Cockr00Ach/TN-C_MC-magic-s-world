@@ -1,0 +1,40 @@
+{
+  "id": "ysjxmodel:daily/alex_forlorn_samples",
+  "enabled": false,
+  "weight": 2,
+  "category": "daily",
+  "repeatable": true,
+  "sync_with_team": false,
+  "title": "§e异寂空谷样本§r",
+  "short_description": "提交夜行蝠翼和粪便",
+  "description": "研究团队需要补充异寂空谷的生态样本。提交 6 个夜行蝠翼和 4 个粪便即可完成任务。",
+  "refresh_pool": "daily",
+  "required_completed": [
+    "ysjxmodel:main/enter_forlorn_hollows"
+  ],
+  "objectives": [
+    {
+      "type": "item",
+      "id": "submit_vesper_wings",
+      "text": "提交 6 个夜行蝠翼",
+      "item": "alexscaves:vesper_wing",
+      "amount": 6,
+      "consume": true
+    },
+    {
+      "type": "item",
+      "id": "submit_guano",
+      "text": "提交 4 个粪便",
+      "item": "alexscaves:guano",
+      "amount": 4,
+      "consume": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "ysjxspells:jinbi",
+      "count": 3
+    }
+  ]
+}

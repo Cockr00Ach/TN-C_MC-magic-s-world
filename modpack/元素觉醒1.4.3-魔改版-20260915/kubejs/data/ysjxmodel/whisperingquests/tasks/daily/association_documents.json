@@ -1,0 +1,37 @@
+{
+  "id": "ysjxmodel:daily/association_documents",
+  "enabled": false,
+  "weight": 8,
+  "category": "daily",
+  "repeatable": true,
+  "sync_with_team": false,
+  "title": "§e协会文书补给§r",
+  "short_description": "提交纸张和墨囊",
+  "description": "魔法协会需要补充日常记录所用的文书材料。提交 12 张纸和 2 个墨囊即可完成任务。",
+  "refresh_pool": "daily",
+  "objectives": [
+    {
+      "type": "item",
+      "id": "submit_paper",
+      "text": "提交 12 张纸",
+      "item": "minecraft:paper",
+      "amount": 12,
+      "consume": true
+    },
+    {
+      "type": "item",
+      "id": "submit_ink_sacs",
+      "text": "提交 2 个墨囊",
+      "item": "minecraft:ink_sac",
+      "amount": 2,
+      "consume": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "ysjxspells:tiebi",
+      "count": 2
+    }
+  ]
+}

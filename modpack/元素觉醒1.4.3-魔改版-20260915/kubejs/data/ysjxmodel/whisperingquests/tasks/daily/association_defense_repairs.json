@@ -1,0 +1,37 @@
+{
+  "id": "ysjxmodel:daily/association_defense_repairs",
+  "enabled": false,
+  "weight": 6,
+  "category": "daily",
+  "repeatable": true,
+  "sync_with_team": false,
+  "title": "§e协会防御修缮§r",
+  "short_description": "提交石砖和铁栏杆",
+  "description": "魔法协会的外围防御设施需要进行修缮。提交 32 个石砖和 8 个铁栏杆即可完成任务。",
+  "refresh_pool": "daily",
+  "objectives": [
+    {
+      "type": "item",
+      "id": "submit_stone_bricks",
+      "text": "提交 32 个石砖",
+      "item": "minecraft:stone_bricks",
+      "amount": 32,
+      "consume": true
+    },
+    {
+      "type": "item",
+      "id": "submit_iron_bars",
+      "text": "提交 8 个铁栏杆",
+      "item": "minecraft:iron_bars",
+      "amount": 8,
+      "consume": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "ysjxspells:jinbi",
+      "count": 2
+    }
+  ]
+}

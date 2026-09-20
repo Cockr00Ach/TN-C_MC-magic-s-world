@@ -1,0 +1,57 @@
+{
+  "id": "ysjxmodel:main/nether_mission_report",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_four",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【地狱任务汇报】§r",
+  "short_description": "返回魔法协会向霜星汇报",
+  "description": "返回魔法协会主城，寻找霜星汇报下界的调查结果。\n\n§2§l【追踪提示】§r§7点击任务页面中的§3「开始追踪」§7，即可显示目标所在的具体坐标。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "location",
+      "id": "reach_frost_nova_for_nether_report",
+      "text": "返回魔法协会寻找霜星",
+      "amount": 1,
+      "consume": false,
+      "position": {
+        "x": -36,
+        "y": 68,
+        "z": 56
+      },
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "ysjx_dimension:magic_association"
+    },
+    {
+      "type": "dialogue",
+      "id": "talk_to_frost_nova_about_nether_mission",
+      "text": "与霜星交谈",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 100,
+      "count": 1
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:max_health_food"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/craft_supreme_spell"
+  ]
+}

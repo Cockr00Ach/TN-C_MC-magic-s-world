@@ -1,0 +1,39 @@
+{
+  "id": "ysjxmodel:side/heavenly_challenger",
+  "enabled": false,
+  "weight": 1,
+  "category": "side",
+  "repeatable": false,
+  "sync_with_team": true,
+  "title": "§6【支线】天堂挑战者§r",
+  "short_description": "访问【天堂挑战者】",
+  "description": "一座充满神圣气息的宏伟建筑出现在观测记录中。那里似乎是为挑战者准备的试炼场，前往其中展开调查。\n\n可使用探险家指南针搜索【天堂挑战者】。\n\n§1§l【搜索提示】§r\n§0如果指南针未能找到目标，说明当前位置周围§4 10,000 格§0范围内没有生成该建筑。\n§0请前往更远的区域，再次使用指南针进行搜索。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "structure",
+      "id": "visit_heavenly_challenger",
+      "text": "访问【天堂挑战者】",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "structure": "dungeons_arise:heavenly_challenger"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 30,
+      "count": 1
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:max_health_food"
+    }
+  ]
+}

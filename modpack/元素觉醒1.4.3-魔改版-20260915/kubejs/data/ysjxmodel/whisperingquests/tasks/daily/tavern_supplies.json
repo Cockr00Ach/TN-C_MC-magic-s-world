@@ -1,0 +1,45 @@
+{
+  "id": "ysjxmodel:daily/tavern_supplies",
+  "enabled": false,
+  "weight": 8,
+  "category": "daily",
+  "repeatable": true,
+  "sync_with_team": false,
+  "title": "§e酒馆原料采购§r",
+  "short_description": "提交甜浆果、苹果和糖",
+  "description": "酒馆需要补充一批调制饮品所用的原料。提交 12 个甜浆果、6 个苹果和 4 个糖即可完成任务。",
+  "refresh_pool": "daily",
+  "objectives": [
+    {
+      "type": "item",
+      "id": "submit_sweet_berries",
+      "text": "提交 12 个甜浆果",
+      "item": "minecraft:sweet_berries",
+      "amount": 12,
+      "consume": true
+    },
+    {
+      "type": "item",
+      "id": "submit_apples",
+      "text": "提交 6 个苹果",
+      "item": "minecraft:apple",
+      "amount": 6,
+      "consume": true
+    },
+    {
+      "type": "item",
+      "id": "submit_sugar",
+      "text": "提交 4 个糖",
+      "item": "minecraft:sugar",
+      "amount": 4,
+      "consume": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "ysjxspells:tiebi",
+      "count": 2
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "id": "ysjxmodel:main/dangerous_mercenary",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/independent_commissions",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§c【危险的雇佣兵】§r",
+  "short_description": "前往魔法协会寻找秦亦禾",
+  "description": "生物个体检测系统从萨尔塔之眼中捕捉到了异常的能量信号。前往魔法协会寻找秦亦禾，向他了解详情。\n\n§2§l【追踪提示】§r§7点击任务页面中的§3「开始追踪」§7，即可显示目标所在的具体坐标。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "location",
+      "id": "reach_qyh",
+      "text": "前往魔法协会寻找秦亦禾",
+      "amount": 1,
+      "consume": false,
+      "position": {
+        "x": 51,
+        "y": 71,
+        "z": 14
+      },
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "ysjx_dimension:magic_association"
+    },
+    {
+      "type": "dialogue",
+      "id": "talk_to_qyh_about_gravestone",
+      "text": "与秦亦禾对话",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 50,
+      "count": 1
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:max_health_food"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/gravestone_hunt"
+  ],
+  "start_triggers": [
+    {
+      "type": "item",
+      "action": "start",
+      "amount": 1,
+      "value": 1.0,
+      "item": "torchesbecomesunlight:sankta_statue_eye"
+    }
+  ]
+}

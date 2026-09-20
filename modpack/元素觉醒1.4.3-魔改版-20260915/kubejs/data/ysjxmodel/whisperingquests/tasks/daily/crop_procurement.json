@@ -1,0 +1,45 @@
+{
+  "id": "ysjxmodel:daily/crop_procurement",
+  "enabled": false,
+  "weight": 8,
+  "category": "daily",
+  "repeatable": true,
+  "sync_with_team": false,
+  "title": "§e农产品收购§r",
+  "short_description": "提交小麦、胡萝卜和马铃薯",
+  "description": "农业商店正在收购一批成熟农作物。提交 16 个小麦、8 个胡萝卜和 8 个马铃薯即可完成任务。",
+  "refresh_pool": "daily",
+  "objectives": [
+    {
+      "type": "item",
+      "id": "submit_wheat",
+      "text": "提交 16 个小麦",
+      "item": "minecraft:wheat",
+      "amount": 16,
+      "consume": true
+    },
+    {
+      "type": "item",
+      "id": "submit_carrots",
+      "text": "提交 8 个胡萝卜",
+      "item": "minecraft:carrot",
+      "amount": 8,
+      "consume": true
+    },
+    {
+      "type": "item",
+      "id": "submit_potatoes",
+      "text": "提交 8 个马铃薯",
+      "item": "minecraft:potato",
+      "amount": 8,
+      "consume": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "ysjxspells:tiebi",
+      "count": 2
+    }
+  ]
+}

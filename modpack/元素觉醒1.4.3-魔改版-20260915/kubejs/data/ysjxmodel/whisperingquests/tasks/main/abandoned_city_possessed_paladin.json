@@ -1,0 +1,122 @@
+{
+  "id": "ysjxmodel:main/abandoned_city_possessed_paladin",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/final_chapter",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§4【堕落圣骑】§r",
+  "short_description": "前往目标区域并击败堕落圣骑",
+  "description": "一名受到未知力量侵蚀的圣骑士出现在监测范围内。\n\n前往指定区域，击败堕落圣骑，终结其失控的力量。\n\n§2§l【追踪提示】§r§7点击任务页面中的§3「开始追踪」§7，即可显示目标所在的具体坐标。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "location",
+      "id": "reach_abandoned_city_target",
+      "text": "前往堕落圣骑所在区域",
+      "amount": 1,
+      "consume": false,
+      "position": {
+        "x": 1131,
+        "y": -33,
+        "z": 1280
+      },
+      "radius": 20,
+      "waypoint_requires_tracking": true,
+      "dimension": "ysjx_dimension:abandoned_city"
+    },
+    {
+      "type": "kill",
+      "id": "defeat_abandoned_city_target",
+      "text": "击败堕落圣骑 ×1",
+      "amount": 1,
+      "consume": false,
+      "entity": "legendary_monsters:posessed_paladin",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:fashuhexin"
+    },
+    {
+      "type": "choice",
+      "amount": 0,
+      "count": 1,
+      "rewards": [
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:fire_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:earth_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:water_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:air_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:arcane_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:frost_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:bealing_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:lightning_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:wuli_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:sheshou_baoshi"
+        }
+      ],
+      "choose": 1,
+      "pool_name": "职业宝石自选"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/catastrophe_creature"
+  ]
+}

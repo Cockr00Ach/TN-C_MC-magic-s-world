@@ -1,0 +1,41 @@
+{
+  "id": "ysjxmodel:main/explore_abandoned_city",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/final_chapter",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§4【前往废弃都市】§r",
+  "short_description": "进入废弃都市并与驻地研究员交谈",
+  "description": "协会已经确认，废弃都市正是诸界异常的核心区域。\n\n进入这座被灾难吞没的城市，寻找驻守当地的魔女酒狐研究员，了解圣城附近的目标情报，并为最后的讨伐行动做好准备。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "dimension",
+      "id": "enter_abandoned_city",
+      "text": "进入废弃都市",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "ysjx_dimension:abandoned_city"
+    },
+    {
+      "type": "dialogue",
+      "id": "talk_to_abandoned_city_researcher",
+      "text": "与废弃都市研究员交谈",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/abandoned_city_frost_nova",
+    "ysjxmodel:main/abandoned_city_infernal_dragon",
+    "ysjxmodel:main/abandoned_city_rosmontis"
+  ]
+}

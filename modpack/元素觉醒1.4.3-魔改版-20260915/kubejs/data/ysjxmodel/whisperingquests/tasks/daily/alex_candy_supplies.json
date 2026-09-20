@@ -1,0 +1,40 @@
+{
+  "id": "ysjxmodel:daily/alex_candy_supplies",
+  "enabled": false,
+  "weight": 2,
+  "category": "daily",
+  "repeatable": true,
+  "sync_with_team": false,
+  "title": "§e糖果甜品补给§r",
+  "short_description": "提交巧克力冰淇淋球和薄荷粉",
+  "description": "森罗酒馆需要补充一批来自糖果龋洞的甜品原料。提交 6 个巧克力冰淇淋球和 6 个薄荷粉即可完成任务。",
+  "refresh_pool": "daily",
+  "required_completed": [
+    "ysjxmodel:main/enter_candy_cavity"
+  ],
+  "objectives": [
+    {
+      "type": "item",
+      "id": "submit_chocolate_ice_cream_scoops",
+      "text": "提交 6 个巧克力冰淇淋球",
+      "item": "alexscaves:chocolate_ice_cream_scoop",
+      "amount": 6,
+      "consume": true
+    },
+    {
+      "type": "item",
+      "id": "submit_peppermint_powder",
+      "text": "提交 6 个薄荷粉",
+      "item": "alexscaves:peppermint_powder",
+      "amount": 6,
+      "consume": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "ysjxspells:jinbi",
+      "count": 3
+    }
+  ]
+}

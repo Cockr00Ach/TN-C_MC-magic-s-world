@@ -1,0 +1,118 @@
+{
+  "id": "ysjxmodel:main/qixing_material_collection_one",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_two",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【七星的材料收集（一）】§r",
+  "short_description": "提交三种突变生物材料",
+  "description": "七星需要三种突变生物的个体数据，以分析毒化洞穴中异常突变的成因。\n\n找到并击败这些危险目标，收集指定材料后在任务页面提交。\n\n若暂时找不到这些目标，也可以在 JEI 中搜索【突变召唤装置】，查看配方并制作对应的召唤装置。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "item",
+      "id": "submit_mutant_husk_vocal_cords",
+      "text": "提交变异尸壳声带 ×1",
+      "amount": 1,
+      "consume": true,
+      "item": "mutantmore:mutant_husk_vocal_cords",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    },
+    {
+      "type": "item",
+      "id": "submit_mutant_frozen_zombie_spikes",
+      "text": "提交变异冻僵尸尖刺 ×1",
+      "amount": 1,
+      "consume": true,
+      "item": "mutantmore:mutant_frozen_zombie_spikes",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    },
+    {
+      "type": "item",
+      "id": "submit_mutant_jungle_zombie_vine_seed",
+      "text": "提交变异丛林僵尸滕蔓种子 ×1",
+      "amount": 1,
+      "consume": true,
+      "item": "mutantmore:mutant_jungle_zombie_vine_seed",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "choice",
+      "amount": 0,
+      "count": 1,
+      "rewards": [
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:arcane_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:fire_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:frost_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:healing_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:water_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:earth_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:air_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:lightning_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:attack_power_food"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:ranged_damage_fruit"
+        }
+      ],
+      "choose": 1,
+      "pool_name": "职业属性果实"
+    }
+  ]
+}

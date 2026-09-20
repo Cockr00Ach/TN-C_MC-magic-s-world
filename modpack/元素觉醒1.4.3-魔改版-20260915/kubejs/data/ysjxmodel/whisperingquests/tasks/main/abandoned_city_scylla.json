@@ -1,0 +1,59 @@
+{
+  "id": "ysjxmodel:main/abandoned_city_scylla",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/final_chapter",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§4【击败斯库拉】§r",
+  "short_description": "前往目标区域并击败斯库拉",
+  "description": "生物个体检测系统在废弃都市上空捕捉到了一股极其危险的生命信号。\n\n目标确认为「斯库拉」。前往信号所在的位置，将其讨伐。\n\n§2§l【追踪提示】§r§7点击任务页面中的§3「开始追踪」§7，即可显示目标所在的具体坐标。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "location",
+      "id": "reach_abandoned_city_target",
+      "text": "前往斯库拉所在区域",
+      "amount": 1,
+      "consume": false,
+      "position": {
+        "x": -2746,
+        "y": 241,
+        "z": -561
+      },
+      "radius": 20,
+      "waypoint_requires_tracking": true,
+      "dimension": "ysjx_dimension:abandoned_city"
+    },
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "defeat_abandoned_city_target",
+      "text": "获取风暴精华 ×1",
+      "amount": 1,
+      "consume": false,
+      "item": "cataclysm:essence_of_the_storm",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:fashuhexin"
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 4,
+      "item": "ysjxspells:max_health_food"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/abandoned_city_possessed_paladin"
+  ]
+}

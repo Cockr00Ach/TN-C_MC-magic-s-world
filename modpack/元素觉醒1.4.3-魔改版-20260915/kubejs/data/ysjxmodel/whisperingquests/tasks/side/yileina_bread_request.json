@@ -1,0 +1,34 @@
+{
+  "id": "ysjxmodel:side/yileina_bread_request",
+  "enabled": false,
+  "weight": 1,
+  "category": "side",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§6【支线】伊蕾娜的面包要求§r",
+  "short_description": "为伊蕾娜提交 320 个面包",
+  "description": "伊蕾娜需要五组面包。虽然数量不少，但她似乎已经准备好了一件十分特殊的谢礼。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "item",
+      "id": "submit_bread",
+      "text": "提交面包 ×320",
+      "amount": 320,
+      "consume": true,
+      "item": "minecraft:bread",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "whispering:spliter_helm"
+    }
+  ]
+}

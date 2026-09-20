@@ -1,0 +1,29 @@
+{
+  "id": "tnc:main/tnc_test_a",
+  "enabled": true,
+  "weight": 1,
+  "category": "main",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "实验A · tnc命名空间",
+  "short_description": "TN-C 实验",
+  "description": "变体A：新 id + tnc 命名空间 + 不挂章节",
+  "icon": "minecraft:zombie_head",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "kill",
+      "id": "tnc_kill_zombie",
+      "text": "击杀 1 只僵尸",
+      "amount": 1,
+      "consume": false,
+      "entity": "minecraft:zombie",
+      "radius": 10,
+      "waypoint_requires_tracking": false
+    }
+  ],
+  "rewards": [
+    { "type": "item", "amount": 0, "count": 3, "item": "minecraft:bread" }
+  ]
+}

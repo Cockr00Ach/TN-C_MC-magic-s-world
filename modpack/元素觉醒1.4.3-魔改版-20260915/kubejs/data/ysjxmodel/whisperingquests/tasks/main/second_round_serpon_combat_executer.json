@@ -1,0 +1,107 @@
+{
+  "id": "ysjxmodel:main/second_round_serpon_combat_executer",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_five",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§c【魔王·蛇龙执战者】§r",
+  "short_description": "寻找并击败蛇龙执战者",
+  "description": "生物个体检测系统捕捉到了一股魔王级气息。目标为「蛇龙执战者」，拥有极强的正面作战能力。\n\n找到蛇龙执战者并将其讨伐，避免它加入正在集结的异界军团。\n\n使用蛇龙召唤器即可召唤袭击，详情可在 JEI 中查看。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "defeat_second_round_target",
+      "text": "获取蛇龙执战者勋章 ×1",
+      "amount": 1,
+      "consume": false,
+      "item": "jerotesvillage:serpon_combat_executer_medal",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "choice",
+      "amount": 0,
+      "count": 1,
+      "rewards": [
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:fire_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:earth_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:water_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:air_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:arcane_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:frost_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:bealing_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:lightning_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:wuli_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:sheshou_baoshi"
+        }
+      ],
+      "choose": 1,
+      "pool_name": "职业宝石自选"
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 3,
+      "item": "ysjxspells:max_health_food"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/second_round_world_report"
+  ]
+}

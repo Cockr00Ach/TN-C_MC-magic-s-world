@@ -1,0 +1,40 @@
+{
+  "id": "ysjxmodel:side/forlorn_gloomoth_hunt",
+  "enabled": false,
+  "weight": 1,
+  "category": "side",
+  "repeatable": false,
+  "sync_with_team": true,
+  "title": "§6【支线任务】击杀幽暗蛾§r",
+  "short_description": "击杀 3 只幽暗蛾",
+  "description": "幽暗蛾是适应了异寂空谷黑暗环境的特殊生物。\n\n研究团队需要更多个体数据，以分析黑暗力量对当地生物造成的影响。清理附近的幽暗蛾并记录相关信息。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "kill",
+      "id": "defeat_gloomoths",
+      "text": "击杀幽暗蛾 ×3",
+      "amount": 3,
+      "consume": false,
+      "entity": "alexscaves:gloomoth",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:max_health_food"
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 10,
+      "item": "iceandfire:chain"
+    }
+  ]
+}

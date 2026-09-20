@@ -1,0 +1,104 @@
+{
+  "id": "ysjxmodel:main/second_round_purple_sand_hag",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_five",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§c【魔王·紫沙鬼婆】§r",
+  "short_description": "寻找并击败紫沙鬼婆",
+  "description": "生物个体检测系统在紫色沙尘笼罩的区域捕捉到了魔王级气息。\n\n目标确认为「紫沙鬼婆」。深入目标区域，终结她所引发的异变。\n\n你可以使用探险家指南针搜索【女巫集会】，并在那里寻找「女巫居所地图」。随后使用「邪恶的药剂」右键点击「鬼婆之锅」，即可召唤 Boss。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "defeat_second_round_target",
+      "text": "获取紫沙鬼婆的头发 ×1",
+      "amount": 1,
+      "consume": false,
+      "item": "jerotesvillage:purple_sand_hag_hair",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "choice",
+      "amount": 0,
+      "count": 1,
+      "rewards": [
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:fire_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:earth_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:water_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:air_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:arcane_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:frost_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:bealing_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:lightning_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:wuli_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:sheshou_baoshi"
+        }
+      ],
+      "choose": 1,
+      "pool_name": "职业宝石自选"
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 3,
+      "item": "ysjxspells:max_health_food"
+    }
+  ]
+}

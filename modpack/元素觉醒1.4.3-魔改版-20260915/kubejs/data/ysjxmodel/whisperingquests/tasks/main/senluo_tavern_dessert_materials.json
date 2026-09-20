@@ -1,0 +1,61 @@
+{
+  "id": "ysjxmodel:main/senluo_tavern_dessert_materials",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_two",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【森罗酒馆的甜点材料】§r",
+  "short_description": "为奥术酒狐收集糖果龋洞的特殊材料",
+  "description": "奥术酒狐需要一批来自糖果龋洞的特殊材料，用于研究并制作全新的甜点。按照清单收集全部材料，并在任务页面提交。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "item",
+      "id": "submit_chocolate_ice_cream",
+      "text": "提交 10 个巧克力冰淇淋球",
+      "amount": 10,
+      "consume": true,
+      "item": "alexscaves:chocolate_ice_cream_scoop",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    },
+    {
+      "type": "item",
+      "id": "submit_chocolate_blocks",
+      "text": "提交 10 个巧克力块",
+      "amount": 10,
+      "consume": true,
+      "item": "alexscaves:block_of_chocolate",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    },
+    {
+      "type": "item",
+      "id": "submit_peppermint_powder",
+      "text": "提交 10 个薄荷粉",
+      "amount": 10,
+      "consume": true,
+      "item": "alexscaves:peppermint_powder",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:zuanshibi"
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 2,
+      "item": "ysjxspells:gaojie_caoyao"
+    }
+  ]
+}

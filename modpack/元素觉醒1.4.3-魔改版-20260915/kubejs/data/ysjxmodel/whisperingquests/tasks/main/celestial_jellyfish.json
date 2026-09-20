@@ -1,0 +1,135 @@
+{
+  "id": "ysjxmodel:main/celestial_jellyfish",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_five",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§5【天穹水母】§r",
+  "short_description": "寻找末地虫洞并调查天穹领域",
+  "description": "霜星：\n冒险小队刚刚传来消息，他们在末地群岛上发现了一个来历不明的神秘虫洞。\n\n生物个体检测系统只能从虫洞内部捕捉到一个生物信号，但那股能量波动十分异常。根据冒险小队看到的轮廓判断，目标似乎是一只体型庞大的水母。\n\n旅行者，麻烦你前往末地寻找这个虫洞，进入其中调查具体情况。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "dimension",
+      "id": "enter_celestial_field",
+      "text": "进入天穹领域",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "bossesunleashed:celestial_field"
+    },
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "obtain_celestial_core",
+      "text": "获得天穹核心 ×1",
+      "amount": 1,
+      "consume": false,
+      "item": "bossesunleashed:celestial_core",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "choice",
+      "amount": 0,
+      "count": 1,
+      "rewards": [
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:fire_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:earth_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:water_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:air_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:arcane_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:frost_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:bealing_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:lightning_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:wuli_baoshi"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:sheshou_baoshi"
+        }
+      ],
+      "choose": 1,
+      "pool_name": "职业宝石自选"
+    },
+    {
+      "type": "choice",
+      "amount": 0,
+      "count": 1,
+      "rewards": [
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "kubejs:dilaohuizhang_atomic"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "kubejs:dilaohuizhang_explosion"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "kubejs:dilaohuizhang_xushici"
+        }
+      ],
+      "choose": 1,
+      "pool_name": "地牢徽章自选"
+    }
+  ]
+}

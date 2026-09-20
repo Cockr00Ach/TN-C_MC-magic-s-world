@@ -1,0 +1,53 @@
+{
+  "id": "ysjxmodel:main/evoker_scroll_lesson",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/tutorial",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§5唤魔试炼§r",
+  "short_description": "返回魔法协会，与伊蕾娜交谈",
+  "description": "试炼已经完成。返回魔法协会向伊蕾娜汇报",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "dimension",
+      "id": "return_to_magic_association",
+      "text": "返回魔法协会",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "ysjx_dimension:magic_association"
+    },
+    {
+      "type": "dialogue",
+      "id": "talk_to_yileina_about_scrolls",
+      "text": "与伊蕾娜交谈",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:scroll"
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "minecraft:totem_of_undying"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/spell_scroll_crafting"
+  ]
+}

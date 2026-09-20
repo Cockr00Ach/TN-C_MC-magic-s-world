@@ -1,0 +1,56 @@
+{
+  "id": "ysjxmodel:main/abandoned_city_realm_warden",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/final_chapter",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§4【界域戍卫】§r",
+  "short_description": "前往目标区域并击败界域戍卫",
+  "description": "一名古老的界域守卫已经进入敌对状态，其力量正在干扰附近的空间结构。\n\n前往指定区域，击败界域戍卫。\n\n你需要使用链齿核心打开界域戍卫房间的机械门。\n\n§2§l【追踪提示】§r§7点击任务页面中的§3「开始追踪」§7，即可显示目标所在的具体坐标。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "location",
+      "id": "reach_abandoned_city_target",
+      "text": "前往界域戍卫所在区域",
+      "amount": 1,
+      "consume": false,
+      "position": {
+        "x": -278,
+        "y": -12,
+        "z": -1324
+      },
+      "radius": 20,
+      "waypoint_requires_tracking": true,
+      "dimension": "ysjx_dimension:abandoned_city"
+    },
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "defeat_abandoned_city_target",
+      "text": "获取戍卫核心 ×1",
+      "amount": 1,
+      "consume": false,
+      "item": "eeeabsmobs:guardian_cube",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:gaojishuijing"
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 3,
+      "item": "ysjxspells:max_health_food"
+    }
+  ]
+}

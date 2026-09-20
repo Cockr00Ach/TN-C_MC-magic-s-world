@@ -1,0 +1,37 @@
+{
+  "id": "ysjxmodel:main/explore_twilight_forest",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_three",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【前往暮色森林】§r",
+  "short_description": "前往暮色森林",
+  "description": "进入暮色森林，调查这片被古老魔法笼罩的异世界。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "dimension",
+      "id": "reach_twilight_forest",
+      "text": "前往暮色森林",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "twilightforest:twilight_forest"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 50,
+      "count": 1
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/twilight_naga"
+  ]
+}

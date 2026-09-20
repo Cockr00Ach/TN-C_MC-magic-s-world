@@ -1,0 +1,107 @@
+{
+  "id": "ysjxmodel:main/defeat_void_blossom",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_one",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§c【击杀虚空之花】§r",
+  "short_description": "寻找并击杀虚空之花",
+  "description": "迷迭香：\n\n生物个体检测系统捕捉到了一股精英级生物的能量信号。我已经将目标坐标发送给你了。\n\n目前磁力洞穴中的空间乱流十分严重，协会成员暂时无法通过传送抵达那里。\n\n那只被称为「虚空之花」的生物，很可能就是引发磁力洞穴异变的源头。\n\n只能拜托你了，旅行者。找到它，并在异变继续扩散之前将其消灭。\n\n你可以使用探险家指南针搜索【虚空之花】。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "defeat_void_blossom",
+      "text": "获取星窥 ×1",
+      "amount": 1,
+      "consume": false,
+      "item": "whispering:xingkui",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "choice",
+      "amount": 0,
+      "count": 1,
+      "rewards": [
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:arcane_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:fire_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:frost_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:healing_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:water_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:earth_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:air_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:lightning_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:attack_power_food"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "ysjxspells:ranged_damage_fruit"
+        }
+      ],
+      "choose": 1,
+      "pool_name": "职业属性果实"
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 2,
+      "item": "ysjxspells:zhongjie_caoyao"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/void_blossom_report"
+  ]
+}

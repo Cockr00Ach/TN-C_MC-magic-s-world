@@ -1,0 +1,123 @@
+{
+  "id": "ysjxmodel:main/defeat_immortal",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_four",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§c【击败不朽者】§r",
+  "short_description": "制作不朽者召唤令并击败不朽者",
+  "description": "通过 JEI 查询并制作不朽者召唤令，使用召唤令完成仪式，随后击败不朽军团的统领「不朽者」。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "craft_immortal_summon_order",
+      "text": "制作不朽者召唤令",
+      "amount": 1,
+      "consume": false,
+      "item": "kubejs:immortal_zhaohuan3",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    },
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "defeat_immortal",
+      "text": "获取不朽护符 ×1",
+      "amount": 1,
+      "consume": false,
+      "item": "whispering:immortal_amulet",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:gaojishuijing"
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:fashuhexin"
+    },
+    {
+      "type": "choice",
+      "amount": 0,
+      "count": 1,
+      "rewards": [
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 3,
+          "item": "ysjxspells:arcane_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 3,
+          "item": "ysjxspells:fire_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 3,
+          "item": "ysjxspells:frost_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 3,
+          "item": "ysjxspells:healing_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 3,
+          "item": "ysjxspells:water_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 3,
+          "item": "ysjxspells:earth_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 3,
+          "item": "ysjxspells:air_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 3,
+          "item": "ysjxspells:lightning_fruit"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 3,
+          "item": "ysjxspells:attack_power_food"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 3,
+          "item": "ysjxspells:ranged_damage_fruit"
+        }
+      ],
+      "choose": 1,
+      "pool_name": "职业属性果实"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/immortal_defeat_report"
+  ]
+}

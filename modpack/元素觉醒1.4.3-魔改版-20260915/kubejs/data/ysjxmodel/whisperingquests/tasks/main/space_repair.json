@@ -1,0 +1,43 @@
+{
+  "id": "ysjxmodel:main/space_repair",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/tutorial",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§5修复空间§r",
+  "short_description": "修复主世界的虚空裂缝",
+  "description": "右键使用激活装置，修复主世界的虚空裂缝。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "kill",
+      "id": "kill_rift_draugr",
+      "text": "击杀 3 只尸鬼",
+      "amount": 3,
+      "consume": false,
+      "entity": "mebahelcreaturesdraugr:draugr",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 50,
+      "count": 1
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:jinbi"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/travel_companion"
+  ]
+}

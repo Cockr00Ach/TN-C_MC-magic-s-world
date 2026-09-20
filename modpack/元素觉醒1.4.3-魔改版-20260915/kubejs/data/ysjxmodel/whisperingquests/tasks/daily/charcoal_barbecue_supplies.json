@@ -1,0 +1,37 @@
+{
+  "id": "ysjxmodel:daily/charcoal_barbecue_supplies",
+  "enabled": false,
+  "weight": 8,
+  "category": "daily",
+  "repeatable": true,
+  "sync_with_team": false,
+  "title": "§e炭火烤肉备料§r",
+  "short_description": "提交生猪排和煤炭",
+  "description": "小吃摊需要补充烤肉与燃料。提交 6 个生猪排和 4 个煤炭即可完成任务。",
+  "refresh_pool": "daily",
+  "objectives": [
+    {
+      "type": "item",
+      "id": "submit_porkchops",
+      "text": "提交 6 个生猪排",
+      "item": "minecraft:porkchop",
+      "amount": 6,
+      "consume": true
+    },
+    {
+      "type": "item",
+      "id": "submit_coal",
+      "text": "提交 4 个煤炭",
+      "item": "minecraft:coal",
+      "amount": 4,
+      "consume": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "ysjxspells:tiebi",
+      "count": 2
+    }
+  ]
+}

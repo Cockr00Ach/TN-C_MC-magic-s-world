@@ -1,0 +1,127 @@
+{
+  "id": "ysjxmodel:main/find_frost_wine_fox",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/tutorial",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b寻找冰霜酒狐§r",
+  "short_description": "寻找冰霜酒狐并制作一本职业法术书",
+  "description": "伊蕾娜建议你去找附近的冰霜酒狐，向她咨询法术书与职业选择。\n\n完成咨询后，将她赠送的书放到法术绑定台上，选择想要体验的职业，并制作对应的法术书。\n\n§2§l【追踪提示】§r§7点击任务页面中的§3「开始追踪」§7，即可显示目标所在的具体坐标。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "location",
+      "id": "reach_frost_wine_fox",
+      "text": "前往冰霜酒狐所在位置",
+      "amount": 1,
+      "consume": false,
+      "position": {
+        "x": 14,
+        "y": 81,
+        "z": -100
+      },
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "ysjx_dimension:magic_association"
+    },
+    {
+      "type": "dialogue",
+      "id": "talk_to_frost_wine_fox",
+      "text": "与冰霜酒狐对话",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    },
+    {
+      "type": "ysjxmodel:spell_book_inventory",
+      "id": "obtain_spell_book",
+      "text": "获得任意一本职业法术书",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "choice",
+      "amount": 0,
+      "count": 1,
+      "rewards": [
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 30,
+          "item": "minecraft:bread"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "minecraft:arrow"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "runes:arcane_stone"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "runes:fire_stone"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "runes:frost_stone"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "runes:healing_stone"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "runes:lightning_stone"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "more_rpg_classes:aqua_stone"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "more_rpg_classes:terra_stone"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 64,
+          "item": "more_rpg_classes:storm_stone"
+        }
+      ],
+      "choose": 1,
+      "pool_name": "符文组自选"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/visit_weapon_merchant",
+    "ysjxmodel:main/visit_barbecue_stall",
+    "ysjxmodel:main/visit_jeweler",
+    "ysjxmodel:main/kill_zombies_by_spell_book"
+  ]
+}

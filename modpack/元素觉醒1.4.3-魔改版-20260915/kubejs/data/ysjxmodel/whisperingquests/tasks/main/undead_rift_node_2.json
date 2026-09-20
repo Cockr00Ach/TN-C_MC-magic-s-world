@@ -1,0 +1,43 @@
+{
+  "id": "ysjxmodel:main/undead_rift_node_2",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_four",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【亡灵节点2】§r",
+  "short_description": "前往虚空裂缝点",
+  "description": "前往亡灵堡垒内的虚空裂缝点，调查该节点的异常情况。\n\n§2§l【追踪提示】§r§7点击任务页面中的§3「开始追踪」§7，即可显示目标所在的具体坐标。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "location",
+      "id": "reach_undead_rift",
+      "text": "前往虚空裂缝点",
+      "amount": 1,
+      "consume": false,
+      "position": {
+        "x": 144,
+        "y": 88,
+        "z": 82
+      },
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "ysjx_dimension:undead_fortress"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:zuanshibi"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/undead_rift_node_3"
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "id": "ysjxmodel:main/abyss_king_briefing",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_four",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§5【深渊的王者】§r",
+  "short_description": "前往神圣竞技场与月汐对话",
+  "description": "前往神圣竞技场寻找月汐，了解古老城市日志中记载的深渊召唤仪式。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "dimension",
+      "id": "reach_sacred_arena_for_abyss_king_briefing",
+      "text": "前往神圣竞技场",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "ysjx_dimension:sacred_arena"
+    },
+    {
+      "type": "dialogue",
+      "id": "talk_to_yuexi_about_abyss_king",
+      "text": "与月汐对话",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 100,
+      "count": 1
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/defeat_abyss_king"
+  ]
+}

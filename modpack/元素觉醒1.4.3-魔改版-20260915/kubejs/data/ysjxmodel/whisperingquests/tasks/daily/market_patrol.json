@@ -1,0 +1,57 @@
+{
+  "id": "ysjxmodel:daily/market_patrol",
+  "enabled": false,
+  "weight": 8,
+  "category": "daily",
+  "repeatable": true,
+  "sync_with_team": false,
+  "title": "§e商区巡查§r",
+  "short_description": "巡查魔法协会的三个商铺",
+  "description": "依次前往武器商店、小吃摊和饰品商店，确认魔法协会商区一切正常。\n\n§2§l【追踪提示】§r§7点击任务页面中的§3「开始追踪」§7，即可显示目标所在的具体坐标。§r",
+  "refresh_pool": "daily",
+  "objectives": [
+    {
+      "type": "location",
+      "id": "reach_weapon_shop",
+      "text": "巡查武器商店",
+      "position": {
+        "x": -39,
+        "y": 72,
+        "z": 19
+      },
+      "radius": 10,
+      "dimension": "ysjx_dimension:magic_association"
+    },
+    {
+      "type": "location",
+      "id": "reach_snack_stall",
+      "text": "巡查小吃摊",
+      "position": {
+        "x": 73,
+        "y": 71,
+        "z": -8
+      },
+      "radius": 10,
+      "dimension": "ysjx_dimension:magic_association"
+    },
+    {
+      "type": "location",
+      "id": "reach_jewelry_shop",
+      "text": "巡查饰品商店",
+      "position": {
+        "x": 72,
+        "y": 75,
+        "z": -52
+      },
+      "radius": 10,
+      "dimension": "ysjx_dimension:magic_association"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "ysjxspells:jinbi",
+      "count": 2
+    }
+  ]
+}

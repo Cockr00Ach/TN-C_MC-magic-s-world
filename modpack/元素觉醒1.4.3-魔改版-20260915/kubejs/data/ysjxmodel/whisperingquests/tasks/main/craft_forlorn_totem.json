@@ -1,0 +1,35 @@
+{
+  "id": "ysjxmodel:main/craft_forlorn_totem",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_two",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【制作遗寂图腾】§r",
+  "short_description": "制作并携带遗寂图腾",
+  "description": "协会研究团队根据从异寂空谷采集到的环境样本，研发出了一件能够适应当地污秽与黑暗环境的特殊图腾。\n\n制作并携带「遗寂图腾」，它将在探索异寂空谷时为你提供重要帮助。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "obtain_forlorn_totem",
+      "text": "制作遗寂图腾",
+      "amount": 1,
+      "consume": false,
+      "item": "whispering:forlorn_totem",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "alex_caves_dimensions:forlorn_hollows_key"
+    }
+  ]
+}

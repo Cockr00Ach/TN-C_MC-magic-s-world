@@ -1,0 +1,45 @@
+{
+  "id": "ysjxmodel:main/enter_toxic_caves",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_two",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【前往毒化洞穴】§r",
+  "short_description": "进入受到严重污染的生化维度",
+  "description": "使用七星提供的「毒化洞穴传送珍珠」激活传送门，进入受到严重污染的生化维度。\n\n调查当地生物发生突变的原因，并为七星收集研究所需的样本。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "dimension",
+      "id": "reach_toxic_caves",
+      "text": "进入毒化洞穴",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "alex_caves_dimensions:toxic_caves"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 50,
+      "count": 1
+    },
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 2,
+      "item": "ysjxspells:max_health_food"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/qixing_material_collection_one",
+    "ysjxmodel:main/qixing_material_collection_two",
+    "ysjxmodel:main/craft_earthshaker_crystal"
+  ]
+}

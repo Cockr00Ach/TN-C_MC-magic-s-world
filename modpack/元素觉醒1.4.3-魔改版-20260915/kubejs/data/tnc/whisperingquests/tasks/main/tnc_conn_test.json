@@ -1,0 +1,41 @@
+{
+  "id": "tnc:main/tnc_conn_test",
+  "enabled": true,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/tutorial",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§6TN-C · 任务书连通测试§r",
+  "short_description": "击杀 1 只僵尸，验证 TN-C 的任务能进作者任务书",
+  "description": "这是 TN-C 自己的任务，走 §atnc§r 命名空间的数据包写入作者的任务书。\n\n§7如果你能看到这张卡片，说明我们不用改 jar、也不用改作者的数据包，就能往这套任务系统里加内容。§r",
+  "icon": "minecraft:zombie_head",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "kill",
+      "id": "tnc_kill_zombie",
+      "text": "击杀 1 只僵尸",
+      "amount": 1,
+      "consume": false,
+      "entity": "minecraft:zombie",
+      "radius": 10,
+      "waypoint_requires_tracking": false
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 3,
+      "item": "minecraft:bread"
+    },
+    {
+      "type": "command",
+      "amount": 0,
+      "count": 1,
+      "command": "/say TN-C 任务系统连通成功"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "id": "ysjxmodel:main/explore_aether",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_two",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【前往天境】§r",
+  "short_description": "进入天境调查帝王云鲸暴走的原因",
+  "description": "使用伊蕾娜提供的天境传送门框架，开启通往云海之上的道路。\n\n进入天境，调查帝王云鲸暴走的原因，并寻找那只刚刚完成进化的魔王种。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "dimension",
+      "id": "reach_the_aether",
+      "text": "前往天境",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "aether:the_aether"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 50,
+      "count": 1
+    }
+  ],
+  "next": [
+    "ysjxmodel:side/senluo_tavern_new_product",
+    "ysjxmodel:side/andrew_aether_commission",
+    "ysjxmodel:main/brass_dungeon",
+    "ysjxmodel:main/airship_fleet_investigation",
+    "ysjxmodel:side/heavenly_challenger",
+    "ysjxmodel:side/heavenly_conqueror",
+    "ysjxmodel:side/heavenly_rider"
+  ]
+}

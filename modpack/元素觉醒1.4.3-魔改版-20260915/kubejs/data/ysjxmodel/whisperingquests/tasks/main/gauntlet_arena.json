@@ -1,0 +1,35 @@
+{
+  "id": "ysjxmodel:main/gauntlet_arena",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/chapter_four",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§b【拳套竞技场】§r",
+  "short_description": "前往拳套竞技场击败拳套",
+  "description": "协会在下界的一座古老竞技场中检测到了异常的生命信号。\n\n一只被称为「拳套」的巨大生物正盘踞在那里。前往拳套竞技场，调查现场并消灭这个危险目标。\n\n你可以使用探险家指南针搜索【拳套竞技场】。",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "ysjxmodel:inventory",
+      "id": "defeat_gauntlet",
+      "text": "获取烈焰之眼 ×1",
+      "amount": 1,
+      "consume": false,
+      "item": "bosses_of_mass_destruction:blazing_eye",
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjxspells:zuanshibi"
+    }
+  ]
+}

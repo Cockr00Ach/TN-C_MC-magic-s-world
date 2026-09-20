@@ -1,0 +1,83 @@
+{
+  "id": "ysjxmodel:main/tutorial_completion",
+  "enabled": false,
+  "weight": 1,
+  "category": "main",
+  "chapter": "ysjxmodel:chapters/tutorial",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§5启程！主世界§r",
+  "short_description": "返回魔法协会，与伊蕾娜交谈",
+  "description": "返回魔法协会与伊蕾娜交谈，准备启程前往主世界。\n\n§2§l【追踪提示】§r§7点击任务页面中的§3「开始追踪」§7，即可显示目标所在的具体坐标。§r",
+  "icon": "whisperingquests:textures/gui/quest_icon.png",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "dimension",
+      "id": "return_after_spell_anvil",
+      "text": "返回魔法协会",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "ysjx_dimension:magic_association"
+    },
+    {
+      "type": "location",
+      "id": "reach_yileina_for_departure",
+      "text": "前往伊蕾娜所在位置",
+      "amount": 1,
+      "consume": false,
+      "position": {
+        "x": 3,
+        "y": 81,
+        "z": -114
+      },
+      "radius": 10,
+      "waypoint_requires_tracking": true,
+      "dimension": "ysjx_dimension:magic_association"
+    },
+    {
+      "type": "dialogue",
+      "id": "finish_tutorial_with_yileina",
+      "text": "与伊蕾娜交谈",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "ysjx_dimension:overworld_teleporter"
+    },
+    {
+      "type": "choice",
+      "amount": 0,
+      "count": 1,
+      "rewards": [
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "building_blueprint:modern_building"
+        },
+        {
+          "type": "item",
+          "amount": 0,
+          "count": 1,
+          "item": "building_blueprint:antiquity_building"
+        }
+      ],
+      "choose": 1,
+      "pool_name": "建筑蓝图"
+    }
+  ],
+  "next": [
+    "ysjxmodel:main/dangerous_start"
+  ]
+}

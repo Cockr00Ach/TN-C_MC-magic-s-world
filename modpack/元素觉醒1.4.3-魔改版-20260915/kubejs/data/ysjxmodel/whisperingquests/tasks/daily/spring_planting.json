@@ -1,0 +1,37 @@
+{
+  "id": "ysjxmodel:daily/spring_planting",
+  "enabled": false,
+  "weight": 10,
+  "category": "daily",
+  "repeatable": true,
+  "sync_with_team": false,
+  "title": "§e春耕补种§r",
+  "short_description": "提交小麦种子和甜菜种子",
+  "description": "农田需要补充下一轮播种所用的种子。提交 16 个小麦种子和 8 个甜菜种子即可完成任务。",
+  "refresh_pool": "daily",
+  "objectives": [
+    {
+      "type": "item",
+      "id": "submit_wheat_seeds",
+      "text": "提交 16 个小麦种子",
+      "item": "minecraft:wheat_seeds",
+      "amount": 16,
+      "consume": true
+    },
+    {
+      "type": "item",
+      "id": "submit_beetroot_seeds",
+      "text": "提交 8 个甜菜种子",
+      "item": "minecraft:beetroot_seeds",
+      "amount": 8,
+      "consume": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "item": "ysjxspells:tiebi",
+      "count": 1
+    }
+  ]
+}
