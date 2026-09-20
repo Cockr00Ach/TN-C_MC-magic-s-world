@@ -7,6 +7,9 @@
     "SpellHelperManaGateMixin",
     "StatusBarBarsMixin"
   ],
+  "client": [
+    "MusicManagerMixin"
+  ],
   "injectors": {
     "defaultRequire": 0
   }

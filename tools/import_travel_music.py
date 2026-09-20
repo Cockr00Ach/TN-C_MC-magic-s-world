@@ -11,6 +11,7 @@ import argparse
 import json
 import shutil
 import subprocess
+import tempfile
 from pathlib import Path
 
 
@@ -49,9 +50,8 @@ def main() -> None:
         raise FileNotFoundError(f"no supported audio files in {args.inbox}")
 
     sound_dir = args.assets / "sounds" / "music" / "travel"
-    sound_dir.mkdir(parents=True, exist_ok=True)
-    for stale in sound_dir.glob("track_*.ogg"):
-        stale.unlink()
+    sound_parent = sound_dir.parent
+    sound_parent.mkdir(parents=True, exist_ok=True)
 
     sounds_path = args.assets / "sounds.json"
     if sounds_path.is_file():
@@ -61,29 +61,56 @@ def main() -> None:
     sounds = {key: value for key, value in sounds.items() if not key.startswith(EVENT_PREFIX)}
 
     imported = []
-    for index, source in enumerate(sources, start=1):
-        track = f"track_{index:03d}"
-        output = sound_dir / f"{track}.ogg"
-        run(
-            [
-                str(ffmpeg), "-hide_banner", "-loglevel", "error", "-y",
-                "-i", str(source), "-vn", "-map_metadata", "-1",
-                "-ac", "2", "-ar", "44100", "-c:a", "libvorbis", "-q:a", "5",
-                str(output),
-            ]
-        )
-        event = EVENT_PREFIX + track
-        sounds[event] = {
-            "sounds": [
-                {
-                    "name": f"tnc:music/travel/{track}",
-                    "stream": True,
-                }
-            ]
-        }
-        imported.append({"event": f"tnc:{event}", "source": source.name, "bytes": output.stat().st_size})
+    staging: Path | None = Path(tempfile.mkdtemp(prefix=".travel-import-", dir=sound_parent))
+    try:
+        for index, source in enumerate(sources, start=1):
+            track = f"track_{index:03d}"
+            output = staging / f"{track}.ogg"
+            run(
+                [
+                    str(ffmpeg), "-hide_banner", "-loglevel", "error", "-y",
+                    "-i", str(source), "-vn", "-map_metadata", "-1",
+                    "-ac", "2", "-ar", "44100", "-c:a", "libvorbis", "-q:a", "5",
+                    str(output),
+                ]
+            )
+            event = EVENT_PREFIX + track
+            sounds[event] = {
+                "sounds": [
+                    {
+                        "name": f"tnc:music/travel/{track}",
+                        "stream": True,
+                    }
+                ]
+            }
+            imported.append({"event": f"tnc:{event}", "source": source.name, "bytes": output.stat().st_size})
 
-    sounds_path.write_text(json.dumps(sounds, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        backup = sound_parent / ".travel-import-backup"
+        if backup.exists():
+            shutil.rmtree(backup)
+        if sound_dir.exists():
+            sound_dir.replace(backup)
+        try:
+            staging.replace(sound_dir)
+            staging = None
+            temporary_json = sounds_path.with_suffix(".json.tmp")
+            temporary_json.write_text(
+                json.dumps(sounds, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+            )
+            temporary_json.replace(sounds_path)
+        except Exception:
+            if sound_dir.exists():
+                shutil.rmtree(sound_dir)
+            if backup.exists():
+                backup.replace(sound_dir)
+            raise
+        else:
+            if backup.exists():
+                shutil.rmtree(backup)
+    finally:
+        if staging is not None and staging.exists():
+            shutil.rmtree(staging)
+
     print(console_report(imported))
 
 

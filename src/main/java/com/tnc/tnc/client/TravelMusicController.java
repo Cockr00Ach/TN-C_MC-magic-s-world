@@ -62,16 +62,18 @@ public final class TravelMusicController {
         if (!inWorld) {
             inWorld = true;
             waitTicks = INITIAL_DELAY_TICKS;
-            refreshCatalog(minecraft.getSoundManager());
+            if (refreshCatalog(minecraft.getSoundManager())) {
+                // Stop a vanilla track which may have started before our catalog was ready.
+                // MusicManagerMixin suppresses future vanilla music without mutating its timer.
+                minecraft.getMusicManager().stopPlaying();
+            }
         }
-
-        // MusicManager owns vanilla situational music. Stopping it does not stop our separate
-        // SoundInstance, even though both respect the MUSIC volume slider.
-        minecraft.getMusicManager().stopPlaying();
 
         if (++refreshTicks >= 400) {
             refreshTicks = 0;
-            refreshCatalog(minecraft.getSoundManager());
+            if (refreshCatalog(minecraft.getSoundManager())) {
+                minecraft.getMusicManager().stopPlaying();
+            }
         }
 
         SoundManager sounds = minecraft.getSoundManager();
@@ -119,7 +121,8 @@ public final class TravelMusicController {
         LOGGER.info("[TN-C Music] playing {} ({} track(s) available)", next, catalog.size());
     }
 
-    private static void refreshCatalog(SoundManager sounds) {
+    private static boolean refreshCatalog(SoundManager sounds) {
+        boolean wasEmpty = catalog.isEmpty();
         List<ResourceLocation> discovered = sounds.getAvailableSounds().stream()
                 .filter(id -> TNMod.MODID.equals(id.getNamespace()))
                 .filter(id -> id.getPath().startsWith(EVENT_PREFIX))
@@ -130,6 +133,12 @@ public final class TravelMusicController {
             queue.clear();
             LOGGER.info("[TN-C Music] discovered {} travel track(s)", catalog.size());
         }
+        return wasEmpty && !catalog.isEmpty();
+    }
+
+    /** Used by the client MusicManager mixin to disable only vanilla background music. */
+    public static boolean shouldSuppressVanillaMusic() {
+        return inWorld && !catalog.isEmpty();
     }
 
     private static ResourceLocation nextTrack() {
@@ -160,6 +169,7 @@ public final class TravelMusicController {
         waitTicks = INITIAL_DELAY_TICKS;
         refreshTicks = 0;
         queue.clear();
+        lastTrack = null;
         inWorld = false;
     }
 }
