@@ -5,15 +5,17 @@ Minecraft 1.20.1 / Forge 47.4.22 的魔改工程。给整合包 **元素觉醒 1
 
 当前阶段：**六系 108 个法术已可用**（雷/火/风各 3 条链、水/土/暗各 4 条链），
 魔法石界面 + 法杖施法已跑通，魔力值真正参与施法（施法前硬拦截，不是事后补扣）。
-**任务系统与剧情正文尚未开工**（现有 FTB 章节基本是物品收集清单式）。
+**任务系统与剧情正文尚未开工** —— 2026-09-21 已清场：作者的"剧情/教学"类 10 章移出工作区
+（归档在 `archive/author-quest-content/`），保留 6 章图鉴类；现有的都是物品收集清单式，没有人说话。
+任务正文由 **任务系统BBB** 实施，剧情文本以 `剧情总纲.md` 为准。
 
 > 📌 **每天开工前先看 [`docs/daily-workflow.md`](docs/daily-workflow.md)** ——
 > 里面有一次性设置、日常命令、提交推送流程、以及"出问题对照表"，
 > 可以直接复制粘贴，也可以打印出来贴屏幕上。
 >
-> 📌 **现在做到哪了** → [`docs/当前状态.md`](docs/当前状态.md)（技术唯一事实来源）。
+> 📌 **现在做到哪了** → [`docs/当前状态.md`](docs/当前状态.md)（技术唯一事实来源，法术系统YYY 维护）。
 > 📌 **故事是什么、任务怎么写** → [`剧情总纲.md`](剧情总纲.md)（剧情唯一事实来源，**编剧系统 AAA** 维护）。
-> 　　其余文档的维护者：技术现状 = 法术专题（`docs/当前状态.md`）；地图/结构 = 地图专题（`docs/地图接入进度.md`）。
+> 📌 **任务系统的坑与流程** → [`docs/任务系统_交接.md`](docs/任务系统_交接.md)（**任务系统BBB** 维护）。
 > 　　各文档首行都写明**维护者与归属**，改别人负责的文件前先打招呼。
 
 ---
@@ -167,11 +169,11 @@ git push -u origin 你的分支名
 ## 多专题协作约定
 
 - **法术系统YYY**：docs/当前状态.md、docs/法术专题_交接.md、docs/投射物模型_配方.md、docs/法术制作与测试.md、docs/特殊魔法_设计.md、docs/法术总表_按设计文档.md、docs/美术资产清单.md、docs/实施进度.md、docs/项目交接.md、docs/验收表.md、docs/导图_全法术.png、src/main/java/com/tnc/tnc/magic/**、src/main/java/com/tnc/tnc/client/**、src/main/resources/data/tnc/spells/**、src/main/resources/assets/tnc/**、tools/gen_tnc_*.ps1、tools/verify_mod_jar.ps1、tools/install-to-pack.ps1。
-- **文书专题**（agent dsh · 会话主题「文书」）：剧情唯一事实来源 `剧情总纲.md`。**只产文本，不实现** —— 新机制/新物品写「需求单」。
+- **编剧系统 AAA**（agent dsh · 会话主题「文书」）：剧情唯一事实来源 `剧情总纲.md`。**只产文本，不实现** —— 新机制/新物品写「需求单」。
 - **地图/结构专题**：docs/地图接入进度.md、地图生成/结构资产相关文件。
-- **任务系统专题 / 任务系统BBB**（agent dsh · 会话主题「任务系统BBB」）：`docs/任务系统_交接.md`、`config/ftbquests/quests/chapters/**`、`config/ftbquests/quests/chapter_groups.snbt`、`config/whisperingquests/ftbq_bindings.json`、`archive/author-quest-content/**`。
-  - **职责**：把文书专题的剧情文本**实施**成 FTB 任务正文（总纲 §零 写明"把任务写进 `config/ftbquests/` —— 队友实施"）。
-  - **不碰**：法术/数值/美术（法术专题）、剧情设定与文案（文书专题）、地图与结构资产（地图专题）。
+- **任务系统BBB**（agent dsh · 会话主题「任务系统BBB」）：`docs/任务系统_交接.md`、`config/ftbquests/quests/chapters/**`、`config/ftbquests/quests/chapter_groups.snbt`、`config/whisperingquests/ftbq_bindings.json`、`archive/author-quest-content/**`。
+  - **职责**：把编剧系统 AAA 的剧情文本**实施**成 FTB 任务正文（`剧情总纲.md` §零 写明"把任务写进 `config/ftbquests/` —— 队友实施"）。
+  - **不碰**：法术/数值/美术（法术系统YYY）、剧情设定与文案（编剧系统 AAA）、地图与结构资产（地图专题）。
 - 每份文档都应带**维护者署名头** ✓；全局状态**只维护 docs/当前状态.md 一页** ✓。
 
 ### ⚠️ 任务系统专题的一条基建缺口（2026-09-21，任务系统BBB 提出）
