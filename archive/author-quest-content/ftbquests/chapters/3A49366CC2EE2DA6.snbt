@@ -1,0 +1,128 @@
+{
+	default_hide_dependency_lines: false
+	default_quest_shape: ""
+	filename: "3A49366CC2EE2DA6"
+	group: "734EA102F1090FA3"
+	icon: "ysjx_dimension:magic_association_teleporter"
+	id: "3A49366CC2EE2DA6"
+	images: [{
+		height: 25.0d
+		image: "ftbquests:textures/gui/mofa.png"
+		rotation: 0.0d
+		width: 25.0d
+		x: 0.0d
+		y: -3.0d
+	}]
+	order_index: 0
+	quest_links: [ ]
+	quests: [
+		{
+			entity_vis_size: 1.0f
+			id: "20BFF2297E769001"
+			size: 0.7d
+			tasks: [{
+				id: "710C7A9297E1FC56"
+				item: "torchesbecomesunlight:rosmontis_ipad"
+				type: "item"
+			}]
+			title: "迷迭香"
+			x: 6.25d
+			y: 2.1d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "431B6BA6FCA0CB8D"
+			size: 0.7d
+			tasks: [{
+				id: "4E608034DA7C3C2D"
+				item: "torchesbecomesunlight:winter_scratch"
+				type: "item"
+			}]
+			title: "霜星"
+			x: -1.4d
+			y: -1.75d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "7A05E4DFEF09AC05"
+			tasks: [{
+				id: "1CB986DC3E70C66D"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:golden_mage_head"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "伊蕾娜"
+			x: 0.0d
+			y: -6.0d
+		}
+		{
+			description: ["&c1"]
+			entity_vis_size: 1.0f
+			id: "7E70A796A0EF8877"
+			size: 0.7d
+			tasks: [{
+				id: "48397A7958824870"
+				item: "kaleidoscope_nether:spicy_pot"
+				type: "item"
+			}]
+			title: "森罗餐厅"
+			x: -0.7d
+			y: -1.75d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "665BC3FBECE0C849"
+			size: 0.7d
+			tasks: [{
+				id: "413D4D06704B2EE9"
+				item: "jewelry:ruby_ring"
+				type: "item"
+			}]
+			title: "饰品商店"
+			x: 1.6d
+			y: -4.2d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "0E1E4E2FE70DFB81"
+			size: 0.7d
+			tasks: [{
+				id: "3D9537A2B090E00C"
+				item: {
+					Count: 1
+					id: "kaleidoscope_tavern:signature_cocktail"
+					tag: { }
+				}
+				type: "item"
+			}]
+			title: "森罗酒馆"
+			x: 0.95d
+			y: -2.6d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "21D8C16C3CDAA2ED"
+			size: 0.7d
+			tasks: [{
+				id: "2D3688457DF46BC6"
+				item: {
+					Count: 1
+					id: "legendary_monsters:soul_great_sword"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "武器商店"
+			x: -1.05d
+			y: -2.8d
+		}
+	]
+	title: "&f魔法协会"
+}

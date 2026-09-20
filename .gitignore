@@ -87,3 +87,16 @@ forge*changelog.txt
 .jdk17/
 .dsh-tmp/
 *.log.gz
+
+# ---------- 唯一例外：作者的旧任务章节（删除前快照）----------
+# 背景：作者的任务章节在 modpack/*/config/ftbquests/ 下，被上面的 `modpack/*/config/*`
+# 排除 —— 也就是它们**从来没进过 git**。2026-09-21 我们按计划把作者的"剧情/教学"类章节
+# 从工作区移走（换成 TN-C 自己的任务线），移走后工作区那份就没了。
+# archive/author-quest-content/ 是这些章节**现存的唯一副本**，丢了无法回退、
+# 也无法核对"到底删了什么"。所以为它开一个口子，纳入版本控制。
+# ⚠️ 这是唯一例外，**不要**据此去放行 config/ 里的其它内容。
+!archive/author-quest-content/
+!archive/author-quest-content/**
+
+# 本地存档备份（**故意不进 git**）：游戏实例里存档的 FTB 任务进度备份，属于本地产物
+archive/local-save-backup/

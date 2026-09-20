@@ -1,0 +1,24 @@
+#是否在对话时隐藏[HUD]
+disable_hud_in_dialog = true
+#[选项]是否居中
+option_in_center = false
+#是否开启[背景框]
+enable_background = true
+#使用[渐变背景框]或[边框背景框]
+faded_background = true
+#是否绘制[回答]的背景
+enable_ans_background = false
+#是否绘制[选项]的背景
+enable_opt_background = false
+#剧情对话是否使用[打字机效果]
+enable_typewriter_effect = true
+#[打字机效果]打字速度
+#Range: > 1
+typewriter_effect_speed = 2
+#[打字机效果]打字间隔
+#Range: > 1
+typewriter_effect_interval = 2
+#对话框宽度
+#Range: > 100
+dialog_width = 300
+

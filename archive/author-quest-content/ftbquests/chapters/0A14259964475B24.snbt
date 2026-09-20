@@ -1,0 +1,2721 @@
+{
+	default_hide_dependency_lines: false
+	default_quest_shape: ""
+	filename: "0A14259964475B24"
+	group: "16A3BF08B404CCE1"
+	icon: {
+		Count: 1
+		id: "ysjx_weapons:golden_mage_head"
+		tag: {
+			Damage: 0
+		}
+	}
+	id: "0A14259964475B24"
+	images: [
+		{
+			height: 9.0d
+			image: "ysjx_weapons:textures/entity/player/kongqifazhen.png"
+			rotation: 0.0d
+			width: 9.0d
+			x: -14.0d
+			y: -29.0d
+		}
+		{
+			height: 9.0d
+			image: "ysjx_weapons:textures/entity/player/shenshengfazhen.png"
+			rotation: 0.0d
+			width: 9.0d
+			x: -2.0d
+			y: -29.0d
+		}
+		{
+			height: 9.0d
+			image: "ysjxspells:textures/entity/leidianfazhen.png"
+			rotation: 0.0d
+			width: 9.0d
+			x: 10.0d
+			y: -29.0d
+		}
+		{
+			height: 9.0d
+			image: "ysjx_weapons:textures/entity/player/dadifazhen.png"
+			rotation: 0.0d
+			width: 9.0d
+			x: -14.0d
+			y: 7.5d
+		}
+		{
+			height: 9.0d
+			image: "ysjx_weapons:textures/entity/player/haiyangfazhen.png"
+			rotation: 0.0d
+			width: 9.0d
+			x: 22.0d
+			y: -29.0d
+		}
+		{
+			height: 9.0d
+			image: "ysjx_weapons:textures/entity/player/huoyanfazhen.png"
+			rotation: 0.0d
+			width: 9.0d
+			x: -1.5d
+			y: 7.5d
+		}
+		{
+			height: 9.0d
+			image: "ysjxspells:textures/entity/haiyangfazhen.png"
+			rotation: 0.0d
+			width: 9.0d
+			x: 10.5d
+			y: 7.5d
+		}
+		{
+			height: 9.0d
+			image: "ysjxspells:textures/entity/aoshufazhen.png"
+			rotation: 0.0d
+			width: 9.0d
+			x: 22.5d
+			y: 7.5d
+		}
+		{
+			height: 9.0d
+			image: "ysjx_weapons:textures/entity/player/kongqifazhen.png"
+			rotation: 0.0d
+			width: 9.0d
+			x: -14.0d
+			y: -10.5d
+		}
+		{
+			height: 9.0d
+			image: "ysjx_weapons:textures/entity/player/shenshengfazhen.png"
+			rotation: 0.0d
+			width: 9.0d
+			x: -2.0d
+			y: -10.5d
+		}
+		{
+			height: 9.0d
+			image: "ysjxspells:textures/entity/leidianfazhen.png"
+			rotation: 0.0d
+			width: 9.0d
+			x: 10.0d
+			y: -10.5d
+		}
+		{
+			height: 9.0d
+			image: "ysjx_weapons:textures/entity/player/dadifazhen.png"
+			rotation: 0.0d
+			width: 9.0d
+			x: -14.0d
+			y: 23.25d
+		}
+		{
+			height: 9.0d
+			image: "ysjx_weapons:textures/entity/player/haiyangfazhen.png"
+			rotation: 0.0d
+			width: 9.0d
+			x: 22.0d
+			y: -10.5d
+		}
+		{
+			height: 9.0d
+			image: "ysjx_weapons:textures/entity/player/huoyanfazhen.png"
+			rotation: 0.0d
+			width: 9.0d
+			x: -1.5d
+			y: 23.25d
+		}
+		{
+			height: 9.0d
+			image: "ysjxspells:textures/entity/haiyangfazhen.png"
+			rotation: 0.0d
+			width: 9.0d
+			x: 10.5d
+			y: 23.25d
+		}
+		{
+			height: 9.0d
+			image: "ysjxspells:textures/entity/aoshufazhen.png"
+			rotation: 0.0d
+			width: 9.0d
+			x: 22.5d
+			y: 23.25d
+		}
+		{
+			height: 13.0d
+			image: "ftbquests:textures/gui/elemental_awakening_9000px_optimized.png"
+			rotation: 0.0d
+			width: 19.0d
+			x: 4.0d
+			y: -1.5d
+		}
+	]
+	order_index: 1
+	quest_links: [ ]
+	quests: [
+		{
+			entity_vis_size: 1.0f
+			id: "25A2B5DDD433D608"
+			size: 1.5d
+			tasks: [{
+				id: "1ECBBD38877E9034"
+				item: {
+					Count: 1
+					id: "wizards:arcane_robe_head"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 18.0d
+			y: 12.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "406A95F147222E9F"
+			size: 1.5d
+			tasks: [{
+				id: "4277972924A44B20"
+				item: {
+					Count: 1
+					id: "wizards:arcane_robe_chest"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 20.25d
+			y: 12.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "0A0F84B9DEBC67CB"
+			size: 1.5d
+			tasks: [{
+				id: "1EC9F52C3C7FDAE2"
+				item: {
+					Count: 1
+					id: "wizards:arcane_robe_legs"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 24.75d
+			y: 12.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "4347EC4E7A015542"
+			size: 1.5d
+			tasks: [{
+				id: "459F918F4C2DA133"
+				item: {
+					Count: 1
+					id: "wizards:arcane_robe_feet"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 27.0d
+			y: 12.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "60AEA7C71106757A"
+			size: 1.5d
+			tasks: [{
+				id: "31AEEF31FAF2E944"
+				item: {
+					Count: 1
+					id: "wizards:fire_robe_head"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -6.0d
+			y: 12.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "5AB86072BEDE092D"
+			size: 1.5d
+			tasks: [{
+				id: "20B037643CC2F3DA"
+				item: {
+					Count: 1
+					id: "wizards:fire_robe_chest"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -3.75d
+			y: 12.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "407BD08BAABA3229"
+			size: 1.5d
+			tasks: [{
+				id: "2A77E0FF3E391390"
+				item: {
+					Count: 1
+					id: "wizards:fire_robe_legs"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 0.75d
+			y: 12.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "76C7C83E3D5D8434"
+			size: 1.5d
+			tasks: [{
+				id: "3614FB74076AA466"
+				item: {
+					Count: 1
+					id: "wizards:fire_robe_feet"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 3.0d
+			y: 12.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "5938BA5D7E385A0B"
+			size: 1.5d
+			tasks: [{
+				id: "507AA2674596B203"
+				item: {
+					Count: 1
+					id: "wizards:frost_robe_head"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 6.0d
+			y: 12.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "212C40177606DA08"
+			size: 1.5d
+			tasks: [{
+				id: "4EC0DAAB0344AC16"
+				item: {
+					Count: 1
+					id: "wizards:frost_robe_chest"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 8.25d
+			y: 12.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "70DAF2954E938C47"
+			size: 1.5d
+			tasks: [{
+				id: "6AA007488804B76C"
+				item: {
+					Count: 1
+					id: "wizards:frost_robe_legs"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 12.75d
+			y: 12.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "4672F4A333390B0E"
+			size: 1.5d
+			tasks: [{
+				id: "55ED82140EB09F95"
+				item: {
+					Count: 1
+					id: "wizards:frost_robe_feet"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 15.0d
+			y: 12.5d
+		}
+		{
+			dependencies: ["25A2B5DDD433D608"]
+			entity_vis_size: 1.0f
+			id: "478723507AB28359"
+			size: 1.5d
+			tasks: [{
+				id: "14C16578001235D2"
+				item: {
+					Count: 1
+					id: "wizards:netherite_arcane_robe_head"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 18.0d
+			y: 15.5d
+		}
+		{
+			dependencies: ["406A95F147222E9F"]
+			entity_vis_size: 1.0f
+			id: "7DA722791C142D06"
+			size: 1.5d
+			tasks: [{
+				id: "1A205FBC22B58110"
+				item: {
+					Count: 1
+					id: "wizards:netherite_arcane_robe_chest"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 20.25d
+			y: 15.5d
+		}
+		{
+			dependencies: ["0A0F84B9DEBC67CB"]
+			entity_vis_size: 1.0f
+			id: "20F138C1482D742C"
+			size: 1.5d
+			tasks: [{
+				id: "615A6C770F0A8F6F"
+				item: {
+					Count: 1
+					id: "wizards:netherite_arcane_robe_legs"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 24.75d
+			y: 15.5d
+		}
+		{
+			dependencies: ["4347EC4E7A015542"]
+			entity_vis_size: 1.0f
+			id: "79DC2E93E991A8A9"
+			size: 1.5d
+			tasks: [{
+				id: "53DA856B0199DEBC"
+				item: {
+					Count: 1
+					id: "wizards:netherite_arcane_robe_feet"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 27.0d
+			y: 15.5d
+		}
+		{
+			dependencies: ["60AEA7C71106757A"]
+			entity_vis_size: 1.0f
+			id: "0C01574B0B834CED"
+			size: 1.5d
+			tasks: [{
+				id: "72949B7A283D5D2E"
+				item: {
+					Count: 1
+					id: "wizards:netherite_fire_robe_head"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -6.0d
+			y: 15.5d
+		}
+		{
+			dependencies: ["5AB86072BEDE092D"]
+			entity_vis_size: 1.0f
+			id: "329DB46BC1971664"
+			size: 1.5d
+			tasks: [{
+				id: "405C508AE2FB5FEF"
+				item: {
+					Count: 1
+					id: "wizards:netherite_fire_robe_chest"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -3.75d
+			y: 15.5d
+		}
+		{
+			dependencies: ["407BD08BAABA3229"]
+			entity_vis_size: 1.0f
+			id: "7C9DA02765E63A66"
+			size: 1.5d
+			tasks: [{
+				id: "4C45D1D977631E5B"
+				item: {
+					Count: 1
+					id: "wizards:netherite_fire_robe_legs"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 0.75d
+			y: 15.5d
+		}
+		{
+			dependencies: ["76C7C83E3D5D8434"]
+			entity_vis_size: 1.0f
+			id: "3DC146D40897CAF3"
+			size: 1.5d
+			tasks: [{
+				id: "59B2B542DDB70A37"
+				item: {
+					Count: 1
+					id: "wizards:netherite_fire_robe_feet"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 3.0d
+			y: 15.5d
+		}
+		{
+			dependencies: ["5938BA5D7E385A0B"]
+			entity_vis_size: 1.0f
+			id: "5710C080DD05721D"
+			size: 1.5d
+			tasks: [{
+				id: "59A8D13933891E1B"
+				item: {
+					Count: 1
+					id: "wizards:netherite_frost_robe_head"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 6.0d
+			y: 15.5d
+		}
+		{
+			dependencies: ["212C40177606DA08"]
+			entity_vis_size: 1.0f
+			id: "616086D4B66C768E"
+			size: 1.5d
+			tasks: [{
+				id: "1D5C0A299502F861"
+				item: {
+					Count: 1
+					id: "wizards:netherite_frost_robe_chest"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 8.25d
+			y: 15.5d
+		}
+		{
+			dependencies: ["70DAF2954E938C47"]
+			entity_vis_size: 1.0f
+			id: "720229622020E4B6"
+			size: 1.5d
+			tasks: [{
+				id: "3212CF89AFD62F77"
+				item: {
+					Count: 1
+					id: "wizards:netherite_frost_robe_legs"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 12.75d
+			y: 15.5d
+		}
+		{
+			dependencies: ["4672F4A333390B0E"]
+			entity_vis_size: 1.0f
+			id: "324BD00EC218D183"
+			size: 1.5d
+			tasks: [{
+				id: "4A5141306200F9F5"
+				item: {
+					Count: 1
+					id: "wizards:netherite_frost_robe_feet"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 15.0d
+			y: 15.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "3D0D70AE566A68B9"
+			size: 1.5d
+			tasks: [{
+				id: "145EEB6AE719CC32"
+				item: {
+					Count: 1
+					id: "wizards:staff_arcane"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 22.5d
+			y: 12.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "6AE66E0DF9B8CC4E"
+			size: 1.5d
+			tasks: [{
+				id: "7E8622192697DF98"
+				item: {
+					Count: 1
+					id: "wizards:staff_fire"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -1.5d
+			y: 12.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "32228736F79ADB98"
+			size: 1.5d
+			tasks: [{
+				id: "7E22B24785AABD2B"
+				item: {
+					Count: 1
+					id: "wizards:staff_frost"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 10.5d
+			y: 12.5d
+		}
+		{
+			dependencies: ["3D0D70AE566A68B9"]
+			entity_vis_size: 1.0f
+			id: "522C6B5837825188"
+			size: 1.5d
+			tasks: [{
+				id: "5E27187EB5336D4F"
+				item: {
+					Count: 1
+					id: "wizards:staff_netherite_arcane"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 22.5d
+			y: 15.5d
+		}
+		{
+			dependencies: ["6AE66E0DF9B8CC4E"]
+			entity_vis_size: 1.0f
+			id: "6AAC479593AAB16F"
+			size: 1.5d
+			tasks: [{
+				id: "6D35AFCF71D22E98"
+				item: {
+					Count: 1
+					id: "wizards:staff_netherite_fire"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -1.5d
+			y: 15.5d
+		}
+		{
+			dependencies: ["32228736F79ADB98"]
+			entity_vis_size: 1.0f
+			id: "74EB58A0D9547335"
+			size: 1.5d
+			tasks: [{
+				id: "3FB59F2F7DD105CE"
+				item: {
+					Count: 1
+					id: "wizards:staff_netherite_frost"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 10.5d
+			y: 15.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "53A033DAE6954EF8"
+			size: 1.5d
+			tasks: [{
+				id: "3A0BD04F81CEE90A"
+				item: {
+					Count: 1
+					id: "elemental_wizards_rpg:kelp_head"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 17.5d
+			y: -21.25d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "064C43C252C9A780"
+			size: 1.5d
+			tasks: [{
+				id: "2D1DA5DC2B3B3C9D"
+				item: {
+					Count: 1
+					id: "elemental_wizards_rpg:kelp_chest"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 19.75d
+			y: -21.25d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "4BFC514D8B771DC2"
+			size: 1.5d
+			tasks: [{
+				id: "1FF3636E3F6B6065"
+				item: {
+					Count: 1
+					id: "elemental_wizards_rpg:kelp_legs"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 24.25d
+			y: -21.25d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "1D72CF59D4B82D63"
+			size: 1.5d
+			tasks: [{
+				id: "6210B3FBABF35FF6"
+				item: {
+					Count: 1
+					id: "elemental_wizards_rpg:kelp_feet"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 26.5d
+			y: -21.25d
+		}
+		{
+			dependencies: ["53A033DAE6954EF8"]
+			entity_vis_size: 1.0f
+			id: "4E8C5416726A5C00"
+			size: 1.5d
+			tasks: [{
+				id: "072698D7521379CF"
+				item: {
+					Count: 1
+					id: "elemental_wizards_rpg:netherite_kelp_head"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 17.5d
+			y: -18.25d
+		}
+		{
+			dependencies: ["064C43C252C9A780"]
+			entity_vis_size: 1.0f
+			id: "33CC970E76230647"
+			size: 1.5d
+			tasks: [{
+				id: "7B4C6A8E406907FB"
+				item: {
+					Count: 1
+					id: "elemental_wizards_rpg:netherite_kelp_chest"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 19.75d
+			y: -18.25d
+		}
+		{
+			dependencies: ["4BFC514D8B771DC2"]
+			entity_vis_size: 1.0f
+			id: "366042F27FD80023"
+			size: 1.5d
+			tasks: [{
+				id: "123829390538E504"
+				item: {
+					Count: 1
+					id: "elemental_wizards_rpg:netherite_kelp_legs"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 24.25d
+			y: -18.25d
+		}
+		{
+			dependencies: ["1D72CF59D4B82D63"]
+			entity_vis_size: 1.0f
+			id: "3BBF439F48E17CBE"
+			size: 1.5d
+			tasks: [{
+				id: "01E868CA2D2ACCF1"
+				item: {
+					Count: 1
+					id: "elemental_wizards_rpg:netherite_kelp_feet"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 26.5d
+			y: -18.25d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "7C2D1E71AE3EACA9"
+			size: 1.5d
+			tasks: [{
+				id: "763A598AE41ACA00"
+				item: {
+					Count: 1
+					id: "elemental_wizards_rpg:dripstone_head"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -18.5d
+			y: 12.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "7F968B466732E0CB"
+			size: 1.5d
+			tasks: [{
+				id: "50EDDBEBA4EDF047"
+				item: {
+					Count: 1
+					id: "elemental_wizards_rpg:dripstone_chest"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -16.25d
+			y: 12.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "0B9DAF9553E608FA"
+			size: 1.5d
+			tasks: [{
+				id: "5E0E4866F1886E23"
+				item: {
+					Count: 1
+					id: "elemental_wizards_rpg:dripstone_legs"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -11.75d
+			y: 12.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "6649DE7A42F8F8FB"
+			size: 1.5d
+			tasks: [{
+				id: "636D4913BA91EABE"
+				item: {
+					Count: 1
+					id: "elemental_wizards_rpg:dripstone_feet"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -9.5d
+			y: 12.5d
+		}
+		{
+			dependencies: ["7C2D1E71AE3EACA9"]
+			entity_vis_size: 1.0f
+			id: "61DC341D64815014"
+			size: 1.5d
+			tasks: [{
+				id: "6805593D729909F7"
+				item: {
+					Count: 1
+					id: "elemental_wizards_rpg:netherite_dripstone_head"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -18.5d
+			y: 15.5d
+		}
+		{
+			dependencies: ["7F968B466732E0CB"]
+			entity_vis_size: 1.0f
+			id: "1B22D166ED9F7499"
+			size: 1.5d
+			tasks: [{
+				id: "664E5C63DA124C52"
+				item: {
+					Count: 1
+					id: "elemental_wizards_rpg:netherite_dripstone_chest"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -16.25d
+			y: 15.5d
+		}
+		{
+			dependencies: ["0B9DAF9553E608FA"]
+			entity_vis_size: 1.0f
+			id: "1E37391C52FD5ECC"
+			size: 1.5d
+			tasks: [{
+				id: "4DD1F65C301ECA98"
+				item: {
+					Count: 1
+					id: "elemental_wizards_rpg:netherite_dripstone_legs"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -11.75d
+			y: 15.5d
+		}
+		{
+			dependencies: ["6649DE7A42F8F8FB"]
+			entity_vis_size: 1.0f
+			id: "72226E900D0E528B"
+			size: 1.5d
+			tasks: [{
+				id: "232A27DD5B1E49FC"
+				item: {
+					Count: 1
+					id: "elemental_wizards_rpg:netherite_dripstone_feet"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -9.5d
+			y: 15.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "57971BFAB1C8B3F2"
+			size: 1.5d
+			tasks: [{
+				id: "11711C724873D534"
+				item: {
+					Count: 1
+					id: "elemental_wizards_rpg:wind_head"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -18.5d
+			y: -21.25d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "074EEB3F0CF1EC21"
+			size: 1.5d
+			tasks: [{
+				id: "1D95E96FAED7C8C3"
+				item: {
+					Count: 1
+					id: "elemental_wizards_rpg:wind_chest"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -16.25d
+			y: -21.25d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "2A734846A1727FC4"
+			size: 1.5d
+			tasks: [{
+				id: "5783E3901A84C2AF"
+				item: {
+					Count: 1
+					id: "elemental_wizards_rpg:wind_legs"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -11.75d
+			y: -21.25d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "6A29A399FF7A965D"
+			size: 1.5d
+			tasks: [{
+				id: "53D55CC5A8C22992"
+				item: {
+					Count: 1
+					id: "elemental_wizards_rpg:wind_feet"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -9.5d
+			y: -21.25d
+		}
+		{
+			dependencies: ["57971BFAB1C8B3F2"]
+			entity_vis_size: 1.0f
+			id: "041B7D812E0AF698"
+			size: 1.5d
+			tasks: [{
+				id: "2BEEFF9268B75BE5"
+				item: {
+					Count: 1
+					id: "elemental_wizards_rpg:netherite_wind_head"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -18.5d
+			y: -18.25d
+		}
+		{
+			dependencies: ["074EEB3F0CF1EC21"]
+			entity_vis_size: 1.0f
+			id: "43F6EC6759BA1E11"
+			size: 1.5d
+			tasks: [{
+				id: "0C79E610CE47641A"
+				item: {
+					Count: 1
+					id: "elemental_wizards_rpg:netherite_wind_chest"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -16.25d
+			y: -18.25d
+		}
+		{
+			dependencies: ["2A734846A1727FC4"]
+			entity_vis_size: 1.0f
+			id: "45D12FDA74A1A1A3"
+			size: 1.5d
+			tasks: [{
+				id: "085217FC1878679A"
+				item: {
+					Count: 1
+					id: "elemental_wizards_rpg:netherite_wind_legs"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -11.75d
+			y: -18.25d
+		}
+		{
+			dependencies: ["6A29A399FF7A965D"]
+			entity_vis_size: 1.0f
+			id: "52C160A957FC0035"
+			size: 1.5d
+			tasks: [{
+				id: "1AD57F7AAF8B1EA3"
+				item: {
+					Count: 1
+					id: "elemental_wizards_rpg:netherite_wind_feet"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -9.5d
+			y: -18.25d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "0D8E731E1826C639"
+			size: 1.5d
+			tasks: [{
+				id: "5BF3E67151CBF334"
+				item: {
+					Count: 1
+					id: "elemental_wizards_rpg:staff_aqua"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 22.0d
+			y: -21.25d
+		}
+		{
+			dependencies: ["0D8E731E1826C639"]
+			entity_vis_size: 1.0f
+			id: "3763EC83DFD227BE"
+			size: 1.5d
+			tasks: [{
+				id: "562799E4697FA3C7"
+				item: {
+					Count: 1
+					id: "elemental_wizards_rpg:staff_netherite_aqua"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 22.0d
+			y: -18.25d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "6234AF789C338885"
+			size: 1.5d
+			tasks: [{
+				id: "09476179DF1C519A"
+				item: {
+					Count: 1
+					id: "elemental_wizards_rpg:staff_terra"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -14.0d
+			y: 12.5d
+		}
+		{
+			dependencies: ["6234AF789C338885"]
+			entity_vis_size: 1.0f
+			id: "7E11423DCC52C8D8"
+			size: 1.5d
+			tasks: [{
+				id: "5EDB2F8F9E70E8E8"
+				item: {
+					Count: 1
+					id: "elemental_wizards_rpg:staff_netherite_terra"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -14.0d
+			y: 15.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "484B9AF30ED62B97"
+			size: 1.5d
+			tasks: [{
+				id: "7FE431D8F1675E44"
+				item: {
+					Count: 1
+					id: "elemental_wizards_rpg:staff_wind"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -14.0d
+			y: -21.25d
+		}
+		{
+			dependencies: ["484B9AF30ED62B97"]
+			entity_vis_size: 1.0f
+			id: "31F40FD716BA751C"
+			size: 1.5d
+			tasks: [{
+				id: "12759A37833DD2C6"
+				item: {
+					Count: 1
+					id: "elemental_wizards_rpg:staff_netherite_wind"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -14.0d
+			y: -18.25d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "5EB40CB7FB8041D4"
+			shape: "diamond"
+			size: 2.5d
+			subtitle: "&e奥术拥有高机动性和高额的法术伤害"
+			tasks: [{
+				id: "7B949BBF7CA68A46"
+				item: "wizards:arcane_spell_book"
+				type: "item"
+			}]
+			x: 22.5d
+			y: 7.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "18BA16512528642F"
+			shape: "diamond"
+			size: 2.5d
+			subtitle: "&e火焰拥有高额的暴击和强大的法术伤害"
+			tasks: [{
+				id: "4FAA3502D1A36F7C"
+				item: "wizards:fire_spell_book"
+				type: "item"
+			}]
+			x: -1.5d
+			y: 7.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "3D81BF1FA4C0C626"
+			shape: "diamond"
+			size: 2.5d
+			subtitle: "&e冰霜拥有aoe和高额的暴击伤害"
+			tasks: [{
+				id: "1D75B4AF7C500B3B"
+				item: "wizards:frost_spell_book"
+				type: "item"
+			}]
+			x: 10.5d
+			y: 7.5d
+		}
+		{
+			dependencies: ["478723507AB28359"]
+			entity_vis_size: 1.0f
+			id: "7A3AF22CB1EDAF10"
+			size: 1.5d
+			tasks: [{
+				id: "1DF53CDE562FB81F"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:diamond_mage_head"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 18.0d
+			y: 18.5d
+		}
+		{
+			dependencies: ["7DA722791C142D06"]
+			entity_vis_size: 1.0f
+			id: "4B507176C76F23B2"
+			size: 1.5d
+			tasks: [{
+				id: "32BD74D9FECD43D7"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:diamond_mage_chest"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 20.25d
+			y: 18.5d
+		}
+		{
+			dependencies: ["20F138C1482D742C"]
+			entity_vis_size: 1.0f
+			id: "0FCC372256968AD1"
+			size: 1.5d
+			tasks: [{
+				id: "61C76522FF5EAEE2"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:diamond_mage_legs"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 24.75d
+			y: 18.5d
+		}
+		{
+			dependencies: ["79DC2E93E991A8A9"]
+			entity_vis_size: 1.0f
+			id: "1BB72E0038D2CE29"
+			size: 1.5d
+			tasks: [{
+				id: "416E6ED233C1A49E"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:diamond_mage_feet"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 27.0d
+			y: 18.5d
+		}
+		{
+			dependencies: ["041B7D812E0AF698"]
+			entity_vis_size: 1.0f
+			id: "3EC34D387559FFCB"
+			size: 1.5d
+			tasks: [{
+				id: "403BD01A54D69748"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:air_mage_head"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -18.5d
+			y: -15.25d
+		}
+		{
+			dependencies: ["43F6EC6759BA1E11"]
+			entity_vis_size: 1.0f
+			id: "53195405CB4FDCD2"
+			size: 1.5d
+			tasks: [{
+				id: "54D57E0CF3F4DD82"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:air_mage_chest"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -16.25d
+			y: -15.25d
+		}
+		{
+			dependencies: ["45D12FDA74A1A1A3"]
+			entity_vis_size: 1.0f
+			id: "75EB2C99D3C0C7CB"
+			size: 1.5d
+			tasks: [{
+				id: "43AC95F880D6EFEA"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:air_mage_legs"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -11.75d
+			y: -15.25d
+		}
+		{
+			dependencies: ["52C160A957FC0035"]
+			entity_vis_size: 1.0f
+			id: "59498CA6991BF76B"
+			size: 1.5d
+			tasks: [{
+				id: "18EADF3300008F32"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:air_mage_feet"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -9.5d
+			y: -15.25d
+		}
+		{
+			dependencies: ["61DC341D64815014"]
+			entity_vis_size: 1.0f
+			id: "147A383D7C330A53"
+			size: 1.5d
+			tasks: [{
+				id: "424624B62AFE5CE4"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:earth_mage_head"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -18.5d
+			y: 18.5d
+		}
+		{
+			dependencies: ["1B22D166ED9F7499"]
+			entity_vis_size: 1.0f
+			id: "796865A622BDEBC6"
+			size: 1.5d
+			tasks: [{
+				id: "78F7F39CC1613083"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:earth_mage_chest"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -16.25d
+			y: 18.5d
+		}
+		{
+			dependencies: ["1E37391C52FD5ECC"]
+			entity_vis_size: 1.0f
+			id: "67D8AF93BFAAB469"
+			size: 1.5d
+			tasks: [{
+				id: "5A804BDA1D9D1B7F"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:earth_mage_legs"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -11.75d
+			y: 18.5d
+		}
+		{
+			dependencies: ["72226E900D0E528B"]
+			entity_vis_size: 1.0f
+			id: "19ED37EA454D2E45"
+			size: 1.5d
+			tasks: [{
+				id: "4156074A4AC5C4DA"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:earth_mage_feet"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -9.5d
+			y: 18.5d
+		}
+		{
+			dependencies: ["0C01574B0B834CED"]
+			entity_vis_size: 1.0f
+			id: "7BDF9253395DEBA1"
+			size: 1.5d
+			tasks: [{
+				id: "39BD0E5256A75E6C"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:fire_mage_head"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -6.0d
+			y: 18.5d
+		}
+		{
+			dependencies: ["329DB46BC1971664"]
+			entity_vis_size: 1.0f
+			id: "1E22DDECAA543EBC"
+			size: 1.5d
+			tasks: [{
+				id: "1D89119870237410"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:fire_mage_chest"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -3.75d
+			y: 18.5d
+		}
+		{
+			dependencies: ["7C9DA02765E63A66"]
+			entity_vis_size: 1.0f
+			id: "140B4FFCD403C97F"
+			size: 1.5d
+			tasks: [{
+				id: "2A25157511710767"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:fire_mage_legs"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 0.75d
+			y: 18.5d
+		}
+		{
+			dependencies: ["3DC146D40897CAF3"]
+			entity_vis_size: 1.0f
+			id: "49F643BC8CBF6DEF"
+			size: 1.5d
+			tasks: [{
+				id: "7F7C99C1A53FD567"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:fire_mage_feet"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 3.0d
+			y: 18.5d
+		}
+		{
+			dependencies: ["5710C080DD05721D"]
+			entity_vis_size: 1.0f
+			id: "037A87F91C254C09"
+			size: 1.5d
+			tasks: [{
+				id: "0D9A4825C4D6DC1E"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:frost_mage_head"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 6.0d
+			y: 18.5d
+		}
+		{
+			dependencies: ["616086D4B66C768E"]
+			entity_vis_size: 1.0f
+			id: "718F0873A328A6A8"
+			size: 1.5d
+			tasks: [{
+				id: "72CDDB6CDD8A9BFD"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:frost_mage_chest"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 8.25d
+			y: 18.5d
+		}
+		{
+			dependencies: ["720229622020E4B6"]
+			entity_vis_size: 1.0f
+			id: "009C10A33FD65C65"
+			size: 1.5d
+			tasks: [{
+				id: "16C25BD46452C745"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:frost_mage_legs"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 12.75d
+			y: 18.5d
+		}
+		{
+			dependencies: ["324BD00EC218D183"]
+			entity_vis_size: 1.0f
+			id: "2A538C499FB7C437"
+			size: 1.5d
+			tasks: [{
+				id: "7BCAD0087C5E7B6A"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:frost_mage_feet"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 15.0d
+			y: 18.5d
+		}
+		{
+			dependencies: ["35E01821174381E7"]
+			entity_vis_size: 1.0f
+			id: "7EF35B041C5624EF"
+			size: 1.5d
+			tasks: [{
+				id: "5EC17B3B140A9B62"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:lightning_mage_head"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 5.5d
+			y: -15.25d
+		}
+		{
+			dependencies: ["7B406E375FF988CD"]
+			entity_vis_size: 1.0f
+			id: "586F09C5149B31CA"
+			size: 1.5d
+			tasks: [{
+				id: "7804E2F1987B0586"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:lightning_mage_chest"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 7.75d
+			y: -15.25d
+		}
+		{
+			dependencies: ["4A4FE143CBD687A2"]
+			entity_vis_size: 1.0f
+			id: "1769515AB528F832"
+			size: 1.5d
+			tasks: [{
+				id: "46B8C382D2EF532D"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:lightning_mage_legs"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 12.25d
+			y: -15.25d
+		}
+		{
+			dependencies: ["7A3A927E3257F917"]
+			entity_vis_size: 1.0f
+			id: "6655829032061FB4"
+			size: 1.5d
+			tasks: [{
+				id: "4A68304D44B3731C"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:lightning_mage_feet"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 14.5d
+			y: -15.25d
+		}
+		{
+			dependencies: ["4E8C5416726A5C00"]
+			entity_vis_size: 1.0f
+			id: "3540F5C95764D496"
+			size: 1.5d
+			tasks: [{
+				id: "4CF1A6F8F6CF4947"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:water_mage_head"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 17.5d
+			y: -15.25d
+		}
+		{
+			dependencies: ["33CC970E76230647"]
+			entity_vis_size: 1.0f
+			id: "63DDEF7BFC78CCB3"
+			size: 1.5d
+			tasks: [{
+				id: "5A30617AC0D31ACE"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:water_mage_chest"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 19.75d
+			y: -15.25d
+		}
+		{
+			dependencies: ["366042F27FD80023"]
+			entity_vis_size: 1.0f
+			id: "2264FE43EA8CB1AF"
+			size: 1.5d
+			tasks: [{
+				id: "795B0E89E2D6B33B"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:water_mage_legs"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 24.25d
+			y: -15.25d
+		}
+		{
+			dependencies: ["3BBF439F48E17CBE"]
+			entity_vis_size: 1.0f
+			id: "1EB6777978CA1892"
+			size: 1.5d
+			tasks: [{
+				id: "1B4D776FF9D2D939"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:water_mage_feet"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 26.5d
+			y: -15.25d
+		}
+		{
+			dependencies: ["562187E8445A42D6"]
+			entity_vis_size: 1.0f
+			id: "3C37EDE53DD84CF9"
+			size: 1.5d
+			tasks: [{
+				id: "3B8749FC68B0E191"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:healing_head"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -6.5d
+			y: -15.25d
+		}
+		{
+			dependencies: ["33330789E9FED530"]
+			entity_vis_size: 1.0f
+			id: "70EC1489044EBEDB"
+			size: 1.5d
+			tasks: [{
+				id: "373C3BF490D3E0E6"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:healing_chest"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -4.25d
+			y: -15.25d
+		}
+		{
+			dependencies: ["7F0B190DC089A7CE"]
+			entity_vis_size: 1.0f
+			id: "652446E4374E432D"
+			size: 1.5d
+			tasks: [{
+				id: "2F7A834E920B8B64"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:healing_legs"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 0.25d
+			y: -15.25d
+		}
+		{
+			dependencies: ["01E381349C72246B"]
+			entity_vis_size: 1.0f
+			id: "68D3B3AEA912631C"
+			size: 1.5d
+			tasks: [{
+				id: "6F30DEA1F013A1FD"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:healing_feet"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 2.5d
+			y: -15.25d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "4C86FEDC9989AF57"
+			size: 1.5d
+			tasks: [{
+				id: "0A00E0968A55EB2D"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:lightning_robe_helmet"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 5.5d
+			y: -21.25d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "227F9FD8BB67C403"
+			size: 1.5d
+			tasks: [{
+				id: "047DDDBE31A28285"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:lightning_robe_chestplate"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 7.75d
+			y: -21.25d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "3AA5668E373A4D77"
+			size: 1.5d
+			tasks: [{
+				id: "39BDF281B205633C"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:lightning_robe_leggings"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 12.25d
+			y: -21.25d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "6C57C216B6E5EAC8"
+			size: 1.5d
+			tasks: [{
+				id: "07CAC9A13D608719"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:lightning_robe_boots"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 14.5d
+			y: -21.25d
+		}
+		{
+			dependencies: ["4C86FEDC9989AF57"]
+			entity_vis_size: 1.0f
+			id: "35E01821174381E7"
+			size: 1.5d
+			tasks: [{
+				id: "5D5FF1461AC53363"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:netherite_lightning_robe_helmet"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 5.5d
+			y: -18.25d
+		}
+		{
+			dependencies: ["227F9FD8BB67C403"]
+			entity_vis_size: 1.0f
+			id: "7B406E375FF988CD"
+			size: 1.5d
+			tasks: [{
+				id: "049D2E29B006E042"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:netherite_lightning_robe_chestplate"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 7.75d
+			y: -18.25d
+		}
+		{
+			dependencies: ["3AA5668E373A4D77"]
+			entity_vis_size: 1.0f
+			id: "4A4FE143CBD687A2"
+			size: 1.5d
+			tasks: [{
+				id: "21DC85A05FC45ACD"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:netherite_lightning_robe_leggings"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 12.25d
+			y: -18.25d
+		}
+		{
+			dependencies: ["6C57C216B6E5EAC8"]
+			entity_vis_size: 1.0f
+			id: "7A3A927E3257F917"
+			size: 1.5d
+			tasks: [{
+				id: "41EBDB5F764D8E7E"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:netherite_lightning_robe_boots"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 14.5d
+			y: -18.25d
+		}
+		{
+			dependencies: ["522C6B5837825188"]
+			entity_vis_size: 1.0f
+			id: "4507AEA402960E60"
+			size: 1.5d
+			tasks: [{
+				id: "3843CDD4ABBA7A79"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:arcane_staff"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 22.5d
+			y: 18.5d
+		}
+		{
+			dependencies: ["31F40FD716BA751C"]
+			entity_vis_size: 1.0f
+			id: "311D13C185AA549C"
+			size: 1.5d
+			tasks: [{
+				id: "705509A2D9C2B335"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:air_staff"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -14.0d
+			y: -15.25d
+		}
+		{
+			dependencies: ["7E11423DCC52C8D8"]
+			entity_vis_size: 1.0f
+			id: "7A970F14F4CF5545"
+			size: 1.5d
+			tasks: [{
+				id: "0462D43BBC6CE70E"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:earth_staff"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -14.0d
+			y: 18.5d
+		}
+		{
+			dependencies: ["3763EC83DFD227BE"]
+			entity_vis_size: 1.0f
+			id: "58A17AC4FDE4A2D3"
+			size: 1.5d
+			tasks: [{
+				id: "79AE8E48A18A8FC0"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:water_staff"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 22.0d
+			y: -15.25d
+		}
+		{
+			dependencies: ["0EB5EE670FB706CF"]
+			entity_vis_size: 1.0f
+			id: "13CB495772C8971E"
+			size: 1.5d
+			tasks: [{
+				id: "35258C040E8479C9"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:healing_staff"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -2.0d
+			y: -15.25d
+		}
+		{
+			dependencies: ["74EB58A0D9547335"]
+			entity_vis_size: 1.0f
+			id: "269F427B783DC2CC"
+			size: 1.5d
+			tasks: [{
+				id: "142811C698AF8DDA"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:frost_staff"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 10.5d
+			y: 18.5d
+		}
+		{
+			dependencies: ["6AAC479593AAB16F"]
+			entity_vis_size: 1.0f
+			id: "69FDB402A681325E"
+			size: 1.5d
+			tasks: [{
+				id: "13EA16D353C8A45F"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:fire_staff"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -1.5d
+			y: 18.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "521DC6538DC75A86"
+			size: 1.5d
+			tasks: [{
+				id: "2679946037725D85"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:lightning_staff"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 10.0d
+			y: -21.25d
+		}
+		{
+			dependencies: ["521DC6538DC75A86"]
+			entity_vis_size: 1.0f
+			id: "3A4F0CC9D5DC30FB"
+			size: 1.5d
+			tasks: [{
+				id: "6991CDFCE109DB04"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:netherite_lightning_staff"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 10.0d
+			y: -18.25d
+		}
+		{
+			dependencies: ["3A4F0CC9D5DC30FB"]
+			entity_vis_size: 1.0f
+			id: "4FA1938AEEB35DB2"
+			size: 1.5d
+			tasks: [{
+				id: "4BABF484E38D9148"
+				item: {
+					Count: 1
+					id: "ysjx_weapons:thunder_wand"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 10.0d
+			y: -15.25d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "18F76C4DE2552709"
+			shape: "diamond"
+			size: 2.5d
+			subtitle: "&e海洋是偏辅助类法术拥有治疗的能力"
+			tasks: [{
+				id: "326B93BD564F3B30"
+				item: "elemental_wizards_rpg:aqua_spell_book"
+				type: "item"
+			}]
+			x: 22.0d
+			y: -10.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "49AE7EB2461CDA5C"
+			shape: "diamond"
+			size: 2.5d
+			subtitle: "&e拥有高额的暴击伤害和aoe法术"
+			tasks: [{
+				id: "11FB750FEE3675BC"
+				item: "elemental_wizards_rpg:terra_spell_book"
+				type: "item"
+			}]
+			x: -14.0d
+			y: 7.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "327EBB02C629B2B8"
+			shape: "diamond"
+			size: 2.5d
+			subtitle: "&e拥有高额的暴击伤害和法术伤害"
+			tasks: [{
+				id: "75C3914AFA04B686"
+				item: "elemental_wizards_rpg:wind_spell_book"
+				type: "item"
+			}]
+			x: -14.0d
+			y: -10.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "646F30C10D45914F"
+			shape: "diamond"
+			size: 2.5d
+			subtitle: "&e闪电拥有高额的暴击伤害和aoe"
+			tasks: [{
+				id: "49EAA46740C5CA59"
+				item: "ysjx_weapons:lightning_spell_book"
+				type: "item"
+			}]
+			x: 10.0d
+			y: -10.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "4BD31415D63EBBB2"
+			shape: "diamond"
+			size: 2.5d
+			subtitle: "&a牧师拥有中等法术伤害，强大的治疗和支援法术，防御较弱。"
+			tasks: [{
+				id: "69A94CFCE25BF57D"
+				item: "paladins:priest_spell_book"
+				type: "item"
+			}]
+			x: -2.0d
+			y: -10.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "270019C280BD1BA6"
+			size: 1.5d
+			tasks: [{
+				id: "1F0D8F99F28C022B"
+				item: {
+					Count: 1
+					id: "paladins:prior_robe_feet"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 2.5d
+			y: -21.25d
+		}
+		{
+			dependencies: ["270019C280BD1BA6"]
+			entity_vis_size: 1.0f
+			id: "01E381349C72246B"
+			size: 1.5d
+			tasks: [{
+				id: "5C62F22FEDE71D02"
+				item: {
+					Count: 1
+					id: "paladins:netherite_prior_robe_feet"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 2.5d
+			y: -18.25d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "68179D9DFD615FC8"
+			size: 1.5d
+			tasks: [{
+				id: "560ED73EC9BB5512"
+				item: {
+					Count: 1
+					id: "paladins:prior_robe_legs"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 0.25d
+			y: -21.25d
+		}
+		{
+			dependencies: ["68179D9DFD615FC8"]
+			entity_vis_size: 1.0f
+			id: "7F0B190DC089A7CE"
+			size: 1.5d
+			tasks: [{
+				id: "66EB697BB809D803"
+				item: {
+					Count: 1
+					id: "paladins:netherite_prior_robe_legs"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 0.25d
+			y: -18.25d
+		}
+		{
+			dependencies: ["2662381459B627DD"]
+			entity_vis_size: 1.0f
+			id: "33330789E9FED530"
+			size: 1.5d
+			tasks: [{
+				id: "44F69C8E0AEC7069"
+				item: {
+					Count: 1
+					id: "paladins:netherite_prior_robe_chest"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -4.25d
+			y: -18.25d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "2662381459B627DD"
+			size: 1.5d
+			tasks: [{
+				id: "6849DFF6866AD10D"
+				item: {
+					Count: 1
+					id: "paladins:prior_robe_chest"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -4.25d
+			y: -21.25d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "65E502F74C5DF913"
+			size: 1.5d
+			tasks: [{
+				id: "7A699EB281EC5534"
+				item: {
+					Count: 1
+					id: "paladins:prior_robe_head"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -6.5d
+			y: -21.25d
+		}
+		{
+			dependencies: ["65E502F74C5DF913"]
+			entity_vis_size: 1.0f
+			id: "562187E8445A42D6"
+			size: 1.5d
+			tasks: [{
+				id: "431B66F0D069D3AD"
+				item: {
+					Count: 1
+					id: "paladins:netherite_prior_robe_head"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -6.5d
+			y: -18.25d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "4C636B6B6FD3AC21"
+			size: 1.5d
+			tasks: [{
+				id: "13AD518E831E1699"
+				item: {
+					Count: 1
+					id: "paladins:diamond_holy_staff"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -2.0d
+			y: -21.25d
+		}
+		{
+			dependencies: ["4C636B6B6FD3AC21"]
+			entity_vis_size: 1.0f
+			id: "0EB5EE670FB706CF"
+			size: 1.5d
+			tasks: [{
+				id: "2C951AA8413D7C02"
+				item: {
+					Count: 1
+					id: "paladins:netherite_holy_staff"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -2.0d
+			y: -18.25d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "334E7C42D78AD176"
+			size: 1.8d
+			tasks: [{
+				id: "79DEE70757BE61B8"
+				item: "ysjx_weapons:arcane"
+				type: "item"
+			}]
+			x: 11.7d
+			y: 1.7999999999999998d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "63ED2228042EFAEC"
+			size: 1.8d
+			tasks: [{
+				id: "66D5C0A1EABDA83A"
+				item: "ysjx_weapons:frost"
+				type: "item"
+			}]
+			x: 11.7d
+			y: -4.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "6E3BC140B2F1F2D8"
+			size: 1.8d
+			tasks: [{
+				id: "6978CC11C992B5A3"
+				item: "ysjx_weapons:fire"
+				type: "item"
+			}]
+			x: 13.5d
+			y: -2.6999999999999997d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "538EFAF842A23E10"
+			size: 1.8d
+			tasks: [{
+				id: "16F5A79C396A1226"
+				item: "ysjx_weapons:water"
+				type: "item"
+			}]
+			x: -3.5999999999999996d
+			y: 1.7999999999999998d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "012D53570D84D10F"
+			size: 1.8d
+			tasks: [{
+				id: "0AA1AE25A39C04AE"
+				item: "ysjx_weapons:earth"
+				type: "item"
+			}]
+			x: 13.5d
+			y: 0.0d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "651E1A902B5E6135"
+			size: 1.8d
+			tasks: [{
+				id: "5EFFB0D5BB46C43E"
+				item: "ysjx_weapons:healing"
+				type: "item"
+			}]
+			x: -5.3999999999999995d
+			y: -2.6999999999999997d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "74490C340E502A6A"
+			size: 1.8d
+			tasks: [{
+				id: "268D692EE3546971"
+				item: "ysjx_weapons:lighting"
+				type: "item"
+			}]
+			x: -3.5999999999999996d
+			y: -4.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "0DF2CCB3F5485857"
+			size: 1.5d
+			subtitle: "&e至尊法术"
+			tasks: [{
+				id: "110232BF53F523AC"
+				item: "kubejs:heidong_scroll"
+				type: "item"
+			}]
+			x: 22.5d
+			y: 23.25d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "4182BBEC037520D0"
+			size: 1.5d
+			subtitle: "&e至尊法术"
+			tasks: [{
+				id: "0504535E32C5887B"
+				item: "kubejs:huoyun_gaojie_scroll"
+				type: "item"
+			}]
+			x: -1.5d
+			y: 23.25d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "3B6D7276A23769DF"
+			size: 1.5d
+			subtitle: "&e至尊法术"
+			tasks: [{
+				id: "5ABD9465D14B5B8D"
+				item: "kubejs:bingdongfazhen_scroll"
+				type: "item"
+			}]
+			x: 10.5d
+			y: 23.25d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "34C49C6582677029"
+			size: 1.5d
+			subtitle: "&e至尊法术"
+			tasks: [{
+				id: "22AF6D824722FFF9"
+				item: "kubejs:haiyangjiejie_scroll"
+				type: "item"
+			}]
+			x: 22.0d
+			y: -29.0d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "70C2C69FABF20758"
+			size: 1.5d
+			subtitle: "&e至尊法术"
+			tasks: [{
+				id: "0B3A75247FD73CF2"
+				item: "kubejs:tianxing_scroll"
+				type: "item"
+			}]
+			x: -14.0d
+			y: 23.25d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "5BE74F04B4920875"
+			size: 1.5d
+			subtitle: "&e至尊法术"
+			tasks: [{
+				id: "793D403A11EAC316"
+				item: "kubejs:lingyuleiji_scroll"
+				type: "item"
+			}]
+			x: 10.0d
+			y: -29.0d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "6F8012694980B49D"
+			size: 1.5d
+			subtitle: "&e至尊法术"
+			tasks: [{
+				id: "1B9BB398F4E67FE9"
+				item: "kubejs:mikaerzhufu_gao_scroll"
+				type: "item"
+			}]
+			x: -2.0d
+			y: -29.0d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "07622EDA4013E8B4"
+			size: 1.5d
+			subtitle: "&e至尊法术"
+			tasks: [{
+				id: "2843D347FA022089"
+				item: "kubejs:fengshenzhishi_scroll"
+				type: "item"
+			}]
+			x: -14.0d
+			y: -29.0d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "38C99DD24B996212"
+			size: 1.8d
+			tasks: [{
+				id: "3A6C040401679F70"
+				item: "ysjx_weapons:air"
+				type: "item"
+			}]
+			x: -5.5d
+			y: 0.0d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "638A1EC9D8B8415D"
+			size: 1.8d
+			tasks: [{
+				id: "0C6287B3C43482C8"
+				item: "ysjx_weapons:original"
+				type: "item"
+			}]
+			x: 4.0d
+			y: 0.0d
+		}
+	]
+	title: "&f元素法师"
+}
