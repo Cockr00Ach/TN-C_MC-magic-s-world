@@ -4,6 +4,7 @@
   "package": "com.tnc.tnc.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "ConquestBushMixin",
     "SpellHelperManaGateMixin",
     "StatusBarBarsMixin"
   ],

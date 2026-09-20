@@ -56,7 +56,6 @@ public final class SkyIslandManager {
     };
     private static final long PORTAL_COOLDOWN_TICKS = 60L;
     private static final String PLAYER_COOLDOWN = "tnc_sky_portal_cooldown";
-    private static final String PLAYER_ARRIVAL_VERSION = "tnc_sky_island_arrival_version";
     private static final Map<MinecraftServer, SkyIslandManifest> MANIFESTS =
             Collections.synchronizedMap(new WeakHashMap<>());
     private static final Map<UUID, PortalChargeState> PORTAL_CHARGES = new HashMap<>();
@@ -570,12 +569,6 @@ public final class SkyIslandManager {
         arrivalBurst(level, destination);
         level.playSound(null, destination, SoundEvents.ENDERMAN_TELEPORT,
                 SoundSource.PLAYERS, 0.8F, 1.25F);
-
-        if (fromGround && player.getPersistentData().getInt(PLAYER_ARRIVAL_VERSION) < manifest.version()) {
-            player.setRespawnPosition(Level.OVERWORLD, island, 180.0F, true, false);
-            player.getPersistentData().putInt(PLAYER_ARRIVAL_VERSION, manifest.version());
-            player.sendSystemMessage(Component.literal("§a已抵达天空岛新手村，并将南门设为重生点。"));
-        }
     }
 
     private static boolean insidePortal(Player player, BlockPos landing) {
