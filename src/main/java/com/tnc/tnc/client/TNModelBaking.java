@@ -31,6 +31,7 @@ public final class TNModelBaking {
     /** 需要被烘焙的投射物模型（与 TNProjectileModels 登记给 SpellEngine 的号一致）。 */
     private static final String[] MODELS = {
             "projectile/lightingball",
+            "projectile/fireball",
             "projectile/fire_ball",
             "projectile/fire_ray",
             "projectile/thunder_ball",

@@ -66,7 +66,8 @@ public final class TNProjectileModels {
                     net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/thunder_ball_min"),
                     net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/thunder_orb"),
                     net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/thunder_probe2"),
-                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/lightingball")));
+                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/fireball"),
+                    ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/lightingball")));
             LOGGER.info("TN-C: registered TN-C projectile model id(s) to SpellEngine");
         } catch (Throwable t) {
             LOGGER.warn("TN-C: projectile model registration skipped ({})", t.toString());
