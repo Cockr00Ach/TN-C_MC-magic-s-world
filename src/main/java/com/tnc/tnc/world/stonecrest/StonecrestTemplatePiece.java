@@ -29,6 +29,11 @@ final class StonecrestTemplatePiece extends TemplateStructurePiece {
                 .setRotation(Rotation.NONE)
                 .setIgnoreEntities(false)
                 .setKeepLiquids(false)
+                // The exported template already contains final block states.  In particular,
+                // Conquest Reforged bushes can return air from updateShape and then attempt to
+                // copy their LAYERS property onto that air state.  Skipping the post-placement
+                // neighbour-shape pass preserves the source map and avoids that mod bug.
+                .setKnownShape(true)
                 .addProcessor(BlockIgnoreProcessor.STRUCTURE_BLOCK);
     }
 

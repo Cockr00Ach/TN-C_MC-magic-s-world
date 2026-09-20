@@ -9,6 +9,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
@@ -23,8 +25,12 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.WeakHashMap;
 
 /**
@@ -49,10 +55,12 @@ public final class SkyIslandManager {
             {0, 0}, {-6, -6}, {-6, 6}, {6, -6}, {6, 6}
     };
     private static final long PORTAL_COOLDOWN_TICKS = 60L;
+    private static final long PORTAL_CHARGE_TICKS = 50L;
     private static final String PLAYER_COOLDOWN = "tnc_sky_portal_cooldown";
     private static final String PLAYER_ARRIVAL_VERSION = "tnc_sky_island_arrival_version";
     private static final Map<MinecraftServer, SkyIslandManifest> MANIFESTS =
             Collections.synchronizedMap(new WeakHashMap<>());
+    private static final Map<UUID, PortalCharge> PORTAL_CHARGES = new HashMap<>();
 
     private SkyIslandManager() {
     }
@@ -125,6 +133,7 @@ public final class SkyIslandManager {
     }
 
     public static void onServerStopping(MinecraftServer server) {
+        PORTAL_CHARGES.clear();
         ServerLevel level = server.overworld();
         SkyIslandSavedData data = SkyIslandSavedData.get(level);
         try {
@@ -479,21 +488,76 @@ public final class SkyIslandManager {
         portalParticles(level, ground);
         portalParticles(level, island);
 
+        Set<UUID> presentPlayers = new HashSet<>();
         for (ServerPlayer player : level.players()) {
+            presentPlayers.add(player.getUUID());
             long cooldown = player.getPersistentData().getLong(PLAYER_COOLDOWN);
             if (level.getGameTime() < cooldown) {
+                PORTAL_CHARGES.remove(player.getUUID());
                 continue;
             }
-            if (insidePortal(player, ground)) {
-                teleport(player, level, island);
-                if (player.getPersistentData().getInt(PLAYER_ARRIVAL_VERSION) < manifest.version()) {
-                    player.setRespawnPosition(Level.OVERWORLD, island, 180.0F, true, false);
-                    player.getPersistentData().putInt(PLAYER_ARRIVAL_VERSION, manifest.version());
-                    player.sendSystemMessage(Component.literal("§a已抵达天空岛新手村，并将南门设为重生点。"));
-                }
-            } else if (insidePortal(player, island)) {
-                teleport(player, level, ground);
+            boolean atGround = insidePortal(player, ground);
+            boolean atIsland = insidePortal(player, island);
+            updatePortalCharge(player, level, manifest, ground, island, atGround, atIsland);
+        }
+        PORTAL_CHARGES.keySet().removeIf(uuid -> !presentPlayers.contains(uuid));
+    }
+
+    private static void updatePortalCharge(
+            ServerPlayer player,
+            ServerLevel level,
+            SkyIslandManifest manifest,
+            BlockPos ground,
+            BlockPos island,
+            boolean atGround,
+            boolean atIsland
+    ) {
+        UUID playerId = player.getUUID();
+        PortalCharge charge = PORTAL_CHARGES.get(playerId);
+        boolean inPortal = atGround || atIsland;
+        boolean fromGround = atGround;
+
+        if (!inPortal) {
+            if (charge != null) {
+                PORTAL_CHARGES.remove(playerId);
+                player.displayClientMessage(Component.literal("§7传送蓄能已取消"), true);
             }
+            return;
+        }
+
+        if (charge == null || charge.fromGround() != fromGround) {
+            charge = new PortalCharge(fromGround, level.getGameTime());
+            PORTAL_CHARGES.put(playerId, charge);
+            player.displayClientMessage(Component.literal("§d传送阵正在蓄能……请留在阵中"), true);
+            level.playSound(null, player.blockPosition(), SoundEvents.BEACON_ACTIVATE,
+                    SoundSource.BLOCKS, 0.55F, 1.25F);
+        }
+
+        long elapsed = level.getGameTime() - charge.startedAt();
+        double progress = Math.min(1.0D, elapsed / (double) PORTAL_CHARGE_TICKS);
+        chargeParticles(level, player, progress);
+        int percent = (int) Math.min(100L, elapsed * 100L / PORTAL_CHARGE_TICKS);
+        player.displayClientMessage(Component.literal("§d传送蓄能 §f" + percent + "%"), true);
+
+        if (elapsed < PORTAL_CHARGE_TICKS) {
+            return;
+        }
+
+        PORTAL_CHARGES.remove(playerId);
+        BlockPos source = fromGround ? ground : island;
+        BlockPos destination = fromGround ? island : ground;
+        departureBurst(level, source);
+        level.playSound(null, source, SoundEvents.ENDERMAN_TELEPORT,
+                SoundSource.PLAYERS, 0.9F, 0.8F);
+        teleport(player, level, destination);
+        arrivalBurst(level, destination);
+        level.playSound(null, destination, SoundEvents.ENDERMAN_TELEPORT,
+                SoundSource.PLAYERS, 0.8F, 1.25F);
+
+        if (fromGround && player.getPersistentData().getInt(PLAYER_ARRIVAL_VERSION) < manifest.version()) {
+            player.setRespawnPosition(Level.OVERWORLD, island, 180.0F, true, false);
+            player.getPersistentData().putInt(PLAYER_ARRIVAL_VERSION, manifest.version());
+            player.sendSystemMessage(Component.literal("§a已抵达天空岛新手村，并将南门设为重生点。"));
         }
     }
 
@@ -545,6 +609,61 @@ public final class SkyIslandManager {
                 1.4D,
                 0.01D
         );
+    }
+
+    private static void chargeParticles(ServerLevel level, ServerPlayer player, double progress) {
+        double centerX = player.getX();
+        double centerY = player.getY() + 0.15D;
+        double centerZ = player.getZ();
+        double radius = 1.65D - progress * 0.85D;
+        double phase = level.getGameTime() * 0.18D;
+        int points = 8 + (int) Math.floor(progress * 6.0D);
+        for (int index = 0; index < points; index++) {
+            double angle = phase + Math.PI * 2.0D * index / points;
+            level.sendParticles(
+                    ParticleTypes.END_ROD,
+                    centerX + Math.cos(angle) * radius,
+                    centerY + progress * 1.2D,
+                    centerZ + Math.sin(angle) * radius,
+                    1,
+                    0.0D,
+                    0.015D,
+                    0.0D,
+                    0.0D
+            );
+        }
+        level.sendParticles(
+                ParticleTypes.REVERSE_PORTAL,
+                centerX,
+                centerY + 0.8D,
+                centerZ,
+                4 + (int) Math.floor(progress * 12.0D),
+                0.9D - progress * 0.45D,
+                0.7D,
+                0.9D - progress * 0.45D,
+                0.035D
+        );
+    }
+
+    private static void departureBurst(ServerLevel level, BlockPos center) {
+        level.sendParticles(ParticleTypes.FLASH,
+                center.getX() + 0.5D, center.getY() + 1.0D, center.getZ() + 0.5D,
+                2, 0.2D, 0.4D, 0.2D, 0.0D);
+        level.sendParticles(ParticleTypes.REVERSE_PORTAL,
+                center.getX() + 0.5D, center.getY() + 0.8D, center.getZ() + 0.5D,
+                45, 1.3D, 1.0D, 1.3D, 0.12D);
+    }
+
+    private static void arrivalBurst(ServerLevel level, BlockPos center) {
+        level.sendParticles(ParticleTypes.END_ROD,
+                center.getX() + 0.5D, center.getY() + 0.8D, center.getZ() + 0.5D,
+                32, 1.7D, 1.1D, 1.7D, 0.06D);
+        level.sendParticles(ParticleTypes.ENCHANT,
+                center.getX() + 0.5D, center.getY() + 0.4D, center.getZ() + 0.5D,
+                36, 2.2D, 0.5D, 2.2D, 0.08D);
+    }
+
+    private record PortalCharge(boolean fromGround, long startedAt) {
     }
 
     private static BlockPos groundLanding(SkyIslandSavedData data) {

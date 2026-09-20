@@ -28,18 +28,17 @@ public final class TravelMusicController {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final String EVENT_PREFIX = "music.travel.";
 
-    // Test tuning: first track after about one second; only 2-6 seconds between tracks.
-    // Production tuning can later change only these three constants.
-    private static final int INITIAL_DELAY_TICKS = 20;
-    private static final int MIN_DELAY_TICKS = 40;
-    private static final int MAX_DELAY_TICKS = 120;
+    private static final int INITIAL_MIN_DELAY_TICKS = 20 * 60 * 2;
+    private static final int INITIAL_MAX_DELAY_TICKS = 20 * 60 * 4;
+    private static final int MIN_DELAY_TICKS = 20 * 60 * 9 / 2;
+    private static final int MAX_DELAY_TICKS = 20 * 60 * 11 / 2;
     private static final int STARTUP_GRACE_TICKS = 40;
 
     private static final Deque<ResourceLocation> queue = new ArrayDeque<>();
     private static List<ResourceLocation> catalog = List.of();
     private static SoundInstance currentTrack;
     private static ResourceLocation lastTrack;
-    private static int waitTicks = INITIAL_DELAY_TICKS;
+    private static int waitTicks;
     private static int currentAge;
     private static int refreshTicks;
     private static boolean inWorld;
@@ -61,7 +60,7 @@ public final class TravelMusicController {
 
         if (!inWorld) {
             inWorld = true;
-            waitTicks = INITIAL_DELAY_TICKS;
+            waitTicks = randomInitialDelay();
             if (refreshCatalog(minecraft.getSoundManager())) {
                 // Stop a vanilla track which may have started before our catalog was ready.
                 // MusicManagerMixin suppresses future vanilla music without mutating its timer.
@@ -157,6 +156,13 @@ public final class TravelMusicController {
         return ThreadLocalRandom.current().nextInt(MIN_DELAY_TICKS, MAX_DELAY_TICKS + 1);
     }
 
+    private static int randomInitialDelay() {
+        return ThreadLocalRandom.current().nextInt(
+                INITIAL_MIN_DELAY_TICKS,
+                INITIAL_MAX_DELAY_TICKS + 1
+        );
+    }
+
     private static void leaveWorld(Minecraft minecraft) {
         if (!inWorld) {
             return;
@@ -166,7 +172,7 @@ public final class TravelMusicController {
         }
         currentTrack = null;
         currentAge = 0;
-        waitTicks = INITIAL_DELAY_TICKS;
+        waitTicks = 0;
         refreshTicks = 0;
         queue.clear();
         lastTrack = null;
