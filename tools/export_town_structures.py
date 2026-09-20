@@ -31,7 +31,10 @@ def state_text(entry: Any) -> str:
     properties = entry.get("Properties")
     if not properties:
         return name
-    pairs = ",".join(f"{key}={properties[key].value}" for key in sorted(properties.keys()))
+    pairs = ",".join(
+        f"{key}={properties[key].value if hasattr(properties[key], 'value') else str(properties[key])}"
+        for key in sorted(properties.keys())
+    )
     return f"{name}[{pairs}]"
 
 
