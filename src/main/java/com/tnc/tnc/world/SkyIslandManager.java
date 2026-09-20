@@ -55,12 +55,11 @@ public final class SkyIslandManager {
             {0, 0}, {-6, -6}, {-6, 6}, {6, -6}, {6, 6}
     };
     private static final long PORTAL_COOLDOWN_TICKS = 60L;
-    private static final long PORTAL_CHARGE_TICKS = 50L;
     private static final String PLAYER_COOLDOWN = "tnc_sky_portal_cooldown";
     private static final String PLAYER_ARRIVAL_VERSION = "tnc_sky_island_arrival_version";
     private static final Map<MinecraftServer, SkyIslandManifest> MANIFESTS =
             Collections.synchronizedMap(new WeakHashMap<>());
-    private static final Map<UUID, PortalCharge> PORTAL_CHARGES = new HashMap<>();
+    private static final Map<UUID, PortalChargeState> PORTAL_CHARGES = new HashMap<>();
 
     private SkyIslandManager() {
     }
@@ -479,14 +478,18 @@ public final class SkyIslandManager {
     }
 
     private static void portalTick(ServerLevel level, SkyIslandSavedData data, SkyIslandManifest manifest) {
-        if (!isComplete(data, manifest) || level.getGameTime() % 5L != 0L) {
+        if (!isComplete(data, manifest)) {
+            PORTAL_CHARGES.clear();
             return;
         }
 
         BlockPos ground = groundLanding(data);
         BlockPos island = islandLanding(data);
-        portalParticles(level, ground);
-        portalParticles(level, island);
+        boolean effectsTick = level.getGameTime() % 5L == 0L;
+        if (effectsTick) {
+            portalParticles(level, ground);
+            portalParticles(level, island);
+        }
 
         Set<UUID> presentPlayers = new HashSet<>();
         for (ServerPlayer player : level.players()) {
@@ -498,7 +501,7 @@ public final class SkyIslandManager {
             }
             boolean atGround = insidePortal(player, ground);
             boolean atIsland = insidePortal(player, island);
-            updatePortalCharge(player, level, manifest, ground, island, atGround, atIsland);
+            updatePortalCharge(player, level, manifest, ground, island, atGround, atIsland, effectsTick);
         }
         PORTAL_CHARGES.keySet().removeIf(uuid -> !presentPlayers.contains(uuid));
     }
@@ -510,36 +513,50 @@ public final class SkyIslandManager {
             BlockPos ground,
             BlockPos island,
             boolean atGround,
-            boolean atIsland
+            boolean atIsland,
+            boolean effectsTick
     ) {
         UUID playerId = player.getUUID();
-        PortalCharge charge = PORTAL_CHARGES.get(playerId);
+        PortalChargeState charge = PORTAL_CHARGES.get(playerId);
         boolean inPortal = atGround || atIsland;
         boolean fromGround = atGround;
+        boolean alive = player.isAlive() && !player.isRemoved();
 
-        if (!inPortal) {
+        if (!alive || !inPortal) {
             if (charge != null) {
                 PORTAL_CHARGES.remove(playerId);
-                player.displayClientMessage(Component.literal("§7传送蓄能已取消"), true);
+                if (alive) {
+                    player.displayClientMessage(Component.literal("§7传送蓄能已取消"), true);
+                }
             }
             return;
         }
 
         if (charge == null || charge.fromGround() != fromGround) {
-            charge = new PortalCharge(fromGround, level.getGameTime());
+            charge = new PortalChargeState(fromGround, level.getGameTime());
             PORTAL_CHARGES.put(playerId, charge);
             player.displayClientMessage(Component.literal("§d传送阵正在蓄能……请留在阵中"), true);
             level.playSound(null, player.blockPosition(), SoundEvents.BEACON_ACTIVATE,
                     SoundSource.BLOCKS, 0.55F, 1.25F);
         }
 
-        long elapsed = level.getGameTime() - charge.startedAt();
-        double progress = Math.min(1.0D, elapsed / (double) PORTAL_CHARGE_TICKS);
-        chargeParticles(level, player, progress);
-        int percent = (int) Math.min(100L, elapsed * 100L / PORTAL_CHARGE_TICKS);
-        player.displayClientMessage(Component.literal("§d传送蓄能 §f" + percent + "%"), true);
+        PortalChargeState.Decision decision = charge.evaluate(alive, atGround, atIsland, level.getGameTime());
+        if (decision == PortalChargeState.Decision.CANCEL) {
+            PORTAL_CHARGES.remove(playerId);
+            player.displayClientMessage(Component.literal("§7传送蓄能已取消"), true);
+            return;
+        }
 
-        if (elapsed < PORTAL_CHARGE_TICKS) {
+        long elapsed = level.getGameTime() - charge.startedAt();
+        double progress = Math.min(1.0D, elapsed / (double) PortalChargeState.DURATION_TICKS);
+        if (effectsTick) {
+            chargeParticles(level, player, progress);
+            int percent = (int) Math.min(100L,
+                    elapsed * 100L / PortalChargeState.DURATION_TICKS);
+            player.displayClientMessage(Component.literal("§d传送蓄能 §f" + percent + "%"), true);
+        }
+
+        if (decision != PortalChargeState.Decision.COMPLETE) {
             return;
         }
 
@@ -643,6 +660,17 @@ public final class SkyIslandManager {
                 0.9D - progress * 0.45D,
                 0.035D
         );
+        level.sendParticles(
+                ParticleTypes.ENCHANT,
+                centerX,
+                centerY + 0.45D,
+                centerZ,
+                5 + (int) Math.floor(progress * 9.0D),
+                1.15D - progress * 0.35D,
+                0.35D + progress * 0.5D,
+                1.15D - progress * 0.35D,
+                0.025D
+        );
     }
 
     private static void departureBurst(ServerLevel level, BlockPos center) {
@@ -663,8 +691,6 @@ public final class SkyIslandManager {
                 36, 2.2D, 0.5D, 2.2D, 0.08D);
     }
 
-    private record PortalCharge(boolean fromGround, long startedAt) {
-    }
 
     private static BlockPos groundLanding(SkyIslandSavedData data) {
         return new BlockPos(data.groundPortalX + 7, data.groundPortalY + 2, data.groundPortalZ + 7);

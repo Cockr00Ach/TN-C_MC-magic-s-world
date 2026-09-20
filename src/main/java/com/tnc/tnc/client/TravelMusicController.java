@@ -28,10 +28,6 @@ public final class TravelMusicController {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final String EVENT_PREFIX = "music.travel.";
 
-    private static final int INITIAL_MIN_DELAY_TICKS = 20 * 60 * 2;
-    private static final int INITIAL_MAX_DELAY_TICKS = 20 * 60 * 4;
-    private static final int MIN_DELAY_TICKS = 20 * 60 * 9 / 2;
-    private static final int MAX_DELAY_TICKS = 20 * 60 * 11 / 2;
     private static final int STARTUP_GRACE_TICKS = 40;
 
     private static final Deque<ResourceLocation> queue = new ArrayDeque<>();
@@ -153,14 +149,11 @@ public final class TravelMusicController {
     }
 
     private static int randomDelay() {
-        return ThreadLocalRandom.current().nextInt(MIN_DELAY_TICKS, MAX_DELAY_TICKS + 1);
+        return TravelMusicTiming.randomInterTrackDelay(ThreadLocalRandom.current());
     }
 
     private static int randomInitialDelay() {
-        return ThreadLocalRandom.current().nextInt(
-                INITIAL_MIN_DELAY_TICKS,
-                INITIAL_MAX_DELAY_TICKS + 1
-        );
+        return TravelMusicTiming.randomInitialDelay(ThreadLocalRandom.current());
     }
 
     private static void leaveWorld(Minecraft minecraft) {
