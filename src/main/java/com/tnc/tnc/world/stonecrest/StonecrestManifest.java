@@ -178,6 +178,10 @@ public final class StonecrestManifest {
         return x >= 0 && z >= 0 && x < dimensions.getX() && z < dimensions.getZ() && terrainRows[z].get(x);
     }
 
+    public boolean buildingAt(int x, int z) {
+        return x >= 0 && z >= 0 && x < dimensions.getX() && z < dimensions.getZ() && buildingRows[z].get(x);
+    }
+
     public int distanceAt(int x, int z) {
         if (!terrainAt(x, z)) return 127;
         return Byte.toUnsignedInt(distances[z * dimensions.getX() + x]);

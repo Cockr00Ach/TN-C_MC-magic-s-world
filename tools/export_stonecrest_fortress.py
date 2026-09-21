@@ -30,12 +30,20 @@ DEFAULT_WORLD = Path(
 # The southern monumental fortress fits inside Minecraft's eight-chunk
 # structure-reference radius.  The northern town/palace, round gardens and
 # detached side landscaping are deliberately outside this export.
-DEFAULT_BOUNDS = (2128, 2399, 888, 1159)
+DEFAULT_BOUNDS = (2114, 2385, 888, 1159)
 DEFAULT_Y = (128, 319)
 DEFAULT_ANCHOR = (2264, 1150)
 DEFAULT_GROUND_Y = 166
 TILE_SIZE = 32
 DATA_VERSION = 3465  # Minecraft 1.20.1
+
+# Source-map exclusions around the southern main fortress.  The first range
+# removes the narrow connection back to the northern gardens.  The second
+# removes the detached eastern circular garden while preserving the castle's
+# upper east wing.
+FORTRESS_MIN_Z = 908
+EAST_GARDEN_MIN_X = 2320
+EAST_GARDEN_Z = (1000, 1112)
 
 ARTIFICIAL_TOKENS = (
     "plaster", "stucco", "shingle", "brick", "beam", "door", "window",
@@ -144,6 +152,15 @@ def is_artificial(state: State) -> bool:
             "stairs", "slab", "fence", "chain", "barrel", "chest", "bed",
         ))
     return any(token in path for token in ARTIFICIAL_TOKENS)
+
+
+def is_fortress_column(source_x: int, source_z: int) -> bool:
+    if source_z < FORTRESS_MIN_Z:
+        return False
+    return not (
+        source_x >= EAST_GARDEN_MIN_X
+        and EAST_GARDEN_Z[0] <= source_z <= EAST_GARDEN_Z[1]
+    )
 
 
 def replacement_for(state: State) -> State:
@@ -323,13 +340,32 @@ def build_mask(reader: WorldReader, bounds: tuple[int, int, int, int], y_bounds:
         dilate(seeds, 9, width, depth),
         (anchor[0] - x0, anchor[1] - z0),
     )
-    selected_seeds = seeds & connected
-    # The 272-square source bounds already isolate the main fortress.  Keep
-    # every connected architectural seed inside them so towers and wings are
-    # not silently clipped a second time by a hard-coded inner rectangle.
+    selected_seeds = {
+        (x, z)
+        for x, z in seeds & connected
+        if is_fortress_column(x0 + x, z0 + z)
+    }
+    # Keep the main fortress wings while explicitly cutting the connected
+    # northern/eastern garden features.  Reapply the geographic filter after
+    # dilation/hole filling so those operations cannot grow back into them.
     # The template mask hugs actual architecture.  A separate, wider terrain
     # mask is used at runtime for the feathered local-ground transition.
     building_mask = fill_small_holes(dilate(selected_seeds, 2, width, depth), width, depth)
+    building_mask = {
+        (x, z)
+        for x, z in building_mask
+        if is_fortress_column(x0 + x, z0 + z)
+    }
+
+    # The south entrance is also the /locate anchor.  Treat a small approach
+    # around it as core terrain so the reported Y is always safe to stand on.
+    anchor_local = (anchor[0] - x0, anchor[1] - z0)
+    entrance_core = dilate({anchor_local}, 6, width, depth)
+    building_mask.update(
+        (x, z)
+        for x, z in entrance_core
+        if is_fortress_column(x0 + x, z0 + z)
+    )
     terrain_mask = dilate(building_mask, 24, width, depth)
     return selected_seeds, building_mask, terrain_mask, source_counts, unsupported_counts
 
@@ -386,6 +422,11 @@ def export(args: argparse.Namespace) -> dict:
                                 y0 + tile_y + ly,
                                 z0 + tile_z + lz,
                             )
+                            # Source air across the complete vertical range is
+                            # carved by terrain pieces before templates are
+                            # placed.  Omitting it here keeps the NBT/JAR
+                            # compact without filling rooms or underground
+                            # cavities with generated terrain.
                             if source == AIR:
                                 continue
                             target = replacement_for(source)
