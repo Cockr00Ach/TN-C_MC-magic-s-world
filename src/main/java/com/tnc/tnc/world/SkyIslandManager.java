@@ -69,19 +69,19 @@ public final class SkyIslandManager {
         try {
             SkyIslandManifest manifest = manifest(server);
             SkyIslandSavedData data = SkyIslandSavedData.get(overworld);
+            boolean complete = isComplete(data, manifest);
+            SkyIslandPlayerNotifications.onLogin(player, manifest.version(), complete,
+                    complete ? groundLanding(data) : BlockPos.ZERO);
 
-            if (isComplete(data, manifest)) {
-                tellCoordinates(player, data);
+            if (complete) {
                 return;
             }
 
             if (data.version != manifest.version()) {
                 releaseActiveChunks(overworld, data);
                 data.resetFor(manifest);
-                player.sendSystemMessage(Component.literal("§b正在勘测主世界中的天空岛位置，新手村会在后台分批生成。"));
             } else if (data.phase == SkyIslandSavedData.Phase.IDLE) {
                 data.resetFor(manifest);
-                player.sendSystemMessage(Component.literal("§b正在勘测主世界中的天空岛位置，新手村会在后台分批生成。"));
             } else if (data.phase == SkyIslandSavedData.Phase.ERROR) {
                 releaseActiveChunks(overworld, data);
                 data.lastError = "";
@@ -89,10 +89,6 @@ public final class SkyIslandManager {
                         ? SkyIslandSavedData.Phase.BUILDING
                         : SkyIslandSavedData.Phase.SURVEY;
                 data.setDirty();
-                player.sendSystemMessage(Component.literal("§e正在从上次失败的检查点重试天空岛生成。"));
-            } else {
-                player.sendSystemMessage(Component.literal("§b天空岛新手村仍在生成，进度："
-                        + data.nextPiece + "/" + manifest.pieces().size() + "。"));
             }
         } catch (Exception error) {
             LOGGER.error("[TN-C Sky Island] could not start generation", error);
@@ -219,8 +215,6 @@ public final class SkyIslandManager {
                 data.originX, data.originY, data.originZ,
                 data.groundPortalX, data.groundPortalY, data.groundPortalZ,
                 data.bestSurveyScore);
-        notifyAll(level.getServer(), "§b天空岛位置勘测完成，开始分批生成 "
-                + manifest.pieces().size() + " 个结构块。");
     }
 
     /** Selects the flattest dry 15x15 portal site in a ring around world spawn. */
@@ -299,17 +293,10 @@ public final class SkyIslandManager {
             throw new IOException("template placement returned false for " + piece.resource());
         }
 
-        int placedIndex = data.nextPiece;
         data.nextPiece++;
         data.setDirty();
         releaseActiveChunks(level, data);
 
-        int oldPercent = placedIndex * 100 / manifest.pieces().size();
-        int newPercent = data.nextPiece * 100 / manifest.pieces().size();
-        if (newPercent / 10 > oldPercent / 10 && newPercent < 100) {
-            notifyAll(level.getServer(), "§b天空岛生成进度：" + newPercent + "%（"
-                    + data.nextPiece + "/" + manifest.pieces().size() + "）");
-        }
         LOGGER.info("[TN-C Sky Island] placed {}/{} {} at {}",
                 data.nextPiece, manifest.pieces().size(), piece.resource(), target);
     }
@@ -354,11 +341,9 @@ public final class SkyIslandManager {
                 data.centerX, data.centerY, data.centerZ,
                 data.arrivalX, data.arrivalY, data.arrivalZ);
 
-        notifyAll(level.getServer(), "§a天空岛新手村生成完成！地面传送阵坐标：X "
-                + (data.groundPortalX + 7) + " / Y " + (data.groundPortalY + 2)
-                + " / Z " + (data.groundPortalZ + 7));
+        BlockPos groundPortal = groundLanding(data);
         for (ServerPlayer player : level.getServer().getPlayerList().getPlayers()) {
-            tellCoordinates(player, data);
+            SkyIslandPlayerNotifications.onGenerationComplete(player, manifest.version(), groundPortal);
         }
     }
 
@@ -691,16 +676,6 @@ public final class SkyIslandManager {
 
     private static BlockPos islandLanding(SkyIslandSavedData data) {
         return new BlockPos(data.arrivalX, data.arrivalY + 1, data.arrivalZ);
-    }
-
-    private static void tellCoordinates(ServerPlayer player, SkyIslandSavedData data) {
-        BlockPos ground = groundLanding(data);
-        player.sendSystemMessage(Component.literal("§b地面传送阵：X " + ground.getX()
-                + " / Y " + ground.getY() + " / Z " + ground.getZ()));
-        player.sendSystemMessage(Component.literal("§b天空岛新手村中心：X " + data.centerX
-                + " / Y " + data.centerY + " / Z " + data.centerZ));
-        player.sendSystemMessage(Component.literal("§b新手村南门：X " + data.arrivalX
-                + " / Y " + (data.arrivalY + 1) + " / Z " + data.arrivalZ));
     }
 
     private static boolean isComplete(SkyIslandSavedData data, SkyIslandManifest manifest) {
