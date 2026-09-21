@@ -18,7 +18,6 @@ import java.util.Optional;
 /** Fixed-layout, terrain-aware worldgen structure for the Stonecrest fortress. */
 public final class StonecrestStructure extends Structure {
     public static final Codec<StonecrestStructure> CODEC = simpleCodec(StonecrestStructure::new);
-    private static final int GROUND_LOCAL_Y = 10;
     private static final int MAX_HEIGHT_SPREAD = 22;
 
     public StonecrestStructure(StructureSettings settings) {
@@ -54,7 +53,7 @@ public final class StonecrestStructure extends Structure {
         if (max - min > MAX_HEIGHT_SPREAD) return Optional.empty();
         Collections.sort(heights);
         int median = heights.get(heights.size() / 2);
-        int originY = median - GROUND_LOCAL_Y;
+        int originY = median - manifest.anchorLocal().getY();
         if (originY < context.heightAccessor().getMinBuildHeight() + 16
                 || originY + manifest.dimensions().getY() >= context.heightAccessor().getMaxBuildHeight() - 4) {
             return Optional.empty();

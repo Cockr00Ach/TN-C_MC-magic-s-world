@@ -21,20 +21,11 @@ abstract class ConquestBushMixin {
             ),
             require = 0
     )
-    private Object tnc$safelySetLayers(BlockState state, Property<?> property, Comparable<?> value) {
-        return ConquestBushPropertyGuard.writeIfPresent(
-                state,
-                state.hasProperty(property),
-                current -> tnc$setValueUnchecked(current, property, value)
-        );
-    }
-
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private static BlockState tnc$setValueUnchecked(
-            BlockState state,
-            Property property,
-            Comparable value
-    ) {
-        return state.setValue(property, value);
+    private Object tnc$safelySetLayers(BlockState state, Property<?> property, Comparable<?> value) {
+        if (!state.hasProperty(property)) {
+            return state;
+        }
+        return state.setValue((Property) property, (Comparable) value);
     }
 }

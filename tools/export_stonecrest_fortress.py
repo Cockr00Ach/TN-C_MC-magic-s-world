@@ -27,12 +27,13 @@ DEFAULT_WORLD = Path(
     r"D:\赫萝斯堪德 资源 新\赫萝斯堪德 资源 新\赫萝斯堪德 资源\地图\4x4.1"
 )
 
-# The main fortress fits inside Minecraft's eight-chunk structure-reference
-# radius when centred on this 256x256 source box.  The eastern town and the
-# southern landscaped plaza are deliberately outside this first export.
-DEFAULT_BOUNDS = (2128, 2399, 560, 831)
-DEFAULT_Y = (144, 223)
-DEFAULT_ANCHOR = (2264, 696)
+# The southern monumental fortress fits inside Minecraft's eight-chunk
+# structure-reference radius.  The northern town/palace, round gardens and
+# detached side landscaping are deliberately outside this export.
+DEFAULT_BOUNDS = (2128, 2399, 888, 1159)
+DEFAULT_Y = (128, 319)
+DEFAULT_ANCHOR = (2264, 1150)
+DEFAULT_GROUND_Y = 166
 TILE_SIZE = 32
 DATA_VERSION = 3465  # Minecraft 1.20.1
 
@@ -323,16 +324,9 @@ def build_mask(reader: WorldReader, bounds: tuple[int, int, int, int], y_bounds:
         (anchor[0] - x0, anchor[1] - z0),
     )
     selected_seeds = seeds & connected
-    # Layout decision for the first release: retain the complete palace mass,
-    # but drop the detached western outbuildings, northern garden ornaments,
-    # and the southern ceremonial garden/round plaza.  The wider 272-square
-    # read window leaves enough empty source space for a full 24-block feather
-    # around the retained architecture instead of clipping the blend at an
-    # extraction edge.
-    selected_seeds = {
-        (x, z) for x, z in selected_seeds
-        if 24 <= x <= 247 and 16 <= z <= 232
-    }
+    # The 272-square source bounds already isolate the main fortress.  Keep
+    # every connected architectural seed inside them so towers and wings are
+    # not silently clipped a second time by a hard-coded inner rectangle.
     # The template mask hugs actual architecture.  A separate, wider terrain
     # mask is used at runtime for the feathered local-ground transition.
     building_mask = fill_small_holes(dilate(selected_seeds, 2, width, depth), width, depth)
@@ -387,7 +381,13 @@ def export(args: argparse.Namespace) -> dict:
                         if column not in mask:
                             continue
                         for ly in range(sy):
-                            source = reader.state(x0 + tile_x + lx, y0 + tile_y + ly, z0 + tile_z + lz)
+                            source = reader.state(
+                                x0 + tile_x + lx,
+                                y0 + tile_y + ly,
+                                z0 + tile_z + lz,
+                            )
+                            if source == AIR:
+                                continue
                             target = replacement_for(source)
                             if target != source:
                                 replacement_counts[f"{source.name} -> {target.name}"] += 1
@@ -409,7 +409,7 @@ def export(args: argparse.Namespace) -> dict:
         "version": 1,
         "source_bounds": {"x": [x0, x1], "y": [y0, y1], "z": [z0, z1]},
         "dimensions": [width, height, depth],
-        "anchor_local": [args.anchor_x - x0, 0, args.anchor_z - z0],
+        "anchor_local": [args.anchor_x - x0, args.ground_y - y0, args.anchor_z - z0],
         "piece_count": len(pieces),
         "block_count": total_blocks,
         "mask_rows": mask_rows(mask, width, depth),
@@ -439,12 +439,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--y1", type=int, default=DEFAULT_Y[1])
     parser.add_argument("--anchor-x", type=int, default=DEFAULT_ANCHOR[0])
     parser.add_argument("--anchor-z", type=int, default=DEFAULT_ANCHOR[1])
+    parser.add_argument("--ground-y", type=int, default=DEFAULT_GROUND_Y)
     parser.add_argument("--analyze-only", action="store_true")
     args = parser.parse_args()
     if not args.world.joinpath("level.dat").exists():
         parser.error(f"not a Minecraft world: {args.world}")
     if args.x0 > args.x1 or args.y0 > args.y1 or args.z0 > args.z1:
         parser.error("minimum coordinates must not exceed maximum coordinates")
+    if not args.y0 <= args.ground_y <= args.y1:
+        parser.error("ground Y must stay inside the exported vertical range")
     if max(args.x1 - args.x0 + 1, args.z1 - args.z0 + 1) > 272:
         parser.error("Stonecrest footprint must stay within Minecraft's 17-chunk structure reference diameter")
     return args

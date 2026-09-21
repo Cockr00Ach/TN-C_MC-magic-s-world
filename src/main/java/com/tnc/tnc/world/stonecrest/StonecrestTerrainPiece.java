@@ -17,7 +17,6 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSeriali
 
 /** One chunk of the irregular terrain feather surrounding the fortress. */
 final class StonecrestTerrainPiece extends StructurePiece {
-    private static final int GROUND_LOCAL_Y = 10;
     private final int originX;
     private final int originY;
     private final int originZ;
@@ -58,7 +57,7 @@ final class StonecrestTerrainPiece extends StructurePiece {
                             RandomSource random, BoundingBox chunkBox, ChunkPos chunkPos, BlockPos pivot) {
         StonecrestManifest manifest = StonecrestManifest.get();
         BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
-        int desiredCoreY = originY + GROUND_LOCAL_Y;
+        int desiredCoreY = originY + manifest.anchorLocal().getY();
 
         for (int dz = 0; dz < 16; dz++) {
             for (int dx = 0; dx < 16; dx++) {
