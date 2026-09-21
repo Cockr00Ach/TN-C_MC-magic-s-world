@@ -64,4 +64,8 @@ final class SkyIslandNotificationPolicy {
     static boolean periodicSaveDue(boolean activeSequence, long gameTime) {
         return activeSequence && gameTime % PERIODIC_SAVE_TICKS == 0L;
     }
+
+    static boolean impactFinishesThisTick(int remainingTicks) {
+        return remainingTicks == 1;
+    }
 }

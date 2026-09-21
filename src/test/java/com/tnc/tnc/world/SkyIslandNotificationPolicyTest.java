@@ -135,4 +135,11 @@ class SkyIslandNotificationPolicyTest {
         assertTrue(SkyIslandNotificationPolicy.periodicSaveDue(true, 400));
         assertFalse(SkyIslandNotificationPolicy.periodicSaveDue(false, 400));
     }
+
+    @Test
+    void impactSoundCompletionIsATransitionThatMustBePersisted() {
+        assertFalse(SkyIslandNotificationPolicy.impactFinishesThisTick(2));
+        assertTrue(SkyIslandNotificationPolicy.impactFinishesThisTick(1));
+        assertFalse(SkyIslandNotificationPolicy.impactFinishesThisTick(0));
+    }
 }

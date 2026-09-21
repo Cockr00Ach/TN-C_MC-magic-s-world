@@ -125,13 +125,13 @@ final class SkyIslandPlayerNotifications {
             return new TickResult(true, true);
         }
 
-        tickImpactSound(player, persisted);
+        boolean impactFinished = tickImpactSound(player, persisted);
         int completionDelay = persisted.getInt(COMPLETION_DELAY_TICKS);
         if (completionDelay > 0) {
             completionDelay = SkyIslandNotificationPolicy.advanceDelay(completionDelay);
             persisted.putInt(COMPLETION_DELAY_TICKS, completionDelay);
             if (completionDelay > 0) {
-                return new TickResult(true, false);
+                return new TickResult(true, impactFinished);
             }
         }
         if (islandComplete && !completionSeen && persisted.getBoolean(COMPLETION_PENDING)) {
@@ -141,7 +141,7 @@ final class SkyIslandPlayerNotifications {
             return new TickResult(false, true);
         }
         boolean impactPending = persisted.getInt(IMPACT_DELAY_TICKS) > 0;
-        return new TickResult(impactPending, false);
+        return new TickResult(impactPending, impactFinished);
     }
 
     private static void initializeSequence(CompoundTag persisted, int manifestVersion,
@@ -168,15 +168,17 @@ final class SkyIslandPlayerNotifications {
         persisted(player).putInt(AWAKENING_TITLE_VERSION, manifestVersion);
     }
 
-    private static void tickImpactSound(ServerPlayer player, CompoundTag persisted) {
+    private static boolean tickImpactSound(ServerPlayer player, CompoundTag persisted) {
         int remaining = persisted.getInt(IMPACT_DELAY_TICKS);
         if (remaining <= 0) {
-            return;
+            return false;
         }
-        if (remaining == 1) {
+        boolean finished = SkyIslandNotificationPolicy.impactFinishesThisTick(remaining);
+        if (finished) {
             player.playNotifySound(SoundEvents.WARDEN_SONIC_BOOM, SoundSource.AMBIENT, 1.2F, 0.8F);
         }
         persisted.putInt(IMPACT_DELAY_TICKS, remaining - 1);
+        return finished;
     }
 
     private static void showCompletionTitle(ServerPlayer player, int manifestVersion, BlockPos groundPortal) {
