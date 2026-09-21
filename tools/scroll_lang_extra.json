@@ -6,5 +6,14 @@
   "en_us": {
     "tooltip.tnc.scroll.read": "Right-click to read",
     "scroll.tnc.missing": "...the writing has faded beyond reading."
-  }
+  },
+  "spoilers": [
+    "暗扣",
+    "吴归衡",
+    "公孙衍",
+    "熙永槐",
+    "庄鹊让",
+    "周坐望",
+    "埋的钩子"
+  ]
 }

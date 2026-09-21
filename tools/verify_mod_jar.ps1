@@ -44,6 +44,7 @@ if ([string]::IsNullOrWhiteSpace($JarPath)) {
 $problems = 0
 function Fail([string]$message) { Write-Host "  [PROBLEM] $message"; $script:problems++ }
 function Ok([string]$message)   { Write-Host "  [ok]      $message" }
+function Note([string]$message) { Write-Host "  [note]    $message" }
 
 Write-Host "jar: $JarPath"
 if (-not (Test-Path $JarPath)) { Write-Host "PROBLEM: jar not found"; exit 1 }
@@ -167,22 +168,36 @@ try {
         else { Fail ("$asset is missing: " + ($missing -join ', ')) }
     }
 
-    # pack side: the spell JSONs and icons must actually be synced, or the spells
-    # simply do not exist in game (and the icons show as the missing-texture square)
+    # pack side: the spell JSONs and icons must exist SOMEWHERE, or the spells simply
+    # do not exist in game (and the icons show as the missing-texture square).
+    #
+    # A spell may live in the pack's kubejs OR in the mod jar. Model-bearing spells
+    # (projectiles) MUST be in the jar: if the same id also sits in kubejs, the kubejs
+    # copy wins and silently reverts the spell to an older definition - which is how
+    # the model_id was lost once and the projectile went purple-black.
     $packForSpells = Find-TncLivePack -WorkPack $WorkPack
     if ($packForSpells) {
         $spellDir = Join-Path $packForSpells 'kubejs\data\tnc\spells'
         $iconDir = Join-Path $packForSpells 'config\openloader\resources\TN-C\assets\tnc\textures\spell'
+        $modSpellDir = Join-Path $TncRepoRoot 'src\main\resources\data\tnc\spells'
+        $modAssetDir = Join-Path $TncRepoRoot 'src\main\resources\assets\tnc'
         $missingSpells = @()
         $missingIcons = @()
+        $dupSpells = @()
         foreach ($id in $spellIds) {
             $path = $id.Substring(4)     # strip the "tnc:" prefix
-            if (-not (Test-Path (Join-Path $spellDir "$path.json"))) { $missingSpells += $path }
+            $inPack = Test-Path (Join-Path $spellDir "$path.json")
+            $inMod = Test-Path (Join-Path $modSpellDir "$path.json")
+            if (-not ($inPack -or $inMod)) { $missingSpells += $path }
+            elseif ($inPack -and $inMod) { $dupSpells += $path }
             if (-not (Test-Path (Join-Path $iconDir "$path.png"))) { $missingIcons += $path }
         }
-        if ($missingSpells.Count -eq 0) { Ok 'pack has all 15 spell json files' }
-        else { Fail ('pack is missing spell json: ' + ($missingSpells -join ', ')) }
-        if ($missingIcons.Count -eq 0) { Ok 'pack has all 15 spell icons' }
+        if ($missingSpells.Count -eq 0) { Ok 'every chain spell json exists (pack kubejs or mod jar)' }
+        else { Fail ('spell json exists in NEITHER pack kubejs NOR mod jar: ' + ($missingSpells -join ', ')) }
+        if ($dupSpells.Count -gt 0) {
+            Note ('spell id defined in BOTH kubejs and the mod jar - the kubejs copy wins, so the jar edits are ignored: ' + ($dupSpells -join ', '))
+        }
+        if ($missingIcons.Count -eq 0) { Ok 'pack has all chain spell icons' }
         else { Fail ('pack is missing spell icon: ' + ($missingIcons -join ', ')) }
 
         # ---- structural checks: valid json can still be a broken spell ----
@@ -207,7 +222,9 @@ try {
         $badModel = @()
         foreach ($id in $spellIds) {
             $path = $id.Substring(4)
+            # the json may live in either place - check whichever one actually has it
             $file = Join-Path $spellDir "$path.json"
+            if (-not (Test-Path $file)) { $file = Join-Path $modSpellDir "$path.json" }
             if (-not (Test-Path $file)) { continue }
             $spell = $null
             try { $spell = ConvertFrom-Json ([System.IO.File]::ReadAllText($file)) }
@@ -246,8 +263,19 @@ try {
             # 同理：只检查我们自己资源包里的模型（老法术用的是别的 mod 的模型）
             if ($modelId -like 'tnc:*') {
                 $rel = $modelId -replace '^tnc:', ''
-                $modelFile = Join-Path $packForSpells "config\openloader\resources\TN-C\assets\tnc\models\$rel.json"
-                if (-not (Test-Path $modelFile)) { $badModel += "$path -> $modelId" }
+                $inPackModel = Join-Path $packForSpells "config\openloader\resources\TN-C\assets\tnc\models\$rel.json"
+                $inModModel = Join-Path $modAssetDir "models\$rel.json"
+                if (-not ((Test-Path $inPackModel) -or (Test-Path $inModModel))) {
+                    $badModel += "$path -> $modelId (no model file in pack or jar)"
+                }
+                # the purple-black cube guard: the id must ALSO be in the single
+                # canonical list, otherwise the client never bakes it and the
+                # projectile renders as the missing model. Two half-lists used to
+                # drift apart here; now TNModelBaking reads this one array.
+                $modelListText = Get-ClassText 'com/tnc/tnc/client/TNProjectileModels.class'
+                if (-not $modelListText -or $modelListText -notmatch [regex]::Escape($rel)) {
+                    $badModel += "$path -> $modelId missing from TNProjectileModels.PROJECTILE_MODELS (never baked -> purple-black)"
+                }
             }
         }
         if ($badShape.Count -eq 0) { Ok 'spell json shape ok (school / release.target / impact)' }
@@ -256,14 +284,76 @@ try {
         else { Fail ('spell json bad tier: ' + ($badTier -join ', ')) }
         if ($badEffect.Count -eq 0) { Ok 'spell json effect ids all registered by TNEffects' }
         else { Fail ('spell references an unregistered effect: ' + ($badEffect -join ', ')) }
-        if ($badModel.Count -eq 0) { Ok 'spell json projectile models exist in the pack' }
-        else { Fail ('spell references a missing model: ' + ($badModel -join ', ')) }
+        if ($badModel.Count -eq 0) { Ok 'every projectile model referenced by a spell exists and is in the baked list' }
+        else { Fail ('spell references a model that would render as a purple-black cube: ' + ($badModel -join ', ')) }
+
+        # reverse direction: an id listed for baking with no model file is dead weight,
+        # and usually means a half-finished edit of the model recipe
+        $listedModels = @()
+        $modelListText2 = Get-ClassText 'com/tnc/tnc/client/TNProjectileModels.class'
+        if ($modelListText2) {
+            foreach ($m in [regex]::Matches($modelListText2, 'projectile/[a-z0-9_]+')) { $listedModels += $m.Value }
+            $listedModels = @($listedModels | Sort-Object -Unique)
+        }
+        $staleModels = @($listedModels | Where-Object {
+            -not ((Test-Path (Join-Path $packForSpells "config\openloader\resources\TN-C\assets\tnc\models\$_.json")) -or
+                  (Test-Path (Join-Path $modAssetDir "models\$_.json")))
+        })
+        if ($staleModels.Count -gt 0) {
+            Note ('listed in PROJECTILE_MODELS but has no model file (dead entry): ' + ($staleModels -join ', '))
+        }
     } else {
         Write-Host '  [note]    live pack not found - skipped the pack-side spell checks'
     }
 
-    # ---------------- D1c. HUD entry point + its keybind ----------------
-    # Nothing HUD-side can be clicked (no cursor while playing), so the keybind IS
+    # ---------------- D1b3. the 6 lore scrolls (right-click reading) ----------------
+    # All of these fail SILENTLY: a missing lang body shows the raw key, a missing
+    # reader class makes right-click do nothing, and shipping the author-only notes
+    # spoils the plot for every player at once.
+    $scrollIds = @('canjuan_1a', 'canjuan_1b', 'canjuan_3', 'canjuan_4', 'canjuan_5', 'canjuan_6')
+    foreach ($cls in @('com/tnc/tnc/magic/TNScrolls.class',
+                       'com/tnc/tnc/magic/TNScrollItem.class',
+                       'com/tnc/tnc/client/TNScrollScreen.class')) {
+        if ($zip.Entries | Where-Object { $_.FullName -eq $cls }) { Ok "class present: $cls" }
+        else { Fail "scroll class missing from jar: $cls" }
+    }
+    $scrollLang = $zip.Entries | Where-Object { $_.FullName -eq 'assets/tnc/lang/zh_cn.json' }
+    if ($scrollLang) {
+        $sr = New-Object System.IO.StreamReader($scrollLang.Open(), [System.Text.Encoding]::UTF8)
+        $scrollLangText = $sr.ReadToEnd(); $sr.Close()
+        $noBody = @()
+        $noName = @()
+        foreach ($sid in $scrollIds) {
+            # the body must be a real multi-line text, not just the key echoed back
+            if ($scrollLangText -notmatch [regex]::Escape("scroll.tnc.$sid")) { $noBody += $sid }
+            if ($scrollLangText -notmatch [regex]::Escape("item.tnc.$sid")) { $noName += $sid }
+        }
+        if ($noBody.Count -eq 0) { Ok 'all 6 scroll bodies are in the lang file (right-click has something to show)' }
+        else { Fail ('scroll body missing from lang (run tools\gen_scroll_lang.ps1): ' + ($noBody -join ', ')) }
+        if ($noName.Count -eq 0) { Ok 'all 6 scroll item names are in the lang file' }
+        else { Fail ('scroll item name missing from lang: ' + ($noName -join ', ')) }
+        # author-only design notes must never ship. The words live in a UTF-8 json
+        # side file on purpose: this script must stay ASCII-only, because Windows
+        # PowerShell 5.1 reads BOM-less .ps1 files as ANSI and turns CJK literals
+        # into mojibake (which also breaks the parsing outright).
+        $leaks = @()
+        $spoilerPath = Join-Path $TncToolsDir 'scroll_lang_extra.json'
+        if (Test-Path -LiteralPath $spoilerPath) {
+            $spoilerText = [System.IO.File]::ReadAllText($spoilerPath, [System.Text.Encoding]::UTF8)
+            $block = [regex]::Match($spoilerText, '"spoilers"\s*:\s*\[(.*?)\]', 'Singleline')
+            if ($block.Success) {
+                foreach ($m in [regex]::Matches($block.Groups[1].Value, '"([^"]+)"')) { $leaks += $m.Groups[1].Value }
+            }
+        }
+        $found = @($leaks | Where-Object { $scrollLangText -match [regex]::Escape($_) })
+        if ($leaks.Count -eq 0) { Fail 'spoiler word list not found (tools\scroll_lang_extra.json -> spoilers) - leak check could not run' }
+        elseif ($found.Count -eq 0) { Ok 'no author-only story notes leaked into the shipped lang' }
+        else { Fail ('story spoilers shipped in lang: ' + ($found -join ', ')) }
+        if ($scrollLangText -match [regex]::Escape('tooltip.tnc.scroll.read')) { Ok 'scroll has the right-click hint tooltip' }
+        else { Fail 'scroll tooltip key missing (players would never know it is readable)' }
+    }
+
+    # ---------------- D1c. HUD entry point + its keybind ----------------    # Nothing HUD-side can be clicked (no cursor while playing), so the keybind IS
     # the entry. RegisterKeyMappingsEvent lives on the MOD bus - registering it on
     # the FORGE bus compiles fine and the key simply never appears in Options.
     # Guard both halves: the subscription exists, and the lang keys exist.

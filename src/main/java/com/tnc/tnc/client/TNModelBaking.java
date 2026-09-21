@@ -28,17 +28,14 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(modid = TNMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class TNModelBaking {
 
-    /** 需要被烘焙的投射物模型（与 TNProjectileModels 登记给 SpellEngine 的号一致）。 */
-    private static final String[] MODELS = {
-            "projectile/lightingball",
-            "projectile/waterball",
-            "projectile/fireball",
-            "projectile/fire_ball",
-            "projectile/fire_ray",
-            "projectile/thunder_ball",
-            "projectile/thunder_orb",
-            "projectile/tnc_ball_v2",
-    };
+    /**
+     * 需要被烘焙的投射物模型 —— <b>直接读 {@link TNProjectileModels#PROJECTILE_MODELS}</b> ✓。
+     *
+     * <p>以前这里<b>另抄了一份</b>名单，两边一旦不一致就会出现
+     * "登记了没烘焙"或"烘焙了没登记"✗ —— 而<b>两种情况的渲染结果都是紫黑方块</b> ✗。
+     * 现在只有一份清单 ✓，加模型不用动这个类。
+     */
+    private static final String[] MODELS = TNProjectileModels.PROJECTILE_MODELS;
 
     private TNModelBaking() {
     }

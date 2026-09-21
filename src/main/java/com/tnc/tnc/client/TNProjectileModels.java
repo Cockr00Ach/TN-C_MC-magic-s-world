@@ -37,6 +37,27 @@ public final class TNProjectileModels {
 
     private static final Logger LOGGER = LogManager.getLogger("TN-C/models");
 
+    /**
+     * ★ <b>投射物模型的唯一清单</b> —— 加模型只改这里 ✗ 不要另抄一份。
+     *
+     * <p>踩过的坑：这份清单以前和 {@link TNModelBaking} 里那份<b>各写了一份</b>，
+     * 结果两边不一致（有的号登记了没烘焙、有的烘焙了没登记），
+     * 而<b>漏掉任何一半都会渲染成紫黑方块</b> ✗。现在 TNModelBaking 直接读这个数组 ✓。
+     *
+     * <p>加新模型的完整步骤见 {@code docs/投射物模型_配方.md}：
+     * 模型文件 + 贴图 + <b>写进这个数组</b> + 法术 JSON 写 {@code "model_id": "tnc:<path>"}。
+     */
+    public static final String[] PROJECTILE_MODELS = {
+            // 火系（用户自制）
+            "projectile/fireball",
+            // 水系（用户自制）
+            "projectile/waterball",
+            // 雷系（用户自制）
+            "projectile/lightingball",
+            // 雷系备用球（用户自制）
+            "projectile/thunder_ball",
+    };
+
     static {
         // 先注册"模型载体物品"（投射物用物品 id 兜底渲染，见 TNProjectileCarriers 的说明）
         try {
@@ -58,18 +79,12 @@ public final class TNProjectileModels {
 
     private static void register() {
         try {
-            net.spell_engine.api.render.CustomModels.registerModelIds(java.util.List.of(
-                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/fire_ball"),
-                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/fire_ray"),
-                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/bolt_copy"),
-                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/thunder_ball"),
-                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/thunder_ball_min"),
-                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/thunder_orb"),
-                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/thunder_probe2"),
-                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/fireball"),
-                    ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/waterball"),
-                    ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "projectile/lightingball")));
-            LOGGER.info("TN-C: registered TN-C projectile model id(s) to SpellEngine");
+            java.util.List<ResourceLocation> ids = new java.util.ArrayList<>();
+            for (String path : PROJECTILE_MODELS) {
+                ids.add(ResourceLocation.fromNamespaceAndPath(TNMod.MODID, path));
+            }
+            net.spell_engine.api.render.CustomModels.registerModelIds(ids);
+            LOGGER.info("TN-C: registered {} TN-C projectile model id(s) to SpellEngine", ids.size());
         } catch (Throwable t) {
             LOGGER.warn("TN-C: projectile model registration skipped ({})", t.toString());
         }
