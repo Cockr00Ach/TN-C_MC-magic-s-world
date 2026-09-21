@@ -16,16 +16,21 @@ import java.util.Map;
  * {@code /tnc npc ...} —— 固定 NPC 的调试与管理命令。
  *
  * <pre>
- *   /tnc npc list                      列出已登记的固定 NPC 与坐标
- *   /tnc npc place &lt;id&gt; &lt;x&gt; &lt;y&gt; &lt;z&gt;   登记/改坐标并立刻放置（id 如 self）
- *   /tnc npc here &lt;id&gt;                把你脚下这格登记为该 NPC 的位置
- *   /tnc npc respawn &lt;id&gt;             先清掉附近的、再按登记坐标重放一个
- *   /tnc npc remove &lt;id&gt;              取消登记（不删已存在的实体）
+ *   /tnc npc list                            列出登记（含锚点与偏移）
+ *   /tnc npc here &lt;id&gt;                       ★ 以你脚下位置登记；**自动判断你离哪个天空岛锚点近**
+ *   /tnc npc here &lt;id&gt; &lt;锚点&gt;              指定锚点登记（ARRIVAL/CENTER/ORIGIN/GROUND_PORTAL）
+ *   /tnc npc place &lt;id&gt; &lt;锚点&gt; &lt;dx&gt; &lt;dy&gt; &lt;dz&gt;   按"锚点+偏移"登记（锚点写 ABSOLUTE 则为世界坐标）
+ *   /tnc npc respawn &lt;id&gt;                   先清掉附近的、再按登记坐标重放一个
+ *   /tnc npc purge &lt;id|all&gt;                 删掉已加载范围内所有该类型 NPC
+ *   /tnc npc remove &lt;id&gt;                    取消登记（不删已存在的实体）
  * </pre>
  *
- * <p>权限等级 2（和 {@code /tnc} 的其它子命令一致）。
- * <b>放在独立类里</b>而不是塞进 {@code MagicStoneCommand}：那个文件已经 581 行、
- * 归魔法专题维护，NPC 的命令不该混进去。
+ * <p>权限等级 2。<b>放在独立类里</b>而不是塞进 {@code MagicStoneCommand}：
+ * 那个文件已经 581 行、归魔法专题维护，NPC 的命令不该混进去。
+ *
+ * <h2>为什么位置要"锚点+偏移"</h2>
+ * 天空岛每个存档位置都不同（生成时在出生点附近选点），所以写死世界坐标换存档就废了。
+ * 存相对锚点的偏移，放置时按该存档的真实岛坐标算 —— NPC 就跟着岛走。
  */
 public final class NpcCommand {
 
@@ -36,25 +41,27 @@ public final class NpcCommand {
                         .requires(source -> source.hasPermission(2))
                         .then(Commands.literal("list")
                                 .executes(ctx -> list(ctx.getSource().getPlayerOrException())))
-                        .then(Commands.literal("place")
-                                .then(Commands.argument("id", StringArgumentType.word())
-                                        .then(Commands.argument("x", IntegerArgumentType.integer())
-                                                .then(Commands.argument("y", IntegerArgumentType.integer())
-                                                        .then(Commands.argument("z", IntegerArgumentType.integer())
-                                                                .executes(ctx -> place(
-                                                                        ctx.getSource().getPlayerOrException(),
-                                                                        StringArgumentType.getString(ctx, "id"),
-                                                                        new BlockPos(
-                                                                                IntegerArgumentType.getInteger(ctx, "x"),
-                                                                                IntegerArgumentType.getInteger(ctx, "y"),
-                                                                                IntegerArgumentType.getInteger(ctx, "z")))))))))
                         .then(Commands.literal("here")
                                 .then(Commands.argument("id", StringArgumentType.word())
-                                        .executes(ctx -> {
-                                            ServerPlayer player = ctx.getSource().getPlayerOrException();
-                                            return place(player, StringArgumentType.getString(ctx, "id"),
-                                                    player.blockPosition());
-                                        })))
+                                        .executes(ctx -> here(ctx.getSource().getPlayerOrException(),
+                                                StringArgumentType.getString(ctx, "id"), null))
+                                        .then(Commands.argument("anchor", StringArgumentType.word())
+                                                .executes(ctx -> here(ctx.getSource().getPlayerOrException(),
+                                                        StringArgumentType.getString(ctx, "id"),
+                                                        StringArgumentType.getString(ctx, "anchor"))))))
+                        .then(Commands.literal("place")
+                                .then(Commands.argument("id", StringArgumentType.word())
+                                        .then(Commands.argument("anchor", StringArgumentType.word())
+                                                .then(Commands.argument("dx", IntegerArgumentType.integer())
+                                                        .then(Commands.argument("dy", IntegerArgumentType.integer())
+                                                                .then(Commands.argument("dz", IntegerArgumentType.integer())
+                                                                        .executes(ctx -> place(
+                                                                                ctx.getSource().getPlayerOrException(),
+                                                                                StringArgumentType.getString(ctx, "id"),
+                                                                                StringArgumentType.getString(ctx, "anchor"),
+                                                                                IntegerArgumentType.getInteger(ctx, "dx"),
+                                                                                IntegerArgumentType.getInteger(ctx, "dy"),
+                                                                                IntegerArgumentType.getInteger(ctx, "dz")))))))))
                         .then(Commands.literal("respawn")
                                 .then(Commands.argument("id", StringArgumentType.word())
                                         .executes(ctx -> respawn(ctx.getSource().getPlayerOrException(),
@@ -69,17 +76,111 @@ public final class NpcCommand {
                                                 StringArgumentType.getString(ctx, "id")))))));
     }
 
-    private static int place(ServerPlayer player, String npcId, BlockPos pos) {
+    // ------------------------------------------------------------------ 登记
+
+    /** 按"锚点+偏移"登记。锚点写 ABSOLUTE 时，dx/dy/dz 就是世界坐标。 */
+    private static int place(ServerPlayer player, String npcId, String anchorArg,
+                             int dx, int dy, int dz) {
         ServerLevel level = player.serverLevel();
+        String anchor = normalizeAnchor(anchorArg);
+        if (anchor == null) {
+            player.displayClientMessage(Component.literal(
+                    "\u00a7c[TN-C] \u672a\u77e5\u951a\u70b9\uff1a" + anchorArg
+                            + "\uff08\u53ef\u7528\uff1aARRIVAL / CENTER / ORIGIN / GROUND_PORTAL / ABSOLUTE\uff09"), false);
+            return 0;
+        }
         NpcPlacementSavedData data = NpcPlacementSavedData.get(level);
-        data.put(npcId, pos);
+        data.put(new NpcPlacementSavedData.Placement(npcId, anchor, dx, dy, dz));
         int spawned = data.respawn(level, npcId);
+        BlockPos resolved = data.resolve(level, data.get(npcId));
         player.displayClientMessage(Component.literal(
-                "\u00a7a[TN-C] \u5df2\u767b\u8bb0\u56fa\u5b9a NPC \u00a7e" + npcId
-                        + "\u00a7a @ " + pos.getX() + "/" + pos.getY() + "/" + pos.getZ()
-                        + "\uff08\u672c\u6b21\u653e\u7f6e " + spawned + " \u4e2a\uff09"), false);
+                "\u00a7a[TN-C] \u5df2\u767b\u8bb0 \u00a7e" + npcId + "\u00a7a \u951a\u70b9=\u00a7e" + anchor
+                        + "\u00a7a \u504f\u79fb=" + dx + "/" + dy + "/" + dz
+                        + (resolved != null ? "\u00a7a \u2192 \u4e16\u754c\u5750\u6807 " + resolved.getX() + "/"
+                        + resolved.getY() + "/" + resolved.getZ() : "\u00a7c\uff08\u951a\u70b9\u5c1a\u672a\u5c31\u7eea\uff09")
+                        + "\u00a77 [\u653e\u7f6e " + spawned + "]"), false);
         return 1;
     }
+
+    /**
+     * 以玩家脚下那格登记，**自动判断离哪个天空岛锚点近**。
+     *
+     * <p>这样你只需要站到想让他站的位置敲一条命令 —— 偏移由我们算，
+     * 换存档时他会跟着岛一起出现在同一个相对位置。
+     */
+    private static int here(ServerPlayer player, String npcId, String anchorArg) {
+        ServerLevel level = player.serverLevel();
+        BlockPos pos = player.blockPosition();
+
+        String anchor;
+        if (anchorArg != null) {
+            anchor = normalizeAnchor(anchorArg);
+            if (anchor == null) {
+                player.displayClientMessage(Component.literal(
+                        "\u00a7c[TN-C] \u672a\u77e5\u951a\u70b9\uff1a" + anchorArg), false);
+                return 0;
+            }
+        } else {
+            anchor = nearestAnchor(level, pos);
+            if (anchor == null) {
+                player.displayClientMessage(Component.literal(
+                        "\u00a7c[TN-C] \u5929\u7a7a\u5c9b\u5c1a\u672a\u5c31\u7eea\uff0c\u65e0\u6cd5\u81ea\u52a8\u5224\u65ad\u951a\u70b9\u3002"
+                                + "\u53ef\u7528\uff1a/tnc npc here " + npcId + " ABSOLUTE"), false);
+                return 0;
+            }
+        }
+
+        BlockPos base = NpcPlacementSavedData.ABSOLUTE.equals(anchor)
+                ? BlockPos.ZERO
+                : SkyIslandAnchors.resolve(level, SkyIslandAnchors.Anchor.valueOf(anchor));
+        if (base == null) {
+            player.displayClientMessage(Component.literal(
+                    "\u00a7c[TN-C] \u951a\u70b9 " + anchor + " \u7684\u5750\u6807\u8fd8\u6ca1\u5c31\u7eea"), false);
+            return 0;
+        }
+        return place(player, npcId, anchor,
+                pos.getX() - base.getX(), pos.getY() - base.getY(), pos.getZ() - base.getZ());
+    }
+
+    /** 找离玩家最近的天空岛锚点（只在岛已生成时有效）。 */
+    private static String nearestAnchor(ServerLevel level, BlockPos pos) {
+        if (!SkyIslandAnchors.isComplete(level)) {
+            return null;
+        }
+        String best = null;
+        double bestDist = Double.MAX_VALUE;
+        for (SkyIslandAnchors.Anchor a : SkyIslandAnchors.Anchor.values()) {
+            BlockPos p = SkyIslandAnchors.resolve(level, a);
+            if (p == null) {
+                continue;
+            }
+            double d = p.distSqr(pos);
+            if (d < bestDist) {
+                bestDist = d;
+                best = a.name();
+            }
+        }
+        return best;
+    }
+
+    private static String normalizeAnchor(String arg) {
+        if (arg == null || arg.isEmpty()) {
+            return null;
+        }
+        String up = arg.toUpperCase(java.util.Locale.ROOT);
+        if (NpcPlacementSavedData.ABSOLUTE.equals(up)) {
+            return NpcPlacementSavedData.ABSOLUTE;
+        }
+        // 允许省略 SKY_ 前缀、也允许直接写锚点名
+        for (SkyIslandAnchors.Anchor a : SkyIslandAnchors.Anchor.values()) {
+            if (a.name().equals(up)) {
+                return a.name();
+            }
+        }
+        return null;
+    }
+
+    // ------------------------------------------------------------------ 其它
 
     private static int respawn(ServerPlayer player, String npcId) {
         ServerLevel level = player.serverLevel();
@@ -90,8 +191,11 @@ public final class NpcCommand {
             return 0;
         }
         int n = data.respawn(level, npcId);
+        BlockPos resolved = data.resolve(level, data.get(npcId));
         player.displayClientMessage(Component.literal(
-                "\u00a7a[TN-C] \u91cd\u653e " + npcId + "\uff1a" + n + " \u4e2a"), false);
+                "\u00a7a[TN-C] \u91cd\u653e " + npcId + "\uff1a" + n + " \u4e2a"
+                        + (resolved != null ? "\uff08\u5750\u6807 " + resolved.getX() + "/" + resolved.getY()
+                        + "/" + resolved.getZ() + "\uff09" : "\u00a7c\uff08\u951a\u70b9\u672a\u5c31\u7eea\uff09")), false);
         return n;
     }
 
@@ -105,20 +209,20 @@ public final class NpcCommand {
     }
 
     /**
-     * 把一个类型的 NPC <b>全部删掉</b>（已加载范围内），并返回删了几个。
-     *
-     * <p>用途：试验期间刷多了、要"世界里只留一个"。传 {@code all} 表示清掉所有 TN-C 的 NPC。
+     * 把一个类型的 NPC <b>全部删掉</b>（已加载范围内），回报删了几个。
+     * 传 {@code all} 表示清掉所有 TN-C 的 NPC。
      */
     private static int purge(ServerPlayer player, String npcId) {
         ServerLevel level = player.serverLevel();
         int removed = 0;
-        for (String id : "@".equals(npcId) || "all".equalsIgnoreCase(npcId)
+        String[] ids = ("@".equals(npcId) || "all".equalsIgnoreCase(npcId))
                 ? new String[]{"self"}                      // 以后加了 NPC 就在这里补
-                : new String[]{npcId}) {
-        net.minecraft.world.entity.EntityType<?> type =
-                net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getValue(
-                        net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(
-                                com.tnc.tnc.TNMod.MODID, id));
+                : new String[]{npcId};
+        for (String id : ids) {
+            net.minecraft.world.entity.EntityType<?> type =
+                    net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getValue(
+                            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(
+                                    com.tnc.tnc.TNMod.MODID, id));
             if (type == null) {
                 player.displayClientMessage(Component.literal(
                         "\u00a7c[TN-C] \u672a\u77e5 NPC id\uff1a" + id), false);
@@ -146,13 +250,19 @@ public final class NpcCommand {
 
     private static int list(ServerPlayer player) {
         NpcPlacementSavedData data = NpcPlacementSavedData.get(player.serverLevel());
-        Map<String, BlockPos> all = data.all();
+        Map<String, NpcPlacementSavedData.Placement> all = data.all();
         if (all.isEmpty()) {
             player.displayClientMessage(Component.literal("\u00a77[TN-C] \u56fa\u5b9a NPC\uff1a\uff08\u7a7a\uff09"), false);
             return 0;
         }
-        all.forEach((id, pos) -> player.displayClientMessage(Component.literal(
-                "\u00a7e" + id + " \u00a77@ \u00a7f" + pos.getX() + " " + pos.getY() + " " + pos.getZ()), false));
+        all.values().forEach(p -> {
+            BlockPos resolved = data.resolve(player.serverLevel(), p);
+            player.displayClientMessage(Component.literal(
+                    "\u00a7e" + p.npcId() + "\u00a77 \u951a\u70b9 \u00a7f" + p.anchor()
+                            + "\u00a77 \u504f\u79fb \u00a7f" + p.dx() + " " + p.dy() + " " + p.dz()
+                            + (resolved != null ? "\u00a77 \u2192 \u00a7f" + resolved.getX() + " "
+                            + resolved.getY() + " " + resolved.getZ() : "\u00a78 (\u951a\u70b9\u672a\u5c31\u7eea)")), false);
+        });
         return all.size();
     }
 }

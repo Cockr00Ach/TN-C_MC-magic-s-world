@@ -19,24 +19,35 @@ import java.util.Map;
 /**
  * "固定 NPC" 的登记表 —— 存在存档里的世界级数据（{@code SavedData}）。
  *
- * <h2>它解决什么问题</h2>
- * 剧情 NPC（Self、cava、riggen…）的位置是**设定**，不是玩家刷出来的：
- * 他应该<b>永远在那儿</b>。所以：登记一次坐标 → 每次世界加载/周期性检查时，
- * 那个坐标上要是没有他，就<b>补一个</b>。
+ * <h2>位置怎么存：锚点 + 偏移，而不是绝对坐标</h2>
+ * 天空岛是**按存档生成的**，每个存档位置都不同。所以这里存的是
+ * <b>「相对天空岛某个锚点的偏移」</b>（见 {@link SkyIslandAnchors}），
+ * 放置时按该存档的真实坐标算出来 —— 这样换存档 NPC 会跟着岛走。
  *
- * <p>这样即使因为任何原因（被创造模式误杀、区块异常、旧的卸载 bug）他没了，
- * 也会自己回来，不需要人工再刷一次。
+ * <p>也支持绝对坐标锚点（{@link SkyIslandAnchors.Anchor} 之外用 {@code ABSOLUTE}），
+ * 留给"不在岛上的 NPC"以及调试用。
  *
- * <p>数据落在 {@code <存档>/data/tnc_npc_placements.dat}，跟着存档走。
- * 换存档就是另一份（每个世界的 NPC 位置独立），这符合"世界状态"的语义。
+ * <p>数据文件：{@code <存档>/data/tnc_npc_placements.dat}。
  */
 public class NpcPlacementSavedData extends net.minecraft.world.level.saveddata.SavedData {
 
     private static final Logger LOGGER = LogUtils.getLogger();
     public static final String DATA_NAME = "tnc_npc_placements";
 
-    /** npcId（如 {@code self}） -> 位置。 */
-    private final Map<String, BlockPos> placements = new HashMap<>();
+    /** 绝对坐标锚点（不在天空岛上的 NPC / 调试）。 */
+    public static final String ABSOLUTE = "ABSOLUTE";
+
+    /**
+     * 一条登记。
+     *
+     * @param npcId  实体 id（如 {@code self}，对应 {@code tnc:self}）
+     * @param anchor 锚点名（{@link SkyIslandAnchors.Anchor} 的名字，或 {@code ABSOLUTE}）
+     * @param dx/dy/dz 相对锚点的偏移；{@code ABSOLUTE} 时它们就是世界坐标
+     */
+    public record Placement(String npcId, String anchor, int dx, int dy, int dz) {
+    }
+
+    private final Map<String, Placement> placements = new HashMap<>();
 
     public static NpcPlacementSavedData get(ServerLevel level) {
         return level.getServer().overworld().getDataStorage().computeIfAbsent(
@@ -47,12 +58,14 @@ public class NpcPlacementSavedData extends net.minecraft.world.level.saveddata.S
         NpcPlacementSavedData data = new NpcPlacementSavedData();
         ListTag list = tag.getList("Npcs", Tag.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
-            CompoundTag entry = list.getCompound(i);
-            String id = entry.getString("Id");
+            CompoundTag e = list.getCompound(i);
+            String id = e.getString("Id");
             if (id.isEmpty()) {
                 continue;
             }
-            data.placements.put(id, new BlockPos(entry.getInt("X"), entry.getInt("Y"), entry.getInt("Z")));
+            data.placements.put(id, new Placement(id,
+                    e.contains("Anchor") ? e.getString("Anchor") : ABSOLUTE,
+                    e.getInt("DX"), e.getInt("DY"), e.getInt("DZ")));
         }
         return data;
     }
@@ -60,13 +73,14 @@ public class NpcPlacementSavedData extends net.minecraft.world.level.saveddata.S
     @Override
     public CompoundTag save(CompoundTag tag) {
         ListTag list = new ListTag();
-        placements.forEach((id, pos) -> {
-            CompoundTag entry = new CompoundTag();
-            entry.putString("Id", id);
-            entry.putInt("X", pos.getX());
-            entry.putInt("Y", pos.getY());
-            entry.putInt("Z", pos.getZ());
-            list.add(entry);
+        placements.values().forEach(p -> {
+            CompoundTag e = new CompoundTag();
+            e.putString("Id", p.npcId());
+            e.putString("Anchor", p.anchor());
+            e.putInt("DX", p.dx());
+            e.putInt("DY", p.dy());
+            e.putInt("DZ", p.dz());
+            list.add(e);
         });
         tag.put("Npcs", list);
         return tag;
@@ -74,16 +88,16 @@ public class NpcPlacementSavedData extends net.minecraft.world.level.saveddata.S
 
     // ------------------------------------------------------------------ API
 
-    public void put(String npcId, BlockPos pos) {
-        placements.put(npcId, pos);
+    public void put(Placement placement) {
+        placements.put(placement.npcId(), placement);
         this.setDirty();
     }
 
-    public BlockPos get(String npcId) {
+    public Placement get(String npcId) {
         return placements.get(npcId);
     }
 
-    public Map<String, BlockPos> all() {
+    public Map<String, Placement> all() {
         return java.util.Collections.unmodifiableMap(placements);
     }
 
@@ -95,32 +109,71 @@ public class NpcPlacementSavedData extends net.minecraft.world.level.saveddata.S
         return removed;
     }
 
-    // ------------------------------------------------------------------ 补位
+    // ------------------------------------------------------------------ 坐标解析
 
     /**
-     * 检查所有登记的 NPC：位置在，但**实体不在** → 补一个。
+     * 把登记换算成**这个世界里**的实际坐标。
      *
-     * @return 本次补出来的数量（便于日志/命令回报）
+     * @return 坐标；天空岛锚点还没就绪时返回 {@code null}（调用方跳过这次补位）
      */
+    public BlockPos resolve(ServerLevel level, Placement placement) {
+        if (ABSOLUTE.equals(placement.anchor())) {
+            return new BlockPos(placement.dx(), placement.dy(), placement.dz());
+        }
+        SkyIslandAnchors.Anchor anchor;
+        try {
+            anchor = SkyIslandAnchors.Anchor.valueOf(placement.anchor());
+        } catch (IllegalArgumentException e) {
+            LOGGER.error("TN-C npc: unknown anchor '{}' for {} —— 登记已失效，请重新 place",
+                    placement.anchor(), placement.npcId());
+            return null;
+        }
+        BlockPos base = SkyIslandAnchors.resolve(level, anchor);
+        if (base == null) {
+            return null;
+        }
+        return base.offset(placement.dx(), placement.dy(), placement.dz());
+    }
+
+    // ------------------------------------------------------------------ 补位
+
+    /** 检查所有登记的 NPC：算得出坐标、但实体不在 → 补一个。返回本次补的数量。 */
     public int ensureAll(ServerLevel overworld) {
         int spawned = 0;
-        for (Map.Entry<String, BlockPos> e : placements.entrySet()) {
-            if (ensureOne(overworld, e.getKey(), e.getValue())) {
+        for (Placement p : placements.values()) {
+            if (ensureOne(overworld, p)) {
                 spawned++;
             }
         }
         return spawned;
     }
 
-    /** 单个 NPC 的补位。返回 true = 这次真的补了一个。 */
-    public boolean ensureOne(ServerLevel level, String npcId, BlockPos pos) {
-        EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(
-                ResourceLocation.fromNamespaceAndPath(com.tnc.tnc.TNMod.MODID, npcId));
-        if (type == null) {
-            LOGGER.error("TN-C npc: placement references unknown entity type tnc:{}", npcId);
+    public boolean ensureOne(ServerLevel level, Placement placement) {
+        // ★ 岛屿没生成完就别放 —— 生成中途 CENTER 这类坐标已经有值了，但路面还没铺完，
+        //   这时放上去 NPC 会掉进虚空（而且生成器随后还会改地形，等于白放）。
+        //   跳过这次；每 5 秒一次的自检会在岛 COMPLETE 之后自动把它放出来。
+        boolean islandAnchor = !ABSOLUTE.equals(placement.anchor());
+        if (islandAnchor && !SkyIslandAnchors.isComplete(level)) {
             return false;
         }
-        // 已经有一个活着的，就什么都不做
+
+        BlockPos pos = resolve(level, placement);
+        if (pos == null) {
+            return false; // 锚点还没就绪（天空岛没生成完）—— 安静跳过，下次再试
+        }
+        // ★ 贴地：锚点的 Y 是生成时算的，和最终地形可能差几格。
+        //   用高度图找该 XZ 上的真实地面，避免 NPC 悬空或埋进方块里。
+        BlockPos grounded = groundAt(level, pos);
+        if (grounded != null) {
+            pos = grounded;
+        }
+
+        EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(
+                ResourceLocation.fromNamespaceAndPath(com.tnc.tnc.TNMod.MODID, placement.npcId()));
+        if (type == null) {
+            LOGGER.error("TN-C npc: placement references unknown entity type tnc:{}", placement.npcId());
+            return false;
+        }
         boolean present = !level.getEntitiesOfClass(Entity.class,
                 new net.minecraft.world.phys.AABB(pos).inflate(24.0D),
                 entity -> entity.getType() == type).isEmpty();
@@ -129,20 +182,44 @@ public class NpcPlacementSavedData extends net.minecraft.world.level.saveddata.S
         }
         Entity entity = type.create(level);
         if (entity == null) {
-            LOGGER.error("TN-C npc: failed to create tnc:{}", npcId);
+            LOGGER.error("TN-C npc: failed to create tnc:{}", placement.npcId());
             return false;
         }
-        // 放在方块正上方一点，避免卡进地里
         entity.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D,
                 level.random.nextFloat() * 360.0F, 0.0F);
         level.addFreshEntity(entity);
-        LOGGER.info("TN-C npc: restored tnc:{} at {}", npcId, pos);
+        LOGGER.info("TN-C npc: restored tnc:{} at {} (anchor={} offset={}/{}/{})",
+                placement.npcId(), pos, placement.anchor(), placement.dx(), placement.dy(), placement.dz());
         return true;
     }
 
-    /** 强制重新放置（先清掉附近同类的，再放一个）—— 给"我改坐标了"用。 */
+    /**
+     * 求该 XZ 上的"可站立方块的上方那一格"。
+     *
+     * <p>用 {@code MOTION_BLOCKING_NO_LEAVES} —— 和原版刷怪/传送找落点用的是同一套高度图，
+     * 所以结果就是玩家会站的那一格。
+     *
+     * @return 落点；该列什么都没有（虚空/未加载）时返回 null，由调用方保留原坐标
+     */
+    private static BlockPos groundAt(ServerLevel level, BlockPos pos) {
+        if (!level.hasChunkAt(pos)) {
+            return null; // 区块没加载就别乱查，原样返回等下次
+        }
+        int y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                pos.getX(), pos.getZ());
+        if (y <= level.getMinBuildHeight()) {
+            return null;
+        }
+        return new BlockPos(pos.getX(), y, pos.getZ());
+    }
+
+    /** 强制重放：先清掉附近的同类，再按登记坐标放一个。返回放置数量。 */
     public int respawn(ServerLevel level, String npcId) {
-        BlockPos pos = placements.get(npcId);
+        Placement placement = placements.get(npcId);
+        if (placement == null) {
+            return 0;
+        }
+        BlockPos pos = resolve(level, placement);
         if (pos == null) {
             return 0;
         }
@@ -156,7 +233,7 @@ public class NpcPlacementSavedData extends net.minecraft.world.level.saveddata.S
                 entity -> entity.getType() == type)) {
             old.discard();
         }
-        return ensureOne(level, npcId, pos) ? 1 : 0;
+        return ensureOne(level, placement) ? 1 : 0;
     }
 
     /** 打印一遍登记表（诊断用）。 */
@@ -165,9 +242,10 @@ public class NpcPlacementSavedData extends net.minecraft.world.level.saveddata.S
             return "(none)";
         }
         StringBuilder sb = new StringBuilder();
-        placements.forEach((id, pos) ->
-                sb.append(id).append('@').append(pos.getX()).append('/')
-                        .append(pos.getY()).append('/').append(pos.getZ()).append(' '));
+        placements.values().forEach(p -> sb.append(p.npcId()).append('@').append(p.anchor())
+                .append(p.dx() >= 0 ? "+" : "").append(p.dx()).append('/')
+                .append(p.dy() >= 0 ? "+" : "").append(p.dy()).append('/')
+                .append(p.dz() >= 0 ? "+" : "").append(p.dz()).append(' '));
         return sb.toString().trim();
     }
 
