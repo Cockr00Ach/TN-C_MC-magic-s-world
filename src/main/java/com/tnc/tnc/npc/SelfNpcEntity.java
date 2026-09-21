@@ -49,6 +49,20 @@ public class SelfNpcEntity extends PathfinderMob {
 
     public SelfNpcEntity(EntityType<? extends SelfNpcEntity> type, Level level) {
         super(type, level);
+        // 生成即钉死"持久化"标志位（不只是靠 isPersistenceRequired() 这个方法返回值），
+        // 让原版自己的存档/清理逻辑也认它
+        this.setPersistenceRequired();
+    }
+
+    /** 加进世界时打一行日志 —— 配合 remove() 的日志，能完整看出"生成→消失"的全过程。 */
+    @Override
+    public void onAddedToWorld() {
+        super.onAddedToWorld();
+        if (!this.level().isClientSide) {
+            com.mojang.logging.LogUtils.getLogger().info(
+                    "TN-C npc: Self added at {} (dim={})",
+                    this.blockPosition(), this.level().dimension().location());
+        }
     }
 
     /** 属性：满血 20、不主动攻击、移速偏低（老板不跑）。 */
@@ -59,6 +73,17 @@ public class SelfNpcEntity extends PathfinderMob {
                 .add(Attributes.FOLLOW_RANGE, 16.0D);
     }
 
+    // ------------------------------------------------------------------
+    //  "不许消失" —— 把原版所有会让 NPC 被卸载的路都堵上
+    //
+    //  用户实测：刷出来的 Self 过一段时间会消失。所以这里逐条封堵，并在
+    //  remove() 里打一行日志 —— 万一还有漏掉的路，日志会直接指出是哪一条。
+    //  原版/Forge 的三条路（读 Mob.checkDespawn 字节码确认）：
+    //    ① 难度=PEACEFUL 且 shouldDespawnInPeaceful() → discard()
+    //    ② isPersistenceRequired() 为假 → 走距离卸载
+    //    ③ requiresCustomPersistence()（Forge 给自定义实体的钩子）
+    // ------------------------------------------------------------------
+
     @Override
     public boolean removeWhenFarAway(double distanceToClosestPlayer) {
         return false;
@@ -67,6 +92,36 @@ public class SelfNpcEntity extends PathfinderMob {
     @Override
     public boolean isPersistenceRequired() {
         return true;
+    }
+
+    /** Forge 给"自定义实体"的持久化钩子，和上面那条一起返回 true 才算完全堵死。 */
+    @Override
+    public boolean requiresCustomPersistence() {
+        return true;
+    }
+
+    /** ①：和平难度下也不许消失（默认 true，会把 NPC 抹掉）。 */
+    @Override
+    protected boolean shouldDespawnInPeaceful() {
+        return false;
+    }
+
+    /**
+     * 兜底：不管哪个机制调到这里，都拒绝被移除，并把"是谁、为什么"打进日志。
+     *
+     * <p>写在 {@code remove} 上而不是 {@code discard}：{@code discard()} 与
+     * {@code kill()} 最终都会走到 {@code remove(RemovalReason)}。
+     */
+    @Override
+    public void remove(net.minecraft.world.entity.Entity.RemovalReason reason) {
+        // 只有在"非正常移除"时才记录，避免玩家退出世界时的正常清理刷屏
+        if (reason != net.minecraft.world.entity.Entity.RemovalReason.UNLOADED_TO_CHUNK
+                && reason != net.minecraft.world.entity.Entity.RemovalReason.CHANGED_DIMENSION) {
+            com.mojang.logging.LogUtils.getLogger().warn(
+                    "TN-C npc: Self removed! reason={} pos={} (persistent={})",
+                    reason, this.blockPosition(), this.isPersistenceRequired());
+        }
+        super.remove(reason);
     }
 
     @Override
