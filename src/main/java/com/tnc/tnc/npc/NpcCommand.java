@@ -59,6 +59,10 @@ public final class NpcCommand {
                                 .then(Commands.argument("id", StringArgumentType.word())
                                         .executes(ctx -> respawn(ctx.getSource().getPlayerOrException(),
                                                 StringArgumentType.getString(ctx, "id")))))
+                        .then(Commands.literal("purge")
+                                .then(Commands.argument("id", StringArgumentType.word())
+                                        .executes(ctx -> purge(ctx.getSource().getPlayerOrException(),
+                                                StringArgumentType.getString(ctx, "id")))))
                         .then(Commands.literal("remove")
                                 .then(Commands.argument("id", StringArgumentType.word())
                                         .executes(ctx -> remove(ctx.getSource().getPlayerOrException(),
@@ -98,6 +102,46 @@ public final class NpcCommand {
                 ok ? "\u00a7a[TN-C] \u5df2\u53d6\u6d88\u767b\u8bb0 " + npcId
                    : "\u00a7c[TN-C] \u6ca1\u6709\u767b\u8bb0\u8fc7 " + npcId), false);
         return ok ? 1 : 0;
+    }
+
+    /**
+     * 把一个类型的 NPC <b>全部删掉</b>（已加载范围内），并返回删了几个。
+     *
+     * <p>用途：试验期间刷多了、要"世界里只留一个"。传 {@code all} 表示清掉所有 TN-C 的 NPC。
+     */
+    private static int purge(ServerPlayer player, String npcId) {
+        ServerLevel level = player.serverLevel();
+        int removed = 0;
+        for (String id : "@".equals(npcId) || "all".equalsIgnoreCase(npcId)
+                ? new String[]{"self"}                      // 以后加了 NPC 就在这里补
+                : new String[]{npcId}) {
+        net.minecraft.world.entity.EntityType<?> type =
+                net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getValue(
+                        net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(
+                                com.tnc.tnc.TNMod.MODID, id));
+            if (type == null) {
+                player.displayClientMessage(Component.literal(
+                        "\u00a7c[TN-C] \u672a\u77e5 NPC id\uff1a" + id), false);
+                continue;
+            }
+            // 查已加载范围内的所有该类型实体。
+            // 边界自己拼：Level 上**没有** getWorldBounds()（这个版本没有，读签名确认），
+            // 所以用 build 高度 + 一个很大的水平范围。原版内部按 chunk 分桶，只遍历已加载的。
+            net.minecraft.world.phys.AABB everywhere = new net.minecraft.world.phys.AABB(
+                    -3.0E7D, level.getMinBuildHeight(), -3.0E7D,
+                     3.0E7D, level.getMaxBuildHeight(),  3.0E7D);
+            java.util.List<net.minecraft.world.entity.Entity> hits = level.getEntities(
+                    net.minecraft.world.level.entity.EntityTypeTest.forClass(net.minecraft.world.entity.Entity.class),
+                    everywhere,
+                    e -> e.getType() == type);
+            for (net.minecraft.world.entity.Entity e : hits) {
+                e.discard();
+                removed++;
+            }
+        }
+        player.displayClientMessage(Component.literal(
+                "\u00a7a[TN-C] \u5df2\u6e05\u7406 " + removed + " \u4e2a " + npcId), false);
+        return removed;
     }
 
     private static int list(ServerPlayer player) {
