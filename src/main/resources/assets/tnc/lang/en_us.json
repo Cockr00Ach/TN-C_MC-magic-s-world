@@ -4,5 +4,11 @@
   "item.tnc.magic_wand.desc": "Hold it to cast. Which spells you can cast comes from your Magic Stone.",
   "key.categories.tnc": "TN-C",
   "key.tnc.open_magic_stone": "Open Magic Stone",
-  "itemGroup.tnc.main": "TN-C"
+  "itemGroup.tnc.main": "TN-C",
+  "item.tnc.canjuan_1a": "Chest Legend Fragment: Scroll I (Part 1) - Brandish",
+  "item.tnc.canjuan_1b": "Chest Legend Fragment: Scroll I (Part 2) - Return",
+  "item.tnc.canjuan_3": "Chest Legend Fragment: Scroll III - Spread",
+  "item.tnc.canjuan_4": "Chest Legend Fragment: Scroll IV - Wall",
+  "item.tnc.canjuan_5": "Chest Legend Fragment: Scroll V - Succession",
+  "item.tnc.canjuan_6": "Chest Legend Fragment: Scroll VI - Sitting Watch",
 }

@@ -83,6 +83,13 @@ public class TNMod
             .displayItems((parameters, output) -> {
                 output.accept(SWORD.get());
                 output.accept(WAND.get());
+                // 剧情道具「宝箱传说残卷」六卷（卷一拆成上下卷）—— 方便验收时直接拿 ✓
+                output.accept(com.tnc.tnc.magic.TNScrolls.JUAN_1A.get());
+                output.accept(com.tnc.tnc.magic.TNScrolls.JUAN_1B.get());
+                output.accept(com.tnc.tnc.magic.TNScrolls.JUAN_3.get());
+                output.accept(com.tnc.tnc.magic.TNScrolls.JUAN_4.get());
+                output.accept(com.tnc.tnc.magic.TNScrolls.JUAN_5.get());
+                output.accept(com.tnc.tnc.magic.TNScrolls.JUAN_6.get());
             }).build());
 
     // ------------------------------------------------------------------
@@ -103,6 +110,8 @@ public class TNMod
         com.tnc.tnc.world.stonecrest.TNStructures.register(modEventBus);
         // 我们自己的状态效果（雷速 / 极速雷风 / 环绕雷球 / 闪电登神）—— 法术 JSON 按 id 引用
         com.tnc.tnc.magic.TNEffects.register(modEventBus);
+        // 剧情道具「宝箱传说残卷」六卷 —— 必须在注册事件之前挂上总线（原因见 TNScrolls）
+        com.tnc.tnc.magic.TNScrolls.register(modEventBus);
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);

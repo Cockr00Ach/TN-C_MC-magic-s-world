@@ -5,7 +5,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -54,13 +53,16 @@ public final class TNScrolls {
     public static final RegistryObject<Item> JUAN_6 = SCROLLS.register("canjuan_6",
             () -> new Item(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC)));
 
-    static {
-        try {
-            IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
-            SCROLLS.register(bus);
-        } catch (Throwable t) {
-            // 注册失败不影响游戏（只是这六个道具不出现）
-        }
+    /**
+     * 把注册器挂到 mod 事件总线上，由 {@code TNMod} 构造函数在**注册事件之前**调用一次 ✓。
+     *
+     * <p>注意这里<b>不能</b>写成静态初始化块：Java 的类加载是懒的 ✗，
+     * 如果没人提前碰过本类的静态字段，静态块就不会跑，
+     * 六个残卷会静默消失（jar 里有模型有贴图，游戏里就是没有 ✗）。
+     * 显式调用保证顺序 ✓。
+     */
+    public static void register(IEventBus bus) {
+        SCROLLS.register(bus);
     }
 
     private TNScrolls() {
