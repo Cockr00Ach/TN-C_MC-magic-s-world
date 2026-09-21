@@ -83,6 +83,10 @@ public final class SkyIslandManager {
             } else if (data.phase == SkyIslandSavedData.Phase.IDLE) {
                 data.resetFor(manifest);
             } else if (data.phase == SkyIslandSavedData.Phase.ERROR) {
+                String storedError = data.lastError == null || data.lastError.isBlank()
+                        ? "未知错误" : data.lastError;
+                player.sendSystemMessage(Component.literal("§c天空岛上次生成失败："
+                        + storedError + "。正在从检查点重试。"));
                 releaseActiveChunks(overworld, data);
                 data.lastError = "";
                 data.phase = data.layoutReady

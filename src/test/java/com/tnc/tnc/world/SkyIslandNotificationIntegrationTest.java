@@ -37,6 +37,11 @@ class SkyIslandNotificationIntegrationTest {
         assertFalse(bytes.contains("位置勘测完成，开始分批生成"));
     }
 
+    @Test
+    void persistedGenerationErrorsRemainVisibleWhenLoginStartsRecovery() throws IOException {
+        assertTrue(classBytes(SkyIslandManager.class).contains("天空岛上次生成失败"));
+    }
+
     private static String classBytes(Class<?> type) throws IOException {
         String resource = "/" + type.getName().replace('.', '/') + ".class";
         try (InputStream stream = type.getResourceAsStream(resource)) {

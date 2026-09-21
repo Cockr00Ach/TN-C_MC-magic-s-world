@@ -42,4 +42,13 @@ class SkyIslandNotificationPolicyTest {
         assertEquals(SkyIslandNotificationPolicy.Title.NONE, decision.title());
         assertTrue(decision.sendCoordinates());
     }
+
+    @Test
+    void recoveryDoesNotRepeatAnAlreadyDeliveredCompletionNotification() {
+        SkyIslandNotificationPolicy.Decision decision =
+                SkyIslandNotificationPolicy.onGenerationComplete(true);
+
+        assertEquals(SkyIslandNotificationPolicy.Title.NONE, decision.title());
+        assertFalse(decision.sendCoordinates());
+    }
 }

@@ -20,4 +20,10 @@ final class SkyIslandNotificationPolicy {
         }
         return new Decision(awakeningSeen ? Title.NONE : Title.AWAKENING, false);
     }
+
+    static Decision onGenerationComplete(boolean completionSeen) {
+        return completionSeen
+                ? new Decision(Title.NONE, false)
+                : new Decision(Title.COMPLETE, true);
+    }
 }

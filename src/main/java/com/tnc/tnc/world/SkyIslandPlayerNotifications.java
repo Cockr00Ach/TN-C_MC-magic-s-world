@@ -59,8 +59,15 @@ final class SkyIslandPlayerNotifications {
     }
 
     static void onGenerationComplete(ServerPlayer player, int manifestVersion, BlockPos groundPortal) {
-        showCompletionTitle(player, manifestVersion, groundPortal);
-        sendPortalReminder(player, groundPortal);
+        boolean completionSeen = persisted(player).getInt(COMPLETE_TITLE_VERSION) >= manifestVersion;
+        SkyIslandNotificationPolicy.Decision decision =
+                SkyIslandNotificationPolicy.onGenerationComplete(completionSeen);
+        if (decision.title() == SkyIslandNotificationPolicy.Title.COMPLETE) {
+            showCompletionTitle(player, manifestVersion, groundPortal);
+        }
+        if (decision.sendCoordinates()) {
+            sendPortalReminder(player, groundPortal);
+        }
     }
 
     private static void showCompletionTitle(ServerPlayer player, int manifestVersion, BlockPos groundPortal) {
