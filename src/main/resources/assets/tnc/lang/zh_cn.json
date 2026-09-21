@@ -1,8 +1,14 @@
 {
-  "item.tnc.sword": "试作之剑",
+  "item.tnc.canjuan_1a": "宝箱传说残卷 · 卷一（上）挥戈",
+  "item.tnc.canjuan_1b": "宝箱传说残卷 · 卷一（下）归",
+  "item.tnc.canjuan_3": "宝箱传说残卷 · 卷三 衍",
+  "item.tnc.canjuan_4": "宝箱传说残卷 · 卷四 垣",
+  "item.tnc.canjuan_5": "宝箱传说残卷 · 卷五 代",
+  "item.tnc.canjuan_6": "宝箱传说残卷 · 卷六 坐望",
   "item.tnc.magic_wand": "魔法法杖",
   "item.tnc.magic_wand.desc": "拿着它才能施法；能放哪些法术由魔法石里的解锁记录决定。",
+  "item.tnc.sword": "试作之剑",
+  "itemGroup.tnc.main": "TN-C",
   "key.categories.tnc": "TN-C",
-  "key.tnc.open_magic_stone": "打开魔法石",
-  "itemGroup.tnc.main": "TN-C"
+  "key.tnc.open_magic_stone": "打开魔法石"
 }
