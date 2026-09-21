@@ -43,12 +43,15 @@ class SkyIslandNotificationIntegrationTest {
     }
 
     @Test
-    void awakeningUsesAFullTwoMinuteOnlineCountdownAndDramaticSoundCues() throws IOException {
+    void awakeningPersistsItsResumableSequenceAndUsesBothSoundCues() throws IOException {
         String bytes = classBytes(SkyIslandPlayerNotifications.class);
 
         assertTrue(bytes.contains("tncSkyIslandAwakeningRemainingTicks"));
         assertTrue(bytes.contains("tncSkyIslandCompletionDelayTicks"));
         assertTrue(bytes.contains("tncSkyIslandImpactDelayTicks"));
+        assertTrue(bytes.contains("PORTAL_TRIGGER"));
+        assertTrue(bytes.contains("WARDEN_SONIC_BOOM"));
+        assertTrue(bytes.contains("saveAll"));
     }
 
     private static String classBytes(Class<?> type) throws IOException {

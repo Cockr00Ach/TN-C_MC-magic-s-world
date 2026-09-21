@@ -352,6 +352,7 @@ public final class SkyIslandManager {
         for (ServerPlayer player : level.getServer().getPlayerList().getPlayers()) {
             SkyIslandPlayerNotifications.onGenerationComplete(player, manifest.version(), groundPortal);
         }
+        level.getServer().getPlayerList().saveAll();
     }
 
     private static void placeTemplate(ServerLevel level, ResourceLocation resource, BlockPos target, long seed)

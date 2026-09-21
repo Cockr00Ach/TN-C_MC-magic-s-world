@@ -27,8 +27,6 @@ final class SkyIslandPlayerNotifications {
     private static final String COMPLETION_PENDING = "tncSkyIslandCompletionPending";
     private static final String COMPLETION_DELAY_TICKS = "tncSkyIslandCompletionDelayTicks";
     private static final String IMPACT_DELAY_TICKS = "tncSkyIslandImpactDelayTicks";
-    private static final int TWO_MINUTES_TICKS = 20 * 60 * 2;
-    private static final int COMPLETION_GAP_TICKS = 20 * 8;
     private static final int IMPACT_GAP_TICKS = 12;
 
     private SkyIslandPlayerNotifications() {
@@ -51,7 +49,9 @@ final class SkyIslandPlayerNotifications {
         boolean completionSeen = persisted.getInt(COMPLETE_TITLE_VERSION) >= manifestVersion;
         initializeSequence(persisted, manifestVersion, awakeningSeen);
         SkyIslandNotificationPolicy.Decision decision = SkyIslandNotificationPolicy.onLogin(
-                islandComplete, awakeningSeen, completionSeen);
+                islandComplete, awakeningSeen, completionSeen,
+                persisted.getBoolean(COMPLETION_PENDING),
+                persisted.getInt(COMPLETION_DELAY_TICKS));
 
         if (decision.title() == SkyIslandNotificationPolicy.Title.COMPLETE) {
             showCompletionTitle(player, manifestVersion, groundPortal);
@@ -63,15 +63,18 @@ final class SkyIslandPlayerNotifications {
         if (islandComplete && !awakeningSeen && !completionSeen) {
             persisted.putBoolean(COMPLETION_PENDING, true);
         }
+        player.server.getPlayerList().saveAll();
     }
 
     static void onGenerationComplete(ServerPlayer player, int manifestVersion, BlockPos groundPortal) {
         CompoundTag persisted = persisted(player);
         boolean awakeningSeen = persisted.getInt(AWAKENING_TITLE_VERSION) >= manifestVersion;
         boolean completionSeen = persisted.getInt(COMPLETE_TITLE_VERSION) >= manifestVersion;
+        boolean completionPending = persisted.getBoolean(COMPLETION_PENDING);
         SkyIslandNotificationPolicy.Decision decision =
-                SkyIslandNotificationPolicy.onGenerationComplete(awakeningSeen, completionSeen);
-        if (!completionSeen && (!awakeningSeen || persisted.getInt(COMPLETION_DELAY_TICKS) > 0)) {
+                SkyIslandNotificationPolicy.onGenerationComplete(
+                        awakeningSeen, completionSeen, completionPending);
+        if (!completionSeen && !awakeningSeen) {
             persisted.putBoolean(COMPLETION_PENDING, true);
         } else if (decision.title() == SkyIslandNotificationPolicy.Title.COMPLETE) {
             showCompletionTitle(player, manifestVersion, groundPortal);
@@ -83,13 +86,21 @@ final class SkyIslandPlayerNotifications {
 
     static void tick(MinecraftServer server, int manifestVersion, boolean islandComplete,
                      BlockPos groundPortal) {
+        boolean activeSequence = false;
+        boolean transitioned = false;
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            tickPlayer(player, manifestVersion, islandComplete, groundPortal);
+            TickResult result = tickPlayer(player, manifestVersion, islandComplete, groundPortal);
+            activeSequence |= result.active();
+            transitioned |= result.transitioned();
+        }
+        if (transitioned || SkyIslandNotificationPolicy.periodicSaveDue(
+                activeSequence, server.overworld().getGameTime())) {
+            server.getPlayerList().saveAll();
         }
     }
 
-    private static void tickPlayer(ServerPlayer player, int manifestVersion, boolean islandComplete,
-                                   BlockPos groundPortal) {
+    private static TickResult tickPlayer(ServerPlayer player, int manifestVersion, boolean islandComplete,
+                                         BlockPos groundPortal) {
         CompoundTag persisted = persisted(player);
         boolean awakeningSeen = persisted.getInt(AWAKENING_TITLE_VERSION) >= manifestVersion;
         boolean completionSeen = persisted.getInt(COMPLETE_TITLE_VERSION) >= manifestVersion;
@@ -99,29 +110,38 @@ final class SkyIslandPlayerNotifications {
             int remaining = persisted.getInt(AWAKENING_REMAINING_TICKS);
             if (!SkyIslandNotificationPolicy.countdownExpired(remaining)) {
                 persisted.putInt(AWAKENING_REMAINING_TICKS, remaining - 1);
-                return;
+                return new TickResult(true, false);
             }
             showAwakening(player, manifestVersion);
             persisted.putInt(AWAKENING_REMAINING_TICKS, 0);
             persisted.putInt(IMPACT_DELAY_TICKS, IMPACT_GAP_TICKS);
-            persisted.putInt(COMPLETION_DELAY_TICKS, COMPLETION_GAP_TICKS);
             if (islandComplete && !completionSeen) {
                 persisted.putBoolean(COMPLETION_PENDING, true);
             }
-            return;
+            if (persisted.getBoolean(COMPLETION_PENDING)) {
+                persisted.putInt(COMPLETION_DELAY_TICKS,
+                        SkyIslandNotificationPolicy.completionGapTicks());
+            }
+            return new TickResult(true, true);
         }
 
         tickImpactSound(player, persisted);
         int completionDelay = persisted.getInt(COMPLETION_DELAY_TICKS);
         if (completionDelay > 0) {
-            persisted.putInt(COMPLETION_DELAY_TICKS, completionDelay - 1);
-            return;
+            completionDelay = SkyIslandNotificationPolicy.advanceDelay(completionDelay);
+            persisted.putInt(COMPLETION_DELAY_TICKS, completionDelay);
+            if (completionDelay > 0) {
+                return new TickResult(true, false);
+            }
         }
         if (islandComplete && !completionSeen && persisted.getBoolean(COMPLETION_PENDING)) {
             showCompletionTitle(player, manifestVersion, groundPortal);
             sendPortalReminder(player, groundPortal);
             persisted.putBoolean(COMPLETION_PENDING, false);
+            return new TickResult(false, true);
         }
+        boolean impactPending = persisted.getInt(IMPACT_DELAY_TICKS) > 0;
+        return new TickResult(impactPending, false);
     }
 
     private static void initializeSequence(CompoundTag persisted, int manifestVersion,
@@ -130,7 +150,8 @@ final class SkyIslandPlayerNotifications {
             return;
         }
         persisted.putInt(SEQUENCE_VERSION, manifestVersion);
-        persisted.putInt(AWAKENING_REMAINING_TICKS, awakeningSeen ? 0 : TWO_MINUTES_TICKS);
+        persisted.putInt(AWAKENING_REMAINING_TICKS,
+                awakeningSeen ? 0 : SkyIslandNotificationPolicy.initialCountdownTicks());
         persisted.putBoolean(COMPLETION_PENDING, false);
         persisted.putInt(COMPLETION_DELAY_TICKS, 0);
         persisted.putInt(IMPACT_DELAY_TICKS, 0);
@@ -202,5 +223,8 @@ final class SkyIslandPlayerNotifications {
         CompoundTag persisted = forgeData.getCompound(Player.PERSISTED_NBT_TAG);
         forgeData.put(Player.PERSISTED_NBT_TAG, persisted);
         return persisted;
+    }
+
+    private record TickResult(boolean active, boolean transitioned) {
     }
 }
