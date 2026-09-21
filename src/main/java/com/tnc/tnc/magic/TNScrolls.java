@@ -20,10 +20,12 @@ import net.minecraftforge.registries.RegistryObject;
  *   卷四 · 垣             卷五 · 代           卷六 · 坐望
  * </pre>
  *
- * <p>道具本身只是"可读的残卷"（暂时没有任何右键功能 ✗）——
- * 后续要做的事写在 {@code docs/法术总表_按设计文档.md} 之外的剧情文档里；
- * 掉落（宝箱）与阅读界面属于**任务系统 / 文书专题**的范畴 ✓，
- * 这里只负责**把道具注册进游戏** ✓（模型 + 贴图 + 名字）。
+ * <p>道具本身是**可读的残卷** ✓ —— <b>右键打开原版书本界面</b>读正文，
+ * 正文来自 {@code 剧情/宝箱传说残卷.md} 的【卷文】段（见 {@link TNScrollItem}
+ * 与 {@code tools/gen_scroll_lang.ps1}）；<b>【暗扣】绝不进游戏</b> ✗。
+ *
+ * <p>掉落（宝箱）属于**任务系统 / 文书专题**的范畴 ✓，
+ * 这里只负责**把道具注册进游戏** ✓（模型 + 贴图 + 名字 + 右键阅读）。
  *
  * <p>模型用原版的 {@code item/generated}（平面物品 ✓ —— 残卷就是一张纸 ✓），
  * 贴图放在 {@code assets/tnc/textures/item/<id>.png}。
@@ -31,27 +33,30 @@ import net.minecraftforge.registries.RegistryObject;
 @Mod.EventBusSubscriber(modid = TNMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public final class TNScrolls {
 
+    /** 正文的语言键前缀：完整键是 {@code scroll.tnc.<id>}（由 tools/gen_scroll_lang.ps1 生成 ✓） */
+    public static final String TEXT_PREFIX = "scroll.tnc.";
+
     private static final DeferredRegister<Item> SCROLLS =
             DeferredRegister.create(ForgeRegistries.ITEMS, TNMod.MODID);
 
     /** 卷一（上）· 挥戈 */
     public static final RegistryObject<Item> JUAN_1A = SCROLLS.register("canjuan_1a",
-            () -> new Item(new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)));
+            () -> new TNScrollItem("canjuan_1a", Rarity.UNCOMMON));
     /** 卷一（下）· 归 */
     public static final RegistryObject<Item> JUAN_1B = SCROLLS.register("canjuan_1b",
-            () -> new Item(new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)));
+            () -> new TNScrollItem("canjuan_1b", Rarity.UNCOMMON));
     /** 卷三 · 衍 */
     public static final RegistryObject<Item> JUAN_3 = SCROLLS.register("canjuan_3",
-            () -> new Item(new Item.Properties().stacksTo(1).rarity(Rarity.RARE)));
+            () -> new TNScrollItem("canjuan_3", Rarity.RARE));
     /** 卷四 · 垣 */
     public static final RegistryObject<Item> JUAN_4 = SCROLLS.register("canjuan_4",
-            () -> new Item(new Item.Properties().stacksTo(1).rarity(Rarity.RARE)));
+            () -> new TNScrollItem("canjuan_4", Rarity.RARE));
     /** 卷五 · 代 */
     public static final RegistryObject<Item> JUAN_5 = SCROLLS.register("canjuan_5",
-            () -> new Item(new Item.Properties().stacksTo(1).rarity(Rarity.RARE)));
+            () -> new TNScrollItem("canjuan_5", Rarity.RARE));
     /** 卷六 · 坐望 */
     public static final RegistryObject<Item> JUAN_6 = SCROLLS.register("canjuan_6",
-            () -> new Item(new Item.Properties().stacksTo(1).rarity(Rarity.EPIC)));
+            () -> new TNScrollItem("canjuan_6", Rarity.EPIC));
 
     /**
      * 把注册器挂到 mod 事件总线上，由 {@code TNMod} 构造函数在**注册事件之前**调用一次 ✓。

@@ -1,0 +1,10 @@
+{
+  "zh_cn": {
+    "tooltip.tnc.scroll.read": "右键阅读",
+    "scroll.tnc.missing": "……字迹已经模糊，什么也看不清了。"
+  },
+  "en_us": {
+    "tooltip.tnc.scroll.read": "Right-click to read",
+    "scroll.tnc.missing": "...the writing has faded beyond reading."
+  }
+}
