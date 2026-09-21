@@ -121,6 +121,10 @@ public class TNMod
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.register(new SkyIslandEvents());
+        // 固定 NPC：世界加载时补位 + 周期性自检（NPC 没了会自己回来）
+        MinecraftForge.EVENT_BUS.register(new com.tnc.tnc.npc.NpcPlacementEvents());
+        // /tnc npc ... —— 登记/查看/重放固定 NPC 的坐标
+        MinecraftForge.EVENT_BUS.register(new com.tnc.tnc.npc.NpcCommand());
         // 服务端资源重载（/reload 或重启）时清对话剧本缓存 ——
         // 否则剧本 txt 改了、游戏里还是旧的（缓存是静态 Map）
         MinecraftForge.EVENT_BUS.addListener((net.minecraftforge.event.AddReloadListenerEvent event) ->
