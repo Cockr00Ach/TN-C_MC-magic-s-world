@@ -18,5 +18,7 @@
   "scroll.tnc.canjuan_5": "(A fragment in ancient script - no translation in this build.)",
   "scroll.tnc.canjuan_6": "(A fragment in ancient script - no translation in this build.)",
   "scroll.tnc.missing": "...the writing has faded beyond reading.",
-  "tooltip.tnc.scroll.read": "Right-click to read"
+  "tooltip.tnc.scroll.read": "Right-click to read",
+  "entity.tnc.self": "A. Self",
+  "item.tnc.self_spawn_egg": "Self Spawn Egg"
 }

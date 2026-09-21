@@ -90,6 +90,8 @@ public class TNMod
                 output.accept(com.tnc.tnc.magic.TNScrolls.JUAN_4.get());
                 output.accept(com.tnc.tnc.magic.TNScrolls.JUAN_5.get());
                 output.accept(com.tnc.tnc.magic.TNScrolls.JUAN_6.get());
+                // NPC 刷怪蛋（调试与放置用）—— 剧情 NPC 上线后由生成逻辑接管
+                output.accept(com.tnc.tnc.npc.TNNpcAttributes.SELF_SPAWN_EGG.get());
             }).build());
 
     // ------------------------------------------------------------------
@@ -112,6 +114,9 @@ public class TNMod
         com.tnc.tnc.magic.TNEffects.register(modEventBus);
         // 剧情道具「宝箱传说残卷」六卷 —— 必须在注册事件之前挂上总线（原因见 TNScrolls）
         com.tnc.tnc.magic.TNScrolls.register(modEventBus);
+        // TN-C 自己的 NPC（第一个：A. Self 酒馆老板）。实体类型 + 属性表 + 刷怪蛋
+        com.tnc.tnc.npc.TNNpcs.register(modEventBus);
+        com.tnc.tnc.npc.TNNpcAttributes.register(modEventBus);
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
