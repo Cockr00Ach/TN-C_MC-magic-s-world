@@ -8,11 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SkyIslandNotificationPolicyTest {
     @Test
-    void firstLoginDuringGenerationShowsOnlyTheAwakeningTitle() {
+    void firstLoginDuringGenerationWaitsForTheOnlineCountdown() {
         SkyIslandNotificationPolicy.Decision decision =
                 SkyIslandNotificationPolicy.onLogin(false, false, false);
 
-        assertEquals(SkyIslandNotificationPolicy.Title.AWAKENING, decision.title());
+        assertEquals(SkyIslandNotificationPolicy.Title.NONE, decision.title());
         assertFalse(decision.sendCoordinates());
     }
 
@@ -26,9 +26,18 @@ class SkyIslandNotificationPolicyTest {
     }
 
     @Test
-    void firstLoginAfterCompletionShowsTheCoordinatesTitleAndReminder() {
+    void firstLoginAfterEarlyCompletionStillWaitsForAwakening() {
         SkyIslandNotificationPolicy.Decision decision =
                 SkyIslandNotificationPolicy.onLogin(true, false, false);
+
+        assertEquals(SkyIslandNotificationPolicy.Title.NONE, decision.title());
+        assertFalse(decision.sendCoordinates());
+    }
+
+    @Test
+    void completionAfterAwakeningShowsTheCoordinatesImmediately() {
+        SkyIslandNotificationPolicy.Decision decision =
+                SkyIslandNotificationPolicy.onLogin(true, true, false);
 
         assertEquals(SkyIslandNotificationPolicy.Title.COMPLETE, decision.title());
         assertTrue(decision.sendCoordinates());
@@ -46,9 +55,34 @@ class SkyIslandNotificationPolicyTest {
     @Test
     void recoveryDoesNotRepeatAnAlreadyDeliveredCompletionNotification() {
         SkyIslandNotificationPolicy.Decision decision =
-                SkyIslandNotificationPolicy.onGenerationComplete(true);
+                SkyIslandNotificationPolicy.onGenerationComplete(true, true);
 
         assertEquals(SkyIslandNotificationPolicy.Title.NONE, decision.title());
         assertFalse(decision.sendCoordinates());
+    }
+
+    @Test
+    void earlyGenerationCompletionWaitsBehindAwakening() {
+        SkyIslandNotificationPolicy.Decision decision =
+                SkyIslandNotificationPolicy.onGenerationComplete(false, false);
+
+        assertEquals(SkyIslandNotificationPolicy.Title.NONE, decision.title());
+        assertFalse(decision.sendCoordinates());
+    }
+
+    @Test
+    void generationCompletionAfterAwakeningIsImmediate() {
+        SkyIslandNotificationPolicy.Decision decision =
+                SkyIslandNotificationPolicy.onGenerationComplete(true, false);
+
+        assertEquals(SkyIslandNotificationPolicy.Title.COMPLETE, decision.title());
+        assertTrue(decision.sendCoordinates());
+    }
+
+    @Test
+    void countdownExpiresOnItsLastOnlineTick() {
+        assertFalse(SkyIslandNotificationPolicy.countdownExpired(2));
+        assertTrue(SkyIslandNotificationPolicy.countdownExpired(1));
+        assertTrue(SkyIslandNotificationPolicy.countdownExpired(0));
     }
 }

@@ -15,15 +15,24 @@ final class SkyIslandNotificationPolicy {
     }
 
     static Decision onLogin(boolean islandComplete, boolean awakeningSeen, boolean completionSeen) {
-        if (islandComplete) {
-            return new Decision(completionSeen ? Title.NONE : Title.COMPLETE, true);
+        if (!islandComplete) {
+            return new Decision(Title.NONE, false);
         }
-        return new Decision(awakeningSeen ? Title.NONE : Title.AWAKENING, false);
+        if (completionSeen) {
+            return new Decision(Title.NONE, true);
+        }
+        return awakeningSeen
+                ? new Decision(Title.COMPLETE, true)
+                : new Decision(Title.NONE, false);
     }
 
-    static Decision onGenerationComplete(boolean completionSeen) {
-        return completionSeen
+    static Decision onGenerationComplete(boolean awakeningSeen, boolean completionSeen) {
+        return completionSeen || !awakeningSeen
                 ? new Decision(Title.NONE, false)
                 : new Decision(Title.COMPLETE, true);
+    }
+
+    static boolean countdownExpired(int remainingTicks) {
+        return remainingTicks <= 1;
     }
 }

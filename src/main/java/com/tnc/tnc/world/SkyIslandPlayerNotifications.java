@@ -11,7 +11,10 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 
 /** Player-facing sky-island titles, reminders and compatibility flags. */
@@ -19,6 +22,14 @@ final class SkyIslandPlayerNotifications {
     private static final String LEGACY_FIRST_JOIN_SHOWN = "ysjxmodelFirstJoinDialogShown";
     private static final String AWAKENING_TITLE_VERSION = "tncSkyIslandAwakeningTitleVersion";
     private static final String COMPLETE_TITLE_VERSION = "tncSkyIslandCompleteTitleVersion";
+    private static final String SEQUENCE_VERSION = "tncSkyIslandNotificationSequenceVersion";
+    private static final String AWAKENING_REMAINING_TICKS = "tncSkyIslandAwakeningRemainingTicks";
+    private static final String COMPLETION_PENDING = "tncSkyIslandCompletionPending";
+    private static final String COMPLETION_DELAY_TICKS = "tncSkyIslandCompletionDelayTicks";
+    private static final String IMPACT_DELAY_TICKS = "tncSkyIslandImpactDelayTicks";
+    private static final int TWO_MINUTES_TICKS = 20 * 60 * 2;
+    private static final int COMPLETION_GAP_TICKS = 20 * 8;
+    private static final int IMPACT_GAP_TICKS = 12;
 
     private SkyIslandPlayerNotifications() {
     }
@@ -38,36 +49,113 @@ final class SkyIslandPlayerNotifications {
         CompoundTag persisted = persisted(player);
         boolean awakeningSeen = persisted.getInt(AWAKENING_TITLE_VERSION) >= manifestVersion;
         boolean completionSeen = persisted.getInt(COMPLETE_TITLE_VERSION) >= manifestVersion;
+        initializeSequence(persisted, manifestVersion, awakeningSeen);
         SkyIslandNotificationPolicy.Decision decision = SkyIslandNotificationPolicy.onLogin(
                 islandComplete, awakeningSeen, completionSeen);
 
-        if (decision.title() == SkyIslandNotificationPolicy.Title.AWAKENING) {
-            showTitle(player,
-                    Component.literal("天空岛向你投来注视")
-                            .withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD),
-                    Component.literal("远方的浮岛正在苏醒")
-                            .withStyle(ChatFormatting.DARK_PURPLE),
-                    15, 90, 25);
-            persisted.putInt(AWAKENING_TITLE_VERSION, manifestVersion);
-        } else if (decision.title() == SkyIslandNotificationPolicy.Title.COMPLETE) {
+        if (decision.title() == SkyIslandNotificationPolicy.Title.COMPLETE) {
             showCompletionTitle(player, manifestVersion, groundPortal);
         }
 
         if (decision.sendCoordinates()) {
             sendPortalReminder(player, groundPortal);
+        }
+        if (islandComplete && !awakeningSeen && !completionSeen) {
+            persisted.putBoolean(COMPLETION_PENDING, true);
         }
     }
 
     static void onGenerationComplete(ServerPlayer player, int manifestVersion, BlockPos groundPortal) {
-        boolean completionSeen = persisted(player).getInt(COMPLETE_TITLE_VERSION) >= manifestVersion;
+        CompoundTag persisted = persisted(player);
+        boolean awakeningSeen = persisted.getInt(AWAKENING_TITLE_VERSION) >= manifestVersion;
+        boolean completionSeen = persisted.getInt(COMPLETE_TITLE_VERSION) >= manifestVersion;
         SkyIslandNotificationPolicy.Decision decision =
-                SkyIslandNotificationPolicy.onGenerationComplete(completionSeen);
-        if (decision.title() == SkyIslandNotificationPolicy.Title.COMPLETE) {
+                SkyIslandNotificationPolicy.onGenerationComplete(awakeningSeen, completionSeen);
+        if (!completionSeen && (!awakeningSeen || persisted.getInt(COMPLETION_DELAY_TICKS) > 0)) {
+            persisted.putBoolean(COMPLETION_PENDING, true);
+        } else if (decision.title() == SkyIslandNotificationPolicy.Title.COMPLETE) {
             showCompletionTitle(player, manifestVersion, groundPortal);
+            if (decision.sendCoordinates()) {
+                sendPortalReminder(player, groundPortal);
+            }
         }
-        if (decision.sendCoordinates()) {
+    }
+
+    static void tick(MinecraftServer server, int manifestVersion, boolean islandComplete,
+                     BlockPos groundPortal) {
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            tickPlayer(player, manifestVersion, islandComplete, groundPortal);
+        }
+    }
+
+    private static void tickPlayer(ServerPlayer player, int manifestVersion, boolean islandComplete,
+                                   BlockPos groundPortal) {
+        CompoundTag persisted = persisted(player);
+        boolean awakeningSeen = persisted.getInt(AWAKENING_TITLE_VERSION) >= manifestVersion;
+        boolean completionSeen = persisted.getInt(COMPLETE_TITLE_VERSION) >= manifestVersion;
+        initializeSequence(persisted, manifestVersion, awakeningSeen);
+
+        if (!awakeningSeen) {
+            int remaining = persisted.getInt(AWAKENING_REMAINING_TICKS);
+            if (!SkyIslandNotificationPolicy.countdownExpired(remaining)) {
+                persisted.putInt(AWAKENING_REMAINING_TICKS, remaining - 1);
+                return;
+            }
+            showAwakening(player, manifestVersion);
+            persisted.putInt(AWAKENING_REMAINING_TICKS, 0);
+            persisted.putInt(IMPACT_DELAY_TICKS, IMPACT_GAP_TICKS);
+            persisted.putInt(COMPLETION_DELAY_TICKS, COMPLETION_GAP_TICKS);
+            if (islandComplete && !completionSeen) {
+                persisted.putBoolean(COMPLETION_PENDING, true);
+            }
+            return;
+        }
+
+        tickImpactSound(player, persisted);
+        int completionDelay = persisted.getInt(COMPLETION_DELAY_TICKS);
+        if (completionDelay > 0) {
+            persisted.putInt(COMPLETION_DELAY_TICKS, completionDelay - 1);
+            return;
+        }
+        if (islandComplete && !completionSeen && persisted.getBoolean(COMPLETION_PENDING)) {
+            showCompletionTitle(player, manifestVersion, groundPortal);
             sendPortalReminder(player, groundPortal);
+            persisted.putBoolean(COMPLETION_PENDING, false);
         }
+    }
+
+    private static void initializeSequence(CompoundTag persisted, int manifestVersion,
+                                           boolean awakeningSeen) {
+        if (persisted.getInt(SEQUENCE_VERSION) >= manifestVersion) {
+            return;
+        }
+        persisted.putInt(SEQUENCE_VERSION, manifestVersion);
+        persisted.putInt(AWAKENING_REMAINING_TICKS, awakeningSeen ? 0 : TWO_MINUTES_TICKS);
+        persisted.putBoolean(COMPLETION_PENDING, false);
+        persisted.putInt(COMPLETION_DELAY_TICKS, 0);
+        persisted.putInt(IMPACT_DELAY_TICKS, 0);
+    }
+
+    private static void showAwakening(ServerPlayer player, int manifestVersion) {
+        showTitle(player,
+                Component.literal("天空岛向你投来注视")
+                        .withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD),
+                Component.literal("远方的浮岛正在苏醒")
+                        .withStyle(ChatFormatting.DARK_PURPLE),
+                15, 90, 25);
+        player.playNotifySound(SoundEvents.PORTAL_TRIGGER, SoundSource.AMBIENT, 0.9F, 0.65F);
+        persisted(player).putInt(AWAKENING_TITLE_VERSION, manifestVersion);
+    }
+
+    private static void tickImpactSound(ServerPlayer player, CompoundTag persisted) {
+        int remaining = persisted.getInt(IMPACT_DELAY_TICKS);
+        if (remaining <= 0) {
+            return;
+        }
+        if (remaining == 1) {
+            player.playNotifySound(SoundEvents.WARDEN_SONIC_BOOM, SoundSource.AMBIENT, 1.2F, 0.8F);
+        }
+        persisted.putInt(IMPACT_DELAY_TICKS, remaining - 1);
     }
 
     private static void showCompletionTitle(ServerPlayer player, int manifestVersion, BlockPos groundPortal) {
@@ -79,6 +167,7 @@ final class SkyIslandPlayerNotifications {
                 Component.literal(coordinates).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD),
                 10, 120, 30);
         persisted(player).putInt(COMPLETE_TITLE_VERSION, manifestVersion);
+        persisted(player).putBoolean(COMPLETION_PENDING, false);
     }
 
     private static void showTitle(ServerPlayer player, Component title, Component subtitle,

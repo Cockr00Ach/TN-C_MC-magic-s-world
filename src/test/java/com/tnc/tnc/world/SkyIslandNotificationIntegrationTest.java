@@ -42,6 +42,15 @@ class SkyIslandNotificationIntegrationTest {
         assertTrue(classBytes(SkyIslandManager.class).contains("天空岛上次生成失败"));
     }
 
+    @Test
+    void awakeningUsesAFullTwoMinuteOnlineCountdownAndDramaticSoundCues() throws IOException {
+        String bytes = classBytes(SkyIslandPlayerNotifications.class);
+
+        assertTrue(bytes.contains("tncSkyIslandAwakeningRemainingTicks"));
+        assertTrue(bytes.contains("tncSkyIslandCompletionDelayTicks"));
+        assertTrue(bytes.contains("tncSkyIslandImpactDelayTicks"));
+    }
+
     private static String classBytes(Class<?> type) throws IOException {
         String resource = "/" + type.getName().replace('.', '/') + ".class";
         try (InputStream stream = type.getResourceAsStream(resource)) {

@@ -117,6 +117,9 @@ public final class SkyIslandManager {
         }
 
         try {
+            boolean complete = isComplete(data, manifest);
+            SkyIslandPlayerNotifications.tick(server, manifest.version(), complete,
+                    complete ? groundLanding(data) : BlockPos.ZERO);
             switch (data.phase) {
                 case SURVEY -> surveyStep(level, data, manifest);
                 case BUILDING -> buildStep(level, data, manifest);
