@@ -43,6 +43,13 @@ public class MagicStoneNetwork {
                 .decoder(MagicStoneActionPacket::decode)
                 .consumerMainThread(MagicStoneActionPacket::handle)
                 .add();
+
+        // 对话系统的两个包挂在**同一条通道**上（包 id 从 100 起，避开上面的 0/1）。
+        // ⚠️ 绝不能另建一条同名通道：Forge 的 newSimpleChannel 对同名会抛
+        //    "NetworkDirection Channel {tnc:main} already registered"，
+        //    而那个异常发生在 mod 构造期 → 整个 mod 变 broken → 启动失败。
+        //    详见 com.tnc.tnc.dialogue.DialogueNetwork 的类注释。
+        com.tnc.tnc.dialogue.DialogueNetwork.registerPackets(CHANNEL, 100);
     }
 
     // ---------------- 客户端调用的小工具 ----------------

@@ -121,11 +121,17 @@ public class TNMod
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.register(new SkyIslandEvents());
+        // 服务端资源重载（/reload 或重启）时清对话剧本缓存 ——
+        // 否则剧本 txt 改了、游戏里还是旧的（缓存是静态 Map）
+        MinecraftForge.EVENT_BUS.addListener((net.minecraftforge.event.AddReloadListenerEvent event) ->
+                com.tnc.tnc.dialogue.DialogueLoader.clearCache());
 
         // Register our mod's ForgeConfigSpec so that Forge can create and load the config file for us
         context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
 
         // 魔法石数据同步用的网络通道（服务端 → 客户端）
+        // 对话系统的包也挂在同一条通道上（在 MagicStoneNetwork.register() 里一并注册）——
+        // 一个 mod 只能有一条 SimpleChannel，另建同名通道会在构造期抛异常、整包启动失败。
         MagicStoneNetwork.register();
     }
 

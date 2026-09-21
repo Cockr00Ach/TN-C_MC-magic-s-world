@@ -1,5 +1,12 @@
 package com.tnc.tnc.npc;
 
+import com.tnc.tnc.TNMod;
+import com.tnc.tnc.dialogue.DialogueLoader;
+import com.tnc.tnc.dialogue.DialogueNetwork;
+import com.tnc.tnc.dialogue.DialogueProgress;
+import com.tnc.tnc.dialogue.DialogueScript;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
@@ -9,6 +16,8 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+
+import java.util.Optional;
 
 /**
  * A. Self —— 酒馆老板（TN-C 第一个自己的 NPC）。
@@ -28,6 +37,15 @@ import net.minecraft.world.level.Level;
  * </ol>
  */
 public class SelfNpcEntity extends PathfinderMob {
+
+    /**
+     * Self 的首次对话剧本。
+     *
+     * <p>剧本内容在 {@code data/tnc/dialogues/self_first.txt}（<b>纯文本，编剧可直接改</b>，
+     * 不用重新编译）。这份文案对应的就是第一场「第二杯酒」。
+     */
+    public static final ResourceLocation FIRST_DIALOGUE =
+            ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "self_first");
 
     public SelfNpcEntity(EntityType<? extends SelfNpcEntity> type, Level level) {
         super(type, level);
@@ -62,13 +80,33 @@ public class SelfNpcEntity extends PathfinderMob {
 
     @Override
     protected InteractionResult mobInteract(Player player, InteractionHand hand) {
-        // 对话在下一步接（先说一句话验证"右键能叫到他"）。
-        if (!this.level().isClientSide) {
+        if (this.level().isClientSide) {
+            return InteractionResult.SUCCESS;
+        }
+        if (!(player instanceof ServerPlayer serverPlayer)) {
+            return InteractionResult.PASS;
+        }
+
+        // 由服务端决定播哪条剧本，再把整条剧本推给客户端（原因见 DialoguePackets 的说明）。
+        // 第一次见面播 self_first；之后先留一句"还没写"的提示，等第二段剧本进来再替换。
+        Optional<DialogueScript> script = DialogueLoader.get(
+                serverPlayer.server.getResourceManager(), FIRST_DIALOGUE);
+
+        if (script.isEmpty()) {
+            // 剧本文件缺失/解析失败 —— 明确告诉玩家和日志，绝不静默什么都不发生
             player.displayClientMessage(
                     net.minecraft.network.chat.Component.literal(
-                            "\u00a77[Self] \u00a7f\u4f60\u597d\u554a\uff0c\u8fdc\u9053\u800c\u6765\u7684\u5ba2\u4eba\u3002"),
+                            "\u00a7c[TN-C] \u5267\u672c\u52a0\u8f7d\u5931\u8d25\uff0c\u8bf7\u770b\u65e5\u5fd7\u3002"),
                     false);
+            return InteractionResult.SUCCESS;
         }
-        return InteractionResult.sidedSuccess(this.level().isClientSide);
+
+        DialogueNetwork.openFor(serverPlayer, script.get());
+        return InteractionResult.SUCCESS;
+    }
+
+    /** 这条剧本该不该给这个玩家播（现在是"看过就不再自动播"）。 */
+    public static boolean shouldPlayFirst(ServerPlayer player) {
+        return !DialogueProgress.hasSeen(player, FIRST_DIALOGUE);
     }
 }
