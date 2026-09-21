@@ -66,12 +66,20 @@ foreach ($f in $staged) {
 }
 
 # ---------------------------------------------------------------- size rules
+# One deliberate exception: our own background music. It is the only thing in
+# this repo that is legitimately larger than the limit (14 tracks, ~45 MB total,
+# committed on purpose on 2026-09-21 so that a fresh `gradlew build` produces a
+# jar WITH music - see src/main/resources/assets/tnc/sounds/music/).
+# Everything else still obeys $MaxMB.
+$sizeExempt = '^src/main/resources/assets/tnc/sounds/music/travel/.*\.ogg$'
+
 $totalBytes = 0
 foreach ($f in $staged) {
     $full = Join-Path $repoRoot ($f -replace '/', '\')
     if (-not (Test-Path -LiteralPath $full)) { continue }
     $len = (Get-Item -LiteralPath $full).Length
     $totalBytes += $len
+    if (($f -replace '\\', '/') -match $sizeExempt) { continue }
     if ($len -gt ($MaxMB * 1MB)) {
         $problems.Add(("  [too big]   {0}`n              -> {1:N1} MB (limit {2} MB)" -f $f, ($len / 1MB), $MaxMB))
     }
