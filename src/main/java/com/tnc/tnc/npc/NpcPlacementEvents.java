@@ -29,8 +29,6 @@ public final class NpcPlacementEvents {
 
     @SubscribeEvent
     public void onServerStarted(ServerStartedEvent event) {
-        // 换存档/重新生成时锚点会变，先让缓存失效
-        SkyIslandAnchors.clearCache();
         ServerLevel overworld = NpcPlacementSavedData.overworldOf(event.getServer());
         if (overworld == null) {
             return;
