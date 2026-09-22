@@ -8,15 +8,17 @@ import java.util.List;
  * 一段对话剧本 —— 已解析好的数据。
  *
  * <p>结构刻意做得很小：<b>一条剧本 = 若干行台词</b>，每行是"谁说的 + 说了什么"。
- * 第一场（Self 的酒馆）只有一条直线，所以暂时不需要分支；
- * 真要分支时，{@link #next}（对白选项→下一条剧本）已经预留好了。
+ * 真要分支时，{@link #next}（演完后接下一段）已经接好了：
+ * 客户端播完回报服务端，服务端再推下一段（见 {@code DialoguePackets.DialogueDone}）。
  *
  * @param id      剧本 id（{@code tnc:self_first}）
  * @param next    台词放完之后跳去的下一条剧本（可空）
+ * @param theme   对话框配色主题名（见 {@link DialogueTheme}）；{@code null} = 默认金色
  * @param lines   台词行，按顺序播放
  */
 public record DialogueScript(ResourceLocation id,
                              ResourceLocation next,
+                             String theme,
                              List<Line> lines) {
 
     /**
@@ -41,6 +43,8 @@ public record DialogueScript(ResourceLocation id,
         if (script.next() != null) {
             buf.writeResourceLocation(script.next());
         }
+        // 主题只传**名字**，调色板留在客户端 —— 改颜色不用动网络协议，也不用两个端同步色值
+        buf.writeUtf(script.theme() == null ? "" : script.theme());
         buf.writeVarInt(script.lines().size());
         for (Line line : script.lines()) {
             buf.writeUtf(line.speaker());
@@ -51,16 +55,19 @@ public record DialogueScript(ResourceLocation id,
     public static DialogueScript read(net.minecraft.network.FriendlyByteBuf buf) {
         ResourceLocation id = buf.readResourceLocation();
         ResourceLocation next = buf.readBoolean() ? buf.readResourceLocation() : null;
+        String theme = buf.readUtf();
         int n = buf.readVarInt();
         java.util.List<Line> lines = new java.util.ArrayList<>(n);
         for (int i = 0; i < n; i++) {
             lines.add(new Line(buf.readUtf(), buf.readUtf()));
         }
-        return new DialogueScript(id, next, List.copyOf(lines));
+        return new DialogueScript(id, next, theme.isEmpty() ? null : theme, List.copyOf(lines));
     }
 
     /** 便于调试/日志：{@code 3 行} 这种摘要。 */
     public String summary() {
-        return id + " (" + lines.size() + " line(s)" + (next != null ? ", next=" + next : "") + ")";
+        return id + " (" + lines.size() + " line(s)"
+                + (theme != null ? ", theme=" + theme : "")
+                + (next != null ? ", next=" + next : "") + ")";
     }
 }

@@ -60,7 +60,14 @@ public final class DialogueDiagnostics {
             // get() 内部会解析；失败时它自己会打 ERROR（含具体行号），这里只负责汇总
             var script = DialogueLoader.get(server.getResourceManager(), id);
             if (script.isPresent()) {
-                okList.add(id.getPath() + "(" + script.get().lines().size() + "行)");
+                okList.add(id.getPath() + "(" + script.get().lines().size() + "行,"
+                        + script.get().theme() + ")");
+                // ★ @next 链也要查：接不上的话玩家看完第一段就"没下文了"，而且不报错。
+                //   静默失效是这个项目最大的坑，所以在这里提前暴露（用户 2026-09-22 加第二段剧情时补齐）。
+                ResourceLocation next = script.get().next();
+                if (next != null && DialogueLoader.get(server.getResourceManager(), next).isEmpty()) {
+                    badList.add(id + " 的 @next -> " + next + "（不存在）");
+                }
             } else {
                 badList.add(id.toString());
             }
@@ -69,8 +76,7 @@ public final class DialogueDiagnostics {
         LOGGER.info("TN-C dialogue self-check: {}/{} script(s) ok -> {}",
                 okList.size(), ids.size(), String.join(", ", okList));
         if (!badList.isEmpty()) {
-            LOGGER.error("TN-C dialogue self-check: {} script(s) FAILED -> {} (详见上面的 parse 错误)",
-                    badList.size(), String.join(", ", badList));
+            LOGGER.error("TN-C dialogue self-check: {} 处有问题 -> {}", badList.size(), String.join(" / ", badList));
         }
     }
 

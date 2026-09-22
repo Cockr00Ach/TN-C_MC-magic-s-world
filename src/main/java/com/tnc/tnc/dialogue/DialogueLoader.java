@@ -111,7 +111,10 @@ public final class DialogueLoader {
         if (lines.isEmpty()) {
             throw new IllegalStateException("no dialogue lines found");
         }
-        return new DialogueScript(id, next, List.copyOf(lines));
+        // 配色主题：按剧本 id 的前缀自动定（zhuangquerang_second -> zhuangquerang），
+        // 所以**加戏不用在 Java 里登记任何东西**，剧本文件一放就有对应颜色。
+        String theme = DialogueTheme.paletteOf(id.getPath()).key();
+        return new DialogueScript(id, next, theme, List.copyOf(lines));
     }
 
     /** 剧本 id 的约定：{@code tnc:<npc>_<序号>}。 */

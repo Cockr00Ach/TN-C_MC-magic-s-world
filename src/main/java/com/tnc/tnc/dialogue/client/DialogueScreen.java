@@ -2,6 +2,7 @@ package com.tnc.tnc.dialogue.client;
 
 import com.tnc.tnc.dialogue.DialogueNetwork;
 import com.tnc.tnc.dialogue.DialogueScript;
+import com.tnc.tnc.dialogue.DialogueTheme;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -27,6 +28,9 @@ import java.util.List;
  *
  * <p>旁白（说话人为空的行）用<b>灰色斜体、居中</b>显示，和角色台词区分开
  * —— 剧本里那七处动作提示就是旁白。
+ *
+ * <p><b>配色</b>：每个 NPC 可以不一样（用户 2026-09-22），由剧本自带的主题决定，
+ * 见 {@link DialogueTheme}。旁白灰是唯一不随主题变的部分。
  */
 public class DialogueScreen extends Screen {
 
@@ -34,14 +38,22 @@ public class DialogueScreen extends Screen {
     private static final int PANEL_HEIGHT = 84;
     private static final int PAD = 8;
     private static final int LINE_HEIGHT = 11;
-    private static final int NAME_COLOR = 0xFFD8A657;
-    private static final int TEXT_COLOR = 0xFFF2F2F2;
-    private static final int NARRATION_COLOR = 0xFFB9B9B9;
 
     /** 逐字速度：每 N tick 出一个字（1 = 最快，20 tick = 1 秒）。 */
     private static final int CHARS_PER_TICK_INTERVAL = 1;
 
+    /** 旁白灰 —— 刻意**不随主题变**：动作提示要一直在"画面之外"，不能跟角色抢眼。 */
+    private static final int NARRATION_COLOR = 0xFFB9B9B9;
+
     private final DialogueScript script;
+
+    /**
+     * 对话框配色 —— 每个 NPC 可以不一样（用户 2026-09-22 的要求）。
+     * 主题随剧本下发（见 {@code DialogueTheme}），这里只管取用；
+     * {@code null} 时回落默认金色，也就是以前的样子。
+     */
+    private final DialogueTheme.Palette theme;
+
     private final List<FormattedCharSequence> wrapped = new ArrayList<>();
 
     private int lineIndex;
@@ -55,6 +67,7 @@ public class DialogueScreen extends Screen {
     public DialogueScreen(DialogueScript script) {
         super(Component.literal("TN-C Dialogue"));
         this.script = script;
+        this.theme = DialogueTheme.byName(script.theme());
     }
 
     // ------------------------------------------------------------------ 布局
@@ -176,14 +189,14 @@ public class DialogueScreen extends Screen {
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        // 底部半透明面板 + 金色描边
-        graphics.fill(panelLeft, panelTop, panelLeft + panelWidth, panelTop + PANEL_HEIGHT, 0xC8101014);
-        graphics.fill(panelLeft, panelTop, panelLeft + panelWidth, panelTop + 1, 0xFFD8A657);
+        // 底部半透明面板 + 主题色描边（颜色随 NPC 变，见 DialogueTheme）
+        graphics.fill(panelLeft, panelTop, panelLeft + panelWidth, panelTop + PANEL_HEIGHT, theme.panel());
+        graphics.fill(panelLeft, panelTop, panelLeft + panelWidth, panelTop + 1, theme.border());
         graphics.fill(panelLeft, panelTop + PANEL_HEIGHT - 1, panelLeft + panelWidth,
-                panelTop + PANEL_HEIGHT, 0xFFD8A657);
-        graphics.fill(panelLeft, panelTop, panelLeft + 1, panelTop + PANEL_HEIGHT, 0xFFD8A657);
+                panelTop + PANEL_HEIGHT, theme.border());
+        graphics.fill(panelLeft, panelTop, panelLeft + 1, panelTop + PANEL_HEIGHT, theme.border());
         graphics.fill(panelLeft + panelWidth - 1, panelTop, panelLeft + panelWidth,
-                panelTop + PANEL_HEIGHT, 0xFFD8A657);
+                panelTop + PANEL_HEIGHT, theme.border());
 
         var font = Minecraft.getInstance().font;
         int x = panelLeft + PAD;
@@ -191,14 +204,14 @@ public class DialogueScreen extends Screen {
 
         // 名字栏（旁白不显示名字）
         if (!isNarration()) {
-            graphics.drawString(font, currentLine().speaker(), x, y, NAME_COLOR, true);
+            graphics.drawString(font, currentLine().speaker(), x, y, theme.name(), true);
             y += LINE_HEIGHT + 2;
         }
 
         // 正文（逐字）
         String full = currentLine().text();
         int shown = Math.min(revealChars, full.length());
-        int color = isNarration() ? NARRATION_COLOR : TEXT_COLOR;
+        int color = isNarration() ? NARRATION_COLOR : theme.text();
         int maxRows = (PANEL_HEIGHT - PAD * 2 - (isNarration() ? 0 : LINE_HEIGHT + 2)) / LINE_HEIGHT;
         int drawn = 0;
         for (FormattedCharSequence row : wrapped) {
@@ -229,7 +242,7 @@ public class DialogueScreen extends Screen {
             String hint = "\u25bc";
             graphics.drawString(font, hint,
                     panelLeft + panelWidth - PAD - font.width(hint),
-                    panelTop + PANEL_HEIGHT - PAD - 8, 0xFFD8A657, true);
+                    panelTop + PANEL_HEIGHT - PAD - 8, theme.hint(), true);
         }
         super.render(graphics, mouseX, mouseY, partialTick);
     }

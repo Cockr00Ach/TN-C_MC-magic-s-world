@@ -65,6 +65,32 @@ public final class DialogueNetwork {
                 new DialoguePackets.DialogueDone(scriptId));
     }
 
+    /**
+     * 玩家看完一段后，把 {@code @next} 接上（用户 2026-09-22：给庄鹊让加第二段剧情）。
+     *
+     * <h2>为什么由服务端接力，而不是客户端自己播</h2>
+     * 剧本放哪几段、下一段是什么，都是**服务端**的事（跟"哪些人该说话"同一类信息）。
+     * 客户端只负责播完回报；服务端收到 DONE 后再决定要不要接着推一段。
+     * 这样以后加条件分支（比如"只有接过任务才播第二段"）也只改服务端。
+     *
+     * <p>找不到 {@code @next} 指向的剧本时**只报错、不静默**：静默失效是这个项目最大的坑，
+     * 而且剧本 id 打错在编辑器里根本看不出来。
+     */
+    public static void playNext(ServerPlayer player, DialogueScript current) {
+        ResourceLocation next = current.next();
+        if (next == null) {
+            return;
+        }
+        var script = DialogueLoader.get(player.server.getResourceManager(), next);
+        if (script.isEmpty()) {
+            com.mojang.logging.LogUtils.getLogger().error(
+                    "TN-C dialogue: {} 的 @next 指向 {} —— 剧本不存在，接不下去（检查文件名与 @id）",
+                    current.id(), next);
+            return;
+        }
+        openFor(player, script.get());
+    }
+
     /** 只用于日志/诊断：确认我们挂在哪条通道上。 */
     public static String channelName() {
         return TNMod.MODID + ":main";

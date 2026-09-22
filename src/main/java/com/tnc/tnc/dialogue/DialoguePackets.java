@@ -86,6 +86,11 @@ public final class DialoguePackets {
                 net.minecraft.server.level.ServerPlayer player = context.getSender();
                 if (player != null) {
                     DialogueProgress.markSeen(player, payload);
+                    // ★ 接力：这段演完了，如果它写了 @next，就把下一段推过去。
+                    //   放在 markSeen 之后 —— 万一 next 加载失败，至少"看过了"已经落账，
+                    //   玩家再右键还是能从第一段重新走，不会卡住。
+                    DialogueLoader.get(player.server.getResourceManager(), payload)
+                            .ifPresent(script -> DialogueNetwork.playNext(player, script));
                 }
             });
             context.setPacketHandled(true);
