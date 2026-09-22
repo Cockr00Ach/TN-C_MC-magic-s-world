@@ -49,6 +49,12 @@ public class NpcPlacementSavedData extends net.minecraft.world.level.saveddata.S
 
     private final Map<String, Placement> placements = new HashMap<>();
 
+    /**
+     * 本存档已经采用过的 {@link NpcPlacementDefaults} 版本。
+     * {@code 0} = 这个存档早在版本机制存在之前就存过盘（或还没播种过）。
+     */
+    private int defaultsVersion = 0;
+
     public static NpcPlacementSavedData get(ServerLevel level) {
         return level.getServer().overworld().getDataStorage().computeIfAbsent(
                 NpcPlacementSavedData::load, NpcPlacementSavedData::new, DATA_NAME);
@@ -56,6 +62,7 @@ public class NpcPlacementSavedData extends net.minecraft.world.level.saveddata.S
 
     public static NpcPlacementSavedData load(CompoundTag tag) {
         NpcPlacementSavedData data = new NpcPlacementSavedData();
+        data.defaultsVersion = tag.getInt("DefaultsVersion"); // 老存档没有这个键 → 0 → 下次启动刷新一次
         ListTag list = tag.getList("Npcs", Tag.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
             CompoundTag e = list.getCompound(i);
@@ -83,6 +90,7 @@ public class NpcPlacementSavedData extends net.minecraft.world.level.saveddata.S
             list.add(e);
         });
         tag.put("Npcs", list);
+        tag.putInt("DefaultsVersion", defaultsVersion);
         return tag;
     }
 
@@ -149,25 +157,50 @@ public class NpcPlacementSavedData extends net.minecraft.world.level.saveddata.S
     }
 
     /**
-     * 确保**默认登记**存在于本存档里（新存档第一次加载时用）。
+     * 确保**默认登记**存在于本存档里，并在默认表版本升级时刷新它们。
      *
-     * <p><b>已存在的不覆盖</b> —— 玩家/GM 用 {@code /tnc npc here} 调过的位置不会被默认值顶掉。
+     * <p>规则（按顺序）：
+     * <ol>
+     *   <li>缺的补上；</li>
+     *   <li>存档记的默认表版本 < {@link NpcPlacementDefaults#VERSION} 时，
+     *       用新默认值覆盖**同名条目**（否则我改了默认值，已经玩过的存档不会跟着变，
+     *       每次都要手敲命令 —— 用户明确要求"下一个新存档直接看到"）；</li>
+     *   <li>刷新完把版本号写进存档，避免每次启动都覆盖。</li>
+     * </ol>
      *
-     * @return 本次新增的条数
+     * <p>想手动调位置：跑 {@code /tnc npc here <id>}，然后<b>把 {@code /tnc npc list}
+     * 打出的那一行抄回 {@link NpcPlacementDefaults#DEFAULTS} 并给 VERSION +1</b> ——
+     * 这样手动值会被固化成新默认，不会被下次刷新顶掉。
+     *
+     * @return 本次新增或刷新的条数
      */
     public int seedDefaults() {
-        int added = 0;
+        int changed = 0;
+        boolean refresh = defaultsVersion < NpcPlacementDefaults.VERSION;
+
         for (Placement def : NpcPlacementDefaults.DEFAULTS) {
-            if (!placements.containsKey(def.npcId())) {
+            Placement existing = placements.get(def.npcId());
+            if (existing == null) {
                 placements.put(def.npcId(), def);
-                added++;
+                changed++;
+            } else if (refresh && !existing.equals(def)) {
+                LOGGER.info("TN-C npc: refreshing default placement of {} -> {} (was {})",
+                        def.npcId(), def, existing);
+                placements.put(def.npcId(), def);
+                changed++;
             }
         }
-        if (added > 0) {
+
+        if (defaultsVersion != NpcPlacementDefaults.VERSION) {
+            defaultsVersion = NpcPlacementDefaults.VERSION;
             this.setDirty();
-            LOGGER.info("TN-C npc: seeded {} default placement(s) into this save", added);
         }
-        return added;
+        if (changed > 0) {
+            this.setDirty();
+            LOGGER.info("TN-C npc: seeded/refreshed {} default placement(s) (defaults v{})",
+                    changed, NpcPlacementDefaults.VERSION);
+        }
+        return changed;
     }
 
     public boolean ensureOne(ServerLevel level, Placement placement) {
