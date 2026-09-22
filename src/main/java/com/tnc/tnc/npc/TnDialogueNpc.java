@@ -97,6 +97,9 @@ public abstract class TnDialogueNpc extends PathfinderMob {
     public void onAddedToWorld() {
         super.onAddedToWorld();
         if (!this.level().isClientSide) {
+            // 穿上这个 NPC 该有的装备（盔甲层已在 TnNpcRenderer 里挂好，穿上就看得见）。
+            // 只做一次：原版实体加入世界只调用一次，读档不会重穿。
+            TnNpcEquipment.equip(this);
             com.mojang.logging.LogUtils.getLogger().info(
                     "TN-C npc: {} added at {} (dim={})",
                     skinName(), this.blockPosition(), this.level().dimension().location());
