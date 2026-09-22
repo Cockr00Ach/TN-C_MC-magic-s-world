@@ -209,7 +209,8 @@ git push -u origin 你的分支名
 
 ## 多专题协作约定
 
-- **法术系统YYY**：docs/当前状态.md、docs/法术专题_交接.md、docs/投射物模型_配方.md、docs/法术制作与测试.md、docs/特殊魔法_设计.md、docs/法术总表_按设计文档.md、docs/美术资产清单.md、docs/实施进度.md、docs/项目交接.md、docs/验收表.md、docs/导图_全法术.png、src/main/java/com/tnc/tnc/magic/**、src/main/java/com/tnc/tnc/client/**、src/main/resources/data/tnc/spells/**、src/main/resources/assets/tnc/**、tools/gen_tnc_*.ps1、tools/verify_mod_jar.ps1、tools/install-to-pack.ps1。
+- **法术系统YYY**：docs/当前状态.md、docs/法术专题_交接.md、docs/投射物模型_配方.md、docs/法术制作与测试.md、docs/特殊魔法_设计.md、docs/法术总表_按设计文档.md、docs/美术资产清单.md、docs/实施进度.md、docs/项目交接.md、docs/验收表.md、docs/导图_全法术.png、docs/宝箱传说残卷_物品预览.png、src/main/java/com/tnc/tnc/magic/**、src/main/java/com/tnc/tnc/client/**、src/main/resources/data/tnc/spells/**、src/main/resources/assets/tnc/**、tools/gen_tnc_*.ps1、tools/gen_scroll_lang.ps1、tools/scroll_lang_extra.json、tools/maid_models.json、tools/sync-tlm-models.ps1、tools/verify_mod_jar.ps1、tools/install-to-pack.ps1。
+  - **也负责**：剧情道具「宝箱传说残卷」六卷（物品本体 + 右键阅读）与**剧情角色形象**（TLM 女仆模型包 `tnc_pet` 的 `zhuangquerang` = 庄鹊让）；**剧情文案本身**仍归编剧系统 AAA ✗。
 - **编剧系统 AAA**（agent dsh · 会话主题「文书」）：剧情唯一事实来源 `剧情总纲.md`。**只产文本，不实现** —— 新机制/新物品写「需求单」。
 - **地图/结构专题**：docs/地图接入进度.md、地图生成/结构资产相关文件。
 - **任务系统BBB**（agent dsh · 会话主题「任务系统BBB」）：`docs/任务系统_交接.md`、`config/ftbquests/quests/chapters/**`、`config/ftbquests/quests/chapter_groups.snbt`、`config/whisperingquests/ftbq_bindings.json`、`archive/author-quest-content/**`。

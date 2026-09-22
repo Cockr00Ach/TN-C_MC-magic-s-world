@@ -111,6 +111,10 @@ D:\ModTest\
 - 已打包成 TLM 模型包 `tnc_pet`，装在 4 个整合包里
 - 文件：`model-source/songzhikun-v4-packed64.json`（模型）、`songzhikun-checker.png`（验证贴图）、`songzhikun-guide64.png`（UV 参照）
 
+**2026-09-21 新增（法术系统YYY）**：`tnc_pet:zhuangquerang`（**庄鹊让**）—— 复制现成模型 `touhou_little_maid:izayoi_sakuya`（十六夜咲夜，蓝白女仆装）。
+模型清单的可复现记录在 `tools/maid_models.json`（配方）+ `tools/sync-tlm-models.ps1`（重建脚本），因为 `tlm_custom_pack/` 不进 git。
+现状与选型理由见 `docs/当前状态.md` 第四节。
+
 **TLM 1.5.0 的关键知识**（见第五节）
 
 ## 4.4 整合包工作区 + 同步工具（可用）

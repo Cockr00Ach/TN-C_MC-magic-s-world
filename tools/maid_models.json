@@ -1,0 +1,16 @@
+{
+  "note": "TN-C 专用的车万女仆(TLM)模型清单。tlm_custom_pack 是第三方内容、不进 git(37MB)，所以这份 JSON 是可复现的唯一记录：换整合包/重装后跑 tools/sync-tlm-models.ps1 就能把模型重建出来。",
+  "target_namespace": "tnc_pet",
+  "models": [
+    {
+      "as": "zhuangquerang",
+      "source": "izayoi_sakuya",
+      "name": "庄鹊让",
+      "description": [
+        "卷五《代》—— 暂借十六夜咲夜的外形",
+        "蓝白配色；待原创贴图替换"
+      ],
+      "why": "咲夜=忠心女仆的招牌形象，与庄鹊让「门客 / 代主受难」的定位同构；蓝白女仆装符合蓝色调要求"
+    }
+  ]
+}
