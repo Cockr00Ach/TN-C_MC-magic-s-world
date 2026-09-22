@@ -6,7 +6,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 
 /**
- * 熙永槐（槐）—— cava 的儿子，勇者小队的<b>战士</b>（不是法师）。
+ * 槐—— cava 的儿子，勇者小队的<b>战士</b>（不是法师）。
  *
  * <p>剧情里他是个"铁匠的儿子"：第一段第三场被他爹塞了一面**没打完的盾**跟着归出门，
  * 口头禅是"找到人我就回来，回来跟老爹交差"（见 {@code 剧情/开场_分离之后.md}）。
