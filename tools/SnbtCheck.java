@@ -158,6 +158,24 @@ public class SnbtCheck {
     @SuppressWarnings("unchecked")
     public static void main(String[] args) throws Exception {
         int bad = 0;
+
+        // 先扫一遍入参，把 chapter_groups.snbt 里的分组 id 收集起来 ——
+        // 章节的 `group:` 必须指向一个真实存在的分组，否则章节挂不进去
+        // （2026-09-22 真踩过：FTB 会**自己重写分组 id**，手写的 id 就变悬空了）。
+        Set<String> knownGroups = new LinkedHashSet<>();
+        for (String f : args) {
+            Object r = null;
+            try { r = parse(Files.readString(Path.of(f), StandardCharsets.UTF_8)); } catch (Exception ignored) { }
+            if (r instanceof Map<?, ?> mm && mm.get("chapter_groups") instanceof List<?> gl) {
+                for (Object g : gl) {
+                    if (g instanceof Map<?, ?> gm && gm.get("id") != null) knownGroups.add(String.valueOf(gm.get("id")));
+                }
+            }
+        }
+        if (!knownGroups.isEmpty()) {
+            System.out.println("已收集到 " + knownGroups.size() + " 个分组 id: " + knownGroups);
+        }
+
         for (String f : args) {
             System.out.println("=== " + Path.of(f).getFileName() + " ===");
             String text = Files.readString(Path.of(f), StandardCharsets.UTF_8);
@@ -171,6 +189,20 @@ public class SnbtCheck {
             }
             if (!(root instanceof Map)) { System.out.println("  [FAIL] 根不是 compound"); bad++; continue; }
             Map<String, Object> m = (Map<String, Object>) root;
+
+            // chapter_groups.snbt 走另一套检查（它没有 quests）
+            if (m.get("chapter_groups") instanceof List<?> gl) {
+                System.out.println("  [ok] 语法通过，分组数=" + gl.size());
+                for (Object g : gl) {
+                    Map<String, Object> gm = (Map<String, Object>) g;
+                    boolean ok = gm.get("id") != null && gm.get("title") != null;
+                    System.out.println("    " + (ok ? "[ok]" : "[FAIL]") + " id=" + gm.get("id")
+                            + " 标题=" + gm.get("title"));
+                    if (!ok) bad++;
+                }
+                continue;
+            }
+
             System.out.println("  [ok] 语法通过，顶层键: " + m.keySet());
 
             // 章节根字段。★ title 漏了**不报错**、只是任务界面显示"未命名"（2026-09-22 真踩过）
@@ -214,6 +246,23 @@ public class SnbtCheck {
             } else {
                 System.out.println("  [FAIL] 悬空依赖: " + dangling);
                 bad++;
+            }
+
+            // ★ 章节的 group 必须真的存在（跨文件）。FTB 会自己重写分组 id，
+            //   手写的 id 一旦被换掉，这里就会悬空、章节挂不进任何分组。
+            if (!knownGroups.isEmpty()) {
+                String g = str(m.get("group"));
+                if (g == null || g.isEmpty()) {
+                    System.out.println("  [FAIL] 章节没有 group（不会出现在任何分组里）");
+                    bad++;
+                } else if (knownGroups.contains(g)) {
+                    System.out.println("  [ok] group " + g + " 在 chapter_groups.snbt 里存在");
+                } else {
+                    System.out.println("  [FAIL] group " + g + " 不存在于 chapter_groups.snbt —— 章节挂不进去！"
+                            + "\n         现有分组: " + knownGroups
+                            + "\n         （FTB 会重写分组 id：改完分组后要 sync pull 再对齐章节的 group）");
+                    bad++;
+                }
             }
 
             // ★ 视觉顺序：FTB 里 y **越小越靠下**，所以线要自上而下就必须"第一个节点 y 最大"。
