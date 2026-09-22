@@ -265,14 +265,18 @@ public class SnbtCheck {
                 }
             }
 
-            // ★ 视觉顺序：FTB 里 y **越小越靠下**，所以线要自上而下就必须"第一个节点 y 最大"。
-            //   2026-09-22 真踩过：按 y 递减排，结果第一个节点显示在最下面（用户一眼看出来）。
+            // ★ 视觉顺序：★ **y 越小越靠上**（2026-09-22 由用户实机观察确定，两次纠正后定案）。
+            //
+            //   踩坑记录：我一开始按"y 越小越靠下"（Minecraft 屏幕坐标的直觉）排，
+            //   结果第一个节点跑到了最下面。进游戏实测：`挥戈 y=0` 在最上、`两个天才 y=8` 在下面
+            //   ⇒ 屏幕上 **y 越大越靠下**，所以"第一个节点要 y 最小"。
+            //   （我一度读字节码以为反过来 —— 以用户屏幕为准，别跟实机较劲。）
             List<Object[]> byY = new ArrayList<>();
             for (Object o : list) {
                 Map<String, Object> q = (Map<String, Object>) o;
                 byY.add(new Object[]{num(q.get("y")), str(q.get("title"))});
             }
-            byY.sort((a, b) -> Double.compare((double) b[0], (double) a[0])); // y 大的在前（= 视觉在上）
+            byY.sort((a, b) -> Double.compare((double) a[0], (double) b[0])); // y 小的在前（= 视觉在上）
             List<String> visual = new ArrayList<>();
             for (Object[] pair : byY) visual.add((String) pair[1]);
             if (visual.equals(titles)) {
@@ -280,7 +284,7 @@ public class SnbtCheck {
             } else {
                 System.out.println("  [FAIL] 视觉顺序与剧情顺序不一致！"
                         + "\n         剧情顺序: " + titles + "\n         屏幕从上到下: " + visual
-                        + "\n         （FTB 里 y 越小越靠下 → 第一个节点应该 y 最大）");
+                        + "\n         （y 越小越靠上 → 第一个节点应该 y 最小）");
                 bad++;
             }
         }
