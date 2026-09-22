@@ -173,13 +173,15 @@ public class SnbtCheck {
             Map<String, Object> m = (Map<String, Object>) root;
             System.out.println("  [ok] 语法通过，顶层键: " + m.keySet());
 
-            // 章节根字段
-            for (String need : new String[]{"id", "filename", "group", "quests"}) {
+            // 章节根字段。★ title 漏了**不报错**、只是任务界面显示"未命名"（2026-09-22 真踩过）
+            //   —— 所以必须在这里拦住。
+            for (String need : new String[]{"id", "filename", "group", "title", "quests"}) {
                 if (!m.containsKey(need)) { System.out.println("  [FAIL] 缺字段 " + need); bad++; }
             }
             Object qs = m.get("quests");
             if (!(qs instanceof List<?> list)) { System.out.println("  [FAIL] quests 不是 list"); bad++; continue; }
-            System.out.println("  章节 id=" + m.get("id") + "  filename=" + m.get("filename")
+            System.out.println("  章节 id=" + m.get("id") + "  标题=" + m.get("title")
+                    + "  filename=" + m.get("filename")
                     + "  group=" + m.get("group") + "  节点数=" + list.size());
 
             Set<String> ids = new LinkedHashSet<>();
@@ -213,8 +215,37 @@ public class SnbtCheck {
                 System.out.println("  [FAIL] 悬空依赖: " + dangling);
                 bad++;
             }
+
+            // ★ 视觉顺序：FTB 里 y **越小越靠下**，所以线要自上而下就必须"第一个节点 y 最大"。
+            //   2026-09-22 真踩过：按 y 递减排，结果第一个节点显示在最下面（用户一眼看出来）。
+            List<Object[]> byY = new ArrayList<>();
+            for (Object o : list) {
+                Map<String, Object> q = (Map<String, Object>) o;
+                byY.add(new Object[]{num(q.get("y")), str(q.get("title"))});
+            }
+            byY.sort((a, b) -> Double.compare((double) b[0], (double) a[0])); // y 大的在前（= 视觉在上）
+            List<String> visual = new ArrayList<>();
+            for (Object[] pair : byY) visual.add((String) pair[1]);
+            if (visual.equals(titles)) {
+                System.out.println("  [ok] 自上而下的视觉顺序与剧情顺序一致: " + visual);
+            } else {
+                System.out.println("  [FAIL] 视觉顺序与剧情顺序不一致！"
+                        + "\n         剧情顺序: " + titles + "\n         屏幕从上到下: " + visual
+                        + "\n         （FTB 里 y 越小越靠下 → 第一个节点应该 y 最大）");
+                bad++;
+            }
         }
         System.out.println(bad == 0 ? "ALL OK" : (bad + " 处问题"));
+    }
+
+    /** 把 SNBT 的数值文本（可能是 "8.0d" / 8 / "true"）转成 double。 */
+    static double num(Object o) {
+        if (o == null) return 0;
+        String s = String.valueOf(o).trim();
+        if (s.isEmpty()) return 0;
+        char last = s.charAt(s.length() - 1);
+        if (Character.isLetter(last)) s = s.substring(0, s.length() - 1);
+        try { return Double.parseDouble(s); } catch (NumberFormatException e) { return 0; }
     }
 
     static String str(Object o) { return o == null ? null : String.valueOf(o); }
