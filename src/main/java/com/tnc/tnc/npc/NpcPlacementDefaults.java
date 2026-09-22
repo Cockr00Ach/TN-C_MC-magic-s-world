@@ -35,17 +35,22 @@ public final class NpcPlacementDefaults {
      *   cava 要站 (-5, 180, -783)  ->  偏移 (+15,  0, -15)
      *   槐   要站 (-8, 180, -781)  ->  偏移 (+12,  0, -13)
      * </pre>
-     * 三者都在 CENTER 同一层（dy=0），只差水平位置。
+     * 这两条都在 CENTER 同一层（dy=0），只差水平位置。
+     * <br>{@code zhuangquerang} —— 用户 2026-09-22 指定的世界坐标 920/234/-330，
+     * 换算自存档「新的世界 (5)」（该档 CENTER = 796/180/-240）→ 偏移 (+124, +54, -90)。
+     * <p>⚠️ <b>改这份表一定要把 {@link #VERSION} +1</b>，否则已经玩过的存档不会跟着更新。
      */
     public static final List<NpcPlacementSavedData.Placement> DEFAULTS = List.of(
             new NpcPlacementSavedData.Placement("self", "CENTER", -1, -1, 44),
             new NpcPlacementSavedData.Placement("cava", "CENTER", 15, 0, -15),
             new NpcPlacementSavedData.Placement("huai", "CENTER", 12, 0, -13),
-            // 庄鹊让（卷五《代》）—— 作者 2026-09-22：「放在 self 旁边先」。
-            // self 在 CENTER +5/-1/+44；她放**同一层、往岛内退 2 格**（+5/-1/+42），
-            // 与 self 相距约 2.2 格 —— 横向错开是不想两个人叠在一起。
-            // 位置仍是**暂定** ✗：定位置跑 /tnc npc here zhuangquerang，再把 /tnc npc list 那行抄回来。
-            new NpcPlacementSavedData.Placement("zhuangquerang", "CENTER", 5, -1, 42)
+            // 庄鹊让（卷五《代》）—— 作者 2026-09-22 指定的位置。
+            // 存档「新的世界 (5)」的世界坐标 920/234/-330，该档 CENTER = 796/180/-240
+            // （实测日志：restored 时 CENTER+偏移 -> 801/179/-198 完全吻合）：
+            //   920-796 = +124  234-180 = +54  -330-(-240) = -90
+            // ⚠️ 水平方向离岛心 163 格 —— 已经在天空岛范围之外（岛最远的部件到 x≈988、
+            //    但那是斜对角）。是作者有意放的独立位置（y 比岛面高 54 格），不是笔误。
+            new NpcPlacementSavedData.Placement("zhuangquerang", "CENTER", 124, 54, -90)
     );
 
     /**
@@ -67,10 +72,11 @@ public final class NpcPlacementDefaults {
      *   <li>1 —— 只有 self；</li>
      *   <li>2 —— cava / 槐 按作者给的精确坐标（CENTER +15,0,-15 / +12,0,-13）；</li>
      *   <li>3 —— 加庄鹊让；</li>
-     *   <li>4 —— 庄鹊让从"贴着 huai"挪到"贴着 self"（作者要求）。</li>
+     *   <li>4 —— 庄鹊让从"贴着 huai"挪到"贴着 self"（作者要求）；</li>
+     *   <li>5 —— 庄鹊让按作者指定的世界坐标挪到天空岛外（CENTER +124,+54,-90）。</li>
      * </ul>
      */
-    public static final int VERSION = 4;
+    public static final int VERSION = 5;
 
     private NpcPlacementDefaults() {
     }
