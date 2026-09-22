@@ -73,7 +73,9 @@ public final class NpcCommand {
                         .then(Commands.literal("remove")
                                 .then(Commands.argument("id", StringArgumentType.word())
                                         .executes(ctx -> remove(ctx.getSource().getPlayerOrException(),
-                                                StringArgumentType.getString(ctx, "id")))))));
+                                                StringArgumentType.getString(ctx, "id")))))
+                        .then(Commands.literal("status")
+                                .executes(ctx -> status(ctx.getSource().getPlayerOrException())))));
     }
 
     // ------------------------------------------------------------------ 登记
@@ -248,8 +250,60 @@ public final class NpcCommand {
         return removed;
     }
 
-    private static int list(ServerPlayer player) {
-        NpcPlacementSavedData data = NpcPlacementSavedData.get(player.serverLevel());
+    /**
+     * {@code /tnc npc status} —— 真实诊断：登记说"该在哪"，这里查"**实际上在不在**"。
+     *
+     * <p>为什么需要它：{@code list} 只报告记表内容，看不出实体到底有没有生成成功。
+     * 用户遇到过"登记正确、命令回显正确，但看不见人" —— 这条命令一次就能分辨是
+     * <b>没生成</b> 还是 <b>生成了但你看不见</b>（高度不对/客户端没渲染）。
+     */
+    private static int status(ServerPlayer player) {
+        ServerLevel level = player.serverLevel();
+        NpcPlacementSavedData data = NpcPlacementSavedData.get(level);
+        if (data.all().isEmpty()) {
+            player.displayClientMessage(Component.literal(
+                    "\u00a77[TN-C] \u6ca1\u6709\u767b\u8bb0\u8fc7 NPC\u3002\u7528 /tnc npc here <id> \u767b\u8bb0"), false);
+            return 0;
+        }
+        for (NpcPlacementSavedData.Placement p : data.all().values()) {
+            net.minecraft.world.entity.EntityType<?> type =
+                    net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getValue(
+                            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(
+                                    com.tnc.tnc.TNMod.MODID, p.npcId()));
+            if (type == null) {
+                player.displayClientMessage(Component.literal("\u00a7c" + p.npcId() + " \u7c7b\u578b\u672a\u6ce8\u518c"), false);
+                continue;
+            }
+            BlockPos want = data.resolve(level, p);
+            java.util.List<? extends net.minecraft.world.entity.Entity> found = level.getEntities(
+                    net.minecraft.world.level.entity.EntityTypeTest.forClass(net.minecraft.world.entity.Entity.class),
+                    new net.minecraft.world.phys.AABB(player.blockPosition()).inflate(512.0D),
+                    e -> e.getType() == type);
+
+            player.displayClientMessage(Component.literal("\u00a7e--- " + p.npcId() + " ---"), false);
+            player.displayClientMessage(Component.literal("\u00a77\u767b\u8bb0: \u00a7f" + p.anchor()
+                    + " " + p.dx() + "/" + p.dy() + "/" + p.dz()
+                    + (want != null ? " \u2192 \u00a7f" + want.getX() + "/" + want.getY() + "/" + want.getZ()
+                                    : " \u00a7c(\u951a\u70b9\u672a\u5c31\u7eea)")), false);
+            if (found.isEmpty()) {
+                player.displayClientMessage(Component.literal(
+                        "\u00a7c\u5b9e\u4f53: 512 \u683c\u5185\u4e00\u4e2a\u90fd\u6ca1\u6709\u3002"
+                                + "\u53ef\u80fd\uff1a\u533a\u5757\u672a\u52a0\u8f7d / \u5806\u5728\u65b9\u5757\u91cc / \u653e\u7f6e\u5931\u8d25"), false);
+            } else {
+                for (net.minecraft.world.entity.Entity e : found) {
+                    BlockPos ep = e.blockPosition();
+                    player.displayClientMessage(Component.literal(
+                            "\u00a7a\u5b9e\u4f53: \u00a7f" + ep.getX() + "/" + ep.getY() + "/" + ep.getZ()
+                                    + "\u00a77 \u8ddd\u4f60 " + (int) Math.sqrt(e.distanceToSqr(player)) + " \u683c"
+                                    + "  Y\u5dee " + (ep.getY() - player.blockPosition().getY())
+                                    + "  \u52a0\u8f7d=" + e.isAlive()), false);
+                }
+            }
+        }
+        return 1;
+    }
+
+    private static int list(ServerPlayer player) {        NpcPlacementSavedData data = NpcPlacementSavedData.get(player.serverLevel());
         Map<String, NpcPlacementSavedData.Placement> all = data.all();
         if (all.isEmpty()) {
             player.displayClientMessage(Component.literal("\u00a77[TN-C] \u56fa\u5b9a NPC\uff1a\uff08\u7a7a\uff09"), false);

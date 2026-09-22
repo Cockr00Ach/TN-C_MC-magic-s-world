@@ -161,11 +161,14 @@ public class NpcPlacementSavedData extends net.minecraft.world.level.saveddata.S
         if (pos == null) {
             return false; // 锚点还没就绪（天空岛没生成完）—— 安静跳过，下次再试
         }
-        // ★ 贴地：锚点的 Y 是生成时算的，和最终地形可能差几格。
-        //   用高度图找该 XZ 上的真实地面，避免 NPC 悬空或埋进方块里。
-        BlockPos grounded = groundAt(level, pos);
-        if (grounded != null) {
-            pos = grounded;
+        // ★ 修正（2026-09-22，用户实测反馈）：以前这里**无条件**用高度图贴地，
+        //   结果把用户明确指定的 Y 覆盖掉了 —— 用户在 179 登记，NPC 被抬到 200（差 21 格），
+        //   表现就是"命令回显对、但人看不见"。
+        //   现在只做**最小必要修正**：目标格本来就站得住 → 原样用；
+        //   只有被方块占住 / 脚下悬空 / 区块没加载时，才去就近找落点。
+        BlockPos adjusted = adjustToStandable(level, pos);
+        if (adjusted != null) {
+            pos = adjusted;
         }
 
         EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(
@@ -194,23 +197,58 @@ public class NpcPlacementSavedData extends net.minecraft.world.level.saveddata.S
     }
 
     /**
-     * 求该 XZ 上的"可站立方块的上方那一格"。
+     * 只做**最小必要**的落点修正 —— 尊重调用方给的 Y。
      *
-     * <p>用 {@code MOTION_BLOCKING_NO_LEAVES} —— 和原版刷怪/传送找落点用的是同一套高度图，
-     * 所以结果就是玩家会站的那一格。
+     * <p>规则（按优先级）：
+     * <ol>
+     *   <li><b>目标格 + 上一格都能站</b>（脚下不是空气）→ 返回原坐标（<b>一字不改</b>）；</li>
+     *   <li>脚下是空气 → 向下找最近的地面（最多 8 格）；</li>
+     *   <li>目标格被方块占住 → 向上找最近的可站立格（最多 6 格）；</li>
+     *   <li>都不行 → 返回 {@code null}，由调用方保留原坐标（宁可放得难看，也别乱挪）。</li>
+     * </ol>
      *
-     * @return 落点；该列什么都没有（虚空/未加载）时返回 null，由调用方保留原坐标
+     * <p>⚠️ 这里曾经写成"无条件用高度图取最高地面"，那会把用户明确指定的高度整个覆盖掉
+     * （用户站 179 → NPC 跑到 200）。<b>修正地形只该在"站不住"时发生。</b>
      */
-    private static BlockPos groundAt(ServerLevel level, BlockPos pos) {
+    private static BlockPos adjustToStandable(ServerLevel level, BlockPos pos) {
         if (!level.hasChunkAt(pos)) {
-            return null; // 区块没加载就别乱查，原样返回等下次
+            return pos; // 区块没加载：原样返回，等下次再试（不要在这里做判断）
         }
-        int y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-                pos.getX(), pos.getZ());
-        if (y <= level.getMinBuildHeight()) {
-            return null;
+        // ① 站得住
+        if (isStandable(level, pos)) {
+            return pos;
         }
-        return new BlockPos(pos.getX(), y, pos.getZ());
+        // ② 脚下悬空 → 向下找地面
+        for (int dy = 1; dy <= 8; dy++) {
+            BlockPos down = pos.below(dy);
+            if (isStandable(level, down)) {
+                return down;
+            }
+            if (!level.getBlockState(down).isAir()) {
+                break; // 碰到实体方块就停：再往下就是钻进去了
+            }
+        }
+        // ③ 被占住 → 向上找
+        for (int dy = 1; dy <= 6; dy++) {
+            BlockPos up = pos.above(dy);
+            if (isStandable(level, up)) {
+                return up;
+            }
+        }
+        return null;
+    }
+
+    /** 该格能站人吗：本格与上一格可穿过，且本格下方是实体方块。 */
+    private static boolean isStandable(ServerLevel level, BlockPos pos) {
+        if (!level.hasChunkAt(pos)) {
+            return false;
+        }
+        var below = level.getBlockState(pos.below());
+        var feet = level.getBlockState(pos);
+        var head = level.getBlockState(pos.above());
+        return !below.isAir() && below.isSolidRender(level, pos.below())
+                && feet.getCollisionShape(level, pos).isEmpty()
+                && head.getCollisionShape(level, pos.above()).isEmpty();
     }
 
     /** 强制重放：先清掉附近的同类，再按登记坐标放一个。返回放置数量。 */
