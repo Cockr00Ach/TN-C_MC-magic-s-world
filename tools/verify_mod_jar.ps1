@@ -345,16 +345,17 @@ try {
                 foreach ($m in [regex]::Matches($block.Groups[1].Value, '"([^"]+)"')) { $leaks += $m.Groups[1].Value }
             }
         }
-        # The check is scoped to the SCROLL BODIES on purpose: character names are
-        # allowed to ship (they are NPC names / dialogue speakers now), but the scroll
-        # text must never name anyone - that mapping is the whole reveal.
+        # The check is scoped to the CHEST-LEGEND SCROLLS on purpose. Those must never
+        # name anyone - the 卷 -> character mapping is the whole reveal. The main-story
+        # record sheets are the opposite: they are a chronicle written with full names,
+        # so they are excluded here.
         $scrollBodies = ''
-        foreach ($m in [regex]::Matches($scrollLangText, '"scroll\.tnc\.[a-z0-9_]+"\s*:\s*"((?:[^"\\]|\\.)*)"')) {
+        foreach ($m in [regex]::Matches($scrollLangText, '"scroll\.tnc\.(?:canjuan_[a-z0-9_]+)"\s*:\s*"((?:[^"\\]|\\.)*)"')) {
             $scrollBodies += $m.Groups[1].Value
         }
         $found = @($leaks | Where-Object { $scrollBodies -match [regex]::Escape($_) })
         if ($leaks.Count -eq 0) { Fail 'spoiler word list not found (tools\scroll_lang_extra.json -> spoilers) - leak check could not run' }
-        elseif ($found.Count -eq 0) { Ok 'no character names / author-only notes leaked into the scroll text' }
+        elseif ($found.Count -eq 0) { Ok 'no character names / author-only notes leaked into the chest-legend scroll text' }
         else { Fail ('story spoilers leaked into the scroll text: ' + ($found -join ', ')) }
         if ($scrollLangText -match [regex]::Escape('tooltip.tnc.scroll.read')) { Ok 'scroll has the right-click hint tooltip' }
         else { Fail 'scroll tooltip key missing (players would never know it is readable)' }
@@ -414,6 +415,38 @@ try {
         $animText = $ar.ReadToEnd(); $ar.Close()
         if ($animText -match '"idle"') { Ok 'maid animation file defines the "idle" clip the entity asks for' }
         else { Fail 'maid animation file has no "idle" clip - the entity would stand frozen (silent)' }
+    }
+
+    # ---------------- D1b5. the 5 main-story record papers (same reader) ----------------
+    # Same silent-failure modes as the scrolls, plus one of its own: the text is
+    # generated from the writer's summary doc, so a forgotten re-run ships stale
+    # or missing text.
+    $recordIds = @('zhengshi_qianqing', 'zhengshi_1', 'zhengshi_2', 'zhengshi_3', 'zhengshi_4')
+    if ($zip.Entries | Where-Object { $_.FullName -eq 'com/tnc/tnc/magic/TNRecords.class' }) {
+        Ok 'class present: com/tnc/tnc/magic/TNRecords.class'
+    } else {
+        Fail 'record class missing from jar: com/tnc/tnc/magic/TNRecords.class'
+    }
+    if ($scrollLang) {
+        $noRecBody = @()
+        $noRecName = @()
+        $noRecModel = @()
+        foreach ($rid in $recordIds) {
+            if ($scrollLangText -notmatch [regex]::Escape("scroll.tnc.$rid")) { $noRecBody += $rid }
+            if ($scrollLangText -notmatch [regex]::Escape("item.tnc.$rid")) { $noRecName += $rid }
+            if (-not ($zip.Entries | Where-Object { $_.FullName -eq "assets/tnc/models/item/$rid.json" })) { $noRecModel += $rid }
+        }
+        if ($noRecBody.Count -eq 0) { Ok 'all 5 record bodies are in the lang file' }
+        else { Fail ('record body missing from lang (run tools\gen_records_lang.ps1): ' + ($noRecBody -join ', ')) }
+        if ($noRecName.Count -eq 0) { Ok 'all 5 record item names are in the lang file' }
+        else { Fail ('record item name missing from lang: ' + ($noRecName -join ', ')) }
+        if ($noRecModel.Count -eq 0) { Ok 'all 5 record item models are in the jar' }
+        else { Fail ('record item model missing (renders as a missing model): ' + ($noRecModel -join ', ')) }
+        if ($zip.Entries | Where-Object { $_.FullName -eq 'assets/tnc/textures/item/zhengshi.png' }) {
+            Ok 'record sheet texture is in the jar'
+        } else {
+            Fail 'record sheet texture missing: assets/tnc/textures/item/zhengshi.png'
+        }
     }
 
     # ---------------- D1c. HUD entry point + its keybind ----------------

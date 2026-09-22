@@ -90,6 +90,12 @@ public class TNMod
                 output.accept(com.tnc.tnc.magic.TNScrolls.JUAN_4.get());
                 output.accept(com.tnc.tnc.magic.TNScrolls.JUAN_5.get());
                 output.accept(com.tnc.tnc.magic.TNScrolls.JUAN_6.get());
+                // 剧情道具「一周目正史」五张记录纸（前情 + 主线四段）—— 同样是可右键阅读的 ✓
+                output.accept(com.tnc.tnc.magic.TNRecords.QIANQING.get());
+                output.accept(com.tnc.tnc.magic.TNRecords.PART_1.get());
+                output.accept(com.tnc.tnc.magic.TNRecords.PART_2.get());
+                output.accept(com.tnc.tnc.magic.TNRecords.PART_3.get());
+                output.accept(com.tnc.tnc.magic.TNRecords.PART_4.get());
                 // NPC 刷怪蛋（调试与放置用）—— 剧情 NPC 上线后由生成逻辑接管
                 output.accept(com.tnc.tnc.npc.TNNpcAttributes.SELF_SPAWN_EGG.get());
                 output.accept(com.tnc.tnc.npc.TNNpcAttributes.CAVA_SPAWN_EGG.get());
@@ -117,6 +123,8 @@ public class TNMod
         com.tnc.tnc.magic.TNEffects.register(modEventBus);
         // 剧情道具「宝箱传说残卷」六卷 —— 必须在注册事件之前挂上总线（原因见 TNScrolls）
         com.tnc.tnc.magic.TNScrolls.register(modEventBus);
+        // 剧情道具「一周目正史」五张记录纸 —— 同上
+        com.tnc.tnc.magic.TNRecords.register(modEventBus);
         // TN-C 自己的 NPC（第一个：A. Self 酒馆老板）。实体类型 + 属性表 + 刷怪蛋
         com.tnc.tnc.npc.TNNpcs.register(modEventBus);
         com.tnc.tnc.npc.TNNpcAttributes.register(modEventBus);

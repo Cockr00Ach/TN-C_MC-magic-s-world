@@ -1,0 +1,16 @@
+{
+  "note": "README for the 5 main-story record papers (前情 + 主线四段). Text is generated from the doc named in 'doc' below by tools/gen_records_lang.ps1; this file holds the Chinese bits so the .ps1 can stay pure ASCII. 'strip' entries are fragments of that summary doc addressed to the team rather than to the player - they are removed from the in-game text (and listed in the script output, never silently).",
+  "doc": "剧情\\主线概要.md",
+  "names": {
+    "zhengshi_qianqing": "一周目正史 · 前情",
+    "zhengshi_1": "一周目正史 · 一 · 分离之后",
+    "zhengshi_2": "一周目正史 · 二 · 黑暗潮",
+    "zhengshi_3": "一周目正史 · 三 · 黑暗深处",
+    "zhengshi_4": "一周目正史 · 四 · 挥戈"
+  },
+  "strip": [
+    "（🎬 动画）",
+    "（★ 真相全在这里，见正文）",
+    "（最终 boss，她只是等在那儿）"
+  ]
+}
