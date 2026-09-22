@@ -216,6 +216,17 @@ public class NpcPlacementSavedData extends net.minecraft.world.level.saveddata.S
         if (pos == null) {
             return false; // 锚点还没就绪（天空岛没生成完）—— 安静跳过，下次再试
         }
+        // ★★ 别在"没在实体刻"的区块里放（2026-09-22 修，日志实锤）★★
+        // 背景：上一个存档的日志里 self 每 5 秒被"restored"一次、连着 18 次，而 `remove()` 的
+        // 警告一次都没打 —— 说明**实体不是被移除的，是压根没进去**。原因就在这一层：
+        // `onAddedToWorld()` 在 Forge 的事件链上**先于**"这个实体到底加没加进去"被调用，
+        // 所以"added/restored"日志只证明我们**尝试**放了，不证明它在世界里。
+        // 玩家后来传送到另一片天空岛（离这儿 750 格）时，这个区块不在实体刻范围内，
+        // 实体就一次次被丢掉、又一次次被重新尝试 —— 白刷 18 遍。
+        // 放不进去不要紧：登记还在，玩家一靠近就会补上（NpcPlacementEvents 每秒复查）。
+        if (!canHoldEntity(level, pos)) {
+            return false;
+        }
         // ★ 修正（2026-09-22，用户实测反馈）：以前这里**无条件**用高度图贴地，
         //   结果把用户明确指定的 Y 覆盖掉了 —— 用户在 179 登记，NPC 被抬到 200（差 21 格），
         //   表现就是"命令回显对、但人看不见"。
@@ -232,12 +243,10 @@ public class NpcPlacementSavedData extends net.minecraft.world.level.saveddata.S
             LOGGER.error("TN-C npc: placement references unknown entity type tnc:{}", placement.npcId());
             return false;
         }
-        boolean present = !level.getEntitiesOfClass(Entity.class,
-                new net.minecraft.world.phys.AABB(pos).inflate(24.0D),
-                entity -> entity.getType() == type).isEmpty();
-        if (present) {
+        if (findNear(level, type, pos, 24.0D) != null) {
             return false;
         }
+
         Entity entity = type.create(level);
         if (entity == null) {
             LOGGER.error("TN-C npc: failed to create tnc:{}", placement.npcId());
@@ -245,10 +254,49 @@ public class NpcPlacementSavedData extends net.minecraft.world.level.saveddata.S
         }
         entity.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D,
                 level.random.nextFloat() * 360.0F, 0.0F);
-        level.addFreshEntity(entity);
-        LOGGER.info("TN-C npc: restored tnc:{} at {} (anchor={} offset={}/{}/{})",
-                placement.npcId(), pos, placement.anchor(), placement.dx(), placement.dy(), placement.dz());
-        return true;
+        boolean added = level.addFreshEntity(entity);
+        // 回查一遍 —— 这是唯一可信的成功判据（理由见上）。
+        boolean there = findNear(level, type, pos, 4.0D) != null;
+        if (there) {
+            LOGGER.info("TN-C npc: restored tnc:{} at {} (anchor={} offset={}/{}/{})",
+                    placement.npcId(), pos, placement.anchor(), placement.dx(), placement.dy(), placement.dz());
+            return true;
+        }
+        LOGGER.warn("TN-C npc: FAILED to place tnc:{} at {} —— addFreshEntity={} 实体刻={} 区块已加载={} "
+                        + "同类型已加载实体={} alive={} removed={} 维度={}",
+                placement.npcId(), pos, added, level.isPositionEntityTicking(pos),
+                level.hasChunkAt(pos), countLoaded(level, type),
+                entity.isAlive(), entity.isRemoved(), level.dimension().location());
+        return false;
+    }
+
+    /** 找附近（水平半径 {@code radius} 格的方盒内）第一个该类型的实体；没有则 {@code null}。 */
+    public static Entity findNear(ServerLevel level, EntityType<?> type, BlockPos pos, double radius) {
+        java.util.List<Entity> hits = level.getEntitiesOfClass(Entity.class,
+                new net.minecraft.world.phys.AABB(pos).inflate(radius),
+                entity -> entity.getType() == type);
+        return hits.isEmpty() ? null : hits.get(0);
+    }
+
+    /** 统计**已加载范围内**该类型的实体总数（诊断用：区分"没生成"与"生成了但在别处"）。 */
+    public static int countLoaded(ServerLevel level, EntityType<?> type) {
+        return level.getEntities(
+                net.minecraft.world.level.entity.EntityTypeTest.forClass(Entity.class),
+                new net.minecraft.world.phys.AABB(
+                        -3.0E7D, level.getMinBuildHeight(), -3.0E7D,
+                        3.0E7D, level.getMaxBuildHeight(), 3.0E7D),
+                e -> e.getType() == type).size();
+    }
+
+    /**
+     * 这个格子现在**放得进实体吗**。
+     *
+     * <p>{@link ServerLevel#isPositionEntityTicking} 是原版给的准确判据：区块已加载
+     * <b>且</b>在某个玩家的实体刻范围（simulation distance）内。不在这个范围里，
+     * 放进去的实体会被立刻丢掉（玩家也看不见它），所以那种"成功"是假的。
+     */
+    private static boolean canHoldEntity(ServerLevel level, BlockPos pos) {
+        return level.hasChunkAt(pos) && level.isPositionEntityTicking(pos);
     }
 
     /**
@@ -321,9 +369,8 @@ public class NpcPlacementSavedData extends net.minecraft.world.level.saveddata.S
         if (type == null) {
             return 0;
         }
-        for (Entity old : level.getEntitiesOfClass(Entity.class,
-                new net.minecraft.world.phys.AABB(pos).inflate(24.0D),
-                entity -> entity.getType() == type)) {
+        Entity old = findNear(level, type, pos, 24.0D);
+        if (old != null) {
             old.discard();
         }
         return ensureOne(level, placement) ? 1 : 0;
