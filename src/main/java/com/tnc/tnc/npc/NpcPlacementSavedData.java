@@ -148,6 +148,28 @@ public class NpcPlacementSavedData extends net.minecraft.world.level.saveddata.S
         return spawned;
     }
 
+    /**
+     * 确保**默认登记**存在于本存档里（新存档第一次加载时用）。
+     *
+     * <p><b>已存在的不覆盖</b> —— 玩家/GM 用 {@code /tnc npc here} 调过的位置不会被默认值顶掉。
+     *
+     * @return 本次新增的条数
+     */
+    public int seedDefaults() {
+        int added = 0;
+        for (Placement def : NpcPlacementDefaults.DEFAULTS) {
+            if (!placements.containsKey(def.npcId())) {
+                placements.put(def.npcId(), def);
+                added++;
+            }
+        }
+        if (added > 0) {
+            this.setDirty();
+            LOGGER.info("TN-C npc: seeded {} default placement(s) into this save", added);
+        }
+        return added;
+    }
+
     public boolean ensureOne(ServerLevel level, Placement placement) {
         // ★ 岛屿没生成完就别放 —— 生成中途 CENTER 这类坐标已经有值了，但路面还没铺完，
         //   这时放上去 NPC 会掉进虚空（而且生成器随后还会改地形，等于白放）。

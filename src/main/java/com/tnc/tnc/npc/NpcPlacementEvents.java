@@ -34,6 +34,10 @@ public final class NpcPlacementEvents {
             return;
         }
         NpcPlacementSavedData data = NpcPlacementSavedData.get(overworld);
+        // ★ 新存档第一次加载时把**默认登记**补进去 ——
+        //   玩家不需要每开一个档就手敲一次 /tnc npc here self。
+        //   已存在的登记不会被覆盖（GM 用命令调过的位置安全）。
+        data.seedDefaults();
         int spawned = data.ensureAll(overworld);
         LOGGER.info("TN-C npc: placements = [{}]{}", data.describe(),
                 spawned > 0 ? ", restored " + spawned : "");
