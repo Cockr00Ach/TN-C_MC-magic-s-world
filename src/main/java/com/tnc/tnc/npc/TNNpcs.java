@@ -1,6 +1,7 @@
 package com.tnc.tnc.npc;
 
 import com.tnc.tnc.TNMod;
+import com.tnc.tnc.npc.compat.GeoSelfSupport;
 import com.tnc.tnc.npc.compat.MaidNpcSupport;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -34,13 +35,35 @@ public final class TNNpcs {
      *       不会自然生成，也不会因为玩家走远而消失（要不要消失由实体类里
      *       {@code removeWhenFarAway} 决定，我们让它不消失）。</li>
      * </ul>
+     *
+     * <p><b>模型分流（2026-09-22，动画系统MMM 加）</b>：与庄鹊让同一套写法 ——
+     * 装了 GeckoLib（整合包一定有）→ 实体是 {@link SelfBedrockNpcEntity}，
+     * 客户端用 GeckoLib 画 {@code self.geo.json} ✓（**能播 Blockbench 关键帧**，剧情演出靠它）；
+     * 没装 → 就是 {@link SelfNpcEntity}，原版人形 + 64×64 皮肤 ✓。
+     * 分流点 {@link GeoSelfSupport}（那里才引用 GeckoLib 的类型，避免整个 mod 加载不了 ✗）✓。
+     *
+     * <p>⚠️ 与庄鹊让那边的**关键区别**：这里的实体类型字段**保持**
+     * {@code RegistryObject<EntityType<SelfNpcEntity>>}（不改成通配符）——
+     * 因为 {@code TNNpcAttributes} / {@code NpcCommand} / {@code NpcPlacementDefaults} 都在按
+     * {@code SelfNpcEntity} 用这个字段，改成通配符会牵动一串别人的文件 ✗；
+     * 而两种实体类型都满足这个签名（一个是父类，一个是它的子类）✓。
      */
-    public static final RegistryObject<EntityType<SelfNpcEntity>> SELF =
-            ENTITY_TYPES.register("self", () -> EntityType.Builder
-                    .of(SelfNpcEntity::new, MobCategory.MISC)
+    public static final RegistryObject<EntityType<SelfNpcEntity>> SELF = registerSelf();
+
+    private static RegistryObject<EntityType<SelfNpcEntity>> registerSelf() {
+        if (GeoSelfSupport.available()) {
+            return ENTITY_TYPES.register("self", () -> EntityType.Builder
+                    .of(GeoSelfSupport::create, MobCategory.MISC)
                     .sized(0.6F, 1.8F)
                     .clientTrackingRange(10)
                     .build("tnc:self"));
+        }
+        return ENTITY_TYPES.register("self", () -> EntityType.Builder
+                .of(SelfNpcEntity::new, MobCategory.MISC)
+                .sized(0.6F, 1.8F)
+                .clientTrackingRange(10)
+                .build("tnc:self"));
+    }
 
     /**
      * B. cava —— 铁匠老板（中立派系），槐的父亲。

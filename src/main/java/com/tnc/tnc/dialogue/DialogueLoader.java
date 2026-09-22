@@ -22,11 +22,20 @@ import java.util.Optional;
  *   # 井号开头是注释，可以整行
  *   @id   tnc:self_first      剧本 id（必须与文件名一致）
  *   @next                     下一条剧本（可选）—— 本行之后的行是台词
+ *   @act  pointcup            可选：给**紧接着的下一行台词**挂一个动作
  *
  *   旁白|                    说话人留空 = 旁白（那七处动作提示就这么写）
  *   Self|你在这儿坐了一整夜了，归。
  *   归|不用换。那杯不是我的。
+ *
+ *   @act wipehand
+ *   Self|他跟你说过「看清楚了就回来」……
  * </pre>
+ *
+ * <p>★ <b>{@code @act} 的语义</b>（2026-09-22，动画系统MMM）：<b>只作用于紧接的那一行</b>，
+ * 那行一显示出来就播这个动作（名字必须与 {@code assets/tnc/animations/entity/*.json}
+ * 里的动画名一致 ✗，写错不会崩，但游戏里什么都不动）。
+ * 动作的"怎么播"在 {@code DialogueNetwork.action} 那一侧（服务端触发）✓。
  *
  * <p>用竖线分隔"说话人 | 台词"。之所以不用 JSON：台词里全是中文标点和引号，
  * 方括号/转义在 JSON 里极易出错，而这种一行一句的格式编剧能直接读、直接改。
@@ -76,6 +85,9 @@ public final class DialogueLoader {
     private static DialogueScript parse(ResourceLocation id, BufferedReader reader) throws Exception {
         ResourceLocation next = null;
         List<DialogueScript.Line> lines = new ArrayList<>();
+        // 待挂到"下一行台词"上的动作名（见类注释里的 @act 说明）
+        String pendingAction = null;
+        int pendingActionLine = 0;
         String raw;
         int lineNo = 0;
         while ((raw = reader.readLine()) != null) {
@@ -99,6 +111,26 @@ public final class DialogueLoader {
                 }
                 continue;
             }
+            if (line.startsWith("@act")) {
+                // ★ 动作名必须挂在**下一行**台词上：写错了（比如挂在另一条 @act 后面、
+                //   或者挂在文件末尾）就直接报错，不做静默忽略 —— 静默失效是这个项目最大的坑。
+                if (pendingAction != null) {
+                    throw new IllegalStateException("line " + lineNo
+                            + ": two @act in a row (the first one at line " + pendingActionLine
+                            + " has no dialogue line to attach to)");
+                }
+                String action = line.substring(4).trim();
+                if (action.isEmpty()) {
+                    throw new IllegalStateException("line " + lineNo + ": @act needs an action name");
+                }
+                if (action.indexOf('|') >= 0 || action.indexOf(' ') >= 0) {
+                    throw new IllegalStateException("line " + lineNo
+                            + ": action name must be one word (no spaces / '|') -> " + action);
+                }
+                pendingAction = action;
+                pendingActionLine = lineNo;
+                continue;
+            }
             int bar = line.indexOf('|');
             if (bar < 0) {
                 throw new IllegalStateException("line " + lineNo
@@ -106,7 +138,12 @@ public final class DialogueLoader {
             }
             String speaker = line.substring(0, bar).trim();
             String text = line.substring(bar + 1).trim();
-            lines.add(new DialogueScript.Line(speaker, text));
+            lines.add(new DialogueScript.Line(speaker, text, pendingAction));
+            pendingAction = null;
+        }
+        if (pendingAction != null) {
+            throw new IllegalStateException("line " + pendingActionLine + ": @act " + pendingAction
+                    + " is not followed by any dialogue line");
         }
         if (lines.isEmpty()) {
             throw new IllegalStateException("no dialogue lines found");

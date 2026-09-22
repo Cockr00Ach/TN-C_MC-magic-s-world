@@ -34,10 +34,17 @@ public final class TNNpcClientEvents {
     @SubscribeEvent
     public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
         // 泛型显式写出：直接传方法引用时 javac 对 HumanoidMobRenderer 的两层泛型推断不稳
-        // （会报"不兼容的参数类型"）。这里两个 NPC 共用同一个渲染器，区别只在皮肤。
+        // （会报"不兼容的参数类型"）。这里几个 NPC 共用同一个渲染器，区别只在皮肤。
         net.minecraft.client.renderer.entity.EntityRendererProvider<TnDialogueNpc> provider =
                 TnNpcRenderer::new;
-        event.registerEntityRenderer(com.tnc.tnc.npc.TNNpcs.SELF.get(), provider);
+        // Self：装了 GeckoLib 就用 Bedrock 模型渲染器（**能播 Blockbench 关键帧** ✓，
+        // 剧情演出的擦手/放抹布/看酒杯都靠它），否则走共用的人形渲染器 + 64×64 皮肤 ✓。
+        // 分流判断与实体注册处（TNNpcs.SELF）用的是同一个 GeoSelfSupport.available() ✓。
+        if (com.tnc.tnc.npc.compat.GeoSelfSupport.available()) {
+            SelfBedrockRenderers.register(event);
+        } else {
+            event.registerEntityRenderer(com.tnc.tnc.npc.TNNpcs.SELF.get(), provider);
+        }
         event.registerEntityRenderer(com.tnc.tnc.npc.TNNpcs.CAVA.get(), provider);
         event.registerEntityRenderer(com.tnc.tnc.npc.TNNpcs.HUAI.get(), provider);
         // 庄鹊让：装了 GeckoLib 就用女仆模型渲染器（GeckoLib 的类只在那个分支里被引用 ✓），

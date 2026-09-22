@@ -36,7 +36,7 @@ public final class DialogueNetwork {
     private DialogueNetwork() {
     }
 
-    /** 把对话的两个包注册到**已有的**主通道上（由 MagicStoneNetwork.register 统一调用）。 */
+    /** 把对话的四个包注册到**已有的**主通道上（由 MagicStoneNetwork.register 统一调用）。 */
     public static void registerPackets(net.minecraftforge.network.simple.SimpleChannel channel, int firstId) {
         int id = firstId;
         channel.messageBuilder(DialoguePackets.OpenDialogue.class, id++, NetworkDirection.PLAY_TO_CLIENT)
@@ -50,13 +50,33 @@ public final class DialogueNetwork {
                 .decoder(DialoguePackets.DialogueDone::decode)
                 .consumerMainThread(DialoguePackets.DialogueDone::handle)
                 .add();
+
+        // 台词动作（2026-09-22）：客户端报"这一行有动作"，服务端让那个 NPC 做出来。
+        // ⚠️ 加包**必须**接在同一个 id 计数器后面（这里接在 101 之后）——
+        //    随便挑个号会和已注册的包撞上，症状是启动时那条"already registered"异常。
+        channel.messageBuilder(DialoguePackets.ActionRequest.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(DialoguePackets.ActionRequest::encode)
+                .decoder(DialoguePackets.ActionRequest::decode)
+                .consumerMainThread(DialoguePackets.ActionRequest::handle)
+                .add();
     }
 
-    /** 服务端 → 某个玩家：播这条剧本。 */
-    public static void openFor(ServerPlayer player, DialogueScript script) {
+    /**
+     * 服务端 → 某个玩家：播这条剧本，并告诉他<b>是哪个 NPC 在说</b>。
+     *
+     * <p>为什么要带上 NPC 的 UUID（2026-09-22 动画系统MMM 加）：台词里的动作指令
+     * （{@code @act}）要作用在"正在说话的那个人"身上，客户端得知道那是谁 ✓。
+     * 用 UUID 而不是实体 id：id 在实体卸载后会被复用 ✗。
+     */
+    public static void openFor(ServerPlayer player, DialogueScript script, java.util.UUID speaker) {
         com.tnc.tnc.network.MagicStoneNetwork.CHANNEL.send(
                 PacketDistributor.PLAYER.with(() -> player),
-                new DialoguePackets.OpenDialogue(script));
+                new DialoguePackets.OpenDialogue(script, speaker));
+    }
+
+    /** 兼容旧调用：不知道说话人是谁时（uuid 为 null = 台词动作会被服务端忽略）。 */
+    public static void openFor(ServerPlayer player, DialogueScript script) {
+        openFor(player, script, null);
     }
 
     /** 客户端 → 服务端：播完了。 */
@@ -89,6 +109,12 @@ public final class DialogueNetwork {
             return;
         }
         openFor(player, script.get());
+    }
+
+    /** 客户端 → 服务端：这一行台词带动作，请让 {{@code npc}} 做出来（见 {@code ActionRequest}）。 */
+    public static void action(java.util.UUID npc, String action) {
+        com.tnc.tnc.network.MagicStoneNetwork.CHANNEL.sendToServer(
+                new DialoguePackets.ActionRequest(npc, action));
     }
 
     /** 只用于日志/诊断：确认我们挂在哪条通道上。 */

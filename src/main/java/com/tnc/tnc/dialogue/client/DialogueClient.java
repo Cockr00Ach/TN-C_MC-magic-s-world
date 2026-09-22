@@ -20,11 +20,11 @@ public final class DialogueClient {
     private DialogueClient() {
     }
 
-    /** 由 OpenDialogue 包在主线程调用。 */
-    public static void accept(DialogueScript script) {
+    /** 由 OpenDialogue 包在主线程调用。{@code speaker} = 说话那个 NPC 的 UUID（可为 null）。 */
+    public static void accept(DialogueScript script, java.util.UUID speaker) {
         // 带上主题名：这一行同时证明了"剧本到了"和"配色挂上了"
-        LOGGER.info("TN-C dialogue: opening {} ({} line(s), theme={}, next={})",
-                script.id(), script.lines().size(), script.theme(), script.next());
-        Minecraft.getInstance().setScreen(new DialogueScreen(script));
+        LOGGER.info("TN-C dialogue: opening {} ({} line(s), theme={}, next={}, speaker={})",
+                script.id(), script.lines().size(), script.theme(), script.next(), speaker);
+        Minecraft.getInstance().setScreen(new DialogueScreen(script, speaker));
     }
 }

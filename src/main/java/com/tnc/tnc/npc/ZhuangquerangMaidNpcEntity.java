@@ -8,6 +8,7 @@ import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache
 import software.bernie.geckolib.core.animation.AnimatableManager;
 import software.bernie.geckolib.core.animation.AnimationController;
 import software.bernie.geckolib.core.animation.RawAnimation;
+import software.bernie.geckolib.core.object.PlayState;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 /**
@@ -38,8 +39,8 @@ import software.bernie.geckolib.util.GeckoLibUtil;
  */
 public class ZhuangquerangMaidNpcEntity extends ZhuangquerangNpcEntity implements GeoEntity {
 
-    /** 站着时的轻微 idle（只动头，避免覆盖模型其余骨骼的静止姿态 ✓）。 */
-    private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("idle");
+    /** 每个点播动作播几遍（与 self 同一规则：用户 2026-09-23 "播两遍就站着"）。 */
+    private static final int ACTION_REPEATS = 2;
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
@@ -47,10 +48,42 @@ public class ZhuangquerangMaidNpcEntity extends ZhuangquerangNpcEntity implement
         super(type, level);
     }
 
+    /**
+     * 只有一个控制器：<b>点播动作</b>。
+     *
+     * <p>平时它返回 {@code STOP}、一根骨头都不写 → 她保持模型自带的站姿 ✓
+     * （用户 2026-09-23 的要求："播完两遍就站着"）。
+     *
+     * <p>动作名（2026-09-23 用户在 Blockbench 里做的，导出到
+     * {@code assets/tnc/animations/entity/zhuangquerang.animation.json}）：
+     * <ul>
+     *   <li>{@code confusing} —— 困惑（头 + 双手），1.17 秒</li>
+     *   <li>{@code shrug-shouder} —— 耸肩（双手 + 头发 {@code line}/{@code line2}），1.0 秒</li>     *   <li>{@code point} —— 抬手指（双手），1.71 秒</li>
+     *   <li>{@code lowerhand} —— 放下手（头），1.0 秒</li>
+     * </ul>
+     * ⚠️ 导出时那个 {@code confusing} 曾带着一个中文顿号（{@code confusing、}）——
+     * 已由 {@code tools/fix_zhuangquerang_anim.py} 改名 ✓，
+     * 因为 {@code @act} 与动作校验只接受**短 ASCII 名**，带符号的名字叫不出来 ✗。
+     *
+     * <p>⚠️ 动画文件里还有一个 {@code idle}（咲夜那套原有的轻微 idle）——
+     * <b>暂时不注册</b>，所以她现在不会自己晃 ✓；要开随时说一句。
+     */
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        // 第一个参数是"过渡刻数"，5 = 动作之间平滑过渡
-        controllers.add(new AnimationController<>(this, "idle", 5, state -> state.setAndContinue(IDLE)));
+        AnimationController<ZhuangquerangMaidNpcEntity> action =
+                new AnimationController<>(this, "action", 2, state ->
+                        state.getController().isPlayingTriggeredAnimation()
+                                ? PlayState.CONTINUE : PlayState.STOP);
+        action.triggerableAnim("confusing",
+                RawAnimation.begin().thenPlayXTimes("confusing", ACTION_REPEATS));
+        action.triggerableAnim("shrug-shouder",
+                RawAnimation.begin().thenPlayXTimes("shrug-shouder", ACTION_REPEATS));
+        action.triggerableAnim("point",
+                RawAnimation.begin().thenPlayXTimes("point", ACTION_REPEATS));
+        action.triggerableAnim("lowerhand",
+                RawAnimation.begin().thenPlayXTimes("lowerhand", ACTION_REPEATS));
+
+        controllers.add(action);
     }
 
     @Override

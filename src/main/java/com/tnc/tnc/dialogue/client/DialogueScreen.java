@@ -34,6 +34,8 @@ import java.util.List;
  */
 public class DialogueScreen extends Screen {
 
+    private static final org.slf4j.Logger LOGGER = com.mojang.logging.LogUtils.getLogger();
+
     private static final int MARGIN = 12;
     private static final int PANEL_HEIGHT = 84;
     private static final int PAD = 8;
@@ -46,6 +48,14 @@ public class DialogueScreen extends Screen {
     private static final int NARRATION_COLOR = 0xFFB9B9B9;
 
     private final DialogueScript script;
+
+    /**
+     * 说话那个 NPC 的 UUID（2026-09-22 动画系统MMM 加）——
+     * 台词上的 {@code @act} 动作要作用在他身上，所以本界面播到那一行时会
+     * 带着这个 UUID 回报服务端（见 {@link #fireActionIfAny()}）✓。
+     * {@code null} = 这条剧本不是某个 NPC 说的（动作会被服务端忽略）。
+     */
+    private final java.util.UUID speaker;
 
     /**
      * 对话框配色 —— 每个 NPC 可以不一样（用户 2026-09-22 的要求）。
@@ -65,8 +75,13 @@ public class DialogueScreen extends Screen {
     private boolean finished;
 
     public DialogueScreen(DialogueScript script) {
+        this(script, null);
+    }
+
+    public DialogueScreen(DialogueScript script, java.util.UUID speaker) {
         super(Component.literal("TN-C Dialogue"));
         this.script = script;
+        this.speaker = speaker;
         this.theme = DialogueTheme.byName(script.theme());
     }
 
@@ -78,6 +93,33 @@ public class DialogueScreen extends Screen {
         this.panelLeft = (this.width - panelWidth) / 2;
         this.panelTop = this.height - PANEL_HEIGHT - MARGIN;
         rewrap();
+        // 第一行也可能挂着动作 —— 界面一开就播（编剧写在第一行之前的 @act）
+        fireActionIfAny();
+    }
+
+    /**
+     * 当前这一行挂了动作就通知服务端播出来 ✓（2026-09-22，动画系统MMM）。
+     *
+     * <p>为什么发网络包而不是在客户端直接播：实体动画是<b>服务端权威</b>的，
+     * 客户端自己播只有自己看得见 ✗（多人同看时别人看不到）。
+     * 服务端那边还会核对"这个 NPC 是不是真的是你正在对话的那个" ✓。
+     *
+     * <p>没有 speaker（不是 NPC 说的剧本）时**只记一行日志**，不报错 ——
+     * 编剧在旁白上挂了 @act 是常见笔误，不该让游戏报错 ✗。
+     */
+    private void fireActionIfAny() {
+        DialogueScript.Line line = currentLine();
+        if (!line.hasAction()) {
+            return;
+        }
+        if (speaker == null) {
+            LOGGER.warn("TN-C dialogue: line has action '{}' but the script has no speaker NPC -> ignored",
+                    line.action());
+            return;
+        }
+        LOGGER.info("TN-C dialogue: line {} -> action '{}' on {}",
+                lineIndex + 1, line.action(), speaker);
+        DialogueNetwork.action(speaker, line.action());
     }
 
     private DialogueScript.Line currentLine() {
@@ -156,6 +198,7 @@ public class DialogueScreen extends Screen {
             revealChars = 0;
             revealTimer = 0;
             rewrap();
+            fireActionIfAny(); // 翻到新的一行：这一行若挂动作，就在这里播 ✓
             return;
         }
         finish();

@@ -134,7 +134,7 @@ public abstract class TnDialogueNpc extends PathfinderMob {
                             + "\uff08\u770b\u65e5\u5fd7\uff09"), false);
             return InteractionResult.SUCCESS;
         }
-        DialogueNetwork.openFor(serverPlayer, script.get());
+        DialogueNetwork.openFor(serverPlayer, script.get(), this.getUUID());
         return InteractionResult.SUCCESS;
     }
 

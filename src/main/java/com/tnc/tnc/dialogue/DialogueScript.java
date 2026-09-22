@@ -27,9 +27,23 @@ public record DialogueScript(ResourceLocation id,
      * @param speaker 显示在名字栏的名字（如 {@code Self}、{@code 归}）。
      *                <b>空字符串 = 旁白</b>（那七处动作提示就这样写）。
      * @param text    台词正文。{@code §} 颜色码可直接写在文本里，客户端按原版解析。
+     * @param action  这一行显示时要播的<b>动作名</b>（可空 = 不动）。
+     *                来自剧本里的 {@code @act <名字>} 行，见 {@code DialogueLoader}；
+     *                播放由服务端执行（见 {@code DialogueNetwork.action}）✓。
      */
-    public record Line(String speaker, String text) {
+    public record Line(String speaker, String text, String action) {
+
+        /** 兼容老写法：没有动作的行。 */
+        public Line(String speaker, String text) {
+            this(speaker, text, null);
+        }
+
+        /** 这一行有动作要播吗？ */
+        public boolean hasAction() {
+            return action != null && !action.isBlank();
+        }
     }
+
 
     // ------------------------------------------------------------------
     //  网络序列化
@@ -49,6 +63,8 @@ public record DialogueScript(ResourceLocation id,
         for (Line line : script.lines()) {
             buf.writeUtf(line.speaker());
             buf.writeUtf(line.text());
+            // 动作名：空串 = 这一行不动（协议上不区分 null 与空串）
+            buf.writeUtf(line.action() == null ? "" : line.action());
         }
     }
 
@@ -59,14 +75,19 @@ public record DialogueScript(ResourceLocation id,
         int n = buf.readVarInt();
         java.util.List<Line> lines = new java.util.ArrayList<>(n);
         for (int i = 0; i < n; i++) {
-            lines.add(new Line(buf.readUtf(), buf.readUtf()));
+            String speaker = buf.readUtf();
+            String text = buf.readUtf();
+            String action = buf.readUtf();
+            lines.add(new Line(speaker, text, action.isEmpty() ? null : action));
         }
         return new DialogueScript(id, next, theme.isEmpty() ? null : theme, List.copyOf(lines));
     }
 
     /** 便于调试/日志：{@code 3 行} 这种摘要。 */
     public String summary() {
+        long acts = lines.stream().filter(Line::hasAction).count();
         return id + " (" + lines.size() + " line(s)"
+                + (acts > 0 ? ", " + acts + " act" : "")
                 + (theme != null ? ", theme=" + theme : "")
                 + (next != null ? ", next=" + next : "") + ")";
     }
