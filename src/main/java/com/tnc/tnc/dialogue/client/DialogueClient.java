@@ -22,7 +22,9 @@ public final class DialogueClient {
 
     /** 由 OpenDialogue 包在主线程调用。 */
     public static void accept(DialogueScript script) {
-        LOGGER.info("TN-C dialogue: opening {} ({} line(s))", script.id(), script.lines().size());
+        // 带上主题名：这一行同时证明了"剧本到了"和"配色挂上了"
+        LOGGER.info("TN-C dialogue: opening {} ({} line(s), theme={}, next={})",
+                script.id(), script.lines().size(), script.theme(), script.next());
         Minecraft.getInstance().setScreen(new DialogueScreen(script));
     }
 }
