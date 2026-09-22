@@ -12,10 +12,13 @@ import net.minecraft.world.level.Level;
  * <p>行为全部继承自 {@link TnDialogueNpc}：站着不动、**不会消失**（四条卸载路径都堵死了）、
  * 打不死、空手右键对话。这个类只声明两件事：<b>用哪张皮肤</b>、<b>播哪条剧本</b>。
  *
- * <p><b>皮肤</b>：{@code assets/tnc/textures/entity/zhuangquerang.png}
+ * <p><b>皮肤</b>：{@code assets/tnc/textures/entity/zhuangquerang_humanoid.png}
  * （64×64 原版人形布局，由 {@code tools/gen_zhuangquerang_skin.ps1} 生成 —— 藏青裙 + 白围裙的
- * 蓝白女仆配色，与她选定的"蓝色调"外形一致，见 {@code docs/当前状态.md} 第四节）。
- * <b>这是占位皮肤</b> ✗，等美术或将来的 UV 重映射工具出正式版。
+ * 蓝白女仆配色）。
+ *
+ * <p>⚠️ <b>这只是"降级皮肤"</b> ✗：正常情况（装了 GeckoLib）她的实体是子类
+ * {@link ZhuangquerangMaidNpcEntity}，客户端用 GeckoLib 直接画<b>女仆模型</b> ✓
+ * （模型/贴图/动画见那个类的说明）。本类的 64×64 皮肤只在没有 GeckoLib 时兜底 ✓。
  *
  * <p><b>剧本</b>：{@code data/tnc/dialogues/zhuangquerang_first.txt}
  * （纯文本，<b>编剧系统 AAA 可直接改</b> ✓；当前是明确标注的占位内容 ✗）。
@@ -33,9 +36,15 @@ public class ZhuangquerangNpcEntity extends TnDialogueNpc {
         super(type, level);
     }
 
+    /**
+     * 降级皮肤名 = 文件名（{@code textures/entity/<skinName>.png}）。
+     *
+     * <p>注意是 {@code zhuangquerang_humanoid} 而**不是** {@code zhuangquerang} ——
+     * 后者是 128×128 的女仆图集，套在原版人形模型上会糊成一团 ✗。
+     */
     @Override
     public String skinName() {
-        return "zhuangquerang";
+        return "zhuangquerang_humanoid";
     }
 
     @Override

@@ -387,6 +387,35 @@ try {
     if ($missingScript.Count -eq 0) { Ok 'every skin NPC has a dialogue script' }
     else { Fail ('npc dialogue script missing (right-click does nothing useful): ' + ($missingScript -join ', ')) }
 
+    # ---- the maid-model NPC: GeckoLib renders it, so three files must ship together ----
+    # Missing any of them is SILENT: no geometry = nothing drawn, wrong animation name =
+    # frozen model, missing texture = the purple-black missing texture.
+    $maidAssets = @(
+        'assets/tnc/geo/entity/zhuangquerang.geo.json',
+        'assets/tnc/animations/entity/zhuangquerang.animation.json',
+        'assets/tnc/textures/entity/zhuangquerang.png',
+        'assets/tnc/textures/entity/zhuangquerang_humanoid.png'
+    )
+    $missingMaid = @($maidAssets | Where-Object { -not ($zip.Entries | Where-Object { $_.FullName -eq $_ }) })
+    if ($missingMaid.Count -eq 0) { Ok 'maid-model NPC ships geometry + animation + both textures' }
+    else { Fail ('maid-model NPC asset missing (wrong or invisible render): ' + ($missingMaid -join ', ')) }
+    foreach ($cls in @('com/tnc/tnc/npc/ZhuangquerangMaidNpcEntity.class',
+                       'com/tnc/tnc/npc/client/ZhuangquerangMaidGeoModel.class',
+                       'com/tnc/tnc/npc/client/ZhuangquerangMaidRenderer.class',
+                       'com/tnc/tnc/npc/compat/MaidNpcSupport.class')) {
+        if ($zip.Entries | Where-Object { $_.FullName -eq $cls }) { Ok "class present: $(Split-Path $cls -Leaf)" }
+        else { Fail "maid NPC class missing from jar: $cls" }
+    }
+    # the entity asks for the animation named "idle" - if the file does not define it,
+    # GeckoLib just plays nothing (no error anywhere)
+    $animEntry = $zip.Entries | Where-Object { $_.FullName -eq 'assets/tnc/animations/entity/zhuangquerang.animation.json' }
+    if ($animEntry) {
+        $ar = New-Object System.IO.StreamReader($animEntry.Open(), [System.Text.Encoding]::UTF8)
+        $animText = $ar.ReadToEnd(); $ar.Close()
+        if ($animText -match '"idle"') { Ok 'maid animation file defines the "idle" clip the entity asks for' }
+        else { Fail 'maid animation file has no "idle" clip - the entity would stand frozen (silent)' }
+    }
+
     # ---------------- D1c. HUD entry point + its keybind ----------------
     # Nothing HUD-side can be clicked (no cursor while playing), so the keybind IS
     # the entry. RegisterKeyMappingsEvent lives on the MOD bus - registering it on

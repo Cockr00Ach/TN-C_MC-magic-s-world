@@ -1,6 +1,7 @@
 package com.tnc.tnc.npc;
 
 import com.tnc.tnc.TNMod;
+import com.tnc.tnc.npc.compat.MaidNpcSupport;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -63,21 +64,37 @@ public final class TNNpcs {
                     .build("tnc:huai"));
 
     /**
-     * 庄鹊让 —— 卷五《代》的角色（作者 2026-09-22："先当 NPC 做"）。
+     * 庄鹊让 —— 卷五《代》的角色（作者 2026-09-22："先当 NPC 做"，且"保持女仆模型"）。
      *
      * <p>参数与前面三个完全一致（玩家尺寸 / 不参与刷怪 / 10 区块追踪）。
+     *
+     * <p><b>模型分流</b>：装了 GeckoLib（整合包一定有）→ 实体是
+     * {@code ZhuangquerangMaidNpcEntity}，客户端用 GeckoLib 画<b>女仆模型</b> ✓；
+     * 没装 → 父类 {@code ZhuangquerangNpcEntity}，原版人形 + 64×64 降级皮肤 ✓。
+     * 分流点见 {@code com.tnc.tnc.npc.compat.MaidNpcSupport}（那里才引用 GeckoLib 的类型，
+     * 避免"没装 GeckoLib 就整个 mod 加载不了" ✗）。
      *
      * <p>注意 <b>id 就是 {@code zhuangquerang}</b> —— {@code /tnc npc} 的 id 是
      * <b>按注册表查实体类型</b>解析的（见 {@code NpcCommand}），所以这里注册完，
      * {@code /tnc npc here zhuangquerang} 立刻可用 ✓，不用再改命令代码。
      * 唯一要同步的地方是 {@code purge all} 的名单 ✗（那里是硬编码数组）。
      */
-    public static final RegistryObject<EntityType<ZhuangquerangNpcEntity>> ZHUANGQUERANG =
-            ENTITY_TYPES.register("zhuangquerang", () -> EntityType.Builder
-                    .of(ZhuangquerangNpcEntity::new, MobCategory.MISC)
+    public static final RegistryObject<EntityType<ZhuangquerangNpcEntity>> ZHUANGQUERANG = registerZhuangquerang();
+
+    private static RegistryObject<EntityType<ZhuangquerangNpcEntity>> registerZhuangquerang() {
+        if (MaidNpcSupport.available()) {
+            return ENTITY_TYPES.register("zhuangquerang", () -> EntityType.Builder
+                    .of(MaidNpcSupport::create, MobCategory.MISC)
                     .sized(0.6F, 1.8F)
                     .clientTrackingRange(10)
                     .build("tnc:zhuangquerang"));
+        }
+        return ENTITY_TYPES.register("zhuangquerang", () -> EntityType.Builder
+                .of(ZhuangquerangNpcEntity::new, MobCategory.MISC)
+                .sized(0.6F, 1.8F)
+                .clientTrackingRange(10)
+                .build("tnc:zhuangquerang"));
+    }
 
     private TNNpcs() {
     }

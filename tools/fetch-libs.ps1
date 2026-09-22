@@ -1,13 +1,21 @@
-# Fetch the two remapped SpellEngine jars into libs/ so the mod can compile.
+# Fetch the compile-only jars into libs/ so the mod can compile.
 #
 #   Why this exists:
 #     build.gradle declares these as compileOnly:
-#       libs/spell_engine-0.15.12+1.20.1_mapped_srg_1.20.1.jar
-#       libs/spell_power-0.12.0+1.20.1_mapped_srg_1.20.1.jar
-#     They are Sinytra Connector's SRG-remapped builds of a third-party mod, so
-#     they are NOT in version control (see .gitignore). Every clone has to fetch
-#     them once from the local modpack, which already contains them here:
-#       <pack>\mods\.connector\*_mapped_srg_1.20.1.jar
+#       libs/spell_engine-0.15.12+1.20.1_mapped_srg_1.20.1.jar   (from mods\.connector)
+#       libs/spell_power-0.12.0+1.20.1_mapped_srg_1.20.1.jar     (from mods\.connector)
+#       libs/touhoulittlemaid-1.5.2.jar                          (from mods, renamed)
+#       libs/geckolib-4.8.4.jar                                  (from mods, renamed)
+#     None of them are in version control (see .gitignore), so every clone has to
+#     fetch them once from the local modpack.
+#
+#     The two TLM/GeckoLib jars are ONLY there so the maid model can be rendered on
+#     our own NPC (庄鹊让). They exist in the pack as:
+#       <pack>\mods\touhoulittlemaid-1.5.2-forge+mc1.20.1.jar
+#       <pack>\mods\geckolib-forge-1.20.1-4.8.4.jar
+#     and are COPIED UNDER SHORTER NAMES on purpose: build.gradle uses a flatDir
+#     repository, which resolves "<name>-<version>.jar" and would read the '+' in
+#     "1.5.2-forge+mc1.20.1" as a dynamic version. fg.deobf() then remaps them.
 #
 #   Run this after cloning, before the first build.
 #
@@ -62,7 +70,13 @@ if (-not $connector) {
     exit 1
 }
 
+# ---- where the plain (not Connector-remapped) mod jars live ----
+# <pack>\mods  is a sibling of <pack>\mods\.connector, so derive it when possible.
+$modsDir = Split-Path $connector -Parent
+if (-not (Test-Path $modsDir)) { $modsDir = $null }
+
 Write-Host "connector dir: $connector"
+if ($modsDir) { Write-Host "mods dir     : $modsDir" } else { Write-Host 'mods dir     : NOT FOUND (TLM/GeckoLib libs will be skipped)' }
 New-Item -ItemType Directory -Force -Path $libsDir | Out-Null
 
 $wanted = @('spell_engine-*_mapped_srg_*.jar', 'spell_power-*_mapped_srg_*.jar')
@@ -79,6 +93,27 @@ foreach ($pattern in $wanted) {
     Copy-Item $src.FullName $dest -Force
     Write-Host ("  [ok] {0}  ({1:N0} bytes)" -f $src.Name, $src.Length)
     $copied++
+}
+
+# ---- plain mod jars, copied under the names the flatDir repo expects ----
+# (the '+' in the pack's file name would be read as a dynamic version by flatDir)
+$renamed = @(
+    @{ pattern = 'touhoulittlemaid-*.jar'; as = 'touhoulittlemaid-1.5.2.jar' },
+    @{ pattern = 'geckolib-forge-*.jar';   as = 'geckolib-4.8.4.jar' }
+)
+if ($modsDir) {
+    foreach ($r in $renamed) {
+        $src = Get-ChildItem $modsDir -Filter $r.pattern -ErrorAction SilentlyContinue |
+               Sort-Object Length -Descending | Select-Object -First 1
+        if (-not $src) {
+            Write-Host ("  [MISSING] {0}  (needed only for the maid-model NPC)" -f $r.pattern)
+            continue
+        }
+        $dest = Join-Path $libsDir $r.as
+        Copy-Item $src.FullName $dest -Force
+        Write-Host ("  [ok] {0}  ->  {1}  ({2:N0} bytes)" -f $src.Name, $r.as, $src.Length)
+        $copied++
+    }
 }
 
 if ($copied -eq 0) { Write-Host 'ERROR: nothing copied.'; exit 1 }

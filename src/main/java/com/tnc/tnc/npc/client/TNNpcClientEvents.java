@@ -40,6 +40,12 @@ public final class TNNpcClientEvents {
         event.registerEntityRenderer(com.tnc.tnc.npc.TNNpcs.SELF.get(), provider);
         event.registerEntityRenderer(com.tnc.tnc.npc.TNNpcs.CAVA.get(), provider);
         event.registerEntityRenderer(com.tnc.tnc.npc.TNNpcs.HUAI.get(), provider);
-        event.registerEntityRenderer(com.tnc.tnc.npc.TNNpcs.ZHUANGQUERANG.get(), provider);
+        // 庄鹊让：装了 GeckoLib 就用女仆模型渲染器（GeckoLib 的类只在那个分支里被引用 ✓），
+        // 否则走上面这个共用的人形渲染器 + 64×64 降级皮肤 ✓
+        if (com.tnc.tnc.npc.compat.MaidNpcSupport.available()) {
+            MaidNpcRenderers.register(event);
+        } else {
+            event.registerEntityRenderer(com.tnc.tnc.npc.TNNpcs.ZHUANGQUERANG.get(), provider);
+        }
     }
 }

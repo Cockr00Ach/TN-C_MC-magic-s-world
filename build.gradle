@@ -117,9 +117,13 @@ repositories {
 
     // If you have mod jar dependencies in ./libs, you can declare them as a repository like so.
     // See https://docs.gradle.org/current/userguide/declaring_repositories.html#sub:flat_dir_resolver
-    // flatDir {
-    //     dir 'libs'
-    // }
+    //
+    // 需要它的是 TLM / GeckoLib：fg.deobf() **不认 files(...)**，只认正规的模块依赖
+    // （报错原文："files(...) dependencies are not deobfuscated. Use a flatDir repository"）。
+    // flatDir 按 <name>-<version>.jar 找文件，所以 libs 里的名字不能带 '+'。
+    flatDir {
+        dir 'libs'
+    }
 }
 
 dependencies {
@@ -145,6 +149,21 @@ dependencies {
             'libs/spell_engine-0.15.12+1.20.1_mapped_srg_1.20.1.jar',
             'libs/spell_power-0.12.0+1.20.1_mapped_srg_1.20.1.jar'
     )
+
+    // ------------------------------------------------------------------
+    //  车万女仆（TLM）与 GeckoLib：**只为了把女仆模型画在我们自己的 NPC 上**
+    //  （庄鹊让 = 卷五《代》；作者要求保持女仆模型，见 docs/当前状态.md 4.1）
+    //
+    //  这两个是**原生 Forge 模组**，包里的产物 jar 是 SRG 命名（MC 方法是 m_xxxxx_），
+    //  直接 compileOnly 编译不过 —— 必须用 fg.deobf() 让 ForgeGradle 先重映射成
+    //  开发环境的正式名（Forge 官方推荐的第三方模组依赖写法）。
+    //
+    //  compileOnly：只用来编译。运行时由整合包提供（TLM 1.5.2 + GeckoLib 4.8.4），
+    //  所以所有引用都必须先 ModList.get().isLoaded(...) 判断，
+    //  相关代码集中在 com.tnc.tnc.npc.compat.MaidModelSupport 里 ✓。
+    // ------------------------------------------------------------------
+    compileOnly fg.deobf('touhoulittlemaid:touhoulittlemaid:1.5.2')
+    compileOnly fg.deobf('geckolib:geckolib:4.8.4')
 
     testImplementation platform('org.junit:junit-bom:5.10.2')
     testImplementation 'org.junit.jupiter:junit-jupiter'
