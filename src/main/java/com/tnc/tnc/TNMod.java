@@ -161,6 +161,18 @@ public class TNMod
         LOGGER.info("TN-C server starting");
     }
 
+    /**
+     * 服务端启动完成（数据包已就绪）→ 跑剧本自检。
+     *
+     * <p>把"剧本文件写错 → 玩家右键只说一句加载失败"这种**静默失效**提前到开服日志里暴露，
+     * 编剧也能自己看日志确认台词被读到了、共几行。
+     */
+    @SubscribeEvent
+    public void onServerStarted(net.minecraftforge.event.server.ServerStartedEvent event)
+    {
+        com.tnc.tnc.dialogue.DialogueDiagnostics.run(event.getServer());
+    }
+
     // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
     @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     public static class ClientModEvents
