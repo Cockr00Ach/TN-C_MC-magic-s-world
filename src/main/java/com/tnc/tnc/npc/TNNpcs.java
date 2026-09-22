@@ -41,6 +41,19 @@ public final class TNNpcs {
                     .clientTrackingRange(10)
                     .build("tnc:self"));
 
+    /**
+     * B. cava —— 铁匠老板（中立派系），槐的父亲。
+     *
+     * <p>剧情第一段第三场「一面没打完的盾」在他铺子里。参数与 Self 完全一致
+     * （同样尺寸、同样不参与刷怪）。<b>加一个 NPC 就是复制这一段</b>。
+     */
+    public static final RegistryObject<EntityType<CavaNpcEntity>> CAVA =
+            ENTITY_TYPES.register("cava", () -> EntityType.Builder
+                    .of(CavaNpcEntity::new, MobCategory.MISC)
+                    .sized(0.6F, 1.8F)
+                    .clientTrackingRange(10)
+                    .build("tnc:cava"));
+
     private TNNpcs() {
     }
 

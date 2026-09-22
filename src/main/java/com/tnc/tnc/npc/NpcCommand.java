@@ -218,7 +218,8 @@ public final class NpcCommand {
         ServerLevel level = player.serverLevel();
         int removed = 0;
         String[] ids = ("@".equals(npcId) || "all".equalsIgnoreCase(npcId))
-                ? new String[]{"self"}                      // 以后加了 NPC 就在这里补
+                // ★ 加了新 NPC 记得往这里补 —— 否则 purge all 会漏掉他
+                ? new String[]{"self", "cava"}
                 : new String[]{npcId};
         for (String id : ids) {
             net.minecraft.world.entity.EntityType<?> type =

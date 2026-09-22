@@ -20,5 +20,7 @@
   "scroll.tnc.missing": "...the writing has faded beyond reading.",
   "tooltip.tnc.scroll.read": "Right-click to read",
   "entity.tnc.self": "A. Self",
-  "item.tnc.self_spawn_egg": "Self Spawn Egg"
+  "item.tnc.self_spawn_egg": "Self Spawn Egg",
+  "entity.tnc.cava": "B. cava",
+  "item.tnc.cava_spawn_egg": "cava Spawn Egg"
 }

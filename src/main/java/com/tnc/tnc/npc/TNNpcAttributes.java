@@ -30,6 +30,11 @@ public final class TNNpcAttributes {
             () -> new net.minecraftforge.common.ForgeSpawnEggItem(
                     TNNpcs.SELF, 0x4A3424, 0xD6C8AC, new Item.Properties()));
 
+    /** cava 的刷怪蛋（配色：炉火暗红 + 铁灰）。 */
+    public static final RegistryObject<Item> CAVA_SPAWN_EGG = SPAWN_EGGS.register("cava_spawn_egg",
+            () -> new net.minecraftforge.common.ForgeSpawnEggItem(
+                    TNNpcs.CAVA, 0x5A2A18, 0x8A8A8A, new Item.Properties()));
+
     private TNNpcAttributes() {
     }
 
@@ -39,6 +44,7 @@ public final class TNNpcAttributes {
 
     @SubscribeEvent
     public static void onEntityAttributeCreation(EntityAttributeCreationEvent event) {
-        event.put(TNNpcs.SELF.get(), SelfNpcEntity.createAttributes().build());
+        event.put(TNNpcs.SELF.get(), TnDialogueNpc.attributes().build());
+        event.put(TNNpcs.CAVA.get(), TnDialogueNpc.attributes().build());
     }
 }

@@ -27,9 +27,14 @@ public final class NpcPlacementDefaults {
      *
      * <p>{@code self} = A. Self（酒馆老板），站在岛中心往南 44 格。
      * 剧情上这对应第一场「第二杯酒」——他就在玩家上岛后走几步的地方。
+     *
+     * <p>{@code cava} = B. cava（铁匠，槐的父亲），在 Self 再往南一点。
+     * ⚠️ 这个偏移是**我自己估的**（还没在游戏里站过），等你站到想要的位置跑
+     * {@code /tnc npc here cava} 再 {@code /tnc npc list}，把那一行抄回这里即可。
      */
     public static final List<NpcPlacementSavedData.Placement> DEFAULTS = List.of(
-            new NpcPlacementSavedData.Placement("self", "CENTER", -1, -1, 44)
+            new NpcPlacementSavedData.Placement("self", "CENTER", -1, -1, 44),
+            new NpcPlacementSavedData.Placement("cava", "CENTER", -16, -1, 44)
     );
 
     private NpcPlacementDefaults() {

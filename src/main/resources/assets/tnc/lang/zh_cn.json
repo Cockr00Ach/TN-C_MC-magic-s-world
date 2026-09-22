@@ -20,5 +20,7 @@
   "scroll.tnc.missing": "……字迹已经模糊，什么也看不清了。",
   "tooltip.tnc.scroll.read": "右键阅读",
   "entity.tnc.self": "A. Self",
-  "item.tnc.self_spawn_egg": "Self 刷怪蛋"
+  "item.tnc.self_spawn_egg": "Self 刷怪蛋",
+  "entity.tnc.cava": "B. cava",
+  "item.tnc.cava_spawn_egg": "cava 刷怪蛋"
 }
