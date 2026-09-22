@@ -22,5 +22,7 @@
   "entity.tnc.self": "A. Self",
   "item.tnc.self_spawn_egg": "Self 刷怪蛋",
   "entity.tnc.cava": "B. cava",
-  "item.tnc.cava_spawn_egg": "cava 刷怪蛋"
+  "item.tnc.cava_spawn_egg": "cava 刷怪蛋",
+  "entity.tnc.huai": "熙永槐",
+  "item.tnc.huai_spawn_egg": "槐 刷怪蛋"
 }

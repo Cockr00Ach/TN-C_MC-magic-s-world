@@ -35,6 +35,11 @@ public final class TNNpcAttributes {
             () -> new net.minecraftforge.common.ForgeSpawnEggItem(
                     TNNpcs.CAVA, 0x5A2A18, 0x8A8A8A, new Item.Properties()));
 
+    /** 槐的刷怪蛋（配色：钢银 + 战袍蓝）。 */
+    public static final RegistryObject<Item> HUAI_SPAWN_EGG = SPAWN_EGGS.register("huai_spawn_egg",
+            () -> new net.minecraftforge.common.ForgeSpawnEggItem(
+                    TNNpcs.HUAI, 0xB0B6BE, 0x2E5696, new Item.Properties()));
+
     private TNNpcAttributes() {
     }
 
@@ -46,5 +51,6 @@ public final class TNNpcAttributes {
     public static void onEntityAttributeCreation(EntityAttributeCreationEvent event) {
         event.put(TNNpcs.SELF.get(), TnDialogueNpc.attributes().build());
         event.put(TNNpcs.CAVA.get(), TnDialogueNpc.attributes().build());
+        event.put(TNNpcs.HUAI.get(), TnDialogueNpc.attributes().build());
     }
 }

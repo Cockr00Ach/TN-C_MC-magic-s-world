@@ -93,6 +93,7 @@ public class TNMod
                 // NPC 刷怪蛋（调试与放置用）—— 剧情 NPC 上线后由生成逻辑接管
                 output.accept(com.tnc.tnc.npc.TNNpcAttributes.SELF_SPAWN_EGG.get());
                 output.accept(com.tnc.tnc.npc.TNNpcAttributes.CAVA_SPAWN_EGG.get());
+                output.accept(com.tnc.tnc.npc.TNNpcAttributes.HUAI_SPAWN_EGG.get());
             }).build());
 
     // ------------------------------------------------------------------

@@ -219,7 +219,7 @@ public final class NpcCommand {
         int removed = 0;
         String[] ids = ("@".equals(npcId) || "all".equalsIgnoreCase(npcId))
                 // ★ 加了新 NPC 记得往这里补 —— 否则 purge all 会漏掉他
-                ? new String[]{"self", "cava"}
+                ? new String[]{"self", "cava", "huai"}
                 : new String[]{npcId};
         for (String id : ids) {
             net.minecraft.world.entity.EntityType<?> type =

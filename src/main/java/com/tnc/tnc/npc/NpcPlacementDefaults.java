@@ -34,7 +34,8 @@ public final class NpcPlacementDefaults {
      */
     public static final List<NpcPlacementSavedData.Placement> DEFAULTS = List.of(
             new NpcPlacementSavedData.Placement("self", "CENTER", -1, -1, 44),
-            new NpcPlacementSavedData.Placement("cava", "CENTER", -16, -1, 44)
+            new NpcPlacementSavedData.Placement("cava", "CENTER", -16, -1, 44),
+            new NpcPlacementSavedData.Placement("huai", "CENTER", 14, -1, 44)
     );
 
     private NpcPlacementDefaults() {

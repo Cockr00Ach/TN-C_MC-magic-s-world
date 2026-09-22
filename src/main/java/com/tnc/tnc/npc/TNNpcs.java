@@ -54,6 +54,14 @@ public final class TNNpcs {
                     .clientTrackingRange(10)
                     .build("tnc:cava"));
 
+    /** 熙永槐（槐）—— cava 的儿子，小队里的战士。参数同前两个。 */
+    public static final RegistryObject<EntityType<HuaiNpcEntity>> HUAI =
+            ENTITY_TYPES.register("huai", () -> EntityType.Builder
+                    .of(HuaiNpcEntity::new, MobCategory.MISC)
+                    .sized(0.6F, 1.8F)
+                    .clientTrackingRange(10)
+                    .build("tnc:huai"));
+
     private TNNpcs() {
     }
 

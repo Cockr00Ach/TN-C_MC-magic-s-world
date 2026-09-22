@@ -22,5 +22,7 @@
   "entity.tnc.self": "A. Self",
   "item.tnc.self_spawn_egg": "Self Spawn Egg",
   "entity.tnc.cava": "B. cava",
-  "item.tnc.cava_spawn_egg": "cava Spawn Egg"
+  "item.tnc.cava_spawn_egg": "cava Spawn Egg",
+  "entity.tnc.huai": "Xi Yonghuai",
+  "item.tnc.huai_spawn_egg": "Huai Spawn Egg"
 }
