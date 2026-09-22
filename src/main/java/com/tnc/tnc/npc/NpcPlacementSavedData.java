@@ -14,6 +14,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -155,6 +156,72 @@ public class NpcPlacementSavedData extends net.minecraft.world.level.saveddata.S
         }
         return spawned;
     }
+
+    /**
+     * ★ 一行式"NPC 到底在不在"自检（2026-09-22 加）。
+     *
+     * <p>为什么需要：实机验收的痛点是**没法立刻分辨**"NPC 真在 / 只是我没看见 /
+     * 我离得太远它还没补上"。{@link #ensureOne} 的日志只说明"我尝试放了"（坑见交接文档 8.5），
+     * 所以这里**回查一次事实**并汇总成一行，让作者一眼就能下结论。
+     *
+     * <p>每个 NPC 三种结论：
+     * <ul>
+     *   <li>{@code id=在} —— 实体确实在（立刻可见）；</li>
+     *   <li>{@code id=待补(原因)} —— 还没补上，但原因是"锚点没就绪 / 区块不在实体刻范围"，
+     *       走过去就会出来，<b>不是</b>故障；</li>
+     *   <li>{@code id=缺失!(原因)} —— 该在、而且放得进去，偏偏不在 → <b>真有问题</b>，
+     *       会在日志里以 WARN 打出来并附原因。</li>
+     * </ul>
+     *
+     * @param notifyOnlyOnChange 只在结论翻转时打日志（避免每秒刷屏）
+     */
+    public String selfCheck(ServerLevel level, boolean notifyOnlyOnChange) {
+        StringBuilder line = new StringBuilder();
+        List<String> missing = new java.util.ArrayList<>();
+
+        for (Placement p : placements.values()) {
+            String id = p.npcId();
+            EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(
+                    ResourceLocation.fromNamespaceAndPath(com.tnc.tnc.TNMod.MODID, id));
+            BlockPos want = resolve(level, p);
+            if (type == null) {
+                line.append('[').append(id).append("=缺失!(实体类型未注册)] ");
+                missing.add(id);
+                continue;
+            }
+            if (findNear(level, type, want == null ? BlockPos.ZERO : want, 24.0D) != null) {
+                line.append('[').append(id).append("=在] ");
+                continue;
+            }
+            String reason = want == null ? "锚点未就绪"
+                    : !level.hasChunkAt(want) ? "区块未加载"
+                    : !level.isPositionEntityTicking(want) ? "不在实体刻范围（没人靠近）"
+                    : null;
+            if (reason == null) {
+                line.append('[').append(id).append("=缺失!] ");
+                missing.add(id);
+            } else {
+                line.append('[').append(id).append("=待补(").append(reason).append(")] ");
+            }
+        }
+
+        String text = line.toString().trim();
+        boolean ok = missing.isEmpty();
+        if (!notifyOnlyOnChange || ok != lastSelfCheckOk || (!ok && !warnedMissing)) {
+            if (ok) {
+                LOGGER.info("TN-C npc self-check: 登记的都到位 -> {}", text);
+            } else {
+                LOGGER.warn("TN-C npc self-check: 有缺失 {} -> {}", missing, text);
+            }
+        }
+        lastSelfCheckOk = ok;
+        warnedMissing = !ok;
+        return text;
+    }
+
+    /** 上一次自检是否全在（只在结论翻转时打日志）。 */
+    private boolean lastSelfCheckOk = true;
+    private boolean warnedMissing = false;
 
     /**
      * 确保**默认登记**存在于本存档里，并在默认表版本升级时刷新它们。

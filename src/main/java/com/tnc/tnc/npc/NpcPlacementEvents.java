@@ -72,13 +72,21 @@ public final class NpcPlacementEvents {
         timer = 0;
         ServerLevel overworld = NpcPlacementSavedData.overworldOf(event.getServer());
         if (overworld != null) {
-            NpcPlacementSavedData.get(overworld).ensureAll(overworld);
+            NpcPlacementSavedData data = NpcPlacementSavedData.get(overworld);
+            int spawned = data.ensureAll(overworld);
+            if (spawned > 0) {
+                LOGGER.info("TN-C npc: 补位 {} 个 -> {}", spawned, data.selfCheck(overworld, false));
+            }
+            // 只在"结论翻转"时打一行（全在 / 有缺失），避免每秒刷屏。
+            data.selfCheck(overworld, true);
         }
     }
 
     private static void ensureNear(net.minecraft.world.entity.player.Player player) {
         if (player.level() instanceof ServerLevel level) {
-            NpcPlacementSavedData.get(level).ensureAll(level);
+            NpcPlacementSavedData data = NpcPlacementSavedData.get(level);
+            int spawned = data.ensureAll(level);
+            LOGGER.info("TN-C npc self-check（玩家就位后）:{} -> {}", spawned, data.selfCheck(level, true));
         }
     }
 }
