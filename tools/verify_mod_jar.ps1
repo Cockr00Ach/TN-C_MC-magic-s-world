@@ -345,15 +345,50 @@ try {
                 foreach ($m in [regex]::Matches($block.Groups[1].Value, '"([^"]+)"')) { $leaks += $m.Groups[1].Value }
             }
         }
-        $found = @($leaks | Where-Object { $scrollLangText -match [regex]::Escape($_) })
+        # The check is scoped to the SCROLL BODIES on purpose: character names are
+        # allowed to ship (they are NPC names / dialogue speakers now), but the scroll
+        # text must never name anyone - that mapping is the whole reveal.
+        $scrollBodies = ''
+        foreach ($m in [regex]::Matches($scrollLangText, '"scroll\.tnc\.[a-z0-9_]+"\s*:\s*"((?:[^"\\]|\\.)*)"')) {
+            $scrollBodies += $m.Groups[1].Value
+        }
+        $found = @($leaks | Where-Object { $scrollBodies -match [regex]::Escape($_) })
         if ($leaks.Count -eq 0) { Fail 'spoiler word list not found (tools\scroll_lang_extra.json -> spoilers) - leak check could not run' }
-        elseif ($found.Count -eq 0) { Ok 'no author-only story notes leaked into the shipped lang' }
-        else { Fail ('story spoilers shipped in lang: ' + ($found -join ', ')) }
+        elseif ($found.Count -eq 0) { Ok 'no character names / author-only notes leaked into the scroll text' }
+        else { Fail ('story spoilers leaked into the scroll text: ' + ($found -join ', ')) }
         if ($scrollLangText -match [regex]::Escape('tooltip.tnc.scroll.read')) { Ok 'scroll has the right-click hint tooltip' }
         else { Fail 'scroll tooltip key missing (players would never know it is readable)' }
     }
 
-    # ---------------- D1c. HUD entry point + its keybind ----------------    # Nothing HUD-side can be clicked (no cursor while playing), so the keybind IS
+    # ---------------- D1b4. the TN-C skin NPCs ----------------
+    # Adding an NPC touches six places (entity type, attributes, spawn egg, renderer,
+    # default placement, purge list). Missing the skin PNG or the lang entry does not
+    # crash: the NPC is simply invisible / shows a raw translation key.
+    $npcIds = @('self', 'cava', 'huai', 'zhuangquerang')
+    $npcLangText = $null
+    $npcLangEntry = $zip.Entries | Where-Object { $_.FullName -eq 'assets/tnc/lang/zh_cn.json' }
+    if ($npcLangEntry) {
+        $nr = New-Object System.IO.StreamReader($npcLangEntry.Open(), [System.Text.Encoding]::UTF8)
+        $npcLangText = $nr.ReadToEnd(); $nr.Close()
+    }
+    $missingSkin = @()
+    $missingName = @()
+    $missingScript = @()
+    foreach ($npc in $npcIds) {
+        if (-not ($zip.Entries | Where-Object { $_.FullName -eq "assets/tnc/textures/entity/$npc.png" })) { $missingSkin += $npc }
+        if ($npcLangText -and $npcLangText -notmatch [regex]::Escape("entity.tnc.$npc")) { $missingName += $npc }
+        $found = $zip.Entries | Where-Object { $_.FullName -like "data/tnc/dialogues/$npc*.txt" }
+        if (-not $found) { $missingScript += $npc }
+    }
+    if ($missingSkin.Count -eq 0) { Ok "every skin NPC has its skin texture in the jar ($($npcIds.Count) npcs)" }
+    else { Fail ('npc skin missing from jar (renders as a missing texture): ' + ($missingSkin -join ', ')) }
+    if ($missingName.Count -eq 0) { Ok 'every skin NPC has a lang name' }
+    else { Fail ('npc lang name missing (shows a raw key): ' + ($missingName -join ', ')) }
+    if ($missingScript.Count -eq 0) { Ok 'every skin NPC has a dialogue script' }
+    else { Fail ('npc dialogue script missing (right-click does nothing useful): ' + ($missingScript -join ', ')) }
+
+    # ---------------- D1c. HUD entry point + its keybind ----------------
+    # Nothing HUD-side can be clicked (no cursor while playing), so the keybind IS
     # the entry. RegisterKeyMappingsEvent lives on the MOD bus - registering it on
     # the FORGE bus compiles fine and the key simply never appears in Options.
     # Guard both halves: the subscription exists, and the lang keys exist.

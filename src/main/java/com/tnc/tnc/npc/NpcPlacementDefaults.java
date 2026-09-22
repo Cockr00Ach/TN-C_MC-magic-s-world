@@ -40,7 +40,10 @@ public final class NpcPlacementDefaults {
     public static final List<NpcPlacementSavedData.Placement> DEFAULTS = List.of(
             new NpcPlacementSavedData.Placement("self", "CENTER", -1, -1, 44),
             new NpcPlacementSavedData.Placement("cava", "CENTER", 15, 0, -15),
-            new NpcPlacementSavedData.Placement("huai", "CENTER", 12, 0, -13)
+            new NpcPlacementSavedData.Placement("huai", "CENTER", 12, 0, -13),
+            // 庄鹊让（卷五《代》）—— 位置**暂定** ✗：先贴着用户实测过的 huai 放，免得生成到墙里/地下。
+            // 定位置：/tnc npc here zhuangquerang，再把 /tnc npc list 那一行抄回这里。
+            new NpcPlacementSavedData.Placement("zhuangquerang", "CENTER", 15, 0, -13)
     );
 
     /**
@@ -57,7 +60,7 @@ public final class NpcPlacementDefaults {
      * <p><b>因此在存档里手动调位置是临时的</b>：只要之后 VERSION +1，就会被顶回去。
      * 想让手动结果留下来，就把 {@code /tnc npc list} 打出的那行抄回 {@link #DEFAULTS} 再 +1。
      */
-    public static final int VERSION = 2;
+    public static final int VERSION = 3;
 
     private NpcPlacementDefaults() {
     }

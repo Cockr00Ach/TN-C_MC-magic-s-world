@@ -94,6 +94,7 @@ public class TNMod
                 output.accept(com.tnc.tnc.npc.TNNpcAttributes.SELF_SPAWN_EGG.get());
                 output.accept(com.tnc.tnc.npc.TNNpcAttributes.CAVA_SPAWN_EGG.get());
                 output.accept(com.tnc.tnc.npc.TNNpcAttributes.HUAI_SPAWN_EGG.get());
+                output.accept(com.tnc.tnc.npc.TNNpcAttributes.ZHUANGQUERANG_SPAWN_EGG.get());
             }).build());
 
     // ------------------------------------------------------------------

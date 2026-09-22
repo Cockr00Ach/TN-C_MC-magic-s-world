@@ -40,5 +40,6 @@ public final class TNNpcClientEvents {
         event.registerEntityRenderer(com.tnc.tnc.npc.TNNpcs.SELF.get(), provider);
         event.registerEntityRenderer(com.tnc.tnc.npc.TNNpcs.CAVA.get(), provider);
         event.registerEntityRenderer(com.tnc.tnc.npc.TNNpcs.HUAI.get(), provider);
+        event.registerEntityRenderer(com.tnc.tnc.npc.TNNpcs.ZHUANGQUERANG.get(), provider);
     }
 }

@@ -62,6 +62,23 @@ public final class TNNpcs {
                     .clientTrackingRange(10)
                     .build("tnc:huai"));
 
+    /**
+     * 庄鹊让 —— 卷五《代》的角色（作者 2026-09-22："先当 NPC 做"）。
+     *
+     * <p>参数与前面三个完全一致（玩家尺寸 / 不参与刷怪 / 10 区块追踪）。
+     *
+     * <p>注意 <b>id 就是 {@code zhuangquerang}</b> —— {@code /tnc npc} 的 id 是
+     * <b>按注册表查实体类型</b>解析的（见 {@code NpcCommand}），所以这里注册完，
+     * {@code /tnc npc here zhuangquerang} 立刻可用 ✓，不用再改命令代码。
+     * 唯一要同步的地方是 {@code purge all} 的名单 ✗（那里是硬编码数组）。
+     */
+    public static final RegistryObject<EntityType<ZhuangquerangNpcEntity>> ZHUANGQUERANG =
+            ENTITY_TYPES.register("zhuangquerang", () -> EntityType.Builder
+                    .of(ZhuangquerangNpcEntity::new, MobCategory.MISC)
+                    .sized(0.6F, 1.8F)
+                    .clientTrackingRange(10)
+                    .build("tnc:zhuangquerang"));
+
     private TNNpcs() {
     }
 

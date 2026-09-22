@@ -101,6 +101,9 @@ foreach ($id in $ids) {
         if ($s.StartsWith(' ')) { $s = $s.TrimStart(' ') }
         $s = $s.Replace('**', '')                            # strip bold markers
         $s = $s.TrimEnd()
+        # a stray trailing '>' means the source doc leaked its blockquote marker
+        # into the text (it renders as junk at the end of the line)
+        if ($s.EndsWith('>')) { $s = $s.TrimEnd('>').TrimEnd() }
         if ($s -eq '') {
             if (-not $prevBlank) { $clean.Add(''); $prevBlank = $true }
         }

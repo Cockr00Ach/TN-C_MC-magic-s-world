@@ -40,6 +40,11 @@ public final class TNNpcAttributes {
             () -> new net.minecraftforge.common.ForgeSpawnEggItem(
                     TNNpcs.HUAI, 0xB0B6BE, 0x2E5696, new Item.Properties()));
 
+    /** 庄鹊让的刷怪蛋（配色：藏青裙 + 白围裙 —— 与她皮肤的蓝白女仆配色一致）。 */
+    public static final RegistryObject<Item> ZHUANGQUERANG_SPAWN_EGG = SPAWN_EGGS.register("zhuangquerang_spawn_egg",
+            () -> new net.minecraftforge.common.ForgeSpawnEggItem(
+                    TNNpcs.ZHUANGQUERANG, 0x2E4A8C, 0xF0F2F6, new Item.Properties()));
+
     private TNNpcAttributes() {
     }
 
@@ -52,5 +57,6 @@ public final class TNNpcAttributes {
         event.put(TNNpcs.SELF.get(), TnDialogueNpc.attributes().build());
         event.put(TNNpcs.CAVA.get(), TnDialogueNpc.attributes().build());
         event.put(TNNpcs.HUAI.get(), TnDialogueNpc.attributes().build());
+        event.put(TNNpcs.ZHUANGQUERANG.get(), TnDialogueNpc.attributes().build());
     }
 }
