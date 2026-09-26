@@ -44,16 +44,21 @@ public final class TNOrbEntities {
                     .build("tnc:thunder_orb"));
 
     /**
-     * 地上的魔法阵（传说级/神级雷球施法时留下）✓
+     * 地上的魔法阵（主链雷法 5 档 ＋ 雷球链 t3/t4/t5 施法时留下）✓
      *
      * <p>尺寸给 0.1：它只是个贴地面片、没有碰撞、不可选中 ✓（碰撞箱小一点，免得挡路）。
+     *
+     * <p><b>`updateInterval(1)`</b>：原来 10 ✗ —— 半径/时长是走 {@code SynchedEntityData} 同步的，
+     * 10 tick 一次意味着<b>客户端可能先收到"实体已生成"、过最多 0.5 秒才收到尺寸</b>，
+     * 而渲染器在尺寸为 0 时直接 return → 表现就是"晚半拍、然后啪地冒出来" ✗
+     * （作者 2026-09-27："魔法阵出现的不是很流畅……释放出魔法的那一刻就出现"）→ 改成每 tick ✓。
      */
     public static final RegistryObject<EntityType<TNMagicCircleEntity>> MAGIC_CIRCLE =
             ENTITY_TYPES.register("magic_circle", () -> EntityType.Builder
                     .of(TNMagicCircleEntity::new, MobCategory.MISC)
                     .sized(0.1F, 0.1F)
                     .clientTrackingRange(10)
-                    .updateInterval(10)
+                    .updateInterval(1)
                     .build("tnc:magic_circle"));
 
     /**

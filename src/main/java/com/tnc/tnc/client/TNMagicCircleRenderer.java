@@ -55,9 +55,29 @@ public class TNMagicCircleRenderer extends EntityRenderer<TNMagicCircleEntity> {
 
         boolean wave = entity instanceof TNShockwaveEntity;
         double radius = entity.radius() * (wave ? (0.3D + 0.7D * t) : 1.0D);
-        // 冲击波：一开始最亮，迅速淡出；魔法阵：快速亮起，最后 35% 淡出 ✓
-        float alpha = wave ? (1.0F - t) : Math.min(1.0F, age / 4.0F) * (t < 0.65F ? 1.0F : (1.0F - t) / 0.35F);
-        if (alpha <= 0.02F || radius <= 0.01D) {
+
+        // 2026-09-27 作者："魔法阵出现的不是很流畅，我建议是释放出魔法的那一刻就出现，然后逐渐淡化消失"
+        //   旧版：alpha = min(1, age/4) * …… —— 前 4 tick 是"淡入" ✗，看起来就是"糊上来/闪一下" ✗。
+        //   现在：**第 0 tick 就满亮度**（出现即所见 ✓），先保持一小段，再用 smoothstep 平滑淡到 0 ✓
+        //   （smoothstep = u²(3-2u)：两头斜率为 0 ✓ 起步和收尾都不会有突变，这就是"流畅"的关键 ✓）
+        float alpha;
+        if (wave) {
+            // 冲击波环保持原样：一开始最亮，迅速向外淡出 ✓
+            alpha = 1.0F - t;
+        } else {
+            // 保持时长：生命的前 25%，并夹在 15~40 tick 之间（低档法术生命短也不至于"没看清就没了" ✓；
+            // 高级法术阵大、留得久，但也不会"亮着不散" ✗）
+            float hold = Math.max(15.0F, Math.min(life * 0.25F, 40.0F));
+            hold = Math.min(hold, life * 0.5F);
+            if (age <= hold) {
+                alpha = 1.0F;
+            } else {
+                float u = 1.0F - (age - hold) / Math.max(1.0F, life - hold);   // 1 -> 0
+                u = Math.max(0.0F, Math.min(1.0F, u));
+                alpha = u * u * (3.0F - 2.0F * u);                            // smoothstep ✓
+            }
+        }
+        if (alpha <= 0.01F || radius <= 0.01D) {
             return;
         }
         // 魔法阵慢慢转；冲击波转得稍快，看起来"扫"出去

@@ -256,6 +256,25 @@ public final class TnSpellMechanics {
             // 环绕雷球（现在是 t4）：作者要求"同款魔法阵" ✓
             spawnMagicCircle(player, 8.0D, 200);
         }
+
+        // 主链雷法（group = primary，5 档）：**释放的那一刻**就在脚下铺一张魔法阵 ✓
+        // 作者 2026-09-27："魔法阵出现的不是很流畅，我建议是释放出魔法的那一刻就出现，然后逐渐淡化消失"
+        //   ＋ "我说改的可是**主链**的雷法啊" —— 主链原来是**没有**魔法阵的 ✗（只有雷球链有）。
+        // 时机：这个回调挂在引擎的 SPELL_CAST 上，且 `action == CHANNEL`（起手蓄力）在上面已经 return ✗
+        //       —— 所以这里**就是"放出去"的那一 tick** ✓，不用再加延迟。
+        // 尺寸/时长按档位递增：越高级的雷法，阵越大、留得越久 ✓（数值都在这一张表里，好调）
+        //   阵的出场是**瞬时满亮度**、随后**平滑淡出**（渲染器负责，见 TNMagicCircleRenderer）✓
+        else if (path.equals("spark")) {
+            spawnMagicCircle(player, 3.0D, 80);          // t1 电花
+        } else if (path.equals("lightning_field")) {
+            spawnMagicCircle(player, 5.0D, 110);         // t2 电场
+        } else if (path.equals("lightning_strike")) {
+            spawnMagicCircle(player, 7.5D, 140);         // t3 雷击
+        } else if (path.equals("lightning_storm")) {
+            spawnMagicCircle(player, 10.5D, 170);        // t4 雷暴
+        } else if (path.equals("heavenly_thunder")) {
+            spawnMagicCircle(player, 14.0D, 210);        // t5 天雷
+        }
     }
 
     /**
