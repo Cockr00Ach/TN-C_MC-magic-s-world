@@ -56,6 +56,16 @@ public final class TNProjectileModels {
      */
     public static final String LIGHTNINGBALL_2 = "projectile/lightingball_2";
 
+    /**
+     * 作者自制闪电（{@code flashinggg}，2026-09-27）：15 个方块、<b>竖直闪电</b>，
+     * 基础尺寸 <b>0.3125 × 2.25 × 0.125 格</b>（高 2.25 格），11 个元素带 ±22.5°/±45° 的
+     * Z 轴旋转（＝闪电的锯齿 ✓ 合法角度 ✓）。
+     *
+     * <p>给法术 {@code heavenly_thunder}（神级天雷，从 30 格高空砸下来的那几道）当投射物模型，
+     * 换掉原来借用的 {@code berserker_rpg:projectile/lightning_bolt}（它在整合包里**缺贴图** ✗）。
+     */
+    public static final String FLASH = "projectile/flash";
+
     public static final String[] PROJECTILE_MODELS = {
             // 火系（用户自制）
             "projectile/fireball",
@@ -65,6 +75,8 @@ public final class TNProjectileModels {
             "projectile/lightingball",
             // 雷系新版球（作者 2026-09-27 自制：58 个小方块拼的碎块球）
             LIGHTNINGBALL_2,
+            // 雷系闪电（作者 2026-09-27 自制：竖直锯齿闪电）
+            FLASH,
             // 雷系备用球（用户自制）
             "projectile/thunder_ball",
     };
