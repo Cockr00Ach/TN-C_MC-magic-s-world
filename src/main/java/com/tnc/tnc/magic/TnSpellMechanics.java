@@ -233,9 +233,9 @@ public final class TnSpellMechanics {
         // 传说级 / 神级雷球：脚下留下魔法阵 ✓（作者 2026-09-22 指定）
         // tier 4 = 传说级、tier 5 = 神级（见 Element.tierName）
         if (path.equals("explosive_thunder_orb")) {
-            spawnMagicCircle(player, 3.2D, 140);
+            spawnMagicCircle(player, 12.8D, 170);
         } else if (path.equals("cataclysm_thunder_orb")) {
-            spawnMagicCircle(player, 5.0D, 220);
+            spawnMagicCircle(player, 20.0D, 260);
         }
     }
 

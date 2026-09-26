@@ -19,17 +19,17 @@
         "launch_radius": 5,
         "launch_properties": {
           "velocity": 0.075,
-          "extra_launch_count": 8,
-          "extra_launch_delay": 4
+          "extra_launch_count": 0,
+          "extra_launch_delay": 0
         },
         "projectile": {
           "homing_angle": 0.0,
           "client_data": {
             "travel_particles": [
-              { "particle_id": "minecraft:witch", "shape": "SPHERE", "rotation": "LOOK", "origin": "CENTER", "count": 80.0, "min_speed": 0.0, "max_speed": 0.3 },
-              { "particle_id": "minecraft:electric_spark", "shape": "SPHERE", "rotation": "LOOK", "origin": "CENTER", "count": 80.0, "min_speed": 0.05, "max_speed": 0.45 },
-              { "particle_id": "minecraft:squid_ink", "shape": "SPHERE", "rotation": "LOOK", "origin": "CENTER", "count": 14.0, "min_speed": 0.0, "max_speed": 0.2 },
-              { "particle_id": "spell_engine:electric_arc_a", "shape": "CIRCLE", "rotation": "LOOK", "origin": "CENTER", "count": 40.0, "min_speed": 0.0, "max_speed": 0.2 }
+              { "particle_id": "minecraft:electric_spark", "shape": "CIRCLE", "rotation": "LOOK", "origin": "CENTER", "count": 220.0, "extent": 14.0, "min_speed": 0.0, "max_speed": 0.05 },
+              { "particle_id": "minecraft:witch", "shape": "CIRCLE", "rotation": "LOOK", "origin": "CENTER", "count": 220.0, "extent": 14.0, "min_speed": 0.0, "max_speed": 0.05 },
+              { "particle_id": "minecraft:squid_ink", "shape": "CIRCLE", "rotation": "LOOK", "origin": "CENTER", "count": 20.0, "extent": 14.0, "min_speed": 0.0, "max_speed": 0.05 },
+              { "particle_id": "spell_engine:electric_arc_a", "shape": "CIRCLE", "rotation": "LOOK", "origin": "CENTER", "count": 60.0, "extent": 14.2, "min_speed": 0.0, "max_speed": 0.08 }
             ],
             "model": { "model_id": "tnc:projectile/lightingball", "light_emission": "RADIATE", "scale": 75.0 }
           }
@@ -43,10 +43,9 @@
     {
       "action": { "type": "DAMAGE", "damage": { "spell_power_coefficient": 2.5, "knockback": 3.0 } },
       "particles": [
-        { "particle_id": "minecraft:witch", "shape": "SPHERE", "origin": "CENTER", "count": 130.0, "min_speed": 1.8, "max_speed": 4.5 },
-        { "particle_id": "minecraft:electric_spark", "shape": "SPHERE", "origin": "CENTER", "count": 130.0, "min_speed": 1.8, "max_speed": 4.5 },
-        { "particle_id": "minecraft:squid_ink", "shape": "SPHERE", "origin": "CENTER", "count": 26.0, "min_speed": 1.5, "max_speed": 3.5 },
-        { "particle_id": "minecraft:large_smoke", "shape": "SPHERE", "origin": "CENTER", "count": 80.0, "min_speed": 1.2, "max_speed": 3.0 },
+        { "particle_id": "minecraft:electric_spark", "shape": "SPHERE", "origin": "CENTER", "count": 450.0, "min_speed": 2.0, "max_speed": 6.0 },
+        { "particle_id": "minecraft:witch", "shape": "SPHERE", "origin": "CENTER", "count": 450.0, "min_speed": 2.0, "max_speed": 6.0 },
+        { "particle_id": "minecraft:squid_ink", "shape": "SPHERE", "origin": "CENTER", "count": 70.0, "min_speed": 1.8, "max_speed": 5.0 },
         { "particle_id": "minecraft:flash", "shape": "SPHERE", "origin": "CENTER", "count": 10.0, "min_speed": 0.0, "max_speed": 0.15 }
       ],
       "sound": { "id": "entity.lightning_bolt.impact", "volume": 1.0 }
@@ -68,16 +67,10 @@
     "extra_radius": { "power_coefficient": 0.5 },
     "area": { "distance_dropoff": "SQUARED" },
     "particles": [
-      { "particle_id": "minecraft:witch", "shape": "SPHERE", "origin": "CENTER", "count": 300.0, "min_speed": 2.0, "max_speed": 5.0 },
-      { "particle_id": "minecraft:electric_spark", "shape": "SPHERE", "origin": "CENTER", "count": 300.0, "min_speed": 2.0, "max_speed": 5.0 },
-      { "particle_id": "minecraft:squid_ink", "shape": "SPHERE", "origin": "CENTER", "count": 55.0, "min_speed": 1.8, "max_speed": 4.0 },
-      { "particle_id": "minecraft:large_smoke", "shape": "SPHERE", "origin": "CENTER", "count": 200.0, "min_speed": 1.5, "max_speed": 3.5 },
-      { "particle_id": "minecraft:flash", "shape": "SPHERE", "origin": "CENTER", "count": 14.0, "min_speed": 0.0, "max_speed": 0.2 },
-      { "particle_id": "minecraft:electric_spark", "shape": "CIRCLE", "rotation": "LOOK", "origin": "CENTER", "count": 200.0, "min_speed": 3.0, "max_speed": 6.0 },
-      { "particle_id": "minecraft:witch", "shape": "CIRCLE", "rotation": "LOOK", "origin": "CENTER", "count": 200.0, "min_speed": 3.0, "max_speed": 6.0 },
-      { "particle_id": "minecraft:squid_ink", "shape": "CIRCLE", "rotation": "LOOK", "origin": "CENTER", "count": 40.0, "min_speed": 2.5, "max_speed": 5.0 },
-      { "particle_id": "minecraft:large_smoke", "shape": "CIRCLE", "rotation": "LOOK", "origin": "CENTER", "count": 120.0, "min_speed": 2.5, "max_speed": 5.0 },
-      { "particle_id": "minecraft:electric_spark", "shape": "PILLAR", "origin": "CENTER", "count": 200.0, "min_speed": 0.5, "max_speed": 1.6 }
+      { "particle_id": "minecraft:electric_spark", "shape": "SPHERE", "origin": "CENTER", "count": 700.0, "min_speed": 2.5, "max_speed": 7.0 },
+      { "particle_id": "minecraft:witch", "shape": "SPHERE", "origin": "CENTER", "count": 700.0, "min_speed": 2.5, "max_speed": 7.0 },
+      { "particle_id": "minecraft:squid_ink", "shape": "SPHERE", "origin": "CENTER", "count": 120.0, "min_speed": 2.0, "max_speed": 6.0 },
+      { "particle_id": "minecraft:flash", "shape": "SPHERE", "origin": "CENTER", "count": 16.0, "min_speed": 0.0, "max_speed": 0.25 }
     ],
     "sound": { "id": "entity.lightning_bolt.thunder", "volume": 1.5 }
   },

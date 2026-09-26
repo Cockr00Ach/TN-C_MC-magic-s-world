@@ -4,10 +4,13 @@
 # Drawn from scratch (no third-party art), 128x128 RGBA with a transparent
 # background so it can be laid flat on the ground as a decal.
 #
-# Look: a cyan outer ring + a violet inner ring + 12 rune ticks + a six-point
-# star, matching the lightning family's colours (cyan #7FE8FF / violet #B072FF).
+# Look: PURE YELLOW (author 2026-09-22: the lightning magic circle should be pure
+# yellow) - a bright ring, a deeper-yellow inner ring and six-point star, and
+# pale-yellow rune diamonds. Only the yellow hue is used, so it reads as one colour.
 #
-# NOTE: pure ASCII on purpose (Windows PowerShell 5.1 reads BOM-less .ps1 as ANSI).
+# NOTE: pure ASCII on purpose. Windows PowerShell 5.1 reads a BOM-less .ps1 as
+# ANSI, so a CJK comment here turns into mojibake and can even swallow the next
+# line (that happened once, and the script died halfway).
 #
 # Usage:
 #   powershell -ExecutionPolicy Bypass -File tools\gen_magic_circle.ps1
@@ -34,10 +37,11 @@ $g.Clear([System.Drawing.Color]::FromArgb(0, 0, 0, 0))
 
 function Col([int]$r, [int]$gr, [int]$b, [int]$a) { [System.Drawing.Color]::FromArgb($a, $r, $gr, $b) }
 
-$cyan   = Col 127 232 255 235
-$cyanDim = Col 127 232 255 120
-$violet = Col 176 114 255 220
-$gold   = Col 255 214 102 200
+# ---- palette: yellow only ----
+$main = Col 255 233 128 235      # bright yellow: outer ring, ticks, centre
+$dim  = Col 255 214  92 130      # dimmer yellow: soft glow / inner ring
+$deep = Col 255 190  40 220      # deep yellow: six-point star
+$pale = Col 255 248 200 210      # pale yellow: rune diamonds / centre dot
 
 function Ring([double]$radius, [double]$width, $color) {
     $pen = New-Object System.Drawing.Pen -ArgumentList $color, $width
@@ -46,23 +50,23 @@ function Ring([double]$radius, [double]$width, $color) {
     $pen.Dispose()
 }
 
-# ---- glow (concentric soft rings) then the crisp rings ----
+# ---- soft glow, then the crisp rings ----
 foreach ($i in 1..6) {
     $alpha = [int](26 / $i)
-    Ring (56 + $i * 1.6) 3.0 (Col 127 232 255 $alpha)
+    Ring (56 + $i * 1.6) 3.0 (Col 255 233 128 $alpha)
 }
-Ring 55 2.6 $cyanDim          # outer
-Ring 56 1.4 $cyan
-Ring 40 1.2 $violet           # inner
-Ring 26 1.0 $cyanDim
-Ring 10 1.6 $cyan
+Ring 55 2.6 $dim              # outer
+Ring 56 1.4 $main
+Ring 40 1.2 $deep             # inner
+Ring 26 1.0 $dim
+Ring 10 1.6 $main
 
 # ---- 12 rune ticks between the two main rings ----
 for ($i = 0; $i -lt 12; $i++) {
     $a = $i * (2.0 * [Math]::PI / 12.0)
     $r1 = 45.0
     $r2 = 51.0
-    $pen = New-Object System.Drawing.Pen -ArgumentList $cyan, 2.4
+    $pen = New-Object System.Drawing.Pen -ArgumentList $main, 2.4
     $x1 = 64 + [Math]::Cos($a) * $r1
     $y1 = 64 + [Math]::Sin($a) * $r1
     $x2 = 64 + [Math]::Cos($a) * $r2
@@ -79,7 +83,7 @@ for ($i = 0; $i -lt 12; $i++) {
         (New-Object System.Drawing.PointF -ArgumentList ([single]$xm), ([single]($ym + 3))),
         (New-Object System.Drawing.PointF -ArgumentList ([single]($xm - 3)), ([single]$ym))
     )
-    $g.FillPolygon((New-Object System.Drawing.SolidBrush -ArgumentList $gold), $pts)
+    $g.FillPolygon((New-Object System.Drawing.SolidBrush -ArgumentList $pale), $pts)
 }
 
 # ---- six-point star (two triangles) ----
@@ -95,12 +99,12 @@ function Star([double]$radius, [double]$rot, $color, [double]$width) {
     }
     $pen.Dispose()
 }
-Star 34 0.0 $violet 1.6
-Star 22 0.52 $cyan 1.2
+Star 34 0.0 $deep 1.6
+Star 22 0.52 $main 1.2
 
 # ---- centre ----
-$g.FillEllipse((New-Object System.Drawing.SolidBrush -ArgumentList $cyan), 60, 60, 8, 8)
-$g.FillEllipse((New-Object System.Drawing.SolidBrush -ArgumentList $gold), 62, 62, 4, 4)
+$g.FillEllipse((New-Object System.Drawing.SolidBrush -ArgumentList $main), 60, 60, 8, 8)
+$g.FillEllipse((New-Object System.Drawing.SolidBrush -ArgumentList $pale), 62, 62, 4, 4)
 
 $g.Dispose()
 
