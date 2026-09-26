@@ -30,5 +30,8 @@ public final class TNSpellOrbClientEvents {
     @SubscribeEvent
     public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(TNOrbEntities.THUNDER_ORB.get(), TNThunderOrbRenderer::new);
+        // 魔法阵与冲击波环共用同一个渲染器（都是"贴地的一张面片"）✓
+        event.registerEntityRenderer(TNOrbEntities.MAGIC_CIRCLE.get(), TNMagicCircleRenderer::new);
+        event.registerEntityRenderer(TNOrbEntities.SHOCKWAVE.get(), TNMagicCircleRenderer::new);
     }
 }

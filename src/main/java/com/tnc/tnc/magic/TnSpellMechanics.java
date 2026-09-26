@@ -229,6 +229,38 @@ public final class TnSpellMechanics {
         if (path.equals("lightning_blink")) {
             blinkBurst(player);
         }
+
+        // 传说级 / 神级雷球：脚下留下魔法阵 ✓（作者 2026-09-22 指定）
+        // tier 4 = 传说级、tier 5 = 神级（见 Element.tierName）
+        if (path.equals("explosive_thunder_orb")) {
+            spawnMagicCircle(player, 3.2D, 140);
+        } else if (path.equals("cataclysm_thunder_orb")) {
+            spawnMagicCircle(player, 5.0D, 220);
+        }
+    }
+
+    /**
+     * 在玩家脚下铺一张魔法阵（{@link TNMagicCircleEntity}，纯表现实体 ✓）。
+     *
+     * @param radius 半径（格）
+     * @param life   存在多少 tick
+     */
+    private static void spawnMagicCircle(ServerPlayer player, double radius, int life) {
+        ServerLevel level = player.serverLevel();
+        TNMagicCircleEntity circle = TNOrbEntities.MAGIC_CIRCLE.get().create(level);
+        if (circle == null) {
+            return;
+        }
+        circle.configure(radius, life);
+        // 贴在他站的那一层：往下找一个不是空气的方块，铺在它上面 ✓
+        net.minecraft.core.BlockPos pos = player.blockPosition();
+        int guard = 0;
+        while (guard++ < 8 && pos.getY() > level.getMinBuildHeight()
+                && level.getBlockState(pos.below()).isAir()) {
+            pos = pos.below();
+        }
+        circle.moveTo(player.getX(), pos.getY() + 0.04D, player.getZ(), 0.0F, 0.0F);
+        level.addFreshEntity(circle);
     }
 
     // ------------------------------------------------------------------

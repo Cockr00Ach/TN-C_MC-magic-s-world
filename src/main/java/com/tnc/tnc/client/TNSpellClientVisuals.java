@@ -41,6 +41,47 @@ public final class TNSpellClientVisuals {
     private TNSpellClientVisuals() {
     }
 
+    // ---- 爆炸震屏（2026-09-22）：附近出现冲击波实体时给镜头加抖动 ----
+    // 为什么走这条路：冲击波实体是服务端在爆炸点生成的 ✓ 而客户端本来就能看到它 ✓，
+    // 所以"震屏"不需要任何网络包 —— 客户端自己每 tick 就近侦测一次即可 ✓。
+    private static float shake = 0.0F;
+    private static final net.minecraft.util.RandomSource SHAKE_RANDOM = net.minecraft.util.RandomSource.create();
+
+    @SubscribeEvent
+    public static void onClientTick(net.minecraftforge.event.TickEvent.ClientTickEvent event) {
+        if (event.phase != net.minecraftforge.event.TickEvent.Phase.END) {
+            return;
+        }
+        net.minecraft.client.Minecraft minecraft = net.minecraft.client.Minecraft.getInstance();
+        if (minecraft.level == null || minecraft.player == null) {
+            shake = 0.0F;
+            return;
+        }
+        // 20 格内有冲击波 => 抖一下（越近越猛）
+        for (com.tnc.tnc.magic.TNShockwaveEntity wave : minecraft.level.getEntitiesOfClass(
+                com.tnc.tnc.magic.TNShockwaveEntity.class, minecraft.player.getBoundingBox().inflate(20.0D))) {
+            double distance = wave.position().distanceTo(minecraft.player.position());
+            float strength = (float) (4.0D * Math.max(0.0D, 1.0D - distance / 20.0D));
+            if (strength > shake) {
+                shake = strength;
+            }
+        }
+        shake *= 0.80F;         // 衰减
+        if (shake < 0.02F) {
+            shake = 0.0F;
+        }
+    }
+
+    @SubscribeEvent
+    public static void onComputeCameraAngles(net.minecraftforge.client.event.ViewportEvent.ComputeCameraAngles event) {
+        if (shake <= 0.0F) {
+            return;
+        }
+        event.setYaw(event.getYaw() + (SHAKE_RANDOM.nextFloat() - 0.5F) * shake * 1.6F);
+        event.setPitch(event.getPitch() + (SHAKE_RANDOM.nextFloat() - 0.5F) * shake * 1.2F);
+        event.setRoll(event.getRoll() + (SHAKE_RANDOM.nextFloat() - 0.5F) * shake * 2.4F);
+    }
+
     @SubscribeEvent
     public static void onComputeFov(ComputeFovModifierEvent event) {
         Player player = event.getPlayer();

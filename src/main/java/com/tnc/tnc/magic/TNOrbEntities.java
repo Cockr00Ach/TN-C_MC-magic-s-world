@@ -36,6 +36,31 @@ public final class TNOrbEntities {
                     .updateInterval(2)
                     .build("tnc:thunder_orb"));
 
+    /**
+     * 地上的魔法阵（传说级/神级雷球施法时留下）✓
+     *
+     * <p>尺寸给 0.1：它只是个贴地面片、没有碰撞、不可选中 ✓（碰撞箱小一点，免得挡路）。
+     */
+    public static final RegistryObject<EntityType<TNMagicCircleEntity>> MAGIC_CIRCLE =
+            ENTITY_TYPES.register("magic_circle", () -> EntityType.Builder
+                    .of(TNMagicCircleEntity::new, MobCategory.MISC)
+                    .sized(0.1F, 0.1F)
+                    .clientTrackingRange(10)
+                    .updateInterval(10)
+                    .build("tnc:magic_circle"));
+
+    /**
+     * 爆炸冲击波 —— 由法术 JSON 的 {@code SPAWN} 动作在爆炸点生成 ✓
+     * （引擎的 SPAWN 只能指定实体类型，所以"冲击波"必须是独立类型，见 {@link TNShockwaveEntity}）。
+     */
+    public static final RegistryObject<EntityType<TNShockwaveEntity>> SHOCKWAVE =
+            ENTITY_TYPES.register("shockwave", () -> EntityType.Builder
+                    .of(TNShockwaveEntity::new, MobCategory.MISC)
+                    .sized(0.1F, 0.1F)
+                    .clientTrackingRange(10)
+                    .updateInterval(2)
+                    .build("tnc:shockwave"));
+
     private TNOrbEntities() {
     }
 
