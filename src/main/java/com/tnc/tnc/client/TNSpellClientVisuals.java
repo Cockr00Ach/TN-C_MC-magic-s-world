@@ -45,6 +45,11 @@ public final class TNSpellClientVisuals {
     // 为什么走这条路：冲击波实体是服务端在爆炸点生成的 ✓ 而客户端本来就能看到它 ✓，
     // 所以"震屏"不需要任何网络包 —— 客户端自己每 tick 就近侦测一次即可 ✓。
     private static float shake = 0.0F;
+    /** 白闪强度（0~1，每 tick ×0.72）✓ */
+    private static float flash = 0.0F;
+    /** 冲击波震屏：贴脸时多大（度）＋ 影响半径（格）✓ 作者要求"参考核弹" → 拉到 14 / 40 ✓ */
+    private static final double SHAKE_MAX = 14.0D;
+    private static final double SHAKE_RANGE = 40.0D;
     private static final net.minecraft.util.RandomSource SHAKE_RANDOM = net.minecraft.util.RandomSource.create();
 
     @SubscribeEvent
@@ -61,15 +66,47 @@ public final class TNSpellClientVisuals {
         for (com.tnc.tnc.magic.TNShockwaveEntity wave : minecraft.level.getEntitiesOfClass(
                 com.tnc.tnc.magic.TNShockwaveEntity.class, minecraft.player.getBoundingBox().inflate(20.0D))) {
             double distance = wave.position().distanceTo(minecraft.player.position());
-            float strength = (float) (4.0D * Math.max(0.0D, 1.0D - distance / 20.0D));
+            // 2026-09-27 作者："爆炸特效感觉好拉，我感受不到那种爆炸的感觉，多加一点镜头晃动吧，参考一下核弹"
+            //   → 震幅 4.0→14.0、作用半径 20→40 格、衰减 0.80→0.88（摇得更久 ✓）
+            float strength = (float) (SHAKE_MAX * Math.max(0.0D, 1.0D - distance / SHAKE_RANGE));
             if (strength > shake) {
                 shake = strength;
             }
+            // 同一发冲击波顺手点一下白闪（越近越白 ✓）——"核弹感"主要靠它 ＋ 抖 ✓
+            float f = (float) Math.max(0.0D, 1.0D - distance / SHAKE_RANGE);
+            if (f > flash) {
+                flash = f;
+            }
         }
-        shake *= 0.80F;         // 衰减
+        shake *= 0.88F;         // 衰减
         if (shake < 0.02F) {
             shake = 0.0F;
         }
+        flash *= 0.72F;
+        if (flash < 0.01F) {
+            flash = 0.0F;
+        }
+    }
+
+    /**
+     * 爆炸白闪：整屏一层白光，随 tick 快速淡掉 ✓。
+     *
+     * <p>为什么要有它：只有镜头晃动的话，"爆炸"还是会显得单薄 ✗ ——
+     * 一记盖住屏幕的白闪是"能量在脸上炸开"最直接的信号 ✓（核弹的观感就是这么来的 ✓）。
+     */
+    @SubscribeEvent
+    public static void onRenderGui(net.minecraftforge.client.event.RenderGuiEvent.Post event) {
+        if (flash <= 0.0F) {
+            return;
+        }
+        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+        int a = (int) Math.min(200.0F, flash * 200.0F);
+        if (a <= 2) {
+            return;
+        }
+        int argb = (a << 24) | 0xFFFFFF;
+        event.getGuiGraphics().fill(0, 0, mc.getWindow().getGuiScaledWidth(),
+                mc.getWindow().getGuiScaledHeight(), argb);
     }
 
     @SubscribeEvent

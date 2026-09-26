@@ -35,6 +35,8 @@ public class TNShockwaveEntity extends TNMagicCircleEntity {
     private static final int PUSH_TICKS = 10;
     /** 推开的最大速度（格/tick）。 */
     private static final double PUSH_STRENGTH = 1.6D;
+    /** 玩家只吃到这么一小份推力（作者不要被自己炸飞 ✗）：约 18%，且几乎不向上掀 ✓。 */
+    private static final double PLAYER_PUSH_FACTOR = 0.18D;
     /** 上掀分量 —— 贴着地面被"掀"一下的感觉。 */
     private static final double PUSH_UP = 0.45D;
 
@@ -64,7 +66,15 @@ public class TNShockwaveEntity extends TNMagicCircleEntity {
             }
             Vec3 push = distance < 0.05D ? new Vec3(1.0D, 0.0D, 0.0D) : away.scale(1.0D / distance);
             double falloff = 1.0D - (distance / (front + 1.0D));      // 越近越强
-            target.push(push.x * PUSH_STRENGTH * falloff, PUSH_UP * falloff, push.z * PUSH_STRENGTH * falloff);
+            // 2026-09-27 作者："没必要把我自己也炸飞那么远" ✗ ——
+            // 引擎的 SPAWN 动作**不带施法者信息** ✗（这个实体是被法术 JSON 直接生成的），
+            // 所以分不出"自己"和"别人" ⇒ 对所有**玩家**都只推一点点 ✓（怪物照旧被掀飞 ✓）。
+            double scale = (target instanceof net.minecraft.world.entity.player.Player)
+                    ? PLAYER_PUSH_FACTOR : 1.0D;
+            double up = (target instanceof net.minecraft.world.entity.player.Player) ? 0.12D : 1.0D;
+            target.push(push.x * PUSH_STRENGTH * falloff * scale,
+                    PUSH_UP * falloff * up,
+                    push.z * PUSH_STRENGTH * falloff * scale);
             target.hurtMarked = true;                                  // 让客户端也动起来 ✓
         }
     }
