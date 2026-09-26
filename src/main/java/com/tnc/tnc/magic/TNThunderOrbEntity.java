@@ -67,7 +67,7 @@ public class TNThunderOrbEntity extends Entity {
     /** 几 tick 电一次。 */
     private static final int ZAP_INTERVAL = 10;
     /** 电击判定半径 / 伤害。 */
-    private static final double HIT_RADIUS = 3.5D;
+    private static final double HIT_RADIUS = 4.4D;   // 2026-09-27 作者：伤害体积 +100% -> 半径 x2^(1/3)
     private static final float DAMAGE = 5.0F;
     /** 球边缘那圈粒子的半径（格）＝球半径（3.21 ÷ 2 ≈ 1.6）✓ */
     private static final double ORB_RING_RADIUS = 1.6D;

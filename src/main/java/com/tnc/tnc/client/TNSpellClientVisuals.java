@@ -48,7 +48,7 @@ public final class TNSpellClientVisuals {
     /** 白闪强度（0~1，每 tick ×0.72）✓ */
     private static float flash = 0.0F;
     /** 冲击波震屏：贴脸时多大（度）＋ 影响半径（格）✓ 作者要求"参考核弹" → 拉到 14 / 40 ✓ */
-    private static final double SHAKE_MAX = 14.0D;
+    private static final double SHAKE_MAX = 9.0D;
     private static final double SHAKE_RANGE = 40.0D;
     private static final net.minecraft.util.RandomSource SHAKE_RANDOM = net.minecraft.util.RandomSource.create();
 
@@ -76,6 +76,18 @@ public final class TNSpellClientVisuals {
             float f = (float) Math.max(0.0D, 1.0D - distance / SHAKE_RANGE);
             if (f > flash) {
                 flash = f;
+            }
+        }
+        // 落雷（主链雷场/雷暴/雷击）：劈下来时也有轻微晃动 ✓（作者指定）
+        if (minecraft.level != null && minecraft.player != null) {
+            for (com.tnc.tnc.magic.TNLightningStrikeEntity bolt : minecraft.level.getEntitiesOfClass(
+                    com.tnc.tnc.magic.TNLightningStrikeEntity.class,
+                    minecraft.player.getBoundingBox().inflate(SHAKE_RANGE))) {
+                double d = bolt.position().distanceTo(minecraft.player.position());
+                float s = (float) (bolt.shake() * Math.max(0.0D, 1.0D - d / SHAKE_RANGE));
+                if (s > shake) {
+                    shake = s;
+                }
             }
         }
         shake *= 0.88F;         // 衰减

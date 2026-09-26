@@ -27,6 +27,18 @@ import net.minecraft.world.level.Level;
  */
 public class TNLightningStrikeEntity extends Entity {
 
+    /**
+     * The particle the heavenly thunder projectile uses for its travel rings
+     * ("electric_arc_a"). Falls back to vanilla sparks when the engine is absent.
+     */
+    private static net.minecraft.core.particles.ParticleOptions arc() {
+        net.minecraft.core.particles.ParticleType<?> t =
+                net.minecraftforge.registries.ForgeRegistries.PARTICLE_TYPES.getValue(
+                        net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(
+                                "spell_engine", "electric_arc_a"));
+        return (t instanceof net.minecraft.core.particles.SimpleParticleType simple)
+                ? simple : ParticleTypes.ELECTRIC_SPARK;
+    }
     /** 每 tick 下落多少格（24 格高 ⇒ 约 4 tick 落地 ✓ 够快，看得出是"劈"下来 ✓）。 */
     private static final double FALL_SPEED = 6.0D;
     /** 生成高度（格）—— 作者要"从天上来" ✓ */
@@ -37,6 +49,10 @@ public class TNLightningStrikeEntity extends Entity {
             SynchedEntityData.defineId(TNLightningStrikeEntity.class, EntityDataSerializers.INT);
     /** 落地后还亮多少 tick ✓ */
     private static final EntityDataAccessor<Integer> DATA_LIFE =
+            SynchedEntityData.defineId(TNLightningStrikeEntity.class, EntityDataSerializers.INT);
+
+    /** 命中时该晃多猛（度，x100 同步给客户端）✓ */
+    private static final EntityDataAccessor<Integer> DATA_SHAKE =
             SynchedEntityData.defineId(TNLightningStrikeEntity.class, EntityDataSerializers.INT);
 
     /** 落点高度（只有服务端要用 ✓ 不用同步）。 */
@@ -57,10 +73,16 @@ public class TNLightningStrikeEntity extends Entity {
      * @param lifeTicks 落地后还亮多少 tick
      * @param fallToY  落到哪个高度（＝目标脚下 ✓）
      */
-    public void configure(double scale, int lifeTicks, double fallToY) {
+    public void configure(double scale, int lifeTicks, double fallToY, double shakeStrength) {
         this.entityData.set(DATA_SCALE, (int) Math.round(scale * 100.0D));
         this.entityData.set(DATA_LIFE, Math.max(1, lifeTicks));
         this.fallTo = fallToY;
+        this.entityData.set(DATA_SHAKE, (int) Math.round(shakeStrength * 100.0D));
+    }
+
+    /** How hard the screen should shake on the hit (degrees) ✓ */
+    public double shake() {
+        return this.entityData.get(DATA_SHAKE) / 100.0D;
     }
 
     public double scale() {
@@ -76,6 +98,7 @@ public class TNLightningStrikeEntity extends Entity {
     protected void defineSynchedData() {
         this.entityData.define(DATA_SCALE, 450);
         this.entityData.define(DATA_LIFE, 4);
+        this.entityData.define(DATA_SHAKE, 300);
     }
 
     @Override
@@ -93,10 +116,16 @@ public class TNLightningStrikeEntity extends Entity {
             double next = Math.max(this.fallTo, this.getY() - FALL_SPEED);
             // 下落拖尾：一路撒电花 —— "从天劈下来"的观感主要靠它 ✓
             ServerLevel level = (ServerLevel) this.level();
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, this.getX(), next + 0.5D, this.getZ(),
-                    8, 0.35D, 0.9D, 0.35D, 0.5D);
+            double rr = 0.7D;
+            for (int i = 0; i < 6; i++) {
+                double aa = i * (Math.PI / 3.0D) + (this.tickCount * 0.4D);
+                double px = this.getX() + Math.cos(aa) * rr;
+                double pz = this.getZ() + Math.sin(aa) * rr;
+                level.sendParticles(arc(), px, next + 0.5D, pz, 1, 0.05D, 0.6D, 0.05D, 0.15D);
+                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, px, next + 0.5D, pz, 1, 0.05D, 0.6D, 0.05D, 0.15D);
+            }
             level.sendParticles(ParticleTypes.WITCH, this.getX(), next + 0.5D, this.getZ(),
-                    3, 0.3D, 0.8D, 0.3D, 0.3D);
+                    4, 0.3D, 0.8D, 0.3D, 0.3D);
             this.setPos(this.getX(), next, this.getZ());
             return;
         }
@@ -104,10 +133,12 @@ public class TNLightningStrikeEntity extends Entity {
             this.landedTick = this.tickCount;
             // 落地那一下：炸开一圈 ✓
             ServerLevel level = (ServerLevel) this.level();
+            level.sendParticles(arc(), this.getX(), this.getY() + 0.4D, this.getZ(),
+                    120, 0.7D, 0.6D, 0.7D, 3.0D);
             level.sendParticles(ParticleTypes.ELECTRIC_SPARK, this.getX(), this.getY() + 0.4D, this.getZ(),
-                    45, 0.6D, 0.5D, 0.6D, 1.2D);
+                    120, 0.7D, 0.6D, 0.7D, 3.0D);
             level.sendParticles(ParticleTypes.WITCH, this.getX(), this.getY() + 0.4D, this.getZ(),
-                    25, 0.5D, 0.4D, 0.5D, 0.9D);
+                    50, 0.5D, 0.4D, 0.5D, 2.0D);
             level.sendParticles(ParticleTypes.FLASH, this.getX(), this.getY() + 0.8D, this.getZ(),
                     2, 0.1D, 0.1D, 0.1D, 0.0D);
             level.playSound(null, this.getX(), this.getY(), this.getZ(),
