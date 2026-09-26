@@ -49,8 +49,18 @@ public class TNThunderOrbEntity extends Entity {
      * （球直径 3.21 格，所以球的内缘离玩家还有约 4.4 格 ✓）
      */
     public static final double RADIUS = 6.0D;
-    /** 环绕高度（相对主人脚底，格）—— 球变大了，抬高一点免得切地面 ✓ */
-    public static final double HEIGHT = 1.6D;
+    /**
+     * 环绕高度（相对主人脚底，格）。
+     *
+     * <p>2026-09-27 作者："环绕雷球的**高度太低了**，然后怎么旋转还不是**以人物为中心**旋转啊" ——
+     * 两个抱怨是同一件事 ✗：球直径 <b>3.21 格</b>（半径 1.6），而中心原本只有 <b>1.6</b> 格高
+     * ⇒ <b>球底正好贴在地面上</b>，看起来像"几个球在地上滚、绕着腿转" ✗。
+     * 抬到 <b>3.0</b>（≈ 头顶再上一格多）后球底离地 <b>1.4 格</b> ✓，才像"绕着人转" ✓。
+     *
+     * <p>注意高度是<b>相对脚底</b>的：轨道圆心在 X/Z 上本来就和玩家重合（半径 6 格的圆，
+     * 见 {@link #tick()}），所以"不居中"的观感来源就是这里太低 ✗ —— 这个数改了就够了。
+     */
+    public static final double HEIGHT = 3.0D;
 
     /** 绕一圈要多久（tick）—— 2026-09-22 作者："转速可以快一倍"：80 → <b>40</b> ✓ */
     private static final int ORBIT_PERIOD = 40;
@@ -128,9 +138,13 @@ public class TNThunderOrbEntity extends Entity {
         long time = level.getGameTime();
         double phase = (time % ORBIT_PERIOD) / (double) ORBIT_PERIOD * Math.PI * 2.0D;
         double a = phase + this.slot * (Math.PI * 2.0D / COUNT);
-        double x = player.getX() + Math.cos(a) * RADIUS;
-        double z = player.getZ() + Math.sin(a) * RADIUS;
-        double y = player.getY() + HEIGHT + Math.sin(a * 2.0D) * 0.25D;
+        // 轨道圆心 = 主人的"身体中心"：X/Z 取碰撞箱中心（玩家的碰撞箱本来就在坐标轴上 ✓，
+        // 但对别的生物/坐骑也成立 ✓），Y = 脚底 + HEIGHT ✓ —— 这样它绕的**就是这个人** ✓
+        net.minecraft.world.phys.Vec3 center = player.getBoundingBox().getCenter();
+        double x = center.x + Math.cos(a) * RADIUS;
+        double z = center.z + Math.sin(a) * RADIUS;
+        // 上下浮动 0.18 格（原来是 0.25）：有点"呼吸感"，但不至于让人看不清轨道 ✓
+        double y = player.getY() + HEIGHT + Math.sin(a * 2.0D) * 0.18D;
         this.setPos(x, y, z);
 
         // 球体本身的电弧（让它在飞的时候一直"噼啪"）
