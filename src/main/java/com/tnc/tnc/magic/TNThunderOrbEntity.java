@@ -45,20 +45,24 @@ public class TNThunderOrbEntity extends Entity {
     /** 同时存在几颗（与机制层的常量一致）。 */
     public static final int COUNT = 4;
     /**
-     * 环绕半径（格）—— 2026-09-22 作者："离人物的距离要远一点"：1.4 → <b>4.0</b> ✓
-     * （球本身直径 3.21 格，所以球的内缘离玩家还有约 2.4 格 ✓）
+     * 环绕半径（格）—— 2026-09-22 作者两次要求"离人物远一点"：1.4 → 4.0 → <b>6.0</b> ✓
+     * （球直径 3.21 格，所以球的内缘离玩家还有约 4.4 格 ✓）
      */
-    public static final double RADIUS = 4.0D;
+    public static final double RADIUS = 6.0D;
     /** 环绕高度（相对主人脚底，格）—— 球变大了，抬高一点免得切地面 ✓ */
     public static final double HEIGHT = 1.6D;
 
-    /** 绕一圈要多久（tick）。 */
-    private static final int ORBIT_PERIOD = 80;
+    /** 绕一圈要多久（tick）—— 2026-09-22 作者："转速可以快一倍"：80 → <b>40</b> ✓ */
+    private static final int ORBIT_PERIOD = 40;
     /** 几 tick 电一次。 */
     private static final int ZAP_INTERVAL = 10;
     /** 电击判定半径 / 伤害。 */
     private static final double HIT_RADIUS = 3.5D;
     private static final float DAMAGE = 5.0F;
+    /** 球边缘那圈粒子的半径（格）＝球半径（3.21 ÷ 2 ≈ 1.6）✓ */
+    private static final double ORB_RING_RADIUS = 1.6D;
+    /** 每 tick 画几个点（每点 4 颗，紫黄各半 ✓） */
+    private static final int ORB_RING_POINTS = 16;
 
     private UUID ownerId;
     private int slot;
@@ -133,6 +137,9 @@ public class TNThunderOrbEntity extends Entity {
         if (time % 2 == 0) {
             TnSpellMechanics.arcBall(level, this.position(), 2, 0.22D);
         }
+        // 同款"边缘一圈"粒子 ✓（作者 2026-09-22："怎么没有同款粒子特效"）——
+        // 半径 1.6 格 = 这颗球（3.21 格直径）的半径 ✓，和爆炸雷球的环一个观感 ✓
+        TnSpellMechanics.ring(level, this.position(), ORB_RING_RADIUS, ORB_RING_POINTS, time);
 
         // 轮到这颗球电人（错开各颗球，避免四颗同时闪）
         if (time % ZAP_INTERVAL == this.slot % ZAP_INTERVAL) {

@@ -99,6 +99,20 @@ public final class TnSpellMechanics {
     private static final Map<UUID, List<SparkMark>> MARKS = new ConcurrentHashMap<>();
     /** 上一个雷印的位置：uuid -> 坐标 */
     private static final Map<UUID, Vec3> LAST_MARK = new ConcurrentHashMap<>();
+    /**
+     * 神级大雷球的"贴粒子窗口"：uuid -> 结束时刻。
+     *
+     * <p>为什么要自己贴：法术 JSON 的 {@code travel_particles} 在这颗球上**不跟随** ✗
+     * （作者 2026-09-22："他的粒子特效怎么不跟随雷球呢"）—— 所以改成 Java 侧每 tick 找到
+     * **自己的** {@code SpellProjectile}（引擎的投射物实体，有 {@code getOwner()} ✓）在它位置上画环 ✓。
+     */
+    private static final Map<UUID, Long> BIG_BALL_UNTIL = new ConcurrentHashMap<>();
+    /** 贴粒子窗口（tick）：球掉得慢，给足 20 秒 ✓ */
+    private static final int BIG_BALL_WINDOW = 400;
+    /** 大雷球的环半径（格）＝球半径（scale 75 × 0.375 ÷ 2 ≈ 14）✓ */
+    private static final double BIG_BALL_RING = 14.0D;
+    /** 每 tick 画几个点（每点 4 颗粒子：水平环紫/黄 ＋ 竖直环紫/黄）✓ */
+    private static final int BIG_BALL_RING_POINTS = 40;
 
     /** 一枚留在原地的雷印。 */
     private record SparkMark(Vec3 pos, long expireAt) {
@@ -236,6 +250,11 @@ public final class TnSpellMechanics {
             spawnMagicCircle(player, 12.8D, 170);
         } else if (path.equals("cataclysm_thunder_orb")) {
             spawnMagicCircle(player, 20.0D, 260);
+            // 大雷球的粒子不跟随 ✗ -> 自己开一个窗口，每 tick 在球的位置画环 ✓
+            BIG_BALL_UNTIL.put(player.getUUID(), player.level().getGameTime() + BIG_BALL_WINDOW);
+        } else if (path.equals("orbiting_thunder_orb")) {
+            // 环绕雷球（现在是 t4）：作者要求"同款魔法阵" ✓
+            spawnMagicCircle(player, 8.0D, 200);
         }
     }
 
@@ -304,6 +323,8 @@ public final class TnSpellMechanics {
         // 回蓝的 3 秒表演 + 地上的雷印（两者都可能没有，函数内部自己判断）
         rechargeFlourish(player, time);
         sparkMarks(player, time);
+        // 神级大雷球：粒子贴到球上（引擎自己的 travel_particles 不跟随 ✗）
+        followBigBall(player, time);
         // 无冷却：雷系"闪电登神"与风系"风神降临"（5 级）都给。
         // 风系用专属标记 wind_god 判断 —— 只有 5 级发它，所以 4 级"超级风速"
         // 不会再蹭到无冷却（之前借用共用的 wind_speed_iii 时就会蹭到）。
@@ -587,11 +608,75 @@ public final class TnSpellMechanics {
                 manager.remove(entry.id());
             }
         }
+
+        /**
+         * 在<b>自己那颗大雷球</b>的位置上画环 ✓（引擎的投射物实体，认主人即可）。
+         *
+         * <p>窗口只有 20 秒，所以不会误伤别的法术的投射物 ✗ —— 而且只认 `getOwner() == player` ✓。
+         */
+        static void ringOnOwnProjectiles(ServerPlayer player, long time) {
+            for (net.spell_engine.entity.SpellProjectile projectile
+                    : player.serverLevel().getEntitiesOfClass(net.spell_engine.entity.SpellProjectile.class,
+                            player.getBoundingBox().inflate(96.0D))) {
+                if (projectile.getOwner() != player) {
+                    continue;
+                }
+                ring(player.serverLevel(), projectile.position(), BIG_BALL_RING, BIG_BALL_RING_POINTS, time);
+            }
+        }
     }
 
     // ------------------------------------------------------------------
     //  小工具
     // ------------------------------------------------------------------
+
+    /**
+     * 神级大雷球：在自己那颗球的位置上每 tick 画一圈粒子 ✓。
+     *
+     * <p>引擎类的引用包在 try/catch 里（软依赖 ✓）：引擎不在时这一段直接跳过，不影响别的法术。
+     */
+    private static void followBigBall(ServerPlayer player, long time) {
+        Long until = BIG_BALL_UNTIL.get(player.getUUID());
+        if (until == null) {
+            return;
+        }
+        if (time > until) {
+            BIG_BALL_UNTIL.remove(player.getUUID());
+            return;
+        }
+        if (player.level().isClientSide()) {
+            return;
+        }
+        try {
+            Impl.ringOnOwnProjectiles(player, time);
+        } catch (Throwable ignored) {
+            // 引擎不在 / API 变了：静默跳过（只是少一层粒子外观）
+        }
+    }
+
+    /**
+     * 在 center 处画一圈粒子（"球的边缘一圈"）✓：水平环 ＋ 一个慢慢转的竖直环，
+     * 紫（`witch`）与黄（`electric_spark`）各半 —— 和法术 JSON 里的拖尾同一个配色 ✓。
+     *
+     * <p>供环绕雷球实体与"大雷球贴粒子"共用 ✓。
+     */
+    public static void ring(ServerLevel level, Vec3 center, double radius, int points, long time) {
+        double tilt = (time % 200) / 200.0D * Math.PI * 2.0D;
+        for (int i = 0; i < points; i++) {
+            double a = i * (Math.PI * 2.0D / points);
+            double cos = Math.cos(a);
+            double sin = Math.sin(a);
+            double x = center.x + cos * radius;
+            double z = center.z + sin * radius;
+            level.sendParticles(ParticleTypes.WITCH, x, center.y, z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, x, center.y, z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+            double vx = center.x + cos * radius * Math.cos(tilt);
+            double vy = center.y + sin * radius;
+            double vz = center.z + cos * radius * Math.sin(tilt);
+            level.sendParticles(ParticleTypes.WITCH, vx, vy, vz, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, vx, vy, vz, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+        }
+    }
 
     private static boolean has(ServerPlayer player, net.minecraftforge.registries.RegistryObject<net.minecraft.world.effect.MobEffect> effect) {
         return effect.isPresent() && player.hasEffect(effect.get());
