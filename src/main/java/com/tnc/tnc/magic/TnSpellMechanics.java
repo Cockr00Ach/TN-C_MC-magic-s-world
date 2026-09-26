@@ -127,7 +127,7 @@ public final class TnSpellMechanics {
     private static String arcSource = "(未解析)";
 
     /** 取电弧粒子（找不到就退回原版 ELECTRIC_SPARK，并留一行日志说明）。 */
-    private static net.minecraft.core.particles.ParticleOptions arc() {
+    public static net.minecraft.core.particles.ParticleOptions arc() {
         if (arcCache != null) {
             return arcCache;
         }
@@ -167,7 +167,7 @@ public final class TnSpellMechanics {
      * <p>这是"闪电感"的关键：零散的点看起来是星星 ✗，沿一条抖动的线连起来才像电弧 ✓。
      * 用 {@code count=1, speed=0} 精确落点，避免原版把粒子随机撒开。
      */
-    private static void arcLine(ServerLevel level, Vec3 from, Vec3 to, int points, double jitter) {
+    public static void arcLine(ServerLevel level, Vec3 from, Vec3 to, int points, double jitter) {
         if (points < 2) {
             points = 2;
         }
@@ -181,7 +181,7 @@ public final class TnSpellMechanics {
     }
 
     /** 以 center 为中心、半径 radius 的粗糙"电球"（爆炸/闪现用）。 */
-    private static void arcBall(ServerLevel level, Vec3 center, int points, double radius) {
+    public static void arcBall(ServerLevel level, Vec3 center, int points, double radius) {
         for (int i = 0; i < points; i++) {
             double a = level.random.nextDouble() * Math.PI * 2.0D;
             double b = (level.random.nextDouble() - 0.5D) * Math.PI;
@@ -248,8 +248,12 @@ public final class TnSpellMechanics {
         }
         long time = player.level().getGameTime();
 
+        // 环绕雷球：现在是**真实体**（TNThunderOrbEntity），这里只负责"维持数量" ✓
+        // 作者 2026-09-22：「环绕雷球的技能，变为我们的实体雷球啊」
         if (has(player, TNEffects.ORBITING_THUNDER_ORB)) {
-            orbitingOrb(player, time);
+            maintainOrbs(player);
+        } else {
+            removeOrbs(player);
         }
         if (has(player, TNEffects.LIGHTNING_WIND)) {
             windTrail(player, time);
@@ -279,38 +283,53 @@ public final class TnSpellMechanics {
         }
     }
 
-    /** 环绕雷球：几颗球绕着玩家转，每半秒电一次附近的敌人。 */
-    private static void orbitingOrb(ServerPlayer player, long time) {
+    /**
+     * 环绕雷球：<b>维持 {@link TNThunderOrbEntity#COUNT} 个真实体球</b>绕着玩家转 ✓。
+     *
+     * <p>位置、电击、轨迹全在实体自己身上（{@link TNThunderOrbEntity#tick()}）——
+     * 这里只做"点名"：缺哪个槽位就补一个、多出来的清掉。
+     *
+     * <p>为什么要按槽位而不是"数量对就行"：数量对但槽位重复时，两颗球会**重叠在同一角度**上 ✗，
+     * 看着像少了一颗。
+     */
+    private static void maintainOrbs(ServerPlayer player) {
         ServerLevel level = player.serverLevel();
-        double phase = (time % 80) / 80.0D * Math.PI * 2.0D;
-
-        // 画圈（客户端看得到）—— 2026-09-22 从"小亮点"改成"一小段电弧"，和雷系其他特效一致 ✓
-        for (int i = 0; i < ORBIT_COUNT; i++) {
-            double a = phase + i * (Math.PI * 2.0D / ORBIT_COUNT);
-            double a2 = a + 0.55D;
-            double x = player.getX() + Math.cos(a) * ORBIT_RADIUS;
-            double z = player.getZ() + Math.sin(a) * ORBIT_RADIUS;
-            double y = player.getY() + 1.0D + Math.sin(a * 2.0D) * 0.25D;
-            double x2 = player.getX() + Math.cos(a2) * ORBIT_RADIUS;
-            double z2 = player.getZ() + Math.sin(a2) * ORBIT_RADIUS;
-            double y2 = player.getY() + 1.0D + Math.sin(a2 * 2.0D) * 0.25D;
-            arcLine(level, new Vec3(x, y, z), new Vec3(x2, y2, z2), 4, 0.07D);
-        }
-
-        if (time % ORBIT_ZAP_INTERVAL != 0) {
-            return;
-        }
-        // 电击：以玩家为中心的球形范围
-        AABB box = player.getBoundingBox().inflate(ORBIT_RADIUS_HIT);
-        List<LivingEntity> targets = level.getEntitiesOfClass(LivingEntity.class, box);
-        for (LivingEntity target : targets) {
-            if (!isEnemy(player, target)) {
+        List<TNThunderOrbEntity> near = level.getEntitiesOfClass(TNThunderOrbEntity.class,
+                player.getBoundingBox().inflate(12.0D));
+        boolean[] taken = new boolean[TNThunderOrbEntity.COUNT];
+        for (TNThunderOrbEntity orb : near) {
+            if (!player.getUUID().equals(orb.ownerId())) {
                 continue;
             }
-            if (target.distanceTo(player) > ORBIT_RADIUS_HIT) {
+            int slot = orb.slot();
+            if (slot >= 0 && slot < taken.length && !taken[slot]) {
+                taken[slot] = true;
+            } else {
+                orb.discard();      // 重复槽位 / 越界：清掉，下面会补正确的
+            }
+        }
+        for (int slot = 0; slot < taken.length; slot++) {
+            if (taken[slot]) {
                 continue;
             }
-            zap(level, player, target, ORBIT_DAMAGE);
+            TNThunderOrbEntity orb = TNOrbEntities.THUNDER_ORB.get().create(level);
+            if (orb == null) {
+                continue;
+            }
+            orb.bind(player.getUUID(), slot);
+            orb.setPos(player.getX(), player.getY() + TNThunderOrbEntity.HEIGHT, player.getZ());
+            level.addFreshEntity(orb);
+        }
+    }
+
+    /** buff 掉了：把这个玩家的球都清掉（实体自己也会查 buff，这里是双保险 ✓）。 */
+    private static void removeOrbs(ServerPlayer player) {
+        ServerLevel level = player.serverLevel();
+        for (TNThunderOrbEntity orb : level.getEntitiesOfClass(TNThunderOrbEntity.class,
+                player.getBoundingBox().inflate(16.0D))) {
+            if (player.getUUID().equals(orb.ownerId())) {
+                orb.discard();
+            }
         }
     }
 

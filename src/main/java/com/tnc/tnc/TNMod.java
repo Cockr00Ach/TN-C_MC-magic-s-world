@@ -128,6 +128,8 @@ public class TNMod
         // TN-C 自己的 NPC（第一个：A. Self 酒馆老板）。实体类型 + 属性表 + 刷怪蛋
         com.tnc.tnc.npc.TNNpcs.register(modEventBus);
         com.tnc.tnc.npc.TNNpcAttributes.register(modEventBus);
+        // 法术召唤物/环绕物实体（环绕雷球）
+        com.tnc.tnc.magic.TNOrbEntities.register(modEventBus);
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
