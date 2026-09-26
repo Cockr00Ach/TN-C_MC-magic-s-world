@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 gen_yan_model.py -- Bedrock model + 128x128 skin for the NPC "yan" (Gongsun Yan).
 
@@ -68,22 +68,47 @@ _BODY = [
 # hair cubes: (bone, parent, pivot, [(ox, oy, oz, w, h, d)])
 # uv is filled in below by layout_hair_uv(); the free sheet area starts at HAIR_UV_ORIGIN.
 _HAIR = [
-    # skull cap + fringe, children of head
-    ("hairTop",   "head",       [0, 32, 0],    [(-4.6, 30.6, -4.6, 9.2, 1.4, 9.2),
-                                                (-4.5, 28.6, -4.8, 9.0, 2.0, 1.0)]),
-    # down the back: 3 segments, each pivot at its top edge
-    ("hairBack",  "head",       [0, 30, 3.0],  [(-4.0, 24.0, 3.0, 8, 6, 2)]),
-    ("hairBack2", "hairBack",   [0, 24, 4.0],  [(-3.5, 17.0, 3.6, 7, 7, 2)]),
-    ("hairBack3", "hairBack2",  [0, 17, 4.5],  [(-3.0, 9.0, 3.8, 6, 8, 2)]),
-    # side locks (temple -> chest, 2 segments)
-    ("hairLeft",  "head",       [-4, 30, -2],  [(-5.0, 20.0, -2.5, 1, 10, 5)]),
-    ("hairLeft2", "hairLeft",   [-4.5, 20, 0], [(-5.0, 13.0, -2.5, 1, 7, 5)]),
-    ("hairRight", "head",       [4, 30, -2],   [(4.0, 20.0, -2.5, 1, 10, 5)]),
-    ("hairRight2", "hairRight", [4.5, 20, 0],  [(4.0, 13.0, -2.5, 1, 7, 5)]),
+    # ---- skull: cap + volume, so the head does not read as a bare cube ------
+    ("hairTop",   "head",       [0, 32, 0],    [(-4.7, 30.9, -4.7, 9.4, 1.7, 9.4),      # crown cap
+                                                (-4.6, 28.0, 3.9, 9.2, 4.0, 1.2),       # back volume
+                                                (-4.8, 25.5, -3.2, 1, 6, 6),            # left side volume
+                                                (3.8, 25.5, -3.2, 1, 6, 6)]),           # right side volume
+    # ---- layered fringe (5 strands of different length, maid-style) --------
+    ("hairBangs", "head",       [0, 31, -4],   [(-4.5, 28.4, -4.9, 2, 3, 1),
+                                                (-2.7, 28.0, -4.9, 2, 4, 1),
+                                                (-0.9, 28.6, -4.9, 2, 3, 1),
+                                                (1.0, 28.0, -4.9, 2, 4, 1),
+                                                (2.7, 28.6, -4.9, 2, 3, 1)]),
+    # ---- side locks hugging the face: 3 segments each ----------------------
+    ("hairSideL", "head",       [-4, 30, -1],  [(-5.2, 21.0, -3.0, 1, 9, 4)]),
+    ("hairSideL2", "hairSideL", [-5, 21, 0],   [(-5.2, 14.0, -2.6, 1, 7, 3)]),
+    ("hairSideL3", "hairSideL2", [-5, 14, 0],  [(-5.0, 8.0, -2.2, 1, 6, 2)]),
+    ("hairSideR", "head",       [4, 30, -1],   [(4.2, 21.0, -3.0, 1, 9, 4)]),
+    ("hairSideR2", "hairSideR", [5, 21, 0],    [(4.2, 14.0, -2.6, 1, 7, 3)]),
+    ("hairSideR3", "hairSideR2", [5, 14, 0],   [(4.0, 8.0, -2.2, 1, 6, 2)]),
+    # ---- the long mass down the back: 4 segments, tapering -----------------
+    ("hairBack",  "head",       [0, 30, 4],    [(-4.4, 24.0, 3.6, 9, 6, 2)]),
+    ("hairBack2", "hairBack",   [0, 24, 4.2],  [(-4.0, 17.0, 3.8, 8, 7, 2)]),
+    ("hairBack3", "hairBack2",  [0, 17, 4.4],  [(-3.4, 10.0, 4.0, 7, 7, 2)]),
+    ("hairBack4", "hairBack3",  [0, 10, 4.5],  [(-2.8, 3.0, 4.2, 6, 7, 2)]),
+    # ---- twin tails beside the head (the "maid" silhouette) ---------------
+    ("hairTieL",  "head",       [-6, 30, 2],   [(-6.9, 27.0, 1.0, 3, 2, 3)]),
+    ("hairTailL", "hairTieL",   [-6, 28, 2.5], [(-7.0, 20.0, 1.2, 3, 8, 3)]),
+    ("hairTailL2", "hairTailL", [-6, 20, 2.5], [(-7.0, 12.0, 1.4, 3, 8, 3)]),
+    ("hairTailL3", "hairTailL2", [-6, 12, 2.5], [(-6.6, 5.0, 1.6, 2, 7, 2)]),
+    ("hairTieR",  "head",       [6, 30, 2],    [(3.9, 27.0, 1.0, 3, 2, 3)]),
+    ("hairTailR", "hairTieR",   [6, 28, 2.5],  [(4.0, 20.0, 1.2, 3, 8, 3)]),
+    ("hairTailR2", "hairTailR", [6, 20, 2.5],  [(4.0, 12.0, 1.4, 3, 8, 3)]),
+    ("hairTailR3", "hairTailR2", [6, 12, 2.5], [(4.6, 5.0, 1.6, 2, 7, 2)]),
+    # ---- ahoge (the little strand that never lies down) -------------------
+    ("hairAhoge", "head",       [0, 32, -2],   [(-0.5, 32.4, -2.4, 1, 3, 1)]),
 ]
 
-HAIR_UV_ORIGIN = (64, 0)      # free area of the 128x128 sheet
-HAIR_UV_WIDTH = 64            # x 64..128 is ours
+HAIR_UV_ORIGIN = (64, 0)      # band B start (kept for reference)
+# The modern 128x128 layout only uses x 0..64 / y 0..64, so BOTH the bottom half
+# (y 64..128, full width) and the right half (x 64..128) are free.  Hair cubes are
+# packed row by row into these bands; band A is the whole bottom half.
+BANDS = [(0, 64, 128, 128), (64, 0, 128, 64)]
 
 
 def _cubes(spec):
@@ -106,20 +131,29 @@ def build_geo():
             bone["parent"] = parent
         bones.append(bone)
 
-    # lay the hair cubes out in the free area, left to right, 2 columns
-    cursor_x, cursor_y = HAIR_UV_ORIGIN
+    # pack the hair cubes into the free bands, integer UVs so the painted regions
+    # line up exactly with what Bedrock samples (no rounding fudge).
+    band = 0
+    bx0, by0, bx1, by1 = BANDS[band]
+    cursor_x, cursor_y = bx0, by0
     row_height = 0
     for (name, parent, pivot, boxes) in _HAIR:
         placed = []
         for (ox, oy, oz, w, h, d) in boxes:
-            need_w = 2 * (w + d)           # Bedrock auto unwrap: 2*(w+d) x (h+d)
+            need_w = 2 * (w + d)                 # Bedrock unwrap: 2*(w+d) x (h+d)
             need_h = h + d
-            if cursor_x + need_w > HAIR_UV_ORIGIN[0] + HAIR_UV_WIDTH:
-                cursor_x = HAIR_UV_ORIGIN[0]
-                cursor_y += row_height + 1
+            if cursor_x + need_w > bx1:
+                cursor_x = bx0
+                cursor_y += row_height
                 row_height = 0
-            placed.append((ox, oy, oz, w, h, d, cursor_x, cursor_y))
-            cursor_x += need_w + 1
+            if cursor_y + need_h > by1:
+                band += 1
+                if band >= len(BANDS):
+                    raise RuntimeError("hair UVs do not fit in the free sheet area")
+                bx0, by0, bx1, by1 = BANDS[band]
+                cursor_x, cursor_y, row_height = bx0, by0, 0
+            placed.append((ox, oy, oz, w, h, d, int(cursor_x), int(cursor_y)))
+            cursor_x += need_w
             row_height = max(row_height, need_h)
         bone = {"name": name, "parent": parent, "pivot": pivot, "cubes": _cubes(placed)}
         bones.append(bone)
@@ -252,13 +286,19 @@ def paint_skin(bones):
 
     # ---- hair cubes: fill every region we allocated -------------------------
     for bone in bones:
-        if not bone["name"].startswith("hair"):
+        name = bone["name"]
+        if not name.startswith("hair"):
             continue
+        is_tie = name.startswith("hairTie")
         for cube in bone.get("cubes", []):
             w, h, d = cube["size"]
             u, v = cube["uv"]
+            if is_tie:
+                # hair ties: solid silver band so the tails read as tied
+                fill(img, int(u), int(v), int(u + 2 * (w + d)), int(v + h + d), TRIM)
+                continue
             fill_hair(img, int(u), int(v), int(u + 2 * (w + d)), int(v + h + d), rng,
-                      root_at_top=("Back" not in bone["name"]))
+                      root_at_top=("Back" not in name))
     return img
 
 

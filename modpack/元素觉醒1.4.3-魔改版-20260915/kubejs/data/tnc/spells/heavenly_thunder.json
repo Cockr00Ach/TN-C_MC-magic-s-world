@@ -41,8 +41,8 @@
         "launch_height": 30,
         "launch_properties": {
           "velocity": 6.0,
-          "extra_launch_count": 8,
-          "extra_launch_delay": 3
+          "extra_launch_count": 14,
+          "extra_launch_delay": 2
         },
         "projectile": {
           "homing_angle": 1.0,
@@ -106,6 +106,7 @@
             ],
             "model": {
               "model_id": "tnc:projectile/flash",
+              "orientation": "TOWARDS_CAMERA",
               "light_emission": "RADIATE",
               "scale": 4.0
             }
