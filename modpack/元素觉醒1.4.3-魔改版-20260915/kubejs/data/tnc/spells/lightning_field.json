@@ -2,110 +2,28 @@
   "school": "LIGHTNING",
   "group": "primary",
   "range": 0.0,
-  "learn": {
-    "tier": 2,
-    "level_cost_per_tier": 5,
-    "level_requirement_per_tier": 5
-  },
+  "learn": { "tier": 2, "level_cost_per_tier": 5, "level_requirement_per_tier": 5 },
   "cast": {
     "duration": 1.0,
     "animation": "spell_engine:dual_handed_ground_release",
-    "sound": {
-      "id": "spell_engine:generic_lightning_casting",
-      "randomness": 0
-    },
+    "sound": { "id": "spell_engine:generic_lightning_casting", "randomness": 0 },
     "particles": [
-      {
-        "particle_id": "spell_engine:electric_arc_b",
-        "shape": "CIRCLE",
-        "origin": "FEET",
-        "count": 12.0,
-        "min_speed": 0.1,
-        "max_speed": 0.5
-      }
+      { "particle_id": "spell_engine:electric_arc_b", "shape": "CIRCLE", "origin": "FEET", "count": 40.0, "min_speed": 0.1, "max_speed": 0.6 },
+      { "particle_id": "minecraft:electric_spark", "shape": "CIRCLE", "origin": "FEET", "count": 40.0, "min_speed": 0.1, "max_speed": 0.6 }
     ]
   },
   "release": {
-    "target": {
-      "type": "CLOUD",
-      "cloud": {
-        "volume": {
-          "radius": 4.0,
-          "area": {
-            "vertical_range_multiplier": 0.5
-          },
-          "sound": {
-            "id": "entity.lightning_bolt.thunder",
-            "volume": 0.4
-          }
-        },
-        "impact_tick_interval": 10,
-        "time_to_live_seconds": 6,
-        "client_data": {
-          "particles": [
-            {
-              "particle_id": "spell_engine:electric_arc_b",
-              "shape": "CIRCLE",
-              "origin": "FEET",
-              "count": 6.0,
-              "min_speed": 0.2,
-              "max_speed": 1.0
-            },
-            {
-              "particle_id": "spell_engine:electric_arc_a",
-              "shape": "PILLAR",
-              "origin": "FEET",
-              "count": 2.0,
-              "min_speed": 0.0,
-              "max_speed": 0.2
-            }
-          ]
-        }
-      }
-    },
-    "sound": {
-      "id": "spell_engine:generic_lightning_release"
-    }
+    "target": { "type": "SELF" },
+    "animation": "spell_engine:one_handed_area_release",
+    "sound": { "id": "entity.lightning_bolt.thunder", "volume": 0.6 }
   },
   "impact": [
     {
-      "action": {
-        "type": "DAMAGE",
-        "damage": {
-          "spell_power_coefficient": 0.35,
-          "knockback": 0.0
-        }
-      },
+      "action": { "type": "STATUS_EFFECT", "status_effect": { "effect_id": "tnc:lightning_field", "duration": 6.0, "amplifier": 0, "apply_mode": "SET", "show_particles": false } },
       "particles": [
-        {
-          "particle_id": "spell_engine:electric_arc_a",
-          "shape": "CIRCLE",
-          "origin": "CENTER",
-          "count": 10.0,
-          "min_speed": 0.2,
-          "max_speed": 1.0
-        }
-      ],
-      "sound": {
-        "id": "entity.lightning_bolt.impact",
-        "volume": 0.3
-      }
-    },
-    {
-      "action": {
-        "type": "STATUS_EFFECT",
-        "status_effect": {
-          "effect_id": "minecraft:slowness",
-          "duration": 2.0,
-          "amplifier": 1,
-          "apply_mode": "SET",
-          "show_particles": false
-        }
-      }
+        { "particle_id": "spell_engine:electric_arc_a", "shape": "PILLAR", "origin": "FEET", "count": 60.0, "min_speed": 0.1, "max_speed": 0.5 }
+      ]
     }
   ],
-  "cost": {
-    "exhaust": 0.35,
-    "cooldown_duration": 0.5
-  }
+  "cost": { "exhaust": 0.35, "cooldown_duration": 0.5 }
 }

@@ -61,6 +61,28 @@ public final class TNEffects {
             });
 
     /**
+     * 雷场（t2）的"场开着"标记 —— 劈人的逻辑在 {@code TnSpellMechanics} 里 ✓。
+     *
+     * <p>作者 2026-09-27："雷场就是有敌人，**每个敌人劈两下**" ✓ ——
+     * 原来这个法术是引擎的 {@code CLOUD}（每 10 tick 自动打一次范围内所有人 ✗），
+     * 现在改成 SELF ＋ 这个标记，由我们自己在第 20 / 60 tick 各劈一轮：出现在场里的敌人正好挨两下 ✓。
+     */
+    public static final RegistryObject<MobEffect> LIGHTNING_FIELD =
+            EFFECTS.register("lightning_field", () -> new MobEffect(
+                    MobEffectCategory.BENEFICIAL, COLOR_LIGHTNING) {
+            });
+
+    /**
+     * 雷暴（t4）的"暴开着"标记 —— 作者："雷暴就是**一直劈到时间结束**" ✓。
+     *
+     * <p>机制层每 15 tick 挑范围内几个敌人各劈一道闪电，持续整个 buff 时间 ✓。
+     */
+    public static final RegistryObject<MobEffect> LIGHTNING_STORM =
+            EFFECTS.register("lightning_storm", () -> new MobEffect(
+                    MobEffectCategory.BENEFICIAL, COLOR_LIGHTNING) {
+            });
+
+    /**
      * 闪电登神：所有伤害提升（+30% 攻击力）+ 期间无冷却（无冷却在机制层）。
      *
      * <p>另外把 spell_power 的 12 个学派属性也一起加（如果装了 spell_power）——

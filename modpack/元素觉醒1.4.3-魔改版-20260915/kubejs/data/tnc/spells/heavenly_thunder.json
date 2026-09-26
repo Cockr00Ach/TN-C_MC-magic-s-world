@@ -108,7 +108,7 @@
               "model_id": "tnc:projectile/flash",
               "orientation": "TOWARDS_CAMERA",
               "light_emission": "RADIATE",
-              "scale": 4.0
+              "scale": 8.0
             }
           }
         }

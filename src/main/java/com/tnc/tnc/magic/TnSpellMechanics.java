@@ -114,6 +114,127 @@ public final class TnSpellMechanics {
     /** 每 tick 画几个点（每点 4 颗粒子：水平环紫/黄 ＋ 竖直环紫/黄）✓ */
     private static final int BIG_BALL_RING_POINTS = 72;
 
+    // ------------------------------------------------------------------
+    //  主链雷法的"劈"（2026-09-27 作者："像这种雷击，就应该有闪电劈敌人啊"）
+    // ------------------------------------------------------------------
+
+    /** 雷击（t3）的准星射线长度（格）。 */
+    private static final double STRIKE_RANGE = 32.0D;
+    /** 闪电从多高的天上劈下来（视觉）✓ */
+    private static final double STRIKE_HEIGHT = 12.0D;
+
+    /** 雷场（t2）：只在第 20 / 60 tick 各劈一轮 ⇒ 场里的敌人**正好各挨两下** ✓（作者原话） */
+    private static final int[] FIELD_STRIKE_TICKS = {20, 60};
+    private static final int FIELD_WINDOW = 100;
+    private static final double FIELD_RADIUS = 6.0D;
+    private static final float FIELD_DAMAGE = 5.0F;
+
+    /** 雷暴（t4）：每 15 tick 一轮，每轮最多 3 个目标，一直劈到 buff 结束 ✓（作者："劈到时间结束"） */
+    private static final int STORM_INTERVAL = 15;
+    private static final int STORM_WINDOW = 200;
+    private static final double STORM_RADIUS = 10.0D;
+    private static final float STORM_DAMAGE = 4.0F;
+    private static final int STORM_TARGETS_PER_WAVE = 3;
+
+    /** 谁在雷场 / 雷暴的窗口里（UUID -> 结束时的 gameTime）。 */
+    private static final Map<UUID, Long> FIELD_UNTIL = new ConcurrentHashMap<>();
+    private static final Map<UUID, Long> STORM_UNTIL = new ConcurrentHashMap<>();
+
+    /**
+     * 一道"从天上劈下来"的闪电（纯视觉）：<b>竖着</b>一条电弧 ＋ 落点炸一圈 ＋ 白光 ✓。
+     *
+     * <p>为什么不做成投射物模型：那样每一道都要一个实体 ＋ 一次发射，
+     * 而这里要的是"啪一下就劈完了" ✓ —— 直接用我们已有的 {@link #arcLine}（环绕雷球的电击就是它，
+     * 作者认可过观感 ✓）＋ {@link #arcBall} 拼出来，零新实体、零新渲染器 ✓。
+     */
+    private static void strikeVisual(ServerLevel level, Vec3 at, int points, double spread) {
+        arcLine(level, at.add(0.0D, STRIKE_HEIGHT, 0.0D), at.add(0.0D, 0.2D, 0.0D), points, spread);
+        arcBall(level, at, 18, 1.2D);
+        level.sendParticles(ParticleTypes.FLASH, at.x, at.y + 0.6D, at.z, 2, 0.1D, 0.1D, 0.1D, 0.0D);
+        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y + 0.4D, at.z,
+                30, 0.35D, 0.7D, 0.35D, 0.5D);
+    }
+
+    /** 劈一个敌人：天上一条电弧 ＋ 落点爆一圈 ＋ 真的扣血 ✓。 */
+    private static void strikeEnemy(ServerLevel level, ServerPlayer player, LivingEntity target, float damage) {
+        Vec3 at = target.position().add(0.0D, target.getBbHeight() * 0.5D, 0.0D);
+        strikeVisual(level, at, 16, 1.5D);
+        zap(level, player, target, damage);
+        level.playSound(null, at.x, at.y, at.z,
+                net.minecraft.sounds.SoundEvents.LIGHTNING_BOLT_IMPACT,
+                net.minecraft.sounds.SoundSource.PLAYERS, 0.7F, 1.2F);
+    }
+
+    /** 雷击（t3）：在**准星落点**劈一道"超级大雷"（更大更粗 ✗ 视觉；伤害由法术 JSON 给 ✓）。 */
+    private static void bigStrike(ServerPlayer player) {
+        ServerLevel level = player.serverLevel();
+        net.minecraft.world.phys.HitResult hit = player.pick(STRIKE_RANGE, 0.0F, false);
+        Vec3 at = hit.getLocation();
+        strikeVisual(level, at, 30, 2.4D);
+        level.playSound(null, at.x, at.y, at.z,
+                net.minecraft.sounds.SoundEvents.LIGHTNING_BOLT_THUNDER,
+                net.minecraft.sounds.SoundSource.PLAYERS, 1.2F, 1.0F);
+    }
+
+    /** 雷场（t2）：第 20 / 60 tick 各劈一轮范围内的敌人 ⇒ 每个敌人挨两下 ✓。 */
+    private static void tickLightningField(ServerPlayer player, long time) {
+        Long until = FIELD_UNTIL.get(player.getUUID());
+        if (until == null) {
+            return;
+        }
+        if (time > until || !has(player, TNEffects.LIGHTNING_FIELD)) {
+            FIELD_UNTIL.remove(player.getUUID());
+            return;
+        }
+        long age = time - (until - FIELD_WINDOW);
+        ServerLevel level = null;
+        for (int offset : FIELD_STRIKE_TICKS) {
+            if (age != offset) {
+                continue;
+            }
+            if (level == null) {
+                level = player.serverLevel();
+            }
+            for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class,
+                    player.getBoundingBox().inflate(FIELD_RADIUS))) {
+                if (isEnemy(player, target) && target.distanceTo(player) <= FIELD_RADIUS) {
+                    strikeEnemy(level, player, target, FIELD_DAMAGE);
+                }
+            }
+        }
+    }
+
+    /** 雷暴（t4）：每 {@link #STORM_INTERVAL} tick 劈几个敌人，**一直劈到 buff 结束** ✓。 */
+    private static void tickLightningStorm(ServerPlayer player, long time) {
+        Long until = STORM_UNTIL.get(player.getUUID());
+        if (until == null) {
+            return;
+        }
+        if (time > until || !has(player, TNEffects.LIGHTNING_STORM)) {
+            STORM_UNTIL.remove(player.getUUID());
+            return;
+        }
+        if (time % STORM_INTERVAL != 0) {
+            return;
+        }
+        ServerLevel level = player.serverLevel();
+        java.util.List<LivingEntity> targets = new java.util.ArrayList<>(level.getEntitiesOfClass(
+                LivingEntity.class, player.getBoundingBox().inflate(STORM_RADIUS)));
+        targets.removeIf(t -> !isEnemy(player, t) || t.distanceTo(player) > STORM_RADIUS);
+        if (targets.isEmpty()) {
+            // 没敌人也别让"雷暴"哑掉：在半空随机劈一道，纯视觉 ✓
+            double a = level.random.nextDouble() * Math.PI * 2.0D;
+            double r = 2.0D + level.random.nextDouble() * (STORM_RADIUS - 2.0D);
+            strikeVisual(level, player.position().add(Math.cos(a) * r, 0.2D, Math.sin(a) * r), 12, 1.4D);
+            return;
+        }
+        java.util.Collections.shuffle(targets);
+        int n = Math.min(STORM_TARGETS_PER_WAVE, targets.size());
+        for (int i = 0; i < n; i++) {
+            strikeEnemy(level, player, targets.get(i), STORM_DAMAGE);
+        }
+    }
+
     /** 一枚留在原地的雷印。 */
     private record SparkMark(Vec3 pos, long expireAt) {
     }
@@ -268,10 +389,15 @@ public final class TnSpellMechanics {
             spawnMagicCircle(player, 3.0D, 80);          // t1 电花
         } else if (path.equals("lightning_field")) {
             spawnMagicCircle(player, 5.0D, 110);         // t2 电场
+            // 雷场：开一个 100 tick 的窗口，第 20 / 60 tick 各劈一轮 ⇒ 场内敌人各挨两下 ✓
+            FIELD_UNTIL.put(player.getUUID(), player.level().getGameTime() + FIELD_WINDOW);
         } else if (path.equals("lightning_strike")) {
             spawnMagicCircle(player, 7.5D, 140);         // t3 雷击
+            bigStrike(player);                            // 准星落点劈一道"超级大雷" ✓
         } else if (path.equals("lightning_storm")) {
             spawnMagicCircle(player, 10.5D, 170);        // t4 雷暴
+            // 雷暴：窗口 200 tick，期间每 15 tick 劈一轮，一直劈到结束 ✓
+            STORM_UNTIL.put(player.getUUID(), player.level().getGameTime() + STORM_WINDOW);
         } else if (path.equals("heavenly_thunder")) {
             spawnMagicCircle(player, 14.0D, 210);        // t5 天雷
         }
@@ -344,6 +470,9 @@ public final class TnSpellMechanics {
         sparkMarks(player, time);
         // 神级大雷球：粒子贴到球上（引擎自己的 travel_particles 不跟随 ✗）
         followBigBall(player, time);
+        // 雷场 / 雷暴：窗口内自己劈敌人（视觉＋伤害都在里面）✓
+        tickLightningField(player, time);
+        tickLightningStorm(player, time);
         // 无冷却：雷系"闪电登神"与风系"风神降临"（5 级）都给。
         // 风系用专属标记 wind_god 判断 —— 只有 5 级发它，所以 4 级"超级风速"
         // 不会再蹭到无冷却（之前借用共用的 wind_speed_iii 时就会蹭到）。

@@ -143,6 +143,7 @@ try {
     $spellIds = @('tnc:spark', 'tnc:lightning_field', 'tnc:lightning_strike', 'tnc:lightning_storm',
                   'tnc:heavenly_thunder', 'tnc:thunder_orb', 'tnc:great_thunder_orb',
                   'tnc:orbiting_thunder_orb', 'tnc:explosive_thunder_orb', 'tnc:cataclysm_thunder_orb',
+                  'tnc:lightning_field', 'tnc:lightning_storm',
                   'tnc:lightning_haste', 'tnc:lightning_blink', 'tnc:lightning_wind',
                   'tnc:lightning_recharge', 'tnc:lightning_ascension',
                   # fire 15 (ray 5 + ball 5 + burn 5)
@@ -207,6 +208,8 @@ try {
         #   * a model_id without a file -> the projectile renders as missing texture
         $registered = @('tnc:lightning_haste', 'tnc:lightning_wind',
                         'tnc:orbiting_thunder_orb', 'tnc:lightning_ascension',
+                        # tnc:lightning_field / tnc:lightning_storm (primary field+storm markers, TNEffects)
+                        'tnc:lightning_field', 'tnc:lightning_storm',
                         # fire (registered in TNFireMechanics)
                         'tnc:fire_aspect', 'tnc:ember_burn', 'tnc:blaze_burn',
                         'tnc:inferno_burn', 'tnc:total_burn',
