@@ -621,7 +621,7 @@ public final class TnSpellMechanics {
                 if (projectile.getOwner() != player) {
                     continue;
                 }
-                ring(player.serverLevel(), projectile.position(), BIG_BALL_RING, BIG_BALL_RING_POINTS, time);
+                ballShell(player.serverLevel(), projectile.position(), BIG_BALL_RING, time);
             }
         }
     }
@@ -693,6 +693,31 @@ public final class TnSpellMechanics {
                 level.sendParticles(ParticleTypes.ELECTRIC_SPARK, vx, vy, vz,
                         1, 0.05D, 0.05D, 0.05D, 0.03D);
             }
+        }
+    }
+
+    /**
+     * 在 center 处铺一层<b>球壳</b>粒子 ✓（大雷球专用，2026-09-22 第三版）。
+     *
+     * <h2>为什么不是 {@link #ring}</h2>
+     * 作者原话："这个超级无敌大雷球还是不行啊……粒子特效也一般"。上一版只在球的赤道上画了
+     * <b>一圈</b>粒子 ✗ —— 28 格的球配一圈线，看起来就是个细光环，不像一颗电球 ✗。
+     * 这一版按<b>纬度</b>切 5 层水平环（越靠近赤道半径越大、点数越多 ✓），
+     * 叠出来是一整层球壳 ✓；每层再用 {@link #ring} 自带的旋转经线，球就"转"起来了 ✓。
+     *
+     * <p>点数按半径算（{@code r * 4}）：半径 14 格时约 350 颗/tick，配 JSON 里
+     * 的 travel_particles，够亮但不到卡的程度。
+     */
+    public static void ballShell(ServerLevel level, Vec3 center, double radius, long time) {
+        for (int k = 0; k < 5; k++) {
+            // -90°..+90° 取 5 个纬度（不含两极，两极半径趋 0、没意义 ✗）
+            double phi = ((k + 0.5D) / 5.0D - 0.5D) * Math.PI;
+            double r = radius * Math.cos(phi);
+            if (r < 0.8D) {
+                continue;
+            }
+            int points = (int) Math.max(12.0D, Math.round(r * 4.0D));
+            ring(level, center.add(0.0D, radius * Math.sin(phi), 0.0D), r, points, time + k * 23L);
         }
     }
 

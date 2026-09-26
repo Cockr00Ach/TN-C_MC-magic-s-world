@@ -15,16 +15,23 @@
     "target": {
       "type": "METEOR",
       "meteor": {
-        "launch_height": 14,
+        "launch_height": 24,
         "launch_radius": 5,
         "launch_properties": {
-          "velocity": 0.35,
+          "velocity": 0.45,
           "extra_launch_count": 0,
           "extra_launch_delay": 0
         },
         "projectile": {
           "homing_angle": 0.0,
           "client_data": {
+            "travel_particles": [
+              { "particle_id": "spell_engine:electric_arc_a", "shape": "CIRCLE", "rotation": "LOOK", "origin": "CENTER", "count": 90.0, "extent": 14.0, "min_speed": 0.0, "max_speed": 0.05 },
+              { "particle_id": "minecraft:electric_spark", "shape": "CIRCLE", "rotation": "LOOK", "origin": "CENTER", "count": 90.0, "extent": 14.0, "min_speed": 0.0, "max_speed": 0.05 },
+              { "particle_id": "minecraft:witch", "shape": "CIRCLE", "rotation": "LOOK", "origin": "CENTER", "count": 90.0, "extent": 14.0, "min_speed": 0.0, "max_speed": 0.05 },
+              { "particle_id": "spell_engine:electric_arc_a", "shape": "SPHERE", "origin": "CENTER", "count": 60.0, "min_speed": 0.2, "max_speed": 1.2 },
+              { "particle_id": "minecraft:electric_spark", "shape": "SPHERE", "origin": "CENTER", "count": 60.0, "min_speed": 0.2, "max_speed": 1.2 }
+            ],
             "model": { "model_id": "tnc:projectile/lightingball", "light_emission": "RADIATE", "scale": 75.0 }
           }
         }
