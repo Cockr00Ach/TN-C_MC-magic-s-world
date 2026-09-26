@@ -38,11 +38,16 @@ import java.util.concurrent.ConcurrentHashMap;
  * 所以这四条用"效果当开关 + 每 tick 检查"的方式实现：
  * 法术 JSON 负责挂效果（{@link TNEffects}），效果在身时这里的 tick 逻辑就开始干活。
  *
- * <p>粒子一律用原版 {@link ParticleTypes#ELECTRIC_SPARK}：不依赖任何 mod 的粒子注册，
- * 少一个"引擎没装/改名"就崩的点。
+ * <p><b>粒子</b>：优先用包里的"真电弧"（{@code spell_engine:electric_arc_b} 等，见 {@link #arc()}），
+ * 沿锯齿线撒出来才像闪电；一个都找不到才退回原版 {@link ParticleTypes#ELECTRIC_SPARK}（小亮点 ✗）。
+ * <b>原版闪电实体不能用</b>：{@code LightningBolt} 不管 {@code visualOnly} 都会播 10000 音量的雷声 ✗。
  */
 @Mod.EventBusSubscriber(modid = TNMod.MODID)
 public final class TnSpellMechanics {
+
+    /** 自己的 logger（TNMod 的那个是 private ✗）。 */
+    private static final org.apache.logging.log4j.Logger LOGGER =
+            org.apache.logging.log4j.LogManager.getLogger("TN-C/spellvisuals");
 
     // ---------------- 可调数值（想改手感只动这里） ----------------
 
@@ -97,6 +102,96 @@ public final class TnSpellMechanics {
 
     /** 一枚留在原地的雷印。 */
     private record SparkMark(Vec3 pos, long expireAt) {
+    }
+
+    // ---- 电弧粒子：优先用包里的"真电弧"，拿不到才退回原版小亮点 ----
+    //
+    // 背景（作者 2026-09-22 反馈"怎么是星星，丑死了"）：原版 ParticleTypes.ELECTRIC_SPARK
+    // 就是个小亮点、END_ROD 是白色星点 —— 都不是闪电 ✗。原版闪电**实体**也不能用：
+    // LightningBolt 不管 visualOnly 都会播 10000 音量的雷声（读源码确认 ✗）。
+    // 所以走"借用包里现成的电弧粒子 + 自己画锯齿雷线"这条路 ✓。
+    //
+    // 为什么要"按顺序找"：这些粒子分别来自不同 mod，哪个被删了都不该让法术崩。
+    // 只在第一次使用时解析一次（注册表在构造期还没填满，静态初始化会拿不到 ✗）。
+    private static final String[] ARC_CANDIDATES = {
+            "spell_engine:electric_arc_b",          // 引擎自带的电弧（法术本体用的就是它）★首选
+            "spell_engine:electric_arc_a",
+            "alexscaves:tesla_bulb_lightning",      // 特斯拉电弧
+            "aquamirae:electric",
+            "jerotes:chain_lightning_display",      // 链状闪电
+            "berserker_rpg:small_thunder",
+    };
+    /** 解析结果缓存：null = 还没找过。 */
+    private static net.minecraft.core.particles.ParticleOptions arcCache = null;
+    /** 最终用的是哪个（给日志/文档看）。 */
+    private static String arcSource = "(未解析)";
+
+    /** 取电弧粒子（找不到就退回原版 ELECTRIC_SPARK，并留一行日志说明）。 */
+    private static net.minecraft.core.particles.ParticleOptions arc() {
+        if (arcCache != null) {
+            return arcCache;
+        }
+        for (String id : ARC_CANDIDATES) {
+            try {
+                net.minecraft.resources.ResourceLocation key = net.minecraft.resources.ResourceLocation.tryParse(id);
+                if (key == null) {
+                    continue;
+                }
+                net.minecraft.core.particles.ParticleType<?> type =
+                        net.minecraftforge.registries.ForgeRegistries.PARTICLE_TYPES.getValue(key);
+                if (type instanceof net.minecraft.core.particles.ParticleOptions options) {
+                    arcCache = options;
+                    arcSource = id;
+                    LOGGER.info("TN-C: 雷速特效使用电弧粒子 {}", id);
+                    return arcCache;
+                }
+            } catch (Throwable ignored) {
+                // 某个 mod 的粒子类型怪：跳过，继续试下一个
+            }
+        }
+        arcCache = ParticleTypes.ELECTRIC_SPARK;
+        arcSource = "(退回原版 ELECTRIC_SPARK)";
+        LOGGER.warn("TN-C: 没找到任何电弧粒子，雷速特效退回原版小亮点");
+        return arcCache;
+    }
+
+    /** 只查不用：给日志/自检查询当前会用哪个粒子。 */
+    public static String arcSourceName() {
+        arc();      // 触发一次解析
+        return arcSource;
+    }
+
+    /**
+     * 画一条<b>锯齿雷线</b>（从 from 到 to，沿路撒 N 个电弧粒子 + 随机抖动）。
+     *
+     * <p>这是"闪电感"的关键：零散的点看起来是星星 ✗，沿一条抖动的线连起来才像电弧 ✓。
+     * 用 {@code count=1, speed=0} 精确落点，避免原版把粒子随机撒开。
+     */
+    private static void arcLine(ServerLevel level, Vec3 from, Vec3 to, int points, double jitter) {
+        if (points < 2) {
+            points = 2;
+        }
+        for (int i = 0; i <= points; i++) {
+            double t = i / (double) points;
+            double x = from.x + (to.x - from.x) * t + (level.random.nextDouble() - 0.5D) * jitter;
+            double y = from.y + (to.y - from.y) * t + (level.random.nextDouble() - 0.5D) * jitter;
+            double z = from.z + (to.z - from.z) * t + (level.random.nextDouble() - 0.5D) * jitter;
+            level.sendParticles(arc(), x, y, z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+        }
+    }
+
+    /** 以 center 为中心、半径 radius 的粗糙"电球"（爆炸/闪现用）。 */
+    private static void arcBall(ServerLevel level, Vec3 center, int points, double radius) {
+        for (int i = 0; i < points; i++) {
+            double a = level.random.nextDouble() * Math.PI * 2.0D;
+            double b = (level.random.nextDouble() - 0.5D) * Math.PI;
+            double r = radius * (0.5D + level.random.nextDouble() * 0.5D);
+            level.sendParticles(arc(),
+                    center.x + Math.cos(a) * Math.cos(b) * r,
+                    center.y + Math.sin(b) * r,
+                    center.z + Math.sin(a) * Math.cos(b) * r,
+                    1, 0.0D, 0.0D, 0.0D, 0.0D);
+        }
     }
 
     private TnSpellMechanics() {
@@ -189,13 +284,17 @@ public final class TnSpellMechanics {
         ServerLevel level = player.serverLevel();
         double phase = (time % 80) / 80.0D * Math.PI * 2.0D;
 
-        // 画圈（客户端看得到）
+        // 画圈（客户端看得到）—— 2026-09-22 从"小亮点"改成"一小段电弧"，和雷系其他特效一致 ✓
         for (int i = 0; i < ORBIT_COUNT; i++) {
             double a = phase + i * (Math.PI * 2.0D / ORBIT_COUNT);
+            double a2 = a + 0.55D;
             double x = player.getX() + Math.cos(a) * ORBIT_RADIUS;
             double z = player.getZ() + Math.sin(a) * ORBIT_RADIUS;
             double y = player.getY() + 1.0D + Math.sin(a * 2.0D) * 0.25D;
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, x, y, z, 2, 0.05D, 0.05D, 0.05D, 0.0D);
+            double x2 = player.getX() + Math.cos(a2) * ORBIT_RADIUS;
+            double z2 = player.getZ() + Math.sin(a2) * ORBIT_RADIUS;
+            double y2 = player.getY() + 1.0D + Math.sin(a2 * 2.0D) * 0.25D;
+            arcLine(level, new Vec3(x, y, z), new Vec3(x2, y2, z2), 4, 0.07D);
         }
 
         if (time % ORBIT_ZAP_INTERVAL != 0) {
@@ -225,13 +324,14 @@ public final class TnSpellMechanics {
             return;     // 站着不动就不留
         }
         ServerLevel level = player.serverLevel();
-        level.sendParticles(ParticleTypes.ELECTRIC_SPARK,
-                player.getX(), player.getY() + 0.2D, player.getZ(),
-                3, 0.25D, 0.1D, 0.25D, 0.02D);
-        // 2026-09-22 加：速度线（END_ROD 白点）—— 光有电弧看不出"我在冲刺"
-        level.sendParticles(ParticleTypes.END_ROD,
-                player.getX(), player.getY() + 0.9D, player.getZ(),
-                2, 0.15D, 0.35D, 0.15D, 0.0D);
+        // 身后的电弧尾巴：从上一 tick 的位置连到当前位置（只撒点看不出"闪电" ✗）
+        Vec3 from = new Vec3(player.xOld, player.yOld + 0.9D, player.zOld);
+        Vec3 to = new Vec3(player.getX(), player.getY() + 0.9D, player.getZ());
+        arcLine(level, from, to, 6, 0.14D);
+        if (time % (WIND_TRAIL_INTERVAL * 3) == 0) {
+            // 偶尔在身上再蹦一条短弧，跑动时更"带电"
+            arcLine(level, randomBodyPoint(player), randomBodyPoint(player), 4, 0.1D);
+        }
 
         AABB box = player.getBoundingBox().inflate(WIND_HIT_RADIUS);
         List<LivingEntity> targets = level.getEntitiesOfClass(LivingEntity.class, box);
@@ -263,10 +363,10 @@ public final class TnSpellMechanics {
     // ------------------------------------------------------------------
 
     /**
-     * <b>t1 雷速</b>：跑动时脚底一直冒电花；站着不动只偶尔闪一下。
+     * <b>t1 雷速</b>：跑动时脚下不断跳出<b>小电弧</b>（两脚之间来回蹦）；站着不动只偶尔闪一下。
      *
-     * <p>为什么这么做：雷速本身是"看不见的 +25% 移速"，脚底电花是最便宜的存在感 ——
-     * 玩家一跑就知道 buff 还在。粒子全用原版 {@code ELECTRIC_SPARK} ✓ 不依赖任何 mod。
+     * <p>2026-09-22 改：原来是零散的小亮点（作者："怎么是星星，丑死了 ✗"），
+     * 现在改成"脚到脚"的短锯齿线 —— 同样几个粒子，观感从"星星"变成"电弧" ✓。
      */
     private static void hasteSparks(ServerPlayer player, long time) {
         if (time % HASTE_SPARK_INTERVAL != 0) {
@@ -275,57 +375,62 @@ public final class TnSpellMechanics {
         Vec3 moved = player.position().subtract(player.xOld, player.yOld, player.zOld);
         boolean moving = moved.length() > HASTE_MIN_MOVE;
         ServerLevel level = player.serverLevel();
-        level.sendParticles(ParticleTypes.ELECTRIC_SPARK,
-                player.getX(), player.getY() + 0.08D, player.getZ(),
-                moving ? 3 : 1,
-                moving ? 0.28D : 0.16D, 0.02D, moving ? 0.28D : 0.16D,
-                moving ? 0.03D : 0.0D);
+        if (!moving) {
+            arcBall(level, new Vec3(player.getX(), player.getY() + 0.15D, player.getZ()), 3, 0.35D);
+            return;
+        }
+        double side = 0.22D;
+        for (int i = 0; i < 2; i++) {
+            double ox = (i == 0 ? -side : side);
+            Vec3 a = new Vec3(player.getX() + ox, player.getY() + 0.06D, player.getZ());
+            Vec3 b = new Vec3(player.getX() - ox, player.getY() + 0.06D, player.getZ());
+            arcLine(level, a, b, 6, 0.12D);
+        }
     }
 
     /**
-     * <b>t2 闪电移位</b>：起点和落点各炸一圈电花 + 一声短促传送音。
+     * <b>t2 闪电移位</b>：起点与落点各炸一团电弧 + 短促传送音，
+     * 中间再画一条贯穿两端的<b>雷线</b>（一闪而过，最能看出"这是闪电"）。
      *
-     * <p>引擎的 TELEPORT 动作自带 {@code depart_particles}，但"炸得够不够"是手感问题 ——
-     * 这里补足两端（用 {@code xOld/yOld/zOld} 拿起点：施法这一 tick 玩家已经落到终点了）。
+     * <p>用 {@code xOld/yOld/zOld} 拿起点 —— 施法这一 tick 玩家已经落到终点了 ✗。
      */
     private static void blinkBurst(ServerPlayer player) {
         ServerLevel level = player.serverLevel();
-        double ox = player.xOld;
-        double oy = player.yOld;
-        double oz = player.zOld;
-        if (player.position().distanceToSqr(ox, oy, oz) > BLINK_MIN_DISTANCE_SQR) {
-            zapBurst(level, ox, oy + 1.0D, oz);
-            level.playSound(null, ox, oy, oz, SoundEvents.ENDERMAN_TELEPORT,
+        Vec3 now = player.position().add(0.0D, 1.0D, 0.0D);
+        Vec3 was = new Vec3(player.xOld, player.yOld + 1.0D, player.zOld);
+        boolean teleported = now.distanceToSqr(was) > BLINK_MIN_DISTANCE_SQR;
+
+        if (teleported) {
+            arcBall(level, was, BLINK_BURST_COUNT, BLINK_BURST_SPREAD);
+            level.sendParticles(ParticleTypes.FLASH, was.x, was.y, was.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+            arcLine(level, was, now, 26, 0.55D);
+            level.playSound(null, was.x, was.y, was.z, SoundEvents.ENDERMAN_TELEPORT,
                     SoundSource.PLAYERS, 0.45F, 1.7F);
         }
-        zapBurst(level, player.getX(), player.getY() + 1.0D, player.getZ());
+        arcBall(level, now, BLINK_BURST_COUNT, BLINK_BURST_SPREAD);
+        level.sendParticles(ParticleTypes.FLASH, now.x, now.y, now.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
         level.playSound(null, player.getX(), player.getY(), player.getZ(),
                 SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.5F, 1.25F);
     }
 
-    /** 一圈电花 + 一次闪光（FLASH 是原版的瞬时亮光粒子）。 */
-    private static void zapBurst(ServerLevel level, double x, double y, double z) {
-        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, x, y, z,
-                BLINK_BURST_COUNT, BLINK_BURST_SPREAD, 0.8D, BLINK_BURST_SPREAD, 0.35D);
-        level.sendParticles(ParticleTypes.FLASH, x, y, z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
-    }
-
-    /** <b>t4 闪电降低冷却</b>：脚下一圈电环（一次性）+ 一声晶鸣。 */
+    /** <b>t4 闪电降低冷却</b>：脚下一圈电弧环（首尾相接）+ 一声晶鸣。 */
     private static void rechargeRing(ServerPlayer player) {
         ServerLevel level = player.serverLevel();
+        double cx = player.getX();
+        double cy = player.getY() + 0.15D;
+        double cz = player.getZ();
         for (int i = 0; i < RECHARGE_RING_COUNT; i++) {
-            double a = i * (Math.PI * 2.0D / RECHARGE_RING_COUNT);
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK,
-                    player.getX() + Math.cos(a) * RECHARGE_RING_RADIUS,
-                    player.getY() + 0.15D,
-                    player.getZ() + Math.sin(a) * RECHARGE_RING_RADIUS,
-                    2, 0.02D, 0.02D, 0.02D, 0.0D);
+            double a1 = i * (Math.PI * 2.0D / RECHARGE_RING_COUNT);
+            double a2 = a1 + Math.PI * 2.0D / RECHARGE_RING_COUNT;
+            Vec3 p1 = new Vec3(cx + Math.cos(a1) * RECHARGE_RING_RADIUS, cy, cz + Math.sin(a1) * RECHARGE_RING_RADIUS);
+            Vec3 p2 = new Vec3(cx + Math.cos(a2) * RECHARGE_RING_RADIUS, cy, cz + Math.sin(a2) * RECHARGE_RING_RADIUS);
+            arcLine(level, p1, p2, 4, 0.08D);
         }
         level.playSound(null, player.getX(), player.getY(), player.getZ(),
                 SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.8F, 1.9F);
     }
 
-    /** <b>t4</b>：施法后 3 秒内，绕身上升的电流（"魔力回来了"的观感）。 */
+    /** <b>t4</b>：施法后 3 秒内，绕着身体螺旋上升的短电弧（"魔力回来了"的观感）。 */
     private static void rechargeFlourish(ServerPlayer player, long time) {
         Long until = RECHARGE_UNTIL.get(player.getUUID());
         if (until == null) {
@@ -340,41 +445,42 @@ public final class TnSpellMechanics {
         }
         ServerLevel level = player.serverLevel();
         double climb = ((until - time) % 20) / 20.0D;      // 0..1 循环上升
-        double y = player.getY() + 0.2D + climb * 1.9D;
         double a = (time % 40) / 40.0D * Math.PI * 2.0D;
-        level.sendParticles(ParticleTypes.ELECTRIC_SPARK,
-                player.getX() + Math.cos(a) * 0.55D, y, player.getZ() + Math.sin(a) * 0.55D,
-                1, 0.02D, 0.05D, 0.02D, 0.01D);
+        double y = player.getY() + 0.2D + climb * 1.9D;
+        Vec3 from = new Vec3(player.getX() + Math.cos(a) * 0.6D, y, player.getZ() + Math.sin(a) * 0.6D);
+        Vec3 to = new Vec3(player.getX() + Math.cos(a + 1.2D) * 0.45D, y + 0.12D,
+                player.getZ() + Math.sin(a + 1.2D) * 0.45D);
+        arcLine(level, from, to, 5, 0.08D);
     }
 
     /**
-     * <b>t5 闪电登神</b>：全身随机电弧 + 三颗环绕电光（纯表现，不造成伤害）+ 走过留雷印。
+     * <b>t5 闪电登神</b>：身上来回跳的<b>电弧</b> + 三颗环绕电光 +
+     * 每走一格留一枚<b>雷印</b>（地上的一小团电弧，存活 40 tick）。
      *
-     * <p>环绕电光故意做得比"环绕雷球"（4 颗、r=1.4、会电人）小一圈、快一点 ——
+     * <p>环绕电光故意比"环绕雷球"（4 颗、r=1.4、会电人）小一圈快一点，
      * 让玩家一眼能分清"这是登神的外观"还是"那段会扎人的光环" ✓
      */
     private static void ascensionAura(ServerPlayer player, long time) {
         ServerLevel level = player.serverLevel();
         double phase = (time % 40) / 40.0D * Math.PI * 2.0D;
         for (int i = 0; i < ASCENSION_ORBIT_COUNT; i++) {
-            double a = phase * 2.0D + i * (Math.PI * 2.0D / ASCENSION_ORBIT_COUNT);
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK,
-                    player.getX() + Math.cos(a) * ASCENSION_ORBIT_RADIUS,
-                    player.getY() + 0.9D + Math.sin(a * 2.0D) * 0.35D,
-                    player.getZ() + Math.sin(a) * ASCENSION_ORBIT_RADIUS,
-                    1, 0.02D, 0.02D, 0.02D, 0.0D);
+            double a1 = phase * 2.0D + i * (Math.PI * 2.0D / ASCENSION_ORBIT_COUNT);
+            double a2 = a1 + 0.5D;
+            Vec3 p1 = new Vec3(player.getX() + Math.cos(a1) * ASCENSION_ORBIT_RADIUS,
+                    player.getY() + 0.9D + Math.sin(a1 * 2.0D) * 0.35D,
+                    player.getZ() + Math.sin(a1) * ASCENSION_ORBIT_RADIUS);
+            Vec3 p2 = new Vec3(player.getX() + Math.cos(a2) * ASCENSION_ORBIT_RADIUS,
+                    player.getY() + 0.9D + Math.sin(a2 * 2.0D) * 0.35D,
+                    player.getZ() + Math.sin(a2) * ASCENSION_ORBIT_RADIUS);
+            arcLine(level, p1, p2, 3, 0.05D);
         }
         if (time % ASCENSION_ARC_INTERVAL == 0) {
+            // 身上：两点之间蹦一条电弧（比撒点更像"电在身上跳" ✓）
             for (int i = 0; i < ASCENSION_ARC_COUNT; i++) {
-                double a = player.getRandom().nextDouble() * Math.PI * 2.0D;
-                double r = 0.35D + player.getRandom().nextDouble() * 0.25D;
-                double y = player.getY() + 0.3D + player.getRandom().nextDouble() * 1.5D;
-                level.sendParticles(ParticleTypes.ELECTRIC_SPARK,
-                        player.getX() + Math.cos(a) * r, y, player.getZ() + Math.sin(a) * r,
-                        1, 0.02D, 0.02D, 0.02D, 0.0D);
+                arcLine(level, randomBodyPoint(player), randomBodyPoint(player), 5, 0.1D);
             }
         }
-        // 雷印：每走一格留一枚
+        // 雷印：每走一格落一枚
         Vec3 pos = player.position();
         Vec3 last = LAST_MARK.get(player.getUUID());
         if (last == null || last.distanceTo(pos) >= ASCENSION_MARK_STEP) {
@@ -385,6 +491,14 @@ public final class TnSpellMechanics {
                 list.remove(0);
             }
         }
+    }
+
+    /** 身上的随机一点（画电弧用）。 */
+    private static Vec3 randomBodyPoint(ServerPlayer player) {
+        double a = player.getRandom().nextDouble() * Math.PI * 2.0D;
+        double r = 0.3D + player.getRandom().nextDouble() * 0.3D;
+        double y = player.getY() + 0.25D + player.getRandom().nextDouble() * 1.45D;
+        return new Vec3(player.getX() + Math.cos(a) * r, y, player.getZ() + Math.sin(a) * r);
     }
 
     /** 地上的雷印：在原地噼啪一小会儿，然后自己消失。 */
@@ -398,16 +512,16 @@ public final class TnSpellMechanics {
             MARKS.remove(player.getUUID());
             return;
         }
-        if (time % 2 != 0) {
+        if (time % 3 != 0) {
             return;
         }
         ServerLevel level = player.serverLevel();
         for (SparkMark mark : list) {
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK,
-                    mark.pos().x, mark.pos().y + 0.08D, mark.pos().z,
-                    1, 0.12D, 0.02D, 0.12D, 0.0D);
+            // 每枚雷印是地上的一小团电弧（不是一堆星星 ✗）
+            arcBall(level, new Vec3(mark.pos().x, mark.pos().y + 0.08D, mark.pos().z), 3, 0.28D);
         }
     }
+
 
     /** 真正碰 SpellEngine 类的部分：只在引擎存在时被加载。 */
     private static final class Impl {
