@@ -2,7 +2,7 @@
   "school": "LIGHTNING",
   "group": "orb",
   "range": 0.0,
-  "learn": { "tier": 3 },
+  "learn": { "tier": 4 },
   "cast": {
     "duration": 0.6,
     "animation": "spell_engine:one_handed_area_charge",
@@ -20,14 +20,14 @@
         "type": "STATUS_EFFECT",
         "status_effect": {
           "effect_id": "tnc:orbiting_thunder_orb",
-          "duration": 10.0,
+          "duration": 12.0,
           "amplifier": 0,
           "apply_mode": "SET",
           "show_particles": false
         }
       },
-      "particles": [ { "particle_id": "spell_engine:electric_arc_b", "shape": "SPHERE", "origin": "CENTER", "count": 40.0, "min_speed": 0.2, "max_speed": 0.8 } ]
+      "particles": [ { "particle_id": "spell_engine:electric_arc_b", "shape": "SPHERE", "origin": "CENTER", "count": 60.0, "min_speed": 0.2, "max_speed": 0.8 } ]
     }
   ],
-  "cost": { "exhaust": 0.0, "cooldown_duration": 14.0 }
+  "cost": { "exhaust": 0.0, "cooldown_duration": 16.0 }
 }

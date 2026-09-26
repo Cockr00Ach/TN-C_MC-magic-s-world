@@ -26,8 +26,14 @@ public class TNThunderOrbRenderer extends EntityRenderer<TNThunderOrbEntity> {
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(
             TNMod.MODID, "textures/spell_projectile/lightingball.png");
 
-    /** 1.0 = 模型原尺寸（6/16 格 ≈ 0.375 格）。 */
-    private static final float SCALE = 1.5F;
+    /**
+     * 1.0 = 模型原尺寸（6/16 格 ≈ 0.375 格）。
+     *
+     * <p>2026-09-22 作者："环绕的雷球是爆炸雷球" → 用**爆炸雷球同一个尺寸**
+     * （法术 JSON 里 `explosive_thunder_orb` 的 `scale` 就是 8.55 ≈ 3.21 格）✓，
+     * 所以这里从 1.5 改成 **8.55** ✓。
+     */
+    private static final float SCALE = 8.55F;
 
     private final TNThunderOrbModel model;
 

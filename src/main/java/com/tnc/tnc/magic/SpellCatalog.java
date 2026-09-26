@@ -133,8 +133,9 @@ public final class SpellCatalog {
             // ---- 雷球线：把雷电做成会飞的球，一级比一级大 ----
             entry("thunder_orb", Chain.ORB, 1, "雷球"),
             entry("great_thunder_orb", Chain.ORB, 2, "大雷球"),
-            entry("orbiting_thunder_orb", Chain.ORB, 3, "环绕雷球"),
-            entry("explosive_thunder_orb", Chain.ORB, 4, "爆炸雷球"),
+            // 2026-09-22 作者调序：爆炸雷球降到 t3、环绕雷球升到 t4（环绕的球就是爆炸雷球 ✓）
+            entry("explosive_thunder_orb", Chain.ORB, 3, "爆炸雷球"),
+            entry("orbiting_thunder_orb", Chain.ORB, 4, "环绕雷球"),
             entry("cataclysm_thunder_orb", Chain.ORB, 5, "天降超级无敌大雷球"),
 
             // ---- 雷速线：加速、位移、以及"以雷的速度"带来的强化 ----

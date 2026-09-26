@@ -43,9 +43,9 @@
     {
       "action": { "type": "DAMAGE", "damage": { "spell_power_coefficient": 2.5, "knockback": 3.0 } },
       "particles": [
-        { "particle_id": "minecraft:electric_spark", "shape": "SPHERE", "origin": "CENTER", "count": 450.0, "min_speed": 2.0, "max_speed": 6.0 },
-        { "particle_id": "minecraft:witch", "shape": "SPHERE", "origin": "CENTER", "count": 450.0, "min_speed": 2.0, "max_speed": 6.0 },
-        { "particle_id": "minecraft:squid_ink", "shape": "SPHERE", "origin": "CENTER", "count": 70.0, "min_speed": 1.8, "max_speed": 5.0 },
+        { "particle_id": "minecraft:electric_spark", "shape": "SPHERE", "origin": "CENTER", "count": 600.0, "min_speed": 5.0, "max_speed": 16.0 },
+        { "particle_id": "minecraft:witch", "shape": "SPHERE", "origin": "CENTER", "count": 600.0, "min_speed": 5.0, "max_speed": 16.0 },
+        { "particle_id": "minecraft:squid_ink", "shape": "SPHERE", "origin": "CENTER", "count": 90.0, "min_speed": 5.0, "max_speed": 15.0 },
         { "particle_id": "minecraft:flash", "shape": "SPHERE", "origin": "CENTER", "count": 10.0, "min_speed": 0.0, "max_speed": 0.15 }
       ],
       "sound": { "id": "entity.lightning_bolt.impact", "volume": 1.0 }
@@ -63,13 +63,13 @@
     }
   ],
   "area_impact": {
-    "radius": 20,
+    "radius": 40.0,
     "extra_radius": { "power_coefficient": 0.5 },
-    "area": { "distance_dropoff": "SQUARED" },
+    "area": { "distance_dropoff": "NONE" },
     "particles": [
-      { "particle_id": "minecraft:electric_spark", "shape": "SPHERE", "origin": "CENTER", "count": 700.0, "min_speed": 2.5, "max_speed": 7.0 },
-      { "particle_id": "minecraft:witch", "shape": "SPHERE", "origin": "CENTER", "count": 700.0, "min_speed": 2.5, "max_speed": 7.0 },
-      { "particle_id": "minecraft:squid_ink", "shape": "SPHERE", "origin": "CENTER", "count": 120.0, "min_speed": 2.0, "max_speed": 6.0 },
+      { "particle_id": "minecraft:electric_spark", "shape": "SPHERE", "origin": "CENTER", "count": 1100.0, "min_speed": 6.0, "max_speed": 18.0 },
+      { "particle_id": "minecraft:witch", "shape": "SPHERE", "origin": "CENTER", "count": 1100.0, "min_speed": 6.0, "max_speed": 18.0 },
+      { "particle_id": "minecraft:squid_ink", "shape": "SPHERE", "origin": "CENTER", "count": 160.0, "min_speed": 5.0, "max_speed": 16.0 },
       { "particle_id": "minecraft:flash", "shape": "SPHERE", "origin": "CENTER", "count": 16.0, "min_speed": 0.0, "max_speed": 0.25 }
     ],
     "sound": { "id": "entity.lightning_bolt.thunder", "volume": 1.5 }

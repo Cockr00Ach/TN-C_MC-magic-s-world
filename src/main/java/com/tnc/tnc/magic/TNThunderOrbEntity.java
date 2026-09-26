@@ -44,10 +44,13 @@ public class TNThunderOrbEntity extends Entity {
 
     /** 同时存在几颗（与机制层的常量一致）。 */
     public static final int COUNT = 4;
-    /** 环绕半径（格）。 */
-    public static final double RADIUS = 1.4D;
-    /** 环绕高度（相对主人脚底，格）。 */
-    public static final double HEIGHT = 1.0D;
+    /**
+     * 环绕半径（格）—— 2026-09-22 作者："离人物的距离要远一点"：1.4 → <b>4.0</b> ✓
+     * （球本身直径 3.21 格，所以球的内缘离玩家还有约 2.4 格 ✓）
+     */
+    public static final double RADIUS = 4.0D;
+    /** 环绕高度（相对主人脚底，格）—— 球变大了，抬高一点免得切地面 ✓ */
+    public static final double HEIGHT = 1.6D;
 
     /** 绕一圈要多久（tick）。 */
     private static final int ORBIT_PERIOD = 80;
@@ -137,16 +140,31 @@ public class TNThunderOrbEntity extends Entity {
         }
     }
 
+    /**
+     * 电附近的敌人 —— <b>以"这颗球自己"为中心</b>判定 ✓
+     * （球现在挂在 4 格外，用玩家位置判定会打不到球边上的敌人 ✗）。
+     *
+     * <p>作者 2026-09-22："环绕的雷球是爆炸雷球" → 命中时额外炸一圈粒子，
+     * 看起来就是"这颗球炸了" ✓（伤害仍是这一下 DAMAGE ✓）。
+     */
     private void zapNearby(ServerLevel level, ServerPlayer player) {
-        AABB box = player.getBoundingBox().inflate(HIT_RADIUS);
+        AABB box = this.getBoundingBox().inflate(HIT_RADIUS);
         List<LivingEntity> targets = level.getEntitiesOfClass(LivingEntity.class, box);
+        boolean hitAnything = false;
         for (LivingEntity target : targets) {
-            if (!isEnemy(player, target) || target.distanceTo(player) > HIT_RADIUS) {
+            if (!isEnemy(player, target) || target.distanceTo(this) > HIT_RADIUS) {
                 continue;
             }
             target.hurt(level.damageSources().indirectMagic(player, player), DAMAGE);
             TnSpellMechanics.arcLine(level, this.position(),
                     target.position().add(0.0D, target.getBbHeight() * 0.5D, 0.0D), 6, 0.15D);
+            hitAnything = true;
+        }
+        if (hitAnything) {
+            // 小爆炸：从球心向外散一圈（和爆炸雷球的散射同款观感 ✓）
+            TnSpellMechanics.arcBall(level, this.position(), 24, 1.1D);
+            level.sendParticles(net.minecraft.core.particles.ParticleTypes.WITCH,
+                    this.getX(), this.getY(), this.getZ(), 20, 0.3D, 0.3D, 0.3D, 0.6D);
         }
     }
 

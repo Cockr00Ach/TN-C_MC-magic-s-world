@@ -2,7 +2,7 @@
   "school": "LIGHTNING",
   "group": "orb",
   "range": 40.0,
-  "learn": { "tier": 4 },
+  "learn": { "tier": 3 },
   "cast": {
     "duration": 0.8,
     "animation": "spell_engine:one_handed_projectile_charge",
@@ -36,8 +36,8 @@
     {
       "action": { "type": "DAMAGE", "damage": { "spell_power_coefficient": 1.6, "knockback": 2.0 } },
       "particles": [
-        { "particle_id": "minecraft:electric_spark", "shape": "SPHERE", "origin": "CENTER", "count": 350.0, "min_speed": 1.5, "max_speed": 5.0 },
-        { "particle_id": "minecraft:witch", "shape": "SPHERE", "origin": "CENTER", "count": 350.0, "min_speed": 1.5, "max_speed": 5.0 },
+        { "particle_id": "minecraft:electric_spark", "shape": "SPHERE", "origin": "CENTER", "count": 500.0, "min_speed": 4.0, "max_speed": 14.0 },
+        { "particle_id": "minecraft:witch", "shape": "SPHERE", "origin": "CENTER", "count": 500.0, "min_speed": 4.0, "max_speed": 14.0 },
         { "particle_id": "minecraft:flash", "shape": "SPHERE", "origin": "CENTER", "count": 8.0, "min_speed": 0.0, "max_speed": 0.1 }
       ]
     },
@@ -54,11 +54,11 @@
     }
   ],
   "area_impact": {
-    "radius": 14,
-    "area": { "distance_dropoff": "SQUARED" },
+    "radius": 30.0,
+    "area": { "distance_dropoff": "NONE" },
     "particles": [
-      { "particle_id": "minecraft:electric_spark", "shape": "SPHERE", "origin": "CENTER", "count": 500.0, "min_speed": 2.0, "max_speed": 6.0 },
-      { "particle_id": "minecraft:witch", "shape": "SPHERE", "origin": "CENTER", "count": 500.0, "min_speed": 2.0, "max_speed": 6.0 },
+      { "particle_id": "minecraft:electric_spark", "shape": "SPHERE", "origin": "CENTER", "count": 900.0, "min_speed": 5.0, "max_speed": 16.0 },
+      { "particle_id": "minecraft:witch", "shape": "SPHERE", "origin": "CENTER", "count": 900.0, "min_speed": 5.0, "max_speed": 16.0 },
       { "particle_id": "minecraft:flash", "shape": "SPHERE", "origin": "CENTER", "count": 12.0, "min_speed": 0.0, "max_speed": 0.2 }
     ],
     "sound": { "id": "entity.lightning_bolt.thunder", "volume": 1.0 }
