@@ -18,7 +18,7 @@
         "launch_height": 14,
         "launch_radius": 5,
         "launch_properties": {
-          "velocity": 0.15,
+          "velocity": 0.35,
           "extra_launch_count": 0,
           "extra_launch_delay": 0
         },

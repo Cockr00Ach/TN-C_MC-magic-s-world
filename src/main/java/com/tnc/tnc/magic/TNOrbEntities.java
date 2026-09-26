@@ -28,12 +28,19 @@ public final class TNOrbEntities {
      * <p>{@code updateInterval(2)}：位置每 2 tick 同步一次 —— 环绕是持续运动的，
      * 默认的 3 tick 会让它在客户端看起来一顿一顿的 ✓。
      */
+    /**
+     * 环绕雷球。
+     *
+     * <p><b>`updateInterval(1)`：位置每 tick 同步一次</b> ✗ 原来是 2 —— 那时它 80 tick 转一圈还行，
+     * 后来作者要求"转速快一倍"（40 tick 一圈）＋"绕得更远"（6 格），2 tick 一次的插值就明显**卡顿**了
+     * （作者 2026-09-22："环绕的帧率低还是卡啊，我感觉转的不流畅"）→ 改成每 tick ✓。
+     */
     public static final RegistryObject<EntityType<TNThunderOrbEntity>> THUNDER_ORB =
             ENTITY_TYPES.register("thunder_orb", () -> EntityType.Builder
                     .of(TNThunderOrbEntity::new, MobCategory.MISC)
                     .sized(0.5F, 0.5F)
                     .clientTrackingRange(10)
-                    .updateInterval(2)
+                    .updateInterval(1)
                     .build("tnc:thunder_orb"));
 
     /**

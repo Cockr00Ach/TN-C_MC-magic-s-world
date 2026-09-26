@@ -62,7 +62,7 @@ public class TNThunderOrbEntity extends Entity {
     /** 球边缘那圈粒子的半径（格）＝球半径（3.21 ÷ 2 ≈ 1.6）✓ */
     private static final double ORB_RING_RADIUS = 1.6D;
     /** 每 tick 画几个点（每点 4 颗，紫黄各半 ✓） */
-    private static final int ORB_RING_POINTS = 16;
+    private static final int ORB_RING_POINTS = 36;
 
     private UUID ownerId;
     private int slot;

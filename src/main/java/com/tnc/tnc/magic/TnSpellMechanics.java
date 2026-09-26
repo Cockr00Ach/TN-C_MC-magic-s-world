@@ -112,7 +112,7 @@ public final class TnSpellMechanics {
     /** 大雷球的环半径（格）＝球半径（scale 75 × 0.375 ÷ 2 ≈ 14）✓ */
     private static final double BIG_BALL_RING = 14.0D;
     /** 每 tick 画几个点（每点 4 颗粒子：水平环紫/黄 ＋ 竖直环紫/黄）✓ */
-    private static final int BIG_BALL_RING_POINTS = 40;
+    private static final int BIG_BALL_RING_POINTS = 72;
 
     /** 一枚留在原地的雷印。 */
     private record SparkMark(Vec3 pos, long expireAt) {
@@ -655,26 +655,44 @@ public final class TnSpellMechanics {
     }
 
     /**
-     * 在 center 处画一圈粒子（"球的边缘一圈"）✓：水平环 ＋ 一个慢慢转的竖直环，
-     * 紫（`witch`）与黄（`electric_spark`）各半 —— 和法术 JSON 里的拖尾同一个配色 ✓。
+     * 在 center 处画一圈粒子（"球的边缘一圈"）✓：水平环 ＋ 一个慢慢转的竖直环。
+     *
+     * <h2>2026-09-22 第二版（作者："粒子特效跟随是跟随了，但是效果非常差，跟前面完全没法比"）</h2>
+     * 第一版只用了 {@code witch} ＋ {@code electric_spark}（都是小亮点 ✗）＋ 零速度、零抖动 ——
+     * 看起来就是"一圈静止的点" ✗。这次三处改进：
+     * <ol>
+     *   <li>改用 {@link #arc()}：**包里那套真电弧粒子**（和法术 JSON 里好看的是同一批 ✓）；</li>
+     *   <li>给每颗粒子**一点向外/向上的速度**（不再死死钉在一个点上 ✓）；</li>
+     *   <li>角度加**随机抖动** ＋ 每 3 个点才画一次竖直环（不然太规整、太费 ✗）。</li>
+     * </ol>
      *
      * <p>供环绕雷球实体与"大雷球贴粒子"共用 ✓。
      */
     public static void ring(ServerLevel level, Vec3 center, double radius, int points, long time) {
         double tilt = (time % 200) / 200.0D * Math.PI * 2.0D;
+        net.minecraft.core.particles.ParticleOptions arcParticle = arc();
         for (int i = 0; i < points; i++) {
-            double a = i * (Math.PI * 2.0D / points);
+            double jitter = (level.random.nextDouble() - 0.5D) * (Math.PI * 2.0D / points) * 0.9D;
+            double a = i * (Math.PI * 2.0D / points) + jitter;
             double cos = Math.cos(a);
             double sin = Math.sin(a);
-            double x = center.x + cos * radius;
-            double z = center.z + sin * radius;
-            level.sendParticles(ParticleTypes.WITCH, x, center.y, z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, x, center.y, z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
-            double vx = center.x + cos * radius * Math.cos(tilt);
-            double vy = center.y + sin * radius;
-            double vz = center.z + cos * radius * Math.sin(tilt);
-            level.sendParticles(ParticleTypes.WITCH, vx, vy, vz, 1, 0.0D, 0.0D, 0.0D, 0.0D);
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, vx, vy, vz, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+            double r = radius * (0.96D + level.random.nextDouble() * 0.08D);
+            // 水平环：电弧（主）＋ 紫点、黄点各一，都带一点向外的速度 ✓
+            level.sendParticles(arcParticle, center.x + cos * r, center.y, center.z + sin * r,
+                    1, 0.05D, 0.05D, 0.05D, 0.02D);
+            level.sendParticles(ParticleTypes.WITCH, center.x + cos * r, center.y, center.z + sin * r,
+                    1, 0.05D, 0.05D, 0.05D, 0.03D);
+            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, center.x + cos * r, center.y, center.z + sin * r,
+                    1, 0.05D, 0.05D, 0.05D, 0.03D);
+            // 竖直环：每 3 个点画一次（够看出"球在转"，又不至于粒子翻倍 ✗）
+            if (i % 3 == 0) {
+                double vx = center.x + cos * r * Math.cos(tilt);
+                double vy = center.y + sin * r;
+                double vz = center.z + cos * r * Math.sin(tilt);
+                level.sendParticles(arcParticle, vx, vy, vz, 1, 0.05D, 0.05D, 0.05D, 0.02D);
+                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, vx, vy, vz,
+                        1, 0.05D, 0.05D, 0.05D, 0.03D);
+            }
         }
     }
 
