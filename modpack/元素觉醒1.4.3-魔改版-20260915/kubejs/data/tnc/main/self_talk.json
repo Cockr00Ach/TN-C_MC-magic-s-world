@@ -1,0 +1,33 @@
+{
+  "id": "tnc:main/self_talk",
+  "enabled": true,
+  "weight": 1,
+  "category": "main",
+  "chapter": "tnc:chapters/main",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "§6第二杯酒§r",
+  "short_description": "和酒馆老板 Self 说说话",
+  "description": "主城的酒馆里，Self 一直在擦那只没人用的杯子。\n\n§7他好像有话要说。§r",
+  "icon": "tnc:self_spawn_egg",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "dialogue",
+      "id": "talk_to_self",
+      "text": "和 Self 对话",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 20,
+      "count": 1
+    }
+  ]
+}
