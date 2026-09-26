@@ -80,6 +80,11 @@ public final class LargeLandmarkJobs {
                     j.surfaces=new int[j.columns()]; j.grounds=new int[j.columns()]; j.materials=new int[j.columns()];
                     j.palette.add(Blocks.GRASS_BLOCK.defaultBlockState());
                 }
+                if (j.manifest().floating()) {
+                    var d=j.manifest().dimensions();
+                    j.floatingFootprint=new FloatingFootprint(d.getX(),d.getZ(),d.getY());
+                    j.validated=0; // Rebuild the transient footprint on every recovery, including completed jobs.
+                }
                 j.initialized=true;
             }
             var m=j.manifest();
@@ -89,6 +94,7 @@ public final class LargeLandmarkJobs {
                     var p=m.pieces().get(j.validated); var t=l.getStructureManager().get(p.resource()).orElseThrow();
                     try {
                         if (!t.getSize().equals(p.size())) throw new IllegalStateException("Wrong template size "+p.resource());
+                        if (m.floating()) j.floatingFootprint.include(t.save(new net.minecraft.nbt.CompoundTag()),p.offset());
                     } finally { l.getStructureManager().remove(p.resource()); }
                 }
             } else if (j.phase==0) survey(l,j);
@@ -119,8 +125,11 @@ public final class LargeLandmarkJobs {
     private static boolean used(LandmarkData.Job j) {
         var p=j.tilePos();
         for (int z=0;z<16;z++) for (int x=0;x<16;x++)
-            if (j.manifest().terrainAt(p.getX()-j.origin.getX()+x,p.getZ()-j.origin.getZ()+z)) return true;
+            if (surveyColumn(j,p.getX()-j.origin.getX()+x,p.getZ()-j.origin.getZ()+z)) return true;
         return false;
+    }
+    private static boolean surveyColumn(LandmarkData.Job j,int x,int z) {
+        return j.manifest().terrainAt(x,z) && (!j.manifest().floating() || j.floatingFootprint.occupied(x,z));
     }
     private static boolean near(ServerLevel l,LandmarkData.Job j,BlockPos p,int sx,int sz) {
         j.waiting=l.players().stream().anyMatch(v->!v.isSpectator() && v.getX()>=p.getX()-6 && v.getX()<p.getX()+sx+6
@@ -142,12 +151,15 @@ public final class LargeLandmarkJobs {
         var m=j.manifest(); int w=m.dimensions().getX();
         for (int z=0;z<16;z++) for (int x=0;x<16;x++) {
             int lx=p.getX()-j.origin.getX()+x,lz=p.getZ()-j.origin.getZ()+z;
-            if (!m.terrainAt(lx,lz)) continue; int idx=lz*w+lx;
+            if (!surveyColumn(j,lx,lz)) continue; int idx=lz*w+lx;
             int high=l.getHeight(Heightmap.Types.WORLD_SURFACE,p.getX()+x,p.getZ()+z)-1;
             int ground=high; var bp=new BlockPos(p.getX()+x,ground,p.getZ()+z);
             while (ground>l.getMinBuildHeight()+1 && !natural(l.getBlockState(bp)) && high-ground<48) { ground--; bp=bp.below(); }
             var top=l.getBlockState(bp); if (!natural(top)) top=Blocks.GRASS_BLOCK.defaultBlockState();
-            if (m.floating() && high>=j.origin.getY()-4) throw new IllegalStateException("Floating island would intersect existing terrain");
+            if (m.floating() && j.floatingFootprint.intersects(high,j.origin.getY(),lx,lz))
+                throw new IllegalStateException("Floating island would intersect existing terrain at "
+                        +(p.getX()+x)+","+(p.getZ()+z)+" surface="+high
+                        +" actualBottom="+(j.origin.getY()+j.floatingFootprint.bottomAt(lx,lz)));
             j.surfaces[idx]=high; j.grounds[idx]=ground;
             int material=j.palette.indexOf(top); if (material<0) { material=j.palette.size(); j.palette.add(top); }
             j.materials[idx]=material;
@@ -161,10 +173,11 @@ public final class LargeLandmarkJobs {
         for (var c:TICKETS.get(l.getServer())) for (var be:l.getChunk(c.x,c.z).getBlockEntitiesPos()) {
             if (be.getX()<tile.getX() || be.getX()>=tile.getX()+16 || be.getZ()<tile.getZ() || be.getZ()>=tile.getZ()+16) continue;
             int x=be.getX()-j.origin.getX(),z=be.getZ()-j.origin.getZ();
-            if (!m.terrainAt(x,z)) continue;
+            if (!surveyColumn(j,x,z)) continue;
             int idx=z*w+x,y=be.getY();
             boolean affected;
-            if (m.floating()) affected=y>=j.origin.getY() && y<j.origin.getY()+m.dimensions().getY();
+            if (m.floating()) affected=y>=j.origin.getY()+j.floatingFootprint.bottomAt(x,z)
+                    && y<j.origin.getY()+m.dimensions().getY();
             else if (m.buildingAt(x,z)) affected=y>=Math.min(j.origin.getY(),j.grounds[idx]+1)
                     && y<=Math.max(j.surfaces[idx],j.origin.getY()+m.dimensions().getY()-1);
             else {

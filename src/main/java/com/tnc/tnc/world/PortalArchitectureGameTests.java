@@ -17,6 +17,23 @@ public final class PortalArchitectureGameTests {
     private static final ResourceLocation GATE = ResourceLocation.tryParse("tnc:sky_island/portal/ritual_gate");
 
     @GameTest(template="building_test_empty",timeoutTicks=400)
+    public static void initialPortalAcceptsOriginalIslandWildflowers(GameTestHelper helper) throws Exception {
+        var level = helper.getLevel();
+        BlockPos origin = new BlockPos(736,200,112);
+        // Actual failure: source town_piece_1_0_6 has a dandelion at portal-local [7,1,8].
+        for (int x=0;x<15;x++) for (int z=0;z<15;z++)
+            level.setBlock(origin.offset(x,0,z),Blocks.GRASS_BLOCK.defaultBlockState(),18);
+        level.setBlock(origin.offset(7,1,8),Blocks.DANDELION.defaultBlockState(),18);
+        level.setBlock(origin.offset(8,1,7),Blocks.AZURE_BLUET.defaultBlockState(),18);
+        var plan = PortalArchitecture.prepare(level,GATE,origin,false);
+        plan.apply(level);
+        if (level.getBlockState(origin.offset(7,1,8)).is(Blocks.DANDELION)
+                || !level.getBlockState(origin.offset(7,16,7)).is(Blocks.SHROOMLIGHT))
+            throw new IllegalStateException("Flowered source ground prevented portal completion");
+        helper.succeed();
+    }
+
+    @GameTest(template="building_test_empty",timeoutTicks=400)
     public static void allLegacyAltarsUpgradeWithoutLeavingOldBlocks(GameTestHelper helper) throws Exception {
         var level = helper.getLevel();
         for (int revision = 0; revision < 3; revision++) {

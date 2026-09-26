@@ -17,6 +17,77 @@ import net.minecraft.world.level.block.Blocks;
 @PrefixGameTestTemplate(false)
 public final class BuildingGameTests {
     @GameTest(template="building_test_empty",timeoutTicks=400)
+    public static void realEndIslandProfileDoesNotRejectReportedSafeColumn(GameTestHelper helper) {
+        var m=StonecrestManifest.get("end_pvp_island");
+        var f=new FloatingFootprint(m.dimensions().getX(),m.dimensions().getZ(),m.dimensions().getY());
+        for (var p:m.pieces()) if (p.offset().getX()==144 && p.offset().getZ()==48) {
+            var manager=helper.getLevel().getStructureManager();
+            var t=manager.get(p.resource()).orElseThrow();
+            try { f.include(t.save(new net.minecraft.nbt.CompoundTag()),p.offset()); }
+            finally { manager.remove(p.resource()); }
+        }
+        if (f.bottomAt(159,63)!=75 || f.intersects(170,132,159,63) || !f.intersects(207,132,159,63))
+            throw new IllegalStateException("Actual island template underside regression");
+        helper.succeed();
+    }
+
+    @GameTest(template="building_test_empty",timeoutTicks=400)
+    public static void legacyFloatingPreflightFailureRetriesOnlyOnce(GameTestHelper helper) {
+        var root=new net.minecraft.nbt.CompoundTag(); var jobs=new net.minecraft.nbt.ListTag();
+        String[] errors={"phase=0 tile=87 piece=0: java.lang.IllegalStateException: Floating island would intersect existing terrain",
+                "phase=2 tile=87 piece=0: java.lang.IllegalStateException: Floating island would intersect existing terrain",
+                "phase=0 tile=87 piece=0: Protected block entity"};
+        for (int i=0;i<3;i++) {
+            var t=new net.minecraft.nbt.CompoundTag(); t.putString("Asset","landmark_floating_fixture");
+            t.putLong("Origin",new BlockPos(992+64*i,200,112).asLong()); t.putInt("Phase",-1);t.putString("Error",errors[i]);jobs.add(t);
+        }
+        root.put("Jobs",jobs);
+        var loaded=LandmarkData.load(root); var values=new java.util.ArrayList<>(loaded.jobs.values());
+        if (values.get(0).phase!=0 || values.get(1).phase!=-1 || values.get(2).phase!=-1)
+            throw new IllegalStateException("Migration revived an unsafe write or missed the legacy preflight");
+        values.get(0).phase=-1; values.get(0).error=errors[0];
+        var saved=loaded.save(new net.minecraft.nbt.CompoundTag());
+        if (LandmarkData.load(saved).jobs.values().stream().anyMatch(j->j.phase!=-1))
+            throw new IllegalStateException("Migration must not retry endlessly");
+        helper.succeed();
+    }
+
+    @GameTest(template="building_test_empty",timeoutTicks=16000)
+    public static void floatingIslandLeavesRaisedTerrainAndChestUnderItsActualUnderside(GameTestHelper helper) {
+        var l=helper.getLevel(); var origin=new BlockPos(832,200,112);
+        var under=origin.offset(4,10,4);
+        l.setBlock(under,Blocks.CHEST.defaultBlockState(),18);
+        String key=new LandmarkData.Job("landmark_floating_fixture",origin).key();
+        LargeLandmarkJobs.request(l,"landmark_floating_fixture",origin);
+        helper.succeedWhen(()->{
+            var j=LandmarkData.get(l).jobs.get(key);
+            if (j!=null && j.phase<0) throw new IllegalStateException("Safe floating clearance rejected: "+j.error);
+            if (j==null || j.phase!=3) throw new net.minecraft.gametest.framework.GameTestAssertException("Waiting for floating fixture");
+            if (!l.getBlockState(under).is(Blocks.CHEST)
+                    || !l.getBlockState(origin.offset(2,17,2)).is(Blocks.DIAMOND_BLOCK)
+                    || !l.getBlockState(origin.offset(18,1,2)).is(Blocks.DIAMOND_BLOCK))
+                throw new IllegalStateException("Floating placement or unrelated container changed");
+        });
+    }
+
+    @GameTest(template="building_test_empty",timeoutTicks=16000)
+    public static void realFloatingIntersectionStopsBeforeAnyPlacement(GameTestHelper helper) {
+        var l=helper.getLevel(); var origin=new BlockPos(896,200,112);
+        var obstacle=origin.offset(18,0,2);
+        l.setBlock(obstacle,Blocks.GOLD_BLOCK.defaultBlockState(),18);
+        String key=new LandmarkData.Job("landmark_floating_fixture",origin).key();
+        LargeLandmarkJobs.request(l,"landmark_floating_fixture",origin);
+        helper.succeedWhen(()->{
+            var j=LandmarkData.get(l).jobs.get(key);
+            if (j!=null && j.phase==3) throw new IllegalStateException("Real intersection was ignored");
+            if (j==null || j.phase!=-1) throw new net.minecraft.gametest.framework.GameTestAssertException("Waiting for collision guard");
+            if (j.piece!=0 || !l.getBlockState(obstacle).is(Blocks.GOLD_BLOCK)
+                    || !l.getBlockState(origin.offset(2,17,2)).isAir())
+                throw new IllegalStateException("Collision guard partially wrote the island");
+        });
+    }
+
+    @GameTest(template="building_test_empty",timeoutTicks=400)
     public static void structureTemplatesLoadOnRealServer(GameTestHelper helper) throws Exception {
         for (String name:new String[]{"roadside_ruin","fantasy_tavern","gothic_castle","dark_fantasy_castle","abyss_citadel"}) {
             try (var stream=BuildingGameTests.class.getResourceAsStream("/data/tnc/buildings/"+name+".json")) {

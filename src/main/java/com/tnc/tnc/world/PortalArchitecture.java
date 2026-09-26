@@ -74,10 +74,13 @@ final class PortalArchitecture {
             if (level.getBlockEntity(pos) != null)
                 throw new IOException("传送阵范围内有容器或方块实体，未修改：" + pos.toShortString());
             if (current.isAir() || (current.canBeReplaced() && current.getFluidState().isEmpty())) continue;
+            // Flowers (e.g. the source island's dandelions) are not canBeReplaced in 1.20.1.
+            // Only initial construction may clear them; don't broaden the building/container whitelist.
+            if (!refresh && current.is(BlockTags.FLOWERS) && current.getFluidState().isEmpty()) continue;
             if (known.getOrDefault(pos, List.of()).contains(current)) continue;
             // Initial disk may replace natural ground, not a house floor or a container.
             if (!refresh && pos.getY() <= origin.getY() + 1 && naturalGround(current)) continue;
-            throw new IOException("传送阵被建筑或玩家改造占用，未修改：" + pos.toShortString());
+            throw new IOException("传送阵被建筑或玩家改造占用，未修改：" + pos.toShortString() + " " + current);
         }
         return new Plan(writes);
     }

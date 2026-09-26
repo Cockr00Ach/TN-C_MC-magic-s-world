@@ -21,6 +21,7 @@ final class LandmarkData extends SavedData {
         String error="";
         boolean initialized,waiting;
         int[] surfaces,grounds,materials;
+        FloatingFootprint floatingFootprint;
         final ArrayList<BlockState> palette=new ArrayList<>();
         Job(String asset,BlockPos origin) { this.asset=asset; this.origin=origin; }
         String key() { return asset+"_"+Long.toHexString(origin.asLong()); }
@@ -38,6 +39,13 @@ final class LandmarkData extends SavedData {
         for (Tag raw:root.getList("Jobs",Tag.TAG_COMPOUND)) {
             var t=(CompoundTag)raw; var j=new Job(t.getString("Asset"),BlockPos.of(t.getLong("Origin")));
             j.phase=t.getInt("Phase"); j.error=t.getString("Error");
+            // Legacy bounding-box false positive: phase 0 has never written any world blocks.
+            // Only retry this exact preflight error once; never revive a partial write or protected-container stop.
+            if (root.getInt("FloatingSurveyVersion")<1 && j.phase==-1 && j.manifest().floating()
+                    && j.error.startsWith("phase=0 ")
+                    && j.error.contains("Floating island would intersect existing terrain")) {
+                j.phase=0; j.error="";
+            }
             // Reconcile chunk-local commit bits, never trust a saved global cursor.
             if (j.phase>0) j.phase=1;
             d.jobs.put(j.key(),j);
@@ -45,6 +53,7 @@ final class LandmarkData extends SavedData {
         return d;
     }
     @Override public CompoundTag save(CompoundTag root) {
+        root.putInt("FloatingSurveyVersion",1);
         var list=new ListTag();
         for (var j:jobs.values()) {
             var t=new CompoundTag(); t.putString("Asset",j.asset); t.putLong("Origin",j.origin.asLong());

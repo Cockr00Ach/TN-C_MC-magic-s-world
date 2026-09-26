@@ -14,3 +14,9 @@ for x in (0,16):
 write_json(root/'buildings/landmark_fixture.json',dict(dimensions=[32,3,16],anchor_local=[16,0,15],
            mask_rows=[[[0,31]] for _ in range(16)],terrain_mask_rows=[[[0,31]] for _ in range(16)],
            pieces=pieces,piece_count=2,block_count=514))
+
+# Same small templates, but the first half of the floating island has a raised underside.
+floating=[dict(p,offset=[p['offset'][0],16 if p['offset'][0]==0 else 0,0]) for p in pieces]
+write_json(root/'buildings/landmark_floating_fixture.json',dict(dimensions=[32,19,16],anchor_local=[16,0,15],floating=True,
+           mask_rows=[[[0,31]] for _ in range(16)],terrain_mask_rows=[[[0,31]] for _ in range(16)],
+           pieces=floating,piece_count=2,block_count=514))
