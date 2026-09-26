@@ -449,6 +449,33 @@ try {
         }
     }
 
+    # ---------------- D1b6. every one of our ITEMS must have an item model ----------------
+    # An item without a model renders as the purple-black missing cube, and nothing logs
+    # an ERROR for it unless you happen to read the resource-reload WARN lines.
+    # This actually happened: zhuangquerang_spawn_egg was registered with no model.
+    # The texture is resolved from the model's own layer0 (the record papers share one
+    # texture, so "assets/tnc/textures/item/<id>.png" is NOT a valid assumption).
+    $ourItems = @('sword', 'magic_wand', 'fireball',
+                  'canjuan_1a', 'canjuan_1b', 'canjuan_3', 'canjuan_4', 'canjuan_5', 'canjuan_6',
+                  'zhengshi_qianqing', 'zhengshi_1', 'zhengshi_2', 'zhengshi_3', 'zhengshi_4',
+                  'self_spawn_egg', 'cava_spawn_egg', 'huai_spawn_egg', 'zhuangquerang_spawn_egg')
+    $noModel = @()
+    $noTexture = @()
+    foreach ($item in $ourItems) {
+        $modelEntry = $zip.Entries | Where-Object { $_.FullName -eq "assets/tnc/models/item/$item.json" }
+        if (-not $modelEntry) { $noModel += $item; continue }
+        $mr = New-Object System.IO.StreamReader($modelEntry.Open(), [System.Text.Encoding]::UTF8)
+        $modelText = $mr.ReadToEnd(); $mr.Close()
+        $ref = [regex]::Match($modelText, '"layer0"\s*:\s*"([^"]+)"')
+        if (-not $ref.Success) { continue }      # 走 parent（如 template_spawn_egg）的不用查贴图 ✓
+        $texPath = ($ref.Groups[1].Value -replace '^([^:]+):', '$1:textures/') + '.png'
+        if (-not ($zip.Entries | Where-Object { $_.FullName -eq ("assets/" + $texPath) })) { $noTexture += "$item -> $($ref.Groups[1].Value)" }
+    }
+    if ($noModel.Count -eq 0) { Ok "all $($ourItems.Count) of our items have an item model" }
+    else { Fail ('item has NO model (renders as the purple-black cube): ' + ($noModel -join ', ')) }
+    if ($noTexture.Count -eq 0) { Ok 'every item model points at a texture that ships' }
+    else { Fail ('item model references a missing texture: ' + ($noTexture -join ', ')) }
+
     # ---------------- D1c. HUD entry point + its keybind ----------------
     # Nothing HUD-side can be clicked (no cursor while playing), so the keybind IS
     # the entry. RegisterKeyMappingsEvent lives on the MOD bus - registering it on
