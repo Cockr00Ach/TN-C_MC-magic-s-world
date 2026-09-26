@@ -33,5 +33,6 @@ public final class TNSpellOrbClientEvents {
         // 魔法阵与冲击波环共用同一个渲染器（都是"贴地的一张面片"）✓
         event.registerEntityRenderer(TNOrbEntities.MAGIC_CIRCLE.get(), TNMagicCircleRenderer::new);
         event.registerEntityRenderer(TNOrbEntities.SHOCKWAVE.get(), TNMagicCircleRenderer::new);
+        event.registerEntityRenderer(TNOrbEntities.LIGHTNING_STRIKE.get(), TNLightningStrikeRenderer::new);
     }
 }

@@ -73,6 +73,20 @@ public final class TNOrbEntities {
                     .updateInterval(2)
                     .build("tnc:shockwave"));
 
+    /**
+     * A single falling-bolt visual (primary chain: field / storm / strike).
+     *
+     * <p>Author 2026-09-27: these three must strike with the flash model he made, the same
+     * way heavenly thunder does - not with particle arcs. Damage is dealt by the mechanic
+     * layer; this entity only draws the author's bolt model for a few ticks.
+     */
+    public static final RegistryObject<EntityType<TNLightningStrikeEntity>> LIGHTNING_STRIKE =
+            ENTITY_TYPES.register("lightning_strike", () -> EntityType.Builder
+                    .of(TNLightningStrikeEntity::new, MobCategory.MISC)
+                    .sized(0.1F, 0.1F)
+                    .clientTrackingRange(10)
+                    .updateInterval(1)
+                    .build("tnc:lightning_strike"));
     private TNOrbEntities() {
     }
 

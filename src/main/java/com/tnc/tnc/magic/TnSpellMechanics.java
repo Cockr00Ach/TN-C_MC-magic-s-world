@@ -126,13 +126,13 @@ public final class TnSpellMechanics {
     /** 雷场（t2）：只在第 20 / 60 tick 各劈一轮 ⇒ 场里的敌人**正好各挨两下** ✓（作者原话） */
     private static final int[] FIELD_STRIKE_TICKS = {20, 60};
     private static final int FIELD_WINDOW = 100;
-    private static final double FIELD_RADIUS = 6.0D;
+    private static final double FIELD_RADIUS = 14.0D;   // 2026-09-27 作者："范围也太小了" -> 6 -> 14
     private static final float FIELD_DAMAGE = 5.0F;
 
     /** 雷暴（t4）：每 15 tick 一轮，每轮最多 3 个目标，一直劈到 buff 结束 ✓（作者："劈到时间结束"） */
     private static final int STORM_INTERVAL = 15;
     private static final int STORM_WINDOW = 200;
-    private static final double STORM_RADIUS = 10.0D;
+    private static final double STORM_RADIUS = 14.0D;
     private static final float STORM_DAMAGE = 4.0F;
     private static final int STORM_TARGETS_PER_WAVE = 3;
 
@@ -148,6 +148,16 @@ public final class TnSpellMechanics {
      * 作者认可过观感 ✓）＋ {@link #arcBall} 拼出来，零新实体、零新渲染器 ✓。
      */
     private static void strikeVisual(ServerLevel level, Vec3 at, int points, double spread) {
+        // 2026-09-27 author: "I gave you the lightning model, why are field/storm/strike using
+        // particles?" -> spawn the real bolt (his flash model, rendered by
+        // TNLightningStrikeRenderer) so it looks exactly like the heavenly thunder strike.
+        // `spread` doubles as the size knob: 1.5 -> 2.25x, 2.4 (the big strike) -> 3.6x.
+        TNLightningStrikeEntity bolt = TNOrbEntities.LIGHTNING_STRIKE.get().create(level);
+        if (bolt != null) {
+            bolt.configure(spread * 1.5D, 7);
+            bolt.moveTo(at.x, at.y, at.z, 0.0F, 0.0F);
+            level.addFreshEntity(bolt);
+        }
         arcLine(level, at.add(0.0D, STRIKE_HEIGHT, 0.0D), at.add(0.0D, 0.2D, 0.0D), points, spread);
         arcBall(level, at, 18, 1.2D);
         level.sendParticles(ParticleTypes.FLASH, at.x, at.y + 0.6D, at.z, 2, 0.1D, 0.1D, 0.1D, 0.0D);
@@ -368,7 +378,7 @@ public final class TnSpellMechanics {
         // 传说级 / 神级雷球：脚下留下魔法阵 ✓（作者 2026-09-22 指定）
         // tier 4 = 传说级、tier 5 = 神级（见 Element.tierName）
         if (path.equals("explosive_thunder_orb")) {
-            spawnMagicCircle(player, 12.8D, 170);
+            // (无魔法阵：爆炸雷球现在是 t3，不做 ✗)
         } else if (path.equals("cataclysm_thunder_orb")) {
             spawnMagicCircle(player, 20.0D, 260);
             // 大雷球的粒子不跟随 ✗ -> 自己开一个窗口，每 tick 在球的位置画环 ✓
@@ -386,13 +396,13 @@ public final class TnSpellMechanics {
         // 尺寸/时长按档位递增：越高级的雷法，阵越大、留得越久 ✓（数值都在这一张表里，好调）
         //   阵的出场是**瞬时满亮度**、随后**平滑淡出**（渲染器负责，见 TNMagicCircleRenderer）✓
         else if (path.equals("spark")) {
-            spawnMagicCircle(player, 3.0D, 80);          // t1 电花
+            // (无魔法阵：t1 不做 -- 作者 2026-09-27：低档也铺 = "随便哪个魔法都有了" ✗)          // t1 电花
         } else if (path.equals("lightning_field")) {
-            spawnMagicCircle(player, 5.0D, 110);         // t2 电场
+            // (无魔法阵：t2 不做 ✗)         // t2 电场
             // 雷场：开一个 100 tick 的窗口，第 20 / 60 tick 各劈一轮 ⇒ 场内敌人各挨两下 ✓
             FIELD_UNTIL.put(player.getUUID(), player.level().getGameTime() + FIELD_WINDOW);
         } else if (path.equals("lightning_strike")) {
-            spawnMagicCircle(player, 7.5D, 140);         // t3 雷击
+            // (无魔法阵：t3 不做 ✗)         // t3 雷击
             bigStrike(player);                            // 准星落点劈一道"超级大雷" ✓
         } else if (path.equals("lightning_storm")) {
             spawnMagicCircle(player, 10.5D, 170);        // t4 雷暴
