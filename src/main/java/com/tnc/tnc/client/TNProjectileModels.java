@@ -47,6 +47,15 @@ public final class TNProjectileModels {
      * <p>加新模型的完整步骤见 {@code docs/投射物模型_配方.md}：
      * 模型文件 + 贴图 + <b>写进这个数组</b> + 法术 JSON 写 {@code "model_id": "tnc:<path>"}。
      */
+    /**
+     * 雷系新版球（作者 2026-09-27 自制）：58 个小方块拼的"碎块球"，基础尺寸
+     * <b>13/16 = 0.8125 格</b>（老 {@code lightingball} 只有 6/16 = 0.375 格）。
+     *
+     * <p>环绕雷球实体与神级大雷球共用它 —— 两边的 {@code scale} 都按同一个基准换算
+     * （见 {@code docs/法术专题_交接.md} 3.2f）。
+     */
+    public static final String LIGHTNINGBALL_2 = "projectile/lightingball_2";
+
     public static final String[] PROJECTILE_MODELS = {
             // 火系（用户自制）
             "projectile/fireball",
@@ -54,9 +63,20 @@ public final class TNProjectileModels {
             "projectile/waterball",
             // 雷系（用户自制）
             "projectile/lightingball",
+            // 雷系新版球（作者 2026-09-27 自制：58 个小方块拼的碎块球）
+            LIGHTNINGBALL_2,
             // 雷系备用球（用户自制）
             "projectile/thunder_ball",
     };
+
+    /**
+     * 取一个"已烘焙的额外模型"的 key —— 必须与 {@link TNModelBaking} 注册时用的变体一致
+     * （{@code "standalone"} ✓），否则拿到的是 missing model（紫黑）✗。
+     */
+    public static net.minecraft.client.resources.model.ModelResourceLocation standalone(String path) {
+        return new net.minecraft.client.resources.model.ModelResourceLocation(
+                ResourceLocation.fromNamespaceAndPath(TNMod.MODID, path), "standalone");
+    }
 
     static {
         // 先注册"模型载体物品"（投射物用物品 id 兜底渲染，见 TNProjectileCarriers 的说明）
