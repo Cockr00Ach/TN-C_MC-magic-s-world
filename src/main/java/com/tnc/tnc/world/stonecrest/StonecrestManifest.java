@@ -23,7 +23,8 @@ public final class StonecrestManifest {
     private static final String CLASSPATH = "/data/tnc/stonecrest/manifest.json";
     private static final Gson GSON = new Gson();
     private static final int MAX_BLEND_DISTANCE = 24;
-    private static volatile StonecrestManifest instance;
+    private static final java.util.concurrent.ConcurrentMap<String, StonecrestManifest> CACHE =
+            new java.util.concurrent.ConcurrentHashMap<>();
 
     public record Piece(ResourceLocation resource, BlockPos offset, Vec3i size, int blocks) {
     }
@@ -46,26 +47,22 @@ public final class StonecrestManifest {
     }
 
     public static StonecrestManifest get() {
-        StonecrestManifest cached = instance;
-        if (cached != null) {
-            return cached;
-        }
-        synchronized (StonecrestManifest.class) {
-            if (instance == null) {
-                try {
-                    instance = load();
-                } catch (IOException error) {
-                    throw new IllegalStateException("Could not load Stonecrest manifest", error);
-                }
-            }
-            return instance;
-        }
+        return get("stonecrest");
     }
 
-    private static StonecrestManifest load() throws IOException {
-        try (InputStream stream = StonecrestManifest.class.getResourceAsStream(CLASSPATH)) {
+    public static StonecrestManifest get(String asset) {
+        if (!asset.matches("[a-z0-9_]+")) throw new IllegalArgumentException("Invalid building id " + asset);
+        return CACHE.computeIfAbsent(asset, key -> {
+            try { return load(key); }
+            catch (IOException error) { throw new IllegalStateException("Could not load building " + key, error); }
+        });
+    }
+
+    private static StonecrestManifest load(String asset) throws IOException {
+        String path = asset.equals("stonecrest") ? CLASSPATH : "/data/tnc/buildings/" + asset + ".json";
+        try (InputStream stream = StonecrestManifest.class.getResourceAsStream(path)) {
             if (stream == null) {
-                throw new IOException("missing bundled resource " + CLASSPATH);
+                throw new IOException("missing bundled resource " + path);
             }
             try (Reader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
                 JsonObject root = GSON.fromJson(reader, JsonObject.class);

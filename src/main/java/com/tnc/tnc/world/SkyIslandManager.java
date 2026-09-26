@@ -321,8 +321,8 @@ public final class SkyIslandManager {
         );
 
         if (data.activeChunks.isEmpty()) {
-            forceAreaChunks(level, data, islandPortalOrigin, 15, 4, 15);
-            forceAreaChunks(level, data, groundPortalOrigin, 15, 4, 15);
+            forceAreaChunks(level, data, islandPortalOrigin, 15, 14, 15);
+            forceAreaChunks(level, data, groundPortalOrigin, 15, 14, 15);
             data.waitUntilTick = level.getGameTime() + 2L;
             data.setDirty();
             return;
@@ -363,12 +363,55 @@ public final class SkyIslandManager {
                 level,
                 target,
                 target,
-                new StructurePlaceSettings().setIgnoreEntities(false).setKeepLiquids(false),
+                new StructurePlaceSettings().setIgnoreEntities(false).setKeepLiquids(false).setKnownShape(true),
                 RandomSource.create(seed),
                 2
         );
         if (!placed) {
             throw new IOException("template placement returned false for " + resource);
+        }
+    }
+
+    /** Explicit local rebuild, never a v5 island reset or an automatic old-save overwrite. */
+    public static void refreshPortalArchitecture(MinecraftServer server) throws IOException {
+        ServerLevel level = server.overworld();
+        SkyIslandSavedData data = SkyIslandSavedData.get(level);
+        SkyIslandManifest manifest = manifest(server);
+        if (!isComplete(data, manifest)) throw new IOException("天空岛尚未生成完成");
+        BlockPos island = new BlockPos(data.arrivalX - 7, data.arrivalY - 1, data.arrivalZ - 7);
+        BlockPos ground = new BlockPos(data.groundPortalX, data.groundPortalY, data.groundPortalZ);
+        for (ResourceLocation id : List.of(manifest.islandPortal(), manifest.groundPortal())) {
+            var template = level.getStructureManager().get(id).orElseThrow(() -> new IOException("缺少传送阵模板 " + id));
+            if (template.getSize().getY() != 14) throw new IOException("传送阵模板仍是旧版，请同步 kubejs/data 后重启游戏");
+        }
+        for (BlockPos origin : List.of(island, ground)) for (ServerPlayer player : level.players()) {
+            if (player.getX() >= origin.getX() - 1 && player.getX() <= origin.getX() + 16
+                    && player.getZ() >= origin.getZ() - 1 && player.getZ() <= origin.getZ() + 16
+                    && player.getY() >= origin.getY() && player.getY() < origin.getY() + 16)
+                throw new IOException("请所有玩家先离开两座传送阵的建筑范围，再刷新外观");
+        }
+        try {
+            forceAreaChunks(level, data, island, 15, 14, 15);
+            forceAreaChunks(level, data, ground, 15, 14, 15);
+            for (BlockPos origin : List.of(island, ground)) {
+                for (int i = 0; i < 8; i++) {
+                    double angle = i * Math.PI / 4;
+                    int x = (int) Math.round(7 + Math.cos(angle) * 5.5);
+                    int z = (int) Math.round(7 + Math.sin(angle) * 5.5);
+                    for (int y = 1; y <= 2; y++) {
+                        BlockPos pos = origin.offset(x,y,z);
+                        var state = level.getBlockState(pos);
+                        if (state.is(Blocks.CHISELED_STONE_BRICKS) || state.is(Blocks.SEA_LANTERN))
+                            level.setBlock(pos,Blocks.AIR.defaultBlockState(),18);
+                    }
+                }
+            }
+            placeTemplate(level,manifest.islandPortal(),island,manifest.seed());
+            placeTemplate(level,manifest.groundPortal(),ground,manifest.seed());
+            ensureLanding(level,islandLanding(data));
+            ensureLanding(level,groundLanding(data));
+        } finally {
+            releaseActiveChunks(level,data);
         }
     }
 

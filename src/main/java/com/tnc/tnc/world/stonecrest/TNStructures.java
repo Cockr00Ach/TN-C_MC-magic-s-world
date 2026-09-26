@@ -16,6 +16,12 @@ public final class TNStructures {
 
     public static final RegistryObject<StructureType<StonecrestStructure>> STONECREST = STRUCTURES.register(
             "stonecrest_fortress", () -> () -> StonecrestStructure.CODEC);
+    public static final RegistryObject<StructureType<ImportedBuildingStructure>> IMPORTED_BUILDING = STRUCTURES.register(
+            "imported_building", () -> () -> ImportedBuildingStructure.CODEC);
+    public static final RegistryObject<StructureType<AbyssCitadelStructure>> ABYSS_CITADEL = STRUCTURES.register(
+            "abyss_citadel", () -> () -> AbyssCitadelStructure.CODEC);
+    public static final RegistryObject<StructurePieceType> ABYSS_MARKER = PIECES.register(
+            "abyss_marker", () -> (StructurePieceType.ContextlessType) AbyssMarkerPiece::new);
     public static final RegistryObject<StructurePieceType> STONECREST_TEMPLATE = PIECES.register(
             "stonecrest_template", () -> (StructurePieceType.StructureTemplateType) StonecrestTemplatePiece::new);
     public static final RegistryObject<StructurePieceType> STONECREST_TERRAIN = PIECES.register(

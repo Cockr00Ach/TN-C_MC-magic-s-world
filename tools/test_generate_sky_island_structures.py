@@ -93,9 +93,16 @@ class SkyIslandGeometryTests(unittest.TestCase):
     def test_portal_has_safe_center_and_lit_ring(self) -> None:
         blocks = sky.portal_blocks()
         positions = {(x, y, z): state for x, y, z, state, _ in blocks}
-        self.assertEqual(positions[(7, 1, 7)], sky.SEA_LANTERN)
-        self.assertGreaterEqual(sum(state == sky.SEA_LANTERN for state in positions.values()), 9)
-        self.assertTrue(all(0 <= x < 15 and 0 <= y < 4 and 0 <= z < 15 for x, y, z in positions))
+        self.assertEqual(positions[(7, 1, 7)], 'minecraft:crying_obsidian')
+        self.assertGreaterEqual(sum(state == 'minecraft:shroomlight' for state in positions.values()), 9)
+        self.assertTrue(all(0 <= x < 15 and 0 <= y < 14 and 0 <= z < 15 for x, y, z in positions))
+        self.assertEqual(len(positions),len(blocks))
+        for y in range(2,7):
+            self.assertNotIn((7,y,7),positions)
+        for v in range(2,13):
+            for y in (2,3):
+                self.assertNotIn((7,y,v),positions)
+                self.assertNotIn((v,y,7),positions)
 
 
 if __name__ == "__main__":

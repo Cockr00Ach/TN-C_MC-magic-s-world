@@ -1,0 +1,8 @@
+{
+  "type": "tnc:imported_building",
+  "asset": "fantasy_tavern",
+  "biomes": "#tnc:has_structure/imported_buildings",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

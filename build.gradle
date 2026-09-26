@@ -167,6 +167,11 @@ dependencies {
 
     testImplementation platform('org.junit:junit-bom:5.10.2')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    // Optional headless building smoke tests need the same NPC animation API as the pack.
+    // Compile-only keeps normal distribution unchanged; enable with -PbuildingGameTests.
+    if (project.hasProperty('buildingGameTests')) {
+        runtimeOnly fg.deobf('geckolib:geckolib:4.8.4')
+    }
 }
 
 tasks.named('test', Test).configure {

@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "tnc:dark_fantasy_castle",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 105385300,
+    "spacing": 48,
+    "separation": 24
+  }
+}

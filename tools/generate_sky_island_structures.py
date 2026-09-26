@@ -24,6 +24,7 @@ import nbtlib
 from PIL import Image, ImageDraw
 
 from export_town_structures import AIR_BLOCKS, state_text, write_piece
+from portal_design import portal_blocks as dark_portal_blocks, PORTAL_SIZE
 
 
 DATA_VERSION = 3105
@@ -431,26 +432,7 @@ def build_town(town_input: Path, output: Path, entries: list[dict[str, Any]]) ->
 
 
 def portal_blocks() -> list[tuple[int, int, int, str, Any | None]]:
-    blocks = []
-    center = 7
-    for x in range(15):
-        for z in range(15):
-            distance = math.hypot(x - center, z - center)
-            if distance <= 6.7:
-                state = "minecraft:polished_andesite"
-                if 4.3 <= distance <= 6.7:
-                    state = "minecraft:stone_bricks"
-                if distance <= 2.2:
-                    state = AMETHYST
-                blocks.append((x, 0, z, state, None))
-    for angle_index in range(8):
-        angle = angle_index * math.tau / 8
-        x = round(center + math.cos(angle) * 5.5)
-        z = round(center + math.sin(angle) * 5.5)
-        blocks.append((x, 1, z, "minecraft:chiseled_stone_bricks", None))
-        blocks.append((x, 2, z, SEA_LANTERN, None))
-    blocks.append((center, 1, center, SEA_LANTERN, None))
-    return blocks
+    return dark_portal_blocks()
 
 
 def build_portals(output: Path, entries: list[dict[str, Any]]) -> dict[str, str]:
@@ -458,7 +440,7 @@ def build_portals(output: Path, entries: list[dict[str, Any]]) -> dict[str, str]
     for name in ("ground_portal", "island_portal"):
         path = output / "portal" / f"{name}.nbt"
         blocks = portal_blocks()
-        count, block_entities = write_piece(path, (15, 4, 15), blocks, DATA_VERSION)
+        count, block_entities = write_piece(path, PORTAL_SIZE, blocks, DATA_VERSION)
         digest = hashlib.sha256(path.read_bytes()).hexdigest()
         entries.append(
             {
@@ -466,7 +448,7 @@ def build_portals(output: Path, entries: list[dict[str, Any]]) -> dict[str, str]
                 "name": name,
                 "resource": f"tnc:sky_island/portal/{name}",
                 "offset": [0, 0, 0],
-                "size": [15, 4, 15],
+                "size": list(PORTAL_SIZE),
                 "blocks": count,
                 "block_entities": block_entities,
                 "sha256": digest,
