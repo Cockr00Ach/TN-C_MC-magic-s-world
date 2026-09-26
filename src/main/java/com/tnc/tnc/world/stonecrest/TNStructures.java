@@ -22,6 +22,10 @@ public final class TNStructures {
             "abyss_citadel", () -> () -> AbyssCitadelStructure.CODEC);
     public static final RegistryObject<StructurePieceType> ABYSS_MARKER = PIECES.register(
             "abyss_marker", () -> (StructurePieceType.ContextlessType) AbyssMarkerPiece::new);
+    public static final RegistryObject<StructureType<LargeLandmarkStructure>> LARGE_LANDMARK = STRUCTURES.register(
+            "large_landmark", () -> () -> LargeLandmarkStructure.CODEC);
+    public static final RegistryObject<StructurePieceType> LANDMARK_MARKER = PIECES.register(
+            "landmark_marker", () -> (StructurePieceType.ContextlessType) LargeLandmarkMarker::new);
     public static final RegistryObject<StructurePieceType> STONECREST_TEMPLATE = PIECES.register(
             "stonecrest_template", () -> (StructurePieceType.StructureTemplateType) StonecrestTemplatePiece::new);
     public static final RegistryObject<StructurePieceType> STONECREST_TERRAIN = PIECES.register(

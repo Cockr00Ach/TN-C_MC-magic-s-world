@@ -59,6 +59,7 @@ public final class SkyIslandManager {
     private static final Map<MinecraftServer, SkyIslandManifest> MANIFESTS =
             Collections.synchronizedMap(new WeakHashMap<>());
     private static final Map<UUID, PortalChargeState> PORTAL_CHARGES = new HashMap<>();
+    private static final Set<BlockPos> ACTIVE_RITUALS = new HashSet<>();
 
     private SkyIslandManager() {
     }
@@ -135,6 +136,7 @@ public final class SkyIslandManager {
 
     public static void onServerStopping(MinecraftServer server) {
         PORTAL_CHARGES.clear();
+        ACTIVE_RITUALS.clear();
         ServerLevel level = server.overworld();
         SkyIslandSavedData data = SkyIslandSavedData.get(level);
         try {
@@ -209,7 +211,7 @@ public final class SkyIslandManager {
         data.arrivalY = data.originY + manifest.arrivalLocal().getY();
         data.arrivalZ = data.originZ + manifest.arrivalLocal().getZ();
 
-        BlockPos portalOrigin = chooseGroundPortal(level);
+        BlockPos portalOrigin = chooseGroundPortal(level, manifest);
         data.groundPortalX = portalOrigin.getX();
         data.groundPortalY = portalOrigin.getY();
         data.groundPortalZ = portalOrigin.getZ();
@@ -225,7 +227,7 @@ public final class SkyIslandManager {
     }
 
     /** Selects the flattest dry 15x15 portal site in a ring around world spawn. */
-    private static BlockPos chooseGroundPortal(ServerLevel level) {
+    private static BlockPos chooseGroundPortal(ServerLevel level, SkyIslandManifest manifest) {
         BlockPos spawn = level.getSharedSpawnPos();
         int bestScore = Integer.MAX_VALUE;
         BlockPos best = null;
@@ -249,13 +251,21 @@ public final class SkyIslandManager {
             }
             int score = (maxY - minY) * 200 + water * 20_000;
             if (score < bestScore) {
+                BlockPos candidate = new BlockPos(centerX - 7, maxY, centerZ - 7);
+                try {
+                    // Reject tree trunks/buildings at the taller altar before building the whole island.
+                    PortalArchitecture.prepare(level, manifest.groundPortal(), candidate, false);
+                } catch (IOException obstruction) {
+                    LOGGER.debug("[TN-C Sky Island] portal candidate rejected at {}: {}", candidate, obstruction.getMessage());
+                    continue;
+                }
                 bestScore = score;
-                best = new BlockPos(centerX - 7, maxY, centerZ - 7);
+                best = candidate;
             }
         }
 
         if (best == null) {
-            throw new IllegalStateException("no ground portal candidate was available");
+            throw new IllegalStateException("出生点周围没有足够净空的安全传送阵候选地，未覆盖已有建筑");
         }
         return best;
     }
@@ -321,8 +331,8 @@ public final class SkyIslandManager {
         );
 
         if (data.activeChunks.isEmpty()) {
-            forceAreaChunks(level, data, islandPortalOrigin, 15, 14, 15);
-            forceAreaChunks(level, data, groundPortalOrigin, 15, 14, 15);
+            forceAreaChunks(level, data, islandPortalOrigin, 15, PortalArchitecture.HEIGHT, 15);
+            forceAreaChunks(level, data, groundPortalOrigin, 15, PortalArchitecture.HEIGHT, 15);
             data.waitUntilTick = level.getGameTime() + 2L;
             data.setDirty();
             return;
@@ -332,8 +342,10 @@ public final class SkyIslandManager {
         }
         ensureActiveChunksLoaded(level, data);
 
-        placeTemplate(level, manifest.islandPortal(), islandPortalOrigin, manifest.seed() ^ 0x51A1D5L);
-        placeTemplate(level, manifest.groundPortal(), groundPortalOrigin, manifest.seed() ^ 0x6A0D5L);
+        var islandPlan = PortalArchitecture.prepare(level, manifest.islandPortal(), islandPortalOrigin, false);
+        var groundPlan = PortalArchitecture.prepare(level, manifest.groundPortal(), groundPortalOrigin, false);
+        islandPlan.apply(level);
+        groundPlan.apply(level);
         supportGroundPortal(level, groundPortalOrigin);
 
         ensureLanding(level, islandLanding(data));
@@ -380,34 +392,14 @@ public final class SkyIslandManager {
         if (!isComplete(data, manifest)) throw new IOException("天空岛尚未生成完成");
         BlockPos island = new BlockPos(data.arrivalX - 7, data.arrivalY - 1, data.arrivalZ - 7);
         BlockPos ground = new BlockPos(data.groundPortalX, data.groundPortalY, data.groundPortalZ);
-        for (ResourceLocation id : List.of(manifest.islandPortal(), manifest.groundPortal())) {
-            var template = level.getStructureManager().get(id).orElseThrow(() -> new IOException("缺少传送阵模板 " + id));
-            if (template.getSize().getY() != 14) throw new IOException("传送阵模板仍是旧版，请同步 kubejs/data 后重启游戏");
-        }
-        for (BlockPos origin : List.of(island, ground)) for (ServerPlayer player : level.players()) {
-            if (player.getX() >= origin.getX() - 1 && player.getX() <= origin.getX() + 16
-                    && player.getZ() >= origin.getZ() - 1 && player.getZ() <= origin.getZ() + 16
-                    && player.getY() >= origin.getY() && player.getY() < origin.getY() + 16)
-                throw new IOException("请所有玩家先离开两座传送阵的建筑范围，再刷新外观");
-        }
         try {
-            forceAreaChunks(level, data, island, 15, 14, 15);
-            forceAreaChunks(level, data, ground, 15, 14, 15);
-            for (BlockPos origin : List.of(island, ground)) {
-                for (int i = 0; i < 8; i++) {
-                    double angle = i * Math.PI / 4;
-                    int x = (int) Math.round(7 + Math.cos(angle) * 5.5);
-                    int z = (int) Math.round(7 + Math.sin(angle) * 5.5);
-                    for (int y = 1; y <= 2; y++) {
-                        BlockPos pos = origin.offset(x,y,z);
-                        var state = level.getBlockState(pos);
-                        if (state.is(Blocks.CHISELED_STONE_BRICKS) || state.is(Blocks.SEA_LANTERN))
-                            level.setBlock(pos,Blocks.AIR.defaultBlockState(),18);
-                    }
-                }
-            }
-            placeTemplate(level,manifest.islandPortal(),island,manifest.seed());
-            placeTemplate(level,manifest.groundPortal(),ground,manifest.seed());
+            forceAreaChunks(level, data, island, 15, PortalArchitecture.HEIGHT, 15);
+            forceAreaChunks(level, data, ground, 15, PortalArchitecture.HEIGHT, 15);
+            ensureActiveChunksLoaded(level, data);
+            var islandPlan = PortalArchitecture.prepare(level, manifest.islandPortal(), island, true);
+            var groundPlan = PortalArchitecture.prepare(level, manifest.groundPortal(), ground, true);
+            islandPlan.apply(level);
+            groundPlan.apply(level);
             ensureLanding(level,islandLanding(data));
             ensureLanding(level,groundLanding(data));
         } finally {
@@ -515,6 +507,8 @@ public final class SkyIslandManager {
     private static void portalTick(ServerLevel level, SkyIslandSavedData data, SkyIslandManifest manifest) {
         if (!isComplete(data, manifest)) {
             PORTAL_CHARGES.clear();
+            for (BlockPos active : ACTIVE_RITUALS) sendRitual(level, active, -1);
+            ACTIVE_RITUALS.clear();
             return;
         }
 
@@ -539,6 +533,28 @@ public final class SkyIslandManager {
             updatePortalCharge(player, level, manifest, ground, island, atGround, atIsland, effectsTick);
         }
         PORTAL_CHARGES.keySet().removeIf(uuid -> !presentPlayers.contains(uuid));
+        for (boolean fromGround : new boolean[]{true, false}) {
+            BlockPos center = fromGround ? ground : island;
+            long started = PORTAL_CHARGES.values().stream()
+                    .filter(c -> c.fromGround() == fromGround)
+                    .mapToLong(PortalChargeState::startedAt).min().orElse(-1);
+            if (started >= 0) {
+                sendRitual(level, center, (int)(level.getGameTime() - started));
+                ACTIVE_RITUALS.add(center);
+            } else if (ACTIVE_RITUALS.remove(center)) {
+                sendRitual(level, center, -1);
+            }
+        }
+    }
+
+    private static void sendRitual(ServerLevel level, BlockPos center, int elapsed) {
+        var packet = new com.tnc.tnc.network.PortalRitualPacket(center, elapsed);
+        for (ServerPlayer viewer : level.players()) {
+            if (viewer.distanceToSqr(center.getX()+.5, center.getY(), center.getZ()+.5) <= 64*64) {
+                com.tnc.tnc.network.MagicStoneNetwork.CHANNEL.send(
+                        net.minecraftforge.network.PacketDistributor.PLAYER.with(() -> viewer), packet);
+            }
+        }
     }
 
     private static void updatePortalCharge(
@@ -583,12 +599,20 @@ public final class SkyIslandManager {
         }
 
         long elapsed = level.getGameTime() - charge.startedAt();
+        BlockPos effectCenter = fromGround ? ground : island;
+        if (elapsed == PortalRitualTiming.CONVERGE || elapsed == PortalRitualTiming.RELEASE) {
+            level.playSound(null, effectCenter, elapsed == PortalRitualTiming.CONVERGE
+                    ? SoundEvents.BEACON_POWER_SELECT : SoundEvents.RESPAWN_ANCHOR_CHARGE,
+                    SoundSource.BLOCKS, .85F, elapsed == PortalRitualTiming.CONVERGE ? .65F : .8F);
+        }
         double progress = Math.min(1.0D, elapsed / (double) PortalChargeState.DURATION_TICKS);
         if (effectsTick) {
-            chargeParticles(level, player, progress);
+            chargeParticles(level, effectCenter, progress);
             int percent = (int) Math.min(100L,
                     elapsed * 100L / PortalChargeState.DURATION_TICKS);
-            player.displayClientMessage(Component.literal("§d传送蓄能 §f" + percent + "%"), true);
+            String phase = elapsed < PortalRitualTiming.CONVERGE ? "符文苏醒"
+                    : elapsed < PortalRitualTiming.RELEASE ? "能量汇聚" : "星门开启";
+            player.displayClientMessage(Component.literal("§c" + phase + " §f" + percent + "%"), true);
         }
 
         if (decision != PortalChargeState.Decision.COMPLETE) {
@@ -657,10 +681,10 @@ public final class SkyIslandManager {
         );
     }
 
-    private static void chargeParticles(ServerLevel level, ServerPlayer player, double progress) {
-        double centerX = player.getX();
-        double centerY = player.getY() + 0.15D;
-        double centerZ = player.getZ();
+    private static void chargeParticles(ServerLevel level, BlockPos center, double progress) {
+        double centerX = center.getX() + .5;
+        double centerY = center.getY() + 0.15D;
+        double centerZ = center.getZ() + .5;
         double radius = 1.65D - progress * 0.85D;
         double phase = level.getGameTime() * 0.18D;
         int points = 8 + (int) Math.floor(progress * 6.0D);

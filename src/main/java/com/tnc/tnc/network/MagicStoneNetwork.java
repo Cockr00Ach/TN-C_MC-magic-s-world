@@ -22,7 +22,8 @@ import java.util.function.Supplier;
  */
 public class MagicStoneNetwork {
 
-    private static final String PROTOCOL_VERSION = "1";
+    // v2 adds the server -> client portal ritual packet. Reject stale clients at handshake.
+    private static final String PROTOCOL_VERSION = "2";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "main"),
@@ -50,6 +51,11 @@ public class MagicStoneNetwork {
         //    而那个异常发生在 mod 构造期 → 整个 mod 变 broken → 启动失败。
         //    详见 com.tnc.tnc.dialogue.DialogueNetwork 的类注释。
         com.tnc.tnc.dialogue.DialogueNetwork.registerPackets(CHANNEL, 100);
+        CHANNEL.messageBuilder(PortalRitualPacket.class, 200, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(PortalRitualPacket::encode)
+                .decoder(PortalRitualPacket::decode)
+                .consumerMainThread(PortalRitualPacket::handle)
+                .add();
     }
 
     // ---------------- 客户端调用的小工具 ----------------

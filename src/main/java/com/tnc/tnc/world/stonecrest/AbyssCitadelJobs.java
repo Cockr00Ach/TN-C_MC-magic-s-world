@@ -114,6 +114,9 @@ public final class AbyssCitadelJobs {
                 continue;
             }
             var job=new AbyssCitadelData.Job(origin);
+            if (LargeLandmarkJobs.conflictsWithAbyss(level,origin)) {
+                job.phase=-1; job.error="Overlapping landmark site";
+            }
             if (origin.getY()!=-64 || level.getMinBuildHeight()!=-64 || level.getMaxBuildHeight()!=320) {
                 job.phase=-1; job.error="World height must be -64..319";
             }

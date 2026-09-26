@@ -96,6 +96,9 @@ minecraft {
         // The gametest system is also enabled by default for other run configs under the /test command.
         gameTestServer {
             property 'forge.enabledGameTestNamespaces', mod_id
+            jvmArgs '-Xmx6G'
+            // Recovery fixtures intentionally change blocks; never reuse a previous run's world.
+            args '--world', "building-tests-${System.currentTimeMillis()}".toString()
         }
 
         data {

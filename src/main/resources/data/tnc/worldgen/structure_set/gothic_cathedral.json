@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "tnc:gothic_cathedral",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 160,
+    "separation": 100,
+    "salt": 137746515
+  }
+}

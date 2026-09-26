@@ -1,0 +1,8 @@
+{
+  "type": "tnc:large_landmark",
+  "asset": "elden_coastal_castle",
+  "biomes": "#tnc:has_structure/imported_buildings",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

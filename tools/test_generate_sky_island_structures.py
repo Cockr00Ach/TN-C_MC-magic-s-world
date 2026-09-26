@@ -95,14 +95,23 @@ class SkyIslandGeometryTests(unittest.TestCase):
         positions = {(x, y, z): state for x, y, z, state, _ in blocks}
         self.assertEqual(positions[(7, 1, 7)], 'minecraft:crying_obsidian')
         self.assertGreaterEqual(sum(state == 'minecraft:shroomlight' for state in positions.values()), 9)
-        self.assertTrue(all(0 <= x < 15 and 0 <= y < 14 and 0 <= z < 15 for x, y, z in positions))
+        self.assertTrue(all(0 <= x < 15 and 0 <= y < 22 and 0 <= z < 15 for x, y, z in positions))
         self.assertEqual(len(positions),len(blocks))
-        for y in range(2,7):
+        for y in range(2,13):
             self.assertNotIn((7,y,7),positions)
         for v in range(2,13):
             for y in (2,3):
                 self.assertNotIn((7,y,v),positions)
                 self.assertNotIn((v,y,7),positions)
+
+    def test_ritual_emitters_match_client_laser_origins(self) -> None:
+        positions = {(x,y,z):s for x,y,z,s,_ in sky.portal_blocks()}
+        for x in (4,10):
+            for z in (4,10):
+                self.assertEqual(positions[x,10,z], 'minecraft:red_stained_glass')
+                self.assertEqual(positions[x,9,z], 'minecraft:shroomlight')
+        self.assertEqual(positions[7,16,7], 'minecraft:shroomlight')
+        self.assertGreaterEqual(max(y for x,y,z in positions),21)
 
 
 if __name__ == "__main__":

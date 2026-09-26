@@ -9,7 +9,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BuildingResourceTest {
     @Test void everyReferencedPieceIsBundled() throws Exception {
-        for (String name:new String[]{"roadside_ruin","fantasy_tavern","gothic_castle","dark_fantasy_castle","abyss_citadel"}) {
+        for (String name:new String[]{"roadside_ruin","fantasy_tavern","gothic_castle","dark_fantasy_castle","abyss_citadel",
+                "end_pvp_island","heroskand_complex","gothic_cathedral","elden_coastal_castle"}) {
             try (var stream=getClass().getResourceAsStream("/data/tnc/buildings/"+name+".json")) {
                 assertNotNull(stream,name);
                 var root=new Gson().fromJson(new InputStreamReader(stream,StandardCharsets.UTF_8),JsonObject.class);
@@ -23,8 +24,9 @@ class BuildingResourceTest {
                 }
                 if (name.equals("abyss_citadel")) assertEquals(200395,blocks);
             }
-            assertNotNull(getClass().getResource("/data/tnc/worldgen/structure/"+name+".json"));
-            assertNotNull(getClass().getResource("/data/tnc/worldgen/structure_set/"+name+".json"));
+            String id=name.equals("heroskand_complex")?"stonecrest_fortress":name;
+            assertNotNull(getClass().getResource("/data/tnc/worldgen/structure/"+id+".json"));
+            assertNotNull(getClass().getResource("/data/tnc/worldgen/structure_set/"+id+".json"));
         }
     }
 }

@@ -20,7 +20,9 @@ public final class ImportedBuildingStructure extends Structure {
     public ImportedBuildingStructure(StructureSettings settings, String asset) {
         super(settings);
         this.asset = asset;
-        StonecrestManifest.get(asset); // Fail during resource loading, not halfway through worldgen.
+        var m=StonecrestManifest.get(asset);
+        if (m.dimensions().getX()>272 || m.dimensions().getZ()>272 || m.dimensions().getY()>256)
+            throw new IllegalArgumentException("Use large_landmark for oversized asset: "+asset);
     }
 
     @Override

@@ -39,10 +39,13 @@ public final class AbyssChunkLedger {
         }
     }
     static synchronized void invalidateTemplates(ServerLevel level,List<ChunkPos> chunks,BlockPos origin) {
+        invalidate(level,chunks,origin,"P");
+    }
+    static synchronized void invalidate(ServerLevel level,List<ChunkPos> chunks,BlockPos origin,String phase) {
         String key=Long.toHexString(origin.asLong());
         for (var c:chunks) {
             var root=entry(level,c); var tag=root.getCompound(key);
-            tag.remove("P"); root.put(key,tag); level.getChunk(c.x,c.z).setUnsaved(true);
+            tag.remove(phase); root.put(key,tag); level.getChunk(c.x,c.z).setUnsaved(true);
         }
     }
     @SubscribeEvent public static void load(ChunkDataEvent.Load event) {
@@ -63,6 +66,9 @@ public final class AbyssChunkLedger {
             if (start.getStructure() instanceof AbyssCitadelStructure)
                 for (var piece:start.getPieces()) if (piece instanceof AbyssMarkerPiece marker)
                     AbyssCitadelJobs.request(level,marker.origin());
+        for (var start:event.getChunk().getAllStarts().values())
+            for (var piece:start.getPieces()) if (piece instanceof LargeLandmarkMarker marker)
+                LargeLandmarkJobs.request(level,marker.asset,marker.origin);
     }
     @SubscribeEvent public static synchronized void save(ChunkDataEvent.Save event) {
         if (!(event.getLevel() instanceof ServerLevel level)) return;

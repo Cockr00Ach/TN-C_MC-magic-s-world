@@ -35,15 +35,20 @@ public final class StonecrestManifest {
     private final BitSet[] buildingRows;
     private final BitSet[] terrainRows;
     private final byte[] distances;
+    private boolean floating;
+    private boolean sunken;
+    private final int blendDistance;
+    private String fingerprint;
 
     private StonecrestManifest(Vec3i dimensions, BlockPos anchorLocal, List<Piece> pieces,
-                               BitSet[] buildingRows, BitSet[] terrainRows) {
+                               BitSet[] buildingRows, BitSet[] terrainRows, int blendDistance) {
         this.dimensions = dimensions;
         this.anchorLocal = anchorLocal;
         this.pieces = List.copyOf(pieces);
         this.buildingRows = buildingRows;
         this.terrainRows = terrainRows;
-        this.distances = buildDistances(dimensions.getX(), dimensions.getZ(), buildingRows, terrainRows);
+        this.blendDistance=blendDistance;
+        this.distances = buildDistances(dimensions.getX(), dimensions.getZ(), buildingRows, terrainRows,blendDistance);
     }
 
     public static StonecrestManifest get() {
@@ -67,9 +72,9 @@ public final class StonecrestManifest {
             try (Reader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
                 JsonObject root = GSON.fromJson(reader, JsonObject.class);
                 Vec3i dimensions = vec3(root.getAsJsonArray("dimensions"), "dimensions");
-                if (dimensions.getX() < 1 || dimensions.getX() > 272
-                        || dimensions.getZ() < 1 || dimensions.getZ() > 272
-                        || dimensions.getY() < 1 || dimensions.getY() > 256) {
+                if (dimensions.getX() < 1 || dimensions.getX() > 2048
+                        || dimensions.getZ() < 1 || dimensions.getZ() > 2048
+                        || dimensions.getY() < 1 || dimensions.getY() > 384) {
                     throw new IOException("unsupported Stonecrest dimensions " + dimensions);
                 }
                 BlockPos anchor = pos(root.getAsJsonArray("anchor_local"), "anchor_local");
@@ -93,7 +98,16 @@ public final class StonecrestManifest {
                 if (pieces.isEmpty() || pieces.size() != root.get("piece_count").getAsInt()) {
                     throw new IOException("Stonecrest piece count mismatch");
                 }
-                return new StonecrestManifest(dimensions, anchor, pieces, buildingRows, terrainRows);
+                int blend=root.has("blend_distance")?root.get("blend_distance").getAsInt():MAX_BLEND_DISTANCE;
+                if (blend<1 || blend>96) throw new IOException("Invalid blend distance");
+                var result = new StonecrestManifest(dimensions, anchor, pieces, buildingRows, terrainRows,blend);
+                result.floating = root.has("floating") && root.get("floating").getAsBoolean();
+                result.sunken = root.has("sunken") && root.get("sunken").getAsBoolean();
+                try {
+                    result.fingerprint = java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256")
+                            .digest(root.toString().getBytes(StandardCharsets.UTF_8)));
+                } catch (java.security.NoSuchAlgorithmException impossible) { throw new IllegalStateException(impossible); }
+                return result;
             }
         }
     }
@@ -119,7 +133,7 @@ public final class StonecrestManifest {
         return result;
     }
 
-    private static byte[] buildDistances(int width, int depth, BitSet[] building, BitSet[] terrain) {
+    private static byte[] buildDistances(int width, int depth, BitSet[] building, BitSet[] terrain,int maxDistance) {
         byte[] result = new byte[width * depth];
         java.util.Arrays.fill(result, (byte) 127);
         ArrayDeque<Integer> queue = new ArrayDeque<>();
@@ -135,7 +149,7 @@ public final class StonecrestManifest {
             int x = index % width;
             int z = index / width;
             int nextDistance = Byte.toUnsignedInt(result[index]) + 1;
-            if (nextDistance > MAX_BLEND_DISTANCE) {
+            if (nextDistance > maxDistance) {
                 continue;
             }
             if (x > 0) visit(index - 1, x - 1, z, width, terrain, result, nextDistance, queue);
@@ -169,7 +183,10 @@ public final class StonecrestManifest {
     public Vec3i dimensions() { return dimensions; }
     public BlockPos anchorLocal() { return anchorLocal; }
     public List<Piece> pieces() { return pieces; }
-    public int maxBlendDistance() { return MAX_BLEND_DISTANCE; }
+    public int maxBlendDistance() { return blendDistance; }
+    public boolean floating() { return floating; }
+    public boolean sunken() { return sunken; }
+    public String fingerprint() { return fingerprint; }
 
     public boolean terrainAt(int x, int z) {
         return x >= 0 && z >= 0 && x < dimensions.getX() && z < dimensions.getZ() && terrainRows[z].get(x);

@@ -1,6 +1,7 @@
 {
-  "type": "tnc:stonecrest_fortress",
-  "biomes": "#tnc:has_structure/stonecrest_fortress",
+  "type": "tnc:large_landmark",
+  "asset": "heroskand_complex",
+  "biomes": "#tnc:has_structure/imported_buildings",
   "step": "surface_structures",
   "spawn_overrides": {},
   "terrain_adaptation": "none"
