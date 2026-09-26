@@ -154,7 +154,7 @@ public final class TnSpellMechanics {
         // `spread` doubles as the size knob: 1.5 -> 2.25x, 2.4 (the big strike) -> 3.6x.
         TNLightningStrikeEntity bolt = TNOrbEntities.LIGHTNING_STRIKE.get().create(level);
         if (bolt != null) {
-            bolt.configure(spread * 1.5D, 7);
+            bolt.configure(spread * 3.0D, 4, at.y);   // x2 size (author) + fall from 24 blocks up
             bolt.moveTo(at.x, at.y, at.z, 0.0F, 0.0F);
             level.addFreshEntity(bolt);
         }
