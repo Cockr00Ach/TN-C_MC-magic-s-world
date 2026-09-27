@@ -113,7 +113,7 @@ public class TNLightningStrikeEntity extends Entity {
     @Override
     protected void defineSynchedData() {
         this.entityData.define(DATA_SCALE, 450);
-        this.entityData.define(DATA_LIFE, 4);
+        this.entityData.define(DATA_LIFE, 6);
         this.entityData.define(DATA_SHAKE, 300);
         this.entityData.define(DATA_KIND, 0);
     }

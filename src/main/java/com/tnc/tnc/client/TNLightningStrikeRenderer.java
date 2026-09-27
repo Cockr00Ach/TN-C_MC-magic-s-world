@@ -50,12 +50,10 @@ public class TNLightningStrikeRenderer extends EntityRenderer<TNLightningStrikeE
                        MultiBufferSource buffer, int packedLight) {
         float age = entity.tickCount + partialTick;
         // pop in over 2 ticks, shrink away over the last 2 - a strike has no time to fade
-        float grow = Math.min(1.0F, age / 2.0F);
-        float left = Math.max(0.0F, entity.life() - age);
-        float k = grow * Math.min(1.0F, left / 2.0F);
-        if (k <= 0.02F) {
-            return;
-        }
+        // 2026-09-27: 原来这里是 grow * min(1, (life-age)/2) ✗ —— life 只有 4 tick 而其中
+        // 大部分被"下落"吃掉，于是雷还在天上时 k 已经归零、整道雷不画 ✗（作者："有的时候
+        // 模型会缺失"）。雷劈本来就是瞬时的，直接满尺寸出现即可 ✓ 消失交给服务端 discard。
+        float k = Math.min(1.0F, age / 2.0F);
         float s = (float) entity.scale() * k;
         // 球形态（神在投篮 t5）用 t5 那颗大雷球的模型 ✓
         ResourceLocation modelId = entity.isBall()
