@@ -404,6 +404,8 @@ public final class TnSpellMechanics {
 
         // 火系那几条（自爆扣最大生命 10%）在自己的类里
         TNFireMechanics.onSpellCast(player, spellId, data);
+        com.tnc.tnc.magic.water.TNWaterSpellEntity.cast(player, spellId);
+        com.tnc.tnc.magic.water.TNWaterFieldEntity.cast(player, spellId);
 
         // 闪电降低冷却：恢复一半蓝量（上限的一半）
         if (path.equals("lightning_recharge")) {

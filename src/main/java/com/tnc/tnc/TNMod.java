@@ -55,6 +55,8 @@ public class TNMod
     // 之后做真正的 TN-C 武器时应该自定义一个 Tier，而不是借用原版的。
     public static final RegistryObject<Item> SWORD = ITEMS.register("sword",
             () -> new SwordItem(Tiers.IRON, 3, -2.4F, new Item.Properties()));
+    public static final RegistryObject<Item> CHAOS_SEAL = ITEMS.register("chaos_seal",
+            com.tnc.tnc.magic.water.ChaosSilence.SealItem::new);
 
     /**
      * 魔法法杖 —— 施法的前提（手上有法杖才能按数字键放法术）。
@@ -82,6 +84,7 @@ public class TNMod
             .icon(() -> SWORD.get().getDefaultInstance())
             .displayItems((parameters, output) -> {
                 output.accept(SWORD.get());
+                output.accept(CHAOS_SEAL.get());
                 output.accept(WAND.get());
                 // 剧情道具「宝箱传说残卷」六卷（卷一拆成上下卷）—— 方便验收时直接拿 ✓
                 output.accept(com.tnc.tnc.magic.TNScrolls.JUAN_1A.get());

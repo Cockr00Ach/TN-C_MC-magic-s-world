@@ -22,6 +22,16 @@ public final class TNOrbEntities {
     public static final DeferredRegister<EntityType<?>> ENTITY_TYPES =
             DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, TNMod.MODID);
 
+    public static final RegistryObject<EntityType<com.tnc.tnc.magic.water.TNWaterSpellEntity>> WATER_SPELL =
+            ENTITY_TYPES.register("water_spell", () -> EntityType.Builder.of(com.tnc.tnc.magic.water.TNWaterSpellEntity::new, MobCategory.MISC)
+                    .sized(.1F,.1F).clientTrackingRange(12).updateInterval(1).build("tnc:water_spell"));
+    public static final RegistryObject<EntityType<com.tnc.tnc.magic.water.TNWaterBoltEntity>> WATER_BOLT =
+            ENTITY_TYPES.register("water_bolt", () -> EntityType.Builder.of(com.tnc.tnc.magic.water.TNWaterBoltEntity::new, MobCategory.MISC)
+                    .sized(.3F,.3F).clientTrackingRange(8).updateInterval(1).build("tnc:water_bolt"));
+    public static final RegistryObject<EntityType<com.tnc.tnc.magic.water.TNWaterFieldEntity>> WATER_FIELD =
+            ENTITY_TYPES.register("water_field", () -> EntityType.Builder.of(com.tnc.tnc.magic.water.TNWaterFieldEntity::new, MobCategory.MISC)
+                    .sized(.1F,.1F).clientTrackingRange(12).updateInterval(1).build("tnc:water_field"));
+
     /**
      * 环绕雷球。
      *

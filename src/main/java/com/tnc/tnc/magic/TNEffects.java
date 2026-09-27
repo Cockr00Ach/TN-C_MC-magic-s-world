@@ -33,6 +33,11 @@ public final class TNEffects {
     public static final DeferredRegister<MobEffect> EFFECTS =
             DeferredRegister.create(ForgeRegistries.MOB_EFFECTS, TNMod.MODID);
 
+    public static final RegistryObject<MobEffect> WATER_CAST = EFFECTS.register("water_cast",
+            () -> new MobEffect(MobEffectCategory.BENEFICIAL, 0x54CEF7) {});
+    public static final RegistryObject<MobEffect> CHAOS_SILENCE = EFFECTS.register("chaos_silence",
+            () -> new MobEffect(MobEffectCategory.HARMFUL, 0x992BDD) {});
+
     /**
      * 雷速线统一用的颜色 —— <b>2026-09-22 从紫改成雷的青色</b>。
      *
