@@ -17,6 +17,61 @@ import net.minecraft.world.level.block.Blocks;
 @PrefixGameTestTemplate(false)
 public final class BuildingGameTests {
     @GameTest(template="building_test_empty",timeoutTicks=400)
+    public static void locateCoordinatesMatchSouthernMarkerCenter(GameTestHelper helper) {
+        var registry=helper.getLevel().registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.STRUCTURE_SET);
+        var chunk=new net.minecraft.world.level.ChunkPos(829,42);
+        for (String id:java.util.List.of("gothic_cathedral","stonecrest_fortress","end_pvp_island","elden_coastal_castle","abyss_citadel")) {
+            var set=registry.get(net.minecraft.resources.ResourceLocation.tryParse("tnc:"+id));
+            if (set==null || !set.placement().getLocatePos(chunk).equals(new BlockPos(13272,0,680)))
+                throw new IllegalStateException("Locate offset disagrees with marker center: "+id);
+        }
+        helper.succeed();
+    }
+    @GameTest(template="building_test_empty",timeoutTicks=400)
+    public static void containerPreflightMigrationNeverRevivesPartialWrites(GameTestHelper helper) {
+        var root=new net.minecraft.nbt.CompoundTag(); var list=new net.minecraft.nbt.ListTag();
+        for (int phase=0;phase<3;phase++) {
+            var t=new net.minecraft.nbt.CompoundTag(); t.putString("Asset","landmark_fixture");
+            t.putLong("Origin",new BlockPos(1300+phase*64,128,112).asLong());t.putInt("Phase",-1);
+            t.putString("Error","phase="+phase+" tile=108 piece=0: java.lang.IllegalStateException: Protected block entity in pending write volume");
+            list.add(t);
+        }
+        root.put("Jobs",list); var d=LandmarkData.load(root); var jobs=new java.util.ArrayList<>(d.jobs.values());
+        if (jobs.get(0).phase!=0 || jobs.get(1).phase!=-1 || jobs.get(2).phase!=-1)
+            throw new IllegalStateException("Migration must only revive no-write preflight failures");
+        jobs.get(0).phase=-1; jobs.get(0).error=((net.minecraft.nbt.CompoundTag)list.get(0)).getString("Error");
+        if (LandmarkData.load(d.save(new net.minecraft.nbt.CompoundTag())).jobs.values().stream().anyMatch(j->j.phase!=-1))
+            throw new IllegalStateException("Preflight migration retried twice");
+        helper.succeed();
+    }
+    @GameTest(template="building_test_empty",timeoutTicks=16000)
+    public static void existingChestIsPreservedLocallyInsteadOfCancellingEntireLandmark(GameTestHelper helper) {
+        var l=helper.getLevel(); var origin=new BlockPos(1184,128,112);
+        var chest=origin.offset(15,1,8); // Protection crosses a checkpoint/chunk boundary.
+        l.setBlock(chest.below(),Blocks.GOLD_BLOCK.defaultBlockState(),18);
+        l.setBlock(chest,Blocks.CHEST.defaultBlockState(),18);
+        ((net.minecraft.world.Container)l.getBlockEntity(chest)).setItem(0,
+                new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND,7));
+        String key=new LandmarkData.Job("landmark_fixture",origin).key();
+        LargeLandmarkJobs.request(l,"landmark_fixture",origin);
+        boolean[] resumed={false};
+        helper.succeedWhen(()->{
+            var j=LandmarkData.get(l).jobs.get(key);
+            if (j!=null && j.phase<0) throw new IllegalStateException("Pre-existing chest stopped the whole structure: "+j.error);
+            if (j==null || j.phase!=3) throw new net.minecraft.gametest.framework.GameTestAssertException("Waiting for protected-site fixture");
+            if (!l.getBlockState(chest).is(Blocks.CHEST) || !l.getBlockState(chest.below()).is(Blocks.GOLD_BLOCK)
+                    || ((net.minecraft.world.Container)l.getBlockEntity(chest)).getItem(0).getCount()!=7
+                    || !l.getBlockState(origin.offset(2,1,2)).is(Blocks.DIAMOND_BLOCK)
+                    || !l.getBlockState(origin.offset(18,1,2)).is(Blocks.DIAMOND_BLOCK))
+                throw new IllegalStateException("Container contents/support or remote architecture lost");
+            if (!resumed[0]) {
+                j.initialized=false; j.phase=1; resumed[0]=true;
+                throw new net.minecraft.gametest.framework.GameTestAssertException("Waiting for immutable-plan recovery");
+            }
+        });
+    }
+
+    @GameTest(template="building_test_empty",timeoutTicks=400)
     public static void realEndIslandProfileDoesNotRejectReportedSafeColumn(GameTestHelper helper) {
         var m=StonecrestManifest.get("end_pvp_island");
         var f=new FloatingFootprint(m.dimensions().getX(),m.dimensions().getZ(),m.dimensions().getY());

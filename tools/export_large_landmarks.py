@@ -126,7 +126,7 @@ def export(args):
     write_json(args.output/'worldgen/structure'/(structure_id+'.json'),dict(type='tnc:large_landmark',asset=args.asset,
                biomes='#minecraft:is_overworld' if args.floating else '#tnc:has_structure/imported_buildings',step='surface_structures',spawn_overrides={},terrain_adaptation='none'))
     write_json(args.output/'worldgen/structure_set'/(structure_id+'.json'),dict(structures=[dict(structure='tnc:'+structure_id,weight=1)],
-               placement=dict(type='minecraft:random_spread',spacing=160,separation=100,salt=int(hashlib.sha256(args.asset.encode()).hexdigest()[:7],16))))
+               placement=dict(type='minecraft:random_spread',locate_offset=[8,0,8],spacing=160,separation=100,salt=int(hashlib.sha256(args.asset.encode()).hexdigest()[:7],16))))
     preview=Path('work/landmark-previews'); preview.mkdir(parents=True,exist_ok=True)
     Image.fromarray(building.astype(np.uint8)*255).save(preview/(args.asset+'-mask.png'))
     print(f'DONE {args.asset}: {dims}, {expected} blocks, {len(pieces)} pieces',flush=True)

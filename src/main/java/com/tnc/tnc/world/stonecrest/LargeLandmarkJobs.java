@@ -51,6 +51,7 @@ public final class LargeLandmarkJobs {
                     throw new IllegalStateException("Overlaps an abyss site");
             } catch (Exception e) { j.phase=-1; j.error=e.toString(); }
             data.jobs.put(j.key(),j); data.setDirty();
+            LogUtils.getLogger().info("[TN-C Landmark] queued {} at {}",j.asset,j.origin);
         }
     }
     private static boolean overlaps(LandmarkData.Job a,LandmarkData.Job b) {
@@ -73,6 +74,7 @@ public final class LargeLandmarkJobs {
         var j=data.jobs.values().stream().filter(v->v.phase>=0 && v.phase<3).findFirst().orElse(null);
         if (j==null) { release(l); var bar=BARS.remove(e.getServer()); if (bar!=null) bar.removeAllPlayers(); return; }
         try {
+            j.waiting=false;
             if (!j.initialized) {
                 boolean restored=LandmarkJournal.restore(l,j);
                 if (j.phase>0 && !restored) throw new IllegalStateException("Missing immutable landmark journal");
@@ -105,6 +107,7 @@ public final class LargeLandmarkJobs {
             j.error="phase="+j.phase+" tile="+j.tile+" piece="+j.piece+": "+error;
             j.phase=-1; data.setDirty(); release(l);
             LogUtils.getLogger().error("[TN-C Landmark] stopped {} {}",j.key(),j.error,error);
+            announce(l,j,"§c遗迹施工暂停："+j.error+"。详情 /tnc landmark status");
             var bar=BARS.remove(e.getServer()); if (bar!=null) bar.removeAllPlayers();
         }
     }
@@ -131,9 +134,12 @@ public final class LargeLandmarkJobs {
     private static boolean surveyColumn(LandmarkData.Job j,int x,int z) {
         return j.manifest().terrainAt(x,z) && (!j.manifest().floating() || j.floatingFootprint.occupied(x,z));
     }
-    private static boolean near(ServerLevel l,LandmarkData.Job j,BlockPos p,int sx,int sz) {
-        j.waiting=l.players().stream().anyMatch(v->!v.isSpectator() && v.getX()>=p.getX()-6 && v.getX()<p.getX()+sx+6
-                && v.getZ()>=p.getZ()-6 && v.getZ()<p.getZ()+sz+6);
+    private static boolean near(ServerLevel l,LandmarkData.Job j,BlockPos p,int sx,int sz,int minY,int maxY) {
+        var dims=j.manifest().dimensions();
+        int maxX=Math.min(p.getX()+sx,j.origin.getX()+dims.getX());
+        int maxZ=Math.min(p.getZ()+sz,j.origin.getZ()+dims.getZ());
+        j.waiting=l.players().stream().anyMatch(v->!v.isSpectator()
+                && LandmarkWorkArea.near(v.getX(),v.getY(),v.getZ(),p.getX(),minY,p.getZ(),maxX,maxY,maxZ));
         return j.waiting;
     }
     private static boolean natural(BlockState s) {
@@ -184,7 +190,10 @@ public final class LargeLandmarkJobs {
                 var plan=StonecrestTerrainPlanner.plan(j.grounds[idx],j.origin.getY()+m.anchorLocal().getY(),m.distanceAt(x,z),m.maxBlendDistance(),false,0,0);
                 affected=y>=Math.min(plan.targetY(),j.grounds[idx]+1) && y<=Math.max(plan.targetY(),j.surfaces[idx]);
             }
-            if (affected) throw new IllegalStateException("Protected block entity in pending write volume "+be);
+            if (affected && !j.preserved.contains(be)) {
+                if (j.phase==0) j.preserved.reserve(be);
+                else throw new IllegalStateException("Protected block entity in pending write volume "+be);
+            }
         }
     }
     private static void terrain(ServerLevel l,LandmarkData.Job j) {
@@ -194,9 +203,7 @@ public final class LargeLandmarkJobs {
         var p=j.tilePos(); if (!area(l,p,16,16)) return;
         var chunks=TICKETS.get(l.getServer()); String phase=j.asset+"_T";
         if (AbyssChunkLedger.complete(l,chunks,j.origin,phase,j.tile)) { j.tile++; j.cursor=0; return; }
-        if (near(l,j,p,16,16)) return;
         protectTerrain(l,j,p); // Recheck every slice, including after restart or a player's visit.
-        if (j.cursor==0) AbyssChunkLedger.invalidate(l,chunks,j.origin,j.asset+"_P");
         // Do not scan the entire 384-layer world for every small terrain tile.
         // Bounds depend only on the immutable plan, so the cursor is stable after a pause.
         int base=l.getMaxBuildHeight(),top=l.getMinBuildHeight();
@@ -206,17 +213,21 @@ public final class LargeLandmarkJobs {
             int idx=lz*m.dimensions().getX()+lx,current=j.grounds[idx];
             if (m.buildingAt(lx,lz)) {
                 base=Math.min(base,Math.min(current+1,j.origin.getY()));
-                top=Math.max(top,Math.max(j.surfaces[idx],j.origin.getY()+m.dimensions().getY()-1));
+                // WORLD_SURFACE already bounds the highest pre-existing non-air block.
+                // Scanning hundreds of empty sky layers delayed cathedrals by minutes.
+                top=Math.max(top,Math.max(j.surfaces[idx],j.origin.getY()-1));
             } else {
                 var plan=StonecrestTerrainPlanner.plan(current,j.origin.getY()+m.anchorLocal().getY(),m.distanceAt(lx,lz),m.maxBlendDistance(),false,0,0);
                 base=Math.min(base,Math.min(current+1,plan.targetY())); top=Math.max(top,Math.max(j.surfaces[idx],plan.targetY()));
             }
         }
         base=Math.max(l.getMinBuildHeight()+1,base); top=Math.min(l.getMaxBuildHeight()-1,top);
+        if (near(l,j,p,16,16,base,top+1)) return;
+        if (j.cursor==0) AbyssChunkLedger.invalidate(l,chunks,j.origin,j.asset+"_P");
         int limit=Math.max(0,top-base+1)*256;
         long deadline=System.nanoTime()+6_000_000L; int checked=0;
         var bp=new BlockPos.MutableBlockPos(); int w=m.dimensions().getX();
-        while (j.cursor<limit && checked<8192) {
+        while (j.cursor<limit && checked<32768) {
             int col=j.cursor%256,y=base+j.cursor/256,x=col%16,z=col/16;
             int lx=p.getX()-j.origin.getX()+x,lz=p.getZ()-j.origin.getZ()+z;
             int distance=m.distanceAt(lx,lz);
@@ -234,7 +245,8 @@ public final class LargeLandmarkJobs {
                     else if (y>current && y<plan.targetY()) target=natural(j.palette.get(j.materials[idx]))
                             && !j.palette.get(j.materials[idx]).is(BlockTags.DIRT) ? j.palette.get(j.materials[idx]) : Blocks.DIRT.defaultBlockState();
                 }
-                if (target!=null) { bp.set(p.getX()+x,y,p.getZ()+z); if (!l.getBlockState(bp).equals(target)) l.setBlock(bp,target,18); }
+                if (target!=null) { bp.set(p.getX()+x,y,p.getZ()+z);
+                    if (!j.preserved.contains(bp) && !l.getBlockState(bp).equals(target)) l.setBlock(bp,target,18); }
             }
             j.cursor++; checked++; if (checked%128==0 && System.nanoTime()>deadline) break;
         }
@@ -242,22 +254,32 @@ public final class LargeLandmarkJobs {
     }
     private static void templates(ServerLevel l,LandmarkData.Job j) {
         var pieces=j.manifest().pieces();
-        if (j.piece>=pieces.size()) { j.phase=3; release(l); return; }
+        if (j.piece>=pieces.size()) {
+            j.phase=3; release(l);
+            LogUtils.getLogger().info("[TN-C Landmark] complete {} pieces={} preserved={}",j.key(),j.piece,j.preserved.blocks.size());
+            announce(l,j,"§a遗迹已生成："+j.asset+"，建筑中心 "+buildingCenter(j).toShortString());
+            return;
+        }
         var p=pieces.get(j.piece); var target=j.origin.offset(p.offset());
         if (!area(l,target,p.size().getX(),p.size().getZ())) return;
         var chunks=TICKETS.get(l.getServer()); String phase=j.asset+"_P";
         if (AbyssChunkLedger.complete(l,chunks,j.origin,phase,j.piece)) { j.piece++; return; }
-        if (near(l,j,target,p.size().getX(),p.size().getZ())) return;
+        if (near(l,j,target,p.size().getX(),p.size().getZ(),target.getY(),target.getY()+p.size().getY())) return;
         var t=l.getStructureManager().get(p.resource()).orElseThrow();
         try {
-            protectTemplate(l,target,chunks,t);
-            if (!t.placeInWorld(l,target,target,new StructurePlaceSettings().setKnownShape(true).setIgnoreEntities(true).setKeepLiquids(false),
+            protectTemplate(l,target,chunks,t,j.preserved);
+            if (!t.placeInWorld(l,target,target,new StructurePlaceSettings().setKnownShape(true).setIgnoreEntities(true).setKeepLiquids(false)
+                            .addProcessor(j.preserved.processor),
                     RandomSource.create(j.origin.asLong()^j.piece),18)) throw new IllegalStateException("Failed template "+p.resource());
         } finally { l.getStructureManager().remove(p.resource()); }
         AbyssChunkLedger.mark(l,chunks,j.origin,phase,j.piece); j.piece++;
     }
     static void protectTemplate(ServerLevel l,BlockPos target,List<ChunkPos> chunks,
                                 net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate template) {
+        protectTemplate(l,target,chunks,template,new PreservedSite());
+    }
+    private static void protectTemplate(ServerLevel l,BlockPos target,List<ChunkPos> chunks,
+                                net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate template,PreservedSite preserved) {
         var size=template.getSize(); var protectedPositions=new HashSet<BlockPos>();
         for (var c:chunks) for (var be:l.getChunk(c.x,c.z).getBlockEntitiesPos())
             if (be.getX()>=target.getX() && be.getX()<target.getX()+size.getX()
@@ -270,18 +292,29 @@ public final class LargeLandmarkJobs {
         for (var raw:saved.getList("blocks",net.minecraft.nbt.Tag.TAG_COMPOUND)) {
             var pos=((net.minecraft.nbt.CompoundTag)raw).getList("pos",net.minecraft.nbt.Tag.TAG_INT);
             var destination=target.offset(pos.getInt(0),pos.getInt(1),pos.getInt(2));
-            if (protectedPositions.contains(destination)) throw new IllegalStateException("Protected block entity in pending template "+destination);
+            if (protectedPositions.contains(destination) && !preserved.contains(destination))
+                throw new IllegalStateException("Protected block entity in pending template "+destination);
         }
     }
     private static void progress(ServerLevel l,LandmarkData.Job j) {
         if (l.getGameTime()%10!=0) return;
         var bar=BARS.computeIfAbsent(l.getServer(),k->new ServerBossEvent(Component.empty(),BossEvent.BossBarColor.PURPLE,BossEvent.BossBarOverlay.PROGRESS));
-        bar.setName(Component.literal(j.asset+" · "+switch(j.phase) { case 0->"核对建筑和场地";case 1->"整修地形";case 2->"建筑正在显现";default->"完成"; }
+        bar.setName(Component.literal(j.asset+" · "+switch(j.phase) {
+                    case 0->j.validated<j.manifest().pieces().size()?"读取建筑 "+j.validated+"/"+j.manifest().pieces().size():"勘测场地 "+j.tile+"/"+j.tileCount();
+                    case 1->"整修地形 "+j.tile+"/"+j.tileCount();case 2->"建筑正在显现 "+j.piece+"/"+j.manifest().pieces().size();default->"完成"; }
                 +(j.waiting?" · 请退出施工区或使用旁观模式":"")));
         float f=j.phase==0 ? .15F*j.tile/j.tileCount() : j.phase==1 ? .15F+.35F*j.tile/j.tileCount() : j.phase==2 ? .5F+.5F*j.piece/j.manifest().pieces().size():1;
         bar.setProgress(Math.max(0,Math.min(1,f)));
         for (var p:List.copyOf(bar.getPlayers())) if (p.level()!=l || p.distanceToSqr(j.origin.getX(),p.getY(),j.origin.getZ())>4000000) bar.removePlayer(p);
         for (var p:l.players()) if (p.distanceToSqr(j.origin.getX(),p.getY(),j.origin.getZ())<=4000000) bar.addPlayer(p);
+    }
+    private static BlockPos buildingCenter(LandmarkData.Job j) {
+        var m=j.manifest(); return j.origin.offset(m.dimensions().getX()/2,m.anchorLocal().getY()+1,m.dimensions().getZ()/2);
+    }
+    private static void announce(ServerLevel l,LandmarkData.Job j,String message) {
+        var center=buildingCenter(j);
+        for (var p:l.players()) if (p.distanceToSqr(center.getX(),p.getY(),center.getZ())<=4000000)
+            p.sendSystemMessage(Component.literal(message));
     }
     @SubscribeEvent public static void stopping(ServerStoppingEvent e) {
         var l=e.getServer().overworld(); if (l!=null) { drain(l); release(l); }
@@ -292,8 +325,16 @@ public final class LargeLandmarkJobs {
         e.getDispatcher().register(Commands.literal("tnc").then(Commands.literal("landmark").requires(s->s.hasPermission(2))
                 .then(Commands.literal("status").executes(c->{
                     var d=LandmarkData.get(c.getSource().getServer().overworld());
-                    for (var j:d.jobs.values()) c.getSource().sendSuccess(()->Component.literal(j.asset+" "+j.origin+" phase="+j.phase
-                            +" terrain="+j.tile+"/"+j.tileCount()+" pieces="+j.piece+"/"+j.manifest().pieces().size()+" "+j.error),false);
+                    for (var j:d.jobs.values()) {
+                        var m=j.manifest();
+                        String label=switch(j.asset) {case "heroskand_complex"->"赫萝斯堪德宫殿";case "gothic_cathedral"->"哥特大教堂";
+                            case "elden_coastal_castle"->"Elden 海岸城堡";case "end_pvp_island"->"末地浮岛";default->j.asset;};
+                        var approach=j.origin.offset(m.dimensions().getX()/2,0,m.dimensions().getZ()+12);
+                        c.getSource().sendSuccess(()->Component.literal(label+" · "+switch(j.phase){case -1->"暂停";case 0->"预检";case 1->"地形施工";case 2->"搭建";default->"完成";}
+                                +" · 地形 "+j.tile+"/"+j.tileCount()+" · 建筑 "+j.piece+"/"+m.pieces().size()
+                                +" · 建筑中心 "+buildingCenter(j).toShortString()+" · 南侧接近点 X="+approach.getX()+" Z="+approach.getZ()
+                                +(j.waiting?" · 请退出施工区或使用旁观模式":"")+" "+j.error),false);
+                    }
                     if (d.jobs.isEmpty()) c.getSource().sendSuccess(()->Component.literal("尚未触发大型遗迹。/locate 定位后到达现场。"),false);
                     return d.jobs.size();
                 }))));

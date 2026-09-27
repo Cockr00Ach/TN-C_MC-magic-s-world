@@ -21,6 +21,7 @@ final class LandmarkJournal {
         if (!t.getString("Fingerprint").equals(j.manifest().fingerprint()) || t.getLong("Origin")!=j.origin.asLong())
             throw new IOException("Landmark asset changed; refusing to overwrite the old occurrence: "+j.key());
         j.surfaces=t.getIntArray("Surfaces"); j.grounds=t.getIntArray("Grounds"); j.materials=t.getIntArray("Materials");
+        j.preserved.load(t.getLongArray("PreservedBlocks"));
         if (j.surfaces.length!=j.columns() || j.grounds.length!=j.columns() || j.materials.length!=j.columns())
             throw new IOException("Incomplete landmark terrain journal");
         j.palette.clear();
@@ -33,6 +34,7 @@ final class LandmarkJournal {
         var p=path(l,j); if (Files.exists(p)) throw new IOException("Existing immutable plan: "+p);
         var t=new CompoundTag(); t.putString("Fingerprint",j.manifest().fingerprint()); t.putLong("Origin",j.origin.asLong());
         t.putIntArray("Surfaces",j.surfaces); t.putIntArray("Grounds",j.grounds); t.putIntArray("Materials",j.materials);
+        t.putLongArray("PreservedBlocks",j.preserved.save());
         var pal=new ListTag(); for (var s:j.palette) pal.add(NbtUtils.writeBlockState(s)); t.put("Palette",pal);
         var bytes=new ByteArrayOutputStream(); NbtIo.writeCompressed(t,bytes);
         Files.createDirectories(p.getParent()); var temp=Files.createTempFile(p.getParent(),"plan-",".tmp");

@@ -1,11 +1,13 @@
 package com.tnc.tnc.client;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.tnc.tnc.TNMod;
 import com.tnc.tnc.world.PortalRitualTiming;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
@@ -23,6 +25,10 @@ public final class PortalRitualRenderer {
     private record Charge(int elapsed, long received) {}
     private static final Map<BlockPos, Charge> CHARGES = new HashMap<>();
     private static ClientLevel owner;
+    // Oculus replaces Minecraft's shared source with segmented buffers whose
+    // endBatch(RenderType) is a no-op, even with shaders OFF. Flush our own source here.
+    private static final MultiBufferSource.BufferSource BUFFERS=MultiBufferSource.immediate(new BufferBuilder(262144));
+    private static boolean loggedReceive,loggedDraw;
 
     private PortalRitualRenderer() {}
 
@@ -30,6 +36,10 @@ public final class PortalRitualRenderer {
         ClientLevel level = Minecraft.getInstance().level;
         if (level != owner) { CHARGES.clear(); owner = level; }
         if (level == null) return;
+        if (!loggedReceive && elapsed>=0) {
+            com.mojang.logging.LogUtils.getLogger().info("[TN-C Portal] client received ritual packet at {}",pos);
+            loggedReceive=true;
+        }
         if (elapsed < 0 || elapsed > PortalRitualTiming.DURATION) CHARGES.remove(pos);
         else CHARGES.put(pos.immutable(), new Charge(elapsed, level.getGameTime()));
     }
@@ -48,7 +58,7 @@ public final class PortalRitualRenderer {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || mc.level != owner) return;
         Vec3 camera = event.getCamera().getPosition();
-        var buffers = mc.renderBuffers().bufferSource();
+        var buffers = BUFFERS;
         VertexConsumer vertices = buffers.getBuffer(RenderType.lightning());
         for (var entry : CHARGES.entrySet()) {
             Vec3 center = Vec3.atBottomCenterOf(entry.getKey());
@@ -63,6 +73,10 @@ public final class PortalRitualRenderer {
             ritual(vertices, translation, Vec3.ZERO, elapsed);
         }
         buffers.endBatch(RenderType.lightning());
+        if (!loggedDraw) {
+            com.mojang.logging.LogUtils.getLogger().info("[TN-C Portal] ritual geometry submitted with independent immediate buffer");
+            loggedDraw=true;
+        }
     }
 
     private static void ritual(VertexConsumer out, Matrix4f pose, Vec3 center, double elapsed) {
@@ -71,24 +85,24 @@ public final class PortalRitualRenderer {
         for (int i = 0; i < 64 * ring; i++) {
             double a = Math.PI * 2 * i / 64;
             double b = Math.PI * 2 * (i + 1) / 64;
-            tube(out, pose, center.add(Math.cos(a) * 4.45, .04, Math.sin(a) * 4.45),
-                    center.add(Math.cos(b) * 4.45, .04, Math.sin(b) * 4.45), .045, 255, 22, 48, 165);
+            tube(out, pose, center.add(Math.cos(a) * 10.2, .07, Math.sin(a) * 10.2),
+                    center.add(Math.cos(b) * 10.2, .07, Math.sin(b) * 10.2), .09, 255, 22, 48, 185);
         }
         // The reference seal has five points; draw a precise luminous star above the block mosaic.
         for (int i = 0; i < 5; i++) {
             double a = -Math.PI / 2 + i * Math.PI * 2 / 5;
             double b = -Math.PI / 2 + (i + 2) * Math.PI * 2 / 5;
-            Vec3 start = center.add(Math.cos(a) * 4, .05, Math.sin(a) * 4);
-            Vec3 end = center.add(Math.cos(b) * 4, .05, Math.sin(b) * 4);
-            tube(out, pose, start, start.lerp(end, ring), .035, 255, 40, 60, 150);
+            Vec3 start = center.add(Math.cos(a) * 8.8, .08, Math.sin(a) * 8.8);
+            Vec3 end = center.add(Math.cos(b) * 8.8, .08, Math.sin(b) * 8.8);
+            tube(out, pose, start, start.lerp(end, ring), .065, 255, 40, 60, 180);
         }
-        Vec3 core = center.add(0, 14.5, 0);
+        Vec3 core = center.add(0, 20.5, 0);
         double converge = PortalRitualTiming.convergence(elapsed);
         if (converge > 0) {
             for (int dx : new int[]{-1, 1}) for (int dz : new int[]{-1, 1}) {
-                // Physical emitters: template (4/10,10,4/10), relative to landing (7,2,7).
-                Vec3 start = center.add(dx * 3, 8.5, dz * 3);
-                laser(out, pose, start, start.lerp(core, converge), .10 + converge * .08);
+                // Template (11/23,10,11/23), relative to landing (17,2,17).
+                Vec3 start = center.add(dx * 6, 8.5, dz * 6);
+                laser(out, pose, start, start.lerp(core, converge), .16 + converge * .12);
             }
             // Slow orbit around the suspended core, no strobing.
             for (int i = 0; i < 32; i++) {
@@ -97,6 +111,13 @@ public final class PortalRitualRenderer {
                 tube(out, pose, core.add(Math.cos(a) * 2.2, -.7, Math.sin(a) * 2.2),
                         core.add(Math.cos(b) * 2.2, -.7, Math.sin(b) * 2.2), .045, 255, 55, 65, 150);
             }
+        }
+        // Rising arcs around the traveller are visible at eye level without looking straight up.
+        for (int i=0;i<36;i++) {
+            double a=phase*2+i*Math.PI/9,b=phase*2+(i+1)*Math.PI/9;
+            double y=i*.13;
+            tube(out,pose,center.add(Math.cos(a)*2.8,y,Math.sin(a)*2.8),
+                    center.add(Math.cos(b)*2.8,y+.13,Math.sin(b)*2.8),.035,255,42,65,(int)(100*ring));
         }
         double release = PortalRitualTiming.release(elapsed);
         if (release > 0) {

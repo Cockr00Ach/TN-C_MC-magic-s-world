@@ -20,9 +20,20 @@ public final class SkyIslandEvents {
                         SkyIslandManager.refreshPortalArchitecture(c.getSource().getServer());
                         c.getSource().sendSuccess(() -> Component.literal("两座传送阵外观已更新；天空岛、NPC 和传送坐标保持不变。"), true);
                         return 1;
+                    } catch (SkyIslandManager.PortalChunksPending pending) {
+                        c.getSource().sendSuccess(()->Component.literal(pending.getMessage()),false);
+                        return 1;
                     } catch (Exception e) {
                         c.getSource().sendFailure(Component.literal("传送阵外观未更新：" + e.getMessage()));
                         return 0;
+                    }
+                })).then(Commands.literal("preview").executes(c -> {
+                    try {
+                        SkyIslandManager.previewRitual(c.getSource().getPlayerOrException());
+                        c.getSource().sendSuccess(()->Component.literal("开始 30 秒循环视觉预演，可在阵外观察；预演本身不会传送。"),false);
+                        return 1;
+                    } catch (Exception e) {
+                        c.getSource().sendFailure(Component.literal(e.getMessage()));return 0;
                     }
                 }))));
     }

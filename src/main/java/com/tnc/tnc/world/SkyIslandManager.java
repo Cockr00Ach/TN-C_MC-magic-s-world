@@ -52,7 +52,7 @@ public final class SkyIslandManager {
             {144, 144}, {144, -144}, {-144, 144}, {-144, -144}
     };
     private static final int[][] PORTAL_SAMPLES = {
-            {0, 0}, {-6, -6}, {-6, 6}, {6, -6}, {6, 6}
+            {0, 0}, {-12, -12}, {-12, 12}, {12, -12}, {12, 12}, {-16,0}, {16,0}, {0,-16}, {0,16}
     };
     private static final long PORTAL_COOLDOWN_TICKS = 60L;
     private static final String PLAYER_COOLDOWN = "tnc_sky_portal_cooldown";
@@ -60,6 +60,20 @@ public final class SkyIslandManager {
             Collections.synchronizedMap(new WeakHashMap<>());
     private static final Map<UUID, PortalChargeState> PORTAL_CHARGES = new HashMap<>();
     private static final Set<BlockPos> ACTIVE_RITUALS = new HashSet<>();
+    private static final Map<MinecraftServer,Long> PORTAL_UPGRADES = new WeakHashMap<>();
+    private static final Map<MinecraftServer,Map<BlockPos,Long>> PREVIEWS = new WeakHashMap<>();
+    static final class PortalChunksPending extends IOException {
+        PortalChunksPending() { super("正在加载两座传送阵及已有生物，加载完成后自动继续升级"); }
+    }
+
+    static boolean portalEntitiesReady(ServerLevel level,SkyIslandSavedData data) {
+        return data.activeChunks.stream().allMatch(level::areEntitiesLoaded);
+    }
+
+    static boolean needsPortalRefresh(SkyIslandSavedData data) {
+        // Retained tickets are also the durable checkpoint for an interrupted manual refresh.
+        return data.portalRevision<4 || !data.activeChunks.isEmpty();
+    }
 
     private SkyIslandManager() {
     }
@@ -75,6 +89,7 @@ public final class SkyIslandManager {
                     complete ? groundLanding(data) : BlockPos.ZERO);
 
             if (complete) {
+                if (needsPortalRefresh(data)) PORTAL_UPGRADES.putIfAbsent(server,overworld.getGameTime()+100);
                 return;
             }
 
@@ -103,6 +118,7 @@ public final class SkyIslandManager {
 
     public static void tick(MinecraftServer server) {
         ServerLevel level = server.overworld();
+        previewTick(level);
         SkyIslandSavedData data = SkyIslandSavedData.get(level);
 
         if (data.phase == SkyIslandSavedData.Phase.IDLE) {
@@ -125,7 +141,10 @@ public final class SkyIslandManager {
                 case SURVEY -> surveyStep(level, data, manifest);
                 case BUILDING -> buildStep(level, data, manifest);
                 case FINALIZING -> finalizeBuild(level, data, manifest);
-                case COMPLETE -> portalTick(level, data, manifest);
+                case COMPLETE -> {
+                    upgradePortalIfReady(level,data);
+                    portalTick(level, data, manifest);
+                }
                 case ERROR, IDLE -> {
                 }
             }
@@ -135,6 +154,8 @@ public final class SkyIslandManager {
     }
 
     public static void onServerStopping(MinecraftServer server) {
+        PORTAL_UPGRADES.remove(server);
+        PREVIEWS.remove(server);
         PORTAL_CHARGES.clear();
         ACTIVE_RITUALS.clear();
         ServerLevel level = server.overworld();
@@ -143,6 +164,49 @@ public final class SkyIslandManager {
             releaseActiveChunks(level, data);
         } catch (Throwable error) {
             LOGGER.error("[TN-C Sky Island] could not release chunk tickets during shutdown", error);
+        }
+    }
+
+    public static void previewRitual(ServerPlayer player) {
+        var level=player.server.overworld(); var data=SkyIslandSavedData.get(level);
+        BlockPos center=player.blockPosition();
+        if (data.isSkyIslandComplete()) {
+            var a=groundLanding(data); var b=islandLanding(data);
+            center=player.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(a))
+                    <player.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(b)) ? a:b;
+            if (player.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(center))>60*60)
+                throw new IllegalArgumentException("请在传送阵附近 60 格内预演");
+        }
+        if (player.level()!=level) throw new IllegalArgumentException("请在主世界使用");
+        PREVIEWS.computeIfAbsent(player.server,k->new HashMap<>()).put(center,level.getGameTime());
+    }
+
+    private static void previewTick(ServerLevel level) {
+        var previews=PREVIEWS.get(level.getServer()); if (previews==null) return;
+        for (var it=previews.entrySet().iterator();it.hasNext();) {
+            var p=it.next(); long age=level.getGameTime()-p.getValue();
+            if (age>=600) {sendRitual(level,p.getKey(),-1);it.remove();}
+            else sendRitual(level,p.getKey(),(int)Math.min(PortalRitualTiming.DURATION,age%100));
+        }
+    }
+
+    private static void upgradePortalIfReady(ServerLevel level,SkyIslandSavedData data) {
+        var server=level.getServer(); Long when=PORTAL_UPGRADES.get(server);
+        if (when==null || level.getGameTime()<when) return;
+        try {
+            refreshPortalArchitecture(server);
+            PORTAL_UPGRADES.remove(server);
+            LOGGER.info("[TN-C Portal] automatically upgraded both altars to revision 4");
+        } catch (PortalChunksPending pending) {
+            PORTAL_UPGRADES.put(server,level.getGameTime()+2);
+        } catch (IOException blocked) {
+            if (blocked.getMessage().contains("玩家及生物")) {
+                PORTAL_UPGRADES.put(server,level.getGameTime()+200); return;
+            }
+            PORTAL_UPGRADES.remove(server);
+            LOGGER.warn("[TN-C Portal] safe upgrade deferred: {}",blocked.getMessage());
+            for (var p:level.players()) p.sendSystemMessage(Component.literal("§e传送阵外观升级暂缓，原功能保留："
+                    +blocked.getMessage()+"。移开障碍后 /tnc skyportal refresh"));
         }
     }
 
@@ -226,7 +290,7 @@ public final class SkyIslandManager {
                 data.bestSurveyScore);
     }
 
-    /** Selects the flattest dry 15x15 portal site in a ring around world spawn. */
+    /** Selects a dry site for the expanded ritual gate without changing the legacy landing offset. */
     private static BlockPos chooseGroundPortal(ServerLevel level, SkyIslandManifest manifest) {
         BlockPos spawn = level.getSharedSpawnPos();
         int bestScore = Integer.MAX_VALUE;
@@ -331,8 +395,8 @@ public final class SkyIslandManager {
         );
 
         if (data.activeChunks.isEmpty()) {
-            forceAreaChunks(level, data, islandPortalOrigin, 15, PortalArchitecture.HEIGHT, 15);
-            forceAreaChunks(level, data, groundPortalOrigin, 15, PortalArchitecture.HEIGHT, 15);
+            forceAreaChunks(level, data, PortalArchitecture.footprintOrigin(islandPortalOrigin), PortalArchitecture.WIDTH, PortalArchitecture.HEIGHT, PortalArchitecture.WIDTH);
+            forceAreaChunks(level, data, PortalArchitecture.footprintOrigin(groundPortalOrigin), PortalArchitecture.WIDTH, PortalArchitecture.HEIGHT, PortalArchitecture.WIDTH);
             data.waitUntilTick = level.getGameTime() + 2L;
             data.setDirty();
             return;
@@ -342,17 +406,21 @@ public final class SkyIslandManager {
         }
         ensureActiveChunksLoaded(level, data);
 
+        if (!portalEntitiesReady(level,data)) return;
+
         var islandPlan = PortalArchitecture.prepare(level, manifest.islandPortal(), islandPortalOrigin, false);
         var groundPlan = PortalArchitecture.prepare(level, manifest.groundPortal(), groundPortalOrigin, false);
+        var supports = PortalArchitecture.prepareSupports(level,groundPortalOrigin);
         islandPlan.apply(level);
         groundPlan.apply(level);
-        supportGroundPortal(level, groundPortalOrigin);
+        supports.apply(level);
 
         ensureLanding(level, islandLanding(data));
         ensureLanding(level, groundLanding(data));
         releaseActiveChunks(level, data);
 
         data.phase = SkyIslandSavedData.Phase.COMPLETE;
+        data.portalRevision = 4;
         data.lastError = "";
         data.setDirty();
         LOGGER.info("[TN-C Sky Island] generation complete: pieces={}, blocks={}, center={}, {}, {}; arrival={}, {}, {}",
@@ -392,41 +460,30 @@ public final class SkyIslandManager {
         if (!isComplete(data, manifest)) throw new IOException("天空岛尚未生成完成");
         BlockPos island = new BlockPos(data.arrivalX - 7, data.arrivalY - 1, data.arrivalZ - 7);
         BlockPos ground = new BlockPos(data.groundPortalX, data.groundPortalY, data.groundPortalZ);
+        boolean pending=false;
         try {
-            forceAreaChunks(level, data, island, 15, PortalArchitecture.HEIGHT, 15);
-            forceAreaChunks(level, data, ground, 15, PortalArchitecture.HEIGHT, 15);
+            forceAreaChunks(level, data, PortalArchitecture.footprintOrigin(island), PortalArchitecture.WIDTH, PortalArchitecture.HEIGHT, PortalArchitecture.WIDTH);
+            forceAreaChunks(level, data, PortalArchitecture.footprintOrigin(ground), PortalArchitecture.WIDTH, PortalArchitecture.HEIGHT, PortalArchitecture.WIDTH);
             ensureActiveChunksLoaded(level, data);
-            var islandPlan = PortalArchitecture.prepare(level, manifest.islandPortal(), island, true);
-            var groundPlan = PortalArchitecture.prepare(level, manifest.groundPortal(), ground, true);
+            // Block chunks load synchronously, saved entities do not. Keep tickets while the
+            // entity manager processes its asynchronous inbox on subsequent server ticks.
+            if (!portalEntitiesReady(level,data)) {
+                pending=true;
+                PORTAL_UPGRADES.put(server,level.getGameTime()+2);
+                throw new PortalChunksPending();
+            }
+            var islandPlan = PortalArchitecture.prepare(level, manifest.islandPortal(), island, true,data.portalRevision<4);
+            var groundPlan = PortalArchitecture.prepare(level, manifest.groundPortal(), ground, true,data.portalRevision<4);
             islandPlan.apply(level);
             groundPlan.apply(level);
             ensureLanding(level,islandLanding(data));
             ensureLanding(level,groundLanding(data));
+            data.portalRevision=4; data.setDirty();
         } finally {
-            releaseActiveChunks(level,data);
+            if (!pending) releaseActiveChunks(level,data);
         }
     }
 
-    private static void supportGroundPortal(ServerLevel level, BlockPos origin) {
-        for (int x = 0; x < 15; x++) {
-            for (int z = 0; z < 15; z++) {
-                double distance = Math.hypot(x - 7, z - 7);
-                if (distance > 6.7) {
-                    continue;
-                }
-                for (int depth = 1; depth <= 5; depth++) {
-                    BlockPos support = origin.offset(x, -depth, z);
-                    if (!level.getBlockState(support).isAir()
-                            && level.getFluidState(support).isEmpty()) {
-                        break;
-                    }
-                    level.setBlock(support, depth <= 2
-                            ? Blocks.COBBLESTONE.defaultBlockState()
-                            : Blocks.STONE.defaultBlockState(), 3);
-                }
-            }
-        }
-    }
 
     private static void ensureLanding(ServerLevel level, BlockPos landing) {
         BlockPos floor = landing.below();

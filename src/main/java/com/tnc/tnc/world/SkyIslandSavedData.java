@@ -21,6 +21,7 @@ public final class SkyIslandSavedData extends SavedData {
     }
 
     int version;
+    int portalRevision;
     Phase phase = Phase.IDLE;
     int nextPiece;
     boolean layoutReady;
@@ -107,6 +108,7 @@ public final class SkyIslandSavedData extends SavedData {
     static SkyIslandSavedData load(CompoundTag tag) {
         SkyIslandSavedData data = new SkyIslandSavedData();
         data.version = tag.getInt("Version");
+        data.portalRevision = tag.getInt("PortalRevision");
         try {
             data.phase = Phase.valueOf(tag.getString("Phase"));
         } catch (IllegalArgumentException ignored) {
@@ -163,6 +165,7 @@ public final class SkyIslandSavedData extends SavedData {
     @Override
     public CompoundTag save(CompoundTag tag) {
         tag.putInt("Version", version);
+        tag.putInt("PortalRevision", portalRevision);
         tag.putString("Phase", phase.name());
         tag.putInt("NextPiece", nextPiece);
         tag.putBoolean("LayoutReady", layoutReady);
