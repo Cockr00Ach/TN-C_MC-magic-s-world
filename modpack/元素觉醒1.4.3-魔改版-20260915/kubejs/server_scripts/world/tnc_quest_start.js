@@ -31,14 +31,17 @@ PlayerEvents.loggedIn(event => {
     const player = event.player
     TNC_STARTUP_QUESTS.forEach(idStr => {
         try {
-            const id = $ResourceLocation.parse(idStr)
-            const state = $WhisperingQuestsApi.getTeamState(player)
+            // ⚠️ 变量名不能叫 id —— KubeJS 脚本作用域里已有 var id，
+            //    用 const id 会抛 "redeclaration of var id"
+            //    （真踩过：任务因此一直没被接取，界面上就永远看不到）
+            const questId = $ResourceLocation.parse(idStr)
+            const questState = $WhisperingQuestsApi.getTeamState(player)
 
             // 幂等：已接取 / 已完成 就不重复接
-            if (state.activeQuests().contains(id)) return
-            if (state.completedQuests().contains(id)) return
+            if (questState.activeQuests().contains(questId)) return
+            if (questState.completedQuests().contains(questId)) return
 
-            const ok = $WhisperingQuestsApi.startQuest(player, id)
+            const ok = $WhisperingQuestsApi.startQuest(player, questId)
             if (ok) {
                 console.info(`[TN-C quest] 已接取 ${idStr}（任务书里现在应该能看到它了）`)
             } else {
