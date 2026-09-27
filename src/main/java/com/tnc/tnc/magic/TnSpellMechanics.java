@@ -141,6 +141,8 @@ public final class TnSpellMechanics {
     private static final double DIVINE_RADIUS = 20.0D;
     private static final double DIVINE_BALL_SCALE = 20.0D;
     private static final Map<UUID, Long> DIVINE_UNTIL = new ConcurrentHashMap<>();
+    /** 这一次施法是否已经铺过球了（防止窗口内每 tick 重复铺 ✓）。 */
+    private static final java.util.Set<UUID> DIVINE_FIRED = java.util.concurrent.ConcurrentHashMap.newKeySet();
 
     /** 谁在雷场 / 雷暴的窗口里（UUID -> 结束时的 gameTime）。 */
     private static final Map<UUID, Long> FIELD_UNTIL = new ConcurrentHashMap<>();
@@ -231,10 +233,15 @@ public final class TnSpellMechanics {
         }
         if (time > until) {
             DIVINE_UNTIL.remove(player.getUUID());
+            DIVINE_FIRED.remove(player.getUUID());
             return;
         }
-        if (time != until - DIVINE_WINDOW) {
-            return;         // 只在施法那一 tick 铺一轮 ✓
+        // ★ 2026-09-27 修：原来是 `time != until - DIVINE_WINDOW` 就 return ✗ ——
+        // 施法回调发生在玩家 tick 之后，机制层 tick 时那一 tick 已经过去了 ⇒ 条件永远不成立、
+        // 一个球都不生成（作者："t5 怎么光爆炸，模型没看见法阵没看见" ✗）。现在改成
+        // "窗口内第一次 tick 就铺"，漏不掉 ✓。
+        if (!DIVINE_FIRED.add(player.getUUID())) {
+            return;
         }
         ServerLevel level = player.serverLevel();
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class,
@@ -247,7 +254,7 @@ public final class TnSpellMechanics {
                 continue;
             }
             ball.asBall();
-            ball.configure(DIVINE_BALL_SCALE, 4, target.getY(), 9.0D);
+            ball.configure(DIVINE_BALL_SCALE, 6, target.getY(), 9.0D);
             ball.moveTo(target.getX(), target.getY(), target.getZ(), 0.0F, 0.0F);
             spawnMagicCircleAt(level, target.position(), 8.0D, 140);   // 阵铺在敌人脚下 ✓
             level.addFreshEntity(ball);
