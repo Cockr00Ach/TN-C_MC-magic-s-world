@@ -180,7 +180,7 @@ public final class TnSpellMechanics {
         ServerLevel level = player.serverLevel();
         net.minecraft.world.phys.HitResult hit = player.pick(STRIKE_RANGE, 0.0F, false);
         Vec3 at = hit.getLocation();
-        strikeVisual(level, at, 30, 2.4D);
+        strikeVisual(level, at, 30, 4.8D);   // x2 again (author 2026-09-27) -> 14.4x bolt
         level.playSound(null, at.x, at.y, at.z,
                 net.minecraft.sounds.SoundEvents.LIGHTNING_BOLT_THUNDER,
                 net.minecraft.sounds.SoundSource.PLAYERS, 1.2F, 1.0F);

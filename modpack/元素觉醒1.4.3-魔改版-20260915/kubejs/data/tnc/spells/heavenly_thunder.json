@@ -28,8 +28,8 @@
         "launch_height": 30,
         "launch_properties": {
           "velocity": 6.0,
-          "extra_launch_count": 14,
-          "extra_launch_delay": 2
+          "extra_launch_count": 29,
+          "extra_launch_delay": 1
         },
         "projectile": {
           "homing_angle": 1.0,
