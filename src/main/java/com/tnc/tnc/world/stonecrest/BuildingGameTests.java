@@ -129,7 +129,7 @@ public final class BuildingGameTests {
     public static void realFloatingIntersectionStopsBeforeAnyPlacement(GameTestHelper helper) {
         var l=helper.getLevel(); var origin=new BlockPos(896,200,112);
         var obstacle=origin.offset(18,0,2);
-        l.setBlock(obstacle,Blocks.GOLD_BLOCK.defaultBlockState(),18);
+        for (int y=80;y<l.getMaxBuildHeight();y++) l.setBlock(new BlockPos(obstacle.getX(),y,obstacle.getZ()),Blocks.GOLD_BLOCK.defaultBlockState(),18);
         String key=new LandmarkData.Job("landmark_floating_fixture",origin).key();
         LargeLandmarkJobs.request(l,"landmark_floating_fixture",origin);
         helper.succeedWhen(()->{
@@ -139,6 +139,32 @@ public final class BuildingGameTests {
             if (j.piece!=0 || !l.getBlockState(obstacle).is(Blocks.GOLD_BLOCK)
                     || !l.getBlockState(origin.offset(2,17,2)).isAir())
                 throw new IllegalStateException("Collision guard partially wrote the island");
+        });
+    }
+
+    @GameTest(template="building_test_empty",timeoutTicks=16000)
+    public static void floatingTowerAvoidanceKeepsLocateXZAndSurvivesJournalRecovery(GameTestHelper helper) {
+        var l=helper.getLevel();var original=new BlockPos(1568,132,112);
+        var tower=original.offset(2,17,2);
+        l.setBlock(tower,Blocks.GOLD_BLOCK.defaultBlockState(),18);
+        // A still higher floating tower must not be treated as solid terrain down to bedrock.
+        l.setBlock(original.offset(18,117,2),Blocks.QUARTZ_BLOCK.defaultBlockState(),18);
+        String key=new LandmarkData.Job("landmark_floating_fixture",original).key();
+        LargeLandmarkJobs.request(l,"landmark_floating_fixture",original);
+        boolean[] restored={false};
+        helper.succeedWhen(()->{
+            var j=LandmarkData.get(l).jobs.get(key);
+            if(j!=null && j.phase<0) throw new IllegalStateException(j.error);
+            if(j==null || j.phase!=3) throw new net.minecraft.gametest.framework.GameTestAssertException("Waiting for adaptive floating site");
+            if(j.origin.getX()!=original.getX() || j.origin.getZ()!=original.getZ() || j.origin.getY()==original.getY()
+                    || !l.getBlockState(tower).is(Blocks.GOLD_BLOCK)
+                    || !l.getBlockState(j.origin.offset(2,17,2)).is(Blocks.DIAMOND_BLOCK))
+                throw new IllegalStateException("Lost tower, geometry or locate identity");
+            if(!restored[0]) {
+                // Simulate a crash after atomic journal publication but before global origin save.
+                j.origin=original;j.initialized=false;j.phase=0;restored[0]=true;
+                throw new net.minecraft.gametest.framework.GameTestAssertException("Waiting for journal origin recovery");
+            }
         });
     }
 

@@ -85,6 +85,7 @@ public final class LargeLandmarkJobs {
                 if (j.manifest().floating()) {
                     var d=j.manifest().dimensions();
                     j.floatingFootprint=new FloatingFootprint(d.getX(),d.getZ(),d.getY());
+                    j.clearance=new FloatingClearance(Math.max(80,l.getMinBuildHeight()+8),l.getMaxBuildHeight()-4-d.getY());
                     j.validated=0; // Rebuild the transient footprint on every recovery, including completed jobs.
                 }
                 j.initialized=true;
@@ -147,7 +148,17 @@ public final class LargeLandmarkJobs {
                 || s.is(BlockTags.TERRACOTTA) || s.is(Blocks.GRAVEL) || s.is(Blocks.SNOW_BLOCK);
     }
     private static void survey(ServerLevel l,LandmarkData.Job j) throws java.io.IOException {
-        if (j.tile>=j.tileCount()) { LandmarkJournal.commit(l,j); j.tile=0; j.phase=1; return; }
+        if (j.tile>=j.tileCount()) {
+            if (j.manifest().floating()) {
+                int y=j.clearance.choose(j.origin.getY());
+                if (y==Integer.MIN_VALUE) throw new IllegalStateException("浮岛场地在允许高度内没有完整净空，未覆盖现有建筑");
+                if (y!=j.origin.getY()) {
+                    LogUtils.getLogger().info("[TN-C Landmark] adjusted floating altitude {} from {} to {} (XZ unchanged)",j.key(),j.origin.getY(),y);
+                    j.origin=new BlockPos(j.origin.getX(),y,j.origin.getZ());
+                }
+            }
+            LandmarkJournal.commit(l,j); j.tile=0; j.phase=1; return;
+        }
         if (!used(j)) { j.tile++; return; }
         var p=j.tilePos(); if (!area(l,p,16,16)) return;
         for (var c:TICKETS.get(l.getServer())) {
@@ -162,10 +173,15 @@ public final class LargeLandmarkJobs {
             int ground=high; var bp=new BlockPos(p.getX()+x,ground,p.getZ()+z);
             while (ground>l.getMinBuildHeight()+1 && !natural(l.getBlockState(bp)) && high-ground<48) { ground--; bp=bp.below(); }
             var top=l.getBlockState(bp); if (!natural(top)) top=Blocks.GRASS_BLOCK.defaultBlockState();
-            if (m.floating() && j.floatingFootprint.intersects(high,j.origin.getY(),lx,lz))
-                throw new IllegalStateException("Floating island would intersect existing terrain at "
-                        +(p.getX()+x)+","+(p.getZ()+z)+" surface="+high
-                        +" actualBottom="+(j.origin.getY()+j.floatingFootprint.bottomAt(lx,lz)));
+            if (m.floating()) {
+                int bottom=j.floatingFootprint.bottomAt(lx,lz),ceiling=j.floatingFootprint.topAt(lx,lz);
+                var check=new BlockPos.MutableBlockPos(p.getX()+x,0,p.getZ()+z);
+                for (int y=Math.max(l.getMinBuildHeight(),j.clearance.minimum+bottom-4);
+                     y<=Math.min(high,Math.min(l.getMaxBuildHeight()-1,j.clearance.maximum+ceiling+4));y++) {
+                    check.setY(y);
+                    if (!l.getBlockState(check).isAir()) j.clearance.obstacle(y,bottom,ceiling);
+                }
+            }
             j.surfaces[idx]=high; j.grounds[idx]=ground;
             int material=j.palette.indexOf(top); if (material<0) { material=j.palette.size(); j.palette.add(top); }
             j.materials[idx]=material;

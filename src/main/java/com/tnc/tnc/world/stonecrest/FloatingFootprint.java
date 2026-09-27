@@ -9,10 +9,12 @@ import java.util.Arrays;
 final class FloatingFootprint {
     private final int width, depth, height;
     private final int[] bottom;
+    private final int[] top;
 
     FloatingFootprint(int width, int depth, int height) {
         this.width=width; this.depth=depth; this.height=height;
         bottom=new int[width*depth]; Arrays.fill(bottom,Integer.MAX_VALUE);
+        top=new int[width*depth]; Arrays.fill(top,Integer.MIN_VALUE);
     }
 
     void include(CompoundTag template, BlockPos offset) {
@@ -32,6 +34,7 @@ final class FloatingFootprint {
             if (x<0 || z<0 || y<0 || x>=width || z>=depth || y>=height)
                 throw new IllegalStateException("Floating template writes outside manifest bounds");
             bottom[z*width+x]=Math.min(bottom[z*width+x],y);
+            top[z*width+x]=Math.max(top[z*width+x],y);
         }
     }
 
@@ -40,6 +43,7 @@ final class FloatingFootprint {
     }
 
     boolean occupied(int x,int z) { return bottomAt(x,z)!=Integer.MAX_VALUE; }
+    int topAt(int x,int z) { return top[z*width+x]; }
 
     boolean intersects(int surface,int originY,int x,int z) {
         return occupied(x,z) && surface>=originY+bottomAt(x,z)-4;

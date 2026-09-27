@@ -1,0 +1,4 @@
+# Serialize early mod setup: Aether Redux 2.0.19 registers placement modifiers
+# during common_setup and can race other registry writers on multicore CPUs.
+# This does not limit normal world ticking or rendering threads.
+maxThreads = 1

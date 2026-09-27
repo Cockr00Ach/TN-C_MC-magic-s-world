@@ -18,8 +18,13 @@ final class LandmarkJournal {
     static boolean restore(ServerLevel l,LandmarkData.Job j) throws IOException {
         var p=path(l,j); if (!Files.exists(p)) return false;
         var t=NbtIo.readCompressed(p.toFile());
-        if (!t.getString("Fingerprint").equals(j.manifest().fingerprint()) || t.getLong("Origin")!=j.origin.asLong())
+        var planned=net.minecraft.core.BlockPos.of(t.getLong("Origin"));
+        boolean sameSite=t.contains("DiscoveryOrigin") ? t.getLong("DiscoveryOrigin")==j.discoveryOrigin.asLong()
+                && planned.getX()==j.discoveryOrigin.getX() && planned.getZ()==j.discoveryOrigin.getZ()
+                : t.getLong("Origin")==j.origin.asLong();
+        if (!t.getString("Fingerprint").equals(j.manifest().fingerprint()) || !sameSite)
             throw new IOException("Landmark asset changed; refusing to overwrite the old occurrence: "+j.key());
+        j.origin=planned;
         j.surfaces=t.getIntArray("Surfaces"); j.grounds=t.getIntArray("Grounds"); j.materials=t.getIntArray("Materials");
         j.preserved.load(t.getLongArray("PreservedBlocks"));
         if (j.surfaces.length!=j.columns() || j.grounds.length!=j.columns() || j.materials.length!=j.columns())
@@ -33,6 +38,7 @@ final class LandmarkJournal {
     static void commit(ServerLevel l,LandmarkData.Job j) throws IOException {
         var p=path(l,j); if (Files.exists(p)) throw new IOException("Existing immutable plan: "+p);
         var t=new CompoundTag(); t.putString("Fingerprint",j.manifest().fingerprint()); t.putLong("Origin",j.origin.asLong());
+        t.putLong("DiscoveryOrigin",j.discoveryOrigin.asLong());
         t.putIntArray("Surfaces",j.surfaces); t.putIntArray("Grounds",j.grounds); t.putIntArray("Materials",j.materials);
         t.putLongArray("PreservedBlocks",j.preserved.save());
         var pal=new ListTag(); for (var s:j.palette) pal.add(NbtUtils.writeBlockState(s)); t.put("Palette",pal);
