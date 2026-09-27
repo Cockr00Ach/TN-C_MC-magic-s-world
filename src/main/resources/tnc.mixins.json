@@ -6,6 +6,9 @@
   "mixins": [
     "ConquestBushMixin",
     "SpellHelperManaGateMixin",
+    "WhisperQuestDumpMixin",
+    "WhisperSyncDumpMixin",
+    "WhisperClientDumpMixin",
     "StatusBarBarsMixin"
   ],
   "client": [

@@ -33,8 +33,14 @@ public final class TNEffects {
     public static final DeferredRegister<MobEffect> EFFECTS =
             DeferredRegister.create(ForgeRegistries.MOB_EFFECTS, TNMod.MODID);
 
-    /** 雷速线统一用的紫色（和魔力条一套配色）。 */
-    private static final int COLOR_LIGHTNING = 0x7C5CE0;
+    /**
+     * 雷速线统一用的颜色 —— <b>2026-09-22 从紫改成雷的青色</b>。
+     *
+     * <p>这个颜色同时决定两件事：原版 HUD 里效果图标的底色 ✓，以及玩家身上那圈
+     * 效果粒子的颜色 ✓（原版 {@code MobEffectInstance} 的可见粒子用它）。
+     * 以前是 {@code 0x7C5CE0}（偏紫，和魔力条一套），作者要"雷的体现"后改成青白。
+     */
+    private static final int COLOR_LIGHTNING = 0x9FE8FF;
 
     /** 雷速：+25% 移速（amp1 = +50%，被"闪电降低冷却"复用）。 */
     public static final RegistryObject<MobEffect> LIGHTNING_HASTE =
@@ -45,12 +51,34 @@ public final class TNEffects {
     /** 极速雷风：+70% 移速（拖尾伤害由机制层处理）。 */
     public static final RegistryObject<MobEffect> LIGHTNING_WIND =
             EFFECTS.register("lightning_wind", () -> new AttributeBuff(
-                    0x9C86F5, Attributes.MOVEMENT_SPEED, 0.70D,
+                    0x7FE8FF, Attributes.MOVEMENT_SPEED, 0.70D,
                     AttributeModifier.Operation.MULTIPLY_BASE));
 
     /** 环绕雷球：本身不加属性，只是个"光环开着"的标记（电击逻辑在机制层）。 */
     public static final RegistryObject<MobEffect> ORBITING_THUNDER_ORB =
             EFFECTS.register("orbiting_thunder_orb", () -> new MobEffect(
+                    MobEffectCategory.BENEFICIAL, COLOR_LIGHTNING) {
+            });
+
+    /**
+     * 雷场（t2）的"场开着"标记 —— 劈人的逻辑在 {@code TnSpellMechanics} 里 ✓。
+     *
+     * <p>作者 2026-09-27："雷场就是有敌人，**每个敌人劈两下**" ✓ ——
+     * 原来这个法术是引擎的 {@code CLOUD}（每 10 tick 自动打一次范围内所有人 ✗），
+     * 现在改成 SELF ＋ 这个标记，由我们自己在第 20 / 60 tick 各劈一轮：出现在场里的敌人正好挨两下 ✓。
+     */
+    public static final RegistryObject<MobEffect> LIGHTNING_FIELD =
+            EFFECTS.register("lightning_field", () -> new MobEffect(
+                    MobEffectCategory.BENEFICIAL, COLOR_LIGHTNING) {
+            });
+
+    /**
+     * 雷暴（t4）的"暴开着"标记 —— 作者："雷暴就是**一直劈到时间结束**" ✓。
+     *
+     * <p>机制层每 15 tick 挑范围内几个敌人各劈一道闪电，持续整个 buff 时间 ✓。
+     */
+    public static final RegistryObject<MobEffect> LIGHTNING_STORM =
+            EFFECTS.register("lightning_storm", () -> new MobEffect(
                     MobEffectCategory.BENEFICIAL, COLOR_LIGHTNING) {
             });
 
@@ -109,7 +137,7 @@ public final class TNEffects {
     private static final class AscensionEffect {
 
         static MobEffect create() {
-            MobEffect effect = new AttributeBuff(0xE4DCFF, Attributes.ATTACK_DAMAGE, 0.30D,
+            MobEffect effect = new AttributeBuff(0xCFF4FF, Attributes.ATTACK_DAMAGE, 0.30D,
                     AttributeModifier.Operation.MULTIPLY_BASE);
             // spell_power 的学派属性（软依赖：没有那个 mod 就跳过）
             for (String school : new String[]{"arcane", "fire", "frost", "healing", "lightning", "soul",
