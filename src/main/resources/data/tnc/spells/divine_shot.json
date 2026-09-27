@@ -17,7 +17,23 @@
     "animation": "spell_engine:one_handed_area_release",
     "sound": { "id": "entity.lightning_bolt.thunder", "volume": 1.5 }
   },
-  "area_impact": {
+  "impact": [
+    {
+      "action": {
+        "type": "SPAWN",
+        "spawn": {
+          "entity_type_id": "tnc:shockwave",
+          "time_to_live_seconds": 2,
+          "delay_ticks": 0,
+          "placement": { "force_onto_ground": true }
+        }
+      },
+      "particles": [
+        { "particle_id": "minecraft:electric_spark", "shape": "SPHERE", "origin": "CENTER", "count": 120.0, "min_speed": 2.0, "max_speed": 6.0 }
+      ],
+      "sound": { "id": "entity.lightning_bolt.impact", "volume": 1.0 }
+    }
+  ],  "area_impact": {
     "radius": 20.0,
     "area": { "distance_dropoff": "NONE" },
     "particles": [
