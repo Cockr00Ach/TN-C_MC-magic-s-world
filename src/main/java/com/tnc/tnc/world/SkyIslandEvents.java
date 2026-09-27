@@ -14,6 +14,12 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 public final class SkyIslandEvents {
     @SubscribeEvent
     public void onCommands(RegisterCommandsEvent event) {
+        event.getDispatcher().register(Commands.literal("tnc").then(Commands.literal("skylandscape")
+                .requires(s->s.hasPermission(2))
+                .then(Commands.literal("status").executes(c->{c.getSource().sendSuccess(
+                        ()->Component.literal(SkyLandscapeUpgrade.status(c.getSource().getServer())),false);return 1;}))
+                .then(Commands.literal("retry").executes(c->{SkyLandscapeUpgrade.retry(c.getSource().getServer());
+                    c.getSource().sendSuccess(()->Component.literal("重新检查天空岛整修现场；不会强行覆盖冲突方块。"),false);return 1;}))));
         event.getDispatcher().register(Commands.literal("tnc").then(Commands.literal("skyportal")
                 .requires(s -> s.hasPermission(2)).then(Commands.literal("refresh").executes(c -> {
                     try {
@@ -49,11 +55,13 @@ public final class SkyIslandEvents {
     public void onServerTick(TickEvent.ServerTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
             SkyIslandManager.tick(event.getServer());
+            SkyLandscapeUpgrade.tick(event.getServer());
         }
     }
 
     @SubscribeEvent
     public void onServerStopping(ServerStoppingEvent event) {
         SkyIslandManager.onServerStopping(event.getServer());
+        SkyLandscapeUpgrade.stop(event.getServer());
     }
 }

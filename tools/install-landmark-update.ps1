@@ -28,7 +28,8 @@ try {
     foreach ($entry in @('com/tnc/tnc/world/stonecrest/LargeLandmarkJobs.class','data/tnc/buildings/end_pvp_island.json',
                         'data/tnc/buildings/heroskand_complex.json','data/tnc/buildings/gothic_cathedral.json','data/tnc/buildings/elden_coastal_castle.json',
                         'com/tnc/tnc/client/PortalRitualRenderer.class','com/tnc/tnc/network/PortalRitualPacket.class',
-                        'data/tnc/structures/sky_island/portal/ritual_gate.nbt')) {
+                        'data/tnc/structures/sky_island/portal/ritual_gate.nbt',
+                        'com/tnc/tnc/world/SkyLandscapeUpgrade.class','data/tnc/sky_island/landscape_v1.nbt')) {
         if (-not $zip.GetEntry($entry)) { throw "Build is missing $entry; rebuild before installing." }
     }
 } finally { $zip.Dispose() }
@@ -50,3 +51,4 @@ try {
 }
 Write-Host "Installed and SHA256 verified. Backup: $backup"
 Write-Host 'Restart PCL. Use a NEW TEST WORLD for complete structures. Old portals: /tnc skyportal refresh'
+Write-Host 'Existing sky-island landscape/tavern upgrade is automatic. Back up saves first; /tnc skylandscape status shows progress or conflicts.'
