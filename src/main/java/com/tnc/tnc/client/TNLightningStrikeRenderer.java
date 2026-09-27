@@ -57,15 +57,23 @@ public class TNLightningStrikeRenderer extends EntityRenderer<TNLightningStrikeE
             return;
         }
         float s = (float) entity.scale() * k;
+        // 球形态（神在投篮 t5）用 t5 那颗大雷球的模型 ✓
+        ResourceLocation modelId = entity.isBall()
+                ? ResourceLocation.fromNamespaceAndPath(TNMod.MODID, TNProjectileModels.LIGHTNINGBALL_2)
+                : MODEL_ID;
 
         poseStack.pushPose();
         poseStack.scale(s, s, s);
-        poseStack.translate(-CENTER_X, BOTTOM_Y, -CENTER_Z);
+        if (entity.isBall()) {
+            poseStack.translate(-0.59375F, -0.71875F, -0.53125F);   // 球心落在实体原点 ✓
+        } else {
+            poseStack.translate(-CENTER_X, BOTTOM_Y, -CENTER_Z);    // 闪电底端立在地面 ✓
+        }
         try {
             net.spell_engine.api.render.CustomModels.render(
                     net.spell_engine.client.render.SpellModelHelper.LAYERS
                             .get(net.spell_engine.api.render.LightEmission.RADIATE),
-                    Minecraft.getInstance().getItemRenderer(), MODEL_ID,
+                    Minecraft.getInstance().getItemRenderer(), modelId,
                     poseStack, buffer, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
         } catch (Throwable ignored) {
             // engine missing / API changed: the hit still has its particles, just no model

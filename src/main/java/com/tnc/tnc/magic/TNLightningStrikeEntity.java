@@ -51,6 +51,13 @@ public class TNLightningStrikeEntity extends Entity {
     private static final EntityDataAccessor<Integer> DATA_LIFE =
             SynchedEntityData.defineId(TNLightningStrikeEntity.class, EntityDataSerializers.INT);
 
+    /**
+     * 0 = 闪电（主链雷场/雷暴/雷击），1 = 大雷球（神在投篮 t5：每个敌人头顶一颗）。
+     * 同步给客户端，渲染器据此换模型（flash vs lightingball_2）✓
+     */
+    private static final EntityDataAccessor<Integer> DATA_KIND =
+            SynchedEntityData.defineId(TNLightningStrikeEntity.class, EntityDataSerializers.INT);
+
     /** 命中时该晃多猛（度，x100 同步给客户端）✓ */
     private static final EntityDataAccessor<Integer> DATA_SHAKE =
             SynchedEntityData.defineId(TNLightningStrikeEntity.class, EntityDataSerializers.INT);
@@ -85,6 +92,15 @@ public class TNLightningStrikeEntity extends Entity {
         return this.entityData.get(DATA_SHAKE) / 100.0D;
     }
 
+    /** 变成"大雷球"形态（神在投篮 t5）✓ */
+    public void asBall() {
+        this.entityData.set(DATA_KIND, 1);
+    }
+
+    public boolean isBall() {
+        return this.entityData.get(DATA_KIND) == 1;
+    }
+
     public double scale() {
         return this.entityData.get(DATA_SCALE) / 100.0D;
     }
@@ -99,6 +115,7 @@ public class TNLightningStrikeEntity extends Entity {
         this.entityData.define(DATA_SCALE, 450);
         this.entityData.define(DATA_LIFE, 4);
         this.entityData.define(DATA_SHAKE, 300);
+        this.entityData.define(DATA_KIND, 0);
     }
 
     @Override

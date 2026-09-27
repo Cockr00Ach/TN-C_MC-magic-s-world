@@ -136,6 +136,12 @@ public final class TnSpellMechanics {
     private static final float STORM_DAMAGE = 4.0F;
     private static final int STORM_TARGETS_PER_WAVE = 3;
 
+    /** 神在投篮（新 t5）：施法那一刻，范围内每个敌人头顶各出现一颗超级无敌大雷球 ✓ */
+    private static final int DIVINE_WINDOW = 40;
+    private static final double DIVINE_RADIUS = 20.0D;
+    private static final double DIVINE_BALL_SCALE = 20.0D;
+    private static final Map<UUID, Long> DIVINE_UNTIL = new ConcurrentHashMap<>();
+
     /** 谁在雷场 / 雷暴的窗口里（UUID -> 结束时的 gameTime）。 */
     private static final Map<UUID, Long> FIELD_UNTIL = new ConcurrentHashMap<>();
     private static final Map<UUID, Long> STORM_UNTIL = new ConcurrentHashMap<>();
@@ -211,6 +217,40 @@ public final class TnSpellMechanics {
                     strikeEnemy(level, player, target, FIELD_DAMAGE);
                 }
             }
+        }
+    }
+
+    /**
+     * 神在投篮（新 t5，作者 2026-09-27）：施法那一刻，**范围内每个敌人头顶各砸一颗超级无敌大雷球** ✓
+     * （就是把 t4 那颗大雷球复制到每个敌人头上 —— 球从天而降、落地炸半径 8 格 ✓）。
+     */
+    private static void tickDivineShot(ServerPlayer player, long time) {
+        Long until = DIVINE_UNTIL.get(player.getUUID());
+        if (until == null) {
+            return;
+        }
+        if (time > until) {
+            DIVINE_UNTIL.remove(player.getUUID());
+            return;
+        }
+        if (time != until - DIVINE_WINDOW) {
+            return;         // 只在施法那一 tick 铺一轮 ✓
+        }
+        ServerLevel level = player.serverLevel();
+        for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class,
+                player.getBoundingBox().inflate(DIVINE_RADIUS))) {
+            if (!isEnemy(player, target) || target.distanceTo(player) > DIVINE_RADIUS) {
+                continue;
+            }
+            TNLightningStrikeEntity ball = TNOrbEntities.LIGHTNING_STRIKE.get().create(level);
+            if (ball == null) {
+                continue;
+            }
+            ball.asBall();
+            ball.configure(DIVINE_BALL_SCALE, 4, target.getY(), 9.0D);
+            ball.moveTo(target.getX(), target.getY(), target.getZ(), 0.0F, 0.0F);
+            spawnMagicCircleAt(level, target.position(), 8.0D, 140);   // 阵铺在敌人脚下 ✓
+            level.addFreshEntity(ball);
         }
     }
 
@@ -380,10 +420,10 @@ public final class TnSpellMechanics {
         if (path.equals("explosive_thunder_orb")) {
             // (无魔法阵：爆炸雷球现在是 t3，不做 ✗)
         } else if (path.equals("cataclysm_thunder_orb")) {
-            spawnMagicCircle(player, 20.0D, 260);
+            spawnMagicCircleAt(player.serverLevel(), aimPoint(player), 20.0D, 260);
             // 大雷球的粒子不跟随 ✗ -> 自己开一个窗口，每 tick 在球的位置画环 ✓
             BIG_BALL_UNTIL.put(player.getUUID(), player.level().getGameTime() + BIG_BALL_WINDOW);
-        } else if (path.equals("orbiting_thunder_orb")) {
+        } else if (path.equals("divine_shot")) {
             // 环绕雷球（现在是 t4）：作者要求"同款魔法阵" ✓
             spawnMagicCircle(player, 8.0D, 200);
         }
@@ -419,6 +459,27 @@ public final class TnSpellMechanics {
      * @param radius 半径（格）
      * @param life   存在多少 tick
      */
+    /** 在**指定坐标**铺魔法阵（作者 2026-09-27：雷球的阵要出现在"敌人脚下"，才有瞄准的感觉 ✓）。 */
+    private static void spawnMagicCircleAt(ServerLevel level, Vec3 at, double radius, int life) {
+        TNMagicCircleEntity circle = TNOrbEntities.MAGIC_CIRCLE.get().create(level);
+        if (circle == null) {
+            return;
+        }
+        circle.configure(radius, life);
+        net.minecraft.core.BlockPos pos = net.minecraft.core.BlockPos.containing(at.x, at.y, at.z);
+        int guard = 0;
+        while (guard++ < 8 && pos.getY() > level.getMinBuildHeight() && level.getBlockState(pos.below()).isAir()) {
+            pos = pos.below();
+        }
+        circle.moveTo(at.x, pos.getY() + 0.04D, at.z, 0.0F, 0.0F);
+        level.addFreshEntity(circle);
+    }
+
+    /** 准星落点（用来把魔法阵铺在"瞄准的地方"✓）。 */
+    private static Vec3 aimPoint(ServerPlayer player) {
+        return player.pick(STRIKE_RANGE, 0.0F, false).getLocation();
+    }
+
     private static void spawnMagicCircle(ServerPlayer player, double radius, int life) {
         ServerLevel level = player.serverLevel();
         TNMagicCircleEntity circle = TNOrbEntities.MAGIC_CIRCLE.get().create(level);
@@ -482,6 +543,7 @@ public final class TnSpellMechanics {
         followBigBall(player, time);
         // 雷场 / 雷暴：窗口内自己劈敌人（视觉＋伤害都在里面）✓
         tickLightningField(player, time);
+        tickDivineShot(player, time);
         tickLightningStorm(player, time);
         // 无冷却：雷系"闪电登神"与风系"风神降临"（5 级）都给。
         // 风系用专属标记 wind_god 判断 —— 只有 5 级发它，所以 4 级"超级风速"
