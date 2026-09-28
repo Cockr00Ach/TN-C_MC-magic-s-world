@@ -1,0 +1,5 @@
+{
+  "_comment": "Paths for tools/dump-whisperingquests-api.ps1. Kept in a UTF-8 JSON file because a .ps1 with non-ASCII bytes is read as ANSI by PowerShell 5.1 and the CJK path gets mangled (project iron rule 7).",
+  "live_root": "E:\\download\\正式版 2.12.6.1\\.minecraft\\versions",
+  "jar_glob": "whisperingquests-*.jar"
+}

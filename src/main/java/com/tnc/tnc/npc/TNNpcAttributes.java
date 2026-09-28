@@ -45,6 +45,14 @@ public final class TNNpcAttributes {
             () -> new net.minecraftforge.common.ForgeSpawnEggItem(
                     TNNpcs.ZHUANGQUERANG, 0x2E4A8C, 0xF0F2F6, new Item.Properties()));
 
+    /**
+     * 周坐望的刷怪蛋（配色取自他自己的贴图：素白长袍 + 金饰。
+     * 主色 {@code 0xE8E4DA} = 银白须发 / 素袍，副色 {@code 0xB8912F} = 袍上的金色滚边）。
+     */
+    public static final RegistryObject<Item> ZUOWANG_SPAWN_EGG = SPAWN_EGGS.register("zuowang_spawn_egg",
+            () -> new net.minecraftforge.common.ForgeSpawnEggItem(
+                    TNNpcs.ZUOWANG, 0xE8E4DA, 0xB8912F, new Item.Properties()));
+
     private TNNpcAttributes() {
     }
 
@@ -58,5 +66,6 @@ public final class TNNpcAttributes {
         event.put(TNNpcs.CAVA.get(), TnDialogueNpc.attributes().build());
         event.put(TNNpcs.HUAI.get(), TnDialogueNpc.attributes().build());
         event.put(TNNpcs.ZHUANGQUERANG.get(), TnDialogueNpc.attributes().build());
+        event.put(TNNpcs.ZUOWANG.get(), TnDialogueNpc.attributes().build());
     }
 }

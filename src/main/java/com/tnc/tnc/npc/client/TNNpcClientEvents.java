@@ -54,5 +54,12 @@ public final class TNNpcClientEvents {
         } else {
             event.registerEntityRenderer(com.tnc.tnc.npc.TNNpcs.ZHUANGQUERANG.get(), provider);
         }
+        // 周坐望：与 self 同一条路（他也有自己的 Bedrock 模型，要 GeckoLib 才能画/播动作）✓，
+        // 所以复用同一个分流判断 GeoSelfSupport.available() ✓
+        if (com.tnc.tnc.npc.compat.GeoSelfSupport.available()) {
+            ZuowangBedrockRenderers.register(event);
+        } else {
+            event.registerEntityRenderer(com.tnc.tnc.npc.TNNpcs.ZUOWANG.get(), provider);
+        }
     }
 }

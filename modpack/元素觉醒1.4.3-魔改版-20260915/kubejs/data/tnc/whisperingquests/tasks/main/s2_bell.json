@@ -1,0 +1,35 @@
+{
+  "id": "tnc:main/s2_bell",
+  "enabled": true,
+  "weight": 1,
+  "category": "main",
+  "chapter": "tnc:chapters/s2",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "半夜里的钟",
+  "short_description": "潮进城了",
+  "description": "它们不咬人，只拆城。拆完就走，谁也不追。\n\n§7这不是掠夺，这是清场。§r",
+  "icon": "minecraft:bell",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "kill",
+      "id": "thin_the_tide",
+      "text": "清掉进城的潮（12只）",
+      "amount": 12,
+      "consume": false,
+      "entity": "minecraft:zombie"
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 60,
+      "count": 1
+    }
+  ],
+  "next": [
+    "tnc:main/s2_wall"
+  ]
+}

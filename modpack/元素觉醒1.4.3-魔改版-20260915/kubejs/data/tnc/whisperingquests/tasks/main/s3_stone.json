@@ -1,0 +1,42 @@
+{
+  "id": "tnc:main/s3_stone",
+  "enabled": true,
+  "weight": 1,
+  "category": "main",
+  "chapter": "tnc:chapters/s3",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "得石",
+  "short_description": "一颗石头。还是热的",
+  "description": "“看一眼。”\n\n§7他握紧了。然后是很多年的黑。§r",
+  "icon": "minecraft:echo_shard",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "dialogue",
+      "id": "read_the_stone",
+      "text": "看他留下的东西",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "tnc:zhengshi_4"
+    },
+    {
+      "type": "experience",
+      "amount": 250,
+      "count": 1
+    }
+  ],
+  "next": [
+    "tnc:main/s4_hand"
+  ]
+}

@@ -368,7 +368,18 @@ try {
     # Adding an NPC touches six places (entity type, attributes, spawn egg, renderer,
     # default placement, purge list). Missing the skin PNG or the lang entry does not
     # crash: the NPC is simply invisible / shows a raw translation key.
-    $npcIds = @('self', 'cava', 'huai', 'zhuangquerang')
+    #
+    # The name on the left is the entity id; the name on the right is what
+    # TnDialogueNpc.skinName() returns for it (usually the same, but an NPC whose
+    # Bedrock model paints the body at non-vanilla UVs ships a separate
+    # "<id>_humanoid.png", exactly like zhuangquerang).
+    $npcSkins = [ordered]@{
+        'self'           = 'self'
+        'cava'           = 'cava'
+        'huai'           = 'huai'
+        'zhuangquerang'  = 'zhuangquerang_humanoid'
+        'zuowang'        = 'zuowang_humanoid'
+    }
     $npcLangText = $null
     $npcLangEntry = $zip.Entries | Where-Object { $_.FullName -eq 'assets/tnc/lang/zh_cn.json' }
     if ($npcLangEntry) {
@@ -378,18 +389,76 @@ try {
     $missingSkin = @()
     $missingName = @()
     $missingScript = @()
-    foreach ($npc in $npcIds) {
-        if (-not ($zip.Entries | Where-Object { $_.FullName -eq "assets/tnc/textures/entity/$npc.png" })) { $missingSkin += $npc }
+    foreach ($npc in $npcSkins.Keys) {
+        $skin = $npcSkins[$npc]
+        if (-not ($zip.Entries | Where-Object { $_.FullName -eq "assets/tnc/textures/entity/$skin.png" })) { $missingSkin += "$npc ($skin.png)" }
         if ($npcLangText -and $npcLangText -notmatch [regex]::Escape("entity.tnc.$npc")) { $missingName += $npc }
         $found = $zip.Entries | Where-Object { $_.FullName -like "data/tnc/dialogues/$npc*.txt" }
         if (-not $found) { $missingScript += $npc }
     }
-    if ($missingSkin.Count -eq 0) { Ok "every skin NPC has its skin texture in the jar ($($npcIds.Count) npcs)" }
+    if ($missingSkin.Count -eq 0) { Ok "every skin NPC has its skin texture in the jar ($($npcSkins.Count) npcs)" }
     else { Fail ('npc skin missing from jar (renders as a missing texture): ' + ($missingSkin -join ', ')) }
     if ($missingName.Count -eq 0) { Ok 'every skin NPC has a lang name' }
     else { Fail ('npc lang name missing (shows a raw key): ' + ($missingName -join ', ')) }
     if ($missingScript.Count -eq 0) { Ok 'every skin NPC has a dialogue script' }
     else { Fail ('npc dialogue script missing (right-click does nothing useful): ' + ($missingScript -join ', ')) }
+
+    # ---- every Bedrock-model NPC must ship its geometry + texture ----
+    # These two are HARD requirements: without the .geo.json nothing is drawn at all,
+    # without the texture the model renders as the purple-black missing texture.
+    # The ANIMATION file is deliberately NOT required: a model with no animation file
+    # still renders fine (it just stands there), which is the intended state for any
+    # NPC whose Blockbench work has not landed yet.
+    $geoAssets = [ordered]@{
+        'self'    = @('geo/entity/self.geo.json',    'textures/entity/self_bedrock.png')
+        'zuowang' = @('geo/entity/zuowang.geo.json', 'textures/entity/zuowang_bedrock.png')
+    }
+    $missingGeo = @()
+    foreach ($npc in $geoAssets.Keys) {
+        foreach ($rel in $geoAssets[$npc]) {
+            if (-not ($zip.Entries | Where-Object { $_.FullName -eq "assets/tnc/$rel" })) { $missingGeo += "$npc -> $rel" }
+        }
+    }
+    if ($missingGeo.Count -eq 0) { Ok "every Bedrock-model NPC ships its geometry + texture ($($geoAssets.Count) npcs)" }
+    else { Fail ('Bedrock-model NPC asset missing (invisible or purple-black in game): ' + ($missingGeo -join ', ')) }
+
+    # ---- every quest id a dialogue references must name a real quest ----
+    # A wrong id here fails SILENTLY in game: the dialogue still plays fine, the
+    # quest just never completes (that is exactly how "talked to Self, quest did
+    # not finish" happened).  Checked for all four directives:
+    #   @quest / @quests  complete a quest   @activate  start one
+    #   @requires / @excludes  gate which script the picker may choose
+    # A bad id in @requires is just as silent: the script simply never plays.
+    $questPack = Find-TncLivePack -WorkPack $WorkPack
+    if ($questPack) {
+        $questDir = Join-Path $questPack 'kubejs\data\tnc\whisperingquests\tasks'
+        $badQuestRefs = @()
+        $questRefCount = 0
+        foreach ($e in $zip.Entries) {
+            if ($e.FullName -notlike 'data/tnc/dialogues/*.txt') { continue }
+            $dr = New-Object System.IO.StreamReader($e.Open(), [System.Text.Encoding]::UTF8)
+            $dtext = $dr.ReadToEnd(); $dr.Close()
+            $ids = @()
+            foreach ($m in [regex]::Matches($dtext, '(?m)^\s*@quest\s+(\S+)\s*$'))  { $ids += $m.Groups[1].Value }
+            foreach ($m in [regex]::Matches($dtext, '(?m)^\s*@quests\s+(.+)$'))     { $ids += ($m.Groups[1].Value.Trim() -split '\s+') }
+            foreach ($m in [regex]::Matches($dtext, '(?m)^\s*@activate\s+(\S+)\s*$')) { $ids += $m.Groups[1].Value }
+            foreach ($m in [regex]::Matches($dtext, '(?m)^\s*@requires\s+(\S+)\s*$')) { $ids += $m.Groups[1].Value }
+            foreach ($m in [regex]::Matches($dtext, '(?m)^\s*@excludes\s+(\S+)\s*$')) { $ids += $m.Groups[1].Value }
+            foreach ($qid in $ids) {
+                $questRefCount++
+                # tnc:main/s1_self -> <tasks>\main\s1_self.json
+                # NOTE: strip the namespace, then keep the FULL path after it --
+                # the file lives under tasks/<category>/, not directly under tasks/.
+                $rel = if ($qid.Contains(':')) { $qid.Substring($qid.IndexOf(':') + 1) } else { $qid }
+                $relPath = $rel -replace '/', '\'
+                if (-not (Test-Path (Join-Path $questDir ($relPath + '.json')))) {
+                    $badQuestRefs += "$($e.FullName) -> $qid"
+                }
+            }
+        }
+        if ($badQuestRefs.Count -eq 0) { Ok "every quest id a dialogue references exists ($questRefCount reference(s))" }
+        else { Fail ('dialogue references a quest that does not exist (the dialogue plays, the quest silently never completes): ' + ($badQuestRefs -join ', ')) }
+    }
 
     # ---- the maid-model NPC: GeckoLib renders it, so three files must ship together ----
     # Missing any of them is SILENT: no geometry = nothing drawn, wrong animation name =
@@ -461,7 +530,8 @@ try {
     $ourItems = @('sword', 'magic_wand', 'fireball',
                   'canjuan_1a', 'canjuan_1b', 'canjuan_3', 'canjuan_4', 'canjuan_5', 'canjuan_6',
                   'zhengshi_qianqing', 'zhengshi_1', 'zhengshi_2', 'zhengshi_3', 'zhengshi_4',
-                  'self_spawn_egg', 'cava_spawn_egg', 'huai_spawn_egg', 'zhuangquerang_spawn_egg')
+                  'self_spawn_egg', 'cava_spawn_egg', 'huai_spawn_egg', 'zhuangquerang_spawn_egg',
+                  'zuowang_spawn_egg')
     $noModel = @()
     $noTexture = @()
     foreach ($item in $ourItems) {
@@ -471,8 +541,16 @@ try {
         $modelText = $mr.ReadToEnd(); $mr.Close()
         $ref = [regex]::Match($modelText, '"layer0"\s*:\s*"([^"]+)"')
         if (-not $ref.Success) { continue }      # 走 parent（如 template_spawn_egg）的不用查贴图 ✓
-        $texPath = ($ref.Groups[1].Value -replace '^([^:]+):', '$1:textures/') + '.png'
-        if (-not ($zip.Entries | Where-Object { $_.FullName -eq ("assets/" + $texPath) })) { $noTexture += "$item -> $($ref.Groups[1].Value)" }
+        # NOTE: do NOT write this as -replace '^([^:]+):', '$1:textures/'.
+        # PowerShell parses '$1:' as a SCOPE-QUALIFIED variable name, so the
+        # replacement never expands and you get "assets/tnc:textures/..." -
+        # a path that can never match, so every item looked like it was missing
+        # its texture (fixed 2026-09-29).
+        $layer = $ref.Groups[1].Value
+        $colon = $layer.IndexOf(':')
+        if ($colon -lt 0) { continue }           # 没写命名空间 = 指向原版贴图，不在我们 jar 里查
+        $texPath = "assets/" + $layer.Substring(0, $colon) + "/textures/" + $layer.Substring($colon + 1) + ".png"
+        if (-not ($zip.Entries | Where-Object { $_.FullName -eq $texPath })) { $noTexture += "$item -> $layer" }
     }
     if ($noModel.Count -eq 0) { Ok "all $($ourItems.Count) of our items have an item model" }
     else { Fail ('item has NO model (renders as the purple-black cube): ' + ($noModel -join ', ')) }

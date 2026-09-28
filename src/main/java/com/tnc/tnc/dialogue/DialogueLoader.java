@@ -22,6 +22,11 @@ import java.util.Optional;
  *   # 井号开头是注释，可以整行
  *   @id   tnc:self_first      剧本 id（必须与文件名一致）
  *   @next                     下一条剧本（可选）—— 本行之后的行是台词
+ *   @quest tnc:main/self_talk 可选：本段演完**完成**这条任务（可写多行）
+ *   @quests a b c             可选：一行完成多条（空格分隔）
+ *   @activate tnc:main/xxx    可选：本段演完**接取**哪条任务（与 @quest 是两件事）
+ *   @requires tnc:main/xxx    可选：**必须先完成**这条任务，本段才会被选中（可写多行）
+ *   @excludes tnc:main/xxx    可选：**完成**这条任务后本段就退场（可写多行）
  *   @act  pointcup            可选：给**紧接着的下一行台词**挂一个动作
  *
  *   旁白|                    说话人留空 = 旁白（那七处动作提示就这么写）
@@ -84,6 +89,10 @@ public final class DialogueLoader {
 
     private static DialogueScript parse(ResourceLocation id, BufferedReader reader) throws Exception {
         ResourceLocation next = null;
+        ResourceLocation activate = null;
+        List<ResourceLocation> quests = new ArrayList<>();
+        List<ResourceLocation> requires = new ArrayList<>();
+        List<ResourceLocation> excludes = new ArrayList<>();
         List<DialogueScript.Line> lines = new ArrayList<>();
         // 待挂到"下一行台词"上的动作名（见类注释里的 @act 说明）
         String pendingAction = null;
@@ -131,6 +140,37 @@ public final class DialogueLoader {
                 pendingActionLine = lineNo;
                 continue;
             }
+            // ★ 顺序要紧：这些 @指令 必须排在"说话人|台词"之前判断，
+            //   否则 "@quest tnc:main/xxx" 里没有竖线，会被下面当成格式错误 ✗。
+            if (line.startsWith("@quests")) {
+                // 一行完成多条（空格分隔）：收尾对话常常同时结掉本段和下一段的引子 ✓
+                for (String one : line.substring(7).trim().split("\\s+")) {
+                    if (!one.isEmpty()) {
+                        quests.add(ResourceLocation.parse(one));
+                    }
+                }
+                if (quests.isEmpty()) {
+                    throw new IllegalStateException("line " + lineNo
+                            + ": @quests needs at least one quest id");
+                }
+                continue;
+            }
+            if (line.startsWith("@quest")) {
+                quests.add(parseIdDirective(line, 6, lineNo, "@quest"));
+                continue;
+            }
+            if (line.startsWith("@activate")) {
+                activate = parseIdDirective(line, 9, lineNo, "@activate");
+                continue;
+            }
+            if (line.startsWith("@requires")) {
+                requires.add(parseIdDirective(line, 9, lineNo, "@requires"));
+                continue;
+            }
+            if (line.startsWith("@excludes")) {
+                excludes.add(parseIdDirective(line, 9, lineNo, "@excludes"));
+                continue;
+            }
             int bar = line.indexOf('|');
             if (bar < 0) {
                 throw new IllegalStateException("line " + lineNo
@@ -151,7 +191,23 @@ public final class DialogueLoader {
         // 配色主题：按剧本 id 的前缀自动定（zhuangquerang_second -> zhuangquerang），
         // 所以**加戏不用在 Java 里登记任何东西**，剧本文件一放就有对应颜色。
         String theme = DialogueTheme.paletteOf(id.getPath()).key();
-        return new DialogueScript(id, next, theme, List.copyOf(lines));
+        return new DialogueScript(id, next, theme, List.copyOf(quests), activate,
+                List.copyOf(requires), List.copyOf(excludes), List.copyOf(lines));
+    }
+
+    /**
+     * 解析 {@code @指令 <资源id>} 形式的一行。
+     *
+     * @param keyword 指令名（只用于报错）
+     * @param at      资源 id 在这一行里的起始下标（= 指令名长度 + 1）
+     */
+    private static ResourceLocation parseIdDirective(String line, int at, int lineNo, String keyword) {
+        String target = line.substring(at).trim();
+        if (target.isEmpty()) {
+            throw new IllegalStateException("line " + lineNo + ": " + keyword
+                    + " needs a quest id (e.g. " + keyword + " tnc:main/self_talk)");
+        }
+        return ResourceLocation.parse(target);
     }
 
     /** 剧本 id 的约定：{@code tnc:<npc>_<序号>}。 */

@@ -1,0 +1,39 @@
+{
+  "id": "tnc:main/s4_hand",
+  "enabled": true,
+  "weight": 1,
+  "category": "main",
+  "chapter": "tnc:chapters/s4",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "手放上去",
+  "short_description": "七样东西一起撞进来",
+  "description": "没有疼。是满。\n\n§7然后世界变成空白。§r",
+  "icon": "minecraft:amethyst_shard",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "location",
+      "id": "touch_the_rift",
+      "text": "把手放到裂口上",
+      "amount": 1,
+      "consume": false,
+      "radius": 8,
+      "waypoint_requires_tracking": true,
+      "x": 137,
+      "y": 82,
+      "z": -343
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 300,
+      "count": 1
+    }
+  ],
+  "next": [
+    "tnc:main/s4_lynn"
+  ]
+}

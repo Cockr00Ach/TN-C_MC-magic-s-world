@@ -104,6 +104,7 @@ public class TNMod
                 output.accept(com.tnc.tnc.npc.TNNpcAttributes.CAVA_SPAWN_EGG.get());
                 output.accept(com.tnc.tnc.npc.TNNpcAttributes.HUAI_SPAWN_EGG.get());
                 output.accept(com.tnc.tnc.npc.TNNpcAttributes.ZHUANGQUERANG_SPAWN_EGG.get());
+                output.accept(com.tnc.tnc.npc.TNNpcAttributes.ZUOWANG_SPAWN_EGG.get());
             }).build());
 
     // ------------------------------------------------------------------
@@ -142,9 +143,13 @@ public class TNMod
         // /tnc npc ... —— 登记/查看/重放固定 NPC 的坐标
         MinecraftForge.EVENT_BUS.register(new com.tnc.tnc.npc.NpcCommand());
         // 服务端资源重载（/reload 或重启）时清对话剧本缓存 ——
-        // 否则剧本 txt 改了、游戏里还是旧的（缓存是静态 Map）
-        MinecraftForge.EVENT_BUS.addListener((net.minecraftforge.event.AddReloadListenerEvent event) ->
-                com.tnc.tnc.dialogue.DialogueLoader.clearCache());
+        // 否则剧本 txt 改了、游戏里还是旧的（缓存是静态 Map）。
+        // ★ DialoguePicker 也有一份"这个 NPC 有哪些剧本"的缓存，一起清 ✓
+        //   （不清的话新增/改名的剧本要重启游戏才会被发现）。
+        MinecraftForge.EVENT_BUS.addListener((net.minecraftforge.event.AddReloadListenerEvent event) -> {
+            com.tnc.tnc.dialogue.DialogueLoader.clearCache();
+            com.tnc.tnc.dialogue.DialoguePicker.clearCache();
+        });
 
         // Register our mod's ForgeConfigSpec so that Forge can create and load the config file for us
         context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);

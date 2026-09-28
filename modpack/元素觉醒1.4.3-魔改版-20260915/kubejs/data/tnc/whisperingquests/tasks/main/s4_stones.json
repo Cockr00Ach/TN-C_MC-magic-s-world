@@ -1,0 +1,40 @@
+{
+  "id": "tnc:main/s4_stones",
+  "enabled": true,
+  "weight": 1,
+  "category": "main",
+  "chapter": "tnc:chapters/s4",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "四块石头",
+  "short_description": "主城。清晨。酒馆门口",
+  "description": "“等一件我不确定有没有发生过的事。”\n\n§7他把布收起来，一块一块收进怀里。§r",
+  "icon": "minecraft:heart_of_the_sea",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "dialogue",
+      "id": "the_four_stones",
+      "text": "回酒馆门口去看一眼",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "tnc:zhengshi_4"
+    },
+    {
+      "type": "experience",
+      "amount": 1000,
+      "count": 1
+    }
+  ],
+  "next": []
+}

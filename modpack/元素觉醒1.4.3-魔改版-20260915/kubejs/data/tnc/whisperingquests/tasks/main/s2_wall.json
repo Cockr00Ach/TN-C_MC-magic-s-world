@@ -1,0 +1,39 @@
+{
+  "id": "tnc:main/s2_wall",
+  "enabled": true,
+  "weight": 1,
+  "category": "main",
+  "chapter": "tnc:chapters/s2",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "墙上的那道痕",
+  "short_description": "东墙。那道焦痕不对劲",
+  "description": "笔直、很深、边缘发白——像被什么从外面一路犁进来。\n\n§7潮只会压墙。这道痕是从城外往城里打。§r",
+  "icon": "minecraft:blackstone",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "location",
+      "id": "read_the_mark",
+      "text": "去看那道痕",
+      "amount": 1,
+      "consume": false,
+      "radius": 12,
+      "waypoint_requires_tracking": true,
+      "x": 137,
+      "y": 82,
+      "z": -343
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 60,
+      "count": 1
+    }
+  ],
+  "next": [
+    "tnc:main/s2_mountain"
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "id": "tnc:main/s1_guild",
+  "enabled": true,
+  "weight": 1,
+  "category": "main",
+  "chapter": "tnc:chapters/s1",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "典籍馆最里面那一格",
+  "short_description": "去魔法协会的典籍馆，找管书的人",
+  "description": "他走之前在酒馆翻了一宿的书架。\n\n§7Self 记得他翻的是哪一格。§r",
+  "icon": "minecraft:bookshelf",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "location",
+      "id": "reach_archive",
+      "text": "前往典籍馆",
+      "amount": 1,
+      "consume": false,
+      "radius": 12,
+      "waypoint_requires_tracking": true,
+      "x": 137,
+      "y": 82,
+      "z": -343
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 30,
+      "count": 1
+    }
+  ],
+  "next": [
+    "tnc:main/s1_zhuang"
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "id": "tnc:main/s1_leave",
+  "enabled": true,
+  "weight": 1,
+  "category": "main",
+  "chapter": "tnc:chapters/s1",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "出城",
+  "short_description": "三匹马出城",
+  "description": "她问先去哪儿。你给不出方向。\n\n§7只知道他在查人——他在查谁？§r",
+  "icon": "minecraft:saddle",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "location",
+      "id": "leave_city",
+      "text": "走出城去",
+      "amount": 1,
+      "consume": false,
+      "radius": 24,
+      "waypoint_requires_tracking": true,
+      "x": 137,
+      "y": 82,
+      "z": -343
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "tnc:zhengshi_1"
+    },
+    {
+      "type": "experience",
+      "amount": 40,
+      "count": 1
+    }
+  ],
+  "next": [
+    "tnc:main/s2_bell"
+  ]
+}

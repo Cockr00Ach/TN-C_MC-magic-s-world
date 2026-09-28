@@ -1,0 +1,39 @@
+{
+  "id": "tnc:main/s3_gate",
+  "enabled": true,
+  "weight": 1,
+  "category": "main",
+  "chapter": "tnc:chapters/s3",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "门前",
+  "short_description": "一道几乎没有厚度的缝",
+  "description": "“这道口子不认属性，只认‘照’。”\n\n§7他拿自己照了三年，够开一次。§r",
+  "icon": "minecraft:end_portal_frame",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "location",
+      "id": "the_seam",
+      "text": "到那道缝前面去",
+      "amount": 1,
+      "consume": false,
+      "radius": 12,
+      "waypoint_requires_tracking": true,
+      "x": 137,
+      "y": 82,
+      "z": -343
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 120,
+      "count": 1
+    }
+  ],
+  "next": [
+    "tnc:main/s3_him"
+  ]
+}

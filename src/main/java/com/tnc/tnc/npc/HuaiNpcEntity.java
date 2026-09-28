@@ -25,9 +25,9 @@ import net.minecraft.world.level.Level;
  */
 public class HuaiNpcEntity extends TnDialogueNpc {
 
-    /** 剧本：{@code data/tnc/dialogues/huai_first.txt}。 */
+    /** 剧本：{@code data/tnc/dialogues/huai.txt}。 */
     public static final ResourceLocation FIRST_DIALOGUE =
-            ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "huai_first");
+            ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "huai");
 
     public HuaiNpcEntity(EntityType<? extends HuaiNpcEntity> type, Level level) {
         super(type, level);

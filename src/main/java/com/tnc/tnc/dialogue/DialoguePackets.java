@@ -171,8 +171,23 @@ public final class DialoguePackets {
                     // ★ 接力：这段演完了，如果它写了 @next，就把下一段推过去。
                     //   放在 markSeen 之后 —— 万一 next 加载失败，至少"看过了"已经落账，
                     //   玩家再右键还是能从第一段重新走，不会卡住。
-                    DialogueLoader.get(player.server.getResourceManager(), payload)
-                            .ifPresent(script -> DialogueNetwork.playNext(player, script));
+                    com.tnc.tnc.dialogue.DialogueLoader
+                            .get(player.server.getResourceManager(), payload)
+                            .ifPresent(script -> {
+                                // ★ 任务钩子：剧本写了 @quest / @activate 就在"这段真的演完"之后生效。
+                                //   必须放在这里（而不是 NPC 被右键时）—— 玩家中途关掉对话就不该算完成 ✓。
+                                //   我们的 NPC 既不是原版 Villager 也不走 p1nero_dl 对话库，
+                                //   所以 WhisperingQuests 自带的 QuestDialogueHandler 永远看不到它们，
+                                //   这条桥就是唯一的推进路径（用户 2026-09-29 反馈"对完话任务没完成"）。
+                                //   顺序：先接取后完成 —— 有些剧本可能同时声明两者 ✓。
+                                com.tnc.tnc.dialogue.compat.WhisperingQuestBridge
+                                        .tryStartQuest(player, script.activate());
+                                for (net.minecraft.resources.ResourceLocation questId : script.quests()) {
+                                    com.tnc.tnc.dialogue.compat.WhisperingQuestBridge
+                                            .onDialogueFinished(player, questId);
+                                }
+                                DialogueNetwork.playNext(player, script);
+                            });
                 }
             });
             context.setPacketHandled(true);

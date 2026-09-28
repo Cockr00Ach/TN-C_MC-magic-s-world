@@ -1,0 +1,48 @@
+{
+  "id": "tnc:main/s2_see",
+  "enabled": true,
+  "weight": 1,
+  "category": "main",
+  "chapter": "tnc:chapters/s2",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "看痕",
+  "short_description": "他让你先去把那道痕看清楚",
+  "description": "“东墙那道痕，还在。你要是真想问，就自己去看清楚。”\n\n§7他知道答案。但那是他的答案。§r",
+  "icon": "minecraft:spyglass",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "location",
+      "id": "back_to_the_mark",
+      "text": "再去一趟",
+      "amount": 1,
+      "consume": false,
+      "radius": 12,
+      "waypoint_requires_tracking": true,
+      "x": 137,
+      "y": 82,
+      "z": -343
+    },
+    {
+      "type": "dialogue",
+      "id": "report_back",
+      "text": "回去告诉他那是什么",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 60,
+      "count": 1
+    }
+  ],
+  "next": [
+    "tnc:main/s2_door"
+  ]
+}

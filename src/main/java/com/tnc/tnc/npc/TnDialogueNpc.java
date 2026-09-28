@@ -2,6 +2,7 @@ package com.tnc.tnc.npc;
 
 import com.tnc.tnc.dialogue.DialogueLoader;
 import com.tnc.tnc.dialogue.DialogueNetwork;
+import com.tnc.tnc.dialogue.DialoguePicker;
 import com.tnc.tnc.dialogue.DialogueProgress;
 import com.tnc.tnc.dialogue.DialogueScript;
 import net.minecraft.network.chat.Component;
@@ -125,9 +126,11 @@ public abstract class TnDialogueNpc extends PathfinderMob {
         if (!(player instanceof ServerPlayer serverPlayer)) {
             return InteractionResult.PASS;
         }
-        // 服务端决定播哪条剧本，再把整条推给客户端（原因见 DialoguePackets 的注释）
-        Optional<DialogueScript> script = DialogueLoader.get(
-                serverPlayer.server.getResourceManager(), dialogueId());
+        // 服务端决定播哪条剧本，再把整条推给客户端（原因见 DialoguePackets 的注释）。
+        // ★ 2026-09-29：不再固定播 dialogueId() —— 交给 DialoguePicker 按**任务进度**挑：
+        //   同一个 NPC 写了 self_first / self_02 / self_03 …，序号大的门槛不满足就往下回落。
+        //   这样"做完第一个任务才能听到那句话"是剧本文件里写门槛，不用改 Java ✓。
+        Optional<DialogueScript> script = DialoguePicker.pickFor(serverPlayer, skinName());
         if (script.isEmpty()) {
             player.displayClientMessage(Component.literal(
                     "\u00a7c[TN-C] \u5267\u672c\u52a0\u8f7d\u5931\u8d25\uff1a" + dialogueId()
@@ -138,7 +141,14 @@ public abstract class TnDialogueNpc extends PathfinderMob {
         return InteractionResult.SUCCESS;
     }
 
-    /** 这个玩家是否已经看过本条剧本（给任务/条件判断用）。 */
+    /**
+     * 这个玩家是否已经看过 {@link #dialogueId()} 那条剧本（给任务/条件判断用）。
+     *
+     * <p>⚠️ 注意：玩家实际看到的可能是 {@code DialoguePicker} 挑出来的**另一段**
+     * （{@code self_02} 之类），不一定是 {@code dialogueId()} ✓。
+     * 这个方法保留原语义（专指"首场"），需要"看过任意一段"时用
+     * {@link DialogueProgress#hasSeen} 配具体 id。
+     */
     public boolean playerHasSeen(ServerPlayer player) {
         return DialogueProgress.hasSeen(player, dialogueId());
     }

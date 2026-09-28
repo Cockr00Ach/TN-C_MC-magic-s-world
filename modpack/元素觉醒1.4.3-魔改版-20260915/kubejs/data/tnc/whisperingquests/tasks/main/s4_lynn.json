@@ -1,0 +1,36 @@
+{
+  "id": "tnc:main/s4_lynn",
+  "enabled": true,
+  "weight": 1,
+  "category": "main",
+  "chapter": "tnc:chapters/s4",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "时间间隙",
+  "short_description": "没有天，没有地，没有上下",
+  "description": "“你来了。”\n\n§7她从不动手。她只需要等。§r",
+  "icon": "minecraft:end_crystal",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "dialogue",
+      "id": "meet_lynn",
+      "text": "面对她",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 350,
+      "count": 1
+    }
+  ],
+  "next": [
+    "tnc:main/s4_ge"
+  ]
+}

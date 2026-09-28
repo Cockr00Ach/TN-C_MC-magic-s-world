@@ -1,0 +1,42 @@
+{
+  "id": "tnc:main/s2_mountain",
+  "enabled": true,
+  "weight": 1,
+  "category": "main",
+  "chapter": "tnc:chapters/s2",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "山上的那个人",
+  "short_description": "山里。一间很小的屋子",
+  "description": "问到的三个人都指这一个方向。\n\n§7门开着。一个老人坐在门里的阴影中。§r",
+  "icon": "tnc:zuowang_spawn_egg",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "dialogue",
+      "id": "talk_to_zuowang",
+      "text": "与周坐望对话",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "tnc:zhengshi_2"
+    },
+    {
+      "type": "experience",
+      "amount": 80,
+      "count": 1
+    }
+  ],
+  "next": [
+    "tnc:main/s2_see"
+  ]
+}

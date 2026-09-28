@@ -1,0 +1,36 @@
+{
+  "id": "tnc:main/s3_him",
+  "enabled": true,
+  "weight": 1,
+  "category": "main",
+  "chapter": "tnc:chapters/s3",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "他",
+  "short_description": "最里面。他站在那儿",
+  "description": "肩膀在抖，人钉得笔直。\n\n§7你叫了一声他的名字。§r",
+  "icon": "minecraft:netherite_sword",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "dialogue",
+      "id": "face_him",
+      "text": "面对他",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 150,
+      "count": 1
+    }
+  ],
+  "next": [
+    "tnc:main/s3_account"
+  ]
+}

@@ -28,9 +28,9 @@ import net.minecraft.world.level.Level;
  */
 public class ZhuangquerangNpcEntity extends TnDialogueNpc {
 
-    /** 首场剧本：{@code data/tnc/dialogues/zhuangquerang_first.txt}。 */
+    /** 首场剧本：{@code data/tnc/dialogues/zhuangquerang.txt}。 */
     public static final ResourceLocation FIRST_DIALOGUE =
-            ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "zhuangquerang_first");
+            ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "zhuangquerang");
 
     public ZhuangquerangNpcEntity(EntityType<? extends ZhuangquerangNpcEntity> type, Level level) {
         super(type, level);

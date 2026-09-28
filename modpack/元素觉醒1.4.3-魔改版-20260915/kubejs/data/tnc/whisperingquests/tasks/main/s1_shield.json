@@ -1,0 +1,36 @@
+{
+  "id": "tnc:main/s1_shield",
+  "enabled": true,
+  "weight": 1,
+  "category": "main",
+  "chapter": "tnc:chapters/s1",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "一面没打完的盾",
+  "short_description": "去铁匠铺找槐",
+  "description": "铁匠说：他十九了，还没出过城。\n\n§7“带着它出门，就带着它进门。”§r",
+  "icon": "minecraft:shield",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "dialogue",
+      "id": "talk_to_huai",
+      "text": "与槐对话",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 30,
+      "count": 1
+    }
+  ],
+  "next": [
+    "tnc:main/s1_leave"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "id": "tnc:main/s3_account",
+  "enabled": true,
+  "weight": 1,
+  "category": "main",
+  "chapter": "tnc:chapters/s3",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "三个人的账",
+  "short_description": "他们把账结在了这里",
+  "description": "槐横矾在前面，人没动；让一次都没犹豫。\n\n§7而你只能往前走。§r",
+  "icon": "minecraft:shield",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "dialogue",
+      "id": "both_of_them",
+      "text": "让他们把账结完",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "experience",
+      "amount": 200,
+      "count": 1
+    }
+  ],
+  "next": [
+    "tnc:main/s3_stone"
+  ]
+}

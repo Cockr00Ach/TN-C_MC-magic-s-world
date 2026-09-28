@@ -15,9 +15,9 @@ import net.minecraft.world.level.Level;
  */
 public class CavaNpcEntity extends TnDialogueNpc {
 
-    /** 剧本：{@code data/tnc/dialogues/cava_first.txt}（纯文本，编剧可直接改）。 */
+    /** 剧本：{@code data/tnc/dialogues/cava.txt}（纯文本，编剧可直接改）。 */
     public static final ResourceLocation FIRST_DIALOGUE =
-            ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "cava_first");
+            ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "cava");
 
     public CavaNpcEntity(EntityType<? extends CavaNpcEntity> type, Level level) {
         super(type, level);

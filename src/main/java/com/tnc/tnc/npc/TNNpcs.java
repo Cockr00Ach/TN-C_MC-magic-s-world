@@ -122,6 +122,38 @@ public final class TNNpcs {
     private TNNpcs() {
     }
 
+    /**
+     * 周坐望 —— 大光魔法师、最初魔法协会的成立者，隐居山林（作者 2026-09-28 做好了他的模型）。
+     *
+     * <p>参数与前面四个完全一致（玩家尺寸 / 不参与刷怪 / 10 区块追踪）。
+     *
+     * <p><b>模型分流</b>：装了 GeckoLib（整合包一定有）→ 实体是
+     * {@code ZuowangBedrockNpcEntity}，客户端用 GeckoLib 画 {@code zuowang.geo.json} ✓；
+     * 没装 → 父类 {@code ZuowangNpcEntity}，原版人形 + 64×64 降级皮肤 ✓。
+     * 分流点复用 {@code com.tnc.tnc.npc.compat.GeoSelfSupport}（与 self 同一个判断：
+     * 两者都只是"想用 GeckoLib 画自己的 Bedrock 模型"）✓。
+     *
+     * <p>id 就是 {@code zuowang} —— {@code /tnc npc} 的 id 是按注册表查实体类型解析的
+     * （见 {@code NpcCommand}），所以注册完 {@code /tnc npc here zuowang} 立刻可用 ✓，
+     * 唯一要同步的是 {@code purge all} 的硬编码名单 ✗。
+     */
+    public static final RegistryObject<EntityType<ZuowangNpcEntity>> ZUOWANG = registerZuowang();
+
+    private static RegistryObject<EntityType<ZuowangNpcEntity>> registerZuowang() {
+        if (GeoSelfSupport.available()) {
+            return ENTITY_TYPES.register("zuowang", () -> EntityType.Builder
+                    .of(GeoSelfSupport::createZuowang, MobCategory.MISC)
+                    .sized(0.6F, 1.8F)
+                    .clientTrackingRange(10)
+                    .build("tnc:zuowang"));
+        }
+        return ENTITY_TYPES.register("zuowang", () -> EntityType.Builder
+                .of(ZuowangNpcEntity::new, MobCategory.MISC)
+                .sized(0.6F, 1.8F)
+                .clientTrackingRange(10)
+                .build("tnc:zuowang"));
+    }
+
     public static void register(IEventBus modEventBus) {
         ENTITY_TYPES.register(modEventBus);
     }

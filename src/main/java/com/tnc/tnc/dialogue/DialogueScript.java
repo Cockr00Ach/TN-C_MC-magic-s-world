@@ -15,11 +15,44 @@ import java.util.List;
  * @param next    台词放完之后跳去的下一条剧本（可空）
  * @param theme   对话框配色主题名（见 {@link DialogueTheme}）；{@code null} = 默认金色
  * @param lines   台词行，按顺序播放
+ * @param quests  这段演完后要推进的 <b>WhisperingQuests 任务 id 列表</b>（可空 = 不推进任何任务）。
+ *                来自 {@code @quest <任务id>}（可写多行）或 {@code @quests a b c}。
+ *                ★ 允许<b>多条</b>是有意的：收尾对话常常要同时结掉"本段最后一环"和
+ *                "下一段的引子"，否则那两条会一条卡住一条 ✓。
+ * @param activate 这段演完后要<b>接取</b>的任务 id（可空 = 不接任务）。
+ *                来自 {@code @activate <任务id>}。与 {@code quests}（完成）是两件事 ✓。
+ * @param requires 前置门槛：<b>必须已完成</b>这些任务，这段才播（空 = 无门槛）。
+ *                来自 {@code @requires <任务id>}，可写多行。见 {@code DialoguePicker}。
+ * @param excludes 反向门槛：<b>已完成</b>其中任意一条，这段就<b>不再播</b>（空 = 不限）。
+ *                来自 {@code @excludes <任务id>} —— 同一个 NPC 的"后来那次对话"就靠它退场 ✓。
+ *                ★ 注意用"已完成"而不是"正在进行"：这样没接任务时也照样能对话，
+ *                  剧本自己会推进任务，不会出现"必须先接任务才能说话"的死锁 ✗。
+ *                ★★ {@code quests / activate / requires / excludes} 四个字段<b>只在服务端用</b>，
+ *                <b>不走网络</b> ✗ —— 客户端不需要知道这段戏跟哪条任务有关。
  */
 public record DialogueScript(ResourceLocation id,
                              ResourceLocation next,
                              String theme,
+                             List<ResourceLocation> quests,
+                             ResourceLocation activate,
+                             List<ResourceLocation> requires,
+                             List<ResourceLocation> excludes,
                              List<Line> lines) {
+
+    /** 这段剧本现在能不能对这名玩家播？（只看门槛，不看 id） */
+    public boolean gatesAllow(net.minecraft.server.level.ServerPlayer player) {
+        for (ResourceLocation needed : requires) {
+            if (!com.tnc.tnc.dialogue.compat.WhisperingQuestBridge.isQuestCompleted(player, needed)) {
+                return false;
+            }
+        }
+        for (ResourceLocation blocked : excludes) {
+            if (com.tnc.tnc.dialogue.compat.WhisperingQuestBridge.isQuestCompleted(player, blocked)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     /**
      * 一行台词。
@@ -80,7 +113,10 @@ public record DialogueScript(ResourceLocation id,
             String action = buf.readUtf();
             lines.add(new Line(speaker, text, action.isEmpty() ? null : action));
         }
-        return new DialogueScript(id, next, theme.isEmpty() ? null : theme, List.copyOf(lines));
+        // ★ quests/activate/requires/excludes 故意不从网络读也不写：它们只在服务端用
+        //   （见 record 上的说明）。
+        return new DialogueScript(id, next, theme.isEmpty() ? null : theme,
+                List.of(), null, List.of(), List.of(), List.copyOf(lines));
     }
 
     /** 便于调试/日志：{@code 3 行} 这种摘要。 */
@@ -89,6 +125,10 @@ public record DialogueScript(ResourceLocation id,
         return id + " (" + lines.size() + " line(s)"
                 + (acts > 0 ? ", " + acts + " act" : "")
                 + (theme != null ? ", theme=" + theme : "")
-                + (next != null ? ", next=" + next : "") + ")";
+                + (next != null ? ", next=" + next : "")
+                + (quests.isEmpty() ? "" : ", quests=" + quests)
+                + (activate != null ? ", activate=" + activate : "")
+                + (requires.isEmpty() ? "" : ", requires=" + requires)
+                + (excludes.isEmpty() ? "" : ", excludes=" + excludes) + ")";
     }
 }

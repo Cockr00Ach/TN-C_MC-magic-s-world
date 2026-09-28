@@ -1,0 +1,42 @@
+{
+  "id": "tnc:main/s2_door",
+  "enabled": true,
+  "weight": 1,
+  "category": "main",
+  "chapter": "tnc:chapters/s2",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "门松了",
+  "short_description": "他答应跟你们走",
+  "description": "“潮进城了。以前它们只在没人烟的地方转。”\n\n§7再松下去，拆的就不只是一座边城。§r",
+  "icon": "minecraft:deepslate_tiles",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "dialogue",
+      "id": "open_the_door",
+      "text": "与周坐望对话",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "tnc:zhengshi_3"
+    },
+    {
+      "type": "experience",
+      "amount": 100,
+      "count": 1
+    }
+  ],
+  "next": [
+    "tnc:main/s3_gate"
+  ]
+}

@@ -43,4 +43,17 @@ public final class GeoSelfSupport {
     public static SelfNpcEntity create(EntityType<SelfNpcEntity> type, Level level) {
         return new com.tnc.tnc.npc.SelfBedrockNpcEntity(type, level);
     }
+
+    /**
+     * 周坐望的实体工厂 —— 与 {@link #create} 同一套写法，共用同一个分流点。
+     *
+     * <p>他的模型由 {@code tools/gen_zuowang_model.py} 生成（原版人形骨架 + 21 根须发骨骼），
+     * 与 self 一样必须由 GeckoLib 渲染才能播 Blockbench 关键帧 ✓。
+     *
+     * <p>⚠️ 同样：只有在 {@link #available()} 为真时才会被调用。
+     */
+    public static com.tnc.tnc.npc.ZuowangNpcEntity createZuowang(
+            EntityType<com.tnc.tnc.npc.ZuowangNpcEntity> type, Level level) {
+        return new com.tnc.tnc.npc.ZuowangBedrockNpcEntity(type, level);
+    }
 }

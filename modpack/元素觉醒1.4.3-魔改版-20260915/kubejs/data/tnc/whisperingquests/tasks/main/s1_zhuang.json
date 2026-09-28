@@ -1,0 +1,42 @@
+{
+  "id": "tnc:main/s1_zhuang",
+  "enabled": true,
+  "weight": 1,
+  "category": "main",
+  "chapter": "tnc:chapters/s1",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "不外借的那一半",
+  "short_description": "与庄鹊让对话",
+  "description": "她记了十一年的簿子，哪天谁借了什么都在上面。\n\n§7只有她还记得他借的是哪一本。§r",
+  "icon": "tnc:zhuangquerang_spawn_egg",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "dialogue",
+      "id": "talk_to_zhuangquerang",
+      "text": "与庄鹊让对话",
+      "amount": 1,
+      "consume": false,
+      "radius": 10,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [
+    {
+      "type": "item",
+      "amount": 0,
+      "count": 1,
+      "item": "tnc:zhengshi_qianqing"
+    },
+    {
+      "type": "experience",
+      "amount": 30,
+      "count": 1
+    }
+  ],
+  "next": [
+    "tnc:main/s1_shield"
+  ]
+}

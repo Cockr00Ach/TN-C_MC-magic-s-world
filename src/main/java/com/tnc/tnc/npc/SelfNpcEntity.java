@@ -34,9 +34,15 @@ import net.minecraft.world.level.Level;
  */
 public class SelfNpcEntity extends TnDialogueNpc {
 
-    /** 首场剧本：{@code data/tnc/dialogues/self_first.txt}（纯文本，编剧可直接改）。 */
+    /**
+     * 首场剧本：{@code data/tnc/dialogues/self.txt}（纯文本，编剧可直接改）。
+     *
+     * <p>⚠️ 自 2026-09-29 起，玩家实际看到的是 {@code self_02 / self_03 …} 里的**某一段** ——
+     * 由 {@code DialoguePicker} 按任务进度挑（序号大的门槛不满足就往下回落）。
+     * 这里返回的是**兜底/首场**那一段，用于"一条剧本都加载不出来"时的报错信息 ✓。
+     */
     public static final ResourceLocation FIRST_DIALOGUE =
-            ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "self_first");
+            ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "self");
 
     /**
      * 降级皮肤名（= 文件名，{@code textures/entity/self.png}，64×64 经典布局）。
