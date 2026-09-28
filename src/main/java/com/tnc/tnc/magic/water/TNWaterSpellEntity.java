@@ -42,7 +42,7 @@ public final class TNWaterSpellEntity extends Entity {
         cast.barrageAim=target!=null?target.getBoundingBox().getCenter():aimWall.getLocation();
         Vec3 desired=player.getEyePosition().add(player.getLookAngle().scale(tier==3?-2:2)).add(0,tier==3?2.5:0,0);
         if(tier==5) {
-            // The complete 14-block aperture must not start buried in the caster's own ground.
+            // The complete aperture must not start buried in the caster's own ground.
             double verticalRadius=WaterSpellRules.radius(tier)*Math.sqrt(Math.max(0,1-player.getLookAngle().y*player.getLookAngle().y));
             desired=desired.add(0,Math.max(0,verticalRadius-player.getEyeHeight()+.8-2*player.getLookAngle().y),0);
         }

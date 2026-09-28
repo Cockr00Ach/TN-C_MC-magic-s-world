@@ -32,6 +32,15 @@ final class WaterGeometry {
             quad(out,pose,start.add(v),end.add(v),end.add(w),start.add(w),r,g,b,a);
         }
     }
+    /** Filled aperture, encoded as degenerate quads for the shared QUADS / NO_CULL buffer. */
+    static void disk(VertexConsumer out,Matrix4f pose,Vec3 center,Vec3 dir,double radius,float r,float g,float b,float alpha) {
+        Vec3 right=WaterSpellRules.right(dir),up=right.cross(dir).normalize();
+        for(int i=0;i<64;i++) {
+            Vec3 p=center.add(radial(right,up,i*Math.PI/32,radius));
+            Vec3 q=center.add(radial(right,up,(i+1)*Math.PI/32,radius));
+            quad(out,pose,center,p,q,center,r,g,b,alpha);
+        }
+    }
     static void ring(VertexConsumer out,Matrix4f pose,Vec3 center,Vec3 dir,double radius,double width,double phase,float alpha) {
         Vec3 right=WaterSpellRules.right(dir),up=right.cross(dir).normalize();
         for(int i=0;i<96;i++) {

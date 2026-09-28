@@ -20,7 +20,7 @@ public final class WaterSpellRules {
     }
     public static int charge(int tier) { return tier == 5 ? 30 : tier == 4 ? 20 : 10; }
     public static int duration(int tier) { return tier == 5 ? 240 : tier == 4 ? 60 : 64; }
-    public static double radius(int tier) { return tier == 5 ? 7 : .8; }
+    public static double radius(int tier) { return tier == 5 ? circleRadius(tier) : .8; }
     public static double range(int tier) { return tier == 5 ? 96 : tier == 1 ? 40 : 48; }
     public static double circleRadius(int tier) { return tier == 5 ? 15 : tier == 4 ? 3.5 : 4; }
     public static double fieldRadius(int kind,int tier) {

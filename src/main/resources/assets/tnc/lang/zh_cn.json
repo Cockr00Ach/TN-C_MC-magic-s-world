@@ -13,7 +13,7 @@
   "spell.tnc.dragon_howl.name": "龙啸",
   "spell.tnc.dragon_howl.description": "在前方展开法阵，持续发射贯穿敌人的水激光；实体墙壁会阻挡。",
   "spell.tnc.dragon_ruin.name": "龙滅",
-  "spell.tnc.dragon_ruin.description": "直径30格的巨型法阵发射直径14格水激光，持续12秒、向前最多96格永久打穿地形。实际射程取决于钻进与区块加载；基岩、容器与保护区域会阻挡。",
+  "spell.tnc.dragon_ruin.description": "直径30格的巨型法阵整面发射等宽水激光，持续12秒、向前最多96格永久打穿地形。实际射程取决于钻进与区块加载；基岩、容器与保护区域会阻挡。",
   "spell.tnc.water_ripple.name": "水纹",
   "spell.tnc.water_ripple.description": "扩散水纹，击退近身敌人。",
   "spell.tnc.water_wave.name": "水波",

@@ -23,8 +23,15 @@ public final class TNWaterSpellRenderer extends EntityRenderer<TNWaterSpellEntit
         double length=e.length(),radius=WaterSpellRules.radius(e.tier());
         Vec3 end=dir.scale(length),right=WaterSpellRules.right(dir),up=right.cross(dir).normalize();
         WaterGeometry.tube(out,pose,Vec3.ZERO,end,radius,.015F,.16F,.85F,fade*.38F);
-        WaterGeometry.tube(out,pose,Vec3.ZERO,end,radius*.78,.025F,.5F,1,fade*.65F);
-        WaterGeometry.tube(out,pose,Vec3.ZERO,end,radius*.35,.4F,.87F,1,fade*.9F);
+        WaterGeometry.tube(out,pose,Vec3.ZERO,end,radius*(e.tier()==5?.94:.78),.025F,.5F,1,fade*.65F);
+        WaterGeometry.tube(out,pose,Vec3.ZERO,end,radius*(e.tier()==5?.72:.35),.4F,.87F,1,fade*.9F);
+        if(e.tier()==5) {
+            // The whole main sigil emits, not only a narrow bright tube in its center.
+            // Both caps stay inside the committed bore; no visual penetration of protected terrain.
+            Vec3 muzzle=dir.scale(Math.min(.08,length*.5));
+            WaterGeometry.disk(out,pose,muzzle,dir,radius,.015F,.36F,1,fade*.72F);
+            WaterGeometry.disk(out,pose,end,dir,radius,.025F,.5F,1,fade*.65F);
+        }
         // Two visible spiral ribbons convey the stream's direction and pressure.
         int strands=e.tier()==5?6:2;
         double step=e.tier()==5?1.6:.8;

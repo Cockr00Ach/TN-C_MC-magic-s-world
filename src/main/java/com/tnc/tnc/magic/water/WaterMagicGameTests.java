@@ -50,12 +50,39 @@ public final class WaterMagicGameTests {
     }
     @GameTest(template="water_test_large_empty",timeoutTicks=30)
     public static void largerBeamReachesBeyondOldRadiusWithinBudget(GameTestHelper h) {
-        h.assertTrue(WaterSpellRules.radius(5)==7&&WaterSpellRules.range(5)==96&&WaterSpellRules.circleRadius(5)==15,"Larger beam rules match requested design");
-        var p=caster(h);Vec3 start=Vec3.atCenterOf(h.absolutePos(new BlockPos(8,10,2)));
-        BlockPos outer=BlockPos.containing(start).offset(5,0,0);h.getLevel().setBlockAndUpdate(outer,Blocks.STONE.defaultBlockState());
-        var bore=new WaterTerrainBore(start,new Vec3(0,0,1),7,96);int edits=bore.tick(h.getLevel(),p);
+        h.assertTrue(WaterSpellRules.radius(5)==15&&WaterSpellRules.range(5)==96&&WaterSpellRules.radius(5)==WaterSpellRules.circleRadius(5),"Beam covers the whole main sigil");
+        h.assertTrue(WaterSpellRules.radius(4)==.8,"Other water lasers remain unchanged");
+        var p=caster(h);Vec3 start=Vec3.atCenterOf(h.absolutePos(new BlockPos(24,24,24)));
+        BlockPos outer=BlockPos.containing(start).offset(14,0,0);h.getLevel().setBlockAndUpdate(outer,Blocks.STONE.defaultBlockState());
+        var bore=new WaterTerrainBore(start,new Vec3(0,0,1),WaterSpellRules.radius(5),96);int edits=bore.tick(h.getLevel(),p);
         h.assertTrue(edits<=WaterTerrainBore.BLOCK_BUDGET,"Expanded bore keeps edit budget");
-        h.assertTrue(h.getLevel().getBlockState(outer).isAir(),"Radius five is no longer clamped to four");h.succeed();
+        h.assertTrue(h.getLevel().getBlockState(outer).isAir(),"Radius fourteen is no longer clamped to seven: "+bore.stopReason());h.succeed();
+    }
+    @GameTest(template="water_test_large_empty",timeoutTicks=30)
+    public static void fullApertureSliceRespectsBudgetAcrossTicks(GameTestHelper h) {
+        var p=caster(h);Vec3 start=Vec3.atCenterOf(h.absolutePos(new BlockPos(24,24,24)));
+        int blocks=0;
+        for(int x=-14;x<=14;x++)for(int y=-14;y<=14;y++)if(x*x+y*y<=14*14) {
+            h.getLevel().setBlockAndUpdate(BlockPos.containing(start).offset(x,y,0),Blocks.STONE.defaultBlockState());blocks++;
+        }
+        var bore=new WaterTerrainBore(start,new Vec3(0,0,1),WaterSpellRules.radius(5),1);
+        int removed=bore.tick(h.getLevel(),p);
+        h.assertTrue(removed==WaterTerrainBore.BLOCK_BUDGET&&bore.length()==0,"Full aperture must not advance before its first slice is committed");
+        for(int i=0;i<10&&bore.length()==0;i++) {
+            int edits=bore.tick(h.getLevel(),p);
+            h.assertTrue(edits<=WaterTerrainBore.BLOCK_BUDGET,"Full aperture retains per-tick edit budget");removed+=edits;
+        }
+        h.assertTrue(removed==blocks&&bore.length()==1&&!bore.stopped(),"Pending full-aperture edits complete without loss: "+bore.stopReason());h.succeed();
+    }
+    @GameTest(template="water_test_large_empty",timeoutTicks=30)
+    public static void fullApertureContainerAtEdgeStopsBeforeAnyEdits(GameTestHelper h) {
+        var p=caster(h);Vec3 start=Vec3.atCenterOf(h.absolutePos(new BlockPos(24,24,24)));
+        BlockPos center=BlockPos.containing(start),container=center.offset(14,0,0);
+        h.getLevel().setBlockAndUpdate(center,Blocks.STONE.defaultBlockState());
+        h.getLevel().setBlockAndUpdate(container,Blocks.CHEST.defaultBlockState());
+        var bore=new WaterTerrainBore(start,new Vec3(0,0,1),WaterSpellRules.radius(5),1);
+        h.assertTrue(bore.tick(h.getLevel(),p)==0&&bore.stopped()&&bore.length()==0,"Protection covers the new outer aperture before editing");
+        h.assertTrue(h.getLevel().getBlockState(center).is(Blocks.STONE)&&h.getLevel().getBlockState(container).is(Blocks.CHEST),"Whole blocked slice and container remain intact");h.succeed();
     }
     private static ServerPlayer caster(GameTestHelper h) {
         var player=FakePlayerFactory.get(h.getLevel(),new GameProfile(UUID.randomUUID(),"water-test"));
@@ -92,8 +119,8 @@ public final class WaterMagicGameTests {
     }
     @GameTest(template="water_test_large_empty",timeoutTicks=30)
     public static void dragonLaunchClearsFlatGrassWithoutRemovingProtection(GameTestHelper h) {
-        var p=caster(h);p.setPos(Vec3.atCenterOf(h.absolutePos(new BlockPos(8,2,8))).subtract(0,.5,0));p.setYRot(0);p.setXRot(0);
-        for(int x=0;x<16;x++)for(int z=0;z<16;z++) {
+        var p=caster(h);p.setPos(Vec3.atCenterOf(h.absolutePos(new BlockPos(24,2,24))).subtract(0,.5,0));p.setYRot(0);p.setXRot(0);
+        for(int x=0;x<48;x++)for(int z=0;z<48;z++) {
             h.getLevel().setBlockAndUpdate(h.absolutePos(new BlockPos(x,1,z)),Blocks.GRASS_BLOCK.defaultBlockState());
             h.getLevel().setBlockAndUpdate(h.absolutePos(new BlockPos(x,2,z)),Blocks.GRASS.defaultBlockState());
         }
@@ -101,8 +128,8 @@ public final class WaterMagicGameTests {
         h.assertTrue(old.stopped()&&old.length()==0,"Reproduce original eye-height grass obstruction");
         TNWaterSpellEntity.cast(p,net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tnc","dragon_ruin"));
         var cast=h.getLevel().getEntitiesOfClass(TNWaterSpellEntity.class,p.getBoundingBox().inflate(20)).get(0);
-        var bore=new WaterTerrainBore(cast.position(),cast.direction(),7,1);bore.tick(h.getLevel(),p);
-        Vec3 desired=p.getEyePosition().add(p.getLookAngle().scale(2)).add(0,7-p.getEyeHeight()+.8,0);
+        var bore=new WaterTerrainBore(cast.position(),cast.direction(),WaterSpellRules.radius(5),1);bore.tick(h.getLevel(),p);
+        Vec3 desired=p.getEyePosition().add(p.getLookAngle().scale(2)).add(0,WaterSpellRules.radius(5)-p.getEyeHeight()+.8,0);
         var obstruction=h.getLevel().clip(new net.minecraft.world.level.ClipContext(p.getEyePosition(),desired,net.minecraft.world.level.ClipContext.Block.COLLIDER,net.minecraft.world.level.ClipContext.Fluid.NONE,p));
         h.assertTrue(bore.length()>0,"Dragon muzzle must launch above its own ground footprint: "+cast.position()+" eye="+p.getEyePosition()+" dir="+cast.direction()+" look="+p.getLookAngle()+" obstruction="+obstruction+" block="+h.getLevel().getBlockState(obstruction.getBlockPos())+" stop="+bore.stopReason());
         cast.discard();h.succeed();

@@ -22,7 +22,7 @@ public final class WaterTerrainBore {
     private String stopReason="";
     public WaterTerrainBore(Vec3 start, Vec3 direction, double radius, double range) {
         this.start=start; this.direction=direction.normalize();
-        this.radius=Math.max(.1,Math.min(7,radius)); this.range=Math.max(0,Math.min(96,range));
+        this.radius=Math.max(.1,Math.min(WaterSpellRules.radius(5),radius)); this.range=Math.max(0,Math.min(96,range));
     }
     public double length() { return length; }
     public boolean stopped() { return stopped; }
