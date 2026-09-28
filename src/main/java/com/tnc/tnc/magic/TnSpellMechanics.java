@@ -208,12 +208,8 @@ public final class TnSpellMechanics {
             return;
         }
         for (SpellCatalog.Entry entry : SpellCatalog.all()) {
-            if (data.hasLearned(entry.id())) {
-                continue;
-            }
-            if (entry.tier() > data.maxTierFor(entry.element())) {
-                continue;                       // 档位还没到 ✓
-            }
+            // 独立魔法没有元素亲和力；乱魔仍在 GUI 手动学习，不能传 null 进亲和力数组。
+            if (!MagicStoneLearning.isElementalAutoLearnCandidate(data,entry))continue;
             MagicStoneLearning.unlock(data, entry);
         }
     }
@@ -578,7 +574,7 @@ public final class TnSpellMechanics {
         // ★ 自动补学（作者 2026-09-27）：链法术只要玩家的**档位已经解锁到它那一级**，就自动进魔法石 ✓
         // 目的：我改链 / 加档 / 换档之后（删环绕、加神在投篮、降超级无敌大雷球…）玩家不需要手敲
         // /tnc learn ✗ —— 之前正是那一步没成功，导致"法术在、但放不出来、也不扣蓝" ✗。
-        if (time % 40 == 0) {
+        if (time % 40 == 0&&!com.tnc.tnc.combat.DownedCombat.isDowned(player)) {
             autoLearnUnlocked(player);
         }
         // 雷场 / 雷暴：窗口内自己劈敌人（视觉＋伤害都在里面）✓

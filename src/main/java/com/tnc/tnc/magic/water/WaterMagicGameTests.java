@@ -182,31 +182,32 @@ public final class WaterMagicGameTests {
         level.setBlock(outside.below(),Blocks.STONE.defaultBlockState(),2|16);
         level.setBlock(outside,Blocks.COMPARATOR.defaultBlockState(),2|16);
         level.setBlock(outside.below(),Blocks.AIR.defaultBlockState(),2|16);
-        var control=new net.minecraft.world.level.block.Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.of()) {
-            @Override public void neighborChanged(net.minecraft.world.level.block.state.BlockState state,
-                    net.minecraft.world.level.Level world,BlockPos at,net.minecraft.world.level.block.Block changed,BlockPos from,boolean moving) {
-                level.setBlock(pos,Blocks.AIR.defaultBlockState(),2|16);
-            }
-        };
-        level.neighborChanged(control.defaultBlockState(),pos.offset(0,3,0),Blocks.STONE,pos.offset(0,3,0),false);
+        insideNeighborRemoval(h,pos.offset(0,3,0),()->level.setBlock(pos,Blocks.AIR.defaultBlockState(),2|16));
         h.assertTrue(level.getBlockState(outside).isAir(),"Control removal must reproduce actual queued comparator destruction");
         level.setBlock(pos,Blocks.CHEST.defaultBlockState(),2|16);
         level.setBlock(outside.below(),Blocks.STONE.defaultBlockState(),2|16);
         level.setBlock(outside,Blocks.COMPARATOR.defaultBlockState(),2|16);
         level.setBlock(outside.below(),Blocks.AIR.defaultBlockState(),2|16);
         var bore=new WaterTerrainBore(Vec3.atCenterOf(pos),new Vec3(0,0,1),.4,1);
-        // A supplied state starts a real CollectingNeighborUpdater chain without registering or placing a fixture block.
-        var trigger=new net.minecraft.world.level.block.Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.of()) {
-            @Override public void neighborChanged(net.minecraft.world.level.block.state.BlockState state,
-                    net.minecraft.world.level.Level world,BlockPos at,net.minecraft.world.level.block.Block changed,BlockPos from,boolean moving) {
-                bore.tick(level,p);
-            }
-        };
-        level.neighborChanged(trigger.defaultBlockState(),pos.offset(0,3,0),Blocks.STONE,pos.offset(0,3,0),false);
+        insideNeighborRemoval(h,pos.offset(0,3,0),()->bore.tick(level,p));
         h.assertTrue(level.getBlockState(pos).isAir()&&level.getBlockState(outside).is(Blocks.COMPARATOR),"Comparator notification cannot escape the guard through an existing neighbor queue");
         level.neighborChanged(outside,Blocks.STONE,outside.below());
         h.assertTrue(level.getBlockState(outside).isAir(),"Queued update isolation clears after removal");
         level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,new net.minecraft.world.phys.AABB(pos).inflate(3)).forEach(Entity::discard);h.succeed();
+    }
+    private static void insideNeighborRemoval(GameTestHelper h,BlockPos trigger,Runnable operation) {
+        var level=h.getLevel();
+        level.setBlock(trigger.below(),Blocks.STONE.defaultBlockState(),2|16);
+        level.setBlock(trigger,Blocks.REDSTONE_WIRE.defaultBlockState(),2|16);
+        level.setBlock(trigger.below(),Blocks.AIR.defaultBlockState(),2|16);
+        var fired=new java.util.concurrent.atomic.AtomicBoolean();
+        Consumer<BlockEvent.NeighborNotifyEvent> listener=event->{
+            if(event.getLevel()==level&&event.getPos().equals(trigger)&&fired.compareAndSet(false,true))operation.run();
+        };
+        MinecraftForge.EVENT_BUS.addListener(net.minecraftforge.eventbus.api.EventPriority.NORMAL,false,BlockEvent.NeighborNotifyEvent.class,listener);
+        try { level.neighborChanged(trigger,Blocks.STONE,trigger.below()); }
+        finally { MinecraftForge.EVENT_BUS.unregister(listener); }
+        h.assertTrue(fired.get(),"Real wire removal must enter its Forge neighbor callback inside the collecting update chain");
     }
     private static TNWaterFieldEntity crypt(GameTestHelper h,ServerPlayer p) {
         p.setPos(Vec3.atCenterOf(h.absolutePos(new BlockPos(32,8,20))));p.setYRot(0);p.setXRot(0);

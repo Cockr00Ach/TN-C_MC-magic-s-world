@@ -29,6 +29,12 @@ public final class MagicStoneLearning {
     private MagicStoneLearning() {
     }
 
+    /** Eligibility filter for the collaborator's periodic elemental catch-up learning. */
+    public static boolean isElementalAutoLearnCandidate(MagicStoneData data,SpellCatalog.Entry entry) {
+        return entry!=null&&!entry.independent()&&entry.element()!=null
+                &&!data.hasLearned(entry.id())&&entry.tier()<=data.maxTierFor(entry.element());
+    }
+
     /** 能不能解锁（不改数据），返回不能的原因；能解锁返回 {@link Result#OK}。 */
     public static Result check(MagicStoneData data, SpellCatalog.Entry entry) {
         if (data.hasLearned(entry.id())) {

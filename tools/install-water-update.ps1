@@ -8,6 +8,10 @@ $workPack=Find-TncWorkPack
 $files=@(@{Source=(Join-Path $TncBuildLibs 'tnc-1.0.0.jar');Relative='mods\tnc-1.0.0.jar'})
 $names=@('water_ripple','water_wave','wave_slash','tsunami','world_ending_sea','water_bind','water_prison','water_burial','abyss','sea_god_crypt','raindrop','first_rain','rainfall','downpour','flood_of_heaven')
 foreach($name in $names){$relative="kubejs\data\tnc\spells\$name.json";$files+=@{Source=(Join-Path $workPack $relative);Relative=$relative}}
+# The merged collaborator update needs its definition, referenced chapter, and login trigger together.
+foreach($relative in @('kubejs\data\tnc\whisperingquests\tasks\main\self_talk.json','kubejs\data\tnc\whisperingquests\chapters\main.json','kubejs\server_scripts\world\tnc_quest_start.js')){
+    $files+=@{Source=(Join-Path $workPack $relative);Relative=$relative}
+}
 foreach($f in $files){
     if(-not(Test-Path -LiteralPath $f.Source -PathType Leaf)){throw "Missing source $($f.Source)"}
     $f.Target=[IO.Path]::GetFullPath((Join-Path $pack $f.Relative))
