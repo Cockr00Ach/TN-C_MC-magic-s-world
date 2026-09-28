@@ -1,0 +1,123 @@
+{
+  "id": "544E430104000000",
+  "filename": "tnc_guide_04_ranks",
+  "group": "544E434755494445",
+  "title": "04 - 让协会记住你",
+  "icon": "minecraft:iron_sword",
+  "order_index": -97,
+  "default_hide_dependency_lines": true,
+  "default_quest_shape": "circle",
+  "quest_links": [],
+  "images": [],
+  "quests": [
+    {
+      "id": "544E430204000000",
+      "title": "&b&l让协会记住你",
+      "icon": "minecraft:iron_sword",
+      "x": 0.0,
+      "y": 0.0,
+      "size": 1.8,
+      "shape": "circle",
+      "description": [
+        "&b&l让协会记住你",
+        "&7等级积累经历，职称见证贡献",
+        "",
+        "&e职称与冠名试炼筹备中",
+        "",
+        "&f点击章节中的节点阅读说明。勾选只表示看过本节，不代表完成升级、买房或委托。",
+        "&7本批先搭任务书框架；筹备中的行为目标与奖励将在机制实装后开放。"
+      ],
+      "tasks": [
+        {
+          "id": "544E430304000000",
+          "type": "checkmark",
+          "title": "阅读本节（不发放玩法奖励）"
+        }
+      ],
+      "rewards": [],
+      "dependencies": []
+    },
+    {
+      "id": "544E430204000001",
+      "title": "六段成长",
+      "icon": "minecraft:iron_sword",
+      "x": -3.0,
+      "y": 3.0,
+      "size": 1.0,
+      "shape": "circle",
+      "description": [
+        "&e职称与冠名试炼筹备中",
+        "",
+        "&b&l六段成长",
+        "",
+        "&f初级冒险者：完成登记，通常接E，最高D。",
+        "&f精锐冒险者：Lv.10、声望100，通常D，最高C。",
+        "&f王级冒险者：Lv.25、声望350，通常C，最高B。",
+        "&f帝级冒险者：Lv.45、声望900，通常B，最高A。",
+        "&f龙级冒险者：Lv.65、声望1800，通常A，最高S。",
+        "&f冠名冒险者：神阶职称，Lv.85、声望3200及专属试炼，通常S。"
+      ],
+      "tasks": [
+        {
+          "id": "544E430304000001",
+          "type": "checkmark",
+          "title": "阅读本节（不发放玩法奖励）"
+        }
+      ],
+      "rewards": [],
+      "dependencies": []
+    },
+    {
+      "id": "544E430204000002",
+      "title": "不只看数字",
+      "icon": "minecraft:iron_sword",
+      "x": 3.0,
+      "y": 3.0,
+      "size": 1.0,
+      "shape": "circle",
+      "description": [
+        "&e职称与冠名试炼筹备中",
+        "",
+        "&b&l不只看数字",
+        "",
+        "&f等级与声望都满足后，还需完成晋升挑战。声望来自协会认可的委托与试炼，不靠给NPC塞钱或无限刷小怪。",
+        "&f世界委托按剧情解锁，不会在普通委托栏随机刷出。"
+      ],
+      "tasks": [
+        {
+          "id": "544E430304000002",
+          "type": "checkmark",
+          "title": "阅读本节（不发放玩法奖励）"
+        }
+      ],
+      "rewards": [],
+      "dependencies": []
+    },
+    {
+      "id": "544E430204000003",
+      "title": "属于你的名号",
+      "icon": "minecraft:iron_sword",
+      "x": -3.0,
+      "y": 6.0,
+      "size": 1.0,
+      "shape": "circle",
+      "description": [
+        "&e职称与冠名试炼筹备中",
+        "",
+        "&b&l属于你的名号",
+        "",
+        "&f最后的职称不是简单加上一个神字。冠名试炼后，你可以选择自己的名号，如“苍潮行者·玩家名”；本包NPC以后使用这个称呼。",
+        "&f名号不是法杖名字，冠名也不自动学会七系神法。具体试炼剧情由主线作者决定。"
+      ],
+      "tasks": [
+        {
+          "id": "544E430304000003",
+          "type": "checkmark",
+          "title": "阅读本节（不发放玩法奖励）"
+        }
+      ],
+      "rewards": [],
+      "dependencies": []
+    }
+  ]
+}

@@ -1,0 +1,312 @@
+{
+  "id": "544E430102000000",
+  "filename": "tnc_guide_02_weapons",
+  "group": "544E434755494445",
+  "title": "02 - 法杖与匠人",
+  "icon": "minecraft:stick",
+  "order_index": -99,
+  "default_hide_dependency_lines": true,
+  "default_quest_shape": "circle",
+  "quest_links": [],
+  "images": [
+    {
+      "image": "tnc:textures/guide/water_focus_1.png",
+      "x": -4.0,
+      "y": -4.0,
+      "width": 1.5,
+      "height": 1.5,
+      "rotation": 0.0
+    },
+    {
+      "image": "tnc:textures/guide/water_staff_2.png",
+      "x": -2.0,
+      "y": -4.0,
+      "width": 1.5,
+      "height": 1.5,
+      "rotation": 0.0
+    },
+    {
+      "image": "tnc:textures/guide/water_staff_3.png",
+      "x": 0.0,
+      "y": -4.0,
+      "width": 1.5,
+      "height": 1.5,
+      "rotation": 0.0
+    },
+    {
+      "image": "tnc:textures/guide/water_staff_4.png",
+      "x": 2.0,
+      "y": -4.0,
+      "width": 1.5,
+      "height": 1.5,
+      "rotation": 0.0
+    },
+    {
+      "image": "tnc:textures/guide/water_staff_5.png",
+      "x": 4.0,
+      "y": -4.0,
+      "width": 1.5,
+      "height": 1.5,
+      "rotation": 0.0
+    }
+  ],
+  "quests": [
+    {
+      "id": "544E430202000000",
+      "title": "&b&l法杖与匠人",
+      "icon": "minecraft:stick",
+      "x": 0.0,
+      "y": 0.0,
+      "size": 1.8,
+      "shape": "circle",
+      "description": [
+        "&b&l法杖与匠人",
+        "&7知识属于你，法器承载力量",
+        "",
+        "&e分级武器与匠人订单筹备中",
+        "",
+        "&f点击章节中的节点阅读说明。勾选只表示看过本节，不代表完成升级、买房或委托。",
+        "&7本批先搭任务书框架；筹备中的行为目标与奖励将在机制实装后开放。"
+      ],
+      "tasks": [
+        {
+          "id": "544E430302000000",
+          "type": "checkmark",
+          "title": "阅读本节（不发放玩法奖励）"
+        }
+      ],
+      "rewards": [],
+      "dependencies": []
+    },
+    {
+      "id": "544E430202000001",
+      "title": "五档法器",
+      "icon": "minecraft:stick",
+      "x": -3.0,
+      "y": 3.0,
+      "size": 1.0,
+      "shape": "circle",
+      "description": [
+        "&e分级武器与匠人订单筹备中",
+        "",
+        "&b&l五档法器",
+        "",
+        "&f水·冒险者法阵 → 水·精良法杖 → 水·王级法杖 → 水·传说级法杖 → 傲慢的水龙王。",
+        "&f精良是武器品级；勇者级是法术等级；王级冒险者是协会职称。三套体系不同，拿到神杖也不会凭空学会神法。"
+      ],
+      "tasks": [
+        {
+          "id": "544E430302000001",
+          "type": "checkmark",
+          "title": "阅读本节（不发放玩法奖励）"
+        }
+      ],
+      "rewards": [],
+      "dependencies": []
+    },
+    {
+      "id": "544E430202000002",
+      "title": "把材料带给匠人",
+      "icon": "minecraft:stick",
+      "x": 3.0,
+      "y": 3.0,
+      "size": 1.0,
+      "shape": "circle",
+      "description": [
+        "&e分级武器与匠人订单筹备中",
+        "",
+        "&b&l把材料带给匠人",
+        "",
+        "&f计划由匠人打造职业战斗装备：你寻找矿石、晶体和战利品，提交材料与人工费，匠人完成订单。第一件教学法器免人工费。",
+        "&f具体配方后续定稿。本页图标是装备概念展示，不是已经注册的新物品，也不要求你寻找不存在的配方。"
+      ],
+      "tasks": [
+        {
+          "id": "544E430302000002",
+          "type": "checkmark",
+          "title": "阅读本节（不发放玩法奖励）"
+        }
+      ],
+      "rewards": [],
+      "dependencies": []
+    },
+    {
+      "id": "544E430202000003",
+      "title": "自己建设生活",
+      "icon": "minecraft:stick",
+      "x": -3.0,
+      "y": 6.0,
+      "size": 1.0,
+      "shape": "circle",
+      "description": [
+        "&e分级武器与匠人订单筹备中",
+        "",
+        "&b&l自己建设生活",
+        "",
+        "&f农具、工作台、灶具和建筑部件仍可自己制作；取消自行打造的范围先是本包法杖和后续职业战斗装备，不删除全包配方。",
+        "&f战士路线后续设计。本批不更换现有施法法杖，不改变已学法术。"
+      ],
+      "tasks": [
+        {
+          "id": "544E430302000003",
+          "type": "checkmark",
+          "title": "阅读本节（不发放玩法奖励）"
+        }
+      ],
+      "rewards": [],
+      "dependencies": []
+    },
+    {
+      "id": "544E430202000004",
+      "title": "神杖各有名字",
+      "icon": "minecraft:stick",
+      "x": 3.0,
+      "y": 6.0,
+      "size": 1.0,
+      "shape": "circle",
+      "description": [
+        "&e分级武器与匠人订单筹备中",
+        "",
+        "&b&l神杖各有名字",
+        "",
+        "&f水：傲慢的水龙王。",
+        "&f其他元素命名草案：火·冠烬烈阳，雷·审判的天穹，风·无拘的长风，土·不动的山君，光·不灭的晨星，暗·吞夜的君主。",
+        "&f独特材料与奇遇是神杖的目标，不只是多付一笔金币。"
+      ],
+      "tasks": [
+        {
+          "id": "544E430302000004",
+          "type": "checkmark",
+          "title": "阅读本节（不发放玩法奖励）"
+        }
+      ],
+      "rewards": [],
+      "dependencies": []
+    },
+    {
+      "id": "544E430202000064",
+      "title": "水·冒险者法阵",
+      "icon": "minecraft:stick",
+      "x": -4.0,
+      "y": -2.0,
+      "size": 0.75,
+      "shape": "circle",
+      "description": [
+        "&e装备概念 - 尚未开放新物品",
+        "",
+        "&f两层水纹环与中央水滴，第一件法器。",
+        "",
+        "&7图标为本包原创草案。具体配方与匠人订单后续设计，不影响现有施法法杖。"
+      ],
+      "tasks": [
+        {
+          "id": "544E430302000064",
+          "type": "checkmark",
+          "title": "阅读本节（不发放玩法奖励）"
+        }
+      ],
+      "rewards": [],
+      "dependencies": []
+    },
+    {
+      "id": "544E430202000065",
+      "title": "水·精良法杖",
+      "icon": "minecraft:stick",
+      "x": -2.0,
+      "y": -2.0,
+      "size": 0.75,
+      "shape": "circle",
+      "description": [
+        "&e装备概念 - 尚未开放新物品",
+        "",
+        "&f双叉包裹蓝晶，开始具备完整杖身。",
+        "",
+        "&7图标为本包原创草案。具体配方与匠人订单后续设计，不影响现有施法法杖。"
+      ],
+      "tasks": [
+        {
+          "id": "544E430302000065",
+          "type": "checkmark",
+          "title": "阅读本节（不发放玩法奖励）"
+        }
+      ],
+      "rewards": [],
+      "dependencies": []
+    },
+    {
+      "id": "544E430202000066",
+      "title": "水·王级法杖",
+      "icon": "minecraft:stick",
+      "x": 0.0,
+      "y": -2.0,
+      "size": 0.75,
+      "shape": "circle",
+      "description": [
+        "&e装备概念 - 尚未开放新物品",
+        "",
+        "&f三叉潮冠与侧晶，承载王级力量。",
+        "",
+        "&7图标为本包原创草案。具体配方与匠人订单后续设计，不影响现有施法法杖。"
+      ],
+      "tasks": [
+        {
+          "id": "544E430302000066",
+          "type": "checkmark",
+          "title": "阅读本节（不发放玩法奖励）"
+        }
+      ],
+      "rewards": [],
+      "dependencies": []
+    },
+    {
+      "id": "544E430202000067",
+      "title": "水·传说级法杖",
+      "icon": "minecraft:stick",
+      "x": 2.0,
+      "y": -2.0,
+      "size": 0.75,
+      "shape": "circle",
+      "description": [
+        "&e装备概念 - 尚未开放新物品",
+        "",
+        "&f双悬浮潮环，深蓝外层与明亮潮核。",
+        "",
+        "&7图标为本包原创草案。具体配方与匠人订单后续设计，不影响现有施法法杖。"
+      ],
+      "tasks": [
+        {
+          "id": "544E430302000067",
+          "type": "checkmark",
+          "title": "阅读本节（不发放玩法奖励）"
+        }
+      ],
+      "rewards": [],
+      "dependencies": []
+    },
+    {
+      "id": "544E430202000068",
+      "title": "傲慢的水龙王",
+      "icon": "minecraft:stick",
+      "x": 4.0,
+      "y": -2.0,
+      "size": 0.75,
+      "shape": "circle",
+      "description": [
+        "&e装备概念 - 尚未开放新物品",
+        "",
+        "&f龙首与双角环抱潮核，水系神杖。",
+        "",
+        "&7图标为本包原创草案。具体配方与匠人订单后续设计，不影响现有施法法杖。"
+      ],
+      "tasks": [
+        {
+          "id": "544E430302000068",
+          "type": "checkmark",
+          "title": "阅读本节（不发放玩法奖励）"
+        }
+      ],
+      "rewards": [],
+      "dependencies": []
+    }
+  ]
+}
