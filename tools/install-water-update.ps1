@@ -17,6 +17,12 @@ foreach($f in $files){
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 $zip=[IO.Compression.ZipFile]::OpenRead($files[0].Source)
 try{
+    foreach($entry in @('com/tnc/tnc/combat/DownedCombat.class','com/tnc/tnc/combat/CombatTeams.class','com/tnc/tnc/client/CombatHud.class','com/tnc/tnc/magic/ChantRules.class','com/tnc/tnc/magic/LearningVisuals.class','com/tnc/tnc/magic/compat/CombatCasting.class','com/tnc/tnc/network/RescueInputPacket.class','com/tnc/tnc/magic/water/WaterBoreEditGuard.class','tnc.water-bore.mixins.json','com/tnc/tnc/mixin/WaterBoreLevelMixin.class','com/tnc/tnc/mixin/WaterBoreNeighborMixin.class','com/tnc/tnc/mixin/WaterBoreBlockStateMixin.class')){
+        if(-not $zip.GetEntry($entry)){throw "Incomplete combat build: $entry"}
+    }
+    $manifestReader=[IO.StreamReader]::new($zip.GetEntry('META-INF/MANIFEST.MF').Open())
+    try{$manifestText=$manifestReader.ReadToEnd().Replace("`r`n ",'').Replace("`n ",'')}finally{$manifestReader.Dispose()}
+    if($manifestText -notmatch 'MixinConfigs: [^\r\n]*tnc\.water-bore\.mixins\.json'){throw 'Missing required bore isolation manifest entry'}
     foreach($entry in @('com/tnc/tnc/magic/water/TNWaterSpellEntity.class','com/tnc/tnc/magic/water/TNWaterFieldEntity.class','com/tnc/tnc/magic/water/SeaGodSwordRules.class','com/tnc/tnc/magic/water/OceanWaveRules.class','com/tnc/tnc/client/SeaGodSwordVisuals.class','com/tnc/tnc/magic/water/ChaosSilence.class','com/tnc/tnc/client/WaterRainVisuals.class','com/tnc/tnc/client/WaterRenderTypes.class','data/tnc/spells/chaos_magic.json','com/tnc/tnc/world/SkyLandscapeUpgrade.class')){if(-not $zip.GetEntry($entry)){throw "Incomplete build: $entry"}}
     foreach($name in @('water_ball','water_cannon','dragon_roar','dragon_howl','dragon_ruin','chaos_magic')+$names){
         if(-not $zip.GetEntry("assets/tnc/textures/spell/$name.png")){throw "Missing spell icon: $name"}

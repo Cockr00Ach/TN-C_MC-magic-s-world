@@ -14,7 +14,7 @@ public final class TNWaterBoltRenderer extends EntityRenderer<TNWaterBoltEntity>
     @Override public void render(TNWaterBoltEntity e,float yaw,float partial,PoseStack stack,MultiBufferSource buffers,int light) {
         var out=buffers.getBuffer(WaterRenderTypes.geometry());var pose=stack.last().pose();
         Vec3 dir=e.getDeltaMovement().normalize();if(dir.lengthSqr()<.5)dir=new Vec3(0,0,1);
-        Vec3 right=WaterSpellRules.right(dir),up=right.cross(dir).normalize();double radius=e.tier()==2?.5:.32;
+        Vec3 right=WaterSpellRules.right(dir),up=right.cross(dir).normalize();double radius=WaterSpellRules.boltRadius(e.tier());
         double age=e.tickCount+partial;
         for(int j=0;j<10;j++) {
             double a=-Math.PI/2+j*Math.PI/10,b=a+Math.PI/10;

@@ -61,6 +61,7 @@ minecraft {
         // applies to all the run configs below
         configureEach {
             workingDirectory project.file('run')
+            args '--mixin', 'tnc.water-bore.mixins.json'
 
             // Recommended logging data for a userdev environment
             // The markers can be added/remove as needed separated by commas.
@@ -214,7 +215,7 @@ tasks.named('jar', Jar).configure {
                 'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
                 // Forge 从 jar 清单里读 mixin 配置；我们的 Mixin 只注入 SpellEngine
                 // （由 TncMixinPlugin 判断引擎在不在）
-                'MixinConfigs'            : "${mod_id}.mixins.json"
+                'MixinConfigs'            : "${mod_id}.mixins.json,${mod_id}.water-bore.mixins.json"
         ])
     }
 

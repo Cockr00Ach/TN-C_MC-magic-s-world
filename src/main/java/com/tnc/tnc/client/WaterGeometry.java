@@ -6,12 +6,9 @@ import org.joml.Matrix4f;
 import com.tnc.tnc.magic.water.WaterSpellRules;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.*;
-import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
 
 /** Continuous geometry rather than a cloud of disconnected particles. */
 final class WaterGeometry {
-    private static final ResourceLocation SIGIL=ResourceLocation.fromNamespaceAndPath("tnc","textures/entity/magic_circle.png");
     private WaterGeometry() {}
     static void vertex(VertexConsumer out,Matrix4f pose,Vec3 p,float r,float g,float b,float a) {
         out.vertex(pose,(float)p.x,(float)p.y,(float)p.z).color(r,g,b,a).endVertex();
@@ -75,7 +72,7 @@ final class WaterGeometry {
                     center.add(radial(right,up,c,radius-width)),center.add(radial(right,up,a,radius-width)),r,g,b,alpha);
         }
     }
-    /** Existing gold lightning sigil, layered on a water-specific moving frame. No copied mod assets. */
+    /** Layered indigo/violet water sigil. Geometry colors are independent of the cyan water body. */
     static void richCircle(MultiBufferSource buffers,PoseStack stack,Vec3 center,Vec3 dir,double radius,double time,float alpha) {
         sigil(buffers,stack,center,dir,radius,time*.016,alpha*.96F);
         sigil(buffers,stack,center.add(dir.scale(.035)),dir,radius*.59,-time*.024,alpha*.84F);
@@ -87,31 +84,35 @@ final class WaterGeometry {
         }
         var out=buffers.getBuffer(WaterRenderTypes.geometry());var pose=stack.last().pose();
         ringColor(out,pose,center,dir,radius*1.04,radius*.028,.005F,.10F,.48F,alpha*.9F);
-        ringColor(out,pose,center.add(dir.scale(.03)),dir,radius*1.03,radius*.018,.015F,.38F,1,alpha*.95F);
-        ringColor(out,pose,center.add(dir.scale(.07)),dir,radius*.73,radius*.024,.03F,.58F,1,alpha*.9F);
+        ringColor(out,pose,center.add(dir.scale(.03)),dir,radius*1.03,radius*.018,.34F,.18F,1,alpha*.95F);
+        ringColor(out,pose,center.add(dir.scale(.07)),dir,radius*.73,radius*.024,.58F,.3F,1,alpha*.9F);
         for(int i=0;i<24;i++) {
             double a=-time*.018+i*Math.PI/12;
             Vec3 p=center.add(radial(right,up,a,radius*.84));
             Vec3 v=radial(right,up,a,radius*.045),w=radial(right,up,a+Math.PI/2,radius*.018);
-            tube(out,pose,p.subtract(v),p.add(w),radius*.006,1,.65F,.08F,alpha*.96F);
-            tube(out,pose,p.add(w),p.add(v),radius*.006,1,.65F,.08F,alpha*.96F);
+            tube(out,pose,p.subtract(v),p.add(w),radius*.006,.6F,.22F,1,alpha*.96F);
+            tube(out,pose,p.add(w),p.add(v),radius*.006,.6F,.22F,1,alpha*.96F);
         }
     }
     private static void sigil(MultiBufferSource buffers,PoseStack stack,Vec3 center,Vec3 dir,double radius,double spin,float alpha) {
-        var out=buffers.getBuffer(RenderType.entityTranslucentEmissive(SIGIL));
-        var pose=stack.last().pose();var normal=stack.last().normal();
+        var out=buffers.getBuffer(WaterRenderTypes.geometry());
+        var pose=stack.last().pose();
         Vec3 right=WaterSpellRules.right(dir),up=right.cross(dir).normalize();
-        Vec3[] corners={center.add(radial(right,up,spin+Math.PI*.25,radius*Math.sqrt(2))),
-                center.add(radial(right,up,spin+Math.PI*.75,radius*Math.sqrt(2))),
-                center.add(radial(right,up,spin+Math.PI*1.25,radius*Math.sqrt(2))),
-                center.add(radial(right,up,spin+Math.PI*1.75,radius*Math.sqrt(2)))};
-        float[][] uv={{1,1},{0,1},{0,0},{1,0}};
-        // This render type is already NO_CULL: one face is visible from both sides.
-        for(int i=0;i<4;i++) {
-            Vec3 p=corners[i];
-            out.vertex(pose,(float)p.x,(float)p.y,(float)p.z).color(1,1,1,alpha).uv(uv[i][0],uv[i][1])
-                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(LightTexture.FULL_BRIGHT)
-                    .normal(normal,(float)dir.x,(float)dir.y,(float)dir.z).endVertex();
+        ringColor(out,pose,center,dir,radius,radius*.013,.12F,.08F,.65F,alpha);
+        ringColor(out,pose,center,dir,radius*.94,radius*.01,.48F,.22F,1,alpha);
+        ringColor(out,pose,center,dir,radius*.61,radius*.015,.28F,.18F,.92F,alpha);
+        ringColor(out,pose,center,dir,radius*.28,radius*.018,.7F,.4F,1,alpha);
+        for(int i=0;i<12;i++) {
+            double a=spin+i*Math.PI/6;
+            Vec3 p=center.add(radial(right,up,a,radius*.6));
+            Vec3 q=center.add(radial(right,up,a+Math.PI*2/3,radius*.6));
+            tube(out,pose,p,q,radius*.004,.38F,.18F,.9F,alpha*.8F);
+            Vec3 c=center.add(radial(right,up,a,radius*.79));
+            Vec3 v=radial(right,up,a,radius*.065),w=radial(right,up,a+Math.PI/2,radius*.025);
+            tube(out,pose,c.subtract(v),c.add(w),radius*.006,.62F,.3F,1,alpha);
+            tube(out,pose,c.add(w),c.add(v),radius*.006,.62F,.3F,1,alpha);
+            tube(out,pose,c.add(v),c.subtract(w),radius*.006,.62F,.3F,1,alpha);
+            tube(out,pose,c.subtract(w),c.subtract(v),radius*.006,.62F,.3F,1,alpha);
         }
     }
     static void spiral(VertexConsumer out,Matrix4f pose,Vec3 center,Vec3 axis,double radius,double height,

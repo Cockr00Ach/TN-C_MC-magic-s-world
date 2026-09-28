@@ -400,6 +400,7 @@ public final class TnSpellMechanics {
      * @param data    玩家数据（回蓝要改它）
      */
     public static void onSpellCast(ServerPlayer player, ResourceLocation spellId, MagicStoneData data) {
+        if(com.tnc.tnc.combat.DownedCombat.isDowned(player))return;
         String path = spellId.getPath();
 
         // 火系那几条（自爆扣最大生命 10%）在自己的类里

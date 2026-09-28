@@ -26,6 +26,8 @@ public final class MagicStoneKeys {
 
     /** 控制设置里的分类名（翻译在语言文件里）。 */
     public static final String CATEGORY = "key.categories.tnc";
+    public static final KeyMapping RESCUE=new KeyMapping("key.tnc.rescue",net.minecraftforge.client.settings.KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,GLFW.GLFW_KEY_R,CATEGORY);
 
     public static final KeyMapping OPEN_MAGIC_STONE = new KeyMapping(
             "key.tnc.open_magic_stone",
@@ -44,6 +46,7 @@ public final class MagicStoneKeys {
      */
     public static void register(RegisterKeyMappingsEvent event) {
         event.register(OPEN_MAGIC_STONE);
+        event.register(RESCUE);
     }
 
     @SubscribeEvent

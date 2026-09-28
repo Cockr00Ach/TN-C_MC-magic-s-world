@@ -22,8 +22,8 @@ import java.util.function.Supplier;
  */
 public class MagicStoneNetwork {
 
-    // v2 adds the server -> client portal ritual packet. Reject stale clients at handshake.
-    private static final String PROTOCOL_VERSION = "2";
+    // v3 adds downed/rescue packets. Reject stale clients instead of silently losing combat state.
+    private static final String PROTOCOL_VERSION = "3";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "main"),
@@ -56,6 +56,12 @@ public class MagicStoneNetwork {
                 .decoder(PortalRitualPacket::decode)
                 .consumerMainThread(PortalRitualPacket::handle)
                 .add();
+        CHANNEL.messageBuilder(CombatStatePacket.class,201,NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(CombatStatePacket::encode).decoder(CombatStatePacket::decode)
+                .consumerMainThread(CombatStatePacket::handle).add();
+        CHANNEL.messageBuilder(RescueInputPacket.class,202,NetworkDirection.PLAY_TO_SERVER)
+                .encoder(RescueInputPacket::encode).decoder(RescueInputPacket::decode)
+                .consumerMainThread(RescueInputPacket::handle).add();
     }
 
     // ---------------- 客户端调用的小工具 ----------------

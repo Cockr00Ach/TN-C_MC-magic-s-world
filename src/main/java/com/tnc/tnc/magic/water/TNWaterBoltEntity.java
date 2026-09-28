@@ -31,12 +31,14 @@ public final class TNWaterBoltEntity extends Projectile {
             if(tickCount%2==0)for(int i=0;i<(tier()==2?6:3);i++) {
                 double angle=tickCount*.5+i*Math.PI*2/3;
                 Vec3 dir=getDeltaMovement().normalize(),right=WaterSpellRules.right(dir),up=right.cross(dir).normalize();
-                Vec3 p=position().add(right.scale(Math.cos(angle)*.4)).add(up.scale(Math.sin(angle)*.4));
+                double r=WaterSpellRules.boltRadius(tier())*1.2;
+                Vec3 p=position().add(right.scale(Math.cos(angle)*r)).add(up.scale(Math.sin(angle)*r));
                 level().addParticle(i%2==0?ParticleTypes.SPLASH:ParticleTypes.BUBBLE_POP,p.x,p.y,p.z,-dir.x*.08,.03-dir.y*.08,-dir.z*.08);
             }
             setPos(position().add(getDeltaMovement())); return;
         }
         if(!(getOwner() instanceof LivingEntity owner) || !owner.isAlive() || tickCount>60 || remaining<=0
+                || owner instanceof net.minecraft.world.entity.player.Player p&&com.tnc.tnc.combat.DownedCombat.isDowned(p)
                 || owner.level()!=level()) { discard(); return; }
         ServerLevel level=(ServerLevel)level();
         Vec3 from=position(), motion=getDeltaMovement(), to=from.add(motion);

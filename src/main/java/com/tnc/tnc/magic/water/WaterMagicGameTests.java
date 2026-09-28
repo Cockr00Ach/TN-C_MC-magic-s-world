@@ -40,7 +40,7 @@ public final class WaterMagicGameTests {
     public static void slashSpawnsAllTwentySixThreeDimensionalDirections(GameTestHelper h) {
         var p=caster(h);p.setYRot(17);
         TNWaterFieldEntity.cast(p,net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tnc","wave_slash"));
-        var fields=h.getLevel().getEntitiesOfClass(TNWaterFieldEntity.class,p.getBoundingBox().inflate(3));
+        var fields=h.getLevel().getEntitiesOfClass(TNWaterFieldEntity.class,p.getBoundingBox().inflate(3),e->!e.isEmitter());
         h.assertTrue(fields.size()==26,"Expected 26 slash fronts, got "+fields.size());
         h.assertTrue(fields.stream().anyMatch(e->e.direction().y>.99)&&fields.stream().anyMatch(e->e.direction().y<-.99),"Both vertical poles synchronized");
         var directions=WaterSpellRules.slashDirections(17);
@@ -75,18 +75,138 @@ public final class WaterMagicGameTests {
         h.assertTrue(removed==blocks&&bore.length()==1&&!bore.stopped(),"Pending full-aperture edits complete without loss: "+bore.stopReason());h.succeed();
     }
     @GameTest(template="water_test_large_empty",timeoutTicks=30)
-    public static void fullApertureContainerAtEdgeStopsBeforeAnyEdits(GameTestHelper h) {
+    public static void fullApertureBedrockAtEdgeStopsBeforeAnyEdits(GameTestHelper h) {
         var p=caster(h);Vec3 start=Vec3.atCenterOf(h.absolutePos(new BlockPos(24,24,24)));
         BlockPos center=BlockPos.containing(start),container=center.offset(14,0,0);
         h.getLevel().setBlockAndUpdate(center,Blocks.STONE.defaultBlockState());
-        h.getLevel().setBlockAndUpdate(container,Blocks.CHEST.defaultBlockState());
+        h.getLevel().setBlockAndUpdate(container,Blocks.BEDROCK.defaultBlockState());
         var bore=new WaterTerrainBore(start,new Vec3(0,0,1),WaterSpellRules.radius(5),1);
         h.assertTrue(bore.tick(h.getLevel(),p)==0&&bore.stopped()&&bore.length()==0,"Protection covers the new outer aperture before editing");
-        h.assertTrue(h.getLevel().getBlockState(center).is(Blocks.STONE)&&h.getLevel().getBlockState(container).is(Blocks.CHEST),"Whole blocked slice and container remain intact");h.succeed();
+        h.assertTrue(h.getLevel().getBlockState(center).is(Blocks.STONE)&&h.getLevel().getBlockState(container).is(Blocks.BEDROCK),"Whole blocked slice and bedrock remain intact");h.succeed();
     }
     private static ServerPlayer caster(GameTestHelper h) {
         var player=FakePlayerFactory.get(h.getLevel(),new GameProfile(UUID.randomUUID(),"water-test"));
         player.setGameMode(GameType.CREATIVE);player.setPos(Vec3.atCenterOf(h.absolutePos(new BlockPos(1,3,1))));return player;
+    }
+    @GameTest(template="water_test_large_empty",timeoutTicks=30)
+    public static void cannonIsLargerAndDragonRoarSustainsTenSeconds(GameTestHelper h) {
+        h.assertTrue(WaterSpellRules.boltRadius(2)>WaterSpellRules.boltRadius(1)*2,"Cannon is clearly larger than a water ball");
+        h.assertTrue(WaterSpellRules.duration(3)==200,"Dragon Roar emits for ten seconds");h.succeed();
+    }
+    @GameTest(template="water_test_large_empty",timeoutTicks=30)
+    public static void slashEmitterReleasesLaterVolleyWithoutInfiniteFrontLifetime(GameTestHelper h) {
+        var p=caster(h);var owners=testOwnerMap(h);owners.put(p.getUUID(),p);
+        try {
+            TNWaterFieldEntity.cast(p,net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tnc","wave_slash"));
+            var fields=h.getLevel().getEntitiesOfClass(TNWaterFieldEntity.class,p.getBoundingBox().inflate(4));
+            var emitter=fields.stream().filter(TNWaterFieldEntity::isEmitter).findFirst().orElseThrow();
+            h.assertTrue(emitter.life()==200,"Controller lasts ten seconds");
+            fields.stream().filter(e->!e.isEmitter()).forEach(Entity::discard);
+            // ServerLevel advances Entity.tickCount before tick(); direct fixture calls do not.
+            emitter.tickCount=20;emitter.tick();
+            var fronts=h.getLevel().getEntitiesOfClass(TNWaterFieldEntity.class,p.getBoundingBox().inflate(4),e->!e.isEmitter());
+            h.assertTrue(fronts.size()==26&&fronts.stream().allMatch(e->e.life()==28),"Later volley has all directions and bounded per-front range; count="+fronts.size()+" tick="+emitter.tickCount);
+            h.getLevel().getEntitiesOfClass(TNWaterFieldEntity.class,p.getBoundingBox().inflate(4)).forEach(Entity::discard);
+        }finally{owners.remove(p.getUUID());}h.succeed();
+    }
+    @GameTest(template="water_test_large_empty",timeoutTicks=30)
+    public static void boreDestroysContainersUnbreakablesAndLeaves(GameTestHelper h) {
+        var p=caster(h);Vec3 start=Vec3.atCenterOf(h.absolutePos(new BlockPos(24,24,24)));
+        BlockPos pos=BlockPos.containing(start);var level=h.getLevel();
+        level.setBlockAndUpdate(pos,Blocks.CHEST.defaultBlockState());
+        var chest=(net.minecraft.world.level.block.entity.ChestBlockEntity)level.getBlockEntity(pos);
+        chest.setItem(0,new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND,3));
+        level.setBlockAndUpdate(pos.offset(0,0,1),Blocks.BARRIER.defaultBlockState());
+        level.setBlockAndUpdate(pos.offset(0,0,2),Blocks.OAK_LEAVES.defaultBlockState());
+        var bore=new WaterTerrainBore(start,new Vec3(0,0,1),.4,3);
+        for(int i=0;i<4;i++)bore.tick(level,p);
+        h.assertTrue(!bore.stopped()&&level.getBlockState(pos).isAir()&&level.getBlockState(pos.offset(0,0,1)).isAir()
+                &&level.getBlockState(pos.offset(0,0,2)).isAir(),"Only bedrock is material-protected: "+bore.stopReason());
+        var loot=level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,new net.minecraft.world.phys.AABB(pos).inflate(2));
+        h.assertTrue(loot.stream().filter(e->e.getItem().is(net.minecraft.world.item.Items.DIAMOND)).mapToInt(e->e.getItem().getCount()).sum()==3,"Container contents retain vanilla drops");
+        loot.forEach(Entity::discard);h.succeed();
+    }
+    @GameTest(template="water_test_large_empty",timeoutTicks=30)
+    public static void borePreservesFilledShulkerInventory(GameTestHelper h) {
+        var level=h.getLevel();var p=caster(h);BlockPos pos=h.absolutePos(new BlockPos(24,24,24));
+        level.setBlockAndUpdate(pos,Blocks.BLUE_SHULKER_BOX.defaultBlockState());
+        var box=(net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity)level.getBlockEntity(pos);
+        box.setItem(0,new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND,7));
+        var bore=new WaterTerrainBore(Vec3.atCenterOf(pos),new Vec3(0,0,1),.4,1);bore.tick(level,p);
+        var loot=level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,new net.minecraft.world.phys.AABB(pos).inflate(2));
+        int diamonds=0,boxes=0;
+        for(var item:loot) {
+            var stack=item.getItem();
+            if(stack.is(net.minecraft.world.item.Items.BLUE_SHULKER_BOX)) {
+                boxes++;var inventory=net.minecraft.core.NonNullList.withSize(27,net.minecraft.world.item.ItemStack.EMPTY);
+                var tag=net.minecraft.world.item.BlockItem.getBlockEntityData(stack);
+                if(tag!=null)net.minecraft.world.ContainerHelper.loadAllItems(tag,inventory);
+                diamonds+=inventory.stream().filter(s->s.is(net.minecraft.world.item.Items.DIAMOND)).mapToInt(net.minecraft.world.item.ItemStack::getCount).sum();
+            }
+            if(stack.is(net.minecraft.world.item.Items.DIAMOND))diamonds+=stack.getCount();
+        }
+        h.assertTrue(level.getBlockState(pos).isAir()&&boxes==1&&diamonds==7,"Filled shulker must retain exactly its seven diamonds; boxes="+boxes+" diamonds="+diamonds);
+        loot.forEach(Entity::discard);h.succeed();
+    }
+    @GameTest(template="water_test_large_empty",timeoutTicks=30)
+    public static void boreCallbacksCannotRemoveUnapprovedOutsideRedstone(GameTestHelper h) {
+        var level=h.getLevel();var p=caster(h);BlockPos pos=h.absolutePos(new BlockPos(24,24,24));
+        level.setBlock(pos.below(),Blocks.STONE.defaultBlockState(),2|16);
+        level.setBlock(pos.east().below(),Blocks.STONE.defaultBlockState(),2|16);
+        level.setBlock(pos,Blocks.REDSTONE_WIRE.defaultBlockState(),2|16);
+        level.setBlock(pos.east(),Blocks.REDSTONE_WIRE.defaultBlockState(),2|16);
+        // Unsupported outside wire remains until notified: removal callbacks used to notify it despite flags 2|16.
+        level.setBlock(pos.east().below(),Blocks.AIR.defaultBlockState(),2|16);
+        h.assertTrue(level.getBlockState(pos.east()).is(Blocks.REDSTONE_WIRE),"Fixture starts with outside wire intact");
+        var bore=new WaterTerrainBore(Vec3.atCenterOf(pos),new Vec3(0,0,1),.4,1);bore.tick(level,p);
+        h.assertTrue(level.getBlockState(pos).isAir()&&level.getBlockState(pos.east()).is(Blocks.REDSTONE_WIRE),"Callback must not break wire outside authorized cylinder");
+        // The isolation must not disable ordinary neighbor updates after the bore returns.
+        level.neighborChanged(pos.east(),Blocks.STONE,pos.east().below());
+        h.assertTrue(level.getBlockState(pos.east()).isAir(),"Ordinary updates resume after scoped bore edit");h.succeed();
+    }
+    @GameTest(template="water_test_large_empty",timeoutTicks=30)
+    public static void grassInsideInBoundsBoreDoesNotStopDragon(GameTestHelper h) {
+        var level=h.getLevel();var p=caster(h);BlockPos pos=h.absolutePos(new BlockPos(24,24,24));
+        level.setBlockAndUpdate(pos.below(),Blocks.GRASS_BLOCK.defaultBlockState());
+        level.setBlockAndUpdate(pos,Blocks.GRASS.defaultBlockState());
+        var bore=new WaterTerrainBore(Vec3.atCenterOf(pos),new Vec3(0,0,1),.4,1);bore.tick(level,p);
+        h.assertTrue(!bore.stopped()&&bore.length()==1&&level.getBlockState(pos).isAir(),"Grass is not bedrock and cannot stop an in-bounds bore: "+bore.stopReason());h.succeed();
+    }
+    @GameTest(template="water_test_large_empty",timeoutTicks=30)
+    public static void boreInsideNeighborChainCannotQueueOutsideComparatorDestruction(GameTestHelper h) {
+        var level=h.getLevel();var p=caster(h);BlockPos pos=h.absolutePos(new BlockPos(24,24,24));
+        BlockPos outside=pos.east(2);
+        level.setBlock(pos,Blocks.CHEST.defaultBlockState(),2|16);
+        // A conductor forces the state-bearing ServerLevel enqueue route, not Forge's direct adjacent notification.
+        level.setBlock(pos.east(),Blocks.STONE.defaultBlockState(),2|16);
+        level.setBlock(outside.below(),Blocks.STONE.defaultBlockState(),2|16);
+        level.setBlock(outside,Blocks.COMPARATOR.defaultBlockState(),2|16);
+        level.setBlock(outside.below(),Blocks.AIR.defaultBlockState(),2|16);
+        var control=new net.minecraft.world.level.block.Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.of()) {
+            @Override public void neighborChanged(net.minecraft.world.level.block.state.BlockState state,
+                    net.minecraft.world.level.Level world,BlockPos at,net.minecraft.world.level.block.Block changed,BlockPos from,boolean moving) {
+                level.setBlock(pos,Blocks.AIR.defaultBlockState(),2|16);
+            }
+        };
+        level.neighborChanged(control.defaultBlockState(),pos.offset(0,3,0),Blocks.STONE,pos.offset(0,3,0),false);
+        h.assertTrue(level.getBlockState(outside).isAir(),"Control removal must reproduce actual queued comparator destruction");
+        level.setBlock(pos,Blocks.CHEST.defaultBlockState(),2|16);
+        level.setBlock(outside.below(),Blocks.STONE.defaultBlockState(),2|16);
+        level.setBlock(outside,Blocks.COMPARATOR.defaultBlockState(),2|16);
+        level.setBlock(outside.below(),Blocks.AIR.defaultBlockState(),2|16);
+        var bore=new WaterTerrainBore(Vec3.atCenterOf(pos),new Vec3(0,0,1),.4,1);
+        // A supplied state starts a real CollectingNeighborUpdater chain without registering or placing a fixture block.
+        var trigger=new net.minecraft.world.level.block.Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.of()) {
+            @Override public void neighborChanged(net.minecraft.world.level.block.state.BlockState state,
+                    net.minecraft.world.level.Level world,BlockPos at,net.minecraft.world.level.block.Block changed,BlockPos from,boolean moving) {
+                bore.tick(level,p);
+            }
+        };
+        level.neighborChanged(trigger.defaultBlockState(),pos.offset(0,3,0),Blocks.STONE,pos.offset(0,3,0),false);
+        h.assertTrue(level.getBlockState(pos).isAir()&&level.getBlockState(outside).is(Blocks.COMPARATOR),"Comparator notification cannot escape the guard through an existing neighbor queue");
+        level.neighborChanged(outside,Blocks.STONE,outside.below());
+        h.assertTrue(level.getBlockState(outside).isAir(),"Queued update isolation clears after removal");
+        level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,new net.minecraft.world.phys.AABB(pos).inflate(3)).forEach(Entity::discard);h.succeed();
     }
     private static TNWaterFieldEntity crypt(GameTestHelper h,ServerPlayer p) {
         p.setPos(Vec3.atCenterOf(h.absolutePos(new BlockPos(32,8,20))));p.setYRot(0);p.setXRot(0);
@@ -275,8 +395,6 @@ public final class WaterMagicGameTests {
             h.getLevel().setBlockAndUpdate(h.absolutePos(new BlockPos(x,1,z)),Blocks.GRASS_BLOCK.defaultBlockState());
             h.getLevel().setBlockAndUpdate(h.absolutePos(new BlockPos(x,2,z)),Blocks.GRASS.defaultBlockState());
         }
-        var old=new WaterTerrainBore(p.getEyePosition().add(0,0,2),new Vec3(0,0,1),7,1);old.tick(h.getLevel(),p);
-        h.assertTrue(old.stopped()&&old.length()==0,"Reproduce original eye-height grass obstruction");
         TNWaterSpellEntity.cast(p,net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tnc","dragon_ruin"));
         var cast=h.getLevel().getEntitiesOfClass(TNWaterSpellEntity.class,p.getBoundingBox().inflate(20)).get(0);
         var bore=new WaterTerrainBore(cast.position(),cast.direction(),WaterSpellRules.radius(5),1);bore.tick(h.getLevel(),p);
@@ -328,10 +446,10 @@ public final class WaterMagicGameTests {
         h.assertTrue(bore.length()<=3,"Finite range required");h.succeed();
     }
     @GameTest(template="building_test_empty",timeoutTicks=30)
-    public static void containersAndBedrockStopBore(GameTestHelper h) {
+    public static void onlyBedrockStopsBore(GameTestHelper h) {
         var p=caster(h);Vec3 start=Vec3.atCenterOf(h.absolutePos(new BlockPos(2,5,1)));
         BlockPos obstacle=BlockPos.containing(start.add(0,0,1));
-        for(var block:new net.minecraft.world.level.block.Block[]{Blocks.CHEST,Blocks.BEDROCK}) {
+        for(var block:new net.minecraft.world.level.block.Block[]{Blocks.BEDROCK}) {
             h.getLevel().setBlockAndUpdate(obstacle,block.defaultBlockState());
             var bore=new WaterTerrainBore(start,new Vec3(0,0,1),1,4);for(int i=0;i<8;i++)bore.tick(h.getLevel(),p);
             h.assertTrue(bore.stopped(),"Protected block must stop beam");
@@ -372,13 +490,13 @@ public final class WaterMagicGameTests {
         finally{MinecraftForge.EVENT_BUS.unregister(listener);}h.succeed();
     }
     @GameTest(template="building_test_empty",timeoutTicks=30)
-    public static void wetSolidIsNotFluidAndContainerSupportIsProtected(GameTestHelper h) {
+    public static void wetSolidsAndLeafNeighborsDoNotStopBore(GameTestHelper h) {
         var wet=Blocks.OAK_STAIRS.defaultBlockState().setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED,true);
         h.assertTrue(!WaterTerrainBore.fluidOnly(wet),"Waterlogged stairs must not count as water");
         var p=caster(h);Vec3 start=Vec3.atCenterOf(h.absolutePos(new BlockPos(2,5,1)));BlockPos pos=BlockPos.containing(start);
-        h.getLevel().setBlockAndUpdate(pos,Blocks.STONE.defaultBlockState());h.getLevel().setBlockAndUpdate(pos.above(),Blocks.CHEST.defaultBlockState());
+        h.getLevel().setBlockAndUpdate(pos,wet);h.getLevel().setBlockAndUpdate(pos.above(),Blocks.OAK_LEAVES.defaultBlockState());
         var bore=new WaterTerrainBore(start,new Vec3(0,0,1),.4,3);bore.tick(h.getLevel(),p);
-        h.assertTrue(bore.stopped()&&h.getLevel().getBlockState(pos).is(Blocks.STONE),"Container support must not be removed");h.succeed();
+        h.assertTrue(!bore.stopped()&&h.getLevel().getBlockState(pos).isAir(),"Leaf neighbors and wet solids must not block beam: "+bore.stopReason());h.succeed();
     }
     @GameTest(template="building_test_empty",timeoutTicks=30)
     public static void weatherLeaseDetectsAdminChangesWithFrozenCycle(GameTestHelper h) {

@@ -335,6 +335,7 @@ public class MagicStoneCommand {
             return 0;
         }
         MagicStoneLearning.Result result = MagicStoneLearning.unlock(data, entry);
+        if(result==MagicStoneLearning.Result.OK)com.tnc.tnc.magic.LearningVisuals.start(player,entry.element());
         ctx.getSource().sendSuccess(() -> MagicStoneLearning.describe(result, entry, data), false);
         if (result == MagicStoneLearning.Result.OK || result == MagicStoneLearning.Result.ALREADY_LEARNED) {
             // 解锁后同步法杖内容（已经学过也同步一次 —— 相当于顺手修好丢了内容的法杖）

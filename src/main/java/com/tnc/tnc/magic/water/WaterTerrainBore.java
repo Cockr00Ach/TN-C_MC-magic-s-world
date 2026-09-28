@@ -10,7 +10,7 @@ import net.minecraftforge.event.level.BlockEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-/** One bounded axial slice at a time. Never loads chunks and never deletes a block entity. */
+/** One bounded axial slice at a time; player-authorized terrain destruction, still claim-aware. */
 public final class WaterTerrainBore {
     public static final int BLOCK_BUDGET = 128;
     private final Vec3 start, direction;
@@ -28,30 +28,18 @@ public final class WaterTerrainBore {
     public boolean stopped() { return stopped; }
     public String stopReason() { return stopReason; }
     public static boolean protectedState(BlockState state, ServerLevel level, BlockPos pos) {
-        return state.hasBlockEntity() || state.getDestroySpeed(level,pos)<0;
+        return state.is(net.minecraft.world.level.block.Blocks.BEDROCK);
     }
     static boolean fluidOnly(BlockState state) { return state.getBlock() instanceof net.minecraft.world.level.block.LiquidBlock; }
     private boolean allowed(ServerLevel level, ServerPlayer player, BlockPos pos) {
         if (!level.hasChunkAt(pos) || !level.getWorldBorder().isWithinBounds(pos)
                 || level.isOutsideBuildHeight(pos)) {stopReason="边界/未加载区块 "+pos.toShortString();return false;}
         BlockState state=level.getBlockState(pos);
-        if (protectedState(state,level,pos)) {stopReason="不可破坏方块/容器 "+pos.toShortString();return false;}
+        if (protectedState(state,level,pos)) {stopReason="基岩 "+pos.toShortString();return false;}
         if (player.isSpectator() || player.gameMode.getGameModeForPlayer()==net.minecraft.world.level.GameType.ADVENTURE
                 || !level.mayInteract(player,pos) || level.getServer().isUnderSpawnProtection(level,pos,player)) {stopReason="交互/出生点保护 "+pos.toShortString();return false;}
         boolean accepted=!MinecraftForge.EVENT_BUS.post(new BlockEvent.BreakEvent(level,pos,state,player));
         if(!accepted)stopReason="领地/事件保护 "+pos.toShortString();return accepted;
-    }
-    private boolean safeSupport(ServerLevel level,BlockPos pos) {
-        // Conservative first pass: don't remove supports of containers, attachments or falling blocks.
-        // Such a cascade could otherwise bypass both claim checks and our direct-edit budget.
-        for(var face:net.minecraft.core.Direction.values()) {
-            BlockPos next=pos.relative(face);if(!level.hasChunkAt(next)){stopReason="支撑物位于未加载区块 "+next.toShortString();return false;}
-            var state=level.getBlockState(next);
-            if(state.isAir() || fluidOnly(state))continue;
-            if(state.hasBlockEntity() || state.getBlock() instanceof net.minecraft.world.level.block.FallingBlock
-                    || !state.isCollisionShapeFullBlock(level,next)) {stopReason="支撑物 "+net.minecraftforge.registries.ForgeRegistries.BLOCKS.getKey(state.getBlock())+" "+next.toShortString();return false;}
-        }
-        return true;
     }
     public int tick(ServerLevel level, ServerPlayer player) {
         if(stopped || length>=range) return 0;
@@ -74,7 +62,6 @@ public final class WaterTerrainBore {
                 if(!allowed(level,player,pos)) { stopped=true; pending=null; return 0; }
                 if(along<length || along>=next || radialSquared>radius*radius)continue;
                 if(!level.getBlockState(pos).isAir() && !fluidOnly(level.getBlockState(pos))) {
-                    if(!safeSupport(level,pos)){stopped=true;pending=null;return 0;}
                     pending.add(pos);
                 }
             }
@@ -84,9 +71,17 @@ public final class WaterTerrainBore {
             BlockPos pos=pending.get(cursor++);
             if(!allowed(level,player,pos)) { stopped=true; pending=null; return changed; }
             if(!level.getBlockState(pos).isAir() && !fluidOnly(level.getBlockState(pos))) {
-                if(!safeSupport(level,pos)){stopped=true;pending=null;return changed;}
-                // No drops: a large beam must not create thousands of ticking item entities.
-                if(!level.destroyBlock(pos,false,player)) { stopped=true; pending=null; return changed; }
+                // Capture normal block-entity loot BEFORE onRemove erases its NBT.
+                // Shulkers encode contents in the dropped box; chests spill contents once in onRemove.
+                BlockState state=level.getBlockState(pos);
+                var blockEntity=level.getBlockEntity(pos);
+                var loot=blockEntity==null?java.util.List.<net.minecraft.world.item.ItemStack>of():
+                        net.minecraft.world.level.block.Block.getDrops(state,level,pos,blockEntity,player,net.minecraft.world.item.ItemStack.EMPTY);
+                if(!WaterBoreEditGuard.remove(level,pos)) {
+                    stopReason="方块移除失败/安全隔离不可用 "+pos.toShortString();
+                    stopped=true; pending=null; return changed;
+                }
+                for(var stack:loot)net.minecraft.world.level.block.Block.popResource(level,pos,stack);
                 changed++;
             }
         }

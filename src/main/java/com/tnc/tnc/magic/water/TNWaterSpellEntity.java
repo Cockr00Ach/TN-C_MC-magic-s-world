@@ -70,7 +70,7 @@ public final class TNWaterSpellEntity extends Entity {
         super.tick(); if(level().isClientSide)return;
         ServerLevel level=(ServerLevel)level();
         ServerPlayer player=owner==null?null:level.getServer().getPlayerList().getPlayer(owner);
-        if(player==null || !player.isAlive() || player.isSpectator() || player.level()!=level || player.distanceToSqr(this)>128*128) {discard();return;}
+        if(player==null || !player.isAlive() || com.tnc.tnc.combat.DownedCombat.isDowned(player) || player.isSpectator() || player.level()!=level || player.distanceToSqr(this)>128*128) {discard();return;}
         entityData.set(AGE,tickCount);
         int active=tickCount-WaterSpellRules.charge(tier());
         if(active<0)return;

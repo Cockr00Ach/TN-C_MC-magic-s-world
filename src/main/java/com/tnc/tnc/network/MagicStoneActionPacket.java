@@ -64,6 +64,7 @@ public class MagicStoneActionPacket {
     }
 
     private void handleUnlock(ServerPlayer player) {
+        if(com.tnc.tnc.combat.DownedCombat.isDowned(player))return;
         ResourceLocation id = ResourceLocation.tryParse(spellId);
         if (id == null) {
             return;
@@ -78,6 +79,7 @@ public class MagicStoneActionPacket {
             return;
         }
         MagicStoneLearning.Result result = MagicStoneLearning.unlock(data, entry);
+        if(result==MagicStoneLearning.Result.OK)com.tnc.tnc.magic.LearningVisuals.start(player,entry.element());
         player.sendSystemMessage(MagicStoneLearning.describe(result, entry, data));
         if (result == MagicStoneLearning.Result.OK || result == MagicStoneLearning.Result.ALREADY_LEARNED) {
             // 解锁成功 = 把"已解锁集合"同步进法杖（玩家看不到卷轴/法术书/注册台）。

@@ -18,10 +18,10 @@ final class WaterRainVisuals {
             WaterGeometry.richCircle(buffers,stack,new Vec3(0,.06,0),UP,r,age*.5,fade*.9F);
         }
         var out=buffers.getBuffer(WaterRenderTypes.geometry());Matrix4f pose=stack.last().pose();
-        float red=tier==4?1:.015F;
-        float green=tier==1?.32F:tier==2?.85F:tier==3?.48F:tier==4?.65F:.3F;
-        float blue=tier==2?.3F:tier==4?.07F:1;
-        WaterGeometry.ringColor(out,pose,new Vec3(0,.07,0),UP,r,.16+r*.003,red,green,blue,fade*.95F);
+        float red=tier==4?.48F:.015F;
+        float green=tier==1?.32F:tier==2?.85F:tier==3?.48F:tier==4?.16F:.3F;
+        float blue=tier==2?.3F:tier==4?.95F:1;
+        WaterGeometry.ringColor(out,pose,new Vec3(0,.07,0),UP,r,.16+r*.003,.14F+tier*.055F,.12F,.72F+tier*.05F,fade*.95F);
         // Each tier has a different hallmark, duration/healing remain server-owned.
         if(tier==1) {
             for(int i=0;i<12;i++) {
@@ -42,7 +42,7 @@ final class WaterRainVisuals {
             }
             dome(out,pose,r,Math.min(10,h*.5),red,green,blue,fade*.7F);
         } else if(tier==4) {
-            // Four turquoise columns wrap a gold shield, clearly different from an ordinary shower.
+            // Four turquoise columns wrap an indigo shield, distinct from the water columns.
             for(int i=0;i<4;i++) {
                 double a=i*Math.PI/2;Vec3 p=new Vec3(Math.cos(a)*r*.75,.1,Math.sin(a)*r*.75);
                 WaterGeometry.tube(out,pose,p,p.add(0,h*.75,0),.18,.01F,.5F,.8F,fade*.5F);
@@ -50,13 +50,13 @@ final class WaterRainVisuals {
             }
             dome(out,pose,r,h*.75,red,green,blue,fade*.8F);
         } else {
-            for(int i=0;i<4;i++)WaterGeometry.ringColor(out,pose,new Vec3(0,.12+i*.35,0),UP,r*(1-i*.08),.18,1,.65F,.05F,fade*.9F);
+            for(int i=0;i<4;i++)WaterGeometry.ringColor(out,pose,new Vec3(0,.12+i*.35,0),UP,r*(1-i*.08),.18,.28F+i*.12F,.12F,1,fade*.9F);
             // Twelve peripheral cataracts connect the sky seal to the whole healing territory.
             for(int i=0;i<12;i++) {
                 double a=i*Math.PI/6;Vec3 p=new Vec3(Math.cos(a)*r*.87,0,Math.sin(a)*r*.87);
                 WaterGeometry.tube(out,pose,p,p.add(0,h,0),.3,.005F,.2F,.8F,fade*.5F);
                 WaterGeometry.spiral(out,pose,p,UP,.65,h,-age*.065+i,.025F,.55F,1,fade*.9F);
-                WaterGeometry.ringColor(out,pose,p.add(0,.2,0),UP,1.8,.18,1,.66F,.04F,fade*.9F);
+                WaterGeometry.ringColor(out,pose,p.add(0,.2,0),UP,1.8,.18,.58F,.2F,1,fade*.9F);
             }
             // Eight luminous arches rise from an open central water crown, never a solid screen-covering dome.
             for(int i=0;i<8;i++)for(int j=0;j<24;j++) {
@@ -65,7 +65,7 @@ final class WaterRainVisuals {
                 WaterGeometry.tube(out,pose,p,v,.075,.01F,.4F,1,fade*.86F);
             }
             for(int i=0;i<3;i++)WaterGeometry.spiral(out,pose,Vec3.ZERO,UP,r*.15,h*.65,age*.035+i*Math.PI*2/3,.01F,.35F,.92F,fade*.75F);
-            dome(out,pose,r,h,1,.65F,.05F,fade*.65F);
+            dome(out,pose,r,h,.28F,.12F,.85F,fade*.65F);
         }
         // Rain is a supporting layer, colored per tier. Keep a strict finite vertex count.
         int count=16+tier*10;

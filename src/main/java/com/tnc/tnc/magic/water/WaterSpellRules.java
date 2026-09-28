@@ -19,7 +19,10 @@ public final class WaterSpellRules {
         };
     }
     public static int charge(int tier) { return tier == 5 ? 30 : tier == 4 ? 20 : 10; }
-    public static int duration(int tier) { return tier == 5 ? 240 : tier == 4 ? 60 : 64; }
+    public static int duration(int tier) { return tier == 5 ? 240 : tier == 4 ? 60 : tier == 3 ? 200 : 64; }
+    public static double boltRadius(int tier) { return tier == 2 ? .85 : .32; }
+    public static final int SLASH_CHANNEL_TICKS = 200;
+    public static final int SLASH_VOLLEY_INTERVAL = 20;
     public static double radius(int tier) { return tier == 5 ? circleRadius(tier) : .8; }
     public static double range(int tier) { return tier == 5 ? 96 : tier == 1 ? 40 : 48; }
     public static double circleRadius(int tier) { return tier == 5 ? 15 : tier == 4 ? 3.5 : 4; }
@@ -73,6 +76,11 @@ public final class WaterSpellRules {
         var attribute = ForgeRegistries.ATTRIBUTES.getValue(ResourceLocation.fromNamespaceAndPath("spell_power", "water"));
         if (attribute == null || caster.getAttribute(attribute) == null) return 1;
         double value = caster.getAttributeValue(attribute);
-        return Double.isFinite(value) ? (float)Math.max(0, Math.min(10000, value)) : 1;
+        return powerMultiplier(value);
+    }
+    public static float powerMultiplier(double value) {
+        // SpellPower attributes start at ZERO in the real pack; zero is no gear bonus,
+        // not permission to turn every base-damage spell into a harmless knockback.
+        return Double.isFinite(value) ? (float)Math.max(1, Math.min(10000, value)) : 1;
     }
 }
