@@ -21,7 +21,10 @@ const $WhisperingQuestsApi = Java.loadClass('com.lirxowo.whisperingquests.api.Wh
 const $TNCLocation = Java.loadClass('net.minecraft.resources.ResourceLocation')
 
 // ★ 想加任务：往这里加 id
-var TNC_STARTUP_QUESTS = ['tnc:main/self_talk']
+// ⚠️ 2026-09-29：原来是 'tnc:main/self_talk'，那条任务已并入主线、改名成
+//    'tnc:main/s1_self'（第一章第一环）。**改任务 id 时这里必须一起改** ✗ ——
+//    接取一条不存在的任务只会打一行 warn，任务书看起来就是"空的"。
+var TNC_STARTUP_QUESTS = ['tnc:main/s1_self']
 
 function tncStartQuest(player, idStr) {
     try {

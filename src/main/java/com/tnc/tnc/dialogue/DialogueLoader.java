@@ -120,26 +120,6 @@ public final class DialogueLoader {
                 }
                 continue;
             }
-            if (line.startsWith("@act")) {
-                // ★ 动作名必须挂在**下一行**台词上：写错了（比如挂在另一条 @act 后面、
-                //   或者挂在文件末尾）就直接报错，不做静默忽略 —— 静默失效是这个项目最大的坑。
-                if (pendingAction != null) {
-                    throw new IllegalStateException("line " + lineNo
-                            + ": two @act in a row (the first one at line " + pendingActionLine
-                            + " has no dialogue line to attach to)");
-                }
-                String action = line.substring(4).trim();
-                if (action.isEmpty()) {
-                    throw new IllegalStateException("line " + lineNo + ": @act needs an action name");
-                }
-                if (action.indexOf('|') >= 0 || action.indexOf(' ') >= 0) {
-                    throw new IllegalStateException("line " + lineNo
-                            + ": action name must be one word (no spaces / '|') -> " + action);
-                }
-                pendingAction = action;
-                pendingActionLine = lineNo;
-                continue;
-            }
             // ★ 顺序要紧：这些 @指令 必须排在"说话人|台词"之前判断，
             //   否则 "@quest tnc:main/xxx" 里没有竖线，会被下面当成格式错误 ✗。
             if (line.startsWith("@quests")) {
@@ -159,6 +139,15 @@ public final class DialogueLoader {
                 quests.add(parseIdDirective(line, 6, lineNo, "@quest"));
                 continue;
             }
+            // ★★ 指令判断顺序的铁律：**长关键字必须排在它的前缀之前** ✗
+            //   出过事：`@activate` 也以 `@act` 开头，而 @act 分支写在前面 ⇒
+            //   它被当成动作名、取 substring(4) 得到 `ivate tnc:main/xxx`
+            //   ⇒ 所有带 @activate 的剧本**整条解析失败**（2026-09-29，5/12 剧本死掉，
+            //   玩家表现就是"跟这个 NPC 没法对话"）。改结构时务必保持这个顺序：
+            //     @requires / @excludes / @activate / @quests / @quest  先
+            //     @next / @id                                         中
+            //     @act                                                最后
+            //   （`@quests` 也要排在 `@quest` 前面，同理。）
             if (line.startsWith("@activate")) {
                 activate = parseIdDirective(line, 9, lineNo, "@activate");
                 continue;
@@ -169,6 +158,44 @@ public final class DialogueLoader {
             }
             if (line.startsWith("@excludes")) {
                 excludes.add(parseIdDirective(line, 9, lineNo, "@excludes"));
+                continue;
+            }
+            // ★★ 顺序铁律：**@act 必须排在所有以它开头的指令之后** ✗
+            //   出过事（2026-09-29，两次）：`@activate` 也以 `@act` 开头。
+            //   当 @act 写在前面时，`@activate tnc:main/s1_leave` 会被当成动作名、
+            //   取 substring(4) 得到 `ivate tnc:main/s1_leave` ⇒ **整条剧本解析失败**
+            //   ⇒ 玩家表现是"跟这个 NPC 没法对话"（huai / cava / 周坐望大半都中招）。
+            //   所以保持这个顺序：
+            //     先： @quests / @quest / @activate / @requires / @excludes
+            //     中： @id / @next
+            //     最后：@act
+            //   下面的防呆会在顺序再次被弄乱时**立刻抛错**，不静默吞掉。
+            if (line.startsWith("@act")) {
+                // 动作名必须挂在**下一行**台词上：写在末尾或连着两条就直接报错，
+                // 不做静默忽略 —— 静默失效是这个项目最大的坑。
+                if (pendingAction != null) {
+                    throw new IllegalStateException("line " + lineNo
+                            + ": two @act in a row (the first one at line " + pendingActionLine
+                            + " has no dialogue line to attach to)");
+                }
+                String action = line.substring(4).trim();
+                if (action.isEmpty()) {
+                    throw new IllegalStateException("line " + lineNo + ": @act needs an action name");
+                }
+                // 防呆：动作名是**一个词**，永远不含 ':' 或 '/'。
+                // 出现了就说明有别的前缀指令（@activate 之类）掉进了这个分支 ⇒ 立刻报错。
+                if (action.contains(":") || action.contains("/")) {
+                    throw new IllegalStateException("line " + lineNo
+                            + ": looks like another @directive fell into the @act branch -> '"
+                            + action + "'. @act must be tested LAST "
+                            + "(see the ordering rule above).");
+                }
+                if (action.indexOf('|') >= 0 || action.indexOf(' ') >= 0) {
+                    throw new IllegalStateException("line " + lineNo
+                            + ": action name must be one word (no spaces / '|') -> " + action);
+                }
+                pendingAction = action;
+                pendingActionLine = lineNo;
                 continue;
             }
             int bar = line.indexOf('|');

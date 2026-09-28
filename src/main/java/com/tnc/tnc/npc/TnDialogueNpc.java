@@ -128,9 +128,15 @@ public abstract class TnDialogueNpc extends PathfinderMob {
         }
         // 服务端决定播哪条剧本，再把整条推给客户端（原因见 DialoguePackets 的注释）。
         // ★ 2026-09-29：不再固定播 dialogueId() —— 交给 DialoguePicker 按**任务进度**挑：
-        //   同一个 NPC 写了 self_first / self_02 / self_03 …，序号大的门槛不满足就往下回落。
+        //   同一个 NPC 写了 self / self_02 / self_03 …，序号大的门槛不满足就往下回落。
         //   这样"做完第一个任务才能听到那句话"是剧本文件里写门槛，不用改 Java ✓。
-        Optional<DialogueScript> script = DialoguePicker.pickFor(serverPlayer, skinName());
+        //
+        // ⚠️ 挑剧本用的是 **scriptPrefix()（= 剧本名前缀）**，**不是 skinName()** ✗ ——
+        //   这两个**不一定同名**：庄鹊让的皮肤叫 `zhuangquerang_humanoid`
+        //   （64×64 降级皮肤，名里带 _humanoid 是故意的），剧本却叫 `zhuangquerang`。
+        //   早先这里传了 skinName() ⇒ 她右键时**一条剧本都匹配不到**、完全没法对话
+        //   （日志原话：`DialoguePicker: no script at all for npc 'zhuangquerang_humanoid'`）。
+        Optional<DialogueScript> script = DialoguePicker.pickFor(serverPlayer, scriptPrefix());
         if (script.isEmpty()) {
             player.displayClientMessage(Component.literal(
                     "\u00a7c[TN-C] \u5267\u672c\u52a0\u8f7d\u5931\u8d25\uff1a" + dialogueId()
@@ -139,6 +145,17 @@ public abstract class TnDialogueNpc extends PathfinderMob {
         }
         DialogueNetwork.openFor(serverPlayer, script.get(), this.getUUID());
         return InteractionResult.SUCCESS;
+    }
+
+    /**
+     * 这个 NPC 的**剧本名前缀** —— 决定 {@code data/tnc/dialogues/} 下哪些文件归他。
+     *
+     * <p>默认取 {@link #dialogueId()} 的路径段（{@code tnc:zhuangquerang} → {@code zhuangquerang}）✓。
+     * 想换个前缀的 NPC 可以覆盖它 —— 但**永远不要用 skinName() 顶替** ✗：
+     * 皮肤名是贴图文件名，剧本名是剧本文件名，两者是两回事（见 {@link #mobInteract} 的说明）。
+     */
+    protected String scriptPrefix() {
+        return dialogueId().getPath();
     }
 
     /**

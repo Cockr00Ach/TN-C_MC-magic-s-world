@@ -403,6 +403,95 @@ try {
     if ($missingScript.Count -eq 0) { Ok 'every skin NPC has a dialogue script' }
     else { Fail ('npc dialogue script missing (right-click does nothing useful): ' + ($missingScript -join ', ')) }
 
+    # ---- the script prefix must be derivable from dialogueId(), NOT skinName() ----
+    # DialoguePicker resolves an NPC's scripts by the PREFIX of its dialogueId.
+    # A skin name is a texture file name and may differ (zhuangquerang's fallback
+    # skin is "zhuangquerang_humanoid", deliberately).  Passing skinName() there
+    # once made her completely undialogueable: the log said
+    #   "no script at all for npc 'zhuangquerang_humanoid'"
+    # while every file it needed was sitting right there.  This gate pins the link.
+    $prefixBad = @()
+    foreach ($npc in $npcSkins.Keys) {
+        $cls = $zip.Entries | Where-Object { $_.FullName -eq "com/tnc/tnc/npc/${npc}NpcEntity.class" }
+        if (-not $cls) { continue }
+        $cs = New-Object System.IO.StreamReader($cls.Open(), [System.Text.Encoding]::UTF8)
+        $cbytes = New-Object System.IO.MemoryStream
+        $cls.Open().CopyTo($cbytes) | Out-Null
+        $ctext = [System.Text.Encoding]::ASCII.GetString($cbytes.ToArray())
+        $cs.Close(); $cbytes.Dispose()
+        # the first dialogue file that actually exists tells us the prefix in use
+        $hasBase = $zip.Entries | Where-Object { $_.FullName -eq "data/tnc/dialogues/$npc.txt" }
+        $hasNumbered = $zip.Entries | Where-Object { $_.FullName -like "data/tnc/dialogues/${npc}_*.txt" }
+        if (-not ($hasBase -or $hasNumbered)) { continue }
+        # the class must mention the prefix somewhere (its FIRST_DIALOGUE constant)
+        if ($ctext -notmatch [regex]::Escape($npc)) {
+            $prefixBad += "$npc (class does not reference prefix '$npc')"
+        }
+    }
+    if ($prefixBad.Count -eq 0) { Ok 'every NPC dialogue prefix matches its shipped scripts' }
+    else { Fail ('NPC dialogue prefix problem (right-click finds NO script): ' + ($prefixBad -join ', ')) }
+
+    # ---- dialogue directive sanity ----
+    # The loader tests @directives with startsWith, so a LONGER keyword must be
+    # tested before any keyword that prefixes it (@activate before @act,
+    # @quests before @quest).  Getting that wrong made five scripts fail to parse
+    # entirely -- in game it just looked like "this NPC will not talk"
+    # (2026-09-29: "@act" swallowed "@activate", leaving the action name
+    # "ivate tnc:main/s1_leave").  A broken @act line is easy to spot: a real
+    # action name is one word and never contains ':' or '/'.
+    $badDirectives = @()
+    $actCount = 0
+    foreach ($e in $zip.Entries) {
+        if ($e.FullName -notlike 'data/tnc/dialogues/*.txt') { continue }
+        $dr = New-Object System.IO.StreamReader($e.Open(), [System.Text.Encoding]::UTF8)
+        $dtext = $dr.ReadToEnd(); $dr.Close()
+        foreach ($m in [regex]::Matches($dtext, '(?m)^\s*@act\s+(\S+)\s*$')) {
+            $actCount++
+            $value = $m.Groups[1].Value
+            if ($value.Contains(':') -or $value.Contains('/')) {
+                $badDirectives += "$($e.FullName) -> @act $value"
+            }
+        }
+        # @id must match the file name, or the script is loaded under a wrong key
+        $idMatch = [regex]::Match($dtext, '(?m)^\s*@id\s+(\S+)\s*$')
+        if ($idMatch.Success) {
+            $expect = 'tnc:' + [IO.Path]::GetFileNameWithoutExtension($e.FullName)
+            if ($idMatch.Groups[1].Value -ne $expect) {
+                $badDirectives += "$($e.FullName) -> @id $($idMatch.Groups[1].Value) (expected $expect)"
+            }
+        } else {
+            $badDirectives += "$($e.FullName) -> missing @id"
+        }
+    }
+    if ($badDirectives.Count -eq 0) { Ok "dialogue directives are well-formed ($actCount @act, ids match file names)" }
+    else { Fail ('dialogue directive problem (the script fails to load; the NPC looks mute): ' + ($badDirectives -join '; ')) }
+
+    # ---- DialogueLoader must test @act LAST ----
+    # The loader matches directives with startsWith, so `@activate` also matches
+    # the `@act` prefix.  With @act tested first, "@activate tnc:main/s1_leave"
+    # is read as the action name "ivate tnc:main/s1_leave" and the WHOLE script
+    # fails to parse -- in game the NPC simply will not talk.  This shipped twice
+    # (2026-09-29).  Checking the source order is crude but it is the real rule.
+    $loaderPath = Join-Path $TncRepoRoot 'src\main\java\com\tnc\tnc\dialogue\DialogueLoader.java'
+    if (Test-Path $loaderPath) {
+        $loaderSrc = [IO.File]::ReadAllText($loaderPath, [System.Text.Encoding]::UTF8)
+        $actAt = $loaderSrc.IndexOf('line.startsWith("@act")')
+        $activateAt = $loaderSrc.IndexOf('line.startsWith("@activate")')
+        $questsAt = $loaderSrc.IndexOf('line.startsWith("@quests")')
+        $questAt = $loaderSrc.IndexOf('line.startsWith("@quest")')
+        if ($actAt -lt 0) {
+            Fail 'DialogueLoader: could not find the @act branch (did the parser change?)'
+        } elseif ($activateAt -lt 0 -or $questsAt -lt 0 -or $questAt -lt 0) {
+            Fail 'DialogueLoader: a directive branch is missing (@activate/@quests/@quest)'
+        } elseif ($actAt -lt $activateAt -or $questsAt -gt $questAt) {
+            # NOTE: keep this on ONE line -- a bare '+' at line start inside a
+            # function call is a PowerShell parse error, not a continuation.
+            Fail ("DialogueLoader directive order is wrong: @act is at $actAt but @activate is at $activateAt (and @quests must precede @quest). @act MUST be tested last, otherwise @activate parses as an action name and the whole script dies.")
+        } else {
+            Ok 'DialogueLoader tests @act after @activate/@quests/@quest (prefix-shadowing safe)'
+        }
+    }
+
     # ---- every Bedrock-model NPC must ship its geometry + texture ----
     # These two are HARD requirements: without the .geo.json nothing is drawn at all,
     # without the texture the model renders as the purple-black missing texture.
@@ -458,6 +547,55 @@ try {
         }
         if ($badQuestRefs.Count -eq 0) { Ok "every quest id a dialogue references exists ($questRefCount reference(s))" }
         else { Fail ('dialogue references a quest that does not exist (the dialogue plays, the quest silently never completes): ' + ($badQuestRefs -join ', ')) }
+    }
+
+    # ---- schema check on every quest WE author ----
+    # The engine throws JsonParseException and DROPS the offending quest, which
+    # also silently breaks the chapter it belongs to.  A whole quest book looked
+    # empty this way (2026-09-29).  Cheap to check, expensive to debug in game.
+    $questPack2 = Find-TncLivePack -WorkPack $WorkPack
+    if ($questPack2) {
+        $tasksRoot = Join-Path $questPack2 "kubejs\data\tnc\whisperingquests\tasks"
+        $badSchema = @()
+        $checked = 0
+        if (Test-Path $tasksRoot) {
+            foreach ($file in Get-ChildItem -Recurse $tasksRoot -Filter *.json -File) {
+                $checked++
+                $qtxt = [IO.File]::ReadAllText($file.FullName, [System.Text.Encoding]::UTF8)
+                try { $qobj = $qtxt | ConvertFrom-Json }
+                catch { $badSchema += "$($file.Name): not valid JSON"; continue }
+
+                foreach ($obj in @($qobj.objectives)) {
+                    if (-not $obj) { continue }
+                    $t = [string]$obj.type
+                    if ($t -eq 'location') {
+                        # must carry a nested position object; flat x/y/z is rejected
+                        if (-not $obj.position) {
+                            $badSchema += "$($file.Name): location objective '$($obj.id)' has no 'position' object"
+                        } elseif ($null -eq $obj.position.x -or $null -eq $obj.position.y -or $null -eq $obj.position.z) {
+                            $badSchema += "$($file.Name): location objective '$($obj.id)' position needs x/y/z"
+                        }
+                    }
+                    elseif ($t -eq 'kill' -and -not $obj.entity) {
+                        $badSchema += "$($file.Name): kill objective '$($obj.id)' has no 'entity'"
+                    }
+                    elseif ($t -eq 'structure' -and -not $obj.structure) {
+                        $badSchema += "$($file.Name): structure objective '$($obj.id)' has no 'structure'"
+                    }
+                    elseif ($t -eq 'dimension' -and -not $obj.dimension) {
+                        $badSchema += "$($file.Name): dimension objective '$($obj.id)' has no 'dimension'"
+                    }
+                    elseif ($t -eq 'item' -and -not $obj.item -and -not $obj.item_tag) {
+                        $badSchema += "$($file.Name): item objective '$($obj.id)' has neither 'item' nor 'item_tag'"
+                    }
+                    if ($obj.type -notin @('dialogue','kill','item','location','dimension','biome','structure','advancement')) {
+                        $badSchema += "$($file.Name): objective '$($obj.id)' has unknown type '$($obj.type)'"
+                    }
+                }
+            }
+        }
+        if ($badSchema.Count -eq 0) { Ok "every TN-C quest passes the objective schema ($checked file(s))" }
+        else { Fail ('quest objective schema problem - the engine DROPS these quests silently and their chapter looks empty: ' + ($badSchema -join '; ')) }
     }
 
     # ---- the maid-model NPC: GeckoLib renders it, so three files must ship together ----

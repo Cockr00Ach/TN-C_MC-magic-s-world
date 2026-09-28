@@ -32,5 +32,9 @@
   ],
   "next": [
     "tnc:main/s1_leave"
-  ]
+  ],
+  "npc": {
+    "entity_type": "tnc:huai",
+    "display_name": "槐"
+  }
 }

@@ -14,16 +14,13 @@
   "min_player_level": 0,
   "objectives": [
     {
-      "type": "location",
+      "type": "dialogue",
       "id": "reach_archive",
-      "text": "前往典籍馆",
+      "text": "去典籍馆找管书的人",
       "amount": 1,
       "consume": false,
-      "radius": 12,
-      "waypoint_requires_tracking": true,
-      "x": 137,
-      "y": 82,
-      "z": -343
+      "radius": 10,
+      "waypoint_requires_tracking": true
     }
   ],
   "rewards": [
@@ -35,5 +32,9 @@
   ],
   "next": [
     "tnc:main/s1_zhuang"
-  ]
+  ],
+  "npc": {
+    "entity_type": "tnc:zhuangquerang",
+    "display_name": "庄鹊让"
+  }
 }

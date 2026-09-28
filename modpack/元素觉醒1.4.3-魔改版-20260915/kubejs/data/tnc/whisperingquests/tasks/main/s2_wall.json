@@ -14,16 +14,13 @@
   "min_player_level": 0,
   "objectives": [
     {
-      "type": "location",
+      "type": "dialogue",
       "id": "read_the_mark",
-      "text": "去看那道痕",
+      "text": "跟让看那道痕",
       "amount": 1,
       "consume": false,
-      "radius": 12,
-      "waypoint_requires_tracking": true,
-      "x": 137,
-      "y": 82,
-      "z": -343
+      "radius": 10,
+      "waypoint_requires_tracking": true
     }
   ],
   "rewards": [
@@ -35,5 +32,9 @@
   ],
   "next": [
     "tnc:main/s2_mountain"
-  ]
+  ],
+  "npc": {
+    "entity_type": "tnc:zhuangquerang",
+    "display_name": "庄鹊让"
+  }
 }

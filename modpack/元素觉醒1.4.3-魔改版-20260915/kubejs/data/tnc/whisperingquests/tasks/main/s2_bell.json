@@ -31,5 +31,9 @@
   ],
   "next": [
     "tnc:main/s2_wall"
-  ]
+  ],
+  "npc": {
+    "entity_type": "tnc:zhuangquerang",
+    "display_name": "庄鹊让"
+  }
 }

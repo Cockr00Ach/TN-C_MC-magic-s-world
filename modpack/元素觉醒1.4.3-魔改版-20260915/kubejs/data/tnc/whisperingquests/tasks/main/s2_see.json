@@ -14,21 +14,9 @@
   "min_player_level": 0,
   "objectives": [
     {
-      "type": "location",
-      "id": "back_to_the_mark",
-      "text": "再去一趟",
-      "amount": 1,
-      "consume": false,
-      "radius": 12,
-      "waypoint_requires_tracking": true,
-      "x": 137,
-      "y": 82,
-      "z": -343
-    },
-    {
       "type": "dialogue",
-      "id": "report_back",
-      "text": "回去告诉他那是什么",
+      "id": "back_to_the_mark",
+      "text": "回去把看到的说出来",
       "amount": 1,
       "consume": false,
       "radius": 10,
@@ -44,5 +32,9 @@
   ],
   "next": [
     "tnc:main/s2_door"
-  ]
+  ],
+  "npc": {
+    "entity_type": "tnc:zuowang",
+    "display_name": "周坐望"
+  }
 }

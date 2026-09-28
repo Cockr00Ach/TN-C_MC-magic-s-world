@@ -53,13 +53,15 @@ public final class NpcPlacementDefaults {
             new NpcPlacementSavedData.Placement("zhuangquerang", "CENTER", 124, 54, -90),
             // 周坐望 —— 作者 2026-09-28 做好模型后加。
             //
-            // ⚠️ 这是**暂定位置** ✗：按剧情（docs/周坐望_任务设计.md）他该待在自己山里那间
+            // ★ 2026-09-29 用户要求：**暂时放在庄鹊让旁边** ✓。
+            //    所以跟着让走：同锚点、同高度（dy=54），只横向挪 3 格
+            //    （让在 +124/-90；他在 +127/-90 ⇒ 差 3 格，正好侧身站着）。
+            //
+            // ⚠️ 仍是**暂定位置** ✗：按剧情（docs/周坐望_任务设计.md）他该待在自己山里那间
             //    屋中（第二段「黑暗潮」），而那间屋子**还没有建** ✗。
-            //    所以先把他登记在天空岛中央台地的一角（与 self / cava / 槐 同一层 dy=0），
-            //    方便随时叫出来看模型、对台词 ✓。
             //    正式位置定了之后：在游戏里站到该处跑 `/tnc npc here zuowang`，
             //    再把 `/tnc npc list` 打出的那行抄回这里 + 把 VERSION +1 ✓。
-            new NpcPlacementSavedData.Placement("zuowang", "CENTER", -14, 0, 30)
+            new NpcPlacementSavedData.Placement("zuowang", "CENTER", 127, 54, -90)
     );
 
     /**
@@ -84,9 +86,11 @@ public final class NpcPlacementDefaults {
      *   <li>4 —— 庄鹊让从"贴着 huai"挪到"贴着 self"（作者要求）；</li>
      *   <li>5 —— 庄鹊让按作者指定的世界坐标挪到天空岛外（CENTER +124,+54,-90）。</li>
      *   <li>6 —— 加周坐望（作者 2026-09-28 做好模型）；位置暂定在中央台地一角。</li>
+     *   <li>7 —— 周坐望**挪到庄鹊让旁边**（用户 2026-09-29）：CENTER +127,+54,-90，
+     *       与让（+124,+54,-90）同锚点同高度、只差 3 格 ✓。</li>
      * </ul>
      */
-    public static final int VERSION = 6;
+    public static final int VERSION = 7;
 
     private NpcPlacementDefaults() {
     }

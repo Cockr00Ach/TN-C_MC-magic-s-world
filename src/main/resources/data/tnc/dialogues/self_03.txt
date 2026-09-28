@@ -15,8 +15,8 @@
 # ---------------------------------------------------------------------------
 
 @id tnc:self_03
-@requires tnc:main/s1_leave
-@excludes tnc:main/s2_door
+@requires tnc:main/s2_wall
+@excludes tnc:main/s2_mountain
 
 Self|回来了。
 归|嗯。

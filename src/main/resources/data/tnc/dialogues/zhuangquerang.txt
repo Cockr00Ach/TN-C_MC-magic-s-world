@@ -15,6 +15,7 @@
 # ---------------------------------------------------------------------------
 
 @id tnc:zhuangquerang
+@quest tnc:main/s1_guild
 @quest tnc:main/s1_zhuang
 
 庄鹊让|归。你很少来这儿，今天怎么……

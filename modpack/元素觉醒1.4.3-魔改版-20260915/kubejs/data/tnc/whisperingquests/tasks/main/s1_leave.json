@@ -14,16 +14,13 @@
   "min_player_level": 0,
   "objectives": [
     {
-      "type": "location",
+      "type": "dialogue",
       "id": "leave_city",
-      "text": "走出城去",
+      "text": "把出发的事定下来",
       "amount": 1,
       "consume": false,
-      "radius": 24,
-      "waypoint_requires_tracking": true,
-      "x": 137,
-      "y": 82,
-      "z": -343
+      "radius": 10,
+      "waypoint_requires_tracking": true
     }
   ],
   "rewards": [
@@ -41,5 +38,9 @@
   ],
   "next": [
     "tnc:main/s2_bell"
-  ]
+  ],
+  "npc": {
+    "entity_type": "tnc:zhuangquerang",
+    "display_name": "庄鹊让"
+  }
 }

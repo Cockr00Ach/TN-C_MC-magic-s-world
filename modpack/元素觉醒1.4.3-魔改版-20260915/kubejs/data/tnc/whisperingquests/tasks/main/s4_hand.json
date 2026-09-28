@@ -14,16 +14,13 @@
   "min_player_level": 0,
   "objectives": [
     {
-      "type": "location",
+      "type": "dialogue",
       "id": "touch_the_rift",
-      "text": "把手放到裂口上",
+      "text": "走到裂口前面",
       "amount": 1,
       "consume": false,
-      "radius": 8,
-      "waypoint_requires_tracking": true,
-      "x": 137,
-      "y": 82,
-      "z": -343
+      "radius": 10,
+      "waypoint_requires_tracking": true
     }
   ],
   "rewards": [
@@ -35,5 +32,9 @@
   ],
   "next": [
     "tnc:main/s4_lynn"
-  ]
+  ],
+  "npc": {
+    "entity_type": "tnc:zuowang",
+    "display_name": "周坐望"
+  }
 }

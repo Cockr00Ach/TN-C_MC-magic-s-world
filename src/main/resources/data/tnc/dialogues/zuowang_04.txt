@@ -1,5 +1,5 @@
 # ---------------------------------------------------------------------------
-#  TN-C 对话剧本 —— zuowang · 第 02 段
+#  TN-C 对话剧本 —— zuowang · 第 04 段
 #
 #  这是**生成出来的**文件（tools/gen_tnc_story_chain.py）✗ 别手改：
 #  改文案请改那个脚本里的台词表，然后重跑一次。
@@ -14,19 +14,17 @@
 #    说话人|台词         说话人留空 = 旁白
 # ---------------------------------------------------------------------------
 
-@id tnc:zuowang_02
-@requires tnc:main/s2_see
-@excludes tnc:main/s3_stone
-@activate tnc:main/s3_him
-@quest tnc:main/s2_see
-@quest tnc:main/s2_door
-@quest tnc:main/s3_gate
+@id tnc:zuowang_04
+@requires tnc:main/s3_stone
+@excludes tnc:main/s4_ge
+@activate tnc:main/s4_stones
+@quest tnc:main/s4_hand
+@quest tnc:main/s4_lynn
+@quest tnc:main/s4_ge
 
-周坐望|你看清楚了。
+周坐望|你要去了。
 归|嗯。
-周坐望|那是什么。
-归|有人从里面划出来的。
-周坐望|……你比他们肯看。
-周坐望|三年前我就认出那是他的手法。我没说，也没动。这三年我一直坐在这张椅子上，等有人来问。你们是第一个。
-周坐望|现在是那件事走到必须解决的时候了。潮进城了 —— 说明那扇门松了。
-周坐望|走吧。我带你们去那道缝前面。
+周坐望|我跟不上。那道口子只认一个人。
+周坐望|我就在这儿看着。看了一辈子了，不差这一会儿。
+归|……
+周坐望|去吧。别回头。

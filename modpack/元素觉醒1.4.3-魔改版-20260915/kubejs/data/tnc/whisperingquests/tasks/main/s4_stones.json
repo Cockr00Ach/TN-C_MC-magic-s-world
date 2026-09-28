@@ -36,5 +36,9 @@
       "count": 1
     }
   ],
-  "next": []
+  "next": [],
+  "npc": {
+    "entity_type": "tnc:zuowang",
+    "display_name": "周坐望"
+  }
 }

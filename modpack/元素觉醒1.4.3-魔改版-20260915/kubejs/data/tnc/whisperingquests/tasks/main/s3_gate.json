@@ -14,16 +14,13 @@
   "min_player_level": 0,
   "objectives": [
     {
-      "type": "location",
+      "type": "dialogue",
       "id": "the_seam",
-      "text": "到那道缝前面去",
+      "text": "跟他到那道缝前面",
       "amount": 1,
       "consume": false,
-      "radius": 12,
-      "waypoint_requires_tracking": true,
-      "x": 137,
-      "y": 82,
-      "z": -343
+      "radius": 10,
+      "waypoint_requires_tracking": true
     }
   ],
   "rewards": [
@@ -35,5 +32,9 @@
   ],
   "next": [
     "tnc:main/s3_him"
-  ]
+  ],
+  "npc": {
+    "entity_type": "tnc:zuowang",
+    "display_name": "周坐望"
+  }
 }

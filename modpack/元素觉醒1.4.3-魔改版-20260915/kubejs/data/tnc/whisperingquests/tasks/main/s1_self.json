@@ -32,5 +32,9 @@
   ],
   "next": [
     "tnc:main/s1_guild"
-  ]
+  ],
+  "npc": {
+    "entity_type": "tnc:self",
+    "display_name": "Self"
+  }
 }

@@ -5,6 +5,7 @@ import net.minecraftforge.fml.ModList;
 import org.slf4j.Logger;
 
 import java.lang.reflect.Method;
+import java.util.Optional;
 
 /**
  * 让"我们的对话剧本演完了"能推动 <b>WhisperingQuests</b> 的任务目标。
@@ -41,6 +42,7 @@ public final class WhisperingQuestBridge {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final String MOD_ID = "whisperingquests";
     private static final String QUEST_MANAGER = "com.lirxowo.whisperingquests.quest.QuestManager";
+    private static final String QUEST_DATA_MANAGER = "com.lirxowo.whisperingquests.data.QuestDataManager";
 
     /**
      * 反射结果缓存：{@code key = 方法名/参数个数}。
@@ -67,13 +69,106 @@ public final class WhisperingQuestBridge {
     /** 这条任务**正在进行中**吗？（没接取 / 已完成都返回 false） */
     public static boolean isQuestActive(net.minecraft.server.level.ServerPlayer player,
                                         net.minecraft.resources.ResourceLocation questId) {
-        return queryState(player, questId, "activeQuests");
+        return engineState(player, questId, "isActiveForPlayer");
     }
 
     /** 这条任务**已经完成**吗？ */
     public static boolean isQuestCompleted(net.minecraft.server.level.ServerPlayer player,
                                            net.minecraft.resources.ResourceLocation questId) {
-        return queryState(player, questId, "completedQuests");
+        return engineState(player, questId, "isCompletedForPlayer");
+    }
+
+    /**
+     * 问引擎"这条任务对该玩家算不算 active / completed"。
+     *
+     * <h2>为什么要绕这么一圈（两次踩坑记录）</h2>
+     * <b>第一版</b>用 {@code getTeamState(player).completedQuests()} —— 错的 ✗：
+     * 任务分**团队**的和**按人**的，引擎读门槛前会先过 {@code stateFor(questDef,
+     * teamState, personalState)} 分流。{@code s1_leave} 是按人存的
+     * （存档里 {@code PlayerTrackedQuests} 就是它），团队集合里没有它 ⇒
+     * 一律判成"未完成" ⇒ 选段永远挑不到后面那段。
+     *
+     * <p><b>第二版</b>想直接调 {@code QuestManager.isCompletedForPlayer(player, id)} ——
+     * 也是错的 ✗：那个方法是 <b>private</b>（只在引擎同类内部被 lambda 调用），
+     * {@code Class.getMethod} 只找 public，运行时报
+     * {@code NoSuchMethodException: ...isCompletedForPlayer(...)}，
+     * 表现依旧是"永远挑不到后面那段"。
+     *
+     * <p><b>现在这版</b>走引擎**公开**的入口，两步：
+     * <ol>
+     *   <li>{@code QuestDataManager.INSTANCE.getQuest(id)} → 拿到 {@code QuestDefinition}
+     *       （公开）✓；</li>
+     *   <li>{@code QuestManager.getQuestState(player, definition)} → 拿到**已经分流好**的
+     *       {@code TeamQuestState}（公开）✓ —— 它内部就是
+     *       {@code stateFor(questDef, teamState, personalState)}。</li>
+     * </ol>
+     * 再从这个 state 上读 {@code activeQuests()} / {@code completedQuests()} 即可，
+     * 团队/按人的区别由引擎处理，我们不用懂 ✓。
+     */
+    private static boolean engineState(net.minecraft.server.level.ServerPlayer player,
+                                       net.minecraft.resources.ResourceLocation questId,
+                                       String accessor) {
+        if (questId == null || player == null) {
+            return false;
+        }
+        if (!available()) {
+            return false;
+        }
+        try {
+            // 1) 查任务定义（公开：QuestDataManager.INSTANCE.getQuest(id)）
+            //    ⚠️ getQuest 在 QuestDataManager 上，**不在 QuestManager 上** ✗ ——
+            //    早先这里用 method() 往 QuestManager 上找，运行时报
+            //    NoSuchMethodException: QuestManager.getQuest(...)，gate 一律判 false。
+            Method managerGetter = methodOn(QUEST_DATA_MANAGER, "getQuest",
+                    new Class<?>[]{net.minecraft.resources.ResourceLocation.class});
+            Object dataManager = dataManagerInstance();
+            if (managerGetter == null || dataManager == null) {
+                return false;
+            }
+            Object optional = managerGetter.invoke(dataManager, questId);
+            if (!(optional instanceof Optional<?> opt) || opt.isEmpty()) {
+                return false;               // 定义不存在 => 谈不上完成
+            }
+            Object definition = opt.get();
+
+            // 2) 走公开的 getQuestState(player, definition) —— 它内部会做按人/团队分流
+            Method getQuestState = method("getQuestState",
+                    net.minecraft.server.level.ServerPlayer.class,
+                    definition.getClass());
+            if (getQuestState == null) {
+                return false;
+            }
+            Object state = getQuestState.invoke(null, player, definition);
+            if (state == null) {
+                return false;
+            }
+
+            // 3) 从分流后的 state 读集合
+            Object set = state.getClass().getMethod(accessor).invoke(state);
+            if (!(set instanceof java.util.Set<?> ids)) {
+                LOGGER.error("TN-C dialogue: {}.{}() did not return a Set",
+                        state.getClass().getName(), accessor);
+                return false;
+            }
+            return ids.contains(questId);
+        } catch (ReflectiveOperationException | RuntimeException error) {
+            LOGGER.error("TN-C dialogue: could not read {} for {}", accessor, questId, error);
+            return false;
+        }
+    }
+
+    /** {@code QuestDataManager.INSTANCE}（公开静态字段）。 */
+    private static Object dataManagerInstance() {
+        if (!available()) {
+            return null;
+        }
+        try {
+            Class<?> cls = Class.forName(QUEST_DATA_MANAGER);
+            return cls.getField("INSTANCE").get(null);
+        } catch (ReflectiveOperationException | RuntimeException error) {
+            LOGGER.error("TN-C dialogue: could not read {}.INSTANCE", QUEST_DATA_MANAGER, error);
+            return null;
+        }
     }
 
     /**
@@ -109,45 +204,6 @@ public final class WhisperingQuestBridge {
             return started;
         } catch (ReflectiveOperationException | RuntimeException error) {
             LOGGER.error("TN-C dialogue: could not accept quest {}", questId, error);
-            return false;
-        }
-    }
-
-    /**
-     * 走向 {@code TeamQuestState} 问某个集合里有没有这条任务 id。
-     *
-     * <p>反射链：{@code QuestManager.getTeamState(player)} -> {@code .xxxQuests()} ->
-     * {@code .contains(questId)}。任何一段拿不到都记 ERROR 并返回 false ——
-     * 不静默、也不崩（对方升级改了签名时必须能一眼看出来）。
-     */
-    private static boolean queryState(net.minecraft.server.level.ServerPlayer player,
-                                      net.minecraft.resources.ResourceLocation questId,
-                                      String accessor) {
-        if (questId == null || player == null) {
-            return false;
-        }
-        if (!available()) {
-            return false;
-        }
-        try {
-            Method getTeamState = method("getTeamState",
-                    net.minecraft.server.level.ServerPlayer.class);
-            if (getTeamState == null) {
-                return false;
-            }
-            Object state = getTeamState.invoke(null, player);
-            if (state == null) {
-                return false;
-            }
-            Method getter = state.getClass().getMethod(accessor);
-            Object set = getter.invoke(state);
-            if (!(set instanceof java.util.Set<?> ids)) {
-                LOGGER.error("TN-C dialogue: {}.{}() did not return a Set", state.getClass(), accessor);
-                return false;
-            }
-            return ids.contains(questId);
-        } catch (ReflectiveOperationException | RuntimeException error) {
-            LOGGER.error("TN-C dialogue: could not query {} for {}", accessor, questId, error);
             return false;
         }
     }
@@ -197,21 +253,37 @@ public final class WhisperingQuestBridge {
         }
     }
 
-    /** 反射查一个 {@code QuestManager} 的静态方法并缓存（找不到也缓存 null，只查一次）。 */
+    /**
+     * 反射查 {@code QuestManager} 上的公开静态方法并缓存（找不到也缓存 null，只查一次）。
+     *
+     * <p>⚠️ 只有真正在 {@code QuestManager} 上的方法才能用这个 —— 别的方法在别的类上
+     * （{@code getQuest} 在 {@code QuestDataManager} 上），用它会得到
+     * {@code NoSuchMethodException}。那种情况请直接用
+     * {@link #methodOn(String, String, Class[])}。
+     */
     private static synchronized Method method(String name, Class<?>... params) {
-        String key = name + "/" + params.length;
+        return methodOn(QUEST_MANAGER, name, params);
+    }
+
+    /**
+     * 同上，但<b>显式指定目标类</b>。
+     *
+     * @param className 目标类的全名（如 {@code com.lirxowo.whisperingquests.data.QuestDataManager}）
+     */
+    private static synchronized Method methodOn(String className, String name, Class<?>[] params) {
+        String key = className + "#" + name + "/" + params.length;
         if (cache.containsKey(key)) {
             return cache.get(key);
         }
         Method resolved = null;
         try {
-            Class<?> manager = Class.forName(QUEST_MANAGER);
-            resolved = manager.getMethod(name, params);
-            LOGGER.info("TN-C dialogue: {} bridge ready ({})", MOD_ID, name);
+            Class<?> owner = Class.forName(className);
+            resolved = owner.getMethod(name, params);
+            LOGGER.info("TN-C dialogue: {} bridge ready ({}#{})", MOD_ID, owner.getSimpleName(), name);
         } catch (ClassNotFoundException | NoSuchMethodException error) {
             // 对方升级后改了签名就会走到这里 —— 明确报出来，别静默 ✓
-            LOGGER.error("TN-C dialogue: could not resolve {}.{}; dialogue-driven quests "
-                    + "will not work", QUEST_MANAGER, name, error);
+            LOGGER.error("TN-C dialogue: could not resolve {}#{}; dialogue-driven quests "
+                    + "will not work", className, name, error);
         }
         cache.put(key, resolved);
         return resolved;

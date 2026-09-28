@@ -75,9 +75,23 @@ def kill(oid, text, entity, amount):
 
 
 def goto(oid, text, radius=10, pos=PORTAL):
+    """
+    A location objective -- NOT USED BY THE MAIN CHAIN ANY MORE (2026-09-29).
+
+    Why it is still here: the engine accepts it, and hand-written quests outside
+    this chain may still want it.  But the story chain was moved off it because
+    the position is a FIXED number in a static JSON file, while the sky island
+    and its ground portal are generated per save near that save's spawn point.
+    A hardcoded position is therefore correct in exactly one world and silently
+    unfinishable in every other -- the quest just sits there, blocking the chain.
+
+    (Schema note, learned the hard way: the engine reads a NESTED position
+    object.  Flat x/y/z is rejected at load time with
+    "Location objective requires position object" and the quest is dropped.)
+    """
     return {"type": "location", "id": oid, "text": text, "amount": 1, "consume": False,
             "radius": radius, "waypoint_requires_tracking": True,
-            "x": pos[0], "y": pos[1], "z": pos[2]}
+            "position": {"x": pos[0], "y": pos[1], "z": pos[2]}}
 
 
 def xp(n):
@@ -110,7 +124,7 @@ Q = [
      "\u5178\u7c4d\u9986\u6700\u91cc\u9762\u90a3\u4e00\u683c",
      "\u53bb\u9b54\u6cd5\u534f\u4f1a\u7684\u5178\u7c4d\u9986\uff0c\u627e\u7ba1\u4e66\u7684\u4eba",
      "\u4ed6\u8d70\u4e4b\u524d\u5728\u9152\u9986\u7ffb\u4e86\u4e00\u5bbf\u7684\u4e66\u67b6\u3002\n\n\u00a77Self \u8bb0\u5f97\u4ed6\u7ffb\u7684\u662f\u54ea\u4e00\u683c\u3002\u00a7r",
-     [goto("reach_archive", "\u524d\u5f80\u5178\u7c4d\u9986", 12, PORTAL)], [xp(30)], ["s1_zhuang"],
+     [talk("reach_archive", "\u53bb\u5178\u7c4d\u9986\u627e\u7ba1\u4e66\u7684\u4eba")], [xp(30)], ["s1_zhuang"],
      "minecraft:bookshelf"),
 
     ("s1_zhuang", "s1",
@@ -131,7 +145,10 @@ Q = [
      "\u51fa\u57ce",
      "\u4e09\u5339\u9a6c\u51fa\u57ce",
      "\u5979\u95ee\u5148\u53bb\u54ea\u513f\u3002\u4f60\u7ed9\u4e0d\u51fa\u65b9\u5411\u3002\n\n\u00a77\u53ea\u77e5\u9053\u4ed6\u5728\u67e5\u4eba\u2014\u2014\u4ed6\u5728\u67e5\u8c01\uff1f\u00a7r",
-     [goto("leave_city", "\u8d70\u51fa\u57ce\u53bb", 24, PORTAL)],
+     # ⚠️ 目标文案不要写人称 ✗ —— 这一环由**庄鹊让自己**的对话完成（zhuangquerang_02），
+     #    写成"告诉她你准备走了"就成了"告诉她自己她要走了"（2026-09-29 用户一眼看出来的）。
+     #    同理：以后加"找某人"的目标时，先确认那一环挂在谁身上再写人称。
+     [talk("leave_city", "\u628a\u51fa\u53d1\u7684\u4e8b\u5b9a\u4e0b\u6765")],
      [item(REC["s1"]), xp(40)], ["s2_bell"], "minecraft:saddle"),
 
     # ===================== segment 2 =====================
@@ -146,7 +163,7 @@ Q = [
      "\u5899\u4e0a\u7684\u90a3\u9053\u75d5",
      "\u4e1c\u5899\u3002\u90a3\u9053\u7126\u75d5\u4e0d\u5bf9\u52b2",
      "\u7b14\u76f4\u3001\u5f88\u6df1\u3001\u8fb9\u7f18\u53d1\u767d\u2014\u2014\u50cf\u88ab\u4ec0\u4e48\u4ece\u5916\u9762\u4e00\u8def\u7281\u8fdb\u6765\u3002\n\n\u00a77\u6f6e\u53ea\u4f1a\u538b\u5899\u3002\u8fd9\u9053\u75d5\u662f\u4ece\u57ce\u5916\u5f80\u57ce\u91cc\u6253\u3002\u00a7r",
-     [goto("read_the_mark", "\u53bb\u770b\u90a3\u9053\u75d5", 12, PORTAL)], [xp(60)], ["s2_mountain"],
+     [talk("read_the_mark", "\u8ddf\u8ba9\u770b\u90a3\u9053\u75d5")], [xp(60)], ["s2_mountain"],
      "minecraft:blackstone"),
 
     ("s2_mountain", "s2",
@@ -160,8 +177,7 @@ Q = [
      "\u770b\u75d5",
      "\u4ed6\u8ba9\u4f60\u5148\u53bb\u628a\u90a3\u9053\u75d5\u770b\u6e05\u695a",
      "\u201c\u4e1c\u5899\u90a3\u9053\u75d5\uff0c\u8fd8\u5728\u3002\u4f60\u8981\u662f\u771f\u60f3\u95ee\uff0c\u5c31\u81ea\u5df1\u53bb\u770b\u6e05\u695a\u3002\u201d\n\n\u00a77\u4ed6\u77e5\u9053\u7b54\u6848\u3002\u4f46\u90a3\u662f\u4ed6\u7684\u7b54\u6848\u3002\u00a7r",
-     [goto("back_to_the_mark", "\u518d\u53bb\u4e00\u8d9f", 12, PORTAL),
-      talk("report_back", "\u56de\u53bb\u544a\u8bc9\u4ed6\u90a3\u662f\u4ec0\u4e48")],
+     [talk("back_to_the_mark", "\u56de\u53bb\u628a\u770b\u5230\u7684\u8bf4\u51fa\u6765")],
      [xp(60)], ["s2_door"], "minecraft:spyglass"),
 
     ("s2_door", "s2",
@@ -176,7 +192,7 @@ Q = [
      "\u95e8\u524d",
      "\u4e00\u9053\u51e0\u4e4e\u6ca1\u6709\u539a\u5ea6\u7684\u7f1d",
      "\u201c\u8fd9\u9053\u53e3\u5b50\u4e0d\u8ba4\u5c5e\u6027\uff0c\u53ea\u8ba4\u2018\u7167\u2019\u3002\u201d\n\n\u00a77\u4ed6\u62ff\u81ea\u5df1\u7167\u4e86\u4e09\u5e74\uff0c\u591f\u5f00\u4e00\u6b21\u3002\u00a7r",
-     [goto("the_seam", "\u5230\u90a3\u9053\u7f1d\u524d\u9762\u53bb", 12, PORTAL)], [xp(120)], ["s3_him"],
+     [talk("the_seam", "\u8ddf\u4ed6\u5230\u90a3\u9053\u7f1d\u524d\u9762")], [xp(120)], ["s3_him"],
      "minecraft:end_portal_frame"),
 
     ("s3_him", "s3",
@@ -204,7 +220,7 @@ Q = [
      "\u624b\u653e\u4e0a\u53bb",
      "\u4e03\u6837\u4e1c\u897f\u4e00\u8d77\u649e\u8fdb\u6765",
      "\u6ca1\u6709\u75bc\u3002\u662f\u6ee1\u3002\n\n\u00a77\u7136\u540e\u4e16\u754c\u53d8\u6210\u7a7a\u767d\u3002\u00a7r",
-     [goto("touch_the_rift", "\u628a\u624b\u653e\u5230\u88c2\u53e3\u4e0a", 8, PORTAL)], [xp(300)], ["s4_lynn"],
+     [talk("touch_the_rift", "\u8d70\u5230\u88c2\u53e3\u524d\u9762")], [xp(300)], ["s4_lynn"],
      "minecraft:amethyst_shard"),
 
     ("s4_lynn", "s4",
@@ -269,8 +285,7 @@ DIALOGUES = [
         ("\u5f52", "\u4e09\u5e74\u3002"),
         ("Self", "\u4e09\u5e74\u3002\u90a3\u676f\u9152\u5374\u6ca1\u53d8\u5473 \u2014\u2014 \u6211\u5929\u5929\u6362\u3002"),
         ("Self", "\u884c\u4e86\u3002\u627e\u5230\u4ed6\u5c31\u56de\u6765\u5750\u5750\u3002\u6211\u7ed9\u4f60\u7559\u7740\u4f4d\u7f6e\u3002"),
-    ], requires=["tnc:main/s1_leave"],
-       excludes=["tnc:main/s2_door"]),
+    ], requires=["tnc:main/s2_wall"], excludes=["tnc:main/s2_mountain"]),
 
     # ---------------- 庄鹊让 ----------------
     D("zhuangquerang", 0, [
@@ -288,22 +303,50 @@ DIALOGUES = [
         ("\u5e84\u9e4a\u8ba9", "\u6211\u8bb0\u4e86\u5341\u4e00\u5e74\u7684\u7c3f\u5b50\uff0c\u54ea\u5929\u8c01\u501f\u4e86\u4ec0\u4e48\u90fd\u5728\u4e0a\u9762\uff0c\u53ef\u90a3\u5929\u6211\u7b2c\u4e00\u4e2a\u5ff5\u5934\u4e0d\u662f\u300c\u5e2e\u4ed6\u300d\uff0c\u662f\u300c\u8fd9\u4e0d\u5408\u89c4\u77e9\u300d\u3002"),
         ("\u5e84\u9e4a\u8ba9", "\u5f52\uff0c\u6211\u4e0d\u60f3\u8fd9\u8f88\u5b50\u53ea\u6709\u90a3\u4e00\u4e2a\u5ff5\u5934\u3002"),
         ("\u5e84\u9e4a\u8ba9", "\u4f60\u8981\u627e\u7684\u4e66\uff0c\u6211\u80fd\u5e2e\u4f60\u627e\u3002\u4f46\u4f60\u5f97\u5e26\u6211\u8d70\u3002"),
-    ], quests=["tnc:main/s1_zhuang"]),
+    # ⚠️ **故意不设 @requires**：这是她唯一"随时能说"的一段，
+    #    也是任务链的真正入口（s1_guild 由它完成、s1_guild 的 next 接着放 s1_zhuang）。
+    #    DialoguePicker 取"序号最大且门槛通过"的一段；若她名下所有段都有门槛，
+    #    玩家在门槛满足前右键她就会**什么都不播** ✗ ——
+    #    tools/check_tnc_quest_chain.py 会专门拦这条。
+    ], quests=["tnc:main/s1_guild", "tnc:main/s1_zhuang"]),
 
+    # 让 · 离开主城之后（第二段开场：潮进城的那个晚上）
+    #
+    # ★ 分段原则（踩过坑，见 tools/check_tnc_dialogue_segments.py）：
+    #   选段规则是"序号最大且门槛通过者胜" ⇒ **后一段的门槛必须比前一段严，或者
+    #   用 @excludes 把前一段排掉**，否则前一段永远轮不到（= 写了但永远播不到 ✗）。
+    #   这里：_02 要求 s1_shield（拿完盾回到让这里），完成 s1_leave 并放行 s2_bell；
+    #        _03 要求 s2_bell（潮已经打过）才接管 —— 两段各有各的窗口 ✓。
     D("zhuangquerang", 2, [
-        ("\u5e84\u9e4a\u8ba9", "\u5148\u53bb\u54ea\u513f\uff1f\u4ed6\u7684\u4e66\u6211\u5e2e\u4f60\u67e5\uff0c\u4f46\u4f60\u5f97\u5148\u7ed9\u6211\u4e2a\u65b9\u5411\u3002"),
-        ("\u5f52", "\u4ed6\u7ffb\u8fc7\u534f\u4f1a\u7684\u540d\u518c\u3002"),
-        ("\u5e84\u9e4a\u8ba9", "\u540d\u518c\u2026\u2026\u6d4b\u4eb2\u548c\u529b\u7684\u90a3\u672c\uff1f"),
-        ("\u5f52", "\u55ef\u3002\u8fde\u5341\u51e0\u5e74\u524d\u7684\u65e7\u518c\u4e00\u8d77\u7ffb\u7684\uff0c\u7ffb\u5f97\u5f88\u4ed4\u7ec6\u3002"),
-        ("\u5e84\u9e4a\u8ba9", "\u5f52\uff0c\u4ed6\u67e5\u6cd5\u672f\u6211\u4e0d\u5947\u602a\uff0c\u4ed6\u672c\u6765\u5c31\u662f\u90a3\u8fb9\u7684\u4eba\u3002\u53ef\u4ed6\u67e5\u4eba \u2014\u2014 \u4ed6\u5728\u67e5\u8c01\uff1f"),
-        ("\u5e84\u9e4a\u8ba9", "\u5168\u534f\u4f1a\u7684\u518c\u5b50\u52a0\u8d77\u6765\u51e0\u5343\u4e2a\u4eba\uff0c\u4ed6\u54ea\u6765\u90a3\u4e48\u591a\u65f6\u95f4\u3002"),
-        ("\u5f52", "\u2026\u2026"),
+        ("\u5e84\u9e4a\u8ba9", "\u540d\u518c\u90a3\u4ef6\u4e8b\uff0c\u6211\u60f3\u4e86\u5f88\u4e45\u3002"),
+        ("\u5f52", "\u55ef\u3002"),
+        ("\u5e84\u9e4a\u8ba9", "\u4ed6\u5728\u67e5\u4eba \u2014\u2014 \u53ef\u4ed6\u4e5f\u5728\u67e5\u4ed6\u81ea\u5df1\u3002\u540d\u518c\u4e0a\u6709\u4ed6\u7684\u540d\u5b57\uff0c\u65e5\u671f\u662f\u5341\u4e09\u5e74\u524d\u3002"),
+        ("\u5f52", "\u5341\u4e09\u5e74\u524d\u4ed6\u8fd8\u6ca1\u6765\u3002"),
+        ("\u5e84\u9e4a\u8ba9", "\u5bf9\u3002\u6240\u4ee5\u4ed6\u5728\u67e5\u7684\u4e0d\u662f\u81ea\u5df1 \u2014\u2014 \u662f\u540c\u4e00\u5929\u5165\u518c\u7684\u53e6\u4e00\u4e2a\u4eba\u3002"),
+        ("\u5e84\u9e4a\u8ba9", "\u5f52\u3002\u6211\u4eec\u51fa\u53d1\u5427\u3002\u518d\u665a\uff0c\u8fde\u8ffd\u7684\u65b9\u5411\u90fd\u6ca1\u4e86\u3002"),
         ("\u5f52", "\u8d70\u3002"),
-        ("\u5e84\u9e4a\u8ba9", "\u5f52\u3002"),
-        ("\u5f52", "\u6211\u77e5\u9053\u4f60\u60f3\u95ee\u4ec0\u4e48\u3002\u7b49\u6211\u67e5\u5b8c\u4e86\u518d\u56de\u7b54\u4f60\u3002"),
-        ("\u5e84\u9e4a\u8ba9", "\u884c\u3002\u90a3\u6211\u8ddf\u7740\u4f60\u8d70 \u2014\u2014 \u53cd\u6b63\u90a3\u672c\u4e66\u662f\u6211\u7ed9\u7684\u3002"),
-    ], requires=["tnc:main/s1_leave"], excludes=["tnc:main/s2_bell"],
-       quests=["tnc:main/s1_leave", "tnc:main/s2_bell"]),
+        ("", "\uff08\u57ce\u95e8\u3002\u6668\u5149\u3002\u4e09\u5339\u9a6c\u51fa\u57ce\u3002\uff09"),
+    ], requires=["tnc:main/s1_shield"], excludes=["tnc:main/s2_bell"],
+       quests=["tnc:main/s1_leave"], activate="tnc:main/s2_bell"),
+
+    # 让 · 墙上的那道痕（第二段第三场）—— 要求 s2_bell（潮已经打过）才轮到她
+    D("zhuangquerang", 3, [
+        ("\u5e84\u9e4a\u8ba9", "\u5f52\uff0c\u4f60\u8fc7\u6765\u770b\uff0c\u4e1c\u5899\u90a3\u4e2a\u4e0d\u5bf9\u52b2\u3002"),
+        ("", "\uff08\u6b8b\u5899\u4e0a\u4e00\u9053\u7126\u75d5\uff1a\u7b14\u76f4\u3001\u5f88\u6df1\u3001\u8fb9\u7f18\u53d1\u767d\u3002\uff09"),
+        ("\u5e84\u9e4a\u8ba9", "\u8fd9\u4e0d\u662f\u6f6e\u7559\u4e0b\u7684\u3002\u6f6e\u53ea\u4f1a\u538b\u5899\u3001\u7838\u5899\uff0c\u4ece\u6765\u4e0d\u70e7\u5899\u3002"),
+        ("\u5e84\u9e4a\u8ba9", "\u800c\u4e14\u4f60\u770b\u8fd9\u4e2a\u8d70\u5411 \u2014\u2014 \u5b83\u662f\u4ece\u5916\u9762\u6253\u8fdb\u6765\u7684\u3002\u6f6e\u662f\u4ece\u57ce\u91cc\u5f80\u5916\u62c6\uff0c\u8fd9\u9053\u75d5\u662f\u4ece\u57ce\u5916\u5f80\u57ce\u91cc\u6253\u3002"),
+        ("\u5f52", "\u96f7\u6cd5\u3002"),
+        ("\u5e84\u9e4a\u8ba9", "\u96f7\uff1f\u90a3\u6279\u4e1c\u897f\u4e0d\u4f1a\u7528\u96f7\uff0c\u6211\u6253\u4e86\u534a\u5bbf\u6ca1\u89c1\u4e00\u9053\u7535\u3002"),
+        ("\u5f52", "\u4e0d\u662f\u5b83\u4eec\u3002"),
+        ("\u5e84\u9e4a\u8ba9", "\u2026\u2026\u90a3\u662f\u8c01\u3002"),
+        ("\u5f52", "\u5899\u5916\u3002\u6709\u4eba\u5728\u5f80\u56de\u6253\u3002"),
+        ("\u5e84\u9e4a\u8ba9", "\u5f52\uff0c\u4f60\u8ba4\u5f97\u8fd9\u4e2a\u624b\u6cd5\u3002\u4f60\u6478\u90a3\u9053\u75d5\u7684\u65f6\u5019\u624b\u505c\u4f4f\u4e86\uff0c\u4f60\u5e73\u65f6\u4e0d\u8fd9\u6837\u3002"),
+        ("\u5f52", "\u8ba4\u5f97\u3002"),
+        ("\u5e84\u9e4a\u8ba9", "\u2026\u2026\u662f\u4ed6\u3002"),
+        ("\u5f52", "\u55ef\u3002"),
+        ("\u5f52", "\u53bb\u95ee\u4ed6\u3002"),
+    ], requires=["tnc:main/s2_bell"], excludes=["tnc:main/s2_mountain"],
+       quests=["tnc:main/s2_wall"]),
 
     # ---------------- 铁匠 cava（槐的父亲）----------------
     D("cava", 0, [
@@ -371,11 +414,54 @@ DIALOGUES = [
         ("\u5468\u5750\u671b", "\u4e09\u5e74\u524d\u6211\u5c31\u8ba4\u51fa\u90a3\u662f\u4ed6\u7684\u624b\u6cd5\u3002\u6211\u6ca1\u8bf4\uff0c\u4e5f\u6ca1\u52a8\u3002\u8fd9\u4e09\u5e74\u6211\u4e00\u76f4\u5750\u5728\u8fd9\u5f20\u6905\u5b50\u4e0a\uff0c\u7b49\u6709\u4eba\u6765\u95ee\u3002\u4f60\u4eec\u662f\u7b2c\u4e00\u4e2a\u3002"),
         ("\u5468\u5750\u671b", "\u73b0\u5728\u662f\u90a3\u4ef6\u4e8b\u8d70\u5230\u5fc5\u987b\u89e3\u51b3\u7684\u65f6\u5019\u4e86\u3002\u6f6e\u8fdb\u57ce\u4e86 \u2014\u2014 \u8bf4\u660e\u90a3\u6247\u95e8\u677e\u4e86\u3002"),
         ("\u5468\u5750\u671b", "\u8d70\u5427\u3002\u6211\u5e26\u4f60\u4eec\u53bb\u90a3\u9053\u7f1d\u524d\u9762\u3002"),
-    ], requires=["tnc:main/s2_see"], excludes=["tnc:main/s2_door"],
-       quests=["tnc:main/s2_see", "tnc:main/s2_door"]),
+    ], requires=["tnc:main/s2_see"], excludes=["tnc:main/s3_stone"],
+       quests=["tnc:main/s2_see", "tnc:main/s2_door", "tnc:main/s3_gate"],
+       activate="tnc:main/s3_him"),
 
-    # 终章之后：周坐望在酒馆门口（第四段第六场）
+    # 第四段 · 门前：他去歇那一下（s4_hand 在这里完成）
+    #
+    # ★ 分段原则：后一段的门槛取"前一段完成过的任务"里**最后一个**，
+    #   并且前一段用 @excludes 同一个任务 —— 两段的窗口正好首尾相接、不重叠 ✓。
+    #   （早先这里写成"后一段要求它自己完成的任务"，那一段就永远轮不到；
+    #     tools/check_tnc_dialogue_segments.py 会把它报成 SHADOWED。）
     D("zuowang", 3, [
+        ("\u5468\u5750\u671b", "\u5230\u4e86\u3002\u5c31\u662f\u8fd9\u513f\u3002"),
+        ("", "\uff08\u4e00\u9053\u51e0\u4e4e\u6ca1\u6709\u539a\u5ea6\u7684\u7f1d\u3002\u91cc\u9762\u4ec0\u4e48\u90fd\u6ca1\u6709\u3002\uff09"),
+        ("\u5468\u5750\u671b", "\u8fd9\u9053\u53e3\u5b50\u4e0d\u8ba4\u5c5e\u6027\uff0c\u53ea\u8ba4\u2018\u7167\u2019\u3002\u6211\u62ff\u81ea\u5df1\u7167\u4e86\u4e09\u5e74\uff0c\u591f\u5f00\u4e00\u6b21\u3002"),
+        ("\u5f52", "\u5f00\u5b8c\u4f60\u4f1a\u600e\u4e48\u6837\u3002"),
+        ("\u5468\u5750\u671b", "\u80fd\u52a8\u3002\u53ea\u662f\u5f97\u6b47\u4e00\u9635\u3002"),
+        ("\u5468\u5750\u671b", "\u4f60\u4eec\u5148\u8fdb\u53bb\u3002\u6211\u8ddf\u4e0a\u3002"),
+        ("\u5e84\u9e4a\u8ba9", "\u524d\u8f88\u2014\u2014"),
+        ("\u5468\u5750\u671b", "\u6211\u4e0d\u7b97\uff0c\u6211\u770b\u3002\u770b\u4e86\u4e00\u8f88\u5b50\u4e86\u3002"),
+        ("\u5468\u5750\u671b", "\u8fd9\u4e00\u6b21\u6211\u8ddf\u4f60\u4eec\u4e00\u8d77\u8fdb\u53bb\u3002"),
+    ], requires=["tnc:main/s3_gate"], excludes=["tnc:main/s4_ge"],
+       quests=["tnc:main/s3_him", "tnc:main/s3_account", "tnc:main/s3_stone"],
+       activate="tnc:main/s4_hand"),
+
+    # 第四段 · 裂口前：只有望还在（他跟不上，但这一句得有人接）
+    #
+    # ⚠️ 时间间隙里直面 Chiller Lynn 的那两环，暂时由"跟望的这一段"收尾 ——
+    #    因为她还没有可对话的实体。要做得完整，得给她建个 NPC
+    #    （照周坐望那八处接线走一遍）。这一段因此写成"望着你走向裂口"，
+    #    台词不冒充 Lynn 说任何话 ✓。
+    D("zuowang", 4, [
+        ("\u5468\u5750\u671b", "\u4f60\u8981\u53bb\u4e86\u3002"),
+        ("\u5f52", "\u55ef\u3002"),
+        ("\u5468\u5750\u671b", "\u6211\u8ddf\u4e0d\u4e0a\u3002\u90a3\u9053\u53e3\u5b50\u53ea\u8ba4\u4e00\u4e2a\u4eba\u3002"),
+        ("\u5468\u5750\u671b", "\u6211\u5c31\u5728\u8fd9\u513f\u770b\u7740\u3002\u770b\u4e86\u4e00\u8f88\u5b50\u4e86\uff0c\u4e0d\u5dee\u8fd9\u4e00\u4f1a\u513f\u3002"),
+        ("\u5f52", "\u2026\u2026"),
+        ("\u5468\u5750\u671b", "\u53bb\u5427\u3002\u522b\u56de\u5934\u3002"),
+    ], requires=["tnc:main/s3_stone"], excludes=["tnc:main/s4_ge"],
+       quests=["tnc:main/s4_hand", "tnc:main/s4_lynn", "tnc:main/s4_ge"],
+       activate="tnc:main/s4_stones"),
+
+    # ---------------- Chiller Lynn（时间间隙）----------------
+    # 她没有 NPC 实体，所以 s4_lynn / s4_ge 这两环只能靠"跟望对话"一并收尾 ——
+    # 台词也**故意不冒充 Lynn 说话**（那会显得像 bug）。
+    # ⚠️ 已知缺口：要做得完整，得给 Lynn 做一个 NPC 实体（照周坐望那八处接线走一遍）。
+
+    # 终章之后：周坐望在酒馆门口（第四段第六场 · s4_stones 在这里完成）
+    D("zuowang", 5, [
         ("", "\uff08\u9152\u9986\u95e8\u53e3\u90a3\u5f20\u65e7\u6905\u5b50\u4e0a\u5750\u7740\u4e00\u4e2a\u4eba\u3002\u817f\u4e0a\u644a\u7740\u4e00\u5757\u5e03\uff0c\u5e03\u4e0a\u6392\u7740\u51e0\u5757\u77f3\u5934\u3002\uff09"),
         ("Self", "\u2026\u2026\u8001\u5148\u751f\uff1f\u60a8\u5750\u8fd9\u513f\u4e00\u65e9\u4e0a\u4e86\u3002\u7b49\u4eba\uff1f"),
         ("\u5468\u5750\u671b", "\u2026\u2026\u4e0d\u7b97\u7b49\u4eba\u3002"),
@@ -393,13 +479,12 @@ DIALOGUES = [
         ("Self", "\u505a\u6210\u4ec0\u4e48\u4e86\uff1f"),
         ("\u5468\u5750\u671b", "\u2026\u2026\u6ca1\u4ec0\u4e48\u3002"),
         ("\u5468\u5750\u671b", "\u6211\u8bb0\u7740\u5c31\u884c\u3002"),
-    ], requires=["tnc:main/s4_stones"], quests=["tnc:main/s4_stones"]),
+    ], requires=["tnc:main/s4_ge"], quests=["tnc:main/s4_stones"]),
 ]
 
 
 def dump(obj):
     return json.dumps(obj, ensure_ascii=False, indent=2) + "\n"
-
 
 def write(path, text, check):
     if os.path.exists(path):
@@ -413,9 +498,38 @@ def write(path, text, check):
     return True
 
 
+# 每环要找的那个人 —— 写进任务 JSON 的 `npc.entity_type`。
+#
+# 为什么写这个：
+#   * 引擎用它把"任务 ↔ NPC"关联起来（作者自己的任务是靠它配的）；
+#   * 我们的 HUD 标记（client/QuestMarkerHud）读它来决定**追踪时标记谁** ✓。
+# 为什么**不**写坐标：天空岛/传送阵每存档位置不同，而 NPC 会走动 ——
+#   坐标交给客户端每帧现查（见 QuestMarkerTarget），写死必错。
+NPC_OF_QUEST = {
+    "s1_self": ("tnc:self", "Self"),
+    "s1_guild": ("tnc:zhuangquerang", "\u5e84\u9e4a\u8ba9"),
+    "s1_zhuang": ("tnc:zhuangquerang", "\u5e84\u9e4a\u8ba9"),
+    "s1_shield": ("tnc:huai", "\u69d0"),
+    "s1_leave": ("tnc:zhuangquerang", "\u5e84\u9e4a\u8ba9"),
+    "s2_bell": ("tnc:zhuangquerang", "\u5e84\u9e4a\u8ba9"),
+    "s2_wall": ("tnc:zhuangquerang", "\u5e84\u9e4a\u8ba9"),
+    "s2_mountain": ("tnc:zuowang", "\u5468\u5750\u671b"),
+    "s2_see": ("tnc:zuowang", "\u5468\u5750\u671b"),
+    "s2_door": ("tnc:zuowang", "\u5468\u5750\u671b"),
+    "s3_gate": ("tnc:zuowang", "\u5468\u5750\u671b"),
+    "s3_him": ("tnc:zuowang", "\u5468\u5750\u671b"),
+    "s3_account": ("tnc:zuowang", "\u5468\u5750\u671b"),
+    "s3_stone": ("tnc:zuowang", "\u5468\u5750\u671b"),
+    "s4_hand": ("tnc:zuowang", "\u5468\u5750\u671b"),
+    "s4_lynn": ("tnc:zuowang", "\u5468\u5750\u671b"),
+    "s4_ge": ("tnc:zuowang", "\u5468\u5750\u671b"),
+    "s4_stones": ("tnc:zuowang", "\u5468\u5750\u671b"),
+}
+
+
 def quest_json(row):
     qid, chapter, title, short, desc, objectives, rewards, nxt, icon = row
-    return {
+    out = {
         "id": "%s:main/%s" % (NS, qid),
         "enabled": True,
         "weight": 1,
@@ -433,6 +547,12 @@ def quest_json(row):
         "rewards": rewards,
         "next": ["%s:main/%s" % (NS, n) for n in nxt],
     }
+    npc = NPC_OF_QUEST.get(qid)
+    if npc:
+        # ⚠️ entity_type 必须是**已注册**的实体类型，否则引擎解析时直接抛错丢任务 ✗
+        #    （QuestDataManager 会 new JsonParseException("unknown entity type ...")）。
+        out["npc"] = {"entity_type": npc[0], "display_name": npc[1]}
+    return out
 
 
 HEADER = """# ---------------------------------------------------------------------------
