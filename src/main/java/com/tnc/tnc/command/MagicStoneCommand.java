@@ -378,7 +378,8 @@ public class MagicStoneCommand {
                     removed++;
                 }
             }
-            return "已遗忘全部 " + removed + " 个法术（亲和力 / 点数 / 链进度都保留）";
+            data.suppressElementalCatchUp();
+            return "已遗忘全部 " + removed + " 个法术（亲和力 / 点数 / 链进度都保留，重新学习不重复扣点）";
         });
     }
 

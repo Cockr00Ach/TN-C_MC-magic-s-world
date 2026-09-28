@@ -198,19 +198,24 @@ public final class TnSpellMechanics {
     /**
      * 把"档位已解锁"的链上法术自动补进魔法石 ✓（见 {@code onPlayerTick} 里的调用）。
      *
-     * <p>判定完全沿用游戏自己的规则：{@link MagicStoneData#maxTierFor} 决定这个元素的档位上限，
-     * 只补 {@code tier <= 上限} 的条目 ✓ —— 没到的档位**不会**越权解锁 ✗；
-     * 真正记账仍然交给 {@link MagicStoneLearning#unlock}（点数够不够由它说了算 ✓）。
+     * <p>仅恢复亲和力和已记录链进度以内的法术；不购买新等级，不扣点，尊重明确遗忘。
      */
     private static void autoLearnUnlocked(ServerPlayer player) {
         MagicStoneData data = MagicStone.getOrNull(player);
         if (data == null || !data.isInitialized()) {
             return;
         }
+        boolean changed = false;
         for (SpellCatalog.Entry entry : SpellCatalog.all()) {
             // 独立魔法没有元素亲和力；乱魔仍在 GUI 手动学习，不能传 null 进亲和力数组。
             if (!MagicStoneLearning.isElementalAutoLearnCandidate(data,entry))continue;
-            MagicStoneLearning.unlock(data, entry);
+            if (com.tnc.tnc.magic.compat.SpellEngineBridge.hasSpell(entry.id())) {
+                changed |= data.learn(entry.id());
+            }
+        }
+        if (changed) {
+            com.tnc.tnc.network.MagicStoneNetwork.syncTo(player);
+            com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(player,SpellCatalog.effectiveIds(data));
         }
     }
 

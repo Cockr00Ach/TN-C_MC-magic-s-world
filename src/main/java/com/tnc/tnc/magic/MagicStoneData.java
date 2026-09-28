@@ -52,6 +52,8 @@ public class MagicStoneData {
      */
     private final int[][] progress = new int[ELEMENT_COUNT][CHAIN_COUNT];
     private final Set<ResourceLocation> learned = new LinkedHashSet<>();
+    private final Set<ResourceLocation> learningHistory = new LinkedHashSet<>();
+    private final Set<ResourceLocation> explicitlyForgotten = new LinkedHashSet<>();
 
     /**
      * 已获得的「领域魔法」（设计总纲 §12.F 特殊魔法）。
@@ -274,6 +276,8 @@ public class MagicStoneData {
         for (int c = 0; c < CHAIN_COUNT; c++) {
             progress[element.ordinal()][c] = 0;
         }
+        learningHistory.removeIf(id -> isSpellOfElement(id, element));
+        explicitlyForgotten.removeIf(id -> isSpellOfElement(id, element));
         pointsSpent = Math.max(0, pointsSpent - refund);
         return refund;
     }
@@ -333,11 +337,32 @@ public class MagicStoneData {
     }
 
     public boolean learn(ResourceLocation spell) {
+        learningHistory.add(spell);
+        explicitlyForgotten.remove(spell);
         return learned.add(spell);
     }
 
     public boolean forget(ResourceLocation spell) {
+        if (learned.contains(spell)) explicitlyForgotten.add(spell);
         return learned.remove(spell);
+    }
+
+    public boolean hasPreviouslyLearned(ResourceLocation spell) {
+        return learningHistory.contains(spell);
+    }
+
+    public boolean isExplicitlyForgotten(ResourceLocation spell) {
+        return explicitlyForgotten.contains(spell);
+    }
+
+    /** Also suppress replacement IDs when forgetting all after a catalog migration. */
+    public void suppressElementalCatchUp() {
+        for (SpellCatalog.Entry entry : SpellCatalog.all()) {
+            if (!entry.independent() && entry.element() != null
+                    && entry.tier() <= getProgress(entry.element(), entry.chain())) {
+                explicitlyForgotten.add(entry.id());
+            }
+        }
     }
 
     // ------------------------------------------------------------------
@@ -352,6 +377,10 @@ public class MagicStoneData {
         this.learned.clear();
         this.specials.clear();
         this.learned.addAll(other.learned);
+        this.learningHistory.clear();
+        this.learningHistory.addAll(other.learningHistory);
+        this.explicitlyForgotten.clear();
+        this.explicitlyForgotten.addAll(other.explicitlyForgotten);
         this.specials.clear();
         this.specials.addAll(other.specials);
         this.mana = other.mana;
@@ -397,6 +426,8 @@ public class MagicStoneData {
             learnedList.add(StringTag.valueOf(spell.toString()));
         }
         tag.put("Learned", learnedList);
+        tag.put("LearningHistory", spellList(learningHistory));
+        tag.put("ExplicitlyForgotten", spellList(explicitlyForgotten));
         // 领域魔法（§12.F）：存元素 id 字符串集合；老存档没有这个键 → 读出来是空集 ✓
         ListTag specialList = new ListTag();
         for (String element : specials) {
@@ -453,6 +484,12 @@ public class MagicStoneData {
         }
 
         mana = tag.getInt("Mana");
+        learningHistory.clear();
+        readSpellSet(tag.getList("LearningHistory", Tag.TAG_STRING), learningHistory);
+        learningHistory.addAll(learned); // Legacy saves retain ownership of current spells.
+        explicitlyForgotten.clear();
+        readSpellSet(tag.getList("ExplicitlyForgotten", Tag.TAG_STRING), explicitlyForgotten);
+        explicitlyForgotten.removeAll(learned);
         maxMana = tag.getInt("MaxMana");
         pointsSpent = tag.getInt("PointsSpent");
         bonusPoints = Math.max(0, tag.getInt("BonusPoints"));
@@ -462,6 +499,19 @@ public class MagicStoneData {
     private static void readIntArray(ListTag list, int[] target) {
         for (int i = 0; i < target.length && i < list.size(); i++) {
             target[i] = list.getInt(i);
+        }
+    }
+
+    private static ListTag spellList(Set<ResourceLocation> spells) {
+        ListTag list = new ListTag();
+        for (ResourceLocation spell : spells) list.add(StringTag.valueOf(spell.toString()));
+        return list;
+    }
+
+    private static void readSpellSet(ListTag list, Set<ResourceLocation> target) {
+        for (int i = 0; i < list.size(); i++) {
+            ResourceLocation id = ResourceLocation.tryParse(list.getString(i));
+            if (id != null) target.add(id);
         }
     }
 

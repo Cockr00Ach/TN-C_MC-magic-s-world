@@ -270,7 +270,7 @@ public class MagicStoneScreen extends Screen {
                     // 消耗要按玩家自己的上限算（随上限等比放大），不然提示和实际扣费对不上
                     String tooltip=entry.fullName()
                                     + "\n§b效果 §r" + effectSummary(entry)
-                                    + "\n§7解锁消耗 " + entry.learnCost() + " 点"
+                                    + "\n§7解锁消耗 " + MagicStoneLearning.learningCost(data,entry) + " 点"
                                     + "\n§7施放消耗 " + entry.manaCostFor(data.getMaxMana()) + " 魔力"
                                     + (entry.independent()?"\n§d独立魔法 · 无亲和力要求": "\n§7亲和力要求 " + Element.tierName(entry.tier())
                                     + "（当前上限 " + Element.tierName(Math.max(1, data.maxTierFor(entry.element()))) + "）")

@@ -32,7 +32,13 @@ public final class MagicStoneLearning {
     /** Eligibility filter for the collaborator's periodic elemental catch-up learning. */
     public static boolean isElementalAutoLearnCandidate(MagicStoneData data,SpellCatalog.Entry entry) {
         return entry!=null&&!entry.independent()&&entry.element()!=null
-                &&!data.hasLearned(entry.id())&&entry.tier()<=data.maxTierFor(entry.element());
+                &&!data.hasLearned(entry.id())&&!data.isExplicitlyForgotten(entry.id())
+                &&entry.tier()<=data.maxTierFor(entry.element())
+                &&entry.tier()<=data.getProgress(entry.element(),entry.chain());
+    }
+
+    public static int learningCost(MagicStoneData data, SpellCatalog.Entry entry) {
+        return data.hasPreviouslyLearned(entry.id()) ? 0 : Config.learnCostForTier(entry.tier());
     }
 
     /** 能不能解锁（不改数据），返回不能的原因；能解锁返回 {@link Result#OK}。 */
@@ -53,7 +59,7 @@ public final class MagicStoneLearning {
         if (!entry.independent() && entry.tier() > data.getProgress(entry.element(), entry.chain()) + 1) {
             return Result.OUT_OF_ORDER;
         }
-        if (data.getPointsAvailable(Config.pointThresholds) < Config.learnCostForTier(entry.tier())) {
+        if (data.getPointsAvailable(Config.pointThresholds) < learningCost(data,entry)) {
             return Result.NOT_ENOUGH_POINTS;
         }
         return Result.OK;
@@ -65,7 +71,7 @@ public final class MagicStoneLearning {
         if (result != Result.OK) {
             return result;
         }
-        data.spendPoints(Config.learnCostForTier(entry.tier()));
+        data.spendPoints(learningCost(data,entry));
         data.learn(entry.id());
         if (!entry.independent()) data.setProgress(entry.element(), entry.chain(),
                 Math.max(data.getProgress(entry.element(), entry.chain()), entry.tier()));
@@ -74,9 +80,9 @@ public final class MagicStoneLearning {
 
     /** 给玩家看的一句话说明（成功和失败都有）。 */
     public static Component describe(Result result, SpellCatalog.Entry entry, MagicStoneData data) {
-        int cost = Config.learnCostForTier(entry.tier());
+        int cost = learningCost(data,entry);
         return switch (result) {
-            case OK -> Component.literal("§a[TN-C] §r已解锁 §e" + entry.fullName() + "§r（花 " + cost + " 点，还剩 "
+            case OK -> Component.literal("§a[TN-C] §r已解锁 §e" + entry.fullName() + "§r（还剩 "
                     + data.getPointsAvailable(Config.pointThresholds) + " 点）");
             case ALREADY_LEARNED -> Component.literal("§7[TN-C] " + entry.displayName() + " 已经学过了");
             case AFFINITY_TOO_LOW -> Component.literal("§c[TN-C] " + entry.element().cn() + "系亲和力不足："
