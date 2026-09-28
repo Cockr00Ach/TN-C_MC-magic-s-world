@@ -88,6 +88,55 @@ public final class WaterMagicGameTests {
         var player=FakePlayerFactory.get(h.getLevel(),new GameProfile(UUID.randomUUID(),"water-test"));
         player.setGameMode(GameType.CREATIVE);player.setPos(Vec3.atCenterOf(h.absolutePos(new BlockPos(1,3,1))));return player;
     }
+    private static TNWaterFieldEntity crypt(GameTestHelper h,ServerPlayer p) {
+        p.setPos(Vec3.atCenterOf(h.absolutePos(new BlockPos(32,8,20))));p.setYRot(0);p.setXRot(0);
+        TNWaterFieldEntity.cast(p,net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tnc","sea_god_crypt"));
+        return h.getLevel().getEntitiesOfClass(TNWaterFieldEntity.class,p.getBoundingBox().inflate(48))
+                .stream().filter(e->e.kind()==2&&e.tier()==5).findFirst().orElseThrow();
+    }
+    private static Zombie toughZombie(GameTestHelper h,Vec3 at) {
+        var z=zombie(h,at);z.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(200);
+        z.setHealth(200);return z;
+    }
+    @GameTest(template="water_test_crypt_empty",timeoutTicks=30)
+    public static void seaGodSwordHitsOnceAtSevenSecondsAndLeavesFieldActive(GameTestHelper h) {
+        var p=caster(h);var field=crypt(h,p);var enemy=toughZombie(h,field.position().add(25,0,0));
+        float full=enemy.getHealth();
+        field.tickCount=139;field.seaGodSwordImpact(h.getLevel(),p);
+        h.assertTrue(enemy.getHealth()==full,"Sword cannot damage before seven seconds");
+        field.tickCount=140;field.affect(h.getLevel(),p);
+        float remaining=enemy.getHealth();
+        // Zombies have innate armor: verify a large real hit rather than ignoring vanilla defenses.
+        h.assertTrue(full-remaining>40&&full-remaining<=SeaGodSwordRules.DAMAGE*WaterSpellRules.power(p),"Large real sword hit reaches the field edge");
+        enemy.invulnerableTime=0;field.seaGodSwordImpact(h.getLevel(),p);
+        field.tickCount=141;field.seaGodSwordImpact(h.getLevel(),p);
+        h.assertTrue(enemy.getHealth()==remaining,"Impact is once per cast even without target invulnerability");
+        h.assertTrue(!field.isRemoved()&&field.life()==600,"Original thirty-second field persists after sword impact");
+        enemy.discard();field.discard();h.succeed();
+    }
+    @GameTest(template="water_test_crypt_empty",timeoutTicks=30)
+    public static void seaGodSwordRespectsWallsVerticalBoundsAndFriendlyTargets(GameTestHelper h) {
+        var p=caster(h);var field=crypt(h,p);Vec3 center=field.position();
+        Zombie exposed=toughZombie(h,center.add(4,0,0)),blocked=toughZombie(h,center.add(0,0,6)),outside=toughZombie(h,center.add(27,0,0));
+        Zombie below=toughZombie(h,center.add(4,-4,0)),above=toughZombie(h,center.add(4,26,0)),ally=toughZombie(h,center.add(-4,0,0));
+        var pet=EntityType.WOLF.create(h.getLevel());pet.setTame(true);pet.setOwnerUUID(p.getUUID());pet.setPos(center.add(-6,0,0));pet.setNoAi(true);h.getLevel().addFreshEntity(pet);
+        float petHealth=pet.getHealth(),playerHealth=p.getHealth();
+        var scoreboard=h.getLevel().getScoreboard();var team=scoreboard.addPlayerTeam("sword-"+UUID.randomUUID().toString().substring(0,8));
+        scoreboard.addPlayerToTeam(p.getScoreboardName(),team);scoreboard.addPlayerToTeam(ally.getScoreboardName(),team);
+        BlockPos wall=BlockPos.containing(center.add(0,0,3));
+        h.getLevel().setBlockAndUpdate(wall,Blocks.STONE.defaultBlockState());h.getLevel().setBlockAndUpdate(wall.above(),Blocks.STONE.defaultBlockState());
+        try {
+            field.tickCount=140;field.seaGodSwordImpact(h.getLevel(),p);
+            h.assertTrue(exposed.getHealth()<160,"Unobstructed enemy receives giant sword damage");
+            for(var z:new Zombie[]{blocked,outside,below,above,ally})h.assertTrue(z.getHealth()==200,"Wall/radius/height/team safety retained: "+z.position());
+            h.assertTrue(p.getHealth()==playerHealth&&pet.getHealth()==petHealth,"Caster and tame pet remain safe");
+            h.assertTrue(h.getLevel().getBlockState(wall).is(Blocks.STONE),"Giant sword does not destroy terrain");
+        } finally {
+            scoreboard.removePlayerTeam(team);field.discard();pet.discard();
+            for(var z:new Zombie[]{exposed,blocked,outside,below,above,ally})z.discard();
+        }
+        h.succeed();
+    }
     @GameTest(template="water_test_large_empty",timeoutTicks=30)
     public static void controlAffectsNearbyEnemiesAndHealingUsesExpandedRadius(GameTestHelper h) {
         var p=caster(h);p.setPos(Vec3.atCenterOf(h.absolutePos(new BlockPos(6,8,2))));p.setYRot(0);p.setXRot(0);

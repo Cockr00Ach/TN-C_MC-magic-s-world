@@ -1,6 +1,6 @@
+param([ValidateRange(32,64)][int]$fixtureSize=48,[ValidateSet('water_test_large_empty','water_test_crypt_empty')][string]$fixtureName='water_test_large_empty')
 $ErrorActionPreference='Stop'
-$fixtureSize=48
-$target=Join-Path (Split-Path $PSScriptRoot -Parent) 'src\main\resources\data\tnc\structures\water_test_large_empty.nbt'
+$target=Join-Path (Split-Path $PSScriptRoot -Parent) "src\main\resources\data\tnc\structures\$fixtureName.nbt"
 $memory=New-Object IO.MemoryStream
 $writer=New-Object IO.BinaryWriter($memory)
 function Int32BE([int]$Value){$bytes=[BitConverter]::GetBytes($Value);[Array]::Reverse($bytes);$writer.Write($bytes)}

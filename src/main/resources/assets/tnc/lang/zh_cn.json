@@ -33,7 +33,7 @@
   "spell.tnc.abyss.name": "深渊",
   "spell.tnc.abyss.description": "展开半径18格的深海封印阵，持续24秒压制敌人；首次命中获得短暂护盾，开放栅格不遮挡视线。",
   "spell.tnc.sea_god_crypt.name": "水神的冥穴",
-  "spell.tnc.sea_god_crypt.description": "半径26格的巨型水神封印囚笼，牵引并压制敌人30秒，结束时坍缩爆发；首次命中给予护盾。",
+  "spell.tnc.sea_god_crypt.description": "半径26格的水神封印牵引并压制敌人30秒；释放7秒后，64格巨型水剑从天而降，刺中领域中心并造成60点基础魔法伤害。结束时坍缩爆发，首次命中给予护盾；巨剑不穿墙、不破坏地形。",
   "spell.tnc.raindrop.name": "雨滴",
   "spell.tnc.raindrop.description": "深蓝露珠与涟漪覆盖半径8格，持续15秒；留在雨域每秒恢复半颗心。",
   "spell.tnc.first_rain.name": "初雨",

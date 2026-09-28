@@ -51,5 +51,6 @@ public final class TNWaterFieldRenderer extends EntityRenderer<TNWaterFieldEntit
             WaterGeometry.ringColor(out,pose,new Vec3(0,.08,0),up,radius,.22,1,.65F,.08F,fade*.9F);
         }
         if(e.kind()==2 && e.tier()>=3)WaterGeometry.richCircle(buffers,stack,new Vec3(0,.06,0),up,radius,age,fade*.65F);
+        if(e.kind()==2 && e.tier()==5)SeaGodSwordVisuals.render(age,radius,fade,stack,buffers);
     }
 }

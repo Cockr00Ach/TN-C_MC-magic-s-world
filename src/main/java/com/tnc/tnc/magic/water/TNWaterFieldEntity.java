@@ -26,6 +26,7 @@ public final class TNWaterFieldEntity extends Entity {
     private static final EntityDataAccessor<Float> YAW=SynchedEntityData.defineId(TNWaterFieldEntity.class,EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Float> PITCH=SynchedEntityData.defineId(TNWaterFieldEntity.class,EntityDataSerializers.FLOAT);
     private UUID owner,anchor;
+    private boolean swordImpacted;
     private final Set<UUID> hit=new HashSet<>();
     public TNWaterFieldEntity(EntityType<? extends TNWaterFieldEntity> type,Level level){super(type,level);noPhysics=true;setNoGravity(true);}
     public int kind(){return entityData.get(KIND);} public int tier(){return entityData.get(TIER);}public int age(){return entityData.get(AGE);}
@@ -87,6 +88,10 @@ public final class TNWaterFieldEntity extends Entity {
         var player=owner==null?null:level.getServer().getPlayerList().getPlayer(owner);
         if(player==null || !player.isAlive() || player.isSpectator() || player.level()!=level || player.distanceToSqr(this)>128*128 || tickCount>life()){discard();return;}
         entityData.set(AGE,tickCount);
+        if(kind()==2 && tier()==5 && tickCount==SeaGodSwordRules.APPEAR_TICK)
+            level.playSound(null,blockPosition(),SoundEvents.CONDUIT_ACTIVATE,SoundSource.PLAYERS,2,.45F);
+        if(kind()==2 && tier()==5 && tickCount==SeaGodSwordRules.DROP_TICK)
+            level.playSound(null,blockPosition(),SoundEvents.TRIDENT_RIPTIDE_3,SoundSource.PLAYERS,2,.6F);
         if(kind()==2 && tier()<3 && anchor!=null){var e=level.getEntity(anchor);if(e==null || !e.isAlive()){discard();return;}setPos(e.position());}
         if(kind()==3){rain(level,player);return;}
         affect(level,player);
@@ -101,6 +106,7 @@ public final class TNWaterFieldEntity extends Entity {
             if(wall.getType()!=HitResult.Type.MISS){discard();return;}
         }
         double r=radius(),height=height();
+        if(kind()==2 && tier()==5)seaGodSwordImpact(level,player);
         var box=kind()==2||kind()==1&&tier()==5?WaterSpellRules.uprightArea(center,r,height):new AABB(previous,center).inflate(r,height,r);
         for(var enemy:level.getEntitiesOfClass(LivingEntity.class,box,e->WaterSpellRules.enemy(player,e))) {
             Vec3 delta=enemy.position().subtract(center);
@@ -123,6 +129,22 @@ public final class TNWaterFieldEntity extends Entity {
                 if(tickCount==life() && tier()==5)enemy.hurt(level.damageSources().indirectMagic(this,player),12*WaterSpellRules.power(player));
             }
         }
+    }
+    /** Delayed one-shot burst. Lifecycle/owner validation happens before affect() in tick(). */
+    void seaGodSwordImpact(ServerLevel level,ServerPlayer player) {
+        if(kind()!=2 || tier()!=5 || swordImpacted || tickCount<SeaGodSwordRules.IMPACT_TICK)return;
+        swordImpacted=true;
+        Vec3 center=position();double r=radius();
+        for(var enemy:level.getEntitiesOfClass(LivingEntity.class,WaterSpellRules.uprightArea(center,r,height()),e->WaterSpellRules.enemy(player,e))) {
+            if(enemy.position().subtract(center).horizontalDistanceSqr()>r*r
+                    || !clearSight(level,center.add(0,1,0),enemy.getBoundingBox().getCenter()))continue;
+            if(enemy.hurt(level.damageSources().indirectMagic(this,player),SeaGodSwordRules.DAMAGE*WaterSpellRules.power(player))) {
+                Vec3 delta=enemy.position().subtract(center);
+                Vec3 push=new Vec3(delta.x,0,delta.z).normalize();enemy.push(push.x*.7,.35,push.z*.7);
+            }
+        }
+        level.playSound(null,blockPosition(),SoundEvents.TRIDENT_THUNDER,SoundSource.PLAYERS,4,.55F);
+        level.playSound(null,blockPosition(),SoundEvents.GENERIC_EXPLODE,SoundSource.PLAYERS,2,.65F);
     }
     static boolean clearSight(ServerLevel level,Vec3 from,Vec3 to){return level.clip(new ClipContext(from,to,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,(Entity)null)).getType()==HitResult.Type.MISS;}
     void rain(ServerLevel level,ServerPlayer player) {
