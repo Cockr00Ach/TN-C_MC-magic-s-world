@@ -195,6 +195,29 @@ public final class TnSpellMechanics {
     }
 
     /** 雷场（t2）：第 20 / 60 tick 各劈一轮范围内的敌人 ⇒ 每个敌人挨两下 ✓。 */
+    /**
+     * 把"档位已解锁"的链上法术自动补进魔法石 ✓（见 {@code onPlayerTick} 里的调用）。
+     *
+     * <p>判定完全沿用游戏自己的规则：{@link MagicStoneData#maxTierFor} 决定这个元素的档位上限，
+     * 只补 {@code tier <= 上限} 的条目 ✓ —— 没到的档位**不会**越权解锁 ✗；
+     * 真正记账仍然交给 {@link MagicStoneLearning#unlock}（点数够不够由它说了算 ✓）。
+     */
+    private static void autoLearnUnlocked(ServerPlayer player) {
+        MagicStoneData data = MagicStone.getOrNull(player);
+        if (data == null || !data.isInitialized()) {
+            return;
+        }
+        for (SpellCatalog.Entry entry : SpellCatalog.all()) {
+            if (data.hasLearned(entry.id())) {
+                continue;
+            }
+            if (entry.tier() > data.maxTierFor(entry.element())) {
+                continue;                       // 档位还没到 ✓
+            }
+            MagicStoneLearning.unlock(data, entry);
+        }
+    }
+
     private static void tickLightningField(ServerPlayer player, long time) {
         Long until = FIELD_UNTIL.get(player.getUUID());
         if (until == null) {
@@ -552,6 +575,12 @@ public final class TnSpellMechanics {
         sparkMarks(player, time);
         // 神级大雷球：粒子贴到球上（引擎自己的 travel_particles 不跟随 ✗）
         followBigBall(player, time);
+        // ★ 自动补学（作者 2026-09-27）：链法术只要玩家的**档位已经解锁到它那一级**，就自动进魔法石 ✓
+        // 目的：我改链 / 加档 / 换档之后（删环绕、加神在投篮、降超级无敌大雷球…）玩家不需要手敲
+        // /tnc learn ✗ —— 之前正是那一步没成功，导致"法术在、但放不出来、也不扣蓝" ✗。
+        if (time % 40 == 0) {
+            autoLearnUnlocked(player);
+        }
         // 雷场 / 雷暴：窗口内自己劈敌人（视觉＋伤害都在里面）✓
         tickLightningField(player, time);
         tickDivineShot(player, time);

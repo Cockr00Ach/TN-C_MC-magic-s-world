@@ -10,7 +10,7 @@
   "short_description": "和酒馆老板 Self 说说话",
   "description": "主城的酒馆里，Self 一直在擦那只没人用的杯子。\n\n§7他好像有话要说。§r",
   "icon": "tnc:self_spawn_egg",
-  "refresh_pool": "triggered",
+  "refresh_pool": "daily",
   "min_player_level": 0,
   "objectives": [
     {
@@ -28,6 +28,15 @@
       "type": "experience",
       "amount": 20,
       "count": 1
+    }
+  ],
+  "start_triggers": [
+    {
+      "type": "advancement",
+      "action": "start",
+      "amount": 1,
+      "value": 1.0,
+      "id": "minecraft:story/root"
     }
   ]
 }
