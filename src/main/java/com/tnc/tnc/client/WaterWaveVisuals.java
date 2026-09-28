@@ -48,8 +48,8 @@ final class WaterWaveVisuals {
             for(int j=0;j<6;j++) {
                 Vec3 p=circularProfile(a,j/6.0,radius,height,age),q=circularProfile(b,j/6.0,radius,height,age);
                 Vec3 v=circularProfile(b,(j+1)/6.0,radius,height,age),u=circularProfile(a,(j+1)/6.0,radius,height,age);
-                WaterGeometry.quad(out,pose,p,q,v,u,.04F,.35F+j*.07F,.95F,alpha*(.25F+j*.055F));
-                if(j==5)WaterGeometry.tube(out,pose,u,v,.09,.9F,.99F,1,alpha);
+                WaterGeometry.quad(out,pose,p,q,v,u,.005F,.12F+j*.045F,.9F,alpha*(.3F+j*.06F));
+                if(j==5)WaterGeometry.tube(out,pose,u,v,.14,.2F,.72F,1,alpha);
             }
         }
     }

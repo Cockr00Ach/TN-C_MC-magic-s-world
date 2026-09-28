@@ -19,8 +19,6 @@ final class WaterGeometry {
     static void quad(VertexConsumer out,Matrix4f pose,Vec3 a,Vec3 b,Vec3 c,Vec3 d,float r,float g,float blue,float alpha) {
         vertex(out,pose,a,r,g,blue,alpha);vertex(out,pose,b,r,g,blue,alpha);
         vertex(out,pose,c,r,g,blue,alpha);vertex(out,pose,d,r,g,blue,alpha);
-        vertex(out,pose,d,r,g,blue,alpha);vertex(out,pose,c,r,g,blue,alpha);
-        vertex(out,pose,b,r,g,blue,alpha);vertex(out,pose,a,r,g,blue,alpha);
     }
     static Vec3 radial(Vec3 right,Vec3 up,double angle,double radius) {
         return right.scale(Math.cos(angle)*radius).add(up.scale(Math.sin(angle)*radius));
@@ -39,7 +37,7 @@ final class WaterGeometry {
         for(int i=0;i<96;i++) {
             double a=phase+i*Math.PI/48,b=phase+(i+1)*Math.PI/48;
             quad(out,pose,center.add(radial(right,up,a,radius)),center.add(radial(right,up,b,radius)),
-                    center.add(radial(right,up,b,radius-width)),center.add(radial(right,up,a,radius-width)),.18F,.8F,1,alpha);
+                    center.add(radial(right,up,b,radius-width)),center.add(radial(right,up,a,radius-width)),.015F,.32F,1,alpha);
         }
     }
     static void circle(VertexConsumer out,Matrix4f pose,Vec3 dir,double radius,double time,float alpha) {
@@ -70,23 +68,24 @@ final class WaterGeometry {
     }
     /** Existing gold lightning sigil, layered on a water-specific moving frame. No copied mod assets. */
     static void richCircle(MultiBufferSource buffers,PoseStack stack,Vec3 center,Vec3 dir,double radius,double time,float alpha) {
-        sigil(buffers,stack,center,dir,radius,time*.016,alpha*.78F);
-        sigil(buffers,stack,center.add(dir.scale(.035)),dir,radius*.59,-time*.024,alpha*.48F);
+        sigil(buffers,stack,center,dir,radius,time*.016,alpha*.96F);
+        sigil(buffers,stack,center.add(dir.scale(.035)),dir,radius*.59,-time*.024,alpha*.84F);
         Vec3 right=WaterSpellRules.right(dir),up=right.cross(dir).normalize();
         int satellites=radius>=6?6:3;
         for(int i=0;i<satellites;i++) {
             double a=time*.006+i*Math.PI*2/satellites;
-            sigil(buffers,stack,center.add(radial(right,up,a,radius*1.1)).add(dir.scale(.06)),dir,radius*.14,-time*.02,alpha*.7F);
+            sigil(buffers,stack,center.add(radial(right,up,a,radius*1.1)).add(dir.scale(.06)),dir,radius*.14,-time*.02,alpha*.94F);
         }
-        var out=buffers.getBuffer(RenderType.lightning());var pose=stack.last().pose();
-        ringColor(out,pose,center,dir,radius*1.03,radius*.012,.15F,.8F,1,alpha*.7F);
-        ringColor(out,pose,center.add(dir.scale(.07)),dir,radius*.73,radius*.014,.6F,.97F,1,alpha*.55F);
+        var out=buffers.getBuffer(WaterRenderTypes.geometry());var pose=stack.last().pose();
+        ringColor(out,pose,center,dir,radius*1.04,radius*.028,.005F,.10F,.48F,alpha*.9F);
+        ringColor(out,pose,center.add(dir.scale(.03)),dir,radius*1.03,radius*.018,.015F,.38F,1,alpha*.95F);
+        ringColor(out,pose,center.add(dir.scale(.07)),dir,radius*.73,radius*.024,.03F,.58F,1,alpha*.9F);
         for(int i=0;i<24;i++) {
             double a=-time*.018+i*Math.PI/12;
             Vec3 p=center.add(radial(right,up,a,radius*.84));
             Vec3 v=radial(right,up,a,radius*.045),w=radial(right,up,a+Math.PI/2,radius*.018);
-            tube(out,pose,p.subtract(v),p.add(w),radius*.004,1,.91F,.56F,alpha*.75F);
-            tube(out,pose,p.add(w),p.add(v),radius*.004,1,.91F,.56F,alpha*.75F);
+            tube(out,pose,p.subtract(v),p.add(w),radius*.006,1,.65F,.08F,alpha*.96F);
+            tube(out,pose,p.add(w),p.add(v),radius*.006,1,.65F,.08F,alpha*.96F);
         }
     }
     private static void sigil(MultiBufferSource buffers,PoseStack stack,Vec3 center,Vec3 dir,double radius,double spin,float alpha) {

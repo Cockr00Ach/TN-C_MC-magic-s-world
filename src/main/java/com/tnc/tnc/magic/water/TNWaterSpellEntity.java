@@ -21,6 +21,7 @@ public final class TNWaterSpellEntity extends Entity {
     private static final EntityDataAccessor<Float> LENGTH=SynchedEntityData.defineId(TNWaterSpellEntity.class,EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Float> YAW=SynchedEntityData.defineId(TNWaterSpellEntity.class,EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Float> PITCH=SynchedEntityData.defineId(TNWaterSpellEntity.class,EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Boolean> BLOCKED=SynchedEntityData.defineId(TNWaterSpellEntity.class,EntityDataSerializers.BOOLEAN);
     private UUID owner;
     private Vec3 barrageAim;
     private WaterTerrainBore bore;
@@ -40,8 +41,19 @@ public final class TNWaterSpellEntity extends Entity {
         var aimWall=player.level().clip(new ClipContext(player.getEyePosition(),player.getEyePosition().add(player.getLookAngle().scale(48)),ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,player));
         cast.barrageAim=target!=null?target.getBoundingBox().getCenter():aimWall.getLocation();
         Vec3 desired=player.getEyePosition().add(player.getLookAngle().scale(tier==3?-2:2)).add(0,tier==3?2.5:0,0);
+        if(tier==5) {
+            // The complete 14-block aperture must not start buried in the caster's own ground.
+            double verticalRadius=WaterSpellRules.radius(tier)*Math.sqrt(Math.max(0,1-player.getLookAngle().y*player.getLookAngle().y));
+            desired=desired.add(0,Math.max(0,verticalRadius-player.getEyeHeight()+.8-2*player.getLookAngle().y),0);
+        }
         var obstacle=player.level().clip(new ClipContext(player.getEyePosition(),desired,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,player));
         cast.setPos(obstacle.getType()==HitResult.Type.MISS?desired:obstacle.getLocation().subtract(desired.subtract(player.getEyePosition()).normalize().scale(.2)));
+        if(tier==5) {
+            Vec3 aim=aimWall.getType()==HitResult.Type.MISS?player.getEyePosition().add(player.getLookAngle().scale(96)):aimWall.getLocation();
+            Vec3 direction=aim.subtract(cast.position()).normalize();
+            cast.entityData.set(YAW,(float)Math.toDegrees(Math.atan2(-direction.x,direction.z)));
+            cast.entityData.set(PITCH,(float)-Math.toDegrees(Math.asin(direction.y)));
+        }
         player.serverLevel().addFreshEntity(cast);
     }
     static void bolt(LivingEntity player,int tier,Vec3 at,Vec3 velocity) {
@@ -51,8 +63,9 @@ public final class TNWaterSpellEntity extends Entity {
     public int tier(){return entityData.get(TIER);}
     public int age(){return entityData.get(AGE);}
     public float length(){return entityData.get(LENGTH);}
+    public boolean blocked(){return entityData.get(BLOCKED);}
     public Vec3 direction(){return Vec3.directionFromRotation(entityData.get(PITCH),entityData.get(YAW));}
-    @Override protected void defineSynchedData(){entityData.define(TIER,3);entityData.define(AGE,0);entityData.define(LENGTH,0F);entityData.define(YAW,0F);entityData.define(PITCH,0F);}
+    @Override protected void defineSynchedData(){entityData.define(TIER,3);entityData.define(AGE,0);entityData.define(LENGTH,0F);entityData.define(YAW,0F);entityData.define(PITCH,0F);entityData.define(BLOCKED,false);}
     @Override public void tick() {
         super.tick(); if(level().isClientSide)return;
         ServerLevel level=(ServerLevel)level();
@@ -80,6 +93,11 @@ public final class TNWaterSpellEntity extends Entity {
         if(tier()==5) {
             if(bore==null)bore=new WaterTerrainBore(position(),dir,WaterSpellRules.radius(tier()),WaterSpellRules.range(tier()));
             bore.tick(level,player);len=bore.length();
+            if(bore.stopped()&&!blocked()) {
+                entityData.set(BLOCKED,true);
+                player.displayClientMessage(net.minecraft.network.chat.Component.literal("§b龙滅受阻："+bore.stopReason()+"。请换到开阔处施放。"),true);
+                level.playSound(null,blockPosition(),SoundEvents.ANVIL_LAND,SoundSource.PLAYERS,.7F,.55F);
+            }
         } else len=clearLength(level,dir);
         entityData.set(LENGTH,(float)len);
         if(len>0 && active%10==0) {

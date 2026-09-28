@@ -19,34 +19,37 @@ public final class WaterTerrainBore {
     private List<BlockPos> pending;
     private int cursor;
     private boolean stopped;
+    private String stopReason="";
     public WaterTerrainBore(Vec3 start, Vec3 direction, double radius, double range) {
         this.start=start; this.direction=direction.normalize();
         this.radius=Math.max(.1,Math.min(7,radius)); this.range=Math.max(0,Math.min(96,range));
     }
     public double length() { return length; }
     public boolean stopped() { return stopped; }
+    public String stopReason() { return stopReason; }
     public static boolean protectedState(BlockState state, ServerLevel level, BlockPos pos) {
         return state.hasBlockEntity() || state.getDestroySpeed(level,pos)<0;
     }
     static boolean fluidOnly(BlockState state) { return state.getBlock() instanceof net.minecraft.world.level.block.LiquidBlock; }
     private boolean allowed(ServerLevel level, ServerPlayer player, BlockPos pos) {
         if (!level.hasChunkAt(pos) || !level.getWorldBorder().isWithinBounds(pos)
-                || level.isOutsideBuildHeight(pos)) return false;
+                || level.isOutsideBuildHeight(pos)) {stopReason="边界/未加载区块 "+pos.toShortString();return false;}
         BlockState state=level.getBlockState(pos);
-        if (protectedState(state,level,pos)) return false;
+        if (protectedState(state,level,pos)) {stopReason="不可破坏方块/容器 "+pos.toShortString();return false;}
         if (player.isSpectator() || player.gameMode.getGameModeForPlayer()==net.minecraft.world.level.GameType.ADVENTURE
-                || !level.mayInteract(player,pos) || level.getServer().isUnderSpawnProtection(level,pos,player)) return false;
-        return !MinecraftForge.EVENT_BUS.post(new BlockEvent.BreakEvent(level,pos,state,player));
+                || !level.mayInteract(player,pos) || level.getServer().isUnderSpawnProtection(level,pos,player)) {stopReason="交互/出生点保护 "+pos.toShortString();return false;}
+        boolean accepted=!MinecraftForge.EVENT_BUS.post(new BlockEvent.BreakEvent(level,pos,state,player));
+        if(!accepted)stopReason="领地/事件保护 "+pos.toShortString();return accepted;
     }
     private boolean safeSupport(ServerLevel level,BlockPos pos) {
         // Conservative first pass: don't remove supports of containers, attachments or falling blocks.
         // Such a cascade could otherwise bypass both claim checks and our direct-edit budget.
         for(var face:net.minecraft.core.Direction.values()) {
-            BlockPos next=pos.relative(face);if(!level.hasChunkAt(next))return false;
+            BlockPos next=pos.relative(face);if(!level.hasChunkAt(next)){stopReason="支撑物位于未加载区块 "+next.toShortString();return false;}
             var state=level.getBlockState(next);
             if(state.isAir() || fluidOnly(state))continue;
             if(state.hasBlockEntity() || state.getBlock() instanceof net.minecraft.world.level.block.FallingBlock
-                    || !state.isCollisionShapeFullBlock(level,next)) return false;
+                    || !state.isCollisionShapeFullBlock(level,next)) {stopReason="支撑物 "+net.minecraftforge.registries.ForgeRegistries.BLOCKS.getKey(state.getBlock())+" "+next.toShortString();return false;}
         }
         return true;
     }

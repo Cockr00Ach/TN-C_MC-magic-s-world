@@ -30,8 +30,9 @@ public final class TNWaterFieldEntity extends Entity {
     public TNWaterFieldEntity(EntityType<? extends TNWaterFieldEntity> type,Level level){super(type,level);noPhysics=true;setNoGravity(true);}
     public int kind(){return entityData.get(KIND);} public int tier(){return entityData.get(TIER);}public int age(){return entityData.get(AGE);}
     public Vec3 direction(){return Vec3.directionFromRotation(entityData.get(PITCH),entityData.get(YAW));}
-    public double radius(){return kind()==1?(tier()==5?20:tier()==4?8:tier()==3?4:3):kind()==2?(tier()<3?1.5: tier()==3?4:tier()==4?6:8):2.5+tier();}
-    public int life(){return kind()==1?(tier()==5?70:tier()==4?48:28):kind()==2?40+tier()*16:200+tier()*100;}
+    public double radius(){return WaterSpellRules.fieldRadius(kind(),tier());}
+    public int life(){return WaterSpellRules.fieldLife(kind(),tier());}
+    public double height(){return WaterSpellRules.fieldHeight(kind(),tier());}
     public Vec3 waveCenter(double age){return kind()==1 && tier()>1 && tier()<5?position().add(direction().scale(age*(tier()==3?1.35:tier()==4?.5:.8))):position();}
     public static boolean cast(ServerPlayer player,ResourceLocation spell) {
         if(!spell.getNamespace().equals("tnc"))return false;
@@ -41,13 +42,14 @@ public final class TNWaterFieldEntity extends Entity {
                 if(player.getUUID().equals(old.owner) && old.kind()==k+1)old.discard();
             Vec3 at=player.position();LivingEntity target=null;
             if(k>0) {
-                var block=player.level().clip(new ClipContext(player.getEyePosition(),player.getEyePosition().add(player.getLookAngle().scale(24)),ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,player));
+                var block=player.level().clip(new ClipContext(player.getEyePosition(),player.getEyePosition().add(player.getLookAngle().scale(36)),ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,player));
+                Vec3 surface=block.getLocation().add(Vec3.atLowerCornerOf(block.getDirection().getNormal()).scale(.2));
                 if(k==1) {
-                    target=aimEnemy(player,24);
+                    target=aimEnemy(player,36);
                     if(target!=null)at=target.position();
                     else if(t<2)return true;
-                    else at=block.getType()==HitResult.Type.MISS?player.position().add(player.getLookAngle().scale(12)):block.getLocation();
-                } else at=block.getType()==HitResult.Type.MISS?player.position():block.getLocation().add(0,.05,0);
+                    else at=block.getType()==HitResult.Type.MISS?player.position().add(player.getLookAngle().scale(12)):surface;
+                } else at=block.getType()==HitResult.Type.MISS?player.position():surface.add(0,.05,0);
             }
             boolean slash=k==0&&t==2;
             if(slash)at=player.getEyePosition();
@@ -63,7 +65,7 @@ public final class TNWaterFieldEntity extends Entity {
                 player.level().addFreshEntity(e);
             }
             if(k==0&&t==4)WaterWeather.storm(player.serverLevel());
-            player.serverLevel().playSound(null,BlockPos.containing(at),SoundEvents.PLAYER_SPLASH,SoundSource.PLAYERS,t==4?2:1,.7F);
+            player.serverLevel().playSound(null,BlockPos.containing(at),t==4?SoundEvents.CONDUIT_ACTIVATE:SoundEvents.PLAYER_SPLASH,SoundSource.PLAYERS,t==4?3:1,t==4?.45F:.7F);
             return true;
         }
         return false;
@@ -87,6 +89,10 @@ public final class TNWaterFieldEntity extends Entity {
         entityData.set(AGE,tickCount);
         if(kind()==2 && tier()<3 && anchor!=null){var e=level.getEntity(anchor);if(e==null || !e.isAlive()){discard();return;}setPos(e.position());}
         if(kind()==3){rain(level,player);return;}
+        affect(level,player);
+    }
+    /** Shared real effect body; owner/lifecycle guards remain in tick(). */
+    void affect(ServerLevel level,ServerPlayer player) {
         Vec3 center=waveCenter(tickCount),previous=waveCenter(tickCount-1);
         if(!level.hasChunkAt(BlockPos.containing(center))) {discard();return;}
         if(kind()==1 && tier()>1 && tier()<5) {
@@ -94,10 +100,9 @@ public final class TNWaterFieldEntity extends Entity {
             var wall=level.clip(new ClipContext(previous.add(lift),center.add(lift),ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,this));
             if(wall.getType()!=HitResult.Type.MISS){discard();return;}
         }
-        double r=radius(),height=kind()==1&&tier()==5?16:kind()==1&&tier()==4?8:kind()==1&&tier()==3?r:3;
-        var box=new AABB(previous,center).inflate(r,height,r);
+        double r=radius(),height=height();
+        var box=kind()==2||kind()==1&&tier()==5?WaterSpellRules.uprightArea(center,r,height):new AABB(previous,center).inflate(r,height,r);
         for(var enemy:level.getEntitiesOfClass(LivingEntity.class,box,e->WaterSpellRules.enemy(player,e))) {
-            if(kind()==2 && tier()<3 && !enemy.getUUID().equals(anchor))continue;
             Vec3 delta=enemy.position().subtract(center);
             if(kind()==1 && tier()==3) {
                 if(!WaterSpellRules.slashIntersects(enemy.getBoundingBox(),previous,center,direction(),r))continue;
@@ -120,9 +125,13 @@ public final class TNWaterFieldEntity extends Entity {
         }
     }
     static boolean clearSight(ServerLevel level,Vec3 from,Vec3 to){return level.clip(new ClipContext(from,to,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,(Entity)null)).getType()==HitResult.Type.MISS;}
-    private void rain(ServerLevel level,ServerPlayer player) {
+    void rain(ServerLevel level,ServerPlayer player) {
         double r=radius();
-        for(var target:level.getEntitiesOfClass(LivingEntity.class,new AABB(position().add(-r,-1,-r),position().add(r,4,r)))) {
+        var area=new AABB(position().add(-r,-1,-r),position().add(r,height(),r));
+        var targets=new ArrayList<>(level.getEntitiesOfClass(LivingEntity.class,area));
+        // Explicit owner inclusion also supports spell callbacks during entity-list registration.
+        if(area.intersects(player.getBoundingBox())&&!targets.contains(player))targets.add(player);
+        for(var target:targets) {
             boolean friend=target==player || tier()==5 && (player.isAlliedTo(target)||target instanceof TamableAnimal pet && player.getUUID().equals(pet.getOwnerUUID()));
             if(!friend || !target.isAlive() || target.position().subtract(position()).horizontalDistanceSqr()>r*r
                     || !clearSight(level,position().add(0,1,0),target.getBoundingBox().getCenter()))continue;

@@ -12,7 +12,7 @@ public final class TNWaterBoltRenderer extends EntityRenderer<TNWaterBoltEntity>
     @Override public boolean shouldRender(TNWaterBoltEntity e,net.minecraft.client.renderer.culling.Frustum f,double x,double y,double z){return e.distanceToSqr(x,y,z)<128*128;}
     @Override public ResourceLocation getTextureLocation(TNWaterBoltEntity e){return ResourceLocation.fromNamespaceAndPath("minecraft","textures/block/water_still.png");}
     @Override public void render(TNWaterBoltEntity e,float yaw,float partial,PoseStack stack,MultiBufferSource buffers,int light) {
-        var out=buffers.getBuffer(RenderType.lightning());var pose=stack.last().pose();
+        var out=buffers.getBuffer(WaterRenderTypes.geometry());var pose=stack.last().pose();
         Vec3 dir=e.getDeltaMovement().normalize();if(dir.lengthSqr()<.5)dir=new Vec3(0,0,1);
         Vec3 right=WaterSpellRules.right(dir),up=right.cross(dir).normalize();double radius=e.tier()==2?.5:.32;
         double age=e.tickCount+partial;

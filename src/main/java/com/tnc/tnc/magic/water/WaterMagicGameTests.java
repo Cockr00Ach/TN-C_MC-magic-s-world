@@ -48,7 +48,7 @@ public final class WaterMagicGameTests {
         for(int i=0;i<directions.size();i++)for(int j=i+1;j<directions.size();j++)h.assertTrue(directions.get(i).distanceToSqr(directions.get(j))>.01,"No duplicate directions");
         fields.forEach(Entity::discard);h.succeed();
     }
-    @GameTest(template="building_test_empty",timeoutTicks=30)
+    @GameTest(template="water_test_large_empty",timeoutTicks=30)
     public static void largerBeamReachesBeyondOldRadiusWithinBudget(GameTestHelper h) {
         h.assertTrue(WaterSpellRules.radius(5)==7&&WaterSpellRules.range(5)==96&&WaterSpellRules.circleRadius(5)==15,"Larger beam rules match requested design");
         var p=caster(h);Vec3 start=Vec3.atCenterOf(h.absolutePos(new BlockPos(8,10,2)));
@@ -60,6 +60,52 @@ public final class WaterMagicGameTests {
     private static ServerPlayer caster(GameTestHelper h) {
         var player=FakePlayerFactory.get(h.getLevel(),new GameProfile(UUID.randomUUID(),"water-test"));
         player.setGameMode(GameType.CREATIVE);player.setPos(Vec3.atCenterOf(h.absolutePos(new BlockPos(1,3,1))));return player;
+    }
+    @GameTest(template="water_test_large_empty",timeoutTicks=30)
+    public static void controlAffectsNearbyEnemiesAndHealingUsesExpandedRadius(GameTestHelper h) {
+        var p=caster(h);p.setPos(Vec3.atCenterOf(h.absolutePos(new BlockPos(6,8,2))));p.setYRot(0);p.setXRot(0);
+        Zombie anchor=zombie(h,p.position().add(0,0,4)),near=zombie(h,p.position().add(4,0,4)),outside=zombie(h,p.position().add(9,0,4)),below=zombie(h,p.position().add(0,-4,4));
+        TNWaterFieldEntity.cast(p,net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tnc","water_bind"));
+        var fields=h.getLevel().getEntitiesOfClass(TNWaterFieldEntity.class,p.getBoundingBox().inflate(12));
+        var control=fields.stream().filter(e->e.kind()==2).findFirst().orElseThrow();control.tickCount=20;control.affect(h.getLevel(),p);
+        h.assertTrue(anchor.hasEffect(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN)&&near.hasEffect(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN),"Low control tier covers nearby enemies, not just anchor");
+        h.assertTrue(!outside.hasEffect(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN),"Outside control radius unaffected");
+        h.assertTrue(!below.hasEffect(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN),"Below-floor enemy unaffected");control.discard();anchor.discard();near.discard();outside.discard();below.discard();
+        TNWaterFieldEntity.cast(p,net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tnc","raindrop"));
+        var rain=h.getLevel().getEntitiesOfClass(TNWaterFieldEntity.class,p.getBoundingBox().inflate(40)).stream().filter(e->e.kind()==3).findFirst().orElseThrow();
+        Vec3 center=rain.position();p.setPos(center.add(7,0,0));p.setHealth(10);rain.tickCount=20;rain.rain(h.getLevel(),p);
+        h.assertTrue(p.getHealth()==11,"Rain heals at seven blocks, beyond old radius");p.setPos(center.add(9,0,0));rain.rain(h.getLevel(),p);
+        h.assertTrue(p.getHealth()==11,"Outside rain radius not healed");rain.discard();h.succeed();
+    }
+    @GameTest(template="building_test_empty",timeoutTicks=30)
+    public static void largerFieldsShareRadiusLifeAndHeight(GameTestHelper h) {
+        double[] controls={5,7,12,18,26},rains={8,12,16,22,32};int[] seconds={8,12,18,24,30};
+        for(int t=1;t<=5;t++) {
+            h.assertTrue(WaterSpellRules.fieldRadius(2,t)==controls[t-1]&&WaterSpellRules.fieldLife(2,t)==seconds[t-1]*20,"Control scale and lifetime tier "+t);
+            h.assertTrue(WaterSpellRules.fieldRadius(3,t)==rains[t-1],"Healing radius tier "+t);
+            h.assertTrue(WaterSpellRules.fieldLife(3,t)==200+t*100,"Healing duration unchanged");
+            h.assertTrue(WaterSpellRules.fieldHeight(2,t)>=7,"Cage vertical coverage");
+        }
+        h.assertTrue(WaterSpellRules.fieldRadius(1,5)==40&&WaterSpellRules.fieldHeight(1,5)==28&&WaterSpellRules.fieldLife(1,5)==160,"Apocalyptic sea scale");
+        var sea=WaterSpellRules.uprightArea(Vec3.ZERO,40,28);
+        h.assertTrue(sea.minY==-.25&&sea.maxY==28,"Sea grows above its floor, not equally underground");h.succeed();
+    }
+    @GameTest(template="water_test_large_empty",timeoutTicks=30)
+    public static void dragonLaunchClearsFlatGrassWithoutRemovingProtection(GameTestHelper h) {
+        var p=caster(h);p.setPos(Vec3.atCenterOf(h.absolutePos(new BlockPos(8,2,8))).subtract(0,.5,0));p.setYRot(0);p.setXRot(0);
+        for(int x=0;x<16;x++)for(int z=0;z<16;z++) {
+            h.getLevel().setBlockAndUpdate(h.absolutePos(new BlockPos(x,1,z)),Blocks.GRASS_BLOCK.defaultBlockState());
+            h.getLevel().setBlockAndUpdate(h.absolutePos(new BlockPos(x,2,z)),Blocks.GRASS.defaultBlockState());
+        }
+        var old=new WaterTerrainBore(p.getEyePosition().add(0,0,2),new Vec3(0,0,1),7,1);old.tick(h.getLevel(),p);
+        h.assertTrue(old.stopped()&&old.length()==0,"Reproduce original eye-height grass obstruction");
+        TNWaterSpellEntity.cast(p,net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tnc","dragon_ruin"));
+        var cast=h.getLevel().getEntitiesOfClass(TNWaterSpellEntity.class,p.getBoundingBox().inflate(20)).get(0);
+        var bore=new WaterTerrainBore(cast.position(),cast.direction(),7,1);bore.tick(h.getLevel(),p);
+        Vec3 desired=p.getEyePosition().add(p.getLookAngle().scale(2)).add(0,7-p.getEyeHeight()+.8,0);
+        var obstruction=h.getLevel().clip(new net.minecraft.world.level.ClipContext(p.getEyePosition(),desired,net.minecraft.world.level.ClipContext.Block.COLLIDER,net.minecraft.world.level.ClipContext.Fluid.NONE,p));
+        h.assertTrue(bore.length()>0,"Dragon muzzle must launch above its own ground footprint: "+cast.position()+" eye="+p.getEyePosition()+" dir="+cast.direction()+" look="+p.getLookAngle()+" obstruction="+obstruction+" block="+h.getLevel().getBlockState(obstruction.getBlockPos())+" stop="+bore.stopReason());
+        cast.discard();h.succeed();
     }
     @GameTest(template="building_test_empty",timeoutTicks=30)
     public static void slashThinSweepIncludesVerticalEdgesButNotFutureTargets(GameTestHelper h) {

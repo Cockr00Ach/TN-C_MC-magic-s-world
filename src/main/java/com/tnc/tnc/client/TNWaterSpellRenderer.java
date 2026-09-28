@@ -18,13 +18,13 @@ public final class TNWaterSpellRenderer extends EntityRenderer<TNWaterSpellEntit
         if(fade<=0)return;
         Vec3 dir=e.direction();double circleRadius=WaterSpellRules.circleRadius(e.tier())*Math.min(1,.45+age/charge);
         WaterGeometry.richCircle(buffers,stack,Vec3.ZERO,dir,circleRadius,age,fade);
-        var out=buffers.getBuffer(RenderType.lightning());var pose=stack.last().pose();
+        var out=buffers.getBuffer(WaterRenderTypes.geometry());var pose=stack.last().pose();
         if(e.length()<=0)return;
         double length=e.length(),radius=WaterSpellRules.radius(e.tier());
         Vec3 end=dir.scale(length),right=WaterSpellRules.right(dir),up=right.cross(dir).normalize();
-        WaterGeometry.tube(out,pose,Vec3.ZERO,end,radius,.05F,.4F,1,fade*.25F);
-        WaterGeometry.tube(out,pose,Vec3.ZERO,end,radius*.78,.1F,.8F,1,fade*.45F);
-        WaterGeometry.tube(out,pose,Vec3.ZERO,end,radius*.35,.8F,.97F,1,fade*.75F);
+        WaterGeometry.tube(out,pose,Vec3.ZERO,end,radius,.015F,.16F,.85F,fade*.38F);
+        WaterGeometry.tube(out,pose,Vec3.ZERO,end,radius*.78,.025F,.5F,1,fade*.65F);
+        WaterGeometry.tube(out,pose,Vec3.ZERO,end,radius*.35,.4F,.87F,1,fade*.9F);
         // Two visible spiral ribbons convey the stream's direction and pressure.
         int strands=e.tier()==5?6:2;
         double step=e.tier()==5?1.6:.8;
