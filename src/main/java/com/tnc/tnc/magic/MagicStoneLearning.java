@@ -40,11 +40,11 @@ public final class MagicStoneLearning {
         if (!com.tnc.tnc.magic.compat.SpellEngineBridge.hasSpell(entry.id())) {
             return Result.NOT_IMPLEMENTED;
         }
-        if (entry.tier() > data.maxTierFor(entry.element())) {
+        if (!entry.independent() && entry.tier() > data.maxTierFor(entry.element())) {
             return Result.AFFINITY_TOO_LOW;
         }
         // 不能跳级：看的是**同一条链**的进度（三条链各自算）
-        if (entry.tier() > data.getProgress(entry.element(), entry.chain()) + 1) {
+        if (!entry.independent() && entry.tier() > data.getProgress(entry.element(), entry.chain()) + 1) {
             return Result.OUT_OF_ORDER;
         }
         if (data.getPointsAvailable(Config.pointThresholds) < Config.learnCostForTier(entry.tier())) {
@@ -61,7 +61,7 @@ public final class MagicStoneLearning {
         }
         data.spendPoints(Config.learnCostForTier(entry.tier()));
         data.learn(entry.id());
-        data.setProgress(entry.element(), entry.chain(),
+        if (!entry.independent()) data.setProgress(entry.element(), entry.chain(),
                 Math.max(data.getProgress(entry.element(), entry.chain()), entry.tier()));
         return Result.OK;
     }

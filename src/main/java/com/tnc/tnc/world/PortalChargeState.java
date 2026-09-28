@@ -2,7 +2,7 @@ package com.tnc.tnc.world;
 
 /** Pure server-side state transition for one player's portal charge. */
 record PortalChargeState(boolean fromGround, long startedAt) {
-    static final long DURATION_TICKS = 50L;
+    static final long DURATION_TICKS = PortalRitualTiming.DURATION;
 
     Decision evaluate(boolean alive, boolean atGround, boolean atIsland, long currentTick) {
         if (!alive || (fromGround ? !atGround : !atIsland)) {

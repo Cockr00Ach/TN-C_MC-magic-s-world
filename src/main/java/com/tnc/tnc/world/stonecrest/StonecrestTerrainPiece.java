@@ -16,6 +16,7 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSeriali
 
 /** One chunk of the irregular terrain feather surrounding the fortress. */
 final class StonecrestTerrainPiece extends StructurePiece {
+    private final String asset;
     private final int originX;
     private final int originY;
     private final int originZ;
@@ -23,8 +24,13 @@ final class StonecrestTerrainPiece extends StructurePiece {
     private final int localZ;
 
     StonecrestTerrainPiece(int originX, int originY, int originZ, int localX, int localZ) {
+        this("stonecrest", originX, originY, originZ, localX, localZ);
+    }
+
+    StonecrestTerrainPiece(String asset, int originX, int originY, int originZ, int localX, int localZ) {
         super(TNStructures.STONECREST_TERRAIN.get(), 0,
-                terrainBox(originX, originY, originZ, localX, localZ));
+                terrainBox(asset, originX, originY, originZ, localX, localZ));
+        this.asset = asset;
         this.originX = originX;
         this.originY = originY;
         this.originZ = originZ;
@@ -32,14 +38,15 @@ final class StonecrestTerrainPiece extends StructurePiece {
         this.localZ = localZ;
     }
 
-    private static BoundingBox terrainBox(int originX, int originY, int originZ, int localX, int localZ) {
-        int structureTopY = originY + StonecrestManifest.get().dimensions().getY() - 1;
+    private static BoundingBox terrainBox(String asset, int originX, int originY, int originZ, int localX, int localZ) {
+        int structureTopY = originY + StonecrestManifest.get(asset).dimensions().getY() - 1;
         return new BoundingBox(originX + localX, originY - 32, originZ + localZ,
                 originX + localX + 15, structureTopY, originZ + localZ + 15);
     }
 
     StonecrestTerrainPiece(CompoundTag tag) {
         super(TNStructures.STONECREST_TERRAIN.get(), tag);
+        this.asset = tag.contains("Asset") ? tag.getString("Asset") : "stonecrest";
         this.originX = tag.getInt("OriginX");
         this.originY = tag.getInt("OriginY");
         this.originZ = tag.getInt("OriginZ");
@@ -49,6 +56,7 @@ final class StonecrestTerrainPiece extends StructurePiece {
 
     @Override
     protected void addAdditionalSaveData(StructurePieceSerializationContext context, CompoundTag tag) {
+        tag.putString("Asset", asset);
         tag.putInt("OriginX", originX);
         tag.putInt("OriginY", originY);
         tag.putInt("OriginZ", originZ);
@@ -59,7 +67,7 @@ final class StonecrestTerrainPiece extends StructurePiece {
     @Override
     public void postProcess(WorldGenLevel level, StructureManager structureManager, ChunkGenerator generator,
                             RandomSource random, BoundingBox chunkBox, ChunkPos chunkPos, BlockPos pivot) {
-        StonecrestManifest manifest = StonecrestManifest.get();
+        StonecrestManifest manifest = StonecrestManifest.get(asset);
         BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
         int desiredCoreY = originY + manifest.anchorLocal().getY();
         int structureTopY = originY + manifest.dimensions().getY() - 1;

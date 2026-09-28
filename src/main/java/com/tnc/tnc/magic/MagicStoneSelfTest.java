@@ -89,7 +89,7 @@ public final class MagicStoneSelfTest {
         }
         int expected = chainTotal * SpellCatalog.maxTier();
         checks.add(new Check("chains are 5 tiers each (>=3 chains per element)",
-                chainsOk && elementCount > 0 && SpellCatalog.all().size() == expected,
+                chainsOk && elementCount > 0 && SpellCatalog.all().size() - SpellCatalog.of(null).size() == expected,
                 "elements=" + elementCount + " chains=" + chainTotal
                         + " total=" + SpellCatalog.all().size() + " expected=" + expected
                         + " [" + chainSizes.toString().trim() + "]"));

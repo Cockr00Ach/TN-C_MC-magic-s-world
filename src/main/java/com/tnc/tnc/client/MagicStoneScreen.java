@@ -23,7 +23,7 @@ import java.util.List;
  */
 public class MagicStoneScreen extends Screen {
 
-    private static final int PANEL_W = 520;   // 变宽了：法术目录要按链分三列
+    private static final int PANEL_W = 600;   // Four water routes when the window is wide enough.
     private static final int PANEL_H = 224;
     private static final int ROW_H = 22;
 
@@ -46,6 +46,16 @@ public class MagicStoneScreen extends Screen {
 
     /** 界面当前显示哪个元素的法术（底部的雷/火切换按钮改它）。 */
     private Element shownElement = Element.LIGHTNING;
+    private int chainPage;
+    private int listX() { return Math.min(LIST_X, (int)(panelWidth()*.35)); }
+    private int chainsPerPage() { return Math.max(1,(panelWidth()-listX()-12)/80); }
+    private List<SpellCatalog.Chain> visibleChains() {
+        var all=SpellCatalog.chainsOf(shownElement);
+        int pages=Math.max(1,(all.size()+chainsPerPage()-1)/chainsPerPage());
+        chainPage=Math.max(0,Math.min(pages-1,chainPage));
+        int from=chainPage*chainsPerPage();
+        return all.subList(from,Math.min(all.size(),from+chainsPerPage()));
+    }
 
     public MagicStoneScreen() {
         super(Component.literal("魔法石"));
@@ -86,32 +96,43 @@ public class MagicStoneScreen extends Screen {
         }
         // 元素切换：每个"有法术的元素"一个按钮（目前是雷 / 火）。
         // 加新元素时这里不用动 —— 遍历 Element.values() 自动多一个。
-        int tabX = left() + LIST_X;   // 元素按钮从法术区左边界开始 —— 不再伸到左下框里
+        int tabX = left() + listX();
+        int tabWidth=Math.min(40,(panelWidth()-listX()-12)/Element.values().length-4);
         for (Element element : Element.values()) {
             if (SpellCatalog.chainsOf(element).isEmpty()) {
                 continue;
             }
             final Element target = element;
-            Button tab = Button.builder(Component.literal(element.cn()), clicked -> {
+            Button tab = Button.builder(Component.literal(element==Element.DARK?"暗":element.cn()), clicked -> {
                         shownElement = target;
+                        chainPage=0;
                         rebuildWidgets();
                     })
-                    .bounds(tabX, top() + PANEL_H - 24, 40, 16)
+                    .bounds(tabX, top() + PANEL_H - 24, tabWidth, 16)
                     .build();
             tab.active = element != shownElement;   // 当前元素灰掉
             addRenderableWidget(tab);
-            tabX += 44;
+            tabX += tabWidth+4;
+        }
+        Button independent=Button.builder(Component.literal("独立魔法"),clicked->{shownElement=null;chainPage=0;rebuildWidgets();})
+                .bounds(left()+12,top()+PANEL_H-24,listX()-24,16).build();
+        independent.active=shownElement!=null;addRenderableWidget(independent);
+        int pages=Math.max(1,(SpellCatalog.chainsOf(shownElement).size()+chainsPerPage()-1)/chainsPerPage());
+        if(pages>1) {
+            Button previous=Button.builder(Component.literal("◀"),b->{chainPage--;rebuildWidgets();}).bounds(left()+panelWidth()-48,top()+LIST_Y-16,18,12).build();
+            Button next=Button.builder(Component.literal("▶"),b->{chainPage++;rebuildWidgets();}).bounds(left()+panelWidth()-28,top()+LIST_Y-16,18,12).build();
+            previous.active=chainPage>0;next.active=chainPage<pages-1;addRenderableWidget(previous);addRenderableWidget(next);
         }
         // 每个法术一行按钮，**按链分列**排。
         //
         // 以前是"名字文本 + 右侧单独一个「解锁 N点」按钮"，所有按钮排在同一列往下叠：
         // 5 个法术时没问题，15 个法术（三条链）就会排到面板外面、跑到屏幕外点不到，
         // 而且那一列还压住了第三条链的名字。现在按钮就是整行（列宽），三个链并排。
-        List<SpellCatalog.Chain> chains = SpellCatalog.chainsOf(shownElement);
+        List<SpellCatalog.Chain> chains = visibleChains();
         int colW = columnWidth(chains.size());
         int chainIndex = 0;
         for (SpellCatalog.Chain chain : chains) {
-            int colX = left() + LIST_X + chainIndex * colW;
+            int colX = left() + listX() + chainIndex * colW;
             int rowY = top() + LIST_Y + 16;
             for (SpellCatalog.Entry entry : SpellCatalog.of(shownElement, chain)) {
                 final SpellCatalog.Entry target = entry;
@@ -123,7 +144,7 @@ public class MagicStoneScreen extends Screen {
                 // —— 冒险者(1)、勇者(2) 是基础，未学也照样显示真名 ✓（用户要求）
                 boolean hideName = !data.hasLearned(entry.id()) && entry.tier() >= 3;
                 String label = hideName ? garble(entry.displayName()) : entry.displayName();
-                Button button = Button.builder(Component.literal(fitLabel(label, colW - 34)),
+                Button button = Button.builder(Component.literal("    "+fitLabel(label, colW - 34)),
                                 clicked -> MagicStoneNetwork.requestUnlock(target.id()))
                         .bounds(colX, rowY, colW - 8, 16)
                         .build();
@@ -152,7 +173,7 @@ public class MagicStoneScreen extends Screen {
 
     /** 法术目录每列多宽（渲染和按钮布局必须用同一个算法，否则又会对不上）。 */
     private int columnWidth(int chainCount) {
-        return (panelWidth() - LIST_X - 12) / Math.max(1, chainCount);
+        return (panelWidth() - listX() - 12) / Math.max(1, chainCount);
     }
 
     /** 列太窄时把法术名截断（完整名字在悬停提示里），免得按钮文字溢出去。 */
@@ -211,21 +232,22 @@ public class MagicStoneScreen extends Screen {
                         + " · 已投 " + data.getPointsSpent() + "）",
                 left + 12, top + 41, COLOR_TEXT, false);
         graphics.fill(left + 8, top + 54, left + panelWidth() - 8, top + 55, 0x50C9A063);
-        graphics.fill(left + LIST_X - 8, top + 58, left + LIST_X - 7, top + PANEL_H - 8, 0x50C9A063);
+        graphics.fill(left + listX() - 8, top + 58, left + listX() - 7, top + PANEL_H - 8, 0x50C9A063);
 
         // 左列：元素亲和度 —— 用户画的水晶贴图 + 42 个亲和力点（点位由用户标注，见 AffinityWidget）
         // 用户要求：等比例放大到占满左下框约 80%，且**不要任何文字** ✗
-        AffinityWidget.render(graphics, left + 43, top + 71, 3, data::getAffinity);   // 3 倍 = 99x111；位置 = 左框(可用区 x:8..178, y:58..196)居中
+        int affinityScale=Math.max(1,Math.min(3,(listX()-20)/33));
+        AffinityWidget.render(graphics,left+(listX()-33*affinityScale)/2,top()+71,affinityScale,data::getAffinity);
 
         // 法术目录：**每条链一列**（雷系现在有主链/雷球/雷速三条，15 个法术挤一列会跑出面板）
         // 每行的按钮在 init() 里创建（名字就是按钮的标签），这里只画表头和悬停提示。
-        List<SpellCatalog.Chain> chains = SpellCatalog.chainsOf(shownElement);
+        List<SpellCatalog.Chain> chains = visibleChains();
         int colW = columnWidth(chains.size());
-        graphics.drawString(this.font, shownElement.cn() + "系法术（每条链独立进度，高级自动替换低级）",
-                left + LIST_X, top + LIST_Y - 14, COLOR_TITLE, false);
+        String heading=shownElement==null?"独立魔法 · 无元素亲和限制":shownElement.cn()+"系法术 · 每链最高档";
+        graphics.drawString(this.font,fitLabel(heading,panelW-listX()-64),left+listX(),top+LIST_Y-14,COLOR_TITLE,false);
         int chainIndex = 0;
         for (SpellCatalog.Chain chain : chains) {
-            int colX = left + LIST_X + chainIndex * colW;
+            int colX = left + listX() + chainIndex * colW;
             graphics.drawString(this.font, chain.cn(), colX, top + LIST_Y, COLOR_TITLE, false);
             chainIndex++;
         }
@@ -236,27 +258,29 @@ public class MagicStoneScreen extends Screen {
         // 悬停提示必须放在**按钮之后**画：按钮是 widget，super.render 会盖住先画的东西
         int chainIndex2 = 0;
         for (SpellCatalog.Chain chain : chains) {
-            int colX = left + LIST_X + chainIndex2 * colW;
+            int colX = left + listX() + chainIndex2 * colW;
             int spellY = top + LIST_Y + 16;
             for (SpellCatalog.Entry entry : SpellCatalog.of(shownElement, chain)) {
                 // 法术图标画在按钮左边（super.render 之后画，否则被按钮盖住）
-                if (data.hasLearned(entry.id())) {   // 未学会：名字/图标都不给看（名字显示成乱码，见 init）
+                if (data.hasLearned(entry.id()) || entry.independent() || entry.tier()<3) {
                     drawSpellIcon(graphics, entry, colX + 2, spellY + 1);
                 }
                 if (isHovering(colX, spellY, colW - 8, 16, mouseX, mouseY)) {
                     MagicStoneLearning.Result state = MagicStoneLearning.check(data, entry);
                     // 消耗要按玩家自己的上限算（随上限等比放大），不然提示和实际扣费对不上
-                    graphics.renderTooltip(this.font,
-                            Component.literal(entry.fullName()
+                    String tooltip=entry.fullName()
                                     + "\n§b效果 §r" + effectSummary(entry)
                                     + "\n§7解锁消耗 " + entry.learnCost() + " 点"
                                     + "\n§7施放消耗 " + entry.manaCostFor(data.getMaxMana()) + " 魔力"
-                                    + "\n§7亲和力要求 " + Element.tierName(entry.tier())
-                                    + "（当前上限 " + Element.tierName(Math.max(1, data.maxTierFor(entry.element()))) + "）"
+                                    + (entry.independent()?"\n§d独立魔法 · 无亲和力要求": "\n§7亲和力要求 " + Element.tierName(entry.tier())
+                                    + "（当前上限 " + Element.tierName(Math.max(1, data.maxTierFor(entry.element()))) + "）")
                                     + "\n§7前置 " + (entry.tier() <= 1 ? "无（链的第 1 级）"
                                             : "先学本链第 " + (entry.tier() - 1) + " 级")
-                                    + "\n§7状态 " + stateText(state, entry)),
-                            mouseX, mouseY);
+                                    + "\n§7状态 " + stateText(state, entry);
+                    var lines=new java.util.ArrayList<net.minecraft.util.FormattedCharSequence>();
+                    for(String line:tooltip.split("\n"))
+                        lines.addAll(this.font.split(Component.literal(line),Math.max(100,Math.min(300,this.width-24))));
+                    graphics.renderTooltip(this.font,lines,mouseX,mouseY);
                 }
                 spellY += ROW_H;
             }
@@ -277,6 +301,8 @@ public class MagicStoneScreen extends Screen {
      * 想要更文学化的描述，就得在目录里给每条法术加一个 desc 字段 —— 那是后话 ✓
      */
     private static String effectSummary(SpellCatalog.Entry entry) {
+        if(entry.independent() || entry.element()==Element.WATER)
+            return Component.translatable("spell.tnc."+entry.id().getPath()+".description").getString();
         return entry.element().cn() + "系 · " + entry.chain().cn() + "链 · 第 " + entry.tier() + " 级 · "
                 + entry.chain().desc();
     }

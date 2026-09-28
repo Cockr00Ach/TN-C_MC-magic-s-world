@@ -1,0 +1,8 @@
+{
+  "type": "tnc:imported_building",
+  "asset": "dark_fantasy_castle",
+  "biomes": "#tnc:has_structure/imported_buildings",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

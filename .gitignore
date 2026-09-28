@@ -62,6 +62,8 @@ modpack/*/_archive/
 # git 就不会进去看，后面的 `!` 放行规则全部失效。
 # 必须"排除子项、再放行子路径"：
 modpack/*/config/*
+# TN-C startup mitigation: keep Forge setup threading configuration in sync.
+!modpack/*/config/fml.toml
 !modpack/*/config/openloader/
 modpack/*/config/openloader/*
 !modpack/*/config/openloader/resources/

@@ -18,6 +18,21 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class StonecrestResourceIdentityTest {
     @Test
+    void newWorldsUseCompletePalaceWhileLegacyManifestStaysAvailable() throws IOException {
+        try (var stream=getClass().getResourceAsStream("/data/tnc/worldgen/structure/stonecrest_fortress.json");
+             var reader=new InputStreamReader(stream,StandardCharsets.UTF_8)) {
+            var root=new Gson().fromJson(reader,JsonObject.class);
+            org.junit.jupiter.api.Assertions.assertEquals("tnc:large_landmark",root.get("type").getAsString());
+            org.junit.jupiter.api.Assertions.assertEquals("heroskand_complex",root.get("asset").getAsString());
+        }
+        try (var stream=getClass().getResourceAsStream("/data/tnc/buildings/heroskand_complex.json");
+             var reader=new InputStreamReader(stream,StandardCharsets.UTF_8)) {
+            var root=new Gson().fromJson(reader,JsonObject.class);
+            assertArrayEquals(new int[]{2064,128,880,2415,319,1167},ints(root.getAsJsonArray("source_bounds")));
+            assertArrayEquals(new int[]{400,192,336},ints(root.getAsJsonArray("dimensions")));
+        }
+    }
+    @Test
     void manifestTargetsTheSouthernHeroskandMainFortress() throws IOException {
         try (InputStream stream = getClass().getResourceAsStream(
                 "/data/tnc/stonecrest/manifest.json")) {

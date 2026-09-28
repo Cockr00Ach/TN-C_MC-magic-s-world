@@ -1,0 +1,7 @@
+{
+  "school":"ARCANE", "group":"chaos_magic", "range":0, "learn":{"tier":1},
+  "cast":{"duration":0.3,"animation":"spell_engine:one_handed_area_charge","sound":{"id":"minecraft:block.enchantment_table.use"}},
+  "release":{"target":{"type":"SELF"},"animation":"spell_engine:one_handed_area_release"},
+  "impact":[{"action":{"type":"STATUS_EFFECT","status_effect":{"effect_id":"tnc:water_cast","duration":0.05,"amplifier":0}}}],
+  "cost":{"exhaust":0,"cooldown_duration":10}
+}

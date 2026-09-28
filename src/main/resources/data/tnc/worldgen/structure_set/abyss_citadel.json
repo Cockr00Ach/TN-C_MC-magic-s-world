@@ -1,0 +1,4 @@
+{
+  "structures": [{"structure": "tnc:abyss_citadel", "weight": 1}],
+  "placement": {"type": "minecraft:random_spread", "locate_offset": [8, 0, 8], "salt": 92726177, "spacing": 128, "separation": 80}
+}

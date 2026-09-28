@@ -6,12 +6,28 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PortalChargeStateTest {
     @Test
-    void chargeCompletesAfterFiftyTicksInItsSourcePortal() {
+    void chargeCompletesAfterEightyTicksInItsSourcePortal() {
         PortalChargeState charge = new PortalChargeState(true, 100L);
         assertEquals(PortalChargeState.Decision.CHARGING,
-                charge.evaluate(true, true, false, 149L));
+                charge.evaluate(true, true, false, 179L));
         assertEquals(PortalChargeState.Decision.COMPLETE,
-                charge.evaluate(true, true, false, 150L));
+                charge.evaluate(true, true, false, 180L));
+    }
+
+    @Test
+    void ritualPhasesDoNotReleaseBeforeLasersHaveConverged() {
+        assertEquals(0, PortalRitualTiming.convergence(19));
+        assertEquals(0, PortalRitualTiming.release(59));
+        assertEquals(1, PortalRitualTiming.convergence(40));
+        assertEquals(1, PortalRitualTiming.release(79));
+        assertEquals(0, PortalRitualTiming.release(-100));
+        assertEquals(1, PortalRitualTiming.convergence(1000));
+    }
+
+    @Test
+    void leavingEvenOnCompletionTickNeverTeleports() {
+        assertEquals(PortalChargeState.Decision.CANCEL,
+                new PortalChargeState(true, 100).evaluate(true, false, false, 180));
     }
 
     @Test
