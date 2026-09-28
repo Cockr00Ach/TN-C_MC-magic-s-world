@@ -23,17 +23,14 @@ public final class TNWaterFieldRenderer extends EntityRenderer<TNWaterFieldEntit
             if(e.tier()==1) {
                 for(int i=0;i<3;i++)WaterGeometry.ring(out,pose,new Vec3(0,.1+i*.12,0),up,Math.min(radius,age*.2+i*.3),.09,0,fade);
             } else if(e.tier()==5) {
-                // Four full circular walls: the interior is filled by successive moving wave fronts.
-                for(int i=0;i<4;i++) {
-                    double r=(age*.85+i*radius/4)%radius;
-                    double height=8+20*Math.sin(Math.PI*r/radius);
-                    WaterWaveVisuals.circularWave(out,pose,r,height,age+i*10,fade*.72F);
+                WaterGeometry.disk(out,pose,new Vec3(0,.08,0),up,radius,.005F,.12F,.42F,fade*.16F);
+                for(int i=0;i<OceanWaveRules.MAX_FRONTS;i++) {
+                    double r=OceanWaveRules.frontRadius(age,i);if(r<0)continue;
+                    float edge=(float)Math.min(1,Math.max(0,(radius-r)/8));
+                    WaterWaveVisuals.breakingWave(out,pose,r,OceanWaveRules.frontHeight(r),radius,age+r*.1,fade*edge);
                 }
-                WaterGeometry.ring(out,pose,new Vec3(0,.1,0),up,radius,.45,0,fade);
-                for(int i=0;i<16;i++) {
-                    double a=i*Math.PI/8+age*.012;Vec3 p=new Vec3(Math.cos(a)*radius*.8,0,Math.sin(a)*radius*.8);
-                    WaterGeometry.spiral(out,pose,p,up,1.2,e.height(),age*.08+i,.02F,.3F,1,fade*.75F);
-                }
+                for(int i=0;i<3;i++)WaterGeometry.ringColor(out,pose,new Vec3(0,.12+i*.05,0),up,
+                        (age*.9+i*radius/3)%radius,.18,.04F,.45F,.8F,fade*.5F);
             } else {
                 if(e.tier()==3)WaterWaveVisuals.crescent(out,pose,center,e.direction(),radius,age,fade);
                 else WaterWaveVisuals.rollingWave(out,pose,center,e.direction(),radius,e.tier()==4?8:2,age,fade);

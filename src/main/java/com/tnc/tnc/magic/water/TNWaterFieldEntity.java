@@ -26,7 +26,8 @@ public final class TNWaterFieldEntity extends Entity {
     private static final EntityDataAccessor<Float> YAW=SynchedEntityData.defineId(TNWaterFieldEntity.class,EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Float> PITCH=SynchedEntityData.defineId(TNWaterFieldEntity.class,EntityDataSerializers.FLOAT);
     private UUID owner,anchor;
-    private boolean swordImpacted;
+    private int lastSwordImpact=-1;
+    private boolean seaWeatherStarted;
     private final Set<UUID> hit=new HashSet<>();
     public TNWaterFieldEntity(EntityType<? extends TNWaterFieldEntity> type,Level level){super(type,level);noPhysics=true;setNoGravity(true);}
     public int kind(){return entityData.get(KIND);} public int tier(){return entityData.get(TIER);}public int age(){return entityData.get(AGE);}
@@ -39,8 +40,8 @@ public final class TNWaterFieldEntity extends Entity {
         if(!spell.getNamespace().equals("tnc"))return false;
         for(int k=0;k<IDS.length;k++)for(int t=0;t<5;t++)if(IDS[k][t].equals(spell.getPath())) {
             // One rain/control area per caster and route; no endless stacked healing/damage.
-            if(k>0)for(var old:player.serverLevel().getEntitiesOfClass(TNWaterFieldEntity.class,player.getBoundingBox().inflate(128)))
-                if(player.getUUID().equals(old.owner) && old.kind()==k+1)old.discard();
+            if(k>0 || k==0&&t==4)for(var old:player.serverLevel().getEntitiesOfClass(TNWaterFieldEntity.class,player.getBoundingBox().inflate(128)))
+                if(player.getUUID().equals(old.owner) && old.kind()==k+1 && (k>0 || old.tier()==5))old.discard();
             Vec3 at=player.position();LivingEntity target=null;
             if(k>0) {
                 var block=player.level().clip(new ClipContext(player.getEyePosition(),player.getEyePosition().add(player.getLookAngle().scale(36)),ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,player));
@@ -65,7 +66,6 @@ public final class TNWaterFieldEntity extends Entity {
                 e.entityData.set(PITCH,(float)-Math.toDegrees(Math.asin(direction.y)));
                 player.level().addFreshEntity(e);
             }
-            if(k==0&&t==4)WaterWeather.storm(player.serverLevel());
             player.serverLevel().playSound(null,BlockPos.containing(at),t==4?SoundEvents.CONDUIT_ACTIVATE:SoundEvents.PLAYER_SPLASH,SoundSource.PLAYERS,t==4?3:1,t==4?.45F:.7F);
             return true;
         }
@@ -88,13 +88,16 @@ public final class TNWaterFieldEntity extends Entity {
         var player=owner==null?null:level.getServer().getPlayerList().getPlayer(owner);
         if(player==null || !player.isAlive() || player.isSpectator() || player.level()!=level || player.distanceToSqr(this)>128*128 || tickCount>life()){discard();return;}
         entityData.set(AGE,tickCount);
-        if(kind()==2 && tier()==5 && tickCount==SeaGodSwordRules.APPEAR_TICK)
+        if(kind()==2 && tier()==5 && SeaGodSwordRules.cue(tickCount,SeaGodSwordRules.APPEAR_TICK))
             level.playSound(null,blockPosition(),SoundEvents.CONDUIT_ACTIVATE,SoundSource.PLAYERS,2,.45F);
-        if(kind()==2 && tier()==5 && tickCount==SeaGodSwordRules.DROP_TICK)
+        if(kind()==2 && tier()==5 && SeaGodSwordRules.cue(tickCount,SeaGodSwordRules.DROP_TICK))
             level.playSound(null,blockPosition(),SoundEvents.TRIDENT_RIPTIDE_3,SoundSource.PLAYERS,2,.6F);
+        if(kind()==1 && tier()==5 && tickCount%40==0)
+            level.playSound(null,blockPosition(),SoundEvents.PLAYER_SPLASH,SoundSource.PLAYERS,2,.4F);
         if(kind()==2 && tier()<3 && anchor!=null){var e=level.getEntity(anchor);if(e==null || !e.isAlive()){discard();return;}setPos(e.position());}
         if(kind()==3){rain(level,player);return;}
         affect(level,player);
+        finishSea(level);
     }
     /** Shared real effect body; owner/lifecycle guards remain in tick(). */
     void affect(ServerLevel level,ServerPlayer player) {
@@ -115,6 +118,7 @@ public final class TNWaterFieldEntity extends Entity {
             } else if(kind()==1 && tier()>1 && tier()<5) {
                 if(Math.abs(delta.dot(direction()))>2 || Math.abs(delta.dot(WaterSpellRules.right(direction())))>r)continue;
             } else if(delta.x*delta.x+delta.z*delta.z>r*r)continue;
+            if(kind()==1 && tier()==5 && !OceanWaveRules.hits(delta.horizontalDistance(),delta.y,Math.atan2(delta.z,delta.x),tickCount))continue;
             if(!clearSight(level,kind()==1&&tier()==3?center:center.add(0,1,0),enemy.getBoundingBox().getCenter()))continue;
             if(kind()==1) {
                 if(tier()==5 ? tickCount%20!=0 : !hit.add(enemy.getUUID()))continue;
@@ -130,10 +134,11 @@ public final class TNWaterFieldEntity extends Entity {
             }
         }
     }
-    /** Delayed one-shot burst. Lifecycle/owner validation happens before affect() in tick(). */
+    /** One burst per scheduled sword, never once per animation frame. */
     void seaGodSwordImpact(ServerLevel level,ServerPlayer player) {
-        if(kind()!=2 || tier()!=5 || swordImpacted || tickCount<SeaGodSwordRules.IMPACT_TICK)return;
-        swordImpacted=true;
+        int index=SeaGodSwordRules.impactIndex(tickCount);
+        if(isRemoved() || kind()!=2 || tier()!=5 || index<0 || index<=lastSwordImpact)return;
+        lastSwordImpact=index;
         Vec3 center=position();double r=radius();
         for(var enemy:level.getEntitiesOfClass(LivingEntity.class,WaterSpellRules.uprightArea(center,r,height()),e->WaterSpellRules.enemy(player,e))) {
             if(enemy.position().subtract(center).horizontalDistanceSqr()>r*r
@@ -145,6 +150,11 @@ public final class TNWaterFieldEntity extends Entity {
         }
         level.playSound(null,blockPosition(),SoundEvents.TRIDENT_THUNDER,SoundSource.PLAYERS,4,.55F);
         level.playSound(null,blockPosition(),SoundEvents.GENERIC_EXPLODE,SoundSource.PLAYERS,2,.65F);
+    }
+    void finishSea(ServerLevel level) {
+        if(!isRemoved() && kind()==1 && tier()==5 && tickCount==life() && !seaWeatherStarted) {
+            seaWeatherStarted=true;WaterWeather.storm(level);
+        }
     }
     static boolean clearSight(ServerLevel level,Vec3 from,Vec3 to){return level.clip(new ClipContext(from,to,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,(Entity)null)).getType()==HitResult.Type.MISS;}
     void rain(ServerLevel level,ServerPlayer player) {

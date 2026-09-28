@@ -98,8 +98,101 @@ public final class WaterMagicGameTests {
         var z=zombie(h,at);z.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(200);
         z.setHealth(200);return z;
     }
+    private static java.util.Map<UUID,ServerPlayer> testOwnerMap(GameTestHelper h) {
+        // Register only a test UUID lookup, not a network client or a production permission bypass.
+        // Verified PlayerList.playersByUUID SRG name; always remove this entry after the test.
+        return net.minecraftforge.fml.util.ObfuscationReflectionHelper.getPrivateValue(
+                net.minecraft.server.players.PlayerList.class,h.getLevel().getServer().getPlayerList(),"f_11197_");
+    }
+    @GameTest(template="water_test_large_empty",timeoutTicks=30)
+    public static void oceanProductionTickCancelsMissingOrDeadOwnerBeforeWeather(GameTestHelper h) {
+        var owners=testOwnerMap(h);var p=caster(h);long before=WaterWeather.get(h.getLevel()).save(new net.minecraft.nbt.CompoundTag()).getLong("until");
+        try {
+            for(boolean dead:new boolean[]{false,true}) {
+                p.setHealth(20);if(dead)owners.put(p.getUUID(),p);else owners.remove(p.getUUID());
+                TNWaterFieldEntity.cast(p,net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tnc","world_ending_sea"));
+                var field=h.getLevel().getEntitiesOfClass(TNWaterFieldEntity.class,p.getBoundingBox().inflate(4)).stream().filter(e->e.kind()==1&&e.tier()==5&&!e.isRemoved()).findFirst().orElseThrow();
+                field.tickCount=600;if(dead)p.setHealth(0);field.tick();
+                h.assertTrue(field.isRemoved(),"Production tick must cancel an invalid owner before completing sea");
+                h.assertTrue(WaterWeather.get(h.getLevel()).save(new net.minecraft.nbt.CompoundTag()).getLong("until")==before,"Canceled owner cannot start trailing storm");
+            }
+        } finally {owners.remove(p.getUUID());p.setHealth(20);}
+        h.succeed();
+    }
+    @GameTest(template="water_test_ocean_empty",timeoutTicks=1350)
+    public static void oceanNaturallyCompletesThenWeatherLeaseExpiresAndRestores(GameTestHelper h) {
+        var owners=testOwnerMap(h);var p=caster(h);p.setPos(Vec3.atCenterOf(h.absolutePos(new BlockPos(72,8,72))));owners.put(p.getUUID(),p);
+        var chunk=new net.minecraft.world.level.ChunkPos(p.blockPosition());
+        boolean wasForced=h.getLevel().getForcedChunks().contains(chunk.toLong());
+        h.getLevel().setChunkForced(chunk.x,chunk.z,true);
+        Runnable cleanup=()->{owners.remove(p.getUUID());if(!wasForced)h.getLevel().setChunkForced(chunk.x,chunk.z,false);};
+        final TNWaterFieldEntity field;
+        try {
+            TNWaterFieldEntity.cast(p,net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tnc","world_ending_sea"));
+            field=h.getLevel().getEntitiesOfClass(TNWaterFieldEntity.class,p.getBoundingBox().inflate(4)).stream().filter(e->e.kind()==1&&e.tier()==5&&!e.isRemoved()).findFirst().orElseThrow();
+        } catch(RuntimeException failure) {cleanup.run();throw failure;}
+        // Clean up before the framework's hard timeout as well as on success or an assertion failure.
+        h.runAfterDelay(1300,()->{cleanup.run();field.discard();h.fail("Natural ocean/weather lifecycle did not complete: age="+field.age()+" tick="+field.tickCount+" gameTime="+h.getLevel().getGameTime()+" lease="+WaterWeather.get(h.getLevel()).save(new net.minecraft.nbt.CompoundTag()));});
+        var captured=new java.util.concurrent.atomic.AtomicReference<net.minecraft.nbt.CompoundTag>();
+        h.onEachTick(()->{
+            try {
+                if(field.age()<600)h.assertTrue(!field.isRemoved(),"Valid test owner keeps production field alive until natural completion");
+                var state=WaterWeather.get(h.getLevel()).save(new net.minecraft.nbt.CompoundTag());long now=h.getLevel().getGameTime();
+                if(field.age()==598)h.assertTrue(state.getLong("until")==0,"No trailing storm before natural sea completion");
+                if(field.age()>=600&&captured.get()==null) {
+                    long until=state.getLong("until");
+                    h.assertTrue(until>=now+598&&until<=now+600,"Natural tick path grants the full trailing thirty-second weather lease");
+                    captured.set(state);
+                }
+                var snapshot=captured.get();
+                if(snapshot!=null&&now>snapshot.getLong("until")) {
+                    var data=h.getLevel().getServer().getWorldData().overworldData();
+                    h.assertTrue(field.isRemoved()&&state.getLong("until")==0,"Field and weather lease naturally terminate");
+                    h.assertTrue(data.isRaining()==snapshot.getBoolean("raining")&&data.isThundering()==snapshot.getBoolean("thundering"),"Weather handler restores original weather flags");
+                    h.assertTrue(Math.abs(data.getRainTime()-snapshot.getInt("rain"))<=1&&Math.abs(data.getThunderTime()-snapshot.getInt("thunder"))<=1,"Weather handler restores original timers, allowing one vanilla tick");
+                    cleanup.run();h.succeed();
+                }
+            } catch(RuntimeException failure) {cleanup.run();field.discard();throw failure;}
+        });
+    }
+    @GameTest(template="water_test_ocean_empty",timeoutTicks=30)
+    public static void oceanBreakersHitAllDirectionsAndStormOnlyAfterCompletion(GameTestHelper h) {
+        var p=caster(h);p.setPos(Vec3.atCenterOf(h.absolutePos(new BlockPos(72,8,72))));
+        var id=net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tnc","world_ending_sea");
+        long before=WaterWeather.get(h.getLevel()).save(new net.minecraft.nbt.CompoundTag()).getLong("until");
+        TNWaterFieldEntity.cast(p,id);
+        var old=h.getLevel().getEntitiesOfClass(TNWaterFieldEntity.class,p.getBoundingBox().inflate(4)).stream().filter(e->e.kind()==1&&e.tier()==5).findFirst().orElseThrow();
+        TNWaterFieldEntity.cast(p,id);
+        var field=h.getLevel().getEntitiesOfClass(TNWaterFieldEntity.class,p.getBoundingBox().inflate(4)).stream().filter(e->e.kind()==1&&e.tier()==5&&!e.isRemoved()).findFirst().orElseThrow();
+        h.assertTrue(old.isRemoved(),"Recasting replaces the previous ocean instead of stacking thirty-second attacks");
+        old.tickCount=600;old.finishSea(h.getLevel());
+        h.assertTrue(WaterWeather.get(h.getLevel()).save(new net.minecraft.nbt.CompoundTag()).getLong("until")==before,"Canceled sea cannot schedule trailing weather");
+        var enemies=new java.util.ArrayList<Zombie>();Vec3 center=field.position();
+        for(int i=0;i<8;i++){double a=i*Math.PI/4;enemies.add(toughZombie(h,center.add(Math.cos(a)*56,0,Math.sin(a)*56)));}
+        Zombie outside=toughZombie(h,center.add(65,0,0)),below=toughZombie(h,center.add(0,-4,56)),blocked=toughZombie(h,center.add(-12,0,34));
+        BlockPos wall=BlockPos.containing(center.add(-6,0,17));h.getLevel().setBlockAndUpdate(wall,Blocks.STONE.defaultBlockState());h.getLevel().setBlockAndUpdate(wall.above(),Blocks.STONE.defaultBlockState());
+        try {
+            field.tickCount=20;field.affect(h.getLevel(),p);
+            for(var z:enemies)h.assertTrue(z.getHealth()==200,"No invisible damage before a wave front reaches the target");
+            field.tickCount=40;field.affect(h.getLevel(),p);
+            for(var z:enemies)h.assertTrue(z.getHealth()<200,"Moving sea reaches 56 blocks in every direction");
+            for(var z:new Zombie[]{outside,below,blocked})h.assertTrue(z.getHealth()==200,"Ocean radius, below-floor and LOS boundaries retained");
+            h.assertTrue(h.getLevel().getBlockState(wall).is(Blocks.STONE),"Ocean is visual water, not destructive terrain edits");
+            field.tickCount=599;field.finishSea(h.getLevel());
+            h.assertTrue(WaterWeather.get(h.getLevel()).save(new net.minecraft.nbt.CompoundTag()).getLong("until")==before,"No weather lease before thirty-second ocean completes");
+            field.tickCount=600;field.finishSea(h.getLevel());
+            long until=WaterWeather.get(h.getLevel()).save(new net.minecraft.nbt.CompoundTag()).getLong("until");
+            var data=h.getLevel().getServer().getWorldData().overworldData();
+            h.assertTrue(until==h.getLevel().getGameTime()+600&&data.isRaining()&&data.isThundering(),"Completion starts another thirty-second thunderstorm");
+            data.setRainTime(500);field.finishSea(h.getLevel());
+            h.assertTrue(data.getRainTime()==500,"Same completion cannot reset weather after an external change");
+        } finally {
+            field.discard();for(var z:enemies)z.discard();outside.discard();below.discard();blocked.discard();
+        }
+        h.succeed();
+    }
     @GameTest(template="water_test_crypt_empty",timeoutTicks=30)
-    public static void seaGodSwordHitsOnceAtSevenSecondsAndLeavesFieldActive(GameTestHelper h) {
+    public static void seaGodSwordHitsOncePerStrikeThroughoutFieldLife(GameTestHelper h) {
         var p=caster(h);var field=crypt(h,p);var enemy=toughZombie(h,field.position().add(25,0,0));
         float full=enemy.getHealth();
         field.tickCount=139;field.seaGodSwordImpact(h.getLevel(),p);
@@ -111,6 +204,15 @@ public final class WaterMagicGameTests {
         enemy.invulnerableTime=0;field.seaGodSwordImpact(h.getLevel(),p);
         field.tickCount=141;field.seaGodSwordImpact(h.getLevel(),p);
         h.assertTrue(enemy.getHealth()==remaining,"Impact is once per cast even without target invulnerability");
+        for(int strike=1;strike<SeaGodSwordRules.COUNT;strike++) {
+            enemy.setHealth(full);enemy.invulnerableTime=0;
+            field.tickCount=140+strike*60-1;field.seaGodSwordImpact(h.getLevel(),p);
+            h.assertTrue(enemy.getHealth()==full,"No early repeated sword impact");
+            field.tickCount++;field.seaGodSwordImpact(h.getLevel(),p);float after=enemy.getHealth();
+            h.assertTrue(full-after>40,"Each scheduled sword causes a real large impact");
+            enemy.invulnerableTime=0;field.seaGodSwordImpact(h.getLevel(),p);
+            h.assertTrue(enemy.getHealth()==after,"Same scheduled sword cannot settle twice");
+        }
         h.assertTrue(!field.isRemoved()&&field.life()==600,"Original thirty-second field persists after sword impact");
         enemy.discard();field.discard();h.succeed();
     }
@@ -162,9 +264,9 @@ public final class WaterMagicGameTests {
             h.assertTrue(WaterSpellRules.fieldLife(3,t)==200+t*100,"Healing duration unchanged");
             h.assertTrue(WaterSpellRules.fieldHeight(2,t)>=7,"Cage vertical coverage");
         }
-        h.assertTrue(WaterSpellRules.fieldRadius(1,5)==40&&WaterSpellRules.fieldHeight(1,5)==28&&WaterSpellRules.fieldLife(1,5)==160,"Apocalyptic sea scale");
-        var sea=WaterSpellRules.uprightArea(Vec3.ZERO,40,28);
-        h.assertTrue(sea.minY==-.25&&sea.maxY==28,"Sea grows above its floor, not equally underground");h.succeed();
+        h.assertTrue(WaterSpellRules.fieldRadius(1,5)==64&&WaterSpellRules.fieldHeight(1,5)==40&&WaterSpellRules.fieldLife(1,5)==600,"Thirty-second giant ocean scale");
+        var sea=WaterSpellRules.uprightArea(Vec3.ZERO,64,40);
+        h.assertTrue(sea.minY==-.25&&sea.maxY==40,"Sea grows above its floor, not equally underground");h.succeed();
     }
     @GameTest(template="water_test_large_empty",timeoutTicks=30)
     public static void dragonLaunchClearsFlatGrassWithoutRemovingProtection(GameTestHelper h) {

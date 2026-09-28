@@ -2,11 +2,41 @@ package com.tnc.tnc.client;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.tnc.tnc.magic.water.WaterSpellRules;
+import com.tnc.tnc.magic.water.OceanWaveRules;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 
 /** Curved water volume and white foam lip, inspired by the visual layering of Alex's Caves waves. */
 final class WaterWaveVisuals {
+    /** Full 360-degree breaker: deep sloping belly, forward lip, then an inward-curled foam edge. */
+    static void breakingWave(VertexConsumer out,Matrix4f pose,double front,double height,double limit,double age,float alpha) {
+        if(front<=0 || height<=0 || alpha<=0)return;
+        int segments=96,points=OceanWaveRules.profilePoints();
+        for(int i=0;i<segments;i++) {
+            double a=i*Math.PI*2/segments,b=(i+1)*Math.PI*2/segments;
+            for(int j=0;j<points-1;j++) {
+                Vec3 p=breakerProfile(a,j,front,height,limit,age),q=breakerProfile(b,j,front,height,limit,age);
+                Vec3 u=breakerProfile(a,j+1,front,height,limit,age),v=breakerProfile(b,j+1,front,height,limit,age);
+                float t=j/(float)(points-1);
+                WaterGeometry.quad(out,pose,p,q,v,u,.005F,.12F+t*.42F,.72F+t*.28F,alpha*(.32F+t*.38F));
+                if(j==points-2) {
+                    // Thin irregular foam edge, not a glowing vertical tube or a uniform light pillar.
+                    WaterGeometry.tube(out,pose,u,v,.085,.72F,.96F,1,alpha);
+                    if(i%4==0)WaterGeometry.tube(out,pose,u,u.add(0,.35+Math.sin(age*.2+a*9)*.2,0),.06,.85F,.98F,1,alpha*.8F);
+                }
+            }
+            // Broken white foam bands on the turning crest reveal the roll direction.
+            if(i%3!=0) {
+                Vec3 p=breakerProfile(a,7,front,height,limit,age),q=breakerProfile(b,8,front,height,limit,age);
+                WaterGeometry.tube(out,pose,p,q,.075,.55F,.9F,1,alpha*.8F);
+            }
+        }
+    }
+    private static Vec3 breakerProfile(double angle,int point,double front,double height,double limit,double age) {
+        double r=OceanWaveRules.profileRadius(point,front,height,limit);
+        double y=OceanWaveRules.profileHeight(point,height)*OceanWaveRules.waveLift(angle,age);
+        return new Vec3(Math.cos(angle)*r,y,Math.sin(angle)*r);
+    }
     static void crescent(VertexConsumer out,Matrix4f pose,Vec3 center,Vec3 dir,double r,double time,float alpha) {
         Vec3 right=WaterSpellRules.right(dir),up=right.cross(dir).normalize();
         for(int i=0;i<40;i++) {

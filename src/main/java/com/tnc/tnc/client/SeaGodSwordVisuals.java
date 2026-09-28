@@ -12,6 +12,13 @@ final class SeaGodSwordVisuals {
     private static final Vec3 UP=new Vec3(0,1,0);
     private SeaGodSwordVisuals() {}
     static void render(double age,double radius,float fieldFade,PoseStack stack,MultiBufferSource buffers) {
+        // Finite barrage: at most two visible swords, sharing the same server schedule.
+        for(int strike=0;strike<SeaGodSwordRules.COUNT;strike++) {
+            double phase=age-strike*SeaGodSwordRules.INTERVAL;
+            if(SeaGodSwordRules.visible(phase))renderSword(phase,radius,fieldFade,stack,buffers);
+        }
+    }
+    private static void renderSword(double age,double radius,float fieldFade,PoseStack stack,MultiBufferSource buffers) {
         float fade=fieldFade*SeaGodSwordRules.opacity(age);
         if(fade<=0)return;
         double tip=SeaGodSwordRules.tipHeight(age);
@@ -44,8 +51,8 @@ final class SeaGodSwordVisuals {
         for(int i=0;i<7;i++)WaterGeometry.ringColor(out,pose,new Vec3(0,tip+54+i,0),UP,.85,.15,1,.67F,.08F,fade*.9F);
         WaterGeometry.tube(out,pose,new Vec3(0,tip+62,0),new Vec3(0,tip+SeaGodSwordRules.LENGTH,0),1.25,.08F,.6F,1,fade);
         WaterGeometry.ringColor(out,pose,new Vec3(0,tip+63,0),UP,3,.25,1,.65F,.08F,fade);
-        // Six open spiral streams flow along the blade, leaving its silhouette readable.
-        for(int i=0;i<6;i++)WaterGeometry.spiral(out,pose,new Vec3(0,tip,0),UP,7,52,-age*.12+i*Math.PI/3,.015F,.45F,1,fade*.65F);
+        // Three open streams preserve the silhouette even when consecutive swords overlap.
+        for(int i=0;i<3;i++)WaterGeometry.spiral(out,pose,new Vec3(0,tip,0),UP,7,52,-age*.12+i*Math.PI*2/3,.015F,.45F,1,fade*.65F);
         WaterGeometry.ringColor(out,pose,new Vec3(0,.16,0),UP,radius,.4,.02F,.5F,1,fade);
         double impactAge=age-SeaGodSwordRules.IMPACT_TICK;
         if(impactAge>=0)impact(out,pose,impactAge,radius,fade);
@@ -58,18 +65,11 @@ final class SeaGodSwordVisuals {
         return new Vec3(p.x*Math.cos(spin)-p.z*Math.sin(spin),p.y,p.x*Math.sin(spin)+p.z*Math.cos(spin));
     }
     private static void impact(VertexConsumer out,Matrix4f pose,double age,double radius,float fade) {
-        for(int i=0;i<4;i++) {
-            double r=Math.min(radius,Math.max(0,(age-i*3)*1.3));
-            if(r<=0)continue;
-            WaterGeometry.ringColor(out,pose,new Vec3(0,.2+i*.25,0),UP,r,.65,.015F,.55F,1,fade*(1-i*.12F));
-        }
-        // Splash crown is visual only; gameplay still uses the existing upright field area.
-        double burst=Math.sin(Math.min(1,age/24)*Math.PI);
-        for(int i=0;i<16;i++) {
-            double a=i*Math.PI/8;
-            Vec3 foot=new Vec3(Math.cos(a)*radius*.45,.25,Math.sin(a)*radius*.45);
-            Vec3 crest=new Vec3(Math.cos(a)*radius*.8,2+burst*(12+i%3*3),Math.sin(a)*radius*.8);
-            WaterGeometry.tube(out,pose,foot,crest,.22,.04F,.5F,1,fade*.75F);
+        for(int i=0;i<2;i++) {
+            double r=(age-i*6)*1.2;if(r<=0 || r>=radius)continue;
+            double height=12*Math.min(1,r/5);
+            float edge=(float)Math.min(1,(radius-r)/4);
+            WaterWaveVisuals.breakingWave(out,pose,r,height,radius,age+i*7,fade*edge);
         }
     }
 }

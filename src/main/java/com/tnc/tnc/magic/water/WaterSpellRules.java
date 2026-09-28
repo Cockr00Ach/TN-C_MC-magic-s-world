@@ -24,13 +24,13 @@ public final class WaterSpellRules {
     public static double range(int tier) { return tier == 5 ? 96 : tier == 1 ? 40 : 48; }
     public static double circleRadius(int tier) { return tier == 5 ? 15 : tier == 4 ? 3.5 : 4; }
     public static double fieldRadius(int kind,int tier) {
-        return kind==1?(tier==5?40:tier==4?8:tier==3?4:3):kind==2?new double[]{5,7,12,18,26}[tier-1]:new double[]{8,12,16,22,32}[tier-1];
+        return kind==1?(tier==5?OceanWaveRules.RADIUS:tier==4?8:tier==3?4:3):kind==2?new double[]{5,7,12,18,26}[tier-1]:new double[]{8,12,16,22,32}[tier-1];
     }
     public static int fieldLife(int kind,int tier) {
-        return kind==1?(tier==5?160:tier==4?48:28):kind==2?new int[]{160,240,360,480,600}[tier-1]:200+tier*100;
+        return kind==1?(tier==5?OceanWaveRules.LIFE:tier==4?48:28):kind==2?new int[]{160,240,360,480,SeaGodSwordRules.FIELD_LIFE}[tier-1]:200+tier*100;
     }
     public static double fieldHeight(int kind,int tier) {
-        return kind==1?(tier==5?28:tier==4?8:tier==3?4:3):kind==2?Math.min(24,3+fieldRadius(kind,tier)*.8):Math.min(28,4+fieldRadius(kind,tier)*.75);
+        return kind==1?(tier==5?OceanWaveRules.HEIGHT:tier==4?8:tier==3?4:3):kind==2?Math.min(24,3+fieldRadius(kind,tier)*.8):Math.min(28,4+fieldRadius(kind,tier)*.75);
     }
     public static net.minecraft.world.phys.AABB uprightArea(Vec3 center,double radius,double height) {
         return new net.minecraft.world.phys.AABB(center.add(-radius,-.25,-radius),center.add(radius,height,radius));

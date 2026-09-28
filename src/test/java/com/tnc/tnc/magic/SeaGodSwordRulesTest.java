@@ -27,4 +27,18 @@ class SeaGodSwordRulesTest {
         }
         assertEquals(60,SeaGodSwordRules.DAMAGE);
     }
+    @Test void continuousBarrageHasEightDistinctStrikesAndNoMoreThanTwoVisibleSwords() {
+        assertEquals(8,SeaGodSwordRules.COUNT);
+        int impacts=0;
+        for(int age=0;age<=600;age++) {
+            int index=SeaGodSwordRules.impactIndex(age);
+            if(index>=0){assertEquals(140+impacts*60,age);assertEquals(impacts++,index);}
+            int visible=0;
+            for(int i=0;i<SeaGodSwordRules.COUNT;i++)if(SeaGodSwordRules.visible(age-i*SeaGodSwordRules.INTERVAL))visible++;
+            assertTrue(visible<=2);
+            if(age>=100&&age<600)assertTrue(visible>=1,"No empty interval in the barrage");
+        }
+        assertEquals(8,impacts);
+        assertFalse(SeaGodSwordRules.cue(580,SeaGodSwordRules.APPEAR_TICK),"No ninth warning for a strike after field expiration");
+    }
 }
