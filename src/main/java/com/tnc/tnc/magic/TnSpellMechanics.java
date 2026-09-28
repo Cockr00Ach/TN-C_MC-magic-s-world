@@ -406,6 +406,7 @@ public final class TnSpellMechanics {
         TNFireMechanics.onSpellCast(player, spellId, data);
         com.tnc.tnc.magic.water.TNWaterSpellEntity.cast(player, spellId);
         com.tnc.tnc.magic.water.TNWaterFieldEntity.cast(player, spellId);
+        com.tnc.tnc.magic.water.ChaosSilence.cast(player, spellId);
 
         // 闪电降低冷却：恢复一半蓝量（上限的一半）
         if (path.equals("lightning_recharge")) {

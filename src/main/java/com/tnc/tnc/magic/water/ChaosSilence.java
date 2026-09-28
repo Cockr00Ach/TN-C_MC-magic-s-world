@@ -35,6 +35,17 @@ public final class ChaosSilence {
         if(applied && target instanceof Creeper creeper)resetFuse(creeper);
         return applied;
     }
+    public static void cast(ServerPlayer player,net.minecraft.resources.ResourceLocation id) {
+        if(!id.toString().equals("tnc:chaos_magic"))return;
+        LivingEntity target=TNWaterFieldEntity.aimEnemy(player,24);
+        if(target==null || !apply(target)) {
+            player.displayClientMessage(Component.literal("§7乱魔：没有可命中的敌人，或目标拒绝沉默。"),true);return;
+        }
+        var level=player.serverLevel();
+        level.sendParticles(net.minecraft.core.particles.ParticleTypes.ENCHANT,target.getX(),target.getY()+target.getBbHeight()*.6,target.getZ(),32,.6,.8,.6,.15);
+        level.playSound(null,target.blockPosition(),net.minecraft.sounds.SoundEvents.ENCHANTMENT_TABLE_USE,net.minecraft.sounds.SoundSource.PLAYERS,1,.55F);
+        player.displayClientMessage(Component.literal("§d乱魔 · "+target.getName().getString()+" · 沉默3秒"),true);
+    }
     private static void resetFuse(Creeper creeper) {
         try { CREEPER_FUSE.setInt(creeper,0);creeper.setSwellDir(-1); }
         catch(IllegalAccessException e){throw new IllegalStateException("Cannot suppress creeper fuse",e);}
@@ -72,24 +83,19 @@ public final class ChaosSilence {
             }
         }
     }
-    /** A separate right-click carrier, no element affinity, upgrade chain or wand slot. */
+    /** Legacy save-compatible carrier; learning/casting now goes through the magic stone and wand. */
     public static final class SealItem extends Item {
         public SealItem(){super(new Item.Properties().stacksTo(1).rarity(Rarity.RARE));}
-        @Override public Component getName(ItemStack stack){return Component.literal("乱魔符印");}
+        @Override public Component getName(ItemStack stack){return Component.literal("旧版乱魔符印（已停用）");}
         @Override public void appendHoverText(ItemStack stack,Level level,List<Component> lines,TooltipFlag flag){
-            lines.add(Component.literal("§d乱魔：瞄准敌对生物右键，沉默3秒"));
-            lines.add(Component.literal("§7独立特殊魔法 · 射程24格 · 冷却10秒"));
-            lines.add(Component.literal("§8不限制移动与普通近战；特殊Boss招式需适配"));
+            lines.add(Component.literal("§7按V打开魔法石 → 独立 → 学习乱魔"));
+            lines.add(Component.literal("§8保留此旧物品仅为兼容旧存档，无法施放。"));
         }
         @Override public InteractionResultHolder<ItemStack> use(Level level,Player player,InteractionHand hand){
             ItemStack stack=player.getItemInHand(hand);
             if(level.isClientSide)return InteractionResultHolder.success(stack);
-            if(!(player instanceof ServerPlayer server)||player.getCooldowns().isOnCooldown(this))return InteractionResultHolder.fail(stack);
-            LivingEntity target=TNWaterFieldEntity.aimEnemy(server,24);
-            if(target==null || !apply(target)){player.displayClientMessage(Component.literal("§7没有可命中的敌人，或目标拒绝该效果。"),true);return InteractionResultHolder.fail(stack);}
-            player.getCooldowns().addCooldown(this,200);
-            player.displayClientMessage(Component.literal("§d乱魔 · "+target.getName().getString()+" · 3秒"),true);
-            return InteractionResultHolder.consume(stack);
+            player.displayClientMessage(Component.literal("§d乱魔已移入魔法石：按V → 独立 → 学习后用法杖施放。"),true);
+            return InteractionResultHolder.fail(stack);
         }
     }
 }

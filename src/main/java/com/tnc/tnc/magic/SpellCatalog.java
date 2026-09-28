@@ -71,7 +71,8 @@ public final class SpellCatalog {
         DARK_HAND("黑夜之手", "暗影之手抓向目标"),
         DARK_SACRIFICE("以伤换伤", "以生命力换力量"),
         DARK_SUMMON("召唤", "从黑暗中召唤暗属性生物"),
-        DARK_FOG("黑雾", "弥漫的黑色雾气");
+        DARK_FOG("黑雾", "弥漫的黑色雾气"),
+        INDEPENDENT("独立魔法", "不属于任何元素，无亲和力要求");
 
         private final String cn;
         private final String desc;
@@ -95,9 +96,12 @@ public final class SpellCatalog {
     /** 一个可解锁法术。 */
     public record Entry(ResourceLocation id, Element element, Chain chain, int tier, String displayName) {
 
+        public boolean independent() { return chain == Chain.INDEPENDENT; }
+
         /** 界面/提示里显示的完整名字，例如「雷击（雷 · 主链 · 专家级）」。 */
         public String fullName() {
-            return displayName + "（" + element.cn() + " · " + chain.cn() + " · " + Element.tierName(tier) + "）";
+            return independent() ? displayName + "（独立魔法 · 无元素）"
+                    : displayName + "（" + element.cn() + " · " + chain.cn() + " · " + Element.tierName(tier) + "）";
         }
 
         /** 施放一次消耗多少魔力（消耗表里的原始值，= 基准上限下的消耗）。 */
@@ -213,6 +217,8 @@ public final class SpellCatalog {
             of(Element.WATER, "rainfall", Chain.WATER_RAIN, 3, "雨落"),
             of(Element.WATER, "downpour", Chain.WATER_RAIN, 4, "暴雨落"),
             of(Element.WATER, "flood_of_heaven", Chain.WATER_RAIN, 5, "天洪"),
+            // Null element is deliberate: independent skills never enter the seven-element NBT arrays.
+            new Entry(ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "chaos_magic"), null, Chain.INDEPENDENT, 1, "乱魔"),
 
             // 土魔法：土弹 / 土动 / 土泥 / 土环
             of(Element.EARTH, "earth_shot", Chain.EARTH_SHOT, 1, "土弹"),
@@ -427,6 +433,9 @@ public final class SpellCatalog {
                     result.add(top);
                 }
             }
+        }
+        for (Entry independent : of(null)) {
+            if (data.hasLearned(independent.id())) result.add(independent);
         }
         return result;
     }

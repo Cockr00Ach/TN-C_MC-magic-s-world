@@ -24,11 +24,12 @@ public final class TNWaterFieldEntity extends Entity {
     private static final EntityDataAccessor<Integer> TIER=SynchedEntityData.defineId(TNWaterFieldEntity.class,EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> AGE=SynchedEntityData.defineId(TNWaterFieldEntity.class,EntityDataSerializers.INT);
     private static final EntityDataAccessor<Float> YAW=SynchedEntityData.defineId(TNWaterFieldEntity.class,EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> PITCH=SynchedEntityData.defineId(TNWaterFieldEntity.class,EntityDataSerializers.FLOAT);
     private UUID owner,anchor;
     private final Set<UUID> hit=new HashSet<>();
     public TNWaterFieldEntity(EntityType<? extends TNWaterFieldEntity> type,Level level){super(type,level);noPhysics=true;setNoGravity(true);}
     public int kind(){return entityData.get(KIND);} public int tier(){return entityData.get(TIER);}public int age(){return entityData.get(AGE);}
-    public Vec3 direction(){return Vec3.directionFromRotation(0,entityData.get(YAW));}
+    public Vec3 direction(){return Vec3.directionFromRotation(entityData.get(PITCH),entityData.get(YAW));}
     public double radius(){return kind()==1?(tier()==5?20:tier()==4?8:tier()==3?4:3):kind()==2?(tier()<3?1.5: tier()==3?4:tier()==4?6:8):2.5+tier();}
     public int life(){return kind()==1?(tier()==5?70:tier()==4?48:28):kind()==2?40+tier()*16:200+tier()*100;}
     public Vec3 waveCenter(double age){return kind()==1 && tier()>1 && tier()<5?position().add(direction().scale(age*(tier()==3?1.35:tier()==4?.5:.8))):position();}
@@ -48,11 +49,18 @@ public final class TNWaterFieldEntity extends Entity {
                     else at=block.getType()==HitResult.Type.MISS?player.position().add(player.getLookAngle().scale(12)):block.getLocation();
                 } else at=block.getType()==HitResult.Type.MISS?player.position():block.getLocation().add(0,.05,0);
             }
-            int count=k==0&&t==2?8:1;
+            boolean slash=k==0&&t==2;
+            if(slash)at=player.getEyePosition();
+            var directions=slash?WaterSpellRules.slashDirections(player.getYRot()):java.util.List.of(Vec3.directionFromRotation(0,player.getYRot()));
+            int count=directions.size();
             for(int i=0;i<count;i++) {
                 var e=TNOrbEntities.WATER_FIELD.get().create(player.level());if(e==null)continue;
                 e.owner=player.getUUID();e.anchor=target==null?null:target.getUUID();e.setPos(at);
-                e.entityData.set(KIND,k+1);e.entityData.set(TIER,t+1);e.entityData.set(YAW,player.getYRot()+i*45);player.level().addFreshEntity(e);
+                Vec3 direction=directions.get(i);
+                e.entityData.set(KIND,k+1);e.entityData.set(TIER,t+1);
+                e.entityData.set(YAW,(float)Math.toDegrees(Math.atan2(-direction.x,direction.z)));
+                e.entityData.set(PITCH,(float)-Math.toDegrees(Math.asin(direction.y)));
+                player.level().addFreshEntity(e);
             }
             if(k==0&&t==4)WaterWeather.storm(player.serverLevel());
             player.serverLevel().playSound(null,BlockPos.containing(at),SoundEvents.PLAYER_SPLASH,SoundSource.PLAYERS,t==4?2:1,.7F);
@@ -71,7 +79,7 @@ public final class TNWaterFieldEntity extends Entity {
         }
         return closest;
     }
-    @Override protected void defineSynchedData(){entityData.define(KIND,1);entityData.define(TIER,1);entityData.define(AGE,0);entityData.define(YAW,0F);}
+    @Override protected void defineSynchedData(){entityData.define(KIND,1);entityData.define(TIER,1);entityData.define(AGE,0);entityData.define(YAW,0F);entityData.define(PITCH,0F);}
     @Override public void tick() {
         super.tick();if(level().isClientSide)return;ServerLevel level=(ServerLevel)level();
         var player=owner==null?null:level.getServer().getPlayerList().getPlayer(owner);
@@ -82,22 +90,25 @@ public final class TNWaterFieldEntity extends Entity {
         Vec3 center=waveCenter(tickCount),previous=waveCenter(tickCount-1);
         if(!level.hasChunkAt(BlockPos.containing(center))) {discard();return;}
         if(kind()==1 && tier()>1 && tier()<5) {
-            var wall=level.clip(new ClipContext(previous.add(0,.8,0),center.add(0,.8,0),ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,this));
+            Vec3 lift=tier()==3?Vec3.ZERO:new Vec3(0,.8,0);
+            var wall=level.clip(new ClipContext(previous.add(lift),center.add(lift),ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,this));
             if(wall.getType()!=HitResult.Type.MISS){discard();return;}
         }
-        double r=radius(),height=kind()==1&&tier()==5?16:kind()==1&&tier()==4?8:3;
+        double r=radius(),height=kind()==1&&tier()==5?16:kind()==1&&tier()==4?8:kind()==1&&tier()==3?r:3;
         var box=new AABB(previous,center).inflate(r,height,r);
         for(var enemy:level.getEntitiesOfClass(LivingEntity.class,box,e->WaterSpellRules.enemy(player,e))) {
             if(kind()==2 && tier()<3 && !enemy.getUUID().equals(anchor))continue;
             Vec3 delta=enemy.position().subtract(center);
-            if(kind()==1 && tier()>1 && tier()<5) {
+            if(kind()==1 && tier()==3) {
+                if(!WaterSpellRules.slashIntersects(enemy.getBoundingBox(),previous,center,direction(),r))continue;
+            } else if(kind()==1 && tier()>1 && tier()<5) {
                 if(Math.abs(delta.dot(direction()))>2 || Math.abs(delta.dot(WaterSpellRules.right(direction())))>r)continue;
             } else if(delta.x*delta.x+delta.z*delta.z>r*r)continue;
-            if(!clearSight(level,center.add(0,1,0),enemy.getBoundingBox().getCenter()))continue;
+            if(!clearSight(level,kind()==1&&tier()==3?center:center.add(0,1,0),enemy.getBoundingBox().getCenter()))continue;
             if(kind()==1) {
                 if(tier()==5 ? tickCount%20!=0 : !hit.add(enemy.getUUID()))continue;
                 if(enemy.hurt(level.damageSources().indirectMagic(this,player),(tier()==5?10:2+tier()*2)*WaterSpellRules.power(player))) {
-                    Vec3 push=tier()==1||tier()==5?delta.normalize():direction();enemy.push(push.x*.65,.15,push.z*.65);
+                    Vec3 push=tier()==1||tier()==5?delta.normalize():direction();enemy.push(push.x*.65,tier()==3?push.y*.65+.1:.15,push.z*.65);
                 }
             } else {
                 enemy.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN,10,tier()==1?1:3,false,false));

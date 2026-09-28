@@ -21,9 +21,58 @@ import java.util.function.Consumer;
 @GameTestHolder("tnc")
 @PrefixGameTestTemplate(false)
 public final class WaterMagicGameTests {
+    @GameTest(template="building_test_empty",timeoutTicks=30)
+    public static void independentChaosLearnsWithoutAffinityAndSurvivesReload(GameTestHelper h) {
+        var id=net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tnc","chaos_magic");
+        var entry=com.tnc.tnc.magic.SpellCatalog.byId(id);
+        var data=new com.tnc.tnc.magic.MagicStoneData();data.addBonusPoints(10);
+        h.assertTrue(entry!=null&&entry.independent()&&entry.element()==null,"Chaos is not an eighth element");
+        h.assertTrue(com.tnc.tnc.magic.Element.values().length==7,"Seven-element storage unchanged");
+        h.assertTrue(com.tnc.tnc.magic.MagicStoneLearning.unlock(data,entry)==com.tnc.tnc.magic.MagicStoneLearning.Result.OK,"Zero affinity can learn chaos");
+        int spent=data.getPointsSpent();
+        h.assertTrue(com.tnc.tnc.magic.MagicStoneLearning.unlock(data,entry)==com.tnc.tnc.magic.MagicStoneLearning.Result.ALREADY_LEARNED&&data.getPointsSpent()==spent,"Duplicate unlock cannot charge twice");
+        var loaded=new com.tnc.tnc.magic.MagicStoneData();loaded.deserializeNBT(data.serializeNBT());
+        h.assertTrue(loaded.hasLearned(id)&&com.tnc.tnc.magic.SpellCatalog.effectiveIds(loaded).contains(id),"Independent spell survives NBT and reaches wand");
+        for(var element:com.tnc.tnc.magic.Element.values())h.assertTrue(loaded.getProgressMax(element)==0,"Chaos cannot advance elemental progression");
+        loaded.forget(id);h.assertTrue(!com.tnc.tnc.magic.SpellCatalog.effectiveIds(loaded).contains(id),"Forget removes it from wand");h.succeed();
+    }
+    @GameTest(template="building_test_empty",timeoutTicks=30)
+    public static void slashSpawnsAllTwentySixThreeDimensionalDirections(GameTestHelper h) {
+        var p=caster(h);p.setYRot(17);
+        TNWaterFieldEntity.cast(p,net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tnc","wave_slash"));
+        var fields=h.getLevel().getEntitiesOfClass(TNWaterFieldEntity.class,p.getBoundingBox().inflate(3));
+        h.assertTrue(fields.size()==26,"Expected 26 slash fronts, got "+fields.size());
+        h.assertTrue(fields.stream().anyMatch(e->e.direction().y>.99)&&fields.stream().anyMatch(e->e.direction().y<-.99),"Both vertical poles synchronized");
+        var directions=WaterSpellRules.slashDirections(17);
+        h.assertTrue(directions.size()==26,"26 planned directions");
+        for(int i=0;i<directions.size();i++)for(int j=i+1;j<directions.size();j++)h.assertTrue(directions.get(i).distanceToSqr(directions.get(j))>.01,"No duplicate directions");
+        fields.forEach(Entity::discard);h.succeed();
+    }
+    @GameTest(template="building_test_empty",timeoutTicks=30)
+    public static void largerBeamReachesBeyondOldRadiusWithinBudget(GameTestHelper h) {
+        h.assertTrue(WaterSpellRules.radius(5)==7&&WaterSpellRules.range(5)==96&&WaterSpellRules.circleRadius(5)==15,"Larger beam rules match requested design");
+        var p=caster(h);Vec3 start=Vec3.atCenterOf(h.absolutePos(new BlockPos(8,10,2)));
+        BlockPos outer=BlockPos.containing(start).offset(5,0,0);h.getLevel().setBlockAndUpdate(outer,Blocks.STONE.defaultBlockState());
+        var bore=new WaterTerrainBore(start,new Vec3(0,0,1),7,96);int edits=bore.tick(h.getLevel(),p);
+        h.assertTrue(edits<=WaterTerrainBore.BLOCK_BUDGET,"Expanded bore keeps edit budget");
+        h.assertTrue(h.getLevel().getBlockState(outer).isAir(),"Radius five is no longer clamped to four");h.succeed();
+    }
     private static ServerPlayer caster(GameTestHelper h) {
         var player=FakePlayerFactory.get(h.getLevel(),new GameProfile(UUID.randomUUID(),"water-test"));
         player.setGameMode(GameType.CREATIVE);player.setPos(Vec3.atCenterOf(h.absolutePos(new BlockPos(1,3,1))));return player;
+    }
+    @GameTest(template="building_test_empty",timeoutTicks=30)
+    public static void slashThinSweepIncludesVerticalEdgesButNotFutureTargets(GameTestHelper h) {
+        Vec3 start=Vec3.ZERO,end=new Vec3(0,0,1.35),dir=new Vec3(0,0,1);
+        var future=new net.minecraft.world.phys.AABB(-.2,-.2,3,.2,.2,3.4);
+        h.assertTrue(!WaterSpellRules.slashIntersects(future,start,end,dir,4),"No early hit ahead of visible blade");
+        for(double y:new double[]{-3.8,3.8}) {
+            var edge=new net.minecraft.world.phys.AABB(-.1,y-.1,.5,.1,y+.1,.7);
+            h.assertTrue(WaterSpellRules.slashIntersects(edge,start,end,dir,4),"Small flying target at vertical edge included");
+            h.assertTrue(new net.minecraft.world.phys.AABB(start,end).inflate(4).intersects(edge),"Candidate bounds include edge");
+        }
+        var pole=new net.minecraft.world.phys.AABB(3.6,.5,-.1,3.8,.7,.1);
+        h.assertTrue(WaterSpellRules.slashIntersects(pole,start,new Vec3(0,1.35,0),new Vec3(0,1,0),4),"Vertical slash has horizontal cross-section");h.succeed();
     }
     private static Zombie zombie(GameTestHelper h,Vec3 pos){var z=EntityType.ZOMBIE.create(h.getLevel());z.setPos(pos);z.setNoAi(true);z.setNoGravity(true);h.getLevel().addFreshEntity(z);return z;}
     @GameTest(template="building_test_empty",timeoutTicks=30)

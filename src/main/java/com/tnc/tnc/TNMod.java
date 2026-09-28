@@ -84,7 +84,7 @@ public class TNMod
             .icon(() -> SWORD.get().getDefaultInstance())
             .displayItems((parameters, output) -> {
                 output.accept(SWORD.get());
-                output.accept(CHAOS_SEAL.get());
+                // Legacy chaos_seal stays registered for save compatibility; learned magic replaces it.
                 output.accept(WAND.get());
                 // 剧情道具「宝箱传说残卷」六卷（卷一拆成上下卷）—— 方便验收时直接拿 ✓
                 output.accept(com.tnc.tnc.magic.TNScrolls.JUAN_1A.get());

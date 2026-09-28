@@ -16,9 +16,16 @@ foreach($f in $files){
 }
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 $zip=[IO.Compression.ZipFile]::OpenRead($files[0].Source)
-try{foreach($entry in @('com/tnc/tnc/magic/water/TNWaterSpellEntity.class','com/tnc/tnc/magic/water/TNWaterFieldEntity.class','com/tnc/tnc/magic/water/ChaosSilence.class','assets/tnc/models/item/chaos_seal.json','com/tnc/tnc/world/SkyLandscapeUpgrade.class')){if(-not $zip.GetEntry($entry)){throw "Incomplete build: $entry"}}}finally{$zip.Dispose()}
+try{
+    foreach($entry in @('com/tnc/tnc/magic/water/TNWaterSpellEntity.class','com/tnc/tnc/magic/water/TNWaterFieldEntity.class','com/tnc/tnc/magic/water/ChaosSilence.class','com/tnc/tnc/client/WaterRainVisuals.class','data/tnc/spells/chaos_magic.json','com/tnc/tnc/world/SkyLandscapeUpgrade.class')){if(-not $zip.GetEntry($entry)){throw "Incomplete build: $entry"}}
+    foreach($name in @('water_ball','water_cannon','dragon_roar','dragon_howl','dragon_ruin','chaos_magic')+$names){
+        if(-not $zip.GetEntry("assets/tnc/textures/spell/$name.png")){throw "Missing spell icon: $name"}
+        $override=Join-Path $pack "config\openloader\resources\TN-C\assets\tnc\textures\spell\$name.png"
+        if(Test-Path -LiteralPath $override){throw "Icon override requires review: $override"}
+    }
+}finally{$zip.Dispose()}
 # A stale external copy would take precedence over the five jar-owned spells.
-foreach($name in @('water_ball','water_cannon','dragon_roar','dragon_howl','dragon_ruin')){
+foreach($name in @('water_ball','water_cannon','dragon_roar','dragon_howl','dragon_ruin','chaos_magic')){
     $candidate=Join-Path $pack "kubejs\data\tnc\spells\$name.json"
     if(Test-Path -LiteralPath $candidate){throw "External override requires review before installation: $candidate"}
 }
