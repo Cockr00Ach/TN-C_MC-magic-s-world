@@ -29,5 +29,14 @@
       "amount": 20,
       "count": 1
     }
+  ],
+  "start_triggers": [
+    {
+      "type": "advancement",
+      "action": "start",
+      "amount": 1,
+      "value": 1.0,
+      "id": "minecraft:story/root"
+    }
   ]
 }
