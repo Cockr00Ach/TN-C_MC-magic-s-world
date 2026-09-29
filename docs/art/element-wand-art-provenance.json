@@ -1,11 +1,5 @@
 [
   {
-    "item": "fire_wand_1",
-    "source_file": "exec-6083da2e-663d-4aaf-9507-e856a7f3dc6b.png",
-    "prompt": "Floating angular broken charcoal ember seal; tier1 fire; transparent pixel inventory sprite",
-    "method": "built-in imagegen; alpha crop; nearest neighbor 32px"
-  },
-  {
     "item": "fire_wand_4",
     "source_file": "exec-0e7bb8b2-7d9c-4aa4-8622-a5c7be762332.png",
     "prompt": "Use case: stylized-concept. Asset: exactly ONE Minecraft RPG inventory item sprite, tier 4 fire mage focus. Subject: a phoenix wing staff, one large swept black-gold wing and descending crimson feathers around a bright flame heart. Style: crisp pixel art intended to remain readable at 32x32; broad clean pixel clusters, strong distinct silhouette, dark contour, controlled burnt orange, charcoal, crimson, small yellow-white highlights palette. Single centered isolated object occupies 80 percent of square frame. No smooth painting, no gradients, no soft glow cloud, no text, no ground or shadow, no duplicates, no sprite sheet. Genuinely transparent background. Distinctive fire construction; do not use a generic blue crystal staff or a trident.",
@@ -30,12 +24,6 @@
     "method": "built-in imagegen; alpha crop; nearest neighbor 32px"
   },
   {
-    "item": "lightning_wand_1",
-    "source_file": "exec-c692f61f-c290-4d4e-abe0-e5b723272fbd.png",
-    "prompt": "Use case: stylized-concept. Asset: exactly ONE Minecraft RPG inventory item sprite, tier 1 lightning mage focus. Subject: floating narrow zigzag thunder sigil, split silver bolt through two violet crystal brackets, no handle. Style: crisp pixel art intended to remain readable at 32x32; broad clean pixel clusters, strong distinct silhouette, dark contour, controlled steel silver, electric blue-white, deep violet palette. Single centered isolated object occupies 80 percent of square frame. No smooth painting, no gradients, no soft glow cloud, no text, no ground or shadow, no duplicates, no sprite sheet. Genuinely transparent background. Distinctive lightning construction; do not use a generic blue crystal staff or a trident.",
-    "method": "built-in imagegen; alpha crop; nearest neighbor 32px"
-  },
-  {
     "item": "lightning_wand_2",
     "source_file": "exec-ceec1d35-39b1-4cca-ae24-1bbff403fde0.png",
     "prompt": "Use case: stylized-concept. Asset: exactly ONE Minecraft RPG inventory item sprite, tier 2 lightning mage focus. Subject: a compact lightning tuning fork wand, unequal sharply angled silver prongs and blue-white spark, zigzag grip. Style: crisp pixel art intended to remain readable at 32x32; broad clean pixel clusters, strong distinct silhouette, dark contour, controlled steel silver, electric blue-white, deep violet palette. Single centered isolated object occupies 80 percent of square frame. No smooth painting, no gradients, no soft glow cloud, no text, no ground or shadow, no duplicates, no sprite sheet. Genuinely transparent background. Distinctive lightning construction; do not use a generic blue crystal staff or a trident.",
@@ -51,12 +39,6 @@
     "item": "lightning_wand_4",
     "source_file": "exec-e7650ce0-69f0-4f53-9771-f8a967155c7a.png",
     "prompt": "Use case: stylized-concept. Asset: exactly ONE Minecraft RPG inventory item sprite, tier 4 lightning mage focus. Subject: storm conductor staff with three levitating jagged shards above a segmented crooked silver rod, violent white bolt connecting them. Style: crisp pixel art intended to remain readable at 32x32; broad clean pixel clusters, strong distinct silhouette, dark contour, controlled steel silver, electric blue-white, deep violet palette. Single centered isolated object occupies 80 percent of square frame. No smooth painting, no gradients, no soft glow cloud, no text, no ground or shadow, no duplicates, no sprite sheet. Genuinely transparent background. Distinctive lightning construction; do not use a generic blue crystal staff or a trident.",
-    "method": "built-in imagegen; alpha crop; nearest neighbor 32px"
-  },
-  {
-    "item": "wind_wand_1",
-    "source_file": "exec-f5c950b2-3612-4f32-bd45-6ae2f8871720.png",
-    "prompt": "Use case: stylized-concept. Asset: exactly ONE Minecraft RPG inventory item sprite, tier 1 wind mage focus. Subject: a floating four-bladed spiral of feather-shaped silver leaves, mint gaps, no circular outer rim and no handle. Style: crisp pixel art intended to remain readable at 32x32; broad clean pixel clusters, strong distinct silhouette, dark contour, controlled silver, pale jade, mint teal, natural pale wood palette. Single centered isolated object occupies 80 percent of square frame. No smooth painting, no gradients, no soft glow cloud, no text, no ground or shadow, no duplicates, no sprite sheet. Genuinely transparent background. Distinctive wind construction; do not use a generic blue crystal staff or a trident.",
     "method": "built-in imagegen; alpha crop; nearest neighbor 32px"
   },
   {
@@ -84,12 +66,6 @@
     "method": "built-in imagegen; alpha crop; nearest neighbor 32px"
   },
   {
-    "item": "earth_wand_1",
-    "source_file": "exec-d5c020a8-ce22-485e-9923-363a8f45c19b.png",
-    "prompt": "Use case: stylized-concept. Asset: exactly ONE Minecraft RPG inventory item sprite, tier 1 earth mage focus. Subject: floating chunky hexagonal layered sandstone rune tablet with a small amber square core, no handle. Style: crisp pixel art intended to remain readable at 32x32; broad clean pixel clusters, strong distinct silhouette, dark contour, controlled ochre sandstone, basalt grey, amber, copper palette. Single centered isolated object occupies 80 percent of square frame. No smooth painting, no gradients, no soft glow cloud, no text, no ground or shadow, no duplicates, no sprite sheet. Genuinely transparent background. Distinctive earth construction; do not use a generic blue crystal staff or a trident.",
-    "method": "built-in imagegen; alpha crop; nearest neighbor 32px"
-  },
-  {
     "item": "wind_wand_5",
     "source_file": "exec-345db986-eb91-4115-bde0-86e163ddab41.png",
     "prompt": "Use case: stylized-concept. Asset: exactly ONE Minecraft RPG inventory item sprite, tier 5 wind mage focus. Subject: the unbound longwind staff, a gigantic elegant falcon wing and comet tail, open flowing crescent around floating emerald seed, slender silver rod. Style: crisp pixel art intended to remain readable at 32x32; broad clean pixel clusters, strong distinct silhouette, dark contour, controlled silver, pale jade, mint teal, natural pale wood palette. Single centered isolated object occupies 80 percent of square frame. No smooth painting, no gradients, no soft glow cloud, no text, no ground or shadow, no duplicates, no sprite sheet. Genuinely transparent background. Distinctive wind construction; do not use a generic blue crystal staff or a trident.",
@@ -111,12 +87,6 @@
     "item": "earth_wand_3",
     "source_file": "exec-3987912f-aa94-4ed2-8c58-19fdaafc66d2.png",
     "prompt": "Use case: stylized-concept. Asset: exactly ONE Minecraft RPG inventory item sprite, tier 3 earth mage focus. Subject: a heavy mountain staff with wide stepped stone fortress crown, quartz ridges and amber vertical seam. Style: crisp pixel art intended to remain readable at 32x32; broad clean pixel clusters, strong distinct silhouette, dark contour, controlled ochre sandstone, basalt grey, amber, copper palette. Single centered isolated object occupies 80 percent of square frame. No smooth painting, no gradients, no soft glow cloud, no text, no ground or shadow, no duplicates, no sprite sheet. Genuinely transparent background. Distinctive earth construction; do not use a generic blue crystal staff or a trident.",
-    "method": "built-in imagegen; alpha crop; nearest neighbor 32px"
-  },
-  {
-    "item": "light_wand_1",
-    "source_file": "exec-71b6b980-578f-4372-9722-4e41d1da3c0e.png",
-    "prompt": "Use case: stylized-concept. Asset: exactly ONE Minecraft RPG inventory item sprite, tier 1 light mage focus. Subject: floating four-point ivory-gold dawn cross with asymmetric small ray spokes and pearly central diamond, no ring or handle. Style: crisp pixel art intended to remain readable at 32x32; broad clean pixel clusters, strong distinct silhouette, dark contour, controlled ivory, warm gold, pale pearl palette. Single centered isolated object occupies 80 percent of square frame. No smooth painting, no gradients, no soft glow cloud, no text, no ground or shadow, no duplicates, no sprite sheet. Genuinely transparent background. Distinctive light construction; do not use a generic blue crystal staff or a trident.",
     "method": "built-in imagegen; alpha crop; nearest neighbor 32px"
   },
   {
@@ -150,12 +120,6 @@
     "method": "built-in imagegen; alpha crop; nearest neighbor 32px"
   },
   {
-    "item": "dark_wand_1",
-    "source_file": "exec-0d30d3e7-ae70-4970-8bb7-f23b96b19581.png",
-    "prompt": "Use case: stylized-concept. Asset: exactly ONE Minecraft RPG inventory item sprite, tier 1 dark mage focus. Subject: floating open jagged eclipse sigil, off-center purple eye between three hooked obsidian crescents, no handle. Style: crisp pixel art intended to remain readable at 32x32; broad clean pixel clusters, strong distinct silhouette, dark contour, controlled near-black obsidian, muted violet, grey bone, small magenta highlights palette. Single centered isolated object occupies 80 percent of square frame. No smooth painting, no gradients, no soft glow cloud, no text, no ground or shadow, no duplicates, no sprite sheet. Genuinely transparent background. Distinctive dark construction; do not use a generic blue crystal staff or a trident.",
-    "method": "built-in imagegen; alpha crop; nearest neighbor 32px"
-  },
-  {
     "item": "dark_wand_2",
     "source_file": "exec-d6a4de15-f3c2-4470-b393-73b1e49f3b25.png",
     "prompt": "Use case: stylized-concept. Asset: exactly ONE Minecraft RPG inventory item sprite, tier 2 dark mage focus. Subject: a crooked black thorn wand, one hooked raven beak wrapping a violet bead and short bent bone grip. Style: crisp pixel art intended to remain readable at 32x32; broad clean pixel clusters, strong distinct silhouette, dark contour, controlled near-black obsidian, muted violet, grey bone, small magenta highlights palette. Single centered isolated object occupies 80 percent of square frame. No smooth painting, no gradients, no soft glow cloud, no text, no ground or shadow, no duplicates, no sprite sheet. Genuinely transparent background. Distinctive dark construction; do not use a generic blue crystal staff or a trident.",
@@ -178,5 +142,40 @@
     "source_file": "exec-65d77764-2ff0-4c47-9329-981ce577d0a2.png",
     "prompt": "Use case: stylized-concept. Asset: exactly ONE Minecraft RPG inventory item sprite, tier 5 dark mage focus. Subject: the night-devouring sovereign staff, dramatic enormous raven-skull crescent with one long horn and suspended violet abyss eye, bat-wing spikes and crooked obsidian rod. Style: crisp pixel art intended to remain readable at 32x32; broad clean pixel clusters, strong distinct silhouette, dark contour, controlled near-black obsidian, muted violet, grey bone, small magenta highlights palette. Single centered isolated object occupies 80 percent of square frame. No smooth painting, no gradients, no soft glow cloud, no text, no ground or shadow, no duplicates, no sprite sheet. Genuinely transparent background. Distinctive dark construction; do not use a generic blue crystal staff or a trident.",
     "method": "built-in imagegen; alpha crop; nearest neighbor 32px"
+  },
+  {
+    "item": "water_wand_1",
+    "source_file": "exec-3f6b9500-e4cd-4ce0-896e-504b5f2df569.png",
+    "method": "built-in imagegen; alpha crop and nearest-neighbor resize; distinct novice wand with complete grip"
+  },
+  {
+    "item": "fire_wand_1",
+    "source_file": "exec-eeeaf5ea-7a4b-4191-8305-fe001c2ab420.png",
+    "method": "built-in imagegen; alpha crop and nearest-neighbor resize; distinct novice wand with complete grip"
+  },
+  {
+    "item": "lightning_wand_1",
+    "source_file": "exec-411f3df2-f0eb-4a0b-b3a4-bae3bfd5ca4a.png",
+    "method": "built-in imagegen; alpha crop and nearest-neighbor resize; distinct novice wand with complete grip"
+  },
+  {
+    "item": "wind_wand_1",
+    "source_file": "exec-6112b9dd-6ba2-4f94-b402-90ec88f423c3.png",
+    "method": "built-in imagegen; alpha crop and nearest-neighbor resize; distinct novice wand with complete grip"
+  },
+  {
+    "item": "earth_wand_1",
+    "source_file": "exec-c49b3448-677c-4295-9c00-c8da4fcd2f90.png",
+    "method": "built-in imagegen; alpha crop and nearest-neighbor resize; distinct novice wand with complete grip"
+  },
+  {
+    "item": "light_wand_1",
+    "source_file": "exec-0b28eb7c-6864-4cb2-8f73-800249788a62.png",
+    "method": "built-in imagegen; alpha crop and nearest-neighbor resize; distinct novice wand with complete grip"
+  },
+  {
+    "item": "dark_wand_1",
+    "source_file": "exec-62875d21-85cd-4c10-b2e1-d5edfa69de86.png",
+    "method": "built-in imagegen; alpha crop and nearest-neighbor resize; distinct novice wand with complete grip"
   }
 ]

@@ -14,11 +14,11 @@ for i,(goal,title,icon,x,y,deps,desc) in enumerate(rows):
     write(RES/f'data/tnc/advancements/onboarding/{goal}.json',{'criteria':{'done':{'trigger':'minecraft:impossible'}}})
     nodes.append({'id':f'544E460200{i:06X}','title':title,'icon':icon,'x':x,'y':y,'size':1.6 if i<2 else 1.2,'shape':'hexagon','description':['&6&l'+title,'','&f'+desc],'dependencies':[f'544E460200{j:06X}' for j in deps],'rewards':[],'tasks':[{'id':f'544E460300{i:06X}','type':'advancement','advancement':'tnc:onboarding/'+goal,'criterion':'done','title':'完成真实行为'}]})
 write(DEST/'tnc_play_00_main.snbt',{'id':'544E460100000000','filename':'tnc_play_00_main','group':'544E434755494445','title':'&6&l主线 · 找到天空岛','icon':'minecraft:compass','order_index':-190,'default_hide_dependency_lines':False,'default_quest_shape':'hexagon','quest_links':[],'images':[],'quests':nodes})
-mapdir=ROOT/'work/revision2/town-map';records=json.loads((mapdir/'建筑编号.json').read_text(encoding='utf-8'));shutil.copy2(mapdir/'天空岛建筑编号.png',guide/'town_atlas.png')
+mapdir=ROOT/'work/revision2/town-map';records=json.loads((mapdir/'建筑编号.json').read_text(encoding='utf-8'));shutil.copy2(ROOT/'docs/art/sky-island-user-map-20260929.png',guide/'town_atlas.png')
 nodes=[]
 for r in records:
-    i=r['number'];nodes.append({'id':f'544E470200{i:06X}','title':f'{i:02} · '+r['proposal'],'icon':'minecraft:map','x':(90+(r['x']-100)*5)/50-22.3,'y':(125+(r['z']-85)*5)/50-20.05+0.5,'size':0.55,'shape':'circle','description':['&6&l'+f'{i:02} · '+r['proposal'],'','&f用途类别：'+r['category'],'&7局部入口：'+'/'.join(map(str,r['entry'])),'&7世界坐标需加当前存档天空岛原点；手册有已开放岗位的动态坐标。','', '&f'+r['note']],'dependencies':[],'rewards':[],'tasks':[{'id':f'544E470300{i:06X}','type':'checkmark','title':'阅读建筑用途（不购房、不发奖励）'}]})
-write(DEST/'tnc_guide_10_atlas.snbt',{'id':'544E470100000000','filename':'tnc_guide_10_atlas','group':'544E434755494445','title':'&3&l城镇图鉴 · 建筑与用途','icon':'minecraft:filled_map','order_index':-180,'default_hide_dependency_lines':True,'default_quest_shape':'circle','quest_links':[],'images':[{'image':'tnc:textures/guide/town_atlas.png','x':0.0,'y':0.0,'width':44.6,'height':40.1,'rotation':0.0}],'quests':nodes})
+    i=r['number'];nodes.append({'id':f'544E470200{i:06X}','title':f'{i:02} · '+r['proposal'],'icon':{19:'tnc:copper_coin',28:'minecraft:anvil',29:'tnc:water_wand_1',34:'minecraft:jukebox',40:'minecraft:oak_door',41:'bountiful:bountyboard'}.get(i,'minecraft:map'),'x':(r['x']*3-280)/40-1173/80,'y':(r['z']*3-290)/40-1022/80,'size':0.95,'shape':'circle','description':['&6&l'+f'{i:02} · '+r['proposal'],'','&f用途类别：'+r['category'],'&7局部入口：'+'/'.join(map(str,r['entry'])),'&7世界坐标需加当前存档天空岛原点；手册有已开放岗位的动态坐标。','', '&f'+r['note']],'dependencies':[],'rewards':[],'tasks':[{'id':f'544E470300{i:06X}','type':'checkmark','title':'阅读建筑用途（不购房、不发奖励）'}]})
+write(DEST/'tnc_guide_10_atlas.snbt',{'id':'544E470100000000','filename':'tnc_guide_10_atlas','group':'544E434755494445','title':'&3&l城镇图鉴 · 建筑与用途','icon':'minecraft:filled_map','order_index':-180,'default_hide_dependency_lines':True,'default_quest_shape':'circle','quest_links':[],'images':[{'image':'tnc:textures/guide/town_atlas.png','x':0.0,'y':0.0,'width':29.325,'height':25.55,'rotation':0.0}],'quests':nodes})
 
 # Render the actual node coordinates as an offline proof, not a claimed game screenshot.
 ch=json.loads((DEST/'tnc_play_03_elements.snbt').read_text(encoding='utf-8'));im=Image.new('RGB',(1800,1510),(25,39,50));dr=ImageDraw.Draw(im);f=ImageFont.truetype('C:/Windows/Fonts/msyh.ttc',17);head=ImageFont.truetype('C:/Windows/Fonts/msyh.ttc',34)
@@ -29,7 +29,7 @@ for n in ch['quests']:
     for parent in n['dependencies']:
         a=byid[parent];dr.line((*xy(a['x'],a['y']),*xy(n['x'],n['y'])),fill='#6a8991',width=3)
 for i,e in enumerate(['water','fire','lightning','wind','earth','light','dark']):
-    art=Image.open(RES/f'assets/tnc/textures/item/wands/{e}_wand_5.png').convert('RGBA').resize((125,125),Image.Resampling.NEAREST);x,y=xy(-18+i*6,-4);im.paste(art,(int(x-62),int(y-62)),art)
+    art=Image.open(RES/f'assets/tnc/textures/item/wands/{e}_wand_5.png').convert('RGBA').resize((125,125),Image.Resampling.NEAREST);x,y=xy(-13.5+i*4.5,-3);im.paste(art,(int(x-62),int(y-62)),art)
 for n in ch['quests']:
     x,y=xy(n['x'],n['y']);iswand='_wand_' in n['icon'];r=20 if iswand else 9;dr.ellipse((x-r,y-r,x+r,y+r),fill='#b29154' if iswand else '#52787c',outline='#dfd9c4',width=2)
     if iswand:

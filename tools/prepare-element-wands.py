@@ -2,6 +2,8 @@
 from pathlib import Path
 from PIL import Image,ImageDraw,ImageFont
 import json,shutil
+import runpy
+make_model=runpy.run_path(str(Path(__file__).with_name('wand-display.py')))['model']
 ROOT=Path(__file__).resolve().parents[1];ASSETS=ROOT/'src/main/resources/assets/tnc'
 jobs=json.loads((ROOT/'work/revision2/generated-wands.json').read_text(encoding='utf-8-sig'))
 raw=ROOT/'work/revision2/wand-originals';raw.mkdir(exist_ok=True)
@@ -18,15 +20,22 @@ for job in jobs:
 for tier in range(1,6):
     source=ASSETS/f'textures/guide/{"water_focus_1" if tier==1 else "water_staff_"+str(tier)}.png'
     shutil.copy2(source,out/f'water_wand_{tier}.png')
+for element in ['water','fire','lightning','wind','earth','light','dark']:
+    novice=ROOT/f'docs/art/adventurer-wands/{element}.png'
+    if novice.exists():
+        shutil.copy2(novice,out/f'{element}_wand_1.png')
+        if element=='water':shutil.copy2(novice,ASSETS/'textures/guide/water_focus_1.png')
+        provenance=[entry for entry in provenance if entry['item']!=f'{element}_wand_1']
+        provenance.append({'item':f'{element}_wand_1','source_file':f'adventurer-wands/{element}.png','method':'revision 3 built-in imagegen; distinct complete-grip novice wand; details in adventurer-wands/provenance.json'})
 names={'water':'水','fire':'火','lightning':'雷','wind':'风','earth':'土','light':'光','dark':'暗'}
 gods={'water':'傲慢的水龙王','fire':'冠烬烈阳','lightning':'审判的天穹','wind':'无拘的长风','earth':'不动的山君','light':'不灭的晨星','dark':'吞夜的君主'}
-tiers=['','冒险者法阵','精良法杖','王级法杖','传说法杖','神杖']
+tiers=['','冒险者法杖','精良法杖','王级法杖','传说法杖','神杖']
 for language in ('zh_cn','en_us'):
     path=ASSETS/f'lang/{language}.json';data=json.loads(path.read_text(encoding='utf-8-sig'))
     for element,cn in names.items():
         for tier in range(1,6):
             name=f'{element}_wand_{tier}';data['item.tnc.'+name]=gods[element] if tier==5 else f'{cn} · {tiers[tier]}'
-            model={'parent':'minecraft:item/generated' if tier==1 else 'minecraft:item/handheld','textures':{'layer0':'tnc:item/wands/'+name}}
+            model=make_model(name,tier)
             (ASSETS/f'models/item/{name}.json').write_text(json.dumps(model,indent=2),encoding='utf-8')
     data['entity.tnc.town_service']='城镇服务人员'
     path.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')

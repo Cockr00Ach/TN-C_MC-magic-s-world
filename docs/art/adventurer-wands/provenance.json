@@ -1,0 +1,37 @@
+[
+  {
+    "element": "water",
+    "generated_source": "exec-3f6b9500-e4cd-4ce0-896e-504b5f2df569.png",
+    "method": "built-in imagegen; alpha crop and nearest-neighbor resize; distinct novice wand with complete grip"
+  },
+  {
+    "element": "fire",
+    "generated_source": "exec-eeeaf5ea-7a4b-4191-8305-fe001c2ab420.png",
+    "method": "built-in imagegen; alpha crop and nearest-neighbor resize; distinct novice wand with complete grip"
+  },
+  {
+    "element": "lightning",
+    "generated_source": "exec-411f3df2-f0eb-4a0b-b3a4-bae3bfd5ca4a.png",
+    "method": "built-in imagegen; alpha crop and nearest-neighbor resize; distinct novice wand with complete grip"
+  },
+  {
+    "element": "wind",
+    "generated_source": "exec-6112b9dd-6ba2-4f94-b402-90ec88f423c3.png",
+    "method": "built-in imagegen; alpha crop and nearest-neighbor resize; distinct novice wand with complete grip"
+  },
+  {
+    "element": "earth",
+    "generated_source": "exec-c49b3448-677c-4295-9c00-c8da4fcd2f90.png",
+    "method": "built-in imagegen; alpha crop and nearest-neighbor resize; distinct novice wand with complete grip"
+  },
+  {
+    "element": "light",
+    "generated_source": "exec-0b28eb7c-6864-4cb2-8f73-800249788a62.png",
+    "method": "built-in imagegen; alpha crop and nearest-neighbor resize; distinct novice wand with complete grip"
+  },
+  {
+    "element": "dark",
+    "generated_source": "exec-62875d21-85cd-4c10-b2e1-d5edfa69de86.png",
+    "method": "built-in imagegen; alpha crop and nearest-neighbor resize; distinct novice wand with complete grip"
+  }
+]

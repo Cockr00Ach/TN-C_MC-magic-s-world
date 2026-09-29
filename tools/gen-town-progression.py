@@ -31,16 +31,16 @@ def chapter(index,name,title,icon,quests,images=()):
 elements=['water','fire','lightning','wind','earth','light','dark'];cn=['水','火','雷','风','土','光','暗'];gems=['prismarine_shard','blaze_powder','amethyst_shard','feather','quartz','glowstone_dust','ender_pearl'];gods=['傲慢的水龙王','冠烬烈阳','审判的天穹','无拘的长风','不动的山君','不灭的晨星','吞夜的君主']
 route=[];images=[]
 for col,(e,c,gem,god) in enumerate(zip(elements,cn,gems,gods)):
-    x=-18+col*6
-    images.append({'image':f'tnc:textures/item/wands/{e}_wand_5.png','x':x,'y':-5.5,'width':4.5,'height':4.5,'rotation':0.0})
+    x=-13.5+col*4.5
+    images.append({'image':f'tnc:textures/item/wands/{e}_wand_5.png','x':x,'y':-3.0,'width':2.6,'height':2.6,'rotation':0.0})
     previous=[]
     for tier in range(1,6):
-        y=(tier-1)*6
+        y=(tier-1)*4.2
         if tier>=2:
-            m=node(c+'系介质 · '+str(tier)+'阶','minecraft:'+gem,x-1.5,y-2.2,'在对应环境收集介质。任务只检测持有；铸器师下单时才扣材料。',item='minecraft:'+gem,count=tier*2);route.append(m)
-        w=node(god if tier==5 else c+'系 · '+['','冒险者法阵','精良法杖','王级法杖','传说法杖'][tier],f'tnc:{e}_wand_{tier}',x,y,f'莉娅订单：Lv{[0,1,10,25,50,85][tier]}；人工费{[0,30,250,1500,8000,50000][tier]}铜（首次一阶免费）。材料详见工坊。承载本系已学1～{tier}阶法术，含通用术。'+('光系普通战斗链尚未开放，可承载通用术；不强制学习占位领域。' if e=='light' else '升阶保留魔法石知识。'),previous,item=f'tnc:{e}_wand_{tier}');route.append(w);previous=[w['id']]
+            m=node(c+'系介质 · '+str(tier)+'阶','minecraft:'+gem,x-1.0,y-1.4,'在对应环境收集介质。任务只检测持有；铸器师下单时才扣材料。',item='minecraft:'+gem,count=tier*2);route.append(m)
+        w=node(god if tier==5 else c+'系 · '+['','冒险者法杖','精良法杖','王级法杖','传说法杖'][tier],f'tnc:{e}_wand_{tier}',x,y,f'莉娅订单：Lv{[0,1,10,25,50,85][tier]}；人工费{[0,30,250,1500,8000,50000][tier]}铜（首次一阶免费）。材料详见工坊。承载本系已学1～{tier}阶法术，含通用术。'+('光系普通战斗链尚未开放，可承载通用术；不强制学习占位领域。' if e=='light' else '升阶保留魔法石知识。'),previous,item=f'tnc:{e}_wand_{tier}');route.append(w);previous=[w['id']]
         if tier<=4 and e!='light':
-            a=node(c+f'系研习 · {tier}阶','minecraft:enchanted_book',x+1.8,y+1.7,'按V学习本系至少一道该阶真实法术。亲和与学习点限制照旧；这是一条可选专精路线。',goal=f'learn_{e}_{tier}');route.append(a)
+            a=node(c+f'系研习 · {tier}阶','minecraft:enchanted_book',x+1.1,y+1.3,'按V学习本系至少一道该阶真实法术。亲和与学习点限制照旧；这是一条可选专精路线。',goal=f'learn_{e}_{tier}');route.append(a)
 chapter(3,'elements','&b&l提升之路 · 七系法器','tnc:water_wand_5',route,images)
 
 route=[]

@@ -14,7 +14,7 @@ public final class ElementWands {
     public record Design(String id,Element element,int tier,String name,long fee,int seconds,List<ContractCatalog.Material> materials){}
     public static final List<Design> ALL=new ArrayList<>();
     public static final Map<String,RegistryObject<Item>> ITEMS=new LinkedHashMap<>();
-    private static final String[] TIERS={"","冒险者法阵","精良法杖","王级法杖","传说法杖","神杖"};
+    private static final String[] TIERS={"","冒险者法杖","精良法杖","王级法杖","传说法杖","神杖"};
     static {
         var gods=Map.of(Element.WATER,"傲慢的水龙王",Element.FIRE,"冠烬烈阳",Element.LIGHTNING,"审判的天穹",Element.WIND,"无拘的长风",Element.EARTH,"不动的山君",Element.LIGHT,"不灭的晨星",Element.DARK,"吞夜的君主");
         var gems=Map.of(Element.WATER,"prismarine_shard",Element.FIRE,"blaze_powder",Element.LIGHTNING,"amethyst_shard",Element.WIND,"feather",Element.EARTH,"quartz",Element.LIGHT,"glowstone_dust",Element.DARK,"ender_pearl");

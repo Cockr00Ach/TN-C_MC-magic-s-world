@@ -11,42 +11,42 @@
   "images": [
     {
       "image": "tnc:textures/guide/water_focus_1.png",
-      "x": -6.0,
-      "y": -4.0,
-      "width": 1.5,
-      "height": 1.5,
+      "x": -4.0,
+      "y": -3.0,
+      "width": 1.8,
+      "height": 1.8,
       "rotation": 0.0
     },
     {
       "image": "tnc:textures/guide/water_staff_2.png",
-      "x": -3.0,
-      "y": -4.0,
-      "width": 1.5,
-      "height": 1.5,
+      "x": -2.0,
+      "y": -3.0,
+      "width": 1.8,
+      "height": 1.8,
       "rotation": 0.0
     },
     {
       "image": "tnc:textures/guide/water_staff_3.png",
       "x": 0.0,
-      "y": -4.0,
-      "width": 1.5,
-      "height": 1.5,
+      "y": -3.0,
+      "width": 1.8,
+      "height": 1.8,
       "rotation": 0.0
     },
     {
       "image": "tnc:textures/guide/water_staff_4.png",
-      "x": 3.0,
-      "y": -4.0,
-      "width": 1.5,
-      "height": 1.5,
+      "x": 2.0,
+      "y": -3.0,
+      "width": 1.8,
+      "height": 1.8,
       "rotation": 0.0
     },
     {
       "image": "tnc:textures/guide/water_staff_5.png",
-      "x": 6.0,
-      "y": -4.0,
-      "width": 1.5,
-      "height": 1.5,
+      "x": 4.0,
+      "y": -3.0,
+      "width": 1.8,
+      "height": 1.8,
       "rotation": 0.0
     }
   ],
@@ -82,8 +82,8 @@
       "id": "544E430202000001",
       "title": "五档法器",
       "icon": "minecraft:stick",
-      "x": -6.0,
-      "y": 3.0,
+      "x": -3.0,
+      "y": 2.5,
       "size": 1.0,
       "shape": "square",
       "description": [
@@ -91,7 +91,7 @@
         "",
         "&b&l五档法器",
         "",
-        "&f水、火、雷、风、土、光、暗各五阶，共35件真实物品。一级法阵，二级精良杖，三级王级杖，四级传说杖，五级神杖。水沿用已认可的外观，其余六系采用独立轮廓。",
+        "&f水、火、雷、风、土、光、暗各五阶，共35件真实物品。一级冒险者法杖，二级精良杖，三级王级杖，四级传说杖，五级神杖。水沿用已认可的外观，其余六系采用独立轮廓。",
         "&f武器只承载本系已学且不高于武器档位的法术和通用术。低档会选择同链已学低阶，已学高阶知识不丢失；旧基础法杖兼容保留。光系普通战斗链尚未开放，光杖可承载通用术，不提供占位领域。"
       ],
       "tasks": [
@@ -108,8 +108,8 @@
       "id": "544E430202000002",
       "title": "把材料带给匠人",
       "icon": "minecraft:stick",
-      "x": -3.0,
-      "y": 3.0,
+      "x": 3.0,
+      "y": 2.5,
       "size": 1.0,
       "shape": "square",
       "description": [
@@ -134,8 +134,8 @@
       "id": "544E430202000003",
       "title": "自己建设生活",
       "icon": "minecraft:stick",
-      "x": 0.0,
-      "y": 3.0,
+      "x": -3.0,
+      "y": 5.1,
       "size": 1.0,
       "shape": "square",
       "description": [
@@ -161,7 +161,7 @@
       "title": "神杖各有名字",
       "icon": "minecraft:stick",
       "x": 3.0,
-      "y": 3.0,
+      "y": 5.1,
       "size": 1.0,
       "shape": "square",
       "description": [
@@ -184,16 +184,16 @@
     },
     {
       "id": "544E430202000064",
-      "title": "水·冒险者法阵",
-      "icon": "minecraft:stick",
-      "x": -6.0,
-      "y": -2.0,
-      "size": 0.75,
+      "title": "水·冒险者法杖",
+      "icon": "tnc:water_wand_1",
+      "x": -4.0,
+      "y": -1.6,
+      "size": 0.85,
       "shape": "square",
       "description": [
         "&e七系五阶订单已开放",
         "",
-        "&f两层水纹环与中央水滴，第一件法器。 此档水系物品已可找莉娅打造。",
+        "&f有完整杖柄的水系冒险者法杖，是莉娅制作的第一件法器。不是悬浮法阵。",
         "",
         "&7水系五阶均为实际物品；全部七系路线请看“提升之路·七系法器”。"
       ],
@@ -210,10 +210,10 @@
     {
       "id": "544E430202000065",
       "title": "水·精良法杖",
-      "icon": "minecraft:stick",
-      "x": -3.0,
-      "y": -2.0,
-      "size": 0.75,
+      "icon": "tnc:water_wand_2",
+      "x": -2.0,
+      "y": -1.6,
+      "size": 0.85,
       "shape": "square",
       "description": [
         "&e七系五阶订单已开放",
@@ -235,10 +235,10 @@
     {
       "id": "544E430202000066",
       "title": "水·王级法杖",
-      "icon": "minecraft:stick",
+      "icon": "tnc:water_wand_3",
       "x": 0.0,
-      "y": -2.0,
-      "size": 0.75,
+      "y": -1.6,
+      "size": 0.85,
       "shape": "square",
       "description": [
         "&e七系五阶订单已开放",
@@ -260,10 +260,10 @@
     {
       "id": "544E430202000067",
       "title": "水·传说级法杖",
-      "icon": "minecraft:stick",
-      "x": 3.0,
-      "y": -2.0,
-      "size": 0.75,
+      "icon": "tnc:water_wand_4",
+      "x": 2.0,
+      "y": -1.6,
+      "size": 0.85,
       "shape": "square",
       "description": [
         "&e七系五阶订单已开放",
@@ -285,10 +285,10 @@
     {
       "id": "544E430202000068",
       "title": "傲慢的水龙王",
-      "icon": "minecraft:stick",
-      "x": 6.0,
-      "y": -2.0,
-      "size": 0.75,
+      "icon": "tnc:water_wand_5",
+      "x": 4.0,
+      "y": -1.6,
+      "size": 0.85,
       "shape": "square",
       "description": [
         "&e七系五阶订单已开放",

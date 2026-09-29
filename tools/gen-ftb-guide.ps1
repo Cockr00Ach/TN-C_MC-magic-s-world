@@ -30,17 +30,17 @@ for($i=0;$i -lt $book.pages.Count;$i++){
     foreach($section in $page.sections){
         $description=@(('&e'+$page.status),'',('&b&l'+$section.heading),'')
         $description+=@($section.text -split '\r?\n' | ForEach-Object { '&f'+$_ })
-        $x=-6.0+($s%5)*3.0
-        $y=3.0+[math]::Floor($s/5)*3.0
+        $x=$(if($i -eq 0){-4.0+($s%3)*4.0}elseif($i -eq 1){-3.0+($s%2)*6.0}else{-6.0+($s%5)*3.0})
+        $y=$(if($i -eq 0){3.0+[math]::Floor($s/3)*2.6}elseif($i -eq 1){2.5+[math]::Floor($s/2)*2.6}else{3.0+[math]::Floor($s/5)*3.0})
         $nodes+=New-ReadingNode $number ($s+1) $section.heading $description $icons[$i] $x $y
         $s++
     }
     $n=0
     foreach($image in $page.illustrations){
-        $x=-6.0+$n*3.0
-        $images+= [ordered]@{image=$image.texture;x=$x;y=-4.0;width=1.5;height=1.5;rotation=0.0}
+        $x=-4.0+$n*2.0
+        $images+= [ordered]@{image=$image.texture;x=$x;y=-3.0;width=1.8;height=1.8;rotation=0.0}
         $nodes+=New-ReadingNode $number (100+$n) $image.title @('&e七系五阶订单已开放','',('&f'+$image.description),'',
-            '&7水系五阶均为实际物品；全部七系路线请看“提升之路·七系法器”。') 'minecraft:stick' $x -2.0 0.75
+            '&7水系五阶均为实际物品；全部七系路线请看“提升之路·七系法器”。') ('tnc:water_wand_'+($n+1)) $x -1.6 0.85
         $n++
     }
     $filename='tnc_guide_{0:D2}_{1}' -f $number,$page.id
@@ -50,7 +50,13 @@ for($i=0;$i -lt $book.pages.Count;$i++){
         default_hide_dependency_lines=$true;default_quest_shape='square';quest_links=@()
         images=$images;quests=$nodes
     }
-    if($i -eq 0){$chapter.title='&6&l歸 · 世界';$chapter.images+= [ordered]@{image='tnc:textures/guide/gui_world_title.png';x=0.0;y=-5.0;width=12.0;height=4.2;rotation=0.0}}
+    if($i -eq 0){
+        $nodes[0].title='&6&l归 · 吴归衡'
+        $nodes[0].icon='minecraft:compass'
+        $nodes[0].description=@('&6&l归 · 吴归衡','','&f普通市井家庭的少年，七系亲和皆为三，没有单一主修。','&f挚友衍不告而别后，他从酒馆出发，去寻找那个没有说清的答案。','','&7这片世界有剑、铠甲、魔法与未知。远行之外，酒馆、工坊和家也为你留着归处。')
+        $castIcons=@('minecraft:shield','minecraft:enchanted_book','tnc:zuowang_spawn_egg','minecraft:amethyst_shard','tnc:self_spawn_egg','minecraft:anvil')
+        for($c=0;$c -lt 6;$c++){$nodes[$c+1].icon=$castIcons[$c];$nodes[$c+1].size=1.2}
+        $chapter.title='&6&l歸 · 世界';$chapter.images+= [ordered]@{image='tnc:textures/guide/gui_world_title.png';x=0.0;y=-5.0;width=12.0;height=4.2;rotation=0.0}}
     [IO.File]::WriteAllText((Join-Path $chapterDir ($filename+'.snbt')),($chapter | ConvertTo-Json -Depth 20),$utf8)
 }
 Write-Output "Generated $($book.pages.Count) original native FTB chapters in questbook/ftbquests."

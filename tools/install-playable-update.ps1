@@ -50,7 +50,19 @@ if($groupText -notmatch '544E434755494445'){
     $separator=if($groupText.Substring($insertAt).TrimStart().StartsWith(']')){''}else{','}
     $groupText=$groupText.Insert($insertAt,"`n"+[IO.File]::ReadAllText((Join-Path $TncRepoRoot 'questbook\ftbquests\group.snbt'))+$separator+"`n")
 }
-if($CheckOnly){Write-Output "Preflight passed: $($entries.Count) owned files, $($ids.Count) unique FTB IDs. No files changed.";return}
+$removed=[Collections.Generic.List[object]]::new()
+foreach($name in @('e.snbt','2032E61CAD845DDF.snbt')){
+    $relative='config\ftbquests\quests\chapters\'+$name
+    $target=[IO.Path]::GetFullPath((Join-Path $taskPack $relative))
+    if(-not $target.StartsWith($taskPack+'\',[StringComparison]::OrdinalIgnoreCase)){throw 'Removal target escapes pack.'}
+    if(Test-Path -LiteralPath $target){
+        $text=[IO.File]::ReadAllText($target,[Text.Encoding]::UTF8)
+        $expected=if($name -eq 'e.snbt'){'注意事项'}else{'鸣谢名单'}
+        if($text -notmatch ('(?m)^\s*title:\s*"[^"\r\n]*'+$expected)){throw "Removal title mismatch: $name"}
+        $removed.Add([ordered]@{Relative=$relative;Target=$target;SHA256=(Get-FileHash -LiteralPath $target -Algorithm SHA256).Hash})
+    }
+}
+if($CheckOnly){Write-Output "Preflight passed: $($entries.Count) owned files, $($ids.Count) unique FTB IDs; $($removed.Count) requested author chapters to archive. No files changed.";return}
 $gameProcesses=@(Get-CimInstance Win32_Process | Where-Object {$_.Name -match '^java(w)?\.exe$' -and $_.CommandLine -match 'forgeclient|net.minecraft.client.main.Main|--launchTarget.*client|net.minecraft.server.Main|--launchTarget.*server'})
 if($gameProcesses.Count){throw 'Minecraft/server is running; no files changed.'}
 $backup=Join-Path $TncRepoRoot ('work\backups\playable-'+(Get-Date -Format 'yyyyMMdd-HHmmss-fff'))
@@ -58,15 +70,19 @@ New-Item -ItemType Directory -Path $backup | Out-Null
 foreach($e in $entries){$e.Backup=Join-Path $backup $e.Relative;if($e.Existed){New-Item -ItemType Directory -Path (Split-Path $e.Backup -Parent) -Force | Out-Null;Copy-Item -LiteralPath $e.Target -Destination $e.Backup}}
 $groupBackup=Join-Path $backup 'chapter_groups.snbt';if($groupExisted){Copy-Item -LiteralPath $groupTarget -Destination $groupBackup}
 [IO.File]::WriteAllText((Join-Path $backup 'manifest.json'),($entries|ConvertTo-Json -Depth 8),[Text.UTF8Encoding]::new($false))
+foreach($e in $removed){$e.Backup=Join-Path $backup $e.Relative}
+[IO.File]::WriteAllText((Join-Path $backup 'removed-chapters.json'),($removed|ConvertTo-Json -Depth 8),[Text.UTF8Encoding]::new($false))
 try{
+    foreach($e in $removed){$e.Backup=Join-Path $backup $e.Relative;New-Item -ItemType Directory -Path (Split-Path $e.Backup -Parent) -Force | Out-Null;Move-Item -LiteralPath $e.Target -Destination $e.Backup;if((Get-FileHash -LiteralPath $e.Backup -Algorithm SHA256).Hash -ne $e.SHA256){throw 'Archived chapter hash mismatch.'}}
     foreach($e in $entries){New-Item -ItemType Directory -Path (Split-Path $e.Target -Parent) -Force | Out-Null;Copy-Item -LiteralPath $e.Source -Destination $e.Target -Force;if((Get-FileHash -LiteralPath $e.Target -Algorithm SHA256).Hash -ne $e.SHA256){throw "Hash mismatch $($e.Relative)"}}
     New-Item -ItemType Directory -Path (Split-Path $groupTarget -Parent) -Force | Out-Null
     [IO.File]::WriteAllText($groupTarget,$groupText,[Text.UTF8Encoding]::new($false))
     if([IO.File]::ReadAllText($groupTarget,[Text.Encoding]::UTF8) -ne $groupText){throw 'Group verification failed.'}
 }catch{
+    foreach($e in $removed){if($e.Backup -and (Test-Path -LiteralPath $e.Backup)){Copy-Item -LiteralPath $e.Backup -Destination $e.Target -Force}}
     if($groupExisted){Copy-Item -LiteralPath $groupBackup -Destination $groupTarget -Force}elseif(Test-Path -LiteralPath $groupTarget){Move-Item -LiteralPath $groupTarget -Destination (Join-Path $backup 'new-chapter_groups.snbt')}
     foreach($e in $entries){if($e.Existed){Copy-Item -LiteralPath $e.Backup -Destination $e.Target -Force}else{if(Test-Path -LiteralPath $e.Target){$recover=Join-Path $backup ('new-files\'+$e.Relative);New-Item -ItemType Directory -Path (Split-Path $recover -Parent) -Force | Out-Null;Move-Item -LiteralPath $e.Target -Destination $recover}}}
     throw "Installation failed; previous files restored. $($_.Exception.Message)"
 }
 Write-Output "Installed $($entries.Count) files with SHA256 verification. Backup: $backup"
-Write-Output 'No save, third-party jar, legacy quest definition or unrelated chapter was edited.'
+Write-Output "Archived $($removed.Count) explicitly requested author chapters. No save or unrelated chapter was edited."
