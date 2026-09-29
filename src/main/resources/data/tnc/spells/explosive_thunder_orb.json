@@ -2,7 +2,7 @@
   "school": "LIGHTNING",
   "group": "orb",
   "range": 40.0,
-  "learn": { "tier": 3 },
+  "learn": { "tier": 3, "level_cost_per_tier": 8, "level_requirement_per_tier": 10 },
   "cast": {
     "duration": 0.8,
     "animation": "spell_engine:one_handed_projectile_charge",
