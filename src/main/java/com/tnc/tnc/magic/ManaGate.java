@@ -70,7 +70,9 @@ public final class ManaGate {
             return Decision.NO_WAND;
         }
         if (requireLearned && !data.hasLearned(entry.id())) {
-            org.apache.logging.log4j.LogManager.getLogger("TN-C/gate").info("TN-C: gate BLOCKED {} reason=NOT_LEARNED", entry.id());
+            // ★ 2026-09-30 作者关闭了自动学习 ✗ —— 这里不再就地补学，老老实实拦住 ✓
+            org.apache.logging.log4j.LogManager.getLogger("TN-C/gate").info(
+                    "TN-C: gate BLOCKED {} reason=NOT_LEARNED", entry.id());
             return Decision.NOT_LEARNED;
         }
         if (data.getMana() < entry.manaCostFor(data.getMaxMana())) {

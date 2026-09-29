@@ -144,6 +144,19 @@ public final class TnSpellMechanics {
     /** 这一次施法是否已经铺过球了（防止窗口内每 tick 重复铺 ✓）。 */
     private static final java.util.Set<UUID> DIVINE_FIRED = java.util.concurrent.ConcurrentHashMap.newKeySet();
 
+    /**
+     * 「雷系三条链 t4 / t5 一定有魔法阵」的保底阵尺寸 ✓
+     * （作者 2026-09-29："保证 t4 和 t5 施法的时候会有魔法阵，雷的三条链"）
+     *
+     * <p>只用于**前面没自己铺过阵**的那几个（雷速链 t4「闪电降低冷却」/ t5「闪电登神」——
+     * 自增益类 ⇒ 阵铺在自己脚下 ✓）。主链那两张（10.5 / 14.0）、雷球那两张
+     * （20 在准星落点 / 锚点那张）都保持原样 ✓。
+     */
+    private static final double MAGIC_CIRCLE_R4 = 12.0D;
+    private static final int MAGIC_CIRCLE_L4 = 190;
+    private static final double MAGIC_CIRCLE_R5 = 15.0D;
+    private static final int MAGIC_CIRCLE_L5 = 220;
+
     /** 谁在雷场 / 雷暴的窗口里（UUID -> 结束时的 gameTime）。 */
     private static final Map<UUID, Long> FIELD_UNTIL = new ConcurrentHashMap<>();
     private static final Map<UUID, Long> STORM_UNTIL = new ConcurrentHashMap<>();
@@ -444,17 +457,25 @@ public final class TnSpellMechanics {
             blinkBurst(player);
         }
 
+        // ★ 查一次目录条目：下面的"魔法阵保证"按 **链 + 档位** 判 ✓（不写死法术 id）
+        SpellCatalog.Entry castEntry = SpellCatalog.byId(spellId);
+        // 这一格里"某个分支已经自己铺过阵了吗"——铺过的（阵摆在该在的位置：脚下 / 准星落点 / 锚点）
+        // 就不该再补一张，否则同一个法术脚下会出现两张阵 ✗
+        boolean circleOwn = false;
+
         // 传说级 / 神级雷球：脚下留下魔法阵 ✓（作者 2026-09-22 指定）
         // tier 4 = 传说级、tier 5 = 神级（见 Element.tierName）
         if (path.equals("explosive_thunder_orb")) {
             // (无魔法阵：爆炸雷球现在是 t3，不做 ✗)
         } else if (path.equals("cataclysm_thunder_orb")) {
             spawnMagicCircleAt(player.serverLevel(), aimPoint(player), 20.0D, 260);
+            circleOwn = true;                             // 阵在**准星落点**（作者要的"敌人脚下"✓）
             // 大雷球的粒子不跟随 ✗ -> 自己开一个窗口，每 tick 在球的位置画环 ✓
             BIG_BALL_UNTIL.put(player.getUUID(), player.level().getGameTime() + BIG_BALL_WINDOW);
         } else if (path.equals("god_descent")) {
             // 环绕雷球（现在是 t4）：作者要求"同款魔法阵" ✓
             spawnMagicCircle(player, 8.0D, 200);
+            circleOwn = true;                             // tickDivineShot 还会在**锚点**铺一张 ✓
         }
 
         // 主链雷法（group = primary，5 档）：**释放的那一刻**就在脚下铺一张魔法阵 ✓
@@ -475,11 +496,53 @@ public final class TnSpellMechanics {
             bigStrike(player);                            // 准星落点劈一道"超级大雷" ✓
         } else if (path.equals("lightning_storm")) {
             spawnMagicCircle(player, 10.5D, 170);        // t4 雷暴
+            circleOwn = true;
             // 雷暴：窗口 200 tick，期间每 15 tick 劈一轮，一直劈到结束 ✓
             STORM_UNTIL.put(player.getUUID(), player.level().getGameTime() + STORM_WINDOW);
         } else if (path.equals("heavenly_thunder")) {
             spawnMagicCircle(player, 14.0D, 210);        // t5 天雷
+            circleOwn = true;
         }
+
+        // ★★ 保证：**雷系三条链（主链 CORE / 雷球 ORB / 雷速 SPEED）的 t4、t5 一定有魔法阵** ✓
+        //    （作者 2026-09-29："保证 t4 和 t5 施法的时候会有魔法阵，雷的三条链"）
+        //    前面几个分支已经按"阵该摆在哪"自己铺过了（雷暴/天雷在自己脚下、超级无敌大雷球在准星落点、
+        //    神在投篮在脚下一张＋锚点一张 ✓）—— 这里补的是**还没铺过**的，也就是雷速链那两个：
+        //      t4「闪电降低冷却」、t5「闪电登神」（自增益类 ⇒ 阵铺在自己脚下 ✓）。
+        //    ★ 判据是 **chain + tier**，不是法术名单 ⇒ 以后加档 / 改名 / 换 id 都自动有 ✓
+        //      （"保证"靠规则，不靠记性 —— 上次就是逐个 id 写 if，才漏了雷速链 ✗）
+        if (needsGuaranteedCircle(castEntry, circleOwn)) {
+            boolean god = castEntry.tier() >= 5;
+            double radius = god ? MAGIC_CIRCLE_R5 : MAGIC_CIRCLE_R4;
+            int life = god ? MAGIC_CIRCLE_L5 : MAGIC_CIRCLE_L4;
+            spawnMagicCircle(player, radius, life);
+            LOGGER.info("TN-C: 魔法阵（按链补）{} chain={} tier={} r={} life={}",
+                    spellId, castEntry.chain(), castEntry.tier(), radius, life);
+        }
+    }
+
+    /**
+     * 雷系三条链 ✓ —— 主链 {@code CORE}（基础雷法）、雷球 {@code ORB}、雷速 {@code SPEED}。
+     *
+     * <p>"t4/t5 一定有魔法阵"这条规则就靠它判（见 {@code onSpellCast}）✓；
+     * 火/水/风/土/暗那几条链**不在**这里 —— 它们的表现各自另做 ✗。
+     */
+    private static boolean isLightningChain(SpellCatalog.Chain chain) {
+        return chain == SpellCatalog.Chain.CORE
+                || chain == SpellCatalog.Chain.ORB
+                || chain == SpellCatalog.Chain.SPEED;
+    }
+
+    /**
+     * <b>纯规则</b>（可单测 ✓）：这一档雷法要不要补一张"保证阵"？
+     *
+     * <p>= 雷系三条链 ＋ 档位 ≥ 4 ＋ 前面没有分支自己铺过。
+     * 抽成独立函数只为一件事：让 {@code MagicCircleGuaranteeTest} 能把"六张阵一张不少"钉在测试里 ✓
+     * —— 靠人记 id 就是漏掉雷速链 t4/t5 的原因 ✗，靠规则 + 测试才叫"保证" ✓。
+     */
+    static boolean needsGuaranteedCircle(SpellCatalog.Entry entry, boolean alreadySpawned) {
+        return !alreadySpawned && entry != null
+                && entry.tier() >= 4 && isLightningChain(entry.chain());
     }
 
     /**
@@ -502,6 +565,9 @@ public final class TnSpellMechanics {
         }
         circle.moveTo(at.x, pos.getY() + 0.04D, at.z, 0.0F, 0.0F);
         level.addFreshEntity(circle);
+        // ★ 铺阵一定留一行日志（作者 2026-09-29："保证 t4/t5 有魔法阵"）——
+        //   验收时 grep `TN-C: spawn circle` 就知道这一张到底铺没铺、铺在哪、多大 ✓
+        LOGGER.info("TN-C: spawn circle at {} r={} life={} (aim point)", pos, radius, life);
     }
 
     /** 准星落点（用来把魔法阵铺在"瞄准的地方"✓）。 */
@@ -525,6 +591,8 @@ public final class TnSpellMechanics {
         }
         circle.moveTo(player.getX(), pos.getY() + 0.04D, player.getZ(), 0.0F, 0.0F);
         level.addFreshEntity(circle);
+        // ★ 铺阵一定留一行日志（见 spawnMagicCircleAt 的说明）✓
+        LOGGER.info("TN-C: spawn circle at {} r={} life={} (caster feet)", pos, radius, life);
     }
 
     // ------------------------------------------------------------------
@@ -570,12 +638,15 @@ public final class TnSpellMechanics {
         sparkMarks(player, time);
         // 神级大雷球：粒子贴到球上（引擎自己的 travel_particles 不跟随 ✗）
         followBigBall(player, time);
-        // ★ 自动补学（作者 2026-09-27）：链法术只要玩家的**档位已经解锁到它那一级**，就自动进魔法石 ✓
-        // 目的：我改链 / 加档 / 换档之后（删环绕、加神在投篮、降超级无敌大雷球…）玩家不需要手敲
-        // /tnc learn ✗ —— 之前正是那一步没成功，导致"法术在、但放不出来、也不扣蓝" ✗。
-        if (time % 40 == 0&&!com.tnc.tnc.combat.DownedCombat.isDowned(player)) {
-            autoLearnUnlockedAndSync(player);
-        }
+        // ★★ 自动补学**不许再挂在 tick 上** ✗✗
+        //    （作者 2026-09-29 两次："为什么会自动学习啊，删去" → "遗忘了还自动学"）
+        //    原来这里每 40 tick 跑一次 autoLearnUnlockedAndSync；而那个方法在
+        //    commit 1b31dea4 里被改成了"**引擎里有这个法术就 data.learn()**"✗：
+        //      ① 没有任何档位 / 前置 / 亲和力判据 ⇒ 开一局就**全学会** ✗
+        //      ② MagicStoneData.learn() 里有一句 explicitlyForgotten.remove(spell) ⇒
+        //         **忘掉的会被学回来、遗忘标记还被抹掉** ✗✗（这就是"遗忘了还自动学"）
+        //    现在：tick 上不调它 ✓；方法本身也补上了遗忘/档位判据（见方法注释）——
+        //    这样万一以后又被接回 tick，也不会全学、更不会撤销遗忘 ✓。
         // 雷场 / 雷暴：窗口内自己劈敌人（视觉＋伤害都在里面）✓
         tickLightningField(player, time);
         tickDivineShot(player, time);
@@ -991,9 +1062,33 @@ public final class TnSpellMechanics {
         }
         boolean learned = false;
         for (SpellCatalog.Entry entry : SpellCatalog.all()) {
-            // Restore only known chain tiers. Independent magic has no element;
-            // explicit forgetting and unspent learning points belong to the player.
-            if(com.tnc.tnc.magic.compat.SpellEngineBridge.hasSpell(entry.id()))learned|=data.learn(entry.id());
+            // ★★ 2026-09-29 作者："遗忘了还自动学" —— 这一版把判据补齐了 ✗✗
+            //    上一版（commit 1b31dea4）写的是"引擎里有这个法术就 data.learn()"✗：
+            //      ① 没有档位/前置/亲和力 ⇒ 一开档就**全学**（作者："为什么有自动全学了"）
+            //      ② MagicStoneData.learn() 会 explicitlyForgotten.remove(spell) ⇒
+            //         **把玩家明确忘掉的又学回来、连遗忘标记一起抹掉** ✗✗
+            //    现在四条判据，缺一不可（和 MagicStoneLearning.check 的规则一致 ✓）：
+            //      独立魔法（element == null，乱魔）跳过 —— maxTierFor(null) 会 NPE 崩服 ✗
+            if (entry.independent() || entry.element() == null) {
+                continue;
+            }
+            //      玩家**明确点过遗忘**的一律不许补 —— 遗忘是玩家的决定，任何自动路径都不能撤销 ✓
+            if (data.isExplicitlyForgotten(entry.id())) {
+                continue;
+            }
+            if (data.hasLearned(entry.id())) {
+                continue;
+            }
+            //      亲和力允许的档位（等级不够不给）
+            if (entry.tier() > data.maxTierFor(entry.element())) {
+                continue;
+            }
+            //      这条链**已经走到过的档位**（= 修复，不是白送）——
+            //      不花点数、也不越过玩家还没解锁的档，所以它只是"把记录补回来" ✓
+            if (entry.tier() > data.getProgress(entry.element(), entry.chain())) {
+                continue;
+            }
+            learned |= data.learn(entry.id());
         }
         if (learned) {
             com.tnc.tnc.network.MagicStoneNetwork.syncTo(player);
