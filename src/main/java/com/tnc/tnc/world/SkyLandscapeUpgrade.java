@@ -177,6 +177,7 @@ public final class SkyLandscapeUpgrade {
             l.players().forEach(p->p.sendSystemMessage(Component.literal("§e天空岛整修暂停："+s.error)));
         }
     }
+    public static boolean complete(MinecraftServer server) { return State.get(server.overworld()).phase==2; }
     public static String status(MinecraftServer server) {
         var s=State.get(server.overworld());var plan=PLANS.get(server);
         return "天空岛整修："+(switch(s.phase){case 0->"检查现场";case 1->"施工";case 2->"已完成";default->"暂停";})

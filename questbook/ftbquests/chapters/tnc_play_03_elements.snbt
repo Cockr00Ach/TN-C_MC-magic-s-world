@@ -1,0 +1,2302 @@
+{
+  "id": "544E450100000003",
+  "filename": "tnc_play_03_elements",
+  "group": "544E434755494445",
+  "title": "&b&l提升之路 · 七系法器",
+  "icon": "tnc:water_wand_5",
+  "order_index": -107,
+  "default_hide_dependency_lines": false,
+  "default_quest_shape": "hexagon",
+  "quest_links": [],
+  "images": [
+    {
+      "image": "tnc:textures/item/wands/water_wand_5.png",
+      "x": -18,
+      "y": -5.5,
+      "width": 4.5,
+      "height": 4.5,
+      "rotation": 0.0
+    },
+    {
+      "image": "tnc:textures/item/wands/fire_wand_5.png",
+      "x": -12,
+      "y": -5.5,
+      "width": 4.5,
+      "height": 4.5,
+      "rotation": 0.0
+    },
+    {
+      "image": "tnc:textures/item/wands/lightning_wand_5.png",
+      "x": -6,
+      "y": -5.5,
+      "width": 4.5,
+      "height": 4.5,
+      "rotation": 0.0
+    },
+    {
+      "image": "tnc:textures/item/wands/wind_wand_5.png",
+      "x": 0,
+      "y": -5.5,
+      "width": 4.5,
+      "height": 4.5,
+      "rotation": 0.0
+    },
+    {
+      "image": "tnc:textures/item/wands/earth_wand_5.png",
+      "x": 6,
+      "y": -5.5,
+      "width": 4.5,
+      "height": 4.5,
+      "rotation": 0.0
+    },
+    {
+      "image": "tnc:textures/item/wands/light_wand_5.png",
+      "x": 12,
+      "y": -5.5,
+      "width": 4.5,
+      "height": 4.5,
+      "rotation": 0.0
+    },
+    {
+      "image": "tnc:textures/item/wands/dark_wand_5.png",
+      "x": 18,
+      "y": -5.5,
+      "width": 4.5,
+      "height": 4.5,
+      "rotation": 0.0
+    }
+  ],
+  "quests": [
+    {
+      "id": "544E450200000001",
+      "title": "水系 · 冒险者法阵",
+      "icon": "tnc:water_wand_1",
+      "x": -18,
+      "y": 0,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l水系 · 冒险者法阵",
+        "",
+        "&f莉娅订单：Lv1；人工费30铜（首次一阶免费）。材料详见工坊。承载本系已学1～1阶法术，含通用术。升阶保留魔法石知识。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000001",
+          "type": "item",
+          "item": "tnc:water_wand_1",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000002",
+      "title": "水系研习 · 1阶",
+      "icon": "minecraft:enchanted_book",
+      "x": -16.2,
+      "y": 1.7,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l水系研习 · 1阶",
+        "",
+        "&f按V学习本系至少一道该阶真实法术。亲和与学习点限制照旧；这是一条可选专精路线。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000002",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/learn_water_1",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E450200000003",
+      "title": "水系介质 · 2阶",
+      "icon": "minecraft:prismarine_shard",
+      "x": -19.5,
+      "y": 3.8,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l水系介质 · 2阶",
+        "",
+        "&f在对应环境收集介质。任务只检测持有；铸器师下单时才扣材料。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000003",
+          "type": "item",
+          "item": "minecraft:prismarine_shard",
+          "count": 4,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000004",
+      "title": "水系 · 精良法杖",
+      "icon": "tnc:water_wand_2",
+      "x": -18,
+      "y": 6,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l水系 · 精良法杖",
+        "",
+        "&f莉娅订单：Lv10；人工费250铜（首次一阶免费）。材料详见工坊。承载本系已学1～2阶法术，含通用术。升阶保留魔法石知识。"
+      ],
+      "dependencies": [
+        "544E450200000001"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000004",
+          "type": "item",
+          "item": "tnc:water_wand_2",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000005",
+      "title": "水系研习 · 2阶",
+      "icon": "minecraft:enchanted_book",
+      "x": -16.2,
+      "y": 7.7,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l水系研习 · 2阶",
+        "",
+        "&f按V学习本系至少一道该阶真实法术。亲和与学习点限制照旧；这是一条可选专精路线。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000005",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/learn_water_2",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E450200000006",
+      "title": "水系介质 · 3阶",
+      "icon": "minecraft:prismarine_shard",
+      "x": -19.5,
+      "y": 9.8,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l水系介质 · 3阶",
+        "",
+        "&f在对应环境收集介质。任务只检测持有；铸器师下单时才扣材料。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000006",
+          "type": "item",
+          "item": "minecraft:prismarine_shard",
+          "count": 6,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000007",
+      "title": "水系 · 王级法杖",
+      "icon": "tnc:water_wand_3",
+      "x": -18,
+      "y": 12,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l水系 · 王级法杖",
+        "",
+        "&f莉娅订单：Lv25；人工费1500铜（首次一阶免费）。材料详见工坊。承载本系已学1～3阶法术，含通用术。升阶保留魔法石知识。"
+      ],
+      "dependencies": [
+        "544E450200000004"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000007",
+          "type": "item",
+          "item": "tnc:water_wand_3",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000008",
+      "title": "水系研习 · 3阶",
+      "icon": "minecraft:enchanted_book",
+      "x": -16.2,
+      "y": 13.7,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l水系研习 · 3阶",
+        "",
+        "&f按V学习本系至少一道该阶真实法术。亲和与学习点限制照旧；这是一条可选专精路线。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000008",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/learn_water_3",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E450200000009",
+      "title": "水系介质 · 4阶",
+      "icon": "minecraft:prismarine_shard",
+      "x": -19.5,
+      "y": 15.8,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l水系介质 · 4阶",
+        "",
+        "&f在对应环境收集介质。任务只检测持有；铸器师下单时才扣材料。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000009",
+          "type": "item",
+          "item": "minecraft:prismarine_shard",
+          "count": 8,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000000A",
+      "title": "水系 · 传说法杖",
+      "icon": "tnc:water_wand_4",
+      "x": -18,
+      "y": 18,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l水系 · 传说法杖",
+        "",
+        "&f莉娅订单：Lv50；人工费8000铜（首次一阶免费）。材料详见工坊。承载本系已学1～4阶法术，含通用术。升阶保留魔法石知识。"
+      ],
+      "dependencies": [
+        "544E450200000007"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000000A",
+          "type": "item",
+          "item": "tnc:water_wand_4",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000000B",
+      "title": "水系研习 · 4阶",
+      "icon": "minecraft:enchanted_book",
+      "x": -16.2,
+      "y": 19.7,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l水系研习 · 4阶",
+        "",
+        "&f按V学习本系至少一道该阶真实法术。亲和与学习点限制照旧；这是一条可选专精路线。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000000B",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/learn_water_4",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E45020000000C",
+      "title": "水系介质 · 5阶",
+      "icon": "minecraft:prismarine_shard",
+      "x": -19.5,
+      "y": 21.8,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l水系介质 · 5阶",
+        "",
+        "&f在对应环境收集介质。任务只检测持有；铸器师下单时才扣材料。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000000C",
+          "type": "item",
+          "item": "minecraft:prismarine_shard",
+          "count": 10,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000000D",
+      "title": "傲慢的水龙王",
+      "icon": "tnc:water_wand_5",
+      "x": -18,
+      "y": 24,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l傲慢的水龙王",
+        "",
+        "&f莉娅订单：Lv85；人工费50000铜（首次一阶免费）。材料详见工坊。承载本系已学1～5阶法术，含通用术。升阶保留魔法石知识。"
+      ],
+      "dependencies": [
+        "544E45020000000A"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000000D",
+          "type": "item",
+          "item": "tnc:water_wand_5",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000000E",
+      "title": "火系 · 冒险者法阵",
+      "icon": "tnc:fire_wand_1",
+      "x": -12,
+      "y": 0,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l火系 · 冒险者法阵",
+        "",
+        "&f莉娅订单：Lv1；人工费30铜（首次一阶免费）。材料详见工坊。承载本系已学1～1阶法术，含通用术。升阶保留魔法石知识。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000000E",
+          "type": "item",
+          "item": "tnc:fire_wand_1",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000000F",
+      "title": "火系研习 · 1阶",
+      "icon": "minecraft:enchanted_book",
+      "x": -10.2,
+      "y": 1.7,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l火系研习 · 1阶",
+        "",
+        "&f按V学习本系至少一道该阶真实法术。亲和与学习点限制照旧；这是一条可选专精路线。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000000F",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/learn_fire_1",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E450200000010",
+      "title": "火系介质 · 2阶",
+      "icon": "minecraft:blaze_powder",
+      "x": -13.5,
+      "y": 3.8,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l火系介质 · 2阶",
+        "",
+        "&f在对应环境收集介质。任务只检测持有；铸器师下单时才扣材料。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000010",
+          "type": "item",
+          "item": "minecraft:blaze_powder",
+          "count": 4,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000011",
+      "title": "火系 · 精良法杖",
+      "icon": "tnc:fire_wand_2",
+      "x": -12,
+      "y": 6,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l火系 · 精良法杖",
+        "",
+        "&f莉娅订单：Lv10；人工费250铜（首次一阶免费）。材料详见工坊。承载本系已学1～2阶法术，含通用术。升阶保留魔法石知识。"
+      ],
+      "dependencies": [
+        "544E45020000000E"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000011",
+          "type": "item",
+          "item": "tnc:fire_wand_2",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000012",
+      "title": "火系研习 · 2阶",
+      "icon": "minecraft:enchanted_book",
+      "x": -10.2,
+      "y": 7.7,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l火系研习 · 2阶",
+        "",
+        "&f按V学习本系至少一道该阶真实法术。亲和与学习点限制照旧；这是一条可选专精路线。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000012",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/learn_fire_2",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E450200000013",
+      "title": "火系介质 · 3阶",
+      "icon": "minecraft:blaze_powder",
+      "x": -13.5,
+      "y": 9.8,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l火系介质 · 3阶",
+        "",
+        "&f在对应环境收集介质。任务只检测持有；铸器师下单时才扣材料。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000013",
+          "type": "item",
+          "item": "minecraft:blaze_powder",
+          "count": 6,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000014",
+      "title": "火系 · 王级法杖",
+      "icon": "tnc:fire_wand_3",
+      "x": -12,
+      "y": 12,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l火系 · 王级法杖",
+        "",
+        "&f莉娅订单：Lv25；人工费1500铜（首次一阶免费）。材料详见工坊。承载本系已学1～3阶法术，含通用术。升阶保留魔法石知识。"
+      ],
+      "dependencies": [
+        "544E450200000011"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000014",
+          "type": "item",
+          "item": "tnc:fire_wand_3",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000015",
+      "title": "火系研习 · 3阶",
+      "icon": "minecraft:enchanted_book",
+      "x": -10.2,
+      "y": 13.7,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l火系研习 · 3阶",
+        "",
+        "&f按V学习本系至少一道该阶真实法术。亲和与学习点限制照旧；这是一条可选专精路线。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000015",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/learn_fire_3",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E450200000016",
+      "title": "火系介质 · 4阶",
+      "icon": "minecraft:blaze_powder",
+      "x": -13.5,
+      "y": 15.8,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l火系介质 · 4阶",
+        "",
+        "&f在对应环境收集介质。任务只检测持有；铸器师下单时才扣材料。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000016",
+          "type": "item",
+          "item": "minecraft:blaze_powder",
+          "count": 8,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000017",
+      "title": "火系 · 传说法杖",
+      "icon": "tnc:fire_wand_4",
+      "x": -12,
+      "y": 18,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l火系 · 传说法杖",
+        "",
+        "&f莉娅订单：Lv50；人工费8000铜（首次一阶免费）。材料详见工坊。承载本系已学1～4阶法术，含通用术。升阶保留魔法石知识。"
+      ],
+      "dependencies": [
+        "544E450200000014"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000017",
+          "type": "item",
+          "item": "tnc:fire_wand_4",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000018",
+      "title": "火系研习 · 4阶",
+      "icon": "minecraft:enchanted_book",
+      "x": -10.2,
+      "y": 19.7,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l火系研习 · 4阶",
+        "",
+        "&f按V学习本系至少一道该阶真实法术。亲和与学习点限制照旧；这是一条可选专精路线。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000018",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/learn_fire_4",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E450200000019",
+      "title": "火系介质 · 5阶",
+      "icon": "minecraft:blaze_powder",
+      "x": -13.5,
+      "y": 21.8,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l火系介质 · 5阶",
+        "",
+        "&f在对应环境收集介质。任务只检测持有；铸器师下单时才扣材料。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000019",
+          "type": "item",
+          "item": "minecraft:blaze_powder",
+          "count": 10,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000001A",
+      "title": "冠烬烈阳",
+      "icon": "tnc:fire_wand_5",
+      "x": -12,
+      "y": 24,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l冠烬烈阳",
+        "",
+        "&f莉娅订单：Lv85；人工费50000铜（首次一阶免费）。材料详见工坊。承载本系已学1～5阶法术，含通用术。升阶保留魔法石知识。"
+      ],
+      "dependencies": [
+        "544E450200000017"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000001A",
+          "type": "item",
+          "item": "tnc:fire_wand_5",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000001B",
+      "title": "雷系 · 冒险者法阵",
+      "icon": "tnc:lightning_wand_1",
+      "x": -6,
+      "y": 0,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l雷系 · 冒险者法阵",
+        "",
+        "&f莉娅订单：Lv1；人工费30铜（首次一阶免费）。材料详见工坊。承载本系已学1～1阶法术，含通用术。升阶保留魔法石知识。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000001B",
+          "type": "item",
+          "item": "tnc:lightning_wand_1",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000001C",
+      "title": "雷系研习 · 1阶",
+      "icon": "minecraft:enchanted_book",
+      "x": -4.2,
+      "y": 1.7,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l雷系研习 · 1阶",
+        "",
+        "&f按V学习本系至少一道该阶真实法术。亲和与学习点限制照旧；这是一条可选专精路线。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000001C",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/learn_lightning_1",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E45020000001D",
+      "title": "雷系介质 · 2阶",
+      "icon": "minecraft:amethyst_shard",
+      "x": -7.5,
+      "y": 3.8,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l雷系介质 · 2阶",
+        "",
+        "&f在对应环境收集介质。任务只检测持有；铸器师下单时才扣材料。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000001D",
+          "type": "item",
+          "item": "minecraft:amethyst_shard",
+          "count": 4,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000001E",
+      "title": "雷系 · 精良法杖",
+      "icon": "tnc:lightning_wand_2",
+      "x": -6,
+      "y": 6,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l雷系 · 精良法杖",
+        "",
+        "&f莉娅订单：Lv10；人工费250铜（首次一阶免费）。材料详见工坊。承载本系已学1～2阶法术，含通用术。升阶保留魔法石知识。"
+      ],
+      "dependencies": [
+        "544E45020000001B"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000001E",
+          "type": "item",
+          "item": "tnc:lightning_wand_2",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000001F",
+      "title": "雷系研习 · 2阶",
+      "icon": "minecraft:enchanted_book",
+      "x": -4.2,
+      "y": 7.7,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l雷系研习 · 2阶",
+        "",
+        "&f按V学习本系至少一道该阶真实法术。亲和与学习点限制照旧；这是一条可选专精路线。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000001F",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/learn_lightning_2",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E450200000020",
+      "title": "雷系介质 · 3阶",
+      "icon": "minecraft:amethyst_shard",
+      "x": -7.5,
+      "y": 9.8,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l雷系介质 · 3阶",
+        "",
+        "&f在对应环境收集介质。任务只检测持有；铸器师下单时才扣材料。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000020",
+          "type": "item",
+          "item": "minecraft:amethyst_shard",
+          "count": 6,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000021",
+      "title": "雷系 · 王级法杖",
+      "icon": "tnc:lightning_wand_3",
+      "x": -6,
+      "y": 12,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l雷系 · 王级法杖",
+        "",
+        "&f莉娅订单：Lv25；人工费1500铜（首次一阶免费）。材料详见工坊。承载本系已学1～3阶法术，含通用术。升阶保留魔法石知识。"
+      ],
+      "dependencies": [
+        "544E45020000001E"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000021",
+          "type": "item",
+          "item": "tnc:lightning_wand_3",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000022",
+      "title": "雷系研习 · 3阶",
+      "icon": "minecraft:enchanted_book",
+      "x": -4.2,
+      "y": 13.7,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l雷系研习 · 3阶",
+        "",
+        "&f按V学习本系至少一道该阶真实法术。亲和与学习点限制照旧；这是一条可选专精路线。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000022",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/learn_lightning_3",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E450200000023",
+      "title": "雷系介质 · 4阶",
+      "icon": "minecraft:amethyst_shard",
+      "x": -7.5,
+      "y": 15.8,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l雷系介质 · 4阶",
+        "",
+        "&f在对应环境收集介质。任务只检测持有；铸器师下单时才扣材料。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000023",
+          "type": "item",
+          "item": "minecraft:amethyst_shard",
+          "count": 8,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000024",
+      "title": "雷系 · 传说法杖",
+      "icon": "tnc:lightning_wand_4",
+      "x": -6,
+      "y": 18,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l雷系 · 传说法杖",
+        "",
+        "&f莉娅订单：Lv50；人工费8000铜（首次一阶免费）。材料详见工坊。承载本系已学1～4阶法术，含通用术。升阶保留魔法石知识。"
+      ],
+      "dependencies": [
+        "544E450200000021"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000024",
+          "type": "item",
+          "item": "tnc:lightning_wand_4",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000025",
+      "title": "雷系研习 · 4阶",
+      "icon": "minecraft:enchanted_book",
+      "x": -4.2,
+      "y": 19.7,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l雷系研习 · 4阶",
+        "",
+        "&f按V学习本系至少一道该阶真实法术。亲和与学习点限制照旧；这是一条可选专精路线。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000025",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/learn_lightning_4",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E450200000026",
+      "title": "雷系介质 · 5阶",
+      "icon": "minecraft:amethyst_shard",
+      "x": -7.5,
+      "y": 21.8,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l雷系介质 · 5阶",
+        "",
+        "&f在对应环境收集介质。任务只检测持有；铸器师下单时才扣材料。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000026",
+          "type": "item",
+          "item": "minecraft:amethyst_shard",
+          "count": 10,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000027",
+      "title": "审判的天穹",
+      "icon": "tnc:lightning_wand_5",
+      "x": -6,
+      "y": 24,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l审判的天穹",
+        "",
+        "&f莉娅订单：Lv85；人工费50000铜（首次一阶免费）。材料详见工坊。承载本系已学1～5阶法术，含通用术。升阶保留魔法石知识。"
+      ],
+      "dependencies": [
+        "544E450200000024"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000027",
+          "type": "item",
+          "item": "tnc:lightning_wand_5",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000028",
+      "title": "风系 · 冒险者法阵",
+      "icon": "tnc:wind_wand_1",
+      "x": 0,
+      "y": 0,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l风系 · 冒险者法阵",
+        "",
+        "&f莉娅订单：Lv1；人工费30铜（首次一阶免费）。材料详见工坊。承载本系已学1～1阶法术，含通用术。升阶保留魔法石知识。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000028",
+          "type": "item",
+          "item": "tnc:wind_wand_1",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000029",
+      "title": "风系研习 · 1阶",
+      "icon": "minecraft:enchanted_book",
+      "x": 1.8,
+      "y": 1.7,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l风系研习 · 1阶",
+        "",
+        "&f按V学习本系至少一道该阶真实法术。亲和与学习点限制照旧；这是一条可选专精路线。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000029",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/learn_wind_1",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E45020000002A",
+      "title": "风系介质 · 2阶",
+      "icon": "minecraft:feather",
+      "x": -1.5,
+      "y": 3.8,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l风系介质 · 2阶",
+        "",
+        "&f在对应环境收集介质。任务只检测持有；铸器师下单时才扣材料。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000002A",
+          "type": "item",
+          "item": "minecraft:feather",
+          "count": 4,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000002B",
+      "title": "风系 · 精良法杖",
+      "icon": "tnc:wind_wand_2",
+      "x": 0,
+      "y": 6,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l风系 · 精良法杖",
+        "",
+        "&f莉娅订单：Lv10；人工费250铜（首次一阶免费）。材料详见工坊。承载本系已学1～2阶法术，含通用术。升阶保留魔法石知识。"
+      ],
+      "dependencies": [
+        "544E450200000028"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000002B",
+          "type": "item",
+          "item": "tnc:wind_wand_2",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000002C",
+      "title": "风系研习 · 2阶",
+      "icon": "minecraft:enchanted_book",
+      "x": 1.8,
+      "y": 7.7,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l风系研习 · 2阶",
+        "",
+        "&f按V学习本系至少一道该阶真实法术。亲和与学习点限制照旧；这是一条可选专精路线。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000002C",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/learn_wind_2",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E45020000002D",
+      "title": "风系介质 · 3阶",
+      "icon": "minecraft:feather",
+      "x": -1.5,
+      "y": 9.8,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l风系介质 · 3阶",
+        "",
+        "&f在对应环境收集介质。任务只检测持有；铸器师下单时才扣材料。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000002D",
+          "type": "item",
+          "item": "minecraft:feather",
+          "count": 6,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000002E",
+      "title": "风系 · 王级法杖",
+      "icon": "tnc:wind_wand_3",
+      "x": 0,
+      "y": 12,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l风系 · 王级法杖",
+        "",
+        "&f莉娅订单：Lv25；人工费1500铜（首次一阶免费）。材料详见工坊。承载本系已学1～3阶法术，含通用术。升阶保留魔法石知识。"
+      ],
+      "dependencies": [
+        "544E45020000002B"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000002E",
+          "type": "item",
+          "item": "tnc:wind_wand_3",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000002F",
+      "title": "风系研习 · 3阶",
+      "icon": "minecraft:enchanted_book",
+      "x": 1.8,
+      "y": 13.7,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l风系研习 · 3阶",
+        "",
+        "&f按V学习本系至少一道该阶真实法术。亲和与学习点限制照旧；这是一条可选专精路线。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000002F",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/learn_wind_3",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E450200000030",
+      "title": "风系介质 · 4阶",
+      "icon": "minecraft:feather",
+      "x": -1.5,
+      "y": 15.8,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l风系介质 · 4阶",
+        "",
+        "&f在对应环境收集介质。任务只检测持有；铸器师下单时才扣材料。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000030",
+          "type": "item",
+          "item": "minecraft:feather",
+          "count": 8,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000031",
+      "title": "风系 · 传说法杖",
+      "icon": "tnc:wind_wand_4",
+      "x": 0,
+      "y": 18,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l风系 · 传说法杖",
+        "",
+        "&f莉娅订单：Lv50；人工费8000铜（首次一阶免费）。材料详见工坊。承载本系已学1～4阶法术，含通用术。升阶保留魔法石知识。"
+      ],
+      "dependencies": [
+        "544E45020000002E"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000031",
+          "type": "item",
+          "item": "tnc:wind_wand_4",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000032",
+      "title": "风系研习 · 4阶",
+      "icon": "minecraft:enchanted_book",
+      "x": 1.8,
+      "y": 19.7,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l风系研习 · 4阶",
+        "",
+        "&f按V学习本系至少一道该阶真实法术。亲和与学习点限制照旧；这是一条可选专精路线。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000032",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/learn_wind_4",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E450200000033",
+      "title": "风系介质 · 5阶",
+      "icon": "minecraft:feather",
+      "x": -1.5,
+      "y": 21.8,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l风系介质 · 5阶",
+        "",
+        "&f在对应环境收集介质。任务只检测持有；铸器师下单时才扣材料。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000033",
+          "type": "item",
+          "item": "minecraft:feather",
+          "count": 10,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000034",
+      "title": "无拘的长风",
+      "icon": "tnc:wind_wand_5",
+      "x": 0,
+      "y": 24,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l无拘的长风",
+        "",
+        "&f莉娅订单：Lv85；人工费50000铜（首次一阶免费）。材料详见工坊。承载本系已学1～5阶法术，含通用术。升阶保留魔法石知识。"
+      ],
+      "dependencies": [
+        "544E450200000031"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000034",
+          "type": "item",
+          "item": "tnc:wind_wand_5",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000035",
+      "title": "土系 · 冒险者法阵",
+      "icon": "tnc:earth_wand_1",
+      "x": 6,
+      "y": 0,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l土系 · 冒险者法阵",
+        "",
+        "&f莉娅订单：Lv1；人工费30铜（首次一阶免费）。材料详见工坊。承载本系已学1～1阶法术，含通用术。升阶保留魔法石知识。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000035",
+          "type": "item",
+          "item": "tnc:earth_wand_1",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000036",
+      "title": "土系研习 · 1阶",
+      "icon": "minecraft:enchanted_book",
+      "x": 7.8,
+      "y": 1.7,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l土系研习 · 1阶",
+        "",
+        "&f按V学习本系至少一道该阶真实法术。亲和与学习点限制照旧；这是一条可选专精路线。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000036",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/learn_earth_1",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E450200000037",
+      "title": "土系介质 · 2阶",
+      "icon": "minecraft:quartz",
+      "x": 4.5,
+      "y": 3.8,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l土系介质 · 2阶",
+        "",
+        "&f在对应环境收集介质。任务只检测持有；铸器师下单时才扣材料。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000037",
+          "type": "item",
+          "item": "minecraft:quartz",
+          "count": 4,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000038",
+      "title": "土系 · 精良法杖",
+      "icon": "tnc:earth_wand_2",
+      "x": 6,
+      "y": 6,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l土系 · 精良法杖",
+        "",
+        "&f莉娅订单：Lv10；人工费250铜（首次一阶免费）。材料详见工坊。承载本系已学1～2阶法术，含通用术。升阶保留魔法石知识。"
+      ],
+      "dependencies": [
+        "544E450200000035"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000038",
+          "type": "item",
+          "item": "tnc:earth_wand_2",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000039",
+      "title": "土系研习 · 2阶",
+      "icon": "minecraft:enchanted_book",
+      "x": 7.8,
+      "y": 7.7,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l土系研习 · 2阶",
+        "",
+        "&f按V学习本系至少一道该阶真实法术。亲和与学习点限制照旧；这是一条可选专精路线。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000039",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/learn_earth_2",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E45020000003A",
+      "title": "土系介质 · 3阶",
+      "icon": "minecraft:quartz",
+      "x": 4.5,
+      "y": 9.8,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l土系介质 · 3阶",
+        "",
+        "&f在对应环境收集介质。任务只检测持有；铸器师下单时才扣材料。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000003A",
+          "type": "item",
+          "item": "minecraft:quartz",
+          "count": 6,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000003B",
+      "title": "土系 · 王级法杖",
+      "icon": "tnc:earth_wand_3",
+      "x": 6,
+      "y": 12,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l土系 · 王级法杖",
+        "",
+        "&f莉娅订单：Lv25；人工费1500铜（首次一阶免费）。材料详见工坊。承载本系已学1～3阶法术，含通用术。升阶保留魔法石知识。"
+      ],
+      "dependencies": [
+        "544E450200000038"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000003B",
+          "type": "item",
+          "item": "tnc:earth_wand_3",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000003C",
+      "title": "土系研习 · 3阶",
+      "icon": "minecraft:enchanted_book",
+      "x": 7.8,
+      "y": 13.7,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l土系研习 · 3阶",
+        "",
+        "&f按V学习本系至少一道该阶真实法术。亲和与学习点限制照旧；这是一条可选专精路线。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000003C",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/learn_earth_3",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E45020000003D",
+      "title": "土系介质 · 4阶",
+      "icon": "minecraft:quartz",
+      "x": 4.5,
+      "y": 15.8,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l土系介质 · 4阶",
+        "",
+        "&f在对应环境收集介质。任务只检测持有；铸器师下单时才扣材料。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000003D",
+          "type": "item",
+          "item": "minecraft:quartz",
+          "count": 8,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000003E",
+      "title": "土系 · 传说法杖",
+      "icon": "tnc:earth_wand_4",
+      "x": 6,
+      "y": 18,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l土系 · 传说法杖",
+        "",
+        "&f莉娅订单：Lv50；人工费8000铜（首次一阶免费）。材料详见工坊。承载本系已学1～4阶法术，含通用术。升阶保留魔法石知识。"
+      ],
+      "dependencies": [
+        "544E45020000003B"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000003E",
+          "type": "item",
+          "item": "tnc:earth_wand_4",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000003F",
+      "title": "土系研习 · 4阶",
+      "icon": "minecraft:enchanted_book",
+      "x": 7.8,
+      "y": 19.7,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l土系研习 · 4阶",
+        "",
+        "&f按V学习本系至少一道该阶真实法术。亲和与学习点限制照旧；这是一条可选专精路线。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000003F",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/learn_earth_4",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E450200000040",
+      "title": "土系介质 · 5阶",
+      "icon": "minecraft:quartz",
+      "x": 4.5,
+      "y": 21.8,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l土系介质 · 5阶",
+        "",
+        "&f在对应环境收集介质。任务只检测持有；铸器师下单时才扣材料。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000040",
+          "type": "item",
+          "item": "minecraft:quartz",
+          "count": 10,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000041",
+      "title": "不动的山君",
+      "icon": "tnc:earth_wand_5",
+      "x": 6,
+      "y": 24,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l不动的山君",
+        "",
+        "&f莉娅订单：Lv85；人工费50000铜（首次一阶免费）。材料详见工坊。承载本系已学1～5阶法术，含通用术。升阶保留魔法石知识。"
+      ],
+      "dependencies": [
+        "544E45020000003E"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000041",
+          "type": "item",
+          "item": "tnc:earth_wand_5",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000042",
+      "title": "光系 · 冒险者法阵",
+      "icon": "tnc:light_wand_1",
+      "x": 12,
+      "y": 0,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l光系 · 冒险者法阵",
+        "",
+        "&f莉娅订单：Lv1；人工费30铜（首次一阶免费）。材料详见工坊。承载本系已学1～1阶法术，含通用术。光系普通战斗链尚未开放，可承载通用术；不强制学习占位领域。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000042",
+          "type": "item",
+          "item": "tnc:light_wand_1",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000043",
+      "title": "光系介质 · 2阶",
+      "icon": "minecraft:glowstone_dust",
+      "x": 10.5,
+      "y": 3.8,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l光系介质 · 2阶",
+        "",
+        "&f在对应环境收集介质。任务只检测持有；铸器师下单时才扣材料。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000043",
+          "type": "item",
+          "item": "minecraft:glowstone_dust",
+          "count": 4,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000044",
+      "title": "光系 · 精良法杖",
+      "icon": "tnc:light_wand_2",
+      "x": 12,
+      "y": 6,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l光系 · 精良法杖",
+        "",
+        "&f莉娅订单：Lv10；人工费250铜（首次一阶免费）。材料详见工坊。承载本系已学1～2阶法术，含通用术。光系普通战斗链尚未开放，可承载通用术；不强制学习占位领域。"
+      ],
+      "dependencies": [
+        "544E450200000042"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000044",
+          "type": "item",
+          "item": "tnc:light_wand_2",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000045",
+      "title": "光系介质 · 3阶",
+      "icon": "minecraft:glowstone_dust",
+      "x": 10.5,
+      "y": 9.8,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l光系介质 · 3阶",
+        "",
+        "&f在对应环境收集介质。任务只检测持有；铸器师下单时才扣材料。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000045",
+          "type": "item",
+          "item": "minecraft:glowstone_dust",
+          "count": 6,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000046",
+      "title": "光系 · 王级法杖",
+      "icon": "tnc:light_wand_3",
+      "x": 12,
+      "y": 12,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l光系 · 王级法杖",
+        "",
+        "&f莉娅订单：Lv25；人工费1500铜（首次一阶免费）。材料详见工坊。承载本系已学1～3阶法术，含通用术。光系普通战斗链尚未开放，可承载通用术；不强制学习占位领域。"
+      ],
+      "dependencies": [
+        "544E450200000044"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000046",
+          "type": "item",
+          "item": "tnc:light_wand_3",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000047",
+      "title": "光系介质 · 4阶",
+      "icon": "minecraft:glowstone_dust",
+      "x": 10.5,
+      "y": 15.8,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l光系介质 · 4阶",
+        "",
+        "&f在对应环境收集介质。任务只检测持有；铸器师下单时才扣材料。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000047",
+          "type": "item",
+          "item": "minecraft:glowstone_dust",
+          "count": 8,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000048",
+      "title": "光系 · 传说法杖",
+      "icon": "tnc:light_wand_4",
+      "x": 12,
+      "y": 18,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l光系 · 传说法杖",
+        "",
+        "&f莉娅订单：Lv50；人工费8000铜（首次一阶免费）。材料详见工坊。承载本系已学1～4阶法术，含通用术。光系普通战斗链尚未开放，可承载通用术；不强制学习占位领域。"
+      ],
+      "dependencies": [
+        "544E450200000046"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000048",
+          "type": "item",
+          "item": "tnc:light_wand_4",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000049",
+      "title": "光系介质 · 5阶",
+      "icon": "minecraft:glowstone_dust",
+      "x": 10.5,
+      "y": 21.8,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l光系介质 · 5阶",
+        "",
+        "&f在对应环境收集介质。任务只检测持有；铸器师下单时才扣材料。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000049",
+          "type": "item",
+          "item": "minecraft:glowstone_dust",
+          "count": 10,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000004A",
+      "title": "不灭的晨星",
+      "icon": "tnc:light_wand_5",
+      "x": 12,
+      "y": 24,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l不灭的晨星",
+        "",
+        "&f莉娅订单：Lv85；人工费50000铜（首次一阶免费）。材料详见工坊。承载本系已学1～5阶法术，含通用术。光系普通战斗链尚未开放，可承载通用术；不强制学习占位领域。"
+      ],
+      "dependencies": [
+        "544E450200000048"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000004A",
+          "type": "item",
+          "item": "tnc:light_wand_5",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000004B",
+      "title": "暗系 · 冒险者法阵",
+      "icon": "tnc:dark_wand_1",
+      "x": 18,
+      "y": 0,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l暗系 · 冒险者法阵",
+        "",
+        "&f莉娅订单：Lv1；人工费30铜（首次一阶免费）。材料详见工坊。承载本系已学1～1阶法术，含通用术。升阶保留魔法石知识。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000004B",
+          "type": "item",
+          "item": "tnc:dark_wand_1",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000004C",
+      "title": "暗系研习 · 1阶",
+      "icon": "minecraft:enchanted_book",
+      "x": 19.8,
+      "y": 1.7,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l暗系研习 · 1阶",
+        "",
+        "&f按V学习本系至少一道该阶真实法术。亲和与学习点限制照旧；这是一条可选专精路线。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000004C",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/learn_dark_1",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E45020000004D",
+      "title": "暗系介质 · 2阶",
+      "icon": "minecraft:ender_pearl",
+      "x": 16.5,
+      "y": 3.8,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l暗系介质 · 2阶",
+        "",
+        "&f在对应环境收集介质。任务只检测持有；铸器师下单时才扣材料。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000004D",
+          "type": "item",
+          "item": "minecraft:ender_pearl",
+          "count": 4,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000004E",
+      "title": "暗系 · 精良法杖",
+      "icon": "tnc:dark_wand_2",
+      "x": 18,
+      "y": 6,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l暗系 · 精良法杖",
+        "",
+        "&f莉娅订单：Lv10；人工费250铜（首次一阶免费）。材料详见工坊。承载本系已学1～2阶法术，含通用术。升阶保留魔法石知识。"
+      ],
+      "dependencies": [
+        "544E45020000004B"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000004E",
+          "type": "item",
+          "item": "tnc:dark_wand_2",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000004F",
+      "title": "暗系研习 · 2阶",
+      "icon": "minecraft:enchanted_book",
+      "x": 19.8,
+      "y": 7.7,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l暗系研习 · 2阶",
+        "",
+        "&f按V学习本系至少一道该阶真实法术。亲和与学习点限制照旧；这是一条可选专精路线。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000004F",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/learn_dark_2",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E450200000050",
+      "title": "暗系介质 · 3阶",
+      "icon": "minecraft:ender_pearl",
+      "x": 16.5,
+      "y": 9.8,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l暗系介质 · 3阶",
+        "",
+        "&f在对应环境收集介质。任务只检测持有；铸器师下单时才扣材料。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000050",
+          "type": "item",
+          "item": "minecraft:ender_pearl",
+          "count": 6,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000051",
+      "title": "暗系 · 王级法杖",
+      "icon": "tnc:dark_wand_3",
+      "x": 18,
+      "y": 12,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l暗系 · 王级法杖",
+        "",
+        "&f莉娅订单：Lv25；人工费1500铜（首次一阶免费）。材料详见工坊。承载本系已学1～3阶法术，含通用术。升阶保留魔法石知识。"
+      ],
+      "dependencies": [
+        "544E45020000004E"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000051",
+          "type": "item",
+          "item": "tnc:dark_wand_3",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000052",
+      "title": "暗系研习 · 3阶",
+      "icon": "minecraft:enchanted_book",
+      "x": 19.8,
+      "y": 13.7,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l暗系研习 · 3阶",
+        "",
+        "&f按V学习本系至少一道该阶真实法术。亲和与学习点限制照旧；这是一条可选专精路线。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000052",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/learn_dark_3",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E450200000053",
+      "title": "暗系介质 · 4阶",
+      "icon": "minecraft:ender_pearl",
+      "x": 16.5,
+      "y": 15.8,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l暗系介质 · 4阶",
+        "",
+        "&f在对应环境收集介质。任务只检测持有；铸器师下单时才扣材料。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000053",
+          "type": "item",
+          "item": "minecraft:ender_pearl",
+          "count": 8,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000054",
+      "title": "暗系 · 传说法杖",
+      "icon": "tnc:dark_wand_4",
+      "x": 18,
+      "y": 18,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l暗系 · 传说法杖",
+        "",
+        "&f莉娅订单：Lv50；人工费8000铜（首次一阶免费）。材料详见工坊。承载本系已学1～4阶法术，含通用术。升阶保留魔法石知识。"
+      ],
+      "dependencies": [
+        "544E450200000051"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000054",
+          "type": "item",
+          "item": "tnc:dark_wand_4",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000055",
+      "title": "暗系研习 · 4阶",
+      "icon": "minecraft:enchanted_book",
+      "x": 19.8,
+      "y": 19.7,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l暗系研习 · 4阶",
+        "",
+        "&f按V学习本系至少一道该阶真实法术。亲和与学习点限制照旧；这是一条可选专精路线。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000055",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/learn_dark_4",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E450200000056",
+      "title": "暗系介质 · 5阶",
+      "icon": "minecraft:ender_pearl",
+      "x": 16.5,
+      "y": 21.8,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l暗系介质 · 5阶",
+        "",
+        "&f在对应环境收集介质。任务只检测持有；铸器师下单时才扣材料。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000056",
+          "type": "item",
+          "item": "minecraft:ender_pearl",
+          "count": 10,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000057",
+      "title": "吞夜的君主",
+      "icon": "tnc:dark_wand_5",
+      "x": 18,
+      "y": 24,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l吞夜的君主",
+        "",
+        "&f莉娅订单：Lv85；人工费50000铜（首次一阶免费）。材料详见工坊。承载本系已学1～5阶法术，含通用术。升阶保留魔法石知识。"
+      ],
+      "dependencies": [
+        "544E450200000054"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000057",
+          "type": "item",
+          "item": "tnc:dark_wand_5",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    }
+  ]
+}

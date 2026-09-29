@@ -71,6 +71,7 @@ public class TNMod
      */
     public static final RegistryObject<Item> WAND = ITEMS.register("magic_wand",
             com.tnc.tnc.magic.compat.SpellEngineBridge::createWandItem);
+    static { com.tnc.tnc.adventure.ElementWands.register(); }
     public static final RegistryObject<Item> HANDBOOK = ITEMS.register("adventure_handbook",
             com.tnc.tnc.adventure.AdventureEvents.HandbookItem::new);
     public static final RegistryObject<Item> MONEY_POUCH = ITEMS.register("money_pouch",com.tnc.tnc.life.LifeEvents.PouchItem::new);
@@ -101,6 +102,7 @@ public class TNMod
                 output.accept(SWORD.get());
                 // Legacy chaos_seal stays registered for save compatibility; learned magic replaces it.
                 output.accept(WAND.get());
+                com.tnc.tnc.adventure.ElementWands.ITEMS.values().forEach(i->output.accept(i.get()));
                 output.accept(HANDBOOK.get());
                 output.accept(MONEY_POUCH.get());output.accept(FOOD_POUCH.get());
                 output.accept(FARM_FOCUS.get());

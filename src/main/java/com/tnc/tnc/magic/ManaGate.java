@@ -94,10 +94,14 @@ public final class ManaGate {
         net.minecraft.world.item.Item wand =
                 net.minecraftforge.registries.ForgeRegistries.ITEMS.getValue(
                         com.tnc.tnc.magic.compat.SpellEngineBridge.WAND);
-        if (wand == null) {
-            return false;
-        }
-        return player.getMainHandItem().is(wand) || player.getOffhandItem().is(wand);
+        return java.util.stream.Stream.of(player.getMainHandItem(),player.getOffhandItem()).anyMatch(s->!s.isEmpty()&&((wand!=null&&s.is(wand))||s.getItem() instanceof com.tnc.tnc.adventure.ElementWands.Wand));
+    }
+    public static boolean hasWandFor(Player player,SpellCatalog.Entry entry){
+        var legacy=net.minecraftforge.registries.ForgeRegistries.ITEMS.getValue(com.tnc.tnc.magic.compat.SpellEngineBridge.WAND);
+        return java.util.stream.Stream.of(player.getMainHandItem(),player.getOffhandItem()).anyMatch(s->{
+            if(s.isEmpty())return false;if(legacy!=null&&s.is(legacy))return true;
+            return s.getItem() instanceof com.tnc.tnc.adventure.ElementWands.Wand w&&entry.tier()<=w.design.tier()&&(entry.independent()||entry.element()==w.design.element());
+        });
     }
 
     // ------------------------------------------------------------------
@@ -160,7 +164,7 @@ public final class ManaGate {
         }
 
         Decision decision = evaluate(data, entry, com.tnc.tnc.Config.requireLearnedToCast,
-                com.tnc.tnc.Config.requireWandToCast, hasWand(serverPlayer));
+                com.tnc.tnc.Config.requireWandToCast, hasWandFor(serverPlayer,entry));
         if (decision == Decision.ALLOW) {
             return false;
         }
@@ -175,7 +179,7 @@ public final class ManaGate {
             noWandCount.incrementAndGet();
             lastBlockedSpell = spellId + "（没拿法杖）";
             serverPlayer.displayClientMessage(Component.literal(
-                    "§c[TN-C] 手上要拿着法杖才能施法"), true);
+                    "§c[TN-C] 需要手持能承载该元素与阶位的法器"), true);
         } else {
             int cost = entry.manaCostFor(data.getMaxMana());
             lastBlockedSpell = spellId + "（" + data.getMana() + " / " + cost + "）";

@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "tnc:item/wands/lightning_wand_3"
+  }
+}

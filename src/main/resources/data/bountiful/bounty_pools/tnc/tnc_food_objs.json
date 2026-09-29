@@ -1,0 +1,246 @@
+{
+  "content": {
+    "tnc_food_wheat": {
+      "type": "item",
+      "content": "minecraft:wheat",
+      "amount": {
+        "min": 8,
+        "max": 32
+      },
+      "unitWorth": 80,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_food_carrot": {
+      "type": "item",
+      "content": "minecraft:carrot",
+      "amount": {
+        "min": 8,
+        "max": 32
+      },
+      "unitWorth": 80,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_food_potato": {
+      "type": "item",
+      "content": "minecraft:potato",
+      "amount": {
+        "min": 8,
+        "max": 32
+      },
+      "unitWorth": 80,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_food_beetroot": {
+      "type": "item",
+      "content": "minecraft:beetroot",
+      "amount": {
+        "min": 8,
+        "max": 32
+      },
+      "unitWorth": 80,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_food_melon_slice": {
+      "type": "item",
+      "content": "minecraft:melon_slice",
+      "amount": {
+        "min": 8,
+        "max": 32
+      },
+      "unitWorth": 60,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_food_pumpkin": {
+      "type": "item",
+      "content": "minecraft:pumpkin",
+      "amount": {
+        "min": 2,
+        "max": 8
+      },
+      "unitWorth": 200,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_food_sugar_cane": {
+      "type": "item",
+      "content": "minecraft:sugar_cane",
+      "amount": {
+        "min": 8,
+        "max": 24
+      },
+      "unitWorth": 80,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_food_sweet_berries": {
+      "type": "item",
+      "content": "minecraft:sweet_berries",
+      "amount": {
+        "min": 8,
+        "max": 32
+      },
+      "unitWorth": 70,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_food_apple": {
+      "type": "item",
+      "content": "minecraft:apple",
+      "amount": {
+        "min": 2,
+        "max": 8
+      },
+      "unitWorth": 180,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_food_bread": {
+      "type": "item",
+      "content": "minecraft:bread",
+      "amount": {
+        "min": 4,
+        "max": 16
+      },
+      "unitWorth": 240,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_food_baked_potato": {
+      "type": "item",
+      "content": "minecraft:baked_potato",
+      "amount": {
+        "min": 4,
+        "max": 16
+      },
+      "unitWorth": 160,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_food_cooked_beef": {
+      "type": "item",
+      "content": "minecraft:cooked_beef",
+      "amount": {
+        "min": 2,
+        "max": 8
+      },
+      "unitWorth": 400,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_food_cooked_porkchop": {
+      "type": "item",
+      "content": "minecraft:cooked_porkchop",
+      "amount": {
+        "min": 2,
+        "max": 8
+      },
+      "unitWorth": 350,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_food_cooked_chicken": {
+      "type": "item",
+      "content": "minecraft:cooked_chicken",
+      "amount": {
+        "min": 2,
+        "max": 8
+      },
+      "unitWorth": 280,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_food_cooked_mutton": {
+      "type": "item",
+      "content": "minecraft:cooked_mutton",
+      "amount": {
+        "min": 2,
+        "max": 8
+      },
+      "unitWorth": 300,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_food_cooked_cod": {
+      "type": "item",
+      "content": "minecraft:cooked_cod",
+      "amount": {
+        "min": 2,
+        "max": 8
+      },
+      "unitWorth": 240,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_food_cooked_salmon": {
+      "type": "item",
+      "content": "minecraft:cooked_salmon",
+      "amount": {
+        "min": 2,
+        "max": 8
+      },
+      "unitWorth": 280,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_food_cookie": {
+      "type": "item",
+      "content": "minecraft:cookie",
+      "amount": {
+        "min": 8,
+        "max": 24
+      },
+      "unitWorth": 80,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_food_pumpkin_pie": {
+      "type": "item",
+      "content": "minecraft:pumpkin_pie",
+      "amount": {
+        "min": 2,
+        "max": 6
+      },
+      "unitWorth": 400,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_food_egg": {
+      "type": "item",
+      "content": "minecraft:egg",
+      "amount": {
+        "min": 4,
+        "max": 12
+      },
+      "unitWorth": 180,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_food_sugar": {
+      "type": "item",
+      "content": "minecraft:sugar",
+      "amount": {
+        "min": 4,
+        "max": 12
+      },
+      "unitWorth": 150,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_food_dried_kelp": {
+      "type": "item",
+      "content": "minecraft:dried_kelp",
+      "amount": {
+        "min": 8,
+        "max": 32
+      },
+      "unitWorth": 80,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    }
+  }
+}

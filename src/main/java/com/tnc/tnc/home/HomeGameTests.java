@@ -11,6 +11,20 @@ import java.util.*;
 
 @GameTestHolder("tnc") @PrefixGameTestTemplate(false)
 public final class HomeGameTests {
+    @GameTest(template="building_test_empty",batch="bank_loading",timeoutTicks=160)
+    public static void bankLoadsRemoteHouseWithoutChargingBeforePreflight(GameTestHelper h)throws Exception{
+        var l=h.getLevel();var buyer=AdventureGameTests.player(h);AdventureService.profile(buyer).credit(1000,"test");
+        var oldIsland=com.tnc.tnc.world.SkyIslandSavedData.get(l);var oldHousing=AdventureSavedData.get(l.getServer()).housing.copy();
+        var load=com.tnc.tnc.world.SkyIslandSavedData.class.getDeclaredMethod("load",CompoundTag.class);load.setAccessible(true);var tag=oldIsland.save(new CompoundTag());
+        tag.putString("Phase","COMPLETE");tag.putBoolean("LayoutReady",true);tag.putInt("OriginX",32000);tag.putInt("OriginY",90);tag.putInt("OriginZ",48000);
+        l.getDataStorage().set("tnc_sky_island_v5",(net.minecraft.world.level.saveddata.SavedData)load.invoke(null,tag));AdventureSavedData.get(l.getServer()).housing.remove(HousingService.ID);
+        try{
+            String waiting=HousingService.buy(buyer);h.assertTrue(waiting.contains("调取")&&AdventureService.profile(buyer).coins()==1000&&!HousingService.home(l.getServer()).hasUUID("Owner"),"Remote unloaded plot starts loading without charging");
+            h.runAfterDelay(100,()->{try{
+                String checked=HousingService.buy(buyer);h.assertTrue(checked.contains("已有改动")&&AdventureService.profile(buyer).coins()==1000&&!HousingService.home(l.getServer()).hasUUID("Owner"),"Bank loads remote plot and strict source preflight rejects empty terrain without charging: "+checked);h.succeed();
+            }finally{l.getDataStorage().set("tnc_sky_island_v5",oldIsland);AdventureSavedData.get(l.getServer()).housing=oldHousing;}});
+        }catch(Exception|Error e){l.getDataStorage().set("tnc_sky_island_v5",oldIsland);AdventureSavedData.get(l.getServer()).housing=oldHousing;throw e;}
+    }
     @GameTest(template="building_test_empty",batch="source_house",timeoutTicks=150)
     public static void originalTownHouseCanBeDeliveredAfterContentsAreSafelyRemoved(GameTestHelper h)throws Exception{
         var level=h.getLevel();var store=AdventureSavedData.get(level.getServer());var original=store.housing.copy();

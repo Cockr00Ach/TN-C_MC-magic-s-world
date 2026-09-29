@@ -1,0 +1,312 @@
+{
+  "content": {
+    "tnc_supply_oak_log": {
+      "type": "item",
+      "content": "minecraft:oak_log",
+      "amount": {
+        "min": 4,
+        "max": 24
+      },
+      "unitWorth": 80,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_supply_spruce_log": {
+      "type": "item",
+      "content": "minecraft:spruce_log",
+      "amount": {
+        "min": 4,
+        "max": 24
+      },
+      "unitWorth": 80,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_supply_birch_log": {
+      "type": "item",
+      "content": "minecraft:birch_log",
+      "amount": {
+        "min": 4,
+        "max": 24
+      },
+      "unitWorth": 80,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_supply_dark_oak_log": {
+      "type": "item",
+      "content": "minecraft:dark_oak_log",
+      "amount": {
+        "min": 4,
+        "max": 16
+      },
+      "unitWorth": 100,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_supply_cobblestone": {
+      "type": "item",
+      "content": "minecraft:cobblestone",
+      "amount": {
+        "min": 16,
+        "max": 64
+      },
+      "unitWorth": 20,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_supply_deepslate": {
+      "type": "item",
+      "content": "minecraft:deepslate",
+      "amount": {
+        "min": 16,
+        "max": 48
+      },
+      "unitWorth": 25,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_supply_sand": {
+      "type": "item",
+      "content": "minecraft:sand",
+      "amount": {
+        "min": 8,
+        "max": 32
+      },
+      "unitWorth": 45,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_supply_gravel": {
+      "type": "item",
+      "content": "minecraft:gravel",
+      "amount": {
+        "min": 8,
+        "max": 32
+      },
+      "unitWorth": 45,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_supply_clay_ball": {
+      "type": "item",
+      "content": "minecraft:clay_ball",
+      "amount": {
+        "min": 8,
+        "max": 32
+      },
+      "unitWorth": 50,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_supply_glass": {
+      "type": "item",
+      "content": "minecraft:glass",
+      "amount": {
+        "min": 4,
+        "max": 16
+      },
+      "unitWorth": 90,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_supply_coal": {
+      "type": "item",
+      "content": "minecraft:coal",
+      "amount": {
+        "min": 4,
+        "max": 20
+      },
+      "unitWorth": 120,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_supply_charcoal": {
+      "type": "item",
+      "content": "minecraft:charcoal",
+      "amount": {
+        "min": 4,
+        "max": 16
+      },
+      "unitWorth": 120,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_supply_iron_ingot": {
+      "type": "item",
+      "content": "minecraft:iron_ingot",
+      "amount": {
+        "min": 2,
+        "max": 8
+      },
+      "unitWorth": 500,
+      "rarity": "UNCOMMON",
+      "timeMult": 2.0
+    },
+    "tnc_supply_copper_ingot": {
+      "type": "item",
+      "content": "minecraft:copper_ingot",
+      "amount": {
+        "min": 4,
+        "max": 16
+      },
+      "unitWorth": 160,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_supply_gold_ingot": {
+      "type": "item",
+      "content": "minecraft:gold_ingot",
+      "amount": {
+        "min": 1,
+        "max": 4
+      },
+      "unitWorth": 700,
+      "rarity": "UNCOMMON",
+      "timeMult": 2.0
+    },
+    "tnc_supply_redstone": {
+      "type": "item",
+      "content": "minecraft:redstone",
+      "amount": {
+        "min": 4,
+        "max": 20
+      },
+      "unitWorth": 160,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_supply_lapis_lazuli": {
+      "type": "item",
+      "content": "minecraft:lapis_lazuli",
+      "amount": {
+        "min": 4,
+        "max": 16
+      },
+      "unitWorth": 180,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_supply_quartz": {
+      "type": "item",
+      "content": "minecraft:quartz",
+      "amount": {
+        "min": 4,
+        "max": 16
+      },
+      "unitWorth": 180,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_supply_amethyst_shard": {
+      "type": "item",
+      "content": "minecraft:amethyst_shard",
+      "amount": {
+        "min": 4,
+        "max": 12
+      },
+      "unitWorth": 250,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_supply_leather": {
+      "type": "item",
+      "content": "minecraft:leather",
+      "amount": {
+        "min": 2,
+        "max": 8
+      },
+      "unitWorth": 250,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_supply_string": {
+      "type": "item",
+      "content": "minecraft:string",
+      "amount": {
+        "min": 4,
+        "max": 16
+      },
+      "unitWorth": 120,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_supply_paper": {
+      "type": "item",
+      "content": "minecraft:paper",
+      "amount": {
+        "min": 8,
+        "max": 24
+      },
+      "unitWorth": 70,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_supply_white_wool": {
+      "type": "item",
+      "content": "minecraft:white_wool",
+      "amount": {
+        "min": 2,
+        "max": 8
+      },
+      "unitWorth": 250,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_supply_prismarine_shard": {
+      "type": "item",
+      "content": "minecraft:prismarine_shard",
+      "amount": {
+        "min": 2,
+        "max": 8
+      },
+      "unitWorth": 500,
+      "rarity": "UNCOMMON",
+      "timeMult": 2.0
+    },
+    "tnc_supply_blaze_powder": {
+      "type": "item",
+      "content": "minecraft:blaze_powder",
+      "amount": {
+        "min": 2,
+        "max": 6
+      },
+      "unitWorth": 700,
+      "rarity": "UNCOMMON",
+      "timeMult": 2.0
+    },
+    "tnc_supply_ender_pearl": {
+      "type": "item",
+      "content": "minecraft:ender_pearl",
+      "amount": {
+        "min": 1,
+        "max": 4
+      },
+      "unitWorth": 900,
+      "rarity": "RARE",
+      "timeMult": 2.0
+    },
+    "tnc_supply_obsidian": {
+      "type": "item",
+      "content": "minecraft:obsidian",
+      "amount": {
+        "min": 2,
+        "max": 8
+      },
+      "unitWorth": 700,
+      "rarity": "UNCOMMON",
+      "timeMult": 2.0
+    },
+    "tnc_supply_ice": {
+      "type": "item",
+      "content": "minecraft:ice",
+      "amount": {
+        "min": 4,
+        "max": 12
+      },
+      "unitWorth": 200,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    }
+  }
+}

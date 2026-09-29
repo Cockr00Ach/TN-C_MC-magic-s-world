@@ -97,6 +97,10 @@ minecraft {
         // The gametest system is also enabled by default for other run configs under the /test command.
         gameTestServer {
             property 'forge.enabledGameTestNamespaces', mod_id
+            if (project.hasProperty('townServicesTests')) {
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+            }
             if (project.hasProperty('fullLandmarkTests')) property 'tnc.fullLandmarkTests', 'true'
             jvmArgs '-Xmx6G'
             // Recovery fixtures intentionally change blocks; never reuse a previous run's world.
@@ -176,6 +180,12 @@ dependencies {
     // Compile-only keeps normal distribution unchanged; enable with -PbuildingGameTests.
     if (project.hasProperty('buildingGameTests')) {
         runtimeOnly fg.deobf('geckolib:geckolib:4.8.4')
+    }
+    // Uses unmodified existing pack jars in an isolated GameTest world.
+    if (project.hasProperty('townServicesTests')) {
+        runtimeOnly fg.deobf('bountiful:Bountiful:6.0.4')
+        runtimeOnly fg.deobf('kambrik:Kambrik:6.1.1')
+        runtimeOnly files('libs/kotlinforforge-4.12.0-all.jar')
     }
 }
 

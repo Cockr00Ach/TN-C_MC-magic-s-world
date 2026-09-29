@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 public class MagicStoneNetwork {
 
     // v3 adds downed/rescue packets. Reject stale clients instead of silently losing combat state.
-    private static final String PROTOCOL_VERSION = "4";
+    private static final String PROTOCOL_VERSION = "5";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "main"),

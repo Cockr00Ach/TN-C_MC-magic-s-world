@@ -49,16 +49,11 @@ public final class AdventureService {
         return origin==null?null:origin.offset(419,90,291);
     }
     public static boolean atService(ServerPlayer player) {
-        if(player.isSpectator()||!player.isAlive()||com.tnc.tnc.combat.DownedCombat.isDowned(player))return false;
-        if(player.level()==player.server.overworld()) {
-            var pos=tavern(player);
-            if(pos!=null&&SkyIslandAnchors.isComplete(player.server.overworld())&&pos.closerToCenterThan(player.position(),20))return true;
-        }
-        return !player.serverLevel().getEntitiesOfClass(com.tnc.tnc.npc.SelfNpcEntity.class,new AABB(player.blockPosition()).inflate(12),e->e.isAlive()).isEmpty();
+        return TownServices.near(player,"guild");
     }
     public static String register(ServerPlayer player) {
         var p=profile(player);if(p.registered)return "你已经登记过，无需再次登记。";
-        p.registered=true;milestone(player,"registered");return "登记成功：初级冒险者。先接教学备料单，再请匠人打造法杖。";
+        p.registered=true;milestone(player,"registered");return "登记成功：初级冒险者。右键酒馆Bountiful委托栏接单；法器找莉娅，基础装备找铎恩。";
     }
     public static String deliver(ServerPlayer player,String id) {
         var p=profile(player);var progress=p.contracts.get(id);var c=ContractCatalog.find(id);
@@ -77,47 +72,61 @@ public final class AdventureService {
         return "委托完成：+"+c.xp()+"冒险经验，+"+AdventureRules.reputation(c.reputation(),p.rank,c.grade())+"声望，+"+c.coins()+"铜。";
     }
     public static String order(ServerPlayer player) {
+        return order(player,"water_wand_1");
+    }
+    public static String order(ServerPlayer player,String designId) {
         var p=profile(player);if(!p.registered)return "请先登记冒险者。";
         if(p.smithReady>=0)return "已有制作中的订单，请先领取。";
-        long fee=p.crafted?30:0;
-        if(p.coins<fee)return "人工费不足：补造30铜，第一次教学免人工费。";
-        var tx=new InventoryTransaction(player.getInventory());if(!tx.take(WAND_MATERIALS,false))return "需要4木棍与2铜锭（初版材料表）。";
-        tx.commit();if(fee>0)p.debit(fee,"法杖打造");
-        p.smithFree=!p.crafted;p.smithReady=AdventureSavedData.get(player.server).activeTicks+400;
-        milestone(player,"ordered");return "材料已交给驻馆匠人，20秒后可领取。退出不会丢失订单。";
+        var design=ElementWands.find(designId);var equipment=EquipmentOrders.find(designId);if(design==null&&equipment==null)return "请选择真实品种，未扣材料。旧基础杖只保留存量与旧待领奖订单。";
+        int tier=design==null?1:design.tier();int[] levels={0,1,10,25,50,85};
+        if(p.level()<levels[tier])return "这一档铸造需要冒险Lv"+levels[tier]+"，未扣材料。";
+        long fee=equipment!=null?(p.armorCrafted?equipment.fee():0):(!p.crafted&&tier==1?0:design.fee());
+        if(p.coins<fee)return "人工费不足：需要"+fee+"铜。首次一阶订单免人工费。";
+        var tx=new InventoryTransaction(player.getInventory());if(!tx.take(equipment!=null?equipment.materials():design.materials(),false))return "材料不足，全部材料和金币保留。";
+        tx.commit();if(fee>0)p.debit(fee,equipment!=null?"铁匠制作":"法杖打造");
+        p.smithDesign=designId;p.smithFree=fee==0;p.smithReady=AdventureSavedData.get(player.server).activeTicks+(equipment!=null?400:design.seconds()*20L);
+        milestone(player,equipment!=null?"equipment_ordered":"ordered");return "材料已交给"+(equipment!=null?"铎恩":"莉娅")+"，"+(design==null?20:design.seconds())+"秒后可领取。退出不会丢失订单。";
     }
     public static String claim(ServerPlayer player) {
         var p=profile(player);long now=AdventureSavedData.get(player.server).activeTicks;
         if(p.smithReady<0)return "没有待领取订单。";
         if(now<p.smithReady)return "匠人仍在制作，请稍候。";
-        var wand=new ItemStack(TNMod.WAND.get());
+        var design=ElementWands.find(p.smithDesign);
+        var equipment=EquipmentOrders.find(p.smithDesign);
+        if(design==null&&equipment==null&&!p.smithDesign.isEmpty())return "订单品种缺失，成品记录保留，请检查版本。";
+        var wand=equipment!=null?new ItemStack(equipment.item()):design==null?new ItemStack(TNMod.WAND.get()):ElementWands.stack(design);
         wand.getOrCreateTag().putBoolean("TncForged",true);
         var tx=new InventoryTransaction(player.getInventory());if(!tx.add(wand))return "背包已满。完成订单已保留，请腾出一个位置。";
-        tx.commit();p.smithReady=-1;p.crafted=true;p.smithFree=false;
+        tx.commit();p.smithReady=-1;if(equipment!=null)p.armorCrafted=true;else p.crafted=true;p.smithFree=false;
         var magic=MagicStone.getOrNull(player);
         if(magic!=null)com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(player,SpellCatalog.effectiveIds(magic));
-        milestone(player,"forged");return "已领取法杖。按V学习一级法术，再在野外练习施放。";
+        if(design!=null)milestone(player,"forged_"+design.id());p.smithDesign="";
+        milestone(player,equipment!=null?"armored":"forged");return equipment!=null?"铁匠订单已交付；装备保留原版属性。":"已领取法器。按V学习对应法术，再在野外练习施放。";
     }
     public static String promote(ServerPlayer player) {
         var p=profile(player);if(!p.registered)return "请先登记。";
         if(p.rank>=1)return "精锐以上晋升和试炼尚未开放。";
         if(p.level()<10||p.reputation<100)return "精锐晋升需要Lv10与100声望。";
-        p.rank=1;milestone(player,"promoted");return "晋升精锐成功。首版开放E/D委托，C以上远征后续扩展。";
+        p.rank=1;milestone(player,"promoted");return "晋升精锐成功。酒馆原生栏提供补给、食材与巡猎；更高职称试炼后续建设。";
     }
     public static void action(ServerPlayer player,AdventurePackets.Action action,String id) {
         if(action==AdventurePackets.Action.REQUEST){sync(player,false,"");return;}
-        if(!atService(player)&&!(action==AdventurePackets.Action.BUY_HOME&&com.tnc.tnc.home.HousingService.atSale(player))){sync(player,false,"请到酒馆驻馆服务处办理；买房也可在南街空屋入口确认。");return;}
+        boolean allowed=switch(action){case REGISTER,PROMOTE->TownServices.near(player,"guild");case ORDER->TownServices.near(player,EquipmentOrders.find(id)!=null?"armorer":"smith");case CLAIM->TownServices.near(player,EquipmentOrders.find(profile(player).smithDesign)!=null?"armorer":"smith");case BUY_HOME,BANK_DEPOSIT,BANK_WITHDRAW->TownServices.near(player,"broker");case ACCEPT,DELIVER,OPEN_BOARD->TownServices.atBoard(player);default->false;};
+        if(!allowed){sync(player,false,"请到对应岗位办理：艾琳登记，酒馆栏交委托，莉娅制杖，铎恩制作装备，米洛办理银行与购房。");return;}
         String message=switch(action) {
             case REGISTER -> register(player);
             case ACCEPT -> {
                 var c=ContractCatalog.find(id);
-                yield c!=null&&profile(player).accept(c,AdventureSavedData.get(player.server).activeTicks/AdventureRules.BOARD_PERIOD)?"已接取："+c.title():"当前不能接取（未登记、已结算、已有同单、达到3单/越阶上限）。";
+                yield c!=null&&c.teaching()&&profile(player).accept(c,AdventureSavedData.get(player.server).activeTicks/AdventureRules.BOARD_PERIOD)?"已接取："+c.title():"常规新委托请使用Bountiful原生栏；旧已接单仍可归档交付。";
             }
             case DELIVER -> deliver(player,id);
-            case ORDER -> order(player);
+            case ORDER -> order(player,id);
             case CLAIM -> claim(player);
             case PROMOTE -> promote(player);
             case BUY_HOME -> com.tnc.tnc.home.HousingService.buy(player);
+            case BANK_DEPOSIT -> BankCounter.deposit(player);
+            case BANK_WITHDRAW -> BankCounter.withdraw(player,id);
+            case OPEN_BOARD -> TownServices.openBoard(player)?"":"请在酒馆委托栏旁使用。";
             default -> "未知请求。";
         };
         if(action==AdventurePackets.Action.ACCEPT)milestoneIfPresent(player,"accepted");
@@ -127,6 +136,10 @@ public final class AdventureService {
     public static void sync(ServerPlayer player,boolean open,String message) {
         var store=AdventureSavedData.get(player.server);var p=profile(player);
         var tag=AdventureSavedData.writeProfile(p);tag.putLong("ActiveTicks",store.activeTicks);tag.putBoolean("AtService",atService(player));tag.putString("Message",message);
+        tag.putBoolean("AtSmith",TownServices.near(player,"smith"));tag.putBoolean("AtBroker",TownServices.near(player,"broker"));tag.putBoolean("AtBoard",TownServices.atBoard(player));
+        tag.putBoolean("AtArmorer",TownServices.near(player,"armorer"));
+        tag.putInt("InitialTab",TownServices.near(player,"armorer")?4:TownServices.near(player,"smith")?2:TownServices.near(player,"broker")?3:0);
+        tag.putString("Directions",TownServices.directions(player.server.overworld()));
         tag.put("Housing",com.tnc.tnc.home.HousingService.snapshot(player));
         tag.putBoolean("AtHomeSale",com.tnc.tnc.home.HousingService.atSale(player));
         var pos=tavern(player);if(pos!=null)tag.putString("Tavern",pos.getX()+" / "+pos.getY()+" / "+pos.getZ());

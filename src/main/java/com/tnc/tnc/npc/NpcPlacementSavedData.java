@@ -55,6 +55,8 @@ public class NpcPlacementSavedData extends net.minecraft.world.level.saveddata.S
      * {@code 0} = 这个存档早在版本机制存在之前就存过盘（或还没播种过）。
      */
     private int defaultsVersion = 0;
+    private Placement previousSelf;
+    private static final net.minecraft.server.level.TicketType<net.minecraft.world.level.ChunkPos> SELF_MOVE = net.minecraft.server.level.TicketType.create("tnc_self_tavern_move",java.util.Comparator.comparingLong(net.minecraft.world.level.ChunkPos::toLong),40);
 
     public static NpcPlacementSavedData get(ServerLevel level) {
         return level.getServer().overworld().getDataStorage().computeIfAbsent(
@@ -64,6 +66,7 @@ public class NpcPlacementSavedData extends net.minecraft.world.level.saveddata.S
     public static NpcPlacementSavedData load(CompoundTag tag) {
         NpcPlacementSavedData data = new NpcPlacementSavedData();
         data.defaultsVersion = tag.getInt("DefaultsVersion"); // 老存档没有这个键 → 0 → 下次启动刷新一次
+        if(tag.contains("PreviousSelf",10)){var t=tag.getCompound("PreviousSelf");data.previousSelf=new Placement("self",t.getString("Anchor"),t.getInt("DX"),t.getInt("DY"),t.getInt("DZ"));}
         ListTag list = tag.getList("Npcs", Tag.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
             CompoundTag e = list.getCompound(i);
@@ -92,6 +95,7 @@ public class NpcPlacementSavedData extends net.minecraft.world.level.saveddata.S
         });
         tag.put("Npcs", list);
         tag.putInt("DefaultsVersion", defaultsVersion);
+        if(previousSelf!=null){var t=new CompoundTag();t.putString("Anchor",previousSelf.anchor());t.putInt("DX",previousSelf.dx());t.putInt("DY",previousSelf.dy());t.putInt("DZ",previousSelf.dz());tag.put("PreviousSelf",t);}else tag.remove("PreviousSelf");
         return tag;
     }
 
@@ -250,7 +254,8 @@ public class NpcPlacementSavedData extends net.minecraft.world.level.saveddata.S
             if (existing == null) {
                 placements.put(def.npcId(), def);
                 changed++;
-            } else if (refresh && !existing.equals(def)) {
+            } else if (refresh && !existing.equals(def) && (defaultsVersion<7||def.npcId().equals("self"))) {
+                if(def.npcId().equals("self")&&def.anchor().equals("ORIGIN"))previousSelf=existing;
                 LOGGER.info("TN-C npc: refreshing default placement of {} -> {} (was {})",
                         def.npcId(), def, existing);
                 placements.put(def.npcId(), def);
@@ -271,6 +276,7 @@ public class NpcPlacementSavedData extends net.minecraft.world.level.saveddata.S
     }
 
     public boolean ensureOne(ServerLevel level, Placement placement) {
+        if(placement.npcId().equals("self")&&placement.anchor().equals("ORIGIN")&&!com.tnc.tnc.world.SkyLandscapeUpgrade.complete(level.getServer()))return false;
         // ★ 岛屿没生成完就别放 —— 生成中途 CENTER 这类坐标已经有值了，但路面还没铺完，
         //   这时放上去 NPC 会掉进虚空（而且生成器随后还会改地形，等于白放）。
         //   跳过这次；每 5 秒一次的自检会在岛 COMPLETE 之后自动把它放出来。
@@ -309,6 +315,15 @@ public class NpcPlacementSavedData extends net.minecraft.world.level.saveddata.S
         if (type == null) {
             LOGGER.error("TN-C npc: placement references unknown entity type tnc:{}", placement.npcId());
             return false;
+        }
+        if(placement.npcId().equals("self")&&previousSelf!=null){
+            var oldPos=resolve(level,previousSelf);if(oldPos==null)return false;
+            var chunks=new java.util.ArrayList<net.minecraft.world.level.ChunkPos>();var center=new net.minecraft.world.level.ChunkPos(oldPos);
+            for(int dx=-2;dx<=2;dx++)for(int dz=-2;dz<=2;dz++){var c=new net.minecraft.world.level.ChunkPos(center.x+dx,center.z+dz);chunks.add(c);level.getChunkSource().addRegionTicket(SELF_MOVE,c,2,c);}
+            if(chunks.stream().anyMatch(c->!level.hasChunk(c.x,c.z)||!level.areEntitiesLoaded(c.toLong())))return false;
+            var original=findNear(level,type,oldPos,24);if(original!=null){original.moveTo(pos.getX()+0.5,pos.getY(),pos.getZ()+0.5,180,0);}
+            previousSelf=null;setDirty();for(var c:chunks)level.getChunkSource().removeRegionTicket(SELF_MOVE,c,2,c);
+            if(original!=null){LOGGER.info("TN-C relocated original Self to tavern, retaining UUID {}",original.getUUID());return true;}
         }
         if (findNear(level, type, pos, 24.0D) != null) {
             return false;

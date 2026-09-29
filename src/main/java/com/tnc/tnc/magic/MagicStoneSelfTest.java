@@ -200,13 +200,12 @@ public final class MagicStoneSelfTest {
         checks.add(new Check("every tier affordable at 210", worst <= 210,
                 "最贵 " + worst + " 魔力 vs 初始上限 210"));
 
-        // 12b. 消耗随上限等比放大 —— 不然等级一高法术就几乎不要钱，HUD 上看不出条子动过
+        // 12b. Check the selected cost mode; older saves can retain proportional costs.
         int costAtBaseline = Config.manaCostForTier(1, Config.manaCostBaselineMaxMana);
         int costAt620 = Config.manaCostForTier(1, 620);
-        boolean costScales = costAtBaseline == Config.manaCostForTier(1) && costAt620 > costAtBaseline;
-        // "看得见"的判据：一级法术至少要让条子动 5%（59 像素的条子 ≈ 3 像素）
-        boolean costVisible = costAt620 * 100 >= 620 * 5;
-        checks.add(new Check("mana cost scales with max mana", costScales && costVisible,
+        int expectedAt620=Config.manaCostScalesWithMaxMana?Math.max(1,(int)Math.round(costAtBaseline*620.0/Math.max(1,Config.manaCostBaselineMaxMana))):costAtBaseline;
+        boolean configuredCost = costAtBaseline == Config.manaCostForTier(1) && costAt620 == expectedAt620;
+        checks.add(new Check("mana cost follows configured fixed/proportional mode", configuredCost,
                 "上限 " + Config.manaCostBaselineMaxMana + " → " + costAtBaseline
                         + "，上限 620 → " + costAt620
                         + "（占上限 " + String.format("%.1f", costAt620 * 100.0 / 620) + "%）"));

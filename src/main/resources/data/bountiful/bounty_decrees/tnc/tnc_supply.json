@@ -1,0 +1,8 @@
+{
+  "objectives": [
+    "tnc_supply_objs"
+  ],
+  "rewards": [
+    "tnc_supply_rews"
+  ]
+}

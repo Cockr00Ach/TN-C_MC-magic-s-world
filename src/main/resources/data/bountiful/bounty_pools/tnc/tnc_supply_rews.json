@@ -1,0 +1,16 @@
+{
+  "content": {
+    "tnc_supply_pay": {
+      "type": "command",
+      "content": "tnc_bounty_reward \"%PLAYER_NAME%\" \"supply\" \"%BOUNTY_AMOUNT%\"",
+      "name": "城镇补给报酬",
+      "icon": "tnc:copper_coin",
+      "amount": {
+        "min": 1,
+        "max": 40
+      },
+      "unitWorth": 600,
+      "timeMult": 2.0
+    }
+  }
+}

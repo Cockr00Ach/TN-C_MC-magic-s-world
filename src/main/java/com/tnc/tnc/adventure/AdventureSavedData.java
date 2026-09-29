@@ -29,7 +29,9 @@ public final class AdventureSavedData extends SavedData {
         p.reputation = Math.max(0,t.getInt("Reputation")); p.rank = Math.max(0,Math.min(1,t.getInt("Rank")));
         p.learningBase = Math.max(4,t.getInt("LearningBase"));
         p.registered=t.getBoolean("Registered"); p.crafted=t.getBoolean("Crafted");
+        p.armorCrafted=t.getBoolean("ArmorCrafted");
         p.smithReady=t.contains("SmithReady")?t.getLong("SmithReady"):-1; p.smithFree=t.getBoolean("SmithFree");
+        p.smithDesign=t.getString("SmithDesign");p.nativeBounties=Math.max(0,t.getInt("NativeBounties"));p.adventureKills=Math.max(0,t.getInt("AdventureKills"));p.bossKills=Math.max(0,t.getInt("BossKills"));
         p.completedEpoch=t.contains("CompletedEpoch")?t.getLong("CompletedEpoch"):-1;
         for (Tag v:t.getList("Milestones",Tag.TAG_STRING)) p.milestones.add(v.getAsString());
         for (Tag v:t.getList("PaidOffers",Tag.TAG_STRING)) p.paidOffers.add(v.getAsString());
@@ -44,6 +46,9 @@ public final class AdventureSavedData extends SavedData {
         var t=new CompoundTag(); t.putLong("XP",p.xp);t.putLong("Coins",p.coins);t.putInt("Reputation",p.reputation);
         t.putInt("Rank",p.rank);t.putInt("LearningBase",p.learningBase);t.putBoolean("Registered",p.registered);
         t.putBoolean("Crafted",p.crafted);t.putLong("SmithReady",p.smithReady);t.putBoolean("SmithFree",p.smithFree);
+        t.putString("SmithDesign",p.smithDesign);t.putInt("NativeBounties",p.nativeBounties);
+        t.putBoolean("ArmorCrafted",p.armorCrafted);
+        t.putInt("AdventureKills",p.adventureKills);t.putInt("BossKills",p.bossKills);
         t.putLong("CompletedEpoch",p.completedEpoch);t.put("Milestones",strings(p.milestones));t.put("PaidOffers",strings(p.paidOffers));t.put("Ledger",strings(p.ledger));
         var list=new ListTag();p.contracts.values().forEach(c->{var v=new CompoundTag();v.putString("ID",c.id);v.putLong("Epoch",c.epoch);v.putInt("Kills",c.kills);list.add(v);});
         t.put("Contracts",list);return t;

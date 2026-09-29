@@ -41,7 +41,7 @@ public final class NpcPlacementDefaults {
      * <p>⚠️ <b>改这份表一定要把 {@link #VERSION} +1</b>，否则已经玩过的存档不会跟着更新。
      */
     public static final List<NpcPlacementSavedData.Placement> DEFAULTS = List.of(
-            new NpcPlacementSavedData.Placement("self", "CENTER", -1, -1, 44),
+            new NpcPlacementSavedData.Placement("self", "ORIGIN", 430, 94, 285),
             new NpcPlacementSavedData.Placement("cava", "CENTER", 15, 0, -15),
             new NpcPlacementSavedData.Placement("huai", "CENTER", 12, 0, -13),
             // 庄鹊让（卷五《代》）—— 作者 2026-09-22 指定的位置。
@@ -90,7 +90,7 @@ public final class NpcPlacementDefaults {
      *       与让（+124,+54,-90）同锚点同高度、只差 3 格 ✓。</li>
      * </ul>
      */
-    public static final int VERSION = 7;
+    public static final int VERSION = 8; // User: Self now introduces the story from the east tavern.
 
     private NpcPlacementDefaults() {
     }

@@ -40,7 +40,7 @@ public final class AdventureGameTests {
         store.activeTicks=p.smithReady;for(int i=0;i<36;i++)a.getInventory().setItem(i,new ItemStack(Items.STONE,64));
         AdventureService.claim(a);h.assertTrue(p.smithReady>=0,"Full pack retains order");
         a.getInventory().setItem(0,ItemStack.EMPTY);AdventureService.claim(a);AdventureService.claim(a);
-        h.assertTrue(p.crafted&&p.smithReady==-1&&a.getInventory().getItem(0).is(TNMod.WAND.get()),"Exactly one finished wand");h.succeed();
+        h.assertTrue(p.crafted&&p.smithReady==-1&&a.getInventory().getItem(0).is(ElementWands.ITEMS.get("water_wand_1").get()),"Exactly one finished typed wand");h.succeed();
     }
     @GameTest(template="building_test_empty",timeoutTicks=30)
     public static void legacyMigrationPreservesManaPointsAndForgetMarkers(GameTestHelper h) {

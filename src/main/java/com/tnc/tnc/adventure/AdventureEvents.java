@@ -42,10 +42,7 @@ public final class AdventureEvents {
         if(e.getEntity() instanceof ServerPlayer p)AdventureService.refreshGrowth(p);
     }
     @SubscribeEvent public static void interact(PlayerInteractEvent.EntityInteract e) {
-        if(e.getEntity() instanceof ServerPlayer p&&p.isShiftKeyDown()&&e.getTarget() instanceof com.tnc.tnc.npc.SelfNpcEntity) {
-            if(e.getHand()==InteractionHand.MAIN_HAND)AdventureService.sync(p,true,"");
-            e.setCancellationResult(InteractionResult.SUCCESS);e.setCanceled(true);
-        }
+        // Self keeps his existing story interaction; public services have separate NPCs.
     }
     @SubscribeEvent public static void death(LivingDeathEvent e) {
         if(!(e.getEntity().level() instanceof net.minecraft.server.level.ServerLevel level))return;
@@ -56,6 +53,9 @@ public final class AdventureEvents {
         for(var hit:hits.entrySet()) {
             var p=level.getServer().getPlayerList().getPlayer(hit.getKey());if(p==null||p.serverLevel()!=level||!p.isAlive()||p.isCreative()||p.isSpectator()||now-hit.getValue()>1200||p.distanceToSqr(e.getEntity())>4096)continue;
             var profile=AdventureService.profile(p);profile.addXp(boss?500:6);
+            profile.adventureKills=Math.min(1_000_000,profile.adventureKills+1);if(boss)profile.bossKills=Math.min(1_000_000,profile.bossKills+1);
+            for(int n:new int[]{25,100})if(profile.adventureKills>=n)AdventureService.milestone(p,"kills_"+n);
+            for(int n:new int[]{1,8})if(profile.bossKills>=n)AdventureService.milestone(p,"bosses_"+n);
             for(var progress:profile.contracts.values()){var c=ContractCatalog.find(progress.id);if(c.enemy().equals(mob))progress.kills=Math.min(c.kills(),progress.kills+1);}
             AdventureSavedData.get(p.server).setDirty();AdventureService.refreshGrowth(p);
         }
@@ -67,11 +67,19 @@ public final class AdventureEvents {
             var data=AdventureSavedData.get(server);data.activeTicks++;data.setDirty();
         }
         if(server.getTickCount()%40==0)for(var p:server.getPlayerList().getPlayers()) {
-            if(p.level()!=server.overworld())continue;
+            if(p.isCreative()||p.isSpectator())continue;
+            NativeBountiful.refreshCount(p);
+            if(AdventureService.profile(p).registered())for(var stack:p.getInventory().items)if(NativeBountiful.isTownPaper(stack)){AdventureService.milestone(p,"accepted");break;}
+            if(p.level().dimension()==net.minecraft.world.level.Level.NETHER)AdventureService.milestone(p,"entered_nether");
+            if(p.level().dimension()==net.minecraft.world.level.Level.END)AdventureService.milestone(p,"entered_end");
+            for(int n:new int[]{5,10,20,30,50,70,85,100})if(AdventureService.profile(p).level()>=n)AdventureService.milestone(p,"level_"+n);
             var arrival=com.tnc.tnc.npc.SkyIslandAnchors.resolve(server.overworld(),com.tnc.tnc.npc.SkyIslandAnchors.Anchor.ARRIVAL);
-            if(arrival!=null&&arrival.closerToCenterThan(p.position(),16))AdventureService.milestone(p,"arrived");
+            if(p.level()==server.overworld()&&arrival!=null&&arrival.closerToCenterThan(p.position(),16))AdventureService.milestone(p,"arrived");
+            var origin=com.tnc.tnc.npc.SkyIslandAnchors.resolve(server.overworld(),com.tnc.tnc.npc.SkyIslandAnchors.Anchor.ORIGIN);
+            if(p.level()==server.overworld()&&origin!=null&&origin.offset(210,95,312).closerToCenterThan(p.position(),12))AdventureService.milestone(p,"visited_entertainment");
             var magic=MagicStone.getOrNull(p);
             if(magic!=null&&!magic.getLearned().isEmpty())AdventureService.milestone(p,"learned");
+            if(magic!=null)for(var entry:com.tnc.tnc.magic.SpellCatalog.all())if(entry.element()!=null&&magic.getLearned().contains(entry.id()))AdventureService.milestone(p,"learn_"+entry.element().id()+"_"+entry.tier());
         }
         if(server.getTickCount()%200==0){long now=server.overworld().getGameTime();CONTRIBUTIONS.values().forEach(h->h.values().removeIf(t->now-t>1200));CONTRIBUTIONS.values().removeIf(java.util.Map::isEmpty);}
     }

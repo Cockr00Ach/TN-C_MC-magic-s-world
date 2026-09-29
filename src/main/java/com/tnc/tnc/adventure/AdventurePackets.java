@@ -8,7 +8,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
 import java.util.function.Supplier;
 
 public final class AdventurePackets {
-    public enum Action {REQUEST,REGISTER,ACCEPT,DELIVER,ORDER,CLAIM,PROMOTE,BUY_HOME}
+    public enum Action {REQUEST,REGISTER,ACCEPT,DELIVER,ORDER,CLAIM,PROMOTE,BUY_HOME,OPEN_BOARD,BANK_DEPOSIT,BANK_WITHDRAW}
     public record Request(Action action,String id) {
         void encode(FriendlyByteBuf b){b.writeEnum(action);b.writeUtf(id,64);}
         static Request decode(FriendlyByteBuf b){return new Request(b.readEnum(Action.class),b.readUtf(64));}

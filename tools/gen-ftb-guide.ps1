@@ -24,7 +24,7 @@ for($i=0;$i -lt $book.pages.Count;$i++){
     $page=$book.pages[$i];$number=$i+1;$nodes=@();$images=@()
     $intro=@(('&b&l'+$page.title),('&7'+$page.subtitle),'',('&e'+$page.status),'',
         '&f点击章节中的节点阅读说明。勾选只表示看过本节，不代表完成升级、买房或委托。',
-        '&7真实目标请查看“启程”和“归处”章节；各系统开放范围见本页状态。')
+        '&7真实目标请查看七个玩法章节；各系统开放范围见本页状态。')
     $nodes+=New-ReadingNode $number 0 ('&b&l'+$page.title) $intro $icons[$i] 0 0 1.8
     $s=0
     foreach($section in $page.sections){
@@ -39,17 +39,18 @@ for($i=0;$i -lt $book.pages.Count;$i++){
     foreach($image in $page.illustrations){
         $x=-6.0+$n*3.0
         $images+= [ordered]@{image=$image.texture;x=$x;y=-4.0;width=1.5;height=1.5;rotation=0.0}
-        $nodes+=New-ReadingNode $number (100+$n) $image.title @('&e武器外观方向 · 基础匠人订单已开放','',('&f'+$image.description),'',
-            '&7高四档武器承载与专属材料继续建设，当前产出兼容原法术的基础法杖。') 'minecraft:stick' $x -2.0 0.75
+        $nodes+=New-ReadingNode $number (100+$n) $image.title @('&e七系五阶订单已开放','',('&f'+$image.description),'',
+            '&7水系五阶均为实际物品；全部七系路线请看“提升之路·七系法器”。') 'minecraft:stick' $x -2.0 0.75
         $n++
     }
     $filename='tnc_guide_{0:D2}_{1}' -f $number,$page.id
     $chapter=[ordered]@{
         id=('544E4301{0:X2}000000' -f $number);filename=$filename;group=$groupId
-        title=('{0:D2} - {1}' -f $number,$page.title);icon=$icons[$i];order_index=(-100+$i)
+        title=('{0:D2} - {1}' -f $number,$page.title);icon=$icons[$i];order_index=$(if($i -eq 0){-200}else{-100+$i})
         default_hide_dependency_lines=$true;default_quest_shape='square';quest_links=@()
         images=$images;quests=$nodes
     }
+    if($i -eq 0){$chapter.title='&6&l歸 · 世界';$chapter.images+= [ordered]@{image='tnc:textures/guide/gui_world_title.png';x=0.0;y=-5.0;width=12.0;height=4.2;rotation=0.0}}
     [IO.File]::WriteAllText((Join-Path $chapterDir ($filename+'.snbt')),($chapter | ConvertTo-Json -Depth 20),$utf8)
 }
 Write-Output "Generated $($book.pages.Count) original native FTB chapters in questbook/ftbquests."

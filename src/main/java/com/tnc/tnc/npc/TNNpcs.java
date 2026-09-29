@@ -50,6 +50,8 @@ public final class TNNpcs {
      */
     public static final RegistryObject<EntityType<SelfNpcEntity>> SELF = registerSelf();
     public static final RegistryObject<EntityType<com.tnc.tnc.home.ResidentEntity>> RESIDENT=ENTITY_TYPES.register("resident",()->EntityType.Builder.of(com.tnc.tnc.home.ResidentEntity::new,MobCategory.MISC).sized(.6F,1.95F).clientTrackingRange(8).build("tnc:resident"));
+    public static final RegistryObject<EntityType<com.tnc.tnc.adventure.TownServiceNpc>> SERVICE_NPC = ENTITY_TYPES.register("town_service",
+            ()->EntityType.Builder.of(com.tnc.tnc.adventure.TownServiceNpc::new,MobCategory.MISC).sized(0.6f,1.95f).clientTrackingRange(10).build("tnc:town_service"));
 
     private static RegistryObject<EntityType<SelfNpcEntity>> registerSelf() {
         if (GeoSelfSupport.available()) {

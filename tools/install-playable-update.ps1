@@ -18,18 +18,18 @@ function Add-InstallFile([string]$Source,[string]$Relative){
 Add-InstallFile $jar 'mods\tnc-1.0.0.jar'
 $chapterDir=Join-Path $TncRepoRoot 'questbook\ftbquests\chapters'
 $chapters=@(Get-ChildItem -LiteralPath $chapterDir -File | Where-Object {$_.Name -match '^tnc_(guide_|play_)'})
-if($chapters.Count -ne 11){throw 'Expected nine guide and two gameplay chapters.'}
+if($chapters.Count -ne 17){throw 'Expected ten guide and seven gameplay chapters.'}
 $ids=[Collections.Generic.HashSet[string]]::new()
 foreach($chapter in $chapters){
     $data=Get-Content -LiteralPath $chapter.FullName -Raw -Encoding UTF8 | ConvertFrom-Json
     if(-not $ids.Add($data.id)){throw 'Duplicate chapter ID.'}
     foreach($quest in $data.quests){
         if(-not $ids.Add($quest.id)-or $quest.rewards.Count){throw 'Duplicate ID or duplicate account rewards.'}
-        foreach($t in $quest.tasks){if(-not $ids.Add($t.id)){throw 'Duplicate task ID.'};if($chapter.Name -match '^tnc_play_' -and $t.type -ne 'advancement'){throw 'Gameplay objectives must be real advancements.'}}
+        foreach($t in $quest.tasks){if(-not $ids.Add($t.id)){throw 'Duplicate task ID.'};if($chapter.Name -match '^tnc_play_' -and $t.type -notin @('advancement','item')){throw 'Gameplay objectives must be real advancements or held items.'}}
     }
     Add-InstallFile $chapter.FullName ('config\ftbquests\quests\chapters\'+$chapter.Name)
 }
-foreach($name in @('water_focus_1','water_staff_2','water_staff_3','water_staff_4','water_staff_5','onboarding_header')){Add-InstallFile (Join-Path $TncRepoRoot "src\main\resources\assets\tnc\textures\guide\$name.png") "kubejs\assets\tnc\textures\guide\$name.png"}
+foreach($name in @('water_focus_1','water_staff_2','water_staff_3','water_staff_4','water_staff_5','onboarding_header','gui_world_title','town_atlas')){Add-InstallFile (Join-Path $TncRepoRoot "src\main\resources\assets\tnc\textures\guide\$name.png") "kubejs\assets\tnc\textures\guide\$name.png"}
 Add-InstallFile (Join-Path $sourcePack 'kubejs\assets\tnc\textures\spell\divine_shot.png') 'kubejs\assets\tnc\textures\spell\divine_shot.png'
 # Whitelisted TN-C resources only. Existing legacy task definitions are deliberately retained.
 foreach($relativeRoot in @('kubejs\data\tnc\whisperingquests','kubejs\data\tnc\dialogues')){

@@ -1,0 +1,202 @@
+{
+  "id": "544E460100000000",
+  "filename": "tnc_play_00_main",
+  "group": "544E434755494445",
+  "title": "&6&l主线 · 找到天空岛",
+  "icon": "minecraft:compass",
+  "order_index": -190,
+  "default_hide_dependency_lines": false,
+  "default_quest_shape": "hexagon",
+  "quest_links": [],
+  "images": [],
+  "quests": [
+    {
+      "id": "544E460200000000",
+      "title": "找到天空岛",
+      "icon": "minecraft:ender_pearl",
+      "x": 0,
+      "y": 0,
+      "size": 1.6,
+      "shape": "hexagon",
+      "description": [
+        "&6&l找到天空岛",
+        "",
+        "&f沿天空岛邀请与传送阵上岛。你的旅程从这里开始。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E460300000000",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/arrived",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E460200000001",
+      "title": "去酒馆找 Self",
+      "icon": "minecraft:book",
+      "x": 0,
+      "y": 3,
+      "size": 1.6,
+      "shape": "hexagon",
+      "description": [
+        "&6&l去酒馆找 Self",
+        "",
+        "&f41号酒馆入门上楼北侧找Self。他会介绍原剧情线索、三家商店与委托栏。"
+      ],
+      "dependencies": [
+        "544E460200000000"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E460300000001",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/met_self",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E460200000002",
+      "title": "Self交给你的材料",
+      "icon": "minecraft:copper_ingot",
+      "x": -8,
+      "y": 5,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "&6&lSelf交给你的材料",
+        "",
+        "&f腾出背包，Self一次性交给4木棍与2铜锭；交给莉娅制作基础法器。领取记录按角色保存。"
+      ],
+      "dependencies": [
+        "544E460200000001"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E460300000002",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/self_materials",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E460200000003",
+      "title": "潮生制杖屋 · 第一根法杖",
+      "icon": "tnc:water_wand_1",
+      "x": -9,
+      "y": 9,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "&6&l潮生制杖屋 · 第一根法杖",
+        "",
+        "&f29号店的莉娅制作法杖。先找酒馆艾琳登记，再带4木棍、2铜锭选任一元素一阶，首次免人工费。"
+      ],
+      "dependencies": [
+        "544E460200000001",
+        "544E460200000002"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E460300000003",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/forged",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E460200000004",
+      "title": "炉石铁匠铺 · 第一件装备",
+      "icon": "minecraft:iron_chestplate",
+      "x": -3,
+      "y": 9,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "&6&l炉石铁匠铺 · 第一件装备",
+        "",
+        "&f28号店找铎恩，粗铁＋煤制作基础铁装备。首件免人工费，保留原版装备属性；法杖交给制杖师。"
+      ],
+      "dependencies": [
+        "544E460200000001"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E460300000004",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/armored",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E460200000005",
+      "title": "归航银行 · 安顿下来",
+      "icon": "minecraft:oak_door",
+      "x": 3,
+      "y": 9,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "&6&l归航银行 · 安顿下来",
+        "",
+        "&f19号银行米洛办理40号空屋的全款购买，500铜。钱袋账户已可存取实体币；存取币已开放；贷款与分期方案详见设计文档，尚未开放。"
+      ],
+      "dependencies": [
+        "544E460200000001"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E460300000005",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/home_bought",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E460200000006",
+      "title": "茶灯会馆 · 先认个门",
+      "icon": "minecraft:jukebox",
+      "x": 9,
+      "y": 9,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "&6&l茶灯会馆 · 先认个门",
+        "",
+        "&f到34号茶灯会馆附近认路。本次只保留娱乐地点；打牌、赌时刻等规则等作者后续设计，当前没有下注或赢钱。"
+      ],
+      "dependencies": [
+        "544E460200000001"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E460300000006",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/visited_entertainment",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    }
+  ]
+}

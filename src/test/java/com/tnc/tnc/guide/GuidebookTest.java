@@ -9,6 +9,29 @@ import com.google.gson.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class GuidebookTest {
+    @Test void revisionChaptersHaveUniqueIdsValidDependenciesAndRealAssets() throws IOException {
+        var chapters=new ArrayList<JsonObject>();var ids=new HashSet<String>();var quests=new HashSet<String>();int real=0,atlas=0;
+        try(var paths=Files.list(Path.of("questbook/ftbquests/chapters"))){
+            for(var file:paths.filter(p->p.getFileName().toString().startsWith("tnc_")).toList()){
+                var chapter=JsonParser.parseString(Files.readString(file)).getAsJsonObject();chapters.add(chapter);assertTrue(ids.add(chapter.get("id").getAsString()));
+                for(var v:chapter.getAsJsonArray("quests")){var q=v.getAsJsonObject();assertTrue(ids.add(q.get("id").getAsString()));quests.add(q.get("id").getAsString());assertEquals(0,q.getAsJsonArray("rewards").size());
+                    for(var value:q.getAsJsonArray("tasks")){var t=value.getAsJsonObject();assertTrue(ids.add(t.get("id").getAsString()));
+                        if(file.getFileName().toString().startsWith("tnc_play_")){real++;var type=t.get("type").getAsString();assertTrue(Set.of("advancement","item").contains(type));
+                            if(type.equals("advancement"))assertNotNull(getClass().getResource("/data/tnc/advancements/"+t.get("advancement").getAsString().split(":")[1]+".json"));
+                            else assertFalse(t.get("consume_items").getAsBoolean());
+                        }else if(file.getFileName().toString().contains("10_atlas"))atlas++;
+                    }
+                }
+                for(var value:chapter.getAsJsonArray("images")){var tex=value.getAsJsonObject().get("image").getAsString();assertNotNull(getClass().getResource("/assets/"+tex.replace(":","/")),tex);}
+            }
+        }
+        assertEquals(17,chapters.size());assertEquals(191,real);assertEquals(41,atlas);
+        for(var chapter:chapters)for(var value:chapter.getAsJsonArray("quests"))for(var d:value.getAsJsonObject().getAsJsonArray("dependencies"))assertTrue(quests.contains(d.getAsString()),d.toString());
+        for(String e:List.of("water","fire","lightning","wind","earth","light","dark"))for(int tier=1;tier<=5;tier++){
+            String name=e+"_wand_"+tier;assertNotNull(getClass().getResource("/assets/tnc/models/item/"+name+".json"));
+            try(var stream=getClass().getResourceAsStream("/assets/tnc/textures/item/wands/"+name+".png")){assertNotNull(stream);var image=javax.imageio.ImageIO.read(stream);assertEquals(32,image.getWidth());assertEquals(32,image.getHeight());assertTrue(image.getColorModel().hasAlpha());}
+        }
+    }
     private GuidebookContent content() throws IOException {
         var stream=getClass().getResourceAsStream("/assets/tnc/guide/gameplay.json");
         assertNotNull(stream);
@@ -66,7 +89,7 @@ class GuidebookTest {
             Path file=Path.of("questbook","ftbquests","chapters",String.format("tnc_guide_%02d_%s.snbt",i+1,page.id()));
             var chapter=JsonParser.parseString(Files.readString(file)).getAsJsonObject();
             assertEquals("544E434755494445",chapter.get("group").getAsString());
-            assertEquals(-100+i,chapter.get("order_index").getAsInt());
+            assertEquals(i==0?-200:-100+i,chapter.get("order_index").getAsInt());
             assertTrue(ids.add(chapter.get("id").getAsString()));
             var nodes=chapter.getAsJsonArray("quests");
             assertEquals(1+page.sections().size()+page.illustrations().size(),nodes.size());
@@ -83,7 +106,7 @@ class GuidebookTest {
                 }
             }
             for(var section:page.sections())assertTrue(titles.contains(section.heading()));
-            assertEquals(page.illustrations().size(),chapter.getAsJsonArray("images").size());
+            assertEquals(page.illustrations().size()+(i==0?1:0),chapter.getAsJsonArray("images").size());
         }
     }
     @Test void rejectedStandaloneGuideDoesNotInterceptTheStoryOrRegisterAKey() throws IOException {

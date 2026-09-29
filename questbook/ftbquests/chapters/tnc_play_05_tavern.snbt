@@ -1,0 +1,439 @@
+{
+  "id": "544E450100000005",
+  "filename": "tnc_play_05_tavern",
+  "group": "544E434755494445",
+  "title": "&e&l城镇履历 · 酒馆与岗位",
+  "icon": "bountiful:bountyboard",
+  "order_index": -105,
+  "default_hide_dependency_lines": false,
+  "default_quest_shape": "hexagon",
+  "quest_links": [],
+  "images": [],
+  "quests": [
+    {
+      "id": "544E45020000007A",
+      "title": "酒馆履历 · 1次",
+      "icon": "bountiful:bounty",
+      "x": -10,
+      "y": 0,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l酒馆履历 · 1次",
+        "",
+        "&f完成实际Bountiful城镇纸张交付。账户奖励只在原生结算时发放；本任务书不重复送钱。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000007A",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/bounties_1",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E45020000007B",
+      "title": "酒馆履历 · 5次",
+      "icon": "bountiful:bounty",
+      "x": -6,
+      "y": 0,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l酒馆履历 · 5次",
+        "",
+        "&f完成实际Bountiful城镇纸张交付。账户奖励只在原生结算时发放；本任务书不重复送钱。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000007B",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/bounties_5",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E45020000007C",
+      "title": "酒馆履历 · 10次",
+      "icon": "bountiful:bounty",
+      "x": -2,
+      "y": 0,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l酒馆履历 · 10次",
+        "",
+        "&f完成实际Bountiful城镇纸张交付。账户奖励只在原生结算时发放；本任务书不重复送钱。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000007C",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/bounties_10",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E45020000007D",
+      "title": "酒馆履历 · 25次",
+      "icon": "bountiful:bounty",
+      "x": 2,
+      "y": 0,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l酒馆履历 · 25次",
+        "",
+        "&f完成实际Bountiful城镇纸张交付。账户奖励只在原生结算时发放；本任务书不重复送钱。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000007D",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/bounties_25",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E45020000007E",
+      "title": "酒馆履历 · 50次",
+      "icon": "bountiful:bounty",
+      "x": 6,
+      "y": 0,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l酒馆履历 · 50次",
+        "",
+        "&f完成实际Bountiful城镇纸张交付。账户奖励只在原生结算时发放；本任务书不重复送钱。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000007E",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/bounties_50",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E45020000007F",
+      "title": "酒馆履历 · 100次",
+      "icon": "bountiful:bounty",
+      "x": 10,
+      "y": 0,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l酒馆履历 · 100次",
+        "",
+        "&f完成实际Bountiful城镇纸张交付。账户奖励只在原生结算时发放；本任务书不重复送钱。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000007F",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/bounties_100",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E450200000080",
+      "title": "冒险等级 · Lv5",
+      "icon": "minecraft:experience_bottle",
+      "x": -14,
+      "y": 6,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l冒险等级 · Lv5",
+        "",
+        "&f通过真实讨伐与委托获得永久经验。附魔消费不会降低冒险等级。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000080",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/level_5",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E450200000081",
+      "title": "冒险等级 · Lv10",
+      "icon": "minecraft:experience_bottle",
+      "x": -10,
+      "y": 6,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l冒险等级 · Lv10",
+        "",
+        "&f通过真实讨伐与委托获得永久经验。附魔消费不会降低冒险等级。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000081",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/level_10",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E450200000082",
+      "title": "冒险等级 · Lv20",
+      "icon": "minecraft:experience_bottle",
+      "x": -6,
+      "y": 6,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l冒险等级 · Lv20",
+        "",
+        "&f通过真实讨伐与委托获得永久经验。附魔消费不会降低冒险等级。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000082",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/level_20",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E450200000083",
+      "title": "冒险等级 · Lv30",
+      "icon": "minecraft:experience_bottle",
+      "x": -2,
+      "y": 6,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l冒险等级 · Lv30",
+        "",
+        "&f通过真实讨伐与委托获得永久经验。附魔消费不会降低冒险等级。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000083",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/level_30",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E450200000084",
+      "title": "冒险等级 · Lv50",
+      "icon": "minecraft:experience_bottle",
+      "x": 2,
+      "y": 6,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l冒险等级 · Lv50",
+        "",
+        "&f通过真实讨伐与委托获得永久经验。附魔消费不会降低冒险等级。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000084",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/level_50",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E450200000085",
+      "title": "冒险等级 · Lv70",
+      "icon": "minecraft:experience_bottle",
+      "x": 6,
+      "y": 6,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l冒险等级 · Lv70",
+        "",
+        "&f通过真实讨伐与委托获得永久经验。附魔消费不会降低冒险等级。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000085",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/level_70",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E450200000086",
+      "title": "冒险等级 · Lv85",
+      "icon": "minecraft:experience_bottle",
+      "x": 10,
+      "y": 6,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l冒险等级 · Lv85",
+        "",
+        "&f通过真实讨伐与委托获得永久经验。附魔消费不会降低冒险等级。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000086",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/level_85",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E450200000087",
+      "title": "冒险等级 · Lv100",
+      "icon": "minecraft:experience_bottle",
+      "x": 14,
+      "y": 6,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l冒险等级 · Lv100",
+        "",
+        "&f通过真实讨伐与委托获得永久经验。附魔消费不会降低冒险等级。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000087",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/level_100",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E450200000088",
+      "title": "艾琳 · 协会接待",
+      "icon": "tnc:adventure_handbook",
+      "x": -4,
+      "y": 11,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l艾琳 · 协会接待",
+        "",
+        "&f找到并右键对应独立NPC。Self保持原有剧情身份。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000088",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/met_guild",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E450200000089",
+      "title": "莉娅 · 潮生制杖屋",
+      "icon": "minecraft:anvil",
+      "x": 0,
+      "y": 11,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l莉娅 · 潮生制杖屋",
+        "",
+        "&f找到并右键对应独立NPC。Self保持原有剧情身份。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000089",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/met_smith",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    },
+    {
+      "id": "544E45020000008A",
+      "title": "米洛 · 归航银行",
+      "icon": "minecraft:map",
+      "x": 4,
+      "y": 11,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l米洛 · 归航银行",
+        "",
+        "&f找到并右键对应独立NPC。Self保持原有剧情身份。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000008A",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/met_broker",
+          "criterion": "done",
+          "title": "完成真实行为"
+        }
+      ]
+    }
+  ]
+}

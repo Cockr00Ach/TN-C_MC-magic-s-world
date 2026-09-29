@@ -7,6 +7,10 @@ public final class AdventureProfile {
     long xp, coins, completedEpoch = -1, smithReady = -1;
     int reputation, rank, learningBase = 4;
     boolean registered, crafted, smithFree;
+    boolean armorCrafted;
+    String smithDesign="";
+    int nativeBounties;
+    int adventureKills,bossKills;
     final Set<String> milestones = new LinkedHashSet<>();
     final Set<String> paidOffers = new LinkedHashSet<>();
     final Map<String, ContractProgress> contracts = new LinkedHashMap<>();

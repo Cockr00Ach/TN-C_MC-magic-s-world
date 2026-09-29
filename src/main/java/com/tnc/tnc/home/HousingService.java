@@ -21,6 +21,7 @@ import java.util.*;
 /** Sale is a real marked source cottage. Unexpected changes stop purchase, never erase player work. */
 public final class HousingService {
     public static final String ID="south_cottage";
+    private static final TicketType<net.minecraft.world.level.ChunkPos> BANK_INSPECTION=TicketType.create("tnc_bank_house_inspection",Comparator.comparingLong(net.minecraft.world.level.ChunkPos::toLong),200);
     public record Cell(BlockPos local,BlockState state,boolean clear){}
     public record Blueprint(BlockPos min,BlockPos max,BlockPos entry,List<Cell> cells){}
     private static BlockPos pos(JsonArray a){return new BlockPos(a.get(0).getAsInt(),a.get(1).getAsInt(),a.get(2).getAsInt());}
@@ -56,7 +57,15 @@ public final class HousingService {
     public static String buy(ServerPlayer p) {
         if(p.level()!=p.server.overworld())return "住宅位于主世界天空岛。";
         var origin=sourceOrigin(p.serverLevel());if(origin==null||!SkyIslandAnchors.isComplete(p.serverLevel()))return "天空岛还未完成，尚无可售房源。";
-        try{return buyAt(p,origin,blueprint(p.serverLevel()));}catch(Exception e){var t=home(p.server);return t.hasUUID("Owner")&&t.getUUID("Owner").equals(p.getUUID())?"住宅已预留；整理遇到问题，产权与扣款已保存："+e.getMessage():"住宅预检停止，未扣款："+e.getMessage();}
+        var chunks=new HashSet<net.minecraft.world.level.ChunkPos>();boolean waiting=false;
+        try{
+            var plan=blueprint(p.serverLevel());var level=p.serverLevel();
+            for(var cell:plan.cells())chunks.add(new net.minecraft.world.level.ChunkPos(origin.offset(cell.local())));
+            for(var chunk:chunks)level.getChunkSource().addRegionTicket(BANK_INSPECTION,chunk,2,chunk);
+            if(chunks.stream().anyMatch(c->!level.hasChunk(c.x,c.z))){waiting=true;return "银行正在调取南街房源，请稍候再次确认购买；尚未扣款。";}
+            return buyAt(p,origin,plan);
+        }catch(Exception e){var t=home(p.server);return t.hasUUID("Owner")&&t.getUUID("Owner").equals(p.getUUID())?"住宅已预留；整理遇到问题，产权与扣款已保存："+e.getMessage():"住宅预检停止，未扣款："+e.getMessage();}
+        finally{if(!waiting)for(var chunk:chunks)p.serverLevel().getChunkSource().removeRegionTicket(BANK_INSPECTION,chunk,2,chunk);}
     }
     static String buyAt(ServerPlayer p,BlockPos origin,Blueprint blueprint) throws Exception {
         var store=AdventureSavedData.get(p.server);var existing=home(p.server);

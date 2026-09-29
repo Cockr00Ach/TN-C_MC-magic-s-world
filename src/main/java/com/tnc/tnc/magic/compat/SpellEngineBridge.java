@@ -191,16 +191,21 @@ public final class SpellEngineBridge {
                 }
                 // 按目录（= 等级）排序，让槽位顺序稳定可预期
                 List<String> wanted = orderedSpellIds(learned);
+                var fullKnowledge=new java.util.LinkedHashSet<ResourceLocation>(learned);
+                var stone=com.tnc.tnc.magic.MagicStone.getOrNull(player);
+                if(stone!=null)fullKnowledge.addAll(stone.getLearned());
 
                 int found = 0;
                 int rewritten = 0;
                 for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
                     ItemStack stack = player.getInventory().getItem(slot);
-                    if (stack.isEmpty() || !stack.is(wandItem)) {
+                    if (stack.isEmpty() || (!stack.is(wandItem)&&!(stack.getItem() instanceof com.tnc.tnc.adventure.ElementWands.Wand))) {
                         continue;
                     }
                     found++;
-                    if (writeIfDifferent(stack, wanted)) {
+                    var supported=stack.getItem() instanceof com.tnc.tnc.adventure.ElementWands.Wand typed
+                            ?orderedSpellIds(com.tnc.tnc.adventure.ElementWands.supported(fullKnowledge,typed.design)):wanted;
+                    if (writeIfDifferent(stack, supported)) {
                         rewritten++;
                     }
                 }

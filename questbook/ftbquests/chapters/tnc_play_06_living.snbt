@@ -1,0 +1,689 @@
+{
+  "id": "544E450100000006",
+  "filename": "tnc_play_06_living",
+  "group": "544E434755494445",
+  "title": "&a&l归处续篇 · 厨房与装点",
+  "icon": "tnc:food_pouch",
+  "order_index": -104,
+  "default_hide_dependency_lines": false,
+  "default_quest_shape": "hexagon",
+  "quest_links": [],
+  "images": [],
+  "quests": [
+    {
+      "id": "544E45020000008B",
+      "title": "烘焙料理",
+      "icon": "minecraft:bread",
+      "x": -10,
+      "y": 0,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l烘焙料理",
+        "",
+        "&f准备并持有料理，可自食、收进行囊或送给成年邻居。此目标不消耗料理。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000008B",
+          "type": "item",
+          "item": "minecraft:bread",
+          "count": 8,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000008C",
+      "title": "炉边料理",
+      "icon": "minecraft:baked_potato",
+      "x": -6,
+      "y": 0,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l炉边料理",
+        "",
+        "&f准备并持有料理，可自食、收进行囊或送给成年邻居。此目标不消耗料理。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000008C",
+          "type": "item",
+          "item": "minecraft:baked_potato",
+          "count": 8,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000008D",
+      "title": "河鲜料理",
+      "icon": "minecraft:cooked_cod",
+      "x": -2,
+      "y": 0,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l河鲜料理",
+        "",
+        "&f准备并持有料理，可自食、收进行囊或送给成年邻居。此目标不消耗料理。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000008D",
+          "type": "item",
+          "item": "minecraft:cooked_cod",
+          "count": 8,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000008E",
+      "title": "归渔料理",
+      "icon": "minecraft:cooked_salmon",
+      "x": 2,
+      "y": 0,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l归渔料理",
+        "",
+        "&f准备并持有料理，可自食、收进行囊或送给成年邻居。此目标不消耗料理。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000008E",
+          "type": "item",
+          "item": "minecraft:cooked_salmon",
+          "count": 8,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000008F",
+      "title": "丰收料理",
+      "icon": "minecraft:pumpkin_pie",
+      "x": 6,
+      "y": 0,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l丰收料理",
+        "",
+        "&f准备并持有料理，可自食、收进行囊或送给成年邻居。此目标不消耗料理。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000008F",
+          "type": "item",
+          "item": "minecraft:pumpkin_pie",
+          "count": 4,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000090",
+      "title": "午后料理",
+      "icon": "minecraft:cookie",
+      "x": 10,
+      "y": 0,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l午后料理",
+        "",
+        "&f准备并持有料理，可自食、收进行囊或送给成年邻居。此目标不消耗料理。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000090",
+          "type": "item",
+          "item": "minecraft:cookie",
+          "count": 16,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000091",
+      "title": "林间料理",
+      "icon": "minecraft:mushroom_stew",
+      "x": -10,
+      "y": 4,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l林间料理",
+        "",
+        "&f准备并持有料理，可自食、收进行囊或送给成年邻居。此目标不消耗料理。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000091",
+          "type": "item",
+          "item": "minecraft:mushroom_stew",
+          "count": 4,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000092",
+      "title": "炖锅料理",
+      "icon": "minecraft:rabbit_stew",
+      "x": -6,
+      "y": 4,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l炖锅料理",
+        "",
+        "&f准备并持有料理，可自食、收进行囊或送给成年邻居。此目标不消耗料理。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000092",
+          "type": "item",
+          "item": "minecraft:rabbit_stew",
+          "count": 2,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000093",
+      "title": "田野料理",
+      "icon": "minecraft:beetroot_soup",
+      "x": -2,
+      "y": 4,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l田野料理",
+        "",
+        "&f准备并持有料理，可自食、收进行囊或送给成年邻居。此目标不消耗料理。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000093",
+          "type": "item",
+          "item": "minecraft:beetroot_soup",
+          "count": 4,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000094",
+      "title": "远行料理",
+      "icon": "minecraft:golden_carrot",
+      "x": 2,
+      "y": 4,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l远行料理",
+        "",
+        "&f准备并持有料理，可自食、收进行囊或送给成年邻居。此目标不消耗料理。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000094",
+          "type": "item",
+          "item": "minecraft:golden_carrot",
+          "count": 4,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000095",
+      "title": "蜂蜜料理",
+      "icon": "minecraft:honey_bottle",
+      "x": 6,
+      "y": 4,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l蜂蜜料理",
+        "",
+        "&f准备并持有料理，可自食、收进行囊或送给成年邻居。此目标不消耗料理。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000095",
+          "type": "item",
+          "item": "minecraft:honey_bottle",
+          "count": 4,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000096",
+      "title": "首领珍馐 · 第1席",
+      "icon": "tnc:boss_feast_1",
+      "x": -14,
+      "y": 10,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l首领珍馐 · 第1席",
+        "",
+        "&f独立首领珍料＋熟牛肉＋碗制作。每种首次品尝永久生命+2；仅持有此节点不会发放生命奖励。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000096",
+          "type": "item",
+          "item": "tnc:boss_feast_1",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000097",
+      "title": "首领珍馐 · 第2席",
+      "icon": "tnc:boss_feast_2",
+      "x": -10,
+      "y": 10,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l首领珍馐 · 第2席",
+        "",
+        "&f独立首领珍料＋熟牛肉＋碗制作。每种首次品尝永久生命+2；仅持有此节点不会发放生命奖励。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000097",
+          "type": "item",
+          "item": "tnc:boss_feast_2",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000098",
+      "title": "首领珍馐 · 第3席",
+      "icon": "tnc:boss_feast_3",
+      "x": -6,
+      "y": 10,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l首领珍馐 · 第3席",
+        "",
+        "&f独立首领珍料＋熟牛肉＋碗制作。每种首次品尝永久生命+2；仅持有此节点不会发放生命奖励。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000098",
+          "type": "item",
+          "item": "tnc:boss_feast_3",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E450200000099",
+      "title": "首领珍馐 · 第4席",
+      "icon": "tnc:boss_feast_4",
+      "x": -2,
+      "y": 10,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l首领珍馐 · 第4席",
+        "",
+        "&f独立首领珍料＋熟牛肉＋碗制作。每种首次品尝永久生命+2；仅持有此节点不会发放生命奖励。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E450300000099",
+          "type": "item",
+          "item": "tnc:boss_feast_4",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000009A",
+      "title": "首领珍馐 · 第5席",
+      "icon": "tnc:boss_feast_5",
+      "x": 2,
+      "y": 10,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l首领珍馐 · 第5席",
+        "",
+        "&f独立首领珍料＋熟牛肉＋碗制作。每种首次品尝永久生命+2；仅持有此节点不会发放生命奖励。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000009A",
+          "type": "item",
+          "item": "tnc:boss_feast_5",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000009B",
+      "title": "首领珍馐 · 第6席",
+      "icon": "tnc:boss_feast_6",
+      "x": 6,
+      "y": 10,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l首领珍馐 · 第6席",
+        "",
+        "&f独立首领珍料＋熟牛肉＋碗制作。每种首次品尝永久生命+2；仅持有此节点不会发放生命奖励。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000009B",
+          "type": "item",
+          "item": "tnc:boss_feast_6",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000009C",
+      "title": "首领珍馐 · 第7席",
+      "icon": "tnc:boss_feast_7",
+      "x": 10,
+      "y": 10,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l首领珍馐 · 第7席",
+        "",
+        "&f独立首领珍料＋熟牛肉＋碗制作。每种首次品尝永久生命+2；仅持有此节点不会发放生命奖励。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000009C",
+          "type": "item",
+          "item": "tnc:boss_feast_7",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000009D",
+      "title": "首领珍馐 · 第8席",
+      "icon": "tnc:boss_feast_8",
+      "x": 14,
+      "y": 10,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l首领珍馐 · 第8席",
+        "",
+        "&f独立首领珍料＋熟牛肉＋碗制作。每种首次品尝永久生命+2；仅持有此节点不会发放生命奖励。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000009D",
+          "type": "item",
+          "item": "tnc:boss_feast_8",
+          "count": 1,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000009E",
+      "title": "收纳",
+      "icon": "minecraft:chest",
+      "x": -14,
+      "y": 16,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l收纳",
+        "",
+        "&f自购空屋后自行布置。持有任务不越过产权保护，不自动替玩家装修。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000009E",
+          "type": "item",
+          "item": "minecraft:chest",
+          "count": 4,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E45020000009F",
+      "title": "装修用材",
+      "icon": "minecraft:oak_planks",
+      "x": -10,
+      "y": 16,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l装修用材",
+        "",
+        "&f自购空屋后自行布置。持有任务不越过产权保护，不自动替玩家装修。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E45030000009F",
+          "type": "item",
+          "item": "minecraft:oak_planks",
+          "count": 64,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E4502000000A0",
+      "title": "暖灯",
+      "icon": "minecraft:lantern",
+      "x": -6,
+      "y": 16,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l暖灯",
+        "",
+        "&f自购空屋后自行布置。持有任务不越过产权保护，不自动替玩家装修。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E4503000000A0",
+          "type": "item",
+          "item": "minecraft:lantern",
+          "count": 8,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E4502000000A1",
+      "title": "窗台",
+      "icon": "minecraft:flower_pot",
+      "x": -2,
+      "y": 16,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l窗台",
+        "",
+        "&f自购空屋后自行布置。持有任务不越过产权保护，不自动替玩家装修。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E4503000000A1",
+          "type": "item",
+          "item": "minecraft:flower_pot",
+          "count": 4,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E4502000000A2",
+      "title": "书房",
+      "icon": "minecraft:bookshelf",
+      "x": 2,
+      "y": 16,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l书房",
+        "",
+        "&f自购空屋后自行布置。持有任务不越过产权保护，不自动替玩家装修。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E4503000000A2",
+          "type": "item",
+          "item": "minecraft:bookshelf",
+          "count": 6,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E4502000000A3",
+      "title": "纪念墙",
+      "icon": "minecraft:painting",
+      "x": 6,
+      "y": 16,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l纪念墙",
+        "",
+        "&f自购空屋后自行布置。持有任务不越过产权保护，不自动替玩家装修。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E4503000000A3",
+          "type": "item",
+          "item": "minecraft:painting",
+          "count": 2,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E4502000000A4",
+      "title": "安稳的床",
+      "icon": "minecraft:white_bed",
+      "x": 10,
+      "y": 16,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l安稳的床",
+        "",
+        "&f自购空屋后自行布置。持有任务不越过产权保护，不自动替玩家装修。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E4503000000A4",
+          "type": "item",
+          "item": "minecraft:white_bed",
+          "count": 2,
+          "consume_items": false
+        }
+      ]
+    },
+    {
+      "id": "544E4502000000A5",
+      "title": "庭院",
+      "icon": "minecraft:composter",
+      "x": 14,
+      "y": 16,
+      "size": 1.1,
+      "shape": "hexagon",
+      "description": [
+        "&b&l庭院",
+        "",
+        "&f自购空屋后自行布置。持有任务不越过产权保护，不自动替玩家装修。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E4503000000A5",
+          "type": "item",
+          "item": "minecraft:composter",
+          "count": 2,
+          "consume_items": false
+        }
+      ]
+    }
+  ]
+}

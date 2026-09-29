@@ -1,0 +1,136 @@
+{
+  "content": {
+    "tnc_hunt_zombie": {
+      "type": "entity",
+      "content": "minecraft:zombie",
+      "amount": {
+        "min": 3,
+        "max": 12
+      },
+      "unitWorth": 350,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_hunt_skeleton": {
+      "type": "entity",
+      "content": "minecraft:skeleton",
+      "amount": {
+        "min": 3,
+        "max": 10
+      },
+      "unitWorth": 400,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_hunt_spider": {
+      "type": "entity",
+      "content": "minecraft:spider",
+      "amount": {
+        "min": 3,
+        "max": 10
+      },
+      "unitWorth": 300,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_hunt_creeper": {
+      "type": "entity",
+      "content": "minecraft:creeper",
+      "amount": {
+        "min": 2,
+        "max": 8
+      },
+      "unitWorth": 550,
+      "rarity": "UNCOMMON",
+      "timeMult": 2.0
+    },
+    "tnc_hunt_drowned": {
+      "type": "entity",
+      "content": "minecraft:drowned",
+      "amount": {
+        "min": 2,
+        "max": 8
+      },
+      "unitWorth": 450,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_hunt_husk": {
+      "type": "entity",
+      "content": "minecraft:husk",
+      "amount": {
+        "min": 2,
+        "max": 8
+      },
+      "unitWorth": 400,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_hunt_stray": {
+      "type": "entity",
+      "content": "minecraft:stray",
+      "amount": {
+        "min": 2,
+        "max": 8
+      },
+      "unitWorth": 450,
+      "rarity": "COMMON",
+      "timeMult": 2.0
+    },
+    "tnc_hunt_enderman": {
+      "type": "entity",
+      "content": "minecraft:enderman",
+      "amount": {
+        "min": 1,
+        "max": 5
+      },
+      "unitWorth": 900,
+      "rarity": "RARE",
+      "timeMult": 2.0
+    },
+    "tnc_hunt_blaze": {
+      "type": "entity",
+      "content": "minecraft:blaze",
+      "amount": {
+        "min": 2,
+        "max": 6
+      },
+      "unitWorth": 850,
+      "rarity": "UNCOMMON",
+      "timeMult": 2.0
+    },
+    "tnc_hunt_wither_skeleton": {
+      "type": "entity",
+      "content": "minecraft:wither_skeleton",
+      "amount": {
+        "min": 1,
+        "max": 5
+      },
+      "unitWorth": 1000,
+      "rarity": "RARE",
+      "timeMult": 2.0
+    },
+    "tnc_hunt_witch": {
+      "type": "entity",
+      "content": "minecraft:witch",
+      "amount": {
+        "min": 1,
+        "max": 4
+      },
+      "unitWorth": 1000,
+      "rarity": "RARE",
+      "timeMult": 2.0
+    },
+    "tnc_hunt_pillager": {
+      "type": "entity",
+      "content": "minecraft:pillager",
+      "amount": {
+        "min": 2,
+        "max": 6
+      },
+      "unitWorth": 600,
+      "rarity": "UNCOMMON",
+      "timeMult": 2.0
+    }
+  }
+}

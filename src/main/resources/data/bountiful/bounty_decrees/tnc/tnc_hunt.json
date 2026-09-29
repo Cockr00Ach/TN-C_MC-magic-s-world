@@ -1,0 +1,8 @@
+{
+  "objectives": [
+    "tnc_hunt_objs"
+  ],
+  "rewards": [
+    "tnc_hunt_rews"
+  ]
+}
