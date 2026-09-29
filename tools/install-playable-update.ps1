@@ -31,6 +31,7 @@ foreach($chapter in $chapters){
 }
 foreach($name in @('water_focus_1','water_staff_2','water_staff_3','water_staff_4','water_staff_5','onboarding_header','gui_world_title','town_atlas')){Add-InstallFile (Join-Path $TncRepoRoot "src\main\resources\assets\tnc\textures\guide\$name.png") "kubejs\assets\tnc\textures\guide\$name.png"}
 Add-InstallFile (Join-Path $sourcePack 'kubejs\assets\tnc\textures\spell\divine_shot.png') 'kubejs\assets\tnc\textures\spell\divine_shot.png'
+Add-InstallFile (Join-Path $sourcePack 'kubejs\assets\tnc\textures\spell\god_descent.png') 'kubejs\assets\tnc\textures\spell\god_descent.png'
 # Whitelisted TN-C resources only. Existing legacy task definitions are deliberately retained.
 foreach($relativeRoot in @('kubejs\data\tnc\whisperingquests','kubejs\data\tnc\dialogues')){
     $directory=Join-Path $sourcePack $relativeRoot

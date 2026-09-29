@@ -94,6 +94,8 @@ for r in records:
     r['proposal']=proposals[r['number']]
     if r['number'] in public:r['category']='NPC公共' if r['number'] not in {18,20,33} else '公共保留'
     r['note']='建筑/入口群编号；连体楼及18/20号需按用途分区人工核对。候选商店尚未实现交易，候选住宅尚未出售。'
+    if r['number']==19:r['proposal']='归航银行：米洛办理存取币与全款购房；借贷/分期为设计方案'
+    if r['number']==41:r['proposal']='东侧酒馆：上楼北侧Self、艾琳与Bountiful原生委托栏'
 json.dump(records,(OUT/'建筑编号.json').open('w',encoding='utf-8'),ensure_ascii=False,indent=2)
 with (OUT/'建筑用途提案.csv').open('w',encoding='utf-8-sig',newline='') as f:
     w=csv.writer(f);w.writerow(['编号','类别','建议用途','局部入口X','局部入口Y','局部入口Z','门数量'])

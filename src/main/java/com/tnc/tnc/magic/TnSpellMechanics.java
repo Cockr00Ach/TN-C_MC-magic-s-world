@@ -576,10 +576,6 @@ public final class TnSpellMechanics {
         if (time % 40 == 0&&!com.tnc.tnc.combat.DownedCombat.isDowned(player)) {
             autoLearnUnlockedAndSync(player);
         }
-        // 链上法术自动补学（每 40 tick 一次）✓
-        if (time % 40 == 0) {
-            autoLearnUnlockedAndSync(player);
-        }
         // 雷场 / 雷暴：窗口内自己劈敌人（视觉＋伤害都在里面）✓
         tickLightningField(player, time);
         tickDivineShot(player, time);
@@ -995,30 +991,14 @@ public final class TnSpellMechanics {
         }
         boolean learned = false;
         for (SpellCatalog.Entry entry : SpellCatalog.all()) {
-            if (data.hasLearned(entry.id())) {
-                continue;
-            }
-            if (entry.tier() > data.maxTierFor(entry.element())) {
-                continue;                       // 档位还没到 ✓
-            }
-            if (entry.tier() > 1) {
-                boolean previousLearned = false;
-                for (SpellCatalog.Entry other : SpellCatalog.all()) {
-                    if (other.chain() == entry.chain() && other.tier() == entry.tier() - 1
-                            && data.hasLearned(other.id())) {
-                        previousLearned = true;
-                        break;
-                    }
-                }
-                if (!previousLearned) {
-                    continue;                   // 上一档没学会 → 不越级补 ✓
-                }
-            }
-            MagicStoneLearning.unlock(data, entry);
-            learned = true;
+            // Restore only known chain tiers. Independent magic has no element;
+            // explicit forgetting and unspent learning points belong to the player.
+            if(!MagicStoneLearning.isElementalAutoLearnCandidate(data,entry))continue;
+            if(com.tnc.tnc.magic.compat.SpellEngineBridge.hasSpell(entry.id()))learned|=data.learn(entry.id());
         }
         if (learned) {
             com.tnc.tnc.network.MagicStoneNetwork.syncTo(player);
+            com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(player,SpellCatalog.effectiveIds(data));
             org.apache.logging.log4j.LogManager.getLogger("TN-C/learn")
                     .info("TN-C: auto-learn synced (chain spells added to magic stone)");
         }

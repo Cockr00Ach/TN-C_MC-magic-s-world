@@ -21,8 +21,11 @@ public final class HomeGameTests {
         try{
             String waiting=HousingService.buy(buyer);h.assertTrue(waiting.contains("调取")&&AdventureService.profile(buyer).coins()==1000&&!HousingService.home(l.getServer()).hasUUID("Owner"),"Remote unloaded plot starts loading without charging");
             h.runAfterDelay(100,()->{try{
+                // Other world-template test fixtures also replace SavedData while their
+                // asynchronous work runs; reselect this fixture for the public call.
+                l.getDataStorage().set("tnc_sky_island_v5",(net.minecraft.world.level.saveddata.SavedData)load.invoke(null,tag));
                 String checked=HousingService.buy(buyer);h.assertTrue(checked.contains("已有改动")&&AdventureService.profile(buyer).coins()==1000&&!HousingService.home(l.getServer()).hasUUID("Owner"),"Bank loads remote plot and strict source preflight rejects empty terrain without charging: "+checked);h.succeed();
-            }finally{l.getDataStorage().set("tnc_sky_island_v5",oldIsland);AdventureSavedData.get(l.getServer()).housing=oldHousing;}});
+            }catch(Exception e){h.fail(e.toString());}finally{l.getDataStorage().set("tnc_sky_island_v5",oldIsland);AdventureSavedData.get(l.getServer()).housing=oldHousing;}});
         }catch(Exception|Error e){l.getDataStorage().set("tnc_sky_island_v5",oldIsland);AdventureSavedData.get(l.getServer()).housing=oldHousing;throw e;}
     }
     @GameTest(template="building_test_empty",batch="source_house",timeoutTicks=150)

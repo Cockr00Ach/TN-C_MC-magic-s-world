@@ -70,16 +70,8 @@ public final class ManaGate {
             return Decision.NO_WAND;
         }
         if (requireLearned && !data.hasLearned(entry.id())) {
-            // ★ 2026-09-29 作者："t5 放不出来、不扣蓝、也没模型" —— 日志实锤：这一整局
-            // `god_descent` 出现 0 次、也没有任何"已解锁"那行 ⇒ 那个法术**从没被学会**，
-            // 而 /tnc learn 那步在他那边始终没送到服务器 ✗（日志只有客户端聊天文字）。
-            // 解决方法：**第一次想放它就就地补学** ✓ —— 学得下来（点数够、档位够）就放行 ✓，
-            // 学不下来才拦 ✓（不再依赖手动敲命令 ✗）。
-            MagicStoneLearning.unlock(data, entry);
-            if (!data.hasLearned(entry.id())) {
-                org.apache.logging.log4j.LogManager.getLogger("TN-C/gate").info("TN-C: gate BLOCKED {} reason=NOT_LEARNED", entry.id());
-                return Decision.NOT_LEARNED;
-            }
+            org.apache.logging.log4j.LogManager.getLogger("TN-C/gate").info("TN-C: gate BLOCKED {} reason=NOT_LEARNED", entry.id());
+            return Decision.NOT_LEARNED;
         }
         if (data.getMana() < entry.manaCostFor(data.getMaxMana())) {
             org.apache.logging.log4j.LogManager.getLogger("TN-C/gate").info("TN-C: gate BLOCKED {} reason=NOT_ENOUGH_MANA {} / {}", entry.id(), data.getMana(), entry.manaCostFor(data.getMaxMana()));
@@ -174,8 +166,18 @@ public final class ManaGate {
             return false;
         }
 
+        boolean supported=hasWandFor(serverPlayer,entry);
+        // Casting is an explicit player request. Keep periodic repair and pure
+        // evaluate free of purchases; only a real eligible cast may learn here.
+        if(com.tnc.tnc.Config.requireLearnedToCast&&!data.hasLearned(entry.id())&&!data.isExplicitlyForgotten(entry.id())
+                &&(!com.tnc.tnc.Config.requireWandToCast||supported)
+                &&MagicStoneLearning.unlock(data,entry)==MagicStoneLearning.Result.OK){
+            com.tnc.tnc.network.MagicStoneNetwork.syncTo(serverPlayer);
+            com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(serverPlayer,SpellCatalog.effectiveIds(data));
+            com.tnc.tnc.adventure.AdventureService.milestone(serverPlayer,"learned");
+        }
         Decision decision = evaluate(data, entry, com.tnc.tnc.Config.requireLearnedToCast,
-                com.tnc.tnc.Config.requireWandToCast, hasWandFor(serverPlayer,entry));
+                com.tnc.tnc.Config.requireWandToCast, supported);
         if (decision == Decision.ALLOW) {
             return false;
         }

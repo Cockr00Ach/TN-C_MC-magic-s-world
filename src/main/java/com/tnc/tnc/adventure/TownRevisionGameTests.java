@@ -12,6 +12,26 @@ import java.util.*;
 @GameTestHolder("tnc") @PrefixGameTestTemplate(false)
 public final class TownRevisionGameTests {
     @GameTest(template="building_test_empty",timeoutTicks=40)
+    public static void castCatchUpIsExplicitAndCannotLearnWithWrongWand(GameTestHelper h){
+        var p=AdventureGameTests.player(h);var data=MagicStone.getOrNull(p);data.assignDefaultAffinities(3);
+        var entry=SpellCatalog.byId(ResourceLocation.parse("tnc:water_ball"));int points=data.getPointsAvailable(com.tnc.tnc.Config.pointThresholds);
+        h.assertTrue(ManaGate.evaluate(data,entry,true)==ManaGate.Decision.NOT_LEARNED&&!data.hasLearned(entry.id())&&data.getPointsAvailable(com.tnc.tnc.Config.pointThresholds)==points,"Pure check cannot buy a spell");
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,ElementWands.stack(ElementWands.find("fire_wand_1")));
+        h.assertTrue(ManaGate.shouldBlock(p,entry.id())&&!data.hasLearned(entry.id())&&data.getPointsAvailable(com.tnc.tnc.Config.pointThresholds)==points,"Wrong wand blocks before learning and spending");
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,ElementWands.stack(ElementWands.find("water_wand_1")));
+        h.assertTrue(!ManaGate.shouldBlock(p,entry.id())&&data.hasLearned(entry.id())&&data.getPointsAvailable(com.tnc.tnc.Config.pointThresholds)==points-com.tnc.tnc.Config.learnCostForTier(1),"Eligible real cast learns once and syncs");
+        ManaGate.shouldBlock(p,entry.id());h.assertTrue(data.getPointsAvailable(com.tnc.tnc.Config.pointThresholds)==points-com.tnc.tnc.Config.learnCostForTier(1),"Second cast cannot buy again");h.succeed();
+    }
+    @GameTest(template="building_test_empty",timeoutTicks=40)
+    public static void actualPeriodicCatchUpKeepsChaosAndForgottenSpellsSafe(GameTestHelper h)throws Exception{
+        var p=AdventureGameTests.player(h);var data=MagicStone.getOrNull(p);data.assignDefaultAffinities(5);
+        var known=SpellCatalog.byId(ResourceLocation.parse("tnc:water_ball"));var forgotten=SpellCatalog.byId(ResourceLocation.parse("tnc:dragon_ruin"));
+        data.setProgress(known.element(),known.chain(),1);data.setProgress(forgotten.element(),forgotten.chain(),5);data.learn(forgotten.id());data.forget(forgotten.id());
+        int points=data.getPointsAvailable(com.tnc.tnc.Config.pointThresholds);
+        var repair=TnSpellMechanics.class.getDeclaredMethod("autoLearnUnlockedAndSync",net.minecraft.server.level.ServerPlayer.class);repair.setAccessible(true);repair.invoke(null,p);repair.invoke(null,p);
+        h.assertTrue(data.hasLearned(known.id())&&!data.hasLearned(ResourceLocation.parse("tnc:chaos_magic"))&&!data.hasLearned(forgotten.id())&&data.getPointsAvailable(com.tnc.tnc.Config.pointThresholds)==points,"Actual periodic method repairs known tiers without null element, automatic new purchases or forgotten spell restoration");h.succeed();
+    }
+    @GameTest(template="building_test_empty",timeoutTicks=40)
     public static void bankConservesValueAndKeepsCoinsOnRejectedTransactions(GameTestHelper h){
         var p=AdventureGameTests.player(h);var a=AdventureService.profile(p);
         p.getInventory().setItem(0,new ItemStack(com.tnc.tnc.TNMod.COPPER_COIN.get(),7));

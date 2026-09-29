@@ -89,6 +89,7 @@ public final class AdventureScreen extends Screen {
         renderBackground(g);g.fill(left-2,top-2,left+panelWidth+2,top+panelHeight+2,0xFFA48257);g.fill(left,top,left+panelWidth,top+panelHeight,0xFFF1E7D5);
         g.fill(left,top,left+panelWidth,top+38,0xFF182C42);text(g,"TN-C  /  冒险者协会",left+16,top+14,0xF7E8CF);
         var p=profile();boolean local=data.getBoolean("AtService");
+        String hoveredDetail=null;
         int bodyStart=top+(tab==2?135:tab==4?115:tab==1?101:78),bodyEnd=top+panelHeight-(tab==3?99:tab==1?60:76);
         bodyLastY=bodyStart;bodyScroll=Math.min(bodyScroll,scrollLimit);
         g.enableScissor(left+12,bodyStart,left+panelWidth-12,Math.max(bodyStart+1,bodyEnd));g.pose().pushPose();g.pose().translate(0,-bodyScroll,0);
@@ -100,7 +101,7 @@ public final class AdventureScreen extends Screen {
             text(g,"余额  "+AdventureRules.money(p.coins()),left+20,y,0x544737);y+=20;
             y=paragraph(g,local?"艾琳负责登记与晋升。委托用原生栏；法杖找莉娅，装备找铎恩，房产找米洛。":"远行档案：可查看成长与委托。交易请到对应岗位办理。",y,0x635A4A);
             y=paragraph(g,data.getString("Directions"),y+8,0x246E78);
-            y+=10;for(var entry:data.getList("Ledger",8)){if(y>top+panelHeight-88)break;text(g,entry.getAsString(),left+20,y,0x635A4A);y+=12;}
+            y+=10;for(var entry:data.getList("Ledger",8)){text(g,entry.getAsString(),left+20,y,0x635A4A);y+=12;}bodyLastY=Math.max(bodyLastY,y);
         } else if(tab==1) {
             paragraph(g,"原生栏接取纸张，手持完成的委托右键酒馆栏交付。数量与期限见纸张；下方为教学/旧单归档。",top+103,0x635A4A);
             int rows=rows();var active=active();
@@ -113,7 +114,7 @@ public final class AdventureScreen extends Screen {
                 bodyLastY=Math.max(bodyLastY,y+30);
                 if(mx>=left+16&&mx<left+panelWidth-88&&my+bodyScroll>=y&&my+bodyScroll<y+32){
                     String detail=c.kills()>0?"接单后击杀 "+enemyName(c.enemy())+" × "+c.kills()+"。完成后回馆结算。":c.materials().stream().map(m->materialName(m)+" × "+m.count()).reduce((a,b)->a+"，"+b).orElse("")+"。提交消耗材料，返还碗/瓶。";
-                    g.renderTooltip(font,font.split(Component.literal(detail),Math.min(260,width-20)),mx,my);
+                    hoveredDetail=detail;
                 }
             }
         } else if(tab==2) {
@@ -147,6 +148,7 @@ public final class AdventureScreen extends Screen {
             if(mx>=left+20&&mx<=left+panelWidth-20&&my>=top+panelHeight-24&&my<top+panelHeight)g.renderTooltip(font,font.split(Component.literal(notice),Math.min(320,width-40)),mx,my);
         }
         super.render(g,mx,my,partial);
+        if(hoveredDetail!=null)g.renderTooltip(font,font.split(Component.literal(hoveredDetail),Math.min(260,width-20)),mx,my);
     }
     @Override public boolean mouseScrolled(double x,double y,double delta){if(x>=left&&x<=left+panelWidth&&y>=top+72&&y<top+panelHeight-76&&scrollLimit>0){bodyScroll=Math.max(0,Math.min(scrollLimit,bodyScroll-(int)(delta*18)));return true;}return super.mouseScrolled(x,y,delta);}
     @Override public void tick(){if(++ticks%20==0)send(AdventurePackets.Action.REQUEST,"");}
