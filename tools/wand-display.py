@@ -26,6 +26,21 @@ def held_pose(grip,angle,scale,sign,target_angle):
     return {'rotation':[0,sign*90,round(sign*z,6)],
             'translation':[0,round(-scale*y,6),round(scale*x,6)],'scale':[scale]*3}
 
+def first_person_pose(grip,angle,scale,sign):
+    # Vanilla's idle hand adds a 45 degree yaw. Keep the sprite's face toward
+    # the camera and its long axis nearly vertical in the camera plane.
+    z=82-angle
+    rz=math.radians(z)
+    yaw=math.radians(-25)
+    x=grip[0]*math.cos(rz)-grip[1]*math.sin(rz)
+    y=grip[0]*math.sin(rz)+grip[1]*math.cos(rz)
+    # ItemTransform mirrors Y/Z rotation and X translation for the left hand.
+    # Cancel the rotated grip in both hands without pushing the head into depth.
+    return {'rotation':[0,-25,round(sign*z,6)],
+            'translation':[round(-sign*scale*x*math.cos(yaw),6),
+                           round(-scale*y,6),round(sign*scale*x*math.sin(yaw),6)],
+            'scale':[scale]*3}
+
 def model(name, tier):
     scale = [0, 1.3, 1.55, 1.7, 1.85, 2.0][tier]
     grip,angle=grip_axis(name)
@@ -34,7 +49,7 @@ def model(name, tier):
         # The player model flips Y; ItemInHandLayer adds Rx(-90), Ry(180).
         # A head at local angle 170 degrees therefore points upward in-world.
         display['thirdperson_' + hand] = held_pose(grip,angle,scale,sign,170)
-        display['firstperson_' + hand] = held_pose(grip,angle,scale,sign,35)
+        display['firstperson_' + hand] = first_person_pose(grip,angle,scale,sign)
     return {'parent': 'minecraft:item/handheld', 'textures': {'layer0': 'tnc:item/wands/'+name}, 'display': display}
 
 if __name__ == '__main__':

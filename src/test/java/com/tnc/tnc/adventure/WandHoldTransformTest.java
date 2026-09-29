@@ -48,7 +48,7 @@ final class WandHoldTransformTest {
             }
         }
     }
-    @Test void firstPersonKeepsGripAtHandAndHeadAboveItInFrontOfCamera() throws IOException {
+    @Test void firstPersonShowsUprightWandFaceInsteadOfPointingIntoCameraDepth() throws IOException {
         for(String element:ELEMENTS)for(int tier=1;tier<=5;tier++) {
             String name=element+"_wand_"+tier;
             var image=ImageIO.read(getClass().getResourceAsStream("/assets/tnc/textures/item/wands/"+name+".png"));
@@ -57,8 +57,13 @@ final class WandHoldTransformTest {
                 var d=displays.getAsJsonObject("firstperson_"+(left?"lefthand":"righthand"));
                 var palm=pose(grip,d,left);
                 assertTrue(palm.length()<1,name+" first person grip must meet the hand");
-                var axis=pose(tip,d,left).sub(palm).rotateY((left?-1:1)*(float)Math.PI/4);
-                assertTrue(axis.y>axis.length()*.4&&axis.z<0,name+" head must rise away from the camera, hand="+left);
+                float cameraYaw=(left?-1:1)*(float)Math.PI/4;
+                var axis=pose(tip,d,left).sub(palm).rotateY(cameraYaw);
+                assertTrue(axis.y>axis.length()*.85&&Math.abs(axis.z)<axis.length()*.2,
+                        name+" must look upright rather than project forward, hand="+left+", axis="+axis);
+                var facing=pose(new Vector3f(0,0,1),d,left).sub(pose(new Vector3f(),d,left)).rotateY(cameraYaw);
+                assertTrue(Math.abs(facing.z)>facing.length()*.85,
+                        name+" sprite face must remain visible in first person, hand="+left+", facing="+facing);
             }
         }
     }
