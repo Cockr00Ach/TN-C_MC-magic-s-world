@@ -108,7 +108,7 @@ public class MagicStoneActionPacket {
             return;
         }
         int page = data.cycleLoadoutPage();
-        SpellEngineBridge.WandResult result = SpellEngineBridge.ensureWand(player, data);
+        SpellEngineBridge.WandResult result = SpellEngineBridge.ensureWand(player, data.learnedView());
         MagicStoneNetwork.syncTo(player);
         player.displayClientMessage(Component.literal("§b[TN-C] §r第 §e" + (page + 1) + "§r/"
                 + MagicStoneData.PAGE_COUNT + " 页 §7（"
@@ -139,7 +139,7 @@ public class MagicStoneActionPacket {
         if (!data.setSlot(value, id)) {
             return;
         }
-        SpellEngineBridge.ensureWand(player, data);
+        SpellEngineBridge.ensureWand(player, data.learnedView());
         MagicStoneNetwork.syncTo(player);
     }
 
@@ -155,7 +155,7 @@ public class MagicStoneActionPacket {
         if (!data.clearSlot(value)) {
             return;
         }
-        SpellEngineBridge.ensureWand(player, data);
+        SpellEngineBridge.ensureWand(player, data.learnedView());
         MagicStoneNetwork.syncTo(player);
     }
 
@@ -194,9 +194,9 @@ public class MagicStoneActionPacket {
         if (result == MagicStoneLearning.Result.OK || result == MagicStoneLearning.Result.ALREADY_LEARNED) {
             // 解锁成功 = 把"当前这一页的配装"同步进法杖（玩家看不到卷轴/法术书/注册台）。
             // 魔法石是权威数据，法杖只是它的一个投影。
-            // ⚠️ 走 ensureWand(player, data)：由它去问 SpellCatalog.wandSpellIds，
+            // ⚠️ 走 ensureWand(player, data.learnedView())：由它去问 SpellCatalog.wandSpellIds，
             //    这样"法杖上该有什么"只有一份口径（页号 + 配装），不会再被按等级排序的旧列表冲掉 ✗
-            SpellEngineBridge.WandResult synced = SpellEngineBridge.ensureWand(player, data);
+            SpellEngineBridge.WandResult synced = SpellEngineBridge.ensureWand(player, data.learnedView());
             player.sendSystemMessage(Component.literal("§7[TN-C] 法杖："
                     + SpellEngineBridge.describeWand(synced, data.loadoutCount())));
         }

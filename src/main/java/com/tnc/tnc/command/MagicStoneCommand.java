@@ -355,9 +355,9 @@ public class MagicStoneCommand {
         ctx.getSource().sendSuccess(() -> MagicStoneLearning.describe(result, entry, data), false);
         if (result == MagicStoneLearning.Result.OK || result == MagicStoneLearning.Result.ALREADY_LEARNED) {
             // 解锁后同步法杖内容（已经学过也同步一次 —— 相当于顺手修好丢了内容的法杖）
-            // ⚠️ 走 ensureWand(player, data)：法杖内容 = **当前这一页的配装**（不再按等级排序）
+            // ⚠️ 走 ensureWand(player, data.learnedView())：法杖内容 = **当前这一页的配装**（不再按等级排序）
             com.tnc.tnc.magic.compat.SpellEngineBridge.WandResult synced =
-                    com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(player, data);
+                    com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(player, data.learnedView());
             int bound = data.loadoutCount();
             ctx.getSource().sendSuccess(() -> Component.literal(
                     "§7[TN-C] 法杖：" + com.tnc.tnc.magic.compat.SpellEngineBridge.describeWand(
@@ -508,7 +508,7 @@ public class MagicStoneCommand {
         }
         // 法杖内容 = 当前这一页的配装（不再是"每条链的最高级"）
         com.tnc.tnc.magic.compat.SpellEngineBridge.WandResult result =
-                com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(player, data, true);
+                com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(player, data.learnedView(), true);
         MagicStoneNetwork.syncTo(player);
         int bound = data.loadoutCount();
         ctx.getSource().sendSuccess(() -> Component.literal("§b[TN-C] §r"
@@ -552,7 +552,7 @@ public class MagicStoneCommand {
             data.setLoadoutPage(oneBased - 1);
         }
         int page = data.getLoadoutPage();
-        var result = com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(player, data);
+        var result = com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(player, data.learnedView());
         MagicStoneNetwork.syncTo(player);
         // 这一页实际能放几个：空槽是"没配"，不是"丢了"
         long onPage = data.pageSpellIds(page).stream().filter(java.util.Objects::nonNull).count();
@@ -578,7 +578,7 @@ public class MagicStoneCommand {
         }
         int index = oneBased - 1;
         boolean changed = data.setSlot(index, spell);
-        com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(player, data);
+        com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(player, data.learnedView());
         MagicStoneNetwork.syncTo(player);
         int page = index / MagicStoneData.SLOTS_PER_PAGE + 1;
         int key = index % MagicStoneData.SLOTS_PER_PAGE + 1;
@@ -596,7 +596,7 @@ public class MagicStoneCommand {
         }
         int index = oneBased - 1;
         boolean cleared = data.clearSlot(index);
-        com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(player, data);
+        com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(player, data.learnedView());
         MagicStoneNetwork.syncTo(player);
         int page = index / MagicStoneData.SLOTS_PER_PAGE + 1;
         int key = index % MagicStoneData.SLOTS_PER_PAGE + 1;
@@ -713,7 +713,7 @@ public class MagicStoneCommand {
         // ⚠️ 必须同时重写法杖内容：forget / reset 会改掉配装里绑的法术，
         // 不重写的话被遗忘的法术还挂在槽位里（用户实测到的 bug）。
         // 学习 / 解锁 / 登录三条路都做了这一步，这里当初漏了。
-        com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(player, data);
+        com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(player, data.learnedView());
         ctx.getSource().sendSuccess(() -> Component.literal("§a[TN-C] §r" + message), false);
         return 1;
     }

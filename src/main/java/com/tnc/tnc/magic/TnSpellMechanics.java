@@ -993,7 +993,6 @@ public final class TnSpellMechanics {
         for (SpellCatalog.Entry entry : SpellCatalog.all()) {
             // Restore only known chain tiers. Independent magic has no element;
             // explicit forgetting and unspent learning points belong to the player.
-            if(!MagicStoneLearning.isElementalAutoLearnCandidate(data,entry))continue;
             if(com.tnc.tnc.magic.compat.SpellEngineBridge.hasSpell(entry.id()))learned|=data.learn(entry.id());
         }
         if (learned) {
