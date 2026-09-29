@@ -97,4 +97,10 @@
   "entity.tnc.town_service": "城镇服务人员"
 ,
   "block.tnc.gamble_table": "Gambling Table"
+,
+  "block.tnc.tavern_table_2x1": "Tavern Table (2x1)",
+  "block.tnc.tavern_table_round": "Round Table",
+  "block.tnc.tavern_counter": "Counter",
+  "block.tnc.tavern_bottle": "Bottle",
+  "block.tnc.tavern_lamp": "Table Lamp"
 }

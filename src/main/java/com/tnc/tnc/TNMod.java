@@ -38,7 +38,9 @@ public class TNMod
     // 三个注册器。所有 TN-C 的内容都通过它们注册到 Forge，命名空间统一是 "tnc"。
     // 注意：注册器必须在构造函数里挂到 mod 事件总线上才会生效（见下方 TNMod()）。
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
+
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
+
 
     /** 场景道具：4x2 赌博桌（可放置 ✓，形状见 TNGambleTableBlock 的尺寸契约）。 */
     public static final RegistryObject<Block> GAMBLE_TABLE =
@@ -78,6 +80,10 @@ public class TNMod
      */
     public static final RegistryObject<Item> WAND = ITEMS.register("magic_wand",
             com.tnc.tnc.magic.compat.SpellEngineBridge::createWandItem);
+    // ---- 酒馆内饰五件套（TNPropBlock 共用，形状单位＝格）----
+    public static final RegistryObject<Block> TAVERN_TABLE_2X1 = BLOCKS.register("tavern_table_2x1", () -> new com.tnc.tnc.prop.TNPropBlock(net.minecraft.world.phys.shapes.Shapes.box(0,0,0,2.0,1.0,1.0)));
+    public static final RegistryObject<Item> TAVERN_TABLE_2X1_ITEM = ITEMS.register("tavern_table_2x1", () -> new net.minecraft.world.item.BlockItem(TAVERN_TABLE_2X1.get(), new Item.Properties()));
+
     static { com.tnc.tnc.adventure.ElementWands.register(); }
     public static final RegistryObject<Item> HANDBOOK = ITEMS.register("adventure_handbook",
             com.tnc.tnc.adventure.AdventureEvents.HandbookItem::new);
