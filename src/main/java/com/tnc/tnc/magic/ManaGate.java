@@ -173,7 +173,7 @@ public final class ManaGate {
         // evaluate free of purchases; only a real eligible cast may learn here.
         if(com.tnc.tnc.Config.requireLearnedToCast&&!data.hasLearned(entry.id())&&!data.isExplicitlyForgotten(entry.id())
                 &&(!com.tnc.tnc.Config.requireWandToCast||supported)
-                &&MagicStoneLearning.unlock(data,entry)==MagicStoneLearning.Result.OK){
+                && false /* 2026-09-30 作者关闭自动学习: 不再就地补学, 直接走 NOT_LEARNED */){
             com.tnc.tnc.network.MagicStoneNetwork.syncTo(serverPlayer);
             com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(serverPlayer,SpellCatalog.effectiveIds(data));
             com.tnc.tnc.adventure.AdventureService.milestone(serverPlayer,"learned");
