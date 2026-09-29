@@ -195,29 +195,7 @@ public final class TnSpellMechanics {
     }
 
     /** 雷场（t2）：第 20 / 60 tick 各劈一轮范围内的敌人 ⇒ 每个敌人挨两下 ✓。 */
-    /**
-     * 把"档位已解锁"的链上法术自动补进魔法石 ✓（见 {@code onPlayerTick} 里的调用）。
-     *
-     * <p>仅恢复亲和力和已记录链进度以内的法术；不购买新等级，不扣点，尊重明确遗忘。
-     */
-    private static void autoLearnUnlocked(ServerPlayer player) {
-        MagicStoneData data = MagicStone.getOrNull(player);
-        if (data == null || !data.isInitialized()) {
-            return;
-        }
-        boolean changed = false;
-        for (SpellCatalog.Entry entry : SpellCatalog.all()) {
-            // 独立魔法没有元素亲和力；乱魔仍在 GUI 手动学习，不能传 null 进亲和力数组。
-            if (!MagicStoneLearning.isElementalAutoLearnCandidate(data,entry))continue;
-            if (com.tnc.tnc.magic.compat.SpellEngineBridge.hasSpell(entry.id())) {
-                changed |= data.learn(entry.id());
-            }
-        }
-        if (changed) {
-            com.tnc.tnc.network.MagicStoneNetwork.syncTo(player);
-            com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(player,SpellCatalog.effectiveIds(data));
-        }
-    }
+    
 
     private static void tickLightningField(ServerPlayer player, long time) {
         Long until = FIELD_UNTIL.get(player.getUUID());
@@ -260,29 +238,45 @@ public final class TnSpellMechanics {
             DIVINE_FIRED.remove(player.getUUID());
             return;
         }
-        // ★ 2026-09-27 修：原来是 `time != until - DIVINE_WINDOW` 就 return ✗ ——
-        // 施法回调发生在玩家 tick 之后，机制层 tick 时那一 tick 已经过去了 ⇒ 条件永远不成立、
-        // 一个球都不生成（作者："t5 怎么光爆炸，模型没看见法阵没看见" ✗）。现在改成
-        // "窗口内第一次 tick 就铺"，漏不掉 ✓。
         if (!DIVINE_FIRED.add(player.getUUID())) {
             return;
         }
         ServerLevel level = player.serverLevel();
+        // 锚点：范围内第一个敌人；没有敌人就用准星落点 ✓
+        net.minecraft.world.phys.Vec3 anchor = null;
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class,
                 player.getBoundingBox().inflate(DIVINE_RADIUS))) {
-            if (!isEnemy(player, target) || target.distanceTo(player) > DIVINE_RADIUS) {
+            if (isEnemy(player, target) && target.distanceTo(player) <= DIVINE_RADIUS) {
+                anchor = target.position();
+                break;
+            }
+        }
+        if (anchor == null) {
+            anchor = aimPoint(player);
+        }
+        // ① 三尊神：悬停在他上方 30 格，绕成一圈，各带一圈黑紫环 ✓（life 100 tick = 5 秒）
+        for (int i = 0; i < 3; i++) {
+            double ang = i * (Math.PI * 2.0D / 3.0D) + (time % 628) * 0.01D;
+            TNLightningStrikeEntity god = TNOrbEntities.LIGHTNING_STRIKE.get().create(level);
+            if (god == null) {
                 continue;
             }
-            TNLightningStrikeEntity ball = TNOrbEntities.LIGHTNING_STRIKE.get().create(level);
-            if (ball == null) {
-                continue;
-            }
+            god.asGod();
+            god.configure(12.0D, 100, anchor.y + 6.0D, 3.0D);
+            god.moveTo(anchor.x + Math.cos(ang) * 6.0D, anchor.y + 30.0D,
+                    anchor.z + Math.sin(ang) * 6.0D, 0.0F, 0.0F);
+            level.addFreshEntity(god);
+        }
+        // ② 一颗雷霆大球：慢速砸下来 ✓
+        TNLightningStrikeEntity ball = TNOrbEntities.LIGHTNING_STRIKE.get().create(level);
+        if (ball != null) {
             ball.asBall();
-            ball.configure(DIVINE_BALL_SCALE, 6, target.getY(), 9.0D);
-            ball.moveTo(target.getX(), target.getY(), target.getZ(), 0.0F, 0.0F);
-            spawnMagicCircleAt(level, target.position(), 8.0D, 140);   // 阵铺在敌人脚下 ✓
+            ball.setFallSpeed(1.5D);
+            ball.configure(DIVINE_BALL_SCALE, 6, anchor.y, 12.0D);
+            ball.moveTo(anchor.x, anchor.y, anchor.z, 0.0F, 0.0F);
             level.addFreshEntity(ball);
         }
+        spawnMagicCircleAt(level, anchor, 8.0D, 140);
     }
 
     /** 雷暴（t4）：每 {@link #STORM_INTERVAL} tick 劈几个敌人，**一直劈到 buff 结束** ✓。 */
@@ -458,7 +452,7 @@ public final class TnSpellMechanics {
             spawnMagicCircleAt(player.serverLevel(), aimPoint(player), 20.0D, 260);
             // 大雷球的粒子不跟随 ✗ -> 自己开一个窗口，每 tick 在球的位置画环 ✓
             BIG_BALL_UNTIL.put(player.getUUID(), player.level().getGameTime() + BIG_BALL_WINDOW);
-        } else if (path.equals("divine_shot")) {
+        } else if (path.equals("god_descent")) {
             // 环绕雷球（现在是 t4）：作者要求"同款魔法阵" ✓
             spawnMagicCircle(player, 8.0D, 200);
         }
@@ -580,7 +574,11 @@ public final class TnSpellMechanics {
         // 目的：我改链 / 加档 / 换档之后（删环绕、加神在投篮、降超级无敌大雷球…）玩家不需要手敲
         // /tnc learn ✗ —— 之前正是那一步没成功，导致"法术在、但放不出来、也不扣蓝" ✗。
         if (time % 40 == 0&&!com.tnc.tnc.combat.DownedCombat.isDowned(player)) {
-            autoLearnUnlocked(player);
+            autoLearnUnlockedAndSync(player);
+        }
+        // 链上法术自动补学（每 40 tick 一次）✓
+        if (time % 40 == 0) {
+            autoLearnUnlockedAndSync(player);
         }
         // 雷场 / 雷暴：窗口内自己劈敌人（视觉＋伤害都在里面）✓
         tickLightningField(player, time);
@@ -982,6 +980,49 @@ public final class TnSpellMechanics {
         }
     }
 
+    /**
+     * 把"档位已解锁"的链上法术自动补进魔法石 ✓ —— 作者改链/加档/换 id 之后不用手敲 /tnc learn。
+     *
+     * <p>规则（2026-09-29）：只补 {@code tier <= maxTierFor(元素)} 的条目，且**必须同链上一档已学会**
+     * （保住 t1→t2→…→t5 的顺序 ✓，作者原话："不需要先学 t1t2 就可以学 t4t5" ✗ 就是这里漏了前置）。
+     * 学会之后**立刻 {@link com.tnc.tnc.network.MagicStoneNetwork.MagicStoneNetwork#syncTo} 同步给客户端** ✗ —— 不同步的话客户端热键栏里
+     * 根本没有这个法术，按下去等于没按（这正是"t5 放不出来、连 gate 都没被调用"的原因 ✓）。
+     */
+    private static void autoLearnUnlockedAndSync(ServerPlayer player) {
+        MagicStoneData data = MagicStone.getOrNull(player);
+        if (data == null || !data.isInitialized()) {
+            return;
+        }
+        boolean learned = false;
+        for (SpellCatalog.Entry entry : SpellCatalog.all()) {
+            if (data.hasLearned(entry.id())) {
+                continue;
+            }
+            if (entry.tier() > data.maxTierFor(entry.element())) {
+                continue;                       // 档位还没到 ✓
+            }
+            if (entry.tier() > 1) {
+                boolean previousLearned = false;
+                for (SpellCatalog.Entry other : SpellCatalog.all()) {
+                    if (other.chain() == entry.chain() && other.tier() == entry.tier() - 1
+                            && data.hasLearned(other.id())) {
+                        previousLearned = true;
+                        break;
+                    }
+                }
+                if (!previousLearned) {
+                    continue;                   // 上一档没学会 → 不越级补 ✓
+                }
+            }
+            MagicStoneLearning.unlock(data, entry);
+            learned = true;
+        }
+        if (learned) {
+            com.tnc.tnc.network.MagicStoneNetwork.syncTo(player);
+            org.apache.logging.log4j.LogManager.getLogger("TN-C/learn")
+                    .info("TN-C: auto-learn synced (chain spells added to magic stone)");
+        }
+    }
     private static boolean has(ServerPlayer player, net.minecraftforge.registries.RegistryObject<net.minecraft.world.effect.MobEffect> effect) {
         return effect.isPresent() && player.hasEffect(effect.get());
     }

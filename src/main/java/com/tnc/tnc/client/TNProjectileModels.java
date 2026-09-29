@@ -77,6 +77,8 @@ public final class TNProjectileModels {
             LIGHTNINGBALL_2,
             // 雷系闪电（作者 2026-09-27 自制：竖直锯齿闪电）
             FLASH,
+            // 作者 2026-09-29 自制：雷霆之神（神在投篮 t5 天上那三尊 ✓）
+            "projectile/lightning_god",
             // 雷系备用球（用户自制）
             "projectile/thunder_ball",
     };
