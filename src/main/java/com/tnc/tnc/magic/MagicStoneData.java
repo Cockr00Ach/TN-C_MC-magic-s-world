@@ -103,6 +103,10 @@ public class MagicStoneData {
      * 可用点数 = 档位总点数 + 额外赠送 − 已花掉。
      */
     private int bonusPoints;
+    /** -1 denotes an account not yet migrated to permanent adventure growth. */
+    private int adventurePoints = -1;
+
+    public void setAdventurePoints(int points) { adventurePoints = Math.max(0, points); }
 
     /**
      * 亲和力是否已经分配过。亲和力天生固定，只在第一次进游戏时掷一次，
@@ -225,6 +229,7 @@ public class MagicStoneData {
      * 上限 99 → 0 点；120 → 1 点；310 → 2 点；520 → 3 点。
      */
     public int getPointsTotal(List<? extends Integer> thresholds) {
+        if (adventurePoints >= 0) return adventurePoints;
         int total = 0;
         for (Integer threshold : thresholds) {
             if (threshold != null && maxMana >= threshold) {
@@ -387,6 +392,7 @@ public class MagicStoneData {
         this.maxMana = other.maxMana;
         this.pointsSpent = other.pointsSpent;
         this.bonusPoints = other.bonusPoints;
+        this.adventurePoints = other.adventurePoints;
         this.initialized = other.initialized;
     }
 
@@ -439,6 +445,7 @@ public class MagicStoneData {
         tag.putInt("MaxMana", maxMana);
         tag.putInt("PointsSpent", pointsSpent);
         tag.putInt("BonusPoints", bonusPoints);
+        tag.putInt("AdventurePoints", adventurePoints);
         tag.putBoolean("Initialized", initialized);
         return tag;
     }
@@ -493,6 +500,7 @@ public class MagicStoneData {
         maxMana = tag.getInt("MaxMana");
         pointsSpent = tag.getInt("PointsSpent");
         bonusPoints = Math.max(0, tag.getInt("BonusPoints"));
+        adventurePoints = tag.contains("AdventurePoints") ? Math.max(-1, tag.getInt("AdventurePoints")) : -1;
         initialized = tag.getBoolean("Initialized");
     }
 

@@ -59,6 +59,7 @@ public final class AbyssChunkLedger {
     }
     @SubscribeEvent public static void loaded(ChunkEvent.Load event) {
         if (!(event.getLevel() instanceof ServerLevel level)) return;
+        if(level.getServer() instanceof net.minecraft.gametest.framework.GameTestServer)return;
         // Vanilla already persists the marker piece in StructureStart, including in
         // ProtoChunks whose ChunkDataEvent.Load has no world. Re-admit from that source
         // when promoted/reloaded; never perform level/chunk operations in this callback.

@@ -16,6 +16,7 @@ abstract class WaterBoreLevelMixin implements WaterBoreEditGuard.Installed {
     @Inject(method={"setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;II)Z",
             "m_6933_(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;II)Z"},at=@At("HEAD"),cancellable=true,require=1)
     private void tnc$boundedWrite(BlockPos pos,BlockState state,int flags,int depth,CallbackInfoReturnable<Boolean> ci) {
+        if(state.getBlock() instanceof net.minecraft.world.level.block.BaseFireBlock&&com.tnc.tnc.home.TownProtection.hazard((Level)(Object)this,pos)){ci.setReturnValue(false);return;}
         if(!WaterBoreEditGuard.allowSetBlock((Level)(Object)this,pos))ci.setReturnValue(false);
     }
     @Inject(method={"destroyBlock(Lnet/minecraft/core/BlockPos;ZLnet/minecraft/world/entity/Entity;I)Z",

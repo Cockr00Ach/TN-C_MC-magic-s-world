@@ -6,7 +6,7 @@
   "icon": "minecraft:compass",
   "order_index": -100,
   "default_hide_dependency_lines": true,
-  "default_quest_shape": "circle",
+  "default_quest_shape": "square",
   "quest_links": [],
   "images": [],
   "quests": [
@@ -17,7 +17,7 @@
       "x": 0.0,
       "y": 0.0,
       "size": 1.8,
-      "shape": "circle",
+      "shape": "square",
       "description": [
         "&b&l剑与魔法的世界",
         "&7冒险者指南 · 从这里认识你的旅途",
@@ -25,7 +25,7 @@
         "&e魔法石与天空岛已开放",
         "",
         "&f点击章节中的节点阅读说明。勾选只表示看过本节，不代表完成升级、买房或委托。",
-        "&7本批先搭任务书框架；筹备中的行为目标与奖励将在机制实装后开放。"
+        "&7真实目标请查看“启程”和“归处”章节；各系统开放范围见本页状态。"
       ],
       "tasks": [
         {
@@ -41,10 +41,10 @@
       "id": "544E430201000001",
       "title": "出发，也有地方回来",
       "icon": "minecraft:compass",
-      "x": -3.0,
+      "x": -6.0,
       "y": 3.0,
       "size": 1.0,
-      "shape": "circle",
+      "shape": "square",
       "description": [
         "&e魔法石与天空岛已开放",
         "",
@@ -67,10 +67,10 @@
       "id": "544E430201000002",
       "title": "七种魔法师",
       "icon": "minecraft:compass",
-      "x": 3.0,
+      "x": -3.0,
       "y": 3.0,
       "size": 1.0,
-      "shape": "circle",
+      "shape": "square",
       "description": [
         "&e魔法石与天空岛已开放",
         "",
@@ -99,10 +99,10 @@
       "id": "544E430201000003",
       "title": "先分清四个词",
       "icon": "minecraft:compass",
-      "x": -3.0,
-      "y": 6.0,
+      "x": 0.0,
+      "y": 3.0,
       "size": 1.0,
-      "shape": "circle",
+      "shape": "square",
       "description": [
         "&e魔法石与天空岛已开放",
         "",
@@ -128,9 +128,9 @@
       "title": "路线，而非一排图标",
       "icon": "minecraft:compass",
       "x": 3.0,
-      "y": 6.0,
+      "y": 3.0,
       "size": 1.0,
-      "shape": "circle",
+      "shape": "square",
       "description": [
         "&e魔法石与天空岛已开放",
         "",
@@ -153,17 +153,17 @@
       "id": "544E430201000005",
       "title": "现在可以做",
       "icon": "minecraft:compass",
-      "x": -3.0,
-      "y": 9.0,
+      "x": 6.0,
+      "y": 3.0,
       "size": 1.0,
-      "shape": "circle",
+      "shape": "square",
       "description": [
         "&e魔法石与天空岛已开放",
         "",
         "&b&l现在可以做",
         "",
-        "&f默认按V打开魔法石，查看亲和力、已学法术和可学路线。天空岛会在开局延迟后给出传送阵指引。快捷键都可在控制设置中修改。",
-        "&f等级、协会、钱袋、打造和家庭是已经确定的玩法方向，但本批尚未开放。指南不会要求你领取无法完成的任务。"
+        "&f按V查看魔法石；E背包左上角打开原生FTB任务书。选择“启程·一次真正的冒险”，按真实目标开始教学。",
+        "&f右键冒险手册或输入/adventure查看个人档案；潜行右键Self办理驻馆业务，普通右键仍进入剧情。成长、E/D委托、基础打造、行囊、农事与第一处住宅已开放。"
       ],
       "tasks": [
         {

@@ -56,7 +56,10 @@ public class MagicStoneActionPacket {
                 return;
             }
             switch (action) {
-                case REQUEST_SYNC -> MagicStoneNetwork.syncTo(player);
+                case REQUEST_SYNC -> {
+                    com.tnc.tnc.adventure.AdventureService.milestone(player,"inspected");
+                    MagicStoneNetwork.syncTo(player);
+                }
                 case UNLOCK -> handleUnlock(player);
             }
         });
@@ -79,7 +82,10 @@ public class MagicStoneActionPacket {
             return;
         }
         MagicStoneLearning.Result result = MagicStoneLearning.unlock(data, entry);
-        if(result==MagicStoneLearning.Result.OK)com.tnc.tnc.magic.LearningVisuals.start(player,entry.element());
+        if(result==MagicStoneLearning.Result.OK) {
+            com.tnc.tnc.magic.LearningVisuals.start(player,entry.element());
+            com.tnc.tnc.adventure.AdventureService.milestone(player,"learned");
+        }
         player.sendSystemMessage(MagicStoneLearning.describe(result, entry, data));
         if (result == MagicStoneLearning.Result.OK || result == MagicStoneLearning.Result.ALREADY_LEARNED) {
             // 解锁成功 = 把"已解锁集合"同步进法杖（玩家看不到卷轴/法术书/注册台）。

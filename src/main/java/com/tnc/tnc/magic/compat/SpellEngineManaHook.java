@@ -159,6 +159,9 @@ public final class SpellEngineManaHook {
 
             // 真正放出去了：数值怎么变交给纯逻辑层（ManaCharge），这里只负责提示与同步
             ManaCharge.Result result = ManaCharge.apply(data, entry);
+            if (result.outcome() == ManaCharge.Outcome.DEDUCTED) {
+                com.tnc.tnc.adventure.AdventureService.milestone(player,"cast");
+            }
             // 风神降临（5 级）：蓝耗减半。
             // 做法是"扣完之后返还一半"，而不是去改 ManaCharge 的签名 ——
             // 那边只有数据、拿不到玩家，改签名会牵动自检里 4 处调用，

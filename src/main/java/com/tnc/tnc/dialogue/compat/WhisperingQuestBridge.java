@@ -69,13 +69,13 @@ public final class WhisperingQuestBridge {
     /** 这条任务**正在进行中**吗？（没接取 / 已完成都返回 false） */
     public static boolean isQuestActive(net.minecraft.server.level.ServerPlayer player,
                                         net.minecraft.resources.ResourceLocation questId) {
-        return engineState(player, questId, "isActiveForPlayer");
+        return engineState(player, questId, "activeQuests");
     }
 
     /** 这条任务**已经完成**吗？ */
     public static boolean isQuestCompleted(net.minecraft.server.level.ServerPlayer player,
                                            net.minecraft.resources.ResourceLocation questId) {
-        return engineState(player, questId, "isCompletedForPlayer");
+        return engineState(player, questId, "completedQuests");
     }
 
     /**

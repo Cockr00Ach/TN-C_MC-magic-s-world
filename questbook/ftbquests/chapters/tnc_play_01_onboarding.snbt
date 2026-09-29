@@ -1,0 +1,302 @@
+{
+  "id": "544E431100000000",
+  "filename": "tnc_play_01_onboarding",
+  "group": "544E434755494445",
+  "title": "&6&l启程 · 一次真正的冒险",
+  "icon": "tnc:adventure_handbook",
+  "order_index": -102,
+  "default_hide_dependency_lines": false,
+  "default_quest_shape": "hexagon",
+  "quest_links": [],
+  "images": [
+    {
+      "image": "tnc:textures/guide/onboarding_header.png",
+      "x": 0.0,
+      "y": -4.0,
+      "width": 14.0,
+      "height": 7.0,
+      "rotation": 0.0
+    }
+  ],
+  "quests": [
+    {
+      "id": "544E431200000000",
+      "title": "认识魔法石",
+      "icon": "minecraft:amethyst_shard",
+      "x": -6,
+      "y": 0,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "&b&l认识魔法石",
+        "",
+        "&f按V查看魔法石。亲和力是学习上限，魔力是施法资源，魔法点数用于学习。",
+        "&f新角色有4点教学额度，每十冒险等级再获得5点；原版附魔经验不会扣冒险成长。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E431300000000",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/inspected",
+          "criterion": "done",
+          "title": "完成实际行为"
+        }
+      ]
+    },
+    {
+      "id": "544E431200000001",
+      "title": "天空岛的邀请",
+      "icon": "minecraft:ender_pearl",
+      "x": -3,
+      "y": 0,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "&b&l天空岛的邀请",
+        "",
+        "&f等待天空岛投来注视，沿提示寻找传送阵，蓄能后上岛。",
+        "&f地图与剧情沿用现有内容；此目标检测实际抵达岛上入口。"
+      ],
+      "dependencies": [
+        "544E431200000000"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E431300000001",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/arrived",
+          "criterion": "done",
+          "title": "完成实际行为"
+        }
+      ]
+    },
+    {
+      "id": "544E431200000002",
+      "title": "酒馆登记",
+      "icon": "tnc:adventure_handbook",
+      "x": 0,
+      "y": 0,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "&b&l酒馆登记",
+        "",
+        "&f潜行右键Self进入驻馆服务，或在天空岛酒馆入口附近右键冒险手册。",
+        "&f在冒险档案页登记初级身份。普通右键Self仍进入原剧情。",
+        "&f没有手册时可使用 /adventure 打开档案，/adventure handbook 补领手册。"
+      ],
+      "dependencies": [
+        "544E431200000001"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E431300000002",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/registered",
+          "criterion": "done",
+          "title": "完成实际行为"
+        }
+      ]
+    },
+    {
+      "id": "544E431200000003",
+      "title": "第一张委托",
+      "icon": "minecraft:paper",
+      "x": 3,
+      "y": 0,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "&b&l第一张委托",
+        "",
+        "&f在酒馆委托页接取教学备料单：4原木与8圆石。",
+        "&f委托最多同时3单，其中最多一份越阶。初级只可接E/D。"
+      ],
+      "dependencies": [
+        "544E431200000002"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E431300000003",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/accepted",
+          "criterion": "done",
+          "title": "完成实际行为"
+        }
+      ]
+    },
+    {
+      "id": "544E431200000004",
+      "title": "你的第一笔收入",
+      "icon": "minecraft:sunflower",
+      "x": 6,
+      "y": 0,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "&b&l你的第一笔收入",
+        "",
+        "&f回馆提交材料，获得120冒险经验、10声望与30铜。",
+        "&f服务端只结算一次，任务书不再次发钱；FTB队伍共享进度不会共享个人账户。"
+      ],
+      "dependencies": [
+        "544E431200000003"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E431300000004",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/first_contract",
+          "criterion": "done",
+          "title": "完成实际行为"
+        }
+      ]
+    },
+    {
+      "id": "544E431200000005",
+      "title": "把材料交给匠人",
+      "icon": "minecraft:anvil",
+      "x": 6,
+      "y": 3,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "&b&l把材料交给匠人",
+        "",
+        "&f准备4木棍与2铜锭，在驻馆匠人页下单。第一次教学免人工费。",
+        "&f初版临时材料表可后续调整，不取消农具、家具和建筑配方。"
+      ],
+      "dependencies": [
+        "544E431200000004"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E431300000005",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/ordered",
+          "criterion": "done",
+          "title": "完成实际行为"
+        }
+      ]
+    },
+    {
+      "id": "544E431200000006",
+      "title": "炉火交付",
+      "icon": "tnc:magic_wand",
+      "x": 3,
+      "y": 3,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "&b&l炉火交付",
+        "",
+        "&f20秒有效服务器运行时间后领取法杖。",
+        "&f退出不丢订单；满背包不吞成品，腾出位置后再领。"
+      ],
+      "dependencies": [
+        "544E431200000005"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E431300000006",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/forged",
+          "criterion": "done",
+          "title": "完成实际行为"
+        }
+      ]
+    },
+    {
+      "id": "544E431200000007",
+      "title": "你的第一道法术",
+      "icon": "minecraft:enchanted_book",
+      "x": 0,
+      "y": 3,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "&b&l你的第一道法术",
+        "",
+        "&f按V，选择亲和力允许的一级法术学习。知识永久属于角色。",
+        "&f学法只同步已有法杖，丢杖后请回馆补造。旧档已学内容与遗忘修复保留。"
+      ],
+      "dependencies": [
+        "544E431200000006"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E431300000007",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/learned",
+          "criterion": "done",
+          "title": "完成实际行为"
+        }
+      ]
+    },
+    {
+      "id": "544E431200000008",
+      "title": "向世界出发",
+      "icon": "minecraft:iron_sword",
+      "x": -3,
+      "y": 3,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "&b&l向世界出发",
+        "",
+        "&f持法杖在安全的野外施放一次已学法术，完成启程教学。",
+        "&f讨伐与委托提供永久冒险经验。之后可接食材、料理和巡猎单，自由选择远征或生活。"
+      ],
+      "dependencies": [
+        "544E431200000007"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E431300000008",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/cast",
+          "criterion": "done",
+          "title": "完成实际行为"
+        }
+      ]
+    },
+    {
+      "id": "544E431200000009",
+      "title": "精锐的证明",
+      "icon": "minecraft:golden_sword",
+      "x": -6,
+      "y": 3,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "&b&l精锐的证明",
+        "",
+        "&f达到Lv10与100协会声望后，回酒馆申请精锐晋升。",
+        "&f首版E/D委托已开放；C以上多阶段远征与冠名试炼继续建设。"
+      ],
+      "dependencies": [
+        "544E431200000008"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "544E431300000009",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/promoted",
+          "criterion": "done",
+          "title": "完成实际行为"
+        }
+      ]
+    }
+  ]
+}

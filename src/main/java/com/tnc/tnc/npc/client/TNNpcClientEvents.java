@@ -33,6 +33,7 @@ public final class TNNpcClientEvents {
 
     @SubscribeEvent
     public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(com.tnc.tnc.npc.TNNpcs.RESIDENT.get(),net.minecraft.client.renderer.entity.VillagerRenderer::new);
         // 泛型显式写出：直接传方法引用时 javac 对 HumanoidMobRenderer 的两层泛型推断不稳
         // （会报"不兼容的参数类型"）。这里几个 NPC 共用同一个渲染器，区别只在皮肤。
         net.minecraft.client.renderer.entity.EntityRendererProvider<TnDialogueNpc> provider =

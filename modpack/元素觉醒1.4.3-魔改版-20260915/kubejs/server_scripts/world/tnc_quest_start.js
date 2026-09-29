@@ -21,15 +21,70 @@ const $WhisperingQuestsApi = Java.loadClass('com.lirxowo.whisperingquests.api.Wh
 const $TNCLocation = Java.loadClass('net.minecraft.resources.ResourceLocation')
 
 // ★ 想加任务：往这里加 id
-// ⚠️ 2026-09-29：原来是 'tnc:main/self_talk'，那条任务已并入主线、改名成
-//    'tnc:main/s1_self'（第一章第一环）。**改任务 id 时这里必须一起改** ✗ ——
-//    接取一条不存在的任务只会打一行 warn，任务书看起来就是"空的"。
 var TNC_STARTUP_QUESTS = ['tnc:main/s1_self']
+var $TNCQuestManager = Java.loadClass('com.lirxowo.whisperingquests.quest.QuestManager')
+var $TNCQuestSavedData = Java.loadClass('com.lirxowo.whisperingquests.quest.QuestSavedData')
+
+// 3.2 compatibility: retain the legacy task and its reward record. Only copy completion
+// to the renamed opening task; never call claimReward or completeObjective during migration.
+function tncMigrateOpening(player) {
+    if (player.persistentData.getBoolean('tncOpeningMigrationV1')) { return }
+    // Initializes 3.2's personal state and imports any legacy team-held solo progress.
+    $TNCQuestManager.getTeamState(player)
+    var personal = $TNCQuestManager.getPlayerState(player)
+    if (!personal.isPresent()) { return }
+    var owner = personal.get()
+    var state = owner.questState()
+    var oldId = $TNCLocation.parse('tnc:main/self_talk')
+    var newId = $TNCLocation.parse('tnc:main/s1_self')
+    if (state.completedQuests().contains(oldId) && !state.completedQuests().contains(newId)) {
+        state.activeQuests().remove(newId)
+        state.completedQuests().add(newId)
+        state.markCompletedThisCycle(newId)
+        state.setProgress(newId, 'talk_to_self', 1)
+        owner.markRewardClaimed(newId, state.completionSeed(newId))
+        $TNCQuestSavedData.get(player.serverLevel()).markPlayerClaimedReward(player.getUUID(), newId, state.completionSeed(newId))
+        // Old completed/reward records stay available under their original ID.
+        tncStartQuest(player, 'tnc:main/s1_guild')
+        $TNCQuestManager.requestFullSync(player)
+        console.info('[TN-C quest] opening completion migrated without awarding rewards')
+    }
+    if (state.activeQuests().contains(oldId)) {
+        // Preserve old definition and records, but avoid two active copies of the opening.
+        if ($WhisperingQuestsApi.startQuest(player, newId) || state.activeQuests().contains(newId) || state.completedQuests().contains(newId)) {
+            if (state.getProgress(oldId, 'talk_to_self') > 0 && !state.completedQuests().contains(newId)) {
+                state.setProgress(newId, 'talk_to_self', 1)
+            }
+            state.activeQuests().remove(oldId)
+            $TNCQuestManager.requestFullSync(player)
+        } else { return }
+    }
+    player.persistentData.putBoolean('tncOpeningMigrationV1', true)
+}
+
+// The retained old definition must not auto-start a second opening on story/root.
+// Completed legacy tasks keep their real seed/reward records. An unused old task receives
+// only a non-repeatable retirement sentinel: no completion seed, no reward, no objective.
+function tncRetireLegacyOpening(player) {
+    var personal = $TNCQuestManager.getPlayerState(player)
+    if (!personal.isPresent()) { return }
+    var state = personal.get().questState()
+    var oldId = $TNCLocation.parse('tnc:main/self_talk')
+    var newId = $TNCLocation.parse('tnc:main/s1_self')
+    if (!state.completedQuests().contains(oldId) && (state.activeQuests().contains(newId) || state.completedQuests().contains(newId))) {
+        state.activeQuests().remove(oldId)
+        state.completedQuests().add(oldId)
+        player.persistentData.putBoolean('tncLegacyOpeningRetiredV1', true)
+        $TNCQuestManager.requestFullSync(player)
+    }
+}
 
 function tncStartQuest(player, idStr) {
     try {
         var questId = $TNCLocation.parse(idStr)
-        var st = $WhisperingQuestsApi.getTeamState(player)
+        var stateOwner = $TNCQuestManager.getPlayerState(player)
+        if (!stateOwner.isPresent()) { return }
+        var st = stateOwner.get().questState()
         if (st.activeQuests().contains(questId)) { return }
         if (st.completedQuests().contains(questId)) { return }
         if ($WhisperingQuestsApi.startQuest(player, questId)) {
@@ -43,7 +98,9 @@ function tncStartQuest(player, idStr) {
 }
 
 PlayerEvents.loggedIn(function (event) {
+    try { tncMigrateOpening(event.player) } catch (err) { console.error('[TN-C quest] migration deferred: ' + err); return }
     for (var i = 0; i < TNC_STARTUP_QUESTS.length; i++) {
         tncStartQuest(event.player, TNC_STARTUP_QUESTS[i])
     }
+    try { tncRetireLegacyOpening(event.player) } catch (err) { console.error('[TN-C quest] legacy retirement deferred: ' + err) }
 })
