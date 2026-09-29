@@ -69,7 +69,15 @@ public final class ManaGate {
             return Decision.NO_WAND;
         }
         if (requireLearned && !data.hasLearned(entry.id())) {
-            return Decision.NOT_LEARNED;
+            // ★ 2026-09-29 作者："t5 放不出来、不扣蓝、也没模型" —— 日志实锤：这一整局
+            // `god_descent` 出现 0 次、也没有任何"已解锁"那行 ⇒ 那个法术**从没被学会**，
+            // 而 /tnc learn 那步在他那边始终没送到服务器 ✗（日志只有客户端聊天文字）。
+            // 解决方法：**第一次想放它就就地补学** ✓ —— 学得下来（点数够、档位够）就放行 ✓，
+            // 学不下来才拦 ✓（不再依赖手动敲命令 ✗）。
+            MagicStoneLearning.unlock(data, entry);
+            if (!data.hasLearned(entry.id())) {
+                return Decision.NOT_LEARNED;
+            }
         }
         if (data.getMana() < entry.manaCostFor(data.getMaxMana())) {
             return Decision.NOT_ENOUGH_MANA;
