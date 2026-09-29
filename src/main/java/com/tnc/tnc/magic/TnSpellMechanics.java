@@ -195,29 +195,7 @@ public final class TnSpellMechanics {
     }
 
     /** 雷场（t2）：第 20 / 60 tick 各劈一轮范围内的敌人 ⇒ 每个敌人挨两下 ✓。 */
-    /**
-     * 把"档位已解锁"的链上法术自动补进魔法石 ✓（见 {@code onPlayerTick} 里的调用）。
-     *
-     * <p>仅恢复亲和力和已记录链进度以内的法术；不购买新等级，不扣点，尊重明确遗忘。
-     */
-    private static void autoLearnUnlocked(ServerPlayer player) {
-        MagicStoneData data = MagicStone.getOrNull(player);
-        if (data == null || !data.isInitialized()) {
-            return;
-        }
-        boolean changed = false;
-        for (SpellCatalog.Entry entry : SpellCatalog.all()) {
-            // 独立魔法没有元素亲和力；乱魔仍在 GUI 手动学习，不能传 null 进亲和力数组。
-            if (!MagicStoneLearning.isElementalAutoLearnCandidate(data,entry))continue;
-            if (com.tnc.tnc.magic.compat.SpellEngineBridge.hasSpell(entry.id())) {
-                changed |= data.learn(entry.id());
-            }
-        }
-        if (changed) {
-            com.tnc.tnc.network.MagicStoneNetwork.syncTo(player);
-            com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(player,SpellCatalog.effectiveIds(data));
-        }
-    }
+    
 
     private static void tickLightningField(ServerPlayer player, long time) {
         Long until = FIELD_UNTIL.get(player.getUUID());
@@ -596,7 +574,11 @@ public final class TnSpellMechanics {
         // 目的：我改链 / 加档 / 换档之后（删环绕、加神在投篮、降超级无敌大雷球…）玩家不需要手敲
         // /tnc learn ✗ —— 之前正是那一步没成功，导致"法术在、但放不出来、也不扣蓝" ✗。
         if (time % 40 == 0&&!com.tnc.tnc.combat.DownedCombat.isDowned(player)) {
-            autoLearnUnlocked(player);
+            autoLearnUnlockedAndSync(player);
+        }
+        // 链上法术自动补学（每 40 tick 一次）✓
+        if (time % 40 == 0) {
+            autoLearnUnlockedAndSync(player);
         }
         // 雷场 / 雷暴：窗口内自己劈敌人（视觉＋伤害都在里面）✓
         tickLightningField(player, time);
@@ -998,6 +980,49 @@ public final class TnSpellMechanics {
         }
     }
 
+    /**
+     * 把"档位已解锁"的链上法术自动补进魔法石 ✓ —— 作者改链/加档/换 id 之后不用手敲 /tnc learn。
+     *
+     * <p>规则（2026-09-29）：只补 {@code tier <= maxTierFor(元素)} 的条目，且**必须同链上一档已学会**
+     * （保住 t1→t2→…→t5 的顺序 ✓，作者原话："不需要先学 t1t2 就可以学 t4t5" ✗ 就是这里漏了前置）。
+     * 学会之后**立刻 {@link com.tnc.tnc.network.MagicStoneNetwork.MagicStoneNetwork#syncTo} 同步给客户端** ✗ —— 不同步的话客户端热键栏里
+     * 根本没有这个法术，按下去等于没按（这正是"t5 放不出来、连 gate 都没被调用"的原因 ✓）。
+     */
+    private static void autoLearnUnlockedAndSync(ServerPlayer player) {
+        MagicStoneData data = MagicStone.getOrNull(player);
+        if (data == null || !data.isInitialized()) {
+            return;
+        }
+        boolean learned = false;
+        for (SpellCatalog.Entry entry : SpellCatalog.all()) {
+            if (data.hasLearned(entry.id())) {
+                continue;
+            }
+            if (entry.tier() > data.maxTierFor(entry.element())) {
+                continue;                       // 档位还没到 ✓
+            }
+            if (entry.tier() > 1) {
+                boolean previousLearned = false;
+                for (SpellCatalog.Entry other : SpellCatalog.all()) {
+                    if (other.chain() == entry.chain() && other.tier() == entry.tier() - 1
+                            && data.hasLearned(other.id())) {
+                        previousLearned = true;
+                        break;
+                    }
+                }
+                if (!previousLearned) {
+                    continue;                   // 上一档没学会 → 不越级补 ✓
+                }
+            }
+            MagicStoneLearning.unlock(data, entry);
+            learned = true;
+        }
+        if (learned) {
+            com.tnc.tnc.network.MagicStoneNetwork.syncTo(player);
+            org.apache.logging.log4j.LogManager.getLogger("TN-C/learn")
+                    .info("TN-C: auto-learn synced (chain spells added to magic stone)");
+        }
+    }
     private static boolean has(ServerPlayer player, net.minecraftforge.registries.RegistryObject<net.minecraft.world.effect.MobEffect> effect) {
         return effect.isPresent() && player.hasEffect(effect.get());
     }
