@@ -71,6 +71,21 @@ public class TNMod
      */
     public static final RegistryObject<Item> WAND = ITEMS.register("magic_wand",
             com.tnc.tnc.magic.compat.SpellEngineBridge::createWandItem);
+    public static final RegistryObject<Item> HANDBOOK = ITEMS.register("adventure_handbook",
+            com.tnc.tnc.adventure.AdventureEvents.HandbookItem::new);
+    public static final RegistryObject<Item> MONEY_POUCH = ITEMS.register("money_pouch",com.tnc.tnc.life.LifeEvents.PouchItem::new);
+    public static final RegistryObject<Item> FOOD_POUCH = ITEMS.register("food_pouch",com.tnc.tnc.life.LifeEvents.PouchItem::new);
+    public static final RegistryObject<Item> FARM_FOCUS = ITEMS.register("farm_focus",com.tnc.tnc.life.FarmMagic.FocusItem::new);
+    public static final RegistryObject<Item> COPPER_COIN = ITEMS.register("copper_coin",()->new Item(new Item.Properties()));
+    public static final RegistryObject<Item> SILVER_COIN = ITEMS.register("silver_coin",()->new Item(new Item.Properties()));
+    public static final RegistryObject<Item> GOLD_COIN = ITEMS.register("gold_coin",()->new Item(new Item.Properties()));
+    public static final java.util.List<RegistryObject<Item>> DELICACIES = java.util.stream.IntStream.range(1,9)
+            .mapToObj(i->ITEMS.<Item>register("boss_feast_"+i,com.tnc.tnc.life.LifeEvents.DelicacyItem::new)).toList();
+    public static final java.util.List<RegistryObject<Item>> BOSS_INGREDIENTS = java.util.stream.IntStream.range(1,9)
+            .mapToObj(i->ITEMS.<Item>register("boss_ingredient_"+i,()->new Item(new Item.Properties().rarity(net.minecraft.world.item.Rarity.RARE)))).toList();
+    public static final DeferredRegister<net.minecraft.world.inventory.MenuType<?>> MENUS = DeferredRegister.create(Registries.MENU,MODID);
+    public static final RegistryObject<net.minecraft.world.inventory.MenuType<com.tnc.tnc.life.TravelBagMenu>> TRAVEL_BAG_MENU =
+            MENUS.register("travel_bag",()->new net.minecraft.world.inventory.MenuType<>(com.tnc.tnc.life.TravelBagMenu::new,net.minecraft.world.flag.FeatureFlags.DEFAULT_FLAGS));
 
     // ------------------------------------------------------------------
     //  创造模式标签页
@@ -86,6 +101,12 @@ public class TNMod
                 output.accept(SWORD.get());
                 // Legacy chaos_seal stays registered for save compatibility; learned magic replaces it.
                 output.accept(WAND.get());
+                output.accept(HANDBOOK.get());
+                output.accept(MONEY_POUCH.get());output.accept(FOOD_POUCH.get());
+                output.accept(FARM_FOCUS.get());
+                output.accept(COPPER_COIN.get());output.accept(SILVER_COIN.get());output.accept(GOLD_COIN.get());
+                DELICACIES.forEach(i->output.accept(i.get()));
+                BOSS_INGREDIENTS.forEach(i->output.accept(i.get()));
                 // 剧情道具「宝箱传说残卷」六卷（卷一拆成上下卷）—— 方便验收时直接拿 ✓
                 output.accept(com.tnc.tnc.magic.TNScrolls.JUAN_1A.get());
                 output.accept(com.tnc.tnc.magic.TNScrolls.JUAN_1B.get());
@@ -121,6 +142,7 @@ public class TNMod
         // 把三个注册器挂到 mod 事件总线上，否则上面注册的内容不会生效
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
+        MENUS.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
         com.tnc.tnc.world.stonecrest.TNStructures.register(modEventBus);
         // 我们自己的状态效果（雷速 / 极速雷风 / 环绕雷球 / 闪电登神）—— 法术 JSON 按 id 引用

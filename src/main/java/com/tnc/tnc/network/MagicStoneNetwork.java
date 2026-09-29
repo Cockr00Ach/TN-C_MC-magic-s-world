@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 public class MagicStoneNetwork {
 
     // v3 adds downed/rescue packets. Reject stale clients instead of silently losing combat state.
-    private static final String PROTOCOL_VERSION = "3";
+    private static final String PROTOCOL_VERSION = "4";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "main"),
@@ -51,6 +51,10 @@ public class MagicStoneNetwork {
         //    而那个异常发生在 mod 构造期 → 整个 mod 变 broken → 启动失败。
         //    详见 com.tnc.tnc.dialogue.DialogueNetwork 的类注释。
         com.tnc.tnc.dialogue.DialogueNetwork.registerPackets(CHANNEL, 100);
+        com.tnc.tnc.adventure.AdventurePackets.register(CHANNEL);
+        CHANNEL.messageBuilder(com.tnc.tnc.life.OpenTravelBagPacket.class,302,NetworkDirection.PLAY_TO_SERVER)
+                .encoder(com.tnc.tnc.life.OpenTravelBagPacket::encode).decoder(com.tnc.tnc.life.OpenTravelBagPacket::decode)
+                .consumerMainThread(com.tnc.tnc.life.OpenTravelBagPacket::handle).add();
         CHANNEL.messageBuilder(PortalRitualPacket.class, 200, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(PortalRitualPacket::encode)
                 .decoder(PortalRitualPacket::decode)

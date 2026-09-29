@@ -191,7 +191,9 @@ try {
             $inMod = Test-Path (Join-Path $modSpellDir "$path.json")
             if (-not ($inPack -or $inMod)) { $missingSpells += $path }
             elseif ($inPack -and $inMod) { $dupSpells += $path }
-            if (-not (Test-Path (Join-Path $iconDir "$path.png"))) { $missingIcons += $path }
+            $kubeIcon=Join-Path $packForSpells "kubejs\assets\tnc\textures\spell\$path.png"
+            $modIcon=Join-Path $modAssetDir "textures\spell\$path.png"
+            if (-not ((Test-Path (Join-Path $iconDir "$path.png")) -or (Test-Path $kubeIcon) -or (Test-Path $modIcon))) { $missingIcons += $path }
         }
         if ($missingSpells.Count -eq 0) { Ok 'every chain spell json exists (pack kubejs or mod jar)' }
         else { Fail ('spell json exists in NEITHER pack kubejs NOR mod jar: ' + ($missingSpells -join ', ')) }
@@ -475,7 +477,8 @@ try {
     $loaderPath = Join-Path $TncRepoRoot 'src\main\java\com\tnc\tnc\dialogue\DialogueLoader.java'
     if (Test-Path $loaderPath) {
         $loaderSrc = [IO.File]::ReadAllText($loaderPath, [System.Text.Encoding]::UTF8)
-        $actAt = $loaderSrc.IndexOf('line.startsWith("@act")')
+        $actAt = $loaderSrc.IndexOf('line.equals("@act")')
+        if($actAt -lt 0){$actAt=$loaderSrc.IndexOf('line.startsWith("@act")')}
         $activateAt = $loaderSrc.IndexOf('line.startsWith("@activate")')
         $questsAt = $loaderSrc.IndexOf('line.startsWith("@quests")')
         $questAt = $loaderSrc.IndexOf('line.startsWith("@quest")')

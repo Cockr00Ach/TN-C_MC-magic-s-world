@@ -49,6 +49,7 @@ public final class TNNpcs {
      * 而两种实体类型都满足这个签名（一个是父类，一个是它的子类）✓。
      */
     public static final RegistryObject<EntityType<SelfNpcEntity>> SELF = registerSelf();
+    public static final RegistryObject<EntityType<com.tnc.tnc.home.ResidentEntity>> RESIDENT=ENTITY_TYPES.register("resident",()->EntityType.Builder.of(com.tnc.tnc.home.ResidentEntity::new,MobCategory.MISC).sized(.6F,1.95F).clientTrackingRange(8).build("tnc:resident"));
 
     private static RegistryObject<EntityType<SelfNpcEntity>> registerSelf() {
         if (GeoSelfSupport.available()) {

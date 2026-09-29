@@ -140,10 +140,14 @@ public final class SpellEngineBridge {
      * @param learned 玩家已解锁的法术（来自魔法石数据，是权威）
      */
     public static WandResult ensureWand(Player player, Collection<ResourceLocation> learned) {
+        return ensureWand(player, learned, false);
+    }
+
+    public static WandResult ensureWand(Player player, Collection<ResourceLocation> learned, boolean adminGive) {
         if (!enginePresent()) {
             return WandResult.NO_ENGINE;
         }
-        return Impl.ensureWand(player, learned);
+        return Impl.ensureWand(player, learned, adminGive && player.hasPermissions(2));
     }
 
     /**
@@ -167,7 +171,7 @@ public final class SpellEngineBridge {
             case ALREADY_COMPLETE -> "法杖已经是最新的（" + learnedCount + " 个已解锁法术都在里面）";
             case UPDATED -> "法杖内容已同步（" + learnedCount + " 个已解锁法术）";
             case GAVE_NEW_WAND -> "没找到法杖，补发了一根（含 " + learnedCount + " 个已解锁法术）";
-            case NO_WAND_ITEM -> "找不到法杖物品，补不了（注册出问题了？）";
+            case NO_WAND_ITEM -> "没有随身法杖，请到酒馆请驻馆匠人打造；已学法术仍然保留";
             case FAILED -> "同步法杖时出错，详见日志";
             case NO_ENGINE -> "没有装 SpellEngine，跳过";
         };
@@ -179,7 +183,7 @@ public final class SpellEngineBridge {
 
     private static final class Impl {
 
-        static WandResult ensureWand(Player player, Collection<ResourceLocation> learned) {
+        static WandResult ensureWand(Player player, Collection<ResourceLocation> learned, boolean adminGive) {
             try {
                 Item wandItem = ForgeRegistries.ITEMS.getValue(WAND);
                 if (wandItem == null) {
@@ -202,6 +206,9 @@ public final class SpellEngineBridge {
                 }
 
                 if (found == 0) {
+                    if (!player.isCreative() && !adminGive) {
+                        return WandResult.NO_WAND_ITEM;
+                    }
                     if (wanted.isEmpty()) {
                         return WandResult.NOTHING_LEARNED;
                     }

@@ -32,14 +32,27 @@ class GuidebookTest {
             }
         }
     }
-    @Test void unimplementedSystemsAreClearlyLabelledWithoutFakeQuestObjectives() throws IOException {
+    @Test void guideDescribesImplementedSystemsAndExplicitFutureScope() throws IOException {
         for(var page:content().pages()) {
             assertFalse(page.status().isBlank());
-            if(!page.id().equals("world"))assertTrue(page.status().contains("筹备")||page.status().contains("逐批开放"));
+            assertTrue(page.status().contains("开放")||page.status().contains("检测"));
         }
         String home=content().pages().get(7).sections().toString();
-        assertTrue(home.contains("住宅必须由玩家购买"));assertTrue(home.contains("没有家具"));
+        assertTrue(home.contains("住宅必须由玩家购买"));assertTrue(home.contains("移除标注家具"));
         assertTrue(home.contains("5银"));
+    }
+    @Test void realGameplayChaptersUseExistingAdvancementsWithoutDuplicateMoneyRewards() throws IOException {
+        Set<String> ids=new HashSet<>();int goals=0;
+        for(String name:List.of("tnc_play_01_onboarding","tnc_play_02_home")) {
+            var chapter=JsonParser.parseString(Files.readString(Path.of("questbook/ftbquests/chapters/"+name+".snbt"))).getAsJsonObject();
+            assertTrue(ids.add(chapter.get("id").getAsString()));
+            Set<String> questIds=new HashSet<>();for(var v:chapter.getAsJsonArray("quests"))questIds.add(v.getAsJsonObject().get("id").getAsString());
+            for(var v:chapter.getAsJsonArray("quests")){
+                var q=v.getAsJsonObject();assertTrue(ids.add(q.get("id").getAsString()));assertEquals(0,q.getAsJsonArray("rewards").size());
+                for(var d:q.getAsJsonArray("dependencies"))assertTrue(questIds.contains(d.getAsString()));
+                for(var t:q.getAsJsonArray("tasks")){var task=t.getAsJsonObject();assertTrue(ids.add(task.get("id").getAsString()));assertEquals("advancement",task.get("type").getAsString());assertNotNull(getClass().getResource("/data/tnc/advancements/"+task.get("advancement").getAsString().split(":")[1]+".json"));goals++;}
+            }
+        }assertEquals(19,goals);
     }
     @Test void duplicatePageIdentifiersAreRejected() {
         String page="{\"id\":\"same\",\"title\":\"t\",\"subtitle\":\"s\",\"status\":\"planned\",\"sections\":[{\"heading\":\"h\",\"text\":\"x\"}]}";

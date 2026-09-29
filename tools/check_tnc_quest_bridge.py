@@ -33,6 +33,7 @@ ASCII only on purpose (cp936 console).
 import argparse
 import io
 import os
+import re
 import subprocess
 import sys
 import zipfile
@@ -144,6 +145,16 @@ def main():
     src = io.open(src_path, encoding="utf-8").read()
 
     problems = []
+    # A correct method listed in comments cannot prove the actual string passed to
+    # getMethod(accessor) is correct. Verify the call-site accessor names as well.
+    state_accessors = re.findall(r'engineState\(player,\s*questId,\s*"([^"]+)"\)', src)
+    if len(state_accessors) != 2:
+        problems.append("expected the active/completed engineState call sites; review accessor validation")
+    state_declarations = javap(javap_exe, jar, "com.lirxowo.whisperingquests.quest.TeamQuestState") or ""
+    for accessor in state_accessors:
+        if not any(line.strip().startswith("public ") and accessor + "()" in line
+                   for line in state_declarations.splitlines()):
+            problems.append("actual engineState accessor %s is not a public TeamQuestState getter" % accessor)
     with zipfile.ZipFile(jar) as z:
         names = set(z.namelist())
         for cls, member, want in EXPECTED_METHODS:

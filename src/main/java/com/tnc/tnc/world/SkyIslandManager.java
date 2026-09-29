@@ -358,6 +358,7 @@ public final class SkyIslandManager {
 
         StructureTemplate template = level.getStructureManager().get(piece.resource())
                 .orElseThrow(() -> new IOException("missing structure template " + piece.resource()));
+        if(com.tnc.tnc.home.HousingService.intersectsOwned(level,target,template.getSize()))throw new IOException("住宅产权保护：模板会覆盖已购房屋，已停止生成");
         StructurePlaceSettings settings = new StructurePlaceSettings()
                 .setIgnoreEntities(false)
                 .setKeepLiquids(false)
@@ -439,6 +440,7 @@ public final class SkyIslandManager {
             throws IOException {
         StructureTemplate template = level.getStructureManager().get(resource)
                 .orElseThrow(() -> new IOException("missing structure template " + resource));
+        if(com.tnc.tnc.home.HousingService.intersectsOwned(level,target,template.getSize()))throw new IOException("住宅产权保护：模板会覆盖已购房屋，已停止施工");
         boolean placed = template.placeInWorld(
                 level,
                 target,

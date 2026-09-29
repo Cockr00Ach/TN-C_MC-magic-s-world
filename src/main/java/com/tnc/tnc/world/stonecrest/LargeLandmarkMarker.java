@@ -24,6 +24,9 @@ final class LargeLandmarkMarker extends StructurePiece {
         t.putString("Asset",asset); t.putLong("Origin",origin.asLong());
     }
     @Override public void postProcess(WorldGenLevel l,StructureManager s,ChunkGenerator g,RandomSource r,BoundingBox b,ChunkPos c,BlockPos p) {
+        // Dedicated GameTests enqueue their own fixtures. Random worldgen landmarks
+        // must not occupy those sites or cast shadows across unrelated test batches.
+        if(l.getLevel().getServer() instanceof net.minecraft.gametest.framework.GameTestServer)return;
         LargeLandmarkJobs.request(l.getLevel(),asset,origin);
     }
 }

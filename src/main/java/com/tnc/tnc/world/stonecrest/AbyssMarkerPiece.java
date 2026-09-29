@@ -28,6 +28,7 @@ final class AbyssMarkerPiece extends StructurePiece {
     @Override public void postProcess(WorldGenLevel level, StructureManager manager, ChunkGenerator generator,
                                       RandomSource random, BoundingBox box, ChunkPos chunk, BlockPos pivot) {
         // No SavedData/chunk access from a worldgen worker thread.
+        if(level.getLevel().getServer() instanceof net.minecraft.gametest.framework.GameTestServer)return;
         AbyssCitadelJobs.request(level.getLevel(),origin);
     }
 }

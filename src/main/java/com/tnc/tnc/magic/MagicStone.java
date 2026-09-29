@@ -79,6 +79,8 @@ public class MagicStone {
             return;
         }
         get(player).ifPresent(data -> {
+            // Snapshot legacy mana/XP before default initialization or recalculation.
+            com.tnc.tnc.adventure.AdventureService.profile(player);
             if (!data.isInitialized()) {
                 data.assignDefaultAffinities(Config.defaultAffinity);
             }
@@ -172,7 +174,13 @@ public class MagicStone {
     // ------------------------------------------------------------------
 
     public static void refreshMaxMana(Player player, MagicStoneData data) {
-        data.recomputeMaxMana(MagicStoneData.vanillaLevelOf(player),
+        int growth = 0;
+        if (player instanceof ServerPlayer serverPlayer) {
+            var profile = com.tnc.tnc.adventure.AdventureService.profile(serverPlayer);
+            growth = profile.level() - 1;
+            data.setAdventurePoints(profile.learningPoints());
+        }
+        data.recomputeMaxMana(growth,
                 Config.manaPerAffinity, Config.manaPerVanillaLevel, Config.flatManaBonus);
     }
 

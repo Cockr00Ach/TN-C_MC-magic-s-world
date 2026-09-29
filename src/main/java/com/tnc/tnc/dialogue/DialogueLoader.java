@@ -170,7 +170,7 @@ public final class DialogueLoader {
             //     中： @id / @next
             //     最后：@act
             //   下面的防呆会在顺序再次被弄乱时**立刻抛错**，不静默吞掉。
-            if (line.startsWith("@act")) {
+            if (line.equals("@act") || line.startsWith("@act ") || line.startsWith("@act\t")) {
                 // 动作名必须挂在**下一行**台词上：写在末尾或连着两条就直接报错，
                 // 不做静默忽略 —— 静默失效是这个项目最大的坑。
                 if (pendingAction != null) {
