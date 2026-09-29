@@ -136,10 +136,44 @@ public final class TnSpellMechanics {
     private static final float STORM_DAMAGE = 4.0F;
     private static final int STORM_TARGETS_PER_WAVE = 3;
 
-    /** 神在投篮（新 t5）：施法那一刻，范围内每个敌人头顶各出现一颗超级无敌大雷球 ✓ */
+    /**
+     * 神在投篮（t5）：施法那一刻，**你正在瞄的那个敌人脚下**铺一张大阵 ＋ 三尊神 ＋ 一颗慢速大雷球 ✓
+     *
+     * <p>★★ 2026-09-29 恢复（作者："全部恢复"）：这一组数值是作者**逐个验收过**的
+     * （3.2i-4：球的体积 ×3、三尊神环绕半径拉大、高度降三格、落地才炸、爆炸不击飞），
+     * 被 commit `1b31dea4` 的回滚换回了 9-27 的旧值（神 12 / 高 +6 / 球 20 / 下落 1.5 / 没有落地爆炸 ✗），
+     * 这里按验收过的值改回来 ✓。
+     */
     private static final int DIVINE_WINDOW = 40;
     private static final double DIVINE_RADIUS = 20.0D;
-    private static final double DIVINE_BALL_SCALE = 20.0D;
+    /** t5 顺带把天变黑（打雷下雨）多少 tick ✓ */
+    private static final int DIVINE_WEATHER_TICKS = 200;
+    /** 大雷球落地那一下：伤害与半径（球**落地才炸** ✓ 作者 2026-09-29） */
+    private static final float DIVINE_BALL_DAMAGE = 25.0F;
+    private static final double DIVINE_BALL_BLAST = 8.0D;
+    /** 神留 200 tick（10 秒）、球落地后还留 40 tick（2 秒）✓ */
+    private static final int DIVINE_GOD_LIFE = 200;
+    private static final int DIVINE_BALL_LIFE = 40;
+    /** 球下落速度（格/tick）：0.5 = 慢慢砸下来，看得清 ✓ */
+    private static final double DIVINE_BALL_FALL = 0.5D;
+    /** 三尊神：体积 ×10 ⇒ 线性 26 ✓；环绕半径 22 格；悬停高度 27 格 ✓ */
+    private static final double DIVINE_GOD_SCALE = 26.0D;
+    private static final double DIVINE_GOD_RADIUS = 22.0D;
+    private static final double DIVINE_GOD_HEIGHT = 27.0D;
+    /** 大雷球：体积 ×3 ⇒ 线性 29 ✓ */
+    private static final double DIVINE_BALL_SCALE = 29.0D;
+    /** 球模型自身的半径（格）—— 用来把球心抬起来，免得半个球埋进地里 ✗ */
+    private static final double DIVINE_BALL_MODEL_BLOCKS = 13.0D / 16.0D;
+    /** 锚点脚下那张阵（半径 15 格、200 tick）✓ */
+    private static final double DIVINE_CIRCLE_RADIUS = 15.0D;
+    private static final int DIVINE_CIRCLE_LIFE = 200;
+    /**
+     * 锚点选取的"瞄准锥"：只认与准星夹角 ≤ 这个度数的敌人 ✓
+     *
+     * <p>为什么要锥：旧的"范围内第一个敌人"会把村民/动物/剧情 NPC 也算进去（{@code isEnemy}
+     * 只排除玩家自己 ✗），于是三尊神和大雷球常常生成在**身后/墙后** ⇒ 玩家什么都看不见 ✗。
+     */
+    private static final double DIVINE_AIM_DEGREES = 35.0D;
     private static final Map<UUID, Long> DIVINE_UNTIL = new ConcurrentHashMap<>();
     /** 这一次施法是否已经铺过球了（防止窗口内每 tick 重复铺 ✓）。 */
     private static final java.util.Set<UUID> DIVINE_FIRED = java.util.concurrent.ConcurrentHashMap.newKeySet();
@@ -156,6 +190,48 @@ public final class TnSpellMechanics {
     private static final int MAGIC_CIRCLE_L4 = 190;
     private static final double MAGIC_CIRCLE_R5 = 15.0D;
     private static final int MAGIC_CIRCLE_L5 = 220;
+
+    /**
+     * ★★ 跟随神（2026-09-29 作者："我已登神，我希望玩家背后会出现 god 的模型跟随"）
+     *
+     * <p>登神（{@code LIGHTNING_ASCENSION} = t5「闪电登神」给的 buff）期间，
+     * 玩家背后**恒有一尊 {@code lightning_god} 模型的雷神跟着** ✓ ——
+     * 用的是和 t5「神在投篮」天上那三尊**完全同一个模型**（{@code projectile/lightning_god}）✓。
+     */
+    private static final int GOD_FOLLOWER_COUNT = 1;
+    /** 跟在背后多少格（离玩家中心）✓ */
+    private static final double GOD_FOLLOWER_BACK = 3.4D;
+    /** 抬高多少格（贴地悬停感）✓ */
+    private static final double GOD_FOLLOWER_UP = 1.1D;
+    /** 尺寸：模型原生 1.63×1.13×0.94 格 ⇒ 5.0 倍 ≈ **5.6 格高** ✓（t5 那三尊是 26 ≈ 29 格 ✗ 当跟随者太大） */
+    private static final double GOD_FOLLOWER_SCALE = 5.0D;
+    /** 多尊时的角间隔（单尊用不到 ✓） */
+    private static final double GOD_FOLLOWER_ARC_DEGREES = 34.0D;
+
+    /**
+     * ★★ 登神链（雷速链 {@code SPEED}）t1..t5 的「<b>万雷归体</b>」
+     * （2026-09-29 作者："登神链他们从 t1 到 t5，根据等级，释放之后应该有无数雷粒子从外部向角色汇集，
+     * 等级越高越多"）
+     *
+     * <p>做法：**释放**那一刻开一个窗口，窗口内每 tick 在玩家周围的球壳上随机取点，
+     * 给每颗粒子一个"**指向玩家**"的初速度（{@code sendParticles(..., count = 0, vx, vy, vz, 0)}：
+     * 原版在 {@code count == 0} 时把这三个数当**定向速度**用 ✓，不是随机散布 ✗）
+     * ⇒ 看上去就是"雷电从四面八方被吸进身体" ✓。
+     */
+    private record Gather(long start, long until, int tier) {
+    }
+
+    private static final Map<UUID, Gather> GATHER = new ConcurrentHashMap<>();
+    /** 每个档位：窗口 tick / 每 tick 颗数 / 起始半径（格）✓（索引 = tier-1） */
+    private static final int[] GATHER_TICKS = {40, 55, 70, 90, 120};
+    private static final int[] GATHER_PER_TICK = {3, 6, 10, 16, 24};
+    private static final double[] GATHER_RADIUS = {6.0D, 9.0D, 12.0D, 16.0D, 21.0D};
+    /** 颗粒子飞几个 tick 到身上 ✓ */
+    private static final double GATHER_TRAVEL_TICKS = 7.0D;
+    /** 收束：窗口末尾粒子从更近的地方来 ✓ */
+    private static final double GATHER_CLOSE_IN = 0.45D;
+    /** 登神 buff 期间常驻的"余波"倍率（t5 登神 12 秒 > 窗口 6 秒 ✓；0 = 关掉） */
+    private static final double ASCENDED_GATHER_MUL = 0.35D;
 
     /** 谁在雷场 / 雷暴的窗口里（UUID -> 结束时的 gameTime）。 */
     private static final Map<UUID, Long> FIELD_UNTIL = new ConcurrentHashMap<>();
@@ -238,8 +314,19 @@ public final class TnSpellMechanics {
     }
 
     /**
-     * 神在投篮（新 t5，作者 2026-09-27）：施法那一刻，**范围内每个敌人头顶各砸一颗超级无敌大雷球** ✓
-     * （就是把 t4 那颗大雷球复制到每个敌人头上 —— 球从天而降、落地炸半径 8 格 ✓）。
+     * 神在投篮（t5）：**你正在瞄的那个敌人 / 准星落点**脚下，铺一张大阵 ＋ 三尊环绕的神 ＋ 一颗慢速大雷球 ✓
+     *
+     * <p>锚点规则（2026-09-29 修，作者："我的模型呢，球的模型跟 god 的模型嘞，没看见"）：
+     * <ul>
+     *   <li>① 20 格内"敌对生物"里与准星夹角最小的那只（≤ {@link #DIVINE_AIM_DEGREES}）——"我看着谁就投谁" ✓</li>
+     *   <li>② 一只都没有 → 准星落点（一定在视线方向上 ✓）</li>
+     * </ul>
+     * 旧代码取的是"**遍历顺序里第一个** isEnemy 的目标"✗ —— 而 isEnemy 把村民、动物、剧情 NPC
+     * 全算成敌人（只排除玩家自己）✗，于是锚点常常落在**身后/墙后**：三尊神、大雷球、魔法阵全生成在背后，
+     * 玩家什么都看不见，却"确实有伤害" ✗。
+     *
+     * <p>三尊神的数值是作者验收过的：体积 ×10（线性 26）、环绕半径 22 格、悬停 27 格、**朝向圆心** ✓
+     * （模型的**脸在 −Z** ⇒ 朝向用原版那套 yaw = atan2(−dx, dz) ✓）。
      */
     private static void tickDivineShot(ServerPlayer player, long time) {
         Long until = DIVINE_UNTIL.get(player.getUUID());
@@ -255,19 +342,33 @@ public final class TnSpellMechanics {
             return;
         }
         ServerLevel level = player.serverLevel();
-        // 锚点：范围内第一个敌人；没有敌人就用准星落点 ✓
+        // 锚点：**玩家正在瞄的那个敌人**优先，其次准星落点 ✓
+        net.minecraft.world.phys.Vec3 look = player.getViewVector(1.0F).normalize();
+        net.minecraft.world.phys.Vec3 eye = player.getEyePosition();
+        double bestDot = Math.cos(Math.toRadians(DIVINE_AIM_DEGREES));
         net.minecraft.world.phys.Vec3 anchor = null;
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class,
                 player.getBoundingBox().inflate(DIVINE_RADIUS))) {
-            if (isEnemy(player, target) && target.distanceTo(player) <= DIVINE_RADIUS) {
+            if (!isDivineTarget(player, target) || target.distanceTo(player) > DIVINE_RADIUS) {
+                continue;
+            }
+            net.minecraft.world.phys.Vec3 to = target.position()
+                    .add(0.0D, target.getBbHeight() * 0.5D, 0.0D).subtract(eye);
+            if (to.lengthSqr() < 1.0E-4D) {
+                continue;                       // 站在我身上：不算"瞄着他" ✓
+            }
+            double dot = to.normalize().dot(look);
+            if (dot > bestDot) {
+                bestDot = dot;
                 anchor = target.position();
-                break;
             }
         }
         if (anchor == null) {
             anchor = aimPoint(player);
         }
-        // ① 三尊神：悬停在他上方 30 格，绕成一圈，各带一圈黑紫环 ✓（life 100 tick = 5 秒）
+        // ① 三尊神：围成一个大圆、每一尊都**朝圆心看** ✓
+        //    悬停高度 = fallTo + FALL_HEIGHT（实体 tick 里定的 ✓）⇒ 想悬停在 DIVINE_GOD_HEIGHT
+        //    就得把 fallTo 设成「目标高度 − FALL_HEIGHT」✓
         for (int i = 0; i < 3; i++) {
             double ang = i * (Math.PI * 2.0D / 3.0D) + (time % 628) * 0.01D;
             TNLightningStrikeEntity god = TNOrbEntities.LIGHTNING_STRIKE.get().create(level);
@@ -275,21 +376,44 @@ public final class TnSpellMechanics {
                 continue;
             }
             god.asGod();
-            god.configure(12.0D, 100, anchor.y + 6.0D, 3.0D);
-            god.moveTo(anchor.x + Math.cos(ang) * 6.0D, anchor.y + 30.0D,
-                    anchor.z + Math.sin(ang) * 6.0D, 0.0F, 0.0F);
+            double gx = anchor.x + Math.cos(ang) * DIVINE_GOD_RADIUS;
+            double gz = anchor.z + Math.sin(ang) * DIVINE_GOD_RADIUS;
+            float yaw = (float) Math.toDegrees(Math.atan2(anchor.x - gx, anchor.z - gz));
+            god.configure(DIVINE_GOD_SCALE, DIVINE_GOD_LIFE,
+                    anchor.y + DIVINE_GOD_HEIGHT - TNLightningStrikeEntity.FALL_HEIGHT, 3.0D);
+            god.moveTo(gx, anchor.y + DIVINE_GOD_HEIGHT, gz, yaw, 0.0F);
             level.addFreshEntity(god);
         }
-        // ② 一颗雷霆大球：慢速砸下来 ✓
+        // ② 一颗雷霆大球：**慢慢**砸下来，**落地那一下**才结算伤害/爆炸 ✓（作者："应该等球落地"）
+        //    球心要抬起"球半径"那么多，否则半个球埋进地里 ✗（而爆心仍然是地面上的锚点 ✓）
         TNLightningStrikeEntity ball = TNOrbEntities.LIGHTNING_STRIKE.get().create(level);
         if (ball != null) {
+            double ballRadius = DIVINE_BALL_MODEL_BLOCKS * DIVINE_BALL_SCALE / 2.0D;
             ball.asBall();
-            ball.setFallSpeed(1.5D);
-            ball.configure(DIVINE_BALL_SCALE, 6, anchor.y, 12.0D);
-            ball.moveTo(anchor.x, anchor.y, anchor.z, 0.0F, 0.0F);
+            ball.setFallSpeed(DIVINE_BALL_FALL);
+            ball.configure(DIVINE_BALL_SCALE, DIVINE_BALL_LIFE, anchor.y + ballRadius, 12.0D);
+            ball.setLandImpact(player, DIVINE_BALL_DAMAGE, DIVINE_BALL_BLAST);
+            ball.moveTo(anchor.x, anchor.y + ballRadius, anchor.z, 0.0F, 0.0F);
             level.addFreshEntity(ball);
         }
-        spawnMagicCircleAt(level, anchor, 8.0D, 140);
+        // 锚点脚下那张阵：半径 15 格（球现在 23.6 格直径 ⇒ 8 格的阵整个压在球底下、看不见 ✗）
+        spawnMagicCircleAt(level, anchor, DIVINE_CIRCLE_RADIUS, DIVINE_CIRCLE_LIFE);
+    }
+
+    /**
+     * "神在投篮"要认的目标 ✓（包内共享给实体侧不需要；这里就一处用）
+     *
+     * <p>比 {@link #isEnemy} 更严：原版 {@code Enemy} 或**正在打玩家**的怪才算 ——
+     * 村民 / 动物 / 剧情 NPC 不算 ✗（它们以前会被当成"我瞄着的敌人"，把三尊神引到背后去 ✗）。
+     */
+    private static boolean isDivineTarget(ServerPlayer player, LivingEntity target) {
+        if (target == player || !target.isAlive()) {
+            return false;
+        }
+        if (target instanceof net.minecraft.world.entity.monster.Enemy) {
+            return true;
+        }
+        return target instanceof Mob mob && mob.getTarget() == player;
     }
 
     /** 雷暴（t4）：每 {@link #STORM_INTERVAL} tick 劈几个敌人，**一直劈到 buff 结束** ✓。 */
@@ -434,6 +558,9 @@ public final class TnSpellMechanics {
         if(com.tnc.tnc.combat.DownedCombat.isDowned(player))return;
         String path = spellId.getPath();
 
+        // 真的放出去了 ⇒ 消掉"放行了却没放出来"的哑火待定项 ✓（见 ManaGate.PENDING）
+        ManaGate.noteCastHappened(player);
+
         // 火系那几条（自爆扣最大生命 10%）在自己的类里
         TNFireMechanics.onSpellCast(player, spellId, data);
         com.tnc.tnc.magic.water.TNWaterSpellEntity.cast(player, spellId);
@@ -473,9 +600,21 @@ public final class TnSpellMechanics {
             // 大雷球的粒子不跟随 ✗ -> 自己开一个窗口，每 tick 在球的位置画环 ✓
             BIG_BALL_UNTIL.put(player.getUUID(), player.level().getGameTime() + BIG_BALL_WINDOW);
         } else if (path.equals("god_descent")) {
-            // 环绕雷球（现在是 t4）：作者要求"同款魔法阵" ✓
-            spawnMagicCircle(player, 8.0D, 200);
-            circleOwn = true;                             // tickDivineShot 还会在**锚点**铺一张 ✓
+            // 神在投篮（t5）：**开窗口** —— 真正的三尊神 / 大雷球 / 锚点魔法阵由 tickDivineShot 摆 ✓
+            // 2026-09-29 修（作者："t5 施法总是有问题"）：这里原来只有一张脚下的阵 ✗，
+            //   DIVINE_UNTIL 从头到尾**没有任何地方写过** ⇒ tickDivineShot 形同死代码：
+            //   按下去只有引擎那一下冲击波，三尊神和大雷球一颗都不出现 ✗。
+            DIVINE_FIRED.remove(player.getUUID());       // 新的一次施法 -> 允许再铺一次 ✓
+            DIVINE_UNTIL.put(player.getUUID(), player.level().getGameTime() + DIVINE_WINDOW);
+            spawnMagicCircle(player, 8.0D, 200);          // 自己脚下一张小的 ＋ 锚点一张大的 ✓
+            circleOwn = true;
+            // 施法那一刻天就黑下来 ✓（作者 2026-09-29：t5 = 雷雨天 + 三尊神 + 一颗慢速大雷球）
+            // ⚠️ 只在"现在没打雷"时才改天：水法那份天气是**带租约**的（10 秒后要把原来的天气还回去 ✗），
+            //    玩家自己 /weather 的结果同理 —— 不该被一个 t5 盖掉 ✓。
+            ServerLevel castLevel = player.serverLevel();
+            if (!castLevel.isThundering()) {
+                castLevel.setWeatherParameters(0, DIVINE_WEATHER_TICKS, true, true);
+            }
         }
 
         // 主链雷法（group = primary，5 档）：**释放的那一刻**就在脚下铺一张魔法阵 ✓
@@ -518,6 +657,12 @@ public final class TnSpellMechanics {
             spawnMagicCircle(player, radius, life);
             LOGGER.info("TN-C: 魔法阵（按链补）{} chain={} tier={} r={} life={}",
                     spellId, castEntry.chain(), castEntry.tier(), radius, life);
+        }
+
+        // ★★ 登神链（雷速链）t1..t5：释放后"万雷归体" —— 从四周向角色汇集，档位越高越多 ✓
+        //    判据同样用**链**（见 startGather）✓
+        if (castEntry != null && castEntry.chain() == SpellCatalog.Chain.SPEED) {
+            startGather(player, castEntry.tier());
         }
     }
 
@@ -570,9 +715,23 @@ public final class TnSpellMechanics {
         LOGGER.info("TN-C: spawn circle at {} r={} life={} (aim point)", pos, radius, life);
     }
 
-    /** 准星落点（用来把魔法阵铺在"瞄准的地方"✓）。 */
+    /**
+     * 准星落点（用来把魔法阵铺在"瞄准的地方"✓）。
+     *
+     * <p>2026-09-29：对着**天空**放的时候（射线 32 格没打到任何方块）以前会返回"天上那个点" ✗
+     * —— 于是大雷球停在半空、魔法阵铺在云里 ✗（作者："模型没看见"）。现在退回
+     * <b>身前 4 格的地面</b>（只取视线方向的水平分量，高度用自己脚底）✓。
+     */
     private static Vec3 aimPoint(ServerPlayer player) {
-        return player.pick(STRIKE_RANGE, 0.0F, false).getLocation();
+        net.minecraft.world.phys.HitResult hit = player.pick(STRIKE_RANGE, 0.0F, false);
+        if (hit.getType() == net.minecraft.world.phys.HitResult.Type.MISS) {
+            Vec3 flat = player.getViewVector(1.0F).multiply(1.0D, 0.0D, 1.0D);
+            if (flat.lengthSqr() < 1.0E-4D) {
+                return player.position();               // 垂直朝上/朝下：就落在自己脚下 ✓
+            }
+            return player.position().add(flat.normalize().scale(4.0D));
+        }
+        return hit.getLocation();
     }
 
     private static void spawnMagicCircle(ServerPlayer player, double radius, int life) {
@@ -607,10 +766,41 @@ public final class TnSpellMechanics {
         if (!(event.player instanceof ServerPlayer player)) {
             return;
         }
+        tickPlayer(player);
+    }
+
+    /**
+     * 第二个入口：服务端每 tick 遍历所有玩家 ✓
+     *
+     * <p>★ 2026-09-29 实机（3.2i-9 那次）：<b>{@code PlayerTickEvent} 在我们的 mod 上一个世界整局都没进来过</b>
+     * （`TN-C/spellvisuals: player-tick driver alive` 那行只在换世界后才第一次出现 ✗），
+     * 而同一段时间 {@code ServerTickEvent} 是好的 ✓。两条都挂上、谁活着谁驱动 ✓ ——
+     * {@link #tickPlayer} 内部有"一个玩家一 tick 只跑一次"的闸门（{@link #LAST_TICK_SEEN}），
+     * 两个入口都来也不会跑两遍 ✗。
+     */
+    @SubscribeEvent
+    public static void onServerTick(TickEvent.ServerTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) {
+            return;
+        }
+        for (ServerPlayer player : event.getServer().getPlayerList().getPlayers()) {
+            tickPlayer(player);
+        }
+    }
+
+    /** 一个玩家一 tick 只处理一次的闸门：uuid -> 这一 tick 的 gameTime ✓ */
+    private static final Map<UUID, Long> LAST_TICK_SEEN = new ConcurrentHashMap<>();
+
+    /** 一个玩家一 tick 的全部持续行为（两个入口共用，幂等 ✓）。 */
+    private static void tickPlayer(ServerPlayer player) {
         if (player.level().isClientSide()) {
             return;
         }
         long time = player.level().getGameTime();
+        Long seen = LAST_TICK_SEEN.put(player.getUUID(), time);
+        if (seen != null && seen == time) {
+            return;                             // 这一 tick 已经由另一个入口跑过了 ✓
+        }
 
         // 环绕雷球：现在是**真实体**（TNThunderOrbEntity），这里只负责"维持数量" ✓
         // 作者 2026-09-22：「环绕雷球的技能，变为我们的实体雷球啊」
@@ -626,18 +816,27 @@ public final class TnSpellMechanics {
         if (has(player, TNEffects.LIGHTNING_HASTE)) {
             hasteSparks(player, time);
         }
-        // 闪电登神：全身电弧 + 环绕电光 + 走过留雷印
+        // 闪电登神：全身电弧 + 环绕电光 + 走过留雷印 + **背后跟着的神** ✓
         if (has(player, TNEffects.LIGHTNING_ASCENSION)) {
             ascensionAura(player, time);
+            maintainGodFollower(player, time);
         } else {
             // buff 没了就把"上一个雷印位置"清掉，免得下次上 buff 时先补一枚
             LAST_MARK.remove(player.getUUID());
+            removeGodFollower(player);
         }
         // 回蓝的 3 秒表演 + 地上的雷印（两者都可能没有，函数内部自己判断）
         rechargeFlourish(player, time);
         sparkMarks(player, time);
+        // ★ 登神链的"万雷归体"（雷粒子从四周向角色汇集）✓
+        tickGather(player, time);
         // 神级大雷球：粒子贴到球上（引擎自己的 travel_particles 不跟随 ✗）
         followBigBall(player, time);
+        // ★★ 魔力恢复的第三个驱动入口（2026-09-29）：
+        //    日志实锤 —— 换世界之后 `TN-C/mana` 一行都不打、魔力卡住不动 ✗，
+        //    而**这个函数是活着的**（同一段 tick 里的别的日志照打 ✓）。所以把回魔挂到这条
+        //    已验证活着的路上来；回魔内部有"每个周期只回一次"的闸门 ⇒ 多入口不会翻倍 ✓。
+        MagicStone.tickManaRegen(player);
         // ★★ 自动补学**不许再挂在 tick 上** ✗✗
         //    （作者 2026-09-29 两次："为什么会自动学习啊，删去" → "遗忘了还自动学"）
         //    原来这里每 40 tick 跑一次 autoLearnUnlockedAndSync；而那个方法在
@@ -651,6 +850,13 @@ public final class TnSpellMechanics {
         tickLightningField(player, time);
         tickDivineShot(player, time);
         tickLightningStorm(player, time);
+        // ★ "放行了却没放出来"的哑火提示（作者 2026-09-29："释放过的法术怎么无法再释放了"）：
+        //   最常见的原因是**读条没满就松手**（引擎那条规则静默生效，界面上毫无反馈 ✗）✓
+        ManaGate.checkSilentFizzle(player, 30);
+        // ★★ 服务端冷却看门狗 —— **"放完一次就再也放不出来"的真因** ✓✓（2026-09-29 实测）
+        //   引擎只在"正在施法"时才 update() 冷却管理器 ⇒ 服务端那次冷却永远停在 100% ✗，
+        //   于是 attemptCasting 静默拒绝：日志里 `coolingDown=true progress=1.0` 就是它 ✓。
+        tickServerCooldowns(player);
         // 无冷却：雷系"闪电登神"与风系"风神降临"（5 级）都给。
         // 风系用专属标记 wind_god 判断 —— 只有 5 级发它，所以 4 级"超级风速"
         // 不会再蹭到无冷却（之前借用共用的 wind_speed_iii 时就会蹭到）。
@@ -659,6 +865,28 @@ public final class TnSpellMechanics {
         boolean noCooldown = has(player, TNEffects.LIGHTNING_ASCENSION) || windGod;
         if (noCooldown && time % ASCENSION_CLEAR_INTERVAL == 0) {
             clearOurCooldowns(player);
+        }
+    }
+
+    /**
+     * 每 tick 手动推一次引擎的<b>服务端</b>冷却管理器 ✓
+     *
+     * <h2>为什么必须自己推（2026-09-29 实机反编译确认）</h2>
+     * 引擎的 {@code PlayerEntityMixin.tick_TAIL_SpellEngine} 里，服务端那一支**只在
+     * {@code synchronizedSpellCastProcess != null}（正在施法）时才调
+     * {@code getCooldownManager().update()}** ✗ —— 也就是"没在读条的时候冷却根本不走字"。
+     * 后果：放完一个法术后冷却冻在 100%，下一次 {@code attemptCasting} 被引擎静默拒绝
+     * （日志实证：`FIZZLE … coolingDown=true progress=1.0`）⇒ <b>每个法术一辈子只能放一次</b> ✗✗。
+     * 客户端那半边同样的问题在 {@code TNSpellClientVisuals} 里补 ✓。
+     *
+     * <p>包在 try 里：引擎不在 / API 变了就退回原样（少一层保险），不影响别的逻辑 ✓。
+     */
+    private static void tickServerCooldowns(ServerPlayer player) {
+        try {
+            ((net.spell_engine.internals.casting.SpellCasterEntity) player)
+                    .getCooldownManager().update();
+        } catch (Throwable ignored) {
+            // 引擎缺失：什么都不做 ✓
         }
     }
 
@@ -889,6 +1117,174 @@ public final class TnSpellMechanics {
                 list.remove(0);
             }
         }
+    }
+
+    // ------------------------------------------------------------------
+    //  ★ 跟随神（登神期间背后那尊）
+    // ------------------------------------------------------------------
+
+    /**
+     * 登神期间，维持玩家背后的 {@link #GOD_FOLLOWER_COUNT} 尊跟随神 ✓
+     * （作者 2026-09-29："我已登神，我希望玩家背后会出现 god 的模型跟随"）
+     *
+     * <p>做法和"环绕雷球"一致（同一条既成做法 ✓）：**实体自己负责跟随**，
+     * 机制层只负责"缺了就补一尊"（每 10 tick 查一次，不用每 tick 遍历世界 ✗）。
+     * 位置/朝向/粒子/消失条件全在 {@link TNLightningStrikeEntity#tick()} 里 ✓。
+     *
+     * <p>为什么不每 tick 重建：重建会**每 tick 重发一次生成包** ⇒ 客户端一直在"新实体出现"，
+     * 模型会不停闪 ✗。所以只在**一尊都没有**的时候补 ✓。
+     */
+    private static void maintainGodFollower(ServerPlayer player, long time) {
+        if (GOD_FOLLOWER_COUNT <= 0 || time % 10 != 0) {
+            return;
+        }
+        ServerLevel level = player.serverLevel();
+        int alive = 0;
+        for (TNLightningStrikeEntity god : level.getEntitiesOfClass(TNLightningStrikeEntity.class,
+                player.getBoundingBox().inflate(64.0D))) {
+            if (god.isFollowerGod() && player.getUUID().equals(god.followOwner())) {
+                alive++;
+            }
+        }
+        if (alive >= GOD_FOLLOWER_COUNT) {
+            return;
+        }
+        double base = Math.toRadians(player.getYRot());
+        for (int i = alive; i < GOD_FOLLOWER_COUNT; i++) {
+            // 多尊时按角度均分站在背后（单尊时 i=0 ⇒ 正后方 ✓）
+            double spread = Math.toRadians((i - (GOD_FOLLOWER_COUNT - 1) / 2.0D) * GOD_FOLLOWER_ARC_DEGREES);
+            double dir = base + spread;
+            TNLightningStrikeEntity god = TNOrbEntities.LIGHTNING_STRIKE.get().create(level);
+            if (god == null) {
+                return;
+            }
+            god.asFollowerGod(player.getUUID(), GOD_FOLLOWER_BACK, GOD_FOLLOWER_UP);
+            god.configure(GOD_FOLLOWER_SCALE, TNLightningStrikeEntity.FOLLOWER_MAX_AGE,
+                    player.getY(), 0.0D);
+            double gx = player.getX() + Math.sin(dir) * GOD_FOLLOWER_BACK;
+            double gz = player.getZ() - Math.cos(dir) * GOD_FOLLOWER_BACK;
+            // 朝向：和玩家一致（原版约定 facing = (−sin yaw, cos yaw) ⇒ 直接用玩家的 yaw ✓）
+            god.moveTo(gx, player.getY() + GOD_FOLLOWER_UP, gz, player.getYRot(), 0.0F);
+            level.addFreshEntity(god);
+        }
+    }
+
+    /** 登神 buff 没了：把玩家背后那几尊跟随神清掉 ✓（实体自己也会查 buff，这里是双保险 ✓）。 */
+    private static void removeGodFollower(ServerPlayer player) {
+        ServerLevel level = player.serverLevel();
+        for (TNLightningStrikeEntity god : level.getEntitiesOfClass(TNLightningStrikeEntity.class,
+                player.getBoundingBox().inflate(80.0D))) {
+            if (god.isFollowerGod() && player.getUUID().equals(god.followOwner())) {
+                god.discard();
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------
+    //  ★ 万雷归体（登神链 t1..t5）
+    // ------------------------------------------------------------------
+
+    /**
+     * ★ 单调时钟（单位 tick，50 ms 一格）—— **只给"跨世界也不能算错"的窗口用** ✓
+     *
+     * <p>为什么：3.2i-9 那个真因（回魔换世界永久停摆）就是"static 的 last 时间 ＋
+     * 每存档各自的 {@code level.getGameTime()}"算出的**负数时间差** ✗。本类里那些旧窗口
+     * （{@code FIELD_UNTIL} / {@code STORM_UNTIL} / {@code DIVINE_UNTIL} …）还在用 gameTime ✗，
+     * 但它们都有 buff / 40 tick 窗口兜底 ✓；**新加的"万雷归体"窗口用这个** ✓。
+     */
+    private static long wallTicks() {
+        return System.currentTimeMillis() / 50L;
+    }
+
+    /**
+     * 登神链释放时开窗：接下来 {@link #GATHER_TICKS}[tier-1] tick 内"万雷归体" ✓。
+     *
+     * <p>判据用**链**而不是法术 id：{@code entry.chain() == Chain.SPEED} ⇒ 这条链
+     * t1..t5 以后再加档也自动有特效 ✓，档位直接决定强度 ✓。
+     */
+    private static void startGather(ServerPlayer player, int tier) {
+        int idx = Math.max(0, Math.min(GATHER_TICKS.length - 1, tier - 1));
+        long now = wallTicks();
+        GATHER.put(player.getUUID(), new Gather(now, now + GATHER_TICKS[idx], tier));
+        LOGGER.info("TN-C: gather start tier={} ticks={} perTick={} radius={}",
+                tier, GATHER_TICKS[idx], GATHER_PER_TICK[idx], GATHER_RADIUS[idx]);
+    }
+
+    /**
+     * 每 tick：在玩家周围球壳上随机取点，给粒子一个**指向玩家**的初速度 ⇒ 雷电被"吸"进身体 ✓。
+     *
+     * <p>窗口结束后若玩家仍在**登神**状态，则按 {@link #ASCENDED_GATHER_MUL} 的倍率继续
+     * （12 秒的登神期里一直有雷在往身上灌 ✓）；两者都没有就直接 return（零开销 ✓）。
+     */
+    private static void tickGather(ServerPlayer player, long time) {
+        long now = wallTicks();                 // ★ 和 startGather 同一把尺子（单调时钟）✓
+        Gather window = GATHER.get(player.getUUID());
+        if (window != null && now > window.until()) {
+            GATHER.remove(player.getUUID());
+            closingBurst(player, window.tier());
+            window = null;
+        }
+        boolean ascended = has(player, TNEffects.LIGHTNING_ASCENSION);
+        if (window == null && !ascended) {
+            return;
+        }
+        int tier = window != null ? window.tier() : GATHER_TICKS.length;
+        double mul = window != null ? 1.0D : ASCENDED_GATHER_MUL;
+        int idx = Math.max(0, Math.min(GATHER_TICKS.length - 1, tier - 1));
+        ServerLevel level = player.serverLevel();
+        // 窗口内越到后面，粒子从越近的地方来（"收束"）✓
+        double closeIn = 1.0D;
+        if (window != null) {
+            double p = (now - window.start()) / (double) Math.max(1L, window.until() - window.start());
+            closeIn = 1.0D - GATHER_CLOSE_IN * Math.min(1.0D, Math.max(0.0D, p));
+        }
+        int count = (int) Math.max(1L, Math.round(GATHER_PER_TICK[idx] * mul));
+        double radius = GATHER_RADIUS[idx] * closeIn;
+        double cx = player.getX();
+        double cy = player.getY() + player.getBbHeight() * 0.55D;
+        double cz = player.getZ();
+        for (int i = 0; i < count; i++) {
+            double a = level.random.nextDouble() * Math.PI * 2.0D;
+            double b = (level.random.nextDouble() - 0.5D) * Math.PI;
+            double rr = radius * (0.7D + level.random.nextDouble() * 0.5D);
+            double px = cx + Math.cos(a) * Math.cos(b) * rr;
+            double py = cy + Math.sin(b) * rr * 0.8D;
+            double pz = cz + Math.sin(a) * Math.cos(b) * rr;
+            // count=0 ⇒ 原版把 xDist/yDist/zDist 当**定向速度**（不是随机散布）✓
+            double vx = (cx - px) / GATHER_TRAVEL_TICKS;
+            double vy = (cy - py) / GATHER_TRAVEL_TICKS;
+            double vz = (cz - pz) / GATHER_TRAVEL_TICKS;
+            level.sendParticles(arc(), px, py, pz, 0, vx, vy, vz, 0.0D);
+            if ((i & 1) == 0) {
+                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, px, py, pz, 0, vx, vy, vz, 0.0D);
+            }
+        }
+        // 身上那点"被灌入"的亮光（每 2 tick 一次，够亮又不糊视野 ✓）
+        if (time % 2 == 0) {
+            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, cx, cy, cz, 4, 0.35D, 0.6D, 0.35D, 0.06D);
+        }
+    }
+
+    /** 窗口收尾：一圈雷电同时向内收 ＋ 一记白闪（"灌满了"的那一下 ✓）。 */
+    private static void closingBurst(ServerPlayer player, int tier) {
+        int idx = Math.max(0, Math.min(GATHER_TICKS.length - 1, tier - 1));
+        ServerLevel level = player.serverLevel();
+        double cx = player.getX();
+        double cy = player.getY() + player.getBbHeight() * 0.55D;
+        double cz = player.getZ();
+        double radius = Math.max(2.0D, GATHER_RADIUS[idx] * 0.45D);
+        int points = 16 + tier * 4;
+        for (int i = 0; i < points; i++) {
+            double a = i * (Math.PI * 2.0D / points);
+            double px = cx + Math.cos(a) * radius;
+            double pz = cz + Math.sin(a) * radius;
+            double py = cy + (level.random.nextDouble() - 0.5D) * 1.2D;
+            level.sendParticles(arc(), px, py, pz, 0,
+                    (cx - px) / 4.0D, (cy - py) / 4.0D, (cz - pz) / 4.0D, 0.0D);
+        }
+        level.sendParticles(ParticleTypes.FLASH, cx, cy, cz, 2, 0.0D, 0.0D, 0.0D, 0.0D);
+        level.playSound(null, cx, cy, cz, net.minecraft.sounds.SoundEvents.LIGHTNING_BOLT_THUNDER,
+                net.minecraft.sounds.SoundSource.PLAYERS, 0.35F, 1.6F);
     }
 
     /** 身上的随机一点（画电弧用）。 */
