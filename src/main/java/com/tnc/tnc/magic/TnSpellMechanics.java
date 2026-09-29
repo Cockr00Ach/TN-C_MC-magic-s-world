@@ -260,29 +260,45 @@ public final class TnSpellMechanics {
             DIVINE_FIRED.remove(player.getUUID());
             return;
         }
-        // ★ 2026-09-27 修：原来是 `time != until - DIVINE_WINDOW` 就 return ✗ ——
-        // 施法回调发生在玩家 tick 之后，机制层 tick 时那一 tick 已经过去了 ⇒ 条件永远不成立、
-        // 一个球都不生成（作者："t5 怎么光爆炸，模型没看见法阵没看见" ✗）。现在改成
-        // "窗口内第一次 tick 就铺"，漏不掉 ✓。
         if (!DIVINE_FIRED.add(player.getUUID())) {
             return;
         }
         ServerLevel level = player.serverLevel();
+        // 锚点：范围内第一个敌人；没有敌人就用准星落点 ✓
+        net.minecraft.world.phys.Vec3 anchor = null;
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class,
                 player.getBoundingBox().inflate(DIVINE_RADIUS))) {
-            if (!isEnemy(player, target) || target.distanceTo(player) > DIVINE_RADIUS) {
+            if (isEnemy(player, target) && target.distanceTo(player) <= DIVINE_RADIUS) {
+                anchor = target.position();
+                break;
+            }
+        }
+        if (anchor == null) {
+            anchor = aimPoint(player);
+        }
+        // ① 三尊神：悬停在他上方 30 格，绕成一圈，各带一圈黑紫环 ✓（life 100 tick = 5 秒）
+        for (int i = 0; i < 3; i++) {
+            double ang = i * (Math.PI * 2.0D / 3.0D) + (time % 628) * 0.01D;
+            TNLightningStrikeEntity god = TNOrbEntities.LIGHTNING_STRIKE.get().create(level);
+            if (god == null) {
                 continue;
             }
-            TNLightningStrikeEntity ball = TNOrbEntities.LIGHTNING_STRIKE.get().create(level);
-            if (ball == null) {
-                continue;
-            }
+            god.asGod();
+            god.configure(12.0D, 100, anchor.y + 6.0D, 3.0D);
+            god.moveTo(anchor.x + Math.cos(ang) * 6.0D, anchor.y + 30.0D,
+                    anchor.z + Math.sin(ang) * 6.0D, 0.0F, 0.0F);
+            level.addFreshEntity(god);
+        }
+        // ② 一颗雷霆大球：慢速砸下来 ✓
+        TNLightningStrikeEntity ball = TNOrbEntities.LIGHTNING_STRIKE.get().create(level);
+        if (ball != null) {
             ball.asBall();
-            ball.configure(DIVINE_BALL_SCALE, 6, target.getY(), 9.0D);
-            ball.moveTo(target.getX(), target.getY(), target.getZ(), 0.0F, 0.0F);
-            spawnMagicCircleAt(level, target.position(), 8.0D, 140);   // 阵铺在敌人脚下 ✓
+            ball.setFallSpeed(1.5D);
+            ball.configure(DIVINE_BALL_SCALE, 6, anchor.y, 12.0D);
+            ball.moveTo(anchor.x, anchor.y, anchor.z, 0.0F, 0.0F);
             level.addFreshEntity(ball);
         }
+        spawnMagicCircleAt(level, anchor, 8.0D, 140);
     }
 
     /** 雷暴（t4）：每 {@link #STORM_INTERVAL} tick 劈几个敌人，**一直劈到 buff 结束** ✓。 */

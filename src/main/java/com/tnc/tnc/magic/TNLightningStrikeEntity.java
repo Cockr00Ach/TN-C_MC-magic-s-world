@@ -66,6 +66,8 @@ public class TNLightningStrikeEntity extends Entity {
     private double fallTo;
     /** 落地那一 tick（-1 = 还没落地 ✓）。 */
     private int landedTick = -1;
+    /** 下落速度（默认 6 格/tick；神在投篮的球会调慢 ✓） */
+    private double fallSpeed = FALL_SPEED;
 
     public TNLightningStrikeEntity(EntityType<? extends TNLightningStrikeEntity> type, Level level) {
         super(type, level);
@@ -101,6 +103,20 @@ public class TNLightningStrikeEntity extends Entity {
         return this.entityData.get(DATA_KIND) == 1;
     }
 
+    /** 神形态（神在投篮 t5：天上那三尊，不下落 ✓） */
+    public void asGod() {
+        this.entityData.set(DATA_KIND, 2);
+    }
+
+    public boolean isGod() {
+        return this.entityData.get(DATA_KIND) == 2;
+    }
+
+    /** 下落速度（格/tick）—— 神在投篮那颗球要慢 ✓ */
+    public void setFallSpeed(double speed) {
+        this.fallSpeed = Math.max(0.1D, speed);
+    }
+
     public double scale() {
         return this.entityData.get(DATA_SCALE) / 100.0D;
     }
@@ -124,13 +140,29 @@ public class TNLightningStrikeEntity extends Entity {
         if (this.level().isClientSide()) {
             return;
         }
+        if (this.isGod()) {
+            // 三尊神：悬停在目标上方（生成时给的落点 + FALL_HEIGHT）✓，只冒紫/黑粒子，不落地 ✓
+            if (this.tickCount == 1) {
+                this.setPos(this.getX(), this.fallTo + FALL_HEIGHT, this.getZ());
+            }
+            if (this.tickCount > this.life()) {
+                this.discard();
+                return;
+            }
+            ServerLevel lvl = (ServerLevel) this.level();
+            lvl.sendParticles(ParticleTypes.WITCH, this.getX(), this.getY() + 2.0D, this.getZ(),
+                    6, 1.6D, 1.6D, 1.6D, 0.15D);
+            lvl.sendParticles(ParticleTypes.SQUID_INK, this.getX(), this.getY() + 2.0D, this.getZ(),
+                    4, 1.6D, 1.6D, 1.6D, 0.10D);
+            return;
+        }
         if (this.tickCount == 1) {
             // 生成在目标正上方（生成时给的是落点坐标 ✓）
             this.setPos(this.getX(), this.fallTo + FALL_HEIGHT, this.getZ());
             return;
         }
         if (this.getY() > this.fallTo) {
-            double next = Math.max(this.fallTo, this.getY() - FALL_SPEED);
+            double next = Math.max(this.fallTo, this.getY() - this.fallSpeed);
             // 下落拖尾：一路撒电花 —— "从天劈下来"的观感主要靠它 ✓
             ServerLevel level = (ServerLevel) this.level();
             double rr = 0.7D;

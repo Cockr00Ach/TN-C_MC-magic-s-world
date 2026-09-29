@@ -34,6 +34,8 @@ public class TNLightningStrikeRenderer extends EntityRenderer<TNLightningStrikeE
     private static final float CENTER_X = 10.5F / 16.0F;
     private static final float CENTER_Z = 9.0F / 16.0F;
     private static final float BOTTOM_Y = 5.0F / 16.0F;
+    /** 神脚底那圈环的贴图 ✓ */
+    private static final ResourceLocation GOD_RING = ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "textures/entity/god_ring.png");
 
     public TNLightningStrikeRenderer(EntityRendererProvider.Context context) {
         super(context);
