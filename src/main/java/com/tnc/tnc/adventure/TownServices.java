@@ -19,15 +19,19 @@ import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber(modid=TNMod.MODID)
 public final class TownServices {
-    public record Post(String role,String name,BlockPos local,VillagerProfession profession){}
+    private static final int POST_LAYOUT_VERSION=2;
+    public record Room(int minX,int y,int minZ,int maxX,int maxZ){
+        public boolean contains(BlockPos p){return p.getY()==y&&p.getX()>=minX&&p.getX()<=maxX&&p.getZ()>=minZ&&p.getZ()<=maxZ;}
+    }
+    public record Post(String role,String name,BlockPos local,VillagerProfession profession,Room room,float yaw){}
     public static final java.util.List<Post> POSTS=java.util.List.of(
-        new Post("guild","协会接待员 · 艾琳",new BlockPos(428,94,285),VillagerProfession.LIBRARIAN),
-        new Post("smith","潮生制杖屋 · 莉娅",new BlockPos(320,87,273),VillagerProfession.LIBRARIAN),
-        new Post("armorer","炉石铁匠铺 · 铎恩",new BlockPos(198,100,264),VillagerProfession.ARMORER),
-        new Post("broker","归航银行 · 米洛",new BlockPos(231,94,238),VillagerProfession.CARTOGRAPHER));
+        new Post("guild","协会接待员 · 艾琳",new BlockPos(428,94,285),VillagerProfession.LIBRARIAN,new Room(427,94,284,430,286),0),
+        new Post("smith","潮生制杖屋 · 莉娅",new BlockPos(320,87,270),VillagerProfession.LIBRARIAN,new Room(320,87,269,321,272),0),
+        new Post("armorer","炉石铁匠铺 · 铎恩",new BlockPos(201,101,259),VillagerProfession.ARMORER,new Room(199,101,256,203,261),45),
+        new Post("broker","归航银行 · 米洛",new BlockPos(228,94,234),VillagerProfession.CARTOGRAPHER,new Room(227,94,233,231,235),0));
     private static BlockPos origin(ServerLevel l){return SkyIslandAnchors.resolve(l,SkyIslandAnchors.Anchor.ORIGIN);}
     public static BlockPos board(ServerLevel l){var o=origin(l);return o==null?null:o.offset(426,94,285);}
-    public static String directions(ServerLevel l){var o=origin(l);if(o==null)return "天空岛尚未落成。";return "29潮生制杖屋 "+o.offset(320,87,273).toShortString()+"；28炉石铁匠铺 "+o.offset(198,100,264).toShortString()+"；19归航银行 "+o.offset(231,94,238).toShortString()+"。酒馆入门上楼北侧为委托栏。";}
+    public static String directions(ServerLevel l){var o=origin(l);if(o==null)return "天空岛尚未落成。";return "29潮生制杖屋 "+o.offset(POSTS.get(1).local).toShortString()+"；28炉石铁匠铺 "+o.offset(POSTS.get(2).local).toShortString()+"；19归航银行 "+o.offset(POSTS.get(3).local).toShortString()+"。店员在屋内，酒馆入门上楼北侧为委托栏。";}
     public static boolean near(ServerPlayer p,String role){
         if(p.serverLevel()!=p.server.overworld()||!p.isAlive()||p.isSpectator()||com.tnc.tnc.combat.DownedCombat.isDowned(p))return false;
         return !p.serverLevel().getEntitiesOfClass(TownServiceNpc.class,new AABB(p.blockPosition()).inflate(8),n->n.isAlive()&&n.role().equals(role)&&n.distanceToSqr(p)<=64).isEmpty();
@@ -35,7 +39,7 @@ public final class TownServices {
     public static boolean atBoard(ServerPlayer p){var b=board(p.server.overworld());return p.serverLevel()==p.server.overworld()&&p.isAlive()&&!p.isSpectator()&&!com.tnc.tnc.combat.DownedCombat.isDowned(p)&&b!=null&&b.closerToCenterThan(p.position(),8)&&p.serverLevel().hasChunkAt(b);}
     public static boolean openBoard(ServerPlayer p){var b=board(p.serverLevel());if(!atBoard(p)||b==null)return false;var be=p.serverLevel().getBlockEntity(b);if(be instanceof MenuProvider menu){p.openMenu(menu);return true;}return false;}
     public static void open(ServerPlayer p,TownServiceNpc npc){
-        if(!near(p,npc.role()))return;AdventureService.milestone(p,"met_"+npc.role());AdventureService.sync(p,true,"");
+        if(!near(p,npc.role()))return;AdventureService.milestone(p,"met_"+npc.role());AdventureService.sync(p,true,"",npc.role());
         if(npc.role().equals("guild"))p.sendSystemMessage(Component.literal("登记在这里办理；接单与交付请右键旁边的Bountiful委托栏。"));
     }
     public static com.tnc.tnc.dialogue.DialogueScript introduce(ServerPlayer p,com.tnc.tnc.dialogue.DialogueScript original){
@@ -52,20 +56,43 @@ public final class TownServices {
         lines.add(new com.tnc.tnc.dialogue.DialogueScript.Line("Self","34号茶灯会馆先留作休闲的去处。各栋建筑我给你记在任务书的城镇地图里。至于你一直惦记的那件事……",null));
         lines.addAll(original.lines());return new com.tnc.tnc.dialogue.DialogueScript(original.id(),original.next(),original.theme(),original.quests(),original.activate(),original.requires(),original.excludes(),java.util.List.copyOf(lines));
     }
-    private static BlockPos standing(ServerLevel l,BlockPos center){
-        for(int radius=0;radius<=5;radius++)for(int dy=-2;dy<=2;dy++)for(int dx=-radius;dx<=radius;dx++)for(int dz=-radius;dz<=radius;dz++){
-            if(Math.max(Math.abs(dx),Math.abs(dz))!=radius)continue;var p=center.offset(dx,dy,dz);
-            if(l.hasChunkAt(p)&&l.getBlockState(p.below()).isCollisionShapeFullBlock(l,p.below())&&l.getBlockState(p).getCollisionShape(l,p).isEmpty()&&l.getBlockState(p.above()).getCollisionShape(l,p.above()).isEmpty()&&l.getFluidState(p).isEmpty())return p;
-        }return null;
+    private static boolean canStand(ServerLevel l,BlockPos p){
+        return l.hasChunkAt(p)&&l.getBlockState(p.below()).isCollisionShapeFullBlock(l,p.below())
+                &&l.getBlockState(p).getCollisionShape(l,p).isEmpty()&&l.getBlockState(p.above()).getCollisionShape(l,p.above()).isEmpty()
+                &&l.getFluidState(p).isEmpty()&&l.getFluidState(p.above()).isEmpty();
+    }
+    static BlockPos standing(ServerLevel l,BlockPos o,Post post){
+        var positions=new java.util.ArrayList<BlockPos>();var room=post.room;var center=o.offset(post.local);
+        for(int x=room.minX;x<=room.maxX;x++)for(int z=room.minZ;z<=room.maxZ;z++)positions.add(o.offset(x,room.y,z));
+        positions.sort(java.util.Comparator.comparingDouble(p->p.distSqr(center)));
+        return positions.stream().filter(p->canStand(l,p)).findFirst().orElse(null);
+    }
+    static boolean ensurePost(ServerLevel l,BlockPos o,Post post,CompoundTag record){
+        if(record.hasUUID("UUID")&&record.getInt("LayoutVersion")>=POST_LAYOUT_VERSION)return false;
+        var target=standing(l,o,post);if(target==null)return false; // No fallback to the street or another floor.
+        TownServiceNpc npc;
+        if(record.hasUUID("UUID")){
+            var entity=l.getEntity(record.getUUID("UUID"));
+            if(entity==null&&record.contains("Pos",4)){
+                var old=BlockPos.of(record.getLong("Pos"));l.getChunk(old.getX()>>4,old.getZ()>>4);
+                entity=l.getEntity(record.getUUID("UUID"));
+            }
+            if(!(entity instanceof TownServiceNpc worker)||!worker.role().equals(post.role))return false;
+            npc=worker;
+            if(post.room.contains(npc.blockPosition().subtract(o))&&canStand(l,npc.blockPosition()))target=npc.blockPosition();
+            else {npc.teleportTo(target.getX()+.5,target.getY(),target.getZ()+.5);npc.setYRot(post.yaw);npc.setYHeadRot(post.yaw);npc.setYBodyRot(post.yaw);}
+        }else{
+            npc=TNNpcs.SERVICE_NPC.get().create(l);if(npc==null)return false;
+            npc.role(post.role);npc.setVillagerData(npc.getVillagerData().setProfession(post.profession));npc.setCustomName(Component.literal(post.name));npc.setCustomNameVisible(true);
+            npc.moveTo(target.getX()+.5,target.getY(),target.getZ()+.5,post.yaw,0);npc.setYHeadRot(post.yaw);npc.setYBodyRot(post.yaw);
+            if(!l.addFreshEntity(npc))return false;record.putUUID("UUID",npc.getUUID());
+        }
+        record.putLong("Pos",target.asLong());record.putInt("LayoutVersion",POST_LAYOUT_VERSION);return true;
     }
     @SubscribeEvent public static void tick(TickEvent.ServerTickEvent e){
         if(e.phase!=TickEvent.Phase.END)return;var s=net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();if(s==null||s.getTickCount()%100!=0)return;var l=s.overworld();var o=origin(l);if(o==null||!SkyIslandAnchors.isComplete(l)||!com.tnc.tnc.world.SkyLandscapeUpgrade.complete(s))return;
         var store=AdventureSavedData.get(s);if(!store.housing.contains("TownServices",10))store.housing.put("TownServices",new CompoundTag());var records=store.housing.getCompound("TownServices");
-        for(var post:POSTS){var record=records.getCompound(post.role);if(record.hasUUID("UUID"))continue;
-            var target=standing(l,o.offset(post.local));if(target==null)continue;var npc=TNNpcs.SERVICE_NPC.get().create(l);if(npc==null)continue;
-            npc.role(post.role);npc.setVillagerData(npc.getVillagerData().setProfession(post.profession));npc.setCustomName(Component.literal(post.name));npc.setCustomNameVisible(true);npc.moveTo(target.getX()+0.5,target.getY(),target.getZ()+0.5,180,0);
-            if(l.addFreshEntity(npc)){record.putUUID("UUID",npc.getUUID());record.putLong("Pos",target.asLong());records.put(post.role,record);store.setDirty();}
-        }
+        for(var post:POSTS){var record=records.getCompound(post.role);if(ensurePost(l,o,post,record)){records.put(post.role,record);store.setDirty();}}
         var b=board(l);if(b==null||!l.hasChunkAt(b)||records.getBoolean("BoardInstalled"))return;
         var block=ForgeRegistries.BLOCKS.getValue(ResourceLocation.parse("bountiful:bountyboard"));
         if(block==null||block==net.minecraft.world.level.block.Blocks.AIR)return;

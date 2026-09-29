@@ -27,7 +27,13 @@ public final class FarmMagic {
     public static void learn(ServerPlayer p) {
         var a=LifeSavedData.get(p.server).account(p.getUUID());
         if(a.farmTier==0)a.farmTier=1;
-        if(!p.getInventory().contains(new ItemStack(TNMod.FARM_FOCUS.get()))){var stack=new ItemStack(TNMod.FARM_FOCUS.get());var tx=new InventoryTransaction(p.getInventory());if(tx.add(stack))tx.commit();else p.drop(stack,false);}
+        if(!p.getInventory().contains(new ItemStack(TNMod.FARM_FOCUS.get()))){
+            // A native Bountiful reward runs before it consumes the held paper.
+            // Adding this single unstackable gift must preserve existing stack identities.
+            var stack=new ItemStack(TNMod.FARM_FOCUS.get());
+            if(!p.getInventory().add(stack))p.drop(stack,false);
+            p.getInventory().setChanged();p.inventoryMenu.broadcastChanges();
+        }
         LifeSavedData.get(p.server).setDirty();AdventureService.milestone(p,"farm_learned");
     }
     public static class FocusItem extends Item {

@@ -1,4 +1,4 @@
-param([Parameter(Mandatory=$true)][string]$LivePack,[switch]$CheckOnly)
+param([Parameter(Mandatory=$true)][string]$LivePack,[switch]$CheckOnly,[switch]$UpdateQuestbook)
 $ErrorActionPreference='Stop'
 . (Join-Path $PSScriptRoot '_common.ps1')
 $taskPack=[IO.Path]::GetFullPath($LivePack).TrimEnd('\')
@@ -27,9 +27,9 @@ foreach($chapter in $chapters){
         if(-not $ids.Add($quest.id)-or $quest.rewards.Count){throw 'Duplicate ID or duplicate account rewards.'}
         foreach($t in $quest.tasks){if(-not $ids.Add($t.id)){throw 'Duplicate task ID.'};if($chapter.Name -match '^tnc_play_' -and $t.type -notin @('advancement','item')){throw 'Gameplay objectives must be real advancements or held items.'}}
     }
-    Add-InstallFile $chapter.FullName ('config\ftbquests\quests\chapters\'+$chapter.Name)
+    if($UpdateQuestbook){Add-InstallFile $chapter.FullName ('config\ftbquests\quests\chapters\'+$chapter.Name)}
 }
-foreach($name in @('water_focus_1','water_staff_2','water_staff_3','water_staff_4','water_staff_5','onboarding_header','gui_world_title','town_atlas')){Add-InstallFile (Join-Path $TncRepoRoot "src\main\resources\assets\tnc\textures\guide\$name.png") "kubejs\assets\tnc\textures\guide\$name.png"}
+if($UpdateQuestbook){foreach($name in @('water_focus_1','water_staff_2','water_staff_3','water_staff_4','water_staff_5','onboarding_header','gui_world_title','town_atlas')){Add-InstallFile (Join-Path $TncRepoRoot "src\main\resources\assets\tnc\textures\guide\$name.png") "kubejs\assets\tnc\textures\guide\$name.png"}}
 Add-InstallFile (Join-Path $sourcePack 'kubejs\assets\tnc\textures\spell\divine_shot.png') 'kubejs\assets\tnc\textures\spell\divine_shot.png'
 Add-InstallFile (Join-Path $sourcePack 'kubejs\assets\tnc\textures\spell\god_descent.png') 'kubejs\assets\tnc\textures\spell\god_descent.png'
 # Whitelisted TN-C resources only. Existing legacy task definitions are deliberately retained.
@@ -42,16 +42,16 @@ if(@(Get-ChildItem -LiteralPath (Join-Path $sourcePack 'kubejs\data\tnc\whisperi
 if(-not(Test-Path -LiteralPath (Join-Path $taskPack 'mods\whisperingquests-3.2.jar'))){throw 'Opening migration requires verified WhisperingQuests 3.2.'}
 $groupTarget=Join-Path $taskPack 'config\ftbquests\quests\chapter_groups.snbt'
 $groupExisted=Test-Path -LiteralPath $groupTarget -PathType Leaf
-if(-not $groupExisted -and -not $workspaceTarget){throw 'Native FTB chapter group file missing.'}
+if($UpdateQuestbook -and -not $groupExisted -and -not $workspaceTarget){throw 'Native FTB chapter group file missing.'}
 $groupText=if($groupExisted){[IO.File]::ReadAllText($groupTarget,[Text.Encoding]::UTF8)}else{'{"chapter_groups": []}'}
-if($groupText -notmatch '544E434755494445'){
+if($UpdateQuestbook -and $groupText -notmatch '544E434755494445'){
     $array=[regex]::Match($groupText,'["'']?chapter_groups["'']?\s*:\s*\[');if(-not $array.Success){throw 'Cannot safely merge group list.'}
     $insertAt=$array.Index+$array.Length
     $separator=if($groupText.Substring($insertAt).TrimStart().StartsWith(']')){''}else{','}
     $groupText=$groupText.Insert($insertAt,"`n"+[IO.File]::ReadAllText((Join-Path $TncRepoRoot 'questbook\ftbquests\group.snbt'))+$separator+"`n")
 }
 $removed=[Collections.Generic.List[object]]::new()
-foreach($name in @('e.snbt','2032E61CAD845DDF.snbt')){
+if($UpdateQuestbook){foreach($name in @('e.snbt','2032E61CAD845DDF.snbt')){
     $relative='config\ftbquests\quests\chapters\'+$name
     $target=[IO.Path]::GetFullPath((Join-Path $taskPack $relative))
     if(-not $target.StartsWith($taskPack+'\',[StringComparison]::OrdinalIgnoreCase)){throw 'Removal target escapes pack.'}
@@ -61,28 +61,31 @@ foreach($name in @('e.snbt','2032E61CAD845DDF.snbt')){
         if($text -notmatch ('(?m)^\s*title:\s*"[^"\r\n]*'+$expected)){throw "Removal title mismatch: $name"}
         $removed.Add([ordered]@{Relative=$relative;Target=$target;SHA256=(Get-FileHash -LiteralPath $target -Algorithm SHA256).Hash})
     }
-}
-if($CheckOnly){Write-Output "Preflight passed: $($entries.Count) owned files, $($ids.Count) unique FTB IDs; $($removed.Count) requested author chapters to archive. No files changed.";return}
+}}
+if($CheckOnly){Write-Output "Preflight passed: $($entries.Count) owned files, $($ids.Count) source FTB IDs; UpdateQuestbook=$UpdateQuestbook; $($removed.Count) requested author chapters to archive. No files changed.";return}
 $gameProcesses=@(Get-CimInstance Win32_Process | Where-Object {$_.Name -match '^java(w)?\.exe$' -and $_.CommandLine -match 'forgeclient|net.minecraft.client.main.Main|--launchTarget.*client|net.minecraft.server.Main|--launchTarget.*server'})
 if($gameProcesses.Count){throw 'Minecraft/server is running; no files changed.'}
 $backup=Join-Path $TncRepoRoot ('work\backups\playable-'+(Get-Date -Format 'yyyyMMdd-HHmmss-fff'))
 New-Item -ItemType Directory -Path $backup | Out-Null
 foreach($e in $entries){$e.Backup=Join-Path $backup $e.Relative;if($e.Existed){New-Item -ItemType Directory -Path (Split-Path $e.Backup -Parent) -Force | Out-Null;Copy-Item -LiteralPath $e.Target -Destination $e.Backup}}
-$groupBackup=Join-Path $backup 'chapter_groups.snbt';if($groupExisted){Copy-Item -LiteralPath $groupTarget -Destination $groupBackup}
+$groupBackup=Join-Path $backup 'chapter_groups.snbt';if($UpdateQuestbook -and $groupExisted){Copy-Item -LiteralPath $groupTarget -Destination $groupBackup}
 [IO.File]::WriteAllText((Join-Path $backup 'manifest.json'),($entries|ConvertTo-Json -Depth 8),[Text.UTF8Encoding]::new($false))
 foreach($e in $removed){$e.Backup=Join-Path $backup $e.Relative}
 [IO.File]::WriteAllText((Join-Path $backup 'removed-chapters.json'),($removed|ConvertTo-Json -Depth 8),[Text.UTF8Encoding]::new($false))
 try{
     foreach($e in $removed){$e.Backup=Join-Path $backup $e.Relative;New-Item -ItemType Directory -Path (Split-Path $e.Backup -Parent) -Force | Out-Null;Move-Item -LiteralPath $e.Target -Destination $e.Backup;if((Get-FileHash -LiteralPath $e.Backup -Algorithm SHA256).Hash -ne $e.SHA256){throw 'Archived chapter hash mismatch.'}}
     foreach($e in $entries){New-Item -ItemType Directory -Path (Split-Path $e.Target -Parent) -Force | Out-Null;Copy-Item -LiteralPath $e.Source -Destination $e.Target -Force;if((Get-FileHash -LiteralPath $e.Target -Algorithm SHA256).Hash -ne $e.SHA256){throw "Hash mismatch $($e.Relative)"}}
-    New-Item -ItemType Directory -Path (Split-Path $groupTarget -Parent) -Force | Out-Null
-    [IO.File]::WriteAllText($groupTarget,$groupText,[Text.UTF8Encoding]::new($false))
-    if([IO.File]::ReadAllText($groupTarget,[Text.Encoding]::UTF8) -ne $groupText){throw 'Group verification failed.'}
+    if($UpdateQuestbook){
+        New-Item -ItemType Directory -Path (Split-Path $groupTarget -Parent) -Force | Out-Null
+        [IO.File]::WriteAllText($groupTarget,$groupText,[Text.UTF8Encoding]::new($false))
+        if([IO.File]::ReadAllText($groupTarget,[Text.Encoding]::UTF8) -ne $groupText){throw 'Group verification failed.'}
+    }
 }catch{
     foreach($e in $removed){if($e.Backup -and (Test-Path -LiteralPath $e.Backup)){Copy-Item -LiteralPath $e.Backup -Destination $e.Target -Force}}
-    if($groupExisted){Copy-Item -LiteralPath $groupBackup -Destination $groupTarget -Force}elseif(Test-Path -LiteralPath $groupTarget){Move-Item -LiteralPath $groupTarget -Destination (Join-Path $backup 'new-chapter_groups.snbt')}
+    if($UpdateQuestbook){if($groupExisted){Copy-Item -LiteralPath $groupBackup -Destination $groupTarget -Force}elseif(Test-Path -LiteralPath $groupTarget){Move-Item -LiteralPath $groupTarget -Destination (Join-Path $backup 'new-chapter_groups.snbt')}}
     foreach($e in $entries){if($e.Existed){Copy-Item -LiteralPath $e.Backup -Destination $e.Target -Force}else{if(Test-Path -LiteralPath $e.Target){$recover=Join-Path $backup ('new-files\'+$e.Relative);New-Item -ItemType Directory -Path (Split-Path $recover -Parent) -Force | Out-Null;Move-Item -LiteralPath $e.Target -Destination $recover}}}
     throw "Installation failed; previous files restored. $($_.Exception.Message)"
 }
 Write-Output "Installed $($entries.Count) files with SHA256 verification. Backup: $backup"
 Write-Output "Archived $($removed.Count) explicitly requested author chapters. No save or unrelated chapter was edited."
+if(-not $UpdateQuestbook){Write-Output 'Author questbook definitions, groups and KubeJS guide artwork were preserved.'}

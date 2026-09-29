@@ -134,11 +134,17 @@ public final class AdventureService {
     }
     public static void milestoneIfPresent(ServerPlayer player,String id){if(profile(player).hasMilestone(id))milestone(player,id);}
     public static void sync(ServerPlayer player,boolean open,String message) {
+        sync(player,open,message,ServicePanel.PROFILE.role());
+    }
+    public static void sync(ServerPlayer player,boolean open,String message,String role) {
+        MagicStoneNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(()->player),new AdventurePackets.Snapshot(snapshot(player,message,role),open));
+    }
+    static CompoundTag snapshot(ServerPlayer player,String message,String role) {
         var store=AdventureSavedData.get(player.server);var p=profile(player);
         var tag=AdventureSavedData.writeProfile(p);tag.putLong("ActiveTicks",store.activeTicks);tag.putBoolean("AtService",atService(player));tag.putString("Message",message);
         tag.putBoolean("AtSmith",TownServices.near(player,"smith"));tag.putBoolean("AtBroker",TownServices.near(player,"broker"));tag.putBoolean("AtBoard",TownServices.atBoard(player));
         tag.putBoolean("AtArmorer",TownServices.near(player,"armorer"));
-        tag.putInt("InitialTab",TownServices.near(player,"armorer")?4:TownServices.near(player,"smith")?2:TownServices.near(player,"broker")?3:0);
+        var panel=ServicePanel.fromRole(role);tag.putString("ServiceRole",panel.role());tag.putInt("InitialTab",panel.tab());
         tag.putString("Directions",TownServices.directions(player.server.overworld()));
         tag.put("Housing",com.tnc.tnc.home.HousingService.snapshot(player));
         tag.putBoolean("AtHomeSale",com.tnc.tnc.home.HousingService.atSale(player));
@@ -147,6 +153,6 @@ public final class AdventureService {
             int have=c.kills()>0?(p.contracts.containsKey(c.id())?p.contracts.get(c.id()).kills:0):c.materials().stream().mapToInt(m->Math.min(InventoryTransaction.count(player.getInventory(),m),m.count())).sum();
             counts.putInt(c.id(),have);
         }
-        tag.put("Counts",counts);MagicStoneNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(()->player),new AdventurePackets.Snapshot(tag,open));
+        tag.put("Counts",counts);return tag;
     }
 }

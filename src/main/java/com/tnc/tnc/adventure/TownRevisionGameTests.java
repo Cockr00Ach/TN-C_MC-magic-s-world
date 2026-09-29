@@ -152,7 +152,13 @@ public final class TownRevisionGameTests {
             @SuppressWarnings("unchecked") var rewards=(List<Object>)dc.getMethod("getRewards").invoke(data);
             h.assertTrue(!rewards.isEmpty(),"Generated paper contains a real reward");
             // Two actual command rewards must still count as one completed native paper.
-            while(rewards.size()>1)rewards.remove(rewards.size()-1);rewards.add(rewards.get(0));
+            while(rewards.size()>1)rewards.remove(rewards.size()-1);
+            // Always cover first-time food rewards: the farm gift is awarded while
+            // native Bountiful still holds the original paper reference.
+            var contentField=rewards.get(0).getClass().getDeclaredField("content");contentField.setAccessible(true);
+            String rewardCommand=(String)contentField.get(rewards.get(0));
+            contentField.set(rewards.get(0),rewardCommand.replace("\"supply\"","\"food\"").replace("\"hunt\"","\"food\""));
+            rewards.add(rewards.get(0));
             int slot=1;for(Object objective:(List<?>)dc.getMethod("getObjectives").invoke(data)){
                 var ec=objective.getClass();int count=(Integer)ec.getMethod("getAmount").invoke(objective);String content=(String)ec.getMethod("getContent").invoke(objective);
                 if(ec.getMethod("getLogicId").invoke(objective).toString().endsWith(":item")){var item=net.minecraftforge.registries.ForgeRegistries.ITEMS.getValue(ResourceLocation.parse(content));p.getInventory().setItem(slot++,new ItemStack(item,count));}
@@ -165,8 +171,10 @@ public final class TownRevisionGameTests {
             TownServices.use(wrongEvent);h.assertTrue(wrongEvent.isCanceled()&&!p.getMainHandItem().isEmpty()&&AdventureService.profile(p).coins()==0,"Wrong board blocks before native consumption");
             AdventureService.profile(p).registered=false;var unregistered=new net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock(p,net.minecraft.world.InteractionHand.MAIN_HAND,pos,hit);
             TownServices.use(unregistered);h.assertTrue(unregistered.isCanceled()&&!p.getMainHandItem().isEmpty(),"Registration failure preserves paper and objectives");AdventureService.profile(p).registered=true;
+            int originalPaperCount=paper.getCount();
             l.getBlockState(pos).use(l,p,net.minecraft.world.InteractionHand.MAIN_HAND,hit);NativeBountiful.refreshCount(p);
-            h.assertTrue(p.getMainHandItem().isEmpty()&&AdventureService.profile(p).coins()>0&&AdventureService.profile(p).nativeBounties==1,"One native paper pays and counts exactly once, including multi-reward papers: empty="+p.getMainHandItem().isEmpty()+", coins="+AdventureService.profile(p).coins()+", count="+AdventureService.profile(p).nativeBounties+", atBoard="+TownServices.atBoard(p));
+            h.assertTrue(p.getMainHandItem().isEmpty()&&AdventureService.profile(p).coins()>0&&AdventureService.profile(p).nativeBounties==1,"One native paper pays and counts exactly once, including multi-reward papers: empty="+p.getMainHandItem().isEmpty()+", coins="+AdventureService.profile(p).coins()+", count="+AdventureService.profile(p).nativeBounties+", atBoard="+TownServices.atBoard(p)+", originalCount="+originalPaperCount+", held="+p.getMainHandItem()+", paperRemaining="+paper.getCount());
+            h.assertTrue(p.getInventory().contains(new ItemStack(com.tnc.tnc.TNMod.FARM_FOCUS.get())),"First food completion also grants its farm focus");
             long coins=AdventureService.profile(p).coins();l.getBlockState(pos).use(l,p,net.minecraft.world.InteractionHand.MAIN_HAND,hit);NativeBountiful.refreshCount(p);h.assertTrue(AdventureService.profile(p).coins()==coins&&AdventureService.profile(p).nativeBounties==1,"Second use cannot pay an empty paper");
             h.assertTrue(p.server.getCommands().getDispatcher().parse("tnc_bounty_reward \"%PLAYER_NAME%\" \"food\" \"%BOUNTY_AMOUNT%\"",p.server.createCommandSourceStack()).getExceptions().isEmpty(),"Native placeholder command parses before substitution");
         }finally{players.remove(p);store.set("tnc_sky_island_v5",old);l.removeBlock(pos,false);}

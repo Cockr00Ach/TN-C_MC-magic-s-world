@@ -1,13 +1,40 @@
-"""Consistent grip transforms; inventory thumbnails retain vanilla scale."""
-import json
+"""Anchor the handle to the palm and orient the head using Minecraft's hand renderer."""
+import json, math
 from pathlib import Path
+from PIL import Image
+
+ROOT=Path(__file__).resolve().parents[1]
+
+def grip_axis(name):
+    image=Image.open(ROOT/f'src/main/resources/assets/tnc/textures/item/wands/{name}.png').convert('RGBA')
+    points=[(x+.5,y+.5) for y in range(32) for x in range(32) if image.getpixel((x,y))[3]>=128]
+    low=min(y for x,y in points);high=max(y for x,y in points)
+    def center(sample):
+        return (sum(x for x,y in sample)/len(sample)/2-8,8-sum(y for x,y in sample)/len(sample)/2)
+    grip=center([(x,y) for x,y in points if y>=high-5])
+    tip=center([(x,y) for x,y in points if y<=low+7])
+    angle=math.degrees(math.atan2(tip[1]-grip[1],tip[0]-grip[0]))
+    return grip,angle
+
+def held_pose(grip,angle,scale,sign,target_angle):
+    z=target_angle-angle
+    radians=math.radians(z)
+    x=grip[0]*math.cos(radians)-grip[1]*math.sin(radians)
+    y=grip[0]*math.sin(radians)+grip[1]*math.cos(radians)
+    # Ry(90) sends the rotated handle's X to -Z. Undo its scaled position,
+    # instead of placing the center of the whole sprite in the player's palm.
+    return {'rotation':[0,sign*90,round(sign*z,6)],
+            'translation':[0,round(-scale*y,6),round(scale*x,6)],'scale':[scale]*3}
 
 def model(name, tier):
     scale = [0, 1.3, 1.55, 1.7, 1.85, 2.0][tier]
+    grip,angle=grip_axis(name)
     display = {}
     for hand, sign in [('righthand', 1), ('lefthand', -1)]:
-        display['thirdperson_' + hand] = {'rotation': [0, sign*90, -sign*35], 'translation': [0, 3, 1], 'scale': [scale]*3}
-        display['firstperson_' + hand] = {'rotation': [0, sign*90, -sign*25], 'translation': [sign*1, 3, 0], 'scale': [scale]*3}
+        # The player model flips Y; ItemInHandLayer adds Rx(-90), Ry(180).
+        # A head at local angle 170 degrees therefore points upward in-world.
+        display['thirdperson_' + hand] = held_pose(grip,angle,scale,sign,170)
+        display['firstperson_' + hand] = held_pose(grip,angle,scale,sign,35)
     return {'parent': 'minecraft:item/handheld', 'textures': {'layer0': 'tnc:item/wands/'+name}, 'display': display}
 
 if __name__ == '__main__':
