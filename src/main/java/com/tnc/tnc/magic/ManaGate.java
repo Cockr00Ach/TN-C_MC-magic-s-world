@@ -66,6 +66,7 @@ public final class ManaGate {
     public static Decision evaluate(MagicStoneData data, SpellCatalog.Entry entry, boolean requireLearned,
                                     boolean requireWand, boolean hasWand) {
         if (requireWand && !hasWand) {
+            org.apache.logging.log4j.LogManager.getLogger("TN-C/gate").info("TN-C: gate BLOCKED {} reason=NO_WAND", entry.id());
             return Decision.NO_WAND;
         }
         if (requireLearned && !data.hasLearned(entry.id())) {
@@ -76,10 +77,12 @@ public final class ManaGate {
             // 学不下来才拦 ✓（不再依赖手动敲命令 ✗）。
             MagicStoneLearning.unlock(data, entry);
             if (!data.hasLearned(entry.id())) {
+                org.apache.logging.log4j.LogManager.getLogger("TN-C/gate").info("TN-C: gate BLOCKED {} reason=NOT_LEARNED", entry.id());
                 return Decision.NOT_LEARNED;
             }
         }
         if (data.getMana() < entry.manaCostFor(data.getMaxMana())) {
+            org.apache.logging.log4j.LogManager.getLogger("TN-C/gate").info("TN-C: gate BLOCKED {} reason=NOT_ENOUGH_MANA {} / {}", entry.id(), data.getMana(), entry.manaCostFor(data.getMaxMana()));
             return Decision.NOT_ENOUGH_MANA;
         }
         return Decision.ALLOW;
