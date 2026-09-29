@@ -83,6 +83,14 @@ public class TNMod
     // ---- 酒馆内饰五件套（TNPropBlock 共用，形状单位＝格）----
     public static final RegistryObject<Block> TAVERN_TABLE_2X1 = BLOCKS.register("tavern_table_2x1", () -> new com.tnc.tnc.prop.TNPropBlock(net.minecraft.world.phys.shapes.Shapes.box(0,0,0,2.0,1.0,1.0)));
     public static final RegistryObject<Item> TAVERN_TABLE_2X1_ITEM = ITEMS.register("tavern_table_2x1", () -> new net.minecraft.world.item.BlockItem(TAVERN_TABLE_2X1.get(), new Item.Properties()));
+    public static final RegistryObject<Block> TAVERN_TABLE_ROUND = BLOCKS.register("tavern_table_round", () -> new com.tnc.tnc.prop.TNPropBlock(net.minecraft.world.phys.shapes.Shapes.box(0,0,0,1.0,1.0,1.0)));
+    public static final RegistryObject<Item> TAVERN_TABLE_ROUND_ITEM = ITEMS.register("tavern_table_round", () -> new net.minecraft.world.item.BlockItem(TAVERN_TABLE_ROUND.get(), new Item.Properties()));
+    public static final RegistryObject<Block> TAVERN_COUNTER = BLOCKS.register("tavern_counter", () -> new com.tnc.tnc.prop.TNPropBlock(net.minecraft.world.phys.shapes.Shapes.box(0,0,0,3.0,1.0,1.0)));
+    public static final RegistryObject<Item> TAVERN_COUNTER_ITEM = ITEMS.register("tavern_counter", () -> new net.minecraft.world.item.BlockItem(TAVERN_COUNTER.get(), new Item.Properties()));
+    public static final RegistryObject<Block> TAVERN_BOTTLE = BLOCKS.register("tavern_bottle", () -> new com.tnc.tnc.prop.TNPropBlock(net.minecraft.world.phys.shapes.Shapes.box(0.375,0,0.375,0.625,0.75,0.625)));
+    public static final RegistryObject<Item> TAVERN_BOTTLE_ITEM = ITEMS.register("tavern_bottle", () -> new net.minecraft.world.item.BlockItem(TAVERN_BOTTLE.get(), new Item.Properties()));
+    public static final RegistryObject<Block> TAVERN_LAMP = BLOCKS.register("tavern_lamp", () -> new com.tnc.tnc.prop.TNPropBlock(net.minecraft.world.phys.shapes.Shapes.box(0.25,0,0.25,0.75,0.6875,0.75), 12));
+    public static final RegistryObject<Item> TAVERN_LAMP_ITEM = ITEMS.register("tavern_lamp", () -> new net.minecraft.world.item.BlockItem(TAVERN_LAMP.get(), new Item.Properties()));
 
     static { com.tnc.tnc.adventure.ElementWands.register(); }
     public static final RegistryObject<Item> HANDBOOK = ITEMS.register("adventure_handbook",
