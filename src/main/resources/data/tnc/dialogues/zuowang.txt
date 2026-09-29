@@ -15,6 +15,7 @@
 # ---------------------------------------------------------------------------
 
 @id tnc:zuowang
+@excludes tnc:main/s2_mountain
 @quest tnc:main/s2_mountain
 
 |（屋里没有点灯。他就坐在门边，看着院子。）

@@ -225,12 +225,18 @@ try {
         $badTier = @()
         $badEffect = @()
         $badModel = @()
+        # area_impact 的"位置"陷阱，分成两份：
+        #   jar 里的法术（我们自己维护）→ Fail；kubejs 里author手改的那份 → Note
+        #   （规则本身对两边都成立，只是改 kubejs 的数值属于作者的地盘，工具不该挡装机 ✗）
+        $badAreaJar = @()
+        $badAreaPack = @()
         foreach ($id in $spellIds) {
             $path = $id.Substring(4)
             # the json may live in either place - check whichever one actually has it
             $file = Join-Path $spellDir "$path.json"
             if (-not (Test-Path $file)) { $file = Join-Path $modSpellDir "$path.json" }
             if (-not (Test-Path $file)) { continue }
+            $fromJar = $file.StartsWith($modSpellDir, [System.StringComparison]::OrdinalIgnoreCase)
             $spell = $null
             try { $spell = ConvertFrom-Json ([System.IO.File]::ReadAllText($file)) }
             catch { $badShape += "$path(parse)"; continue }
@@ -245,6 +251,26 @@ try {
                 $badShape += "$path(release.target.type)"
             }
             if (-not $spell.impact -and -not $spell.area_impact) { $badShape += "$path(no impact)" }
+
+            # ---- area_impact 必须有一个"能给出坐标"的 release.target ----
+            # SpellEngine 0.15.12 的 SpellHelper.lookupAndPerformAreaImpact 第一句就是
+            #   point = context.position()          （反编译确认）
+            # 然后把它丢给 TargetHelper.targetsFromArea(...) 做距离判定。而遍历
+            # performSpell 的分支可以看到，**只有** AREA / BEAM / PROJECTILE / METEOR /
+            # CLOUD / SHOOT_ARROW 会给这个 position 赋值；SELF 与 CURSOR 走的是
+            # directImpact(...)，position 从头到尾是 null ⇒ 施法当场
+            #   NullPointerException: Cannot read field "f_82479_" because "point" is null
+            #   at net.spell_engine.utils.VectorHelper.distanceVector
+            # 症状极具迷惑性：音效、施法粒子、impact 里的冲击波都出来了，然后**没有伤害、
+            # 不扣魔力、Java 侧那套表现一个都不出现**（2026-09-29 god_descent 就是这么坏的）。
+            if ($spell.area_impact) {
+                $areaTarget = "$($spell.release.target.type)"
+                if ($areaTarget -eq 'SELF' -or $areaTarget -eq 'CURSOR') {
+                    # printed text stays ASCII (this script is BOM-less UTF-8; CJK would mojibake)
+                    $entry = "$path (release.target=$areaTarget + area_impact -> engine NPE on every cast)"
+                    if ($fromJar) { $badAreaJar += $entry } else { $badAreaPack += $entry }
+                }
+            }
 
             $jsonId = $spell.learn.tier
             if ($null -eq $jsonId) { $badTier += "$path(no learn.tier)" }
@@ -291,6 +317,14 @@ try {
         else { Fail ('spell references an unregistered effect: ' + ($badEffect -join ', ')) }
         if ($badModel.Count -eq 0) { Ok 'every projectile model referenced by a spell exists and is in the baked list' }
         else { Fail ('spell references a model that would render as a purple-black cube: ' + ($badModel -join ', ')) }
+        if ($badAreaJar.Count -eq 0) {
+            Ok 'no jar spell pairs a position-less release target (SELF/CURSOR) with area_impact'
+        } else {
+            Fail ('these spells throw a NullPointerException on every cast (SELF/CURSOR never fills the area-impact position): ' + ($badAreaJar -join ', '))
+        }
+        if ($badAreaPack.Count -gt 0) {
+            Note ('pack kubejs spells with the same cast-time crash (author-owned data, fix when convenient): ' + ($badAreaPack -join ', '))
+        }
 
         # reverse direction: an id listed for baking with no model file is dead weight,
         # and usually means a half-finished edit of the model recipe
@@ -595,10 +629,28 @@ try {
                         $badSchema += "$($file.Name): objective '$($obj.id)' has unknown type '$($obj.type)'"
                     }
                 }
+
+                # ---- NO 'choice' REWARDS on a story quest (2026-09-30, from bytecode) ----
+                # The dialogue bridge finishes a quest by calling claimReward(player, id),
+                # which is the 2-arg overload -> the 3-arg one with List.of().
+                # That overload begins with:
+                #     if (selections.size() != <count of rewards with type=="choice">) return false;
+                # With List.of() the size is 0, so ANY 'choice' reward makes claimReward
+                # return false BEFORE finishQuest is ever reached -- finishQuest is the only
+                # writer of completedQuests.  The quest then stays "objective done but not
+                # finished" for ever, so the NEXT segment's @requires never passes and that
+                # NPC looks permanently stuck on its first segment.
+                # A choice reward must be picked by hand in the quest book, which is exactly
+                # what we do not want on the main line.
+                foreach ($rw in @($qobj.rewards)) {
+                    if ($rw -and ([string]$rw.type) -eq 'choice') {
+                        $badSchema += "$($file.Name): has a 'choice' reward -- claimReward(List.of()) returns false, so the dialogue bridge can NEVER finish this quest; split it or use item/xp rewards"
+                    }
+                }
             }
         }
-        if ($badSchema.Count -eq 0) { Ok "every TN-C quest passes the objective schema ($checked file(s))" }
-        else { Fail ('quest objective schema problem - the engine DROPS these quests silently and their chapter looks empty: ' + ($badSchema -join '; ')) }
+        if ($badSchema.Count -eq 0) { Ok "every TN-C quest passes the objective schema + reward-type rule ($checked file(s))" }
+        else { Fail ('quest schema problem - the engine DROPS bad quests silently and their chapter looks empty, and a choice reward makes the dialogue bridge unable to finish the quest: ' + ($badSchema -join '; ')) }
     }
 
     # ---- the maid-model NPC: GeckoLib renders it, so three files must ship together ----
@@ -963,6 +1015,34 @@ if (-not $livePack) {
 if ($livePack -and (Test-Path (Join-Path $livePack 'mods'))) {
     $modCount = (Get-ChildItem (Join-Path $livePack 'mods') -File -Filter *.jar).Count
     Ok "live instance mods\ now holds $modCount jars"
+}
+
+# ---------------- G. dialogue segment reachability + quest chain ----------------
+# Both of these already existed as standalone python checkers, but they were only
+# ever run by hand -- which is how a segment that can NEVER be selected shipped
+# twice in a row while every file in the listing looked perfectly correct:
+#   zuowang.txt (seq 0) had no @requires, so zuowang_02 (also ungated) outranked
+#   it in EVERY state.  In game that is indistinguishable from "the NPC is mute",
+#   and it cost the user several rounds of "他还是不切段" (2026-09-29 .. 30).
+# A dialogue that can never play is a build failure, not a content detail.
+$chkPython = Get-Command python -ErrorAction SilentlyContinue
+if (-not $chkPython) {
+    Note "python not on PATH -- SKIPPED the dialogue segment / quest chain checkers"
+} else {
+    $savedEap = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    foreach ($chkName in @('check_tnc_quest_chain.py', 'check_tnc_dialogue_segments.py')) {
+        $chkPath = Join-Path $PSScriptRoot $chkName
+        if (-not (Test-Path $chkPath)) { Fail "missing checker: tools\$chkName"; continue }
+        $chkOut = @(& python $chkPath 2>&1)
+        if ($LASTEXITCODE -eq 0) {
+            Ok "$chkName passed"
+        } else {
+            Fail "$chkName failed -- do NOT install this build:"
+            foreach ($chkLine in $chkOut) { Write-Host "            $chkLine" }
+        }
+    }
+    $ErrorActionPreference = $savedEap
 }
 
 Write-Host ''

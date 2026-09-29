@@ -72,11 +72,23 @@ public final class DialoguePicker {
                 continue;                       // 加载失败的原因已在 DialogueLoader 里报过 ✓
             }
             DialogueScript script = loaded.get();
-            if (script.gatesAllow(player)) {
-                if (!id.equals(candidates.get(0))) {
-                    LOGGER.info("TN-C dialogue: picked {} for npc '{}' (gates passed)",
-                            id, npcPrefix);
-                }
+            // ★ 诊断：把"每段为什么落选"逐条打出来。
+            //
+            // 没有这条日志时，"选段不对"只能靠猜 —— 而任务状态分团队/按人两套
+            // （引擎用 stateFor 分流），光看存档文件和代码都推不出来
+            // （2026-09-29 为此连续误判四轮）。这条日志一次性说清：
+            //   wins  = 这一段被选中
+            //   needs X / NEEDS-MISSING X   = @requires 里 X 已完成 / 还没完成
+            //   BLOCKS-DONE X / allows X    = @excludes 里 X 已完成（本段该退场）/ 还没完成
+            //   (no gates)                  = 这一段一个门槛都没写（很容易遮住别人）
+            // 注意：最高序号那一段**选中时不打**（这里 !id.equals(candidates.get(0))），
+            //       否则每次右键都刷一行。
+            boolean allowed = script.gatesAllow(player);
+            if (LOGGER.isInfoEnabled() && (!allowed || !id.equals(candidates.get(0)))) {
+                LOGGER.info("TN-C dialogue: {} <- {} for npc '{}'",
+                        allowed ? "wins" : "skipped", describeGate(player, script, id), npcPrefix);
+            }
+            if (allowed) {
                 return Optional.of(script);
             }
             if (fallback == null) {
@@ -90,6 +102,39 @@ public final class DialoguePicker {
                 + "playing the lowest-numbered one anyway. Give '{}_first' no @requires "
                 + "to make this go away", npcPrefix, npcPrefix);
         return Optional.ofNullable(fallback);
+    }
+
+    /**
+     * 把一段剧本的门槛判定理成一句人话，用于诊断日志。
+     *
+     * <p>例子：{@code zuowang_02 needs tnc:main/s2_see (missing)}、
+     * {@code zuowang_02 blocks tnc:main/s3_stone (done)}。
+     */
+    private static String describeGate(ServerPlayer player, DialogueScript script, ResourceLocation id) {
+        StringBuilder sb = new StringBuilder(id.getPath());
+        boolean wrote = false;
+        for (ResourceLocation needs : script.requires()) {
+            boolean done;
+            try {
+                done = com.tnc.tnc.dialogue.compat.WhisperingQuestBridge
+                        .isQuestCompleted(player, needs);
+            } catch (RuntimeException error) {
+                sb.append(" [requires check threw: ").append(error).append(']');
+                return sb.toString();
+            }
+            sb.append(done ? " needs " : " NEEDS-MISSING ").append(needs.getPath());
+            wrote = true;
+        }
+        for (ResourceLocation blocked : script.excludes()) {
+            boolean done = com.tnc.tnc.dialogue.compat.WhisperingQuestBridge
+                    .isQuestCompleted(player, blocked);
+            sb.append(done ? " BLOCKS-DONE " : " allows ").append(blocked.getPath());
+            wrote = true;
+        }
+        if (!wrote) {
+            sb.append(" (no gates)");
+        }
+        return sb.toString();
     }
 
     /** 资源重载后要清缓存，否则改了文件名/加了新段游戏里看不到（服务器 /reload 时会调用）。 */

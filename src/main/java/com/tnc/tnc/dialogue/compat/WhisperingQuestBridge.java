@@ -238,7 +238,36 @@ public final class WhisperingQuestBridge {
             Object result = method.invoke(null, player, questId);
             boolean done = result instanceof Boolean b && b;
             if (done) {
-                LOGGER.info("TN-C dialogue: finished quest objective via dialogue -> {}", questId);
+                // ★★ 关键一步：**接着把奖励领掉**，任务才算真正完成。
+                //
+                // 为什么必须这样（2026-09-29 反编译实锤）：
+                // `completeDialogueObjective` 只是把目标标记成完成，
+                // 真正把任务放进 completedQuests 的唯一入口是 `finishQuest`，
+                // 而全项目**只有 claimReward 会调它**：
+                //     public static boolean claimReward(...)
+                //         ... canComplete(...) ? finishQuest(...) : ...
+                // 所以不领奖的话任务永远停在"可领奖/未完成"，
+                // 下一段剧本的 @requires 就永远判 false ⇒ 对话永远切不过去 ✗
+                // （用户实测：周坐望五段永远只播第一段。）
+                claimQuietly(player, questId);
+                LOGGER.info("TN-C dialogue: finished quest via dialogue -> {}", questId);
+                // ★ 自己回头问引擎一句"它到底算不算完成了"，不信 claimReward 的返回值。
+                //
+                // 为什么非要多这一句：`completedQuests` 是下一段剧本 @requires 的**唯一**
+                // 依据，而 claimReward 在两种情况下会**静默地**不完成任务：
+                //   1. 任务里有 type=="choice" 的奖励 —— 2 参重载传的是空选择表，
+                //      validRewardChoices 第一个判断就返回 false，根本够不到 finishQuest；
+                //   2. 任务还有别的没打完的目标 —— canComplete 返回 false。
+                // 这两种都没有任何报错，实机表现就是"这个 NPC 永远说第一段"。
+                // 有了这一行，拿到日志就能一眼定位，不用再猜四轮 ✓
+                // （第 1 种已经被 tools/verify_mod_jar.ps1 挡在构建之前。）
+                if (!isQuestCompleted(player, questId)) {
+                    LOGGER.warn("TN-C dialogue: quest {} is STILL not completed after the dialogue "
+                            + "-- the next dialogue segment's @requires will not pass, so that NPC "
+                            + "will keep playing its first segment. Check for a 'choice' reward "
+                            + "(claimReward refuses an empty selection) or an objective that is "
+                            + "still unfinished.", questId);
+                }
             } else {
                 // 常见但不是故障：任务还没接取 / 目标已经完成过了
                 LOGGER.info("TN-C dialogue: quest {} was not advanced by this dialogue "
@@ -250,6 +279,36 @@ public final class WhisperingQuestBridge {
             LOGGER.error("TN-C dialogue: calling {}.completeDialogueObjective for {} failed",
                     QUEST_MANAGER, questId, error);
             return false;
+        }
+    }
+
+    /**
+     * 领掉这条任务的奖励 —— 目的是让引擎把它**真正标记为完成**。
+     *
+     * <p>见 {@link #onDialogueFinished} 里的说明：不领奖，任务就永远停在
+     * "目标已完成但未结束"，下一段的 {@code @requires} 判不过。
+     *
+     * <p>⚠️ 这里**不把失败当成错误**：奖励里如果有"多选一"就必须由玩家来选，
+     * 引擎会拒绝自动领取 —— 那种情况只记一条 debug，不刷错误、
+     * 也不影响对话本身 ✓。真正要保证的是<b>任务完成位</b>，不是奖励。
+     */
+    private static void claimQuietly(net.minecraft.server.level.ServerPlayer player,
+                                     net.minecraft.resources.ResourceLocation questId) {
+        Method claim = method("claimReward",
+                net.minecraft.server.level.ServerPlayer.class,
+                net.minecraft.resources.ResourceLocation.class);
+        if (claim == null) {
+            return;
+        }
+        try {
+            Object result = claim.invoke(null, player, questId);
+            if (result instanceof Boolean b && !b) {
+                LOGGER.debug("TN-C dialogue: reward for {} was not auto-claimed "
+                        + "(likely a choice reward -- the player picks it in the quest book)",
+                        questId);
+            }
+        } catch (ReflectiveOperationException | RuntimeException error) {
+            LOGGER.debug("TN-C dialogue: auto-claim for {} skipped", questId, error);
         }
     }
 
