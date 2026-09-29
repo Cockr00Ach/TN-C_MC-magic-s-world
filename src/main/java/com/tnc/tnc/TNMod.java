@@ -39,6 +39,13 @@ public class TNMod
     // 注意：注册器必须在构造函数里挂到 mod 事件总线上才会生效（见下方 TNMod()）。
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
+
+    /** 场景道具：4x2 赌博桌（可放置 ✓，形状见 TNGambleTableBlock 的尺寸契约）。 */
+    public static final RegistryObject<Block> GAMBLE_TABLE =
+            BLOCKS.register("gamble_table", com.tnc.tnc.prop.TNGambleTableBlock::new);
+    public static final RegistryObject<Item> GAMBLE_TABLE_ITEM =
+            ITEMS.register("gamble_table", () -> new net.minecraft.world.item.BlockItem(
+                    GAMBLE_TABLE.get(), new Item.Properties()));
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
     // ------------------------------------------------------------------

@@ -1008,7 +1008,7 @@ public final class TnSpellMechanics {
     }
 
     /** 敌人 = 不是自己、不是队友（简单判据：不是玩家、也不是驯服过的宠物）。 */
-    private static boolean isEnemy(Player player, LivingEntity target) {
+    public static boolean isEnemy(Player player, LivingEntity target) {
         if (target == player || !target.isAlive()) {
             return false;
         }

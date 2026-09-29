@@ -63,6 +63,216 @@ public class MagicStoneData {
      */
     private final Set<String> specials = new LinkedHashSet<>();
 
+    // ------------------------------------------------------------------
+    //  配装（loadout）—— "哪个键放哪个法术"，玩家自己排
+    // ------------------------------------------------------------------
+
+    /** 一共几页热键。2 页 × 9 键 = 18 个槽（2026-09-29 用户拍板）。 */
+    public static final int PAGE_COUNT = 2;
+
+    /** 一页几个键。引擎只给了 9 个施法热键（右键 + 2~9），改不动。 */
+    public static final int SLOTS_PER_PAGE = 9;
+
+    /** 一共几个槽。 */
+    public static final int LOADOUT_SLOTS = PAGE_COUNT * SLOTS_PER_PAGE;
+
+    /**
+     * 18 个配装槽，元素是法术 id 字符串，{@code null} = 空槽。
+     *
+     * <p>用 List 而不是数组：NBT 读写 + 定长截断最省事，
+     * 而且要保证<b>定长</b> —— 槽位号就是键位号，不能挤位。
+     *
+     * <p>为什么空槽留 null 而不是"把有内容的往前挤"：
+     * 玩家把位移放在 7 号键，就不能因为前面空着而被挪到 2 号键。
+     */
+    private final List<String> loadout = new ArrayList<>(Collections.nCopies(LOADOUT_SLOTS, (String) null));
+
+    /** 当前翻到第几页（0 基）。服务端权威，客户端只是镜像。 */
+    private int loadoutPage;
+
+    // ---- 配装（loadout）对外方法 ----
+
+    public int getLoadoutPage() {
+        return clamp(loadoutPage, 0, PAGE_COUNT - 1);
+    }
+
+    /** 设置当前页；真的变了才返回 true（调用方据此决定要不要重写杖）。 */
+    public boolean setLoadoutPage(int page) {
+        int clamped = clamp(page, 0, PAGE_COUNT - 1);
+        if (clamped == getLoadoutPage()) {
+            return false;
+        }
+        loadoutPage = clamped;
+        return true;
+    }
+
+    /** 切到下一页（循环）。返回切换后的页号。 */
+    public int cycleLoadoutPage() {
+        setLoadoutPage((getLoadoutPage() + 1) % PAGE_COUNT);
+        return getLoadoutPage();
+    }
+
+    /** 全局槽位下标（0..17）上放的是什么，空槽返回 null。 */
+    public ResourceLocation getSlot(int index) {
+        if (index < 0 || index >= LOADOUT_SLOTS) {
+            return null;
+        }
+        String id = loadout.get(index);
+        return id == null ? null : ResourceLocation.tryParse(id);
+    }
+
+    /**
+     * 把一个法术放进某个槽。
+     *
+     * <p>同一个法术<b>只能占一个槽</b>（防止"3 个键全绑雷暴"刷冷却）——
+     * 所以放进新槽时会顺手清掉它在别处的旧位置 ✓。
+     *
+     * @return 真的改动了才返回 true
+     */
+    public boolean setSlot(int index, ResourceLocation spell) {
+        if (index < 0 || index >= LOADOUT_SLOTS) {
+            return false;
+        }
+        String id = spell == null ? null : spell.toString();
+        if (java.util.Objects.equals(loadout.get(index), id)) {
+            return false;
+        }
+        if (id != null) {
+            for (int i = 0; i < LOADOUT_SLOTS; i++) {
+                if (id.equals(loadout.get(i))) {
+                    loadout.set(i, null);
+                }
+            }
+        }
+        loadout.set(index, id);
+        return true;
+    }
+
+    /** 清空某个槽；本来就空返回 false。 */
+    public boolean clearSlot(int index) {
+        if (index < 0 || index >= LOADOUT_SLOTS || loadout.get(index) == null) {
+            return false;
+        }
+        loadout.set(index, null);
+        return true;
+    }
+
+    /** 第一个空槽的全局下标；18 个槽全满返回 -1。 */
+    public int firstFreeSlot() {
+        for (int i = 0; i < LOADOUT_SLOTS; i++) {
+            if (loadout.get(i) == null) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /** 这个法术是不是已经配在某个槽里。 */
+    public boolean isBound(ResourceLocation spell) {
+        return spell != null && loadout.contains(spell.toString());
+    }
+
+    /** 已经配好的槽数（跨两页）。 */
+    public int loadoutCount() {
+        int count = 0;
+        for (String id : loadout) {
+            if (id != null) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * 默认配装：把新学会的法术放进<b>第一个空槽</b>。
+     *
+     * <p>★ 铁律：<b>绝不覆盖玩家已经配好的槽</b> —— 玩家手动排过键位之后，
+     * 再学一个法术不该把他排好的东西顶掉（作者 2026-09-29 要的就是"自己调整"）✓。
+     * 18 个槽全满就什么都不做：法术仍然在魔法石里，玩家自己去配键页腾位置。
+     *
+     * <p>⚠️ 但"同一条链学了更高档"是<b>例外</b>：那时要换掉这个键上的低档
+     * （见 {@link #rebindChainToTop}）—— 那不是覆盖玩家的选择，
+     * 玩家配的是"我的这条链"，链顶是哪一档由他学到哪儿决定 ✓。
+     *
+     * <p>还有一条收敛规则：<b>非链顶的法术自动不去占新槽</b>。
+     * 因为配键列表只列链顶（{@link SpellCatalog#chainTopAssignable}），
+     * 自动把过时的低档塞进槽里只会产生"列表里没有、却占着一个键"的怪状态 ✗。
+     *
+     * @return 真的放进去了才返回 true
+     */
+    public boolean fillFirstFree(ResourceLocation spell) {
+        if (spell == null || isBound(spell)) {
+            return false;
+        }
+        if (!SpellCatalog.isChainTop(this, spell)) {
+            return false;                       // 不是链顶：不进新槽（学了更高档时会被换掉）
+        }
+        int free = firstFreeSlot();
+        if (free < 0) {
+            return false;
+        }
+        loadout.set(free, spell.toString());
+        return true;
+    }
+
+    /**
+     * 裁掉"已经绑不了"的槽（换了链、法术被移除、被遗忘之后用）。
+     *
+     * @param assignable 现在还能绑的法术集合
+     * @return 被清掉的槽数
+     */
+    public int pruneLoadout(Collection<ResourceLocation> assignable) {
+        int removed = 0;
+        for (int i = 0; i < LOADOUT_SLOTS; i++) {
+            String id = loadout.get(i);
+            if (id == null) {
+                continue;
+            }
+            ResourceLocation parsed = ResourceLocation.tryParse(id);
+            if (parsed == null || !assignable.contains(parsed)) {
+                loadout.set(i, null);
+                removed++;
+            }
+        }
+        return removed;
+    }
+
+    /**
+     * <b>某一页</b>该写进法杖的内容：定长 9 项，空槽是 {@code null}。
+     *
+     * <p>这是"法杖上到底有什么"的<b>唯一口径</b> —— 施法、切页、补杖、界面全走它，
+     * 免得几处各算一套慢慢跑偏 ✗。
+     */
+    public List<ResourceLocation> pageSpellIds(int page) {
+        int base = clamp(page, 0, PAGE_COUNT - 1) * SLOTS_PER_PAGE;
+        List<ResourceLocation> result = new ArrayList<>(SLOTS_PER_PAGE);
+        for (int i = 0; i < SLOTS_PER_PAGE; i++) {
+            String id = loadout.get(base + i);
+            result.add(id == null ? null : ResourceLocation.tryParse(id));
+        }
+        return result;
+    }
+
+    /** 配装的调试摘要（`/tnc loadout list` 与魔法石界面用）。 */
+    public List<String> describeLoadout() {
+        List<String> lines = new ArrayList<>();
+        int page = getLoadoutPage();
+        lines.add("配装  第 " + (page + 1) + "/" + PAGE_COUNT + " 页 · 已配 " + loadoutCount() + "/" + LOADOUT_SLOTS + " 个槽");
+        for (int i = 0; i < SLOTS_PER_PAGE; i++) {
+            int global = page * SLOTS_PER_PAGE + i;
+            String id = loadout.get(global);
+            String key = i == 0 ? "右键" : String.valueOf(i + 1);
+            String name = "（空）";
+            if (id != null) {
+                ResourceLocation parsed = ResourceLocation.tryParse(id);
+                SpellCatalog.Entry entry = parsed == null ? null : SpellCatalog.byId(parsed);
+                name = entry != null ? entry.displayName() : id + "（不在目录里）";
+            }
+            lines.add("  " + key + " → " + name);
+        }
+        return lines;
+    }
+
     // ---- 领域魔法（§12.F）对外方法 ----
 
     /** 有没有获得这个元素的领域魔法。 */
@@ -135,7 +345,17 @@ public class MagicStoneData {
         return initialized;
     }
 
+    /**
+     * 某元素的亲和力。
+     *
+     * <p>⚠️ {@code element == null} 是**合法输入**：独立魔法（乱魔）的 element 就是 null ✗
+     * （它不属于七元素之一）。2026-09-29 18:27 实机崩服就是 {@code null.ordinal()} ——
+     * 所以这里直接返回 0，任何调用方都不该因为这个崩服务器 ✓。
+     */
     public int getAffinity(Element element) {
+        if (element == null) {
+            return 0;
+        }
         return affinity[element.ordinal()];
     }
 
@@ -166,6 +386,9 @@ public class MagicStoneData {
 
     /** 亲和力 → 该元素能学到的最高等级（设计文档第二节的对照表）。 */
     public int maxTierFor(Element element) {
+        if (element == null) {
+            return 5;                           // 独立魔法没有亲和力门槛（学习路径另有 entry.independent() 闸门 ✓）
+        }
         int a = getAffinity(element);
         if (a <= 0) {
             return 0;
@@ -283,6 +506,17 @@ public class MagicStoneData {
         }
         learningHistory.removeIf(id -> isSpellOfElement(id, element));
         explicitlyForgotten.removeIf(id -> isSpellOfElement(id, element));
+        // 配装里属于这个元素的槽一起清掉（否则法杖留着放不出来的死槽 ✗）
+        for (int i = 0; i < LOADOUT_SLOTS; i++) {
+            String id = loadout.get(i);
+            if (id == null) {
+                continue;
+            }
+            ResourceLocation parsed = ResourceLocation.tryParse(id);
+            if (parsed != null && isSpellOfElement(parsed, element)) {
+                loadout.set(i, null);
+            }
+        }
         pointsSpent = Math.max(0, pointsSpent - refund);
         return refund;
     }
@@ -344,11 +578,77 @@ public class MagicStoneData {
     public boolean learn(ResourceLocation spell) {
         learningHistory.add(spell);
         explicitlyForgotten.remove(spell);
-        return learned.add(spell);
+        boolean added = learned.add(spell);
+        if (!added) {
+            // 已经学过：那次学习可能是"补记录"，但链顶仍可能变（例如老存档迁移），照样同步一次
+            rebindChainToTop(spell);
+            return false;
+        }
+        // ★ 链式替换（作者 2026-09-29 定的规则）：
+        //   学会某条链的更高档时，**原来绑着这条链低档的那些键自动换成新的最高档**。
+        //   这不是"覆盖玩家手配的键位" ✗ —— 它换的是**同一条链**的东西：
+        //   玩家配的是"我的雷系主链"，至于主链当前是哪一档，由他学到哪儿决定 ✓。
+        //   不同链、别的元素的键一律不动 ✓。
+        if (!rebindChainToTop(spell)) {
+            // 独立魔法 / 不在链上的法术：没有"链顶"概念，按普通新法术填空槽
+            fillFirstFree(spell);
+        }
+        return true;
     }
 
+    /**
+     * 把配装里所有"绑着 {@code spell} 所属链的低档"的槽改成 {@code spell}。
+     *
+     * @return 这个法术属于某条链（做了链式替换）返回 true；独立魔法/目录外返回 false
+     */
+    private boolean rebindChainToTop(ResourceLocation spell) {
+        SpellCatalog.Entry entry = SpellCatalog.byId(spell);
+        if (entry == null || entry.independent() || entry.element() == null) {
+            return false;
+        }
+        SpellCatalog.Entry top = SpellCatalog.topLearned(this, entry.element(), entry.chain());
+        if (top == null || !top.id().equals(spell)) {
+            return false;                       // 学会的不是链顶（理论上不该发生）→ 不替换
+        }
+        String newId = spell.toString();
+        boolean changed = false;
+        for (int i = 0; i < LOADOUT_SLOTS; i++) {
+            String bound = loadout.get(i);
+            if (bound == null) {
+                continue;
+            }
+            ResourceLocation parsed = ResourceLocation.tryParse(bound);
+            SpellCatalog.Entry boundEntry = parsed == null ? null : SpellCatalog.byId(parsed);
+            if (boundEntry == null || boundEntry.independent() || boundEntry.element() == null) {
+                continue;
+            }
+            if (boundEntry.element() == entry.element() && boundEntry.chain() == entry.chain()) {
+                loadout.set(i, newId);
+                changed = true;
+            }
+        }
+        if (!changed) {
+            // 这条链还没在任何键上 → 当成新法术填空槽（玩家不手动配也能用上）
+            fillFirstFree(spell);
+        }
+        return true;
+    }
+
+    /**
+     * 遗忘时顺手把配装里的槽清掉。
+     *
+     * <p>不清的话法杖会留一个"绑着已遗忘法术"的死槽 ——
+     * 放不出来、也没有任何提示，玩家只会觉得"这个键坏了" ✗。
+     */
     public boolean forget(ResourceLocation spell) {
-        if (learned.contains(spell)) explicitlyForgotten.add(spell);
+        if (learned.contains(spell)) {
+            explicitlyForgotten.add(spell);
+        }
+        for (int i = 0; i < LOADOUT_SLOTS; i++) {
+            if (spell.toString().equals(loadout.get(i))) {
+                loadout.set(i, null);
+            }
+        }
         return learned.remove(spell);
     }
 
@@ -388,6 +688,10 @@ public class MagicStoneData {
         this.explicitlyForgotten.addAll(other.explicitlyForgotten);
         this.specials.clear();
         this.specials.addAll(other.specials);
+        // 配装：死亡重生/换维度必须原样带过去，否则一死键位就全空了
+        this.loadout.clear();
+        this.loadout.addAll(other.loadout);
+        this.loadoutPage = other.loadoutPage;
         this.mana = other.mana;
         this.maxMana = other.maxMana;
         this.pointsSpent = other.pointsSpent;
@@ -441,6 +745,15 @@ public class MagicStoneData {
         }
         tag.put("Specials", specialList);
 
+        // 配装（loadout）：定长 18 项，空槽写空串 —— 空串表示"这个槽是空的"，
+        // 不能用跳过的方式存，否则槽位号会被压缩（玩家排好的键位就乱了）✓
+        ListTag loadoutList = new ListTag();
+        for (String id : loadout) {
+            loadoutList.add(StringTag.valueOf(id == null ? "" : id));
+        }
+        tag.put("Loadout", loadoutList);
+        tag.putInt("LoadoutPage", getLoadoutPage());
+
         tag.putInt("Mana", mana);
         tag.putInt("MaxMana", maxMana);
         tag.putInt("PointsSpent", pointsSpent);
@@ -491,8 +804,24 @@ public class MagicStoneData {
         }
 
         mana = tag.getInt("Mana");
-        learningHistory.clear();
-        readSpellSet(tag.getList("LearningHistory", Tag.TAG_STRING), learningHistory);
+        loadoutPage = clamp(tag.getInt("LoadoutPage"), 0, PAGE_COUNT - 1);
+        // 配装：老存档没有 Loadout 键 → 空表 → 走下面的"按链进度自动补默认配装"✓
+        loadout.clear();
+        if (tag.contains("Loadout", Tag.TAG_LIST)) {
+            ListTag loadoutList = tag.getList("Loadout", Tag.TAG_STRING);
+            for (int i = 0; i < LOADOUT_SLOTS; i++) {
+                String raw = i < loadoutList.size() ? loadoutList.getString(i) : "";
+                loadout.add(raw.isEmpty() ? null : raw);
+            }
+        } else {
+            loadout.addAll(Collections.nCopies(LOADOUT_SLOTS, (String) null));
+            // 迁移：老存档从来没有配装概念 → 用"每条链的已学最高档"当第一版默认配装。
+            // 只补能进目录的（防呆闸门那套由调用方 prune），且忠于链式替换的老观感 ✓。
+            for (SpellCatalog.Entry entry : SpellCatalog.effective(this)) {
+                fillFirstFree(entry.id());
+            }
+        }
+        learningHistory.clear();        readSpellSet(tag.getList("LearningHistory", Tag.TAG_STRING), learningHistory);
         learningHistory.addAll(learned); // Legacy saves retain ownership of current spells.
         explicitlyForgotten.clear();
         readSpellSet(tag.getList("ExplicitlyForgotten", Tag.TAG_STRING), explicitlyForgotten);
@@ -575,6 +904,7 @@ public class MagicStoneData {
                 + (bonusPoints > 0 ? " + 赠送 " + bonusPoints : "")
                 + "，已投 " + pointsSpent + "）");
         lines.add("已学法术 " + (learned.isEmpty() ? "（无）" : joinSpells()));
+        lines.addAll(describeLoadout());
         // 领域魔法（§12.F）：只列"已获得"的，没获得的不刷屏
         List<Element> domains = specialElements();
         StringBuilder domainText = new StringBuilder();

@@ -418,10 +418,49 @@ public final class SpellCatalog {
     }
 
     /**
-     * 法杖的<b>实际内容</b>：每条链只取已解锁的最高级（高阶替换低阶）。
+     * <b>配键列表用</b>：某元素下"每条链当前拥有的最高档"，按链的顺序返回。
      *
-     * <p>这就是为什么法杖不需要装下 15 个法术 —— 三条链满级时它上面只有 3 个。
-     * 学过的低级法术仍然记在魔法石里（换链/回退都能用），只是不再占法杖的格子。
+     * <p>为什么列表只给链顶而不是"全部已学"（作者 2026-09-29 要求）：
+     * 玩家心里的一条链就是<b>一个法术</b> —— "我的雷系主链是雷击"。
+     * 把 t1~t4 全列出来会让人以为四张牌都能带，实际上带哪张都得占一个键，
+     * 而链内低档在数值上就是纯退化 ✗。
+     *
+     * <p>没学过的链直接<b>不出现</b>（不是灰条目）—— 列表里只有你真拥有的东西 ✓。
+     * 找不到能绑的（引擎没实装）也跳过，免得出现按不动的条目。
+     */
+    public static List<Entry> chainTopAssignable(MagicStoneData data, Element element) {
+        List<Entry> result = new ArrayList<>();
+        for (Chain chain : chainsOf(element)) {
+            Entry top = topLearned(data, element, chain);
+            if (top != null && canBind(data, top.id())) {
+                result.add(top);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 这个法术是不是它那条链的<b>链顶</b>。
+     *
+     * <p>独立魔法（乱魔）没有链概念，直接放行 ✓；不在目录里的（第三方法术）也放行 ✓。
+     */
+    public static boolean isChainTop(MagicStoneData data, ResourceLocation spell) {
+        if (data == null || spell == null) {
+            return false;
+        }
+        Entry entry = byId(spell);
+        if (entry == null || entry.independent() || entry.element() == null) {
+            return true;
+        }
+        Entry top = topLearned(data, entry.element(), entry.chain());
+        return top != null && top.id().equals(spell);
+    }
+
+    /**
+     * 老口径：每条链只取已解锁的最高级。
+     *
+     * <p>⚠️ <b>它已经不再决定法杖内容了</b>（那是 {@link #wandSpellIds}）。
+     * 现在只剩两个用途：老存档迁移时生成第一版默认配装、以及自检里那条"链式替换"的断言。
      */
     public static List<Entry> effective(MagicStoneData data) {
         List<Entry> result = new ArrayList<>();
@@ -447,5 +486,98 @@ public final class SpellCatalog {
             ids.add(entry.id());
         }
         return ids;
+    }
+
+    // ------------------------------------------------------------------
+    //  配装（loadout）—— "哪个键放哪个法术"
+    // ------------------------------------------------------------------
+
+    /**
+     * 现在<b>还能被配到键位上</b>的法术。
+     *
+     * <p>为什么不是 {@link #effective}：那条路每条链只留最高档（那是老热键栏容量不够时的妥协 ✗）。
+     * 有了 18 个槽 + 玩家自己排键位之后，<b>低档法术同样可以绑</b> ——
+     * "右键小闪电清杂兵、2 号键雷暴打 Boss"是玩家自己的选择 ✓。
+     *
+     * <p>所以判据就一条：<b>学过 = 可以绑</b>。忘掉的（{@code forget} 会把它从 learned 移除）
+     * 自动就不在这个名单里 ✓。
+     */
+    public static List<Entry> assignable(MagicStoneData data) {
+        List<Entry> result = new ArrayList<>();
+        for (Entry entry : all()) {
+            if (data.hasLearned(entry.id())) {
+                result.add(entry);
+            }
+        }
+        return result;
+    }
+
+    /** {@link #assignable(MagicStoneData)} 的 id 版本。 */
+    public static List<ResourceLocation> assignableIds(MagicStoneData data) {
+        List<ResourceLocation> ids = new ArrayList<>();
+        for (Entry entry : assignable(data)) {
+            ids.add(entry.id());
+        }
+        return ids;
+    }
+
+    /**
+     * 这个法术<b>能不能被玩家配到键位上</b>。
+     *
+     * <p>三条判据（缺一不可）：
+     * <ol>
+     *   <li><b>学过</b> —— 魔法石是权威数据</li>
+     *   <li><b>是它那条链的最高档</b> —— 作者 2026-09-29 定的规则：
+     *       一条链就是一个法术，学了高阶就用高阶（低档在数值上纯退化 ✗）。
+     *       独立魔法与目录外的第三方法术不受这条限制 ✓</li>
+     *   <li><b>引擎认识它</b> —— 目录里有、JSON 还没写的法术绑上去也放不出来</li>
+     * </ol>
+     */
+    public static boolean canBind(MagicStoneData data, ResourceLocation spell) {
+        if (data == null || spell == null || !data.hasLearned(spell)) {
+            return false;
+        }
+        if (!isChainTop(data, spell)) {
+            return false;
+        }
+        Entry entry = byId(spell);
+        return entry == null || com.tnc.tnc.magic.compat.SpellEngineBridge.hasSpell(entry.id());
+    }
+
+    /**
+     * <b>法杖当前这一页该写什么</b> —— 定长 {@link MagicStoneData#SLOTS_PER_PAGE} 项，
+     * 空槽是 {@code null}（空槽必须占位，不能挤位）。
+     *
+     * <p>这是"法杖内容"的<b>唯一口径</b>：登录补杖、学法后同步、切页、{@code /tnc wand}
+     * 全都要走它 —— 几处各算一套的话，页号和配装会互相冲掉 ✗。
+     *
+     * <p>顺带做两层过滤（只影响这次写进杖里的内容，<b>不改</b>玩家的配装）：
+     * <ol>
+     *   <li>没学过 / 目录里查不到 → 空槽（老存档迁移过来的配装对不上目录时兜底）</li>
+     *   <li>引擎不认识的 → 空槽（防呆闸门，免得法杖上出现按不动的空格）</li>
+     * </ol>
+     */
+    public static List<ResourceLocation> wandSpellIds(MagicStoneData data) {
+        List<ResourceLocation> page = data.pageSpellIds(data.getLoadoutPage());
+        List<ResourceLocation> result = new ArrayList<>(page.size());
+        for (ResourceLocation id : page) {
+            result.add(canBind(data, id) ? id : null);
+        }
+        return result;
+    }
+
+    /**
+     * 现在值不值得给玩家写/补法杖 —— 当前这一页<b>真的至少有一个能放的法术</b>。
+     *
+     * <p>为什么不写成 {@code !wandSpellIds(data).isEmpty()}：那份列表是<b>定长</b>的，
+     * 永远非空 ✗ —— 配装空着的时候会补出一根空杖。
+     */
+    public static boolean wandSpellIdsNonEmpty(MagicStoneData data) {
+        for (ResourceLocation id : wandSpellIds(data)) {
+            if (id != null) {
+                return true;
+            }
+        }
+        return false;
     }
 }

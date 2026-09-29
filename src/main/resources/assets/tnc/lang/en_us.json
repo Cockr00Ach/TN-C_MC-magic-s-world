@@ -22,6 +22,7 @@
   "itemGroup.tnc.main": "TN-C",
   "key.categories.tnc": "TN-C",
   "key.tnc.open_magic_stone": "Open Magic Stone",
+  "key.tnc.next_page": "Switch spell hotbar page (2 pages x 9)",
   "scroll.tnc.canjuan_1a": "(A fragment in ancient script - no translation in this build.)",
   "scroll.tnc.canjuan_1b": "(A fragment in ancient script - no translation in this build.)",
   "scroll.tnc.canjuan_3": "(A fragment in ancient script - no translation in this build.)",
@@ -94,4 +95,6 @@
   "item.tnc.dark_wand_4": "暗 · 传说法杖",
   "item.tnc.dark_wand_5": "吞夜的君主",
   "entity.tnc.town_service": "城镇服务人员"
+,
+  "block.tnc.gamble_table": "Gambling Table"
 }
