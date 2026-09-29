@@ -48,6 +48,12 @@ EXPECTED_METHODS = [
      ["ServerPlayer", "ResourceLocation"]),
     ("com.lirxowo.whisperingquests.quest.QuestManager", "startQuest",
      ["ServerPlayer", "ResourceLocation"]),
+    # claimReward is what actually pushes a quest into completedQuests
+    # (finishQuest is only reachable from here), so the bridge calls it after
+    # completing a dialogue objective -- otherwise the next segment's @requires
+    # never passes.
+    ("com.lirxowo.whisperingquests.quest.QuestManager", "claimReward",
+     ["ServerPlayer", "ResourceLocation"]),
     ("com.lirxowo.whisperingquests.quest.QuestManager", "getQuestState",
      ["ServerPlayer", "QuestDefinition"]),
     ("com.lirxowo.whisperingquests.data.QuestDataManager", "getQuest",

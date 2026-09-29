@@ -15,9 +15,11 @@
 # ---------------------------------------------------------------------------
 
 @id tnc:zuowang_03
-@requires tnc:main/s3_gate
+@requires tnc:main/s2_see
 @excludes tnc:main/s4_ge
 @activate tnc:main/s4_hand
+@quest tnc:main/s2_door
+@quest tnc:main/s3_gate
 @quest tnc:main/s3_him
 @quest tnc:main/s3_account
 @quest tnc:main/s3_stone

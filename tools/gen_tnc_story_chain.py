@@ -403,8 +403,23 @@ DIALOGUES = [
         ("\u5468\u5750\u671b", "\u6211\u77e5\u9053\u3002\u4f60\u6478\u5230\u90a3\u9053\u75d5\u7684\u90a3\u5929\u8d77\uff0c\u4f60\u5c31\u5df2\u7ecf\u51b3\u5b9a\u8981\u53bb\u4e86 \u2014\u2014 \u6240\u4ee5\u6211\u8ddf\u4f60\u4eec\u53bb\u3002"),
         ("\u5e84\u9e4a\u8ba9", "\u524d\u8f88\uff0c\u60a8\u521a\u624d\u8fd8\u8bf4\u300c\u8bf4\u4e86\u4f60\u4eec\u4e5f\u4e0d\u6539\u300d\u3002"),
         ("\u5468\u5750\u671b", "\u90a3\u53e5\u8bdd\u662f\u5bf9\u522b\u4eba\u8bf4\u7684\u3002\u8fd9\u6b21\u4e0d\u4e00\u6837\uff0c\u8fd9\u6b21\u662f\u6211\u81ea\u5df1\u8981\u4e0b\u53bb\u3002\u6211\u5728\u5c71\u4e0a\u5750\u4e86\u8fd9\u4e48\u591a\u5e74\uff0c\u603b\u5f97\u6709\u4e00\u6b21\u4e0d\u662f\u5750\u7740\u770b\u3002"),
-    ], quests=["tnc:main/s2_mountain"]),
+    # ★ 第一段必须给自己上闸，否则会被后面的段永久遮住（第六次踩坑）：
+    #   选段规则是"序号最大且门槛通过的那一段"。_02 早先**没有 @requires**，
+    #   于是它从第一秒起就永远压过这一段 ⇒ 山上初遇这段从来没播过
+    #   （tools/check_tnc_dialogue_segments.py 报 SHADOWED）。
+    #   ⇒ 本段完成 s2_mountain，就用 @excludes 同一个任务把自己退场，
+    #      让 _02 用 @requires=s2_mountain 接上。两段窗口首尾相接、不重叠 ✓。
+    ], excludes=["tnc:main/s2_mountain"], quests=["tnc:main/s2_mountain"]),
 
+    # ★★ 分段原则（第五次踩坑后总结，照做）：
+    #   后一段的 @requires 必须是**前一段完成过的任务** ✓，
+    #   绝不能写成"后一段自己要完成的任务" —— 那是死锁，永远轮不到 ✗。
+    #   本轮就栽在这：zuowang_02 原写 requires=s2_see，而 s2_see 正是它自己完成的
+    #   ⇒ 永远落选、永远回落第一段（用户实测「看痕任务无法完成」）。
+    #
+    #   时间线（照剧情）：山上初遇 → 去看痕 → 回来报告 → 他带你走
+    #   ⇒ _00 接取 s2_see；_02 回来报告（**完成** s2_see）并放行 s2_door；
+    #      _03 门前（完成 s2_door＋第三段三环）并放行 s4_hand；_04 裂口前；_05 终章。
     D("zuowang", 2, [
         ("\u5468\u5750\u671b", "\u4f60\u770b\u6e05\u695a\u4e86\u3002"),
         ("\u5f52", "\u55ef\u3002"),
@@ -414,9 +429,9 @@ DIALOGUES = [
         ("\u5468\u5750\u671b", "\u4e09\u5e74\u524d\u6211\u5c31\u8ba4\u51fa\u90a3\u662f\u4ed6\u7684\u624b\u6cd5\u3002\u6211\u6ca1\u8bf4\uff0c\u4e5f\u6ca1\u52a8\u3002\u8fd9\u4e09\u5e74\u6211\u4e00\u76f4\u5750\u5728\u8fd9\u5f20\u6905\u5b50\u4e0a\uff0c\u7b49\u6709\u4eba\u6765\u95ee\u3002\u4f60\u4eec\u662f\u7b2c\u4e00\u4e2a\u3002"),
         ("\u5468\u5750\u671b", "\u73b0\u5728\u662f\u90a3\u4ef6\u4e8b\u8d70\u5230\u5fc5\u987b\u89e3\u51b3\u7684\u65f6\u5019\u4e86\u3002\u6f6e\u8fdb\u57ce\u4e86 \u2014\u2014 \u8bf4\u660e\u90a3\u6247\u95e8\u677e\u4e86\u3002"),
         ("\u5468\u5750\u671b", "\u8d70\u5427\u3002\u6211\u5e26\u4f60\u4eec\u53bb\u90a3\u9053\u7f1d\u524d\u9762\u3002"),
-    ], requires=["tnc:main/s2_see"], excludes=["tnc:main/s3_stone"],
-       quests=["tnc:main/s2_see", "tnc:main/s2_door", "tnc:main/s3_gate"],
-       activate="tnc:main/s3_him"),
+    ], requires=["tnc:main/s2_mountain"], excludes=["tnc:main/s3_stone"],
+       quests=["tnc:main/s2_see"],
+       activate="tnc:main/s2_door"),
 
     # 第四段 · 门前：他去歇那一下（s4_hand 在这里完成）
     #
@@ -434,8 +449,9 @@ DIALOGUES = [
         ("\u5e84\u9e4a\u8ba9", "\u524d\u8f88\u2014\u2014"),
         ("\u5468\u5750\u671b", "\u6211\u4e0d\u7b97\uff0c\u6211\u770b\u3002\u770b\u4e86\u4e00\u8f88\u5b50\u4e86\u3002"),
         ("\u5468\u5750\u671b", "\u8fd9\u4e00\u6b21\u6211\u8ddf\u4f60\u4eec\u4e00\u8d77\u8fdb\u53bb\u3002"),
-    ], requires=["tnc:main/s3_gate"], excludes=["tnc:main/s4_ge"],
-       quests=["tnc:main/s3_him", "tnc:main/s3_account", "tnc:main/s3_stone"],
+    ], requires=["tnc:main/s2_see"], excludes=["tnc:main/s4_ge"],
+       quests=["tnc:main/s2_door", "tnc:main/s3_gate",
+               "tnc:main/s3_him", "tnc:main/s3_account", "tnc:main/s3_stone"],
        activate="tnc:main/s4_hand"),
 
     # 第四段 · 裂口前：只有望还在（他跟不上，但这一句得有人接）
