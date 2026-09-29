@@ -474,7 +474,7 @@ public final class TnSpellMechanics {
             spawnMagicCircleAt(player.serverLevel(), aimPoint(player), 20.0D, 260);
             // 大雷球的粒子不跟随 ✗ -> 自己开一个窗口，每 tick 在球的位置画环 ✓
             BIG_BALL_UNTIL.put(player.getUUID(), player.level().getGameTime() + BIG_BALL_WINDOW);
-        } else if (path.equals("divine_shot")) {
+        } else if (path.equals("god_descent")) {
             // 环绕雷球（现在是 t4）：作者要求"同款魔法阵" ✓
             spawnMagicCircle(player, 8.0D, 200);
         }
