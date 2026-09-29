@@ -19,7 +19,10 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$instance = 'E:\download\正式版 2.12.6.1\.minecraft\versions\元素觉醒1.4.3-魔改版-20260915'
+$recipe = Join-Path $PSScriptRoot 'tnc_instance.json'
+if (-not (Test-Path -LiteralPath $recipe)) { Write-Host "missing tools\tnc_instance.json"; exit 1 }
+# the instance path contains CJK, so it lives in a UTF-8 side file (a .ps1 literal would mojibake)
+$instance = (([IO.File]::ReadAllText($recipe, [Text.Encoding]::UTF8) | ConvertFrom-Json).instance)
 $log = Join-Path $instance 'logs\latest.log'
 
 if (-not (Test-Path -LiteralPath $log)) {
