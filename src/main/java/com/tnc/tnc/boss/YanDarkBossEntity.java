@@ -22,9 +22,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
-import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
@@ -140,17 +138,31 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
                 .add(Attributes.MAX_HEALTH, PHASE_HEALTH)
                 .add(Attributes.ATTACK_DAMAGE, 12.0D)
                 .add(Attributes.MOVEMENT_SPEED, 0.30D)
-                .add(Attributes.FOLLOW_RANGE, 40.0D)
+                // ★ 2026-09-30 作者："他应该站在原地，有很长的施法距离" ⇒ 索敌/施法距离拉到 64 格 ✓
+                //   （原来 40 格 ✗；四个技能全是从远处打的：落雷/雷球/神在投篮都生成在目标身上 ✓）
+                .add(Attributes.FOLLOW_RANGE, 64.0D)
                 .add(Attributes.ARMOR, 8.0D)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0D);
     }
 
+    /**
+     * AI 目标 —— ★ 2026-09-30 作者："他怎么能一直追着我撕咬呢，他应该站在原地，有很长的施法距离"。
+     *
+     * <p>所以这里**只留"会动嘴/动脚"以外的目标**：
+     * <ul>
+     *   <li>✗ 删掉 {@code MeleeAttackGoal}（原来是第 2 优先级 —— 就是它让他一路追着你咬 ✗）</li>
+     *   <li>✗ 删掉 {@code RandomStrollGoal}（没事乱晃也会凑过来 ✗）</li>
+     *   <li>✓ 保留 FloatGoal（掉水里不至于淹死）／LookAtPlayerGoal（**只转头**看你 ✓）／
+     *       RandomLookAroundGoal ✓</li>
+     *   <li>✓ 保留 HurtByTargetGoal（被打会还手 ⇒ 还是会施法打你 ✓）与
+     *       NearestAttackableTargetGoal（配合 64 格 FOLLOW_RANGE ⇒ **站桩远程开火** ✓）</li>
+     * </ul>
+     * 没有 movement goal ⇒ 他**根本不会寻路**，只能原地转身 ✓（这正是作者要的"站在原地" ✓）。
+     */
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.0D, true));
-        this.goalSelector.addGoal(7, new RandomStrollGoal(this, 0.8D));
-        this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 24.0F));
+        this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 64.0F));
         this.goalSelector.addGoal(9, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
@@ -498,11 +510,24 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
                 SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.HOSTILE, 2.0F, 0.7F);
     }
 
-    /** 闪电移位：瞬移到目标身侧（带一圈**暗色**电花 ✓：黑雾 + 少量蓝电） */
+    /**
+     * 闪电移位：**原地小幅换位**（不是朝你冲过来 ✗）。
+     *
+     * <p>作者 2026-09-30："他怎么能一直追着我撕咬呢，他应该站在原地" ⇒ 原来这一招是瞬移到
+     * <b>目标身边</b>（{@code target.position() ± 3} ✗）—— 等于每放一次就贴脸一次 ✗，
+     * 配合 64 格施法距离完全不该这样 ✓。现在改成：**在自己附近 8 格内**随机挪一格
+     * （保持"闪电移位"的观感 ✓，但永远留在远处开火 ✓）。
+     */
     private void castBlink(ServerLevel level, LivingEntity target) {
         Vec3 from = this.position();
-        Vec3 to = target.position().add(
-                (this.random.nextDouble() - 0.5D) * 6.0D, 0.0D, (this.random.nextDouble() - 0.5D) * 6.0D);
+        double a = this.random.nextDouble() * Math.PI * 2.0D;
+        double r = 4.0D + this.random.nextDouble() * 4.0D;
+        Vec3 to = new Vec3(this.getX() + Math.cos(a) * r, this.getY(), this.getZ() + Math.sin(a) * r);
+        // 兜一层：万一身位算法把落点放到目标 12 格以内了，就往外挪一挪 ✓（"站在原地"优先）
+        Vec3 away = to.subtract(target.position());
+        if (away.length() < 12.0D) {
+            to = target.position().add(away.normalize().scale(12.0D)).add(0.0D, this.getY() - target.getY(), 0.0D);
+        }
         darkSparks(level, from, 60);
         this.teleportTo(to.x, to.y, to.z);
         darkSparks(level, to, 60);
