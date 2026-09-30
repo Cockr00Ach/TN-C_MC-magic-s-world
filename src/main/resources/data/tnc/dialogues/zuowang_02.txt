@@ -15,12 +15,10 @@
 # ---------------------------------------------------------------------------
 
 @id tnc:zuowang_02
-@requires tnc:main/s2_see
+@requires tnc:main/s2_mountain
 @excludes tnc:main/s3_stone
-@activate tnc:main/s3_him
+@activate tnc:main/s2_door
 @quest tnc:main/s2_see
-@quest tnc:main/s2_door
-@quest tnc:main/s3_gate
 
 周坐望|你看清楚了。
 归|嗯。

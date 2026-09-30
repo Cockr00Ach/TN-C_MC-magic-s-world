@@ -221,6 +221,12 @@ public final class MagicStoneHud {
     private static final int COLOR_FILL_TOP = 0xFFE4DCFF;
     private static final int COLOR_TEXT = 0xFFFFFFFF;
 
+    /** 页号提示里"切页"那半段的颜色（比页号暗一点，不抢视线）。 */
+    private static final int COLOR_PAGE_HINT = 0xFFBFBFBF;
+
+    /** 页号文字缩放：比条上的数字再小一档，免得盖住护甲条那一行。 */
+    private static final float PAGE_TEXT_SCALE = 0.5F;
+
     /**
      * 条上数字的缩放 —— 想调字号就改这一个数。
      *
@@ -357,6 +363,39 @@ public final class MagicStoneHud {
         graphics.pose().scale(TEXT_SCALE, TEXT_SCALE, 1.0F);
         graphics.drawString(font, text, -font.width(text) / 2, -font.lineHeight / 2 + 1,
                 COLOR_TEXT, true);
+        graphics.pose().popPose();
+
+        // 4) 热键页号（只有"确实有多页"时才画）
+        drawPageIndicator(minecraft, graphics, x, y);
+    }
+
+    /**
+     * 画"第 N/2 页"。
+     *
+     * <p>只在<b>已学法术超过一页</b>（&gt; 9 个）时才画 —— 只有一页的时候画个"1/1"
+     * 纯粹是噪音，而且会让玩家以为还有别的东西没解锁 ✓。
+     *
+     * <p>位置：魔力条正上方一行（最省地方，也不和包里的护甲条/饱食度打架）。
+     */
+    private static void drawPageIndicator(Minecraft minecraft, GuiGraphics graphics, int x, int manaBarY) {
+        MagicStoneData data = MagicStone.getOrNull(minecraft.player);
+        if (data == null) {
+            return;
+        }
+        int pages = com.tnc.tnc.magic.MagicStoneData.PAGE_COUNT;
+        // 一页装得下就不显示
+        if (data.getLearned().size() <= com.tnc.tnc.magic.MagicStoneData.SLOTS_PER_PAGE) {
+            return;
+        }
+        String head = "第 " + (data.getLoadoutPage() + 1) + "/" + pages + " 页";
+        var font = minecraft.font;
+        int y = manaBarY - font.lineHeight - 1;
+        graphics.pose().pushPose();
+        graphics.pose().translate(x + 2, y, 0.0F);
+        graphics.pose().scale(PAGE_TEXT_SCALE, PAGE_TEXT_SCALE, 1.0F);
+        graphics.drawString(font, head, 0, 0, COLOR_TEXT, true);
+        int dx = font.width(head) + 3;
+        graphics.drawString(font, "[1] 切页", dx, 0, COLOR_PAGE_HINT, true);
         graphics.pose().popPose();
     }
 

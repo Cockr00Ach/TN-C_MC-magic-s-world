@@ -41,6 +41,66 @@ public final class TNSpellClientVisuals {
     private TNSpellClientVisuals() {
     }
 
+    /**
+     * ★ <b>客户端冷却看门狗</b>（2026-09-29 作者："我有一直按着" —— 他没冤枉谁，这是真 bug ✓）
+     *
+     * <h2>问题（反编译 SpellEngine 0.15.12 实锤）</h2>
+     * 让冷却递减的 {@code SpellCooldownManager.update()} <b>只在服务端分支被调用</b>：
+     * {@code PlayerEntityMixin.tick_TAIL_SpellEngine} 里是
+     * {@code if (!player.level().isClientSide) { … cooldownManager.update() … }}，
+     * 而客户端那份 manager 的 {@code tick} 计数器<b>永远不增长</b> ✗。
+     *
+     * <p>偏偏客户端的施法流程每一 tick 都要问它：
+     * {@code ClientPlayerEntityMixin.updateSpellCast()} → {@code isCoolingDown(id)} 为真就
+     * <b>立刻取消自己的读条</b> ✗✗。于是：一个法术只要放过一次，客户端那边就永远"冷却中"，
+     * 玩家按住不放也没用 —— 而服务端其实早就放行了 ✓（日志里只有 {@code gate ALLOW}、
+     * 没有 {@code SPELL_CAST}，两次 ALLOW 只隔 0.1 秒，正是"读条刚起就被自己取消" ✗）。
+     *
+     * <p>解除本来靠服务端发的"冷却清零包"（Fabric 网络 `Packets$SpellCooldown`，duration 0），
+     * 但那套网络在 <b>Connector</b> 环境下没有送到客户端 ✗。所以这里替引擎把客户端那份
+     * 每 tick {@code update()} 一次（和引擎本该做的一模一样 ✓）。
+     *
+     * <p>安全性：{@code cooldownSet/cooldownCleared} 只在 owner 是 {@code ServerPlayer} 时才发包
+     * （反编译确认 ✓）⇒ 在客户端调用<b>不会</b>反过来动服务端的冷却 ✓。引擎不在时静默跳过 ✓。
+     */
+    private static void tickClientCooldowns(net.minecraft.client.Minecraft minecraft) {
+        try {
+            if (!(minecraft.player instanceof net.spell_engine.internals.casting.SpellCasterEntity caster)) {
+                return;
+            }
+            net.spell_engine.internals.SpellCooldownManager manager = caster.getCooldownManager();
+            manager.update();
+            // ★ 实测日志（作者 2026-09-29："释放一遍之后没有第二遍了"）：每 2 秒把我们法术的
+            //   客户端冷却进度打一行 —— "进度在下降" ⇒ 替引擎 tick 生效了 ✓；
+            //   "一直 1.00" ⇒ 还没生效 ✗（那就继续往下查别的取消条件）。
+            if (minecraft.level != null && minecraft.level.getGameTime() % 40L == 0L) {
+                StringBuilder sb = new StringBuilder();
+                for (com.tnc.tnc.magic.SpellCatalog.Entry entry : com.tnc.tnc.magic.SpellCatalog.all()) {
+                    float progress = manager.getCooldownProgress(entry.id(), 0.0F);
+                    if (progress > 0.0F) {
+                        if (sb.length() > 0) {
+                            sb.append(' ');
+                        }
+                        sb.append(entry.id().getPath()).append('=')
+                                .append(String.format(java.util.Locale.ROOT, "%.2f", progress));
+                    }
+                }
+                if (sb.length() > 0) {
+                    LOGGER.info("TN-C/cd: client cooldowns {}", sb);
+                }
+            }
+        } catch (Throwable error) {
+            if (COOLDOWN_ERROR_LOGGED.compareAndSet(false, true)) {
+                LOGGER.warn("TN-C/cd: client cooldown tick failed: {}", error.toString());
+            }
+        }
+    }
+
+    private static final org.apache.logging.log4j.Logger LOGGER =
+            org.apache.logging.log4j.LogManager.getLogger("TN-C/cd");
+    private static final java.util.concurrent.atomic.AtomicBoolean COOLDOWN_ERROR_LOGGED =
+            new java.util.concurrent.atomic.AtomicBoolean();
+
     // ---- 爆炸震屏（2026-09-22）：附近出现冲击波实体时给镜头加抖动 ----
     // 为什么走这条路：冲击波实体是服务端在爆炸点生成的 ✓ 而客户端本来就能看到它 ✓，
     // 所以"震屏"不需要任何网络包 —— 客户端自己每 tick 就近侦测一次即可 ✓。
@@ -62,6 +122,7 @@ public final class TNSpellClientVisuals {
             shake = 0.0F;
             return;
         }
+        tickClientCooldowns(minecraft);
         // 20 格内有冲击波 => 抖一下（越近越猛）
         for (com.tnc.tnc.magic.TNShockwaveEntity wave : minecraft.level.getEntitiesOfClass(
                 com.tnc.tnc.magic.TNShockwaveEntity.class, minecraft.player.getBoundingBox().inflate(20.0D))) {
@@ -79,10 +140,18 @@ public final class TNSpellClientVisuals {
             }
         }
         // 落雷（主链雷场/雷暴/雷击）：劈下来时也有轻微晃动 ✓（作者指定）
+        // ★ 2026-09-29 修正（作者："怎么刚释放就震动"）：只在**刚落地那几 tick** 晃 ✓ ——
+        //   以前只要附近有这个实体就晃 ✗，而三尊神是"悬停不落地"的 ⇒ 它们一生成就开始晃、
+        //   一直晃 10 秒 ✗（球的 12.0 更夸张）。现在由实体同步的"落地时刻"决定 ✓
+        //   （神永远不落地 ⇒ 永远不晃 ✓；球/雷只在砸到地上那一下晃 ✓）。
         if (minecraft.level != null && minecraft.player != null) {
             for (com.tnc.tnc.magic.TNLightningStrikeEntity bolt : minecraft.level.getEntitiesOfClass(
                     com.tnc.tnc.magic.TNLightningStrikeEntity.class,
                     minecraft.player.getBoundingBox().inflate(SHAKE_RANGE))) {
+                int age = bolt.tickCount;
+                if (!bolt.isShaking(age)) {
+                    continue;                   // 还在天上飞 / 已经砸完 ⇒ 不晃 ✓
+                }
                 double d = bolt.position().distanceTo(minecraft.player.position());
                 float s = (float) (bolt.shake() * Math.max(0.0D, 1.0D - d / SHAKE_RANGE));
                 if (s > shake) {

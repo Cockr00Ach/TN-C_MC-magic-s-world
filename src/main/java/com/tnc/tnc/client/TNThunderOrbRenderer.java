@@ -92,7 +92,11 @@ public class TNThunderOrbRenderer extends EntityRenderer<TNThunderOrbEntity> {
         poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(spin));
         poseStack.scale(SCALE, SCALE, SCALE);
         // 先平移（在缩放后的空间里）→ 球心落在实体原点 ✓
-        poseStack.translate(-CENTER_X, -CENTER_Y, -CENTER_Z);
+        // ★ 2026-09-29：每个分量 **+0.5** —— 引擎的 CustomModels.render 会再平移
+        //   (−0.5,−0.5,−0.5)，而那是**缩放过的坐标系** ⇒ 实际偏移 = SCALE×0.5 ≈ **2 格** ✗。
+        //   环绕球以前就是歪的 2 格（作者没看出来 ✗），现在一并修正 ✓。
+        //   推导见 TNLightningStrikeRenderer.ENGINE_HALF_BLOCK 的注释 ✓
+        poseStack.translate(0.5F - CENTER_X, 0.5F - CENTER_Y, 0.5F - CENTER_Z);
 
         if (!renderWithEngine(poseStack, buffer)) {
             // 兜底：老球（代码搭的 7 方块），至少不会变成紫黑方块 ✗

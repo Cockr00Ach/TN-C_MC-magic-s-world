@@ -52,8 +52,9 @@ public class TNLightningStrikeEntity extends Entity {
             SynchedEntityData.defineId(TNLightningStrikeEntity.class, EntityDataSerializers.INT);
 
     /**
-     * 0 = 闪电（主链雷场/雷暴/雷击），1 = 大雷球（神在投篮 t5：每个敌人头顶一颗）。
-     * 同步给客户端，渲染器据此换模型（flash vs lightingball_2）✓
+     * 0 = 闪电（主链雷场/雷暴/雷击），1 = 大雷球（神在投篮 t5：每个敌人头顶一颗），
+     * 2 = 神（神在投篮 t5 天上那三尊），3 = <b>跟随神</b>（闪电登神时跟在玩家背后的那一尊）✓
+     * 同步给客户端，渲染器据此换模型（flash vs lightingball_2 vs lightning_god）✓
      */
     private static final EntityDataAccessor<Integer> DATA_KIND =
             SynchedEntityData.defineId(TNLightningStrikeEntity.class, EntityDataSerializers.INT);
@@ -62,12 +63,45 @@ public class TNLightningStrikeEntity extends Entity {
     private static final EntityDataAccessor<Integer> DATA_SHAKE =
             SynchedEntityData.defineId(TNLightningStrikeEntity.class, EntityDataSerializers.INT);
 
+    /**
+     * 暗色版（黑暗衍 {@code tnc:yan_dark} 专用）✓ —— 同步给客户端，渲染器据此换
+     * {@code *_dark} 模型（{@code flash_dark} / {@code god_dark} / {@code lightingball_dark}）。
+     *
+     * <p>三种形态各有暗色模型，所以**一个布尔就够** ✓（暗色模型的几何与亮色版完全一致，
+     * 只有 UV 与贴图不同 —— 见 {@code tools/gen_dark_projectile_models.ps1} ✓）。
+     */
+    private static final EntityDataAccessor<Boolean> DATA_DARK =
+            SynchedEntityData.defineId(TNLightningStrikeEntity.class, EntityDataSerializers.BOOLEAN);
+
     /** 落点高度（只有服务端要用 ✓ 不用同步）。 */
     private double fallTo;
     /** 落地那一 tick（-1 = 还没落地 ✓）。 */
     private int landedTick = -1;
+
+    /**
+     * 落地那一 tick（**同步给客户端** ✓）：客户端据此只在"砸到地上那一下"晃屏 ✓
+     *
+     * <p>2026-09-29 作者："怎么刚释放就震动" —— 之前客户端只要附近有落雷实体就按
+     * {@link #shake()} 晃屏 ✗，于是三尊神**一生成就开始晃**（`configure(..., 3.0)` ✗），
+     * 一直晃 10 秒 ✗。现在只有 {@code tickCount - DATA_IMPACT_AT <= IMPACT_SHAKE_TICKS}
+     * 才晃 ✓；神永远不落地（值一直是 -1）⇒ 永远不晃 ✓。
+     */
+    private static final EntityDataAccessor<Integer> DATA_IMPACT_AT =
+            SynchedEntityData.defineId(TNLightningStrikeEntity.class, EntityDataSerializers.INT);
     /** 下落速度（默认 6 格/tick；神在投篮的球会调慢 ✓） */
     private double fallSpeed = FALL_SPEED;
+
+    /**
+     * 落地那一下的伤害与半径（0 = 纯表现 ✓）。
+     *
+     * <p>主链的雷场 / 雷暴 / 雷击**不要**用这个：那些伤害由机制层在生成时就结算了
+     * （见 {@link TnSpellMechanics}），这里再来一次会打两遍 ✗。
+     * 只有"神在投篮 t5"那颗大雷球走这条路 ✓（它的伤害本来就该发生在落地那一刻）。
+     */
+    private float landDamage = 0.0F;
+    private double landRadius = 0.0D;
+    /** 伤害归属者（击杀统计 / 掉落要用）；null = 不结算伤害 ✓。 */
+    private java.util.UUID landOwner = null;
 
     public TNLightningStrikeEntity(EntityType<? extends TNLightningStrikeEntity> type, Level level) {
         super(type, level);
@@ -94,6 +128,20 @@ public class TNLightningStrikeEntity extends Entity {
         return this.entityData.get(DATA_SHAKE) / 100.0D;
     }
 
+    /** 落地时刻（-1 = 还没落地 / 永不落下）。客户端用它判断"这一下该不该晃屏" ✓ */
+    public int impactAt() {
+        return this.entityData.get(DATA_IMPACT_AT);
+    }
+
+    /** 砸到地上那一下之后还晃几 tick（≈0.25 秒 ✓ 干脆的一下，不是持续震 ✗） */
+    public static final int IMPACT_SHAKE_TICKS = 5;
+
+    /** 这一 tick 该不该晃屏：只有**刚落地**那几 tick ✓（神永远 -1 ⇒ 永远不晃 ✓） */
+    public boolean isShaking(int age) {
+        int at = this.impactAt();
+        return at >= 0 && age - at >= 0 && age - at <= IMPACT_SHAKE_TICKS;
+    }
+
     /** 变成"大雷球"形态（神在投篮 t5）✓ */
     public void asBall() {
         this.entityData.set(DATA_KIND, 1);
@@ -112,9 +160,84 @@ public class TNLightningStrikeEntity extends Entity {
         return this.entityData.get(DATA_KIND) == 2;
     }
 
+    /**
+     * 变成<b>暗色版</b>（黑暗衍专用）✓ —— 三种形态都能用，渲染器按形态各取 {@code *_dark} 模型。
+     *
+     * <p>作者 2026-09-30："这个黑暗衍我希望他的魔法也是新的，我制作了 god_dark 和 flash_dark
+     * 和 lightingball_dark，你拿去替换他的法术" ✓
+     */
+    public void asDark() {
+        this.entityData.set(DATA_DARK, true);
+    }
+
+    public boolean isDark() {
+        return this.entityData.get(DATA_DARK);
+    }
+
+    // ------------------------------------------------------------------
+    //  ★ 跟随神（2026-09-29 作者："我已登神，我希望玩家背后会出现 god 的模型跟随"）
+    // ------------------------------------------------------------------
+
+    /** 跟随谁的 UUID（只有服务端要用 ✓ 不用同步）。 */
+    private java.util.UUID followOwner = null;
+    /** 跟在背后多少格、抬高多少格 ✓ */
+    private double followBack = 3.5D;
+    private double followUp = 1.2D;
+
+    /**
+     * 变成"跟随神"形态：每 tick 贴在 owner 背后 {@code back} 格、抬高 {@code up} 格 ✓，
+     * 朝向和 owner 一致（原版约定：facing = (−sin yaw, cos yaw) ⇒ 背后 = +(sin yaw, −cos yaw) ✓）。
+     *
+     * <p>它和 t5 天上那三尊的区别：
+     * <ul>
+     *   <li>不落地、不结算伤害（纯跟随/装饰 ✓）</li>
+     *   <li>位置由 owner 决定（不是由落点决定）</li>
+     *   <li>owner 没了 / 登神 buff 掉了 ⇒ 自己 {@code discard} ✓</li>
+     * </ul>
+     */
+    public void asFollowerGod(java.util.UUID owner, double back, double up) {
+        this.entityData.set(DATA_KIND, 3);
+        this.followOwner = owner;
+        this.followBack = Math.max(0.0D, back);
+        this.followUp = up;
+    }
+
+    public boolean isFollowerGod() {
+        return this.entityData.get(DATA_KIND) == 3;
+    }
+
+    /** 跟随目标（只有服务端能拿到 ✓；客户端返回 null）。 */
+    public java.util.UUID followOwner() {
+        return this.followOwner;
+    }
+
+    /** 神形态 / 跟随神都用同一个模型 ✓（渲染器里判的）。 */
+    public boolean usesGodModel() {
+        return isGod() || isFollowerGod();
+    }
+
     /** 下落速度（格/tick）—— 神在投篮那颗球要慢 ✓ */
     public void setFallSpeed(double speed) {
         this.fallSpeed = Math.max(0.1D, speed);
+    }
+
+    /**
+     * 让这颗球<b>落地时真的打人</b> ✓（神在投篮 t5：半径 8 格、每只敌人 25 伤）。
+     *
+     * <p>为什么伤害放在实体里、而不是生成它的那一刻：作者要的就是"<b>砸下来</b>那一下才疼" ✓
+     * —— 球在空中那 16 tick，敌人跑开就打不着了（这才像"投篮"）。
+     *
+     * @param owner  伤害归属者（同时也是"不打自己"的判据）✓ ——
+     *               ★ 2026-09-30 从 {@code Player} 放宽到 {@link net.minecraft.world.entity.LivingEntity}：
+     *               黑暗衍（boss）的落雷/大雷球也要真的打人 ✓（原来只认玩家 ✗ ⇒ boss 的法术
+     *               **一点伤害都没有**，纯放烟花 ✗✗ —— 作者："他的法术怎么感觉一般啊"）
+     * @param damage 落地伤害（≤0 = 不结算，退回纯表现 ✓）
+     * @param radius 落地伤害半径（格）
+     */
+    public void setLandImpact(net.minecraft.world.entity.LivingEntity owner, float damage, double radius) {
+        this.landOwner = owner == null ? null : owner.getUUID();
+        this.landDamage = Math.max(0.0F, damage);
+        this.landRadius = Math.max(0.0D, radius);
     }
 
     public double scale() {
@@ -132,12 +255,18 @@ public class TNLightningStrikeEntity extends Entity {
         this.entityData.define(DATA_LIFE, 6);
         this.entityData.define(DATA_SHAKE, 300);
         this.entityData.define(DATA_KIND, 0);
+        this.entityData.define(DATA_IMPACT_AT, -1);
+        this.entityData.define(DATA_DARK, false);
     }
 
     @Override
     public void tick() {
         super.tick();
         if (this.level().isClientSide()) {
+            return;
+        }
+        if (this.isFollowerGod()) {
+            tickFollowerGod();
             return;
         }
         if (this.isGod()) {
@@ -180,6 +309,7 @@ public class TNLightningStrikeEntity extends Entity {
         }
         if (this.landedTick < 0) {
             this.landedTick = this.tickCount;
+            this.entityData.set(DATA_IMPACT_AT, this.tickCount);     // 同步给客户端：该晃屏了 ✓
             // 落地那一下：炸开一圈 ✓
             ServerLevel level = (ServerLevel) this.level();
             level.sendParticles(arc(), this.getX(), this.getY() + 0.4D, this.getZ(),
@@ -193,9 +323,130 @@ public class TNLightningStrikeEntity extends Entity {
             level.playSound(null, this.getX(), this.getY(), this.getZ(),
                     net.minecraft.sounds.SoundEvents.LIGHTNING_BOLT_IMPACT,
                     net.minecraft.sounds.SoundSource.PLAYERS, 1.0F, 1.2F);
+            landBlast(level);
         } else if (this.tickCount > this.landedTick + this.life()) {
             this.discard();
         }
+    }
+
+    /**
+     * 跟随神每 tick：贴到 owner 背后、朝向跟着 owner 转、撒一点紫黑粒子 ✓。
+     *
+     * <p>为什么用"平滑插值"而不是直接 {@code setPos}：直接贴的话，玩家每 tick 的位置抖动
+     * （走路/上台阶/被击退）会原样传到比玩家大好几倍的模型上（跟随神 5.6 格高、t5 那三尊 29 格）
+     * ⇒ 看起来像在抽 ✗。这里按 0.35 追，正常走路跟得住 ✓；距离超过 8 格（传送/速度过快）直接吸附 ✓。
+     *
+     * <p>什么情况下自己消失（三道保险，缺一道都会留下"孤儿神" ✗）：
+     * <ol>
+     *   <li>owner 死掉 / 掉线 / 不在同一个维度</li>
+     *   <li>owner 的<b>闪电登神 buff 掉了</b> —— 机制层也会清（{@code TnSpellMechanics}），
+     *       但实体自己也要会死 ✓（机制层漏了那次，神会一直跟着你 ✗）</li>
+     *   <li>超过 {@link #FOLLOWER_MAX_AGE} tick（10 分钟）—— 兜底，防止任何异常路径把它留下 ✓</li>
+     * </ol>
+     *
+     * <p>★ 2026-09-30：owner 的查找从"只找玩家"放宽到**任意生物** ✓ ——
+     * 作者要的 boss 二阶段登神外观正是这个效果（"我想要的登神外观是那个 god 的模型在他背后跟随"）✓，
+     * 而黑暗衍是 Mob ✗，原来 {@code getPlayerList().getPlayer(uuid)} 永远查不到它 ⇒ 神一生成就自杀 ✗✗。
+     */
+    private void tickFollowerGod() {
+        ServerLevel level = (ServerLevel) this.level();
+        net.minecraft.world.entity.Entity owner = this.followOwner == null
+                ? null : level.getEntity(this.followOwner);
+        boolean ascended = owner instanceof net.minecraft.world.entity.LivingEntity living
+                && TNEffects.LIGHTNING_ASCENSION.isPresent()
+                && living.hasEffect(TNEffects.LIGHTNING_ASCENSION.get());
+        if (owner == null || owner.isRemoved() || owner.level() != level || !ascended
+                || this.tickCount > FOLLOWER_MAX_AGE) {
+            this.discard();
+            return;
+        }
+        float yaw = owner.getYRot();
+        double rad = Math.toRadians(yaw);
+        double tx = owner.getX() + Math.sin(rad) * this.followBack;
+        double tz = owner.getZ() - Math.cos(rad) * this.followBack;
+        double ty = owner.getY() + this.followUp;
+        double dx = tx - this.getX();
+        double dy = ty - this.getY();
+        double dz = tz - this.getZ();
+        if (dx * dx + dy * dy + dz * dz > 64.0D) {
+            this.setPos(tx, ty, tz);                        // 太远了：直接吸附 ✓
+        } else if (this.tickCount > 1) {
+            this.setPos(this.getX() + dx * 0.35D, this.getY() + dy * 0.35D, this.getZ() + dz * 0.35D);
+        } else {
+            this.setPos(tx, ty, tz);
+        }
+        this.setYRot(yaw);
+        this.setXRot(0.0F);
+        // 粒子：和 t5 天上那三尊同一套配色（紫 + 一点点黑）✓
+        level.sendParticles(ParticleTypes.WITCH, this.getX(), this.getY() + 2.5D, this.getZ(),
+                3, 1.0D, 1.2D, 1.0D, 0.10D);
+        level.sendParticles(ParticleTypes.SQUID_INK, this.getX(), this.getY() + 2.5D, this.getZ(),
+                2, 1.0D, 1.2D, 1.0D, 0.06D);
+    }
+
+    /** 跟随神的兜底寿命（tick）：10 分钟 ✓ */
+    public static final int FOLLOWER_MAX_AGE = 12000;
+
+    /**
+     * 落地伤害：以落点为中心、半径 {@link #landRadius} 内的敌人各挨 {@link #landDamage} ✓。
+     *
+     * <p>只在 {@link #setLandImpact} 被调用过（神在投篮 t5 那颗球）时生效 ✓ ——
+     * 主链那些落雷都是纯表现，走到这里会直接 return ✓。
+     *
+     * <p>判据用 {@link TnSpellMechanics#isEnemy}（包内共享），于是"不打自己、不打队友"这条
+     * 和机制层其余法术完全一致 ✓。归属者取不到（比如掉线了）就**不结算**，
+     * 也不退化成"无主伤害" ✗ —— 否则击杀统计会记在一个不存在的来源上。
+     */
+    private void landBlast(ServerLevel level) {
+        if (this.landDamage <= 0.0F || this.landOwner == null) {
+            return;
+        }
+        // ★ 归属者可能是玩家（t5 神在投篮）也可能是 boss（黑暗衍）⇒ 一律按 UUID 找 ✓
+        net.minecraft.world.entity.Entity rawOwner = level.getEntity(this.landOwner);
+        if (!(rawOwner instanceof net.minecraft.world.entity.LivingEntity owner)) {
+            return;
+        }
+        // 爆心 = **球落点**（{@link #fallTo}，也就是地面上的锚点）✗ 不是球心 ——
+        // 球半径让球心抬起来了（见 TnSpellMechanics.tickDivineShot），
+        // 拿球心当爆心的话：判定框整个悬在半空、地上的敌人一个都打不到 ✗
+        double cx = this.getX();
+        double cy = this.fallTo;
+        double cz = this.getZ();
+        net.minecraft.world.phys.AABB box = new net.minecraft.world.phys.AABB(
+                cx - this.landRadius, cy - this.landRadius, cz - this.landRadius,
+                cx + this.landRadius, cy + this.landRadius, cz + this.landRadius);
+        for (net.minecraft.world.entity.LivingEntity target
+                : level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, box)) {
+            if (!TnSpellMechanics.isEnemy(owner, target)) {
+                continue;
+            }
+            double dx = target.getX() - cx;
+            double dy = target.getY() + target.getBbHeight() * 0.5D - cy;
+            double dz = target.getZ() - cz;
+            if (dx * dx + dy * dy + dz * dz > this.landRadius * this.landRadius) {
+                continue;                       // 以**爆心**算距离（不是以球心 ✗）
+            }
+            target.hurt(level.damageSources().indirectMagic(owner, owner), this.landDamage);
+        }
+
+        // ★ **落地才是"爆炸"**（作者 2026-09-29："怎么刚放出来就爆炸，应该等球落地" ✓）
+        //   起手那一下原来在法术 JSON 里就炸了（冲击波 + 720 颗粒子）✗ —— 现在 JSON 只留一点点"起手电花"，
+        //   真正的爆炸搬到这里：冲击波环（推人 ＋ 震屏 ＋ 向外扩张的光环）＋ 一大团粒子 ＋ 白闪 ✓
+        TNShockwaveEntity wave = TNOrbEntities.SHOCKWAVE.get().create(level);
+        if (wave != null) {
+            wave.configure(this.landRadius, 40);            // 环半径 = 伤害半径 ✓
+            wave.exemptFromPush(owner);                     // 作者 2026-09-29："爆炸不要把我击飞" ✓
+            wave.moveTo(cx, cy + 0.05D, cz, 0.0F, 0.0F);
+            level.addFreshEntity(wave);
+        }
+        level.sendParticles(arc(), cx, cy + 1.0D, cz, 200, 1.4D, 0.9D, 1.4D, 4.0D);
+        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, cx, cy + 1.0D, cz,
+                400, 1.4D, 0.9D, 1.4D, 6.0D);
+        level.sendParticles(ParticleTypes.WITCH, cx, cy + 1.0D, cz,
+                150, 1.2D, 0.7D, 1.2D, 4.0D);
+        level.sendParticles(ParticleTypes.SQUID_INK, cx, cy + 1.0D, cz,
+                60, 1.0D, 0.6D, 1.0D, 3.0D);
+        level.sendParticles(ParticleTypes.FLASH, cx, cy + 1.5D, cz, 4, 0.3D, 0.3D, 0.3D, 0.0D);
     }
 
     @Override

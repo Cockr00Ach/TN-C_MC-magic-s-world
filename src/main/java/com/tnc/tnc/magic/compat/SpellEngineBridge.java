@@ -97,8 +97,23 @@ public final class SpellEngineBridge {
     private SpellEngineBridge() {
     }
 
+    /**
+     * 引擎在不在 ✓
+     *
+     * <p>★ 2026-09-29：这里原来是裸的 {@code ModList.get().isLoaded(...)} ✗ ——
+     * 在**纯 JUnit**（没有 Forge 引导）里 {@code ModList.get()} 返回 {@code null} ⇒
+     * {@code NullPointerException} ✗，于是所有"顺手查一下引擎"的单元测试都挂
+     * （实测：{@code SpellLoadoutTest} 的 {@code assignableListExposesOnlyChainTops} /
+     * {@code learningAHigherTierOfAChainUpgradesThatChainsSlotOnly} 两条直接 NPE，
+     * 整个 {@code gradlew build} 变红 ✗）。引擎边界上的函数本来就不该把异常抛给调用方 ✓。
+     */
     public static boolean enginePresent() {
-        return ModList.get().isLoaded(ENGINE_MOD_ID);
+        try {
+            net.minecraftforge.fml.ModList list = ModList.get();
+            return list != null && list.isLoaded(ENGINE_MOD_ID);
+        } catch (Throwable ignored) {
+            return false;                       // dev / 纯单测环境：当作没装引擎 ✓
+        }
     }
 
     /**

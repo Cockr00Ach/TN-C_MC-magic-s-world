@@ -40,6 +40,25 @@ public class TNShockwaveEntity extends TNMagicCircleEntity {
     /** 上掀分量 —— 贴着地面被"掀"一下的感觉。 */
     private static final double PUSH_UP = 0.45D;
 
+    /**
+     * 这一发冲击波**豁免谁**（UUID）—— 作者 2026-09-29："爆炸不要把我击飞" ✓
+     *
+     * <p>引擎 JSON 的 {@code SPAWN} 动作生成冲击波时**不带施法者信息** ✗（所以那个只能
+     * "对所有玩家都只推一点点" ✓）；但"神在投篮"那颗球的落地爆炸是我们**自己在 Java 里**
+     * 生成的 ✓ ⇒ 可以明确把人豁免掉 ✓✓。
+     */
+    private java.util.UUID exempt = null;
+
+    /** 谁不被这一发冲击波推动（一般传施法者自己）✓ */
+    public void exemptFromPush(net.minecraft.world.entity.Entity entity) {
+        this.exempt = entity == null ? null : entity.getUUID();
+    }
+
+    /** 豁免者在这儿也**不产生任何推力** ✓（不是"推小一点" —— 作者要的是"不要把我击飞" ✓）。 */
+    private boolean isExempt(net.minecraft.world.entity.Entity entity) {
+        return this.exempt != null && this.exempt.equals(entity.getUUID());
+    }
+
     public TNShockwaveEntity(EntityType<? extends TNShockwaveEntity> type, Level level) {
         super(type, level);
         this.configure(MAX_RADIUS, LIFE);
@@ -58,6 +77,9 @@ public class TNShockwaveEntity extends TNMagicCircleEntity {
         for (Entity entity : level.getEntities(this, this.getBoundingBox().inflate(front))) {
             if (!(entity instanceof LivingEntity target)) {
                 continue;       // 只管活物：这个实体本身不是 LivingEntity，所以不用排除自己 ✓
+            }
+            if (isExempt(target)) {
+                continue;       // 豁免者（＝施法者自己）：一点力都不给 ✓
             }
             Vec3 away = target.position().subtract(center);
             double distance = away.length();

@@ -30,6 +30,30 @@ public final class TravelMusicController {
 
     private static final int STARTUP_GRACE_TICKS = 40;
 
+    /**
+     * ★ 2026-09-30：boss 战音乐（作者："音乐效果没出来"）
+     *
+     * <h2>为什么"凋零那套"没有音乐可放</h2>
+     * 原版凋零**根本没有专属 BGM** ✗ —— 全游戏只有末影龙有 boss 音乐
+     * （{@code minecraft:music.dragon}）。所以这里直接借**末影龙那首**当 boss 曲 ✓。
+     *
+     * <h2>为什么不能交给原版 MusicManager</h2>
+     * 本整合包的背景音乐由**我们自己**接管：{@code MusicManagerMixin} 把原版音乐关掉了
+     * （见 {@link #shouldSuppressVanillaMusic()}）✗ ⇒ 竖琴/原版那套放不出 boss 曲 ✗。
+     * 所以这里走和旅行音乐**同一条通道**（{@code SoundSource.MUSIC} 的 SoundInstance ✓）：
+     * 玩家附近有活着的黑暗衍 ⇒ 停掉旅行音乐、改放这一首 ✓；boss 走了/死了再切回旅行音乐 ✓。
+     */
+    /**
+     * boss 曲的**音效 id** ✓ —— 直接用 {@code ResourceLocation}（和旅行音乐那几条一样 ✓），
+     * 不走 {@code SoundEvents} 常量：那个常量在这里是 {@code Holder} 形态、取不到 id ✗。
+     */
+    private static final ResourceLocation BOSS_MUSIC =
+            ResourceLocation.fromNamespaceAndPath("minecraft", "music.dragon");
+    /** 多近算"在打 boss"（格）✓ —— 比 64 格施法距离略小一点，免得刚看见就切音乐 ✓ */
+    private static final double BOSS_MUSIC_RANGE = 56.0D;
+    private static SoundInstance bossTrack;
+    private static int bossAge;
+
     private static final Deque<ResourceLocation> queue = new ArrayDeque<>();
     private static List<ResourceLocation> catalog = List.of();
     private static SoundInstance currentTrack;
@@ -72,6 +96,12 @@ public final class TravelMusicController {
         }
 
         SoundManager sounds = minecraft.getSoundManager();
+
+        // ★ boss 战优先：附近有活着的黑暗衍 ⇒ 旅行音乐让位、改放 boss 曲 ✓（见 BOSS_MUSIC 的说明）
+        if (tickBossMusic(minecraft, sounds)) {
+            return;
+        }
+
         if (currentTrack != null) {
             currentAge++;
             if (currentAge < STARTUP_GRACE_TICKS || sounds.isActive(currentTrack)) {
@@ -114,6 +144,64 @@ public final class TravelMusicController {
         lastTrack = next;
         sounds.play(currentTrack);
         LOGGER.info("[TN-C Music] playing {} ({} track(s) available)", next, catalog.size());
+    }
+
+    /**
+     * boss 战音乐那一支 ✓ —— 返回 true 表示"现在归 boss 音乐管"（旅行音乐这一 tick 什么都别做）。
+     *
+     * <p>曲子放完（{@code isActive} 变 false）就在下一 tick 重放 ✓ ——
+     * 原版那首 boss 曲本身不循环 ✗，而战斗可能打很久 ⇒ 靠这里续 ✓。
+     */
+    private static boolean tickBossMusic(Minecraft minecraft, SoundManager sounds) {
+        boolean bossNear = minecraft.level != null && minecraft.player != null
+                && !minecraft.level.getEntitiesOfClass(
+                        com.tnc.tnc.boss.YanDarkBossEntity.class,
+                        minecraft.player.getBoundingBox().inflate(BOSS_MUSIC_RANGE)).isEmpty();
+
+        if (!bossNear) {
+            if (bossTrack != null) {                     // boss 走了/死了：收掉 boss 曲，旅行音乐恢复 ✓
+                sounds.stop(bossTrack);
+                bossTrack = null;
+                bossAge = 0;
+                LOGGER.info("[TN-C Music] boss music stopped");
+            }
+            return false;
+        }
+
+        if (currentTrack != null) {                      // 旅行音乐让位 ✓
+            sounds.stop(currentTrack);
+            currentTrack = null;
+            currentAge = 0;
+        }
+        if (bossTrack != null) {
+            bossAge++;
+            if (bossAge < STARTUP_GRACE_TICKS || sounds.isActive(bossTrack)) {
+                return true;
+            }
+            bossTrack = null;                            // 放完了 ⇒ 下面重放 ✓
+            bossAge = 0;
+        }
+        if (minecraft.options.getSoundSourceVolume(SoundSource.MUSIC) <= 0.0F) {
+            return true;
+        }
+        bossTrack = new SimpleSoundInstance(
+                BOSS_MUSIC,
+                SoundSource.MUSIC,
+                1.0F,
+                1.0F,
+                RandomSource.create(),
+                false,
+                0,
+                SoundInstance.Attenuation.NONE,
+                0.0D,
+                0.0D,
+                0.0D,
+                true
+        );
+        bossAge = 0;
+        sounds.play(bossTrack);
+        LOGGER.info("[TN-C Music] boss music {} (dark boss nearby)", BOSS_MUSIC);
+        return true;
     }
 
     private static boolean refreshCatalog(SoundManager sounds) {
@@ -162,6 +250,11 @@ public final class TravelMusicController {
         }
         if (currentTrack != null) {
             minecraft.getSoundManager().stop(currentTrack);
+        }
+        if (bossTrack != null) {                         // ★ boss 曲也要收 ✓
+            minecraft.getSoundManager().stop(bossTrack);
+            bossTrack = null;
+            bossAge = 0;
         }
         currentTrack = null;
         currentAge = 0;

@@ -52,6 +52,97 @@ public final class ManaGate {
     }
 
     // ------------------------------------------------------------------
+    //  "放行了、但引擎没让放"的哑火检测（作者 2026-09-29："释放过的法术怎么无法再释放了"）
+    //  ★ 2026-09-29 恢复：这一整块在 commit 1b31dea4 的回滚里丢了（作者："全部恢复"）
+    // ------------------------------------------------------------------
+
+    /**
+     * 闸门刚**放行**的那次施法：uuid -> (法术, 游戏刻) ✓
+     *
+     * <h2>为什么需要它</h2>
+     * 引擎的 `attemptCasting` 过了之后，`performSpell` **还会自己再判一次**，而它有一条
+     * 很容易踩的规则（反编译确认）：<b>非引导型法术的 RELEASE 必须带"蓄力进度 ≥ 1.0"</b>
+     * —— 也就是"读条没满就松手"时，引擎会**静默地什么都不做** ✗（不报错、不扣蓝、不发事件）。
+     * 作者实测（日志 19:00）：唯一成功的一次是 **按住 2.26 秒**，之后 25 次全是 **0.1~0.2 秒的点按**
+     * ⇒ 一次都没放出来，而界面上毫无提示 ✗。
+     *
+     * <p>所以这里记一笔"我放行了"，{@link TnSpellMechanics} 的每 tick 逻辑负责看它有没有
+     * 在 ~1.5 秒内变成真的施法（{@code SPELL_CAST} 会给 {@link #noteCastHappened}）：
+     * 没有就提示玩家"读条没满/被取消"，而不是让他对着空气按半天 ✗。
+     */
+    private static final java.util.Map<java.util.UUID, Pending> PENDING =
+            new java.util.concurrent.ConcurrentHashMap<>();
+
+    /** 一次"已放行、尚未确认"的施法。 */
+    public record Pending(ResourceLocation spell, long at) {
+    }
+
+    static void noteAllowed(ServerPlayer player, ResourceLocation spell) {
+        PENDING.put(player.getUUID(), new Pending(spell, player.level().getGameTime()));
+    }
+
+    /** 真的放出去了（引擎发了 SPELL_CAST）⇒ 这笔就不算哑火 ✓ */
+    public static void noteCastHappened(ServerPlayer player) {
+        PENDING.remove(player.getUUID());
+    }
+
+    /**
+     * 每 tick 检查：放行了却没放出来 ⇒ 给玩家一句话 ✓（每个玩家最多提示一次，不刷屏 ✓）。
+     *
+     * @param patienceTicks 多久没动静算哑火（30 tick = 1.5 秒足够读条 ✓）
+     */
+    public static void checkSilentFizzle(ServerPlayer player, int patienceTicks) {
+        Pending pending = PENDING.get(player.getUUID());
+        if (pending == null) {
+            return;
+        }
+        long now = player.level().getGameTime();
+        if (now - pending.at() < patienceTicks) {
+            return;
+        }
+        PENDING.remove(player.getUUID());
+        // 措辞中性：哑火有可能是**引擎在客户端把自己的读条取消了**，不一定怪玩家按得短 ✗
+        player.displayClientMessage(Component.literal(
+                "§c[TN-C] 这次没放出来 §7（读条被打断 / 冷却未清 / 引擎没接受这次释放）"), true);
+        // ★ 一次到位的"为什么哑火"转储：把引擎 performSpell 里那几条判定全查一遍写进日志 ✓
+        org.apache.logging.log4j.LogManager.getLogger("TN-C/gate").info(
+                "TN-C: FIZZLE {} {}", pending.spell().getPath(), engineState(player, pending.spell()));
+    }
+
+    /**
+     * 把"这次为什么可能没放出来"一次查完（引擎侧的全部判据）✓
+     *
+     * <p>引擎 `ClientPlayerEntityMixin.updateSpellCast()` 会在下面任一条不成立时**取消客户端读条** ⇒
+     * 发出的 RELEASE 进度 < 1 ⇒ 服务端按"没蓄满"静默丢弃 ✗：
+     * <ol>
+     *   <li>{@code player.isAlive()}</li>
+     *   <li>{@code player.getMainHandItem().getItem() == 施法时那个物品} ← 副手施法会踩这个 ✗</li>
+     *   <li>{@code !getCooldownManager().isCoolingDown(id)} ← 客户端冷却</li>
+     *   <li>{@code !EntityActionsAllowed.isImpaired(player, CAST_SPELL)} ← 沉默/眩晕类效果 ✗</li>
+     * </ol>
+     */
+    private static String engineState(ServerPlayer player, ResourceLocation spell) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("alive=").append(player.isAlive());
+        sb.append(" mainItem=").append(player.getMainHandItem().getItem());
+        try {
+            net.spell_engine.internals.SpellCooldownManager manager =
+                    ((net.spell_engine.internals.casting.SpellCasterEntity) player).getCooldownManager();
+            sb.append(" coolingDown=").append(manager.isCoolingDown(spell))
+                    .append(" progress=").append(manager.getCooldownProgress(spell, 0.0F));
+        } catch (Throwable t) {
+            sb.append(" cooldown=unavailable(").append(t.getClass().getSimpleName()).append(')');
+        }
+        try {
+            sb.append(" impaired=").append(net.spell_engine.api.effect.EntityActionsAllowed.isImpaired(
+                    player, net.spell_engine.api.effect.EntityActionsAllowed.Player.CAST_SPELL, true));
+        } catch (Throwable t) {
+            sb.append(" impaired=unavailable(").append(t.getClass().getSimpleName()).append(')');
+        }
+        return sb.toString();
+    }
+
+    // ------------------------------------------------------------------
     //  纯逻辑（可单测、可自检）
     // ------------------------------------------------------------------
 
@@ -73,11 +164,13 @@ public final class ManaGate {
             return Decision.NO_WAND;
         }
         if (requireLearned && !data.hasLearned(entry.id())) {
-            org.apache.logging.log4j.LogManager.getLogger("TN-C/gate").info("TN-C: gate BLOCKED {} reason=NOT_LEARNED", entry.id());
+            // ★ 2026-09-30 作者关闭了自动学习 ✗ —— 这里不再就地补学，老老实实拦住 ✓
+            org.apache.logging.log4j.LogManager.getLogger("TN-C/gate").info(
+                    "TN-C: gate BLOCKED {} reason=NOT_LEARNED", entry.id());
             return Decision.NOT_LEARNED;
         }
         if (data.getMana() < cost) {
-            org.apache.logging.log4j.LogManager.getLogger("TN-C/gate").info("TN-C: gate BLOCKED {} reason=NOT_ENOUGH_MANA {} / {}", entry.id(), data.getMana(), entry.manaCostFor(data.getMaxMana()));
+            org.apache.logging.log4j.LogManager.getLogger("TN-C/gate").info("TN-C: gate BLOCKED {} reason=NOT_ENOUGH_MANA {} / {}", entry.id(), data.getMana(), cost);
             return Decision.NOT_ENOUGH_MANA;
         }
         return Decision.ALLOW;
@@ -174,7 +267,7 @@ public final class ManaGate {
         // evaluate free of purchases; only a real eligible cast may learn here.
         if(com.tnc.tnc.Config.requireLearnedToCast&&!data.hasLearned(entry.id())&&!data.isExplicitlyForgotten(entry.id())
                 &&(!com.tnc.tnc.Config.requireWandToCast||supported)
-                &&MagicStoneLearning.unlock(data,entry)==MagicStoneLearning.Result.OK){
+                && false /* 2026-09-30 作者关闭自动学习: 不再就地补学, 直接走 NOT_LEARNED */){
             com.tnc.tnc.network.MagicStoneNetwork.syncTo(serverPlayer);
             com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(serverPlayer,SpellCatalog.effectiveIds(data));
             com.tnc.tnc.adventure.AdventureService.milestone(serverPlayer,"learned");
@@ -182,6 +275,15 @@ public final class ManaGate {
         Decision decision = evaluateCost(data, entry, com.tnc.tnc.Config.requireLearnedToCast,
                 com.tnc.tnc.Config.requireWandToCast, supported,com.tnc.tnc.equipment.MageGear.spellCost(serverPlayer,entry.manaCostFor(data.getMaxMana())));
         if (decision == Decision.ALLOW) {
+            // ★ 诊断（作者 2026-09-29："投篮没法再释放了"）：**放行也留一行**。
+            //   反过来读更有用：玩家说"按了没反应"时，日志里**既没有 BLOCKED 也没有 ALLOW**
+            //   ⇒ 说明客户端根本没把这次施法送上来（引擎自己的冷却/弹药判定拦在前面 ✗），
+            //   而不是我们的闸门拦的（拦截一定会打出 reason=… ✓）。
+            org.apache.logging.log4j.LogManager.getLogger("TN-C/gate").info(
+                    "TN-C: gate ALLOW {} mana {} / {}", entry.id(), data.getMana(),
+                    entry.manaCostFor(data.getMaxMana()));
+            // 记一笔"我放行了"：1.5 秒内没有 SPELL_CAST 就提示"没放出来"（见 PENDING 的说明 ✓）
+            noteAllowed(serverPlayer, spellId);
             return false;
         }
 

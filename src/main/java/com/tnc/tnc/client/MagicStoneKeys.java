@@ -35,6 +35,23 @@ public final class MagicStoneKeys {
             GLFW.GLFW_KEY_V,
             CATEGORY);
 
+    /**
+     * 切换热键页 —— 默认 <b>数字键 1</b>。
+     *
+     * <p>为什么是 1：引擎的施法热键是「右键 + 2~9」共 9 个
+     * （{@code client.json5} 里 {@code spellHotbar_1_defer: "USE_KEY"}），
+     * <b>数字键 1 从来没有被法术系统用过</b> —— 正好拿来翻页 ✓。
+     *
+     * <p>用 {@link net.minecraftforge.client.settings.KeyConflictContext#IN_GAME}：
+     * 只在游戏里生效，开背包/聊天框时不抢按键（否则打字会切页）。
+     */
+    public static final KeyMapping NEXT_PAGE = new KeyMapping(
+            "key.tnc.next_page",
+            net.minecraftforge.client.settings.KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_1,
+            CATEGORY);
+
     private MagicStoneKeys() {
     }
 
@@ -47,6 +64,7 @@ public final class MagicStoneKeys {
     public static void register(RegisterKeyMappingsEvent event) {
         event.register(OPEN_MAGIC_STONE);
         event.register(RESCUE);
+        event.register(NEXT_PAGE);
     }
 
     @SubscribeEvent
@@ -64,6 +82,13 @@ public final class MagicStoneKeys {
             if (minecraft.screen == null) {
                 MagicStoneNetwork.requestSync();
                 minecraft.setScreen(new MagicStoneScreen());
+            }
+        }
+        // 切页：不用判断"学没学过几个法术" —— 服务端知道，
+        // 只有一页时它会回一句"第 1/1 页"，不值得为省一次包在客户端再算一遍 ✓
+        while (NEXT_PAGE.consumeClick()) {
+            if (minecraft.screen == null) {
+                MagicStoneNetwork.requestNextPage();
             }
         }
     }

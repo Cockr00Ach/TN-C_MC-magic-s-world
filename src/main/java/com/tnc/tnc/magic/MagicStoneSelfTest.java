@@ -163,6 +163,150 @@ public final class MagicStoneSelfTest {
         checks.add(new Check("NBT round-trip", nbtOk,
                 "affinity=" + copy.affinitySum() + " maxMana=" + copy.getMaxMana() + " learned=" + copy.getLearned().size()));
 
+        // 8b. 配装（loadout）：2 页 × 9 槽 = 18（2026-09-29 用户拍板）
+        //
+        // 这一批断言守的是几个真会翻车的点：
+        //   ① 学法"只填空槽、绝不覆盖玩家手配的"——否则玩家排好的键位会被顶掉
+        //   ② 同链升档要替换该链的键，但**别的链、别的元素**一律不动
+        //   ③ 配键列表只给"每条链当前拥有的最高档"（没学过的不出现）
+        //   ④ 同一法术只能占一个槽 ——否则"3 个键全绑雷暴"刷冷却
+        //   ⑤ 槽位定长、不挤位，写进法杖的顺序 = 键位顺序
+        //   ⑥ 切页/遗忘之后法杖内容跟着变（忘了的法术不许留在槽里当死键）
+        MagicStoneData loadout = new MagicStoneData();
+        loadout.assignDefaultAffinities(5);          // 亲和 5 → 前四级都能学
+        loadout.recomputeMaxMana(0, 10, 10, 0);
+        loadout.addBonusPoints(200);
+        java.util.List<SpellCatalog.Entry> learnable = new java.util.ArrayList<>();
+        for (SpellCatalog.Chain chain : SpellCatalog.Chain.values()) {
+            java.util.List<SpellCatalog.Entry> ofChain = SpellCatalog.of(Element.LIGHTNING, chain);
+            if (!ofChain.isEmpty()) {
+                learnable.add(ofChain.get(0));       // 每条链的第一级
+            }
+        }
+        for (SpellCatalog.Entry entry : learnable) {
+            MagicStoneLearning.unlock(loadout, entry);
+        }
+        checks.add(new Check("loadout: slot count = 2 pages x 9",
+                MagicStoneData.LOADOUT_SLOTS == 18 && MagicStoneData.PAGE_COUNT == 2
+                        && MagicStoneData.SLOTS_PER_PAGE == 9,
+                "pages=" + MagicStoneData.PAGE_COUNT + " perPage=" + MagicStoneData.SLOTS_PER_PAGE
+                        + " total=" + MagicStoneData.LOADOUT_SLOTS));
+        checks.add(new Check("loadout: learning fills slots in order, no duplicates",
+                loadout.loadoutCount() == loadout.getLearned().size()
+                        && loadout.getSlot(0) != null && loadout.getSlot(1) != null && loadout.getSlot(2) != null,
+                "bound=" + loadout.loadoutCount() + " learned=" + loadout.getLearned().size()
+                        + " slot0=" + loadout.getSlot(0)));
+
+        // ① 玩家手配的槽不许被新学的**别的链**的法术覆盖
+        java.util.List<SpellCatalog.Entry> fireChain = SpellCatalog.of(Element.FIRE, SpellCatalog.Chain.BALL);
+        net.minecraft.resources.ResourceLocation manual = loadout.getSlot(0);
+        loadout.setSlot(13, manual);                 // 手动挪到第 2 页的某个槽
+        boolean manualKept = loadout.getSlot(13) != null && loadout.getSlot(0) == null;
+        loadout.setSlot(0, manual);
+        int freeBefore = loadout.firstFreeSlot();
+        if (!fireChain.isEmpty()) {
+            MagicStoneLearning.unlock(loadout, fireChain.get(0));
+        }
+        boolean filledFreeOnly = freeBefore >= 0 && manual.equals(loadout.getSlot(0))
+                && loadout.getSlot(freeBefore) != null;
+        checks.add(new Check("loadout: manual binding survives a new spell", manualKept && filledFreeOnly,
+                "freeBefore=" + freeBefore + " slot0=" + loadout.getSlot(0)
+                        + " slot" + freeBefore + "=" + loadout.getSlot(freeBefore)));
+
+        // ② 配键列表 = 每条链的最高档；同链升档后列表换成新档、旧档不再可绑
+        java.util.List<SpellCatalog.Entry> topsBefore = SpellCatalog.chainTopAssignable(loadout, Element.LIGHTNING);
+        boolean topsAreChainTops = !topsBefore.isEmpty();
+        for (SpellCatalog.Entry top : topsBefore) {
+            if (!top.id().equals(SpellCatalog.topLearned(loadout, Element.LIGHTNING, top.chain()).id())) {
+                topsAreChainTops = false;
+            }
+        }
+        checks.add(new Check("loadout: bind list = each chain's current top only", topsAreChainTops,
+                "lightning tops=" + topsBefore.size() + " " + topsBefore.stream()
+                        .map(SpellCatalog.Entry::displayName).toList()));
+
+        // ②b 同链升档：该链的键被换成新档，别的链不动
+        SpellCatalog.Entry coreT1 = SpellCatalog.of(Element.LIGHTNING, SpellCatalog.Chain.CORE).get(0);
+        SpellCatalog.Entry coreT2 = SpellCatalog.of(Element.LIGHTNING, SpellCatalog.Chain.CORE).get(1);
+        SpellCatalog.Entry orbT1Self = SpellCatalog.of(Element.LIGHTNING, SpellCatalog.Chain.ORB).get(0);
+        int coreSlot = -1;
+        int orbSlot = -1;
+        for (int i = 0; i < MagicStoneData.LOADOUT_SLOTS; i++) {
+            if (coreT1.id().equals(loadout.getSlot(i))) coreSlot = i;
+            if (orbT1Self.id().equals(loadout.getSlot(i))) orbSlot = i;
+        }
+        MagicStoneLearning.unlock(loadout, coreT2);
+        boolean upgraded = coreSlot >= 0 && coreT2.id().equals(loadout.getSlot(coreSlot))
+                && orbSlot >= 0 && orbT1Self.id().equals(loadout.getSlot(orbSlot))
+                && !SpellCatalog.canBind(loadout, coreT1.id());
+        checks.add(new Check("loadout: same-chain upgrade swaps that chain's key only", upgraded,
+                "coreSlot=" + coreSlot + " -> " + loadout.getSlot(coreSlot)
+                        + " orbSlot=" + orbSlot + " kept=" + (orbSlot >= 0 && orbT1Self.id().equals(loadout.getSlot(orbSlot)))));
+
+        // ③ 同一法术只能占一个槽
+        net.minecraft.resources.ResourceLocation boundNow = loadout.getSlot(coreSlot >= 0 ? coreSlot : 0);
+        int second = loadout.firstFreeSlot();
+        boolean movedNotCopied = false;
+        if (second >= 0 && boundNow != null) {
+            loadout.setSlot(second, boundNow);
+            movedNotCopied = boundNow.equals(loadout.getSlot(second))
+                    && !boundNow.equals(loadout.getSlot(coreSlot >= 0 ? coreSlot : 0));
+            loadout.setSlot(coreSlot >= 0 ? coreSlot : 0, boundNow);
+        }
+        checks.add(new Check("loadout: one spell occupies exactly one slot", movedNotCopied,
+                "moved to " + second + " from " + coreSlot));
+
+        // ③ 法杖内容 = 定长 9 项、按槽位顺序（不排序、不挤位）
+        java.util.List<net.minecraft.resources.ResourceLocation> page0 = loadout.pageSpellIds(0);
+        boolean fixedLengthAndOrder = page0.size() == MagicStoneData.SLOTS_PER_PAGE
+                && java.util.Objects.equals(page0.get(0), loadout.getSlot(0))
+                && java.util.Objects.equals(page0.get(1), loadout.getSlot(1))
+                && page0.get(MagicStoneData.SLOTS_PER_PAGE - 1) == loadout.getSlot(MagicStoneData.SLOTS_PER_PAGE - 1);
+        checks.add(new Check("loadout: page ids are fixed-length and slot-ordered", fixedLengthAndOrder,
+                "page0=" + page0.size() + " first=" + page0.get(0)));
+
+        // ④ NBT 往返：配装和页号都要活下来（不然一重登键位就全空了）
+        MagicStoneData loadoutCopy = new MagicStoneData();
+        loadoutCopy.deserializeNBT(loadout.serializeNBT());
+        boolean loadoutNbt = loadoutCopy.loadoutCount() == loadout.loadoutCount()
+                && java.util.Objects.equals(loadoutCopy.getSlot(0), loadout.getSlot(0))
+                && loadoutCopy.getLoadoutPage() == loadout.getLoadoutPage()
+                && java.util.Objects.equals(loadoutCopy.getSlot(MagicStoneData.SLOTS_PER_PAGE - 1),
+                        loadout.getSlot(MagicStoneData.SLOTS_PER_PAGE - 1));
+        checks.add(new Check("loadout: survives NBT round-trip", loadoutNbt,
+                "bound=" + loadoutCopy.loadoutCount() + " page=" + loadoutCopy.getLoadoutPage()));
+
+        // ⑤ 切页循环
+        int pageBefore = loadout.getLoadoutPage();
+        int pageAfter = loadout.cycleLoadoutPage();
+        boolean pageOk = pageAfter == (pageBefore + 1) % MagicStoneData.PAGE_COUNT
+                && loadout.cycleLoadoutPage() == pageBefore;
+        checks.add(new Check("loadout: page cycles", pageOk,
+                "page " + pageBefore + " -> " + pageAfter));
+
+        // ⑥ 清空槽
+        int nonEmpty = -1;
+        for (int i = 0; i < MagicStoneData.LOADOUT_SLOTS; i++) {
+            if (loadout.getSlot(i) != null) {
+                nonEmpty = i;
+                break;
+            }
+        }
+        boolean clearOk = nonEmpty >= 0 && loadout.clearSlot(nonEmpty) && loadout.getSlot(nonEmpty) == null;
+        checks.add(new Check("loadout: clearing a slot empties it", clearOk, "cleared slot " + nonEmpty));
+
+        // ⑦ 遗忘的链法术必须一起从配装里消失（否则法杖上留一个按不动的死键 ✗）
+        net.minecraft.resources.ResourceLocation forgotten = null;
+        for (int i = 0; i < MagicStoneData.LOADOUT_SLOTS; i++) {
+            if (loadout.getSlot(i) != null && SpellCatalog.byId(loadout.getSlot(i)) != null) {
+                forgotten = loadout.getSlot(i);
+                break;
+            }
+        }
+        boolean forgetClears = forgotten != null && loadout.forget(forgotten) && !loadout.isBound(forgotten);
+        checks.add(new Check("loadout: forgetting removes it from the hotbar", forgetClears,
+                "forgot=" + forgotten));
+
         // 9. 施法魔力消耗表（按等级递增）
         int[] manaCosts = new int[5];
         boolean ascending = true;

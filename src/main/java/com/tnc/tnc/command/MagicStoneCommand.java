@@ -149,6 +149,22 @@ public class MagicStoneCommand {
                                 .executes(ctx -> cast(ctx, ResourceLocationArgument.getId(ctx, "spell")))))
                  .then(Commands.literal("wand").requires(s -> s.hasPermission(2))
                         .executes(MagicStoneCommand::wand))
+                 .then(Commands.literal("loadout").requires(s -> s.hasPermission(2))
+                        .then(Commands.literal("list").requires(s -> s.hasPermission(2))
+                                .executes(MagicStoneCommand::loadoutList))
+                        .then(Commands.literal("page").requires(s -> s.hasPermission(2))
+                                .executes(ctx -> loadoutPage(ctx, -1))
+                                .then(Commands.argument("index", IntegerArgumentType.integer(1, com.tnc.tnc.magic.MagicStoneData.PAGE_COUNT))
+                                        .executes(ctx -> loadoutPage(ctx,
+                                                IntegerArgumentType.getInteger(ctx, "index")))))
+                        .then(Commands.argument("slot", IntegerArgumentType.integer(1, com.tnc.tnc.magic.MagicStoneData.LOADOUT_SLOTS))
+                                .executes(ctx -> loadoutClear(ctx,
+                                        IntegerArgumentType.getInteger(ctx, "slot")))
+                                .then(Commands.argument("spell", ResourceLocationArgument.id())
+                                        .suggests(MagicStoneCommand::suggestSpells)
+                                        .executes(ctx -> loadoutSet(ctx,
+                                                IntegerArgumentType.getInteger(ctx, "slot"),
+                                                ResourceLocationArgument.getId(ctx, "spell"))))))
                  .then(Commands.literal("engine").requires(s -> s.hasPermission(2))
                         .executes(MagicStoneCommand::engineStatus))
                  .then(Commands.literal("gatetest").requires(s -> s.hasPermission(2))
@@ -339,13 +355,13 @@ public class MagicStoneCommand {
         ctx.getSource().sendSuccess(() -> MagicStoneLearning.describe(result, entry, data), false);
         if (result == MagicStoneLearning.Result.OK || result == MagicStoneLearning.Result.ALREADY_LEARNED) {
             // 解锁后同步法杖内容（已经学过也同步一次 —— 相当于顺手修好丢了内容的法杖）
-            // ⚠️ 喂进去的是 effectiveIds：学了高阶就把低阶顶下去（高阶替换低阶）
-            java.util.List<ResourceLocation> effective = com.tnc.tnc.magic.SpellCatalog.effectiveIds(data);
+            // ⚠️ 走 ensureWand(player, data.learnedView())：法杖内容 = **当前这一页的配装**（不再按等级排序）
             com.tnc.tnc.magic.compat.SpellEngineBridge.WandResult synced =
-                    com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(player, effective);
+                    com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(player, data.learnedView());
+            int bound = data.loadoutCount();
             ctx.getSource().sendSuccess(() -> Component.literal(
                     "§7[TN-C] 法杖：" + com.tnc.tnc.magic.compat.SpellEngineBridge.describeWand(
-                            synced, effective.size())), false);
+                            synced, bound)), false);
         }
         MagicStone.refreshMaxMana(player, data);
         MagicStoneNetwork.syncTo(player);
@@ -490,14 +506,103 @@ public class MagicStoneCommand {
         if (data == null) {
             return 0;
         }
-        // 法杖内容 = 每条链的最高级（高阶替换低阶），不是"学过的全部"
-        java.util.List<ResourceLocation> effective = com.tnc.tnc.magic.SpellCatalog.effectiveIds(data);
+        // 法杖内容 = 当前这一页的配装（不再是"每条链的最高级"）
         com.tnc.tnc.magic.compat.SpellEngineBridge.WandResult result =
-                com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(player, effective, true);
+                com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(player, data.learnedView(), true);
         MagicStoneNetwork.syncTo(player);
+        int bound = data.loadoutCount();
         ctx.getSource().sendSuccess(() -> Component.literal("§b[TN-C] §r"
-                + com.tnc.tnc.magic.compat.SpellEngineBridge.describeWand(result, effective.size())), false);
+                + com.tnc.tnc.magic.compat.SpellEngineBridge.describeWand(result, bound)), false);
         return result == com.tnc.tnc.magic.compat.SpellEngineBridge.WandResult.FAILED ? 0 : 1;
+    }
+
+    // ------------------------------------------------------------------
+    //  配装（loadout）—— /tnc loadout
+    // ------------------------------------------------------------------
+
+    /** /tnc loadout list —— 打出当前页的 9 个槽。 */
+    private static int loadoutList(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        MagicStoneData data = require(player, ctx);
+        if (data == null) {
+            return 0;
+        }
+        for (String line : data.describeLoadout()) {
+            ctx.getSource().sendSuccess(() -> Component.literal("§7" + line), false);
+        }
+        ctx.getSource().sendSuccess(() -> Component.literal(
+                "§7用法：/tnc loadout <槽 1..18> <法术 id> 配键；/tnc loadout <槽> 清空；/tnc loadout page [页] 切页"),
+                false);
+        return 1;
+    }
+
+    /**
+     * /tnc loadout page [index] —— 不带参数就切下一页，带参数就直接跳到第 index 页（1 基）。
+     */
+    private static int loadoutPage(CommandContext<CommandSourceStack> ctx, int oneBased) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        MagicStoneData data = require(player, ctx);
+        if (data == null) {
+            return 0;
+        }
+        // 不带参数 = 切下一页；带参数 = 跳到第 index 页（1 基）
+        if (oneBased < 0) {
+            data.cycleLoadoutPage();
+        } else {
+            data.setLoadoutPage(oneBased - 1);
+        }
+        int page = data.getLoadoutPage();
+        var result = com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(player, data.learnedView());
+        MagicStoneNetwork.syncTo(player);
+        // 这一页实际能放几个：空槽是"没配"，不是"丢了"
+        long onPage = data.pageSpellIds(page).stream().filter(java.util.Objects::nonNull).count();
+        ctx.getSource().sendSuccess(() -> Component.literal("§b[TN-C] §r第 " + (page + 1) + "/"
+                + MagicStoneData.PAGE_COUNT + " 页 · 本页 " + onPage + " 个 · 共配好 "
+                + data.loadoutCount() + " 个 · "
+                + com.tnc.tnc.magic.compat.SpellEngineBridge.describeWand(result, (int) onPage)), false);
+        return 1;
+    }
+
+    /** /tnc loadout <slot> <spell> —— 配键。 */
+    private static int loadoutSet(CommandContext<CommandSourceStack> ctx, int oneBased, ResourceLocation spell)
+            throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        MagicStoneData data = require(player, ctx);
+        if (data == null) {
+            return 0;
+        }
+        if (!com.tnc.tnc.magic.SpellCatalog.canBind(data, spell)) {
+            ctx.getSource().sendFailure(Component.literal(
+                    "§c这个法术不能配到键位上 §7（没学过，或引擎还没实装它）"));
+            return 0;
+        }
+        int index = oneBased - 1;
+        boolean changed = data.setSlot(index, spell);
+        com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(player, data.learnedView());
+        MagicStoneNetwork.syncTo(player);
+        int page = index / MagicStoneData.SLOTS_PER_PAGE + 1;
+        int key = index % MagicStoneData.SLOTS_PER_PAGE + 1;
+        ctx.getSource().sendSuccess(() -> Component.literal("§b[TN-C] §r第 " + page + " 页第 " + key
+                + " 个键 → " + spell + (changed ? "" : "§7（没有变化）")), false);
+        return 1;
+    }
+
+    /** /tnc loadout <slot> —— 清空该槽。 */
+    private static int loadoutClear(CommandContext<CommandSourceStack> ctx, int oneBased) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        MagicStoneData data = require(player, ctx);
+        if (data == null) {
+            return 0;
+        }
+        int index = oneBased - 1;
+        boolean cleared = data.clearSlot(index);
+        com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(player, data.learnedView());
+        MagicStoneNetwork.syncTo(player);
+        int page = index / MagicStoneData.SLOTS_PER_PAGE + 1;
+        int key = index % MagicStoneData.SLOTS_PER_PAGE + 1;
+        ctx.getSource().sendSuccess(() -> Component.literal("§b[TN-C] §r第 " + page + " 页第 " + key
+                + " 个键已" + (cleared ? "清空" : "经是空的")), false);
+        return 1;
     }
 
     private static int engineStatus(CommandContext<CommandSourceStack> ctx) {
@@ -605,11 +710,10 @@ public class MagicStoneCommand {
         String message = edit.apply(player, data);
         MagicStone.refreshMaxMana(player, data);
         MagicStoneNetwork.syncTo(player);
-        // ⚠️ 必须同时重写法杖内容：forget / reset 会改变"每条链的最高级"，
+        // ⚠️ 必须同时重写法杖内容：forget / reset 会改掉配装里绑的法术，
         // 不重写的话被遗忘的法术还挂在槽位里（用户实测到的 bug）。
         // 学习 / 解锁 / 登录三条路都做了这一步，这里当初漏了。
-        com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(
-                player, com.tnc.tnc.magic.SpellCatalog.effectiveIds(data));
+        com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(player, data.learnedView());
         ctx.getSource().sendSuccess(() -> Component.literal("§a[TN-C] §r" + message), false);
         return 1;
     }

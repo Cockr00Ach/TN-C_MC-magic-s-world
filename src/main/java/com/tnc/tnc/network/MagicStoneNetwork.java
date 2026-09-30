@@ -80,6 +80,23 @@ public class MagicStoneNetwork {
         CHANNEL.sendToServer(new MagicStoneActionPacket(MagicStoneActionPacket.Action.UNLOCK, spell.toString()));
     }
 
+    /** 切到下一页热键（页号由服务端算：它有权威数据）。 */
+    public static void requestNextPage() {
+        CHANNEL.sendToServer(new MagicStoneActionPacket(MagicStoneActionPacket.Action.SET_PAGE, ""));
+    }
+
+    /** 把一个法术配到第 slot 个槽（0..17）。 */
+    public static void requestSetSlot(int slot, ResourceLocation spell) {
+        CHANNEL.sendToServer(new MagicStoneActionPacket(
+                MagicStoneActionPacket.Action.SET_SLOT, spell == null ? "" : spell.toString(), slot));
+    }
+
+    /** 清空第 slot 个槽。 */
+    public static void requestClearSlot(int slot) {
+        CHANNEL.sendToServer(new MagicStoneActionPacket(
+                MagicStoneActionPacket.Action.CLEAR_SLOT, "", slot));
+    }
+
     /** 把某个玩家的魔法石数据推给他自己。 */
     public static void syncTo(ServerPlayer player) {
         MagicStone.get(player).ifPresent(data ->

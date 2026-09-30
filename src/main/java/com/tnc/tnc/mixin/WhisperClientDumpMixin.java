@@ -23,7 +23,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class WhisperClientDumpMixin {
 
     @Inject(method = "applyDefinitions", at = @At("TAIL"), require = 0)
-    private static void tnc$dumpClientDefs(Object packet, CallbackInfo ci) {
+    // ★ 2026-09-30 修：原来这里声明了 `Object packet` 参数 ⇒ 注入失败 ✗
+    //   （日志：`Invalid descriptor … Expected (…SyncDefinitionsPacket;…CallbackInfo;)V
+    //   but found (Ljava/lang/Object;…)V`）—— whisperingquests 换了版本，目标方法的参数
+    //   从 Object 变成了 SyncDefinitionsPacket ✗，而那个类不在我们的编译期依赖里
+    //   （Connector 重映射的 Fabric 包）⇒ 写不出正确类型 ✗。
+    //   办法：**一个参数都不收** ✓ —— Mixin 允许 handler 只收 CallbackInfo（参数可不捕获），
+    //   描述符恒为 (…CallbackInfo)V，对面以后再改包类型也不会失效 ✓。
+    //   反正这只是个打日志用的诊断 mixin ✓。
+    private static void tnc$dumpClientDefs(CallbackInfo ci) {
         var log = LogUtils.getLogger();
         try {
             var f = Class.forName("com.lirxowo.whisperingquests.client.ClientQuestData")

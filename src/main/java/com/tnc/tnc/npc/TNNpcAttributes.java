@@ -68,6 +68,7 @@ public final class TNNpcAttributes {
         event.put(TNNpcs.CAVA.get(), TnDialogueNpc.attributes().build());
         event.put(TNNpcs.HUAI.get(), TnDialogueNpc.attributes().build());
         event.put(TNNpcs.ZHUANGQUERANG.get(), TnDialogueNpc.attributes().build());
+        event.put(TNNpcs.YAN_DARK.get(), com.tnc.tnc.boss.YanDarkBossEntity.createAttributes().build());
         event.put(TNNpcs.ZUOWANG.get(), TnDialogueNpc.attributes().build());
     }
 }

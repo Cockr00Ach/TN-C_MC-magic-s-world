@@ -29,13 +29,13 @@ public final class MagicStoneLearning {
     private MagicStoneLearning() {
     }
 
-    /** Eligibility filter for the collaborator's periodic elemental catch-up learning. */
-    public static boolean isElementalAutoLearnCandidate(MagicStoneData data,SpellCatalog.Entry entry) {
-        return entry!=null&&!entry.independent()&&entry.element()!=null
-                &&!data.hasLearned(entry.id())&&!data.isExplicitlyForgotten(entry.id())
-                &&entry.tier()<=data.maxTierFor(entry.element())
-                &&entry.tier()<=data.getProgress(entry.element(),entry.chain());
-    }
+    // ★★ 2026-09-29 作者："为什么会自动学习啊，删去" —— 这里原来有一个
+    //    `isElementalAutoLearnCandidate`（"档位够了就自动补学"的判定），
+    //    以及调用它的周期性补学、和 `ManaGate` 里"就地补学"。
+    //    三者**全部删除** ✓：学法术现在只有两个入口 ——
+    //      ① 魔法石界面（MagicStoneActionPacket → MagicStoneLearning.unlock）
+    //      ② 命令 `/tnc learn`（MagicStoneCommand）
+    //    这样"没学过"就永远是"没学过"（界面能学、遗忘不会被撤销）✓。
 
     public static int learningCost(MagicStoneData data, SpellCatalog.Entry entry) {
         return data.hasPreviouslyLearned(entry.id()) ? 0 : Config.learnCostForTier(entry.tier());
