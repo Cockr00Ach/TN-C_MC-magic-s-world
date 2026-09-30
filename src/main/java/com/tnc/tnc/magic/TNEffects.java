@@ -59,6 +59,11 @@ public final class TNEffects {
                     0x7FE8FF, Attributes.MOVEMENT_SPEED, 0.70D,
                     AttributeModifier.Operation.MULTIPLY_BASE));
 
+    /** 光翼：光亲和力够就挂着（飞行 + 客户端画翅膀，逻辑在 light/TNLightWingsEvents ✓）。 */
+    public static final RegistryObject<MobEffect> LIGHT_WINGS =
+            EFFECTS.register("light_wings", () -> new MobEffect(
+                    MobEffectCategory.BENEFICIAL, 0xFFE9A8) {
+            });
     /** 环绕雷球：本身不加属性，只是个"光环开着"的标记（电击逻辑在机制层）。 */
     public static final RegistryObject<MobEffect> ORBITING_THUNDER_ORB =
             EFFECTS.register("orbiting_thunder_orb", () -> new MobEffect(
