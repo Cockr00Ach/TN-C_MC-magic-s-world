@@ -64,6 +64,42 @@ public final class TNEffects {
             EFFECTS.register("light_wings", () -> new MobEffect(
                     MobEffectCategory.BENEFICIAL, 0xFFE9A8) {
             });
+    /**
+     * 光系链 t1「飞行」：纯标记 ✓ —— 飞行与光翼由 {@code light/TNLightWingsEvents} 负责 ✓。
+     */
+    public static final RegistryObject<MobEffect> LIGHT_FLIGHT =
+            EFFECTS.register("light_flight", () -> new MobEffect(
+                    MobEffectCategory.BENEFICIAL, 0xFFE9A8) {
+            });
+
+    /**
+     * 光系链 t2「极速飞行」：移动速度 <b>+50%</b> ✓（减伤 25% 在受伤事件里 ✓）。
+     */
+    public static final RegistryObject<MobEffect> LIGHT_SWIFT_FLIGHT =
+            EFFECTS.register("light_swift_flight", () -> new AttributeBuff(0xFFE9A8,
+                    Attributes.MOVEMENT_SPEED, 0.50D, AttributeModifier.Operation.MULTIPLY_BASE));
+
+    /**
+     * 光系链 t3「光翼展开」：移动速度 <b>+150%</b> ✓ ＋ 光属性伤害 <b>+50%</b> ✓
+     * （光在引擎里映射 {@code spell_power:healing} ✓，照 {@link #DARK_POWER} 的写法，
+     * 没装 spell_power 时只加速度、不崩 ✓）。减伤 50% 同样在受伤事件里 ✓。
+     */
+    public static final RegistryObject<MobEffect> LIGHT_WINGSPAN =
+            EFFECTS.register("light_wingspan", () -> new MobEffect(
+                    MobEffectCategory.BENEFICIAL, 0xFFD98A) {
+                {
+                    addAttributeModifier(Attributes.MOVEMENT_SPEED,
+                            uuidFor("tnc:light_wingspan_speed"), 1.50D,
+                            AttributeModifier.Operation.MULTIPLY_BASE);
+                    Attribute healing = ForgeRegistries.ATTRIBUTES.getValue(
+                            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(
+                                    "spell_power", "healing"));
+                    if (healing != null) {
+                        addAttributeModifier(healing, uuidFor("tnc:light_wingspan_heal"),
+                                0.50D, AttributeModifier.Operation.MULTIPLY_BASE);
+                    }
+                }
+            });
     /** 环绕雷球：本身不加属性，只是个"光环开着"的标记（电击逻辑在机制层）。 */
     public static final RegistryObject<MobEffect> ORBITING_THUNDER_ORB =
             EFFECTS.register("orbiting_thunder_orb", () -> new MobEffect(

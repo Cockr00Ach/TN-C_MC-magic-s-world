@@ -31,6 +31,11 @@ public final class TNLightWingsEvents {
     }
 
     @SubscribeEvent
+    private static boolean has(ServerPlayer player,
+                               net.minecraftforge.registries.RegistryObject<
+                                       net.minecraft.world.effect.MobEffect> effect) {
+        return effect.isPresent() && player.hasEffect(effect.get());
+    }
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
         if (event.phase != TickEvent.Phase.END) {
             return;
@@ -38,9 +43,11 @@ public final class TNLightWingsEvents {
         if (!(event.player instanceof ServerPlayer player) || player.level().isClientSide()) {
             return;
         }
-        MagicStoneData data = MagicStone.getOrNull(player);
-        int light = data == null ? 0 : data.getAffinity(Element.LIGHT);
-        boolean winged = light >= LIGHT_AFFINITY_REQUIRED;
+        // ★ 2026-10-01 作者："这条链的技能使用期间都可以展开光翼飞行" ✓
+        //   所以看的是【光系链的任一 buff】是否生效，而不是光亲和力 ✗。
+        boolean winged = has(player, TNEffects.LIGHT_FLIGHT)
+                || has(player, TNEffects.LIGHT_SWIFT_FLIGHT)
+                || has(player, TNEffects.LIGHT_WINGSPAN);
 
         if (TNEffects.LIGHT_WINGS.isPresent()) {
             if (winged) {

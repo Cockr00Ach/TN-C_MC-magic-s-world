@@ -28,8 +28,20 @@ public final class TNIronArmorEvents {
         if (victim.level().isClientSide()) {
             return;
         }
+        // ★ 2026-10-01：减伤一律【取最高档、不相乘】✓ —— 铁甲 99% / 光翼展开 50% / 极速飞行 25% ✓
+        float keep = 1.0F;                     // 1.0 = 不减伤
         if (victim.getItemBySlot(EquipmentSlot.CHEST).getItem() instanceof TNIronArmorItem) {
-            event.setAmount(event.getAmount() * DAMAGE_TAKEN);
+            keep = Math.min(keep, DAMAGE_TAKEN);          // 0.01
+        }
+        if (com.tnc.tnc.magic.TNEffects.LIGHT_WINGSPAN.isPresent()
+                && victim.hasEffect(com.tnc.tnc.magic.TNEffects.LIGHT_WINGSPAN.get())) {
+            keep = Math.min(keep, 0.50F);
+        } else if (com.tnc.tnc.magic.TNEffects.LIGHT_SWIFT_FLIGHT.isPresent()
+                && victim.hasEffect(com.tnc.tnc.magic.TNEffects.LIGHT_SWIFT_FLIGHT.get())) {
+            keep = Math.min(keep, 0.75F);
+        }
+        if (keep < 1.0F) {
+            event.setAmount(event.getAmount() * keep);
         }
     }
 }
