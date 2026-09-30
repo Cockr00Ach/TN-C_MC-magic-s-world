@@ -63,6 +63,16 @@ public class TNLightningStrikeEntity extends Entity {
     private static final EntityDataAccessor<Integer> DATA_SHAKE =
             SynchedEntityData.defineId(TNLightningStrikeEntity.class, EntityDataSerializers.INT);
 
+    /**
+     * 暗色版（黑暗衍 {@code tnc:yan_dark} 专用）✓ —— 同步给客户端，渲染器据此换
+     * {@code *_dark} 模型（{@code flash_dark} / {@code god_dark} / {@code lightingball_dark}）。
+     *
+     * <p>三种形态各有暗色模型，所以**一个布尔就够** ✓（暗色模型的几何与亮色版完全一致，
+     * 只有 UV 与贴图不同 —— 见 {@code tools/gen_dark_projectile_models.ps1} ✓）。
+     */
+    private static final EntityDataAccessor<Boolean> DATA_DARK =
+            SynchedEntityData.defineId(TNLightningStrikeEntity.class, EntityDataSerializers.BOOLEAN);
+
     /** 落点高度（只有服务端要用 ✓ 不用同步）。 */
     private double fallTo;
     /** 落地那一 tick（-1 = 还没落地 ✓）。 */
@@ -150,6 +160,20 @@ public class TNLightningStrikeEntity extends Entity {
         return this.entityData.get(DATA_KIND) == 2;
     }
 
+    /**
+     * 变成<b>暗色版</b>（黑暗衍专用）✓ —— 三种形态都能用，渲染器按形态各取 {@code *_dark} 模型。
+     *
+     * <p>作者 2026-09-30："这个黑暗衍我希望他的魔法也是新的，我制作了 god_dark 和 flash_dark
+     * 和 lightingball_dark，你拿去替换他的法术" ✓
+     */
+    public void asDark() {
+        this.entityData.set(DATA_DARK, true);
+    }
+
+    public boolean isDark() {
+        return this.entityData.get(DATA_DARK);
+    }
+
     // ------------------------------------------------------------------
     //  ★ 跟随神（2026-09-29 作者："我已登神，我希望玩家背后会出现 god 的模型跟随"）
     // ------------------------------------------------------------------
@@ -229,6 +253,7 @@ public class TNLightningStrikeEntity extends Entity {
         this.entityData.define(DATA_SHAKE, 300);
         this.entityData.define(DATA_KIND, 0);
         this.entityData.define(DATA_IMPACT_AT, -1);
+        this.entityData.define(DATA_DARK, false);
     }
 
     @Override

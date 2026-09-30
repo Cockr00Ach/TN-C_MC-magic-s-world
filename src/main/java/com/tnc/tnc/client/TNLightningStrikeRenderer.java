@@ -55,6 +55,23 @@ public class TNLightningStrikeRenderer extends EntityRenderer<TNLightningStrikeE
     private static final ResourceLocation GOD_MODEL_ID = ResourceLocation.fromNamespaceAndPath(
             TNMod.MODID, "projectile/lightning_god");
 
+    /**
+     * ★ 黑暗衍（公孙衍·迷失，{@code tnc:yan_dark}）专用的<b>暗色三件套</b>
+     * （作者 2026-09-30 自制 ✓："我制作了 god_dark 和 flash_dark 和 lightingball_dark，
+     * 你拿去替换他的法术"）。
+     *
+     * <p>几何与上面三个亮色模型**完全一致**，只有 UV 与贴图不同 —— 由
+     * {@code tools/gen_dark_projectile_models.ps1} 从**已发货的亮色模型**生成，
+     * 脚本里逐元素校验过几何（`-SelfTest` 还能把亮色模型重新生成一遍跟发货文件比对 ✓）。
+     * 实体带 {@link TNLightningStrikeEntity#isDark()} 时按形态各取一个 ✓。
+     */
+    private static final ResourceLocation FLASH_DARK_MODEL_ID = ResourceLocation.fromNamespaceAndPath(
+            TNMod.MODID, TNProjectileModels.FLASH_DARK);
+    private static final ResourceLocation BALL_DARK_MODEL_ID = ResourceLocation.fromNamespaceAndPath(
+            TNMod.MODID, TNProjectileModels.LIGHTNINGBALL_DARK);
+    private static final ResourceLocation GOD_DARK_MODEL_ID = ResourceLocation.fromNamespaceAndPath(
+            TNMod.MODID, TNProjectileModels.GOD_DARK);
+
     private static final float CENTER_X = 10.5F / 16.0F;
     private static final float CENTER_Z = 9.0F / 16.0F;
     private static final float BOTTOM_Y = 5.0F / 16.0F;
@@ -155,7 +172,11 @@ public class TNLightningStrikeRenderer extends EntityRenderer<TNLightningStrikeE
         boolean god = entity.usesGodModel();
         boolean t5god = entity.isGod();
         boolean ball = entity.isBall();
-        ResourceLocation modelId = god ? GOD_MODEL_ID : (ball ? BALL_MODEL_ID : MODEL_ID);
+        // ★ 暗色版（黑暗衍专用）：形态不变，只把模型换成 *_dark ✓
+        boolean dark = entity.isDark();
+        ResourceLocation modelId = god ? (dark ? GOD_DARK_MODEL_ID : GOD_MODEL_ID)
+                : ball ? (dark ? BALL_DARK_MODEL_ID : BALL_MODEL_ID)
+                : (dark ? FLASH_DARK_MODEL_ID : MODEL_ID);
 
         poseStack.pushPose();
         poseStack.scale(s, s, s);
@@ -197,6 +218,9 @@ public class TNLightningStrikeRenderer extends EntityRenderer<TNLightningStrikeE
         }
 
         String kind = t5god ? "god" : (entity.isFollowerGod() ? "follower-god" : (ball ? "ball" : "bolt"));
+        if (dark) {
+            kind = kind + "-dark";           // 日志里一眼看出用的是暗色模型 ✓
+        }
         if (LOGGED.add(kind)) {
             LOGGER.info("TN-C: strike render kind={} model={} scale={} life={}",
                     kind, modelId, entity.scale(), entity.life());

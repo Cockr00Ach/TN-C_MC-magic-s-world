@@ -181,12 +181,13 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
         }
     }
 
-    /** 落雷：在 from 上方落下并砸向目标点 ✓（形态 0） */
+    /** 落雷：在 from 上方落下并砸向目标点 ✓（形态 0，**暗色版** ✓） */
     private void bolt(ServerLevel level, Vec3 at, double scale, double shake) {
         TNLightningStrikeEntity b = TNOrbEntities.LIGHTNING_STRIKE.get().create(level);
         if (b == null) {
             return;
         }
+        b.asDark();                                  // 黑暗衍专用模型：flash_dark ✓
         b.configure(scale, 6, at.y, shake);
         b.moveTo(at.x, at.y, at.z, 0.0F, 0.0F);
         level.addFreshEntity(b);
@@ -214,12 +215,13 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
                 SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.HOSTILE, 2.0F, 0.9F);
     }
 
-    /** 神在投篮：目标头顶一颗大雷球（慢速下落 ✓）＋ 三尊神 ✓ */
+    /** 神在投篮：目标头顶一颗大雷球（慢速下落 ✓）＋ 三尊神 ✓ —— 全部用**暗色**模型 ✓ */
     private void castGodDescent(ServerLevel level, LivingEntity target) {
         Vec3 at = target.position();
         TNLightningStrikeEntity ball = TNOrbEntities.LIGHTNING_STRIKE.get().create(level);
         if (ball != null) {
             ball.asBall();
+            ball.asDark();                           // lightingball_dark ✓
             ball.setFallSpeed(1.5D);
             ball.configure(20.0D, 6, at.y, 12.0D);
             ball.moveTo(at.x, at.y, at.z, 0.0F, 0.0F);
@@ -232,6 +234,7 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
                 continue;
             }
             god.asGod();
+            god.asDark();                            // god_dark ✓
             god.configure(12.0D, 100, at.y + 6.0D, 3.0D);
             god.moveTo(at.x + Math.cos(ang) * 6.0D, at.y + 30.0D, at.z + Math.sin(ang) * 6.0D, 0.0F, 0.0F);
             level.addFreshEntity(god);
@@ -240,17 +243,23 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
                 SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.HOSTILE, 2.0F, 0.7F);
     }
 
-    /** 闪电移位：瞬移到目标身侧（带一圈电花 ✓） */
+    /** 闪电移位：瞬移到目标身侧（带一圈**暗色**电花 ✓：黑雾 + 少量蓝电） */
     private void castBlink(ServerLevel level, LivingEntity target) {
         Vec3 from = this.position();
         Vec3 to = target.position().add(
                 (this.random.nextDouble() - 0.5D) * 6.0D, 0.0D, (this.random.nextDouble() - 0.5D) * 6.0D);
-        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, from.x, from.y + 1.0D, from.z,
-                60, 0.6D, 0.8D, 0.6D, 0.8D);
+        darkSparks(level, from, 60);
         this.teleportTo(to.x, to.y, to.z);
-        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, to.x, to.y + 1.0D, to.z,
-                60, 0.6D, 0.8D, 0.6D, 0.8D);
+        darkSparks(level, to, 60);
         level.playSound(null, to.x, to.y, to.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.HOSTILE, 1.2F, 1.2F);
+    }
+
+    /** 黑暗衍的"电花"＝ 黑雾为主 + 一点蓝电 ✓（亮蓝色 60 颗看着像普通雷法，不像他 ✗）。 */
+    private void darkSparks(ServerLevel level, Vec3 at, int count) {
+        level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y + 1.0D, at.z,
+                count, 0.6D, 0.8D, 0.6D, 0.5D);
+        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y + 1.0D, at.z,
+                Math.max(1, count / 4), 0.6D, 0.8D, 0.6D, 0.6D);
     }
 
     public static ResourceLocation modelResource() {

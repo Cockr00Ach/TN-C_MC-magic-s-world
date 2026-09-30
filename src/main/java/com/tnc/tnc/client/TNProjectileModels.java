@@ -66,6 +66,21 @@ public final class TNProjectileModels {
      */
     public static final String FLASH = "projectile/flash";
 
+    /**
+     * ★ 黑暗衍（{@code tnc:yan_dark}，公孙衍·迷失）的<b>暗色三件套</b>
+     * （作者 2026-09-30 自制：{@code flashinggg_dark} / {@code LINGTINGGOD_dark} /
+     * {@code lightingball_2_dark}）。
+     *
+     * <p>几何与对应的亮色模型**完全一致**（生成脚本里逐元素校验过 ✓），
+     * 只有 UV 与贴图不同 ⇒ 由 {@code tools/gen_dark_projectile_models.ps1} 生成：
+     * 以**已发货的亮色模型**为模板，只把每个面的 UV/贴图换成暗版 ✓。
+     */
+    public static final String FLASH_DARK = "projectile/flash_dark";
+    /** 暗色雷霆之神（三个灰度贴图版本，见 god_dark.json 的 textures ✓）。 */
+    public static final String GOD_DARK = "projectile/god_dark";
+    /** 暗色新版雷球。 */
+    public static final String LIGHTNINGBALL_DARK = "projectile/lightingball_dark";
+
     public static final String[] PROJECTILE_MODELS = {
             // 火系（用户自制）
             "projectile/fireball",
@@ -79,6 +94,11 @@ public final class TNProjectileModels {
             FLASH,
             // 作者 2026-09-29 自制：雷霆之神（神在投篮 t5 天上那三尊 ✓）
             "projectile/lightning_god",
+            // 作者 2026-09-30 自制：黑暗衍（公孙衍·迷失）专用的暗色三件套 ✓
+            //   （闪电 / 雷霆之神 / 新版雷球 的暗色版；几何与上面三个一致，只有 UV+贴图不同）
+            FLASH_DARK,
+            GOD_DARK,
+            LIGHTNINGBALL_DARK,
             // 雷系备用球（用户自制）
             "projectile/thunder_ball",
     };
