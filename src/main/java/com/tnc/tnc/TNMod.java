@@ -92,6 +92,9 @@ public class TNMod
     public static final RegistryObject<Block> TAVERN_LAMP = BLOCKS.register("tavern_lamp", () -> new com.tnc.tnc.prop.TNPropBlock(net.minecraft.world.phys.shapes.Shapes.box(0.25,0,0.25,0.75,0.6875,0.75), 12));
     public static final RegistryObject<Item> TAVERN_LAMP_ITEM = ITEMS.register("tavern_lamp", () -> new net.minecraft.world.item.BlockItem(TAVERN_LAMP.get(), new Item.Properties()));
 
+    /** 铁甲：99% 减伤（逻辑在 armor/TNIronArmorEvents ✓） */
+    public static final RegistryObject<Item> TNC_IRON_ARMOR = ITEMS.register("tnc_iron_armor", com.tnc.tnc.armor.TNIronArmorItem::new);
+
     static { com.tnc.tnc.adventure.ElementWands.register(); }
     public static final RegistryObject<Item> HANDBOOK = ITEMS.register("adventure_handbook",
             com.tnc.tnc.adventure.AdventureEvents.HandbookItem::new);
