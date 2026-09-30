@@ -1,0 +1,275 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.tnc.light_wings",
+        "texture_width": 64,
+        "texture_height": 64,
+        "visible_bounds_width": 3,
+        "visible_bounds_height": 2,
+        "visible_bounds_offset": [
+          0,
+          0.5,
+          0
+        ]
+      },
+      "bones": [
+        {
+          "name": "root",
+          "pivot": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "wingRight",
+          "pivot": [
+            0,
+            0,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                0,
+                0,
+                0
+              ],
+              "size": [
+                6,
+                1,
+                1
+              ],
+              "uv": [
+                0,
+                0
+              ]
+            },
+            {
+              "origin": [
+                6,
+                1,
+                0
+              ],
+              "size": [
+                4,
+                1,
+                1
+              ],
+              "uv": [
+                0,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "wingRightMid",
+          "parent": "wingRight",
+          "pivot": [
+            9,
+            3,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                9,
+                3,
+                0
+              ],
+              "size": [
+                6,
+                6,
+                1
+              ],
+              "uv": [
+                0,
+                16
+              ]
+            }
+          ]
+        },
+        {
+          "name": "wingRightTip",
+          "parent": "wingRightMid",
+          "pivot": [
+            13,
+            7,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                13,
+                7,
+                0
+              ],
+              "size": [
+                5,
+                7,
+                1
+              ],
+              "uv": [
+                0,
+                24
+              ]
+            }
+          ]
+        },
+        {
+          "name": "wingRightInner",
+          "parent": "wingRight",
+          "pivot": [
+            5,
+            0,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                5,
+                -1,
+                0
+              ],
+              "size": [
+                6,
+                5,
+                1
+              ],
+              "uv": [
+                0,
+                8
+              ]
+            }
+          ]
+        },
+        {
+          "name": "wingLeft",
+          "pivot": [
+            0,
+            0,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -6,
+                0,
+                0
+              ],
+              "size": [
+                6,
+                1,
+                1
+              ],
+              "uv": [
+                0,
+                0
+              ]
+            },
+            {
+              "origin": [
+                -10,
+                1,
+                0
+              ],
+              "size": [
+                4,
+                1,
+                1
+              ],
+              "uv": [
+                0,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "wingLeftMid",
+          "parent": "wingLeft",
+          "pivot": [
+            -9,
+            3,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -15,
+                3,
+                0
+              ],
+              "size": [
+                6,
+                6,
+                1
+              ],
+              "uv": [
+                0,
+                16
+              ]
+            }
+          ]
+        },
+        {
+          "name": "wingLeftTip",
+          "parent": "wingLeftMid",
+          "pivot": [
+            -13,
+            7,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -18,
+                7,
+                0
+              ],
+              "size": [
+                5,
+                7,
+                1
+              ],
+              "uv": [
+                0,
+                24
+              ]
+            }
+          ]
+        },
+        {
+          "name": "wingLeftInner",
+          "parent": "wingLeft",
+          "pivot": [
+            -5,
+            0,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -11,
+                -1,
+                0
+              ],
+              "size": [
+                6,
+                5,
+                1
+              ],
+              "uv": [
+                0,
+                8
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
