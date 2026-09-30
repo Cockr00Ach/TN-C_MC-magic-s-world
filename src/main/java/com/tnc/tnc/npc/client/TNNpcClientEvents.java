@@ -62,6 +62,7 @@ public final class TNNpcClientEvents {
             ZuowangBedrockRenderers.register(event);
         } else {
             event.registerEntityRenderer(com.tnc.tnc.npc.TNNpcs.ZUOWANG.get(), provider);
+        event.registerEntityRenderer(com.tnc.tnc.npc.TNNpcs.YAN_DARK.get(), ctx -> new com.tnc.tnc.boss.client.YanDarkRenderer(ctx));
         }
     }
 }
