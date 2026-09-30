@@ -72,6 +72,12 @@ public final class SpellCatalog {
         DARK_SACRIFICE("以伤换伤", "以生命力换力量"),
         DARK_SUMMON("召唤", "从黑暗中召唤暗属性生物"),
         DARK_FOG("黑雾", "弥漫的黑色雾气"),
+        /**
+         * ★ 光系<b>第二条链</b>（治疗 + 减伤，作者 2026-10-01 定）：光芒照耀 → 圣光 → 神光 →
+         * 天使降临 → 天使的悲悯 ✓。第一条光链是"飞行/光翼"（{@code light_flight} 那套 ✓），
+         * 所以这条链**不带飞行** ✗ —— 只做治疗、减伤、法阵与天使 ✓。
+         */
+        LIGHT_GRACE("光耀", "治疗与减伤（光系第二条链）"),
         INDEPENDENT("独立魔法", "不属于任何元素，无亲和力要求");
 
         private final String cn;
@@ -194,6 +200,19 @@ public final class SpellCatalog {
             windEntry("vast_gale", Chain.GALE, 3, "超大范围风"),
             windEntry("giant_gale", Chain.GALE, 4, "巨型风刃风暴"),
             windEntry("wind_god_gale", Chain.GALE, 5, "风神风暴"),
+
+            // ---- 光耀线（光系第二条链，作者 2026-10-01 定）----
+            //   1 光芒照耀：范围 8，队友 25% 减伤 + 立刻回 20 血，地面铺同半径法阵
+            //   2 圣光：范围 10，50% 减伤 + 回 30 血 + 法阵
+            //   3 神光：范围 12，50% 减伤 + 回 30 血 + 法阵中心召唤 2 格高天使（白/淡黄粒子）+ 转晴
+            //   4 天使降临：范围 14，天使 3 格高，减伤 70%
+            //   5 天使的悲悯：范围 16，天使 5 格高，70% 减伤，范围内怪物停手 5 秒
+            //   （数值都在 light/TNLightChainMechanics 的一张表里 ✓，改那里就行 ✓）
+            of(Element.LIGHT, "light_radiance", Chain.LIGHT_GRACE, 1, "光芒照耀"),
+            of(Element.LIGHT, "holy_light", Chain.LIGHT_GRACE, 2, "圣光"),
+            of(Element.LIGHT, "divine_light", Chain.LIGHT_GRACE, 3, "神光"),
+            of(Element.LIGHT, "angel_descent", Chain.LIGHT_GRACE, 4, "天使降临"),
+            of(Element.LIGHT, "angel_mercy", Chain.LIGHT_GRACE, 5, "天使的悲悯"),
 
             // ================= 骨架（法术 JSON 待补，先占名字对齐文档）=================
             // 水魔法：水球 / 水纹 / 水缚 / 雨滴
@@ -551,6 +570,11 @@ public final class SpellCatalog {
      * <p>这是"法杖内容"的<b>唯一口径</b>：登录补杖、学法后同步、切页、{@code /tnc wand}
      * 全都要走它 —— 几处各算一套的话，页号和配装会互相冲掉 ✗。
      *
+     * <p><b>写杖之前先规范化配装</b>（{@link MagicStoneData#normalizeLoadout}）——
+     * 这一步是"同一条链的低档不许留在法杖上"的强制执行点 ✗。
+     * 作者 2026-09-29 实测的顺序是"先学完几个档、再去配键页手动摆"，
+     * 那种顺序下低档会各占一个空槽，只有在这里统一收口才治得住 ✓。
+     *
      * <p>顺带做两层过滤（只影响这次写进杖里的内容，<b>不改</b>玩家的配装）：
      * <ol>
      *   <li>没学过 / 目录里查不到 → 空槽（老存档迁移过来的配装对不上目录时兜底）</li>
@@ -558,6 +582,8 @@ public final class SpellCatalog {
      * </ol>
      */
     public static List<ResourceLocation> wandSpellIds(MagicStoneData data) {
+        // ★ 唯一出口上的不变量：一条链一个法术、且只能是当前链顶
+        data.normalizeLoadout();
         List<ResourceLocation> page = data.pageSpellIds(data.getLoadoutPage());
         List<ResourceLocation> result = new ArrayList<>(page.size());
         for (ResourceLocation id : page) {

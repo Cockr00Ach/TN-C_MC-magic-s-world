@@ -40,8 +40,42 @@ public final class TNIronArmorEvents {
                 && victim.hasEffect(com.tnc.tnc.magic.TNEffects.LIGHT_SWIFT_FLIGHT.get())) {
             keep = Math.min(keep, 0.75F);
         }
+        // ★ 2026-10-01 光系第二条链（治疗/减伤）：t1 25% / t2 50% / t3 50% / t4 70% / t5 70%
+        //   —— 同样走"取最高档、不相乘"✓（作者给的数值直接写在这里，一处可调 ✓）
+        keep = Math.min(keep, lightChainKeep(victim));
         if (keep < 1.0F) {
             event.setAmount(event.getAmount() * keep);
+        }
+    }
+
+    /** 光系第二条链的减伤（返回"该吃多少"，1.0 = 不减伤 ✓）。 */
+    private static float lightChainKeep(LivingEntity victim) {
+        var e = com.tnc.tnc.magic.TNEffects.class;
+        if (has(victim, com.tnc.tnc.magic.TNEffects.LIGHT_MERCY)) return 0.30F;      // t5 天使的悲悯 70%
+        if (has(victim, com.tnc.tnc.magic.TNEffects.LIGHT_DESCENT)) return 0.30F;    // t4 天使降临 70%
+        if (has(victim, com.tnc.tnc.magic.TNEffects.LIGHT_DIVINE)) return 0.50F;     // t3 神光 50%
+        if (has(victim, com.tnc.tnc.magic.TNEffects.LIGHT_HOLY)) return 0.50F;       // t2 圣光 50%
+        if (has(victim, com.tnc.tnc.magic.TNEffects.LIGHT_RADIANCE)) return 0.75F;   // t1 光芒照耀 25%
+        return 1.0F;
+    }
+
+    private static boolean has(LivingEntity entity,
+                               net.minecraftforge.registries.RegistryObject<
+                                       net.minecraft.world.effect.MobEffect> effect) {
+        return effect.isPresent() && entity.hasEffect(effect.get());
+    }
+
+    /**
+     * 光系 t5「天使的悲悯」：带 {@code tnc:light_calm} 的怪物**打出的伤害直接取消** ✓。
+     *
+     * <p>这是"停手五秒"的最后一道保险 ✓ —— {@code light/TNLightCalmEvents} 每 tick 已经在清它们的
+     * 攻击目标了，但它可能已经挥出去了（或者被别的东西触发了攻击 ✓）⇒ 这里再按攻击者判一次 ✓。
+     */
+    @SubscribeEvent
+    public static void onCalmAttacker(LivingHurtEvent event) {
+        if (event.getSource().getEntity() instanceof LivingEntity attacker
+                && has(attacker, com.tnc.tnc.magic.TNEffects.LIGHT_CALM)) {
+            event.setAmount(0.0F);
         }
     }
 }

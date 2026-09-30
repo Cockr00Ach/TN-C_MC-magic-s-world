@@ -36,6 +36,11 @@
     "tnc:wind_speed",
     "tnc:greater_wind_speed",
     "tnc:super_wind_speed",
-    "tnc:wind_god_descent"
+    "tnc:wind_god_descent",
+    "tnc:light_radiance",
+    "tnc:holy_light",
+    "tnc:divine_light",
+    "tnc:angel_descent",
+    "tnc:angel_mercy"
   ]
 }

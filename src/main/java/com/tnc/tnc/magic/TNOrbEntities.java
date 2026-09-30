@@ -97,6 +97,21 @@ public final class TNOrbEntities {
                     .clientTrackingRange(10)
                     .updateInterval(1)
                     .build("tnc:lightning_strike"));
+
+    /**
+     * ★ 光系第二条链 t3/t4/t5 召唤的**光天使** ✓（作者 2026-10-01 做的 Bedrock 模型 ✓）。
+     *
+     * <p>它是 {@link com.tnc.tnc.light.TNAngelEntity}（GeckoLib 生物 ✓，纯雕像：无敌/无 AI/不推动别人 ✓）。
+     * 尺寸由法术定（2 / 3 / 5 格高 ✓）；碰撞箱给一个正常玩家大小即可（它不可选中 ✓）。
+     */
+    public static final RegistryObject<EntityType<com.tnc.tnc.light.TNAngelEntity>> ANGEL =
+            ENTITY_TYPES.register("angel", () -> EntityType.Builder
+                    .of(com.tnc.tnc.light.TNAngelEntity::new, MobCategory.MISC)
+                    .sized(0.7F, 2.5F)
+                    .clientTrackingRange(12)
+                    .updateInterval(2)
+                    .build("tnc:angel"));
+
     private TNOrbEntities() {
     }
 

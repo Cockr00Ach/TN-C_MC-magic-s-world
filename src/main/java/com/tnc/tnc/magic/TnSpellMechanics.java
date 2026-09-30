@@ -672,6 +672,12 @@ public final class TnSpellMechanics {
         if (castEntry != null && castEntry.chain() == SpellCatalog.Chain.SPEED) {
             startGather(player, castEntry.tier());
         }
+
+        // ★★ 光系第二条链（光耀）：范围治疗 + 队友减伤 + 光系法阵 + 天使 + 转晴 + 怪物停手 ✓
+        //    数值全在 light/TNLightChainMechanics 的一张表里 ✓；这里只转发 ✓
+        if (com.tnc.tnc.light.TNLightChainMechanics.isLightChainSpell(path)) {
+            com.tnc.tnc.light.TNLightChainMechanics.onSpellCast(player, path);
+        }
     }
 
     /**

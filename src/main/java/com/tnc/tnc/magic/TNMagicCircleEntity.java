@@ -33,6 +33,16 @@ public class TNMagicCircleEntity extends Entity {
     protected static final EntityDataAccessor<Integer> DATA_LIFE =
             SynchedEntityData.defineId(TNMagicCircleEntity.class, EntityDataSerializers.INT);
 
+    /**
+     * ★ 法阵**样式**（作者 2026-10-01："专门为光魔法画一个法阵，要纯白色的"）：
+     * 0 = 原来的雷系阵（{@code magic_circle.png} ✓），1 = 光系阵（{@code light_circle.png} ✓）。
+     */
+    public static final int STYLE_STORM = 0;
+    public static final int STYLE_LIGHT = 1;
+
+    protected static final EntityDataAccessor<Integer> DATA_STYLE =
+            SynchedEntityData.defineId(TNMagicCircleEntity.class, EntityDataSerializers.INT);
+
     public TNMagicCircleEntity(EntityType<? extends TNMagicCircleEntity> type, Level level) {
         super(type, level);
         this.setNoGravity(true);
@@ -41,8 +51,19 @@ public class TNMagicCircleEntity extends Entity {
 
     /** 生成后调用一次：半径（格）与存在时长（tick）。 */
     public void configure(double radius, int lifeTicks) {
+        this.configure(radius, lifeTicks, STYLE_STORM);
+    }
+
+    /** 生成后调用一次：半径（格）、存在时长（tick）、样式 ✓。 */
+    public void configure(double radius, int lifeTicks, int style) {
         this.entityData.set(DATA_RADIUS, (int) Math.round(radius * 10.0D));
         this.entityData.set(DATA_LIFE, Math.max(1, lifeTicks));
+        this.entityData.set(DATA_STYLE, style);
+    }
+
+    /** 样式（0 雷 / 1 光 ✓）。 */
+    public int style() {
+        return this.entityData.get(DATA_STYLE);
     }
 
     public double radius() {
@@ -57,6 +78,7 @@ public class TNMagicCircleEntity extends Entity {
     protected void defineSynchedData() {
         this.entityData.define(DATA_RADIUS, 30);
         this.entityData.define(DATA_LIFE, DEFAULT_LIFE);
+        this.entityData.define(DATA_STYLE, STYLE_STORM);
     }
 
     @Override

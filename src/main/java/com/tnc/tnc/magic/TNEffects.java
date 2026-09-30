@@ -73,6 +73,46 @@ public final class TNEffects {
             });
 
     /**
+     * ★★ 光系<b>第二条链</b>（治疗 + 减伤，作者 2026-10-01 定）的五个 buff ✓
+     *
+     * <p>减伤数值**不在效果里**做 ✗ —— 一律由 {@code armor/TNIronArmorEvents} 在
+     * {@code LivingHurtEvent} 里按"取最高档、不相乘"统一结算 ✓（和铁甲 99% / 光翼 50% 同一处 ✓）。
+     * 这里只管"标记 + 时长"：t1 25% / t2 50% / t3 50% / t4 70% / t5 70% ✓。
+     * 颜色统一走光系的暖白（{@code 0xFFF6DC}）✓。
+     */
+    public static final RegistryObject<MobEffect> LIGHT_RADIANCE =
+            EFFECTS.register("light_radiance", () -> new MobEffect(
+                    MobEffectCategory.BENEFICIAL, 0xFFF6DC) {
+            });
+    public static final RegistryObject<MobEffect> LIGHT_HOLY =
+            EFFECTS.register("light_holy", () -> new MobEffect(
+                    MobEffectCategory.BENEFICIAL, 0xFFF6DC) {
+            });
+    public static final RegistryObject<MobEffect> LIGHT_DIVINE =
+            EFFECTS.register("light_divine", () -> new MobEffect(
+                    MobEffectCategory.BENEFICIAL, 0xFFF6DC) {
+            });
+    public static final RegistryObject<MobEffect> LIGHT_DESCENT =
+            EFFECTS.register("light_descent", () -> new MobEffect(
+                    MobEffectCategory.BENEFICIAL, 0xFFF6DC) {
+            });
+    public static final RegistryObject<MobEffect> LIGHT_MERCY =
+            EFFECTS.register("light_mercy", () -> new MobEffect(
+                    MobEffectCategory.BENEFICIAL, 0xFFF6DC) {
+            });
+
+    /**
+     * 天使的悲悯 t5：范围内的怪物**停止攻击 5 秒** ✓（作者 2026-10-01："范围内的怪物停止攻击五秒钟"）。
+     *
+     * <p>只挂在怪物身上 ✓（HARMFUL，因为对它们是负面 ✓）；具体"停手"由
+     * {@code light/TNLightChainMechanics} 每 tick 清目标 + 在 {@code LivingHurtEvent} 里取消伤害 ✓。
+     */
+    public static final RegistryObject<MobEffect> LIGHT_CALM =
+            EFFECTS.register("light_calm", () -> new MobEffect(
+                    MobEffectCategory.HARMFUL, 0xFFF6DC) {
+            });
+
+    /**
      * 光系链 t2「极速飞行」：移动速度 <b>+50%</b> ✓（减伤 25% 在受伤事件里 ✓）。
      */
     public static final RegistryObject<MobEffect> LIGHT_SWIFT_FLIGHT =

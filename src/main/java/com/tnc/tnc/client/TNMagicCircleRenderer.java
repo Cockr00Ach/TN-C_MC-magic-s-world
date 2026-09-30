@@ -36,6 +36,10 @@ public class TNMagicCircleRenderer extends EntityRenderer<TNMagicCircleEntity> {
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(
             TNMod.MODID, "textures/entity/magic_circle.png");
 
+    /** ★ 光系专用法阵（纯白 + 极淡黄，作者 2026-10-01 指定 ✓）。 */
+    private static final ResourceLocation LIGHT_TEXTURE = ResourceLocation.fromNamespaceAndPath(
+            TNMod.MODID, "textures/entity/light_circle.png");
+
     public TNMagicCircleRenderer(EntityRendererProvider.Context context) {
         super(context);
         this.shadowRadius = 0.0F;
@@ -43,7 +47,12 @@ public class TNMagicCircleRenderer extends EntityRenderer<TNMagicCircleEntity> {
 
     @Override
     public ResourceLocation getTextureLocation(TNMagicCircleEntity entity) {
-        return TEXTURE;
+        return textureFor(entity);
+    }
+
+    /** ★ 样式选贴图：光系链的阵用 {@code light_circle.png} ✓（作者要"专门为光魔法画一个法阵"✓）。 */
+    private static ResourceLocation textureFor(TNMagicCircleEntity entity) {
+        return entity.style() == TNMagicCircleEntity.STYLE_LIGHT ? LIGHT_TEXTURE : TEXTURE;
     }
 
     @Override
@@ -89,7 +98,7 @@ public class TNMagicCircleRenderer extends EntityRenderer<TNMagicCircleEntity> {
         poseStack.mulPose(Axis.XP.rotationDegrees(90.0F)); // 立着的面片 -> 平铺到地面
         Matrix4f matrix = poseStack.last().pose();
 
-        VertexConsumer consumer = buffer.getBuffer(RenderType.entityTranslucentEmissive(TEXTURE));
+        VertexConsumer consumer = buffer.getBuffer(RenderType.entityTranslucentEmissive(textureFor(entity)));
         float r = (float) radius;
         drawQuad(consumer, matrix, r, alpha, false);
         drawQuad(consumer, matrix, r, alpha, true);
