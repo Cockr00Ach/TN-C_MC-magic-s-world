@@ -21,6 +21,7 @@ public final class MaidNpcRenderers {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static void register(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer((EntityType) TNNpcs.ZHUANGQUERANG.get(),
+        event.registerEntityRenderer(TNNpcs.YAN_DARK.get(), com.tnc.tnc.boss.client.YanDarkRenderer::new);
                 (EntityRendererProvider) ZhuangquerangMaidRenderer::new);
     }
 }

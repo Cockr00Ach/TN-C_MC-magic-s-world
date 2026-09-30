@@ -122,6 +122,13 @@ public final class TNNpcs {
                 .build("tnc:zhuangquerang"));
     }
 
+    /** 公孙衍（迷失）—— 两阶段 Boss（作者 2026-09-30 指定）✓ */
+    public static final RegistryObject<EntityType<com.tnc.tnc.boss.YanDarkBossEntity>> YAN_DARK =
+            ENTITY_TYPES.register("yan_dark", () -> EntityType.Builder
+                    .of(com.tnc.tnc.boss.YanDarkBossEntity::new, MobCategory.MONSTER)
+                    .sized(0.9F, 2.4F)
+                    .clientTrackingRange(12)
+                    .build("tnc:yan_dark"));
     private TNNpcs() {
     }
 
