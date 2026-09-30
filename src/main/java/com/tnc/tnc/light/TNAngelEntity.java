@@ -35,7 +35,7 @@ import software.bernie.geckolib.util.GeckoLibUtil;
  *   <li>寿命由 {@link #configure} 定，到了自己 {@code discard} ✓；不写进存档 ✓</li>
  * </ul>
  *
- * <h2>尺寸（作者：神光 2 格 / 天使降临 3 格 / 天使的悲悯 5 格）</h2>
+ * <h2>尺寸（作者 2026-10-01：在原来的 2 / 3 / 5 格基础上<b>再翻一倍</b> ⇒ 4 / 6 / 10 格）</h2>
  * 模型原生高 2.5 格（量自 {@code geo/entity/angel.geo.json} 的骨骼包围盒 y −1..39 ✓）⇒
  * 想要 H 格高就 {@code scale = H / 2.5} ✓（见 {@link #scaleFactor()} ✓，渲染器里用它缩放 ✓）。
  *
@@ -64,7 +64,7 @@ public class TNAngelEntity extends Monster implements GeoEntity {
         this.xpReward = 0;
     }
 
-    /** 生成后调用一次：活多少 tick、要几格高 ✓（2 / 3 / 5 ✓）。 */
+    /** 生成后调用一次：活多少 tick、要几格高 ✓（4 / 6 / 10 ✓）。 */
     public void configure(int lifeTicks, double heightBlocks) {
         this.entityData.set(DATA_LIFE, Math.max(1, lifeTicks));
         this.entityData.set(DATA_HEIGHT, (int) Math.round(heightBlocks * 100.0D));
@@ -78,9 +78,23 @@ public class TNAngelEntity extends Monster implements GeoEntity {
         return this.entityData.get(DATA_HEIGHT) / 100.0D;
     }
 
-    /** 渲染缩放 = 想要的高度 ÷ 模型原生高度 ✓（2 格 → 0.8 / 3 格 → 1.2 / 5 格 → 2.0 ✓）。 */
+    /** 渲染缩放 = 想要的高度 ÷ 模型原生高度 ✓（4 格 → 1.6 / 6 格 → 2.4 / 10 格 → 4.0 ✓）。 */
     public double scaleFactor() {
         return Math.max(0.1D, heightBlocks() / MODEL_HEIGHT_BLOCKS);
+    }
+
+    /**
+     * 视锥剔除用的包围盒 ✓ —— <b>缩放过的模型必须自己撑大它</b> ✗。
+     *
+     * <p>原版判"要不要画这个实体"用的是实体的碰撞箱 ✗（天使没有 AI、箱子只有 0.6×1.95 格），
+     * 而 10 格高的模型会远远超出它 ⇒ 玩家抬头只看上半身时整尊天使会**突然消失** ✗。
+     * 这里按 {@link #heightBlocks()} 撑一圈（只管剔除，不影响碰撞/推挤 ✓）。
+     */
+    @Override
+    public net.minecraft.world.phys.AABB getBoundingBoxForCulling() {
+        double h = Math.max(1.0D, this.heightBlocks());
+        // 水平按模型最大展开半径撑（天使连翅膀约 ±2 格）✓
+        return this.getBoundingBox().inflate(h * 0.6D, h, h * 0.6D);
     }
 
     /** 纯雕像：一条 goal 都不加 ✓（作者要的是"法阵中心站着一尊天使"✗ 不是战斗宠物 ✓）。 */

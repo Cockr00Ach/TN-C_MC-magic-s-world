@@ -57,14 +57,25 @@ public final class TNLightWingsModel {
     private static final class Cube {
         float x0, y0, z0, x1, y1, z1;
         float u, v;
-        float rx, ry, rz;          // 度；绕方块自身 from 点旋转 ✓（Bedrock 默认枢轴）
+        float rx, ry, rz;          // 度；绕方块自身 pivot 旋转 ✓（Bedrock 默认枢轴）
+        /** 方块的旋转枢轴（Bedrock 的 {@code pivot} 字段 ✓）；没写就用 origin 角 ✓。 */
+        float px, py, pz;
+        boolean hasPivot;
     }
 
     private static final class Bone {
         String name;
         String parent;
         float px, py, pz;
+        /** 骨骼自身的旋转（Bedrock 的 {@code rotation} 字段 ✓，绕 pivot ✓）。 */
+        float rx, ry, rz;
         final List<Cube> cubes = new ArrayList<>();
+    }
+
+    /** geo 有没有读进来（读不进来时渲染器改用备用翅膀 ✓ —— 绝不允许"什么都没有"✗）。 */
+    public static boolean isLoaded() {
+        load();
+        return bones != null;
     }
 
     private static void load() {
@@ -99,6 +110,13 @@ public final class TNLightWingsModel {
                         bone.py = p.get(1).getAsFloat();
                         bone.pz = p.get(2).getAsFloat();
                     }
+                    // ★ 骨骼自身的旋转也要读（作者的 wingright 就是 [0,180,0] ✓ 不读就画反 ✗）
+                    JsonArray br = bo.getAsJsonArray("rotation");
+                    if (br != null && br.size() == 3) {
+                        bone.rx = br.get(0).getAsFloat();
+                        bone.ry = br.get(1).getAsFloat();
+                        bone.rz = br.get(2).getAsFloat();
+                    }
                     if (bo.has("cubes")) {
                         for (JsonElement ce : bo.getAsJsonArray("cubes")) {
                             JsonObject co = ce.getAsJsonObject();
@@ -115,6 +133,18 @@ public final class TNLightWingsModel {
                             if (uv != null) {
                                 c.u = uv.get(0).getAsFloat();
                                 c.v = uv.get(1).getAsFloat();
+                            }
+                            // ★ 旋转枢轴：Bedrock 用方块自己的 pivot ✗（不是 origin 角 ✗）——
+                            //   作者这个模型里两者差最多 7 个单位（0.44 格）⇒ 用错枢轴整片羽毛会歪掉 ✗
+                            c.px = c.x0;
+                            c.py = c.y0;
+                            c.pz = c.z0;
+                            JsonArray cp = co.getAsJsonArray("pivot");
+                            if (cp != null && cp.size() == 3) {
+                                c.px = cp.get(0).getAsFloat();
+                                c.py = cp.get(1).getAsFloat();
+                                c.pz = cp.get(2).getAsFloat();
+                                c.hasPivot = true;
                             }
                             if (co.has("rotation")) {
                                 JsonArray r = co.getAsJsonArray("rotation");
@@ -133,6 +163,9 @@ public final class TNLightWingsModel {
             }
         } catch (Throwable t) {
             failed = true;
+            // ★ 读失败必须留痕 ✗（原来是静默的 ⇒ 作者只会看到"没有翅膀"，查不出原因 ✗）
+            org.apache.logging.log4j.LogManager.getLogger("TN-C/light").warn(
+                    "TN-C/light: 光翼 geo 读取失败，改用备用翅膀：{}", t.toString());
         }
     }
 
@@ -156,6 +189,16 @@ public final class TNLightWingsModel {
                 float deg = n.equals("wingleft") ? -flap : flap;
                 m.rotate(Axis.ZP.rotationDegrees(deg));
             }
+            // ★ 骨骼自身旋转（Bedrock 的 rotation ✓）：作者的 wingright 是 [0,180,0] ⇒ 右翼镜像 ✓
+            if (bone.rz != 0.0F) {
+                m.rotate(Axis.ZP.rotationDegrees(bone.rz));
+            }
+            if (bone.ry != 0.0F) {
+                m.rotate(Axis.YP.rotationDegrees(bone.ry));
+            }
+            if (bone.rx != 0.0F) {
+                m.rotate(Axis.XP.rotationDegrees(bone.rx));
+            }
             m.translate(-bone.px / 16.0F, -bone.py / 16.0F, -bone.pz / 16.0F);
             world.put(bone.name, m);
 
@@ -163,7 +206,8 @@ public final class TNLightWingsModel {
                 Matrix4f cube = new Matrix4f();
                 cube.set(m);
                 if (c.rx != 0.0F || c.ry != 0.0F || c.rz != 0.0F) {
-                    cube.translate(c.x0 / 16.0F, c.y0 / 16.0F, c.z0 / 16.0F);
+                    // 绕**方块自己的 pivot**转（没写 pivot 才退回 origin 角 ✓）
+                    cube.translate(c.px / 16.0F, c.py / 16.0F, c.pz / 16.0F);
                     if (c.rz != 0.0F) {
                         cube.rotate(Axis.ZP.rotationDegrees(c.rz));
                     }
@@ -173,7 +217,7 @@ public final class TNLightWingsModel {
                     if (c.rx != 0.0F) {
                         cube.rotate(Axis.XP.rotationDegrees(c.rx));
                     }
-                    cube.translate(-c.x0 / 16.0F, -c.y0 / 16.0F, -c.z0 / 16.0F);
+                    cube.translate(-c.px / 16.0F, -c.py / 16.0F, -c.pz / 16.0F);
                 }
                 box(vc, cube, c);
             }

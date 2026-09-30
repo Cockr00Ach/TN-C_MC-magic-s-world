@@ -16,7 +16,7 @@ import software.bernie.geckolib.renderer.GeoEntityRenderer;
  *   <li><b>自发光</b>：同一个渲染类型就是"发光 + 半透明"✓（不吃场景光照，夜里也是亮的 ✓）。</li>
  * </ol>
  *
- * <p>尺寸：按 {@link TNAngelEntity#scaleFactor()} 缩放 ✓（2 格 / 3 格 / 5 格高，
+ * <p>尺寸：按 {@link TNAngelEntity#scaleFactor()} 缩放 ✓（4 格 / 6 格 / 10 格高，
  * 由法术在 {@code configure(...)} 里定 ✓）—— 缩放放在 {@code scaleModelForRender} 里，
  * 和 {@code YanDarkRenderer} 同一个钩子 ✓（这样包围盒/阴影都跟着一起缩 ✓）。
  */

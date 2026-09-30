@@ -856,6 +856,11 @@ public final class TnSpellMechanics {
         //    而**这个函数是活着的**（同一段 tick 里的别的日志照打 ✓）。所以把回魔挂到这条
         //    已验证活着的路上来；回魔内部有"每个周期只回一次"的闸门 ⇒ 多入口不会翻倍 ✓。
         MagicStone.tickManaRegen(player);
+        // ★★ 光翼链的"能飞 + 有翅膀"（2026-10-01）✓
+        //    必须挂在这条**已证活着**的路上：原来挂在 TickEvent.PlayerTickEvent 上，
+        //    而那个事件在本仓库一个世界整局都不进来 ✗ ⇒ 法术放得出来却飞不起来、也看不见翅膀 ✗✗
+        //    （详见 light/TNLightChainMechanics 的类注释 ✓；函数幂等 ✓）
+        com.tnc.tnc.light.TNLightChainMechanics.tickWings(player);
         // ★★ 自动补学**不许再挂在 tick 上** ✗✗
         //    （作者 2026-09-29 两次："为什么会自动学习啊，删去" → "遗忘了还自动学"）
         //    原来这里每 40 tick 跑一次 autoLearnUnlockedAndSync；而那个方法在

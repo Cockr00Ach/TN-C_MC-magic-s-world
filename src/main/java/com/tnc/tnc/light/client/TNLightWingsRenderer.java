@@ -33,6 +33,13 @@ public final class TNLightWingsRenderer {
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(
             TNMod.MODID, "textures/entity/light_wings.png");
 
+    /** 作者 geo 模型的贴图（和 {@code light_wings.geo.json} 一套的 64×64 图 ✓）。 */
+    private static final ResourceLocation GEO_TEXTURE = ResourceLocation.fromNamespaceAndPath(
+            TNMod.MODID, "textures/entity/light_wings_bedrock.png");
+
+    /** 只打一次"我在这儿画了"的日志 ✓（下次"没翅膀"能一眼分清是渲染没跑还是模型没读进来 ✓）。 */
+    private static boolean announced;
+
     /** 翅膀挂在背后的位置（相对玩家：高度 / 后移）。 */
     private static final float BACK_Z = 0.16F;
     private static final float BACK_Y = 1.18F;
@@ -67,14 +74,28 @@ public final class TNLightWingsRenderer {
         PoseStack pose = event.getPoseStack();
         MultiBufferSource buffers = event.getMultiBufferSource();
         int light = LightTexture.FULL_BRIGHT;
-        // ★ 2026-10-01 换成作者的 geo 模型（半透明 + 自发光，见 TNLightWingsModel ✓）
+        // ★ 2026-10-01 换成作者的 geo 模型（半透明 + 自发光，见 TNLightWingsModel ✓）；
+        //   geo 读不进来时**退回**程序化的两片翅膀 ✓ —— 作者要的是"飞的时候看得见翅膀"✗，
+        //   宁可画得糙一点，也不能什么都没有 ✗（原来读失败是静默的 ⇒ 只有"没翅膀"这一个现象 ✗）
+        boolean geo = TNLightWingsModel.isLoaded();
+        if (!announced) {
+            announced = true;
+            org.apache.logging.log4j.LogManager.getLogger("TN-C/light").info(
+                    "TN-C/light: 光翼渲染已启动（{}）", geo ? "作者 geo 模型" : "备用程序化翅膀");
+        }
         VertexConsumer vc = buffers.getBuffer(RenderType.entityTranslucentEmissive(
-                ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "textures/entity/light_wings_bedrock.png")));
+                geo ? GEO_TEXTURE : TEXTURE));
 
         pose.pushPose();
         pose.mulPose(Axis.YP.rotationDegrees(-player.yBodyRot + YAW_OFFSET));
         pose.translate(0.0F, BACK_Y, BACK_Z);
-        TNLightWingsModel.render(pose, vc, flap + pitch * 0.3F);
+        if (geo) {
+            TNLightWingsModel.render(pose, vc, flap + pitch * 0.3F);
+        } else {
+            Matrix4f m = pose.last().pose();
+            drawWing(vc, m, true, flap, pitch);
+            drawWing(vc, m, false, flap, pitch);
+        }
         pose.popPose();
     }
 

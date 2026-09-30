@@ -26,10 +26,10 @@
           "show_particles": false
         }
       },
-      "particles": [ { "particle_id": "end_rod", "shape": "SPHERE", "origin": "CENTER", "count": 70.0, "min_speed": 0.3, "max_speed": 1.0 } ]
-    },
-    {
-      "particles": [ { "particle_id": "firework", "shape": "SPHERE", "origin": "CENTER", "count": 40.0, "min_speed": 0.3, "max_speed": 1.0 } ]
+      "particles": [
+        { "particle_id": "end_rod", "shape": "SPHERE", "origin": "CENTER", "count": 70.0, "min_speed": 0.3, "max_speed": 1.0 },
+        { "particle_id": "firework", "shape": "SPHERE", "origin": "CENTER", "count": 40.0, "min_speed": 0.3, "max_speed": 1.0 }
+      ]
     }
   ],
   "cost": { "exhaust": 0.0, "cooldown_duration": 120 }
