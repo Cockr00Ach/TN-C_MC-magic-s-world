@@ -114,6 +114,10 @@ public class Config {
                     "设 0 = 施法后立刻开始回魔。")
             .defineInRange("manaRegenDelayAfterCastTicks", 60, 0, 12000);
 
+    private static final ForgeConfigSpec.IntValue BANK_INTEREST = BUILDER.comment("银行每现实24小时存款利率（百分比）；在线离线均计算，不自动复利。").defineInRange("bankDailyInterestPercent",10,0,100);
+    private static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> BANK_WAGES = BUILDER.comment("冒险等级1/10/25/45/70五阶段的每日津贴（铜）。").defineList("bankDailyWages",List.of(20,50,100,180,300),v->v instanceof Integer n&&n>=0&&n<=100000);
+    public static int bankDailyInterestPercent=10;
+    public static List<? extends Integer> bankDailyWages=List.of(20,50,100,180,300);
     static final ForgeConfigSpec SPEC = BUILDER.build();
 
     // ---------------- 运行时字段（读一次缓存到这里） ----------------
@@ -137,6 +141,8 @@ public class Config {
 
     @SubscribeEvent
     static void onLoad(final ModConfigEvent event) {
+        bankDailyInterestPercent=BANK_INTEREST.get();
+        bankDailyWages=BANK_WAGES.get().size()==5?List.copyOf(BANK_WAGES.get()):List.of(20,50,100,180,300);
         manaPerAffinity = MANA_PER_AFFINITY.get();
         manaPerVanillaLevel = MANA_PER_VANILLA_LEVEL.get();
         flatManaBonus = FLAT_MANA_BONUS.get();

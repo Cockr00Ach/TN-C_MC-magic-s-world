@@ -53,7 +53,7 @@ public final class AdventureService {
     }
     public static String register(ServerPlayer player) {
         var p=profile(player);if(p.registered)return "你已经登记过，无需再次登记。";
-        p.registered=true;milestone(player,"registered");return "登记成功：初级冒险者。右键酒馆Bountiful委托栏接单；法器找莉娅，基础装备找铎恩。";
+        p.registered=true;BankService.settle(player);milestone(player,"registered");return "登记成功：初级冒险者。右键酒馆Bountiful委托栏接单；法器找莉娅，基础装备找铎恩。";
     }
     public static String deliver(ServerPlayer player,String id) {
         var p=profile(player);var progress=p.contracts.get(id);var c=ContractCatalog.find(id);
@@ -115,7 +115,7 @@ public final class AdventureService {
     }
     public static void action(ServerPlayer player,AdventurePackets.Action action,String id) {
         if(action==AdventurePackets.Action.REQUEST){sync(player,false,"");return;}
-        boolean allowed=switch(action){case REGISTER,PROMOTE->TownServices.near(player,"guild");case ORDER->TownServices.near(player,EquipmentOrders.find(id)!=null?"armorer":"smith");case CLAIM->TownServices.near(player,EquipmentOrders.find(profile(player).smithDesign)!=null?"armorer":"smith");case BUY_HOME,BANK_DEPOSIT,BANK_WITHDRAW->TownServices.near(player,"broker");case ACCEPT,DELIVER,OPEN_BOARD->TownServices.atBoard(player);default->false;};
+        boolean allowed=switch(action){case REGISTER,PROMOTE->TownServices.near(player,"guild");case ORDER->TownServices.near(player,EquipmentOrders.find(id)!=null?"armorer":"smith");case CLAIM->TownServices.near(player,EquipmentOrders.find(profile(player).smithDesign)!=null?"armorer":"smith");case BUY_HOME,BUY_HOME_INSTALLMENT,BANK_DEPOSIT,BANK_WITHDRAW,BANK_SAVE,BANK_TAKE,BANK_BORROW,BANK_CLEAR->TownServices.near(player,"broker");case ACCEPT,DELIVER,OPEN_BOARD->TownServices.atBoard(player);default->false;};
         if(!allowed){sync(player,false,"请到对应岗位办理：艾琳登记，酒馆栏交委托，莉娅制杖，铎恩制作装备，米洛办理银行与购房。");return;}
         String message=switch(action) {
             case REGISTER -> register(player);
@@ -128,6 +128,11 @@ public final class AdventureService {
             case CLAIM -> claim(player);
             case PROMOTE -> promote(player);
             case BUY_HOME -> com.tnc.tnc.home.HousingService.buy(player);
+            case BUY_HOME_INSTALLMENT -> com.tnc.tnc.home.HousingService.buy(player,true);
+            case BANK_SAVE -> BankService.save(player,id);
+            case BANK_TAKE -> BankService.take(player,id);
+            case BANK_BORROW -> BankService.borrow(player,id);
+            case BANK_CLEAR -> BankService.clear(player,id);
             case BANK_DEPOSIT -> BankCounter.deposit(player);
             case BANK_WITHDRAW -> BankCounter.withdraw(player,id);
             case OPEN_BOARD -> TownServices.openBoard(player)?"":"请在酒馆委托栏旁使用。";
@@ -144,13 +149,14 @@ public final class AdventureService {
         MagicStoneNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(()->player),new AdventurePackets.Snapshot(snapshot(player,message,role),open));
     }
     static CompoundTag snapshot(ServerPlayer player,String message,String role) {
-        var store=AdventureSavedData.get(player.server);var p=profile(player);
+        BankService.settle(player);var store=AdventureSavedData.get(player.server);var p=profile(player);
         var tag=AdventureSavedData.writeProfile(p);tag.putLong("ActiveTicks",store.activeTicks);tag.putBoolean("AtService",atService(player));tag.putString("Message",message);
         tag.putBoolean("AtSmith",TownServices.near(player,"smith"));tag.putBoolean("AtBroker",TownServices.near(player,"broker"));tag.putBoolean("AtBoard",TownServices.atBoard(player));
         tag.putBoolean("AtArmorer",TownServices.near(player,"armorer"));
         var panel=ServicePanel.fromRole(role);tag.putString("ServiceRole",panel.role());tag.putInt("InitialTab",panel.tab());
         tag.putString("Directions",TownServices.directions(player.server.overworld()));
         tag.put("Housing",com.tnc.tnc.home.HousingService.snapshot(player));
+        tag.putLong("BankNow",System.currentTimeMillis());tag.putInt("BankInterestPercent",Config.bankDailyInterestPercent);tag.putInt("BankWage",BankService.wage(p));
         tag.putBoolean("AtHomeSale",com.tnc.tnc.home.HousingService.atSale(player));
         var pos=tavern(player);if(pos!=null)tag.putString("Tavern",pos.getX()+" / "+pos.getY()+" / "+pos.getZ());
         var counts=new CompoundTag();for(var c:ContractCatalog.ALL) {

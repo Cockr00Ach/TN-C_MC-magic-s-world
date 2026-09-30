@@ -11,27 +11,44 @@ import java.util.*;
 
 @GameTestHolder("tnc") @PrefixGameTestTemplate(false)
 public final class HomeGameTests {
+    @GameTest(template="building_test_empty",batch="mortgage",timeoutTicks=30)
+    public static void installmentHouseKeepsOwnershipAndWaivesFutureFees(GameTestHelper h)throws Exception{
+        var level=h.getLevel();var store=AdventureSavedData.get(level.getServer());var original=store.housing.copy();store.housing.remove(HousingService.ID);
+        try{
+            var buyer=AdventureGameTests.player(h);var p=AdventureService.profile(buyer);AdventureService.register(buyer);p.addXp(AdventureRules.xpAtLevel(10));p.credit(4000,"fixture");
+            var local=new BlockPos(182,90,384);var target=h.absolutePos(new BlockPos(4,3,4));var origin=target.subtract(local);
+            level.setBlockAndUpdate(target,Blocks.OAK_PLANKS.defaultBlockState());
+            var plan=new HousingService.Blueprint(local,local,local,List.of(new HousingService.Cell(local,Blocks.OAK_PLANKS.defaultBlockState(),false)));
+            String result=HousingService.buyAt(buyer,origin,plan,true);
+            h.assertTrue(HousingService.owned(buyer)&&p.coins()==3100&&p.bank.mortgage.remainingPrincipal()==2100&&p.bank.mortgage.remaining()==2310,"Down payment and immediate ownership: "+result);
+            HousingService.buyAt(buyer,origin,plan,true);h.assertTrue(p.coins()==3100,"Duplicate purchase cannot charge again");
+            p.bank.online(p,BankAccount.ROUND);h.assertTrue(p.coins()==2869&&p.bank.mortgage.paid==1,"Online round pays one 231 installment");
+            h.assertTrue(p.bank.clear(p,true)&&p.coins()==979,"Early payoff pays remaining 1890 principal and waives future fees");BankService.settle(buyer);
+            h.assertTrue(HousingService.owned(buyer)&&!HousingService.home(buyer.server).getBoolean("Mortgage"),"Ownership remains and mortgage flag clears");
+            var loaded=AdventureSavedData.load(store.save(new CompoundTag()));h.assertTrue(loaded.save(new CompoundTag()).getList("Players",10).stream().map(t->(CompoundTag)t).filter(t->t.hasUUID("UUID")&&t.getUUID("UUID").equals(buyer.getUUID())).map(AdventureSavedData::readProfile).findFirst().orElseThrow().bank.mortgage.active()==false&&loaded.housing.getCompound(HousingService.ID).getUUID("Owner").equals(buyer.getUUID()),"Settled mortgage and ownership survive reload");h.succeed();
+        }finally{store.housing=original;store.setDirty();}
+    }
     @GameTest(template="building_test_empty",batch="bank_loading",timeoutTicks=160)
     public static void bankLoadsRemoteHouseWithoutChargingBeforePreflight(GameTestHelper h)throws Exception{
-        var l=h.getLevel();var buyer=AdventureGameTests.player(h);AdventureService.profile(buyer).credit(1000,"test");
+        var l=h.getLevel();var buyer=AdventureGameTests.player(h);AdventureService.profile(buyer).credit(5000,"test");
         var oldIsland=com.tnc.tnc.world.SkyIslandSavedData.get(l);var oldHousing=AdventureSavedData.get(l.getServer()).housing.copy();
         var load=com.tnc.tnc.world.SkyIslandSavedData.class.getDeclaredMethod("load",CompoundTag.class);load.setAccessible(true);var tag=oldIsland.save(new CompoundTag());
         tag.putString("Phase","COMPLETE");tag.putBoolean("LayoutReady",true);tag.putInt("OriginX",32000);tag.putInt("OriginY",90);tag.putInt("OriginZ",48000);
         l.getDataStorage().set("tnc_sky_island_v5",(net.minecraft.world.level.saveddata.SavedData)load.invoke(null,tag));AdventureSavedData.get(l.getServer()).housing.remove(HousingService.ID);
         try{
-            String waiting=HousingService.buy(buyer);h.assertTrue(waiting.contains("调取")&&AdventureService.profile(buyer).coins()==1000&&!HousingService.home(l.getServer()).hasUUID("Owner"),"Remote unloaded plot starts loading without charging");
+            String waiting=HousingService.buy(buyer);h.assertTrue(waiting.contains("调取")&&AdventureService.profile(buyer).coins()==5000&&!HousingService.home(l.getServer()).hasUUID("Owner"),"Remote unloaded plot starts loading without charging");
             h.runAfterDelay(100,()->{try{
                 // Other world-template test fixtures also replace SavedData while their
                 // asynchronous work runs; reselect this fixture for the public call.
                 l.getDataStorage().set("tnc_sky_island_v5",(net.minecraft.world.level.saveddata.SavedData)load.invoke(null,tag));
-                String checked=HousingService.buy(buyer);h.assertTrue(checked.contains("已有改动")&&AdventureService.profile(buyer).coins()==1000&&!HousingService.home(l.getServer()).hasUUID("Owner"),"Bank loads remote plot and strict source preflight rejects empty terrain without charging: "+checked);h.succeed();
+                String checked=HousingService.buy(buyer);h.assertTrue(checked.contains("已有改动")&&AdventureService.profile(buyer).coins()==5000&&!HousingService.home(l.getServer()).hasUUID("Owner"),"Bank loads remote plot and strict source preflight rejects empty terrain without charging: "+checked);h.succeed();
             }catch(Exception e){h.fail(e.toString());}finally{l.getDataStorage().set("tnc_sky_island_v5",oldIsland);AdventureSavedData.get(l.getServer()).housing=oldHousing;}});
         }catch(Exception|Error e){l.getDataStorage().set("tnc_sky_island_v5",oldIsland);AdventureSavedData.get(l.getServer()).housing=oldHousing;throw e;}
     }
     @GameTest(template="building_test_empty",batch="source_house",timeoutTicks=150)
     public static void originalTownHouseCanBeDeliveredAfterContentsAreSafelyRemoved(GameTestHelper h)throws Exception{
         var level=h.getLevel();var store=AdventureSavedData.get(level.getServer());var original=store.housing.copy();
-        var buyer=AdventureGameTests.player(h);AdventureService.profile(buyer).credit(1000,"test");
+        var buyer=AdventureGameTests.player(h);AdventureService.profile(buyer).credit(5000,"test");
         var plan=HousingService.blueprint(level);var fixture=h.absolutePos(new BlockPos(400,5,400));
         // The published island origin is Y=90; this plot starts at Y=180.
         // Putting its omitted-air cells underground would compare natural deepslate to sky.
@@ -69,7 +86,7 @@ public final class HomeGameTests {
         h.runAfterDelay(5,()->{
             try{
                 String blocked=HousingService.buyAt(buyer,origin,plan);
-                h.assertTrue(blocked.contains("箱内")&&AdventureService.profile(buyer).coins()==1000,"Original filled containers block sale without debit: "+blocked);
+                h.assertTrue(blocked.contains("箱内")&&AdventureService.profile(buyer).coins()==5000,"Original filled containers block sale without debit: "+blocked);
                 int filled=0;
                 for(var cell:plan.cells())if(level.getBlockEntity(origin.offset(cell.local())) instanceof net.minecraft.world.Container container&&!container.isEmpty()){filled++;container.clearContent();}
                 h.assertTrue(filled==3,"Source has three filled containers; fixture removes their contents as an explicit prior step");
@@ -80,11 +97,11 @@ public final class HomeGameTests {
                 var stair=plan.cells().stream().filter(c->c.state().getBlock() instanceof net.minecraft.world.level.block.StairBlock).findFirst().orElseThrow();
                 var stairPos=origin.offset(stair.local());var stairState=level.getBlockState(stairPos);
                 level.setBlock(stairPos,stairState.setValue(net.minecraft.world.level.block.StairBlock.FACING,stairState.getValue(net.minecraft.world.level.block.StairBlock.FACING).getClockWise()),2);
-                h.assertTrue(HousingService.buyAt(buyer,origin,plan).contains("已有改动")&&AdventureService.profile(buyer).coins()==1000,"Rotated source stair stops sale without debit");level.setBlock(stairPos,stairState,2);
+                h.assertTrue(HousingService.buyAt(buyer,origin,plan).contains("已有改动")&&AdventureService.profile(buyer).coins()==5000,"Rotated source stair stops sale without debit");level.setBlock(stairPos,stairState,2);
                 var bed=Blocks.RED_BED.defaultBlockState();h.assertTrue(!HousingService.stable(bed,bed.setValue(net.minecraft.world.level.block.BedBlock.PART,net.minecraft.world.level.block.state.properties.BedPart.HEAD)),"Bed part remains strict");
                 h.assertTrue(!HousingService.stable(stairState,stairState.cycle(net.minecraft.world.level.block.StairBlock.HALF)),"Stair half remains strict");
                 String bought=HousingService.buyAt(buyer,origin,plan);
-                h.assertTrue(bought.contains("已购")&&HousingService.owned(buyer)&&AdventureService.profile(buyer).coins()==500,"Actual source house passes sale after contents are removed: "+bought);
+                h.assertTrue(bought.contains("已购")&&HousingService.owned(buyer)&&AdventureService.profile(buyer).coins()==2000,"Actual source house passes sale after contents are removed: "+bought);
                 for(var cell:plan.cells())if(cell.clear())h.assertTrue(level.getBlockState(origin.offset(cell.local())).isAir(),"Every marked source furnishing is removed");
                 h.succeed();
             }catch(Exception e){h.fail(e.toString());}finally{store.housing=original;store.setDirty();for(var chunk:fixtureChunks)level.setChunkForced(chunk.x,chunk.z,false);}
@@ -95,18 +112,18 @@ public final class HomeGameTests {
     public static void realPurchasePreflightUniqueOwnerAndRecovery(GameTestHelper h)throws Exception{
         var level=h.getLevel();var store=AdventureSavedData.get(level.getServer());var original=store.housing.copy();store.housing.remove(HousingService.ID);
         try{
-            var a=AdventureGameTests.player(h);var b=AdventureGameTests.player(h);AdventureService.profile(a).credit(1000,"test");AdventureService.profile(b).credit(1000,"test");
+            var a=AdventureGameTests.player(h);var b=AdventureGameTests.player(h);AdventureService.profile(a).credit(5000,"test");AdventureService.profile(b).credit(5000,"test");
             var local=new BlockPos(182,90,384);var target=h.absolutePos(new BlockPos(4,3,4));var origin=target.subtract(local);
             var cells=List.of(new HousingService.Cell(local,Blocks.CHEST.defaultBlockState(),true),new HousingService.Cell(local.east(),Blocks.OAK_PLANKS.defaultBlockState(),false),new HousingService.Cell(local.above(),Blocks.AIR.defaultBlockState(),false));
             var plan=new HousingService.Blueprint(local,local.offset(1,1,0),local,cells);level.setBlockAndUpdate(target,Blocks.CHEST.defaultBlockState());level.setBlockAndUpdate(target.east(),Blocks.OAK_PLANKS.defaultBlockState());
             var chest=(net.minecraft.world.Container)level.getBlockEntity(target);chest.setItem(0,new ItemStack(Items.DIAMOND));HousingService.buyAt(a,origin,plan);
-            h.assertTrue(AdventureService.profile(a).coins()==1000&&chest.getItem(0).is(Items.DIAMOND),"Full container preflight preserves funds and contents");chest.clearContent();
-            level.setBlockAndUpdate(target.above(),Blocks.GOLD_BLOCK.defaultBlockState());HousingService.buyAt(a,origin,plan);h.assertTrue(AdventureService.profile(a).coins()==1000,"New player block in original air stops sale");level.setBlockAndUpdate(target.above(),Blocks.AIR.defaultBlockState());
+            h.assertTrue(AdventureService.profile(a).coins()==5000&&chest.getItem(0).is(Items.DIAMOND),"Full container preflight preserves funds and contents");chest.clearContent();
+            level.setBlockAndUpdate(target.above(),Blocks.GOLD_BLOCK.defaultBlockState());HousingService.buyAt(a,origin,plan);h.assertTrue(AdventureService.profile(a).coins()==5000,"New player block in original air stops sale");level.setBlockAndUpdate(target.above(),Blocks.AIR.defaultBlockState());
             HousingService.buyAt(a,origin,plan);HousingService.buyAt(b,origin,plan);
-            h.assertTrue(AdventureService.profile(a).coins()==500&&AdventureService.profile(b).coins()==1000&&HousingService.owned(a)&&!HousingService.owned(b),"One owner, one debit, second buyer untouched");
+            h.assertTrue(AdventureService.profile(a).coins()==2000&&AdventureService.profile(b).coins()==5000&&HousingService.owned(a)&&!HousingService.owned(b),"One owner, one debit, second buyer untouched");
             h.assertTrue(level.getBlockState(target).isAir()&&level.getBlockState(target.east()).is(Blocks.OAK_PLANKS),"Furnishings cleared and structure retained");
             var state=HousingService.home(a.server);state.putBoolean("Preparing",true);state.putInt("Cursor",0);HousingService.finish(level,origin,plan,state);
-            h.assertTrue(!state.getBoolean("Preparing")&&AdventureService.profile(a).coins()==500,"Journal recovery is idempotent and never debits again");
+            h.assertTrue(!state.getBoolean("Preparing")&&AdventureService.profile(a).coins()==2000,"Journal recovery is idempotent and never debits again");
             level.setBlockAndUpdate(target,Blocks.CRAFTING_TABLE.defaultBlockState());HousingService.finish(level,origin,plan,state);h.assertTrue(level.getBlockState(target).is(Blocks.CRAFTING_TABLE),"Completed house never clears later decoration");
             h.assertTrue(HousingService.mayDecorate(a,target)&&!HousingService.mayDecorate(b,target)&&HousingService.intersectsOwned(level,target,new BlockPos(2,2,2)),"Owner permissions and template overwrite guard use same plot");
             var loaded=AdventureSavedData.load(store.save(new CompoundTag()));h.assertTrue(loaded.housing.getCompound(HousingService.ID).getUUID("Owner").equals(a.getUUID()),"Ownership survives save");h.succeed();

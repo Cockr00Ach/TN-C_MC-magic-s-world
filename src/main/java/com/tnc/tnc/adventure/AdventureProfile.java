@@ -9,6 +9,7 @@ public final class AdventureProfile {
     boolean registered, crafted, smithFree;
     boolean armorCrafted;
     public long divineReadyAt;
+    public final BankAccount bank=new BankAccount();
     String smithDesign="";
     int nativeBounties;
     int adventureKills,bossKills;
@@ -34,7 +35,7 @@ public final class AdventureProfile {
     public boolean canCredit(long amount) { return amount >= 0 && amount <= AdventureRules.MAX_COINS - coins; }
     public boolean credit(long amount, String reason) {
         if (!canCredit(amount)) return false;
-        coins += amount; record("+" + amount + "铜 · " + reason); return true;
+        coins += amount; record("+" + amount + "铜 · " + reason);if(amount>0&&!reason.equals("银行取款"))bank.payOneDue(this);return true;
     }
     void record(String line) { ledger.addFirst(line); while (ledger.size() > 5) ledger.removeLast(); }
     void epoch(long epoch) {

@@ -21,6 +21,7 @@ import java.util.*;
 /** Sale is a real marked source cottage. Unexpected changes stop purchase, never erase player work. */
 public final class HousingService {
     public static final String ID="south_cottage";
+    public static final long PRICE=3000,DOWN_PAYMENT=900;
     private static final TicketType<net.minecraft.world.level.ChunkPos> BANK_INSPECTION=TicketType.create("tnc_bank_house_inspection",Comparator.comparingLong(net.minecraft.world.level.ChunkPos::toLong),200);
     public record Cell(BlockPos local,BlockState state,boolean clear){}
     public record Blueprint(BlockPos min,BlockPos max,BlockPos entry,List<Cell> cells){}
@@ -54,7 +55,9 @@ public final class HousingService {
         guests.removeIf(v->v.getAsString().equals(id));if(allow){if(guests.size()>=8)return "最多八位装修伙伴。";if(!friend.getUUID().equals(owner.getUUID()))guests.add(net.minecraft.nbt.StringTag.valueOf(id));}
         t.put("Guests",guests);AdventureSavedData.get(owner.server).setDirty();return (allow?"已授权":"已撤销")+friend.getGameProfile().getName()+"的装修权限；不会转移产权。";
     }
-    public static String buy(ServerPlayer p) {
+    public static String buy(ServerPlayer p) {return buy(p,false);}
+    public static String buy(ServerPlayer p,boolean installment) {
+        com.tnc.tnc.adventure.BankService.settle(p);
         if(p.level()!=p.server.overworld())return "住宅位于主世界天空岛。";
         var origin=sourceOrigin(p.serverLevel());if(origin==null||!SkyIslandAnchors.isComplete(p.serverLevel()))return "天空岛还未完成，尚无可售房源。";
         var chunks=new HashSet<net.minecraft.world.level.ChunkPos>();boolean waiting=false;
@@ -63,14 +66,17 @@ public final class HousingService {
             for(var cell:plan.cells())chunks.add(new net.minecraft.world.level.ChunkPos(origin.offset(cell.local())));
             for(var chunk:chunks)level.getChunkSource().addRegionTicket(BANK_INSPECTION,chunk,2,chunk);
             if(chunks.stream().anyMatch(c->!level.hasChunk(c.x,c.z))){waiting=true;return "银行正在调取南街房源，请稍候再次确认购买；尚未扣款。";}
-            return buyAt(p,origin,plan);
+            return buyAt(p,origin,plan,installment);
         }catch(Exception e){var t=home(p.server);return t.hasUUID("Owner")&&t.getUUID("Owner").equals(p.getUUID())?"住宅已预留；整理遇到问题，产权与扣款已保存："+e.getMessage():"住宅预检停止，未扣款："+e.getMessage();}
         finally{if(!waiting)for(var chunk:chunks)p.serverLevel().getChunkSource().removeRegionTicket(BANK_INSPECTION,chunk,2,chunk);}
     }
-    static String buyAt(ServerPlayer p,BlockPos origin,Blueprint blueprint) throws Exception {
+    static String buyAt(ServerPlayer p,BlockPos origin,Blueprint blueprint) throws Exception {return buyAt(p,origin,blueprint,false);}
+    static String buyAt(ServerPlayer p,BlockPos origin,Blueprint blueprint,boolean installment) throws Exception {
         var store=AdventureSavedData.get(p.server);var existing=home(p.server);
         if(existing.hasUUID("Owner"))return "这间住宅已有房主。";
-        var account=AdventureService.profile(p);if(account.coins()<500)return "需要5银（500铜）。";
+        var account=AdventureService.profile(p);long charge=installment?DOWN_PAYMENT:PRICE;
+        if(installment&&!account.bank.canMortgage(account))return "分期需要协会登记、冒险Lv10且没有欠付账单。";
+        if(account.coins()+account.bank.savings<charge)return "钱袋和存款合计需要"+charge+"铜，尚未扣款。";
         var level=p.serverLevel();for(var cell:blueprint.cells) {
             var world=origin.offset(cell.local);if(!level.hasChunkAt(world))return "请先到南街空屋看房，让房屋区块加载；未扣款。";
             var state=level.getBlockState(world);
@@ -79,7 +85,9 @@ public final class HousingService {
         }
         // Ownership and debit are saved in the same account file. Journal prevents repeat cleanup.
         var t=new CompoundTag();t.putUUID("Owner",p.getUUID());t.putLong("Origin",origin.asLong());t.putBoolean("Preparing",true);t.putInt("Cursor",0);
-        store.housing.put(ID,t);account.debit(500,"购买南街空屋");store.setDirty();
+        if(!account.bank.spend(account,charge,"购买南街空屋"))return "余额变化，尚未扣款。";
+        if(installment){account.bank.startMortgage(PRICE-DOWN_PAYMENT);t.putBoolean("Mortgage",true);}
+        t.putLong("Price",PRICE);store.housing.put(ID,t);store.setDirty();
         level.getServer().overworld().getDataStorage().save();
         finish(level,origin,blueprint,t);
         if(t.getBoolean("Preparing"))return "住宅已预留，整理尚未完成。请保持房屋区块加载；不会再次扣款。";
@@ -115,7 +123,7 @@ public final class HousingService {
         if(t.hasUUID("Owner")){var owner=level.getServer().getPlayerList().getPlayer(t.getUUID("Owner"));if(owner!=null)AdventureService.milestone(owner,"home_bought");}
     }
     public static CompoundTag snapshot(ServerPlayer p){
-        var t=home(p.server).copy();var origin=t.hasUUID("Owner")?BlockPos.of(t.getLong("Origin")):sourceOrigin(p.server.overworld());
+        var t=home(p.server).copy();t.putLong("SalePrice",PRICE);t.putLong("DownPayment",DOWN_PAYMENT);var origin=t.hasUUID("Owner")?BlockPos.of(t.getLong("Origin")):sourceOrigin(p.server.overworld());
         if(origin!=null){t.putString("Entry",origin.offset(189,92,394).toShortString());t.putString("Boundary",origin.offset(182,90,384).toShortString()+" 至 "+origin.offset(199,117,398).toShortString());}
         t.putBoolean("Mine",owned(p));return t;
     }

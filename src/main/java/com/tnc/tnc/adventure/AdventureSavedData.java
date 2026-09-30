@@ -31,6 +31,7 @@ public final class AdventureSavedData extends SavedData {
         p.registered=t.getBoolean("Registered"); p.crafted=t.getBoolean("Crafted");
         p.armorCrafted=t.getBoolean("ArmorCrafted");
         p.divineReadyAt=Math.max(0,t.getLong("DivineReadyAt"));
+        p.bank.load(t.getCompound("Bank"));
         p.smithReady=t.contains("SmithReady")?t.getLong("SmithReady"):-1; p.smithFree=t.getBoolean("SmithFree");
         p.smithDesign=t.getString("SmithDesign");p.nativeBounties=Math.max(0,t.getInt("NativeBounties"));p.adventureKills=Math.max(0,t.getInt("AdventureKills"));p.bossKills=Math.max(0,t.getInt("BossKills"));
         p.completedEpoch=t.contains("CompletedEpoch")?t.getLong("CompletedEpoch"):-1;
@@ -50,6 +51,7 @@ public final class AdventureSavedData extends SavedData {
         t.putString("SmithDesign",p.smithDesign);t.putInt("NativeBounties",p.nativeBounties);
         t.putBoolean("ArmorCrafted",p.armorCrafted);
         t.putLong("DivineReadyAt",p.divineReadyAt);
+        t.put("Bank",p.bank.save());
         t.putInt("AdventureKills",p.adventureKills);t.putInt("BossKills",p.bossKills);
         t.putLong("CompletedEpoch",p.completedEpoch);t.put("Milestones",strings(p.milestones));t.put("PaidOffers",strings(p.paidOffers));t.put("Ledger",strings(p.ledger));
         var list=new ListTag();p.contracts.values().forEach(c->{var v=new CompoundTag();v.putString("ID",c.id);v.putLong("Epoch",c.epoch);v.putInt("Kills",c.kills);list.add(v);});

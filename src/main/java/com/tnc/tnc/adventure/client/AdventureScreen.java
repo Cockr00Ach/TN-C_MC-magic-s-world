@@ -27,7 +27,9 @@ public final class AdventureScreen extends Screen {
     }
     public static void accept(CompoundTag tag,boolean open) {
         if(tag==null)return;var mc=Minecraft.getInstance();
-        if(open)mc.setScreen(new AdventureScreen(tag));
+        if(open&&ServicePanel.fromRole(tag.getString("ServiceRole"))==ServicePanel.BANK)mc.setScreen(new BankScreen(tag));
+        else if(open)mc.setScreen(new AdventureScreen(tag));
+        else if(mc.screen instanceof BankScreen bank)bank.update(tag);
         else if(mc.screen instanceof AdventureScreen screen) {
             screen.data=tag;if(!tag.getString("Message").isEmpty())screen.notice=tag.getString("Message");screen.rebuildWidgets();
         }
@@ -71,7 +73,7 @@ public final class AdventureScreen extends Screen {
             button("取铜",left+116,by,48,()->send(AdventurePackets.Action.BANK_WITHDRAW,"copper"),bank);
             button("取银",left+170,by,48,()->send(AdventurePackets.Action.BANK_WITHDRAW,"silver"),bank);
             button("取金",left+224,by,48,()->send(AdventurePackets.Action.BANK_WITHDRAW,"gold"),bank);
-            button("确认购买 · 5银",left+20,top+panelHeight-66,140,()->send(AdventurePackets.Action.BUY_HOME,""),data.getBoolean("AtBroker")&&!house.hasUUID("Owner")&&p.coins()>=500);
+            button("确认购买 · 30银",left+20,top+panelHeight-66,140,()->send(AdventurePackets.Action.BUY_HOME,""),data.getBoolean("AtBroker")&&!house.hasUUID("Owner")&&p.coins()+p.bank.savings>=3000);
         } else {
             if(compactGear()){
                 int w=(panelWidth-40)/3;
@@ -152,7 +154,7 @@ public final class AdventureScreen extends Screen {
             var ordered=ElementWands.find(data.getString("SmithDesign"));long ready=data.getLong("SmithReady");String state=ready<0?"去潮生制杖屋找莉娅下单。":"订单："+(ordered==null?"铁匠/旧法杖订单":ordered.name())+" · "+(ready<=data.getLong("ActiveTicks")?"完成可领取":"剩余 "+(ready-data.getLong("ActiveTicks")+19)/20+" 秒");
             paragraph(g,state,y+8,0x246E78);
         } else if(tab==3) {
-            var house=data.getCompound("Housing");int y=paragraph(g,"南街三层空屋 · 5银（500铜）",top+82,0x182C42);
+            var house=data.getCompound("Housing");int y=paragraph(g,"南街三层空屋 · 30银（3000铜）",top+82,0x182C42);
             y=paragraph(g,house.getBoolean("Preparing")?house.getString("Status"):house.getBoolean("Mine")?"你的住宅：装修与物品长期保留。":house.hasUUID("Owner")?"本存档房源已售出，其他玩家无需付款。":"先看房，找归航银行米洛确认全款购买。分期与借贷尚未开放。",y+8,0x635A4A);
             y=paragraph(g,"入口："+house.getString("Entry"),y+8,0x246E78);
             y=paragraph(g,"装修边界："+house.getString("Boundary"),y+8,0x635A4A);

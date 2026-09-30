@@ -1,0 +1,24 @@
+package com.tnc.tnc.adventure;
+import org.junit.jupiter.api.Test;
+import java.util.List;
+import static org.junit.jupiter.api.Assertions.*;
+class BankAccountTest {
+    static final long NOW=1_800_000_000_000L;
+    private AdventureProfile saved(long n){var p=new AdventureProfile();p.credit(n,"test");p.bank.settle(NOW,false,20,10);assertTrue(p.bank.deposit(p,n));return p;}
+    private void settle(AdventureProfile p,long now){p.bank.settle(now,p.registered,20,10);p.bank.flush(p,now);}
+    @Test void offlineThreeDaysPaySimpleInterestExactlyOnce(){var p=saved(1000);settle(p,NOW+3*BankAccount.DAY);assertEquals(300,p.coins());assertEquals(1000,p.bank.savings);settle(p,NOW+3*BankAccount.DAY);assertEquals(300,p.coins());}
+    @Test void addingMoneyMidDayCannotEarnAFullDay(){var p=saved(1000);p.credit(1000,"test");settle(p,NOW+BankAccount.DAY/2);assertEquals(1000,p.coins());p.bank.deposit(p,1000);settle(p,NOW+BankAccount.DAY);assertEquals(150,p.coins());}
+    @Test void withdrawingMidDayRetainsAccruedInterest(){var p=saved(1000);settle(p,NOW+BankAccount.DAY/2);assertTrue(p.bank.withdraw(p,1000));settle(p,NOW+BankAccount.DAY);assertEquals(1050,p.coins());}
+    @Test void interestFractionSurvivesManySmallSettlements(){var p=saved(7);for(int n=1;n<=300;n++)settle(p,NOW+n*(BankAccount.DAY/100));assertEquals(2,p.coins());assertTrue(p.bank.interestNumerator>0);}
+    @Test void borrowedPrincipalAndDepositCapAreRespected(){var p=saved(50000);p.bank.loan=BankAccount.Debt.create(45000,49500,10,0);settle(p,NOW+BankAccount.DAY);assertEquals(500,p.coins());p.bank.loan.paid=10;settle(p,NOW+2*BankAccount.DAY);assertEquals(1500,p.coins());}
+    @Test void backwardClockCannotRepeatOrDeleteIncome(){var p=saved(1000);settle(p,NOW+BankAccount.DAY);settle(p,NOW);settle(p,NOW+BankAccount.DAY);assertEquals(100,p.coins());assertEquals(NOW+BankAccount.DAY,p.bank.lastAt);}
+    @Test void dailySalaryIncludesOfflineDaysWithoutBackPayAtNewRank(){var p=new AdventureProfile();p.registered=true;p.bank.settle(NOW,true,20,10);p.bank.settle(NOW+3*BankAccount.DAY,true,300,10);p.bank.flush(p,NOW+3*BankAccount.DAY);assertEquals(60,p.coins());p.bank.settle(NOW+5*BankAccount.DAY,true,300,10);p.bank.flush(p,NOW+5*BankAccount.DAY);assertEquals(380,p.coins());}
+    @Test void midPeriodPromotionChangesOnlyNextSalaryPeriod(){var p=new AdventureProfile();p.registered=true;p.bank.settle(NOW,true,20,10);p.bank.settle(NOW+BankAccount.DAY/2,true,50,10);p.bank.settle(NOW+BankAccount.DAY,true,50,10);p.bank.flush(p,NOW+BankAccount.DAY);assertEquals(20,p.coins());p.bank.settle(NOW+2*BankAccount.DAY,true,50,10);p.bank.flush(p,NOW+2*BankAccount.DAY);assertEquals(70,p.coins());}
+    @Test void salaryStagesUseAdventureLevel(){var r=List.of(20,50,100,180,300);assertEquals(20,BankAccount.salary(9,r));assertEquals(50,BankAccount.salary(10,r));assertEquals(100,BankAccount.salary(25,r));assertEquals(180,BankAccount.salary(45,r));assertEquals(300,BankAccount.salary(70,r));}
+    @Test void transfersConserveMoneyAndRejectInvalidAmounts(){var p=saved(1000);assertFalse(p.bank.deposit(p,-1));assertFalse(p.bank.withdraw(p,1001));assertTrue(p.bank.withdraw(p,250));assertEquals(1000,p.coins()+p.bank.savings);assertTrue(p.bank.deposit(p,100));assertEquals(1000,p.coins()+p.bank.savings);}
+    @Test void onlineInstallmentsConsumeExactTotalAndNeverDuplicate(){var p=new AdventureProfile();p.registered=true;p.xp=AdventureRules.xpAtLevel(5);assertTrue(p.bank.borrow(p,200));assertFalse(p.bank.borrow(p,200));p.credit(20,"test");for(int n=0;n<4;n++)p.bank.online(p,BankAccount.ROUND);assertEquals(0,p.coins());assertFalse(p.bank.loan.active());assertFalse(p.bank.payOneDue(p));}
+    @Test void offlineIncomeCannotAdvanceDebtClock(){var p=new AdventureProfile();p.registered=true;p.xp=AdventureRules.xpAtLevel(5);p.bank.borrow(p,200);p.bank.settle(NOW,true,20,10);settle(p,NOW+20*BankAccount.DAY);assertEquals(0,p.bank.loan.paid);assertEquals(0,p.bank.onlineTicks);}
+    @Test void earlyRepaymentWaivesOnlyFutureFees(){var p=new AdventureProfile();p.coins=1000;p.bank.loan=BankAccount.Debt.create(200,220,4,0);p.bank.online(p,BankAccount.ROUND);assertEquals(150,p.bank.loan.clearAmount(p.bank.onlineTicks));assertTrue(p.bank.clear(p,false));assertEquals(795,p.coins());}
+    @Test void insufficientFundsKeepWholeBillAndIncomePaysOneAtATime(){var p=new AdventureProfile();p.bank.loan=BankAccount.Debt.create(200,220,4,0);p.bank.online(p,2*BankAccount.ROUND);assertEquals(0,p.bank.loan.paid);p.credit(60,"test");assertEquals(1,p.bank.loan.paid);assertEquals(5,p.coins());p.credit(50,"test");assertEquals(2,p.bank.loan.paid);assertEquals(0,p.coins());}
+    @Test void walletCapRetainsEarnedMoneyUntilSpaceExists(){var p=saved(1000);p.coins=AdventureRules.MAX_COINS;settle(p,NOW+BankAccount.DAY);assertEquals(100,p.bank.pendingInterest);p.debit(150,"test");settle(p,NOW+BankAccount.DAY+1000);assertEquals(0,p.bank.pendingInterest);assertEquals(AdventureRules.MAX_COINS-50,p.coins());}
+}
