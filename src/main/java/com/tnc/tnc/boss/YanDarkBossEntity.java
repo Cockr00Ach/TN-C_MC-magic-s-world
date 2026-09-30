@@ -9,9 +9,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.BossEvent;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -198,6 +200,47 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
         return this.phase;
     }
 
+    // ------------------------------------------------------------------
+    //  ★ 凋零那一套音效（作者 2026-09-30："音乐也用凋零的好了"）
+    //
+    //  说明：**原版凋零其实没有专属 BGM** ✗ —— 全游戏只有末影龙有 boss 音乐
+    //  （{@code SoundEvents.MUSIC_DRAGON}）。"凋零的那套"就是它的**叫声**：
+    //  生成咆哮 / 平时低吼 / 受伤 / 死亡 / 发射骷髅头 ✓。这里整套照搬，
+    //  再加上"变身神降"时的一声生成咆哮 ✓ —— 打过凋零的人一听就知道这是 boss ✓。
+    //
+    //  平时的低吼/受伤/死亡走原版那三个 getter ✓（节流、音量、音高全由原版管，
+    //  不用自己写计时器 ✗）；只有"生成"和"施法"两处要我们自己放 ✓。
+    // ------------------------------------------------------------------
+
+    /** 平时低吼 ✓（原版按 {@code getAmbientSoundInterval()} 自动节流）。 */
+    @Override
+    protected SoundEvent getAmbientSound() {
+        return SoundEvents.WITHER_AMBIENT;
+    }
+
+    /** 受伤 ✓。 */
+    @Override
+    protected SoundEvent getHurtSound(DamageSource source) {
+        return SoundEvents.WITHER_HURT;
+    }
+
+    /** 死亡 ✓。 */
+    @Override
+    protected SoundEvent getDeathSound() {
+        return SoundEvents.WITHER_DEATH;
+    }
+
+    /**
+     * 生成时那声咆哮 ✓（凋零标志性的 {@code WITHER_SPAWN}）。
+     *
+     * <p>为什么要自己放：原版只有 {@code WitherBoss} 自己在生成动画里播这一声 ✗，
+     * 我们的实体没有那段动画 ⇒ 得在**第一次 tick**（服务端）补上 ✓。
+     */
+    private void playSpawnRoar() {
+        this.level().playSound(null, this.getX(), this.getY(), this.getZ(),
+                SoundEvents.WITHER_SPAWN, SoundSource.HOSTILE, 3.0F, 0.7F);
+    }
+
     /** 二阶段：全程闪电登神（无限时长 ✓）。 */
     private void ensurePhaseTwoAura() {
         if (TNEffects.LIGHTNING_ASCENSION.isPresent()
@@ -227,6 +270,8 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
                         120, 1.2D, 1.2D, 1.2D, 0.4D);
                 level.playSound(null, this.getX(), this.getY(), this.getZ(),
                         SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.HOSTILE, 2.0F, 0.8F);
+                // ★ 二阶段变身＝再来一次"生成咆哮" ✓（凋零那套；听过一次就忘不掉 ✓）
+                this.playSpawnRoar();
             }
             return false;                    // 这一下不把他打死 ✓
         }
@@ -238,6 +283,10 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
         super.aiStep();
         if (this.level().isClientSide()) {
             return;
+        }
+        // ★ 生成咆哮（凋零那套）：第一次 tick 播一次 ✓（见 playSpawnRoar 的说明）
+        if (this.tickCount == 1) {
+            this.playSpawnRoar();
         }
         if (this.phase == 2) {
             this.ensurePhaseTwoAura();
@@ -272,6 +321,10 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
             return;
         }
         this.triggerAnim("action", this.random.nextBoolean() ? "playmagic_1" : "playmagic_2");
+        // ★ 施法那一下：凋零发射骷髅头的声音（{@code WITHER_SHOOT}）✓ —— 音高压低一点，
+        //   听起来像"蓄能"而不是"吐口水" ✓；技能本身的落雷声照旧在各自方法里播 ✓
+        level.playSound(null, this.getX(), this.getY() + 1.0D, this.getZ(),
+                SoundEvents.WITHER_SHOOT, SoundSource.HOSTILE, 1.6F, 0.6F);
         switch (this.random.nextInt(4)) {
             case 0 -> this.castStorm(level, target);
             case 1 -> this.castHeavenlyThunder(level, target);
