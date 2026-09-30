@@ -72,13 +72,22 @@ public final class SpellCatalog {
         DARK_SACRIFICE("以伤换伤", "以生命力换力量"),
         DARK_SUMMON("召唤", "从黑暗中召唤暗属性生物"),
         DARK_FOG("黑雾", "弥漫的黑色雾气"),
+        INDEPENDENT("独立魔法", "不属于任何元素，无亲和力要求"),
         /**
          * ★ 光系<b>第二条链</b>（治疗 + 减伤，作者 2026-10-01 定）：光芒照耀 → 圣光 → 神光 →
          * 天使降临 → 天使的悲悯 ✓。第一条光链是"飞行/光翼"（{@code light_flight} 那套 ✓），
          * 所以这条链**不带飞行** ✗ —— 只做治疗、减伤、法阵与天使 ✓。
          */
         LIGHT_GRACE("光耀", "治疗与减伤（光系第二条链）"),
-        INDEPENDENT("独立魔法", "不属于任何元素，无亲和力要求");
+        /**
+         * ★ 光系<b>第一条链</b>「光翼」（作者 2026-10-01 指定，见 {@code docs/光系链_设计.md}）：
+         * 飞行 → 极速飞行 → 光翼展开 ✓（3 档，全是自身增益 ✓）。
+         *
+         * <p>⚠️ 两条新链**必须追加在枚举末尾** ✗ —— 存档里的进度按**链的序数**存
+         * （{@code MagicStoneData} 的按链索引数组 ✓），插在中间会把所有人的技能页错位 ✗✗
+         * （设计文档第三节明确警告过 ✓）。所以 {@code INDEPENDENT} 之后才是这两条 ✓。
+         */
+        LIGHT_WINGS("光翼", "飞行与极速（光系第一条链）");
 
         private final String cn;
         private final String desc;
@@ -213,6 +222,18 @@ public final class SpellCatalog {
             of(Element.LIGHT, "divine_light", Chain.LIGHT_GRACE, 3, "神光"),
             of(Element.LIGHT, "angel_descent", Chain.LIGHT_GRACE, 4, "天使降临"),
             of(Element.LIGHT, "angel_mercy", Chain.LIGHT_GRACE, 5, "天使的悲悯"),
+
+            // ---- 光翼线（光系第一条链，作者 2026-10-01 指定；见 docs/光系链_设计.md）----
+            //   1 飞行：展开光翼 + 可飞（原版 mayfly），无速度/减伤
+            //   2 极速飞行：+50% 速度、减伤 25%
+            //   3 光翼展开：+150% 速度、减伤 50%、光属性(healing)伤害 +50%
+            //   ★ 链级规则：这条链的**任一** buff 在身 ⇒ 光翼展开且可飞 ✓（不看亲和力 ✓，
+            //     实现在 light/TNLightWingsEvents ✓）
+            //   时长/冷却：t1 30s/CD40、t2 20s/CD60、t3 12s/CD120 ✓
+            //   （设计文档给的**建议值** ✓ —— 作者要改就改这三个 JSON + TNLightWingsEvents 的注释 ✓）
+            of(Element.LIGHT, "light_flight", Chain.LIGHT_WINGS, 1, "飞行"),
+            of(Element.LIGHT, "light_swift_flight", Chain.LIGHT_WINGS, 2, "极速飞行"),
+            of(Element.LIGHT, "light_wingspan", Chain.LIGHT_WINGS, 3, "光翼展开"),
 
             // ================= 骨架（法术 JSON 待补，先占名字对齐文档）=================
             // 水魔法：水球 / 水纹 / 水缚 / 雨滴

@@ -41,6 +41,9 @@
     "tnc:holy_light",
     "tnc:divine_light",
     "tnc:angel_descent",
-    "tnc:angel_mercy"
+    "tnc:angel_mercy",
+    "tnc:light_flight",
+    "tnc:light_swift_flight",
+    "tnc:light_wingspan"
   ]
 }
