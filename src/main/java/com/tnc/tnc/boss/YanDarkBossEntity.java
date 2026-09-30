@@ -78,6 +78,17 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
     private static final int PHASE2_WEATHER_REFRESH = 200;
 
     /**
+     * 黑暗衍版"神在投篮"的三尊神参数 ✓
+     *
+     * <p>2026-09-30 作者："神的格数太高了，改成 20 格高吧，持续时间可以短一点" ⇒
+     * 悬停 **20 格**（原来是 30 ✗）、存活 **80 tick = 4 秒**（原来 100 ✗）✓。
+     * 尺寸保持 12（作者验收过的大小 ✓，和玩家 t5 那三尊的 26 是两个不同的观感 ✓）。
+     */
+    private static final double GOD_HOVER_HEIGHT = 20.0D;
+    private static final double GOD_SCALE = 12.0D;
+    private static final int GOD_LIFE = 80;
+
+    /**
      * ★ Boss 血量条（作者 2026-09-30："我希望他会显示 boss 血量条啊，就是那种 boss 战的血量条，
      * 你可以用凋零的替代"）。
      *
@@ -241,13 +252,63 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
                 SoundEvents.WITHER_SPAWN, SoundSource.HOSTILE, 3.0F, 0.7F);
     }
 
-    /** 二阶段：全程闪电登神（无限时长 ✓）。 */
+    /** 二阶段：全程闪电登神（**永久** ✓ —— 作者："boss 二阶段是要一直开着闪电登神的"）。 */
     private void ensurePhaseTwoAura() {
         if (TNEffects.LIGHTNING_ASCENSION.isPresent()
                 && !this.hasEffect(TNEffects.LIGHTNING_ASCENSION.get())) {
             this.addEffect(new MobEffectInstance(TNEffects.LIGHTNING_ASCENSION.get(),
-                    Integer.MAX_VALUE, 0, false, false));
+                    PHASE2_ASCENSION_TICKS, 0, false, false));
         }
+    }
+
+    /**
+     * 二阶段的登神**时长**（tick）✓
+     *
+     * <p>作者提过"或者直接把 boss 的闪电登神时间改成 2 分钟？" —— 这里直接用
+     * {@link Integer#MAX_VALUE}（≈3.4 年 ⇒ 实战就是**永久** ✓）：
+     * 因为 {@link #ensurePhaseTwoAura()} 每 tick 都会检查、掉了就补 ✓，
+     * 所以"2 分钟"反而会变成"每 2 分钟断一瞬、下一 tick 又接上" ✗，没必要 ✓。
+     * 想改成有限时长就把这个常量改成 {@code 2400}（2 分钟 ✓）—— 逻辑不用动 ✓。
+     */
+    private static final int PHASE2_ASCENSION_TICKS = Integer.MAX_VALUE;
+
+    /**
+     * 二阶段的登神**外观**（作者："boss 二阶段是要一直开着闪电登神的"）✓
+     *
+     * <p>血的教训：{@code TNEffects.LIGHTNING_ASCENSION} 只给**数值**（攻击力/法术强度）✗，
+     * 电弧 + 环绕电光 + 地上雷印是谁画的？是 {@code TnSpellMechanics.ascensionAura} ✓ ——
+     * 而那一套以前**只挂在玩家的每 tick 逻辑上** ✗ ⇒ boss 身上有 buff、却一点电光都没有，
+     * 看起来"根本没开登神" ✗✗。现在由 boss 自己每 tick 调那两个方法 ✓（它们已经放宽到
+     * 任意 {@code LivingEntity} ✓），玩家那边一个字都没改 ✓。
+     */
+    private void phaseTwoAscensionVisuals() {
+        long time = this.level().getGameTime();
+        com.tnc.tnc.magic.TnSpellMechanics.ascensionAura(this, time);
+        com.tnc.tnc.magic.TnSpellMechanics.sparkMarks(this, time);
+    }
+
+    /**
+     * 二阶段登场那一下的"<b>万雷归体</b>"✓ —— 三圈雷电同时向内收 + 一记白闪。
+     *
+     * <p>和玩家 t5 登神链释放时的收尾（{@code TnSpellMechanics.closingBurst}）同一个观感 ✓：
+     * 玩家一眼就能读出"他现在是被雷灌满的状态"✓，配合永久登神 + 雷雨 + 血条回满 ⇒ 变身成立 ✓。
+     */
+    private void phaseTwoGatherBurst(ServerLevel level) {
+        double cy = this.getY() + this.getBbHeight() * 0.55D;
+        for (int ring = 0; ring < 3; ring++) {
+            double radius = 6.0D + ring * 3.0D;
+            int points = 12 + ring * 4;
+            for (int i = 0; i < points; i++) {
+                double a = i * (Math.PI * 2.0D / points) + ring * 0.3D;
+                Vec3 from = new Vec3(
+                        this.getX() + Math.cos(a) * radius,
+                        cy + (ring - 1) * 1.5D,
+                        this.getZ() + Math.sin(a) * radius);
+                com.tnc.tnc.magic.TnSpellMechanics.arcLine(level, from,
+                        new Vec3(this.getX(), cy, this.getZ()), 5, 0.15D);
+            }
+        }
+        level.sendParticles(ParticleTypes.FLASH, this.getX(), cy, this.getZ(), 3, 0.2D, 0.3D, 0.2D, 0.0D);
     }
 
     @Override
@@ -272,6 +333,8 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
                         SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.HOSTILE, 2.0F, 0.8F);
                 // ★ 二阶段变身＝再来一次"生成咆哮" ✓（凋零那套；听过一次就忘不掉 ✓）
                 this.playSpawnRoar();
+                // ★ 万雷归体：三圈雷向内收 ⇒ "他被雷灌满了" ✓（配合下面的永久登神 ✓）
+                this.phaseTwoGatherBurst(level);
             }
             return false;                    // 这一下不把他打死 ✓
         }
@@ -290,6 +353,7 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
         }
         if (this.phase == 2) {
             this.ensurePhaseTwoAura();
+            this.phaseTwoAscensionVisuals();     // ★ 电弧/环绕电光/雷印（不然"看不出在登神" ✗）
         }
         if (this.getTarget() == null) {
             return;
@@ -390,8 +454,12 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
             }
             god.asGod();
             god.asDark();                            // god_dark ✓
-            god.configure(12.0D, 100, at.y + 6.0D, 3.0D);
-            god.moveTo(at.x + Math.cos(ang) * 6.0D, at.y + 30.0D, at.z + Math.sin(ang) * 6.0D, 0.0F, 0.0F);
+            // 悬停高度：实体 tick 里是 `fallTo + FALL_HEIGHT(24)` ⇒ 想悬停在 GOD_HOVER_HEIGHT
+            // 就得把 fallTo 设成「目标高度 − 24」✓（作者 2026-09-30："神的格数太高了，改成 20 格高"）
+            god.configure(GOD_SCALE, GOD_LIFE,
+                    at.y + GOD_HOVER_HEIGHT - TNLightningStrikeEntity.FALL_HEIGHT, 3.0D);
+            god.moveTo(at.x + Math.cos(ang) * 6.0D, at.y + GOD_HOVER_HEIGHT,
+                    at.z + Math.sin(ang) * 6.0D, 0.0F, 0.0F);
             level.addFreshEntity(god);
         }
         level.playSound(null, this.getX(), this.getY(), this.getZ(),

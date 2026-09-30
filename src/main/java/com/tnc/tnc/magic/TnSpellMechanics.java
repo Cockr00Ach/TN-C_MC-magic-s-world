@@ -151,15 +151,20 @@ public final class TnSpellMechanics {
     /** 大雷球落地那一下：伤害与半径（球**落地才炸** ✓ 作者 2026-09-29） */
     private static final float DIVINE_BALL_DAMAGE = 25.0F;
     private static final double DIVINE_BALL_BLAST = 8.0D;
-    /** 神留 200 tick（10 秒）、球落地后还留 40 tick（2 秒）✓ */
-    private static final int DIVINE_GOD_LIFE = 200;
+    /** 神留 120 tick（6 秒）—— 作者 2026-09-30："持续时间可以短一点" ✓（原来 200 = 10 秒）；球落地后还留 40 tick（2 秒）✓ */
+    private static final int DIVINE_GOD_LIFE = 120;
     private static final int DIVINE_BALL_LIFE = 40;
     /** 球下落速度（格/tick）：0.5 = 慢慢砸下来，看得清 ✓ */
     private static final double DIVINE_BALL_FALL = 0.5D;
-    /** 三尊神：体积 ×10 ⇒ 线性 26 ✓；环绕半径 22 格；悬停高度 27 格 ✓ */
+    /**
+     * 三尊神：体积 ×10 ⇒ 线性 26 ✓；环绕半径 22 格；悬停高度 **20 格** ✓
+     *
+     * <p>2026-09-30 作者："神的格数太高了，改成 20 格高吧，持续时间可以短一点" ⇒
+     * 悬停 27 → **20** 格、{@link #DIVINE_GOD_LIFE} 200 → **120** tick（10 秒 → 6 秒）✓。
+     */
     private static final double DIVINE_GOD_SCALE = 26.0D;
     private static final double DIVINE_GOD_RADIUS = 22.0D;
-    private static final double DIVINE_GOD_HEIGHT = 27.0D;
+    private static final double DIVINE_GOD_HEIGHT = 20.0D;
     /** 大雷球：体积 ×3 ⇒ 线性 29 ✓ */
     private static final double DIVINE_BALL_SCALE = 29.0D;
     /** 球模型自身的半径（格）—— 用来把球心抬起来，免得半个球埋进地里 ✗ */
@@ -1085,33 +1090,42 @@ public final class TnSpellMechanics {
      *
      * <p>环绕电光故意比"环绕雷球"（4 颗、r=1.4、会电人）小一圈快一点，
      * 让玩家一眼能分清"这是登神的外观"还是"那段会扎人的光环" ✓
+     *
+     * <p>★ 2026-09-30：参数从 {@code ServerPlayer} 放宽到 {@link LivingEntity} ✓ ——
+     * 黑暗衍（{@code tnc:yan_dark}）二阶段是**永久登神**的（作者："boss 二阶段是要一直开着
+     * 闪电登神的"），但 aura 这套以前只挂在**玩家**的每 tick 逻辑上 ✗ ⇒ boss 身上有 buff、
+     * 却一点电光都看不见 ✗。放宽之后由 boss 自己每 tick 调这个方法 ✓（见
+     * {@code YanDarkBossEntity.aiStep}），玩家那边调用点一个字都不用改 ✓。
      */
-    private static void ascensionAura(ServerPlayer player, long time) {
-        ServerLevel level = player.serverLevel();
+    public static void ascensionAura(net.minecraft.world.entity.LivingEntity entity, long time) {
+        if (!(entity.level() instanceof ServerLevel level)) {
+            return;
+        }
+        java.util.UUID id = entity.getUUID();
         double phase = (time % 40) / 40.0D * Math.PI * 2.0D;
         for (int i = 0; i < ASCENSION_ORBIT_COUNT; i++) {
             double a1 = phase * 2.0D + i * (Math.PI * 2.0D / ASCENSION_ORBIT_COUNT);
             double a2 = a1 + 0.5D;
-            Vec3 p1 = new Vec3(player.getX() + Math.cos(a1) * ASCENSION_ORBIT_RADIUS,
-                    player.getY() + 0.9D + Math.sin(a1 * 2.0D) * 0.35D,
-                    player.getZ() + Math.sin(a1) * ASCENSION_ORBIT_RADIUS);
-            Vec3 p2 = new Vec3(player.getX() + Math.cos(a2) * ASCENSION_ORBIT_RADIUS,
-                    player.getY() + 0.9D + Math.sin(a2 * 2.0D) * 0.35D,
-                    player.getZ() + Math.sin(a2) * ASCENSION_ORBIT_RADIUS);
+            Vec3 p1 = new Vec3(entity.getX() + Math.cos(a1) * ASCENSION_ORBIT_RADIUS,
+                    entity.getY() + 0.9D + Math.sin(a1 * 2.0D) * 0.35D,
+                    entity.getZ() + Math.sin(a1) * ASCENSION_ORBIT_RADIUS);
+            Vec3 p2 = new Vec3(entity.getX() + Math.cos(a2) * ASCENSION_ORBIT_RADIUS,
+                    entity.getY() + 0.9D + Math.sin(a2 * 2.0D) * 0.35D,
+                    entity.getZ() + Math.sin(a2) * ASCENSION_ORBIT_RADIUS);
             arcLine(level, p1, p2, 3, 0.05D);
         }
         if (time % ASCENSION_ARC_INTERVAL == 0) {
             // 身上：两点之间蹦一条电弧（比撒点更像"电在身上跳" ✓）
             for (int i = 0; i < ASCENSION_ARC_COUNT; i++) {
-                arcLine(level, randomBodyPoint(player), randomBodyPoint(player), 5, 0.1D);
+                arcLine(level, randomBodyPoint(entity), randomBodyPoint(entity), 5, 0.1D);
             }
         }
         // 雷印：每走一格落一枚
-        Vec3 pos = player.position();
-        Vec3 last = LAST_MARK.get(player.getUUID());
+        Vec3 pos = entity.position();
+        Vec3 last = LAST_MARK.get(id);
         if (last == null || last.distanceTo(pos) >= ASCENSION_MARK_STEP) {
-            LAST_MARK.put(player.getUUID(), pos);
-            List<SparkMark> list = MARKS.computeIfAbsent(player.getUUID(), key -> new ArrayList<>());
+            LAST_MARK.put(id, pos);
+            List<SparkMark> list = MARKS.computeIfAbsent(id, key -> new ArrayList<>());
             list.add(new SparkMark(pos, time + ASCENSION_MARK_LIFE));
             while (list.size() > ASCENSION_MARK_MAX) {
                 list.remove(0);
@@ -1287,29 +1301,36 @@ public final class TnSpellMechanics {
                 net.minecraft.sounds.SoundSource.PLAYERS, 0.35F, 1.6F);
     }
 
-    /** 身上的随机一点（画电弧用）。 */
-    private static Vec3 randomBodyPoint(ServerPlayer player) {
-        double a = player.getRandom().nextDouble() * Math.PI * 2.0D;
-        double r = 0.3D + player.getRandom().nextDouble() * 0.3D;
-        double y = player.getY() + 0.25D + player.getRandom().nextDouble() * 1.45D;
-        return new Vec3(player.getX() + Math.cos(a) * r, y, player.getZ() + Math.sin(a) * r);
+    /** 身上的随机一点（画电弧用）✓ —— 玩家和 boss 共用（{@link #ascensionAura}）✓。 */
+    private static Vec3 randomBodyPoint(net.minecraft.world.entity.LivingEntity entity) {
+        double a = entity.getRandom().nextDouble() * Math.PI * 2.0D;
+        double r = 0.3D + entity.getRandom().nextDouble() * 0.3D;
+        double y = entity.getY() + 0.25D + entity.getRandom().nextDouble() * 1.45D;
+        return new Vec3(entity.getX() + Math.cos(a) * r, y, entity.getZ() + Math.sin(a) * r);
     }
 
-    /** 地上的雷印：在原地噼啪一小会儿，然后自己消失。 */
-    private static void sparkMarks(ServerPlayer player, long time) {
-        List<SparkMark> list = MARKS.get(player.getUUID());
+    /**
+     * 地上的雷印：在原地噼啪一小会儿，然后自己消失 ✓。
+     *
+     * <p>★ 2026-09-30：和 {@link #ascensionAura} 一样放宽到 {@link LivingEntity} ✓
+     * （boss 二阶段也要留雷印 ✓）。
+     */
+    public static void sparkMarks(net.minecraft.world.entity.LivingEntity entity, long time) {
+        if (!(entity.level() instanceof ServerLevel level)) {
+            return;
+        }
+        List<SparkMark> list = MARKS.get(entity.getUUID());
         if (list == null || list.isEmpty()) {
             return;
         }
         list.removeIf(mark -> mark.expireAt() < time);
         if (list.isEmpty()) {
-            MARKS.remove(player.getUUID());
+            MARKS.remove(entity.getUUID());
             return;
         }
         if (time % 3 != 0) {
             return;
         }
-        ServerLevel level = player.serverLevel();
         for (SparkMark mark : list) {
             // 每枚雷印是地上的一小团电弧（不是一堆星星 ✗）
             arcBall(level, new Vec3(mark.pos().x, mark.pos().y + 0.08D, mark.pos().z), 3, 0.28D);
