@@ -117,8 +117,15 @@ public class TNLightningStrikeRenderer extends EntityRenderer<TNLightningStrikeE
      * （原版约定 yaw=0 面向 +Z；模型的脸在 −Z，转 180° 刚好把脸转到 +Z ✓）。
      * <b>万一哪天换了模型、或者游戏里看到神是背对着的</b>，只改这一个数即可：
      * 180 ⇒ 0（脸朝反方向），或者 ±90 微调 ✓。
+     *
+     * <p>★★ 2026-09-30 实机反馈（作者："第一个登神的朝向反了，应该面部跟 boss 的面部朝向一致，
+     * 我发现玩家的也反了"）⇒ **180 → 0** ✓。
+     * 也就是说这份模型实际的脸在 <b>+Z</b>（不是上面记的 −Z ✗）：跟随神按 {@code owner.getYRot()}
+     * 走，180 偏移时正好背对主人 ✗；改成 0 之后 {@code face = (−sin yaw, cos yaw)} ＝ 主人的朝向 ✓。
+     * ⚠️ 连带：三尊神"朝向圆心"的 yaw 公式必须跟着写成 {@code atan2(−dx, dz)} ✓
+     * （同一套约定：{@code look = (−sin yaw, +cos yaw)} ✓），否则它们会背对圆心 ✗。
      */
-    private static final float GOD_MODEL_YAW_OFFSET = 180.0F;
+    private static final float GOD_MODEL_YAW_OFFSET = 0.0F;
 
     /** 神脚底那圈环的贴图 ✓（128×128 的黑紫圆环，半透明自发光画成贴地面片） */
     private static final org.apache.logging.log4j.Logger LOGGER = org.apache.logging.log4j.LogManager.getLogger("TN-C/strike");

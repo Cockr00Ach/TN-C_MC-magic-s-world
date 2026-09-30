@@ -227,11 +227,14 @@ public class TNLightningStrikeEntity extends Entity {
      * <p>为什么伤害放在实体里、而不是生成它的那一刻：作者要的就是"<b>砸下来</b>那一下才疼" ✓
      * —— 球在空中那 16 tick，敌人跑开就打不着了（这才像"投篮"）。
      *
-     * @param owner  伤害归属者（同时也是"不打自己"的判据）✓
+     * @param owner  伤害归属者（同时也是"不打自己"的判据）✓ ——
+     *               ★ 2026-09-30 从 {@code Player} 放宽到 {@link net.minecraft.world.entity.LivingEntity}：
+     *               黑暗衍（boss）的落雷/大雷球也要真的打人 ✓（原来只认玩家 ✗ ⇒ boss 的法术
+     *               **一点伤害都没有**，纯放烟花 ✗✗ —— 作者："他的法术怎么感觉一般啊"）
      * @param damage 落地伤害（≤0 = 不结算，退回纯表现 ✓）
      * @param radius 落地伤害半径（格）
      */
-    public void setLandImpact(net.minecraft.world.entity.player.Player owner, float damage, double radius) {
+    public void setLandImpact(net.minecraft.world.entity.LivingEntity owner, float damage, double radius) {
         this.landOwner = owner == null ? null : owner.getUUID();
         this.landDamage = Math.max(0.0F, damage);
         this.landRadius = Math.max(0.0D, radius);
@@ -398,9 +401,9 @@ public class TNLightningStrikeEntity extends Entity {
         if (this.landDamage <= 0.0F || this.landOwner == null) {
             return;
         }
-        net.minecraft.world.entity.player.Player owner = level.getServer() == null
-                ? null : level.getServer().getPlayerList().getPlayer(this.landOwner);
-        if (owner == null) {
+        // ★ 归属者可能是玩家（t5 神在投篮）也可能是 boss（黑暗衍）⇒ 一律按 UUID 找 ✓
+        net.minecraft.world.entity.Entity rawOwner = level.getEntity(this.landOwner);
+        if (!(rawOwner instanceof net.minecraft.world.entity.LivingEntity owner)) {
             return;
         }
         // 爆心 = **球落点**（{@link #fallTo}，也就是地面上的锚点）✗ 不是球心 ——

@@ -157,14 +157,14 @@ public final class TnSpellMechanics {
     /** 球下落速度（格/tick）：0.5 = 慢慢砸下来，看得清 ✓ */
     private static final double DIVINE_BALL_FALL = 0.5D;
     /**
-     * 三尊神：体积 ×10 ⇒ 线性 26 ✓；环绕半径 22 格；悬停高度 **20 格** ✓
+     * 三尊神：体积 ×10 ⇒ 线性 26 ✓；环绕半径 **30 格**；悬停高度 **10 格** ✓
      *
-     * <p>2026-09-30 作者："神的格数太高了，改成 20 格高吧，持续时间可以短一点" ⇒
-     * 悬停 27 → **20** 格、{@link #DIVINE_GOD_LIFE} 200 → **120** tick（10 秒 → 6 秒）✓。
+     * <p>2026-09-30 作者："神的格数太高了，改成 20 格高吧" → 然后又"三个 god 的高度降低到 10 格吧，
+     * 间距可以拉大点" ⇒ 27 → 20 → **10** 格 ✓；半径 22 → **30** 格 ✓（间距拉大 ✓）。
      */
     private static final double DIVINE_GOD_SCALE = 26.0D;
-    private static final double DIVINE_GOD_RADIUS = 22.0D;
-    private static final double DIVINE_GOD_HEIGHT = 20.0D;
+    private static final double DIVINE_GOD_RADIUS = 30.0D;
+    private static final double DIVINE_GOD_HEIGHT = 10.0D;
     /** 大雷球：体积 ×3 ⇒ 线性 29 ✓ */
     private static final double DIVINE_BALL_SCALE = 29.0D;
     /** 球模型自身的半径（格）—— 用来把球心抬起来，免得半个球埋进地里 ✗ */
@@ -383,7 +383,10 @@ public final class TnSpellMechanics {
             god.asGod();
             double gx = anchor.x + Math.cos(ang) * DIVINE_GOD_RADIUS;
             double gz = anchor.z + Math.sin(ang) * DIVINE_GOD_RADIUS;
-            float yaw = (float) Math.toDegrees(Math.atan2(anchor.x - gx, anchor.z - gz));
+            // 朝向圆心 ✓ —— ★ 约定：look = (−sin yaw, +cos yaw)（见 getViewVector）
+            //   ⇒ 想面向 (dx, dz) 必须 yaw = atan2(−dx, dz) ✓
+            //   （2026-09-30 实机反馈"朝向反了"：原来写成 atan2(dx, dz)，x 分量正好反 ✗）
+            float yaw = (float) Math.toDegrees(Math.atan2(gx - anchor.x, anchor.z - gz));
             god.configure(DIVINE_GOD_SCALE, DIVINE_GOD_LIFE,
                     anchor.y + DIVINE_GOD_HEIGHT - TNLightningStrikeEntity.FALL_HEIGHT, 3.0D);
             god.moveTo(gx, anchor.y + DIVINE_GOD_HEIGHT, gz, yaw, 0.0F);
@@ -701,8 +704,13 @@ public final class TnSpellMechanics {
      * @param radius 半径（格）
      * @param life   存在多少 tick
      */
-    /** 在**指定坐标**铺魔法阵（作者 2026-09-27：雷球的阵要出现在"敌人脚下"，才有瞄准的感觉 ✓）。 */
-    private static void spawnMagicCircleAt(ServerLevel level, Vec3 at, double radius, int life) {
+    /**
+     * 在**指定坐标**铺魔法阵（作者 2026-09-27：雷球的阵要出现在"敌人脚下"，才有瞄准的感觉 ✓）。
+     *
+     * <p>★ 2026-09-30 改成 public：黑暗衍的「天打五雷轰」也要在他目标脚下铺一张 ✓
+     * （作者："他的法术怎么感觉一般啊，他没有天打五雷轰吗" ⇒ 给他配上阵，和玩家 t5 同款 ✓）。
+     */
+    public static void spawnMagicCircleAt(ServerLevel level, Vec3 at, double radius, int life) {
         TNMagicCircleEntity circle = TNOrbEntities.MAGIC_CIRCLE.get().create(level);
         if (circle == null) {
             return;
@@ -1535,10 +1543,19 @@ public final class TnSpellMechanics {
         return effect.isPresent() && player.hasEffect(effect.get());
     }
 
-    /** 敌人 = 不是自己、不是队友（简单判据：不是玩家、也不是驯服过的宠物）。 */
-    public static boolean isEnemy(Player player, LivingEntity target) {
-        if (target == player || !target.isAlive()) {
+    /**
+     * 敌人判据（包内共享）✓
+     *
+     * <p>★ 2026-09-30：owner 从 {@code Player} 放宽到 {@link LivingEntity} ✓ ——
+     * 黑暗衍（boss）的落雷/大雷球也要真的打人 ✓（原来只认玩家 ✗ ⇒ boss 的法术一点伤害都没有 ✗）。
+     * 非玩家 owner **只打玩家** ✓ —— boss 之间 / 召唤物之间互相误伤不是我们要的观感 ✗。
+     */
+    public static boolean isEnemy(LivingEntity owner, LivingEntity target) {
+        if (target == owner || !target.isAlive()) {
             return false;
+        }
+        if (!(owner instanceof Player player)) {
+            return target instanceof Player;
         }
         if (target instanceof Player other && !player.canHarmPlayer(other)) {
             return false;

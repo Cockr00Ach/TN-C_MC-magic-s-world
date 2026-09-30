@@ -21,8 +21,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
-import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
-import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
@@ -78,13 +76,32 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
     /**
      * 黑暗衍版"神在投篮"的三尊神参数 ✓
      *
-     * <p>2026-09-30 作者："神的格数太高了，改成 20 格高吧，持续时间可以短一点" ⇒
-     * 悬停 **20 格**（原来是 30 ✗）、存活 **80 tick = 4 秒**（原来 100 ✗）✓。
+     * <p>2026-09-30 作者："神的格数太高了，改成 20 格高吧，持续时间可以短一点" →
+     * 然后又"三个 god 的高度降低到 10 格吧，间距可以拉大点" ⇒ 悬停 **10 格**（30 → 20 → 10 ✓）、
+     * 环绕半径 **12 格**（原来 6 ✓）、存活 **80 tick = 4 秒** ✓。
      * 尺寸保持 12（作者验收过的大小 ✓，和玩家 t5 那三尊的 26 是两个不同的观感 ✓）。
      */
-    private static final double GOD_HOVER_HEIGHT = 20.0D;
+    private static final double GOD_HOVER_HEIGHT = 10.0D;
+    private static final double GOD_RADIUS = 12.0D;
     private static final double GOD_SCALE = 12.0D;
     private static final int GOD_LIFE = 80;
+
+    /**
+     * 四个技能的伤害 / 范围 ✓
+     *
+     * <p>★★ 2026-09-30 大发现（作者："他的法术怎么感觉一般啊"）：{@code TNLightningStrikeEntity}
+     * 只在 {@code setLandImpact(...)} 被调用过时才结算伤害 ✗，而黑暗衍的 {@code bolt()} 从来
+     * **没有调过它** ⇒ 他放的全是**纯视觉烟花、一点伤害都没有** ✗✗；这次又删掉了近战
+     * ⇒ 他完全打不到人 ✗✗✗。现在四个技能都挂上归属与伤害 ✓。
+     */
+    private static final float STORM_DAMAGE = 6.0F;
+    private static final double STORM_RADIUS = 3.0D;
+    private static final float THUNDER_DAMAGE = 10.0F;
+    private static final double THUNDER_RADIUS = 4.0D;
+    private static final float BALL_DAMAGE = 24.0F;
+    private static final double BALL_BLAST = 7.0D;
+    /** 神在投篮那颗球的下落速度（作者："球速太快了" ⇒ 1.5 → **0.4** ✓，和玩家 t5 的 0.5 同档 ✓） */
+    private static final double BALL_FALL_SPEED = 0.4D;
 
     /**
      * ★ Boss 血量条（作者 2026-09-30："我希望他会显示 boss 血量条啊，就是那种 boss 战的血量条，
@@ -158,14 +175,40 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
      *       NearestAttackableTargetGoal（配合 64 格 FOLLOW_RANGE ⇒ **站桩远程开火** ✓）</li>
      * </ul>
      * 没有 movement goal ⇒ 他**根本不会寻路**，只能原地转身 ✓（这正是作者要的"站在原地" ✓）。
+     *
+     * <p>★ 2026-09-30 追加：作者"boss 虽然不动，他的朝向应该一直看着玩家啊" ⇒
+     * 「转头看你」这件事**不再交给 LookAtPlayerGoal/RandomLookAroundGoal** ✗ ——
+     * 那两个 goal 只动**头**（`yHeadRot`），而 GeckoLib 画的是整个身体 ⇒ 看着像没转 ✗。
+     * 现在由 {@link #faceTarget()} 每 tick **直接写身体 yaw**（`setYRot` + `yBodyRot` ✓），
+     * 比 goal 更可靠、也不会被"随机张望"打断 ✓。
      */
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 64.0F));
-        this.goalSelector.addGoal(9, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
+    }
+
+    /**
+     * 每 tick 把**整个身体**转向目标 ✓（作者："boss 虽然不动，他的朝向应该一直看着玩家啊"）。
+     *
+     * <p>约定：原版 {@code getViewVector} = {@code (−sin yaw, cos yaw)} ⇒
+     * 想面向 (dx, dz) 就得 {@code yaw = atan2(−dx, dz)} ✓（x 分量最容易写反 ✗）。
+     * 三个都写：`setYRot`（实体朝向）、`yBodyRot`（渲染器用的身体角 ✓）、`yHeadRot`（头部）✓。
+     */
+    private void faceTarget() {
+        LivingEntity target = this.getTarget();
+        if (target == null) {
+            return;
+        }
+        double dx = target.getX() - this.getX();
+        double dz = target.getZ() - this.getZ();
+        float yaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
+        this.setYRot(yaw);
+        this.yBodyRot = yaw;
+        this.yBodyRotO = yaw;
+        this.setYHeadRot(yaw);
+        this.getLookControl().setLookAt(target, 30.0F, 30.0F);
     }
 
     @Override
@@ -399,6 +442,8 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
             this.ensurePhaseTwoAura();
             this.phaseTwoAscensionVisuals();     // ★ 电弧/环绕电光/雷印（不然"看不出在登神" ✗）
         }
+        // ★ 一直看着玩家（作者："boss 虽然不动，他的朝向应该一直看着玩家啊"）✓ 在施法/目标判定之前 ✓
+        this.faceTarget();
         if (this.getTarget() == null) {
             return;
         }
@@ -441,41 +486,64 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
         }
     }
 
-    /** 落雷：在 from 上方落下并砸向目标点 ✓（形态 0，**暗色版** ✓） */
-    private void bolt(ServerLevel level, Vec3 at, double scale, double shake) {
+    /**
+     * 落雷：从天上砸到 at ✓（形态 0，**暗色版** ✓），并且**真的会打人** ✓。
+     *
+     * @param damage 落地伤害（≤0 = 纯表现）；{@code radius} 落地伤害半径
+     */
+    private void bolt(ServerLevel level, Vec3 at, double scale, double shake,
+                      float damage, double radius) {
         TNLightningStrikeEntity b = TNOrbEntities.LIGHTNING_STRIKE.get().create(level);
         if (b == null) {
             return;
         }
         b.asDark();                                  // 黑暗衍专用模型：flash_dark ✓
         b.configure(scale, 6, at.y, shake);
+        if (damage > 0.0F) {
+            b.setLandImpact(this, damage, radius);   // ★ 关键：不调这句就是纯烟花 ✗
+        }
         b.moveTo(at.x, at.y, at.z, 0.0F, 0.0F);
         level.addFreshEntity(b);
     }
 
-    /** 雷暴：目标周围 5 道 ✓ */
+    /** 雷暴：目标周围 5 道（各带伤害 ✓） */
     private void castStorm(ServerLevel level, LivingEntity target) {
         for (int i = 0; i < 5; i++) {
             double dx = (this.random.nextDouble() - 0.5D) * 10.0D;
             double dz = (this.random.nextDouble() - 0.5D) * 10.0D;
-            this.bolt(level, target.position().add(dx, 0.0D, dz), 4.5D, 3.0D);
+            this.bolt(level, target.position().add(dx, 0.0D, dz), 4.5D, 3.0D,
+                    STORM_DAMAGE, STORM_RADIUS);
         }
         level.playSound(null, this.getX(), this.getY(), this.getZ(),
                 SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.HOSTILE, 1.5F, 1.0F);
     }
 
-    /** 天打五雷轰：目标头顶连落 8 道（大一号）✓ */
+    /**
+     * 天打五雷轰：目标头顶连落 **12 道**（大一号 ＋ 会炸 ✓）＋ 脚下铺一张魔法阵 ✓。
+     *
+     * <p>作者 2026-09-30："他的法术怎么感觉一般啊，他没有天打五雷轰吗" ⇒ 有，但原来只有 8 道、
+     * scale 9、**没有伤害也没有阵** ✗ ⇒ 现在 12 道、scale 12、每道 10 伤 4 格，
+     * 并且照玩家 t5 那套在目标脚下铺 14 格魔法阵 ✓（`spawnMagicCircleAt` 已改成 public ✓）。
+     */
     private void castHeavenlyThunder(ServerLevel level, LivingEntity target) {
-        for (int i = 0; i < 8; i++) {
-            double dx = (this.random.nextDouble() - 0.5D) * 6.0D;
-            double dz = (this.random.nextDouble() - 0.5D) * 6.0D;
-            this.bolt(level, target.position().add(dx, 0.0D, dz), 9.0D, 8.0D);
+        Vec3 at = target.position();
+        com.tnc.tnc.magic.TnSpellMechanics.spawnMagicCircleAt(level, at, 14.0D, 210);
+        for (int i = 0; i < 12; i++) {
+            double dx = (this.random.nextDouble() - 0.5D) * 8.0D;
+            double dz = (this.random.nextDouble() - 0.5D) * 8.0D;
+            this.bolt(level, at.add(dx, 0.0D, dz), 12.0D, 8.0D, THUNDER_DAMAGE, THUNDER_RADIUS);
         }
         level.playSound(null, this.getX(), this.getY(), this.getZ(),
                 SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.HOSTILE, 2.0F, 0.9F);
     }
 
-    /** 神在投篮：目标头顶一颗大雷球（慢速下落 ✓）＋ 三尊神 ✓ —— 全部用**暗色**模型 ✓ */
+    /**
+     * 神在投篮：目标头顶一颗大雷球（**慢慢**下落 ＋ 落地重炸 ✓）＋ 三尊神 ✓ —— 全部暗色 ✓。
+     *
+     * <p>作者 2026-09-30："他的神的投篮球速太快了我感觉，而且爆炸威力一般" ⇒
+     * 下落 1.5 → **0.4**（和玩家 t5 的 0.5 同档 ✓）、落地 **24 伤 7 格** ＋ 冲击波/大团粒子 ✓
+     * （调了 {@code setLandImpact} 才会走 {@code landBlast} 那一整套演出 ✓）。
+     */
     private void castGodDescent(ServerLevel level, LivingEntity target) {
         Vec3 at = target.position();
         // ★ 先把天变黑（作者 2026-09-30："怎么放神在投篮没有雷雨天啊"）✓
@@ -485,8 +553,9 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
         if (ball != null) {
             ball.asBall();
             ball.asDark();                           // lightingball_dark ✓
-            ball.setFallSpeed(1.5D);
+            ball.setFallSpeed(BALL_FALL_SPEED);
             ball.configure(20.0D, 6, at.y, 12.0D);
+            ball.setLandImpact(this, BALL_DAMAGE, BALL_BLAST);   // ★ 落地才有伤害/爆炸 ✓
             ball.moveTo(at.x, at.y, at.z, 0.0F, 0.0F);
             level.addFreshEntity(ball);
         }
@@ -498,12 +567,16 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
             }
             god.asGod();
             god.asDark();                            // god_dark ✓
+            double gx = at.x + Math.cos(ang) * GOD_RADIUS;
+            double gz = at.z + Math.sin(ang) * GOD_RADIUS;
+            // 朝向：面向目标 ✓ —— 约定 look = (−sin yaw, +cos yaw) ⇒ yaw = atan2(−dx, dz) ✓
+            //   （2026-09-30 实机反馈"朝向反了"：x 分量不能写反 ✓）
+            float yaw = (float) Math.toDegrees(Math.atan2(gx - at.x, at.z - gz));
             // 悬停高度：实体 tick 里是 `fallTo + FALL_HEIGHT(24)` ⇒ 想悬停在 GOD_HOVER_HEIGHT
-            // 就得把 fallTo 设成「目标高度 − 24」✓（作者 2026-09-30："神的格数太高了，改成 20 格高"）
+            // 就得把 fallTo 设成「目标高度 − 24」✓（作者："三个 god 的高度降低到 10 格"）
             god.configure(GOD_SCALE, GOD_LIFE,
                     at.y + GOD_HOVER_HEIGHT - TNLightningStrikeEntity.FALL_HEIGHT, 3.0D);
-            god.moveTo(at.x + Math.cos(ang) * 6.0D, at.y + GOD_HOVER_HEIGHT,
-                    at.z + Math.sin(ang) * 6.0D, 0.0F, 0.0F);
+            god.moveTo(gx, at.y + GOD_HOVER_HEIGHT, gz, yaw, 0.0F);
             level.addFreshEntity(god);
         }
         level.playSound(null, this.getX(), this.getY(), this.getZ(),
