@@ -146,11 +146,11 @@ public final class SpellEngineManaHook {
                 return;
             }
 
-            int cost = entry.manaCostFor(data.getMaxMana());
+            int cost = com.tnc.tnc.equipment.MageGear.spellCost(player,entry.manaCostFor(data.getMaxMana()));
 
             if (args.action() == net.spell_engine.internals.casting.SpellCast.Action.CHANNEL) {
                 // 起手阶段：不够就先警告（只在进度刚开始时提示一次，避免刷屏）
-                if (!ManaCharge.canAfford(data, entry) && args.progress() <= 0.05F) {
+                if (data.getMana()<cost && args.progress() <= 0.05F) {
                     player.displayClientMessage(Component.literal(
                             "§c[TN-C] 魔力不足（" + data.getMana() + " / " + cost + "）§7—— 现在收手还来得及"), true);
                 }
@@ -158,7 +158,7 @@ public final class SpellEngineManaHook {
             }
 
             // 真正放出去了：数值怎么变交给纯逻辑层（ManaCharge），这里只负责提示与同步
-            ManaCharge.Result result = ManaCharge.apply(data, entry);
+            ManaCharge.Result result = ManaCharge.applyCost(data,cost);
             if (result.outcome() == ManaCharge.Outcome.DEDUCTED) {
                 com.tnc.tnc.adventure.AdventureService.milestone(player,"cast");
             }
@@ -169,7 +169,7 @@ public final class SpellEngineManaHook {
             if (result.outcome() == ManaCharge.Outcome.DEDUCTED
                     && com.tnc.tnc.magic.TNWindMechanics.WIND_GOD.isPresent()
                     && player.hasEffect(com.tnc.tnc.magic.TNWindMechanics.WIND_GOD.get())) {
-                int fullCost = entry.manaCostFor(data.getMaxMana());
+                int fullCost = cost;
                 data.setMana(Math.min(data.getMaxMana(), data.getMana() + fullCost / 2));
                 player.displayClientMessage(Component.literal(
                         "§b[TN-C] 风神降临：蓝耗减半 §7(-" + (fullCost - fullCost / 2) + ")"), true);

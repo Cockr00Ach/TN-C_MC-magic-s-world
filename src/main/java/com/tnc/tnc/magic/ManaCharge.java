@@ -59,6 +59,10 @@ public final class ManaCharge {
         // 消耗随上限等比放大 —— 和 ManaGate 的判定必须用同一个口径，
         // 否则会出现"拦截说够、扣费说不够"或者反过来
         int cost = entry.manaCostFor(data.getMaxMana());
+        return applyCost(data,cost);
+    }
+    public static Result applyCost(MagicStoneData data,int cost) {
+        cost=Math.max(0,cost);
         int before = data.getMana();
 
         if (before >= cost) {

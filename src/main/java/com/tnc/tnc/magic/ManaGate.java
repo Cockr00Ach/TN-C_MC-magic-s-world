@@ -65,6 +65,9 @@ public final class ManaGate {
      */
     public static Decision evaluate(MagicStoneData data, SpellCatalog.Entry entry, boolean requireLearned,
                                     boolean requireWand, boolean hasWand) {
+        return evaluateCost(data,entry,requireLearned,requireWand,hasWand,entry.manaCostFor(data.getMaxMana()));
+    }
+    public static Decision evaluateCost(MagicStoneData data,SpellCatalog.Entry entry,boolean requireLearned,boolean requireWand,boolean hasWand,int cost){
         if (requireWand && !hasWand) {
             org.apache.logging.log4j.LogManager.getLogger("TN-C/gate").info("TN-C: gate BLOCKED {} reason=NO_WAND", entry.id());
             return Decision.NO_WAND;
@@ -73,7 +76,7 @@ public final class ManaGate {
             org.apache.logging.log4j.LogManager.getLogger("TN-C/gate").info("TN-C: gate BLOCKED {} reason=NOT_LEARNED", entry.id());
             return Decision.NOT_LEARNED;
         }
-        if (data.getMana() < entry.manaCostFor(data.getMaxMana())) {
+        if (data.getMana() < cost) {
             org.apache.logging.log4j.LogManager.getLogger("TN-C/gate").info("TN-C: gate BLOCKED {} reason=NOT_ENOUGH_MANA {} / {}", entry.id(), data.getMana(), entry.manaCostFor(data.getMaxMana()));
             return Decision.NOT_ENOUGH_MANA;
         }
@@ -176,8 +179,8 @@ public final class ManaGate {
             com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(serverPlayer,SpellCatalog.effectiveIds(data));
             com.tnc.tnc.adventure.AdventureService.milestone(serverPlayer,"learned");
         }
-        Decision decision = evaluate(data, entry, com.tnc.tnc.Config.requireLearnedToCast,
-                com.tnc.tnc.Config.requireWandToCast, supported);
+        Decision decision = evaluateCost(data, entry, com.tnc.tnc.Config.requireLearnedToCast,
+                com.tnc.tnc.Config.requireWandToCast, supported,com.tnc.tnc.equipment.MageGear.spellCost(serverPlayer,entry.manaCostFor(data.getMaxMana())));
         if (decision == Decision.ALLOW) {
             return false;
         }
@@ -194,7 +197,7 @@ public final class ManaGate {
             serverPlayer.displayClientMessage(Component.literal(
                     "§c[TN-C] 需要手持能承载该元素与阶位的法器"), true);
         } else {
-            int cost = entry.manaCostFor(data.getMaxMana());
+            int cost = com.tnc.tnc.equipment.MageGear.spellCost(serverPlayer,entry.manaCostFor(data.getMaxMana()));
             lastBlockedSpell = spellId + "（" + data.getMana() + " / " + cost + "）";
             serverPlayer.displayClientMessage(Component.literal(
                     "§c[TN-C] 魔力不足（" + data.getMana() + " / " + cost + "），施法失败"), true);

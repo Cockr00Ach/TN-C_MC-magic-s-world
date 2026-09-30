@@ -78,14 +78,17 @@ public final class AdventureService {
         var p=profile(player);if(!p.registered)return "请先登记冒险者。";
         if(p.smithReady>=0)return "已有制作中的订单，请先领取。";
         var design=ElementWands.find(designId);var equipment=EquipmentOrders.find(designId);if(design==null&&equipment==null)return "请选择真实品种，未扣材料。旧基础杖只保留存量与旧待领奖订单。";
+        if(designId.equals("equipment_leggings")||designId.equals("equipment_boots"))return "装备栏已改为帽子与全身身甲，请选择新的装备。";
         int tier=design==null?1:design.tier();int[] levels={0,1,10,25,50,85};
-        if(p.level()<levels[tier])return "这一档铸造需要冒险Lv"+levels[tier]+"，未扣材料。";
-        long fee=equipment!=null?(p.armorCrafted?equipment.fee():0):(!p.crafted&&tier==1?0:design.fee());
+        int required=equipment!=null?equipment.level():levels[tier];
+        if(p.level()<required)return "这一档铸造需要冒险Lv"+required+"，未扣材料。";
+        long fee=equipment!=null?(!p.armorCrafted&&required==1?0:equipment.fee()):(!p.crafted&&tier==1?0:design.fee());
         if(p.coins<fee)return "人工费不足：需要"+fee+"铜。首次一阶订单免人工费。";
         var tx=new InventoryTransaction(player.getInventory());if(!tx.take(equipment!=null?equipment.materials():design.materials(),false))return "材料不足，全部材料和金币保留。";
         tx.commit();if(fee>0)p.debit(fee,equipment!=null?"铁匠制作":"法杖打造");
-        p.smithDesign=designId;p.smithFree=fee==0;p.smithReady=AdventureSavedData.get(player.server).activeTicks+(equipment!=null?400:design.seconds()*20L);
-        milestone(player,equipment!=null?"equipment_ordered":"ordered");return "材料已交给"+(equipment!=null?"铎恩":"莉娅")+"，"+(design==null?20:design.seconds())+"秒后可领取。退出不会丢失订单。";
+        int seconds=equipment!=null?equipment.seconds():design.seconds();
+        p.smithDesign=designId;p.smithFree=fee==0;p.smithReady=AdventureSavedData.get(player.server).activeTicks+seconds*20L;
+        milestone(player,equipment!=null?"equipment_ordered":"ordered");return "材料已交给"+(equipment!=null?"铎恩":"莉娅")+"，"+seconds+"秒后可领取。退出不会丢失订单。";
     }
     public static String claim(ServerPlayer player) {
         var p=profile(player);long now=AdventureSavedData.get(player.server).activeTicks;
@@ -101,7 +104,8 @@ public final class AdventureService {
         var magic=MagicStone.getOrNull(player);
         if(magic!=null)com.tnc.tnc.magic.compat.SpellEngineBridge.ensureWand(player,SpellCatalog.effectiveIds(magic));
         if(design!=null)milestone(player,"forged_"+design.id());p.smithDesign="";
-        milestone(player,equipment!=null?"armored":"forged");return equipment!=null?"铁匠订单已交付；装备保留原版属性。":"已领取法器。按V学习对应法术，再在野外练习施放。";
+        if(equipment!=null&&com.tnc.tnc.equipment.MageGear.find(equipment.id())!=null)milestone(player,"gear_"+equipment.id());
+        milestone(player,equipment!=null?"armored":"forged");return equipment!=null?"铁匠订单已交付；魔法帽戴头部，完整身甲穿胸甲槽。":"已领取法器。按V学习对应法术，再在野外练习施放。";
     }
     public static String promote(ServerPlayer player) {
         var p=profile(player);if(!p.registered)return "请先登记。";

@@ -146,7 +146,9 @@ public class MagicStone {
         }
         get(serverPlayer).ifPresent(data -> {
             if (data.getMana() < data.getMaxMana()) {
-                int regen = Config.manaRegenFor(data.getMaxMana());
+                int bonus = com.tnc.tnc.equipment.MageGear.regen(serverPlayer);
+                int gearRegen = (int)(((long)player.tickCount*bonus/40)-((long)(player.tickCount-interval)*bonus/40));
+                int regen = Config.manaRegenFor(data.getMaxMana())+gearRegen;
                 if (regen > 0) {
                     data.addMana(regen);
                     // ★ 必须同步给客户端，否则客户端的魔力值会一直停在旧值上 ——
@@ -180,8 +182,11 @@ public class MagicStone {
             growth = profile.level() - 1;
             data.setAdventurePoints(profile.learningPoints());
         }
+        int previousMana=data.getMana();
         data.recomputeMaxMana(growth,
                 Config.manaPerAffinity, Config.manaPerVanillaLevel, Config.flatManaBonus);
+        data.setMaxMana(data.getMaxMana()+com.tnc.tnc.equipment.MageGear.mana(player));
+        data.setMana(previousMana);
     }
 
     public static LazyOptional<MagicStoneData> get(Player player) {

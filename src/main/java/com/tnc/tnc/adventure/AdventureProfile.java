@@ -8,6 +8,7 @@ public final class AdventureProfile {
     int reputation, rank, learningBase = 4;
     boolean registered, crafted, smithFree;
     boolean armorCrafted;
+    public long divineReadyAt;
     String smithDesign="";
     int nativeBounties;
     int adventureKills,bossKills;

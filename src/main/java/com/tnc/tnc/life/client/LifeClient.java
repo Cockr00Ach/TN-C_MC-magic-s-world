@@ -14,7 +14,14 @@ import net.minecraftforge.client.event.ScreenEvent;
 
 @Mod.EventBusSubscriber(modid=TNMod.MODID,value=Dist.CLIENT)
 public final class LifeClient {
-    @SubscribeEvent public static void inventory(ScreenEvent.Init.Post e){if(e.getScreen() instanceof InventoryScreen s)e.addListener(Button.builder(Component.literal("行囊"),b->MagicStoneNetwork.CHANNEL.sendToServer(new OpenTravelBagPacket())).bounds(s.getGuiLeft()+177,s.getGuiTop()+110,42,20).build());}
+    private static final java.util.Map<InventoryScreen,Button> BAGS=new java.util.WeakHashMap<>();
+    @SubscribeEvent public static void inventory(ScreenEvent.Init.Post e){if(e.getScreen() instanceof InventoryScreen s){
+        var button=Button.builder(Component.literal("行囊"),b->MagicStoneNetwork.CHANNEL.sendToServer(new OpenTravelBagPacket())).bounds(s.getGuiLeft()+39,Math.max(2,s.getGuiTop()-22),42,20).build();
+        BAGS.put(s,button);e.addListener(button);
+    }}
+    @SubscribeEvent public static void align(ScreenEvent.Render.Pre e){if(e.getScreen() instanceof InventoryScreen s){
+        var b=BAGS.get(s);if(b!=null){b.setX(s.getGuiLeft()+39);b.setY(Math.max(2,s.getGuiTop()-22));}
+    }}
     @Mod.EventBusSubscriber(modid=TNMod.MODID,value=Dist.CLIENT,bus=Mod.EventBusSubscriber.Bus.MOD)
     public static class Setup {@SubscribeEvent public static void setup(FMLClientSetupEvent e){e.enqueueWork(()->MenuScreens.register(TNMod.TRAVEL_BAG_MENU.get(),TravelBagScreen::new));}}
 }

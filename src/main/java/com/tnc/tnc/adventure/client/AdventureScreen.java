@@ -14,12 +14,17 @@ public final class AdventureScreen extends Screen {
     private CompoundTag data;
     private final ServicePanel panel;
     private final int tab;
-    private int page,left,top,panelWidth,panelHeight,ticks,element,armChoice,tier=1;
+    private int page,left,top,panelWidth,panelHeight,ticks,element,armChoice,gearCategory,tier=1,gearTier=1;
     private String notice="";
     private int bodyScroll,scrollLimit,bodyLastY;
     private List<ContractCatalog.Contract> visible=List.of();
     public AdventureScreen(CompoundTag tag){super(Component.literal(ServicePanel.fromRole(tag.getString("ServiceRole")).title()));data=tag;panel=ServicePanel.fromRole(tag.getString("ServiceRole"));tab=panel.tab();}
     private ElementWands.Design design(){return ElementWands.ALL.get(element*5+tier-1);}
+    private com.tnc.tnc.equipment.MageGear.Design gear(){
+        String style=gearCategory==2?"divine":new String[]{"bastion","astral","runic","wanderer"}[armChoice];
+        boolean hat=gearCategory==1||(gearCategory==2&&armChoice==1);
+        return com.tnc.tnc.equipment.MageGear.find(style+(hat?"_hat_":"_outfit_")+(gearCategory==2?5:gearTier));
+    }
     public static void accept(CompoundTag tag,boolean open) {
         if(tag==null)return;var mc=Minecraft.getInstance();
         if(open)mc.setScreen(new AdventureScreen(tag));
@@ -68,18 +73,31 @@ public final class AdventureScreen extends Screen {
             button("取金",left+224,by,48,()->send(AdventurePackets.Action.BANK_WITHDRAW,"gold"),bank);
             button("确认购买 · 5银",left+20,top+panelHeight-66,140,()->send(AdventurePackets.Action.BUY_HOME,""),data.getBoolean("AtBroker")&&!house.hasUUID("Owner")&&p.coins()>=500);
         } else {
-            int w=(panelWidth-40)/5;for(int i=0;i<5;i++){final int c=i;button(List.of("铁盔","铁甲","护腿","铁靴","铁剑").get(i),left+20+i*w,top+80,w-3,()->{armChoice=c;rebuildWidgets();},armChoice!=i);}
-            button("交矿石下单",left+20,top+panelHeight-66,110,()->send(AdventurePackets.Action.ORDER,EquipmentOrders.ALL.get(armChoice).id()),data.getBoolean("AtArmorer")&&data.getLong("SmithReady")<0);
-            button("领取装备",left+138,top+panelHeight-66,110,()->send(AdventurePackets.Action.CLAIM,""),data.getBoolean("AtArmorer")&&data.getLong("SmithReady")>=0);
+            if(compactGear()){
+                int w=(panelWidth-40)/3;
+                button(List.of("全身身甲","魔法帽","遗物修复").get(gearCategory),left+20,top+44,w-3,()->{gearCategory=(gearCategory+1)%3;armChoice=0;bodyScroll=0;rebuildWidgets();},true);
+                var choices=gearCategory==2?List.of("神袍遗物","星冠遗物"):gearCategory==1?List.of("守望宽檐","观星尖帽","回响法冠","行旅兜帽"):List.of("壁垒战甲","星织长袍","秘纹锁甲","远行外衣");
+                button(choices.get(armChoice),left+20+w,top+44,w-3,()->{armChoice=(armChoice+1)%choices.size();bodyScroll=0;rebuildWidgets();},true);
+                button(com.tnc.tnc.equipment.MageGear.RANKS[gearCategory==2?5:gearTier],left+20+w*2,top+44,w-3,()->{gearTier=gearTier%4+1;bodyScroll=0;rebuildWidgets();},gearCategory!=2);
+            }else{
+            int cw=(panelWidth-40)/3;for(int i=0;i<3;i++){final int c=i;button(List.of("全身身甲","魔法帽","遗物修复").get(i),left+20+i*cw,top+75,cw-3,()->{gearCategory=c;armChoice=0;bodyScroll=0;rebuildWidgets();},gearCategory!=i);}
+            var choices=gearCategory==2?List.of("神袍遗物","星冠遗物"):gearCategory==1?List.of("守望宽檐","观星尖帽","回响法冠","行旅兜帽"):List.of("壁垒战甲","星织长袍","秘纹锁甲","远行外衣");
+            int w=(panelWidth-40)/choices.size();for(int i=0;i<choices.size();i++){final int c=i;button(choices.get(i),left+20+i*w,top+99,w-3,()->{armChoice=c;bodyScroll=0;rebuildWidgets();},armChoice!=i);}
+            if(gearCategory!=2){int rw=(panelWidth-40)/4;for(int i=1;i<=4;i++){final int t=i;button(com.tnc.tnc.equipment.MageGear.RANKS[i],left+20+(i-1)*rw,top+123,rw-3,()->{gearTier=t;bodyScroll=0;rebuildWidgets();},gearTier!=i);}}
+            }
+            int actionY=top+panelHeight-(compactGear()?44:66),actionW=(panelWidth-44)/2;
+            button(gearCategory==2?"提交遗物修复":"交材料制作",left+20,actionY,actionW,()->send(AdventurePackets.Action.ORDER,gear().id()),data.getBoolean("AtArmorer")&&data.getLong("SmithReady")<0);
+            button("领取装备",left+24+actionW,actionY,actionW,()->send(AdventurePackets.Action.CLAIM,""),data.getBoolean("AtArmorer")&&data.getLong("SmithReady")>=0);
         }
         button("关闭",left+panelWidth-64,top+12,48,this::onClose,true);
     }
+    private boolean compactGear(){return tab==4&&panelHeight<260;}
     private Set<String> active(){var ids=new HashSet<String>();for(var c:data.getList("Contracts",10))ids.add(((CompoundTag)c).getString("ID"));return ids;}
     private int rows(){return Math.max(1,(panelHeight-192)/36);}
     private String materialName(ContractCatalog.Material material){
         if(material.tag())return material.id().equals("minecraft:logs")?"任意原木":"匹配材料";
         var item=net.minecraftforge.registries.ForgeRegistries.ITEMS.getValue(net.minecraft.resources.ResourceLocation.parse(material.id()));
-        return item==null?"所需材料":item.getDescription().getString();
+        return item==null?"所需材料":new net.minecraft.world.item.ItemStack(item).getHoverName().getString();
     }
     private String enemyName(String id){
         var entity=net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getValue(net.minecraft.resources.ResourceLocation.parse(id));
@@ -90,10 +108,10 @@ public final class AdventureScreen extends Screen {
     @Override public void render(GuiGraphics g,int mx,int my,float partial) {
         renderBackground(g);g.fill(left-2,top-2,left+panelWidth+2,top+panelHeight+2,0xFFA48257);g.fill(left,top,left+panelWidth,top+panelHeight,0xFFF1E7D5);
         g.fill(left,top,left+panelWidth,top+38,0xFF182C42);text(g,panel.title(),left+16,top+14,0xF7E8CF);
-        text(g,panel.subtitle(),left+20,top+49,0x246E78);
+        if(!compactGear())text(g,panel.subtitle(),left+20,top+49,0x246E78);
         var p=profile();boolean local=data.getBoolean("AtService");
         String hoveredDetail=null;
-        int bodyStart=top+(tab==2?135:tab==4?115:tab==1?101:78),bodyEnd=top+panelHeight-(tab==3?99:tab==1?60:76);
+        int bodyStart=top+(tab==2?135:tab==4?(compactGear()?70:153):tab==1?101:78),bodyEnd=top+panelHeight-(tab==3?99:tab==1?60:compactGear()?48:76);
         bodyLastY=bodyStart;bodyScroll=Math.min(bodyScroll,scrollLimit);
         g.enableScissor(left+12,bodyStart,left+panelWidth-12,Math.max(bodyStart+1,bodyEnd));g.pose().pushPose();g.pose().translate(0,-bodyScroll,0);
         if(tab==0) {
@@ -140,17 +158,18 @@ public final class AdventureScreen extends Screen {
             y=paragraph(g,"装修边界："+house.getString("Boundary"),y+8,0x635A4A);
             paragraph(g,"账户余额："+AdventureRules.money(p.coins())+"。银行存取与钱袋共用余额；实体币不重复记账。",y+8,0x635A4A);
         } else {
-            var r=EquipmentOrders.ALL.get(armChoice);g.renderItem(new net.minecraft.world.item.ItemStack(r.item()),left+20,top+118);
-            int y=paragraph(g,"炉石铁匠铺 · "+r.item().getDescription().getString(),top+145,0x182C42);
-            y=paragraph(g,"粗铁×"+r.ore()+"，煤炭×1；人工费"+r.fee()+"铜。首件基础装备免人工费，20秒交付。",y+10,0x635A4A);
-            y=paragraph(g,"法杖与铁匠订单共用一张个人提货凭证；先到原商家领完，再下新单。装备保持原版属性与附魔规则。",y+10,0x635A4A);
+            var d=gear();var r=EquipmentOrders.find(d.id());int gearY=top+(compactGear()?72:155);g.renderItem(com.tnc.tnc.equipment.MageGear.stack(d),left+20,gearY);
+            text(g,d.name(),left+48,gearY,0x182C42);text(g,"Lv"+r.level()+" · "+r.seconds()+"秒 · "+r.fee()+"铜",left+48,gearY+18,0x246E78);
+            int y=paragraph(g,d.detail(),gearY+39,0x635A4A);
+            y=paragraph(g,r.materials().stream().map(m->materialName(m)+"×"+m.count()).reduce((a,b)->a+" / "+b).orElse(""),y+5,0x635A4A);
+            y=paragraph(g,d.divine()?"修复需要破损遗物；遗物获取地点尚未开放。":"首次冒险者装备免人工费。帽子与身甲可自由混搭，身甲已包含裤鞋。",y+5,0x635A4A);
             var equipment=EquipmentOrders.find(data.getString("SmithDesign"));var wand=ElementWands.find(data.getString("SmithDesign"));
-            String pending=equipment!=null?equipment.item().getDescription().getString():wand!=null?wand.name():"旧基础杖";
+            String pending=equipment!=null?new net.minecraft.world.item.ItemStack(equipment.item()).getHoverName().getString():wand!=null?wand.name():"旧基础杖";
             paragraph(g,data.getLong("SmithReady")<0?"当前没有订单。":"已有订单："+pending+"；请回原商家领取。",y+10,0x246E78);
         }
         g.pose().popPose();g.disableScissor();scrollLimit=Math.max(0,bodyLastY-bodyEnd+4);
         if(tab==1)text(g,"原生栏已完成 "+data.getInt("NativeBounties")+" 次",left+170,top+panelHeight-46,0x635A4A);
-        if(scrollLimit>0)text(g,"滚轮查看更多",left+panelWidth-90,bodyEnd+2,0x635A4A);
+        if(scrollLimit>0&&!compactGear())text(g,"滚轮查看更多",left+panelWidth-90,bodyEnd+2,0x635A4A);
         if(!notice.isEmpty()){
             String shortNotice=font.plainSubstrByWidth(notice,panelWidth-40);text(g,shortNotice,left+20,top+panelHeight-20,0x7B452B);
             if(mx>=left+20&&mx<=left+panelWidth-20&&my>=top+panelHeight-24&&my<top+panelHeight)g.renderTooltip(font,font.split(Component.literal(notice),Math.min(320,width-40)),mx,my);
@@ -158,7 +177,7 @@ public final class AdventureScreen extends Screen {
         super.render(g,mx,my,partial);
         if(hoveredDetail!=null)g.renderTooltip(font,font.split(Component.literal(hoveredDetail),Math.min(260,width-20)),mx,my);
     }
-    @Override public boolean mouseScrolled(double x,double y,double delta){if(x>=left&&x<=left+panelWidth&&y>=top+72&&y<top+panelHeight-76&&scrollLimit>0){bodyScroll=Math.max(0,Math.min(scrollLimit,bodyScroll-(int)(delta*18)));return true;}return super.mouseScrolled(x,y,delta);}
+    @Override public boolean mouseScrolled(double x,double y,double delta){if(x>=left&&x<=left+panelWidth&&y>=top+72&&y<top+panelHeight-(compactGear()?48:76)&&scrollLimit>0){bodyScroll=Math.max(0,Math.min(scrollLimit,bodyScroll-(int)(delta*18)));return true;}return super.mouseScrolled(x,y,delta);}
     @Override public void tick(){if(++ticks%20==0)send(AdventurePackets.Action.REQUEST,"");}
     @Override public boolean isPauseScreen(){return false;}
 }

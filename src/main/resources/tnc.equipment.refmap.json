@@ -1,0 +1,26 @@
+{
+  "mappings": {
+    "com/tnc/tnc/mixin/TwoSlotInventoryScreenMixin": {
+      "renderBg": "Lnet/minecraft/client/gui/screens/inventory/InventoryScreen;m_7286_(Lnet/minecraft/client/gui/GuiGraphics;FII)V"
+    },
+    "com/tnc/tnc/mixin/TwoSlotArmorUseMixin": {
+      "use": "Lnet/minecraft/world/item/ArmorItem;m_7203_(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResultHolder;"
+    },
+    "com/tnc/tnc/mixin/TwoSlotPlayerEquipMixin": {
+      "canTakeItem": "Lnet/minecraft/world/entity/player/Player;m_7066_(Lnet/minecraft/world/item/ItemStack;)Z"
+    }
+  },
+  "data": {
+    "searge": {
+      "com/tnc/tnc/mixin/TwoSlotInventoryScreenMixin": {
+        "renderBg": "Lnet/minecraft/client/gui/screens/inventory/InventoryScreen;m_7286_(Lnet/minecraft/client/gui/GuiGraphics;FII)V"
+      },
+      "com/tnc/tnc/mixin/TwoSlotArmorUseMixin": {
+        "use": "Lnet/minecraft/world/item/ArmorItem;m_7203_(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResultHolder;"
+      },
+      "com/tnc/tnc/mixin/TwoSlotPlayerEquipMixin": {
+        "canTakeItem": "Lnet/minecraft/world/entity/player/Player;m_7066_(Lnet/minecraft/world/item/ItemStack;)Z"
+      }
+    }
+  }
+}
