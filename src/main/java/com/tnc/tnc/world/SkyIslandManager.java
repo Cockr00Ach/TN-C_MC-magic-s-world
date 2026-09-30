@@ -362,7 +362,8 @@ public final class SkyIslandManager {
         StructurePlaceSettings settings = new StructurePlaceSettings()
                 .setIgnoreEntities(false)
                 .setKeepLiquids(false)
-                .setFinalizeEntities(true);
+                .setFinalizeEntities(true)
+                .addProcessor(ConquestPlantProcessor.INSTANCE);
         boolean placed = template.placeInWorld(
                 level,
                 target,
@@ -445,7 +446,8 @@ public final class SkyIslandManager {
                 level,
                 target,
                 target,
-                new StructurePlaceSettings().setIgnoreEntities(false).setKeepLiquids(false).setKnownShape(true),
+                new StructurePlaceSettings().setIgnoreEntities(false).setKeepLiquids(false).setKnownShape(true)
+                        .addProcessor(ConquestPlantProcessor.INSTANCE),
                 RandomSource.create(seed),
                 2
         );

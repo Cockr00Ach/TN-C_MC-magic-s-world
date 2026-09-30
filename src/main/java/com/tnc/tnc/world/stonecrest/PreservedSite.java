@@ -22,7 +22,8 @@ final class PreservedSite {
         @Override public StructureTemplate.StructureBlockInfo processBlock(LevelReader level, BlockPos origin,
                 BlockPos pivot, StructureTemplate.StructureBlockInfo local, StructureTemplate.StructureBlockInfo world,
                 StructurePlaceSettings settings) {
-            return contains(world.pos()) ? null : world;
+            return contains(world.pos()) ? null : com.tnc.tnc.world.ConquestPlantProcessor.INSTANCE
+                    .processBlock(level, origin, pivot, local, world, settings);
         }
         // This per-job processor is never serialized or used by a datapack.
         @Override protected StructureProcessorType<?> getType() { return StructureProcessorType.BLOCK_IGNORE; }

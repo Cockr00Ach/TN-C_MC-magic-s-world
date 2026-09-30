@@ -229,7 +229,8 @@ public final class AbyssCitadelJobs {
         if (playersNear(level,target,p.sx(),p.sz())) { j.waitingForPlayers=true; return; }
         var template=level.getStructureManager().get(p.id()).orElseThrow(()->new IllegalStateException("Missing "+p.id()));
         if (!template.placeInWorld(level,target,target,new StructurePlaceSettings().setKnownShape(true)
-                .setKeepLiquids(false).setIgnoreEntities(true),RandomSource.create(j.origin.asLong()^j.piece),18))
+                .setKeepLiquids(false).setIgnoreEntities(true)
+                .addProcessor(com.tnc.tnc.world.ConquestPlantProcessor.INSTANCE),RandomSource.create(j.origin.asLong()^j.piece),18))
             throw new IllegalStateException("Failed to place "+p.id());
         AbyssChunkLedger.mark(level,chunks,j.origin,"P",j.piece);
         j.piece++;

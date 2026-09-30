@@ -34,7 +34,8 @@ final class StonecrestTemplatePiece extends TemplateStructurePiece {
                 // copy their LAYERS property onto that air state.  Skipping the post-placement
                 // neighbour-shape pass preserves the source map and avoids that mod bug.
                 .setKnownShape(true)
-                .addProcessor(BlockIgnoreProcessor.STRUCTURE_BLOCK);
+                .addProcessor(BlockIgnoreProcessor.STRUCTURE_BLOCK)
+                .addProcessor(com.tnc.tnc.world.ConquestPlantProcessor.INSTANCE);
     }
 
     @Override

@@ -16,6 +16,28 @@ import net.minecraft.world.level.block.Blocks;
 @GameTestHolder("tnc")
 @PrefixGameTestTemplate(false)
 public final class BuildingGameTests {
+    @GameTest(template="building_test_empty")
+    public static void importedCropDecorationsBecomePersistentVanillaFoliage(GameTestHelper helper) {
+        for (String id: java.util.List.of("beautyberry_bush")) {
+            var state = com.tnc.tnc.world.ConquestPlantProcessor.replacement(new ResourceLocation("conquest", id));
+            if (state == null || !state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.PERSISTENT))
+                throw new IllegalStateException("Replacement must not decay: " + id);
+            if (state.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.AGE_7))
+                throw new IllegalStateException("Replacement must not inherit crop support rules");
+        }
+        if (com.tnc.tnc.world.ConquestPlantProcessor.replacement(new ResourceLocation("conquest", "brown_granite")) != null
+                || com.tnc.tnc.world.ConquestPlantProcessor.replacement(new ResourceLocation("minecraft", "wheat")) != null
+                || com.tnc.tnc.world.ConquestPlantProcessor.replacement(new ResourceLocation("conquest", "hawthorn_bush")) != null
+                || com.tnc.tnc.world.ConquestPlantProcessor.replacement(new ResourceLocation("conquest", "orange_tree_leaves")) != null)
+            throw new IllegalStateException("Architecture or normal farming was replaced");
+        var processor = com.tnc.tnc.world.ConquestPlantProcessor.INSTANCE;
+        var info = new net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate.StructureBlockInfo(
+                BlockPos.ZERO, Blocks.CHEST.defaultBlockState(), new net.minecraft.nbt.CompoundTag());
+        if (processor.processBlock(helper.getLevel(), BlockPos.ZERO, BlockPos.ZERO, info, info,
+                new net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings()) != info)
+            throw new IllegalStateException("Unrelated template block/NBT must remain identical");
+        helper.succeed();
+    }
     @GameTest(template="building_test_empty",timeoutTicks=400)
     public static void locateCoordinatesMatchSouthernMarkerCenter(GameTestHelper helper) {
         var registry=helper.getLevel().registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.STRUCTURE_SET);

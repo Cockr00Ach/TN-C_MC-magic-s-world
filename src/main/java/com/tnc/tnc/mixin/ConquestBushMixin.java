@@ -8,9 +8,13 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 /**
  * Conquest Reforged 1.6.0 can ask an air state to accept the bush-only layers property after
- * vanilla shape updates remove the bush. Guard only those writes inside Bush#updateShape.
+ * vanilla shape updates remove the plant. Berry bushes inherit the same bug from
+ * AbstractCropsBlock; this also protects plants already stored in existing saves.
  */
-@Mixin(targets = "com.conquestrefabricated.content.blocks.block.plants.Bush", remap = false)
+@Mixin(targets = {
+        "com.conquestrefabricated.content.blocks.block.plants.Bush",
+        "com.conquestrefabricated.content.blocks.block.plants.AbstractCropsBlock"
+}, remap = false)
 abstract class ConquestBushMixin {
     @Redirect(
             method = "m_7417_(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/Direction;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/LevelAccessor;Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/block/state/BlockState;",
