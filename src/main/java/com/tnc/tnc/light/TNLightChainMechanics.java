@@ -315,8 +315,13 @@ public final class TNLightChainMechanics {
         boolean on = winged(player);
         if (on) {
             if (TNEffects.LIGHT_WINGS.isPresent()) {
-                player.addEffect(new MobEffectInstance(TNEffects.LIGHT_WINGS.get(),
-                        WING_MARKER_EXTRA + 20, 0, false, false, false));
+                // ★ 只在快到期时续（阈值 30 tick ✓）—— 每 tick 都 addEffect 会每 tick 发一次
+                //   同步包 ✗（600 包/半分钟），纯浪费 ✓
+                MobEffectInstance marker = player.getEffect(TNEffects.LIGHT_WINGS.get());
+                if (marker == null || marker.getDuration() < 30) {
+                    player.addEffect(new MobEffectInstance(TNEffects.LIGHT_WINGS.get(),
+                            WING_MARKER_EXTRA + 20, 0, false, false, false));
+                }
             }
             giveFlight(player, true);
         } else {
