@@ -4,11 +4,16 @@ import com.tnc.tnc.magic.TNEffects;
 import com.tnc.tnc.magic.TNOrbEntities;
 import com.tnc.tnc.magic.TNLightningStrikeEntity;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.BossEvent;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -70,6 +75,23 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
     private static final int GOD_WEATHER_TICKS = 300;
     private static final int PHASE2_WEATHER_REFRESH = 200;
 
+    /**
+     * ★ Boss 血量条（作者 2026-09-30："我希望他会显示 boss 血量条啊，就是那种 boss 战的血量条，
+     * 你可以用凋零的替代"）。
+     *
+     * <p>用的就是**凋零那套**：{@link BossEvent.BossBarColor#PURPLE} ＋
+     * {@link BossEvent.BossBarOverlay#PROGRESS} ✓ —— 和本项目别处（AbyssCitadelJobs /
+     * LargeLandmarkJobs）那两根进度条同样的配色，一处一眼就认得出来 ✓。
+     *
+     * <p>血量条显示的是**当前这一阶段**的血（每阶段 3000 ✓）：一阶段打空 → 二阶段回满 3000
+     * ⇒ 条子会**再灌满一次** ＋ 名字后面挂上「· 神降」✓ —— 玩家一眼看出"进二阶段了" ✓。
+     *
+     * <p>加入/移除玩家走原版那对钩子（{@code startSeenByPlayer} / {@code stopSeenByPlayer} ✓，
+     * 和凋零、末影龙一样）：谁看得见 boss、谁就看到条子 ✓，走远了自动消失 ✓。
+     */
+    private final ServerBossEvent bossEvent = new ServerBossEvent(Component.empty(),
+            BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS);
+
     /** 技能间隔（tick）：一阶段 100、二阶段 60（更快 ✓）。 */
     private static final int CAST_INTERVAL_P1 = 100;
     private static final int CAST_INTERVAL_P2 = 60;
@@ -126,6 +148,47 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
         return false;
     }
 
+    // ------------------------------------------------------------------
+    //  Boss 血量条（凋零那套 ✓）
+    // ------------------------------------------------------------------
+
+    /** 玩家开始看得见他 ⇒ 给他加一条血量条 ✓（原版凋零/末影龙同款钩子）。 */
+    @Override
+    public void startSeenByPlayer(ServerPlayer player) {
+        super.startSeenByPlayer(player);
+        this.refreshBossBar();
+        this.bossEvent.addPlayer(player);
+    }
+
+    /** 玩家看不见了（走远/换维度/下线）⇒ 把条子摘掉 ✓。 */
+    @Override
+    public void stopSeenByPlayer(ServerPlayer player) {
+        super.stopSeenByPlayer(player);
+        this.bossEvent.removePlayer(player);
+    }
+
+    /** 每 tick（服务端）刷新条子的长度 ✓ —— 原版凋零也是在这里 setProgress 的 ✓。 */
+    @Override
+    protected void customServerAiStep() {
+        super.customServerAiStep();
+        this.bossEvent.setProgress(this.getHealth() / this.getMaxHealth());
+    }
+
+    /** 条子的名字：二阶段挂上「· 神降」✓（名字本身来自 lang：公孙衍（迷失）✓）。 */
+    private void refreshBossBar() {
+        this.bossEvent.setName(this.phase >= 2
+                ? this.getDisplayName().copy().append(Component.literal(" §5· 神降"))
+                : this.getDisplayName());
+    }
+
+    /** 死了/被清掉时把条子收干净 ✓（不然玩家那边会留一条空条 ✗）。 */
+    @Override
+    public void remove(Entity.RemovalReason reason) {
+        this.bossEvent.removeAllPlayers();
+        this.bossEvent.setVisible(false);
+        super.remove(reason);
+    }
+
     @Override
     public boolean isPersistenceRequired() {
         return true;
@@ -156,6 +219,7 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
             this.setHealth(PHASE_HEALTH);
             this.castCooldown = CAST_INTERVAL_P2;
             this.ensurePhaseTwoAura();
+            this.refreshBossBar();              // 条子名字挂上「· 神降」，血条同时回满 ✓
             if (this.level() instanceof ServerLevel level) {
                 level.sendParticles(ParticleTypes.FLASH, this.getX(), this.getY() + 1.5D, this.getZ(),
                         6, 0.4D, 0.6D, 0.4D, 0.0D);
