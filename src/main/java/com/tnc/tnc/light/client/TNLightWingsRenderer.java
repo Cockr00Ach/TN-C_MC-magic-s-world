@@ -67,13 +67,14 @@ public final class TNLightWingsRenderer {
         PoseStack pose = event.getPoseStack();
         MultiBufferSource buffers = event.getMultiBufferSource();
         int light = LightTexture.FULL_BRIGHT;
-        VertexConsumer vc = buffers.getBuffer(RenderType.entityTranslucentEmissive(TEXTURE));
+        // ★ 2026-10-01 换成作者的 geo 模型（半透明 + 自发光，见 TNLightWingsModel ✓）
+        VertexConsumer vc = buffers.getBuffer(RenderType.entityTranslucentEmissive(
+                ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "textures/entity/light_wings_bedrock.png")));
 
         pose.pushPose();
         pose.mulPose(Axis.YP.rotationDegrees(-player.yBodyRot + YAW_OFFSET));
         pose.translate(0.0F, BACK_Y, BACK_Z);
-        drawWing(vc, pose.last().pose(), true, flap, pitch);
-        drawWing(vc, pose.last().pose(), false, flap, pitch);
+        TNLightWingsModel.render(pose, vc, flap + pitch * 0.3F);
         pose.popPose();
     }
 
