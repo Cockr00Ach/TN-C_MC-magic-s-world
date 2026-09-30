@@ -50,7 +50,7 @@ public final class LargeLandmarkStructure extends Structure {
         if (heights.isEmpty()) return Optional.empty();
         Collections.sort(heights);
         int min=heights.get(0),max=heights.get(heights.size()-1);
-        if (!m.floating() && max-min>30) return Optional.empty();
+        if (!m.floating() && !LandmarkPlacementPlan.terrainFits(min,max,m.hasGroundProfile())) return Optional.empty();
         int oy=LandmarkPlacementPlan.originY(heights.get(heights.size()/2),max,m.anchorLocal().getY(),d.getY(),
                 c.heightAccessor().getMaxBuildHeight(),m.floating(),m.sunken());
         if (!LandmarkPlacementPlan.fits(oy,d.getY(),c.heightAccessor().getMinBuildHeight(),c.heightAccessor().getMaxBuildHeight())) return Optional.empty();

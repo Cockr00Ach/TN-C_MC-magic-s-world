@@ -38,9 +38,9 @@ public final class LandmarkGenerationMode extends SavedData {
                     && !(level.getServer() instanceof net.minecraft.gametest.framework.GameTestServer));
             created.setDirty(); return created;
         },ID);
-        MODES.put(level,mode.nativeChunks);
         PALACES.put(level.getStructureManager(), mode.fullHeroskand
                 || level.getServer() instanceof net.minecraft.gametest.framework.GameTestServer);
+        MODES.put(level,mode.nativeChunks);
     }
     @SubscribeEvent public static void stopped(ServerStoppedEvent event) {
         MODES.keySet().removeIf(l->{

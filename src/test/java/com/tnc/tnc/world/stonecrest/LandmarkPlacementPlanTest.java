@@ -3,6 +3,14 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class LandmarkPlacementPlanTest {
+    @Test void fullLandscapeAllowsRollingLandButNotSteepMountains() {
+        assertFalse(LandmarkPlacementPlan.terrainFits(64,100,false));
+        assertTrue(LandmarkPlacementPlan.terrainFits(64,100,true));
+        assertTrue(LandmarkPlacementPlan.terrainFits(64,112,true));
+        assertFalse(LandmarkPlacementPlan.terrainFits(64,113,true));
+        assertTrue(LandmarkPlacementPlan.terrainFits(64,94,false));
+        assertFalse(LandmarkPlacementPlan.terrainFits(64,95,false));
+    }
     @Test void cathedralIsUnscaledButFitsEntireWorldHeight() {
         int y=LandmarkPlacementPlan.originY(70,80,1,358,320,false,true);
         assertEquals(-42,y); assertEquals(315,y+358-1);
