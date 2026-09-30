@@ -30,12 +30,27 @@ public final class TNLightWingsEvents {
     private TNLightWingsEvents() {
     }
 
-    @SubscribeEvent
+    /**
+     * 判断玩家身上有没有某个效果 ✓ —— 纯工具方法。
+     *
+     * <p>★★ 2026-10-01 事故：这个方法原来被误标了 {@code @SubscribeEvent} ✗ ——
+     * Forge 的 {@code EventAccessTransformer} 会直接报
+     * {@code Illegal private member annotated as @SubscribeEvent} ✗，
+     * 并且**连带整批自动订阅者注册失败**（{@code Failed to register automatic subscribers. ModID: tnc}）✗，
+     * 于是 {@code CONSTRUCT} 生命周期出错（{@code Failed to complete lifecycle event CONSTRUCT, 1 errors found}）✗
+     * ⇒ 整个游戏进入 "broken mod state" ✗ ⇒ **模组自带资源包全都没注册** ✗
+     * ⇒ paramagic 找不到自己的 shader 直接 fast-fail 崩端 ✗✗（作者："整合包打开失败"）。
+     * 教训：{@code @SubscribeEvent} 只许标在"事件方法"上（public static void、参数是事件）✗，
+     * 工具方法一个都不能标 ✓。
+     */
     private static boolean has(ServerPlayer player,
                                net.minecraftforge.registries.RegistryObject<
                                        net.minecraft.world.effect.MobEffect> effect) {
         return effect.isPresent() && player.hasEffect(effect.get());
     }
+
+    /** 每 tick（服务端）：有光系链的 buff ⇒ 挂光翼标记 + 开飞行 ✓。 */
+    @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
         if (event.phase != TickEvent.Phase.END) {
             return;
