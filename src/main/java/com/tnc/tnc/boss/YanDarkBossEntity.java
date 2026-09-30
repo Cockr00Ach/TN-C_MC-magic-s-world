@@ -21,6 +21,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
@@ -185,6 +186,10 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
+        // ★ 2026-09-30 作者："他应该能走路，不是追着我但是可以慢走，站桩也怪怪的" ⇒
+        //   把 **慢速乱走** 加回来 ✓（RandomStrollGoal 0.5 ⇒ 只有玩家速度的一半 ✓），
+        //   但**不加 MeleeAttackGoal** ✗ ⇒ 它会慢悠悠挪窝，却**不会朝你扑过来** ✓。
+        this.goalSelector.addGoal(7, new RandomStrollGoal(this, 0.5D));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
     }
@@ -584,27 +589,51 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
     }
 
     /**
-     * 闪电移位：**原地小幅换位**（不是朝你冲过来 ✗）。
+     * 闪电移位：**原地小幅换位**（不是朝你冲过来 ✗），而且必须落在**地面上** ✓。
      *
-     * <p>作者 2026-09-30："他怎么能一直追着我撕咬呢，他应该站在原地" ⇒ 原来这一招是瞬移到
-     * <b>目标身边</b>（{@code target.position() ± 3} ✗）—— 等于每放一次就贴脸一次 ✗，
-     * 配合 64 格施法距离完全不该这样 ✓。现在改成：**在自己附近 8 格内**随机挪一格
-     * （保持"闪电移位"的观感 ✓，但永远留在远处开火 ✓）。
+     * <p>作者 2026-09-30："他的闪电移位怎么会进地底呢" —— 上一版是 {@code teleportTo(x, y, z)}
+     * 里直接用**自己当前的 y** ✗：站山坡/悬空时这个 y 可能在地里、也可能在崖外 ⇒
+     * 一头钻进方块或掉到地底 ✗✗。现在改成：
+     * <ol>
+     *   <li>先在附近随机选点，<b>离目标 ≥12 格</b>（站位优先 ✓）；</li>
+     *   <li>用**高度图** `MOTION_BLOCKING_NO_LEAVES` 把 y 贴到地面 ✓（不管原来站多高 ✓）；</li>
+     *   <li>再用 `noCollision` 验一遍"他这个碰撞箱放不放得下" ✓；</li>
+     *   <li>10 次都找不到能站的点 ⇒ **这次就不闪** ✓（宁可不动，也不钻进地里 ✗）。</li>
+     * </ol>
      */
     private void castBlink(ServerLevel level, LivingEntity target) {
         Vec3 from = this.position();
-        double a = this.random.nextDouble() * Math.PI * 2.0D;
-        double r = 4.0D + this.random.nextDouble() * 4.0D;
-        Vec3 to = new Vec3(this.getX() + Math.cos(a) * r, this.getY(), this.getZ() + Math.sin(a) * r);
-        // 兜一层：万一身位算法把落点放到目标 12 格以内了，就往外挪一挪 ✓（"站在原地"优先）
-        Vec3 away = to.subtract(target.position());
-        if (away.length() < 12.0D) {
-            to = target.position().add(away.normalize().scale(12.0D)).add(0.0D, this.getY() - target.getY(), 0.0D);
-        }
+        Vec3 to = this.findSafeSpot(level, target);
         darkSparks(level, from, 60);
+        if (to == null) {
+            return;                       // 周围没有能站的地方：这次不闪 ✓
+        }
         this.teleportTo(to.x, to.y, to.z);
         darkSparks(level, to, 60);
         level.playSound(null, to.x, to.y, to.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.HOSTILE, 1.2F, 1.2F);
+    }
+
+    /** 在附近找一个"离目标 ≥12 格、且站得下"的**地面**点 ✓（找不到返回 null）。 */
+    private Vec3 findSafeSpot(ServerLevel level, LivingEntity target) {
+        for (int i = 0; i < 10; i++) {
+            double a = this.random.nextDouble() * Math.PI * 2.0D;
+            double r = 4.0D + this.random.nextDouble() * 6.0D;
+            double x = this.getX() + Math.cos(a) * r;
+            double z = this.getZ() + Math.sin(a) * r;
+            double dx = x - target.getX();
+            double dz = z - target.getZ();
+            if (dx * dx + dz * dz < 12.0D * 12.0D) {
+                continue;                 // 太靠近玩家：换一个点 ✓
+            }
+            int y = level.getHeight(
+                    net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                    (int) Math.floor(x), (int) Math.floor(z));
+            Vec3 spot = new Vec3(x, y, z);
+            if (level.noCollision(this, this.getBoundingBox().move(spot.subtract(this.position())))) {
+                return spot;
+            }
+        }
+        return null;
     }
 
     /** 黑暗衍的"电花"＝ 黑雾为主 + 一点蓝电 ✓（亮蓝色 60 颗看着像普通雷法，不像他 ✗）。 */
