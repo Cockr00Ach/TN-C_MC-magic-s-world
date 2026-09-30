@@ -224,7 +224,27 @@ public final class TNLightWingsModel {
         }
     }
 
-    /** 画一个方块（Bedrock 的盒子 UV 展开 ✓，UV 归一化到 0..1 ✓，贴图是独立文件不是图集 ✓）。 */
+    /**
+     * 画一个方块（Bedrock 的盒子 UV 展开 ✓，UV 归一化到 0..1 ✓，贴图是独立文件不是图集 ✓）。
+     *
+     * <h2>★★ 2026-10-01 事故：四个面的绕序是反的 ⇒ 整对翅膀被背面剔除吃掉了 ✗</h2>
+     * {@code entityTranslucentEmissive} <b>开着背面剔除</b> ✓，而绕序必须是"从外面看逆时针" ✓。
+     * 原来 up / down / north / south 四个面的顶点顺序恰好都写反了 ✗ ——
+     * 而作者的翅膀正是**一单位厚的薄片**：大面积的脸就是 north / south ✗✗
+     * ⇒ 渲染器明明在跑（日志里 `光翼渲染已启动（作者 geo 模型）` ✓）、顶点也提交了 ✓，
+     * 玩家却**一片都看不见** ✗（作者："没看见翅膀"）。
+     *
+     * <p>绕序速查（右手定则，cross(ab, bc) 要指向**外侧** ✓）：
+     * <pre>
+     *   up    (+Y)：a(x0,y1,z1) b(x1,y1,z1) c(x1,y1,z0) d(x0,y1,z0)
+     *   down  (−Y)：a(x0,y0,z0) b(x1,y0,z0) c(x1,y0,z1) d(x0,y0,z1)
+     *   east  (+X)：a(x1,y0,z0) b(x1,y1,z0) c(x1,y1,z1) d(x1,y0,z1)   ← 本来就对
+     *   north (−Z)：a(x1,y0,z0) b(x0,y0,z0) c(x0,y1,z0) d(x1,y1,z0)
+     *   west  (−X)：a(x0,y0,z1) b(x0,y1,z1) c(x0,y1,z0) d(x0,y0,z0)   ← 本来就对
+     *   south (+Z)：a(x0,y0,z1) b(x1,y0,z1) c(x1,y1,z1) d(x0,y1,z1)
+     * </pre>
+     * 改完如果哪天又"看不见"，先查这一条 ✓（也可以临时换成不剔除的渲染类型验证 ✓）。
+     */
     private static void box(VertexConsumer vc, Matrix4f m, Cube c) {
         float w = c.x1 - c.x0, h = c.y1 - c.y0, d = c.z1 - c.z0;
         float u = c.u, v = c.v;
@@ -236,32 +256,40 @@ public final class TNLightWingsModel {
         float[] south = {u + d + w + d, v + d, w, h};
         float x0 = c.x0 / 16.0F, y0 = c.y0 / 16.0F, z0 = c.z0 / 16.0F;
         float x1 = c.x1 / 16.0F, y1 = c.y1 / 16.0F, z1 = c.z1 / 16.0F;
-        quad(vc, m, x0, y1, z0, x1, y1, z0, x1, y1, z1, x0, y1, z1, up);          // up
-        quad(vc, m, x0, y0, z1, x1, y0, z1, x1, y0, z0, x0, y0, z0, down);        // down
-        quad(vc, m, x1, y0, z0, x1, y1, z0, x1, y1, z1, x1, y0, z1, east);        // east
-        quad(vc, m, x0, y0, z0, x1, y0, z0, x1, y1, z0, x0, y1, z0, north);       // north
-        quad(vc, m, x0, y0, z1, x0, y1, z1, x0, y1, z0, x0, y0, z0, west);        // west
-        quad(vc, m, x1, y0, z1, x0, y0, z1, x0, y1, z1, x1, y1, z1, south);       // south
+        quad(vc, m, x0, y1, z1, x1, y1, z1, x1, y1, z0, x0, y1, z0, up);          // up    (+Y)
+        quad(vc, m, x0, y0, z0, x1, y0, z0, x1, y0, z1, x0, y0, z1, down);        // down  (−Y)
+        quad(vc, m, x1, y0, z0, x1, y1, z0, x1, y1, z1, x1, y0, z1, east);        // east  (+X)
+        quad(vc, m, x1, y0, z0, x0, y0, z0, x0, y1, z0, x1, y1, z0, north);       // north (−Z)
+        quad(vc, m, x0, y0, z1, x0, y1, z1, x0, y1, z0, x0, y0, z0, west);        // west  (−X)
+        quad(vc, m, x0, y0, z1, x1, y0, z1, x1, y1, z1, x0, y1, z1, south);       // south (+Z)
     }
 
+    /**
+     * 画一个面 —— <b>正反两面都提交</b> ✓（见下）。
+     *
+     * <p>★ 翅膀本来就是"发光半透明的一片"，没有正/背面之分 ✓；而
+     * {@code entityTranslucentEmissive} **开着背面剔除** ✗ ⇒ 只要绕序写反（本文件刚踩过一次 ✗）
+     * 整片就消失，而且**一声不响** ✗（作者："没看见翅膀"）。所以这里正反各提交一次 ✓：
+     * 绕序对不对都看得见 ✓，代价只是顶点数 ×2（整对翅膀不到 2000 个顶点 ✓）。
+     */
     private static void quad(VertexConsumer vc, Matrix4f m, float ax, float ay, float az,
                              float bx, float by, float bz, float cx, float cy, float cz,
                              float dx, float dy, float dz, float[] uv) {
         float u0 = uv[0] / texW, v0 = uv[1] / texH;
         float u1 = (uv[0] + uv[2]) / texW, v1 = (uv[1] + uv[3]) / texH;
-        vc.vertex(m, ax, ay, az).color(1.0F, 1.0F, 1.0F, ALPHA).uv(u0, v0)
-                .overlayCoords(net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY)
-                .uv2(net.minecraft.client.renderer.LightTexture.FULL_BRIGHT)
-                .normal(0.0F, 0.0F, 1.0F).endVertex();
-        vc.vertex(m, bx, by, bz).color(1.0F, 1.0F, 1.0F, ALPHA).uv(u1, v0)
-                .overlayCoords(net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY)
-                .uv2(net.minecraft.client.renderer.LightTexture.FULL_BRIGHT)
-                .normal(0.0F, 0.0F, 1.0F).endVertex();
-        vc.vertex(m, cx, cy, cz).color(1.0F, 1.0F, 1.0F, ALPHA).uv(u1, v1)
-                .overlayCoords(net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY)
-                .uv2(net.minecraft.client.renderer.LightTexture.FULL_BRIGHT)
-                .normal(0.0F, 0.0F, 1.0F).endVertex();
-        vc.vertex(m, dx, dy, dz).color(1.0F, 1.0F, 1.0F, ALPHA).uv(u0, v1)
+        vertex(vc, m, ax, ay, az, u0, v0);
+        vertex(vc, m, bx, by, bz, u1, v0);
+        vertex(vc, m, cx, cy, cz, u1, v1);
+        vertex(vc, m, dx, dy, dz, u0, v1);
+        // 反面：顶点顺序倒着再来一遍 ⇒ 绕序相反 ⇒ 从另一侧也画得出来 ✓
+        vertex(vc, m, dx, dy, dz, u0, v1);
+        vertex(vc, m, cx, cy, cz, u1, v1);
+        vertex(vc, m, bx, by, bz, u1, v0);
+        vertex(vc, m, ax, ay, az, u0, v0);
+    }
+
+    private static void vertex(VertexConsumer vc, Matrix4f m, float x, float y, float z, float u, float v) {
+        vc.vertex(m, x, y, z).color(1.0F, 1.0F, 1.0F, ALPHA).uv(u, v)
                 .overlayCoords(net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY)
                 .uv2(net.minecraft.client.renderer.LightTexture.FULL_BRIGHT)
                 .normal(0.0F, 0.0F, 1.0F).endVertex();

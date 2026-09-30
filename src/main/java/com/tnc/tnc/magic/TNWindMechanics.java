@@ -260,8 +260,17 @@ public final class TNWindMechanics {
     /**
      * 每 tick 维护"能不能飞"。
      *
-     * <p>判断顺序：永久飞行（链进度 ≥ 4）→ 标记效果 → 都没有就收回。
+     * <p>判断顺序：永久飞行（链进度 ≥ 4）→ 风速链标记效果 → <b>光翼链的任一 buff</b> → 都没有就收回。
      * 收回只针对生存模式，创造/旁观不碰。
+     *
+     * <h2>★ 2026-10-01 事故：这一条把光翼链的飞行<b>每 tick 收走一次</b> ✗</h2>
+     * 光翼链（{@code light/TNLightChainMechanics}）给玩家开的 {@code mayfly} 在这里被**无条件收掉** ✗ ——
+     * 因为这里只认风速链的 {@code WIND_FLIGHT} ✗。日志实锤：作者放完「飞行」后
+     * {@code TN-C/light: 光翼飞行 给上} **每 tick 打一次**（768 次/47 秒 ✗）——
+     * 那就是"我刚给上、下一 tick 又被收走"的指纹 ✓，作者看到的就是"翅膀有了，但双击空格飞不起来" ✗。
+     *
+     * <p>所以这里必须把光翼 buff 也算进 {@code shouldFly} ✓ ——
+     * <b>"谁能飞"这件事有且只有这一个裁决点</b> ✓（两个系统各自 set/clear 必然互相打架 ✗）。
      */
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
@@ -269,7 +278,9 @@ public final class TNWindMechanics {
             return;
         }
         boolean creativeLike = player.isCreative() || player.isSpectator();
-        boolean shouldFly = permanentFlight(player) || player.hasEffect(WIND_FLIGHT.get());
+        boolean shouldFly = permanentFlight(player)
+                || player.hasEffect(WIND_FLIGHT.get())
+                || lightWings(player);                   // ★ 光翼链：任一档 buff 在身就允许飞 ✓
         if (shouldFly == player.getAbilities().mayfly) {
             return;                                  // 已经是想要的状态，别每 tick 刷同步包
         }
@@ -281,6 +292,19 @@ public final class TNWindMechanics {
             player.getAbilities().flying = false;
         }
         player.onUpdateAbilities();
+    }
+
+    /** 光翼链的任一档 buff 在身（t1 飞行 / t2 极速飞行 / t3 光翼展开 ✓）。 */
+    private static boolean lightWings(ServerPlayer player) {
+        return hasLightEffect(player, TNEffects.LIGHT_FLIGHT)
+                || hasLightEffect(player, TNEffects.LIGHT_SWIFT_FLIGHT)
+                || hasLightEffect(player, TNEffects.LIGHT_WINGSPAN);
+    }
+
+    private static boolean hasLightEffect(ServerPlayer player,
+                                          net.minecraftforge.registries.RegistryObject<
+                                                  net.minecraft.world.effect.MobEffect> effect) {
+        return effect.isPresent() && player.hasEffect(effect.get());
     }
 
     /** 链2：绕身球（另开一个 tick 处理，逻辑上互不影响）。 */

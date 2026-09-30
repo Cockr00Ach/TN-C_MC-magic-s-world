@@ -107,13 +107,20 @@ public final class TNLightWingsRenderer {
         float bx = s * SPAN, by = RISE * 0.72F;
         float cx = s * SPAN * 0.55F, cy = RISE * -0.28F;
         float dx = s * SPAN * 0.18F, dy = RISE * -0.42F;
-        vc.vertex(m, ax, ay, 0.0F).color(1.0F, 1.0F, 1.0F, 0.92F).uv(0.0F, 1.0F)
-                .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(LightTexture.FULL_BRIGHT).normal(0.0F, 0.0F, 1.0F).endVertex();
-        vc.vertex(m, bx, by, 0.0F).color(1.0F, 1.0F, 1.0F, 0.70F).uv(1.0F, 0.06F)
-                .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(LightTexture.FULL_BRIGHT).normal(0.0F, 0.0F, 1.0F).endVertex();
-        vc.vertex(m, cx, cy, 0.0F).color(1.0F, 1.0F, 1.0F, 0.55F).uv(0.72F, 0.62F)
-                .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(LightTexture.FULL_BRIGHT).normal(0.0F, 0.0F, 1.0F).endVertex();
-        vc.vertex(m, dx, dy, 0.0F).color(1.0F, 1.0F, 1.0F, 0.35F).uv(0.32F, 0.9F)
-                .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(LightTexture.FULL_BRIGHT).normal(0.0F, 0.0F, 1.0F).endVertex();
+        // ★ 正反各一份 ✓：geo 那条路踩过"绕序反了 ⇒ 被背面剔除吃光"✗，备用路径也照这个来 ✓
+        wingVertex(vc, m, ax, ay, 0.92F, 0.0F, 1.0F);
+        wingVertex(vc, m, bx, by, 0.70F, 1.0F, 0.06F);
+        wingVertex(vc, m, cx, cy, 0.55F, 0.72F, 0.62F);
+        wingVertex(vc, m, dx, dy, 0.35F, 0.32F, 0.9F);
+        wingVertex(vc, m, dx, dy, 0.35F, 0.32F, 0.9F);
+        wingVertex(vc, m, cx, cy, 0.55F, 0.72F, 0.62F);
+        wingVertex(vc, m, bx, by, 0.70F, 1.0F, 0.06F);
+        wingVertex(vc, m, ax, ay, 0.92F, 0.0F, 1.0F);
+    }
+
+    private static void wingVertex(VertexConsumer vc, Matrix4f m, float x, float y, float alpha, float u, float v) {
+        vc.vertex(m, x, y, 0.0F).color(1.0F, 1.0F, 1.0F, alpha).uv(u, v)
+                .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(LightTexture.FULL_BRIGHT)
+                .normal(0.0F, 0.0F, 1.0F).endVertex();
     }
 }
