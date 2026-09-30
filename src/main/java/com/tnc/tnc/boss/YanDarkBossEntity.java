@@ -48,6 +48,28 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
     /** 每个阶段的满血（作者："二阶段还是三千血" ✓）。 */
     public static final float PHASE_HEALTH = 3000.0F;
 
+    /**
+     * ★ 雷雨天（作者 2026-09-30："这个黑暗衍怎么放神在投篮没有雷雨天啊"）
+     *
+     * <p>玩家自己放 t5「神在投篮」时会**把天变黑下雷雨** ✓（{@code TnSpellMechanics} 里的
+     * {@code DIVINE_WEATHER_TICKS = 200}），而黑暗衍这四个技能是它**自己实现**的 ✗ ——
+     * 之前只放了球和三尊神、**完全没碰天气** ⇒ 少了那半截"神降"的气氛 ✗。
+     *
+     * <p>所以这里补两处：
+     * <ol>
+     *   <li>{@link #castGodDescent} 时开雷雨（{@link #GOD_WEATHER_TICKS} = 15 秒 ✓
+     *       —— 二阶段技能间隔只有 60 tick，15 秒够把两次连起来 ✓）</li>
+     *   <li>二阶段（永久闪电登神那一段）**打架期间一直保持雷雨** ✓，每
+     *       {@link #PHASE2_WEATHER_REFRESH} tick 续一次 ⇒ 整场二阶段天都是黑的 ✓
+     *       （只在"有目标"时续，别让他在世界角落里到处改天气 ✗）</li>
+     * </ol>
+     *
+     * <p>⚠️ 和玩家法术一样的规矩：**只在当前没打雷时才改** ✓ —— 水法那份天气是带租约的、
+     * 玩家自己 {@code /weather} 的结果也不该被一个 boss 盖掉 ✓。
+     */
+    private static final int GOD_WEATHER_TICKS = 300;
+    private static final int PHASE2_WEATHER_REFRESH = 200;
+
     /** 技能间隔（tick）：一阶段 100、二阶段 60（更快 ✓）。 */
     private static final int CAST_INTERVAL_P1 = 100;
     private static final int CAST_INTERVAL_P2 = 60;
@@ -159,11 +181,24 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
         if (this.getTarget() == null) {
             return;
         }
+        // ★ 二阶段：打架期间把雷雨续上（作者要看"神降"的天 ✓，见 GOD_WEATHER_TICKS 的注释）
+        if (this.phase == 2 && PHASE2_WEATHER_REFRESH > 0
+                && this.tickCount % PHASE2_WEATHER_REFRESH == 0
+                && this.level() instanceof ServerLevel stormLevel) {
+            this.startThunderstorm(stormLevel, PHASE2_WEATHER_REFRESH + 100);
+        }
         if (--this.castCooldown > 0) {
             return;
         }
         this.castCooldown = (this.phase == 2) ? CAST_INTERVAL_P2 : CAST_INTERVAL_P1;
         this.castRandomSpell();
+    }
+
+    /** 把天变黑下雷雨 ✓（**只在现在没打雷时才改** —— 和玩家法术同一条规矩，见常量注释）。 */
+    private void startThunderstorm(ServerLevel level, int ticks) {
+        if (!level.isThundering()) {
+            level.setWeatherParameters(0, Math.max(20, ticks), true, true);
+        }
     }
 
     /** 随机放四个技能之一（作者的四个"随机放" ✓）。 */
@@ -218,6 +253,9 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
     /** 神在投篮：目标头顶一颗大雷球（慢速下落 ✓）＋ 三尊神 ✓ —— 全部用**暗色**模型 ✓ */
     private void castGodDescent(ServerLevel level, LivingEntity target) {
         Vec3 at = target.position();
+        // ★ 先把天变黑（作者 2026-09-30："怎么放神在投篮没有雷雨天啊"）✓
+        //   玩家自己放这一招会开雷雨，boss 之前没开 ⇒ 现在补上，两边观感一致 ✓
+        this.startThunderstorm(level, GOD_WEATHER_TICKS);
         TNLightningStrikeEntity ball = TNOrbEntities.LIGHTNING_STRIKE.get().create(level);
         if (ball != null) {
             ball.asBall();
