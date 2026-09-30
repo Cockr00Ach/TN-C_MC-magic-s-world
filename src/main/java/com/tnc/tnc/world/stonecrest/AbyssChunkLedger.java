@@ -69,7 +69,7 @@ public final class AbyssChunkLedger {
                     AbyssCitadelJobs.request(level,marker.origin());
         for (var start:event.getChunk().getAllStarts().values())
             for (var piece:start.getPieces()) if (piece instanceof LargeLandmarkMarker marker)
-                LargeLandmarkJobs.request(level,marker.asset,marker.origin);
+                if (!LandmarkGenerationMode.enabled(level)) LargeLandmarkJobs.request(level,marker.asset,marker.origin);
     }
     @SubscribeEvent public static synchronized void save(ChunkDataEvent.Save event) {
         if (!(event.getLevel() instanceof ServerLevel level)) return;

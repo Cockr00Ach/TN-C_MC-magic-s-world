@@ -28,6 +28,7 @@ public final class AbyssCitadelStructure extends Structure {
             min = Math.min(min, h); max = Math.max(max, h);
         }
         if (max - min > 40) return Optional.empty();
+        if (LandmarkArbitration.pitConflicts(c,cx,cz)) return Optional.empty();
         int y = c.chunkGenerator().getFirstOccupiedHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG,
                 c.heightAccessor(), c.randomState()) + 1;
         BlockPos lookout = new BlockPos(x,y,z);

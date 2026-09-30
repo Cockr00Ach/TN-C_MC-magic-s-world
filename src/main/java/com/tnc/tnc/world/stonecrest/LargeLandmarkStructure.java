@@ -15,6 +15,7 @@ public final class LargeLandmarkStructure extends Structure {
     public static final Codec<LargeLandmarkStructure> CODEC=RecordCodecBuilder.create(i->i.group(
             settingsCodec(i),Codec.STRING.fieldOf("asset").forGetter(s->s.asset)).apply(i,LargeLandmarkStructure::new));
     private final String asset;
+    String asset() { return asset; }
     public LargeLandmarkStructure(StructureSettings settings,String asset) {
         super(settings); this.asset=asset;
         var m=StonecrestManifest.get(asset);
@@ -22,6 +23,12 @@ public final class LargeLandmarkStructure extends Structure {
             throw new IllegalArgumentException("Landmarks require <=16 cube checkpoints: "+p.resource());
     }
     @Override protected Optional<GenerationStub> findGenerationPoint(GenerationContext c) {
+        return rawGenerationPoint(c).filter(stub->{
+            var marker=(LargeLandmarkMarker)stub.getPiecesBuilder().build().pieces().get(0);
+            return LandmarkArbitration.wins(c,asset,marker.origin);
+        });
+    }
+    Optional<GenerationStub> rawGenerationPoint(GenerationContext c) {
         var m=StonecrestManifest.get(asset); var d=m.dimensions();
         // Locate at the southern approach, not inside a roof or unbuilt floating island.
         int x=c.chunkPos().getMinBlockX()+8,z=c.chunkPos().getMinBlockZ()+8;

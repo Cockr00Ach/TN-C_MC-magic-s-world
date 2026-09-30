@@ -97,7 +97,7 @@ minecraft {
         // The gametest system is also enabled by default for other run configs under the /test command.
         gameTestServer {
             property 'forge.enabledGameTestNamespaces', mod_id
-            if (project.hasProperty('townServicesTests')) {
+            if (project.hasProperty('townServicesTests') || project.hasProperty('buildingGameTests')) {
                 property 'mixin.env.remapRefMap', 'true'
                 property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
             }

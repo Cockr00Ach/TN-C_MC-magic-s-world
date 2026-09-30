@@ -13,6 +13,10 @@ public final class TNStructures {
             DeferredRegister.create(Registries.STRUCTURE_TYPE, TNMod.MODID);
     private static final DeferredRegister<StructurePieceType> PIECES =
             DeferredRegister.create(Registries.STRUCTURE_PIECE, TNMod.MODID);
+    private static final DeferredRegister<net.minecraft.world.level.levelgen.feature.Feature<?>> FEATURES =
+            DeferredRegister.create(Registries.FEATURE, TNMod.MODID);
+    public static final RegistryObject<LandmarkChunkFeature> LANDMARK_CHUNK =
+            FEATURES.register("landmark_chunk", LandmarkChunkFeature::new);
 
     public static final RegistryObject<StructureType<StonecrestStructure>> STONECREST = STRUCTURES.register(
             "stonecrest_fortress", () -> () -> StonecrestStructure.CODEC);
@@ -37,5 +41,6 @@ public final class TNStructures {
     public static void register(IEventBus bus) {
         STRUCTURES.register(bus);
         PIECES.register(bus);
+        FEATURES.register(bus);
     }
 }

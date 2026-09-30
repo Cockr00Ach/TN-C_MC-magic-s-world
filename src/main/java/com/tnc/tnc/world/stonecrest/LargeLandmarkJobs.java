@@ -29,8 +29,12 @@ public final class LargeLandmarkJobs {
     private record Request(String asset,BlockPos origin) { }
     private static final Map<ServerLevel,Set<Request>> REQUESTS=new ConcurrentHashMap<>();
     private static final Map<MinecraftServer,List<ChunkPos>> TICKETS=new WeakHashMap<>();
+    private static final Map<MinecraftServer,Map<ChunkPos,Long>> HELD=new WeakHashMap<>();
+    private static final Map<MinecraftServer,Integer> NEXT=new WeakHashMap<>();
+    private static final Map<ServerLevel,java.util.concurrent.CompletableFuture<List<LandmarkSites.Site>>> RECOVERY=new ConcurrentHashMap<>();
     private static final Map<MinecraftServer,ServerBossEvent> BARS=new WeakHashMap<>();
     private static final TicketType<ChunkPos> TICKET=TicketType.create("tnc_landmark",Comparator.comparingLong(ChunkPos::toLong));
+    private static final TicketType<ChunkPos> RECOVERY_TICKET=TicketType.create("tnc_landmark_anchor",Comparator.comparingLong(ChunkPos::toLong),240);
     static void request(ServerLevel l,String asset,BlockPos origin) {
         if (l.dimension()==Level.OVERWORLD) REQUESTS.computeIfAbsent(l,k->ConcurrentHashMap.newKeySet()).add(new Request(asset,origin.immutable()));
     }
@@ -61,6 +65,10 @@ public final class LargeLandmarkJobs {
     }
     static boolean conflictsWithAbyss(ServerLevel l,BlockPos origin) {
         int x=origin.getX()+122,z=origin.getZ()+70;
+        if (LandmarkGenerationMode.enabled(l)) for (var site:LandmarkSites.touching(l,new ChunkPos(new BlockPos(x,0,z)),220)) {
+            var d=site.manifest().dimensions(); var p=site.origin();
+            if (p.getX()<x+220 && p.getX()+d.getX()>x-220 && p.getZ()<z+180 && p.getZ()+d.getZ()>z-180) return true;
+        }
         for (var j:LandmarkData.get(l).jobs.values()) if (j.phase>=0) {
             var d=j.manifest().dimensions();
             if (j.origin.getX()<x+220 && j.origin.getX()+d.getX()>x-220
@@ -70,9 +78,58 @@ public final class LargeLandmarkJobs {
     }
     @SubscribeEvent public static void tick(TickEvent.ServerTickEvent e) {
         if (e.phase!=TickEvent.Phase.END) return; var l=e.getServer().overworld(); if (l==null) return;
+        // A locate result is just a start. Its one-block marker may never have reached FULL.
+        // In old worlds admit the same deterministic site when ANY part of its footprint is visited.
+        if (!LandmarkGenerationMode.enabled(l) && !(e.getServer() instanceof net.minecraft.gametest.framework.GameTestServer)) {
+            var pending=RECOVERY.get(l);
+            if (pending!=null && pending.isDone()) {
+                RECOVERY.remove(l);
+                try { for (var site:pending.join()) recover(l,site); }
+                catch (java.util.concurrent.CompletionException error) { LogUtils.getLogger().warn("[TN-C Landmark] recovery discovery failed",error); }
+            }
+            if (l.getGameTime()%100==0) {
+                // Read only already-FULL anchors: saved starts take precedence over changed datapack predictions.
+                for (var player:l.players()) for (int dz=-1;dz<=1;dz++) for (int dx=-1;dx<=1;dx++) {
+                    var c=l.getChunkSource().getChunkNow(player.chunkPosition().x+dx,player.chunkPosition().z+dz);
+                    if (c!=null) for (var start:c.getAllStarts().values()) for (var piece:start.getPieces())
+                        if (piece instanceof LargeLandmarkMarker marker) request(l,marker.asset,marker.origin);
+                }
+                if (!RECOVERY.containsKey(l) && !l.players().isEmpty()) {
+                    var positions=l.players().stream().map(p->p.chunkPosition()).distinct().toList();
+                    RECOVERY.put(l,java.util.concurrent.CompletableFuture.supplyAsync(()->positions.stream()
+                            .flatMap(p->LandmarkSites.touching(l,p,32).stream()).distinct().toList(),net.minecraft.Util.backgroundExecutor()));
+                }
+            }
+        }
         drain(l); var data=LandmarkData.get(l);
-        var j=data.jobs.values().stream().filter(v->v.phase>=0 && v.phase<3).findFirst().orElse(null);
-        if (j==null) { release(l); var bar=BARS.remove(e.getServer()); if (bar!=null) bar.removeAllPlayers(); return; }
+        var jobs=data.jobs.values().stream().filter(v->v.phase>=0 && v.phase<3).toList();
+        if (jobs.isEmpty()) { release(l); var bar=BARS.remove(e.getServer()); if (bar!=null) bar.removeAllPlayers(); return; }
+        long deadline=System.nanoTime()+8_000_000L;
+        int next=Math.floorMod(NEXT.getOrDefault(e.getServer(),0),jobs.size());
+        for (int visited=0;visited<jobs.size();visited++) {
+            var j=jobs.get(next); next=(next+1)%jobs.size(); NEXT.put(e.getServer(),next);
+            for (int batch=0;batch<32 && j.phase>=0 && j.phase<3;batch++) {
+                int phase=j.phase,tile=j.tile,piece=j.piece,cursor=j.cursor,validated=j.validated;
+                step(l,j,data);
+                if (System.nanoTime()>=deadline) { expire(l); return; }
+                if (phase==j.phase && tile==j.tile && piece==j.piece && cursor==j.cursor && validated==j.validated) break;
+            }
+        }
+        expire(l);
+    }
+    private static void recover(ServerLevel level,LandmarkSites.Site site) {
+        if (LandmarkData.get(level).jobs.containsKey(new LandmarkData.Job(site.asset(),site.origin()).key())) return;
+        var anchor=site.anchor(); var chunk=level.getChunkSource().getChunkNow(anchor.x,anchor.z);
+        if (chunk==null) {
+            // Advance the actual persisted start to FULL asynchronously. Never create a building merely
+            // from a fresh noise prediction in an old visited world (its datapacks may have changed).
+            level.getChunkSource().addRegionTicket(RECOVERY_TICKET,anchor,2,anchor); return;
+        }
+        for (var start:chunk.getAllStarts().values()) for (var piece:start.getPieces())
+            if (piece instanceof LargeLandmarkMarker marker && marker.asset.equals(site.asset()))
+                request(level,marker.asset,marker.origin);
+    }
+    private static void step(ServerLevel l,LandmarkData.Job j,LandmarkData data) {
         try {
             j.waiting=false;
             if (!j.initialized) {
@@ -109,7 +166,7 @@ public final class LargeLandmarkJobs {
             j.phase=-1; data.setDirty(); release(l);
             LogUtils.getLogger().error("[TN-C Landmark] stopped {} {}",j.key(),j.error,error);
             announce(l,j,"§c遗迹施工暂停："+j.error+"。详情 /tnc landmark status");
-            var bar=BARS.remove(e.getServer()); if (bar!=null) bar.removeAllPlayers();
+            var bar=BARS.remove(l.getServer()); if (bar!=null) bar.removeAllPlayers();
         }
     }
     private static boolean area(ServerLevel l,BlockPos p,int sx,int sz) {
@@ -117,14 +174,32 @@ public final class LargeLandmarkJobs {
         for (int z=p.getZ()>>4;z<=(p.getZ()+sz-1)>>4;z++)
             for (int x=p.getX()>>4;x<=(p.getX()+sx-1)>>4;x++) desired.add(new ChunkPos(x,z));
         if (!desired.equals(TICKETS.get(l.getServer()))) {
-            release(l); TICKETS.put(l.getServer(),desired);
-            for (var c:desired) l.getChunkSource().addRegionTicket(TICKET,c,2,c);
+            TICKETS.put(l.getServer(),desired);
+        }
+        var held=HELD.computeIfAbsent(l.getServer(),k->new LinkedHashMap<>(64,.75F,true));
+        for (var c:desired) {
+            if (!held.containsKey(c)) l.getChunkSource().addRegionTicket(TICKET,c,2,c);
+            held.put(c,l.getGameTime());
+        }
+        // Retain blocked jobs' areas briefly without accumulating hundreds of force-loaded chunks.
+        var iterator=held.keySet().iterator();
+        while (held.size()>64 && iterator.hasNext()) { var c=iterator.next();
+            if (!desired.contains(c)) { l.getChunkSource().removeRegionTicket(TICKET,c,2,c); iterator.remove(); }
         }
         return desired.stream().allMatch(c->l.getChunkSource().getChunkNow(c.x,c.z)!=null);
     }
+    private static void expire(ServerLevel l) {
+        var held=HELD.get(l.getServer()); if (held==null) return;
+        var iterator=held.entrySet().iterator();
+        while (iterator.hasNext()) { var entry=iterator.next();
+            if (l.getGameTime()-entry.getValue()>100) {
+                l.getChunkSource().removeRegionTicket(TICKET,entry.getKey(),2,entry.getKey()); iterator.remove();
+            }
+        }
+    }
     private static void release(ServerLevel l) {
-        var old=TICKETS.remove(l.getServer()); if (old!=null)
-            for (var c:old) l.getChunkSource().removeRegionTicket(TICKET,c,2,c);
+        TICKETS.remove(l.getServer()); var held=HELD.remove(l.getServer()); if (held!=null)
+            for (var c:held.keySet()) l.getChunkSource().removeRegionTicket(TICKET,c,2,c);
     }
     private static boolean used(LandmarkData.Job j) {
         var p=j.tilePos();
@@ -143,7 +218,7 @@ public final class LargeLandmarkJobs {
                 && LandmarkWorkArea.near(v.getX(),v.getY(),v.getZ(),p.getX(),minY,p.getZ(),maxX,maxY,maxZ));
         return j.waiting;
     }
-    private static boolean natural(BlockState s) {
+    static boolean natural(BlockState s) {
         return s.is(BlockTags.DIRT) || s.is(BlockTags.BASE_STONE_OVERWORLD) || s.is(BlockTags.SAND)
                 || s.is(BlockTags.TERRACOTTA) || s.is(Blocks.GRAVEL) || s.is(Blocks.SNOW_BLOCK);
     }
@@ -336,7 +411,13 @@ public final class LargeLandmarkJobs {
         var l=e.getServer().overworld(); if (l!=null) { drain(l); release(l); }
         var bar=BARS.remove(e.getServer()); if (bar!=null) bar.removeAllPlayers();
     }
-    @SubscribeEvent public static void stopped(ServerStoppedEvent e) { REQUESTS.keySet().removeIf(l->l.getServer()==e.getServer()); }
+    @SubscribeEvent public static void stopped(ServerStoppedEvent e) {
+        REQUESTS.keySet().removeIf(l->l.getServer()==e.getServer()); NEXT.remove(e.getServer());
+        RECOVERY.entrySet().removeIf(entry->{
+            if (entry.getKey().getServer()!=e.getServer()) return false;
+            entry.getValue().cancel(false); return true;
+        });
+    }
     @SubscribeEvent public static void commands(RegisterCommandsEvent e) {
         e.getDispatcher().register(Commands.literal("tnc").then(Commands.literal("landmark").requires(s->s.hasPermission(2))
                 .then(Commands.literal("status").executes(c->{
@@ -351,7 +432,10 @@ public final class LargeLandmarkJobs {
                                 +" · 建筑中心 "+buildingCenter(j).toShortString()+" · 南侧接近点 X="+approach.getX()+" Z="+approach.getZ()
                                 +(j.waiting?" · 请退出施工区或使用旁观模式":"")+" "+j.error),false);
                     }
-                    if (d.jobs.isEmpty()) c.getSource().sendSuccess(()->Component.literal("尚未触发大型遗迹。/locate 定位后到达现场。"),false);
+                    if (d.jobs.isEmpty()) c.getSource().sendSuccess(()->Component.literal(
+                            LandmarkGenerationMode.enabled(c.getSource().getServer().overworld())
+                                    ?"此世界采用随区块生成模式：大型遗迹不使用逐帧施工队列。"
+                                    :"尚未触发大型遗迹。到达 /locate 坐标或建筑区域后，5 秒内自动检查。"),false);
                     return d.jobs.size();
                 }))));
     }

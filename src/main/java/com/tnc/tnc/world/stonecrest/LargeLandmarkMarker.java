@@ -27,6 +27,7 @@ final class LargeLandmarkMarker extends StructurePiece {
         // Dedicated GameTests enqueue their own fixtures. Random worldgen landmarks
         // must not occupy those sites or cast shadows across unrelated test batches.
         if(l.getLevel().getServer() instanceof net.minecraft.gametest.framework.GameTestServer)return;
+        if (LandmarkGenerationMode.enabled(l.getLevel())) return;
         LargeLandmarkJobs.request(l.getLevel(),asset,origin);
     }
 }
