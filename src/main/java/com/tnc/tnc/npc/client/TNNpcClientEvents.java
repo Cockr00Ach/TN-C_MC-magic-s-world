@@ -62,7 +62,21 @@ public final class TNNpcClientEvents {
             ZuowangBedrockRenderers.register(event);
         } else {
             event.registerEntityRenderer(com.tnc.tnc.npc.TNNpcs.ZUOWANG.get(), provider);
-        event.registerEntityRenderer(com.tnc.tnc.npc.TNNpcs.YAN_DARK.get(), ctx -> new com.tnc.tnc.boss.client.YanDarkRenderer(ctx));
         }
+        // ★★ 公孙衍（迷失）yan_dark —— **这一行必须在 if/else 外面** ✗✗
+        //    （2026-09-30 客户端崩溃的真因，crash-2026-09-30_18.37.25-client.txt）
+        //
+        //    它原来被插进了上面那个 else 的花括号里 ✗：本整合包**装了 GeckoLib** ⇒
+        //    GeoSelfSupport.available() == true ⇒ 只走 if 分支 ⇒ **else 整段永不执行** ⇒
+        //    yan_dark 在客户端**根本没有渲染器** ✗。于是实体一进世界，
+        //    Oculus/Iris 的影子渲染阶段会调 EntityRenderDispatcher.shouldRender(...)，
+        //    而它内部直接 `this.getRenderer(entity).shouldRender(...)`、**不做 null 检查** ✗
+        //    ⇒ NullPointerException，整个客户端崩掉（存档里/刚召唤出来就崩）。
+        //    原版自己的 render 路径有 null 检查，所以"只有影子一开就崩"是这条 bug 的指纹 ✓。
+        //
+        //    ★ 教训：实体渲染器 / 模型层这类注册**不要写在条件分支里**，
+        //      除非那个条件本身就是"这个实体类型存不存在"（self/maid 那种分流才是合法的 ✓）。
+        event.registerEntityRenderer(com.tnc.tnc.npc.TNNpcs.YAN_DARK.get(),
+                ctx -> new com.tnc.tnc.boss.client.YanDarkRenderer(ctx));
     }
 }
