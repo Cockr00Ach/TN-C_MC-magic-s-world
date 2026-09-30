@@ -5,12 +5,13 @@ limited structure-reference radius. Source commands, mobs and inventories are om
 """
 import argparse
 import hashlib
+import json
 from collections import deque
 from pathlib import Path
 import zipfile
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw
 from building_assets import AIR, read_blueprint, state_text
 from import_buildings import compatible, dilate, runs, write_json
 from export_stonecrest_fortress import WorldReader, replacement_for, is_artificial
@@ -37,6 +38,41 @@ def fill_holes(mask):
             if 0<=nx<w and 0<=nz<h and not mask[nz,nx] and not outside[nz,nx]:
                 outside[nz,nx]=True; queue.append((nx,nz))
     return ~outside
+
+
+def landscape_mask(bounds, polygon):
+    x0, _, z0, x1, _, z1 = bounds
+    if len(polygon) < 3 or any(not (x0 <= x <= x1 and z0 <= z <= z1) for x, z in polygon):
+        raise ValueError('Landscape polygon must fit the source bounds')
+    image = Image.new('1', (x1-x0+1, z1-z0+1))
+    ImageDraw.Draw(image).polygon([(x-x0, z-z0) for x, z in polygon], fill=1)
+    return np.asarray(image, dtype=bool)
+
+
+def ground_profile(blocks, palette, fallback):
+    # Roofs, leaves and decorative granite are not a reliable ground-height signal.
+    names = [s.split('[')[0].split(':')[-1] for s in palette]
+    soil = np.array([n in {'grass_block', 'dirt', 'coarse_dirt', 'podzol', 'mycelium',
+                           'moss_block', 'sand', 'red_sand', 'mud', 'rooted_dirt'}
+                     or n.endswith(('_grass_block', '_dirt', '_podzol')) for n in names])
+    result = np.full(blocks.shape[1:], fallback, dtype=np.int16)
+    for y in range(blocks.shape[0]):
+        result[soil[blocks[y]]] = y
+    return result
+
+
+def height_runs(mask, heights):
+    result = []
+    for row, values in zip(mask, heights):
+        runs_in_row = []
+        for x in np.flatnonzero(row):
+            x, h = int(x), int(values[x])
+            if runs_in_row and runs_in_row[-1][1]+1 == x and runs_in_row[-1][2] == h:
+                runs_in_row[-1][1] = x
+            else:
+                runs_in_row.append([x, x, h])
+        result.append(runs_in_row)
+    return result
 
 
 def read_world(world,bounds):
@@ -71,11 +107,20 @@ def read_world(world,bounds):
 
 
 def export(args):
+    landscape = None
     if args.world:
         blocks,palette,artificial,provenance=read_world(args.source,args.bounds)
         # Roofs/walls, not a flat imported lawn, define the footprint. Preserve enclosed courtyards.
         ground=args.ground_y-args.bounds[1]
-        mask=fill_holes(dilate(np.any(artificial[blocks[max(0,ground+3):]],axis=0),2))
+        if args.landscape_profile:
+            landscape = json.loads(args.landscape_profile.read_text(encoding='utf8'))
+            if landscape['bounds'] != args.bounds:
+                raise ValueError('Profile bounds disagree with command line')
+            mask = landscape_mask(args.bounds, landscape['polygon'])
+            provenance['landscape_polygon'] = landscape['polygon']
+            provenance['selection'] = landscape['selection']
+        else:
+            mask=fill_holes(dilate(np.any(artificial[blocks[max(0,ground+3):]],axis=0),2))
         if args.exclude:
             for x0,x1,z0,z1 in args.exclude:
                 mask[max(0,z0-args.bounds[2]):z1-args.bounds[2]+1,max(0,x0-args.bounds[0]):x1-args.bounds[0]+1]=False
@@ -121,12 +166,23 @@ def export(args):
     manifest=dict(dimensions=dims,anchor_local=[dims[0]//2,ground,dims[2]-1],floating=args.floating,sunken=args.sunken,blend_distance=args.blend,
                   mask_rows=runs(building),terrain_mask_rows=runs(terrain),pieces=pieces,piece_count=len(pieces),block_count=expected,
                   **provenance,policy='No source entities, commands, inventories or block-entity payloads; full-size architecture')
+    if landscape:
+        reference = landscape['placement_reference_y'] - args.bounds[1]
+        if not 0 <= reference < h:
+            raise ValueError('Landscape placement reference must fit source height')
+        manifest['anchor_local'][1] = reference
+        manifest['placement_reference_y'] = landscape['placement_reference_y']
+        heights = np.pad(ground_profile(blocks, palette, ground), margin, constant_values=ground)
+        manifest['ground_height_rows'] = height_runs(building, heights)
+        manifest['terrain_profile_version'] = 1
+        manifest['revision'] = 'full-axis-20261001'
     write_json(args.output/'buildings'/(args.asset+'.json'),manifest)
     structure_id=args.structure_id or args.asset
     write_json(args.output/'worldgen/structure'/(structure_id+'.json'),dict(type='tnc:large_landmark',asset=args.asset,
                biomes='#minecraft:is_overworld' if args.floating else '#tnc:has_structure/imported_buildings',step='surface_structures',spawn_overrides={},terrain_adaptation='none'))
+    salt = landscape['placement_salt'] if landscape else int(hashlib.sha256(args.asset.encode()).hexdigest()[:7],16)
     write_json(args.output/'worldgen/structure_set'/(structure_id+'.json'),dict(structures=[dict(structure='tnc:'+structure_id,weight=1)],
-               placement=dict(type='minecraft:random_spread',locate_offset=[8,0,8],spacing=160,separation=100,salt=int(hashlib.sha256(args.asset.encode()).hexdigest()[:7],16))))
+               placement=dict(type='minecraft:random_spread',locate_offset=[8,0,8],spacing=160,separation=100,salt=salt)))
     preview=Path('work/landmark-previews'); preview.mkdir(parents=True,exist_ok=True)
     Image.fromarray(building.astype(np.uint8)*255).save(preview/(args.asset+'-mask.png'))
     print(f'DONE {args.asset}: {dims}, {expected} blocks, {len(pieces)} pieces',flush=True)
@@ -140,6 +196,7 @@ if __name__=='__main__':
     p.add_argument('--floating',action='store_true'); p.add_argument('--registry-jar',type=Path,action='append',required=True)
     p.add_argument('--sunken',action='store_true'); p.add_argument('--blend',type=int,default=24)
     p.add_argument('--structure-id')
+    p.add_argument('--landscape-profile', type=Path)
     a=p.parse_args()
     if a.world and (a.bounds is None or a.ground_y is None): p.error('world requires bounds and ground-y')
     export(a)

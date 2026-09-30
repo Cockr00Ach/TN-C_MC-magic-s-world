@@ -17,6 +17,48 @@ import net.minecraft.world.level.block.Blocks;
 @PrefixGameTestTemplate(false)
 public final class BuildingGameTests {
     @GameTest(template="building_test_empty")
+    public static void fullHeroskandLandscapeRetainsSoilElevationsAndPropagatesEdgeHeights(GameTestHelper helper) {
+        var m=StonecrestManifest.get("heroskand_estate_v2");
+        if (!m.hasGroundProfile() || m.anchorLocal().getY()!=42 || m.maxBlendDistance()!=96)
+            throw new IllegalStateException("Full landscape must use measured perimeter reference, not palace floor");
+        int core=0, edge=0; boolean varied=false; int first=-1;
+        for (int z=0;z<m.dimensions().getZ();z++) for (int x=0;x<m.dimensions().getX();x++) {
+            if (!m.terrainAt(x,z)) continue;
+            int h=m.groundHeightAt(x,z);
+            if (h<0 || h>=m.dimensions().getY()) throw new IllegalStateException("Invalid propagated ground height");
+            if (m.buildingAt(x,z)) {
+                core++; if (first<0) first=h; else if(h!=first) varied=true;
+            } else {
+                edge++;
+                if (m.distanceAt(x,z)>96) throw new IllegalStateException("Terrain belt was not reached by edge profile");
+                if (m.distanceAt(x,z)==96 && m.terrainPlan(80,32,x,z).targetY()!=80)
+                    throw new IllegalStateException("Outer belt must meet existing terrain exactly");
+            }
+        }
+        if (core<60000 || edge==0 || !varied) throw new IllegalStateException("Landscape was flattened or incomplete");
+        if (Math.abs(m.groundHeightAt(343,109)-m.groundHeightAt(344,109))>2)
+            throw new IllegalStateException("Nearest-boundary height assignment created a Voronoi cliff");
+        helper.succeed();
+    }
+    @GameTest(template="building_test_empty")
+    public static void palaceEpochKeepsExistingNativeWorldsOnTheirOriginalAsset(GameTestHelper helper) {
+        var old=new net.minecraft.nbt.CompoundTag(); old.putBoolean("NativeChunks",true);
+        var loaded=LandmarkGenerationMode.load(old);
+        if (!loaded.nativeChunks || loaded.fullHeroskand)
+            throw new IllegalStateException("Existing native world silently adopted a new palace footprint");
+        var restored=LandmarkGenerationMode.load(loaded.save(new net.minecraft.nbt.CompoundTag()));
+        if (restored.fullHeroskand) throw new IllegalStateException("Old palace epoch changed on save");
+        var fresh=LandmarkGenerationMode.load(new LandmarkGenerationMode(true).save(new net.minecraft.nbt.CompoundTag()));
+        if (!fresh.nativeChunks || !fresh.fullHeroskand)
+            throw new IllegalStateException("Fresh native world must retain full-axis epoch");
+        var manager=helper.getLevel().getStructureManager();
+        var registry=helper.getLevel().registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.STRUCTURE);
+        var structure=(LargeLandmarkStructure)registry.get(ResourceLocation.tryParse("tnc:stonecrest_fortress"));
+        if (!structure.asset(manager).equals("heroskand_estate_v2"))
+            throw new IllegalStateException("Dev generator does not exercise new palace discovery");
+        helper.succeed();
+    }
+    @GameTest(template="building_test_empty")
     public static void importedCropDecorationsBecomePersistentVanillaFoliage(GameTestHelper helper) {
         for (String id: java.util.List.of("beautyberry_bush")) {
             var state = com.tnc.tnc.world.ConquestPlantProcessor.replacement(new ResourceLocation("conquest", id));

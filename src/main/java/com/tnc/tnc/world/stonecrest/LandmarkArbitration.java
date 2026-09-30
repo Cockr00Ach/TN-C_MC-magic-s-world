@@ -34,7 +34,7 @@ final class LandmarkArbitration {
             var set=holder.value();
             if (set.structures().size()!=1 || !(set.placement() instanceof RandomSpreadStructurePlacement placement)) continue;
             if (!(set.structures().get(0).structure().value() instanceof LargeLandmarkStructure large)) continue;
-            var d=StonecrestManifest.get(large.asset()).dimensions();
+            var d=StonecrestManifest.get(large.asset(c.structureTemplateManager())).dimensions();
             int ax0=Math.floorDiv(minX-d.getX()+1+d.getX()/2-8,16),ax1=Math.floorDiv(maxX+d.getX()/2-8,16);
             int az0=Math.floorDiv(minZ+4,16),az1=Math.floorDiv(maxZ+d.getZ()+4,16);
             for (int rz=Math.floorDiv(az0,placement.spacing());rz<=Math.floorDiv(az1,placement.spacing());rz++)

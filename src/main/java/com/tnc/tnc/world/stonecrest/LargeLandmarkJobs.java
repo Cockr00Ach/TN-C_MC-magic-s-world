@@ -36,6 +36,12 @@ public final class LargeLandmarkJobs {
     private static final TicketType<ChunkPos> TICKET=TicketType.create("tnc_landmark",Comparator.comparingLong(ChunkPos::toLong));
     private static final TicketType<ChunkPos> RECOVERY_TICKET=TicketType.create("tnc_landmark_anchor",Comparator.comparingLong(ChunkPos::toLong),240);
     static void request(ServerLevel l,String asset,BlockPos origin) {
+        // Full-axis landscapes are native-new-world only, never retroactive FULL-chunk construction.
+        if (asset.equals("heroskand_estate_v2")
+                && !(l.getServer() instanceof net.minecraft.gametest.framework.GameTestServer)) {
+            LogUtils.getLogger().warn("[TN-C Landmark] refused legacy full-axis construction at {}; use a new native world",origin);
+            return;
+        }
         if (l.dimension()==Level.OVERWORLD) REQUESTS.computeIfAbsent(l,k->ConcurrentHashMap.newKeySet()).add(new Request(asset,origin.immutable()));
     }
     private static void drain(ServerLevel l) {
@@ -44,6 +50,9 @@ public final class LargeLandmarkJobs {
             q.remove(r); var j=new LandmarkData.Job(r.asset,r.origin);
             if (data.jobs.containsKey(j.key())) continue;
             try {
+                if (j.asset.equals("heroskand_estate_v2")
+                        && !(l.getServer() instanceof net.minecraft.gametest.framework.GameTestServer))
+                    throw new IllegalStateException("Full Heroskand landscape cannot overwrite existing FULL chunks");
                 var m=j.manifest();
                 if (j.origin.getY()<l.getMinBuildHeight()+1 || j.origin.getY()+m.dimensions().getY()>l.getMaxBuildHeight())
                     throw new IllegalStateException("Landmark outside world height");
@@ -132,6 +141,9 @@ public final class LargeLandmarkJobs {
     private static void step(ServerLevel l,LandmarkData.Job j,LandmarkData data) {
         try {
             j.waiting=false;
+            if (j.asset.equals("heroskand_estate_v2")
+                    && !(l.getServer() instanceof net.minecraft.gametest.framework.GameTestServer))
+                throw new IllegalStateException("Full Heroskand landscape is native-new-world only; existing chunks are protected");
             if (!j.initialized) {
                 boolean restored=LandmarkJournal.restore(l,j);
                 if (j.phase>0 && !restored) throw new IllegalStateException("Missing immutable landmark journal");
@@ -278,7 +290,7 @@ public final class LargeLandmarkJobs {
             else if (m.buildingAt(x,z)) affected=y>=Math.min(j.origin.getY(),j.grounds[idx]+1)
                     && y<=Math.max(j.surfaces[idx],j.origin.getY()+m.dimensions().getY()-1);
             else {
-                var plan=StonecrestTerrainPlanner.plan(j.grounds[idx],j.origin.getY()+m.anchorLocal().getY(),m.distanceAt(x,z),m.maxBlendDistance(),false,0,0);
+                var plan=m.terrainPlan(j.grounds[idx],j.origin.getY(),x,z);
                 affected=y>=Math.min(plan.targetY(),j.grounds[idx]+1) && y<=Math.max(plan.targetY(),j.surfaces[idx]);
             }
             if (affected && !j.preserved.contains(be)) {
@@ -308,7 +320,7 @@ public final class LargeLandmarkJobs {
                 // Scanning hundreds of empty sky layers delayed cathedrals by minutes.
                 top=Math.max(top,Math.max(j.surfaces[idx],j.origin.getY()-1));
             } else {
-                var plan=StonecrestTerrainPlanner.plan(current,j.origin.getY()+m.anchorLocal().getY(),m.distanceAt(lx,lz),m.maxBlendDistance(),false,0,0);
+                var plan=m.terrainPlan(current,j.origin.getY(),lx,lz);
                 base=Math.min(base,Math.min(current+1,plan.targetY())); top=Math.max(top,Math.max(j.surfaces[idx],plan.targetY()));
             }
         }
@@ -324,17 +336,17 @@ public final class LargeLandmarkJobs {
             int distance=m.distanceAt(lx,lz);
             if (distance<=m.maxBlendDistance()) {
                 int idx=lz*w+lx,current=j.grounds[idx],high=j.surfaces[idx];
-                var plan=StonecrestTerrainPlanner.plan(current,j.origin.getY()+m.anchorLocal().getY(),distance,m.maxBlendDistance(),
-                        m.buildingAt(lx,lz),j.origin.getY(),j.origin.getY()+m.dimensions().getY()-1);
+                var plan=m.terrainPlan(current,j.origin.getY(),lx,lz);
                 BlockState target=null;
                 if (m.buildingAt(lx,lz)) {
-                    if (y>=j.origin.getY() && y<=Math.max(high,plan.clearToY())) target=Blocks.AIR.defaultBlockState();
+                    if (y>=j.origin.getY() && y<=Math.max(high,j.origin.getY()+m.dimensions().getY()-1)) target=Blocks.AIR.defaultBlockState();
                     else if (y>current && y<j.origin.getY()) target=Blocks.STONE.defaultBlockState();
-                } else {
+                } else if (!m.hasGroundProfile() || plan.targetY()!=current) {
                     if (y>plan.targetY() && y<=high) target=Blocks.AIR.defaultBlockState();
                     else if (y==plan.targetY()) target=j.palette.get(j.materials[idx]);
                     else if (y>current && y<plan.targetY()) target=natural(j.palette.get(j.materials[idx]))
-                            && !j.palette.get(j.materials[idx]).is(BlockTags.DIRT) ? j.palette.get(j.materials[idx]) : Blocks.DIRT.defaultBlockState();
+                            && !j.palette.get(j.materials[idx]).is(BlockTags.DIRT) ? j.palette.get(j.materials[idx])
+                            :m.hasGroundProfile() && y<plan.targetY()-3 ? Blocks.STONE.defaultBlockState() : Blocks.DIRT.defaultBlockState();
                 }
                 if (target!=null) { bp.set(p.getX()+x,y,p.getZ()+z);
                     if (!j.preserved.contains(bp) && !l.getBlockState(bp).equals(target)) l.setBlock(bp,target,18); }
@@ -424,7 +436,7 @@ public final class LargeLandmarkJobs {
                     var d=LandmarkData.get(c.getSource().getServer().overworld());
                     for (var j:d.jobs.values()) {
                         var m=j.manifest();
-                        String label=switch(j.asset) {case "heroskand_complex"->"赫萝斯堪德宫殿";case "gothic_cathedral"->"哥特大教堂";
+                        String label=switch(j.asset) {case "heroskand_complex", "heroskand_estate_v2"->"赫萝斯堪德宫殿群";case "gothic_cathedral"->"哥特大教堂";
                             case "elden_coastal_castle"->"Elden 海岸城堡";case "end_pvp_island"->"末地浮岛";default->j.asset;};
                         var approach=j.origin.offset(m.dimensions().getX()/2,0,m.dimensions().getZ()+12);
                         c.getSource().sendSuccess(()->Component.literal(label+" · "+switch(j.phase){case -1->"暂停";case 0->"预检";case 1->"地形施工";case 2->"搭建";default->"完成";}

@@ -8,6 +8,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class StonecrestTerrainPlannerTest {
     @Test
+    void landscapeTransitionIsFlatAtBothEndsAndKeepsSourceElevation() {
+        assertEquals(112, StonecrestTerrainPlanner.plan(64,112,0,96,false,0,0,true).targetY());
+        assertEquals(112, StonecrestTerrainPlanner.plan(64,112,1,96,false,0,0,true).targetY());
+        assertEquals(64, StonecrestTerrainPlanner.plan(64,112,95,96,false,0,0,true).targetY());
+        assertEquals(64, StonecrestTerrainPlanner.plan(64,112,96,96,false,0,0,true).targetY());
+        assertEquals(88, StonecrestTerrainPlanner.plan(64,112,48,96,false,0,0,true).targetY());
+    }
+    @Test
     void buildingColumnsAreLevelAndClearedThroughTheTemplateVolume() {
         StonecrestTerrainPlanner.ColumnPlan plan = StonecrestTerrainPlanner.plan(
                 121, 100, 0, 24, true, 62, 253);

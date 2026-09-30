@@ -23,13 +23,20 @@ class StonecrestResourceIdentityTest {
              var reader=new InputStreamReader(stream,StandardCharsets.UTF_8)) {
             var root=new Gson().fromJson(reader,JsonObject.class);
             org.junit.jupiter.api.Assertions.assertEquals("tnc:large_landmark",root.get("type").getAsString());
-            org.junit.jupiter.api.Assertions.assertEquals("heroskand_complex",root.get("asset").getAsString());
+            org.junit.jupiter.api.Assertions.assertEquals("heroskand_estate_v2",root.get("asset").getAsString());
         }
-        try (var stream=getClass().getResourceAsStream("/data/tnc/buildings/heroskand_complex.json");
+        try (var stream=getClass().getResourceAsStream("/data/tnc/buildings/heroskand_estate_v2.json");
              var reader=new InputStreamReader(stream,StandardCharsets.UTF_8)) {
             var root=new Gson().fromJson(reader,JsonObject.class);
-            assertArrayEquals(new int[]{2064,128,880,2415,319,1167},ints(root.getAsJsonArray("source_bounds")));
-            assertArrayEquals(new int[]{400,192,336},ints(root.getAsJsonArray("dimensions")));
+            assertArrayEquals(new int[]{2016,112,528,2447,319,1199},ints(root.getAsJsonArray("source_bounds")));
+            assertArrayEquals(new int[]{624,208,864},ints(root.getAsJsonArray("dimensions")));
+            org.junit.jupiter.api.Assertions.assertEquals(96,root.get("blend_distance").getAsInt());
+            assertTrue(root.has("ground_height_rows"));
+            var rows=root.getAsJsonArray("mask_rows");
+            for (int[] point:new int[][]{{2264,592},{2176,704},{2264,850},{2068,980},{2400,1040},{2264,1100}})
+                assertTrue(contains(rows,point[0]-2016+96,point[1]-528+96),"Missing approved building or plaza");
+            assertFalse(contains(rows,2432-2016+96,704-528+96),"Far-bank village must remain excluded");
+            assertNotNull(getClass().getResource("/data/tnc/buildings/heroskand_complex.json"),"Old save markers still need their original resource");
         }
     }
     @Test

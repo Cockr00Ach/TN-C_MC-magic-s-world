@@ -13,9 +13,9 @@ public final class FullLandmarkGameTests {
     public static Collection<TestFunction> tests() {
         if (!Boolean.getBoolean("tnc.fullLandmarkTests")) return List.of();
         var result=new ArrayList<TestFunction>(); int index=0;
-        for (String asset:List.of("gothic_cathedral","heroskand_complex","elden_coastal_castle","end_pvp_island")) {
-            if (asset.equals("heroskand_complex") && !net.minecraftforge.fml.ModList.get().isLoaded("conquest")) {
-                com.mojang.logging.LogUtils.getLogger().warn("[TN-C Full Test] SKIPPED heroskand_complex: Conquest registry unavailable; never test a palace with its blocks substituted by air");
+        for (String asset:List.of("gothic_cathedral","heroskand_complex","heroskand_estate_v2","elden_coastal_castle","end_pvp_island")) {
+            if (asset.startsWith("heroskand_") && !net.minecraftforge.fml.ModList.get().isLoaded("conquest")) {
+                com.mojang.logging.LogUtils.getLogger().warn("[TN-C Full Test] SKIPPED {}: Conquest registry unavailable; never test a palace with its blocks substituted by air",asset);
                 continue;
             }
             int offset=index++*2048;

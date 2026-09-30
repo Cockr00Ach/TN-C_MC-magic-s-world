@@ -16,6 +16,10 @@ public final class LargeLandmarkStructure extends Structure {
             settingsCodec(i),Codec.STRING.fieldOf("asset").forGetter(s->s.asset)).apply(i,LargeLandmarkStructure::new));
     private final String asset;
     String asset() { return asset; }
+    String asset(net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager manager) {
+        return asset.equals("heroskand_estate_v2") && !LandmarkGenerationMode.fullPalace(manager)
+                ? "heroskand_complex" : asset;
+    }
     public LargeLandmarkStructure(StructureSettings settings,String asset) {
         super(settings); this.asset=asset;
         var m=StonecrestManifest.get(asset);
@@ -25,11 +29,12 @@ public final class LargeLandmarkStructure extends Structure {
     @Override protected Optional<GenerationStub> findGenerationPoint(GenerationContext c) {
         return rawGenerationPoint(c).filter(stub->{
             var marker=(LargeLandmarkMarker)stub.getPiecesBuilder().build().pieces().get(0);
-            return LandmarkArbitration.wins(c,asset,marker.origin);
+            return LandmarkArbitration.wins(c,marker.asset,marker.origin);
         });
     }
     Optional<GenerationStub> rawGenerationPoint(GenerationContext c) {
-        var m=StonecrestManifest.get(asset); var d=m.dimensions();
+        String selected=asset(c.structureTemplateManager());
+        var m=StonecrestManifest.get(selected); var d=m.dimensions();
         // Locate at the southern approach, not inside a roof or unbuilt floating island.
         int x=c.chunkPos().getMinBlockX()+8,z=c.chunkPos().getMinBlockZ()+8;
         int ox=x-d.getX()/2,oz=z-d.getZ()-12;
@@ -51,7 +56,7 @@ public final class LargeLandmarkStructure extends Structure {
         if (!LandmarkPlacementPlan.fits(oy,d.getY(),c.heightAccessor().getMinBuildHeight(),c.heightAccessor().getMaxBuildHeight())) return Optional.empty();
         int y=c.chunkGenerator().getFirstOccupiedHeight(x,z,Heightmap.Types.WORLD_SURFACE_WG,c.heightAccessor(),c.randomState())+1;
         BlockPos marker=new BlockPos(x,y,z),origin=new BlockPos(ox,oy,oz);
-        return Optional.of(new GenerationStub(marker,b->b.addPiece(new LargeLandmarkMarker(asset,marker,origin))));
+        return Optional.of(new GenerationStub(marker,b->b.addPiece(new LargeLandmarkMarker(selected,marker,origin))));
     }
     @Override public StructureType<?> type() { return TNStructures.LARGE_LANDMARK.get(); }
 }

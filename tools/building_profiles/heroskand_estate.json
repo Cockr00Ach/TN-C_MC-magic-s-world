@@ -1,0 +1,15 @@
+{
+  "bounds": [2016, 112, 528, 2447, 319, 1199],
+  "placement_reference_y": 154,
+  "placement_salt": 240425629,
+  "selection": "Approved southern palace, central plazas and northern connected buildings, with source courtyards and natural terrain; exclude the village across the eastern river",
+  "polygon": [
+    [2216, 552], [2312, 552], [2336, 608], [2376, 648],
+    [2392, 696], [2384, 784], [2376, 840], [2392, 912],
+    [2424, 968], [2432, 1016], [2432, 1104], [2400, 1152],
+    [2336, 1176], [2200, 1176], [2144, 1136], [2120, 1056],
+    [2064, 1040], [2040, 1016], [2040, 944], [2096, 920],
+    [2136, 888], [2136, 816], [2096, 776], [2096, 728],
+    [2120, 672], [2160, 632], [2200, 608]
+  ]
+}

@@ -31,15 +31,20 @@ public final class LandmarkChunkGameTests {
             var structure=set.structures().get(0).structure().value();
             var placement=(net.minecraft.world.level.levelgen.structure.placement.RandomSpreadStructurePlacement)set.placement();
             LargeLandmarkMarker found=null; ChunkPos anchor=null;
-            search: for (int z=-4;z<=4;z++) for (int x=-4;x<=4;x++) {
+            int radius=id.equals("stonecrest_fortress")?8:4;
+            int rawValid=0,attempts=0;
+            search: for (int z=-radius;z<=radius;z++) for (int x=-radius;x<=radius;x++) {
                 var candidate=placement.getPotentialStructureChunk(seed,x*placement.spacing(),z*placement.spacing());
                 var context=new net.minecraft.world.level.levelgen.structure.Structure.GenerationContext(access,generator,generator.getBiomeSource(),
                         random,l.getStructureManager(),seed,candidate,l,structure.biomes()::contains);
+                attempts++;
+                if (((LargeLandmarkStructure)structure).rawGenerationPoint(context).isPresent()) rawValid++;
                 var stub=structure.findValidGenerationPoint(context);
                 if (stub.isEmpty()) continue;
                 found=(LargeLandmarkMarker)stub.get().getPiecesBuilder().build().pieces().get(0); anchor=candidate; break search;
             }
-            if (found==null) throw new IllegalStateException("No normal-world valid site tested: "+id);
+            if (found==null) throw new IllegalStateException("No normal-world valid site tested: "+id+" rawValid="+rawValid+" attempts="+attempts);
+            com.mojang.logging.LogUtils.getLogger().info("[TN-C Landmark Test] {} valid anchor={} asset={} attempts={} rawValid={}",id,anchor,found.asset,attempts,rawValid);
             var expected=found;
             for (var chunk:List.of(anchor,new ChunkPos(found.origin),new ChunkPos(found.origin.offset(160,0,32)))) {
                 var sites=LandmarkSites.touching(l,chunk,32,generator,state);
@@ -69,7 +74,7 @@ public final class LandmarkChunkGameTests {
     }
     @GameTest(template="building_test_empty",timeoutTicks=400)
     public static void remoteWingsAreIndexedBeyondVanillaReferenceRadius(GameTestHelper helper) {
-        for (String asset:List.of("heroskand_complex","elden_coastal_castle","gothic_cathedral","end_pvp_island")) {
+        for (String asset:List.of("heroskand_complex","heroskand_estate_v2","elden_coastal_castle","gothic_cathedral","end_pvp_island")) {
             var origin=new BlockPos(-10003,128,-14007); var m=StonecrestManifest.get(asset);
             int tested=0;
             for (var piece:m.pieces()) {

@@ -37,7 +37,7 @@ final class LandmarkSites {
             if (set.structures().size()!=1 || !(set.placement() instanceof RandomSpreadStructurePlacement placement)) continue;
             var structure=set.structures().get(0).structure().value();
             if (!(structure instanceof LargeLandmarkStructure large)) continue;
-            var d=StonecrestManifest.get(large.asset()).dimensions();
+            var d=StonecrestManifest.get(large.asset(level.getStructureManager())).dimensions();
             int minX=Math.floorDiv(chunk.getMinBlockX()-margin-d.getX()+1+d.getX()/2-8,16);
             int maxX=Math.floorDiv(chunk.getMaxBlockX()+margin+d.getX()/2-8,16);
             int minZ=Math.floorDiv(chunk.getMinBlockZ()-margin+4,16);

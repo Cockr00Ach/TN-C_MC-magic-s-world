@@ -74,13 +74,15 @@ public final class LandmarkChunkFeature extends Feature<NoneFeatureConfiguration
             while (ground>level.getMinBuildHeight()+1 && !LargeLandmarkJobs.natural(level.getBlockState(p)) && high-ground<48) p.setY(--ground);
             var top=level.getBlockState(p);
             if (!LargeLandmarkJobs.natural(top)) top=Blocks.GRASS_BLOCK.defaultBlockState();
-            var plan=StonecrestTerrainPlanner.plan(ground,o.getY()+m.anchorLocal().getY(),m.distanceAt(lx,lz),m.maxBlendDistance(),false,0,0);
+            var plan=m.terrainPlan(ground,o.getY(),lx,lz);
+            if (m.hasGroundProfile() && !m.buildingAt(lx,lz) && plan.targetY()==ground) continue;
             int bottom=Math.max(level.getMinBuildHeight()+1,Math.min(ground+1,m.buildingAt(lx,lz)?o.getY():plan.targetY()));
             int ceiling=Math.min(level.getMaxBuildHeight()-1,Math.max(high,m.buildingAt(lx,lz)?o.getY()-1:plan.targetY()));
             for (int y=bottom;y<=ceiling;y++) {
                 p.set(x,y,z); if (preserved.contains(p)) continue;
                 var target=m.buildingAt(lx,lz)?(y>=o.getY()?Blocks.AIR.defaultBlockState():Blocks.STONE.defaultBlockState())
-                        :y>plan.targetY()?Blocks.AIR.defaultBlockState():y==plan.targetY()?top:Blocks.DIRT.defaultBlockState();
+                        :y>plan.targetY()?Blocks.AIR.defaultBlockState():y==plan.targetY()?top
+                        :m.hasGroundProfile() && y<plan.targetY()-3?Blocks.STONE.defaultBlockState():Blocks.DIRT.defaultBlockState();
                 if (!level.getBlockState(p).equals(target)) level.setBlock(p,target,18);
             }
         }

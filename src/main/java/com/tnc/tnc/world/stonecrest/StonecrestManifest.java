@@ -35,20 +35,24 @@ public final class StonecrestManifest {
     private final BitSet[] buildingRows;
     private final BitSet[] terrainRows;
     private final byte[] distances;
+    private final short[] groundHeights;
+    private final float[] smoothHeights;
     private boolean floating;
     private boolean sunken;
     private final int blendDistance;
     private String fingerprint;
 
     private StonecrestManifest(Vec3i dimensions, BlockPos anchorLocal, List<Piece> pieces,
-                               BitSet[] buildingRows, BitSet[] terrainRows, int blendDistance) {
+                               BitSet[] buildingRows, BitSet[] terrainRows, int blendDistance, short[] groundHeights) {
         this.dimensions = dimensions;
         this.anchorLocal = anchorLocal;
         this.pieces = List.copyOf(pieces);
         this.buildingRows = buildingRows;
         this.terrainRows = terrainRows;
         this.blendDistance=blendDistance;
-        this.distances = buildDistances(dimensions.getX(), dimensions.getZ(), buildingRows, terrainRows,blendDistance);
+        this.groundHeights = groundHeights;
+        this.distances = buildDistances(dimensions.getX(), dimensions.getZ(), buildingRows, terrainRows,blendDistance,groundHeights);
+        this.smoothHeights=groundHeights==null?null:smoothEdgeHeights(dimensions.getX(),dimensions.getZ(),buildingRows,terrainRows,groundHeights,blendDistance);
     }
 
     public static StonecrestManifest get() {
@@ -100,7 +104,9 @@ public final class StonecrestManifest {
                 }
                 int blend=root.has("blend_distance")?root.get("blend_distance").getAsInt():MAX_BLEND_DISTANCE;
                 if (blend<1 || blend>96) throw new IOException("Invalid blend distance");
-                var result = new StonecrestManifest(dimensions, anchor, pieces, buildingRows, terrainRows,blend);
+                short[] heights = root.has("ground_height_rows")
+                        ? groundHeights(root.getAsJsonArray("ground_height_rows"), dimensions, buildingRows) : null;
+                var result = new StonecrestManifest(dimensions, anchor, pieces, buildingRows, terrainRows,blend,heights);
                 result.floating = root.has("floating") && root.get("floating").getAsBoolean();
                 result.sunken = root.has("sunken") && root.get("sunken").getAsBoolean();
                 try {
@@ -133,7 +139,24 @@ public final class StonecrestManifest {
         return result;
     }
 
-    private static byte[] buildDistances(int width, int depth, BitSet[] building, BitSet[] terrain,int maxDistance) {
+    private static short[] groundHeights(JsonArray rows, Vec3i dims, BitSet[] building) throws IOException {
+        if (rows.size()!=dims.getZ()) throw new IOException("Ground profile row count mismatch");
+        short[] values=new short[dims.getX()*dims.getZ()];
+        for (int z=0;z<dims.getZ();z++) {
+            var covered=new BitSet(dims.getX());
+            for (var element:rows.get(z).getAsJsonArray()) {
+                var run=element.getAsJsonArray(); int a=run.get(0).getAsInt(), b=run.get(1).getAsInt(), h=run.get(2).getAsInt();
+                if (a<0 || b<a || b>=dims.getX() || h<0 || h>=dims.getY()
+                        || covered.nextSetBit(a)>=0 && covered.nextSetBit(a)<=b)
+                    throw new IOException("Invalid landscape ground profile");
+                for (int x=a;x<=b;x++) { covered.set(x); values[z*dims.getX()+x]=(short)h; }
+            }
+            if (!covered.equals(building[z])) throw new IOException("Landscape profile must exactly cover core mask");
+        }
+        return values;
+    }
+
+    private static byte[] buildDistances(int width, int depth, BitSet[] building, BitSet[] terrain,int maxDistance,short[] heights) {
         byte[] result = new byte[width * depth];
         java.util.Arrays.fill(result, (byte) 127);
         ArrayDeque<Integer> queue = new ArrayDeque<>();
@@ -152,20 +175,44 @@ public final class StonecrestManifest {
             if (nextDistance > maxDistance) {
                 continue;
             }
-            if (x > 0) visit(index - 1, x - 1, z, width, terrain, result, nextDistance, queue);
-            if (x + 1 < width) visit(index + 1, x + 1, z, width, terrain, result, nextDistance, queue);
-            if (z > 0) visit(index - width, x, z - 1, width, terrain, result, nextDistance, queue);
-            if (z + 1 < depth) visit(index + width, x, z + 1, width, terrain, result, nextDistance, queue);
+            if (x > 0) visit(index, index - 1, x - 1, z, width, terrain, result, nextDistance, queue,heights);
+            if (x + 1 < width) visit(index, index + 1, x + 1, z, width, terrain, result, nextDistance, queue,heights);
+            if (z > 0) visit(index, index - width, x, z - 1, width, terrain, result, nextDistance, queue,heights);
+            if (z + 1 < depth) visit(index, index + width, x, z + 1, width, terrain, result, nextDistance, queue,heights);
         }
         return result;
     }
 
-    private static void visit(int index, int x, int z, int width, BitSet[] terrain, byte[] distances,
-                              int distance, ArrayDeque<Integer> queue) {
+    private static void visit(int from, int index, int x, int z, int width, BitSet[] terrain, byte[] distances,
+                              int distance, ArrayDeque<Integer> queue,short[] heights) {
         if (terrain[z].get(x) && Byte.toUnsignedInt(distances[index]) > distance) {
             distances[index] = (byte) distance;
+            if (heights!=null) heights[index]=heights[from];
             queue.addLast(index);
         }
+    }
+
+    /** Harmonic extension removes Voronoi seams between different boundary heights.
+     * Source core elevations stay fixed; only the unexported transition belt is relaxed. */
+    private static float[] smoothEdgeHeights(int width,int depth,BitSet[] core,BitSet[] terrain,short[] heights,int blend) {
+        float[] current=new float[heights.length];
+        for (int i=0;i<current.length;i++) current[i]=heights[i];
+        float[] next=current.clone(); var cells=new java.util.ArrayList<Integer>();
+        for (int z=0;z<depth;z++) for (int x=terrain[z].nextSetBit(0);x>=0;x=terrain[z].nextSetBit(x+1))
+            if (!core[z].get(x)) cells.add(z*width+x);
+        int[] indexes=cells.stream().mapToInt(Integer::intValue).toArray();
+        for (int iteration=0;iteration<blend*2;iteration++) {
+            for (int i:indexes) {
+                int x=i%width,z=i/width,count=0; float sum=0;
+                if (x>0 && terrain[z].get(x-1)) {sum+=current[i-1];count++;}
+                if (x+1<width && terrain[z].get(x+1)) {sum+=current[i+1];count++;}
+                if (z>0 && terrain[z-1].get(x)) {sum+=current[i-width];count++;}
+                if (z+1<depth && terrain[z+1].get(x)) {sum+=current[i+width];count++;}
+                next[i]=count==0?current[i]:sum/count;
+            }
+            var swap=current; current=next; next=swap;
+        }
+        return current;
     }
 
     private static Vec3i vec3(JsonArray array, String name) throws IOException {
@@ -187,6 +234,14 @@ public final class StonecrestManifest {
     public boolean floating() { return floating; }
     public boolean sunken() { return sunken; }
     public String fingerprint() { return fingerprint; }
+    public boolean hasGroundProfile() { return groundHeights!=null; }
+    public int groundHeightAt(int x,int z) {
+        return smoothHeights==null || !terrainAt(x,z) ? anchorLocal.getY() : Math.round(smoothHeights[z*dimensions.getX()+x]);
+    }
+    StonecrestTerrainPlanner.ColumnPlan terrainPlan(int currentY,int originY,int x,int z) {
+        return StonecrestTerrainPlanner.plan(currentY,originY+groundHeightAt(x,z),distanceAt(x,z),blendDistance,
+                false,0,0,hasGroundProfile());
+    }
 
     public boolean terrainAt(int x, int z) {
         return x >= 0 && z >= 0 && x < dimensions.getX() && z < dimensions.getZ() && terrainRows[z].get(x);

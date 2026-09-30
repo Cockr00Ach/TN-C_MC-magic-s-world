@@ -19,7 +19,7 @@ class LandmarkTests(unittest.TestCase):
             def _section(self,sy): return list(range(16)),[(1<<64)-1]*256,4
         a,p=section_array(Chunk(),0);self.assertEqual(a.shape,(16,16,16));self.assertTrue((a==15).all())
     def test_every_piece_matches_manifest_and_has_safe_nbt(self):
-        for asset in ('end_pvp_island','heroskand_complex','gothic_cathedral','elden_coastal_castle'):
+        for asset in ('end_pvp_island','heroskand_complex','heroskand_estate_v2','gothic_cathedral','elden_coastal_castle'):
             m=json.loads((ROOT/'buildings'/f'{asset}.json').read_text(encoding='utf8'))
             seen=set(); total=0; dims=m['dimensions']
             for p in m['pieces']:
