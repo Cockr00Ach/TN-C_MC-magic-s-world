@@ -285,7 +285,39 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
         long time = this.level().getGameTime();
         com.tnc.tnc.magic.TnSpellMechanics.ascensionAura(this, time);
         com.tnc.tnc.magic.TnSpellMechanics.sparkMarks(this, time);
+        // ★★ 作者要的"登神外观"＝背后跟随的那尊 god ✓（"我想要的登神外观是那个 god 的模型
+        //    在他背后跟随的那个效果"）—— 黑暗衍用它那套暗色模型（god_dark ✓），
+        //    尺寸按 boss 的体型放大到 GOD_FOLLOWER_SCALE ✓。
+        com.tnc.tnc.magic.TnSpellMechanics.maintainGodFollower(this, time, true, GOD_FOLLOWER_SCALE);
+        // ★★ 作者 2026-09-30："boss 二阶段我希望他身上一直散发着黑色和紫色粒子" ✓
+        this.phaseTwoAuraParticles();
     }
+
+    /**
+     * 二阶段常驻的**黑 + 紫**粒子 ✓（作者："身上一直散发着黑色和紫色粒子"）。
+     *
+     * <p>配色沿用 t5 三尊神那套（紫 {@code witch} ＋ 黑 {@code squid_ink} ✓）——
+     * 整个雷系"神"的视觉语言就这两种颜色，别再引入第三种 ✗。
+     * 每 tick 各来一小撮（约 120/秒 紫 + 80/秒 黑），贴着身体中段往上飘 ✓。
+     */
+    private void phaseTwoAuraParticles() {
+        if (!(this.level() instanceof ServerLevel level)) {
+            return;
+        }
+        double cy = this.getY() + this.getBbHeight() * 0.6D;
+        level.sendParticles(ParticleTypes.WITCH, this.getX(), cy, this.getZ(),
+                6, 0.7D, 1.1D, 0.7D, 0.02D);
+        level.sendParticles(ParticleTypes.SQUID_INK, this.getX(), cy, this.getZ(),
+                4, 0.7D, 1.1D, 0.7D, 0.01D);
+    }
+
+    /**
+     * 黑暗衍背后那尊跟随神的尺寸 ✓
+     *
+     * <p>玩家那尊是 5.0（≈5.6 格高）；boss 本体 2.4 格高、而且要撑住"神降"的气势 ⇒ 放大到
+     * **9.0**（≈10 格高）✓。想改就改这一个数 ✓。
+     */
+    private static final double GOD_FOLLOWER_SCALE = 9.0D;
 
     /**
      * 二阶段登场那一下的"<b>万雷归体</b>"✓ —— 三圈雷电同时向内收 + 一记白闪。

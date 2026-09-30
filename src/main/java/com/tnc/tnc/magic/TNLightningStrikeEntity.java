@@ -335,18 +335,24 @@ public class TNLightningStrikeEntity extends Entity {
      *
      * <p>什么情况下自己消失（三道保险，缺一道都会留下"孤儿神" ✗）：
      * <ol>
-     *   <li>owner 掉线 / 不在同一个维度</li>
+     *   <li>owner 死掉 / 掉线 / 不在同一个维度</li>
      *   <li>owner 的<b>闪电登神 buff 掉了</b> —— 机制层也会清（{@code TnSpellMechanics}），
      *       但实体自己也要会死 ✓（机制层漏了那次，神会一直跟着你 ✗）</li>
      *   <li>超过 {@link #FOLLOWER_MAX_AGE} tick（10 分钟）—— 兜底，防止任何异常路径把它留下 ✓</li>
      * </ol>
+     *
+     * <p>★ 2026-09-30：owner 的查找从"只找玩家"放宽到**任意生物** ✓ ——
+     * 作者要的 boss 二阶段登神外观正是这个效果（"我想要的登神外观是那个 god 的模型在他背后跟随"）✓，
+     * 而黑暗衍是 Mob ✗，原来 {@code getPlayerList().getPlayer(uuid)} 永远查不到它 ⇒ 神一生成就自杀 ✗✗。
      */
     private void tickFollowerGod() {
         ServerLevel level = (ServerLevel) this.level();
-        net.minecraft.world.entity.player.Player owner = this.followOwner == null || level.getServer() == null
-                ? null : level.getServer().getPlayerList().getPlayer(this.followOwner);
-        if (owner == null || owner.level() != level
-                || !owner.hasEffect(TNEffects.LIGHTNING_ASCENSION.get())
+        net.minecraft.world.entity.Entity owner = this.followOwner == null
+                ? null : level.getEntity(this.followOwner);
+        boolean ascended = owner instanceof net.minecraft.world.entity.LivingEntity living
+                && TNEffects.LIGHTNING_ASCENSION.isPresent()
+                && living.hasEffect(TNEffects.LIGHTNING_ASCENSION.get());
+        if (owner == null || owner.isRemoved() || owner.level() != level || !ascended
                 || this.tickCount > FOLLOWER_MAX_AGE) {
             this.discard();
             return;

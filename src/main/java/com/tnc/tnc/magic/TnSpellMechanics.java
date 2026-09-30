@@ -824,7 +824,7 @@ public final class TnSpellMechanics {
         // 闪电登神：全身电弧 + 环绕电光 + 走过留雷印 + **背后跟着的神** ✓
         if (has(player, TNEffects.LIGHTNING_ASCENSION)) {
             ascensionAura(player, time);
-            maintainGodFollower(player, time);
+            maintainGodFollower(player, time, false);
         } else {
             // buff 没了就把"上一个雷印位置"清掉，免得下次上 buff 时先补一枚
             LAST_MARK.remove(player.getUUID());
@@ -1147,23 +1147,36 @@ public final class TnSpellMechanics {
      *
      * <p>为什么不每 tick 重建：重建会**每 tick 重发一次生成包** ⇒ 客户端一直在"新实体出现"，
      * 模型会不停闪 ✗。所以只在**一尊都没有**的时候补 ✓。
+     *
+     * <p>★ 2026-09-30：参数放宽到 {@link net.minecraft.world.entity.LivingEntity} ✓ ——
+     * 作者要的"登神外观"就是这个跟随神（"我想要的登神外观是那个 god 的模型在他背后跟随"），
+     * 而黑暗衍二阶段是永久登神 ⇒ 它背后也要有一尊 ✓（{@code dark = true} 时用 {@code god_dark} ✓）。
      */
-    private static void maintainGodFollower(ServerPlayer player, long time) {
+    public static void maintainGodFollower(net.minecraft.world.entity.LivingEntity owner, long time,
+                                           boolean dark) {
+        maintainGodFollower(owner, time, dark, GOD_FOLLOWER_SCALE);
+    }
+
+    /** 带尺寸的版本（boss 想用更大的跟随神时传 scale ✓）。 */
+    public static void maintainGodFollower(net.minecraft.world.entity.LivingEntity owner, long time,
+                                           boolean dark, double scale) {
         if (GOD_FOLLOWER_COUNT <= 0 || time % 10 != 0) {
             return;
         }
-        ServerLevel level = player.serverLevel();
+        if (!(owner.level() instanceof ServerLevel level)) {
+            return;
+        }
         int alive = 0;
         for (TNLightningStrikeEntity god : level.getEntitiesOfClass(TNLightningStrikeEntity.class,
-                player.getBoundingBox().inflate(64.0D))) {
-            if (god.isFollowerGod() && player.getUUID().equals(god.followOwner())) {
+                owner.getBoundingBox().inflate(64.0D))) {
+            if (god.isFollowerGod() && owner.getUUID().equals(god.followOwner())) {
                 alive++;
             }
         }
         if (alive >= GOD_FOLLOWER_COUNT) {
             return;
         }
-        double base = Math.toRadians(player.getYRot());
+        double base = Math.toRadians(owner.getYRot());
         for (int i = alive; i < GOD_FOLLOWER_COUNT; i++) {
             // 多尊时按角度均分站在背后（单尊时 i=0 ⇒ 正后方 ✓）
             double spread = Math.toRadians((i - (GOD_FOLLOWER_COUNT - 1) / 2.0D) * GOD_FOLLOWER_ARC_DEGREES);
@@ -1172,23 +1185,27 @@ public final class TnSpellMechanics {
             if (god == null) {
                 return;
             }
-            god.asFollowerGod(player.getUUID(), GOD_FOLLOWER_BACK, GOD_FOLLOWER_UP);
-            god.configure(GOD_FOLLOWER_SCALE, TNLightningStrikeEntity.FOLLOWER_MAX_AGE,
-                    player.getY(), 0.0D);
-            double gx = player.getX() + Math.sin(dir) * GOD_FOLLOWER_BACK;
-            double gz = player.getZ() - Math.cos(dir) * GOD_FOLLOWER_BACK;
-            // 朝向：和玩家一致（原版约定 facing = (−sin yaw, cos yaw) ⇒ 直接用玩家的 yaw ✓）
-            god.moveTo(gx, player.getY() + GOD_FOLLOWER_UP, gz, player.getYRot(), 0.0F);
+            god.asFollowerGod(owner.getUUID(), GOD_FOLLOWER_BACK, GOD_FOLLOWER_UP);
+            if (dark) {
+                god.asDark();                    // 黑暗衍背后那尊用 god_dark ✓
+            }
+            god.configure(scale, TNLightningStrikeEntity.FOLLOWER_MAX_AGE, owner.getY(), 0.0D);
+            double gx = owner.getX() + Math.sin(dir) * GOD_FOLLOWER_BACK;
+            double gz = owner.getZ() - Math.cos(dir) * GOD_FOLLOWER_BACK;
+            // 朝向：和主人一致（原版约定 facing = (−sin yaw, cos yaw) ⇒ 直接用主人的 yaw ✓）
+            god.moveTo(gx, owner.getY() + GOD_FOLLOWER_UP, gz, owner.getYRot(), 0.0F);
             level.addFreshEntity(god);
         }
     }
 
-    /** 登神 buff 没了：把玩家背后那几尊跟随神清掉 ✓（实体自己也会查 buff，这里是双保险 ✓）。 */
-    private static void removeGodFollower(ServerPlayer player) {
-        ServerLevel level = player.serverLevel();
+    /** 登神 buff 没了：把主人背后那几尊跟随神清掉 ✓（实体自己也会查 buff，这里是双保险 ✓）。 */
+    public static void removeGodFollower(net.minecraft.world.entity.LivingEntity owner) {
+        if (!(owner.level() instanceof ServerLevel level)) {
+            return;
+        }
         for (TNLightningStrikeEntity god : level.getEntitiesOfClass(TNLightningStrikeEntity.class,
-                player.getBoundingBox().inflate(80.0D))) {
-            if (god.isFollowerGod() && player.getUUID().equals(god.followOwner())) {
+                owner.getBoundingBox().inflate(80.0D))) {
+            if (god.isFollowerGod() && owner.getUUID().equals(god.followOwner())) {
                 god.discard();
             }
         }
