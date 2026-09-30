@@ -22,7 +22,10 @@ def mirror_cube(c):
     d["origin"] = [-(o[0] + s[0]), o[1], o[2]]
     d["mirror"] = True
     rot = d.get("rotation")
-    if rot and rot.get("angle"):
+    if isinstance(rot, list) and len(rot) == 3:
+        # Blockbench shorthand: [x, y, z] degrees -> mirror keeps x, negates y/z
+        d["rotation"] = [rot[0], -rot[1], -rot[2]]
+    elif isinstance(rot, dict) and rot.get("angle"):
         ax = rot.get("axis", "y")
         if ax in ("y", "z"):
             rot["angle"] = -rot["angle"]
