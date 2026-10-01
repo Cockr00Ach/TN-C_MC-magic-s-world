@@ -57,6 +57,15 @@ public class TNLightBeamEntity extends Entity {
     /** 施法者的实体 id（判"只打敌人"要用 ✓；-1 = 找不到 ✓）。 */
     protected static final EntityDataAccessor<Integer> DATA_CASTER =
             SynchedEntityData.defineId(TNLightBeamEntity.class, EntityDataSerializers.INT);
+    /**
+     * ★ <b>锁定目标</b>的实体 id（-1 = 没锁 ✓）。
+     *
+     * <p>作者 2026-10-01："我是要那种对着敌人释放然后**瞄着敌人**的那种" ✓ ——
+     * 光柱不是"朝一个方向射出去就不管了" ✗，而是**每一 tick 都重新瞄准目标** ✓：
+     * 目标跑，光柱跟着转 ✓（服务端改朝向/位置 ✓，客户端渲染器也拿这个 id 做平滑跟随 ✓）。
+     */
+    protected static final EntityDataAccessor<Integer> DATA_TARGET =
+            SynchedEntityData.defineId(TNLightBeamEntity.class, EntityDataSerializers.INT);
 
     /** 伤害只在服务端算 ✓（不进同步 ✓）。 */
     private float damage;
@@ -69,15 +78,29 @@ public class TNLightBeamEntity extends Entity {
         this.noPhysics = true;
     }
 
-    /** 生成后调用一次：多粗、多长、多疼、活多久、什么形态、谁放的 ✓。 */
+    /** 生成后调用一次：多粗、多长、多疼、活多久、什么形态、谁放的、锁谁 ✓。 */
     public void configure(Entity caster, double radius, double length, float damage,
-                          int lifeTicks, int style) {
+                          int lifeTicks, int style, LivingEntity target) {
         this.entityData.set(DATA_RADIUS, (int) Math.round(radius * 100.0D));
         this.entityData.set(DATA_LENGTH, (int) Math.round(length * 100.0D));
         this.entityData.set(DATA_LIFE, Math.max(1, lifeTicks));
         this.entityData.set(DATA_STYLE, style);
         this.entityData.set(DATA_CASTER, caster == null ? -1 : caster.getId());
+        this.entityData.set(DATA_TARGET, target == null ? -1 : target.getId());
         this.damage = damage;
+        if (target != null) {
+            this.aimAt(target);                  // 生成瞬间先对准一次 ✓
+        }
+    }
+
+    /** 锁定目标的 id（-1 = 没锁 ✓）。 */
+    public int targetId() {
+        return this.entityData.get(DATA_TARGET);
+    }
+
+    /** 是不是在"瞄着某个敌人" ✓（渲染器要用它做平滑跟随 ✓）。 */
+    public boolean tracking() {
+        return this.targetId() >= 0;
     }
 
     public double radius() {
@@ -108,6 +131,7 @@ public class TNLightBeamEntity extends Entity {
         this.entityData.define(DATA_LIFE, 12);
         this.entityData.define(DATA_STYLE, STYLE_RAY);
         this.entityData.define(DATA_CASTER, -1);
+        this.entityData.define(DATA_TARGET, -1);
     }
 
     @Override
@@ -120,8 +144,64 @@ public class TNLightBeamEntity extends Entity {
             this.discard();
             return;
         }
+        this.trackTarget();                      // ★ 瞄着敌人：每 tick 重新瞄准 ✓
         this.damageAlong();
         this.sparkle();
+    }
+
+    /**
+     * ★ <b>瞄着敌人</b>（作者 2026-10-01 ✓）—— 每 tick 把光柱重新对准目标 ✓：
+     *
+     * <ul>
+     *   <li><b>前射形态</b>：光柱的起点**跟着施法者走**（人动光也动 ✓），方向指着目标的身体中心 ✓，
+     *       长度 = 到目标的距离 ✓（目标跑远就拉长 ✓）；</li>
+     *   <li><b>天降形态</b>：整根柱子**悬在目标头顶**（跟着目标平移 ✓），方向永远竖直向下 ✓；</li>
+     *   <li>目标死了/丢了：保持最后一次的朝向 ✓（不追了 ✓），伤害照旧只打这一条线上的敌人 ✓。</li>
+     * </ul>
+     */
+    private void trackTarget() {
+        LivingEntity target = this.targetEntity();
+        if (target == null) {
+            return;
+        }
+        if (this.style() == STYLE_DESCENT) {
+            double ground = TNLightBeamMechanics.groundY((ServerLevel) this.level(), target.position());
+            this.setPos(target.getX(), ground + TNLightBeamMechanics.skyHeight(), target.getZ());
+            this.setYRot(0.0F);
+            this.setXRot(90.0F);                 // +Z 转到竖直向下 ✓（渲染器同一套约定 ✓）
+            return;
+        }
+        // 前射：起点跟着施法者（找不到施法者就用当前位置 ✓）
+        if (this.level() instanceof ServerLevel server) {
+            int id = this.entityData.get(DATA_CASTER);
+            if (id >= 0 && server.getEntity(id) instanceof LivingEntity caster) {
+                Vec3 eye = caster.getEyePosition();
+                this.setPos(eye.x, eye.y, eye.z);
+            }
+        }
+        this.aimAt(target);
+        double dist = this.position().distanceTo(center(target));
+        this.entityData.set(DATA_LENGTH, (int) Math.round(Math.max(1.0D, dist) * 100.0D));
+    }
+
+    /** 把朝向设成"从当前位置指向目标身体中心" ✓。 */
+    private void aimAt(LivingEntity target) {
+        Vec3 d = center(target).subtract(this.position()).normalize();
+        this.setYRot(TNLightBeamMechanics.yawFor(d));
+        this.setXRot(TNLightBeamMechanics.pitchFor(d));
+    }
+
+    /** 当前锁定的目标实体（客户端也能拿到 ⇒ 渲染器做平滑跟随 ✓）。 */
+    public LivingEntity targetEntity() {
+        int id = this.targetId();
+        if (id < 0 || this.level() == null) {
+            return null;
+        }
+        return this.level().getEntity(id) instanceof LivingEntity living && living.isAlive() ? living : null;
+    }
+
+    private static Vec3 center(LivingEntity e) {
+        return e.position().add(0.0D, e.getBbHeight() * 0.5D, 0.0D);
     }
 
     /** 沿柱子打伤害 ✓ —— 敌人**每条光线只挨一次** ✓（否则贴脸会被打几十下 ✗）。 */

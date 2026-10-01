@@ -78,8 +78,8 @@ public final class TNLightBeamMechanics {
             new Spell("radiant_barrage", 5, 1, 0.0D, 4.50D, 32.0F, 40.0D, true, 5),
     };
 
-    /** 光柱存活时长（tick）：14 tick ≈ 0.7 秒 ✓（实体，够看清又不糊屏 ✓）。 */
-    private static final int BEAM_LIFE = 14;
+    /** 光柱存活时长（tick）：18 tick = 0.9 秒 ✓（"瞄着敌人"要一点持续时间才看得出在跟 ✗）。 */
+    private static final int BEAM_LIFE = 18;
     /** 天降的魔法阵留在天上的时长（tick）✓ —— 阵先亮、光柱随后落下 ✓。 */
     private static final int SKY_CIRCLE_LIFE = 120;
     /** 天降时阵离地多高（格 ✓）。 */
@@ -116,10 +116,11 @@ public final class TNLightBeamMechanics {
         final Vec3 dir;
         final Spell spell;
         final int style;
+        final LivingEntity target;
         int delay;
 
         Pending(ServerLevel level, ServerPlayer caster, Vec3 from, Vec3 dir,
-                Spell spell, int style, int delay) {
+                Spell spell, int style, int delay, LivingEntity target) {
             this.level = level;
             this.caster = caster;
             this.from = from;
@@ -127,6 +128,7 @@ public final class TNLightBeamMechanics {
             this.spell = spell;
             this.style = style;
             this.delay = delay;
+            this.target = target;
         }
     }
 
@@ -210,6 +212,37 @@ public final class TNLightBeamMechanics {
     }
 
     /**
+     * 方向 → MC 的 yaw（度 ✓）—— <b>一处定义</b>，生成时、追踪时、渲染器都用它 ✓
+     * （三处各写一份必然有一天不一致 ✗，光翼那轮的"手性反了"就是这么来的 ✗）。
+     */
+    public static float yawFor(Vec3 dir) {
+        Vec3 d = dir.normalize();
+        return (float) (Mth.atan2(d.x, d.z) * (180.0F / (float) Math.PI));
+    }
+
+    /** 方向 → MC 的 pitch（度 ✓）。 */
+    public static float pitchFor(Vec3 dir) {
+        Vec3 d = dir.normalize();
+        return (float) (-Mth.atan2(d.y, Math.sqrt(d.x * d.x + d.z * d.z)) * (180.0F / (float) Math.PI));
+    }
+
+    /** 天降时阵离地多高（格 ✓）—— 实体的追踪逻辑也要用 ✓。 */
+    public static double skyHeight() {
+        return SKY_HEIGHT;
+    }
+
+    /**
+     * 某个水平位置的**地面高度** ✓（用高度图；找不到就退回传入的 y ✓）——
+     * 实体的"天降跟着目标平移"也要用 ✓。
+     */
+    public static double groundY(ServerLevel level, Vec3 at) {
+        var pos = net.minecraft.core.BlockPos.containing(at.x, at.y, at.z);
+        var top = level.getHeightmapPos(
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, pos);
+        return Math.max(top.getY(), at.y);
+    }
+
+    /**
      * 一个点**在不在准星锥 + 射程里** ✓ —— 抽成纯函数，单测直接验 ✓
      * （"身后不要、旁边不要、太远不要" 这三条就是索敌的全部规矩 ✓）。
      */
@@ -223,8 +256,11 @@ public final class TNLightBeamMechanics {
     }
 
     /**
-     * ★ <b>索敌</b>（作者 2026-10-01："t1234激光怎么没有索敌啊" ✗）：
+     * ★ <b>索敌</b>（作者 2026-10-01："我是要那种对着敌人释放然后瞄着敌人的那种" ✓）：
      * 在**准星锥**（{@link #AIM_CONE_DEGREES} ✓）里、射程内的敌人，按距离从近到远排 ✓。
+     *
+     * <p>注意分工：这里只负责"**选中谁**" ✓；"**一直瞄着它**"是实体自己的事
+     * （{@link TNLightBeamEntity#tick} 每 tick 重新瞄准 ✓）。
      */
     public static List<LivingEntity> coneTargets(ServerPlayer caster, List<LivingEntity> candidates,
                                                  Vec3 look, double reach, double coneDegrees) {
@@ -305,7 +341,7 @@ public final class TNLightBeamMechanics {
         }
         List<Vec3> dirs = fanDirections(center, spell.rays(), spell.spreadDeg());
         for (Vec3 dir : dirs) {
-            spawn(level, caster, from, dir, spell, TNLightBeamEntity.STYLE_RAY);
+            spawn(level, caster, from, dir, spell, TNLightBeamEntity.STYLE_RAY, target);
         }
         play(level, from, spell.tier() >= 3 ? SoundEvents.BEACON_ACTIVATE : SoundEvents.AMETHYST_BLOCK_CHIME);
         caster.displayClientMessage(Component.literal("§e[TN-C] §r" + name(spell)
@@ -332,11 +368,13 @@ public final class TNLightBeamMechanics {
                 reach, AIM_CONE_DEGREES);
 
         List<Vec3> spots = new ArrayList<>();
+        List<LivingEntity> locked = new ArrayList<>();
         for (LivingEntity target : targets) {
             if (spots.size() >= spell.circles()) {
                 break;
             }
             spots.add(target.position());        // ★ 每个阵开在目标头上 ✓
+            locked.add(target);                  // ★ 这根柱子会一直瞄着它 ✓
         }
         if (spots.isEmpty()) {
             // 没锁到敌人：中心一个 + 围着准星落点铺一圈 ✓（t4 就只铺中心那一个 ✓）
@@ -363,9 +401,11 @@ public final class TNLightBeamMechanics {
             // ② 地面也补一张阵，让"落点"看得见 ✓
             circle(level, at.x, ground + 0.04D, at.z, spell.radius() * SKY_CIRCLE_SCALE * 0.8D, 0.0F);
             // ③ 光柱：等 SKY_DELAY + i*SKY_STAGGER 才落 ✓（t5 一根接一根 ✓）
+            //    锁了人的那些会**一直跟着那个人**（实体自己每 tick 重新瞄准 ✓）
+            LivingEntity lockedTarget = i < locked.size() ? locked.get(i) : null;
             PENDING.add(new Pending(level, caster, new Vec3(at.x, ground + SKY_HEIGHT, at.z),
                     new Vec3(0.0D, -1.0D, 0.0D), spell, TNLightBeamEntity.STYLE_DESCENT,
-                    SKY_DELAY + i * SKY_STAGGER));
+                    SKY_DELAY + i * SKY_STAGGER, lockedTarget));
         }
         play(level, caster.position(), SoundEvents.TRIDENT_THUNDER);
         caster.displayClientMessage(Component.literal("§e[TN-C] §r" + name(spell)
@@ -375,14 +415,6 @@ public final class TNLightBeamMechanics {
                 + "）"), true);
         LOGGER.info("TN-C/light: 光柱 {} circles={} radius={} delay={}t dmg={} targets={}",
                 spell.path(), spots.size(), spell.radius(), SKY_DELAY, spell.damage(), targets.size());
-    }
-
-    /** 某个水平位置的地面高度 ✓（用高度图，找不到就退回实体脚下的 y ✓）。 */
-    private static double groundY(ServerLevel level, Vec3 at) {
-        var pos = net.minecraft.core.BlockPos.containing(at.x, at.y, at.z);
-        var top = level.getHeightmapPos(
-                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, pos);
-        return Math.max(top.getY(), at.y);
     }
 
     private static void circle(ServerLevel level, double x, double y, double z, double radius, float yaw) {
@@ -396,23 +428,25 @@ public final class TNLightBeamMechanics {
     }
 
     /**
-     * 生成一根实体光柱 ✓（作者 2026-10-01："光线我想要实体的"✗）。
+     * 生成一根实体光柱 ✓（作者 2026-10-01："光线我想要实体的" ✗ / "瞄着敌人" ✓）。
      *
-     * <p>光柱沿**本地 +Z** 长 {@code length} 格 ✓ ⇒ 这里只要把实体的朝向摆成 {@code dir} ✓
-     * （{@code yRot/xRot} 那套和原版投射物一致 ✓）。
+     * <p>光柱沿**本地 +Z** 长 {@code length} 格 ✓ ⇒ 这里把实体朝向摆成 {@code dir} ✓；
+     * 锁定 {@code target} 之后，**接下来每一 tick 的重新瞄准由实体自己负责** ✓
+     * （{@link TNLightBeamEntity#tick} ✓），所以这里只要给一个正确的初值 ✓。
      */
     private static void spawn(ServerLevel level, ServerPlayer caster, Vec3 from, Vec3 dir,
-                              Spell spell, int style) {
+                              Spell spell, int style, LivingEntity target) {
         TNLightBeamEntity beam = TNOrbEntities.LIGHT_BEAM.get().create(level);
         if (beam == null) {
             return;
         }
         Vec3 d = dir.normalize();
-        float yaw = (float) (Mth.atan2(d.x, d.z) * (180.0F / (float) Math.PI));
-        float pitch = (float) (-Mth.atan2(d.y, Math.sqrt(d.x * d.x + d.z * d.z)) * (180.0F / (float) Math.PI));
-        beam.moveTo(from.x, from.y, from.z, yaw, pitch);
+        beam.moveTo(from.x, from.y, from.z, yawFor(d), pitchFor(d));
         double length = spell.sky() ? SKY_HEIGHT + 1.0D : spell.reach();
-        beam.configure(caster, spell.radius(), length, spell.damage(), BEAM_LIFE, style);
+        if (target != null) {
+            length = Math.max(1.0D, target.position().distanceTo(from));
+        }
+        beam.configure(caster, spell.radius(), length, spell.damage(), BEAM_LIFE, style, target);
         level.addFreshEntity(beam);
     }
 
@@ -457,7 +491,8 @@ public final class TNLightBeamMechanics {
                 pending.delay--;                 // 还没到点：只减计数 ✓
                 continue;
             }
-            spawn(pending.level, pending.caster, pending.from, pending.dir, pending.spell, pending.style);
+            spawn(pending.level, pending.caster, pending.from, pending.dir, pending.spell,
+                    pending.style, pending.target);
             it.remove();
         }
     }
