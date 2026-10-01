@@ -1,6 +1,8 @@
 package com.tnc.tnc.light;
 
+import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.junit.jupiter.api.Test;
 
@@ -75,6 +77,42 @@ class LightBeamGeometryTest {
         }
         Vector3f loop = TNLightBeamMechanics.rainbow(1.0D);
         assertTrue(loop.distance(a) < 1.0E-5F, "1.0 没有绕回 0.0（不循环）");
+    }
+
+    /**
+     * ★★ 渲染器的朝向必须正好对上"光柱末端"（作者 2026-10-01："我就看到冒烟，没看到光线" ✗）。
+     *
+     * <p>第一版渲染器**忘了乘实体朝向** ✗ —— {@code pose} 里只有"实体在哪"、没有"朝哪" ✗，
+     * 于是那根柱子永远沿世界 +Z 躺平 ✗。这条测试把"渲染器那套旋转"和
+     * {@code getLookAngle()}（判伤用的方向 ✓）**对账** ✓：
+     * 本地 {@code (0,0,L)} 经过 {@code R_y(-yRot) · R_x(xRot)} 之后，必须落在 {@code look · L} 上 ✓。
+     * 这样以后谁把旋转写反/漏掉，构建就直接红 ✗（不用等进游戏看 ✗）。
+     */
+    @Test
+    void rendererRotationMatchesBeamDirection() {
+        // 和 TNLightBeamMechanics.spawn 里同一套算法 ✓
+        for (Vec3 d : new Vec3[]{
+                new Vec3(1.0D, 0.0D, 0.0D), new Vec3(0.0D, -1.0D, 0.0D), new Vec3(0.0D, 0.0D, 1.0D),
+                new Vec3(-0.4D, -0.6D, 0.7D).normalize()}) {
+            float yaw = (float) (Mth.atan2(d.x, d.z) * (180.0F / (float) Math.PI));
+            float pitch = (float) (-Mth.atan2(d.y, Math.sqrt(d.x * d.x + d.z * d.z)) * (180.0F / (float) Math.PI));
+            // 渲染器：pose.mulPose(YP, -yRot) 然后 pose.mulPose(XP, xRot) ✓
+            Matrix4f m = new Matrix4f()
+                    .rotateY((float) Math.toRadians(-yaw))
+                    .rotateX((float) Math.toRadians(pitch));
+            double length = 20.0D;
+            org.joml.Vector4f tip = new org.joml.Vector4f(0.0F, 0.0F, (float) length, 1.0F);
+            m.transform(tip);
+            // getLookAngle 的公式：(-sin(yaw)cos(pitch), -sin(pitch), cos(yaw)cos(pitch)) ✓
+            double cy = Math.cos(Math.toRadians(yaw));
+            double sy = Math.sin(Math.toRadians(yaw));
+            double cp = Math.cos(Math.toRadians(pitch));
+            double sp = Math.sin(Math.toRadians(pitch));
+            double[] want = {-sy * cp * length, -sp * length, cy * cp * length};
+            assertEquals(want[0], tip.x, 1.0E-3D, "光柱末端 X 对不上（方向错了）" + d);
+            assertEquals(want[1], tip.y, 1.0E-3D, "光柱末端 Y 对不上（方向错了）" + d);
+            assertEquals(want[2], tip.z, 1.0E-3D, "光柱末端 Z 对不上（方向错了）" + d);
+        }
     }
 
     /**
