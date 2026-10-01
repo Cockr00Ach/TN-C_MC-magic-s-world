@@ -346,9 +346,9 @@ public final class TNLightWingsModel {
     /** 游戏里实际用的手性 ✓（A/B 定下来的 ✓）。 */
     static final float ROT_SIGN = ROT_MINUS;
 
-    /** 生成预览面 ✓（{@code animated=false} 时就是站着静止的姿势 ✓）。 */
+    /** 生成预览面 ✓（{@code animated=false} 时就是站着静止的姿势 ✓；手性用游戏里的那份 ✓）。 */
     public static List<PreviewFace> previewFaces(float animTime, boolean animated) {
-        return previewFaces(animTime, animated, ROT_PLUS);
+        return previewFaces(animTime, animated, ROT_SIGN);
     }
 
     /** 带旋转手性的预览 ✓（A/B 对比用 ✓）。 */
