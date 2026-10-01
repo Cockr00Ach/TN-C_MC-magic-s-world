@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -77,6 +78,38 @@ class LightBeamGeometryTest {
         }
         Vector3f loop = TNLightBeamMechanics.rainbow(1.0D);
         assertTrue(loop.distance(a) < 1.0E-5F, "1.0 没有绕回 0.0（不循环）");
+    }
+
+    /**
+     * ★★ <b>索敌规矩</b>（作者 2026-10-01："t1234激光怎么没有索敌啊" ✗）：
+     * 准星锥里 + 射程内才算目标 ✓；身后 / 旁边（超锥）/ 太远 都不算 ✗。
+     */
+    @Test
+    void aimConeSelectsOnlyWhatIsInFront() {
+        Vec3 eye = new Vec3(0.0D, 1.6D, 0.0D);
+        Vec3 look = new Vec3(0.0D, 0.0D, 1.0D);           // 朝 +Z 看 ✓
+        double reach = 30.0D;
+        double cone = 35.0D;
+
+        assertTrue(TNLightBeamMechanics.inAimCone(eye, look, new Vec3(0.0D, 1.6D, 10.0D), reach, cone),
+                "正前方的目标没被选中 ✗");
+        assertTrue(TNLightBeamMechanics.inAimCone(eye, look, new Vec3(3.0D, 1.6D, 10.0D), reach, cone),
+                "前偏 17 度左右的目标没被选中 ✗（锥是 35 度）");
+        assertFalse(TNLightBeamMechanics.inAimCone(eye, look, new Vec3(0.0D, 1.6D, -10.0D), reach, cone),
+                "身后的目标也被选中了 ✗");
+        assertFalse(TNLightBeamMechanics.inAimCone(eye, look, new Vec3(10.0D, 1.6D, 10.0D), reach, cone),
+                "正侧面（45 度）的目标也被选中了 ✗");
+        assertFalse(TNLightBeamMechanics.inAimCone(eye, look, new Vec3(0.0D, 1.6D, 40.0D), reach, cone),
+                "超出射程的目标也被选中了 ✗");
+        // 锥边上：34 度要中、36 度不要 ✓
+        double d34 = Math.toRadians(34.0D);
+        double d36 = Math.toRadians(36.0D);
+        assertTrue(TNLightBeamMechanics.inAimCone(eye, look,
+                        new Vec3(Math.sin(d34) * 10.0D, 1.6D, Math.cos(d34) * 10.0D), reach, cone),
+                "锥内 34 度的目标没选中 ✗");
+        assertFalse(TNLightBeamMechanics.inAimCone(eye, look,
+                        new Vec3(Math.sin(d36) * 10.0D, 1.6D, Math.cos(d36) * 10.0D), reach, cone),
+                "锥外 36 度的目标被选中了 ✗");
     }
 
     /**

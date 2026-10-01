@@ -2,6 +2,7 @@ package com.tnc.tnc.light;
 
 import com.tnc.tnc.magic.TNMagicCircleEntity;
 import com.tnc.tnc.magic.TNOrbEntities;
+import com.tnc.tnc.magic.TnSpellMechanics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -9,6 +10,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -79,15 +81,29 @@ public final class TNLightBeamMechanics {
     /** 光柱存活时长（tick）：14 tick ≈ 0.7 秒 ✓（实体，够看清又不糊屏 ✓）。 */
     private static final int BEAM_LIFE = 14;
     /** 天降的魔法阵留在天上的时长（tick）✓ —— 阵先亮、光柱随后落下 ✓。 */
-    private static final int SKY_CIRCLE_LIFE = 90;
+    private static final int SKY_CIRCLE_LIFE = 120;
     /** 天降时阵离地多高（格 ✓）。 */
     private static final double SKY_HEIGHT = 16.0D;
-    /** t5 五张阵之间的错开（tick ✓）：一个一个落下来，像连射 ✓。 */
-    private static final int SKY_STAGGER = 4;
+    /**
+     * ★ 天降的"阵先亮 → 光柱落下"间隔（tick）：作者 2026-10-01："要等魔法阵出来之后个一秒，再放激光" ✓
+     * ⇒ 20 tick = 1 秒 ✓（原来是 4 tick = 0.2 秒 ✗，等于阵和光柱一起冒出来 ✗）。
+     */
+    private static final int SKY_DELAY = 20;
+    /** t5 五张阵之间的额外错开（tick ✓）：一个一个落下来，像连射 ✓（在 {@link #SKY_DELAY} 之后再叠 ✓）。 */
+    private static final int SKY_STAGGER = 5;
     /** t5 外围四个阵离中心多远（格 ✓）—— 要 ≥ 光柱直径才不叠 ✓（见 {@link #SPELLS} ✓）。 */
     private static final double BARRAGE_RING = 12.0D;
     /** 天降的阵画多大（相对光柱半径 ✓）。 */
     private static final double SKY_CIRCLE_SCALE = 1.6D;
+
+    /**
+     * ★ 索敌的"瞄准锥"（度 ✓）—— 作者 2026-10-01："t1234激光怎么没有索敌啊" ✗。
+     *
+     * <p>只认**与准星夹角 ≤ 这个度数**的敌人 ✓（和雷法 t5 挑锚点用的是同一个思路 ✓）：
+     * 全 360° 找最近的话，会打到身后/墙后的怪 ✗（玩家看不见，手感很差 ✗）。
+     * 35° 差不多就是"屏幕正中间那一片" ✓。
+     */
+    private static final double AIM_CONE_DEGREES = 35.0D;
 
     private static final org.apache.logging.log4j.Logger LOGGER =
             org.apache.logging.log4j.LogManager.getLogger("TN-C/light");
@@ -193,6 +209,55 @@ public final class TNLightBeamMechanics {
         return out;
     }
 
+    /**
+     * 一个点**在不在准星锥 + 射程里** ✓ —— 抽成纯函数，单测直接验 ✓
+     * （"身后不要、旁边不要、太远不要" 这三条就是索敌的全部规矩 ✓）。
+     */
+    public static boolean inAimCone(Vec3 eye, Vec3 look, Vec3 point, double reach, double coneDegrees) {
+        Vec3 to = point.subtract(eye);
+        double dist = to.length();
+        if (dist > reach || dist < 1.0E-3D) {
+            return false;
+        }
+        return to.normalize().dot(look.normalize()) >= Math.cos(Math.toRadians(coneDegrees));
+    }
+
+    /**
+     * ★ <b>索敌</b>（作者 2026-10-01："t1234激光怎么没有索敌啊" ✗）：
+     * 在**准星锥**（{@link #AIM_CONE_DEGREES} ✓）里、射程内的敌人，按距离从近到远排 ✓。
+     */
+    public static List<LivingEntity> coneTargets(ServerPlayer caster, List<LivingEntity> candidates,
+                                                 Vec3 look, double reach, double coneDegrees) {
+        List<LivingEntity> out = new ArrayList<>();
+        for (LivingEntity e : candidates) {
+            if (e == caster || !e.isAlive()) {
+                continue;
+            }
+            if (!TnSpellMechanics.isEnemy(caster, e)) {
+                continue;                        // 村民/动物/剧情 NPC 不算 ✓
+            }
+            Vec3 centre = e.position().add(0.0D, e.getBbHeight() * 0.5D, 0.0D);
+            if (!inAimCone(caster.getEyePosition(), look, centre, reach, coneDegrees)) {
+                continue;                        // 不在准星锥里（身后/旁边/太远）✗
+            }
+            out.add(e);
+        }
+        out.sort(java.util.Comparator.comparingDouble(
+                e -> e.position().distanceToSqr(caster.position())));
+        return out;
+    }
+
+    /** 找一个目标（最近的 ✓）；没有就返回 null ⇒ 调用方回退成"顺着视线射" ✓。 */
+    private static LivingEntity findTarget(ServerPlayer caster, Spell spell) {
+        ServerLevel level = caster.serverLevel();
+        double reach = Math.max(12.0D, spell.reach());
+        List<LivingEntity> candidates = level.getEntitiesOfClass(LivingEntity.class,
+                caster.getBoundingBox().inflate(reach));
+        List<LivingEntity> targets = coneTargets(caster, candidates, caster.getLookAngle(),
+                reach, AIM_CONE_DEGREES);
+        return targets.isEmpty() ? null : targets.get(0);
+    }
+
     // ------------------------------------------------------------------
     //  释放
     // ------------------------------------------------------------------
@@ -224,44 +289,100 @@ public final class TNLightBeamMechanics {
         }
     }
 
-    /** t1~t3：从眼睛顺着视线射出（t1 是扇形散开的三道 ✓）—— 每道一个**实体光柱** ✓。 */
+    /**
+     * t1~t3：从眼睛射出（t1 是扇形散开的三道 ✓）—— 每道一个**实体光柱** ✓。
+     *
+     * <p>★ 索敌（作者 2026-10-01："t1234激光怎么没有索敌啊"✗）：先按准星锥找最近的一个敌人 ✓，
+     * 找到就把**中心那道对准它**（侧面几道围着它散开 ✓）；一个都没找到就顺着视线射 ✓（不至于打空 ✗）。
+     */
     private static void castForward(ServerPlayer caster, Spell spell) {
         ServerLevel level = caster.serverLevel();
         Vec3 from = caster.getEyePosition();
-        List<Vec3> dirs = fanDirections(caster.getLookAngle(), spell.rays(), spell.spreadDeg());
+        LivingEntity target = findTarget(caster, spell);
+        Vec3 center = caster.getLookAngle();
+        if (target != null) {
+            center = target.position().add(0.0D, target.getBbHeight() * 0.5D, 0.0D).subtract(from).normalize();
+        }
+        List<Vec3> dirs = fanDirections(center, spell.rays(), spell.spreadDeg());
         for (Vec3 dir : dirs) {
             spawn(level, caster, from, dir, spell, TNLightBeamEntity.STYLE_RAY);
         }
         play(level, from, spell.tier() >= 3 ? SoundEvents.BEACON_ACTIVATE : SoundEvents.AMETHYST_BLOCK_CHIME);
         caster.displayClientMessage(Component.literal("§e[TN-C] §r" + name(spell)
                 + " §7（" + spell.rays() + " 道实体光线，每道粗 "
-                + String.format(java.util.Locale.ROOT, "%.1f", spell.radius() * 2.0D) + " 格）"), true);
-        LOGGER.info("TN-C/light: 光线 {} rays={} radius={} dmg={}",
-                spell.path(), spell.rays(), spell.radius(), spell.damage());
+                + String.format(java.util.Locale.ROOT, "%.1f", spell.radius() * 2.0D) + " 格"
+                + (target == null ? "，无目标" : "，锁定 " + target.getName().getString()) + "）"), true);
+        LOGGER.info("TN-C/light: 光线 {} rays={} radius={} dmg={} target={}",
+                spell.path(), spell.rays(), spell.radius(), spell.damage(),
+                target == null ? "none" : target.getName().getString());
     }
 
-    /** t4/t5：天上开阵，然后从阵里垂直往下落光柱 ✓。 */
+    /**
+     * t4/t5：天上开阵 → **等 1 秒** → 从阵里垂直往下落光柱 ✓（作者："要等魔法阵出来之后个一秒，再放激光"✓）。
+     *
+     * <p>★ 索敌：阵**开在目标头顶**（准星锥里最近的敌人 ✓）；没有目标才落在准星落点上 ✓。
+     * t5 会一次锁定最多 5 个敌人，一人一个阵 ✓（不够就围着落点补圈 ✓）。
+     */
     private static void castSky(ServerPlayer caster, Spell spell) {
         ServerLevel level = caster.serverLevel();
-        Vec3 aim = aimPoint(caster, spell.reach());
-        List<Vec3> offsets = barrageOffsets(spell.circles(), BARRAGE_RING);
-        for (int i = 0; i < offsets.size(); i++) {
-            Vec3 at = aim.add(offsets.get(i));
-            // ① 天上的阵（雷法那种线条型 ✓）—— 阵先出现，光柱随后落下 ✓
-            circle(level, at.x, at.y + SKY_HEIGHT, at.z, spell.radius() * SKY_CIRCLE_SCALE, 0.0F);
-            // ② 地面也补一张阵，让"落点"看得见 ✓
-            circle(level, at.x, at.y + 0.04D, at.z, spell.radius() * SKY_CIRCLE_SCALE * 0.8D, 0.0F);
-            // ③ 光柱：从阵垂直往下 ✓（第 i 张阵延迟 i*SKY_STAGGER tick ⇒ 像连射 ✓）
-            PENDING.add(new Pending(level, caster, new Vec3(at.x, at.y + SKY_HEIGHT, at.z),
-                    new Vec3(0.0D, -1.0D, 0.0D), spell, TNLightBeamEntity.STYLE_DESCENT,
-                    i * SKY_STAGGER));
+        double reach = Math.max(16.0D, spell.reach());
+        List<LivingEntity> candidates = level.getEntitiesOfClass(LivingEntity.class,
+                caster.getBoundingBox().inflate(reach));
+        List<LivingEntity> targets = coneTargets(caster, candidates, caster.getLookAngle(),
+                reach, AIM_CONE_DEGREES);
+
+        List<Vec3> spots = new ArrayList<>();
+        for (LivingEntity target : targets) {
+            if (spots.size() >= spell.circles()) {
+                break;
+            }
+            spots.add(target.position());        // ★ 每个阵开在目标头上 ✓
         }
-        play(level, aim, SoundEvents.TRIDENT_THUNDER);
+        if (spots.isEmpty()) {
+            // 没锁到敌人：中心一个 + 围着准星落点铺一圈 ✓（t4 就只铺中心那一个 ✓）
+            Vec3 aim = aimPoint(caster, spell.reach());
+            for (Vec3 off : barrageOffsets(spell.circles(), BARRAGE_RING)) {
+                spots.add(aim.add(off));
+            }
+        } else if (spots.size() < spell.circles()) {
+            // 锁到的人不够：以第一个目标为中心补圈 ✓
+            Vec3 center = spots.get(0);
+            for (Vec3 off : barrageOffsets(spell.circles() - spots.size() + 1, BARRAGE_RING)) {
+                if (off.length() < 0.01D) {
+                    continue;                    // 跳过那个"中心"（已经有目标了 ✓）
+                }
+                spots.add(center.add(off));
+            }
+        }
+
+        for (int i = 0; i < spots.size(); i++) {
+            Vec3 at = spots.get(i);
+            double ground = groundY(level, at);
+            // ① 天上的阵（雷法那种线条型 ✓）—— 阵先亮，**1 秒后**光柱才落下 ✓
+            circle(level, at.x, ground + SKY_HEIGHT, at.z, spell.radius() * SKY_CIRCLE_SCALE, 0.0F);
+            // ② 地面也补一张阵，让"落点"看得见 ✓
+            circle(level, at.x, ground + 0.04D, at.z, spell.radius() * SKY_CIRCLE_SCALE * 0.8D, 0.0F);
+            // ③ 光柱：等 SKY_DELAY + i*SKY_STAGGER 才落 ✓（t5 一根接一根 ✓）
+            PENDING.add(new Pending(level, caster, new Vec3(at.x, ground + SKY_HEIGHT, at.z),
+                    new Vec3(0.0D, -1.0D, 0.0D), spell, TNLightBeamEntity.STYLE_DESCENT,
+                    SKY_DELAY + i * SKY_STAGGER));
+        }
+        play(level, caster.position(), SoundEvents.TRIDENT_THUNDER);
         caster.displayClientMessage(Component.literal("§e[TN-C] §r" + name(spell)
-                + " §7（天上 " + spell.circles() + " 个阵，每道光柱粗 "
-                + String.format(java.util.Locale.ROOT, "%.1f", spell.radius() * 2.0D) + " 格）"), true);
-        LOGGER.info("TN-C/light: 光柱 {} circles={} radius={} ring={} dmg={}",
-                spell.path(), spell.circles(), spell.radius(), BARRAGE_RING, spell.damage());
+                + " §7（天上 " + spots.size() + " 个阵，1 秒后落下，每道粗 "
+                + String.format(java.util.Locale.ROOT, "%.1f", spell.radius() * 2.0D) + " 格"
+                + (targets.isEmpty() ? "，无目标" : "，锁定 " + Math.min(targets.size(), spell.circles()) + " 个目标")
+                + "）"), true);
+        LOGGER.info("TN-C/light: 光柱 {} circles={} radius={} delay={}t dmg={} targets={}",
+                spell.path(), spots.size(), spell.radius(), SKY_DELAY, spell.damage(), targets.size());
+    }
+
+    /** 某个水平位置的地面高度 ✓（用高度图，找不到就退回实体脚下的 y ✓）。 */
+    private static double groundY(ServerLevel level, Vec3 at) {
+        var pos = net.minecraft.core.BlockPos.containing(at.x, at.y, at.z);
+        var top = level.getHeightmapPos(
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, pos);
+        return Math.max(top.getY(), at.y);
     }
 
     private static void circle(ServerLevel level, double x, double y, double z, double radius, float yaw) {
