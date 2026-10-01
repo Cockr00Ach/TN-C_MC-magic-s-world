@@ -81,7 +81,8 @@ public final class TNLightWingsRenderer {
         if (!announced) {
             announced = true;
             org.apache.logging.log4j.LogManager.getLogger("TN-C/light").info(
-                    "TN-C/light: 光翼渲染已启动（{}）", geo ? "作者 geo 模型" : "备用程序化翅膀");
+                    "TN-C/light: 光翼渲染已启动（{}，{}）",
+                    geo ? "作者 geo 模型" : "备用程序化翅膀", TNLightWingsModel.describe());
         }
         VertexConsumer vc = buffers.getBuffer(RenderType.entityTranslucentEmissive(
                 geo ? GEO_TEXTURE : TEXTURE));

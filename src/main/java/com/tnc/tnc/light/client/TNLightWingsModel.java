@@ -72,10 +72,36 @@ public final class TNLightWingsModel {
         final List<Cube> cubes = new ArrayList<>();
     }
 
-    /** geo 有没有读进来（读不进来时渲染器改用备用翅膀 ✓ —— 绝不允许"什么都没有"✗）。 */
+    /**
+     * geo 有没有读进来（读不进来时渲染器改用备用翅膀 ✓ —— 绝不允许"什么都没有"✗）。
+     *
+     * <p>注意判据是"**至少有一个方块**" ✓：文件在、骨头也在、但一个方块都没有的情况
+     * （写坏了/导出错了）同样应该走备用翅膀 ✗，不能算"读进来了" ✓。
+     */
     public static boolean isLoaded() {
         load();
-        return bones != null;
+        if (bones == null) {
+            return false;
+        }
+        for (Bone bone : bones) {
+            if (!bone.cubes.isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** 自检/日志用：几根骨头、几个方块 ✓（"渲染在跑但看不见"时这一行能区分模型空不空 ✓）。 */
+    public static String describe() {
+        load();
+        if (bones == null) {
+            return "geo 未读入";
+        }
+        int cubes = 0;
+        for (Bone bone : bones) {
+            cubes += bone.cubes.size();
+        }
+        return bones.size() + " 骨 / " + cubes + " 方块";
     }
 
     private static void load() {
@@ -169,17 +195,33 @@ public final class TNLightWingsModel {
         }
     }
 
-    /** 在玩家背上画一对光翼 ✓。flap 单位是度（正值＝扇起 ✓）。 */
+    /**
+     * 在玩家背上画一对光翼 ✓。flap 单位是度（正值＝扇起 ✓）。
+     *
+     * <h2>★★ 2026-10-01 事故：忘了乘 {@code PoseStack} ⇒ 翅膀画在<b>世界原点</b> ✗</h2>
+     * 这里原来是 {@code Matrix4f m = new Matrix4f();}（单位矩阵）从头算骨骼 ✗ ——
+     * 而 {@code pose} 里装的是"玩家在哪、朝哪、背上偏移多少" ✓，**一乘不上就等于把翅膀钉在世界原点** ✗:
+     * {@code vc.vertex(m, …)} 只用 m 变换顶点 ✓，玩家位置/朝向全在 {@code pose} 里 ✓
+     * ⇒ 渲染器明明在跑（日志 `光翼渲染已启动（作者 geo 模型）` ✓）、顶点也提交了 ✓、
+     * 剔除也修了 ✓，玩家就是**一片都看不见** ✗（因为那一对翅膀正躺在坐标 (0,0,0) 附近 ✗）。
+     *
+     * <p>修法：根骨骼的矩阵**以 {@code pose.last().pose()} 为起点** ✓（子骨骼从父骨骼继承 ✓，
+     * 所以整棵树都带上玩家变换了 ✓）。★ 这也是"自己写 geo 渲染"最容易漏的一步 ✗ ——
+     * 备用程序化翅膀那边用的是 {@code pose.last().pose()} ✓，所以它一直是对的 ✓。
+     */
     public static void render(PoseStack pose, VertexConsumer vc, float flap) {
         load();
         if (bones == null) {
             return;
         }
+        Matrix4f root = pose.last().pose();     // ★ 玩家位置/朝向/背上偏移都在这里 ✗ 不能丢
         Map<String, Matrix4f> world = new HashMap<>();
         for (Bone bone : bones) {
             Matrix4f m = new Matrix4f();
             if (bone.parent != null && world.containsKey(bone.parent)) {
                 m.set(world.get(bone.parent));
+            } else {
+                m.set(root);                     // 根骨骼：从玩家坐标系出发 ✓
             }
             // 绕骨骼 pivot：translate(p) * rot(bone) * translate(-p)
             m.translate(bone.px / 16.0F, bone.py / 16.0F, bone.pz / 16.0F);
