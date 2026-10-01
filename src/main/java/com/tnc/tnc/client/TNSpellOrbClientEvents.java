@@ -39,5 +39,8 @@ public final class TNSpellOrbClientEvents {
         event.registerEntityRenderer(TNOrbEntities.WATER_FIELD.get(), TNWaterFieldRenderer::new);
         // ★ 光天使（光系第二条链 t3/t4/t5 ✓）：半透明 + 自发光，见 TNAngelRenderer ✓
         event.registerEntityRenderer(TNOrbEntities.ANGEL.get(), com.tnc.tnc.light.client.TNAngelRenderer::new);
+        // ★ 实体光柱（光系第三条链「光线」✓）：一整根棱柱 + 彩虹顶点色，见 TNLightBeamRenderer ✓
+        event.registerEntityRenderer(TNOrbEntities.LIGHT_BEAM.get(),
+                com.tnc.tnc.light.client.TNLightBeamRenderer::new);
     }
 }

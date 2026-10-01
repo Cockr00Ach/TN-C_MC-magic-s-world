@@ -112,6 +112,23 @@ public final class TNOrbEntities {
                     .updateInterval(2)
                     .build("tnc:angel"));
 
+    /**
+     * ★ 光系第三条链「光线」的**实体光柱** ✓（作者 2026-10-01："光线我想要实体的" ✗）。
+     *
+     * <p>它是 {@link com.tnc.tnc.light.TNLightBeamEntity}（纯表现 + 自己判伤 ✓）：
+     * 实体只有一个点，**光柱是渲染器画出来的**（本地 +Z 方向长 {@code length} 格 ✓）。
+     * 所以 {@code updateInterval(1)} 很关键 ✗ —— 不然客户端会"先收到实体、过一会才知道多粗多长"，
+     * 表现就是那根柱子晚半拍才冒出来 ✗（魔法阵那轮踩过同样的坑 ✓）。
+     * {@code clientTrackingRange(16)} 给得大一些：远处的大光柱也要看得见 ✓。
+     */
+    public static final RegistryObject<EntityType<com.tnc.tnc.light.TNLightBeamEntity>> LIGHT_BEAM =
+            ENTITY_TYPES.register("light_beam", () -> EntityType.Builder
+                    .of(com.tnc.tnc.light.TNLightBeamEntity::new, MobCategory.MISC)
+                    .sized(0.1F, 0.1F)
+                    .clientTrackingRange(16)
+                    .updateInterval(1)
+                    .build("tnc:light_beam"));
+
     private TNOrbEntities() {
     }
 

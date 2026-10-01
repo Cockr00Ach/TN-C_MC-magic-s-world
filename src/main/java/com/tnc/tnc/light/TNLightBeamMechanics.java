@@ -2,28 +2,22 @@ package com.tnc.tnc.light;
 
 import com.tnc.tnc.magic.TNMagicCircleEntity;
 import com.tnc.tnc.magic.TNOrbEntities;
-import com.tnc.tnc.magic.TnSpellMechanics;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 
 /**
  * <b>光系第三条链「光线」</b> ✓ —— 作者 2026-10-01 给的五档：
@@ -31,29 +25,21 @@ import java.util.UUID;
  * <table border="1">
  *   <tr><th>档</th><th>法术</th><th>表现</th><th>伤害</th></tr>
  *   <tr><td>t1</td><td>光线</td><td>向前射出 <b>3 道细的彩色光线</b>（扇形散开 ✓）</td><td>每道 6</td></tr>
- *   <tr><td>t2</td><td>大光线</td><td>一道 <b>粗</b>的彩色光线</td><td>16</td></tr>
- *   <tr><td>t3</td><td>巨大光线</td><td>一道 <b>极粗</b>的彩色光线</td><td>28</td></tr>
- *   <tr><td>t4</td><td>圣光天降</td><td>天上展开魔法阵（<b>雷法那种线条型</b> ✓），从阵里<b>垂直向下</b>射出极粗光线</td><td>36</td></tr>
- *   <tr><td>t5</td><td>五光十射</td><td>天上展开 <b>5 个</b>魔法阵，每个都放一次圣光天降（错开落下 ✓）</td><td>每个 32</td></tr>
+ *   <tr><td>t2</td><td>大光线</td><td>一道 <b>粗</b>的彩色光线（1.6 格宽 ✓）</td><td>16</td></tr>
+ *   <tr><td>t3</td><td>巨大光线</td><td>一道 <b>极粗</b>的彩色光线（3.2 格宽 ✓）</td><td>28</td></tr>
+ *   <tr><td>t4</td><td>圣光天降</td><td>天上展开魔法阵（<b>雷法那种线条型</b> ✓），从阵里<b>垂直向下</b>射出极粗光线（<b>9 格宽</b> ✓）</td><td>36</td></tr>
+ *   <tr><td>t5</td><td>五光十射</td><td>天上展开 <b>5 个</b>魔法阵（彼此分开 12 格 ✓），每个都放一次圣光天降</td><td>每个 32</td></tr>
  * </table>
  *
- * <h2>为什么整条链都在 Java 里做（JSON 只负责表演）</h2>
- * 和「光耀」那条链同一个理由 ✓：{@code release.target = SELF} 的法术**绝不能在 JSON 里放
- * {@code area_impact}** ✗（引擎会在 {@code ImpactContext.position} 为 null 时 NPE 崩服，本仓库踩过 ✓）。
- * 所以 JSON 只做起手粒子/动作/音效 ✓，真正的光线、法阵、伤害都在这里 ✓。
+ * <h2>★ 2026-10-01 第二版：光线改成<b>实体</b>（作者："光线我想要实体的"）</h2>
+ * 原来是用 {@code DustParticleOptions} 撒一条粒子管 ✗ —— 看着像"一串点"、边缘毛 ✗。
+ * 现在每道光线是一个 {@link TNLightBeamEntity} ✓（一整个棱柱 ✓，颜色沿轴线走彩虹 ✓），
+ * 加粗只是改半径、变长只是改长度 ✗，和魔法阵同一个思路 ✓。
+ * <b>伤害也搬进实体了</b> ✓（{@code TNLightBeamEntity.tick} 自己判伤 ✓，每个敌人每条光线只挨一次 ✓），
+ * 所以这里只剩"什么时候、从哪儿、朝哪儿、放几道"✓。
  *
- * <h2>实现要点</h2>
- * <ul>
- *   <li><b>光线是"活动对象"</b>：每道光线活 {@link #BEAM_LIFE} tick ✓，每 tick 画一串彩色粒子管 ✓
- *       （{@link DustParticleOptions} 上色 ✓ —— "彩色"就是靠它 ✓），进场的敌人**只挨一次**伤害 ✓
- *       （用 {@link Beam#hit} 记账 ✓，免得贴着脸被打几十下 ✗）。</li>
- *   <li><b>每 tick 的驱动走"已证活着"的那条路</b> ✓（{@code TnSpellMechanics.tickPlayer} ✓）——
- *       2026-10-01 光翼链就是挂在死事件上才一直不出效果的 ✗。</li>
- *   <li><b>伤害只打敌人</b>：复用 {@link TnSpellMechanics#isEnemy} ✓（村民/动物/剧情 NPC 不算 ✗）。</li>
- *   <li><b>法阵用雷法那种</b> ✓：{@link TNMagicCircleEntity#STYLE_STORM}（线条多 ✓，作者原话 ✓）。</li>
- * </ul>
- *
- * <p>★ 数值全在 {@link #SPELLS} 一张表里 ✓（想调手感只改那里 ✓）。
+ * <h2>数值（作者 2026-10-01 第二版要求："全部加粗 / 圣光天降加个10倍 / 五光十射分开点"）</h2>
+ * 全在 {@link #SPELLS} 一张表里 ✓ —— 半径是"格"，写 4.5 就是 9 格宽的光柱 ✓。
  */
 public final class TNLightBeamMechanics {
 
@@ -64,7 +50,7 @@ public final class TNLightBeamMechanics {
      * @param tier      档位 ✓
      * @param rays      射出几道 ✓（t1 = 3 ✓）
      * @param spreadDeg 多道之间的总散角（度 ✓）
-     * @param radius    光线的粗细半径（格 ✓）—— 粒子管半径 + 伤害判定半径 ✓
+     * @param radius    光柱半径（格 ✓）—— 直径 = 2×radius ✓
      * @param damage    每道光线对每个敌人的伤害 ✓
      * @param reach     射程（格 ✓）
      * @param sky       是否"天降"形态 ✓（false = 从眼睛向前射 ✗）
@@ -76,72 +62,61 @@ public final class TNLightBeamMechanics {
 
     /** 每个档位的数值（作者给的是"表现"，具体数字是这里定的 ✓，要调就调这里 ✓）。 */
     private static final Spell[] SPELLS = {
-            // 向前射的三道细光线：细（0.10 格）＋ 散角 14° ⇒ 三根能明显分开 ✓
-            new Spell("light_beam", 1, 3, 14.0D, 0.10D, 6.0F, 26.0D, false, 0),
-            // 大光线：一下变粗（0.34 格）✓
-            new Spell("great_light_beam", 2, 1, 0.0D, 0.34D, 16.0F, 30.0D, false, 0),
-            // 巨大光线：极粗（0.75 格）✓
-            new Spell("giant_light_beam", 3, 1, 0.0D, 0.75D, 28.0F, 34.0D, false, 0),
-            // 圣光天降：天上一张阵，垂直落下极粗光柱（高度见 SKY_HEIGHT ✓）
-            new Spell("holy_light_descent", 4, 1, 0.0D, 1.1D, 36.0F, 40.0D, true, 1),
-            // 五光十射：天上五张阵，各自落一道（错开 SKY_STAGGER ✓）
-            new Spell("radiant_barrage", 5, 1, 0.0D, 1.1D, 32.0F, 40.0D, true, 5),
+            // 向前射的三道细光线：现在是**实体光柱** ✓（半径 0.22 格 ⇒ 约 0.44 格宽 ✓）
+            new Spell("light_beam", 1, 3, 14.0D, 0.22D, 6.0F, 26.0D, false, 0),
+            // 大光线：粗（0.80 格 ⇒ 1.6 格宽 ✓）
+            new Spell("great_light_beam", 2, 1, 0.0D, 0.80D, 16.0F, 30.0D, false, 0),
+            // 巨大光线：极粗（1.60 格 ⇒ 3.2 格宽 ✓）
+            new Spell("giant_light_beam", 3, 1, 0.0D, 1.60D, 28.0F, 34.0D, false, 0),
+            // 圣光天降：作者"感觉可以加个10倍都" ⇒ 4.5 格半径 ＝ **9 格宽**的光柱 ✓
+            //   （原来是 1.1 ⇒ 现在约 4 倍；真要 10 倍就把 4.5 改成 11.0 ⇒ 一根柱子 22 格宽 ✗ 很夸张 ✓）
+            new Spell("holy_light_descent", 4, 1, 0.0D, 4.50D, 36.0F, 40.0D, true, 1),
+            // 五光十射：作者"每个法阵可以分开点" ⇒ 环半径 4.5 → **12 格** ✓
+            //   （光柱半径 4.5 ⇒ 相邻两根要离 ≥9 格才不叠 ✗，12 格刚好各自独立 ✓）
+            new Spell("radiant_barrage", 5, 1, 0.0D, 4.50D, 32.0F, 40.0D, true, 5),
     };
 
-    /** 光线存活时长（tick）：12 tick = 0.6 秒 ✓（够看清，又不至于长时间糊屏 ✓）。 */
-    private static final int BEAM_LIFE = 12;
+    /** 光柱存活时长（tick）：14 tick ≈ 0.7 秒 ✓（实体，够看清又不糊屏 ✓）。 */
+    private static final int BEAM_LIFE = 14;
     /** 天降的魔法阵留在天上的时长（tick）✓ —— 阵先亮、光柱随后落下 ✓。 */
     private static final int SKY_CIRCLE_LIFE = 90;
     /** 天降时阵离地多高（格 ✓）。 */
-    private static final double SKY_HEIGHT = 14.0D;
+    private static final double SKY_HEIGHT = 16.0D;
     /** t5 五张阵之间的错开（tick ✓）：一个一个落下来，像连射 ✓。 */
     private static final int SKY_STAGGER = 4;
-    /** t5 五个阵里，外围四个离中心多远（格 ✓）。 */
-    private static final double BARRAGE_RING = 4.5D;
-    /** 每 tick 沿光线每走多远画一"圈"粒子（格 ✓）。 */
-    private static final double PARTICLE_STEP = 0.45D;
-    /** 每个截面撒几颗粒子 ✓（越大越"实" ✓，也越费 ✓）。 */
-    private static final int PARTICLE_PER_STEP = 6;
+    /** t5 外围四个阵离中心多远（格 ✓）—— 要 ≥ 光柱直径才不叠 ✓（见 {@link #SPELLS} ✓）。 */
+    private static final double BARRAGE_RING = 12.0D;
+    /** 天降的阵画多大（相对光柱半径 ✓）。 */
+    private static final double SKY_CIRCLE_SCALE = 1.6D;
 
     private static final org.apache.logging.log4j.Logger LOGGER =
             org.apache.logging.log4j.LogManager.getLogger("TN-C/light");
 
-    /** 正在活动的光线 ✓（每 tick 由 {@link #tick} 推进 ✓）。 */
-    private static final List<Beam> ACTIVE = new ArrayList<>();
-
-    private TNLightBeamMechanics() {
-    }
-
-    /** 一条正在射的光线 ✓。 */
-    private static final class Beam {
-        ServerLevel level;
-        UUID caster;
-        Vec3 from;
-        Vec3 dir;
-        double radius;
-        double length;
-        float damage;
-        /** 还要等几 tick 才出现 ✓（天降的"连射"靠它错开 ✓）。 */
+    /** 还没到时间落下的光柱 ✓（t5 的"连射"靠它错开 ✓）——每 tick 由 {@link #tick} 推进 ✓。 */
+    private static final class Pending {
+        final ServerLevel level;
+        final ServerPlayer caster;
+        final Vec3 from;
+        final Vec3 dir;
+        final Spell spell;
+        final int style;
         int delay;
-        /** 总寿命与剩余寿命（tick ✓）。 */
-        int maxLife;
-        int life;
-        /** 已经挨过这条光线伤害的实体 ✓（只打一次 ✓）。 */
-        final Set<UUID> hit = new HashSet<>();
 
-        Beam(ServerLevel level, UUID caster, Vec3 from, Vec3 dir, double radius,
-             double length, float damage, int life, int delay) {
+        Pending(ServerLevel level, ServerPlayer caster, Vec3 from, Vec3 dir,
+                Spell spell, int style, int delay) {
             this.level = level;
             this.caster = caster;
             this.from = from;
             this.dir = dir;
-            this.radius = radius;
-            this.length = length;
-            this.damage = damage;
-            this.maxLife = Math.max(1, life);
-            this.life = this.maxLife;
+            this.spell = spell;
+            this.style = style;
             this.delay = delay;
         }
+    }
+
+    private static final List<Pending> PENDING = new ArrayList<>();
+
+    private TNLightBeamMechanics() {
     }
 
     // ------------------------------------------------------------------
@@ -167,7 +142,7 @@ public final class TNLightBeamMechanics {
         // 以 (0,1,0) 为轴左右转；视线接近竖直时退化，改用 (1,0,0) ✓
         Vec3 axis = Math.abs(look.normalize().y) > 0.95D ? new Vec3(1.0D, 0.0D, 0.0D) : new Vec3(0.0D, 1.0D, 0.0D);
         for (int i = 0; i < count; i++) {
-            double f = count == 1 ? 0.0D : (double) i / (count - 1) - 0.5D;   // -0.5 .. +0.5 ✓
+            double f = (double) i / (count - 1) - 0.5D;   // -0.5 .. +0.5 ✓
             out.add(rotateAround(look.normalize(), axis, f * spreadDeg));
         }
         return out;
@@ -180,10 +155,7 @@ public final class TNLightBeamMechanics {
         double s = Math.sin(rad);
         Vec3 k = axis.normalize();
         // 罗德里格斯公式 ✓
-        Vec3 term1 = v.scale(c);
-        Vec3 term2 = k.cross(v).scale(s);
-        Vec3 term3 = k.scale(k.dot(v) * (1.0D - c));
-        return term1.add(term2).add(term3).normalize();
+        return v.scale(c).add(k.cross(v).scale(s)).add(k.scale(k.dot(v) * (1.0D - c))).normalize();
     }
 
     /**
@@ -204,8 +176,8 @@ public final class TNLightBeamMechanics {
     }
 
     /**
-     * 五光十射的五个落点偏移 ✓（中心一个 ＋ 四个围一圈 ✓，全部在 y=0 平面上 ✓）。
-     * 纯函数 ✓（单测查"5 个、对称、都在同一个平面上" ✓）。
+     * 五光十射的五个落点偏移 ✓（中心一个 ＋ 四个围一圈 ✓，全在 y=0 平面上 ✓）。
+     * 纯函数 ✓（单测查"5 个、对称、间距够大" ✓）。
      */
     public static List<Vec3> barrageOffsets(int circles, double ringRadius) {
         List<Vec3> out = new ArrayList<>();
@@ -252,19 +224,18 @@ public final class TNLightBeamMechanics {
         }
     }
 
-    /** t1~t3：从眼睛顺着视线射出（t1 是扇形散开的三道 ✓）。 */
+    /** t1~t3：从眼睛顺着视线射出（t1 是扇形散开的三道 ✓）—— 每道一个**实体光柱** ✓。 */
     private static void castForward(ServerPlayer caster, Spell spell) {
         ServerLevel level = caster.serverLevel();
         Vec3 from = caster.getEyePosition();
         List<Vec3> dirs = fanDirections(caster.getLookAngle(), spell.rays(), spell.spreadDeg());
         for (Vec3 dir : dirs) {
-            ACTIVE.add(new Beam(level, caster.getUUID(), from, dir, spell.radius(),
-                    spell.reach(), spell.damage(), BEAM_LIFE, 0));
+            spawn(level, caster, from, dir, spell, TNLightBeamEntity.STYLE_RAY);
         }
         play(level, from, spell.tier() >= 3 ? SoundEvents.BEACON_ACTIVATE : SoundEvents.AMETHYST_BLOCK_CHIME);
         caster.displayClientMessage(Component.literal("§e[TN-C] §r" + name(spell)
-                + " §7（" + spell.rays() + " 道，粗细 " + String.format(java.util.Locale.ROOT, "%.2f", spell.radius())
-                + " 格）"), true);
+                + " §7（" + spell.rays() + " 道实体光线，每道粗 "
+                + String.format(java.util.Locale.ROOT, "%.1f", spell.radius() * 2.0D) + " 格）"), true);
         LOGGER.info("TN-C/light: 光线 {} rays={} radius={} dmg={}",
                 spell.path(), spell.rays(), spell.radius(), spell.damage());
     }
@@ -276,33 +247,52 @@ public final class TNLightBeamMechanics {
         List<Vec3> offsets = barrageOffsets(spell.circles(), BARRAGE_RING);
         for (int i = 0; i < offsets.size(); i++) {
             Vec3 at = aim.add(offsets.get(i));
-            // ① 天上的阵（雷法那种线条型 ✓）—— 阵先出现，随后光柱落下 ✓
-            TNMagicCircleEntity circle = TNOrbEntities.MAGIC_CIRCLE.get().create(level);
-            if (circle != null) {
-                circle.configure(Math.max(2.5D, spell.radius() * 4.0D), SKY_CIRCLE_LIFE,
-                        TNMagicCircleEntity.STYLE_STORM);
-                circle.moveTo(at.x, at.y + SKY_HEIGHT, at.z, 0.0F, 0.0F);
-                level.addFreshEntity(circle);
-            }
-            // ② 地面也补一张小阵，让"落点"看得见 ✓
-            TNMagicCircleEntity ground = TNOrbEntities.MAGIC_CIRCLE.get().create(level);
-            if (ground != null) {
-                ground.configure(Math.max(2.0D, spell.radius() * 2.6D), SKY_CIRCLE_LIFE,
-                        TNMagicCircleEntity.STYLE_STORM);
-                ground.moveTo(at.x, at.y + 0.04D, at.z, 0.0F, 0.0F);
-                level.addFreshEntity(ground);
-            }
-            // ③ 光柱：从阵往下 ✓（第 i 张阵延迟 i*SKY_STAGGER tick 才落下 ⇒ 像连射 ✓）
-            Vec3 from = new Vec3(at.x, at.y + SKY_HEIGHT, at.z);
-            Vec3 down = new Vec3(0.0D, -1.0D, 0.0D);
-            ACTIVE.add(new Beam(level, caster.getUUID(), from, down, spell.radius(),
-                    SKY_HEIGHT + 1.0D, spell.damage(), BEAM_LIFE, i * SKY_STAGGER));
+            // ① 天上的阵（雷法那种线条型 ✓）—— 阵先出现，光柱随后落下 ✓
+            circle(level, at.x, at.y + SKY_HEIGHT, at.z, spell.radius() * SKY_CIRCLE_SCALE, 0.0F);
+            // ② 地面也补一张阵，让"落点"看得见 ✓
+            circle(level, at.x, at.y + 0.04D, at.z, spell.radius() * SKY_CIRCLE_SCALE * 0.8D, 0.0F);
+            // ③ 光柱：从阵垂直往下 ✓（第 i 张阵延迟 i*SKY_STAGGER tick ⇒ 像连射 ✓）
+            PENDING.add(new Pending(level, caster, new Vec3(at.x, at.y + SKY_HEIGHT, at.z),
+                    new Vec3(0.0D, -1.0D, 0.0D), spell, TNLightBeamEntity.STYLE_DESCENT,
+                    i * SKY_STAGGER));
         }
         play(level, aim, SoundEvents.TRIDENT_THUNDER);
         caster.displayClientMessage(Component.literal("§e[TN-C] §r" + name(spell)
-                + " §7（天上 " + spell.circles() + " 个阵）"), true);
-        LOGGER.info("TN-C/light: 光柱 {} circles={} radius={} dmg={}",
-                spell.path(), spell.circles(), spell.radius(), spell.damage());
+                + " §7（天上 " + spell.circles() + " 个阵，每道光柱粗 "
+                + String.format(java.util.Locale.ROOT, "%.1f", spell.radius() * 2.0D) + " 格）"), true);
+        LOGGER.info("TN-C/light: 光柱 {} circles={} radius={} ring={} dmg={}",
+                spell.path(), spell.circles(), spell.radius(), BARRAGE_RING, spell.damage());
+    }
+
+    private static void circle(ServerLevel level, double x, double y, double z, double radius, float yaw) {
+        TNMagicCircleEntity circle = TNOrbEntities.MAGIC_CIRCLE.get().create(level);
+        if (circle == null) {
+            return;
+        }
+        circle.configure(radius, SKY_CIRCLE_LIFE, TNMagicCircleEntity.STYLE_STORM);
+        circle.moveTo(x, y, z, yaw, 0.0F);
+        level.addFreshEntity(circle);
+    }
+
+    /**
+     * 生成一根实体光柱 ✓（作者 2026-10-01："光线我想要实体的"✗）。
+     *
+     * <p>光柱沿**本地 +Z** 长 {@code length} 格 ✓ ⇒ 这里只要把实体的朝向摆成 {@code dir} ✓
+     * （{@code yRot/xRot} 那套和原版投射物一致 ✓）。
+     */
+    private static void spawn(ServerLevel level, ServerPlayer caster, Vec3 from, Vec3 dir,
+                              Spell spell, int style) {
+        TNLightBeamEntity beam = TNOrbEntities.LIGHT_BEAM.get().create(level);
+        if (beam == null) {
+            return;
+        }
+        Vec3 d = dir.normalize();
+        float yaw = (float) (Mth.atan2(d.x, d.z) * (180.0F / (float) Math.PI));
+        float pitch = (float) (-Mth.atan2(d.y, Math.sqrt(d.x * d.x + d.z * d.z)) * (180.0F / (float) Math.PI));
+        beam.moveTo(from.x, from.y, from.z, yaw, pitch);
+        double length = spell.sky() ? SKY_HEIGHT + 1.0D : spell.reach();
+        beam.configure(caster, spell.radius(), length, spell.damage(), BEAM_LIFE, style);
+        level.addFreshEntity(beam);
     }
 
     /** 准星落点（打到地面/方块就用它，否则取射程尽头 ✓）。 */
@@ -314,11 +304,10 @@ public final class TNLightBeamMechanics {
         if (hit.getType() == HitResult.Type.BLOCK) {
             return hit.getLocation();
         }
-        // 没打到方块：取落点正下方最近的地面（用高度图 ✓）
-        Vec3 level = end;
-        var pos = net.minecraft.core.BlockPos.containing(level.x, level.y, level.z);
-        var top = caster.level().getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, pos);
-        return new Vec3(level.x, top.getY(), level.z);
+        var pos = net.minecraft.core.BlockPos.containing(end.x, end.y, end.z);
+        var top = caster.level().getHeightmapPos(
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, pos);
+        return new Vec3(end.x, top.getY(), end.z);
     }
 
     private static String name(Spell spell) {
@@ -332,95 +321,42 @@ public final class TNLightBeamMechanics {
     }
 
     // ------------------------------------------------------------------
-    //  每 tick：画 + 判伤（由 TnSpellMechanics.tickPlayer 调 ✓ 已证活着的路 ✓）
+    //  每 tick：把"还没落下"的光柱放出来（伤害/粒子都在实体自己身上 ✓）
+    //  驱动走 TnSpellMechanics.tickPlayer ✓（已证活着的路 ✓）
     // ------------------------------------------------------------------
 
     public static void tick(ServerPlayer player) {
-        if (ACTIVE.isEmpty()) {
+        if (PENDING.isEmpty()) {
             return;
         }
-        Iterator<Beam> it = ACTIVE.iterator();
+        Iterator<Pending> it = PENDING.iterator();
         while (it.hasNext()) {
-            Beam beam = it.next();
-            if (beam.delay > 0) {                // 天降的"连射"错开 ✓
-                beam.delay--;
+            Pending pending = it.next();
+            if (pending.delay > 0) {
+                pending.delay--;                 // 还没到点：只减计数 ✓
                 continue;
             }
-            if (beam.life <= 0) {
-                it.remove();
-                continue;
-            }
-            beam.life--;
-            draw(beam);
-            damage(beam);
+            spawn(pending.level, pending.caster, pending.from, pending.dir, pending.spell, pending.style);
+            it.remove();
         }
-    }
-
-    /** 画：沿光线每 {@link #PARTICLE_STEP} 格撒一圈彩色粒子 ✓。 */
-    private static void draw(Beam beam) {
-        int steps = (int) Math.max(1.0D, beam.length / PARTICLE_STEP);
-        double age = 1.0D - (double) beam.life / Math.max(1, beam.maxLife);   // 0..1 ✓
-        for (int i = 1; i <= steps; i++) {
-            double d = i * PARTICLE_STEP;
-            if (d > beam.length) {
-                break;
-            }
-            Vec3 p = beam.from.add(beam.dir.scale(d));
-            // 颜色沿光线走一整圈彩虹 ✓，并随时间轻微流动 ⇒ "彩色的光线" ✓
-            Vector3f color = rainbow(d / Math.max(1.0D, beam.length) + age * 0.35D);
-            float scale = (float) Math.max(0.35D, beam.radius * 1.6D);
-            DustParticleOptions dust = new DustParticleOptions(color, scale);
-            double r = beam.radius;
-            double spread = Math.max(0.05D, r);
-            beam.level.sendParticles(dust, p.x, p.y, p.z, PARTICLE_PER_STEP,
-                    spread, spread, spread, 0.0D);
-            // 中心再补一道白芯，看着更"实" ✓（粗光线尤其明显 ✓）
-            if (beam.radius >= 0.3D) {
-                beam.level.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD,
-                        p.x, p.y, p.z, 1, r * 0.3D, r * 0.3D, r * 0.3D, 0.0D);
-            }
-        }
-    }
-
-    /** 判伤：在线段 {@code from -> from+dir*length} 周围 {@code radius} 内的敌人，**只挨一次** ✓。 */
-    private static void damage(Beam beam) {
-        Vec3 end = beam.from.add(beam.dir.scale(beam.length));
-        AABB box = new AABB(beam.from, end).inflate(beam.radius + 0.6D);
-        LivingEntity owner = beam.level.getServer() == null ? null
-                : beam.level.getServer().getPlayerList().getPlayer(beam.caster);
-        for (LivingEntity target : beam.level.getEntitiesOfClass(LivingEntity.class, box)) {
-            if (target == owner || !target.isAlive()) {
-                continue;
-            }
-            if (owner instanceof ServerPlayer caster && !TnSpellMechanics.isEnemy(caster, target)) {
-                continue;                        // 村民/动物/剧情 NPC 不打 ✗
-            }
-            if (!beam.hit.add(target.getUUID())) {
-                continue;                        // 这条光线已经打过它了 ✓
-            }
-            if (owner != null) {
-                target.hurt(beam.level.damageSources().indirectMagic(owner, owner), beam.damage);
-            } else {
-                target.hurt(beam.level.damageSources().magic(), beam.damage);
-            }
-        }
-    }
-
-    private static void play(ServerLevel level, Vec3 at, SoundEvent sound) {
-        level.playSound(null, at.x, at.y, at.z, sound, SoundSource.PLAYERS, 1.2F, 1.0F);
     }
 
     // ------------------------------------------------------------------
     //  自检/命令用
     // ------------------------------------------------------------------
 
-    /** 现在有几条光线在飞 ✓（自检用 ✓）。 */
-    public static int activeCount() {
-        return ACTIVE.size();
+    /** 还有几根光柱没落下 ✓（自检用 ✓）。 */
+    public static int pendingCount() {
+        return PENDING.size();
     }
 
     /** 清空（换世界/自检用 ✓）。 */
     public static void clear() {
-        ACTIVE.clear();
+        PENDING.clear();
+    }
+
+    /** 声音（服务端播 ✓）。 */
+    private static void play(ServerLevel level, Vec3 at, SoundEvent sound) {
+        level.playSound(null, at.x, at.y, at.z, sound, SoundSource.PLAYERS, 1.2F, 1.0F);
     }
 }
