@@ -24,8 +24,10 @@ import org.joml.Matrix4f;
  * <p><b>飞的时候会动</b> ✓：扇动频率与幅度由"是否在飞"决定（飞 = 快而大 ✓，站着/走路 = 慢而小 ✓），
  * 再按竖直速度加一点俯仰 ✓ —— 纯代码算，不需要关键帧 ✓。
  *
- * <p>⚠️ 朝向：翅膀是贴在玩家背后的两片四边形，用身体朝向摆正 ✓；若进游戏看着"贴反了/翻面"，
- * 改 {@link #BACK_Z} 的符号或 {@link #YAW_OFFSET} 即可（各一个数 ✓）。
+ * <p>★ <b>位置/大小/朝向/透明度全部挪进了 {@link TNLightWingsPlacement}</b> ✓ ——
+ * 也就是 {@code config/tnc/light_wings_placement.json}：改完存盘**1 秒内生效** ✓，
+ * 不用重装、不用重启 ✗（作者 2026-10-01："出现了但是模型有点不对吧" —— 贴着看才知道对不对 ✓，
+ * 所以这些数不该写死在代码里 ✗）。代码里剩下的只有"扇动"这条动画逻辑 ✓。
  */
 @Mod.EventBusSubscriber(modid = TNMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public final class TNLightWingsRenderer {
@@ -40,20 +42,18 @@ public final class TNLightWingsRenderer {
     /** 只打一次"我在这儿画了"的日志 ✓（下次"没翅膀"能一眼分清是渲染没跑还是模型没读进来 ✓）。 */
     private static boolean announced;
 
-    /** 翅膀挂在背后的位置（相对玩家：高度 / 后移）。 */
-    private static final float BACK_Z = 0.16F;
-    private static final float BACK_Y = 1.18F;
-    /** 翅膀尺寸（格）＋ 张开角度。 */
+    /** 备用（程序化）翅膀的形状：半展宽 / 高 ✓（作者 geo 读不进来时才会用到 ✓）。 */
     private static final float SPAN = 0.95F;
     private static final float RISE = 1.15F;
-    private static final float OPEN = 34.0F;
-    private static final float YAW_OFFSET = 180.0F;
 
     private TNLightWingsRenderer() {
     }
 
     @SubscribeEvent
     public static void onRenderPlayer(RenderPlayerEvent.Post event) {
+        // ★ 先让配置有机会重载（内部一秒只查一次文件 ✓）—— 放在最前面，
+        //   这样"没有翅膀 buff"的时候也会把默认配置文件写出来 ✓
+        TNLightWingsPlacement.tick();
         if (!(event.getEntity() instanceof AbstractClientPlayer player)) {
             return;
         }
@@ -64,9 +64,9 @@ public final class TNLightWingsRenderer {
         boolean flying = player.getAbilities().flying;
         double vy = player.getDeltaMovement().y;
 
-        // 扇动：飞行时又快又大，平时慢慢摆 ✓
-        float speed = flying ? 0.85F : 0.18F;
-        float amp = flying ? 42.0F : 9.0F;
+        // 扇动：飞行时又快又大，平时慢慢摆 ✓（速度/幅度都可调 ✓）
+        float speed = flying ? TNLightWingsPlacement.flapSpeedFlying : TNLightWingsPlacement.flapSpeedIdle;
+        float amp = flying ? TNLightWingsPlacement.flapAmpFlying : TNLightWingsPlacement.flapAmpIdle;
         float flap = (float) Math.sin((player.tickCount + partial) * speed) * amp;
         // 竖直速度带来的仰角（上升时收一点、下落时张开 ✓）
         float pitch = (float) Math.max(-18.0D, Math.min(18.0D, vy * 40.0D));
@@ -81,15 +81,21 @@ public final class TNLightWingsRenderer {
         if (!announced) {
             announced = true;
             org.apache.logging.log4j.LogManager.getLogger("TN-C/light").info(
-                    "TN-C/light: 光翼渲染已启动（{}，{}）",
-                    geo ? "作者 geo 模型" : "备用程序化翅膀", TNLightWingsModel.describe());
+                    "TN-C/light: 光翼渲染已启动（{}，{}，{}）",
+                    geo ? "作者 geo 模型" : "备用程序化翅膀", TNLightWingsModel.describe(),
+                    TNLightWingsPlacement.describe());
         }
+        TNLightWingsModel.setAlpha(TNLightWingsPlacement.alpha);
         VertexConsumer vc = buffers.getBuffer(RenderType.entityTranslucentEmissive(
                 geo ? GEO_TEXTURE : TEXTURE));
 
         pose.pushPose();
-        pose.mulPose(Axis.YP.rotationDegrees(-player.yBodyRot + YAW_OFFSET));
-        pose.translate(0.0F, BACK_Y, BACK_Z);
+        pose.mulPose(Axis.YP.rotationDegrees(-player.yBodyRot + TNLightWingsPlacement.yawOffset));
+        pose.translate(0.0F, TNLightWingsPlacement.backY, TNLightWingsPlacement.backZ);
+        if (TNLightWingsPlacement.scale != 1.0F) {
+            float s = TNLightWingsPlacement.scale;
+            pose.scale(s, s, s);
+        }
         if (geo) {
             TNLightWingsModel.render(pose, vc, flap + pitch * 0.3F);
         } else {

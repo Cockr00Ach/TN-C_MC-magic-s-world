@@ -28,7 +28,7 @@ import java.util.Optional;
  *
  * <h2>作者要的两点</h2>
  * <ul>
- *   <li><b>有点透明</b> ✓：{@link #ALPHA}（0.78，越小越透 ✓）</li>
+ *   <li><b>有点透明</b> ✓：{@link #alpha}（0.78，越小越透 ✓；可在 config 文件里实时调 ✓）</li>
  *   <li><b>自发光</b> ✓：{@code entityTranslucentEmissive} ＋ 全亮度（不随环境变暗 ✓）</li>
  * </ul>
  *
@@ -43,8 +43,16 @@ public final class TNLightWingsModel {
     private static final ResourceLocation TEX = ResourceLocation.fromNamespaceAndPath(
             "tnc", "textures/entity/light_wings_bedrock.png");
 
-    /** 透明度：小一点更透 ✓（作者："翅膀要有点透明"） */
-    private static final float ALPHA = 0.78F;
+    /**
+     * 透明度：小一点更透 ✓（作者："翅膀要有点透明"）——
+     * 可由 {@code config/tnc/light_wings_placement.json} 改，**存盘 1 秒内生效** ✓（见 TNLightWingsPlacement ✓）。
+     */
+    private static float alpha = 0.78F;
+
+    /** 由 {@link TNLightWingsRenderer} 每帧按配置设一次 ✓。 */
+    public static void setAlpha(float value) {
+        alpha = Math.max(0.05F, Math.min(1.0F, value));
+    }
 
     private static List<Bone> bones;
     private static boolean failed;
@@ -331,7 +339,7 @@ public final class TNLightWingsModel {
     }
 
     private static void vertex(VertexConsumer vc, Matrix4f m, float x, float y, float z, float u, float v) {
-        vc.vertex(m, x, y, z).color(1.0F, 1.0F, 1.0F, ALPHA).uv(u, v)
+        vc.vertex(m, x, y, z).color(1.0F, 1.0F, 1.0F, alpha).uv(u, v)
                 .overlayCoords(net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY)
                 .uv2(net.minecraft.client.renderer.LightTexture.FULL_BRIGHT)
                 .normal(0.0F, 0.0F, 1.0F).endVertex();
