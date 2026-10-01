@@ -1,0 +1,33 @@
+{
+  "school": "HEALING",
+  "group": "light_beam",
+  "range": 0.0,
+  "learn": { "tier": 3 },
+  "cast": {
+    "duration": 1.0,
+    "animation": "spell_engine:one_handed_projectile_charge",
+    "sound": { "id": "block.beacon.activate", "randomness": 0 },
+    "particles": [ { "particle_id": "end_rod", "shape": "CIRCLE", "origin": "FEET", "count": 40.0, "min_speed": 0.08, "max_speed": 0.3 } ]
+  },
+  "release": {
+    "target": { "type": "SELF" },
+    "animation": "spell_engine:one_handed_projectile_release",
+    "sound": { "id": "entity.firework_rocket.launch" }
+  },
+  "impact": [
+    {
+      "action": {
+        "type": "STATUS_EFFECT",
+        "status_effect": {
+          "effect_id": "tnc:light_divine",
+          "duration": 3,
+          "amplifier": 0,
+          "apply_mode": "ADD",
+          "show_particles": false
+        }
+      },
+      "particles": [ { "particle_id": "end_rod", "shape": "SPHERE", "origin": "CENTER", "count": 60.0, "min_speed": 0.3, "max_speed": 0.9 } ]
+    }
+  ],
+  "cost": { "exhaust": 0.0, "cooldown_duration": 60 }
+}

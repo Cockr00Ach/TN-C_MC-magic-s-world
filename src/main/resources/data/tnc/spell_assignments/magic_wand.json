@@ -44,6 +44,11 @@
     "tnc:angel_mercy",
     "tnc:light_flight",
     "tnc:light_swift_flight",
-    "tnc:light_wingspan"
+    "tnc:light_wingspan",
+    "tnc:light_beam",
+    "tnc:great_light_beam",
+    "tnc:giant_light_beam",
+    "tnc:holy_light_descent",
+    "tnc:radiant_barrage"
   ]
 }

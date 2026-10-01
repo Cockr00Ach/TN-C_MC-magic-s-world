@@ -87,7 +87,18 @@ public final class SpellCatalog {
          * （{@code MagicStoneData} 的按链索引数组 ✓），插在中间会把所有人的技能页错位 ✗✗
          * （设计文档第三节明确警告过 ✓）。所以 {@code INDEPENDENT} 之后才是这两条 ✓。
          */
-        LIGHT_WINGS("光翼", "飞行与极速（光系第一条链）");
+        LIGHT_WINGS("光翼", "飞行与极速（光系第一条链）"),
+        /**
+         * ★ 光系<b>第三条链</b>「光线」（作者 2026-10-01 指定）：
+         * 光线（向前数道细彩色光线）→ 大光线（粗）→ 巨大光线（极粗）
+         * → 圣光天降（天上开阵、垂直落下极粗光柱）→ 五光十射（天上五个阵，各自圣光天降）✓。
+         *
+         * <p>法阵用的是**雷法那种线条型**（{@code TNMagicCircleEntity.STORM} ✓，作者要求 ✓）；
+         * 机制全在 {@code light/TNLightBeamMechanics} ✓（JSON 只负责表演 ✓）。
+         *
+         * <p>⚠️ 和其它新链一样：**必须追加在枚举末尾** ✗（存档按链的序数存进度 ✗）。
+         */
+        LIGHT_BEAM("光线", "向前/天降的彩色光线（光系第三条链）");
 
         private final String cn;
         private final String desc;
@@ -235,6 +246,19 @@ public final class SpellCatalog {
             of(Element.LIGHT, "light_flight", Chain.LIGHT_WINGS, 1, "飞行"),
             of(Element.LIGHT, "light_swift_flight", Chain.LIGHT_WINGS, 2, "极速飞行"),
             of(Element.LIGHT, "light_wingspan", Chain.LIGHT_WINGS, 3, "光翼展开"),
+
+            // ---- 光线线（光系第三条链，作者 2026-10-01 指定）----
+            //   1 光线：向前 3 道细的彩色光线（扇形散开）
+            //   2 大光线：一道粗的彩色光线
+            //   3 巨大光线：一道极粗的彩色光线
+            //   4 圣光天降：天上开阵（雷法那种线条型），从阵里垂直向下射出极粗光柱
+            //   5 五光十射：天上开 5 个阵，每个阵各放一次圣光天降（错开落下）
+            //   （数值都在 light/TNLightBeamMechanics 的一张表里 ✓，改那里就行 ✓）
+            of(Element.LIGHT, "light_beam", Chain.LIGHT_BEAM, 1, "光线"),
+            of(Element.LIGHT, "great_light_beam", Chain.LIGHT_BEAM, 2, "大光线"),
+            of(Element.LIGHT, "giant_light_beam", Chain.LIGHT_BEAM, 3, "巨大光线"),
+            of(Element.LIGHT, "holy_light_descent", Chain.LIGHT_BEAM, 4, "圣光天降"),
+            of(Element.LIGHT, "radiant_barrage", Chain.LIGHT_BEAM, 5, "五光十射"),
 
             // ================= 骨架（法术 JSON 待补，先占名字对齐文档）=================
             // 水魔法：水球 / 水纹 / 水缚 / 雨滴
