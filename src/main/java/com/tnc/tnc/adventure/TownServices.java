@@ -28,7 +28,8 @@ public final class TownServices {
         new Post("guild","协会接待员 · 艾琳",new BlockPos(428,94,285),VillagerProfession.LIBRARIAN,new Room(427,94,284,430,286),0),
         new Post("smith","潮生制杖屋 · 莉娅",new BlockPos(320,87,270),VillagerProfession.LIBRARIAN,new Room(320,87,269,321,272),0),
         new Post("armorer","炉石铁匠铺 · 铎恩",new BlockPos(201,101,259),VillagerProfession.ARMORER,new Room(199,101,256,203,261),45),
-        new Post("broker","归航银行 · 米洛",new BlockPos(228,94,234),VillagerProfession.CARTOGRAPHER,new Room(227,94,233,231,235),0));
+        new Post("broker","归航银行 · 米洛",new BlockPos(228,94,234),VillagerProfession.CARTOGRAPHER,new Room(227,94,233,231,235),0),
+        new Post("shop","朝夕商行 · 织夏",new BlockPos(247,89,297),VillagerProfession.FARMER,new Room(245,89,294,248,298),180));
     private static BlockPos origin(ServerLevel l){return SkyIslandAnchors.resolve(l,SkyIslandAnchors.Anchor.ORIGIN);}
     public static BlockPos board(ServerLevel l){var o=origin(l);return o==null?null:o.offset(426,94,285);}
     public static String directions(ServerLevel l){var o=origin(l);if(o==null)return "天空岛尚未落成。";return "29潮生制杖屋 "+o.offset(POSTS.get(1).local).toShortString()+"；28炉石铁匠铺 "+o.offset(POSTS.get(2).local).toShortString()+"；19归航银行 "+o.offset(POSTS.get(3).local).toShortString()+"。店员在屋内，酒馆入门上楼北侧为委托栏。";}
@@ -53,7 +54,7 @@ public final class TownServices {
         var lines=new java.util.ArrayList<com.tnc.tnc.dialogue.DialogueScript.Line>();
         lines.add(new com.tnc.tnc.dialogue.DialogueScript.Line("Self","先认认城里的路。酒馆的艾琳负责协会登记，委托接取和交付去她旁边的委托栏。",null));
         lines.add(new com.tnc.tnc.dialogue.DialogueScript.Line("Self","法杖去29号潮生制杖屋找莉娅；铠甲去28号炉石铁匠铺找铎恩。买房找19号归航银行的米洛。",null));
-        lines.add(new com.tnc.tnc.dialogue.DialogueScript.Line("Self","34号茶灯会馆先留作休闲的去处。各栋建筑我给你记在任务书的城镇地图里。至于你一直惦记的那件事……",null));
+        lines.add(new com.tnc.tnc.dialogue.DialogueScript.Line("Self","这里叫RouchNao小镇。32号朝夕商行的织夏卖家具，也收购你种的菜和牧场的产物。选房先找米洛拿门牌指引，实地看过再决定。34号茶灯会馆先留作休闲的去处。至于你一直惦记的那件事……",null));
         lines.addAll(original.lines());return new com.tnc.tnc.dialogue.DialogueScript(original.id(),original.next(),original.theme(),original.quests(),original.activate(),original.requires(),original.excludes(),java.util.List.copyOf(lines));
     }
     private static boolean canStand(ServerLevel l,BlockPos p){

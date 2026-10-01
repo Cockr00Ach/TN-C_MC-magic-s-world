@@ -33,6 +33,7 @@ public final class ResidentService {
     public static String stage(int value){return value>=85?"伴侣意愿":value>=70?"亲密":value>=45?"朋友":value>=20?"熟悉":"陌生";}
     private static Component choice(String label,String action){return Component.literal("["+label+"] ").withStyle(s->s.withColor(net.minecraft.ChatFormatting.GOLD).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,"/neighbor "+action)));}
     public static void open(ServerPlayer p,ResidentEntity npc){
+        if(McaResidents.available()){p.sendSystemMessage(Component.literal("居民正在接入凡家物语，请稍后再次右键交流。"));return;}
         var def=definition(npc.identity());if(def==null||!p.isAlive()||p.isSpectator()||com.tnc.tnc.combat.DownedCombat.isDowned(p))return;
         SESSIONS.put(p.getUUID(),npc.getUUID());var r=relation(p,def.id);
         p.sendSystemMessage(Component.literal(def.name+" · 成年邻居 · "+stage(r.getInt("Affection"))+"（"+r.getInt("Affection")+"/100）\n喜欢："+preference(def.preference)+"。手持料理赠食；同一种连续赠送收益减半。"));
@@ -42,6 +43,7 @@ public final class ResidentService {
     private static String preference(String s){return switch(s){case "bread"->"面包与烘焙";case "vegetable"->"蔬菜";case "fish"->"鱼料理";case "sweet"->"甜食";case "meat"->"熟肉";default->"汤与炖菜";};}
     static boolean likes(Definition d,String item){return switch(d.preference){case "bread"->item.contains("bread")||item.contains("pie");case "vegetable"->item.contains("carrot")||item.contains("potato")||item.contains("salad");case "fish"->item.contains("fish")||item.contains("salmon")||item.contains("cod");case "sweet"->item.contains("cookie")||item.contains("berry")||item.contains("pie");case "meat"->item.contains("cooked_")&&!item.contains("fish")&&!item.contains("cod")&&!item.contains("salmon");default->item.contains("soup")||item.contains("stew")||item.contains("feast");};}
     public static String act(ServerPlayer p,String action){
+        if(McaResidents.available())return action.equals("home")?McaResidents.moveFamily(p):"请右键居民使用凡家物语的聊天、送礼、婚姻与家庭面板。结婚后带伴侣回自己的房子，输入 /neighbor home 设置住处。";
         if(p.serverLevel()!=p.server.overworld())return "生活互动仅在主世界住宅区办理。";
         var session=SESSIONS.get(p.getUUID());var entity=session==null?null:p.serverLevel().getEntity(session);
         if(!(entity instanceof ResidentEntity npc)||npc.distanceToSqr(p)>64||!p.isAlive()||p.isSpectator()||com.tnc.tnc.combat.DownedCombat.isDowned(p))return "请先到邻居身边右键交流。";
@@ -102,6 +104,7 @@ public final class ResidentService {
         }return null;
     }
     public static void tick(ServerLevel level){
+        if(McaResidents.available()){McaResidents.tick(level);return;}
         if(!SkyIslandAnchors.isComplete(level))return;var origin=HousingService.sourceOrigin(level);if(origin==null)return;var store=AdventureSavedData.get(level.getServer());var all=records(level.getServer());
         for(var d:ALL){
             var record=all.getCompound(d.id);var position=record.contains("Pos")?BlockPos.of(record.getLong("Pos")):origin.offset(d.bed);long chunk=net.minecraft.world.level.ChunkPos.asLong(position);

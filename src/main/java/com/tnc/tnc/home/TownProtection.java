@@ -18,13 +18,15 @@ public final class TownProtection {
         return (p.getX()>=120&&p.getX()<=402&&p.getZ()>=92&&p.getZ()<=432&&p.getY()>=80&&p.getY()<=180)
                 ||(p.getX()>=410&&p.getX()<=490&&p.getZ()>=260&&p.getZ()<=330&&p.getY()>=80&&p.getY()<=145);
     }
-    private static boolean denied(ServerPlayer p,BlockPos pos){return (town(p.serverLevel(),pos)||HousingService.isOwnedPosition(p.serverLevel(),pos))&&!HousingService.mayDecorate(p,pos)&&!p.isCreative();}
+    public static boolean denied(ServerPlayer p,BlockPos pos){return (town(p.serverLevel(),pos)||HousingService.plotAt(p.serverLevel(),pos)!=null||HousingService.isOwnedPosition(p.serverLevel(),pos))&&!HousingService.mayDecorate(p,pos)&&!p.isCreative();}
     public static boolean hazard(net.minecraft.world.level.BlockGetter world,BlockPos pos){return world instanceof ServerLevel l&&((com.tnc.tnc.npc.SkyIslandAnchors.isComplete(l)&&town(l,pos))||HousingService.isOwnedPosition(l,pos));}
-    @SubscribeEvent public static void breaking(BlockEvent.BreakEvent e){if(e.getPlayer() instanceof ServerPlayer p&&denied(p,e.getPos())&&!(e.getState().getBlock() instanceof CropBlock&&!HousingService.isOwnedPosition(p.serverLevel(),e.getPos())))e.setCanceled(true);}
-    @SubscribeEvent public static void placing(BlockEvent.EntityPlaceEvent e){if(e.getEntity() instanceof ServerPlayer p&&denied(p,e.getPos())&&!(e.getPlacedBlock().getBlock() instanceof CropBlock&&!HousingService.isOwnedPosition(p.serverLevel(),e.getPos())))e.setCanceled(true);}
+    @SubscribeEvent public static void breaking(BlockEvent.BreakEvent e){if(e.getPlayer() instanceof ServerPlayer p&&denied(p,e.getPos())&&!(e.getState().getBlock() instanceof CropBlock&&!HousingService.isOwnedPosition(p.serverLevel(),e.getPos())&&HousingService.plotAt(p.serverLevel(),e.getPos())==null))e.setCanceled(true);}
+    @SubscribeEvent public static void placing(BlockEvent.EntityPlaceEvent e){if(e.getEntity() instanceof ServerPlayer p&&denied(p,e.getPos())&&!(e.getPlacedBlock().getBlock() instanceof CropBlock&&!HousingService.isOwnedPosition(p.serverLevel(),e.getPos())&&HousingService.plotAt(p.serverLevel(),e.getPos())==null))e.setCanceled(true);}
     @SubscribeEvent public static void using(PlayerInteractEvent.RightClickBlock e){
         if(!(e.getEntity() instanceof ServerPlayer p)||p.isCreative())return;
-        var item=e.getItemStack().getItem();boolean edits=item instanceof net.minecraft.world.item.BlockItem||item instanceof net.minecraft.world.item.BucketItem||item instanceof net.minecraft.world.item.DiggerItem||item instanceof net.minecraft.world.item.FlintAndSteelItem||item instanceof net.minecraft.world.item.FireChargeItem;
+        var id=net.minecraftforge.registries.ForgeRegistries.BLOCKS.getKey(e.getLevel().getBlockState(e.getPos()).getBlock());
+        if(id!=null&&id.getNamespace().equals("immersive_furniture")&&id.getPath().equals("artisans_workstation")){e.setCanceled(true);p.displayClientMessage(net.minecraft.network.chat.Component.literal("家具请到32号朝夕商行购买。"),true);return;}
+        var item=e.getItemStack().getItem();boolean edits=item instanceof net.minecraft.world.item.BlockItem||item instanceof net.minecraft.world.item.BucketItem||item instanceof net.minecraft.world.item.DiggerItem||item instanceof net.minecraft.world.item.FlintAndSteelItem||item instanceof net.minecraft.world.item.FireChargeItem||item instanceof net.minecraft.world.item.BoneMealItem;
         if((HousingService.isOwnedPosition(p.serverLevel(),e.getPos())&&!HousingService.mayDecorate(p,e.getPos()))||(edits&&denied(p,e.getPos())))e.setCanceled(true);
     }
     @SubscribeEvent public static void tool(BlockEvent.BlockToolModificationEvent e){if(e.getPlayer() instanceof ServerPlayer p&&denied(p,e.getPos()))e.setCanceled(true);}
@@ -39,7 +41,13 @@ public final class TownProtection {
     @SubscribeEvent public static void explosion(ExplosionEvent.Detonate e){if(e.getLevel() instanceof ServerLevel l)e.getAffectedBlocks().removeIf(pos->town(l,pos)||HousingService.isOwnedPosition(l,pos));}
     @SubscribeEvent public static void tick(TickEvent.ServerTickEvent e){
         if(e.phase!=TickEvent.Phase.END)return;var server=net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();if(server==null||server.getTickCount()%200!=0)return;
-        var t=HousingService.home(server);if(!t.getBoolean("Preparing"))return;
-        try{HousingService.finish(server.overworld(),BlockPos.of(t.getLong("Origin")),HousingService.blueprint(server.overworld()),t);}catch(Exception ignored){}
+        for(var plot:PlotCatalog.ALL){var t=HousingService.home(server,plot.id());if(!t.getBoolean("Preparing"))continue;
+        try{HousingService.finish(server.overworld(),BlockPos.of(t.getLong("Origin")),HousingService.blueprint(server.overworld(),plot.id()),t);}catch(Exception ignored){}}
     }
+    @SubscribeEvent public static void animalUse(PlayerInteractEvent.EntityInteract e){if(e.getEntity() instanceof ServerPlayer p&&e.getTarget() instanceof net.minecraft.world.entity.animal.Animal&&HousingService.ownedAt(p.serverLevel(),e.getTarget().blockPosition())!=null&&denied(p,e.getTarget().blockPosition()))e.setCanceled(true);}
+    @SubscribeEvent public static void preciseAnimalUse(PlayerInteractEvent.EntityInteractSpecific e){if(e.getEntity() instanceof ServerPlayer p&&e.getTarget() instanceof net.minecraft.world.entity.animal.Animal&&HousingService.ownedAt(p.serverLevel(),e.getTarget().blockPosition())!=null&&denied(p,e.getTarget().blockPosition()))e.setCanceled(true);}
+    @SubscribeEvent public static void mobGrief(net.minecraftforge.event.entity.EntityMobGriefingEvent e){if(e.getEntity().level() instanceof ServerLevel l&&(town(l,e.getEntity().blockPosition())||HousingService.isOwnedPosition(l,e.getEntity().blockPosition())))e.setResult(net.minecraftforge.eventbus.api.Event.Result.DENY);}
+    @SubscribeEvent public static void attackDecor(net.minecraftforge.event.entity.player.AttackEntityEvent e){if(e.getEntity() instanceof ServerPlayer p&&e.getTarget() instanceof net.minecraft.world.entity.decoration.HangingEntity&&denied(p,e.getTarget().blockPosition()))e.setCanceled(true);}
+    @SubscribeEvent public static void animalAttack(net.minecraftforge.event.entity.living.LivingAttackEvent e){if(e.getEntity() instanceof net.minecraft.world.entity.animal.Animal&&e.getEntity().level() instanceof ServerLevel l&&HousingService.ownedAt(l,e.getEntity().blockPosition())!=null){var attacker=e.getSource().getEntity();if(!(attacker instanceof ServerPlayer p)||denied(p,e.getEntity().blockPosition()))e.setCanceled(true);}}
+    @SubscribeEvent public static void pickup(net.minecraftforge.event.entity.player.EntityItemPickupEvent e){if(e.getEntity() instanceof ServerPlayer p&&HousingService.isOwnedPosition(p.serverLevel(),e.getItem().blockPosition())&&!HousingService.mayDecorate(p,e.getItem().blockPosition())&&!p.isCreative())e.setCanceled(true);}
 }

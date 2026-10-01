@@ -26,7 +26,7 @@ public final class BankScreen extends Screen {
         if(amount!=null)typed=amount.getValue();amount=null;
         w=Math.min(440,width-16);h=Math.min(310,height-16);left=(width-w)/2;top=(height-h)/2;
         boolean bank=data.getBoolean("AtBroker");var p=profile();
-        int tw=(w-32)/4;for(int i=0;i<4;i++){final int n=i;button(List.of("存钱","取钱","借钱","房子").get(i),left+16+i*tw,top+70,tw-3,()->{page=n;confirmation="";rebuildWidgets();},page!=i);}
+        int tw=(w-32)/4;for(int i=0;i<4;i++){final int n=i;button(List.of("存钱","取钱","借钱","房子/土地").get(i),left+16+i*tw,top+70,tw-3,()->{if(n==3){net.minecraft.client.Minecraft.getInstance().setScreen(new PropertyScreen(data));return;}page=n;confirmation="";rebuildWidgets();},page!=i);}
         button("关闭",left+w-49,top+8,40,this::onClose,true);
         if(!confirmation.isEmpty()){
             button("确认办理",left+16,top+h-48,(w-36)/2,()->send(confirmAction,confirmId),bank);

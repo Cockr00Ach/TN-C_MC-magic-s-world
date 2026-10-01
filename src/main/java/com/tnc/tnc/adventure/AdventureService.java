@@ -115,7 +115,7 @@ public final class AdventureService {
     }
     public static void action(ServerPlayer player,AdventurePackets.Action action,String id) {
         if(action==AdventurePackets.Action.REQUEST){sync(player,false,"");return;}
-        boolean allowed=switch(action){case REGISTER,PROMOTE->TownServices.near(player,"guild");case ORDER->TownServices.near(player,EquipmentOrders.find(id)!=null?"armorer":"smith");case CLAIM->TownServices.near(player,EquipmentOrders.find(profile(player).smithDesign)!=null?"armorer":"smith");case BUY_HOME,BUY_HOME_INSTALLMENT,BANK_DEPOSIT,BANK_WITHDRAW,BANK_SAVE,BANK_TAKE,BANK_BORROW,BANK_CLEAR->TownServices.near(player,"broker");case ACCEPT,DELIVER,OPEN_BOARD->TownServices.atBoard(player);default->false;};
+        boolean allowed=switch(action){case REGISTER,PROMOTE->TownServices.near(player,"guild");case ORDER->TownServices.near(player,EquipmentOrders.find(id)!=null?"armorer":"smith");case CLAIM->TownServices.near(player,EquipmentOrders.find(profile(player).smithDesign)!=null?"armorer":"smith");case BUY_HOME,BUY_HOME_INSTALLMENT,BANK_DEPOSIT,BANK_WITHDRAW,BANK_SAVE,BANK_TAKE,BANK_BORROW,BANK_CLEAR->TownServices.near(player,"broker");case PROPERTY_LOOK->TownServices.near(player,"broker")||TownServices.near(player,"shop");case SHOP_BUY,SHOP_SELL->TownServices.near(player,"shop");case ACCEPT,DELIVER,OPEN_BOARD->TownServices.atBoard(player);default->false;};
         if(!allowed){sync(player,false,"请到对应岗位办理：艾琳登记，酒馆栏交委托，莉娅制杖，铎恩制作装备，米洛办理银行与购房。");return;}
         String message=switch(action) {
             case REGISTER -> register(player);
@@ -127,8 +127,11 @@ public final class AdventureService {
             case ORDER -> order(player,id);
             case CLAIM -> claim(player);
             case PROMOTE -> promote(player);
-            case BUY_HOME -> com.tnc.tnc.home.HousingService.buy(player);
-            case BUY_HOME_INSTALLMENT -> com.tnc.tnc.home.HousingService.buy(player,true);
+            case BUY_HOME -> com.tnc.tnc.home.HousingService.buy(player,id.isEmpty()?com.tnc.tnc.home.HousingService.ID:id,false);
+            case BUY_HOME_INSTALLMENT -> com.tnc.tnc.home.HousingService.buy(player,id.isEmpty()?com.tnc.tnc.home.HousingService.ID:id,true);
+            case PROPERTY_LOOK -> com.tnc.tnc.home.PropertyGuidance.look(player,id);
+            case SHOP_BUY -> ShopService.buy(player,id);
+            case SHOP_SELL -> ShopService.sell(player,id);
             case BANK_SAVE -> BankService.save(player,id);
             case BANK_TAKE -> BankService.take(player,id);
             case BANK_BORROW -> BankService.borrow(player,id);
@@ -153,6 +156,7 @@ public final class AdventureService {
         var tag=AdventureSavedData.writeProfile(p);tag.putLong("ActiveTicks",store.activeTicks);tag.putBoolean("AtService",atService(player));tag.putString("Message",message);
         tag.putBoolean("AtSmith",TownServices.near(player,"smith"));tag.putBoolean("AtBroker",TownServices.near(player,"broker"));tag.putBoolean("AtBoard",TownServices.atBoard(player));
         tag.putBoolean("AtArmorer",TownServices.near(player,"armorer"));
+        tag.putBoolean("AtShop",TownServices.near(player,"shop"));tag.put("Shop",ShopService.snapshot(player));
         var panel=ServicePanel.fromRole(role);tag.putString("ServiceRole",panel.role());tag.putInt("InitialTab",panel.tab());
         tag.putString("Directions",TownServices.directions(player.server.overworld()));
         tag.put("Housing",com.tnc.tnc.home.HousingService.snapshot(player));

@@ -1,0 +1,662 @@
+[
+  {
+    "id": "building_1",
+    "number": "01",
+    "name": "公共建筑",
+    "entry": [
+      220,
+      140,
+      127
+    ]
+  },
+  {
+    "id": "building_2",
+    "number": "02",
+    "name": "公共建筑",
+    "entry": [
+      329,
+      147,
+      132
+    ]
+  },
+  {
+    "id": "building_3",
+    "number": "03",
+    "name": "公共建筑",
+    "entry": [
+      357,
+      147,
+      133
+    ]
+  },
+  {
+    "id": "building_4",
+    "number": "04",
+    "name": "公共建筑",
+    "entry": [
+      379,
+      147,
+      133
+    ]
+  },
+  {
+    "id": "building_5",
+    "number": "05",
+    "name": "公共建筑",
+    "entry": [
+      397,
+      147,
+      133
+    ]
+  },
+  {
+    "id": "building_6",
+    "number": "06",
+    "name": "公共建筑",
+    "entry": [
+      186,
+      126,
+      137
+    ]
+  },
+  {
+    "id": "building_7",
+    "number": "07",
+    "name": "公共建筑",
+    "entry": [
+      206,
+      113,
+      137
+    ]
+  },
+  {
+    "id": "building_8",
+    "number": "08",
+    "name": "公共建筑",
+    "entry": [
+      317,
+      141,
+      146
+    ]
+  },
+  {
+    "id": "building_9",
+    "number": "09",
+    "name": "公共建筑",
+    "entry": [
+      362,
+      144,
+      164
+    ]
+  },
+  {
+    "id": "building_10",
+    "number": "10",
+    "name": "公共建筑",
+    "entry": [
+      330,
+      147,
+      189
+    ]
+  },
+  {
+    "id": "building_11",
+    "number": "11",
+    "name": "公共建筑",
+    "entry": [
+      395,
+      147,
+      189
+    ]
+  },
+  {
+    "id": "building_12",
+    "number": "12",
+    "name": "公共建筑",
+    "entry": [
+      165,
+      115,
+      197
+    ]
+  },
+  {
+    "id": "building_13",
+    "number": "13",
+    "name": "公共建筑",
+    "entry": [
+      188,
+      114,
+      196
+    ]
+  },
+  {
+    "id": "building_14",
+    "number": "14",
+    "name": "公共建筑",
+    "entry": [
+      339,
+      147,
+      205
+    ]
+  },
+  {
+    "id": "building_15",
+    "number": "15",
+    "name": "公共建筑",
+    "entry": [
+      373,
+      147,
+      211
+    ]
+  },
+  {
+    "id": "building_16",
+    "number": "16",
+    "name": "书风宅",
+    "entry": [
+      206,
+      100,
+      219
+    ]
+  },
+  {
+    "id": "building_17",
+    "number": "17",
+    "name": "公共建筑",
+    "entry": [
+      279,
+      91,
+      215
+    ]
+  },
+  {
+    "id": "building_18",
+    "number": "18",
+    "name": "公共建筑",
+    "entry": [
+      171,
+      109,
+      222
+    ]
+  },
+  {
+    "id": "building_19",
+    "number": "19",
+    "name": "归航银行",
+    "entry": [
+      231,
+      94,
+      237
+    ]
+  },
+  {
+    "id": "building_20",
+    "number": "20",
+    "name": "公共建筑",
+    "entry": [
+      171,
+      109,
+      240
+    ]
+  },
+  {
+    "id": "building_21",
+    "number": "21",
+    "name": "公共建筑",
+    "entry": [
+      287,
+      88,
+      254
+    ]
+  },
+  {
+    "id": "building_22",
+    "number": "22",
+    "name": "公共建筑",
+    "entry": [
+      262,
+      90,
+      250
+    ]
+  },
+  {
+    "id": "building_23",
+    "number": "23",
+    "name": "禾麦之家",
+    "entry": [
+      331,
+      89,
+      251
+    ]
+  },
+  {
+    "id": "building_24",
+    "number": "24",
+    "name": "东庭双层宅",
+    "entry": [
+      378,
+      90,
+      252
+    ]
+  },
+  {
+    "id": "building_25",
+    "number": "25",
+    "name": "公共建筑",
+    "entry": [
+      156,
+      109,
+      256
+    ]
+  },
+  {
+    "id": "building_26",
+    "number": "26",
+    "name": "甜麦小屋",
+    "entry": [
+      350,
+      90,
+      255
+    ]
+  },
+  {
+    "id": "building_27",
+    "number": "27",
+    "name": "灯下小筑",
+    "entry": [
+      233,
+      90,
+      264
+    ]
+  },
+  {
+    "id": "building_28",
+    "number": "28",
+    "name": "炉石铁匠铺",
+    "entry": [
+      198,
+      101,
+      262
+    ]
+  },
+  {
+    "id": "building_29",
+    "number": "29",
+    "name": "潮生制杖屋",
+    "entry": [
+      320,
+      87,
+      274
+    ]
+  },
+  {
+    "id": "building_30",
+    "number": "30",
+    "name": "公共建筑",
+    "entry": [
+      186,
+      101,
+      278
+    ]
+  },
+  {
+    "id": "building_31",
+    "number": "31",
+    "name": "潮汐之家",
+    "entry": [
+      363,
+      88,
+      279
+    ]
+  },
+  {
+    "id": "building_32",
+    "number": "32",
+    "name": "朝夕商行",
+    "entry": [
+      247,
+      89,
+      299
+    ]
+  },
+  {
+    "id": "building_33",
+    "number": "33",
+    "name": "公共建筑",
+    "entry": [
+      270,
+      88,
+      310
+    ]
+  },
+  {
+    "id": "building_34",
+    "number": "34",
+    "name": "茶灯会馆",
+    "entry": [
+      210,
+      95,
+      312
+    ]
+  },
+  {
+    "id": "building_35",
+    "number": "35",
+    "name": "公共建筑",
+    "entry": [
+      186,
+      99,
+      327
+    ]
+  },
+  {
+    "id": "building_36",
+    "number": "36",
+    "name": "公共建筑",
+    "entry": [
+      259,
+      86,
+      346
+    ]
+  },
+  {
+    "id": "building_37",
+    "number": "37",
+    "name": "归林之家",
+    "entry": [
+      222,
+      91,
+      352
+    ]
+  },
+  {
+    "id": "building_38",
+    "number": "38",
+    "name": "公共建筑",
+    "entry": [
+      199,
+      93,
+      366
+    ]
+  },
+  {
+    "id": "building_39",
+    "number": "39",
+    "name": "公共建筑",
+    "entry": [
+      240,
+      86,
+      369
+    ]
+  },
+  {
+    "id": "building_40",
+    "number": "40",
+    "name": "南街三层屋",
+    "entry": [
+      189,
+      92,
+      394
+    ]
+  },
+  {
+    "id": "building_41",
+    "number": "41",
+    "name": "归航酒馆",
+    "entry": [
+      419,
+      90,
+      291
+    ]
+  },
+  {
+    "id": "field_01",
+    "number": "F01",
+    "name": "南圃1号农田",
+    "entry": [
+      318,
+      88,
+      347
+    ]
+  },
+  {
+    "id": "field_01_corner0",
+    "number": "F01",
+    "name": "地界",
+    "entry": [
+      312,
+      89,
+      348
+    ]
+  },
+  {
+    "id": "field_01_corner1",
+    "number": "F01",
+    "name": "地界",
+    "entry": [
+      325,
+      89,
+      348
+    ]
+  },
+  {
+    "id": "field_01_corner2",
+    "number": "F01",
+    "name": "地界",
+    "entry": [
+      325,
+      89,
+      363
+    ]
+  },
+  {
+    "id": "field_01_corner3",
+    "number": "F01",
+    "name": "地界",
+    "entry": [
+      312,
+      89,
+      363
+    ]
+  },
+  {
+    "id": "field_02",
+    "number": "F02",
+    "name": "南圃2号农田",
+    "entry": [
+      334,
+      88,
+      347
+    ]
+  },
+  {
+    "id": "field_02_corner0",
+    "number": "F02",
+    "name": "地界",
+    "entry": [
+      328,
+      89,
+      348
+    ]
+  },
+  {
+    "id": "field_02_corner1",
+    "number": "F02",
+    "name": "地界",
+    "entry": [
+      341,
+      89,
+      348
+    ]
+  },
+  {
+    "id": "field_02_corner2",
+    "number": "F02",
+    "name": "地界",
+    "entry": [
+      341,
+      89,
+      363
+    ]
+  },
+  {
+    "id": "field_02_corner3",
+    "number": "F02",
+    "name": "地界",
+    "entry": [
+      328,
+      89,
+      363
+    ]
+  },
+  {
+    "id": "field_03",
+    "number": "F03",
+    "name": "南圃3号农田",
+    "entry": [
+      318,
+      88,
+      368
+    ]
+  },
+  {
+    "id": "field_03_corner0",
+    "number": "F03",
+    "name": "地界",
+    "entry": [
+      312,
+      89,
+      369
+    ]
+  },
+  {
+    "id": "field_03_corner1",
+    "number": "F03",
+    "name": "地界",
+    "entry": [
+      325,
+      89,
+      369
+    ]
+  },
+  {
+    "id": "field_03_corner2",
+    "number": "F03",
+    "name": "地界",
+    "entry": [
+      325,
+      89,
+      384
+    ]
+  },
+  {
+    "id": "field_03_corner3",
+    "number": "F03",
+    "name": "地界",
+    "entry": [
+      312,
+      89,
+      384
+    ]
+  },
+  {
+    "id": "field_04",
+    "number": "F04",
+    "name": "南圃4号农田",
+    "entry": [
+      334,
+      88,
+      368
+    ]
+  },
+  {
+    "id": "field_04_corner0",
+    "number": "F04",
+    "name": "地界",
+    "entry": [
+      328,
+      89,
+      369
+    ]
+  },
+  {
+    "id": "field_04_corner1",
+    "number": "F04",
+    "name": "地界",
+    "entry": [
+      341,
+      89,
+      369
+    ]
+  },
+  {
+    "id": "field_04_corner2",
+    "number": "F04",
+    "name": "地界",
+    "entry": [
+      341,
+      89,
+      384
+    ]
+  },
+  {
+    "id": "field_04_corner3",
+    "number": "F04",
+    "name": "地界",
+    "entry": [
+      328,
+      89,
+      384
+    ]
+  },
+  {
+    "id": "pasture_01",
+    "number": "P01",
+    "name": "南圃牧场",
+    "entry": [
+      311,
+      86,
+      401
+    ]
+  },
+  {
+    "id": "pasture_01_corner0",
+    "number": "P01",
+    "name": "地界",
+    "entry": [
+      312,
+      89,
+      392
+    ]
+  },
+  {
+    "id": "pasture_01_corner1",
+    "number": "P01",
+    "name": "地界",
+    "entry": [
+      332,
+      89,
+      392
+    ]
+  },
+  {
+    "id": "pasture_01_corner2",
+    "number": "P01",
+    "name": "地界",
+    "entry": [
+      332,
+      89,
+      411
+    ]
+  },
+  {
+    "id": "pasture_01_corner3",
+    "number": "P01",
+    "name": "地界",
+    "entry": [
+      312,
+      89,
+      411
+    ]
+  }
+]

@@ -11,7 +11,7 @@ public final class BankService {
     public static void settle(ServerPlayer p){settle(p,System.currentTimeMillis());}
     public static void settle(ServerPlayer p,long now){
         var a=AdventureService.profile(p);a.bank.settle(now,a.registered(),wage(a),Config.bankDailyInterestPercent);a.bank.flush(a,Math.max(now,a.bank.lastAt));
-        var home=com.tnc.tnc.home.HousingService.home(p.server);
+        var home=com.tnc.tnc.home.HousingService.home(p);
         if(home.hasUUID("Owner")&&home.getUUID("Owner").equals(p.getUUID())&&home.getBoolean("Mortgage")&&a.bank.mortgage.parts>0&&!a.bank.mortgage.active())home.putBoolean("Mortgage",false);
         AdventureSavedData.get(p.server).setDirty();
     }

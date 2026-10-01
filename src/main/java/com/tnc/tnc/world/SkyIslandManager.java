@@ -362,6 +362,10 @@ public final class SkyIslandManager {
         StructurePlaceSettings settings = new StructurePlaceSettings()
                 .setIgnoreEntities(false)
                 .setKeepLiquids(false)
+                // Adjacent tiles arrive on different ticks. Recomputing neighbor shapes
+                // now destroys doors whose two halves cross a tile's vertical seam.
+                // Preserve the authored snapshot, as the portal placement already does.
+                .setKnownShape(true)
                 .setFinalizeEntities(true)
                 .addProcessor(ConquestPlantProcessor.INSTANCE);
         boolean placed = template.placeInWorld(

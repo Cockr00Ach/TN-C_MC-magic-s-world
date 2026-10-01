@@ -28,7 +28,10 @@ public final class AdventureScreen extends Screen {
     public static void accept(CompoundTag tag,boolean open) {
         if(tag==null)return;var mc=Minecraft.getInstance();
         if(open&&ServicePanel.fromRole(tag.getString("ServiceRole"))==ServicePanel.BANK)mc.setScreen(new BankScreen(tag));
+        else if(open&&ServicePanel.fromRole(tag.getString("ServiceRole"))==ServicePanel.SHOP)mc.setScreen(new ShopScreen(tag));
         else if(open)mc.setScreen(new AdventureScreen(tag));
+        else if(mc.screen instanceof PropertyScreen property)property.update(tag);
+        else if(mc.screen instanceof ShopScreen shop)shop.update(tag);
         else if(mc.screen instanceof BankScreen bank)bank.update(tag);
         else if(mc.screen instanceof AdventureScreen screen) {
             screen.data=tag;if(!tag.getString("Message").isEmpty())screen.notice=tag.getString("Message");screen.rebuildWidgets();
