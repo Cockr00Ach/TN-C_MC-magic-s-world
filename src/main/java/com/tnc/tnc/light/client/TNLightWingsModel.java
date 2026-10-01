@@ -319,6 +319,94 @@ public final class TNLightWingsModel {
         return keys.get(keys.size() - 1).rot().clone();
     }
 
+    /**
+     * 离线预览用：每个"面"的 4 个顶点（模型坐标系 ✓，已经过**和渲染同一份**变换 ✓）
+     * ＋ 4 组 UV（0..1 ✓，UV 展开也和 {@link #box} 一模一样 ✓）。
+     *
+     * <p>用途：把模型**带贴图**画成 PNG ✓ —— 我这边看不到游戏画面 ✗，
+     * 光靠数字/字符画判断不了"这到底像不像翅膀"✗（作者 2026-10-01："你自己看看图片这是啥"✗）。
+     */
+    public record PreviewFace(String bone, int cubeIndex, boolean guide, float[][] pos, float[][] uv) {
+    }
+
+    /**
+     * ★ <b>旋转手性</b>（2026-10-01 作者反馈："你每个随便自己转肯定不对的" ✗ —— 这次他猜对了 ✓）。
+     *
+     * <p>Bedrock/Blockbench 的 {@code rotation: [x,y,z]} 与 JOML 的 {@code rotateX/Y/Z(+θ)} 方向**相反** ✗：
+     * 作者这个模型的**每根羽毛都靠 Z 旋转成扇**（25°~62.5° ✓），
+     * 手性反了的时候羽毛会**朝里叠成一坨**✗（作者截图里那堆散板子 ✓），
+     * 取反之后才是正常的扇形排布 ✓ —— 这是拿**离线预览 A/B 对照**看出来的 ✓
+     * （{@code LightWingsPreviewTest.renderRotationHandednessAb} ✓ 会画出
+     * {@code build/light_wings_rot_none|plus|minus.png} 三张纯色图 ✓）。
+     *
+     * <p>★ 所以游戏里用 {@link #ROT_MINUS} ✓（骨骼旋转与关键帧动画**一起**取反 ✓，否则动画也会反着摆 ✗）。
+     */
+    static final float ROT_PLUS = 1.0F;
+    static final float ROT_MINUS = -1.0F;
+    /** 游戏里实际用的手性 ✓（A/B 定下来的 ✓）。 */
+    static final float ROT_SIGN = ROT_MINUS;
+
+    /** 生成预览面 ✓（{@code animated=false} 时就是站着静止的姿势 ✓）。 */
+    public static List<PreviewFace> previewFaces(float animTime, boolean animated) {
+        return previewFaces(animTime, animated, ROT_PLUS);
+    }
+
+    /** 带旋转手性的预览 ✓（A/B 对比用 ✓）。 */
+    public static List<PreviewFace> previewFaces(float animTime, boolean animated, float rotSign) {
+        List<PreviewFace> out = new ArrayList<>();
+        if (bones == null) {
+            return out;
+        }
+        List<Matrix4f> matrices = buildMatrices(new Matrix4f(), 0.0F, animTime, animated, rotSign);
+        int index = 0;
+        for (Bone bone : bones) {
+            for (Cube c : bone.cubes) {
+                Matrix4f m = c.guide ? new Matrix4f() : (index < matrices.size() ? matrices.get(index) : new Matrix4f());
+                float w = c.x1 - c.x0, h = c.y1 - c.y0, d = c.z1 - c.z0;
+                float u = c.u, v = c.v;
+                float x0 = c.x0 / 16.0F, y0 = c.y0 / 16.0F, z0 = c.z0 / 16.0F;
+                float x1 = c.x1 / 16.0F, y1 = c.y1 / 16.0F, z1 = c.z1 / 16.0F;
+                // 六面：顶点顺序 = box() 里那套"朝外逆时针"✓；UV 也照 box() 的展开 ✓
+                addFace(out, bone.name, index, c.guide, m, texW, texH,
+                        x0, y1, z1, x1, y1, z1, x1, y1, z0, x0, y1, z0, u + d, v, w, d);
+                addFace(out, bone.name, index, c.guide, m, texW, texH,
+                        x0, y0, z0, x1, y0, z0, x1, y0, z1, x0, y0, z1, u + d + w, v, w, d);
+                addFace(out, bone.name, index, c.guide, m, texW, texH,
+                        x1, y0, z0, x1, y1, z0, x1, y1, z1, x1, y0, z1, u, v + d, d, h);
+                addFace(out, bone.name, index, c.guide, m, texW, texH,
+                        x1, y0, z0, x0, y0, z0, x0, y1, z0, x1, y1, z0, u + d, v + d, w, h);
+                addFace(out, bone.name, index, c.guide, m, texW, texH,
+                        x0, y0, z1, x0, y1, z1, x0, y1, z0, x0, y0, z0, u + d + w, v + d, d, h);
+                addFace(out, bone.name, index, c.guide, m, texW, texH,
+                        x0, y0, z1, x1, y0, z1, x1, y1, z1, x0, y1, z1, u + d + w + d, v + d, w, h);
+                if (!c.guide) {
+                    index++;
+                }
+            }
+        }
+        return out;
+    }
+
+    private static void addFace(List<PreviewFace> out, String bone, int index, boolean guide, Matrix4f m,
+                                int texW, int texH,
+                                float ax, float ay, float az, float bx, float by, float bz,
+                                float cx, float cy, float cz, float dx, float dy, float dz,
+                                float u, float v, float w, float h) {
+        float[][] pos = new float[4][];
+        float[][] uv = new float[4][];
+        float[][] src = {{ax, ay, az}, {bx, by, bz}, {cx, cy, cz}, {dx, dy, dz}};
+        for (int i = 0; i < 4; i++) {
+            org.joml.Vector4f p = new org.joml.Vector4f(src[i][0], src[i][1], src[i][2], 1.0F);
+            m.transform(p);
+            pos[i] = new float[]{p.x, p.y, p.z};
+        }
+        uv[0] = new float[]{u / texW, v / texH};
+        uv[1] = new float[]{(u + w) / texW, v / texH};
+        uv[2] = new float[]{(u + w) / texW, (v + h) / texH};
+        uv[3] = new float[]{u / texW, (v + h) / texH};
+        out.add(new PreviewFace(bone, index, guide, pos, uv));
+    }
+
     private static void load() {
         if (bones != null || failed) {
             return;
@@ -481,6 +569,12 @@ public final class TNLightWingsModel {
      *                 这正是作者 2026-10-01 要的："站着的时候翅膀不动的，只有起飞的时候播放那个 waving"✓）
      */
     static List<Matrix4f> buildMatrices(Matrix4f root, float flap, float animTime, boolean animated) {
+        return buildMatrices(root, flap, animTime, animated, ROT_SIGN);
+    }
+
+    /** 带旋转手性的版本 ✓（A/B 对比/自检用 ✓；游戏里用 {@link #ROT_SIGN} ✓）。 */
+    static List<Matrix4f> buildMatrices(Matrix4f root, float flap, float animTime, boolean animated,
+                                        float rotSign) {
         List<Matrix4f> out = new ArrayList<>();
         if (bones == null) {
             return out;
@@ -512,14 +606,15 @@ public final class TNLightWingsModel {
                 az = off[2];
             }
             // ★ 骨骼自身旋转（Bedrock 的 rotation ✓）：作者的 wingright 是 [0,180,0] ⇒ 右翼镜像 ✓
+            //   手性 rotSign 和方块那边保持一致 ✓（否则骨骼和羽毛会朝相反方向转 ✗）
             if (bone.rz + az != 0.0F) {
-                m.rotate(Axis.ZP.rotationDegrees(bone.rz + az));
+                m.rotate(Axis.ZP.rotationDegrees((bone.rz + az) * rotSign));
             }
             if (bone.ry + ay != 0.0F) {
-                m.rotate(Axis.YP.rotationDegrees(bone.ry + ay));
+                m.rotate(Axis.YP.rotationDegrees((bone.ry + ay) * rotSign));
             }
             if (bone.rx + ax != 0.0F) {
-                m.rotate(Axis.XP.rotationDegrees(bone.rx + ax));
+                m.rotate(Axis.XP.rotationDegrees((bone.rx + ax) * rotSign));
             }
             m.translate(-bone.px / 16.0F, -bone.py / 16.0F, -bone.pz / 16.0F);
             world.put(bone.name, m);
@@ -534,13 +629,13 @@ public final class TNLightWingsModel {
                     // 绕**方块自己的 pivot**转（没写 pivot 才退回 origin 角 ✓）
                     cube.translate(c.px / 16.0F, c.py / 16.0F, c.pz / 16.0F);
                     if (c.rz != 0.0F) {
-                        cube.rotate(Axis.ZP.rotationDegrees(c.rz));
+                        cube.rotate(Axis.ZP.rotationDegrees(c.rz * rotSign));
                     }
                     if (c.ry != 0.0F) {
-                        cube.rotate(Axis.YP.rotationDegrees(c.ry));
+                        cube.rotate(Axis.YP.rotationDegrees(c.ry * rotSign));
                     }
                     if (c.rx != 0.0F) {
-                        cube.rotate(Axis.XP.rotationDegrees(c.rx));
+                        cube.rotate(Axis.XP.rotationDegrees(c.rx * rotSign));
                     }
                     cube.translate(-c.px / 16.0F, -c.py / 16.0F, -c.pz / 16.0F);
                 }
