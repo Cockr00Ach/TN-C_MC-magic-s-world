@@ -97,13 +97,20 @@ public final class TNLightBeamMechanics {
     private static final double SKY_CIRCLE_SCALE = 1.6D;
 
     /**
-     * ★ 索敌的"瞄准锥"（度 ✓）—— 作者 2026-10-01："t1234激光怎么没有索敌啊" ✗。
+     * ★ 索敌的"瞄准锥"（度 ✓）—— 起手**选谁**用这个 ✓（35° ≈ 屏幕正中间那一片 ✓）。
      *
-     * <p>只认**与准星夹角 ≤ 这个度数**的敌人 ✓（和雷法 t5 挑锚点用的是同一个思路 ✓）：
-     * 全 360° 找最近的话，会打到身后/墙后的怪 ✗（玩家看不见，手感很差 ✗）。
-     * 35° 差不多就是"屏幕正中间那一片" ✓。
+     * <p>为什么不全 360° 找最近的：会打到身后/墙后的怪 ✗（玩家看不见，手感很差 ✗）。
      */
     private static final double AIM_CONE_DEGREES = 35.0D;
+
+    /**
+     * ★ <b>追踪时的锥</b>（度 ✓）—— 作者 2026-10-01："就像雷球那样索敌" ✓。
+     *
+     * <p>雷球是引擎投射物的 {@code homing_angle: 0.5}（发射后拐弯追人 ✓），也就是"能拐多远" ✓。
+     * 这里用 55°：起手锁定之后，目标跑到侧面一点也还追得上 ✓（每 tick 限速转向见
+     * {@code TNLightBeamEntity.TURN_PER_TICK} ✓），但不会突然掉头 ✗。
+     */
+    public static final double HOMING_CONE_DEGREES = 55.0D;
 
     private static final org.apache.logging.log4j.Logger LOGGER =
             org.apache.logging.log4j.LogManager.getLogger("TN-C/light");

@@ -73,37 +73,44 @@ public class TNLightBeamRenderer extends EntityRenderer<TNLightBeamEntity> {
         boolean descent = beam.style() == TNLightBeamEntity.STYLE_DESCENT;
 
         pose.pushPose();
-        // ★ 朝向：优先**每帧瞄着目标**（作者 2026-10-01："对着敌人释放然后瞄着敌人的那种"✓）——
-        //   客户端自己拿目标的实时位置算方向 ⇒ 目标怎么跑，光柱就怎么跟 ✓，
-        //   而且比"等同步包"更顺（同步有 0.05 秒的台阶 ✗）。
-        //   没锁定目标时才用实体同步过来的 yRot/xRot ✓（原版投射物那套 ✓）。
-        double aimLength = length;
-        LivingEntity target = beam.targetEntity();
-        if (target != null && beam.style() == TNLightBeamEntity.STYLE_RAY) {
-            Vec3 want = target.position().add(0.0D, target.getBbHeight() * 0.5D, 0.0D)
-                    .subtract(beam.getX(), beam.getY(), beam.getZ());
-            aimLength = Math.max(1.0D, want.length());
-            Vec3 d = want.normalize();
-            pose.mulPose(Axis.YP.rotationDegrees(-TNLightBeamMechanics.yawFor(d)));
-            pose.mulPose(Axis.XP.rotationDegrees(TNLightBeamMechanics.pitchFor(d)));
-        } else {
-            pose.mulPose(Axis.YP.rotationDegrees(-Mth.lerp(partialTick, beam.yRotO, beam.getYRot())));
-            pose.mulPose(Axis.XP.rotationDegrees(Mth.lerp(partialTick, beam.xRotO, beam.getXRot())));
-        }
+        // ★ 起点用施法者的眼睛（客户端实时位置 ✓）—— 派发器已经平移到"实体插值后的位置"了，
+        //   所以这里补一个差值平移 ✓（否则边跑边放会看到光柱从身后追上来 ✗）。
+        Vec3 origin = originOf(beam);
+        Vec3 dispatched = beam.getPosition(partialTick);
+        pose.translate(origin.x - dispatched.x, origin.y - dispatched.y, origin.z - dispatched.z);
+        // ★ 朝向用**实体自己那份**（服务端每 tick 限速转向 ✓ ⇒ 看得见它拐向敌人 ✓，这就是"索敌"✓）。
+        //   为什么不在客户端直接对准目标：那样会**瞬间贴上去** ✗，看不出在追 ✗
+        //   （雷球是引擎投射物的 homing_angle，也是"拐弯"而不是瞬移 ✓）。
+        pose.mulPose(Axis.YP.rotationDegrees(-Mth.lerp(partialTick, beam.yRotO, beam.getYRot())));
+        pose.mulPose(Axis.XP.rotationDegrees(Mth.lerp(partialTick, beam.xRotO, beam.getXRot())));
 
         VertexConsumer vc = buffers.getBuffer(RenderType.entityTranslucentEmissive(WHITE));
         Matrix4f m = pose.last().pose();
 
         // ① 外层彩色壳（沿轴线彩虹 ✓）
         float shell = (float) (radius * grow);
-        tube(vc, m, shell, (float) aimLength, false, age, descent);
+        tube(vc, m, shell, (float) length, false, age, descent);
         // ② 内层白芯（粗光才画 ✓；天降那档芯更粗 ✓）
         float coreFraction = descent ? 0.45F : 0.30F;
-        tube(vc, m, shell * coreFraction, (float) aimLength, true, age, descent);
+        tube(vc, m, shell * coreFraction, (float) length, true, age, descent);
         // ③ 两端的亮圈
         cap(vc, m, shell, 0.0F, age);
-        cap(vc, m, shell * 1.15F, (float) aimLength, age);
+        cap(vc, m, shell * 1.15F, (float) length, age);
         pose.popPose();
+    }
+
+    /**
+     * 光柱的起点：前射形态用**施法者的眼睛**（客户端实时位置 ✓）。
+     *
+     * <p>为什么不用实体自己的位置：非生物实体的位置在客户端是**3 tick 插值**的 ✗，
+     * 拿它当起点的话，边跑边放会看到"光柱从身后追上来"✗。施法者就在本地时位置是精确的 ✓。
+     */
+    private static Vec3 originOf(TNLightBeamEntity beam) {
+        if (beam.style() == TNLightBeamEntity.STYLE_RAY
+                && beam.level().getEntity(beam.casterId()) instanceof LivingEntity caster) {
+            return caster.getEyePosition();
+        }
+        return beam.position();
     }
 
     /**
