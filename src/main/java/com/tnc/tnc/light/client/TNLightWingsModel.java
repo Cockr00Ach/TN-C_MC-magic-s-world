@@ -71,6 +71,12 @@ public final class TNLightWingsModel {
         /** 方块的旋转枢轴（Bedrock 的 {@code pivot} 字段 ✓）；没写就用 origin 角 ✓。 */
         float px, py, pz;
         boolean hasPivot;
+        /**
+         * ★ <b>参考方块</b>（作者用来标"后背 / 胸前"的 ✓，2026-10-01）——
+         * 判据：{@code uv} 有负数（作者的指南块写的是 {@code uv:[-4,-1]} ✓）。
+         * 这种方块**只给程序算位置用，不进游戏画面** ✗ —— 否则玩家背上会多两块砖 ✗✗。
+         */
+        boolean guide;
     }
 
     private static final class Bone {
@@ -109,9 +115,14 @@ public final class TNLightWingsModel {
         }
         int cubes = 0;
         for (Bone bone : bones) {
-            cubes += bone.cubes.size();
+            for (Cube c : bone.cubes) {
+                if (!c.guide) {
+                    cubes++;
+                }
+            }
         }
-        return bones.size() + " 骨 / " + cubes + " 方块";
+        String guide = guideCount() > 0 ? "，参考块 " + guideCount() + " 个（不画 ✓）" : "";
+        return bones.size() + " 骨 / " + cubes + " 方块" + guide;
     }
 
     /**
@@ -132,6 +143,9 @@ public final class TNLightWingsModel {
         int i = 0;
         for (Bone bone : bones) {
             for (Cube c : bone.cubes) {
+                if (c.guide) {
+                    continue;                    // ★ 参考方块没有 UV，不进"采样检查" ✓
+                }
                 float w = c.x1 - c.x0, h = c.y1 - c.y0, d = c.z1 - c.z0;
                 float u = c.u, v = c.v;
                 float[][] faces = {
@@ -380,6 +394,8 @@ public final class TNLightWingsModel {
                                 c.u = uv.get(0).getAsFloat();
                                 c.v = uv.get(1).getAsFloat();
                             }
+                            // ★ 负 uv = 作者的"参考方块"（后背/胸前指南 ✓）⇒ 不画，只用来算位置 ✓
+                            c.guide = c.u < 0.0F || c.v < 0.0F;
                             // ★ 旋转枢轴：Bedrock 用方块自己的 pivot ✗（不是 origin 角 ✗）——
                             //   作者这个模型里两者差最多 7 个单位（0.44 格）⇒ 用错枢轴整片羽毛会歪掉 ✗
                             c.px = c.x0;
@@ -437,6 +453,9 @@ public final class TNLightWingsModel {
         int i = 0;
         for (Bone bone : bones) {
             for (Cube c : bone.cubes) {
+                if (c.guide) {
+                    continue;                    // ★ 索引要和 buildMatrices 对齐 ⇒ 这里也必须跳 ✓
+                }
                 if (i < matrices.size()) {
                     box(vc, matrices.get(i), c);
                 }
@@ -506,6 +525,9 @@ public final class TNLightWingsModel {
             world.put(bone.name, m);
 
             for (Cube c : bone.cubes) {
+                if (c.guide) {
+                    continue;                    // ★ 参考方块（后背/胸前）不进画面 ✗
+                }
                 Matrix4f cube = new Matrix4f();
                 cube.set(m);
                 if (c.rx != 0.0F || c.ry != 0.0F || c.rz != 0.0F) {
@@ -538,25 +560,74 @@ public final class TNLightWingsModel {
 
     /** 带动画的版本 ✓（离线验证"站着不动 / 飞起来播 waving"就是用这个 ✓）。 */
     public static List<float[]> corners(Matrix4f root, float flap, float animTime, boolean animated) {
+        return cornersOf(root, flap, animTime, animated, false);
+    }
+
+    /**
+     * ★ 作者那两个"后背 / 胸前"参考方块的位置 ✓（模型坐标系，未做玩家变换 ✗）——
+     * 单测拿它 + {@link TNLightWingsPlacement} 的当前参数，算"这套摆放有没有把参考块放到身上" ✓。
+     */
+    public static List<float[]> guideCorners() {
+        return cornersOf(new Matrix4f(), 0.0F, 0.0F, false, true);
+    }
+
+    /** 参考方块有几个 ✓（作者用它们标身体位置 ✓）。 */
+    public static int guideCount() {
+        int n = 0;
+        if (bones != null) {
+            for (Bone b : bones) {
+                for (Cube c : b.cubes) {
+                    if (c.guide) {
+                        n++;
+                    }
+                }
+            }
+        }
+        return n;
+    }
+
+    private static List<float[]> cornersOf(Matrix4f root, float flap, float animTime,
+                                          boolean animated, boolean guidesOnly) {
         List<float[]> out = new ArrayList<>();
         List<Matrix4f> matrices = buildMatrices(root, flap, animTime, animated);
         int i = 0;
         for (Bone bone : bones) {
             for (Cube c : bone.cubes) {
-                Matrix4f m = i < matrices.size() ? matrices.get(i) : new Matrix4f(root);
+                if (c.guide != guidesOnly) {
+                    if (!c.guide) {
+                        i++;                     // ★ 索引只随"会画的方块"走（和 buildMatrices 对齐 ✓）
+                    }
+                    continue;
+                }
+                Matrix4f m;
+                if (guidesOnly) {
+                    // 参考方块在根骨骼上、没有旋转 ⇒ 直接平移即可 ✓
+                    m = new Matrix4f(root).translate(c.x0 / 16.0F, c.y0 / 16.0F, c.z0 / 16.0F);
+                } else {
+                    m = i < matrices.size() ? matrices.get(i) : new Matrix4f(root);
+                }
+                // ★ 顶点坐标要用**绝对值**（c.x0..c.x1 ✓）—— 方块矩阵里**不含**方块的 origin 平移 ✗，
+                //   平移是编码在顶点坐标里的 ✓。（参考块那条路是自己拼的 root*translate(origin) ✗，
+                //   所以那边才用 0..size 的局部偏移 ✓ —— 两边不能混 ✗，2026-10-01 自己踩了一次 ✗）
+                boolean absolute = !guidesOnly;
                 for (int cx = 0; cx < 2; cx++) {
                     for (int cy = 0; cy < 2; cy++) {
                         for (int cz = 0; cz < 2; cz++) {
-                            org.joml.Vector4f v = new org.joml.Vector4f(
-                                    (cx == 0 ? c.x0 : c.x1) / 16.0F,
-                                    (cy == 0 ? c.y0 : c.y1) / 16.0F,
-                                    (cz == 0 ? c.z0 : c.z1) / 16.0F, 1.0F);
+                            float lx = absolute ? (cx == 0 ? c.x0 : c.x1) / 16.0F
+                                    : (cx == 0 ? 0.0F : (c.x1 - c.x0) / 16.0F);
+                            float ly = absolute ? (cy == 0 ? c.y0 : c.y1) / 16.0F
+                                    : (cy == 0 ? 0.0F : (c.y1 - c.y0) / 16.0F);
+                            float lz = absolute ? (cz == 0 ? c.z0 : c.z1) / 16.0F
+                                    : (cz == 0 ? 0.0F : (c.z1 - c.z0) / 16.0F);
+                            org.joml.Vector4f v = new org.joml.Vector4f(lx, ly, lz, 1.0F);
                             m.transform(v);
                             out.add(new float[]{v.x, v.y, v.z, i});
                         }
                     }
                 }
-                i++;
+                if (!c.guide) {
+                    i++;
+                }
             }
         }
         return out;

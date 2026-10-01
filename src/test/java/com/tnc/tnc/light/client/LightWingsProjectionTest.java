@@ -286,7 +286,79 @@ class LightWingsProjectionTest {
         return max;
     }
 
-    /** 三张图一起写一份文件 ✓ —— 从构建日志里捞字符画太费劲 ✗，落盘之后直接读 ✓。 */    private static final StringBuilder ART = new StringBuilder();
+    /**
+     * ★★ 作者 2026-10-01："翅膀位置还是不对啊，我在模型文件里面加了后背跟胸前，你要照那样子放啊" ✓
+     * —— 这条测试就拿他那两个参考方块当**尺子** ✓：
+     * <ol>
+     *   <li>参考块（模型 z 1..7 单位 ＝ 身体）用当前 {@code TNLightWingsPlacement} 参数变换到玩家坐标系后，
+     *     必须**套在原版躯干盒子**上 ✓（躯干：x ±0.25、y 0.75..1.5、z ±0.125 ✓）；</li>
+     *   <li>翅膀必须落在躯干**背面之后**（不能穿到胸前 ✗）。</li>
+     * </ol>
+     * 这两条一钉，"朝向反了 / 推错方向"这类错就不会再悄悄溜过去 ✓（这次就是这么错的 ✗）。
+     */
+    @Test
+    void placementMatchesAuthorsBackChestGuides() throws Exception {
+        loadModel();
+        int guides = TNLightWingsModel.guideCount();
+        System.out.println("参考方块数: " + guides + "（作者的 后背 / 胸前 ✓）");
+        assertTrue(guides >= 2, "没找到作者的参考方块（uv 为负的那些 ✓）");
+
+        // 玩家坐标系 = 渲染器那套：先按 yaw_offset 转，再 translate(0, backY, backZ) ✓
+        Matrix4f playerSpace = new Matrix4f()
+                .rotateY((float) Math.toRadians(TNLightWingsPlacement.yawOffset))
+                .translate(0.0F, TNLightWingsPlacement.backY, TNLightWingsPlacement.backZ);
+
+        float[] body = bounds(transform(TNLightWingsModel.guideCorners(), playerSpace));
+        float[] wings = bounds(transform(TNLightWingsModel.corners(new Matrix4f(), 0.0F), playerSpace));
+        String report = String.format(java.util.Locale.ROOT,
+                "%n放置自检（back_y=%.3f back_z=%.3f yaw=%.1f）%n"
+                        + "  参考块(身体) 世界坐标: x %.3f..%.3f  y %.3f..%.3f  z %.3f..%.3f%n"
+                        + "  原版躯干盒子        : x -0.250..0.250  y 0.750..1.500  z -0.125..0.125%n"
+                        + "  翅膀                : x %.3f..%.3f  y %.3f..%.3f  z %.3f..%.3f%n",
+                TNLightWingsPlacement.backY, TNLightWingsPlacement.backZ, TNLightWingsPlacement.yawOffset,
+                body[0], body[1], body[2], body[3], body[4], body[5],
+                wings[0], wings[1], wings[2], wings[3], wings[4], wings[5]);
+        System.out.print(report);
+        ART.append(report);
+
+        // ① 参考块要和躯干在 z（前后）上重合 —— 说明"作者画的身体"正落在玩家身上 ✓
+        assertTrue(body[4] < 0.125F && body[5] > -0.125F,
+                "参考块没套在躯干上（z " + body[4] + ".." + body[5] + "）⇒ 朝向/前后推错了 ✗");
+        // ② 参考块与躯干在高度上要有明显重叠 ✓
+        double overlapY = Math.min(body[3], 1.5F) - Math.max(body[2], 0.75F);
+        assertTrue(overlapY > 0.1D, "参考块与躯干高度几乎不重叠（" + overlapY + "）✗");
+        // ③ 翅膀必须在躯干背面之后，且不能穿到胸前 ✗
+        assertTrue(wings[5] <= 0.125F, "翅膀穿到胸前了（z 最大 " + wings[5] + "）✗");
+        assertTrue(wings[4] < -0.05F, "翅膀不在背后（z 最小 " + wings[4] + "）✗");
+    }
+
+    private static List<float[]> transform(List<float[]> points, Matrix4f matrix) {
+        List<float[]> out = new java.util.ArrayList<>();
+        for (float[] p : points) {
+            org.joml.Vector4f v = new org.joml.Vector4f(p[0], p[1], p[2], 1.0F);
+            matrix.transform(v);
+            out.add(new float[]{v.x, v.y, v.z});
+        }
+        return out;
+    }
+
+    /** {@code [minX, maxX, minY, maxY, minZ, maxZ]} ✓。 */
+    private static float[] bounds(List<float[]> points) {
+        float[] b = {Float.MAX_VALUE, -Float.MAX_VALUE, Float.MAX_VALUE, -Float.MAX_VALUE,
+                Float.MAX_VALUE, -Float.MAX_VALUE};
+        for (float[] p : points) {
+            b[0] = Math.min(b[0], p[0]);
+            b[1] = Math.max(b[1], p[0]);
+            b[2] = Math.min(b[2], p[1]);
+            b[3] = Math.max(b[3], p[1]);
+            b[4] = Math.min(b[4], p[2]);
+            b[5] = Math.max(b[5], p[2]);
+        }
+        return b;
+    }
+
+    /** 三张图一起写一份文件 ✓ —— 从构建日志里捞字符画太费劲 ✗，落盘之后直接读 ✓。 */
+    private static final StringBuilder ART = new StringBuilder();
 
     @org.junit.jupiter.api.AfterAll
     static void writeArt() throws Exception {
