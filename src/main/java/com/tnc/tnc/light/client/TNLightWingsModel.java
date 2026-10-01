@@ -112,6 +112,41 @@ public final class TNLightWingsModel {
         return bones.size() + " 骨 / " + cubes + " 方块";
     }
 
+    /**
+     * 自检用：每个方块用到的 **UV 矩形**（和 {@link #box} 的展开方式一致 ✓）＋ 它在哪根骨头、多大 ✓。
+     *
+     * <p>用途：拿这些矩形去贴图里数不透明像素 ⇒ 一眼看出"哪些方块采到了空白"✗
+     * （2026-10-01 的"模型有点不对"就是这个：羽毛的 v 用到 42，而贴图只画了 y 0..31 ✗）。
+     */
+    public record CubeReport(String bone, int index, float u, float v,
+                             float sizeX, float sizeY, float sizeZ, float[][] faces) {
+    }
+
+    public static List<CubeReport> cubeUvReport() {
+        List<CubeReport> out = new ArrayList<>();
+        if (bones == null) {
+            return out;
+        }
+        int i = 0;
+        for (Bone bone : bones) {
+            for (Cube c : bone.cubes) {
+                float w = c.x1 - c.x0, h = c.y1 - c.y0, d = c.z1 - c.z0;
+                float u = c.u, v = c.v;
+                float[][] faces = {
+                        {u + d, v, w, d},                 // up
+                        {u + d + w, v, w, d},             // down
+                        {u, v + d, d, h},                 // east
+                        {u + d, v + d, w, h},             // north
+                        {u + d + w, v + d, d, h},         // west
+                        {u + d + w + d, v + d, w, h},     // south
+                };
+                out.add(new CubeReport(bone.name, i, u, v, w, h, d, faces));
+                i++;
+            }
+        }
+        return out;
+    }
+
     private static void load() {
         if (bones != null || failed) {
             return;
@@ -123,46 +158,65 @@ public final class TNLightWingsModel {
                 return;
             }
             try (BufferedReader reader = res.get().openAsReader()) {
-                JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
-                JsonObject geo = root.getAsJsonArray("minecraft:geometry").get(0).getAsJsonObject();
-                JsonObject desc = geo.getAsJsonObject("description");
-                if (desc.has("texture_width")) {
-                    texW = desc.get("texture_width").getAsInt();
-                }
-                if (desc.has("texture_height")) {
-                    texH = desc.get("texture_height").getAsInt();
-                }
-                List<Bone> list = new ArrayList<>();
-                for (JsonElement be : geo.getAsJsonArray("bones")) {
-                    JsonObject bo = be.getAsJsonObject();
-                    Bone bone = new Bone();
-                    bone.name = bo.get("name").getAsString();
-                    bone.parent = bo.has("parent") ? bo.get("parent").getAsString() : null;
-                    JsonArray p = bo.getAsJsonArray("pivot");
-                    if (p != null) {
-                        bone.px = p.get(0).getAsFloat();
-                        bone.py = p.get(1).getAsFloat();
-                        bone.pz = p.get(2).getAsFloat();
-                    }
-                    // ★ 骨骼自身的旋转也要读（作者的 wingright 就是 [0,180,0] ✓ 不读就画反 ✗）
-                    JsonArray br = bo.getAsJsonArray("rotation");
-                    if (br != null && br.size() == 3) {
-                        bone.rx = br.get(0).getAsFloat();
-                        bone.ry = br.get(1).getAsFloat();
-                        bone.rz = br.get(2).getAsFloat();
-                    }
-                    if (bo.has("cubes")) {
-                        for (JsonElement ce : bo.getAsJsonArray("cubes")) {
-                            JsonObject co = ce.getAsJsonObject();
-                            Cube c = new Cube();
-                            JsonArray f = co.getAsJsonArray("origin");
-                            JsonArray s = co.getAsJsonArray("size");
-                            c.x0 = f.get(0).getAsFloat();
-                            c.y0 = f.get(1).getAsFloat();
-                            c.z0 = f.get(2).getAsFloat();
-                            c.x1 = c.x0 + s.get(0).getAsFloat();
-                            c.y1 = c.y0 + s.get(1).getAsFloat();
-                            c.z1 = c.z0 + s.get(2).getAsFloat();
+                parse(reader);
+            }
+        } catch (Throwable t) {
+            failed = true;
+            // ★ 读失败必须留痕 ✗（原来是静默的 ⇒ 作者只会看到"没有翅膀"，查不出原因 ✗）
+            org.apache.logging.log4j.LogManager.getLogger("TN-C/light").warn(
+                    "TN-C/light: 光翼 geo 读取失败，改用备用翅膀：{}", t.toString());
+        }
+    }
+
+    /**
+     * 纯解析 ✓ —— <b>不碰任何 Minecraft 运行时</b>（只吃一个 {@code Reader} ✓）。
+     *
+     * <p>为什么要单独抽出来：2026-10-01 的"模型有点不对"只能靠**离线投影成字符画**来判 ✓
+     * （我这边看不到画面 ✗），而 {@code load()} 里要 {@code Minecraft.getInstance()} ✗
+     * ⇒ 单测没法用 ✗。抽出来之后 {@code LightWingsProjectionTest} 就能直接喂 JSON 文本，
+     * 用**和渲染完全相同的那份数学**（{@link #buildMatrices} ✓）画出来 ✓。
+     */
+    static void parse(java.io.Reader reader) {
+        JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
+        JsonObject geo = root.getAsJsonArray("minecraft:geometry").get(0).getAsJsonObject();
+        JsonObject desc = geo.getAsJsonObject("description");
+        if (desc.has("texture_width")) {
+            texW = desc.get("texture_width").getAsInt();
+        }
+        if (desc.has("texture_height")) {
+            texH = desc.get("texture_height").getAsInt();
+        }
+        List<Bone> list = new ArrayList<>();
+        for (JsonElement be : geo.getAsJsonArray("bones")) {
+            JsonObject bo = be.getAsJsonObject();
+            Bone bone = new Bone();
+            bone.name = bo.get("name").getAsString();
+            bone.parent = bo.has("parent") ? bo.get("parent").getAsString() : null;
+            JsonArray p = bo.getAsJsonArray("pivot");
+            if (p != null) {
+                bone.px = p.get(0).getAsFloat();
+                bone.py = p.get(1).getAsFloat();
+                bone.pz = p.get(2).getAsFloat();
+            }
+            // ★ 骨骼自身的旋转也要读（作者的 wingright 就是 [0,180,0] ✓ 不读就画反 ✗）
+            JsonArray br = bo.getAsJsonArray("rotation");
+            if (br != null && br.size() == 3) {
+                bone.rx = br.get(0).getAsFloat();
+                bone.ry = br.get(1).getAsFloat();
+                bone.rz = br.get(2).getAsFloat();
+            }
+            if (bo.has("cubes")) {
+                for (JsonElement ce : bo.getAsJsonArray("cubes")) {
+                    JsonObject co = ce.getAsJsonObject();
+                    Cube c = new Cube();
+                    JsonArray f = co.getAsJsonArray("origin");
+                    JsonArray s = co.getAsJsonArray("size");
+                    c.x0 = f.get(0).getAsFloat();
+                    c.y0 = f.get(1).getAsFloat();
+                    c.z0 = f.get(2).getAsFloat();
+                    c.x1 = c.x0 + s.get(0).getAsFloat();
+                    c.y1 = c.y0 + s.get(1).getAsFloat();
+                    c.z1 = c.z0 + s.get(2).getAsFloat();
                             JsonArray uv = co.getAsJsonArray("uv");
                             if (uv != null) {
                                 c.u = uv.get(0).getAsFloat();
@@ -193,14 +247,7 @@ public final class TNLightWingsModel {
                     }
                     list.add(bone);
                 }
-                bones = list;
-            }
-        } catch (Throwable t) {
-            failed = true;
-            // ★ 读失败必须留痕 ✗（原来是静默的 ⇒ 作者只会看到"没有翅膀"，查不出原因 ✗）
-            org.apache.logging.log4j.LogManager.getLogger("TN-C/light").warn(
-                    "TN-C/light: 光翼 geo 读取失败，改用备用翅膀：{}", t.toString());
-        }
+        bones = list;
     }
 
     /**
@@ -222,7 +269,30 @@ public final class TNLightWingsModel {
         if (bones == null) {
             return;
         }
-        Matrix4f root = pose.last().pose();     // ★ 玩家位置/朝向/背上偏移都在这里 ✗ 不能丢
+        List<Matrix4f> matrices = buildMatrices(pose.last().pose(), flap);
+        int i = 0;
+        for (Bone bone : bones) {
+            for (Cube c : bone.cubes) {
+                if (i < matrices.size()) {
+                    box(vc, matrices.get(i), c);
+                }
+                i++;
+            }
+        }
+    }
+
+    /**
+     * 把每个方块的世界变换算出来 ✓ —— <b>渲染与离线自检共用这一份数学</b> ✗
+     * （复制一份的话两边必然慢慢跑偏 ✗，而"模型有点不对"这种问题就是靠对账才能定位 ✓）。
+     *
+     * @param root 玩家坐标系（位置/朝向/背上偏移 ✓）；离线自检直接传单位矩阵 ✓
+     * @param flap 扇动角度（度）✓
+     */
+    static List<Matrix4f> buildMatrices(Matrix4f root, float flap) {
+        List<Matrix4f> out = new ArrayList<>();
+        if (bones == null) {
+            return out;
+        }
         Map<String, Matrix4f> world = new HashMap<>();
         for (Bone bone : bones) {
             Matrix4f m = new Matrix4f();
@@ -269,9 +339,39 @@ public final class TNLightWingsModel {
                     }
                     cube.translate(-c.px / 16.0F, -c.py / 16.0F, -c.pz / 16.0F);
                 }
-                box(vc, cube, c);
+                out.add(cube);
             }
         }
+        return out;
+    }
+
+    /**
+     * 离线自检：所有方块的 8 个角（格 ✓，已按 {@link #buildMatrices} 变换 ✓），
+     * 每条是 {@code [x, y, z, 方块序号]} ✓ —— 单测据此画字符画/查对称 ✓。不碰 Minecraft 运行时 ✓。
+     */
+    public static List<float[]> corners(Matrix4f root, float flap) {
+        List<float[]> out = new ArrayList<>();
+        List<Matrix4f> matrices = buildMatrices(root, flap);
+        int i = 0;
+        for (Bone bone : bones) {
+            for (Cube c : bone.cubes) {
+                Matrix4f m = i < matrices.size() ? matrices.get(i) : new Matrix4f(root);
+                for (int cx = 0; cx < 2; cx++) {
+                    for (int cy = 0; cy < 2; cy++) {
+                        for (int cz = 0; cz < 2; cz++) {
+                            org.joml.Vector4f v = new org.joml.Vector4f(
+                                    (cx == 0 ? c.x0 : c.x1) / 16.0F,
+                                    (cy == 0 ? c.y0 : c.y1) / 16.0F,
+                                    (cz == 0 ? c.z0 : c.z1) / 16.0F, 1.0F);
+                            m.transform(v);
+                            out.add(new float[]{v.x, v.y, v.z, i});
+                        }
+                    }
+                }
+                i++;
+            }
+        }
+        return out;
     }
 
     /**
