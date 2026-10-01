@@ -102,6 +102,10 @@ minecraft {
                 property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
             }
             if (project.hasProperty('fullLandmarkTests')) property 'tnc.fullLandmarkTests', 'true'
+            if (project.hasProperty('fullSkyIslandTests')) {
+                property 'tnc.fullSkyIslandTests', 'true'
+                property 'tnc.skyIslandSource', file('modpack/元素觉醒1.4.3-魔改版-20260915/kubejs/data/tnc').absolutePath
+            }
             jvmArgs '-Xmx6G'
             // Recovery fixtures intentionally change blocks; never reuse a previous run's world.
             args '--world', "building-tests-${System.currentTimeMillis()}".toString()

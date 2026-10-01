@@ -24,6 +24,12 @@ final class PortalArchitecture {
     static final int HEIGHT = 28;
     static final int WIDTH = 35;
     static final int CENTER = 17;
+    /** A loaded living actor is a temporary condition, not a broken build resource. */
+    static final class SiteOccupied extends IOException {
+        SiteOccupied(BlockPos pos) {
+            super("传送阵施工位置有玩家或生物：" + pos.toShortString() + "；离开后自动继续");
+        }
+    }
     static BlockPos footprintOrigin(BlockPos legacyOrigin) { return legacyOrigin.offset(7-CENTER,0,7-CENTER); }
     record Plan(Map<BlockPos, BlockState> writes) {
         void apply(ServerLevel level) {
@@ -104,7 +110,7 @@ final class PortalArchitecture {
             var occupied=entity.getBoundingBox().inflate(.05,.1,.05);
             for (var entry:writes.entrySet()) if (!level.getBlockState(entry.getKey()).equals(entry.getValue())
                     && occupied.intersects(new AABB(entry.getKey())))
-                throw new IOException("请玩家及生物先离开正在改建的方块范围，再刷新外观");
+                throw new SiteOccupied(entry.getKey());
         }
         return new Plan(writes);
     }
@@ -113,15 +119,21 @@ final class PortalArchitecture {
         Map<BlockPos,BlockState> writes=new LinkedHashMap<>();
         for (int x=-10;x<25;x++) for (int z=-10;z<25;z++) {
             if (Math.hypot(x-7,z-7)>16.6) continue;
+            Map<BlockPos,BlockState> column=new LinkedHashMap<>();
+            boolean occupied=false;
             for (int depth=1;depth<=5;depth++) {
                 var pos=origin.offset(x,-depth,z); var state=level.getBlockState(pos);
                 if (pos.getY()<level.getMinBuildHeight() || level.getBlockEntity(pos)!=null) break;
                 // Waterlogging does not make a chest, stair or other solid replaceable.
                 if (!state.isAir() && !(state.getBlock() instanceof net.minecraft.world.level.block.LiquidBlock)) break;
-                if (!level.getEntitiesOfClass(LivingEntity.class,new AABB(pos)).isEmpty())
-                    throw new IOException("请玩家及生物先离开传送阵基础施工范围");
-                writes.put(pos,depth<=2?Blocks.COBBLESTONE.defaultBlockState():Blocks.STONE.defaultBlockState());
+                if (!level.getEntitiesOfClass(LivingEntity.class,new AABB(pos)).isEmpty()) {
+                    occupied=true; break;
+                }
+                column.put(pos,depth<=2?Blocks.COBBLESTONE.defaultBlockState():Blocks.STONE.defaultBlockState());
             }
+            // This is optional terrain dressing under the disk. Preserve the entire occupied
+            // column, including its headroom, rather than fail the whole island or entomb a mob.
+            if (!occupied) writes.putAll(column);
         }
         return new Plan(writes);
     }

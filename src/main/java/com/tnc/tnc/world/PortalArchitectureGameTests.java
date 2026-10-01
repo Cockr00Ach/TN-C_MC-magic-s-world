@@ -16,6 +16,85 @@ import java.io.IOException;
 public final class PortalArchitectureGameTests {
     private static final ResourceLocation GATE = ResourceLocation.tryParse("tnc:sky_island/portal/ritual_gate");
 
+    private static SkyIslandManifest finalizationManifest() {
+        return SkyIslandManifest.parse(com.google.gson.JsonParser.parseString("""
+                {"version":5,"seed":1,"dimensions":[480,160,512],"world_origin_y":90,
+                 "town_center_local":[240,90,260],"arrival_local":[209,90,424],
+                 "root_tips":[[240,0,260]],"non_air_blocks":1,"piece_count":1,
+                 "portal_templates":{"ground_portal":"tnc:sky_island/portal/ritual_gate",
+                                     "island_portal":"tnc:sky_island/portal/ritual_gate"},
+                 "pieces":[{"resource":"tnc:building_test_empty","offset":[0,0,0],"size":[1,1,1],"blocks":1}]}
+                """).getAsJsonObject());
+    }
+
+    private static SkyIslandSavedData finalizationData(BlockPos ground) {
+        var data=new SkyIslandSavedData();
+        data.phase=SkyIslandSavedData.Phase.FINALIZING; data.layoutReady=true; data.version=5; data.nextPiece=301;
+        data.originX=ground.getX(); data.originY=ground.getY(); data.originZ=ground.getZ();
+        data.groundPortalX=ground.getX(); data.groundPortalY=ground.getY(); data.groundPortalZ=ground.getZ();
+        data.arrivalX=ground.getX()+71; data.arrivalY=ground.getY()+1; data.arrivalZ=ground.getZ()+7;
+        return data;
+    }
+
+    @GameTest(template="building_test_empty",timeoutTicks=500)
+    public static void caveResidentDoesNotFailWholeIslandFinalization(GameTestHelper helper) throws Exception {
+        var level=helper.getLevel(); var origin=new BlockPos(4960,200,112);
+        var data=finalizationData(origin); var manifest=finalizationManifest();
+        SkyIslandManager.finalizeBuild(level,data,manifest);
+        var resident=new net.minecraft.world.entity.decoration.ArmorStand(level,origin.getX()+7.5,origin.getY()-3,origin.getZ()+7.5);
+        resident.setNoGravity(true); level.addFreshEntity(resident);
+        helper.succeedWhen(()->{
+            try {SkyIslandManager.finalizeBuild(level,data,manifest);} catch (IOException failure) {throw new IllegalStateException(failure);}
+            if (data.phase!=SkyIslandSavedData.Phase.COMPLETE)
+                throw new net.minecraft.gametest.framework.GameTestAssertException("Waiting for finalization");
+            if (level.getEntity(resident.getUUID())!=resident)
+                throw new IllegalStateException("Foundation fixture resident was not actually loaded");
+            if (data.nextPiece!=301 || data.portalRevision!=4 || !data.activeChunks.isEmpty())
+                throw new IllegalStateException("Finalization lost checkpoint or chunk tickets");
+            if (!resident.isAlive() || !level.getBlockState(origin.offset(7,-1,7)).isAir()
+                    || !level.getBlockState(origin.offset(7,-2,7)).isAir()
+                    || !level.getBlockState(origin.offset(7,-3,7)).isAir())
+                throw new IllegalStateException("Optional foundation sealed a resident's column");
+            if (!level.getBlockState(origin.offset(7,22,7)).is(Blocks.SHROOMLIGHT))
+                throw new IllegalStateException("Ground portal not built");
+            resident.discard();
+        });
+    }
+
+    @GameTest(template="building_test_empty",timeoutTicks=600)
+    public static void occupiedRitualRetriesFinalizationWithoutPartialPlacement(GameTestHelper helper) throws Exception {
+        var level=helper.getLevel(); var origin=new BlockPos(5120,200,112);
+        var checkpoint=new SkyIslandSavedData[]{finalizationData(origin)}; var manifest=finalizationManifest();
+        SkyIslandManager.finalizeBuild(level,checkpoint[0],manifest);
+        var resident=new net.minecraft.world.entity.decoration.ArmorStand(level,origin.getX()+16.5,origin.getY()+12,origin.getZ()+16.5);
+        resident.setNoGravity(true); level.addFreshEntity(resident);
+        var verifiedWaiting=new boolean[1];
+        helper.succeedWhen(()->{
+            var data=checkpoint[0];
+            if (!SkyIslandManager.portalEntitiesReady(level,data) || level.getGameTime()<data.waitUntilTick)
+                throw new net.minecraft.gametest.framework.GameTestAssertException("Waiting for chunks or retry");
+            try {SkyIslandManager.finalizeBuild(level,data,manifest);} catch (IOException failure) {throw new IllegalStateException(failure);}
+            if (!verifiedWaiting[0]) {
+                if (data.phase!=SkyIslandSavedData.Phase.FINALIZING || data.nextPiece!=301
+                        || !level.getBlockState(origin.offset(7,22,7)).isAir()
+                        || !level.getBlockState(origin.offset(71,22,7)).isAir()
+                        || data.waitUntilTick<=level.getGameTime())
+                    throw new IllegalStateException("Transient occupancy failed or partly built a portal");
+                // Crash/restart checkpoint retains pending work; an actor leaving needs no relog.
+                checkpoint[0]=SkyIslandSavedData.load(data.save(new net.minecraft.nbt.CompoundTag()));
+                resident.setPos(origin.getX()+40.5,origin.getY()+12,origin.getZ()+16.5);
+                verifiedWaiting[0]=true;
+                throw new net.minecraft.gametest.framework.GameTestAssertException("Waiting after resident left");
+            }
+            if (data.phase!=SkyIslandSavedData.Phase.COMPLETE || data.nextPiece!=301
+                    || data.portalRevision!=4 || !data.activeChunks.isEmpty() || !data.lastError.isEmpty()
+                    || !level.getBlockState(origin.offset(7,22,7)).is(Blocks.SHROOMLIGHT)
+                    || !level.getBlockState(origin.offset(71,22,7)).is(Blocks.SHROOMLIGHT))
+                throw new IllegalStateException("Pending finalization did not resume both portals");
+            resident.discard();
+        });
+    }
+
     @GameTest(template="building_test_empty",timeoutTicks=400)
     public static void completedRevisionFourReloadResumesPendingManualRefresh(GameTestHelper helper) {
         var data=new SkyIslandSavedData();

@@ -199,10 +199,9 @@ public final class SkyIslandManager {
             LOGGER.info("[TN-C Portal] automatically upgraded both altars to revision 4");
         } catch (PortalChunksPending pending) {
             PORTAL_UPGRADES.put(server,level.getGameTime()+2);
+        } catch (PortalArchitecture.SiteOccupied occupied) {
+            PORTAL_UPGRADES.put(server,level.getGameTime()+200);
         } catch (IOException blocked) {
-            if (blocked.getMessage().contains("玩家及生物")) {
-                PORTAL_UPGRADES.put(server,level.getGameTime()+200); return;
-            }
             PORTAL_UPGRADES.remove(server);
             LOGGER.warn("[TN-C Portal] safe upgrade deferred: {}",blocked.getMessage());
             for (var p:level.players()) p.sendSystemMessage(Component.literal("§e传送阵外观升级暂缓，原功能保留："
@@ -334,7 +333,7 @@ public final class SkyIslandManager {
         return best;
     }
 
-    private static void buildStep(ServerLevel level, SkyIslandSavedData data, SkyIslandManifest manifest) throws IOException {
+    static void buildStep(ServerLevel level, SkyIslandSavedData data, SkyIslandManifest manifest) throws IOException {
         if (data.nextPiece >= manifest.pieces().size()) {
             releaseActiveChunks(level, data);
             data.phase = SkyIslandSavedData.Phase.FINALIZING;
@@ -388,7 +387,7 @@ public final class SkyIslandManager {
                 data.nextPiece, manifest.pieces().size(), piece.resource(), target);
     }
 
-    private static void finalizeBuild(ServerLevel level, SkyIslandSavedData data, SkyIslandManifest manifest) throws IOException {
+    static void finalizeBuild(ServerLevel level, SkyIslandSavedData data, SkyIslandManifest manifest) throws IOException {
         BlockPos islandPortalOrigin = new BlockPos(
                 data.arrivalX - 7,
                 data.arrivalY - 1,
@@ -414,9 +413,22 @@ public final class SkyIslandManager {
 
         if (!portalEntitiesReady(level,data)) return;
 
-        var islandPlan = PortalArchitecture.prepare(level, manifest.islandPortal(), islandPortalOrigin, false);
-        var groundPlan = PortalArchitecture.prepare(level, manifest.groundPortal(), groundPortalOrigin, false);
-        var supports = PortalArchitecture.prepareSupports(level,groundPortalOrigin);
+        PortalArchitecture.Plan islandPlan, groundPlan, supports;
+        try {
+            islandPlan = PortalArchitecture.prepare(level, manifest.islandPortal(), islandPortalOrigin, false);
+            groundPlan = PortalArchitecture.prepare(level, manifest.groundPortal(), groundPortalOrigin, false);
+            supports = PortalArchitecture.prepareSupports(level,groundPortalOrigin);
+        } catch (PortalArchitecture.SiteOccupied occupied) {
+            String waiting=occupied.getMessage();
+            if (!waiting.equals(data.lastError)) {
+                LOGGER.info("[TN-C Sky Island] finalization waiting: {}",waiting);
+                notifyAll(level.getServer(),"§e天空岛主体已就绪，"+waiting);
+            }
+            data.lastError=waiting;
+            data.waitUntilTick=level.getGameTime()+200;
+            data.setDirty();
+            return;
+        }
         islandPlan.apply(level);
         groundPlan.apply(level);
         supports.apply(level);
@@ -485,6 +497,10 @@ public final class SkyIslandManager {
             ensureLanding(level,islandLanding(data));
             ensureLanding(level,groundLanding(data));
             data.portalRevision=4; data.setDirty();
+        } catch (PortalArchitecture.SiteOccupied occupied) {
+            pending=true;
+            PORTAL_UPGRADES.put(server,level.getGameTime()+200);
+            throw occupied;
         } finally {
             if (!pending) releaseActiveChunks(level,data);
         }
