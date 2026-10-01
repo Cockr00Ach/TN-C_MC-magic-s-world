@@ -58,6 +58,20 @@ public final class TNLightWingsPlacement {
     public static float backZ = -0.25F;
     /** 朝向偏移（度）✓ —— 0 ＝ 模型 +Z 对准玩家胸前 ✓（由作者 2026-10-01 的参考块定 ✓）。 */
     public static float yawOffset = 0.0F;
+    /**
+     * ★ <b>左右镜像</b>（作者 2026-10-01："翅膀的左右反了" ✗）。
+     *
+     * <p>为什么需要它：把 {@code yawOffset} 从 180 改成 0（为了对齐作者的"后背 / 胸前"参考块 ✓）之后，
+     * <b>模型 +Z 对了，但 +X 也跟着换边了</b> ✗ —— 两只翅膀就长反了 ✗。
+     *
+     * <p>为什么不用 {@code yawOffset = 180} 修：那样参考块会又跑到背后去 ✗（16.6 节那次就是这个毛病 ✗）。
+     * 所以这里单独加一个 <b>x 轴镜像</b>（{@code scale(-1,1,1)} ✓）：只换左右、不动前后 ✓。
+     *
+     * <p>★ 渲染是**正反两面都提交**的 ✓（见 {@code TNLightWingsModel.quad} ✓），
+     * 所以负缩放**不会**因为背面剔除而把翅膀弄没 ✓（这是负缩放最常见的坑 ✗）。
+     * 万一方向还是反的，作者在 config 里把这个值取反即可 ✓（存盘 1 秒生效 ✓）。
+     */
+    public static boolean mirrorX = true;
     /** 整体缩放 ✓。 */
     public static float scale = 1.0F;
     /** 透明度（越小越透 ✓）。 */
@@ -126,10 +140,10 @@ public final class TNLightWingsPlacement {
     /** 供日志/自检用的一行摘要 ✓。 */
     public static String describe() {
         return String.format(java.util.Locale.ROOT,
-                "back_y=%.3f back_z=%.3f yaw=%.1f scale=%.3f alpha=%.2f "
+                "back_y=%.3f back_z=%.3f yaw=%.1f mirror_x=%s scale=%.3f alpha=%.2f "
                         + "waving_fly=%s waving_idle=%s anim_speed=%.2f pitch=%.2f "
                         + "flap_fly=%.2f/%.1f flap_idle=%.2f/%.1f",
-                backY, backZ, yawOffset, scale, alpha,
+                backY, backZ, yawOffset, mirrorX, scale, alpha,
                 wavingWhenFlying, wavingWhenIdle, animationSpeed, pitchFactor,
                 flapSpeedFlying, flapAmpFlying, flapSpeedIdle, flapAmpIdle);
     }
@@ -148,6 +162,7 @@ public final class TNLightWingsPlacement {
                     "back_y": "模型原点的高度(格), 1.18≈肩胛; 想整体上移就加大",
                     "back_z": "沿模型+Z(胸前方向)推多远; -0.25=原点在身体中心往后0.25格(贴背)",
                     "yaw_offset": "朝向(度), 0=模型+Z对准胸前(按作者的参考块定); 贴反了就试 180",
+                    "mirror_x": "左右镜像(true/false); 翅膀左右长反了就把它取反",
                     "scale": "整体大小, 0.5=一半, 2.0=两倍",
                     "alpha": "透明度, 越小越透",
                     "waving_when_flying": "飞的时候播作者的 waving 关键帧动画(true/false)",
@@ -160,6 +175,7 @@ public final class TNLightWingsPlacement {
                   "back_y": 1.18,
                   "back_z": -0.25,
                   "yaw_offset": 0.0,
+                  "mirror_x": true,
                   "scale": 1.0,
                   "alpha": 0.78,
                   "waving_when_flying": true,
@@ -190,6 +206,7 @@ public final class TNLightWingsPlacement {
         flapAmpIdle = read(root, "flap_amp_idle", flapAmpIdle, 0.0F, 90.0F);
         wavingWhenFlying = readBool(root, "waving_when_flying", wavingWhenFlying);
         wavingWhenIdle = readBool(root, "waving_when_idle", wavingWhenIdle);
+        mirrorX = readBool(root, "mirror_x", mirrorX);
         animationSpeed = read(root, "animation_speed", animationSpeed, 0.05F, 6.0F);
         pitchFactor = read(root, "pitch_factor", pitchFactor, 0.0F, 3.0F);
         LOGGER.info("TN-C/light: 光翼放置参数 {}", describe());

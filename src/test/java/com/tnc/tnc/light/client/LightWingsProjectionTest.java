@@ -303,19 +303,23 @@ class LightWingsProjectionTest {
         System.out.println("参考方块数: " + guides + "（作者的 后背 / 胸前 ✓）");
         assertTrue(guides >= 2, "没找到作者的参考方块（uv 为负的那些 ✓）");
 
-        // 玩家坐标系 = 渲染器那套：先按 yaw_offset 转，再 translate(0, backY, backZ) ✓
+        // 玩家坐标系 = 渲染器那套：yaw_offset → 镜像 → translate(0, backY, backZ) ✓（顺序也要一致 ✓）
         Matrix4f playerSpace = new Matrix4f()
-                .rotateY((float) Math.toRadians(TNLightWingsPlacement.yawOffset))
-                .translate(0.0F, TNLightWingsPlacement.backY, TNLightWingsPlacement.backZ);
+                .rotateY((float) Math.toRadians(TNLightWingsPlacement.yawOffset));
+        if (TNLightWingsPlacement.mirrorX) {
+            playerSpace.scale(-1.0F, 1.0F, 1.0F);
+        }
+        playerSpace.translate(0.0F, TNLightWingsPlacement.backY, TNLightWingsPlacement.backZ);
 
         float[] body = bounds(transform(TNLightWingsModel.guideCorners(), playerSpace));
         float[] wings = bounds(transform(TNLightWingsModel.corners(new Matrix4f(), 0.0F), playerSpace));
         String report = String.format(java.util.Locale.ROOT,
-                "%n放置自检（back_y=%.3f back_z=%.3f yaw=%.1f）%n"
+                "%n放置自检（back_y=%.3f back_z=%.3f yaw=%.1f mirror_x=%s）%n"
                         + "  参考块(身体) 世界坐标: x %.3f..%.3f  y %.3f..%.3f  z %.3f..%.3f%n"
                         + "  原版躯干盒子        : x -0.250..0.250  y 0.750..1.500  z -0.125..0.125%n"
                         + "  翅膀                : x %.3f..%.3f  y %.3f..%.3f  z %.3f..%.3f%n",
                 TNLightWingsPlacement.backY, TNLightWingsPlacement.backZ, TNLightWingsPlacement.yawOffset,
+                TNLightWingsPlacement.mirrorX,
                 body[0], body[1], body[2], body[3], body[4], body[5],
                 wings[0], wings[1], wings[2], wings[3], wings[4], wings[5]);
         System.out.print(report);

@@ -119,6 +119,11 @@ public final class TNLightWingsRenderer {
 
         pose.pushPose();
         pose.mulPose(Axis.YP.rotationDegrees(-player.yBodyRot + TNLightWingsPlacement.yawOffset));
+        if (TNLightWingsPlacement.mirrorX) {
+            // ★ 左右镜像（作者 2026-10-01："翅膀的左右反了" ✗）—— 只换左右，不动前后 ✓。
+            //   渲染是正反两面都提交的 ✓，所以负缩放不会因为背面剔除把翅膀弄没 ✓。
+            pose.scale(-1.0F, 1.0F, 1.0F);
+        }
         pose.translate(0.0F, TNLightWingsPlacement.backY, TNLightWingsPlacement.backZ);
         if (TNLightWingsPlacement.scale != 1.0F) {
             float s = TNLightWingsPlacement.scale;
