@@ -96,6 +96,8 @@ public final class SkyLandscapeUpgrade {
         // Newly added soil can spread grass before the next column is finished.
         if(c.before.isAir()&&c.after.is(net.minecraft.world.level.block.Blocks.DIRT)
                 &&actual.is(net.minecraft.world.level.block.Blocks.GRASS_BLOCK))return true;
+        if(c.before.is(net.minecraft.world.level.block.Blocks.GRASS_BLOCK)&&actual.is(net.minecraft.world.level.block.Blocks.DIRT)
+                &&(c.after.is(net.minecraft.world.level.block.Blocks.STONE)||c.after.is(net.minecraft.world.level.block.Blocks.DIRT)))return true;
         // Template edge water can spread into formerly empty air after initial placement.
         // Never accept source water or a fluid replacing an existing solid/player building.
         return c.before.isAir()&&actual.is(net.minecraft.world.level.block.Blocks.WATER)
@@ -125,6 +127,7 @@ public final class SkyLandscapeUpgrade {
     static boolean occupied(ServerLevel l,BlockPos origin,Tile tile) {
         var bounds=new AABB(origin.offset(tile.min),origin.offset(tile.max).offset(1,1,1)).inflate(1);
         return !l.getEntitiesOfClass(Entity.class,bounds,e->!(e instanceof Player p&&p.isSpectator())
+                &&!(e instanceof net.minecraft.world.entity.Display)
                 &&!(e instanceof net.minecraft.world.entity.item.ItemEntity)
                 &&!(e instanceof net.minecraft.world.entity.ExperienceOrb)
                 &&!(e instanceof net.minecraft.world.entity.projectile.Projectile)
@@ -141,6 +144,10 @@ public final class SkyLandscapeUpgrade {
                 release(l);String message="天空岛地形与东侧酒馆已更新，酒馆入口："+s.origin.offset(plan.tavern).toShortString();
                 LogUtils.getLogger().info("[TN-C Landscape] {}",message);
                 l.players().forEach(p->p.sendSystemMessage(Component.literal(message)));
+                try{var manifest=SkyIslandManifest.load(l.getServer());var island=SkyIslandSavedData.get(l);
+                    var portal=new BlockPos(island.groundPortalX+7,island.groundPortalY+2,island.groundPortalZ+7);
+                    l.players().forEach(p->SkyIslandPlayerNotifications.onGenerationComplete(p,manifest.version(),portal));
+                }catch(IOException e){LogUtils.getLogger().warn("Completed landscape notification deferred",e);}
             }
             s.setDirty();return;
         }

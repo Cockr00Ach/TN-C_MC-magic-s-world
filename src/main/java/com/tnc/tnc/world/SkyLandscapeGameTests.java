@@ -12,6 +12,13 @@ import java.util.List;
 @GameTestHolder("tnc")
 @PrefixGameTestTemplate(false)
 public final class SkyLandscapeGameTests {
+    @GameTest(template="building_test_empty",timeoutTicks=30)
+    public static void townDoorDisplayMustNotDeadlockTavernConstruction(GameTestHelper h){
+        var l=h.getLevel();var p=h.absolutePos(new BlockPos(3,3,3));var display=net.minecraft.world.entity.EntityType.TEXT_DISPLAY.create(l);
+        display.moveTo(p.getX()+.5,p.getY(),p.getZ()+.5);l.addFreshEntity(display);
+        var tile=new SkyLandscapeUpgrade.Tile(List.of(new SkyLandscapeUpgrade.Change(BlockPos.ZERO,Blocks.AIR.defaultBlockState(),Blocks.STONE.defaultBlockState())),BlockPos.ZERO,new BlockPos(3,3,3));
+        h.assertTrue(!SkyLandscapeUpgrade.occupied(l,p,tile),"Nonphysical town door label cannot block the update that creates its tavern");display.discard();h.succeed();
+    }
     @GameTest(template="building_test_empty",timeoutTicks=400)
     public static void realLandscapeResourceLoadsWithStableDoorAndNoPortalOverlap(GameTestHelper h) throws Exception {
         var p=SkyLandscapeUpgrade.load(h.getLevel());
@@ -72,6 +79,8 @@ public final class SkyLandscapeGameTests {
         var air=new SkyLandscapeUpgrade.Change(BlockPos.ZERO,Blocks.AIR.defaultBlockState(),Blocks.DIRT.defaultBlockState());
         if(SkyLandscapeUpgrade.compatible(Blocks.WATER.defaultBlockState(),air)||SkyLandscapeUpgrade.compatible(Blocks.GOLD_BLOCK.defaultBlockState(),air))throw new IllegalStateException("Source/player edit accepted");
         if(!SkyLandscapeUpgrade.compatible(Blocks.WATER.defaultBlockState().setValue(net.minecraft.world.level.block.LiquidBlock.LEVEL,3),air))throw new IllegalStateException("Flow update rejected");
+        var coveredGrass=new SkyLandscapeUpgrade.Change(BlockPos.ZERO,Blocks.GRASS_BLOCK.defaultBlockState(),Blocks.STONE.defaultBlockState());
+        if(!SkyLandscapeUpgrade.compatible(Blocks.DIRT.defaultBlockState(),coveredGrass))throw new IllegalStateException("Natural covered grass rejected during fresh terrain construction");
         h.succeed();
     }
     @GameTest(template="building_test_empty",timeoutTicks=400)
@@ -106,5 +115,19 @@ public final class SkyLandscapeGameTests {
         s.phase=2;recovered=SkyLandscapeUpgrade.State.load(s.save(new CompoundTag()));
         if(recovered.phase!=2)throw new IllegalStateException("Completed overlay restarted");
         h.succeed();
+    }
+    @GameTest(template="building_test_empty",timeoutTicks=40)
+    public static void everyIslandStoryActorWaitsForCompleteTerrainAndWorkersAvoidAllRealTiles(GameTestHelper h)throws Exception{
+        var level=h.getLevel();var old=StateBackup.capture(level);var sky=new SkyIslandSavedData();sky.phase=SkyIslandSavedData.Phase.COMPLETE;sky.layoutReady=true;sky.originX=h.absolutePos(BlockPos.ZERO).getX();sky.originY=h.absolutePos(BlockPos.ZERO).getY();sky.originZ=h.absolutePos(BlockPos.ZERO).getZ();level.getDataStorage().set("tnc_sky_island_v5",sky);var landscape=new SkyLandscapeUpgrade.State();landscape.phase=1;level.getDataStorage().set("tnc_sky_landscape_v1",landscape);
+        try{var positions=new com.tnc.tnc.npc.NpcPlacementSavedData();h.setBlock(new BlockPos(4,1,4),Blocks.STONE);for(String id:List.of("self","cava","huai","zhuangquerang","zuowang")){var p=new com.tnc.tnc.npc.NpcPlacementSavedData.Placement(id,"ORIGIN",4,2,4);h.assertTrue(!positions.ensureOne(level,p),"Every anchored actor waits for terrain, not only Self: "+id);}
+            var data=com.tnc.tnc.adventure.AdventureSavedData.get(level.getServer());var before=data.housing.copy();try{data.housing.remove("Residents");var expected=data.housing.copy();com.tnc.tnc.home.McaResidents.tick(level);h.assertTrue(expected.equals(data.housing),"Native neighbors do not spawn or write identities during new-island construction");}finally{data.housing=before;}
+            var plan=SkyLandscapeUpgrade.load(level);for(var post:com.tnc.tnc.adventure.TownServices.POSTS){if(post.role().equals("guild"))continue;for(var tile:plan.tiles()){var box=new net.minecraft.world.phys.AABB(tile.min(),tile.max().offset(1,1,1)).inflate(1);var room=post.room();var workerArea=new net.minecraft.world.phys.AABB(room.minX()-.3,room.y(),room.minZ()-.3,room.maxX()+1.3,room.y()+2,room.maxZ()+1.3);h.assertTrue(!box.intersects(workerArea),"Independent "+post.role()+" room cannot obstruct any real landscape tile");}}
+            landscape.phase=2;for(String id:List.of("self","cava","huai","zhuangquerang","zuowang")){var p=new com.tnc.tnc.npc.NpcPlacementSavedData.Placement(id,"ORIGIN",4,2,4);h.assertTrue(positions.ensureOne(level,p),"Same fresh fixture really spawns known story actor after terrain completion: "+id);var type=net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getValue(net.minecraft.resources.ResourceLocation.parse("tnc:"+id));var npc=com.tnc.tnc.npc.NpcPlacementSavedData.findNear(level,type,h.absolutePos(new BlockPos(4,2,4)),4);h.assertTrue(npc!=null,"Spawned actor is present, not a pending id");npc.discard();}
+            h.succeed();
+        }finally{old.restore(level);}
+    }
+    private record StateBackup(SkyIslandSavedData island,SkyLandscapeUpgrade.State landscape){
+        static StateBackup capture(net.minecraft.server.level.ServerLevel l){return new StateBackup(SkyIslandSavedData.get(l),SkyLandscapeUpgrade.State.get(l));}
+        void restore(net.minecraft.server.level.ServerLevel l){l.getDataStorage().set("tnc_sky_island_v5",island);l.getDataStorage().set("tnc_sky_landscape_v1",landscape);}
     }
 }

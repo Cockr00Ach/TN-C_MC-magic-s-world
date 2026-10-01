@@ -20,7 +20,7 @@ for p in plots:
  if p['kind']=='HOME':continue
  rows.append(dict(p,x=(p['min'][0]+p['max'][0])/2,z=(p['min'][2]+p['max'][2])/2,kind='可购买土地'))
 mapdata=base64.b64encode((root/'docs/art/sky-island-user-map-20260929.png').read_bytes()).decode()
-origin=[-36,90,524] # Recorded origin of the author's current world; editable in the atlas.
+origin=[0,90,0] # Placeholder only; use --world to read a real world origin.
 if args.world:
  world=nbtlib.load(args.world/'data/tnc_sky_island_v5.dat')['data']
  origin=[int(world.get('OriginX',0)),int(world.get('OriginY',90)),int(world.get('OriginZ',0))]
@@ -39,6 +39,7 @@ rows.forEach(r=>{if(r.kind==='可购买土地'){let [x,z]=point(r.min[0],r.min[2
 function select(r){selected=r;rows.forEach(a=>a.button.classList.toggle('selected',a===r));document.getElementById('type').textContent=r.kind;document.getElementById('name').textContent=r.number+' · '+r.name;document.getElementById('detail').textContent=r.detail;let ori=['ox','oy','oz'].map(id=>Number(document.getElementById(id).value)||0);const coord=p=>p.map((v,i)=>v+ori[i]).join(' / ');let facts='<dt>入口坐标 X / Y / Z</dt><dd>'+coord(r.entry)+'</dd>';if(r.price){facts+='<dt>全款价格</dt><dd>'+r.price+' 铜</dd>';if(r.kind==='可购买住宅')facts+='<dt>分期购房</dt><dd>首付 '+(r.price*.3)+' 铜</dd><dt>随后 10 期</dt><dd>每期 '+(Math.floor(Math.round(r.price*.7*1.1)/10))+(Math.round(r.price*.7*1.1)%10?'–'+Math.ceil(Math.round(r.price*.7*1.1)/10):'')+' 铜 / 期</dd>';facts+='<dt>产权边界（含高度）</dt><dd style="font:13px Microsoft YaHei">'+coord(r.min)+'<br>至 '+coord(r.max)+'</dd>';}document.getElementById('facts').innerHTML=facts;document.getElementById('brief').textContent=r.kind==='可购买住宅'?'交付标准：空屋。墙、屋顶、楼梯和门保留；室内家居交付时清理。玩家买入后边界内可挖可放。箱内物品或现场有改动时银行会停止出售，保留现场。':r.kind==='可购买土地'?'原状土地交付：坡度、树木由主人整理。地界标签用于辨认四角。无需租金；同类土地每人先各一块。陌生人不能收割或操作私有地的牲畜。':r.kind==='居民住宅'?'保留两张普通 Minecraft 床及床旁两格高活动空间。六位居民使用凡家物语原生交往、婚姻、生育与家谱；不要把常驻居民床换成仅有装饰外观的家具床。':'内饰优先保留店员与楼梯通路；公共柜台不出售。茶灯会馆玩法后续制作，其他未指定公共建筑先保留。';}
 rows.filter(r=>r.kind==='可购买住宅').forEach(r=>{let b=document.createElement('button');b.textContent=r.number+'号';b.onclick=()=>select(r);document.getElementById('homes').appendChild(b);});document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-filter]').forEach(a=>a.classList.toggle('active',a===b));document.querySelectorAll('.pin,.plot').forEach(a=>a.hidden=b.dataset.filter!=='全部'&&a.dataset.kind!==b.dataset.filter);});select(selected);
 </script></html>'''
+if not args.world:page=page.replace('已填入「新的世界」记录，可改成其他测试世界','示例值；请填写游戏实际原点或用--world重新生成')
 page=page.replace('MAPDATA',mapdata).replace('ROWS',json.dumps(rows,ensure_ascii=False)).replace('ORIGIN',json.dumps(origin))
 (output/'RouchNao-小镇编号地图.html').write_text(page,encoding='utf8')
 (root/'work/rouchnao-map-metadata.json').write_text(json.dumps(dict(origin=origin,rows=rows),ensure_ascii=False,indent=2),encoding='utf8')

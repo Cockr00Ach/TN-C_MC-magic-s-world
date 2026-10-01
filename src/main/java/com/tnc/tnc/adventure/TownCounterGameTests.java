@@ -11,6 +11,13 @@ import net.minecraftforge.gametest.*;
 @GameTestHolder("tnc") @PrefixGameTestTemplate(false)
 public final class TownCounterGameTests {
     @GameTest(template="building_test_empty",timeoutTicks=40)
+    public static void bankOpensIndependentlyOfUnfinishedLandscape(GameTestHelper h){
+        for(var post:TownServices.POSTS)h.assertTrue(TownServices.postReady(post,false)==!post.role().equals("guild"),"Only tavern workers depend on tavern construction");
+        var origin=h.absolutePos(BlockPos.ZERO);var post=new TownServices.Post("broker","Test bank",new BlockPos(4,2,4),VillagerProfession.CARTOGRAPHER,new TownServices.Room(4,2,4,4,4),0);
+        h.setBlock(new BlockPos(4,1,4),Blocks.OAK_PLANKS);var record=new CompoundTag();h.assertTrue(TownServices.ensurePost(h.getLevel(),origin,post,record),"Independent bank worker actually spawns");
+        var npc=h.getLevel().getEntity(record.getUUID("UUID"));h.assertTrue(npc instanceof TownServiceNpc&&((TownServiceNpc)npc).role().equals("broker"),"MCA does not convert the bank worker out of service type");h.succeed();
+    }
+    @GameTest(template="building_test_empty",timeoutTicks=40)
     public static void clickedCounterWinsEvenWhenSeveralWorkersAreNearby(GameTestHelper h){
         var player=AdventureGameTests.player(h);player.teleportTo(h.absolutePos(new BlockPos(4,2,4)).getX(),h.absolutePos(new BlockPos(4,2,4)).getY(),h.absolutePos(new BlockPos(4,2,4)).getZ());
         for(var role:new String[]{"armorer","smith","broker","guild"}){

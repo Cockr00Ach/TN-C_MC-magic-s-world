@@ -85,7 +85,7 @@ public final class SkyIslandManager {
             SkyIslandManifest manifest = manifest(server);
             SkyIslandSavedData data = SkyIslandSavedData.get(overworld);
             boolean complete = isComplete(data, manifest);
-            SkyIslandPlayerNotifications.onLogin(player, manifest.version(), complete,
+            SkyIslandPlayerNotifications.onLogin(player, manifest.version(), complete&&SkyLandscapeUpgrade.complete(server),
                     complete ? groundLanding(data) : BlockPos.ZERO);
 
             if (complete) {
@@ -135,7 +135,7 @@ public final class SkyIslandManager {
 
         try {
             boolean complete = isComplete(data, manifest);
-            SkyIslandPlayerNotifications.tick(server, manifest.version(), complete,
+            SkyIslandPlayerNotifications.tick(server, manifest.version(), complete&&SkyLandscapeUpgrade.complete(server),
                     complete ? groundLanding(data) : BlockPos.ZERO);
             switch (data.phase) {
                 case SURVEY -> surveyStep(level, data, manifest);
@@ -435,9 +435,7 @@ public final class SkyIslandManager {
                 data.arrivalX, data.arrivalY, data.arrivalZ);
 
         BlockPos groundPortal = groundLanding(data);
-        for (ServerPlayer player : level.getServer().getPlayerList().getPlayers()) {
-            SkyIslandPlayerNotifications.onGenerationComplete(player, manifest.version(), groundPortal);
-        }
+        // Landscape completion sends the invitation after the tavern and transition belt exist.
         level.getServer().getPlayerList().saveAll();
     }
 
@@ -570,7 +568,7 @@ public final class SkyIslandManager {
     }
 
     private static void portalTick(ServerLevel level, SkyIslandSavedData data, SkyIslandManifest manifest) {
-        if (!isComplete(data, manifest)) {
+        if (!isComplete(data, manifest)||!SkyLandscapeUpgrade.complete(level.getServer())) {
             PORTAL_CHARGES.clear();
             for (BlockPos active : ACTIVE_RITUALS) sendRitual(level, active, -1);
             ACTIVE_RITUALS.clear();

@@ -33,6 +33,7 @@ public final class AdventureScreen extends Screen {
         else if(mc.screen instanceof PropertyScreen property)property.update(tag);
         else if(mc.screen instanceof ShopScreen shop)shop.update(tag);
         else if(mc.screen instanceof BankScreen bank)bank.update(tag);
+        else if(mc.screen instanceof TownStoryScreen stories)stories.update(tag);
         else if(mc.screen instanceof AdventureScreen screen) {
             screen.data=tag;if(!tag.getString("Message").isEmpty())screen.notice=tag.getString("Message");screen.rebuildWidgets();
         }
@@ -48,8 +49,10 @@ public final class AdventureScreen extends Screen {
         if(panel==ServicePanel.PROFILE) {
             button("委托旧单记录",left+20,top+panelHeight-66,110,()->{var copy=data.copy();copy.putString("ServiceRole",ServicePanel.ARCHIVE.role());Minecraft.getInstance().setScreen(new AdventureScreen(copy));},true);
         } else if(panel==ServicePanel.GUILD) {
-            button(p.registered()?"已登记":"登记冒险者",left+20,top+panelHeight-66,100,()->send(AdventurePackets.Action.REGISTER,""),local&&!p.registered());
-            button("申请精锐晋升",left+126,top+panelHeight-66,110,()->send(AdventurePackets.Action.PROMOTE,""),local&&p.registered());
+            int actionWidth=(panelWidth-52)/3;
+            button(p.registered()?"已登记":"冒险者登记",left+20,top+panelHeight-66,actionWidth,()->send(AdventurePackets.Action.REGISTER,""),local&&!p.registered());
+            button("精锐晋升",left+26+actionWidth,top+panelHeight-66,actionWidth,()->send(AdventurePackets.Action.PROMOTE,""),local&&p.registered());
+            button("归航札记",left+32+actionWidth*2,top+panelHeight-66,actionWidth,()->Minecraft.getInstance().setScreen(new TownStoryScreen(data)),local&&p.registered());
         } else if(tab==1) {
             var active=active();
             local=data.getBoolean("AtBoard");

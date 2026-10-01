@@ -69,7 +69,15 @@ public final class TownServices {
         return positions.stream().filter(p->canStand(l,p)).findFirst().orElse(null);
     }
     static boolean ensurePost(ServerLevel l,BlockPos o,Post post,CompoundTag record){
-        if(record.hasUUID("UUID")&&record.getInt("LayoutVersion")>=POST_LAYOUT_VERSION)return false;
+        if(record.hasUUID("UUID")&&record.getInt("LayoutVersion")>=POST_LAYOUT_VERSION){
+            var existing=l.getEntity(record.getUUID("UUID"));
+            if(existing instanceof TownServiceNpc worker&&worker.role().equals(post.role))return false;
+            if(!record.contains("Pos",4))return false;
+            var old=BlockPos.of(record.getLong("Pos"));var chunk=new net.minecraft.world.level.ChunkPos(old);
+            if(!l.hasChunkAt(old)||!l.areEntitiesLoaded(chunk.toLong()))return false;
+            if(existing!=null)return false;
+            record.remove("UUID");
+        }
         var target=standing(l,o,post);if(target==null)return false; // No fallback to the street or another floor.
         TownServiceNpc npc;
         if(record.hasUUID("UUID")){
@@ -78,11 +86,15 @@ public final class TownServices {
                 var old=BlockPos.of(record.getLong("Pos"));l.getChunk(old.getX()>>4,old.getZ()>>4);
                 entity=l.getEntity(record.getUUID("UUID"));
             }
+            if(entity==null&&record.contains("Pos",4)){
+                var old=BlockPos.of(record.getLong("Pos"));if(l.hasChunkAt(old)&&l.areEntitiesLoaded(new net.minecraft.world.level.ChunkPos(old).toLong())){record.remove("UUID");return ensurePost(l,o,post,record);}
+            }
             if(!(entity instanceof TownServiceNpc worker)||!worker.role().equals(post.role))return false;
             npc=worker;
             if(post.room.contains(npc.blockPosition().subtract(o))&&canStand(l,npc.blockPosition()))target=npc.blockPosition();
             else {npc.teleportTo(target.getX()+.5,target.getY(),target.getZ()+.5);npc.setYRot(post.yaw);npc.setYHeadRot(post.yaw);npc.setYBodyRot(post.yaw);}
         }else{
+            if(!l.isPositionEntityTicking(target)||!l.areEntitiesLoaded(new net.minecraft.world.level.ChunkPos(target).toLong()))return false;
             npc=TNNpcs.SERVICE_NPC.get().create(l);if(npc==null)return false;
             npc.role(post.role);npc.setVillagerData(npc.getVillagerData().setProfession(post.profession));npc.setCustomName(Component.literal(post.name));npc.setCustomNameVisible(true);
             npc.moveTo(target.getX()+.5,target.getY(),target.getZ()+.5,post.yaw,0);npc.setYHeadRot(post.yaw);npc.setYBodyRot(post.yaw);
@@ -91,9 +103,10 @@ public final class TownServices {
         record.putLong("Pos",target.asLong());record.putInt("LayoutVersion",POST_LAYOUT_VERSION);return true;
     }
     @SubscribeEvent public static void tick(TickEvent.ServerTickEvent e){
-        if(e.phase!=TickEvent.Phase.END)return;var s=net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();if(s==null||s.getTickCount()%100!=0)return;var l=s.overworld();var o=origin(l);if(o==null||!SkyIslandAnchors.isComplete(l)||!com.tnc.tnc.world.SkyLandscapeUpgrade.complete(s))return;
+        if(e.phase!=TickEvent.Phase.END)return;var s=net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();if(s==null||s.getTickCount()%100!=0)return;var l=s.overworld();var o=origin(l);if(o==null||!SkyIslandAnchors.isComplete(l))return;
         var store=AdventureSavedData.get(s);if(!store.housing.contains("TownServices",10))store.housing.put("TownServices",new CompoundTag());var records=store.housing.getCompound("TownServices");
-        for(var post:POSTS){var record=records.getCompound(post.role);if(ensurePost(l,o,post,record)){records.put(post.role,record);store.setDirty();}}
+        for(var post:POSTS){if(!postReady(post,com.tnc.tnc.world.SkyLandscapeUpgrade.complete(s)))continue;var record=records.getCompound(post.role);if(ensurePost(l,o,post,record)){records.put(post.role,record);store.setDirty();}}
+        if(!com.tnc.tnc.world.SkyLandscapeUpgrade.complete(s))return;
         var b=board(l);if(b==null||!l.hasChunkAt(b)||records.getBoolean("BoardInstalled"))return;
         var block=ForgeRegistries.BLOCKS.getValue(ResourceLocation.parse("bountiful:bountyboard"));
         if(block==null||block==net.minecraft.world.level.block.Blocks.AIR)return;
@@ -106,6 +119,7 @@ public final class TownServices {
         var be=l.getBlockEntity(b);if(be==null)return;
         if(seedDecrees(be)){records.putBoolean("BoardInstalled",true);store.setDirty();}
     }
+    static boolean postReady(Post post,boolean landscapeReady){return !post.role.equals("guild")||landscapeReady;}
     static boolean seedDecrees(net.minecraft.world.level.block.entity.BlockEntity be){
         try{
             var dataClass=Class.forName("io.ejekta.bountiful.bounty.DecreeData");var itemClass=Class.forName("io.ejekta.bountiful.content.DecreeItem");var companion=itemClass.getField("Companion").get(null);

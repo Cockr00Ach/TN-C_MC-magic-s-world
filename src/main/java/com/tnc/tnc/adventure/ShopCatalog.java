@@ -20,7 +20,10 @@ public final class ShopCatalog {
         new Goods("flowerpot","窗边花盆","minecraft:flower_pot",1,10,"可种植花草。"),
         new Goods("oak_cabinet","橡木壁柜","farmersdelight:oak_cabinet",1,80,"农夫乐事原生壁柜。"),
         new Goods("spruce_cabinet","云杉壁柜","farmersdelight:spruce_cabinet",1,80,"农夫乐事原生壁柜。"),
-        new Goods("candle","晚餐蜡烛 ×4","minecraft:candle",4,12,"摆好后用打火石点亮。"));
+        new Goods("candle","晚餐蜡烛 ×4","minecraft:candle",4,12,"摆好后用打火石点亮。"),
+        new Goods("feast_table","团聚长桌","model:feast_table",1,150,"酒馆晚餐归档后开放；双格长桌，红色桌旗。"),
+        new Goods("travel_lamp","远方航灯","model:travel_lamp",1,100,"远行见闻归档后开放；铜框蓝光，高架提灯。"),
+        new Goods("memory_shelf","归处纪念柜","model:memory_shelf",1,130,"第一盏灯归档后开放；不对称陈列，六格储物。"));
     public static final List<Goods> PRODUCE=List.of(
         new Goods("wheat","小麦 ×16","minecraft:wheat",16,16,"农场主的基础收入。"),
         new Goods("carrot","胡萝卜 ×16","minecraft:carrot",16,12,"新鲜蔬菜。"),

@@ -24,22 +24,29 @@ public final class McaResidents {
         factoryClass.getMethod("withGender",genderClass).invoke(factory,Enum.valueOf((Class)genderClass,gender));
         factoryClass.getMethod("withName",String.class).invoke(factory,d.name());factoryClass.getMethod("withAge",int.class).invoke(factory,0);
         factoryClass.getMethod("withProfession",net.minecraft.world.entity.npc.VillagerProfession.class).invoke(factory,d.profession());factoryClass.getMethod("withPosition",BlockPos.class).invoke(factory,stand);
-        var npc=(Villager)factoryClass.getMethod("build").invoke(factory);npc.setUUID(uuid);npc.setPersistenceRequired();npc.setCustomName(Component.literal(d.name()));npc.setCustomNameVisible(true);return npc;
+        var npc=(Villager)factoryClass.getMethod("build").invoke(factory);npc.setUUID(uuid);
+        npc.getClass().getMethod("initialize",MobSpawnType.class).invoke(npc,MobSpawnType.STRUCTURE);
+        npc.getClass().getMethod("setName",String.class).invoke(npc,d.name());npc.setAge(0);npc.setPersistenceRequired();npc.setCustomName(Component.literal(d.name()));npc.setCustomNameVisible(true);return npc;
     }
     @SuppressWarnings("unchecked") public static void setHome(Villager npc,BlockPos bed)throws ReflectiveOperationException{
         var brain=(Brain<?>)npc.getClass().getMethod("getMCABrain").invoke(npc);brain.setMemory(MemoryModuleType.HOME,GlobalPos.of(npc.level().dimension(),bed));
     }
     public static void tick(ServerLevel level){
         var origin=HousingService.sourceOrigin(level);if(origin==null||!com.tnc.tnc.npc.SkyIslandAnchors.isComplete(level))return;
+        if(!com.tnc.tnc.world.SkyLandscapeUpgrade.complete(level.getServer()))return;
         var all=ResidentService.records(level.getServer());var store=AdventureSavedData.get(level.getServer());
         for(var d:ResidentService.ALL){var record=all.getCompound(d.id());var bed=origin.offset(d.bed());var oldPos=record.contains("Pos")?BlockPos.of(record.getLong("Pos")):bed;
             if(!level.hasChunkAt(oldPos)||!level.hasChunkAt(bed))continue;
             UUID id=record.hasUUID("UUID")?record.getUUID("UUID"):UUID.nameUUIDFromBytes(("tnc:"+origin.asLong()+":"+d.id()).getBytes(java.nio.charset.StandardCharsets.UTF_8));var old=level.getEntity(id);
-            if(old!=null&&nativeResident(old)){if(!record.getBoolean("NativeMca")){record.putBoolean("NativeMca",true);record.remove("Partner");all.put(d.id(),record);store.setDirty();}continue;}
+            if(old!=null&&nativeResident(old)){
+                try{for(String part:List.of("Hair","Clothes"))if(((String)old.getClass().getMethod("get"+part).invoke(old)).isBlank())old.getClass().getMethod("randomize"+part).invoke(old);}catch(ReflectiveOperationException ex){com.mojang.logging.LogUtils.getLogger().warn("MCA appearance repair deferred",ex);}
+                if(!record.getBoolean("NativeMca")){record.putBoolean("NativeMca",true);record.remove("Partner");all.put(d.id(),record);store.setDirty();}continue;
+            }
             if(record.hasUUID("UUID")&&old==null)continue; // An unloaded villager must not be duplicated.
             if(old!=null&&!(old instanceof ResidentEntity))continue;
             if(!(level.getBlockState(bed).getBlock() instanceof net.minecraft.world.level.block.BedBlock))continue;
             var stand=ResidentService.safeBeside(level,bed);if(stand==null)continue;
+            if(!level.isPositionEntityTicking(stand)||!level.areEntitiesLoaded(new net.minecraft.world.level.ChunkPos(stand).toLong()))continue;
             try{
                 // Distinct deterministic migration ID lets the old resident survive a canceled add.
                 UUID nativeId=old==null?id:UUID.nameUUIDFromBytes((id+":mca-v1").getBytes(java.nio.charset.StandardCharsets.UTF_8));

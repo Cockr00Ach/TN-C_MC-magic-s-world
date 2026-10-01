@@ -276,7 +276,8 @@ public class NpcPlacementSavedData extends net.minecraft.world.level.saveddata.S
     }
 
     public boolean ensureOne(ServerLevel level, Placement placement) {
-        if(placement.npcId().equals("self")&&placement.anchor().equals("ORIGIN")&&!com.tnc.tnc.world.SkyLandscapeUpgrade.complete(level.getServer()))return false;
+        // Island story actors join only after the terrain pass, in every new world.
+        if(!ABSOLUTE.equals(placement.anchor())&&!com.tnc.tnc.world.SkyLandscapeUpgrade.complete(level.getServer()))return false;
         // ★ 岛屿没生成完就别放 —— 生成中途 CENTER 这类坐标已经有值了，但路面还没铺完，
         //   这时放上去 NPC 会掉进虚空（而且生成器随后还会改地形，等于白放）。
         //   跳过这次；每 5 秒一次的自检会在岛 COMPLETE 之后自动把它放出来。
