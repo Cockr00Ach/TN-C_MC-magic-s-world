@@ -42,6 +42,12 @@ public final class TNLightWingsRenderer {
     /** 只打一次"我在这儿画了"的日志 ✓（下次"没翅膀"能一眼分清是渲染没跑还是模型没读进来 ✓）。 */
     private static boolean announced;
 
+    /**
+     * 每个玩家"这次起飞是从哪一 tick 开始的" ✓ —— 用来让 waving 动画**从起飞那一刻从头播** ✓
+     * （不然会接着上次的相位继续 ✗，作者要的是"一起飞就播那个 waving"✓）。
+     */
+    private static final java.util.Map<java.util.UUID, Long> FLIGHT_START = new java.util.HashMap<>();
+
     /** 备用（程序化）翅膀的形状：半展宽 / 高 ✓（作者 geo 读不进来时才会用到 ✓）。 */
     private static final float SPAN = 0.95F;
     private static final float RISE = 1.15F;
@@ -58,18 +64,40 @@ public final class TNLightWingsRenderer {
             return;
         }
         if (!TNEffects.LIGHT_WINGS.isPresent() || !player.hasEffect(TNEffects.LIGHT_WINGS.get())) {
+            FLIGHT_START.remove(player.getUUID());
             return;
         }
         float partial = event.getPartialTick();
         boolean flying = player.getAbilities().flying;
         double vy = player.getDeltaMovement().y;
 
-        // 扇动：飞行时又快又大，平时慢慢摆 ✓（速度/幅度都可调 ✓）
+        // ★★ 2026-10-01 作者："我希望在站着的时候翅膀不动的，你只有起飞的时候就播放那个 waving" ✓
+        //   ⇒ ① 站着（没飞）默认**完全静止**（备用扇动的幅度默认 0 ✓，可在 config 里调回来 ✓）；
+        //     ② 飞起来就播作者的 waving **关键帧**动画 ✓（没有动画文件时退回程序化扇动 ✓）。
+        TNLightWingsModel.ensureAnimationLoaded();
+        long now = player.level().getGameTime();
+        if (flying) {
+            FLIGHT_START.putIfAbsent(player.getUUID(), now);
+        } else {
+            FLIGHT_START.remove(player.getUUID());
+        }
+        Long start = FLIGHT_START.get(player.getUUID());
+        float flightSeconds = start == null ? 0.0F : (now - start + partial) / 20.0F;
+        boolean animated = flying && TNLightWingsPlacement.wavingWhenFlying && TNLightWingsModel.hasAnimation();
+        boolean idleWaving = !flying && TNLightWingsPlacement.wavingWhenIdle;
+        float animTime = flightSeconds * TNLightWingsPlacement.animationSpeed;
+
+        // 备用扇动：飞行时又快又大，平时慢慢摆 ✓（站着时幅度默认 0 ⇒ 静止 ✓）
         float speed = flying ? TNLightWingsPlacement.flapSpeedFlying : TNLightWingsPlacement.flapSpeedIdle;
         float amp = flying ? TNLightWingsPlacement.flapAmpFlying : TNLightWingsPlacement.flapAmpIdle;
-        float flap = (float) Math.sin((player.tickCount + partial) * speed) * amp;
-        // 竖直速度带来的仰角（上升时收一点、下落时张开 ✓）
-        float pitch = (float) Math.max(-18.0D, Math.min(18.0D, vy * 40.0D));
+        float flap = animated ? 0.0F : (float) Math.sin((player.tickCount + partial) * speed) * amp;
+        if (!flying && !idleWaving) {
+            flap = 0.0F;                     // ★ 站着不动：连备用扇动都不给 ✗
+        }
+        // 竖直速度带来的仰角：只在飞的时候用 ✓（站着时翅膀不该跟着掉落的 vy 动 ✗）
+        float pitch = flying
+                ? (float) Math.max(-18.0D, Math.min(18.0D, vy * 40.0D)) * TNLightWingsPlacement.pitchFactor
+                : 0.0F;
 
         PoseStack pose = event.getPoseStack();
         MultiBufferSource buffers = event.getMultiBufferSource();
@@ -81,9 +109,9 @@ public final class TNLightWingsRenderer {
         if (!announced) {
             announced = true;
             org.apache.logging.log4j.LogManager.getLogger("TN-C/light").info(
-                    "TN-C/light: 光翼渲染已启动（{}，{}，{}）",
+                    "TN-C/light: 光翼渲染已启动（{}，{}，动画 {}，{}）",
                     geo ? "作者 geo 模型" : "备用程序化翅膀", TNLightWingsModel.describe(),
-                    TNLightWingsPlacement.describe());
+                    TNLightWingsModel.describeAnimation(), TNLightWingsPlacement.describe());
         }
         TNLightWingsModel.setAlpha(TNLightWingsPlacement.alpha);
         VertexConsumer vc = buffers.getBuffer(RenderType.entityTranslucentEmissive(
@@ -97,7 +125,7 @@ public final class TNLightWingsRenderer {
             pose.scale(s, s, s);
         }
         if (geo) {
-            TNLightWingsModel.render(pose, vc, flap + pitch * 0.3F);
+            TNLightWingsModel.render(pose, vc, flap, animTime, animated);
         } else {
             Matrix4f m = pose.last().pose();
             drawWing(vc, m, true, flap, pitch);

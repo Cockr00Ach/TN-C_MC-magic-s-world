@@ -47,12 +47,25 @@ public final class TNLightWingsPlacement {
     public static float scale = 1.0F;
     /** 透明度（越小越透 ✓）。 */
     public static float alpha = 0.78F;
-    /** 飞行时的扇动速度与幅度（度）✓。 */
+    /** 飞行时的扇动速度与幅度（度）✓ —— **只在没有关键帧动画时当备用** ✓。 */
     public static float flapSpeedFlying = 0.85F;
     public static float flapAmpFlying = 42.0F;
-    /** 站着/走路时的轻微扇动 ✓。 */
+    /**
+     * 站着/走路时的轻微扇动 ✓ —— ★ 默认 **0 ⇒ 完全静止** ✓
+     * （作者 2026-10-01："我希望在站着的时候翅膀不动的"✓；想让站姿也轻轻摆就把幅度调大 ✓）。
+     */
     public static float flapSpeedIdle = 0.18F;
-    public static float flapAmpIdle = 9.0F;
+    public static float flapAmpIdle = 0.0F;
+    /**
+     * ★ 作者 2026-10-01："你只有起飞的时候就播放那个 waving" ✓
+     * ⇒ 飞起来播 {@code waving} 关键帧动画（默认开 ✓），站着不播（默认关 ✓）。
+     */
+    public static boolean wavingWhenFlying = true;
+    public static boolean wavingWhenIdle = false;
+    /** 动画播放速度倍率（1.0 = 原速 ✓）。 */
+    public static float animationSpeed = 1.0F;
+    /** 竖直速度带来的仰角系数（只在飞的时候生效 ✓；设 0 就完全不仰 ✓）。 */
+    public static float pitchFactor = 0.3F;
 
     private static final org.apache.logging.log4j.Logger LOGGER =
             org.apache.logging.log4j.LogManager.getLogger("TN-C/light");
@@ -99,8 +112,10 @@ public final class TNLightWingsPlacement {
     public static String describe() {
         return String.format(java.util.Locale.ROOT,
                 "back_y=%.3f back_z=%.3f yaw=%.1f scale=%.3f alpha=%.2f "
+                        + "waving_fly=%s waving_idle=%s anim_speed=%.2f pitch=%.2f "
                         + "flap_fly=%.2f/%.1f flap_idle=%.2f/%.1f",
                 backY, backZ, yawOffset, scale, alpha,
+                wavingWhenFlying, wavingWhenIdle, animationSpeed, pitchFactor,
                 flapSpeedFlying, flapAmpFlying, flapSpeedIdle, flapAmpIdle);
     }
 
@@ -113,25 +128,33 @@ public final class TNLightWingsPlacement {
         Files.createDirectories(file.getParent());
         String text = """
                 {
-                  "_说明": "光翼在玩家背上的位置/大小 —— 改完存盘, 1 秒内自动生效(不用重启游戏)。调好把日志里那行『光翼放置参数』发我, 我抄成默认值。",
+                  "_说明": "光翼在玩家背上的位置/大小/动作 —— 改完存盘, 1 秒内自动生效(不用重启游戏)。调好把日志里那行『光翼放置参数』发我, 我抄成默认值。",
                   "_字段说明": {
                     "back_y": "模型原点的高度(格), 1.18≈肩胛; 想整体上移就加大",
                     "back_z": "往背后推多少(格), 负数=推到胸前(贴反了先试这个)",
                     "yaw_offset": "朝向(度), 贴反了先试 0 或 180",
                     "scale": "整体大小, 0.5=一半, 2.0=两倍",
                     "alpha": "透明度, 越小越透",
-                    "flap_speed_flying/flap_amp_flying": "飞行时扇动速度/幅度(度)",
-                    "flap_speed_idle/flap_amp_idle": "站着走路时的轻微扇动"
+                    "waving_when_flying": "飞的时候播作者的 waving 关键帧动画(true/false)",
+                    "waving_when_idle": "站着的时候也播动画(默认 false = 站着完全不动)",
+                    "animation_speed": "动画速度倍率, 1.0=原速",
+                    "pitch_factor": "飞行时按竖直速度仰头的幅度(0=完全不仰)",
+                    "flap_speed_flying/flap_amp_flying": "★备用★ 没读到动画时才用的程序化扇动(飞行)",
+                    "flap_speed_idle/flap_amp_idle": "★备用★ 站着的扇动幅度, 默认 0 = 静止"
                   },
                   "back_y": 1.18,
                   "back_z": 0.16,
                   "yaw_offset": 180.0,
                   "scale": 1.0,
                   "alpha": 0.78,
+                  "waving_when_flying": true,
+                  "waving_when_idle": false,
+                  "animation_speed": 1.0,
+                  "pitch_factor": 0.3,
                   "flap_speed_flying": 0.85,
                   "flap_amp_flying": 42.0,
                   "flap_speed_idle": 0.18,
-                  "flap_amp_idle": 9.0
+                  "flap_amp_idle": 0.0
                 }
                 """;
         Files.writeString(file, text, StandardCharsets.UTF_8);
@@ -150,7 +173,24 @@ public final class TNLightWingsPlacement {
         flapAmpFlying = read(root, "flap_amp_flying", flapAmpFlying, 0.0F, 90.0F);
         flapSpeedIdle = read(root, "flap_speed_idle", flapSpeedIdle, 0.0F, 4.0F);
         flapAmpIdle = read(root, "flap_amp_idle", flapAmpIdle, 0.0F, 90.0F);
+        wavingWhenFlying = readBool(root, "waving_when_flying", wavingWhenFlying);
+        wavingWhenIdle = readBool(root, "waving_when_idle", wavingWhenIdle);
+        animationSpeed = read(root, "animation_speed", animationSpeed, 0.05F, 6.0F);
+        pitchFactor = read(root, "pitch_factor", pitchFactor, 0.0F, 3.0F);
         LOGGER.info("TN-C/light: 光翼放置参数 {}", describe());
+    }
+
+    /** 读一个开关 ✓：缺字段保留原值 ✓，写错类型也保留原值 ✓。 */
+    private static boolean readBool(JsonObject root, String key, boolean fallback) {
+        JsonElement value = root.get(key);
+        if (value == null || !value.isJsonPrimitive()) {
+            return fallback;
+        }
+        try {
+            return value.getAsBoolean();
+        } catch (Throwable t) {
+            return fallback;
+        }
     }
 
     /** 读一个数：缺字段就保留原值 ✓，超范围就夹住 ✓（永远不会把翅膀弄没 ✗）。 */

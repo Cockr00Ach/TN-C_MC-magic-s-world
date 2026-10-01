@@ -212,8 +212,81 @@ class LightWingsProjectionTest {
                 "平均不透明率太低（" + (sum / count * 100.0D) + "%）—— UV 布局和贴图对不上，翅膀会缺块 ✗");
     }
 
-    /** 三张图一起写一份文件 ✓ —— 从构建日志里捞字符画太费劲 ✗，落盘之后直接读 ✓。 */
-    private static final StringBuilder ART = new StringBuilder();
+    /**
+     * ★★ 作者 2026-10-01："我希望在站着的时候翅膀不动的，你只有起飞的时候就播放那个 waving" ✓
+     * —— 这条测试就是把这句话钉住 ✓：
+     * <ol>
+     *   <li><b>站着（animated=false）</b>：姿势与时间无关 ⇒ 一动不动 ✓；</li>
+     *   <li><b>飞起来（animated=true）</b>：到关键帧 t=0.75s 时确实动了 ✓，而且两翼**对称**地动 ✓；</li>
+     *   <li>动画真的读进来了（作者的文件是 waving / 2 秒 / 6 根骨头 ✓），并且**会循环**（t=0 与 t=2 同姿势 ✓）。</li>
+     * </ol>
+     */
+    @Test
+    void standingIsStillAndFlyingPlaysWaving() throws Exception {
+        loadModel();
+        try (var stream = LightWingsProjectionTest.class.getResourceAsStream(
+                "/assets/tnc/animations/entity/light_wings.animation.json")) {
+            assertNotNull(stream, "找不到 light_wings.animation.json");
+            TNLightWingsModel.parseAnimation(new InputStreamReader(stream, StandardCharsets.UTF_8));
+        }
+        assertTrue(TNLightWingsModel.hasAnimation(), "waving 动画没读进来 ✗");
+        System.out.println("动画: " + TNLightWingsModel.describeAnimation());
+        ART.append("\n动画: ").append(TNLightWingsModel.describeAnimation()).append('\n');
+
+        Matrix4f root = new Matrix4f();
+        // ① 站着：换个时间点，姿势必须完全一样（翅膀静止 ✓）
+        List<float[]> idleA = TNLightWingsModel.corners(root, 0.0F, 0.0F, false);
+        List<float[]> idleB = TNLightWingsModel.corners(root, 0.0F, 1.3F, false);
+        assertEquals(0.0D, maxDelta(idleA, idleB), 1.0E-5D, "站着的时候翅膀还在动 ✗");
+
+        // ② 飞起来：t=0.75s（作者关键帧的峰值）必须真的动，而且左右对称
+        List<float[]> fly0 = TNLightWingsModel.corners(root, 0.0F, 0.0F, true);
+        List<float[]> flyPeak = TNLightWingsModel.corners(root, 0.0F, 0.75F, true);
+        double moved = maxDelta(fly0, flyPeak);
+        System.out.printf("waving t=0 -> 0.75s 最大位移: %.3f 格%n", moved);
+        assertTrue(moved > 0.03D, "飞起来也没动（waving 没生效）✗ 位移只有 " + moved);
+
+        // ★ 作者的 waving 主要是**绕 Y** 摆（关键帧是 [0, ±7.5/±10, 0] ✓）⇒ 位移主要在 X/Z 上 ✗，
+        //   所以这里量的是**三维位移**，不是只看高度 ✓（第一版只量了 Y，误判成"没动"✗）
+        double leftMax = 0.0D, rightMax = 0.0D;
+        double leftY = 0.0D, rightY = 0.0D;
+        for (int i = 0; i < fly0.size(); i++) {
+            double dx = flyPeak.get(i)[0] - fly0.get(i)[0];
+            double dy = flyPeak.get(i)[1] - fly0.get(i)[1];
+            double dz = flyPeak.get(i)[2] - fly0.get(i)[2];
+            double d3 = Math.sqrt(dx * dx + dy * dy + dz * dz);
+            double x0 = fly0.get(i)[0];
+            if (x0 < -0.3F) {
+                leftMax = Math.max(leftMax, d3);
+                leftY = Math.max(leftY, Math.abs(dy));
+            } else if (x0 > 0.3F) {
+                rightMax = Math.max(rightMax, d3);
+                rightY = Math.max(rightY, Math.abs(dy));
+            }
+        }
+        System.out.printf("两翼三维最大位移: 左 %.3f / 右 %.3f 格（应接近）%n", leftMax, rightMax);
+        System.out.printf("两翼竖直方向最大位移: 左 %.3f / 右 %.3f 格%n", leftY, rightY);
+        assertTrue(leftMax > 0.02D && rightMax > 0.02D, "有一侧没动 ✗");
+        assertEquals(leftMax, rightMax, Math.max(0.02D, leftMax * 0.35D), "两翼动得不一样多 ✗");
+
+        // ③ 循环：t=0 与 t=动画总长 应该回到同一姿势
+        List<float[]> loopEnd = TNLightWingsModel.corners(root, 0.0F, 2.0F, true);
+        List<float[]> loopStart = TNLightWingsModel.corners(root, 0.0F, 0.0F, true);
+        assertTrue(maxDelta(loopStart, loopEnd) < 1.0E-4D, "waving 没有循环（2 秒后没回到原点）✗");
+    }
+
+    private static double maxDelta(List<float[]> a, List<float[]> b) {
+        assertEquals(a.size(), b.size(), "点数不一致");
+        double max = 0.0D;
+        for (int i = 0; i < a.size(); i++) {
+            max = Math.max(max, Math.abs(a.get(i)[0] - b.get(i)[0]));
+            max = Math.max(max, Math.abs(a.get(i)[1] - b.get(i)[1]));
+            max = Math.max(max, Math.abs(a.get(i)[2] - b.get(i)[2]));
+        }
+        return max;
+    }
+
+    /** 三张图一起写一份文件 ✓ —— 从构建日志里捞字符画太费劲 ✗，落盘之后直接读 ✓。 */    private static final StringBuilder ART = new StringBuilder();
 
     @org.junit.jupiter.api.AfterAll
     static void writeArt() throws Exception {

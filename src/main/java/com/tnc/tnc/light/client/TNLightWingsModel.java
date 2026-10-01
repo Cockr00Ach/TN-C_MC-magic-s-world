@@ -40,6 +40,8 @@ public final class TNLightWingsModel {
 
     private static final ResourceLocation GEO = ResourceLocation.fromNamespaceAndPath(
             "tnc", "geo/entity/light_wings.geo.json");
+    private static final ResourceLocation ANIM = ResourceLocation.fromNamespaceAndPath(
+            "tnc", "animations/entity/light_wings.animation.json");
     private static final ResourceLocation TEX = ResourceLocation.fromNamespaceAndPath(
             "tnc", "textures/entity/light_wings_bedrock.png");
 
@@ -145,6 +147,162 @@ public final class TNLightWingsModel {
             }
         }
         return out;
+    }
+
+    // ------------------------------------------------------------------
+    //  作者的 waving 关键帧动画（assets/tnc/animations/entity/light_wings.animation.json ✓）
+    //  ★ 2026-10-01 作者："我希望在站着的时候翅膀不动的，你只有起飞的时候就播放那个 waving" ✓
+    // ------------------------------------------------------------------
+
+    /** 一个关键帧：时间（秒）+ 相对骨骼自身 rotation 的**增量**角度（度 ✓，Bedrock 是叠加的 ✓）。 */
+    private record AnimKey(float time, float[] rot) {
+    }
+
+    /** 骨头名（小写 ✓）→ 按时间排好的关键帧 ✓ */
+    private static Map<String, List<AnimKey>> animBones;
+    /** 动画总长（秒 ✓，用来循环 ✓）。 */
+    private static float animLength = 2.0F;
+    /** 动画名字（日志用 ✓）。 */
+    private static String animName = "（未读入）";
+    private static boolean animFailed;
+
+    /** 动画读进来了没（读不进来就退回程序化扇动 ✓，绝不允许"什么都不动"✗）。 */
+    public static boolean hasAnimation() {
+        return animBones != null && !animBones.isEmpty();
+    }
+
+    /** 渲染器每帧调一次（内部只读一次文件 ✓）。 */
+    public static void ensureAnimationLoaded() {
+        loadAnimation();
+    }
+
+    public static String describeAnimation() {
+        return hasAnimation()
+                ? "waving " + animLength + "s / " + animBones.size() + " 骨"
+                : "无（退回程序化扇动）";
+    }
+
+    private static void loadAnimation() {
+        if (animBones != null || animFailed) {
+            return;
+        }
+        try {
+            Optional<Resource> res = Minecraft.getInstance().getResourceManager().getResource(ANIM);
+            if (res.isEmpty()) {
+                animFailed = true;
+                return;
+            }
+            try (BufferedReader reader = res.get().openAsReader()) {
+                parseAnimation(reader);
+            }
+        } catch (Throwable t) {
+            animFailed = true;
+            org.apache.logging.log4j.LogManager.getLogger("TN-C/light").warn(
+                    "TN-C/light: 光翼动画读取失败，改用程序化扇动：{}", t.toString());
+        }
+    }
+
+    /**
+     * 纯解析 ✓（不碰 Minecraft 运行时 ✓ —— 单测可以直接喂 JSON ✓）。
+     *
+     * <p>只认第一段动画（作者的文件里就叫 {@code waving} ✓）；每个骨头只读 {@code rotation} 轨道
+     * （这份文件也只有 rotation ✓），关键帧值支持两种写法：数组 ✓ 或 {@code {"post": [...]}} ✓。
+     */
+    static void parseAnimation(java.io.Reader reader) {
+        JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
+        JsonObject anims = root.getAsJsonObject("animations");
+        if (anims == null || anims.size() == 0) {
+            animFailed = true;
+            return;
+        }
+        String first = anims.keySet().iterator().next();
+        JsonObject anim = anims.getAsJsonObject(first);
+        animName = first;
+        if (anim.has("animation_length")) {
+            animLength = Math.max(0.05F, anim.get("animation_length").getAsFloat());
+        }
+        Map<String, List<AnimKey>> map = new HashMap<>();
+        JsonObject bonesObj = anim.getAsJsonObject("bones");
+        if (bonesObj != null) {
+            for (String boneName : bonesObj.keySet()) {
+                JsonObject bone = bonesObj.getAsJsonObject(boneName);
+                JsonObject rot = bone.getAsJsonObject("rotation");
+                if (rot == null) {
+                    continue;
+                }
+                List<AnimKey> keys = new ArrayList<>();
+                for (String timeKey : rot.keySet()) {
+                    float t;
+                    try {
+                        t = Float.parseFloat(timeKey);
+                    } catch (NumberFormatException e) {
+                        continue;
+                    }
+                    JsonElement value = rot.get(timeKey);
+                    JsonArray arr = null;
+                    if (value.isJsonArray()) {
+                        arr = value.getAsJsonArray();
+                    } else if (value.isJsonObject()) {
+                        JsonObject obj = value.getAsJsonObject();
+                        if (obj.has("post") && obj.get("post").isJsonArray()) {
+                            arr = obj.getAsJsonArray("post");
+                        } else if (obj.has("pre") && obj.get("pre").isJsonArray()) {
+                            arr = obj.getAsJsonArray("pre");
+                        }
+                    }
+                    if (arr == null || arr.size() < 3) {
+                        continue;
+                    }
+                    keys.add(new AnimKey(t, new float[]{arr.get(0).getAsFloat(),
+                            arr.get(1).getAsFloat(), arr.get(2).getAsFloat()}));
+                }
+                if (!keys.isEmpty()) {
+                    keys.sort(java.util.Comparator.comparingDouble(AnimKey::time));
+                    map.put(boneName.toLowerCase(), keys);
+                }
+            }
+        }
+        animBones = map;
+    }
+
+    /**
+     * 求某个骨头在 {@code time} 秒时的旋转增量 ✓（线性插值 ✓、到尾巴保持最后一个关键帧 ✓、
+     * 超过总长就按 {@code loop} 绕回去 ✓）。
+     *
+     * @return {@code [x, y, z]}（度 ✓）；这根骨头没被动画就返回全 0 ✓
+     */
+    static float[] animationRotation(String boneName, float time) {
+        if (animBones == null) {
+            return new float[]{0.0F, 0.0F, 0.0F};
+        }
+        List<AnimKey> keys = animBones.get(boneName.toLowerCase());
+        if (keys == null || keys.isEmpty()) {
+            return new float[]{0.0F, 0.0F, 0.0F};
+        }
+        float t = time;
+        if (animLength > 0.0F) {
+            t = t % animLength;
+            if (t < 0.0F) {
+                t += animLength;
+            }
+        }
+        AnimKey first = keys.get(0);
+        if (t <= first.time()) {
+            return first.rot().clone();
+        }
+        for (int i = 1; i < keys.size(); i++) {
+            AnimKey a = keys.get(i - 1);
+            AnimKey b = keys.get(i);
+            if (t <= b.time()) {
+                float span = b.time() - a.time();
+                float f = span <= 0.0F ? 0.0F : (t - a.time()) / span;
+                return new float[]{
+                        a.rot()[0] + (b.rot()[0] - a.rot()[0]) * f,
+                        a.rot()[1] + (b.rot()[1] - a.rot()[1]) * f,
+                        a.rot()[2] + (b.rot()[2] - a.rot()[2]) * f};
+            }
+        }
+        return keys.get(keys.size() - 1).rot().clone();
     }
 
     private static void load() {
@@ -265,11 +423,17 @@ public final class TNLightWingsModel {
      * 备用程序化翅膀那边用的是 {@code pose.last().pose()} ✓，所以它一直是对的 ✓。
      */
     public static void render(PoseStack pose, VertexConsumer vc, float flap) {
+        render(pose, vc, flap, 0.0F, false);
+    }
+
+    /** 带关键帧动画的渲染 ✓（{@code animated == false} 时就是静止的默认姿势 ✓）。 */
+    public static void render(PoseStack pose, VertexConsumer vc, float flap,
+                             float animTime, boolean animated) {
         load();
         if (bones == null) {
             return;
         }
-        List<Matrix4f> matrices = buildMatrices(pose.last().pose(), flap);
+        List<Matrix4f> matrices = buildMatrices(pose.last().pose(), flap, animTime, animated);
         int i = 0;
         for (Bone bone : bones) {
             for (Cube c : bone.cubes) {
@@ -286,9 +450,18 @@ public final class TNLightWingsModel {
      * （复制一份的话两边必然慢慢跑偏 ✗，而"模型有点不对"这种问题就是靠对账才能定位 ✓）。
      *
      * @param root 玩家坐标系（位置/朝向/背上偏移 ✓）；离线自检直接传单位矩阵 ✓
-     * @param flap 扇动角度（度）✓
+     * @param flap 程序化扇动角度（度 ✓；只在"没有关键帧动画"时当备用 ✓）
      */
     static List<Matrix4f> buildMatrices(Matrix4f root, float flap) {
+        return buildMatrices(root, flap, 0.0F, false);
+    }
+
+    /**
+     * @param animTime 动画时间（秒 ✓）—— 只有 {@code animated == true} 时才用它 ✓
+     * @param animated 是否在播 {@code waving} 关键帧动画 ✓（站着的时候传 false ⇒ 翅膀**静止** ✓，
+     *                 这正是作者 2026-10-01 要的："站着的时候翅膀不动的，只有起飞的时候播放那个 waving"✓）
+     */
+    static List<Matrix4f> buildMatrices(Matrix4f root, float flap, float animTime, boolean animated) {
         List<Matrix4f> out = new ArrayList<>();
         if (bones == null) {
             return out;
@@ -305,19 +478,29 @@ public final class TNLightWingsModel {
             m.translate(bone.px / 16.0F, bone.py / 16.0F, bone.pz / 16.0F);
             String n = bone.name.toLowerCase();
             if (n.equals("wingright") || n.equals("wingleft")) {
-                // 两根翅膀根：绕 Z 扇动（左翼反向 ✓）
+                // 备用扇动：绕 Z 摆（左翼反向 ✓）；有作者动画时 flap 是 0 ✓
                 float deg = n.equals("wingleft") ? -flap : flap;
-                m.rotate(Axis.ZP.rotationDegrees(deg));
+                if (deg != 0.0F) {
+                    m.rotate(Axis.ZP.rotationDegrees(deg));
+                }
+            }
+            // ★ 作者的 waving 关键帧（**叠加**在骨骼自身 rotation 上 ✓ —— Bedrock 的动画就是相对的 ✓）
+            float ax = 0.0F, ay = 0.0F, az = 0.0F;
+            if (animated && animBones != null) {
+                float[] off = animationRotation(bone.name, animTime);
+                ax = off[0];
+                ay = off[1];
+                az = off[2];
             }
             // ★ 骨骼自身旋转（Bedrock 的 rotation ✓）：作者的 wingright 是 [0,180,0] ⇒ 右翼镜像 ✓
-            if (bone.rz != 0.0F) {
-                m.rotate(Axis.ZP.rotationDegrees(bone.rz));
+            if (bone.rz + az != 0.0F) {
+                m.rotate(Axis.ZP.rotationDegrees(bone.rz + az));
             }
-            if (bone.ry != 0.0F) {
-                m.rotate(Axis.YP.rotationDegrees(bone.ry));
+            if (bone.ry + ay != 0.0F) {
+                m.rotate(Axis.YP.rotationDegrees(bone.ry + ay));
             }
-            if (bone.rx != 0.0F) {
-                m.rotate(Axis.XP.rotationDegrees(bone.rx));
+            if (bone.rx + ax != 0.0F) {
+                m.rotate(Axis.XP.rotationDegrees(bone.rx + ax));
             }
             m.translate(-bone.px / 16.0F, -bone.py / 16.0F, -bone.pz / 16.0F);
             world.put(bone.name, m);
@@ -350,8 +533,13 @@ public final class TNLightWingsModel {
      * 每条是 {@code [x, y, z, 方块序号]} ✓ —— 单测据此画字符画/查对称 ✓。不碰 Minecraft 运行时 ✓。
      */
     public static List<float[]> corners(Matrix4f root, float flap) {
+        return corners(root, flap, 0.0F, false);
+    }
+
+    /** 带动画的版本 ✓（离线验证"站着不动 / 飞起来播 waving"就是用这个 ✓）。 */
+    public static List<float[]> corners(Matrix4f root, float flap, float animTime, boolean animated) {
         List<float[]> out = new ArrayList<>();
-        List<Matrix4f> matrices = buildMatrices(root, flap);
+        List<Matrix4f> matrices = buildMatrices(root, flap, animTime, animated);
         int i = 0;
         for (Bone bone : bones) {
             for (Cube c : bone.cubes) {
