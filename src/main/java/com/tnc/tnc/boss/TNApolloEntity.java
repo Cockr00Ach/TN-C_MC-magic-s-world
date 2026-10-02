@@ -199,6 +199,9 @@ public class TNApolloEntity extends Monster implements GeoEntity {
         this.pendingTicks = CAST_TICKS[spell];
         this.triggerAnim("action", ANIM[spell]);
         if (this.level() instanceof ServerLevel level) {
+            // ★ 作者 2026-10-01："阿波罗施法技能就晴天" ✓ —— 太阳神一出手天就放晴 ✓
+            //   （和光耀 t3「神光」的"回归晴天"同一套写法 ✓；6000 tick = 5 分钟 ✓）
+            level.setWeatherParameters(6000, 0, false, false);
             level.playSound(null, this.getX(), this.getY(), this.getZ(),
                     SoundEvents.EVOKER_CAST_SPELL, SoundSource.HOSTILE, 1.2F, 1.1F);
             level.sendParticles(ParticleTypes.END_ROD, this.getX(), this.getY() + 2.0D, this.getZ(),
