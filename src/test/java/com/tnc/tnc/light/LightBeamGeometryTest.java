@@ -6,6 +6,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -175,6 +176,70 @@ class LightBeamGeometryTest {
                 assertTrue(d >= minGap, "两个外围阵挨太近（" + d + " < " + minGap + "）✗ 光柱会叠在一起");
             }
         }
+    }
+
+    /**
+     * ★★ <b>最低分散距离</b>（作者 2026-10-01："t5的技能每个设定一个最低分散距离，不然都叠在一起不大好看" ✓）。
+     *
+     * <p>t5 原来"一人一个阵" ✗ —— 怪一扎堆，五根 27 格宽的柱子就糊成一坨 ✗。
+     * 这条测试钉住三件事：① 扎堆的候选点只收得下第一个 ✓；② 剩下的从环上补 ✓；
+     * ③ **任何两个落点的距离都 ≥ minGap** ✓（少放几根也比叠着好看 ✓）。
+     */
+    @Test
+    void spreadSpotsKeepsMinimumDistance() throws Exception {
+        double minGap = readSpellMinGap("radiant_barrage");
+        assertTrue(minGap > 0.0D, "五光十射没设最低分散距离 ✗");
+        double ring = Math.max(readConstant("BARRAGE_RING"), minGap);
+
+        // ① 五个怪全挤在一起（差 1 格）⇒ 只能收下最近的第一个，其余从环上补 ✓
+        List<Vec3> clustered = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            clustered.add(new Vec3(i * 1.0D, 0.0D, 0.0D));
+        }
+        List<Vec3> spots = TNLightBeamMechanics.spreadSpots(clustered, Vec3.ZERO, 5, ring, minGap);
+        assertTrue(spots.size() >= 2, "扎堆时只放出来 " + spots.size() + " 根，太少");
+        assertTrue(spots.size() <= 5, "放出来超过 5 根了");
+        assertPairwiseGap(spots, minGap);
+        // 第一根应该就在扎堆处 ✓（优先打人，其余才补圈 ✓）
+        assertEquals(0.0D, spots.get(0).distanceTo(clustered.get(0)), 1.0E-6D, "第一根没落在最近的敌人脚下");
+
+        // ② 五个怪本来就散得很开（≥ minGap）⇒ 五个都该收下、且都挨着怪 ✓
+        List<Vec3> spread = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            spread.add(new Vec3(i * (minGap + 5.0D), 0.0D, 0.0D));
+        }
+        List<Vec3> direct = TNLightBeamMechanics.spreadSpots(spread, Vec3.ZERO, 5, ring, minGap);
+        assertEquals(5, direct.size(), "散开的五个目标没有全部保留 ✗");
+        for (int i = 0; i < 5; i++) {
+            assertEquals(0.0D, direct.get(i).distanceTo(spread.get(i)), 1.0E-6D, "第 " + i + " 根没落在目标脚下");
+        }
+
+        // ③ 一个目标都没有 ⇒ 围着 fallback（准星落点）铺开 ✓
+        List<Vec3> none = TNLightBeamMechanics.spreadSpots(new ArrayList<>(), new Vec3(3.0D, 0.0D, 4.0D),
+                5, ring, minGap);
+        assertTrue(none.size() >= 2, "没有目标时应该围着落点铺一圈，实际只有 " + none.size() + " 根");
+        assertPairwiseGap(none, minGap);
+        assertEquals(0.0D, none.get(0).distanceTo(new Vec3(3.0D, 0.0D, 4.0D)), 1.0E-6D,
+                "没有目标时第一根应该在准星落点上");
+    }
+
+    private static void assertPairwiseGap(List<Vec3> spots, double minGap) {
+        for (int i = 0; i < spots.size(); i++) {
+            for (int j = i + 1; j < spots.size(); j++) {
+                double d = spots.get(i).distanceTo(spots.get(j));
+                assertTrue(d >= minGap - 1.0E-6D,
+                        "第 " + i + " 根和第 " + j + " 根只隔 " + d + " 格（要求 ≥ " + minGap + "）✗ 会叠在一起");
+            }
+        }
+    }
+
+    /** 从源码的 {@code SPELLS} 表里读某一档的"最低分散距离"（第 11 个字段 ✓）。 */
+    private static double readSpellMinGap(String id) throws Exception {
+        String src = source();
+        int at = src.indexOf("new Spell(\"" + id + "\"");
+        assertTrue(at > 0, "表里找不到 " + id);
+        String[] parts = src.substring(at, src.indexOf(")", at)).split(",");
+        return Double.parseDouble(parts[10].trim().replace("D", ""));
     }
 
     /** 从源码里读一个 {@code private static final} 常数 ✓（比反射稳，也不用把数字抄第二遍 ✓）。 */

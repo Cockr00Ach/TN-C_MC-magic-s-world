@@ -58,24 +58,29 @@ public final class TNLightBeamMechanics {
      * @param sky       是否"天降"形态 ✓（false = 从眼睛向前射 ✗）
      * @param circles   天上开几个阵 ✓（天降形态用的是它 ✓）
      * @param shake     画面震动强度（度 ✓；0 = 不震 ✓）—— 越粗的光柱给得越大 ✓
+     * @param minGap    多个阵之间的**最低分散距离**（格 ✓）—— 作者 2026-10-01：
+     *                  "t5的技能每个设定一个最低分散距离，不然都叠在一起不大好看" ✓
+     *                  （0 = 不要求 ✓，单根的法术用不到 ✓）
      */
     private record Spell(String path, int tier, int rays, double spreadDeg, double radius,
-                         float damage, double reach, boolean sky, int circles, double shake) {
+                         float damage, double reach, boolean sky, int circles, double shake,
+                         double minGap) {
     }
 
     /** 每个档位的数值（作者给的是"表现"，具体数字是这里定的 ✓，要调就调这里 ✓）。 */
     private static final Spell[] SPELLS = {
             // 向前射的三道细光线：射程 26 → 95（作者："长个三四倍"✓）；震动很轻（细光 ✓）
-            new Spell("light_beam", 1, 3, 14.0D, 0.22D, 6.0F, 95.0D, false, 0, 0.5D),
+            new Spell("light_beam", 1, 3, 14.0D, 0.22D, 6.0F, 95.0D, false, 0, 0.5D, 0.0D),
             // 大光线：粗 0.8 格；射程 110 ✓
-            new Spell("great_light_beam", 2, 1, 0.0D, 0.80D, 16.0F, 110.0D, false, 0, 1.2D),
+            new Spell("great_light_beam", 2, 1, 0.0D, 0.80D, 16.0F, 110.0D, false, 0, 1.2D, 0.0D),
             // 巨大光线：极粗 1.6 格；射程 130 ✓
-            new Spell("giant_light_beam", 3, 1, 0.0D, 1.60D, 28.0F, 130.0D, false, 0, 2.2D),
+            new Spell("giant_light_beam", 3, 1, 0.0D, 1.60D, 28.0F, 130.0D, false, 0, 2.2D, 0.0D),
             // 圣光天降：作者"t4的圣光变大五倍" ⇒ 4.5 → 22.5 格半径（**45 格宽** ✓）；
-            //   震动给到 8.5 度（仓库上限 SHAKE_MAX=9 ✓）—— 一根 45 格宽的光柱砸下来必须地动山摇 ✓
-            new Spell("holy_light_descent", 4, 1, 0.0D, 22.50D, 36.0F, 64.0D, true, 1, 8.5D),
+            //   震动给到 8.5 度（仓库上限 SHAKE_MAX=9 ✓）；只有一根 ⇒ 不需要分散距离 ✓
+            new Spell("holy_light_descent", 4, 1, 0.0D, 22.50D, 36.0F, 64.0D, true, 1, 8.5D, 0.0D),
             // 五光十射：作者"t5的变大三倍" ⇒ 4.5 → 13.5 格半径（27 格宽 ✓）；五根轮着砸 ⇒ 5.5 度 ✓
-            new Spell("radiant_barrage", 5, 1, 0.0D, 13.50D, 32.0F, 64.0D, true, 5, 5.5D),
+            //   ★ 最低分散 36 格（> 直径 27 ✓ 再留点缝）= 作者要的"别叠在一起" ✓
+            new Spell("radiant_barrage", 5, 1, 0.0D, 13.50D, 32.0F, 64.0D, true, 5, 5.5D, 36.0D),
     };
 
     /**
@@ -315,6 +320,69 @@ public final class TNLightBeamMechanics {
         return targets.isEmpty() ? null : targets.get(0);
     }
 
+    /**
+     * ★ <b>拉开落点</b>（作者 2026-10-01："t5的技能每个设定一个最低分散距离，不然都叠在一起不大好看" ✓）。
+     *
+     * <p>为什么需要它：t5 会"一人一个阵" ✓ —— 但怪一扎堆，五个阵就几乎重叠 ✗
+     * （光柱半径 13.5 ⇒ 27 格宽 ✗），五根柱子糊成一坨，什么都看不清 ✗。
+     *
+     * <p>做法（纯函数 ✓ 可单测 ✓）：
+     * <ol>
+     *   <li>按顺序收候选点 ✓，**每个都必须离已选的点 ≥ {@code minGap}** 才收 ✓（近的就跳过 ✗）；</li>
+     *   <li>不够 {@code count} 个时，围着第一个点补一圈环（半径 {@code ringRadius} ✓），
+     *       同样要过"≥ minGap"这一关 ✓；</li>
+     *   <li>还是不够就少放几个 ✓ —— **宁可少一根，也不要叠在一起** ✓（作者要的就是好看 ✓）。</li>
+     * </ol>
+     *
+     * @param candidates 想放的位置（一般就是锁到的敌人脚下 ✓，按距离排好 ✓）
+     * @param fallback   一个候选都没有时用的锚点（准星落点 ✓）
+     * @param minGap     最低分散距离（格 ✓；0 或负数 = 不限制 ✓）
+     */
+    public static List<Vec3> spreadSpots(List<Vec3> candidates, Vec3 fallback, int count,
+                                         double ringRadius, double minGap) {
+        List<Vec3> out = new ArrayList<>();
+        if (count <= 0) {
+            return out;
+        }
+        double gap = Math.max(0.0D, minGap);
+        for (Vec3 c : candidates) {
+            if (out.size() >= count) {
+                return out;
+            }
+            if (farEnough(out, c, gap)) {
+                out.add(c);
+            }
+        }
+        Vec3 anchor = out.isEmpty() ? fallback : out.get(0);
+        // 围着锚点补环（够远的才收 ✓）
+        for (int ring = 0; ring < 3 && out.size() < count; ring++) {
+            double radius = ringRadius * (1.0D + ring);   // 一圈不够就往外再铺一圈 ✓
+            for (Vec3 off : barrageOffsets(9, radius)) {  // 9 个方向，挑够远的 ✓
+                if (out.size() >= count) {
+                    break;
+                }
+                Vec3 spot = anchor.add(off);
+                if (farEnough(out, spot, gap)) {
+                    out.add(spot);
+                }
+            }
+        }
+        return out;
+    }
+
+    /** 候选点离已选的每个点都 ≥ gap ⇒ 可以收 ✓（gap ≤ 0 时永远 true ✓）。 */
+    private static boolean farEnough(List<Vec3> chosen, Vec3 candidate, double gap) {
+        if (gap <= 0.0D) {
+            return true;
+        }
+        for (Vec3 c : chosen) {
+            if (c.distanceTo(candidate) < gap) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     // ------------------------------------------------------------------
     //  释放
     // ------------------------------------------------------------------
@@ -388,30 +456,28 @@ public final class TNLightBeamMechanics {
         List<LivingEntity> targets = coneTargets(caster, candidates, caster.getLookAngle(),
                 reach, AIM_CONE_DEGREES);
 
-        List<Vec3> spots = new ArrayList<>();
-        List<LivingEntity> locked = new ArrayList<>();
+        // ★ 落点：先按"锁到的敌人脚下"排 ✓，然后交给 spreadSpots 拉开（最低分散距离 minGap ✓）——
+        //   怪扎堆时宁可少放几根，也不让五根 27 格宽的柱子糊成一坨 ✗（作者 2026-10-01 ✓）。
+        List<Vec3> wanted = new ArrayList<>();
         for (LivingEntity target : targets) {
-            if (spots.size() >= spell.circles()) {
-                break;
-            }
-            spots.add(target.position());        // ★ 每个阵开在目标头上 ✓
-            locked.add(target);                  // ★ 这根柱子会一直瞄着它 ✓
+            wanted.add(target.position());
         }
-        if (spots.isEmpty()) {
-            // 没锁到敌人：中心一个 + 围着准星落点铺一圈 ✓（t4 就只铺中心那一个 ✓）
-            Vec3 aim = aimPoint(caster, spell.reach());
-            for (Vec3 off : barrageOffsets(spell.circles(), BARRAGE_RING)) {
-                spots.add(aim.add(off));
-            }
-        } else if (spots.size() < spell.circles()) {
-            // 锁到的人不够：以第一个目标为中心补圈 ✓
-            Vec3 center = spots.get(0);
-            for (Vec3 off : barrageOffsets(spell.circles() - spots.size() + 1, BARRAGE_RING)) {
-                if (off.length() < 0.01D) {
-                    continue;                    // 跳过那个"中心"（已经有目标了 ✓）
+        Vec3 fallback = aimPoint(caster, spell.reach());
+        List<Vec3> spots = spreadSpots(wanted, fallback, spell.circles(),
+                Math.max(BARRAGE_RING, spell.minGap()), spell.minGap());
+        List<LivingEntity> locked = new ArrayList<>();
+        // 每个落点记下"当初是冲着谁去的" ✓（锁到人的那些会一直跟着那个人 ✓）
+        for (Vec3 spot : spots) {
+            LivingEntity best = null;
+            double bestDist = Double.MAX_VALUE;
+            for (LivingEntity target : targets) {
+                double d = target.position().distanceTo(spot);
+                if (d < bestDist) {
+                    bestDist = d;
+                    best = target;
                 }
-                spots.add(center.add(off));
             }
+            locked.add(bestDist <= Math.max(6.0D, spell.minGap()) ? best : null);
         }
 
         for (int i = 0; i < spots.size(); i++) {
