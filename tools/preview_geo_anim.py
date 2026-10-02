@@ -92,6 +92,8 @@ def load_geo(path):
 
 
 def load_anim(path, clip):
+    if path == "-" or clip in (None, "-"):
+        return {"animation_length": 0.0, "loop": False, "bones": {}}   # bind pose (no animation)
     with open(path, encoding="utf-8") as f:
         data = json.load(f)
     return data["animations"][clip]
@@ -194,7 +196,29 @@ def camera(azimuth, elevation):
     return f, right, up
 
 
-def render(bones, order, anim, t, size, azimuth, elevation, zoom, label):
+def model_bounds(bones, order, anim, t):
+    """(min, max) of every cube corner in model space - used to auto-fit big models."""
+    lo = [1e9, 1e9, 1e9]
+    hi = [-1e9, -1e9, -1e9]
+    tfs = world_transforms(bones, anim, t)
+    for name in order:
+        tf = tfs[name]
+        for cube in bones[name].get("cubes", []):
+            o, s = cube["origin"], cube["size"]
+            for i in (0, 1):
+                for j in (0, 1):
+                    for k in (0, 1):
+                        p = apply(tf, [o[0] + s[0] * i, o[1] + s[1] * j, o[2] + s[2] * k])
+                        if FRONT == "+Z":
+                            p = flip_y180(p)
+                        for c in range(3):
+                            lo[c] = min(lo[c], p[c])
+                            hi[c] = max(hi[c], p[c])
+    return lo, hi
+
+
+def render(bones, order, anim, t, size, azimuth, elevation, zoom, label,
+           center=(0.0, 20.0, 0.0), show_bones=False):
     f, right, up = camera(azimuth, elevation)
     light = norm([-0.4, 0.85, -0.35])
 
@@ -211,20 +235,14 @@ def render(bones, order, anim, t, size, azimuth, elevation, zoom, label):
                 nrm = flip_dir(nrm)
             tris.append((pts, nrm, base))
 
-    # ground marker: red arrow in FRONT of the model (-Z), kept outside the body's z range
-    # (the robe reaches z=-4, the wings z=-8, so the arrow lives at z=-10..-13)
-    arrow = [([[-1.2, -1.0, -10.0], [1.2, -1.0, -10.0], [0.0, -1.0, -13.0]], (225, 45, 45))]
-
     def project(p):
-        v = [p[0], p[1] - 20.0, p[2]]
+        v = [p[i] - center[i] for i in range(3)]
         x = sum(v[i] * right[i] for i in range(3))
         y = sum(v[i] * up[i] for i in range(3))
         return (size / 2 + x * zoom, size / 2 - y * zoom)
 
     img = Image.new("RGB", (size, size), (26, 26, 34))
     d = ImageDraw.Draw(img)
-    for pts, col in arrow:
-        d.polygon([project(p) for p in pts], fill=col)
 
     tris.sort(key=lambda e: -sum(sum(p[i] * f[i] for i in range(3)) for p in e[0]) / len(e[0]))
     for pts, nrm, base in tris:
@@ -234,6 +252,28 @@ def render(bones, order, anim, t, size, azimuth, elevation, zoom, label):
             shade *= 0.55
         col = tuple(min(255, int(c * shade)) for c in base)
         d.polygon([project(p) for p in pts], fill=col, outline=(55, 53, 60))
+
+    # ---- skeleton overlay: one dot per bone pivot + a line to its parent ----
+    if show_bones:
+        ident = ([[1, 0, 0], [0, 1, 0], [0, 0, 1]], [0.0, 0.0, 0.0])
+        for name in order:
+            b = bones[name]
+            parent = b.get("parent")
+            piv = b.get("pivot") or [0, 0, 0]
+            a = anim["bones"].get(name, {})
+            pos = sample(a.get("position"), t, anim.get("animation_length", 0.0), bool(anim.get("loop")))
+            here = apply(tfs[parent] if parent else ident, [piv[i] + pos[i] for i in range(3)])
+            if FRONT == "+Z":
+                here = flip_y180(here)
+            if parent:
+                there = apply(tfs[parent], bones[parent].get("pivot") or [0, 0, 0])
+                if FRONT == "+Z":
+                    there = flip_y180(there)
+                d.line([project(here), project(there)], fill=(90, 230, 255), width=2)
+            px, py = project(here)
+            r = 3
+            d.ellipse([px - r, py - r, px + r, py + r], fill=(255, 240, 120), outline=(20, 20, 20))
+
     d.rectangle([0, 0, size - 1, 12], fill=(12, 12, 16))
     d.text((3, 2), label, fill=(230, 230, 240))
     return img
@@ -288,38 +328,73 @@ def cube_faces_cached(name):
 _GEO = {}
 
 
-def strip(geo_path, anim_path, clip, times, views, out, size=260, zoom=4.4):
-    global _GEO
+def strip(geo_path, anim_path, clip, times, views, out, size=260, zoom=4.4,
+          front=None, fit=False, show_bones=False):
+    global _GEO, FRONT
+    if front:
+        FRONT = front
     _GEO, order = load_geo(geo_path)
     anim = load_anim(anim_path, clip)
     cols = len(times) * len(views)
     sheet = Image.new("RGB", (size * cols, size), (26, 26, 34))
+    lo, hi = model_bounds(_GEO, order, anim, times[0])
+    center = [(lo[i] + hi[i]) / 2.0 for i in range(3)]
     for c, view in enumerate(views):
         az, el, tag = {"side": (-90, 8, "side(-X)"), "side2": (90, 8, "side(+X)"),
-                       "front": (180, 8, "front(-Z)"), "three": (-135, 18, "3/4")}[view]
+                       "front": (180, 8, "front(-Z)"), "back": (0, 8, "back(+Z)"),
+                       "top": (180, 78, "top"), "three": (-135, 18, "3/4")}[view]
+        z = zoom
+        if fit:
+            # per-view auto-fit: project the 8 bounding-box corners and pick the zoom
+            _, right, up = camera(az, el)
+            xs, ys = [], []
+            for i in (0, 1):
+                for j in (0, 1):
+                    for k in (0, 1):
+                        p = [lo[0] if i == 0 else hi[0], lo[1] if j == 0 else hi[1],
+                             lo[2] if k == 0 else hi[2]]
+                        v = [p[m] - center[m] for m in range(3)]
+                        xs.append(sum(v[m] * right[m] for m in range(3)))
+                        ys.append(sum(v[m] * up[m] for m in range(3)))
+            span = max(max(xs) - min(xs), max(ys) - min(ys), 1e-3)
+            z = size * 0.88 / span
         for r, t in enumerate(times):
-            img = render(_GEO, order, anim, t, size, az, el, zoom,
-                         "%s %s t=%.2f" % (clip, tag, t))
+            img = render(_GEO, order, anim, t, size, az, el, z,
+                         "%s %s t=%.2f" % (clip, tag, t), center=tuple(center),
+                         show_bones=show_bones)
             sheet.paste(img, ((r * len(views) + c) * size, 0))
     os.makedirs(os.path.dirname(out), exist_ok=True)
     sheet.save(out)
-    print("preview -> %s (%dx%d)" % (out, sheet.size[0], sheet.size[1]))
+    print("preview -> %s (%dx%d) bounds=%s..%s" % (out, sheet.size[0], sheet.size[1],
+                                                   [round(v) for v in lo], [round(v) for v in hi]))
 
 
 def main():
     repo = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     os.chdir(repo)
-    clip = sys.argv[3] if len(sys.argv) > 3 else "attack"
-    times = [0.0, 0.15, 0.3, 0.45, 0.6, 0.8]
-    if len(sys.argv) > 4:
-        times = [float(x) for x in sys.argv[4].split(",")]
-    views = ["side", "front"]
-    if len(sys.argv) > 5:
-        views = sys.argv[5].split(",")
-    out = os.path.join("docs", "previews", "anim_%s.png" % clip)
-    strip(sys.argv[1] if len(sys.argv) > 1 else GEO,
-          sys.argv[2] if len(sys.argv) > 2 else ANIM,
-          clip, times, views, out)
+    args = sys.argv[1:]
+    opts = {}
+    flags = set()
+    for a in args:
+        if a.startswith("--"):
+            if "=" in a:
+                k, v = a.split("=", 1)
+                opts[k] = v
+            else:
+                flags.add(a)
+    pos = [a for a in args if not a.startswith("--")]
+    geo = pos[0] if pos else GEO
+    anim = pos[1] if len(pos) > 1 else ANIM
+    clip = pos[2] if len(pos) > 2 else "attack"
+    times = [float(x) for x in opts.get("--times", "0,0.15,0.3,0.45,0.6,0.8").split(",")]
+    views = opts.get("--views", "side,front").split(",")
+    out = opts.get("--out", os.path.join("docs", "previews", "anim_%s.png" % clip))
+    strip(geo, anim, clip, times, views, out,
+          size=int(opts.get("--size", 260)),
+          zoom=float(opts.get("--zoom", 4.4)),
+          front=opts.get("--front"),
+          fit=("--fit" in flags),
+          show_bones=("--bones" in flags))
 
 
 if __name__ == "__main__":
