@@ -50,9 +50,13 @@ public final class TNLightDragonChain {
     private static final Dragon[] DRAGONS = {
             new Dragon("light_dragon_breath", 1, 0, 0.0D, 0.0D, 0.0D, 0, 0.0D, "光龙吐息"),
             new Dragon("light_dragon_scales", 2, 0, 0.0D, 0.0D, 0.0D, 0, 0.0D, "光龙鳞甲"),
+            // ★ 个头是作者 2026-10-02 定的倍率：t3 = 1 倍 / t4 = 3 倍 / t5 = 10 倍 ✓
+            //   （以 t3 的 0.30 为 1 倍 ⇒ 0.30 / 0.90 / 3.00 ✓）
+            //   模型原长 23 格 ⇒ 三条龙分别是 **≈7 / ≈21 / ≈69 格长** ✗（t5 就是这么夸张 ✓）
+            //   预览图 docs/previews/dragon_scale.png 里带了一个玩家大小的参照方块 ✓
             new Dragon("summon_light_dragon", 3, 1, 0.30D, 24.0D, 1.45D, 62, 0.0D, "光龙出击"),
-            new Dragon("light_dragon_dive", 4, 2, 0.40D, 34.0D, 1.65D, 74, 7.0D, "光龙俯冲"),
-            new Dragon("light_dragon_descend", 5, 3, 0.45D, 44.0D, 1.85D, 84, 16.0D, "光龙降世"),
+            new Dragon("light_dragon_dive", 4, 2, 0.90D, 34.0D, 1.65D, 74, 7.0D, "光龙俯冲"),
+            new Dragon("light_dragon_descend", 5, 3, 3.00D, 44.0D, 1.85D, 84, 16.0D, "光龙降世"),
     };
 
     /** 龙放主人前方多远（格 ✓）—— 它 23 格长，贴着放会把自己穿进主人身上 ✗。 */
@@ -161,14 +165,18 @@ public final class TNLightDragonChain {
      */
     private static void release(ServerLevel level, LivingEntity caster, Dragon dragon) {
         Vec3 look = caster.getLookAngle();
-        Vec3 start = caster.position().add(look.scale(SPAWN_DISTANCE));
+        // ★ 这么大的龙不能贴脸放 ✗ —— 出生点随**体长**往后挪 ✓（t5 是 69 格长 ⇒ 放在 25 格外 ✓）
+        double length = TNDragonEntity.MODEL_LENGTH_BLOCKS * dragon.scale();
+        double distance = SPAWN_DISTANCE + length * 0.25D;
+        Vec3 start = caster.position().add(look.scale(distance));
         Vec3 side = new Vec3(-look.z, 0.0D, look.x).normalize();
         int spawned = 0;
         for (int i = 0; i < dragon.count(); i++) {
             // 扇形：i = 0 时居中；多条时左右分（t4 两条 ⇒ ∓7°，t5 三条 ⇒ -16/0/+16 ✓）
             double offset = (i - (dragon.count() - 1) / 2.0D) * dragon.fanDeg();
             Vec3 dir = rotateY(look, offset);
-            Vec3 at = start.add(side.scale(offset * 0.35D));
+            // 横向也按体长错开 ✓（不然两条 21 格的龙会完全重叠 ✗）
+            Vec3 at = start.add(side.scale((i - (dragon.count() - 1) / 2.0D) * length * 0.45D));
             if (spawnOne(level, caster, dragon, at, dir)) {
                 spawned++;
             }

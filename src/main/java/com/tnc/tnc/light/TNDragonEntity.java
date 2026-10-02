@@ -264,8 +264,10 @@ public class TNDragonEntity extends Monster implements GeoEntity {
             return;
         }
         // 前方是实心方块 ⇒ 撞墙爆开 ✓（noPhysics 会直接穿过去，所以要自己判 ✗）
-        Vec3 next = this.position().add(this.chargeDir.scale(Math.max(1.0D, this.chargeSpeed)));
-        BlockPos pos = BlockPos.containing(next.x, next.y + this.getBbHeight() * 0.5D, next.z);
+        // ★ 判的是**龙头**的位置（不是身体中心 ✓）：模型长 23×scale 格，头在原点前方约 10.5×scale 格 ✓
+        double headAhead = 10.5D * this.scale() + Math.max(1.0D, this.chargeSpeed);
+        Vec3 head = this.position().add(this.chargeDir.scale(headAhead));
+        BlockPos pos = BlockPos.containing(head.x, head.y, head.z);
         if (!level.getBlockState(pos).isAir()) {
             this.burst(level, 40, 1.5D);
             this.discard();
@@ -284,18 +286,23 @@ public class TNDragonEntity extends Monster implements GeoEntity {
                     this.getX(), this.getY() + 1.0D, this.getZ(), 4, 0.8D, 0.6D, 0.8D, 0.03D);
         }
         // 碰到就伤 ✓（一次冲刺对同一个敌人只打一下 ✓）
-        for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, this.sweepBox())) {
-            if (!this.isValidLightTarget(victim) || !this.hitThisCharge.add(victim.getId())) {
-                continue;
+        //   ★ t5 放大 10 倍后判定盒有 69 格宽 ✗ ⇒ 大龙**隔 tick 扫一次** ✓
+        //     （它每 tick 才走 1.85 格，隔一 tick 也漏不掉谁 ✓；每个敌人反正只挨一下 ✓）
+        boolean heavy = this.scale() >= 1.0D;
+        if (!heavy || (this.tickCount & 1) == 0) {
+            for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, this.sweepBox())) {
+                if (!this.isValidLightTarget(victim) || !this.hitThisCharge.add(victim.getId())) {
+                    continue;
+                }
+                LivingEntity caster = this.ownerId == null ? this : level.getPlayerByUUID(this.ownerId);
+                victim.hurt(level.damageSources().indirectMagic(this, caster == null ? this : caster),
+                        (float) this.chargeDamage);
+                victim.push(this.chargeDir.x * 2.0D, 0.45D, this.chargeDir.z * 2.0D);
+                this.hurtMarked = true;
+                level.sendParticles(net.minecraft.core.particles.ParticleTypes.FIREWORK,
+                        victim.getX(), victim.getY() + victim.getBbHeight() * 0.5D, victim.getZ(),
+                        18, 0.5D, 0.6D, 0.5D, 0.08D);
             }
-            LivingEntity caster = this.ownerId == null ? this : level.getPlayerByUUID(this.ownerId);
-            victim.hurt(level.damageSources().indirectMagic(this, caster == null ? this : caster),
-                    (float) this.chargeDamage);
-            victim.push(this.chargeDir.x * 2.0D, 0.45D, this.chargeDir.z * 2.0D);
-            this.hurtMarked = true;
-            level.sendParticles(net.minecraft.core.particles.ParticleTypes.FIREWORK,
-                    victim.getX(), victim.getY() + victim.getBbHeight() * 0.5D, victim.getZ(),
-                    18, 0.5D, 0.6D, 0.5D, 0.08D);
         }
     }
 

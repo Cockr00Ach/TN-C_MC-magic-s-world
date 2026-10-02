@@ -372,12 +372,46 @@ _GEO = {}
 _TEX = None      # the model's texture, when one was found (previews then show real colours)
 
 
+def scale_geo(geo, order, factor):
+    """emulate the renderer's poseStack.scale(factor) over the whole model
+    (used to show what a spell's 'size multiplier' really looks like in blocks)"""
+    if factor == 1.0:
+        return
+    for name in order:
+        b = geo[name]
+        b["pivot"] = [c * factor for c in (b.get("pivot") or [0, 0, 0])]
+        for c in b.get("cubes", []):
+            c["origin"] = [v * factor for v in c["origin"]]
+            c["size"] = [v * factor for v in c["size"]]
+
+
+REF_BONE = "__ref"
+
+
+def add_reference(geo, order, height_blocks=1.8, width_blocks=0.6, z_units=0.0):
+    """a box the size of a player, standing on y=0 - so a picture always shows how big the
+    model really is (a giant dragon next to a tiny player box). z_units shifts it along the
+    model's length so it does not hide behind the body in a side view."""
+    h = height_blocks * 16.0
+    w = width_blocks * 16.0
+    geo[REF_BONE] = {"name": REF_BONE, "pivot": [0, 0, 0], "cubes": [
+        {"origin": [w * 0.5 + 6.0, 0.0, z_units - w * 0.5], "size": [w, h, w], "uv": [0, 0]}
+    ]}
+    order.append(REF_BONE)
+    TINT[REF_BONE] = (110, 190, 245)          # the blue "player" box
+
+
 def strip(geo_path, anim_path, clip, times, views, out, size=260, zoom=4.4,
-          front=None, fit=False, show_bones=False, texture=None):
+          front=None, fit=False, show_bones=False, texture=None,
+          model_scale=1.0, reference=False, reference_z=0.0):
     global _GEO, FRONT, _TEX
     if front:
         FRONT = front
     _GEO, order = load_geo(geo_path)
+    scale_geo(_GEO, order, model_scale)
+    if reference:
+        # AFTER scaling: the reference box must stay a player-sized 1.8 blocks, never scaled ✗
+        add_reference(_GEO, order, z_units=reference_z)
     if texture is None:
         # guess: .../geo/entity/<name>.geo.json -> .../textures/entity/<name>_bedrock.png
         # (normalise the separators first: on Windows os.sep is "\" but argv often has "/",
@@ -454,7 +488,9 @@ def main():
           front=opts.get("--front"),
           fit=("--fit" in flags),
           show_bones=("--bones" in flags),
-          texture=opts.get("--texture"))
+          texture=opts.get("--texture"),
+          model_scale=float(opts.get("--model-scale", 1.0)),
+          reference=("--ref" in flags))
 
 
 if __name__ == "__main__":
