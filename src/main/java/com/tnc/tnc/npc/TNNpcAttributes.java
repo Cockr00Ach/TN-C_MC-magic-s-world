@@ -69,6 +69,7 @@ public final class TNNpcAttributes {
         event.put(TNNpcs.HUAI.get(), TnDialogueNpc.attributes().build());
         event.put(TNNpcs.ZHUANGQUERANG.get(), TnDialogueNpc.attributes().build());
         event.put(TNNpcs.YAN_DARK.get(), com.tnc.tnc.boss.YanDarkBossEntity.createAttributes().build());
+        event.put(TNNpcs.APOLLO.get(), com.tnc.tnc.boss.TNApolloEntity.createAttributes().build());
         event.put(TNNpcs.ZUOWANG.get(), TnDialogueNpc.attributes().build());
         // ★ 光天使（光系第二条链召唤的雕像 ✓）——**生物必须在这里有属性，漏了生成即崩** ✗
         event.put(com.tnc.tnc.magic.TNOrbEntities.ANGEL.get(),
