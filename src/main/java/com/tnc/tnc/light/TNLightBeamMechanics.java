@@ -64,26 +64,29 @@ public final class TNLightBeamMechanics {
 
     /** 每个档位的数值（作者给的是"表现"，具体数字是这里定的 ✓，要调就调这里 ✓）。 */
     private static final Spell[] SPELLS = {
-            // 向前射的三道细光线：现在是**实体光柱** ✓（半径 0.22 格 ⇒ 约 0.44 格宽 ✓）
-            new Spell("light_beam", 1, 3, 14.0D, 0.22D, 6.0F, 26.0D, false, 0),
-            // 大光线：粗（0.80 格 ⇒ 1.6 格宽 ✓）
-            new Spell("great_light_beam", 2, 1, 0.0D, 0.80D, 16.0F, 30.0D, false, 0),
-            // 巨大光线：极粗（1.60 格 ⇒ 3.2 格宽 ✓）
-            new Spell("giant_light_beam", 3, 1, 0.0D, 1.60D, 28.0F, 34.0D, false, 0),
+            // 向前射的三道细光线：★ 作者 2026-10-01："光束太短了，长个三四倍吧" ⇒ 射程 26 → 95（×3.6 ✓）
+            new Spell("light_beam", 1, 3, 14.0D, 0.22D, 6.0F, 95.0D, false, 0),
+            // 大光线：粗（0.80 格 ⇒ 1.6 格宽 ✓）；射程 30 → 110 ✓
+            new Spell("great_light_beam", 2, 1, 0.0D, 0.80D, 16.0F, 110.0D, false, 0),
+            // 巨大光线：极粗（1.60 格 ⇒ 3.2 格宽 ✓）；射程 34 → 130 ✓
+            new Spell("giant_light_beam", 3, 1, 0.0D, 1.60D, 28.0F, 130.0D, false, 0),
             // 圣光天降：作者"感觉可以加个10倍都" ⇒ 4.5 格半径 ＝ **9 格宽**的光柱 ✓
-            //   （原来是 1.1 ⇒ 现在约 4 倍；真要 10 倍就把 4.5 改成 11.0 ⇒ 一根柱子 22 格宽 ✗ 很夸张 ✓）
-            new Spell("holy_light_descent", 4, 1, 0.0D, 4.50D, 36.0F, 40.0D, true, 1),
-            // 五光十射：作者"每个法阵可以分开点" ⇒ 环半径 4.5 → **12 格** ✓
-            //   （光柱半径 4.5 ⇒ 相邻两根要离 ≥9 格才不叠 ✗，12 格刚好各自独立 ✓）
-            new Spell("radiant_barrage", 5, 1, 0.0D, 4.50D, 32.0F, 40.0D, true, 5),
+            new Spell("holy_light_descent", 4, 1, 0.0D, 4.50D, 36.0F, 48.0D, true, 1),
+            // 五光十射：作者"每个法阵可以分开点" ⇒ 环半径 12 格 ✓
+            new Spell("radiant_barrage", 5, 1, 0.0D, 4.50D, 32.0F, 48.0D, true, 5),
     };
 
-    /** 光柱存活时长（tick）：18 tick = 0.9 秒 ✓（"瞄着敌人"要一点持续时间才看得出在跟 ✗）。 */
-    private static final int BEAM_LIFE = 18;
-    /** 天降的魔法阵留在天上的时长（tick）✓ —— 阵先亮、光柱随后落下 ✓。 */
-    private static final int SKY_CIRCLE_LIFE = 120;
-    /** 天降时阵离地多高（格 ✓）。 */
-    private static final double SKY_HEIGHT = 16.0D;
+    /**
+     * 光柱存活时长（tick）—— ★ 作者 2026-10-01："光束太短了，长个三四倍吧" ⇒ 18 → <b>60</b>（3 秒 ✓）。
+     *
+     * <p>注意：变长**不会**让伤害变多 ✓（每个敌人每条光线仍然只挨一次 ✓）；
+     * 变长的效果是"这条锁定激光一直咬着目标 3 秒"✓ —— 目标跑，光柱跟着转 ✓。
+     */
+    private static final int BEAM_LIFE = 60;
+    /** 天降的魔法阵留在天上的时长（tick）✓ —— 要盖过"1 秒延迟 + 3 秒光柱"✓。 */
+    private static final int SKY_CIRCLE_LIFE = 180;
+    /** 天降时阵离地多高（格 ✓）—— 作者说光束太短 ⇒ 16 → <b>28</b>（天降那根柱子也更长 ✓）。 */
+    private static final double SKY_HEIGHT = 28.0D;
     /**
      * ★ 天降的"阵先亮 → 光柱落下"间隔（tick）：作者 2026-10-01："要等魔法阵出来之后个一秒，再放激光" ✓
      * ⇒ 20 tick = 1 秒 ✓（原来是 4 tick = 0.2 秒 ✗，等于阵和光柱一起冒出来 ✗）。
