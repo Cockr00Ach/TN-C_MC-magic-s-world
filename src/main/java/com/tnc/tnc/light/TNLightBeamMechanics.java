@@ -137,7 +137,7 @@ public final class TNLightBeamMechanics {
     /** 还没到时间落下的光柱 ✓（t5 的"连射"靠它错开 ✓）——每 tick 由 {@link #tick} 推进 ✓。 */
     private static final class Pending {
         final ServerLevel level;
-        final ServerPlayer caster;
+        final LivingEntity caster;
         final Vec3 from;
         final Vec3 dir;
         final Spell spell;
@@ -145,7 +145,7 @@ public final class TNLightBeamMechanics {
         final LivingEntity target;
         int delay;
 
-        Pending(ServerLevel level, ServerPlayer caster, Vec3 from, Vec3 dir,
+        Pending(ServerLevel level, LivingEntity caster, Vec3 from, Vec3 dir,
                 Spell spell, int style, int delay, LivingEntity target) {
             this.level = level;
             this.caster = caster;
@@ -282,21 +282,39 @@ public final class TNLightBeamMechanics {
     }
 
     /**
-     * ★ <b>索敌</b>（作者 2026-10-01："我是要那种对着敌人释放然后瞄着敌人的那种" ✓）：
+     * ★ <b>谁能被打</b>（作者 2026-10-01："新做了一个阿波罗 boss，他应该可以放光线链的 t4t5" ✓）——
+     * 玩家施法时沿用老规矩（{@code TnSpellMechanics.isEnemy} ✓：村民/动物/剧情 NPC 不打 ✗）；
+     * <b>怪物施法时只打玩家</b> ✓（Boss 没有"队伍"概念，打自己/打别的怪都不合理 ✗）。
+     */
+    public static boolean isHostile(LivingEntity caster, LivingEntity target) {
+        if (caster == target || !target.isAlive()) {
+            return false;
+        }
+        if (caster instanceof ServerPlayer player) {
+            return TnSpellMechanics.isEnemy(player, target);
+        }
+        return target instanceof net.minecraft.world.entity.player.Player
+                && (!(target instanceof ServerPlayer sp) || !sp.isCreative());
+    }
+
+    /**
+     * ★ 索敌（作者 2026-10-01："我是要那种对着敌人释放然后瞄着敌人的那种" ✓）：
      * 在**准星锥**（{@link #AIM_CONE_DEGREES} ✓）里、射程内的敌人，按距离从近到远排 ✓。
      *
      * <p>注意分工：这里只负责"**选中谁**" ✓；"**一直瞄着它**"是实体自己的事
      * （{@link TNLightBeamEntity#tick} 每 tick 重新瞄准 ✓）。
+     *
+     * <p>施法者放宽到 {@link LivingEntity} ✓ —— 阿波罗那种 Boss 也要能索敌 ✓。
      */
-    public static List<LivingEntity> coneTargets(ServerPlayer caster, List<LivingEntity> candidates,
+    public static List<LivingEntity> coneTargets(LivingEntity caster, List<LivingEntity> candidates,
                                                  Vec3 look, double reach, double coneDegrees) {
         List<LivingEntity> out = new ArrayList<>();
         for (LivingEntity e : candidates) {
             if (e == caster || !e.isAlive()) {
                 continue;
             }
-            if (!TnSpellMechanics.isEnemy(caster, e)) {
-                continue;                        // 村民/动物/剧情 NPC 不算 ✓
+            if (!isHostile(caster, e)) {
+                continue;                        // 村民/动物/剧情 NPC 不算 ✓（怪物施法只打玩家 ✓）
             }
             Vec3 centre = e.position().add(0.0D, e.getBbHeight() * 0.5D, 0.0D);
             if (!inAimCone(caster.getEyePosition(), look, centre, reach, coneDegrees)) {
@@ -310,8 +328,8 @@ public final class TNLightBeamMechanics {
     }
 
     /** 找一个目标（最近的 ✓）；没有就返回 null ⇒ 调用方回退成"顺着视线射" ✓。 */
-    private static LivingEntity findTarget(ServerPlayer caster, Spell spell) {
-        ServerLevel level = caster.serverLevel();
+    private static LivingEntity findTarget(LivingEntity caster, Spell spell) {
+        ServerLevel level = (ServerLevel) caster.level();
         double reach = Math.max(12.0D, spell.reach());
         List<LivingEntity> candidates = level.getEntitiesOfClass(LivingEntity.class,
                 caster.getBoundingBox().inflate(reach));
@@ -401,8 +419,14 @@ public final class TNLightBeamMechanics {
         return null;
     }
 
-    /** 释放时调用（由 {@code TnSpellMechanics.onSpellCast} 转发 ✓）。 */
-    public static void onSpellCast(ServerPlayer caster, String path) {
+    /**
+     * 释放时调用。
+     *
+     * <p>施法者放宽到 {@link LivingEntity} ✓ —— 作者 2026-10-01："新做了一个阿波罗 boss，
+     * 他应该可以放光线链的 t4t5" ✓（玩家走 {@code TnSpellMechanics} 的 SPELL_CAST 钩子 ✓，
+     * Boss 在自己 {@code aiStep} 里直接调这个 ✓）。玩家专属的东西（聊天提示）都做了判断 ✓。
+     */
+    public static void onSpellCast(LivingEntity caster, String path) {
         Spell spell = find(path);
         if (spell == null) {
             return;
@@ -420,8 +444,8 @@ public final class TNLightBeamMechanics {
      * <p>★ 索敌（作者 2026-10-01："t1234激光怎么没有索敌啊"✗）：先按准星锥找最近的一个敌人 ✓，
      * 找到就把**中心那道对准它**（侧面几道围着它散开 ✓）；一个都没找到就顺着视线射 ✓（不至于打空 ✗）。
      */
-    private static void castForward(ServerPlayer caster, Spell spell) {
-        ServerLevel level = caster.serverLevel();
+    private static void castForward(LivingEntity caster, Spell spell) {
+        ServerLevel level = (ServerLevel) caster.level();
         Vec3 from = caster.getEyePosition();
         LivingEntity target = findTarget(caster, spell);
         Vec3 center = caster.getLookAngle();
@@ -433,12 +457,14 @@ public final class TNLightBeamMechanics {
             spawn(level, caster, from, dir, spell, TNLightBeamEntity.STYLE_RAY, target);
         }
         play(level, from, spell.tier() >= 3 ? SoundEvents.BEACON_ACTIVATE : SoundEvents.AMETHYST_BLOCK_CHIME);
-        caster.displayClientMessage(Component.literal("§e[TN-C] §r" + name(spell)
-                + " §7（" + spell.rays() + " 道实体光线，每道粗 "
-                + String.format(java.util.Locale.ROOT, "%.1f", spell.radius() * 2.0D) + " 格"
-                + (target == null ? "，无目标" : "，锁定 " + target.getName().getString()) + "）"), true);
-        LOGGER.info("TN-C/light: 光线 {} rays={} radius={} dmg={} target={}",
-                spell.path(), spell.rays(), spell.radius(), spell.damage(),
+        if (caster instanceof ServerPlayer player) {
+            player.displayClientMessage(Component.literal("§e[TN-C] §r" + name(spell)
+                    + " §7（" + spell.rays() + " 道实体光线，每道粗 "
+                    + String.format(java.util.Locale.ROOT, "%.1f", spell.radius() * 2.0D) + " 格"
+                    + (target == null ? "，无目标" : "，锁定 " + target.getName().getString()) + "）"), true);
+        }
+        LOGGER.info("TN-C/light: 光线 {} rays={} radius={} dmg={} caster={} target={}",
+                spell.path(), spell.rays(), spell.radius(), spell.damage(), caster.getName().getString(),
                 target == null ? "none" : target.getName().getString());
     }
 
@@ -446,10 +472,10 @@ public final class TNLightBeamMechanics {
      * t4/t5：天上开阵 → **等 1 秒** → 从阵里垂直往下落光柱 ✓（作者："要等魔法阵出来之后个一秒，再放激光"✓）。
      *
      * <p>★ 索敌：阵**开在目标头顶**（准星锥里最近的敌人 ✓）；没有目标才落在准星落点上 ✓。
-     * t5 会一次锁定最多 5 个敌人，一人一个阵 ✓（不够就围着落点补圈 ✓）。
+     * t5 会一次锁定最多 5 个敌人，一人一个阵 ✓（怪扎堆时按最低分散距离拉开 ✓）。
      */
-    private static void castSky(ServerPlayer caster, Spell spell) {
-        ServerLevel level = caster.serverLevel();
+    private static void castSky(LivingEntity caster, Spell spell) {
+        ServerLevel level = (ServerLevel) caster.level();
         double reach = Math.max(16.0D, spell.reach());
         List<LivingEntity> candidates = level.getEntitiesOfClass(LivingEntity.class,
                 caster.getBoundingBox().inflate(reach));
@@ -495,13 +521,16 @@ public final class TNLightBeamMechanics {
                     SKY_DELAY + i * SKY_STAGGER, lockedTarget));
         }
         play(level, caster.position(), SoundEvents.TRIDENT_THUNDER);
-        caster.displayClientMessage(Component.literal("§e[TN-C] §r" + name(spell)
-                + " §7（天上 " + spots.size() + " 个阵，1 秒后落下，每道粗 "
-                + String.format(java.util.Locale.ROOT, "%.1f", spell.radius() * 2.0D) + " 格"
-                + (targets.isEmpty() ? "，无目标" : "，锁定 " + Math.min(targets.size(), spell.circles()) + " 个目标")
-                + "）"), true);
-        LOGGER.info("TN-C/light: 光柱 {} circles={} radius={} delay={}t dmg={} targets={}",
-                spell.path(), spots.size(), spell.radius(), SKY_DELAY, spell.damage(), targets.size());
+        if (caster instanceof ServerPlayer player) {
+            player.displayClientMessage(Component.literal("§e[TN-C] §r" + name(spell)
+                    + " §7（天上 " + spots.size() + " 个阵，1 秒后落下，每道粗 "
+                    + String.format(java.util.Locale.ROOT, "%.1f", spell.radius() * 2.0D) + " 格"
+                    + (targets.isEmpty() ? "，无目标" : "，锁定 " + Math.min(targets.size(), spell.circles()) + " 个目标")
+                    + "）"), true);
+        }
+        LOGGER.info("TN-C/light: 光柱 {} circles={} radius={} delay={}t dmg={} targets={} caster={}",
+                spell.path(), spots.size(), spell.radius(), SKY_DELAY, spell.damage(), targets.size(),
+                caster.getName().getString());
     }
 
     private static void circle(ServerLevel level, double x, double y, double z, double radius, float yaw) {
@@ -521,7 +550,7 @@ public final class TNLightBeamMechanics {
      * 锁定 {@code target} 之后，**接下来每一 tick 的重新瞄准由实体自己负责** ✓
      * （{@link TNLightBeamEntity#tick} ✓），所以这里只要给一个正确的初值 ✓。
      */
-    private static void spawn(ServerLevel level, ServerPlayer caster, Vec3 from, Vec3 dir,
+    private static void spawn(ServerLevel level, LivingEntity caster, Vec3 from, Vec3 dir,
                               Spell spell, int style, LivingEntity target) {
         TNLightBeamEntity beam = TNOrbEntities.LIGHT_BEAM.get().create(level);
         if (beam == null) {
@@ -538,9 +567,23 @@ public final class TNLightBeamMechanics {
         level.addFreshEntity(beam);
     }
 
-    /** 准星落点（打到地面/方块就用它，否则取射程尽头 ✓）。 */
-    private static Vec3 aimPoint(ServerPlayer caster, double reach) {
+    /**
+     * 准星落点（打到地面/方块就用它，否则取射程尽头 ✓）。
+     *
+     * <p>玩家用准星那套 ✓；<b>怪物（Boss）没有"准星"</b> ✗ ⇒ 用它的**当前目标**脚下 ✓；
+     * 连目标都没有就取自己前方一节路的落点 ✓（和公孙衍(迷失)那套"对着目标打"一致 ✓）。
+     */
+    private static Vec3 aimPoint(LivingEntity caster, double reach) {
         Vec3 eye = caster.getEyePosition();
+        if (!(caster instanceof ServerPlayer player)) {
+            LivingEntity victim = caster instanceof net.minecraft.world.entity.Mob mob ? mob.getTarget() : null;
+            Vec3 end = victim == null ? eye.add(caster.getLookAngle().scale(Math.min(16.0D, reach)))
+                    : victim.position();
+            var pos = net.minecraft.core.BlockPos.containing(end.x, end.y, end.z);
+            var top = caster.level().getHeightmapPos(
+                    net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, pos);
+            return new Vec3(end.x, Math.min(end.y, top.getY()), end.z);
+        }
         Vec3 end = eye.add(caster.getLookAngle().scale(reach));
         BlockHitResult hit = caster.level().clip(new ClipContext(eye, end,
                 ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, caster));

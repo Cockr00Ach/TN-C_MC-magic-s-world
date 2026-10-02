@@ -154,23 +154,30 @@ public final class TNLightChainMechanics {
     }
 
     /**
-     * 释放时调用（由 {@code TnSpellMechanics.onSpellCast} 转发 ✓）。
+     * 释放时调用（玩家走 {@code TnSpellMechanics} 的 SPELL_CAST 钩子 ✓）。
      *
      * <p>顺序：法阵 → 治疗/挂 buff → 天使 → 转晴 → 怪物停手 ✓（先铺阵再治疗，观感上"光先落地"✓）。
+     *
+     * <p>★ 作者 2026-10-01："新做了一个阿波罗 boss…就跟公孙衍迷失一样，能放玩家的法术" ✓
+     * ⇒ 施法者放宽到 {@link LivingEntity} ✓（阿波罗在自己 {@code aiStep} 里直接调 ✓）；
+     * 飞行链那条路仍然只给玩家 ✗（Boss 不需要光翼 ✓）。
      */
-    public static void onSpellCast(ServerPlayer caster, String path) {
-        // ① 光翼链（飞行）另一条路 ✓ —— 先看它，别掉进光耀那张表 ✗
+    public static void onSpellCast(LivingEntity caster, String path) {
+        // ① 光翼链（飞行）另一条路 ✓ —— 先看它，别掉进光耀那张表 ✗（只玩家 ✓）
         Wing wing = findWing(path);
         if (wing != null) {
-            castWings(caster, wing);
+            if (caster instanceof ServerPlayer player) {
+                castWings(player, wing);
+            }
             return;
         }
         Spell spell = find(path);
         if (spell == null) {
             return;
         }
-        ServerLevel level = caster.serverLevel();
+        ServerLevel level = (ServerLevel) caster.level();
         Vec3 at = caster.position();
+        boolean playerCaster = caster instanceof ServerPlayer;
 
         // ① 法阵：半径 = 法术范围 ✓（作者："范围多大法阵多大"✓），用**光系**那张纯白贴图 ✓
         TNMagicCircleEntity circle = TNOrbEntities.MAGIC_CIRCLE.get().create(level);
@@ -180,20 +187,31 @@ public final class TNLightChainMechanics {
             level.addFreshEntity(circle);
         }
 
-        // ② 范围内的队友：立刻回血 + 挂减伤 buff（施法者自己一定算 ✓）
-        List<Player> allies = level.getEntitiesOfClass(Player.class,
-                new AABB(at, at).inflate(spell.radius()));
+        // ② 队友：立刻回血 + 挂减伤 buff（施法者自己一定算 ✓）
+        //    ★ 作者 2026-10-01："新做了一个阿波罗 boss…就跟公孙衍迷失一样，能放玩家的法术" ✓
+        //    ⇒ 施法者不再限定玩家 ✗：**怪物施法时就只有它自己吃到**（它没有队伍 ✗），
+        //       玩家施法时照旧连队友一起 ✓。
         int healed = 0;
-        for (Player ally : allies) {
-            if (!isAlly(caster, ally)) {
-                continue;
+        caster.heal(spell.heal());
+        if (spell.buff().isPresent()) {
+            caster.addEffect(new MobEffectInstance(spell.buff().get(),
+                    spell.buffSeconds() * 20, 0, false, true, true));
+        }
+        healed++;
+        if (playerCaster) {
+            List<Player> allies = level.getEntitiesOfClass(Player.class,
+                    new AABB(at, at).inflate(spell.radius()));
+            for (Player ally : allies) {
+                if (ally == caster || !isAlly(caster, ally)) {
+                    continue;
+                }
+                ally.heal(spell.heal());
+                if (spell.buff().isPresent()) {
+                    ally.addEffect(new MobEffectInstance(spell.buff().get(),
+                            spell.buffSeconds() * 20, 0, false, true, true));
+                }
+                healed++;
             }
-            ally.heal(spell.heal());
-            if (spell.buff().isPresent()) {
-                ally.addEffect(new MobEffectInstance(spell.buff().get(),
-                        spell.buffSeconds() * 20, 0, false, true, true));
-            }
-            healed++;
         }
 
         // ③ 天使（t3 起 ✓）：先把旧的那尊清掉（一尊就够 ✗ 免得叠一排 ✗）
@@ -219,7 +237,8 @@ public final class TNLightChainMechanics {
         }
 
         // ⑤ t5：范围内怪物停手 5 秒 ✓（挂标记；"停手"的具体执行在 tick() ✓）
-        if (spell.calmMonsters()) {
+        //    ★ 只对**玩家施法**生效 ✓ —— Boss 放这招时把它自己的小怪也"劝停"很怪 ✗
+        if (spell.calmMonsters() && playerCaster) {
             for (Mob mob : level.getEntitiesOfClass(Mob.class, new AABB(at, at).inflate(spell.radius()))) {
                 if (mob instanceof Enemy && TNEffects.LIGHT_CALM.isPresent()) {
                     mob.addEffect(new MobEffectInstance(TNEffects.LIGHT_CALM.get(),
@@ -229,8 +248,12 @@ public final class TNLightChainMechanics {
             }
         }
 
-        caster.displayClientMessage(Component.literal("§e[TN-C] §r" + spellName(spell)
-                + " §7（" + healed + " 人受治疗，范围 " + (int) spell.radius() + " 格）"), true);
+        if (caster instanceof ServerPlayer player) {
+            player.displayClientMessage(Component.literal("§e[TN-C] §r" + spellName(spell)
+                    + " §7（" + healed + " 人受治疗，范围 " + (int) spell.radius() + " 格）"), true);
+        }
+        LOGGER.info("TN-C/light: 光耀 {} radius={} heal={} caster={}",
+                spell.path(), spell.radius(), healed, caster.getName().getString());
     }
 
     private static String spellName(Spell spell) {
@@ -243,13 +266,13 @@ public final class TNLightChainMechanics {
         };
     }
 
-    /** 队友 = 同一个 {@link CombatTeams#group} ✓（自己也算 ✓）。 */
-    private static boolean isAlly(ServerPlayer caster, Player other) {
+    /** 队友 = 同一个 {@link CombatTeams#group} ✓（自己也算 ✓）；怪物施法没有队伍 ⇒ 只算自己 ✓。 */
+    private static boolean isAlly(LivingEntity caster, Player other) {
         if (other == caster) {
             return true;
         }
-        if (other instanceof ServerPlayer sp) {
-            return CombatTeams.group(caster).equals(CombatTeams.group(sp));
+        if (caster instanceof ServerPlayer sp && other instanceof ServerPlayer osp) {
+            return CombatTeams.group(sp).equals(CombatTeams.group(osp));
         }
         return false;
     }

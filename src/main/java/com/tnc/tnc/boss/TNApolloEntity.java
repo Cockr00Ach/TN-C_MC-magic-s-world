@@ -189,62 +189,35 @@ public class TNApolloEntity extends Monster implements GeoEntity {
         }
     }
 
-    /** 动画播完 → 法术生效 ✓。 */
+    /**
+     * 动画播完 → 法术生效 ✓。
+     *
+     * <h2>★ 2026-10-01 作者："他应该可以放光线链的 t4t5，和光耀的 t4t5" / "就跟公孙衍迷失一样，能放玩家的法术"</h2>
+     * 原来这里是用自己的粒子"演"的 ✗（一条 {@code END_ROD} 光带 ＋ 一圈爆发 ✗）——
+     * 现在直接**调玩家那套机制** ✓：{@link com.tnc.tnc.light.TNLightBeamMechanics}（光线的实体光柱 ＋
+     * 天上开阵 ＋ 1 秒后落柱 ＋ 画面震动 ✓）与 {@link com.tnc.tnc.light.TNLightChainMechanics}
+     * （光耀的法阵 ＋ 天使 ＋ 减伤 buff ✓），施法者就是**阿波罗自己** ✓。
+     * 也就是说：玩家放 t4/t5 长什么样，Boss 放就长什么样 ✓（同一份代码、同一张数值表 ✗ 不会走偏 ✓）。
+     */
     private void applySpell(int spell) {
         if (!(this.level() instanceof ServerLevel level)) {
             return;
         }
-        LivingEntity target = this.getTarget();
-        switch (spell) {
-            case 0 -> this.lightBeam(level, target, 6.0F, 1.0D);
-            case 1 -> this.lightBeam(level, target, 14.0F, 1.4D);
-            case 2 -> this.lightBeam(level, target, 18.0F, 1.8D);
-            case 3 -> this.radiance(level, 10.0F, 1.4D);
-            default -> this.radiance(level, 14.0F, 1.8D);
+        String path = switch (spell) {
+            case 0 -> "light_beam";                 // 光线 t1（三条细光 ✓）
+            case 1 -> "holy_light_descent";         // 光线 t4：天上开阵 → 1 秒后 45 格宽巨柱 ✓
+            case 2 -> "radiant_barrage";            // 光线 t5：五个阵错开连射 ✓
+            case 3 -> "angel_descent";              // 光耀 t4：法阵 + 6 格高天使 ✓
+            default -> "angel_mercy";               // 光耀 t5：法阵 + 10 格高天使 ✓
+        };
+        if (spell == 0 || spell == 1 || spell == 2) {
+            com.tnc.tnc.light.TNLightBeamMechanics.onSpellCast(this, path);
+        } else {
+            com.tnc.tnc.light.TNLightChainMechanics.onSpellCast(this, path);
         }
-    }
-
-    /** 光线：一条亮白光柱扫向目标 ✓（t1/t4/t5 只是粗细与伤害不同）。 */
-    private void lightBeam(ServerLevel level, LivingEntity target, float damage, double scale) {
-        Vec3 from = this.position().add(0.0D, this.getBbHeight() * 0.8D, 0.0D);
-        Vec3 to = target == null
-                ? from.add(this.getLookAngle().scale(24.0D))
-                : target.position().add(0.0D, target.getBbHeight() * 0.5D, 0.0D);
-        Vec3 dir = to.subtract(from);
-        double len = dir.length();
-        if (len < 0.01D) {
-            return;
-        }
-        dir = dir.scale(1.0D / len);
-        for (double d = 0.0D; d < len; d += 0.4D) {
-            Vec3 p = from.add(dir.scale(d));
-            level.sendParticles(ParticleTypes.END_ROD, p.x, p.y, p.z, 1, 0.05D, 0.05D, 0.05D, 0.0D);
-            level.sendParticles(ParticleTypes.FLASH, p.x, p.y, p.z, 1, 0.02D, 0.02D, 0.02D, 0.0D);
-        }
-        if (target != null) {
-            target.hurt(level.damageSources().indirectMagic(this, this), damage);
-            target.hurtMarked = true;
-        }
+        // 让 Boss 把仇恨目标当作"施法对象"（光柱/天降都对着它 ✓）——已经是 getTarget() ✓，这里只是补个音效 ✓
         level.playSound(null, this.getX(), this.getY(), this.getZ(),
-                SoundEvents.BEACON_POWER_SELECT, SoundSource.HOSTILE, (float) scale, 1.4F);
-    }
-
-    /** 光耀：自身爆发一圈光，并对周围敌人造成伤害 ✓。 */
-    private void radiance(ServerLevel level, float damage, double scale) {
-        double r = 6.0D * scale;
-        level.sendParticles(ParticleTypes.END_ROD, this.getX(), this.getY() + 1.5D, this.getZ(),
-                180, r * 0.4D, 1.2D, r * 0.4D, 0.35D);
-        level.sendParticles(ParticleTypes.WITCH, this.getX(), this.getY() + 1.5D, this.getZ(),
-                60, r * 0.3D, 1.0D, r * 0.3D, 0.2D);
-        for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class,
-                this.getBoundingBox().inflate(r))) {
-            if (victim != this && victim instanceof Player) {
-                victim.hurt(level.damageSources().indirectMagic(this, this), damage);
-                victim.hurtMarked = true;
-            }
-        }
-        level.playSound(null, this.getX(), this.getY(), this.getZ(),
-                SoundEvents.BEACON_ACTIVATE, SoundSource.HOSTILE, 1.5F, 1.0F);
+                SoundEvents.BEACON_POWER_SELECT, SoundSource.HOSTILE, 1.4F, 1.4F);
     }
 
     // ---- 资源 ----

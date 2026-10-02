@@ -259,7 +259,7 @@ public class TNLightBeamEntity extends Entity {
         if (!(this.level() instanceof ServerLevel server)) {
             return null;
         }
-        if (!(server.getEntity(this.entityData.get(DATA_CASTER)) instanceof ServerPlayer caster)) {
+        if (!(server.getEntity(this.entityData.get(DATA_CASTER)) instanceof LivingEntity caster)) {
             return null;
         }
         double reach = Math.max(24.0D, this.length());
@@ -307,8 +307,10 @@ public class TNLightBeamEntity extends Entity {
             if (target == owner || !target.isAlive()) {
                 continue;
             }
-            if (owner instanceof ServerPlayer caster && !TnSpellMechanics.isEnemy(caster, target)) {
-                continue;                        // 村民/动物/剧情 NPC 不打 ✗
+            // ★ 统一用 isHostile ✓：玩家施法按老规矩（村民/动物/剧情NPC 不打 ✓）；
+            //   怪物（阿波罗那种 Boss）施法时**只打玩家** ✓ —— 不然它自己会把自己的小怪一起轰 ✗
+            if (!TNLightBeamMechanics.isHostile(owner, target)) {
+                continue;
             }
             if (!this.hit.add(target.getUUID())) {
                 continue;
