@@ -863,11 +863,13 @@ public final class TnSpellMechanics {
         //    而**这个函数是活着的**（同一段 tick 里的别的日志照打 ✓）。所以把回魔挂到这条
         //    已验证活着的路上来；回魔内部有"每个周期只回一次"的闸门 ⇒ 多入口不会翻倍 ✓。
         MagicStone.tickManaRegen(player);
-        // ★★ 光翼链的"能飞 + 有翅膀"（2026-10-01）✓
+        // ★★ 光耀链的"能飞 + 有翅膀"（2026-10-01 起，2026-10-02 并进光耀 ✓）
         //    必须挂在这条**已证活着**的路上：原来挂在 TickEvent.PlayerTickEvent 上，
         //    而那个事件在本仓库一个世界整局都不进来 ✗ ⇒ 法术放得出来却飞不起来、也看不见翅膀 ✗✗
         //    （详见 light/TNLightChainMechanics 的类注释 ✓；函数幂等 ✓）
-        com.tnc.tnc.light.TNLightChainMechanics.tickWings(player);
+        //    ★ 作者 2026-10-02："把光魔法的飞行链删去，加入到光耀里，释放光耀法术就获得飞行" ✓
+        //      ⇒ 判据从"光翼 buff"改成了"光耀 buff" ✓（方法名也跟着改了 ✓）
+        com.tnc.tnc.light.TNLightChainMechanics.tickGraceFlight(player);
         // ★★ 光系第三条链（光线）：推进"正在射的光线"（画粒子 + 判伤 ✓）
         //    同样走这条**已证活着**的路 ✓ —— 挂死事件上的教训见 light/TNLightChainMechanics 类注释 ✓
         com.tnc.tnc.light.TNLightBeamMechanics.tick(player);

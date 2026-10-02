@@ -28,17 +28,15 @@ public final class TNIronArmorEvents {
         if (victim.level().isClientSide()) {
             return;
         }
-        // ★ 2026-10-01：减伤一律【取最高档、不相乘】✓ —— 铁甲 99% / 光翼展开 50% / 极速飞行 25% ✓
+        // ★ 2026-10-01：减伤一律【取最高档、不相乘】✓ —— 铁甲 99% / 光耀链按档位 / 光龙鳞甲
         float keep = 1.0F;                     // 1.0 = 不减伤
         if (victim.getItemBySlot(EquipmentSlot.CHEST).getItem() instanceof TNIronArmorItem) {
             keep = Math.min(keep, DAMAGE_TAKEN);          // 0.01
         }
-        if (com.tnc.tnc.magic.TNEffects.LIGHT_WINGSPAN.isPresent()
-                && victim.hasEffect(com.tnc.tnc.magic.TNEffects.LIGHT_WINGSPAN.get())) {
+        // ★ 2026-10-02：光翼链删掉了（飞行并进光耀 ✓），它那两档减伤（50% / 75%）也一起没了 ✓；
+        //   光龙链的 t2「光龙鳞甲」给 50% ✓
+        if (has(victim, com.tnc.tnc.magic.TNEffects.LIGHT_DRAGON_SCALES)) {
             keep = Math.min(keep, 0.50F);
-        } else if (com.tnc.tnc.magic.TNEffects.LIGHT_SWIFT_FLIGHT.isPresent()
-                && victim.hasEffect(com.tnc.tnc.magic.TNEffects.LIGHT_SWIFT_FLIGHT.get())) {
-            keep = Math.min(keep, 0.75F);
         }
         // ★ 2026-10-01 光系第二条链（治疗/减伤）：t1 25% / t2 50% / t3 50% / t4 70% / t5 70%
         //   —— 同样走"取最高档、不相乘"✓（作者给的数值直接写在这里，一处可调 ✓）

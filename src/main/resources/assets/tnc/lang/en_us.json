@@ -111,4 +111,8 @@
   "entity.tnc.apollo": "Apollo"
 ,
   "entity.tnc.fighting_angel": "Fighting Angel"
+,
+  "entity.tnc.light_dragon": "Light Dragon"
+,
+  "effect.tnc.light_dragon_scales": "Light Dragon Scales"
 }

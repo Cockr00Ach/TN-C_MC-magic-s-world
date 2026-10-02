@@ -95,23 +95,16 @@ public final class TNLightChainMechanics {
     private static final int CALM_TICKS = 100;
 
     // ------------------------------------------------------------------
-    //  光翼链（第一条链）—— 飞行 ✓
+    //  ★ 飞行已经并进光耀链（作者 2026-10-02："把光魔法的飞行链删去，加入到光耀里，
+    //    释放光耀法术就获得飞行" ✓）—— 原来那条"光翼链"（light_flight /
+    //    light_swift_flight / light_wingspan）整个删掉了 ✓
+    //    ⇒ 现在判"能不能飞"就是看身上有没有**光耀链任一条 buff** ✓（见 graceBuffed ✓），
+    //      飞行时长 = 那一次法术的 buff 时长（12 / 14 / 16 / 18 / 20 秒 ✓），
+    //      顺带把玩家背后的光翼也一起点亮（标记 LIGHT_WINGS ✓ 客户端画翅膀那套没变 ✓）
     // ------------------------------------------------------------------
 
-    /**
-     * 光翼链的一档：法术名 / 该挂的 buff / 时长（秒） / 聊天里叫什么 ✓。
-     *
-     * <p>时长＝作者设计文档给的建议值（t1 30s / t2 20s / t3 12s ✓），
-     * <b>必须和法术 JSON 里的 {@code cooldown_duration} 配套</b> ✓（改这里也要改那边 ✓）。
-     */
-    private record Wing(String path, RegistryObject<MobEffect> buff, int seconds, String name) {
-    }
-
-    private static final Wing[] WINGS = {
-            new Wing("light_flight", TNEffects.LIGHT_FLIGHT, 30, "飞行"),
-            new Wing("light_swift_flight", TNEffects.LIGHT_SWIFT_FLIGHT, 20, "极速飞行"),
-            new Wing("light_wingspan", TNEffects.LIGHT_WINGSPAN, 12, "光翼展开"),
-    };
+    /** 光翼标记的续期（tick）：比 buff 多留一点点，避免"buff 还在、翅膀先掉"✓。 */
+    private static final int WING_MARKER_EXTRA = 20;
 
     // ------------------------------------------------------------------
     //  召唤天使链（第四条链，作者 2026-10-02）—— 会飞的战斗天使 ✓
@@ -165,28 +158,25 @@ public final class TNLightChainMechanics {
     private TNLightChainMechanics() {
     }
 
-    /** 光翼标记的续期（tick）：比 buff 多留一点点，避免"buff 还在、翅膀先掉"✓。 */
-    private static final int WING_MARKER_EXTRA = 20;
+    /** 这个法术是不是本文件的（光耀 / 召唤天使 / 光龙 那几条链 ✓）。 */
+    public static boolean isLightChainSpell(String path) {
+        return find(path) != null || findSummon(path) != null
+                || com.tnc.tnc.light.TNLightDragonChain.isLightDragonSpell(path);
+    }
 
-    private static Wing findWing(String path) {
-        for (Wing wing : WINGS) {
-            if (wing.path().equals(path)) {
-                return wing;
+    /**
+     * ★ 身上有没有**光耀链**任一条 buff（任一档 ✓）—— 这就是"现在能不能飞"的判据 ✓
+     * （作者 2026-10-02：飞行并进光耀链了 ✓）。
+     *
+     * <p>直接照 {@link #SPELLS} 那张表查 ✓ —— 以后加档/改 buff 都不用再动这里 ✓。
+     */
+    private static boolean graceBuffed(ServerPlayer player) {
+        for (Spell spell : SPELLS) {
+            if (spell.buff().isPresent() && player.hasEffect(spell.buff().get())) {
+                return true;
             }
         }
-        return null;
-    }
-
-    /** 这个法术是不是本文件的（三条链都算 ✓：光耀 / 光翼 / 召唤天使 ✓）。 */
-    public static boolean isLightChainSpell(String path) {
-        return find(path) != null || findWing(path) != null || findSummon(path) != null;
-    }
-
-    /** 玩家身上有没有光翼链的 buff（任一档 ✓）。 */
-    private static boolean winged(ServerPlayer player) {
-        return has(player, TNEffects.LIGHT_FLIGHT)
-                || has(player, TNEffects.LIGHT_SWIFT_FLIGHT)
-                || has(player, TNEffects.LIGHT_WINGSPAN);
+        return false;
     }
 
     private static boolean has(ServerPlayer player, RegistryObject<MobEffect> effect) {
@@ -209,24 +199,22 @@ public final class TNLightChainMechanics {
      *
      * <p>★ 作者 2026-10-01："新做了一个阿波罗 boss…就跟公孙衍迷失一样，能放玩家的法术" ✓
      * ⇒ 施法者放宽到 {@link LivingEntity} ✓（阿波罗在自己 {@code aiStep} 里直接调 ✓）；
-     * 飞行链那条路仍然只给玩家 ✗（Boss 不需要光翼 ✓）。
+     * ★ 作者 2026-10-02："释放光耀法术就获得飞行" ✓ ⇒ 光耀链**每一档**都会给玩家飞行 ✓
+     * （见中段那次 {@code grantGraceFlight} ✓；怪物施法当然不给 ✗）。
      */
     public static void onSpellCast(LivingEntity caster, String path) {
-        // ① 光翼链（飞行）另一条路 ✓ —— 先看它，别掉进光耀那张表 ✗（只玩家 ✓）
-        Wing wing = findWing(path);
-        if (wing != null) {
-            if (caster instanceof ServerPlayer player) {
-                castWings(player, wing);
-            }
-            return;
-        }
         Spell spell = find(path);
         if (spell == null) {
-            // ★ 召唤天使链（第四条链 ✓）：和光耀/光翼不一样 —— 它不治疗、不铺大阵，
+            // ★ 召唤天使链（第四条链 ✓）：和光耀不一样 —— 它不治疗、不铺大阵，
             //   只把"会飞的战斗天使"放到主人身边 ✓（见 castSummon ✓）
             Summon summon = findSummon(path);
             if (summon != null) {
                 castSummon(caster, summon);
+                return;
+            }
+            // ★ 光龙链（第五条链 ✓，作者 2026-10-02）：吐息 / 鳞甲 / 召唤光龙 ✓
+            if (com.tnc.tnc.light.TNLightDragonChain.isLightDragonSpell(path)) {
+                com.tnc.tnc.light.TNLightDragonChain.onSpellCast(caster, path);
             }
             return;
         }
@@ -253,6 +241,11 @@ public final class TNLightChainMechanics {
                     spell.buffSeconds() * 20, 0, false, true, true));
         }
         healed++;
+        // ★ 作者 2026-10-02："释放光耀法术就获得飞行" ✓ —— 光耀**每一档**都给玩家飞行 ✓
+        //   （时长 = 这一次的 buff 时长 ✓；随后每 tick 由 tickGraceFlight 续/收 ✓）
+        if (caster instanceof ServerPlayer self) {
+            grantGraceFlight(self, spell.buffSeconds());
+        }
         if (playerCaster) {
             List<Player> allies = level.getEntitiesOfClass(Player.class,
                     new AABB(at, at).inflate(spell.radius()));
@@ -264,6 +257,10 @@ public final class TNLightChainMechanics {
                 if (spell.buff().isPresent()) {
                     ally.addEffect(new MobEffectInstance(spell.buff().get(),
                             spell.buffSeconds() * 20, 0, false, true, true));
+                }
+                // 队友也一起飞 ✓（光耀是范围法术，只给施法者飞会很怪 ✗）
+                if (ally instanceof ServerPlayer mate) {
+                    grantGraceFlight(mate, spell.buffSeconds());
                 }
                 healed++;
             }
@@ -305,7 +302,8 @@ public final class TNLightChainMechanics {
 
         if (caster instanceof ServerPlayer player) {
             player.displayClientMessage(Component.literal("§e[TN-C] §r" + spellName(spell)
-                    + " §7（" + healed + " 人受治疗，范围 " + (int) spell.radius() + " 格）"), true);
+                    + " §7（" + healed + " 人受治疗，范围 " + (int) spell.radius()
+                    + " 格 · " + spell.buffSeconds() + " 秒内可飞行 ✓）"), true);
         }
         LOGGER.info("TN-C/light: 光耀 {} radius={} heal={} caster={}",
                 spell.path(), spell.radius(), healed, caster.getName().getString());
@@ -452,46 +450,39 @@ public final class TNLightChainMechanics {
     }
 
     // ------------------------------------------------------------------
-    //  光翼链：释放 + 每 tick 维持（两条链共用同一个入口文件 ✓）
+    //  ★ 光耀链自带的飞行（原来那条"光翼链"删掉了 ✓，作者 2026-10-02）
     // ------------------------------------------------------------------
 
     /**
-     * 光翼链释放：挂 buff + 挂光翼标记 + <b>立刻给飞行</b> ✓。
+     * 光耀**释放那一刻**就给飞行 + 点亮光翼 ✓。
      *
      * <p>为什么不靠法术 JSON 里的 {@code STATUS_EFFECT}：那是引擎那条链 ✓（这里也留着，不冲突 ✓），
      * 但"能不能飞"必须由**我们自己的代码**保证 —— 作者实测的那次事故里，
      * 引擎把 buff 挂上了，而负责发飞行的事件根本没跑 ✗（见类注释的事故记录）。
-     * 所以这里<b>自己挂一遍</b>：{@code apply_mode = SET} 的语义用 {@code addEffect} 覆盖即可 ✓。
+     * 所以这里<b>自己给一遍</b>：{@code mayfly = true} + 光翼标记 ✓。
+     *
+     * @param seconds 这一次的 buff 时长（飞行也跟着它走 ✓）
      */
-    private static void castWings(ServerPlayer caster, Wing wing) {
-        if (!wing.buff().isPresent()) {
-            LOGGER.warn("TN-C/light: 光翼 buff 没注册，{} 只给了飞行", wing.path());
-        } else {
-            caster.addEffect(new MobEffectInstance(wing.buff().get(),
-                    wing.seconds() * 20, 0, false, true, true));
-        }
-        // 光翼标记（客户端拿它画翅膀 ✓）：比 buff 多留 1 秒，避免"buff 还在、翅膀先掉"✗
+    private static void grantGraceFlight(ServerPlayer player, int seconds) {
         if (TNEffects.LIGHT_WINGS.isPresent()) {
-            caster.addEffect(new MobEffectInstance(TNEffects.LIGHT_WINGS.get(),
-                    wing.seconds() * 20 + WING_MARKER_EXTRA, 0, false, false, false));
+            // 光翼标记（客户端拿它画翅膀 ✓）：比 buff 多留 1 秒，避免"buff 还在、翅膀先掉"✗
+            player.addEffect(new MobEffectInstance(TNEffects.LIGHT_WINGS.get(),
+                    seconds * 20 + WING_MARKER_EXTRA, 0, false, false, false));
         }
-        giveFlight(caster, true);
-        caster.displayClientMessage(Component.literal("§b[TN-C] §r" + wing.name()
-                + " §7（" + wing.seconds() + " 秒内可飞行：双击空格起飞）"), true);
-        LOGGER.info("TN-C/light: 光翼 {} ticks={} mayfly=true", wing.path(), wing.seconds() * 20);
+        giveFlight(player, true);
+        LOGGER.info("TN-C/light: 光耀给飞行 {} 秒", seconds);
     }
 
     /**
-     * 每 tick 维持光翼链的状态 ✓（由 {@code TnSpellMechanics.tickPlayer} 调用 —— <b>那条路已证实活着</b> ✓）。
+     * 每 tick 维持光耀给的飞行 ✓（由 {@code TnSpellMechanics.tickPlayer} 调用 —— <b>那条路已证实活着</b> ✓）。
      *
      * <ul>
-     *   <li>有光翼 buff ⇒ 续标记 ＋ 保证 {@code mayfly} ✓；</li>
+     *   <li>身上还有光耀 buff ⇒ 续光翼标记 ＋ 保证 {@code mayfly} ✓；</li>
      *   <li>buff 掉了 ⇒ 收标记 ＋ 收回飞行 ✓（创造/旁观不碰 ✗ —— 那不是我们给的 ✓）。</li>
      * </ul>
      */
-    public static void tickWings(ServerPlayer player) {
-        boolean on = winged(player);
-        if (on) {
+    public static void tickGraceFlight(ServerPlayer player) {
+        if (graceBuffed(player)) {
             if (TNEffects.LIGHT_WINGS.isPresent()) {
                 // ★ 只在快到期时续（阈值 30 tick ✓）—— 每 tick 都 addEffect 会每 tick 发一次
                 //   同步包 ✗（600 包/半分钟），纯浪费 ✓

@@ -30,13 +30,12 @@ class SpellCatalogStructureTest {
     /**
      * "不满档"的链（作者规格就是这么多档）✓ —— 记在这里，免得后来人以为是漏做 ✗。
      *
-     * <p>目前只有一条：**光系「光翼」链**（飞行 → 极速飞行 → 光翼展开，2026-10-01 作者指定，
-     * 见 {@code docs/光系链_设计.md} 第一节："链结构（3 档，均为自身增益）"✓）。
-     * 加进来的时候**必须写清依据** ✗ —— 这条表就是"故意不满档"的白名单 ✓。
+     * <p>★ 2026-10-02：原来这里记的是光系「光翼」链（3 档 ✓）—— 作者要求
+     * <b>"把光魔法的飞行链删去，加入到光耀里"</b> ⇒ 那条链整条删掉了，
+     * 白名单**空了** ✓（现在每条链都是满 5 档 ✓）。
+     * 以后要加不满档的链，**必须在这里写清依据** ✗。
      */
-    private static final Map<String, Integer> EXPECTED_TIER_COUNT = Map.of(
-            "光 · 光翼", 3
-    );
+    private static final Map<String, Integer> EXPECTED_TIER_COUNT = Map.of();
 
     @Test
     void everyChainHasExactlyOneSpellPerTier() {

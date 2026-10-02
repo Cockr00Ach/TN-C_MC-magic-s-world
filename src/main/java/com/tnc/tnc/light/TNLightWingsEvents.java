@@ -7,7 +7,12 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 /**
- * 光翼的"每 tick 维持"入口 ✓ —— 真正的逻辑在 {@link TNLightChainMechanics#tickWings}（数值也都在那边 ✓）。
+ * 光耀给的飞行"每 tick 维持"入口 ✓ —— 真正的逻辑在 {@link TNLightChainMechanics#tickGraceFlight}
+ * （数值也都在那边 ✓）。
+ *
+ * <p>★ 2026-10-02：飞行原来属于单独的"光翼链"（light_flight / light_swift_flight /
+ * light_wingspan ✓），作者要求**删掉那条链、并进光耀** ⇒ 现在判据是"身上有没有光耀 buff" ✓
+ * （类名/文件名保留 ✗ —— 它现在只管"给光耀玩家续翅膀 + 续 mayfly" ✓）。
  *
  * <h2>★ 2026-10-01 事故：飞行链"既飞不了也看不到翅膀"</h2>
  * 这个类原来把逻辑挂在 {@code TickEvent.PlayerTickEvent} 上 ✗ —— 而<b>该事件在本仓库里是死的</b> ✗
@@ -17,7 +22,7 @@ import net.minecraftforge.fml.common.Mod;
  *
  * <p>现在改挂 {@code TickEvent.ServerTickEvent}（<b>已证活着的那个</b> ✓，和
  * {@code TnSpellMechanics.onServerTick} 同一个）＋ 同时由 {@code TnSpellMechanics.tickPlayer}
- * 转发一份 ✓ —— 两条路互为保险，{@code tickWings} 本身幂等（状态没变不发包 ✓）。
+ * 转发一份 ✓ —— 两条路互为保险，{@code tickGraceFlight} 本身幂等（状态没变不发包 ✓）。
  */
 @Mod.EventBusSubscriber(modid = TNMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class TNLightWingsEvents {
@@ -32,7 +37,7 @@ public final class TNLightWingsEvents {
             return;
         }
         for (ServerPlayer player : event.getServer().getPlayerList().getPlayers()) {
-            TNLightChainMechanics.tickWings(player);
+            TNLightChainMechanics.tickGraceFlight(player);
         }
     }
 }

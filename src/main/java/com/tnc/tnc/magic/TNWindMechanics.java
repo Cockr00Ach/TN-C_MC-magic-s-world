@@ -294,11 +294,12 @@ public final class TNWindMechanics {
         player.onUpdateAbilities();
     }
 
-    /** 光翼链的任一档 buff 在身（t1 飞行 / t2 极速飞行 / t3 光翼展开 ✓）。 */
+    /**
+     * 光耀链给的飞行在不在身 ✓（作者 2026-10-02：飞行并进光耀链了，光翼链整条删掉 ✓）。
+     * 判据就是那个**光翼标记** ✓ —— 光耀 buff 在身时由 {@code TNLightChainMechanics.tickGraceFlight} 挂着 ✓。
+     */
     private static boolean lightWings(ServerPlayer player) {
-        return hasLightEffect(player, TNEffects.LIGHT_FLIGHT)
-                || hasLightEffect(player, TNEffects.LIGHT_SWIFT_FLIGHT)
-                || hasLightEffect(player, TNEffects.LIGHT_WINGSPAN);
+        return hasLightEffect(player, TNEffects.LIGHT_WINGS);
     }
 
     private static boolean hasLightEffect(ServerPlayer player,

@@ -45,5 +45,8 @@ public final class TNSpellOrbClientEvents {
         // ★ 战斗天使（光法第 4 条链「召唤天使」✓）：GeckoLib 模型 + 按档位放大，见 TNFightingAngelRenderer ✓
         event.registerEntityRenderer(TNOrbEntities.FIGHTING_ANGEL.get(),
                 com.tnc.tnc.light.client.TNFightingAngelRenderer::new);
+        // ★ 光明龙（光法第 5 条链「光龙」✓）：作者的东方龙 + 半透明自发光，见 TNDragonRenderer ✓
+        event.registerEntityRenderer(TNOrbEntities.LIGHT_DRAGON.get(),
+                com.tnc.tnc.light.client.TNDragonRenderer::new);
     }
 }

@@ -5,9 +5,6 @@
     "tnc:divine_light",
     "tnc:angel_descent",
     "tnc:angel_mercy",
-    "tnc:light_flight",
-    "tnc:light_swift_flight",
-    "tnc:light_wingspan",
     "tnc:light_beam",
     "tnc:great_light_beam",
     "tnc:giant_light_beam",
@@ -17,6 +14,11 @@
     "tnc:angel_twins",
     "tnc:angel_legion",
     "tnc:seraph_descent",
-    "tnc:archangel"
+    "tnc:archangel",
+    "tnc:light_dragon_breath",
+    "tnc:light_dragon_scales",
+    "tnc:summon_light_dragon",
+    "tnc:light_dragon_dive",
+    "tnc:light_dragon_descend"
   ]
 }

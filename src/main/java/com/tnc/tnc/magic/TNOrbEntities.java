@@ -146,6 +146,23 @@ public final class TNOrbEntities {
                     .updateInterval(2)
                     .build("tnc:fighting_angel"));
 
+    /**
+     * ★ 光系第五条链「光龙」的**光明龙** ✓（作者 2026-10-02："新增加一条光龙链" ✓）。
+     *
+     * <p>它是 {@link com.tnc.tnc.light.TNDragonEntity}（作者的东方龙模型 ✓ 23 格长 / 41 骨骼 ✓）：
+     * 会飞、跟着主人、有敌人就低头**冲刺**（dash 动画 ✓）从敌人身上扫过去 ✓。
+     *
+     * <p>碰撞箱只给身体那一小段（2.5 × 2 格 ✓）—— 23 格全进碰撞箱会卡墙 ✗；
+     * 渲染缩放由法术写进实体（t3 0.30 / t4 0.40 / t5 0.45 ✓），剔除由实体自己按体长撑 ✓。
+     */
+    public static final RegistryObject<EntityType<com.tnc.tnc.light.TNDragonEntity>> LIGHT_DRAGON =
+            ENTITY_TYPES.register("light_dragon", () -> EntityType.Builder
+                    .of(com.tnc.tnc.light.TNDragonEntity::new, MobCategory.CREATURE)
+                    .sized(2.5F, 2.0F)
+                    .clientTrackingRange(16)
+                    .updateInterval(2)
+                    .build("tnc:light_dragon"));
+
     private TNOrbEntities() {
     }
 

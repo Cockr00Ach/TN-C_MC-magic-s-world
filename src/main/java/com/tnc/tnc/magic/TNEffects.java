@@ -59,26 +59,31 @@ public final class TNEffects {
                     0x7FE8FF, Attributes.MOVEMENT_SPEED, 0.70D,
                     AttributeModifier.Operation.MULTIPLY_BASE));
 
-    /** 光翼：光亲和力够就挂着（飞行 + 客户端画翅膀，逻辑在 light/TNLightWingsEvents ✓）。 */
+    /**
+     * ★ 光翼标记（客户端拿它画玩家背后的光翼 ✓，逻辑在 {@code light/TNLightWingsEvents} ✓）。
+     *
+     * <p>★ 2026-10-02：原来那条"光翼链"（light_flight / light_swift_flight / light_wingspan）
+     * 被作者要求**删掉、并进光耀链** ✗ ⇒ 现在这个标记由**光耀 buff**驱动：
+     * 身上有光耀任一档 buff 就挂着它 + 给 {@code mayfly} ✓（见
+     * {@code TNLightChainMechanics.tickGraceFlight} ✓）。**这个标记本身保留** ✓
+     * —— 翅膀模型/贴图/渲染器都还在用 ✓。
+     */
     public static final RegistryObject<MobEffect> LIGHT_WINGS =
             EFFECTS.register("light_wings", () -> new MobEffect(
                     MobEffectCategory.BENEFICIAL, 0xFFE9A8) {
             });
-    /**
-     * 光系链 t1「飞行」：纯标记 ✓ —— 飞行与光翼由 {@code light/TNLightWingsEvents} 负责 ✓。
-     */
-    public static final RegistryObject<MobEffect> LIGHT_FLIGHT =
-            EFFECTS.register("light_flight", () -> new MobEffect(
-                    MobEffectCategory.BENEFICIAL, 0xFFE9A8) {
-            });
 
     /**
-     * ★★ 光系<b>第二条链</b>（治疗 + 减伤，作者 2026-10-01 定）的五个 buff ✓
+     * ★★ 光系<b>第二条链</b>（治疗 + 减伤 + <b>飞行</b>，作者 2026-10-01 定、2026-10-02 并入飞行 ✓）
+     * 的五个 buff ✓
      *
      * <p>减伤数值**不在效果里**做 ✗ —— 一律由 {@code armor/TNIronArmorEvents} 在
-     * {@code LivingHurtEvent} 里按"取最高档、不相乘"统一结算 ✓（和铁甲 99% / 光翼 50% 同一处 ✓）。
+     * {@code LivingHurtEvent} 里按"取最高档、不相乘"统一结算 ✓（和铁甲 99% / 光龙鳞甲 50% 同一处 ✓）。
      * 这里只管"标记 + 时长"：t1 25% / t2 50% / t3 50% / t4 70% / t5 70% ✓。
      * 颜色统一走光系的暖白（{@code 0xFFF6DC}）✓。
+     *
+     * <p><b>飞行也挂在这五个 buff 上</b> ✓ —— 作者 2026-10-02："释放光耀法术就获得飞行" ✓：
+     * 时长就是这里的 {@code buffSeconds}（12 / 14 / 16 / 18 / 20 秒 ✓）。
      */
     public static final RegistryObject<MobEffect> LIGHT_RADIANCE =
             EFFECTS.register("light_radiance", () -> new MobEffect(
@@ -113,30 +118,24 @@ public final class TNEffects {
             });
 
     /**
-     * 光系链 t2「极速飞行」：移动速度 <b>+50%</b> ✓（减伤 25% 在受伤事件里 ✓）。
+     * ★ 光龙链 t2「光龙鳞甲」：移动速度 <b>+20%</b> ✓（减伤 50% 在受伤事件里 ✓）
+     * ＋ 光属性伤害 <b>+30%</b> ✓（照 {@link #DARK_POWER} 的写法，没装 spell_power 时只加速度、不崩 ✓）。
+     *
+     * <p>光龙链 = 作者 2026-10-02 新增的第五条光链 ✓（用的是那条东方光明龙 ✓）。
      */
-    public static final RegistryObject<MobEffect> LIGHT_SWIFT_FLIGHT =
-            EFFECTS.register("light_swift_flight", () -> new AttributeBuff(0xFFE9A8,
-                    Attributes.MOVEMENT_SPEED, 0.50D, AttributeModifier.Operation.MULTIPLY_BASE));
-
-    /**
-     * 光系链 t3「光翼展开」：移动速度 <b>+150%</b> ✓ ＋ 光属性伤害 <b>+50%</b> ✓
-     * （光在引擎里映射 {@code spell_power:healing} ✓，照 {@link #DARK_POWER} 的写法，
-     * 没装 spell_power 时只加速度、不崩 ✓）。减伤 50% 同样在受伤事件里 ✓。
-     */
-    public static final RegistryObject<MobEffect> LIGHT_WINGSPAN =
-            EFFECTS.register("light_wingspan", () -> new MobEffect(
-                    MobEffectCategory.BENEFICIAL, 0xFFD98A) {
+    public static final RegistryObject<MobEffect> LIGHT_DRAGON_SCALES =
+            EFFECTS.register("light_dragon_scales", () -> new MobEffect(
+                    MobEffectCategory.BENEFICIAL, 0xFFE08A) {
                 {
                     addAttributeModifier(Attributes.MOVEMENT_SPEED,
-                            uuidFor("tnc:light_wingspan_speed"), 1.50D,
+                            uuidFor("tnc:light_dragon_scales_speed"), 0.20D,
                             AttributeModifier.Operation.MULTIPLY_BASE);
                     Attribute healing = ForgeRegistries.ATTRIBUTES.getValue(
                             net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(
                                     "spell_power", "healing"));
                     if (healing != null) {
-                        addAttributeModifier(healing, uuidFor("tnc:light_wingspan_heal"),
-                                0.50D, AttributeModifier.Operation.MULTIPLY_BASE);
+                        addAttributeModifier(healing, uuidFor("tnc:light_dragon_scales_heal"),
+                                0.30D, AttributeModifier.Operation.MULTIPLY_BASE);
                     }
                 }
             });

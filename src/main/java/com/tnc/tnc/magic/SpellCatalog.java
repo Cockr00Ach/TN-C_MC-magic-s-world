@@ -74,20 +74,15 @@ public final class SpellCatalog {
         DARK_FOG("黑雾", "弥漫的黑色雾气"),
         INDEPENDENT("独立魔法", "不属于任何元素，无亲和力要求"),
         /**
-         * ★ 光系<b>第二条链</b>（治疗 + 减伤，作者 2026-10-01 定）：光芒照耀 → 圣光 → 神光 →
-         * 天使降临 → 天使的悲悯 ✓。第一条光链是"飞行/光翼"（{@code light_flight} 那套 ✓），
-         * 所以这条链**不带飞行** ✗ —— 只做治疗、减伤、法阵与天使 ✓。
-         */
-        LIGHT_GRACE("光耀", "治疗与减伤（光系第二条链）"),
-        /**
-         * ★ 光系<b>第一条链</b>「光翼」（作者 2026-10-01 指定，见 {@code docs/光系链_设计.md}）：
-         * 飞行 → 极速飞行 → 光翼展开 ✓（3 档，全是自身增益 ✓）。
+         * ★ 光系<b>第二条链</b>「光耀」（治疗 + 减伤 + <b>飞行</b>，作者 2026-10-01 定）：
+         * 光芒照耀 → 圣光 → 神光 → 天使降临 → 天使的悲悯 ✓。
          *
-         * <p>⚠️ 两条新链**必须追加在枚举末尾** ✗ —— 存档里的进度按**链的序数**存
-         * （{@code MagicStoneData} 的按链索引数组 ✓），插在中间会把所有人的技能页错位 ✗✗
-         * （设计文档第三节明确警告过 ✓）。所以 {@code INDEPENDENT} 之后才是这两条 ✓。
+         * <p>★ 2026-10-02 作者：<b>"把光魔法的飞行链删去，加入到光耀里，释放光耀法术就获得飞行"</b> ✓
+         * ⇒ 原来那条「光翼」链（light_flight / light_swift_flight / light_wingspan）**整条删除** ✗，
+         * 飞行改成"身上有光耀 buff 就能飞" ✓（时长 = 该档 buff 时长 12/14/16/18/20 秒 ✓，
+         * 背后的光翼也一起点亮 ✓）。所以这条链现在同时管：治疗 / 减伤 / 飞行 ✓。
          */
-        LIGHT_WINGS("光翼", "飞行与极速（光系第一条链）"),
+        LIGHT_GRACE("光耀", "治疗、减伤与飞行（光系第二条链）"),
         /**
          * ★ 光系<b>第三条链</b>「光线」（作者 2026-10-01 指定）：
          * 光线（向前数道细彩色光线）→ 大光线（粗）→ 巨大光线（极粗）
@@ -109,7 +104,18 @@ public final class SpellCatalog {
          *
          * <p>⚠️ 和其它新链一样：**必须追加在枚举末尾** ✗（存档按链的序数存进度 ✗）。
          */
-        LIGHT_SUMMON("召唤天使", "召唤会飞的战斗天使（光系第四条链）");
+        LIGHT_SUMMON("召唤天使", "召唤会飞的战斗天使（光系第四条链）"),
+        /**
+         * ★ 光系<b>第五条链</b>「光龙」（作者 2026-10-02 指定 ✓）：
+         * 光龙吐息 → 光龙鳞甲 → 召唤光龙 → 光龙俯冲 → 光龙降世 ✓。
+         *
+         * <p>主角是那条**东方光明龙**（{@code geo/entity/dragon.geo.json} ✓ 23 格长、
+         * 41 骨骼、模型由作者手改 ✓）：会飞、绕着你转、有敌人就**低头冲刺**（dash 动画 ✓）
+         * 并从身上扫过造成伤害 ✓。档位越高：龙越大、越多、血越厚 ✓。
+         *
+         * <p>⚠️ 和其它新链一样：**必须追加在枚举末尾** ✗（存档按链的序数存进度 ✗）。
+         */
+        LIGHT_DRAGON("光龙", "召唤光明龙（光系第五条链）");
 
         private final String cn;
         private final String desc;
@@ -246,17 +252,10 @@ public final class SpellCatalog {
             of(Element.LIGHT, "angel_descent", Chain.LIGHT_GRACE, 4, "天使降临"),
             of(Element.LIGHT, "angel_mercy", Chain.LIGHT_GRACE, 5, "天使的悲悯"),
 
-            // ---- 光翼线（光系第一条链，作者 2026-10-01 指定；见 docs/光系链_设计.md）----
-            //   1 飞行：展开光翼 + 可飞（原版 mayfly），无速度/减伤
-            //   2 极速飞行：+50% 速度、减伤 25%
-            //   3 光翼展开：+150% 速度、减伤 50%、光属性(healing)伤害 +50%
-            //   ★ 链级规则：这条链的**任一** buff 在身 ⇒ 光翼展开且可飞 ✓（不看亲和力 ✓，
-            //     实现在 light/TNLightWingsEvents ✓）
-            //   时长/冷却：t1 30s/CD40、t2 20s/CD60、t3 12s/CD120 ✓
-            //   （设计文档给的**建议值** ✓ —— 作者要改就改这三个 JSON + TNLightWingsEvents 的注释 ✓）
-            of(Element.LIGHT, "light_flight", Chain.LIGHT_WINGS, 1, "飞行"),
-            of(Element.LIGHT, "light_swift_flight", Chain.LIGHT_WINGS, 2, "极速飞行"),
-            of(Element.LIGHT, "light_wingspan", Chain.LIGHT_WINGS, 3, "光翼展开"),
+            // ---- 光翼线：★ 2026-10-02 作者要求**整条删掉** ✗（"把光魔法的飞行链删去，
+            //      加入到光耀里，释放光耀法术就获得飞行" ✓）—— light_flight /
+            //      light_swift_flight / light_wingspan 三个法术 + 法术 JSON + 图标都删了 ✓，
+            //      飞行改成"光耀 buff 在身就能飞" ✓（见 Chain.LIGHT_GRACE ✓）
 
             // ---- 光线线（光系第三条链，作者 2026-10-01 指定）----
             //   1 光线：向前 3 道细的彩色光线（扇形散开）
@@ -286,6 +285,20 @@ public final class SpellCatalog {
             of(Element.LIGHT, "angel_legion", Chain.LIGHT_SUMMON, 3, "天使军团"),
             of(Element.LIGHT, "seraph_descent", Chain.LIGHT_SUMMON, 4, "炽天使降临"),
             of(Element.LIGHT, "archangel", Chain.LIGHT_SUMMON, 5, "大天使长"),
+
+            // ---- 光龙线（光系第五条链，作者 2026-10-02 指定）----
+            //   1 光龙吐息：向前喷出一道金色光柱（复用光线链的实体光柱 ✓ 尺寸加大）
+            //   2 光龙鳞甲：自己 + 队友 减伤 50% + 速度 +20% + 光伤 +30%，20 秒
+            //   3 召唤光龙：1 条（0.30 倍 ≈ 7 格长）
+            //   4 光龙俯冲：1 条更大的（0.40）+ 天上落一道圣光
+            //   5 光龙降世：2 条最大的（0.45）+ 大号圣光天降
+            //   ★ 龙会跟着你、有敌人就**低头冲刺**（用 dash 动画 ✓）从敌人身上扫过去造成伤害 ✓
+            //   （数值全在 light/TNLightDragonChain 的一张表里 ✓，改那里就行 ✓）
+            of(Element.LIGHT, "light_dragon_breath", Chain.LIGHT_DRAGON, 1, "光龙吐息"),
+            of(Element.LIGHT, "light_dragon_scales", Chain.LIGHT_DRAGON, 2, "光龙鳞甲"),
+            of(Element.LIGHT, "summon_light_dragon", Chain.LIGHT_DRAGON, 3, "召唤光龙"),
+            of(Element.LIGHT, "light_dragon_dive", Chain.LIGHT_DRAGON, 4, "光龙俯冲"),
+            of(Element.LIGHT, "light_dragon_descend", Chain.LIGHT_DRAGON, 5, "光龙降世"),
 
             // ================= 骨架（法术 JSON 待补，先占名字对齐文档）=================
             // 水魔法：水球 / 水纹 / 水缚 / 雨滴
