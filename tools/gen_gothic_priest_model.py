@@ -106,16 +106,17 @@ def texture():
                 img.putpixel((x, y), fn(x - x0, y - y0, w, h))
 
     # ---- 皮肤：作者要"光的那种彩色" -> 虹彩/棱镜渐变（HSV 沿两轴旋转 + 珍珠质感）----
-    def prismatic(x, y, w, h):
-        hue = ((x / float(w)) * 300.0 + (y / float(h)) * 70.0) % 360.0
-        sat = 0.42 + 0.10 * ((x + y) % 3) / 2.0        # 珍珠感：饱和度不高
-        val = 0.86 + 0.14 * (1.0 - y / float(h))       # 上亮下略暗，像受光
-        r, g, b = colorsys.hsv_to_rgb(hue / 360.0, sat, val)
-        # 边缘压暗一点，勾出轮廓
-        edge = x in (0, w - 1) or y in (0, h - 1)
-        k = 0.72 if edge else 1.0
-        return (int(r * 255 * k), int(g * 255 * k), int(b * 255 * k), 255)
-    fill(0, 0, 16, 16, prismatic)
+    def prism(hue0, hueSpan, sat, val, vdrop=0.14, edge=0.72):
+        """虹彩（作者："皮肤/服饰都要光的那种彩色"）—— 同一套算法，不同区间 ✓"""
+        def f(x, y, w, h):
+            hue = (hue0 + (x / float(w)) * hueSpan + (y / float(h)) * hueSpan * 0.25) % 360.0
+            s = max(0.05, min(1.0, sat + 0.08 * ((x + y) % 3) / 2.0))
+            v = max(0.05, min(1.0, val + vdrop * (1.0 - y / float(h))))
+            r, g, b = colorsys.hsv_to_rgb(hue / 360.0, s, v)
+            k = edge if (x in (0, w - 1) or y in (0, h - 1)) else 1.0
+            return (int(r * 255 * k), int(g * 255 * k), int(b * 255 * k), 255)
+        return f
+    fill(0, 0, 16, 16, prism(0, 300, 0.42, 0.86))                       # 皮肤：珍珠虹彩 ✓
     def cloth(base, seam):
         def f(x, y, w, h):
             if y % 5 == 0:
@@ -123,14 +124,11 @@ def texture():
             j = rng.randint(-5, 5)
             return (max(0, base[0]+j), max(0, base[1]+j), max(0, base[2]+j), 255)
         return f
-    fill(16, 0, 16, 16, cloth((38, 34, 44), (22, 20, 28)))       # robe black
-    fill(32, 0, 16, 16, cloth((108, 28, 40), (76, 18, 28)))      # crimson
-    def gold(x, y, w, h):
-        if (x + y) % 4 == 0:
-            return (120, 96, 44, 255)
-        return (196, 162, 82, 255)
-    fill(48, 0, 16, 16, gold)                                     # gold
-    fill(64, 0, 16, 16, cloth((72, 52, 62), (48, 34, 42)))        # hood lining
+    # ---- 服饰四块同样是虹彩 ✓（各自区间不同，层次还在 ✓）----
+    fill(16, 0, 16, 16, prism(200, 200, 0.55, 0.26))   # 黑袍：低明度、偏蓝紫 => 暗处流光 ✓
+    fill(32, 0, 16, 16, prism(330, 120, 0.62, 0.52))   # 深红：偏红区间、中明度 ✓
+    fill(48, 0, 16, 16, prism(35, 120, 0.66, 0.86))    # 金饰：偏金区间、高明度 => 最亮 ✓
+    fill(64, 0, 16, 16, prism(150, 180, 0.45, 0.40))   # 兜帽内衬：偏青区间、中低明度 ✓
     def wood(x, y, w, h):
         if x % 3 == 0:
             return (52, 36, 26, 255)
