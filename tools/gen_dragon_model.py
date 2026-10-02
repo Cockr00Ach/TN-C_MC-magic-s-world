@@ -2,6 +2,14 @@
 """
 gen_dragon_model.py -- a RIGGED **Eastern dragon** (Chinese / dragon-dance style).
 
+★★ 2026-10-02 起：作者自己动手改了模型（41 骨骼 / 100 方块、他自己的 box-UV 布局、
+   腿和须暂时是空骨骼 ✓）⇒ **不要再直接跑本脚本** ✗（会覆盖他的改动；脚本里已经加了
+   拒绝覆盖的闸门，只有 --force 才会写 ✓）。
+   他的模型现在只需要"贴图 + 动画"：
+     贴图  -> tools/retexture_dragon.py   （只写 png，绝不碰 geo ✓）
+     动画  -> tools/gen_dragon_animation.py（dash 冲刺 / idle ✓）
+   本脚本留着是为了：以后要重新生成一版模型时还能用 ✓（改色/改结构都在这里 ✓）。
+
 Author 2026-10-02: "生成一个巨龙的模型，我要骨骼的" -> first pass was a western dragon
 ("太粗糙了") -> "我想要那种东方的，舞龙的那样长长的" (this file).
 
@@ -388,6 +396,7 @@ def build():
 
 
 def main():
+    import sys
     repo = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     gp = os.path.join(repo, "src", "main", "resources", "assets", "tnc", "geo", "entity", NAME + ".geo.json")
     tp = os.path.join(repo, "src", "main", "resources", "assets", "tnc", "textures", "entity", NAME + "_bedrock.png")
@@ -395,6 +404,22 @@ def main():
     for p in (gp, tp, pp):
         os.makedirs(os.path.dirname(p), exist_ok=True)
     geo, tex, rep = build()
+
+    # ★ 作者 2026-10-02 自己改过这个模型 ⇒ 这里**拒绝覆盖** ✗（不然他手改的东西就没了）
+    #   要重画贴图请用 tools/retexture_dragon.py ✓（它只动 png，不动 geo ✓）
+    if os.path.exists(gp) and "--force" not in sys.argv:
+        try:
+            old = json.load(open(gp, encoding="utf-8"))["minecraft:geometry"][0]
+            old_cubes = sum(len(b.get("cubes", [])) for b in old["bones"])
+        except Exception:
+            old_cubes = -1
+        if old_cubes != rep["cubes"]:
+            print("REFUSING to overwrite %s" % os.path.relpath(gp, repo))
+            print("  on disk : %d cubes   this script would write: %d cubes" % (old_cubes, rep["cubes"]))
+            print("  (the author edited the model by hand - use tools/retexture_dragon.py instead;"
+                  " add --force only if you really mean to throw his edit away)")
+            return
+
     with open(gp, "w", encoding="utf-8", newline="\n") as f:
         json.dump(geo, f, indent=2, ensure_ascii=False)
         f.write("\n")
