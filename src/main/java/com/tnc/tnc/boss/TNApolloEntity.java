@@ -50,28 +50,33 @@ public class TNApolloEntity extends Monster implements GeoEntity {
     public static final float MAX_HP = 2500.0F;
 
     /**
-     * 五个法术：{索引, 权重} ✓。
+     * 六个法术：{索引, 权重} ✓。
      *
      * <p>★ 作者 2026-10-01 调整："把 boss 的法术里 t1 光线删了，加上 t2 和 t3 吧，
      * 然后光耀链只留下 t5，然后 boss 的 t2t3 光线长度增加三倍" ✓
-     * ⇒ 现在的五招是：光线 t2 / t3 / t4 / t5 ＋ 光耀 t5 ✗（t1 与光耀 t4 都删了 ✓）。
+     * ⇒ 光线 t2 / t3 / t4 / t5 ＋ 光耀 t5 ✗（t1 与光耀 t4 都删了 ✓）。
+     *
+     * <p>★ 随后又补了一句："给阿波罗加上召唤天使 t4" ✓ ⇒ 把 <b>光耀 t4「天使降临」</b>
+     * （{@code angel_descent}：法阵 ＋ <b>6 格高天使</b>）加回来 ✓ —— 六招 ✓。
      */
-    private static final int[][] SPELLS = {{0, 4}, {1, 3}, {2, 2}, {3, 2}, {4, 1}};
+    private static final int[][] SPELLS = {{0, 4}, {1, 3}, {2, 2}, {3, 2}, {4, 1}, {5, 1}};
 
-    /** 五招分别对应哪个法术 ✓（顺序和 {@link #SPELLS} 的索引一致 ✓）。 */
+    /** 六招分别对应哪个法术 ✓（顺序和 {@link #SPELLS} 的索引一致 ✓）。 */
     private static final String[] PATHS = {
-            "great_light_beam", "giant_light_beam", "holy_light_descent", "radiant_barrage", "angel_mercy"};
+            "great_light_beam", "giant_light_beam", "holy_light_descent", "radiant_barrage",
+            "angel_mercy", "angel_descent"};
 
-    /** 是不是"光线链"的招 ✓（前四个是；最后一个是光耀链 ✗ —— 两条链的入口不一样 ✓）。 */
-    private static final boolean[] IS_BEAM = {true, true, true, true, false};
+    /** 是不是"光线链"的招 ✓（前四个是；后两个是光耀链 ✗ —— 两条链的入口不一样 ✓）。 */
+    private static final boolean[] IS_BEAM = {true, true, true, true, false, false};
 
     /** 光柱长度倍数 ✓ —— 作者："boss 的 t2t3 光线长度增加三倍" ⇒ 前两招 ×3 ✓，其余原长 ✓。 */
-    private static final double[] LENGTH_SCALE = {3.0D, 3.0D, 1.0D, 1.0D, 1.0D};
+    private static final double[] LENGTH_SCALE = {3.0D, 3.0D, 1.0D, 1.0D, 1.0D, 1.0D};
 
     /** 每个法术对应的动画名与动画时长（tick）——"等动画播完再施法" ✓ */
     private static final String[] ANIM = {
-            "palymagic_t1", "palymagic_t1", "palymagic_t4_t5", "palymagic_t4_t5", "palymagic_t4_t5"};
-    private static final int[] CAST_TICKS = {55, 55, 60, 60, 60};
+            "palymagic_t1", "palymagic_t1", "palymagic_t4_t5", "palymagic_t4_t5",
+            "palymagic_t4_t5", "palymagic_t4_t5"};
+    private static final int[] CAST_TICKS = {55, 55, 60, 60, 60, 60};
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private int castCooldown = 80;
