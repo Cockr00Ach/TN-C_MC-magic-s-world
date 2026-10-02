@@ -77,14 +77,17 @@ public final class TNLightBeamMechanics {
     };
 
     /**
-     * 光柱存活时长（tick）—— ★ 作者 2026-10-01："光束太短了，长个三四倍吧" ⇒ 18 → <b>60</b>（3 秒 ✓）。
+     * 光柱存活时长（tick）。
+     *
+     * <p>★ 作者 2026-10-01 两轮调整："光束太短了，长个三四倍吧" ⇒ 18 → 60（3 秒 ✓）；
+     * 紧接着"持续时间加一倍" ⇒ 60 → <b>120</b>（6 秒 ✓）。
      *
      * <p>注意：变长**不会**让伤害变多 ✓（每个敌人每条光线仍然只挨一次 ✓）；
-     * 变长的效果是"这条锁定激光一直咬着目标 3 秒"✓ —— 目标跑，光柱跟着转 ✓。
+     * 变长的效果是"这条锁定激光一直咬着目标"✓ —— 目标跑，光柱跟着转 ✓。
      */
-    private static final int BEAM_LIFE = 60;
-    /** 天降的魔法阵留在天上的时长（tick）✓ —— 要盖过"1 秒延迟 + 3 秒光柱"✓。 */
-    private static final int SKY_CIRCLE_LIFE = 180;
+    private static final int BEAM_LIFE = 120;
+    /** 天降的魔法阵留在天上的时长（tick）✓ —— 要盖过"1 秒延迟 + 6 秒光柱"✓。 */
+    private static final int SKY_CIRCLE_LIFE = 300;
     /** 天降时阵离地多高（格 ✓）—— 作者说光束太短 ⇒ 16 → <b>28</b>（天降那根柱子也更长 ✓）。 */
     private static final double SKY_HEIGHT = 28.0D;
     /**
