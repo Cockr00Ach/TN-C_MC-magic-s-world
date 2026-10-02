@@ -143,10 +143,11 @@ public final class TNLightBeamMechanics {
         final Spell spell;
         final int style;
         final LivingEntity target;
+        final double sizeScale;
         int delay;
 
         Pending(ServerLevel level, LivingEntity caster, Vec3 from, Vec3 dir,
-                Spell spell, int style, int delay, LivingEntity target) {
+                Spell spell, int style, int delay, LivingEntity target, double sizeScale) {
             this.level = level;
             this.caster = caster;
             this.from = from;
@@ -155,10 +156,14 @@ public final class TNLightBeamMechanics {
             this.style = style;
             this.delay = delay;
             this.target = target;
+            this.sizeScale = sizeScale;
         }
     }
 
     private static final List<Pending> PENDING = new ArrayList<>();
+
+    /** 上一次推进 {@link #PENDING} 的世界刻 ✓（多人时"一世界刻只推进一次"的闸门 ✓）。 */
+    private static long LAST_PENDING_TICK = Long.MIN_VALUE;
 
     private TNLightBeamMechanics() {
     }
@@ -292,6 +297,11 @@ public final class TNLightBeamMechanics {
         }
         if (caster instanceof ServerPlayer player) {
             return TnSpellMechanics.isEnemy(player, target);
+        }
+        // ★ 召唤天使（作者 2026-10-02："可以轮流着放光线链的 t1 和 t4" ✓）：它的光线打**敌对生物** ✓
+        //   —— 走它自己那套尺子（和它近战的目标完全一致 ✓，绝不打玩家/主人 ✗）
+        if (caster instanceof com.tnc.tnc.light.TNFightingAngelEntity angel) {
+            return angel.isValidLightTarget(target);
         }
         return target instanceof net.minecraft.world.entity.player.Player
                 && (!(target instanceof ServerPlayer sp) || !sp.isCreative());
@@ -435,14 +445,24 @@ public final class TNLightBeamMechanics {
      *                    （只放大 Boss 那两招 ✗，玩家的 t2/t3 仍是原长 ✓；1.0 = 原长 ✓）
      */
     public static void onSpellCast(LivingEntity caster, String path, double lengthScale) {
+        onSpellCast(caster, path, lengthScale, 1.0D);
+    }
+
+    /**
+     * @param sizeScale <b>粗细/法阵倍数</b> ✓ —— 作者 2026-10-02："天使轮流放光线链的 t1 和 t4，
+     *                  <b>不过 t4 魔法阵的大小要缩小五倍</b>" ✓ ⇒ 召唤天使那一发传 0.2 ✓
+     *                  （光柱半径和天上/地下那两张阵一起缩 ✓，1.0 = 原尺寸 ✓）。
+     */
+    public static void onSpellCast(LivingEntity caster, String path, double lengthScale, double sizeScale) {
         Spell spell = find(path);
         if (spell == null) {
             return;
         }
+        double size = Math.max(0.05D, sizeScale);
         if (spell.sky()) {
-            castSky(caster, spell);
+            castSky(caster, spell, size);
         } else {
-            castForward(caster, spell, Math.max(0.1D, lengthScale));
+            castForward(caster, spell, Math.max(0.1D, lengthScale), size);
         }
     }
 
@@ -452,7 +472,7 @@ public final class TNLightBeamMechanics {
      * <p>★ 索敌（作者 2026-10-01："t1234激光怎么没有索敌啊"✗）：先按准星锥找最近的一个敌人 ✓，
      * 找到就把**中心那道对准它**（侧面几道围着它散开 ✓）；一个都没找到就顺着视线射 ✓（不至于打空 ✗）。
      */
-    private static void castForward(LivingEntity caster, Spell spell, double lengthScale) {
+    private static void castForward(LivingEntity caster, Spell spell, double lengthScale, double sizeScale) {
         ServerLevel level = (ServerLevel) caster.level();
         Vec3 from = caster.getEyePosition();
         LivingEntity target = findTarget(caster, spell, lengthScale);
@@ -462,7 +482,7 @@ public final class TNLightBeamMechanics {
         }
         List<Vec3> dirs = fanDirections(center, spell.rays(), spell.spreadDeg());
         for (Vec3 dir : dirs) {
-            spawn(level, caster, from, dir, spell, TNLightBeamEntity.STYLE_RAY, target, lengthScale);
+            spawn(level, caster, from, dir, spell, TNLightBeamEntity.STYLE_RAY, target, lengthScale, sizeScale);
         }
         play(level, from, spell.tier() >= 3 ? SoundEvents.BEACON_ACTIVATE : SoundEvents.AMETHYST_BLOCK_CHIME);
         if (caster instanceof ServerPlayer player) {
@@ -482,7 +502,7 @@ public final class TNLightBeamMechanics {
      * <p>★ 索敌：阵**开在目标头顶**（准星锥里最近的敌人 ✓）；没有目标才落在准星落点上 ✓。
      * t5 会一次锁定最多 5 个敌人，一人一个阵 ✓（怪扎堆时按最低分散距离拉开 ✓）。
      */
-    private static void castSky(LivingEntity caster, Spell spell) {
+    private static void castSky(LivingEntity caster, Spell spell, double sizeScale) {
         ServerLevel level = (ServerLevel) caster.level();
         double reach = Math.max(16.0D, spell.reach());
         List<LivingEntity> candidates = level.getEntitiesOfClass(LivingEntity.class,
@@ -518,27 +538,30 @@ public final class TNLightBeamMechanics {
             Vec3 at = spots.get(i);
             double ground = groundY(level, at);
             // ① 天上的阵（雷法那种线条型 ✓）—— 阵先亮，**1 秒后**光柱才落下 ✓
-            circle(level, at.x, ground + SKY_HEIGHT, at.z, spell.radius() * SKY_CIRCLE_SCALE, 0.0F);
+            //    ★ 半径乘 sizeScale ✓（天使那发 t4：22.5 × 1.6 × 0.2 ≈ 7.2 格 ✓ = 缩小五倍 ✓）
+            circle(level, at.x, ground + SKY_HEIGHT, at.z,
+                    spell.radius() * sizeScale * SKY_CIRCLE_SCALE, 0.0F);
             // ② 地面也补一张阵，让"落点"看得见 ✓
-            circle(level, at.x, ground + 0.04D, at.z, spell.radius() * SKY_CIRCLE_SCALE * 0.8D, 0.0F);
+            circle(level, at.x, ground + 0.04D, at.z,
+                    spell.radius() * sizeScale * SKY_CIRCLE_SCALE * 0.8D, 0.0F);
             // ③ 光柱：等 SKY_DELAY + i*SKY_STAGGER 才落 ✓（t5 一根接一根 ✓）
             //    锁了人的那些会**一直跟着那个人**（实体自己每 tick 重新瞄准 ✓）
             LivingEntity lockedTarget = i < locked.size() ? locked.get(i) : null;
             PENDING.add(new Pending(level, caster, new Vec3(at.x, ground + SKY_HEIGHT, at.z),
                     new Vec3(0.0D, -1.0D, 0.0D), spell, TNLightBeamEntity.STYLE_DESCENT,
-                    SKY_DELAY + i * SKY_STAGGER, lockedTarget));
+                    SKY_DELAY + i * SKY_STAGGER, lockedTarget, sizeScale));
         }
         play(level, caster.position(), SoundEvents.TRIDENT_THUNDER);
         if (caster instanceof ServerPlayer player) {
             player.displayClientMessage(Component.literal("§e[TN-C] §r" + name(spell)
                     + " §7（天上 " + spots.size() + " 个阵，1 秒后落下，每道粗 "
-                    + String.format(java.util.Locale.ROOT, "%.1f", spell.radius() * 2.0D) + " 格"
+                    + String.format(java.util.Locale.ROOT, "%.1f", spell.radius() * sizeScale * 2.0D) + " 格"
                     + (targets.isEmpty() ? "，无目标" : "，锁定 " + Math.min(targets.size(), spell.circles()) + " 个目标")
                     + "）"), true);
         }
         LOGGER.info("TN-C/light: 光柱 {} circles={} radius={} delay={}t dmg={} targets={} caster={}",
-                spell.path(), spots.size(), spell.radius(), SKY_DELAY, spell.damage(), targets.size(),
-                caster.getName().getString());
+                spell.path(), spots.size(), spell.radius() * sizeScale, SKY_DELAY, spell.damage(),
+                targets.size(), caster.getName().getString());
     }
 
     private static void circle(ServerLevel level, double x, double y, double z, double radius, float yaw) {
@@ -559,7 +582,8 @@ public final class TNLightBeamMechanics {
      * （{@link TNLightBeamEntity#tick} ✓），所以这里只要给一个正确的初值 ✓。
      */
     private static void spawn(ServerLevel level, LivingEntity caster, Vec3 from, Vec3 dir,
-                              Spell spell, int style, LivingEntity target, double lengthScale) {
+                              Spell spell, int style, LivingEntity target, double lengthScale,
+                              double sizeScale) {
         TNLightBeamEntity beam = TNOrbEntities.LIGHT_BEAM.get().create(level);
         if (beam == null) {
             return;
@@ -572,7 +596,8 @@ public final class TNLightBeamMechanics {
             //   （不然"加长三倍"在近距离完全看不出来 ✗ —— 作者 2026-10-01 ✓）
             length = Math.max(length * 0.5D, target.position().distanceTo(from));
         }
-        beam.configure(caster, spell.radius(), length, spell.damage(), BEAM_LIFE, style, target);
+        // ★ 半径乘 sizeScale ✓（天使那发 t4 传 0.2 = 缩小五倍 ✓）
+        beam.configure(caster, spell.radius() * sizeScale, length, spell.damage(), BEAM_LIFE, style, target);
         beam.setShake(spell.shake());            // ★ 画面震动（作者 2026-10-01："并且加上画面震动"✓）
         level.addFreshEntity(beam);
     }
@@ -625,6 +650,14 @@ public final class TNLightBeamMechanics {
         if (PENDING.isEmpty()) {
             return;
         }
+        // ★ 一个世界刻只推进一次 ✓：这个 tick 是**按玩家**调的（多人时每个玩家各叫一次 ✗），
+        //   而 PENDING 是全局的一张表 ⇒ 两个人的话 1 秒延迟会变成 0.5 秒 ✗。
+        //   单人时行为完全不变 ✓。
+        long now = player.level().getGameTime();
+        if (now == LAST_PENDING_TICK) {
+            return;
+        }
+        LAST_PENDING_TICK = now;
         Iterator<Pending> it = PENDING.iterator();
         while (it.hasNext()) {
             Pending pending = it.next();
@@ -633,7 +666,7 @@ public final class TNLightBeamMechanics {
                 continue;
             }
             spawn(pending.level, pending.caster, pending.from, pending.dir, pending.spell,
-                    pending.style, pending.target, 1.0D);
+                    pending.style, pending.target, 1.0D, pending.sizeScale);
             it.remove();
         }
     }
@@ -650,6 +683,7 @@ public final class TNLightBeamMechanics {
     /** 清空（换世界/自检用 ✓）。 */
     public static void clear() {
         PENDING.clear();
+        LAST_PENDING_TICK = Long.MIN_VALUE;
     }
 
     /** 声音（服务端播 ✓）。 */

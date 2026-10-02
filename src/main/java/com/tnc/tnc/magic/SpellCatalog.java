@@ -271,16 +271,18 @@ public final class SpellCatalog {
             of(Element.LIGHT, "holy_light_descent", Chain.LIGHT_BEAM, 4, "圣光天降"),
             of(Element.LIGHT, "radiant_barrage", Chain.LIGHT_BEAM, 5, "五光十射"),
 
-            // ---- 召唤天使线（光系第四条链，作者 2026-10-02 指定）----
-            //   1 召唤天使：1 只 t1 天使（60 血 / 8 伤 / 30 秒）
-            //   2 天使双卫：2 只 t2（90 血 / 11 伤 / 30 秒）
-            //   3 天使军团：3 只 t3（120 血 / 14 伤 / 40 秒）
-            //   4 炽天使降临：3 只 t4（160 血 / 18 伤 / 45 秒）
-            //   5 大天使长：2 只 t5（220 血 / 24 伤 / 60 秒）
-            //   ★ 天使**会飞**（跟着你上天 ✓）、会替你打敌对生物 ✓、到点自己消散 ✓
-            //   （数值都在 light/TNLightChainMechanics 的一张表里 ✓，改那里就行 ✓）
+            // ---- 召唤天使线（光系第四条链，作者 2026-10-02 指定；只数/个头是作者第二版要的）----
+            //   1 召唤天使  ：1 只，个头 0.45（小小）
+            //   2 天使卫队  ：3 只，0.70
+            //   3 天使军团  ：5 只，1.05（= "现在这样的"）
+            //   4 炽天使降临：15 只，0.75（一群小的）
+            //   5 大天使长  ：3 只，1.80（大只的）
+            //   ★ 天使**会飞**（跟着你上天 ✓）、会替你打敌对生物 ✓、
+            //     **轮流放光线链的 t1（光线）和 t4（圣光天降）** ✓ ——
+            //     其中 t4 的法阵按作者要求**缩小五倍** ✓（见 TNFightingAngelEntity.DESCENT_CIRCLE_SCALE）
+            //   （只数/个头/血伤/时长都在 light/TNLightChainMechanics 的 SUMMONS 一张表里 ✓）
             of(Element.LIGHT, "summon_angel", Chain.LIGHT_SUMMON, 1, "召唤天使"),
-            of(Element.LIGHT, "angel_twins", Chain.LIGHT_SUMMON, 2, "天使双卫"),
+            of(Element.LIGHT, "angel_twins", Chain.LIGHT_SUMMON, 2, "天使卫队"),
             of(Element.LIGHT, "angel_legion", Chain.LIGHT_SUMMON, 3, "天使军团"),
             of(Element.LIGHT, "seraph_descent", Chain.LIGHT_SUMMON, 4, "炽天使降临"),
             of(Element.LIGHT, "archangel", Chain.LIGHT_SUMMON, 5, "大天使长"),

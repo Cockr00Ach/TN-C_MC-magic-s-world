@@ -47,7 +47,9 @@ public class TNFightingAngelRenderer extends GeoEntityRenderer<TNFightingAngelEn
                                     float partialTick, int packedLight, int packedOverlay) {
         super.scaleModelForRender(widthScale, heightScale, poseStack, animatable, model,
                 isReRender, partialTick, packedLight, packedOverlay);
-        float s = 0.7F + 0.175F * (animatable.tier() - 1);       // t1 0.70 / t3 1.05 / t5 1.40 ✓
+        // 个头由**法术**写进实体 ✓（作者 2026-10-02：t1 一只小小 / t3 五只现在这样的 /
+        //   t4 十五只 / t5 三只大只的 ⇒ 个头不再等于档位 ✗，别再按 tier 算 ✗）
+        float s = (float) animatable.scale();
         poseStack.scale(s, s, s);
     }
 }

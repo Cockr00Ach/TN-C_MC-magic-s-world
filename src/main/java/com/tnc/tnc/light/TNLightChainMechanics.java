@@ -118,27 +118,38 @@ public final class TNLightChainMechanics {
     // ------------------------------------------------------------------
 
     /**
-     * 召唤天使链的一档：法术 / 档位 / 召唤几只 / 血 / 伤害 / 活多久（秒） / 名字 ✓。
+     * 召唤天使链的一档：法术 / 档位 / 召唤几只 / **个头** / 血 / 伤害 / 活多久（秒） / 名字 ✓。
      *
-     * <p>天使的**档位 = 法术档位** ✓ —— 档位管两件事：渲染个头（0.70 → 1.40 倍 ✓）
-     * 与这里的血量伤害 ✓（召唤出来之后由 {@link #summonOne} 写进属性表 ✓）。
+     * <p>★ 作者 2026-10-02 改的第二版：<b>"t1 一只小小的，t2 三只，t3 五只现在这样的，
+     * t4 十五只，t5 三只大只的"</b> ✓ ⇒ 只数 <b>1 / 3 / 5 / 15 / 3</b> ✓，
+     * 并且**个头不再等于档位** ✗（t4 是十五只小的、t5 才是大的 ✓）⇒ 这里单独写一列 ✓。
      */
-    private record Summon(String path, int tier, int count, double health, double damage,
-                          int seconds, String name) {
+    private record Summon(String path, int tier, int count, double scale, double health,
+                          double damage, int seconds, String name) {
     }
 
+    /**
+     * 数值表 ✓ —— 要调就调这一张表（一档一行）✓。
+     *
+     * <p>个头（{@link Summon#scale}，1.0 = 模型原尺寸 2.44 格 ✓）：
+     * t1 <b>0.45</b>（小小 ✓）/ t2 0.70 / t3 <b>1.05</b>（= "现在这样的" ✓）/
+     * t4 <b>0.75</b>（十五只 ⇒ 做成一群小的，不然满屏都是三格高的天使 ✗，作者要改就改这个数 ✓）/
+     * t5 <b>1.80</b>（大只的 ✓）。
+     */
     private static final Summon[] SUMMONS = {
-            new Summon("summon_angel", 1, 1, 60.0D, 8.0D, 30, "召唤天使"),
-            new Summon("angel_twins", 2, 2, 90.0D, 11.0D, 30, "天使双卫"),
-            new Summon("angel_legion", 3, 3, 120.0D, 14.0D, 40, "天使军团"),
-            new Summon("seraph_descent", 4, 3, 160.0D, 18.0D, 45, "炽天使降临"),
-            new Summon("archangel", 5, 2, 220.0D, 24.0D, 60, "大天使长"),
+            new Summon("summon_angel", 1, 1, 0.45D, 50.0D, 7.0D, 30, "召唤天使"),
+            new Summon("angel_twins", 2, 3, 0.70D, 70.0D, 10.0D, 30, "天使卫队"),
+            new Summon("angel_legion", 3, 5, 1.05D, 120.0D, 14.0D, 40, "天使军团"),
+            new Summon("seraph_descent", 4, 15, 0.75D, 60.0D, 8.0D, 45, "炽天使降临"),
+            new Summon("archangel", 5, 3, 1.80D, 260.0D, 26.0D, 60, "大天使长"),
     };
 
-    /** 同一个人身上最多留几只天使 ✓（连续放 t3 会叠出一大片 ✗ —— 超了就把最老的送走 ✓）。 */
-    private static final int SUMMON_CAP = 8;
+    /** 同一个人身上最多留几只天使 ✓（t4 一次就是十五只 ⇒ 上限必须 ≥ 15 ✓，超了送走最老的 ✓）。 */
+    private static final int SUMMON_CAP = 20;
     /** 召唤出来的天使落在主人周围多大半径的圈上 ✓。 */
     private static final double SUMMON_RING = 2.4D;
+    /** 一圈最多挤几只 ✓ —— 满了就往外再来一圈 ✓（t4 十五只要两圈 ✓）。 */
+    private static final int SUMMON_PER_RING = 8;
     /** 招呼唤物时那一下白光的亮度 ✓。 */
     private static final int SUMMON_FLASH_PARTICLES = 60;
 
@@ -356,18 +367,24 @@ public final class TNLightChainMechanics {
         int toSpawn = Math.min(summon.count(), Math.max(0, free));
 
         // ③ 在主人周围一圈放下来 ✓（角度跟着朝向转，天使落在你面前而不是背后 ✓）
+        //    ★ t4 一次十五只 ⇒ 一圈八个放不下 ✗：满八个就往外再铺一圈 ✓（见 ring 那两行 ✓）
         for (int i = 0; i < toSpawn; i++) {
-            double angle = Math.toRadians(caster.getYRot()) + (Math.PI * 2.0D * i) / Math.max(1, toSpawn);
+            int ring = i / SUMMON_PER_RING;
+            int inRing = Math.min(SUMMON_PER_RING, toSpawn - ring * SUMMON_PER_RING);
+            int indexInRing = i - ring * SUMMON_PER_RING;
+            double radius = SUMMON_RING * (1.0D + ring * 0.9D);
+            double angle = Math.toRadians(caster.getYRot())
+                    + (Math.PI * 2.0D * indexInRing) / Math.max(1, inRing);
             summonOne(level, caster, summon,
-                    caster.getX() + Math.cos(angle) * SUMMON_RING,
+                    caster.getX() + Math.cos(angle) * radius,
                     caster.getY() + 1.0D,
-                    caster.getZ() + Math.sin(angle) * SUMMON_RING);
+                    caster.getZ() + Math.sin(angle) * radius);
         }
 
         if (caster instanceof ServerPlayer player) {
             player.displayClientMessage(Component.literal("§e[TN-C] §r" + summon.name()
                     + " §7（" + toSpawn + " 只 · " + summon.seconds() + " 秒 · "
-                    + (int) summon.health() + " 血 / " + (int) summon.damage() + " 伤）"), true);
+                    + (int) summon.health() + " 血 / " + (int) summon.damage() + " 伤 · 会轮流放光线 ✓）"), true);
         }
         LOGGER.info("TN-C/light: 召唤天使 {} count={} tier={} caster={}",
                 summon.path(), toSpawn, summon.tier(), caster.getName().getString());
@@ -381,6 +398,7 @@ public final class TNLightChainMechanics {
             return;
         }
         angel.setTier(summon.tier());
+        angel.setScale(summon.scale());            // ★ 个头由法术定 ✓（不再等于档位 ✗）
         angel.setOwner(caster.getUUID());
         angel.setLifetime(summon.seconds() * 20);
         angel.moveTo(x, y, z, caster.getYRot(), 0.0F);
