@@ -45,6 +45,14 @@ public class TNLightBeamEntity extends Entity {
     public static final int STYLE_DESCENT = 1;
 
     /**
+     * 震动持续几 tick（0.4 秒 ✓）—— <b>只在"刚出现那一下"抖</b> ✓，不是整条光柱都在抖 ✗。
+     *
+     * <p>为什么：光柱现在活 6 秒 ✗，全程晃会把人晃吐 ✗（雷暴那轮也踩过"一生成就一直晃"✗）。
+     * 天降的光柱一出现就是"砸到地上"的那一刻 ✓，所以前 8 tick 抖 = 命中感 ✓。
+     */
+    public static final int SHAKE_TICKS = 8;
+
+    /**
      * ★ 每 tick 最多转多少度（作者 2026-10-01："就像雷球那样索敌" ✓）。
      *
      * <p>雷球是引擎投射物的 {@code homing_angle: 0.5}（拐弯追人 ✓）；这里用"每 tick 限速转向"达到同样的手感 ✓：
@@ -74,6 +82,15 @@ public class TNLightBeamEntity extends Entity {
      * 目标跑，光柱跟着转 ✓（服务端改朝向/位置 ✓，客户端渲染器也拿这个 id 做平滑跟随 ✓）。
      */
     protected static final EntityDataAccessor<Integer> DATA_TARGET =
+            SynchedEntityData.defineId(TNLightBeamEntity.class, EntityDataSerializers.INT);
+    /**
+     * ★ <b>画面震动强度</b>（度 ×100 ✓；0 = 不震 ✓）—— 作者 2026-10-01："并且加上画面震动" ✓。
+     *
+     * <p>走的是仓库里已有的那条路 ✓（雷暴/冲击波就是这么震的 ✓）：
+     * 服务端同步强度 ✓，客户端每 tick 就近侦测一次 ✓，再在 {@code ComputeCameraAngles} 里抖镜头 ✓
+     * —— <b>不需要任何自定义网络包</b> ✓。越粗的光柱给得越大 ✓（数值都在 SPELLS 表里 ✓）。
+     */
+    protected static final EntityDataAccessor<Integer> DATA_SHAKE =
             SynchedEntityData.defineId(TNLightBeamEntity.class, EntityDataSerializers.INT);
 
     /** 伤害只在服务端算 ✓（不进同步 ✓）。 */
@@ -110,6 +127,21 @@ public class TNLightBeamEntity extends Entity {
         return this.entityData.get(DATA_CASTER);
     }
 
+    /** 画面震动强度（度 ✓；0 = 不震 ✓）。 */
+    public double shake() {
+        return this.entityData.get(DATA_SHAKE) / 100.0D;
+    }
+
+    /** 后置设置震幅 ✓（生成时在 {@code configure} 之后调一次 ✓）。 */
+    public void setShake(double strength) {
+        this.entityData.set(DATA_SHAKE, (int) Math.round(Math.max(0.0D, strength) * 100.0D));
+    }
+
+    /** ★ 现在该不该抖：**只在刚出现那几 tick** ✓（活 6 秒全程抖会晃吐人 ✗）。 */
+    public boolean isShaking(int age) {
+        return this.shake() > 0.0D && age >= 0 && age <= SHAKE_TICKS;
+    }
+
     /** 是不是在"瞄着某个敌人" ✓（渲染器要用它做平滑跟随 ✓）。 */
     public boolean tracking() {
         return this.targetId() >= 0;
@@ -144,6 +176,7 @@ public class TNLightBeamEntity extends Entity {
         this.entityData.define(DATA_STYLE, STYLE_RAY);
         this.entityData.define(DATA_CASTER, -1);
         this.entityData.define(DATA_TARGET, -1);
+        this.entityData.define(DATA_SHAKE, 0);
     }
 
     @Override

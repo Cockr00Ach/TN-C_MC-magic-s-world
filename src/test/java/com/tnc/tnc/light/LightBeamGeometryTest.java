@@ -150,11 +150,13 @@ class LightBeamGeometryTest {
 
     /**
      * t5：5 个阵 —— 一个在中心、四个围一圈、都在同一个水平面上、**彼此分开得够远** ✓
-     * （作者 2026-10-01："五光十射每个法阵可以分开点"✗ —— 光柱半径 4.5 ⇒ 间距必须 ≥ 9 格 ✓）。
+     * （作者两轮："五光十射每个法阵可以分开点" + "t5的变大三倍" ✗ ——
+     * 光柱半径 13.5 ⇒ 直径 27 ⇒ 中心到环、环上相邻两点都必须 ≥ 27 才不叠 ✓）。
      */
     @Test
-    void barragePlacesFiveDistinctCircles() {
-        double ring = 12.0D;
+    void barragePlacesFiveDistinctCircles() throws Exception {
+        double ring = readConstant("BARRAGE_RING");
+        double minGap = readSpellRadius("radiant_barrage") * 2.0D;   // 不叠的最低要求 = 直径 ✓
         List<Vec3> offs = TNLightBeamMechanics.barrageOffsets(5, ring);
         assertEquals(5, offs.size(), "五光十射不是 5 个阵");
         assertEquals(0.0D, offs.get(0).length(), 1.0E-9D, "第一个阵应该在落点中心");
@@ -164,48 +166,64 @@ class LightBeamGeometryTest {
         }
         for (int i = 1; i < offs.size(); i++) {
             assertEquals(ring, offs.get(i).length(), 1.0E-6D, "外围的阵不在圆环上");
-        }
-        // ★ 相邻两根光柱不能叠：中心阵到外围阵、以及外围阵两两之间，都要 ≥ 光柱直径（9 格 ✓）
-        for (int i = 1; i < offs.size(); i++) {
-            assertTrue(offs.get(0).distanceTo(offs.get(i)) >= 9.0D,
-                    "中心阵和外围阵挨太近（" + offs.get(0).distanceTo(offs.get(i)) + "）✗");
+            assertTrue(offs.get(0).distanceTo(offs.get(i)) >= minGap,
+                    "中心阵和外围阵挨太近（" + offs.get(0).distanceTo(offs.get(i)) + " < " + minGap + "）✗");
         }
         for (int i = 1; i < offs.size(); i++) {
             for (int j = i + 1; j < offs.size(); j++) {
                 double d = offs.get(i).distanceTo(offs.get(j));
-                assertTrue(d >= 9.0D, "两个外围阵挨太近（" + d + "）✗ 光柱会叠在一起");
+                assertTrue(d >= minGap, "两个外围阵挨太近（" + d + " < " + minGap + "）✗ 光柱会叠在一起");
             }
         }
     }
 
+    /** 从源码里读一个 {@code private static final} 常数 ✓（比反射稳，也不用把数字抄第二遍 ✓）。 */
+    private static double readConstant(String name) throws Exception {
+        String src = source();
+        int at = src.indexOf("double " + name + " =");
+        assertTrue(at > 0, "源码里找不到常数 " + name);
+        String tail = src.substring(at + ("double " + name).length());
+        int from = tail.indexOf('=');
+        int to = tail.indexOf(';', from);
+        return Double.parseDouble(tail.substring(from + 1, to).replace("D", "").trim());
+    }
+
+    /** 从源码的 {@code SPELLS} 表里读某一档的半径 ✓。 */
+    private static double readSpellRadius(String id) throws Exception {
+        String src = source();
+        int at = src.indexOf("new Spell(\"" + id + "\"");
+        assertTrue(at > 0, "表里找不到 " + id);
+        String[] parts = src.substring(at, src.indexOf(")", at)).split(",");
+        return Double.parseDouble(parts[4].trim().replace("D", ""));
+    }
+
+    private static String source() throws Exception {
+        return java.nio.file.Files.readString(
+                java.nio.file.Path.of("src/main/java/com/tnc/tnc/light/TNLightBeamMechanics.java"),
+                java.nio.charset.StandardCharsets.UTF_8);
+    }
+
     /**
-     * 粗细阶梯（作者 2026-10-01 第二版："全部加粗" / "圣光天降感觉可以加个10倍都"✓）：
-     * 逐档变粗 ✓、天降比巨大光线粗得多 ✓、五光十射和天降一样粗 ✓。
-     *
-     * <p>半径写在 {@code SPELLS} 那张私有表里 ✗ ⇒ 这里用 {@code rainbow}/{@code fanDirections}
-     * 之外的方式验证不了 ✗，所以改成查"公开的几何行为"：天降/五光的**阵**半径由
-     * {@code radius × SKY_CIRCLE_SCALE} 决定 ✗ 也是私有 ✗ ——
-     * 于是就查一件事：**散开角度不变**（t1 仍是 3 道 ±7° ✓），粗细由人工在表里核对 ✓。
+     * 粗细阶梯（作者多轮："全部加粗" / "圣光天降感觉可以加个10倍都" / "t4的圣光变大五倍，t5的变大三倍" ✓）：
+     * 逐档变粗 ✓，天降与五光都要明显比巨大光线粗 ✓。
      */
     @Test
     void thicknessLadderIsMonotonicInSource() throws Exception {
-        // 直接从源码读那张表 ✓（比反射稳，也比"再抄一份数字"可靠 ✓）
-        String src = java.nio.file.Files.readString(
-                java.nio.file.Path.of("src/main/java/com/tnc/tnc/light/TNLightBeamMechanics.java"),
-                java.nio.charset.StandardCharsets.UTF_8);
         double[] radii = new double[5];
         String[] ids = {"light_beam", "great_light_beam", "giant_light_beam",
                 "holy_light_descent", "radiant_barrage"};
         for (int i = 0; i < ids.length; i++) {
-            int at = src.indexOf("new Spell(\"" + ids[i] + "\"");
-            assertTrue(at > 0, "表里找不到 " + ids[i]);
-            String[] parts = src.substring(at, src.indexOf(")", at)).split(",");
-            radii[i] = Double.parseDouble(parts[4].trim());
+            radii[i] = readSpellRadius(ids[i]);
         }
         for (int i = 1; i < 4; i++) {
-            assertTrue(radii[i] > radii[i - 1], "第 " + (i + 1) + " 档没有比上一档粗：" + radii[i - 1] + " -> " + radii[i]);
+            assertTrue(radii[i] > radii[i - 1], "第 " + (i + 1) + " 档没有比上一档粗："
+                    + radii[i - 1] + " -> " + radii[i]);
         }
-        assertTrue(radii[3] >= radii[2] * 2.0D, "圣光天降没有明显比巨大光线粗（" + radii[2] + " -> " + radii[3] + "）");
-        assertEquals(radii[3], radii[4], 1.0E-9D, "五光十射的光柱应该和圣光天降一样粗");
+        assertTrue(radii[3] >= radii[2] * 2.0D, "圣光天降没有明显比巨大光线粗（"
+                + radii[2] + " -> " + radii[3] + "）");
+        assertTrue(radii[4] >= radii[2] * 2.0D, "五光十射没有明显比巨大光线粗（"
+                + radii[2] + " -> " + radii[4] + "）");
+        System.out.printf("光线粗细（半径/格）: t1 %.2f  t2 %.2f  t3 %.2f  t4 %.2f  t5 %.2f%n",
+                radii[0], radii[1], radii[2], radii[3], radii[4]);
     }
 }

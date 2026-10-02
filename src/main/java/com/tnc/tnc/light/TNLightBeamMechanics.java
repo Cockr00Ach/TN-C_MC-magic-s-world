@@ -57,23 +57,25 @@ public final class TNLightBeamMechanics {
      * @param reach     射程（格 ✓）
      * @param sky       是否"天降"形态 ✓（false = 从眼睛向前射 ✗）
      * @param circles   天上开几个阵 ✓（天降形态用的是它 ✓）
+     * @param shake     画面震动强度（度 ✓；0 = 不震 ✓）—— 越粗的光柱给得越大 ✓
      */
     private record Spell(String path, int tier, int rays, double spreadDeg, double radius,
-                         float damage, double reach, boolean sky, int circles) {
+                         float damage, double reach, boolean sky, int circles, double shake) {
     }
 
     /** 每个档位的数值（作者给的是"表现"，具体数字是这里定的 ✓，要调就调这里 ✓）。 */
     private static final Spell[] SPELLS = {
-            // 向前射的三道细光线：★ 作者 2026-10-01："光束太短了，长个三四倍吧" ⇒ 射程 26 → 95（×3.6 ✓）
-            new Spell("light_beam", 1, 3, 14.0D, 0.22D, 6.0F, 95.0D, false, 0),
-            // 大光线：粗（0.80 格 ⇒ 1.6 格宽 ✓）；射程 30 → 110 ✓
-            new Spell("great_light_beam", 2, 1, 0.0D, 0.80D, 16.0F, 110.0D, false, 0),
-            // 巨大光线：极粗（1.60 格 ⇒ 3.2 格宽 ✓）；射程 34 → 130 ✓
-            new Spell("giant_light_beam", 3, 1, 0.0D, 1.60D, 28.0F, 130.0D, false, 0),
-            // 圣光天降：作者"感觉可以加个10倍都" ⇒ 4.5 格半径 ＝ **9 格宽**的光柱 ✓
-            new Spell("holy_light_descent", 4, 1, 0.0D, 4.50D, 36.0F, 48.0D, true, 1),
-            // 五光十射：作者"每个法阵可以分开点" ⇒ 环半径 12 格 ✓
-            new Spell("radiant_barrage", 5, 1, 0.0D, 4.50D, 32.0F, 48.0D, true, 5),
+            // 向前射的三道细光线：射程 26 → 95（作者："长个三四倍"✓）；震动很轻（细光 ✓）
+            new Spell("light_beam", 1, 3, 14.0D, 0.22D, 6.0F, 95.0D, false, 0, 0.5D),
+            // 大光线：粗 0.8 格；射程 110 ✓
+            new Spell("great_light_beam", 2, 1, 0.0D, 0.80D, 16.0F, 110.0D, false, 0, 1.2D),
+            // 巨大光线：极粗 1.6 格；射程 130 ✓
+            new Spell("giant_light_beam", 3, 1, 0.0D, 1.60D, 28.0F, 130.0D, false, 0, 2.2D),
+            // 圣光天降：作者"t4的圣光变大五倍" ⇒ 4.5 → 22.5 格半径（**45 格宽** ✓）；
+            //   震动给到 8.5 度（仓库上限 SHAKE_MAX=9 ✓）—— 一根 45 格宽的光柱砸下来必须地动山摇 ✓
+            new Spell("holy_light_descent", 4, 1, 0.0D, 22.50D, 36.0F, 64.0D, true, 1, 8.5D),
+            // 五光十射：作者"t5的变大三倍" ⇒ 4.5 → 13.5 格半径（27 格宽 ✓）；五根轮着砸 ⇒ 5.5 度 ✓
+            new Spell("radiant_barrage", 5, 1, 0.0D, 13.50D, 32.0F, 64.0D, true, 5, 5.5D),
     };
 
     /**
@@ -97,8 +99,14 @@ public final class TNLightBeamMechanics {
     private static final int SKY_DELAY = 20;
     /** t5 五张阵之间的额外错开（tick ✓）：一个一个落下来，像连射 ✓（在 {@link #SKY_DELAY} 之后再叠 ✓）。 */
     private static final int SKY_STAGGER = 5;
-    /** t5 外围四个阵离中心多远（格 ✓）—— 要 ≥ 光柱直径才不叠 ✓（见 {@link #SPELLS} ✓）。 */
-    private static final double BARRAGE_RING = 12.0D;
+    /**
+     * t5 外围四个阵离中心多远（格 ✓）。
+     *
+     * <p>★ 必须 ≥ 光柱**直径**，否则五根柱子会叠在一起看不清 ✗ ——
+     * 2026-10-01 光柱放大之后跟着一起放大：4.5 直径 9 → 环 12 ✓；13.5 直径 27 → 环 <b>28</b> ✓
+     * （中心到环 28 ≥ 27 ✓；环上相邻两点 1.414×28 ≈ 40 ≥ 27 ✓）。
+     */
+    private static final double BARRAGE_RING = 28.0D;
     /** 天降的阵画多大（相对光柱半径 ✓）。 */
     private static final double SKY_CIRCLE_SCALE = 1.6D;
 
@@ -460,6 +468,7 @@ public final class TNLightBeamMechanics {
             length = Math.max(1.0D, target.position().distanceTo(from));
         }
         beam.configure(caster, spell.radius(), length, spell.damage(), BEAM_LIFE, style, target);
+        beam.setShake(spell.shake());            // ★ 画面震动（作者 2026-10-01："并且加上画面震动"✓）
         level.addFreshEntity(beam);
     }
 
