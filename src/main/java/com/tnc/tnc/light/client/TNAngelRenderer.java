@@ -27,6 +27,22 @@ public class TNAngelRenderer extends GeoEntityRenderer<TNAngelEntity> {
         this.shadowRadius = 0.0F;                  // 发光体不投影，免得地上出现一团黑 ✓
     }
 
+    /**
+     * ★ 同一个"反着做的模型"问题 ✓（2026-10-02 查出，和战斗天使同源）：
+     * {@code angel.geo.json} 的眼睛也画在头的 <b>+Z</b> 那一面，而 GeckoLib 把 −Z 当实体朝向
+     * ⇒ 不转 180° 的话，法阵中心那尊天使是**背对着你**的 ✗（判据见 {@code tools/face_uv_check.py} ✓）。
+     */
+    @Override
+    public void preRender(PoseStack poseStack, TNAngelEntity animatable, BakedGeoModel model,
+                          net.minecraft.client.renderer.MultiBufferSource bufferSource,
+                          com.mojang.blaze3d.vertex.VertexConsumer buffer, boolean isReRender,
+                          float partialTick, int packedLight, int packedOverlay,
+                          float red, float green, float blue, float alpha) {
+        poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180.0F));
+        super.preRender(poseStack, animatable, model, bufferSource, buffer, isReRender,
+                partialTick, packedLight, packedOverlay, red, green, blue, alpha);
+    }
+
     /** ★ 半透明 + 自发光 ✓（这两条就是作者要的观感，别改成 entitySolid ✗）。 */
     @Override
     public RenderType getRenderType(TNAngelEntity animatable, ResourceLocation texture,

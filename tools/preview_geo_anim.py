@@ -206,6 +206,9 @@ def render(bones, order, anim, t, size, azimuth, elevation, zoom, label):
         for quad, n in cube_faces_cached(name):
             pts = [apply(tf, p) for p in quad]
             nrm = rot_dir(tf[0], n)
+            if FRONT == "+Z":                     # same 180 deg the renderer adds
+                pts = [flip_y180(p) for p in pts]
+                nrm = flip_dir(nrm)
             tris.append((pts, nrm, base))
 
     # ground marker: red arrow in FRONT of the model (-Z), kept outside the body's z range
@@ -237,6 +240,21 @@ def render(bones, order, anim, t, size, azimuth, elevation, zoom, label):
 
 
 _CACHE = {}
+
+# Which way does THIS model face inside its own geometry?
+#   "-Z" = the usual convention (GeckoLib/vanilla map the model's -Z onto the entity's facing)
+#   "+Z" = the author's two angel models (the eyes are painted on the +Z face; see
+#          tools/face_uv_check.py). Their renderers therefore add a 180 deg yaw, and this
+#          preview does the same, so the red arrow always means "the way the entity looks".
+FRONT = "+Z"
+
+
+def flip_y180(p):
+    return [-p[0], p[1], -p[2]]
+
+
+def flip_dir(v):
+    return [-v[0], v[1], -v[2]]
 
 # per-bone colours so the limbs are never ambiguous in the output
 TINT = {
