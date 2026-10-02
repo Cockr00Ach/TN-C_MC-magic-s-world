@@ -64,8 +64,33 @@ public class TNApolloEntity extends Monster implements GeoEntity {
     public TNApolloEntity(EntityType<? extends TNApolloEntity> type, Level level) {
         super(type, level);
         this.xpReward = 500;
+        this.bossEvent = new net.minecraft.server.level.ServerBossEvent(this.getDisplayName(),
+                net.minecraft.world.BossEvent.BossBarColor.WHITE,
+                net.minecraft.world.BossEvent.BossBarOverlay.PROGRESS);
     }
 
+    // ---- 顶部 BOSS 血条（作者：要"boss 那种血量条" ✓）----
+    private final net.minecraft.server.level.ServerBossEvent bossEvent;
+
+    @Override
+    public void startSeenByPlayer(net.minecraft.server.level.ServerPlayer player) {
+        super.startSeenByPlayer(player);
+        this.bossEvent.addPlayer(player);
+    }
+
+    @Override
+    public void stopSeenByPlayer(net.minecraft.server.level.ServerPlayer player) {
+        super.stopSeenByPlayer(player);
+        this.bossEvent.removePlayer(player);
+    }
+
+    /** 每 tick 同步血条（血量比例 + 名字）✓。 */
+    private void tickBossBar() {
+        this.bossEvent.setName(this.getDisplayName());
+        this.bossEvent.setProgress(Math.max(0.0F, Math.min(1.0F,
+                this.getHealth() / Math.max(1.0F, this.getMaxHealth()))));
+        this.bossEvent.setVisible(!this.isDeadOrDying() && this.isAlive());
+    }
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MAX_HEALTH, MAX_HP)
@@ -114,6 +139,9 @@ public class TNApolloEntity extends Monster implements GeoEntity {
     @Override
     public void aiStep() {
         super.aiStep();
+        if (!this.level().isClientSide()) {
+            this.tickBossBar();
+        }
         if (this.level().isClientSide()) {
             return;
         }
