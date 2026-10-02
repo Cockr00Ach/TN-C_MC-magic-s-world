@@ -20,7 +20,7 @@ TEXTURE 128x128 regions (uv = pixel, Bedrock box unwrap):
     skin (0,0) | robe black (16,0) | crimson (32,0) | gold (48,0) | hood lining (64,0) | staff wood (80,0)
 ASCII only.
 """
-import json, os, random
+import colorsys, json, os, random
 from PIL import Image
 
 MODID, NAME = "tnc", "gothic_priest"
@@ -105,7 +105,17 @@ def texture():
             for x in range(x0, x0 + w):
                 img.putpixel((x, y), fn(x - x0, y - y0, w, h))
 
-    fill(0, 0, 16, 16, lambda x, y, w, h: (232, 214, 204, 255) if not (x in (0, w-1) or y in (0, h-1)) else (198, 178, 170, 255))
+    # ---- 皮肤：作者要"光的那种彩色" -> 虹彩/棱镜渐变（HSV 沿两轴旋转 + 珍珠质感）----
+    def prismatic(x, y, w, h):
+        hue = ((x / float(w)) * 300.0 + (y / float(h)) * 70.0) % 360.0
+        sat = 0.42 + 0.10 * ((x + y) % 3) / 2.0        # 珍珠感：饱和度不高
+        val = 0.86 + 0.14 * (1.0 - y / float(h))       # 上亮下略暗，像受光
+        r, g, b = colorsys.hsv_to_rgb(hue / 360.0, sat, val)
+        # 边缘压暗一点，勾出轮廓
+        edge = x in (0, w - 1) or y in (0, h - 1)
+        k = 0.72 if edge else 1.0
+        return (int(r * 255 * k), int(g * 255 * k), int(b * 255 * k), 255)
+    fill(0, 0, 16, 16, prismatic)
     def cloth(base, seam):
         def f(x, y, w, h):
             if y % 5 == 0:
