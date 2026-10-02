@@ -113,6 +113,44 @@ public final class TNLightChainMechanics {
             new Wing("light_wingspan", TNEffects.LIGHT_WINGSPAN, 12, "光翼展开"),
     };
 
+    // ------------------------------------------------------------------
+    //  召唤天使链（第四条链，作者 2026-10-02）—— 会飞的战斗天使 ✓
+    // ------------------------------------------------------------------
+
+    /**
+     * 召唤天使链的一档：法术 / 档位 / 召唤几只 / 血 / 伤害 / 活多久（秒） / 名字 ✓。
+     *
+     * <p>天使的**档位 = 法术档位** ✓ —— 档位管两件事：渲染个头（0.70 → 1.40 倍 ✓）
+     * 与这里的血量伤害 ✓（召唤出来之后由 {@link #summonOne} 写进属性表 ✓）。
+     */
+    private record Summon(String path, int tier, int count, double health, double damage,
+                          int seconds, String name) {
+    }
+
+    private static final Summon[] SUMMONS = {
+            new Summon("summon_angel", 1, 1, 60.0D, 8.0D, 30, "召唤天使"),
+            new Summon("angel_twins", 2, 2, 90.0D, 11.0D, 30, "天使双卫"),
+            new Summon("angel_legion", 3, 3, 120.0D, 14.0D, 40, "天使军团"),
+            new Summon("seraph_descent", 4, 3, 160.0D, 18.0D, 45, "炽天使降临"),
+            new Summon("archangel", 5, 2, 220.0D, 24.0D, 60, "大天使长"),
+    };
+
+    /** 同一个人身上最多留几只天使 ✓（连续放 t3 会叠出一大片 ✗ —— 超了就把最老的送走 ✓）。 */
+    private static final int SUMMON_CAP = 8;
+    /** 召唤出来的天使落在主人周围多大半径的圈上 ✓。 */
+    private static final double SUMMON_RING = 2.4D;
+    /** 招呼唤物时那一下白光的亮度 ✓。 */
+    private static final int SUMMON_FLASH_PARTICLES = 60;
+
+    private static Summon findSummon(String path) {
+        for (Summon summon : SUMMONS) {
+            if (summon.path().equals(path)) {
+                return summon;
+            }
+        }
+        return null;
+    }
+
     private TNLightChainMechanics() {
     }
 
@@ -128,9 +166,9 @@ public final class TNLightChainMechanics {
         return null;
     }
 
-    /** 这个法术是不是本文件的（两条链都算 ✓）。 */
+    /** 这个法术是不是本文件的（三条链都算 ✓：光耀 / 光翼 / 召唤天使 ✓）。 */
     public static boolean isLightChainSpell(String path) {
-        return find(path) != null || findWing(path) != null;
+        return find(path) != null || findWing(path) != null || findSummon(path) != null;
     }
 
     /** 玩家身上有没有光翼链的 buff（任一档 ✓）。 */
@@ -173,6 +211,12 @@ public final class TNLightChainMechanics {
         }
         Spell spell = find(path);
         if (spell == null) {
+            // ★ 召唤天使链（第四条链 ✓）：和光耀/光翼不一样 —— 它不治疗、不铺大阵，
+            //   只把"会飞的战斗天使"放到主人身边 ✓（见 castSummon ✓）
+            Summon summon = findSummon(path);
+            if (summon != null) {
+                castSummon(caster, summon);
+            }
             return;
         }
         ServerLevel level = (ServerLevel) caster.level();
@@ -264,6 +308,99 @@ public final class TNLightChainMechanics {
             case 4 -> "天使降临";
             default -> "天使的悲悯";
         };
+    }
+
+    /**
+     * <b>召唤天使链（光系第四条链）释放</b> ✓ —— 主人身边一圈白光里落下 N 只<b>会飞的</b>战斗天使 ✓。
+     *
+     * <h2>为什么天使不用 JSON 的 SPAWN 动作生成 ✗</h2>
+     * 引擎的 {@code SPAWN} 只能指定实体类型 ✗ —— 而天使的<b>档位 / 主人 / 寿命 / 血伤</b>都要现写 ✗。
+     * 所以和其它三条光链一样：JSON 只管表演，实体由这里生成 ✓（见 {@link #summonOne} ✓）。
+     *
+     * <h2>叠放规则（作者没规定，我定的 —— 只改这几个常量就行 ✓）</h2>
+     * <ul>
+     *   <li><b>同档覆盖</b>：再放一次 t3 ⇒ 先把上一批 t3 撤掉 ✓（不然连点两下变 6 只 ✗）；</li>
+     *   <li><b>总数上限</b> {@link #SUMMON_CAP} 只 ✓：位置不够就把<b>最老的</b>送走 ✓（按实体 id 排 ✓）；</li>
+     *   <li>不同档的天使可以共存 ✓（放完 t5 再放 t1，两只一起飞 ✓ —— 这正是"链"该有的样子 ✓）。</li>
+     * </ul>
+     */
+    private static void castSummon(LivingEntity caster, Summon summon) {
+        if (!(caster.level() instanceof ServerLevel level)) {
+            return;
+        }
+        Vec3 at = caster.position();
+        List<TNFightingAngelEntity> mine = level.getEntitiesOfClass(TNFightingAngelEntity.class,
+                new AABB(at, at).inflate(64.0D),
+                a -> caster.getUUID().equals(a.owner()));
+
+        // ① 同档覆盖 ✓
+        for (TNFightingAngelEntity old : mine) {
+            if (old.tier() == summon.tier()) {
+                old.discard();
+            }
+        }
+        // ② 总数上限 ✓：不够位置就把最老的（实体 id 最小 = 先出生的 ✓）送走 ✓
+        List<TNFightingAngelEntity> others = new java.util.ArrayList<>();
+        for (TNFightingAngelEntity old : mine) {
+            if (old.isAlive() && old.tier() != summon.tier()) {
+                others.add(old);
+            }
+        }
+        others.sort(java.util.Comparator.comparingInt(TNFightingAngelEntity::getId));
+        int free = SUMMON_CAP - others.size();
+        int index = 0;
+        while (free < summon.count() && index < others.size()) {
+            others.get(index++).discard();
+            free++;
+        }
+        int toSpawn = Math.min(summon.count(), Math.max(0, free));
+
+        // ③ 在主人周围一圈放下来 ✓（角度跟着朝向转，天使落在你面前而不是背后 ✓）
+        for (int i = 0; i < toSpawn; i++) {
+            double angle = Math.toRadians(caster.getYRot()) + (Math.PI * 2.0D * i) / Math.max(1, toSpawn);
+            summonOne(level, caster, summon,
+                    caster.getX() + Math.cos(angle) * SUMMON_RING,
+                    caster.getY() + 1.0D,
+                    caster.getZ() + Math.sin(angle) * SUMMON_RING);
+        }
+
+        if (caster instanceof ServerPlayer player) {
+            player.displayClientMessage(Component.literal("§e[TN-C] §r" + summon.name()
+                    + " §7（" + toSpawn + " 只 · " + summon.seconds() + " 秒 · "
+                    + (int) summon.health() + " 血 / " + (int) summon.damage() + " 伤）"), true);
+        }
+        LOGGER.info("TN-C/light: 召唤天使 {} count={} tier={} caster={}",
+                summon.path(), toSpawn, summon.tier(), caster.getName().getString());
+    }
+
+    /** 放下一只天使 ✓：档位 / 主人 / 寿命 / 血伤全在这里写进去 ✓。 */
+    private static void summonOne(ServerLevel level, LivingEntity caster, Summon summon,
+                                  double x, double y, double z) {
+        TNFightingAngelEntity angel = TNOrbEntities.FIGHTING_ANGEL.get().create(level);
+        if (angel == null) {
+            return;
+        }
+        angel.setTier(summon.tier());
+        angel.setOwner(caster.getUUID());
+        angel.setLifetime(summon.seconds() * 20);
+        angel.moveTo(x, y, z, caster.getYRot(), 0.0F);
+        // 档位 → 血量/伤害 ✓（实体自身的基准值只是兜底 ✓；血要先 setBaseValue 再 setHealth ✗，
+        // 反过来会被钳到旧上限 ✗）
+        if (angel.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH) != null) {
+            angel.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH)
+                    .setBaseValue(summon.health());
+            angel.setHealth((float) summon.health());
+        }
+        if (angel.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE) != null) {
+            angel.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE)
+                    .setBaseValue(summon.damage());
+        }
+        level.addFreshEntity(angel);
+        // 出场白光 ✓（金 + 白，和光耀链一个色系 ✓）
+        level.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD,
+                x, y + 1.0D, z, SUMMON_FLASH_PARTICLES, 0.4D, 0.7D, 0.4D, 0.05D);
+        level.sendParticles(net.minecraft.core.particles.ParticleTypes.FIREWORK,
+                x, y + 1.0D, z, 24, 0.3D, 0.5D, 0.3D, 0.08D);
     }
 
     /** 队友 = 同一个 {@link CombatTeams#group} ✓（自己也算 ✓）；怪物施法没有队伍 ⇒ 只算自己 ✓。 */

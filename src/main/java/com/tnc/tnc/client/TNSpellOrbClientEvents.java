@@ -42,5 +42,8 @@ public final class TNSpellOrbClientEvents {
         // ★ 实体光柱（光系第三条链「光线」✓）：一整根棱柱 + 彩虹顶点色，见 TNLightBeamRenderer ✓
         event.registerEntityRenderer(TNOrbEntities.LIGHT_BEAM.get(),
                 com.tnc.tnc.light.client.TNLightBeamRenderer::new);
+        // ★ 战斗天使（光法第 4 条链「召唤天使」✓）：GeckoLib 模型 + 按档位放大，见 TNFightingAngelRenderer ✓
+        event.registerEntityRenderer(TNOrbEntities.FIGHTING_ANGEL.get(),
+                com.tnc.tnc.light.client.TNFightingAngelRenderer::new);
     }
 }

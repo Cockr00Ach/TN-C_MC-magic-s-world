@@ -6,7 +6,8 @@ Writes assets/tnc/animations/entity/fightingangel.animation.json (GeckoLib / Bed
 
 Animations (bone names taken from the actual model: robe, body, armRight/armLeft,
 armLeft2/3/4, armRight4, head, halo, wingRight/Mid/Tip, wingLeft/Mid/Tip):
-    idle    4.0s loop  breathing bob, wing flap, halo spin, robe sway, head sway
+    idle    4.0s loop  hovering: breathing bob, slow wing flap, halo spin, robe sway, head sway
+    fly     0.8s loop  FLIGHT: hard wing beats, body leaning into the dive, robe trailing back
     walk    1.0s loop  faster bob + wing beat + robe sway   (this model has no legs)
     attack  0.8s       right arm swings down/forward, body lunge, wings snap
     cast    1.6s       both arms raised, halo grows, wings spread wide
@@ -44,6 +45,37 @@ def build():
             "wingRightMid": {"rotation": kf([(0.0, [0, 0, -4]), (1.0, [0, 0, -10]), (2.0, [0, 0, -4]), (3.0, [0, 0, -10]), (4.0, [0, 0, -4])])},
             "wingLeftMid": {"rotation": kf([(0.0, [0, 0, 4]), (1.0, [0, 0, 10]), (2.0, [0, 0, 4]), (3.0, [0, 0, 10]), (4.0, [0, 0, 4])])},
             "halo": {"rotation": kf([(0.0, [0, 0, 0]), (2.0, [0, 180, 0]), (4.0, [0, 360, 0])])},
+        },
+    }
+
+    # ---------------- fly (loop) ----------------
+    # 作者 2026-10-02："这个召唤出来的天使要能飞的" => 飞行专用循环：
+    # 翅拍幅度/频率都明显大于 idle（-14 <-> -48，一次 0.4s），身体前倾、袍子被风带向后方 ✓
+    anims["fly"] = {
+        "loop": True, "animation_length": 0.8, "bones": {
+            "body": {"position": bob(0.35, 0.8, 4),
+                     "rotation": kf([(0.0, [14.0, 0.0, 0.0]), (0.2, [16.0, 0.0, 2.0]),
+                                     (0.4, [14.0, 0.0, 0.0]), (0.6, [16.0, 0.0, -2.0]),
+                                     (0.8, [14.0, 0.0, 0.0])])},
+            "robe": {"rotation": kf([(0.0, [-18.0, 0.0, 0.0]), (0.2, [-21.0, 0.0, 3.0]),
+                                     (0.4, [-18.0, 0.0, 0.0]), (0.6, [-21.0, 0.0, -3.0]),
+                                     (0.8, [-18.0, 0.0, 0.0])])},
+            "head": {"rotation": kf([(0.0, [-8.0, 0.0, 0.0]), (0.4, [-5.0, 0.0, 0.0]), (0.8, [-8.0, 0.0, 0.0])])},
+            "halo": {"rotation": kf([(0.0, [0, 0, 0]), (0.8, [0, 360, 0])])},
+            "wingRight": {"rotation": kf([(0.0, [0, 0, -14]), (0.2, [0, 0, -48]), (0.4, [0, 0, -14]),
+                                          (0.6, [0, 0, -48]), (0.8, [0, 0, -14])])},
+            "wingLeft": {"rotation": kf([(0.0, [0, 0, 14]), (0.2, [0, 0, 48]), (0.4, [0, 0, 14]),
+                                         (0.6, [0, 0, 48]), (0.8, [0, 0, 14])])},
+            "wingRightMid": {"rotation": kf([(0.0, [0, 0, -8]), (0.2, [0, 0, -26]), (0.4, [0, 0, -8]),
+                                             (0.6, [0, 0, -26]), (0.8, [0, 0, -8])])},
+            "wingLeftMid": {"rotation": kf([(0.0, [0, 0, 8]), (0.2, [0, 0, 26]), (0.4, [0, 0, 8]),
+                                            (0.6, [0, 0, 26]), (0.8, [0, 0, 8])])},
+            "wingRightTip": {"rotation": kf([(0.0, [0, 0, -4]), (0.2, [0, 0, -14]), (0.4, [0, 0, -4]),
+                                             (0.6, [0, 0, -14]), (0.8, [0, 0, -4])])},
+            "wingLeftTip": {"rotation": kf([(0.0, [0, 0, 4]), (0.2, [0, 0, 14]), (0.4, [0, 0, 4]),
+                                            (0.6, [0, 0, 14]), (0.8, [0, 0, 4])])},
+            "armRight": {"rotation": kf([(0.0, [-10, 0, -6]), (0.4, [-15, 0, -9]), (0.8, [-10, 0, -6])])},
+            "armLeft": {"rotation": kf([(0.0, [-10, 0, 6]), (0.4, [-15, 0, 9]), (0.8, [-10, 0, 6])])},
         },
     }
 

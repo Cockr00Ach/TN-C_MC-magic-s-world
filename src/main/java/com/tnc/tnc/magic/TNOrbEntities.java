@@ -129,6 +129,23 @@ public final class TNOrbEntities {
                     .updateInterval(1)
                     .build("tnc:light_beam"));
 
+    /**
+     * ★ 光法第 4 条链「召唤天使」的**战斗天使** ✓（作者 2026-10-02："我制作了一个 fightingangel，你先把他做成怪" ✓）。
+     *
+     * <p>和上面那位"雕像天使"（{@link #ANGEL}）是两个东西 ✗：那个是第二条链法阵中心的无敌雕像，
+     * 这个是**会飞、跟着你、替你打怪**的召唤物 ✓（见 {@link com.tnc.tnc.light.TNFightingAngelEntity} ✓）。
+     *
+     * <p>档位由法术写入（t1..t5 ✓），渲染器按档位放大 0.70 → 1.40 ✓；
+     * 碰撞箱按模型原尺寸给（0.9 × 2.2 格 ✓ —— 视觉缩放只影响画面，不影响打不打得到 ✓）。
+     */
+    public static final RegistryObject<EntityType<com.tnc.tnc.light.TNFightingAngelEntity>> FIGHTING_ANGEL =
+            ENTITY_TYPES.register("fighting_angel", () -> EntityType.Builder
+                    .of(com.tnc.tnc.light.TNFightingAngelEntity::new, MobCategory.CREATURE)
+                    .sized(0.9F, 2.2F)
+                    .clientTrackingRange(12)
+                    .updateInterval(2)
+                    .build("tnc:fighting_angel"));
+
     private TNOrbEntities() {
     }
 
