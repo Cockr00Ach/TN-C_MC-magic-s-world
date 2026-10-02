@@ -152,6 +152,14 @@ def world_transforms(bones, anim, t):
 
 
 def cube_faces(cube):
+    """-> [(quad, normal, rect)] where rect = that face's pixel rectangle in the texture.
+
+    Box-UV layout (validated against the author's models: tools/face_uv_check.py found the
+    eyes of yan exactly in the -Z column, and yan faces -Z in game):
+        up   = (u+d,     v,     w, d)      down = (u+d+w, v,     w, d)
+        -X   = (u,       v+d,   d, h)      -Z   = (u+d,   v+d,   w, h)
+        +X   = (u+d+w,   v+d,   d, h)      +Z   = (u+d+w+d, v+d, w, h)
+    """
     o = cube["origin"]
     s = cube["size"]
     rot = cube.get("rotation") or [0, 0, 0]
@@ -164,14 +172,47 @@ def cube_faces(cube):
                 corners.append(apply(local, [o[0] + s[0] * i, o[1] + s[1] * j, o[2] + s[2] * k]))
     # index of corner (i,j,k) = 4*i + 2*j + k
     quads = [
-        ([0, 1, 3, 2], (0, 0, -1)),   # -X
-        ([4, 5, 7, 6], (0, 0, 1)),    # +X
-        ([0, 1, 5, 4], (0, -1, 0)),   # -Y
-        ([2, 3, 7, 6], (0, 1, 0)),    # +Y
-        ([0, 2, 6, 4], (0, 0, -1)),   # -Z
-        ([1, 3, 7, 5], (0, 0, 1)),    # +Z
+        ([0, 1, 3, 2], (0, 0, -1), "west"),
+        ([4, 5, 7, 6], (0, 0, 1), "east"),
+        ([0, 1, 5, 4], (0, -1, 0), "down"),
+        ([2, 3, 7, 6], (0, 1, 0), "up"),
+        ([0, 2, 6, 4], (0, 0, -1), "north"),
+        ([1, 3, 7, 5], (0, 0, 1), "south"),
     ]
-    return [( [corners[i] for i in idx], n) for idx, n in quads]
+    uv = cube.get("uv")
+    w, h, d = [float(v) for v in s]
+    rects = None
+    if isinstance(uv, list):
+        u, v = float(uv[0]), float(uv[1])
+        rects = {
+            "up": (u + d, v, w, d),
+            "down": (u + d + w, v, w, d),
+            "west": (u, v + d, d, h),
+            "north": (u + d, v + d, w, h),
+            "east": (u + d + w, v + d, d, h),
+            "south": (u + d + w + d, v + d, w, h),
+        }
+    out = []
+    for idx, n, key in quads:
+        out.append(([corners[i] for i in idx], n, rects.get(key) if rects else None))
+    return out
+
+
+def face_color(tex, rect, fallback):
+    """average colour of that face's texture rectangle (so previews show the real palette)"""
+    if tex is None or rect is None:
+        return fallback
+    x0, y0, w, h = [int(round(v)) for v in rect]
+    if w <= 0 or h <= 0:
+        return fallback
+    x0 = max(0, min(tex.width - 1, x0))
+    y0 = max(0, min(tex.height - 1, y0))
+    x1 = max(x0 + 1, min(tex.width, x0 + w))
+    y1 = max(y0 + 1, min(tex.height, y0 + h))
+    px = tex.crop((x0, y0, x1, y1)).resize((1, 1), Image.BILINEAR).getpixel((0, 0))
+    if len(px) == 4 and px[3] < 8:
+        return fallback
+    return (px[0], px[1], px[2])
 
 
 def norm(v):
@@ -226,14 +267,14 @@ def render(bones, order, anim, t, size, azimuth, elevation, zoom, label,
     tfs = world_transforms(bones, anim, t)
     for name in order:
         tf = tfs[name]
-        base = TINT.get(name, (235, 232, 222))
-        for quad, n in cube_faces_cached(name):
+        fb = TINT.get(name, (235, 232, 222))
+        for quad, n, rect in cube_faces_cached(name):
             pts = [apply(tf, p) for p in quad]
             nrm = rot_dir(tf[0], n)
             if FRONT == "+Z":                     # same 180 deg the renderer adds
                 pts = [flip_y180(p) for p in pts]
                 nrm = flip_dir(nrm)
-            tris.append((pts, nrm, base))
+            tris.append((pts, nrm, face_color(_TEX, rect, fb)))
 
     def project(p):
         v = [p[i] - center[i] for i in range(3)]
@@ -246,12 +287,14 @@ def render(bones, order, anim, t, size, azimuth, elevation, zoom, label,
 
     tris.sort(key=lambda e: -sum(sum(p[i] * f[i] for i in range(3)) for p in e[0]) / len(e[0]))
     for pts, nrm, base in tris:
-        shade = 0.30 + 0.70 * abs(sum(nrm[i] * light[i] for i in range(3)))
+        # flat shading, but gentle: in game the palette is roughly evenly lit, and a heavy
+        # multiply here makes every preview look muddy (the author read that as "too crude")
+        shade = 0.62 + 0.42 * abs(sum(nrm[i] * light[i] for i in range(3)))
         facing = sum(nrm[i] * (-f[i]) for i in range(3)) >= 0
         if not facing:
-            shade *= 0.55
+            shade *= 0.72
         col = tuple(min(255, int(c * shade)) for c in base)
-        d.polygon([project(p) for p in pts], fill=col, outline=(55, 53, 60))
+        d.polygon([project(p) for p in pts], fill=col, outline=(40, 38, 44))
 
     # ---- skeleton overlay: one dot per bone pivot + a line to its parent ----
     if show_bones:
@@ -326,14 +369,26 @@ def cube_faces_cached(name):
 
 
 _GEO = {}
+_TEX = None      # the model's texture, when one was found (previews then show real colours)
 
 
 def strip(geo_path, anim_path, clip, times, views, out, size=260, zoom=4.4,
-          front=None, fit=False, show_bones=False):
-    global _GEO, FRONT
+          front=None, fit=False, show_bones=False, texture=None):
+    global _GEO, FRONT, _TEX
     if front:
         FRONT = front
     _GEO, order = load_geo(geo_path)
+    if texture is None:
+        # guess: .../geo/entity/<name>.geo.json -> .../textures/entity/<name>_bedrock.png
+        # (normalise the separators first: on Windows os.sep is "\" but argv often has "/",
+        #  and a failed guess used to silently fall back to flat grey previews)
+        g = geo_path.replace("\\", "/")
+        guess = g.replace("/geo/", "/textures/").replace(".geo.json", "_bedrock.png")
+        texture = guess if os.path.exists(guess) else "-"
+    try:
+        _TEX = None if texture in (None, "-") else Image.open(texture).convert("RGBA")
+    except Exception:
+        _TEX = None
     anim = load_anim(anim_path, clip)
     cols = len(times) * len(views)
     sheet = Image.new("RGB", (size * cols, size), (26, 26, 34))
@@ -342,7 +397,11 @@ def strip(geo_path, anim_path, clip, times, views, out, size=260, zoom=4.4,
     for c, view in enumerate(views):
         az, el, tag = {"side": (-90, 8, "side(-X)"), "side2": (90, 8, "side(+X)"),
                        "front": (180, 8, "front(-Z)"), "back": (0, 8, "back(+Z)"),
-                       "top": (180, 78, "top"), "three": (-135, 18, "3/4")}[view]
+                       "top": (180, 78, "top"), "three": (-135, 18, "3/4"),
+                       # views named from the MODEL's point of view for a -Z facing model
+                       # (the usual convention here): camera in front of it / front 3/4
+                       "face": (0, 6, "face(front of -Z model)"),
+                       "face34": (-45, 16, "3/4 front")}[view]
         z = zoom
         if fit:
             # per-view auto-fit: project the 8 bounding-box corners and pick the zoom
@@ -394,7 +453,8 @@ def main():
           zoom=float(opts.get("--zoom", 4.4)),
           front=opts.get("--front"),
           fit=("--fit" in flags),
-          show_bones=("--bones" in flags))
+          show_bones=("--bones" in flags),
+          texture=opts.get("--texture"))
 
 
 if __name__ == "__main__":
