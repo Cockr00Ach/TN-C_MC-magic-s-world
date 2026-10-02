@@ -1,7 +1,6 @@
 package com.tnc.tnc.light;
 
 import com.tnc.tnc.magic.TnSpellMechanics;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -159,7 +158,9 @@ public class TNLightBeamEntity extends Entity {
         }
         this.trackTarget();                      // ★ 瞄着敌人：每 tick 重新瞄准 ✓
         this.damageAlong();
-        this.sparkle();
+        // ★ 2026-10-01 作者："把烟雾特效去掉" ✗ —— 原来这里每 tick 撒 END_ROD（末端火花）
+        //   和 FLASH（起手一团白，看着就像冒烟 ✗）；光柱其实已经是**实体几何**了 ✓，
+        //   这些粒子只会互相干扰 ✗ ⇒ 整块删掉，光柱就是干干净净一根柱子 ✓（要加回来说一声 ✓）。
     }
 
     /**
@@ -281,18 +282,6 @@ public class TNLightBeamEntity extends Entity {
             }
             target.hurt(this.level().damageSources().indirectMagic(owner, owner), this.damage);
         }
-    }
-
-    /** 一点火花：起手处 + 末端 ✓（主体是几何 ✓，这里只是点缀 ✓）。 */
-    private void sparkle() {
-        if (!(this.level() instanceof ServerLevel server)) {
-            return;
-        }
-        Vec3 to = this.endPoint();
-        server.sendParticles(ParticleTypes.END_ROD, to.x, to.y, to.z,
-                6, this.radius() * 0.4D, this.radius() * 0.4D, this.radius() * 0.4D, 0.02D);
-        Vec3 from = this.position();
-        server.sendParticles(ParticleTypes.FLASH, from.x, from.y, from.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
     }
 
     @Override
