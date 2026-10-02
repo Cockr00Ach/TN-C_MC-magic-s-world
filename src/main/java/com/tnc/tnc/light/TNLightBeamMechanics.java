@@ -328,9 +328,9 @@ public final class TNLightBeamMechanics {
     }
 
     /** 找一个目标（最近的 ✓）；没有就返回 null ⇒ 调用方回退成"顺着视线射" ✓。 */
-    private static LivingEntity findTarget(LivingEntity caster, Spell spell) {
+    private static LivingEntity findTarget(LivingEntity caster, Spell spell, double lengthScale) {
         ServerLevel level = (ServerLevel) caster.level();
-        double reach = Math.max(12.0D, spell.reach());
+        double reach = Math.max(12.0D, spell.reach() * Math.max(1.0D, lengthScale));
         List<LivingEntity> candidates = level.getEntitiesOfClass(LivingEntity.class,
                 caster.getBoundingBox().inflate(reach));
         List<LivingEntity> targets = coneTargets(caster, candidates, caster.getLookAngle(),
@@ -427,6 +427,14 @@ public final class TNLightBeamMechanics {
      * Boss 在自己 {@code aiStep} 里直接调这个 ✓）。玩家专属的东西（聊天提示）都做了判断 ✓。
      */
     public static void onSpellCast(LivingEntity caster, String path) {
+        onSpellCast(caster, path, 1.0D);
+    }
+
+    /**
+     * @param lengthScale <b>光柱长度倍数</b> ✓ —— 作者 2026-10-01："boss 的 t2t3 光线长度增加三倍" ✓
+     *                    （只放大 Boss 那两招 ✗，玩家的 t2/t3 仍是原长 ✓；1.0 = 原长 ✓）
+     */
+    public static void onSpellCast(LivingEntity caster, String path, double lengthScale) {
         Spell spell = find(path);
         if (spell == null) {
             return;
@@ -434,7 +442,7 @@ public final class TNLightBeamMechanics {
         if (spell.sky()) {
             castSky(caster, spell);
         } else {
-            castForward(caster, spell);
+            castForward(caster, spell, Math.max(0.1D, lengthScale));
         }
     }
 
@@ -444,17 +452,17 @@ public final class TNLightBeamMechanics {
      * <p>★ 索敌（作者 2026-10-01："t1234激光怎么没有索敌啊"✗）：先按准星锥找最近的一个敌人 ✓，
      * 找到就把**中心那道对准它**（侧面几道围着它散开 ✓）；一个都没找到就顺着视线射 ✓（不至于打空 ✗）。
      */
-    private static void castForward(LivingEntity caster, Spell spell) {
+    private static void castForward(LivingEntity caster, Spell spell, double lengthScale) {
         ServerLevel level = (ServerLevel) caster.level();
         Vec3 from = caster.getEyePosition();
-        LivingEntity target = findTarget(caster, spell);
+        LivingEntity target = findTarget(caster, spell, lengthScale);
         Vec3 center = caster.getLookAngle();
         if (target != null) {
             center = target.position().add(0.0D, target.getBbHeight() * 0.5D, 0.0D).subtract(from).normalize();
         }
         List<Vec3> dirs = fanDirections(center, spell.rays(), spell.spreadDeg());
         for (Vec3 dir : dirs) {
-            spawn(level, caster, from, dir, spell, TNLightBeamEntity.STYLE_RAY, target);
+            spawn(level, caster, from, dir, spell, TNLightBeamEntity.STYLE_RAY, target, lengthScale);
         }
         play(level, from, spell.tier() >= 3 ? SoundEvents.BEACON_ACTIVATE : SoundEvents.AMETHYST_BLOCK_CHIME);
         if (caster instanceof ServerPlayer player) {
@@ -551,16 +559,18 @@ public final class TNLightBeamMechanics {
      * （{@link TNLightBeamEntity#tick} ✓），所以这里只要给一个正确的初值 ✓。
      */
     private static void spawn(ServerLevel level, LivingEntity caster, Vec3 from, Vec3 dir,
-                              Spell spell, int style, LivingEntity target) {
+                              Spell spell, int style, LivingEntity target, double lengthScale) {
         TNLightBeamEntity beam = TNOrbEntities.LIGHT_BEAM.get().create(level);
         if (beam == null) {
             return;
         }
         Vec3 d = dir.normalize();
         beam.moveTo(from.x, from.y, from.z, yawFor(d), pitchFor(d));
-        double length = spell.sky() ? SKY_HEIGHT + 1.0D : spell.reach();
+        double length = spell.sky() ? SKY_HEIGHT + 1.0D : spell.reach() * Math.max(0.1D, lengthScale);
         if (target != null) {
-            length = Math.max(1.0D, target.position().distanceTo(from));
+            // 瞄准着目标时长度 = 到目标的距离 ✓，但**不会短于**法术射程的倍数 ✗
+            //   （不然"加长三倍"在近距离完全看不出来 ✗ —— 作者 2026-10-01 ✓）
+            length = Math.max(length * 0.5D, target.position().distanceTo(from));
         }
         beam.configure(caster, spell.radius(), length, spell.damage(), BEAM_LIFE, style, target);
         beam.setShake(spell.shake());            // ★ 画面震动（作者 2026-10-01："并且加上画面震动"✓）
@@ -623,7 +633,7 @@ public final class TNLightBeamMechanics {
                 continue;
             }
             spawn(pending.level, pending.caster, pending.from, pending.dir, pending.spell,
-                    pending.style, pending.target);
+                    pending.style, pending.target, 1.0D);
             it.remove();
         }
     }

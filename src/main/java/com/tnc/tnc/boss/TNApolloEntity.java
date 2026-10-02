@@ -49,12 +49,29 @@ public class TNApolloEntity extends Monster implements GeoEntity {
     /** 血量（作者没指定，我先定 2500 ✓；改这一个常量即可 ✓）。 */
     public static final float MAX_HP = 2500.0F;
 
-    /** 五个法术：{法术 id, 权重} ✓（id：0 光线t1 / 1 光线t4 / 2 光线t5 / 3 光耀t4 / 4 光耀t5） */
-    private static final int[][] SPELLS = {{0, 6}, {1, 2}, {2, 2}, {3, 1}, {4, 1}};
+    /**
+     * 五个法术：{索引, 权重} ✓。
+     *
+     * <p>★ 作者 2026-10-01 调整："把 boss 的法术里 t1 光线删了，加上 t2 和 t3 吧，
+     * 然后光耀链只留下 t5，然后 boss 的 t2t3 光线长度增加三倍" ✓
+     * ⇒ 现在的五招是：光线 t2 / t3 / t4 / t5 ＋ 光耀 t5 ✗（t1 与光耀 t4 都删了 ✓）。
+     */
+    private static final int[][] SPELLS = {{0, 4}, {1, 3}, {2, 2}, {3, 2}, {4, 1}};
+
+    /** 五招分别对应哪个法术 ✓（顺序和 {@link #SPELLS} 的索引一致 ✓）。 */
+    private static final String[] PATHS = {
+            "great_light_beam", "giant_light_beam", "holy_light_descent", "radiant_barrage", "angel_mercy"};
+
+    /** 是不是"光线链"的招 ✓（前四个是；最后一个是光耀链 ✗ —— 两条链的入口不一样 ✓）。 */
+    private static final boolean[] IS_BEAM = {true, true, true, true, false};
+
+    /** 光柱长度倍数 ✓ —— 作者："boss 的 t2t3 光线长度增加三倍" ⇒ 前两招 ×3 ✓，其余原长 ✓。 */
+    private static final double[] LENGTH_SCALE = {3.0D, 3.0D, 1.0D, 1.0D, 1.0D};
+
     /** 每个法术对应的动画名与动画时长（tick）——"等动画播完再施法" ✓ */
     private static final String[] ANIM = {
-            "palymagic_t1", "palymagic_t4_t5", "palymagic_t4_t5", "palymagic_t4_t5", "palymagic_t4_t5"};
-    private static final int[] CAST_TICKS = {55, 60, 60, 60, 60};
+            "palymagic_t1", "palymagic_t1", "palymagic_t4_t5", "palymagic_t4_t5", "palymagic_t4_t5"};
+    private static final int[] CAST_TICKS = {55, 55, 60, 60, 60};
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private int castCooldown = 80;
@@ -203,19 +220,12 @@ public class TNApolloEntity extends Monster implements GeoEntity {
         if (!(this.level() instanceof ServerLevel level)) {
             return;
         }
-        String path = switch (spell) {
-            case 0 -> "light_beam";                 // 光线 t1（三条细光 ✓）
-            case 1 -> "holy_light_descent";         // 光线 t4：天上开阵 → 1 秒后 45 格宽巨柱 ✓
-            case 2 -> "radiant_barrage";            // 光线 t5：五个阵错开连射 ✓
-            case 3 -> "angel_descent";              // 光耀 t4：法阵 + 6 格高天使 ✓
-            default -> "angel_mercy";               // 光耀 t5：法阵 + 10 格高天使 ✓
-        };
-        if (spell == 0 || spell == 1 || spell == 2) {
-            com.tnc.tnc.light.TNLightBeamMechanics.onSpellCast(this, path);
+        String path = PATHS[spell];
+        if (IS_BEAM[spell]) {
+            com.tnc.tnc.light.TNLightBeamMechanics.onSpellCast(this, path, LENGTH_SCALE[spell]);
         } else {
             com.tnc.tnc.light.TNLightChainMechanics.onSpellCast(this, path);
         }
-        // 让 Boss 把仇恨目标当作"施法对象"（光柱/天降都对着它 ✓）——已经是 getTarget() ✓，这里只是补个音效 ✓
         level.playSound(null, this.getX(), this.getY(), this.getZ(),
                 SoundEvents.BEACON_POWER_SELECT, SoundSource.HOSTILE, 1.4F, 1.4F);
     }
