@@ -5,15 +5,15 @@ gen_light_dragon_spells.py -- the 5 spell JSONs of the light chain #5 (光龙).
 Author 2026-10-02: "然后新增加一条光龙链" (on top of the Eastern light dragon model).
 
 The JSONs are PERFORMANCE ONLY (animation / sound / particles + a small absorption buff):
-the real work is done by light/TNLightDragonChain (breath beam / scales buff / summoning
-light dragons - the engine's SPAWN action cannot set tier / owner / lifetime / hp / damage).
+the real work is done by light/TNLightDragonChain (breath beam / scales buff / RELEASING
+charging dragons - the engine's SPAWN action cannot set direction / speed / damage).
 
 Ids / names (tier -> spell):
     1  light_dragon_breath    光龙吐息   forward golden beam (reuses the beam chain's entity)
     2  light_dragon_scales    光龙鳞甲   self+allies: DR 50% / speed +20% / light dmg +30%, 20s
-    3  summon_light_dragon    召唤光龙   1 dragon (0.30x ~7 blocks)
-    4  light_dragon_dive      光龙俯冲   1 bigger dragon (0.40x) + a small sky beam
-    5  light_dragon_descend   光龙降世   2 biggest dragons (0.45x) + a big sky beam
+    3  summon_light_dragon    光龙出击   1 dragon that CHARGES forward ~45 blocks (0.30x)
+    4  light_dragon_dive      光龙俯冲   2 dragons (0.40x, +-7 deg) charge ~60 blocks + a small sky beam
+    5  light_dragon_descend   光龙降世   3 dragons (0.45x, fan +-16 deg) charge ~75 blocks + a big sky beam
 ASCII only.
 """
 import json

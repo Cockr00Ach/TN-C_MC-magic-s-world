@@ -1,5 +1,6 @@
 package com.tnc.tnc.light;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -10,15 +11,9 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.control.FlyingMoveControl;
-import net.minecraft.world.entity.ai.goal.FloatGoal;
-import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
-import net.minecraft.world.entity.ai.navigation.PathNavigation;
-import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -34,78 +29,64 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * <b>光明龙</b> —— 光系第五条链「光龙」的召唤物 ✓（作者 2026-10-02："新增加一条光龙链" ✓）。
+ * <b>光明龙</b> —— 光系第五条链「光龙」放出去的那条**向前冲刺的龙** ✓
+ * （作者 2026-10-02："不要做成召唤物啊，我要释放出一条巨龙往前冲，触碰造成伤害" ✓）。
  *
- * <p>模型/贴图/动画就是那条**东方光明龙**（{@code geo/entity/dragon.geo.json} ✓ 作者手改的 ✓、
- * 贴图 {@code dragon_bedrock.png} ✓、动画 {@code dragon.animation.json} 的 {@code idle}/{@code dash} ✓）。
- *
- * <h2>行为（这条龙最要紧的是"冲刺"✓）</h2>
+ * <h2>它不是宠物 ✗ —— 是一发"活体弹道" ✓</h2>
  * <ul>
- *   <li><b>会飞</b> ✓：无重力 + {@link FlyingMoveControl} + {@link FlyingPathNavigation}（和战斗天使同一套 ✓）；</li>
- *   <li><b>跟着主人</b> ✓：主人身边悬停（超过 24 格直接瞬移过去 ✓）；</li>
- *   <li><b>有敌人就低头冲刺</b> ✓：每 {@link #DASH_GAP} tick 冲一次，一次 {@link #DASH_LENGTH} tick，
- *       沿冲刺方向高速前进并播 {@code dash} 动画 ✓，路上用一条"扫过判定盒"把敌人各扫一次 ✓
- *       （判定盒按**体长**给 ⇒ 龙越大扫得越宽 ✓）；</li>
- *   <li><b>寿命</b> ✓：召唤时写死，到点白光一散自己消散 ✓；主人没了也消散 ✓。</li>
+ *   <li><b>放出来就往前冲</b> ✓：召唤时写死方向 + 速度 + 能飞多久（{@link #charge} ✓），
+ *       之后**直线飞行**、不跟人、不索敌、不悬停 ✗；</li>
+ *   <li><b>碰到就伤</b> ✓：每 tick 用一条"按体长给的判定盒"扫一遍，
+ *       每个敌人**整次冲刺只挨一下** ✓（{@link #hitThisCharge} ✓），命中有击退 + 金光爆开 ✓；</li>
+ *   <li><b>撞墙/到点就散</b> ✓：前方方块是实心就爆开消失 ✓（不然会一头钻进山体里 ✗）；</li>
+ *   <li>飞行途中**无敌** ✓（{@link #isInvulnerableTo}）—— 一发弹道不该被怪打断 ✗；</li>
+ *   <li>只打敌对生物 ✓：不打玩家（含施法者）、不打天使/别的龙、不打阿波罗 ✓。</li>
  * </ul>
  *
- * <h2>尺寸（23 格长的模型，两个数要配套 ✓）</h2>
- * <ul>
- *   <li><b>碰撞箱</b>只给身体那一小段（2.5 × 2 格 ✓）—— 整条龙都进碰撞箱会卡墙 ✗（作者的模型长 23 格 ✓）；</li>
- *   <li><b>剔除盒</b>必须按体长自己撑大 ✗（{@link #getBoundingBoxForCulling} ✓）——
- *       不然抬头只看一段时整条龙会突然消失（天使/雕像那两个都踩过 ✓）；</li>
- *   <li>渲染缩放由法术写进实体（{@code setScale ✓}，t3 0.30 / t4 0.40 / t5 0.45 ✓）。</li>
- * </ul>
+ * <h2>动画 / 朝向</h2>
+ * 全程播 {@code dash}（那段就是"低头前冲"✓，循环 ✓）；朝向每 tick 对齐飞行方向 ✓
+ * —— 龙是**朝前冲**的，不是横着飘 ✗。
+ *
+ * <h2>尺寸（23 格长的模型）</h2>
+ * 碰撞箱只给身体那一小段（2.5 × 2 格 ✓，免得卡墙 ✗）；剔除盒按体长自己撑 ✓
+ * （{@link #getBoundingBoxForCulling} ✓，不然抬头只看一段时整条会消失 ✓）。
  */
 public class TNDragonEntity extends Monster implements GeoEntity {
 
     /** 模型原长（格 ✓）—— 量自 geo（吻 z≈−168 → 尾焰 z≈+200 ⇒ 368 单位 = 23 格 ✓）。 */
     public static final double MODEL_LENGTH_BLOCKS = 23.0D;
 
-    /** 渲染个头（×100 同步 ✓）—— 法术召唤时写入 ✓。 */
+    /** 渲染个头（×100 同步 ✓）—— 释放时由法术写入 ✓。 */
     private static final EntityDataAccessor<Integer> DATA_SCALE =
             SynchedEntityData.defineId(TNDragonEntity.class, EntityDataSerializers.INT);
-    /** 档次 1..5 ✓ —— 只用来做"同档覆盖"（再放一次 t3 先把上一批 t3 送走 ✓）。 */
+    /** 档次 1..5 ✓（只用来区分/调试 ✓）。 */
     private static final EntityDataAccessor<Integer> DATA_TIER =
             SynchedEntityData.defineId(TNDragonEntity.class, EntityDataSerializers.INT);
-    /** 正在冲刺吗（0/1 ✓）—— 只用来驱动动画 ✓（能不能打是服务端自己算的 ✓）。 */
-    private static final EntityDataAccessor<Integer> DATA_DASH =
-            SynchedEntityData.defineId(TNDragonEntity.class, EntityDataSerializers.INT);
 
-    /** 冲刺持续多久（tick ✓）。 */
-    private static final int DASH_LENGTH = 26;
-    /** 两次冲刺之间隔多久（tick ✓）—— 冲完先绕一圈再冲，才像活物 ✓。 */
-    private static final int DASH_GAP = 70;
-    /** 第一次冲刺前先等一下（tick ✓）。 */
-    private static final int FIRST_DASH_DELAY = 30;
-    /** 冲刺时每 tick 走多远（格 ✓）—— 比它自己的寻路快得多 ⇒ 看起来就是"扑"过去 ✓。 */
-    private static final double DASH_SPEED = 1.35D;
-    /** 超过这个距离直接瞬移到主人身边（格 ✓）。 */
-    private static final double TELEPORT_DISTANCE = 24.0D;
-    /** 悬停在主人身边的距离 / 高度（格 ✓）。 */
-    private static final double HOVER_DISTANCE = 6.0D;
-    private static final double HOVER_HEIGHT = 3.0D;
-    /** 冲刺撞人的判定，横向给多宽（格 ✓）—— 纵向按体长给 ✓（见 {@link #sweepBox()}）。 */
+    /** 冲刺撞人的判定，横向给多宽（格 ✓）—— 纵向按体长给 ✓。 */
     private static final double SWEEP_WIDTH = 3.0D;
+    /** 没显式给参数时（比如 /summon 出来的）用这套默认值 ✓。 */
+    private static final double DEFAULT_SPEED = 1.4D;
+    private static final int DEFAULT_TICKS = 60;
+    private static final double DEFAULT_DAMAGE = 20.0D;
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+    /** 施法者（伤害记在它头上 ✓ / 判"不打自己人" ✓）；可能为 null ✓。 */
     private UUID ownerId;
-    /** 寿命（tick ✓；0 = 不自动消散，给 /summon 调试用 ✓）。 */
-    private int lifeTicks;
-    /** 冲刺撞一下多少伤害（召唤时写入 ✓）。 */
-    private double dashDamage = 10.0D;
-    private int dashCooldown = FIRST_DASH_DELAY;
-    private int dashTicks;
-    private Vec3 dashDir = Vec3.ZERO;
-    /** 这一次冲刺已经扫过谁（按实体 id ✓）—— 一次冲刺对同一个敌人只打一下 ✓。 */
-    private final Set<Integer> dashHit = new HashSet<>();
+    private Vec3 chargeDir = Vec3.ZERO;
+    private double chargeSpeed = DEFAULT_SPEED;
+    private double chargeDamage = DEFAULT_DAMAGE;
+    private int chargeTicks;
+    /** 这一次冲刺已经扫过谁（按实体 id ✓）—— 同一个敌人只挨一下 ✓。 */
+    private final Set<Integer> hitThisCharge = new HashSet<>();
+    private boolean configured;
 
     public TNDragonEntity(EntityType<? extends TNDragonEntity> type, Level level) {
         super(type, level);
         this.xpReward = 0;
-        this.setPersistenceRequired();
-        this.moveControl = new FlyingMoveControl(this, 20, true);
         this.setNoGravity(true);
+        this.noPhysics = true;                 // 弹道不受推挤/碰撞箱卡住 ✓（撞墙靠下面自己判 ✓）
+        this.setInvulnerable(true);
         this.setCanPickUpLoot(false);
     }
 
@@ -113,20 +94,14 @@ public class TNDragonEntity extends Monster implements GeoEntity {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MAX_HEALTH, 300.0D)
                 .add(Attributes.ATTACK_DAMAGE, 10.0D)
-                .add(Attributes.MOVEMENT_SPEED, 0.32D)
-                .add(Attributes.FLYING_SPEED, 0.6D)
+                .add(Attributes.MOVEMENT_SPEED, 0.0D)
                 .add(Attributes.FOLLOW_RANGE, 48.0D)
-                .add(Attributes.ARMOR, 6.0D)
-                .add(Attributes.KNOCKBACK_RESISTANCE, 0.8D);
+                .add(Attributes.KNOCKBACK_RESISTANCE, 1.0D);
     }
 
+    /** 一条龙不需要任何 AI ✓（不寻路、不选目标 ✓）。 */
     @Override
-    protected PathNavigation createNavigation(Level level) {
-        FlyingPathNavigation navigation = new FlyingPathNavigation(this, level);
-        navigation.setCanOpenDoors(false);
-        navigation.setCanFloat(true);
-        navigation.setCanPassDoors(true);
-        return navigation;
+    protected void registerGoals() {
     }
 
     @Override
@@ -134,24 +109,6 @@ public class TNDragonEntity extends Monster implements GeoEntity {
         super.defineSynchedData();
         this.entityData.define(DATA_SCALE, 30);
         this.entityData.define(DATA_TIER, 3);
-        this.entityData.define(DATA_DASH, 0);
-    }
-
-    public int tier() {
-        return this.entityData.get(DATA_TIER);
-    }
-
-    public void setTier(int tier) {
-        this.entityData.set(DATA_TIER, Mth.clamp(tier, 1, 5));
-    }
-
-    @Override
-    protected void registerGoals() {
-        this.goalSelector.addGoal(0, new FloatGoal(this));
-        // 目标只用来"找谁冲" ✓ —— 追人/咬人交给冲刺那一套（见 aiStep ✓），不用 MeleeAttackGoal ✗
-        // 尺子就是 isValidLightTarget ✓（只敌对生物、不打主人/天使/阿波罗 ✓）
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Monster.class, true,
-                this::isValidLightTarget));
     }
 
     public double scale() {
@@ -162,28 +119,33 @@ public class TNDragonEntity extends Monster implements GeoEntity {
         this.entityData.set(DATA_SCALE, (int) Math.round(Mth.clamp(scale, 0.05D, 4.0D) * 100.0D));
     }
 
+    public int tier() {
+        return this.entityData.get(DATA_TIER);
+    }
+
+    public void setTier(int tier) {
+        this.entityData.set(DATA_TIER, Mth.clamp(tier, 1, 5));
+    }
+
     public void setOwner(UUID owner) {
         this.ownerId = owner;
     }
 
-    public UUID owner() {
-        return this.ownerId;
-    }
-
-    public void setLifetime(int ticks) {
-        this.lifeTicks = Math.max(0, ticks);
-    }
-
-    public void setDashDamage(double damage) {
-        this.dashDamage = Math.max(1.0D, damage);
-    }
-
-    public boolean isDashing() {
-        return this.entityData.get(DATA_DASH) != 0;
-    }
-
-    private void setDashing(boolean dashing) {
-        this.entityData.set(DATA_DASH, dashing ? 1 : 0);
+    /**
+     * ★ 放出去：朝 {@code dir} 冲 {@code ticks} tick、每 tick 走 {@code speed} 格、
+     * 碰到敌人打 {@code damage} ✓（法术在生成的那一刻调它 ✓）。
+     */
+    public void charge(Vec3 dir, double speed, int ticks, double damage) {
+        Vec3 d = dir.lengthSqr() < 1.0E-6D ? Vec3.ZERO : dir.normalize();
+        if (d == Vec3.ZERO) {
+            d = new Vec3(0.0D, 0.0D, -1.0D);
+        }
+        this.chargeDir = d;
+        this.chargeSpeed = Math.max(0.1D, speed);
+        this.chargeTicks = Math.max(1, ticks);
+        this.chargeDamage = Math.max(1.0D, damage);
+        this.configured = true;
+        this.faceDir(d);
     }
 
     @Override
@@ -192,10 +154,14 @@ public class TNDragonEntity extends Monster implements GeoEntity {
         if (this.ownerId != null) {
             tag.putUUID("Owner", this.ownerId);
         }
-        tag.putInt("Life", this.lifeTicks);
         tag.putInt("Scale", this.entityData.get(DATA_SCALE));
         tag.putInt("Tier", this.tier());
-        tag.putDouble("DashDamage", this.dashDamage);
+        tag.putDouble("ChargeSpeed", this.chargeSpeed);
+        tag.putDouble("ChargeDamage", this.chargeDamage);
+        tag.putInt("ChargeTicks", this.chargeTicks);
+        tag.putDouble("DirX", this.chargeDir.x);
+        tag.putDouble("DirY", this.chargeDir.y);
+        tag.putDouble("DirZ", this.chargeDir.z);
     }
 
     @Override
@@ -210,9 +176,13 @@ public class TNDragonEntity extends Monster implements GeoEntity {
         if (tag.contains("Tier")) {
             this.setTier(tag.getInt("Tier"));
         }
-        this.lifeTicks = tag.getInt("Life");
-        if (tag.contains("DashDamage")) {
-            this.dashDamage = tag.getDouble("DashDamage");
+        if (tag.contains("ChargeSpeed")) {
+            this.chargeSpeed = tag.getDouble("ChargeSpeed");
+            this.chargeDamage = tag.getDouble("ChargeDamage");
+            this.chargeTicks = tag.getInt("ChargeTicks");
+            this.chargeDir = new Vec3(tag.getDouble("DirX"), tag.getDouble("DirY"),
+                    tag.getDouble("DirZ"));
+            this.configured = true;
         }
     }
 
@@ -221,10 +191,36 @@ public class TNDragonEntity extends Monster implements GeoEntity {
         return false;
     }
 
-    /**
-     * 剔除盒必须按**体长**撑 ✗（23 格长的模型，光看碰撞箱会在抬头时整条消失 ✓）。
-     * 只管剔除、不影响碰撞/推挤 ✓。
-     */
+    /** 一发弹道不该被打断 ✗（也别被别的怪当靶子 ✓）。 */
+    @Override
+    public boolean isInvulnerableTo(DamageSource source) {
+        return true;
+    }
+
+    @Override
+    public boolean hurt(DamageSource source, float amount) {
+        return false;
+    }
+
+    @Override
+    public boolean isPushable() {
+        return false;
+    }
+
+    @Override
+    public void push(Entity entity) {
+    }
+
+    @Override
+    protected void doPush(Entity entity) {
+    }
+
+    @Override
+    protected boolean canRide(Entity vehicle) {
+        return false;
+    }
+
+    /** 剔除盒按**体长**撑 ✗（23 格长的模型，光看碰撞箱会在抬头时整条消失 ✓）。 */
     @Override
     public AABB getBoundingBoxForCulling() {
         double len = MODEL_LENGTH_BLOCKS * this.scale();
@@ -238,7 +234,7 @@ public class TNDragonEntity extends Monster implements GeoEntity {
                 this.getX() + len * 0.5D, this.getY() + 2.5D, this.getZ() + len * 0.5D);
     }
 
-    /** 这条龙的光能打谁 ✓（和战斗天使同一把尺子 ✓：只打敌对生物，绝不打主人 ✗）。 */
+    /** 这条龙能打谁 ✓（只敌对生物；不打玩家/施法者/天使/别的龙/阿波罗 ✓）。 */
     public boolean isValidLightTarget(LivingEntity target) {
         if (!(target instanceof Monster)) {
             return false;
@@ -252,112 +248,65 @@ public class TNDragonEntity extends Monster implements GeoEntity {
     }
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
-        Entity attacker = source.getEntity();
-        if (this.ownerId != null && attacker != null && this.ownerId.equals(attacker.getUUID())) {
-            return false;
-        }
-        return super.hurt(source, amount);
-    }
-
-    @Override
     public void aiStep() {
         super.aiStep();
         if (this.level().isClientSide() || !(this.level() instanceof ServerLevel level)) {
             return;
         }
-        // ★ 寿命（走 tick 递减 ✓ —— 读档后 tickCount 会归零 ✗）
-        if (this.lifeTicks > 0) {
-            this.lifeTicks--;
-            if (this.lifeTicks == 0) {
-                level.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD,
-                        this.getX(), this.getY() + 1.0D, this.getZ(), 40, 1.2D, 1.2D, 1.2D, 0.08D);
-                this.discard();
-                return;
-            }
+        if (!this.configured) {
+            // /summon 出来的：沿当前朝向自己冲一段 ✓（不然它原地不动，看着像坏了 ✗）
+            this.charge(this.getLookAngle(), DEFAULT_SPEED, DEFAULT_TICKS, DEFAULT_DAMAGE);
         }
-        // 光尘拖尾 ✓（23 格长的东西在高空很容易看不见 ✗）
-        if (this.tickCount % 3 == 0) {
-            level.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD,
-                    this.getX(), this.getY() + 0.8D, this.getZ(), 2, 0.8D, 0.5D, 0.8D, 0.01D);
-        }
-        if (this.ownerId == null) {
-            return;
-        }
-        Player owner = level.getPlayerByUUID(this.ownerId);
-        if (owner == null || !owner.isAlive() || owner.level() != this.level()) {
+        this.chargeTicks--;
+        if (this.chargeTicks <= 0) {
+            this.burst(level, 30, 1.2D);
             this.discard();
             return;
         }
-        LivingEntity target = this.getTarget();
-        if (this.dashTicks > 0) {
-            this.dashStep(level);
-        } else {
-            this.setDashing(false);
-            if (this.dashCooldown > 0) {
-                this.dashCooldown--;
-            }
-            if (target != null && target.isAlive() && this.dashCooldown <= 0) {
-                this.startDash(target);
-            } else if (target == null) {
-                this.hoverNear(owner);
-            }
-        }
-    }
-
-    /** 没敌人的时候：绕回主人身边悬停 ✓（主人飞高它跟着升 ✓）。 */
-    private void hoverNear(Player owner) {
-        double d = this.distanceTo(owner);
-        if (d > TELEPORT_DISTANCE) {
-            this.getNavigation().stop();
-            this.teleportTo(owner.getX(), owner.getY() + HOVER_HEIGHT, owner.getZ());
+        // 前方是实心方块 ⇒ 撞墙爆开 ✓（noPhysics 会直接穿过去，所以要自己判 ✗）
+        Vec3 next = this.position().add(this.chargeDir.scale(Math.max(1.0D, this.chargeSpeed)));
+        BlockPos pos = BlockPos.containing(next.x, next.y + this.getBbHeight() * 0.5D, next.z);
+        if (!level.getBlockState(pos).isAir()) {
+            this.burst(level, 40, 1.5D);
+            this.discard();
             return;
         }
-        double angle = Math.toRadians(owner.getYRot() + 140.0F);
-        this.getMoveControl().setWantedPosition(
-                owner.getX() + Math.cos(angle) * HOVER_DISTANCE,
-                owner.getY() + HOVER_HEIGHT,
-                owner.getZ() + Math.sin(angle) * HOVER_DISTANCE, 1.0D);
-    }
-
-    /** 开始一次冲刺：方向 = 冲向目标 ✓（顺带把身体转过去 ✓）。 */
-    private void startDash(LivingEntity target) {
-        Vec3 dir = target.position().add(0.0D, target.getBbHeight() * 0.5D, 0.0D)
-                .subtract(this.position().add(0.0D, this.getBbHeight() * 0.5D, 0.0D));
-        if (dir.lengthSqr() < 1.0E-4D) {
-            dir = this.getLookAngle();
-        }
-        this.dashDir = dir.normalize();
-        this.dashTicks = DASH_LENGTH;
-        this.dashHit.clear();
-        this.setDashing(true);
-        this.getNavigation().stop();
-        this.faceDir(this.dashDir);
-    }
-
-    /** 冲刺中：沿方向高速推进 + 扫过谁就打谁 ✓。 */
-    private void dashStep(ServerLevel level) {
-        this.dashTicks--;
-        this.setDeltaMovement(this.dashDir.scale(DASH_SPEED));
+        // 往前冲 ✓ + 朝向对齐 ✓
+        this.setDeltaMovement(this.chargeDir.scale(this.chargeSpeed));
         this.hurtMarked = true;
-        this.faceDir(this.dashDir);
-        if (this.dashTicks <= 0) {
-            this.dashCooldown = DASH_GAP;
-            this.setDashing(false);
+        this.faceDir(this.chargeDir);
+        // 拖尾（光尘 + 偶尔金光 ✓）
+        Vec3 tail = this.position().subtract(this.chargeDir.scale(MODEL_LENGTH_BLOCKS * this.scale() * 0.35D));
+        level.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD,
+                tail.x, tail.y + 1.0D, tail.z, 3, 1.0D, 0.6D, 1.0D, 0.02D);
+        if (this.tickCount % 4 == 0) {
+            level.sendParticles(net.minecraft.core.particles.ParticleTypes.FIREWORK,
+                    this.getX(), this.getY() + 1.0D, this.getZ(), 4, 0.8D, 0.6D, 0.8D, 0.03D);
         }
+        // 碰到就伤 ✓（一次冲刺对同一个敌人只打一下 ✓）
         for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, this.sweepBox())) {
-            if (!this.isValidLightTarget(victim) || !this.dashHit.add(victim.getId())) {
+            if (!this.isValidLightTarget(victim) || !this.hitThisCharge.add(victim.getId())) {
                 continue;
             }
-            victim.hurt(level.damageSources().indirectMagic(this, this), (float) this.dashDamage);
-            victim.push(this.dashDir.x * 1.6D, 0.35D, this.dashDir.z * 1.6D);
+            LivingEntity caster = this.ownerId == null ? this : level.getPlayerByUUID(this.ownerId);
+            victim.hurt(level.damageSources().indirectMagic(this, caster == null ? this : caster),
+                    (float) this.chargeDamage);
+            victim.push(this.chargeDir.x * 2.0D, 0.45D, this.chargeDir.z * 2.0D);
+            this.hurtMarked = true;
             level.sendParticles(net.minecraft.core.particles.ParticleTypes.FIREWORK,
                     victim.getX(), victim.getY() + victim.getBbHeight() * 0.5D, victim.getZ(),
-                    14, 0.4D, 0.5D, 0.4D, 0.06D);
+                    18, 0.5D, 0.6D, 0.5D, 0.08D);
         }
     }
 
-    /** 把身体/头都转向某个方向 ✓（冲刺时整条龙要冲着目标 ✓）。 */
+    private void burst(ServerLevel level, int count, double spread) {
+        level.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD,
+                this.getX(), this.getY() + 1.0D, this.getZ(), count, spread, spread * 0.7D, spread, 0.08D);
+        level.sendParticles(net.minecraft.core.particles.ParticleTypes.FIREWORK,
+                this.getX(), this.getY() + 1.0D, this.getZ(), count / 2, spread, spread * 0.7D, spread, 0.10D);
+    }
+
+    /** 把身体/头都转向飞行方向 ✓（这条龙是朝前冲的，不是横着飘 ✗）。 */
     private void faceDir(Vec3 dir) {
         float yaw = (float) (Mth.atan2(dir.z, dir.x) * (180.0D / Math.PI)) - 90.0F;
         float pitch = (float) (-(Mth.atan2(dir.y, Math.sqrt(dir.x * dir.x + dir.z * dir.z))
@@ -372,25 +321,14 @@ public class TNDragonEntity extends Monster implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        // 冲刺播 dash、其余播 idle ✓（两段都是循环 ✓，所以来回切不会"卡在最后一帧"✗）
+        // 全程 dash ✓（那段动画本来就是"低头前冲"✓，循环着播正好 ✓）
         controllers.add(new AnimationController<>(this, "move", 5, state ->
-                state.setAndContinue(RawAnimation.begin().thenLoop(
-                        this.isDashing() ? "dash" : "idle"))));
+                state.setAndContinue(RawAnimation.begin().thenLoop("dash"))));
     }
 
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return this.cache;
-    }
-
-    @Override
-    public boolean isPushable() {
-        return false;
-    }
-
-    @Override
-    protected boolean canRide(Entity vehicle) {
-        return false;
     }
 
     // ---- 资源（作者手改的那条东方光明龙 ✓）----

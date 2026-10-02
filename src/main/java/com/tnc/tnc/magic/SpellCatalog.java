@@ -107,15 +107,15 @@ public final class SpellCatalog {
         LIGHT_SUMMON("召唤天使", "召唤会飞的战斗天使（光系第四条链）"),
         /**
          * ★ 光系<b>第五条链</b>「光龙」（作者 2026-10-02 指定 ✓）：
-         * 光龙吐息 → 光龙鳞甲 → 召唤光龙 → 光龙俯冲 → 光龙降世 ✓。
+         * 光龙吐息 → 光龙鳞甲 → 光龙出击 → 光龙俯冲 → 光龙降世 ✓。
          *
-         * <p>主角是那条**东方光明龙**（{@code geo/entity/dragon.geo.json} ✓ 23 格长、
-         * 41 骨骼、模型由作者手改 ✓）：会飞、绕着你转、有敌人就**低头冲刺**（dash 动画 ✓）
-         * 并从身上扫过造成伤害 ✓。档位越高：龙越大、越多、血越厚 ✓。
+         * <p>★ 作者同日第二版："<b>不要做成召唤物啊，我要释放出一条巨龙往前冲，触碰造成伤害</b>" ✓
+         * ⇒ 龙不是宠物 ✗：放出去就**直线往前冲**，路上碰到谁伤谁，撞墙/到点爆开消失 ✓
+         * （行为在 {@code light/TNDragonEntity}，档位数值在 {@code light/TNLightDragonChain} ✓）。
          *
          * <p>⚠️ 和其它新链一样：**必须追加在枚举末尾** ✗（存档按链的序数存进度 ✗）。
          */
-        LIGHT_DRAGON("光龙", "召唤光明龙（光系第五条链）");
+        LIGHT_DRAGON("光龙", "放出一条巨龙向前冲（光系第五条链）");
 
         private final String cn;
         private final String desc;
@@ -286,17 +286,17 @@ public final class SpellCatalog {
             of(Element.LIGHT, "seraph_descent", Chain.LIGHT_SUMMON, 4, "炽天使降临"),
             of(Element.LIGHT, "archangel", Chain.LIGHT_SUMMON, 5, "大天使长"),
 
-            // ---- 光龙线（光系第五条链，作者 2026-10-02 指定）----
+            // ---- 光龙线（光系第五条链，作者 2026-10-02 指定；同日第二版：龙是"冲出去"的不是召唤物 ✓）----
             //   1 光龙吐息：向前喷出一道金色光柱（复用光线链的实体光柱 ✓ 尺寸加大）
             //   2 光龙鳞甲：自己 + 队友 减伤 50% + 速度 +20% + 光伤 +30%，20 秒
-            //   3 召唤光龙：1 条（0.30 倍 ≈ 7 格长）
-            //   4 光龙俯冲：1 条更大的（0.40）+ 天上落一道圣光
-            //   5 光龙降世：2 条最大的（0.45）+ 大号圣光天降
-            //   ★ 龙会跟着你、有敌人就**低头冲刺**（用 dash 动画 ✓）从敌人身上扫过去造成伤害 ✓
+            //   3 光龙出击：放 1 条（0.30 倍 ≈ 7 格长）向前冲 ≈ 45 格，撞到 24 伤
+            //   4 光龙俯冲：2 条（0.40 · 左右各偏 7°）冲 ≈ 60 格，撞到 34 伤 + 小圣光
+            //   5 光龙降世：3 条（0.45 · 扇形 ∓16°）冲 ≈ 75 格，撞到 44 伤 + 大圣光天降
+            //   ★ 龙一路往前冲、碰到谁伤谁（每个敌人整次冲刺只挨一下 ✓），撞墙/到点爆开消失 ✓
             //   （数值全在 light/TNLightDragonChain 的一张表里 ✓，改那里就行 ✓）
             of(Element.LIGHT, "light_dragon_breath", Chain.LIGHT_DRAGON, 1, "光龙吐息"),
             of(Element.LIGHT, "light_dragon_scales", Chain.LIGHT_DRAGON, 2, "光龙鳞甲"),
-            of(Element.LIGHT, "summon_light_dragon", Chain.LIGHT_DRAGON, 3, "召唤光龙"),
+            of(Element.LIGHT, "summon_light_dragon", Chain.LIGHT_DRAGON, 3, "光龙出击"),
             of(Element.LIGHT, "light_dragon_dive", Chain.LIGHT_DRAGON, 4, "光龙俯冲"),
             of(Element.LIGHT, "light_dragon_descend", Chain.LIGHT_DRAGON, 5, "光龙降世"),
 
