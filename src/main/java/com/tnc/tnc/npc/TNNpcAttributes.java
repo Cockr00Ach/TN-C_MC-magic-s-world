@@ -77,8 +77,8 @@ public final class TNNpcAttributes {
         // ★ 战斗天使（光法第 4 条链「召唤天使」的召唤物 ✓，会飞那种 ✓）——同样必须在这里有属性 ✗
         event.put(com.tnc.tnc.magic.TNOrbEntities.FIGHTING_ANGEL.get(),
                 com.tnc.tnc.light.TNFightingAngelEntity.createAttributes().build());
-        // ★ 光明龙（光法第 5 条链「光龙」的召唤物 ✓）——**漏了生成即崩** ✗
-        event.put(com.tnc.tnc.magic.TNOrbEntities.LIGHT_DRAGON.get(),
-                com.tnc.tnc.light.TNDragonEntity.createAttributes().build());
+        // ★ 光明龙**不在这里** ✓ —— 它是投射物（{@code extends Entity} ✗ 不是生物 ✗），
+        //   作者 2026-10-02："我要的龙不是怪，你把他怪给我删了" ✓
+        //   ⇒ 非生物**不能**注册属性（注册了反而会出问题 ✗），所以这一行是故意没有的 ✓
     }
 }

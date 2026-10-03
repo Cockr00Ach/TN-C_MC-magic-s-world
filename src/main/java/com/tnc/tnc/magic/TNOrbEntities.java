@@ -127,6 +127,7 @@ public final class TNOrbEntities {
                     .sized(0.1F, 0.1F)
                     .clientTrackingRange(16)
                     .updateInterval(1)
+                    .updateInterval(1)
                     .build("tnc:light_beam"));
 
     /**
@@ -147,20 +148,24 @@ public final class TNOrbEntities {
                     .build("tnc:fighting_angel"));
 
     /**
-     * ★ 光系第五条链「光龙」的**光明龙** ✓（作者 2026-10-02："新增加一条光龙链" ✓）。
+     * ★ 光系第五条链「光龙」<b>扔出去的那条龙</b> ✓（作者 2026-10-02："新增加一条光龙链" ✓）。
      *
-     * <p>它是 {@link com.tnc.tnc.light.TNDragonEntity}（作者的东方龙模型 ✓ 23 格长 / 41 骨骼 ✓）：
-     * 会飞、跟着主人、有敌人就低头**冲刺**（dash 动画 ✓）从敌人身上扫过去 ✓。
+     * <p>★ 它是 {@link com.tnc.tnc.light.TNDragonEntity} —— **和雷球同一类东西** ✓：
+     * 基类是 {@code Entity} ✗ 不是生物 ✗（作者同日："我要的龙不是怪，你把他怪给我删了，
+     * 我要的是跟雷球一样，扔出去，一条龙冲出去" ✓）⇒ 所以这里是
+     * <b>{@code MobCategory.MISC}</b>（和雷球/光柱/魔法阵一个分类 ✓），
+     * 而且 {@code TNNpcAttributes} 里**没有它**（非生物不注册属性 ✓）。
      *
      * <p>碰撞箱只给身体那一小段（2.5 × 2 格 ✓）—— 23 格全进碰撞箱会卡墙 ✗；
-     * 渲染缩放由法术写进实体（t3 0.30 / t4 0.40 / t5 0.45 ✓），剔除由实体自己按体长撑 ✓。
+     * 渲染缩放由法术写进实体（t3 0.30 / t4 0.90 / t5 3.00 ✓），剔除由实体自己按体长撑 ✓；
+     * {@code updateInterval(1)} —— 它飞得快，隔久了客户端会一卡一卡 ✗（光柱那条同理 ✓）。
      */
     public static final RegistryObject<EntityType<com.tnc.tnc.light.TNDragonEntity>> LIGHT_DRAGON =
             ENTITY_TYPES.register("light_dragon", () -> EntityType.Builder
-                    .of(com.tnc.tnc.light.TNDragonEntity::new, MobCategory.CREATURE)
+                    .of(com.tnc.tnc.light.TNDragonEntity::new, MobCategory.MISC)
                     .sized(2.5F, 2.0F)
                     .clientTrackingRange(16)
-                    .updateInterval(2)
+                    .updateInterval(1)
                     .build("tnc:light_dragon"));
 
     private TNOrbEntities() {
