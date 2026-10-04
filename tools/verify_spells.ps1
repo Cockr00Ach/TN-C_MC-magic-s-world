@@ -19,6 +19,7 @@
 #
 # Usage:
 #   powershell -NoProfile -ExecutionPolicy Bypass -File verify_spells.ps1 [-Namespace tnc]
+#   powershell -NoProfile -ExecutionPolicy Bypass -File verify_spells.ps1 -WorkPack "<repo>\modpack\<pack>"
 #
 # Exit code 0 = pass, 1 = problems found.
 
@@ -30,9 +31,16 @@ param(
 $ErrorActionPreference = 'Stop'
 
 if ([string]::IsNullOrWhiteSpace($WorkPack)) {
-    $packDirs = @(Get-ChildItem 'D:\ModTest\modpack' -Directory | Where-Object { $_.Name -ne 'archive' })
-    if ($packDirs.Count -ne 1) { Write-Host "ERROR: expected exactly 1 modpack folder under D:\ModTest\modpack, found $($packDirs.Count)"; exit 1 }
-    $WorkPack = $packDirs[0].FullName
+    # Shared discovery (_common.ps1): exactly one folder under <repo>\modpack,
+    # derived from this script's own location. This used to be hardcoded to
+    # D:\ModTest\modpack, so it only worked on one machine.
+    . (Join-Path $PSScriptRoot '_common.ps1')
+    $WorkPack = Find-TncWorkPack
+    if (-not $WorkPack) {
+        Write-Host 'ERROR: could not locate the modpack workspace (see the message above).'
+        Write-Host '       Pass it explicitly:  -WorkPack "<repo>\modpack\<pack>"'
+        exit 1
+    }
 }
 
 $enumKeys    = @('type', 'shape', 'origin', 'rotation', 'distance_dropoff', 'apply_mode', 'light_emission', 'mode', 'school')
