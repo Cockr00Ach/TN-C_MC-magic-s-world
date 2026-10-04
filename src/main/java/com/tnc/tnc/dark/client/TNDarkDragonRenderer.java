@@ -9,9 +9,12 @@ import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 
 /**
- * 暗龙渲染器 ✓ —— 和光龙那个（{@code light/client/TNDragonRenderer}）**只差一张贴图** ✓：
- * 光龙是半透明自发光的"光明龙"✓，暗龙同样自发光，只是贴图换成玄黑紫 ✓
- * （自发光对暗龙反而更对：紫黑鳞里那些幽紫亮边在黑处也会亮 ✓）。
+ * 暗龙渲染器 ✓ —— 和光龙那个（{@code light/client/TNDragonRenderer}）差别就是**不自发光** ✓。
+ *
+ * <p>★ 作者 2026-10-04：<b>"黑龙不要自发光了，让他周身弥漫着黑雾"</b> ✓
+ * ⇒ 渲染类型从 {@code entityTranslucentEmissive}（发光 ✗）改成 {@code entityTranslucent}
+ * （正常吃场景光照 ✓，黑鳞才真的是黑的 ✓）；"黑雾"由实体自己每 tick 沿身体撒
+ * {@code LARGE_SMOKE} 来做 ✓（见 {@code light/TNDragonEntity.trail()} 的暗龙分支 ✓）。
  *
  * <p>缩放同样由法术写进实体（{@code scale() ✓}），照抄光龙那一处 ✓。
  */
@@ -19,14 +22,15 @@ public class TNDarkDragonRenderer extends GeoEntityRenderer<TNDragonEntity> {
 
     public TNDarkDragonRenderer(EntityRendererProvider.Context context) {
         super(context, new TNDarkDragonGeoModel());
-        this.shadowRadius = 0.0F;                 // 发光体不投影 ✓（和光龙/光天使一致 ✓）
+        this.shadowRadius = 0.0F;                 // 不投影（体形太大，投影会拖一大片 ✗）
     }
 
+    /** ★ 不自发光 ✗ —— 半透明但正常受光 ✓（作者 2026-10-04 指定 ✓）。 */
     @Override
     public RenderType getRenderType(TNDragonEntity animatable, ResourceLocation texture,
                                     net.minecraft.client.renderer.MultiBufferSource bufferSource,
                                     float partialTick) {
-        return RenderType.entityTranslucentEmissive(texture);
+        return RenderType.entityTranslucent(texture);
     }
 
     @Override

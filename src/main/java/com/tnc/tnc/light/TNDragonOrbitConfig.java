@@ -38,8 +38,14 @@ public final class TNDragonOrbitConfig {
 
     /** 旋转方向：+1 / -1 ✓（三条龙拐向中心的那一侧就是对的 ✓ 见类注释 ✓）。 */
     public static int direction = 1;
-    /** 环半径倍率（1.0 = 首尾正好接上 ✓）。 */
-    public static double radiusFactor = 1.0D;
+    /**
+     * 环半径倍率 ✓ —— 1.0 是"三条龙首尾正好接上"的几何值（半径 ≈ 3.3 格 ✓）。
+     *
+     * <p>★ 作者 2026-10-04："我希望是龙绕着一个圆环绕，现在的实机效果是三条弯弯的龙在那转，
+     * 根本不是圆" ✗ ⇒ 现在**不再把身体掰弯** ✗、龙直着飞 ✓，所以环要**明显更大**才看得出是圆 ✓；
+     * 默认给 2.5（半径 ≈ 8.2 格，直径 ≈ 16 格 ✓）—— 这就是"绕着一个圆环飞"该有的样子 ✓。
+     */
+    public static double radiusFactor = 2.5D;
     /** 环心相对主人脚底的高度（格 ✓）。 */
     public static double height = 1.2D;
     /** 每秒转多少度（度/tick ✓）。 */

@@ -534,8 +534,31 @@ public class TNDragonEntity extends Entity implements GeoEntity {
     /**
      * 拖尾（★ 客户端放 ✓）：位置既然是客户端自己算的，粒子当然也得在客户端放 ✗
      * （服务端 {@code sendParticles} 还是 20 次/秒一撮 ✗，那就白改了 ✓）。
+     *
+     * <p>★ 暗龙（作者 2026-10-04："黑龙不要自发光了，让他周身弥漫着黑雾" ✓）：
+     * 不走光龙那条白金光尘 ✗ —— 改成沿**整条身体**撒大团黑烟 ✓（体长越长撒得越多 ✓），
+     * 另加少量灵魂火当"眼睛/缝隙里透出来的光"✓。渲染那边也去掉了自发光 ✓
+     * （见 {@code dark/client/TNDarkDragonRenderer} ✓）。
      */
     private void trail(Vec3 dir) {
+        if (this.isDark()) {
+            double len = MODEL_LENGTH_BLOCKS * this.scale();
+            int puffs = Math.min(24, 4 + (int) (len * 0.30D));
+            for (int i = 0; i < puffs; i++) {
+                double t = (this.tickCount * 0.13D + i / (double) puffs) % 1.0D;
+                Vec3 at = this.position().add(dir.scale(-len * 0.55D + len * 1.05D * t));
+                double a = this.tickCount * 0.37D + i * 1.7D;
+                double r = 1.0D + 1.6D * this.scale();
+                this.level().addParticle(ParticleTypes.LARGE_SMOKE,
+                        at.x + Math.cos(a) * r, at.y + 0.7D + Math.sin(a * 0.7D) * 0.7D,
+                        at.z + Math.sin(a) * r, 0.0D, 0.012D, 0.0D);
+            }
+            if (this.tickCount % 3 == 0) {
+                this.level().addParticle(ParticleTypes.SOUL, this.getX(), this.getY() + 1.0D,
+                        this.getZ(), 0.0D, 0.02D, 0.0D);
+            }
+            return;
+        }
         Vec3 tail = this.position().subtract(dir.scale(MODEL_LENGTH_BLOCKS * this.scale() * 0.35D));
         this.level().addParticle(this.trailParticle(), tail.x, tail.y + 1.0D, tail.z, 0.0D, 0.0D, 0.0D);
         if (this.tickCount % 4 == 0) {
@@ -637,11 +660,14 @@ public class TNDragonEntity extends Entity implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        // 冲刺播 dash ✓（"低头前冲"✓）；t2 绕圈播 orbit ✓（★ 那段动画把身体弯成 120° 的弧 ✓，
-        // 三条首尾相接正好围成一个整圆 ✓ —— 见 tools/gen_dragon_orbit.ps1 ✓）
+        // ★ 作者 2026-10-04："我希望是龙绕着一个圆环绕，现在的实机效果是三条弯弯的龙在那转，
+        //   根本不是圆" ✗ ⇒ **不再用那段"把身体弯成 120° 弧"的 orbit 动画** ✗。
+        //   现在绕圈也播 `dash`（＝直着往前飞 ✓）：龙保持自己的形状、**沿着一个圆飞** ✓，
+        //   这样看到的才是"一条条龙绕着圆心转"✓（圆是靠**飞行的轨迹**画出来的 ✓，
+        //   不是靠把身体掰弯 ✗ —— 掰弯那种只有俯视才像圆，实机看着就是三条弯管子 ✗）。
+        //   （`orbit` 那段动画还留在 json 里没删 ✓，想再试随时可以切回来 ✓）
         controllers.add(new AnimationController<>(this, "move", 5, state ->
-                state.setAndContinue(RawAnimation.begin()
-                        .thenLoop(this.orbiting() ? "orbit" : "dash"))));
+                state.setAndContinue(RawAnimation.begin().thenLoop("dash"))));
     }
 
     @Override
