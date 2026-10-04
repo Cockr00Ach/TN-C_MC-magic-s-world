@@ -154,6 +154,8 @@ public class TNMod
                 output.accept(com.tnc.tnc.npc.TNNpcAttributes.HUAI_SPAWN_EGG.get());
                 output.accept(com.tnc.tnc.npc.TNNpcAttributes.ZHUANGQUERANG_SPAWN_EGG.get());
                 output.accept(com.tnc.tnc.npc.TNNpcAttributes.ZUOWANG_SPAWN_EGG.get());
+                // BOSS 刷怪蛋（暗系巨人）—— 同样是验收用，正式上线走召唤/剧情
+                output.accept(com.tnc.tnc.npc.TNNpcAttributes.DARK_GIANT_SPAWN_EGG.get());
             }).build());
 
     // ------------------------------------------------------------------

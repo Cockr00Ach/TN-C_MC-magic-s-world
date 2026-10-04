@@ -53,6 +53,14 @@ public final class TNNpcAttributes {
             () -> new net.minecraftforge.common.ForgeSpawnEggItem(
                     TNNpcs.ZUOWANG, 0xE8E4DA, 0xB8912F, new Item.Properties()));
 
+    /**
+     * 暗系巨人 BOSS 的刷怪蛋（配色：黑曜甲片的暗紫 {@code 0x261A2E} + 甲缝间透出的暗红血光 {@code 0x8E2B24}）。
+     * 和别的 BOSS 一样留一个蛋，方便验收时一句话把它扔到场上。
+     */
+    public static final RegistryObject<Item> DARK_GIANT_SPAWN_EGG = SPAWN_EGGS.register("dark_giant_spawn_egg",
+            () -> new net.minecraftforge.common.ForgeSpawnEggItem(
+                    TNNpcs.DARK_GIANT, 0x261A2E, 0x8E2B24, new Item.Properties()));
+
     private TNNpcAttributes() {
     }
 
@@ -70,6 +78,8 @@ public final class TNNpcAttributes {
         event.put(TNNpcs.ZHUANGQUERANG.get(), TnDialogueNpc.attributes().build());
         event.put(TNNpcs.YAN_DARK.get(), com.tnc.tnc.boss.YanDarkBossEntity.createAttributes().build());
         event.put(TNNpcs.APOLLO.get(), com.tnc.tnc.boss.TNApolloEntity.createAttributes().build());
+        // ★ 暗系巨人领主（作者 2026-10-03 ✓）—— 生物必须在这里有属性，漏了生成即崩 ✗
+        event.put(TNNpcs.DARK_GIANT.get(), com.tnc.tnc.boss.TNDarkGiantEntity.createAttributes().build());
         event.put(TNNpcs.ZUOWANG.get(), TnDialogueNpc.attributes().build());
         // ★ 光天使（光系第二条链召唤的雕像 ✓）——**生物必须在这里有属性，漏了生成即崩** ✗
         event.put(com.tnc.tnc.magic.TNOrbEntities.ANGEL.get(),
