@@ -158,10 +158,9 @@ public final class TNLightChainMechanics {
     private TNLightChainMechanics() {
     }
 
-    /** 这个法术是不是本文件的（光耀 / 召唤天使 / 光龙 那几条链 ✓）。 */
+    /** 这个法术是不是本文件的（光耀 / 召唤天使 ✓）—— ★ 光龙链 2026-10-04 已按作者要求删除 ✗。 */
     public static boolean isLightChainSpell(String path) {
-        return find(path) != null || findSummon(path) != null
-                || com.tnc.tnc.light.TNLightDragonChain.isLightDragonSpell(path);
+        return find(path) != null || findSummon(path) != null;
     }
 
     /**
@@ -212,10 +211,9 @@ public final class TNLightChainMechanics {
                 castSummon(caster, summon);
                 return;
             }
-            // ★ 光龙链（第五条链 ✓，作者 2026-10-02）：吐息 / 鳞甲 / 召唤光龙 ✓
-            if (com.tnc.tnc.light.TNLightDragonChain.isLightDragonSpell(path)) {
-                com.tnc.tnc.light.TNLightDragonChain.onSpellCast(caster, path);
-            }
+            // ★ 光龙链 2026-10-04 按作者要求**整条删了** ✗（"把龙法术都删了吧，包括光龙和暗龙" ✓）
+            //   ⇒ 这里不再派发 ✓（法术 json / 法杖池条目也都没了 ✓，
+            //      Java 那条链的代码还留着但**没有任何入口** ✓ —— 要不要连代码+模型+贴图一起删，等作者点头 ✓）
             return;
         }
         ServerLevel level = (ServerLevel) caster.level();

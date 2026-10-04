@@ -298,33 +298,20 @@ public final class SpellCatalog {
             of(Element.LIGHT, "seraph_descent", Chain.LIGHT_SUMMON, 4, "炽天使降临"),
             of(Element.LIGHT, "archangel", Chain.LIGHT_SUMMON, 5, "大天使长"),
 
-            // ---- 光龙线（光系第五条链，作者 2026-10-02 指定；同日第二版：龙是"冲出去"的不是召唤物 ✓）----
-            //   1 光龙吐息：向前喷出一道金色光柱（复用光线链的实体光柱 ✓ 尺寸加大）
-            //   2 光龙鳞甲：自己 + 队友 减伤 50% + 速度 +20% + 光伤 +30%，20 秒
-            //   3 光龙出击：放 1 条（0.30 倍 ≈ 7 格长）向前冲 ≈ 45 格，撞到 24 伤
-            //   4 光龙俯冲：2 条（0.40 · 左右各偏 7°）冲 ≈ 60 格，撞到 34 伤 + 小圣光
-            //   5 光龙降世：3 条（0.45 · 扇形 ∓16°）冲 ≈ 75 格，撞到 44 伤 + 大圣光天降
-            //   ★ 龙一路往前冲、碰到谁伤谁（每个敌人整次冲刺只挨一下 ✓），撞墙/到点爆开消失 ✓
-            //   （数值全在 light/TNLightDragonChain 的一张表里 ✓，改那里就行 ✓）
-            of(Element.LIGHT, "light_dragon_breath", Chain.LIGHT_DRAGON, 1, "光龙吐息"),
-            of(Element.LIGHT, "light_dragon_scales", Chain.LIGHT_DRAGON, 2, "光龙鳞甲"),
-            of(Element.LIGHT, "summon_light_dragon", Chain.LIGHT_DRAGON, 3, "光龙出击"),
-            of(Element.LIGHT, "light_dragon_dive", Chain.LIGHT_DRAGON, 4, "光龙俯冲"),
-            of(Element.LIGHT, "light_dragon_descend", Chain.LIGHT_DRAGON, 5, "光龙降世"),
+            // ★★ 2026-10-04 作者："把龙法术都删了吧，包括光龙和暗龙" ✗
+            //   ⇒ 光龙 5 招（light_dragon_breath / light_dragon_scales / summon_light_dragon /
+            //      light_dragon_dive / light_dragon_descend）**从这里删掉了** ✓：
+            //   - 法术 json 已删 ✓（data/tnc/spells/ 里没有了 ✓）
+            //   - 法杖池里的条目也删了 ✓（data/tnc/spell_pools/tnc_light.json ✓）
+            //   - 出招的口子也关了 ✓（light/TNLightChainMechanics 里那条分支 ✓）
+            //   链的 enum 常量**故意留着** ✗：存档里的"每条链练到第几档"是**按序号**存的 ✗，
+            //   删 enum 常量会让后面那些链的序号整体前移 ✗ ⇒ 老存档的进度会串位 ✗。
+            //   常量留着不影响 UI ✓ —— 目录里没有这一条链的法术，它就不会出现在任何列表里 ✓
+            //   （见 SpellCatalog.chainsOf：链是从"有没有法术"推出来的 ✓，不是枚举硬列的 ✓）。
 
-            // ---- 暗龙线（暗系第五条链，作者 2026-10-02："复制一下光龙，生成一个暗龙" ✓）----
-            //   数值 = 光龙那张表**逐字照抄** ✓（只换皮：实体类型 / 贴图 / 粒子 / 鳞甲的伤害属性）
-            //   1 暗龙吐息：一条最小的龙（0.30 倍 ≈ 6.8 格）往前冲 ≈54 格，撞到 14 伤
-            //   2 暗龙鳞甲：三条小龙绕着自己转（咬到 6 伤）+ 减伤 50% / 速度 +20% / 暗伤 +30%
-            //   3 暗龙出击：一条大龙（1.50 倍 ≈ 34 格）冲 ≈90 格，撞到 24 伤
-            //   4 暗龙俯冲：两条（3.00 倍 · 左右各偏 7°）冲 ≈122 格，撞到 34 伤
-            //   5 暗龙降世：三条（6.00 倍 · 扇形 ∓16°）冲 ≈155 格，撞到 44 伤
-            //   （数值全在 dark/TNDarkDragonChain 的一张表里 ✓，改那里就行 ✓）
-            of(Element.DARK, "dark_dragon_breath", Chain.DARK_DRAGON, 1, "暗龙吐息"),
-            of(Element.DARK, "dark_dragon_scales", Chain.DARK_DRAGON, 2, "暗龙鳞甲"),
-            of(Element.DARK, "dark_dragon_charge", Chain.DARK_DRAGON, 3, "暗龙出击"),
-            of(Element.DARK, "dark_dragon_dive", Chain.DARK_DRAGON, 4, "暗龙俯冲"),
-            of(Element.DARK, "dark_dragon_descend", Chain.DARK_DRAGON, 5, "暗龙降世"),
+            // ★★ 2026-10-04 作者："把龙法术都删了吧，包括光龙和暗龙" ✗
+            //   ⇒ 暗龙 5 招（dark_dragon_breath / scales / charge / dive / descend）也**删掉了** ✓
+            //   （同样的四件事：json 删 ✓ / 池子删 ✓ / 出招口子关 ✓ / enum 常量留着保序号 ✓ —— 理由见上面光龙那段 ✓）
 
             // ================= 骨架（法术 JSON 待补，先占名字对齐文档）=================
             // 水魔法：水球 / 水纹 / 水缚 / 雨滴

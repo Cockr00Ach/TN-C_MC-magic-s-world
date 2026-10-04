@@ -1,6 +1,5 @@
 package com.tnc.tnc.boss;
 
-import com.tnc.tnc.dark.TNDarkDragonChain;
 import com.tnc.tnc.dark.TNDarkSummonChain;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -17,12 +16,13 @@ import java.util.Locale;
 
 /**
  * <b>巨兽人领主的招式表</b> ✓ —— 作者 2026-10-03："这个 boss 会放<b>暗龙的 t5</b> 和
- * <b>召唤的 t4t5</b> 和<b>手的 t3t4</b>" ✓。
+ * <b>召唤的 t4t5</b> 和<b>手的 t3t4</b>" ✓；
+ * ★ 2026-10-04 作者："<b>把龙法术都删了吧，包括光龙和暗龙</b>" ✗ ⇒ 暗龙那一招已删 ✓（现在四招 ✓）。
  *
- * <h2>三条链分别怎么放（关键区别 ✗）</h2>
+ * <h2>两条链分别怎么放（关键区别 ✗）</h2>
  * <ul>
- *   <li><b>暗龙 / 召唤</b>：本模组自己写的链 ✓，入口就是
- *       {@link TNDarkDragonChain#onSpellCast} / {@link TNDarkSummonChain#onSpellCast}，
+ *   <li><b>召唤</b>：本模组自己写的链 ✓，入口就是
+ *       {@link TNDarkSummonChain#onSpellCast}，
  *       施法者直接传**这只 boss** ✓（和阿波罗放光系那两条链一模一样 ✓）——
  *       玩家放 t5 长什么样，boss 放就长什么样 ✓（同一份代码、同一张数值表 ✓）；</li>
  *   <li><b>手</b>：这几招是**引擎的纯数据法术** ✗（{@code release.target.type = PROJECTILE} ＋
@@ -41,9 +41,8 @@ import java.util.Locale;
  */
 public final class TNDarkGiantSpells {
 
-    private static final int CHAIN_DARK_DRAGON = 0;
-    private static final int CHAIN_SUMMON = 1;
-    private static final int CHAIN_HAND = 2;
+    private static final int CHAIN_SUMMON = 0;
+    private static final int CHAIN_HAND = 1;
 
     /**
      * 一招 ✓。
@@ -58,9 +57,13 @@ public final class TNDarkGiantSpells {
     public record Move(String path, int tier, int chain, int castTicks, int weight, String name) {
     }
 
-    /** ★ 作者要的五招 ✓（暗龙 t5 · 召唤 t4/t5 · 手 t3/t4 ✓）。 */
+    /**
+     * ★ 作者 2026-10-03 点名的招 ✓（召唤 t4/t5 · 手 t3/t4 ✓）。
+     *
+     * <p>★ 2026-10-04 作者："<b>把龙法术都删了吧，包括光龙和暗龙</b>" ✗ ⇒
+     * 原来这里还有一招 {@code dark_dragon_descend}（暗龙 t5 ✓）—— **已删** ✓，龙法术整套没了 ✓。
+     */
     private static final Move[] MOVES = {
-            new Move("dark_dragon_descend", 5, CHAIN_DARK_DRAGON, 46, 3, "暗龙降世（暗龙 t5）"),
             new Move("dark_king", 4, CHAIN_SUMMON, 50, 2, "暗之国王（召唤 t4）"),
             new Move("evil_god", 5, CHAIN_SUMMON, 56, 2, "邪神（召唤 t5）"),
             new Move("night_embrace", 3, CHAIN_HAND, 40, 3, "夜之拥抱（手 t3）"),
@@ -104,10 +107,6 @@ public final class TNDarkGiantSpells {
         }
         Move move = move(index);
         boolean ok = switch (move.chain()) {
-            case CHAIN_DARK_DRAGON -> {
-                TNDarkDragonChain.onSpellCast(caster, move.path());
-                yield true;
-            }
             case CHAIN_SUMMON -> {
                 TNDarkSummonChain.onSpellCast(caster, move.path());
                 yield true;

@@ -68,7 +68,11 @@ class DarkGiantPhaseTest {
         // ★ 作者 2026-10-03："谁让你把践踏当走路了" ✗ —— 这两件事必须是**两个**片段 ✓
         assertFalse(TNDarkGiantEntity.ANIM_WALK.equals(TNDarkGiantEntity.ANIM_STOMP),
                 "走路又变回践踏了 ✗（walk 是 tools/gen_dark_giant_walk.ps1 生成的 ✓）");
-        assertTrue(TNDarkGiantSpells.count() >= 5, "招式表至少要覆盖作者点名的五招 ✓");
+        // 龙法术 2026-10-04 被作者要求全删 ⇒ 现在剩四招（召唤 t4/t5 + 手 t3/t4 ✓）
+        assertTrue(TNDarkGiantSpells.count() >= 4, "招式表至少要覆盖作者点名的招 ✓");
+        for (String path : TNDarkGiantSpells.paths()) {
+            assertFalse(path.contains("dragon"), "龙法术已经删了 ✗ 不该再出现在 boss 招式表里：" + path);
+        }
     }
 
     /**
@@ -92,6 +96,8 @@ class DarkGiantPhaseTest {
                     path + " 的档位跟 json 对不上 ✗（作者要的档位在 TNDarkGiantSpells.MOVES 里 ✓）");
             checked++;
         }
-        assertTrue(checked >= 3, "至少该核对上手/暗龙那几招 ✓（现在只核对了 " + checked + " 招 ✗）");
+        // 现在有 json 的是手那两招（night_embrace / black_ruin ✓）；召唤链的 dark_king / evil_god
+        // 还没有 json ✓（链自己认得这两个 path ✓）⇒ 能核对的上 2 条就算过 ✓
+        assertTrue(checked >= 2, "至少该核对上手那两招 ✓（现在只核对了 " + checked + " 招 ✗）");
     }
 }

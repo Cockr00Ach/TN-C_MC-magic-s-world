@@ -686,12 +686,9 @@ public final class TnSpellMechanics {
             com.tnc.tnc.light.TNLightBeamMechanics.onSpellCast(player, path);
         }
 
-        // ★★ 暗系第五条链（暗龙）：放出去一条暗龙往前冲 ✓
-        //    （作者 2026-10-02："复制一下光龙，生成一个暗龙" ✓ —— 行为和光龙那张表一模一样 ✓，
-        //      只换实体类型 / 贴图 / 粒子 / 鳞甲的伤害属性 ✓）
-        if (com.tnc.tnc.dark.TNDarkDragonChain.isDarkDragonSpell(path)) {
-            com.tnc.tnc.dark.TNDarkDragonChain.onSpellCast(player, path);
-        }
+        // ★★ 暗龙（暗系第五条链）2026-10-04 按作者要求**整条删了** ✗
+        //    （"把龙法术都删了吧，包括光龙和暗龙" ✓ ⇒ 这里不再派发 ✓：
+        //      法术 json / 法杖池条目都删了 ✓，Java 那条链的代码留着但**没有入口** ✓）
 
         // ★★ 暗系第三条链（召唤）：小恶魔 / 暗卫 / 暗之统领 / 暗之国王 / 邪神 ✓
         //    （作者 2026-10-04："暗魔法的召唤流没实装吗" ✓ —— 这五个法术原来挂的是
