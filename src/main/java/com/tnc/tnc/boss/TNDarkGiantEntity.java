@@ -102,6 +102,16 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
+    // ---- 招式（作者 2026-10-03："会放暗龙的 t5 和召唤的 t4t5 和手的 t3t4" ✓ 见 TNDarkGiantSpells ✓）----
+    /** 正在起手的那一招（−1 = 没在起手 ✓）。 */
+    private int pendingMove = -1;
+    /** 还有多少 tick 生效 ✓（= 作者那段施法动画的长度附近 ✓）。 */
+    private int pendingTicks;
+    /** 两招之间歇多久 ✓（二阶段更凶 ⇒ 歇得更短 ✓）。 */
+    private int castCooldown = 80;
+    private static final int COOLDOWN_PHASE_ONE = 90;
+    private static final int COOLDOWN_PHASE_TWO = 45;
+
     public TNDarkGiantEntity(EntityType<? extends TNDarkGiantEntity> type, Level level) {
         super(type, level);
         this.xpReward = 800;
@@ -263,6 +273,38 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
                     this.getZ() + (this.random.nextDouble() - 0.5D) * 3.0D,
                     2, 0.3D, 0.4D, 0.3D, 0.02D);
         }
+        this.tickCasting(level);
+    }
+
+    /**
+     * 出招的节奏 ✓（照阿波罗那套：**起手 → 作者的施法动画播完才生效** ✓）。
+     *
+     * <p>没目标不放 ✗；两招之间有冷却 ✓；正在起手时这一 tick 不干别的 ✓。
+     */
+    private void tickCasting(ServerLevel level) {
+        if (this.pendingMove >= 0) {
+            if (--this.pendingTicks <= 0) {
+                TNDarkGiantSpells.cast(this, this.pendingMove);
+                this.pendingMove = -1;
+                this.castCooldown = this.isPhaseTwo() ? COOLDOWN_PHASE_TWO : COOLDOWN_PHASE_ONE;
+            }
+            return;
+        }
+        if (this.getTarget() == null || --this.castCooldown > 0) {
+            return;
+        }
+        this.startCast(TNDarkGiantSpells.pick(this.random), level);
+    }
+
+    /** 起手：播作者的施法动作（{@code playmagic} ✓）＋ 攒一撮暗火 ✓。 */
+    private void startCast(int move, ServerLevel level) {
+        this.pendingMove = move;
+        this.pendingTicks = TNDarkGiantSpells.move(move).castTicks();
+        this.playMagic();
+        level.playSound(null, this.getX(), this.getY(), this.getZ(),
+                SoundEvents.EVOKER_CAST_SPELL, SoundSource.HOSTILE, 1.6F, 0.7F);
+        level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, this.getX(), this.getY() + 3.0D, this.getZ(),
+                30, 1.2D, 1.0D, 1.2D, 0.04D);
     }
 
     /** 走的比普通怪慢，但每一步都沉（落地扬尘 ✓）。 */

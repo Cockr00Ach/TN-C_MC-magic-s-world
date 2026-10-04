@@ -66,4 +66,28 @@ class DarkGiantPhaseTest {
         assertTrue(Files.exists(Path.of("src/main/resources/assets/tnc/geo/entity/dark_giant.geo.json")),
                 "模型文件不见了 ✗");
     }
+
+    /**
+     * 招式表里的档位必须跟法术 json 的 {@code learn.tier} 对得上 ✓ ——
+     * 作者要的是"暗龙 t5 · 召唤 t4/t5 · 手 t3/t4" ✓，而我一开始是**按模型大小猜**手链档位的 ✗：
+     * 真相是手 t3 = {@code night_embrace} ✓、t4 = {@code black_ruin} ✓（{@code slay_light} 才是 t5 ✗）。
+     * 这条测试就是防止以后再猜错 ✓。
+     */
+    @Test
+    void movesMatchTheSpellJsonTiers() throws Exception {
+        int checked = 0;
+        for (String path : TNDarkGiantSpells.paths()) {
+            Path json = Path.of("src/main/resources/data/tnc/spells", path + ".json");
+            if (!Files.exists(json)) {
+                continue;   // 召唤链的 dark_king / evil_god 还没有 json ✓（链自己认得这两个 path ✓）
+            }
+            JsonObject spell = JsonParser.parseString(Files.readString(json, java.nio.charset.StandardCharsets.UTF_8)
+                    .replace("\uFEFF", "")).getAsJsonObject();
+            int tier = spell.getAsJsonObject("learn").get("tier").getAsInt();
+            assertEquals(TNDarkGiantSpells.tierOf(path), tier,
+                    path + " 的档位跟 json 对不上 ✗（作者要的档位在 TNDarkGiantSpells.MOVES 里 ✓）");
+            checked++;
+        }
+        assertTrue(checked >= 3, "至少该核对上手/暗龙那几招 ✓（现在只核对了 " + checked + " 招 ✗）");
+    }
 }
