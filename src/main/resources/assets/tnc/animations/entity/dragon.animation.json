@@ -1,6 +1,33 @@
 {
 	"format_version": "1.8.0",
 	"animations": {
+		"orbit": {
+			"loop": true,
+			"animation_length": 3.0,
+			"bones": {
+				"head": { "rotation": [0, 8.90, 0] },
+				"neck2": { "rotation": [0, 4.95, 0] },
+				"neck1": { "rotation": [0, 5.11, 0] },
+				"body1": { "rotation": [0, -2.64, 0] },
+				"body2": { "rotation": [0, -5.27, 0] },
+				"body3": { "rotation": [0, -5.27, 0] },
+				"body4": { "rotation": [0, -5.27, 0] },
+				"body5": { "rotation": [0, -5.27, 0] },
+				"body6": { "rotation": [0, -5.27, 0] },
+				"body7": { "rotation": [0, -5.27, 0] },
+				"body8": { "rotation": [0, -5.27, 0] },
+				"body9": { "rotation": [0, -5.27, 0] },
+				"body10": { "rotation": [0, -5.27, 0] },
+				"body11": { "rotation": [0, -5.27, 0] },
+				"body12": { "rotation": [0, -5.27, 0] },
+				"tail1": { "rotation": [0, -5.27, 0] },
+				"tail2": { "rotation": [0, -5.27, 0] },
+				"tail3": { "rotation": [0, -5.27, 0] },
+				"tail4": { "rotation": [0, -5.27, 0] },
+				"tail5": { "rotation": [0, -5.27, 0] },
+				"tailFin": { "rotation": [0, -6.43, 0] }
+			}
+		},
 		"dash": {
 			"loop": true,
 			"animation_length": 1,
