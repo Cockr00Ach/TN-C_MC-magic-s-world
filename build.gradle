@@ -99,6 +99,15 @@ minecraft {
                 property 'tnc.forgeGuiAudit', 'true'
                 args '--quickPlaySingleplayer', 'ecology-gui-feedback', '--width', '1280', '--height', '720'
             }
+            if (project.hasProperty('ecologyVisualAudit')) {
+                workingDirectory project.file('run-client-ecology-audit')
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+                property 'tnc.ecologyVisualAudit', 'true'
+                property 'tnc.visualAuditManifest', file('art/ecology-redesign-20261004/export-audit.json').absolutePath
+                property 'tnc.visualAuditReport', file('work/ecology-visual-client-audit.json').absolutePath
+                args '--quickPlaySingleplayer', 'ecology-gui-feedback', '--width', '1280', '--height', '720'
+            }
         }
 
         server {

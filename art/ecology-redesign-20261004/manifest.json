@@ -1,0 +1,663 @@
+{
+  "native_size": 32,
+  "sheets": [
+    {
+      "id": "items_01",
+      "columns": 4,
+      "rows": 4,
+      "assets": [
+        {
+          "id": "dawn_disk_seed",
+          "description": "two flat dark brown sunflower seeds with a split golden seam"
+        },
+        {
+          "id": "hearth_pepper_seed",
+          "description": "split dried red chili pod revealing ivory seeds"
+        },
+        {
+          "id": "mist_cotton_seed",
+          "description": "three black cotton seeds attached to a tiny white tuft"
+        },
+        {
+          "id": "stone_fern_seed",
+          "description": "curled green fern crozier cutting with brown root tip"
+        },
+        {
+          "id": "mirror_lotus_seed",
+          "description": "round green lotus seed head with three dark holes and a blue shoot"
+        },
+        {
+          "id": "wish_puff_seed",
+          "description": "two tiny ochre seeds with separate white parachute tufts"
+        },
+        {
+          "id": "echo_bean_seed",
+          "description": "three curved green-speckled beans with one open husk"
+        },
+        {
+          "id": "ladder_vine_seed",
+          "description": "forked woody vine cutting with two leaves and white rootlets"
+        },
+        {
+          "id": "frost_chime_seed",
+          "description": "tapered icy-blue bulb with purple base and short shoot"
+        },
+        {
+          "id": "salt_ink_seed",
+          "description": "charcoal-purple mushroom cap with white spores underneath"
+        },
+        {
+          "id": "wind_sail_seed",
+          "description": "two paired tan winged tree seeds in a V"
+        },
+        {
+          "id": "sleep_clock_seed",
+          "description": "tiny navy onion bulb with gold root ring"
+        },
+        {
+          "id": "shadow_cut_seed",
+          "description": "dark plum six-pointed papery seedpod, pink seeds inside a slit"
+        },
+        {
+          "id": "paper_tree_seed",
+          "description": "brown tree nut inside rolled pale bark"
+        },
+        {
+          "id": "flight_pod_seed",
+          "description": "jade seedpod with two flat ivory wings"
+        },
+        {
+          "id": "honey_cluster_seed",
+          "description": "three amber wax seeds in one open honeycomb cell"
+        }
+      ]
+    },
+    {
+      "id": "items_02",
+      "columns": 4,
+      "rows": 4,
+      "assets": [
+        {
+          "id": "star_dew_seed",
+          "description": "two midnight-blue teardrop seeds, each with a tiny silver star fleck"
+        },
+        {
+          "id": "dance_bell_seed",
+          "description": "two pink hooked bellflower seeds joined to a wiry stalk"
+        },
+        {
+          "id": "star_rest_seed",
+          "description": "pearly lavender root crown with three tiny violet buds"
+        },
+        {
+          "id": "dawn_honey",
+          "description": "squat amber glass honey jar, dark wood lid and a golden honey drop label"
+        },
+        {
+          "id": "hearth_pepper_fruit",
+          "description": "two long curved red chili peppers, green stems and one orange tip"
+        },
+        {
+          "id": "mist_cotton_fiber",
+          "description": "white fluffy cotton boll, dark brown calyx and turquoise wisps"
+        },
+        {
+          "id": "stone_pattern_leaf",
+          "description": "fan-shaped serrated green fern leaf with pale stone-grey angular veins"
+        },
+        {
+          "id": "mirror_dew",
+          "description": "round blue glass vial, silver rim and a reflective blue droplet inside"
+        },
+        {
+          "id": "farlight_fruit",
+          "description": "pale golden lantern-shaped fruit, papery ribs and a short green stem"
+        },
+        {
+          "id": "echo_bean_pod",
+          "description": "open curved green bean pod showing three pale round beans"
+        },
+        {
+          "id": "vine_sinew",
+          "description": "two twisted olive vine tendrils tied into a loose cord with one leaf"
+        },
+        {
+          "id": "frost_dew",
+          "description": "narrow dark-blue glass ampoule, icy liquid and a white crystal stopper"
+        },
+        {
+          "id": "salt_ink",
+          "description": "small black ceramic inkpot, violet salt crystals spilled at its base"
+        },
+        {
+          "id": "sail_fiber",
+          "description": "three long straw fibers bound into a frayed tassel with a blue thread"
+        },
+        {
+          "id": "sleep_leaf",
+          "description": "two asymmetric curled midnight-blue leaves with silver veins and a bronze stem"
+        },
+        {
+          "id": "shadow_silk",
+          "description": "folded violet silk ribbon, deep shadow fold and pink stitched edge"
+        }
+      ]
+    },
+    {
+      "id": "items_03",
+      "columns": 4,
+      "rows": 4,
+      "assets": [
+        {
+          "id": "paper_bark",
+          "description": "three layered off-white peeling bark strips with rough dark-brown backing"
+        },
+        {
+          "id": "rainproof_pod",
+          "description": "split jade winged seed husk with pale inner lining"
+        },
+        {
+          "id": "honey_powder",
+          "description": "torn brown paper sachet spilling coarse golden pollen powder"
+        },
+        {
+          "id": "star_dew_fruit",
+          "description": "cluster of three indigo berries, white cross-shaped shine and a leafy stem"
+        },
+        {
+          "id": "dance_petal",
+          "description": "three curved rose-magenta petals, one ribbon twist and dark wine edges"
+        },
+        {
+          "id": "star_rest_dew",
+          "description": "tiny violet droplet bottle, silver crescent stopper and lavender fluid"
+        },
+        {
+          "id": "hearth_oil",
+          "description": "tall brown oil bottle, copper cap, orange fluid and a red chili label"
+        },
+        {
+          "id": "morning_honey_breakfast",
+          "description": "wooden plate of golden toast, fried egg and honey drizzle"
+        },
+        {
+          "id": "hearth_pepper_soup",
+          "description": "deep dark ceramic bowl of red-orange soup, chili rings and green leaves"
+        },
+        {
+          "id": "frost_pepper_meal",
+          "description": "white plate with seared meat, red chili strips and pale blue herb garnish"
+        },
+        {
+          "id": "mist_cloth",
+          "description": "folded cream and pale-blue woven cloth with stitched border"
+        },
+        {
+          "id": "folded_mist_tent",
+          "description": "rolled grey-blue tent canvas strapped with two brown leather belts"
+        },
+        {
+          "id": "folded_descent_cloth",
+          "description": "fan-folded ivory parachute cloth, green cords and a metal ring"
+        },
+        {
+          "id": "mirror_lotus_drink",
+          "description": "flared pale-blue cup with blue-green drink and pink lotus petal garnish"
+        },
+        {
+          "id": "sleep_clock_tea",
+          "description": "dark-blue teacup on a saucer, golden handle and curled herb leaf"
+        },
+        {
+          "id": "star_dew_drink",
+          "description": "slim deep-purple corked beverage bottle with a silver star label"
+        }
+      ]
+    },
+    {
+      "id": "items_04",
+      "columns": 4,
+      "rows": 4,
+      "assets": [
+        {
+          "id": "star_rest_drink",
+          "description": "short lavender flask with silver neck and crescent label"
+        },
+        {
+          "id": "honey_cluster_cake",
+          "description": "square golden honey cake slice, honeycomb crust and cream layer"
+        },
+        {
+          "id": "survey_route_page",
+          "description": "cream parchment map partly rolled, green route dots and red wax seal"
+        },
+        {
+          "id": "stone_rubbing_page",
+          "description": "grey stone rubbing sheet, jagged black rune imprint and charcoal stick"
+        },
+        {
+          "id": "shadow_pattern_card",
+          "description": "three plum-colored cards fanned out, each with a different pale glyph"
+        },
+        {
+          "id": "flower_gift",
+          "description": "small bouquet of pink and blue flowers tied with golden twine"
+        },
+        {
+          "id": "field_envelope",
+          "description": "cream folded envelope with a green leaf wax seal"
+        },
+        {
+          "id": "condensing_shell",
+          "description": "copper spiral condenser around a blue ceramic bowl, three pipe loops"
+        },
+        {
+          "id": "energy_saving_crystal",
+          "description": "tall emerald crystal in a small bronze fork-shaped holder"
+        },
+        {
+          "id": "companion_bell_chip",
+          "description": "tiny golden bell clapper on a dark leather tab with blue bead"
+        },
+        {
+          "id": "dawn_direction_page",
+          "description": "rolled parchment compass drawing with red needle and golden sun corner"
+        },
+        {
+          "id": "plant_sample_clip",
+          "description": "steel botanical pruning shears, brown wood handles holding one leaf"
+        },
+        {
+          "id": "rain_watering_flask",
+          "description": "blue-green ceramic watering flask, side handle and long curved spout"
+        },
+        {
+          "id": "pollination_brush",
+          "description": "thin wooden brush, copper ferrule and fluffy golden pollen bristles"
+        },
+        {
+          "id": "field_tuning_bell",
+          "description": "bronze handbell on a short dark wood handle with a blue gemstone"
+        },
+        {
+          "id": "rainproof_seed_box",
+          "description": "rectangular teal seed box, brass hinges and a seed emblem"
+        }
+      ]
+    },
+    {
+      "id": "items_05",
+      "columns": 4,
+      "rows": 4,
+      "assets": [
+        {
+          "id": "survey_archive_folder",
+          "description": "thick brown leather folder, parchment pages protruding and a metal clasp"
+        },
+        {
+          "id": "climbing_rope",
+          "description": "loosely coiled tan rope with a steel carabiner and hanging free end"
+        },
+        {
+          "id": "stonebarrow_meat",
+          "description": "thick dark red steak, white marbling and a square bone at one end"
+        },
+        {
+          "id": "stone_bone",
+          "description": "short rugged ivory knucklebone with dark grey stone ridges"
+        },
+        {
+          "id": "emberback_meat",
+          "description": "two red-orange bacon strips with dark crust and pale fat bands"
+        },
+        {
+          "id": "warm_fat",
+          "description": "cream animal fat lump wrapped in brown butcher paper"
+        },
+        {
+          "id": "tideback_meat",
+          "description": "pale pink fillet, dark blue skin on one side and diagonal cut lines"
+        },
+        {
+          "id": "water_membrane",
+          "description": "folded translucent turquoise fin membrane with dark branching veins"
+        },
+        {
+          "id": "froststride_meat",
+          "description": "raw poultry leg, red meat, exposed ivory bone and pale blue skin strip"
+        },
+        {
+          "id": "frost_bone",
+          "description": "long icy-blue forked bone, white joints and a frost crystal tip"
+        },
+        {
+          "id": "froststride_egg",
+          "description": "off-white egg with navy speckles and a pale blue lower rim"
+        },
+        {
+          "id": "apiary_meat",
+          "description": "two golden frog hind legs with short bones and red cut ends"
+        },
+        {
+          "id": "sweet_fat",
+          "description": "golden soft fat slab with a honey sheen resting on a small dark leaf"
+        },
+        {
+          "id": "honeydew",
+          "description": "round golden flask, honey-yellow liquid and a bee wing label"
+        },
+        {
+          "id": "starfelt_meat",
+          "description": "small purple-red rabbit meat cut with two distinct ivory rib bones"
+        },
+        {
+          "id": "soft_down",
+          "description": "purple and cream down feather tuft with three airy fronds"
+        }
+      ]
+    },
+    {
+      "id": "items_06",
+      "columns": 4,
+      "rows": 4,
+      "assets": [
+        {
+          "id": "lantern_antler",
+          "description": "branched brown antler with three warm yellow glowing tips"
+        },
+        {
+          "id": "shell_glue",
+          "description": "broken green snail shell cup with sticky resin dripping from its lip"
+        },
+        {
+          "id": "flight_feather",
+          "description": "long ivory feather, dark teal vane tips and golden shaft"
+        },
+        {
+          "id": "watch_wing",
+          "description": "wide tapered green mantis wing with dark branching veins"
+        },
+        {
+          "id": "mirror_scale",
+          "description": "three overlapping silver-blue scales with scalloped edges"
+        },
+        {
+          "id": "warm_breath",
+          "description": "round amber breath jar, dark metal lid and orange swirling vapor"
+        },
+        {
+          "id": "spring_concentrate",
+          "description": "slender pale-green vial, leafy stopper and teal liquid"
+        },
+        {
+          "id": "loam_pebble",
+          "description": "three earthy brown soil pebbles with a tiny green shoot between them"
+        },
+        {
+          "id": "air_plume",
+          "description": "fan of three ivory feathers with sky-blue tips tied with red thread"
+        },
+        {
+          "id": "storm_crystal",
+          "description": "jagged cobalt crystal with yellow lightning fissures and dark base"
+        },
+        {
+          "id": "runner_hide",
+          "description": "rugged flat brown leather hide, four irregular corners and dark patches"
+        },
+        {
+          "id": "horn_powder",
+          "description": "ivory horn fragment beside a mound of chalky powder in folded paper"
+        },
+        {
+          "id": "forage_paper_hide",
+          "description": "thin tan hide sheet, rolled corner, fur fringe and dark writing marks"
+        },
+        {
+          "id": "nest_glue",
+          "description": "small reed basket of sticky amber resin with loose twigs"
+        },
+        {
+          "id": "hoof_glue",
+          "description": "short black tin of dark teal resin with its lid leaning beside it"
+        },
+        {
+          "id": "lamp_wax",
+          "description": "two pale-yellow wax cylinders, one melted edge and a short dark wick"
+        }
+      ]
+    },
+    {
+      "id": "items_07",
+      "columns": 4,
+      "rows": 4,
+      "assets": [
+        {
+          "id": "stonebarrow_hotpot",
+          "description": "black iron handled hotpot, red stew, mushrooms and meat chunks"
+        },
+        {
+          "id": "emberback_stew",
+          "description": "rustic reddish ceramic bowl, orange stew and a visible red pepper"
+        },
+        {
+          "id": "tideback_chowder",
+          "description": "pale-blue bowl of cream chowder with fish and fresh green herbs"
+        },
+        {
+          "id": "frostwarm_skewer",
+          "description": "diagonal wooden skewer alternating red meat and blue-white herb cubes"
+        },
+        {
+          "id": "honeydew_casserole",
+          "description": "rectangular brown baking dish, golden gratin crust and green leaves"
+        },
+        {
+          "id": "starfelt_travel_roll",
+          "description": "cut flatbread wrap, purple meat, green leaves and paper band"
+        },
+        {
+          "id": "soft_lantern",
+          "description": "wood-framed yellow lantern, blue cloth hood and hanging ring"
+        },
+        {
+          "id": "waterproof_seed_wrap",
+          "description": "turquoise waxed cloth packet tied crosswise with brown twine"
+        },
+        {
+          "id": "quiet_felt",
+          "description": "thick plum-grey rolled felt blanket with fluffy edge and a leather strap"
+        },
+        {
+          "id": "calming_bell",
+          "description": "tiny golden collar bell, dark green ribbon and an ivory clapper"
+        },
+        {
+          "id": "warning_lens",
+          "description": "red-orange round lens in a rugged brass frame with triangular rim"
+        },
+        {
+          "id": "focus_lens",
+          "description": "cool blue convex lens, thin silver oval frame and short grip"
+        },
+        {
+          "id": "wind_bottle",
+          "description": "tall asymmetrical blue glass bottle, copper neck and a white spiral inside"
+        },
+        {
+          "id": "warm_feed",
+          "description": "golden hay bundle tied with red cord, three orange pepper pieces tucked inside"
+        },
+        {
+          "id": "climbing_cord",
+          "description": "green braided cord around a small steel hook, visibly different from tan rope"
+        },
+        {
+          "id": "beast_saddle",
+          "description": "rich brown saddle with raised leather seat, copper buckle and stirrups"
+        }
+      ]
+    },
+    {
+      "id": "items_08",
+      "columns": 4,
+      "rows": 4,
+      "assets": [
+        {
+          "id": "empty_breath_jar",
+          "description": "empty clear squat jar, grey-blue metal lid and visibly transparent center"
+        },
+        {
+          "id": "pasture_scraper",
+          "description": "broad curved steel scraper, wooden handle and a pale blue sharpened edge"
+        },
+        {
+          "id": "pasture_book",
+          "description": "dark green leather book, gold corner guards and a hoof emblem"
+        },
+        {
+          "id": "pasture_staff",
+          "description": "crooked wood shepherd staff, leaf carving and a bronze hanging charm"
+        },
+        {
+          "id": "pasture_cage",
+          "description": "square iron wire cage with an arched wood handle, empty interior"
+        },
+        {
+          "id": "fertile_pasture_egg",
+          "description": "cream egg in a little straw nest, small amber rune on the shell"
+        },
+        {
+          "id": "homeward_flower_seed",
+          "description": "burgundy bulb with a cream shoot and thin white roots"
+        },
+        {
+          "id": "homeward_flower_petal",
+          "description": "two pale teal petals with red-brown tips and a dark stalk"
+        },
+        {
+          "id": "warning_moss_spore",
+          "description": "moss-green spore pouch with three golden dust flecks spilling out"
+        },
+        {
+          "id": "warning_moss_flake",
+          "description": "branching flat green moss mat, amber dots and jagged outline"
+        },
+        {
+          "id": "road_bell_seed",
+          "description": "three tiny tan grain seeds attached to a short dry straw stalk"
+        },
+        {
+          "id": "road_bell_ear",
+          "description": "golden grain ear with small bronze bell-shaped kernels"
+        },
+        {
+          "id": "road_bell_travel_bread",
+          "description": "cut brown bread loaf with golden crust in a paper wrapper"
+        },
+        {
+          "id": "road_bell_wild_sample",
+          "description": "bound golden grass specimen on a tan sample card"
+        },
+        {
+          "id": "night_gourd_seed",
+          "description": "two dark purple gourd seeds with sharp pale seams"
+        },
+        {
+          "id": "night_gourd",
+          "description": "midnight-purple pumpkin, golden speckles and curled green stem"
+        }
+      ]
+    },
+    {
+      "id": "items_09",
+      "columns": 4,
+      "rows": 4,
+      "assets": [
+        {
+          "id": "night_gourd_wild_sample",
+          "description": "tiny violet pumpkin with one leaf on a paper specimen tag"
+        },
+        {
+          "id": "tide_reed_seed",
+          "description": "brown reed rhizome with two cream roots and a fresh green shoot"
+        },
+        {
+          "id": "tide_reed_stem",
+          "description": "diagonal bundle of three green hollow reeds tied with tan string"
+        },
+        {
+          "id": "tide_reed_wild_sample",
+          "description": "blue-green reed tuft and dark roots mounted on parchment"
+        },
+        {
+          "id": "hushcap_spore",
+          "description": "two tiny brown mushroom caps with green spores underneath"
+        },
+        {
+          "id": "hushcap_slice",
+          "description": "three cream mushroom slices, brown edge and visible dark gills"
+        },
+        {
+          "id": "hushcap_broth",
+          "description": "wooden broth bowl, two sliced mushrooms and green herb garnish"
+        },
+        {
+          "id": "rainletter_seed",
+          "description": "red-brown vine cutting with a teal leaf and pink bud nodes"
+        },
+        {
+          "id": "rainletter_berry",
+          "description": "dangling crimson berry bunch with two deep green leaves"
+        },
+        {
+          "id": "rainletter_cordial",
+          "description": "ruby-red corked cordial bottle, golden label and dark neck"
+        },
+        {
+          "id": "mana_root_seed",
+          "description": "crooked tan root cutting with one pale green glowing shoot"
+        },
+        {
+          "id": "mana_root_core",
+          "description": "branching brown root with exposed green crystal center and white rootlets"
+        },
+        {
+          "id": "verdant_vein_seed",
+          "description": "split dark green seed with luminous mint vein and moss fringe"
+        },
+        {
+          "id": "verdant_branch",
+          "description": "forked green branch, dark bark and bright green sap drops"
+        },
+        {
+          "id": "mana_copper_coil",
+          "description": "tightly wound orange copper spool, hollow center and two loose wire ends"
+        },
+        {
+          "id": "insulating_forge_clay",
+          "description": "cracked grey-beige clay lump with white mica flecks on a dark paper backing"
+        }
+      ]
+    },
+    {
+      "id": "items_10",
+      "columns": 4,
+      "rows": 4,
+      "assets": [
+        {
+          "id": "forge_guide",
+          "description": "open cream-paged workshop book, dark furnace sketch and golden corner straps"
+        },
+        {
+          "id": "bellwool_fodder",
+          "description": "thick golden grain and green grass feed bundle, tied in the middle with brown rope and tiny brass bells"
+        },
+        {
+          "id": "sky_vine_seed",
+          "description": "large tan seed with a winged green shoot, forked cream roots and a pale green stripe"
+        }
+      ]
+    }
+  ]
+}

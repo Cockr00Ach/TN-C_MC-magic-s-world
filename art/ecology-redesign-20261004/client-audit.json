@@ -1,0 +1,10 @@
+{
+  "items": 147,
+  "plant_species": 29,
+  "baked_plant_states": 723,
+  "screenshots": 14,
+  "machine_inventory_models": 16,
+  "feed_models": 7,
+  "failures": [],
+  "scope": "Actual Minecraft inventory, block and block-entity rendering in a dev gallery; not a full modpack playthrough"
+}

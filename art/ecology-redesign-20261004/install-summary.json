@@ -1,0 +1,34 @@
+{
+  "installed_at": "2026-10-04T19:30:01.625916",
+  "live_pack": "D:\\垃圾桶\\PCL 正式版 2.9.3\\.minecraft\\versions\\元素觉醒1.4.3-魔改版-20260915",
+  "sha256": "A5756A7E34E7C1C273E667918347AE9555F58A305D5F227710F9D35648315BD4",
+  "backup": "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\work\\backups\\ecology-art-20261004-193000",
+  "sprites": 147,
+  "plant_species": 29,
+  "native_models": 417,
+  "feed_meshes": 7,
+  "unit_tests": 130,
+  "client_audit": {
+    "items": 147,
+    "plant_species": 29,
+    "baked_plant_states": 723,
+    "screenshots": 14,
+    "machine_inventory_models": 16,
+    "feed_models": 7,
+    "failures": [],
+    "scope": "Actual Minecraft inventory, block and block-entity rendering in a dev gallery; not a full modpack playthrough"
+  },
+  "verified_source_resources": 596,
+  "protected_jar_island_entries": 25,
+  "jar_json_parsed": 1334,
+  "installed_files": [
+    "D:\\垃圾桶\\PCL 正式版 2.9.3\\.minecraft\\versions\\元素觉醒1.4.3-魔改版-20260915\\mods\\tnc-1.0.0.jar",
+    "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\modpack\\元素觉醒1.4.3-魔改版-20260915\\mods\\tnc-1.0.0.jar"
+  ],
+  "quests_changed": false,
+  "player_worlds_changed": false,
+  "island_templates_changed": false,
+  "protected_live_chapters": 33,
+  "protected_live_island_files": 305,
+  "protected_live_world_metadata": 4
+}

@@ -1,76 +1,244 @@
 {
   "parent": "minecraft:block/block",
-  "ambientocclusion": false,
   "render_type": "minecraft:cutout",
   "textures": {
-    "wood": "tnc:block/eco_wood",
-    "wetleaf": "tnc:block/eco_rain_leaf",
-    "dryleaf": "tnc:block/eco_rain_leaf_dry",
-    "wetberry": "tnc:block/eco_berry",
-    "dryberry": "tnc:block/eco_berry_dry"
+    "leaf": "tnc:block/art_leaf",
+    "bark": "tnc:block/art_bark",
+    "pollen": "tnc:block/art_pollen",
+    "cotton": "tnc:block/art_cotton",
+    "pepper": "tnc:block/art_pepper",
+    "ice": "tnc:block/art_ice",
+    "violet": "tnc:block/art_violet",
+    "rose": "tnc:block/art_rose",
+    "paper": "tnc:block/art_paper",
+    "copper": "tnc:block/art_copper",
+    "linen": "tnc:block/art_linen",
+    "wood": "tnc:block/art_wood",
+    "iron": "tnc:block/art_iron",
+    "hay": "tnc:block/art_hay",
+    "grain": "tnc:block/art_grain",
+    "pellets": "tnc:block/art_pellets",
+    "stone": "minecraft:block/deepslate_tiles",
+    "glass": "minecraft:block/glass",
+    "gold": "minecraft:block/gold_block",
+    "light": "minecraft:block/sea_lantern",
+    "green": "minecraft:block/amethyst_block",
+    "white": "minecraft:block/quartz_block_side",
+    "brick": "tnc:block/forge_firebrick",
+    "particle": "tnc:block/art_rose"
   },
   "elements": [
     {
       "from": [
-        7,
+        4,
         0,
-        7
+        5
       ],
       "to": [
-        9,
-        4,
-        9
+        5.3,
+        2.0,
+        6.3
       ],
       "faces": {
-        "down": {
-          "texture": "#wood"
-        },
-        "up": {
-          "texture": "#wood"
-        },
         "north": {
-          "texture": "#wood"
+          "texture": "#leaf",
+          "uv": [
+            0,
+            0,
+            1.2999999999999998,
+            2.0
+          ]
         },
         "south": {
-          "texture": "#wood"
-        },
-        "west": {
-          "texture": "#wood"
+          "texture": "#leaf",
+          "uv": [
+            0,
+            0,
+            1.2999999999999998,
+            2.0
+          ]
         },
         "east": {
-          "texture": "#wood"
+          "texture": "#leaf",
+          "uv": [
+            0,
+            0,
+            1.2999999999999998,
+            2.0
+          ]
+        },
+        "west": {
+          "texture": "#leaf",
+          "uv": [
+            0,
+            0,
+            1.2999999999999998,
+            2.0
+          ]
+        },
+        "up": {
+          "texture": "#leaf",
+          "uv": [
+            0,
+            0,
+            1.2999999999999998,
+            1.2999999999999998
+          ]
+        },
+        "down": {
+          "texture": "#leaf",
+          "uv": [
+            0,
+            0,
+            1.2999999999999998,
+            1.2999999999999998
+          ]
         }
       }
     },
     {
       "from": [
-        5,
-        3,
-        5
+        2,
+        1.0,
+        4
       ],
       "to": [
-        11,
-        5,
-        11
+        7,
+        1.5,
+        8
       ],
       "faces": {
-        "down": {
-          "texture": "#wetleaf"
-        },
-        "up": {
-          "texture": "#wetleaf"
-        },
         "north": {
-          "texture": "#wetleaf"
+          "texture": "#leaf",
+          "uv": [
+            0,
+            0,
+            5,
+            0.5
+          ]
         },
         "south": {
-          "texture": "#wetleaf"
-        },
-        "west": {
-          "texture": "#wetleaf"
+          "texture": "#leaf",
+          "uv": [
+            0,
+            0,
+            5,
+            0.5
+          ]
         },
         "east": {
-          "texture": "#wetleaf"
+          "texture": "#leaf",
+          "uv": [
+            0,
+            0,
+            4,
+            0.5
+          ]
+        },
+        "west": {
+          "texture": "#leaf",
+          "uv": [
+            0,
+            0,
+            4,
+            0.5
+          ]
+        },
+        "up": {
+          "texture": "#leaf",
+          "uv": [
+            0,
+            0,
+            5,
+            4
+          ]
+        },
+        "down": {
+          "texture": "#leaf",
+          "uv": [
+            0,
+            0,
+            5,
+            4
+          ]
+        }
+      },
+      "rotation": {
+        "angle": -22.5,
+        "axis": "z",
+        "origin": [
+          4.5,
+          1.25,
+          6.0
+        ],
+        "rescale": false
+      }
+    },
+    {
+      "from": [
+        4.3,
+        1.5,
+        5.3
+      ],
+      "to": [
+        4.9,
+        2.1,
+        5.9
+      ],
+      "faces": {
+        "north": {
+          "texture": "#ice",
+          "uv": [
+            0,
+            0,
+            0.6000000000000005,
+            0.6000000000000001
+          ]
+        },
+        "south": {
+          "texture": "#ice",
+          "uv": [
+            0,
+            0,
+            0.6000000000000005,
+            0.6000000000000001
+          ]
+        },
+        "east": {
+          "texture": "#ice",
+          "uv": [
+            0,
+            0,
+            0.6000000000000005,
+            0.6000000000000001
+          ]
+        },
+        "west": {
+          "texture": "#ice",
+          "uv": [
+            0,
+            0,
+            0.6000000000000005,
+            0.6000000000000001
+          ]
+        },
+        "up": {
+          "texture": "#ice",
+          "uv": [
+            0,
+            0,
+            0.6000000000000005,
+            0.6000000000000005
+          ]
+        },
+        "down": {
+          "texture": "#ice",
+          "uv": [
+            0,
+            0,
+            0.6000000000000005,
+            0.6000000000000005
+          ]
         }
       }
     }

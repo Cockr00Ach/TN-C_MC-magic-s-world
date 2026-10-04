@@ -4,6 +4,7 @@ import com.tnc.tnc.TNMod;
 import com.tnc.tnc.life.pasture.PastureRegistry;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -16,6 +17,11 @@ import net.minecraft.resources.ResourceLocation;
 @Mod.EventBusSubscriber(modid = TNMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class PastureClientEvents {
     private PastureClientEvents() {}
+
+    @SubscribeEvent public static void models(ModelEvent.RegisterAdditional event) {
+        for (String material : new String[]{"hay", "grain", "roots", "fruit", "fish", "fungus", "pellets"})
+            event.register(ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "block/feed_" + material));
+    }
 
     @SubscribeEvent public static void layers(EntityRenderersEvent.RegisterLayerDefinitions event) {
         PastureGeometry.LAYERS.forEach((species, layer) -> event.registerLayerDefinition(layer, () -> PastureGeometry.layer(species)));
