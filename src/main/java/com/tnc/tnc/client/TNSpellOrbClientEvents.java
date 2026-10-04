@@ -48,5 +48,9 @@ public final class TNSpellOrbClientEvents {
         // ★ 光明龙（光法第 5 条链「光龙」✓）：作者的东方龙 + 半透明自发光，见 TNDragonRenderer ✓
         event.registerEntityRenderer(TNOrbEntities.LIGHT_DRAGON.get(),
                 com.tnc.tnc.light.client.TNDragonRenderer::new);
+        // ★ 暗龙（暗系「暗龙」链 ✓，作者："复制一下光龙，生成一个暗龙" ✓）：
+        //   同一个实体类 + 同一套 geo/动画 ⇒ 只换渲染器（另一张贴图 + 灵魂火粒子 ✓）
+        event.registerEntityRenderer(TNOrbEntities.DARK_DRAGON.get(),
+                com.tnc.tnc.dark.client.TNDarkDragonRenderer::new);
     }
 }

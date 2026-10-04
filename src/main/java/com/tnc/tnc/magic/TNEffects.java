@@ -139,6 +139,31 @@ public final class TNEffects {
                     }
                 }
             });
+
+    /**
+     * ★ 暗龙链 t2「暗龙鳞甲」：移动速度 <b>+20%</b> ✓（减伤 50% 在受伤事件里 ✓）
+     * ＋ 暗属性伤害 <b>+30%</b> ✓（暗在引擎里映射 {@code spell_power:soul} ✓，
+     * 照 {@link #DARK_POWER} 的写法，没装时只加速度、不崩 ✓）。
+     *
+     * <p>它就是上面那个光龙鳞甲的**暗属性镜像** ✓ ——
+     * 作者 2026-10-02："复制一下光龙，生成一个暗龙" ✓。
+     */
+    public static final RegistryObject<MobEffect> DARK_DRAGON_SCALES =
+            EFFECTS.register("dark_dragon_scales", () -> new MobEffect(
+                    MobEffectCategory.BENEFICIAL, 0x6A2AB0) {
+                {
+                    addAttributeModifier(Attributes.MOVEMENT_SPEED,
+                            uuidFor("tnc:dark_dragon_scales_speed"), 0.20D,
+                            AttributeModifier.Operation.MULTIPLY_BASE);
+                    Attribute soul = ForgeRegistries.ATTRIBUTES.getValue(
+                            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(
+                                    "spell_power", "soul"));
+                    if (soul != null) {
+                        addAttributeModifier(soul, uuidFor("tnc:dark_dragon_scales_soul"),
+                                0.30D, AttributeModifier.Operation.MULTIPLY_BASE);
+                    }
+                }
+            });
     /** 环绕雷球：本身不加属性，只是个"光环开着"的标记（电击逻辑在机制层）。 */
     public static final RegistryObject<MobEffect> ORBITING_THUNDER_ORB =
             EFFECTS.register("orbiting_thunder_orb", () -> new MobEffect(

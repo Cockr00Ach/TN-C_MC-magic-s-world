@@ -685,6 +685,13 @@ public final class TnSpellMechanics {
         if (com.tnc.tnc.light.TNLightBeamMechanics.isLightBeamSpell(path)) {
             com.tnc.tnc.light.TNLightBeamMechanics.onSpellCast(player, path);
         }
+
+        // ★★ 暗系第五条链（暗龙）：放出去一条暗龙往前冲 ✓
+        //    （作者 2026-10-02："复制一下光龙，生成一个暗龙" ✓ —— 行为和光龙那张表一模一样 ✓，
+        //      只换实体类型 / 贴图 / 粒子 / 鳞甲的伤害属性 ✓）
+        if (com.tnc.tnc.dark.TNDarkDragonChain.isDarkDragonSpell(path)) {
+            com.tnc.tnc.dark.TNDarkDragonChain.onSpellCast(player, path);
+        }
     }
 
     /**

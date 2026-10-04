@@ -115,4 +115,12 @@
   "entity.tnc.light_dragon": "Light Dragon"
 ,
   "effect.tnc.light_dragon_scales": "Light Dragon Scales"
+,
+  "entity.tnc.dark_dragon": "Dark Dragon"
+,
+  "effect.tnc.dark_dragon_scales": "Dark Dragon Scales"
+,
+  "entity.tnc.dark_giant": "Beastman Warlord"
+,
+  "item.tnc.dark_giant_spawn_egg": "Beastman Warlord Spawn Egg"
 }

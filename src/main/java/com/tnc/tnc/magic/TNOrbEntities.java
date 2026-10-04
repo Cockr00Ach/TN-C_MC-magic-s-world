@@ -168,6 +168,27 @@ public final class TNOrbEntities {
                     .updateInterval(1)
                     .build("tnc:light_dragon"));
 
+    /**
+     * ★ 暗系链「暗龙」<b>扔出去的那条暗龙</b> ✓（作者 2026-10-02：<b>"复制一下光龙，生成一个暗龙"</b> ✓）。
+     *
+     * <p>它就是上面那条光龙的**暗色镜像** ✓ —— 实体类**完全一样**
+     * （{@link com.tnc.tnc.light.TNDragonEntity} ✓，冲/环绕/撞伤那套逻辑一个字没改 ✗），
+     * 差别只有两处：
+     * <ul>
+     *   <li><b>实体类型不同</b>（{@code tnc:dark_dragon} ✓）⇒ 客户端走另一个渲染器 + 另一张贴图
+     *       （{@code dark/client/TNDarkDragonGeoModel} ✓）；</li>
+     *   <li>法术生成时调一次 {@code entity.setDark(true)} ✓ ⇒ 粒子换成灵魂火 + 黑烟 ✓。</li>
+     * </ul>
+     * 同样是投射物（{@code MobCategory.MISC} ✓ 不是生物 ✗、**不注册属性** ✓）。
+     */
+    public static final RegistryObject<EntityType<com.tnc.tnc.light.TNDragonEntity>> DARK_DRAGON =
+            ENTITY_TYPES.register("dark_dragon", () -> EntityType.Builder
+                    .of(com.tnc.tnc.light.TNDragonEntity::new, MobCategory.MISC)
+                    .sized(2.5F, 2.0F)
+                    .clientTrackingRange(16)
+                    .updateInterval(1)
+                    .build("tnc:dark_dragon"));
+
     private TNOrbEntities() {
     }
 

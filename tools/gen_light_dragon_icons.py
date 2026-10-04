@@ -16,6 +16,7 @@ ASCII only.  Usage:  python tools/gen_light_dragon_icons.py
 """
 import math
 import os
+import sys
 
 from PIL import Image, ImageDraw, ImageFilter
 
@@ -24,6 +25,14 @@ SS = 8
 W = SIZE * SS
 WHITE = (255, 255, 255, 255)
 GOLD = (255, 214, 120, 255)
+
+# ★ --dark：同一批形状、暗龙配色 ✓（作者 2026-10-02："复制一下光龙，生成一个暗龙" ✓）
+#   核心换成幽紫白、镶边换成紫红 ⇒ 16x16 下一眼分得出是暗系 ✓
+DARK = "--dark" in sys.argv
+if DARK:
+    WHITE = (234, 222, 250, 255)
+    GOLD = (168, 60, 200, 255)
+PREFIX = "dark_dragon_" if DARK else "light_dragon_"
 
 
 def layer():
@@ -123,13 +132,14 @@ def icon_descend():
     return compose(c, W * 0.03)
 
 
-ICONS = {
-    "light_dragon_breath": icon_breath,
-    "light_dragon_scales": icon_scales,
-    "summon_light_dragon": icon_summon,
-    "light_dragon_dive": icon_dive,
-    "light_dragon_descend": icon_descend,
-}
+ICONS = {}
+for _short, _fn in (("breath", icon_breath), ("scales", icon_scales), ("charge", icon_summon),
+                    ("dive", icon_dive), ("descend", icon_descend)):
+    ICONS[PREFIX + _short] = _fn
+if not DARK:
+    # 光龙那条链的 t3 法术 id 是历史遗留的 summon_light_dragon ✓（显示名早已是"光龙出击"✓）
+    # 暗龙那条链用的是干净名字 dark_dragon_charge ✓
+    ICONS["summon_light_dragon"] = ICONS.pop("light_dragon_charge")
 
 OUT = os.path.join("src", "main", "resources", "assets", "tnc", "textures", "spell")
 
@@ -147,8 +157,9 @@ def main():
         print("icon -> %s.png (%d bytes)" % (name, os.path.getsize(p)))
     preview = os.path.join(repo, "docs", "previews")
     os.makedirs(preview, exist_ok=True)
-    sheet.save(os.path.join(preview, "light_dragon_icons.png"))
-    print("preview -> docs/previews/light_dragon_icons.png")
+    sheet_name = "dark_dragon_icons.png" if DARK else "light_dragon_icons.png"
+    sheet.save(os.path.join(preview, sheet_name))
+    print("preview -> docs/previews/%s" % sheet_name)
 
 
 if __name__ == "__main__":

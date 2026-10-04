@@ -30,17 +30,62 @@ GEO = os.path.join("src", "main", "resources", "assets", "tnc", "geo", "entity",
 TEX = os.path.join("src", "main", "resources", "assets", "tnc", "textures", "entity", "dragon_bedrock.png")
 PREVIEW = os.path.join("docs", "previews", "dragon_texture.png")
 
-# ------------------------------------------------------------------ light-dragon palette
-SCALE = (250, 248, 240)         # 珍珠白鳞（更亮 ✓）
-SCALE_HI = (255, 206, 92)       # 金边（更饱和 ✓）
-SCALE2 = (240, 230, 200)        # 隔节的暖白（舞龙那种一节一节 ✓）
-BELLY = (255, 250, 236)         # 奶白腹甲
-FIN = (255, 206, 96)            # 金鳍 / 鬃 / 尾焰（亮金 ✓）
-BONE = (252, 248, 236)          # 角 / 须 / 牙（白金色 ✓）
-CLAW = (232, 208, 152)          # 爪（浅金 ✓）
-EYE = (255, 240, 180)           # 眼（白金发光 ✓）
-SHEEN = (168, 220, 245)         # 虹彩偏色（很淡的一点冷色 ⇒ "光"的感觉 ✓）
-SEAM = (214, 206, 186)          # 鳞缝：淡暖灰（别太重，不然整条龙发灰 ✗）
+# ------------------------------------------------------------------ palettes
+# 作者 2026-10-02：先要"光明龙"，紧接着"复制一下光龙，生成一个暗龙" ✓
+#   ⇒ 同一套 UV / 同一套材质分类，只换调色板 ✓（龙模型是共享的，暗龙只是换贴图 ✓）
+# 用法：python tools/retexture_dragon.py            （光明龙 -> dragon_bedrock.png）
+#       python tools/retexture_dragon.py --dark     （暗龙   -> dragon_dark_bedrock.png）
+PALETTES = {
+    "light": {
+        "name": "光明龙",
+        "scale": (250, 248, 240),      # 珍珠白鳞
+        "scale_hi": (255, 206, 92),    # 金边
+        "scale2": (240, 230, 200),     # 隔节的暖白（舞龙那种一节一节 ✓）
+        "belly": (255, 250, 236),      # 奶白腹甲
+        "fin": (255, 206, 96),         # 金鳍 / 鬃 / 尾焰
+        "bone": (252, 248, 236),       # 角 / 须 / 牙
+        "claw": (232, 208, 152),       # 爪
+        "eye": (255, 240, 180),        # 眼（白金发光）
+        "sheen": (168, 220, 245),      # 很淡的冷色虹彩
+        "seam": (214, 206, 186),       # 鳞缝
+        "hoop": (255, 212, 104),       # 节与节之间的金箍
+        "out": "dragon_bedrock.png",
+        "preview": "dragon_texture.png",
+    },
+    "dark": {
+        "name": "暗龙",
+        "scale": (46, 38, 62),         # 玄黑紫鳞
+        "scale_hi": (150, 62, 190),    # 幽紫亮边
+        "scale2": (32, 26, 44),        # 隔节更深（一节一节 ✓）
+        "belly": (92, 70, 118),        # 暗紫腹甲
+        "fin": (168, 44, 108),         # 血红／紫红的鳍与尾焰
+        "bone": (206, 200, 214),       # 角 / 须（冷骨白）
+        "claw": (150, 132, 160),
+        "eye": (255, 74, 84),          # 眼（血红发光）
+        "sheen": (90, 60, 170),        # 幽紫偏色
+        "seam": (24, 18, 32),
+        "hoop": (120, 40, 150),        # 节与节之间的紫箍
+        "out": "dragon_dark_bedrock.png",
+        "preview": "dragon_dark_texture.png",
+    },
+}
+
+SCALE = SCALE_HI = SCALE2 = BELLY = FIN = BONE = CLAW = EYE = SHEEN = SEAM = None
+HOOP = None
+
+
+def use_palette(key):
+    """切换调色板 —— 下面那些 painter 都是按**模块全局名**取色的 ✓（所以这里改全局就生效 ✓）"""
+    global SCALE, SCALE_HI, SCALE2, BELLY, FIN, BONE, CLAW, EYE, SHEEN, SEAM, HOOP, PAL
+    p = PALETTES[key]
+    PAL = p
+    SCALE, SCALE_HI, SCALE2 = p["scale"], p["scale_hi"], p["scale2"]
+    BELLY, FIN, BONE, CLAW, EYE = p["belly"], p["fin"], p["bone"], p["claw"], p["eye"]
+    SHEEN, SEAM, HOOP = p["sheen"], p["seam"], p["hoop"]
+    return p
+
+
+PAL = PALETTES["light"]
 
 
 def clamp(v):
@@ -193,7 +238,7 @@ PAINTERS = {
     "scale": lambda img, box, size: paint_scales(img, box, size, SCALE, SCALE_HI, 8, 31),
     "scale2": lambda img, box, size: paint_scales(img, box, size, SCALE2, SCALE_HI, 8, 32),
     "belly": lambda img, box, size: paint_belly(img, box, size, BELLY),
-    "hoop": lambda img, box, size: paint_belly(img, box, size, (255, 212, 104)),
+    "hoop": lambda img, box, size: paint_belly(img, box, size, HOOP),
     "fin": lambda img, box, size: paint_fin(img, box, size, FIN),
     "bone": lambda img, box, size: paint_bone(img, box, size, BONE),
     "claw": lambda img, box, size: paint_claw(img, box, size, CLAW),
@@ -211,9 +256,14 @@ def segment_index(bone):
 
 
 def main():
+    import sys
+    dark = "--dark" in sys.argv
+    pal = use_palette("dark" if dark else "light")
     repo = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     os.chdir(repo)
-    geo_path, tex_path = GEO, TEX
+    geo_path = GEO
+    tex_path = os.path.join(os.path.dirname(TEX), pal["out"])
+    preview_path = os.path.join(os.path.dirname(PREVIEW), pal["preview"])
     before = hashlib.sha256(open(geo_path, "rb").read()).hexdigest()
 
     geo = json.load(open(geo_path, encoding="utf-8"))["minecraft:geometry"][0]
@@ -235,13 +285,13 @@ def main():
 
     os.makedirs(os.path.dirname(tex_path), exist_ok=True)
     img.save(tex_path)
-    os.makedirs(os.path.dirname(PREVIEW), exist_ok=True)
-    img.resize((tw, th), Image.NEAREST).save(PREVIEW)
+    os.makedirs(os.path.dirname(preview_path), exist_ok=True)
+    img.resize((tw, th), Image.NEAREST).save(preview_path)
 
     after = hashlib.sha256(open(geo_path, "rb").read()).hexdigest()
     assert before == after, "the geo was modified - this tool must never touch the model"
-    print("texture -> %s (%dx%d)" % (tex_path, tw, th))
-    print("preview -> %s" % PREVIEW)
+    print("[%s] texture -> %s (%dx%d)" % (pal["name"], tex_path, tw, th))
+    print("[%s] preview -> %s" % (pal["name"], preview_path))
     print("geo untouched (sha256 %s...)" % before[:12])
     print("cubes painted: %d  ->  %s" % (sum(report.values()),
           ", ".join("%s=%d" % kv for kv in sorted(report.items()))))

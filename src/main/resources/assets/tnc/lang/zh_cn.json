@@ -165,4 +165,12 @@
   "entity.tnc.light_dragon": "光明龙"
 ,
   "effect.tnc.light_dragon_scales": "光龙鳞甲"
+,
+  "entity.tnc.dark_dragon": "暗龙"
+,
+  "effect.tnc.dark_dragon_scales": "暗龙鳞甲"
+,
+  "entity.tnc.dark_giant": "巨兽人领主"
+,
+  "item.tnc.dark_giant_spawn_egg": "巨兽人领主 刷怪蛋"
 }

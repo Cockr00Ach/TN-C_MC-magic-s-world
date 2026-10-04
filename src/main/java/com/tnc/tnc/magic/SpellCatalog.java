@@ -115,7 +115,19 @@ public final class SpellCatalog {
          *
          * <p>⚠️ 和其它新链一样：**必须追加在枚举末尾** ✗（存档按链的序数存进度 ✗）。
          */
-        LIGHT_DRAGON("光龙", "放出一条巨龙向前冲（光系第五条链）");
+        LIGHT_DRAGON("光龙", "放出一条巨龙向前冲（光系第五条链）"),
+        /**
+         * ★ 暗系<b>第五条链</b>「暗龙」（作者 2026-10-02：<b>"复制一下光龙，生成一个暗龙"</b> ✓）：
+         * 暗龙吐息 → 暗龙鳞甲 → 暗龙出击 → 暗龙俯冲 → 暗龙降世 ✓。
+         *
+         * <p>**逐字照搬光龙那张表** ✓（同一套行为：t1 一条小龙冲出去、t2 三条小龙绕着自己转 +
+         * 鳞甲 buff、t3/t4/t5 一条/两条/三条大龙往前冲 ✓），只换皮：
+         * 龙的实体类型 + 贴图（玄黑紫 ✓）、粒子（灵魂火/黑烟 ✓）、
+         * 鳞甲 buff 的伤害加成从"光"换成"暗"（{@code spell_power:soul} ✓）。
+         *
+         * <p>⚠️ 和其它新链一样：**必须追加在枚举末尾** ✗（存档按链的序数存进度 ✗）。
+         */
+        DARK_DRAGON("暗龙", "放出一条暗龙向前冲（暗系第五条链）");
 
         private final String cn;
         private final String desc;
@@ -299,6 +311,20 @@ public final class SpellCatalog {
             of(Element.LIGHT, "summon_light_dragon", Chain.LIGHT_DRAGON, 3, "光龙出击"),
             of(Element.LIGHT, "light_dragon_dive", Chain.LIGHT_DRAGON, 4, "光龙俯冲"),
             of(Element.LIGHT, "light_dragon_descend", Chain.LIGHT_DRAGON, 5, "光龙降世"),
+
+            // ---- 暗龙线（暗系第五条链，作者 2026-10-02："复制一下光龙，生成一个暗龙" ✓）----
+            //   数值 = 光龙那张表**逐字照抄** ✓（只换皮：实体类型 / 贴图 / 粒子 / 鳞甲的伤害属性）
+            //   1 暗龙吐息：一条最小的龙（0.30 倍 ≈ 6.8 格）往前冲 ≈54 格，撞到 14 伤
+            //   2 暗龙鳞甲：三条小龙绕着自己转（咬到 6 伤）+ 减伤 50% / 速度 +20% / 暗伤 +30%
+            //   3 暗龙出击：一条大龙（1.50 倍 ≈ 34 格）冲 ≈90 格，撞到 24 伤
+            //   4 暗龙俯冲：两条（3.00 倍 · 左右各偏 7°）冲 ≈122 格，撞到 34 伤
+            //   5 暗龙降世：三条（6.00 倍 · 扇形 ∓16°）冲 ≈155 格，撞到 44 伤
+            //   （数值全在 dark/TNDarkDragonChain 的一张表里 ✓，改那里就行 ✓）
+            of(Element.DARK, "dark_dragon_breath", Chain.DARK_DRAGON, 1, "暗龙吐息"),
+            of(Element.DARK, "dark_dragon_scales", Chain.DARK_DRAGON, 2, "暗龙鳞甲"),
+            of(Element.DARK, "dark_dragon_charge", Chain.DARK_DRAGON, 3, "暗龙出击"),
+            of(Element.DARK, "dark_dragon_dive", Chain.DARK_DRAGON, 4, "暗龙俯冲"),
+            of(Element.DARK, "dark_dragon_descend", Chain.DARK_DRAGON, 5, "暗龙降世"),
 
             // ================= 骨架（法术 JSON 待补，先占名字对齐文档）=================
             // 水魔法：水球 / 水纹 / 水缚 / 雨滴
