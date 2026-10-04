@@ -57,14 +57,18 @@ class DarkGiantPhaseTest {
         JsonObject animations = JsonParser.parseString(Files.readString(Path.of(
                         "src/main/resources/assets/tnc/animations/entity/dark_giant.animation.json")))
                 .getAsJsonObject().getAsJsonObject("animations");
-        for (String clip : new String[] {TNDarkGiantEntity.ANIM_WALK, TNDarkGiantEntity.ANIM_MAGIC,
-                TNDarkGiantEntity.ANIM_SUMMON}) {
+        for (String clip : new String[] {TNDarkGiantEntity.ANIM_WALK, TNDarkGiantEntity.ANIM_STOMP,
+                TNDarkGiantEntity.ANIM_MAGIC, TNDarkGiantEntity.ANIM_SUMMON}) {
             assertTrue(animations.has(clip),
                     "动作文件里没有 '" + clip + "' ✗（作者换名字了？改 TNDarkGiantEntity 里的常量 ✓）");
         }
         // 模型也得在 ✓（骨头名变了没关系 —— 渲染器 crashIfBoneMissing=false ✓）
         assertTrue(Files.exists(Path.of("src/main/resources/assets/tnc/geo/entity/dark_giant.geo.json")),
                 "模型文件不见了 ✗");
+        // ★ 作者 2026-10-03："谁让你把践踏当走路了" ✗ —— 这两件事必须是**两个**片段 ✓
+        assertFalse(TNDarkGiantEntity.ANIM_WALK.equals(TNDarkGiantEntity.ANIM_STOMP),
+                "走路又变回践踏了 ✗（walk 是 tools/gen_dark_giant_walk.ps1 生成的 ✓）");
+        assertTrue(TNDarkGiantSpells.count() >= 5, "招式表至少要覆盖作者点名的五招 ✓");
     }
 
     /**

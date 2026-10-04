@@ -78,9 +78,19 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
     public static final float HITBOX_WIDTH = 2.4F;
     public static final float HITBOX_HEIGHT = 5.6F;
 
-    // ---- 作者给的三个动作片段 ✓ ----
-    /** 走路（循环 ✓）。 */
-    public static final String ANIM_WALK = "treadon";
+    // ---- 作者的三个动作片段 + 我们补的走路 ✓ ----
+    /**
+     * 走路（循环 ✓）。
+     *
+     * <p>★ 2026-10-03 作者："你给 boss 做个走路的动画啊，谁让你把践踏当走路了" ✗ ——
+     * 第一版把作者的 {@link #ANIM_STOMP}（{@code treadon} = 践踏 ✓）当走路播了 ✗，是错的 ✓。
+     * 现在 {@code walk} 是 {@code tools/gen_dark_giant_walk.ps1} 生成的**真走路循环** ✓
+     * （1.4 秒一个完整跨步 ✓、两腿反相摆动 ±32/−26° ✓、手臂反向摆 ✓、躯干左右压 ✓、
+     * 斗篷滞后 ✓、尾巴甩 ✓ —— 幅度是照"髋到脚底 34 单位"和 boss 的移速算过的 ✓，不滑步 ✓）。
+     */
+    public static final String ANIM_WALK = "walk";
+    /** 践踏（一次性 ✓，作者的原动作 ✓）—— 打中人的时候播 ✓。 */
+    public static final String ANIM_STOMP = "treadon";
     /** 施法（一次性 ✓）。 */
     public static final String ANIM_MAGIC = "playmagic";
     /** 召唤 + 冒烟（一次性 ✓）—— 进二阶段播它 ✓。 */
@@ -121,7 +131,7 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MAX_HEALTH, MAX_HP)
                 .add(Attributes.ATTACK_DAMAGE, 18.0D)
-                .add(Attributes.MOVEMENT_SPEED, 0.24D)      // 巨人走得慢一点 ✓
+                .add(Attributes.MOVEMENT_SPEED, 0.16D)      // 巨人走得慢而沉 ✓（和 walk 动画的步幅配套 ✓ 见 gen_dark_giant_walk.ps1 ✓）
                 .add(Attributes.FOLLOW_RANGE, 40.0D)
                 .add(Attributes.ARMOR, 12.0D)               // 通身盔甲 ⇒ 护甲给高 ✓
                 .add(Attributes.ARMOR_TOUGHNESS, 6.0D)
@@ -196,6 +206,24 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
     /** 播"召唤+冒烟"动作 ✓（进二阶段会自动调一次 ✓）。 */
     public void playSummon() {
         this.triggerAnim(CONTROLLER_ACTION, "summon");
+    }
+
+    /** 播"践踏"动作 ✓（作者的 {@code treadon} ✓）—— 打中人的那一刻播 ✓。 */
+    public void playStomp() {
+        this.triggerAnim(CONTROLLER_ACTION, "stomp");
+    }
+
+    /**
+     * 打中目标 ⇒ 播一次践踏 ✓（作者的 {@code treadon} 本来就是踩踏动作 ✓，
+     * 以前被我误当走路 ✗，现在归位 ✓）。
+     */
+    @Override
+    public boolean doHurtTarget(net.minecraft.world.entity.Entity target) {
+        boolean hit = super.doHurtTarget(target);
+        if (hit && !this.level().isClientSide()) {
+            this.playStomp();
+        }
+        return hit;
     }
 
     // ---- 目标/行为 ----
@@ -343,20 +371,23 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        // 走路：动起来循环播作者的 treadon ✓；站着**不播**（作者的动画文件里还没有 idle ✗ ⇒ 回静止姿 ✓）
+        // 走路：动起来循环播**真走路** ✓（tools/gen_dark_giant_walk.ps1 ✓）；
+        // 二阶段走得更快 ⇒ 动画也跟着快 15% ✓（不然会"滑步" ✗ 见那个脚本里的算术 ✓）
         AnimationController<TNDarkGiantEntity> move = new AnimationController<>(this, "move", 5, state -> {
+            state.getController().setAnimationSpeed(this.isPhaseTwo() ? 1.15F : 1.0F);
             if (state.isMoving()) {
                 return state.setAndContinue(RawAnimation.begin().thenLoop(ANIM_WALK));
             }
-            return PlayState.STOP;
+            return PlayState.STOP;   // 站着 = 模型的静止姿 ✓（作者还没导 idle ✓）
         });
         controllers.add(move);
 
-        // 一次性动作：由 playMagic() / playSummon() 触发 ✓（照抄 TNApolloEntity ✓）
+        // 一次性动作：由 playMagic() / playSummon() / playStomp() 触发 ✓（照抄 TNApolloEntity ✓）
         AnimationController<TNDarkGiantEntity> action = new AnimationController<>(this, CONTROLLER_ACTION, 2,
                 state -> PlayState.STOP);
         action.triggerableAnim("magic", RawAnimation.begin().thenPlay(ANIM_MAGIC));
         action.triggerableAnim("summon", RawAnimation.begin().thenPlay(ANIM_SUMMON));
+        action.triggerableAnim("stomp", RawAnimation.begin().thenPlay(ANIM_STOMP));
         controllers.add(action);
     }
 
