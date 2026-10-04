@@ -54,8 +54,11 @@ public final class TNLightDragonChain {
     }
 
     private static final Dragon[] DRAGONS = {
-            new Dragon("light_dragon_breath", 1, 0, 0.0D, 0.0D, 0.0D, 0, 0.0D, "光龙吐息"),
-            new Dragon("light_dragon_scales", 2, 0, 0.0D, 0.0D, 0.0D, 0, 0.0D, "光龙鳞甲"),
+            // ★ t1（作者 2026-10-03："t1 放一条小龙" ✓）：一条最小的龙（×1 = 0.30 ⇒ 约 7 格长）✓
+            new Dragon("light_dragon_breath", 1, 1, 0.30D, 14.0D, 1.20D, 45, 0.0D, "光龙吐息"),
+            // ★ t2（作者："t2 放三条小龙围绕着自己" ✓）：三条小龙绕着自己转 ✓
+            //   个数 3 ⇒ 环绕半径 {@link #ORBIT_RADIUS}、起始角错开 120° ✓；伤害是"贴上来咬一口"的 ✓
+            new Dragon("light_dragon_scales", 2, 3, 0.30D, 6.0D, 0.0D, 400, 0.0D, "光龙鳞甲"),
             // ★ 个头倍率（作者 2026-10-03："t3的龙放大五倍，t4的放大十倍，t5 20倍" ✓）：
             //   以基准 0.30 为 1 倍 ⇒ t3 = 0.30×5 = **1.50** / t4 = ×10 = **3.00** / t5 = ×20 = **6.00** ✓
             //   模型原长 23 格 ⇒ 三条龙分别约 **34 / 69 / 138 格长** ✗（t5 已经两个多区块长了 ✓）
@@ -64,6 +67,11 @@ public final class TNLightDragonChain {
             new Dragon("light_dragon_dive", 4, 2, 3.00D, 34.0D, 1.65D, 74, 7.0D, "光龙俯冲"),
             new Dragon("light_dragon_descend", 5, 3, 6.00D, 44.0D, 1.85D, 84, 16.0D, "光龙降世"),
     };
+
+    /** t2 那三条小龙绕着主人转的半径（格 ✓）—— 5 格 ⇒ 正好在玩家周围一圈 ✓。 */
+    private static final double ORBIT_RADIUS = 5.0D;
+    /** 绕一圈多快（度/tick ✓）：3° ⇒ 约 2 秒一圈 ✓（看得清是三条龙在绕 ✓）。 */
+    private static final double ORBIT_DEG_PER_TICK = 3.0D;
 
     /** 龙放主人前方多远（格 ✓）—— 它 23 格长，贴着放会把自己穿进主人身上 ✗。 */
     private static final double SPAWN_DISTANCE = 8.0D;
@@ -97,34 +105,42 @@ public final class TNLightDragonChain {
             return;
         }
         switch (dragon.tier()) {
-            case 1 -> breath(caster, dragon);
-            case 2 -> scales(caster, dragon);
+            case 1 -> release(level, caster, dragon);                       // 一条小龙冲出去 ✓
+            case 2 -> {                                                     // 鳞甲 + 三条小龙环绕 ✓
+                scales(caster, dragon);
+                orbit(level, caster, dragon);
+            }
             default -> release(level, caster, dragon);
         }
     }
 
     /**
-     * t1 光龙吐息：**只留"龙吼 + 前冲的一道火光"** ✓ ——
-     * 作者 2026-10-03："怎么光龙的魔法还会有光线的 t4 呢，我只要龙冲出去好不好，你把其他的都给我删了" ✗
-     * ⇒ 原来这里直接调了光线链的「大光线」✗（那是别的链的东西 ✗），现在删掉 ✓。
+     * ★ t2 的三条小龙**绕着主人转**（作者 2026-10-03："t2 放三条小龙围绕着自己" ✓）。
+     *
+     * <p>起始角按 360/条数 错开 ⇒ 三条正好围成一圈 ✓；转 {@code dragon.ticks()} 到点爆开 ✓
+     * （和"光龙鳞甲"的 buff 同为 20 秒 ✓，buff 掉的时候龙也正好散掉 ✓）。
      */
-    private static void breath(LivingEntity caster, Dragon dragon) {
-        if (caster.level() instanceof ServerLevel level) {
-            Vec3 eye = caster.getEyePosition();
-            Vec3 look = caster.getLookAngle();
-            for (int i = 1; i <= 6; i++) {
-                Vec3 at = eye.add(look.scale(i * 1.6D));
-                level.sendParticles(net.minecraft.core.particles.ParticleTypes.FIREWORK,
-                        at.x, at.y, at.z, 6, 0.3D, 0.3D, 0.3D, 0.02D);
+    private static void orbit(ServerLevel level, LivingEntity caster, Dragon dragon) {
+        int n = Math.max(1, dragon.count());
+        for (int i = 0; i < n; i++) {
+            TNDragonEntity entity = TNOrbEntities.LIGHT_DRAGON.get().create(level);
+            if (entity == null) {
+                continue;
             }
-            level.playSound(null, eye.x, eye.y, eye.z,
-                    net.minecraft.sounds.SoundEvents.ENDER_DRAGON_GROWL,
-                    net.minecraft.sounds.SoundSource.PLAYERS, 0.7F, 1.35F);
+            double angle = 360.0D * i / n;
+            double rad = Math.toRadians(angle);
+            double x = caster.getX() + Math.cos(rad) * ORBIT_RADIUS;
+            double z = caster.getZ() + Math.sin(rad) * ORBIT_RADIUS;
+            entity.setTier(dragon.tier());
+            entity.setScale(dragon.scale());
+            entity.setOwner(caster.getUUID());
+            entity.moveTo(x, caster.getY() + 1.2D, z, caster.getYRot(), 0.0F);
+            entity.orbit(caster.getUUID(), ORBIT_RADIUS, ORBIT_DEG_PER_TICK,
+                    dragon.ticks(), dragon.damage(), angle);
+            level.addFreshEntity(entity);
         }
-        if (caster instanceof ServerPlayer player) {
-            player.displayClientMessage(Component.literal(
-                    "§e[TN-C] §r光龙吐息 §7（一道火光，不再借用光线链）"), true);
-        }
+        LOGGER.info("TN-C/light: 光龙环绕 count={} radius={} ticks={} caster={}",
+                n, ORBIT_RADIUS, dragon.ticks(), caster.getName().getString());
     }
 
     /** t2 光龙鳞甲：自己 + 附近队友挂 {@link TNEffects#LIGHT_DRAGON_SCALES} ✓。 */

@@ -81,6 +81,17 @@ public class TNDragonEntity extends Entity implements GeoEntity {
     private final Set<Integer> hitThisCharge = new HashSet<>();
     private boolean configured;
 
+    // ---- ★ 环绕模式（作者 2026-10-03："t2 放三条小龙围绕着自己" ✓）----
+    /** 是不是"绕着主人转"（false = 老样子：直线冲出去 ✓）。 */
+    private boolean orbiting;
+    /** 环绕半径（格 ✓）/ 每 tick 转多少度 / 起始角 ✓（三条龙错开 120° ✓）。 */
+    private double orbitRadius = 5.0D;
+    private double orbitDegPerTick = 3.0D;
+    private double orbitAngle;
+    /** 环绕期间对同一个敌人的伤害冷却（tick ✓）—— 不然贴着的怪会被每 tick 割 ✗。 */
+    private final java.util.Map<Integer, Integer> orbitNextHit = new java.util.HashMap<>();
+    private static final int ORBIT_HIT_COOLDOWN = 10;
+
     public TNDragonEntity(EntityType<? extends TNDragonEntity> type, Level level) {
         super(type, level);
         this.setNoGravity(true);          // 和雷球一样：位置完全由我们每 tick 设定 ✓
@@ -125,6 +136,27 @@ public class TNDragonEntity extends Entity implements GeoEntity {
         this.chargeDamage = Math.max(1.0D, damage);
         this.configured = true;
         this.faceDir(d);
+    }
+
+    /**
+     * ★ <b>绕着主人转</b>（作者 2026-10-03："t2 放三条小龙围绕着自己" ✓）。
+     *
+     * <p>和 {@link #charge} 是同一个实体的两种活法 ✓：这个模式下它**不往前冲** ✗，
+     * 而是每 tick 按 {@code degPerTick} 绕主人转圈 ✓（半径 {@code radius} 格、开始于 {@code startAngle} 度 ✓），
+     * 转到 {@code ticks} 到点就爆开消失 ✓（天数正好和"光龙鳞甲"的 buff 一样长 ✓）。
+     * 三个一起放时起始角错开 120° ⇒ 正好围成一圈 ✓。
+     *
+     * @param damage 贴到敌人时的伤害 ✓（同一个敌人每 {@link #ORBIT_HIT_COOLDOWN} tick 才挨一下 ✗ 不然贴脸会被割死 ✗）
+     */
+    public void orbit(UUID owner, double radius, double degPerTick, int ticks, double damage, double startAngle) {
+        this.ownerId = owner;
+        this.orbiting = true;
+        this.orbitRadius = Math.max(1.0D, radius);
+        this.orbitDegPerTick = degPerTick;
+        this.orbitAngle = startAngle;
+        this.chargeTicks = Math.max(1, ticks);
+        this.chargeDamage = Math.max(0.0D, damage);
+        this.configured = true;
     }
 
     // ---- 投射物不做交互 ✓ ----
@@ -195,6 +227,10 @@ public class TNDragonEntity extends Entity implements GeoEntity {
             // /summon 出来的：沿当前朝向自己冲一段 ✓（不然它原地不动，看着像坏了 ✗）
             this.charge(this.getLookAngle(), DEFAULT_SPEED, DEFAULT_TICKS, DEFAULT_DAMAGE);
         }
+        if (this.orbiting) {
+            this.tickOrbit(level);
+            return;
+        }
         this.chargeTicks--;
         if (this.chargeTicks <= 0) {
             this.burst(level, 30, 1.2D);
@@ -241,6 +277,59 @@ public class TNDragonEntity extends Entity implements GeoEntity {
                         victim.getX(), victim.getY() + victim.getBbHeight() * 0.5D, victim.getZ(),
                         18, 0.5D, 0.6D, 0.5D, 0.08D);
             }
+        }
+    }
+
+    /**
+     * ★ 环绕模式的一 tick（作者 2026-10-03："t2 放三条小龙围绕着自己" ✓）：
+     * 绕主人转圈 ✓、贴到敌人就咬一口（每个敌人有冷却 ✗）✓、到点爆开走人 ✓。
+     *
+     * <p>主人没了（死了/换维度）⇒ 立刻爆开消失 ✓（不留一条孤儿龙在天上转 ✗）。
+     */
+    private void tickOrbit(ServerLevel level) {
+        LivingEntity owner = this.ownerId == null ? null : level.getPlayerByUUID(this.ownerId);
+        if (owner == null || !owner.isAlive()) {
+            this.burst(level, 24, 1.0D);
+            this.discard();
+            return;
+        }
+        if (--this.chargeTicks <= 0) {
+            this.burst(level, 30, 1.2D);
+            this.discard();
+            return;
+        }
+        this.orbitAngle += this.orbitDegPerTick;
+        double rad = Math.toRadians(this.orbitAngle);
+        double x = owner.getX() + Math.cos(rad) * this.orbitRadius;
+        double z = owner.getZ() + Math.sin(rad) * this.orbitRadius;
+        double y = owner.getY() + 1.2D;
+        this.setPos(x, y, z);
+        // 面朝切线方向 ✓（这样看着是在"绕圈飞"，而不是横着平移 ✓）
+        double tangent = rad + Math.PI / 2.0D;
+        this.faceDir(new Vec3(Math.cos(tangent), 0.0D, Math.sin(tangent)));
+        // 拖尾（比冲刺淡一点 ✓）
+        level.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD,
+                x, y, z, 2, 0.5D, 0.4D, 0.5D, 0.01D);
+        // 贴到敌人咬一口（同一个敌人 10 tick 才一下 ✓）
+        if (this.chargeDamage <= 0.0D) {
+            return;
+        }
+        for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, this.sweepBox())) {
+            if (!this.isValidLightTarget(victim)) {
+                continue;
+            }
+            int now = this.tickCount;
+            Integer next = this.orbitNextHit.get(victim.getId());
+            if (next != null && now < next) {
+                continue;
+            }
+            this.orbitNextHit.put(victim.getId(), now + ORBIT_HIT_COOLDOWN);
+            LivingEntity caster = owner;
+            victim.hurt(level.damageSources().indirectMagic(this, caster), (float) this.chargeDamage);
+            victim.hurtMarked = true;
+            level.sendParticles(net.minecraft.core.particles.ParticleTypes.FIREWORK,
+                    victim.getX(), victim.getY() + victim.getBbHeight() * 0.5D, victim.getZ(),
+                    10, 0.4D, 0.5D, 0.4D, 0.06D);
         }
     }
 
