@@ -97,15 +97,12 @@ public final class TravelMusicController {
 
         SoundManager sounds = minecraft.getSoundManager();
 
-        // ★ boss 战优先：附近有活着的黑暗衍 ⇒ 旅行音乐让位、改放 boss 曲 ✓（见 BOSS_MUSIC 的说明）
-        boolean bossMusic=tickBossMusic(minecraft, sounds);
-        boolean tavernMusic=com.tnc.tnc.tavern.client.TavernMusicController.tick(minecraft,bossMusic);
-        if (tavernMusic && currentTrack!=null) {
-            sounds.stop(currentTrack);currentTrack=null;currentAge=0;waitTicks=100;
+        // Indoors the inn owns the channel, including its initial ten seconds of silence.
+        if(com.tnc.tnc.tavern.client.TavernMusicController.tick(minecraft)){
+            if(currentTrack!=null)sounds.stop(currentTrack);currentTrack=null;currentAge=0;waitTicks=100;
+            if(bossTrack!=null)sounds.stop(bossTrack);bossTrack=null;bossAge=0;return;
         }
-        if (bossMusic || tavernMusic) {
-            return;
-        }
+        if(tickBossMusic(minecraft,sounds))return;
 
         if (currentTrack != null) {
             currentAge++;

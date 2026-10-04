@@ -5,6 +5,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TavernMusicTimingTest {
+    @Test void thirdSongCanBeSelectedAndNextSongDoesNotRepeatOrWaitAgain(){
+        var t=new TavernMusicTiming();for(int i=0;i<200;i++)t.tick(true,false,()->2);
+        assertEquals(2,t.selectedTrack());assertEquals(0,t.finished(()->0));assertEquals(1,t.finished(()->0));assertEquals(2,t.finished(()->1));assertEquals(200,t.ticks());assertEquals(2,t.tick(true,false,()->0));
+    }
+    @Test void inactiveOrDepartedVisitCannotAdvanceThePlaylist(){var t=new TavernMusicTiming();assertEquals(-1,t.finished(()->1));for(int i=0;i<200;i++)t.tick(true,false,()->2);t.tick(false,false,()->0);assertEquals(-1,t.finished(()->1));}
     @Test void waitsExactlyTenSecondsAndChoosesOnceForTheWholeVisit(){
         var timing=new TavernMusicTiming();var calls=new AtomicInteger();
         for(int i=1;i<200;i++)assertEquals(-1,timing.tick(true,false,()->{calls.incrementAndGet();return 1;}));

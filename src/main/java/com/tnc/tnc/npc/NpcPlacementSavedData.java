@@ -275,6 +275,7 @@ public class NpcPlacementSavedData extends net.minecraft.world.level.saveddata.S
         return changed;
     }
 
+    private static boolean tavernSelf(Placement p){var target=com.tnc.tnc.tavern.TavernUpgrade.SELF;return p.npcId().equals("self")&&p.anchor().equals("ORIGIN")&&p.dx()==target.getX()&&p.dy()==target.getY()&&p.dz()==target.getZ();}
     public boolean ensureOne(ServerLevel level, Placement placement) {
         // Island story actors join only after the terrain pass, in every new world.
         if(!ABSOLUTE.equals(placement.anchor())&&!com.tnc.tnc.world.SkyLandscapeUpgrade.complete(level.getServer()))return false;
@@ -322,7 +323,7 @@ public class NpcPlacementSavedData extends net.minecraft.world.level.saveddata.S
             var chunks=new java.util.ArrayList<net.minecraft.world.level.ChunkPos>();var center=new net.minecraft.world.level.ChunkPos(oldPos);
             for(int dx=-2;dx<=2;dx++)for(int dz=-2;dz<=2;dz++){var c=new net.minecraft.world.level.ChunkPos(center.x+dx,center.z+dz);chunks.add(c);level.getChunkSource().addRegionTicket(SELF_MOVE,c,2,c);}
             if(chunks.stream().anyMatch(c->!level.hasChunk(c.x,c.z)||!level.areEntitiesLoaded(c.toLong())))return false;
-            var original=findNear(level,type,oldPos,24);if(original!=null){original.moveTo(pos.getX()+0.5,pos.getY(),pos.getZ()+0.5,180,0);}
+            var original=findNear(level,type,oldPos,24);if(original!=null){float yaw=tavernSelf(placement)?com.tnc.tnc.tavern.TavernUpgrade.SELF_YAW:180;original.moveTo(pos.getX()+0.5,pos.getY(),pos.getZ()+0.5,yaw,0);if(original instanceof net.minecraft.world.entity.LivingEntity living){living.setYHeadRot(yaw);living.setYBodyRot(yaw);}}
             previousSelf=null;setDirty();for(var c:chunks)level.getChunkSource().removeRegionTicket(SELF_MOVE,c,2,c);
             if(original!=null){LOGGER.info("TN-C relocated original Self to tavern, retaining UUID {}",original.getUUID());return true;}
         }
@@ -335,8 +336,9 @@ public class NpcPlacementSavedData extends net.minecraft.world.level.saveddata.S
             LOGGER.error("TN-C npc: failed to create tnc:{}", placement.npcId());
             return false;
         }
-        entity.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D,
-                level.random.nextFloat() * 360.0F, 0.0F);
+        float yaw=tavernSelf(placement)?com.tnc.tnc.tavern.TavernUpgrade.SELF_YAW:level.random.nextFloat()*360.0F;
+        entity.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D,yaw,0.0F);
+        if(entity instanceof net.minecraft.world.entity.LivingEntity living){living.setYHeadRot(yaw);living.setYBodyRot(yaw);}
         boolean added = level.addFreshEntity(entity);
         // 回查一遍 —— 这是唯一可信的成功判据（理由见上）。
         boolean there = findNear(level, type, pos, 4.0D) != null;

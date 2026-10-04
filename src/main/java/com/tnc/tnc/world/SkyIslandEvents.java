@@ -57,6 +57,7 @@ public final class SkyIslandEvents {
             SkyIslandManager.tick(event.getServer());
             SkyLandscapeUpgrade.tick(event.getServer());
             com.tnc.tnc.tavern.TavernUpgrade.tick(event.getServer());
+            com.tnc.tnc.tavern.TavernBasementUpgrade.tick(event.getServer());
         }
     }
 
@@ -65,5 +66,6 @@ public final class SkyIslandEvents {
         SkyIslandManager.onServerStopping(event.getServer());
         SkyLandscapeUpgrade.stop(event.getServer());
         com.tnc.tnc.tavern.TavernUpgrade.stop(event.getServer());
+        com.tnc.tnc.tavern.TavernBasementUpgrade.stop(event.getServer());
     }
 }

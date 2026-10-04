@@ -34,6 +34,8 @@ public final class TavernClientAudit {
     private static TavernAtmosphere atmosphere;
     private static TavernRoomPacket region;
     private static float volume;
+    private static net.minecraft.client.resources.sounds.SoundInstance foreignMusic,foreignRecord;
+    private static long fullSongStart;
     @SubscribeEvent public static void tick(TickEvent.ClientTickEvent event)throws Exception {
         if(!Boolean.getBoolean("tnc.tavernClientAudit")||event.phase!=TickEvent.Phase.END)return;
         var mc=Minecraft.getInstance();org.lwjgl.glfw.GLFW.glfwHideWindow(mc.getWindow().getWindow());
@@ -42,7 +44,7 @@ public final class TavernClientAudit {
             atmosphere=TavernAtmosphere.load(mc.getSingleplayerServer());mc.options.guiScale().set(1);mc.options.pauseOnLostFocus=false;mc.resizeDisplay();
             volume=mc.options.getSoundSourceVolume(SoundSource.MUSIC);mc.options.getSoundSourceOptionInstance(SoundSource.MUSIC).set(.5);
             region=new TavernRoomPacket(mc.level.dimension().location(),List.of(mc.player.getBoundingBox().inflate(10)));
-            send(mc,region);mc.setScreen(new Gallery(false));evidence.add("49 patron definitions loaded; dedicated renderer registered");
+            send(mc,region);mc.setScreen(new Gallery(false));evidence.add("43 patron definitions loaded; entrance group cleared");
         }
         age++;
         if(TavernMusicController.entryTicks()>0&&TavernMusicController.entryTicks()<200&&TavernMusicController.active(mc))failures.add("Music started before 200 entry ticks");
@@ -67,21 +69,24 @@ public final class TavernClientAudit {
             evidence.add("Actual server mobInteract opened the dialogue over the registered channel");saved=false;frames=0;phase=3;mc.setScreen(new Gallery(true));return;
         }
         if(phase==3&&TavernMusicController.entryTicks()==200&&TavernMusicController.active(mc)) {
-            chosen=TavernMusicController.selectedTrack();evidence.add("Looping OGG sound active after 200 entry ticks; track="+chosen);phase=4;frames=0;
+            chosen=TavernMusicController.selectedTrack();evidence.add("Full OGG song active after 200 entry ticks; track="+chosen);
+            foreignMusic=foreign(SoundSource.MUSIC);foreignRecord=foreign(SoundSource.RECORDS);mc.getSoundManager().play(foreignMusic);mc.getSoundManager().play(foreignRecord);phase=4;frames=0;
         }
-        if(phase==4&&++frames==30){mc.options.getSoundSourceOptionInstance(SoundSource.MUSIC).set(0.0);phase=5;frames=0;}
+        if(phase==4&&++frames==30){if(mc.getSoundManager().isActive(foreignMusic)||mc.getSoundManager().isActive(foreignRecord)||!TavernMusicController.active(mc))failures.add("Foreign background music was not blocked inside the inn");else evidence.add("Foreign MUSIC and RECORDS requests blocked while own song continued");mc.options.getSoundSourceOptionInstance(SoundSource.MUSIC).set(0.0);phase=5;frames=0;}
         if(phase==5&&++frames==15){if(TavernMusicController.active(mc))failures.add("Music was not stopped on mute");mc.options.getSoundSourceOptionInstance(SoundSource.MUSIC).set(.5);phase=6;frames=0;}
         if(phase==6&&++frames==45){if(!TavernMusicController.active(mc)||TavernMusicController.selectedTrack()!=chosen)failures.add("Mute/resume changed the visit track or failed");evidence.add("Mute/resume retained selected track");send(mc,new TavernRoomPacket(region.dimension(),List.of()));phase=7;frames=0;}
         if(phase==7&&++frames==15){if(TavernMusicController.active(mc)||TavernMusicController.entryTicks()!=0)failures.add("Leaving the room did not stop and reset music");evidence.add("Room exit stopped the sound and reset timer");send(mc,region);phase=8;frames=0;}
-        if(phase==8&&++frames>205&&TavernMusicController.active(mc)){evidence.add("Reentry waited and began a new looping visit");finish(mc);}
-        if(age>850){failures.add("Audit timeout at phase "+phase+", entry ticks="+TavernMusicController.entryTicks());finish(mc);}
+        if(phase==8&&++frames>205&&TavernMusicController.active(mc)){evidence.add("Reentry waited and began a new playlist visit");chosen=TavernMusicController.selectedTrack();fullSongStart=System.nanoTime();phase=9;frames=0;}
+        if(phase==9){double elapsed=(System.nanoTime()-fullSongStart)/1_000_000_000.0;if(TavernMusicController.selectedTrack()!=chosen&&TavernMusicController.active(mc)){if(elapsed<170)failures.add("Song advanced before its full natural duration");else evidence.add("Natural end after "+elapsed+" seconds advanced to a different song without a new ten-second wait");finish(mc);}}
+        if(age>6500){failures.add("Audit timeout at phase "+phase+", entry ticks="+TavernMusicController.entryTicks());finish(mc);}
     }
     private static void send(Minecraft mc,TavernRoomPacket packet){mc.getSingleplayerServer().execute(()->com.tnc.tnc.network.MagicStoneNetwork.CHANNEL.send(net.minecraftforge.network.PacketDistributor.PLAYER.with(()->mc.getSingleplayerServer().getPlayerList().getPlayers().get(0)),packet));}
+    private static net.minecraft.client.resources.sounds.SoundInstance foreign(SoundSource source){return new net.minecraft.client.resources.sounds.SimpleSoundInstance(ResourceLocation.fromNamespaceAndPath("minecraft","music.game"),source,1,1,net.minecraft.util.RandomSource.create(),false,0,net.minecraft.client.resources.sounds.SoundInstance.Attenuation.NONE,0,0,0,true);}
     private static void capture(Minecraft mc,String name){saving=true;Screenshot.grab(mc.gameDirectory,name,mc.getMainRenderTarget(),message->{System.out.println("TAVERN AUDIT: "+message.getString());saved=true;saving=false;});}
     private static void finish(Minecraft mc)throws Exception {
         mc.options.getSoundSourceOptionInstance(SoundSource.MUSIC).set((double)volume);
-        var report=Map.of("guest_definitions",49,"screenshots",3,"evidence",evidence,"failures",failures,"scope","Actual Conquest furniture and custom seated models in a development gallery; real dialogue packet and OpenAL music lifecycle; not a full-pack tour");
-        Files.writeString(Path.of("../work/tavern-client-audit.json"),new GsonBuilder().setPrettyPrinting().create().toJson(report));System.out.println("TAVERN AUDIT "+(failures.isEmpty()?"PASS":"FAIL")+": "+report);mc.stop();
+        var report=Map.of("guest_definitions",43,"music_tracks",3,"screenshots",3,"evidence",evidence,"failures",failures,"scope","Actual Conquest furniture, real dialogue, exclusive OpenAL music and a full naturally completed song; not a full-pack tour");
+        Files.writeString(Path.of("../work/tavern-revision-20261005/client-audit.json"),new GsonBuilder().setPrettyPrinting().create().toJson(report));System.out.println("TAVERN AUDIT "+(failures.isEmpty()?"PASS":"FAIL")+": "+report);mc.stop();
     }
     private static final class Gallery extends Screen {
         private final boolean clothes;
@@ -103,7 +108,7 @@ public final class TavernClientAudit {
                 minecraft.getEntityRenderDispatcher().render(guests.get(i),.5,heights[c],.5,0,partial,pose,buffer,15728880);buffer.endBatch();pose.popPose();Lighting.setupForFlatItems();
                 g.drawString(font,clothes?guests.get(i).getCustomName().getString():chairs[c],x-70,y+74,0xDECDAA,false);
             }
-            g.drawString(font,"仅开发验收画面 / 正式酒馆按楼层和桌组安排49位常客",24,height-24,0xADB8B5,false);
+            g.drawString(font,"仅开发验收画面 / 正式酒馆按楼层和桌组安排43位常客 / 入口坐垫留空",24,height-24,0xADB8B5,false);
         }
         private static <T extends Comparable<T>> net.minecraft.world.level.block.state.BlockState setSouth(net.minecraft.world.level.block.state.BlockState state,net.minecraft.world.level.block.state.properties.Property<T> property){return state.setValue(property,property.getValue("south").orElseThrow());}
     }

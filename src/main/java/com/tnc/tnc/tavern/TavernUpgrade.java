@@ -22,7 +22,8 @@ import java.util.*;
 /** Independently versioned, bounded tavern migration. Never resets/rebuilds the island. */
 public final class TavernUpgrade {
     public static final BlockPos MIN=new BlockPos(416,89,270),MAX=new BlockPos(486,131,327);
-    public static final BlockPos SELF=new BlockPos(430,90,294),BOARD=new BlockPos(432,91,285);
+    public static final BlockPos SELF=new BlockPos(465,90,292),BOARD=new BlockPos(432,91,285);
+    public static final float SELF_YAW=90;
     private static final BlockPos OLD_BOARD=new BlockPos(426,94,285);
     private static final ResourceLocation RESOURCE=ResourceLocation.fromNamespaceAndPath("tnc","tavern/interior_v1.nbt");
     private static final TicketType<ChunkPos> TICKET=TicketType.create("tnc_tavern",Comparator.comparingLong(ChunkPos::toLong),40);
@@ -105,7 +106,7 @@ public final class TavernUpgrade {
         var data=NpcPlacementSavedData.get(l);data.put(new NpcPlacementSavedData.Placement("self","ORIGIN",SELF.getX(),SELF.getY(),SELF.getZ()));
         var target=state.origin.offset(SELF);
         for(var self:l.getEntitiesOfClass(SelfNpcEntity.class,new AABB(state.origin.offset(MIN),state.origin.offset(MAX).offset(1,1,1)))) {
-            self.moveTo(target.getX()+.5,target.getY(),target.getZ()+.5,180,0);self.setYHeadRot(180);self.setYBodyRot(180);
+            self.moveTo(target.getX()+.5,target.getY(),target.getZ()+.5,SELF_YAW,0);self.setYHeadRot(SELF_YAW);self.setYBodyRot(SELF_YAW);
         }
         com.tnc.tnc.adventure.TownServices.prepareDecoratedTavern(l.getServer(),!state.legacyBoard.isEmpty());
         l.getChunkSource().save(true);state.phase=2;state.cursor=0;state.setDirty();release(l);
@@ -161,6 +162,8 @@ public final class TavernUpgrade {
     }
     public static int ensureGuests(ServerLevel l,BlockPos origin,TavernAtmosphere atmosphere) {
         int spawned=0;
+        var retained=atmosphere.seats().stream().map(TavernAtmosphere.Seat::id).collect(java.util.stream.Collectors.toSet());
+        for(var guest:l.getEntitiesOfClass(TavernGuestEntity.class,new AABB(origin.offset(MIN),origin.offset(MAX).offset(1,1,1))))if(!retained.contains(guest.seatId()))guest.discard();
         for(var seat:atmosphere.seats()) {
             var p=origin.offset(seat.local());var chunk=new ChunkPos(p);
             if(!l.hasChunkAt(p)||!l.areEntitiesLoaded(chunk.toLong())||!l.isPositionEntityTicking(p))continue;

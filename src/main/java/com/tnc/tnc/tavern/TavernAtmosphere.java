@@ -30,16 +30,19 @@ public record TavernAtmosphere(List<Seat> seats,List<AABB> rooms,int totalSeats)
             if(lines.isEmpty()||lines.size()>2)throw new IllegalArgumentException("酒馆台词应为一至两句");
             seats.add(new Seat(t.get("id").getAsString(),pos,t.get("block").getAsString(),t.get("height").getAsDouble(),t.get("yaw").getAsFloat(),t.get("persona").getAsInt(),t.get("name").getAsString(),List.copyOf(lines)));
         }
-        int total=root.get("total_seats").getAsInt();
-        if(total<=0||seats.size()<total*.60||seats.size()>total*.70)throw new IllegalArgumentException("酒馆坐席比例应为60%—70%");
+        int total=root.get("total_seats").getAsInt();var empty=new HashSet<BlockPos>();
+        if(root.has("empty_seats"))for(var raw:root.getAsJsonArray("empty_seats")){var p=raw.getAsJsonArray();var pos=new BlockPos(p.get(0).getAsInt(),p.get(1).getAsInt(),p.get(2).getAsInt());if(!TavernUpgrade.inside(pos)||!empty.add(pos)||positions.contains(pos))throw new IllegalArgumentException("指定空座越界、重复或仍有客人");}
+        int available=total-empty.size();
+        if(available<=0||seats.size()<available*.60||seats.size()>available*.70)throw new IllegalArgumentException("除指定空座外的酒馆坐席比例应为60%—70%");
         var rooms=new ArrayList<AABB>();
         for(var raw:root.getAsJsonArray("rooms")) {
             var a=raw.getAsJsonArray();if(a.size()!=6)throw new IllegalArgumentException("无效的酒馆室内范围");
             var box=new AABB(a.get(0).getAsDouble(),a.get(1).getAsDouble(),a.get(2).getAsDouble(),a.get(3).getAsDouble(),a.get(4).getAsDouble(),a.get(5).getAsDouble());
-            if(box.getSize()<=0||!TavernUpgrade.inside(BlockPos.containing(box.minX,box.minY,box.minZ))||!TavernUpgrade.inside(BlockPos.containing(box.maxX,box.maxY,box.maxZ)))throw new IllegalArgumentException("酒馆音乐范围越界");
+            if(box.getSize()<=0||!insideRoom(BlockPos.containing(box.minX,box.minY,box.minZ))||!insideRoom(BlockPos.containing(box.maxX,box.maxY,box.maxZ)))throw new IllegalArgumentException("酒馆音乐范围越界");
             rooms.add(box);
         }
         if(rooms.isEmpty()||rooms.size()>8)throw new IllegalArgumentException("酒馆音乐范围数量无效");
         return new TavernAtmosphere(List.copyOf(seats),List.copyOf(rooms),total);
     }
+    private static boolean insideRoom(BlockPos p){return TavernUpgrade.inside(p)||(p.getX()>=425&&p.getX()<=441&&p.getY()>=80&&p.getY()<=90&&p.getZ()>=287&&p.getZ()<=299);}
 }

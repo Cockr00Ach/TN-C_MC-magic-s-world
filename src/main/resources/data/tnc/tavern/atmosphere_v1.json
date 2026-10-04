@@ -4,122 +4,6 @@
   "guests": [
     {
       "local": [
-        427,
-        90,
-        289
-      ],
-      "block": "conquest:red_cushion",
-      "properties": {
-        "facing": "south",
-        "offset_toggle": "false",
-        "toggle": "1"
-      },
-      "id": "guest_01",
-      "name": "禾叔",
-      "lines": [
-        "晨露收进瓶里比卖菜值钱，可别把菜园全改成露架。"
-      ],
-      "persona": 0,
-      "height": 0.1875,
-      "yaw": 0
-    },
-    {
-      "local": [
-        428,
-        90,
-        288
-      ],
-      "block": "conquest:small_red_cushion_stool",
-      "properties": {
-        "offset_toggle": "false"
-      },
-      "id": "guest_02",
-      "name": "阿芙",
-      "lines": [
-        "我把第一笔委托钱换成了餐桌。屋里有了饭香，才像自己的家。"
-      ],
-      "persona": 1,
-      "height": 0.375,
-      "yaw": 90
-    },
-    {
-      "local": [
-        429,
-        90,
-        288
-      ],
-      "block": "conquest:small_red_cushion_stool",
-      "properties": {
-        "offset_toggle": "false"
-      },
-      "id": "guest_03",
-      "name": "罗恩",
-      "lines": [
-        "矿井里的脚步声会骗人。听到第三声，先停一下。"
-      ],
-      "persona": 2,
-      "height": 0.375,
-      "yaw": 180
-    },
-    {
-      "local": [
-        430,
-        90,
-        288
-      ],
-      "block": "conquest:small_red_cushion_stool",
-      "properties": {
-        "offset_toggle": "false"
-      },
-      "id": "guest_04",
-      "name": "米莎",
-      "lines": [
-        "酒馆的胡椒炖肉暖得很。明天的远行，今晚先吃饱。"
-      ],
-      "persona": 3,
-      "height": 0.375,
-      "yaw": 270
-    },
-    {
-      "local": [
-        430,
-        90,
-        289
-      ],
-      "block": "conquest:small_red_cushion_stool",
-      "properties": {
-        "offset_toggle": "false"
-      },
-      "id": "guest_05",
-      "name": "塔洛",
-      "lines": [
-        "我的羊又把铃声藏起来了。回牧场得先给它添草。"
-      ],
-      "persona": 4,
-      "height": 0.375,
-      "yaw": 0
-    },
-    {
-      "local": [
-        431,
-        90,
-        289
-      ],
-      "block": "conquest:small_red_cushion_stool",
-      "properties": {
-        "offset_toggle": "false"
-      },
-      "id": "guest_06",
-      "name": "芦青",
-      "lines": [
-        "种子袋里留一份，剩下的再卖。这个习惯救过我的菜园。"
-      ],
-      "persona": 5,
-      "height": 0.375,
-      "yaw": 90
-    },
-    {
-      "local": [
         453,
         90,
         284
@@ -1063,7 +947,7 @@
       452.0,
       89.5,
       281.0,
-      463.0,
+      466.8,
       100.0,
       306.0
     ],
@@ -1090,6 +974,74 @@
       453.0,
       107.0,
       300.5
+    ],
+    [
+      425.5,
+      80.5,
+      287.5,
+      435.5,
+      84.5,
+      298.5
+    ],
+    [
+      432,
+      81,
+      294.5,
+      440.5,
+      90.5,
+      298.5
+    ]
+  ],
+  "empty_seats": [
+    [
+      428,
+      90,
+      288
+    ],
+    [
+      429,
+      90,
+      288
+    ],
+    [
+      430,
+      90,
+      288
+    ],
+    [
+      430,
+      90,
+      289
+    ],
+    [
+      431,
+      90,
+      289
+    ],
+    [
+      431,
+      90,
+      290
+    ],
+    [
+      427,
+      90,
+      289
+    ],
+    [
+      427,
+      90,
+      290
+    ],
+    [
+      429,
+      90,
+      291
+    ],
+    [
+      430,
+      90,
+      291
     ]
   ]
 }

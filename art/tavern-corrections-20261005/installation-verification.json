@@ -1,0 +1,78 @@
+{
+  "sha256": "EBF239250624E338F67CFB033492DCDD896A3D2FE6DEA3D63A00CCB1817D4E66",
+  "worlds": [
+    {
+      "world": "Elden Lands",
+      "status": "automatic migration on load"
+    },
+    {
+      "world": "Gothic Cathedral by silversurfer671",
+      "status": "automatic migration on load"
+    },
+    {
+      "world": "RouchNao-内饰试玩-第一版-20261003",
+      "status": "verified installed",
+      "staff": [
+        {
+          "type": "tnc:self",
+          "position": [
+            979.5,
+            180.0,
+            0.5
+          ],
+          "yaw": 90.0
+        }
+      ]
+    },
+    {
+      "world": "新的世界",
+      "status": "verified installed",
+      "staff": [
+        {
+          "type": "tnc:town_service",
+          "position": [
+            -447.5,
+            180.0,
+            650.5
+          ],
+          "yaw": 0.0
+        },
+        {
+          "type": "tnc:self",
+          "position": [
+            -418.5,
+            180.0,
+            656.5
+          ],
+          "yaw": 90.0
+        }
+      ]
+    },
+    {
+      "world": "新的世界 (1)",
+      "status": "verified installed",
+      "staff": [
+        {
+          "type": "tnc:town_service",
+          "position": [
+            816.5,
+            180.0,
+            666.5
+          ],
+          "yaw": 0.0
+        },
+        {
+          "type": "tnc:self",
+          "position": [
+            845.5,
+            180.0,
+            672.5
+          ],
+          "yaw": 90.0
+        }
+      ]
+    }
+  ],
+  "package_backup": "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\work\\backups\\tavern-package-20261005-032101",
+  "world_backup": "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\work\\backups\\tavern-corrections-20261005-032150"
+}

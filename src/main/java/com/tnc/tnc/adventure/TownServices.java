@@ -25,7 +25,7 @@ public final class TownServices {
     }
     public record Post(String role,String name,BlockPos local,VillagerProfession profession,Room room,float yaw){}
     public static final java.util.List<Post> POSTS=java.util.List.of(
-        new Post("guild","协会接待员 · 艾琳",new BlockPos(434,90,285),VillagerProfession.LIBRARIAN,new Room(434,90,285,435,285),0),
+        new Post("guild","协会接待员 · 艾琳",new BlockPos(436,90,286),VillagerProfession.LIBRARIAN,new Room(436,90,286,436,286),0),
         new Post("smith","潮生制杖屋 · 莉娅",new BlockPos(320,87,270),VillagerProfession.LIBRARIAN,new Room(320,87,269,321,272),0),
         new Post("armorer","炉石铁匠铺 · 铎恩",new BlockPos(201,101,259),VillagerProfession.ARMORER,new Room(199,101,256,203,261),45),
         new Post("broker","归航银行 · 米洛",new BlockPos(228,94,234),VillagerProfession.CARTOGRAPHER,new Room(227,94,233,231,235),0),

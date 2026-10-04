@@ -1,0 +1,27 @@
+[
+  {
+    "world": "RouchNao-内饰试玩-第一版-20261003",
+    "verified_block_positions": 0,
+    "changed_blocks": 0,
+    "removed_guests": []
+  },
+  {
+    "world": "新的世界",
+    "verified_block_positions": 294912,
+    "changed_blocks": 573,
+    "removed_guests": []
+  },
+  {
+    "world": "新的世界 (1)",
+    "verified_block_positions": 294912,
+    "changed_blocks": 565,
+    "removed_guests": [
+      "guest_01",
+      "guest_02",
+      "guest_03",
+      "guest_04",
+      "guest_05",
+      "guest_06"
+    ]
+  }
+]

@@ -1,0 +1,11 @@
+{
+  "absorption": 4.0,
+  "screenshots": [
+    "hud-a-c-full.png",
+    "hud-a-c-partial.png"
+  ],
+  "gui_scale": 2,
+  "food": 14,
+  "maximum": 40.0,
+  "health": 24.0
+}

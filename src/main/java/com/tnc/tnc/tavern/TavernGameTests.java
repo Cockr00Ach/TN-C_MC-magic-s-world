@@ -50,9 +50,30 @@ public final class TavernGameTests {
     }
     @GameTest(template="building_test_empty",timeoutTicks=60)
     public static void realSeatCatalogHasUniqueShortDialoguesAndIndoorRooms(GameTestHelper h)throws Exception {
-        var a=TavernAtmosphere.load(h.getLevel().getServer());h.assertTrue(a.seats().size()==49&&a.totalSeats()==75,"Wrong patron occupancy");
+        var a=TavernAtmosphere.load(h.getLevel().getServer());h.assertTrue(a.seats().size()==43&&a.totalSeats()==75,"Wrong patron occupancy after clearing the entrance group");
+        h.assertTrue(a.seats().stream().noneMatch(s->s.local().getY()==90&&s.block().contains("red_cushion")),"Entrance cushions must all be empty");
         for(var seat:a.seats())h.assertTrue(com.tnc.tnc.dialogue.DialogueLoader.get(h.getLevel().getServer().getResourceManager(),ResourceLocation.fromNamespaceAndPath("tnc","tavern/"+seat.id())).isPresent(),"Missing patron dialogue: "+seat.id());
-        h.assertTrue(a.rooms().stream().anyMatch(b->b.contains(430.5,90,294.5)),"Bartender must be inside music region");h.assertTrue(a.rooms().stream().noneMatch(b->b.contains(418,90,291)),"Approach road must not start tavern music");h.succeed();
+        h.assertTrue(a.rooms().stream().anyMatch(b->b.contains(465.5,90,292.5)),"Bartender's back walkway must be inside music region");h.assertTrue(a.rooms().stream().anyMatch(b->b.contains(429.5,81,293.5)),"Cellar must remain inside music region");h.assertTrue(a.rooms().stream().noneMatch(b->b.contains(418,90,291)),"Approach road must not start tavern music");h.succeed();
+    }
+    @GameTest(template="building_test_empty",timeoutTicks=60)
+    public static void cellarAcceptsGeneratedSoilButRejectsPlayerWalls(GameTestHelper h)throws Exception {
+        var l=h.getLevel();var p=h.absolutePos(new BlockPos(1,2,1));var change=new TavernUpgrade.Change(BlockPos.ZERO,Blocks.STONE.defaultBlockState(),Blocks.AIR.defaultBlockState(),null);
+        l.setBlock(p,Blocks.GRASS_BLOCK.defaultBlockState(),18);TavernBasementUpgrade.validate(l,p,List.of(change));TavernUpgrade.place(l,p,change);h.assertTrue(l.getBlockState(p).isAir(),"Grass covering the cellar opening must be removed");
+        l.setBlock(p,Blocks.GOLD_BLOCK.defaultBlockState(),18);boolean refused=false;try{TavernBasementUpgrade.validate(l,p,List.of(change));}catch(java.io.IOException expected){refused=true;}h.assertTrue(refused,"Cellar correction must preserve player construction");h.succeed();
+    }
+    @GameTest(template="building_test_empty",timeoutTicks=60)
+    public static void cellarCorrectionAlignsExistingWorkersAndRetainsIdentity(GameTestHelper h) {
+        var l=h.getLevel();var origin=h.absolutePos(new BlockPos(2,2,2)).subtract(new BlockPos(430,90,294));
+        var self=TNNpcs.SELF.get().create(l);var old=origin.offset(430,90,294);self.moveTo(old.getX()+.5,old.getY(),old.getZ()+.5,180,0);l.addFreshEntity(self);
+        var guild=TNNpcs.SERVICE_NPC.get().create(l);guild.role("guild");guild.moveTo(old.getX()+2.5,old.getY(),old.getZ()+.5,90,0);l.addFreshEntity(guild);var selfId=self.getUUID();var guildId=guild.getUUID();
+        TavernBasementUpgrade.alignWorkers(l,origin);h.assertTrue(self.getUUID().equals(selfId)&&self.blockPosition().equals(origin.offset(465,90,292))&&self.getYRot()==90,"Self must retain UUID behind the bar facing west");
+        h.assertTrue(guild.getUUID().equals(guildId)&&guild.blockPosition().equals(origin.offset(436,90,286))&&guild.getYRot()==0,"Eileen must retain UUID behind the lectern facing south");self.discard();guild.discard();h.succeed();
+    }
+    @GameTest(template="building_test_empty",timeoutTicks=60)
+    public static void removedEntranceGuestsDisappearWithoutRemovingTheSeats(GameTestHelper h)throws Exception {
+        var l=h.getLevel();var pos=h.absolutePos(new BlockPos(2,2,2));var origin=pos.subtract(new BlockPos(427,90,289));l.setBlock(pos,Blocks.OAK_PLANKS.defaultBlockState(),18);
+        var guest=TNNpcs.TAVERN_GUEST.get().create(l);guest.configure(new TavernAtmosphere.Seat("guest_01",new BlockPos(427,90,289),"minecraft:oak_planks",.2,0,0,"入口客人",List.of("短句")),origin);l.addFreshEntity(guest);
+        TavernUpgrade.ensureGuests(l,origin,TavernAtmosphere.load(l.getServer()));h.assertTrue(guest.isRemoved()&&l.getBlockState(pos).is(Blocks.OAK_PLANKS),"Remove the retired guest and preserve furniture");h.succeed();
     }
     @GameTest(template="building_test_empty",timeoutTicks=100)
     public static void guestCreationWaitsForEntitiesAndDoesNotDuplicate(GameTestHelper h) {

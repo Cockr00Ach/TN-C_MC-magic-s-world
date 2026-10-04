@@ -78,7 +78,8 @@ public final class TownRevisionGameTests {
         var tag=new CompoundTag();tag.putInt("DefaultsVersion",7);var list=new net.minecraft.nbt.ListTag();
         for(String id:new String[]{"self","cava"}){var t=new CompoundTag();t.putString("Id",id);t.putString("Anchor","ABSOLUTE");t.putInt("DX",55);t.putInt("DY",100);t.putInt("DZ",66);list.add(t);}tag.put("Npcs",list);
         var data=com.tnc.tnc.npc.NpcPlacementSavedData.load(tag);data.seedDefaults();var saved=data.save(new CompoundTag());
-        h.assertTrue(data.get("self").anchor().equals("ORIGIN")&&data.get("self").dx()==430&&data.get("cava").dx()==55&&saved.getCompound("PreviousSelf").getInt("DX")==55,"Self migrates to tavern and records old entity lookup location, keeping other manual v7 placements");
+        var self=data.get("self");var target=com.tnc.tnc.tavern.TavernUpgrade.SELF;
+        h.assertTrue(self.anchor().equals("ORIGIN")&&self.dx()==target.getX()&&self.dy()==target.getY()&&self.dz()==target.getZ()&&data.get("cava").dx()==55&&saved.getCompound("PreviousSelf").getInt("DX")==55,"Self migrates to tavern and records old entity lookup location, keeping other manual v7 placements");
         var loaded=com.tnc.tnc.npc.NpcPlacementSavedData.load(saved);loaded.seedDefaults();h.assertTrue(loaded.save(new CompoundTag()).getCompound("PreviousSelf").getInt("DX")==55,"Pending original entity lookup survives restart without being overwritten");h.succeed();
     }
     @GameTest(template="building_test_empty",batch="self_move",timeoutTicks=200)
