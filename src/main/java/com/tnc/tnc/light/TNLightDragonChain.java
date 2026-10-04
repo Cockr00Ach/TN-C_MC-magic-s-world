@@ -25,12 +25,15 @@ import net.minecraft.world.phys.Vec3;
  * <h2>五档（作者没给数值，这张表是我定的 ✓，要改就改这一张表）</h2>
  * <table border="1">
  *   <tr><th>档</th><th>法术</th><th>做什么</th></tr>
- *   <tr><td>t1</td><td>光龙吐息</td><td>向前喷一道**粗金白光柱**（复用光线链的实体光柱 ✓ 会自己索敌 ✓）</td></tr>
+ *   <tr><td>t1</td><td>光龙吐息</td><td>龙吼 + 前冲的一道火光（**不再借用光线链的光柱** ✓，见作者 2026-10-03 的删除要求）</td></tr>
  *   <tr><td>t2</td><td>光龙鳞甲</td><td>自己 + 10 格内队友：减伤 50% + 速度 +20% + 光伤 +30%，20 秒</td></tr>
- *   <tr><td>t3</td><td>光龙出击</td><td>放出 **1 条**（0.30 倍 ≈ 7 格长）向前冲 ≈ 45 格，撞到 24 伤</td></tr>
- *   <tr><td>t4</td><td>光龙俯冲</td><td>**2 条**（0.40 倍 · 左右各偏 7°）向前冲 ≈ 60 格，撞到 34 伤 + 天上落一道小圣光</td></tr>
- *   <tr><td>t5</td><td>光龙降世</td><td>**3 条**（0.45 倍 · 扇形 −16/0/+16°）向前冲 ≈ 75 格，撞到 44 伤 + 大号圣光天降</td></tr>
+ *   <tr><td>t3</td><td>光龙出击</td><td>放出 **1 条**（×5 ≈ 34 格长）向前冲 ≈ 45 格，撞到 24 伤</td></tr>
+ *   <tr><td>t4</td><td>光龙俯冲</td><td>**2 条**（×10 · 左右各偏 7°）向前冲 ≈ 60 格，撞到 34 伤</td></tr>
+ *   <tr><td>t5</td><td>光龙降世</td><td>**3 条**（×20 · 扇形 −16/0/+16°）向前冲 ≈ 75 格，撞到 44 伤</td></tr>
  * </table>
+ *
+ * <p>★ t3/t4/t5 **只有龙** ✓ —— 原来 t4/t5 放完龙还会砸一道「圣光天降」（光线链的 t4 ✗），
+ * 作者 2026-10-03："我只要龙冲出去好不好，你把其他的都给我删了" ⇒ 已删 ✓。
  *
  * <p>放出来的位置：施法者**正前方** {@link #SPAWN_DISTANCE} 格、朝准星方向 ✓
  * （贴着放会把自己穿进去 ✗）；穿过掩体/墙会直接爆开 ✓（见 {@code TNDragonEntity.aiStep} ✓）。
@@ -53,13 +56,13 @@ public final class TNLightDragonChain {
     private static final Dragon[] DRAGONS = {
             new Dragon("light_dragon_breath", 1, 0, 0.0D, 0.0D, 0.0D, 0, 0.0D, "光龙吐息"),
             new Dragon("light_dragon_scales", 2, 0, 0.0D, 0.0D, 0.0D, 0, 0.0D, "光龙鳞甲"),
-            // ★ 个头是作者 2026-10-02 定的倍率：t3 = 1 倍 / t4 = 3 倍 / t5 = 10 倍 ✓
-            //   （以 t3 的 0.30 为 1 倍 ⇒ 0.30 / 0.90 / 3.00 ✓）
-            //   模型原长 23 格 ⇒ 三条龙分别是 **≈7 / ≈21 / ≈69 格长** ✗（t5 就是这么夸张 ✓）
+            // ★ 个头倍率（作者 2026-10-03："t3的龙放大五倍，t4的放大十倍，t5 20倍" ✓）：
+            //   以基准 0.30 为 1 倍 ⇒ t3 = 0.30×5 = **1.50** / t4 = ×10 = **3.00** / t5 = ×20 = **6.00** ✓
+            //   模型原长 23 格 ⇒ 三条龙分别约 **34 / 69 / 138 格长** ✗（t5 已经两个多区块长了 ✓）
             //   预览图 docs/previews/dragon_scale.png 里带了一个玩家大小的参照方块 ✓
-            new Dragon("summon_light_dragon", 3, 1, 0.30D, 24.0D, 1.45D, 62, 0.0D, "光龙出击"),
-            new Dragon("light_dragon_dive", 4, 2, 0.90D, 34.0D, 1.65D, 74, 7.0D, "光龙俯冲"),
-            new Dragon("light_dragon_descend", 5, 3, 3.00D, 44.0D, 1.85D, 84, 16.0D, "光龙降世"),
+            new Dragon("summon_light_dragon", 3, 1, 1.50D, 24.0D, 1.45D, 62, 0.0D, "光龙出击"),
+            new Dragon("light_dragon_dive", 4, 2, 3.00D, 34.0D, 1.65D, 74, 7.0D, "光龙俯冲"),
+            new Dragon("light_dragon_descend", 5, 3, 6.00D, 44.0D, 1.85D, 84, 16.0D, "光龙降世"),
     };
 
     /** 龙放主人前方多远（格 ✓）—— 它 23 格长，贴着放会把自己穿进主人身上 ✗。 */
@@ -67,8 +70,6 @@ public final class TNLightDragonChain {
     /** t2 鳞甲持续多久 / 影响半径（格 ✓）。 */
     private static final int SCALES_TICKS = 400;
     private static final double SCALES_RADIUS = 10.0D;
-    /** t1 吐息：用光线链的「大光线」放大到多粗（1.0 = 原尺寸 ✓）。 */
-    private static final double BREATH_SIZE_SCALE = 1.8D;
 
     private static final org.apache.logging.log4j.Logger LOGGER =
             org.apache.logging.log4j.LogManager.getLogger("TN-C/light");
@@ -103,12 +104,11 @@ public final class TNLightDragonChain {
     }
 
     /**
-     * t1 光龙吐息：从施法者眼睛向前一道**粗金白光柱** ✓ ——
-     * 直接复用光线链的实体光柱（{@link TNLightBeamMechanics#onSpellCast} ✓ 会自己索敌 ✓），
-     * 只把尺寸放大 ✓（"龙吐出来的比人射的粗"✓）。
+     * t1 光龙吐息：**只留"龙吼 + 前冲的一道火光"** ✓ ——
+     * 作者 2026-10-03："怎么光龙的魔法还会有光线的 t4 呢，我只要龙冲出去好不好，你把其他的都给我删了" ✗
+     * ⇒ 原来这里直接调了光线链的「大光线」✗（那是别的链的东西 ✗），现在删掉 ✓。
      */
     private static void breath(LivingEntity caster, Dragon dragon) {
-        TNLightBeamMechanics.onSpellCast(caster, "great_light_beam", 1.0D, BREATH_SIZE_SCALE);
         if (caster.level() instanceof ServerLevel level) {
             Vec3 eye = caster.getEyePosition();
             Vec3 look = caster.getLookAngle();
@@ -123,7 +123,7 @@ public final class TNLightDragonChain {
         }
         if (caster instanceof ServerPlayer player) {
             player.displayClientMessage(Component.literal(
-                    "§e[TN-C] §r光龙吐息 §7（一道粗光柱，会自己索敌）"), true);
+                    "§e[TN-C] §r光龙吐息 §7（一道火光，不再借用光线链）"), true);
         }
     }
 
@@ -164,11 +164,15 @@ public final class TNLightDragonChain {
 
     /**
      * t3 / t4 / t5：**放龙** ✓ —— 在施法者正前方生成，每一条朝准星方向（多条按
-     * {@link Dragon#fanDeg} 扇形散开 ✓）直线冲出去 ✓，t4/t5 再补一道圣光 ✓。
+     * {@link Dragon#fanDeg} 扇形散开 ✓）直线冲出去 ✓。
+     *
+     * <p>★ 作者 2026-10-03："我只要龙冲出去好不好，你把其他的都给我删了" ✗
+     * ⇒ 原来 t4/t5 放完龙**还额外砸一道「圣光天降」（光线链的 t4）**✗ —— 已删除 ✓，
+     * 现在这几档**只有龙** ✓。
      */
     private static void release(ServerLevel level, LivingEntity caster, Dragon dragon) {
         Vec3 look = caster.getLookAngle();
-        // ★ 这么大的龙不能贴脸放 ✗ —— 出生点随**体长**往后挪 ✓（t5 是 69 格长 ⇒ 放在 25 格外 ✓）
+        // ★ 这么大的龙不能贴脸放 ✗ —— 出生点随**体长**往后挪 ✓（t5 是 138 格长 ⇒ 放在 40 格外 ✓）
         double length = TNDragonEntity.MODEL_LENGTH_BLOCKS * dragon.scale();
         double distance = SPAWN_DISTANCE + length * 0.25D;
         Vec3 start = caster.position().add(look.scale(distance));
@@ -178,16 +182,11 @@ public final class TNLightDragonChain {
             // 扇形：i = 0 时居中；多条时左右分（t4 两条 ⇒ ∓7°，t5 三条 ⇒ -16/0/+16 ✓）
             double offset = (i - (dragon.count() - 1) / 2.0D) * dragon.fanDeg();
             Vec3 dir = rotateY(look, offset);
-            // 横向也按体长错开 ✓（不然两条 21 格的龙会完全重叠 ✗）
+            // 横向也按体长错开 ✓（不然两条 69 格的龙会完全重叠 ✗）
             Vec3 at = start.add(side.scale((i - (dragon.count() - 1) / 2.0D) * length * 0.45D));
             if (spawnOne(level, caster, dragon, at, dir)) {
                 spawned++;
             }
-        }
-        // t4/t5 的"天上那道圣光"（复用光线链的 t4 ✓ 尺寸缩小：t4 0.35 / t5 0.6 ✓）
-        if (dragon.tier() >= 4) {
-            TNLightBeamMechanics.onSpellCast(caster, "holy_light_descent", 1.0D,
-                    dragon.tier() >= 5 ? 0.60D : 0.35D);
         }
         level.playSound(null, caster.getX(), caster.getY(), caster.getZ(),
                 net.minecraft.sounds.SoundEvents.ENDER_DRAGON_GROWL,
