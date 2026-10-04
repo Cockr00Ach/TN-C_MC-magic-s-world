@@ -238,6 +238,51 @@ public class MagicStoneData {
     }
 
     /**
+     * <b>规范化配装</b>：把「同一条链的低档」从<b>已占的槽</b>里清掉 ——
+     * 法杖写内容之前的强制执行点（{@link SpellCatalog#wandSpellIds} 开头调它）。
+     *
+     * <p>为什么需要它：配键页是<b>手动</b>的，玩家可能「先学完几个档、再去配键页手动摆」，
+     * 那种顺序下低档会各占一个空槽；而配键列表只列链顶
+     * （{@link SpellCatalog#chainTopAssignable}），于是法杖上会出现
+     * 「这条链已经学了更高档、低档却还占着一个键」的怪状态 ✗。
+     * {@link #fillFirstFree} 已经挡住了「<b>新</b>槽进低档」，这里补上「<b>已占</b>的槽也收口」。
+     *
+     * <p><b>刻意不管的两类</b> —— 它们只在写杖时被过滤成空槽
+     * （见 {@link SpellCatalog#wandSpellIds}），<b>不动</b>玩家存下来的配装：
+     * <ol>
+     *   <li>没学过 / 目录里查不到的 —— 老存档迁移过来对不上目录时的兜底</li>
+     *   <li>引擎不认识的 —— 防呆闸门，免得法杖上出现按不动的空格</li>
+     * </ol>
+     *
+     * @return 被清掉的槽数
+     */
+    public int normalizeLoadout() {
+        int removed = 0;
+        for (int i = 0; i < LOADOUT_SLOTS; i++) {
+            String id = loadout.get(i);
+            if (id == null) {
+                continue;
+            }
+            ResourceLocation parsed = ResourceLocation.tryParse(id);
+            if (parsed == null) {
+                continue;                       // 存的就是坏数据：留给写杖时的过滤
+            }
+            SpellCatalog.Entry entry = SpellCatalog.byId(parsed);
+            if (entry == null || entry.independent() || entry.element() == null) {
+                continue;                       // 目录外 / 独立魔法：它不是任何链的成员
+            }
+            if (!hasLearned(parsed)) {
+                continue;                       // 没学过：写杖时才过滤，不改配装
+            }
+            if (!SpellCatalog.isChainTop(this, parsed)) {
+                loadout.set(i, null);           // 同链低档：在这里统一收口
+                removed++;
+            }
+        }
+        return removed;
+    }
+
+    /**
      * <b>某一页</b>该写进法杖的内容：定长 9 项，空槽是 {@code null}。
      *
      * <p>这是"法杖上到底有什么"的<b>唯一口径</b> —— 施法、切页、补杖、界面全走它，
