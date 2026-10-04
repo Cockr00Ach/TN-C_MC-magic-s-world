@@ -133,7 +133,7 @@ public final class UncommonMagicPlants {
         }
         @Override public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
             BlockState substrate = level.getBlockState(pos.below());
-            return substrate.is(Blocks.MYCELIUM) || substrate.is(Blocks.PODZOL)
+            return substrate.is(BlockTags.DIRT) || substrate.is(Blocks.FARMLAND) || substrate.is(Blocks.MUD) || substrate.is(Blocks.MYCELIUM) || substrate.is(Blocks.PODZOL)
                     || substrate.is(Blocks.MOSS_BLOCK) || substrate.is(Blocks.STONE)
                     || substrate.is(Blocks.DEEPSLATE) || substrate.is(Blocks.COBBLED_DEEPSLATE)
                     || substrate.is(Blocks.TUFF);
@@ -153,8 +153,7 @@ public final class UncommonMagicPlants {
         }
         @Override public boolean isRandomlyTicking(BlockState state) { return state.getValue(AGE) < 3; }
         @Override public void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-            if (state.getValue(AGE) < 3 && state.getValue(QUIET) == 3
-                    && level.getRawBrightness(pos, 0) < 8 && random.nextInt(4) == 0)
+            if (state.getValue(AGE) < 3 && random.nextInt(4) == 0)
                 level.setBlock(pos, state.setValue(AGE, state.getValue(AGE) + 1), 2);
         }
         @Override public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
@@ -194,7 +193,7 @@ public final class UncommonMagicPlants {
         @Override public void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
             if (state.getValue(AGE) >= 3) return;
             boolean raining = level.isRainingAt(pos.above());
-            if (state.getValue(WET) || raining) {
+            {
                 if (random.nextInt(3) == 0)
                     level.setBlock(pos, state.setValue(AGE, state.getValue(AGE) + 1).setValue(WET, false), 2);
                 else if (raining && !state.getValue(WET)) level.setBlock(pos, state.setValue(WET, true), 2);

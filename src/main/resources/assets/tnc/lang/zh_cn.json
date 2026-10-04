@@ -153,7 +153,7 @@
   "block.tnc.tavern_lamp": "台灯",
   "entity.tnc.yan_dark": "公孙衍（迷失）",
   "item.tnc.tnc_iron_armor": "铁甲",
-  "block.tnc.magic_forge": "载魔锻造炉",
+  "block.tnc.magic_forge": "炼金炉口",
   "item.tnc.magic_forge": "载魔锻造炉",
   "item.tnc.mana_copper_coil": "载魔线圈",
   "block.tnc.homeward_lamp": "归路灯",
@@ -433,5 +433,6 @@
   "entity.tnc.apollo": "阿波罗",
   "entity.tnc.fighting_angel": "战斗天使",
   "entity.tnc.light_dragon": "光明龙",
-  "effect.tnc.light_dragon_scales": "光龙鳞甲"
+  "effect.tnc.light_dragon_scales": "光龙鳞甲",
+  "block.tnc.forge_core": "魔力炉核"
 }

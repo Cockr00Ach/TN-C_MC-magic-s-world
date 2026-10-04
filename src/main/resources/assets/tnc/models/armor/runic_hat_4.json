@@ -1,0 +1,210 @@
+{
+  "parts": [
+    {
+      "name": "head",
+      "parent": "root",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": []
+    },
+    {
+      "name": "hat",
+      "parent": "root",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": []
+    },
+    {
+      "name": "body",
+      "parent": "root",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": []
+    },
+    {
+      "name": "right_arm",
+      "parent": "root",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": []
+    },
+    {
+      "name": "left_arm",
+      "parent": "root",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": []
+    },
+    {
+      "name": "right_leg",
+      "parent": "root",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": []
+    },
+    {
+      "name": "left_leg",
+      "parent": "root",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": []
+    },
+    {
+      "name": "ring",
+      "parent": "head",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "uv": [
+            0,
+            20
+          ],
+          "position": [
+            -4.5,
+            -10,
+            -4.5
+          ],
+          "size": [
+            9,
+            3,
+            9
+          ],
+          "inflate": 0
+        }
+      ]
+    },
+    {
+      "name": "top",
+      "parent": "head",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "uv": [
+            0,
+            0
+          ],
+          "position": [
+            -3.5,
+            -12,
+            -3.5
+          ],
+          "size": [
+            7,
+            2,
+            7
+          ],
+          "inflate": 0
+        }
+      ]
+    },
+    {
+      "name": "gem",
+      "parent": "head",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "uv": [
+            44,
+            0
+          ],
+          "position": [
+            -1,
+            -11,
+            -5.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "inflate": 0
+        }
+      ]
+    }
+  ],
+  "texture_width": 64,
+  "texture_height": 64
+}

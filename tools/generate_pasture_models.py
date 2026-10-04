@@ -97,6 +97,60 @@ PALETTES = {
     "hoof": ("414c4e", "283638", "646f69", "889087"),
     "ivory": ("d9cdb0", "aa9b7f", "eae0c3", "f7efd6"),
 }
+# Each species owns a readable hue family; avoid washing all coats into sage/beige.
+PALETTES.update({
+    "stone_hide":("6f7283","414353","a7adbf","d1d7e8"),
+    "boar_skin":("996143","5b342a","cd9560","f2cf98"),
+    "ember_hide":("412e41","231e2e","794451","b66964"),
+    "ember_plate":("bd4b2e","70302b","f08035","ffc15d"),
+    "tide_hide":("168c8c","135565","43c4b8","a0edca"),
+    "tide_fin":("e8866b","b24461","ffb18a","ffe0b3"),
+    "frost_feather":("e4edf7","9bafcd","f6fcff","ffffff"),
+    "frost_dark":("314e9a","203061","5889d5","9abded"),
+    "toad_skin":("d0ab23","81751c","f1d94c","fff2a0"),
+    "honey":("e66c26","a43e22","ffad3e","ffe09a"),
+    "hare_fur":("9a58b8","63387d","cb91e3","f2d5f6"),
+    "hare_ear":("e792c6","a25595","ffc5e1","fff0ee"),
+    "deer_fur":("ae573a","713225","de8960","ffe0b0"),
+    "deer_mane":("382e48","211c30","655079","947393"),
+    "antler_glow":("ffce43","dc8d2b","fff394","ffffdc"),
+    "snail_body":("e4a172","a96155","ffd0a0","fff0cf"),
+    "snail_shell":("7144a4","422575","ae75d0","eab6ee"),
+    "shell_stripe":("f3c549","c07b27","ffe685","fff9d1"),
+    "heron_feather":("f3f0e8","bab8c9","ffffff","ffffff"),
+    "heron_dark":("263554","151b30","476399","91a9d7"),
+    "heron_bill":("f39139","b95429","ffc775","ffe7ad"),
+    "mantis_leaf":("56ae35","2b6c2e","96de48","e6f987"),
+    "mantis_dark":("254b3e","152e30","438368","95bf7b"),
+    "moth_body":("923758","522746","d96b8c","ffaabd"),
+    "mirror":("f1bd58","bd7b31","ffe8a2","fffbe2"),
+    "mirror_rim":("7149bc","423073","b17beb","e3b3ff"),
+    "tapir_hide":("323142","1c1b27","615465","b0959b"),
+    "tapir_gill":("d54a35","8b2828","ff9951","ffd17e"),
+    "otter_fur":("704332","422921","ab7150","deb394"),
+    "otter_belly":("44bac5","287280","85e4df","d1fff0"),
+    "tortoise_shell":("cc8e30","795025","edc657","fff1ab"),
+    "earth_ring":("573a75","322647","9c6db5","d3a1d4"),
+    "ray_sail":("faf0da","c7bca1","fffcec","ffffff"),
+    "ray_edge":("2d8bb7","235275","72c9e1","ccf3ed"),
+    "ray_body":("57a8bf","2b617e","9de0e4","e6ffff"),
+    "lizard_skin":("315dc2","233b7b","709bf2","b5d7ff"),
+    "lizard_ridge":("e1bd36","977e23","fff171","ffffcc"),
+    "electric_glow":("ffd758","caaa35","fff29c","ffffff"),
+    "whale_skin":("3c7ed2","234974","75b9f1","c2e8ff"),
+    "whale_belly":("dfedf5","a3c1d7","f6fcff","ffffff"),
+    "runner_hide":("995635","5f3329","cb8557","f1bf89"),
+    "runner_bag":("a32f4b","63253b","d26071","f39a94"),
+    "rhino_hide":("838da8","4f5874","bbc7d9","e7eff6"),
+    "rhino_plate":("555074","34334e","8b85ac","c5c0d8"),
+    "raccoon_fur":("dad9d2","91939a","f7f1df","ffffff"),
+    "raccoon_mask":("343440","1c1c28","646477","a1a1b4"),
+    "beaver_fur":("a86625","66391f","dd9d42","ffd789"),
+    "strider_hide":("298a67","23553e","69c693","b9efb2"),
+    "strider_hoof":("533a77","322745","9573b7","d3b1da"),
+    "marten_fur":("bd75bb","75467f","e9afd8","ffe8f4"),
+    "marten_tail":("f2d3e8","c39aba","fff3f9","ffffff"),
+})
 GLOW = {"warm_glow", "water_glow", "frost_glow", "star_glow", "antler_glow", "lamp_glow", "mirror_glow", "electric_glow", "dew_glow"}
 
 @dataclass
@@ -544,6 +598,10 @@ def paint_texture(model,uv):
                     if material in GLOW and (xx+yy+seed)%9==0: idx=3
                     if material in {"snail_shell","shell_stripe"} and ((xx//2+yy//2+seed)%6)==0: idx=2
                     if material=="mirror" and (xx==fw//2 or yy==fh//2): idx=3
+                    if material in {"stone_hide","deer_fur","hare_fur","whale_skin"} and (xx//2*7+yy//2*11+seed)%23<3: idx=3
+                    if material in {"tide_hide","ember_hide","lizard_skin","strider_hide"} and (xx+yy//3)%7<2: idx=1
+                    if material in {"heron_feather","frost_feather","ray_edge"} and yy>=fh*2//3: idx=1
+                    if material=="snail_shell" and (xx+yy*2)%9<2: idx=3
                     pix[x0+xx,y0+yy]=palette[idx]
                     if material in GLOW: emissive[x0+xx,y0+yy]=palette[idx]
     TEXTURES.mkdir(parents=True,exist_ok=True)

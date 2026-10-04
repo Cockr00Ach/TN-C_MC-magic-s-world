@@ -1,0 +1,276 @@
+{
+  "parts": [
+    {
+      "name": "head",
+      "parent": "root",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": []
+    },
+    {
+      "name": "hat",
+      "parent": "root",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": []
+    },
+    {
+      "name": "body",
+      "parent": "root",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": []
+    },
+    {
+      "name": "right_arm",
+      "parent": "root",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": []
+    },
+    {
+      "name": "left_arm",
+      "parent": "root",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": []
+    },
+    {
+      "name": "right_leg",
+      "parent": "root",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": []
+    },
+    {
+      "name": "left_leg",
+      "parent": "root",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": []
+    },
+    {
+      "name": "hood_top",
+      "parent": "head",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "uv": [
+            0,
+            0
+          ],
+          "position": [
+            -4.7,
+            -9,
+            -4.7
+          ],
+          "size": [
+            9.4,
+            2,
+            9.4
+          ],
+          "inflate": 0
+        }
+      ]
+    },
+    {
+      "name": "hood_left",
+      "parent": "head",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "uv": [
+            0,
+            24
+          ],
+          "position": [
+            -4.7,
+            -7,
+            -4.2
+          ],
+          "size": [
+            1.2,
+            8,
+            8.8
+          ],
+          "inflate": 0
+        }
+      ]
+    },
+    {
+      "name": "hood_right",
+      "parent": "head",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "uv": [
+            0,
+            24
+          ],
+          "position": [
+            3.5,
+            -7,
+            -4.2
+          ],
+          "size": [
+            1.2,
+            8,
+            8.8
+          ],
+          "inflate": 0
+        }
+      ]
+    },
+    {
+      "name": "hood_back",
+      "parent": "head",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "uv": [
+            32,
+            32
+          ],
+          "position": [
+            -3.5,
+            -7,
+            3.7
+          ],
+          "size": [
+            7,
+            8,
+            1
+          ],
+          "inflate": 0
+        }
+      ]
+    },
+    {
+      "name": "neck",
+      "parent": "head",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "uv": [
+            0,
+            24
+          ],
+          "position": [
+            -4,
+            0,
+            -3
+          ],
+          "size": [
+            8,
+            3,
+            6
+          ],
+          "inflate": 0.3
+        }
+      ]
+    }
+  ],
+  "texture_width": 64,
+  "texture_height": 64
+}

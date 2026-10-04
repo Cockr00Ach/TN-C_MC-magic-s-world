@@ -50,17 +50,17 @@ public final class ForgeGuideScreen extends Screen {
 
     private void lines(GuiGraphics g, int x, int y, String... lines) {
         for (int i = 0; i < lines.length; i++)
-            g.drawString(font, lines[i], x, y + i * 17, 0xff493b32, false);
+            g.drawString(font, lines[i], x, y + i * 15, 0xff493b32, false);
     }
 
     private void intro(GuiGraphics g, int left, int top) {
         lines(g, left + 16, top + 39,
-                "一座真正的炉台，共 26 个实体部件。",
-                "它占三层，每层 3×3；中层中心留空。",
-                "准备：耐火炉砖 ×12、刻铜炉框 ×8、",
-                "侧壁投料砖 ×2、底层出料砖 ×1、",
-                "炉芯 ×1、注能口 ×1、排烟顶 ×1。",
-                "先选炉芯朝外的一面，这面就是「前」。",
+                "三层炼金炉，只需要四种部件。",
+                "准备：耐火炉砖 ×24、炼金炉口 ×1、",
+                "魔力炉核 ×1、排烟顶 ×1。",
+                "底层9砖；中层7砖+炉口+炉核。",
+                "顶层8砖，中间放排烟顶。",
+                "先选炉口朝外的一面，这面就是「前」。",
                 "下一页按底→中→顶的顺序逐层搭建。");
     }
 
@@ -81,38 +81,39 @@ public final class ForgeGuideScreen extends Screen {
             }
         }
         lines(g, left + 17, top + 113,
-                "砖=耐火砖  框=刻铜框  入=投料  出=出料",
-                "芯=炉芯  注=注能口  烟=排烟  空=空气",
-                "图的下方是前；注能口必须向后朝外。",
-                "炉芯右键可看红格诊断；灰格是区块未加载。");
+                "砖=炉砖  口=炼金炉口  核=魔力炉核",
+                "烟=排烟顶；图的下方是前。",
+                "中层炉口朝外，正中央放魔力炉核。",
+                "炉口右键可看红格诊断；灰格是区块未加载。");
     }
 
     private String code(ForgeStructure.Part part) {
         return switch (part) {
             case BRICK -> "砖"; case FRAME -> "框"; case INPUT -> "入";
-            case OUTPUT -> "出"; case CORE -> "芯"; case INJECTOR -> "注";
+            case OUTPUT -> "出"; case CORE -> "口"; case HEART -> "核"; case INJECTOR -> "注";
             case EXHAUST -> "烟"; case AIR -> "空";
         };
     }
 
     private void operation(GuiGraphics g, int left, int top) {
         lines(g, left + 16, top + 39,
-                "右键前方炉芯，先选工艺，再向四格投料。",
+                "右键前方炉口，先选工艺，再向四格投料。",
                 "空格会显示所选工艺的材料和数量。",
                 "点击「注魔」消耗玩家真实魔力 25 点以内。",
-                "也可手持蓄魔根芯右键后方注能口。",
+                "也可手持魔力瓶或蓄魔根芯右键炉口。",
                 "仅结构完整时收取魔力和制作材料；",
                 "拆走部件会暂停，不会吃掉库存。",
-                "侧壁投料砖接漏斗，底部出料砖取成品。",
+                "两侧中层炉砖接漏斗投料。",
+                "炉口正下的基座砖接漏斗取成品。",
                 "正在施工或未加载时端口自动闭锁。");
     }
 
     private void power(GuiGraphics g, int left, int top) {
         lines(g, left + 16, top + 39,
-                "成熟且已认养的绿脉枝紧贴注能口背面，",
+                "成熟且已认养的翠脉枝种在炉口前一格，",
                 "可缓慢输送它真正储存的魔力。",
                 "只有炉主及同一地块的植物能向炉供能。",
-                "绿色粒子显示植物→注口→炉芯的路径。",
+                "绿色粒子显示植物→炉口的真实输送。",
                 "发电座可将魔力转成有限的 Forge Energy；",
                 "导能线、电池和工作灯使用这一路能源。",
                 "Create 的机械转速与 FE 分开运行。",

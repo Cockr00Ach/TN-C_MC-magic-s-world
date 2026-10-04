@@ -58,7 +58,7 @@ public final class ManaRootGameTests {
         BlockPos forgePos = rootPos.east(2);
         var forge = MagicForgeGameTests.build(h,forgePos,Direction.NORTH);
         forge.setOwner(player.getUUID());
-        var inlet=ForgeStructure.at(forgePos,Direction.NORTH,1,0,1);
+        var inlet=forgePos;
         var core = new ItemStack(TNMod.MANA_ROOT_CORE.get());
         forge.addCharge(190);
         forge.useRootCore(player, core, inlet);

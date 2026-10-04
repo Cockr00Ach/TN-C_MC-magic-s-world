@@ -1,0 +1,431 @@
+{
+  "meta": {
+    "format_version": "4.10",
+    "model_format": "modded_entity",
+    "box_uv": true
+  },
+  "name": "bastion_hat_3",
+  "resolution": {
+    "width": 64,
+    "height": 64
+  },
+  "elements": [
+    {
+      "name": "brim_0",
+      "uuid": "9a699819-8a67-513c-ade3-cd04aaa0ca55",
+      "type": "cube",
+      "box_uv": true,
+      "uv_offset": [
+        0,
+        0
+      ],
+      "inflate": 0,
+      "origin": [
+        0,
+        24,
+        0
+      ],
+      "from": [
+        -7,
+        32,
+        -7
+      ],
+      "to": [
+        7,
+        33,
+        7
+      ],
+      "faces": {
+        "north": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "south": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "east": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "west": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "up": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "down": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "name": "crown_0",
+      "uuid": "050cd00e-0784-5785-bbdf-7f0c9e7b99bb",
+      "type": "cube",
+      "box_uv": true,
+      "uv_offset": [
+        0,
+        20
+      ],
+      "inflate": 0.25,
+      "origin": [
+        0,
+        24,
+        0
+      ],
+      "from": [
+        -4,
+        33,
+        -4
+      ],
+      "to": [
+        4,
+        37,
+        4
+      ],
+      "faces": {
+        "north": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "south": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "east": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "west": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "up": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "down": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "name": "crest_0",
+      "uuid": "0142c0be-b5b5-565e-9d26-b3fa8d1e7a4f",
+      "type": "cube",
+      "box_uv": true,
+      "uv_offset": [
+        40,
+        0
+      ],
+      "inflate": 0,
+      "origin": [
+        0,
+        24,
+        0
+      ],
+      "from": [
+        -1,
+        37,
+        -4
+      ],
+      "to": [
+        1,
+        40,
+        3
+      ],
+      "faces": {
+        "north": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "south": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "east": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "west": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "up": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "down": {
+          "texture": 0,
+          "uv": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    }
+  ],
+  "outliner": [
+    {
+      "name": "head",
+      "origin": [
+        0,
+        24,
+        0
+      ],
+      "rotation": [
+        -0.0,
+        0.0,
+        -0.0
+      ],
+      "uuid": "ff5d83e4-eebc-5a36-b5eb-90ce8dc406f5",
+      "children": [
+        {
+          "name": "brim",
+          "origin": [
+            0,
+            24,
+            0
+          ],
+          "rotation": [
+            -0.0,
+            0.0,
+            -0.0
+          ],
+          "uuid": "9b4165de-7a41-59a6-83a0-5cae30cb20c5",
+          "children": [
+            "9a699819-8a67-513c-ade3-cd04aaa0ca55"
+          ]
+        },
+        {
+          "name": "crown",
+          "origin": [
+            0,
+            24,
+            0
+          ],
+          "rotation": [
+            -0.0,
+            0.0,
+            -0.0
+          ],
+          "uuid": "077d616d-4dd8-5448-be52-0557211e3428",
+          "children": [
+            "050cd00e-0784-5785-bbdf-7f0c9e7b99bb"
+          ]
+        },
+        {
+          "name": "crest",
+          "origin": [
+            0,
+            24,
+            0
+          ],
+          "rotation": [
+            -0.0,
+            0.0,
+            -0.0
+          ],
+          "uuid": "7cf49c25-32ea-5d86-b019-f56fe60ff5aa",
+          "children": [
+            "0142c0be-b5b5-565e-9d26-b3fa8d1e7a4f"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "hat",
+      "origin": [
+        0,
+        24,
+        0
+      ],
+      "rotation": [
+        -0.0,
+        0.0,
+        -0.0
+      ],
+      "uuid": "fbf8826f-47c1-5fc7-af37-b780a71442c5",
+      "children": []
+    },
+    {
+      "name": "body",
+      "origin": [
+        0,
+        24,
+        0
+      ],
+      "rotation": [
+        -0.0,
+        0.0,
+        -0.0
+      ],
+      "uuid": "747cb419-6452-5017-b3fd-b9bdeb3f4020",
+      "children": []
+    },
+    {
+      "name": "right_arm",
+      "origin": [
+        0,
+        24,
+        0
+      ],
+      "rotation": [
+        -0.0,
+        0.0,
+        -0.0
+      ],
+      "uuid": "61e7dbd4-084d-58bb-bbb5-5966d212a034",
+      "children": []
+    },
+    {
+      "name": "left_arm",
+      "origin": [
+        0,
+        24,
+        0
+      ],
+      "rotation": [
+        -0.0,
+        0.0,
+        -0.0
+      ],
+      "uuid": "20ce8644-26ef-50dd-b2bc-bfba0d5544c3",
+      "children": []
+    },
+    {
+      "name": "right_leg",
+      "origin": [
+        0,
+        24,
+        0
+      ],
+      "rotation": [
+        -0.0,
+        0.0,
+        -0.0
+      ],
+      "uuid": "4183ff8d-858c-53af-8ba3-355553d34c85",
+      "children": []
+    },
+    {
+      "name": "left_leg",
+      "origin": [
+        0,
+        24,
+        0
+      ],
+      "rotation": [
+        -0.0,
+        0.0,
+        -0.0
+      ],
+      "uuid": "e238d569-5615-5c00-9073-bc07374ff84d",
+      "children": []
+    }
+  ],
+  "textures": [
+    {
+      "id": "0",
+      "name": "bastion_hat_3.png",
+      "path": "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\src\\main\\resources\\assets\\tnc\\textures\\models\\armor\\bastion_hat_3.png",
+      "width": 64,
+      "height": 64,
+      "uv_width": 64,
+      "uv_height": 64,
+      "source": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAACNElEQVR4nO1aMU/CQBh9mKqLmhg0EKOsNHHmDzDqwo9g6M7g4NKFwYGdgR/RRUb+gLOJLi4aQwKEBIxBTcDFI5VWbL87rtfevam0ff2uj/vu9bu7XKFkL9p1GxQ4nQdQuUnzGXeLHF0xVMpFVMrF2LxcoWQvikfHpKD94QBUrih+u27D9Ua4vToHAFze3MOt5eF6o0ixM9MDqNBeACvpBoiAW8vj7rG/PI4DCwD2Dw5JgfvDAZkrit/qzUOv/fdcFtsCgOlkTG4ED/cvfpRBTET86WSs3hjAunDcrkyFegL8/PNRewAvlBMAkPfygKICyETqXYC37Uq6gCy+ki4gGxZAtxynM+CyqyT5jKt9D0h9OczbduMCgN4uILwc3t7ZXR4/v74AAM5OTpfnvj4/RIfkgvaDoBQBri/2ZIQhYeMCsGlrVUUQ7gKz2fuv32z+vdl9w2qsTLqAfxBkYC8fdn/SLqD9ICjcBv257nSC51zP2KBSEN4D/Pm+7pwq2LgLrEJJF2hUaZngPAW5ze56jv/+MD5v/LjcjQ6CAH3tXxa0nw/Q3gW0F8DMCAF6zwhlIgV4ptZTLwDvcnr6BeBcTk+9AADfcrpxAUBsLZAWPuNmIgV4YGqBsIuydmipgIAAsrepJY2AC7R6czSqW2j15pF3W1KhjAusfk+7XvQHaVcLZC01YgmQxfEhngCSt7HKQPwUyNDLA6YWMDNC2tcCRoCkG5A0tBfAuACgtwuY7fLk6BnBN4fcsyUoWCPgAAAAAElFTkSuQmCC"
+    }
+  ]
+}

@@ -1,6 +1,16 @@
 {
-  "type": "minecraft:crafting_shapeless",
-  "ingredients": [{"item": "tnc:forge_firebrick"}, {"item": "tnc:forge_firebrick"},
-    {"item": "tnc:forge_firebrick"}, {"item": "minecraft:iron_bars"}],
-  "result": {"item": "tnc:forge_exhaust", "count": 1}
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "B B",
+    "B B",
+    "BBB"
+  ],
+  "key": {
+    "B": {
+      "item": "tnc:forge_firebrick"
+    }
+  },
+  "result": {
+    "item": "tnc:forge_exhaust"
+  }
 }

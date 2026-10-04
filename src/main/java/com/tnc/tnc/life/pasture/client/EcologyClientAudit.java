@@ -43,6 +43,11 @@ public final class EcologyClientAudit {
         for(Item item:items){var id=ForgeRegistries.ITEMS.getKey(item);if(models.getModel(new ModelResourceLocation(id,"inventory"))==missing)failures.add("Missing baked item: "+id);}
         for(String id:List.of("dance_bell_joint","dance_bell_head","dawn_disk_head","mist_cotton_ring","botanical_sprite_body","botanical_sprite_wing"))if(models.getModel(ResourceLocation.fromNamespaceAndPath("tnc","block/"+id))==missing)failures.add("Missing additional plant model: "+id);
         BotanicalContent.BLOCKS.forEach((id,block)->{for(var state:block.getStateDefinition().getPossibleStates())if(mc.getBlockRenderer().getBlockModel(state)==missing)failures.add("Missing baked plant state: "+state);});
+        var gearMesh=com.tnc.tnc.equipment.client.GearModels.class.getDeclaredMethod("mesh",com.tnc.tnc.equipment.MageGear.Design.class);gearMesh.setAccessible(true);
+        for(var design:com.tnc.tnc.equipment.MageGear.ALL){
+            try{var root=((net.minecraft.client.model.geom.builders.LayerDefinition)gearMesh.invoke(null,design)).bakeRoot();for(var bone:List.of("head","hat","body","right_arm","left_arm","right_leg","left_leg"))root.getChild(bone);}
+            catch(Throwable failure){failures.add("Worn gear failed to load/bake: "+design.id()+" "+failure);}
+        }
         for(String id:PastureRegistry.TYPES.keySet())for(String suffix:new String[]{"","_glow"})if(mc.getResourceManager().getResource(ResourceLocation.fromNamespaceAndPath("tnc","textures/entity/pasture/"+id+suffix+".png")).isEmpty())failures.add("Missing animal texture: "+id+suffix);
         var report=new LinkedHashMap<String,Object>();report.put("registered_animal_renderers",renderers);report.put("baked_items",items.size());report.put("baked_plant_states",BotanicalContent.BLOCKS.values().stream().mapToInt(b->b.getStateDefinition().getPossibleStates().size()).sum());report.put("failures",failures);report.put("scope","Real client resource reload and renderer construction; not a gameplay screenshot or live animation review");
         Files.writeString(Path.of(System.getProperty("tnc.ecologyClientAuditOutput")),new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(report));

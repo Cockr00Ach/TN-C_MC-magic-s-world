@@ -1,0 +1,824 @@
+{
+  "id": "646C30AF488BF038",
+  "filename": "tnc_field_01_expeditions",
+  "group": "59249BFD5667691A",
+  "title": "&a&l远行与耕作",
+  "icon": "tnc:road_bell_ear",
+  "order_index": 2,
+  "default_hide_dependency_lines": false,
+  "default_quest_shape": "hexagon",
+  "quest_links": [],
+  "images": [],
+  "quests": [
+    {
+      "id": "992041243E19D226",
+      "title": "&a&l远行与耕作",
+      "icon": "tnc:road_bell_ear",
+      "x": 0,
+      "y": -5,
+      "size": 2.0,
+      "shape": "square",
+      "description": [
+        "&a&l远行与耕作",
+        "&7共29种已实现植物、24种独立异兽与魔导工坊，把远方带回生活",
+        "",
+        "&f普通野外可以自由种养；天空岛公共区域受保护，自己的田地允许操作。",
+        "&7以下实物节点只检测背包持有，不消耗物品，也不冒充已经亲手种植。各条路线都可选，主线不要求完成。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "2290CCCC838D705D",
+          "type": "checkmark",
+          "title": "阅读本页（不发放玩法奖励）"
+        }
+      ]
+    },
+    {
+      "id": "36B1D2DC1C914AED",
+      "title": "&6野外标本 · 路铃麦",
+      "icon": "tnc:road_bell_wild_sample",
+      "x": -10,
+      "y": 0,
+      "size": 1.18,
+      "shape": "circle",
+      "description": [
+        "&6&l在旧路旁，留一份样本",
+        "",
+        "&f新探索的平原、草甸可能见到野生路铃麦；打掉野株会留下标本与种子。",
+        "&7这是收藏目标，不挡下方种植路线；旧地图可从泥径旁的草取得第一粒种子。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "DA1E83C3D32AD578",
+          "type": "item",
+          "item": "tnc:road_bell_wild_sample",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "subtitle": "&7野株调查 · 可选"
+    },
+    {
+      "id": "E6F54BC9942D7610",
+      "title": "&5野外标本 · 夜窗瓠",
+      "icon": "tnc:night_gourd_wild_sample",
+      "x": 0,
+      "y": 0,
+      "size": 1.18,
+      "shape": "circle",
+      "description": [
+        "&5&l林影里，留一份样本",
+        "",
+        "&f新探索的暗色林地可能见到野生夜窗瓠。破坏野株可收一份标本。",
+        "&7这是收藏目标；低天空光下采褐蘑菇也有机会找到种子。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "E16C7005D244BB76",
+          "type": "item",
+          "item": "tnc:night_gourd_wild_sample",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "subtitle": "&7野株调查 · 可选"
+    },
+    {
+      "id": "1CAE3E8F0C0EF40C",
+      "title": "&3野外标本 · 听潮苇",
+      "icon": "tnc:tide_reed_wild_sample",
+      "x": 10,
+      "y": 0,
+      "size": 1.18,
+      "shape": "circle",
+      "description": [
+        "&3&l潮水退后，留一份样本",
+        "",
+        "&f新探索的沼泽浅水边可能见到野生听潮苇；破坏野株能收标本。",
+        "&7这是收藏目标；水中采海草也有机会找到种子。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "A5F643D61E61CBC3",
+          "type": "item",
+          "item": "tnc:tide_reed_wild_sample",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "subtitle": "&7野株调查 · 可选"
+    },
+    {
+      "id": "EBDAC2172873F0FA",
+      "title": "&6一粒路铃麦种",
+      "icon": "tnc:road_bell_seed",
+      "x": -10,
+      "y": 4,
+      "size": 1.35,
+      "shape": "hexagon",
+      "description": [
+        "&6&l把旧路的麦声带回家",
+        "",
+        "&f路边野株或泥径旁的草可找到种子。种在普通耕地，成熟后收获麦穗和下一代种子。",
+        "&7背包持有一粒即可完成；不要求先找到野外标本。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "1C8CC556DEA222BF",
+          "type": "item",
+          "item": "tnc:road_bell_seed",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "subtitle": "&7平原 / 草甸 · 耕地"
+    },
+    {
+      "id": "66ABA49C85FDF647",
+      "title": "&5一粒夜窗瓠种",
+      "icon": "tnc:night_gourd_seed",
+      "x": 0,
+      "y": 4,
+      "size": 1.35,
+      "shape": "hexagon",
+      "description": [
+        "&5&l日落以后，田地仍醒着",
+        "",
+        "&f林中野株或昏暗处的褐蘑菇可提供种子。种在耕地；它只在夜里或低天空光下自然成长。",
+        "&7作物成熟时会透出微光；白天没长大不等于坏了。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "8F60B9070143F64C",
+          "type": "item",
+          "item": "tnc:night_gourd_seed",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "subtitle": "&7林地 / 暗处 · 耕地"
+    },
+    {
+      "id": "E26B50727BA93E38",
+      "title": "&3一粒听潮苇种",
+      "icon": "tnc:tide_reed_seed",
+      "x": 10,
+      "y": 4,
+      "size": 1.35,
+      "shape": "hexagon",
+      "description": [
+        "&3&l水退一点，给纸留一条岸",
+        "",
+        "&f沼泽野株或海草可提供种子。种在土、沙、黏土或泥上；根旁必须邻接水。",
+        "&7它不是普通耕地作物。要在住处种，先给它造一条湿岸。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "E7477F50B070DD49",
+          "type": "item",
+          "item": "tnc:tide_reed_seed",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "subtitle": "&7沼泽 / 水边 · 湿岸"
+    },
+    {
+      "id": "A44A1CD410286476",
+      "title": "&6第一把麦穗",
+      "icon": "tnc:road_bell_ear",
+      "x": -10,
+      "y": 8,
+      "size": 1.18,
+      "shape": "hexagon",
+      "description": [
+        "&6&l一路吃到下一站",
+        "",
+        "&f成熟路铃麦会同时返还种子和麦穗。收够三穗，留种后再考虑做饭或出售。",
+        "&7这是实物持有目标，不验证种植过程；保留你的第一粒种。"
+      ],
+      "dependencies": [
+        "EBDAC2172873F0FA"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "57746C1214CBAEA6",
+          "type": "item",
+          "item": "tnc:road_bell_ear",
+          "count": 3,
+          "consume_items": false
+        }
+      ],
+      "subtitle": "&7收获 3 穗 · 不消耗"
+    },
+    {
+      "id": "211DD488AB0060C7",
+      "title": "&5窗下的一餐",
+      "icon": "tnc:night_gourd",
+      "x": 0,
+      "y": 8,
+      "size": 1.18,
+      "shape": "hexagon",
+      "description": [
+        "&5&l夜长，炉火也长",
+        "",
+        "&f成熟夜窗瓠能收果并返还种子。果实可直接吃，夜行之前留两只在行囊里。",
+        "&7若想观察它的生长，把田设在室外等日落，或用屋檐压低天空光。"
+      ],
+      "dependencies": [
+        "66ABA49C85FDF647"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "8FC6E88CDA259FF9",
+          "type": "item",
+          "item": "tnc:night_gourd",
+          "count": 2,
+          "consume_items": false
+        }
+      ],
+      "subtitle": "&7收获 2 果 · 不消耗"
+    },
+    {
+      "id": "763125D9DC2ABFFB",
+      "title": "&3一束苇杆",
+      "icon": "tnc:tide_reed_stem",
+      "x": 10,
+      "y": 8,
+      "size": 1.18,
+      "shape": "hexagon",
+      "description": [
+        "&3&l旅行需要能写字的东西",
+        "",
+        "&f成熟听潮苇会返还种子与苇杆。收三根苇杆，可在工作台做出三张纸。",
+        "&7湿岸让它稳定生长；下雨时成熟会更快。"
+      ],
+      "dependencies": [
+        "E26B50727BA93E38"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "19856B9A83158F51",
+          "type": "item",
+          "item": "tnc:tide_reed_stem",
+          "count": 3,
+          "consume_items": false
+        }
+      ],
+      "subtitle": "&7收获 3 杆 · 不消耗"
+    },
+    {
+      "id": "0AC9491A6DB024E9",
+      "title": "&6归路铃饼",
+      "icon": "tnc:road_bell_travel_bread",
+      "x": -10,
+      "y": 12,
+      "size": 1.18,
+      "shape": "hexagon",
+      "description": [
+        "&6&l别把种子全吃掉",
+        "",
+        "&f三穗路铃麦可合成一块归路铃饼。它更耐饥，还会让短途赶路的脚步轻快半分钟。",
+        "&7这是实际合成的旅途食物；任务书只检查背包持有，不复制物品。",
+        "&7以后多余麦穗可去小镇商店卖；酒馆货单也可能收农产，以当日实单为准。"
+      ],
+      "dependencies": [
+        "A44A1CD410286476"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "6929E46FAD012BCC",
+          "type": "item",
+          "item": "tnc:road_bell_travel_bread",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "subtitle": "&7三穗成一份路粮"
+    },
+    {
+      "id": "DBFCA37FC0BD0614",
+      "title": "&5留给夜行的人",
+      "icon": "tnc:night_gourd",
+      "x": 0,
+      "y": 12,
+      "size": 1.18,
+      "shape": "hexagon",
+      "description": [
+        "&5&l一株作物，一种作息",
+        "",
+        "&f夜窗瓠本身就是食物；留一只自用，另一只可交换旅费。",
+        "&7它自然生长偏爱夜色；已学会的农事魔法仍可主动催生。"
+      ],
+      "dependencies": [
+        "211DD488AB0060C7"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "E54B7FFC4B722990",
+          "type": "item",
+          "item": "tnc:night_gourd",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "subtitle": "&7食用 / 留种 / 买卖"
+    },
+    {
+      "id": "61A2912EA97296B2",
+      "title": "&3旅行纸张",
+      "icon": "minecraft:paper",
+      "x": 10,
+      "y": 12,
+      "size": 1.18,
+      "shape": "hexagon",
+      "description": [
+        "&3&l把路记下来",
+        "",
+        "&f三根听潮苇杆可制三张纸。纸用于写下远行见闻，也可留给委托与制作。",
+        "&7纸由真实合成或别的来源取得；本节点只检查手中的三张。"
+      ],
+      "dependencies": [
+        "763125D9DC2ABFFB"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "9CAB40BC25BAFA04",
+          "type": "item",
+          "item": "minecraft:paper",
+          "count": 3,
+          "consume_items": false
+        }
+      ],
+      "subtitle": "&7三杆成三张纸"
+    },
+    {
+      "id": "2352A4756B7C986E",
+      "title": "&a三袋带回家的种子",
+      "icon": "tnc:road_bell_seed",
+      "x": 0,
+      "y": 17,
+      "size": 1.75,
+      "shape": "square",
+      "description": [
+        "&a&l三袋种子，三种不同的住处",
+        "",
+        "&f路铃麦要耕地，夜窗瓠要夜色或遮阴，听潮苇要湿岸。把每种至少一粒留下，以后还可以继续种。",
+        "&7三项持有检测都不消耗种子；收集路线独立，不锁任何剧情。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "C67BEA0C62A3CF01",
+          "type": "item",
+          "item": "tnc:road_bell_seed",
+          "count": 1,
+          "consume_items": false
+        },
+        {
+          "id": "89F9867E9BC1F42F",
+          "type": "item",
+          "item": "tnc:night_gourd_seed",
+          "count": 1,
+          "consume_items": false
+        },
+        {
+          "id": "B372B0DA78E56A81",
+          "type": "item",
+          "item": "tnc:tide_reed_seed",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "subtitle": "&7收藏一份未来"
+    },
+    {
+      "id": "35C5865B7E693627",
+      "title": "&e牧场的行囊",
+      "icon": "minecraft:milk_bucket",
+      "x": -10,
+      "y": 17,
+      "size": 1.35,
+      "shape": "square",
+      "description": [
+        "&e&l远行的人，也要靠牧场",
+        "",
+        "&f带一桶牛奶、四枚鸡蛋和两份白色羊毛。现有牛、鸡、羊就能提供这些可再生物资。",
+        "&7原创动物尚在设计；本节点只用当前能取得的实物，不要求玩家先建畜栏。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "E85D30E37744AD21",
+          "type": "item",
+          "item": "minecraft:milk_bucket",
+          "count": 1,
+          "consume_items": false
+        },
+        {
+          "id": "3E19E7C20A65B0EF",
+          "type": "item",
+          "item": "minecraft:egg",
+          "count": 4,
+          "consume_items": false
+        },
+        {
+          "id": "01349A37702A720F",
+          "type": "item",
+          "item": "minecraft:white_wool",
+          "count": 2,
+          "consume_items": false
+        }
+      ],
+      "subtitle": "&7现有牲畜 · 可选"
+    },
+    {
+      "id": "46645DD133BF761B",
+      "title": "&e带回小镇",
+      "icon": "minecraft:emerald",
+      "x": 10,
+      "y": 17,
+      "size": 1.35,
+      "shape": "square",
+      "description": [
+        "&e&l收成是下一次远行的盘缠",
+        "",
+        "&f多出的农产可到小镇商店出售；接到食材单时，请到酒馆原生 Bountiful 委托栏交付。",
+        "&7这里仅介绍去处。实际交易和委托报酬由对应界面结算，任务书不另发钱。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "6D551B6A46E4117A",
+          "type": "checkmark",
+          "title": "阅读本页（不发放玩法奖励）"
+        }
+      ],
+      "subtitle": "&7交易说明 · 无领取奖励"
+    },
+    {
+      "id": "A7F4D95E3B2C1081",
+      "title": "&d归巢花 · 远行后的茶",
+      "icon": "tnc:homeward_flower_seed",
+      "x": -19,
+      "y": 10,
+      "size": 1.35,
+      "shape": "circle",
+      "description": [
+        "&d&l让野外营地也认得归路",
+        "",
+        "&f普通野外土壤可种归巢花。潜行空手右键花株，把它设为露营归处；不需要先买房。",
+        "&7远行超过512格，实际走动并停留一分钟，再回到归处16格内，最多三朵花迎你开放。每游戏日最多三朵，离线挂机不算远行。",
+        "&f开花后右键取瓣，花株留下；花瓣可做迎归茶。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "A7F4D95E3B2C1082",
+          "type": "item",
+          "item": "tnc:homeward_flower_seed",
+          "count": 1,
+          "consume_items": false
+        },
+        {
+          "id": "A7F4D95E3B2C1083",
+          "type": "item",
+          "item": "tnc:homecoming_tea",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "subtitle": "&7住宅花圃 · 可选"
+    },
+    {
+      "id": "A7F4D95E3B2C1084",
+      "title": "&a警路苔 · 会醒的墙",
+      "icon": "tnc:warning_moss_spore",
+      "x": 19,
+      "y": 10,
+      "size": 1.35,
+      "shape": "circle",
+      "description": [
+        "&a&l墙上也能长出守夜人",
+        "",
+        "&f苔块、紫水晶碎片和蜘蛛眼可唤醒警路苔孢子。贴在石或砖墙上，附近有敌对生物时会显出亮纹。",
+        "&7成熟后右键剪下苔片，苔会继续再生。四片苔、一盏灯笼和铜锭可制门前警灯，警戒范围更远。",
+        "&f苔片可卖给商行，也可能出现在酒馆的材料委托里。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "A7F4D95E3B2C1085",
+          "type": "item",
+          "item": "tnc:warning_moss_spore",
+          "count": 1,
+          "consume_items": false
+        },
+        {
+          "id": "A7F4D95E3B2C1086",
+          "type": "item",
+          "item": "tnc:warning_moss_lantern",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "subtitle": "&7警戒植物 · 可选"
+    },
+    {
+      "id": "02CCAC82BD3FA23E",
+      "title": "&d归路灯 · 作坊里的光",
+      "icon": "tnc:homeward_lamp",
+      "x": 0,
+      "y": 23,
+      "size": 1.5,
+      "shape": "square",
+      "description": [
+        "&b&l先搭炉台，再把魔力做成材料",
+        "",
+        "&f制作炉台工匠札记，照三层3×3图搭26个部件；中层中央留空，炉芯向前、注能口向后。右键炉芯可看缺件位置及锻造面板。",
+        "&7面板选择载魔线圈，四投料格放铜锭2、紫晶1，注入40魔力，完成后取线圈。根芯在背面注能口投入，释放30魔力。",
+        "&f线圈可做归路灯，也能进入发电、储能与压纸路线；独立侧壁投料砖和底层出料砖可接漏斗，炉不完整时停产。",
+        "&7这个节点只检查灯具实物，不消费、不强制主线。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "5087608DA1ABDDF3",
+          "type": "item",
+          "item": "tnc:homeward_lamp",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "subtitle": "&7魔力锻造 · 可选"
+    },
+    {
+      "id": "A7F4D95E3B2C1090",
+      "title": "&6响铃羊 · 草甸里的铜铃",
+      "icon": "tnc:bellwool_fodder",
+      "x": -19,
+      "y": 17,
+      "size": 1.25,
+      "shape": "circle",
+      "description": [
+        "&6&l去野外寻找真正的响铃羊",
+        "",
+        "&f在远离小镇的草原、草甸或向日葵平原，寻找长青角、颈下挂铜铃的响铃羊。它是独立物种，普通绵羊喂食后不会变身。",
+        "&7两穗路铃麦和一份小麦可做饲捆，分别喂给两只成年响铃羊即可繁殖。每只繁殖后需等一个游戏日；幼羊约两游戏日长大。",
+        "&f用剪刀从成年活羊取得两团响绒，之后每两个游戏日可再剪一次。羊吃草、长绒，不必宰杀。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "A7F4D95E3B2C1091",
+          "type": "item",
+          "item": "tnc:bellwool_fodder",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "subtitle": "&7寻找独立羊种 × 牧养 · 可选"
+    },
+    {
+      "id": "A7F4D95E3B2C1092",
+      "title": "&e响绒 · 留下羊的回报",
+      "icon": "tnc:resonant_fleece",
+      "x": -19,
+      "y": 21,
+      "size": 1.25,
+      "shape": "circle",
+      "description": [
+        "&e&l剪毛，不必杀羊",
+        "",
+        "&f响绒四团可以卖给朝夕商行，也可能出现在酒馆材料委托里。",
+        "&7两团响绒与一根线可合成两条牵绳；再添皮革可编成能防细雪冻结的响绒毡。"
+      ],
+      "dependencies": [
+        "A7F4D95E3B2C1090"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "A7F4D95E3B2C1093",
+          "type": "item",
+          "item": "tnc:resonant_fleece",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "subtitle": "&7羊仍活着 · 可选"
+    },
+    {
+      "id": "A7F4D95E3B2C1094",
+      "title": "&9缄声蕈 · 洞穴里的安静",
+      "icon": "tnc:hushcap_spore",
+      "x": -28,
+      "y": 10,
+      "size": 1.25,
+      "shape": "circle",
+      "description": [
+        "&9&l走得慢，菌盖才会舒展",
+        "",
+        "&f新探索的蘑菇岛或原始云杉林偶有野生缄声蕈。褐蘑菇、苔块、紫水晶碎片也可培出孢子。种在菌丝、苔块或洞石上，保持昏暗与安静。",
+        "&7附近生物不停走动会让菌盖闭合；安静后成熟，可右键摘蕈片，孢子仍可续种。",
+        "&f两片蕈片、胡萝卜和碗能熬洞行蕈汤，短暂看清暗处；酒馆和商行也收这种蘑菇。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "A7F4D95E3B2C1095",
+          "type": "item",
+          "item": "tnc:hushcap_spore",
+          "count": 1,
+          "consume_items": false
+        },
+        {
+          "id": "A7F4D95E3B2C1096",
+          "type": "item",
+          "item": "tnc:hushcap_broth",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "subtitle": "&7洞石 / 阴暗 / 安静 · 可选"
+    },
+    {
+      "id": "A7F4D95E3B2C1097",
+      "title": "&3雨书莓 · 把雨酿在瓶里",
+      "icon": "tnc:rainletter_seed",
+      "x": 28,
+      "y": 10,
+      "size": 1.25,
+      "shape": "circle",
+      "description": [
+        "&3&l雨天结果，晴天也有办法",
+        "",
+        "&f新探索的丛林可能见到野生雨书莓。甜浆果、紫水晶碎片和纸也可培出种子；种在泥土或耕地上，雨水会育果。",
+        "&7不下雨时，拿一瓶清水右键苗株也能浇灌，返还空瓶。成熟后右键采果，植株留下继续生长。",
+        "&f两颗果、玻璃瓶与糖可做雨书莓露，短暂获得水下呼吸；果子也能交酒馆或卖给商行。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "A7F4D95E3B2C1098",
+          "type": "item",
+          "item": "tnc:rainletter_seed",
+          "count": 1,
+          "consume_items": false
+        },
+        {
+          "id": "A7F4D95E3B2C1099",
+          "type": "item",
+          "item": "tnc:rainletter_cordial",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "subtitle": "&7雨水 / 手动浇灌 · 可选"
+    },
+    {
+      "id": "A7F4D95E3B2C1100",
+      "title": "&b蓄魔根 · 把魔力种进土里",
+      "icon": "tnc:mana_root_seed",
+      "x": 0,
+      "y": 29,
+      "size": 1.4,
+      "shape": "hexagon",
+      "description": [
+        "&b&l田地与魔法炉之间，长着一条活的线",
+        "",
+        "&f甜菜种、紫水晶碎片和铜锭可培出两粒蓄魔根种；种在泥土或耕地上。",
+        "&7空手右键四次，每次从自己的魔法石注入 10 魔力。根吸满后仍需生长时间，成熟时右键取出一枚根芯，根会重新发芽。",
+        "&f手持根芯右键载魔锻造炉可释放 30 魔力。你投入 40、只取回 30；它是便携储能，不会凭空生魔力或电力。",
+        "&7酒馆偶尔会收根芯。只做冒险也可直接手动给炉充能，这条植物路线完全可选。"
+      ],
+      "dependencies": [
+        "02CCAC82BD3FA23E"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "A7F4D95E3B2C1101",
+          "type": "item",
+          "item": "tnc:mana_root_core",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "subtitle": "&7玩家魔力 → 活根 → 工坊 · 可选"
+    },
+    {
+      "id": "1C75C30F564C905F",
+      "title": "&a绿脉枝 · 留株还是取枝",
+      "icon": "tnc:verdant_vein_seed",
+      "x": -10,
+      "y": 35,
+      "size": 1.4,
+      "shape": "hexagon",
+      "description": [
+        "&a&l把真实魔力留在院子里",
+        "",
+        "&f在湿林找野株；旧地图用剪刀右键湿林水边的蕨，每两秒采样一次，最多十次可得种。普通土壤可种，根旁水、白天足够日光才成长。",
+        "&7成熟储魔40，每秒最多送1，能给邻接的本人发电座或炉口补能；有真实取魔才显示绿流。剪枝会取到导魔枝，但退回生长阶段、清空储量。",
+        "&f导魔枝可与铜、绝缘炉泥锻成导能线。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "7794FF8BABEBF388",
+          "type": "item",
+          "item": "tnc:verdant_vein_seed",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "subtitle": "&7可选生活工艺 · 持有检测、不消耗"
+    },
+    {
+      "id": "726ACAFB4CBAB9DC",
+      "title": "&b魔导电网 · 光有账可查",
+      "icon": "tnc:mana_generator",
+      "x": 0,
+      "y": 35,
+      "size": 1.4,
+      "shape": "hexagon",
+      "description": [
+        "&b&l魔力变电，电驱动生活",
+        "",
+        "&f空手右键发电座注入自己的魔力，根芯也可供能；每魔力转换5 FE。把同主人的导能线、蓄能匣和作业灯接在一起。",
+        "&7蓄能匣存5000 FE；灯潜行右键可选关、常亮、仅夜间、红石。每4刻耗1 FE，断电真熄灭。机器/线路只处理已加载区块，不跨邻居产权取能。",
+        "&f一株绿脉枝适合夜灯；全天灯建议两株加蓄能匣，更多工作机要另备供能。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "BC8532B83E338EC4",
+          "type": "item",
+          "item": "tnc:mana_generator",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "subtitle": "&7可选生活工艺 · 持有检测、不消耗"
+    },
+    {
+      "id": "2E678B52695CF2DF",
+      "title": "&6苇杆压纹 · 第一台电力工艺",
+      "icon": "tnc:mana_paper_press",
+      "x": 10,
+      "y": 35,
+      "size": 1.4,
+      "shape": "hexagon",
+      "description": [
+        "&6&l湿岸的收成进入工坊",
+        "",
+        "&f压纹机右键放听潮苇杆和真实水桶，空桶返还。一桶水可做8批：每批苇杆2、水125mB、80 FE，80刻后出普通纸3。",
+        "&7缺水、缺电或成纸放不下时暂停，原料保留。潜行空手右键取成纸；顶部/侧面漏斗投苇杆，底部收成纸。拆机搬迁保留储电、库存和水量。",
+        "&f没建电网时仍可手工苇杆3做纸3；这里产原版纸，能制书、地图或交易。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "45E869B62F82818C",
+          "type": "item",
+          "item": "tnc:mana_paper_press",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "subtitle": "&7可选生活工艺 · 持有检测、不消耗"
+    }
+  ]
+}

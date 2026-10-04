@@ -40,6 +40,7 @@ public final class MagicForgeGameTests {
                 case INPUT -> MagicForgeContent.INPUT_PORT.defaultBlockState();
                 case OUTPUT -> MagicForgeContent.OUTPUT_PORT.defaultBlockState();
                 case CORE -> MagicForgeContent.FORGE.defaultBlockState().setValue(MagicForgeBlock.FACING, front);
+                case HEART -> MagicForgeContent.HEART.defaultBlockState();
                 case INJECTOR -> MagicForgeContent.INJECTOR.defaultBlockState()
                         .setValue(ForgeInjectorBlock.FACING, front.getOpposite());
                 case EXHAUST -> MagicForgeContent.EXHAUST.defaultBlockState();
@@ -69,9 +70,9 @@ public final class MagicForgeGameTests {
             int real = 0;
             for (int i = 0; i < ForgeStructure.CELL_COUNT; i++)
                 if (ForgeStructure.expected(i) != ForgeStructure.Part.AIR) real++;
-            helper.assertTrue(real == 26, "Structure has exactly 26 tangible blocks and one air cavity");
+            helper.assertTrue(real == 27, "Four materials fill all twenty-seven cells");
             BlockPos chamber = ForgeStructure.at(core, front, 1, 1, 1);
-            helper.assertTrue(helper.getLevel().getBlockState(chamber).isAir(), "Middle cavity remains empty");
+            helper.assertTrue(helper.getLevel().getBlockState(chamber).is(MagicForgeContent.HEART), "Central cell is the mana heart");
         }
         helper.succeed();
     }
@@ -84,14 +85,14 @@ public final class MagicForgeGameTests {
         helper.getLevel().setBlockAndUpdate(injector,
                 MagicForgeContent.INJECTOR.defaultBlockState().setValue(ForgeInjectorBlock.FACING, Direction.NORTH));
         helper.assertTrue(!forge.formed() && forge.report().code(ForgeStructure.index(1, 0, 1))
-                == ForgeStructure.WRONG_DIRECTION, "Reverse injector is diagnosed and refuses formation");
+                == ForgeStructure.WRONG_BLOCK, "Legacy injector cannot replace masonry");
         helper.getLevel().setBlockAndUpdate(injector,
-                MagicForgeContent.INJECTOR.defaultBlockState().setValue(ForgeInjectorBlock.FACING, Direction.SOUTH));
+                MagicForgeContent.FIREBRICK.defaultBlockState());
         BlockPos chamber = ForgeStructure.at(core, Direction.NORTH, 1, 1, 1);
         helper.getLevel().setBlockAndUpdate(chamber, Blocks.STONE.defaultBlockState());
         helper.assertTrue(!forge.formed() && forge.report().code(ForgeStructure.index(1, 1, 1))
-                == ForgeStructure.FILLED_CHAMBER, "Filled chamber is diagnosed");
-        helper.getLevel().setBlockAndUpdate(chamber, Blocks.AIR.defaultBlockState());
+                == ForgeStructure.WRONG_BLOCK, "Ordinary stone cannot replace the mana heart");
+        helper.getLevel().setBlockAndUpdate(chamber, MagicForgeContent.HEART.defaultBlockState());
         helper.getLevel().setBlockAndUpdate(core.offset(3, 0, 0),
                 MagicForgeContent.FORGE.defaultBlockState().setValue(MagicForgeBlock.FACING, Direction.WEST));
         helper.assertTrue(forge.formed(), "Incomplete nearby core cannot falsely claim shared parts");
@@ -114,7 +115,7 @@ public final class MagicForgeGameTests {
         helper.assertTrue(forge.getItem(0).getCount() == 2 && forge.getItem(1).getCount() == 1
                 && forge.charge() == 40 && forge.getItem(4).isEmpty(),
                 "Breaking any frame pauses before spending mana or items, even on completion tick");
-        helper.getLevel().setBlockAndUpdate(frame, MagicForgeContent.COPPER_FRAME.defaultBlockState());
+        helper.getLevel().setBlockAndUpdate(frame, MagicForgeContent.FIREBRICK.defaultBlockState());
         for (int i = 0; i < 2; i++) MagicForgeBlockEntity.serverTick(helper.getLevel(), core,
                 helper.getLevel().getBlockState(core), forge);
         helper.assertTrue(forge.getItem(4).is(MagicForgeContent.MANA_COPPER_COIL)
@@ -172,7 +173,7 @@ public final class MagicForgeGameTests {
         helper.assertTrue(output.extractItem(0, 1, false).isEmpty()
                 && input.insertItem(1, new ItemStack(Items.AMETHYST_SHARD), false).getCount() == 1,
                 "Cached capability cannot transfer while any structural block is missing");
-        helper.getLevel().setBlockAndUpdate(frame, MagicForgeContent.COPPER_FRAME.defaultBlockState());
+        helper.getLevel().setBlockAndUpdate(frame, MagicForgeContent.FIREBRICK.defaultBlockState());
         helper.getLevel().setBlockAndUpdate(core, Blocks.AIR.defaultBlockState());
         var replacement = build(helper, core, Direction.NORTH);
         replacement.setOwner(player.getUUID());

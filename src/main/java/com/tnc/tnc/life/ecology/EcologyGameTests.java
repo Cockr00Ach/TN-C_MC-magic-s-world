@@ -25,21 +25,21 @@ public final class EcologyGameTests {
         be.prune();h.assertTrue(be.storedMana()==0&&level.getBlockState(p).getValue(VerdantVeinBlock.AGE)==1,"Pruning spends stored charge and gives up mature generation");h.succeed();
     }
     @GameTest(template="building_test_empty",batch="ecology",timeoutTicks=50)
-    public static void shadedDryPlantDoesNotCreateMana(GameTestHelper h){
+    public static void cultivatedPlantProducesRealManaEvenInShadeWithoutWater(GameTestHelper h){
         var l=h.getLevel();var p=h.absolutePos(new BlockPos(2,3,2));l.setBlockAndUpdate(p.below(),Blocks.DIRT.defaultBlockState());l.setBlockAndUpdate(p,EcologyContent.VERDANT.defaultBlockState().setValue(VerdantVeinBlock.AGE,3));
         l.setBlockAndUpdate(p.above(),Blocks.STONE.defaultBlockState());var be=(VerdantVeinBlockEntity)l.getBlockEntity(p);
         // Cross a real one-second generation boundary; an arbitrary direct call can
         // miss the modulo-20 update entirely and give a false-positive test.
-        h.runAfterDelay(21,()->{h.assertTrue(be.storedMana()==0&&be.drawMana(1)==0,"Dry shaded plants do not create phantom energy");h.succeed();});
+        h.runAfterDelay(21,()->{int before=be.storedMana();h.assertTrue(before>=1&&before<=2&&be.drawMana(1)==1&&be.storedMana()==before-1,"A real generation boundary creates one mana, and transfer debits it even on dry shaded soil");h.succeed();});
     }
     @GameTest(template="building_test_empty",batch="ecology",timeoutTicks=30)
-    public static void reloadCannotCreditUnsuitableGrowthOrOfflineMana(GameTestHelper h){
+    public static void reloadCreditsCultivatedGrowthOnceButNeverOfflineMana(GameTestHelper h){
         var l=h.getLevel();var p=h.absolutePos(new BlockPos(2,3,2));
         l.setBlockAndUpdate(p.below(),Blocks.DIRT.defaultBlockState());l.setBlockAndUpdate(p,EcologyContent.VERDANT.defaultBlockState());l.setBlockAndUpdate(p.above(),Blocks.STONE.defaultBlockState());
         var be=(VerdantVeinBlockEntity)l.getBlockEntity(p);var tag=be.saveWithoutMetadata();
         tag.putInt("Growth",0);tag.putInt("Mana",0);tag.putBoolean("WasGrowing",true);tag.putLong("LastActiveTick",l.getGameTime()-96000);
         be.load(tag);be.onLoad();
-        h.assertTrue(l.getBlockState(p).getValue(VerdantVeinBlock.AGE)==0&&be.storedMana()==0,"Even long absence cannot credit a shaded dry plant or invent stored mana");
+        h.assertTrue(l.getBlockState(p).getValue(VerdantVeinBlock.AGE)==3&&be.storedMana()==0,"Cultivated growth catches up on dry shaded soil; unloaded energy generation remains zero");
         be.onLoad();h.assertTrue(be.storedMana()==0,"Repeated load callbacks cannot synthesize energy");h.succeed();
     }
 }

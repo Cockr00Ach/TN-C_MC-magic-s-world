@@ -103,7 +103,7 @@
   "block.tnc.tavern_lamp": "Table Lamp",
   "entity.tnc.yan_dark": "Gongsun Yan (Lost)",
   "item.tnc.tnc_iron_armor": "Iron Armor",
-  "block.tnc.magic_forge": "Mana Forge",
+  "block.tnc.magic_forge": "Alchemy Furnace",
   "item.tnc.magic_forge": "Mana Forge",
   "item.tnc.mana_copper_coil": "Mana Copper Coil",
   "block.tnc.homeward_lamp": "Homeward Lamp",
@@ -383,5 +383,6 @@
   "entity.tnc.apollo": "Apollo",
   "entity.tnc.fighting_angel": "Fighting Angel",
   "entity.tnc.light_dragon": "Light Dragon",
-  "effect.tnc.light_dragon_scales": "Light Dragon Scales"
+  "effect.tnc.light_dragon_scales": "Light Dragon Scales",
+  "block.tnc.forge_core": "Mana Forge Core"
 }

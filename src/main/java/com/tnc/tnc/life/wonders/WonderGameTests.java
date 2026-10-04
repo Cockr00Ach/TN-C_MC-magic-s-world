@@ -18,6 +18,17 @@ import java.util.*;
 @GameTestHolder("tnc") @PrefixGameTestTemplate(false)
 public final class WonderGameTests {
     @GameTest(template="building_test_empty",batch="living_wonders",timeoutTicks=30)
+    public static void bottlesAndPulseBaseFeedNewFourMaterialForgeMouthExactlyOnce(GameTestHelper h){
+        var l=h.getLevel();var player=AdventureGameTests.player(h);var at=h.absolutePos(new BlockPos(2,2,2));
+        var forge=com.tnc.tnc.production.MagicForgeGameTests.build(h,at,Direction.NORTH);forge.setOwner(player.getUUID());
+        var bottle=new ItemStack(PastureRegistry.item("mana_bottle"));var ledger=PastureBottleLedger.get(l);ledger.deposit(bottle,24,24);player.setItemInHand(InteractionHand.MAIN_HAND,bottle);
+        var hit=new BlockHitResult(Vec3.atCenterOf(at),Direction.NORTH,at,false);l.getBlockState(at).use(l,player,InteractionHand.MAIN_HAND,hit);
+        h.assertTrue(forge.charge()==24&&ledger.amount(bottle)==0,"Normal right-click injects real bottled mana through the new front furnace mouth");
+        ledger.deposit(bottle,24,10);var base=at.north();int moved=ManaBottleItem.transferFromBase(l,base,player.getUUID(),bottle,5);
+        h.assertTrue(moved==5&&forge.charge()==29&&ledger.amount(bottle)==5,"A base beside the furnace mouth sends and debits exactly five mana");
+        l.setBlockAndUpdate(at.below(),Blocks.AIR.defaultBlockState());h.assertTrue(ManaBottleItem.transferFromBase(l,base,player.getUUID(),bottle,5)==0&&ledger.amount(bottle)==5,"Incomplete structures cannot accept or consume bottled mana");h.succeed();
+    }
+    @GameTest(template="building_test_empty",batch="living_wonders",timeoutTicks=30)
     public static void bottleCopiesShareOneSavedBalanceAndRejectStackedDeposit(GameTestHelper h){
         var ledger=new PastureBottleLedger();var bottle=new ItemStack(PastureRegistry.item("mana_bottle"));
         h.assertTrue(ledger.deposit(bottle,24,40)==24,"Capacity clamps an actual deposit");
@@ -111,9 +122,10 @@ public final class WonderGameTests {
         for(int dx=-56;dx<=56;dx++)for(int dz=-56;dz<=56;dz++)l.setBlock(center.offset(dx,-1,dz),Blocks.STONE.defaultBlockState(),2);
         var sites=LightBloomData.findSites(player,center);h.assertTrue(sites.size()>80&&sites.size()<=256,"Surface discovery creates a bounded light field");
         for(var at:sites){l.setBlock(at,WonderContent.LIGHT_NODE.defaultBlockState(),3);((LightNodeEntity)l.getBlockEntity(at)).bind(UUID.randomUUID(),l.getGameTime()+400);}
-        h.runAfterDelay(60,()->{try{
+        h.startSequence().thenWaitUntil(()->{
             int lit=0,total=0;for(int dx=-50;dx<=50;dx+=2)for(int dz=-50;dz<=50;dz+=2)if(dx*dx+dz*dz<=2500){total++;if(l.getBrightness(LightLayer.BLOCK,center.offset(dx,0,dz))>=5)lit++;}
             h.assertTrue(lit>=total*.9,"Actual block light reaches at least90% of a flat50-block radius; got "+lit+"/"+total);
+            }).thenExecute(()->{try{
             for(var at:sites)l.setBlock(at,Blocks.AIR.defaultBlockState(),2);
             for(int z=-56;z<=56;z++)for(int y=0;y<=9;y++)l.setBlock(center.offset(4,y,z),Blocks.STONE.defaultBlockState(),2);
             var sheltered=LightBloomData.findSites(player,center);h.assertTrue(sheltered.stream().noneMatch(at->at.getX()>center.getX()+4),"Opaque wall prevents planting lights through the wall");h.succeed();

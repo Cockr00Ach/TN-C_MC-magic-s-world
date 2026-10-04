@@ -266,7 +266,7 @@ public final class MagicForgeBlockEntity extends BlockEntity implements WorldlyC
 
     public String useRootCore(ServerPlayer player, ItemStack held, BlockPos injector) {
         if (!canOperate(player, true)) return "这座炉台不属于你，或当前位置禁止使用。";
-        if (!formed() || !injector.equals(ForgeStructure.at(worldPosition, front(), 1, 0, 1)))
+        if (!formed() || !injector.equals(worldPosition))
             return firstIssueMessage() + " 根芯未消耗。";
         if (!held.is(TNMod.MANA_ROOT_CORE.get())) return "请手持蓄魔根芯。";
         if (MAX_CHARGE - charge < ManaRoot.CORE_FORGE_MANA)
@@ -349,8 +349,8 @@ public final class MagicForgeBlockEntity extends BlockEntity implements WorldlyC
 
     private void drawAdjacentPlant(ServerLevel server) {
         if (owner == null || charge >= MAX_CHARGE) return;
-        BlockPos injector = ForgeStructure.at(worldPosition, front(), 1, 0, 1);
-        BlockPos plantPos = injector.relative(front().getOpposite());
+        BlockPos injector = worldPosition;
+        BlockPos plantPos = worldPosition.relative(front());
         if (!server.hasChunkAt(plantPos) || TownProtection.town(server, plantPos)
                 && HousingService.ownedAt(server, plantPos) == null) return;
         var corePlot = HousingService.ownedAt(server, worldPosition);
@@ -455,10 +455,17 @@ public final class MagicForgeBlockEntity extends BlockEntity implements WorldlyC
     }
     @Override public void clearContent() { for (int i = 0; i < items.size(); i++) items.set(i, ItemStack.EMPTY); changed(); }
     // Direct hopper/pipe access to the core would bypass the 26-part structure.
-    @Override public int[] getSlotsForFace(Direction side) { return NO_DIRECT_PORT; }
+    @Override public int[] getSlotsForFace(Direction side) {
+        return formedForTransfer() && automaticAccessAllowed()
+                ? side == Direction.DOWN ? new int[]{OUTPUT_SLOT} : new int[]{0, 1, 2, 3} : NO_DIRECT_PORT;
+    }
     @Override public boolean canPlaceItem(int slot, ItemStack stack) {
         return slot >= 0 && slot < 4 || slot == UPGRADE_SLOT && upgradeUses(stack) > 0;
     }
-    @Override public boolean canPlaceItemThroughFace(int slot, ItemStack stack, Direction side) { return false; }
-    @Override public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction side) { return false; }
+    @Override public boolean canPlaceItemThroughFace(int slot, ItemStack stack, Direction side) {
+        return slot >= 0 && slot < 4 && side != Direction.DOWN && formedForTransfer() && automaticAccessAllowed();
+    }
+    @Override public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction side) {
+        return slot == OUTPUT_SLOT && side == Direction.DOWN && formedForTransfer() && automaticAccessAllowed();
+    }
 }

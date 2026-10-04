@@ -35,12 +35,14 @@ public final class MagicForgeContent {
     // Construct registry entries only inside their own RegisterEvent callbacks.
     public static MagicForgeBlock FORGE;
     public static HomewardLampBlock LAMP;
-    public static ForgePartBlock FIREBRICK;
+    public static ForgeBrickBlock FIREBRICK;
     public static ForgeFrameBlock COPPER_FRAME;
     public static ForgePortBlock INPUT_PORT;
     public static ForgePortBlock OUTPUT_PORT;
     public static ForgeInjectorBlock INJECTOR;
     public static ForgeExhaustBlock EXHAUST;
+    public static ForgePartBlock HEART;
+    public static Item HEART_ITEM;
     public static Item FORGE_ITEM;
     public static Item MANA_COPPER_COIL;
     public static Item LAMP_ITEM;
@@ -64,12 +66,14 @@ public final class MagicForgeContent {
         event.register(Registries.BLOCK, helper -> {
             FORGE = new MagicForgeBlock();
             LAMP = new HomewardLampBlock();
-            FIREBRICK = new ForgePartBlock(false);
+            FIREBRICK = new ForgeBrickBlock();
             COPPER_FRAME = new ForgeFrameBlock();
             INPUT_PORT = new ForgePortBlock(false);
             OUTPUT_PORT = new ForgePortBlock(true);
             INJECTOR = new ForgeInjectorBlock();
             EXHAUST = new ForgeExhaustBlock();
+            HEART = new ForgePartBlock(false);
+            helper.register(ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "forge_core"), HEART);
             helper.register(FORGE_ID, FORGE);
             helper.register(LAMP_ID, LAMP);
             helper.register(BRICK_ID, FIREBRICK);
@@ -89,6 +93,8 @@ public final class MagicForgeContent {
             OUTPUT_ITEM = new BlockItem(OUTPUT_PORT, new Item.Properties());
             INJECTOR_ITEM = new BlockItem(INJECTOR, new Item.Properties());
             EXHAUST_ITEM = new BlockItem(EXHAUST, new Item.Properties());
+            HEART_ITEM = new BlockItem(HEART, new Item.Properties());
+            helper.register(ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "forge_core"), HEART_ITEM);
             GUIDE_ITEM = new ForgeGuideItem();
             helper.register(FORGE_ID, FORGE_ITEM);
             helper.register(COIL_ID, MANA_COPPER_COIL);
@@ -104,7 +110,7 @@ public final class MagicForgeContent {
         event.register(Registries.BLOCK_ENTITY_TYPE, helper -> {
             FORGE_ENTITY = BlockEntityType.Builder.of(MagicForgeBlockEntity::new, FORGE).build(null);
             helper.register(FORGE_ID, FORGE_ENTITY);
-            PORT_ENTITY = BlockEntityType.Builder.of(ForgePortBlockEntity::new, INPUT_PORT, OUTPUT_PORT).build(null);
+            PORT_ENTITY = BlockEntityType.Builder.of(ForgePortBlockEntity::new, INPUT_PORT, OUTPUT_PORT, FIREBRICK).build(null);
             helper.register(INPUT_ID, PORT_ENTITY);
         });
         event.register(Registries.MENU, helper -> {
@@ -127,6 +133,7 @@ public final class MagicForgeContent {
     public static void creativeTab(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey().equals(TNMod.TNC_TAB.getKey())) {
             event.accept(FORGE_ITEM);
+        event.accept(HEART_ITEM);
             event.accept(MANA_COPPER_COIL);
             event.accept(LAMP_ITEM);
             event.accept(BRICK_ITEM);

@@ -173,6 +173,32 @@ public class MagicStoneData {
     }
 
     /** 已经配好的槽数（跨两页）。 */
+    /** Keep slot positions while upgrading each chain once to its learned top. */
+    public void normalizeLoadout() {
+        java.util.Map<String,Integer> existingTops=new java.util.HashMap<>();
+        for(int i=0;i<LOADOUT_SLOTS;i++){
+            ResourceLocation id=loadout.get(i)==null?null:ResourceLocation.tryParse(loadout.get(i));
+            SpellCatalog.Entry entry=id==null?null:SpellCatalog.byId(id);
+            if(entry==null||entry.independent()||entry.element()==null||!hasLearned(id))continue;
+            SpellCatalog.Entry top=SpellCatalog.topLearned(this,entry.element(),entry.chain());
+            if(top!=null&&top.id().equals(id))existingTops.putIfAbsent(top.id().toString(),i);
+        }
+        java.util.Set<String> seen=new java.util.HashSet<>();
+        for(int i=0;i<LOADOUT_SLOTS;i++){
+            String bound=loadout.get(i);if(bound==null)continue;
+            ResourceLocation id=ResourceLocation.tryParse(bound);
+            if(id==null||!hasLearned(id)){loadout.set(i,null);continue;}
+            SpellCatalog.Entry entry=SpellCatalog.byId(id);
+            if(entry!=null&&!entry.independent()&&entry.element()!=null){
+                SpellCatalog.Entry top=SpellCatalog.topLearned(this,entry.element(),entry.chain());
+                if(top==null){loadout.set(i,null);continue;}
+                bound=top.id().toString();
+                if(existingTops.containsKey(bound)&&existingTops.get(bound)!=i){loadout.set(i,null);continue;}
+            }
+            loadout.set(i,seen.add(bound)?bound:null);
+        }
+    }
+
     public int loadoutCount() {
         int count = 0;
         for (String id : loadout) {

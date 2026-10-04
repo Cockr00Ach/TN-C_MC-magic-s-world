@@ -25,7 +25,7 @@ public final class VerdantVeinBlockEntity extends BlockEntity implements OwnedMa
     public int storedMana(){return mana;}
     public void setOwner(UUID id){if(owner==null){owner=id;setChanged();}}
     static boolean wet(ServerLevel l,BlockPos p){for(Direction d:Direction.Plane.HORIZONTAL)if(l.getFluidState(p.below().relative(d)).is(FluidTags.WATER))return true;return l.isRainingAt(p);}
-    static boolean valid(ServerLevel l,BlockPos p){return l.isDay()&&l.getBrightness(LightLayer.SKY,p)>=12&&wet(l,p);}
+    static boolean valid(ServerLevel l,BlockPos p){return l.hasChunkAt(p);}
     public static void tick(ServerLevel l,BlockPos p,BlockState s,VerdantVeinBlockEntity be){
         if(l.getGameTime()%20!=0)return;
         int age=s.getValue(VerdantVeinBlock.AGE);
@@ -43,13 +43,13 @@ public final class VerdantVeinBlockEntity extends BlockEntity implements OwnedMa
     public int drawMana(int max){
         if(max<1||!(level instanceof ServerLevel l)||getBlockState().getValue(VerdantVeinBlock.AGE)<3||mana==0)return 0;
         long second=l.getGameTime()/20;if(lastDrawSecond==second)return 0;
-        // Stored charge remains available in darkness, but it cannot regenerate.
+        // A receiver only withdraws existing stored charge; generation occurs in tick().
         mana--;lastDrawSecond=second;setChanged();return 1;
     }
     public boolean prune(){mana=0;growth=12000;prunes++;lastDrawSecond=-1;setChanged();if(level!=null)level.setBlock(worldPosition,getBlockState().setValue(VerdantVeinBlock.AGE,1).setValue(VerdantVeinBlock.GLOW,0),3);return prunes%3==0;}
     public String status(){
-        if(getBlockState().getValue(VerdantVeinBlock.AGE)<3)return "绿脉枝成长 "+(growth*100/24000)+"%；需要白天、日照和根旁水。";
-        String reason=level instanceof ServerLevel l?(valid(l,worldPosition)?"正在蓄魔":"缺光或缺水，停止补充"):"";
+        if(getBlockState().getValue(VerdantVeinBlock.AGE)<3)return "翠脉枝成长 "+(growth*100/24000)+"%；栽培后不受光照与水源限制。";
+        String reason=level instanceof ServerLevel l?(valid(l,worldPosition)?"正在蓄魔":"区块未加载"):"";
         return "绿脉储魔 "+mana+"/40 · "+reason+"；每秒最多送1。用剪刀取枝会暂停供能。";
     }
     @Override public void onLoad(){

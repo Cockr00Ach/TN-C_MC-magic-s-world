@@ -1,0 +1,282 @@
+{
+  "id": "2461EBA415AB4226",
+  "filename": "tnc_field_04_workshop",
+  "group": "59249BFD5667691A",
+  "title": "&b&l魔导工坊与小自动化",
+  "icon": "tnc:forge_guide",
+  "order_index": 5,
+  "default_hide_dependency_lines": false,
+  "default_quest_shape": "hexagon",
+  "quest_links": [],
+  "images": [],
+  "quests": [
+    {
+      "id": "35C18CF0EC952999",
+      "title": "&b&l魔导工坊 · 魔力成为工作",
+      "icon": "tnc:forge_guide",
+      "x": 0,
+      "y": -4,
+      "size": 2,
+      "shape": "square",
+      "description": [
+        "&f魔力来自自己、成熟翠脉枝和养成后的浮鲸。存储与输送是实际资源账，不靠改名物品。",
+        "&7这一页教你装炉、接线、做有限自动化；不是必须完成的主线。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "1B19189F7DEC20F2",
+          "type": "checkmark",
+          "title": "阅读这项实际玩法说明"
+        }
+      ]
+    },
+    {
+      "id": "3243A78BBC688E5E",
+      "title": "&6先读3×3×3搭炉说明",
+      "icon": "tnc:forge_guide",
+      "x": -16,
+      "y": 0,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "按说明书摆完整27格：上下层铜框与耐火砖，中层四接口与四立柱，最上方中央排烟口。",
+        "任意缺块、接口反向或材料不足都会暂停，完成前不会提前吃掉材料。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "2EFA7BDE5A8D8BA6",
+          "type": "item",
+          "item": "tnc:forge_guide",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "409494854293A030",
+      "title": "&6打开炉子的真实GUI",
+      "icon": "tnc:magic_forge",
+      "x": 0,
+      "y": 0,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "炉芯右键打开四输入、一输出、一升级槽。配方列表显示材料、魔力与进度；后注能口空手注魔，或根芯/魔力瓶注入。",
+        "加魔、点火、加工与完成各有粒子和声音；输入/输出接口可接自己的漏斗。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "3C0AE9570EFF7DBB",
+          "type": "item",
+          "item": "tnc:magic_forge",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "56D35D4906FC9903",
+      "title": "&e炉油与冷凝壳",
+      "icon": "tnc:hearth_oil",
+      "x": 16,
+      "y": 0,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "余热椒油十次成功作业，冷凝壳二十次成功作业，都让当前工作20%更快。",
+        "只有实际完成才扣次数，暂停不扣；移出升级物保留剩余次数。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "67BCEEE6738C0287",
+          "type": "item",
+          "item": "tnc:hearth_oil",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "57500388ACCEA4D2",
+      "title": "&a魔力发电",
+      "icon": "tnc:mana_generator",
+      "x": -16,
+      "y": 6,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "发电座收真实魔力，按单向规则转换FE。不会把FE转换回无限魔力。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "59F335D74F66CBEB",
+          "type": "item",
+          "item": "tnc:mana_generator",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "72FF80A5A0E5B438",
+      "title": "&a铜脉接线",
+      "icon": "tnc:mana_cable",
+      "x": 0,
+      "y": 6,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "连接同主人设备；网络有限节点、吞吐和加载范围，不会强行加载天空岛或远处区块。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "277948ACE934D040",
+          "type": "item",
+          "item": "tnc:mana_cable",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "69D41A475111D8A8",
+      "title": "&b存电再分配",
+      "icon": "tnc:mana_battery",
+      "x": 16,
+      "y": 6,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "魔力先存瓶或发电座；电存在5000FE蓄电箱。只能向合规设备实际转移可用电量。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "0D94C5D2ECAE8CB1",
+          "type": "item",
+          "item": "tnc:mana_battery",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "2253B39328D3EF29",
+      "title": "&e给工作台照明",
+      "icon": "tnc:mana_work_lamp",
+      "x": -16,
+      "y": 12,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "工作灯可常亮、夜间或红石控制，默认每四有效照明刻耗1FE。",
+        "节能晶芯：有效照明十分钟，改为每八刻1FE。聚光镜片：真实方块光12升15。都可拆，剩余次数保存。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "44A22D90D406CBCD",
+          "type": "item",
+          "item": "tnc:mana_work_lamp",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "7A625D7617202985",
+      "title": "&6一台会吃水的压纸机",
+      "icon": "tnc:mana_paper_press",
+      "x": 0,
+      "y": 12,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "听潮苇、水与FE实际加工成纸，缺任一原料暂停。可接合规漏斗供料、取产。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "69022601CC66A49C",
+          "type": "item",
+          "item": "tnc:mana_paper_press",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "30B411C58D4B92B1",
+      "title": "&d声音控制红石",
+      "icon": "tnc:field_sound_relay",
+      "x": 16,
+      "y": 12,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "空手右键循环音高0—24；六格内同音符触发十刻红石脉冲，五秒冷却。",
+        "装伴步铃芯后空手可手动响铃；潜行调音，剪刀拆回铃芯。可驱动魔瓶座。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "028E3ED619A00119",
+          "type": "item",
+          "item": "tnc:field_sound_relay",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "4E3E092390569C98",
+      "title": "&b动物也参加工坊",
+      "icon": "tnc:storm_crystal",
+      "x": -16,
+      "y": 18,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "鸣线蜥把实际存电压成50FE雷余晶，右键蓄能设备只转入可接收电量，余量仍在晶中。",
+        "雾腹水獭供灌溉、锦纹筑狸修围栏、囊背负兽搬货；自动化从伙伴和资源分工开始。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "574E757FCA2F5E98",
+          "type": "item",
+          "item": "tnc:storm_crystal",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    }
+  ]
+}

@@ -84,8 +84,10 @@ public final class OriginalCropsGameTests {
             h.assertTrue(OriginalCrops.TIDE_REED_CROP.defaultBlockState().canSurvive(level, pos),
                     "Tide reed roots next to shallow water");
             level.setBlockAndUpdate(pos.below().east(), Blocks.DIRT.defaultBlockState());
-            h.assertTrue(!OriginalCrops.TIDE_REED_CROP.defaultBlockState().canSurvive(level, pos),
-                    "Tide reed cannot turn into an ordinary dry-field crop");
+            h.assertTrue(OriginalCrops.TIDE_REED_CROP.defaultBlockState().canSurvive(level, pos),
+                    "Cultivated tide reed grows on dry soil");
+            h.assertTrue(!OriginalCrops.WILD_TIDE_REED.defaultBlockState().canSurvive(level,pos),
+                    "Wild tide reed keeps its shoreline habitat");
         } finally {
             touched.forEach(level::setBlockAndUpdate);
         }

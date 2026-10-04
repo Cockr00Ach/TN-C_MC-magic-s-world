@@ -44,6 +44,10 @@ public final class PastureAnimalRenderer extends MobRenderer<PastureAnimal, Past
     }
 
     @Override public ResourceLocation getTextureLocation(PastureAnimal entity) { return texture; }
+    @Override protected void scale(PastureAnimal entity, PoseStack pose, float partial) {
+        float scale=com.tnc.tnc.life.pasture.PastureFlight.scale(entity.speciesId());
+        pose.scale(scale,scale,scale);
+    }
 
     /** Alpha-zero ordinary UV islands keep this glow strictly on luminous anatomy. */
     private static final class ResourceGlow extends RenderLayer<PastureAnimal, PastureAnimalModel> {

@@ -27,7 +27,10 @@ public final class ForgePortBlockEntity extends BlockEntity {
         super(MagicForgeContent.PORT_ENTITY, pos, state);
     }
 
-    private boolean isOutput() { return getBlockState().is(MagicForgeContent.OUTPUT_PORT); }
+    private boolean isOutput() { return getBlockState().is(MagicForgeContent.OUTPUT_PORT)
+            || getBlockState().is(MagicForgeContent.FIREBRICK) && level != null
+            && level.hasChunkAt(worldPosition.above())
+            && level.getBlockEntity(worldPosition.above()) instanceof MagicForgeBlockEntity; }
 
     @Nullable private MagicForgeBlockEntity findCore() {
         if (level == null || level.isClientSide || isRemoved()
@@ -39,7 +42,7 @@ public final class ForgePortBlockEntity extends BlockEntity {
                     && ForgeStructure.at(candidate, forge.front(), 0, 2, 1).equals(worldPosition)) return forge;
             return null;
         }
-        if (!getBlockState().is(MagicForgeContent.INPUT_PORT)) return null;
+        if (!getBlockState().is(MagicForgeContent.INPUT_PORT) && !getBlockState().is(MagicForgeContent.FIREBRICK)) return null;
         for (Direction front : Direction.Plane.HORIZONTAL) {
             Direction right = front.getCounterClockWise();
             for (int side : new int[]{-1, 1}) {

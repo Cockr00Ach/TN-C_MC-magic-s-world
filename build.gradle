@@ -92,6 +92,13 @@ minecraft {
                 property 'tnc.ecologyClientAudit', 'true'
                 property 'tnc.ecologyClientAuditOutput', file('work/living-ecology-client-audit.json').absolutePath
             }
+            if (project.hasProperty('forgeGuiAudit')) {
+                workingDirectory project.file('run-client-ecology-audit')
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+                property 'tnc.forgeGuiAudit', 'true'
+                args '--quickPlaySingleplayer', 'ecology-gui-feedback', '--width', '1280', '--height', '720'
+            }
         }
 
         server {

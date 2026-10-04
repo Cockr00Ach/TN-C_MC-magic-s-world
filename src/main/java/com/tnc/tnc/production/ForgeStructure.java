@@ -22,7 +22,7 @@ public final class ForgeStructure {
     public static final int SHARED_PART = 5;
     public static final int CELL_COUNT = 27;
 
-    public enum Part { BRICK, INPUT, OUTPUT, FRAME, CORE, INJECTOR, EXHAUST, AIR }
+    public enum Part { BRICK, INPUT, OUTPUT, FRAME, CORE, HEART, INJECTOR, EXHAUST, AIR }
 
     public record Scan(int[] cells, int firstBad) {
         public boolean formed() { return firstBad < 0; }
@@ -37,14 +37,11 @@ public final class ForgeStructure {
         int layer = index / 9;
         int row = index % 9 / 3;
         int column = index % 3;
-        if (layer == 0) return row == 2 && column == 1 ? Part.OUTPUT : Part.BRICK;
-        if (layer == 2) return row == 1 && column == 1 ? Part.EXHAUST
-                : row != 1 && column != 1 ? Part.FRAME : Part.BRICK;
-        if (row == 1 && column == 1) return Part.AIR;
-        if (row == 0 && column == 1) return Part.INJECTOR;
+        if (layer == 0) return Part.BRICK;
+        if (layer == 2) return row == 1 && column == 1 ? Part.EXHAUST : Part.BRICK;
+        if (row == 1 && column == 1) return Part.HEART;
         if (row == 2 && column == 1) return Part.CORE;
-        if (row == 1) return Part.INPUT;
-        return Part.FRAME;
+        return Part.BRICK;
     }
 
     public static String expectedName(Part part) {
@@ -53,7 +50,8 @@ public final class ForgeStructure {
             case INPUT -> "侧壁投料砖";
             case OUTPUT -> "底层出料砖";
             case FRAME -> "刻铜炉框";
-            case CORE -> "炉芯";
+            case CORE -> "炼金炉口";
+            case HEART -> "魔力炉核";
             case INJECTOR -> "注能口（朝后）";
             case EXHAUST -> "排烟顶";
             case AIR -> "空炉膛";
@@ -154,6 +152,7 @@ public final class ForgeStructure {
             case OUTPUT -> MagicForgeContent.OUTPUT_PORT;
             case FRAME -> MagicForgeContent.COPPER_FRAME;
             case CORE -> MagicForgeContent.FORGE;
+            case HEART -> MagicForgeContent.HEART;
             case INJECTOR -> MagicForgeContent.INJECTOR;
             case EXHAUST -> MagicForgeContent.EXHAUST;
             case AIR -> throw new IllegalArgumentException("air has no block item");

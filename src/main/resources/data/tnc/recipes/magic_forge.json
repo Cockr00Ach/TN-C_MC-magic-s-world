@@ -1,11 +1,19 @@
 {
   "type": "minecraft:crafting_shaped",
-  "pattern": ["ACA", "ICI", "FIC"],
+  "pattern": [
+    "BBB",
+    "BFB",
+    "BBB"
+  ],
   "key": {
-    "A": {"item": "minecraft:amethyst_shard"},
-    "C": {"item": "minecraft:copper_ingot"},
-    "I": {"item": "minecraft:iron_ingot"},
-    "F": {"item": "minecraft:furnace"}
+    "B": {
+      "item": "tnc:forge_firebrick"
+    },
+    "F": {
+      "item": "minecraft:furnace"
+    }
   },
-  "result": {"item": "tnc:magic_forge", "count": 1}
+  "result": {
+    "item": "tnc:magic_forge"
+  }
 }

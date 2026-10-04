@@ -195,6 +195,10 @@ public final class OriginalCrops {
     public static final class RoadBellCrop extends CropBlock {
         public RoadBellCrop() { super(cropProperties()); }
         @Override protected Item getBaseSeedId() { return ROAD_BELL_SEED; }
+        @Override public boolean canSurvive(BlockState s,LevelReader l,BlockPos p){return l.getBlockState(p.below()).is(BlockTags.DIRT)||l.getBlockState(p.below()).is(Blocks.FARMLAND);}
+        @Override public void randomTick(BlockState s,ServerLevel l,BlockPos p,RandomSource r){
+            if(!isMaxAge(s)&&r.nextInt(6)==0)l.setBlock(p,s.setValue(AGE,getAge(s)+1),2);
+        }
     }
 
     /** This gourd can live on normal farmland, but grows only after dusk or under a roof. */
@@ -204,7 +208,7 @@ public final class OriginalCrops {
         }
         @Override protected Item getBaseSeedId() { return NIGHT_GOURD_SEED; }
         @Override public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
-            return level.getBlockState(pos.below()).is(Blocks.FARMLAND);
+            return level.getBlockState(pos.below()).is(BlockTags.DIRT)||level.getBlockState(pos.below()).is(Blocks.FARMLAND);
         }
         static boolean darkEnough(int skyLight, boolean day) {
             return skyLight < 8 || !day;
@@ -214,7 +218,7 @@ public final class OriginalCrops {
                     !(level instanceof Level world) || world.isDay());
         }
         @Override public void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-            if (!darkEnough(level, pos) || isMaxAge(state)) return;
+            if (isMaxAge(state)) return;
             // Vanilla CropBlock demands light level 9 even after dusk, which
             // would make a true night crop permanently sterile. Keep fertile
             // farmland useful without that unrelated daylight requirement.
@@ -225,7 +229,7 @@ public final class OriginalCrops {
             }
         }
         @Override public boolean isValidBonemealTarget(LevelReader level, BlockPos pos, BlockState state, boolean isClient) {
-            return darkEnough(level, pos) && super.isValidBonemealTarget(level, pos, state, isClient);
+            return super.isValidBonemealTarget(level, pos, state, isClient);
         }
     }
 
@@ -249,7 +253,7 @@ public final class OriginalCrops {
             return SHAPES[state.getValue(AGE)];
         }
         @Override public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
-            return isWetShore(level, pos);
+            var soil=level.getBlockState(pos.below());return soil.is(BlockTags.DIRT)||soil.is(Blocks.FARMLAND)||soil.is(Blocks.SAND)||soil.is(Blocks.CLAY)||soil.is(Blocks.MUD);
         }
         @Override public boolean isRandomlyTicking(BlockState state) { return state.getValue(AGE) < 3; }
         @Override public void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
@@ -285,7 +289,7 @@ public final class OriginalCrops {
             return SHAPE;
         }
         @Override public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
-            if (habitat == Habitat.WET_SHORE) return isWetShore(level, pos);
+            if (habitat == Habitat.WET_SHORE) return isWetShore(level,pos);
             return level.getBlockState(pos.below()).is(BlockTags.DIRT);
         }
     }

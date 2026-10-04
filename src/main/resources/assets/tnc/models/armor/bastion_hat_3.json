@@ -1,0 +1,210 @@
+{
+  "parts": [
+    {
+      "name": "head",
+      "parent": "root",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": []
+    },
+    {
+      "name": "hat",
+      "parent": "root",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": []
+    },
+    {
+      "name": "body",
+      "parent": "root",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": []
+    },
+    {
+      "name": "right_arm",
+      "parent": "root",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": []
+    },
+    {
+      "name": "left_arm",
+      "parent": "root",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": []
+    },
+    {
+      "name": "right_leg",
+      "parent": "root",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": []
+    },
+    {
+      "name": "left_leg",
+      "parent": "root",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": []
+    },
+    {
+      "name": "brim",
+      "parent": "head",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "uv": [
+            0,
+            0
+          ],
+          "position": [
+            -7,
+            -9,
+            -7
+          ],
+          "size": [
+            14,
+            1,
+            14
+          ],
+          "inflate": 0
+        }
+      ]
+    },
+    {
+      "name": "crown",
+      "parent": "head",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "uv": [
+            0,
+            20
+          ],
+          "position": [
+            -4,
+            -13,
+            -4
+          ],
+          "size": [
+            8,
+            4,
+            8
+          ],
+          "inflate": 0.25
+        }
+      ]
+    },
+    {
+      "name": "crest",
+      "parent": "head",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "uv": [
+            40,
+            0
+          ],
+          "position": [
+            -1,
+            -16,
+            -4
+          ],
+          "size": [
+            2,
+            3,
+            7
+          ],
+          "inflate": 0
+        }
+      ]
+    }
+  ],
+  "texture_width": 64,
+  "texture_height": 64
+}

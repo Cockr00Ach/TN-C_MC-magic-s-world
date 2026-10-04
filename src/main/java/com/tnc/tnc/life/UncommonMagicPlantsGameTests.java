@@ -22,12 +22,12 @@ public final class UncommonMagicPlantsGameTests {
     private UncommonMagicPlantsGameTests() {}
 
     @GameTest(template = "building_test_empty", batch = "uncommon_plants", timeoutTicks = 30)
-    public static void hushcapRequiresCaveStoneAndQuietAndRenewsItsSpore(GameTestHelper h) {
+    public static void hushcapAcceptsCultivatedDirtAndRetainsQuietBehaviourAndRenewal(GameTestHelper h) {
         var level = h.getLevel();
         BlockPos pos = h.absolutePos(new BlockPos(2, 2, 2));
         level.setBlockAndUpdate(pos.below(), Blocks.DIRT.defaultBlockState());
-        h.assertTrue(!UncommonMagicPlants.HUSHCAP.defaultBlockState().canSurvive(level, pos),
-                "Hushcap cannot grow like an ordinary crop on dirt");
+        h.assertTrue(UncommonMagicPlants.HUSHCAP.defaultBlockState().canSurvive(level, pos),
+                "Cultivated hushcap accepts ordinary soil");
         level.setBlockAndUpdate(pos.below(), Blocks.STONE.defaultBlockState());
         level.setBlockAndUpdate(pos, UncommonMagicPlants.HUSHCAP.defaultBlockState());
         h.assertTrue(level.getBlockState(pos).canSurvive(level, pos), "Cave stone supports hushcap");

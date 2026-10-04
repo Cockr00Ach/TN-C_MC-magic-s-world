@@ -84,6 +84,12 @@ public final class MagicForgeBlock extends BaseEntityBlock {
             serverPlayer.displayClientMessage(Component.literal("这座炉台不属于你，或当前位置禁止使用。"), true);
             return InteractionResult.CONSUME;
         }
+        if (player.getItemInHand(hand).is(com.tnc.tnc.TNMod.MANA_ROOT_CORE.get())) {
+            serverPlayer.displayClientMessage(Component.literal(forge.useRootCore(serverPlayer, player.getItemInHand(hand), pos)), true);
+            return InteractionResult.CONSUME;
+        }
+        if (player.getItemInHand(hand).getItem() instanceof com.tnc.tnc.life.pasture.ManaBottleItem bottle)
+            return bottle.useOn(new net.minecraft.world.item.context.UseOnContext(player, hand, hit));
         NetworkHooks.openScreen(serverPlayer, forge, pos);
         return InteractionResult.CONSUME;
     }

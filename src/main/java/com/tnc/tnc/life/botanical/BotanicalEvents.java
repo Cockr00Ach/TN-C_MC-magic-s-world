@@ -39,7 +39,7 @@ public final class BotanicalEvents {
     @SubscribeEvent public static void nature(TickEvent.ServerTickEvent e){if(e.phase!=TickEvent.Phase.END)return;var server=net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();if(server==null||server.getTickCount()%20!=0)return;
         for(int job=0;job<8;job++){var pending=NEW_CHUNKS.poll();if(pending==null)break;ServerLevel l=null;for(var world:server.getAllLevels())if(world.dimension().location().toString().equals(pending.dimension)){l=world;break;}if(l==null||l!=server.overworld())continue;var cp=new net.minecraft.world.level.ChunkPos(pending.pos);var chunk=l.getChunkSource().getChunkNow(cp.x,cp.z);if(chunk==null)continue;BlockPos anchor=com.tnc.tnc.world.SkyIslandSavedData.get(l).anchorPos("CENTER");if(anchor==null){NEW_CHUNKS.add(pending);continue;}if(chunk.getInhabitedTime()>1200||!chunk.getBlockEntitiesPos().isEmpty()||!chunk.getAllReferences().isEmpty())continue;
             var biome=l.getBiome(new BlockPos(cp.getMiddleBlockX(),l.getSeaLevel(),cp.getMiddleBlockZ())).unwrapKey().map(k->k.location().getPath()).orElse("");var candidates=naturalSpecies(biome);if(candidates.isEmpty()||l.random.nextInt(3)!=0)continue;var species=candidates.get(l.random.nextInt(candidates.size()));
-            for(int attempt=0;attempt<24;attempt++){int x=cp.getMinBlockX()+l.random.nextInt(16),z=cp.getMinBlockZ()+l.random.nextInt(16);BlockPos at=l.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,new BlockPos(x,0,z));long dx=(long)at.getX()-anchor.getX(),dz=(long)at.getZ()-anchor.getZ();if(dx*dx+dz*dz<=810000||TownProtection.hazard(l,at)||com.tnc.tnc.home.HousingService.plotAt(l,at)!=null||!l.getBlockState(at).isAir())continue;var state=BotanicalContent.BLOCKS.get(species.id).defaultBlockState().setValue(BotanicalBlock.AGE,3).setValue(BotanicalBlock.WILD,true);if(!state.canSurvive(l,at))continue;if(species==BotanicalSpecies.PAPER_TREE&&(!l.getBlockState(at.above()).isAir()||!l.getBlockState(at.above(2)).isAir()))continue;l.setBlock(at,state,3);if(l.getBlockEntity(at) instanceof BotanicalPlantEntity be){be.setWild();if(species==BotanicalSpecies.PAPER_TREE)be.bookStudied=true;}break;}
+            for(int attempt=0;attempt<24;attempt++){int x=cp.getMinBlockX()+l.random.nextInt(16),z=cp.getMinBlockZ()+l.random.nextInt(16);BlockPos at=l.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,new BlockPos(x,0,z));long dx=(long)at.getX()-anchor.getX(),dz=(long)at.getZ()-anchor.getZ();if(dx*dx+dz*dz<=810000||TownProtection.hazard(l,at)||com.tnc.tnc.home.HousingService.plotAt(l,at)!=null||!l.getBlockState(at).isAir())continue;var state=BotanicalContent.BLOCKS.get(species.id).defaultBlockState().setValue(BotanicalBlock.AGE,3).setValue(BotanicalBlock.WILD,true);if(!state.canSurvive(l,at)||!naturalSite(l,at,species))continue;if(species==BotanicalSpecies.PAPER_TREE&&(!l.getBlockState(at.above()).isAir()||!l.getBlockState(at.above(2)).isAir()))continue;l.setBlock(at,state,3);if(l.getBlockEntity(at) instanceof BotanicalPlantEntity be){be.setWild();if(species==BotanicalSpecies.PAPER_TREE)be.bookStudied=true;}break;}
         }
     }
     static List<BotanicalSpecies> naturalSpecies(String biome){return switch(biome){
@@ -52,6 +52,26 @@ public final class BotanicalEvents {
         case "jungle","sparse_jungle","bamboo_jungle"->List.of(BotanicalSpecies.LADDER_VINE,BotanicalSpecies.HONEY_CLUSTER,BotanicalSpecies.HEARTH_PEPPER);
         case "beach","stony_shore"->List.of(BotanicalSpecies.SALT_INK,BotanicalSpecies.STONE_FERN);
         default->List.of();};}
+    /** Stable habitat only: no hour, rain event, beds or man-made furnace requirements. */
+    static boolean naturalSite(ServerLevel l,BlockPos p,BotanicalSpecies species){
+        var biome=l.getBiome(p).unwrapKey().map(k->k.location().getPath()).orElse("");
+        if(!naturalSpecies(biome).contains(species))return false;
+        int light=l.getBrightness(LightLayer.SKY,p);
+        boolean water=near(l,p,3,q->q.getFluidState().is(FluidTags.WATER));
+        return switch(species){
+            case MIST_COTTON->water&&light>=8&&light<=11;
+            case STONE_FERN,SLEEP_CLOCK->light<=11;
+            case WISH_PUFF,FLIGHT_POD->water;
+            case FROST_CHIME->l.getBiome(p).value().getBaseTemperature()<=.15F;
+            case WIND_SAIL->l.canSeeSky(p)&&p.getY()>=l.getSeaLevel()+20;
+            case SALT_INK->water&&light<=7;
+            case SHADOW_CUT->light>=8&&light<=11&&near(l,p.above(2),1,q->!q.isAir());
+            case PAPER_TREE,LADDER_VINE->l.getBlockState(p.above()).isAir()&&l.getBlockState(p.above(2)).isAir();
+            case STAR_DEW,STAR_REST,DAWN_DISK->l.canSeeSky(p);
+            case HEARTH_PEPPER->l.getBiome(p).value().getBaseTemperature()>=.8F;
+            default->true;
+        };
+    }
     private static boolean wet(ServerLevel l,BlockPos p){if(l.isRainingAt(p))return true;for(var d:net.minecraft.core.Direction.Plane.HORIZONTAL)if(l.getFluidState(p.below().relative(d)).is(FluidTags.WATER))return true;return false;}
     private static boolean near(ServerLevel l,BlockPos p,int radius,java.util.function.Predicate<BlockState> predicate){for(var at:BlockPos.betweenClosed(p.offset(-radius,-1,-radius),p.offset(radius,1,radius)))if(l.hasChunkAt(at)&&predicate.test(l.getBlockState(at)))return true;return false;}
     public static List<BotanicalSpecies> samples(ServerPlayer p,BlockPos at,BlockState state){var l=p.serverLevel();int sky=l.getBrightness(LightLayer.SKY,at);long clock=Math.floorMod(l.getDayTime(),24000);String biome=l.getBiome(at).unwrapKey().map(k->k.location().getPath()).orElse("");List<BotanicalSpecies> out=new ArrayList<>();

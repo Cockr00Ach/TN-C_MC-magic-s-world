@@ -37,7 +37,12 @@ public final class BotanicalPlantEntity extends BlockEntity {
     private boolean wet(ServerLevel l){if(l.getGameTime()<wetUntil||l.isRainingAt(worldPosition))return true;for(Direction d:Direction.Plane.HORIZONTAL)if(l.getFluidState(worldPosition.below().relative(d)).is(FluidTags.WATER))return true;return false;}
     private boolean adjacent(ServerLevel l,java.util.function.Predicate<BlockState> predicate,int r){for(BlockPos p:BlockPos.betweenClosed(worldPosition.offset(-r,-1,-r),worldPosition.offset(r,1,r)))if(l.hasChunkAt(p)&&predicate.test(l.getBlockState(p)))return true;return false;}
     private boolean sky(ServerLevel l){return l.canSeeSky(worldPosition);}
-    public String reason(ServerLevel l){int sky=l.getBrightness(LightLayer.SKY,worldPosition);var s=species();return switch(s){
+    public String reason(ServerLevel l){
+        if(!wild) {
+            int height=species()==BotanicalSpecies.LADDER_VINE?Math.min(4,Math.max(1,(growth+20)/7200)):species()==BotanicalSpecies.PAPER_TREE?3:1;
+            return space(l,height)?"":"上方生长空间被挡住";
+        }
+        int sky=l.getBrightness(LightLayer.SKY,worldPosition);var s=species();return switch(s){
         case DAWN_DISK,STAR_REST -> sky(l)?"":"需要露天";
         case HEARTH_PEPPER -> adjacent(l,b->b.hasProperty(AbstractFurnaceBlock.LIT)&&b.getValue(AbstractFurnaceBlock.LIT)||b.is(Blocks.CAMPFIRE)&&b.getValue(CampfireBlock.LIT),2)?"":"没有真正燃烧的余热";
         case MIST_COTTON -> !wet(l)?"根旁缺水":sky<8||sky>11?"需要半阴（天空光8—11）":"";

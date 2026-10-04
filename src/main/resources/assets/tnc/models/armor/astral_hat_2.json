@@ -1,0 +1,243 @@
+{
+  "parts": [
+    {
+      "name": "head",
+      "parent": "root",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": []
+    },
+    {
+      "name": "hat",
+      "parent": "root",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": []
+    },
+    {
+      "name": "body",
+      "parent": "root",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": []
+    },
+    {
+      "name": "right_arm",
+      "parent": "root",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": []
+    },
+    {
+      "name": "left_arm",
+      "parent": "root",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": []
+    },
+    {
+      "name": "right_leg",
+      "parent": "root",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": []
+    },
+    {
+      "name": "left_leg",
+      "parent": "root",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": []
+    },
+    {
+      "name": "brim",
+      "parent": "head",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "uv": [
+            0,
+            0
+          ],
+          "position": [
+            -6.5,
+            -9,
+            -6.5
+          ],
+          "size": [
+            13,
+            1,
+            13
+          ],
+          "inflate": 0
+        }
+      ]
+    },
+    {
+      "name": "cone_base",
+      "parent": "head",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "uv": [
+            0,
+            18
+          ],
+          "position": [
+            -4,
+            -12,
+            -4
+          ],
+          "size": [
+            8,
+            3,
+            8
+          ],
+          "inflate": 0
+        }
+      ]
+    },
+    {
+      "name": "cone_middle",
+      "parent": "head",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "uv": [
+            0,
+            32
+          ],
+          "position": [
+            -3,
+            -16,
+            -3
+          ],
+          "size": [
+            6,
+            4,
+            6
+          ],
+          "inflate": 0
+        }
+      ]
+    },
+    {
+      "name": "cone_tip",
+      "parent": "head",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0.12
+      ],
+      "boxes": [
+        {
+          "uv": [
+            28,
+            32
+          ],
+          "position": [
+            -1.5,
+            -20,
+            -1.5
+          ],
+          "size": [
+            3,
+            4,
+            3
+          ],
+          "inflate": 0
+        }
+      ]
+    }
+  ],
+  "texture_width": 64,
+  "texture_height": 64
+}

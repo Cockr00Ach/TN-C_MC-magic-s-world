@@ -27,6 +27,8 @@ public final class GearModels {
     }
     private static CubeListBuilder box(int u,int v,float x,float y,float z,float w,float h,float depth,float inflate){return CubeListBuilder.create().texOffs(u,v).addBox(x,y,z,w,h,depth,new CubeDeformation(inflate));}
     private static LayerDefinition mesh(MageGear.Design d){
+        LayerDefinition authored=authoredModel(d.id());
+        if(authored!=null)return authored;
         var mesh=new MeshDefinition();var root=mesh.getRoot();
         for(String n:List.of("head","hat","body","right_arm","left_arm","right_leg","left_leg"))root.addOrReplaceChild(n,CubeListBuilder.create(),PartPose.ZERO);
         boolean heavy=d.style().equals("bastion"),chain=d.style().equals("runic"),light=d.style().equals("wanderer"),god=d.divine();
@@ -69,5 +71,28 @@ public final class GearModels {
             }
         }
         return LayerDefinition.create(mesh,64,64);
+    }
+    /** Import output from tools/equipment_blockbench.py; exact ModelPart bones remain animated. */
+    private static LayerDefinition authoredModel(String id){
+        var path=net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tnc","models/armor/"+id+".json");
+        var resource=net.minecraft.client.Minecraft.getInstance().getResourceManager().getResource(path);
+        if(resource.isEmpty())return null;
+        try(var reader=resource.get().openAsReader()){
+            var json=com.google.gson.JsonParser.parseReader(reader).getAsJsonObject();
+            var mesh=new MeshDefinition();var definitions=new HashMap<String,PartDefinition>();definitions.put("root",mesh.getRoot());
+            for(var value:json.getAsJsonArray("parts")){
+                var p=value.getAsJsonObject();var cubes=CubeListBuilder.create();
+                for(var b:p.getAsJsonArray("boxes")){
+                    var box=b.getAsJsonObject();var uv=box.getAsJsonArray("uv");var pos=box.getAsJsonArray("position");var size=box.getAsJsonArray("size");
+                    cubes.texOffs(uv.get(0).getAsInt(),uv.get(1).getAsInt()).addBox(pos.get(0).getAsFloat(),pos.get(1).getAsFloat(),pos.get(2).getAsFloat(),
+                            size.get(0).getAsFloat(),size.get(1).getAsFloat(),size.get(2).getAsFloat(),new CubeDeformation(box.get("inflate").getAsFloat()));
+                }
+                var pivot=p.getAsJsonArray("pivot");var rotation=p.getAsJsonArray("rotation");
+                var part=definitions.get(p.get("parent").getAsString()).addOrReplaceChild(p.get("name").getAsString(),cubes,
+                        PartPose.offsetAndRotation(pivot.get(0).getAsFloat(),pivot.get(1).getAsFloat(),pivot.get(2).getAsFloat(),rotation.get(0).getAsFloat(),rotation.get(1).getAsFloat(),rotation.get(2).getAsFloat()));
+                definitions.put(p.get("name").getAsString(),part);
+            }
+            return LayerDefinition.create(mesh,json.get("texture_width").getAsInt(),json.get("texture_height").getAsInt());
+        }catch(Exception e){throw new IllegalStateException("Invalid wearable source: "+path,e);}
     }
 }

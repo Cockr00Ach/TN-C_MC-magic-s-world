@@ -48,18 +48,18 @@ public final class MagicForgeMenu extends AbstractContainerMenu {
         this.playerInventory = inventory;
         checkContainerSize(forgeInventory, 6);
         checkContainerDataCount(data, MagicForgeBlockEntity.DATA_COUNT);
-        for (int i = 0; i < 4; i++) addSlot(new Slot(forgeInventory, i, 23 + (i % 2) * 20, 49 + (i / 2) * 20));
-        addSlot(new Slot(forgeInventory, 4, 105, 59) {
+        for (int i = 0; i < 4; i++) addSlot(new Slot(forgeInventory, i, 18 + (i % 2) * 22, 60 + (i / 2) * 22));
+        addSlot(new Slot(forgeInventory, 4, 109, 71) {
             @Override public boolean mayPlace(ItemStack stack) { return false; }
         });
-        addSlot(new Slot(forgeInventory, MagicForgeBlockEntity.UPGRADE_SLOT, 78, 67) {
+        addSlot(new Slot(forgeInventory, MagicForgeBlockEntity.UPGRADE_SLOT, 109, 105) {
             @Override public boolean mayPlace(ItemStack stack) { return MagicForgeBlockEntity.upgradeUses(stack) > 0; }
             @Override public int getMaxStackSize() { return 1; }
             @Override public int getMaxStackSize(ItemStack stack) { return 1; }
         });
         for (int row = 0; row < 3; row++) for (int col = 0; col < 9; col++)
-            addSlot(new Slot(inventory, col + row * 9 + 9, 34 + col * 18, 155 + row * 18));
-        for (int col = 0; col < 9; col++) addSlot(new Slot(inventory, col, 34 + col * 18, 213));
+            addSlot(new Slot(inventory, col + row * 9 + 9, 79 + col * 18, 161 + row * 18));
+        for (int col = 0; col < 9; col++) addSlot(new Slot(inventory, col, 79 + col * 18, 219));
         addDataSlots(data);
     }
 

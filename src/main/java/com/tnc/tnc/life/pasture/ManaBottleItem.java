@@ -72,7 +72,7 @@ public final class ManaBottleItem extends Item {
             int deposited=ledger.deposit(filled,capacity,taken);
             if(deposited!=taken)throw new IllegalStateException("Animal-to-bottle transfer lost mana");
             if(filled!=stack){stack.shrink(1);if(!player.getInventory().add(filled))player.drop(filled,false);}
-            message(player,"采得 "+taken+" 魔力；瓶可饮用，或右键炉后注口/发电座。");
+            message(player,"采得 "+taken+" 魔力；瓶可饮用，或右键炼金炉口/发电座。");
         }else{
             var magic=MagicStone.getOrNull(player);if(magic==null)return stack;
             int used=ledger.withdraw(stack,Math.min(24,magic.getMaxMana()-magic.getMana()));magic.addMana(used);MagicStoneNetwork.syncTo(player);message(player,"回复 "+used+" 魔力，瓶中还剩 "+ledger.amount(stack)+"。");
@@ -85,6 +85,11 @@ public final class ManaBottleItem extends Item {
         BlockPos p=context.getClickedPos();if(TownProtection.denied(player,p))return InteractionResult.FAIL;
         ItemStack stack=context.getItemInHand();var ledger=PastureBottleLedger.get(player.serverLevel());int offered=Math.min(25,ledger.amount(stack));int accepted=0;
         if(context.getLevel().getBlockEntity(p) instanceof EnergyBlockEntity node&&node.mayUse(player)){accepted=node.addMana(offered);}
+        else if(context.getLevel().getBlockEntity(p) instanceof MagicForgeBlockEntity forge){
+            if(forge.canOperate(player,true)&&forge.formedForTransfer()){
+                accepted=Math.min(offered,MagicForgeBlockEntity.MAX_CHARGE-forge.charge());forge.addCharge(accepted);
+            }
+        }
         else if(context.getLevel().getBlockState(p).getBlock() instanceof ForgeInjectorBlock){
             var dir=context.getLevel().getBlockState(p).getValue(ForgeInjectorBlock.FACING);
             if(context.getLevel().getBlockEntity(p.relative(dir.getOpposite(),2)) instanceof MagicForgeBlockEntity forge&&forge.canOperate(player,true)&&forge.formedForTransfer()){
@@ -95,7 +100,7 @@ public final class ManaBottleItem extends Item {
     }
     private static void message(ServerPlayer p,String text){p.displayClientMessage(Component.literal(text),true);}
     @Override public void inventoryTick(ItemStack stack,Level level,Entity holder,int slot,boolean selected){if(holder instanceof ServerPlayer player)PastureBottleLedger.get(player.serverLevel()).sync(stack);}
-    @Override public void appendHoverText(ItemStack stack,Level level,List<Component> tooltip,TooltipFlag flags){tooltip.add(Component.literal("魔力 "+(stack.hasTag()?stack.getTag().getInt("StoredMana"):0)+"/"+capacity));tooltip.add(Component.literal("右键浮鲸采集4秒；空中右键饮用，右键注口/发电座注魔。"));}
+    @Override public void appendHoverText(ItemStack stack,Level level,List<Component> tooltip,TooltipFlag flags){tooltip.add(Component.literal("魔力 "+(stack.hasTag()?stack.getTag().getInt("StoredMana"):0)+"/"+capacity));tooltip.add(Component.literal("右键浮鲸采集4秒；空中右键饮用，右键炼金炉口/发电座注魔。"));}
     public static void clearSessions(){COLLECTING.clear();}
     /** One redstone pulse distributes at most five stored mana; never FE back into mana. */
     public static int transferFromBase(net.minecraft.server.level.ServerLevel level,BlockPos base,UUID owner,ItemStack stack,int maximum){
@@ -107,6 +112,7 @@ public final class ManaBottleItem extends Item {
             if(!level.hasChunkAt(p)||TownProtection.denied(actor,p))continue;
             int accepted=0;
             if(level.getBlockEntity(p) instanceof EnergyBlockEntity node&&owner.equals(node.owner()))accepted=node.addMana(remaining);
+            else if(level.getBlockEntity(p) instanceof MagicForgeBlockEntity forge&&owner.equals(forge.owner())&&forge.canOperate(actor,true)&&forge.formedForTransfer()){accepted=Math.min(remaining,MagicForgeBlockEntity.MAX_CHARGE-forge.charge());forge.addCharge(accepted);}
             else if(level.getBlockState(p).getBlock() instanceof ForgeInjectorBlock){var facing=level.getBlockState(p).getValue(ForgeInjectorBlock.FACING);if(level.getBlockEntity(p.relative(facing.getOpposite(),2)) instanceof MagicForgeBlockEntity forge&&owner.equals(forge.owner())&&forge.formedForTransfer()){accepted=Math.min(remaining,MagicForgeBlockEntity.MAX_CHARGE-forge.charge());forge.addCharge(accepted);}}
             if(accepted>0){ledger.withdraw(stack,accepted);remaining-=accepted;total+=accepted;level.sendParticles(ParticleTypes.ENCHANT,p.getX()+.5,p.getY()+.7,p.getZ()+.5,4,.2,.2,.2,.02);}
         }

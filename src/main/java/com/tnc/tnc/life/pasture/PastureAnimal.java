@@ -49,12 +49,12 @@ public class PastureAnimal extends Animal implements PlayerRideableJumping {
     public PastureAnimal(EntityType<? extends PastureAnimal> type,Level level,PastureSpecies species){
         super(type,level);this.species=species;lastActive=level.getGameTime();setPathfindingMalus(BlockPathTypes.WATER,0);
         if(species.habitat()==PastureSpecies.Habitat.WATER)navigation=new net.minecraft.world.entity.ai.navigation.AmphibiousPathNavigation(this,level);
-        if(Set.of("post_heron","mirrorwing_moth","papersail_ray","dewbound_whale").contains(species.id())){navigation=new net.minecraft.world.entity.ai.navigation.FlyingPathNavigation(this,level);moveControl=new net.minecraft.world.entity.ai.control.FlyingMoveControl(this,10,true);setNoGravity(true);}
-        getNavigation().setCanFloat(true);
+        if(Set.of("post_heron","mirrorwing_moth","papersail_ray","dewbound_whale").contains(species.id())){navigation=new net.minecraft.world.entity.ai.navigation.FlyingPathNavigation(this,level);moveControl=new PastureFlight.Control(this);setNoGravity(true);}
+        getNavigation().setCanFloat(true);if(navigation instanceof net.minecraft.world.entity.ai.navigation.FlyingPathNavigation air){air.setCanOpenDoors(false);air.setCanPassDoors(true);}
         goalSelector.addGoal(0,new Goal(){ {setFlags(EnumSet.of(Flag.MOVE));} @Override public boolean canUse(){return level().getGameTime()<calmUntil;} @Override public void start(){getNavigation().stop();} @Override public void tick(){getNavigation().stop();} });
         goalSelector.addGoal(0,new FloatGoal(this));goalSelector.addGoal(1,new PanicGoal(this,1.15));goalSelector.addGoal(2,new BreedGoal(this,1));
         goalSelector.addGoal(3,new TemptGoal(this,1.05,Ingredient.of(species.food()),false));goalSelector.addGoal(4,new FollowParentGoal(this,1));
-        goalSelector.addGoal(7,Set.of("post_heron","mirrorwing_moth","papersail_ray","dewbound_whale").contains(species.id())?new WaterAvoidingRandomFlyingGoal(this,.8):new WaterAvoidingRandomStrollGoal(this,.8));goalSelector.addGoal(8,new LookAtPlayerGoal(this,Player.class,7));goalSelector.addGoal(9,new RandomLookAroundGoal(this));
+        goalSelector.addGoal(7,Set.of("post_heron","mirrorwing_moth","papersail_ray","dewbound_whale").contains(species.id())?new PastureFlight.Roam(this):new WaterAvoidingRandomStrollGoal(this,.8));goalSelector.addGoal(8,new LookAtPlayerGoal(this,Player.class,7));goalSelector.addGoal(9,new RandomLookAroundGoal(this));
     }
     @Override protected void registerGoals(){}
     @Override public boolean canBreatheUnderwater(){return species!=null&&species.habitat()==PastureSpecies.Habitat.WATER;}
@@ -68,8 +68,10 @@ public class PastureAnimal extends Animal implements PlayerRideableJumping {
     public float animationPhase(float partialTick){return(tickCount+partialTick)*.09f;}
     public boolean isWorking(){return entityData.get(WORKING);}
     @Nullable public UUID owner(){return owner;}
+    public BlockPos flightAnchor(){return home==null?blockPosition():home;}
+    public boolean flightBusy(){return following||returning||level().getGameTime()<calmUntil||isInLove()||isWorking()||!getNavigation().isDone();}
     public int storedResource(){return resource;}
-    public void calmFor(int ticks){calmUntil=Math.max(calmUntil,level().getGameTime()+Math.max(0,Math.min(200,ticks)));getNavigation().stop();swing(InteractionHand.MAIN_HAND);}
+    public void calmFor(int ticks){calmUntil=Math.max(calmUntil,level().getGameTime()+Math.max(0,Math.min(200,ticks)));getNavigation().stop();getMoveControl().setWantedPosition(getX(),getY(),getZ(),0);setDeltaMovement(Vec3.ZERO);swing(InteractionHand.MAIN_HAND);}
     public List<ItemStack> carriedItems(){return cargo.stream().map(ItemStack::copy).toList();}
     private int capacity(){return switch(speciesId()){case"dewbound_whale"->96;case"wirecall_lizard"->100;case"pillowlight_marten"->60;default->species.amount();};}
     private int interval(){return species.harvestDays()*24000;}

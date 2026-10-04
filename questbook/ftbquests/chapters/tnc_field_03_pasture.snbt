@@ -1,0 +1,941 @@
+{
+  "id": "658EDF9AA62F1C1B",
+  "filename": "tnc_field_03_pasture",
+  "group": "59249BFD5667691A",
+  "title": "&6&l异兽牧养与伙伴",
+  "icon": "tnc:pasture_book",
+  "order_index": 4,
+  "default_hide_dependency_lines": false,
+  "default_quest_shape": "hexagon",
+  "quest_links": [],
+  "images": [],
+  "quests": [
+    {
+      "id": "5717B82489BA6290",
+      "title": "&6&l异兽牧养 · 食物、伙伴和工作",
+      "icon": "tnc:pasture_book",
+      "x": 0,
+      "y": -8,
+      "size": 2,
+      "shape": "square",
+      "description": [
+        "&f已有响铃羊，加上23种各自注册、各自模型的新异兽。",
+        "&e喜食食物照料三次，每次有效照料间隔60秒，建立主人与窝点。牧养册右键动物查看状态。",
+        "&7买房不是野外养殖的前置。活产、肉食、元素、助工四种路线都可选。",
+        "&f窝点、饲料、栖居条件、工作路线与资源保存到存档；幼兽至少两个游戏日长大。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "18921F1D097DE78A",
+          "type": "checkmark",
+          "title": "阅读这项实际玩法说明"
+        }
+      ]
+    },
+    {
+      "id": "4CFF50E9BB8F5EEA",
+      "title": "&e石垒豪豕",
+      "icon": "tnc:stonebarrow_meat",
+      "x": -9,
+      "y": 5.0,
+      "size": 1,
+      "shape": "hexagon",
+      "description": [
+        "&6肉食与料理 · 幼兽2游戏日成熟",
+        "留养繁殖成年屠宰，石垒肉与石骨做厚实锅食；吃锅食下一次受击减少2伤害。",
+        "",
+        "&7普通生存寻找对应环境的野生个体。节点检查真实产物持有；购得产物也可以阅读完成，不能证明亲手养成。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "78F958B09C36EE4B",
+          "type": "item",
+          "item": "tnc:stonebarrow_meat",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "51E2972E6B889087",
+      "title": "&e暮炭野豕",
+      "icon": "tnc:emberback_meat",
+      "x": -9,
+      "y": 8.5,
+      "size": 1,
+      "shape": "hexagon",
+      "description": [
+        "&6肉食与料理 · 幼兽2游戏日成熟",
+        "温暖窝点，专属暮炭肉与暖脂供保暖炖食、暖饲料。",
+        "",
+        "&7普通生存寻找对应环境的野生个体。节点检查真实产物持有；购得产物也可以阅读完成，不能证明亲手养成。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "5CF73F3775C1DE15",
+          "type": "item",
+          "item": "tnc:emberback_meat",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "1452B10FF4791AB6",
+      "title": "&e潮背鳄螈",
+      "icon": "tnc:tideback_meat",
+      "x": -9,
+      "y": 12.0,
+      "size": 1,
+      "shape": "hexagon",
+      "description": [
+        "&6肉食与料理 · 幼兽3游戏日成熟",
+        "真实水体窝点，潮背肉和水膜供水边料理及防水材料。",
+        "",
+        "&7普通生存寻找对应环境的野生个体。节点检查真实产物持有；购得产物也可以阅读完成，不能证明亲手养成。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "773988122BE85C43",
+          "type": "item",
+          "item": "tnc:tideback_meat",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "3EF82504044C3794",
+      "title": "&e银霜步禽",
+      "icon": "tnc:froststride_meat",
+      "x": -9,
+      "y": 15.5,
+      "size": 1,
+      "shape": "hexagon",
+      "description": [
+        "&6肉食与料理 · 幼兽2游戏日成熟",
+        "鸟肉做御寒串；留养也可周期取银霜卵。繁育受精卵在卵架实际孵两天。",
+        "",
+        "&7普通生存寻找对应环境的野生个体。节点检查真实产物持有；购得产物也可以阅读完成，不能证明亲手养成。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "0262644AE692E621",
+          "type": "item",
+          "item": "tnc:froststride_meat",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "6569A28C957353A3",
+      "title": "&e蜂囊腴蛙",
+      "icon": "tnc:honeydew",
+      "x": -9,
+      "y": 19.0,
+      "size": 1,
+      "shape": "hexagon",
+      "description": [
+        "&6肉食与料理 · 幼兽2游戏日成熟",
+        "蛙肉可做料理；活体取蜜露需真实空瓶，不能凭空造瓶。",
+        "",
+        "&7普通生存寻找对应环境的野生个体。节点检查真实产物持有；购得产物也可以阅读完成，不能证明亲手养成。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "6E1C8F39E655C79D",
+          "type": "item",
+          "item": "tnc:honeydew",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "5615D8C137E9D297",
+      "title": "&e星茸耳兔",
+      "icon": "tnc:starfelt_meat",
+      "x": -9,
+      "y": 22.5,
+      "size": 1,
+      "shape": "hexagon",
+      "description": [
+        "&6肉食与料理 · 幼兽2游戏日成熟",
+        "专属兔肉与软绒；远行卷给一分钟分次回复12魔力。",
+        "",
+        "&7普通生存寻找对应环境的野生个体。节点检查真实产物持有；购得产物也可以阅读完成，不能证明亲手养成。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "26D008FB5107664E",
+          "type": "item",
+          "item": "tnc:starfelt_meat",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "02C85C74B0D02396",
+      "title": "&e暮灯鹿",
+      "icon": "tnc:lantern_antler",
+      "x": -3,
+      "y": 5.0,
+      "size": 1,
+      "shape": "hexagon",
+      "description": [
+        "&6留养周期取产 · 幼兽2游戏日成熟",
+        "成熟周期自然落角，托盘/采露架可收，不必杀鹿。角给随身提灯添12分钟燃料。",
+        "",
+        "&7普通生存寻找对应环境的野生个体。节点检查真实产物持有；购得产物也可以阅读完成，不能证明亲手养成。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "573D4DD4369CF4ED",
+          "type": "item",
+          "item": "tnc:lantern_antler",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "3613EE212966EEAE",
+      "title": "&e纹壳蜗",
+      "icon": "tnc:shell_glue",
+      "x": -3,
+      "y": 8.5,
+      "size": 1,
+      "shape": "hexagon",
+      "description": [
+        "&6留养周期取产 · 幼兽2游戏日成熟",
+        "水边养，木刮具取壳胶，每次扣真实储备与工具耐久；壳胶是工具配方材料。",
+        "",
+        "&7普通生存寻找对应环境的野生个体。节点检查真实产物持有；购得产物也可以阅读完成，不能证明亲手养成。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "23C7786FDA59D2A7",
+          "type": "item",
+          "item": "tnc:shell_glue",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "65C2C247A627F009",
+      "title": "&e邮羽鹭",
+      "icon": "tnc:flight_feather",
+      "x": -3,
+      "y": 12.0,
+      "size": 1,
+      "shape": "hexagon",
+      "description": [
+        "&6留养周期取产 · 幼兽2游戏日成熟",
+        "可取羽毛，也能选择两只自己的托盘、128格内真实搬运；走到两端才交接货物。",
+        "",
+        "&7普通生存寻找对应环境的野生个体。节点检查真实产物持有；购得产物也可以阅读完成，不能证明亲手养成。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "7CB8CEB41B05377F",
+          "type": "item",
+          "item": "tnc:flight_feather",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "5B4167F466C2DA1F",
+      "title": "&e巡灯螳螂",
+      "icon": "tnc:watch_wing",
+      "x": -3,
+      "y": 15.5,
+      "size": 1,
+      "shape": "hexagon",
+      "description": [
+        "&6留养周期取产 · 幼兽2游戏日成熟",
+        "两个自己的栖居标记设夜巡路线；真实附近敌对生物触发预警，翅材制警路镜片。",
+        "",
+        "&7普通生存寻找对应环境的野生个体。节点检查真实产物持有；购得产物也可以阅读完成，不能证明亲手养成。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "04068391288B4CBE",
+          "type": "item",
+          "item": "tnc:watch_wing",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "1AA2B0A09A764851",
+      "title": "&e镜瓣夜蛾",
+      "icon": "tnc:mirror_scale",
+      "x": -3,
+      "y": 19.0,
+      "size": 1,
+      "shape": "hexagon",
+      "description": [
+        "&6留养周期取产 · 幼兽2游戏日成熟",
+        "夜间探访真实植物并有限助长；鳞片做聚光镜片，工作灯真实亮度12升15。",
+        "",
+        "&7普通生存寻找对应环境的野生个体。节点检查真实产物持有；购得产物也可以阅读完成，不能证明亲手养成。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "5E7BA05240C538DA",
+          "type": "item",
+          "item": "tnc:mirror_scale",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "6E9182BBA41B4CB9",
+      "title": "&e炉鳃山貘",
+      "icon": "tnc:warm_breath",
+      "x": 3,
+      "y": 5.0,
+      "size": 1,
+      "shape": "hexagon",
+      "description": [
+        "&6元素资源 · 幼兽3游戏日成熟",
+        "温暖窝点积暖息，用空暖息罐采集。喝后保暖一分钟并返罐；也做暖饲料。",
+        "",
+        "&7普通生存寻找对应环境的野生个体。节点检查真实产物持有；购得产物也可以阅读完成，不能证明亲手养成。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "67E142BD38AE12B1",
+          "type": "item",
+          "item": "tnc:warm_breath",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "22761D1CF0FFD899",
+      "title": "&e雾腹水獭",
+      "icon": "tnc:spring_concentrate",
+      "x": 3,
+      "y": 8.5,
+      "size": 1,
+      "shape": "hexagon",
+      "description": [
+        "&6元素资源 · 幼兽2游戏日成熟",
+        "自己的食水槽供真水：每次取四次浇灌的浓露扣四水份，用空瓶接。没有水不会产水。",
+        "",
+        "&7普通生存寻找对应环境的野生个体。节点检查真实产物持有；购得产物也可以阅读完成，不能证明亲手养成。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "643C775209483DAA",
+          "type": "item",
+          "item": "tnc:spring_concentrate",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "623BCCB70E06A3B4",
+      "title": "&e环砾龟",
+      "icon": "tnc:loam_pebble",
+      "x": 3,
+      "y": 12.0,
+      "size": 1,
+      "shape": "hexagon",
+      "description": [
+        "&6元素资源 · 幼兽3游戏日成熟",
+        "消耗饲料产润土砾，浇灌既有耕地/植物保湿十分钟，不凭空造水或矿。",
+        "",
+        "&7普通生存寻找对应环境的野生个体。节点检查真实产物持有；购得产物也可以阅读完成，不能证明亲手养成。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "0F4456C94B2522FB",
+          "type": "item",
+          "item": "tnc:loam_pebble",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "5F144AB5761F1CC3",
+      "title": "&e纸帆魟",
+      "icon": "tnc:air_plume",
+      "x": 3,
+      "y": 15.5,
+      "size": 1,
+      "shape": "hexagon",
+      "description": [
+        "&6元素资源 · 幼兽3游戏日成熟",
+        "开阔窝点，取风羽；使用小幅上升与六秒缓降，也可加工风瓶。",
+        "",
+        "&7普通生存寻找对应环境的野生个体。节点检查真实产物持有；购得产物也可以阅读完成，不能证明亲手养成。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "4E7FCE1F40A9F0BE",
+          "type": "item",
+          "item": "tnc:air_plume",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "6AC417291E382B51",
+      "title": "&e鸣线蜥",
+      "icon": "tnc:storm_crystal",
+      "x": 3,
+      "y": 19.0,
+      "size": 1,
+      "shape": "hexagon",
+      "description": [
+        "&6元素资源 · 幼兽2游戏日成熟",
+        "雷雨可存电，充电栖架实际扣100FE只存80FE；雷余晶每份50FE，输电扣存量，不造免费电。",
+        "",
+        "&7普通生存寻找对应环境的野生个体。节点检查真实产物持有；购得产物也可以阅读完成，不能证明亲手养成。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "65784EA0B488E5AB",
+          "type": "item",
+          "item": "tnc:storm_crystal",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "6DE9EB4A54E39018",
+      "title": "&e凝露浮鲸",
+      "icon": "tnc:mana_bottle",
+      "x": 3,
+      "y": 22.5,
+      "size": 1,
+      "shape": "square",
+      "description": [
+        "&6元素资源 · 幼兽4游戏日成熟",
+        "露天慢蓄魔，成年每日48、最多96。魔力瓶右键采四秒，每次最多24，采后有间隔。新鲸与幼鲸从零存量开始。",
+        "",
+        "&7本节点是魔力采集说明，读完自行勾选。用空瓶制作不冒充已收集魔力。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "249A5F540242E915",
+          "type": "checkmark",
+          "title": "阅读这项实际玩法说明"
+        }
+      ]
+    },
+    {
+      "id": "32D1BBF405418CAB",
+      "title": "&e囊背负兽",
+      "icon": "tnc:runner_hide",
+      "x": 9,
+      "y": 5.0,
+      "size": 1,
+      "shape": "hexagon",
+      "description": [
+        "&6实际助工 · 幼兽3游戏日成熟",
+        "两托盘32格内四格各16物品真实搬运，每四趟耗一份饲料；货物随动物存档和搬迁笼保存。",
+        "",
+        "&7普通生存寻找对应环境的野生个体。节点检查真实产物持有；购得产物也可以阅读完成，不能证明亲手养成。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "3A127612D601CA74",
+          "type": "item",
+          "item": "tnc:runner_hide",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "1DD217BCE04B4FAD",
+      "title": "&e碗角犀",
+      "icon": "tnc:horn_powder",
+      "x": 9,
+      "y": 8.5,
+      "size": 1,
+      "shape": "hexagon",
+      "description": [
+        "&6实际助工 · 幼兽4游戏日成熟",
+        "牧务杖批准3×3地块，消耗饲料逐格到达开垦；不会越权挖玩家建筑。",
+        "",
+        "&7普通生存寻找对应环境的野生个体。节点检查真实产物持有；购得产物也可以阅读完成，不能证明亲手养成。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "655FD47574BC19B4",
+          "type": "item",
+          "item": "tnc:horn_powder",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "11E8FEA95A0963A3",
+      "title": "&e觅页浣兽",
+      "icon": "tnc:forage_paper_hide",
+      "x": 9,
+      "y": 12.0,
+      "size": 1,
+      "shape": "hexagon",
+      "description": [
+        "&6实际助工 · 幼兽2游戏日成熟",
+        "只拾取主人掉落的种子/纸。记住实际见过种源后，每两日可用纸皮换该目录一粒种子；不会解锁未发现植物。",
+        "",
+        "&7普通生存寻找对应环境的野生个体。节点检查真实产物持有；购得产物也可以阅读完成，不能证明亲手养成。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "6F0615D5B1B12006",
+          "type": "item",
+          "item": "tnc:forage_paper_hide",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "1E7CFE7A3DFCAEC4",
+      "title": "&e锦纹筑狸",
+      "icon": "tnc:nest_glue",
+      "x": 9,
+      "y": 15.5,
+      "size": 1,
+      "shape": "hexagon",
+      "description": [
+        "&6实际助工 · 幼兽3游戏日成熟",
+        "最多记八处已有栅栏，托盘供真木栅栏；缺口出现后到场修补并扣材料。",
+        "",
+        "&7普通生存寻找对应环境的野生个体。节点检查真实产物持有；购得产物也可以阅读完成，不能证明亲手养成。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "7F116EA336E71654",
+          "type": "item",
+          "item": "tnc:nest_glue",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "04E9DA38B9857F5F",
+      "title": "&e跃泉蹄兽",
+      "icon": "tnc:hoof_glue",
+      "x": 9,
+      "y": 19.0,
+      "size": 1,
+      "shape": "hexagon",
+      "description": [
+        "&6实际助工 · 幼兽3游戏日成熟",
+        "可装兽鞍骑乘与蓄力跳；耐力/饲料实际消耗，蹄胶供攀绳配方。",
+        "",
+        "&7普通生存寻找对应环境的野生个体。节点检查真实产物持有；购得产物也可以阅读完成，不能证明亲手养成。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "577329BDE81683FB",
+          "type": "item",
+          "item": "tnc:hoof_glue",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "0BB7FC39DA0893F2",
+      "title": "&e枕光貂",
+      "icon": "tnc:lamp_wax",
+      "x": 9,
+      "y": 22.5,
+      "size": 1,
+      "shape": "hexagon",
+      "description": [
+        "&6实际助工 · 幼兽2游戏日成熟",
+        "瓶中魔力注入，最多存60；跟随消耗魔力生成真实移动灯，灯有期限，不留永久光。取灯蜡供提灯。",
+        "",
+        "&7普通生存寻找对应环境的野生个体。节点检查真实产物持有；购得产物也可以阅读完成，不能证明亲手养成。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "05115C1037FFD2F7",
+          "type": "item",
+          "item": "tnc:lamp_wax",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "4CB67AF677AF21D0",
+      "title": "&b魔力瓶 · 一份储备，三种用途",
+      "icon": "tnc:mana_bottle",
+      "x": -15,
+      "y": 31,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "普通瓶24、精制瓶72容量。采鲸四秒；空中饮用回复真实魔力，右键炉后注口或发电座转入。",
+        "魔瓶座放一瓶，每次红石上升沿向相邻同主人设备转最多5魔力。节律继电器可驱动脉冲。",
+        "瓶复制NBT仍共享同一世界账；不会复制可用魔力。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "6257675E51464F77",
+          "type": "item",
+          "item": "tnc:mana_bottle",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "1A2E940C71AFB319",
+      "title": "&6先建窝，再安排工作",
+      "icon": "tnc:pasture_staff",
+      "x": 0,
+      "y": 31,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "食水槽：四槽各16真实饲料、16份真实水。托盘：搬运端点和物资箱。",
+        "栖居标记定窝，卵架孵育，采露架收落物，充电栖架存电；各自有主人与四槽原生GUI。",
+        "牧务杖选动物后右键标记/托盘/地块设路线；潜行可调整跟随与留守。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "78BBF7AC2ED14ACB",
+          "type": "item",
+          "item": "tnc:pasture_staff",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "670A4C5EF59F55E8",
+      "title": "&6搬迁笼 · 货物也带走",
+      "icon": "tnc:pasture_cage",
+      "x": 15,
+      "y": 31,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "只可搬自己的异兽，同UUID保存、健康与资源照原值保留。",
+        "笼使用世界票据；复制笼NBT只允许成功放出一次。普通放出检查碰撞与地界。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "7FF3C19E2FB69211",
+          "type": "item",
+          "item": "tnc:pasture_cage",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "245259E920722029",
+      "title": "&a养殖是生活，不只是任务",
+      "icon": "minecraft:emerald",
+      "x": 0,
+      "y": 37,
+      "size": 1.2,
+      "shape": "square",
+      "description": [
+        "朝夕商行现收购新增魔法农产、专属肉材和留养产物。酒馆委托栏也会出现料理、远征供货、布料与纸材委托。",
+        "决定把收获留下自用、扩大繁育，还是出售买家具和房屋。每日推荐与个人收购额度沿用现有系统。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "5B101F253E294954",
+          "type": "checkmark",
+          "title": "阅读这项实际玩法说明"
+        }
+      ]
+    },
+    {
+      "id": "129B6DF6E7C93A95",
+      "title": "&6第一步 · 读懂它的喜食",
+      "icon": "tnc:pasture_book",
+      "x": -5,
+      "y": -3,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "&f牧养册右键动物看喜食、认养、窝点和真实剩余时间。",
+        "&f三次有效照料，各间隔60秒；别把快速连点当成认养。"
+      ],
+      "dependencies": [
+        "5717B82489BA6290"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "30AA33817743E4C5",
+          "type": "item",
+          "item": "tnc:pasture_book",
+          "count": 1,
+          "consume_items": false,
+          "title": "持有成果，不消耗；可通过制作或交易获得"
+        }
+      ]
+    },
+    {
+      "id": "50DA3E9407C112AE",
+      "title": "&a第二步 · 安排窝点与食槽",
+      "icon": "tnc:pasture_trough",
+      "x": 0,
+      "y": -3,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "&f按牧养册搭窝点；食槽放它喜欢的食物。",
+        "&f牧务杖选动物，再右键自己的栖居标记设窝点。",
+        "&7持有食槽仅证明你已准备设施，认养状态仍以牧养册为准。"
+      ],
+      "dependencies": [
+        "129B6DF6E7C93A95"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "3CC0C1A7C0430C74",
+          "type": "item",
+          "item": "tnc:pasture_trough",
+          "count": 1,
+          "consume_items": false,
+          "title": "持有成果，不消耗；可通过制作或交易获得"
+        }
+      ]
+    },
+    {
+      "id": "6D24BF06175C4A17",
+      "title": "&e第三步 · 选择自己的牧场",
+      "icon": "tnc:pasture_staff",
+      "x": 5,
+      "y": -3,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "&f下面四列：肉食、活取、元素、助手。挑喜欢的一种开始。",
+        "&f先体验一次取产或派工，再决定扩大。没有必须养齐所有动物的剧情锁。"
+      ],
+      "dependencies": [
+        "50DA3E9407C112AE"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "4DC7AD63265B7261",
+          "type": "checkmark",
+          "title": "阅读并按步骤尝试（手动确认）"
+        }
+      ]
+    },
+    {
+      "id": "7F810E38AC9093F3",
+      "title": "&6牧場餐桌",
+      "icon": "tnc:starfelt_travel_roll",
+      "x": -9,
+      "y": 1,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "&f星茸耳兔的肉制远行卷，60秒分段回复12魔力。",
+        "&f肉食牧场先保留繁殖对，再让成年产物变成补给。"
+      ],
+      "dependencies": [
+        "6D24BF06175C4A17"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "5CB72B4932FAB20F",
+          "type": "item",
+          "item": "tnc:starfelt_travel_roll",
+          "count": 1,
+          "consume_items": false,
+          "title": "持有成果，不消耗；可通过制作或交易获得"
+        }
+      ]
+    },
+    {
+      "id": "3AE5E8FDFBAF9AB9",
+      "title": "&e活取做成灯",
+      "icon": "tnc:soft_lantern",
+      "x": -3,
+      "y": 1,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "&f暮灯落角或枕光灯蜡为提灯添燃料；不必把鹿杀掉。"
+      ],
+      "dependencies": [
+        "6D24BF06175C4A17"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "1BDF6A8F26614A26",
+          "type": "item",
+          "item": "tnc:soft_lantern",
+          "count": 1,
+          "consume_items": false,
+          "title": "持有成果，不消耗；可通过制作或交易获得"
+        }
+      ]
+    },
+    {
+      "id": "5669AE8AB225BB2A",
+      "title": "&b浮鲸把魔力带回来",
+      "icon": "tnc:mana_bottle",
+      "x": 3,
+      "y": 1,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "&f露天水边真实清晨采露蓄魔；瓶采4秒，最多24魔力。",
+        "&f可饮用，或右键新炼金炉口/发电座；所有转移扣真实储量。"
+      ],
+      "dependencies": [
+        "6D24BF06175C4A17"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "7B31BCD21BB12E96",
+          "type": "item",
+          "item": "tnc:mana_bottle",
+          "count": 1,
+          "consume_items": false,
+          "title": "持有成果，不消耗；可通过制作或交易获得"
+        }
+      ]
+    },
+    {
+      "id": "3B26AA2A256B805B",
+      "title": "&a让伙伴完成一次工作",
+      "icon": "tnc:pasture_tray",
+      "x": 9,
+      "y": 1,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "&f放两托盘，用牧务杖选负兽或邮鹭、设起终点。",
+        "&f先做短路线，看到货物真实交接。派工说明在各个体页。"
+      ],
+      "dependencies": [
+        "6D24BF06175C4A17"
+      ],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "3480B042EBC5B89C",
+          "type": "item",
+          "item": "tnc:pasture_tray",
+          "count": 1,
+          "consume_items": false,
+          "title": "持有成果，不消耗；可通过制作或交易获得"
+        }
+      ]
+    }
+  ]
+}

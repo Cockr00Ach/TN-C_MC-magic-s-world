@@ -1,0 +1,609 @@
+{
+  "id": "28716AA722E2CC25",
+  "filename": "tnc_field_02_botany",
+  "group": "59249BFD5667691A",
+  "title": "&a&l花园与魔法植物",
+  "icon": "tnc:dance_bell_seed",
+  "order_index": 3,
+  "default_hide_dependency_lines": false,
+  "default_quest_shape": "hexagon",
+  "quest_links": [],
+  "images": [],
+  "quests": [
+    {
+      "id": "6080CD69BFD226F3",
+      "title": "&a&l魔法植物 · 找到自己的花园",
+      "icon": "tnc:plant_sample_clip",
+      "x": 0,
+      "y": -4,
+      "size": 2,
+      "shape": "square",
+      "description": [
+        "&a&l观察环境 → 找到种源 → 布置花床 → 留种收获 → 料理、工具和交易",
+        "",
+        "&f新旧世界的普通野外都能种，不要求先买天空岛田地。天空岛的公共区域才受保护。",
+        "&7这些是可选生活玩法，没有强制主线依赖。单株节点检测背包持有，不冒充亲手栽培。",
+        "&e剪刀或采样夹对对应原版植株采样：首次十次有效采样保底两粒种源。野外也可遇到已成熟魔法植物。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "4852CC05DCFE4E7E",
+          "type": "checkmark",
+          "title": "阅读这项实际玩法说明"
+        }
+      ]
+    },
+    {
+      "id": "218616900D77188A",
+      "title": "&a晨晖盘葵 · 跨过黎明",
+      "icon": "tnc:dawn_disk_seed",
+      "x": -20,
+      "y": 0,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "露天日照；亲眼见它从深夜迎来黎明，睡觉跳时不算。晨蜜做早餐或定向调查页。",
+        "",
+        "&7留种后可继续扩培；产物可选择自用、加工、供酒馆或出售。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "1021EBA71F88AF48",
+          "type": "item",
+          "item": "tnc:dawn_disk_seed",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "5785CFDF3DA3B71A",
+      "title": "&a炉息椒 · 炉边长出的余热",
+      "icon": "tnc:hearth_pepper_seed",
+      "x": -10,
+      "y": 0,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "附近有正在燃烧的熔炉或点燃营火才生长。暖椒制保暖料理，余热椒油装进锻炉升级槽，十次实际完成后用尽。",
+        "",
+        "&7留种后可继续扩培；产物可选择自用、加工、供酒馆或出售。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "6F06EC48934F10F6",
+          "type": "item",
+          "item": "tnc:hearth_pepper_seed",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "7EF51307CC8C4808",
+      "title": "&a雾织棉 · 半阴织雾",
+      "icon": "tnc:mist_cotton_seed",
+      "x": 0,
+      "y": 0,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "湿润且半阴环境。收获雾棉，织布做折叠雾帐；原地30秒内阻止远处怪新锁定，攻击会结束。",
+        "",
+        "&7留种后可继续扩培；产物可选择自用、加工、供酒馆或出售。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "3EEEAD8705FA5D21",
+          "type": "item",
+          "item": "tnc:mist_cotton_seed",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "4B0468EA51165B1E",
+      "title": "&a岩函蕨 · 四类表层岩纹",
+      "icon": "tnc:stone_fern_seed",
+      "x": 10,
+      "y": 0,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "在岩床生长，叶纹写入产物NBT。岩叶与纸加工时保留纹样，可装调查档案夹。",
+        "",
+        "&7留种后可继续扩培；产物可选择自用、加工、供酒馆或出售。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "397A1EEE207EEE84",
+          "type": "item",
+          "item": "tnc:stone_fern_seed",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "0F4E7EDB692CEDFB",
+      "title": "&a镜潭莲 · 清水下的镜潭",
+      "icon": "tnc:mirror_lotus_seed",
+      "x": 20,
+      "y": 0,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "清澈源水与泥/黏土底床。镜露用真实空瓶取，制镜潭饮：水下清晰视野60秒，饮后返瓶。",
+        "",
+        "&7留种后可继续扩培；产物可选择自用、加工、供酒馆或出售。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "7D31B578743222DC",
+          "type": "item",
+          "item": "tnc:mirror_lotus_seed",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "2B01F700F23FC0E2",
+      "title": "&a灯愿蒲 · 把远照果丢出去",
+      "icon": "tnc:wish_puff_seed",
+      "x": -20,
+      "y": 6,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "夜间湿润花床。成熟收远照果；投掷后在可见表面铺真实方块光，水平半径50格、20秒，不隔实体墙照亮屋内。",
+        "",
+        "&7留种后可继续扩培；产物可选择自用、加工、供酒馆或出售。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "31D88429F13EDBAB",
+          "type": "item",
+          "item": "tnc:wish_puff_seed",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "33434F1FBC8C126E",
+      "title": "&a回声豆 · 让豆荚听见三音",
+      "icon": "tnc:echo_bean_seed",
+      "x": -10,
+      "y": 6,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "附近音符盒奏C—E—G。豆荚制作音符盒和节律继电器，声音能真正触发红石。",
+        "",
+        "&7留种后可继续扩培；产物可选择自用、加工、供酒馆或出售。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "3B33B5FA2C8B0E22",
+          "type": "item",
+          "item": "tnc:echo_bean_seed",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "1FE3D942D9733451",
+      "title": "&a梯脊藤 · 搭架向上",
+      "icon": "tnc:ladder_vine_seed",
+      "x": 0,
+      "y": 6,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "相邻田间藤架，留出上方空间。藤筋制登山绳，能部署12格真实攀绳、潜行收回。",
+        "",
+        "&7留种后可继续扩培；产物可选择自用、加工、供酒馆或出售。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "19E10AB3819167FD",
+          "type": "item",
+          "item": "tnc:ladder_vine_seed",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "275B11F331AB26CE",
+      "title": "&a霜鸣蒿 · 寒地的露",
+      "icon": "tnc:frost_chime_seed",
+      "x": 10,
+      "y": 6,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "低温与水分。霜露用瓶取，配暖椒成霜椒餐，可获得10秒耐火。",
+        "",
+        "&7留种后可继续扩培；产物可选择自用、加工、供酒馆或出售。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "317416A92758B6AA",
+          "type": "item",
+          "item": "tnc:frost_chime_seed",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "4EB629ABABB37376",
+      "title": "&a盐墨菌 · 海风写字",
+      "icon": "tnc:salt_ink_seed",
+      "x": 20,
+      "y": 6,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "海岸附近盐水/盐盆条件。盐墨制调查页、信封，也是墨信树的种源研究材料。",
+        "",
+        "&7留种后可继续扩培；产物可选择自用、加工、供酒馆或出售。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "5C3F33CE2CC59D42",
+          "type": "item",
+          "item": "tnc:salt_ink_seed",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "7BBA6669F6B8ADCB",
+      "title": "&a风铃帆草 · 让花床迎风",
+      "icon": "tnc:wind_sail_seed",
+      "x": -20,
+      "y": 12,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "高处露天与上方空间。帆纤维制折叠缓降布，使用8秒缓降，落地结束。",
+        "",
+        "&7留种后可继续扩培；产物可选择自用、加工、供酒馆或出售。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "759BFB4927A0E3B4",
+          "type": "item",
+          "item": "tnc:wind_sail_seed",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "4AF54D8F496F5ECF",
+      "title": "&a钟眠草 · 跟着主人作息",
+      "icon": "tnc:sleep_clock_seed",
+      "x": -10,
+      "y": 12,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "床边培育，真实睡够再醒来会留下照料事件。静叶制钟眠茶：解除挖掘疲劳，非战斗回复4生命。",
+        "",
+        "&7留种后可继续扩培；产物可选择自用、加工、供酒馆或出售。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "6F71BA88D2C59A43",
+          "type": "item",
+          "item": "tnc:sleep_clock_seed",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "42653123A34B8B0B",
+      "title": "&a影裁花 · 半阴花床的纹样",
+      "icon": "tnc:shadow_cut_seed",
+      "x": 0,
+      "y": 12,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "半阴照明。八种纹样留在影绢上；与纸加工成图样卡，署名记录与原纹样一同保存。",
+        "",
+        "&7留种后可继续扩培；产物可选择自用、加工、供酒馆或出售。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "41B9F267164E9FFD",
+          "type": "item",
+          "item": "tnc:shadow_cut_seed",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "49FC1830961DCF3C",
+      "title": "&a墨信树 · 把书带进花园",
+      "icon": "tnc:paper_tree_seed",
+      "x": 10,
+      "y": 12,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "桦苗采样时随身两纸与一盐墨可研究种源。栽种后附近阅读研究，预留上方两格，持续取纸皮。",
+        "",
+        "&7留种后可继续扩培；产物可选择自用、加工、供酒馆或出售。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "68D7A4BD7596C8DC",
+          "type": "item",
+          "item": "tnc:paper_tree_seed",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "679A80D1D5B68F1B",
+      "title": "&a换羽荚 · 给种子做行囊",
+      "icon": "tnc:flight_pod_seed",
+      "x": 20,
+      "y": 12,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "水边湿润环境。荚壳制防雨种匣，四品种各16粒；可打开真实容器，内容随物品保存。",
+        "",
+        "&7留种后可继续扩培；产物可选择自用、加工、供酒馆或出售。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "43C33E0698849481",
+          "type": "item",
+          "item": "tnc:flight_pod_seed",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "1A6D584C54AD2E53",
+      "title": "&a共生蜜簇 · 养蜂也养花",
+      "icon": "tnc:honey_cluster_seed",
+      "x": -20,
+      "y": 18,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "真正蜜蜂到花边完成授粉；对刷同一花有节流，授粉刷每次耗耐久。蜜粉做蜜簇糕、授粉刷和其他料理。",
+        "",
+        "&7留种后可继续扩培；产物可选择自用、加工、供酒馆或出售。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "0A03EEC42EB1ECD1",
+          "type": "item",
+          "item": "tnc:honey_cluster_seed",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "0BEE92B72545C562",
+      "title": "&a星露藤 · 夜里长出的法力",
+      "icon": "tnc:star_dew_seed",
+      "x": -10,
+      "y": 18,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "露天夜间与水分。星露果食用16刻完成，回复30真实法力，四秒冷却；也可制瓶饮。",
+        "",
+        "&7留种后可继续扩培；产物可选择自用、加工、供酒馆或出售。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "7F5D96CDC3925166",
+          "type": "item",
+          "item": "tnc:star_dew_seed",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "1A5FEAD114DC06E5",
+      "title": "&a脉舞铃花 · 记住主人的花",
+      "icon": "tnc:dance_bell_seed",
+      "x": 0,
+      "y": 18,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "水壶照料认主。成熟后主人近身就连续摆动，不是只转一下模型；舞瓣可做居民礼物和铃片。",
+        "",
+        "&7留种后可继续扩培；产物可选择自用、加工、供酒馆或出售。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "32B46F774D282A6A",
+          "type": "item",
+          "item": "tnc:dance_bell_seed",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "1E79CD0CAADFD729",
+      "title": "&a星憩蕊 · 三只会回家的花灵",
+      "icon": "tnc:star_rest_seed",
+      "x": 10,
+      "y": 18,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "高处晴夜观察十秒获得种源。成熟植株在合适时段生出三只独立花灵，围绕母花飞；离开母花会返回，重载不重复增加。",
+        "",
+        "&7留种后可继续扩培；产物可选择自用、加工、供酒馆或出售。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "701988E6437CA1AB",
+          "type": "item",
+          "item": "tnc:star_rest_seed",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "2A8E7F9556C5EE31",
+      "title": "&2望天蔓 · 四日通天",
+      "icon": "tnc:sky_vine_seed",
+      "x": -15,
+      "y": 25,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "制作三境调查卷，在相距256格的林地、高地、谷地各观察一次，首次完成得到两粒种源。",
+        "预留9×9空地和上方64格。四游戏日分阶段生长，遇建筑暂停；不替换原有方块，也不强制加载区块。",
+        "成熟用剪刀每游戏日取四天幕纤维与一粒种源。纤维制24格可收回长绳。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "710473163E6637DD",
+          "type": "item",
+          "item": "tnc:sky_vine_seed",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "2C55A413C1D7178A",
+      "title": "&a翠脉枝 · 可见且真实的输送",
+      "icon": "tnc:verdant_vein_seed",
+      "x": 0,
+      "y": 25,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "成熟翠脉枝向相邻合规设备输送绿色魔力；绿色轨迹对应真实扣除与接收。",
+        "接发电座或锻炉注口，存魔与采枝共享同一资源账，不能同时免费取得。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "27CC7AD1CC2D663A",
+          "type": "item",
+          "item": "tnc:verdant_vein_seed",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    },
+    {
+      "id": "03CF30AD5B0166A4",
+      "title": "&6种匣、档案与日常照料",
+      "icon": "tnc:rainproof_seed_box",
+      "x": 15,
+      "y": 25,
+      "size": 1.2,
+      "shape": "hexagon",
+      "description": [
+        "雨囊水壶存水、授粉刷有耐久、调律铃与音符盒照料特定植株。",
+        "种匣四品种各16粒；档案夹十二份署名调查页。持有槽锁定，防止把容器装进自己或复制库存。"
+      ],
+      "dependencies": [],
+      "rewards": [],
+      "tasks": [
+        {
+          "id": "70A5863AD1FCC85D",
+          "type": "item",
+          "item": "tnc:rainproof_seed_box",
+          "count": 1,
+          "consume_items": false,
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）"
+        }
+      ]
+    }
+  ]
+}
