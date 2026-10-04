@@ -28,11 +28,13 @@ public final class TNNpcClientEvents {
 
     @SubscribeEvent
     public static void onRegisterLayers(EntityRenderersEvent.RegisterLayerDefinitions event) {
+        event.registerLayerDefinition(com.tnc.tnc.tavern.client.TavernGuestRenderer.LAYER,com.tnc.tnc.tavern.client.TavernGuestRenderer::layer);
         event.registerLayerDefinition(TnHumanoidNpcModel.LAYER, TnHumanoidNpcModel::createBodyLayer);
     }
 
     @SubscribeEvent
     public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(com.tnc.tnc.npc.TNNpcs.TAVERN_GUEST.get(),com.tnc.tnc.tavern.client.TavernGuestRenderer::new);
         event.registerEntityRenderer(com.tnc.tnc.npc.TNNpcs.RESIDENT.get(),net.minecraft.client.renderer.entity.VillagerRenderer::new);
         event.registerEntityRenderer(com.tnc.tnc.npc.TNNpcs.SERVICE_NPC.get(),net.minecraft.client.renderer.entity.VillagerRenderer::new);
         // 泛型显式写出：直接传方法引用时 javac 对 HumanoidMobRenderer 的两层泛型推断不稳

@@ -25,13 +25,16 @@ public final class TownServices {
     }
     public record Post(String role,String name,BlockPos local,VillagerProfession profession,Room room,float yaw){}
     public static final java.util.List<Post> POSTS=java.util.List.of(
-        new Post("guild","协会接待员 · 艾琳",new BlockPos(428,94,285),VillagerProfession.LIBRARIAN,new Room(427,94,284,430,286),0),
+        new Post("guild","协会接待员 · 艾琳",new BlockPos(434,90,285),VillagerProfession.LIBRARIAN,new Room(434,90,285,435,285),0),
         new Post("smith","潮生制杖屋 · 莉娅",new BlockPos(320,87,270),VillagerProfession.LIBRARIAN,new Room(320,87,269,321,272),0),
         new Post("armorer","炉石铁匠铺 · 铎恩",new BlockPos(201,101,259),VillagerProfession.ARMORER,new Room(199,101,256,203,261),45),
         new Post("broker","归航银行 · 米洛",new BlockPos(228,94,234),VillagerProfession.CARTOGRAPHER,new Room(227,94,233,231,235),0),
         new Post("shop","朝夕商行 · 织夏",new BlockPos(247,89,297),VillagerProfession.FARMER,new Room(245,89,294,248,298),180));
     private static BlockPos origin(ServerLevel l){return SkyIslandAnchors.resolve(l,SkyIslandAnchors.Anchor.ORIGIN);}
-    public static BlockPos board(ServerLevel l){var o=origin(l);return o==null?null:o.offset(426,94,285);}
+    public static BlockPos board(ServerLevel l){var o=origin(l);return o==null?null:o.offset(com.tnc.tnc.tavern.TavernUpgrade.BOARD);}
+    public static void prepareDecoratedTavern(net.minecraft.server.MinecraftServer server,boolean migratedExistingBoard){
+        var store=AdventureSavedData.get(server);var records=store.housing.getCompound("TownServices");var guild=records.getCompound("guild");guild.putInt("LayoutVersion",0);records.put("guild",guild);records.putBoolean("BoardPlaced",true);if(!migratedExistingBoard)records.putBoolean("BoardInstalled",false);store.housing.put("TownServices",records);store.setDirty();
+    }
     public static String directions(ServerLevel l){var o=origin(l);if(o==null)return "天空岛尚未落成。";return "29潮生制杖屋 "+o.offset(POSTS.get(1).local).toShortString()+"；28炉石铁匠铺 "+o.offset(POSTS.get(2).local).toShortString()+"；19归航银行 "+o.offset(POSTS.get(3).local).toShortString()+"。店员在屋内，酒馆入门上楼北侧为委托栏。";}
     public static boolean near(ServerPlayer p,String role){
         if(p.serverLevel()!=p.server.overworld()||!p.isAlive()||p.isSpectator()||com.tnc.tnc.combat.DownedCombat.isDowned(p))return false;
@@ -105,8 +108,8 @@ public final class TownServices {
     @SubscribeEvent public static void tick(TickEvent.ServerTickEvent e){
         if(e.phase!=TickEvent.Phase.END)return;var s=net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();if(s==null||s.getTickCount()%100!=0)return;var l=s.overworld();var o=origin(l);if(o==null||!SkyIslandAnchors.isComplete(l))return;
         var store=AdventureSavedData.get(s);if(!store.housing.contains("TownServices",10))store.housing.put("TownServices",new CompoundTag());var records=store.housing.getCompound("TownServices");
-        for(var post:POSTS){if(!postReady(post,com.tnc.tnc.world.SkyLandscapeUpgrade.complete(s)))continue;var record=records.getCompound(post.role);if(ensurePost(l,o,post,record)){records.put(post.role,record);store.setDirty();}}
-        if(!com.tnc.tnc.world.SkyLandscapeUpgrade.complete(s))return;
+        for(var post:POSTS){if(!postReady(post,com.tnc.tnc.world.SkyLandscapeUpgrade.complete(s))||(post.role.equals("guild")&&!com.tnc.tnc.tavern.TavernUpgrade.complete(s)))continue;var record=records.getCompound(post.role);if(ensurePost(l,o,post,record)){records.put(post.role,record);store.setDirty();}}
+        if(!com.tnc.tnc.world.SkyLandscapeUpgrade.complete(s)||!com.tnc.tnc.tavern.TavernUpgrade.complete(s))return;
         var b=board(l);if(b==null||!l.hasChunkAt(b)||records.getBoolean("BoardInstalled"))return;
         var block=ForgeRegistries.BLOCKS.getValue(ResourceLocation.parse("bountiful:bountyboard"));
         if(block==null||block==net.minecraft.world.level.block.Blocks.AIR)return;
@@ -123,9 +126,18 @@ public final class TownServices {
     static boolean seedDecrees(net.minecraft.world.level.block.entity.BlockEntity be){
         try{
             var dataClass=Class.forName("io.ejekta.bountiful.bounty.DecreeData");var itemClass=Class.forName("io.ejekta.bountiful.content.DecreeItem");var companion=itemClass.getField("Companion").get(null);
-            var inventory=net.minecraft.core.NonNullList.withSize(3,ItemStack.EMPTY);String[] decrees={"tnc_supply","tnc_food","tnc_hunt"};
-            for(int i=0;i<3;i++){var decree=dataClass.getConstructor(java.util.List.class).newInstance(java.util.List.of(decrees[i]));inventory.set(i,(ItemStack)companion.getClass().getMethod("create",dataClass).invoke(companion,decree));}
-            var saved=be.saveWithoutMetadata();var inv=new CompoundTag();net.minecraft.world.ContainerHelper.saveAllItems(inv,inventory);saved.put("decree_inv",inv);be.load(saved);be.setChanged();
+            var saved=be.saveWithoutMetadata();var inventory=net.minecraft.core.NonNullList.withSize(3,ItemStack.EMPTY);net.minecraft.world.ContainerHelper.loadAllItems(saved.getCompound("decree_inv"),inventory);
+            var pending=new java.util.ArrayList<>(java.util.List.of("tnc_supply","tnc_food","tnc_hunt"));var empty=new java.util.ArrayList<Integer>();
+            for(int i=0;i<3;i++){
+                if(inventory.get(i).isEmpty()){empty.add(i);continue;}
+                var itemTag=inventory.get(i).getTag();if(itemTag==null||!itemTag.contains("bountiful:decree_data"))continue;
+                try{var ids=com.google.gson.JsonParser.parseString(itemTag.getString("bountiful:decree_data")).getAsJsonObject().getAsJsonArray("ids");ids.forEach(value->pending.remove(value.getAsString()));}catch(RuntimeException ignored){/* Keep unfamiliar player data verbatim. */}
+            }
+            for(int i=0;i<empty.size()&&!pending.isEmpty();i++){
+                var ids=i==empty.size()-1?java.util.List.copyOf(pending):java.util.List.of(pending.get(0));pending.removeAll(ids);
+                var decree=dataClass.getConstructor(java.util.List.class).newInstance(ids);inventory.set(empty.get(i),(ItemStack)companion.getClass().getMethod("create",dataClass).invoke(companion,decree));
+            }
+            var inv=new CompoundTag();net.minecraft.world.ContainerHelper.saveAllItems(inv,inventory);saved.put("decree_inv",inv);be.load(saved);be.setChanged();
             be.getClass().getMethod("tryInitialPopulation").invoke(be);
             var l=be.getLevel();var b=be.getBlockPos();l.sendBlockUpdated(b,l.getBlockState(b),l.getBlockState(b),3);return true;
         }catch(ReflectiveOperationException error){com.mojang.logging.LogUtils.getLogger().error("TN-C Bountiful decree setup failed; board retained for inspection",error);return false;}

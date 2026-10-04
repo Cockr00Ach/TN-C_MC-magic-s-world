@@ -1,0 +1,88 @@
+{
+  "installed_at": "2026-10-04T23:56:39.595782",
+  "sha256": "3F83B2DDBAC8E99338C7B997FCAEE2887D2E783D9C32616D907D5FB8D8EA13D5",
+  "guest_seats": 49,
+  "total_seats": 75,
+  "unit_tests": 134,
+  "game_tests": 229,
+  "protected_resources": 1555,
+  "protected_files": 6182,
+  "music_tracks": 2,
+  "worlds": [
+    {
+      "world": "D:\\垃圾桶\\PCL 正式版 2.9.3\\.minecraft\\versions\\元素觉醒1.4.3-魔改版-20260915\\saves\\Elden Lands",
+      "origin": [
+        -1700,
+        90,
+        -66
+      ],
+      "pending_runtime": true
+    },
+    {
+      "world": "D:\\垃圾桶\\PCL 正式版 2.9.3\\.minecraft\\versions\\元素觉醒1.4.3-魔改版-20260915\\saves\\Gothic Cathedral by silversurfer671",
+      "origin": [
+        -778,
+        90,
+        -1015
+      ],
+      "pending_runtime": true
+    },
+    {
+      "world": "D:\\垃圾桶\\PCL 正式版 2.9.3\\.minecraft\\versions\\元素觉醒1.4.3-魔改版-20260915\\saves\\RouchNao-内饰试玩-第一版-20261003",
+      "origin": [
+        514,
+        90,
+        -292
+      ],
+      "changed_blocks": 0,
+      "retained_furniture": 396,
+      "decor_added": 0,
+      "actors_moved": 1
+    },
+    {
+      "world": "D:\\垃圾桶\\PCL 正式版 2.9.3\\.minecraft\\versions\\元素觉醒1.4.3-魔改版-20260915\\saves\\新的世界",
+      "origin": [
+        -884,
+        90,
+        364
+      ],
+      "changed_blocks": 4996,
+      "retained_furniture": 8,
+      "decor_added": 5,
+      "actors_moved": 2
+    }
+  ],
+  "stage_audit": {
+    "stage": "work\\tavern-stage-20261004-233001",
+    "worlds": [
+      {
+        "world": "Elden Lands",
+        "pending_runtime": true
+      },
+      {
+        "world": "Gothic Cathedral by silversurfer671",
+        "pending_runtime": true
+      },
+      {
+        "world": "RouchNao-内饰试玩-第一版-20261003",
+        "checked_patch_blocks": 5004,
+        "retained_containers": 396,
+        "audited_chunk_blocks": 0,
+        "unexpected_changes": 0
+      },
+      {
+        "world": "新的世界",
+        "checked_patch_blocks": 5004,
+        "retained_containers": 8,
+        "audited_chunk_blocks": 983040,
+        "unexpected_changes": 0
+      }
+    ],
+    "failures": []
+  },
+  "backups": [
+    "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\work\\backups\\tavern-package-20261004-235620",
+    "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\work\\backups\\tavern-20261004-235659"
+  ],
+  "installed_hash_verification": "passed"
+}

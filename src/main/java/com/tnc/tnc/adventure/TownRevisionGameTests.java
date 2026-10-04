@@ -139,11 +139,25 @@ public final class TownRevisionGameTests {
         h.assertTrue(AdventureService.profile(p).smithReady<0&&p.getInventory().getItem(0).getCount()==4,"Empty ID and unmet level cannot debit or create a universal wand");h.succeed();
     }
     @GameTest(template="building_test_empty",batch="native_bountiful",timeoutTicks=100)
+    public static void tavernDecreesPreserveCustomSlots(GameTestHelper h)throws Exception{
+        if(!net.minecraftforge.fml.ModList.get().isLoaded("bountiful")){h.succeed();return;}
+        var l=h.getLevel();var pos=h.absolutePos(new BlockPos(2,2,2));var block=net.minecraftforge.registries.ForgeRegistries.BLOCKS.getValue(ResourceLocation.parse("bountiful:bountyboard"));
+        l.setBlock(pos.below(),net.minecraft.world.level.block.Blocks.OAK_PLANKS.defaultBlockState(),3);l.setBlock(pos,block.defaultBlockState(),3);var be=l.getBlockEntity(pos);
+        var dataClass=Class.forName("io.ejekta.bountiful.bounty.DecreeData");var itemClass=Class.forName("io.ejekta.bountiful.content.DecreeItem");var companion=itemClass.getField("Companion").get(null);var decree=dataClass.getConstructor(java.util.List.class).newInstance(java.util.List.of("inventor"));
+        var original=(ItemStack)companion.getClass().getMethod("create",dataClass).invoke(companion,decree);var inventory=net.minecraft.core.NonNullList.withSize(3,ItemStack.EMPTY);inventory.set(0,original.copy());var saved=be.saveWithoutMetadata();var tag=new CompoundTag();net.minecraft.world.ContainerHelper.saveAllItems(tag,inventory);saved.put("decree_inv",tag);be.load(saved);
+        h.assertTrue(TownServices.seedDecrees(be),"Decorated board can add town commissions beside the existing decree");
+        var after=net.minecraft.core.NonNullList.withSize(3,ItemStack.EMPTY);net.minecraft.world.ContainerHelper.loadAllItems(be.saveWithoutMetadata().getCompound("decree_inv"),after);
+        h.assertTrue(ItemStack.matches(original,after.get(0)),"Existing custom decree is unchanged");var ids=new java.util.HashSet<String>();
+        for(var item:after){var itemTag=item.getTag();if(itemTag!=null&&itemTag.contains("bountiful:decree_data"))com.google.gson.JsonParser.parseString(itemTag.getString("bountiful:decree_data")).getAsJsonObject().getAsJsonArray("ids").forEach(value->ids.add(value.getAsString()));}
+        h.assertTrue(ids.containsAll(java.util.List.of("tnc_supply","tnc_food","tnc_hunt")),"All three town pools fit the remaining two slots");
+        var snapshot=be.saveWithoutMetadata().getCompound("decree_inv").copy();TownServices.seedDecrees(be);h.assertTrue(snapshot.equals(be.saveWithoutMetadata().getCompound("decree_inv")),"Repeated seed does not duplicate or replace decrees");h.succeed();
+    }
+    @GameTest(template="building_test_empty",batch="native_bountiful",timeoutTicks=100)
     public static void realBountifulPoolGenerationAndPaperCashIn(GameTestHelper h)throws Exception{
         if(!net.minecraftforge.fml.ModList.get().isLoaded("bountiful")){h.succeed();return;}
         var l=h.getLevel();var pos=h.absolutePos(new BlockPos(2,2,2));var store=l.getDataStorage();var skyClass=com.tnc.tnc.world.SkyIslandSavedData.class;
         var old=com.tnc.tnc.world.SkyIslandSavedData.get(l);var load=skyClass.getDeclaredMethod("load",CompoundTag.class);load.setAccessible(true);var fixture=old.save(new CompoundTag());
-        fixture.putString("Phase","COMPLETE");fixture.putBoolean("LayoutReady",true);var origin=pos.subtract(new BlockPos(426,94,285));fixture.putInt("OriginX",origin.getX());fixture.putInt("OriginY",origin.getY());fixture.putInt("OriginZ",origin.getZ());
+        fixture.putString("Phase","COMPLETE");fixture.putBoolean("LayoutReady",true);var origin=pos.subtract(com.tnc.tnc.tavern.TavernUpgrade.BOARD);fixture.putInt("OriginX",origin.getX());fixture.putInt("OriginY",origin.getY());fixture.putInt("OriginZ",origin.getZ());
         store.set("tnc_sky_island_v5",(net.minecraft.world.level.saveddata.SavedData)load.invoke(null,fixture));
         var p=AdventureGameTests.player(h);p.setPos(pos.getX()+0.5,pos.getY(),pos.getZ()+1.5);AdventureService.register(p);
         var playersField=net.minecraftforge.fml.util.ObfuscationReflectionHelper.findField(net.minecraft.server.players.PlayerList.class,"f_11196_");

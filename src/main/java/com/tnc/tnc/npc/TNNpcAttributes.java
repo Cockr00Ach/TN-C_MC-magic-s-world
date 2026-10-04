@@ -62,6 +62,7 @@ public final class TNNpcAttributes {
 
     @SubscribeEvent
     public static void onEntityAttributeCreation(EntityAttributeCreationEvent event) {
+        event.put(TNNpcs.TAVERN_GUEST.get(),net.minecraft.world.entity.npc.Villager.createAttributes().build());
         event.put(TNNpcs.RESIDENT.get(),net.minecraft.world.entity.npc.Villager.createAttributes().build());
         event.put(TNNpcs.SERVICE_NPC.get(),net.minecraft.world.entity.npc.Villager.createAttributes().build());
         event.put(TNNpcs.SELF.get(), TnDialogueNpc.attributes().build());

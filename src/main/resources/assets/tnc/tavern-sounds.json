@@ -1,0 +1,4 @@
+{
+  "music.tavern.wander_ward": {"sounds": [{"name": "tnc:tavern/wander_ward", "stream": true}]},
+  "music.tavern.wander_ward_1": {"sounds": [{"name": "tnc:tavern/wander_ward_1", "stream": true}]}
+}

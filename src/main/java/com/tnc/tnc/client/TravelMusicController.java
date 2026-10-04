@@ -98,7 +98,12 @@ public final class TravelMusicController {
         SoundManager sounds = minecraft.getSoundManager();
 
         // ★ boss 战优先：附近有活着的黑暗衍 ⇒ 旅行音乐让位、改放 boss 曲 ✓（见 BOSS_MUSIC 的说明）
-        if (tickBossMusic(minecraft, sounds)) {
+        boolean bossMusic=tickBossMusic(minecraft, sounds);
+        boolean tavernMusic=com.tnc.tnc.tavern.client.TavernMusicController.tick(minecraft,bossMusic);
+        if (tavernMusic && currentTrack!=null) {
+            sounds.stop(currentTrack);currentTrack=null;currentAge=0;waitTicks=100;
+        }
+        if (bossMusic || tavernMusic) {
             return;
         }
 
@@ -221,7 +226,7 @@ public final class TravelMusicController {
 
     /** Used by the client MusicManager mixin to disable only vanilla background music. */
     public static boolean shouldSuppressVanillaMusic() {
-        return inWorld && !catalog.isEmpty();
+        return inWorld && (!catalog.isEmpty()||com.tnc.tnc.tavern.client.TavernMusicController.inside(Minecraft.getInstance()));
     }
 
     private static ResourceLocation nextTrack() {
@@ -248,6 +253,7 @@ public final class TravelMusicController {
         if (!inWorld) {
             return;
         }
+        com.tnc.tnc.tavern.client.TavernMusicController.disconnect(minecraft);
         if (currentTrack != null) {
             minecraft.getSoundManager().stop(currentTrack);
         }

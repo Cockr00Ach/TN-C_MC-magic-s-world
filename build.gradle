@@ -83,6 +83,14 @@ minecraft {
         }
 
         client {
+            if (project.hasProperty('tavernClientAudit')) {
+                workingDirectory project.file('run-client-ecology-audit')
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+                property 'tnc.tavernClientAudit', 'true'
+                args '--quickPlaySingleplayer', 'ecology-gui-feedback', '--width', '1280', '--height', '720'
+                jvmArgs '-Xmx6G'
+            }
             // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
             property 'forge.enabledGameTestNamespaces', mod_id
             if (project.hasProperty('ecologyClientAudit')) {
@@ -203,6 +211,11 @@ dependencies {
 
     testImplementation platform('org.junit:junit-bom:5.10.2')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    if (project.hasProperty('tavernClientAudit')) {
+        // Dev-only nested Fabric API SRG names must also match Mojmap; game jar untouched.
+        runtimeOnly files('work/tavern-fixtures/conquest-dev.jar')
+        runtimeOnly fg.deobf('geckolib:geckolib:4.8.4')
+    }
     // Optional headless building smoke tests need the same NPC animation API as the pack.
     // Compile-only keeps normal distribution unchanged; enable with -PbuildingGameTests.
     if (project.hasProperty('buildingGameTests')) {
@@ -225,6 +238,17 @@ dependencies {
 
 tasks.named('test', Test).configure {
     useJUnitPlatform()
+}
+
+// Local travel music definitions are optional; tavern events must survive a clean checkout.
+tasks.named('processResources', ProcessResources).configure {
+    doLast {
+        def target = new File(destinationDir, 'assets/tnc/sounds.json')
+        def combined = target.exists() ? new groovy.json.JsonSlurper().parse(target, 'UTF-8') : [:]
+        combined.putAll(new groovy.json.JsonSlurper().parse(file('src/main/resources/assets/tnc/tavern-sounds.json'), 'UTF-8'))
+        target.parentFile.mkdirs()
+        target.setText(groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(combined)), 'UTF-8')
+    }
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

@@ -71,7 +71,8 @@ foreach ($f in $staged) {
 # committed on purpose on 2026-09-21 so that a fresh `gradlew build` produces a
 # jar WITH music - see src/main/resources/assets/tnc/sounds/music/).
 # Everything else still obeys $MaxMB.
-$sizeExempt = '^src/main/resources/assets/tnc/sounds/music/travel/.*\.ogg$'
+# The two user-provided inn tracks are also intentional build resources.
+$sizeExempt = '^src/main/resources/assets/tnc/sounds/(music/travel/.*|tavern/wander_ward(_1)?)\.ogg$'
 
 $totalBytes = 0
 foreach ($f in $staged) {

@@ -1,0 +1,14 @@
+{
+  "scope": "Actual Conquest furniture and custom seated models in a development gallery; real dialogue packet and OpenAL music lifecycle; not a full-pack tour",
+  "guest_definitions": 49,
+  "screenshots": 3,
+  "evidence": [
+    "49 patron definitions loaded; dedicated renderer registered",
+    "Actual server mobInteract opened the dialogue over the registered channel",
+    "Looping OGG sound active after 200 entry ticks; track\u003d1",
+    "Mute/resume retained selected track",
+    "Room exit stopped the sound and reset timer",
+    "Reentry waited and began a new looping visit"
+  ],
+  "failures": []
+}

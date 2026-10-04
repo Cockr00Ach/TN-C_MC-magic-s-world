@@ -56,6 +56,7 @@ public final class SkyIslandEvents {
         if (event.phase == TickEvent.Phase.END) {
             SkyIslandManager.tick(event.getServer());
             SkyLandscapeUpgrade.tick(event.getServer());
+            com.tnc.tnc.tavern.TavernUpgrade.tick(event.getServer());
         }
     }
 
@@ -63,5 +64,6 @@ public final class SkyIslandEvents {
     public void onServerStopping(ServerStoppingEvent event) {
         SkyIslandManager.onServerStopping(event.getServer());
         SkyLandscapeUpgrade.stop(event.getServer());
+        com.tnc.tnc.tavern.TavernUpgrade.stop(event.getServer());
     }
 }
