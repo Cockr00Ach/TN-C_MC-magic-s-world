@@ -128,6 +128,10 @@ public class TNDragonEntity extends Entity implements GeoEntity {
     private static final EntityDataAccessor<Integer> DATA_DARK =
             SynchedEntityData.defineId(TNDragonEntity.class, EntityDataSerializers.INT);
 
+    /** 头部锚定（0/1 ✓）—— 见 {@link #headAnchored()} ✓。 */
+    private static final EntityDataAccessor<Integer> DATA_HEAD_ANCHOR =
+            SynchedEntityData.defineId(TNDragonEntity.class, EntityDataSerializers.INT);
+
     /** 龙的贴图：光龙默认这张 ✓；暗龙走**另一个模型类**（{@code dark/client} ✓）不靠覆写 ✗。 */
     public static final net.minecraft.resources.ResourceLocation LIGHT_TEXTURE =
             net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tnc", "textures/entity/dragon_bedrock.png");
@@ -203,11 +207,32 @@ public class TNDragonEntity extends Entity implements GeoEntity {
         this.entityData.define(DATA_ORBIT_START, 0);
         this.entityData.define(DATA_ORBIT_HEIGHT, 120);
         this.entityData.define(DATA_DARK, 0);
+        this.entityData.define(DATA_HEAD_ANCHOR, 1);
     }
 
     /** 这是暗龙吗 ✓（只影响粒子颜色 ✓，见 {@link #DATA_DARK}）。 */
     public boolean isDark() {
         return this.entityData.get(DATA_DARK) != 0;
+    }
+
+    /**
+     * ★ <b>头部锚定</b> ✓（作者 2026-10-04："t5 根本不显示，t3 显示一会也消失了" ✗）。
+     *
+     * <p>为什么必须这样：龙是**施法者正前方**生成的 ✓，而体长是 23 格 × 个头 ✗ ——
+     * 如果按"实体原点 = 身体中点"来放（老做法 ✗），t5 的原点会被推到
+     * {@code 8 + 273×0.25 ≈ 76 格}外 ✗：超出可见/已加载范围、经常直接落在地形里 ⇒
+     * 第一 tick 撞墙自爆 ⇒ 实机就是"**根本不显示**"✗；t3（68 格）也有一半身子在视野外 ✗。
+     *
+     * <p>现在改成：<b>把鼻子（局部 −Z 那一端）锚在实体位置上</b> ✓
+     * ⇒ 法术只要把实体放在施法者前方几格 ✓，整条龙身就从那里**往后铺开、正从你身边掠过** ✓，
+     * 永远在视野里 ✓（渲染时的平移见 {@link #modelCenterOffset()} ✓、判定的走廊见 {@link #sweepBox()} ✓）。
+     */
+    public boolean headAnchored() {
+        return this.entityData.get(DATA_HEAD_ANCHOR) != 0;
+    }
+
+    public void setHeadAnchored(boolean anchored) {
+        this.entityData.set(DATA_HEAD_ANCHOR, anchored ? 1 : 0);
     }
 
     public void setDark(boolean dark) {
@@ -370,18 +395,59 @@ public class TNDragonEntity extends Entity implements GeoEntity {
     private static final double RENDER_DISTANCE = 512.0D;
 
     /**
-     * 冲刺扫过的判定盒 ✓（以龙自己为中心 ✓）。
+     * 冲刺扫过的判定走廊 ✓。
      *
-     * <p>★ 体长**封顶 {@link #SWEEP_MAX_LENGTH}** ✗ —— 作者 2026-10-04 把 t5 放大到 12 倍之后
+     * <p>★ 体长**封顶 {@link SWEEP_MAX_LENGTH}** ✗ —— 作者 2026-10-04 把 t5 放大到 12 倍之后
      * 体长是 273 格 ✗，按全长的立方体去查实体每一下都要扫几百个区块段 ✗（会卡顿 ✓）。
      * 封顶之后：够得着的敌人照样一下一个 ✓（每个敌人整次冲刺只挨一次 ✓），
      * 只是**离身体很远**那段不再吃伤害 ✓。
+     *
+     * <p>★ 2026-10-04 头部锚定之后重算 ✓（作者："t5 根本不显示" ✗ ⇒ 改成鼻子锚定 ✓）：
+     * 老版本是"以实体为中心的立方体"✗ —— 那是按"原点 = 身体中点"写的 ✓；
+     * 现在原点在**鼻尖** ✓，身体全在**身后** ✗ ⇒ 再按中心给盒子就会**漏掉整条龙身、
+     * 还多扫身前半个身位** ✗。现在按**飞行方向**铺一条走廊 ✓：
+     * 身前 {@code SWEEP_AHEAD} 格（龙下一刻会扫到哪儿 ✓）+ 身后按体长（封顶 ✓）。
      */
     private AABB sweepBox() {
-        double len = Math.min(SWEEP_MAX_LENGTH, MODEL_LENGTH_BLOCKS * this.scale());
-        return new AABB(this.getX() - len * 0.5D, this.getY() - 1.5D, this.getZ() - len * 0.5D,
-                this.getX() + len * 0.5D, this.getY() + 2.5D, this.getZ() + len * 0.5D);
+        double body = Math.min(SWEEP_MAX_LENGTH, MODEL_LENGTH_BLOCKS * this.scale());
+        Vec3 dir = this.chargeDir.lengthSqr() < 1.0E-6D ? new Vec3(0.0D, 0.0D, -1.0D)
+                : this.chargeDir.normalize();
+        double ahead = SWEEP_AHEAD;
+        // 头部锚定 ⇒ 身体全在身后（整条算 ✓）；老的中心模式 ⇒ 只算半条 ✓（和从前一致 ✓）
+        double behind = this.headAnchored() ? body : body * 0.5D;
+        double ax = this.getX() + dir.x * ahead;
+        double az = this.getZ() + dir.z * ahead;
+        double bx = this.getX() - dir.x * behind;
+        double bz = this.getZ() - dir.z * behind;
+        return new AABB(Math.min(ax, bx) - SWEEP_HALF, this.getY() - 1.5D,
+                Math.min(az, bz) - SWEEP_HALF,
+                Math.max(ax, bx) + SWEEP_HALF, this.getY() + 2.5D,
+                Math.max(az, bz) + SWEEP_HALF);
     }
+
+    /** 判定走廊：身前给多少格 ✓ / 横向+竖向各撑多宽 ✓。 */
+    private static final double SWEEP_AHEAD = 6.0D;
+    private static final double SWEEP_HALF = 2.5D;
+
+    /**
+     * ★ 身体中点相对**实体原点**的偏移（格 ✓，已含个头 ✓）—— 头部锚定时渲染要往回挪这么多 ✓。
+     *
+     * <p>为什么：模型自己的原点在**身体中段** ✓（鼻子 z≈−165、尾焰 z≈+199 ⇒ 中点大约在
+     * z ≈ +17 单位 ≈ 1 格 ✓，"鼻子到原点"是 10.3 格 ✓）。要让**鼻子**落在实体位置上 ✓，
+     * 就得把模型沿**它的 +Z（身后）**挪 {@code 10.3 × 个头} 格 ✓ —— 方向用实体的
+     * {@code yRot} 现算 ✓（不能用 {@code renderYaw} ✗，那个是给渲染矩阵用的、含修正 ✓）。
+     */
+    public Vec3 modelCenterOffset() {
+        if (!this.headAnchored()) {
+            return Vec3.ZERO;
+        }
+        double back = MODEL_NOSE_BLOCKS * this.scale();
+        double yaw = Math.toRadians(this.getYRot());
+        return new Vec3(-Math.sin(yaw) * back, 0.0D, -Math.cos(yaw) * back);
+    }
+
+    /** 鼻子（局部 −Z 那端）离模型原点多远（格 ✓）：165 单位 / 16 ✓。 */
+    public static final double MODEL_NOSE_BLOCKS = 165.0D / 16.0D;
 
     /** 这条龙能打谁 ✓（只敌对生物；不打玩家/施法者/天使/别的龙/阿波罗 ✓）。 */
     public boolean isValidLightTarget(LivingEntity target) {
@@ -617,12 +683,15 @@ public class TNDragonEntity extends Entity implements GeoEntity {
      * （见 {@code dark/client/TNDarkDragonRenderer} ✓）。
      */
     private void trail(Vec3 dir) {
+        // ★ 头部锚定：实体原点在**鼻尖** ✓ ⇒ 身体整条在**身后** ✗
+        //   ⇒ 撒粒子要沿 −dir 从鼻子往后铺 ✓（不锚定就还是老算法：沿 +Z 那半截 ✓）
+        double forwardFromOrigin = this.headAnchored() ? 0.0D : 0.45D;
         if (this.isDark()) {
             double len = MODEL_LENGTH_BLOCKS * this.scale();
             int puffs = Math.min(24, 4 + (int) (len * 0.30D));
             for (int i = 0; i < puffs; i++) {
                 double t = (this.tickCount * 0.13D + i / (double) puffs) % 1.0D;
-                Vec3 at = this.position().add(dir.scale(-len * 0.55D + len * 1.05D * t));
+                Vec3 at = this.position().add(dir.scale(len * (forwardFromOrigin - t)));
                 double a = this.tickCount * 0.37D + i * 1.7D;
                 double r = 1.0D + 1.6D * this.scale();
                 this.level().addParticle(ParticleTypes.LARGE_SMOKE,
@@ -635,7 +704,9 @@ public class TNDragonEntity extends Entity implements GeoEntity {
             }
             return;
         }
-        Vec3 tail = this.position().subtract(dir.scale(MODEL_LENGTH_BLOCKS * this.scale() * 0.35D));
+        Vec3 tail = this.position()
+                .subtract(dir.scale(MODEL_LENGTH_BLOCKS * this.scale()
+                        * (this.headAnchored() ? 0.90D : 0.35D)));
         this.level().addParticle(this.trailParticle(), tail.x, tail.y + 1.0D, tail.z, 0.0D, 0.0D, 0.0D);
         if (this.tickCount % 4 == 0) {
             this.level().addParticle(this.trailParticle(), this.getX(), this.getY() + 1.0D, this.getZ(),

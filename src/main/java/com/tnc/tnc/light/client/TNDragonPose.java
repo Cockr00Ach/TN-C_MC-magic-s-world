@@ -71,12 +71,23 @@ public final class TNDragonPose {
     /**
      * 把龙的模型摆正 ✓（在 GeckoLib 那一下之后**再**补，所以是"抵消 + 重新定向"✓）。
      *
+     * <p>★ 顺带做**头部锚定**的平移 ✓（作者 2026-10-04："t5 根本不显示、t3 显示一会也消失了；
+     * 龙生成在我的头顶吧" ✗）：模型自己的原点在**身体中段** ✓（鼻子 z=−165 单位、
+     * 尾焰 z=+199 ✓），而实体现在锚的是**鼻尖** ✓ ⇒ 渲染时要把模型沿它的 +Z（身后）
+     * 挪 {@code 10.3 × 个头} 格 ✓（{@link TNDragonEntity#modelCenterOffset()} ✓）。
+     * 这样法术只要把实体放在施法者前方**几格** ✓，整条龙身就从那里往后铺开、
+     * 正从你身边掠过 ✓，永远不会因为"原点被推到几十格外"而整条看不见 ✓。
+     *
      * @param partialTick 用来插值角度 ✓ —— 不然每 tick 朝向会一跳一跳 ✗
      */
     public static void fixFacing(PoseStack poseStack, TNDragonEntity animatable, float partialTick) {
         poseStack.mulPose(Axis.YP.rotationDegrees(MODEL_YAW_OFFSET));
         poseStack.mulPose(Axis.YP.rotationDegrees(animatable.renderYaw(partialTick)));
         poseStack.mulPose(Axis.XP.rotationDegrees(-animatable.renderPitch(partialTick)));
+        var offset = animatable.modelCenterOffset();
+        if (offset.lengthSqr() > 1.0E-6D) {
+            poseStack.translate(offset.x, offset.y, offset.z);
+        }
         debug(animatable);
     }
 

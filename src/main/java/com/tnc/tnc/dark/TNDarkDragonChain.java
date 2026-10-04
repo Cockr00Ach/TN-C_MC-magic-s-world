@@ -38,16 +38,20 @@ import net.minecraft.world.phys.Vec3;
  *   <tr><th>档</th><th>法术</th><th>做什么</th></tr>
  *   <tr><td>t1</td><td>暗龙吐息</td><td>一条最小的龙（0.30 倍 ≈ 6.8 格）往前冲 ≈54 格，撞到 14 伤</td></tr>
  *   <tr><td>t2</td><td>暗龙鳞甲</td><td>三条小龙绕着自己转（咬到 6 伤）+ 减伤 50% / 速度 +20% / 暗伤 +30%，20 秒</td></tr>
- *   <tr><td>t3</td><td>暗龙出击</td><td>一条大龙（1.50 倍 ≈ 34 格）冲 ≈90 格，撞到 24 伤</td></tr>
- *   <tr><td>t4</td><td>暗龙俯冲</td><td>两条（3.00 倍 ≈ 68 格 · 左右各偏 7°）冲 ≈122 格，撞到 34 伤</td></tr>
- *   <tr><td>t5</td><td>暗龙降世</td><td>三条（6.00 倍 ≈ 137 格 · 扇形 ∓16°）冲 ≈155 格，撞到 44 伤</td></tr>
+ *   <tr><td>t3</td><td>暗龙出击</td><td>一条大龙（3.00 倍 ≈ 68 格）冲 ≈90 格，撞到 24 伤</td></tr>
+ *   <tr><td>t4</td><td>暗龙俯冲</td><td>两条（6.00 倍 ≈ 137 格）<b>一前一后</b>冲 ≈122 格，撞到 34 伤</td></tr>
+ *   <tr><td>t5</td><td>暗龙降世</td><td>三条（12.00 倍 ≈ 273 格）<b>一条接一条</b>冲 ≈155 格，撞到 44 伤</td></tr>
  * </table>
+ *
+ * <p>★ 2026-10-04：出生点/纵列/抬高全部照抄光龙那一套 ✓（{@code TNLightDragonChain.release} ✓）
+ * —— 作者："t4 为什么冒出来两条龙"✗、"t5 根本不显示"✗、"龙生成在我的头顶吧"✓。
+ * 两张表要一直保持一致 ✓（要分头调就改各自的数 ✓）。
  */
 public final class TNDarkDragonChain {
 
-    /** 一档暗龙法术：法术 id / 档位 / 放几条 / 个头 / 撞伤 / 速度（格/tick）/ 时长（tick）/ 扇形角 / 名字 ✓。 */
+    /** 一档暗龙法术：法术 id / 档位 / 放几条 / 个头 / 撞伤 / 速度（格/tick）/ 时长（tick）/ 编队层高（格）/ 名字 ✓。 */
     private record Dragon(String path, int tier, int count, double scale, double damage,
-                          double speed, int ticks, double fanDeg, String name) {
+                          double speed, int ticks, double spacing, String name) {
 
         double range() {
             return speed * ticks;
@@ -64,12 +68,10 @@ public final class TNDarkDragonChain {
             new Dragon("dark_dragon_breath", 1, 1, 0.30D, 14.0D, 0.48D, 450, 0.0D, "暗龙吐息"),
             new Dragon("dark_dragon_scales", 2, 3, 0.30D, 6.0D, 0.0D, 800, 0.0D, "暗龙鳞甲"),
             new Dragon("dark_dragon_charge", 3, 1, 3.00D, 24.0D, 0.58D, 620, 0.0D, "暗龙出击"),
-            new Dragon("dark_dragon_dive", 4, 2, 6.00D, 34.0D, 0.66D, 740, 7.0D, "暗龙俯冲"),
-            new Dragon("dark_dragon_descend", 5, 3, 12.00D, 44.0D, 0.74D, 840, 16.0D, "暗龙降世"),
+            new Dragon("dark_dragon_dive", 4, 2, 6.00D, 34.0D, 0.66D, 740, 0.50D, "暗龙俯冲"),
+            new Dragon("dark_dragon_descend", 5, 3, 12.00D, 44.0D, 0.74D, 840, 0.35D, "暗龙降世"),
     };
 
-    /** 龙放主人前方多远（格 ✓）。 */
-    private static final double SPAWN_DISTANCE = 8.0D;
     /** t2 鳞甲持续多久 / 影响半径（格 ✓）。 */
     private static final int SCALES_TICKS = 400;
     private static final double SCALES_RADIUS = 10.0D;
@@ -174,19 +176,17 @@ public final class TNDarkDragonChain {
         LOGGER.info("TN-C/dark: 暗龙鳞甲 buffed={}", buffed);
     }
 
-    /** t1 / t3 / t4 / t5：**放龙** ✓ —— 在施法者正前方生成，一条/两条/三条朝准星方向冲出去 ✓。 */
+    /** t1 / t3 / t4 / t5：**放龙** ✓ —— 施法者正前方、鼻尖锚定、多条上下编队（对齐光龙 ✓）。 */
     private static void release(ServerLevel level, LivingEntity caster, Dragon dragon) {
         Vec3 look = caster.getLookAngle();
-        double length = TNDragonEntity.MODEL_LENGTH_BLOCKS * dragon.scale();
-        double distance = SPAWN_DISTANCE + length * 0.25D;
-        Vec3 start = caster.position().add(look.scale(distance));
-        Vec3 side = new Vec3(-look.z, 0.0D, look.x).normalize();
+        double bodyRadius = TNDragonEntity.MODEL_LENGTH_BLOCKS * dragon.scale() + HEAD_CLEARANCE;
+        double lift = Math.min(LIFT_MAX, bodyRadius * LIFT);
+        Vec3 start = caster.position().add(look.scale(bodyRadius));
         int spawned = 0;
         for (int i = 0; i < dragon.count(); i++) {
-            double offset = (i - (dragon.count() - 1) / 2.0D) * dragon.fanDeg();
-            Vec3 dir = rotateY(look, offset);
-            Vec3 at = start.add(side.scale((i - (dragon.count() - 1) / 2.0D) * length * 0.45D));
-            if (spawnOne(level, caster, dragon, at, dir)) {
+            double offset = (i - (dragon.count() - 1) / 2.0D) * dragon.spacing() * dragon.scale();
+            Vec3 at = start.add(0.0D, lift + offset, 0.0D);
+            if (spawnOne(level, caster, dragon, at, look)) {
                 spawned++;
             }
         }
@@ -199,17 +199,15 @@ public final class TNDarkDragonChain {
                     + " §7（" + spawned + " 条 · 向前冲约 " + (int) dragon.range() + " 格 · 撞到 "
                     + (int) dragon.damage() + " 伤）"), true);
         }
-        LOGGER.info("TN-C/dark: 暗龙冲锋 {} count={} scale={} speed={} ticks={} caster={}",
+        LOGGER.info("TN-C/dark: 暗龙冲锋 {} count={} scale={} speed={} ticks={} spacing={} caster={}",
                 dragon.path(), spawned, dragon.scale(), dragon.speed(), dragon.ticks(),
-                caster.getName().getString());
+                dragon.spacing(), caster.getName().getString());
     }
 
-    private static Vec3 rotateY(Vec3 v, double degree) {
-        double r = Math.toRadians(degree);
-        double cos = Math.cos(r);
-        double sin = Math.sin(r);
-        return new Vec3(v.x * cos + v.z * sin, v.y, -v.x * sin + v.z * cos).normalize();
-    }
+    /** 鼻尖至少放在身体半径之外多少格 ✓ / 大龙抬高多少（× 体长 ✓）与封顶（格 ✓）—— 和光龙一致 ✓。 */
+    private static final double HEAD_CLEARANCE = 2.5D;
+    private static final double LIFT = 0.22D;
+    private static final double LIFT_MAX = 12.0D;
 
     private static boolean spawnOne(ServerLevel level, LivingEntity caster, Dragon dragon,
                                     Vec3 at, Vec3 dir) {
@@ -221,6 +219,7 @@ public final class TNDarkDragonChain {
         entity.setScale(dragon.scale());
         entity.setOwner(caster.getUUID());
         entity.setDark(true);                           // ★ 灵魂火 + 黑烟 ✓
+        entity.setHeadAnchored(true);                   // ★ 鼻尖锚定 ✓（和光龙一致 ✓）
         entity.moveTo(at.x, at.y, at.z, caster.getYRot(), 0.0F);
         entity.charge(dir, dragon.speed(), dragon.ticks(), dragon.damage());
         level.addFreshEntity(entity);
