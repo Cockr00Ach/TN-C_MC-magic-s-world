@@ -1,0 +1,5 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [{"item": "tnc:forge_firebrick"}, {"item": "minecraft:copper_ingot"}],
+  "result": {"item": "tnc:forge_input_port", "count": 1}
+}

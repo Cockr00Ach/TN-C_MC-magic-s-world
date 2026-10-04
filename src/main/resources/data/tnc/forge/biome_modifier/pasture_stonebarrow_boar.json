@@ -1,0 +1,10 @@
+{
+  "type": "forge:add_spawns",
+  "biomes": "#tnc:pasture_stonebarrow_boar",
+  "spawners": {
+    "type": "tnc:stonebarrow_boar",
+    "weight": 3,
+    "minCount": 2,
+    "maxCount": 4
+  }
+}

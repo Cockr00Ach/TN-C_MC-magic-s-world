@@ -1,0 +1,14 @@
+{
+  "conditions": [],
+  "responses": {
+    "fail": "gift.flowers.fail",
+    "good": "gift.flowers.good",
+    "better": "gift.flowers.better",
+    "best": "gift.flowers.best"
+  },
+  "items": {
+    "tnc:flower_gift": 8,
+    "tnc:sleep_clock_tea": 6,
+    "tnc:morning_honey_breakfast": 6
+  }
+}

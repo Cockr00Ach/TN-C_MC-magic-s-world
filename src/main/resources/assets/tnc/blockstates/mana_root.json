@@ -1,0 +1,64 @@
+{
+  "variants": {
+    "age=0,fed=0": {
+      "model": "tnc:block/mana_root_0_0"
+    },
+    "age=0,fed=1": {
+      "model": "tnc:block/mana_root_0_1"
+    },
+    "age=0,fed=2": {
+      "model": "tnc:block/mana_root_0_2"
+    },
+    "age=0,fed=3": {
+      "model": "tnc:block/mana_root_0_3"
+    },
+    "age=0,fed=4": {
+      "model": "tnc:block/mana_root_0_4"
+    },
+    "age=1,fed=0": {
+      "model": "tnc:block/mana_root_1_0"
+    },
+    "age=1,fed=1": {
+      "model": "tnc:block/mana_root_1_1"
+    },
+    "age=1,fed=2": {
+      "model": "tnc:block/mana_root_1_2"
+    },
+    "age=1,fed=3": {
+      "model": "tnc:block/mana_root_1_3"
+    },
+    "age=1,fed=4": {
+      "model": "tnc:block/mana_root_1_4"
+    },
+    "age=2,fed=0": {
+      "model": "tnc:block/mana_root_2_0"
+    },
+    "age=2,fed=1": {
+      "model": "tnc:block/mana_root_2_1"
+    },
+    "age=2,fed=2": {
+      "model": "tnc:block/mana_root_2_2"
+    },
+    "age=2,fed=3": {
+      "model": "tnc:block/mana_root_2_3"
+    },
+    "age=2,fed=4": {
+      "model": "tnc:block/mana_root_2_4"
+    },
+    "age=3,fed=0": {
+      "model": "tnc:block/mana_root_3_0"
+    },
+    "age=3,fed=1": {
+      "model": "tnc:block/mana_root_3_1"
+    },
+    "age=3,fed=2": {
+      "model": "tnc:block/mana_root_3_2"
+    },
+    "age=3,fed=3": {
+      "model": "tnc:block/mana_root_3_3"
+    },
+    "age=3,fed=4": {
+      "model": "tnc:block/mana_root_3_4"
+    }
+  }
+}

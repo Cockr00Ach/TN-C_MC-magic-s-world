@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "FSF",
+    "FSF",
+    "FSF"
+  ],
+  "key": {
+    "F": {
+      "item": "tnc:sky_canopy_fiber"
+    },
+    "S": {
+      "item": "minecraft:string"
+    }
+  },
+  "result": {
+    "item": "tnc:sky_canopy_rope",
+    "count": 1
+  }
+}

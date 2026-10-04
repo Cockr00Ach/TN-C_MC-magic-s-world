@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "tnc:froststride_meat"
+    },
+    {
+      "item": "tnc:froststride_meat"
+    },
+    {
+      "item": "tnc:hearth_pepper_fruit"
+    }
+  ],
+  "result": {
+    "item": "tnc:frostwarm_skewer",
+    "count": 1
+  }
+}

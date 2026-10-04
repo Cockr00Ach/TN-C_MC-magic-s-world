@@ -1,0 +1,533 @@
+{
+  "id": "stonebarrow_boar",
+  "name": "石垒豪豕",
+  "animation": "boar",
+  "shadow": 0.65,
+  "texture_size": [
+    128,
+    128
+  ],
+  "coordinate_system": "Minecraft ModelPart: +Y down, forward -Z, ground y=24",
+  "parts": [
+    {
+      "name": "body",
+      "parent": "root",
+      "pivot": [
+        0,
+        14,
+        1
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -7,
+            -4,
+            -9
+          ],
+          "size": [
+            14,
+            8,
+            18
+          ],
+          "material": "stone_hide",
+          "uv": [
+            1,
+            1
+          ]
+        },
+        {
+          "position": [
+            -7,
+            -6,
+            -5
+          ],
+          "size": [
+            3,
+            4,
+            5
+          ],
+          "material": "stone",
+          "uv": [
+            101,
+            1
+          ]
+        },
+        {
+          "position": [
+            -7,
+            -5,
+            1
+          ],
+          "size": [
+            3,
+            3,
+            5
+          ],
+          "material": "stone",
+          "uv": [
+            39,
+            28
+          ]
+        },
+        {
+          "position": [
+            5,
+            -6,
+            -5
+          ],
+          "size": [
+            3,
+            4,
+            5
+          ],
+          "material": "stone",
+          "uv": [
+            101,
+            1
+          ]
+        },
+        {
+          "position": [
+            5,
+            -5,
+            1
+          ],
+          "size": [
+            3,
+            3,
+            5
+          ],
+          "material": "stone",
+          "uv": [
+            39,
+            28
+          ]
+        },
+        {
+          "position": [
+            -4,
+            -6,
+            -6
+          ],
+          "size": [
+            8,
+            2,
+            5
+          ],
+          "material": "stone",
+          "uv": [
+            56,
+            28
+          ]
+        },
+        {
+          "position": [
+            -3,
+            -5,
+            1
+          ],
+          "size": [
+            6,
+            2,
+            4
+          ],
+          "material": "stone",
+          "uv": [
+            83,
+            28
+          ]
+        }
+      ]
+    },
+    {
+      "name": "head",
+      "parent": "root",
+      "pivot": [
+        0,
+        14,
+        -8
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -5,
+            -4,
+            -5
+          ],
+          "size": [
+            10,
+            7,
+            7
+          ],
+          "material": "boar_skin",
+          "uv": [
+            66,
+            1
+          ]
+        },
+        {
+          "position": [
+            -4,
+            -1,
+            -8
+          ],
+          "size": [
+            8,
+            4,
+            4
+          ],
+          "material": "nose",
+          "uv": [
+            14,
+            28
+          ]
+        },
+        {
+          "position": [
+            -5.0,
+            -2,
+            -5.5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "eye",
+          "uv": [
+            119,
+            28
+          ]
+        },
+        {
+          "position": [
+            4.0,
+            -2,
+            -5.5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "eye",
+          "uv": [
+            119,
+            28
+          ]
+        },
+        {
+          "position": [
+            -5,
+            -6,
+            -2
+          ],
+          "size": [
+            2,
+            3,
+            3
+          ],
+          "material": "boar_skin",
+          "uv": [
+            14,
+            38
+          ]
+        },
+        {
+          "position": [
+            -4,
+            2,
+            -8
+          ],
+          "size": [
+            2,
+            3,
+            2
+          ],
+          "material": "ivory",
+          "uv": [
+            118,
+            1
+          ]
+        },
+        {
+          "position": [
+            3,
+            -6,
+            -2
+          ],
+          "size": [
+            2,
+            3,
+            3
+          ],
+          "material": "boar_skin",
+          "uv": [
+            14,
+            38
+          ]
+        },
+        {
+          "position": [
+            2,
+            2,
+            -8
+          ],
+          "size": [
+            2,
+            3,
+            2
+          ],
+          "material": "ivory",
+          "uv": [
+            118,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_fl",
+      "parent": "root",
+      "pivot": [
+        -5,
+        18,
+        -5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1.5,
+            0,
+            -1.5
+          ],
+          "size": [
+            3,
+            6,
+            3
+          ],
+          "material": "boar_skin",
+          "uv": [
+            1,
+            28
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            4,
+            -2.0
+          ],
+          "size": [
+            3,
+            2,
+            4
+          ],
+          "material": "hoof",
+          "uv": [
+            104,
+            28
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_fr",
+      "parent": "root",
+      "pivot": [
+        5,
+        18,
+        -5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1.5,
+            0,
+            -1.5
+          ],
+          "size": [
+            3,
+            6,
+            3
+          ],
+          "material": "boar_skin",
+          "uv": [
+            1,
+            28
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            4,
+            -2.0
+          ],
+          "size": [
+            3,
+            2,
+            4
+          ],
+          "material": "hoof",
+          "uv": [
+            104,
+            28
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_bl",
+      "parent": "root",
+      "pivot": [
+        -5,
+        18,
+        7
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1.5,
+            0,
+            -1.5
+          ],
+          "size": [
+            3,
+            6,
+            3
+          ],
+          "material": "boar_skin",
+          "uv": [
+            1,
+            28
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            4,
+            -2.0
+          ],
+          "size": [
+            3,
+            2,
+            4
+          ],
+          "material": "hoof",
+          "uv": [
+            104,
+            28
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_br",
+      "parent": "root",
+      "pivot": [
+        5,
+        18,
+        7
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1.5,
+            0,
+            -1.5
+          ],
+          "size": [
+            3,
+            6,
+            3
+          ],
+          "material": "boar_skin",
+          "uv": [
+            1,
+            28
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            4,
+            -2.0
+          ],
+          "size": [
+            3,
+            2,
+            4
+          ],
+          "material": "hoof",
+          "uv": [
+            104,
+            28
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tail",
+      "parent": "body",
+      "pivot": [
+        0,
+        -1,
+        9
+      ],
+      "rotation": [
+        -0.4,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            0,
+            0
+          ],
+          "size": [
+            2,
+            2,
+            4
+          ],
+          "material": "stone_hide",
+          "uv": [
+            1,
+            38
+          ]
+        }
+      ]
+    }
+  ]
+}

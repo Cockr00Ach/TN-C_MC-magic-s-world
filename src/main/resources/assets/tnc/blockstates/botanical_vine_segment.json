@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "segment=1": {
+      "model": "tnc:block/botanical_vine_segment"
+    },
+    "segment=2": {
+      "model": "tnc:block/botanical_vine_segment"
+    },
+    "segment=3": {
+      "model": "tnc:block/botanical_vine_segment"
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["SSS", "SCS", "SSS"],
+  "key": {"S": {"item": "minecraft:stone"}, "C": {"item": "minecraft:clay_ball"}},
+  "result": {"item": "tnc:forge_firebrick", "count": 8}
+}

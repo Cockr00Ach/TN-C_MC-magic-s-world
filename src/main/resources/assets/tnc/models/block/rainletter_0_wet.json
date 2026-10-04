@@ -1,0 +1,78 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "wood": "tnc:block/eco_wood",
+    "wetleaf": "tnc:block/eco_rain_leaf",
+    "dryleaf": "tnc:block/eco_rain_leaf_dry",
+    "wetberry": "tnc:block/eco_berry",
+    "dryberry": "tnc:block/eco_berry_dry"
+  },
+  "elements": [
+    {
+      "from": [
+        7,
+        0,
+        7
+      ],
+      "to": [
+        9,
+        4,
+        9
+      ],
+      "faces": {
+        "down": {
+          "texture": "#wood"
+        },
+        "up": {
+          "texture": "#wood"
+        },
+        "north": {
+          "texture": "#wood"
+        },
+        "south": {
+          "texture": "#wood"
+        },
+        "west": {
+          "texture": "#wood"
+        },
+        "east": {
+          "texture": "#wood"
+        }
+      }
+    },
+    {
+      "from": [
+        5,
+        3,
+        5
+      ],
+      "to": [
+        11,
+        5,
+        11
+      ],
+      "faces": {
+        "down": {
+          "texture": "#wetleaf"
+        },
+        "up": {
+          "texture": "#wetleaf"
+        },
+        "north": {
+          "texture": "#wetleaf"
+        },
+        "south": {
+          "texture": "#wetleaf"
+        },
+        "west": {
+          "texture": "#wetleaf"
+        },
+        "east": {
+          "texture": "#wetleaf"
+        }
+      }
+    }
+  ]
+}

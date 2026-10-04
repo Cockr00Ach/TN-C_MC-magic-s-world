@@ -25,6 +25,7 @@ public final class ShopService {
         if(left>0)return "需要"+goods.count()+"个普通"+goods.name().split(" ×")[0]+"；命名、附魔或带特殊数据的物品不会收走。";
         if(id.equals("milk")&&!tx.add(new ItemStack(Items.BUCKET)))return "请为返还空桶腾出位置，未收购。";
         if(id.equals("honey")&&!tx.add(new ItemStack(Items.GLASS_BOTTLE,4)))return "请为返还玻璃瓶腾出位置，未收购。";
+        if(id.equals("dawn_honey")&&!tx.add(new ItemStack(Items.GLASS_BOTTLE,goods.count())))return "请为返还晨蜜瓶腾出位置，未收购。";
         tx.commit();a.credit(price,"朝夕收购·"+goods.name());t.putLong("Sold",t.getLong("Sold")+price);AdventureSavedData.get(p.server).setDirty();AdventureService.milestone(p,"produce_sold");return "已售出"+goods.name()+"，收入"+price+"铜。";
     }
     public static CompoundTag snapshot(ServerPlayer p){var t=account(p).copy();t.putInt("Quota",ShopCatalog.quota(AdventureService.profile(p).level()));t.putLong("Next",PERIOD-AdventureSavedData.get(p.server).activeTicks%PERIOD);var available=new ListTag();for(var g:ShopCatalog.FURNITURE){var item=g.item().startsWith("model:")?"immersive_furniture:furniture":g.item();var found=ForgeRegistries.ITEMS.getValue(ResourceLocation.parse(item));if(found!=null&&found!=Items.AIR&&TownStories.unlocked(p,g.id()))available.add(StringTag.valueOf(g.id()));}t.put("Available",available);String featured=TownMarketDay.featured(p.server);t.putString("Featured",featured);var prices=new CompoundTag();for(var g:ShopCatalog.PRODUCE)prices.putInt(g.id(),TownMarketDay.price(g,featured));t.put("SalePrices",prices);return t;}

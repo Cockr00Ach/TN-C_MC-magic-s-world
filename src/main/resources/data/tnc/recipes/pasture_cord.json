@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "tnc:hoof_glue"
+    },
+    {
+      "item": "minecraft:string"
+    },
+    {
+      "item": "tnc:hoof_glue"
+    },
+    {
+      "item": "minecraft:string"
+    }
+  ],
+  "result": {
+    "item": "tnc:climbing_cord",
+    "count": 1
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "type": "tnc:field_kitchen",
+  "ingredients": [
+    {
+      "item": "tnc:mist_cloth"
+    },
+    {
+      "item": "minecraft:stick"
+    },
+    {
+      "item": "minecraft:stick"
+    }
+  ],
+  "result": {
+    "item": "tnc:folded_mist_tent",
+    "count": 1
+  }
+}

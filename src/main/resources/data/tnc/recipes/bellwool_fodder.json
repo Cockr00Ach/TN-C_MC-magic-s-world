@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "tnc:road_bell_ear" },
+    { "item": "tnc:road_bell_ear" },
+    { "item": "minecraft:wheat" }
+  ],
+  "result": { "item": "tnc:bellwool_fodder" }
+}

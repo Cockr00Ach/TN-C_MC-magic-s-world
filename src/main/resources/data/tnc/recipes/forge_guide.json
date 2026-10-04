@@ -1,0 +1,5 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [{"item": "minecraft:book"}, {"item": "minecraft:copper_ingot"}],
+  "result": {"item": "tnc:forge_guide", "count": 1}
+}

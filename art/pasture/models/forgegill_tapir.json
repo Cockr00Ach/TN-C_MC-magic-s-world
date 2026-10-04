@@ -1,0 +1,831 @@
+{
+  "id": "forgegill_tapir",
+  "name": "炉鳃山貘",
+  "animation": "tapir",
+  "shadow": 0.72,
+  "texture_size": [
+    128,
+    128
+  ],
+  "coordinate_system": "Minecraft ModelPart: +Y down, forward -Z, ground y=24",
+  "parts": [
+    {
+      "name": "body",
+      "parent": "root",
+      "pivot": [
+        0,
+        12,
+        2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -7,
+            -5,
+            -10
+          ],
+          "size": [
+            14,
+            10,
+            20
+          ],
+          "material": "tapir_hide",
+          "uv": [
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "head",
+      "parent": "root",
+      "pivot": [
+        0,
+        12,
+        -8
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -4,
+            -4,
+            -6
+          ],
+          "size": [
+            8,
+            7,
+            8
+          ],
+          "material": "tapir_hide",
+          "uv": [
+            70,
+            1
+          ]
+        },
+        {
+          "position": [
+            -3,
+            0,
+            -9
+          ],
+          "size": [
+            6,
+            4,
+            4
+          ],
+          "material": "tapir_gill",
+          "uv": [
+            1,
+            32
+          ]
+        },
+        {
+          "position": [
+            -3,
+            3,
+            -10
+          ],
+          "size": [
+            6,
+            2,
+            3
+          ],
+          "material": "nose",
+          "uv": [
+            61,
+            32
+          ]
+        },
+        {
+          "position": [
+            -4.1,
+            -2,
+            -5.5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "eye",
+          "uv": [
+            123,
+            1
+          ]
+        },
+        {
+          "position": [
+            3.1,
+            -2,
+            -5.5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "eye",
+          "uv": [
+            123,
+            1
+          ]
+        },
+        {
+          "position": [
+            -4,
+            -6,
+            0
+          ],
+          "size": [
+            2,
+            3,
+            3
+          ],
+          "material": "tapir_gill",
+          "uv": [
+            50,
+            32
+          ]
+        },
+        {
+          "position": [
+            2,
+            -6,
+            0
+          ],
+          "size": [
+            2,
+            3,
+            3
+          ],
+          "material": "tapir_gill",
+          "uv": [
+            50,
+            32
+          ]
+        }
+      ]
+    },
+    {
+      "name": "gill_l0",
+      "parent": "body",
+      "pivot": [
+        -6,
+        -2,
+        -7
+      ],
+      "rotation": [
+        0,
+        -0.22,
+        0.15
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            -2,
+            -0.5
+          ],
+          "size": [
+            2,
+            6,
+            1
+          ],
+          "material": "tapir_gill",
+          "uv": [
+            116,
+            1
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            -1,
+            -0.5
+          ],
+          "size": [
+            3,
+            4,
+            1
+          ],
+          "material": "warm_glow",
+          "uv": [
+            91,
+            32
+          ]
+        }
+      ]
+    },
+    {
+      "name": "gill_l1",
+      "parent": "body",
+      "pivot": [
+        -6,
+        -2,
+        -5
+      ],
+      "rotation": [
+        0,
+        -0.22,
+        0.15
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            -2,
+            -0.5
+          ],
+          "size": [
+            2,
+            6,
+            1
+          ],
+          "material": "tapir_gill",
+          "uv": [
+            116,
+            1
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            -1,
+            -0.5
+          ],
+          "size": [
+            3,
+            4,
+            1
+          ],
+          "material": "warm_glow",
+          "uv": [
+            91,
+            32
+          ]
+        }
+      ]
+    },
+    {
+      "name": "gill_l2",
+      "parent": "body",
+      "pivot": [
+        -6,
+        -2,
+        -3
+      ],
+      "rotation": [
+        0,
+        -0.22,
+        0.15
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            -2,
+            -0.5
+          ],
+          "size": [
+            2,
+            6,
+            1
+          ],
+          "material": "tapir_gill",
+          "uv": [
+            116,
+            1
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            -1,
+            -0.5
+          ],
+          "size": [
+            3,
+            4,
+            1
+          ],
+          "material": "warm_glow",
+          "uv": [
+            91,
+            32
+          ]
+        }
+      ]
+    },
+    {
+      "name": "gill_l3",
+      "parent": "body",
+      "pivot": [
+        -6,
+        -2,
+        -1
+      ],
+      "rotation": [
+        0,
+        -0.22,
+        0.15
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            -2,
+            -0.5
+          ],
+          "size": [
+            2,
+            6,
+            1
+          ],
+          "material": "tapir_gill",
+          "uv": [
+            116,
+            1
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            -1,
+            -0.5
+          ],
+          "size": [
+            3,
+            4,
+            1
+          ],
+          "material": "warm_glow",
+          "uv": [
+            91,
+            32
+          ]
+        }
+      ]
+    },
+    {
+      "name": "gill_r0",
+      "parent": "body",
+      "pivot": [
+        6,
+        -2,
+        -7
+      ],
+      "rotation": [
+        0,
+        0.22,
+        -0.15
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            -2,
+            -0.5
+          ],
+          "size": [
+            2,
+            6,
+            1
+          ],
+          "material": "tapir_gill",
+          "uv": [
+            116,
+            1
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            -1,
+            -0.5
+          ],
+          "size": [
+            3,
+            4,
+            1
+          ],
+          "material": "warm_glow",
+          "uv": [
+            91,
+            32
+          ]
+        }
+      ]
+    },
+    {
+      "name": "gill_r1",
+      "parent": "body",
+      "pivot": [
+        6,
+        -2,
+        -5
+      ],
+      "rotation": [
+        0,
+        0.22,
+        -0.15
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            -2,
+            -0.5
+          ],
+          "size": [
+            2,
+            6,
+            1
+          ],
+          "material": "tapir_gill",
+          "uv": [
+            116,
+            1
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            -1,
+            -0.5
+          ],
+          "size": [
+            3,
+            4,
+            1
+          ],
+          "material": "warm_glow",
+          "uv": [
+            91,
+            32
+          ]
+        }
+      ]
+    },
+    {
+      "name": "gill_r2",
+      "parent": "body",
+      "pivot": [
+        6,
+        -2,
+        -3
+      ],
+      "rotation": [
+        0,
+        0.22,
+        -0.15
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            -2,
+            -0.5
+          ],
+          "size": [
+            2,
+            6,
+            1
+          ],
+          "material": "tapir_gill",
+          "uv": [
+            116,
+            1
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            -1,
+            -0.5
+          ],
+          "size": [
+            3,
+            4,
+            1
+          ],
+          "material": "warm_glow",
+          "uv": [
+            91,
+            32
+          ]
+        }
+      ]
+    },
+    {
+      "name": "gill_r3",
+      "parent": "body",
+      "pivot": [
+        6,
+        -2,
+        -1
+      ],
+      "rotation": [
+        0,
+        0.22,
+        -0.15
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            -2,
+            -0.5
+          ],
+          "size": [
+            2,
+            6,
+            1
+          ],
+          "material": "tapir_gill",
+          "uv": [
+            116,
+            1
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            -1,
+            -0.5
+          ],
+          "size": [
+            3,
+            4,
+            1
+          ],
+          "material": "warm_glow",
+          "uv": [
+            91,
+            32
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_fl",
+      "parent": "root",
+      "pivot": [
+        -4.8,
+        17,
+        -4
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1.5,
+            0,
+            -1.5
+          ],
+          "size": [
+            3,
+            7,
+            3
+          ],
+          "material": "tapir_hide",
+          "uv": [
+            103,
+            1
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            5,
+            -2.0
+          ],
+          "size": [
+            3,
+            2,
+            4
+          ],
+          "material": "hoof",
+          "uv": [
+            22,
+            32
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_fr",
+      "parent": "root",
+      "pivot": [
+        4.8,
+        17,
+        -4
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1.5,
+            0,
+            -1.5
+          ],
+          "size": [
+            3,
+            7,
+            3
+          ],
+          "material": "tapir_hide",
+          "uv": [
+            103,
+            1
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            5,
+            -2.0
+          ],
+          "size": [
+            3,
+            2,
+            4
+          ],
+          "material": "hoof",
+          "uv": [
+            22,
+            32
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_bl",
+      "parent": "root",
+      "pivot": [
+        -4.8,
+        17,
+        9
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1.5,
+            0,
+            -1.5
+          ],
+          "size": [
+            3,
+            7,
+            3
+          ],
+          "material": "tapir_hide",
+          "uv": [
+            103,
+            1
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            5,
+            -2.0
+          ],
+          "size": [
+            3,
+            2,
+            4
+          ],
+          "material": "hoof",
+          "uv": [
+            22,
+            32
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_br",
+      "parent": "root",
+      "pivot": [
+        4.8,
+        17,
+        9
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1.5,
+            0,
+            -1.5
+          ],
+          "size": [
+            3,
+            7,
+            3
+          ],
+          "material": "tapir_hide",
+          "uv": [
+            103,
+            1
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            5,
+            -2.0
+          ],
+          "size": [
+            3,
+            2,
+            4
+          ],
+          "material": "hoof",
+          "uv": [
+            22,
+            32
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tail",
+      "parent": "body",
+      "pivot": [
+        0,
+        0,
+        10
+      ],
+      "rotation": [
+        -0.2,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            -1,
+            0
+          ],
+          "size": [
+            2,
+            2,
+            4
+          ],
+          "material": "tapir_hide",
+          "uv": [
+            37,
+            32
+          ]
+        },
+        {
+          "position": [
+            -2,
+            -2,
+            3
+          ],
+          "size": [
+            4,
+            4,
+            1
+          ],
+          "material": "tapir_gill",
+          "uv": [
+            80,
+            32
+          ]
+        }
+      ]
+    }
+  ]
+}

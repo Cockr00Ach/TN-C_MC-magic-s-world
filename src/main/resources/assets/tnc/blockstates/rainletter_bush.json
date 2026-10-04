@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "age=0,wet=false": {
+      "model": "tnc:block/rainletter_0_dry"
+    },
+    "age=0,wet=true": {
+      "model": "tnc:block/rainletter_0_wet"
+    },
+    "age=1,wet=false": {
+      "model": "tnc:block/rainletter_1_dry"
+    },
+    "age=1,wet=true": {
+      "model": "tnc:block/rainletter_1_wet"
+    },
+    "age=2,wet=false": {
+      "model": "tnc:block/rainletter_2_dry"
+    },
+    "age=2,wet=true": {
+      "model": "tnc:block/rainletter_2_wet"
+    },
+    "age=3,wet=false": {
+      "model": "tnc:block/rainletter_3_dry"
+    },
+    "age=3,wet=true": {
+      "model": "tnc:block/rainletter_3_wet"
+    }
+  }
+}

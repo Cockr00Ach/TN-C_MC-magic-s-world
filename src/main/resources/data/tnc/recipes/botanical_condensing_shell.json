@@ -1,0 +1,24 @@
+{
+  "type": "tnc:mana_forging",
+  "ingredients": [
+    {
+      "item": "tnc:frost_dew",
+      "count": 2
+    },
+    {
+      "item": "minecraft:slime_ball",
+      "count": 1
+    },
+    {
+      "item": "minecraft:clay_ball",
+      "count": 2
+    }
+  ],
+  "result": {
+    "item": "tnc:condensing_shell",
+    "count": 1
+  },
+  "mana": 20,
+  "work_ticks": 120,
+  "category": "workshop"
+}

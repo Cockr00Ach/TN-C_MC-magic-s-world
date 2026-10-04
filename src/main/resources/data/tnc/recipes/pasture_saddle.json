@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "tnc:runner_hide"
+    },
+    {
+      "item": "minecraft:leather"
+    },
+    {
+      "item": "tnc:runner_hide"
+    },
+    {
+      "item": "minecraft:leather"
+    },
+    {
+      "item": "minecraft:iron_ingot"
+    }
+  ],
+  "result": {
+    "item": "tnc:beast_saddle",
+    "count": 1
+  }
+}

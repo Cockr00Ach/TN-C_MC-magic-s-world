@@ -1,0 +1,10 @@
+{
+  "type": "forge:add_spawns",
+  "biomes": "#tnc:pasture_tideback_newt",
+  "spawners": {
+    "type": "tnc:tideback_newt",
+    "weight": 3,
+    "minCount": 2,
+    "maxCount": 4
+  }
+}

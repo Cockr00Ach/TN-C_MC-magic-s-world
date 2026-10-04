@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=false": {
+      "model": "tnc:block/warning_moss_lantern_dark"
+    },
+    "lit=true": {
+      "model": "tnc:block/warning_moss_lantern_lit"
+    }
+  }
+}

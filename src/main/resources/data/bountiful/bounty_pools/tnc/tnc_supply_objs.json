@@ -231,6 +231,72 @@
       "rarity": "COMMON",
       "timeMult": 2.0
     },
+    "tnc_supply_tide_reed": {
+      "type": "item",
+      "content": "tnc:tide_reed_stem",
+      "amount": {
+        "min": 4,
+        "max": 16
+      },
+      "unitWorth": 145,
+      "rarity": "UNCOMMON",
+      "timeMult": 2.0
+    },
+    "tnc_supply_warning_moss_flake": {
+      "type": "item",
+      "content": "tnc:warning_moss_flake",
+      "amount": {
+        "min": 2,
+        "max": 8
+      },
+      "unitWorth": 180,
+      "rarity": "UNCOMMON",
+      "timeMult": 2.0
+    },
+    "tnc_supply_homeward_flower_petal": {
+      "type": "item",
+      "content": "tnc:homeward_flower_petal",
+      "amount": {
+        "min": 1,
+        "max": 4
+      },
+      "unitWorth": 240,
+      "rarity": "UNCOMMON",
+      "timeMult": 2.0
+    },
+    "tnc_supply_resonant_fleece": {
+      "type": "item",
+      "content": "tnc:resonant_fleece",
+      "amount": {
+        "min": 2,
+        "max": 6
+      },
+      "unitWorth": 300,
+      "rarity": "UNCOMMON",
+      "timeMult": 2.0
+    },
+    "tnc_supply_hushcap_slice": {
+      "type": "item",
+      "content": "tnc:hushcap_slice",
+      "amount": {
+        "min": 2,
+        "max": 8
+      },
+      "unitWorth": 180,
+      "rarity": "UNCOMMON",
+      "timeMult": 2.0
+    },
+    "tnc_supply_mana_root_core": {
+      "type": "item",
+      "content": "tnc:mana_root_core",
+      "amount": {
+        "min": 1,
+        "max": 2
+      },
+      "unitWorth": 800,
+      "rarity": "RARE",
+      "timeMult": 2.0
+    },
     "tnc_supply_paper": {
       "type": "item",
       "content": "minecraft:paper",
@@ -307,6 +373,193 @@
       "unitWorth": 200,
       "rarity": "COMMON",
       "timeMult": 2.0
+    },
+    "tnc_supply_mist_cotton_fiber": {
+      "type": "item",
+      "content": "tnc:mist_cotton_fiber",
+      "amount": {
+        "min": 2,
+        "max": 6
+      },
+      "unitWorth": 250,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_supply_stone_pattern_leaf": {
+      "type": "item",
+      "content": "tnc:stone_pattern_leaf",
+      "amount": {
+        "min": 2,
+        "max": 6
+      },
+      "unitWorth": 250,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_supply_vine_sinew": {
+      "type": "item",
+      "content": "tnc:vine_sinew",
+      "amount": {
+        "min": 2,
+        "max": 6
+      },
+      "unitWorth": 250,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_supply_salt_ink": {
+      "type": "item",
+      "content": "tnc:salt_ink",
+      "amount": {
+        "min": 2,
+        "max": 6
+      },
+      "unitWorth": 250,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_supply_sail_fiber": {
+      "type": "item",
+      "content": "tnc:sail_fiber",
+      "amount": {
+        "min": 2,
+        "max": 6
+      },
+      "unitWorth": 250,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_supply_paper_bark": {
+      "type": "item",
+      "content": "tnc:paper_bark",
+      "amount": {
+        "min": 2,
+        "max": 6
+      },
+      "unitWorth": 250,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_supply_rainproof_pod": {
+      "type": "item",
+      "content": "tnc:rainproof_pod",
+      "amount": {
+        "min": 2,
+        "max": 6
+      },
+      "unitWorth": 250,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_supply_dance_petal": {
+      "type": "item",
+      "content": "tnc:dance_petal",
+      "amount": {
+        "min": 2,
+        "max": 6
+      },
+      "unitWorth": 250,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_supply_sky_canopy_fiber": {
+      "type": "item",
+      "content": "tnc:sky_canopy_fiber",
+      "amount": {
+        "min": 2,
+        "max": 6
+      },
+      "unitWorth": 250,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_supply_lantern_antler": {
+      "type": "item",
+      "content": "tnc:lantern_antler",
+      "amount": {
+        "min": 2,
+        "max": 6
+      },
+      "unitWorth": 250,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_supply_shell_glue": {
+      "type": "item",
+      "content": "tnc:shell_glue",
+      "amount": {
+        "min": 2,
+        "max": 6
+      },
+      "unitWorth": 250,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_supply_flight_feather": {
+      "type": "item",
+      "content": "tnc:flight_feather",
+      "amount": {
+        "min": 2,
+        "max": 6
+      },
+      "unitWorth": 250,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_supply_mirror_scale": {
+      "type": "item",
+      "content": "tnc:mirror_scale",
+      "amount": {
+        "min": 2,
+        "max": 6
+      },
+      "unitWorth": 250,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_supply_soft_down": {
+      "type": "item",
+      "content": "tnc:soft_down",
+      "amount": {
+        "min": 2,
+        "max": 6
+      },
+      "unitWorth": 250,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_supply_nest_glue": {
+      "type": "item",
+      "content": "tnc:nest_glue",
+      "amount": {
+        "min": 2,
+        "max": 6
+      },
+      "unitWorth": 250,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_supply_hoof_glue": {
+      "type": "item",
+      "content": "tnc:hoof_glue",
+      "amount": {
+        "min": 2,
+        "max": 6
+      },
+      "unitWorth": 250,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_supply_lamp_wax": {
+      "type": "item",
+      "content": "tnc:lamp_wax",
+      "amount": {
+        "min": 2,
+        "max": 6
+      },
+      "unitWorth": 250,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
     }
   }
 }

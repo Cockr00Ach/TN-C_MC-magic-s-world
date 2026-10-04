@@ -1,0 +1,24 @@
+{
+  "type": "tnc:field_kitchen",
+  "ingredients": [
+    {
+      "item": "minecraft:clay_ball"
+    },
+    {
+      "item": "minecraft:clay_ball"
+    },
+    {
+      "item": "minecraft:clay_ball"
+    },
+    {
+      "item": "tnc:rainletter_berry"
+    },
+    {
+      "item": "tnc:tide_reed_stem"
+    }
+  ],
+  "result": {
+    "item": "tnc:rain_watering_flask",
+    "count": 1
+  }
+}

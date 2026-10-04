@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "tnc:starfelt_meat"
+    },
+    {
+      "item": "tnc:starfelt_meat"
+    },
+    {
+      "item": "tnc:star_dew_fruit"
+    },
+    {
+      "item": "tnc:road_bell_ear"
+    }
+  ],
+  "result": {
+    "item": "tnc:starfelt_travel_roll",
+    "count": 1
+  }
+}

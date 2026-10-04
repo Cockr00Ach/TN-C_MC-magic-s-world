@@ -1,0 +1,24 @@
+{
+  "type": "tnc:field_kitchen",
+  "ingredients": [
+    {
+      "item": "minecraft:oak_planks"
+    },
+    {
+      "item": "minecraft:oak_planks"
+    },
+    {
+      "item": "tnc:rainproof_pod"
+    },
+    {
+      "item": "tnc:rainproof_pod"
+    },
+    {
+      "item": "minecraft:slime_ball"
+    }
+  ],
+  "result": {
+    "item": "tnc:rainproof_seed_box",
+    "count": 1
+  }
+}

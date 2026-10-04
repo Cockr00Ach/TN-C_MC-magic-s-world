@@ -1,0 +1,205 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "moss": "tnc:block/eco_moss",
+    "glow": "tnc:block/eco_moss_glow"
+  },
+  "elements": [
+    {
+      "from": [
+        4,
+        3,
+        14
+      ],
+      "to": [
+        12,
+        11,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#moss"
+        },
+        "up": {
+          "texture": "#moss"
+        },
+        "north": {
+          "texture": "#moss"
+        },
+        "south": {
+          "texture": "#moss"
+        },
+        "west": {
+          "texture": "#moss"
+        },
+        "east": {
+          "texture": "#moss"
+        }
+      }
+    },
+    {
+      "from": [
+        3,
+        5,
+        13
+      ],
+      "to": [
+        7,
+        10,
+        15
+      ],
+      "faces": {
+        "down": {
+          "texture": "#moss"
+        },
+        "up": {
+          "texture": "#moss"
+        },
+        "north": {
+          "texture": "#moss"
+        },
+        "south": {
+          "texture": "#moss"
+        },
+        "west": {
+          "texture": "#moss"
+        },
+        "east": {
+          "texture": "#moss"
+        }
+      }
+    },
+    {
+      "from": [
+        9,
+        4,
+        13
+      ],
+      "to": [
+        13,
+        11,
+        15
+      ],
+      "faces": {
+        "down": {
+          "texture": "#moss"
+        },
+        "up": {
+          "texture": "#moss"
+        },
+        "north": {
+          "texture": "#moss"
+        },
+        "south": {
+          "texture": "#moss"
+        },
+        "west": {
+          "texture": "#moss"
+        },
+        "east": {
+          "texture": "#moss"
+        }
+      }
+    },
+    {
+      "from": [
+        6,
+        9,
+        12
+      ],
+      "to": [
+        10,
+        13,
+        14
+      ],
+      "faces": {
+        "down": {
+          "texture": "#moss"
+        },
+        "up": {
+          "texture": "#moss"
+        },
+        "north": {
+          "texture": "#moss"
+        },
+        "south": {
+          "texture": "#moss"
+        },
+        "west": {
+          "texture": "#moss"
+        },
+        "east": {
+          "texture": "#moss"
+        }
+      }
+    },
+    {
+      "from": [
+        6,
+        6,
+        12
+      ],
+      "to": [
+        8,
+        8,
+        13
+      ],
+      "faces": {
+        "down": {
+          "texture": "#glow"
+        },
+        "up": {
+          "texture": "#glow"
+        },
+        "north": {
+          "texture": "#glow"
+        },
+        "south": {
+          "texture": "#glow"
+        },
+        "west": {
+          "texture": "#glow"
+        },
+        "east": {
+          "texture": "#glow"
+        }
+      },
+      "shade": false
+    },
+    {
+      "from": [
+        10,
+        8,
+        12
+      ],
+      "to": [
+        12,
+        10,
+        13
+      ],
+      "faces": {
+        "down": {
+          "texture": "#glow"
+        },
+        "up": {
+          "texture": "#glow"
+        },
+        "north": {
+          "texture": "#glow"
+        },
+        "south": {
+          "texture": "#glow"
+        },
+        "west": {
+          "texture": "#glow"
+        },
+        "east": {
+          "texture": "#glow"
+        }
+      },
+      "shade": false
+    }
+  ]
+}

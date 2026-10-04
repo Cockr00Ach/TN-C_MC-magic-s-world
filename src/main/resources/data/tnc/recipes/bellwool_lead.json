@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "tnc:resonant_fleece" },
+    { "item": "tnc:resonant_fleece" },
+    { "item": "minecraft:string" }
+  ],
+  "result": { "item": "minecraft:lead", "count": 2 }
+}

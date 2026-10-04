@@ -1,0 +1,27 @@
+{
+  "type": "tnc:field_kitchen",
+  "ingredients": [
+    {
+      "item": "tnc:sail_fiber"
+    },
+    {
+      "item": "tnc:sail_fiber"
+    },
+    {
+      "item": "tnc:sail_fiber"
+    },
+    {
+      "item": "tnc:sail_fiber"
+    },
+    {
+      "item": "minecraft:string"
+    },
+    {
+      "item": "minecraft:string"
+    }
+  ],
+  "result": {
+    "item": "tnc:folded_descent_cloth",
+    "count": 1
+  }
+}

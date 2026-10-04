@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "tnc:emberback_meat"
+    },
+    {
+      "item": "tnc:emberback_meat"
+    },
+    {
+      "item": "minecraft:pumpkin"
+    },
+    {
+      "item": "tnc:warm_fat"
+    },
+    {
+      "item": "minecraft:bowl"
+    }
+  ],
+  "result": {
+    "item": "tnc:emberback_stew",
+    "count": 1
+  }
+}

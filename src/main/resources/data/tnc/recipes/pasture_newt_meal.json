@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "tnc:tideback_meat"
+    },
+    {
+      "item": "tnc:tideback_meat"
+    },
+    {
+      "item": "tnc:rainletter_berry"
+    },
+    {
+      "item": "minecraft:bowl"
+    }
+  ],
+  "result": {
+    "item": "tnc:tideback_chowder",
+    "count": 1
+  }
+}

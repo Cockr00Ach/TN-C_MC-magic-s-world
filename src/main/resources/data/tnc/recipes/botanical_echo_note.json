@@ -1,0 +1,21 @@
+{
+  "type": "tnc:field_kitchen",
+  "ingredients": [
+    {
+      "item": "tnc:echo_bean_pod"
+    },
+    {
+      "item": "tnc:echo_bean_pod"
+    },
+    {
+      "item": "minecraft:oak_planks"
+    },
+    {
+      "item": "minecraft:redstone"
+    }
+  ],
+  "result": {
+    "item": "minecraft:note_block",
+    "count": 1
+  }
+}

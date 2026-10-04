@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "tnc:road_bell_ear"
+    },
+    {
+      "item": "tnc:road_bell_ear"
+    },
+    {
+      "item": "tnc:road_bell_ear"
+    }
+  ],
+  "result": {
+    "item": "tnc:road_bell_travel_bread",
+    "count": 1
+  }
+}

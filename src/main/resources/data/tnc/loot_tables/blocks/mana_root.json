@@ -1,0 +1,33 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "tnc:mana_root_seed"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "tnc:mana_root_core",
+          "conditions": [
+            {
+              "condition": "minecraft:block_state_property",
+              "block": "tnc:mana_root",
+              "properties": {
+                "age": "3",
+                "fed": "4"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

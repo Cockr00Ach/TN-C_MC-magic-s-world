@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "age=0": {
+      "model": "tnc:block/sky_vine_0"
+    },
+    "age=1": {
+      "model": "tnc:block/sky_vine_1"
+    },
+    "age=2": {
+      "model": "tnc:block/sky_vine_2"
+    },
+    "age=3": {
+      "model": "tnc:block/sky_vine_3"
+    },
+    "age=4": {
+      "model": "tnc:block/sky_vine_4"
+    }
+  }
+}

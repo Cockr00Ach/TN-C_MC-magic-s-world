@@ -1,0 +1,1603 @@
+{
+  "meta": {
+    "format_version": "4.10",
+    "model_format": "free",
+    "box_uv": false
+  },
+  "name": "froststride_fowl",
+  "resolution": {
+    "width": 128,
+    "height": 128
+  },
+  "elements": [
+    {
+      "name": "frost_feather",
+      "uuid": "1fdc53b65d1990f50bd12342503672f2",
+      "type": "cube",
+      "from": [
+        -4.0,
+        8.0,
+        -4.0
+      ],
+      "to": [
+        4.0,
+        17.0,
+        6.0
+      ],
+      "origin": [
+        0.0,
+        13.0,
+        1.0
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            1,
+            11,
+            11,
+            20
+          ],
+          "texture": 0
+        },
+        "north": {
+          "uv": [
+            11,
+            11,
+            19,
+            20
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            19,
+            11,
+            29,
+            20
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            29,
+            11,
+            37,
+            20
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            11,
+            1,
+            19,
+            11
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            19,
+            1,
+            27,
+            11
+          ],
+          "texture": 0
+        }
+      }
+    },
+    {
+      "name": "frost_glow",
+      "uuid": "ac74aeedee670dfe4876e4facf0f7f92",
+      "type": "cube",
+      "from": [
+        -2.0,
+        12.0,
+        -5.0
+      ],
+      "to": [
+        2.0,
+        16.0,
+        -4.0
+      ],
+      "origin": [
+        0.0,
+        13.0,
+        1.0
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            65,
+            22,
+            66,
+            26
+          ],
+          "texture": 0
+        },
+        "north": {
+          "uv": [
+            66,
+            22,
+            70,
+            26
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            70,
+            22,
+            71,
+            26
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            71,
+            22,
+            75,
+            26
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            66,
+            21,
+            70,
+            22
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            70,
+            21,
+            74,
+            22
+          ],
+          "texture": 0
+        }
+      }
+    },
+    {
+      "name": "frost_glow",
+      "uuid": "d112c7c4a3c45378b7a3c8d289c67622",
+      "type": "cube",
+      "from": [
+        -1.0,
+        16.0,
+        -5.0
+      ],
+      "to": [
+        1.0,
+        17.0,
+        -4.0
+      ],
+      "origin": [
+        0.0,
+        13.0,
+        1.0
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            76,
+            22,
+            77,
+            23
+          ],
+          "texture": 0
+        },
+        "north": {
+          "uv": [
+            77,
+            22,
+            79,
+            23
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            79,
+            22,
+            80,
+            23
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            80,
+            22,
+            82,
+            23
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            77,
+            21,
+            79,
+            22
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            79,
+            21,
+            81,
+            22
+          ],
+          "texture": 0
+        }
+      }
+    },
+    {
+      "name": "frost_glow",
+      "uuid": "20cadef8389fddcd9656245653c1a4b8",
+      "type": "cube",
+      "from": [
+        -1.0,
+        11.0,
+        -5.0
+      ],
+      "to": [
+        1.0,
+        12.0,
+        -4.0
+      ],
+      "origin": [
+        0.0,
+        13.0,
+        1.0
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            76,
+            22,
+            77,
+            23
+          ],
+          "texture": 0
+        },
+        "north": {
+          "uv": [
+            77,
+            22,
+            79,
+            23
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            79,
+            22,
+            80,
+            23
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            80,
+            22,
+            82,
+            23
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            77,
+            21,
+            79,
+            22
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            79,
+            21,
+            81,
+            22
+          ],
+          "texture": 0
+        }
+      }
+    },
+    {
+      "name": "frost_feather",
+      "uuid": "1a0b9db6703bb0ff6fbfb08d49a345f8",
+      "type": "cube",
+      "from": [
+        -3.0,
+        14.0,
+        -7.0
+      ],
+      "to": [
+        3.0,
+        20.0,
+        -1.0
+      ],
+      "origin": [
+        0.0,
+        17.0,
+        -4.0
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            57,
+            7,
+            63,
+            13
+          ],
+          "texture": 0
+        },
+        "north": {
+          "uv": [
+            63,
+            7,
+            69,
+            13
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            69,
+            7,
+            75,
+            13
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            75,
+            7,
+            81,
+            13
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            63,
+            1,
+            69,
+            7
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            69,
+            1,
+            75,
+            7
+          ],
+          "texture": 0
+        }
+      }
+    },
+    {
+      "name": "frost_dark",
+      "uuid": "5d11e68217daf3ec0028bd3cb5a080e9",
+      "type": "cube",
+      "from": [
+        -2.0,
+        15.0,
+        -11.0
+      ],
+      "to": [
+        2.0,
+        17.0,
+        -6.0
+      ],
+      "origin": [
+        0.0,
+        17.0,
+        -4.0
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            108,
+            6,
+            113,
+            8
+          ],
+          "texture": 0
+        },
+        "north": {
+          "uv": [
+            113,
+            6,
+            117,
+            8
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            117,
+            6,
+            122,
+            8
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            122,
+            6,
+            126,
+            8
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            113,
+            1,
+            117,
+            6
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            117,
+            1,
+            121,
+            6
+          ],
+          "texture": 0
+        }
+      }
+    },
+    {
+      "name": "eye",
+      "uuid": "665ffd7a336e4fb7afa6b43359d6648c",
+      "type": "cube",
+      "from": [
+        -3.2,
+        17.0,
+        -6.5
+      ],
+      "to": [
+        -2.2,
+        18.0,
+        -5.5
+      ],
+      "origin": [
+        0.0,
+        17.0,
+        -4.0
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            83,
+            22,
+            84,
+            23
+          ],
+          "texture": 0
+        },
+        "north": {
+          "uv": [
+            84,
+            22,
+            85,
+            23
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            85,
+            22,
+            86,
+            23
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            86,
+            22,
+            87,
+            23
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            84,
+            21,
+            85,
+            22
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            85,
+            21,
+            86,
+            22
+          ],
+          "texture": 0
+        }
+      }
+    },
+    {
+      "name": "eye",
+      "uuid": "c9670f3ca49ad0b89acc7360fb6da383",
+      "type": "cube",
+      "from": [
+        2.2,
+        17.0,
+        -6.5
+      ],
+      "to": [
+        3.2,
+        18.0,
+        -5.5
+      ],
+      "origin": [
+        0.0,
+        17.0,
+        -4.0
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            83,
+            22,
+            84,
+            23
+          ],
+          "texture": 0
+        },
+        "north": {
+          "uv": [
+            84,
+            22,
+            85,
+            23
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            85,
+            22,
+            86,
+            23
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            86,
+            22,
+            87,
+            23
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            84,
+            21,
+            85,
+            22
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            85,
+            21,
+            86,
+            22
+          ],
+          "texture": 0
+        }
+      }
+    },
+    {
+      "name": "frost_dark",
+      "uuid": "67ace3dfea0d18a7bd111534e681ed02",
+      "type": "cube",
+      "from": [
+        -5.0,
+        9.0,
+        -2.0
+      ],
+      "to": [
+        -3.0,
+        16.0,
+        5.0
+      ],
+      "origin": [
+        -4.0,
+        15.0,
+        1.0
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            38,
+            8,
+            45,
+            15
+          ],
+          "texture": 0
+        },
+        "north": {
+          "uv": [
+            45,
+            8,
+            47,
+            15
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            47,
+            8,
+            54,
+            15
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            54,
+            8,
+            56,
+            15
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            45,
+            1,
+            47,
+            8
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            47,
+            1,
+            49,
+            8
+          ],
+          "texture": 0
+        }
+      }
+    },
+    {
+      "name": "frost_feather",
+      "uuid": "8cca678a4e95d316367dc66c86620fa5",
+      "type": "cube",
+      "from": [
+        -5.0,
+        8.0,
+        -1.0
+      ],
+      "to": [
+        -3.0,
+        10.0,
+        4.0
+      ],
+      "origin": [
+        -4.0,
+        15.0,
+        1.0
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            1,
+            26,
+            6,
+            28
+          ],
+          "texture": 0
+        },
+        "north": {
+          "uv": [
+            6,
+            26,
+            8,
+            28
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            8,
+            26,
+            13,
+            28
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            13,
+            26,
+            15,
+            28
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            6,
+            21,
+            8,
+            26
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            8,
+            21,
+            10,
+            26
+          ],
+          "texture": 0
+        }
+      }
+    },
+    {
+      "name": "frost_dark",
+      "uuid": "0c01e2da286595c596ccbb78ac0962d3",
+      "type": "cube",
+      "from": [
+        -3.3,
+        2.0,
+        1.0
+      ],
+      "to": [
+        -1.2999999999999998,
+        9.0,
+        3.0
+      ],
+      "origin": [
+        -2.3,
+        9.0,
+        2.0
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            82,
+            3,
+            84,
+            10
+          ],
+          "texture": 0
+        },
+        "north": {
+          "uv": [
+            84,
+            3,
+            86,
+            10
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            86,
+            3,
+            88,
+            10
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            88,
+            3,
+            90,
+            10
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            84,
+            1,
+            86,
+            3
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            86,
+            1,
+            88,
+            3
+          ],
+          "texture": 0
+        }
+      }
+    },
+    {
+      "name": "frost_dark",
+      "uuid": "fcf8551026fb07fe351fc92e4e7dda11",
+      "type": "cube",
+      "from": [
+        -3.3,
+        0.0,
+        -2.0
+      ],
+      "to": [
+        -1.2999999999999998,
+        2.0,
+        4.0
+      ],
+      "origin": [
+        -2.3,
+        9.0,
+        2.0
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            91,
+            7,
+            97,
+            9
+          ],
+          "texture": 0
+        },
+        "north": {
+          "uv": [
+            97,
+            7,
+            99,
+            9
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            99,
+            7,
+            105,
+            9
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            105,
+            7,
+            107,
+            9
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            97,
+            1,
+            99,
+            7
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            99,
+            1,
+            101,
+            7
+          ],
+          "texture": 0
+        }
+      }
+    },
+    {
+      "name": "frost_dark",
+      "uuid": "c669651fcdd0a7d6014c813b0323f6fd",
+      "type": "cube",
+      "from": [
+        3.0,
+        9.0,
+        -2.0
+      ],
+      "to": [
+        5.0,
+        16.0,
+        5.0
+      ],
+      "origin": [
+        4.0,
+        15.0,
+        1.0
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            38,
+            8,
+            45,
+            15
+          ],
+          "texture": 0
+        },
+        "north": {
+          "uv": [
+            45,
+            8,
+            47,
+            15
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            47,
+            8,
+            54,
+            15
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            54,
+            8,
+            56,
+            15
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            45,
+            1,
+            47,
+            8
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            47,
+            1,
+            49,
+            8
+          ],
+          "texture": 0
+        }
+      }
+    },
+    {
+      "name": "frost_feather",
+      "uuid": "3a94f0599b8432d9b3a401ab3f3215fd",
+      "type": "cube",
+      "from": [
+        3.0,
+        8.0,
+        -1.0
+      ],
+      "to": [
+        5.0,
+        10.0,
+        4.0
+      ],
+      "origin": [
+        4.0,
+        15.0,
+        1.0
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            1,
+            26,
+            6,
+            28
+          ],
+          "texture": 0
+        },
+        "north": {
+          "uv": [
+            6,
+            26,
+            8,
+            28
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            8,
+            26,
+            13,
+            28
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            13,
+            26,
+            15,
+            28
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            6,
+            21,
+            8,
+            26
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            8,
+            21,
+            10,
+            26
+          ],
+          "texture": 0
+        }
+      }
+    },
+    {
+      "name": "frost_dark",
+      "uuid": "8f00eeecba6050cab5d51f31a0f69ad2",
+      "type": "cube",
+      "from": [
+        1.2999999999999998,
+        2.0,
+        1.0
+      ],
+      "to": [
+        3.3,
+        9.0,
+        3.0
+      ],
+      "origin": [
+        2.3,
+        9.0,
+        2.0
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            82,
+            3,
+            84,
+            10
+          ],
+          "texture": 0
+        },
+        "north": {
+          "uv": [
+            84,
+            3,
+            86,
+            10
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            86,
+            3,
+            88,
+            10
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            88,
+            3,
+            90,
+            10
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            84,
+            1,
+            86,
+            3
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            86,
+            1,
+            88,
+            3
+          ],
+          "texture": 0
+        }
+      }
+    },
+    {
+      "name": "frost_dark",
+      "uuid": "ba07476bd1515efafe730550f5e0bb2e",
+      "type": "cube",
+      "from": [
+        1.2999999999999998,
+        0.0,
+        -2.0
+      ],
+      "to": [
+        3.3,
+        2.0,
+        4.0
+      ],
+      "origin": [
+        2.3,
+        9.0,
+        2.0
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            91,
+            7,
+            97,
+            9
+          ],
+          "texture": 0
+        },
+        "north": {
+          "uv": [
+            97,
+            7,
+            99,
+            9
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            99,
+            7,
+            105,
+            9
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            105,
+            7,
+            107,
+            9
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            97,
+            1,
+            99,
+            7
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            99,
+            1,
+            101,
+            7
+          ],
+          "texture": 0
+        }
+      }
+    },
+    {
+      "name": "frost_dark",
+      "uuid": "e9eca101fcd78903c8f804b0915685f4",
+      "type": "cube",
+      "from": [
+        -3.0,
+        12.0,
+        6.0
+      ],
+      "to": [
+        3.0,
+        14.0,
+        10.0
+      ],
+      "origin": [
+        0.0,
+        14.0,
+        6.0
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            16,
+            25,
+            20,
+            27
+          ],
+          "texture": 0
+        },
+        "north": {
+          "uv": [
+            20,
+            25,
+            26,
+            27
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            26,
+            25,
+            30,
+            27
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            30,
+            25,
+            36,
+            27
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            20,
+            21,
+            26,
+            25
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            26,
+            21,
+            32,
+            25
+          ],
+          "texture": 0
+        }
+      }
+    },
+    {
+      "name": "frost_feather",
+      "uuid": "03b71e71f336d1ed6168feebbfe22c4c",
+      "type": "cube",
+      "from": [
+        -2.0,
+        13.0,
+        9.0
+      ],
+      "to": [
+        2.0,
+        15.0,
+        13.0
+      ],
+      "origin": [
+        0.0,
+        14.0,
+        6.0
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            37,
+            25,
+            41,
+            27
+          ],
+          "texture": 0
+        },
+        "north": {
+          "uv": [
+            41,
+            25,
+            45,
+            27
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            45,
+            25,
+            49,
+            27
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            49,
+            25,
+            53,
+            27
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            41,
+            21,
+            45,
+            25
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            45,
+            21,
+            49,
+            25
+          ],
+          "texture": 0
+        }
+      }
+    },
+    {
+      "name": "frost_dark",
+      "uuid": "fca95df12bc4356a762152d2738e2adb",
+      "type": "cube",
+      "from": [
+        -1.0,
+        14.0,
+        12.0
+      ],
+      "to": [
+        1.0,
+        16.0,
+        15.0
+      ],
+      "origin": [
+        0.0,
+        14.0,
+        6.0
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            54,
+            24,
+            57,
+            26
+          ],
+          "texture": 0
+        },
+        "north": {
+          "uv": [
+            57,
+            24,
+            59,
+            26
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            59,
+            24,
+            62,
+            26
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            62,
+            24,
+            64,
+            26
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            57,
+            21,
+            59,
+            24
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            59,
+            21,
+            61,
+            24
+          ],
+          "texture": 0
+        }
+      }
+    }
+  ],
+  "outliner": [
+    {
+      "name": "body",
+      "origin": [
+        0.0,
+        13.0,
+        1.0
+      ],
+      "rotation": [
+        -8.594366926962348,
+        0.0,
+        0.0
+      ],
+      "uuid": "47d9e26f6de95ef5bffb9f54f1480e14",
+      "children": [
+        "1fdc53b65d1990f50bd12342503672f2",
+        "ac74aeedee670dfe4876e4facf0f7f92",
+        "d112c7c4a3c45378b7a3c8d289c67622",
+        "20cadef8389fddcd9656245653c1a4b8",
+        {
+          "name": "wing_l",
+          "origin": [
+            -4.0,
+            15.0,
+            1.0
+          ],
+          "rotation": [
+            -11.459155902616466,
+            -5.729577951308233,
+            4.583662361046586
+          ],
+          "uuid": "7f21d98001d7930bb6a73d25251f62ea",
+          "children": [
+            "67ace3dfea0d18a7bd111534e681ed02",
+            "8cca678a4e95d316367dc66c86620fa5"
+          ]
+        },
+        {
+          "name": "wing_r",
+          "origin": [
+            4.0,
+            15.0,
+            1.0
+          ],
+          "rotation": [
+            -11.459155902616466,
+            5.729577951308233,
+            -4.583662361046586
+          ],
+          "uuid": "e4c08b40c3651c1ebb91dc91221a5b50",
+          "children": [
+            "c669651fcdd0a7d6014c813b0323f6fd",
+            "3a94f0599b8432d9b3a401ab3f3215fd"
+          ]
+        },
+        {
+          "name": "tail",
+          "origin": [
+            0.0,
+            14.0,
+            6.0
+          ],
+          "rotation": [
+            21.772396214971284,
+            0.0,
+            0.0
+          ],
+          "uuid": "83f45ed81be430e4d0d2b2dde9d901fc",
+          "children": [
+            "e9eca101fcd78903c8f804b0915685f4",
+            "03b71e71f336d1ed6168feebbfe22c4c",
+            "fca95df12bc4356a762152d2738e2adb"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "head",
+      "origin": [
+        0.0,
+        17.0,
+        -4.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "uuid": "1ad7c07abeef170d887d289ed2202684",
+      "children": [
+        "1a0b9db6703bb0ff6fbfb08d49a345f8",
+        "5d11e68217daf3ec0028bd3cb5a080e9",
+        "665ffd7a336e4fb7afa6b43359d6648c",
+        "c9670f3ca49ad0b89acc7360fb6da383"
+      ]
+    },
+    {
+      "name": "leg_fl",
+      "origin": [
+        -2.3,
+        9.0,
+        2.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "uuid": "1eb69d516c2122e992c9f504b0d63a88",
+      "children": [
+        "0c01e2da286595c596ccbb78ac0962d3",
+        "fcf8551026fb07fe351fc92e4e7dda11"
+      ]
+    },
+    {
+      "name": "leg_fr",
+      "origin": [
+        2.3,
+        9.0,
+        2.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "uuid": "08e7169b6d6e822a557ef90ccb8da107",
+      "children": [
+        "8f00eeecba6050cab5d51f31a0f69ad2",
+        "ba07476bd1515efafe730550f5e0bb2e"
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "name": "froststride_fowl.png",
+      "path": "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\src\\main\\resources\\assets\\tnc\\textures\\entity\\pasture\\froststride_fowl.png",
+      "id": "0",
+      "width": 128,
+      "height": 128,
+      "uv_width": 128,
+      "uv_height": 128
+    }
+  ],
+  "display": {}
+}

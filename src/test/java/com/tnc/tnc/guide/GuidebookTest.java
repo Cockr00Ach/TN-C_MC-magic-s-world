@@ -25,7 +25,7 @@ class GuidebookTest {
                 for(var value:chapter.getAsJsonArray("images")){var tex=value.getAsJsonObject().get("image").getAsString();assertNotNull(getClass().getResource("/assets/"+tex.replace(":","/")),tex);}
             }
         }
-        assertEquals(18,chapters.size());assertEquals(191,real);assertEquals(41,atlas);
+        assertEquals(22,chapters.size());assertEquals(191,real);assertEquals(41,atlas);
         for(var chapter:chapters)for(var value:chapter.getAsJsonArray("quests"))for(var d:value.getAsJsonObject().getAsJsonArray("dependencies"))assertTrue(quests.contains(d.getAsString()),d.toString());
         for(String e:List.of("water","fire","lightning","wind","earth","light","dark"))for(int tier=1;tier<=5;tier++){
             String name=e+"_wand_"+tier;assertNotNull(getClass().getResource("/assets/tnc/models/item/"+name+".json"));

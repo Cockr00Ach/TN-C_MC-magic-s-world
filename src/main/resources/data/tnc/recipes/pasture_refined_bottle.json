@@ -1,0 +1,24 @@
+{
+  "type": "tnc:mana_forging",
+  "category": "husbandry",
+  "mana": 30,
+  "work_ticks": 120,
+  "ingredients": [
+    {
+      "item": "tnc:mana_bottle",
+      "count": 1
+    },
+    {
+      "item": "tnc:mana_copper_coil",
+      "count": 1
+    },
+    {
+      "item": "tnc:mirror_scale",
+      "count": 1
+    }
+  ],
+  "result": {
+    "item": "tnc:refined_mana_bottle",
+    "count": 1
+  }
+}

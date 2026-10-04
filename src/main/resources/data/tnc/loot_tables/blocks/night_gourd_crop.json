@@ -1,0 +1,56 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "tnc:night_gourd_seed"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "tnc:night_gourd_seed",
+          "conditions": [
+            {
+              "condition": "minecraft:block_state_property",
+              "block": "tnc:night_gourd_crop",
+              "properties": {
+                "age": "7"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "tnc:night_gourd",
+          "conditions": [
+            {
+              "condition": "minecraft:block_state_property",
+              "block": "tnc:night_gourd_crop",
+              "properties": {
+                "age": "7"
+              }
+            }
+          ],
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": 2
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "variants": {
+    "age=0,quiet=0": {
+      "model": "tnc:block/hushcap_0_closed"
+    },
+    "age=0,quiet=1": {
+      "model": "tnc:block/hushcap_0_closed"
+    },
+    "age=0,quiet=2": {
+      "model": "tnc:block/hushcap_0_closed"
+    },
+    "age=0,quiet=3": {
+      "model": "tnc:block/hushcap_0_open"
+    },
+    "age=1,quiet=0": {
+      "model": "tnc:block/hushcap_1_closed"
+    },
+    "age=1,quiet=1": {
+      "model": "tnc:block/hushcap_1_closed"
+    },
+    "age=1,quiet=2": {
+      "model": "tnc:block/hushcap_1_closed"
+    },
+    "age=1,quiet=3": {
+      "model": "tnc:block/hushcap_1_open"
+    },
+    "age=2,quiet=0": {
+      "model": "tnc:block/hushcap_2_closed"
+    },
+    "age=2,quiet=1": {
+      "model": "tnc:block/hushcap_2_closed"
+    },
+    "age=2,quiet=2": {
+      "model": "tnc:block/hushcap_2_closed"
+    },
+    "age=2,quiet=3": {
+      "model": "tnc:block/hushcap_2_open"
+    },
+    "age=3,quiet=0": {
+      "model": "tnc:block/hushcap_3_closed"
+    },
+    "age=3,quiet=1": {
+      "model": "tnc:block/hushcap_3_closed"
+    },
+    "age=3,quiet=2": {
+      "model": "tnc:block/hushcap_3_closed"
+    },
+    "age=3,quiet=3": {
+      "model": "tnc:block/hushcap_3_open"
+    }
+  }
+}

@@ -1,0 +1,141 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "stalk": "tnc:block/eco_gill",
+    "cap": "tnc:block/eco_cap",
+    "closed": "tnc:block/eco_cap_closed",
+    "gill": "tnc:block/eco_gill"
+  },
+  "elements": [
+    {
+      "from": [
+        7,
+        0,
+        7
+      ],
+      "to": [
+        9,
+        9,
+        9
+      ],
+      "faces": {
+        "down": {
+          "texture": "#stalk"
+        },
+        "up": {
+          "texture": "#stalk"
+        },
+        "north": {
+          "texture": "#stalk"
+        },
+        "south": {
+          "texture": "#stalk"
+        },
+        "west": {
+          "texture": "#stalk"
+        },
+        "east": {
+          "texture": "#stalk"
+        }
+      }
+    },
+    {
+      "from": [
+        4,
+        9,
+        4
+      ],
+      "to": [
+        12,
+        10,
+        12
+      ],
+      "faces": {
+        "down": {
+          "texture": "#gill"
+        },
+        "up": {
+          "texture": "#gill"
+        },
+        "north": {
+          "texture": "#gill"
+        },
+        "south": {
+          "texture": "#gill"
+        },
+        "west": {
+          "texture": "#gill"
+        },
+        "east": {
+          "texture": "#gill"
+        }
+      }
+    },
+    {
+      "from": [
+        4,
+        10,
+        4
+      ],
+      "to": [
+        12,
+        12,
+        12
+      ],
+      "faces": {
+        "down": {
+          "texture": "#cap"
+        },
+        "up": {
+          "texture": "#cap"
+        },
+        "north": {
+          "texture": "#cap"
+        },
+        "south": {
+          "texture": "#cap"
+        },
+        "west": {
+          "texture": "#cap"
+        },
+        "east": {
+          "texture": "#cap"
+        }
+      }
+    },
+    {
+      "from": [
+        6,
+        12,
+        6
+      ],
+      "to": [
+        10,
+        13,
+        10
+      ],
+      "faces": {
+        "down": {
+          "texture": "#cap"
+        },
+        "up": {
+          "texture": "#cap"
+        },
+        "north": {
+          "texture": "#cap"
+        },
+        "south": {
+          "texture": "#cap"
+        },
+        "west": {
+          "texture": "#cap"
+        },
+        "east": {
+          "texture": "#cap"
+        }
+      }
+    }
+  ]
+}

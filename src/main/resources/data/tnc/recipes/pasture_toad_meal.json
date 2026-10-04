@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "tnc:apiary_meat"
+    },
+    {
+      "item": "tnc:apiary_meat"
+    },
+    {
+      "item": "tnc:honeydew"
+    },
+    {
+      "item": "minecraft:brown_mushroom"
+    },
+    {
+      "item": "minecraft:bowl"
+    }
+  ],
+  "result": {
+    "item": "tnc:honeydew_casserole",
+    "count": 1
+  }
+}

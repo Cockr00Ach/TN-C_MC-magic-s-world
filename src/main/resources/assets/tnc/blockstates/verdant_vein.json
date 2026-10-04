@@ -1,0 +1,40 @@
+{
+  "variants": {
+    "age=0,glow=0": {
+      "model": "tnc:block/verdant_vein_0_0"
+    },
+    "age=0,glow=1": {
+      "model": "tnc:block/verdant_vein_0_1"
+    },
+    "age=0,glow=2": {
+      "model": "tnc:block/verdant_vein_0_2"
+    },
+    "age=1,glow=0": {
+      "model": "tnc:block/verdant_vein_1_0"
+    },
+    "age=1,glow=1": {
+      "model": "tnc:block/verdant_vein_1_1"
+    },
+    "age=1,glow=2": {
+      "model": "tnc:block/verdant_vein_1_2"
+    },
+    "age=2,glow=0": {
+      "model": "tnc:block/verdant_vein_2_0"
+    },
+    "age=2,glow=1": {
+      "model": "tnc:block/verdant_vein_2_1"
+    },
+    "age=2,glow=2": {
+      "model": "tnc:block/verdant_vein_2_2"
+    },
+    "age=3,glow=0": {
+      "model": "tnc:block/verdant_vein_3_0"
+    },
+    "age=3,glow=1": {
+      "model": "tnc:block/verdant_vein_3_1"
+    },
+    "age=3,glow=2": {
+      "model": "tnc:block/verdant_vein_3_2"
+    }
+  }
+}

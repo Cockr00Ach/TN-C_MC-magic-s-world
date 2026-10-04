@@ -1,0 +1,869 @@
+{
+  "id": "springhoof_strider",
+  "name": "跃泉蹄兽",
+  "animation": "strider",
+  "shadow": 0.59,
+  "texture_size": [
+    128,
+    128
+  ],
+  "coordinate_system": "Minecraft ModelPart: +Y down, forward -Z, ground y=24",
+  "parts": [
+    {
+      "name": "body",
+      "parent": "root",
+      "pivot": [
+        0,
+        9,
+        1
+      ],
+      "rotation": [
+        -0.14,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -4,
+            -3,
+            -5
+          ],
+          "size": [
+            8,
+            6,
+            12
+          ],
+          "material": "strider_hide",
+          "uv": [
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "neck",
+      "parent": "body",
+      "pivot": [
+        0,
+        -1,
+        -4
+      ],
+      "rotation": [
+        -0.2,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -2,
+            -5,
+            -2
+          ],
+          "size": [
+            4,
+            6,
+            4
+          ],
+          "material": "strider_hide",
+          "uv": [
+            67,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "head",
+      "parent": "root",
+      "pivot": [
+        0,
+        4,
+        -4
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -3,
+            -2,
+            -4
+          ],
+          "size": [
+            6,
+            5,
+            6
+          ],
+          "material": "strider_hide",
+          "uv": [
+            42,
+            1
+          ]
+        },
+        {
+          "position": [
+            -2,
+            0,
+            -6
+          ],
+          "size": [
+            4,
+            3,
+            3
+          ],
+          "material": "strider_hoof",
+          "uv": [
+            28,
+            20
+          ]
+        },
+        {
+          "position": [
+            -3.2,
+            -1,
+            -4
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "eye",
+          "uv": [
+            84,
+            20
+          ]
+        },
+        {
+          "position": [
+            2.2,
+            -1,
+            -4
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "eye",
+          "uv": [
+            84,
+            20
+          ]
+        }
+      ]
+    },
+    {
+      "name": "horn_l",
+      "parent": "head",
+      "pivot": [
+        -2,
+        -2,
+        0
+      ],
+      "rotation": [
+        -0.65,
+        0,
+        -0.15
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            -6,
+            -0.5
+          ],
+          "size": [
+            2,
+            6,
+            1
+          ],
+          "material": "leaf_horn",
+          "uv": [
+            112,
+            1
+          ]
+        },
+        {
+          "position": [
+            -1,
+            -6,
+            -1.5
+          ],
+          "size": [
+            2,
+            2,
+            2
+          ],
+          "material": "leaf_horn",
+          "uv": [
+            119,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_fl",
+      "parent": "root",
+      "pivot": [
+        -2.7,
+        12,
+        -2
+      ],
+      "rotation": [
+        0.12,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            0,
+            -1
+          ],
+          "size": [
+            2,
+            8,
+            2
+          ],
+          "material": "strider_hide",
+          "uv": [
+            84,
+            1
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            8,
+            -1.5
+          ],
+          "size": [
+            3,
+            1,
+            4
+          ],
+          "material": "strider_hoof",
+          "uv": [
+            43,
+            20
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            9,
+            -1.5
+          ],
+          "size": [
+            3,
+            1,
+            4
+          ],
+          "material": "water_glow",
+          "uv": [
+            58,
+            20
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            10,
+            -1.5
+          ],
+          "size": [
+            3,
+            1,
+            4
+          ],
+          "material": "strider_hoof",
+          "uv": [
+            43,
+            20
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            11,
+            -2
+          ],
+          "size": [
+            1,
+            1,
+            4
+          ],
+          "material": "strider_hoof",
+          "uv": [
+            73,
+            20
+          ]
+        },
+        {
+          "position": [
+            -0.5,
+            11,
+            -2
+          ],
+          "size": [
+            1,
+            1,
+            4
+          ],
+          "material": "strider_hoof",
+          "uv": [
+            73,
+            20
+          ]
+        },
+        {
+          "position": [
+            0.5,
+            11,
+            -2
+          ],
+          "size": [
+            1,
+            1,
+            4
+          ],
+          "material": "strider_hoof",
+          "uv": [
+            73,
+            20
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_bl",
+      "parent": "root",
+      "pivot": [
+        -2.7,
+        12,
+        6
+      ],
+      "rotation": [
+        -0.12,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            0,
+            -1
+          ],
+          "size": [
+            2,
+            8,
+            2
+          ],
+          "material": "strider_hide",
+          "uv": [
+            84,
+            1
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            8,
+            -1.5
+          ],
+          "size": [
+            3,
+            1,
+            4
+          ],
+          "material": "strider_hoof",
+          "uv": [
+            43,
+            20
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            9,
+            -1.5
+          ],
+          "size": [
+            3,
+            1,
+            4
+          ],
+          "material": "water_glow",
+          "uv": [
+            58,
+            20
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            10,
+            -1.5
+          ],
+          "size": [
+            3,
+            1,
+            4
+          ],
+          "material": "strider_hoof",
+          "uv": [
+            43,
+            20
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            11,
+            -2
+          ],
+          "size": [
+            1,
+            1,
+            4
+          ],
+          "material": "strider_hoof",
+          "uv": [
+            73,
+            20
+          ]
+        },
+        {
+          "position": [
+            -0.5,
+            11,
+            -2
+          ],
+          "size": [
+            1,
+            1,
+            4
+          ],
+          "material": "strider_hoof",
+          "uv": [
+            73,
+            20
+          ]
+        },
+        {
+          "position": [
+            0.5,
+            11,
+            -2
+          ],
+          "size": [
+            1,
+            1,
+            4
+          ],
+          "material": "strider_hoof",
+          "uv": [
+            73,
+            20
+          ]
+        }
+      ]
+    },
+    {
+      "name": "horn_r",
+      "parent": "head",
+      "pivot": [
+        2,
+        -2,
+        0
+      ],
+      "rotation": [
+        -0.65,
+        0,
+        0.15
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            -6,
+            -0.5
+          ],
+          "size": [
+            2,
+            6,
+            1
+          ],
+          "material": "leaf_horn",
+          "uv": [
+            112,
+            1
+          ]
+        },
+        {
+          "position": [
+            -1,
+            -6,
+            -1.5
+          ],
+          "size": [
+            2,
+            2,
+            2
+          ],
+          "material": "leaf_horn",
+          "uv": [
+            119,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_fr",
+      "parent": "root",
+      "pivot": [
+        2.7,
+        12,
+        -2
+      ],
+      "rotation": [
+        0.12,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            0,
+            -1
+          ],
+          "size": [
+            2,
+            8,
+            2
+          ],
+          "material": "strider_hide",
+          "uv": [
+            84,
+            1
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            8,
+            -1.5
+          ],
+          "size": [
+            3,
+            1,
+            4
+          ],
+          "material": "strider_hoof",
+          "uv": [
+            43,
+            20
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            9,
+            -1.5
+          ],
+          "size": [
+            3,
+            1,
+            4
+          ],
+          "material": "water_glow",
+          "uv": [
+            58,
+            20
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            10,
+            -1.5
+          ],
+          "size": [
+            3,
+            1,
+            4
+          ],
+          "material": "strider_hoof",
+          "uv": [
+            43,
+            20
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            11,
+            -2
+          ],
+          "size": [
+            1,
+            1,
+            4
+          ],
+          "material": "strider_hoof",
+          "uv": [
+            73,
+            20
+          ]
+        },
+        {
+          "position": [
+            -0.5,
+            11,
+            -2
+          ],
+          "size": [
+            1,
+            1,
+            4
+          ],
+          "material": "strider_hoof",
+          "uv": [
+            73,
+            20
+          ]
+        },
+        {
+          "position": [
+            0.5,
+            11,
+            -2
+          ],
+          "size": [
+            1,
+            1,
+            4
+          ],
+          "material": "strider_hoof",
+          "uv": [
+            73,
+            20
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_br",
+      "parent": "root",
+      "pivot": [
+        2.7,
+        12,
+        6
+      ],
+      "rotation": [
+        -0.12,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            0,
+            -1
+          ],
+          "size": [
+            2,
+            8,
+            2
+          ],
+          "material": "strider_hide",
+          "uv": [
+            84,
+            1
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            8,
+            -1.5
+          ],
+          "size": [
+            3,
+            1,
+            4
+          ],
+          "material": "strider_hoof",
+          "uv": [
+            43,
+            20
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            9,
+            -1.5
+          ],
+          "size": [
+            3,
+            1,
+            4
+          ],
+          "material": "water_glow",
+          "uv": [
+            58,
+            20
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            10,
+            -1.5
+          ],
+          "size": [
+            3,
+            1,
+            4
+          ],
+          "material": "strider_hoof",
+          "uv": [
+            43,
+            20
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            11,
+            -2
+          ],
+          "size": [
+            1,
+            1,
+            4
+          ],
+          "material": "strider_hoof",
+          "uv": [
+            73,
+            20
+          ]
+        },
+        {
+          "position": [
+            -0.5,
+            11,
+            -2
+          ],
+          "size": [
+            1,
+            1,
+            4
+          ],
+          "material": "strider_hoof",
+          "uv": [
+            73,
+            20
+          ]
+        },
+        {
+          "position": [
+            0.5,
+            11,
+            -2
+          ],
+          "size": [
+            1,
+            1,
+            4
+          ],
+          "material": "strider_hoof",
+          "uv": [
+            73,
+            20
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tail",
+      "parent": "body",
+      "pivot": [
+        0,
+        -1,
+        7
+      ],
+      "rotation": [
+        -0.3,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -2,
+            -1,
+            0
+          ],
+          "size": [
+            4,
+            2,
+            5
+          ],
+          "material": "strider_hide",
+          "uv": [
+            93,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "resource_saddle",
+      "parent": "body",
+      "pivot": [
+        0,
+        -3,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -4,
+            -1,
+            -2
+          ],
+          "size": [
+            8,
+            1,
+            5
+          ],
+          "material": "mud_board",
+          "uv": [
+            1,
+            20
+          ]
+        }
+      ]
+    }
+  ]
+}

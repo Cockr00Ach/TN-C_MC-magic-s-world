@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "glow=false": {
+      "model": "tnc:block/forge_copper_frame"
+    },
+    "glow=true": {
+      "model": "tnc:block/forge_copper_frame_glow"
+    }
+  }
+}

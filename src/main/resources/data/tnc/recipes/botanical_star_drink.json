@@ -1,0 +1,19 @@
+{
+  "type": "tnc:field_kitchen",
+  "ingredients": [
+    {
+      "item": "tnc:star_dew_fruit"
+    },
+    {
+      "type": "forge:nbt",
+      "item": "minecraft:potion",
+      "nbt": {
+        "Potion": "minecraft:water"
+      }
+    }
+  ],
+  "result": {
+    "item": "tnc:star_dew_drink",
+    "count": 1
+  }
+}

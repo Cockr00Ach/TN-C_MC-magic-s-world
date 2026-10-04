@@ -20,14 +20,19 @@ public final class TownProtection {
     }
     public static boolean denied(ServerPlayer p,BlockPos pos){return (town(p.serverLevel(),pos)||HousingService.plotAt(p.serverLevel(),pos)!=null||HousingService.isOwnedPosition(p.serverLevel(),pos))&&!HousingService.mayDecorate(p,pos)&&!p.isCreative();}
     public static boolean hazard(net.minecraft.world.level.BlockGetter world,BlockPos pos){return world instanceof ServerLevel l&&((com.tnc.tnc.npc.SkyIslandAnchors.isComplete(l)&&town(l,pos))||HousingService.isOwnedPosition(l,pos));}
-    @SubscribeEvent public static void breaking(BlockEvent.BreakEvent e){if(e.getPlayer() instanceof ServerPlayer p&&denied(p,e.getPos())&&!(e.getState().getBlock() instanceof CropBlock&&!HousingService.isOwnedPosition(p.serverLevel(),e.getPos())&&HousingService.plotAt(p.serverLevel(),e.getPos())==null))e.setCanceled(true);}
-    @SubscribeEvent public static void placing(BlockEvent.EntityPlaceEvent e){if(e.getEntity() instanceof ServerPlayer p&&denied(p,e.getPos())&&!(e.getPlacedBlock().getBlock() instanceof CropBlock&&!HousingService.isOwnedPosition(p.serverLevel(),e.getPos())&&HousingService.plotAt(p.serverLevel(),e.getPos())==null))e.setCanceled(true);}
+    @SubscribeEvent public static void breaking(BlockEvent.BreakEvent e){if(e.getPlayer() instanceof ServerPlayer p&&denied(p,e.getPos()))e.setCanceled(true);}
+    @SubscribeEvent public static void placing(BlockEvent.EntityPlaceEvent e){if(e.getEntity() instanceof ServerPlayer p&&denied(p,e.getPos()))e.setCanceled(true);}
     @SubscribeEvent public static void using(PlayerInteractEvent.RightClickBlock e){
         if(!(e.getEntity() instanceof ServerPlayer p)||p.isCreative())return;
         var id=net.minecraftforge.registries.ForgeRegistries.BLOCKS.getKey(e.getLevel().getBlockState(e.getPos()).getBlock());
         if(id!=null&&id.getNamespace().equals("immersive_furniture")&&id.getPath().equals("artisans_workstation")){e.setCanceled(true);p.displayClientMessage(net.minecraft.network.chat.Component.literal("家具请到32号朝夕商行购买。"),true);return;}
         var item=e.getItemStack().getItem();boolean edits=item instanceof net.minecraft.world.item.BlockItem||item instanceof net.minecraft.world.item.BucketItem||item instanceof net.minecraft.world.item.DiggerItem||item instanceof net.minecraft.world.item.FlintAndSteelItem||item instanceof net.minecraft.world.item.FireChargeItem||item instanceof net.minecraft.world.item.BoneMealItem;
-        if((HousingService.isOwnedPosition(p.serverLevel(),e.getPos())&&!HousingService.mayDecorate(p,e.getPos()))||(edits&&denied(p,e.getPos())))e.setCanceled(true);
+        // Check both the clicked support and final placement position; a seed must
+        // not bypass a plot boundary by clicking its neighbour. Wilderness remains
+        // editable without any purchased town property.
+        boolean plants=e.getLevel().getBlockState(e.getPos()).getBlock() instanceof net.minecraft.world.level.block.BushBlock;
+        var placement=new net.minecraft.world.item.context.BlockPlaceContext(p,e.getHand(),e.getItemStack(),e.getHitVec());
+        if((HousingService.isOwnedPosition(p.serverLevel(),e.getPos())&&!HousingService.mayDecorate(p,e.getPos()))||((edits||plants)&&denied(p,e.getPos()))||(item instanceof net.minecraft.world.item.BlockItem&&denied(p,placement.getClickedPos())))e.setCanceled(true);
     }
     @SubscribeEvent public static void tool(BlockEvent.BlockToolModificationEvent e){if(e.getPlayer() instanceof ServerPlayer p&&denied(p,e.getPos()))e.setCanceled(true);}
     @SubscribeEvent public static void fluid(BlockEvent.FluidPlaceBlockEvent e){if(e.getLevel() instanceof ServerLevel l&&(town(l,e.getPos())||HousingService.isOwnedPosition(l,e.getPos()))){e.setNewState(e.getOriginalState());e.setCanceled(true);}}

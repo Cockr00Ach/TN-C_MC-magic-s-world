@@ -1,0 +1,27 @@
+{
+  "type": "tnc:field_kitchen",
+  "ingredients": [
+    {
+      "item": "tnc:paper_bark"
+    },
+    {
+      "item": "tnc:paper_bark"
+    },
+    {
+      "item": "minecraft:paper"
+    },
+    {
+      "item": "minecraft:paper"
+    },
+    {
+      "item": "minecraft:paper"
+    },
+    {
+      "item": "minecraft:string"
+    }
+  ],
+  "result": {
+    "item": "tnc:survey_archive_folder",
+    "count": 1
+  }
+}

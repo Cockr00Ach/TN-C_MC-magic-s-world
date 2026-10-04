@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=false": {
+      "model": "tnc:block/mana_paper_press"
+    },
+    "lit=true": {
+      "model": "tnc:block/mana_paper_press_lit"
+    }
+  }
+}

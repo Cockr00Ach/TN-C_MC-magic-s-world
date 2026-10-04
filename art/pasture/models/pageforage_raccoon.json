@@ -1,0 +1,515 @@
+{
+  "id": "pageforage_raccoon",
+  "name": "觅页浣兽",
+  "animation": "raccoon",
+  "shadow": 0.37,
+  "texture_size": [
+    128,
+    128
+  ],
+  "coordinate_system": "Minecraft ModelPart: +Y down, forward -Z, ground y=24",
+  "parts": [
+    {
+      "name": "body",
+      "parent": "root",
+      "pivot": [
+        0,
+        18,
+        1
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -3,
+            -4,
+            -4
+          ],
+          "size": [
+            6,
+            7,
+            9
+          ],
+          "material": "raccoon_fur",
+          "uv": [
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "head",
+      "parent": "root",
+      "pivot": [
+        0,
+        15,
+        -3
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -4,
+            -3,
+            -4
+          ],
+          "size": [
+            8,
+            6,
+            6
+          ],
+          "material": "raccoon_fur",
+          "uv": [
+            32,
+            1
+          ]
+        },
+        {
+          "position": [
+            -4,
+            -1,
+            -4.5
+          ],
+          "size": [
+            8,
+            2,
+            1
+          ],
+          "material": "raccoon_mask",
+          "uv": [
+            75,
+            18
+          ]
+        },
+        {
+          "position": [
+            -2,
+            0,
+            -6
+          ],
+          "size": [
+            4,
+            2,
+            3
+          ],
+          "material": "raccoon_fur",
+          "uv": [
+            94,
+            1
+          ]
+        },
+        {
+          "position": [
+            -1,
+            0,
+            -7
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "nose",
+          "uv": [
+            94,
+            18
+          ]
+        },
+        {
+          "position": [
+            -3.0,
+            -0.8,
+            -5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "eye_light",
+          "uv": [
+            101,
+            18
+          ]
+        },
+        {
+          "position": [
+            2.0,
+            -0.8,
+            -5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "eye_light",
+          "uv": [
+            101,
+            18
+          ]
+        },
+        {
+          "position": [
+            -4,
+            -5,
+            -1
+          ],
+          "size": [
+            2,
+            3,
+            2
+          ],
+          "material": "raccoon_mask",
+          "uv": [
+            1,
+            18
+          ]
+        },
+        {
+          "position": [
+            2,
+            -5,
+            -1
+          ],
+          "size": [
+            2,
+            3,
+            2
+          ],
+          "material": "raccoon_mask",
+          "uv": [
+            1,
+            18
+          ]
+        }
+      ]
+    },
+    {
+      "name": "arm_l",
+      "parent": "root",
+      "pivot": [
+        -3,
+        17,
+        -1
+      ],
+      "rotation": [
+        -0.15,
+        0,
+        0.2
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            0,
+            -1
+          ],
+          "size": [
+            2,
+            6,
+            2
+          ],
+          "material": "raccoon_fur",
+          "uv": [
+            61,
+            1
+          ]
+        },
+        {
+          "position": [
+            -1,
+            5,
+            -2
+          ],
+          "size": [
+            2,
+            2,
+            3
+          ],
+          "material": "raccoon_mask",
+          "uv": [
+            109,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_bl",
+      "parent": "root",
+      "pivot": [
+        -2,
+        21,
+        4
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            0,
+            -1
+          ],
+          "size": [
+            2,
+            3,
+            3
+          ],
+          "material": "raccoon_mask",
+          "uv": [
+            83,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "arm_r",
+      "parent": "root",
+      "pivot": [
+        3,
+        17,
+        -1
+      ],
+      "rotation": [
+        -0.15,
+        0,
+        -0.2
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            0,
+            -1
+          ],
+          "size": [
+            2,
+            6,
+            2
+          ],
+          "material": "raccoon_fur",
+          "uv": [
+            61,
+            1
+          ]
+        },
+        {
+          "position": [
+            -1,
+            5,
+            -2
+          ],
+          "size": [
+            2,
+            2,
+            3
+          ],
+          "material": "raccoon_mask",
+          "uv": [
+            109,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_br",
+      "parent": "root",
+      "pivot": [
+        2,
+        21,
+        4
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            0,
+            -1
+          ],
+          "size": [
+            2,
+            3,
+            3
+          ],
+          "material": "raccoon_mask",
+          "uv": [
+            83,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "resource_paperbag",
+      "parent": "body",
+      "pivot": [
+        0,
+        0,
+        -4
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -2,
+            0,
+            -2
+          ],
+          "size": [
+            4,
+            4,
+            2
+          ],
+          "material": "paper",
+          "uv": [
+            70,
+            1
+          ]
+        },
+        {
+          "position": [
+            -1,
+            1,
+            -2.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "raccoon_mask",
+          "uv": [
+            120,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tail",
+      "parent": "body",
+      "pivot": [
+        0,
+        -1,
+        5
+      ],
+      "rotation": [
+        -0.4,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1.0,
+            -1,
+            0
+          ],
+          "size": [
+            2,
+            2,
+            2
+          ],
+          "material": "raccoon_mask",
+          "uv": [
+            66,
+            18
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            -1,
+            2
+          ],
+          "size": [
+            3,
+            2,
+            2
+          ],
+          "material": "raccoon_fur",
+          "uv": [
+            55,
+            18
+          ]
+        },
+        {
+          "position": [
+            -2.0,
+            -1,
+            4
+          ],
+          "size": [
+            4,
+            2,
+            2
+          ],
+          "material": "raccoon_mask",
+          "uv": [
+            42,
+            18
+          ]
+        },
+        {
+          "position": [
+            -2.5,
+            -1,
+            6
+          ],
+          "size": [
+            5,
+            2,
+            2
+          ],
+          "material": "raccoon_fur",
+          "uv": [
+            27,
+            18
+          ]
+        },
+        {
+          "position": [
+            -3.0,
+            -1,
+            8
+          ],
+          "size": [
+            6,
+            2,
+            2
+          ],
+          "material": "raccoon_mask",
+          "uv": [
+            10,
+            18
+          ]
+        }
+      ]
+    }
+  ]
+}

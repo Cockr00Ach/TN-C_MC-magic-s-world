@@ -15,6 +15,8 @@ import java.io.IOException;
 @PrefixGameTestTemplate(false)
 public final class PortalArchitectureGameTests {
     private static final ResourceLocation GATE = ResourceLocation.tryParse("tnc:sky_island/portal/ritual_gate");
+    // Use open air above even tall test-world mountains, while leaving room for
+    // the 28-block ritual at the world's y=320 build ceiling.
 
     private static SkyIslandManifest finalizationManifest() {
         return SkyIslandManifest.parse(com.google.gson.JsonParser.parseString("""
@@ -38,7 +40,7 @@ public final class PortalArchitectureGameTests {
 
     @GameTest(template="building_test_empty",timeoutTicks=500)
     public static void caveResidentDoesNotFailWholeIslandFinalization(GameTestHelper helper) throws Exception {
-        var level=helper.getLevel(); var origin=new BlockPos(4960,200,112);
+        var level=helper.getLevel(); var origin=new BlockPos(4960,280,112);
         var data=finalizationData(origin); var manifest=finalizationManifest();
         SkyIslandManager.finalizeBuild(level,data,manifest);
         var resident=new net.minecraft.world.entity.decoration.ArmorStand(level,origin.getX()+7.5,origin.getY()-3,origin.getZ()+7.5);
@@ -63,7 +65,7 @@ public final class PortalArchitectureGameTests {
 
     @GameTest(template="building_test_empty",timeoutTicks=600)
     public static void occupiedRitualRetriesFinalizationWithoutPartialPlacement(GameTestHelper helper) throws Exception {
-        var level=helper.getLevel(); var origin=new BlockPos(5120,200,112);
+        var level=helper.getLevel(); var origin=new BlockPos(5120,280,112);
         var checkpoint=new SkyIslandSavedData[]{finalizationData(origin)}; var manifest=finalizationManifest();
         SkyIslandManager.finalizeBuild(level,checkpoint[0],manifest);
         var resident=new net.minecraft.world.entity.decoration.ArmorStand(level,origin.getX()+16.5,origin.getY()+12,origin.getZ()+16.5);
@@ -119,7 +121,7 @@ public final class PortalArchitectureGameTests {
 
     @GameTest(template="building_test_empty",timeoutTicks=400)
     public static void loadedGuardianInNewStatueCellBlocksUpgradeButCourtyardIsSafe(GameTestHelper helper) {
-        var l=helper.getLevel();var origin=new BlockPos(4832,200,112);
+        var l=helper.getLevel();var origin=new BlockPos(4832,280,112);
         var chunks=new java.util.ArrayList<net.minecraft.world.level.ChunkPos>();
         for (int x=(origin.getX()-10)>>4;x<=(origin.getX()+24)>>4;x++)
             for (int z=(origin.getZ()-10)>>4;z<=(origin.getZ()+24)>>4;z++) {
@@ -145,7 +147,7 @@ public final class PortalArchitectureGameTests {
 
     @GameTest(template="building_test_empty",timeoutTicks=400)
     public static void supportsNeverReplaceWaterloggedChest(GameTestHelper helper) throws Exception {
-        var l=helper.getLevel();var origin=new BlockPos(4704,200,112);var chest=origin.offset(7,-1,-2);
+        var l=helper.getLevel();var origin=new BlockPos(4704,280,112);var chest=origin.offset(7,-1,-2);
         l.setBlock(chest,Blocks.CHEST.defaultBlockState().setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED,true),18);
         ((net.minecraft.world.Container)l.getBlockEntity(chest)).setItem(0,new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND,9));
         PortalArchitecture.prepareSupports(l,origin).apply(l);
@@ -156,7 +158,7 @@ public final class PortalArchitectureGameTests {
 
     @GameTest(template="building_test_empty",timeoutTicks=400)
     public static void repeatRefreshProtectsExpandedNaturalMaterialFloorEdit(GameTestHelper helper) throws Exception {
-        var l=helper.getLevel();var origin=new BlockPos(4768,200,112);
+        var l=helper.getLevel();var origin=new BlockPos(4768,280,112);
         PortalArchitecture.prepare(l,GATE,origin,false).apply(l);
         var edited=origin.offset(7,1,-2); l.setBlock(edited,Blocks.STONE.defaultBlockState(),18);
         boolean rejected=false;
@@ -168,7 +170,7 @@ public final class PortalArchitectureGameTests {
     @GameTest(template="building_test_empty",timeoutTicks=400)
     public static void initialPortalAcceptsOriginalIslandWildflowers(GameTestHelper helper) throws Exception {
         var level = helper.getLevel();
-        BlockPos origin = new BlockPos(4448,200,112);
+        BlockPos origin = new BlockPos(4448,280,112);
         // Actual failure: source town_piece_1_0_6 has a dandelion at portal-local [7,1,8].
         for (int x=0;x<15;x++) for (int z=0;z<15;z++)
             level.setBlock(origin.offset(x,0,z),Blocks.GRASS_BLOCK.defaultBlockState(),18);
@@ -186,7 +188,7 @@ public final class PortalArchitectureGameTests {
     public static void allLegacyAltarsUpgradeWithoutLeavingOldBlocks(GameTestHelper helper) throws Exception {
         var level = helper.getLevel();
         for (int revision = 0; revision < 4; revision++) {
-            BlockPos origin = new BlockPos(4096 + revision * 64, 200, 112);
+            BlockPos origin = new BlockPos(4096 + revision * 64, 280, 112);
             var id = ResourceLocation.tryParse("tnc:sky_island/portal/legacy_v" + revision);
             var old = level.getStructureManager().get(id).orElseThrow();
             old.placeInWorld(level, origin, origin, new StructurePlaceSettings().setKnownShape(true), RandomSource.create(1), 18);
@@ -206,7 +208,7 @@ public final class PortalArchitectureGameTests {
     @GameTest(template="building_test_empty",timeoutTicks=400)
     public static void portalRefreshRejectsContainersAndPlayerChangesBeforeWriting(GameTestHelper helper) throws Exception {
         var level = helper.getLevel();
-        BlockPos origin = new BlockPos(4512,200,112);
+        BlockPos origin = new BlockPos(4512,280,112);
         PortalArchitecture.prepare(level,GATE,origin,false).apply(level);
         PortalArchitecture.prepare(level,GATE,origin,false).apply(level); // Crash retry is idempotent.
         BlockPos chest = origin.offset(1,10,1);
@@ -236,7 +238,7 @@ public final class PortalArchitectureGameTests {
     @GameTest(template="building_test_empty",timeoutTicks=400)
     public static void freshPortalRejectsOverheadObstacleWithoutPartialPlacement(GameTestHelper helper) throws Exception {
         var level = helper.getLevel();
-        BlockPos origin = new BlockPos(4576,200,112);
+        BlockPos origin = new BlockPos(4576,280,112);
         level.setBlock(origin.offset(7,20,7),Blocks.GOLD_BLOCK.defaultBlockState(),18);
         boolean rejected = false;
         try { PortalArchitecture.prepare(level,GATE,origin,false); }
@@ -248,7 +250,7 @@ public final class PortalArchitectureGameTests {
 
     @GameTest(template="building_test_empty",timeoutTicks=400)
     public static void expansionPreservesOldPathButRejectsTallPlayerBuild(GameTestHelper helper) throws Exception {
-        var l=helper.getLevel(); var origin=new BlockPos(4640,200,112);
+        var l=helper.getLevel(); var origin=new BlockPos(4640,280,112);
         var path=origin.offset(7,0,-9); var fence=origin.offset(5,1,-3);
         l.setBlock(path,Blocks.MOSSY_COBBLESTONE.defaultBlockState(),18);
         l.setBlock(fence,Blocks.SPRUCE_FENCE.defaultBlockState(),18);

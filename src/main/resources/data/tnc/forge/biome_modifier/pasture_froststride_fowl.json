@@ -1,0 +1,10 @@
+{
+  "type": "forge:add_spawns",
+  "biomes": "#tnc:pasture_froststride_fowl",
+  "spawners": {
+    "type": "tnc:froststride_fowl",
+    "weight": 3,
+    "minCount": 2,
+    "maxCount": 4
+  }
+}

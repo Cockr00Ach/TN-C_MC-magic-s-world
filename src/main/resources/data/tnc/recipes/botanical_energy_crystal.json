@@ -1,0 +1,24 @@
+{
+  "type": "tnc:mana_forging",
+  "ingredients": [
+    {
+      "item": "tnc:star_rest_dew",
+      "count": 1
+    },
+    {
+      "item": "minecraft:quartz",
+      "count": 1
+    },
+    {
+      "item": "tnc:mana_copper_coil",
+      "count": 1
+    }
+  ],
+  "result": {
+    "item": "tnc:energy_saving_crystal",
+    "count": 1
+  },
+  "mana": 20,
+  "work_ticks": 100,
+  "category": "workshop"
+}

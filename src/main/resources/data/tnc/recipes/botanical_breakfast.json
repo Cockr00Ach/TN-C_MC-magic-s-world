@@ -1,0 +1,21 @@
+{
+  "type": "tnc:field_kitchen",
+  "ingredients": [
+    {
+      "item": "tnc:dawn_honey"
+    },
+    {
+      "item": "minecraft:egg"
+    },
+    {
+      "item": "tnc:road_bell_ear"
+    },
+    {
+      "item": "tnc:road_bell_ear"
+    }
+  ],
+  "result": {
+    "item": "tnc:morning_honey_breakfast",
+    "count": 1
+  }
+}

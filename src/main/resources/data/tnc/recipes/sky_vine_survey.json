@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "P P",
+    "PSP",
+    " P "
+  ],
+  "key": {
+    "P": {
+      "item": "minecraft:paper"
+    },
+    "S": {
+      "item": "minecraft:spyglass"
+    }
+  },
+  "result": {
+    "item": "tnc:sky_vine_survey",
+    "count": 1
+  }
+}

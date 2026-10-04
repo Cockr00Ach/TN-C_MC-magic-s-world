@@ -1,0 +1,696 @@
+{
+  "id": "mirrorwing_moth",
+  "name": "镜瓣夜蛾",
+  "animation": "moth",
+  "shadow": 0.38,
+  "texture_size": [
+    128,
+    128
+  ],
+  "coordinate_system": "Minecraft ModelPart: +Y down, forward -Z, ground y=24",
+  "parts": [
+    {
+      "name": "body",
+      "parent": "root",
+      "pivot": [
+        0,
+        17,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -2,
+            -2,
+            -4
+          ],
+          "size": [
+            4,
+            4,
+            9
+          ],
+          "material": "moth_body",
+          "uv": [
+            1,
+            1
+          ]
+        },
+        {
+          "position": [
+            -2,
+            -1,
+            4
+          ],
+          "size": [
+            4,
+            3,
+            3
+          ],
+          "material": "mirror_rim",
+          "uv": [
+            109,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "head",
+      "parent": "root",
+      "pivot": [
+        0,
+        16,
+        -4
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -2,
+            -2,
+            -2
+          ],
+          "size": [
+            4,
+            4,
+            4
+          ],
+          "material": "moth_body",
+          "uv": [
+            61,
+            1
+          ]
+        },
+        {
+          "position": [
+            -2.2,
+            -1,
+            -2.5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "eye_light",
+          "uv": [
+            79,
+            15
+          ]
+        },
+        {
+          "position": [
+            1.2,
+            -1,
+            -2.5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "eye_light",
+          "uv": [
+            79,
+            15
+          ]
+        }
+      ]
+    },
+    {
+      "name": "antenna_l",
+      "parent": "head",
+      "pivot": [
+        -1,
+        -2,
+        -1
+      ],
+      "rotation": [
+        -0.25,
+        0,
+        -0.3
+      ],
+      "boxes": [
+        {
+          "position": [
+            -0.5,
+            -4,
+            -0.5
+          ],
+          "size": [
+            1,
+            4,
+            1
+          ],
+          "material": "mirror_rim",
+          "uv": [
+            49,
+            15
+          ]
+        },
+        {
+          "position": [
+            -1,
+            -5,
+            -1
+          ],
+          "size": [
+            2,
+            1,
+            2
+          ],
+          "material": "mirror_glow",
+          "uv": [
+            70,
+            15
+          ]
+        }
+      ]
+    },
+    {
+      "name": "wing_front_l",
+      "parent": "body",
+      "pivot": [
+        -1.5,
+        0,
+        -3
+      ],
+      "rotation": [
+        0,
+        -0.12,
+        0.45
+      ],
+      "boxes": [
+        {
+          "position": [
+            -9,
+            -1,
+            -3
+          ],
+          "size": [
+            9,
+            1,
+            7
+          ],
+          "material": "mirror_rim",
+          "uv": [
+            28,
+            1
+          ]
+        },
+        {
+          "position": [
+            -8,
+            -1.5,
+            -2
+          ],
+          "size": [
+            7,
+            1,
+            5
+          ],
+          "material": "mirror",
+          "uv": [
+            1,
+            15
+          ]
+        },
+        {
+          "position": [
+            -5,
+            -2,
+            -1
+          ],
+          "size": [
+            2,
+            1,
+            3
+          ],
+          "material": "mirror_glow",
+          "uv": [
+            59,
+            15
+          ]
+        }
+      ]
+    },
+    {
+      "name": "wing_back_l",
+      "parent": "body",
+      "pivot": [
+        -1.5,
+        0,
+        2
+      ],
+      "rotation": [
+        0,
+        -0.12,
+        0.45
+      ],
+      "boxes": [
+        {
+          "position": [
+            -9,
+            -1,
+            -3
+          ],
+          "size": [
+            9,
+            1,
+            6
+          ],
+          "material": "mirror_rim",
+          "uv": [
+            78,
+            1
+          ]
+        },
+        {
+          "position": [
+            -8,
+            -1.5,
+            -2
+          ],
+          "size": [
+            7,
+            1,
+            4
+          ],
+          "material": "mirror",
+          "uv": [
+            26,
+            15
+          ]
+        },
+        {
+          "position": [
+            -5,
+            -2,
+            -1
+          ],
+          "size": [
+            2,
+            1,
+            2
+          ],
+          "material": "mirror_glow",
+          "uv": [
+            70,
+            15
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_fl",
+      "parent": "root",
+      "pivot": [
+        -1,
+        19,
+        -2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -0.5,
+            0,
+            -0.5
+          ],
+          "size": [
+            1,
+            4,
+            1
+          ],
+          "material": "moth_body",
+          "uv": [
+            54,
+            15
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_ml",
+      "parent": "root",
+      "pivot": [
+        -1,
+        19,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -0.5,
+            0,
+            -0.5
+          ],
+          "size": [
+            1,
+            4,
+            1
+          ],
+          "material": "moth_body",
+          "uv": [
+            54,
+            15
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_bl",
+      "parent": "root",
+      "pivot": [
+        -1,
+        19,
+        3
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -0.5,
+            0,
+            -0.5
+          ],
+          "size": [
+            1,
+            4,
+            1
+          ],
+          "material": "moth_body",
+          "uv": [
+            54,
+            15
+          ]
+        }
+      ]
+    },
+    {
+      "name": "antenna_r",
+      "parent": "head",
+      "pivot": [
+        1,
+        -2,
+        -1
+      ],
+      "rotation": [
+        -0.25,
+        0,
+        0.3
+      ],
+      "boxes": [
+        {
+          "position": [
+            -0.5,
+            -4,
+            -0.5
+          ],
+          "size": [
+            1,
+            4,
+            1
+          ],
+          "material": "mirror_rim",
+          "uv": [
+            49,
+            15
+          ]
+        },
+        {
+          "position": [
+            -1,
+            -5,
+            -1
+          ],
+          "size": [
+            2,
+            1,
+            2
+          ],
+          "material": "mirror_glow",
+          "uv": [
+            70,
+            15
+          ]
+        }
+      ]
+    },
+    {
+      "name": "wing_front_r",
+      "parent": "body",
+      "pivot": [
+        1.5,
+        0,
+        -3
+      ],
+      "rotation": [
+        0,
+        0.12,
+        -0.45
+      ],
+      "boxes": [
+        {
+          "position": [
+            0,
+            -1,
+            -3
+          ],
+          "size": [
+            9,
+            1,
+            7
+          ],
+          "material": "mirror_rim",
+          "uv": [
+            28,
+            1
+          ]
+        },
+        {
+          "position": [
+            1,
+            -1.5,
+            -2
+          ],
+          "size": [
+            7,
+            1,
+            5
+          ],
+          "material": "mirror",
+          "uv": [
+            1,
+            15
+          ]
+        },
+        {
+          "position": [
+            3,
+            -2,
+            -1
+          ],
+          "size": [
+            2,
+            1,
+            3
+          ],
+          "material": "mirror_glow",
+          "uv": [
+            59,
+            15
+          ]
+        }
+      ]
+    },
+    {
+      "name": "wing_back_r",
+      "parent": "body",
+      "pivot": [
+        1.5,
+        0,
+        2
+      ],
+      "rotation": [
+        0,
+        0.12,
+        -0.45
+      ],
+      "boxes": [
+        {
+          "position": [
+            0,
+            -1,
+            -3
+          ],
+          "size": [
+            9,
+            1,
+            6
+          ],
+          "material": "mirror_rim",
+          "uv": [
+            78,
+            1
+          ]
+        },
+        {
+          "position": [
+            1,
+            -1.5,
+            -2
+          ],
+          "size": [
+            7,
+            1,
+            4
+          ],
+          "material": "mirror",
+          "uv": [
+            26,
+            15
+          ]
+        },
+        {
+          "position": [
+            3,
+            -2,
+            -1
+          ],
+          "size": [
+            2,
+            1,
+            2
+          ],
+          "material": "mirror_glow",
+          "uv": [
+            70,
+            15
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_fr",
+      "parent": "root",
+      "pivot": [
+        1,
+        19,
+        -2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -0.5,
+            0,
+            -0.5
+          ],
+          "size": [
+            1,
+            4,
+            1
+          ],
+          "material": "moth_body",
+          "uv": [
+            54,
+            15
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_mr",
+      "parent": "root",
+      "pivot": [
+        1,
+        19,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -0.5,
+            0,
+            -0.5
+          ],
+          "size": [
+            1,
+            4,
+            1
+          ],
+          "material": "moth_body",
+          "uv": [
+            54,
+            15
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_br",
+      "parent": "root",
+      "pivot": [
+        1,
+        19,
+        3
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -0.5,
+            0,
+            -0.5
+          ],
+          "size": [
+            1,
+            4,
+            1
+          ],
+          "material": "moth_body",
+          "uv": [
+            54,
+            15
+          ]
+        }
+      ]
+    }
+  ]
+}

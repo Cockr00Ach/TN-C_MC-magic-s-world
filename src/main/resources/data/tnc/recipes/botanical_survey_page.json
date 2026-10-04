@@ -1,0 +1,21 @@
+{
+  "type": "tnc:field_kitchen",
+  "ingredients": [
+    {
+      "item": "minecraft:paper"
+    },
+    {
+      "item": "minecraft:paper"
+    },
+    {
+      "item": "minecraft:paper"
+    },
+    {
+      "item": "tnc:salt_ink"
+    }
+  ],
+  "result": {
+    "item": "tnc:survey_route_page",
+    "count": 1
+  }
+}

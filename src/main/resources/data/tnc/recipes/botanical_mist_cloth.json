@@ -1,0 +1,18 @@
+{
+  "type": "tnc:field_kitchen",
+  "ingredients": [
+    {
+      "item": "tnc:mist_cotton_fiber"
+    },
+    {
+      "item": "tnc:mist_cotton_fiber"
+    },
+    {
+      "item": "minecraft:string"
+    }
+  ],
+  "result": {
+    "item": "tnc:mist_cloth",
+    "count": 1
+  }
+}

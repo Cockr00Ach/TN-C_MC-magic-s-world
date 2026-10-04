@@ -1,0 +1,20 @@
+{
+  "type": "tnc:mana_forging",
+  "ingredients": [
+    {
+      "item": "tnc:dance_petal",
+      "count": 2
+    },
+    {
+      "item": "minecraft:copper_ingot",
+      "count": 1
+    }
+  ],
+  "result": {
+    "item": "tnc:companion_bell_chip",
+    "count": 1
+  },
+  "mana": 15,
+  "work_ticks": 100,
+  "category": "workshop"
+}

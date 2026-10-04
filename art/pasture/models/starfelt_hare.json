@@ -1,0 +1,582 @@
+{
+  "id": "starfelt_hare",
+  "name": "星茸耳兔",
+  "animation": "hare",
+  "shadow": 0.34,
+  "texture_size": [
+    128,
+    128
+  ],
+  "coordinate_system": "Minecraft ModelPart: +Y down, forward -Z, ground y=24",
+  "parts": [
+    {
+      "name": "body",
+      "parent": "root",
+      "pivot": [
+        0,
+        18,
+        3
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -3,
+            -4,
+            -3
+          ],
+          "size": [
+            6,
+            7,
+            8
+          ],
+          "material": "hare_fur",
+          "uv": [
+            1,
+            1
+          ]
+        },
+        {
+          "position": [
+            -4,
+            -6,
+            0
+          ],
+          "size": [
+            8,
+            7,
+            6
+          ],
+          "material": "hare_fur",
+          "uv": [
+            30,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "head",
+      "parent": "root",
+      "pivot": [
+        0,
+        16,
+        -2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -3,
+            -3,
+            -4
+          ],
+          "size": [
+            6,
+            6,
+            5
+          ],
+          "material": "hare_fur",
+          "uv": [
+            59,
+            1
+          ]
+        },
+        {
+          "position": [
+            -1,
+            0,
+            -5
+          ],
+          "size": [
+            2,
+            2,
+            2
+          ],
+          "material": "nose",
+          "uv": [
+            44,
+            17
+          ]
+        },
+        {
+          "position": [
+            -3.2,
+            -1,
+            -4
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "eye",
+          "uv": [
+            53,
+            17
+          ]
+        },
+        {
+          "position": [
+            2.2,
+            -1,
+            -4
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "eye",
+          "uv": [
+            53,
+            17
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ear_l",
+      "parent": "head",
+      "pivot": [
+        -1.6,
+        -3,
+        -1
+      ],
+      "rotation": [
+        0.1,
+        0,
+        -0.12
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            -8,
+            -1
+          ],
+          "size": [
+            2,
+            8,
+            2
+          ],
+          "material": "hare_fur",
+          "uv": [
+            101,
+            1
+          ]
+        },
+        {
+          "position": [
+            -0.5,
+            -7,
+            -1.5
+          ],
+          "size": [
+            1,
+            6,
+            1
+          ],
+          "material": "hare_ear",
+          "uv": [
+            110,
+            1
+          ]
+        },
+        {
+          "position": [
+            -0.5,
+            -6,
+            -2
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "star_glow",
+          "uv": [
+            58,
+            17
+          ]
+        },
+        {
+          "position": [
+            -0.5,
+            -4,
+            -2
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "star_glow",
+          "uv": [
+            58,
+            17
+          ]
+        },
+        {
+          "position": [
+            -0.5,
+            -2,
+            -2
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "star_glow",
+          "uv": [
+            58,
+            17
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_fl",
+      "parent": "root",
+      "pivot": [
+        -2,
+        20,
+        -1
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            0,
+            -1
+          ],
+          "size": [
+            2,
+            3,
+            2
+          ],
+          "material": "hare_fur",
+          "uv": [
+            35,
+            17
+          ]
+        },
+        {
+          "position": [
+            -1,
+            3,
+            -3
+          ],
+          "size": [
+            2,
+            1,
+            4
+          ],
+          "material": "hare_ear",
+          "uv": [
+            22,
+            17
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_bl",
+      "parent": "root",
+      "pivot": [
+        -3,
+        18,
+        5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -2,
+            0,
+            -2
+          ],
+          "size": [
+            4,
+            5,
+            5
+          ],
+          "material": "hare_fur",
+          "uv": [
+            82,
+            1
+          ]
+        },
+        {
+          "position": [
+            -2,
+            5,
+            -4
+          ],
+          "size": [
+            4,
+            1,
+            6
+          ],
+          "material": "hare_ear",
+          "uv": [
+            1,
+            17
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ear_r",
+      "parent": "head",
+      "pivot": [
+        1.6,
+        -3,
+        -1
+      ],
+      "rotation": [
+        -0.1,
+        0,
+        0.12
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            -8,
+            -1
+          ],
+          "size": [
+            2,
+            8,
+            2
+          ],
+          "material": "hare_fur",
+          "uv": [
+            101,
+            1
+          ]
+        },
+        {
+          "position": [
+            -0.5,
+            -7,
+            -1.5
+          ],
+          "size": [
+            1,
+            6,
+            1
+          ],
+          "material": "hare_ear",
+          "uv": [
+            110,
+            1
+          ]
+        },
+        {
+          "position": [
+            -0.5,
+            -6,
+            -2
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "star_glow",
+          "uv": [
+            58,
+            17
+          ]
+        },
+        {
+          "position": [
+            -0.5,
+            -4,
+            -2
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "star_glow",
+          "uv": [
+            58,
+            17
+          ]
+        },
+        {
+          "position": [
+            -0.5,
+            -2,
+            -2
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "star_glow",
+          "uv": [
+            58,
+            17
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_fr",
+      "parent": "root",
+      "pivot": [
+        2,
+        20,
+        -1
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            0,
+            -1
+          ],
+          "size": [
+            2,
+            3,
+            2
+          ],
+          "material": "hare_fur",
+          "uv": [
+            35,
+            17
+          ]
+        },
+        {
+          "position": [
+            -1,
+            3,
+            -3
+          ],
+          "size": [
+            2,
+            1,
+            4
+          ],
+          "material": "hare_ear",
+          "uv": [
+            22,
+            17
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_br",
+      "parent": "root",
+      "pivot": [
+        3,
+        18,
+        5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -2,
+            0,
+            -2
+          ],
+          "size": [
+            4,
+            5,
+            5
+          ],
+          "material": "hare_fur",
+          "uv": [
+            82,
+            1
+          ]
+        },
+        {
+          "position": [
+            -2,
+            5,
+            -4
+          ],
+          "size": [
+            4,
+            1,
+            6
+          ],
+          "material": "hare_ear",
+          "uv": [
+            1,
+            17
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tail",
+      "parent": "body",
+      "pivot": [
+        0,
+        -2,
+        5
+      ],
+      "rotation": [
+        -0.35,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            -1,
+            0
+          ],
+          "size": [
+            2,
+            3,
+            3
+          ],
+          "material": "star_glow",
+          "uv": [
+            115,
+            1
+          ]
+        }
+      ]
+    }
+  ]
+}

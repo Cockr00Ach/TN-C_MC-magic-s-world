@@ -1,0 +1,1 @@
+{"type":"tnc:mana_forging","category":"workshop","mana":20,"work_ticks":100,"ingredients":[{"item":"tnc:verdant_branch","count":2},{"item":"minecraft:copper_ingot","count":2},{"item":"tnc:insulating_forge_clay","count":1}],"result":{"item":"tnc:mana_cable","count":4}}

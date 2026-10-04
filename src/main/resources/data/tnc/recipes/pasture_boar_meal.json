@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "tnc:stonebarrow_meat"
+    },
+    {
+      "item": "tnc:stonebarrow_meat"
+    },
+    {
+      "item": "minecraft:potato"
+    },
+    {
+      "item": "tnc:hearth_pepper_fruit"
+    },
+    {
+      "item": "minecraft:bowl"
+    }
+  ],
+  "result": {
+    "item": "tnc:stonebarrow_hotpot",
+    "count": 1
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "type": "tnc:field_kitchen",
+  "ingredients": [
+    {
+      "item": "tnc:paper_bark"
+    },
+    {
+      "item": "tnc:paper_bark"
+    }
+  ],
+  "result": {
+    "item": "minecraft:paper",
+    "count": 3
+  }
+}

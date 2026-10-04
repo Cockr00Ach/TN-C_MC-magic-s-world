@@ -1,0 +1,12 @@
+{
+  "type": "tnc:field_kitchen",
+  "ingredients": [
+    {
+      "item": "tnc:hearth_pepper_fruit"
+    }
+  ],
+  "result": {
+    "item": "tnc:hearth_oil",
+    "count": 1
+  }
+}

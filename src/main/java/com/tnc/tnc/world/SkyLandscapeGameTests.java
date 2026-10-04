@@ -116,15 +116,22 @@ public final class SkyLandscapeGameTests {
         if(recovered.phase!=2)throw new IllegalStateException("Completed overlay restarted");
         h.succeed();
     }
-    @GameTest(template="building_test_empty",timeoutTicks=40)
+    @GameTest(template="building_test_empty",batch="island_story_actor_fixture",timeoutTicks=200)
     public static void everyIslandStoryActorWaitsForCompleteTerrainAndWorkersAvoidAllRealTiles(GameTestHelper h)throws Exception{
-        var level=h.getLevel();var old=StateBackup.capture(level);var sky=new SkyIslandSavedData();sky.phase=SkyIslandSavedData.Phase.COMPLETE;sky.layoutReady=true;sky.originX=h.absolutePos(BlockPos.ZERO).getX();sky.originY=h.absolutePos(BlockPos.ZERO).getY();sky.originZ=h.absolutePos(BlockPos.ZERO).getZ();level.getDataStorage().set("tnc_sky_island_v5",sky);var landscape=new SkyLandscapeUpgrade.State();landscape.phase=1;level.getDataStorage().set("tnc_sky_landscape_v1",landscape);
+        var level=h.getLevel();var site=h.absolutePos(new BlockPos(4,2,4));var center=new net.minecraft.world.level.ChunkPos(site);var forced=new java.util.ArrayList<net.minecraft.world.level.ChunkPos>();
+        for(int x=-2;x<=2;x++)for(int z=-2;z<=2;z++){var c=new net.minecraft.world.level.ChunkPos(center.x+x,center.z+z);if(!level.getForcedChunks().contains(c.toLong())){forced.add(c);level.setChunkForced(c.x,c.z,true);}level.getChunk(c.x,c.z);}
+        // Entity section loading is asynchronous. Run separately from fixtures
+        // that replace the same SavedData, and create actors only after loading.
+        h.succeedWhen(()->{
+        h.assertTrue(level.isPositionEntityTicking(site)&&forced.stream().allMatch(c->level.areEntitiesLoaded(c.toLong())),"Waiting for actual NPC fixture entity sections");
+        var old=StateBackup.capture(level);var sky=new SkyIslandSavedData();sky.phase=SkyIslandSavedData.Phase.COMPLETE;sky.layoutReady=true;sky.originX=h.absolutePos(BlockPos.ZERO).getX();sky.originY=h.absolutePos(BlockPos.ZERO).getY();sky.originZ=h.absolutePos(BlockPos.ZERO).getZ();level.getDataStorage().set("tnc_sky_island_v5",sky);var landscape=new SkyLandscapeUpgrade.State();landscape.phase=1;level.getDataStorage().set("tnc_sky_landscape_v1",landscape);
         try{var positions=new com.tnc.tnc.npc.NpcPlacementSavedData();h.setBlock(new BlockPos(4,1,4),Blocks.STONE);for(String id:List.of("self","cava","huai","zhuangquerang","zuowang")){var p=new com.tnc.tnc.npc.NpcPlacementSavedData.Placement(id,"ORIGIN",4,2,4);h.assertTrue(!positions.ensureOne(level,p),"Every anchored actor waits for terrain, not only Self: "+id);}
             var data=com.tnc.tnc.adventure.AdventureSavedData.get(level.getServer());var before=data.housing.copy();try{data.housing.remove("Residents");var expected=data.housing.copy();com.tnc.tnc.home.McaResidents.tick(level);h.assertTrue(expected.equals(data.housing),"Native neighbors do not spawn or write identities during new-island construction");}finally{data.housing=before;}
-            var plan=SkyLandscapeUpgrade.load(level);for(var post:com.tnc.tnc.adventure.TownServices.POSTS){if(post.role().equals("guild"))continue;for(var tile:plan.tiles()){var box=new net.minecraft.world.phys.AABB(tile.min(),tile.max().offset(1,1,1)).inflate(1);var room=post.room();var workerArea=new net.minecraft.world.phys.AABB(room.minX()-.3,room.y(),room.minZ()-.3,room.maxX()+1.3,room.y()+2,room.maxZ()+1.3);h.assertTrue(!box.intersects(workerArea),"Independent "+post.role()+" room cannot obstruct any real landscape tile");}}
+            SkyLandscapeUpgrade.Plan plan;try{plan=SkyLandscapeUpgrade.load(level);}catch(Exception e){throw new IllegalStateException(e);}for(var post:com.tnc.tnc.adventure.TownServices.POSTS){if(post.role().equals("guild"))continue;for(var tile:plan.tiles()){var box=new net.minecraft.world.phys.AABB(tile.min(),tile.max().offset(1,1,1)).inflate(1);var room=post.room();var workerArea=new net.minecraft.world.phys.AABB(room.minX()-.3,room.y(),room.minZ()-.3,room.maxX()+1.3,room.y()+2,room.maxZ()+1.3);h.assertTrue(!box.intersects(workerArea),"Independent "+post.role()+" room cannot obstruct any real landscape tile");}}
             landscape.phase=2;for(String id:List.of("self","cava","huai","zhuangquerang","zuowang")){var p=new com.tnc.tnc.npc.NpcPlacementSavedData.Placement(id,"ORIGIN",4,2,4);h.assertTrue(positions.ensureOne(level,p),"Same fresh fixture really spawns known story actor after terrain completion: "+id);var type=net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getValue(net.minecraft.resources.ResourceLocation.parse("tnc:"+id));var npc=com.tnc.tnc.npc.NpcPlacementSavedData.findNear(level,type,h.absolutePos(new BlockPos(4,2,4)),4);h.assertTrue(npc!=null,"Spawned actor is present, not a pending id");npc.discard();}
-            h.succeed();
+            for(var c:forced)level.setChunkForced(c.x,c.z,false);
         }finally{old.restore(level);}
+        });
     }
     private record StateBackup(SkyIslandSavedData island,SkyLandscapeUpgrade.State landscape){
         static StateBackup capture(net.minecraft.server.level.ServerLevel l){return new StateBackup(SkyIslandSavedData.get(l),SkyLandscapeUpgrade.State.get(l));}

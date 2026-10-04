@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:poppy"
+    },
+    {
+      "item": "tnc:road_bell_ear"
+    },
+    {
+      "item": "minecraft:honeycomb"
+    }
+  ],
+  "result": {
+    "item": "tnc:homeward_flower_seed",
+    "count": 2
+  }
+}

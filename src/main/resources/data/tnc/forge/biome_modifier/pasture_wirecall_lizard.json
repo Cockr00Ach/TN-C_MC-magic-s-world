@@ -1,0 +1,10 @@
+{
+  "type": "forge:add_spawns",
+  "biomes": "#tnc:pasture_wirecall_lizard",
+  "spawners": {
+    "type": "tnc:wirecall_lizard",
+    "weight": 1,
+    "minCount": 1,
+    "maxCount": 2
+  }
+}

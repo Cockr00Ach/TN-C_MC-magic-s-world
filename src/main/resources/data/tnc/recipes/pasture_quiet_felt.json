@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "tnc:soft_down"
+    },
+    {
+      "item": "tnc:soft_down"
+    },
+    {
+      "item": "minecraft:string"
+    },
+    {
+      "item": "minecraft:leather"
+    }
+  ],
+  "result": {
+    "item": "tnc:quiet_felt",
+    "count": 1
+  }
+}

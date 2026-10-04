@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "powered=false": {
+      "model": "tnc:block/field_sound_relay"
+    },
+    "powered=true": {
+      "model": "tnc:block/field_sound_relay"
+    }
+  }
+}

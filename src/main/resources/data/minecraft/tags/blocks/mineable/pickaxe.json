@@ -1,0 +1,5 @@
+{
+  "replace": false,
+  "values": ["tnc:magic_forge", "tnc:forge_firebrick", "tnc:forge_copper_frame",
+    "tnc:forge_input_port", "tnc:forge_output_port", "tnc:forge_mana_injector", "tnc:forge_exhaust"]
+}

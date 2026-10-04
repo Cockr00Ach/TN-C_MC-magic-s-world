@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "tnc:froststride_meat"
+    },
+    {
+      "item": "tnc:froststride_meat"
+    },
+    {
+      "item": "minecraft:carrot"
+    },
+    {
+      "item": "minecraft:baked_potato"
+    }
+  ],
+  "result": {
+    "item": "tnc:frostwarm_skewer",
+    "count": 1
+  }
+}

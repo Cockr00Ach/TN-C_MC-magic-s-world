@@ -1,0 +1,77 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "stalk": "tnc:block/eco_gill",
+    "cap": "tnc:block/eco_cap",
+    "closed": "tnc:block/eco_cap_closed",
+    "gill": "tnc:block/eco_gill"
+  },
+  "elements": [
+    {
+      "from": [
+        7,
+        0,
+        7
+      ],
+      "to": [
+        9,
+        4,
+        9
+      ],
+      "faces": {
+        "down": {
+          "texture": "#stalk"
+        },
+        "up": {
+          "texture": "#stalk"
+        },
+        "north": {
+          "texture": "#stalk"
+        },
+        "south": {
+          "texture": "#stalk"
+        },
+        "west": {
+          "texture": "#stalk"
+        },
+        "east": {
+          "texture": "#stalk"
+        }
+      }
+    },
+    {
+      "from": [
+        6,
+        4,
+        6
+      ],
+      "to": [
+        10,
+        6,
+        10
+      ],
+      "faces": {
+        "down": {
+          "texture": "#closed"
+        },
+        "up": {
+          "texture": "#closed"
+        },
+        "north": {
+          "texture": "#closed"
+        },
+        "south": {
+          "texture": "#closed"
+        },
+        "west": {
+          "texture": "#closed"
+        },
+        "east": {
+          "texture": "#closed"
+        }
+      }
+    }
+  ]
+}

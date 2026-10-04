@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["CAC", "RMR", "CSC"],
+  "key": {
+    "C": {"item": "minecraft:copper_ingot"},
+    "A": {"item": "minecraft:amethyst_shard"},
+    "R": {"item": "minecraft:redstone"},
+    "M": {"item": "tnc:mana_copper_coil"},
+    "S": {"item": "minecraft:smooth_stone"}
+  },
+  "result": {"item": "tnc:mana_generator"}
+}

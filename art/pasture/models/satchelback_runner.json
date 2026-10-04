@@ -1,0 +1,631 @@
+{
+  "id": "satchelback_runner",
+  "name": "囊背负兽",
+  "animation": "runner",
+  "shadow": 0.62,
+  "texture_size": [
+    128,
+    128
+  ],
+  "coordinate_system": "Minecraft ModelPart: +Y down, forward -Z, ground y=24",
+  "parts": [
+    {
+      "name": "body",
+      "parent": "root",
+      "pivot": [
+        0,
+        12,
+        2
+      ],
+      "rotation": [
+        -0.12,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -5,
+            -4,
+            -8
+          ],
+          "size": [
+            10,
+            8,
+            17
+          ],
+          "material": "runner_hide",
+          "uv": [
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "head",
+      "parent": "root",
+      "pivot": [
+        0,
+        14,
+        -7
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -3,
+            -3,
+            -5
+          ],
+          "size": [
+            6,
+            6,
+            7
+          ],
+          "material": "runner_hide",
+          "uv": [
+            89,
+            1
+          ]
+        },
+        {
+          "position": [
+            -2,
+            0,
+            -7
+          ],
+          "size": [
+            4,
+            3,
+            3
+          ],
+          "material": "nose",
+          "uv": [
+            1,
+            40
+          ]
+        },
+        {
+          "position": [
+            -3.2,
+            -1,
+            -4.5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "eye",
+          "uv": [
+            27,
+            40
+          ]
+        },
+        {
+          "position": [
+            2.2,
+            -1,
+            -4.5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "eye",
+          "uv": [
+            27,
+            40
+          ]
+        },
+        {
+          "position": [
+            -4,
+            -5,
+            -1
+          ],
+          "size": [
+            2,
+            3,
+            3
+          ],
+          "material": "runner_bag",
+          "uv": [
+            116,
+            1
+          ]
+        },
+        {
+          "position": [
+            2,
+            -5,
+            -1
+          ],
+          "size": [
+            2,
+            3,
+            3
+          ],
+          "material": "runner_bag",
+          "uv": [
+            116,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "resource_bag_l",
+      "parent": "body",
+      "pivot": [
+        -5,
+        -2,
+        1
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -3,
+            -1,
+            -5
+          ],
+          "size": [
+            6,
+            7,
+            10
+          ],
+          "material": "runner_bag",
+          "uv": [
+            56,
+            1
+          ]
+        },
+        {
+          "position": [
+            -3,
+            -2,
+            -5
+          ],
+          "size": [
+            6,
+            2,
+            10
+          ],
+          "material": "bag_seam",
+          "uv": [
+            1,
+            27
+          ]
+        },
+        {
+          "position": [
+            -2,
+            1,
+            -5.5
+          ],
+          "size": [
+            4,
+            2,
+            1
+          ],
+          "material": "bag_seam",
+          "uv": [
+            16,
+            40
+          ]
+        }
+      ]
+    },
+    {
+      "name": "bag_lid_l",
+      "parent": "resource_bag_l",
+      "pivot": [
+        0,
+        -2,
+        4
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -3,
+            -1,
+            -9
+          ],
+          "size": [
+            6,
+            1,
+            9
+          ],
+          "material": "runner_hide",
+          "uv": [
+            34,
+            27
+          ]
+        }
+      ]
+    },
+    {
+      "name": "resource_bag_r",
+      "parent": "body",
+      "pivot": [
+        5,
+        -2,
+        1
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -3,
+            -1,
+            -5
+          ],
+          "size": [
+            6,
+            7,
+            10
+          ],
+          "material": "runner_bag",
+          "uv": [
+            56,
+            1
+          ]
+        },
+        {
+          "position": [
+            -3,
+            -2,
+            -5
+          ],
+          "size": [
+            6,
+            2,
+            10
+          ],
+          "material": "bag_seam",
+          "uv": [
+            1,
+            27
+          ]
+        },
+        {
+          "position": [
+            -2,
+            1,
+            -5.5
+          ],
+          "size": [
+            4,
+            2,
+            1
+          ],
+          "material": "bag_seam",
+          "uv": [
+            16,
+            40
+          ]
+        }
+      ]
+    },
+    {
+      "name": "bag_lid_r",
+      "parent": "resource_bag_r",
+      "pivot": [
+        0,
+        -2,
+        4
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -3,
+            -1,
+            -9
+          ],
+          "size": [
+            6,
+            1,
+            9
+          ],
+          "material": "runner_hide",
+          "uv": [
+            34,
+            27
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_fl",
+      "parent": "root",
+      "pivot": [
+        -3.5,
+        17,
+        -4
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1.5,
+            0,
+            -1.5
+          ],
+          "size": [
+            3,
+            7,
+            3
+          ],
+          "material": "runner_hide",
+          "uv": [
+            65,
+            27
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            5,
+            -2.0
+          ],
+          "size": [
+            3,
+            2,
+            4
+          ],
+          "material": "hoof",
+          "uv": [
+            99,
+            27
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_fr",
+      "parent": "root",
+      "pivot": [
+        3.5,
+        17,
+        -4
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1.5,
+            0,
+            -1.5
+          ],
+          "size": [
+            3,
+            7,
+            3
+          ],
+          "material": "runner_hide",
+          "uv": [
+            65,
+            27
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            5,
+            -2.0
+          ],
+          "size": [
+            3,
+            2,
+            4
+          ],
+          "material": "hoof",
+          "uv": [
+            99,
+            27
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_bl",
+      "parent": "root",
+      "pivot": [
+        -3.5,
+        15,
+        8
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1.5,
+            0,
+            -1.5
+          ],
+          "size": [
+            3,
+            7,
+            3
+          ],
+          "material": "runner_hide",
+          "uv": [
+            65,
+            27
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            5,
+            -2.0
+          ],
+          "size": [
+            3,
+            2,
+            4
+          ],
+          "material": "hoof",
+          "uv": [
+            99,
+            27
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            6,
+            -1.5
+          ],
+          "size": [
+            3,
+            3,
+            3
+          ],
+          "material": "hoof",
+          "uv": [
+            114,
+            27
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_br",
+      "parent": "root",
+      "pivot": [
+        3.5,
+        15,
+        8
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1.5,
+            0,
+            -1.5
+          ],
+          "size": [
+            3,
+            7,
+            3
+          ],
+          "material": "runner_hide",
+          "uv": [
+            65,
+            27
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            5,
+            -2.0
+          ],
+          "size": [
+            3,
+            2,
+            4
+          ],
+          "material": "hoof",
+          "uv": [
+            99,
+            27
+          ]
+        },
+        {
+          "position": [
+            -1.5,
+            6,
+            -1.5
+          ],
+          "size": [
+            3,
+            3,
+            3
+          ],
+          "material": "hoof",
+          "uv": [
+            114,
+            27
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tail",
+      "parent": "body",
+      "pivot": [
+        0,
+        0,
+        9
+      ],
+      "rotation": [
+        -0.35,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -2,
+            -1,
+            0
+          ],
+          "size": [
+            4,
+            2,
+            6
+          ],
+          "material": "runner_bag",
+          "uv": [
+            78,
+            27
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "type": "forge:add_spawns",
+  "biomes": "#tnc:pasture_pattern_shell_snail",
+  "spawners": {
+    "type": "tnc:pattern_shell_snail",
+    "weight": 1,
+    "minCount": 1,
+    "maxCount": 2
+  }
+}

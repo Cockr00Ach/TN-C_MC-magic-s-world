@@ -1,0 +1,759 @@
+{
+  "id": "watch_mantis",
+  "name": "巡灯螳螂",
+  "animation": "mantis",
+  "shadow": 0.36,
+  "texture_size": [
+    128,
+    128
+  ],
+  "coordinate_system": "Minecraft ModelPart: +Y down, forward -Z, ground y=24",
+  "parts": [
+    {
+      "name": "body",
+      "parent": "root",
+      "pivot": [
+        0,
+        15,
+        0
+      ],
+      "rotation": [
+        0.18,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -2,
+            -4,
+            -3
+          ],
+          "size": [
+            4,
+            8,
+            5
+          ],
+          "material": "mantis_dark",
+          "uv": [
+            32,
+            1
+          ]
+        },
+        {
+          "position": [
+            -3,
+            1,
+            1
+          ],
+          "size": [
+            6,
+            6,
+            9
+          ],
+          "material": "mantis_leaf",
+          "uv": [
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "head",
+      "parent": "root",
+      "pivot": [
+        0,
+        8,
+        -2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -4,
+            -2,
+            -2
+          ],
+          "size": [
+            8,
+            4,
+            4
+          ],
+          "material": "mantis_leaf",
+          "uv": [
+            72,
+            1
+          ]
+        },
+        {
+          "position": [
+            -4.0,
+            -1,
+            -2.5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "eye",
+          "uv": [
+            27,
+            17
+          ]
+        },
+        {
+          "position": [
+            3.0,
+            -1,
+            -2.5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "eye",
+          "uv": [
+            27,
+            17
+          ]
+        }
+      ]
+    },
+    {
+      "name": "resource_lamp",
+      "parent": "body",
+      "pivot": [
+        0,
+        -3,
+        -3
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            -1,
+            -1
+          ],
+          "size": [
+            2,
+            4,
+            2
+          ],
+          "material": "lamp_glow",
+          "uv": [
+            113,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "antenna_l",
+      "parent": "head",
+      "pivot": [
+        -2,
+        -2,
+        0
+      ],
+      "rotation": [
+        -0.3,
+        0,
+        -0.3
+      ],
+      "boxes": [
+        {
+          "position": [
+            -0.5,
+            -5,
+            -0.5
+          ],
+          "size": [
+            1,
+            5,
+            1
+          ],
+          "material": "mantis_dark",
+          "uv": [
+            122,
+            1
+          ]
+        },
+        {
+          "position": [
+            -0.5,
+            -6,
+            -1.5
+          ],
+          "size": [
+            1,
+            2,
+            2
+          ],
+          "material": "lamp_glow",
+          "uv": [
+            20,
+            17
+          ]
+        }
+      ]
+    },
+    {
+      "name": "arm_l",
+      "parent": "root",
+      "pivot": [
+        -2,
+        10,
+        -2
+      ],
+      "rotation": [
+        -0.6,
+        0,
+        -0.45
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            0,
+            -1
+          ],
+          "size": [
+            2,
+            5,
+            2
+          ],
+          "material": "mantis_leaf",
+          "uv": [
+            97,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "arm_l_sickle",
+      "parent": "arm_l",
+      "pivot": [
+        0,
+        5,
+        0
+      ],
+      "rotation": [
+        -1.7,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -0.5,
+            0,
+            -1
+          ],
+          "size": [
+            1,
+            5,
+            2
+          ],
+          "material": "mantis_dark",
+          "uv": [
+            106,
+            1
+          ]
+        },
+        {
+          "position": [
+            -0.5,
+            4,
+            -2
+          ],
+          "size": [
+            1,
+            2,
+            3
+          ],
+          "material": "ivory",
+          "uv": [
+            6,
+            17
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_fl",
+      "parent": "root",
+      "pivot": [
+        -2.5,
+        17,
+        0
+      ],
+      "rotation": [
+        0,
+        -0.35,
+        0.7
+      ],
+      "boxes": [
+        {
+          "position": [
+            -0.5,
+            0,
+            -0.5
+          ],
+          "size": [
+            1,
+            5,
+            1
+          ],
+          "material": "mantis_leaf",
+          "uv": [
+            1,
+            17
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_fl_foot",
+      "parent": "leg_fl",
+      "pivot": [
+        0,
+        5,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        -0.7
+      ],
+      "boxes": [
+        {
+          "position": [
+            -0.5,
+            0,
+            -0.5
+          ],
+          "size": [
+            1,
+            4,
+            1
+          ],
+          "material": "mantis_dark",
+          "uv": [
+            15,
+            17
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_bl",
+      "parent": "root",
+      "pivot": [
+        -2.5,
+        17,
+        6
+      ],
+      "rotation": [
+        0,
+        -0.35,
+        0.7
+      ],
+      "boxes": [
+        {
+          "position": [
+            -0.5,
+            0,
+            -0.5
+          ],
+          "size": [
+            1,
+            5,
+            1
+          ],
+          "material": "mantis_leaf",
+          "uv": [
+            1,
+            17
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_bl_foot",
+      "parent": "leg_bl",
+      "pivot": [
+        0,
+        5,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        -0.7
+      ],
+      "boxes": [
+        {
+          "position": [
+            -0.5,
+            0,
+            -0.5
+          ],
+          "size": [
+            1,
+            4,
+            1
+          ],
+          "material": "mantis_dark",
+          "uv": [
+            15,
+            17
+          ]
+        }
+      ]
+    },
+    {
+      "name": "antenna_r",
+      "parent": "head",
+      "pivot": [
+        2,
+        -2,
+        0
+      ],
+      "rotation": [
+        -0.3,
+        0,
+        0.3
+      ],
+      "boxes": [
+        {
+          "position": [
+            -0.5,
+            -5,
+            -0.5
+          ],
+          "size": [
+            1,
+            5,
+            1
+          ],
+          "material": "mantis_dark",
+          "uv": [
+            122,
+            1
+          ]
+        },
+        {
+          "position": [
+            -0.5,
+            -6,
+            -1.5
+          ],
+          "size": [
+            1,
+            2,
+            2
+          ],
+          "material": "lamp_glow",
+          "uv": [
+            20,
+            17
+          ]
+        }
+      ]
+    },
+    {
+      "name": "arm_r",
+      "parent": "root",
+      "pivot": [
+        2,
+        10,
+        -2
+      ],
+      "rotation": [
+        -0.6,
+        0,
+        0.45
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            0,
+            -1
+          ],
+          "size": [
+            2,
+            5,
+            2
+          ],
+          "material": "mantis_leaf",
+          "uv": [
+            97,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "arm_r_sickle",
+      "parent": "arm_r",
+      "pivot": [
+        0,
+        5,
+        0
+      ],
+      "rotation": [
+        -1.7,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -0.5,
+            0,
+            -1
+          ],
+          "size": [
+            1,
+            5,
+            2
+          ],
+          "material": "mantis_dark",
+          "uv": [
+            106,
+            1
+          ]
+        },
+        {
+          "position": [
+            -0.5,
+            4,
+            -2
+          ],
+          "size": [
+            1,
+            2,
+            3
+          ],
+          "material": "ivory",
+          "uv": [
+            6,
+            17
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_fr",
+      "parent": "root",
+      "pivot": [
+        2.5,
+        17,
+        0
+      ],
+      "rotation": [
+        0,
+        0.35,
+        -0.7
+      ],
+      "boxes": [
+        {
+          "position": [
+            -0.5,
+            0,
+            -0.5
+          ],
+          "size": [
+            1,
+            5,
+            1
+          ],
+          "material": "mantis_leaf",
+          "uv": [
+            1,
+            17
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_fr_foot",
+      "parent": "leg_fr",
+      "pivot": [
+        0,
+        5,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0.7
+      ],
+      "boxes": [
+        {
+          "position": [
+            -0.5,
+            0,
+            -0.5
+          ],
+          "size": [
+            1,
+            4,
+            1
+          ],
+          "material": "mantis_dark",
+          "uv": [
+            15,
+            17
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_br",
+      "parent": "root",
+      "pivot": [
+        2.5,
+        17,
+        6
+      ],
+      "rotation": [
+        0,
+        0.35,
+        -0.7
+      ],
+      "boxes": [
+        {
+          "position": [
+            -0.5,
+            0,
+            -0.5
+          ],
+          "size": [
+            1,
+            5,
+            1
+          ],
+          "material": "mantis_leaf",
+          "uv": [
+            1,
+            17
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_br_foot",
+      "parent": "leg_br",
+      "pivot": [
+        0,
+        5,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0.7
+      ],
+      "boxes": [
+        {
+          "position": [
+            -0.5,
+            0,
+            -0.5
+          ],
+          "size": [
+            1,
+            4,
+            1
+          ],
+          "material": "mantis_dark",
+          "uv": [
+            15,
+            17
+          ]
+        }
+      ]
+    },
+    {
+      "name": "wing_l",
+      "parent": "body",
+      "pivot": [
+        -2,
+        2,
+        3
+      ],
+      "rotation": [
+        0,
+        0,
+        -0.2
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            0,
+            0
+          ],
+          "size": [
+            2,
+            1,
+            8
+          ],
+          "material": "mantis_leaf",
+          "uv": [
+            51,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "wing_r",
+      "parent": "body",
+      "pivot": [
+        2,
+        2,
+        3
+      ],
+      "rotation": [
+        0,
+        0,
+        0.2
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            0,
+            0
+          ],
+          "size": [
+            2,
+            1,
+            8
+          ],
+          "material": "mantis_leaf",
+          "uv": [
+            51,
+            1
+          ]
+        }
+      ]
+    }
+  ]
+}

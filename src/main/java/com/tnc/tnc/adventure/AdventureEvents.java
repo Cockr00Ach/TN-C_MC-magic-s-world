@@ -48,7 +48,7 @@ public final class AdventureEvents {
         if(!(e.getEntity().level() instanceof net.minecraft.server.level.ServerLevel level))return;
         var hits=CONTRIBUTIONS.remove(e.getEntity().getUUID());if(hits==null)hits=new java.util.HashMap<>();
         String mob=ForgeRegistries.ENTITY_TYPES.getKey(e.getEntity().getType()).toString();
-        boolean boss=com.tnc.tnc.life.BossCuisine.BOSSES.contains(mob);if(!(e.getEntity() instanceof Enemy)&&!boss)return;
+        boolean boss=com.tnc.tnc.life.BossCuisine.BOSSES.contains(mob)||BossCommissions.isTarget(mob);if(!(e.getEntity() instanceof Enemy)&&!boss)return;
         long now=level.getServer().overworld().getGameTime();if(e.getSource().getEntity() instanceof ServerPlayer p)hits.put(p.getUUID(),now);
         for(var hit:hits.entrySet()) {
             var p=level.getServer().getPlayerList().getPlayer(hit.getKey());if(p==null||p.serverLevel()!=level||!p.isAlive()||p.isCreative()||p.isSpectator()||now-hit.getValue()>1200||p.distanceToSqr(e.getEntity())>4096)continue;
@@ -57,6 +57,7 @@ public final class AdventureEvents {
             for(int n:new int[]{25,100})if(profile.adventureKills>=n)AdventureService.milestone(p,"kills_"+n);
             for(int n:new int[]{1,8})if(profile.bossKills>=n)AdventureService.milestone(p,"bosses_"+n);
             for(var progress:profile.contracts.values()){var c=ContractCatalog.find(progress.id);if(c.enemy().equals(mob))progress.kills=Math.min(c.kills(),progress.kills+1);}
+            BossCommissions.recordParticipant(p,mob);
             AdventureSavedData.get(p.server).setDirty();AdventureService.refreshGrowth(p);
         }
     }

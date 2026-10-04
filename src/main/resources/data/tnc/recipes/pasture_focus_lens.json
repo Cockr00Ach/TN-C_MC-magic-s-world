@@ -1,0 +1,24 @@
+{
+  "type": "tnc:mana_forging",
+  "category": "husbandry",
+  "mana": 20,
+  "work_ticks": 120,
+  "ingredients": [
+    {
+      "item": "tnc:mirror_scale",
+      "count": 2
+    },
+    {
+      "item": "minecraft:glass",
+      "count": 1
+    },
+    {
+      "item": "minecraft:amethyst_shard",
+      "count": 1
+    }
+  ],
+  "result": {
+    "item": "tnc:focus_lens",
+    "count": 1
+  }
+}

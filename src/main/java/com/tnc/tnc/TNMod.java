@@ -45,6 +45,8 @@ public class TNMod
     /** 场景道具：4x2 赌博桌（可放置 ✓，形状见 TNGambleTableBlock 的尺寸契约）。 */
     public static final RegistryObject<Block> GAMBLE_TABLE =
             BLOCKS.register("gamble_table", com.tnc.tnc.prop.TNGambleTableBlock::new);
+    public static final RegistryObject<Block> MANA_ROOT =
+            BLOCKS.register("mana_root", com.tnc.tnc.life.ManaRoot.RootBlock::new);
     public static final RegistryObject<Item> GAMBLE_TABLE_ITEM =
             ITEMS.register("gamble_table", () -> new net.minecraft.world.item.BlockItem(
                     GAMBLE_TABLE.get(), new Item.Properties()));
@@ -101,6 +103,14 @@ public class TNMod
     public static final RegistryObject<Item> MONEY_POUCH = ITEMS.register("money_pouch",com.tnc.tnc.life.LifeEvents.PouchItem::new);
     public static final RegistryObject<Item> FOOD_POUCH = ITEMS.register("food_pouch",com.tnc.tnc.life.LifeEvents.PouchItem::new);
     public static final RegistryObject<Item> FARM_FOCUS = ITEMS.register("farm_focus",com.tnc.tnc.life.FarmMagic.FocusItem::new);
+    public static final RegistryObject<Item> BELLWOOL_FODDER = ITEMS.register("bellwool_fodder",
+            com.tnc.tnc.life.BellwoolHusbandry.FodderItem::new);
+    public static final RegistryObject<Item> RESONANT_FLEECE = ITEMS.register("resonant_fleece",
+            com.tnc.tnc.life.BellwoolHusbandry.FleeceItem::new);
+    public static final RegistryObject<Item> MANA_ROOT_SEED = ITEMS.register("mana_root_seed",
+            () -> new net.minecraft.world.item.ItemNameBlockItem(MANA_ROOT.get(), new Item.Properties()));
+    public static final RegistryObject<Item> MANA_ROOT_CORE = ITEMS.register("mana_root_core",
+            com.tnc.tnc.life.ManaRoot.CoreItem::new);
     public static final RegistryObject<Item> COPPER_COIN = ITEMS.register("copper_coin",()->new Item(new Item.Properties()));
     public static final RegistryObject<Item> SILVER_COIN = ITEMS.register("silver_coin",()->new Item(new Item.Properties()));
     public static final RegistryObject<Item> GOLD_COIN = ITEMS.register("gold_coin",()->new Item(new Item.Properties()));
@@ -132,6 +142,8 @@ public class TNMod
                 output.accept(HANDBOOK.get());
                 output.accept(MONEY_POUCH.get());output.accept(FOOD_POUCH.get());
                 output.accept(FARM_FOCUS.get());
+                output.accept(BELLWOOL_FODDER.get());output.accept(RESONANT_FLEECE.get());
+                output.accept(MANA_ROOT_SEED.get());output.accept(MANA_ROOT_CORE.get());
                 output.accept(COPPER_COIN.get());output.accept(SILVER_COIN.get());output.accept(GOLD_COIN.get());
                 DELICACIES.forEach(i->output.accept(i.get()));
                 BOSS_INGREDIENTS.forEach(i->output.accept(i.get()));
@@ -166,6 +178,18 @@ public class TNMod
 
         // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);
+
+        // The ecology content registers plain block/item instances in RegisterEvent.
+        // Attach those listeners from the mod constructor so registration happens
+        // exactly once, before the block and item registries freeze.
+        modEventBus.addListener(com.tnc.tnc.life.OriginalCrops.Registration::register);
+        modEventBus.addListener(com.tnc.tnc.life.OriginalCrops.Registration::creative);
+        modEventBus.addListener(com.tnc.tnc.life.HomewardFlower.Registration::register);
+        modEventBus.addListener(com.tnc.tnc.life.HomewardFlower.Registration::creative);
+        modEventBus.addListener(com.tnc.tnc.life.WarningMoss.Registration::register);
+        modEventBus.addListener(com.tnc.tnc.life.WarningMoss.Registration::creative);
+        modEventBus.addListener(com.tnc.tnc.life.UncommonMagicPlants::register);
+        modEventBus.addListener(com.tnc.tnc.life.UncommonMagicPlants::creative);
 
         // 把三个注册器挂到 mod 事件总线上，否则上面注册的内容不会生效
         BLOCKS.register(modEventBus);

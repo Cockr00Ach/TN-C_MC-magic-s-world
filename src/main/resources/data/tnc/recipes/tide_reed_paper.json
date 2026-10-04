@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "tnc:tide_reed_stem"
+    },
+    {
+      "item": "tnc:tide_reed_stem"
+    },
+    {
+      "item": "tnc:tide_reed_stem"
+    }
+  ],
+  "result": {
+    "item": "minecraft:paper",
+    "count": 3
+  }
+}

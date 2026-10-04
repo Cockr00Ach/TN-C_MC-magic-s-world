@@ -1,0 +1,24 @@
+{
+  "type": "tnc:mana_forging",
+  "category": "husbandry",
+  "mana": 20,
+  "work_ticks": 120,
+  "ingredients": [
+    {
+      "item": "minecraft:copper_ingot",
+      "count": 2
+    },
+    {
+      "item": "minecraft:stone",
+      "count": 2
+    },
+    {
+      "item": "minecraft:redstone",
+      "count": 1
+    }
+  ],
+  "result": {
+    "item": "tnc:mana_bottle_base",
+    "count": 1
+  }
+}

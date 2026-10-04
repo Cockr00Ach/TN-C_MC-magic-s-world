@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=false": {
+      "model": "tnc:block/mana_work_lamp"
+    },
+    "lit=true": {
+      "model": "tnc:block/mana_work_lamp"
+    }
+  }
+}

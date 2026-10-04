@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=false": {
+      "model": "tnc:block/mana_generator"
+    },
+    "lit=true": {
+      "model": "tnc:block/mana_generator"
+    }
+  }
+}

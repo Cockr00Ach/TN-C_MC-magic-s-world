@@ -1,0 +1,564 @@
+{
+  "id": "mistbelly_otter",
+  "name": "雾腹水獭",
+  "animation": "otter",
+  "shadow": 0.46,
+  "texture_size": [
+    128,
+    128
+  ],
+  "coordinate_system": "Minecraft ModelPart: +Y down, forward -Z, ground y=24",
+  "parts": [
+    {
+      "name": "body",
+      "parent": "root",
+      "pivot": [
+        0,
+        20,
+        1
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -4,
+            -3,
+            -8
+          ],
+          "size": [
+            8,
+            6,
+            17
+          ],
+          "material": "otter_fur",
+          "uv": [
+            1,
+            1
+          ]
+        },
+        {
+          "position": [
+            -3,
+            2,
+            -6
+          ],
+          "size": [
+            6,
+            1,
+            12
+          ],
+          "material": "otter_belly",
+          "uv": [
+            52,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "head",
+      "parent": "root",
+      "pivot": [
+        0,
+        18,
+        -8
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -4,
+            -3,
+            -4
+          ],
+          "size": [
+            8,
+            6,
+            6
+          ],
+          "material": "otter_fur",
+          "uv": [
+            1,
+            25
+          ]
+        },
+        {
+          "position": [
+            -3,
+            0,
+            -6
+          ],
+          "size": [
+            6,
+            3,
+            3
+          ],
+          "material": "otter_belly",
+          "uv": [
+            99,
+            25
+          ]
+        },
+        {
+          "position": [
+            -1,
+            0,
+            -7
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "nose",
+          "uv": [
+            14,
+            38
+          ]
+        },
+        {
+          "position": [
+            -4.1,
+            -1,
+            -4
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "eye",
+          "uv": [
+            21,
+            38
+          ]
+        },
+        {
+          "position": [
+            3.1,
+            -1,
+            -4
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "eye",
+          "uv": [
+            21,
+            38
+          ]
+        },
+        {
+          "position": [
+            -4,
+            -4,
+            0
+          ],
+          "size": [
+            2,
+            2,
+            2
+          ],
+          "material": "otter_fur",
+          "uv": [
+            116,
+            1
+          ]
+        },
+        {
+          "position": [
+            -6,
+            0,
+            -4
+          ],
+          "size": [
+            3,
+            1,
+            1
+          ],
+          "material": "ivory",
+          "uv": [
+            118,
+            25
+          ]
+        },
+        {
+          "position": [
+            2,
+            -4,
+            0
+          ],
+          "size": [
+            2,
+            2,
+            2
+          ],
+          "material": "otter_fur",
+          "uv": [
+            116,
+            1
+          ]
+        },
+        {
+          "position": [
+            3,
+            0,
+            -4
+          ],
+          "size": [
+            3,
+            1,
+            1
+          ],
+          "material": "ivory",
+          "uv": [
+            118,
+            25
+          ]
+        }
+      ]
+    },
+    {
+      "name": "resource_sac_l",
+      "parent": "body",
+      "pivot": [
+        -3,
+        1,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            -2,
+            -5
+          ],
+          "size": [
+            3,
+            3,
+            10
+          ],
+          "material": "water_glow",
+          "uv": [
+            89,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_fl",
+      "parent": "root",
+      "pivot": [
+        -3,
+        21,
+        -5
+      ],
+      "rotation": [
+        0,
+        0,
+        0.5
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            0,
+            -1
+          ],
+          "size": [
+            2,
+            2,
+            4
+          ],
+          "material": "otter_fur",
+          "uv": [
+            1,
+            38
+          ]
+        },
+        {
+          "position": [
+            -2,
+            2,
+            -2
+          ],
+          "size": [
+            4,
+            1,
+            5
+          ],
+          "material": "otter_belly",
+          "uv": [
+            80,
+            25
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_bl",
+      "parent": "root",
+      "pivot": [
+        -3,
+        21,
+        7
+      ],
+      "rotation": [
+        0,
+        0,
+        0.5
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            0,
+            -1
+          ],
+          "size": [
+            2,
+            2,
+            4
+          ],
+          "material": "otter_fur",
+          "uv": [
+            1,
+            38
+          ]
+        },
+        {
+          "position": [
+            -2,
+            2,
+            -2
+          ],
+          "size": [
+            4,
+            1,
+            5
+          ],
+          "material": "otter_belly",
+          "uv": [
+            80,
+            25
+          ]
+        }
+      ]
+    },
+    {
+      "name": "resource_sac_r",
+      "parent": "body",
+      "pivot": [
+        3,
+        1,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            -2,
+            -5
+          ],
+          "size": [
+            3,
+            3,
+            10
+          ],
+          "material": "water_glow",
+          "uv": [
+            89,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_fr",
+      "parent": "root",
+      "pivot": [
+        3,
+        21,
+        -5
+      ],
+      "rotation": [
+        0,
+        0,
+        -0.5
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            0,
+            -1
+          ],
+          "size": [
+            2,
+            2,
+            4
+          ],
+          "material": "otter_fur",
+          "uv": [
+            1,
+            38
+          ]
+        },
+        {
+          "position": [
+            -2,
+            2,
+            -2
+          ],
+          "size": [
+            4,
+            1,
+            5
+          ],
+          "material": "otter_belly",
+          "uv": [
+            80,
+            25
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_br",
+      "parent": "root",
+      "pivot": [
+        3,
+        21,
+        7
+      ],
+      "rotation": [
+        0,
+        0,
+        -0.5
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            0,
+            -1
+          ],
+          "size": [
+            2,
+            2,
+            4
+          ],
+          "material": "otter_fur",
+          "uv": [
+            1,
+            38
+          ]
+        },
+        {
+          "position": [
+            -2,
+            2,
+            -2
+          ],
+          "size": [
+            4,
+            1,
+            5
+          ],
+          "material": "otter_belly",
+          "uv": [
+            80,
+            25
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tail",
+      "parent": "body",
+      "pivot": [
+        0,
+        0,
+        9
+      ],
+      "rotation": [
+        0.1,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -2,
+            -1,
+            0
+          ],
+          "size": [
+            4,
+            2,
+            5
+          ],
+          "material": "otter_fur",
+          "uv": [
+            61,
+            25
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tail_tip",
+      "parent": "tail",
+      "pivot": [
+        0,
+        0,
+        4
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -4,
+            -0.5,
+            0
+          ],
+          "size": [
+            8,
+            1,
+            7
+          ],
+          "material": "otter_belly",
+          "uv": [
+            30,
+            25
+          ]
+        }
+      ]
+    }
+  ]
+}

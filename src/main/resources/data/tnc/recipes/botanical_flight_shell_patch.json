@@ -1,0 +1,15 @@
+{
+  "type": "tnc:field_kitchen",
+  "ingredients": [
+    {
+      "item": "tnc:rainproof_pod"
+    },
+    {
+      "item": "minecraft:string"
+    }
+  ],
+  "result": {
+    "item": "minecraft:leather",
+    "count": 1
+  }
+}

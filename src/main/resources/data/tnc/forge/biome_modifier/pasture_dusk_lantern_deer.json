@@ -1,0 +1,10 @@
+{
+  "type": "forge:add_spawns",
+  "biomes": "#tnc:pasture_dusk_lantern_deer",
+  "spawners": {
+    "type": "tnc:dusk_lantern_deer",
+    "weight": 1,
+    "minCount": 1,
+    "maxCount": 2
+  }
+}

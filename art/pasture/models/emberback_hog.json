@@ -1,0 +1,547 @@
+{
+  "id": "emberback_hog",
+  "name": "暮炭野豕",
+  "animation": "hog",
+  "shadow": 0.57,
+  "texture_size": [
+    128,
+    128
+  ],
+  "coordinate_system": "Minecraft ModelPart: +Y down, forward -Z, ground y=24",
+  "parts": [
+    {
+      "name": "body",
+      "parent": "root",
+      "pivot": [
+        0,
+        14,
+        2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -5,
+            -4,
+            -10
+          ],
+          "size": [
+            10,
+            8,
+            21
+          ],
+          "material": "ember_hide",
+          "uv": [
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "head",
+      "parent": "root",
+      "pivot": [
+        0,
+        13,
+        -8
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -3,
+            -3,
+            -5
+          ],
+          "size": [
+            6,
+            6,
+            7
+          ],
+          "material": "ember_hide",
+          "uv": [
+            97,
+            1
+          ]
+        },
+        {
+          "position": [
+            -2,
+            -1,
+            -12
+          ],
+          "size": [
+            4,
+            3,
+            8
+          ],
+          "material": "ember_plate",
+          "uv": [
+            30,
+            31
+          ]
+        },
+        {
+          "position": [
+            -2,
+            1,
+            -13
+          ],
+          "size": [
+            4,
+            2,
+            2
+          ],
+          "material": "nose",
+          "uv": [
+            1,
+            43
+          ]
+        },
+        {
+          "position": [
+            -3.3,
+            -1,
+            -5.5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "eye",
+          "uv": [
+            116,
+            31
+          ]
+        },
+        {
+          "position": [
+            2.3,
+            -1,
+            -5.5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "eye",
+          "uv": [
+            116,
+            31
+          ]
+        },
+        {
+          "position": [
+            -4,
+            -5,
+            0
+          ],
+          "size": [
+            2,
+            3,
+            4
+          ],
+          "material": "ember_plate",
+          "uv": [
+            81,
+            31
+          ]
+        },
+        {
+          "position": [
+            -3,
+            2,
+            -9
+          ],
+          "size": [
+            1,
+            2,
+            4
+          ],
+          "material": "ivory",
+          "uv": [
+            94,
+            31
+          ]
+        },
+        {
+          "position": [
+            2,
+            -5,
+            0
+          ],
+          "size": [
+            2,
+            3,
+            4
+          ],
+          "material": "ember_plate",
+          "uv": [
+            81,
+            31
+          ]
+        },
+        {
+          "position": [
+            1,
+            2,
+            -9
+          ],
+          "size": [
+            1,
+            2,
+            4
+          ],
+          "material": "ivory",
+          "uv": [
+            94,
+            31
+          ]
+        }
+      ]
+    },
+    {
+      "name": "vent_l",
+      "parent": "body",
+      "pivot": [
+        -3,
+        -3,
+        -2
+      ],
+      "rotation": [
+        0,
+        0,
+        -0.35
+      ],
+      "boxes": [
+        {
+          "position": [
+            -2,
+            -4,
+            -5
+          ],
+          "size": [
+            4,
+            5,
+            12
+          ],
+          "material": "ember_plate",
+          "uv": [
+            64,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "vent_r",
+      "parent": "body",
+      "pivot": [
+        3,
+        -3,
+        -2
+      ],
+      "rotation": [
+        0,
+        0,
+        0.35
+      ],
+      "boxes": [
+        {
+          "position": [
+            -2,
+            -4,
+            -5
+          ],
+          "size": [
+            4,
+            5,
+            12
+          ],
+          "material": "ember_plate",
+          "uv": [
+            64,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "resource_heat",
+      "parent": "body",
+      "pivot": [
+        0,
+        -4,
+        1
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -2,
+            -1,
+            -5
+          ],
+          "size": [
+            4,
+            1,
+            10
+          ],
+          "material": "warm_glow",
+          "uv": [
+            1,
+            31
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_fl",
+      "parent": "root",
+      "pivot": [
+        -3.7,
+        18,
+        -5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1.0,
+            0,
+            -1.0
+          ],
+          "size": [
+            2,
+            6,
+            2
+          ],
+          "material": "ember_hide",
+          "uv": [
+            72,
+            31
+          ]
+        },
+        {
+          "position": [
+            -1.0,
+            4,
+            -1.5
+          ],
+          "size": [
+            2,
+            2,
+            3
+          ],
+          "material": "hoof",
+          "uv": [
+            105,
+            31
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_fr",
+      "parent": "root",
+      "pivot": [
+        3.7,
+        18,
+        -5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1.0,
+            0,
+            -1.0
+          ],
+          "size": [
+            2,
+            6,
+            2
+          ],
+          "material": "ember_hide",
+          "uv": [
+            72,
+            31
+          ]
+        },
+        {
+          "position": [
+            -1.0,
+            4,
+            -1.5
+          ],
+          "size": [
+            2,
+            2,
+            3
+          ],
+          "material": "hoof",
+          "uv": [
+            105,
+            31
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_bl",
+      "parent": "root",
+      "pivot": [
+        -3.7,
+        18,
+        9
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1.0,
+            0,
+            -1.0
+          ],
+          "size": [
+            2,
+            6,
+            2
+          ],
+          "material": "ember_hide",
+          "uv": [
+            72,
+            31
+          ]
+        },
+        {
+          "position": [
+            -1.0,
+            4,
+            -1.5
+          ],
+          "size": [
+            2,
+            2,
+            3
+          ],
+          "material": "hoof",
+          "uv": [
+            105,
+            31
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_br",
+      "parent": "root",
+      "pivot": [
+        3.7,
+        18,
+        9
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1.0,
+            0,
+            -1.0
+          ],
+          "size": [
+            2,
+            6,
+            2
+          ],
+          "material": "ember_hide",
+          "uv": [
+            72,
+            31
+          ]
+        },
+        {
+          "position": [
+            -1.0,
+            4,
+            -1.5
+          ],
+          "size": [
+            2,
+            2,
+            3
+          ],
+          "material": "hoof",
+          "uv": [
+            105,
+            31
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tail",
+      "parent": "body",
+      "pivot": [
+        0,
+        0,
+        11
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            0,
+            0
+          ],
+          "size": [
+            2,
+            2,
+            6
+          ],
+          "material": "ember_plate",
+          "uv": [
+            55,
+            31
+          ]
+        }
+      ]
+    }
+  ]
+}

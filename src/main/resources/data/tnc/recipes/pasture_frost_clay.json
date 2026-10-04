@@ -1,0 +1,24 @@
+{
+  "type": "tnc:mana_forging",
+  "category": "husbandry",
+  "mana": 20,
+  "work_ticks": 120,
+  "ingredients": [
+    {
+      "item": "tnc:frost_bone",
+      "count": 1
+    },
+    {
+      "item": "minecraft:clay_ball",
+      "count": 2
+    },
+    {
+      "item": "minecraft:sand",
+      "count": 1
+    }
+  ],
+  "result": {
+    "item": "tnc:insulating_forge_clay",
+    "count": 2
+  }
+}

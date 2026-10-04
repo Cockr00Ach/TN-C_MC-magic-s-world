@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "age=0": {
+      "model": "tnc:block/night_gourd_crop_0"
+    },
+    "age=1": {
+      "model": "tnc:block/night_gourd_crop_1"
+    },
+    "age=2": {
+      "model": "tnc:block/night_gourd_crop_2"
+    },
+    "age=3": {
+      "model": "tnc:block/night_gourd_crop_3"
+    },
+    "age=4": {
+      "model": "tnc:block/night_gourd_crop_4"
+    },
+    "age=5": {
+      "model": "tnc:block/night_gourd_crop_5"
+    },
+    "age=6": {
+      "model": "tnc:block/night_gourd_crop_6"
+    },
+    "age=7": {
+      "model": "tnc:block/night_gourd_crop_7"
+    }
+  }
+}

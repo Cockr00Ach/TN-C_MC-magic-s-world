@@ -1,6 +1,6 @@
 # TN-C 整合包工作区
 
-在这里编辑整合包**可以改的部分**。`mods/`（GB 级 jar）和存档不进来。
+在这里编辑整合包**可以改的部分**。基础 `mods/`（GB 级 jar）只保留本地副本；本项目新增的两个模组会单独纳入版本库。
 
 ## 目录约定
 
@@ -53,7 +53,7 @@ kubejs  config  defaultconfigs  local  data
 tlm_custom_pack  vaultpatcher  hotai  immersive_furniture
 ```
 
-**绝不碰**：`mods` `saves` `logs` `backups` `xaero` `resourcepacks` `shaderpacks`
+**基础环境不参与同步**：除本项目明确跟踪的两个新增模组外，`mods`、`saves`、`logs`、`backups`、`xaero`、`resourcepacks`、`shaderpacks` 均不参与同步。
 
 ## 归档
 
@@ -90,7 +90,11 @@ tlm_custom_pack  vaultpatcher  hotai  immersive_furniture
 并把归档的**闪现 7 个文件**重放回 `kubejs\`（照 `archive/blink-spell/README.md`）。
 仍未搬：`hotai`、`immersive_furniture`、`local`、`data`。
 
-另外把 **`mods\touhoulittlemaid-1.5.2-forge+mc1.20.1.jar` 装回了新实例**（魔改版把它删了，
-而我们的 `tnc_pet` 女仆模型包需要它）。⚠️ **`mods` 目录不参与同步** —— 这类改动只在游戏包里。
+当前仓库的本地 `mods` 目录由原始实例的 280 个模组复制而来，并额外加入：
+
+- `touhoulittlemaid-1.5.2-forge+mc1.20.1.jar`
+- `tnc-1.0.0.jar`
+
+基础 280 个模组不进入版本库；以上两个新增模组单独跟踪。
 
 **`mods\.connector`（信雅互联缓存）被有意剔除**，首次启动会自动重建，那一次启动会比较慢，属正常。

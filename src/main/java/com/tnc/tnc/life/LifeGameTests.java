@@ -26,9 +26,10 @@ public final class LifeGameTests {
     @GameTest(template="building_test_empty",batch="farm",timeoutTicks=100)
     public static void actualFarmCastHasBoundedGrowthManaCostAndPersistentCooldown(GameTestHelper h){
         var p=AdventureGameTests.player(h);var center=h.absolutePos(new net.minecraft.core.BlockPos(2,2,2));
-        // Other batches can leave tall structures around this fixture. Supply real light
-        // before planting so crops survive without depending on an unobstructed sky.
-        for(int x:new int[]{-2,2})for(int z:new int[]{-2,2})h.getLevel().setBlockAndUpdate(center.offset(x,1,z),net.minecraft.world.level.block.Blocks.GLOWSTONE.defaultBlockState());
+        // The four corner lights remain inside the 5x5x5 fixture and sit two
+        // blocks above the crops: one air gap avoids shading the wheat below.
+        for(int x:new int[]{-2,2})for(int z:new int[]{-2,2})
+            h.getLevel().setBlockAndUpdate(center.offset(x,2,z),net.minecraft.world.level.block.Blocks.GLOWSTONE.defaultBlockState());
         h.runAfterDelay(5,()->{
         for(int x=-2;x<=2;x++)for(int z=-2;z<=2;z++){
             var pos=center.offset(x,0,z);h.getLevel().setBlockAndUpdate(pos.below(),net.minecraft.world.level.block.Blocks.FARMLAND.defaultBlockState().setValue(net.minecraft.world.level.block.FarmBlock.MOISTURE,7));h.getLevel().setBlockAndUpdate(pos,net.minecraft.world.level.block.Blocks.WHEAT.defaultBlockState());

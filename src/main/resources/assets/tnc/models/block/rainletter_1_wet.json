@@ -1,0 +1,206 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "wood": "tnc:block/eco_wood",
+    "wetleaf": "tnc:block/eco_rain_leaf",
+    "dryleaf": "tnc:block/eco_rain_leaf_dry",
+    "wetberry": "tnc:block/eco_berry",
+    "dryberry": "tnc:block/eco_berry_dry"
+  },
+  "elements": [
+    {
+      "from": [
+        7,
+        0,
+        7
+      ],
+      "to": [
+        9,
+        6,
+        9
+      ],
+      "faces": {
+        "down": {
+          "texture": "#wood"
+        },
+        "up": {
+          "texture": "#wood"
+        },
+        "north": {
+          "texture": "#wood"
+        },
+        "south": {
+          "texture": "#wood"
+        },
+        "west": {
+          "texture": "#wood"
+        },
+        "east": {
+          "texture": "#wood"
+        }
+      }
+    },
+    {
+      "from": [
+        5,
+        5,
+        5
+      ],
+      "to": [
+        11,
+        7,
+        11
+      ],
+      "faces": {
+        "down": {
+          "texture": "#wetleaf"
+        },
+        "up": {
+          "texture": "#wetleaf"
+        },
+        "north": {
+          "texture": "#wetleaf"
+        },
+        "south": {
+          "texture": "#wetleaf"
+        },
+        "west": {
+          "texture": "#wetleaf"
+        },
+        "east": {
+          "texture": "#wetleaf"
+        }
+      }
+    },
+    {
+      "from": [
+        4,
+        3,
+        7
+      ],
+      "to": [
+        8,
+        4,
+        9
+      ],
+      "faces": {
+        "down": {
+          "texture": "#wood"
+        },
+        "up": {
+          "texture": "#wood"
+        },
+        "north": {
+          "texture": "#wood"
+        },
+        "south": {
+          "texture": "#wood"
+        },
+        "west": {
+          "texture": "#wood"
+        },
+        "east": {
+          "texture": "#wood"
+        }
+      }
+    },
+    {
+      "from": [
+        8,
+        4,
+        7
+      ],
+      "to": [
+        12,
+        5,
+        9
+      ],
+      "faces": {
+        "down": {
+          "texture": "#wood"
+        },
+        "up": {
+          "texture": "#wood"
+        },
+        "north": {
+          "texture": "#wood"
+        },
+        "south": {
+          "texture": "#wood"
+        },
+        "west": {
+          "texture": "#wood"
+        },
+        "east": {
+          "texture": "#wood"
+        }
+      }
+    },
+    {
+      "from": [
+        3,
+        3,
+        6
+      ],
+      "to": [
+        7,
+        5,
+        10
+      ],
+      "faces": {
+        "down": {
+          "texture": "#wetleaf"
+        },
+        "up": {
+          "texture": "#wetleaf"
+        },
+        "north": {
+          "texture": "#wetleaf"
+        },
+        "south": {
+          "texture": "#wetleaf"
+        },
+        "west": {
+          "texture": "#wetleaf"
+        },
+        "east": {
+          "texture": "#wetleaf"
+        }
+      }
+    },
+    {
+      "from": [
+        9,
+        4,
+        6
+      ],
+      "to": [
+        13,
+        6,
+        10
+      ],
+      "faces": {
+        "down": {
+          "texture": "#wetleaf"
+        },
+        "up": {
+          "texture": "#wetleaf"
+        },
+        "north": {
+          "texture": "#wetleaf"
+        },
+        "south": {
+          "texture": "#wetleaf"
+        },
+        "west": {
+          "texture": "#wetleaf"
+        },
+        "east": {
+          "texture": "#wetleaf"
+        }
+      }
+    }
+  ]
+}

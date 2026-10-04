@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/leaves",
+  "textures": {
+    "all": "tnc:block/sky_vine_leaf"
+  }
+}

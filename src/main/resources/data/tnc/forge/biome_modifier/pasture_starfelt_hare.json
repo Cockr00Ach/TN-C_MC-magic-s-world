@@ -1,0 +1,10 @@
+{
+  "type": "forge:add_spawns",
+  "biomes": "#tnc:pasture_starfelt_hare",
+  "spawners": {
+    "type": "tnc:starfelt_hare",
+    "weight": 3,
+    "minCount": 2,
+    "maxCount": 4
+  }
+}

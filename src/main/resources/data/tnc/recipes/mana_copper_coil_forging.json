@@ -1,0 +1,11 @@
+{
+  "type": "tnc:mana_forging",
+  "category": "materials",
+  "mana": 40,
+  "work_ticks": 80,
+  "ingredients": [
+    {"item": "minecraft:copper_ingot", "count": 2},
+    {"item": "minecraft:amethyst_shard", "count": 1}
+  ],
+  "result": {"item": "tnc:mana_copper_coil", "count": 1}
+}

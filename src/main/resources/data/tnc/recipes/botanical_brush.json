@@ -1,0 +1,18 @@
+{
+  "type": "tnc:field_kitchen",
+  "ingredients": [
+    {
+      "item": "tnc:honey_powder"
+    },
+    {
+      "item": "minecraft:stick"
+    },
+    {
+      "item": "minecraft:feather"
+    }
+  ],
+  "result": {
+    "item": "tnc:pollination_brush",
+    "count": 1
+  }
+}

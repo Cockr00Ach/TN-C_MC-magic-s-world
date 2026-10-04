@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["CNC", "N N", "CNC"],
+  "key": {"C": {"item": "minecraft:copper_ingot"}, "N": {"item": "minecraft:iron_nugget"}},
+  "result": {"item": "tnc:forge_copper_frame", "count": 4}
+}

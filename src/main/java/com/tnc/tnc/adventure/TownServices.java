@@ -136,6 +136,7 @@ public final class TownServices {
         if(!(e.getEntity() instanceof ServerPlayer p)||!atBoard(p)||!e.getPos().equals(board(p.serverLevel())))return;
         AdventureService.milestone(p,"visited_board");
         if(!AdventureService.profile(p).registered()){e.setCanceled(true);p.sendSystemMessage(Component.literal("先与协会接待员艾琳登记，再使用委托栏。"));}
+        else if(p.isShiftKeyDown()){e.setCanceled(true);BossCommissions.visitBoard(p);}
     }
     private static boolean profileReady(ServerPlayer p){return atBoard(p)&&AdventureService.profile(p).registered();}
 }

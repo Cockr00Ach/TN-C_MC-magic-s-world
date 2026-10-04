@@ -1,0 +1,612 @@
+{
+  "id": "tideback_newt",
+  "name": "潮背鳄螈",
+  "animation": "newt",
+  "shadow": 0.55,
+  "texture_size": [
+    128,
+    128
+  ],
+  "coordinate_system": "Minecraft ModelPart: +Y down, forward -Z, ground y=24",
+  "parts": [
+    {
+      "name": "body",
+      "parent": "root",
+      "pivot": [
+        0,
+        20,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -5,
+            -3,
+            -9
+          ],
+          "size": [
+            10,
+            5,
+            20
+          ],
+          "material": "tide_hide",
+          "uv": [
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "head",
+      "parent": "root",
+      "pivot": [
+        0,
+        19,
+        -10
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -6,
+            -2,
+            -6
+          ],
+          "size": [
+            12,
+            4,
+            8
+          ],
+          "material": "tide_hide",
+          "uv": [
+            1,
+            27
+          ]
+        },
+        {
+          "position": [
+            -5,
+            1,
+            -6
+          ],
+          "size": [
+            10,
+            1,
+            7
+          ],
+          "material": "tide_fin",
+          "uv": [
+            67,
+            27
+          ]
+        },
+        {
+          "position": [
+            -6.0,
+            -2,
+            -4.5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "eye",
+          "uv": [
+            112,
+            1
+          ]
+        },
+        {
+          "position": [
+            5.0,
+            -2,
+            -4.5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "eye",
+          "uv": [
+            112,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "resource_sac0",
+      "parent": "body",
+      "pivot": [
+        0,
+        -3,
+        -6
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -3,
+            -2,
+            -2
+          ],
+          "size": [
+            6,
+            3,
+            4
+          ],
+          "material": "water_glow",
+          "uv": [
+            102,
+            27
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_fl",
+      "parent": "root",
+      "pivot": [
+        -4.5,
+        21,
+        -6
+      ],
+      "rotation": [
+        0,
+        -0.25,
+        0.32
+      ],
+      "boxes": [
+        {
+          "position": [
+            -4,
+            0,
+            -1
+          ],
+          "size": [
+            5,
+            2,
+            3
+          ],
+          "material": "tide_hide",
+          "uv": [
+            18,
+            40
+          ]
+        },
+        {
+          "position": [
+            -6,
+            1,
+            -2
+          ],
+          "size": [
+            3,
+            1,
+            5
+          ],
+          "material": "tide_fin",
+          "uv": [
+            1,
+            40
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_fr",
+      "parent": "root",
+      "pivot": [
+        4.5,
+        21,
+        -6
+      ],
+      "rotation": [
+        0,
+        0.25,
+        -0.32
+      ],
+      "boxes": [
+        {
+          "position": [
+            0,
+            0,
+            -1
+          ],
+          "size": [
+            5,
+            2,
+            3
+          ],
+          "material": "tide_hide",
+          "uv": [
+            18,
+            40
+          ]
+        },
+        {
+          "position": [
+            4,
+            1,
+            -2
+          ],
+          "size": [
+            3,
+            1,
+            5
+          ],
+          "material": "tide_fin",
+          "uv": [
+            1,
+            40
+          ]
+        }
+      ]
+    },
+    {
+      "name": "resource_sac1",
+      "parent": "body",
+      "pivot": [
+        0,
+        -3,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -3,
+            -2,
+            -2
+          ],
+          "size": [
+            6,
+            3,
+            4
+          ],
+          "material": "water_glow",
+          "uv": [
+            102,
+            27
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_ml",
+      "parent": "root",
+      "pivot": [
+        -4.5,
+        21,
+        0
+      ],
+      "rotation": [
+        0,
+        -0.25,
+        0.32
+      ],
+      "boxes": [
+        {
+          "position": [
+            -4,
+            0,
+            -1
+          ],
+          "size": [
+            5,
+            2,
+            3
+          ],
+          "material": "tide_hide",
+          "uv": [
+            18,
+            40
+          ]
+        },
+        {
+          "position": [
+            -6,
+            1,
+            -2
+          ],
+          "size": [
+            3,
+            1,
+            5
+          ],
+          "material": "tide_fin",
+          "uv": [
+            1,
+            40
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_mr",
+      "parent": "root",
+      "pivot": [
+        4.5,
+        21,
+        0
+      ],
+      "rotation": [
+        0,
+        0.25,
+        -0.32
+      ],
+      "boxes": [
+        {
+          "position": [
+            0,
+            0,
+            -1
+          ],
+          "size": [
+            5,
+            2,
+            3
+          ],
+          "material": "tide_hide",
+          "uv": [
+            18,
+            40
+          ]
+        },
+        {
+          "position": [
+            4,
+            1,
+            -2
+          ],
+          "size": [
+            3,
+            1,
+            5
+          ],
+          "material": "tide_fin",
+          "uv": [
+            1,
+            40
+          ]
+        }
+      ]
+    },
+    {
+      "name": "resource_sac2",
+      "parent": "body",
+      "pivot": [
+        0,
+        -3,
+        6
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -3,
+            -2,
+            -2
+          ],
+          "size": [
+            6,
+            3,
+            4
+          ],
+          "material": "water_glow",
+          "uv": [
+            102,
+            27
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_bl",
+      "parent": "root",
+      "pivot": [
+        -4.5,
+        21,
+        6
+      ],
+      "rotation": [
+        0,
+        -0.25,
+        0.32
+      ],
+      "boxes": [
+        {
+          "position": [
+            -4,
+            0,
+            -1
+          ],
+          "size": [
+            5,
+            2,
+            3
+          ],
+          "material": "tide_hide",
+          "uv": [
+            18,
+            40
+          ]
+        },
+        {
+          "position": [
+            -6,
+            1,
+            -2
+          ],
+          "size": [
+            3,
+            1,
+            5
+          ],
+          "material": "tide_fin",
+          "uv": [
+            1,
+            40
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_br",
+      "parent": "root",
+      "pivot": [
+        4.5,
+        21,
+        6
+      ],
+      "rotation": [
+        0,
+        0.25,
+        -0.32
+      ],
+      "boxes": [
+        {
+          "position": [
+            0,
+            0,
+            -1
+          ],
+          "size": [
+            5,
+            2,
+            3
+          ],
+          "material": "tide_hide",
+          "uv": [
+            18,
+            40
+          ]
+        },
+        {
+          "position": [
+            4,
+            1,
+            -2
+          ],
+          "size": [
+            3,
+            1,
+            5
+          ],
+          "material": "tide_fin",
+          "uv": [
+            1,
+            40
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tail",
+      "parent": "body",
+      "pivot": [
+        0,
+        0,
+        11
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -3,
+            -2,
+            0
+          ],
+          "size": [
+            6,
+            4,
+            9
+          ],
+          "material": "tide_hide",
+          "uv": [
+            62,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tail_tip",
+      "parent": "tail",
+      "pivot": [
+        0,
+        0,
+        8
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -2,
+            -2,
+            0
+          ],
+          "size": [
+            4,
+            3,
+            8
+          ],
+          "material": "tide_fin",
+          "uv": [
+            42,
+            27
+          ]
+        },
+        {
+          "position": [
+            -1,
+            -4,
+            1
+          ],
+          "size": [
+            2,
+            6,
+            7
+          ],
+          "material": "tide_fin",
+          "uv": [
+            93,
+            1
+          ]
+        }
+      ]
+    }
+  ]
+}

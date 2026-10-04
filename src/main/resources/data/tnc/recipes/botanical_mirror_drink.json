@@ -1,0 +1,21 @@
+{
+  "type": "tnc:field_kitchen",
+  "ingredients": [
+    {
+      "item": "tnc:mirror_dew"
+    },
+    {
+      "item": "tnc:mirror_dew"
+    },
+    {
+      "item": "tnc:rainletter_berry"
+    },
+    {
+      "item": "minecraft:glass_bottle"
+    }
+  ],
+  "result": {
+    "item": "tnc:mirror_lotus_drink",
+    "count": 1
+  }
+}

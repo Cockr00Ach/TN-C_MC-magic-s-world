@@ -85,6 +85,13 @@ minecraft {
         client {
             // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
             property 'forge.enabledGameTestNamespaces', mod_id
+            if (project.hasProperty('ecologyClientAudit')) {
+                workingDirectory project.file('run-client-ecology-audit')
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+                property 'tnc.ecologyClientAudit', 'true'
+                property 'tnc.ecologyClientAuditOutput', file('work/living-ecology-client-audit.json').absolutePath
+            }
         }
 
         server {

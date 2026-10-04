@@ -18,6 +18,11 @@ public final class LifeSavedData extends SavedData {
         public int farmTier;
         public long farmCooldown;
         public long nextMealTick;
+        public String campDimension="";
+        public long campPosition;
+        public long campBloomDay=-1;
+        public int campBloomCount;
+        public final List<CompoundTag> homewardFlowers=new ArrayList<>();
     }
     public static LifeSavedData load(CompoundTag root) {
         var d=new LifeSavedData();for(Tag v:root.getList("Accounts",10)) {
@@ -26,6 +31,10 @@ public final class LifeSavedData extends SavedData {
             for(Tag s:t.getList("Tasted",8))a.tasted.add(s.getAsString());for(Tag s:t.getList("Delicacies",8))a.delicacies.add(s.getAsString());
             a.farmTier=Math.max(0,Math.min(3,t.getInt("FarmTier")));a.farmCooldown=Math.max(0,t.getLong("FarmCooldown"));
             a.nextMealTick=Math.max(0,t.getLong("NextMealTick"));
+            a.campDimension=t.getString("CampDimension");a.campPosition=t.getLong("CampPosition");
+            a.campBloomDay=t.contains("CampBloomDay")?t.getLong("CampBloomDay"):-1;
+            a.campBloomCount=Math.max(0,Math.min(3,t.getInt("CampBloomCount")));
+            for(Tag entry:t.getList("HomewardFlowers",10))if(a.homewardFlowers.size()<256)a.homewardFlowers.add(((CompoundTag)entry).copy());
         }return d;
     }
     @Override public CompoundTag save(CompoundTag root) {
@@ -33,7 +42,10 @@ public final class LifeSavedData extends SavedData {
             var t=new CompoundTag();t.putUUID("UUID",id);var slots=new ListTag();for(int i=0;i<7;i++)if(!a.bag.getItem(i).isEmpty()){var s=a.bag.getItem(i).save(new CompoundTag());s.putInt("Slot",i);slots.add(s);}t.put("Bag",slots);
             var tasted=new ListTag();a.tasted.forEach(s->tasted.add(StringTag.valueOf(s)));t.put("Tasted",tasted);
             var delicacies=new ListTag();a.delicacies.forEach(s->delicacies.add(StringTag.valueOf(s)));t.put("Delicacies",delicacies);
-            t.putInt("FarmTier",a.farmTier);t.putLong("FarmCooldown",a.farmCooldown);t.putLong("NextMealTick",a.nextMealTick);list.add(t);
+            t.putInt("FarmTier",a.farmTier);t.putLong("FarmCooldown",a.farmCooldown);t.putLong("NextMealTick",a.nextMealTick);
+            t.putString("CampDimension",a.campDimension);t.putLong("CampPosition",a.campPosition);
+            t.putLong("CampBloomDay",a.campBloomDay);t.putInt("CampBloomCount",a.campBloomCount);
+            var flowers=new ListTag();a.homewardFlowers.forEach(f->flowers.add(f.copy()));t.put("HomewardFlowers",flowers);list.add(t);
         });root.put("Accounts",list);return root;
     }
 }

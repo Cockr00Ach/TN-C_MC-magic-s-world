@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "blooming=false": {
+      "model": "tnc:block/homeward_flower_bud"
+    },
+    "blooming=true": {
+      "model": "tnc:block/homeward_flower_bloom"
+    }
+  }
+}

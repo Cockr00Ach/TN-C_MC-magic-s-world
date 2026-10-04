@@ -1,0 +1,880 @@
+{
+  "id": "wirecall_lizard",
+  "name": "鸣线蜥",
+  "animation": "lizard",
+  "shadow": 0.43,
+  "texture_size": [
+    128,
+    128
+  ],
+  "coordinate_system": "Minecraft ModelPart: +Y down, forward -Z, ground y=24",
+  "parts": [
+    {
+      "name": "body",
+      "parent": "root",
+      "pivot": [
+        0,
+        21,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -3,
+            -2,
+            -7
+          ],
+          "size": [
+            6,
+            4,
+            15
+          ],
+          "material": "lizard_skin",
+          "uv": [
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "head",
+      "parent": "root",
+      "pivot": [
+        0,
+        20,
+        -7
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -3,
+            -2,
+            -4
+          ],
+          "size": [
+            6,
+            4,
+            5
+          ],
+          "material": "lizard_skin",
+          "uv": [
+            44,
+            1
+          ]
+        },
+        {
+          "position": [
+            -2,
+            0,
+            -6
+          ],
+          "size": [
+            4,
+            2,
+            3
+          ],
+          "material": "lizard_ridge",
+          "uv": [
+            18,
+            21
+          ]
+        },
+        {
+          "position": [
+            -3.2,
+            -1,
+            -4
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "eye",
+          "uv": [
+            57,
+            21
+          ]
+        },
+        {
+          "position": [
+            2.2,
+            -1,
+            -4
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "eye",
+          "uv": [
+            57,
+            21
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ridge_l0",
+      "parent": "body",
+      "pivot": [
+        -2,
+        -2,
+        -5
+      ],
+      "rotation": [
+        0,
+        0,
+        -0.25
+      ],
+      "boxes": [
+        {
+          "position": [
+            -0.5,
+            -3,
+            -1
+          ],
+          "size": [
+            1,
+            4,
+            2
+          ],
+          "material": "lizard_ridge",
+          "uv": [
+            112,
+            1
+          ]
+        },
+        {
+          "position": [
+            -0.5,
+            -3,
+            -1.5
+          ],
+          "size": [
+            1,
+            2,
+            1
+          ],
+          "material": "electric_glow",
+          "uv": [
+            119,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ridge_l1",
+      "parent": "body",
+      "pivot": [
+        -2,
+        -2,
+        -1
+      ],
+      "rotation": [
+        0,
+        0,
+        -0.25
+      ],
+      "boxes": [
+        {
+          "position": [
+            -0.5,
+            -3,
+            -1
+          ],
+          "size": [
+            1,
+            4,
+            2
+          ],
+          "material": "lizard_ridge",
+          "uv": [
+            112,
+            1
+          ]
+        },
+        {
+          "position": [
+            -0.5,
+            -3,
+            -1.5
+          ],
+          "size": [
+            1,
+            2,
+            1
+          ],
+          "material": "electric_glow",
+          "uv": [
+            119,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ridge_l2",
+      "parent": "body",
+      "pivot": [
+        -2,
+        -2,
+        3
+      ],
+      "rotation": [
+        0,
+        0,
+        -0.25
+      ],
+      "boxes": [
+        {
+          "position": [
+            -0.5,
+            -3,
+            -1
+          ],
+          "size": [
+            1,
+            4,
+            2
+          ],
+          "material": "lizard_ridge",
+          "uv": [
+            112,
+            1
+          ]
+        },
+        {
+          "position": [
+            -0.5,
+            -3,
+            -1.5
+          ],
+          "size": [
+            1,
+            2,
+            1
+          ],
+          "material": "electric_glow",
+          "uv": [
+            119,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ridge_l3",
+      "parent": "body",
+      "pivot": [
+        -2,
+        -2,
+        7
+      ],
+      "rotation": [
+        0,
+        0,
+        -0.25
+      ],
+      "boxes": [
+        {
+          "position": [
+            -0.5,
+            -3,
+            -1
+          ],
+          "size": [
+            1,
+            4,
+            2
+          ],
+          "material": "lizard_ridge",
+          "uv": [
+            112,
+            1
+          ]
+        },
+        {
+          "position": [
+            -0.5,
+            -3,
+            -1.5
+          ],
+          "size": [
+            1,
+            2,
+            1
+          ],
+          "material": "electric_glow",
+          "uv": [
+            119,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_fl",
+      "parent": "root",
+      "pivot": [
+        -2.5,
+        22,
+        -4
+      ],
+      "rotation": [
+        0,
+        -0.3,
+        0.4
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            0,
+            -1
+          ],
+          "size": [
+            2,
+            1,
+            4
+          ],
+          "material": "lizard_skin",
+          "uv": [
+            33,
+            21
+          ]
+        },
+        {
+          "position": [
+            -2,
+            1,
+            -2
+          ],
+          "size": [
+            4,
+            1,
+            4
+          ],
+          "material": "lizard_ridge",
+          "uv": [
+            1,
+            21
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_bl",
+      "parent": "root",
+      "pivot": [
+        -2.5,
+        22,
+        6
+      ],
+      "rotation": [
+        0,
+        -0.3,
+        0.4
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            0,
+            -1
+          ],
+          "size": [
+            2,
+            1,
+            4
+          ],
+          "material": "lizard_skin",
+          "uv": [
+            33,
+            21
+          ]
+        },
+        {
+          "position": [
+            -2,
+            1,
+            -2
+          ],
+          "size": [
+            4,
+            1,
+            4
+          ],
+          "material": "lizard_ridge",
+          "uv": [
+            1,
+            21
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ridge_r0",
+      "parent": "body",
+      "pivot": [
+        2,
+        -2,
+        -5
+      ],
+      "rotation": [
+        0,
+        0,
+        0.25
+      ],
+      "boxes": [
+        {
+          "position": [
+            -0.5,
+            -3,
+            -1
+          ],
+          "size": [
+            1,
+            4,
+            2
+          ],
+          "material": "lizard_ridge",
+          "uv": [
+            112,
+            1
+          ]
+        },
+        {
+          "position": [
+            -0.5,
+            -3,
+            -1.5
+          ],
+          "size": [
+            1,
+            2,
+            1
+          ],
+          "material": "electric_glow",
+          "uv": [
+            119,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ridge_r1",
+      "parent": "body",
+      "pivot": [
+        2,
+        -2,
+        -1
+      ],
+      "rotation": [
+        0,
+        0,
+        0.25
+      ],
+      "boxes": [
+        {
+          "position": [
+            -0.5,
+            -3,
+            -1
+          ],
+          "size": [
+            1,
+            4,
+            2
+          ],
+          "material": "lizard_ridge",
+          "uv": [
+            112,
+            1
+          ]
+        },
+        {
+          "position": [
+            -0.5,
+            -3,
+            -1.5
+          ],
+          "size": [
+            1,
+            2,
+            1
+          ],
+          "material": "electric_glow",
+          "uv": [
+            119,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ridge_r2",
+      "parent": "body",
+      "pivot": [
+        2,
+        -2,
+        3
+      ],
+      "rotation": [
+        0,
+        0,
+        0.25
+      ],
+      "boxes": [
+        {
+          "position": [
+            -0.5,
+            -3,
+            -1
+          ],
+          "size": [
+            1,
+            4,
+            2
+          ],
+          "material": "lizard_ridge",
+          "uv": [
+            112,
+            1
+          ]
+        },
+        {
+          "position": [
+            -0.5,
+            -3,
+            -1.5
+          ],
+          "size": [
+            1,
+            2,
+            1
+          ],
+          "material": "electric_glow",
+          "uv": [
+            119,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ridge_r3",
+      "parent": "body",
+      "pivot": [
+        2,
+        -2,
+        7
+      ],
+      "rotation": [
+        0,
+        0,
+        0.25
+      ],
+      "boxes": [
+        {
+          "position": [
+            -0.5,
+            -3,
+            -1
+          ],
+          "size": [
+            1,
+            4,
+            2
+          ],
+          "material": "lizard_ridge",
+          "uv": [
+            112,
+            1
+          ]
+        },
+        {
+          "position": [
+            -0.5,
+            -3,
+            -1.5
+          ],
+          "size": [
+            1,
+            2,
+            1
+          ],
+          "material": "electric_glow",
+          "uv": [
+            119,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_fr",
+      "parent": "root",
+      "pivot": [
+        2.5,
+        22,
+        -4
+      ],
+      "rotation": [
+        0,
+        0.3,
+        -0.4
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            0,
+            -1
+          ],
+          "size": [
+            2,
+            1,
+            4
+          ],
+          "material": "lizard_skin",
+          "uv": [
+            33,
+            21
+          ]
+        },
+        {
+          "position": [
+            -2,
+            1,
+            -2
+          ],
+          "size": [
+            4,
+            1,
+            4
+          ],
+          "material": "lizard_ridge",
+          "uv": [
+            1,
+            21
+          ]
+        }
+      ]
+    },
+    {
+      "name": "leg_br",
+      "parent": "root",
+      "pivot": [
+        2.5,
+        22,
+        6
+      ],
+      "rotation": [
+        0,
+        0.3,
+        -0.4
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            0,
+            -1
+          ],
+          "size": [
+            2,
+            1,
+            4
+          ],
+          "material": "lizard_skin",
+          "uv": [
+            33,
+            21
+          ]
+        },
+        {
+          "position": [
+            -2,
+            1,
+            -2
+          ],
+          "size": [
+            4,
+            1,
+            4
+          ],
+          "material": "lizard_ridge",
+          "uv": [
+            1,
+            21
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tail",
+      "parent": "body",
+      "pivot": [
+        0,
+        0,
+        8
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            -1,
+            0
+          ],
+          "size": [
+            2,
+            2,
+            6
+          ],
+          "material": "lizard_skin",
+          "uv": [
+            67,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tail_tip",
+      "parent": "tail",
+      "pivot": [
+        0,
+        0,
+        5
+      ],
+      "rotation": [
+        0,
+        0.85,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            -1,
+            0
+          ],
+          "size": [
+            2,
+            2,
+            5
+          ],
+          "material": "lizard_skin",
+          "uv": [
+            84,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tail_end",
+      "parent": "tail_tip",
+      "pivot": [
+        0,
+        0,
+        4
+      ],
+      "rotation": [
+        0,
+        1.3,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -1,
+            -1,
+            0
+          ],
+          "size": [
+            2,
+            2,
+            4
+          ],
+          "material": "lizard_ridge",
+          "uv": [
+            99,
+            1
+          ]
+        },
+        {
+          "position": [
+            -2,
+            -1,
+            1
+          ],
+          "size": [
+            4,
+            1,
+            1
+          ],
+          "material": "electric_glow",
+          "uv": [
+            46,
+            21
+          ]
+        },
+        {
+          "position": [
+            -2,
+            -1,
+            2
+          ],
+          "size": [
+            4,
+            1,
+            1
+          ],
+          "material": "electric_glow",
+          "uv": [
+            46,
+            21
+          ]
+        },
+        {
+          "position": [
+            -2,
+            -1,
+            3
+          ],
+          "size": [
+            4,
+            1,
+            1
+          ],
+          "material": "electric_glow",
+          "uv": [
+            46,
+            21
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "tnc:homeward_flower_seed"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "tnc:homeward_flower_petal",
+          "conditions": [
+            {
+              "condition": "minecraft:block_state_property",
+              "block": "tnc:homeward_flower",
+              "properties": {
+                "blooming": "true"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

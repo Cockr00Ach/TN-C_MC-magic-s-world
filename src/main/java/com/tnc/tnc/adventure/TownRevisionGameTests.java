@@ -81,19 +81,22 @@ public final class TownRevisionGameTests {
         h.assertTrue(data.get("self").anchor().equals("ORIGIN")&&data.get("self").dx()==430&&data.get("cava").dx()==55&&saved.getCompound("PreviousSelf").getInt("DX")==55,"Self migrates to tavern and records old entity lookup location, keeping other manual v7 placements");
         var loaded=com.tnc.tnc.npc.NpcPlacementSavedData.load(saved);loaded.seedDefaults();h.assertTrue(loaded.save(new CompoundTag()).getCompound("PreviousSelf").getInt("DX")==55,"Pending original entity lookup survives restart without being overwritten");h.succeed();
     }
-    @GameTest(template="building_test_empty",batch="self_move",timeoutTicks=80)
+    @GameTest(template="building_test_empty",batch="self_move",timeoutTicks=200)
     public static void actualSelfMovesWithSameUuidAndNoDuplicate(GameTestHelper h){
         var l=h.getLevel();var old=h.absolutePos(new BlockPos(3,2,3));var target=old.offset(40,0,0);var forced=new ArrayList<net.minecraft.world.level.ChunkPos>();
         for(var base:List.of(old,target)){var center=new net.minecraft.world.level.ChunkPos(base);for(int x=-2;x<=2;x++)for(int z=-2;z<=2;z++){var c=new net.minecraft.world.level.ChunkPos(center.x+x,center.z+z);if(!l.getForcedChunks().contains(c.toLong())){forced.add(c);l.setChunkForced(c.x,c.z,true);}l.getChunk(c.x,c.z);}}
         l.setBlockAndUpdate(old.below(),net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
         l.setBlockAndUpdate(target.below(),net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());l.setBlockAndUpdate(target,net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());l.setBlockAndUpdate(target.above(),net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
-        var type=net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getValue(ResourceLocation.parse("tnc:self"));var npc=type.create(l);npc.moveTo(old.getX()+0.5,old.getY(),old.getZ()+0.5,0,0);l.addFreshEntity(npc);var uuid=npc.getUUID();
+        var type=net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getValue(ResourceLocation.parse("tnc:self"));
+        var original=new net.minecraft.world.entity.Entity[1];
         var tag=new CompoundTag();tag.putInt("DefaultsVersion",8);var prev=new CompoundTag();prev.putString("Anchor","ABSOLUTE");prev.putInt("DX",old.getX());prev.putInt("DY",old.getY());prev.putInt("DZ",old.getZ());tag.put("PreviousSelf",prev);
         var data=com.tnc.tnc.npc.NpcPlacementSavedData.load(tag);var placement=new com.tnc.tnc.npc.NpcPlacementSavedData.Placement("self","ABSOLUTE",target.getX(),target.getY(),target.getZ());data.put(placement);
         h.succeedWhen(()->{
+            h.assertTrue(l.isPositionEntityTicking(old)&&l.isPositionEntityTicking(target)&&forced.stream().allMatch(c->l.areEntitiesLoaded(c.toLong())),"Waiting for the original and destination entity sections before creating Self");
+            if(original[0]==null){var npc=type.create(l);npc.moveTo(old.getX()+0.5,old.getY(),old.getZ()+0.5,0,0);h.assertTrue(l.addFreshEntity(npc),"Original Self is really accepted by the loaded fixture");original[0]=npc;}
             data.ensureOne(l,placement);data.ensureOne(l,placement);var moved=com.tnc.tnc.npc.NpcPlacementSavedData.findNear(l,type,target,4);
-            h.assertTrue(moved!=null&&moved.getUUID().equals(uuid)&&l.getEntitiesOfClass(net.minecraft.world.entity.Entity.class,new net.minecraft.world.phys.AABB(target).inflate(24),e->e.getType()==type).size()==1&&!data.save(new CompoundTag()).contains("PreviousSelf"),"Original Self retains UUID and repeated ensure cannot create duplicate");
-            npc.discard();for(var c:forced)l.setChunkForced(c.x,c.z,false);
+            h.assertTrue(moved!=null&&moved.getUUID().equals(original[0].getUUID())&&l.getEntitiesOfClass(net.minecraft.world.entity.Entity.class,new net.minecraft.world.phys.AABB(target).inflate(24),e->e.getType()==type).size()==1&&!data.save(new CompoundTag()).contains("PreviousSelf"),"Original Self retains UUID and repeated ensure cannot create duplicate");
+            original[0].discard();for(var c:forced)l.setChunkForced(c.x,c.z,false);
         });
     }
     @GameTest(template="building_test_empty",timeoutTicks=40)

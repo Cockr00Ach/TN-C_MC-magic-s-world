@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [{"item": "tnc:forge_firebrick"}, {"item": "minecraft:amethyst_shard"},
+    {"item": "minecraft:copper_ingot"}, {"item": "minecraft:copper_ingot"}],
+  "result": {"item": "tnc:forge_mana_injector", "count": 1}
+}

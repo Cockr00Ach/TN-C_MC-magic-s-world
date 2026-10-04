@@ -1,0 +1,21 @@
+{
+  "type": "tnc:field_kitchen",
+  "ingredients": [
+    {
+      "item": "tnc:honey_powder"
+    },
+    {
+      "item": "tnc:honey_powder"
+    },
+    {
+      "item": "minecraft:honey_bottle"
+    },
+    {
+      "item": "tnc:road_bell_ear"
+    }
+  ],
+  "result": {
+    "item": "tnc:honey_cluster_cake",
+    "count": 2
+  }
+}

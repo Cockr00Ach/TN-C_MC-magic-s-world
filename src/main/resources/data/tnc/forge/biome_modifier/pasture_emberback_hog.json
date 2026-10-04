@@ -1,0 +1,10 @@
+{
+  "type": "forge:add_spawns",
+  "biomes": "#tnc:pasture_emberback_hog",
+  "spawners": {
+    "type": "tnc:emberback_hog",
+    "weight": 3,
+    "minCount": 2,
+    "maxCount": 4
+  }
+}

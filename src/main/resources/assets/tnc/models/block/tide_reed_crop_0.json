@@ -1,0 +1,76 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "reed": "tnc:block/eco_reed",
+    "head": "tnc:block/eco_reed_head",
+    "leaf": "tnc:block/eco_leaf"
+  },
+  "elements": [
+    {
+      "from": [
+        8,
+        0,
+        7
+      ],
+      "to": [
+        9,
+        4,
+        8
+      ],
+      "faces": {
+        "down": {
+          "texture": "#reed"
+        },
+        "up": {
+          "texture": "#reed"
+        },
+        "north": {
+          "texture": "#reed"
+        },
+        "south": {
+          "texture": "#reed"
+        },
+        "west": {
+          "texture": "#reed"
+        },
+        "east": {
+          "texture": "#reed"
+        }
+      }
+    },
+    {
+      "from": [
+        6,
+        2,
+        6
+      ],
+      "to": [
+        9,
+        3,
+        9
+      ],
+      "faces": {
+        "down": {
+          "texture": "#leaf"
+        },
+        "up": {
+          "texture": "#leaf"
+        },
+        "north": {
+          "texture": "#leaf"
+        },
+        "south": {
+          "texture": "#leaf"
+        },
+        "west": {
+          "texture": "#leaf"
+        },
+        "east": {
+          "texture": "#leaf"
+        }
+      }
+    }
+  ]
+}

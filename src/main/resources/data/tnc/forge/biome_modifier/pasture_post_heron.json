@@ -1,0 +1,10 @@
+{
+  "type": "forge:add_spawns",
+  "biomes": "#tnc:pasture_post_heron",
+  "spawners": {
+    "type": "tnc:post_heron",
+    "weight": 1,
+    "minCount": 1,
+    "maxCount": 2
+  }
+}

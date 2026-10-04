@@ -231,6 +231,83 @@
       "rarity": "COMMON",
       "timeMult": 2.0
     },
+    "tnc_food_road_bell": {
+      "type": "item",
+      "content": "tnc:road_bell_ear",
+      "amount": {
+        "min": 4,
+        "max": 12
+      },
+      "unitWorth": 170,
+      "rarity": "UNCOMMON",
+      "timeMult": 2.0
+    },
+    "tnc_food_night_gourd": {
+      "type": "item",
+      "content": "tnc:night_gourd",
+      "amount": {
+        "min": 2,
+        "max": 8
+      },
+      "unitWorth": 210,
+      "rarity": "UNCOMMON",
+      "timeMult": 2.0
+    },
+    "tnc_food_road_bell_travel_bread": {
+      "type": "item",
+      "content": "tnc:road_bell_travel_bread",
+      "amount": {
+        "min": 1,
+        "max": 4
+      },
+      "unitWorth": 320,
+      "rarity": "UNCOMMON",
+      "timeMult": 2.0
+    },
+    "tnc_food_homecoming_tea": {
+      "type": "item",
+      "content": "tnc:homecoming_tea",
+      "amount": {
+        "min": 1,
+        "max": 2
+      },
+      "unitWorth": 350,
+      "rarity": "RARE",
+      "timeMult": 2.0
+    },
+    "tnc_food_rainletter_berry": {
+      "type": "item",
+      "content": "tnc:rainletter_berry",
+      "amount": {
+        "min": 4,
+        "max": 12
+      },
+      "unitWorth": 165,
+      "rarity": "UNCOMMON",
+      "timeMult": 2.0
+    },
+    "tnc_food_hushcap_broth": {
+      "type": "item",
+      "content": "tnc:hushcap_broth",
+      "amount": {
+        "min": 1,
+        "max": 3
+      },
+      "unitWorth": 360,
+      "rarity": "UNCOMMON",
+      "timeMult": 2.0
+    },
+    "tnc_food_rainletter_cordial": {
+      "type": "item",
+      "content": "tnc:rainletter_cordial",
+      "amount": {
+        "min": 1,
+        "max": 3
+      },
+      "unitWorth": 320,
+      "rarity": "UNCOMMON",
+      "timeMult": 2.0
+    },
     "tnc_food_dried_kelp": {
       "type": "item",
       "content": "minecraft:dried_kelp",
@@ -241,6 +318,127 @@
       "unitWorth": 80,
       "rarity": "COMMON",
       "timeMult": 2.0
+    },
+    "tnc_food_star_dew_fruit": {
+      "type": "item",
+      "content": "tnc:star_dew_fruit",
+      "amount": {
+        "min": 1,
+        "max": 3
+      },
+      "unitWorth": 360,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_food_morning_honey_breakfast": {
+      "type": "item",
+      "content": "tnc:morning_honey_breakfast",
+      "amount": {
+        "min": 1,
+        "max": 3
+      },
+      "unitWorth": 360,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_food_hearth_pepper_soup": {
+      "type": "item",
+      "content": "tnc:hearth_pepper_soup",
+      "amount": {
+        "min": 1,
+        "max": 3
+      },
+      "unitWorth": 360,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_food_frost_pepper_meal": {
+      "type": "item",
+      "content": "tnc:frost_pepper_meal",
+      "amount": {
+        "min": 1,
+        "max": 3
+      },
+      "unitWorth": 360,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_food_honey_cluster_cake": {
+      "type": "item",
+      "content": "tnc:honey_cluster_cake",
+      "amount": {
+        "min": 1,
+        "max": 3
+      },
+      "unitWorth": 360,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_food_stonebarrow_hotpot": {
+      "type": "item",
+      "content": "tnc:stonebarrow_hotpot",
+      "amount": {
+        "min": 1,
+        "max": 3
+      },
+      "unitWorth": 360,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_food_emberback_stew": {
+      "type": "item",
+      "content": "tnc:emberback_stew",
+      "amount": {
+        "min": 1,
+        "max": 3
+      },
+      "unitWorth": 360,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_food_tideback_chowder": {
+      "type": "item",
+      "content": "tnc:tideback_chowder",
+      "amount": {
+        "min": 1,
+        "max": 3
+      },
+      "unitWorth": 360,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_food_frostwarm_skewer": {
+      "type": "item",
+      "content": "tnc:frostwarm_skewer",
+      "amount": {
+        "min": 1,
+        "max": 3
+      },
+      "unitWorth": 360,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_food_honeydew_casserole": {
+      "type": "item",
+      "content": "tnc:honeydew_casserole",
+      "amount": {
+        "min": 1,
+        "max": 3
+      },
+      "unitWorth": 360,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_food_starfelt_travel_roll": {
+      "type": "item",
+      "content": "tnc:starfelt_travel_roll",
+      "amount": {
+        "min": 1,
+        "max": 3
+      },
+      "unitWorth": 360,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
     }
   }
 }

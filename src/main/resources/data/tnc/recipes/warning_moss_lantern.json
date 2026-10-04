@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:lantern"
+    },
+    {
+      "item": "minecraft:copper_ingot"
+    },
+    {
+      "item": "tnc:warning_moss_flake"
+    },
+    {
+      "item": "tnc:warning_moss_flake"
+    },
+    {
+      "item": "tnc:warning_moss_flake"
+    },
+    {
+      "item": "tnc:warning_moss_flake"
+    }
+  ],
+  "result": {
+    "item": "tnc:warning_moss_lantern",
+    "count": 1
+  }
+}

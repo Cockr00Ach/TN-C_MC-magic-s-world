@@ -1,0 +1,52 @@
+{
+  "variants": {
+    "age=0,mode=0": {
+      "model": "tnc:block/dawn_disk_0_0"
+    },
+    "age=0,mode=1": {
+      "model": "tnc:block/dawn_disk_0_1"
+    },
+    "age=0,mode=2": {
+      "model": "tnc:block/dawn_disk_0_2"
+    },
+    "age=0,mode=3": {
+      "model": "tnc:block/dawn_disk_0_3"
+    },
+    "age=1,mode=0": {
+      "model": "tnc:block/dawn_disk_1_0"
+    },
+    "age=1,mode=1": {
+      "model": "tnc:block/dawn_disk_1_1"
+    },
+    "age=1,mode=2": {
+      "model": "tnc:block/dawn_disk_1_2"
+    },
+    "age=1,mode=3": {
+      "model": "tnc:block/dawn_disk_1_3"
+    },
+    "age=2,mode=0": {
+      "model": "tnc:block/dawn_disk_2_0"
+    },
+    "age=2,mode=1": {
+      "model": "tnc:block/dawn_disk_2_1"
+    },
+    "age=2,mode=2": {
+      "model": "tnc:block/dawn_disk_2_2"
+    },
+    "age=2,mode=3": {
+      "model": "tnc:block/dawn_disk_2_3"
+    },
+    "age=3,mode=0": {
+      "model": "tnc:block/dawn_disk_3_0"
+    },
+    "age=3,mode=1": {
+      "model": "tnc:block/dawn_disk_3_1"
+    },
+    "age=3,mode=2": {
+      "model": "tnc:block/dawn_disk_3_2"
+    },
+    "age=3,mode=3": {
+      "model": "tnc:block/dawn_disk_3_3"
+    }
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "stem": "tnc:block/eco_vein",
+    "leaf": "tnc:block/eco_leaf",
+    "glow": "tnc:block/eco_vein_glow",
+    "root": "tnc:block/eco_root"
+  },
+  "elements": [
+    {
+      "from": [
+        7,
+        0,
+        7
+      ],
+      "to": [
+        9,
+        4,
+        9
+      ],
+      "faces": {
+        "down": {
+          "texture": "#stem"
+        },
+        "up": {
+          "texture": "#stem"
+        },
+        "north": {
+          "texture": "#stem"
+        },
+        "south": {
+          "texture": "#stem"
+        },
+        "west": {
+          "texture": "#stem"
+        },
+        "east": {
+          "texture": "#stem"
+        }
+      }
+    },
+    {
+      "from": [
+        5,
+        0,
+        6
+      ],
+      "to": [
+        11,
+        2,
+        10
+      ],
+      "faces": {
+        "down": {
+          "texture": "#root"
+        },
+        "up": {
+          "texture": "#root"
+        },
+        "north": {
+          "texture": "#root"
+        },
+        "south": {
+          "texture": "#root"
+        },
+        "west": {
+          "texture": "#root"
+        },
+        "east": {
+          "texture": "#root"
+        }
+      }
+    }
+  ]
+}

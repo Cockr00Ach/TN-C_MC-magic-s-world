@@ -1,0 +1,596 @@
+{
+  "id": "dewbound_whale",
+  "name": "凝露浮鲸",
+  "animation": "whale",
+  "shadow": 0.71,
+  "texture_size": [
+    128,
+    128
+  ],
+  "coordinate_system": "Minecraft ModelPart: +Y down, forward -Z, ground y=24",
+  "parts": [
+    {
+      "name": "body",
+      "parent": "root",
+      "pivot": [
+        0,
+        12,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -9,
+            -6,
+            -11
+          ],
+          "size": [
+            18,
+            12,
+            22
+          ],
+          "material": "whale_skin",
+          "uv": [
+            1,
+            1
+          ]
+        },
+        {
+          "position": [
+            -7,
+            5,
+            -9
+          ],
+          "size": [
+            14,
+            2,
+            18
+          ],
+          "material": "whale_belly",
+          "uv": [
+            1,
+            36
+          ]
+        },
+        {
+          "position": [
+            -10,
+            -3,
+            -8
+          ],
+          "size": [
+            1,
+            6,
+            16
+          ],
+          "material": "whale_belly",
+          "uv": [
+            82,
+            1
+          ]
+        },
+        {
+          "position": [
+            9,
+            -3,
+            -8
+          ],
+          "size": [
+            1,
+            6,
+            16
+          ],
+          "material": "whale_belly",
+          "uv": [
+            82,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "head",
+      "parent": "root",
+      "pivot": [
+        0,
+        11,
+        -10
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -7,
+            -4,
+            -4
+          ],
+          "size": [
+            14,
+            9,
+            6
+          ],
+          "material": "whale_skin",
+          "uv": [
+            66,
+            36
+          ]
+        },
+        {
+          "position": [
+            -5,
+            3,
+            -5
+          ],
+          "size": [
+            10,
+            2,
+            4
+          ],
+          "material": "whale_belly",
+          "uv": [
+            61,
+            57
+          ]
+        },
+        {
+          "position": [
+            -7.0,
+            0,
+            -3.5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "eye",
+          "uv": [
+            1,
+            65
+          ]
+        },
+        {
+          "position": [
+            6.0,
+            0,
+            -3.5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "eye",
+          "uv": [
+            1,
+            65
+          ]
+        },
+        {
+          "position": [
+            -3,
+            3,
+            -5.5
+          ],
+          "size": [
+            6,
+            1,
+            1
+          ],
+          "material": "nose",
+          "uv": [
+            109,
+            57
+          ]
+        }
+      ]
+    },
+    {
+      "name": "fin_front_l",
+      "parent": "body",
+      "pivot": [
+        -8,
+        2,
+        -5
+      ],
+      "rotation": [
+        0,
+        -0.1,
+        -0.5
+      ],
+      "boxes": [
+        {
+          "position": [
+            -5,
+            -1,
+            -2
+          ],
+          "size": [
+            5,
+            2,
+            5
+          ],
+          "material": "whale_skin",
+          "uv": [
+            40,
+            57
+          ]
+        },
+        {
+          "position": [
+            -5,
+            -1,
+            -1
+          ],
+          "size": [
+            1,
+            2,
+            3
+          ],
+          "material": "dew_glow",
+          "uv": [
+            117,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "fin_back_l",
+      "parent": "body",
+      "pivot": [
+        -8,
+        2,
+        5
+      ],
+      "rotation": [
+        0,
+        -0.1,
+        -0.5
+      ],
+      "boxes": [
+        {
+          "position": [
+            -5,
+            -1,
+            -2
+          ],
+          "size": [
+            5,
+            2,
+            5
+          ],
+          "material": "whale_skin",
+          "uv": [
+            40,
+            57
+          ]
+        },
+        {
+          "position": [
+            -5,
+            -1,
+            -1
+          ],
+          "size": [
+            1,
+            2,
+            3
+          ],
+          "material": "dew_glow",
+          "uv": [
+            117,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "fin_front_r",
+      "parent": "body",
+      "pivot": [
+        8,
+        2,
+        -5
+      ],
+      "rotation": [
+        0,
+        0.1,
+        0.5
+      ],
+      "boxes": [
+        {
+          "position": [
+            0,
+            -1,
+            -2
+          ],
+          "size": [
+            5,
+            2,
+            5
+          ],
+          "material": "whale_skin",
+          "uv": [
+            40,
+            57
+          ]
+        },
+        {
+          "position": [
+            4,
+            -1,
+            -1
+          ],
+          "size": [
+            1,
+            2,
+            3
+          ],
+          "material": "dew_glow",
+          "uv": [
+            117,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "fin_back_r",
+      "parent": "body",
+      "pivot": [
+        8,
+        2,
+        5
+      ],
+      "rotation": [
+        0,
+        0.1,
+        0.5
+      ],
+      "boxes": [
+        {
+          "position": [
+            0,
+            -1,
+            -2
+          ],
+          "size": [
+            5,
+            2,
+            5
+          ],
+          "material": "whale_skin",
+          "uv": [
+            40,
+            57
+          ]
+        },
+        {
+          "position": [
+            4,
+            -1,
+            -1
+          ],
+          "size": [
+            1,
+            2,
+            3
+          ],
+          "material": "dew_glow",
+          "uv": [
+            117,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "pip_0",
+      "parent": "body",
+      "pivot": [
+        0,
+        -6,
+        -6
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -3,
+            -3,
+            -1
+          ],
+          "size": [
+            6,
+            3,
+            3
+          ],
+          "material": "dew_glow",
+          "uv": [
+            90,
+            57
+          ]
+        }
+      ]
+    },
+    {
+      "name": "pip_1",
+      "parent": "body",
+      "pivot": [
+        0,
+        -6,
+        -2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -3,
+            -3,
+            -1
+          ],
+          "size": [
+            6,
+            3,
+            3
+          ],
+          "material": "dew_glow",
+          "uv": [
+            90,
+            57
+          ]
+        }
+      ]
+    },
+    {
+      "name": "pip_2",
+      "parent": "body",
+      "pivot": [
+        0,
+        -6,
+        2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -3,
+            -3,
+            -1
+          ],
+          "size": [
+            6,
+            3,
+            3
+          ],
+          "material": "dew_glow",
+          "uv": [
+            90,
+            57
+          ]
+        }
+      ]
+    },
+    {
+      "name": "pip_3",
+      "parent": "body",
+      "pivot": [
+        0,
+        -6,
+        6
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -3,
+            -3,
+            -1
+          ],
+          "size": [
+            6,
+            3,
+            3
+          ],
+          "material": "dew_glow",
+          "uv": [
+            90,
+            57
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tail",
+      "parent": "body",
+      "pivot": [
+        0,
+        0,
+        11
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -3,
+            -2,
+            0
+          ],
+          "size": [
+            6,
+            4,
+            4
+          ],
+          "material": "whale_skin",
+          "uv": [
+            107,
+            36
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tail_tip",
+      "parent": "tail",
+      "pivot": [
+        0,
+        0,
+        3
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "position": [
+            -7,
+            -1,
+            0
+          ],
+          "size": [
+            14,
+            2,
+            5
+          ],
+          "material": "whale_belly",
+          "uv": [
+            1,
+            57
+          ]
+        }
+      ]
+    }
+  ]
+}

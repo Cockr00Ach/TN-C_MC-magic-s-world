@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "front": "tnc:block/forge_injector_front",
+    "side": "tnc:block/forge_firebrick",
+    "top": "tnc:block/forge_firebrick",
+    "bottom": "tnc:block/forge_firebrick"
+  }
+}
