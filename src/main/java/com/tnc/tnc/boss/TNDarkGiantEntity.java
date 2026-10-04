@@ -261,19 +261,42 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
         if (TNDarkGiantPhase.shouldEnterPhaseTwo(this.getHealth(), this.getMaxHealth(), this.phase())) {
             this.enterPhaseTwo(level);
         }
-        // 脚下冒暗色尘（纯表现，让这尊巨人站在那儿有存在感 ✓）；二阶段更浓、还往上飘魂火 ✓
+        // 脚下冒暗色尘（纯表现，让这尊巨人站在那儿有存在感 ✓）
         if (this.tickCount % 8 == 0) {
             level.sendParticles(ParticleTypes.SMOKE, this.getX(), this.getY() + 0.2D, this.getZ(),
                     6, HITBOX_WIDTH * 0.6D, 0.2D, HITBOX_WIDTH * 0.6D, 0.01D);
         }
-        if (this.isPhaseTwo() && this.tickCount % 5 == 0) {
-            level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME,
-                    this.getX() + (this.random.nextDouble() - 0.5D) * 3.0D,
-                    this.getY() + 0.2D,
-                    this.getZ() + (this.random.nextDouble() - 0.5D) * 3.0D,
-                    2, 0.3D, 0.4D, 0.3D, 0.02D);
+        // ★ 2026-10-03 作者："虚影存在，boss 可以一直散发着黑色粒子" ✓ ——
+        //   只要在二阶段（＝背后立着虚影 ✓）就**一直**往外冒黑烟 ✓
+        //   （范围按**虚影的体积**给：两倍高 ⇒ 一直冒到 11 格高 ✓，看着像那尊巨影在渗黑气 ✓）
+        if (this.isPhaseTwo()) {
+            this.blackAura(level);
         }
         this.tickCasting(level);
+    }
+
+    /**
+     * 二阶段的黑气 ✓（作者要的"一直散发着黑色粒子" ✓）。
+     *
+     * <p>用 {@code LARGE_SMOKE + SQUID_INK}（1.20.1 里最"黑"的两颗 ✓）——
+     * 不是 SOUL_FIRE_FLAME ✗（那是青白的 ✗，作者要的是黑的 ✓）。
+     * 每 3 tick 冒 4 颗 ⇒ 约 27 颗/秒 ✓（够浓但不会把帧数吃掉 ✗）。
+     */
+    private void blackAura(ServerLevel level) {
+        if (this.tickCount % 3 != 0) {
+            return;
+        }
+        double phantomTop = HITBOX_HEIGHT * TNDarkGiantPhase.PHANTOM_SCALE;   // ≈ 11 格 ✓
+        for (int i = 0; i < 4; i++) {
+            double angle = this.random.nextDouble() * Math.PI * 2.0D;
+            double radius = 1.2D + this.random.nextDouble() * 2.4D;
+            double x = this.getX() + Math.cos(angle) * radius;
+            double z = this.getZ() + Math.sin(angle) * radius;
+            double y = this.getY() + 0.3D + this.random.nextDouble() * phantomTop;
+            level.sendParticles(this.random.nextBoolean()
+                            ? ParticleTypes.LARGE_SMOKE : ParticleTypes.SQUID_INK,
+                    x, y, z, 1, 0.02D, 0.06D, 0.02D, 0.01D);
+        }
     }
 
     /**

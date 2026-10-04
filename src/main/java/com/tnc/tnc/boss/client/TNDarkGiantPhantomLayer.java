@@ -25,9 +25,11 @@ import software.bernie.geckolib.renderer.layer.GeoRenderLayer;
  * <p>所以这一层只干三件事：
  * <ol>
  *   <li>按 {@link TNDarkGiantPhase#PHANTOM_SCALE}（<b>2 倍</b>）放大 ✓；</li>
- *   <li>往**背后**（模型 +Z ✓）挪 {@link TNDarkGiantPhase#PHANTOM_BACK} 格 ✓；</li>
+ *   <li>横向按 {@link TNDarkGiantPhase#PHANTOM_BACK} 挪 ✓（★ 2026-10-03 作者："虚影跟人物的中心没对齐" ✗
+ *       ⇒ 这个值现在是 <b>0 = 和本体同心</b> ✓，两边共用同一个中心轴 ✓）；</li>
  *   <li>换一个**半透明暗紫**的渲染层重画一遍 ✓（{@code entityTranslucentEmissive} + 全亮 ✓
- *       ⇒ 不受世界光照影响、自带一点幽光 ✓，正是"虚影"该有的样子 ✓）。</li>
+ *       ⇒ 不受世界光照影响、自带一点幽光 ✓，正是"虚影"该有的样子 ✓；
+ *       作者嫌太透 ⇒ alpha 已经提到 {@link TNDarkGiantPhase#PHANTOM_ALPHA} ✓）。</li>
  * </ol>
  *
  * <p>★ 只在二阶段画 ✓（{@link TNDarkGiantPhase#phantomVisible} ✓）；

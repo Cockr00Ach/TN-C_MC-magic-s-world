@@ -33,15 +33,27 @@ public final class TNDarkGiantPhase {
     /** 虚影的缩放：<b>2.0 = 本体两倍高</b> ✓（作者原话 ✓）。 */
     public static final double PHANTOM_SCALE = 2.0D;
 
-    /** 虚影站在**背后**多少格 ✓（模型 +Z 是背 ✓；1.6 格 ⇒ 刚好从本体身后长出来 ✓）。 */
-    public static final double PHANTOM_BACK = 1.6D;
+    /**
+     * 虚影相对本体的**横向偏移**（格 ✓）。
+     *
+     * <p>★ 2026-10-03 作者："虚影跟人物的中心没对齐" ✗ —— 第一版是 1.6（往**背后**推 ✓），
+     * 结果虚影整根柱子偏在身后 ✗，看着就是"没对齐"✗ ⇒ 现在取 <b>0 = 和本体同心</b> ✓
+     * （模型的 x 是 ±32 对称 ✓、z 的几何中心也只差 0.25 单位 ✓ ⇒ 同心之后中心就是重合的 ✓）。
+     * 想再往后挪一点就把它调大 ✓（0.5 以内基本还是"套在身上"的感觉 ✓）。
+     */
+    public static final double PHANTOM_BACK = 0.0D;
 
     /** 虚影的颜色（暗紫）+ 透明度 ✓（半透明才叫"虚影" ✓）。 */
     public static final float PHANTOM_RED = 0.58F;
     public static final float PHANTOM_GREEN = 0.30F;
     public static final float PHANTOM_BLUE = 0.95F;
-    /** 基础透明度 ✓（再叠一个 0.1 的呼吸 ✓）。 */
-    public static final float PHANTOM_ALPHA = 0.34F;
+    /**
+     * 基础透明度 ✓。
+     *
+     * <p>★ 2026-10-03 作者："虚影的太透明了" ✗ —— 第一版 0.34 确实太淡 ✗ ⇒ 现在 <b>0.62</b> ✓
+     * （呼吸幅度也收小到 ±0.06 ✓，别一会儿浓一会儿淡 ✗）。
+     */
+    public static final float PHANTOM_ALPHA = 0.62F;
 
     /** 二阶段本体的加成：移速 ×1.15 / 攻击 ×1.25 ✓（进了二阶段就该更凶 ✓）。 */
     public static final double PHASE_TWO_SPEED_MULTIPLIER = 1.15D;
@@ -70,9 +82,9 @@ public final class TNDarkGiantPhase {
         return phase >= PHASE_TWO;
     }
 
-    /** 虚影的呼吸透明度 ✓（让虚影"活"一点 ✗ 别像块塑料 ✓）。 */
+    /** 虚影的呼吸透明度 ✓（让虚影"活"一点 ✗ 别像块塑料 ✓；幅度收小 ⇒ 一直是"看得清"的浓度 ✓）。 */
     public static float phantomAlpha(int tickCount) {
-        return PHANTOM_ALPHA + 0.10F * (float) Math.sin(tickCount * 0.15D);
+        return PHANTOM_ALPHA + 0.06F * (float) Math.sin(tickCount * 0.15D);
     }
 
     /** 供日志/自检看的一行摘要 ✓。 */
