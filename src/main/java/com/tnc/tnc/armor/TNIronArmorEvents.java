@@ -28,8 +28,52 @@ public final class TNIronArmorEvents {
         if (victim.level().isClientSide()) {
             return;
         }
+        // ★ 2026-10-01：减伤一律【取最高档、不相乘】✓ —— 铁甲 99% / 光耀链按档位 / 光龙鳞甲
+        float keep = 1.0F;                     // 1.0 = 不减伤
         if (victim.getItemBySlot(EquipmentSlot.CHEST).getItem() instanceof TNIronArmorItem) {
-            event.setAmount(event.getAmount() * DAMAGE_TAKEN);
+            keep = Math.min(keep, DAMAGE_TAKEN);          // 0.01
+        }
+        // ★ 2026-10-02：光翼链删掉了（飞行并进光耀 ✓），它那两档减伤（50% / 75%）也一起没了 ✓；
+        //   光龙链的 t2「光龙鳞甲」给 50% ✓
+        if (has(victim, com.tnc.tnc.magic.TNEffects.LIGHT_DRAGON_SCALES)) {
+            keep = Math.min(keep, 0.50F);
+        }
+        // ★ 2026-10-01 光系第二条链（治疗/减伤）：t1 25% / t2 50% / t3 50% / t4 70% / t5 70%
+        //   —— 同样走"取最高档、不相乘"✓（作者给的数值直接写在这里，一处可调 ✓）
+        keep = Math.min(keep, lightChainKeep(victim));
+        if (keep < 1.0F) {
+            event.setAmount(event.getAmount() * keep);
+        }
+    }
+
+    /** 光系第二条链的减伤（返回"该吃多少"，1.0 = 不减伤 ✓）。 */
+    private static float lightChainKeep(LivingEntity victim) {
+        var e = com.tnc.tnc.magic.TNEffects.class;
+        if (has(victim, com.tnc.tnc.magic.TNEffects.LIGHT_MERCY)) return 0.30F;      // t5 天使的悲悯 70%
+        if (has(victim, com.tnc.tnc.magic.TNEffects.LIGHT_DESCENT)) return 0.30F;    // t4 天使降临 70%
+        if (has(victim, com.tnc.tnc.magic.TNEffects.LIGHT_DIVINE)) return 0.50F;     // t3 神光 50%
+        if (has(victim, com.tnc.tnc.magic.TNEffects.LIGHT_HOLY)) return 0.50F;       // t2 圣光 50%
+        if (has(victim, com.tnc.tnc.magic.TNEffects.LIGHT_RADIANCE)) return 0.75F;   // t1 光芒照耀 25%
+        return 1.0F;
+    }
+
+    private static boolean has(LivingEntity entity,
+                               net.minecraftforge.registries.RegistryObject<
+                                       net.minecraft.world.effect.MobEffect> effect) {
+        return effect.isPresent() && entity.hasEffect(effect.get());
+    }
+
+    /**
+     * 光系 t5「天使的悲悯」：带 {@code tnc:light_calm} 的怪物**打出的伤害直接取消** ✓。
+     *
+     * <p>这是"停手五秒"的最后一道保险 ✓ —— {@code light/TNLightCalmEvents} 每 tick 已经在清它们的
+     * 攻击目标了，但它可能已经挥出去了（或者被别的东西触发了攻击 ✓）⇒ 这里再按攻击者判一次 ✓。
+     */
+    @SubscribeEvent
+    public static void onCalmAttacker(LivingHurtEvent event) {
+        if (event.getSource().getEntity() instanceof LivingEntity attacker
+                && has(attacker, com.tnc.tnc.magic.TNEffects.LIGHT_CALM)) {
+            event.setAmount(0.0F);
         }
     }
 }

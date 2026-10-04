@@ -72,7 +72,50 @@ public final class SpellCatalog {
         DARK_SACRIFICE("以伤换伤", "以生命力换力量"),
         DARK_SUMMON("召唤", "从黑暗中召唤暗属性生物"),
         DARK_FOG("黑雾", "弥漫的黑色雾气"),
-        INDEPENDENT("独立魔法", "不属于任何元素，无亲和力要求");
+        INDEPENDENT("独立魔法", "不属于任何元素，无亲和力要求"),
+        /**
+         * ★ 光系<b>第二条链</b>「光耀」（治疗 + 减伤 + <b>飞行</b>，作者 2026-10-01 定）：
+         * 光芒照耀 → 圣光 → 神光 → 天使降临 → 天使的悲悯 ✓。
+         *
+         * <p>★ 2026-10-02 作者：<b>"把光魔法的飞行链删去，加入到光耀里，释放光耀法术就获得飞行"</b> ✓
+         * ⇒ 原来那条「光翼」链（light_flight / light_swift_flight / light_wingspan）**整条删除** ✗，
+         * 飞行改成"身上有光耀 buff 就能飞" ✓（时长 = 该档 buff 时长 12/14/16/18/20 秒 ✓，
+         * 背后的光翼也一起点亮 ✓）。所以这条链现在同时管：治疗 / 减伤 / 飞行 ✓。
+         */
+        LIGHT_GRACE("光耀", "治疗、减伤与飞行（光系第二条链）"),
+        /**
+         * ★ 光系<b>第三条链</b>「光线」（作者 2026-10-01 指定）：
+         * 光线（向前数道细彩色光线）→ 大光线（粗）→ 巨大光线（极粗）
+         * → 圣光天降（天上开阵、垂直落下极粗光柱）→ 五光十射（天上五个阵，各自圣光天降）✓。
+         *
+         * <p>法阵用的是**雷法那种线条型**（{@code TNMagicCircleEntity.STORM} ✓，作者要求 ✓）；
+         * 机制全在 {@code light/TNLightBeamMechanics} ✓（JSON 只负责表演 ✓）。
+         *
+         * <p>⚠️ 和其它新链一样：**必须追加在枚举末尾** ✗（存档按链的序数存进度 ✗）。
+         */
+        LIGHT_BEAM("光线", "向前/天降的彩色光线（光系第三条链）"),
+        /**
+         * ★ 光系<b>第四条链</b>「召唤天使」（作者 2026-10-02 指定 ✓）：
+         * 召唤天使 → 天使双卫 → 天使军团 → 炽天使降临 → 大天使长 ✓。
+         *
+         * <p>召唤物是 {@code light/TNFightingAngelEntity}（作者的 fightingangel 模型 ✓）：
+         * <b>会飞</b> ✓（无重力 + 飞行移动控制 + 飞行寻路 ✓）、跟着主人 ✓、替你打敌对生物 ✓、
+         * 到点自己消散 ✓。档位越高：个头越大（渲染缩放 0.70 → 1.40 ✓）、血越厚、打得越疼 ✓。
+         *
+         * <p>⚠️ 和其它新链一样：**必须追加在枚举末尾** ✗（存档按链的序数存进度 ✗）。
+         */
+        LIGHT_SUMMON("召唤天使", "召唤会飞的战斗天使（光系第四条链）"),
+        /**
+         * ★ 光系<b>第五条链</b>「光龙」（作者 2026-10-02 指定 ✓）：
+         * 光龙吐息 → 光龙鳞甲 → 光龙出击 → 光龙俯冲 → 光龙降世 ✓。
+         *
+         * <p>★ 作者同日第二版："<b>不要做成召唤物啊，我要释放出一条巨龙往前冲，触碰造成伤害</b>" ✓
+         * ⇒ 龙不是宠物 ✗：放出去就**直线往前冲**，路上碰到谁伤谁，撞墙/到点爆开消失 ✓
+         * （行为在 {@code light/TNDragonEntity}，档位数值在 {@code light/TNLightDragonChain} ✓）。
+         *
+         * <p>⚠️ 和其它新链一样：**必须追加在枚举末尾** ✗（存档按链的序数存进度 ✗）。
+         */
+        LIGHT_DRAGON("光龙", "放出一条巨龙向前冲（光系第五条链）");
 
         private final String cn;
         private final String desc;
@@ -194,6 +237,68 @@ public final class SpellCatalog {
             windEntry("vast_gale", Chain.GALE, 3, "超大范围风"),
             windEntry("giant_gale", Chain.GALE, 4, "巨型风刃风暴"),
             windEntry("wind_god_gale", Chain.GALE, 5, "风神风暴"),
+
+            // ---- 光耀线（光系第二条链，作者 2026-10-01 定）----
+            //   1 光芒照耀：范围 8，队友 25% 减伤 + 立刻回 20 血，地面铺同半径法阵
+            //   2 圣光：范围 10，50% 减伤 + 回 30 血 + 法阵
+            //   3 神光：范围 12，50% 减伤 + 回 30 血 + 法阵中心召唤 4 格高天使（白/淡黄粒子）+ 转晴
+            //   4 天使降临：范围 14，天使 6 格高，减伤 70%
+            //   5 天使的悲悯：范围 16，天使 10 格高，70% 减伤，范围内怪物停手 5 秒
+            //   （天使高度 = 作者 2026-10-01："变成现在的两倍" ⇒ 4/6/10 ✓）
+            //   （数值都在 light/TNLightChainMechanics 的一张表里 ✓，改那里就行 ✓）
+            of(Element.LIGHT, "light_radiance", Chain.LIGHT_GRACE, 1, "光芒照耀"),
+            of(Element.LIGHT, "holy_light", Chain.LIGHT_GRACE, 2, "圣光"),
+            of(Element.LIGHT, "divine_light", Chain.LIGHT_GRACE, 3, "神光"),
+            of(Element.LIGHT, "angel_descent", Chain.LIGHT_GRACE, 4, "天使降临"),
+            of(Element.LIGHT, "angel_mercy", Chain.LIGHT_GRACE, 5, "天使的悲悯"),
+
+            // ---- 光翼线：★ 2026-10-02 作者要求**整条删掉** ✗（"把光魔法的飞行链删去，
+            //      加入到光耀里，释放光耀法术就获得飞行" ✓）—— light_flight /
+            //      light_swift_flight / light_wingspan 三个法术 + 法术 JSON + 图标都删了 ✓，
+            //      飞行改成"光耀 buff 在身就能飞" ✓（见 Chain.LIGHT_GRACE ✓）
+
+            // ---- 光线线（光系第三条链，作者 2026-10-01 指定）----
+            //   1 光线：向前 3 道细的彩色光线（扇形散开）
+            //   2 大光线：一道粗的彩色光线
+            //   3 巨大光线：一道极粗的彩色光线
+            //   4 圣光天降：天上开阵（雷法那种线条型），从阵里垂直向下射出极粗光柱
+            //   5 五光十射：天上开 5 个阵，每个阵各放一次圣光天降（错开落下）
+            //   （数值都在 light/TNLightBeamMechanics 的一张表里 ✓，改那里就行 ✓）
+            of(Element.LIGHT, "light_beam", Chain.LIGHT_BEAM, 1, "光线"),
+            of(Element.LIGHT, "great_light_beam", Chain.LIGHT_BEAM, 2, "大光线"),
+            of(Element.LIGHT, "giant_light_beam", Chain.LIGHT_BEAM, 3, "巨大光线"),
+            of(Element.LIGHT, "holy_light_descent", Chain.LIGHT_BEAM, 4, "圣光天降"),
+            of(Element.LIGHT, "radiant_barrage", Chain.LIGHT_BEAM, 5, "五光十射"),
+
+            // ---- 召唤天使线（光系第四条链，作者 2026-10-02 指定；只数/个头是作者第二版要的）----
+            //   1 召唤天使  ：1 只，个头 0.45（小小）
+            //   2 天使卫队  ：3 只，0.70
+            //   3 天使军团  ：5 只，1.05（= "现在这样的"）
+            //   4 炽天使降临：15 只，0.75（一群小的）
+            //   5 大天使长  ：3 只，1.80（大只的）
+            //   ★ 天使**会飞**（跟着你上天 ✓）、会替你打敌对生物 ✓、
+            //     **轮流放光线链的 t1（光线）和 t4（圣光天降）** ✓ ——
+            //     其中 t4 的法阵按作者要求**缩小五倍** ✓（见 TNFightingAngelEntity.DESCENT_CIRCLE_SCALE）
+            //   （只数/个头/血伤/时长都在 light/TNLightChainMechanics 的 SUMMONS 一张表里 ✓）
+            of(Element.LIGHT, "summon_angel", Chain.LIGHT_SUMMON, 1, "召唤天使"),
+            of(Element.LIGHT, "angel_twins", Chain.LIGHT_SUMMON, 2, "天使卫队"),
+            of(Element.LIGHT, "angel_legion", Chain.LIGHT_SUMMON, 3, "天使军团"),
+            of(Element.LIGHT, "seraph_descent", Chain.LIGHT_SUMMON, 4, "炽天使降临"),
+            of(Element.LIGHT, "archangel", Chain.LIGHT_SUMMON, 5, "大天使长"),
+
+            // ---- 光龙线（光系第五条链，作者 2026-10-02 指定；同日第二版：龙是"冲出去"的不是召唤物 ✓）----
+            //   1 光龙吐息：向前喷出一道金色光柱（复用光线链的实体光柱 ✓ 尺寸加大）
+            //   2 光龙鳞甲：自己 + 队友 减伤 50% + 速度 +20% + 光伤 +30%，20 秒
+            //   3 光龙出击：放 1 条（0.30 倍 ≈ 7 格长）向前冲 ≈ 45 格，撞到 24 伤
+            //   4 光龙俯冲：2 条（0.40 · 左右各偏 7°）冲 ≈ 60 格，撞到 34 伤 + 小圣光
+            //   5 光龙降世：3 条（0.45 · 扇形 ∓16°）冲 ≈ 75 格，撞到 44 伤 + 大圣光天降
+            //   ★ 龙一路往前冲、碰到谁伤谁（每个敌人整次冲刺只挨一下 ✓），撞墙/到点爆开消失 ✓
+            //   （数值全在 light/TNLightDragonChain 的一张表里 ✓，改那里就行 ✓）
+            of(Element.LIGHT, "light_dragon_breath", Chain.LIGHT_DRAGON, 1, "光龙吐息"),
+            of(Element.LIGHT, "light_dragon_scales", Chain.LIGHT_DRAGON, 2, "光龙鳞甲"),
+            of(Element.LIGHT, "summon_light_dragon", Chain.LIGHT_DRAGON, 3, "光龙出击"),
+            of(Element.LIGHT, "light_dragon_dive", Chain.LIGHT_DRAGON, 4, "光龙俯冲"),
+            of(Element.LIGHT, "light_dragon_descend", Chain.LIGHT_DRAGON, 5, "光龙降世"),
 
             // ================= 骨架（法术 JSON 待补，先占名字对齐文档）=================
             // 水魔法：水球 / 水纹 / 水缚 / 雨滴
@@ -551,6 +656,11 @@ public final class SpellCatalog {
      * <p>这是"法杖内容"的<b>唯一口径</b>：登录补杖、学法后同步、切页、{@code /tnc wand}
      * 全都要走它 —— 几处各算一套的话，页号和配装会互相冲掉 ✗。
      *
+     * <p><b>写杖之前先规范化配装</b>（{@link MagicStoneData#normalizeLoadout}）——
+     * 这一步是"同一条链的低档不许留在法杖上"的强制执行点 ✗。
+     * 作者 2026-09-29 实测的顺序是"先学完几个档、再去配键页手动摆"，
+     * 那种顺序下低档会各占一个空槽，只有在这里统一收口才治得住 ✓。
+     *
      * <p>顺带做两层过滤（只影响这次写进杖里的内容，<b>不改</b>玩家的配装）：
      * <ol>
      *   <li>没学过 / 目录里查不到 → 空槽（老存档迁移过来的配装对不上目录时兜底）</li>
@@ -558,6 +668,8 @@ public final class SpellCatalog {
      * </ol>
      */
     public static List<ResourceLocation> wandSpellIds(MagicStoneData data) {
+        // ★ 唯一出口上的不变量：一条链一个法术、且只能是当前链顶
+        data.normalizeLoadout();
         List<ResourceLocation> page = data.pageSpellIds(data.getLoadoutPage());
         List<ResourceLocation> result = new ArrayList<>(page.size());
         for (ResourceLocation id : page) {

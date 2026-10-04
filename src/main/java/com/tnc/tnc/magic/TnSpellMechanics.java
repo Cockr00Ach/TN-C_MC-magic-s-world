@@ -672,6 +672,19 @@ public final class TnSpellMechanics {
         if (castEntry != null && castEntry.chain() == SpellCatalog.Chain.SPEED) {
             startGather(player, castEntry.tier());
         }
+
+        // ★★ 光系第二条链（光耀）：范围治疗 + 队友减伤 + 光系法阵 + 天使 + 转晴 + 怪物停手 ✓
+        //    数值全在 light/TNLightChainMechanics 的一张表里 ✓；这里只转发 ✓
+        if (com.tnc.tnc.light.TNLightChainMechanics.isLightChainSpell(path)) {
+            com.tnc.tnc.light.TNLightChainMechanics.onSpellCast(player, path);
+        }
+
+        // ★★ 光系第三条链（光线）：向前数道彩色光线 / 天上开阵垂直落下的光柱 ✓
+        //    （作者 2026-10-01："光线 — 大光线 — 巨大光线 — 圣光天降 — 五光十射" ✓）
+        //    数值全在 light/TNLightBeamMechanics 的一张表里 ✓；每 tick 的推进见 tickPlayer ✓
+        if (com.tnc.tnc.light.TNLightBeamMechanics.isLightBeamSpell(path)) {
+            com.tnc.tnc.light.TNLightBeamMechanics.onSpellCast(player, path);
+        }
     }
 
     /**
@@ -850,6 +863,16 @@ public final class TnSpellMechanics {
         //    而**这个函数是活着的**（同一段 tick 里的别的日志照打 ✓）。所以把回魔挂到这条
         //    已验证活着的路上来；回魔内部有"每个周期只回一次"的闸门 ⇒ 多入口不会翻倍 ✓。
         MagicStone.tickManaRegen(player);
+        // ★★ 光耀链的"能飞 + 有翅膀"（2026-10-01 起，2026-10-02 并进光耀 ✓）
+        //    必须挂在这条**已证活着**的路上：原来挂在 TickEvent.PlayerTickEvent 上，
+        //    而那个事件在本仓库一个世界整局都不进来 ✗ ⇒ 法术放得出来却飞不起来、也看不见翅膀 ✗✗
+        //    （详见 light/TNLightChainMechanics 的类注释 ✓；函数幂等 ✓）
+        //    ★ 作者 2026-10-02："把光魔法的飞行链删去，加入到光耀里，释放光耀法术就获得飞行" ✓
+        //      ⇒ 判据从"光翼 buff"改成了"光耀 buff" ✓（方法名也跟着改了 ✓）
+        com.tnc.tnc.light.TNLightChainMechanics.tickGraceFlight(player);
+        // ★★ 光系第三条链（光线）：推进"正在射的光线"（画粒子 + 判伤 ✓）
+        //    同样走这条**已证活着**的路 ✓ —— 挂死事件上的教训见 light/TNLightChainMechanics 类注释 ✓
+        com.tnc.tnc.light.TNLightBeamMechanics.tick(player);
         // ★★ 自动补学**不许再挂在 tick 上** ✗✗
         //    （作者 2026-09-29 两次："为什么会自动学习啊，删去" → "遗忘了还自动学"）
         //    原来这里每 40 tick 跑一次 autoLearnUnlockedAndSync；而那个方法在

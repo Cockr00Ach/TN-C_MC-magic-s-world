@@ -1,0 +1,75 @@
+光翼贴图补画清单（light_wings_bedrock.png，64x64）
+生成时间: 2026-10-01 14:00   来源: LightWingsProjectionTest 自检
+
+要补画的范围（外框）: x 0..40 , y 32..42   —— 共 64 个矩形（去重后）
+颜色随意（自发光 + 半透明渲染，会直接按你画的原色显示）；alpha>8 就算画了。
+
+  u   v   w   h    用到的方块
+ --- --- --- ---   ----------
+  25  32   1   1   c7-wingLeftTip2
+  26  32   1   1   c7-wingLeftTip2
+  29  32   1   1   c8-wingLeftTip2
+  30  32   1   1   c8-wingLeftTip2
+  33  32   1   1   c10-wingLeftTip2
+  34  32   1   1   c10-wingLeftTip2
+  36  32   1   5   c16-wingLeftTip2
+  37  32   1   5   c16-wingLeftTip2
+  38  32   1   5   c16-wingLeftTip2
+  39  32   1   5   c16-wingLeftTip2
+  24  33   1   6   c7-wingLeftTip2
+  25  33   1   6   c7-wingLeftTip2
+  26  33   1   6   c7-wingLeftTip2
+  27  33   1   6   c7-wingLeftTip2
+  28  33   1   6   c8-wingLeftTip2
+  29  33   1   6   c8-wingLeftTip2
+  30  33   1   6   c8-wingLeftTip2
+  31  33   1   6   c8-wingLeftTip2
+  32  33   1   6   c10-wingLeftTip2
+  33  33   1   6   c10-wingLeftTip2
+  34  33   1   6   c10-wingLeftTip2
+  35  33   1   6   c10-wingLeftTip2
+   1  34   1   1   c11-wingLeftTip2
+   2  34   1   1   c11-wingLeftTip2
+   5  34   1   1   c12-wingLeftTip2
+   6  34   1   1   c12-wingLeftTip2
+   9  34   1   1   c13-wingLeftTip2
+  10  34   1   1   c13-wingLeftTip2
+  13  34   1   1   c14-wingLeftTip2
+  14  34   1   1   c14-wingLeftTip2
+  17  34   1   1   c15-wingLeftTip2
+  18  34   1   1   c15-wingLeftTip2
+  21  34   1   1   c30-wingLeftTip
+  22  34   1   1   c30-wingLeftTip
+   0  35   1   6   c11-wingLeftTip2
+   1  35   1   6   c11-wingLeftTip2
+   2  35   1   6   c11-wingLeftTip2
+   3  35   1   6   c11-wingLeftTip2
+   4  35   1   6   c12-wingLeftTip2
+   5  35   1   6   c12-wingLeftTip2
+   6  35   1   6   c12-wingLeftTip2
+   7  35   1   6   c12-wingLeftTip2
+   8  35   1   6   c13-wingLeftTip2
+   9  35   1   6   c13-wingLeftTip2
+  10  35   1   6   c13-wingLeftTip2
+  11  35   1   6   c13-wingLeftTip2
+  12  35   1   6   c14-wingLeftTip2
+  13  35   1   6   c14-wingLeftTip2
+  14  35   1   6   c14-wingLeftTip2
+  15  35   1   6   c14-wingLeftTip2
+  16  35   1   6   c15-wingLeftTip2
+  17  35   1   6   c15-wingLeftTip2
+  18  35   1   6   c15-wingLeftTip2
+  19  35   1   6   c15-wingLeftTip2
+  20  35   1   5   c30-wingLeftTip
+  21  35   1   5   c30-wingLeftTip
+  22  35   1   5   c30-wingLeftTip
+  23  35   1   5   c30-wingLeftTip
+  37  37   1   1   c38-wingLeftTip
+  38  37   1   1   c38-wingLeftTip
+  36  38   1   4   c38-wingLeftTip
+  37  38   1   4   c38-wingLeftTip
+  38  38   1   4   c38-wingLeftTip
+  39  38   1   4   c38-wingLeftTip
+
+说明: 每个方块在贴图上占 6 个矩形（上/下/东/北/西/南），上面已去重。
+      画完跑一次 gradlew test --tests *LightWingsProjectionTest 就能看到平均不透明率回升。

@@ -37,5 +37,16 @@ public final class TNSpellOrbClientEvents {
         event.registerEntityRenderer(TNOrbEntities.WATER_SPELL.get(), TNWaterSpellRenderer::new);
         event.registerEntityRenderer(TNOrbEntities.WATER_BOLT.get(), TNWaterBoltRenderer::new);
         event.registerEntityRenderer(TNOrbEntities.WATER_FIELD.get(), TNWaterFieldRenderer::new);
+        // ★ 光天使（光系第二条链 t3/t4/t5 ✓）：半透明 + 自发光，见 TNAngelRenderer ✓
+        event.registerEntityRenderer(TNOrbEntities.ANGEL.get(), com.tnc.tnc.light.client.TNAngelRenderer::new);
+        // ★ 实体光柱（光系第三条链「光线」✓）：一整根棱柱 + 彩虹顶点色，见 TNLightBeamRenderer ✓
+        event.registerEntityRenderer(TNOrbEntities.LIGHT_BEAM.get(),
+                com.tnc.tnc.light.client.TNLightBeamRenderer::new);
+        // ★ 战斗天使（光法第 4 条链「召唤天使」✓）：GeckoLib 模型 + 按档位放大，见 TNFightingAngelRenderer ✓
+        event.registerEntityRenderer(TNOrbEntities.FIGHTING_ANGEL.get(),
+                com.tnc.tnc.light.client.TNFightingAngelRenderer::new);
+        // ★ 光明龙（光法第 5 条链「光龙」✓）：作者的东方龙 + 半透明自发光，见 TNDragonRenderer ✓
+        event.registerEntityRenderer(TNOrbEntities.LIGHT_DRAGON.get(),
+                com.tnc.tnc.light.client.TNDragonRenderer::new);
     }
 }

@@ -1,0 +1,169 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.tnc.dark_imp",
+        "texture_width": 128,
+        "texture_height": 128,
+        "visible_bounds_width": 4,
+        "visible_bounds_height": 4,
+        "visible_bounds_offset": [
+          0,
+          1,
+          0
+        ]
+      },
+      "bones": [
+        {
+          "name": "root",
+          "pivot": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "blob",
+          "parent": "root",
+          "pivot": [
+            0,
+            6,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -4,
+                2,
+                -4
+              ],
+              "size": [
+                9,
+                6,
+                8
+              ],
+              "uv": [
+                0,
+                0
+              ]
+            },
+            {
+              "origin": [
+                -3,
+                7,
+                -3
+              ],
+              "size": [
+                7,
+                4,
+                6
+              ],
+              "uv": [
+                0,
+                0
+              ]
+            },
+            {
+              "origin": [
+                -3,
+                0,
+                -2
+              ],
+              "size": [
+                6,
+                3,
+                5
+              ],
+              "uv": [
+                16,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "eyeL",
+          "parent": "blob",
+          "pivot": [
+            -2,
+            8,
+            -4
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -3,
+                8,
+                -4
+              ],
+              "size": [
+                2,
+                1,
+                1
+              ],
+              "uv": [
+                32,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "eyeR",
+          "parent": "blob",
+          "pivot": [
+            2,
+            8,
+            -4
+          ],
+          "cubes": [
+            {
+              "origin": [
+                1,
+                8,
+                -4
+              ],
+              "size": [
+                2,
+                1,
+                1
+              ],
+              "uv": [
+                32,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "wisp",
+          "parent": "blob",
+          "pivot": [
+            0,
+            4,
+            4
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -1,
+                0,
+                4
+              ],
+              "size": [
+                3,
+                5,
+                2
+              ],
+              "uv": [
+                48,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

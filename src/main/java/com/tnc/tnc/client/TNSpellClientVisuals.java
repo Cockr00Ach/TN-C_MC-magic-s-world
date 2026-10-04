@@ -159,6 +159,25 @@ public final class TNSpellClientVisuals {
                 }
             }
         }
+        // ★ 光系「光线」链：光柱刚出现那 8 tick 抖镜头 ✓（作者 2026-10-01："并且加上画面震动"✓）
+        //   和落雷同一个套路 ✓：服务端把震幅同步到实体上 ✓，客户端就近侦测 ✓，不需要网络包 ✓。
+        //   天降那种 45 格宽的大柱子震幅给到 8.5 度 ✓；细光线只有 0.5 度 ✓。
+        for (com.tnc.tnc.light.TNLightBeamEntity beam : minecraft.level.getEntitiesOfClass(
+                com.tnc.tnc.light.TNLightBeamEntity.class,
+                minecraft.player.getBoundingBox().inflate(SHAKE_RANGE))) {
+            if (!beam.isShaking(beam.tickCount)) {
+                continue;                       // 只有"刚砸下来"那一下 ✓（活 6 秒全程抖会晃吐人 ✗）
+            }
+            double d = beam.position().distanceTo(minecraft.player.position());
+            float s = (float) (beam.shake() * Math.max(0.0D, 1.0D - d / SHAKE_RANGE));
+            if (s > shake) {
+                shake = s;
+            }
+            float f = (float) Math.max(0.0D, 1.0D - d / SHAKE_RANGE) * 0.5F;
+            if (f > flash) {
+                flash = f;                      // 顺手一点点白闪 ✓（大光柱砸下来该亮一下 ✓）
+            }
+        }
         shake *= 0.88F;         // 衰减
         if (shake < 0.02F) {
             shake = 0.0F;

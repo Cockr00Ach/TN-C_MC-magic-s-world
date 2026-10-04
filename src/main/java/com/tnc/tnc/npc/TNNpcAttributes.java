@@ -69,6 +69,16 @@ public final class TNNpcAttributes {
         event.put(TNNpcs.HUAI.get(), TnDialogueNpc.attributes().build());
         event.put(TNNpcs.ZHUANGQUERANG.get(), TnDialogueNpc.attributes().build());
         event.put(TNNpcs.YAN_DARK.get(), com.tnc.tnc.boss.YanDarkBossEntity.createAttributes().build());
+        event.put(TNNpcs.APOLLO.get(), com.tnc.tnc.boss.TNApolloEntity.createAttributes().build());
         event.put(TNNpcs.ZUOWANG.get(), TnDialogueNpc.attributes().build());
+        // ★ 光天使（光系第二条链召唤的雕像 ✓）——**生物必须在这里有属性，漏了生成即崩** ✗
+        event.put(com.tnc.tnc.magic.TNOrbEntities.ANGEL.get(),
+                com.tnc.tnc.light.TNAngelEntity.createAttributes().build());
+        // ★ 战斗天使（光法第 4 条链「召唤天使」的召唤物 ✓，会飞那种 ✓）——同样必须在这里有属性 ✗
+        event.put(com.tnc.tnc.magic.TNOrbEntities.FIGHTING_ANGEL.get(),
+                com.tnc.tnc.light.TNFightingAngelEntity.createAttributes().build());
+        // ★ 光明龙**不在这里** ✓ —— 它是投射物（{@code extends Entity} ✗ 不是生物 ✗），
+        //   作者 2026-10-02："我要的龙不是怪，你把他怪给我删了" ✓
+        //   ⇒ 非生物**不能**注册属性（注册了反而会出问题 ✗），所以这一行是故意没有的 ✓
     }
 }

@@ -59,6 +59,86 @@ public final class TNEffects {
                     0x7FE8FF, Attributes.MOVEMENT_SPEED, 0.70D,
                     AttributeModifier.Operation.MULTIPLY_BASE));
 
+    /**
+     * ★ 光翼标记（客户端拿它画玩家背后的光翼 ✓，逻辑在 {@code light/TNLightWingsEvents} ✓）。
+     *
+     * <p>★ 2026-10-02：原来那条"光翼链"（light_flight / light_swift_flight / light_wingspan）
+     * 被作者要求**删掉、并进光耀链** ✗ ⇒ 现在这个标记由**光耀 buff**驱动：
+     * 身上有光耀任一档 buff 就挂着它 + 给 {@code mayfly} ✓（见
+     * {@code TNLightChainMechanics.tickGraceFlight} ✓）。**这个标记本身保留** ✓
+     * —— 翅膀模型/贴图/渲染器都还在用 ✓。
+     */
+    public static final RegistryObject<MobEffect> LIGHT_WINGS =
+            EFFECTS.register("light_wings", () -> new MobEffect(
+                    MobEffectCategory.BENEFICIAL, 0xFFE9A8) {
+            });
+
+    /**
+     * ★★ 光系<b>第二条链</b>（治疗 + 减伤 + <b>飞行</b>，作者 2026-10-01 定、2026-10-02 并入飞行 ✓）
+     * 的五个 buff ✓
+     *
+     * <p>减伤数值**不在效果里**做 ✗ —— 一律由 {@code armor/TNIronArmorEvents} 在
+     * {@code LivingHurtEvent} 里按"取最高档、不相乘"统一结算 ✓（和铁甲 99% / 光龙鳞甲 50% 同一处 ✓）。
+     * 这里只管"标记 + 时长"：t1 25% / t2 50% / t3 50% / t4 70% / t5 70% ✓。
+     * 颜色统一走光系的暖白（{@code 0xFFF6DC}）✓。
+     *
+     * <p><b>飞行也挂在这五个 buff 上</b> ✓ —— 作者 2026-10-02："释放光耀法术就获得飞行" ✓：
+     * 时长就是这里的 {@code buffSeconds}（12 / 14 / 16 / 18 / 20 秒 ✓）。
+     */
+    public static final RegistryObject<MobEffect> LIGHT_RADIANCE =
+            EFFECTS.register("light_radiance", () -> new MobEffect(
+                    MobEffectCategory.BENEFICIAL, 0xFFF6DC) {
+            });
+    public static final RegistryObject<MobEffect> LIGHT_HOLY =
+            EFFECTS.register("light_holy", () -> new MobEffect(
+                    MobEffectCategory.BENEFICIAL, 0xFFF6DC) {
+            });
+    public static final RegistryObject<MobEffect> LIGHT_DIVINE =
+            EFFECTS.register("light_divine", () -> new MobEffect(
+                    MobEffectCategory.BENEFICIAL, 0xFFF6DC) {
+            });
+    public static final RegistryObject<MobEffect> LIGHT_DESCENT =
+            EFFECTS.register("light_descent", () -> new MobEffect(
+                    MobEffectCategory.BENEFICIAL, 0xFFF6DC) {
+            });
+    public static final RegistryObject<MobEffect> LIGHT_MERCY =
+            EFFECTS.register("light_mercy", () -> new MobEffect(
+                    MobEffectCategory.BENEFICIAL, 0xFFF6DC) {
+            });
+
+    /**
+     * 天使的悲悯 t5：范围内的怪物**停止攻击 5 秒** ✓（作者 2026-10-01："范围内的怪物停止攻击五秒钟"）。
+     *
+     * <p>只挂在怪物身上 ✓（HARMFUL，因为对它们是负面 ✓）；具体"停手"由
+     * {@code light/TNLightChainMechanics} 每 tick 清目标 + 在 {@code LivingHurtEvent} 里取消伤害 ✓。
+     */
+    public static final RegistryObject<MobEffect> LIGHT_CALM =
+            EFFECTS.register("light_calm", () -> new MobEffect(
+                    MobEffectCategory.HARMFUL, 0xFFF6DC) {
+            });
+
+    /**
+     * ★ 光龙链 t2「光龙鳞甲」：移动速度 <b>+20%</b> ✓（减伤 50% 在受伤事件里 ✓）
+     * ＋ 光属性伤害 <b>+30%</b> ✓（照 {@link #DARK_POWER} 的写法，没装 spell_power 时只加速度、不崩 ✓）。
+     *
+     * <p>光龙链 = 作者 2026-10-02 新增的第五条光链 ✓（用的是那条东方光明龙 ✓）。
+     */
+    public static final RegistryObject<MobEffect> LIGHT_DRAGON_SCALES =
+            EFFECTS.register("light_dragon_scales", () -> new MobEffect(
+                    MobEffectCategory.BENEFICIAL, 0xFFE08A) {
+                {
+                    addAttributeModifier(Attributes.MOVEMENT_SPEED,
+                            uuidFor("tnc:light_dragon_scales_speed"), 0.20D,
+                            AttributeModifier.Operation.MULTIPLY_BASE);
+                    Attribute healing = ForgeRegistries.ATTRIBUTES.getValue(
+                            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(
+                                    "spell_power", "healing"));
+                    if (healing != null) {
+                        addAttributeModifier(healing, uuidFor("tnc:light_dragon_scales_heal"),
+                                0.30D, AttributeModifier.Operation.MULTIPLY_BASE);
+                    }
+                }
+            });
     /** 环绕雷球：本身不加属性，只是个"光环开着"的标记（电击逻辑在机制层）。 */
     public static final RegistryObject<MobEffect> ORBITING_THUNDER_ORB =
             EFFECTS.register("orbiting_thunder_orb", () -> new MobEffect(

@@ -129,6 +129,14 @@ public final class TNNpcs {
                     .sized(0.9F, 2.4F)
                     .clientTrackingRange(12)
                     .build("tnc:yan_dark"));
+    /** 阿波罗 —— 光系 Boss（哥特大祭司外形，作者 2026-10-01 指定）✓ */
+    public static final RegistryObject<EntityType<com.tnc.tnc.boss.TNApolloEntity>> APOLLO =
+            ENTITY_TYPES.register("apollo", () -> EntityType.Builder
+                    .of(com.tnc.tnc.boss.TNApolloEntity::new, MobCategory.MONSTER)
+                    .sized(0.9F, 2.3F)
+                    .clientTrackingRange(12)
+                    .build("tnc:apollo"));
+
     private TNNpcs() {
     }
 

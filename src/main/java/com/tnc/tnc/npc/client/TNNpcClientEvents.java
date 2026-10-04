@@ -78,5 +78,6 @@ public final class TNNpcClientEvents {
         //      除非那个条件本身就是"这个实体类型存不存在"（self/maid 那种分流才是合法的 ✓）。
         event.registerEntityRenderer(com.tnc.tnc.npc.TNNpcs.YAN_DARK.get(),
                 ctx -> new com.tnc.tnc.boss.client.YanDarkRenderer(ctx));
+        event.registerEntityRenderer(com.tnc.tnc.npc.TNNpcs.APOLLO.get(), ctx -> new com.tnc.tnc.boss.client.TNApolloRenderer(ctx));
     }
 }

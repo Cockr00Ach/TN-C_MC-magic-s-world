@@ -97,6 +97,77 @@ public final class TNOrbEntities {
                     .clientTrackingRange(10)
                     .updateInterval(1)
                     .build("tnc:lightning_strike"));
+
+    /**
+     * ★ 光系第二条链 t3/t4/t5 召唤的**光天使** ✓（作者 2026-10-01 做的 Bedrock 模型 ✓）。
+     *
+     * <p>它是 {@link com.tnc.tnc.light.TNAngelEntity}（GeckoLib 生物 ✓，纯雕像：无敌/无 AI/不推动别人 ✓）。
+     * 尺寸由法术定（2 / 3 / 5 格高 ✓）；碰撞箱给一个正常玩家大小即可（它不可选中 ✓）。
+     */
+    public static final RegistryObject<EntityType<com.tnc.tnc.light.TNAngelEntity>> ANGEL =
+            ENTITY_TYPES.register("angel", () -> EntityType.Builder
+                    .of(com.tnc.tnc.light.TNAngelEntity::new, MobCategory.MISC)
+                    .sized(0.7F, 2.5F)
+                    .clientTrackingRange(12)
+                    .updateInterval(2)
+                    .build("tnc:angel"));
+
+    /**
+     * ★ 光系第三条链「光线」的**实体光柱** ✓（作者 2026-10-01："光线我想要实体的" ✗）。
+     *
+     * <p>它是 {@link com.tnc.tnc.light.TNLightBeamEntity}（纯表现 + 自己判伤 ✓）：
+     * 实体只有一个点，**光柱是渲染器画出来的**（本地 +Z 方向长 {@code length} 格 ✓）。
+     * 所以 {@code updateInterval(1)} 很关键 ✗ —— 不然客户端会"先收到实体、过一会才知道多粗多长"，
+     * 表现就是那根柱子晚半拍才冒出来 ✗（魔法阵那轮踩过同样的坑 ✓）。
+     * {@code clientTrackingRange(16)} 给得大一些：远处的大光柱也要看得见 ✓。
+     */
+    public static final RegistryObject<EntityType<com.tnc.tnc.light.TNLightBeamEntity>> LIGHT_BEAM =
+            ENTITY_TYPES.register("light_beam", () -> EntityType.Builder
+                    .of(com.tnc.tnc.light.TNLightBeamEntity::new, MobCategory.MISC)
+                    .sized(0.1F, 0.1F)
+                    .clientTrackingRange(16)
+                    .updateInterval(1)
+                    .updateInterval(1)
+                    .build("tnc:light_beam"));
+
+    /**
+     * ★ 光法第 4 条链「召唤天使」的**战斗天使** ✓（作者 2026-10-02："我制作了一个 fightingangel，你先把他做成怪" ✓）。
+     *
+     * <p>和上面那位"雕像天使"（{@link #ANGEL}）是两个东西 ✗：那个是第二条链法阵中心的无敌雕像，
+     * 这个是**会飞、跟着你、替你打怪**的召唤物 ✓（见 {@link com.tnc.tnc.light.TNFightingAngelEntity} ✓）。
+     *
+     * <p>档位由法术写入（t1..t5 ✓），渲染器按档位放大 0.70 → 1.40 ✓；
+     * 碰撞箱按模型原尺寸给（0.9 × 2.2 格 ✓ —— 视觉缩放只影响画面，不影响打不打得到 ✓）。
+     */
+    public static final RegistryObject<EntityType<com.tnc.tnc.light.TNFightingAngelEntity>> FIGHTING_ANGEL =
+            ENTITY_TYPES.register("fighting_angel", () -> EntityType.Builder
+                    .of(com.tnc.tnc.light.TNFightingAngelEntity::new, MobCategory.CREATURE)
+                    .sized(0.9F, 2.2F)
+                    .clientTrackingRange(12)
+                    .updateInterval(2)
+                    .build("tnc:fighting_angel"));
+
+    /**
+     * ★ 光系第五条链「光龙」<b>扔出去的那条龙</b> ✓（作者 2026-10-02："新增加一条光龙链" ✓）。
+     *
+     * <p>★ 它是 {@link com.tnc.tnc.light.TNDragonEntity} —— **和雷球同一类东西** ✓：
+     * 基类是 {@code Entity} ✗ 不是生物 ✗（作者同日："我要的龙不是怪，你把他怪给我删了，
+     * 我要的是跟雷球一样，扔出去，一条龙冲出去" ✓）⇒ 所以这里是
+     * <b>{@code MobCategory.MISC}</b>（和雷球/光柱/魔法阵一个分类 ✓），
+     * 而且 {@code TNNpcAttributes} 里**没有它**（非生物不注册属性 ✓）。
+     *
+     * <p>碰撞箱只给身体那一小段（2.5 × 2 格 ✓）—— 23 格全进碰撞箱会卡墙 ✗；
+     * 渲染缩放由法术写进实体（t3 0.30 / t4 0.90 / t5 3.00 ✓），剔除由实体自己按体长撑 ✓；
+     * {@code updateInterval(1)} —— 它飞得快，隔久了客户端会一卡一卡 ✗（光柱那条同理 ✓）。
+     */
+    public static final RegistryObject<EntityType<com.tnc.tnc.light.TNDragonEntity>> LIGHT_DRAGON =
+            ENTITY_TYPES.register("light_dragon", () -> EntityType.Builder
+                    .of(com.tnc.tnc.light.TNDragonEntity::new, MobCategory.MISC)
+                    .sized(2.5F, 2.0F)
+                    .clientTrackingRange(16)
+                    .updateInterval(1)
+                    .build("tnc:light_dragon"));
+
     private TNOrbEntities() {
     }
 

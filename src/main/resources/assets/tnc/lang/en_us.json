@@ -379,5 +379,9 @@
   "item.tnc.sky_canopy_fiber": "Canopy Fiber",
   "item.tnc.sky_canopy_rope": "Canopy Rope",
   "item.tnc.sky_vine_survey": "Three Biomes Survey",
-  "entity.tnc.farlight_fruit": "Farlight Fruit"
+  "entity.tnc.farlight_fruit": "Farlight Fruit",
+  "entity.tnc.apollo": "Apollo",
+  "entity.tnc.fighting_angel": "Fighting Angel",
+  "entity.tnc.light_dragon": "Light Dragon",
+  "effect.tnc.light_dragon_scales": "Light Dragon Scales"
 }
