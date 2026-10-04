@@ -50,8 +50,13 @@ public final class TNDragonOrbitConfig {
     public static double height = 1.2D;
     /** 每秒转多少度（度/tick ✓）。 */
     public static double degPerTick = 3.0D;
-    /** 转多久（tick ✓）。 */
-    public static int ticks = 400;
+    /**
+     * 转多久（tick ✓）。
+     *
+     * <p>★ 作者 2026-10-04："龙存在的时间太短了" ✗ ⇒ 400 → <b>800</b>（40 秒 ✓，
+     * 鳞甲 buff 还是 20 秒 ✗ —— 龙比 buff 多留一会儿，看着更从容 ✓）。
+     */
+    public static int ticks = 800;
     /** 几条龙 ✓。 */
     public static int count = 3;
 
