@@ -49,14 +49,14 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
     public static final float MAX_HP = 3000.0F;
 
     /**
-     * 渲染缩放（1.0 = 原样 ✓）—— 模型实测：脚底 y=0 → 头顶（含角）y=96 单位 = <b>6 格</b> ✓
-     * （躯干肩高约 84 单位 = 5.25 格 ✓）⇒ 玩家(1.8)的 3.3 倍 ✓，本来就是"巨人" ✓，不用再放 ✓。
+     * 渲染缩放（1.0 = 原样 ✓）—— 模型实测：脚底 y=0 → 头顶（含角）y=97 单位 ≈ <b>6 格</b> ✓，
+     * <b>肩宽 64 单位 = 4 格</b> ✓（宽高比 1.5 ⇒ 作者要的"粗壮 / 雄壮"，不是竹竿 ✓；玩家是 3.0）。
      */
     public static final double MODEL_SCALE = 1.0D;
 
-    /** 碰撞箱（宽 × 高，格 ✓）—— 量自模型（身体 2.75 格宽 · 肩高 5.25 格 ✓），不然会穿墙/浮空 ✗。 */
-    public static final float HITBOX_WIDTH = 1.8F;
-    public static final float HITBOX_HEIGHT = 5.25F;
+    /** 碰撞箱（宽 × 高，格 ✓）—— 量自模型（肩甲外缘 4 格 · 头顶 5.6 格 ✓），不然会穿墙/浮空 ✗。 */
+    public static final float HITBOX_WIDTH = 2.4F;
+    public static final float HITBOX_HEIGHT = 5.6F;
 
     /** 顶部血条（作者要"boss 那种血量条"✓）。 */
     private final ServerBossEvent bossEvent = new ServerBossEvent(this.getDisplayName(),

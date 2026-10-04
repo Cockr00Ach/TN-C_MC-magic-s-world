@@ -196,86 +196,102 @@ function AddBox([string]$bone, [string]$name, [double]$x, [double]$y, [double]$z
 }
 
 # ---------------------------------------------------------------- legs
-# Feet at y=0, hip at y=40. The deep parts (thigh, shin, boot, chest, waist) are cut into two
-# stacked cubes: box UV for one cube of size (w,h,d) is 2*(d+w) * (d+h), while k slabs cost
-# k * 2*(d+w) * (d+h/k) -- close to half for k=2. That trade is what lets a 4-block giant fit.
-foreach ($side in @(@('right', -8.0), @('left', 0.0))) {
+# ★ 2026-10-03 作者："这巨人看着瘦瘦高高的，太丑了，我要粗壮，肌肉，那种雄壮的" --
+#   The first version was a normal humanoid stretched to 6 blocks: 44 units wide against 96 tall
+#   (ratio 2.2, a beanpole). This pass is built the other way round: a 64-unit-wide shoulder line
+#   against ~96 tall (ratio 1.5), with the legs shortened (hip at 34 instead of 40) so the torso
+#   owns most of the height. Brute checklist: wide stance, thighs as thick as the old waist,
+#   18-unit-deep boots, arms hanging past the crotch, 13-unit-thick forearms, fists wider than
+#   the old chest plate, a trapezius slab that swallows the neck, and a small head sunk into it.
+foreach ($side in @(@('right', -15.5), @('left', 0.5))) {
     $tag = $side[0]
     $x0 = $side[1]
     $bone = "leg$tag"
-    AddBox $bone "thigh_$tag" $x0       26 -3   8  14 5  'fur'   1
-    AddBox $bone "knee_$tag"  ($x0-1)   20 -4   10 6  3  'steel' 1
-    AddBox $bone "shin_$tag"  $x0       8  -3   7  13 5  'steel' 2
-    AddBox $bone "boot_$tag"  ($x0-1)   0  -5   9  8  9  'steel' 2
+    AddBox $bone "thigh_$tag"  $x0        20 -6    15 14 12 'fur'    1
+    AddBox $bone "knee_$tag"   ($x0-1)    13 -6.5  17 8  13 'steel'  1
+    AddBox $bone "shin_$tag"   ($x0+0.5)   4 -6    14 10 12 'steel'  2
+    AddBox $bone "boot_$tag"   ($x0-1.5)   0 -9    18 5  16 'steel'  2
+    AddBox $bone "toecap_$tag" ($x0-1)     0.5 -10 17 4  3  'steelHi' 1
 }
 
 # ---------------------------------------------------------------- arms
-foreach ($side in @(@('right', -16.0), @('left', 8.0))) {
+# Shoulder joint at y=66, fist bottom at y=18: long *and* thick (13 wide), with a bicep bulge and
+# a knuckle plate. The arm bones' pivots move out to x=+-19 to match.
+foreach ($side in @(@('right', -26.0), @('left', 13.0))) {
     $tag = $side[0]
     $ax = $side[1]
     $bone = "arm$tag"
-    AddBox $bone "upperarm_$tag" ($ax)     46 -3   7 14 5  'fur'     1
-    AddBox $bone "forearm_$tag"  ($ax)     34 -3   6 12 5  'fur'     1
-    AddBox $bone "bracer_$tag"   ($ax-0.5) 33 -4   7 12 2  'steel'  1
-    AddBox $bone "hand_$tag"     ($ax-0.5) 22 -4   8 11 6  'steelLo' 1
-    AddBox $bone "paw_$tag"      ($ax-0.5) 16 -4.5 8 6  3  'bone'    1
+    AddBox $bone "upperarm_$tag" ($ax)      48 -6    13 18 13 'fur'     1
+    AddBox $bone "bicep_$tag"    ($ax-1.5)  52 -7.5  16 10 16 'fur'     1
+    AddBox $bone "forearm_$tag"  ($ax)      30 -6    13 18 14 'steel'   1
+    AddBox $bone "bracer_$tag"   ($ax-0.5)  32 -6.5  14 14 15 'steelLo' 1
+    AddBox $bone "hand_$tag"     ($ax-1)    18 -7    15 12 15 'steelLo' 1
+    AddBox $bone "knuckle_$tag"  ($ax-1.5)  20 -9    16 6  3  'bone'    1
 }
 
 # ---------------------------------------------------------------- torso (bone: body)
-AddBox 'body' 'neck'        -3    70 -3   6  5  5   'steel'   1
-AddBox 'body' 'chest'       -9    52 -4.5 18 16 7   'steel'   2
-AddBox 'body' 'chestplate'  -10   53 -6.5 20 9  2.5 'steel'   1
-AddBox 'body' 'chestplate2' -10   45 -6.5 20 8  2.5 'steel'   1
-AddBox 'body' 'chestrune'   -3    54 -7   6  5  1.5 'rune'    1
-AddBox 'body' 'waist'       -8    40 -4.5 16 12 6   'steel'   1
-AddBox 'body' 'belt'        -9    37 -5   18 5  3   'leather' 1
-AddBox 'body' 'buckle'      -3.5  37 -6.5 7  5  3   'steelHi' 1
+AddBox 'body' 'neck'        -5.5  76 -4    11 7  11 'steel'   1
+AddBox 'body' 'trap'        -13   70 -5    26 8  13 'fur'     1
+AddBox 'body' 'chest'       -14   54 -7    28 18 14 'steel'   2
+AddBox 'body' 'pec_r'       -13.5 59 -9.5  12 11 3  'steelHi' 1
+AddBox 'body' 'pec_l'        1.5  59 -9.5  12 11 3  'steelHi' 1
+AddBox 'body' 'chestplate'  -15   55 -9    30 17 2.5 'steel'  1
+AddBox 'body' 'chestrune'   -4    60 -9.5  8  6  1.5 'rune'   1
+AddBox 'body' 'chestplate2' -15   44 -8    30 11 2.5 'steel'  1
+AddBox 'body' 'abdomen'     -12   42 -6    24 12 12 'steel'   1
+AddBox 'body' 'absplate1'   -9    43 -7.5  18 5  2  'steelHi' 1
+AddBox 'body' 'absplate2'   -9    49 -7.5  18 5  2  'steelHi' 1
+AddBox 'body' 'waist'       -12   32 -5.5  24 10 11 'steel'   1
+AddBox 'body' 'belt'        -13   30 -7    26 6  14 'leather' 1
+AddBox 'body' 'buckle'      -4.5  30 -8.5  9  6  3  'steelHi' 1
 
-# cape: stacked slabs (one 12x48x2 slab would cost three times as much atlas)
-AddBox 'cape' 'cape1' -6 57 6.5 12 15 2 'cloth' 1
-AddBox 'cape' 'cape2' -6 42 6.5 12 15 2 'cloth' 1
-AddBox 'cape' 'cape3' -6 24 6.5 12 18 2 'cloth' 1
+# cape: stacked slabs (one 18x50x3 slab would cost three times as much atlas)
+AddBox 'cape' 'cape1' -9 57 8.5 18 15 3 'cloth' 1
+AddBox 'cape' 'cape2' -9 42 8.5 18 15 3 'cloth' 1
+AddBox 'cape' 'cape3' -9 22 8.5 18 20 3 'cloth' 1
 
-AddBox 'tail' 'tail1' -2.5 27 5.5 5 9 4 'fur' 1
-AddBox 'tail' 'tail2' -2   18 6   4 9 3 'fur' 1
-AddBox 'tail' 'tail3' -1.5 10 6.5 3 9 3 'fur' 1
+AddBox 'tail' 'tail1' -4   30 6.5 8 10 5 'fur' 1
+AddBox 'tail' 'tail2' -3.5 20 7   7 10 4 'fur' 1
+AddBox 'tail' 'tail3' -3   10 7.5 6 10 4 'fur' 1
 
 # ---------------------------------------------------------------- head (bone: head)
-AddBox 'head' 'skull'  -6   76   -5   12 11 8 'fur'  1
-AddBox 'head' 'snout'  -4.5 73   -8.5 9  8  5 'fur'  1
-AddBox 'head' 'brow'   -6   85   -6   12 3  4 'fur'  1
-AddBox 'head' 'tusk_r' -5.5 71   -8.5 2  5  2 'bone' 1
-AddBox 'head' 'tusk_l'  3.5 71   -8.5 2  5  2 'bone' 1
-AddBox 'head' 'eye_r'  -4.5 81   -5.5 2.5 2 0.8 'eye' 1
-AddBox 'head' 'eye_l'   2   81   -5.5 2.5 2 0.8 'eye' 1
-AddBox 'head' 'ear_r'  -7   83   -1.5 2 3  2  'fur'  1
-AddBox 'head' 'ear_l'   5   83   -1.5 2 3  2  'fur'  1
+# Small head, heavy jaw, jutting snout: it has to sit *between* the pauldrons, not above them.
+AddBox 'head' 'skull'  -7.5 77   -6.5  15 13 12 'fur'  1
+AddBox 'head' 'snout'  -5.5 74   -10.5 11 9  6  'fur'  1
+AddBox 'head' 'brow'   -7.5 87   -7.5  15 4  5  'fur'  1
+AddBox 'head' 'tusk_r' -7.5 72   -11   3  6  2.5 'bone' 1
+AddBox 'head' 'tusk_l'  4.5 72   -11   3  6  2.5 'bone' 1
+AddBox 'head' 'eye_r'  -5   83   -7.5  3  2.5 1 'eye' 1
+AddBox 'head' 'eye_l'   2   83   -7.5  3  2.5 1 'eye' 1
+AddBox 'head' 'ear_r'  -9.5 84   -2    3  4  3  'fur' 1
+AddBox 'head' 'ear_l'   6.5 84   -2    3  4  3  'fur' 1
 
 # horns: base + tip per side (out and back), with an iron collar at the root
 foreach ($side in @(@('right', -1.0), @('left', 1.0))) {
     $tag = $side[0]
     $sgn = $side[1]
-    $x0 = if ($sgn -lt 0) { -8.0 } else { 4.0 }
-    $x1 = if ($sgn -lt 0) { -11.5 } else { 7.5 }
-    $x2 = if ($sgn -lt 0) { -9.0 } else { 5.0 }
-    AddBox "horn$tag" "hornbase_$tag" $x0 86   -2 4 5 4 'bone'    1
-    AddBox "horn$tag" "horntip_$tag"  $x1 89   -1 4 7 4 'bone'    1
-    AddBox "horn$tag" "hornring_$tag" $x2 87.5 -2 5 2 4 'steelLo' 1
+    $x0 = if ($sgn -lt 0) { -10.5 } else { 6.5 }
+    $x1 = if ($sgn -lt 0) { -14.0 } else { 10.0 }
+    $x2 = if ($sgn -lt 0) { -11.5 } else { 7.5 }
+    AddBox "horn$tag" "hornbase_$tag" $x0 88   -3 5 5 5 'bone'    1
+    AddBox "horn$tag" "horntip_$tag"  $x1 91   -2 5 6 5 'bone'    1
+    AddBox "horn$tag" "hornring_$tag" $x2 89.5 -3 6 2 5 'steelLo' 1
 }
 
 # ---------------------------------------------------------------- pauldrons
+# Outer edge at x=+-32 => a 64-unit (4 block) shoulder line: the widest thing on the model.
 foreach ($side in @(@('right', -1.0), @('left', 1.0))) {
     $tag = $side[0]
     $sgn = $side[1]
-    $capA = if ($sgn -lt 0) { -22.0 } else { 12.0 }
-    AddBox "pauldron$tag" "pauldroncapA_$tag" $capA 70 -5   10 8 9 'steel' 2
-    AddBox "pauldron$tag" "pauldroncapB_$tag" $capA 62 -4.5 9  8 8 'steel' 1
-    $sx = if ($sgn -lt 0) { @(-20.0, -17.5, -15.0) } else { @(10.0, 12.5, 15.0) }
+    $capA = if ($sgn -lt 0) { -32.0 } else { 15.0 }
+    AddBox "pauldron$tag" "pauldroncapA_$tag" $capA 62 -7 17 13 16 'steel' 2
+    AddBox "pauldron$tag" "pauldroncapB_$tag" ($capA+1) 52 -6.5 15 11 15 'steel' 1
+    $sx = if ($sgn -lt 0) { @(-29.0, -25.0, -21.0) } else { @(25.5, 21.5, 17.5) }
     $i = 0
     foreach ($spx in $sx) {
         $tipx = if ($sgn -lt 0) { $spx - 1.5 } else { $spx + 1.5 }
-        AddBox "pauldron$tag" "spike_${tag}_$i"    $spx  78 -5 2 6 3 'steelHi' 1
-        AddBox "pauldron$tag" "spiketip_${tag}_$i" $tipx 84 -4 2 4 2 'bone'    1
+        AddBox "pauldron$tag" "spike_${tag}_$i"    $spx  74 -6 3.5 7 4.5 'steelHi' 1
+        AddBox "pauldron$tag" "spiketip_${tag}_$i" $tipx 81 -5 3.5 5 3.5 'bone'    1
         $i++
     }
 }
@@ -685,18 +701,18 @@ $boneParent = @{ root = $null; body = 'root'; head = 'body'; hornright = 'head';
                  legright = 'body'; legleft = 'body'; cape = 'body'; tail = 'body' }
 $bonePivot = @{
     root          = @(0, 0, 0)
-    body          = @(0, 40, 0)
+    body          = @(0, 34, 0)
     head          = @(0, 76, 0)
-    hornright     = @(-6.5, 86, -1)
-    hornleft      = @(6.5, 86, -1)
-    armright      = @(-12, 70, 0)
-    armleft       = @(12, 70, 0)
-    pauldronright = @(-15, 70, 0)
-    pauldronleft  = @(15, 70, 0)
-    legright      = @(-4, 40, 0)
-    legleft       = @(4, 40, 0)
-    cape          = @(0, 72, 6)
-    tail          = @(0, 36, 6)
+    hornright     = @(-10.5, 88, -3)
+    hornleft      = @(10.5, 88, -3)
+    armright      = @(-19, 66, 0)
+    armleft       = @(19, 66, 0)
+    pauldronright = @(-19, 66, 0)
+    pauldronleft  = @(19, 66, 0)
+    legright      = @(-8, 34, 0)
+    legleft       = @(8, 34, 0)
+    cape          = @(0, 74, 8)
+    tail          = @(0, 34, 8)
 }
 
 $L = New-Object System.Collections.ArrayList
