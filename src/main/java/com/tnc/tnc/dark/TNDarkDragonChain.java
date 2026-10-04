@@ -57,15 +57,15 @@ public final class TNDarkDragonChain {
     /**
      * 数值表 ✓ —— 和光龙那张**逐字一样** ✓（作者要的是"复制"✓；要单独调就改这里 ✓）。
      *
-     * <p>★ 作者 2026-10-04："龙存在的时间太短了" ✗ ⇒ **飞行时长整体翻倍** ✓
-     * （速度一个没动 ✓ ⇒ 看着飞得一样快，就是**能多看一倍时间** ✓，航程也跟着翻倍 ✓）。
+     * <p>★ 2026-10-04 两轮改动：飞行时长翻倍 ✓（"龙存在的时间太短了"）、
+     * 速度翻倍 ✓（"速度加快一倍"）、t3/t4/t5 个头再放大一倍 ✓（"t345 模型都放大一倍"）。
      */
     private static final Dragon[] DRAGONS = {
-            new Dragon("dark_dragon_breath", 1, 1, 0.30D, 14.0D, 0.24D, 450, 0.0D, "暗龙吐息"),
+            new Dragon("dark_dragon_breath", 1, 1, 0.30D, 14.0D, 0.48D, 450, 0.0D, "暗龙吐息"),
             new Dragon("dark_dragon_scales", 2, 3, 0.30D, 6.0D, 0.0D, 800, 0.0D, "暗龙鳞甲"),
-            new Dragon("dark_dragon_charge", 3, 1, 1.50D, 24.0D, 0.29D, 620, 0.0D, "暗龙出击"),
-            new Dragon("dark_dragon_dive", 4, 2, 3.00D, 34.0D, 0.33D, 740, 7.0D, "暗龙俯冲"),
-            new Dragon("dark_dragon_descend", 5, 3, 6.00D, 44.0D, 0.37D, 840, 16.0D, "暗龙降世"),
+            new Dragon("dark_dragon_charge", 3, 1, 3.00D, 24.0D, 0.58D, 620, 0.0D, "暗龙出击"),
+            new Dragon("dark_dragon_dive", 4, 2, 6.00D, 34.0D, 0.66D, 740, 7.0D, "暗龙俯冲"),
+            new Dragon("dark_dragon_descend", 5, 3, 12.00D, 44.0D, 0.74D, 840, 16.0D, "暗龙降世"),
     };
 
     /** 龙放主人前方多远（格 ✓）。 */

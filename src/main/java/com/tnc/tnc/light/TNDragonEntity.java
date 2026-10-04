@@ -137,6 +137,8 @@ public class TNDragonEntity extends Entity implements GeoEntity {
 
     /** 冲刺撞人的判定，横向给多宽（格 ✓）—— 纵向按体长给 ✓。 */
     private static final double SWEEP_WIDTH = 3.0D;
+    /** 判定盒纵向**封顶**多少格 ✓（t5 放大 12 倍后体长 273 格 ✗ —— 见 {@link #sweepBox()}）。 */
+    private static final double SWEEP_MAX_LENGTH = 96.0D;
     /** 没显式给参数时（比如 /summon 出来的）用这套默认值 ✓。 */
     private static final double DEFAULT_SPEED = 0.28D;
     private static final int DEFAULT_TICKS = 200;
@@ -211,8 +213,15 @@ public class TNDragonEntity extends Entity implements GeoEntity {
         return this.entityData.get(DATA_SCALE) / 100.0D;
     }
 
+    /**
+     * 设置个头 ✓。
+     *
+     * <p>★ 上限 2026-10-04 从 4.0 提到 <b>64.0</b> ✗ —— 作者："t345 模型都放大一倍" ✓
+     * ⇒ t4 = 6.0、t5 = **12.0** ✓，原来那个 4.0 的钳位会把它们**悄悄压回 4.0** ✗
+     * （表现就是"我改大了但游戏里看不出变化"✗，这种静默失效最难查 ✓）。
+     */
     public void setScale(double scale) {
-        this.entityData.set(DATA_SCALE, (int) Math.round(Mth.clamp(scale, 0.05D, 4.0D) * 100.0D));
+        this.entityData.set(DATA_SCALE, (int) Math.round(Mth.clamp(scale, 0.05D, 64.0D) * 100.0D));
     }
 
     public int tier() {
@@ -320,9 +329,16 @@ public class TNDragonEntity extends Entity implements GeoEntity {
         return this.getBoundingBox().inflate(SWEEP_WIDTH, len * 0.35D, len * 0.55D);
     }
 
-    /** 冲刺扫过的判定盒 ✓（以龙自己为中心、按体长给 ✓）。 */
+    /**
+     * 冲刺扫过的判定盒 ✓（以龙自己为中心 ✓）。
+     *
+     * <p>★ 体长**封顶 {@link #SWEEP_MAX_LENGTH}** ✗ —— 作者 2026-10-04 把 t5 放大到 12 倍之后
+     * 体长是 273 格 ✗，按全长的立方体去查实体每一下都要扫几百个区块段 ✗（会卡顿 ✓）。
+     * 封顶之后：够得着的敌人照样一下一个 ✓（每个敌人整次冲刺只挨一次 ✓），
+     * 只是**离身体很远**那段不再吃伤害 ✓。
+     */
     private AABB sweepBox() {
-        double len = MODEL_LENGTH_BLOCKS * this.scale();
+        double len = Math.min(SWEEP_MAX_LENGTH, MODEL_LENGTH_BLOCKS * this.scale());
         return new AABB(this.getX() - len * 0.5D, this.getY() - 1.5D, this.getZ() - len * 0.5D,
                 this.getX() + len * 0.5D, this.getY() + 2.5D, this.getZ() + len * 0.5D);
     }
