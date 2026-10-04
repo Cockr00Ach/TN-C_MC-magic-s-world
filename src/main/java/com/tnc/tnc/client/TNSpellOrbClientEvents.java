@@ -45,13 +45,10 @@ public final class TNSpellOrbClientEvents {
         // ★ 战斗天使（光法第 4 条链「召唤天使」✓）：GeckoLib 模型 + 按档位放大，见 TNFightingAngelRenderer ✓
         event.registerEntityRenderer(TNOrbEntities.FIGHTING_ANGEL.get(),
                 com.tnc.tnc.light.client.TNFightingAngelRenderer::new);
-        // ★ 光明龙（光法第 5 条链「光龙」✓）：作者的东方龙 + 半透明自发光，见 TNDragonRenderer ✓
-        event.registerEntityRenderer(TNOrbEntities.LIGHT_DRAGON.get(),
-                com.tnc.tnc.light.client.TNDragonRenderer::new);
-        // ★ 暗龙（暗系「暗龙」链 ✓，作者："复制一下光龙，生成一个暗龙" ✓）：
-        //   同一个实体类 + 同一套 geo/动画 ⇒ 只换渲染器（另一张贴图 + 灵魂火粒子 ✓）
-        event.registerEntityRenderer(TNOrbEntities.DARK_DRAGON.get(),
-                com.tnc.tnc.dark.client.TNDarkDragonRenderer::new);
+        // ★ 龙（光龙 / 暗龙）：★ 2026-10-04 起**不再注册渲染器** ✗ ——
+        //   龙现在是原版 Display.BlockDisplay（作者："你把他当成block来使用好不好" ✓），
+        //   由**原版**的 DisplayRenderer 自己画方块模型 ✓（见 light/TNDragonDisplayEntity ✓）。
+        //   曾经的 TNDragonRenderer / TNDarkDragonRenderer 就此退役 ✓（那两个类还在，随时能翻回去看 ✓）。
         // ★ 暗系第三条链「召唤」的五个召唤物（作者 2026-10-04："暗魔法的召唤流没实装吗" ✓）
         //   五档模型差别很大 ⇒ 五个类型共用**一个**渲染器（模型类按档位挑文件 ✓）
         event.registerEntityRenderer(TNOrbEntities.DARK_IMP.get(),

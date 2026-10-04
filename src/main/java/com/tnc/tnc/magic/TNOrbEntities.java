@@ -169,6 +169,26 @@ public final class TNOrbEntities {
                     .build("tnc:light_dragon"));
 
     /**
+     * ★★ <b>龙真正的实体（2026-10-04 起）</b> —— 原版 {@link net.minecraft.world.entity.Display.BlockDisplay} ✓。
+     *
+     * <p>作者："<b>龙释放还是异常，都没法出现啊大哥，你把他当成block来使用好不好</b>" ✓
+     * ⇒ 不再走 GeckoLib（那条路上"非生物实体 yaw 恒为 0 / 大模型被视锥剔掉 / 出生点被推到
+     * 几十格外"三件事叠起来，实机就是"根本没法出现"✗），
+     * 改成**方块模型 + 原版 Display** ✓（见 {@code light/TNDragonDisplayEntity} ✓）。
+     *
+     * <p>光龙 / 暗龙**共用这一个实体类型** ✓ —— 差别只有"挂哪个载体方块" ✓
+     * （{@code tnc:dragon_display_light} / {@code _dark} ✓），
+     * 法术生成时用 {@code setCarrier(...)} 指定 ✓。
+     */
+    public static final RegistryObject<EntityType<com.tnc.tnc.light.TNDragonDisplayEntity>> DRAGON =
+            ENTITY_TYPES.register("dragon", () -> EntityType.Builder
+                    .of(com.tnc.tnc.light.TNDragonDisplayEntity::new, MobCategory.MISC)
+                    .sized(2.5F, 2.0F)
+                    .clientTrackingRange(16)
+                    .updateInterval(1)
+                    .build("tnc:dragon"));
+
+    /**
      * ★ 暗系链「暗龙」<b>扔出去的那条暗龙</b> ✓（作者 2026-10-02：<b>"复制一下光龙，生成一个暗龙"</b> ✓）。
      *
      * <p>它就是上面那条光龙的**暗色镜像** ✓ —— 实体类**完全一样**

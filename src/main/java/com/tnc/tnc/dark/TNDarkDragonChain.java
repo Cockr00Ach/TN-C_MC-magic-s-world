@@ -120,7 +120,7 @@ public final class TNDarkDragonChain {
         int ticks = TNDragonOrbitConfig.ticks;
         int spawned = 0;
         for (int i = 0; i < n; i++) {
-            TNDragonEntity entity = TNOrbEntities.DARK_DRAGON.get().create(level);
+            com.tnc.tnc.light.TNDragonDisplayEntity entity = TNOrbEntities.DRAGON.get().create(level);
             if (entity == null) {
                 continue;
             }
@@ -128,10 +128,12 @@ public final class TNDarkDragonChain {
             entity.setTier(dragon.tier());
             entity.setScale(dragon.scale());
             entity.setOwner(caster.getUUID());
-            entity.setDark(true);                       // ★ 只有皮不同：灵魂火 + 黑烟 ✓
+            // 暗龙：挂"暗色那份"载体方块 ✓（且**不**满亮 ✓ —— 满亮会把黑鳞照成灰的 ✗）
+            entity.setCarrier(com.tnc.tnc.TNMod.DRAGON_DISPLAY_DARK.get(), true);
             entity.orbit(caster.getUUID(), caster.getId(), radius, degPerTick,
                     TNDragonOrbitConfig.height, ticks, dragon.damage(), angle);
             entity.placeOnRing(caster, angle);          // 立刻摆到环上 ✓（不然第一帧会闪在脚下 ✗）
+            entity.pushTransform();
             level.addFreshEntity(entity);
             spawned++;
         }
@@ -179,7 +181,8 @@ public final class TNDarkDragonChain {
     /** t1 / t3 / t4 / t5：**放龙** ✓ —— 施法者正前方、鼻尖锚定、多条上下编队（对齐光龙 ✓）。 */
     private static void release(ServerLevel level, LivingEntity caster, Dragon dragon) {
         Vec3 look = caster.getLookAngle();
-        double bodyRadius = TNDragonEntity.MODEL_LENGTH_BLOCKS * dragon.scale() + HEAD_CLEARANCE;
+        double bodyRadius = com.tnc.tnc.light.TNDragonDisplayEntity.MODEL_LENGTH_BLOCKS
+                * dragon.scale() + HEAD_CLEARANCE;
         double lift = Math.min(LIFT_MAX, bodyRadius * LIFT);
         Vec3 start = caster.position().add(look.scale(bodyRadius));
         int spawned = 0;
@@ -211,17 +214,18 @@ public final class TNDarkDragonChain {
 
     private static boolean spawnOne(ServerLevel level, LivingEntity caster, Dragon dragon,
                                     Vec3 at, Vec3 dir) {
-        TNDragonEntity entity = TNOrbEntities.DARK_DRAGON.get().create(level);
+        com.tnc.tnc.light.TNDragonDisplayEntity entity = TNOrbEntities.DRAGON.get().create(level);
         if (entity == null) {
             return false;
         }
         entity.setTier(dragon.tier());
         entity.setScale(dragon.scale());
         entity.setOwner(caster.getUUID());
-        entity.setDark(true);                           // ★ 灵魂火 + 黑烟 ✓
-        entity.setHeadAnchored(true);                   // ★ 鼻尖锚定 ✓（和光龙一致 ✓）
+        // 暗龙：暗色载体方块 + **不满亮** ✓（灵魂火 + 黑烟由粒子做 ✓）
+        entity.setCarrier(com.tnc.tnc.TNMod.DRAGON_DISPLAY_DARK.get(), true);
         entity.moveTo(at.x, at.y, at.z, caster.getYRot(), 0.0F);
         entity.charge(dir, dragon.speed(), dragon.ticks(), dragon.damage());
+        entity.pushTransform();
         level.addFreshEntity(entity);
         level.sendParticles(net.minecraft.core.particles.ParticleTypes.SOUL_FIRE_FLAME,
                 at.x, at.y + 1.0D, at.z, 60, 1.2D, 1.0D, 1.2D, 0.06D);

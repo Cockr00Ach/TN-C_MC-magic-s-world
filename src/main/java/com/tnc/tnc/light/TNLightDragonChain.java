@@ -157,7 +157,7 @@ public final class TNLightDragonChain {
         int ticks = TNDragonOrbitConfig.ticks;
         int spawned = 0;
         for (int i = 0; i < n; i++) {
-            TNDragonEntity entity = TNOrbEntities.LIGHT_DRAGON.get().create(level);
+            com.tnc.tnc.light.TNDragonDisplayEntity entity = TNOrbEntities.DRAGON.get().create(level);
             if (entity == null) {
                 continue;
             }
@@ -165,10 +165,12 @@ public final class TNLightDragonChain {
             entity.setTier(dragon.tier());
             entity.setScale(dragon.scale());
             entity.setOwner(caster.getUUID());
+            entity.setCarrier(com.tnc.tnc.TNMod.DRAGON_DISPLAY_LIGHT.get(), false);
             entity.orbit(caster.getUUID(), caster.getId(), radius, degPerTick,
                     TNDragonOrbitConfig.height, ticks, dragon.damage(), angle);
             // 立刻摆到环上 ✓（不先摆的话，第一帧会闪在主人脚下再飞出去 ✗）
             entity.placeOnRing(caster, angle);
+            entity.pushTransform();
             level.addFreshEntity(entity);
             spawned++;
         }
@@ -240,7 +242,7 @@ public final class TNLightDragonChain {
     private static void release(ServerLevel level, LivingEntity caster, Dragon dragon) {
         Vec3 look = caster.getLookAngle();
         // 身体半径（从鼻尖到尾尖 = 体长 ✓）+ 一点余量 ⇒ 这是"鼻尖至少要放多远" ✓
-        double bodyRadius = TNDragonEntity.MODEL_LENGTH_BLOCKS * dragon.scale() + HEAD_CLEARANCE;
+        double bodyRadius = TNDragonDisplayEntity.MODEL_LENGTH_BLOCKS * dragon.scale() + HEAD_CLEARANCE;
         // 抬高：小龙贴着视线 ✓，大龙整体抬到头顶上方 ✓（封顶，免得飞到云上去 ✗）
         double lift = Math.min(LIFT_MAX, bodyRadius * LIFT);
         Vec3 start = caster.position().add(look.scale(bodyRadius));
@@ -274,16 +276,20 @@ public final class TNLightDragonChain {
 
     private static boolean spawnOne(ServerLevel level, LivingEntity caster, Dragon dragon,
                                     Vec3 at, Vec3 dir) {
-        TNDragonEntity entity = TNOrbEntities.LIGHT_DRAGON.get().create(level);
+        // ★ 2026-10-04：改成原版 Display.BlockDisplay（作者："你把他当成block来使用好不好" ✓）
+        com.tnc.tnc.light.TNDragonDisplayEntity entity =
+                TNOrbEntities.DRAGON.get().create(level);
         if (entity == null) {
             return false;
         }
         entity.setTier(dragon.tier());
         entity.setScale(dragon.scale());
         entity.setOwner(caster.getUUID());
-        entity.setHeadAnchored(true);       // ★ 鼻尖锚定 ✓（出生点不用再随体长往外推 ✓）
+        // 光龙：挂"发光那份"载体方块 ✓（满亮 ✓）
+        entity.setCarrier(com.tnc.tnc.TNMod.DRAGON_DISPLAY_LIGHT.get(), false);
         entity.moveTo(at.x, at.y, at.z, caster.getYRot(), 0.0F);
         entity.charge(dir, dragon.speed(), dragon.ticks(), dragon.damage());
+        entity.pushTransform();
         level.addFreshEntity(entity);
         spawnFlash(level, at);
         return true;
