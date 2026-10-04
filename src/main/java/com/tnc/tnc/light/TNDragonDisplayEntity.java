@@ -369,17 +369,19 @@ public class TNDragonDisplayEntity extends Display.BlockDisplay {
         if (!this.configured) {
             this.charge(this.getLookAngle(), DEFAULT_SPEED, DEFAULT_TICKS, DEFAULT_DAMAGE);
         }
-        if (--this.chargeTicks <= 0 && !this.level().isClientSide()) {
-            this.burst(20, 1.2D);
-            this.discard();
-            return;
-        }
         if (this.level().isClientSide()) {
             this.advance(this.facing(), this.entityData.get(DATA_SPEED) / 1000.0D);
             this.trail(this.facing());
             return;
         }
         ServerLevel level = (ServerLevel) this.level();
+        // ★ 寿命只在**服务端**数 ✗ —— 两端都减的话，客户端会先到点把自己删掉 ✗
+        //   （表现就是"龙比法术先消失"✓，这类"客户端和服务端各算一份"的地方最容易漏 ✓）
+        if (--this.chargeTicks <= 0) {
+            this.burst(20, 1.2D);
+            this.discard();
+            return;
+        }
         // 龙头前方是实心方块 ⇒ 撞墙爆开 ✓（出生后 SPAWN_GRACE_TICKS tick 内不判 ✓，
         //   因为出生点常常正好在地形里 ✓ —— 那会造成"出生即自爆"✗）
         if (this.tickCount > SPAWN_GRACE_TICKS) {
