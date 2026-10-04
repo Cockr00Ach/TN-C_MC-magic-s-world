@@ -123,4 +123,14 @@
   "entity.tnc.dark_giant": "Beastman Warlord"
 ,
   "item.tnc.dark_giant_spawn_egg": "Beastman Warlord Spawn Egg"
+,
+  "entity.tnc.dark_imp": "Imp"
+,
+  "entity.tnc.dark_guard": "Dark Guard"
+,
+  "entity.tnc.dark_lord": "Dark Lord"
+,
+  "entity.tnc.dark_king": "Dark King"
+,
+  "entity.tnc.evil_god": "Evil God"
 }

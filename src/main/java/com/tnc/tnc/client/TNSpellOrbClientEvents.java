@@ -52,5 +52,17 @@ public final class TNSpellOrbClientEvents {
         //   同一个实体类 + 同一套 geo/动画 ⇒ 只换渲染器（另一张贴图 + 灵魂火粒子 ✓）
         event.registerEntityRenderer(TNOrbEntities.DARK_DRAGON.get(),
                 com.tnc.tnc.dark.client.TNDarkDragonRenderer::new);
+        // ★ 暗系第三条链「召唤」的五个召唤物（作者 2026-10-04："暗魔法的召唤流没实装吗" ✓）
+        //   五档模型差别很大 ⇒ 五个类型共用**一个**渲染器（模型类按档位挑文件 ✓）
+        event.registerEntityRenderer(TNOrbEntities.DARK_IMP.get(),
+                com.tnc.tnc.dark.client.TNDarkSummonRenderer::new);
+        event.registerEntityRenderer(TNOrbEntities.DARK_GUARD.get(),
+                com.tnc.tnc.dark.client.TNDarkSummonRenderer::new);
+        event.registerEntityRenderer(TNOrbEntities.DARK_LORD.get(),
+                com.tnc.tnc.dark.client.TNDarkSummonRenderer::new);
+        event.registerEntityRenderer(TNOrbEntities.DARK_KING.get(),
+                com.tnc.tnc.dark.client.TNDarkSummonRenderer::new);
+        event.registerEntityRenderer(TNOrbEntities.EVIL_GOD.get(),
+                com.tnc.tnc.dark.client.TNDarkSummonRenderer::new);
     }
 }

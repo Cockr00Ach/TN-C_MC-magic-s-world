@@ -90,5 +90,17 @@ public final class TNNpcAttributes {
         // ★ 光明龙**不在这里** ✓ —— 它是投射物（{@code extends Entity} ✗ 不是生物 ✗），
         //   作者 2026-10-02："我要的龙不是怪，你把他怪给我删了" ✓
         //   ⇒ 非生物**不能**注册属性（注册了反而会出问题 ✗），所以这一行是故意没有的 ✓
+        // ★ 暗系五个召唤物（作者 2026-10-04："暗魔法的召唤流没实装吗" ✓）
+        //   ——**生物，必须在这里有属性** ✗（漏了生成即崩 ✓），每档一套数值 ✓
+        event.put(com.tnc.tnc.magic.TNOrbEntities.DARK_IMP.get(),
+                com.tnc.tnc.dark.TNDarkSummonEntity.createAttributes(1).build());
+        event.put(com.tnc.tnc.magic.TNOrbEntities.DARK_GUARD.get(),
+                com.tnc.tnc.dark.TNDarkSummonEntity.createAttributes(2).build());
+        event.put(com.tnc.tnc.magic.TNOrbEntities.DARK_LORD.get(),
+                com.tnc.tnc.dark.TNDarkSummonEntity.createAttributes(3).build());
+        event.put(com.tnc.tnc.magic.TNOrbEntities.DARK_KING.get(),
+                com.tnc.tnc.dark.TNDarkSummonEntity.createAttributes(4).build());
+        event.put(com.tnc.tnc.magic.TNOrbEntities.EVIL_GOD.get(),
+                com.tnc.tnc.dark.TNDarkSummonEntity.createAttributes(5).build());
     }
 }

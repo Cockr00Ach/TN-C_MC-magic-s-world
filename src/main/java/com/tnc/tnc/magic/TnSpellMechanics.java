@@ -692,6 +692,13 @@ public final class TnSpellMechanics {
         if (com.tnc.tnc.dark.TNDarkDragonChain.isDarkDragonSpell(path)) {
             com.tnc.tnc.dark.TNDarkDragonChain.onSpellCast(player, path);
         }
+
+        // ★★ 暗系第三条链（召唤）：小恶魔 / 暗卫 / 暗之统领 / 暗之国王 / 邪神 ✓
+        //    （作者 2026-10-04："暗魔法的召唤流没实装吗" ✓ —— 这五个法术原来挂的是
+        //      **风系占位效果** ✗，现在真的把召唤物叫出来 ✓）
+        if (com.tnc.tnc.dark.TNDarkSummonChain.isDarkSummonSpell(path)) {
+            com.tnc.tnc.dark.TNDarkSummonChain.onSpellCast(player, path);
+        }
     }
 
     /**

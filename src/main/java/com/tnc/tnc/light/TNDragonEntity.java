@@ -144,6 +144,20 @@ public class TNDragonEntity extends Entity implements GeoEntity {
     private static final int DEFAULT_TICKS = 200;
     private static final double DEFAULT_DAMAGE = 20.0D;
 
+    /**
+     * ★ 出生后多少 tick 内**不做撞墙判定** ✓（作者 2026-10-04："怎么模型一出来闪一下就消失了" ✗）。
+     *
+     * <p>龙是法术在**施法者正前方最多几十格**处生成的 ✓（{@code SPAWN_DISTANCE + 体长 × 0.25}），
+     * 生成点很可能**就在地形里面** ✗（贴着墙放、在山里放、在树冠里放 ✓）——
+     * 原来的判定是"龙头前方那一格不是空气就爆开" ✓ ⇒ 这种时候**第一 tick 就自爆** ✗，
+     * 实机看到的就是"闪一下就没了" ✓（出生粒子是服务端发的，所以那一下还是看得见的 ✓）。
+     *
+     * <p>现在头 {@link #SPAWN_GRACE_TICKS} tick 里不判墙 ✓：让它先飞出来 ✓
+     * （它本来就是"无碰撞投射物"✓，穿出几格土石完全没问题 ✓），
+     * 之后恢复正常 —— 真的是墙那也照样爆 ✓，只是不再"出生即死" ✓。
+     */
+    private static final int SPAWN_GRACE_TICKS = 6;
+
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     /** 施法者（伤害记在它头上 ✓）；可能为 null ✓。 */
     private UUID ownerId;
@@ -322,12 +336,38 @@ public class TNDragonEntity extends Entity implements GeoEntity {
         return true;
     }
 
-    /** 剔除盒按**体长**撑 ✗（22.75 格长的模型，光看碰撞箱会在抬头时整条消失 ✓）。 */
+    /**
+     * 剔除盒按**体长**撑 ✗（22.75 格长的模型，光看碰撞箱会在抬头时整条消失 ✓）。
+     *
+     * <p>★ 2026-10-04：纵向从 {@code len*0.35 / len*0.55} 改成按**龙头到龙尾的实际长度**给 ✗ ——
+     * 原来那个 0.55 只罩住 12 格（0.3 个头的小龙还够 ✓，t3 放大 3 倍之后就罩不住了 ✗）。
+     * 顺带把横向也按体长放宽一点 ✓（龙是弯的 ✓，不是一根直线 ✗）。
+     */
     @Override
     public AABB getBoundingBoxForCulling() {
         double len = MODEL_LENGTH_BLOCKS * this.scale();
-        return this.getBoundingBox().inflate(SWEEP_WIDTH, len * 0.35D, len * 0.55D);
+        return this.getBoundingBox().inflate(SWEEP_WIDTH + len * 0.15D, len * 0.45D, len * 0.65D);
     }
+
+    /**
+     * ★ <b>不做视锥剔除</b> ✓（作者 2026-10-04："怎么模型一出来闪一下就消失了" ✗）。
+     *
+     * <p>原版 {@code Entity.shouldRenderAtSqrDistance} 只看**实体原点**到摄像机的距离 ✓，
+     * 而视锥剔除是拿原点那一小块盒子和视锥求交 ✗ —— 对一条 <b>23 格长 → 放大后 273 格长</b>
+     * 的龙来说完全不成立 ✗：<b>整条身体有一大半在屏幕里、原点却在视锥外</b>的时候，
+     * 原版会说"不可见"⇒ 整条龙**凭空消失** ✓（这正好就是作者看到的"闪一下就消失" ✓）。
+     *
+     * <p>改成：只要在 {@link #RENDER_DISTANCE} 格内就**无条件画** ✓（跳过视锥那一步 ✓）。
+     * 这是这个工程里其它大模型早就用过的写法 ✓（见 {@code TNLightningStrikeRenderer} /
+     * {@code TNWaterSpellRenderer} ✓）；龙每次最多几条 ✓，代价可以忽略 ✓。
+     */
+    @Override
+    public boolean shouldRenderAtSqrDistance(double distanceSqr) {
+        return distanceSqr < RENDER_DISTANCE * RENDER_DISTANCE;
+    }
+
+    /** 多远之内无条件画（格 ✓）—— 够 t5 那条 273 格长的龙横穿视野 ✓，又不至于全图都画 ✗。 */
+    private static final double RENDER_DISTANCE = 512.0D;
 
     /**
      * 冲刺扫过的判定盒 ✓（以龙自己为中心 ✓）。
@@ -363,13 +403,27 @@ public class TNDragonEntity extends Entity implements GeoEntity {
      * <p>{@code Entity} 基类的 {@code lerpTo} 是**硬赋值**（{@code setPos} + {@code setRot} ✓）✗ ——
      * 20 次/秒啪一下，绕着玩家转的时候就是"一卡一卡" ✗。位置我们两端都会自己算 ✓ ⇒
      * 服务端那份只当**兜底**：主人找不到 / 被传送 / 不是自己算位置的时候才采纳 ✓。
+     *
+     * <p>★ 2026-10-04：再加一条"**追不上就拉回来**" ✓ ——
+     * 客户端虽然自己算位置 ✓，但和服务端一定会**慢慢走偏** ✗（卡顿、区块没加载、
+     * 主人被瞬移、服务端那次撞墙判定把它挪了 ✗…）。两边各算各的、又永远不接受修正，
+     * 偏到一定程度就是"**画面上一个地方、判定在另一个地方**"✗（看着像闪一下就没 ✓）。
+     * 所以现在：偏 &lt; {@link #DESYNC_SNAP} 格（正常情况每 tick 差几厘米 ✓）**一声不响**；
+     * 偏得离谱就**贴回服务端那个点** ✓（一帧的跳，总比整个人都不见了强 ✓）。
      */
     @Override
     public void lerpTo(double x, double y, double z, float yaw, float pitch, int steps, boolean teleport) {
         if (!this.level().isClientSide() || teleport || !this.selfDriven()) {
             super.lerpTo(x, y, z, yaw, pitch, steps, teleport);
+            return;
+        }
+        if (this.distanceToSqr(x, y, z) > DESYNC_SNAP * DESYNC_SNAP) {
+            super.lerpTo(x, y, z, yaw, pitch, steps, teleport);
         }
     }
+
+    /** 客户端自己的预测和服务端离多远就认输、贴回服务端（格 ✓）。 */
+    private static final double DESYNC_SNAP = 4.0D;
 
     /** 客户端能不能自己算位置 ✓（环绕必须先在客户端找到主人 ✓）。 */
     private boolean selfDriven() {
@@ -410,13 +464,18 @@ public class TNDragonEntity extends Entity implements GeoEntity {
             return;
         }
         // 前方（**龙头**那个点 ✓）是实心方块 ⇒ 撞墙爆开 ✓
-        double headAhead = 10.4D * this.scale() + Math.max(1.0D, this.chargeSpeed);
-        Vec3 head = this.position().add(this.chargeDir.scale(headAhead));
-        BlockPos pos = BlockPos.containing(head.x, head.y, head.z);
-        if (!level.getBlockState(pos).isAir()) {
-            this.burst(level, 40, 1.5D);
-            this.discard();
-            return;
+        //   ★ 出生后 SPAWN_GRACE_TICKS tick 内**不判墙** ✗ —— 龙是在施法者正前方几十格处
+        //     生成的 ✓，落在地形里的时候原来会"第一 tick 自爆"，看着就是"闪一下就消失" ✗
+        //     （见 SPAWN_GRACE_TICKS 的注释 ✓）
+        if (this.tickCount > SPAWN_GRACE_TICKS) {
+            double headAhead = 10.4D * this.scale() + Math.max(1.0D, this.chargeSpeed);
+            Vec3 head = this.position().add(this.chargeDir.scale(headAhead));
+            BlockPos pos = BlockPos.containing(head.x, head.y, head.z);
+            if (!level.getBlockState(pos).isAir()) {
+                this.burst(level, 40, 1.5D);
+                this.discard();
+                return;
+            }
         }
         this.advance(this.chargeDir, this.chargeSpeed);
         // 碰到就伤 ✓（一次冲刺对同一个敌人只打一下 ✓）
@@ -491,6 +550,7 @@ public class TNDragonEntity extends Entity implements GeoEntity {
         } else {
             this.clientChargeTick();
         }
+        this.tickRenderOffsets();     // 这一 tick 的角度 → 上一 tick ✓（渲染插值用 ✓）
     }
 
     private void clientChargeTick() {
@@ -603,10 +663,82 @@ public class TNDragonEntity extends Entity implements GeoEntity {
                 * (180.0D / Math.PI)));
         this.setYRot(yaw);
         this.setXRot(pitch);
+        this.updateRenderOffsets();
         if (alsoOld) {
             this.yRotO = yaw;
             this.xRotO = pitch;
+            this.renderYawOffset = yaw;
+            this.renderYawOffsetO = yaw;
+            this.renderPitchOffset = pitch;
+            this.renderPitchOffsetO = pitch;
         }
+    }
+
+    // ------------------------------------------------------------------
+    //  ★★ 渲染要用的朝向：GeckoLib 对**非生物实体**根本读不到我们的 yRot ✗
+    //     （见 light/client/TNDragonPose 的类注释：反汇编出来 yaw 恒为 0 ✓）
+    //     ⇒ 实体这边把"要用的那对角度"算好摆在这儿，渲染器一个字都不用猜 ✓。
+    // ------------------------------------------------------------------
+
+    /** 渲染用的偏航 / 俯仰（度 ✓）—— 由 {@link #updateRenderOffsets()} 从 {@code yRot/xRot} 推出来 ✓。 */
+    private float renderYawOffset;
+    private float renderYawOffsetO;
+    private float renderPitchOffset;
+    private float renderPitchOffsetO;
+
+    /**
+     * 把 {@code yRot/xRot} 换算成"渲染器该用的角度" ✓。
+     *
+     * <p>★ 推导（别凭感觉改 ✗ —— 这里差一个 180° 就是作者看到的"倒着飞"✓）：<br>
+     * 龙模型鼻子在<b>局部 −Z</b> ✓（作者手改的 geo：下颌 z=−165、尾巴 z=+199 ✓，
+     * 现场可用 {@code tools/check_dragon_charge_facing.py} 从 geo 里量出来 ✓）。
+     *
+     * <p>渲染链（{@code mulPose} 是右乘 ⇒ 角度直接相加 ✓）：
+     * <pre>
+     *   GeckoLib  : ry(180 − 0)                     = 180°   ← 非生物实体它硬取 yaw = 0 ✗
+     *   fixFacing : ry(MODEL_YAW_OFFSET) + ry(renderYaw)
+     * </pre>
+     * 鼻子要指向飞行方向，就是要 <b>{@code ry(total)·(0,0,−1) = 飞行方向}</b> ✓；
+     * MC 的飞行方向是 {@code (−sin yRot, 0, cos yRot)} ✓（{@code Entity.calculateViewVector} ✓）；
+     * 而实测 {@code ry(θ)·(0,0,−1) = (−sin θ, 0, −cos θ)} ✓ ⇒
+     * 要的是 <b>{@code θ = 180 − yRot}</b> ✓（验算：yRot=0 ⇒ θ=180 ⇒ (0,0,1) 正南 ✓；
+     * yRot=−90（正东）⇒ θ=270 ⇒ (1,0,0) 正东 ✓）⇒
+     * {@code 180 + MODEL_YAW_OFFSET + renderYaw = 180 − yRot}
+     * ⇒ <b>{@code renderYaw = −yRot − MODEL_YAW_OFFSET}</b> ✓（MODEL_YAW_OFFSET = 180 时即 180 − yRot ✓）。
+     *
+     * <p>⚠️ 这一步千万别"凭对称性"写成 {@code yRot ± 180} ✗ —— 我就在这里栽过：
+     * 先算 180 + 180 + yRot，再看"180 和 −180 在模 360 下等价"就以为能换，
+     * 结果**南/北对了、东/西正好反 180°** ✗（角度不是先取模再相加的 ✓）。
+     * 现在这个式子是用 {@code tools/check_dragon_charge_facing.py} 把
+     * 东/南/西/北 × 俯仰 −45…+45 全跑了一遍 4/4 ✓ 才写下来的 ✓，改之前先跑它 ✓。
+     *
+     * <p>为什么不在 {@code lerpTo} 里做 ✗：位置包对"自己算位置"的模式本来就**不采纳** ✓，
+     * 只在 {@link #DESYNC_SNAP} 之外才贴回去 ✓ —— 靠它来同步朝向会漏 ✓。
+     * 而 {@code advance() → faceDir()} 是**两端每 tick 都调**的 ✓，所以这里最稳 ✓。
+     * （渲染器每帧还会再调一次兜底 ✓：第一帧 / 数据包比实体先到的情况也不会歪 ✓）
+     */
+    private void updateRenderOffsets() {
+        this.renderYawOffset = 180.0F - this.getYRot();
+        this.renderPitchOffset = this.getXRot();
+    }
+
+    /** 渲染器读它 ✓（{@code partialTick} 用来在上一 tick 和这一 tick 之间插值 ✓）。 */
+    public float renderYaw(float partialTick) {
+        this.updateRenderOffsets();
+        return Mth.rotLerp(partialTick, this.renderYawOffsetO, this.renderYawOffset);
+    }
+
+    /** 渲染器读它 ✓（俯仰同理 ✓）。 */
+    public float renderPitch(float partialTick) {
+        this.updateRenderOffsets();
+        return Mth.lerp(partialTick, this.renderPitchOffsetO, this.renderPitchOffset);
+    }
+
+    /** 客户端每 tick 收尾：把"这一 tick 的角度"存成"上一 tick"✓（渲染插值用 ✓）。 */
+    private void tickRenderOffsets() {
+        this.updateRenderOffsets();
+        this.renderYawOffsetO = this.renderYawOffset;
+        this.renderPitchOffsetO = this.renderPitchOffset;
     }
 
     @Override

@@ -189,6 +189,38 @@ public final class TNOrbEntities {
                     .updateInterval(1)
                     .build("tnc:dark_dragon"));
 
+    // ------------------------------------------------------------------
+    //  ★ 暗系第三条链「召唤」的五个召唤物 ✓（作者 2026-10-04："暗魔法的召唤流没实装吗" ✓）
+    //    五个模型差得远（5/8/10/11/18 骨骼 ✗）⇒ 注册成**五个实体类型** ✓：
+    //    这样一个类（{@code dark/TNDarkSummonEntity}）就能按类型读出档位 ✓，
+    //    每档还能有自己的名字（小恶魔 / 暗卫 / … ✓）和自己的属性表 ✓。
+    // ------------------------------------------------------------------
+
+    /** t1 小恶魔（0.69 格，飘着的一团）✓ */
+    public static final RegistryObject<EntityType<com.tnc.tnc.dark.TNDarkSummonEntity>> DARK_IMP =
+            summonType("dark_imp", 0.7F, 0.9F);
+    /** t2 暗卫（1.88 格，单刀）✓ */
+    public static final RegistryObject<EntityType<com.tnc.tnc.dark.TNDarkSummonEntity>> DARK_GUARD =
+            summonType("dark_guard", 0.8F, 1.9F);
+    /** t3 暗之统领（1.88 格，双刀 + 披风）✓ */
+    public static final RegistryObject<EntityType<com.tnc.tnc.dark.TNDarkSummonEntity>> DARK_LORD =
+            summonType("dark_lord", 0.8F, 1.9F);
+    /** t4 暗之国王（2.0 格，王冠）✓ */
+    public static final RegistryObject<EntityType<com.tnc.tnc.dark.TNDarkSummonEntity>> DARK_KING =
+            summonType("dark_king", 0.9F, 2.0F);
+    /** t5 邪神（2.38 格，六臂 + 光环）✓ */
+    public static final RegistryObject<EntityType<com.tnc.tnc.dark.TNDarkSummonEntity>> EVIL_GOD =
+            summonType("evil_god", 1.1F, 2.4F);
+
+    private static RegistryObject<EntityType<com.tnc.tnc.dark.TNDarkSummonEntity>> summonType(
+            String id, float width, float height) {
+        return ENTITY_TYPES.register(id, () -> EntityType.Builder
+                .of(com.tnc.tnc.dark.TNDarkSummonEntity::new, MobCategory.CREATURE)
+                .sized(width, height)
+                .clientTrackingRange(10)
+                .build("tnc:" + id));
+    }
+
     private TNOrbEntities() {
     }
 

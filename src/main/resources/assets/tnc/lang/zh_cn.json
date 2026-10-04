@@ -173,4 +173,14 @@
   "entity.tnc.dark_giant": "巨兽人领主"
 ,
   "item.tnc.dark_giant_spawn_egg": "巨兽人领主 刷怪蛋"
+,
+  "entity.tnc.dark_imp": "小恶魔"
+,
+  "entity.tnc.dark_guard": "暗卫"
+,
+  "entity.tnc.dark_lord": "暗之统领"
+,
+  "entity.tnc.dark_king": "暗之国王"
+,
+  "entity.tnc.evil_god": "邪神"
 }
