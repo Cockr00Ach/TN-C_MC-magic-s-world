@@ -183,12 +183,27 @@ public final class TNFireBoltEntity extends Projectile {
     }
 
     /**
+     * 这一档的<b>成形时长</b>（tick）。
+     *
+     * <p>手扔的火球要"先在手里凝成一颗球再射出去"，所以有 {@link #FORM_TICKS} 的悬停；
+     * 但<b>陨星坠的陨石不能有</b> —— 它是从天而降的，悬在天上不动 6 tick 会明显顿一下 ✗
+     * （作者 2026-10-05 反馈「陨石的下落不流畅」）
+     */
+    private int formTicks() {
+        return "meteor_fall".equals(spellPath()) ? 0 : FORM_TICKS;
+    }
+
+    /**
      * 成形进度 0.25 → 1.0（渲染器用）—— 决定这颗球现在多大。
      *
      * <p>起点给 0.25 而不是 0：一出生就有一小团在手里，看着才像"凝聚"而不是"凭空出现"。
      */
     public float formProgress(float partial) {
-        double t = (tickCount + partial) / (double) FORM_TICKS;
+        int form = formTicks();
+        if (form <= 0) {
+            return 1.0F;                       // 不做成形阶段（陨石）→ 一出生就是满大小
+        }
+        double t = (tickCount + partial) / (double) form;
         return t >= 1.0D ? 1.0F : (float) Math.max(0.25D, t);
     }
 
@@ -205,7 +220,7 @@ public final class TNFireBoltEntity extends Projectile {
 
         // ---------------- 成形阶段：先在手前凝成一颗球，再射出去 ----------------
         // 这 5 tick 里**不移动、也不判定命中**（火球还在手里），渲染器负责让它长大
-        if (tickCount <= FORM_TICKS) {
+        if (tickCount <= formTicks()) {
             if (level().isClientSide) {
                 // 往中心收拢的几粒火星 —— "凝聚"的感觉
                 if (tickCount % 2 == 0) {
@@ -240,7 +255,13 @@ public final class TNFireBoltEntity extends Projectile {
                         getZ() + tail.z + (random.nextDouble() - 0.5D) * radius(),
                         -getDeltaMovement().x * 0.02D, 0.015D, -getDeltaMovement().z * 0.02D);
             }
-            setPos(position().add(getDeltaMovement()));
+            // ⚠️ **客户端绝对不能再自己挪实体**（作者 2026-10-05 实测「陨石的下落不流畅」）。
+            //
+            //    抛出物的位置由**服务端**算好、每 tick 同步过来
+            //    （见 TNOrbEntities.FIRE_BOLT 的 updateInterval(1)），客户端只负责插值。
+            //    这里原来还有一句 setPos(position().add(getDeltaMovement()))，
+            //    等于两边各挪一次 —— 客户端的外推和服务端的同步互相打架，
+            //    看上去就是**一顿一顿 / 来回弹** ✗
             return;
         }
 
