@@ -200,6 +200,14 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
     private static final double CRACK_HALF_WIDTH = 0.18D;
     /** 裂缝画在岩壳外侧一点点 —— 免得和岩板同半径打架（z-fight）。 */
     private static final double CRACK_LIFT = 1.006D;
+    /**
+     * 球面起伏幅度（± 比例）—— 作者 2026-10-05：「球的形状不用太过规整，可以不完全是球体」。
+     *
+     * <p>⚠️ 起伏加在<b>顶点</b>上（不是每个面各自抖）：相邻的面共用顶点，
+     * 所以同一处的半径一定算得一样，岩壳<b>不会裂开缝</b> ✗
+     * 如果按面抖，四个角各说各话，会看到破洞。
+     */
+    private static final double ROCK_LUMP = 0.13D;
 
     /**
      * 画一颗<b>熔岩岩球</b>：黑炭岩壳 + 从缝里透出的熔岩（作者 2026-10-05 参照图）。
@@ -245,14 +253,17 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
                 float shade = rockShade(i, j);
                 boolean rim = seamLon(i - 1, j) || seamLon(i + 1, j)
                         || seamLat(i, j - 1) || seamLat(i, j + 1);
-                surfaceQuad(out, pose, dir, right, up, radius, a, c, u, v,
+                lumpyQuad(out, pose, dir, right, up, radius, i, j, a, c, u, v, 1.0D,
                         shade + (rim ? 0.055F : 0.0F),
                         shade + (rim ? 0.015F : 0.0F),
                         shade + (rim ? 0.002F : 0.0F),
                         fade);
 
                 // ---- 缝里的熔岩：一条窄亮条，浮在壳外 ----
-                double lift = radius * CRACK_LIFT;
+                // 半径取这块板四个角的起伏平均值 —— 亮条才能贴着凹凸不平的岩壳，不会陷进去或飘起来
+                double base = (lump(radius, i, j) + lump(radius, i + 1, j)
+                        + lump(radius, i + 1, j + 1) + lump(radius, i, j + 1)) * 0.25D;
+                double lift = base * CRACK_LIFT;
                 if (seamLon) {
                     double mid = (u + v) * 0.5D;
                     double half = (v - u) * 0.5D * CRACK_HALF_WIDTH;
@@ -267,6 +278,33 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
                 }
             }
         }
+    }
+
+    /**
+     * 球面上的一片，四个角的半径**各自起伏** —— 于是球面被揉成一颗不规则的岩石。
+     *
+     * <p>角点半径由 {@link #lump} 按<b>顶点格号</b>算，相邻的面共用同一个角就得到同一个值，
+     * 所以揉完仍然是封闭的一层壳 ✅
+     */
+    private static void lumpyQuad(VertexConsumer out, Matrix4f pose, Vec3 dir, Vec3 right, Vec3 up,
+                                  double radius, int i, int j,
+                                  double latA, double latC, double lonU, double lonV, double lift,
+                                  float r, float g, float b, float alpha) {
+        Vec3 p = spherePoint(dir, right, up, lump(radius, i, j) * lift, latA, lonU);
+        Vec3 q = spherePoint(dir, right, up, lump(radius, i + 1, j) * lift, latA, lonV);
+        Vec3 s = spherePoint(dir, right, up, lump(radius, i + 1, j + 1) * lift, latC, lonV);
+        Vec3 t = spherePoint(dir, right, up, lump(radius, i, j + 1) * lift, latC, lonU);
+        WaterGeometry.quad(out, pose, p, q, s, t, r, g, b, alpha);
+    }
+
+    /**
+     * 某个<b>顶点</b>（按经/纬格号）自己的半径。
+     *
+     * <p>振幅 ±{@link #ROCK_LUMP}，用 {@link #hash} 保证"同一个顶点恒定同一个值"
+     * （不能每帧随机，否则岩石会抖/闪 ✗）。
+     */
+    private static double lump(double radius, int i, int j) {
+        return radius * (1.0D + ROCK_LUMP * (hash(i * 7 + 13, j * 5 + 29) - 0.5D) * 2.0D);
     }
 
     /** 球面上的一片（经纬范围给全，内部按 dir/right/up 参数化）。 */

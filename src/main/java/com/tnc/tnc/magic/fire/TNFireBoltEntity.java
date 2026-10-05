@@ -285,7 +285,9 @@ public final class TNFireBoltEntity extends Projectile {
                 }
             }
             server.sendParticles(ParticleTypes.FLAME, impact.x, impact.y, impact.z, 14, 0.25D, 0.25D, 0.25D, 0.06D);
-            server.sendParticles(ParticleTypes.LAVA, impact.x, impact.y, impact.z, 3, 0.2D, 0.2D, 0.2D, 0.0D);
+            // 命中时**炸开**成一团火焰粒子（作者 2026-10-05 要求：不要"啪"地直接消失）。
+            // ⚠️ 纯视觉、**零伤害** —— 真正的爆炸伤害在上面 blastRadius 那一段，两者互不影响
+            spawnImpactBurst(server, impact);
             // 熔岩地：在落点**下方**留一块持续灼烧的地面（t3 熔岩火球起才有）。
             // 它的每秒伤害和焚身是两条独立结算，会同时触发 —— 这是作者明确要的 ✓
             if (lavaField) {
@@ -314,6 +316,30 @@ public final class TNFireBoltEntity extends Projectile {
 
         setPos(to);
         remaining -= motion.length();
+    }
+
+    /**
+     * 命中时炸成一团火焰粒子 —— <b>纯视觉，零伤害</b>（作者 2026-10-05 要求）。
+     *
+     * <p>目的只有一个：火球打到东西时不要"啪"地凭空消失，而是<b>炸开</b>。
+     * 所以这里<b>只发粒子、不碰任何伤害逻辑</b>；
+     * 熔岳天倾那种"真的有爆炸伤害"的是上面 {@code blastRadius} 那一段，两者完全独立 ✓
+     *
+     * <p>规模跟着球的大小走（{@link #radius()}）—— 大火球的爆开也更壮观。
+     */
+    private void spawnImpactBurst(ServerLevel server, Vec3 at) {
+        double scale = Math.max(0.8D, radius() / 0.35D);       // 火球术 = 1.0 倍
+        double spread = 0.30D * scale;
+
+        server.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z, (int) (34 * scale),
+                spread, spread, spread, 0.10D);
+        server.sendParticles(ParticleTypes.SMALL_FLAME, at.x, at.y, at.z, (int) (20 * scale),
+                spread * 1.2D, spread * 1.2D, spread * 1.2D, 0.14D);
+        // 几点熔岩渣 + 烟：给它"炸开"的重量感，而不是一团浮在空中的火
+        server.sendParticles(ParticleTypes.LAVA, at.x, at.y, at.z, (int) (6 * scale),
+                spread * 0.75D, spread * 0.75D, spread * 0.75D, 0.0D);
+        server.sendParticles(ParticleTypes.SMOKE, at.x, at.y, at.z, (int) (8 * scale),
+                spread, spread, spread, 0.03D);
     }
 
     /** 熔岩地要贴地：从命中点往下找一层可站立的平面，找不到就退回命中点本身。 */
