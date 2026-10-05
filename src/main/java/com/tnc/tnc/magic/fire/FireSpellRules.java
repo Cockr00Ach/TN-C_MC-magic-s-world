@@ -53,14 +53,17 @@ public final class FireSpellRules {
     /**
      * 这条链里所有「扔出去的火球」。<b>唯一的一份表</b> —— 加新火球只改这里。
      *
-     * <p>t2 是**二选一分支**（大火球术 / 连珠火球术），所以这里 t2 有两行 ——
-     * 现有链进度是线性的（{@code tier <= 进度+1}），两个都学得动，天然支持「自由选择」。
+     * <p>⚠️ 这里**每档只有一个**，和 {@code SpellCatalogStructureTest} 的
+     * 「每条链每档恰好一个」保持一致：曾经想给 t2 加第二个选项「连珠火球术」，
+     * 但同档两个会让 {@code SpellCatalog.isChainTop} 的"一边学一边进"判定算错，
+     * 作者 2026-10-05 决定**只保留大火球术** ✓
+     * （那套"一次放多发"的代码仍留在 {@link Bolt#launches} 与 {@code TNFireBoltEntity.cast}
+     * 的循环里，将来真要加同档选项时可以直接用。）
      */
     private static final Map<String, Bolt> BOLTS = Map.of(
-            "fireball",         new Bolt(1.0F, 40.0F, 0.35F, 1, false),   // t1 冒险者
-            "great_fireball",   new Bolt(2.4F, 40.0F, 0.62F, 1, false),   // t2 精英（大）
-            "fireball_barrage", new Bolt(1.0F, 40.0F, 0.35F, 3, false),   // t2 精英（连珠）
-            "lava_fireball",    new Bolt(3.2F, 44.0F, 0.50F, 1, false)    // t3 王
+            "fireball",       new Bolt(1.0F, 40.0F, 0.35F, 1, false),   // t1 冒险者
+            "great_fireball", new Bolt(2.4F, 40.0F, 0.62F, 1, false),   // t2 精英
+            "lava_fireball",  new Bolt(3.2F, 44.0F, 0.50F, 1, false)    // t3 王（机制下一个分支补齐）
     );
 
     private FireSpellRules() {

@@ -211,9 +211,17 @@ public final class SpellCatalog {
             fireEntry("explosive_fire_ray", Chain.RAY, 4, "爆炸射线"),
             fireEntry("cataclysm_fire_ray", Chain.RAY, 5, "巨大爆炸射线"),
 
-            // ---- 火球线：1 火球 → 2 大火球 → 3 巨大火球(砸地) → 4 自爆 → 5 天降陨石 ----
-            fireEntry("fireball", Chain.BALL, 1, "火球"),
-            fireEntry("great_fireball", Chain.BALL, 2, "大火球"),
+            // ---- 火球线（作者 2026-10-05 定稿）----
+            //   ★ 1/2 两档已改成**自有实体**（magic/fire/TNFireBoltEntity）：
+            //     焚身要按"这一发实际打了多少"算，而引擎的 PROJECTILE 在伤害事件里
+            //     不带法术 id —— 见 FireSpellRules 的类注释。
+            //   ⚠️ 曾经想给 t2 加第二个选项「连珠火球术」，但
+            //     SpellCatalogStructureTest 的「每条链每档恰好一个」是**有依据的**不变量
+            //     （同档两个会让 isChainTop 的"一边学一边进"判定算错），
+            //     所以按作者决定**只保留大火球术** ✓
+            //   3/4/5 仍是引擎驱动，待换成 熔岩火球 / 熔岳天倾 / 炎葬（下一个分支）----
+            fireEntry("fireball", Chain.BALL, 1, "火球术"),
+            fireEntry("great_fireball", Chain.BALL, 2, "大火球术"),
             fireEntry("giant_fireball", Chain.BALL, 3, "巨大火球"),
             fireEntry("self_destruct", Chain.BALL, 4, "自爆"),
             fireEntry("meteor_fireball", Chain.BALL, 5, "天降陨石火球"),
