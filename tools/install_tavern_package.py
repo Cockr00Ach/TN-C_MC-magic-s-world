@@ -24,7 +24,7 @@ def snapshot(root):
     return {str(p):sha(p) for p in set(files)}
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--install',action='store_true');parser.add_argument('--corrections',action='store_true');parser.add_argument('--access-fix',action='store_true');parser.add_argument('--merged-resources-from');args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('--install',action='store_true');parser.add_argument('--corrections',action='store_true');parser.add_argument('--access-fix',action='store_true');parser.add_argument('--merged-resources-from');parser.add_argument('--test-log',type=Path);parser.add_argument('--receipt-output',type=Path);args=parser.parse_args()
     if args.access_fix:args.corrections=True
     audit=ROOT/'work/tavern-revision-20261005' if args.corrections else ROOT/'work'
     guest_count,tracks,game_tests,min_unit=(43,3,232,139) if args.corrections else (49,2,229,134)
@@ -33,7 +33,7 @@ def main():
     assert client['failures']==[] and client['guest_definitions']==guest_count and client['screenshots']==3
     assert any('200 entry ticks' in line for line in client['evidence'])
     assert 'BUILD SUCCESSFUL' in (audit/('client.log' if args.corrections else 'tavern-client.log')).read_text(encoding='utf8',errors='replace')
-    log=(ROOT/'work/tavern-access-20261005-tests.log' if args.access_fix else audit/('final-tests.log' if args.corrections else 'tavern-final-tests.log')).read_text(encoding='utf8',errors='replace')
+    log=(args.test_log or (ROOT/'work/tavern-access-20261005-tests.log' if args.access_fix else audit/('final-tests.log' if args.corrections else 'tavern-final-tests.log'))).read_text(encoding='utf8',errors='replace')
     assert f'All {game_tests} required tests passed' in log and 'BUILD SUCCESSFUL' in log
     if args.corrections:
         assert any('Natural end' in line for line in client['evidence'])
@@ -97,7 +97,7 @@ def main():
         raise
     receipt={'installed_at':datetime.datetime.now().isoformat(),'sha256':sha(JAR),'backup':str(backup),'installed_files':[str(target) for target,saved in targets],
         'guest_seats':guest_count,'total_seats':75,'unit_tests':count,'game_tests':game_tests,'client':client,'protected_resources':len(protected),'protected_files':len(before)}
-    (ROOT/'work/tavern-access-20261005-package-install.json' if args.access_fix else audit/('package-install.json' if args.corrections else 'tavern-package-install-receipt.json')).write_bytes(json.dumps(receipt,ensure_ascii=False,indent=2).encode('utf8'))
+    (args.receipt_output or (ROOT/'work/tavern-access-20261005-package-install.json' if args.access_fix else audit/('package-install.json' if args.corrections else 'tavern-package-install-receipt.json'))).write_bytes(json.dumps(receipt,ensure_ascii=False,indent=2).encode('utf8'))
     print('Installed package:',receipt['sha256'])
 
 if __name__=='__main__':main()

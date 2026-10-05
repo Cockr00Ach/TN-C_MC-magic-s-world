@@ -94,40 +94,5 @@ public final class TNSpellOrbClientEvents {
         if (net.minecraftforge.fml.ModList.get().isLoaded("spell_engine")) {
             TNFogClientRegistration.register(event);
         }
-        // ★ 吸血结算实体（暗系第二条链改"从敌人身上抽血"）：它只在命中点活几 tick、
-        //   本身没有任何可见外观（表现由它自己撒的血雾粒子负责 ✓）⇒ 注册一个**空渲染器**。
-        //   ⚠️ 这行**不能省** ✗：实体类型缺少渲染器 ⇒ 一生成就 `entityrenderer is null` 卡退
-        //   （OrbEntityRendererCoverageTest 在构建期把关 ✓；本项目为这个坑崩过三次 ✓）。
-        //   ⚠️ 它**放在守卫外面**：这个空渲染器只用原版类（零引擎依赖 ✓），
-        //   塞进守卫里反而会变成"没装引擎时这个实体没有渲染器"的漏网 ✗。
-        event.registerEntityRenderer(TNOrbEntities.DRAIN.get(), NoopRenderer::new);
-    }
-
-    /**
-     * 什么都不画的渲染器 —— 给"纯逻辑、靠粒子做表现"的实体用 ✓。
-     *
-     * <p>存在意义只有一个：让 {@code EntityRenderDispatcher} 在查渲染器时**查得到** ✗。
-     * 缺了它，实体一生成客户端就 NPE 卡退（不是"看不见"，是**崩** ✗）。
-     */
-    private static final class NoopRenderer extends net.minecraft.client.renderer.entity.EntityRenderer<
-            com.tnc.tnc.magic.TNDarkDrainEntity> {
-
-        NoopRenderer(net.minecraft.client.renderer.entity.EntityRendererProvider.Context context) {
-            super(context);
-            this.shadowRadius = 0.0F;
-        }
-
-        @Override
-        public net.minecraft.resources.ResourceLocation getTextureLocation(
-                com.tnc.tnc.magic.TNDarkDrainEntity entity) {
-            return net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_PARTICLES;
-        }
-
-        @Override
-        public void render(com.tnc.tnc.magic.TNDarkDrainEntity entity, float entityYaw,
-                           float partialTick, com.mojang.blaze3d.vertex.PoseStack poseStack,
-                           net.minecraft.client.renderer.MultiBufferSource buffer, int packedLight) {
-            // 故意的：这个实体的"外观"是它自己撒的粒子，不是模型 ✓
-        }
     }
 }
