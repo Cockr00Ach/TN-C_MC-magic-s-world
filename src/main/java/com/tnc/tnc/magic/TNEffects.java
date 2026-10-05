@@ -407,6 +407,33 @@ public final class TNEffects {
         return 5;
     }
 
+    /**
+     * <b>黑雾 · 致盲</b> —— 谁站进黑雾谁挨的那个减益 ✓
+     * （作者 2026-10-09："敌人包括其他玩家触碰到这个雾就会受到致盲效果，屏幕得给我黑了，
+     * t 级越高屏幕越黑"）。
+     *
+     * <h2>为什么不能只用原版 {@code minecraft:darkness}</h2>
+     * ★ 原版 `darkness` 的屏幕压暗**只对玩家生效** ✗（它是客户端视觉效果，
+     * 对僵尸/骷髅这些生物**没有任何作用** ✗）—— 所以"敌人被致盲"这件事它做不到 ✓。
+     * 于是两个一起上：
+     * <ul>
+     *   <li>{@code minecraft:darkness} ⇒ 给**玩家**的屏幕压暗（叠在客户端那层黑幕上 ✓）；</li>
+     *   <li>{@link #DARK_FOG} ⇒ 给**所有生物**（含玩家）真实惩罚：视野被剥夺的代价
+     *       = 移动与攻击都被削弱 ✓，而且**怪物也吃得到** ✓。</li>
+     * </ul>
+     *
+     * <p>颜色选近黑紫（{@code 0x1A1024}）—— 和"暗雾侵蚀"的暗紫区分开，HUD 上一眼认得出 ✓。
+     * 走原版 amplifier 递增：t1 用 0 档、t5 用 2 档 ⇒ 越深的雾里越走不动 ✓。
+     */
+    public static final RegistryObject<MobEffect> DARK_FOG = EFFECTS.register("dark_fog",
+            () -> {
+                MobEffect effect = new AttributeBuff(MobEffectCategory.HARMFUL, 0x1A1024,
+                        Attributes.MOVEMENT_SPEED, -0.20D, AttributeModifier.Operation.MULTIPLY_TOTAL);
+                effect.addAttributeModifier(Attributes.ATTACK_DAMAGE,
+                        uuidFor("tnc:dark_fog_weak"), -0.15D, AttributeModifier.Operation.MULTIPLY_TOTAL);
+                return effect;
+            });
+
     private TNEffects() {
     }
 

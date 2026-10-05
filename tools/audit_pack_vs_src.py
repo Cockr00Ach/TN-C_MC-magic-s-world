@@ -39,8 +39,14 @@ INSTANCE = "\u5143\u7d20\u89c9\u91921.4.3-\u9b54\u6539\u7248-20260915"
 
 # files that are dev-only and deliberately not shipped
 RESOURCE_SKIP = (".gitignore", ".bbmodel", ".psd", ".xcf", ".bak", ".pyc")
-# files Gradle REWRITES on the way into the jar, so a byte compare is meaningless
-RESOURCE_TRANSFORMED = ("META-INF/mods.toml", "pack.mcmeta")
+# files Gradle REWRITES on the way into the jar, so a byte compare is meaningless:
+#   META-INF/mods.toml, pack.mcmeta -> token expansion
+#   assets/tnc/sounds.json          -> GENERATED at build time by a generator; the
+#                                      committed file is the minimised source (2105 B)
+#                                      while the jar version is bigger (3089 B) and
+#                                      carries extra entries such as the tavern sounds
+RESOURCE_TRANSFORMED = ("META-INF/mods.toml", "pack.mcmeta",
+                        "assets/tnc/sounds.json")
 
 
 def repo_root():
