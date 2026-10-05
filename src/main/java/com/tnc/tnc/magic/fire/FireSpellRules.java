@@ -44,10 +44,27 @@ public final class FireSpellRules {
     public static final double SKYFALL_BLAST_RADIUS = 5.0D;
 
     /** 法阵持续 10 秒。 */
-    public static final int SKYFALL_LIFE_TICKS = 200;
+    /**
+     * 熔岳天倾法阵持续多久 —— 作者 2026-10-05：「t4 档法术持续时间改为 8s」✓
+     *
+     * <p>（原来 200 tick = 10 秒 ✗）
+     */
+    public static final int SKYFALL_LIFE_TICKS = 160;
 
     /** 法阵每隔 10 tick（0.5 秒）砸一发下来。 */
-    public static final int SKYFALL_INTERVAL_TICKS = 10;
+    /**
+     * 每几 tick 来一轮 —— 作者 2026-10-05：「不要固定一颗一颗向下落，可以一秒内落下多颗，
+     * 且把落下的时间间隔减小，不用等到落地了再落下下一颗」✗
+     *
+     * <p>10 tick（0.5 秒一发 ✗）→ <b>8 tick 一轮、每轮 {@link #SKYFALL_LAUNCHES_PER_VOLLEY} 发</b>：
+     * 也就是 <b>每秒约 5 发</b>，天上会同时挂着好几颗 ✓
+     *
+     * <p>⚠️ 与"落地"完全无关 —— 落没落地都照砸 ✓（原来也不等落地，只是间隔太长看着像"一颗一颗"✗）
+     */
+    public static final int SKYFALL_INTERVAL_TICKS = 8;
+
+    /** 每一轮落下几颗。2 ⇒ 每秒约 5 颗 ✓ */
+    public static final int SKYFALL_LAUNCHES_PER_VOLLEY = 2;
 
     /** 法阵悬在多高（格）。 */
     public static final double SKYFALL_HEIGHT = 12.0D;

@@ -39,6 +39,18 @@ public class TNShockwaveEntity extends TNMagicCircleEntity {
     public static final float DEFAULT_SHAKE = 9.0F;
 
     /**
+     * 这一发冲击波顺手点多少「白闪」（0 = 完全不闪）。
+     *
+     * <p>⚠️ 作者 2026-10-05：「把震动时的界面变灰删去」✗ —— 那个"变灰/发白"其实是
+     * {@code client\TNSpellClientVisuals} 在 flash 时盖的一层白色（最高 200 alpha ✗），
+     * 火系冲击波一多就把整个画面糊白 ✗。默认 1.0 ⇒ <b>已有的爆炸观感完全不变</b> ✓，
+     * 火系自己传 0 ✓
+     */
+    private static final net.minecraft.network.syncher.EntityDataAccessor<Float> DATA_FLASH =
+            net.minecraft.network.syncher.SynchedEntityData.defineId(TNShockwaveEntity.class,
+                    net.minecraft.network.syncher.EntityDataSerializers.FLOAT);
+
+    /**
      * 这一发冲击波给镜头多大抖动（度，**同步字段**）。
      *
      * <p>为什么要按发定制：作者 2026-10-05 要求火球链「t3 轻微震动 → t4 较强烈 → t5 强烈」，
@@ -82,6 +94,17 @@ public class TNShockwaveEntity extends TNMagicCircleEntity {
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(DATA_SHAKE, DEFAULT_SHAKE);
+        this.entityData.define(DATA_FLASH, 1.0F);
+    }
+
+    /** 客户端用它决定这一发要不要给屏幕盖白 ✗ */
+    public float flashStrength() {
+        return this.entityData.get(DATA_FLASH);
+    }
+
+    /** 服务端设这一发的白闪强度（0 = 不闪 ✓）。 */
+    public void configureFlash(float flash) {
+        this.entityData.set(DATA_FLASH, flash);
     }
 
     /** 客户端用它决定镜头抖多少 ✓ */
@@ -102,9 +125,16 @@ public class TNShockwaveEntity extends TNMagicCircleEntity {
      */
     public static TNShockwaveEntity blast(ServerLevel level, Vec3 at, double radius,
                                           float shake, Entity exempt) {
+        return blast(level, at, radius, shake, exempt, 1.0F);
+    }
+
+    /** 同上，但可以指定「白闪强度」（火系传 0 ⇒ 只震屏、不把画面糊白 ✓）。 */
+    public static TNShockwaveEntity blast(ServerLevel level, Vec3 at, double radius,
+                                          float shake, Entity exempt, float flash) {
         TNShockwaveEntity wave = new TNShockwaveEntity(TNOrbEntities.SHOCKWAVE.get(), level);
         wave.configure(radius, LIFE);
         wave.configureShake(shake);
+        wave.configureFlash(flash);
         wave.exemptFromPush(exempt);
         wave.setPos(at.x, at.y, at.z);
         level.addFreshEntity(wave);

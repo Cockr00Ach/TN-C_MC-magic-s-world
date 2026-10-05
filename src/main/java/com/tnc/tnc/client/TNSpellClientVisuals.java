@@ -134,7 +134,7 @@ public final class TNSpellClientVisuals {
                 shake = strength;
             }
             // 同一发冲击波顺手点一下白闪（越近越白 ✓）——"核弹感"主要靠它 ＋ 抖 ✓
-            float f = (float) Math.max(0.0D, 1.0D - distance / SHAKE_RANGE);
+            float f = (float) Math.max(0.0D, 1.0D - distance / SHAKE_RANGE) * wave.flashStrength();
             if (f > flash) {
                 flash = f;
             }

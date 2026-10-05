@@ -577,6 +577,8 @@ public final class TNFireBoltEntity extends Projectile {
         //    原来这里叠了一声 LIGHTNING_BOLT_THUNDER（我按"轰鸣声"理解的），
         //    但作者要的是**爆炸的轰鸣**，不是打雷 ✗ ⇒ 整段拿掉，只留 GENERIC_EXPLODE ✓
         // 震屏：复用冲击波实体；半径跟着强度走，视觉上也分得出大小 ✓
-        TNShockwaveEntity.blast(server, at, 3.0D + shake * 0.6D, shake, getOwner());
+                // ⚠️ 最后一个参数 0 = 不发白闪 ✗ —— 作者 2026-10-05：「把震动时的界面变灰删去」
+        //    （那个"变灰"是 TNSpellClientVisuals 在 flash 时盖的白色 ✗）
+        TNShockwaveEntity.blast(server, at, 3.0D + shake * 0.6D, shake, getOwner(), 0.0F);
     }
 }
