@@ -100,16 +100,15 @@ public final class TNSkyfallEntity extends Entity {
         //    caster 现在只用于判断"打谁"（自己的召唤物/队友不能砸），不再影响位置。
 
         if (level().isClientSide) {
-            // 一圈缓慢旋转的火环 + 中心往下淌的火星，暗示"它在往下砸"
-            double r = 3.0D;
-            for (int i = 0; i < 6; i++) {
-                double a = age * 0.12D + i * Math.PI / 3.0D;
-                level().addParticle(ParticleTypes.FLAME,
-                        getX() + Math.cos(a) * r, getY() + 0.1D, getZ() + Math.sin(a) * r,
-                        0.0D, -0.02D, 0.0D);
-            }
-            if (age % 4 == 0) {
-                level().addParticle(ParticleTypes.LAVA, getX(), getY() - 0.2D, getZ(), 0.0D, -0.05D, 0.0D);
+            // ⚠️ 这里**不再画那圈火环了**。法阵的形状由 {@code TNSigilRenderer} 用几何体画；
+            //    再叠一圈火焰粒子，看上去就是"法阵 = 一串火"—— 正是作者 2026-10-05 否定过的做法 ✗
+            //    粒子只留零星火星当点缀：从盘面上慢慢飘起来
+            if (age % 3 == 0) {
+                double a = random.nextDouble() * Math.PI * 2.0D;
+                double d = Math.sqrt(random.nextDouble()) * SIGIL_RADIUS;
+                level().addParticle(ParticleTypes.SMALL_FLAME,
+                        getX() + Math.cos(a) * d, getY() + 0.1D, getZ() + Math.sin(a) * d,
+                        0.0D, 0.03D, 0.0D);
             }
             return;
         }

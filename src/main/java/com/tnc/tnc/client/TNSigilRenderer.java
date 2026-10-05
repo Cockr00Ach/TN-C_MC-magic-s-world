@@ -68,13 +68,19 @@ public final class TNSigilRenderer<T extends Entity> extends EntityRenderer<T> {
                        MultiBufferSource buffers, int light) {
         var out = buffers.getBuffer(WaterRenderTypes.geometry());
         Matrix4f pose = stack.last().pose();
-        Vec3 center = entity.position();
         double age = entity.tickCount + partial;
 
         // 出场渐显：前 8 tick 从 0 涨到 1（免得"啪"地整座法阵凭空出现）
         float fade = (float) Math.min(1.0D, (entity.tickCount + partial) / 8.0D);
 
-        drawSigil(out, pose, center, radius, grand, age, fade);
+        // ⚠️ 中心必须是 **原点**，不能用 entity.position()。
+        //    EntityRenderer 被调用之前，派发器已经做过
+        //    poseStack.translate(x - camX, y - camY, z - camZ) ——
+        //    也就是说**姿态的原点已经落在实体身上了**。
+        //    这里再传一次世界坐标，等于偏移了整整一个世界坐标的距离，
+        //    几何体会被画到天边去（作者 2026-10-05 实测：「为什么还是这样，没有变化」）
+        //    —— 水球/火球两个渲染器都是按原点画的，照它们来 ✓
+        drawSigil(out, pose, Vec3.ZERO, radius, grand, age, fade);
     }
 
     /**
