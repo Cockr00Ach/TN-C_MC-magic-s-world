@@ -184,96 +184,128 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
     //  熔岩岩球：黑炭岩板 + 熔岩裂缝（作者 2026-10-05 参照图）
     // ------------------------------------------------------------------
 
-    /** 岩石外壳切多少圈 / 多少边 —— 比平滑球粗，正好要"一张张板"的感觉。 */
+    /** 岩石外壳切多少圈 / 多少边。 */
     private static final int ROCK_LAT = 14;
     private static final int ROCK_LON = 24;
     /** 每 N 格算一块岩板；板与板的接缝就是熔岩裂缝。 */
-    private static final int ROCK_PLATE = 3;
+    private static final int ROCK_PLATE = 4;
+    /**
+     * 裂缝有多宽（= 格子在那一方向上的比例，0.18 即 36%）。
+     *
+     * <p>⚠️ 这个值<b>必须独立于网格粗细</b>：第一版是"把整个裂缝格子跳过不画"，
+     * 于是裂缝宽度被锁死成"1/N 的格子"，PLATE=3 时占掉 56% 的面积 ——
+     * 整颗球变成熔岩、岩板反成碎块，和参考图正好相反 ✗
+     * 现在岩壳整面画满，熔岩只是缝上的一条<b>细亮条浮在壳外</b>，宽度由这里说了算 ✓
+     */
+    private static final double CRACK_HALF_WIDTH = 0.18D;
+    /** 裂缝画在岩壳外侧一点点 —— 免得和岩板同半径打架（z-fight）。 */
+    private static final double CRACK_LIFT = 1.006D;
 
     /**
-     * 画一颗<b>熔岩岩球</b>：里面是熔岩、外面是裂开的黑炭岩壳。
+     * 画一颗<b>熔岩岩球</b>：黑炭岩壳 + 从缝里透出的熔岩（作者 2026-10-05 参照图）。
      *
-     * <p>做法（作者参照图的关键是"黑壳 + 从缝里透出的亮橙"）：
-     * <ol>
-     *   <li>先画<b>里面的熔岩</b>——两层亮橙黄的球</li>
-     *   <li>再画<b>岩壳</b>，但<b>裂缝那几格直接跳过不画</b>，于是熔岩从缝里透出来 ✓
-     *       （比"画完壳再往上贴发光线"省一半顶点，而且缝是真的镂空）</li>
-     *   <li>最后绕球一圈<b>边缘火苗</b>——参照图外围那圈飘动的火</li>
-     * </ol>
-     *
-     * <p>关于"球型不好做可以做成正方体"：球体这套参数化在
-     * {@code TNWaterBoltRenderer} 里已经跑通了，直接复用即可，<b>不用退成正方体</b> ✓
+     * <p>关于"球型不好做可以做成正方体"：球面这套参数化在
+     * {@code TNWaterBoltRenderer} 里早就跑通了，直接复用即可，<b>不用退成正方体</b> ✓
      */
     private static void lavaRock(VertexConsumer out, Matrix4f pose, Vec3 dir, Vec3 right, Vec3 up,
                                  double radius, double age, float fade) {
-        // 1) 里面的熔岩：透过裂缝看得见的那层
-        sphere(out, pose, dir, right, up, radius * 0.93D, 1.00F, 0.52F, 0.06F, 0.98F * fade);
-        sphere(out, pose, dir, right, up, radius * 0.78D, 1.00F, 0.80F, 0.30F, 0.95F * fade);
-
-        // 2) 黑炭岩板外壳（裂缝处镂空）
+        // 岩壳 + 缝里的熔岩（一起画，保证岩板在前、熔岩条浮在外侧）
         rockShell(out, pose, dir, right, up, radius, fade);
 
-        // 3) 边缘舔上来的火苗：绕球一圈，长度各自抖（"在烧"的关键）
+        // 边缘舔上来的火苗：绕球一圈，长度各自抖（"在烧"的关键）
+        // ⚠️ 用**锥形**（根部粗、尖端细）而不是等粗的管子 —— 等粗的会像一圈"黄纸片" ✗
         for (int k = 0; k < 7; k++) {
             double angle = age * 0.22D + k * Math.PI * 2.0D / 7.0D;
             Vec3 base = WaterGeometry.radial(right, up, angle, radius * 0.97D);
-            double flick = 0.55D + 0.45D * Math.sin(age * 0.85D + k * 2.1D);
-            Vec3 tip = base.add(base.normalize().scale(radius * 0.80D * flick));
-            WaterGeometry.tube(out, pose, base, tip, radius * 0.11D, 1.00F, 0.60F, 0.10F, 0.55F * fade);
+            double flick = 0.45D + 0.55D * Math.sin(age * 0.85D + k * 2.1D);
+            Vec3 tip = base.add(base.normalize().scale(radius * 0.50D * flick));
+            float[] flame = {1.00F, 0.58F, 0.10F, 0.50F * fade};
+            ring(out, pose, right, up, base, radius * 0.085D, tip, radius * 0.015D, flame, 6);
         }
 
-        // 4) 一点点尾迹：它是飞出去的，不是浮在那儿（比彗星焰尾短得多）
-        wisp(out, pose, dir, right, up, radius * 0.85D, radius * 1.8D, age, 0, 0.45F * fade);
+        // 一点点尾迹：它是飞出去的，不是浮在那儿（比彗星焰尾短得多）
+        wisp(out, pose, dir, right, up, radius * 0.85D, radius * 1.8D, age, 0, 0.40F * fade);
     }
 
-    /** 岩板外壳：网格里凡是"裂缝"就不画，让下面那层熔岩透出来。 */
+    /** 岩壳：整面画满深灰近黑的岩板，再在缝上叠一条细的熔岩亮条。 */
     private static void rockShell(VertexConsumer out, Matrix4f pose, Vec3 dir, Vec3 right, Vec3 up,
                                   double radius, float fade) {
         for (int j = 0; j < ROCK_LAT; j++) {
             double a = -Math.PI / 2.0D + j * Math.PI / ROCK_LAT;
             double c = a + Math.PI / ROCK_LAT;
             for (int i = 0; i < ROCK_LON; i++) {
-                if (isCrack(i, j)) {
-                    continue;                                   // 裂缝：留给熔岩层
-                }
                 double u = i * Math.PI * 2.0D / ROCK_LON;
                 double v = (i + 1) * Math.PI * 2.0D / ROCK_LON;
-                Vec3 p = dir.scale(Math.sin(a) * radius).add(WaterGeometry.radial(right, up, u, Math.cos(a) * radius));
-                Vec3 q = dir.scale(Math.sin(a) * radius).add(WaterGeometry.radial(right, up, v, Math.cos(a) * radius));
-                Vec3 s = dir.scale(Math.sin(c) * radius).add(WaterGeometry.radial(right, up, v, Math.cos(c) * radius));
-                Vec3 t = dir.scale(Math.sin(c) * radius).add(WaterGeometry.radial(right, up, u, Math.cos(c) * radius));
+                boolean seamLon = seamLon(i, j);
+                boolean seamLat = seamLat(i, j);
 
+                // ---- 岩板（深灰近黑；只有**紧挨**裂缝的那一圈边缘透一点热）----
+                // ⚠️ 这里**不能**把格子自己是不是缝算进去：那样 44% 的格子都算"边缘"，
+                //    整颗球会变成暖橙色，岩壳就不黑了 ✗（第一版正是这么错的）
                 float shade = rockShade(i, j);
-                // 紧挨裂缝的岩板边缘透一点热 —— 参照图里岩块边缘是橙的，不是纯黑
-                boolean rim = isCrack(i - 1, j) || isCrack(i + 1, j)
-                        || isCrack(i, j - 1) || isCrack(i, j + 1);
-                WaterGeometry.quad(out, pose, p, q, s, t,
-                        shade + (rim ? 0.34F : 0.0F),
-                        shade + (rim ? 0.11F : 0.0F),
-                        shade + (rim ? 0.01F : 0.0F),
+                boolean rim = seamLon(i - 1, j) || seamLon(i + 1, j)
+                        || seamLat(i, j - 1) || seamLat(i, j + 1);
+                surfaceQuad(out, pose, dir, right, up, radius, a, c, u, v,
+                        shade + (rim ? 0.055F : 0.0F),
+                        shade + (rim ? 0.015F : 0.0F),
+                        shade + (rim ? 0.002F : 0.0F),
                         fade);
+
+                // ---- 缝里的熔岩：一条窄亮条，浮在壳外 ----
+                double lift = radius * CRACK_LIFT;
+                if (seamLon) {
+                    double mid = (u + v) * 0.5D;
+                    double half = (v - u) * 0.5D * CRACK_HALF_WIDTH;
+                    surfaceQuad(out, pose, dir, right, up, lift, a, c, mid - half, mid + half,
+                            1.00F, 0.62F, 0.10F, 0.95F * fade);
+                }
+                if (seamLat) {
+                    double mid = (a + c) * 0.5D;
+                    double half = (c - a) * 0.5D * CRACK_HALF_WIDTH;
+                    surfaceQuad(out, pose, dir, right, up, lift, mid - half, mid + half, u, v,
+                            1.00F, 0.78F, 0.22F, 0.95F * fade);
+                }
             }
         }
     }
 
+    /** 球面上的一片（经纬范围给全，内部按 dir/right/up 参数化）。 */
+    private static void surfaceQuad(VertexConsumer out, Matrix4f pose, Vec3 dir, Vec3 right, Vec3 up,
+                                    double radius, double latA, double latC, double lonU, double lonV,
+                                    float r, float g, float b, float alpha) {
+        Vec3 p = spherePoint(dir, right, up, radius, latA, lonU);
+        Vec3 q = spherePoint(dir, right, up, radius, latA, lonV);
+        Vec3 s = spherePoint(dir, right, up, radius, latC, lonV);
+        Vec3 t = spherePoint(dir, right, up, radius, latC, lonU);
+        WaterGeometry.quad(out, pose, p, q, s, t, r, g, b, alpha);
+    }
+
+    private static Vec3 spherePoint(Vec3 dir, Vec3 right, Vec3 up, double radius, double lat, double lon) {
+        return dir.scale(Math.sin(lat) * radius)
+                .add(WaterGeometry.radial(right, up, lon, Math.cos(lat) * radius));
+    }
+
     /**
-     * 这一格经纬网格是「熔岩裂缝」还是「岩石板块」。
+     * 这一格是不是落在<b>经线方向</b>的裂缝上。
      *
      * <p>每 {@link #ROCK_PLATE} 格一块板，并且用 {@link #hash} 给<b>每块板一个自己的错位量</b> ——
      * 否则裂缝会排成规整的棋盘格，一点都不像裂开的岩壳 ✗
      */
-    private static boolean isCrack(int i, int j) {
-        int cellI = Math.floorDiv(i, ROCK_PLATE);
-        int cellJ = Math.floorDiv(j, ROCK_PLATE);
-        int offI = (int) (hash(cellI, cellJ) * ROCK_PLATE);
-        int offJ = (int) (hash(cellJ + 977, cellI + 331) * ROCK_PLATE);
-        return Math.floorMod(i + offI, ROCK_PLATE) == 0
-                || Math.floorMod(j + offJ, ROCK_PLATE) == 0;
+    private static boolean seamLon(int i, int j) {
+        int off = (int) (hash(Math.floorDiv(i, ROCK_PLATE), Math.floorDiv(j, ROCK_PLATE)) * ROCK_PLATE);
+        return Math.floorMod(i + off, ROCK_PLATE) == 0;
     }
 
-    /** 每块岩板深浅略有不同（0.04 ~ 0.09 的极暗灰），免得整颗球糊成一块死黑。 */
+    /** 这一格是不是落在<b>纬线方向</b>的裂缝上（错位量另取一个哈希，两条缝才不互相对齐）。 */
+    private static boolean seamLat(int i, int j) {
+        int off = (int) (hash(Math.floorDiv(j, ROCK_PLATE) + 977, Math.floorDiv(i, ROCK_PLATE) + 331)
+                * ROCK_PLATE);
+        return Math.floorMod(j + off, ROCK_PLATE) == 0;
+    }
+
+    /** 每块岩板深浅略有不同（0.030 ~ 0.065 的极暗灰），免得整颗球糊成一块死黑。 */
     private static float rockShade(int i, int j) {
-        return (float) (0.040D + 0.050D
+        return (float) (0.030D + 0.035D
                 * hash(Math.floorDiv(i, ROCK_PLATE) * 31, Math.floorDiv(j, ROCK_PLATE) * 17));
     }
 
