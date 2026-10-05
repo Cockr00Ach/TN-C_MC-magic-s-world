@@ -23,7 +23,8 @@ import java.util.UUID;
  *
  * <h2>规则</h2>
  * <ul>
- *   <li>法阵悬在施法者上方，<b>跟着施法者走</b>（"视角上方"的意思就是它一直在你头顶）</li>
+ *   <li>法阵落在<b>选定目标的头顶</b>（由 {@code TNFireFields.skyfallAnchor} 选点），
+ *       生成之后<b>位置固定不变</b> —— 不是跟着谁走 ✓（作者 2026-10-05 明确要求）</li>
  *   <li>每 {@link FireSpellRules#SKYFALL_INTERVAL_TICKS} tick 砸一发熔岩火球；
  *       在法阵周围找人，<b>找不到就直直往下砸</b>（不会因为没目标就整个失效）</li>
  *   <li>砸下去的火球会爆炸（伤害 = 火球伤害 × 50%）<b>并且留下熔岩地</b> ——
@@ -80,10 +81,9 @@ public final class TNSkyfallEntity extends Entity {
         int age = age() + 1;
         entityData.set(AGE, age);
 
-        // 跟着施法者走：法阵一直在你头顶
-        if (caster != null && caster.isAlive() && caster.level() == level()) {
-            setPos(caster.getX(), caster.getY() + FireSpellRules.SKYFALL_HEIGHT, caster.getZ());
-        }
+        // ⚠️ 位置**生成后就不再变**（作者 2026-10-05 明确要求）。
+        //    早先这里是"跟着施法者走"，那样法阵会一直挂在玩家头顶 —— 与设计不符 ✗
+        //    caster 现在只用于判断"打谁"（自己的召唤物/队友不能砸），不再影响位置。
 
         if (level().isClientSide) {
             // 一圈缓慢旋转的火环 + 中心往下淌的火星，暗示"它在往下砸"

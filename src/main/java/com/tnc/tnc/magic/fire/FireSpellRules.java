@@ -52,6 +52,15 @@ public final class FireSpellRules {
     /** 法阵悬在多高（格）。 */
     public static final double SKYFALL_HEIGHT = 8.0D;
 
+    /**
+     * 熔岳天倾<b>选定目标</b>的距离（格）—— 作者 2026-10-05：
+     * 「在选定目标头上生成法阵，法阵不是在玩家上方」。
+     *
+     * <p>所以要沿视线先找到"你瞄的是谁"：<b>先做实体扫掠</b>，打不到实体就看方块落点，
+     * 连方块都没有（对着天空）才退回自己头顶。
+     */
+    public static final double SKYFALL_CAST_RANGE = 24.0D;
+
     /** 法阵的多大范围内找目标（格）—— 找不到就直直往下砸。 */
     public static final double SKYFALL_SEEK_RADIUS = 12.0D;
 
