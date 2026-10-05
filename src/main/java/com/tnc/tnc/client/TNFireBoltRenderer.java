@@ -83,8 +83,14 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
         Vec3 right = FireSpellRules.right(dir);
         Vec3 up = right.cross(dir).normalize();
 
-        // 成形阶段整体长大（作者要求"先形成一个球形再发射出去"）
-        double radius = entity.radius() * entity.formProgress(partial);
+        // 成形阶段整体长大（作者要求"先形成一个球形再发射出去"）；
+        // 飞过射程 65% 之后逐渐消失（作者要求"离开一定距离后逐渐消失"）。
+        // 两件事都作用在"这颗球现在多大 + 多亮"上，所以在这里一次算完。
+        float fade = entity.fade(partial);
+        if (fade <= 0.02F) {
+            return;                                        // 已经飞到头，整颗收掉
+        }
+        double radius = entity.radius() * entity.formProgress(partial) * (0.35D + 0.65D * fade);
         if (radius < 0.02D) {
             return;
         }
@@ -94,10 +100,10 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
         // 画法顺序 = 从"最外层/最暗"到"最亮"，让白热核最后压上去。
         // （渲染通道只写颜色不写深度，所以后画的会盖在前面的上面）
         for (int w = 0; w < WISPS; w++) {
-            wisp(out, pose, dir, right, up, radius, length, age, w);
+            wisp(out, pose, dir, right, up, radius, length, age, w, fade);
         }
-        flameBody(out, pose, dir, right, up, radius, length, age);
-        coreBlob(out, pose, dir, right, up, radius, age);
+        flameBody(out, pose, dir, right, up, radius, length, age, fade);
+        coreBlob(out, pose, dir, right, up, radius, age, fade);
     }
 
     // ------------------------------------------------------------------
@@ -105,7 +111,7 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
     // ------------------------------------------------------------------
 
     private static void flameBody(VertexConsumer out, Matrix4f pose, Vec3 dir, Vec3 right, Vec3 up,
-                                  double radius, double length, double age) {
+                                  double radius, double length, double age, float fade) {
         float[] color = new float[4];
         Vec3 prevCenter = null;
         double prevR = 0.0D;
@@ -114,7 +120,7 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
             Vec3 center = axisPoint(dir, right, up, t, length, radius, age, 1.0D);
             double r = profile(t) * radius;
             if (prevCenter != null && prevR > 1.0E-4D && r > 1.0E-4D) {
-                flameColor(t, 0.80F, color);
+                flameColor(t, 0.80F * fade, color);
                 ring(out, pose, right, up, prevCenter, prevR, center, r, color, BODY_SIDES);
             }
             prevCenter = center;
@@ -127,7 +133,7 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
     // ------------------------------------------------------------------
 
     private static void wisp(VertexConsumer out, Matrix4f pose, Vec3 dir, Vec3 right, Vec3 up,
-                             double radius, double length, double age, int index) {
+                             double radius, double length, double age, int index, float fade) {
         float[] color = new float[4];
         Vec3 prevCenter = null;
         double prevR = 0.0D;
@@ -143,7 +149,7 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
 
             if (prevCenter != null && prevR > 1.0E-4D && r > 1.0E-4D) {
                 // 火舌比主体更亮更透 —— 它是"蹿起来的火苗"
-                flameColor(t * 0.85D, 0.55F, color);
+                flameColor(t * 0.85D, 0.55F * fade, color);
                 color[0] = Math.min(1.0F, color[0] * 1.05F);
                 color[2] = Math.min(1.0F, color[2] * 1.10F);
                 ring(out, pose, right, up, prevCenter, prevR, center, r, color, WISP_SIDES);
@@ -158,12 +164,12 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
     // ------------------------------------------------------------------
 
     private static void coreBlob(VertexConsumer out, Matrix4f pose, Vec3 dir, Vec3 right, Vec3 up,
-                                 double radius, double age) {
+                                 double radius, double age, float fade) {
         // 燃烧的呼吸感
         float flicker = (float) (0.85D + 0.15D * Math.sin(age * 0.6D));
-        sphere(out, pose, dir, right, up, radius * 1.00D, 1.00F, 0.66F, 0.20F, 0.55F * flicker);
-        sphere(out, pose, dir, right, up, radius * 0.74D, 1.00F, 0.86F, 0.42F, 0.78F * flicker);
-        sphere(out, pose, dir, right, up, radius * 0.44D, 1.00F, 0.97F, 0.82F, 0.95F);
+        sphere(out, pose, dir, right, up, radius * 1.00D, 1.00F, 0.66F, 0.20F, 0.55F * flicker * fade);
+        sphere(out, pose, dir, right, up, radius * 0.74D, 1.00F, 0.86F, 0.42F, 0.78F * flicker * fade);
+        sphere(out, pose, dir, right, up, radius * 0.44D, 1.00F, 0.97F, 0.82F, 0.95F * fade);
     }
 
     // ------------------------------------------------------------------

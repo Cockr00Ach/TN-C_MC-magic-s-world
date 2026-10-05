@@ -43,6 +43,15 @@ public final class TNFireBoltEntity extends Projectile {
             SynchedEntityData.defineId(TNFireBoltEntity.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<Float> RADIUS =
             SynchedEntityData.defineId(TNFireBoltEntity.class, EntityDataSerializers.FLOAT);
+    /** 射程（格）—— 同步给客户端，客户端靠它算"该在什么时候开始消失"。 */
+    private static final EntityDataAccessor<Float> RANGE =
+            SynchedEntityData.defineId(TNFireBoltEntity.class, EntityDataSerializers.FLOAT);
+
+    /** 飞过射程的这个比例之后开始逐渐消失（见 {@link #fade}）。 */
+    public static final double FADE_START = 0.65D;
+
+    /** 出手速度（格/tick）。作者 2026-10-05：从 1.3 降下来，让焰尾看得清。 */
+    public static final double LAUNCH_SPEED = 1.0D;
 
     /** 这一发的伤害（服务端算好；客户端不用）。 */
     private float damage;
@@ -54,6 +63,37 @@ public final class TNFireBoltEntity extends Projectile {
     private boolean lavaField;
     /** 命中后的爆炸半径（0 = 不爆炸；t4 熔岳天倾的那些火球才有）。 */
     private double blastRadius;
+
+    /**
+     * 距离衰减 <b>1 → 0</b>：飞过射程的 {@link #FADE_START} 之后一路缩到看不见。
+     *
+     * <p>作者 2026-10-05 要求「当火球离开一定距离后会逐渐消失」——
+     * 之前是 {@code remaining <= 0} 时直接 {@code discard()}，火球会"啪"地凭空不见 ✗。
+     *
+     * <p>怎么算"飞了多远"：射程是同步字段（{@link #RANGE}），
+     * 每 tick 的位移长度从同步的速度拿（{@code getDeltaMovement()}），
+     * 两者相乘即已飞距离 —— 所以<b>不需要每 tick 同步剩余距离</b>，省带宽。
+     *
+     * @return 1.0 = 还是完整的球；0.0 = 已经该看不见了
+     */
+    public float fade(float partial) {
+        double speed = getDeltaMovement().length();
+        double range = range();
+        if (speed <= 0.01D || range <= 0.01D) {
+            return 1.0F;                      // 还没出手（成形阶段）→ 不衰减
+        }
+        double progress = (tickCount + partial) * speed / range;
+        if (progress <= FADE_START) {
+            return 1.0F;
+        }
+        double k = (progress - FADE_START) / (1.0D - FADE_START);
+        return (float) Math.max(0.0D, 1.0D - k);
+    }
+
+    /** 这一发的射程（同步字段）。 */
+    public double range() {
+        return entityData.get(RANGE);
+    }
 
     /**
      * <b>成形阶段</b>的长度（tick）—— 作者 2026-10-05 要求「先形成一个球形再发射出去」。
@@ -78,6 +118,7 @@ public final class TNFireBoltEntity extends Projectile {
         setOwner(owner);
         entityData.set(SPELL, spellPath);
         entityData.set(RADIUS, bolt.radius());
+        entityData.set(RANGE, bolt.range());
         setPos(at);
         setDeltaMovement(velocity);
         damage = FireSpellRules.damage(bolt, FireSpellRules.power(owner));
@@ -119,7 +160,7 @@ public final class TNFireBoltEntity extends Projectile {
             double spread = bolt.launches() > 1
                     ? (i - (bolt.launches() - 1) / 2.0D) * 0.055D
                     : 0.0D;
-            Vec3 velocity = look.scale(1.3D).add(right.scale(spread));
+            Vec3 velocity = look.scale(LAUNCH_SPEED).add(right.scale(spread));
             TNFireBoltEntity boltEntity = new TNFireBoltEntity(
                     com.tnc.tnc.magic.TNOrbEntities.FIRE_BOLT.get(), player.level());
             boltEntity.configure(player, bolt, spellId.getPath(), muzzle, velocity);
@@ -148,6 +189,7 @@ public final class TNFireBoltEntity extends Projectile {
     protected void defineSynchedData() {
         entityData.define(SPELL, "");
         entityData.define(RADIUS, 0.35F);
+        entityData.define(RANGE, 40.0F);
     }
 
     @Override

@@ -122,9 +122,10 @@ public final class TNSkyfallEntity extends Entity {
                 .orElse(null);
 
         Vec3 from = position();
+        // 速度跟手扔的那颗保持一致（作者 2026-10-05 要求降速）—— 别自己另定一个数
         Vec3 velocity = target == null
-                ? new Vec3(0.0D, -1.4D, 0.0D)
-                : target.getEyePosition().subtract(from).normalize().scale(1.4D);
+                ? new Vec3(0.0D, -TNFireBoltEntity.LAUNCH_SPEED, 0.0D)
+                : target.getEyePosition().subtract(from).normalize().scale(TNFireBoltEntity.LAUNCH_SPEED);
 
         TNFireBoltEntity shot = new TNFireBoltEntity(TNOrbEntities.FIRE_BOLT.get(), server);
         shot.configure(shooter, bolt, "molten_skyfall", from, velocity);
