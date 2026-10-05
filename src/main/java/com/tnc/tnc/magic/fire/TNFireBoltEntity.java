@@ -10,6 +10,9 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
+import com.tnc.tnc.magic.TNShockwaveEntity;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -404,6 +407,9 @@ public final class TNFireBoltEntity extends Projectile {
             if ("meteor_fall".equals(spellPath())) {
                 meteorImpactBurst(server, impact);
             }
+            // 声音 + 震屏（作者 2026-10-05）：t3 响亮爆炸+轻微震动 / t4 巨大爆炸+轰鸣+较强烈 /
+            // t5 巨大爆炸+轰鸣+强烈 —— 逐档加强，不会出现低档比高档猛 ✗
+            boom(server, impact);
             // 熔岩地：在落点**下方**留一块持续灼烧的地面（t3 熔岩火球起才有）。
             // 它的每秒伤害和焚身是两条独立结算，会同时触发 —— 这是作者明确要的 ✓
             if (lavaField) {
@@ -526,5 +532,53 @@ public final class TNFireBoltEntity extends Projectile {
                     at.x + Math.cos(a) * blast, at.y + 0.25D, at.z + Math.sin(a) * blast,
                     4, 0.25D, 0.25D, 0.25D, 0.08D);
         }
+    }
+
+    /**
+     * 命中时的「动静」：<b>声音 + 震屏</b>（作者 2026-10-05 要求，且必须逐档加强 ✗）。
+     *
+     * <ul>
+     *   <li><b>t3 熔岩火球</b>：较响亮的爆炸声 + <b>轻微</b>视角震动</li>
+     *   <li><b>t4 熔岳天倾</b>：巨大的爆炸与轰鸣声 + <b>较强烈</b>震动</li>
+     *   <li><b>t5 陨星坠</b>：巨大的爆炸与轰鸣声 + <b>强烈</b>震动</li>
+     * </ul>
+     *
+     * <p>用原版音效（不需要额外素材 ✓），靠<b>音量</b>拉开档次；
+     * 震屏复用现有的 {@link TNShockwaveEntity} —— 客户端本来就在侦测它 ✓，
+     * 只是现在带上「这一发自己的强度」✓（见 TNShockwaveEntity.DATA_SHAKE）。
+     *
+     * <p>⚠️ 装饰小陨石（meteor_shard）走 default 分支：<b>不出声、不震屏</b> ——
+     *    它是纯装饰，响了反而分不清主次 ✗
+     */
+    private void boom(ServerLevel server, Vec3 at) {
+        String path = spellPath();
+        float shake;
+        float volume;
+        switch (path) {
+            case "lava_fireball" -> {
+                shake = FireSpellRules.SHAKE_T3;
+                volume = 1.8F;
+            }
+            case "molten_skyfall" -> {
+                shake = FireSpellRules.SHAKE_T4;
+                volume = 3.5F;
+            }
+            case "meteor_fall" -> {
+                shake = FireSpellRules.SHAKE_T5;
+                volume = 6.0F;
+            }
+            default -> {
+                return;
+            }
+        }
+        server.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE,
+                SoundSource.PLAYERS, volume, 1.0F);
+        // t4/t5 再加一声「轰鸣」（更低更长）—— 作者要的「轰鸣声」就是它 ✓
+        if (!"lava_fireball".equals(path)) {
+            server.playSound(null, at.x, at.y, at.z, SoundEvents.LIGHTNING_BOLT_THUNDER,
+                    SoundSource.WEATHER, volume * 0.7F, 0.55F);
+        }
+        // 震屏：复用冲击波实体；半径跟着强度走，视觉上也分得出大小 ✓
+        TNShockwaveEntity.blast(server, at, 3.0D + shake * 0.6D, shake, getOwner());
     }
 }

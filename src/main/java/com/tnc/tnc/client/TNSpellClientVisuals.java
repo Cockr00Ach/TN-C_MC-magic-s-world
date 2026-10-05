@@ -129,7 +129,7 @@ public final class TNSpellClientVisuals {
             double distance = wave.position().distanceTo(minecraft.player.position());
             // 2026-09-27 作者："爆炸特效感觉好拉，我感受不到那种爆炸的感觉，多加一点镜头晃动吧，参考一下核弹"
             //   → 震幅 4.0→14.0、作用半径 20→40 格、衰减 0.80→0.88（摇得更久 ✓）
-            float strength = (float) (SHAKE_MAX * Math.max(0.0D, 1.0D - distance / SHAKE_RANGE));
+            float strength = (float) (wave.shakeStrength() * Math.max(0.0D, 1.0D - distance / SHAKE_RANGE));
             if (strength > shake) {
                 shake = strength;
             }

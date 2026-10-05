@@ -35,6 +35,20 @@ public class TNShockwaveEntity extends TNMagicCircleEntity {
     private static final int PUSH_TICKS = 10;
     /** 推开的最大速度（格/tick）。 */
     private static final double PUSH_STRENGTH = 1.6D;
+    /** 不特别指定时，这一发给镜头的抖动（度）—— 与 client\TNSpellClientVisuals 的 SHAKE_MAX 一致 ✓。 */
+    public static final float DEFAULT_SHAKE = 9.0F;
+
+    /**
+     * 这一发冲击波给镜头多大抖动（度，**同步字段**）。
+     *
+     * <p>为什么要按发定制：作者 2026-10-05 要求火球链「t3 轻微震动 → t4 较强烈 → t5 强烈」，
+     * 而原来客户端对**任何**冲击波都用同一个 SHAKE_MAX ✗ —— 分不出大小。
+     * 默认给 DEFAULT_SHAKE，所以**已有的爆炸行为完全不变** ✓
+     */
+    private static final net.minecraft.network.syncher.EntityDataAccessor<Float> DATA_SHAKE =
+            net.minecraft.network.syncher.SynchedEntityData.defineId(TNShockwaveEntity.class,
+                    net.minecraft.network.syncher.EntityDataSerializers.FLOAT);
+
     /** 玩家只吃到这么一小份推力（作者不要被自己炸飞 ✗）：约 18%，且几乎不向上掀 ✓。 */
     private static final double PLAYER_PUSH_FACTOR = 0.18D;
     /** 上掀分量 —— 贴着地面被"掀"一下的感觉。 */
@@ -62,6 +76,39 @@ public class TNShockwaveEntity extends TNMagicCircleEntity {
     public TNShockwaveEntity(EntityType<? extends TNShockwaveEntity> type, Level level) {
         super(type, level);
         this.configure(MAX_RADIUS, LIFE);
+    }
+
+    @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(DATA_SHAKE, DEFAULT_SHAKE);
+    }
+
+    /** 客户端用它决定镜头抖多少 ✓ */
+    public float shakeStrength() {
+        return this.entityData.get(DATA_SHAKE);
+    }
+
+    /** 服务端设这一发的抖动强度（客户端会同步收到 ✓）。 */
+    public void configureShake(float shake) {
+        this.entityData.set(DATA_SHAKE, shake);
+    }
+
+    /**
+     * 由我们自己 Java 放一发冲击波（法术 JSON 的 SPAWN 动作只能指定实体类型、带不了参数 ✗）。
+     *
+     * @param shake  给镜头的抖动（度）—— 逐档递增，见 FireSpellRules.SHAKE_T3/T4/T5
+     * @param exempt 不推动谁（一般传施法者自己）
+     */
+    public static TNShockwaveEntity blast(ServerLevel level, Vec3 at, double radius,
+                                          float shake, Entity exempt) {
+        TNShockwaveEntity wave = new TNShockwaveEntity(TNOrbEntities.SHOCKWAVE.get(), level);
+        wave.configure(radius, LIFE);
+        wave.configureShake(shake);
+        wave.exemptFromPush(exempt);
+        wave.setPos(at.x, at.y, at.z);
+        level.addFreshEntity(wave);
+        return wave;
     }
 
     @Override

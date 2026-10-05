@@ -50,7 +50,7 @@ public final class TNSkyfallEntity extends Entity {
      * <p>这是「魔法阵」的尺寸，和 {@link FireSpellRules#SKYFALL_SEEK_RADIUS}（打多大范围）
      * 是两件事，所以分开写 ✓
      */
-    public static final double SIGIL_RADIUS = 3.0D;
+    public static final double SIGIL_RADIUS = 6.0D;
 
     /**
      * 砸下来的火球<b>不从正中心出</b>（作者 2026-10-05：「火球不要固定在正中心落下」）——
@@ -148,9 +148,8 @@ public final class TNSkyfallEntity extends Entity {
         Vec3 from = position().add(Math.cos(spreadAngle) * spreadDist, 0.0D,
                 Math.sin(spreadAngle) * spreadDist);
         // 速度跟手扔的那颗保持一致（作者 2026-10-05 要求降速）—— 别自己另定一个数
-        Vec3 velocity = target == null
-                ? new Vec3(0.0D, -TNFireBoltEntity.LAUNCH_SPEED, 0.0D)
-                : target.getEyePosition().subtract(from).normalize().scale(TNFireBoltEntity.LAUNCH_SPEED);
+        // 作者 2026-10-05：「垂直落下不用朝向目标」—— 一律垂直下砸 ✓（不再瞄准谁）
+        Vec3 velocity = new Vec3(0.0D, -TNFireBoltEntity.LAUNCH_SPEED, 0.0D);
 
         TNFireBoltEntity shot = new TNFireBoltEntity(TNOrbEntities.FIRE_BOLT.get(), server);
         shot.configure(shooter, bolt, "molten_skyfall", from, velocity);
