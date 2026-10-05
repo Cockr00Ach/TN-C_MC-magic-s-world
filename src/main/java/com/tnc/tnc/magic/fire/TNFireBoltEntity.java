@@ -55,6 +55,18 @@ public final class TNFireBoltEntity extends Projectile {
     /** 命中后的爆炸半径（0 = 不爆炸；t4 熔岳天倾的那些火球才有）。 */
     private double blastRadius;
 
+    /**
+     * <b>成形阶段</b>的长度（tick）—— 作者 2026-10-05 要求「先形成一个球形再发射出去」。
+     *
+     * <p>这 5 tick（0.25 秒）里火球<b>停在手前不动、也不判定命中</b>，
+     * 渲染器把它从 25% 大小长到 100%（见 {@link #formProgress}），
+     * 长满的那一帧喷一次火星表示"射出去了"，然后才开始飞。
+     *
+     * <p>为什么不靠法术 JSON 的 {@code cast.particles} 做这件事：那只能摆粒子，
+     * 摆不出"一颗球"；而且引擎的粒子形状/原点语义没有文档，猜错了就是在脚下冒烟 ✗
+     */
+    public static final int FORM_TICKS = 5;
+
     public TNFireBoltEntity(EntityType<? extends TNFireBoltEntity> type, Level level) {
         super(type, level);
         setNoGravity(true);
@@ -116,6 +128,22 @@ public final class TNFireBoltEntity extends Projectile {
         return true;
     }
 
+    /** 刚出生那一帧到长满之前都还没有速度，别让 normalize 炸。 */
+    public Vec3 safeDirection() {
+        Vec3 motion = getDeltaMovement();
+        return motion.lengthSqr() < 0.01D ? new Vec3(0.0D, 0.0D, 1.0D) : motion.normalize();
+    }
+
+    /**
+     * 成形进度 0.25 → 1.0（渲染器用）—— 决定这颗球现在多大。
+     *
+     * <p>起点给 0.25 而不是 0：一出生就有一小团在手里，看着才像"凝聚"而不是"凭空出现"。
+     */
+    public float formProgress(float partial) {
+        double t = (tickCount + partial) / (double) FORM_TICKS;
+        return t >= 1.0D ? 1.0F : (float) Math.max(0.25D, t);
+    }
+
     @Override
     protected void defineSynchedData() {
         entityData.define(SPELL, "");
@@ -125,6 +153,29 @@ public final class TNFireBoltEntity extends Projectile {
     @Override
     public void tick() {
         super.tick();
+
+        // ---------------- 成形阶段：先在手前凝成一颗球，再射出去 ----------------
+        // 这 5 tick 里**不移动、也不判定命中**（火球还在手里），渲染器负责让它长大
+        if (tickCount <= FORM_TICKS) {
+            if (level().isClientSide) {
+                // 往中心收拢的几粒火星 —— "凝聚"的感觉
+                if (tickCount % 2 == 0) {
+                    double r = radius() * (1.5D - formProgress(0.0F));
+                    for (int i = 0; i < 3; i++) {
+                        double a = tickCount * 0.9D + i * Math.PI * 2.0D / 3.0D;
+                        level().addParticle(ParticleTypes.SMALL_FLAME,
+                                getX() + Math.cos(a) * r, getY() + Math.sin(a) * r * 0.6D,
+                                getZ() + Math.sin(a) * r,
+                                -Math.cos(a) * 0.04D, 0.01D, -Math.sin(a) * 0.04D);
+                    }
+                }
+            } else if (tickCount == FORM_TICKS) {
+                // 长满的这一帧喷一次火星：给"射出去了"一个明确的瞬间
+                ((ServerLevel) level()).sendParticles(ParticleTypes.FLAME,
+                        getX(), getY(), getZ(), 14, 0.12D, 0.12D, 0.12D, 0.09D);
+            }
+            return;
+        }
 
         // ---------------- 客户端：只负责好看 ----------------
         if (level().isClientSide) {
