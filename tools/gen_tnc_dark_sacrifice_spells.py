@@ -66,23 +66,34 @@ SPELLS = {
 # and a bad id crashes the client when the engine casts it).
 BLOOD = "fromtheshadows:blood"                 # SimpleParticleType ✓
 SOUL_FIRE = "minecraft:soul_fire_flame"        # vanilla ✓
-SHADOW = "fromtheshadows:shadow"               # SimpleParticleType ✓ (dark vapour)
-# ⚠ block_factorys_bosses:ink_fog used to be here -- it is a BEDROCK particle there,
-#   not a ParticleType, and looking it up crashes SpellEngine with a ClassCastException.
 BLACK_FLAME = "soulsweapons:black_flame"       # SimpleParticleType ✓
+#
+# ⚠⚠ `fromtheshadows:shadow` AND `minecraft:smoke` WERE HERE -- NOW BANNED (2026-10-09)
+#     Author: "为什么放以伤换伤也有雾" (why does trade-wounds also produce fog).
+#     Because this chain spawned shadow/smoke on cast, and those two ids ARE the black
+#     fog chain's material. A blood sacrifice must never read as fog.
+#     This chain is blood + soul fire + embers ONLY; the fog ids sit in FORBIDDEN below
+#     so the generator refuses to write them again.
+FORBIDDEN = {"fromtheshadows:shadow", "minecraft:smoke", "minecraft:large_smoke",
+             # the assets-only block_factorys_bosses ids that crash the client:
+             "block_factorys_bosses:ink_fog", "block_factorys_bosses:fog_1",
+             "block_factorys_bosses:mist_cloud"}
 
 
 def batch(pid, shape, origin, count, mn, mx):
+    if pid in FORBIDDEN:
+        raise AssertionError("forbidden particle in the sacrifice chain: %s" % pid)
     return {"particle_id": pid, "shape": shape, "origin": origin,
             "count": float(count), "min_speed": float(mn), "max_speed": float(mx)}
 
 
 def cast_fx(tier):
-    """The caster cuts himself open: a ring of blood at the feet, soul fire licking up."""
+    """The caster cuts himself open: blood at his feet, soul fire licking up, no fog."""
     return [
-        batch(BLOOD, "CIRCLE", "FEET", 10 + 4 * tier, 0.1, 0.5),
+        batch(BLOOD, "CIRCLE", "FEET", 14 + 4 * tier, 0.1, 0.5),
+        batch(BLOOD, "SPHERE", "CENTER", 10 + 3 * tier, 0.05, 0.3),
         batch(SOUL_FIRE, "CIRCLE", "FEET", 12 + 4 * tier, 0.1, 0.4),
-        batch(SHADOW, "SPHERE", "CENTER", 10 + 3 * tier, 0.05, 0.3),
+        batch(BLACK_FLAME, "CIRCLE", "FEET", 3 + tier, 0.05, 0.2),
     ]
 
 
@@ -96,6 +107,33 @@ def heal_action(coefficient):
         },
         "particles": [batch(BLOOD, "SPHERE", "CENTER", 24.0, 0.1, 0.5),
                       batch(SOUL_FIRE, "CIRCLE", "FEET", 16.0, 0.05, 0.3)],
+    }
+
+
+def drain_action():
+    """★ The LIFESTEAL settlement (author 2026-10-09).
+
+    The engine's actions cannot do either half of what the author asked for:
+    "damage the target for a PERCENTAGE of its max health" and "give the reward to the
+    CASTER" are both outside DAMAGE/HEAL/STATUS_EFFECT/FIRE/SPAWN/TELEPORT. But the
+    engine does call `SpellSpawnedEntity.onCreatedFromSpell(caster, spellId, spawn)` on
+    whatever a SPAWN action creates -- so a SPAWN of our own `tnc:drain` entity is the
+    hook that hands us the caster at the exact moment of impact. The entity does the
+    drain + mana refund + max-health buff and discards itself (see
+    src/main/java/com/tnc/tnc/magic/TNDarkDrainEntity.java, whose STATS table holds the
+    per-tier numbers). Nothing about the visual changes: it is invisible, the blood
+    particles come from this impact entry and from the entity's own burst.
+    """
+    return {
+        "action": {
+            "type": "SPAWN",
+            "spawn": {
+                "entity_type_id": "tnc:drain",
+                "time_to_live_seconds": 1,
+                "delay_ticks": 0,
+            },
+        },
+        "particles": [batch(BLOOD, "CIRCLE", "FEET", 16.0, 0.15, 0.6)],
     }
 
 
@@ -124,6 +162,10 @@ def rewrite(spell, effect_id, heal_coef):
         kept.append(impact)
     assert swapped == 1, "expected exactly one dark-sacrifice effect in %s" % effect_id
     assert all("action" in i for i in kept), "impact without action -> engine NPE on every cast"
+
+    # the lifesteal settlement: drop any previous one (idempotent), then append
+    kept = [i for i in kept if (i["action"] or {}).get("spawn", {}).get("entity_type_id") != "tnc:drain"]
+    kept.append(drain_action())
 
     # the heal: drop any previous one (idempotent), then append
     kept = [i for i in kept if i["action"].get("type") != "HEAL"]

@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="UTF-16"?>
+<Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
+  <RegistrationInfo>
+    <Author>DESKTOP-TO12FQM\FDCX</Author>
+    <Description>QuarkUpdater Task User 1.0.0.21</Description>
+    <URI>\QuarkUpdaterUser\QuarkUpdater\QuarkUpdaterTaskUser1.0.0.21{F41B57EE-26B3-4B64-B94D-B911E76CAD97}</URI>
+  </RegistrationInfo>
+  <Principals>
+    <Principal id="Author">
+      <UserId>S-1-5-21-620344409-4013399299-2564790692-1001</UserId>
+      <LogonType>InteractiveToken</LogonType>
+    </Principal>
+  </Principals>
+  <Settings>
+    <DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries>
+    <StopIfGoingOnBatteries>false</StopIfGoingOnBatteries>
+    <Hidden>true</Hidden>
+    <MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy>
+    <StartWhenAvailable>true</StartWhenAvailable>
+    <IdleSettings>
+      <Duration>PT10M</Duration>
+      <WaitTimeout>PT1H</WaitTimeout>
+      <StopOnIdleEnd>false</StopOnIdleEnd>
+      <RestartOnIdle>false</RestartOnIdle>
+    </IdleSettings>
+  </Settings>
+  <Triggers>
+    <LogonTrigger>
+      <UserId>DESKTOP-TO12FQM\FDCX</UserId>
+    </LogonTrigger>
+    <CalendarTrigger>
+      <StartBoundary>2026-01-24T19:20:32+08:00</StartBoundary>
+      <Repetition>
+        <Interval>PT1H</Interval>
+        <Duration>P1D</Duration>
+      </Repetition>
+      <ScheduleByDay>
+        <DaysInterval>1</DaysInterval>
+      </ScheduleByDay>
+    </CalendarTrigger>
+  </Triggers>
+  <Actions Context="Author">
+    <Exec>
+      <Command>"C:\Users\FDCX\AppData\Local\QuarkUpdater\QuarkUpdater\1.0.0.21\updater.exe"</Command>
+      <Arguments>--wake --enable-logging --vmodule=*/components/winhttp/*=1,*/components/update_client/*=2,*/chrome/updater/*=2,*/chrome/updater/quark/*=2,*/quark/utils/*=2</Arguments>
+    </Exec>
+  </Actions>
+</Task>

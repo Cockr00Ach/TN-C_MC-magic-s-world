@@ -186,6 +186,75 @@ public final class TNSpellClientVisuals {
         if (flash < 0.01F) {
             flash = 0.0F;
         }
+        // ★ 黑夜之手 t3+ 的"震动"（作者 2026-10-09："t3 开始增加震动"）✓
+        if (handShakeTicks > 0) {
+            handShakeTicks--;
+            handShake *= 0.94F;
+            if (handShake < 0.02F) {
+                handShake = 0.0F;
+                handShakeTicks = 0;
+            }
+        } else {
+            handShake = 0.0F;
+        }
+    }
+
+    // ------------------------------------------------------------------
+    //  ★ 黑夜之手链（暗系第 1 条）的"手砸出去"震动（作者 2026-10-09："t3 开始增加震动"）
+    //
+    //  为什么不用"侦测附近的手投射物"：引擎的投射物是**通用类型** ✗（`SpellProjectile`），
+    //  客户端这边只看得到"附近有一个投射物"，认不出是不是这一条链 ✗
+    //  ⇒ 改成**施法时记一笔**（客户端也收得到引擎的 SPELL_CAST ✓）：
+    //    放 t3 起的手 → 记下"要抖多久、多猛"，之后每 tick 衰减 ✓。
+    //  副作用：这是**屏幕**效果，所以旁边的队友也会一起晃 —— 对"这一记很猛"的传达反而更好 ✓。
+    // ------------------------------------------------------------------
+
+    /** 手链的档位 → (震动强度, 持续 tick)；t1/t2 是 0（作者：t3 起才有）✓。 */
+    private static final double[] HAND_SHAKE_STRENGTH = {0.0D, 0.0D, 5.0D, 9.0D, 14.0D};
+    private static final int[] HAND_SHAKE_TICKS = {0, 0, 12, 18, 26};
+
+    /** 还在抖的剩余 tick 与当前强度 ✓（客户端内存，不进存档 ✓）。 */
+    private static int handShakeTicks = 0;
+    private static float handShake = 0.0F;
+
+    static {
+        // 挂在引擎自己的事件上（不是 Forge 事件 ✗ —— 见 DarkFogMechanics 类注释）
+        try {
+            net.spell_engine.api.event.CombatEvents.SPELL_CAST.register(
+                    TNSpellClientVisuals::onSpellCastForShake);
+        } catch (Throwable t) {
+            org.apache.logging.log4j.LogManager.getLogger("TN-C/spellvisuals")
+                    .warn("TN-C: hand shake listener registration failed ({})", t.toString());
+        }
+    }
+
+    /**
+     * 施法时记一笔震动（只看"黑夜之手"这一条链的 t3+）✓。
+     *
+     * <p>判据是<b>法术的 group</b>（{@code "dark_hand"}）＋ {@code learn.tier} ✓ ——
+     * 不写死五个 id，以后加档/改名都不用动这里 ✓。
+     */
+    private static void onSpellCastForShake(
+            net.spell_engine.api.event.CombatEvents.SpellCast.Args args) {
+        if (args == null || args.spell() == null || args.spell().spell() == null) {
+            return;
+        }
+        net.spell_engine.api.spell.Spell spell = args.spell().spell();
+        if (!"dark_hand".equals(spell.group) || spell.learn == null) {
+            return;
+        }
+        int tier = spell.learn.tier;
+        if (tier < 3 || tier > HAND_SHAKE_STRENGTH.length) {
+            return;
+        }
+        double strength = HAND_SHAKE_STRENGTH[tier - 1];
+        int ticks = HAND_SHAKE_TICKS[tier - 1];
+        if (strength > handShake) {
+            handShake = (float) strength;
+        }
+        if (ticks > handShakeTicks) {
+            handShakeTicks = ticks;
+        }
     }
 
     /**
@@ -211,12 +280,14 @@ public final class TNSpellClientVisuals {
 
     @SubscribeEvent
     public static void onComputeCameraAngles(net.minecraftforge.client.event.ViewportEvent.ComputeCameraAngles event) {
-        if (shake <= 0.0F) {
+        // 两种抖动叠加：爆炸/落雷那份（shake）＋ 黑夜之手 t3+ 那份（handShake）✓
+        float total = Math.max(shake, handShake);
+        if (total <= 0.0F) {
             return;
         }
-        event.setYaw(event.getYaw() + (SHAKE_RANDOM.nextFloat() - 0.5F) * shake * 1.6F);
-        event.setPitch(event.getPitch() + (SHAKE_RANDOM.nextFloat() - 0.5F) * shake * 1.2F);
-        event.setRoll(event.getRoll() + (SHAKE_RANDOM.nextFloat() - 0.5F) * shake * 2.4F);
+        event.setYaw(event.getYaw() + (SHAKE_RANDOM.nextFloat() - 0.5F) * total * 1.6F);
+        event.setPitch(event.getPitch() + (SHAKE_RANDOM.nextFloat() - 0.5F) * total * 1.2F);
+        event.setRoll(event.getRoll() + (SHAKE_RANDOM.nextFloat() - 0.5F) * total * 2.4F);
     }
 
     @SubscribeEvent

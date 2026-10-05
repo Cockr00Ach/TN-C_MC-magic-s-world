@@ -130,36 +130,57 @@ def batch(pid, shape, origin, count, min_speed, max_speed, extent=0.0, **kw):
 
 
 def fog_batches(radius, tier):
-    """The cloud's per-tick particles: ground pool + body + wisps + embers.
+    """The cloud's per-tick particles: dark pool + dark canopy + body + wisps + embers.
 
     `extent` on CIRCLE/SPHERE/CONE is a *distance multiplier* on the spawn offset
     (verified in the engine bytecode: offset = dirVector * (distance + radius)),
     so extent = radius spreads the batch across the whole field.
 
-    ⚠ COUNT BUDGET. These run EVERY TICK for 15 seconds, so the count is really a
-    per-tick cost: the t5 field is ~190 particles/tick (~3800/s). That is in the same
-    league as the existing 天雷 / 大雷球 effects, but if the author reports lag this
-    function is the FIRST knob -- halve the three big numbers and nothing else breaks.
+    ★ DARKNESS MIX (2026-10-09, author: "黑雾感觉不够黑啊")
+      The first pass used `minecraft:smoke` as the bulk layer. Smoke is a LIGHT grey,
+      semi-transparent puff that also RISES, so piling it on turned the field into
+      pale haze -- exactly the complaint. The ratio is now inverted:
+        * `minecraft:squid_ink` (the only genuinely dark vanilla particle) carries the
+          ground pool, a canopy over the dome, and the rim wall;
+        * `fromtheshadows:shadow` is the body vapour;
+        * smoke only softens the dome's cube edges (a handful of puffs);
+        * the wisps are few and the embers sit low and inside.
+      Density knobs: the four big counts in this function. Nothing else needs changing.
     """
     b = []
-    # 1) ground pool: dense, very slow -- this is the "the fog is a liquid" layer.
-    #    squid_ink is the dark body; the smoke underneath gives it volume
-    b.append(batch(INK, "CIRCLE", "FEET", int(30 + 5 * tier), 0.005, 0.05, extent=radius))
-    b.append(batch(SMOKE, "CIRCLE", "FEET", int(40 + 6 * tier), 0.005, 0.05, extent=radius))
-    b.append(batch(SHADOW, "SPHERE", "CENTER", int(10 + 2 * tier), 0.01, 0.08, extent=radius * 0.8))
-    # 2) mid haze that softens the hard cube edges of the dome model
-    b.append(batch(SMOKE, "SPHERE", "CENTER", int(14 + 3 * tier), 0.01, 0.10, extent=radius * 0.75))
-    # 3) wisps rising out of it
-    b.append(batch(SOUL, "SPHERE", "CENTER", int(2 + tier), 0.01, 0.07, extent=radius * 0.6))
+    # 1) ground pool: dense, very slow, DARK -- the "the fog is a liquid" layer
+    b.append(batch(INK, "CIRCLE", "FEET", int(66 + 12 * tier), 0.005, 0.04, extent=radius))
+    b.append(batch(SHADOW, "CIRCLE", "FEET", int(30 + 6 * tier), 0.005, 0.04, extent=radius))
+    b.append(batch(SMOKE, "CIRCLE", "FEET", int(10 + 2 * tier), 0.005, 0.04, extent=radius))
+    # 2) a dark canopy above the dome, so you cannot see sky through the fog.
+    #    ⚠ the batch origin is always the cloud itself (ParticleHelper.origin ignores
+    #    any entity height for a cloud), so "canopy" here means "spread with an upward
+    #    speed bias" -- NOT a placement offset. The engine drops unknown json fields
+    #    silently, so an `offset_y` here would do nothing at all.
+    b.append(batch(INK, "SPHERE", "CENTER", int(26 + 6 * tier), 0.02, 0.16,
+                   extent=radius * 0.7))
+    b.append(batch(SHADOW, "SPHERE", "CENTER", int(16 + 4 * tier), 0.02, 0.14,
+                   extent=radius * 0.7))
+    # 3) body vapour + a thin grey layer only to soften the dome's hard cube edges
+    b.append(batch(SHADOW, "SPHERE", "CENTER", int(26 + 6 * tier), 0.01, 0.08, extent=radius * 0.85))
+    b.append(batch(SMOKE, "SPHERE", "CENTER", int(6 + 2 * tier), 0.01, 0.08, extent=radius * 0.7))
+    # 4) wisps rising out of it -- few, small, and the only bright thing up high
+    b.append(batch(SOUL, "SPHERE", "CENTER", int(2 + tier), 0.01, 0.06, extent=radius * 0.55))
     if tier >= 3:
-        b.append(batch(SOUL_FLIP, "SPHERE", "CENTER", int(2 + tier), 0.02, 0.10, extent=radius * 0.8))
-    # 4) a thin wall so the boundary is readable even without the circle on the floor
-    b.append(batch(SMOKE, "CIRCLE", "CENTER", int(16 + 4 * tier), 0.01, 0.06, extent=radius * 1.05))
-    # 5) embers: the only bright thing in the fog
+        b.append(batch(SOUL_FLIP, "SPHERE", "CENTER", int(1 + tier), 0.02, 0.08,
+                       extent=radius * 0.7))
+    # 5) a dark wall at the rim, twice over: the edge has to read as black
+    b.append(batch(INK, "CIRCLE", "CENTER", int(20 + 5 * tier), 0.01, 0.05,
+                   extent=radius * 1.05))
+    b.append(batch(SHADOW, "CIRCLE", "FEET", int(14 + 4 * tier), 0.02, 0.08,
+                   extent=radius * 1.0))
+    # 6) embers: low, inside, few (accent, not lighting)
     if tier >= 2:
-        b.append(batch(BLACK_FLAME, "CIRCLE", "FEET", int(3 + tier), 0.02, 0.10, extent=radius * 0.8))
+        b.append(batch(BLACK_FLAME, "CIRCLE", "FEET", int(2 + tier), 0.02, 0.08,
+                       extent=radius * 0.6))
     if tier >= 4:
-        b.append(batch(SOUL_FIRE, "CIRCLE", "FEET", int(3 + tier), 0.05, 0.18, extent=radius * 0.5))
+        b.append(batch(SOUL_FIRE, "CIRCLE", "FEET", int(2 + tier), 0.05, 0.15,
+                       extent=radius * 0.4))
     return b
 
 
@@ -167,8 +188,8 @@ def cast_batches(radius, tier):
     """Cast-time flourish: the fog is PULLED together in front of the caster."""
     return [
         batch(SHADOW, "SPHERE", "CENTER", int(26 + 6 * tier), 0.15, 0.7, extent=radius * 0.5),
-        batch(SMOKE, "SPHERE", "CENTER", int(30 + 8 * tier), 0.15, 0.7, extent=radius * 0.5),
-        batch(INK, "CIRCLE", "FEET", int(10 + 3 * tier), 0.05, 0.25, extent=radius * 0.6),
+        batch(SMOKE, "SPHERE", "CENTER", int(10 + 3 * tier), 0.15, 0.7, extent=radius * 0.5),
+        batch(INK, "SPHERE", "CENTER", int(22 + 6 * tier), 0.12, 0.6, extent=radius * 0.6),
         batch(BLACK_FLAME, "CIRCLE", "FEET", int(4 + tier), 0.05, 0.2, extent=radius * 0.4),
     ]
 
@@ -177,20 +198,22 @@ def spawn_batches(radius, tier):
     """The moment the field appears: it BLOOMS outward from the caster."""
     return [
         batch(SHADOW, "SPHERE", "CENTER", int(40 + 12 * tier), 0.4, 1.8, extent=radius),
-        batch(SMOKE, "SPHERE", "CENTER", int(50 + 14 * tier), 0.3, 1.2, extent=radius),
-        batch(INK, "SPHERE", "CENTER", int(16 + 5 * tier), 0.3, 1.2, extent=radius * 0.9),
+        batch(INK, "SPHERE", "CENTER", int(34 + 10 * tier), 0.35, 1.5, extent=radius),
+        batch(SMOKE, "SPHERE", "CENTER", int(18 + 6 * tier), 0.3, 1.2, extent=radius),
     ]
 
 
 def pulse_batches(radius, tier):
     """Every impact tick (1 s): the field breathes -- a dark wave rolls outward."""
     out = [
-        batch(SMOKE, "CIRCLE", "FEET", int(20 + 5 * tier), 0.15, 0.6, extent=radius),
-        batch(INK, "CIRCLE", "FEET", int(8 + 2 * tier), 0.15, 0.6, extent=radius),
-        batch(SOUL, "SPHERE", "CENTER", int(4 + 2 * tier), 0.1, 0.5, extent=radius * 0.7),
+        batch(INK, "CIRCLE", "FEET", int(22 + 5 * tier), 0.15, 0.6, extent=radius),
+        batch(SHADOW, "CIRCLE", "FEET", int(14 + 4 * tier), 0.15, 0.6, extent=radius),
+        batch(SMOKE, "CIRCLE", "FEET", int(4 + tier), 0.15, 0.6, extent=radius),
+        batch(SOUL, "SPHERE", "CENTER", int(3 + tier), 0.1, 0.5, extent=radius * 0.7),
     ]
     if tier >= 3:
-        out.append(batch(SOUL_FLIP, "SPHERE", "CENTER", int(3 + tier), 0.1, 0.5, extent=radius * 0.8))
+        out.append(batch(SOUL_FLIP, "SPHERE", "CENTER", int(2 + tier), 0.1, 0.5,
+                         extent=radius * 0.8))
     return out
 
 

@@ -42,8 +42,21 @@ public class DarkFogCloudEntity extends SpellCloud {
     /** 与 {@code TnSpellMechanics.FOG_GROUP} 一致（那边也用它挑法术）。 */
     public static final String FOG_GROUP = "dark_fog";
 
-    /** 从第几档开始整片雾跟着施法者走（1..5）。 */
-    private static final int FOLLOW_FROM_TIER = 3;
+    /**
+     * 从第几档开始整片雾跟着施法者走（1..5）。
+     *
+     * <p>★★ <b>2026-10-09 改成"永不跟随"（{@code 6}）</b> —— 作者实机反馈：
+     * 「**黑雾的 t4t5 中间生成的模型怎么会黏在人物身上一起走了**」✗。
+     *
+     * <p>那正是我当初加的"t3 起跟随"设计（本文档 §2.3 写的就是它）✓，逻辑上没错，
+     * 但实机观感是"领域"变成了**挂在身上的一个球** ✗ —— 作者不要这个。
+     * AOE 领域本来就该**钉在释放点**：丢出去、敌人走进去吃伤害，这才是"领域" ✓。
+     *
+     * <p>⇒ 现在标记与穹顶都**原地不动** ✓。想恢复跟随只要把这里改成 3（或 4/5）✓；
+     * 想只让"标记"跟随、穹顶留在原地，那是另一套改法（穹顶位置与实体位置解耦），
+     * 要做再说 ✓。
+     */
+    private static final int FOLLOW_FROM_TIER = 6;
 
     /**
      * 生成后先"定住"几 tick 再开始跟随。

@@ -268,6 +268,28 @@ public final class TNOrbEntities {
                     .updateInterval(1)
                     .build("tnc:fog")) : null;
 
+    /**
+     * ★ <b>吸血</b>（暗系第二条链「以伤换伤」改成"从敌人身上抽血"之后的结算点）✓
+     * （作者 2026-10-09："我希望这个技能可以对敌人释放……扣除敌人的生命值并暂时提高我自己的血上限"）。
+     *
+     * <p>它不是投射物、也不需要可见的渲染 ✓ —— 法术 JSON 的 {@code impact} 里一条
+     * {@code SPAWN}（{@code entity_type_id: "tnc:drain"}）会在<b>命中那一刻</b>让引擎造出它，
+     * 并通过 {@code SpellSpawnedEntity} 回调把<b>施法者</b>交给我们 ✓
+     * （引擎的 DAMAGE/HEAL/STATUS_EFFECT 做不到"按目标百分比扣血"，也做不到"把收益给施法者" ✗）。
+     * 它活几 tick、结算完自己 discard ✓。
+     *
+     * <p>⚠️ 它**必须有客户端渲染器** ✗ —— 实体类型缺少渲染器 = 一生成就
+     * {@code entityrenderer is null} 卡退（`OrbEntityRendererCoverageTest` 会在构建期拦住 ✓），
+     * 所以客户端给它注册了一个**什么都不画**的渲染器 ✓（见 {@code client/TNSpellOrbClientEvents}）。
+     */
+    public static final RegistryObject<EntityType<TNDarkDrainEntity>> DRAIN =
+            ENTITY_TYPES.register("drain", () -> EntityType.Builder
+                    .of(TNDarkDrainEntity::new, MobCategory.MISC)
+                    .sized(1.0F, 1.0F)
+                    .clientTrackingRange(8)
+                    .updateInterval(20)
+                    .build("tnc:drain"));
+
     private TNOrbEntities() {
     }
 

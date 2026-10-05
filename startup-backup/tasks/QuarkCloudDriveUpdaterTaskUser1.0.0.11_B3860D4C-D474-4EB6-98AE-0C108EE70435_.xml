@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="UTF-16"?>
+<Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
+  <RegistrationInfo>
+    <Author>DESKTOP-TO12FQM\FDCX</Author>
+    <Description>QuarkCloudDriveUpdater Task User 1.0.0.11</Description>
+    <URI>\QuarkCloudDriveUpdaterUser\QuarkCloudDriveUpdater\QuarkCloudDriveUpdaterTaskUser1.0.0.11{B3860D4C-D474-4EB6-98AE-0C108EE70435}</URI>
+  </RegistrationInfo>
+  <Principals>
+    <Principal id="Author">
+      <UserId>S-1-5-21-620344409-4013399299-2564790692-1001</UserId>
+      <LogonType>InteractiveToken</LogonType>
+    </Principal>
+  </Principals>
+  <Settings>
+    <DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries>
+    <StopIfGoingOnBatteries>false</StopIfGoingOnBatteries>
+    <Hidden>true</Hidden>
+    <MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy>
+    <StartWhenAvailable>true</StartWhenAvailable>
+    <IdleSettings>
+      <Duration>PT10M</Duration>
+      <WaitTimeout>PT1H</WaitTimeout>
+      <StopOnIdleEnd>false</StopOnIdleEnd>
+      <RestartOnIdle>false</RestartOnIdle>
+    </IdleSettings>
+  </Settings>
+  <Triggers>
+    <LogonTrigger>
+      <UserId>DESKTOP-TO12FQM\FDCX</UserId>
+    </LogonTrigger>
+    <CalendarTrigger>
+      <StartBoundary>2026-06-25T19:56:08+08:00</StartBoundary>
+      <Repetition>
+        <Interval>PT1H</Interval>
+        <Duration>P1D</Duration>
+      </Repetition>
+      <ScheduleByDay>
+        <DaysInterval>1</DaysInterval>
+      </ScheduleByDay>
+    </CalendarTrigger>
+  </Triggers>
+  <Actions Context="Author">
+    <Exec>
+      <Command>"C:\Users\FDCX\AppData\Local\QuarkCloudDriveUpdater\QuarkCloudDriveUpdater\1.0.0.11\updater.exe"</Command>
+      <Arguments>--wake --enable-logging --vmodule=*/components/winhttp/*=1,*/components/update_client/*=2,*/chrome/updater/*=2,*/chrome/updater/quark/*=2,*/quark/utils/*=2,*/quark/common/cms/*=2,*/quattro/common/ut/*=1</Arguments>
+    </Exec>
+  </Actions>
+</Task>

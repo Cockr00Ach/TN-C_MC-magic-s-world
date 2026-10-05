@@ -17,9 +17,17 @@
         "particle_id": "fromtheshadows:blood",
         "shape": "CIRCLE",
         "origin": "FEET",
-        "count": 30.0,
+        "count": 34.0,
         "min_speed": 0.1,
         "max_speed": 0.5
+      },
+      {
+        "particle_id": "fromtheshadows:blood",
+        "shape": "SPHERE",
+        "origin": "CENTER",
+        "count": 25.0,
+        "min_speed": 0.05,
+        "max_speed": 0.3
       },
       {
         "particle_id": "minecraft:soul_fire_flame",
@@ -30,12 +38,12 @@
         "max_speed": 0.4
       },
       {
-        "particle_id": "fromtheshadows:shadow",
-        "shape": "SPHERE",
-        "origin": "CENTER",
-        "count": 25.0,
+        "particle_id": "soulsweapons:black_flame",
+        "shape": "CIRCLE",
+        "origin": "FEET",
+        "count": 8.0,
         "min_speed": 0.05,
-        "max_speed": 0.3
+        "max_speed": 0.2
       }
     ]
   },
@@ -106,6 +114,26 @@
           "count": 18.0,
           "min_speed": 0.05,
           "max_speed": 0.3
+        }
+      ]
+    },
+    {
+      "action": {
+        "type": "SPAWN",
+        "spawn": {
+          "entity_type_id": "tnc:drain",
+          "time_to_live_seconds": 1,
+          "delay_ticks": 0
+        }
+      },
+      "particles": [
+        {
+          "particle_id": "fromtheshadows:blood",
+          "shape": "CIRCLE",
+          "origin": "FEET",
+          "count": 16.0,
+          "min_speed": 0.15,
+          "max_speed": 0.6
         }
       ]
     },

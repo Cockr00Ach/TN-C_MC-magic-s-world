@@ -1,0 +1,72 @@
+﻿=== final pass @ 2026-09-29 19:34:43 ===
+19:34:43  --- 1. adware residue ---
+19:34:43    killing pid 15256 IShowSU
+19:34:46    PARTIAL: C:\Program Files (x86)\XDImageShow (4.4MB -> 0.4MB)
+19:34:48    killing pid 17828 WinZips
+19:34:49    DELETED: C:\Program Files (x86)\XDZipApp (10.6 MB)
+19:34:51    killing pid 9820 XAS
+19:34:51    killing pid 15248 XSU
+19:34:52    PARTIAL: C:\Users\FDCX\AppData\Local\{AA74A9F6-603B-4B0D-922D-36753FB491EE} (3.4MB -> 0.2MB)
+19:34:52    already gone: C:\ProgramData\XDImageShow
+19:34:52    already gone: C:\ProgramData\XDZipApp
+19:34:52  --- 2. finish Lenovo store removal ---
+19:34:56    PARTIAL: C:\Program Files (x86)\Lenovo\LeAppStore (507.3MB -> 1.9MB)
+19:35:00    PARTIAL: C:\ProgramData\Lenovo\LeAppStore (89.9MB -> 0.7MB)
+19:35:00    already gone: C:\Users\FDCX\AppData\Roaming\Lenovo\LeAppStore
+19:35:06    DELETED: C:\Users\FDCX\AppData\Local\Lenovo\LeAppStore (38.5 MB)
+19:35:09    PARTIAL: E:\LeStoreDownload (51MB -> 51MB)
+19:35:09    E:\LeStoreDownload removed: True
+19:35:09  --- 3. remote control: stop + remove services and leftovers ---
+19:35:09    sc delete SunloginService -> [SC] DeleteService 成功
+19:35:10    sc delete ToDesk_Service -> [SC] DeleteService 成功
+19:35:15    DELETED: D:\Program Files\SunloginClient (140.7 MB)
+19:35:18    DELETED: C:\Users\FDCX\ToDesk (146.4 MB)
+19:35:18    already gone: C:\Program Files\ToDesk
+19:35:18    already gone: C:\ProgramData\ToDesk
+19:35:18    already gone: C:\Users\FDCX\AppData\Roaming\ToDesk
+19:35:24    DELETED: C:\Users\FDCX\AppData\Local\ToDesk (5.1 MB)
+19:35:32    DELETED: C:\ProgramData\Oray (72 MB)
+19:35:32    already gone: C:\Program Files (x86)\Oray
+19:35:33  --- 4. sweep stale uninstall registry entries pointing at deleted dirs ---
+19:35:34    entry 'UU加速器'  loc=''  dead=True
+19:35:34      -> removed
+19:35:34    entry '向日葵远程控制'  loc='D:\Program Files\SunloginClient'  dead=True
+19:35:34      -> removed
+19:35:34    entry 'ToDesk'  loc=''  dead=True
+19:35:34      -> removed
+19:35:34    entry 'Watt加速器'  loc='C:\Program Files (x86)\WattAccelerator'  dead=True
+19:35:34      -> removed
+19:35:34    entry '迅读看图'  loc='C:\Program Files (x86)\XDImageShow\'  dead=False
+19:35:34    entry 'Winz解压缩'  loc='C:\Program Files (x86)\XDZipApp\'  dead=True
+19:35:34      -> removed
+19:35:34    entry '夸克网盘'  loc='C:\Users\FDCX\AppData\Local\Programs\QuarkCloudDrive'  dead=False
+19:35:34  --- 5. restore QuarkCloudDrive (user asked to keep it) ---
+19:35:35    downloaded installer: C:\Users\FDCX\Downloads\QuarkCloudDrive_setup.exe (0.01 MB)
+19:35:35    installer too small - likely an HTML redirect page, NOT executed
+19:35:35      html: <!DOCTYPE html>
+19:35:35      html: <html>
+19:35:35      html:   <head>
+19:35:35      html:     <meta charset="utf-8" />
+19:35:35      html:     <link rel="icon" href="/favicon.ico" />
+19:35:35  --- 6. verification ---
+19:35:35    C:\Program Files (x86)\XDImageShow                             EXISTS
+19:35:35    C:\Program Files (x86)\XDZipApp                                gone
+19:35:35    C:\Users\FDCX\AppData\Local\{AA74A9F6-603B-4B0D-922D-36753FB491EE} EXISTS
+19:35:35    C:\Program Files (x86)\Lenovo\LeAppStore                       EXISTS
+19:35:35    D:\Program Files\SunloginClient                                gone
+19:35:35    C:\Users\FDCX\ToDesk                                           gone
+19:35:35    E:\LeStoreDownload                                             gone
+19:35:35    C:\Users\FDCX\AppData\Local\Programs\QuarkCloudDrive           EXISTS
+19:35:35    svc BaseJMI              gone
+19:35:35    svc CleanSvr             gone
+19:35:35    svc npzsvc               gone
+19:35:35    svc IShowServer          gone
+19:35:35    svc WinZips_Svr          gone
+19:35:35    svc WattAcceleratorSvc   gone
+19:35:35    svc UUAccelerator        gone
+19:35:35    svc SunloginService      gone
+19:35:35    svc ToDesk_Service       gone
+19:35:35    svc LenovoServiceAS      gone
+19:35:35    svc LISFService          gone
+19:35:35    C: free=18.08GB  D: free=65.67GB  E: free=121.43GB
+19:35:35  FINAL PASS DONE

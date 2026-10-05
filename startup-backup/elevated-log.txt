@@ -1,0 +1,22 @@
+﻿admin = True  (2026-09-27T00:36:53)
+removed  HKLM32\SunJavaUpdateSched
+removed  HKLM32\DesktopPortal
+removed  HKLM32\RadminVPN
+removed  HKLM32\Adobe CCXProcess
+removed  HKLM32\ControlCenter4
+removed  HKLM32\BrStsMon00
+removed  HKLM32\M15A
+kept     HKLM64\SecurityHealth (system / audio - not touched)
+kept     HKLM64\RtkAudUService (system / audio - not touched)
+disabled task: OneDrive Startup Task-S-1-5-21-620344409-4013399299-2564790692-1001
+disabled task: WpsUpdateLogonTask_FDCX
+disabled task: WpsWakeWnsLogonTask
+--- verify ---
+[HKLM Run32]
+  HuionTablet
+[HKLM Run]
+  SecurityHealth
+  RtkAudUService
+  OneDrive Startup Task-S-1-5-21-620344409-4013399299-2564790692-1001 -> Disabled
+  WpsUpdateLogonTask_FDCX -> Disabled
+  WpsWakeWnsLogonTask -> Disabled

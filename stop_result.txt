@@ -1,0 +1,7 @@
+﻿成功: 已终止 PID 25692 (属于 PID 24012 子进程)的进程。
+成功: 已终止 PID 24592 (属于 PID 24012 子进程)的进程。
+成功: 已终止 PID 24012 (属于 PID 24840 子进程)的进程。
+24012 alive: False
+StoreUninstaller alive: False
+waiter 23400 alive: True
+waiter 28372 alive: False

@@ -1,0 +1,16 @@
+﻿=== shell-extension cleanup @ 19:43:20 ===
+19:43:20    CLSID removed: {054D1B2B-DDA8-4B1A-BDA8-A6DADB60CAA8} (HKLM:\SOFTWARE\Classes\CLSID)
+19:43:24    CLSID removed: {1F23370B-625A-453E-9D2C-1FAF54061C85} (HKLM:\SOFTWARE\Classes\CLSID)
+19:43:28    CLSID removed: {31178089-D3F4-401D-A8F8-F030413BA37F} (HKLM:\SOFTWARE\Classes\CLSID)
+19:43:31    restarting explorer.exe to unload the shell extensions...
+19:43:42    C:\Program Files (x86)\XDImageShow -> DELETED
+19:43:42    C:\Users\FDCX\AppData\Local\{AA74A9F6-603B-4B0D-922D-36753FB491EE} -> DELETED
+19:43:42    C:\Program Files (x86)\Lenovo\LeAppStore -> DELETED
+19:43:42    C:\ProgramData\Lenovo\LeAppStore -> STILL PRESENT
+19:43:42  --- remaining shell extensions pointing at deleted vendors ---
+19:44:45    ORPHAN CLSID {3D32AF7C-2C97-4938-9CBE-ED2004E482B3} -> C:\Program Files (x86)\XDZipApp\ZipPreviewHandler64.dll
+19:45:05    ORPHAN CLSID {58B6AAE3-C0BC-49E8-BEB1-751726BBD0D2} -> C:\Users\FDCX\AppData\Local\Programs\Common\Quark\QuarkMenuExtension_20260929193657243_8794.dll
+19:45:47    ORPHAN CLSID {99D4E39A-EA7F-453E-9488-58C56BBF7B98} -> C:\Users\FDCX\AppData\Local\Programs\Common\Quark\quarkshellext_20260116232710.dll
+19:46:01    ORPHAN CLSID {B4E15CD0-F916-4C8E-830A-15E3E9D01A1B} -> C:\Users\FDCX\AppData\Roaming\XDZipAppData\XDZipShellExt64.dll
+19:46:54    ORPHAN CLSID {FB49CED7-2410-4936-B9CB-7B15401768D9} -> C:\Users\FDCX\AppData\Roaming\XDZipAppData\XDZipShellExt64.dll
+19:47:54  DONE

@@ -316,6 +316,55 @@ public final class TNEffects {
     }
 
     /**
+     * <b>暗 · 血盈</b> —— 以伤换伤链「从敌人身上吸血」的收益：<b>临时提高自己的血上限</b> ✓
+     * （作者 2026-10-09："我希望这个技能可以对敌人释放……扣除敌人的生命值并暂时提高我自己的血上限"）。
+     *
+     * <h2>为什么是"自己给自己上的增益"而不是"从敌人身上偷"</h2>
+     * 引擎的 {@code STATUS_EFFECT} 动作只会给**被命中的目标**上效果 ✗ ——
+     * 想给"施法者"上就必须由 Java 侧在抽血那一刻自己施加 ✓
+     * （见 {@code magic/TNDarkDrainEntity.onCreatedFromSpell} ✓）。
+     *
+     * <h2>数值</h2>
+     * 五档给的血上限加成：+4 / +6 / +9 / +14 / +20 ✓；
+     * 每一档**可叠加**（每层 +2 秒）⇒ 连着抽能把自己的血池越堆越高 ✓，
+     * 上限 {@link #BLOOD_POOL_MAX_STACKS} 层，免得刷成无限血 ✓。
+     *
+     * <p>颜色用亮血红（{@code 0xC0284A}）—— 和"暗雾侵蚀"的暗紫区分开，
+     * HUD 上一眼能认出"这是吸血回上来的" ✓。
+     */
+    public static final RegistryObject<MobEffect> BLOOD_POOL =
+            EFFECTS.register("blood_pool", () -> new BloodPoolEffect());
+
+    /** 血盈最多叠几层（每层 = 一档的加成，额外 2 秒）。 */
+    public static final int BLOOD_POOL_MAX_STACKS = 5;
+
+    /** 血盈：每层 +{@code maxHealthPerTier} 血上限 ＋ 每层 +2 秒。 */
+    public static final class BloodPoolEffect extends MobEffect {
+
+        BloodPoolEffect() {
+            super(MobEffectCategory.BENEFICIAL, 0xC0284A);
+        }
+
+        /**
+         * ★ 让引擎按<b>实际层数</b>放大属性修饰符，而不是原版那套 {@code (amplifier + 1)} 倍 ✗。
+         *
+         * <p>原版 {@code MobEffectInstance} 会把属性修饰符的量乘 {@code (amplifier + 1)}
+         * ✗ —— 那是为"药水等级越高加成越大"设计的；而血盈要的是
+         * **每一层加同一个固定量**（叠 3 层就是 3 倍加成，不是 1+2+3 倍）。
+         * 所以这里把缩放<b>抵消</b>掉：{@code amount / (amplifier + 1)}，
+         * 引擎再乘回去正好等于固定量 ✓。
+         *
+         * <p>⚠️ 这个覆写是**编译期**就能验证的（签名对不上就编不过）；
+         * 但我没法在开发环境里开游戏确认"叠 3 层时血上限正好 +3×"，所以
+         * **验收时请顺手看一眼 HUD 上的心数** ✓。
+         */
+        @Override
+        public double getAttributeModifierValue(int amplifier, AttributeModifier modifier) {
+            return modifier.getAmount() / (amplifier + 1.0D);
+        }
+    }
+
+    /**
      * 火系燃烧线的五个效果工厂 —— <b>给 {@link TNFireMechanics} 用</b> ✓。
      *
      * <p>原来那个私有嵌套类只加 {@code spell_power:fire}；现在把"加哪个学派"参数化，

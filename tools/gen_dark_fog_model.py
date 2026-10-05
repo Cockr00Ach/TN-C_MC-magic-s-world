@@ -185,11 +185,18 @@ def build_texture():
     rng = random.Random(SEED + 7)
 
     shades = {
-        "fog_base": (30, 22, 44),
-        "fog_dark": (18, 13, 28),
-        "fog_mid": (38, 27, 56),
-        "fog_edge": (24, 17, 36),
-        "fog_top": (34, 25, 50),
+        # ★ darkened 2026-10-09 (author: "黑雾感觉不够黑啊" / "the fog is not dark enough").
+        # The dome is the largest solid mass of the field, so this atlas is the strongest
+        # darkness knob available. It used to sit at brightness 20..41 out of 255; it is now
+        # 7..21. Why it matters: SpellCloudRenderer passes CustomModels.render a light value
+        # taken from the ENTITY (`entity.getId()` / eye height), not from the world lightmap,
+        # so the dome is drawn at a fairly bright light no matter where it stands -- a
+        # mid-grey atlas therefore reads as exactly that, mid grey. Keep these near-black.
+        "fog_base": (14, 10, 22),
+        "fog_dark": (8, 6, 13),
+        "fog_mid": (20, 14, 30),
+        "fog_edge": (11, 8, 17),
+        "fog_top": (16, 12, 25),
         "ember": (196, 74, 214),        # magenta ember, deliberately loud
     }
 

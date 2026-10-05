@@ -1,0 +1,60 @@
+﻿=== adware cleanup @ 2026-09-29 19:26:23 ===
+19:26:23  === 1. adware family: Chengdu Aishang Office (迅读看图 / Winz解压缩 / BaseJMI) ===
+19:26:23    size before: XDImageShow=4.6MB XDZipApp=10.9MB BaseJMI=3.4MB
+19:26:23      service not present: BaseJMI
+19:26:23    uninstalling 迅读看图
+19:26:23      exec: C:\Program Files (x86)\XDImageShow\Uninstall.exe
+19:27:42      ! still present: C:\Program Files (x86)\XDImageShow
+19:27:42    uninstalling Winz解压缩
+19:27:42      exec: C:\Program Files (x86)\XDZipApp\Uninstall.exe
+19:29:00      ! still present: C:\Program Files (x86)\XDZipApp
+19:29:00    sweeping leftover adware artifacts...
+19:29:00      ! still present: C:\Users\FDCX\AppData\Local\{AA74A9F6-603B-4B0D-922D-36753FB491EE}
+19:29:00      ! still present: C:\Program Files (x86)\XDImageShow
+19:29:00      ! still present: C:\Program Files (x86)\XDZipApp
+19:29:00    removing adware registry keys...
+19:29:01  === 2. orphan services + dead startup entries ===
+19:29:01      service not present: CleanSvr
+19:29:01      service not present: npzsvc
+19:29:01      service not present: IShowServer
+19:29:01      service not present: WinZips_Svr
+19:29:01      service not present: XDExtend
+19:29:01    dead startup folder entries:
+19:29:01  === 3. Xunlei browser helper object (IE injection) ===
+19:29:06  === 4. homepage hijack repair (hao.360.com) ===
+19:29:06    old Start Page: about:blank
+19:29:06    new Start Page: about:blank
+19:29:06    Winlogon Shell: explorer.exe   Userinit: C:\Windows\system32\userinit.exe,
+19:29:06  === 5. 夸克 / 夸克网盘 ===
+19:29:07    size before: Quark=0MB QuarkCloudDrive=3827.9MB
+19:29:07    uninstalling 夸克
+19:29:07      could not resolve uninstaller from: C:\Users\FDCX\AppData\Local\Programs\Quark\unins000.exe --brand-quark /SILENT --fake-silent
+19:29:13      uninstaller cleaned up on its own
+19:29:13    uninstalling 夸克网盘
+19:29:13      exec: C:\Users\FDCX\AppData\Local\Programs\QuarkCloudDrive\unins000.exe --brand-clouddrive /SILENT --fake-silent
+19:30:36      ! still present: C:\Users\FDCX\AppData\Local\Programs\QuarkCloudDrive
+19:30:40      removed dir: C:\Users\FDCX\AppData\Local\QuarkCloudDrive
+19:30:40      removed dir: C:\Users\FDCX\AppData\Local\QuarkUpdater
+19:30:40      removed dir: C:\Users\FDCX\AppData\Local\QuarkCloudDriveUpdater
+19:30:40      removed dir: C:\Users\FDCX\AppData\Roaming\Quark
+19:30:51      task removed: \QuarkCloudDriveUpdaterUser\QuarkCloudDriveUpdater\QuarkCloudDriveUpdaterTaskUser1.0.0.11{B3860D4C-D474-4EB6-98AE-0C108EE70435}
+19:30:54      task removed: \QuarkUpdaterUser\QuarkUpdater\QuarkUpdaterTaskUser1.0.0.21{F41B57EE-26B3-4B64-B94D-B911E76CAD97}
+19:30:54  === 6. accelerators: Watt / UU / SakuraFrp ===
+19:30:54    size before: Watt=271.6MB
+19:30:54    uninstalling Watt加速器
+19:30:54      exec: C:\Program Files (x86)\WattAccelerator\Uninstall.exe (x86)\WattAccelerator\Uninstall.exe
+19:32:12      ! still present: C:\Program Files (x86)\WattAccelerator
+19:32:12    uninstalling UU加速器
+19:32:12      exec: C:\Program Files (x86)\Netease\UU\uninstall.exe (x86)\Netease\UU\uninstall.exe
+19:33:31      removed dir: C:\Program Files (x86)\Netease\UU
+19:33:31    uninstalling SakuraFrp
+19:33:32      exec: C:\Program Files\SakuraFrpLauncher\unins000.exe /SILENT
+19:33:38      uninstaller cleaned up on its own
+19:33:38      removed dir: C:\Program Files (x86)\WattAccelerator
+19:33:38      service not present: WattAcceleratorSvc
+19:33:38      service not present: UUAccelerator
+19:33:40      task removed: \Microsoft\Windows\UpdateOrchestrator\UUS Failover Task
+19:33:40  === 7. Lenovo app store + framework ===
+19:33:40    size before: LeAppStore=515.4MB LISF=5.6MB
+19:33:40    uninstalling 联想应用商店
+19:33:40      exec: C:\Program Files (x86)\Lenovo\LeAppStore\StoreUninstaller.exe (x86)\Lenovo\LeAppStore\StoreUninstaller.exe

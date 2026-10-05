@@ -1,0 +1,115 @@
+﻿To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.8/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :
+Java: 17.0.15, JVM: 17.0.15+6-LTS (Microsoft), Arch: amd64
+
+> Task :compileJava
+.\gradlew.bat : D:\ModTest\src\main\java\com\tnc\tnc\light\TNDragonDisplayEntity.java:143: ����: �Ҳ�������
+At line:1 char:203
++ ... | Out-Null; .\gradlew.bat compileJava --console=plain --no-daemon 2>& ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (D:\ModTest\src\...����: �Ҳ�������:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+        this.setBillboardConstraints(Display.BillboardConstraints.FIXED);
+            ^
+  ����: ���� setBillboardConstraints(BillboardConstraints)
+D:\ModTest\src\main\java\com\tnc\tnc\light\TNDragonDisplayEntity.java:144: ����: �Ҳ�������
+        this.setViewRange(8.0F);            // 8 �� 16 = 128 ��ɼ� ?���� t5 ���� 273 ����� ?��
+            ^
+  ����: ���� setViewRange(float)
+D:\ModTest\src\main\java\com\tnc\tnc\light\TNDragonDisplayEntity.java:145: ����: �Ҳ�������
+        this.setShadowRadius(0.0F);
+            ^
+  ����: ���� setShadowRadius(float)
+D:\ModTest\src\main\java\com\tnc\tnc\light\TNDragonDisplayEntity.java:146: ����: �Ҳ�������
+        this.setShadowStrength(0.0F);
+            ^
+  ����: ���� setShadowStrength(float)
+D:\ModTest\src\main\java\com\tnc\tnc\light\TNDragonDisplayEntity.java:147: ����: �Ҳ�������
+        this.setInterpolationDuration(INTERPOLATION_TICKS);
+            ^
+  ����: ���� setInterpolationDuration(int)
+D:\ModTest\src\main\java\com\tnc\tnc\light\TNDragonDisplayEntity.java:148: ����: �Ҳ�������
+        this.setInterpolationDelay(0);
+            ^
+  ����: ���� setInterpolationDelay(int)
+D:\ModTest\src\main\java\com\tnc\tnc\light\TNDragonDisplayEntity.java:179: ����: �Ҳ�������
+        this.setBlockState(block.defaultBlockState());
+            ^
+  ����: ���� setBlockState(BlockState)
+D:\ModTest\src\main\java\com\tnc\tnc\light\TNDragonDisplayEntity.java:184: ����: �Ҳ�������
+            this.setBrightnessOverride(null);
+                ^
+  ����: ���� setBrightnessOverride(<��ֵ>)
+D:\ModTest\src\main\java\com\tnc\tnc\light\TNDragonDisplayEntity.java:186: ����: �Ҳ�������
+            this.setBrightnessOverride(Brightness.FULL_BRIGHT);
+                ^
+  ����: ���� setBrightnessOverride(Brightness)
+D:\ModTest\src\main\java\com\tnc\tnc\light\TNDragonDisplayEntity.java:222: ����: �Ҳ�������
+        this.setTransformation(new Transformation(
+            ^
+  ����: ���� setTransformation(Transformation)
+D:\ModTest\src\main\java\com\tnc\tnc\magic\TNProjectileCarriers.java:56: ����: [removal] FMLJavaModLoadingContext �е� g
+et() �ѹ�ʱ, �ұ��Ϊ��ɾ��
+        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+                                                ^
+D:\ModTest\src\main\java\com\tnc\tnc\world\stonecrest\AbyssCitadelJobs.java:68: ����: [removal] ResourceLocation �е� Re
+sourceLocation(String) �ѹ�ʱ, �ұ��Ϊ��ɾ��
+                result.add(new Piece(new ResourceLocation(p.get("resource").getAsString()),new BlockPos(x,y,z),sx,sy,sz
+));
+                                     ^
+D:\ModTest\src\main\java\com\tnc\tnc\world\stonecrest\BuildingGameTests.java:64: ����: [removal] ResourceLocation �е� R
+esourceLocation(String,String) �ѹ�ʱ, �ұ��Ϊ��ɾ��
+            var state = com.tnc.tnc.world.ConquestPlantProcessor.replacement(new ResourceLocation("conquest", id));
+                                                                             ^
+D:\ModTest\src\main\java\com\tnc\tnc\world\stonecrest\BuildingGameTests.java:70: ����: [removal] ResourceLocation �е� R
+esourceLocation(String,String) �ѹ�ʱ, �ұ��Ϊ��ɾ��
+        if (com.tnc.tnc.world.ConquestPlantProcessor.replacement(new ResourceLocation("conquest", "brown_granite")) != 
+null
+                                                                 ^
+D:\ModTest\src\main\java\com\tnc\tnc\world\stonecrest\BuildingGameTests.java:71: ����: [removal] ResourceLocation �е� R
+esourceLocation(String,String) �ѹ�ʱ, �ұ��Ϊ��ɾ��
+                || com.tnc.tnc.world.ConquestPlantProcessor.replacement(new ResourceLocation("minecraft", "wheat")) != 
+null
+                                                                        ^
+D:\ModTest\src\main\java\com\tnc\tnc\world\stonecrest\BuildingGameTests.java:72: ����: [removal] ResourceLocation �е� R
+esourceLocation(String,String) �ѹ�ʱ, �ұ��Ϊ��ɾ��
+                || com.tnc.tnc.world.ConquestPlantProcessor.replacement(new ResourceLocation("conquest", "hawthorn_bush
+")) != null
+                                                                        ^
+D:\ModTest\src\main\java\com\tnc\tnc\world\stonecrest\BuildingGameTests.java:73: ����: [removal] ResourceLocation �е� R
+esourceLocation(String,String) �ѹ�ʱ, �ұ��Ϊ��ɾ��
+                || com.tnc.tnc.world.ConquestPlantProcessor.replacement(new ResourceLocation("conquest", "orange_tree_l
+eaves")) != null)
+                                                                        ^
+D:\ModTest\src\main\java\com\tnc\tnc\world\stonecrest\LandmarkChunkGameTests.java:30: ����: [removal] ResourceLocation 
+�е� ResourceLocation(String,String) �ѹ�ʱ, �ұ��Ϊ��ɾ��
+            var set=sets.get(new net.minecraft.resources.ResourceLocation("tnc",id));
+                             ^
+ע: ĳЩ�����ļ�ʹ�û򸲸����ѹ�ʱ�� API��
+ע: �й���ϸ��Ϣ, ��ʹ�� -Xlint:deprecation ���±��롣
+10 ������
+8 ������
+
+> Task :compileJava FAILED
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':compileJava'.
+> Compilation failed; see the compiler error output for details.
+
+* Try:
+> Run with --info option to get more log output.
+> Run with --scan to get full insights.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.8/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 32s
+1 actionable task: 1 executed

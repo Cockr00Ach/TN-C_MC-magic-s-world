@@ -1,0 +1,7 @@
+﻿
+
+EnableLUA                  : 1
+ConsentPromptBehaviorAdmin : 0
+
+
+

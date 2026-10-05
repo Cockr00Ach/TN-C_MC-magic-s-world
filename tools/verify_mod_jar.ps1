@@ -263,10 +263,26 @@ try {
                         # for a dark spell). Registered in TNEffects.
                         'tnc:blood_mark', 'tnc:blood_burn', 'tnc:blood_sacrifice',
                         'tnc:blood_possess', 'tnc:blood_god',
+                        # dark chain 2 lifesteal (2026-10-09): the temporary MAX HEALTH the
+                        # caster gains from draining an enemy. Registered in TNEffects.
+                        'tnc:blood_pool',
                         # dark chain 2/3 shared amplifier (+50% soul per amplifier step).
                         # Registered all along but MISSING from this whitelist -- the check
                         # only stayed green because no dark spell was in $spellIds yet.
                         'tnc:dark_power')
+
+        # ★ SPAWN actions: the entity id must be one WE register, otherwise the engine
+        # silently spawns nothing (or the vanilla default) and the whole mechanic is a
+        # no-op in game with no error anywhere. Our own types live in TNOrbEntities /
+        # TNNpcs; vanilla + the other mods' ids are not ours to police.
+        $ourEntities = @()
+        foreach ($sourceFile in @('com/tnc/tnc/magic/TNOrbEntities.class',
+                                  'com/tnc/tnc/npc/TNNpcs.class')) {
+            $text = Get-ClassText $sourceFile
+            if ($text) { $ourEntities += [regex]::Matches($text, 'tnc:[a-z0-9_]+') | ForEach-Object { $_.Value } }
+        }
+        $ourEntities = @($ourEntities | Sort-Object -Unique)
+        $badSpawn = @()
         $badShape = @()
         $badTier = @()
         $badEffect = @()
@@ -340,6 +356,18 @@ try {
                         -and $eff -like 'tnc:fire_*') {
                     $badEffect += "$path -> $eff (FIRE effect on a dark chain: the reward would be spell_power:fire = 0 for this spell)"
                 }
+                # SPAWN: a `tnc:` entity id that we do not register makes the engine
+                # spawn nothing and the mechanic becomes a silent no-op
+                $spawnId = "$($impact.action.spawn.entity_type_id)"
+                if ($spawnId -like 'tnc:*' -and ($ourEntities -notcontains $spawnId)) {
+                    $badSpawn += "$path -> $spawnId (not registered by TNOrbEntities / TNNpcs)"
+                }
+                foreach ($extra in @($impact.action.spawns)) {
+                    $spawnId2 = "$($extra.entity_type_id)"
+                    if ($spawnId2 -like 'tnc:*' -and ($ourEntities -notcontains $spawnId2)) {
+                        $badSpawn += "$path -> $spawnId2 (not registered by TNOrbEntities / TNNpcs)"
+                    }
+                }
             }
 
             $modelId = $null
@@ -385,6 +413,8 @@ try {
         else { Fail ('spell json bad tier: ' + ($badTier -join ', ')) }
         if ($badEffect.Count -eq 0) { Ok 'spell json effect ids all registered by TNEffects' }
         else { Fail ('spell references an unregistered effect: ' + ($badEffect -join ', ')) }
+        if ($badSpawn.Count -eq 0) { Ok "every SPAWN references an entity type we register ($($ourEntities.Count) known ids)" }
+        else { Fail ('SPAWN references an entity type nobody registers (the engine then spawns nothing - silent no-op): ' + ($badSpawn -join ', ')) }
         if ($badModel.Count -eq 0) { Ok 'every projectile model referenced by a spell exists and is in the baked list' }
         else { Fail ('spell references a model that would render as a purple-black cube: ' + ($badModel -join ', ')) }
         if ($badAreaJar.Count -eq 0) {

@@ -1,0 +1,16 @@
+﻿=== QuarkCloudDrive reinstall @ 19:36:35 ===
+residue C:\Program Files (x86)\XDImageShow -> STILL
+residue C:\Users\FDCX\AppData\Local\{AA74A9F6-603B-4B0D-922D-36753FB491EE} -> STILL
+residue C:\Program Files (x86)\Lenovo\LeAppStore -> STILL
+residue C:\ProgramData\Lenovo\LeAppStore -> STILL
+installing Alibaba.QuarkCloudDrive via winget (user scope)...
+宸叉壘鍒?澶稿厠缃戠洏 [Alibaba.QuarkCloudDrive] 鐗堟湰 3.24.0
+姝ゅ簲鐢ㄧ▼搴忕敱鍏舵墍鏈夎€呮巿鏉冪粰浣犮€?
+Microsoft 瀵圭涓夋柟绋嬪簭鍖呮涓嶈礋璐ｏ紝涔熶笉鍚戠涓夋柟绋嬪簭鍖呮巿浜堜换浣曡鍙瘉銆?
+姝ｅ湪涓嬭浇 https://pdds.quark.cn/download/stfile/jjpoopokmjknjlrle/QuarkCloudDrive_v3.24.0_release_(Build2830585-20260305155231).exe
+宸叉垚鍔熼獙璇佸畨瑁呯▼搴忓搱甯?
+姝ｅ湪鍚姩绋嬪簭鍖呭畨瑁?..
+宸叉垚鍔熷畨瑁?
+
+exe present: False
+QUARK DONE
