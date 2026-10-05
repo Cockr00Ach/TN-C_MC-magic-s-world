@@ -133,4 +133,12 @@
   "entity.tnc.dark_king": "Dark King"
 ,
   "entity.tnc.evil_god": "Evil God"
+,
+  "effect.tnc.dark_veil": "Dark Veil",
+  "entity.tnc.fog": "Black Fog",
+  "effect.tnc.blood_mark": "Blood Mark",
+  "effect.tnc.blood_burn": "Blood Burn",
+  "effect.tnc.blood_sacrifice": "Blood Sacrifice",
+  "effect.tnc.blood_possess": "Possession",
+  "effect.tnc.blood_god": "I Am God"
 }

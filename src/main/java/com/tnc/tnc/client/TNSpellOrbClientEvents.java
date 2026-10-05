@@ -80,5 +80,15 @@ public final class TNSpellOrbClientEvents {
                 com.tnc.tnc.dark.client.TNDarkSummonRenderer::new);
         event.registerEntityRenderer(TNOrbEntities.EVIL_GOD.get(),
                 com.tnc.tnc.dark.client.TNDarkSummonRenderer::new);
+        // ★ 暗系第四条链「黑雾」（作者 2026-10-09："你全做吧"）：雾是**引擎 SpellCloud 的子类**
+        //   （tnc:fog ⇒ DarkFogCloudEntity），所以直接复用**引擎自己的**
+        //   SpellCloudRenderer ✓ —— 它会读 cloud.client_data.model 把穹顶画出来
+        //   （走 CustomModels.render，和投射物同一条通道 ✓）。
+        //   ⚠️ 这一行**不能省** ✗：实体类型没有渲染器 ⇒ 一生成就
+        //   `entityrenderer is null` 卡退 ✗（这条坑在本项目已经崩过三次，
+        //   现在由 OrbEntityRendererCoverageTest 在构建期把关 ✓）。
+        event.registerEntityRenderer(TNOrbEntities.FOG.get(),
+                context -> new net.spell_engine.client.render.SpellCloudRenderer<
+                        com.tnc.tnc.magic.DarkFogCloudEntity>(context));
     }
 }

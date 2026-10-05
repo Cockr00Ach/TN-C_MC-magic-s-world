@@ -137,6 +137,22 @@ public final class TNNpcs {
                     .clientTrackingRange(12)
                     .build("tnc:apollo"));
 
+    /**
+     * ★ 暗系巨人领主（作者 2026-10-03："做一个暗系 boss 的模型，我希望他是一个巨人的模型，
+     * 然后通身穿戴盔甲，这个盔甲可以直接融到模型里面去，一个巨兽人领主的感觉" ✓）。
+     *
+     * <p>模型：{@code geo/entity/dark_giant.geo.json}（盔甲是长在模型里的方块 ✓）＋
+     * 预览图 {@code docs/previews/dark_giant_preview.png} ✓。
+     * 碰撞箱按 4.5 格高的巨人给 ✓；★ 属性必须在 {@code TNNpcAttributes} 里也注册 ✗ 漏了生成即崩 ✗。
+     */
+    public static final RegistryObject<EntityType<com.tnc.tnc.boss.TNDarkGiantEntity>> DARK_GIANT =
+            ENTITY_TYPES.register("dark_giant", () -> EntityType.Builder
+                    .of(com.tnc.tnc.boss.TNDarkGiantEntity::new, MobCategory.MONSTER)
+                    .sized(com.tnc.tnc.boss.TNDarkGiantEntity.HITBOX_WIDTH,
+                            com.tnc.tnc.boss.TNDarkGiantEntity.HITBOX_HEIGHT)
+                    .clientTrackingRange(16)
+                    .build("tnc:dark_giant"));
+
     private TNNpcs() {
     }
 

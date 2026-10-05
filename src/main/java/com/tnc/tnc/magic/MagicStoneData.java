@@ -148,6 +148,87 @@ public class MagicStoneData {
         return true;
     }
 
+    /**
+     * <b>把配装拉回合法状态</b> —— 这是"一条链一个法术"的强制执行点。
+     *
+     * <h2>为什么不变量写在 setSlot/learn 里就够</h2>
+     * 作者 2026-09-29 实测的真实顺序是"**先学完几个档，再去配键页手动摆**"：
+     * 学法那一刻低档各占一个空槽，之后手动摆键时谁也没去清掉那些已经过时的低档 ✗
+     * —— 结果是<a>同一条链的 t1 / t4 / t5 三个档同时挂在法杖上</a>，
+     * 玩家当然"学了高级的，低级还能放"。
+     *
+     * <p>所以不做"在某个时刻替换"，而是定一条<b>不变量</b>，在每次写杖前强制执行：
+     * <blockquote>每条链在配装里最多出现一次，且只能是它当前的最高档。</blockquote>
+     *
+     * <p>具体三步：
+     * <ol>
+     *   <li>槽位上的法术如果是自己那条链的<b>低档</b> → 换成该链当前链顶</li>
+     *   <li>同一条链出现多次 → 只保留<b>第一个</b>槽（玩家先放的那个位置优先），其余清空</li>
+     *   <li>某条链有链顶但没被绑过 → 补进第一个空槽（不挤掉任何已绑的）</li>
+     * </ol>
+     *
+     * <p>放在 {@link SpellCatalog#wandSpellIds} 的入口上，所有路径（学法 / 手动配键 /
+     * 切页 / 登录补杖 / 老存档）都会自愈 ✓。
+     *
+     * @return 真的改动过配装才返回 true
+     */
+    public boolean normalizeLoadout() {
+        boolean changed = false;
+
+        // ① 低档 → 链顶（顺便把"引擎不认识/不在目录里"的槽清掉，它们是死键）
+        for (int i = 0; i < LOADOUT_SLOTS; i++) {
+            String id = loadout.get(i);
+            if (id == null) {
+                continue;
+            }
+            ResourceLocation parsed = ResourceLocation.tryParse(id);
+            SpellCatalog.Entry entry = parsed == null ? null : SpellCatalog.byId(parsed);
+            if (entry == null || entry.independent() || entry.element() == null) {
+                continue;                       // 目录外/独立魔法：没有链顶概念，不动它
+            }
+            SpellCatalog.Entry top = SpellCatalog.topLearned(this, entry.element(), entry.chain());
+            if (top == null) {
+                loadout.set(i, null);           // 链顶都没了（被遗忘）→ 清掉这个死槽
+                changed = true;
+            } else if (!top.id().toString().equals(id)) {
+                loadout.set(i, top.id().toString());
+                changed = true;
+            }
+        }
+
+        // ② 每条链只留一个槽（保留下标最小的那个 = 玩家最早放的位置）
+        java.util.Map<String, Integer> firstSeen = new java.util.HashMap<>();
+        for (int i = 0; i < LOADOUT_SLOTS; i++) {
+            String id = loadout.get(i);
+            if (id == null) {
+                continue;
+            }
+            ResourceLocation parsed = ResourceLocation.tryParse(id);
+            SpellCatalog.Entry entry = parsed == null ? null : SpellCatalog.byId(parsed);
+            String key = (entry == null || entry.independent() || entry.element() == null)
+                    ? "id:" + id                                   // 独立/目录外：按 id 去重
+                    : entry.element().name() + "/" + entry.chain().name();
+            Integer previous = firstSeen.putIfAbsent(key, i);
+            if (previous != null) {
+                loadout.set(i, null);
+                changed = true;
+            }
+        }
+
+        // ③ 链顶必须至少在配装里出现一次（玩家手动排过就不动位置）
+        for (SpellCatalog.Entry top : SpellCatalog.effective(this)) {
+            if (!isBound(top.id())) {
+                int free = firstFreeSlot();
+                if (free < 0) {
+                    break;                                      // 18 个槽满了就到此为止
+                }
+                loadout.set(free, top.id().toString());
+                changed = true;
+            }
+        }
+        return changed;
+    }
+
     /** 清空某个槽；本来就空返回 false。 */
     public boolean clearSlot(int index) {
         if (index < 0 || index >= LOADOUT_SLOTS || loadout.get(index) == null) {
@@ -213,6 +294,19 @@ public class MagicStoneData {
         }
         loadout.set(free, spell.toString());
         return true;
+    }
+
+    /**
+     * <b>只给测试用</b>：直接写一个槽，绕过"同一法术只占一个槽"的清理。
+     *
+     * <p>为什么需要它：{@link #setSlot} 会顺手清掉同一个法术的旧位置，
+     * 所以<b>造不出</b>"一个法术挂在两个槽上"那种坏状态 ——
+     * 而 {@link #normalizeLoadout} 恰恰要能修好这种状态（老存档 / 异常路径）✓。
+     */
+    void forceSlotForTest(int index, ResourceLocation spell) {
+        if (index >= 0 && index < LOADOUT_SLOTS) {
+            loadout.set(index, spell == null ? null : spell.toString());
+        }
     }
 
     /**

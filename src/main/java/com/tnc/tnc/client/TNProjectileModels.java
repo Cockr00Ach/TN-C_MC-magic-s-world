@@ -81,6 +81,42 @@ public final class TNProjectileModels {
     /** 暗色新版雷球。 */
     public static final String LIGHTNINGBALL_DARK = "projectile/lightingball_dark";
 
+    /**
+     * ★ <b>黑夜之手</b>（暗系第一条链:黑夜之手 → 黑夜之袭 → 黑夜之拥 → 黑之破灭 → 戮光）。
+     *
+     * <p>作者 2026-10-02："给我一个手的模型" —— 这五档以前全都借用
+     * {@code projectile/lightingball}（一个黄色雷球 ✗），和"黑夜之手"毫无关系。
+     *
+     * <p>模型由 {@code tools/gen_dark_hand_model.py} 程序化生成（和 {@code light_wings} /
+     * {@code angel} 同一套做法：脚本 → 模型 + 贴图 + 预览 ✓，改一个数字就能重来）。
+     *
+     * <p>★ <b>朝向约定</b>：模型里<b>手指指向 +Z</b>（＝飞行方向），手腕在 -Z，
+     * 包围盒已居中到原点（否则投射物会绕着自己前方的一点翻滚，像在自转手腕 ✗）。
+     * 所以如果以后要让它"伸着手抓过去"，在法术 JSON 的 model 块里加
+     * {@code "orientation": "TOWARDS_MOTION"} 即可 ✓ ——
+     * 但现在<b>故意不设</b>，和包里其它投射物保持一致（默认朝向镜头/翻滚 ✓）。
+     */
+    public static final String DARK_HAND = "projectile/dark_hand";
+
+    /**
+     * ★ <b>黑雾的穹顶</b>（暗系第四条链：黑雾 / 领域）—— 作者 2026-10-09："你全做吧"。
+     *
+     * <p>它<b>不是投射物</b>，但走的是同一条模型通道 ✓：引擎的 {@code SpellCloudRenderer}
+     * 会把 {@code release.target.cloud.client_data.model} 喂给
+     * {@code CustomModels.render(...)}（和投射物渲染器同一个函数），
+     * 所以它同样<b>必须登记进这份唯一的清单、必须被烘焙</b> —— 否则引擎取到的是
+     * "缺失模型"，画出来就是紫黑方块 ✗（这条链是<b>第一个</b>用这个槽的法术）。
+     *
+     * <p>模型由 {@code tools/gen_dark_fog_model.py} 程序化生成：三层抖动过的方块环
+     * （外圈薄、里圈厚）+ 顶盖 + 少量"余烬"块；贴图是程序画的暗紫烟灰图集 ✓。
+     *
+     * <p>★ <b>几何约定</b>：包围盒在 x/z 上以 (8,8) 单位为中心、<b>底边正好落在 y=8</b>，
+     * 因为 {@code CustomModels.render} 先 {@code translate(-0.5,-0.5,-0.5)} ⇒
+     * 模型的底边正好贴在实体位置上 ✓（雾是贴地的一层，不能像投射物那样居中到原点 ✗）。
+     * 法术 JSON 里的 {@code scale} 就等于<b>雾的半径（格）</b> ✓。
+     */
+    public static final String DARK_FOG = "projectile/dark_fog";
+
     public static final String[] PROJECTILE_MODELS = {
             // 火系（用户自制）
             "projectile/fireball",
@@ -101,6 +137,11 @@ public final class TNProjectileModels {
             LIGHTNINGBALL_DARK,
             // 雷系备用球（用户自制）
             "projectile/thunder_ball",
+            // 暗系黑夜之手链（生成器：tools/gen_dark_hand_model.py）
+            DARK_HAND,
+            // 暗系黑雾链的"领域"穹顶（生成器：tools/gen_dark_fog_model.py）——
+            //   挂在 CLOUD 的 client_data.model 上，不是投射物，但走同一条渲染/烘焙通道 ✓
+            DARK_FOG,
     };
 
     /**

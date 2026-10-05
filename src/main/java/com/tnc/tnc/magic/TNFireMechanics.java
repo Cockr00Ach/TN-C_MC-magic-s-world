@@ -40,28 +40,26 @@ public final class TNFireMechanics {
     public static final DeferredRegister<MobEffect> FIRE_EFFECTS =
             DeferredRegister.create(ForgeRegistries.MOB_EFFECTS, TNMod.MODID);
 
-    private static final int COLOR_FIRE = 0xE06010;
-
-    /** 火系伤害加成的属性 id（spell_power 的学派属性）。 */
-    private static final ResourceLocation FIRE_ATTRIBUTE =
-            ResourceLocation.fromNamespaceAndPath("spell_power", "fire");
-
     // ---------------- 效果 ----------------
 
+    /**
+     * 火系燃烧线的五个效果 —— 加 {@code spell_power:fire} ✓。
+     *
+     * <p>实现搬到了 {@link TNEffects#fireScales}（原来这里是私有嵌套类）：暗系第二条链
+     * 「以伤换伤 · 献祭」要用**同一套实现**加 {@code spell_power:soul} ✓
+     * —— 两条链只差"加哪个学派"，代码不该写两份 ✗。
+     * 效果 id 与数值**一个字没变** ✓（`tnc:fire_aspect` 等五个）。
+     */
     /** 火附着 +10%。 */
-    public static final RegistryObject<MobEffect> FIRE_ASPECT = fireBonus("fire_aspect", 0.10D);
+    public static final RegistryObject<MobEffect> FIRE_ASPECT = TNEffects.fireScales("fire_aspect", 0.10D);
     /** 初级燃烧 +25%，燃血 1%/秒。 */
-    public static final RegistryObject<MobEffect> EMBER_BURN = fireBonus("ember_burn", 0.25D);
+    public static final RegistryObject<MobEffect> EMBER_BURN = TNEffects.fireScales("ember_burn", 0.25D);
     /** 中级燃烧 +75%，燃血 2%/秒，15 秒内死亡可原地复活。 */
-    public static final RegistryObject<MobEffect> BLAZE_BURN = fireBonus("blaze_burn", 0.75D);
+    public static final RegistryObject<MobEffect> BLAZE_BURN = TNEffects.fireScales("blaze_burn", 0.75D);
     /** 高级燃烧 +150%，燃血 3%/秒，20 秒内死亡可原地复活。 */
-    public static final RegistryObject<MobEffect> INFERNO_BURN = fireBonus("inferno_burn", 1.50D);
+    public static final RegistryObject<MobEffect> INFERNO_BURN = TNEffects.fireScales("inferno_burn", 1.50D);
     /** 完全燃烧 +200%，血变 1 + 无敌，结束回半血，不燃血。 */
-    public static final RegistryObject<MobEffect> TOTAL_BURN = fireBonus("total_burn", 2.00D);
-
-    private static RegistryObject<MobEffect> fireBonus(String name, double amount) {
-        return FIRE_EFFECTS.register(name, () -> new FireBonusEffect(amount));
-    }
+    public static final RegistryObject<MobEffect> TOTAL_BURN = TNEffects.fireScales("total_burn", 2.00D);
 
     private TNFireMechanics() {
     }
@@ -71,23 +69,10 @@ public final class TNFireMechanics {
         FIRE_EFFECTS.register(modEventBus);
     }
 
-    /** 只加 spell_power:fire 的增益效果（属性在 spell_power 存在时才有）。 */
-    private static final class FireBonusEffect extends MobEffect {
-        FireBonusEffect(double amount) {
-            super(MobEffectCategory.BENEFICIAL, COLOR_FIRE);
-            Attribute fire = ForgeRegistries.ATTRIBUTES.getValue(FIRE_ATTRIBUTE);
-            if (fire != null) {
-                addAttributeModifier(fire,
-                        UUID.nameUUIDFromBytes(("tnc:fire:" + amount).getBytes(java.nio.charset.StandardCharsets.UTF_8)).toString(),
-                        amount, AttributeModifier.Operation.MULTIPLY_BASE);
-            }
-        }
-    }
-
     // ---------------- 数值 ----------------
 
-    /** 燃血：每秒扣最大生命的百分之几（0 = 不燃血）。 */
-    private static double burnPercentPerSecond(ServerPlayer player) {
+    /** 燃血：每秒扣最大生命的百分之几（0 = 不燃血）。包级可见：暗系献祭线共用同一套判定 ✓。 */
+    static double burnPercentPerSecond(ServerPlayer player) {
         if (has(player, TOTAL_BURN) || has(player, FIRE_ASPECT)) {
             return 0.0D;                    // 完全燃烧已经把血烧光了；火附着不燃血
         }
@@ -145,13 +130,24 @@ public final class TNFireMechanics {
         }
 
         // 燃血：每秒一次，按最大生命百分比，永不致死
+        //
+        // ⚠ 与暗系献祭链同一条修法（2026-10-09）：**不要用 setHealth()** ——
+        //   它绕开原版的受伤窗口（invulnerableTime），在刚被打过/刚烧过的玩家身上
+        //   会被静默丢掉 ⇒ "有时掉血、有时不掉" ✗。这里走 `hurt(..., MAGIC, ...)`：
+        //   先把自己那 10 tick 受伤窗口清成 0，保证每秒那一下一定生效 ✓；
+        //   扣血前夹住，保证永不致死（保底 1 点 ✓）。
         double percent = burnPercentPerSecond(player);
         if (percent <= 0.0D || time % 20 != 0) {
             return;
         }
         float drain = (float) (player.getMaxHealth() * percent);
-        float next = player.getHealth() - drain;
-        player.setHealth(Math.max(1.0F, next));      // 保底 1 点：燃血不会致死
+        float health = player.getHealth();
+        if (health <= 1.0F || drain <= 0.0F) {
+            return;
+        }
+        player.invulnerableTime = 0;
+        player.hurt(player.damageSources().magic(),
+                Math.min(drain, Math.max(0.0F, health - 1.0F)));
     }
 
     /** 完全燃烧期间被打上标记（用来判断"效果刚结束"）。 */

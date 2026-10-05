@@ -241,6 +241,31 @@ public final class TNOrbEntities {
                 .build("tnc:" + id));
     }
 
+    /**
+     * ★ <b>黑雾</b>（暗系第四条链：黑雾 / 领域）✓（作者 2026-10-09："你全做吧"）。
+     *
+     * <p>它就是引擎 {@code SpellCloud} 的<b>子类</b> ✓ —— 法术 JSON 写
+     * {@code "entity_type_id": "tnc:fog"} 之后，{@code SpellHelper.placeCloud} 会
+     * {@code create(level)} 出这个类（随后强转成 {@code SpellCloud}）✓，
+     * 于是那五个法术的雾就能<b>跟着施法者走</b>（t3 起）✓、并托管一张跟着走的
+     * <b>边界法阵</b> ✓（见 {@link DarkFogCloudEntity}）。
+     *
+     * <p>尺寸给 <b>9 × 6</b>：它不是"实心方块"，而是要画成一大团低矮的穹顶云 ✓ ——
+     * 包围盒偏小会让客户端的可见性剔除把雾<b>提前剪掉</b> ✗（10 格高的天使踩过这个坑：
+     * 抬头看天使整尊消失，见 {@code TNAngelEntity.getBoundingBoxForCulling}）；
+     * {@code clientTrackingRange} 也要够大，否则站在雾里的玩家收不到这片雾 ✓。
+     *
+     * <p><b>{@code updateInterval(1)}</b>：t3 起雾的位置每 tick 都在变，
+     * 2 tick 同步一次就会看起来一顿一顿 ✗（环绕雷球当初就是这么被作者抓到的 ✓）。
+     */
+    public static final RegistryObject<EntityType<DarkFogCloudEntity>> FOG =
+            ENTITY_TYPES.register("fog", () -> EntityType.Builder
+                    .of(DarkFogCloudEntity::new, MobCategory.MISC)
+                    .sized(9.0F, 6.0F)
+                    .clientTrackingRange(16)
+                    .updateInterval(1)
+                    .build("tnc:fog"));
+
     private TNOrbEntities() {
     }
 
