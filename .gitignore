@@ -31,6 +31,10 @@ build
 # ---------- 运行环境（dev 服务器、世界存档、日志）----------
 run
 modpack/*/logs/
+# 仓库根的 logs\：tools\verify_mod_jar.ps1 每次跑完都会在这里留下
+# logs/debug.log + logs/latest.log（两个 0 字节文件）。
+# 上面那条 `modpack/*/logs/` 管不到它，于是每跑一次闸门 git status 就多一条噪音。
+/logs/
 modpack/*/crash-reports/
 modpack/*/saves/
 modpack/*/screenshots/

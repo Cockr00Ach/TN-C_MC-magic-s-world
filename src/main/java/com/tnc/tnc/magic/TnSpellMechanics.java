@@ -569,11 +569,17 @@ public final class TnSpellMechanics {
         // 真的放出去了 ⇒ 消掉"放行了却没放出来"的哑火待定项 ✓（见 ManaGate.PENDING）
         ManaGate.noteCastHappened(player);
 
-        // 火系那几条（自爆扣最大生命 10%）在自己的类里
-        TNFireMechanics.onSpellCast(player, spellId, data);
+        // ⚠️ 2026-10-05：火系的"施法瞬间"机制（自爆）已随火球链重做删除（那一档换成了熔岳天倾），
+        //    所以这里不再调 TNFireMechanics.onSpellCast —— 燃烧线现在只有每 tick 的维护。
         com.tnc.tnc.magic.water.TNWaterSpellEntity.cast(player, spellId);
         com.tnc.tnc.magic.water.TNWaterFieldEntity.cast(player, spellId);
         com.tnc.tnc.magic.water.ChaosSilence.cast(player, spellId);
+        // 火球链（火系第 1 条链）：自有投射物。命中时要精确知道「是哪个法术、打了多少」
+        // 才能挂焚身，所以不走引擎的 PROJECTILE —— 引擎不会把法术 id 告诉伤害事件。
+        // 不是本链的法术它返回 false，所以这里无脑调一遍是安全的（和水系同一个约定）。
+        com.tnc.tnc.magic.fire.TNFireBoltEntity.cast(player, spellId);
+        // 火球链里"不是朝准星扔火球"的那两档（t4 熔岳天倾的头顶法阵 / t5 炎葬的脚下法阵）
+        com.tnc.tnc.magic.fire.TNFireFields.cast(player, spellId);
 
         // 闪电降低冷却：恢复一半蓝量（上限的一半）
         if (path.equals("lightning_recharge")) {

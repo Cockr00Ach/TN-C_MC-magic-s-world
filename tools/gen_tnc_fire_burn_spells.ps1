@@ -1,4 +1,4 @@
-# One-off bootstrap for the FIRE burning chain (5 self buffs) + self_destruct.
+# One-off bootstrap for the FIRE burning chain (5 self buffs) + self_destruct (REMOVED 2026-10-05).
 # These are the spells that actually HAND OUT the effects registered by
 # TNFireMechanics, without them the 5 effects are unreachable.
 #
@@ -9,7 +9,7 @@
 #   blaze_burn   15s = the "die within 15s and revive" window
 #   inferno_burn 20s = the "die within 20s and revive" window
 #   total_burn   15s = the invincibility window (Java pins hp to 1 meanwhile)
-# self_destruct is AREA targeted: the radius is the TOP LEVEL "range" field
+# (the self_destruct block below is kept for history; the spell no longer exists)
 # (verified against elemental_wizards_rpg aqua_springwater: range 6 + AREA).
 #
 # ASCII only (tools/*.ps1 convention).
@@ -85,7 +85,7 @@ Burn-Spell 'total_burn'    5 'total_burn'    15.0 120.0    # 15s = invincible wi
 #  The 10% max hp self cost is NOT here: the engine has no hp cost field, it is
 #  applied in TNFireMechanics.onSpellCast.
 # ---------------------------------------------------------------------------
-Write-Json 'self_destruct' @"
+Write-Json 'self_destruct_removed_20261005' @"
 {
   "school": "FIRE",
   "group": "ball",

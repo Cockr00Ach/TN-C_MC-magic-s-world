@@ -5,6 +5,8 @@
   "spell.tnc.chaos_magic.description": "独立魔法。瞄准24格内敌对生物，封住其常见技能3秒；不冻结移动或普通近战。冷却10秒，无元素亲和力要求。模组Boss特殊招式需适配。",
   "effect.tnc.chaos_silence": "乱魔·沉默",
   "effect.tnc.water_cast": "水术凝聚",
+  "effect.tnc.burning_body": "焚身",
+  "effect.tnc.fire_cast": "火术凝聚",
   "spell.tnc.water_ball.name": "水球",
   "spell.tnc.water_ball.description": "射出一枚水球，只伤害首个命中的敌人。",
   "spell.tnc.water_cannon.name": "水炮弹",

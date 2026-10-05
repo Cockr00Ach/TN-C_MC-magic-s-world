@@ -37,6 +37,15 @@ public final class TNSpellOrbClientEvents {
         event.registerEntityRenderer(TNOrbEntities.WATER_SPELL.get(), TNWaterSpellRenderer::new);
         event.registerEntityRenderer(TNOrbEntities.WATER_BOLT.get(), TNWaterBoltRenderer::new);
         event.registerEntityRenderer(TNOrbEntities.WATER_FIELD.get(), TNWaterFieldRenderer::new);
+        // ★ 火球链的自有投射物（火系第 1 条链 ✓）：命中要精确知道法术与伤害才能挂焚身，
+        //   所以不走引擎的 PROJECTILE。视觉暂由粒子承担，见 TNFireBoltRenderer ✓
+        event.registerEntityRenderer(TNOrbEntities.FIRE_BOLT.get(), TNFireBoltRenderer::new);
+        // ★ 熔岩地（火球链 t3 熔岩火球起）：贴地的持续灼烧区域，视觉同样由粒子承担 ✓
+        event.registerEntityRenderer(TNOrbEntities.LAVA_FIELD.get(), TNLavaFieldRenderer::new);
+        // ★ 两座法阵（t4 熔岳天倾的头顶阵 / t5 炎葬的脚下阵）：同样是粒子表达，
+        //   共用通用的空渲染器，见 TNParticleOnlyRenderer ✓
+        event.registerEntityRenderer(TNOrbEntities.SKYFALL.get(), TNSigilRenderer::skyfall);
+        event.registerEntityRenderer(TNOrbEntities.METEOR_FALL.get(), TNSigilRenderer::meteorFall);
         // ★ 光天使（光系第二条链 t3/t4/t5 ✓）：半透明 + 自发光，见 TNAngelRenderer ✓
         event.registerEntityRenderer(TNOrbEntities.ANGEL.get(), com.tnc.tnc.light.client.TNAngelRenderer::new);
         // ★ 实体光柱（光系第三条链「光线」✓）：一整根棱柱 + 彩虹顶点色，见 TNLightBeamRenderer ✓

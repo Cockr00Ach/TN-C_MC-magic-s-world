@@ -400,5 +400,7 @@
   "effect.tnc.blood_burn": "Blood Burn",
   "effect.tnc.blood_sacrifice": "Blood Sacrifice",
   "effect.tnc.blood_possess": "Possession",
-  "effect.tnc.blood_god": "I Am God"
+  "effect.tnc.blood_god": "I Am God",
+  "effect.tnc.burning_body": "Immolation",
+  "effect.tnc.fire_cast": "Fire Focus"
 }

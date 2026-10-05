@@ -39,6 +39,19 @@ public final class TNEffects {
             () -> new MobEffect(MobEffectCategory.HARMFUL, 0x992BDD) {});
 
     /**
+     * 火球链的施法标记（0.05 秒，无害）。
+     *
+     * <p>和 {@link #WATER_CAST} 同一个用途：法术 JSON 用 {@code release.target.type = SELF}
+     * + 一条 STATUS_EFFECT 表示"这一发已经放出来了"，真正的投射物由我们自己的实体在
+     * {@code TnSpellMechanics.onSpellCast} 里放出去（见 {@code TNFireBoltEntity.cast}）。
+     *
+     * <p>为什么不直接在 JSON 里写引擎的 {@code PROJECTILE}：那样命中时引擎不会把法术 id
+     * 告诉伤害事件，焚身就没法按"这一发实际打了多少"来算（详见 {@code FireSpellRules} 的类注释）。
+     */
+    public static final RegistryObject<MobEffect> FIRE_CAST = EFFECTS.register("fire_cast",
+            () -> new MobEffect(MobEffectCategory.BENEFICIAL, 0xE06010) {});
+
+    /**
      * 雷速线统一用的颜色 —— <b>2026-09-22 从紫改成雷的青色</b>。
      *
      * <p>这个颜色同时决定两件事：原版 HUD 里效果图标的底色 ✓，以及玩家身上那圈
@@ -455,5 +468,7 @@ public final class TNEffects {
         //   在 DarkFogMechanics 的静态块里注册 ⇒ 这里显式碰一下它的静态字段，
         //   保证类在"任何施法之前"就被加载 ✓（否则第一次放黑雾会没反应 ✗）。
         DarkFogMechanics.ensureLoaded();
+        // 火系火球链的「焚身」（命中灼伤）—— 自有实体那一套，见 magic/fire/TNScorch
+        com.tnc.tnc.magic.fire.TNScorch.register(modEventBus);
     }
 }

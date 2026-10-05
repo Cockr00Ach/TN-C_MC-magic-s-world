@@ -105,7 +105,7 @@ Ray-Spell 'explosive_fire_ray'  4 1.4 1.6 1.0  3.5 2  3.0 0.7
 Ray-Spell 'cataclysm_fire_ray'  5 1.3 2.4 1.4  8.0 2  6.0 1.0
 
 # ---------------------------------------------------------------------------
-#  BALL CHAIN - fireball / big / giant / meteor (self_destruct is Java)
+#  BALL CHAIN - fireball / big / giant / meteor.  REWORKED 2026-10-05:
 # ---------------------------------------------------------------------------
 function Ball-Spell($name, $tier, $velocity, $coef, $scale, $cooldown, $radius, $castSeconds) {
     $json = @"
@@ -158,10 +158,10 @@ function Ball-Spell($name, $tier, $velocity, $coef, $scale, $cooldown, $radius, 
 
 Ball-Spell 'fireball'       1 1.2 1.0 0.8 1.5 2.0 0.5
 Ball-Spell 'great_fireball' 2 1.1 1.8 1.2 3.0 3.0 0.7
-Ball-Spell 'giant_fireball' 3 1.0 2.2 1.8 4.5 5.0 0.9
+Ball-Spell 'lava_fireball' 3 1.0 2.2 1.8 4.5 5.0 0.9   # renamed 2026-10-05; the JSONs are now hand-edited (see header)
 
 # (note moved to PROJECT-STATE; kept ASCII for GBK safety)
-Write-Json 'meteor_fireball' @"
+Write-Json 'meteor_fall' @"
 {
   "school": "FIRE",
   "group": "ball",
@@ -211,4 +211,4 @@ Write-Json 'meteor_fireball' @"
 
 Write-Output ''
 Write-Output ('done -> ' + $dest)
-Write-Output 'NOTE: self_destruct (4/5, ball chain) is Java-only (costs 10% max hp) - not written here.'
+Write-Output 'NOTE: the ball chain was REWORKED 2026-10-05 (lava_fireball / molten_skyfall / flame_burial).'

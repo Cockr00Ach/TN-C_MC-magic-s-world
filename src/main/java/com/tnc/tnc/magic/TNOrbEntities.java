@@ -33,6 +33,40 @@ public final class TNOrbEntities {
                     .sized(.1F,.1F).clientTrackingRange(12).updateInterval(1).build("tnc:water_field"));
 
     /**
+     * 火球链的自有投射物。
+     *
+     * <p>{@code updateInterval(1)}：火球飞得快，位置要每 tick 同步，不然客户端会看到它一跳一跳。
+     * 碰撞判定在服务端做（见 {@code TNFireBoltEntity.tick}），客户端只跟位置 + 撒粒子。
+     */
+    public static final RegistryObject<EntityType<com.tnc.tnc.magic.fire.TNFireBoltEntity>> FIRE_BOLT =
+            ENTITY_TYPES.register("fire_bolt", () -> EntityType.Builder.of(com.tnc.tnc.magic.fire.TNFireBoltEntity::new, MobCategory.MISC)
+                    .sized(.3F,.3F).clientTrackingRange(10).updateInterval(1).build("tnc:fire_bolt"));
+
+    /**
+     * 熔岩地（火系火球链 t3 起）：贴在落点下方的一块持续灼烧区域。
+     *
+     * <p>{@code updateInterval(10)}：它自己是静止的、只撒粒子，位置同步慢一点无所谓
+     * （省带宽）；判定完全在服务端做。
+     */
+    public static final RegistryObject<EntityType<com.tnc.tnc.magic.fire.TNLavaFieldEntity>> LAVA_FIELD =
+            ENTITY_TYPES.register("lava_field", () -> EntityType.Builder.of(com.tnc.tnc.magic.fire.TNLavaFieldEntity::new, MobCategory.MISC)
+                    .sized(.1F,.1F).clientTrackingRange(12).updateInterval(10).build("tnc:lava_field"));
+
+    /**
+     * 熔岳天倾（火球链 t4）的头顶法阵。
+     *
+     * <p>{@code updateInterval(2)}：它跟着施法者移动，位置同步慢会看起来"飘在后面"。
+     */
+    public static final RegistryObject<EntityType<com.tnc.tnc.magic.fire.TNSkyfallEntity>> SKYFALL =
+            ENTITY_TYPES.register("skyfall", () -> EntityType.Builder.of(com.tnc.tnc.magic.fire.TNSkyfallEntity::new, MobCategory.MISC)
+                    .sized(.1F,.1F).clientTrackingRange(16).updateInterval(2).build("tnc:skyfall"));
+
+    /** 炎葬（火球链 t5）的自身周围法阵。同样跟着施法者走，所以同步要快一点。 */
+    public static final RegistryObject<EntityType<com.tnc.tnc.magic.fire.TNMeteorFallEntity>> METEOR_FALL =
+            ENTITY_TYPES.register("meteor_fall", () -> EntityType.Builder.of(com.tnc.tnc.magic.fire.TNMeteorFallEntity::new, MobCategory.MISC)
+                    .sized(.1F,.1F).clientTrackingRange(16).updateInterval(2).build("tnc:meteor_fall"));
+
+    /**
      * 环绕雷球。
      *
      * <p>{@code updateInterval(2)}：位置每 2 tick 同步一次 —— 环绕是持续运动的，
