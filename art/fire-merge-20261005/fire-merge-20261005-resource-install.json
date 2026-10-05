@@ -1,0 +1,162 @@
+{
+  "commit": "c3f98b88b0d400170369634c67fc8a5fd4c56192",
+  "files": [
+    {
+      "file": "config/openloader/resources/TN-C/assets/tnc/textures/spell/giant_fireball.png",
+      "action": "retired to backup",
+      "sha256": null
+    },
+    {
+      "file": "config/openloader/resources/TN-C/assets/tnc/textures/spell/lava_fireball.png",
+      "action": "installed",
+      "sha256": "b2e249aa455e37e6b5dee5bb8587122bcc4d3197ed882d08867882dadd2dbf57"
+    },
+    {
+      "file": "config/openloader/resources/TN-C/assets/tnc/textures/spell/meteor_fall.png",
+      "action": "installed",
+      "sha256": "4a5c069a745ad9e5a6e901b19b1013c3dbba3454771b93eea4311e0c669d7442"
+    },
+    {
+      "file": "config/openloader/resources/TN-C/assets/tnc/textures/spell/meteor_fireball.png",
+      "action": "retired to backup",
+      "sha256": null
+    },
+    {
+      "file": "config/openloader/resources/TN-C/assets/tnc/textures/spell/molten_skyfall.png",
+      "action": "installed",
+      "sha256": "85efc4ab823eb1e14015a69c5768c8da6cefb0746dd425e8d36b565273f76643"
+    },
+    {
+      "file": "config/openloader/resources/TN-C/assets/tnc/textures/spell/self_destruct.png",
+      "action": "retired to backup",
+      "sha256": null
+    },
+    {
+      "file": "kubejs/assets/tnc/textures/entity/beam_white.png",
+      "action": "installed",
+      "sha256": "987c7d198cb8f101ec3669d1c6a405f81be148a794b3460ac9699f739fa0f282"
+    },
+    {
+      "file": "kubejs/assets/tnc/textures/spell/giant_fireball.png",
+      "action": "retired to backup",
+      "sha256": null
+    },
+    {
+      "file": "kubejs/assets/tnc/textures/spell/giant_light_beam.png",
+      "action": "installed",
+      "sha256": "f8230bc12871c5b7fb3cf8539d57b5c416e5780adf3507537746fdb1a2c8beb1"
+    },
+    {
+      "file": "kubejs/assets/tnc/textures/spell/great_light_beam.png",
+      "action": "installed",
+      "sha256": "7086cf8f16c6c485c33612c3854a8ba7ebc728e453385a026dbd7c1d4481e9a9"
+    },
+    {
+      "file": "kubejs/assets/tnc/textures/spell/holy_light_descent.png",
+      "action": "installed",
+      "sha256": "b0243cb606a0047a1f86165555960eb2cc3635702a15965a4d5a1014d66cabb3"
+    },
+    {
+      "file": "kubejs/assets/tnc/textures/spell/light_beam.png",
+      "action": "installed",
+      "sha256": "27d66b0c0dee9173721098f8c6721c4b456d9c4d9232059bd55ec17129b65dfd"
+    },
+    {
+      "file": "kubejs/assets/tnc/textures/spell/meteor_fireball.png",
+      "action": "retired to backup",
+      "sha256": null
+    },
+    {
+      "file": "kubejs/assets/tnc/textures/spell/radiant_barrage.png",
+      "action": "installed",
+      "sha256": "fa261c2ece80baa2e82ae39a3281df4ce783476a70fd53924d754eb1a42ad8a3"
+    },
+    {
+      "file": "kubejs/assets/tnc/textures/spell/self_destruct.png",
+      "action": "retired to backup",
+      "sha256": null
+    },
+    {
+      "file": "kubejs/data/tnc/spells/black_mist.json",
+      "action": "installed",
+      "sha256": "9be9973dc9ac3e1178c1dc50c2e96d508fe7b44e1990f55cfea5c83d4b3899ba"
+    },
+    {
+      "file": "kubejs/data/tnc/spells/blood_burn.json",
+      "action": "installed",
+      "sha256": "bca9c7258c4ea7525e4e9c6dbdc74358f6f718745597db75c6ea3c750d42a6cf"
+    },
+    {
+      "file": "kubejs/data/tnc/spells/dark_city.json",
+      "action": "installed",
+      "sha256": "aebbf74dba08610931728f5949b4b59aa9b63d55075c57fc53f67939b0223fca"
+    },
+    {
+      "file": "kubejs/data/tnc/spells/dark_king.json",
+      "action": "installed",
+      "sha256": "cdffa3d89bd47d0d2e0697b5c663ede32255f1e2af15a78514db90e9f7c6b114"
+    },
+    {
+      "file": "kubejs/data/tnc/spells/devour_light.json",
+      "action": "installed",
+      "sha256": "6c2c387bf6c4632655c902b9c7427b1d2611ab01e1c871b4b799161972eab9ed"
+    },
+    {
+      "file": "kubejs/data/tnc/spells/evil_god.json",
+      "action": "installed",
+      "sha256": "cbf09d23d0d75d2bf973381c602cb5ef87f51b71cbfbfaae622a1eac5a116af7"
+    },
+    {
+      "file": "kubejs/data/tnc/spells/i_am_god.json",
+      "action": "installed",
+      "sha256": "b649109b3d5748ab1307e7d40694697216ad85610879fb82538bbf96e43ca55e"
+    },
+    {
+      "file": "kubejs/data/tnc/spells/night_grace.json",
+      "action": "installed",
+      "sha256": "afa43ccc873e343d602673d412fe39230a35637980134e3c785379499223f59c"
+    },
+    {
+      "file": "kubejs/data/tnc/spells/possess.json",
+      "action": "installed",
+      "sha256": "30b86af1880e34e6c33c5749cd818ce14d7096337c9209aaa8dc5e3d9e441cc4"
+    },
+    {
+      "file": "kubejs/data/tnc/spells/sacrifice.json",
+      "action": "installed",
+      "sha256": "9d1b837243e310ab9268745b9944d4f71373ce333dc143525b53c70d5083ee92"
+    },
+    {
+      "file": "kubejs/data/tnc/spells/self_destruct.json",
+      "action": "retired to backup",
+      "sha256": null
+    },
+    {
+      "file": "kubejs/data/tnc/spells/summon_dark.json",
+      "action": "installed",
+      "sha256": "1e5b766e72647a9e1693294795adb95e747d76f11dab06721b7a28dc761fa6d1"
+    },
+    {
+      "file": "kubejs/data/tnc/spells/summon_elite.json",
+      "action": "installed",
+      "sha256": "f0393f2b62cf8fc6c091707a4eae76081d63dbd614d2eaa0e48b4677ef1457f0"
+    },
+    {
+      "file": "kubejs/data/tnc/spells/summon_lord.json",
+      "action": "installed",
+      "sha256": "6a44173434822b061c73eb89fdec31baca03760089d8f5a868cf012694db5261"
+    },
+    {
+      "file": "kubejs/data/tnc/spells/trade_wounds.json",
+      "action": "installed",
+      "sha256": "56dab72608ef1949db334e6bf3642ea9c8b67266aa4a8122d4715bffc40fdb66"
+    },
+    {
+      "file": "kubejs/data/tnc/spells/where_light_cannot_reach.json",
+      "action": "installed",
+      "sha256": "42b57492210f1acaba58924ed7ca704ee88a804e95f4c64508237790594b904a"
+    }
+  ],
+  "backup": "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\work\\backups\\fire-and-dark-resources-20261005-213446",
+  "scope": "Pulled tracked KubeJS/openloader changes; Only explicit resource targets; saves and questbook never opened or written"
+}

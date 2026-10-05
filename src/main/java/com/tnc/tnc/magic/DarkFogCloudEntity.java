@@ -146,9 +146,10 @@ public class DarkFogCloudEntity extends SpellCloud {
 
     @Override
     protected void defineSynchedData() {
-        // ⚠ 1.20.1 的 Entity.defineSynchedData() 是**抽象**的、没有 super 可调 ✗ ——
-        //   引擎的 SpellCloud 也只是自己 define 自己的那几个字段，它读的是私有 accessor，
-        //   不需要我们的字段参与 ✓；我们只加自己的两个 ✓。
+        // SpellCloud owns spell id, data index and radius trackers used during spell creation.
+        // Initialise them before extending the tracker table with our overlay fields.
+        // The Connector compile-time engine jar exposes this inherited method under its SRG name.
+        super.m_8097_();
         this.entityData.define(DATA_FOG_TIER, 0);
         this.entityData.define(DATA_FOG_RADIUS, 0);
     }

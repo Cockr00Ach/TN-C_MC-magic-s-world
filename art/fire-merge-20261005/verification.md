@@ -1,0 +1,1 @@
+167项JUnit通过；235项GameTests通过。最后的黑雾父类同步字段修复重新运行test jar成功；javap确认先调用SpellCloud.m_8097_。安装后构建、镜像、PCL三份JAR SHA256一致；31项资源逐一校验通过。未启动游戏进行本轮火法人工试玩。
