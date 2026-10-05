@@ -574,6 +574,10 @@ public final class TnSpellMechanics {
         com.tnc.tnc.magic.water.TNWaterSpellEntity.cast(player, spellId);
         com.tnc.tnc.magic.water.TNWaterFieldEntity.cast(player, spellId);
         com.tnc.tnc.magic.water.ChaosSilence.cast(player, spellId);
+        // 火球链（火系第 1 条链）：自有投射物。命中时要精确知道「是哪个法术、打了多少」
+        // 才能挂焚身，所以不走引擎的 PROJECTILE —— 引擎不会把法术 id 告诉伤害事件。
+        // 不是本链的法术它返回 false，所以这里无脑调一遍是安全的（和水系同一个约定）。
+        com.tnc.tnc.magic.fire.TNFireBoltEntity.cast(player, spellId);
 
         // 闪电降低冷却：恢复一半蓝量（上限的一半）
         if (path.equals("lightning_recharge")) {

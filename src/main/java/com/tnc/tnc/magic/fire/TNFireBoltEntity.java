@@ -1,5 +1,6 @@
 package com.tnc.tnc.magic.fire;
 
+import com.tnc.tnc.TNMod;
 import com.tnc.tnc.combat.DownedCombat;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -7,6 +8,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
@@ -73,6 +75,39 @@ public final class TNFireBoltEntity extends Projectile {
 
     public float radius() {
         return entityData.get(RADIUS);
+    }
+
+    /**
+     * 由 {@code TnSpellMechanics.onSpellCast} 转调：这一发是火球链的就放出去。
+     *
+     * <p>和 {@code TNWaterBoltEntity} / {@code TNWaterFieldEntity} 的 {@code cast} 同一个约定：
+     * <b>不是本链的法术就返回 false 让别的链去处理</b>，所以派发处可以无脑全调一遍。
+     *
+     * @return 真的放出去了才 true
+     */
+    public static boolean cast(ServerPlayer player, ResourceLocation spellId) {
+        if (player == null || spellId == null || !spellId.getNamespace().equals(TNMod.MODID)) {
+            return false;
+        }
+        FireSpellRules.Bolt bolt = FireSpellRules.bolt(spellId.getPath());
+        if (bolt == null) {
+            return false;
+        }
+        Vec3 look = player.getLookAngle();
+        Vec3 muzzle = FireSpellRules.muzzle(player, 0.6D);
+        Vec3 right = FireSpellRules.right(look);
+        for (int i = 0; i < bolt.launches(); i++) {
+            // 连珠：横向错开一点，免得三发叠成一根。单发时 spread = 0，行为不变
+            double spread = bolt.launches() > 1
+                    ? (i - (bolt.launches() - 1) / 2.0D) * 0.055D
+                    : 0.0D;
+            Vec3 velocity = look.scale(1.3D).add(right.scale(spread));
+            TNFireBoltEntity boltEntity = new TNFireBoltEntity(
+                    com.tnc.tnc.magic.TNOrbEntities.FIRE_BOLT.get(), player.level());
+            boltEntity.configure(player, bolt, spellId.getPath(), muzzle, velocity);
+            player.level().addFreshEntity(boltEntity);
+        }
+        return true;
     }
 
     @Override

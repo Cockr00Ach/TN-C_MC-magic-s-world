@@ -122,4 +122,14 @@ public final class FireSpellRules {
         Vec3 look = caster.getLookAngle();
         return caster.getEyePosition().add(look.scale(forward)).add(0.0D, -0.15D, 0.0D);
     }
+
+    /**
+     * 射向的"右手边"单位向量 —— 连珠要在横向错开，不能叠成一根。
+     *
+     * <p>视线几乎垂直时必须换参考轴，否则叉乘退化成零向量、连珠会全叠在一起。
+     */
+    public static Vec3 right(Vec3 direction) {
+        Vec3 reference = Math.abs(direction.y) > 0.95D ? new Vec3(0, 0, 1) : new Vec3(0, 1, 0);
+        return direction.cross(reference).normalize();
+    }
 }
