@@ -42,16 +42,6 @@ public final class FireSpellRules {
 
     /** 爆炸半径（格）。 */
     public static final double SKYFALL_BLAST_RADIUS = 5.0D;
-
-    /** 法阵持续 10 秒。 */
-    /**
-     * 熔岳天倾法阵持续多久 —— 作者 2026-10-05：「t4 档法术持续时间改为 8s」✓
-     *
-     * <p>（原来 200 tick = 10 秒 ✗）
-     */
-    public static final int SKYFALL_LIFE_TICKS = 160;
-
-    /** 法阵每隔 10 tick（0.5 秒）砸一发下来。 */
     /**
      * 每几 tick 来一轮 —— 作者 2026-10-05：「不要固定一颗一颗向下落，可以一秒内落下多颗，
      * 且把落下的时间间隔减小，不用等到落地了再落下下一颗」✗
@@ -61,10 +51,42 @@ public final class FireSpellRules {
      *
      * <p>⚠️ 与"落地"完全无关 —— 落没落地都照砸 ✓（原来也不等落地，只是间隔太长看着像"一颗一颗"✗）
      */
-    public static final int SKYFALL_INTERVAL_TICKS = 8;
+    public static final int SKYFALL_INTERVAL_TICKS = 7;
 
-    /** 每一轮落下几颗。2 ⇒ 每秒约 5 颗 ✓ */
-    public static final int SKYFALL_LAUNCHES_PER_VOLLEY = 2;
+    /** 法阵持续 10 秒。 */
+
+    /** 开火窗口：5 秒（作者 2026-10-05：「t4 档改为 5 秒」✓）。 */
+    public static final int SKYFALL_FIRE_TICKS = 100;
+
+    /** 一共落几颗（作者：「5 秒共 13 个火球，13 个火球在 5s 内落完」✓）。 */
+    public static final int SKYFALL_BOLTS = 13;
+
+    /**
+     * 最后一颗在第几 tick 放出 = 间隔 ×（颗数 - 1）= 7 × 12 = <b>84</b> ✓
+     *
+     * <p>这样 13 颗正好均匀落在 <b>0 ~ 84 tick</b>（0~4.2 秒）内，
+     * 最后一颗大约第 96 tick 落地 —— 仍在 5 秒窗口里 ✓
+     * 写法是**算出来的**，改颗数或间隔时不会再对不上 ✗
+     */
+    public static final int SKYFALL_LAST_FIRE_TICK =
+            SKYFALL_INTERVAL_TICKS * (SKYFALL_BOLTS - 1);
+    /**
+     * 熔岳天倾法阵持续多久 —— 作者 2026-10-05：「t4 档法术持续时间改为 8s」✓
+     *
+     * <p>（原来 200 tick = 10 秒 ✗）
+     */
+    public static final int SKYFALL_LIFE_TICKS = SKYFALL_FIRE_TICKS + 20;
+
+    /** 法阵每隔 10 tick（0.5 秒）砸一发下来。 */
+
+    /**
+     * 一轮落几颗。
+     *
+     * <p>⚠️ 作者 2026-10-05：「不要出现一起下落的现象」✗ ⇒ <b>固定 1 颗</b>，
+     * 靠 {@link #SKYFALL_INTERVAL_TICKS} 把 13 颗**均匀铺开** ✓
+     * （之前为了"一秒多颗"改成一轮 2 颗 ✗ —— 那正是"一起下落"的来源 ✗）
+     */
+    public static final int SKYFALL_LAUNCHES_PER_VOLLEY = 1;
 
     /** 法阵悬在多高（格）。 */
     public static final double SKYFALL_HEIGHT = 12.0D;
@@ -199,7 +221,7 @@ public final class FireSpellRules {
     /** t3 熔岩火球：轻微的视角震动。 */
     public static final float SHAKE_T3 = 3.0F;
     /** t4 熔岳天倾：较强烈（比普通爆炸更猛）。 */
-    public static final float SHAKE_T4 = 11.0F;
+    public static final float SHAKE_T4 = 7.0F;
     /** t5 陨星坠：强烈。 */
     public static final float SHAKE_T5 = 16.0F;
 

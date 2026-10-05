@@ -124,7 +124,10 @@ public final class TNSkyfallEntity extends Entity {
             discard();
             return;
         }
-        if (age % FireSpellRules.SKYFALL_INTERVAL_TICKS != 0) {
+        // ⚠️ 开火窗口 + 末颗上限：只有 0 ~ SKYFALL_LAST_FIRE_TICK 之间、且踩在间隔上的才放 ✓
+        //    ⇒ 正好 SKYFALL_BOLTS 颗，**均匀铺开**，不会扎堆、也不会在窗口结束后继续放 ✗
+        if (age > FireSpellRules.SKYFALL_LAST_FIRE_TICK
+                || age % FireSpellRules.SKYFALL_INTERVAL_TICKS != 0) {
             return;
         }
         ServerLevel server = (ServerLevel) level();

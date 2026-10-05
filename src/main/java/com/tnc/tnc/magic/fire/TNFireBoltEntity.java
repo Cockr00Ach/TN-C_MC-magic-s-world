@@ -208,7 +208,23 @@ public final class TNFireBoltEntity extends Projectile {
      * （作者 2026-10-05 反馈「陨石的下落不流畅」）
      */
     private int formTicks() {
-        return meteorLike() ? 0 : FORM_TICKS;
+        return skyFall() ? 0 : FORM_TICKS;
+    }
+
+    /**
+     * 「从天上砸下来」的那些（t4 熔岳天倾的火球 + t5 的陨石/伴随陨石）。
+     *
+     * <p>它们<b>不是从手里推出去</b>的 ✗ ⇒ 既不做成形悬停、也不加出手缓冲：
+     * <ul>
+     *   <li>悬停 3 tick 会看着"顿一下" ✗</li>
+     *   <li>出手缓冲会让下落**先慢后快** ✗ —— 作者 2026-10-05 说「下落流畅点」，
+     *       落到一半突然加速正是"不流畅" ✗</li>
+     * </ul>
+     * ⇒ 它们一律<b>匀速直接砸</b> ✓（只有手扔的火球保留"凝聚 + 推出去"那套 ✓）
+     */
+    private boolean skyFall() {
+        String path = spellPath();
+        return meteorLike() || "molten_skyfall".equals(path);
     }
 
     /** 陨石类（大陨石 + 装饰小陨石）—— 拖尾、跳过成形、岩块外观都按这个判。 */
@@ -327,7 +343,7 @@ public final class TNFireBoltEntity extends Projectile {
         // ⚠️ 只改**实际走了多远**，不改 getDeltaMovement() ——
         //    改速度会每 tick 触发一次速度同步包，反而更卡 ✗
         Vec3 step = motion;
-        if (!meteorLike()) {
+        if (!skyFall()) {
             double ramp = Math.min(1.0D,
                     (tickCount - formTicks()) / (double) LAUNCH_RAMP_TICKS);
             step = motion.scale(LAUNCH_START_FRACTION + (1.0D - LAUNCH_START_FRACTION) * ramp);
