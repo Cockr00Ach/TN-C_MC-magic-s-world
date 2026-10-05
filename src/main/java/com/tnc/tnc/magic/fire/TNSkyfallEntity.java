@@ -116,7 +116,7 @@ public final class TNSkyfallEntity extends Entity {
         // 找人：法阵下方一圈里最近的敌人；找不到就直直往下砸
         LivingEntity target = shooter == null ? null : server.getEntitiesOfClass(LivingEntity.class,
                         FireSpellRules.uprightArea(position(), FireSpellRules.SKYFALL_SEEK_RADIUS, 48.0D),
-                        t -> FireSpellRules.enemy(shooter, t))
+                        t -> FireSpellRules.hittable(shooter, t))
                 .stream()
                 .min(Comparator.comparingDouble(t -> t.distanceToSqr(position())))
                 .orElse(null);

@@ -123,7 +123,7 @@ public final class TNLavaFieldEntity extends Entity {
         LivingEntity caster = resolveOwner(server);
         for (LivingEntity target : server.getEntitiesOfClass(LivingEntity.class,
                 FireSpellRules.uprightArea(position(), radius(), 1.5D),
-                t -> FireSpellRules.enemy(caster, t))) {
+                t -> FireSpellRules.hittable(caster, t))) {
             target.invulnerableTime = 0;      // 和焚身同一个坑：不清无敌帧会被吞
             target.hurt(server.damageSources().indirectMagic(this, caster == null ? this : caster),
                     perSecond);

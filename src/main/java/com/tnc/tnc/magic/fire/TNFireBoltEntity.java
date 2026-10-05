@@ -226,7 +226,7 @@ public final class TNFireBoltEntity extends Projectile {
         Vec3 impact = limit;
         double closest = from.distanceToSqr(limit) + 1e-7D;
         for (LivingEntity target : server.getEntitiesOfClass(LivingEntity.class,
-                new AABB(from, to).inflate(0.4D), t -> FireSpellRules.enemy(owner, t))) {
+                new AABB(from, to).inflate(0.4D), t -> FireSpellRules.hittable(owner, t))) {
             AABB box = target.getBoundingBox().inflate(0.15D);
             Optional<Vec3> point = box.contains(from) ? Optional.of(from) : box.clip(from, limit);
             if (point.isPresent() && point.get().distanceToSqr(from) < closest) {
@@ -261,7 +261,7 @@ public final class TNFireBoltEntity extends Projectile {
                 float blast = FireSpellRules.blastDamage(damage);
                 for (LivingEntity victim : server.getEntitiesOfClass(LivingEntity.class,
                         FireSpellRules.uprightArea(impact, blastRadius, 2.0D),
-                        t -> FireSpellRules.enemy(owner, t))) {
+                        t -> FireSpellRules.hittable(owner, t))) {
                     victim.invulnerableTime = 0;   // 直击刚把这个设成 20，不清的话爆炸会被吞
                     victim.hurt(server.damageSources().indirectMagic(this, owner), blast);
                 }
