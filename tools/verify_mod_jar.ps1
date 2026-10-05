@@ -588,10 +588,25 @@ try {
                 $badDirectives += "$($e.FullName) -> @act $value"
             }
         }
-        # @id must match the file name, or the script is loaded under a wrong key
+        # @id must match the path the loader will use as the key, or the script is
+        # loaded under a wrong key (DialogueLoader.get() builds the file path as
+        # `dialogues/<id.getPath()>.txt` and then asserts the file's @id == that id).
+        #
+        # ★ 2026-10-10 fix: the expectation used to be "namespace + file name only",
+        # which is WRONG for files in a sub-directory. The tavern guests live in
+        # `dialogues/tavern/guest_NN.txt` and are opened with
+        #     ResourceLocation.fromNamespaceAndPath("tnc", "tavern/" + seatId)
+        # (TavernGuestEntity.mobInteract) => the id is `tnc:tavern/guest_NN`, and the
+        # loader then looks for `dialogues/tavern/guest_NN.txt` -- self-consistent.
+        # The old rule demanded `tnc:guest_NN`, i.e. it would have "fixed" 49 correct
+        # files into broken ones (the loader would then look for
+        # `dialogues/guest_NN.txt`, which does not exist => genuinely mute NPCs).
+        # So: expect `tnc:` + the path RELATIVE to data/tnc/dialogues, minus ".txt".
         $idMatch = [regex]::Match($dtext, '(?m)^\s*@id\s+(\S+)\s*$')
         if ($idMatch.Success) {
-            $expect = 'tnc:' + [IO.Path]::GetFileNameWithoutExtension($e.FullName)
+            $rel = $e.FullName.Substring('data/tnc/dialogues/'.Length)
+            if ($rel.EndsWith('.txt')) { $rel = $rel.Substring(0, $rel.Length - 4) }
+            $expect = 'tnc:' + $rel
             if ($idMatch.Groups[1].Value -ne $expect) {
                 $badDirectives += "$($e.FullName) -> @id $($idMatch.Groups[1].Value) (expected $expect)"
             }
