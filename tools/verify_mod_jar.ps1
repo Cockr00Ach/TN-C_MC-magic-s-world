@@ -174,8 +174,8 @@ try {
                   # fire 15 (ray 5 + ball 5 + burn 5)
                   'tnc:fire_ray', 'tnc:thick_fire_ray', 'tnc:triple_fire_ray',
                   'tnc:explosive_fire_ray', 'tnc:cataclysm_fire_ray',
-                  'tnc:fireball', 'tnc:great_fireball', 'tnc:giant_fireball',
-                  'tnc:self_destruct', 'tnc:meteor_fireball',
+                  'tnc:fireball', 'tnc:great_fireball', 'tnc:lava_fireball',
+                  'tnc:molten_skyfall', 'tnc:meteor_fall',
                   'tnc:fire_aspect', 'tnc:ember_burn', 'tnc:blaze_burn',
                   'tnc:inferno_burn', 'tnc:total_burn',
                   # wind chain 1 (the other 10 wind spells get added when their json exists)
@@ -249,6 +249,10 @@ try {
                         # fire (registered in TNFireMechanics)
                         'tnc:fire_aspect', 'tnc:ember_burn', 'tnc:blaze_burn',
                         'tnc:inferno_burn', 'tnc:total_burn',
+                        # fire ball chain (2026-10-05)：施法标记 + 命中灼伤
+                        #   fire_cast  —— 法术 JSON 里 release.target=SELF 的那条标记（TNEffects 注册）
+                        #   burning_body —— 焚身，由自有实体在命中时施加（TNScorch 注册）
+                        'tnc:fire_cast', 'tnc:burning_body',
                         # wind (registered in TNWindMechanics)
                         'tnc:wind_flight', 'tnc:wind_speed_i', 'tnc:wind_speed_ii',
                         'tnc:wind_speed_iii', 'tnc:wind_power_i', 'tnc:wind_power_ii',

@@ -1,13 +1,13 @@
 {
   "school": "FIRE",
   "group": "ball",
-  "range": 40.0,
-  "learn": { "tier": 1 },
+  "range": 44.0,
+  "learn": { "tier": 3 },
   "cast": {
-    "duration": 0.5,
+    "duration": 0.9,
     "animation": "spell_engine:one_handed_projectile_charge",
     "sound": { "id": "spell_engine:generic_fire_casting", "randomness": 0 },
-    "particles": [ { "particle_id": "flame", "shape": "PIPE", "origin": "FEET", "count": 1.0, "min_speed": 0.05, "max_speed": 0.1 } ]
+    "particles": [ { "particle_id": "lava", "shape": "PIPE", "origin": "FEET", "count": 1.0, "min_speed": 0.05, "max_speed": 0.1 } ]
   },
   "release": {
     "target": {
@@ -24,5 +24,5 @@
       }
     }
   ],
-  "cost": { "exhaust": 0.0, "cooldown_duration": 1.5 }
+  "cost": { "exhaust": 0.0, "cooldown_duration": 5.0 }
 }

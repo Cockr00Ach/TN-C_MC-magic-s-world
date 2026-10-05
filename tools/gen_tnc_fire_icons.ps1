@@ -142,9 +142,9 @@ Icon-Ray 'cataclysm_fire_ray' 5
 Write-Output 'BALL chain:'
 Icon-Ball 'fireball' 1
 Icon-Ball 'great_fireball' 2
-Icon-Ball 'giant_fireball' 3
-Icon-Ball 'self_destruct' 4
-Icon-Ball 'meteor_fireball' 5
+Icon-Ball 'lava_fireball' 3   # renamed 2026-10-05 (giant_fireball -> lava_fireball)
+Icon-Ball 'molten_skyfall' 4   # renamed 2026-10-05
+Icon-Ball 'meteor_fall' 5     # renamed 2026-10-05
 Write-Output 'BURN chain (+ effect icons):'
 Icon-Burn 'fire_aspect' 1
 Icon-Burn 'ember_burn' 2
