@@ -43,7 +43,7 @@ public final class TavernBasementUpgrade {
         for(var c:changes){var p=origin.offset(c.local());var actual=l.getBlockState(p);if(!compatible(actual,c))throw new IOException("保留地下室现场改动："+p.toShortString());if(l.getBlockEntity(p)!=null&&!actual.equals(c.after()))throw new IOException("保留地下室现场容器："+p.toShortString());}
     }
     public static void alignWorkers(ServerLevel l,BlockPos origin) {
-        var target=origin.offset(TavernUpgrade.SELF);NpcPlacementSavedData.get(l).put(new NpcPlacementSavedData.Placement("self","ORIGIN",465,90,292));
+        var target=origin.offset(TavernUpgrade.SELF);NpcPlacementSavedData.get(l).put(new NpcPlacementSavedData.Placement("self","ORIGIN",464,90,292));
         var box=new AABB(origin.offset(TavernUpgrade.MIN),origin.offset(TavernUpgrade.MAX).offset(1,1,1));
         for(var self:l.getEntitiesOfClass(SelfNpcEntity.class,box)){self.moveTo(target.getX()+.5,target.getY(),target.getZ()+.5,90,0);self.setYHeadRot(90);self.setYBodyRot(90);}
         var guild=origin.offset(436,90,286);

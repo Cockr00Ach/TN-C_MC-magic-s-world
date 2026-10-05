@@ -44,5 +44,5 @@ public record TavernAtmosphere(List<Seat> seats,List<AABB> rooms,int totalSeats)
         if(rooms.isEmpty()||rooms.size()>8)throw new IllegalArgumentException("酒馆音乐范围数量无效");
         return new TavernAtmosphere(List.copyOf(seats),List.copyOf(rooms),total);
     }
-    private static boolean insideRoom(BlockPos p){return TavernUpgrade.inside(p)||(p.getX()>=425&&p.getX()<=441&&p.getY()>=80&&p.getY()<=90&&p.getZ()>=287&&p.getZ()<=299);}
+    private static boolean insideRoom(BlockPos p){return p.getX()>=414&&p.getX()<=489&&p.getY()>=79&&p.getY()<=134&&p.getZ()>=268&&p.getZ()<=330;}
 }

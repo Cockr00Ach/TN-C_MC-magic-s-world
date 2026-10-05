@@ -24,20 +24,23 @@ def snapshot(root):
     return {str(p):sha(p) for p in set(files)}
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--install',action='store_true');parser.add_argument('--corrections',action='store_true');args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('--install',action='store_true');parser.add_argument('--corrections',action='store_true');parser.add_argument('--access-fix',action='store_true');args=parser.parse_args()
+    if args.access_fix:args.corrections=True
     audit=ROOT/'work/tavern-revision-20261005' if args.corrections else ROOT/'work'
     guest_count,tracks,game_tests,min_unit=(43,3,232,139) if args.corrections else (49,2,229,134)
+    if args.access_fix:game_tests,min_unit=235,136
     client=json.loads((audit/('client-audit.json' if args.corrections else 'tavern-client-audit.json')).read_text(encoding='utf8'))
     assert client['failures']==[] and client['guest_definitions']==guest_count and client['screenshots']==3
     assert any('200 entry ticks' in line for line in client['evidence'])
     assert 'BUILD SUCCESSFUL' in (audit/('client.log' if args.corrections else 'tavern-client.log')).read_text(encoding='utf8',errors='replace')
-    log=(audit/('final-tests.log' if args.corrections else 'tavern-final-tests.log')).read_text(encoding='utf8',errors='replace')
+    log=(ROOT/'work/tavern-access-20261005-tests.log' if args.access_fix else audit/('final-tests.log' if args.corrections else 'tavern-final-tests.log')).read_text(encoding='utf8',errors='replace')
     assert f'All {game_tests} required tests passed' in log and 'BUILD SUCCESSFUL' in log
     if args.corrections:
         assert any('Natural end' in line for line in client['evidence'])
-        hud=json.loads((audit/'hud-client-audit.json').read_text(encoding='utf8'))
-        assert hud['food']==14 and hud['health']<hud['maximum'] and hud['absorption']==4
-        assert 'BUILD SUCCESSFUL' in (audit/'hud-client.log').read_text(encoding='utf8',errors='replace')
+        if not args.access_fix:
+            hud=json.loads((audit/'hud-client-audit.json').read_text(encoding='utf8'))
+            assert hud['food']==14 and hud['health']<hud['maximum'] and hud['absorption']==4
+            assert 'BUILD SUCCESSFUL' in (audit/'hud-client.log').read_text(encoding='utf8',errors='replace')
     count=0
     for p in (ROOT/'build/test-results/test').glob('TEST-*.xml'):
         s=ET.parse(p).getroot();count+=int(s.attrib['tests']);assert int(s.attrib['failures'])==0 and int(s.attrib['errors'])==0
@@ -47,7 +50,8 @@ def main():
         required=['assets/tnc/sounds/tavern/wander_ward.ogg','assets/tnc/sounds/tavern/wander_ward_1.ogg',
             'data/tnc/tavern/interior_v1.nbt','data/tnc/tavern/atmosphere_v1.json','assets/tnc/tavern-sounds.json']
         required.extend(f'data/tnc/dialogues/tavern/guest_{i:02}.txt' for i in range(1,50))
-        if args.corrections:required.extend(['data/tnc/tavern/basement_v1.nbt','assets/tnc/sounds/tavern/tavern_third.ogg','assets/tnc/textures/gui/health_bar/health_a_frame.png','assets/tnc/textures/gui/hunger_bar/hunger_c_frame.png'])
+        if args.corrections:required.extend(['data/tnc/tavern/basement_v1.nbt','assets/tnc/sounds/tavern/tavern_third.ogg'])
+        if args.corrections and not args.access_fix:required.extend(['assets/tnc/textures/gui/health_bar/health_a_frame.png','assets/tnc/textures/gui/hunger_bar/hunger_c_frame.png'])
         for name in required:assert new.read(name)==(SOURCE/name).read_bytes(),name
         for name in ['com/tnc/tnc/tavern/TavernUpgrade.class','com/tnc/tnc/tavern/TavernGuestEntity.class','com/tnc/tnc/tavern/client/TavernGuestRenderer.class']:
             assert name in new.namelist()
@@ -55,12 +59,17 @@ def main():
         if args.corrections:
             assert len(catalog['empty_seats'])==10
             assert not {f'guest_{i:02}' for i in range(1,7)} & {g['id'] for g in catalog['guests']}
-            for name in ['com/tnc/tnc/tavern/TavernBasementUpgrade.class','com/tnc/tnc/client/HealthGaugeHud.class','com/tnc/tnc/client/HungerGaugeHud.class']:assert name in new.namelist()
+            assert 'com/tnc/tnc/tavern/TavernBasementUpgrade.class' in new.namelist()
+            for name in ['com/tnc/tnc/client/HealthGaugeHud.class','com/tnc/tnc/client/HungerGaugeHud.class']:assert (name in new.namelist())!=args.access_fix
+            if args.access_fix:assert catalog['rooms']==[[414,79,268,489,134,330]]
         sounds=json.loads(new.read('assets/tnc/sounds.json'))
         for key in json.loads(new.read('assets/tnc/tavern-sounds.json')):assert sounds[key]['sounds'][0]['stream']
         protected=[name for name in old.namelist() if '/sky_island/' in name or ('SkyIsland' in name and 'SkyIslandEvents' not in name)]
         protected.extend(name for name in old.namelist() if name.startswith(('assets/tnc/textures/','assets/tnc/models/')))
-        for name in protected:assert new.read(name)==old.read(name),'Protected resource changed: '+name
+        removed_hud={'assets/tnc/textures/gui/health_bar/health_a_frame.png','assets/tnc/textures/gui/hunger_bar/hunger_c_frame.png'} if args.access_fix else set()
+        for name in protected:
+            if name in removed_hud:continue
+            assert new.read(name)==old.read(name),'Protected resource changed: '+name
         for name in new.namelist():
             if name.endswith('.json') and name.startswith(('assets/tnc/','data/tnc/')):json.loads(new.read(name))
     game_closed();print(f'Verified {guest_count}/75 seats, {tracks} streamed tracks, {count} unit tests, {game_tests} GameTests, actual client captures')
@@ -80,7 +89,7 @@ def main():
         raise
     receipt={'installed_at':datetime.datetime.now().isoformat(),'sha256':sha(JAR),'backup':str(backup),'installed_files':[str(target) for target,saved in targets],
         'guest_seats':guest_count,'total_seats':75,'unit_tests':count,'game_tests':game_tests,'client':client,'protected_resources':len(protected),'protected_files':len(before)}
-    (audit/('package-install.json' if args.corrections else 'tavern-package-install-receipt.json')).write_bytes(json.dumps(receipt,ensure_ascii=False,indent=2).encode('utf8'))
+    (ROOT/'work/tavern-access-20261005-package-install.json' if args.access_fix else audit/('package-install.json' if args.corrections else 'tavern-package-install-receipt.json')).write_bytes(json.dumps(receipt,ensure_ascii=False,indent=2).encode('utf8'))
     print('Installed package:',receipt['sha256'])
 
 if __name__=='__main__':main()

@@ -22,7 +22,7 @@ import java.util.*;
 /** Independently versioned, bounded tavern migration. Never resets/rebuilds the island. */
 public final class TavernUpgrade {
     public static final BlockPos MIN=new BlockPos(416,89,270),MAX=new BlockPos(486,131,327);
-    public static final BlockPos SELF=new BlockPos(465,90,292),BOARD=new BlockPos(432,91,285);
+    public static final BlockPos SELF=new BlockPos(464,90,292),BOARD=new BlockPos(432,91,285);
     public static final float SELF_YAW=90;
     private static final BlockPos OLD_BOARD=new BlockPos(426,94,285);
     private static final ResourceLocation RESOURCE=ResourceLocation.fromNamespaceAndPath("tnc","tavern/interior_v1.nbt");

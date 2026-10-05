@@ -82,6 +82,21 @@ public final class TownRevisionGameTests {
         h.assertTrue(self.anchor().equals("ORIGIN")&&self.dx()==target.getX()&&self.dy()==target.getY()&&self.dz()==target.getZ()&&data.get("cava").dx()==55&&saved.getCompound("PreviousSelf").getInt("DX")==55,"Self migrates to tavern and records old entity lookup location, keeping other manual v7 placements");
         var loaded=com.tnc.tnc.npc.NpcPlacementSavedData.load(saved);loaded.seedDefaults();h.assertTrue(loaded.save(new CompoundTag()).getCompound("PreviousSelf").getInt("DX")==55,"Pending original entity lookup survives restart without being overwritten");h.succeed();
     }
+    @GameTest(template="building_test_empty",timeoutTicks=40)
+    public static void versionEightMovesSelfOneBlockAndKeepsOtherManualPositions(GameTestHelper h){
+        var tag=new CompoundTag();tag.putInt("DefaultsVersion",8);var list=new net.minecraft.nbt.ListTag();
+        for(String id:new String[]{"self","cava"}){var t=new CompoundTag();t.putString("Id",id);t.putString("Anchor",id.equals("self")?"ORIGIN":"ABSOLUTE");t.putInt("DX",id.equals("self")?465:55);t.putInt("DY",id.equals("self")?90:100);t.putInt("DZ",id.equals("self")?292:66);list.add(t);}tag.put("Npcs",list);
+        var data=com.tnc.tnc.npc.NpcPlacementSavedData.load(tag);data.seedDefaults();var saved=data.save(new CompoundTag());
+        h.assertTrue(data.get("self").dx()==464&&data.get("self").dy()==90&&data.get("self").dz()==292&&data.get("cava").dx()==55&&saved.getCompound("PreviousSelf").getInt("DX")==465,"Version8 keeps other NPCs and remembers original SELF for UUID-preserving move");h.succeed();
+    }
+    @GameTest(template="building_test_empty",timeoutTicks=40)
+    public static void unfinishedVersionEightSelfMoveKeepsItsOriginalSource(GameTestHelper h){
+        var tag=new CompoundTag();tag.putInt("DefaultsVersion",8);var list=new net.minecraft.nbt.ListTag();var current=new CompoundTag();
+        current.putString("Id","self");current.putString("Anchor","ORIGIN");current.putInt("DX",465);current.putInt("DY",90);current.putInt("DZ",292);list.add(current);tag.put("Npcs",list);
+        var previous=new CompoundTag();previous.putString("Anchor","ABSOLUTE");previous.putInt("DX",555);previous.putInt("DY",100);previous.putInt("DZ",666);tag.put("PreviousSelf",previous);
+        var data=com.tnc.tnc.npc.NpcPlacementSavedData.load(tag);data.seedDefaults();var saved=data.save(new CompoundTag());
+        h.assertTrue(data.get("self").dx()==464&&saved.getCompound("PreviousSelf").equals(previous),"Version9 must preserve unfinished older migration source and original NPC identity");h.succeed();
+    }
     @GameTest(template="building_test_empty",batch="self_move",timeoutTicks=200)
     public static void actualSelfMovesWithSameUuidAndNoDuplicate(GameTestHelper h){
         var l=h.getLevel();var old=h.absolutePos(new BlockPos(3,2,3));var target=old.offset(40,0,0);var forced=new ArrayList<net.minecraft.world.level.ChunkPos>();

@@ -53,7 +53,18 @@ public final class TavernGameTests {
         var a=TavernAtmosphere.load(h.getLevel().getServer());h.assertTrue(a.seats().size()==43&&a.totalSeats()==75,"Wrong patron occupancy after clearing the entrance group");
         h.assertTrue(a.seats().stream().noneMatch(s->s.local().getY()==90&&s.block().contains("red_cushion")),"Entrance cushions must all be empty");
         for(var seat:a.seats())h.assertTrue(com.tnc.tnc.dialogue.DialogueLoader.get(h.getLevel().getServer().getResourceManager(),ResourceLocation.fromNamespaceAndPath("tnc","tavern/"+seat.id())).isPresent(),"Missing patron dialogue: "+seat.id());
-        h.assertTrue(a.rooms().stream().anyMatch(b->b.contains(465.5,90,292.5)),"Bartender's back walkway must be inside music region");h.assertTrue(a.rooms().stream().anyMatch(b->b.contains(429.5,81,293.5)),"Cellar must remain inside music region");h.assertTrue(a.rooms().stream().noneMatch(b->b.contains(418,90,291)),"Approach road must not start tavern music");h.succeed();
+        h.assertTrue(a.rooms().stream().anyMatch(b->b.contains(464.5,90,292.5)),"Bartender's back walkway must be inside music region");h.assertTrue(a.rooms().stream().anyMatch(b->b.contains(429.5,81,293.5)),"Cellar must remain inside music region");h.assertTrue(a.rooms().stream().noneMatch(b->b.contains(413,90,291)),"Outside the expanded envelope must not start tavern music");h.succeed();
+    }
+    @GameTest(template="building_test_empty",timeoutTicks=60)
+    public static void entireInnAndAllFloorsHaveContinuousMusicCoverage(GameTestHelper h)throws Exception {
+        var rooms=TavernAtmosphere.load(h.getLevel().getServer()).rooms();
+        for(int x=414;x<489;x++)for(int y=79;y<134;y++)for(int z=268;z<330;z++){
+            final double px=x+.5,py=y+.5,pz=z+.5;
+            h.assertTrue(rooms.stream().anyMatch(b->b.contains(px,py,pz)),"Music coverage gap at "+x+","+y+","+z);
+        }
+        h.assertTrue(rooms.stream().anyMatch(b->b.contains(418,90,291)),"Entrance approach must keep music");
+        h.assertTrue(rooms.stream().anyMatch(b->b.contains(480,90,305)),"Kitchen must keep music");
+        h.assertTrue(rooms.stream().anyMatch(b->b.contains(460,122,305)),"Upper floors must keep music");h.succeed();
     }
     @GameTest(template="building_test_empty",timeoutTicks=60)
     public static void cellarAcceptsGeneratedSoilButRejectsPlayerWalls(GameTestHelper h)throws Exception {
@@ -66,7 +77,7 @@ public final class TavernGameTests {
         var l=h.getLevel();var origin=h.absolutePos(new BlockPos(2,2,2)).subtract(new BlockPos(430,90,294));
         var self=TNNpcs.SELF.get().create(l);var old=origin.offset(430,90,294);self.moveTo(old.getX()+.5,old.getY(),old.getZ()+.5,180,0);l.addFreshEntity(self);
         var guild=TNNpcs.SERVICE_NPC.get().create(l);guild.role("guild");guild.moveTo(old.getX()+2.5,old.getY(),old.getZ()+.5,90,0);l.addFreshEntity(guild);var selfId=self.getUUID();var guildId=guild.getUUID();
-        TavernBasementUpgrade.alignWorkers(l,origin);h.assertTrue(self.getUUID().equals(selfId)&&self.blockPosition().equals(origin.offset(465,90,292))&&self.getYRot()==90,"Self must retain UUID behind the bar facing west");
+        TavernBasementUpgrade.alignWorkers(l,origin);h.assertTrue(self.getUUID().equals(selfId)&&self.blockPosition().equals(origin.offset(464,90,292))&&self.getYRot()==90,"Self must retain UUID behind the bar facing west");
         h.assertTrue(guild.getUUID().equals(guildId)&&guild.blockPosition().equals(origin.offset(436,90,286))&&guild.getYRot()==0,"Eileen must retain UUID behind the lectern facing south");self.discard();guild.discard();h.succeed();
     }
     @GameTest(template="building_test_empty",timeoutTicks=60)

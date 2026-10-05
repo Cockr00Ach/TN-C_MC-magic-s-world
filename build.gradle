@@ -83,14 +83,6 @@ minecraft {
         }
 
         client {
-            if (project.hasProperty('healthHudAudit')) {
-                workingDirectory project.file('run-client-ecology-audit')
-                property 'mixin.env.remapRefMap', 'true'
-                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
-                property 'tnc.healthHudAudit', 'true'
-                args '--quickPlaySingleplayer', 'ecology-gui-feedback', '--width', '1280', '--height', '720'
-                jvmArgs '-Xmx6G'
-            }
             if (project.hasProperty('tavernClientAudit')) {
                 workingDirectory project.file('run-client-ecology-audit')
                 property 'mixin.env.remapRefMap', 'true'
@@ -219,7 +211,7 @@ dependencies {
 
     testImplementation platform('org.junit:junit-bom:5.10.2')
     testImplementation 'org.junit.jupiter:junit-jupiter'
-    if (project.hasProperty('tavernClientAudit') || project.hasProperty('healthHudAudit')) {
+    if (project.hasProperty('tavernClientAudit')) {
         // Dev-only nested Fabric API SRG names must also match Mojmap; game jar untouched.
         runtimeOnly files('work/tavern-fixtures/conquest-dev.jar')
         runtimeOnly fg.deobf('geckolib:geckolib:4.8.4')

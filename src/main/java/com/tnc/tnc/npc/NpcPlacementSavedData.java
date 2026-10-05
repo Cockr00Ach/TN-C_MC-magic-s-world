@@ -255,7 +255,7 @@ public class NpcPlacementSavedData extends net.minecraft.world.level.saveddata.S
                 placements.put(def.npcId(), def);
                 changed++;
             } else if (refresh && !existing.equals(def) && (defaultsVersion<7||def.npcId().equals("self"))) {
-                if(def.npcId().equals("self")&&def.anchor().equals("ORIGIN"))previousSelf=existing;
+                if(def.npcId().equals("self")&&def.anchor().equals("ORIGIN")&&previousSelf==null)previousSelf=existing;
                 LOGGER.info("TN-C npc: refreshing default placement of {} -> {} (was {})",
                         def.npcId(), def, existing);
                 placements.put(def.npcId(), def);
