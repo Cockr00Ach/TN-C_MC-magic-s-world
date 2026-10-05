@@ -181,43 +181,81 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
     }
 
     // ------------------------------------------------------------------
-    //  熔岩岩球：黑炭岩板 + 熔岩裂缝（作者 2026-10-05 参照图）
+    //  熔岩岩球：一颗颗不规则岩块拼成的球（作者 2026-10-05 定稿）
     // ------------------------------------------------------------------
 
-    /** 岩石外壳切多少圈 / 多少边。 */
-    private static final int ROCK_LAT = 14;
-    private static final int ROCK_LON = 24;
-    /** 每 N 格算一块岩板；板与板的接缝就是熔岩裂缝。 */
-    private static final int ROCK_PLATE = 4;
+    /** 岩壳网格：切多少圈 / 多少边（岩块就是从这些格子聚出来的）。 */
+    private static final int ROCK_LAT = 24;
+    private static final int ROCK_LON = 40;
     /**
-     * 裂缝有多宽（= 格子在那一方向上的比例，0.18 即 36%）。
+     * 岩块数量 = {@code SEED_LAT × SEED_LON} 个种子点。
      *
-     * <p>⚠️ 这个值<b>必须独立于网格粗细</b>：第一版是"把整个裂缝格子跳过不画"，
-     * 于是裂缝宽度被锁死成"1/N 的格子"，PLATE=3 时占掉 56% 的面积 ——
-     * 整颗球变成熔岩、岩板反成碎块，和参考图正好相反 ✗
-     * 现在岩壳整面画满，熔岩只是缝上的一条<b>细亮条浮在壳外</b>，宽度由这里说了算 ✓
+     * <p>种子放在<b>抖动过的经纬网格</b>上 —— 网格保证「每块差不多同等大小」，
+     * 抖动保证「形状不规则、不是整齐方格」✓（作者 2026-10-05 的两条要求正好对应这两点）
      */
-    private static final double CRACK_HALF_WIDTH = 0.18D;
-    /** 裂缝画在岩壳外侧一点点 —— 免得和岩板同半径打架（z-fight）。 */
-    private static final double CRACK_LIFT = 1.006D;
+    private static final int SEED_LAT = 5;
+    private static final int SEED_LON = 7;
+    private static final int SEED_COUNT = SEED_LAT * SEED_LON;
+    /** 每块岩石的半径差异（±）—— 让它们各自鼓出/缩进，像一颗颗独立岩块而不是一层壳。 */
+    private static final double CHUNK_LUMP = 0.10D;
     /**
-     * 球面起伏幅度（± 比例）—— 作者 2026-10-05：「球的形状不用太过规整，可以不完全是球体」。
+     * 「离缝多近算缝」—— 用<b>最近与次近种子</b>的点积差做连续量：
+     * 差 &lt; 这个值就认为贴上等距面（= 两块岩块之间的缝）。
      *
-     * <p>⚠️ 起伏加在<b>顶点</b>上（不是每个面各自抖）：相邻的面共用顶点，
-     * 所以同一处的半径一定算得一样，岩壳<b>不会裂开缝</b> ✗
-     * 如果按面抖，四个角各说各话，会看到破洞。
+     * <p>⚠️ 不能用"整格二选一"（相邻格子不同块就算缝）：那样 1 格宽的环会把
+     * 有效面积吃掉一大半 —— 实测 35 块时岩浆占到 <b>84%</b>，整颗球反过来变成熔岩 ✗
      */
-    private static final double ROCK_LUMP = 0.13D;
+    private static final double EDGE_TOL = 0.020D;
+    /** 有多少比例的**整块岩块**是熔融的（随机挑块，不是随机挑格子 —— 否则又会出方块）。 */
+    private static final double MOLTEN_CHUNK_CHANCE = 0.22D;
+    /** 熔融处凹进去多少 —— 岩块之间才有"缝"的深度感。 */
+    private static final double LAVA_RECESS = 0.94D;
+
+    // ---- 下面这些表都是**预计算一次**的（见 buildRockPattern），每帧只查表 ----
+    /** 每格属于哪一块岩块。 */
+    private static final int[] CELL = new int[ROCK_LAT * ROCK_LON];
+    /** 每块岩块自己的半径倍率与深浅。 */
+    private static final double[] CHUNK_RADIUS = new double[SEED_COUNT];
+    private static final float[] CHUNK_SHADE = new float[SEED_COUNT];
+    /** 这一块岩块整体是不是熔融的（随机挑**块** → 随机区域也是不规则多边形，不会出方块）。 */
+    private static final boolean[] CHUNK_MOLTEN = new boolean[SEED_COUNT];
+    /** 种子点在球面上的单位向量（局部坐标：极轴 = 飞行方向）。 */
+    private static final double[] SEED = new double[SEED_COUNT * 3];
+    /**
+     * <b>顶点</b>级的归属与"热度"（0 = 纯岩石，1 = 纯岩浆）。
+     *
+     * <p>为什么要顶点级的：颜色如果在格子中心算、整格一个常数，
+     * 24×40 的网格看上去就是<b>一格格的色块</b>（像马赛克）✗。
+     * 顶点级 + 四边形内插值之后，岩块内部与缝上都是平滑过渡 ✓
+     * （半径仍然按<b>格</b>取，所以一块块岩石之间还是有硬台阶 —— 那正是"一块块"的来源）
+     */
+    private static final int VLAT = ROCK_LAT + 1;
+    private static final int VLON = ROCK_LON + 1;
+    private static final int[] VCELL = new int[VLAT * VLON];
+    private static final float[] VHEAT = new float[VLAT * VLON];
+
+    static {
+        buildRockPattern();
+    }
 
     /**
-     * 画一颗<b>熔岩岩球</b>：黑炭岩壳 + 从缝里透出的熔岩（作者 2026-10-05 参照图）。
+     * 画一颗<b>熔岩岩球</b>：一颗颗不规则的、差不多同等大小的岩块拼成的球，
+     * 块与块之间以及表面随机分布着岩浆（作者 2026-10-05 定稿）。
+     *
+     * <h2>演进（都是实测反馈推动的）</h2>
+     * <ol>
+     *   <li>第一版：经纬网格上切"岩板"，缝按格子算 → 只占 56% 面积，整颗球变熔岩 ✗</li>
+     *   <li>第二版：岩壳画满 + 缝上叠细亮条 → 岩壳太棕、缝太规整像棋盘 ✗</li>
+     *   <li><b>现在</b>：种子抖动网格 + Voronoi 归块 → 岩块<b>大小均匀、形状不规则</b>；
+     *       每块还有自己的半径与深浅，所以是一颗颗<b>独立</b>的岩块，不是一层壳 ✓</li>
+     * </ol>
      *
      * <p>关于"球型不好做可以做成正方体"：球面这套参数化在
      * {@code TNWaterBoltRenderer} 里早就跑通了，直接复用即可，<b>不用退成正方体</b> ✓
      */
     private static void lavaRock(VertexConsumer out, Matrix4f pose, Vec3 dir, Vec3 right, Vec3 up,
                                  double radius, double age, float fade) {
-        // 岩壳 + 缝里的熔岩（一起画，保证岩板在前、熔岩条浮在外侧）
+        // 岩壳（岩块 + 岩浆）
         rockShell(out, pose, dir, right, up, radius, fade);
 
         // 边缘舔上来的火苗：绕球一圈，长度各自抖（"在烧"的关键）
@@ -235,7 +273,20 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
         wisp(out, pose, dir, right, up, radius * 0.85D, radius * 1.8D, age, 0, 0.40F * fade);
     }
 
-    /** 岩壳：整面画满深灰近黑的岩板，再在缝上叠一条细的熔岩亮条。 */
+    /**
+     * 岩壳：整面画满，<b>半径按岩块取、颜色按顶点热度算</b>。
+     *
+     * <ul>
+     *   <li><b>岩块</b>：半径来自<b>所属岩块</b>（{@link #CELL}）—— 同一块内连成一片、
+     *       块与块之间留有硬台阶，所以看上去是<b>一颗颗独立的、差不多同等大小的不规则岩块</b> ✓</li>
+     *   <li><b>岩浆</b>：顶点热度 {@link #VHEAT} 决定颜色 —— 贴缝处渐变到 1、
+     *       整块熔融的岩块恒为 1；热度高的地方半径也凹进去 {@link #LAVA_RECESS} ✓</li>
+     * </ul>
+     *
+     * <p>⚠️ 颜色<b>必须按顶点算再插值</b>：早先按"整格一个常数"画，
+     * 24×40 的网格看上去就是一格格的马赛克 ✗
+     * 岩石的硬台阶只该来自<b>半径</b>（那才是"一块块"），颜色应当连续过渡 ✓
+     */
     private static void rockShell(VertexConsumer out, Matrix4f pose, Vec3 dir, Vec3 right, Vec3 up,
                                   double radius, float fade) {
         for (int j = 0; j < ROCK_LAT; j++) {
@@ -244,67 +295,141 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
             for (int i = 0; i < ROCK_LON; i++) {
                 double u = i * Math.PI * 2.0D / ROCK_LON;
                 double v = (i + 1) * Math.PI * 2.0D / ROCK_LON;
-                boolean seamLon = seamLon(i, j);
-                boolean seamLat = seamLat(i, j);
+                int chunk = CELL[j * ROCK_LON + i];
+                float shade = CHUNK_SHADE[chunk];
 
-                // ---- 岩板（深灰近黑；只有**紧挨**裂缝的那一圈边缘透一点热）----
-                // ⚠️ 这里**不能**把格子自己是不是缝算进去：那样 44% 的格子都算"边缘"，
-                //    整颗球会变成暖橙色，岩壳就不黑了 ✗（第一版正是这么错的）
-                float shade = rockShade(i, j);
-                boolean rim = seamLon(i - 1, j) || seamLon(i + 1, j)
-                        || seamLat(i, j - 1) || seamLat(i, j + 1);
-                lumpyQuad(out, pose, dir, right, up, radius, i, j, a, c, u, v, 1.0D,
-                        shade + (rim ? 0.055F : 0.0F),
-                        shade + (rim ? 0.015F : 0.0F),
-                        shade + (rim ? 0.002F : 0.0F),
-                        fade);
+                int vp = vIdx(i, j);
+                int vq = vIdx(i + 1, j);
+                int vs = vIdx(i + 1, j + 1);
+                int vt = vIdx(i, j + 1);
+                float hp = VHEAT[vp];
+                float hq = VHEAT[vq];
+                float hs = VHEAT[vs];
+                float ht = VHEAT[vt];
 
-                // ---- 缝里的熔岩：一条窄亮条，浮在壳外 ----
-                // 半径取这块板四个角的起伏平均值 —— 亮条才能贴着凹凸不平的岩壳，不会陷进去或飘起来
-                double base = (lump(radius, i, j) + lump(radius, i + 1, j)
-                        + lump(radius, i + 1, j + 1) + lump(radius, i, j + 1)) * 0.25D;
-                double lift = base * CRACK_LIFT;
-                if (seamLon) {
-                    double mid = (u + v) * 0.5D;
-                    double half = (v - u) * 0.5D * CRACK_HALF_WIDTH;
-                    surfaceQuad(out, pose, dir, right, up, lift, a, c, mid - half, mid + half,
-                            1.00F, 0.62F, 0.10F, 0.95F * fade);
-                }
-                if (seamLat) {
-                    double mid = (a + c) * 0.5D;
-                    double half = (c - a) * 0.5D * CRACK_HALF_WIDTH;
-                    surfaceQuad(out, pose, dir, right, up, lift, mid - half, mid + half, u, v,
-                            1.00F, 0.78F, 0.22F, 0.95F * fade);
-                }
+                // 凹进去多少用四个角的平均热度（整格一个值）—— 台阶正好落在岩块边界上
+                double heat = (hp + hq + hs + ht) * 0.25D;
+                double chunkRadius = radius * CHUNK_RADIUS[chunk]
+                        * (1.0D - (1.0D - LAVA_RECESS) * heat);
+
+                Vec3 p = spherePoint(dir, right, up, chunkRadius, a, u);
+                Vec3 q = spherePoint(dir, right, up, chunkRadius, a, v);
+                Vec3 s = spherePoint(dir, right, up, chunkRadius, c, v);
+                Vec3 t = spherePoint(dir, right, up, chunkRadius, c, u);
+
+                // 色温也按格子抖一点 —— 岩浆的分布与颜色都不规则
+                double tint = hash(i * 53 + 3, j * 59 + 7);
+                hotspot(out, pose, p, hp, shade, tint, fade);
+                hotspot(out, pose, q, hq, shade, tint, fade);
+                hotspot(out, pose, s, hs, shade, tint, fade);
+                hotspot(out, pose, t, ht, shade, tint, fade);
+            }
+        }
+    }
+
+    /** 顶点索引（顶点网格比格子多一圈/一列 —— 极点是顶点、经度是环）。 */
+    private static int vIdx(int i, int j) {
+        return j * VLON + i;
+    }
+
+    /**
+     * 一个顶点：<b>岩石深浅</b>与<b>岩浆橙黄</b>按热度线性混合后写出去。
+     *
+     * <p>热度 0 = 纯岩石（近黑灰）、1 = 纯岩浆（橙黄）。
+     * 中间值是渐变，所以缝上看起来是"石头上透出热"而不是一条硬边 ✓
+     */
+    private static void hotspot(VertexConsumer out, Matrix4f pose, Vec3 p,
+                                double heat, float shade, double tint, float fade) {
+        float r = (float) Math.min(1.0D, shade * (1.0D - heat) + 1.00D * heat);
+        float g = (float) Math.min(1.0D, shade * (1.0D - heat) + (0.74D - 0.30D * tint) * heat);
+        float b = (float) Math.min(1.0D, shade * (1.0D - heat) + (0.28D - 0.24D * tint) * heat);
+        WaterGeometry.vertex(out, pose, p, r, g, b, fade);
+    }
+
+    /**
+     * 预计算岩块图案 —— <b>只算一次</b>（放在 static 块里）。
+     *
+     * <p>为什么必须预计算：每格、每顶点都要找最近种子（Voronoi），是 O(点数 × 种子)；
+     * 每帧现算的话，熔岳天倾那种同时飞好几颗的场合要做十几万次距离比较，纯属浪费 ✗
+     * 而且图案本来就<b>不该每帧变</b> —— 用的是确定性 {@link #hash}，不是 {@code Math.random()} ✓
+     *
+     * <h2>三步</h2>
+     * <ol>
+     *   <li><b>种子</b>：抖动过的经纬网格 —— 网格保证「每块差不多同等大小」，
+     *       抖动保证「不规则、不是整齐方格」；每块再各自随机一个半径、深浅、是否熔融</li>
+     *   <li><b>格子</b>：归到最近的种子 —— 半径按块取，于是块与块之间有硬台阶（"一块块"的来源）</li>
+     *   <li><b>顶点</b>：归属 + <b>热度</b>。热度 = 「离两块岩块的等距面有多近」，
+     *       再与「这一块是不是熔融的」取较大值 —— 颜色按它插值，所以缝上是渐变、
+     *       熔融块整片发亮 ✓</li>
+     * </ol>
+     */
+    private static void buildRockPattern() {
+        int[] best = new int[1];
+
+        // ---- 1) 种子 ----
+        for (int a = 0; a < SEED_LAT; a++) {
+            for (int b = 0; b < SEED_LON; b++) {
+                int k = a * SEED_LON + b;
+                double lat = -Math.PI / 2.0D + (a + 0.5D) * Math.PI / SEED_LAT
+                        + (hash(a * 13 + 5, b * 7 + 3) - 0.5D) * 0.7D * Math.PI / SEED_LAT;
+                double lon = (b + 0.5D) * Math.PI * 2.0D / SEED_LON
+                        + (hash(a * 3 + 91, b * 11 + 17) - 0.5D) * 0.7D * Math.PI * 2.0D / SEED_LON;
+                SEED[k * 3] = Math.sin(lat);
+                SEED[k * 3 + 1] = Math.cos(lat) * Math.cos(lon);
+                SEED[k * 3 + 2] = Math.cos(lat) * Math.sin(lon);
+                // 每块自己的半径、深浅、是否熔融：大小差不多，但各自不同
+                CHUNK_RADIUS[k] = 1.0D + CHUNK_LUMP * (hash(k * 29 + 7, k * 17 + 23) - 0.5D) * 2.0D;
+                CHUNK_SHADE[k] = (float) (0.030D + 0.040D * hash(k * 31 + 1, k * 19 + 9));
+                CHUNK_MOLTEN[k] = hash(k * 41 + 13, k * 23 + 3) < MOLTEN_CHUNK_CHANCE;
+            }
+        }
+
+        // ---- 2) 格子归属（半径按块取）----
+        for (int j = 0; j < ROCK_LAT; j++) {
+            double lat = -Math.PI / 2.0D + (j + 0.5D) * Math.PI / ROCK_LAT;
+            for (int i = 0; i < ROCK_LON; i++) {
+                nearestGap(lat, (i + 0.5D) * Math.PI * 2.0D / ROCK_LON, best);
+                CELL[j * ROCK_LON + i] = best[0];
+            }
+        }
+
+        // ---- 3) 顶点归属 + 热度（颜色按它插值）----
+        for (int j = 0; j < VLAT; j++) {
+            double lat = -Math.PI / 2.0D + j * Math.PI / ROCK_LAT;
+            for (int i = 0; i < VLON; i++) {
+                double gap = nearestGap(lat, i * Math.PI * 2.0D / ROCK_LON, best);
+                int v = j * VLON + i;
+                VCELL[v] = best[0];
+                double edge = Math.max(0.0D, Math.min(1.0D, 1.0D - gap / EDGE_TOL));
+                VHEAT[v] = (float) Math.max(edge, CHUNK_MOLTEN[best[0]] ? 1.0D : 0.0D);
             }
         }
     }
 
     /**
-     * 球面上的一片，四个角的半径**各自起伏** —— 于是球面被揉成一颗不规则的岩石。
+     * 找最近的种子，并返回「最近与次近的点积差」（越小 = 越贴近两块岩块的等距面）。
      *
-     * <p>角点半径由 {@link #lump} 按<b>顶点格号</b>算，相邻的面共用同一个角就得到同一个值，
-     * 所以揉完仍然是封闭的一层壳 ✅
+     * @param bestOut 长度 ≥1 的数组，写出最近种子的下标（复用数组，避免热路径上分配对象）
      */
-    private static void lumpyQuad(VertexConsumer out, Matrix4f pose, Vec3 dir, Vec3 right, Vec3 up,
-                                  double radius, int i, int j,
-                                  double latA, double latC, double lonU, double lonV, double lift,
-                                  float r, float g, float b, float alpha) {
-        Vec3 p = spherePoint(dir, right, up, lump(radius, i, j) * lift, latA, lonU);
-        Vec3 q = spherePoint(dir, right, up, lump(radius, i + 1, j) * lift, latA, lonV);
-        Vec3 s = spherePoint(dir, right, up, lump(radius, i + 1, j + 1) * lift, latC, lonV);
-        Vec3 t = spherePoint(dir, right, up, lump(radius, i, j + 1) * lift, latC, lonU);
-        WaterGeometry.quad(out, pose, p, q, s, t, r, g, b, alpha);
-    }
-
-    /**
-     * 某个<b>顶点</b>（按经/纬格号）自己的半径。
-     *
-     * <p>振幅 ±{@link #ROCK_LUMP}，用 {@link #hash} 保证"同一个顶点恒定同一个值"
-     * （不能每帧随机，否则岩石会抖/闪 ✗）。
-     */
-    private static double lump(double radius, int i, int j) {
-        return radius * (1.0D + ROCK_LUMP * (hash(i * 7 + 13, j * 5 + 29) - 0.5D) * 2.0D);
+    private static double nearestGap(double lat, double lon, int[] bestOut) {
+        double px = Math.sin(lat);
+        double py = Math.cos(lat) * Math.cos(lon);
+        double pz = Math.cos(lat) * Math.sin(lon);
+        double first = -2.0D;
+        double second = -2.0D;
+        int bestK = 0;
+        for (int k = 0; k < SEED_COUNT; k++) {
+            double dot = px * SEED[k * 3] + py * SEED[k * 3 + 1] + pz * SEED[k * 3 + 2];
+            if (dot > first) {
+                second = first;
+                first = dot;
+                bestK = k;
+            } else if (dot > second) {
+                second = dot;
+            }
+        }
+        bestOut[0] = bestK;
+        return first - second;
     }
 
     /** 球面上的一片（经纬范围给全，内部按 dir/right/up 参数化）。 */
@@ -321,30 +446,6 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
     private static Vec3 spherePoint(Vec3 dir, Vec3 right, Vec3 up, double radius, double lat, double lon) {
         return dir.scale(Math.sin(lat) * radius)
                 .add(WaterGeometry.radial(right, up, lon, Math.cos(lat) * radius));
-    }
-
-    /**
-     * 这一格是不是落在<b>经线方向</b>的裂缝上。
-     *
-     * <p>每 {@link #ROCK_PLATE} 格一块板，并且用 {@link #hash} 给<b>每块板一个自己的错位量</b> ——
-     * 否则裂缝会排成规整的棋盘格，一点都不像裂开的岩壳 ✗
-     */
-    private static boolean seamLon(int i, int j) {
-        int off = (int) (hash(Math.floorDiv(i, ROCK_PLATE), Math.floorDiv(j, ROCK_PLATE)) * ROCK_PLATE);
-        return Math.floorMod(i + off, ROCK_PLATE) == 0;
-    }
-
-    /** 这一格是不是落在<b>纬线方向</b>的裂缝上（错位量另取一个哈希，两条缝才不互相对齐）。 */
-    private static boolean seamLat(int i, int j) {
-        int off = (int) (hash(Math.floorDiv(j, ROCK_PLATE) + 977, Math.floorDiv(i, ROCK_PLATE) + 331)
-                * ROCK_PLATE);
-        return Math.floorMod(j + off, ROCK_PLATE) == 0;
-    }
-
-    /** 每块岩板深浅略有不同（0.030 ~ 0.065 的极暗灰），免得整颗球糊成一块死黑。 */
-    private static float rockShade(int i, int j) {
-        return (float) (0.030D + 0.035D
-                * hash(Math.floorDiv(i, ROCK_PLATE) * 31, Math.floorDiv(j, ROCK_PLATE) * 17));
     }
 
     /**
