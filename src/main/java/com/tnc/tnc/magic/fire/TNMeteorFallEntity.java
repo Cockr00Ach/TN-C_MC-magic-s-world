@@ -145,6 +145,24 @@ public final class TNMeteorFallEntity extends Entity {
         meteor.configure(caster, FireSpellRules.METEOR_BOLT, "meteor_fall",
                 from, new Vec3(0.0D, -FireSpellRules.METEOR_FALL_SPEED, 0.0D));
         server.addFreshEntity(meteor);
+
+        // 跟随的**装饰小陨石**（作者 2026-10-05：「旁边可以跟随大小不一的陨石一起落下，
+        // 跟随的陨石起装饰作用」）—— 系数 0，所以纯视觉、零伤害 ✓
+        for (int i = 0; i < FireSpellRules.METEOR_SHARD_COUNT; i++) {
+            double a = random.nextDouble() * Math.PI * 2.0D;
+            double d = 0.6D + random.nextDouble() * FireSpellRules.METEOR_SHARD_SPREAD;
+            double scale = FireSpellRules.METEOR_SHARD_MIN_SCALE
+                    + random.nextDouble() * (FireSpellRules.METEOR_SHARD_MAX_SCALE
+                            - FireSpellRules.METEOR_SHARD_MIN_SCALE);
+            // 位置围着主陨石散开、高度也错开 —— 看着才像"一伙的"，不是并排的列队
+            Vec3 at = from.add(Math.cos(a) * d, (random.nextDouble() - 0.5D) * 6.0D, Math.sin(a) * d);
+            // 速度各自差一点 ⇒ 落地时间不同，不会"整齐划一"地砸下来
+            double speed = FireSpellRules.METEOR_FALL_SPEED * (0.85D + random.nextDouble() * 0.35D);
+            TNFireBoltEntity shard = new TNFireBoltEntity(TNOrbEntities.FIRE_BOLT.get(), server);
+            shard.configureShard(caster, FireSpellRules.METEOR_SHARD, "meteor_shard",
+                    at, new Vec3(0.0D, -speed, 0.0D), (float) scale);
+            server.addFreshEntity(shard);
+        }
         // 落下瞬间的一声"轰"之前，先在法阵中心攒一团火星
         server.sendParticles(ParticleTypes.FLAME, getX(), getY() + 0.3D, getZ(),
                 30, SIGIL_RADIUS * 0.5D, 0.3D, SIGIL_RADIUS * 0.5D, 0.05D);

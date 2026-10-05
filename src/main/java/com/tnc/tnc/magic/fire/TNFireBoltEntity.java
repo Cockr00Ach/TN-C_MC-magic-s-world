@@ -190,7 +190,25 @@ public final class TNFireBoltEntity extends Projectile {
      * （作者 2026-10-05 反馈「陨石的下落不流畅」）
      */
     private int formTicks() {
-        return "meteor_fall".equals(spellPath()) ? 0 : FORM_TICKS;
+        return meteorLike() ? 0 : FORM_TICKS;
+    }
+
+    /** 陨石类（大陨石 + 装饰小陨石）—— 拖尾、跳过成形、岩块外观都按这个判。 */
+    private boolean meteorLike() {
+        String path = spellPath();
+        return "meteor_fall".equals(path) || "meteor_shard".equals(path);
+    }
+
+    /**
+     * 装饰小陨石的初始化：和普通火球一样，但<b>尺寸按比例缩放</b>。
+     *
+     * <p>作者 2026-10-05 要求跟随的陨石「大小不一」—— 所以尺寸得逐个给，
+     * 不能都在 {@link FireSpellRules.Bolt} 里写死一个值 ✓
+     */
+    public void configureShard(LivingEntity owner, FireSpellRules.Bolt bolt, String spellPath,
+                               Vec3 at, Vec3 velocity, float scale) {
+        configure(owner, bolt, spellPath, at, velocity);
+        entityData.set(RADIUS, (float) (bolt.radius() * scale));
     }
 
     /**
@@ -279,11 +297,25 @@ public final class TNFireBoltEntity extends Projectile {
         Vec3 motion = getDeltaMovement();
         Vec3 to = from.add(motion);
 
-        // 陨星坠的陨石：一路冒火焰 + 浓烟 —— 作者 2026-10-05 实测「我没有看到陨石」，
-        // 光靠那颗球体在下落时很容易被错过，拖尾让它从任何角度都藏不住 ✓
-        if ("meteor_fall".equals(spellPath())) {
-            server.sendParticles(ParticleTypes.FLAME, from.x, from.y, from.z, 8, 0.55D, 0.55D, 0.55D, 0.02D);
-            server.sendParticles(ParticleTypes.LARGE_SMOKE, from.x, from.y, from.z, 4, 0.7D, 0.7D, 0.7D, 0.01D);
+        // 陨星坠的陨石：身周冒火 + **身后铺一条拖尾**
+        // （作者 2026-10-05：「我没有看到陨石」→ 先加粒子；又要求「下落过程可以带点拖尾」→ 再铺长）
+        if (meteorLike() && motion.lengthSqr() > 0.01D) {
+            float scale = Math.max(0.35F, radius() / 2.0F);   // 越大拖得越粗
+            server.sendParticles(ParticleTypes.FLAME, from.x, from.y, from.z,
+                    (int) (10.0F * scale) + 4, 0.55D * scale, 0.55D * scale, 0.55D * scale, 0.03D);
+            server.sendParticles(ParticleTypes.LARGE_SMOKE, from.x, from.y, from.z,
+                    (int) (4.0F * scale) + 2, 0.7D * scale, 0.7D * scale, 0.7D * scale, 0.01D);
+            // 身后 5 段，越远越少 —— 连成一条看得见的火尾
+            Vec3 back = motion.normalize().scale(-1.0D);
+            for (int i = 1; i <= 5; i++) {
+                Vec3 tail = from.add(back.scale(i * 0.85D));
+                server.sendParticles(ParticleTypes.FLAME, tail.x, tail.y, tail.z,
+                        Math.max(1, 5 - i), 0.4D * scale, 0.4D * scale, 0.4D * scale, 0.02D);
+                if (i <= 3) {
+                    server.sendParticles(ParticleTypes.LARGE_SMOKE, tail.x, tail.y, tail.z,
+                            2, 0.5D * scale, 0.5D * scale, 0.5D * scale, 0.01D);
+                }
+            }
         }
         if (!server.hasChunkAt(BlockPos.containing(to))) {
             discard();
@@ -315,7 +347,9 @@ public final class TNFireBoltEntity extends Projectile {
                 boolean hurt = hit.hurt(server.damageSources().indirectMagic(this, owner), damage);
                 // 焚身：命中就挂（基数 = 这一发实际打出的伤害）。
                 // 已经挂了同级或更高的目标由 TNScorch 自己判「跳过」——这里不用管"不刷新"
-                if (hurt && owner instanceof ServerPlayer caster) {
+                // ⚠️ `damage > 0` 这道门是给**装饰小陨石**留的：它的伤害是 0，
+                //    不拦的话会"挂上焚身但每秒掉 0 血"—— 看着就是白白多了个图标 ✗
+                if (hurt && damage > 0.0F && owner instanceof ServerPlayer caster) {
                     TNScorch.apply(hit, caster, damage, heavyScorch);
                 }
                 // 陨星坠：直击之后**再按目标最大生命扣一次**（作者 2026-10-05 要求 10%）。
@@ -331,6 +365,11 @@ public final class TNFireBoltEntity extends Projectile {
             // 命中时**炸开**成一团火焰粒子（作者 2026-10-05 要求：不要"啪"地直接消失）。
             // ⚠️ 纯视觉、**零伤害** —— 真正的爆炸伤害在上面 blastRadius 那一段，两者互不影响
             spawnImpactBurst(server, impact);
+            // 陨星坠：命中时来一场**大范围**的火焰扩散
+            // （作者 2026-10-05：「爆开后会产生大量火焰粒子向四周扩散，场景壮观点」）
+            if ("meteor_fall".equals(spellPath())) {
+                meteorImpactBurst(server, impact);
+            }
             // 熔岩地：在落点**下方**留一块持续灼烧的地面（t3 熔岩火球起才有）。
             // 它的每秒伤害和焚身是两条独立结算，会同时触发 —— 这是作者明确要的 ✓
             if (lavaField) {
@@ -414,5 +453,44 @@ public final class TNFireBoltEntity extends Projectile {
     @Override
     protected void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
+    }
+
+    /**
+     * 陨星坠落地那一下的<b>大范围火焰扩散</b>（作者 2026-10-05：「场景壮观点」）。
+     *
+     * <p>分四层，从里到外：
+     * <ol>
+     *   <li>中心一团爆炸 + 大量岩浆粒子（横向铺开，像溅起的熔岩）</li>
+     *   <li><b>三层向外扩散的火焰</b>：每层半径与速度都更大 —— 这才是"向四周扩散"</li>
+     *   <li>升起的浓烟柱</li>
+     *   <li>贴着地面炸开的一圈火环（半径 = 爆炸半径，让人一眼看出打到了多大范围）</li>
+     * </ol>
+     *
+     * <p>⚠️ 纯视觉，<b>零伤害</b> —— 真正的伤害在上面 blastRadius / maxHealthPercent 两段。
+     */
+    private void meteorImpactBurst(ServerLevel server, Vec3 at) {
+        double blast = FireSpellRules.METEOR_BOLT.blastRadius();
+
+        server.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y + 0.4D, at.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+        server.sendParticles(ParticleTypes.LAVA, at.x, at.y + 0.3D, at.z, 70, 1.2D, 0.7D, 1.2D, 0.45D);
+
+        // 三层向外扩散的火焰：层数越外，铺得越开、飞得越快
+        for (int ring = 0; ring < 3; ring++) {
+            double spread = 1.6D + ring * 1.1D;
+            server.sendParticles(ParticleTypes.FLAME, at.x, at.y + 0.3D + ring * 0.35D, at.z,
+                    90, spread, 0.5D, spread, 0.55D + ring * 0.45D);
+        }
+
+        server.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y + 1.2D, at.z, 50, 2.2D, 1.2D, 2.2D, 0.18D);
+        server.sendParticles(ParticleTypes.SMALL_FLAME, at.x, at.y + 0.2D, at.z, 60, 2.6D, 0.4D, 2.6D, 0.25D);
+
+        // 贴地的一圈火环：半径就是爆炸半径，让"打到多大范围"看得见
+        int spokes = 40;
+        for (int i = 0; i < spokes; i++) {
+            double a = i * Math.PI * 2.0D / spokes;
+            server.sendParticles(ParticleTypes.FLAME,
+                    at.x + Math.cos(a) * blast, at.y + 0.25D, at.z + Math.sin(a) * blast,
+                    4, 0.25D, 0.25D, 0.25D, 0.08D);
+        }
     }
 }

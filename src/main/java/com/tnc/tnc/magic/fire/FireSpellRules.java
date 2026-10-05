@@ -148,6 +148,26 @@ public final class FireSpellRules {
     public static final Bolt METEOR_BOLT =
             new Bolt(6.0F, 64.0F, 2.00F, 1, true, true, 5.0D, METEOR_MAX_HEALTH_PERCENT);
 
+    /**
+     * <b>装饰用的小陨石</b>（作者 2026-10-05：「旁边可以跟随大小不一的陨石一起落下，
+     * 跟随的陨石起装饰作用」）。
+     *
+     * <p>系数 <b>0</b> ⇒ 伤害 0、不挂焚身、不爆炸、不留熔岩地 —— <b>纯视觉</b> ✓
+     * （命中处理里加了 {@code damage > 0} 的门，0 伤害不会给目标挂上焚身效果）
+     */
+    public static final Bolt METEOR_SHARD =
+            new Bolt(0.0F, 64.0F, 0.50F, 1, false, false, 0.0D, 0.0F);
+
+    /** 跟随大陨石一起落下的装饰小陨石数量。 */
+    public static final int METEOR_SHARD_COUNT = 4;
+
+    /** 装饰小陨石散落在主陨石周围多大范围（格）。 */
+    public static final double METEOR_SHARD_SPREAD = 4.5D;
+
+    /** 装饰小陨石的尺寸范围（相对 {@link #METEOR_SHARD} 的半径）—— 作者要「大小不一」。 */
+    public static final double METEOR_SHARD_MIN_SCALE = 0.35D;
+    public static final double METEOR_SHARD_MAX_SCALE = 0.80D;
+
     /** 爆炸伤害 = 那一发火球伤害 × {@link #SKYFALL_BLAST_PERCENT}。 */
     public static float blastDamage(float boltDamage) {
         return boltDamage <= 0.0F ? 0.0F : boltDamage * SKYFALL_BLAST_PERCENT;
@@ -191,7 +211,7 @@ public final class FireSpellRules {
      */
     public static boolean isLavaRock(String spellPath) {
         return "lava_fireball".equals(spellPath) || "molten_skyfall".equals(spellPath)
-                || "meteor_fall".equals(spellPath);
+                || "meteor_fall".equals(spellPath) || "meteor_shard".equals(spellPath);
     }
 
     private FireSpellRules() {
