@@ -111,7 +111,22 @@ public final class TNFireBoltEntity extends Projectile {
      * <p>为什么不靠法术 JSON 的 {@code cast.particles} 做这件事：那只能摆粒子，
      * 摆不出"一颗球"；而且引擎的粒子形状/原点语义没有文档，猜错了就是在脚下冒烟 ✗
      */
-    public static final int FORM_TICKS = 5;
+    public static final int FORM_TICKS = 3;
+
+    /**
+     * 出手缓冲：离开手之后的这几 tick 里，位移从 {@link #LAUNCH_START_FRACTION} 涨到全速。
+     *
+     * <p>⚠️ 作者 2026-10-05 实测「火球术、大火球术和熔岩火球的产生和发射过程不流畅」——
+     * 原因是原来<b>一离手就走满 1 格/tick（= 20 格/秒）</b>：
+     * 球先在手里悬停 5 tick 不动，然后"啪"地一下弹到满速，看着就是一顿 ✗
+     * 现在给它一段加速，读起来才像"被推出去" ✓
+     *
+     * <p>⚠️ 只对手抛的火球生效；<b>天上掉下来的陨石不加速</b>
+     * （自由落体越落越快才合理，减速反而怪 ✗）—— 见 {@code meteorLike()}
+     */
+    public static final int LAUNCH_RAMP_TICKS = 4;
+    /** 刚离手时走全速的几成。0.30 = 第一 tick 只走 30%，第 4 tick 起满速。 */
+    public static final double LAUNCH_START_FRACTION = 0.30D;
 
     public TNFireBoltEntity(EntityType<? extends TNFireBoltEntity> type, Level level) {
         super(type, level);
@@ -251,10 +266,20 @@ public final class TNFireBoltEntity extends Projectile {
                                 -Math.cos(a) * 0.04D, 0.01D, -Math.sin(a) * 0.04D);
                     }
                 }
-            } else if (tickCount == FORM_TICKS) {
-                // 长满的这一帧喷一次火星：给"射出去了"一个明确的瞬间
-                ((ServerLevel) level()).sendParticles(ParticleTypes.FLAME,
-                        getX(), getY(), getZ(), 14, 0.12D, 0.12D, 0.12D, 0.09D);
+            } else {
+                // ⚠️ 成形期间**别完全钉死**：原来这里一点不挪，球就在手里悬着，
+                //    然后突然满速弹出去 —— 作者说的"产生过程不流畅"就有这一半 ✗
+                //    现在让它一边长大一边**微微向前漂**（12% 速度），读起来像"正在被推出去" ✓
+                if (formTicks() > 0) {
+                    setPos(position().add(getDeltaMovement().scale(0.12D)));
+                }
+                // 长满的那一帧喷一次火星：给"射出去了"一个明确的瞬间。
+                // ⚠️ 这里原来是 `else if (tickCount == FORM_TICKS)` ——
+                //    被上面的 `tickCount <= formTicks()` 整个吃掉了，**从来没触发过** ✗
+                if (tickCount == formTicks()) {
+                    ((ServerLevel) level()).sendParticles(ParticleTypes.FLAME,
+                            getX(), getY(), getZ(), 18, 0.14D, 0.14D, 0.14D, 0.10D);
+                }
             }
             return;
         }
@@ -295,7 +320,16 @@ public final class TNFireBoltEntity extends Projectile {
         ServerLevel server = (ServerLevel) level();
         Vec3 from = position();
         Vec3 motion = getDeltaMovement();
-        Vec3 to = from.add(motion);
+        // 出手缓冲：刚离手那几 tick 只走一部分，LAUNCH_RAMP_TICKS 内涨到全速。
+        // ⚠️ 只改**实际走了多远**，不改 getDeltaMovement() ——
+        //    改速度会每 tick 触发一次速度同步包，反而更卡 ✗
+        Vec3 step = motion;
+        if (!meteorLike()) {
+            double ramp = Math.min(1.0D,
+                    (tickCount - formTicks()) / (double) LAUNCH_RAMP_TICKS);
+            step = motion.scale(LAUNCH_START_FRACTION + (1.0D - LAUNCH_START_FRACTION) * ramp);
+        }
+        Vec3 to = from.add(step);
 
         // 陨星坠的陨石：身周冒火 + **身后铺一条拖尾**
         // （作者 2026-10-05：「我没有看到陨石」→ 先加粒子；又要求「下落过程可以带点拖尾」→ 再铺长）
@@ -403,7 +437,7 @@ public final class TNFireBoltEntity extends Projectile {
         }
 
         setPos(to);
-        remaining -= motion.length();
+        remaining -= step.length();
     }
 
     /**
