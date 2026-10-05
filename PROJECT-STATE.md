@@ -1562,11 +1562,11 @@ TN-C effects registered: [tnc:lightning_haste, tnc:lightning_wind, tnc:orbiting_
 | 链 | 1 级 | 2 级 | 3 级 | 4 级 | 5 级 |
 |---|---|---|---|---|---|
 | **RAY 火射线** | 火射线（穿透） | 粗火射线 | 三条火射线（三向） | 爆炸射线 | 巨大爆炸射线 |
-| **BALL 火球** | 火球 | 大火球 | 巨大火球（砸地） | 自爆（扣10%血） | 天降陨石火球 |
+| **BALL 火球** | 火球术 | 大火球术 | 熔岩火球（留熔岩地） | 熔岳天倾（头顶法阵） | 炎葬（脚下法阵） |
 | **BURN 燃烧** | 火附着 +10% | 初级燃烧 +25% | 中级燃烧 +75%（15s 可复活） | 高级燃烧 +150%（20s 可复活） | 完全燃烧 +200%（血1+无敌15s） |
 
 用户拍板的细节：**燃血按最大生命百分比扣、永不致死**；**复活回满血**；
-**加成只加火系**（不是所有伤害）；**自爆会把自己炸死**，但伤害非常高。
+**加成只加火系**（不是所有伤害）。自爆 已于 2026-10-05 随火球链重做**删除**（那一档换成「熔岳天倾」）。
 
 #### 4.21.1 落地方式（哪些纯数据、哪些必须写代码）
 
@@ -1574,9 +1574,9 @@ TN-C effects registered: [tnc:lightning_haste, tnc:lightning_wind, tnc:orbiting_
 |---|---|
 | 火射线 / 粗火射线 / 爆炸射线 / 巨大爆炸射线 | 纯 JSON：**高速穿透投射物**（`perks.pierce`），爆炸靠 `area_impact` |
 | 三条火射线 | `extra_launch_count: 2` + `divergence: 45` → 扇形三束 |
-| 火球 / 大火球 / 巨大火球 / 天降陨石火球 | 纯 JSON：`PROJECTILE` / `METEOR` + `area_impact` |
-| 自爆（范围伤害部分） | 纯 JSON：**`AREA` 目标**，半径就是顶层 `range`（对着真实样例 `aqua_springwater` 核对过） |
-| 自爆（扣 10% 最大生命） | **Java**：引擎 `cost` 只有饱食度，没有生命值字段 |
+| 火球术 / 大火球术 / 熔岩火球 | **Java 自有实体**（`magic/fire/TNFireBoltEntity`）：命中要精确知道"是哪个法术、打了多少"才能挂焚身；引擎的 `PROJECTILE` 在伤害事件里不带法术 id ✗ |
+| 熔岩火球 / 熔岳天倾 的落点 | **Java**：留一块**熔岩地**（`TNLavaFieldEntity`，与焚身不冲突、可同时跳）；熔岳天倾的火球还会爆炸 |
+| 熔岳天倾 / 炎葬 | **Java 自有实体**（`TNSkyfallEntity` / `TNBurialEntity`）：跟着施法者走的 10 秒法阵（头顶 / 脚下）|
 | 燃烧线 5 个伤害加成 | **Java 注册的 5 个效果**（只挂 `spell_power:fire`） |
 | 燃血 / 原地复活 / 完全燃烧 | **Java**：`TNFireMechanics` |
 
@@ -1589,7 +1589,7 @@ TN-C effects registered: [tnc:lightning_haste, tnc:lightning_wind, tnc:orbiting_
 - **复活窗口**：中级 15 秒、高级 20 秒 —— **窗口就是效果的持续时间**，所以
   `blaze_burn` / `inferno_burn` 的 JSON 持续时间不是随便写的，改它等于改复活窗口
 - **完全燃烧**：效果期间 Java 把血锁在 1 + `setInvulnerable(true)`；效果结束回半血
-- **自爆**：扣最大生命 10%（`player.hurt(damageSources().magic(), …)`）
+- **（2026-10-05 移除）自爆**：原为扣最大生命 10%。火球链重做后那一档换成「熔岳天倾」，机制移到 `magic/fire/TNSkyfallEntity`
 
 #### 4.21.3 踩过的坑：写死元素名的地方一共四处
 
