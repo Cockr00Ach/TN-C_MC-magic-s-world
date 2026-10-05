@@ -33,6 +33,16 @@ public final class TNOrbEntities {
                     .sized(.1F,.1F).clientTrackingRange(12).updateInterval(1).build("tnc:water_field"));
 
     /**
+     * 火球链的自有投射物。
+     *
+     * <p>{@code updateInterval(1)}：火球飞得快，位置要每 tick 同步，不然客户端会看到它一跳一跳。
+     * 碰撞判定在服务端做（见 {@code TNFireBoltEntity.tick}），客户端只跟位置 + 撒粒子。
+     */
+    public static final RegistryObject<EntityType<com.tnc.tnc.magic.fire.TNFireBoltEntity>> FIRE_BOLT =
+            ENTITY_TYPES.register("fire_bolt", () -> EntityType.Builder.of(com.tnc.tnc.magic.fire.TNFireBoltEntity::new, MobCategory.MISC)
+                    .sized(.3F,.3F).clientTrackingRange(10).updateInterval(1).build("tnc:fire_bolt"));
+
+    /**
      * 环绕雷球。
      *
      * <p>{@code updateInterval(2)}：位置每 2 tick 同步一次 —— 环绕是持续运动的，

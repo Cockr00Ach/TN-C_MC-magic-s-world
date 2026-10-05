@@ -37,6 +37,9 @@ public final class TNSpellOrbClientEvents {
         event.registerEntityRenderer(TNOrbEntities.WATER_SPELL.get(), TNWaterSpellRenderer::new);
         event.registerEntityRenderer(TNOrbEntities.WATER_BOLT.get(), TNWaterBoltRenderer::new);
         event.registerEntityRenderer(TNOrbEntities.WATER_FIELD.get(), TNWaterFieldRenderer::new);
+        // ★ 火球链的自有投射物（火系第 1 条链 ✓）：命中要精确知道法术与伤害才能挂焚身，
+        //   所以不走引擎的 PROJECTILE。视觉暂由粒子承担，见 TNFireBoltRenderer ✓
+        event.registerEntityRenderer(TNOrbEntities.FIRE_BOLT.get(), TNFireBoltRenderer::new);
         // ★ 光天使（光系第二条链 t3/t4/t5 ✓）：半透明 + 自发光，见 TNAngelRenderer ✓
         event.registerEntityRenderer(TNOrbEntities.ANGEL.get(), com.tnc.tnc.light.client.TNAngelRenderer::new);
         // ★ 实体光柱（光系第三条链「光线」✓）：一整根棱柱 + 彩虹顶点色，见 TNLightBeamRenderer ✓
