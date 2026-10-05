@@ -257,6 +257,13 @@ public final class TNFireBoltEntity extends Projectile {
         Vec3 from = position();
         Vec3 motion = getDeltaMovement();
         Vec3 to = from.add(motion);
+
+        // 陨星坠的陨石：一路冒火焰 + 浓烟 —— 作者 2026-10-05 实测「我没有看到陨石」，
+        // 光靠那颗球体在下落时很容易被错过，拖尾让它从任何角度都藏不住 ✓
+        if ("meteor_fall".equals(spellPath())) {
+            server.sendParticles(ParticleTypes.FLAME, from.x, from.y, from.z, 8, 0.55D, 0.55D, 0.55D, 0.02D);
+            server.sendParticles(ParticleTypes.LARGE_SMOKE, from.x, from.y, from.z, 4, 0.7D, 0.7D, 0.7D, 0.01D);
+        }
         if (!server.hasChunkAt(BlockPos.containing(to))) {
             discard();
             return;

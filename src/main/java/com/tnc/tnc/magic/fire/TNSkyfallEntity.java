@@ -100,10 +100,17 @@ public final class TNSkyfallEntity extends Entity {
         //    caster 现在只用于判断"打谁"（自己的召唤物/队友不能砸），不再影响位置。
 
         if (level().isClientSide) {
-            // ⚠️ 这里**不再画那圈火环了**。法阵的形状由 {@code TNSigilRenderer} 用几何体画；
-            //    再叠一圈火焰粒子，看上去就是"法阵 = 一串火"—— 正是作者 2026-10-05 否定过的做法 ✗
-            //    粒子只留零星火星当点缀：从盘面上慢慢飘起来
-            if (age % 3 == 0) {
+            // 法阵的形状由 TNSigilRenderer 用几何体画；粒子是**叠加的火焰装饰** ——
+            // 作者 2026-10-05 要求「两个法阵加上火焰粒子效果凸显其实火系魔法」✓
+            // ⚠️ 粒子和几何体是两件事，别用粒子代替几何体 ✗
+            for (int i = 0; i < 8; i++) {
+                double a = age * 0.02D + i * Math.PI / 4.0D;
+                level().addParticle(ParticleTypes.FLAME,
+                        getX() + Math.cos(a) * SIGIL_RADIUS * 0.96D, getY() + 0.12D,
+                        getZ() + Math.sin(a) * SIGIL_RADIUS * 0.96D,
+                        0.0D, 0.012D, 0.0D);
+            }
+            if (age % 2 == 0) {
                 double a = random.nextDouble() * Math.PI * 2.0D;
                 double d = Math.sqrt(random.nextDouble()) * SIGIL_RADIUS;
                 level().addParticle(ParticleTypes.SMALL_FLAME,

@@ -76,7 +76,17 @@ public final class FireSpellRules {
     public static final float METEOR_MAX_HEALTH_PERCENT = 0.10F;
 
     /** 陨石从法阵上方多高开始落下（格）—— 给高一点才看得出"从天而降"。 */
-    public static final double METEOR_DROP_HEIGHT = 42.0D;
+    public static final double METEOR_DROP_HEIGHT = 30.0D;
+
+    /**
+     * 陨石下落速度（格/tick）。
+     *
+     * <p>⚠️ 作者 2026-10-05 实测「我没有看到陨石」—— 原来用的是
+     * {@code LAUNCH_SPEED × 1.6 = 1.6 格/tick}：从 42 格砸下来只要 <b>1.3 秒</b>，
+     * 而玩家当时正盯着地面的目标，根本来不及抬头 ✗
+     * 现在放慢到 0.85（约 <b>1.75 秒</b>），并让陨石一路冒火焰拖尾，从任何角度看都能注意到 ✓
+     */
+    public static final double METEOR_FALL_SPEED = 0.85D;
 
     /** 只用于编译期兜底的无主法术 id（正常不该出现）。 */
     private static final ResourceLocation FIRE_ATTRIBUTE =
@@ -136,7 +146,7 @@ public final class FireSpellRules {
      * 后者正是作者对 t5 的明确要求 ✓
      */
     public static final Bolt METEOR_BOLT =
-            new Bolt(6.0F, 64.0F, 1.40F, 1, true, true, 5.0D, METEOR_MAX_HEALTH_PERCENT);
+            new Bolt(6.0F, 64.0F, 2.00F, 1, true, true, 5.0D, METEOR_MAX_HEALTH_PERCENT);
 
     /** 爆炸伤害 = 那一发火球伤害 × {@link #SKYFALL_BLAST_PERCENT}。 */
     public static float blastDamage(float boltDamage) {

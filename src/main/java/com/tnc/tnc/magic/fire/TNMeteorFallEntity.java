@@ -42,11 +42,22 @@ import java.util.UUID;
 public final class TNMeteorFallEntity extends Entity {
 
     /** 法阵半径（格）—— 作者要求"巨大的法阵"，所以比熔岳天倾的 3 格大一圈。 */
-    public static final double SIGIL_RADIUS = 5.0D;
+    public static final double SIGIL_RADIUS = 7.0D;
     /** 法阵亮多久之后陨石落下（2 秒，够看清法阵，也够躲）。 */
     public static final int CHARGE_TICKS = 40;
     /** 陨石落下后法阵再留多久（1 秒收尾）。 */
     public static final int LINGER_TICKS = 20;
+    /** 陨石从生成到落地要多久（tick）—— 由高度 ÷ 速度算，别写死。 */
+    public static final int DROP_TICKS =
+            (int) Math.ceil(FireSpellRules.METEOR_DROP_HEIGHT / FireSpellRules.METEOR_FALL_SPEED);
+    /**
+     * 法阵总寿命。
+     *
+     * <p>⚠️ <b>必须覆盖到陨石落地</b>：作者 2026-10-05 实测「法阵消失了一会儿目标才收到伤害」——
+     * 原来是写死的 {@code CHARGE + LINGER = 60} tick，而陨石落地要
+     * {@code CHARGE + DROP} = 40 + 36 = 76 tick，法阵提前 16 tick 就没了 ✗
+     */
+    public static final int LIFE_TICKS = CHARGE_TICKS + DROP_TICKS + LINGER_TICKS;
 
     private static final EntityDataAccessor<Integer> AGE =
             SynchedEntityData.defineId(TNMeteorFallEntity.class, EntityDataSerializers.INT);
@@ -68,7 +79,7 @@ public final class TNMeteorFallEntity extends Entity {
         TNMeteorFallEntity sigil = new TNMeteorFallEntity(TNOrbEntities.METEOR_FALL.get(), level);
         sigil.owner = owner == null ? null : owner.getUUID();
         sigil.caster = owner;
-        sigil.entityData.set(LIFE, CHARGE_TICKS + LINGER_TICKS);
+        sigil.entityData.set(LIFE, LIFE_TICKS);
         sigil.setPos(ground.x, ground.y, ground.z);
         level.addFreshEntity(sigil);
         return sigil;
@@ -85,7 +96,7 @@ public final class TNMeteorFallEntity extends Entity {
     @Override
     protected void defineSynchedData() {
         entityData.define(AGE, 0);
-        entityData.define(LIFE, CHARGE_TICKS + LINGER_TICKS);
+        entityData.define(LIFE, LIFE_TICKS);
     }
 
     @Override
@@ -96,13 +107,23 @@ public final class TNMeteorFallEntity extends Entity {
 
         // ⚠️ 位置**生成后不再变**（作者 2026-10-05）—— 法阵钉在目标的脚下地面上
         if (level().isClientSide) {
-            // 粒子只做点缀：法阵的形状由 TNSigilRenderer 用几何体画
-            if (age % 4 == 0) {
+            // 法阵的形状由 TNSigilRenderer 用几何体画；粒子是**叠加的火焰装饰** ——
+            // 作者 2026-10-05 要求「两个法阵加上火焰粒子效果凸显其实火系魔法」✓
+            // ⚠️ 粒子和几何体是两件事，别用粒子代替几何体 ✗
+            int ring = age >= CHARGE_TICKS ? 16 : 12;   // 陨石落下后法阵烧得更旺
+            for (int i = 0; i < ring; i++) {
+                double a = age * 0.015D + i * Math.PI * 2.0D / ring;
+                level().addParticle(ParticleTypes.FLAME,
+                        getX() + Math.cos(a) * SIGIL_RADIUS * 0.96D, getY() + 0.12D,
+                        getZ() + Math.sin(a) * SIGIL_RADIUS * 0.96D,
+                        0.0D, 0.012D, 0.0D);
+            }
+            for (int i = 0; i < 3; i++) {
                 double a = random.nextDouble() * Math.PI * 2.0D;
                 double d = Math.sqrt(random.nextDouble()) * SIGIL_RADIUS;
                 level().addParticle(ParticleTypes.SMALL_FLAME,
                         getX() + Math.cos(a) * d, getY() + 0.15D, getZ() + Math.sin(a) * d,
-                        0.0D, 0.02D, 0.0D);
+                        0.0D, 0.025D, 0.0D);
             }
             return;
         }
@@ -122,7 +143,7 @@ public final class TNMeteorFallEntity extends Entity {
         Vec3 from = position().add(0.0D, FireSpellRules.METEOR_DROP_HEIGHT, 0.0D);
         TNFireBoltEntity meteor = new TNFireBoltEntity(TNOrbEntities.FIRE_BOLT.get(), server);
         meteor.configure(caster, FireSpellRules.METEOR_BOLT, "meteor_fall",
-                from, new Vec3(0.0D, -TNFireBoltEntity.LAUNCH_SPEED * 1.6D, 0.0D));
+                from, new Vec3(0.0D, -FireSpellRules.METEOR_FALL_SPEED, 0.0D));
         server.addFreshEntity(meteor);
         // 落下瞬间的一声"轰"之前，先在法阵中心攒一团火星
         server.sendParticles(ParticleTypes.FLAME, getX(), getY() + 0.3D, getZ(),
