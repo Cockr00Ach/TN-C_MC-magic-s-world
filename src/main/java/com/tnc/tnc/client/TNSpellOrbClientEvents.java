@@ -42,6 +42,10 @@ public final class TNSpellOrbClientEvents {
         event.registerEntityRenderer(TNOrbEntities.FIRE_BOLT.get(), TNFireBoltRenderer::new);
         // ★ 熔岩地（火球链 t3 熔岩火球起）：贴地的持续灼烧区域，视觉同样由粒子承担 ✓
         event.registerEntityRenderer(TNOrbEntities.LAVA_FIELD.get(), TNLavaFieldRenderer::new);
+        // ★ 两座法阵（t4 熔岳天倾的头顶阵 / t5 炎葬的脚下阵）：同样是粒子表达，
+        //   共用通用的空渲染器，见 TNParticleOnlyRenderer ✓
+        event.registerEntityRenderer(TNOrbEntities.SKYFALL.get(), TNParticleOnlyRenderer::new);
+        event.registerEntityRenderer(TNOrbEntities.BURIAL.get(), TNParticleOnlyRenderer::new);
         // ★ 光天使（光系第二条链 t3/t4/t5 ✓）：半透明 + 自发光，见 TNAngelRenderer ✓
         event.registerEntityRenderer(TNOrbEntities.ANGEL.get(), com.tnc.tnc.light.client.TNAngelRenderer::new);
         // ★ 实体光柱（光系第三条链「光线」✓）：一整根棱柱 + 彩虹顶点色，见 TNLightBeamRenderer ✓

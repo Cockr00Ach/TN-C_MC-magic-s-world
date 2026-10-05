@@ -52,6 +52,8 @@ public final class TNFireBoltEntity extends Projectile {
     private boolean heavyScorch;
     /** 命中后是否在落点留下熔岩地（t3 熔岩火球起才有）。 */
     private boolean lavaField;
+    /** 命中后的爆炸半径（0 = 不爆炸；t4 熔岳天倾的那些火球才有）。 */
+    private double blastRadius;
 
     public TNFireBoltEntity(EntityType<? extends TNFireBoltEntity> type, Level level) {
         super(type, level);
@@ -69,6 +71,7 @@ public final class TNFireBoltEntity extends Projectile {
         damage = FireSpellRules.damage(bolt, FireSpellRules.power(owner));
         heavyScorch = bolt.heavyScorch();
         lavaField = bolt.lavaField();
+        blastRadius = bolt.blastRadius();
         remaining = bolt.range();
     }
 
@@ -200,6 +203,20 @@ public final class TNFireBoltEntity extends Projectile {
                         owner instanceof ServerPlayer caster ? caster : null,
                         FireSpellRules.lavaFieldPerSecond(damage),
                         FireSpellRules.LAVA_FIELD_RADIUS, FireSpellRules.LAVA_FIELD_LIFE_TICKS);
+            }
+            // 爆炸（t4 熔岳天倾的火球才有）：对范围内敌人造成**火球伤害的一半**。
+            // 直击目标也会吃到（先被直接命中、再被爆炸波及）—— 爆炸本来就该是这样
+            if (blastRadius > 0.0D) {
+                float blast = FireSpellRules.blastDamage(damage);
+                for (LivingEntity victim : server.getEntitiesOfClass(LivingEntity.class,
+                        FireSpellRules.uprightArea(impact, blastRadius, 2.0D),
+                        t -> FireSpellRules.enemy(owner, t))) {
+                    victim.invulnerableTime = 0;   // 直击刚把这个设成 20，不清的话爆炸会被吞
+                    victim.hurt(server.damageSources().indirectMagic(this, owner), blast);
+                }
+                server.sendParticles(ParticleTypes.EXPLOSION, impact.x, impact.y, impact.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+                server.sendParticles(ParticleTypes.LAVA, impact.x, impact.y, impact.z, 20,
+                        blastRadius * 0.4D, 0.4D, blastRadius * 0.4D, 0.2D);
             }
             discard();
             return;

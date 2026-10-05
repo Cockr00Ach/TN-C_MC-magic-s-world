@@ -40,7 +40,7 @@ public final class SpellCatalog {
         /** 火射线线：从一条穿透射线，到三条齐发，再到命中就炸。 */
         RAY("火射线", "穿透的火焰射线"),
 
-        /** 火球线：从一颗火球，到砸地范围伤害，到自爆与陨石。 */
+        /** 火球线（2026-10-05 重做）：火球术 → 大火球术 → 熔岩火球 → 熔岳天倾 → 炎葬。 */
         BALL("火球", "会飞的火球"),
 
         /** 燃烧线：拿血量换伤害，越烧越强，烧到尽头能原地复活。 */
@@ -223,8 +223,8 @@ public final class SpellCatalog {
             fireEntry("fireball", Chain.BALL, 1, "火球术"),
             fireEntry("great_fireball", Chain.BALL, 2, "大火球术"),
             fireEntry("lava_fireball", Chain.BALL, 3, "熔岩火球"),
-            fireEntry("self_destruct", Chain.BALL, 4, "自爆"),
-            fireEntry("meteor_fireball", Chain.BALL, 5, "天降陨石火球"),
+            fireEntry("molten_skyfall", Chain.BALL, 4, "熔岳天倾"),
+            fireEntry("flame_burial", Chain.BALL, 5, "炎葬"),
 
             // ---- 燃烧线：1 附着(+10%) → 2 初级(+25%) → 3 中级(+75%,15s复活)
             //              → 4 高级(+150%,20s复活) → 5 完全燃烧(血1+无敌15s+200%) ----

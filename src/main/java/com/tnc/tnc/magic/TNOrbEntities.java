@@ -53,6 +53,20 @@ public final class TNOrbEntities {
                     .sized(.1F,.1F).clientTrackingRange(12).updateInterval(10).build("tnc:lava_field"));
 
     /**
+     * 熔岳天倾（火球链 t4）的头顶法阵。
+     *
+     * <p>{@code updateInterval(2)}：它跟着施法者移动，位置同步慢会看起来"飘在后面"。
+     */
+    public static final RegistryObject<EntityType<com.tnc.tnc.magic.fire.TNSkyfallEntity>> SKYFALL =
+            ENTITY_TYPES.register("skyfall", () -> EntityType.Builder.of(com.tnc.tnc.magic.fire.TNSkyfallEntity::new, MobCategory.MISC)
+                    .sized(.1F,.1F).clientTrackingRange(16).updateInterval(2).build("tnc:skyfall"));
+
+    /** 炎葬（火球链 t5）的自身周围法阵。同样跟着施法者走，所以同步要快一点。 */
+    public static final RegistryObject<EntityType<com.tnc.tnc.magic.fire.TNBurialEntity>> BURIAL =
+            ENTITY_TYPES.register("burial", () -> EntityType.Builder.of(com.tnc.tnc.magic.fire.TNBurialEntity::new, MobCategory.MISC)
+                    .sized(.1F,.1F).clientTrackingRange(16).updateInterval(2).build("tnc:burial"));
+
+    /**
      * 环绕雷球。
      *
      * <p>{@code updateInterval(2)}：位置每 2 tick 同步一次 —— 环绕是持续运动的，

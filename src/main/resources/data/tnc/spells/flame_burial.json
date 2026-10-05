@@ -1,0 +1,28 @@
+{
+  "school": "FIRE",
+  "group": "ball",
+  "range": 6.0,
+  "learn": { "tier": 5 },
+  "cast": {
+    "duration": 1.5,
+    "animation": "spell_engine:one_handed_projectile_charge",
+    "sound": { "id": "spell_engine:generic_fire_casting", "randomness": 0 },
+    "particles": [ { "particle_id": "lava", "shape": "PIPE", "origin": "FEET", "count": 1.0, "min_speed": 0.05, "max_speed": 0.1 } ]
+  },
+  "release": {
+    "target": {
+      "type": "SELF"
+    },
+    "animation": "spell_engine:one_handed_projectile_release",
+    "sound": { "id": "spell_engine:generic_fire_release" }
+  },
+  "impact": [
+    {
+      "action": {
+        "type": "STATUS_EFFECT",
+        "status_effect": { "effect_id": "tnc:fire_cast", "duration": 0.05, "amplifier": 0 }
+      }
+    }
+  ],
+  "cost": { "exhaust": 0.0, "cooldown_duration": 20.0 }
+}

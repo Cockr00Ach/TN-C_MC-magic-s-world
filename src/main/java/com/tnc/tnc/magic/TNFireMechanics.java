@@ -31,7 +31,9 @@ import java.util.UUID;
  *       初级 1%/秒、中级 2%/秒、高级 3%/秒；火附着与完全燃烧<b>不扣</b>。</li>
  *   <li><b>原地复活</b>：中级/高级燃烧期间死亡 → 取消死亡、回满血、效果结束（一次）。</li>
  *   <li><b>完全燃烧</b>：血设 1 + 无敌，效果结束时回半血。期间不燃血。</li>
- *   <li><b>自爆</b>：施法瞬间扣自己最大生命 10%（<b>会致死</b>），范围伤害由法术 JSON 负责。</li>
+ *   <li><b>（已移除 2026-10-05）自爆</b>：原来施法瞬间扣自己最大生命 10%（会致死）。
+ *       火球链重做后那一档换成了「熔岳天倾」，机制在 {@code TNSkyfallEntity}，
+ *       与燃烧线无关，所以从本类删掉了。</li>
  * </ul>
  */
 @Mod.EventBusSubscriber(modid = TNMod.MODID)
@@ -88,22 +90,16 @@ public final class TNFireMechanics {
         return 0.0D;
     }
 
-    /** 自爆：扣自己最大生命的 10%（会致死）。 */
-    private static final double SELF_DESTRUCT_COST = 0.10D;
-
     /** 完全燃烧：结束时回多少血。 */
     private static final double TOTAL_BURN_END_HEALTH_FRACTION = 0.5D;
 
     // ---------------- 机制 ----------------
-
-    /** 施法瞬间的反应（由 SPELL_CAST 钩子转调）。 */
-    public static void onSpellCast(ServerPlayer player, ResourceLocation spellId, MagicStoneData data) {
-        if (!spellId.getPath().equals("self_destruct")) {
-            return;
-        }
-        float cost = (float) (player.getMaxHealth() * SELF_DESTRUCT_COST);
-        player.hurt(player.damageSources().magic(), cost);   // 会死，用户确认过
-    }
+    //
+    // 2026-10-05 移除了本类唯一的"施法瞬间"机制：**自爆**（self_destruct）。
+    // 火球链重做后那一档换成了「熔岳天倾」（TNSkyfallEntity），
+    // 于是 SPELL_CAST 钩子在本类已经没有要处理的事了。
+    // **故意不留一个空方法**：空方法会被下一个读代码的人当成"这里还有逻辑"。
+    // 将来如果燃烧线又需要施法瞬间的反应，再加回来即可（派发处在 TnSpellMechanics）。
 
     /** 每 tick：燃血 + 完全燃烧的血量/无敌维护。 */
     @SubscribeEvent
