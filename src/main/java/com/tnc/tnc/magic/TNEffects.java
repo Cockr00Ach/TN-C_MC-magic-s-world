@@ -406,5 +406,7 @@ public final class TNEffects {
         //   在 DarkFogMechanics 的静态块里注册 ⇒ 这里显式碰一下它的静态字段，
         //   保证类在"任何施法之前"就被加载 ✓（否则第一次放黑雾会没反应 ✗）。
         DarkFogMechanics.ensureLoaded();
+        // 火系火球链的「焚身」（命中灼伤）—— 自有实体那一套，见 magic/fire/TNScorch
+        com.tnc.tnc.magic.fire.TNScorch.register(modEventBus);
     }
 }
