@@ -60,6 +60,9 @@ PACK_SPELL_DIR = os.path.join(REPO, "modpack", PACK_NAME, "kubejs", "data", "tnc
 FOG_ENTITY = "tnc:fog"
 FOG_MODEL = "tnc:projectile/dark_fog"
 VEIL = "tnc:dark_veil"
+# ★ 站进雾里就挨的"致盲"（作者 2026-10-09）—— 必须是**我们自己的**效果：
+#   原版 minecraft:darkness 的压暗只对玩家生效、对生物完全无效 ✗（见 TNEffects.DARK_FOG 注释）。
+DARK_FOG = "tnc:dark_fog"
 
 # The dome's scale relative to the fog radius.
 #
@@ -129,6 +132,30 @@ def batch(pid, shape, origin, count, min_speed, max_speed, extent=0.0, **kw):
     return out
 
 
+# ---------------------------------------------------------------------------
+#  ★ 雾的粒子总量（作者 2026-10-10："雾的量减少75%"）
+#
+#  0.25 = 原来的四分之一。这个数字就是"雾看起来多厚"的总旋钮 ✓。
+#  为什么敢砍这么多：屏幕压暗那套（DarkFogCloudEntity 同步 tier+radius，
+#  客户端 TNSpellClientVisuals 画黑幕）接手了"我在黑雾里"的主要观感 ✓，
+#  所以雾本身不再需要靠粒子堆出体量 ✓。
+#  嫌太空就把 0.25 往上调（0.5 = 原一半）；**别调回 1.0** ✗ ——
+#  当初 4 倍粒子正是"不够黑"的原因之一（体积是灰烟堆出来的）。
+# ---------------------------------------------------------------------------
+FOG_DENSITY = 0.25
+# ---------------------------------------------------------------------------
+
+
+def density(count):
+    """按 FOG_DENSITY 缩一个粒子数（至少 1 颗，免得整批消失 ✓）。"""
+    return max(1, int(round(count * FOG_DENSITY)))
+
+
+def density_min(count):
+    """同上，但允许调用处再取 max —— 语义上"这一档至少要有几颗"✓。"""
+    return density(count)
+
+
 def fog_batches(radius, tier):
     """The cloud's per-tick particles: dark pool + dark canopy + body + wisps + embers.
 
@@ -145,41 +172,52 @@ def fog_batches(radius, tier):
         * `fromtheshadows:shadow` is the body vapour;
         * smoke only softens the dome's cube edges (a handful of puffs);
         * the wisps are few and the embers sit low and inside.
-      Density knobs: the four big counts in this function. Nothing else needs changing.
+      Density knobs: every count below goes through FOG_DENSITY.
+
+    ★★ DENSITY CUT (2026-10-10, author: "雾的量减少75%")
+      All counts are the previous values x FOG_DENSITY (0.25). The point of the cut is
+      that the *screen darkening* now carries the "you are inside black fog" feeling
+      (DarkFogCloudEntity syncs tier+radius, TNSpellClientVisuals draws the overlay),
+      so the field no longer has to be a wall of particles. Too thin now? Raise
+      FOG_DENSITY -- but do not go back to 1.0: 4x the particles was also why it read
+      as "not black enough" (grey smoke did the volume).
     """
     b = []
-    # 1) ground pool: dense, very slow, DARK -- the "the fog is a liquid" layer
-    b.append(batch(INK, "CIRCLE", "FEET", int(66 + 12 * tier), 0.005, 0.04, extent=radius))
-    b.append(batch(SHADOW, "CIRCLE", "FEET", int(30 + 6 * tier), 0.005, 0.04, extent=radius))
-    b.append(batch(SMOKE, "CIRCLE", "FEET", int(10 + 2 * tier), 0.005, 0.04, extent=radius))
+    # 1) ground pool: a thin, very slow, dark film -- "the fog is a liquid"
+    b.append(batch(INK, "CIRCLE", "FEET", density(66 + 12 * tier), 0.005, 0.04, extent=radius))
+    b.append(batch(SHADOW, "CIRCLE", "FEET", density(30 + 6 * tier), 0.005, 0.04, extent=radius))
+    b.append(batch(SMOKE, "CIRCLE", "FEET", density(10 + 2 * tier), 0.005, 0.04, extent=radius))
     # 2) a dark canopy above the dome, so you cannot see sky through the fog.
     #    ⚠ the batch origin is always the cloud itself (ParticleHelper.origin ignores
     #    any entity height for a cloud), so "canopy" here means "spread with an upward
     #    speed bias" -- NOT a placement offset. The engine drops unknown json fields
     #    silently, so an `offset_y` here would do nothing at all.
-    b.append(batch(INK, "SPHERE", "CENTER", int(26 + 6 * tier), 0.02, 0.16,
+    b.append(batch(INK, "SPHERE", "CENTER", density(26 + 6 * tier), 0.02, 0.16,
                    extent=radius * 0.7))
-    b.append(batch(SHADOW, "SPHERE", "CENTER", int(16 + 4 * tier), 0.02, 0.14,
+    b.append(batch(SHADOW, "SPHERE", "CENTER", density(16 + 4 * tier), 0.02, 0.14,
                    extent=radius * 0.7))
     # 3) body vapour + a thin grey layer only to soften the dome's hard cube edges
-    b.append(batch(SHADOW, "SPHERE", "CENTER", int(26 + 6 * tier), 0.01, 0.08, extent=radius * 0.85))
-    b.append(batch(SMOKE, "SPHERE", "CENTER", int(6 + 2 * tier), 0.01, 0.08, extent=radius * 0.7))
+    b.append(batch(SHADOW, "SPHERE", "CENTER", density(26 + 6 * tier), 0.01, 0.08,
+                   extent=radius * 0.85))
+    b.append(batch(SMOKE, "SPHERE", "CENTER", density(6 + 2 * tier), 0.01, 0.08,
+                   extent=radius * 0.7))
     # 4) wisps rising out of it -- few, small, and the only bright thing up high
-    b.append(batch(SOUL, "SPHERE", "CENTER", int(2 + tier), 0.01, 0.06, extent=radius * 0.55))
+    b.append(batch(SOUL, "SPHERE", "CENTER", density(2 + tier), 0.01, 0.06,
+                   extent=radius * 0.55))
     if tier >= 3:
-        b.append(batch(SOUL_FLIP, "SPHERE", "CENTER", int(1 + tier), 0.02, 0.08,
+        b.append(batch(SOUL_FLIP, "SPHERE", "CENTER", density(1 + tier), 0.02, 0.08,
                        extent=radius * 0.7))
     # 5) a dark wall at the rim, twice over: the edge has to read as black
-    b.append(batch(INK, "CIRCLE", "CENTER", int(20 + 5 * tier), 0.01, 0.05,
+    b.append(batch(INK, "CIRCLE", "CENTER", density(20 + 5 * tier), 0.01, 0.05,
                    extent=radius * 1.05))
-    b.append(batch(SHADOW, "CIRCLE", "FEET", int(14 + 4 * tier), 0.02, 0.08,
+    b.append(batch(SHADOW, "CIRCLE", "FEET", density(14 + 4 * tier), 0.02, 0.08,
                    extent=radius * 1.0))
     # 6) embers: low, inside, few (accent, not lighting)
     if tier >= 2:
-        b.append(batch(BLACK_FLAME, "CIRCLE", "FEET", int(2 + tier), 0.02, 0.08,
+        b.append(batch(BLACK_FLAME, "CIRCLE", "FEET", density_min(2 + tier), 0.02, 0.08,
                        extent=radius * 0.6))
     if tier >= 4:
-        b.append(batch(SOUL_FIRE, "CIRCLE", "FEET", int(2 + tier), 0.05, 0.15,
+        b.append(batch(SOUL_FIRE, "CIRCLE", "FEET", density_min(2 + tier), 0.05, 0.15,
                        extent=radius * 0.4))
     return b
 
@@ -222,15 +260,15 @@ def pulse_batches(radius, tier):
 # ---------------------------------------------------------------------------
 TIERS = {
     "black_mist": dict(damage=0.6, veil_amp=0, veil_secs=4, darkness=0, weakness=False,
-                       caster_speed=0),
+                       caster_speed=0, blind_amp=0),
     "night_grace": dict(damage=0.9, veil_amp=0, veil_secs=5, darkness=0, weakness=False,
-                        caster_speed=5),
+                        caster_speed=5, blind_amp=0),
     "dark_city": dict(damage=1.2, veil_amp=0, veil_secs=6, darkness=4, weakness=False,
-                      caster_speed=0),
+                      caster_speed=0, blind_amp=0),
     "where_light_cannot_reach": dict(damage=1.6, veil_amp=1, veil_secs=8, darkness=5,
-                                     weakness=True, caster_speed=8),
+                                     weakness=True, caster_speed=8, blind_amp=1),
     "devour_light": dict(damage=2.1, veil_amp=1, veil_secs=10, darkness=6, weakness=True,
-                         caster_speed=0, caster_strength=True),
+                         caster_speed=0, caster_strength=True, blind_amp=2),
 }
 
 
@@ -293,6 +331,13 @@ def rewrite(spell, name, cfg):
     # ---- impact: what happens to everything caught in the field, every 20 ticks ----
     impacts = [damage_action(cfg["damage"])]
     impacts.append(status(VEIL, cfg["veil_secs"], cfg["veil_amp"]))
+    # ★ 致盲（作者 2026-10-09："敌人包括其他玩家触碰到这个雾就会受到致盲效果"）
+    #   两条一起上，因为它们管的是不同的人：
+    #     minecraft:darkness  = 给**玩家**的屏幕压暗（对生物无效 ✗，所以不够）
+    #     tnc:dark_fog        = 给**所有生物**的真实惩罚（怪物也吃得到 ✓），
+    #                           档位越高越重（amplifier 0/1/2）✓
+    #   外加客户端那层按档位的黑幕（TNSpellClientVisuals）—— 三层叠出"越深越瞎" ✓
+    impacts.append(status(DARK_FOG, cfg["veil_secs"], cfg["blind_amp"]))
     if cfg["darkness"]:
         impacts.append(status("minecraft:darkness", cfg["darkness"], 0))
     if cfg["weakness"]:

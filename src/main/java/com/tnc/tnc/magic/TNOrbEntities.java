@@ -317,12 +317,13 @@ public final class TNOrbEntities {
      * 所以客户端给它注册了一个**什么都不画**的渲染器 ✓（见 {@code client/TNSpellOrbClientEvents}）。
      */
     public static final RegistryObject<EntityType<TNDarkDrainEntity>> DRAIN =
-            ENTITY_TYPES.register("drain", () -> EntityType.Builder
+            net.minecraftforge.fml.ModList.get().isLoaded("spell_engine")
+            ? ENTITY_TYPES.register("drain", () -> EntityType.Builder
                     .of(TNDarkDrainEntity::new, MobCategory.MISC)
                     .sized(1.0F, 1.0F)
                     .clientTrackingRange(8)
                     .updateInterval(20)
-                    .build("tnc:drain"));
+                    .build("tnc:drain")) : null;
 
     private TNOrbEntities() {
     }

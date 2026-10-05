@@ -74,7 +74,7 @@
               "particle_id": "minecraft:squid_ink",
               "shape": "CIRCLE",
               "origin": "FEET",
-              "count": 102.0,
+              "count": 26.0,
               "min_speed": 0.005,
               "max_speed": 0.04,
               "extent": 6.0
@@ -83,7 +83,7 @@
               "particle_id": "fromtheshadows:shadow",
               "shape": "CIRCLE",
               "origin": "FEET",
-              "count": 48.0,
+              "count": 12.0,
               "min_speed": 0.005,
               "max_speed": 0.04,
               "extent": 6.0
@@ -92,7 +92,7 @@
               "particle_id": "minecraft:smoke",
               "shape": "CIRCLE",
               "origin": "FEET",
-              "count": 16.0,
+              "count": 4.0,
               "min_speed": 0.005,
               "max_speed": 0.04,
               "extent": 6.0
@@ -101,7 +101,7 @@
               "particle_id": "minecraft:squid_ink",
               "shape": "SPHERE",
               "origin": "CENTER",
-              "count": 44.0,
+              "count": 11.0,
               "min_speed": 0.02,
               "max_speed": 0.16,
               "extent": 4.199999999999999
@@ -110,7 +110,7 @@
               "particle_id": "fromtheshadows:shadow",
               "shape": "SPHERE",
               "origin": "CENTER",
-              "count": 28.0,
+              "count": 7.0,
               "min_speed": 0.02,
               "max_speed": 0.14,
               "extent": 4.199999999999999
@@ -119,7 +119,7 @@
               "particle_id": "fromtheshadows:shadow",
               "shape": "SPHERE",
               "origin": "CENTER",
-              "count": 44.0,
+              "count": 11.0,
               "min_speed": 0.01,
               "max_speed": 0.08,
               "extent": 5.1
@@ -128,7 +128,7 @@
               "particle_id": "minecraft:smoke",
               "shape": "SPHERE",
               "origin": "CENTER",
-              "count": 12.0,
+              "count": 3.0,
               "min_speed": 0.01,
               "max_speed": 0.08,
               "extent": 4.199999999999999
@@ -137,7 +137,7 @@
               "particle_id": "minecraft:soul",
               "shape": "SPHERE",
               "origin": "CENTER",
-              "count": 5.0,
+              "count": 1.0,
               "min_speed": 0.01,
               "max_speed": 0.06,
               "extent": 3.3000000000000003
@@ -146,7 +146,7 @@
               "particle_id": "block_factorys_bosses:soul_flip",
               "shape": "SPHERE",
               "origin": "CENTER",
-              "count": 4.0,
+              "count": 1.0,
               "min_speed": 0.02,
               "max_speed": 0.08,
               "extent": 4.199999999999999
@@ -155,7 +155,7 @@
               "particle_id": "minecraft:squid_ink",
               "shape": "CIRCLE",
               "origin": "CENTER",
-              "count": 35.0,
+              "count": 9.0,
               "min_speed": 0.01,
               "max_speed": 0.05,
               "extent": 6.300000000000001
@@ -164,7 +164,7 @@
               "particle_id": "fromtheshadows:shadow",
               "shape": "CIRCLE",
               "origin": "FEET",
-              "count": 26.0,
+              "count": 6.0,
               "min_speed": 0.02,
               "max_speed": 0.08,
               "extent": 6.0
@@ -173,7 +173,7 @@
               "particle_id": "soulsweapons:black_flame",
               "shape": "CIRCLE",
               "origin": "FEET",
-              "count": 5.0,
+              "count": 1.0,
               "min_speed": 0.02,
               "max_speed": 0.08,
               "extent": 3.5999999999999996
@@ -245,6 +245,19 @@
         "apply_to_caster": false,
         "status_effect": {
           "effect_id": "tnc:dark_veil",
+          "duration": 6,
+          "amplifier": 0,
+          "apply_mode": "SET",
+          "show_particles": true
+        }
+      }
+    },
+    {
+      "action": {
+        "type": "STATUS_EFFECT",
+        "apply_to_caster": false,
+        "status_effect": {
+          "effect_id": "tnc:dark_fog",
           "duration": 6,
           "amplifier": 0,
           "apply_mode": "SET",

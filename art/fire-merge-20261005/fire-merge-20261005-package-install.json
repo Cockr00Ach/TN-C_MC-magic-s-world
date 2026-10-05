@@ -1,0 +1,12 @@
+{
+  "commit": "c3f98b88b0d400170369634c67fc8a5fd4c56192",
+  "sha256": "D032716B9C684D110C285A6721A27C79C4BCDD742920FCF53C52B1AA6411CCF0",
+  "installed_files": [
+    "D:\\垃圾桶\\PCL 正式版 2.9.3\\.minecraft\\versions\\元素觉醒1.4.3-魔改版-20260915\\mods\\tnc-1.0.0.jar",
+    "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\modpack\\元素觉醒1.4.3-魔改版-20260915\\mods\\tnc-1.0.0.jar"
+  ],
+  "backup": "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\work\\backups\\fire-merge-jar-20261005-213423",
+  "unit_tests": 167,
+  "game_tests": 235,
+  "scope": "JAR only; no existing world opened or repaired"
+}

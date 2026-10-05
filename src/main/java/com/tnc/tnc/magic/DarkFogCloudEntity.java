@@ -122,6 +122,74 @@ public class DarkFogCloudEntity extends SpellCloud {
         return spell.learn.tier;
     }
 
+    // ------------------------------------------------------------------
+    //  ★ 同步给客户端的"我有多黑"（作者 2026-10-09："敌人包括其他玩家触碰到这个雾就会
+    //    受到致盲效果，屏幕得给我黑了，t 级越高屏幕越黑"）
+    //
+    //  为什么要同步：**屏幕变黑只能客户端自己做** ✗ ——
+    //    * 原版 `darkness` 效果只有**一档**、而且它是给"站在里面的玩家"暗视野用的，
+    //      没法"t 级越高越黑" ✗；
+    //    * 引擎的 `Impact$Action` 也没有"压暗屏幕"这种动作 ✗。
+    //  所以：服务端把"档位 + 半径"同步下来，客户端在 `TNSpellClientVisuals` 里
+    //  按"离雾心多远 / 半径"算一个 0..1 的深度，再乘以档位对应的最大压暗值 ✓。
+    // ------------------------------------------------------------------
+
+    /** 同步字段：档位（1..5，0 = 未知）✓ */
+    private static final net.minecraft.network.syncher.EntityDataAccessor<Integer> DATA_FOG_TIER =
+            net.minecraft.network.syncher.SynchedEntityData.defineId(
+                    DarkFogCloudEntity.class, net.minecraft.network.syncher.EntityDataSerializers.INT);
+
+    /** 同步字段：雾的真实半径（×100 存整数，和魔法阵那套一个办法 ✓） */
+    private static final net.minecraft.network.syncher.EntityDataAccessor<Integer> DATA_FOG_RADIUS =
+            net.minecraft.network.syncher.SynchedEntityData.defineId(
+                    DarkFogCloudEntity.class, net.minecraft.network.syncher.EntityDataSerializers.INT);
+
+    @Override
+    protected void defineSynchedData() {
+        // SpellCloud owns spell id, data index and radius trackers used during spell creation.
+        // Initialise them before extending the tracker table with our overlay fields.
+        // The Connector compile-time engine jar exposes this inherited method under its SRG name.
+        super.m_8097_();
+        this.entityData.define(DATA_FOG_TIER, 0);
+        this.entityData.define(DATA_FOG_RADIUS, 0);
+    }
+
+    /** 客户端用：这片雾是第几档（0 = 还不知道）✓。 */
+    public int syncedTier() {
+        return this.entityData.get(DATA_FOG_TIER);
+    }
+
+    /** 客户端用：这片雾的半径（格；0 = 还不知道）✓。 */
+    public double syncedRadius() {
+        return this.entityData.get(DATA_FOG_RADIUS) / 100.0D;
+    }
+
+    /**
+     * 服务端把"档位 + 半径"写进同步字段（每 tick 调一次，客户端因此不会晚半拍 ✓）。
+     *
+     * <p>半径取自 JSON 的 `volume.radius`（不是 combinedRadius(null)，那条对没有
+     * `extra_radius` 的法术合法但没必要在这儿重复算 ✓）。
+     */
+    private void syncAppearance() {
+        if (level().isClientSide()) {
+            return;
+        }
+        int t = tier();
+        if (this.entityData.get(DATA_FOG_TIER) != t) {
+            this.entityData.set(DATA_FOG_TIER, t);
+        }
+        double radius = 0.0D;
+        net.spell_engine.api.spell.Spell spell = getSpell();
+        if (spell != null && spell.release != null && spell.release.target != null
+                && spell.release.target.cloud != null && spell.release.target.cloud.volume != null) {
+            radius = spell.release.target.cloud.volume.radius;
+        }
+        int stored = (int) Math.round(radius * 100.0D);
+        if (this.entityData.get(DATA_FOG_RADIUS) != stored) {
+            this.entityData.set(DATA_FOG_RADIUS, stored);
+        }
+    }
+
     /**
      * 把一张边界法阵交给这片雾托管（重复调用是幂等的 ✓）。
      *
@@ -177,6 +245,7 @@ public class DarkFogCloudEntity extends SpellCloud {
         placeCircle();
         purgeExtraCircles();
         idleParticles();
+        syncAppearance();
 
         if (!isDarkFog() || tickCount < FOLLOW_GRACE_TICKS) {
             return;

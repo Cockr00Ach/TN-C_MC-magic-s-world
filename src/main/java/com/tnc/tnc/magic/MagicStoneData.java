@@ -868,7 +868,7 @@ public class MagicStoneData {
         }
         ListTag learnedList = tag.getList("Learned", Tag.TAG_STRING);
         for (int i = 0; i < learnedList.size(); i++) {
-            ResourceLocation id = ResourceLocation.tryParse(learnedList.getString(i));
+            ResourceLocation id = ResourceLocation.tryParse(currentSpellId(learnedList.getString(i)));
             if (id != null) {
                 learned.add(id);
             }
@@ -882,7 +882,7 @@ public class MagicStoneData {
             ListTag loadoutList = tag.getList("Loadout", Tag.TAG_STRING);
             for (int i = 0; i < LOADOUT_SLOTS; i++) {
                 String raw = i < loadoutList.size() ? loadoutList.getString(i) : "";
-                loadout.add(raw.isEmpty() ? null : raw);
+                loadout.add(raw.isEmpty() ? null : currentSpellId(raw));
             }
         } else {
             loadout.addAll(Collections.nCopies(LOADOUT_SLOTS, (String) null));
@@ -916,9 +916,19 @@ public class MagicStoneData {
         return list;
     }
 
+    /** Preserve ownership, custom keys and explicit forgetting across the fireball-chain rename. */
+    private static String currentSpellId(String id) {
+        return switch (id) {
+            case "tnc:giant_fireball" -> "tnc:lava_fireball";
+            case "tnc:self_destruct" -> "tnc:molten_skyfall";
+            case "tnc:meteor_fireball" -> "tnc:meteor_fall";
+            default -> id;
+        };
+    }
+
     private static void readSpellSet(ListTag list, Set<ResourceLocation> target) {
         for (int i = 0; i < list.size(); i++) {
-            ResourceLocation id = ResourceLocation.tryParse(list.getString(i));
+            ResourceLocation id = ResourceLocation.tryParse(currentSpellId(list.getString(i)));
             if (id != null) target.add(id);
         }
     }

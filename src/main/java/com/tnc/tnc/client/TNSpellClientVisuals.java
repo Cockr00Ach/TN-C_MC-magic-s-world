@@ -197,6 +197,79 @@ public final class TNSpellClientVisuals {
         } else {
             handShake = 0.0F;
         }
+        // ★ 黑雾的"屏幕变黑"（作者 2026-10-09："敌人包括其他玩家触碰到这个雾……
+        //   屏幕得给我黑了，t 级越高屏幕越黑"）✓
+        tickFogDarkness(minecraft);
+    }
+
+    // ------------------------------------------------------------------
+    //  ★★ 黑雾：站在雾里，屏幕按档位变黑
+    //
+    //  引擎给不了这个 ✗：
+    //    * 原版 `darkness` 效果只有**一档**，而且它压的是"视野亮度"，做不到"t 级越高越黑" ✗；
+    //    * 引擎的 `Impact$Action` 里也没有"压暗屏幕"这种动作 ✗。
+    //  所以分两半做：
+    //    服务端 —— `DarkFogCloudEntity.tick` 把 **档位 + 半径** 写进同步字段 ✓
+    //    客户端 —— 这里就近找到雾，按"离雾心多远 / 半径"算一个 0..1 的深度，
+    //              再乘以**该档位的最大压暗值**，在 `RenderGuiEvent.Post` 上盖一层黑 ✓。
+    //
+    //  为什么要"深度"而不是"在圈里就全黑"：从边缘走进去应该是**渐渐变黑** ✓，
+    //  一圈突然全黑会像画面被切了一刀 ✗。
+    //
+    //  验收注意：致盲（服务端那个 1 秒结算的 `minecraft:blindness`）与这里压暗是**两件事** ✓
+    //  —— 致盲是给"在雾里"的惩罚，压暗是让你**看见**自己在雾里 ✓；两个一起才成立 ✓。
+    // ------------------------------------------------------------------
+
+    /**
+     * 每一档的**最大**压暗值（0..1，乘 250 得 alpha）✓。
+     *
+     * <p>t1 25% / t2 35% / t3 50% / t4 65% / t5 80% —— 单调递增，最高档也**不到全瞎** ✗
+     * （连自己脚下都看不见会不好玩；想更黑就把最后一个数字往上加 ✓）。
+     */
+    private static final float[] FOG_DARKNESS_BY_TIER = {0.25F, 0.35F, 0.50F, 0.65F, 0.80F};
+
+    /** 出圈之后再留多久才完全恢复（tick）—— 走出来的那一下不该"啪"地亮回来 ✓ */
+    private static final float FOG_DARKNESS_RELEASE = 0.12F;
+
+    /** 当前应该压多黑（0 = 不压）✓ */
+    private static float fogDarkness = 0.0F;
+
+    private static void tickFogDarkness(net.minecraft.client.Minecraft minecraft) {
+        float target = 0.0F;
+        if (minecraft.level != null && minecraft.player != null) {
+            double px = minecraft.player.getX();
+            double py = minecraft.player.getY();
+            double pz = minecraft.player.getZ();
+            for (com.tnc.tnc.magic.DarkFogCloudEntity fog : minecraft.level.getEntitiesOfClass(
+                    com.tnc.tnc.magic.DarkFogCloudEntity.class,
+                    minecraft.player.getBoundingBox().inflate(32.0D))) {
+                double radius = fog.syncedRadius();
+                int tier = fog.syncedTier();
+                if (radius <= 0.5D || tier <= 0 || tier > FOG_DARKNESS_BY_TIER.length) {
+                    continue;                       // 还没同步下来 / 不是我们的雾 ⇒ 跳过 ✓
+                }
+                double distance = Math.sqrt(
+                        (fog.getX() - px) * (fog.getX() - px)
+                                + (fog.getZ() - pz) * (fog.getZ() - pz));
+                if (distance > radius) {
+                    continue;                       // 在圈外 ⇒ 不压 ✓
+                }
+                // 圈心最黑、贴边最浅；再乘一个"高度也影响"的小修正（站高处略淡 ✓）
+                double depth = 1.0D - (distance / radius);
+                double vertical = 1.0D - Math.min(1.0D, Math.abs(fog.getY() - py) / 8.0D);
+                float value = (float) (FOG_DARKNESS_BY_TIER[tier - 1] * depth * (0.55D + 0.45D * vertical));
+                if (value > target) {
+                    target = value;
+                }
+            }
+        }
+        // 进去快、出来稍慢 ✓（免得站在边界上闪）
+        fogDarkness = target > fogDarkness
+                ? target
+                : fogDarkness + (target - fogDarkness) * FOG_DARKNESS_RELEASE;
+        if (fogDarkness < 0.01F) {
+            fogDarkness = 0.0F;
+        }
     }
 
     // ------------------------------------------------------------------
@@ -265,10 +338,19 @@ public final class TNSpellClientVisuals {
      */
     @SubscribeEvent
     public static void onRenderGui(net.minecraftforge.client.event.RenderGuiEvent.Post event) {
+        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+        // ① 黑雾的"屏幕变黑"（作者 2026-10-09："屏幕得给我黑了，t 级越高屏幕越黑"）✓
+        if (fogDarkness > 0.0F) {
+            int fa = (int) Math.min(250.0F, fogDarkness * 250.0F);
+            if (fa > 1) {
+                event.getGuiGraphics().fill(0, 0, mc.getWindow().getGuiScaledWidth(),
+                        mc.getWindow().getGuiScaledHeight(), fa << 24);
+            }
+        }
+        // ② 爆炸白闪（原有的）✓
         if (flash <= 0.0F) {
             return;
         }
-        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
         int a = (int) Math.min(200.0F, flash * 200.0F);
         if (a <= 2) {
             return;
