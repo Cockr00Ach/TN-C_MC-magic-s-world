@@ -158,6 +158,21 @@ public final class FireSpellRules {
         return boltDamage <= 0.0F ? 0.0F : boltDamage * LAVA_FIELD_PERCENT;
     }
 
+    /**
+     * 这一发的火球是不是<b>熔岩岩球</b>外观（作者 2026-10-05 给参照图定稿）：
+     * <b>黑炭岩板 + 亮橙熔岩裂缝</b>，而不是彗星焰尾。
+     *
+     * <p>会留下熔岩地的那两档就是它：{@code lava_fireball}（t3）与
+     * {@code molten_skyfall}（t4 法阵往下砸的也是熔岩火球）——
+     * 「会不会留熔岩地」和「长什么样」在这里正好是同一批，所以并成一个判据，
+     * 免得以后加档位时两处各改一次、改漏一处 ✗
+     *
+     * <p>渲染器读的是实体的<b>同步字段</b> {@code spellPath()}，所以客户端拿得到 ✓
+     */
+    public static boolean isLavaRock(String spellPath) {
+        return "lava_fireball".equals(spellPath) || "molten_skyfall".equals(spellPath);
+    }
+
     private FireSpellRules() {
     }
 
