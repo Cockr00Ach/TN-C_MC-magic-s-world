@@ -1,13 +1,8 @@
 package com.tnc.tnc.client;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.tnc.tnc.TNMod;
 import com.tnc.tnc.magic.fire.FireSpellRules;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -19,21 +14,26 @@ import net.minecraftforge.fml.common.Mod;
 import java.util.Optional;
 
 /**
- * <b>锁定目标的红色边框</b>（作者 2026-10-05：「准心指向生物时，生物的边框会有红色线条
- * 表示该法术锁定的目标」）。
+ * <b>施法时给锁定目标描一圈轮廓</b>。
  *
- * <h2>几点设计决定</h2>
- * <ul>
- *   <li><b>不用原版的准心判定</b>：原版 {@code hitResult} 的实体距离只有约 3 格 ✗，
- *       而火球链最远打到 64 格 —— 那样"锁定"基本没意义。这里自己按 {@link #REACH} 做扫掠 ✓</li>
- *   <li><b>判据和火球完全一致</b>：用同一个 {@link FireSpellRules#hittable} +
- *       同一套「线段 × 包围盒」扫掠 ✓ ⇒ <b>框到谁就一定会打到谁</b>，
- *       不会出现"框了但穿过去"或者"没框却打中了" ✗</li>
- *   <li><b>纯客户端</b>：不产生任何网络包、不改服务端逻辑 ✓（别人看不到你的框，这是你自己的准心提示 ✓）</li>
- * </ul>
+ * <h2>演进（两轮作者实测反馈）</h2>
+ * <ol>
+ *   <li><b>第一版</b>：自己用 {@code LevelRenderer.renderLineBox} 在目标外面画一个<b>红色方框</b> ✗
+ *       —— 作者 2026-10-05 看了截图说：不要方框，要像参考图那样<b>贴着生物外形的一圈黄线</b> ✗</li>
+ *   <li><b>现在</b>：直接用<b>原版的「发光」轮廓</b>（{@code Entity#setGlowingTag}）✓
+ *       —— 它就是那个效果：沿模型轮廓描一圈、自动处理遮挡与深度 ✓
+ *       而且这是纯客户端标记，不发包、不改服务端状态 ✓</li>
+ * </ol>
  *
- * <p>画法：借原版的 {@code LevelRenderer.renderLineBox} 画一个红色线框 ✓
- * （和选中方块/碰撞箱同一套，风格统一 ✓）。
+ * <h2>什么时候亮</h2>
+ * <p>只有<b>正在施法</b>（按住右键）且准心对着生物时才亮 ✓
+ * （作者 2026-10-05：「只有当瞄准目标释放法术时才会有红线」✗ —— 一直亮会干扰视线）。
+ *
+ * <h2>为什么不用原版准心判定</h2>
+ * <p>原版 {@code hitResult} 的实体距离只有约 3 格 ✗，而火球最远打到 72 格 ——
+ * 那样"锁定"基本没意义。这里自己按 {@link #REACH} 做扫掠，并且
+ * <b>判据与火球完全一致</b>（同一个 {@link FireSpellRules#hittable}）
+ * ⇒ <b>亮了就一定打得到，不亮就打不到</b> ✓
  */
 @Mod.EventBusSubscriber(modid = TNMod.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class TNFireTargetOutline {
@@ -41,48 +41,53 @@ public final class TNFireTargetOutline {
     private TNFireTargetOutline() {
     }
 
-    /**
-     * 判定距离（格）。
-     *
-     * <p>取 32：比原版准心（约 3 格）远得多、又不必到 t4 的 64 格那么夸张 ✓ ——
-     * 这是一个"我瞄着谁"的提示，不是"法术一定能打到那么远"的承诺 ✓
-     */
+    /** 判定距离（格）—— 比原版准心（约 3 格）远得多，又不必到 t5 的 72 格那么夸张 ✓ */
     private static final double REACH = 32.0D;
+
+    /**
+     * 上一帧标亮的生物 —— 用来在<b>松开右键 / 移开准心</b>时把它的发光标记清掉 ✓
+     *
+     * <p>⚠️ 别的实体不能不管：发光标记是**共享标记位**（会同步），
+     * 留着不清的话那只怪会一直亮着 ✗
+     */
+    private static LivingEntity marked;
 
     @SubscribeEvent
     public static void onRenderStage(RenderLevelStageEvent event) {
-        // 只在实体画完之后补一个线框 —— 这样它盖在生物身上，不会被生物自己的模型挡住 ✓
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
             return;
         }
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.level == null || minecraft.player == null) {
-            return;
-        }
-        LivingEntity target = aimedAt(minecraft);
-        if (target == null) {
+            clear();
             return;
         }
 
-        // ⚠️ 事件里的姿态已经是"相机相对"的 ⇒ 包围盒要先减去相机坐标，否则会画到天边去 ✗
-        //    （法阵渲染器那儿踩过一模一样的坑）
-        Vec3 camera = event.getCamera().getPosition();
-        AABB box = target.getBoundingBox().inflate(0.06D)
-                .move(-camera.x, -camera.y, -camera.z);
+        // 只有「正在施法」才提示：本模组用法杖施法就是按住右键 ✓（作者要求不要一直亮 ✗）
+        LivingEntity target = minecraft.options.keyUse.isDown() ? aimedAt(minecraft) : null;
 
-        PoseStack pose = event.getPoseStack();
-        pose.pushPose();
-        MultiBufferSource.BufferSource buffers = minecraft.renderBuffers().bufferSource();
-        VertexConsumer lines = buffers.getBuffer(RenderType.lines());
-        LevelRenderer.renderLineBox(pose, lines, box, 1.0F, 0.12F, 0.12F, 1.0F);
-        buffers.endBatch(RenderType.lines());
-        pose.popPose();
+        if (marked != null && marked != target) {
+            marked.setGlowingTag(false);          // 上一只恢复原样 ✓
+            marked = null;
+        }
+        if (target != null) {
+            target.setGlowingTag(true);           // 原版轮廓：贴外形的一圈线 ✓
+            marked = target;
+        }
+    }
+
+    /** 退出世界 / 换维度时别把发光标记落在实体上（{@code level == null} 时会被调到 ✓）。 */
+    private static void clear() {
+        if (marked != null) {
+            marked.setGlowingTag(false);
+            marked = null;
+        }
     }
 
     /**
      * 沿视线找<b>最近的、火球链能打中的</b>生物（没有就是 null）。
      *
-     * <p>和 {@code TNFireBoltEntity} 用同一套判据，所以"框出来的"就是"会命中的" ✓
+     * <p>和 {@code TNFireBoltEntity} 用同一套判据，所以"亮出来的"就是"会命中的" ✓
      */
     private static LivingEntity aimedAt(Minecraft minecraft) {
         Vec3 eye = minecraft.player.getEyePosition(1.0F);

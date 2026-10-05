@@ -122,9 +122,13 @@ public final class TNFireFields {
      * 让法阵平平地贴地 ✓（往下最多找 8 格，找不到就用瞄准点本身）
      */
     private static Vec3 groundAnchor(ServerPlayer player) {
-        Vec3 aim = groundAim(player);
+        // ⚠️ groundAim 给的是「头顶」（已经 +SKYFALL_HEIGHT）—— 必须先减回来再往下找地板 ✗
+        //    作者 2026-10-05 实测「为什么 t5 的法阵会生成在目标上方」就是这个：
+        //    以前只往下找 8 格，而高度是 12 ⇒ 净效果停在目标上方 4 格 ✗
+        Vec3 aim = groundAim(player).subtract(0.0D, FireSpellRules.SKYFALL_HEIGHT, 0.0D);
+        // 往下找地板给足 32 格（法阵本来就该铺在地上，多找一点更稳 ✓）
         BlockHitResult floor = player.level().clip(new ClipContext(aim,
-                aim.subtract(0.0D, 8.0D, 0.0D),
+                aim.subtract(0.0D, 32.0D, 0.0D),
                 ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
         Vec3 at = floor.getType() == HitResult.Type.MISS ? aim : floor.getLocation();
         return new Vec3(at.x, at.y + 0.06D, at.z);

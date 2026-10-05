@@ -573,11 +573,9 @@ public final class TNFireBoltEntity extends Projectile {
         }
         server.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE,
                 SoundSource.PLAYERS, volume, 1.0F);
-        // t4/t5 再加一声「轰鸣」（更低更长）—— 作者要的「轰鸣声」就是它 ✓
-        if (!"lava_fireball".equals(path)) {
-            server.playSound(null, at.x, at.y, at.z, SoundEvents.LIGHTNING_BOLT_THUNDER,
-                    SoundSource.WEATHER, volume * 0.7F, 0.55F);
-        }
+        // ⚠️ 作者 2026-10-05：「把 t4、t5 的雷声去掉」✗
+        //    原来这里叠了一声 LIGHTNING_BOLT_THUNDER（我按"轰鸣声"理解的），
+        //    但作者要的是**爆炸的轰鸣**，不是打雷 ✗ ⇒ 整段拿掉，只留 GENERIC_EXPLODE ✓
         // 震屏：复用冲击波实体；半径跟着强度走，视觉上也分得出大小 ✓
         TNShockwaveEntity.blast(server, at, 3.0D + shake * 0.6D, shake, getOwner());
     }
