@@ -50,7 +50,7 @@ public final class TNSkyfallEntity extends Entity {
      * <p>这是「魔法阵」的尺寸，和 {@link FireSpellRules#SKYFALL_SEEK_RADIUS}（打多大范围）
      * 是两件事，所以分开写 ✓
      */
-    public static final double SIGIL_RADIUS = 3.0D;
+    public static final double SIGIL_RADIUS = 6.0D;
 
     /**
      * 砸下来的火球<b>不从正中心出</b>（作者 2026-10-05：「火球不要固定在正中心落下」）——
@@ -124,7 +124,10 @@ public final class TNSkyfallEntity extends Entity {
             discard();
             return;
         }
-        if (age % FireSpellRules.SKYFALL_INTERVAL_TICKS != 0) {
+        // ⚠️ 开火窗口 + 末颗上限：只有 0 ~ SKYFALL_LAST_FIRE_TICK 之间、且踩在间隔上的才放 ✓
+        //    ⇒ 正好 SKYFALL_BOLTS 颗，**均匀铺开**，不会扎堆、也不会在窗口结束后继续放 ✗
+        if (age > FireSpellRules.SKYFALL_LAST_FIRE_TICK
+                || age % FireSpellRules.SKYFALL_INTERVAL_TICKS != 0) {
             return;
         }
         ServerLevel server = (ServerLevel) level();
@@ -142,20 +145,22 @@ public final class TNSkyfallEntity extends Entity {
                 .orElse(null);
 
         // 作者 2026-10-05：**火球不要固定在正中心落下** ——
-        // 在法阵圆盘里随机取一点当发射点（面积均匀取点，所以是 sqrt(random) 而不是 random）
+        // 作者 2026-10-05：「可以一秒内落下多颗」⇒ 一轮放 SKYFALL_LAUNCHES_PER_VOLLEY 发，
+        //   每发**各自**在法阵圆盘里随机取落点（面积均匀取点，所以是 sqrt(random) 而不是 random）✓
+        for (int n = 0; n < FireSpellRules.SKYFALL_LAUNCHES_PER_VOLLEY; n++) {
         double spreadAngle = random.nextDouble() * Math.PI * 2.0D;
         double spreadDist = Math.sqrt(random.nextDouble()) * LAUNCH_SPREAD;
         Vec3 from = position().add(Math.cos(spreadAngle) * spreadDist, 0.0D,
                 Math.sin(spreadAngle) * spreadDist);
         // 速度跟手扔的那颗保持一致（作者 2026-10-05 要求降速）—— 别自己另定一个数
-        Vec3 velocity = target == null
-                ? new Vec3(0.0D, -TNFireBoltEntity.LAUNCH_SPEED, 0.0D)
-                : target.getEyePosition().subtract(from).normalize().scale(TNFireBoltEntity.LAUNCH_SPEED);
+        // 作者 2026-10-05：「垂直落下不用朝向目标」—— 一律垂直下砸 ✓（不再瞄准谁）
+        Vec3 velocity = new Vec3(0.0D, -TNFireBoltEntity.LAUNCH_SPEED, 0.0D);
 
         TNFireBoltEntity shot = new TNFireBoltEntity(TNOrbEntities.FIRE_BOLT.get(), server);
         shot.configure(shooter, bolt, "molten_skyfall", from, velocity);
         server.addFreshEntity(shot);
         server.sendParticles(ParticleTypes.LAVA, from.x, from.y, from.z, 6, 0.3D, 0.1D, 0.3D, 0.05D);
+        }
     }
 
     private LivingEntity resolveCaster(ServerLevel level) {

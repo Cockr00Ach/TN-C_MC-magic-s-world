@@ -41,16 +41,55 @@ public final class FireSpellRules {
     public static final float SKYFALL_BLAST_PERCENT = 0.50F;
 
     /** 爆炸半径（格）。 */
-    public static final double SKYFALL_BLAST_RADIUS = 3.5D;
+    public static final double SKYFALL_BLAST_RADIUS = 5.0D;
+    /**
+     * 每几 tick 来一轮 —— 作者 2026-10-05：「不要固定一颗一颗向下落，可以一秒内落下多颗，
+     * 且把落下的时间间隔减小，不用等到落地了再落下下一颗」✗
+     *
+     * <p>10 tick（0.5 秒一发 ✗）→ <b>8 tick 一轮、每轮 {@link #SKYFALL_LAUNCHES_PER_VOLLEY} 发</b>：
+     * 也就是 <b>每秒约 5 发</b>，天上会同时挂着好几颗 ✓
+     *
+     * <p>⚠️ 与"落地"完全无关 —— 落没落地都照砸 ✓（原来也不等落地，只是间隔太长看着像"一颗一颗"✗）
+     */
+    public static final int SKYFALL_INTERVAL_TICKS = 7;
 
     /** 法阵持续 10 秒。 */
-    public static final int SKYFALL_LIFE_TICKS = 200;
+
+    /** 开火窗口：5 秒（作者 2026-10-05：「t4 档改为 5 秒」✓）。 */
+    public static final int SKYFALL_FIRE_TICKS = 100;
+
+    /** 一共落几颗（作者：「5 秒共 13 个火球，13 个火球在 5s 内落完」✓）。 */
+    public static final int SKYFALL_BOLTS = 13;
+
+    /**
+     * 最后一颗在第几 tick 放出 = 间隔 ×（颗数 - 1）= 7 × 12 = <b>84</b> ✓
+     *
+     * <p>这样 13 颗正好均匀落在 <b>0 ~ 84 tick</b>（0~4.2 秒）内，
+     * 最后一颗大约第 96 tick 落地 —— 仍在 5 秒窗口里 ✓
+     * 写法是**算出来的**，改颗数或间隔时不会再对不上 ✗
+     */
+    public static final int SKYFALL_LAST_FIRE_TICK =
+            SKYFALL_INTERVAL_TICKS * (SKYFALL_BOLTS - 1);
+    /**
+     * 熔岳天倾法阵持续多久 —— 作者 2026-10-05：「t4 档法术持续时间改为 8s」✓
+     *
+     * <p>（原来 200 tick = 10 秒 ✗）
+     */
+    public static final int SKYFALL_LIFE_TICKS = SKYFALL_FIRE_TICKS + 20;
 
     /** 法阵每隔 10 tick（0.5 秒）砸一发下来。 */
-    public static final int SKYFALL_INTERVAL_TICKS = 10;
+
+    /**
+     * 一轮落几颗。
+     *
+     * <p>⚠️ 作者 2026-10-05：「不要出现一起下落的现象」✗ ⇒ <b>固定 1 颗</b>，
+     * 靠 {@link #SKYFALL_INTERVAL_TICKS} 把 13 颗**均匀铺开** ✓
+     * （之前为了"一秒多颗"改成一轮 2 颗 ✗ —— 那正是"一起下落"的来源 ✗）
+     */
+    public static final int SKYFALL_LAUNCHES_PER_VOLLEY = 1;
 
     /** 法阵悬在多高（格）。 */
-    public static final double SKYFALL_HEIGHT = 8.0D;
+    public static final double SKYFALL_HEIGHT = 12.0D;
 
     /**
      * 熔岳天倾<b>选定目标</b>的距离（格）—— 作者 2026-10-05：
@@ -59,7 +98,15 @@ public final class FireSpellRules {
      * <p>所以要沿视线先找到"你瞄的是谁"：<b>先做实体扫掠</b>，打不到实体就看方块落点，
      * 连方块都没有（对着天空）才退回自己头顶。
      */
-    public static final double SKYFALL_CAST_RANGE = 24.0D;
+    public static final double SKYFALL_CAST_RANGE = 64.0D;
+
+    /**
+     * 陨星坠（t5）选定目标的距离 —— 比 t4 的 {@link #SKYFALL_CAST_RANGE} 再远一点。
+     *
+     * <p>⚠️ 作者 2026-10-05 明确要求「以上的效果要保持高档强于低档，不要出现低档高于高档的现象」✗
+     * —— 而 t5 原来只有 24 格、比 t4 的 64 格**还近** ✗，所以这里拉到 72 ✓
+     */
+    public static final double METEOR_CAST_RANGE = 72.0D;
 
     /** 法阵的多大范围内找目标（格）—— 找不到就直直往下砸。 */
     public static final double SKYFALL_SEEK_RADIUS = 12.0D;
@@ -123,7 +170,7 @@ public final class FireSpellRules {
     private static final Map<String, Bolt> BOLTS = Map.of(
             "fireball",       new Bolt(1.0F, 40.0F, 0.35F, 1, false, false, 0.0D, 0.0F),  // t1 冒险者
             "great_fireball", new Bolt(2.4F, 40.0F, 0.62F, 1, false, false, 0.0D, 0.0F),  // t2 精英
-            "lava_fireball",  new Bolt(3.2F, 44.0F, 0.50F, 1, false, true,  0.0D, 0.0F)   // t3 王：落点留熔岩地
+            "lava_fireball",  new Bolt(3.2F, 44.0F, 0.70F, 1, false, true,  0.0D, 0.0F)   // t3 王：落点留熔岩地（作者要求体积增大）
     );
 
     /**
@@ -134,7 +181,7 @@ public final class FireSpellRules {
      * 玩家直接施放它就会变成"扔出一颗大火球"，与设计不符 ✗
      */
     public static final Bolt SKYFALL_BOLT =
-            new Bolt(3.4F, 64.0F, 0.50F, 1, false, true, SKYFALL_BLAST_RADIUS, 0.0F);
+            new Bolt(3.4F, 64.0F, 1.05F, 1, false, true, SKYFALL_BLAST_RADIUS, 0.0F);
 
     /**
      * <b>陨星坠</b>砸下来的那颗<b>大陨石</b>（作者 2026-10-05）。
@@ -146,7 +193,7 @@ public final class FireSpellRules {
      * 后者正是作者对 t5 的明确要求 ✓
      */
     public static final Bolt METEOR_BOLT =
-            new Bolt(6.0F, 64.0F, 2.00F, 1, true, true, 5.0D, METEOR_MAX_HEALTH_PERCENT);
+            new Bolt(6.0F, 64.0F, 6.00F, 1, true, true, 8.0D, METEOR_MAX_HEALTH_PERCENT);
 
     /**
      * <b>装饰用的小陨石</b>（作者 2026-10-05：「旁边可以跟随大小不一的陨石一起落下，
@@ -159,14 +206,24 @@ public final class FireSpellRules {
             new Bolt(0.0F, 64.0F, 0.50F, 1, false, false, 0.0D, 0.0F);
 
     /** 跟随大陨石一起落下的装饰小陨石数量。 */
-    public static final int METEOR_SHARD_COUNT = 4;
+    public static final int METEOR_SHARD_COUNT = 8;
 
     /** 装饰小陨石散落在主陨石周围多大范围（格）。 */
     public static final double METEOR_SHARD_SPREAD = 4.5D;
 
     /** 装饰小陨石的尺寸范围（相对 {@link #METEOR_SHARD} 的半径）—— 作者要「大小不一」。 */
-    public static final double METEOR_SHARD_MIN_SCALE = 0.35D;
-    public static final double METEOR_SHARD_MAX_SCALE = 0.80D;
+    public static final double METEOR_SHARD_MIN_SCALE = 0.50D;
+    public static final double METEOR_SHARD_MAX_SCALE = 1.30D;
+
+    // ---------------- 命中震屏强度（t3 轻微 -> t5 强烈，2026-10-05 作者要求）----------------
+    // ⚠️ 必须**逐档递增**，不能出现低档比高档还猛 ✗（作者明确要求"保持高档强于低档"）
+    // 参考：现有普通爆炸的震幅是 client\TNSpellClientVisuals 里的 SHAKE_MAX = 9.0
+    /** t3 熔岩火球：轻微的视角震动。 */
+    public static final float SHAKE_T3 = 3.0F;
+    /** t4 熔岳天倾：较强烈（比普通爆炸更猛）。 */
+    public static final float SHAKE_T4 = 7.0F;
+    /** t5 陨星坠：强烈。 */
+    public static final float SHAKE_T5 = 16.0F;
 
     /** 爆炸伤害 = 那一发火球伤害 × {@link #SKYFALL_BLAST_PERCENT}。 */
     public static float blastDamage(float boltDamage) {

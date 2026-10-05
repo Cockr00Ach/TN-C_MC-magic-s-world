@@ -69,9 +69,23 @@ public final class TNFireFields {
      * 法阵本身<b>不会再移动</b>（位置只在 {@code TNSkyfallEntity.cast} 时定一次）✓
      */
     private static Vec3 skyfallAnchor(ServerPlayer player) {
+        return aimPoint(player, FireSpellRules.SKYFALL_CAST_RANGE);
+    }
+
+    /**
+     * 陨星坠（t5）的瞄准点 —— 和熔岳天倾同一套选点，只是射程更大。
+     *
+     * <p>⚠️ 作者 2026-10-05 要求「保持高档强于低档，不要出现低档高于高档」✗，
+     * 而 t5 原来射程 24 比 t4 的 64 还近 ✗ —— 所以分开成两个常量 ✓
+     */
+    private static Vec3 groundAim(ServerPlayer player) {
+        return aimPoint(player, FireSpellRules.METEOR_CAST_RANGE);
+    }
+
+    /** 共用的选点逻辑：沿视线 实体 → 方块 → 自己（见上面那条顺序说明）。 */
+    private static Vec3 aimPoint(ServerPlayer player, double reach) {
         Vec3 eye = player.getEyePosition();
         Vec3 look = player.getLookAngle();
-        double reach = FireSpellRules.SKYFALL_CAST_RANGE;
         Vec3 end = eye.add(look.scale(reach));
 
         // 1) 沿视线找最近的实体（和火球用同一套"线段 × 包围盒"扫掠，不自己另发明）
@@ -108,9 +122,13 @@ public final class TNFireFields {
      * 让法阵平平地贴地 ✓（往下最多找 8 格，找不到就用瞄准点本身）
      */
     private static Vec3 groundAnchor(ServerPlayer player) {
-        Vec3 aim = skyfallAnchor(player).subtract(0.0D, FireSpellRules.SKYFALL_HEIGHT, 0.0D);
+        // ⚠️ groundAim 给的是「头顶」（已经 +SKYFALL_HEIGHT）—— 必须先减回来再往下找地板 ✗
+        //    作者 2026-10-05 实测「为什么 t5 的法阵会生成在目标上方」就是这个：
+        //    以前只往下找 8 格，而高度是 12 ⇒ 净效果停在目标上方 4 格 ✗
+        Vec3 aim = groundAim(player).subtract(0.0D, FireSpellRules.SKYFALL_HEIGHT, 0.0D);
+        // 往下找地板给足 32 格（法阵本来就该铺在地上，多找一点更稳 ✓）
         BlockHitResult floor = player.level().clip(new ClipContext(aim,
-                aim.subtract(0.0D, 8.0D, 0.0D),
+                aim.subtract(0.0D, 32.0D, 0.0D),
                 ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
         Vec3 at = floor.getType() == HitResult.Type.MISS ? aim : floor.getLocation();
         return new Vec3(at.x, at.y + 0.06D, at.z);

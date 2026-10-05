@@ -42,7 +42,7 @@ import java.util.UUID;
 public final class TNMeteorFallEntity extends Entity {
 
     /** 法阵半径（格）—— 作者要求"巨大的法阵"，所以比熔岳天倾的 3 格大一圈。 */
-    public static final double SIGIL_RADIUS = 7.0D;
+    public static final double SIGIL_RADIUS = 14.0D;
     /** 法阵亮多久之后陨石落下（2 秒，够看清法阵，也够躲）。 */
     public static final int CHARGE_TICKS = 40;
     /** 陨石落下后法阵再留多久（1 秒收尾）。 */
