@@ -179,20 +179,17 @@ public final class TNFireBoltEntity extends Projectile {
 
         // ---------------- 客户端：只负责好看 ----------------
         if (level().isClientSide) {
-            if (tickCount % 2 == 0) {
-                Vec3 dir = getDeltaMovement().normalize();
-                double r = radius();
-                for (int i = 0; i < 4; i++) {
-                    double angle = tickCount * 0.6D + i * Math.PI / 2.0D;
-                    level().addParticle(i % 2 == 0 ? ParticleTypes.FLAME : ParticleTypes.SMALL_FLAME,
-                            getX() + Math.cos(angle) * r * 0.7D,
-                            getY() + Math.sin(angle) * r * 0.7D,
-                            getZ() + Math.cos(angle) * r * 0.7D,
-                            -dir.x * 0.05D, 0.02D, -dir.z * 0.05D);
-                }
-                if (tickCount % 6 == 0) {
-                    level().addParticle(ParticleTypes.LAVA, getX(), getY(), getZ(), 0, 0, 0);
-                }
+            // ⚠️ 粒子只做"余烬点缀" —— 火球的形状由 TNFireBoltRenderer 的几何体负责。
+            //    作者 2026-10-05 明确指出"不要一个球外面一些火焰粒子"，
+            //    所以这里从"每 2 tick 撒 4 颗 + 一颗 LAVA"减到"每 3 tick 在尾后留一颗小火星"，
+            //    并且**删掉了 LAVA 粒子**（它是一坨，看着像旁边多长了一颗小球 ✗）
+            if (tickCount % 3 == 0 && getDeltaMovement().lengthSqr() > 0.01D) {
+                Vec3 tail = getDeltaMovement().normalize().scale(-radius() * 3.0D);
+                level().addParticle(ParticleTypes.SMALL_FLAME,
+                        getX() + tail.x + (random.nextDouble() - 0.5D) * radius(),
+                        getY() + tail.y + (random.nextDouble() - 0.5D) * radius(),
+                        getZ() + tail.z + (random.nextDouble() - 0.5D) * radius(),
+                        -getDeltaMovement().x * 0.02D, 0.015D, -getDeltaMovement().z * 0.02D);
             }
             setPos(position().add(getDeltaMovement()));
             return;
