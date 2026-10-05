@@ -123,14 +123,19 @@ public final class TNLavaFieldEntity extends Entity {
         LivingEntity caster = resolveOwner(server);
         for (LivingEntity target : server.getEntitiesOfClass(LivingEntity.class,
                 FireSpellRules.uprightArea(position(), radius(), 1.5D),
-                t -> FireSpellRules.enemyOrUnowned(caster, t))) {
+                t -> FireSpellRules.enemy(caster, t))) {
             target.invulnerableTime = 0;      // 和焚身同一个坑：不清无敌帧会被吞
             target.hurt(server.damageSources().indirectMagic(this, caster == null ? this : caster),
                     perSecond);
         }
     }
 
-    /** 施法者可能已下线/换维度 —— 取不到就按"无主"处理（见 enemyOrUnowned）。 */
+    /**
+     * 施法者可能已下线/换维度 —— 取不到就返回 null。
+     *
+     * <p>{@link FireSpellRules#enemy} <b>接受 null 主人</b>：这时只跳过"同队"那一条判据，
+     * 区域不会因为"找不到主人"就整个失效 ✓
+     */
     private LivingEntity resolveOwner(ServerLevel level) {
         if (owner == null) {
             return null;

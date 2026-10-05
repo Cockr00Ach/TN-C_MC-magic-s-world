@@ -122,7 +122,7 @@ public final class TNBurialEntity extends Entity {
         ServerPlayer casterPlayer = source instanceof ServerPlayer sp ? sp : null;
         for (LivingEntity target : server.getEntitiesOfClass(LivingEntity.class,
                 FireSpellRules.uprightArea(position(), FireSpellRules.BURIAL_RADIUS, 4.0D),
-                t -> FireSpellRules.enemyOrUnowned(source, t))) {
+                t -> FireSpellRules.enemy(source, t))) {
             // 1) 重度灼烧（II 级焚身）：能顶掉已有的 I 级，并按作者确认**刷新时间**
             TNScorch.apply(target, casterPlayer, scorchBase, true);
             // 2) 目标最大生命的 1%（magic 类型不吃护甲）

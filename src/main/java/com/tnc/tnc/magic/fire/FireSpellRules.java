@@ -1,10 +1,9 @@
 package com.tnc.tnc.magic.fire;
 
+import com.tnc.tnc.TNMod;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.TamableAnimal;
-import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -180,17 +179,58 @@ public final class FireSpellRules {
     }
 
     /**
-     * 只打「敌人」：不碰玩家、盟友、已驯服宠物。
+     * 火球能打中谁 —— <b>判据是「不是自己人」，而不是「必须是敌对怪」</b>。
      *
-     * <p>判据和 {@code WaterSpellRules.enemy} 保持一致 —— 打到自己人是最容易出的纰漏。
+     * <h2>为什么反过来写（2026-10-05 作者实测反馈）</h2>
+     * 原判据抄的是 {@code WaterSpellRules.enemy}：「{@code target instanceof Enemy}
+     * 或者它正在打你」。结果 <b>训练假人打不中</b> —— 假人不是 {@code Enemy}，
+     * 火球直接从它身上穿过去 ✗。而玩家对着一个东西放火球，直觉就是"它该被点着"。
+     *
+     * <p>所以先排掉<b>明确不该打的</b>，剩下的全都能打：
+     * <ul>
+     *   <li>玩家（含自己）</li>
+     *   <li>已驯服的宠物</li>
+     *   <li>同队伍 / 同阵营（{@code isAlliedTo}）</li>
+     *   <li><b>TN-C 自己名下的一切</b>（NPC / 女仆 / 居民 / 光系召唤的天使与龙）——
+     *       按实体类型的命名空间 {@code tnc} 一刀切，新加实体自动被保护，
+     *       免得自己的「炎葬」把自己人烧了 ✗</li>
+     * </ul>
+     *
+     * <p>⚠️ <b>副作用（已确认的取舍）</b>：村民、动物这类被动生物现在也会被打中 ——
+     * 这是"打中你瞄的东西"的必然结果。范围伤害（爆炸 / 熔岩地 / 炎葬）用的是<b>同一个判据</b>，
+     * 所以在村子里放炎葬会伤到村民。要恢复"范围伤害只打敌对怪"，改这一个方法即可。
+     *
+     * <p>注意：水系 {@code WaterSpellRules.enemy} <b>仍是原判据，本次没动</b> ——
+     * 那是另一条链的手感，不该顺手改。
+     *
+     * @param caster 施法者，<b>可以是 null</b>（熔岩地/炎葬的主人已下线时）——
+     *               这时只跳过"同队"那一条，其余判据照旧
      */
     public static boolean enemy(LivingEntity caster, LivingEntity target) {
-        if (target == caster || !target.isAlive() || target.isAlliedTo(caster) || caster.isAlliedTo(target)
-                || target instanceof Player
-                || target instanceof TamableAnimal pet && pet.isTame()) {
+        if (neverTarget(target) || target == caster) {
             return false;
         }
-        return target instanceof Enemy || target instanceof Mob mob && mob.getTarget() == caster;
+        return caster == null || (!target.isAlliedTo(caster) && !caster.isAlliedTo(target));
+    }
+
+    /** 无论施法者在不在，都不该被打中的那些。 */
+    private static boolean neverTarget(LivingEntity target) {
+        if (target == null || !target.isAlive() || target.isSpectator()) {
+            return true;
+        }
+        if (target instanceof Player) {
+            return true;                                        // 不打玩家（含自己）
+        }
+        if (target instanceof TamableAnimal pet && pet.isTame()) {
+            return true;                                        // 不打驯服宠物
+        }
+        return isOurOwn(target);                                // 不打自家 NPC/召唤物
+    }
+
+    /** 这个实体是不是 TN-C 自己名下的（按命名空间判断，以后新加的实体自动受保护）。 */
+    private static boolean isOurOwn(LivingEntity target) {
+        ResourceLocation key = ForgeRegistries.ENTITY_TYPES.getKey(target.getType());
+        return key != null && TNMod.MODID.equals(key.getNamespace());
     }
 
     /**
@@ -236,24 +276,5 @@ public final class FireSpellRules {
     public static AABB uprightArea(Vec3 center, double radius, double halfHeight) {
         return new AABB(center.x - radius, center.y - halfHeight, center.z - radius,
                 center.x + radius, center.y + halfHeight, center.z + radius);
-    }
-
-    /**
-     * 熔岩地/炎葬这类"无人认领也要生效"的区域该打谁。
-     *
-     * <p>和 {@link #enemy}(LivingEntity, LivingEntity) 的区别：施法者可能已经下线或换了维度，
-     * 这时不能因为"找不到主人"就整个区域失效 —— 退化成"打所有非玩家、非宠物"。
-     */
-    public static boolean enemyOrUnowned(LivingEntity caster, LivingEntity target) {
-        if (target == null || !target.isAlive() || target instanceof Player) {
-            return false;
-        }
-        if (target instanceof TamableAnimal pet && pet.isTame()) {
-            return false;
-        }
-        if (caster != null) {
-            return enemy(caster, target);
-        }
-        return target instanceof Enemy || target instanceof Mob;
     }
 }
