@@ -50,6 +50,8 @@ public final class TNFireBoltEntity extends Projectile {
     private double remaining = 40.0D;
     /** 命中挂的焚身是不是 II 级。 */
     private boolean heavyScorch;
+    /** 命中后是否在落点留下熔岩地（t3 熔岩火球起才有）。 */
+    private boolean lavaField;
 
     public TNFireBoltEntity(EntityType<? extends TNFireBoltEntity> type, Level level) {
         super(type, level);
@@ -66,6 +68,7 @@ public final class TNFireBoltEntity extends Projectile {
         setDeltaMovement(velocity);
         damage = FireSpellRules.damage(bolt, FireSpellRules.power(owner));
         heavyScorch = bolt.heavyScorch();
+        lavaField = bolt.lavaField();
         remaining = bolt.range();
     }
 
@@ -190,12 +193,29 @@ public final class TNFireBoltEntity extends Projectile {
             }
             server.sendParticles(ParticleTypes.FLAME, impact.x, impact.y, impact.z, 14, 0.25D, 0.25D, 0.25D, 0.06D);
             server.sendParticles(ParticleTypes.LAVA, impact.x, impact.y, impact.z, 3, 0.2D, 0.2D, 0.2D, 0.0D);
+            // 熔岩地：在落点**下方**留一块持续灼烧的地面（t3 熔岩火球起才有）。
+            // 它的每秒伤害和焚身是两条独立结算，会同时触发 —— 这是作者明确要的 ✓
+            if (lavaField) {
+                TNLavaFieldEntity.spawn(server, groundBelow(server, impact),
+                        owner instanceof ServerPlayer caster ? caster : null,
+                        FireSpellRules.lavaFieldPerSecond(damage),
+                        FireSpellRules.LAVA_FIELD_RADIUS, FireSpellRules.LAVA_FIELD_LIFE_TICKS);
+            }
             discard();
             return;
         }
 
         setPos(to);
         remaining -= motion.length();
+    }
+
+    /** 熔岩地要贴地：从命中点往下找一层可站立的平面，找不到就退回命中点本身。 */
+    private Vec3 groundBelow(ServerLevel level, Vec3 impact) {
+        Vec3 down = impact.add(0.0D, -4.0D, 0.0D);
+        BlockHitResult floor = level.clip(new ClipContext(impact, down, ClipContext.Block.COLLIDER,
+                ClipContext.Fluid.NONE, this));
+        Vec3 at = floor.getType() == HitResult.Type.MISS ? impact : floor.getLocation();
+        return new Vec3(at.x, at.y + 0.06D, at.z);
     }
 
     @Override

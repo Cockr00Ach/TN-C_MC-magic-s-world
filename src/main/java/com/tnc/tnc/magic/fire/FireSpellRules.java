@@ -6,6 +6,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -44,10 +45,12 @@ public final class FireSpellRules {
      * @param coefficient 伤害系数（相对 {@link #BASE_DAMAGE}）
      * @param range       最大飞行距离（格）
      * @param radius      视觉/判定半径
-     * @param launches    一次施法放出几发（连珠 = 3）
+     * @param launches    一次施法放出几发
      * @param heavyScorch 命中挂的焚身是 I 级还是 II 级
+     * @param lavaField   命中后是否在落点留下熔岩地（见 {@link TNLavaFieldEntity}）
      */
-    public record Bolt(float coefficient, float range, float radius, int launches, boolean heavyScorch) {
+    public record Bolt(float coefficient, float range, float radius, int launches,
+                       boolean heavyScorch, boolean lavaField) {
     }
 
     /**
@@ -61,10 +64,35 @@ public final class FireSpellRules {
      * 的循环里，将来真要加同档选项时可以直接用。）
      */
     private static final Map<String, Bolt> BOLTS = Map.of(
-            "fireball",       new Bolt(1.0F, 40.0F, 0.35F, 1, false),   // t1 冒险者
-            "great_fireball", new Bolt(2.4F, 40.0F, 0.62F, 1, false),   // t2 精英
-            "lava_fireball",  new Bolt(3.2F, 44.0F, 0.50F, 1, false)    // t3 王（机制下一个分支补齐）
+            "fireball",       new Bolt(1.0F, 40.0F, 0.35F, 1, false, false),  // t1 冒险者
+            "great_fireball", new Bolt(2.4F, 40.0F, 0.62F, 1, false, false),  // t2 精英
+            "lava_fireball",  new Bolt(3.2F, 44.0F, 0.50F, 1, false, true)    // t3 王：落点留熔岩地
     );
+
+    // ---------------- 熔岩地 ----------------
+
+    /**
+     * 熔岩地每秒烧多少 = 那一发火球的伤害 × 这个比率。
+     *
+     * <p>取 10% 和焚身的比率一致。作者明确要求<b>熔岩地与焚身可以同时触发</b>
+     * （"此伤害与自身携带的灼烧并不冲突"）—— 所以站在熔岩地里又中了焚身，
+     * 就是每秒吃两份 ✓ 这不是 bug。
+     */
+    public static final float LAVA_FIELD_PERCENT = 0.10F;
+
+    /** 熔岩地持续 5 秒。 */
+    public static final int LAVA_FIELD_LIFE_TICKS = 100;
+
+    /** 熔岩地每秒结算一次（和焚身同节奏）。 */
+    public static final int LAVA_FIELD_TICK_INTERVAL = 20;
+
+    /** 熔岩地半径（格）。 */
+    public static final double LAVA_FIELD_RADIUS = 3.0D;
+
+    /** 熔岩地每秒该烧多少（绝对值）。 */
+    public static float lavaFieldPerSecond(float boltDamage) {
+        return boltDamage <= 0.0F ? 0.0F : boltDamage * LAVA_FIELD_PERCENT;
+    }
 
     private FireSpellRules() {
     }
@@ -134,5 +162,30 @@ public final class FireSpellRules {
     public static Vec3 right(Vec3 direction) {
         Vec3 reference = Math.abs(direction.y) > 0.95D ? new Vec3(0, 0, 1) : new Vec3(0, 1, 0);
         return direction.cross(reference).normalize();
+    }
+
+    /** 以某点为中心的"直立圆柱"包围盒（熔岩地这类贴地区域用它选人，不用球形免得选到天上）。 */
+    public static AABB uprightArea(Vec3 center, double radius, double halfHeight) {
+        return new AABB(center.x - radius, center.y - halfHeight, center.z - radius,
+                center.x + radius, center.y + halfHeight, center.z + radius);
+    }
+
+    /**
+     * 熔岩地/炎葬这类"无人认领也要生效"的区域该打谁。
+     *
+     * <p>和 {@link #enemy}(LivingEntity, LivingEntity) 的区别：施法者可能已经下线或换了维度，
+     * 这时不能因为"找不到主人"就整个区域失效 —— 退化成"打所有非玩家、非宠物"。
+     */
+    public static boolean enemyOrUnowned(LivingEntity caster, LivingEntity target) {
+        if (target == null || !target.isAlive() || target instanceof Player) {
+            return false;
+        }
+        if (target instanceof TamableAnimal pet && pet.isTame()) {
+            return false;
+        }
+        if (caster != null) {
+            return enemy(caster, target);
+        }
+        return target instanceof Enemy || target instanceof Mob;
     }
 }

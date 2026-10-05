@@ -174,7 +174,7 @@ try {
                   # fire 15 (ray 5 + ball 5 + burn 5)
                   'tnc:fire_ray', 'tnc:thick_fire_ray', 'tnc:triple_fire_ray',
                   'tnc:explosive_fire_ray', 'tnc:cataclysm_fire_ray',
-                  'tnc:fireball', 'tnc:great_fireball', 'tnc:giant_fireball',
+                  'tnc:fireball', 'tnc:great_fireball', 'tnc:lava_fireball',
                   'tnc:self_destruct', 'tnc:meteor_fireball',
                   'tnc:fire_aspect', 'tnc:ember_burn', 'tnc:blaze_burn',
                   'tnc:inferno_burn', 'tnc:total_burn',

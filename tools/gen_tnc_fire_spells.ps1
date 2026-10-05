@@ -158,7 +158,7 @@ function Ball-Spell($name, $tier, $velocity, $coef, $scale, $cooldown, $radius, 
 
 Ball-Spell 'fireball'       1 1.2 1.0 0.8 1.5 2.0 0.5
 Ball-Spell 'great_fireball' 2 1.1 1.8 1.2 3.0 3.0 0.7
-Ball-Spell 'giant_fireball' 3 1.0 2.2 1.8 4.5 5.0 0.9
+Ball-Spell 'lava_fireball' 3 1.0 2.2 1.8 4.5 5.0 0.9   # renamed 2026-10-05; the JSONs are now hand-edited (see header)
 
 # (note moved to PROJECT-STATE; kept ASCII for GBK safety)
 Write-Json 'meteor_fireball' @"

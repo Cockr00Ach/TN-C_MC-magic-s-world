@@ -222,7 +222,7 @@ public final class SpellCatalog {
             //   3/4/5 仍是引擎驱动，待换成 熔岩火球 / 熔岳天倾 / 炎葬（下一个分支）----
             fireEntry("fireball", Chain.BALL, 1, "火球术"),
             fireEntry("great_fireball", Chain.BALL, 2, "大火球术"),
-            fireEntry("giant_fireball", Chain.BALL, 3, "巨大火球"),
+            fireEntry("lava_fireball", Chain.BALL, 3, "熔岩火球"),
             fireEntry("self_destruct", Chain.BALL, 4, "自爆"),
             fireEntry("meteor_fireball", Chain.BALL, 5, "天降陨石火球"),
 

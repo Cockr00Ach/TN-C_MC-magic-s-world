@@ -43,6 +43,16 @@ public final class TNOrbEntities {
                     .sized(.3F,.3F).clientTrackingRange(10).updateInterval(1).build("tnc:fire_bolt"));
 
     /**
+     * 熔岩地（火系火球链 t3 起）：贴在落点下方的一块持续灼烧区域。
+     *
+     * <p>{@code updateInterval(10)}：它自己是静止的、只撒粒子，位置同步慢一点无所谓
+     * （省带宽）；判定完全在服务端做。
+     */
+    public static final RegistryObject<EntityType<com.tnc.tnc.magic.fire.TNLavaFieldEntity>> LAVA_FIELD =
+            ENTITY_TYPES.register("lava_field", () -> EntityType.Builder.of(com.tnc.tnc.magic.fire.TNLavaFieldEntity::new, MobCategory.MISC)
+                    .sized(.1F,.1F).clientTrackingRange(12).updateInterval(10).build("tnc:lava_field"));
+
+    /**
      * 环绕雷球。
      *
      * <p>{@code updateInterval(2)}：位置每 2 tick 同步一次 —— 环绕是持续运动的，
