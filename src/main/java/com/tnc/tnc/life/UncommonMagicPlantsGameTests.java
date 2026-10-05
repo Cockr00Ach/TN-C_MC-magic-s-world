@@ -35,7 +35,12 @@ public final class UncommonMagicPlantsGameTests {
             UncommonMagicPlants.HUSHCAP.tick(level.getBlockState(pos), level, pos, level.random);
         h.assertTrue(level.getBlockState(pos).getValue(UncommonMagicPlants.HushcapBlock.QUIET) == 3,
                 "Quiet surroundings unfold the mushroom cap");
-        h.assertTrue(level.getRawBrightness(pos, 0) < 8, "Underground fixture is dark enough");
+        // Build an actual sealed cave instead of relying on stale underground skylight.
+        for (int dx=-2; dx<=2; dx++) for (int dy=-2; dy<=2; dy++) for (int dz=-2; dz<=2; dz++)
+            if (Math.abs(dx)==2 || Math.abs(dy)==2 || Math.abs(dz)==2)
+                level.setBlockAndUpdate(pos.offset(dx,dy,dz), Blocks.STONE.defaultBlockState());
+        h.runAfterDelay(5, () -> {
+        h.assertTrue(level.getRawBrightness(pos, 0) < 8, "Sealed cave fixture is dark enough");
         var random = net.minecraft.util.RandomSource.create(311);
         for (int i = 0; i < 160; i++)
             UncommonMagicPlants.HUSHCAP.randomTick(level.getBlockState(pos), level, pos, random);
@@ -47,6 +52,7 @@ public final class UncommonMagicPlantsGameTests {
                         && count(drops, UncommonMagicPlants.HUSHCAP_SLICE) == 2,
                 "A full plant yields a replantable spore and useful food");
         h.succeed();
+        });
     }
 
     @GameTest(template = "building_test_empty", batch = "uncommon_plants", timeoutTicks = 30)

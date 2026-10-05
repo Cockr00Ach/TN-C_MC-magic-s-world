@@ -4,7 +4,7 @@ World migration is handled separately by install_tavern.py. This installer never
 copies a complete pack or a save and preserves the already reviewed ecology art.
 """
 from pathlib import Path
-import argparse, datetime, hashlib, json, os, shutil, zipfile
+import argparse, datetime, hashlib, json, os, shutil, zipfile, subprocess
 import xml.etree.ElementTree as ET
 from install_tavern import game_closed
 
@@ -24,7 +24,7 @@ def snapshot(root):
     return {str(p):sha(p) for p in set(files)}
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--install',action='store_true');parser.add_argument('--corrections',action='store_true');parser.add_argument('--access-fix',action='store_true');args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('--install',action='store_true');parser.add_argument('--corrections',action='store_true');parser.add_argument('--access-fix',action='store_true');parser.add_argument('--merged-resources-from');args=parser.parse_args()
     if args.access_fix:args.corrections=True
     audit=ROOT/'work/tavern-revision-20261005' if args.corrections else ROOT/'work'
     guest_count,tracks,game_tests,min_unit=(43,3,232,139) if args.corrections else (49,2,229,134)
@@ -67,8 +67,16 @@ def main():
         protected=[name for name in old.namelist() if '/sky_island/' in name or ('SkyIsland' in name and 'SkyIslandEvents' not in name)]
         protected.extend(name for name in old.namelist() if name.startswith(('assets/tnc/textures/','assets/tnc/models/')))
         removed_hud={'assets/tnc/textures/gui/health_bar/health_a_frame.png','assets/tnc/textures/gui/hunger_bar/hunger_c_frame.png'} if args.access_fix else set()
+        merged_resources=set()
+        if args.merged_resources_from:
+            changed=subprocess.check_output(['git','diff','--name-only',args.merged_resources_from,'HEAD','--','src/main/resources/assets/tnc/textures','src/main/resources/assets/tnc/models'],cwd=ROOT,text=True).splitlines()
+            merged_resources={name.removeprefix('src/main/resources/') for name in changed}
+            for name in merged_resources:
+                source=SOURCE/name
+                if source.exists():assert new.read(name)==source.read_bytes(),'Merged resource differs from reviewed source: '+name
+                else:assert name not in new.namelist(),'Deleted resource still packaged: '+name
         for name in protected:
-            if name in removed_hud:continue
+            if name.endswith("/") or name in removed_hud or name in merged_resources:continue
             assert new.read(name)==old.read(name),'Protected resource changed: '+name
         for name in new.namelist():
             if name.endswith('.json') and name.startswith(('assets/tnc/','data/tnc/')):json.loads(new.read(name))

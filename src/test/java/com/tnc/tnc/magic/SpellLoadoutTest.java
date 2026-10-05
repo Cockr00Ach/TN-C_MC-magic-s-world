@@ -404,8 +404,8 @@ class SpellLoadoutTest {
         data.setSlot(3, id("god_descent"));
 
         data.normalizeLoadout();
-        assertEquals(id("god_descent"), data.getSlot(0), "低档的位置要换成链顶");
-        assertNull(data.getSlot(3), "同链只留一个槽");
+        assertNull(data.getSlot(0), "清除低档的重复槽");
+        assertEquals(id("god_descent"), data.getSlot(3), "保留玩家已经设置的链顶位置");
         assertFalse(wandIds(data).contains(id("thunder_orb")), "低档绝不能再出现在法杖上");
     }
 

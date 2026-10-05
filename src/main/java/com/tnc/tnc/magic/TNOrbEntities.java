@@ -258,13 +258,15 @@ public final class TNOrbEntities {
      * <p><b>{@code updateInterval(1)}</b>：t3 起雾的位置每 tick 都在变，
      * 2 tick 同步一次就会看起来一顿一顿 ✗（环绕雷球当初就是这么被作者抓到的 ✓）。
      */
+    // SpellCloud is supplied by the optional engine; isolated tests have no engine.
     public static final RegistryObject<EntityType<DarkFogCloudEntity>> FOG =
-            ENTITY_TYPES.register("fog", () -> EntityType.Builder
+            net.minecraftforge.fml.ModList.get().isLoaded("spell_engine")
+            ? ENTITY_TYPES.register("fog", () -> EntityType.Builder
                     .of(DarkFogCloudEntity::new, MobCategory.MISC)
                     .sized(9.0F, 6.0F)
                     .clientTrackingRange(16)
                     .updateInterval(1)
-                    .build("tnc:fog"));
+                    .build("tnc:fog")) : null;
 
     private TNOrbEntities() {
     }

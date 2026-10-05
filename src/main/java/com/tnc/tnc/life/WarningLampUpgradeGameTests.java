@@ -14,15 +14,22 @@ import java.util.UUID;
 
 @GameTestHolder("tnc") @PrefixGameTestTemplate(false)
 public final class WarningLampUpgradeGameTests {
-    @GameTest(template="building_test_empty",batch="warning_lamp_upgrade",timeoutTicks=30)
+    @GameTest(template="building_test_empty",batch="warning_lamp_upgrade",timeoutTicks=60)
     public static void lensChangesActualAlarmRangeAndReloadRetainsInventory(GameTestHelper h) {
         var level = h.getLevel(); var pos = h.absolutePos(new BlockPos(2, 3, 2));
         level.setBlockAndUpdate(pos, WarningMoss.LANTERN.defaultBlockState());
         var lamp = (WarningMoss.LanternEntity)level.getBlockEntity(pos);
         var player = FakePlayerFactory.get(level, new GameProfile(UUID.randomUUID(), "warning_upgrade")); lamp.claim(player.getUUID());
         var zombie = EntityType.ZOMBIE.create(level); h.assertTrue(zombie != null, "Hostile fixture exists");
+        zombie.setNoAi(true); zombie.setNoGravity(true);
+        zombie.setPos(pos.getX() + 10.5, pos.getY(), pos.getZ() + .5);
+        var fixtureChunk = new net.minecraft.world.level.ChunkPos(zombie.blockPosition());
+        boolean alreadyForced = level.getForcedChunks().contains(fixtureChunk.toLong());
+        level.setChunkForced(fixtureChunk.x, fixtureChunk.z, true);
+        level.addFreshEntity(zombie);
+        // The hostile is outside the small template; allow entity chunk visibility to settle.
+        h.runAfterDelay(5, () -> {
         try {
-            zombie.setNoAi(true); zombie.setPos(pos.getX() + 10.5, pos.getY(), pos.getZ() + .5); level.addFreshEntity(zombie);
             WarningMoss.LANTERN.tick(level.getBlockState(pos), level, pos, level.random);
             h.assertTrue(!level.getBlockState(pos).getValue(WarningMoss.LanternBlock.LIT), "Unmodified eight-block lamp ignores ten-block hostile");
             ItemStack lens = new ItemStack(PastureRegistry.item("warning_lens")); lamp.interact(player, lens, false);
@@ -35,6 +42,10 @@ public final class WarningLampUpgradeGameTests {
             WarningMoss.LANTERN.tick(level.getBlockState(pos), level, pos, level.random);
             h.assertTrue(lamp.range() == 8 && !level.getBlockState(pos).getValue(WarningMoss.LanternBlock.LIT), "Detachment actually contracts alarm range");
             h.succeed();
-        } finally { zombie.discard(); }
+        } finally {
+            zombie.discard();
+            if (!alreadyForced) level.setChunkForced(fixtureChunk.x, fixtureChunk.z, false);
+        }
+        });
     }
 }

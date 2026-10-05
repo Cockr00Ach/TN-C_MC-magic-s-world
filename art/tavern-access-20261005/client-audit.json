@@ -1,0 +1,17 @@
+{
+  "evidence": [
+    "43 patron definitions loaded; entrance group cleared",
+    "Actual server mobInteract opened the dialogue over the registered channel",
+    "Full OGG song active after 200 entry ticks; track\u003d2",
+    "Foreign MUSIC and RECORDS requests blocked while own song continued",
+    "Mute/resume retained selected track",
+    "Room exit stopped the sound and reset timer",
+    "Reentry waited and began a new playlist visit",
+    "Natural end after 207.4507466 seconds advanced to a different song without a new ten-second wait"
+  ],
+  "failures": [],
+  "scope": "Actual Conquest furniture, real dialogue, exclusive OpenAL music and a full naturally completed song; not a full-pack tour",
+  "music_tracks": 3,
+  "screenshots": 3,
+  "guest_definitions": 43
+}

@@ -163,7 +163,7 @@ public class MagicStoneData {
      * <p>具体三步：
      * <ol>
      *   <li>槽位上的法术如果是自己那条链的<b>低档</b> → 换成该链当前链顶</li>
-     *   <li>同一条链出现多次 → 只保留<b>第一个</b>槽（玩家先放的那个位置优先），其余清空</li>
+     *   <li>同一条链出现多次 → 优先保留玩家已绑定的<b>链顶</b>槽，否则保留第一个槽，其余清空</li>
      *   <li>某条链有链顶但没被绑过 → 补进第一个空槽（不挤掉任何已绑的）</li>
      * </ol>
      *
@@ -173,60 +173,37 @@ public class MagicStoneData {
      * @return 真的改动过配装才返回 true
      */
     public boolean normalizeLoadout() {
-        boolean changed = false;
-
-        // ① 低档 → 链顶（顺便把"引擎不认识/不在目录里"的槽清掉，它们是死键）
-        for (int i = 0; i < LOADOUT_SLOTS; i++) {
-            String id = loadout.get(i);
-            if (id == null) {
-                continue;
-            }
-            ResourceLocation parsed = ResourceLocation.tryParse(id);
-            SpellCatalog.Entry entry = parsed == null ? null : SpellCatalog.byId(parsed);
-            if (entry == null || entry.independent() || entry.element() == null) {
-                continue;                       // 目录外/独立魔法：没有链顶概念，不动它
-            }
-            SpellCatalog.Entry top = SpellCatalog.topLearned(this, entry.element(), entry.chain());
-            if (top == null) {
-                loadout.set(i, null);           // 链顶都没了（被遗忘）→ 清掉这个死槽
-                changed = true;
-            } else if (!top.id().toString().equals(id)) {
-                loadout.set(i, top.id().toString());
-                changed = true;
-            }
+        java.util.List<String> before = new java.util.ArrayList<>(loadout);
+        java.util.Map<String,Integer> existingTops=new java.util.HashMap<>();
+        for(int i=0;i<LOADOUT_SLOTS;i++){
+            ResourceLocation id=loadout.get(i)==null?null:ResourceLocation.tryParse(loadout.get(i));
+            SpellCatalog.Entry entry=id==null?null:SpellCatalog.byId(id);
+            if(entry==null||entry.independent()||entry.element()==null||!hasLearned(id))continue;
+            SpellCatalog.Entry top=SpellCatalog.topLearned(this,entry.element(),entry.chain());
+            if(top!=null&&top.id().equals(id))existingTops.putIfAbsent(top.id().toString(),i);
         }
-
-        // ② 每条链只留一个槽（保留下标最小的那个 = 玩家最早放的位置）
-        java.util.Map<String, Integer> firstSeen = new java.util.HashMap<>();
-        for (int i = 0; i < LOADOUT_SLOTS; i++) {
-            String id = loadout.get(i);
-            if (id == null) {
-                continue;
+        java.util.Set<String> seen=new java.util.HashSet<>();
+        for(int i=0;i<LOADOUT_SLOTS;i++){
+            String bound=loadout.get(i);if(bound==null)continue;
+            ResourceLocation id=ResourceLocation.tryParse(bound);
+            if(id==null||!hasLearned(id)){loadout.set(i,null);continue;}
+            SpellCatalog.Entry entry=SpellCatalog.byId(id);
+            if(entry!=null&&!entry.independent()&&entry.element()!=null){
+                SpellCatalog.Entry top=SpellCatalog.topLearned(this,entry.element(),entry.chain());
+                if(top==null){loadout.set(i,null);continue;}
+                bound=top.id().toString();
+                if(existingTops.containsKey(bound)&&existingTops.get(bound)!=i){loadout.set(i,null);continue;}
             }
-            ResourceLocation parsed = ResourceLocation.tryParse(id);
-            SpellCatalog.Entry entry = parsed == null ? null : SpellCatalog.byId(parsed);
-            String key = (entry == null || entry.independent() || entry.element() == null)
-                    ? "id:" + id                                   // 独立/目录外：按 id 去重
-                    : entry.element().name() + "/" + entry.chain().name();
-            Integer previous = firstSeen.putIfAbsent(key, i);
-            if (previous != null) {
-                loadout.set(i, null);
-                changed = true;
-            }
+            loadout.set(i,seen.add(bound)?bound:null);
         }
-
-        // ③ 链顶必须至少在配装里出现一次（玩家手动排过就不动位置）
         for (SpellCatalog.Entry top : SpellCatalog.effective(this)) {
             if (!isBound(top.id())) {
                 int free = firstFreeSlot();
-                if (free < 0) {
-                    break;                                      // 18 个槽满了就到此为止
-                }
+                if (free < 0) break;
                 loadout.set(free, top.id().toString());
-                changed = true;
             }
         }
-        return changed;
+        return !before.equals(loadout);
     }
 
     /** 清空某个槽；本来就空返回 false。 */
@@ -254,32 +231,6 @@ public class MagicStoneData {
     }
 
     /** 已经配好的槽数（跨两页）。 */
-    /** Keep slot positions while upgrading each chain once to its learned top. */
-    public void normalizeLoadout() {
-        java.util.Map<String,Integer> existingTops=new java.util.HashMap<>();
-        for(int i=0;i<LOADOUT_SLOTS;i++){
-            ResourceLocation id=loadout.get(i)==null?null:ResourceLocation.tryParse(loadout.get(i));
-            SpellCatalog.Entry entry=id==null?null:SpellCatalog.byId(id);
-            if(entry==null||entry.independent()||entry.element()==null||!hasLearned(id))continue;
-            SpellCatalog.Entry top=SpellCatalog.topLearned(this,entry.element(),entry.chain());
-            if(top!=null&&top.id().equals(id))existingTops.putIfAbsent(top.id().toString(),i);
-        }
-        java.util.Set<String> seen=new java.util.HashSet<>();
-        for(int i=0;i<LOADOUT_SLOTS;i++){
-            String bound=loadout.get(i);if(bound==null)continue;
-            ResourceLocation id=ResourceLocation.tryParse(bound);
-            if(id==null||!hasLearned(id)){loadout.set(i,null);continue;}
-            SpellCatalog.Entry entry=SpellCatalog.byId(id);
-            if(entry!=null&&!entry.independent()&&entry.element()!=null){
-                SpellCatalog.Entry top=SpellCatalog.topLearned(this,entry.element(),entry.chain());
-                if(top==null){loadout.set(i,null);continue;}
-                bound=top.id().toString();
-                if(existingTops.containsKey(bound)&&existingTops.get(bound)!=i){loadout.set(i,null);continue;}
-            }
-            loadout.set(i,seen.add(bound)?bound:null);
-        }
-    }
-
     public int loadoutCount() {
         int count = 0;
         for (String id : loadout) {

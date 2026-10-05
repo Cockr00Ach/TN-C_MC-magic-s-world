@@ -87,8 +87,8 @@ public final class TNSpellOrbClientEvents {
         //   ⚠️ 这一行**不能省** ✗：实体类型没有渲染器 ⇒ 一生成就
         //   `entityrenderer is null` 卡退 ✗（这条坑在本项目已经崩过三次，
         //   现在由 OrbEntityRendererCoverageTest 在构建期把关 ✓）。
-        event.registerEntityRenderer(TNOrbEntities.FOG.get(),
-                context -> new net.spell_engine.client.render.SpellCloudRenderer<
-                        com.tnc.tnc.magic.DarkFogCloudEntity>(context));
+        if (net.minecraftforge.fml.ModList.get().isLoaded("spell_engine")) {
+            TNFogClientRegistration.register(event);
+        }
     }
 }

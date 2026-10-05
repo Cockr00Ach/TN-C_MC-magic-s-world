@@ -1,0 +1,32 @@
+{
+  "installed_at": "2026-10-05T16:27:22.404282",
+  "sha256": "FE493945E70C4A4140452D0807A8A2E6F9A292778DA6AFBA0E8A290A4E0FC20C",
+  "backup": "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\work\\backups\\tavern-package-20261005-162715",
+  "installed_files": [
+    "D:\\垃圾桶\\PCL 正式版 2.9.3\\.minecraft\\versions\\元素觉醒1.4.3-魔改版-20260915\\mods\\tnc-1.0.0.jar",
+    "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\modpack\\元素觉醒1.4.3-魔改版-20260915\\mods\\tnc-1.0.0.jar"
+  ],
+  "guest_seats": 43,
+  "total_seats": 75,
+  "unit_tests": 163,
+  "game_tests": 235,
+  "client": {
+    "evidence": [
+      "43 patron definitions loaded; entrance group cleared",
+      "Actual server mobInteract opened the dialogue over the registered channel",
+      "Full OGG song active after 200 entry ticks; track=2",
+      "Foreign MUSIC and RECORDS requests blocked while own song continued",
+      "Mute/resume retained selected track",
+      "Room exit stopped the sound and reset timer",
+      "Reentry waited and began a new playlist visit",
+      "Natural end after 207.4507466 seconds advanced to a different song without a new ten-second wait"
+    ],
+    "failures": [],
+    "scope": "Actual Conquest furniture, real dialogue, exclusive OpenAL music and a full naturally completed song; not a full-pack tour",
+    "music_tracks": 3,
+    "screenshots": 3,
+    "guest_definitions": 43
+  },
+  "protected_resources": 1559,
+  "protected_files": 6826
+}
