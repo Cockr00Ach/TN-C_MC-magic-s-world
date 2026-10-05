@@ -41,10 +41,10 @@ public final class TNFireFields {
                 TNSkyfallEntity.cast(level, player, skyfallAnchor(player));
                 return true;
             }
-            case "flame_burial" -> {
-                // 灼烧基数 = 系数 × 绝对基准 × 火法强（炎葬不是一个"命中"，没有命中伤害可用）
-                TNBurialEntity.cast(level, player,
-                        FireSpellRules.burialScorchBase(FireSpellRules.power(player)));
+            case "meteor_fall" -> {
+                // 作者 2026-10-05：地上先张开一座巨大法阵，随后天上一颗大陨石砸下来。
+                // 法阵钉在**目标脚下的地面**上，不跟着谁走 ✓
+                TNMeteorFallEntity.cast(level, player, groundAnchor(player));
                 return true;
             }
             default -> {
@@ -100,8 +100,24 @@ public final class TNFireFields {
         return player.position().add(0.0D, FireSpellRules.SKYFALL_HEIGHT, 0.0D);
     }
 
+    /**
+     * 陨星坠的法阵该铺在哪 —— 作者 2026-10-05：「地上出现一个巨大的法阵」。
+     *
+     * <p>和 {@link #skyfallAnchor} 的区别：那座在"<b>头上</b>"，这座要铺在<b>地面</b>上。
+     * 所以先复用 {@code skyfallAnchor} 找出"你瞄的是哪"，再<b>往下找一层地板</b>，
+     * 让法阵平平地贴地 ✓（往下最多找 8 格，找不到就用瞄准点本身）
+     */
+    private static Vec3 groundAnchor(ServerPlayer player) {
+        Vec3 aim = skyfallAnchor(player).subtract(0.0D, FireSpellRules.SKYFALL_HEIGHT, 0.0D);
+        BlockHitResult floor = player.level().clip(new ClipContext(aim,
+                aim.subtract(0.0D, 8.0D, 0.0D),
+                ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
+        Vec3 at = floor.getType() == HitResult.Type.MISS ? aim : floor.getLocation();
+        return new Vec3(at.x, at.y + 0.06D, at.z);
+    }
+
     /** 这个法术是不是由本类负责（命令/自检用）。 */
     public static boolean handles(String path) {
-        return "molten_skyfall".equals(path) || "flame_burial".equals(path);
+        return "molten_skyfall".equals(path) || "meteor_fall".equals(path);
     }
 }

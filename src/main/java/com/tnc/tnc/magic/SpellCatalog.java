@@ -224,7 +224,7 @@ public final class SpellCatalog {
             fireEntry("great_fireball", Chain.BALL, 2, "大火球术"),
             fireEntry("lava_fireball", Chain.BALL, 3, "熔岩火球"),
             fireEntry("molten_skyfall", Chain.BALL, 4, "熔岳天倾"),
-            fireEntry("flame_burial", Chain.BALL, 5, "炎葬"),
+            fireEntry("meteor_fall", Chain.BALL, 5, "陨星坠"),
 
             // ---- 燃烧线：1 附着(+10%) → 2 初级(+25%) → 3 中级(+75%,15s复活)
             //              → 4 高级(+150%,20s复活) → 5 完全燃烧(血1+无敌15s+200%) ----

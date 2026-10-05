@@ -44,6 +44,20 @@ public final class TNSkyfallEntity extends Entity {
     private UUID owner;
     private LivingEntity caster;
 
+    /**
+     * 法阵的视觉半径（格）—— 给渲染器 {@code TNSigilRenderer} 用，决定画多大一座。
+     *
+     * <p>这是「魔法阵」的尺寸，和 {@link FireSpellRules#SKYFALL_SEEK_RADIUS}（打多大范围）
+     * 是两件事，所以分开写 ✓
+     */
+    public static final double SIGIL_RADIUS = 3.0D;
+
+    /**
+     * 砸下来的火球<b>不从正中心出</b>（作者 2026-10-05：「火球不要固定在正中心落下」）——
+     * 在法阵圆盘内随机取一个落点，看着才像"整座法阵在开火"而不是"一根管子往下吐"。
+     */
+    private static final double LAUNCH_SPREAD = 2.4D;
+
     public TNSkyfallEntity(EntityType<? extends TNSkyfallEntity> type, Level level) {
         super(type, level);
         noPhysics = true;
@@ -121,7 +135,12 @@ public final class TNSkyfallEntity extends Entity {
                 .min(Comparator.comparingDouble(t -> t.distanceToSqr(position())))
                 .orElse(null);
 
-        Vec3 from = position();
+        // 作者 2026-10-05：**火球不要固定在正中心落下** ——
+        // 在法阵圆盘里随机取一点当发射点（面积均匀取点，所以是 sqrt(random) 而不是 random）
+        double spreadAngle = random.nextDouble() * Math.PI * 2.0D;
+        double spreadDist = Math.sqrt(random.nextDouble()) * LAUNCH_SPREAD;
+        Vec3 from = position().add(Math.cos(spreadAngle) * spreadDist, 0.0D,
+                Math.sin(spreadAngle) * spreadDist);
         // 速度跟手扔的那颗保持一致（作者 2026-10-05 要求降速）—— 别自己另定一个数
         Vec3 velocity = target == null
                 ? new Vec3(0.0D, -TNFireBoltEntity.LAUNCH_SPEED, 0.0D)

@@ -67,25 +67,16 @@ public final class FireSpellRules {
     // ---------------- 炎葬（t5）----------------
 
     /**
-     * 炎葬给的重度灼烧的"基准伤害"。
+     * <b>陨星坠</b>（t5）的参数。
      *
-     * <p>它不是一个"命中"，所以没有命中伤害可用 —— 用系数 × {@link #BASE_DAMAGE} 算出来：
-     * 6.0 × 5.0 = 30 → II 级焚身每秒 30 × 20% = <b>6.0 点</b>，持续 10 秒（合计 60）。
-     * 这是这一档唯一的"自定数值"，要调手感改这里。
+     * <p>它<b>不再</b>是"以自己为中心"的持续法阵了（那是改名前「炎葬」的做法）——
+     * 现在分两段：<b>地上先张开一座大法阵</b>（{@link TNMeteorFallEntity}），
+     * 随后从天上砸下一颗<b>大陨石</b>（{@link #METEOR_BOLT}）。
      */
-    public static final float BURIAL_SCORCH_COEFFICIENT = 6.0F;
+    public static final float METEOR_MAX_HEALTH_PERCENT = 0.10F;
 
-    /** 炎葬法阵持续 10 秒。 */
-    public static final int BURIAL_LIFE_TICKS = 200;
-
-    /** 炎葬每秒结算一次。 */
-    public static final int BURIAL_TICK_INTERVAL = 20;
-
-    /** 炎葬法阵半径（格）—— 作者：「自身周围」= 一颗烈焰灵珠的爆炸范围。 */
-    public static final double BURIAL_RADIUS = 6.0D;
-
-    /** 炎葬每秒扣<b>目标最大生命</b>的百分比（作者定：1%）。 */
-    public static final float BURIAL_MAX_HEALTH_PERCENT = 0.01F;
+    /** 陨石从法阵上方多高开始落下（格）—— 给高一点才看得出"从天而降"。 */
+    public static final double METEOR_DROP_HEIGHT = 42.0D;
 
     /** 只用于编译期兜底的无主法术 id（正常不该出现）。 */
     private static final ResourceLocation FIRE_ATTRIBUTE =
@@ -94,16 +85,19 @@ public final class FireSpellRules {
     /**
      * 一个「火球」型法术的形态参数。
      *
-     * @param coefficient 伤害系数（相对 {@link #BASE_DAMAGE}）
-     * @param range       最大飞行距离（格）
-     * @param radius      视觉/判定半径
-     * @param launches    一次施法放出几发
-     * @param heavyScorch 命中挂的焚身是 I 级还是 II 级
-     * @param lavaField   命中后是否在落点留下熔岩地（见 {@link TNLavaFieldEntity}）
-     * @param blastRadius 命中后的爆炸半径（0 = 不爆炸）
+     * @param coefficient      伤害系数（相对 {@link #BASE_DAMAGE}）
+     * @param range            最大飞行距离（格）
+     * @param radius           视觉/判定半径
+     * @param launches         一次施法放出几发
+     * @param heavyScorch      命中挂的焚身是 I 级还是 II 级
+     * @param lavaField        命中后是否在落点留下熔岩地（见 {@link TNLavaFieldEntity}）
+     * @param blastRadius      命中后的爆炸半径（0 = 不爆炸）
+     * @param maxHealthPercent 命中后再按目标<b>最大生命</b>的这个比例额外扣一次（0 = 不扣）；
+     *                         陨星坠的 10% 走这里 ✓
      */
     public record Bolt(float coefficient, float range, float radius, int launches,
-                       boolean heavyScorch, boolean lavaField, double blastRadius) {
+                       boolean heavyScorch, boolean lavaField, double blastRadius,
+                       float maxHealthPercent) {
     }
 
     /**
@@ -117,29 +111,36 @@ public final class FireSpellRules {
      * 的循环里，将来真要加同档选项时可以直接用。）
      */
     private static final Map<String, Bolt> BOLTS = Map.of(
-            "fireball",       new Bolt(1.0F, 40.0F, 0.35F, 1, false, false, 0.0D),   // t1 冒险者
-            "great_fireball", new Bolt(2.4F, 40.0F, 0.62F, 1, false, false, 0.0D),   // t2 精英
-            "lava_fireball",  new Bolt(3.2F, 44.0F, 0.50F, 1, false, true,  0.0D)    // t3 王：落点留熔岩地
+            "fireball",       new Bolt(1.0F, 40.0F, 0.35F, 1, false, false, 0.0D, 0.0F),  // t1 冒险者
+            "great_fireball", new Bolt(2.4F, 40.0F, 0.62F, 1, false, false, 0.0D, 0.0F),  // t2 精英
+            "lava_fireball",  new Bolt(3.2F, 44.0F, 0.50F, 1, false, true,  0.0D, 0.0F)   // t3 王：落点留熔岩地
     );
 
     /**
      * <b>熔岳天倾</b>砸下来的那种火球。
      *
      * <p>⚠️ 它<b>故意不在 {@link #BOLTS} 里</b>：熔岳天倾不是一个"朝准星扔火球"的法术，
-     * 而是头顶法阵往下砸（见 {@code TNSkyfallEntity}）。放进 {@code BOLTS} 的话
+     * 而是法阵往下砸（见 {@code TNSkyfallEntity}）。放进 {@code BOLTS} 的话
      * 玩家直接施放它就会变成"扔出一颗大火球"，与设计不符 ✗
      */
     public static final Bolt SKYFALL_BOLT =
-            new Bolt(3.4F, 64.0F, 0.50F, 1, false, true, SKYFALL_BLAST_RADIUS);
+            new Bolt(3.4F, 64.0F, 0.50F, 1, false, true, SKYFALL_BLAST_RADIUS, 0.0F);
+
+    /**
+     * <b>陨星坠</b>砸下来的那颗<b>大陨石</b>（作者 2026-10-05）。
+     *
+     * <p>同样**故意不在 {@link #BOLTS} 里** —— 它不是"朝准星扔火球"。
+     *
+     * <p>比熔岳天倾那颗更狠：半径 1.4（视觉上"巨大"）、爆炸半径 5、
+     * 挂 <b>II 级焚身</b>，并且再按目标<b>最大生命扣 10%</b>（{@code maxHealthPercent}）——
+     * 后者正是作者对 t5 的明确要求 ✓
+     */
+    public static final Bolt METEOR_BOLT =
+            new Bolt(6.0F, 64.0F, 1.40F, 1, true, true, 5.0D, METEOR_MAX_HEALTH_PERCENT);
 
     /** 爆炸伤害 = 那一发火球伤害 × {@link #SKYFALL_BLAST_PERCENT}。 */
     public static float blastDamage(float boltDamage) {
         return boltDamage <= 0.0F ? 0.0F : boltDamage * SKYFALL_BLAST_PERCENT;
-    }
-
-    /** 炎葬的 II 级焚身该以多少为基数（系数 × 绝对基准 × 火法强）。 */
-    public static float burialScorchBase(float power) {
-        return BURIAL_SCORCH_COEFFICIENT * BASE_DAMAGE * power;
     }
 
     // ---------------- 熔岩地 ----------------
@@ -179,7 +180,8 @@ public final class FireSpellRules {
      * <p>渲染器读的是实体的<b>同步字段</b> {@code spellPath()}，所以客户端拿得到 ✓
      */
     public static boolean isLavaRock(String spellPath) {
-        return "lava_fireball".equals(spellPath) || "molten_skyfall".equals(spellPath);
+        return "lava_fireball".equals(spellPath) || "molten_skyfall".equals(spellPath)
+                || "meteor_fall".equals(spellPath);
     }
 
     private FireSpellRules() {

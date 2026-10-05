@@ -62,9 +62,9 @@ public final class TNOrbEntities {
                     .sized(.1F,.1F).clientTrackingRange(16).updateInterval(2).build("tnc:skyfall"));
 
     /** 炎葬（火球链 t5）的自身周围法阵。同样跟着施法者走，所以同步要快一点。 */
-    public static final RegistryObject<EntityType<com.tnc.tnc.magic.fire.TNBurialEntity>> BURIAL =
-            ENTITY_TYPES.register("burial", () -> EntityType.Builder.of(com.tnc.tnc.magic.fire.TNBurialEntity::new, MobCategory.MISC)
-                    .sized(.1F,.1F).clientTrackingRange(16).updateInterval(2).build("tnc:burial"));
+    public static final RegistryObject<EntityType<com.tnc.tnc.magic.fire.TNMeteorFallEntity>> METEOR_FALL =
+            ENTITY_TYPES.register("meteor_fall", () -> EntityType.Builder.of(com.tnc.tnc.magic.fire.TNMeteorFallEntity::new, MobCategory.MISC)
+                    .sized(.1F,.1F).clientTrackingRange(16).updateInterval(2).build("tnc:meteor_fall"));
 
     /**
      * 环绕雷球。

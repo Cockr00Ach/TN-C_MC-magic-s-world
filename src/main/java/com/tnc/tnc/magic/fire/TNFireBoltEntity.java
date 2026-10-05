@@ -63,6 +63,12 @@ public final class TNFireBoltEntity extends Projectile {
     private boolean lavaField;
     /** 命中后的爆炸半径（0 = 不爆炸；t4 熔岳天倾的那些火球才有）。 */
     private double blastRadius;
+    /**
+     * 命中后<b>再按目标最大生命</b>扣掉的比例（0 = 不扣）。
+     *
+     * <p>目前只有<b>陨星坠</b>（t5）用：作者 2026-10-05 要求「造成 10% 的最大生命值伤害」。
+     */
+    private float maxHealthPercent;
 
     /**
      * 距离衰减 <b>1 → 0</b>：飞过射程的 {@link #FADE_START} 之后一路缩到看不见。
@@ -125,6 +131,7 @@ public final class TNFireBoltEntity extends Projectile {
         heavyScorch = bolt.heavyScorch();
         lavaField = bolt.lavaField();
         blastRadius = bolt.blastRadius();
+        maxHealthPercent = bolt.maxHealthPercent();
         remaining = bolt.range();
     }
 
@@ -283,6 +290,14 @@ public final class TNFireBoltEntity extends Projectile {
                 if (hurt && owner instanceof ServerPlayer caster) {
                     TNScorch.apply(hit, caster, damage, heavyScorch);
                 }
+                // 陨星坠：直击之后**再按目标最大生命扣一次**（作者 2026-10-05 要求 10%）。
+                // ⚠️ 一定要先把无敌帧清掉 —— 上面那次直击刚把它设成 20，
+                //    不清的话这一下会被原版的无敌帧整个吞掉（和灼烧跳伤同一个坑）
+                if (maxHealthPercent > 0.0F) {
+                    hit.invulnerableTime = 0;
+                    hit.hurt(server.damageSources().indirectMagic(this, owner),
+                            hit.getMaxHealth() * maxHealthPercent);
+                }
             }
             server.sendParticles(ParticleTypes.FLAME, impact.x, impact.y, impact.z, 14, 0.25D, 0.25D, 0.25D, 0.06D);
             // 命中时**炸开**成一团火焰粒子（作者 2026-10-05 要求：不要"啪"地直接消失）。
@@ -305,6 +320,12 @@ public final class TNFireBoltEntity extends Projectile {
                         t -> FireSpellRules.hittable(owner, t))) {
                     victim.invulnerableTime = 0;   // 直击刚把这个设成 20，不清的话爆炸会被吞
                     victim.hurt(server.damageSources().indirectMagic(this, owner), blast);
+                    // 陨星坠：**范围内**的生物也挂 II 级焚身（作者 2026-10-05 要求）。
+                    // 判据就用 maxHealthPercent > 0 —— 目前"按最大生命扣血 + 范围焚身"
+                    // 是陨星坠这一档独有的组合；将来真有第二个法术只要其中之一，再拆独立字段
+                    if (maxHealthPercent > 0.0F && owner instanceof ServerPlayer caster) {
+                        TNScorch.apply(victim, caster, damage, true);
+                    }
                 }
                 server.sendParticles(ParticleTypes.EXPLOSION, impact.x, impact.y, impact.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
                 server.sendParticles(ParticleTypes.LAVA, impact.x, impact.y, impact.z, 20,

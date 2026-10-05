@@ -175,7 +175,7 @@ try {
                   'tnc:fire_ray', 'tnc:thick_fire_ray', 'tnc:triple_fire_ray',
                   'tnc:explosive_fire_ray', 'tnc:cataclysm_fire_ray',
                   'tnc:fireball', 'tnc:great_fireball', 'tnc:lava_fireball',
-                  'tnc:molten_skyfall', 'tnc:flame_burial',
+                  'tnc:molten_skyfall', 'tnc:meteor_fall',
                   'tnc:fire_aspect', 'tnc:ember_burn', 'tnc:blaze_burn',
                   'tnc:inferno_burn', 'tnc:total_burn',
                   # wind chain 1 (the other 10 wind spells get added when their json exists)
