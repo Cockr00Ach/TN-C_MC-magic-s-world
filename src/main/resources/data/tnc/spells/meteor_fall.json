@@ -1,7 +1,7 @@
 {
   "school": "FIRE",
   "group": "ball",
-  "range": 6.0,
+  "range": 24.0,
   "learn": { "tier": 5 },
   "cast": {
     "duration": 1.5,
