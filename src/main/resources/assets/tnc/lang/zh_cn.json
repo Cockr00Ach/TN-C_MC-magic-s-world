@@ -434,5 +434,21 @@
   "entity.tnc.fighting_angel": "战斗天使",
   "entity.tnc.light_dragon": "光明龙",
   "effect.tnc.light_dragon_scales": "光龙鳞甲",
-  "block.tnc.forge_core": "魔力炉核"
+  "block.tnc.forge_core": "魔力炉核",
+  "entity.tnc.dark_dragon": "暗龙",
+  "effect.tnc.dark_dragon_scales": "暗龙鳞甲",
+  "entity.tnc.dark_giant": "巨兽人领主",
+  "item.tnc.dark_giant_spawn_egg": "巨兽人领主 刷怪蛋",
+  "entity.tnc.dark_imp": "小恶魔",
+  "entity.tnc.dark_guard": "暗卫",
+  "entity.tnc.dark_lord": "暗之统领",
+  "entity.tnc.dark_king": "暗之国王",
+  "entity.tnc.evil_god": "邪神",
+  "effect.tnc.dark_veil": "暗雾侵蚀",
+  "entity.tnc.fog": "黑雾",
+  "effect.tnc.blood_mark": "血之烙印",
+  "effect.tnc.blood_burn": "燃血",
+  "effect.tnc.blood_sacrifice": "献祭",
+  "effect.tnc.blood_possess": "夺舍",
+  "effect.tnc.blood_god": "我为神"
 }

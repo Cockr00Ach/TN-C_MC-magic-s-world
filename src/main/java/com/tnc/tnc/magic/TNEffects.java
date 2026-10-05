@@ -139,6 +139,31 @@ public final class TNEffects {
                     }
                 }
             });
+
+    /**
+     * ★ 暗龙链 t2「暗龙鳞甲」：移动速度 <b>+20%</b> ✓（减伤 50% 在受伤事件里 ✓）
+     * ＋ 暗属性伤害 <b>+30%</b> ✓（暗在引擎里映射 {@code spell_power:soul} ✓，
+     * 照 {@link #DARK_POWER} 的写法，没装时只加速度、不崩 ✓）。
+     *
+     * <p>它就是上面那个光龙鳞甲的**暗属性镜像** ✓ ——
+     * 作者 2026-10-02："复制一下光龙，生成一个暗龙" ✓。
+     */
+    public static final RegistryObject<MobEffect> DARK_DRAGON_SCALES =
+            EFFECTS.register("dark_dragon_scales", () -> new MobEffect(
+                    MobEffectCategory.BENEFICIAL, 0x6A2AB0) {
+                {
+                    addAttributeModifier(Attributes.MOVEMENT_SPEED,
+                            uuidFor("tnc:dark_dragon_scales_speed"), 0.20D,
+                            AttributeModifier.Operation.MULTIPLY_BASE);
+                    Attribute soul = ForgeRegistries.ATTRIBUTES.getValue(
+                            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(
+                                    "spell_power", "soul"));
+                    if (soul != null) {
+                        addAttributeModifier(soul, uuidFor("tnc:dark_dragon_scales_soul"),
+                                0.30D, AttributeModifier.Operation.MULTIPLY_BASE);
+                    }
+                }
+            });
     /** 环绕雷球：本身不加属性，只是个"光环开着"的标记（电击逻辑在机制层）。 */
     public static final RegistryObject<MobEffect> ORBITING_THUNDER_ORB =
             EFFECTS.register("orbiting_thunder_orb", () -> new MobEffect(
@@ -199,14 +224,145 @@ public final class TNEffects {
                 return new AttributeBuff(0x6A3FA0, soul, 0.50D, AttributeModifier.Operation.MULTIPLY_BASE);
             });
 
+    /**
+     * <b>黑雾 · 侵蚀</b> —— 暗系第四条链（黑雾 / 领域）挂在敌人身上的减益 ✓
+     * （作者 2026-10-09："你全做吧"）。
+     *
+     * <h2>为什么不再借 {@code tnc:gale_slow}</h2>
+     * 那五个黑雾法术原来挂的是<b>风系</b>的 {@code gale_slow} ✗ —— 暗雾用风的效果，
+     * 图标/颜色/名字全是风的味道，而且它只是"减速"，和"黑雾侵蚀"没关系。
+     * 现在换成自己的：<b>减速 + 虚弱</b>（移动速度与攻击力一起降）✓
+     * 走原版那套"amplifier 递增"就够（amp 0/1/2 = 缓 0/I/II 阶）✓，不必写五个效果类。
+     *
+     * <p>颜色用暗紫（{@code 0x4A2C6E}）⇒ 它同时决定 <b>HUD 图标底色</b>和身上那圈粒子颜色 ✓ ——
+     * 一眼能认出"这是暗的"，和雷系的青色、风系的浅绿区分开 ✓。
+     */
+    public static final RegistryObject<MobEffect> DARK_VEIL = EFFECTS.register("dark_veil",
+            () -> {
+                // 1.20.1 的 MobEffect 构造器是 protected、也没有 setCategory ✗
+                // ⇒ 走我们自己的子类，把 category 从构造器喂进去 ✓
+                AttributeBuff effect = new AttributeBuff(MobEffectCategory.HARMFUL, 0x4A2C6E,
+                        Attributes.MOVEMENT_SPEED, -0.15D, AttributeModifier.Operation.MULTIPLY_TOTAL);
+                effect.addAttributeModifier(Attributes.ATTACK_DAMAGE,
+                        uuidFor("tnc:dark_veil_weak"), -0.10D, AttributeModifier.Operation.MULTIPLY_TOTAL);
+                return effect;
+            });
+
+    // ------------------------------------------------------------------
+    //  暗系第二条链「以伤换伤 · 献祭」（作者 2026-10-09："你还可以再优化一下以伤换伤"）
+    //
+    //  为什么这五个效果必须存在（链条的核心一直缺一半 ✗）：
+    //  这条链原来是**借火系燃烧线的五个效果**当"代价"（`tnc:fire_aspect` … `tnc:total_burn`），
+    //  而那五个效果加的是 `spell_power:fire` ✗ —— 暗系法术吃不到，
+    //  于是"烧血"只剩纯亏：扣自己的血、换一个对暗系毫无用处的火系加成 ✗✗。
+    //  ⇒ 现在有暗系自己的五个效果（加 `spell_power:soul` ✓），
+    //    "燃血"这套代价由 `magic/TNDarkSacrificeMechanics` 按同一条规则结算 ✓。
+    //
+    //  加成走原版"amplifier 递增"：MobEffectInstance 按 (amplifier + 1) 放大，
+    //  所以一个效果覆盖 +10% / +20% / +30% …（JSON 里写 amplifier 0..3）✓。
+    // ------------------------------------------------------------------
+
+    /** 火系燃烧线用的颜色（和 `TNFireMechanics.COLOR_FIRE` 一致）。 */
+    private static final int COLOR_FIRE = 0xE06010;
+    /** 暗系献祭线用的颜色（暗红紫：血 + 暗 ✓）。 */
+    private static final int COLOR_BLOOD = 0x8E1E3C;
+
+    /** 暗 · 血之烙印：+10% 暗属性强度（不燃血 → 安全档）。 */
+    public static final RegistryObject<MobEffect> BLOOD_MARK =
+            darkScales("blood_mark", 0.10D, false);
+    /** 暗 · 燃血：+25% 暗属性强度，燃血 1%/秒。 */
+    public static final RegistryObject<MobEffect> BLOOD_BURN =
+            darkScales("blood_burn", 0.25D, true);
+    /** 暗 · 献祭：+50% 暗属性强度，燃血 2%/秒，死亡可原地复活。 */
+    public static final RegistryObject<MobEffect> BLOOD_SACRIFICE =
+            darkScales("blood_sacrifice", 0.50D, true);
+    /** 暗 · 夺舍：+100% 暗属性强度，燃血 3%/秒，死亡可原地复活。 */
+    public static final RegistryObject<MobEffect> BLOOD_POSSESS =
+            darkScales("blood_possess", 1.00D, true);
+    /** 暗 · 我为神：+200% 暗属性强度，血锁 1 ＋ 无敌，结束回半血。 */
+    public static final RegistryObject<MobEffect> BLOOD_GOD =
+            darkScales("blood_god", 2.00D, false);
+
+    /**
+     * 暗系献祭效果工厂：挂一个 {@code spell_power:soul} 修饰符 ✓。
+     *
+     * <p>没装 spell_power 时不挂任何属性 ⇒ 退化成"纯标记"，至少不崩 ✓。
+     * 颜色决定 HUD 图标底色与身上粒子色（暗红紫 = 血与暗 ✓）。
+     */
+    private static RegistryObject<MobEffect> darkScales(String name, double amount, boolean burn) {
+        return EFFECTS.register(name, () -> new DarkScalesEffect(amount, burn));
+    }
+
+    /** 暗系献祭标记 + {@code spell_power:soul} 加成。 */
+    public static final class DarkScalesEffect extends MobEffect {
+
+        private final boolean burning;
+
+        DarkScalesEffect(double amount, boolean burning) {
+            super(MobEffectCategory.BENEFICIAL, COLOR_BLOOD);
+            this.burning = burning;
+            Attribute soul = ForgeRegistries.ATTRIBUTES.getValue(
+                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("spell_power", "soul"));
+            if (soul != null) {
+                addAttributeModifier(soul, uuidFor("tnc:soul:" + amount), amount,
+                        AttributeModifier.Operation.MULTIPLY_BASE);
+            }
+        }
+
+        /** 这个档位是不是"持续燃血"的那种（我为神不是 —— 它把血锁在 1 ✓）。 */
+        public boolean burning() {
+            return burning;
+        }
+    }
+
+    /**
+     * 火系燃烧线的五个效果工厂 —— <b>给 {@link TNFireMechanics} 用</b> ✓。
+     *
+     * <p>原来那个私有嵌套类只加 {@code spell_power:fire}；现在把"加哪个学派"参数化，
+     * 暗系那五个（{@link #BLOOD_MARK} 等）走同一个实现，只是换成 {@code soul} ✓。
+     * （两条链因此**不会互相影响**：燃血判定看的是各自那组效果 ✓。）
+     */
+    static RegistryObject<MobEffect> fireScales(String name, double amount) {
+        return EFFECTS.register(name, () -> new ScalesEffect(COLOR_FIRE, "fire", amount));
+    }
+
+    /** 加某一个学派法术强度的通用实现（`spell_power:<school>` 必须存在）。 */
+    public static final class ScalesEffect extends MobEffect {
+
+        ScalesEffect(int color, String school, double amount) {
+            super(MobEffectCategory.BENEFICIAL, color);
+            Attribute attribute = ForgeRegistries.ATTRIBUTES.getValue(
+                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("spell_power", school));
+            if (attribute != null) {
+                addAttributeModifier(attribute, uuidFor("tnc:" + school + ":" + amount), amount,
+                        AttributeModifier.Operation.MULTIPLY_BASE);
+            }
+        }
+    }
+
+    /** 给自检/命令看：暗系献祭那五个效果都注册上了吗。 */
+    public static int darkScalesCount() {
+        return 5;
+    }
+
     private TNEffects() {
     }
 
-    /** 带一个属性修饰符的增益效果。 */
+    /** 带一个属性修饰符的效果（默认增益；减益走下面那个带 category 的构造器 ✓）。 */
     private static class AttributeBuff extends MobEffect {
 
         AttributeBuff(int color, Attribute attribute, double amount, AttributeModifier.Operation op) {
-            super(MobEffectCategory.BENEFICIAL, color);
+            this(MobEffectCategory.BENEFICIAL, color, attribute, amount, op);
+        }
+
+        /**
+         * ★ 带 category 的版本 —— 1.20.1 的 {@code MobEffect(MobEffectCategory, int)} 是
+         * <b>protected</b> ✗、也没有 {@code setCategory}，所以"减益"只能从构造器传进来 ✓
+         * （黑雾的 {@code tnc:dark_veil} 要用它；HUD 上减益是红框、增益是蓝框 ✓）。
+         */
+        AttributeBuff(MobEffectCategory category, int color, Attribute attribute,
+                      double amount, AttributeModifier.Operation op) {
+            super(category, color);
             // 1.20.1 的 addAttributeModifier 收的是"UUID 字符串"
             // 固定 UUID：同一个效果重复上不该叠加出多个修饰符
             addAttributeModifier(attribute, uuidFor("tnc:" + attribute.getDescriptionId()), amount, op);
@@ -246,5 +402,9 @@ public final class TNEffects {
         TNFireMechanics.register(modEventBus);
         // 风系的效果与飞行机制同理
         TNWindMechanics.register(modEventBus);
+        // ★ 黑雾链的事件订阅挂在**引擎自己的**事件上（不是 Forge 总线 ✗），
+        //   在 DarkFogMechanics 的静态块里注册 ⇒ 这里显式碰一下它的静态字段，
+        //   保证类在"任何施法之前"就被加载 ✓（否则第一次放黑雾会没反应 ✗）。
+        DarkFogMechanics.ensureLoaded();
     }
 }

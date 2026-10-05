@@ -384,5 +384,21 @@
   "entity.tnc.fighting_angel": "Fighting Angel",
   "entity.tnc.light_dragon": "Light Dragon",
   "effect.tnc.light_dragon_scales": "Light Dragon Scales",
-  "block.tnc.forge_core": "Mana Forge Core"
+  "block.tnc.forge_core": "Mana Forge Core",
+  "entity.tnc.dark_dragon": "Dark Dragon",
+  "effect.tnc.dark_dragon_scales": "Dark Dragon Scales",
+  "entity.tnc.dark_giant": "Beastman Warlord",
+  "item.tnc.dark_giant_spawn_egg": "Beastman Warlord Spawn Egg",
+  "entity.tnc.dark_imp": "Imp",
+  "entity.tnc.dark_guard": "Dark Guard",
+  "entity.tnc.dark_lord": "Dark Lord",
+  "entity.tnc.dark_king": "Dark King",
+  "entity.tnc.evil_god": "Evil God",
+  "effect.tnc.dark_veil": "Dark Veil",
+  "entity.tnc.fog": "Black Fog",
+  "effect.tnc.blood_mark": "Blood Mark",
+  "effect.tnc.blood_burn": "Blood Burn",
+  "effect.tnc.blood_sacrifice": "Blood Sacrifice",
+  "effect.tnc.blood_possess": "Possession",
+  "effect.tnc.blood_god": "I Am God"
 }

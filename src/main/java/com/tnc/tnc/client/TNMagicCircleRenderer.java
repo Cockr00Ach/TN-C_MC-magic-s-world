@@ -40,6 +40,15 @@ public class TNMagicCircleRenderer extends EntityRenderer<TNMagicCircleEntity> {
     private static final ResourceLocation LIGHT_TEXTURE = ResourceLocation.fromNamespaceAndPath(
             TNMod.MODID, "textures/entity/light_circle.png");
 
+    /**
+     * ★ 暗色法阵 —— <b>黑雾链的边界线</b>（作者 2026-10-09："你全做吧"）。
+     *
+     * <p>由 {@code tools/gen_dark_fog_model.py} 程序化画出（外圈亮紫 = "你正在离开雾"的那条线，
+     * 内圈是暗紫符文）✓。它不是装饰：半径 = 雾半径，所以玩家一眼看得出站在里面还是外面 ✓。
+     */
+    private static final ResourceLocation DARK_TEXTURE = ResourceLocation.fromNamespaceAndPath(
+            TNMod.MODID, "textures/entity/dark_circle.png");
+
     public TNMagicCircleRenderer(EntityRendererProvider.Context context) {
         super(context);
         this.shadowRadius = 0.0F;
@@ -50,9 +59,19 @@ public class TNMagicCircleRenderer extends EntityRenderer<TNMagicCircleEntity> {
         return textureFor(entity);
     }
 
-    /** ★ 样式选贴图：光系链的阵用 {@code light_circle.png} ✓（作者要"专门为光魔法画一个法阵"✓）。 */
+    /**
+     * ★ 样式选贴图：光系阵用 {@code light_circle.png}、黑雾边界用 {@code dark_circle.png}，
+     * 其余（雷系）走原来的 {@code magic_circle.png} ✓。
+     */
     private static ResourceLocation textureFor(TNMagicCircleEntity entity) {
-        return entity.style() == TNMagicCircleEntity.STYLE_LIGHT ? LIGHT_TEXTURE : TEXTURE;
+        int style = entity.style();
+        if (style == TNMagicCircleEntity.STYLE_LIGHT) {
+            return LIGHT_TEXTURE;
+        }
+        if (style == TNMagicCircleEntity.STYLE_DARK) {
+            return DARK_TEXTURE;
+        }
+        return TEXTURE;
     }
 
     @Override

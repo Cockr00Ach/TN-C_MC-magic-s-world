@@ -35,10 +35,16 @@ public class TNMagicCircleEntity extends Entity {
 
     /**
      * ★ 法阵**样式**（作者 2026-10-01："专门为光魔法画一个法阵，要纯白色的"）：
-     * 0 = 原来的雷系阵（{@code magic_circle.png} ✓），1 = 光系阵（{@code light_circle.png} ✓）。
+     * 0 = 原来的雷系阵（{@code magic_circle.png} ✓），1 = 光系阵（{@code light_circle.png} ✓），
+     * 2 = 暗色阵（{@code dark_circle.png} ✓）—— 给<b>黑雾链</b>当"领域的边界"用 ✓。
+     *
+     * <p>暗色阵和另外两张的用法不一样：它不是"施法时脚下的装饰"，而是
+     * <b>雾的边界线</b> —— 半径 = 雾半径、时长 = 雾时长、位置每 tick 跟着雾走 ✓
+     * （由 {@link DarkFogCloudEntity} 托管，见那边的 {@code claimBoundaryCircle}）。
      */
     public static final int STYLE_STORM = 0;
     public static final int STYLE_LIGHT = 1;
+    public static final int STYLE_DARK = 2;
 
     protected static final EntityDataAccessor<Integer> DATA_STYLE =
             SynchedEntityData.defineId(TNMagicCircleEntity.class, EntityDataSerializers.INT);

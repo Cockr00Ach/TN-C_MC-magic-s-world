@@ -168,6 +168,104 @@ public final class TNOrbEntities {
                     .updateInterval(1)
                     .build("tnc:light_dragon"));
 
+    /**
+     * ★★ <b>龙真正的实体（2026-10-04 起）</b> —— 原版 {@link net.minecraft.world.entity.Display.BlockDisplay} ✓。
+     *
+     * <p>作者："<b>龙释放还是异常，都没法出现啊大哥，你把他当成block来使用好不好</b>" ✓
+     * ⇒ 不再走 GeckoLib（那条路上"非生物实体 yaw 恒为 0 / 大模型被视锥剔掉 / 出生点被推到
+     * 几十格外"三件事叠起来，实机就是"根本没法出现"✗），
+     * 改成**方块模型 + 原版 Display** ✓（见 {@code light/TNDragonDisplayEntity} ✓）。
+     *
+     * <p>光龙 / 暗龙**共用这一个实体类型** ✓ —— 差别只有"挂哪个载体方块" ✓
+     * （{@code tnc:dragon_display_light} / {@code _dark} ✓），
+     * 法术生成时用 {@code setCarrier(...)} 指定 ✓。
+     */
+    public static final RegistryObject<EntityType<com.tnc.tnc.light.TNDragonDisplayEntity>> DRAGON =
+            ENTITY_TYPES.register("dragon", () -> EntityType.Builder
+                    .of(com.tnc.tnc.light.TNDragonDisplayEntity::new, MobCategory.MISC)
+                    .sized(2.5F, 2.0F)
+                    .clientTrackingRange(16)
+                    .updateInterval(1)
+                    .build("tnc:dragon"));
+
+    /**
+     * ★ 暗系链「暗龙」<b>扔出去的那条暗龙</b> ✓（作者 2026-10-02：<b>"复制一下光龙，生成一个暗龙"</b> ✓）。
+     *
+     * <p>它就是上面那条光龙的**暗色镜像** ✓ —— 实体类**完全一样**
+     * （{@link com.tnc.tnc.light.TNDragonEntity} ✓，冲/环绕/撞伤那套逻辑一个字没改 ✗），
+     * 差别只有两处：
+     * <ul>
+     *   <li><b>实体类型不同</b>（{@code tnc:dark_dragon} ✓）⇒ 客户端走另一个渲染器 + 另一张贴图
+     *       （{@code dark/client/TNDarkDragonGeoModel} ✓）；</li>
+     *   <li>法术生成时调一次 {@code entity.setDark(true)} ✓ ⇒ 粒子换成灵魂火 + 黑烟 ✓。</li>
+     * </ul>
+     * 同样是投射物（{@code MobCategory.MISC} ✓ 不是生物 ✗、**不注册属性** ✓）。
+     */
+    public static final RegistryObject<EntityType<com.tnc.tnc.light.TNDragonEntity>> DARK_DRAGON =
+            ENTITY_TYPES.register("dark_dragon", () -> EntityType.Builder
+                    .of(com.tnc.tnc.light.TNDragonEntity::new, MobCategory.MISC)
+                    .sized(2.5F, 2.0F)
+                    .clientTrackingRange(16)
+                    .updateInterval(1)
+                    .build("tnc:dark_dragon"));
+
+    // ------------------------------------------------------------------
+    //  ★ 暗系第三条链「召唤」的五个召唤物 ✓（作者 2026-10-04："暗魔法的召唤流没实装吗" ✓）
+    //    五个模型差得远（5/8/10/11/18 骨骼 ✗）⇒ 注册成**五个实体类型** ✓：
+    //    这样一个类（{@code dark/TNDarkSummonEntity}）就能按类型读出档位 ✓，
+    //    每档还能有自己的名字（小恶魔 / 暗卫 / … ✓）和自己的属性表 ✓。
+    // ------------------------------------------------------------------
+
+    /** t1 小恶魔（0.69 格，飘着的一团）✓ */
+    public static final RegistryObject<EntityType<com.tnc.tnc.dark.TNDarkSummonEntity>> DARK_IMP =
+            summonType("dark_imp", 0.7F, 0.9F);
+    /** t2 暗卫（1.88 格，单刀）✓ */
+    public static final RegistryObject<EntityType<com.tnc.tnc.dark.TNDarkSummonEntity>> DARK_GUARD =
+            summonType("dark_guard", 0.8F, 1.9F);
+    /** t3 暗之统领（1.88 格，双刀 + 披风）✓ */
+    public static final RegistryObject<EntityType<com.tnc.tnc.dark.TNDarkSummonEntity>> DARK_LORD =
+            summonType("dark_lord", 0.8F, 1.9F);
+    /** t4 暗之国王（2.0 格，王冠）✓ */
+    public static final RegistryObject<EntityType<com.tnc.tnc.dark.TNDarkSummonEntity>> DARK_KING =
+            summonType("dark_king", 0.9F, 2.0F);
+    /** t5 邪神（2.38 格，六臂 + 光环）✓ */
+    public static final RegistryObject<EntityType<com.tnc.tnc.dark.TNDarkSummonEntity>> EVIL_GOD =
+            summonType("evil_god", 1.1F, 2.4F);
+
+    private static RegistryObject<EntityType<com.tnc.tnc.dark.TNDarkSummonEntity>> summonType(
+            String id, float width, float height) {
+        return ENTITY_TYPES.register(id, () -> EntityType.Builder
+                .of(com.tnc.tnc.dark.TNDarkSummonEntity::new, MobCategory.CREATURE)
+                .sized(width, height)
+                .clientTrackingRange(10)
+                .build("tnc:" + id));
+    }
+
+    /**
+     * ★ <b>黑雾</b>（暗系第四条链：黑雾 / 领域）✓（作者 2026-10-09："你全做吧"）。
+     *
+     * <p>它就是引擎 {@code SpellCloud} 的<b>子类</b> ✓ —— 法术 JSON 写
+     * {@code "entity_type_id": "tnc:fog"} 之后，{@code SpellHelper.placeCloud} 会
+     * {@code create(level)} 出这个类（随后强转成 {@code SpellCloud}）✓，
+     * 于是那五个法术的雾就能<b>跟着施法者走</b>（t3 起）✓、并托管一张跟着走的
+     * <b>边界法阵</b> ✓（见 {@link DarkFogCloudEntity}）。
+     *
+     * <p>尺寸给 <b>9 × 6</b>：它不是"实心方块"，而是要画成一大团低矮的穹顶云 ✓ ——
+     * 包围盒偏小会让客户端的可见性剔除把雾<b>提前剪掉</b> ✗（10 格高的天使踩过这个坑：
+     * 抬头看天使整尊消失，见 {@code TNAngelEntity.getBoundingBoxForCulling}）；
+     * {@code clientTrackingRange} 也要够大，否则站在雾里的玩家收不到这片雾 ✓。
+     *
+     * <p><b>{@code updateInterval(1)}</b>：t3 起雾的位置每 tick 都在变，
+     * 2 tick 同步一次就会看起来一顿一顿 ✗（环绕雷球当初就是这么被作者抓到的 ✓）。
+     */
+    public static final RegistryObject<EntityType<DarkFogCloudEntity>> FOG =
+            ENTITY_TYPES.register("fog", () -> EntityType.Builder
+                    .of(DarkFogCloudEntity::new, MobCategory.MISC)
+                    .sized(9.0F, 6.0F)
+                    .clientTrackingRange(16)
+                    .updateInterval(1)
+                    .build("tnc:fog"));
+
     private TNOrbEntities() {
     }
 

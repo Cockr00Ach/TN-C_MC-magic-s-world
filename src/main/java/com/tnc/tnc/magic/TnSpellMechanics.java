@@ -685,6 +685,17 @@ public final class TnSpellMechanics {
         if (com.tnc.tnc.light.TNLightBeamMechanics.isLightBeamSpell(path)) {
             com.tnc.tnc.light.TNLightBeamMechanics.onSpellCast(player, path);
         }
+
+        // ★★ 暗龙（暗系第五条链）2026-10-04 按作者要求**整条删了** ✗
+        //    （"把龙法术都删了吧，包括光龙和暗龙" ✓ ⇒ 这里不再派发 ✓：
+        //      法术 json / 法杖池条目都删了 ✓，Java 那条链的代码留着但**没有入口** ✓）
+
+        // ★★ 暗系第三条链（召唤）：小恶魔 / 暗卫 / 暗之统领 / 暗之国王 / 邪神 ✓
+        //    （作者 2026-10-04："暗魔法的召唤流没实装吗" ✓ —— 这五个法术原来挂的是
+        //      **风系占位效果** ✗，现在真的把召唤物叫出来 ✓）
+        if (com.tnc.tnc.dark.TNDarkSummonChain.isDarkSummonSpell(path)) {
+            com.tnc.tnc.dark.TNDarkSummonChain.onSpellCast(player, path);
+        }
     }
 
     /**

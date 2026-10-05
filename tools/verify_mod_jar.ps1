@@ -46,6 +46,25 @@ function Fail([string]$message) { Write-Host "  [PROBLEM] $message"; $script:pro
 function Ok([string]$message)   { Write-Host "  [ok]      $message" }
 function Note([string]$message) { Write-Host "  [note]    $message" }
 
+# Deep JSON -> PSCustomObject, for Windows PowerShell 5.1.
+#
+# WHY: PS 5.1's ConvertFrom-Json has no -Depth and defaults to a nesting limit of 2,
+# and past it the value is SILENTLY replaced (a nested object becomes a string), so
+# `$spell.release.target.cloud.entity_type_id` reads back as "" while the file is in
+# fact correct. That silently disabled the model check for the black fog chain (the
+# first spell whose interesting fields sit at depth 5).
+#
+# JavaScriptSerializer has a real RecursionLimit; its Dictionary output is then
+# round-tripped through ConvertTo/From-Json so the dot-access below keeps working.
+Add-Type -AssemblyName System.Web.Extensions
+$script:TncJson = New-Object System.Web.Script.Serialization.JavaScriptSerializer
+$script:TncJson.RecursionLimit = 100
+function ConvertFrom-TncSpellJson([string]$text) {
+    $raw = $script:TncJson.DeserializeObject($text)
+    if ($null -eq $raw) { return $null }
+    return ($script:TncJson.Serialize($raw) | ConvertFrom-Json)
+}
+
 Write-Host "jar: $JarPath"
 if (-not (Test-Path $JarPath)) { Write-Host "PROBLEM: jar not found"; exit 1 }
 Ok ("artifact present ({0:N0} bytes)" -f (Get-Item $JarPath).Length)
@@ -135,7 +154,13 @@ try {
     #  * the spell JSON / icon missing from the PACK -> the spell does not exist
     #    (they live in the modpack's kubejs + its TN-C resource pack, not in the jar).
     foreach ($cls in @('com/tnc/tnc/magic/TNEffects.class',
-                       'com/tnc/tnc/magic/TnSpellMechanics.class')) {
+                       'com/tnc/tnc/magic/TnSpellMechanics.class',
+                       # black fog chain (2026-10-09): the cloud subclass + the cast listener.
+                       # BOTH must be in the jar: without the entity class the fog cannot be
+                       # created at all, and without the mechanics class the boundary circle
+                       # is never placed (and that failure is silent in game).
+                       'com/tnc/tnc/magic/DarkFogCloudEntity.class',
+                       'com/tnc/tnc/magic/DarkFogMechanics.class')) {
         if ($zip.Entries | Where-Object { $_.FullName -eq $cls }) { Ok "class present: $cls" }
         else { Fail "class missing from jar: $cls" }
     }
@@ -155,7 +180,16 @@ try {
                   'tnc:inferno_burn', 'tnc:total_burn',
                   # wind chain 1 (the other 10 wind spells get added when their json exists)
                   'tnc:wind_field', 'tnc:wind_speed', 'tnc:greater_wind_speed',
-                  'tnc:super_wind_speed', 'tnc:wind_god_descent')
+                  'tnc:super_wind_speed', 'tnc:wind_god_descent',
+                  # dark chain 4 "black fog" (2026-10-09: real fog particles, the
+                  # tnc:projectile/dark_fog dome, tnc:dark_veil, the tnc:fog cloud entity)
+                  'tnc:black_mist', 'tnc:night_grace', 'tnc:dark_city',
+                  'tnc:where_light_cannot_reach', 'tnc:devour_light',
+                  # dark chain 2 "dark sacrifice" (2026-10-09: it used to borrow the FIRE
+                  # burn effects, which add spell_power:fire => the whole chain's reward
+                  # was worth zero to a dark spell. Now tnc:blood_* = spell_power:soul.)
+                  'tnc:trade_wounds', 'tnc:blood_burn', 'tnc:sacrifice',
+                  'tnc:possess', 'tnc:i_am_god')
     # only the wand assignment must list everything; pools are per element and are
     # checked separately in the pack-side block below
     foreach ($asset in @('data/tnc/spell_assignments/magic_wand.json')) {
@@ -220,7 +254,19 @@ try {
                         'tnc:wind_speed_iii', 'tnc:wind_power_i', 'tnc:wind_power_ii',
                         'tnc:wind_god',            # 风神降临 5 级专属标记
                         'tnc:gale_slow', 'tnc:gale_haste',
-                        'tnc:wind_orb_three', 'tnc:wind_orb_five', 'tnc:wind_spirit')
+                        'tnc:wind_orb_three', 'tnc:wind_orb_five', 'tnc:wind_spirit',
+                        # dark chain 4 "black fog": our own debuff, replacing the borrowed
+                        # tnc:gale_slow (a WIND effect on a dark spell). Registered in TNEffects.
+                        'tnc:dark_veil',
+                        # dark chain 2 "dark sacrifice": the five soul-power steps, replacing the
+                        # borrowed tnc:fire_* effects (which add spell_power:fire => zero reward
+                        # for a dark spell). Registered in TNEffects.
+                        'tnc:blood_mark', 'tnc:blood_burn', 'tnc:blood_sacrifice',
+                        'tnc:blood_possess', 'tnc:blood_god',
+                        # dark chain 2/3 shared amplifier (+50% soul per amplifier step).
+                        # Registered all along but MISSING from this whitelist -- the check
+                        # only stayed green because no dark spell was in $spellIds yet.
+                        'tnc:dark_power')
         $badShape = @()
         $badTier = @()
         $badEffect = @()
@@ -238,13 +284,18 @@ try {
             if (-not (Test-Path $file)) { continue }
             $fromJar = $file.StartsWith($modSpellDir, [System.StringComparison]::OrdinalIgnoreCase)
             $spell = $null
-            try { $spell = ConvertFrom-Json ([System.IO.File]::ReadAllText($file)) }
+            # NOTE: no ConvertFrom-Json -Depth on PS 5.1 -- see ConvertFrom-TncSpellJson
+            try { $spell = ConvertFrom-TncSpellJson ([System.IO.File]::ReadAllText($file)) }
             catch { $badShape += "$path(parse)"; continue }
 
             # school must be one of the engine's real school names.
             # NOTE: wind is "AIR", not "WIND" (verified against the pack's real spells)
             $school = "$($spell.school)"
-            if ($school -notin @('LIGHTNING', 'FIRE', 'AIR', 'WATER', 'EARTH', 'LIGHT', 'DARK')) {
+            # dark is "SOUL", not "DARK" (all 20 of our dark spells say SOUL, and the
+            # engine's dark school is spell_power:soul) -- "DARK" never matched anything,
+            # which silently skipped every dark spell in this check until the black fog
+            # chain was added to $spellIds below.
+            if ($school -notin @('LIGHTNING', 'FIRE', 'AIR', 'WATER', 'EARTH', 'LIGHT', 'SOUL', 'ARCANE', 'HEALING')) {
                 $badShape += "$path(school=$school)"
             }
             if (-not $spell.release -or -not $spell.release.target -or -not $spell.release.target.type) {
@@ -283,6 +334,12 @@ try {
                 if ($eff -like 'tnc:*' -and ($registered -notcontains $eff)) {
                     $badEffect += "$path -> $eff"
                 }
+                # dark sacrifice must never go back to borrowing the FIRE line: those add
+                # spell_power:fire, so a dark spell gets no reward for burning its own HP.
+                if ($path -in @('trade_wounds', 'blood_burn', 'sacrifice', 'possess', 'i_am_god') `
+                        -and $eff -like 'tnc:fire_*') {
+                    $badEffect += "$path -> $eff (FIRE effect on a dark chain: the reward would be spell_power:fire = 0 for this spell)"
+                }
             }
 
             $modelId = $null
@@ -290,6 +347,19 @@ try {
                 $modelId = "$($spell.release.target.projectile.projectile.client_data.model.model_id)"
             } elseif ($spell.release.target.meteor) {
                 $modelId = "$($spell.release.target.meteor.projectile.client_data.model.model_id)"
+            } elseif ($spell.release.target.cloud) {
+                # CLOUD targets can carry a model too (SpellCloudRenderer feeds it to
+                # CustomModels.render, the same path projectiles use). The black fog chain
+                # is the first user of that slot -- a wrong id here would draw the
+                # purple-black cube in the middle of the fog.
+                $modelId = "$($spell.release.target.cloud.client_data.model.model_id)"
+                # the fog must use OUR cloud entity, otherwise it never follows the caster
+                # and never hosts the boundary circle (that wiring lives in
+                # DarkFogCloudEntity, and the engine creates it from this id)
+                $cloudType = "$($spell.release.target.cloud.entity_type_id)"
+                if ($path -match '^(black_mist|night_grace|dark_city|where_light_cannot_reach|devour_light)$' -and $cloudType -ne 'tnc:fog') {
+                    $badModel += "$path -> cloud.entity_type_id=$cloudType (want tnc:fog, else no follow / no boundary circle)"
+                }
             }
             # 同理：只检查我们自己资源包里的模型（老法术用的是别的 mod 的模型）
             if ($modelId -like 'tnc:*') {
@@ -721,6 +791,11 @@ try {
     # The texture is resolved from the model's own layer0 (the record papers share one
     # texture, so "assets/tnc/textures/item/<id>.png" is NOT a valid assumption).
     $ourItems = @('sword', 'magic_wand', 'fireball',
+                  # The three bank coins. Added 2026-10-09 after the author reported
+                  # "我的金银铜币怎么还是紫黑方块啊": they HAD models, but the models were
+                  # unloadable (-90 degree rotations), and they were missing from this list
+                  # so nothing here checked them either.
+                  'copper_coin', 'silver_coin', 'gold_coin',
                   'canjuan_1a', 'canjuan_1b', 'canjuan_3', 'canjuan_4', 'canjuan_5', 'canjuan_6',
                   'zhengshi_qianqing', 'zhengshi_1', 'zhengshi_2', 'zhengshi_3', 'zhengshi_4',
                   'self_spawn_egg', 'cava_spawn_egg', 'huai_spawn_egg', 'zhuangquerang_spawn_egg',
@@ -749,6 +824,72 @@ try {
     else { Fail ('item has NO model (renders as the purple-black cube): ' + ($noModel -join ', ')) }
     if ($noTexture.Count -eq 0) { Ok 'every item model points at a texture that ships' }
     else { Fail ('item model references a missing texture: ' + ($noTexture -join ', ')) }
+
+    # ---------------- D1b7. every ITEM model must be LOADABLE by the vanilla loader --
+    # 2026-10-09 (author: "我的金银铜币怎么还是紫黑方块啊"): the three coin models were
+    # Blockbench block-format exports carrying four elements rotated **-90 degrees**.
+    # Vanilla only accepts -45 / -22.5 / 0 / 22.5 / 45, and ONE bad angle makes the WHOLE
+    # model fail to load:
+    #   [ModelManager] Failed to load model tnc:models/item/copper_coin.json
+    #   JsonParseException: Invalid rotation -90.0 found, only -45/-22.5/0/22.5/45 allowed
+    # and the game then draws the purple-black missing-model cube.
+    # The same trap bit the projectile models before (tools/import_author_model.ps1
+    # validates those); this is the general net over the ITEM models.
+    #
+    # Scope = models/item/** ONLY, because that is the path the ordinary ModelBakery
+    # deserializer walks (it is what logged the coin error). Our big prop models under
+    # models/block/** (dragon_display_*, deliberately far outside -16..32) are loaded
+    # through the engine/dynamic path instead, so holding them to these limits would be
+    # a false alarm.
+    #
+    # What the loader enforces (BlockElement/BlockFace deserializers, 1.20.1):
+    #   * rotation.angle in {-45,-22.5,0,22.5,45}
+    #   * from/to within [-16, 32]
+    #   * uv within [0, texture_size] (16 when the model does not declare one)
+    $badModels = @()
+    $legalAngles = @(-45.0, -22.5, 0.0, 22.5, 45.0)
+    $faceNames = @('north', 'south', 'east', 'west', 'up', 'down')
+    foreach ($entry in ($zip.Entries | Where-Object { $_.FullName -like 'assets/tnc/models/item/*.json' })) {
+        $er = New-Object System.IO.StreamReader($entry.Open(), [System.Text.Encoding]::UTF8)
+        $text = $er.ReadToEnd(); $er.Close()
+        $model = $null
+        try { $model = ConvertFrom-TncSpellJson $text } catch { $badModels += "$($entry.FullName) (unparsable)"; continue }
+        $texSize = 16.0
+        if ($model.texture_size) { $texSize = [double]@($model.texture_size)[0] }
+        $angles = @()
+        foreach ($el in @($model.elements)) {
+            if ($null -eq $el) { continue }
+            $angles += [double]$el.rotation.angle
+            foreach ($key in @('from', 'to')) {
+                foreach ($v in @($el.$key)) {
+                    if ($null -eq $v) { continue }
+                    $f = [double]$v
+                    if ($f -lt -16.0001 -or $f -gt 32.0001) {
+                        $badModels += "$($entry.FullName) $key=$f outside the loader limit -16..32"
+                    }
+                }
+            }
+            foreach ($faceName in $faceNames) {
+                $face = $el.faces.$faceName
+                if ($null -eq $face) { continue }
+                if ($null -eq $face.uv) { continue }
+                foreach ($c in @($face.uv)) {
+                    $f = [double]$c
+                    if ($f -lt -0.0001 -or $f -gt ($texSize + 0.0001)) {
+                        $badModels += "$($entry.FullName) $faceName uv=$f outside the $texSize-pixel atlas"
+                    }
+                }
+            }
+        }
+        # one illegal angle kills the WHOLE model, so report the model once
+        $illegal = @($angles | Where-Object { $null -ne $_ -and ($legalAngles -notcontains $_) })
+        if ($illegal.Count -gt 0) {
+            $badModels += ("$($entry.FullName) illegal rotation angle(s) " + (($illegal | Select-Object -Unique) -join ',') +
+                           " (only -45/-22.5/0/22.5/45 are allowed; the WHOLE model then fails to load)")
+        }
+    }
+    if ($badModels.Count -eq 0) { Ok 'every item model can be loaded by the vanilla model loader (angles / extents / uv)' }
+    else { Fail ('item model(s) the client would refuse to load (=> purple-black cube): ' + ($badModels -join '; ')) }
 
     # ---------------- D1c. HUD entry point + its keybind ----------------
     # Nothing HUD-side can be clicked (no cursor while playing), so the keybind IS

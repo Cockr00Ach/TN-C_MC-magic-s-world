@@ -94,6 +94,20 @@ public class TNMod
     public static final RegistryObject<Block> TAVERN_LAMP = BLOCKS.register("tavern_lamp", () -> new com.tnc.tnc.prop.TNPropBlock(net.minecraft.world.phys.shapes.Shapes.box(0.25,0,0.25,0.75,0.6875,0.75), 12));
     public static final RegistryObject<Item> TAVERN_LAMP_ITEM = ITEMS.register("tavern_lamp", () -> new net.minecraft.world.item.BlockItem(TAVERN_LAMP.get(), new Item.Properties()));
 
+    // ---- ★ 龙的"载体方块"（作者 2026-10-04："你把他当成block来使用好不好" ）----
+    // 龙现在由原版 Display.BlockDisplay 来画（见 light/TNDragonDisplayEntity），
+    // 而 BlockDisplay 走的是**原版的方块渲染管线**（renderSingleBlock）⇒ 必须有两个真的方块
+    // 把两份方块模型挂上去：光龙一份、暗龙一份（同一个 geo、两张贴图）。
+    // 它们**没有物品形态**、不进背包、不可合成，只是给 Display 用的壳子 ✓。
+    public static final RegistryObject<Block> DRAGON_DISPLAY_LIGHT = BLOCKS.register("dragon_display_light",
+            () -> new net.minecraft.world.level.block.Block(
+                    net.minecraft.world.level.block.state.BlockBehaviour.Properties.of()
+                            .noCollission().noOcclusion().instabreak()));
+    public static final RegistryObject<Block> DRAGON_DISPLAY_DARK = BLOCKS.register("dragon_display_dark",
+            () -> new net.minecraft.world.level.block.Block(
+                    net.minecraft.world.level.block.state.BlockBehaviour.Properties.of()
+                            .noCollission().noOcclusion().instabreak()));
+
     /** 铁甲：99% 减伤（逻辑在 armor/TNIronArmorEvents ✓） */
     public static final RegistryObject<Item> TNC_IRON_ARMOR = ITEMS.register("tnc_iron_armor", com.tnc.tnc.armor.TNIronArmorItem::new);
 
@@ -166,6 +180,8 @@ public class TNMod
                 output.accept(com.tnc.tnc.npc.TNNpcAttributes.HUAI_SPAWN_EGG.get());
                 output.accept(com.tnc.tnc.npc.TNNpcAttributes.ZHUANGQUERANG_SPAWN_EGG.get());
                 output.accept(com.tnc.tnc.npc.TNNpcAttributes.ZUOWANG_SPAWN_EGG.get());
+                // BOSS 刷怪蛋（暗系巨人）—— 同样是验收用，正式上线走召唤/剧情
+                output.accept(com.tnc.tnc.npc.TNNpcAttributes.DARK_GIANT_SPAWN_EGG.get());
             }).build());
 
     // ------------------------------------------------------------------

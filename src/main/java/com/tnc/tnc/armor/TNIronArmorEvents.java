@@ -34,8 +34,11 @@ public final class TNIronArmorEvents {
             keep = Math.min(keep, DAMAGE_TAKEN);          // 0.01
         }
         // ★ 2026-10-02：光翼链删掉了（飞行并进光耀 ✓），它那两档减伤（50% / 75%）也一起没了 ✓；
-        //   光龙链的 t2「光龙鳞甲」给 50% ✓
+        //   光龙链的 t2「光龙鳞甲」给 50% ✓；暗龙链的 t2「暗龙鳞甲」同样 50% ✓（它的暗属性镜像 ✓）
         if (has(victim, com.tnc.tnc.magic.TNEffects.LIGHT_DRAGON_SCALES)) {
+            keep = Math.min(keep, 0.50F);
+        }
+        if (has(victim, com.tnc.tnc.magic.TNEffects.DARK_DRAGON_SCALES)) {
             keep = Math.min(keep, 0.50F);
         }
         // ★ 2026-10-01 光系第二条链（治疗/减伤）：t1 25% / t2 50% / t3 50% / t4 70% / t5 70%

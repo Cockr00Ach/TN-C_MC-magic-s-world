@@ -25,27 +25,39 @@ import net.minecraft.world.phys.Vec3;
  * <h2>五档（作者没给数值，这张表是我定的 ✓，要改就改这一张表）</h2>
  * <table border="1">
  *   <tr><th>档</th><th>法术</th><th>做什么</th></tr>
- *   <tr><td>t1</td><td>光龙吐息</td><td>龙吼 + 前冲的一道火光（**不再借用光线链的光柱** ✓，见作者 2026-10-03 的删除要求）</td></tr>
- *   <tr><td>t2</td><td>光龙鳞甲</td><td>自己 + 10 格内队友：减伤 50% + 速度 +20% + 光伤 +30%，20 秒</td></tr>
- *   <tr><td>t3</td><td>光龙出击</td><td>放出 **1 条**（×5 ≈ 34 格长）向前冲 ≈ 45 格，撞到 24 伤</td></tr>
- *   <tr><td>t4</td><td>光龙俯冲</td><td>**2 条**（×10 · 左右各偏 7°）向前冲 ≈ 60 格，撞到 34 伤</td></tr>
- *   <tr><td>t5</td><td>光龙降世</td><td>**3 条**（×20 · 扇形 −16/0/+16°）向前冲 ≈ 75 格，撞到 44 伤</td></tr>
+ *   <tr><td>t1</td><td>光龙吐息</td><td>一条小龙（×1）慢慢游出去 ≈ 54 格，撞到 14 伤</td></tr>
+ *   <tr><td>t2</td><td>光龙鳞甲</td><td>自己 + 10 格内队友：减伤 50% + 速度 +20% + 光伤 +30%，20 秒；<b>同时三条小龙首尾相接围成一圈绕着自己转</b> 20 秒</td></tr>
+ *   <tr><td>t3</td><td>光龙出击</td><td>放出 **1 条**（×5 ≈ 34 格长）游出去 ≈ 90 格，撞到 24 伤</td></tr>
+ *   <tr><td>t4</td><td>光龙俯冲</td><td>**2 条**（×10 · 左右各偏 7°）游出去 ≈ 122 格，撞到 34 伤</td></tr>
+ *   <tr><td>t5</td><td>光龙降世</td><td>**3 条**（×20 · 扇形 −16/0/+16°）游出去 ≈ 155 格，撞到 44 伤</td></tr>
  * </table>
+ *
+ * <p>★ 2026-10-03 作者："<b>光龙的飞行速度降低为现在的 1/5，然后应该能飞很远，也就是持续时间要[长]</b>" ✓
+ * ⇒ 速度 ÷5、时长 ×5 ✓ —— <b>航程一格没少</b> ✓，只是从"嗖一下冲过去"变成"慢慢游过去" ✓
+ * （要更远就把表里的 {@code ticks} 直接乘上去 ✓）。
  *
  * <p>★ t3/t4/t5 **只有龙** ✓ —— 原来 t4/t5 放完龙还会砸一道「圣光天降」（光线链的 t4 ✗），
  * 作者 2026-10-03："我只要龙冲出去好不好，你把其他的都给我删了" ⇒ 已删 ✓。
  *
- * <p>放出来的位置：施法者**正前方** {@link #SPAWN_DISTANCE} 格、朝准星方向 ✓
- * （贴着放会把自己穿进去 ✗）；穿过掩体/墙会直接爆开 ✓（见 {@code TNDragonEntity.aiStep} ✓）。
+ * <p>放出来的位置：施法者**正前方、身体半径之外一点点**（{@link #HEAD_CLEARANCE} ✓）、
+ * 大龙再从**头顶上方**掠过（{@link #LIFT} ✓）；多条不并排，而是**同一个点依次出发** ✓
+ * （见 {@link #release} ✓）。穿过掩体/墙会直接爆开 ✓（见 {@code TNDragonEntity.tickCharge} ✓）。
  */
 public final class TNLightDragonChain {
 
     /**
      * 一档光龙法术：法术 id / 档位 / 放几条 / 个头 / 撞伤 / 每 tick 飞多快（格）/ 飞多久（tick）/
-     * 扇形散角（度）/ 名字 ✓。{@code count == 0} 表示这一档不冲（吐息 / 鳞甲 ✓）。
+     * <b>编队里相邻两条差多少格高</b>（格 ✓）/ 名字 ✓。
+     * {@code count == 0} 表示这一档不冲（吐息 / 鳞甲 ✓）。
+     *
+     * <p>★ 2026-10-04：原来的 {@code fanDeg}（扇形散角 ✗）换成了 {@code spacing}（**编队层高** ✓）——
+     * 作者："<b>t4 为什么会冒出来两条龙</b>" ✗。原因是原来两条 137 格长的龙**并排**生成 ✗，
+     * 看着就是"凭空冒出两条"✗。（也试过"排队依次出发"✗：head-anchored 之后要等前面整条飞过去，
+     * t5 一等 19 秒 ✗ —— 那不是一次法术了 ✓。）现在是**编队** ✓：同一 tick 出发、
+     * 只在高度上错开一条在另一条上方 ✓。
      */
     private record Dragon(String path, int tier, int count, double scale, double damage,
-                          double speed, int ticks, double fanDeg, String name) {
+                          double speed, int ticks, double spacing, String name) {
 
         /** 大概能飞多远（格 ✓）—— 只是给提示/日志看的 ✓。 */
         double range() {
@@ -55,26 +67,36 @@ public final class TNLightDragonChain {
 
     private static final Dragon[] DRAGONS = {
             // ★ t1（作者 2026-10-03："t1 放一条小龙" ✓）：一条最小的龙（×1 = 0.30 ⇒ 约 7 格长）✓
-            new Dragon("light_dragon_breath", 1, 1, 0.30D, 14.0D, 1.20D, 45, 0.0D, "光龙吐息"),
+            //   ★ 2026-10-03 作者："光龙的飞行速度降低为现在的1/5，然后应该能飞很远，也就是持续时间要[长]"
+            //     ⇒ **速度 ÷5、时长 ×5** ✓ ⇒ 航程**一点没少**（还是 54 格 ✓），但看着是慢慢游过去 ✓
+            new Dragon("light_dragon_breath", 1, 1, 0.30D, 14.0D, 0.48D, 450, 0.0D, "光龙吐息"),
             // ★ t2（作者："t2 放三条小龙围绕着自己" ✓）：三条小龙绕着自己转 ✓
-            //   个数 3 ⇒ 环绕半径 {@link #ORBIT_RADIUS}、起始角错开 120° ✓；伤害是"贴上来咬一口"的 ✓
-            new Dragon("light_dragon_scales", 2, 3, 0.30D, 6.0D, 0.0D, 400, 0.0D, "光龙鳞甲"),
+            //   个数 / 时长 / 半径 / 转速 **全部挪进了 config/tnc/dragon_orbit.json** ✓
+            new Dragon("light_dragon_scales", 2, 3, 0.30D, 6.0D, 0.0D, 800, 0.0D, "光龙鳞甲"),
             // ★ 个头倍率（作者 2026-10-03："t3的龙放大五倍，t4的放大十倍，t5 20倍" ✓）：
-            //   以基准 0.30 为 1 倍 ⇒ t3 = 0.30×5 = **1.50** / t4 = ×10 = **3.00** / t5 = ×20 = **6.00** ✓
-            //   模型原长 23 格 ⇒ 三条龙分别约 **34 / 69 / 138 格长** ✗（t5 已经两个多区块长了 ✓）
-            //   预览图 docs/previews/dragon_scale.png 里带了一个玩家大小的参照方块 ✓
-            new Dragon("summon_light_dragon", 3, 1, 1.50D, 24.0D, 1.45D, 62, 0.0D, "光龙出击"),
-            new Dragon("light_dragon_dive", 4, 2, 3.00D, 34.0D, 1.65D, 74, 7.0D, "光龙俯冲"),
-            new Dragon("light_dragon_descend", 5, 3, 6.00D, 44.0D, 1.85D, 84, 16.0D, "光龙降世"),
+            //   2026-10-04 作者又："t345 模型都放大一倍" ✓ ⇒ 在此基础上**再乘 2** ✓
+            //   ⇒ t3 = **3.00**（≈68 格长）/ t4 = **6.00**（≈137 格）/ t5 = **12.00**（≈273 格）
+            // ★ 编队层高（× 个头 ✓）：t4 两条上下差 0.5 个体长 ✓，t5 三条差 0.35 个 ✓
+            new Dragon("summon_light_dragon", 3, 1, 3.00D, 24.0D, 0.58D, 620, 0.0D, "光龙出击"),
+            new Dragon("light_dragon_dive", 4, 2, 6.00D, 34.0D, 0.66D, 740, 0.50D, "光龙俯冲"),
+            new Dragon("light_dragon_descend", 5, 3, 12.00D, 44.0D, 0.74D, 840, 0.35D, "光龙降世"),
     };
 
-    /** t2 那三条小龙绕着主人转的半径（格 ✓）—— 5 格 ⇒ 正好在玩家周围一圈 ✓。 */
-    private static final double ORBIT_RADIUS = 5.0D;
-    /** 绕一圈多快（度/tick ✓）：3° ⇒ 约 2 秒一圈 ✓（看得清是三条龙在绕 ✓）。 */
-    private static final double ORBIT_DEG_PER_TICK = 3.0D;
+    /**
+     * t2 三条小龙绕着主人转的**半径**（格 ✓）—— <b>由体长算出来，正好首尾相接围成一个整圆</b> ✓
+     * （作者 2026-10-03："三条龙头对尾绕成一个圆接在一起" ✓）。
+     *
+     * <p>怎么来的：{@code orbit} 动画把身体从鼻子到尾巴**均匀弯了 360/n = 120°** ✓
+     * （见 {@code tools/gen_dragon_orbit.ps1}：每一节按自己那段的长度分到相应的一点角度 ✓）⇒
+     * 整条身体就是半径 {@code r} 的圆上的一弧 ✓，弧长 = 体长 {@code L} ✓、圆心角 = 120° = 2π/3 ✓ ⇒
+     * <b>{@code r = L × n / 2π}</b> ✓（0.30 个头的龙 = 6.83 格长 ⇒ r ≈ 3.26 格 ✓）。
+     *
+     * <p>★ 半径被 config 里的 {@code radius_factor} 乘一下 ✓（想拉开缝就调大 ✓）。
+     */
+    private static double ringRadius(double scale, int count) {
+        return TNDragonOrbitMath.ringRadius(scale, count);
+    }
 
-    /** 龙放主人前方多远（格 ✓）—— 它 23 格长，贴着放会把自己穿进主人身上 ✗。 */
-    private static final double SPAWN_DISTANCE = 8.0D;
     /** t2 鳞甲持续多久 / 影响半径（格 ✓）。 */
     private static final int SCALES_TICKS = 400;
     private static final double SCALES_RADIUS = 10.0D;
@@ -117,30 +139,44 @@ public final class TNLightDragonChain {
     /**
      * ★ t2 的三条小龙**绕着主人转**（作者 2026-10-03："t2 放三条小龙围绕着自己" ✓）。
      *
-     * <p>起始角按 360/条数 错开 ⇒ 三条正好围成一圈 ✓；转 {@code dragon.ticks()} 到点爆开 ✓
+     * <p>起始角按 360/条数 错开 ⇒ 三条正好围成一圈 ✓；转 {@code ticks} 到点爆开 ✓
      * （和"光龙鳞甲"的 buff 同为 20 秒 ✓，buff 掉的时候龙也正好散掉 ✓）。
+     *
+     * <p>★ 2026-10-03：半径不再是写死的 5 格 ✗ —— 改由**体长**算（{@link #ringRadius} ✓）⇒
+     * 三条龙的**鼻子正好咬住前一条的尾巴**、围成一个整圆 ✓（配合新的 {@code orbit} 动画 ✓）。
+     * 个数 / 时长 / 转速 / 方向 / 环高都在 {@code config/tnc/dragon_orbit.json} 里 ✓
+     * （作者开着游戏改存盘，下次放 t2 就生效 ✓）。
      */
     private static void orbit(ServerLevel level, LivingEntity caster, Dragon dragon) {
-        int n = Math.max(1, dragon.count());
+        TNDragonOrbitConfig.reload();
+        int n = Math.max(1, TNDragonOrbitConfig.count);
+        double radius = ringRadius(dragon.scale(), n) * TNDragonOrbitConfig.radiusFactor;
+        // 转速**带正负** ✓ —— 正负决定绕哪边转 ✓，而"三条龙拐向中心的那一侧"才是对的 ✓
+        //   ★ 万一作者看到的是"肚皮朝外拐" ⇒ 把 config 里的 direction 取反即可 ✓（不用重装 ✓）
+        double degPerTick = TNDragonOrbitConfig.degPerTick * TNDragonOrbitConfig.direction;
+        int ticks = TNDragonOrbitConfig.ticks;
+        int spawned = 0;
         for (int i = 0; i < n; i++) {
-            TNDragonEntity entity = TNOrbEntities.LIGHT_DRAGON.get().create(level);
+            com.tnc.tnc.light.TNDragonDisplayEntity entity = TNOrbEntities.DRAGON.get().create(level);
             if (entity == null) {
                 continue;
             }
             double angle = 360.0D * i / n;
-            double rad = Math.toRadians(angle);
-            double x = caster.getX() + Math.cos(rad) * ORBIT_RADIUS;
-            double z = caster.getZ() + Math.sin(rad) * ORBIT_RADIUS;
             entity.setTier(dragon.tier());
             entity.setScale(dragon.scale());
             entity.setOwner(caster.getUUID());
-            entity.moveTo(x, caster.getY() + 1.2D, z, caster.getYRot(), 0.0F);
-            entity.orbit(caster.getUUID(), ORBIT_RADIUS, ORBIT_DEG_PER_TICK,
-                    dragon.ticks(), dragon.damage(), angle);
+            entity.setCarrier(com.tnc.tnc.TNMod.DRAGON_DISPLAY_LIGHT.get(), false);
+            entity.orbit(caster.getUUID(), caster.getId(), radius, degPerTick,
+                    TNDragonOrbitConfig.height, ticks, dragon.damage(), angle);
+            // 立刻摆到环上 ✓（不先摆的话，第一帧会闪在主人脚下再飞出去 ✗）
+            entity.placeOnRing(caster, angle);
+            entity.pushTransform();
             level.addFreshEntity(entity);
+            spawned++;
         }
-        LOGGER.info("TN-C/light: 光龙环绕 count={} radius={} ticks={} caster={}",
-                n, ORBIT_RADIUS, dragon.ticks(), caster.getName().getString());
+        LOGGER.info("TN-C/light: 光龙环绕 count={} radius={} deg/tick={} ticks={} caster={} | {}",
+                spawned, String.format(java.util.Locale.ROOT, "%.3f", radius), degPerTick, ticks,
+                caster.getName().getString(), TNDragonOrbitConfig.describe());
     }
 
     /** t2 光龙鳞甲：自己 + 附近队友挂 {@link TNEffects#LIGHT_DRAGON_SCALES} ✓。 */
@@ -179,28 +215,43 @@ public final class TNLightDragonChain {
     }
 
     /**
-     * t3 / t4 / t5：**放龙** ✓ —— 在施法者正前方生成，每一条朝准星方向（多条按
-     * {@link Dragon#fanDeg} 扇形散开 ✓）直线冲出去 ✓。
+     * t3 / t4 / t5：**放龙** ✓ —— 在施法者正前方生成，每一条朝准星方向直线冲出去 ✓。
      *
      * <p>★ 作者 2026-10-03："我只要龙冲出去好不好，你把其他的都给我删了" ✗
      * ⇒ 原来 t4/t5 放完龙**还额外砸一道「圣光天降」（光线链的 t4）**✗ —— 已删除 ✓，
      * 现在这几档**只有龙** ✓。
+     *
+     * <h2>★ 2026-10-04 重写：出生点 + 纵列（作者："t4 为什么冒出来两条龙" ✗、"t5 根本不显示" ✗、
+     * "t3 显示一会也消失了" ✗、"龙生成在我的头顶吧" ✓）</h2>
+     * 老公式 {@code 8 + 体长 × 0.25} ✗ 是给"实体原点 = 身体中点"算的 ——
+     * t5 一算就是 <b>76 格开外</b> ✗（超出可见范围、常常直接落在地形里 ⇒ 第一 tick 自爆 ⇒
+     * 实机"根本不显示"✗），t3 也有半个身子在视野外 ✗。
+     *
+     * <p>现在改成三点：
+     * <ol>
+     *   <li><b>头部锚定</b>（{@code entity.setHeadAnchored(true)} ✓）：实体位置 = **鼻尖** ✓，
+     *       身体整条往后铺 ✓ —— 于是出生点只需在身体半径之外一点点 ✓
+     *       （{@link #HEAD_CLEARANCE} ✓），**再也不用随体长往外推** ✓；</li>
+     *   <li><b>抬高</b>（{@link #LIFT} ✓，按个头封顶 ✓）：大龙从**头顶上方**掠过 ✓
+     *       —— 作者要的就是这个 ✓，顺带不会把自己整个人包在龙身里 ✗；</li>
+     *   <li><b>上下编队</b>（{@code Dragon#spacing} ✓）：几条**同一 tick 出发** ✓，
+     *       只在高度上错开（一条在另一条上方 ✓）—— 看着是"一队龙叠着冲出去" ✓，
+     *       既不并排冒出来 ✗，也不用排队等十几秒 ✗。</li>
+     * </ol>
      */
     private static void release(ServerLevel level, LivingEntity caster, Dragon dragon) {
         Vec3 look = caster.getLookAngle();
-        // ★ 这么大的龙不能贴脸放 ✗ —— 出生点随**体长**往后挪 ✓（t5 是 138 格长 ⇒ 放在 40 格外 ✓）
-        double length = TNDragonEntity.MODEL_LENGTH_BLOCKS * dragon.scale();
-        double distance = SPAWN_DISTANCE + length * 0.25D;
-        Vec3 start = caster.position().add(look.scale(distance));
-        Vec3 side = new Vec3(-look.z, 0.0D, look.x).normalize();
+        // 身体半径（从鼻尖到尾尖 = 体长 ✓）+ 一点余量 ⇒ 这是"鼻尖至少要放多远" ✓
+        double bodyRadius = TNDragonDisplayEntity.MODEL_LENGTH_BLOCKS * dragon.scale() + HEAD_CLEARANCE;
+        // 抬高：小龙贴着视线 ✓，大龙整体抬到头顶上方 ✓（封顶，免得飞到云上去 ✗）
+        double lift = Math.min(LIFT_MAX, bodyRadius * LIFT);
+        Vec3 start = caster.position().add(look.scale(bodyRadius));
         int spawned = 0;
         for (int i = 0; i < dragon.count(); i++) {
-            // 扇形：i = 0 时居中；多条时左右分（t4 两条 ⇒ ∓7°，t5 三条 ⇒ -16/0/+16 ✓）
-            double offset = (i - (dragon.count() - 1) / 2.0D) * dragon.fanDeg();
-            Vec3 dir = rotateY(look, offset);
-            // 横向也按体长错开 ✓（不然两条 69 格的龙会完全重叠 ✗）
-            Vec3 at = start.add(side.scale((i - (dragon.count() - 1) / 2.0D) * length * 0.45D));
-            if (spawnOne(level, caster, dragon, at, dir)) {
+            // 编队：把这一条摆到队伍里它那一层 ✓（单条时 offset = 0 ⇒ 就是原来的 lift ✓）
+            double offset = (i - (dragon.count() - 1) / 2.0D) * dragon.spacing() * dragon.scale();
+            Vec3 at = start.add(0.0D, lift + offset, 0.0D);
+            if (spawnOne(level, caster, dragon, at, look)) {
                 spawned++;
             }
         }
@@ -212,36 +263,44 @@ public final class TNLightDragonChain {
                     + " §7（" + spawned + " 条 · 向前冲约 " + (int) dragon.range() + " 格 · 撞到 "
                     + (int) dragon.damage() + " 伤）"), true);
         }
-        LOGGER.info("TN-C/light: 光龙冲锋 {} count={} scale={} speed={} ticks={} caster={}",
+        LOGGER.info("TN-C/light: 光龙冲锋 {} count={} scale={} speed={} ticks={} spacing={} caster={}",
                 dragon.path(), spawned, dragon.scale(), dragon.speed(), dragon.ticks(),
-                caster.getName().getString());
+                dragon.spacing(), caster.getName().getString());
     }
 
-    /** 把方向绕 Y 轴转 degree 度 ✓（扇形散开用 ✓）。 */
-    private static Vec3 rotateY(Vec3 v, double degree) {
-        double r = Math.toRadians(degree);
-        double cos = Math.cos(r);
-        double sin = Math.sin(r);
-        return new Vec3(v.x * cos + v.z * sin, v.y, -v.x * sin + v.z * cos).normalize();
-    }
+    /** 鼻尖至少放在身体半径之外多少格 ✓（免得第一帧就把自己整个人包进龙身里 ✗）。 */
+    private static final double HEAD_CLEARANCE = 2.5D;
+    /** 大龙往上抬多少（× 体长 ✓）与封顶（格 ✓）—— 作者："龙生成在我的头顶吧" ✓。 */
+    private static final double LIFT = 0.22D;
+    private static final double LIFT_MAX = 12.0D;
 
     private static boolean spawnOne(ServerLevel level, LivingEntity caster, Dragon dragon,
                                     Vec3 at, Vec3 dir) {
-        TNDragonEntity entity = TNOrbEntities.LIGHT_DRAGON.get().create(level);
+        // ★ 2026-10-04：改成原版 Display.BlockDisplay（作者："你把他当成block来使用好不好" ✓）
+        com.tnc.tnc.light.TNDragonDisplayEntity entity =
+                TNOrbEntities.DRAGON.get().create(level);
         if (entity == null) {
             return false;
         }
         entity.setTier(dragon.tier());
         entity.setScale(dragon.scale());
         entity.setOwner(caster.getUUID());
+        // 光龙：挂"发光那份"载体方块 ✓（满亮 ✓）
+        entity.setCarrier(com.tnc.tnc.TNMod.DRAGON_DISPLAY_LIGHT.get(), false);
         entity.moveTo(at.x, at.y, at.z, caster.getYRot(), 0.0F);
         entity.charge(dir, dragon.speed(), dragon.ticks(), dragon.damage());
+        entity.pushTransform();
         level.addFreshEntity(entity);
+        spawnFlash(level, at);
+        return true;
+    }
+
+    /** 出场的爆开粒子 ✓（每条自己那一点放一次 ✓）。 */
+    private static void spawnFlash(ServerLevel level, Vec3 at) {
         level.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD,
                 at.x, at.y + 1.0D, at.z, 60, 1.2D, 1.0D, 1.2D, 0.06D);
         level.sendParticles(net.minecraft.core.particles.ParticleTypes.FIREWORK,
                 at.x, at.y + 1.0D, at.z, 40, 1.0D, 0.8D, 1.0D, 0.10D);
-        return true;
     }
 
     /** 供命令/自检看的摘要 ✓。 */

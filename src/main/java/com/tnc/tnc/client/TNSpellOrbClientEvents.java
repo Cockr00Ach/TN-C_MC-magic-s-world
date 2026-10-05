@@ -45,8 +45,50 @@ public final class TNSpellOrbClientEvents {
         // ★ 战斗天使（光法第 4 条链「召唤天使」✓）：GeckoLib 模型 + 按档位放大，见 TNFightingAngelRenderer ✓
         event.registerEntityRenderer(TNOrbEntities.FIGHTING_ANGEL.get(),
                 com.tnc.tnc.light.client.TNFightingAngelRenderer::new);
-        // ★ 光明龙（光法第 5 条链「光龙」✓）：作者的东方龙 + 半透明自发光，见 TNDragonRenderer ✓
-        event.registerEntityRenderer(TNOrbEntities.LIGHT_DRAGON.get(),
+        // ★ 龙（光龙 / 暗龙 ✓）：走**普通 Forge 渲染器** ✓，几何+贴图全内嵌 ✓（见 TNDragonRenderer ✓）。
+        //   ★ 这一句是**必须**的 ✗ —— 之前用原版 Display 实体、以为"原版会自己画" ✗，
+        //   结果原版只给内置的 minecraft:block_display 注册渲染器 ✓，我们自己的实体类型没有 ✗
+        //   ⇒ EntityRenderDispatcher 空指针 ⇒ **释放龙直接卡退** ✗（崩报里那句 entityrenderer is null ✓）。
+        event.registerEntityRenderer(TNOrbEntities.DRAGON.get(),
                 com.tnc.tnc.light.client.TNDragonRenderer::new);
+        // ★★ 2026-10-04 卡退修复 ✗：**每一个实体类型都必须有渲染器** ✓
+        //   作者："释放龙法术会卡退" ✓ —— 崩报就是这一句：
+        //     NullPointerException: Cannot invoke "EntityRenderer.shouldRender(...)" because "entityrenderer" is null
+        //     at EntityRenderDispatcher.render(EntityRenderDispatcher.java:127)
+        //   根因：装机那一版（16:44 构建）里，龙已经换成新实体类型 {@code tnc:dragon}，
+        //   而**客户端这一行还没进构建** ✗ ⇒ 龙一生成，客户端查不到渲染器 ⇒ 整个游戏崩 ✗。
+        //   （同一个坑第三次了：2026-09-30 yan_dark、光龙、暗龙 ✗ ⇒ 见
+        //    {@code OrbEntityRendererCoverageTest}：现在**每一个**实体类型都必须有渲染器，漏了就构建红 ✓）
+        //
+        //   下面这两条是**旧版 GeckoLib 龙**的类型（{@code TNDragonEntity} ✓，现在的法术已经不用它们 ✗）——
+        //   照样补上渲染器 ✓：万一老存档里还留着、或者以后哪条路又生成它们，也不会再卡退 ✗。
+        //   ★ 用 {@code TNDarkDragonRenderer}（它就是 {@code GeoEntityRenderer<TNDragonEntity>} ✓）：
+        //     老的"光龙渲染器"已经跟着 Display 那条路改成渲染 Display 实体了 ✗，泛型对不上 ✗。
+        event.registerEntityRenderer(TNOrbEntities.LIGHT_DRAGON.get(),
+                com.tnc.tnc.dark.client.TNDarkDragonRenderer::new);
+        event.registerEntityRenderer(TNOrbEntities.DARK_DRAGON.get(),
+                com.tnc.tnc.dark.client.TNDarkDragonRenderer::new);
+        // ★ 暗系第三条链「召唤」的五个召唤物（作者 2026-10-04："暗魔法的召唤流没实装吗" ✓）
+        //   五档模型差别很大 ⇒ 五个类型共用**一个**渲染器（模型类按档位挑文件 ✓）
+        event.registerEntityRenderer(TNOrbEntities.DARK_IMP.get(),
+                com.tnc.tnc.dark.client.TNDarkSummonRenderer::new);
+        event.registerEntityRenderer(TNOrbEntities.DARK_GUARD.get(),
+                com.tnc.tnc.dark.client.TNDarkSummonRenderer::new);
+        event.registerEntityRenderer(TNOrbEntities.DARK_LORD.get(),
+                com.tnc.tnc.dark.client.TNDarkSummonRenderer::new);
+        event.registerEntityRenderer(TNOrbEntities.DARK_KING.get(),
+                com.tnc.tnc.dark.client.TNDarkSummonRenderer::new);
+        event.registerEntityRenderer(TNOrbEntities.EVIL_GOD.get(),
+                com.tnc.tnc.dark.client.TNDarkSummonRenderer::new);
+        // ★ 暗系第四条链「黑雾」（作者 2026-10-09："你全做吧"）：雾是**引擎 SpellCloud 的子类**
+        //   （tnc:fog ⇒ DarkFogCloudEntity），所以直接复用**引擎自己的**
+        //   SpellCloudRenderer ✓ —— 它会读 cloud.client_data.model 把穹顶画出来
+        //   （走 CustomModels.render，和投射物同一条通道 ✓）。
+        //   ⚠️ 这一行**不能省** ✗：实体类型没有渲染器 ⇒ 一生成就
+        //   `entityrenderer is null` 卡退 ✗（这条坑在本项目已经崩过三次，
+        //   现在由 OrbEntityRendererCoverageTest 在构建期把关 ✓）。
+        event.registerEntityRenderer(TNOrbEntities.FOG.get(),
+                context -> new net.spell_engine.client.render.SpellCloudRenderer<
+                        com.tnc.tnc.magic.DarkFogCloudEntity>(context));
     }
 }
