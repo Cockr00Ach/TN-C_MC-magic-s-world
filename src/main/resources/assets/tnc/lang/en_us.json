@@ -402,5 +402,6 @@
   "effect.tnc.blood_possess": "Possession",
   "effect.tnc.blood_god": "I Am God",
   "effect.tnc.burning_body": "Immolation",
-  "effect.tnc.fire_cast": "Fire Focus"
+  "effect.tnc.fire_cast": "Fire Focus",
+  "effect.tnc.dark_fog": "Dark Fog"
 }

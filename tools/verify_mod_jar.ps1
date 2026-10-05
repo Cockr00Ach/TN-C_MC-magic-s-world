@@ -262,6 +262,10 @@ try {
                         # dark chain 4 "black fog": our own debuff, replacing the borrowed
                         # tnc:gale_slow (a WIND effect on a dark spell). Registered in TNEffects.
                         'tnc:dark_veil',
+                        # dark chain 4 blindness (2026-10-10): everyone standing in the fog,
+                        # monsters included. Vanilla `minecraft:darkness` only darkens a
+                        # PLAYER's screen, so it cannot blind a mob -- hence our own effect.
+                        'tnc:dark_fog',
                         # dark chain 2 "dark sacrifice": the five soul-power steps, replacing the
                         # borrowed tnc:fire_* effects (which add spell_power:fire => zero reward
                         # for a dark spell). Registered in TNEffects.
