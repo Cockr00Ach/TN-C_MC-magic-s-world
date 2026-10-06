@@ -166,10 +166,14 @@ public final class TNFireBoltEntity extends Projectile {
         if (speed <= 0.01D || range <= 0.01D) {
             return 1.0F;                      // 还没出手（成形阶段）→ 不衰减
         }
-        // ⚠️ 射线链 t1/t2：**整段射程都保持满亮度** ✗ ——
-        //    原来从 65% 射程起就开始变淡 ✗，8 格射程里 5.2 格就淡了 ⇒
-        //    看起来就像"射线飞到一半没了"✗（作者报"没有穿透"很可能有这个成分 ✓）
-        if (isRayShot()) {
+        // ⚠️ 作者 2026-10-05：「FADE_START 这个还有吗，如果有把它改成出射程前都存在，
+        //    出射程后散开为火焰粒子」✓
+        //    ⇒ 射线链（含火龙 ✓）**整段射程满亮度** ✓，不参与任何淡出 ✓；
+        //      飞出射程那一下由 tick() 里撒一团火焰粒子收尾 ✓
+        //    ⚠️ `FADE_START` 这个常量仍**服务于火球链** ✓
+        //      （火球"离开一定距离后逐渐消失"是作者 2026-10-05 早先明确要的 ✓，
+        //        属于另一条链的手感 ⇒ 这里不动它 ✗）
+        if (isRayShot() || isDragon()) {
             return 1.0F;
         }
         double progress = (tickCount + partial) * speed / range;
@@ -461,6 +465,18 @@ public final class TNFireBoltEntity extends Projectile {
             //    （这是它唯一的爆炸 —— 命中生物时是不爆的 ✓）
             if (isDragon() && level() instanceof net.minecraft.server.level.ServerLevel sl) {
                 dragonExplode(sl);
+            }
+            // ★ 作者 2026-10-05：「出射程前都存在，出射程后散开为火焰粒子」✓
+            //   射线链：全程满亮度（不淡出 ✓，见 fade() 里的 isRayShot 分支 ✓），
+            //   飞到射程尽头就**散成一团火焰粒子** ✓ —— 而不是"啪"地凭空不见 ✗
+            if (isRayShot() && level() instanceof net.minecraft.server.level.ServerLevel slRay) {
+                Vec3 at = position();
+                slRay.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z,
+                        44, 0.35D, 0.35D, 0.35D, 0.10D);
+                slRay.sendParticles(ParticleTypes.SMALL_FLAME, at.x, at.y, at.z,
+                        26, 0.45D, 0.45D, 0.45D, 0.13D);
+                slRay.sendParticles(ParticleTypes.LAVA, at.x, at.y, at.z,
+                        8, 0.30D, 0.30D, 0.30D, 0.05D);
             }
             discard();
             return;
