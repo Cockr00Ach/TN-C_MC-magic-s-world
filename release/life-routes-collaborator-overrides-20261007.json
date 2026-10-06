@@ -1,0 +1,114 @@
+{
+  "base": "e713b42d",
+  "remote_commit": "0c0301359389f03beccd0dd10401145c2240eb91",
+  "changes": [
+    {
+      "status": "A",
+      "path": "config/openloader/resources/TN-C/assets/tnc/textures/entity/fire_dragon_head.png"
+    },
+    {
+      "status": "A",
+      "path": "config/openloader/resources/TN-C/assets/tnc/textures/spell/blast_ray.png"
+    },
+    {
+      "status": "D",
+      "path": "config/openloader/resources/TN-C/assets/tnc/textures/spell/cataclysm_fire_ray.png"
+    },
+    {
+      "status": "D",
+      "path": "config/openloader/resources/TN-C/assets/tnc/textures/spell/explosive_fire_ray.png"
+    },
+    {
+      "status": "A",
+      "path": "config/openloader/resources/TN-C/assets/tnc/textures/spell/fire_dragon.png"
+    },
+    {
+      "status": "D",
+      "path": "config/openloader/resources/TN-C/assets/tnc/textures/spell/fire_ray.png"
+    },
+    {
+      "status": "A",
+      "path": "config/openloader/resources/TN-C/assets/tnc/textures/spell/flame_demon_wrath.png"
+    },
+    {
+      "status": "A",
+      "path": "config/openloader/resources/TN-C/assets/tnc/textures/spell/solar_judgment.png"
+    },
+    {
+      "status": "A",
+      "path": "config/openloader/resources/TN-C/assets/tnc/textures/spell/sun_ray.png"
+    },
+    {
+      "status": "D",
+      "path": "config/openloader/resources/TN-C/assets/tnc/textures/spell/thick_fire_ray.png"
+    },
+    {
+      "status": "D",
+      "path": "config/openloader/resources/TN-C/assets/tnc/textures/spell/triple_fire_ray.png"
+    },
+    {
+      "status": "A",
+      "path": "kubejs/assets/tnc/textures/entity/fire_dragon_head.png"
+    },
+    {
+      "status": "A",
+      "path": "kubejs/assets/tnc/textures/spell/blast_ray.png"
+    },
+    {
+      "status": "D",
+      "path": "kubejs/assets/tnc/textures/spell/cataclysm_fire_ray.png"
+    },
+    {
+      "status": "D",
+      "path": "kubejs/assets/tnc/textures/spell/explosive_fire_ray.png"
+    },
+    {
+      "status": "A",
+      "path": "kubejs/assets/tnc/textures/spell/fire_dragon.png"
+    },
+    {
+      "status": "D",
+      "path": "kubejs/assets/tnc/textures/spell/fire_ray.png"
+    },
+    {
+      "status": "A",
+      "path": "kubejs/assets/tnc/textures/spell/flame_demon_wrath.png"
+    },
+    {
+      "status": "A",
+      "path": "kubejs/assets/tnc/textures/spell/solar_judgment.png"
+    },
+    {
+      "status": "A",
+      "path": "kubejs/assets/tnc/textures/spell/sun_ray.png"
+    },
+    {
+      "status": "D",
+      "path": "kubejs/assets/tnc/textures/spell/thick_fire_ray.png"
+    },
+    {
+      "status": "D",
+      "path": "kubejs/assets/tnc/textures/spell/triple_fire_ray.png"
+    },
+    {
+      "status": "M",
+      "path": "kubejs/data/tnc/spells/blood_burn.json"
+    },
+    {
+      "status": "M",
+      "path": "kubejs/data/tnc/spells/i_am_god.json"
+    },
+    {
+      "status": "M",
+      "path": "kubejs/data/tnc/spells/possess.json"
+    },
+    {
+      "status": "M",
+      "path": "kubejs/data/tnc/spells/sacrifice.json"
+    },
+    {
+      "status": "M",
+      "path": "kubejs/data/tnc/spells/trade_wounds.json"
+    }
+  ]
+}

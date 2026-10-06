@@ -1,11 +1,37 @@
 {
-  "type": "minecraft:crafting_shaped",
-  "pattern": ["CGC", "GMG", "CRC"],
-  "key": {
-    "C": {"item": "minecraft:copper_ingot"},
-    "G": {"item": "minecraft:glass_pane"},
-    "M": {"item": "tnc:mana_copper_coil"},
-    "R": {"item": "minecraft:redstone"}
-  },
-  "result": {"item": "tnc:mana_work_lamp"}
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:false"
+        }
+      ],
+      "recipe": {
+        "type": "minecraft:crafting_shaped",
+        "pattern": [
+          "CGC",
+          "GMG",
+          "CRC"
+        ],
+        "key": {
+          "C": {
+            "item": "minecraft:copper_ingot"
+          },
+          "G": {
+            "item": "minecraft:glass_pane"
+          },
+          "M": {
+            "item": "tnc:mana_copper_coil"
+          },
+          "R": {
+            "item": "minecraft:redstone"
+          }
+        },
+        "result": {
+          "item": "tnc:mana_work_lamp"
+        }
+      }
+    }
+  ]
 }

@@ -1,1 +1,40 @@
-{"type":"tnc:mana_forging","category":"workshop","mana":50,"work_ticks":160,"ingredients":[{"item":"minecraft:iron_ingot","count":2},{"item":"minecraft:copper_ingot","count":2},{"item":"tnc:mana_copper_coil","count":1},{"item":"minecraft:paper","count":3}],"result":{"item":"tnc:mana_paper_press","count":1}}
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:false"
+        }
+      ],
+      "recipe": {
+        "type": "tnc:mana_forging",
+        "category": "workshop",
+        "mana": 50,
+        "work_ticks": 160,
+        "ingredients": [
+          {
+            "item": "minecraft:iron_ingot",
+            "count": 2
+          },
+          {
+            "item": "minecraft:copper_ingot",
+            "count": 2
+          },
+          {
+            "item": "tnc:mana_copper_coil",
+            "count": 1
+          },
+          {
+            "item": "minecraft:paper",
+            "count": 3
+          }
+        ],
+        "result": {
+          "item": "tnc:mana_paper_press",
+          "count": 1
+        }
+      }
+    }
+  ]
+}

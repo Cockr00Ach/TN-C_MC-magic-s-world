@@ -7,7 +7,23 @@ import net.minecraft.world.level.block.*;
 public final class RouteWork {
     public static void tick(ServerLevel l,RouteNodeEntity node){switch(node.kind()){
         case PAPER_PRESS->{if(hasWater(l,node)){var s=node.inventory.getItem(0);if(s.is(RouteContent.item("tide_reed_stem")))process(node,s.getItem(),2,Items.PAPER,3,16,4);else process(node,Items.SUGAR_CANE,2,Items.PAPER,3,16,4);}else node.status="纸皮压机需要相邻清水";}
-        case SAWMILL->{var input=node.inventory.getItem(0);if(input.is(net.minecraft.tags.ItemTags.LOGS)){var id=net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(input.getItem());var planks=net.minecraftforge.registries.ForgeRegistries.ITEMS.getValue(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(id.getNamespace(),id.getPath().replace("_log","_planks").replace("_wood","_planks").replace("stripped_","")));if(planks!=null&&planks!=Items.AIR)process(node,input.getItem(),1,planks,6,12,4);}}
+        case SAWMILL->{
+            var input=node.inventory.getItem(0);
+            if(input.is(net.minecraft.tags.ItemTags.LOGS)){
+                var id=net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(input.getItem());
+                String path=id.getPath();
+                if(path.startsWith("stripped_"))path=path.substring("stripped_".length());
+                String outputPath=null;
+                for(String suffix:java.util.List.of("_log","_wood","_stem","_hyphae")){
+                    if(path.endsWith(suffix)){outputPath=path.substring(0,path.length()-suffix.length())+"_planks";break;}
+                }
+                if(path.equals("bamboo_block"))outputPath="bamboo_planks";
+                var planks=outputPath==null?null:net.minecraftforge.registries.ForgeRegistries.ITEMS.getValue(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(id.getNamespace(),outputPath));
+                // Unknown modded log shapes fail closed instead of multiplying their input.
+                if(planks!=null&&planks!=input.getItem()&&new ItemStack(planks).is(net.minecraft.tags.ItemTags.PLANKS))process(node,input.getItem(),1,planks,6,12,4);
+                else node.status="这种木材暂无对应木板加工配方";
+            }
+        }
         case LOOM->{var s=node.inventory.getItem(0);if(s.is(RouteContent.item("sail_fiber")))process(node,s.getItem(),2,RouteContent.item("mist_cloth"),1,30,6);else process(node,RouteContent.item("mist_cotton_fiber"),2,RouteContent.item("mist_cloth"),1,30,6);}
         case DRYER->{var input=node.inventory.getItem(0);if(input.isEdible()&&!input.is(RouteContent.item("packed_meal"))&&input.getItem().getFoodProperties()!=null&&input.getItem().getFoodProperties().getNutrition()>=6&&node.inventory.getItem(1).is(Items.PAPER))process(node,input.getItem(),1,RouteContent.item("packed_meal"),1,24,6);}
         case IRRIGATOR->irrigate(l,node);

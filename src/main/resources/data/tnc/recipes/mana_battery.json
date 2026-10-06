@@ -1,12 +1,40 @@
 {
-  "type": "minecraft:crafting_shaped",
-  "pattern": ["CAC", "RMR", "CSC"],
-  "key": {
-    "C": {"item": "minecraft:copper_ingot"},
-    "A": {"item": "minecraft:amethyst_shard"},
-    "R": {"item": "minecraft:redstone_block"},
-    "M": {"item": "tnc:mana_copper_coil"},
-    "S": {"item": "minecraft:iron_block"}
-  },
-  "result": {"item": "tnc:mana_battery"}
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:false"
+        }
+      ],
+      "recipe": {
+        "type": "minecraft:crafting_shaped",
+        "pattern": [
+          "CAC",
+          "RMR",
+          "CSC"
+        ],
+        "key": {
+          "C": {
+            "item": "minecraft:copper_ingot"
+          },
+          "A": {
+            "item": "minecraft:amethyst_shard"
+          },
+          "R": {
+            "item": "minecraft:redstone_block"
+          },
+          "M": {
+            "item": "tnc:mana_copper_coil"
+          },
+          "S": {
+            "item": "minecraft:iron_block"
+          }
+        },
+        "result": {
+          "item": "tnc:mana_battery"
+        }
+      }
+    }
+  ]
 }

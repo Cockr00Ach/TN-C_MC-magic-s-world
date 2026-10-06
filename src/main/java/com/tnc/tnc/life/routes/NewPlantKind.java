@@ -8,7 +8,7 @@ public enum NewPlantKind {
     DEW("hanging_dewgrass","垂露丝草","dewgrass_thread","露丝",600,2,"真实雨水逐秒蓄能，晴天慢慢放出"),
     PRISM("prism_crown","虹折冠","prism_crown_petal","虹折片",180,3,"天然日光通过三色玻璃折射；自身灯不生效"),
     ORE("ore_sleep_moss","矿眠苔","ore_dream_flake","矿眠屑",1200,2,"天然矿脉有限共鸣；同区块每日共享1200"),
-    STORM("storm_crown","雷纹冠","storm_crown_tip","雷冠尖",2400,6,"自然雷击蓄2400；付费造雷只返实际能量的80%");
+    STORM("storm_crown","雷纹冠","storm_crown_tip","雷冠尖",2400,6,"自然雷击蓄2400；玩家制造的雷击不计入产能");
     public final String id,name,product,productName,help;public final int capacity;public final double rate;
     NewPlantKind(String id,String name,String product,String productName,int capacity,double rate,String help){this.id=id;this.name=name;this.product=product;this.productName=productName;this.capacity=capacity;this.rate=rate;this.help=help;}
 }

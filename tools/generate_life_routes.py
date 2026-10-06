@@ -28,7 +28,7 @@ for name,source in [('magic_soil',False),('magic_soil_source',True)]:
     faces={d:{'texture':'#soil','uv':top if d=='up' else side,'cullface':d} for d in ['up','down','north','south','east','west']}
     write(Path('assets/tnc/models/block')/(name+'.json'),{'textures':{'soil':'tnc:block/magic_soil_atlas','particle':'tnc:block/magic_soil_atlas'},'elements':[{'from':[0,0,0],'to':[16,16,16],'faces':faces}]})
     write(Path('assets/tnc/blockstates')/(name+'.json'),{'variants':{'':{'model':'tnc:block/'+name}}});write(Path('assets/tnc/models/item')/(name+'.json'),{'parent':'tnc:block/'+name});loot(name)
-write(Path('assets/tnc/blockstates/flowing_mana.json'),{'variants':{'':{'model':'minecraft:block/water'}}})
+write(Path('assets/tnc/blockstates/flowing_mana.json'),{'variants':{'':{'model':'tnc:block/flowing_mana'}}})
 write(Path('data/tnc/recipes/magic_soil_source.json'),{'type':'tnc:mana_container_crafting','category':'misc'})
 write(Path('data/tnc/recipes/mana_bucket_merge.json'),{'type':'tnc:mana_container_crafting','category':'misc'})
 for id,input,cost,sec in [('spirit_iron','iron_ingot',60,6),('radiant_gold','gold_ingot',180,10),('star_marrow','diamond',600,16)]:
@@ -47,7 +47,8 @@ reagents={
 'mana_cart_track':'minecraft:rail','ward_bell':'tnc:warning_moss_spore','accessory_charger':'tnc:ore_dream_flake'}
 for id,name in nodes:
     material='tnc:star_marrow' if id.startswith('star_') else 'tnc:radiant_gold' if id.startswith('radiant_') or id in ['accessory_charger','mist_loom'] else 'tnc:spirit_iron'
-    if id=='mana_infuser':material='minecraft:copper_ingot'
+    if id=='mana_infuser':
+        shaped(id,[' G ','C C','SSS'],{'G':'minecraft:glass','C':'minecraft:copper_ingot','S':'minecraft:stone'});continue
     shaped(id,[' M ','MLM',' B '],{'M':material,'L':reagents[id],'B':'minecraft:stone_bricks'},4 if 'thread' in id else 1)
 accessory_core={'homeward_ribbon':'tnc:homeward_flower_petal','descent_feather':'tnc:air_plume','ore_whisper_earring':'tnc:ore_dream_flake','dew_ward_charm':'tnc:lantern_antler','mana_building_ruler':'minecraft:iron_pickaxe','rune_crossbow':'minecraft:crossbow','mana_mech':'minecraft:iron_chestplate','mech_spellgun':'tnc:storm_crystal'}
 for id,name,capacity in re.findall(r'\w+\("([a-z_]+)","([^"]+)",(\d+)\)',(J/'RouteAccessory.java').read_text(encoding='utf-8')):

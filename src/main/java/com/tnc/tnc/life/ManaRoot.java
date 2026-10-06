@@ -91,6 +91,7 @@ public final class ManaRoot {
                 serverPlayer.displayClientMessage(Component.literal("取下一枚蓄魔根芯。根还活着，可以重新注魔培育。"), true);
                 return InteractionResult.CONSUME;
             }
+            if (player.getItemInHand(hand).is(net.minecraft.world.item.Items.SHEARS)) return InteractionResult.PASS;
             if (fed == FEEDS_TO_GROW) {
                 serverPlayer.displayClientMessage(Component.literal("根已吸满魔力，还需一点生长时间。"), true);
                 return InteractionResult.CONSUME;

@@ -1167,7 +1167,7 @@
       "name": "归巢花",
       "seed": "homeward_flower_seed",
       "product": "homeward_flower_petal",
-      "use": "归途补给；归途缎带（拟新增）",
+      "use": "归途补给；归途缎带",
       "help": "人工种植需要魔法土与八格内流动魔力。",
       "discovery": "村路边、旧营地附近；根/芽"
     },
@@ -1248,7 +1248,7 @@
       "name": "天穹藤",
       "seed": "sky_vine_seed",
       "product": "sky_canopy_fiber",
-      "use": "真实攀爬；壮观景观；拟树冠供魔",
+      "use": "真实攀爬；壮观景观；树冠供魔",
       "help": "人工种植需要魔法土与八格内流动魔力。",
       "discovery": "高崖脚、古老林地；种＋产"
     },
@@ -1259,7 +1259,7 @@
       "product": "dawn_honey",
       "productName": "晨蜜",
       "help": "栽培不挑环境；成株后经历真实黎明，用空瓶采晨蜜。",
-      "use": "晨蜜早餐；拟光能供给",
+      "use": "晨蜜早餐；光能供给",
       "discovery": "开阔草坡；根/芽"
     },
     {
@@ -1319,7 +1319,7 @@
       "product": "echo_bean_pod",
       "productName": "回声豆",
       "help": "不需要先听音才能长成；音符盒三音会记录豆荚音调。",
-      "use": "回音器件；拟节奏供魔，须扣一豆",
+      "use": "回音器件；节奏供魔，须扣一豆",
       "discovery": "峡谷、回音洞口；果种"
     },
     {
@@ -1359,7 +1359,7 @@
       "product": "sail_fiber",
       "productName": "帆纤维",
       "help": "低地、室内与雨天都可栽培；收帆纤维。",
-      "use": "缓降布；帆材；拟风能供魔",
+      "use": "缓降布；帆材；风能供魔",
       "discovery": "迎风丘陵；种＋产"
     },
     {
@@ -1409,7 +1409,7 @@
       "product": "honey_powder",
       "productName": "蜜粉",
       "help": "栽培不挑环境；长成后三次蜂访或授粉刷结蜜粉。",
-      "use": "蜜簇糕；动物精制饲料；拟授粉供魔",
+      "use": "蜜簇糕；动物精制饲料；授粉供魔",
       "discovery": "花甸、蜂巢附近；根/芽"
     },
     {
@@ -1520,7 +1520,7 @@
       "seed": "storm_crown_seed",
       "product": "storm_crown_tip",
       "productName": "雷冠尖",
-      "help": "自然雷击蓄2400；付费造雷只返实际能量的80%",
+      "help": "自然雷击蓄2400；玩家制造的雷击不计入产能",
       "use": "采收、厨房加工或对应工坊器件；按 JEI 查看实际配方。"
     }
   ],

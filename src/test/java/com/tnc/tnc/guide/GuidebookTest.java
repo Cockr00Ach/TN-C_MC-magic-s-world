@@ -14,7 +14,11 @@ class GuidebookTest {
         try(var paths=Files.list(Path.of("questbook/ftbquests/chapters"))){
             for(var file:paths.filter(p->p.getFileName().toString().startsWith("tnc_")).toList()){
                 var chapter=JsonParser.parseString(Files.readString(file)).getAsJsonObject();chapters.add(chapter);assertTrue(ids.add(chapter.get("id").getAsString()));
-                for(var v:chapter.getAsJsonArray("quests")){var q=v.getAsJsonObject();assertTrue(ids.add(q.get("id").getAsString()));quests.add(q.get("id").getAsString());assertEquals(0,q.getAsJsonArray("rewards").size());
+                for(var v:chapter.getAsJsonArray("quests")){var q=v.getAsJsonObject();assertTrue(ids.add(q.get("id").getAsString()));quests.add(q.get("id").getAsString());boolean life=chapter.has("group")&&chapter.get("group").getAsString().equals("544E434C49464531");
+                    if(q.has("rewards"))for(var reward:q.getAsJsonArray("rewards")){
+                        assertTrue(life,"Legacy chapters must not duplicate money rewards");var r=reward.getAsJsonObject();assertTrue(ids.add(r.get("id").getAsString()));
+                        assertEquals("item",r.get("type").getAsString());assertTrue(Set.of("tnc:season_handbook","tnc:magic_garden_book","tnc:beast_ranch_book","tnc:mana_workshop_book").contains(r.get("item").getAsString()));assertEquals(1,r.get("count").getAsInt());
+                    }
                     for(var value:q.getAsJsonArray("tasks")){var t=value.getAsJsonObject();assertTrue(ids.add(t.get("id").getAsString()));
                         if(file.getFileName().toString().startsWith("tnc_play_")){real++;var type=t.get("type").getAsString();assertTrue(Set.of("advancement","item").contains(type));
                             if(type.equals("advancement"))assertNotNull(getClass().getResource("/data/tnc/advancements/"+t.get("advancement").getAsString().split(":")[1]+".json"));
@@ -25,7 +29,7 @@ class GuidebookTest {
                 for(var value:chapter.getAsJsonArray("images")){var tex=value.getAsJsonObject().get("image").getAsString();assertNotNull(getClass().getResource("/assets/"+tex.replace(":","/")),tex);}
             }
         }
-        assertEquals(22,chapters.size());assertEquals(191,real);assertEquals(41,atlas);
+        assertEquals(23,chapters.size());assertEquals(191,real);assertEquals(41,atlas);
         for(var chapter:chapters)for(var value:chapter.getAsJsonArray("quests"))for(var d:value.getAsJsonObject().getAsJsonArray("dependencies"))assertTrue(quests.contains(d.getAsString()),d.toString());
         for(String e:List.of("water","fire","lightning","wind","earth","light","dark"))for(int tier=1;tier<=5;tier++){
             String name=e+"_wand_"+tier;assertNotNull(getClass().getResource("/assets/tnc/models/item/"+name+".json"));

@@ -120,7 +120,7 @@ for x,id,title,desc in [(-9,'magic_soil_source','土源 · 十秒铺田','八泥
 for i,p in enumerate(magic):
  x=(i%6-2.5)*4.5;y=3+(i//6)*14
  details=table.get(p['id'],table.get(p['id'].removesuffix('_crop').removesuffix('_mushroom').removesuffix('_bush'),[]))
- if details:p['discovery']=details[0];p['use']=details[-1]
+ if details:p['discovery']=details[0];p['use']=details[-1].replace('（拟新增）','').replace('拟新增','').replace('拟','')
  a=quest(garden,'magic/'+p['id']+'/seed',p['name'],'tnc:'+p['seed'],x,y,[p.get('discovery','野外对应林地、草坡、河岸或山地寻找自然株。'),'不消耗种源。留一份种回家，采一份用于生活。'],itemtask('magic/'+p['id']+'/seed','tnc:'+p['seed']),size=1.8)
  b=quest(garden,'magic/'+p['id']+'/plant','扎下魔法根','tnc:magic_soil',x,y+2.8,[p['help'],'亲手种下记录；生长不分春夏秋冬。'],action('plant/'+p['id']),[a['id']])
  c=quest(garden,'magic/'+p['id']+'/harvest','亲手收获','tnc:'+p['product'],x,y+5.6,['成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。'],action('harvest/'+p['id']),[b['id']])
@@ -150,9 +150,14 @@ nodes=re.findall(r'\w+\("([a-z_]+)","([^"]+)",(\d+),(\d+)\)',(J/'routes/RouteKin
 helps={'mana_infuser':'空手按住右键，每秒注入自身5魔力，松开停止；潜行右键开界面放取第一个槽的容器，界面按钮也可注入五秒。普通瓶100，精炼瓶400，桶400。接线可自动装。','breath_collector':'牧务杖选兽后右键绑定。空手潜行右键切取魔/充能；鲸32、蜥8、貂25魔力/秒各有上限。','mana_pulp_press':'两听潮苇或甘蔗＋相邻水，16魔力、4秒制三纸。','mana_sawmill':'一原木＋12魔力，4秒制六木板。','mist_loom':'两雾棉或帆纤维＋30魔力，6秒制雾布。','meal_dryer':'一份熟食＋纸＋24魔力，6秒制远行餐。','mana_incubator':'放自己实际受精卵；0.15魔力/秒加快25%，不会生成新卵。','accessory_charger':'放充能饰品或机甲，接线每秒最多16魔力充入真实账本。','mana_cart_track':'这是沿普通铁轨铺设的魔导驱动座，真实载货矿车每10格花1魔力。','mana_valve':'潜行右键切优先。红石信号可关闭；消费者先获得魔力，余量进储池。','mana_mirror':'两镜沿六轴对齐，12格无遮挡传能；共享4魔力/秒。','star_mirror':'沿六轴对齐，24格无遮挡，16魔力/秒。','color_target':'拿染料右键改色。对应角羚12格内无遮挡发射，不伤人、不破坏地形。'}
 for i,(id,name,cap,rate) in enumerate(nodes):quest(workshop,'node/'+id,name,'tnc:'+id,(i%6-2.5)*4.5,2+(i//6)*5.7,[helps.get(id,'放在获准区域并连接相邻线路；检流尺右键看真实工作状态。'),f'缓冲{cap}；带宽{rate}魔力/秒。'],itemtask('node/'+id,'tnc:'+id),size=1.5)
 for i,(id,label,key) in enumerate([('dew_collector','看见第一次真实供能','network/collected'),('mana_basin','存下真实魔力','network/stored'),('mana_sawmill','实际完成一次加工','network/worked'),('accessory_charger','真正充满一部分饰品','network/charged')]):quest(workshop,'network/'+key,label,'tnc:'+id,(i-1.5)*7,34,['这个节点检测实际转移或加工，而非持有机器。'],action(key))
-for i,(id,name,cap) in enumerate(re.findall(r'\w+\("([a-z_]+)","([^"]+)",(\d+)\)',(J/'routes/RouteAccessory.java').read_text(encoding='utf-8'))):quest(workshop,'accessory/'+id,name,'tnc:'+id,(i%4-1.5)*6,41+(i//4)*6,[('由穿戴的魔道机甲供能；模块不单独充能。' if id=='mech_spellgun' else ('由穿戴的魔道机甲供能；模块不单独充能。' if id=='mech_spellgun' else f'容量{cap}。先在饰品充能台充能，再使用。')),'副手饰品生效；机甲穿胸甲位。用途与消耗见物品提示。'],itemtask('accessory/'+id,'tnc:'+id),size=1.5)
-groups=json.loads((Q/'chapter_groups.snbt').read_text(encoding='utf-8-sig'));groups['chapter_groups']=[g for g in groups['chapter_groups'] if g['id']!=GROUP];groups['chapter_groups'].append(dict(id=GROUP,title='&b&lRouchNao · 生活与魔导',collapse=False));dump(Q/'chapter_groups.snbt',groups)
-for c in [season,garden,beasts,workshop]:dump(Q/'chapters'/f"{c['filename']}.snbt",c)
+for i,(id,name,cap) in enumerate(re.findall(r'\w+\("([a-z_]+)","([^"]+)",(\d+)\)',(J/'routes/RouteAccessory.java').read_text(encoding='utf-8'))):quest(workshop,'accessory/'+id,name,'tnc:'+id,(i%4-1.5)*6,41+(i//4)*6,[('由穿戴的魔道机甲供能；模块不单独充能。' if id=='mech_spellgun' else f'容量{cap}。先在饰品充能台充能，再使用。'),'副手饰品生效；机甲穿胸甲位。用途与消耗见物品提示。'],itemtask('accessory/'+id,'tnc:'+id),size=1.5)
+from install_life_routes import groups as append_life_group
+existing_group=(Q/'chapter_groups.snbt').read_text(encoding='utf-8-sig') if (Q/'chapter_groups.snbt').exists() else '{chapter_groups: []}'
+(Q/'chapter_groups.snbt').parent.mkdir(parents=True,exist_ok=True)
+(Q/'chapter_groups.snbt').write_text(append_life_group(existing_group),encoding='utf-8')
+for c in [season,garden,beasts,workshop]:
+ dump(Q/'chapters'/f"{c['filename']}.snbt",c)
+ dump(R/'questbook/ftbquests/chapters'/f"{c['filename']}.snbt",c)
 dump(RES/'data/tnc/life_routes/catalogue.json',dict(traditional=traditional,magic=magic,animals=animals,machines=[dict(id=i,name=n,help=helps.get(i,'接线供魔后工作；材料放输入位，成品从输出位取。')) for i,n,_,_ in nodes]))
 dump(R/'work/life-routes-unresolved-icons.json',unresolved)
 print(f'Four chapters: {sum(len(c["quests"]) for c in [season,garden,beasts,workshop])} quests; {len(traditional)} traditional entries; {len(magic)} magic plants; {len(animals)} beasts. Unresolved traditional icons: {len(unresolved)}')

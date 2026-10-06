@@ -1,0 +1,170 @@
+{
+  "client": {
+    "new_items": 66,
+    "plants": 9,
+    "network_blocks": 28,
+    "animal_types": 25,
+    "screenshots": 8,
+    "failures": [],
+    "scope": "Actual native client models and GUI, isolated development world; full PCL playthrough remains user testing."
+  },
+  "data": {
+    "chapters": 4,
+    "quests": 409,
+    "tasks": 409,
+    "season_links": 56,
+    "traditional_entries": 94,
+    "magic_plants": 38,
+    "beasts": 26,
+    "network_blocks": 28,
+    "failures": []
+  },
+  "installation": {
+    "installed_at": "2026-10-07T05:56:04.731844",
+    "jar_sha256": "a166fd236cab89fab078c1aaad2966b5adf90f21130b07b340a3c09ef56074c7",
+    "backup": "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\work\\backups\\life-routes-20261007-055604",
+    "unit_tests": 167,
+    "route_gametests": 22,
+    "chapters": [
+      "tnc_field_02_botany.snbt",
+      "tnc_field_03_pasture.snbt",
+      "tnc_field_04_workshop.snbt",
+      "tnc_field_05_seasons.snbt"
+    ],
+    "saves_changed": false,
+    "island_templates_changed": false,
+    "installed": [
+      {
+        "target": "live",
+        "root": "D:\\垃圾桶\\PCL 正式版 2.9.3\\.minecraft\\versions\\元素觉醒1.4.3-魔改版-20260915",
+        "unchanged_chapters": 30
+      },
+      {
+        "target": "mirror",
+        "root": "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\modpack\\元素觉醒1.4.3-魔改版-20260915",
+        "unchanged_chapters": 19
+      }
+    ],
+    "collaborator_override_changes": [
+      {
+        "status": "A",
+        "path": "config/openloader/resources/TN-C/assets/tnc/textures/entity/fire_dragon_head.png"
+      },
+      {
+        "status": "A",
+        "path": "config/openloader/resources/TN-C/assets/tnc/textures/spell/blast_ray.png"
+      },
+      {
+        "status": "D",
+        "path": "config/openloader/resources/TN-C/assets/tnc/textures/spell/cataclysm_fire_ray.png"
+      },
+      {
+        "status": "D",
+        "path": "config/openloader/resources/TN-C/assets/tnc/textures/spell/explosive_fire_ray.png"
+      },
+      {
+        "status": "A",
+        "path": "config/openloader/resources/TN-C/assets/tnc/textures/spell/fire_dragon.png"
+      },
+      {
+        "status": "D",
+        "path": "config/openloader/resources/TN-C/assets/tnc/textures/spell/fire_ray.png"
+      },
+      {
+        "status": "A",
+        "path": "config/openloader/resources/TN-C/assets/tnc/textures/spell/flame_demon_wrath.png"
+      },
+      {
+        "status": "A",
+        "path": "config/openloader/resources/TN-C/assets/tnc/textures/spell/solar_judgment.png"
+      },
+      {
+        "status": "A",
+        "path": "config/openloader/resources/TN-C/assets/tnc/textures/spell/sun_ray.png"
+      },
+      {
+        "status": "D",
+        "path": "config/openloader/resources/TN-C/assets/tnc/textures/spell/thick_fire_ray.png"
+      },
+      {
+        "status": "D",
+        "path": "config/openloader/resources/TN-C/assets/tnc/textures/spell/triple_fire_ray.png"
+      },
+      {
+        "status": "A",
+        "path": "kubejs/assets/tnc/textures/entity/fire_dragon_head.png"
+      },
+      {
+        "status": "A",
+        "path": "kubejs/assets/tnc/textures/spell/blast_ray.png"
+      },
+      {
+        "status": "D",
+        "path": "kubejs/assets/tnc/textures/spell/cataclysm_fire_ray.png"
+      },
+      {
+        "status": "D",
+        "path": "kubejs/assets/tnc/textures/spell/explosive_fire_ray.png"
+      },
+      {
+        "status": "A",
+        "path": "kubejs/assets/tnc/textures/spell/fire_dragon.png"
+      },
+      {
+        "status": "D",
+        "path": "kubejs/assets/tnc/textures/spell/fire_ray.png"
+      },
+      {
+        "status": "A",
+        "path": "kubejs/assets/tnc/textures/spell/flame_demon_wrath.png"
+      },
+      {
+        "status": "A",
+        "path": "kubejs/assets/tnc/textures/spell/solar_judgment.png"
+      },
+      {
+        "status": "A",
+        "path": "kubejs/assets/tnc/textures/spell/sun_ray.png"
+      },
+      {
+        "status": "D",
+        "path": "kubejs/assets/tnc/textures/spell/thick_fire_ray.png"
+      },
+      {
+        "status": "D",
+        "path": "kubejs/assets/tnc/textures/spell/triple_fire_ray.png"
+      },
+      {
+        "status": "M",
+        "path": "kubejs/data/tnc/spells/blood_burn.json"
+      },
+      {
+        "status": "M",
+        "path": "kubejs/data/tnc/spells/i_am_god.json"
+      },
+      {
+        "status": "M",
+        "path": "kubejs/data/tnc/spells/possess.json"
+      },
+      {
+        "status": "M",
+        "path": "kubejs/data/tnc/spells/sacrifice.json"
+      },
+      {
+        "status": "M",
+        "path": "kubejs/data/tnc/spells/trade_wounds.json"
+      }
+    ]
+  },
+  "screenshots_sha256": {
+    "life-routes-0.png": "2398d89273d9668e84e9810a35748fa1099910724d9f0a87a55ac94082399ea2",
+    "life-routes-1.png": "83d67ed0602f7c4ba8d20487810856e4a273661d7ddaa5a274a17605c16a8ac4",
+    "life-routes-2.png": "6e28fab708d51055cbc64218d0541cc351dbad0669bde4a0dfce3fb09fd3b44f",
+    "life-routes-3.png": "9c9adc9e75b3d5a1635f5a6f75376b7921187c2337ed8b73c9bd1bb89a110b84",
+    "life-routes-4.png": "8817e1a1892651103976d17a1ccc9adc9db37c584c2575422b92abd27e4473b4",
+    "life-routes-5.png": "764fd3dad07ecf198a36df220473a43c645d7a04755a7d81c4490b81c5c0e2b4",
+    "life-routes-6.png": "094e7c719a67eeaa1ebae06f96cdf893adc11ef694db11fb349010cdf6a57dfa",
+    "life-routes-7.png": "cac12ad72dd98d0abb883f56dec85277b5ddb74f29fddb4596acfd6129fcf2f6"
+  },
+  "client_checked_at": "2026-10-07T05:55:03.780314"
+}
