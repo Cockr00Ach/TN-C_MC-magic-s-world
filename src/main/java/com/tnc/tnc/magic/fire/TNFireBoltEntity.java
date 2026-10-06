@@ -146,37 +146,22 @@ public final class TNFireBoltEntity extends Projectile {
     private float maxHealthPercent;
 
     /**
-     * 距离衰减 <b>1 → 0</b>：飞过射程的 {@link #FADE_START} 之后一路缩到看不见。
+     * 距离衰减 —— <b>现在恒为 1.0</b> ✓
      *
-     * <p>作者 2026-10-05 要求「当火球离开一定距离后会逐渐消失」——
-     * 之前是 {@code remaining <= 0} 时直接 {@code discard()}，火球会"啪"地凭空不见 ✗。
+     * <p>作者 2026-10-05：「出射程前都存在，出射程后散开为火焰粒子」，随后又追加「**都按这样改**」✓
+     * ⇒ <b>所有</b>火系投射物（火球链 + 射线链 + 火龙 + 陨石 ✓）
+     * 一律"出射程前一直存在"✓ —— 不再有任何距离淡出 ✗
      *
-     * <p>怎么算"飞了多远"：射程是同步字段（{@link #RANGE}），
-     * 每 tick 的位移长度从同步的速度拿（{@code getDeltaMovement()}），
-     * 两者相乘即已飞距离 —— 所以<b>不需要每 tick 同步剩余距离</b>，省带宽。
+     * <p>飞出射程那一下由 {@code tick()} 撒一团火焰粒子收尾 ✓（撞方块同理 ✓）；
+     * 火龙例外 ✓ —— 它有自己那一下"剧烈爆炸"✓
      *
-     * @return 1.0 = 还是完整的球；0.0 = 已经该看不见了
+     * <p>⚠️ 原来的 `FADE_START = 0.65` 与整段衰减计算已经**删除** ✓（没有使用者了 ✓）。
+     *
+     * @return 恒为 1.0（保留这个方法是因为渲染器还在调它 ✓）
      */
     public float fade(float partial) {
-        double speed = getDeltaMovement().length();
-        double range = range();
-        if (speed <= 0.01D || range <= 0.01D) {
-            return 1.0F;                      // 还没出手（成形阶段）→ 不衰减
-        }
-        // ⚠️ 作者 2026-10-05 追加：「都按这样改」✓
-        //    ⇒ **所有**火系投射物（火球链 + 射线链 + 火龙 + 陨石 ✓）
-        //      一律"**出射程前一直存在**"✓ —— 不再有任何距离淡出 ✗
-        //      飞出射程那一下由 tick() 撒一团火焰粒子收尾 ✓（撞方块同理 ✓）
-        //    ⚠️ 所以 `FADE_START` 这个常量已经没有使用者了 ⇒ 一并删掉 ✓
         return 1.0F;
-        double progress = (tickCount + partial) * speed / range;
-        if (progress <= FADE_START) {
-            return 1.0F;
-        }
-        double k = (progress - FADE_START) / (1.0D - FADE_START);
-        return (float) Math.max(0.0D, 1.0D - k);
     }
-
     /** 这一发的射程（同步字段）。 */
     public double range() {
         return entityData.get(RANGE);
