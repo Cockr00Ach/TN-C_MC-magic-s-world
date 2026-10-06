@@ -41,20 +41,7 @@ import org.joml.Matrix4f;
 public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
 
     /** 不会被真正贴图（几何体自带颜色），指向一张一定存在的原版贴图只为不触发缺图警告。 */
-    /**
-     * <b>火龙头的像素贴图</b> ✓
-     *
-     * <p>⚠️ 作者 2026-10-05：「t3 的效果我希望和图 1 那样…<b>不要用真实渲染，用像素风格</b>」✓
-     * ⇒ 龙头不再画光滑锥体 ✗，改成**一张 32×32 像素贴片** ✓（原版牌子/粒子同一个路子 ✓）
-     */
-    private static final ResourceLocation DRAGON_HEAD =
-            ResourceLocation.fromNamespaceAndPath("tnc", "textures/entity/fire_dragon_head.png");
 
-    /** 龙头贴片多大（格）—— 作者要「龙要大」✗ ⇒ 3 格 ✓。 */
-    private static final double DRAGON_HEAD_SIZE = 3.0D;
-
-    /** 龙身多长（格）—— 作者要「身体大概 5 个方块长」✓。 */
-    private static final double DRAGON_BODY_BLOCKS = 5.0D;
 
     private static final ResourceLocation PLACEHOLDER =
             ResourceLocation.fromNamespaceAndPath("minecraft", "textures/particle/flame.png");
@@ -123,10 +110,10 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
             return;
         }
 
-        // 射线链 t3「火龙术」：成形阶段画**朝向准心的法阵**，成形后是一颗火焰龙头 ✓
+        // 射线链 t3「火龙术」：**整条龙由 TNDragonParticles 的粒子构成** ✓
+        //   ⚠️ 作者 2026-10-05：「把龙后面的圆环即法阵删了」✗
+        //   ⇒ 这里**什么都不画** ✓（连成形阶段的法阵也删了 ✓，几何体为零 ✓）
         if ("fire_dragon".equals(entity.spellPath())) {
-            dragon(out, stack, buffers, pose, dir, right, up, radius, age, fade,
-                    entity.formProgress(partial));
             return;
         }
 
@@ -642,35 +629,6 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
 
     /** 龙头的角数（每圈）—— 比焰体细分一些，棱角更像"有骨头的头" ✓。 */
     private static final int DRAGON_SIDES = 16;
-
-    private static void dragon(VertexConsumer out, PoseStack stack, MultiBufferSource buffers,
-                               Matrix4f pose, Vec3 dir, Vec3 right, Vec3 up,
-                               double radius, double age, float fade, double form) {
-        // ⚠️ 作者 2026-10-05：图 1 = **像素风的大龙头**（平涂贴片 ✗，不是光滑几何体 ✗）
-        //   ① 成形阶段：照旧画**朝向准心的法阵** ✓
-        //   ② 龙头本体：改成**一张像素贴片** ✓，面向摄像机 ✓，约 3 格大 ✓
-        //   ③ 龙身：约 5 格长的火尾 ✓（原几何体保留 ✓）
-        float[] color = new float[4];
-
-        // ① 成形法阵（外环先亮、内环依次跟上 ✓）
-        if (form < 0.999D) {
-            for (int i = 0; i < 3; i++) {
-                double drawn = Math.max(0.0D, Math.min(1.0D, form * 1.7D - i * 0.26D));
-                if (drawn <= 0.03D) {
-                    continue;
-                }
-                double rr = radius * (1.10D + i * 0.72D);
-                flameColor(0.16D + i * 0.24D, 0.60F * (float) drawn, color);
-                ring(out, pose, right, up, dir.scale(-0.05D * radius), rr * 0.93D,
-                        dir.scale(0.05D * radius), rr, color, 48);
-            }
-        }
-
-        // ⚠️ 作者 2026-10-05：「不要用光滑的几何体（**这是重点**）」✗
-        //   ⇒ 龙头与龙身**不再画任何几何体** ✓（也没有贴片 ✗）
-        //      整条龙由 `TNDragonParticles` 每 tick 撒的**染色粒子**构成 ✓
-        //      这里只保留成形阶段那个**朝准心的法阵** ✓（作者早先明确要的 ✓）
-    }
 
     /** 连接两圈、每段一个颜色的锥台（焰体的基本积木）。 */
     private static void ring(VertexConsumer out, Matrix4f pose, Vec3 right, Vec3 up,
