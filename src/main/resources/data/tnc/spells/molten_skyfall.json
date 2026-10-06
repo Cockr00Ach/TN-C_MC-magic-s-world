@@ -4,7 +4,7 @@
   "range": 64.0,
   "learn": { "tier": 4 },
   "cast": {
-    "duration": 1.2,
+    "duration": 2.0,
     "animation": "spell_engine:one_handed_projectile_charge",
     "sound": { "id": "spell_engine:generic_fire_casting", "randomness": 0 },
     "particles": [ { "particle_id": "lava", "shape": "PIPE", "origin": "FEET", "count": 1.0, "min_speed": 0.05, "max_speed": 0.1 } ]
