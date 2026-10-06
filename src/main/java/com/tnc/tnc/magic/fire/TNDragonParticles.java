@@ -70,7 +70,7 @@ public final class TNDragonParticles {
     private static final double EYE_R = 0.055D;
 
     /** 龙头周围的**火焰光晕**粒子数 ✓（头壳本身由渲染器画方块模型 ✓）。 */
-    private static final int AURA_POINTS = 60;
+    private static final int AURA_POINTS = 16;   // 作者反馈施法卡顿 ✗ ⇒ 从 60 砍到 16 ✓
 
     /** 轮廓粒子数（越大线越实 ✓）—— 现在只对兜底有用 ✗。 */
     private static final int OUTLINE_POINTS = 46;
@@ -79,7 +79,7 @@ public final class TNDragonParticles {
     private static final int FILL_POINTS = 34;
 
     /** 龙身粒子数 ✓。 */
-    private static final int BODY_POINTS = 40;
+    private static final int BODY_POINTS = 26;   // 同样为降负载 ✗
 
     /** 头部整体尺寸（格 ✓）—— 作者要"龙要大"✗ ⇒ 3 格 ✓。 */
     public static final double HEAD_SIZE = 3.0D;
@@ -134,6 +134,11 @@ public final class TNDragonParticles {
                     Math.abs(aw) + 0.10D, 0.35D + Math.random() * 0.5D, 1, 1);
         }
         // ④ 龙身：沿 -前 的蛇形曲线 ✓，**有体积**（每步撒一小团 ✓，不是一条线 ✗）
+        // ⚠️ 作者反馈「施法时有卡顿」✗ ⇒ 身体改成**每 2 tick 发一次** ✓
+        //    （粒子本身有寿命，隔 tick 发视觉上几乎没差 ✓，负载直接减半 ✓）
+        if (((int) age & 1) != 0) {
+            return;
+        }
         for (int p = 0; p < BODY_POINTS; p++) {
             double t = p / (double) BODY_POINTS;                 // 0 = 颈, 1 = 尾尖 ✓
             double back = 0.25D + t * BODY_LENGTH;               // 以**方块**为单位 ✓
@@ -144,7 +149,7 @@ public final class TNDragonParticles {
             // 越往后越细、越暗 ✓；每步撒 3 颗、带半径 ⇒ 尾巴是**一根有粗有细的火柱** ✓
             double r = BODY_RADIUS * (1.0D - 0.72D * t);
             level.sendParticles(dust(0.35D + t * 0.55D, 1.45F),
-                    at.x, at.y, at.z, 3, r, r, r, 0.0D);
+                    at.x, at.y, at.z, 2, r, r, r, 0.0D);
         }
     }
 

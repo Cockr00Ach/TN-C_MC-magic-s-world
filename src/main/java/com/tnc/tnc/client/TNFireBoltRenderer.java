@@ -124,7 +124,7 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
             //     一共 5 个**长方体** ✓（方块拼的 ✗，不是光滑曲面 ✓）
             //     侧面（±right 面）贴我们的赤红像素贴图 ✓，其余面取贴图上一块实色 ✓
             float grow = (float) (0.30D + 0.70D * entity.formProgress(partial));
-            float k = 3.0F * grow;                     // 整体尺寸：满成形约 3 格 ✓
+            float k = 2.2F * grow;   // 作者：龙头稍微小一点 ✗（原 3.0 ✓）                     // 整体尺寸：满成形约 3 格 ✓
             VertexConsumer hv = buffers.getBuffer(
                     net.minecraft.client.renderer.RenderType.entityTranslucentEmissive(DRAGON_HEAD));
             // 头骨（略靠后 ✓）
