@@ -112,8 +112,12 @@ public final class TNWindMechanics {
     // 每 ORB_ZAP_INTERVAL tick 打一下最近的敌人（并把它往你这边拽一点 = 牵引）。
     //
     // 简化掉的部分（都是"独立实体"才有的东西）：球不会自己飞出去、
-    // 不会被攻击、不会寻路。风灵 3/4 级的"自主召唤"这里表现为球更多、
-    // 打得更疼（同一个机制，不同参数）。
+    // 不会被攻击、不会寻路。所以五档的成长**目前只能靠"球数 + 单次伤害"**表达 ✓ ——
+    // 一档一行写在 {@link #orbTier} 的那张表里 ✓。
+    //
+    // ⚠️ 2026-10-07 修：在这之前 4 级和 5 级跟 3 级共用同一个标记 ⇒
+    //   4 级（"三个风灵"）实际只是 3 级换了个更短的时长 = **严格更弱** ✗，
+    //   5 级则是 3 级的逐字复制 ✗。现在三级各有自己的标记，阶梯单调 ✓。
 
     /**
      * 风神降临（5 级）专属标记：只由那一个法术发出。
@@ -144,6 +148,29 @@ public final class TNWindMechanics {
     public static final RegistryObject<MobEffect> WIND_SPIRIT = WIND_EFFECTS.register(
             "wind_spirit", MarkerEffect::new);
 
+    /**
+     * 三个风灵（4 级，<b>2026-10-07 补</b>）。
+     *
+     * <p>为什么必须给它一个独立标记：4 级原来和 3 级**共用** {@link #WIND_SPIRIT} ✗ ——
+     * 而 {@code orbCount()} 对那个标记一律返回 5 ⇒ 4 级「召唤三个风灵」在实装里
+     * **和 3 级是同一个东西**，而且时长 15s 比 3 级的 30s 更短、冷却还更长（35 对 25）⇒
+     * **4 级在每一个维度上都严格劣于 3 级** ✗（这是真 bug，不是手感问题）。
+     * 拆出独立标记后，档位表才表达得出"4 级比 3 级强" ✓。
+     */
+    public static final RegistryObject<MobEffect> WIND_SPIRIT_II = WIND_EFFECTS.register(
+            "wind_spirit_ii", MarkerEffect::new);
+
+    /**
+     * 风灵之主（5 级，<b>2026-10-07 补</b>）。
+     *
+     * <p>原来 5 级是 3 级的**逐字复制**（同一个 {@code wind_spirit}、同样 30s）✗ ——
+     * {@code SpellCatalog} 的注释自己就写着"5 用户还没定，先占位" ✓。
+     * 这里先给它**自己的档位**（见 {@link #orbTier}），把阶梯修成单调递增的 ✓；
+     * 真正的「风灵之约 / 合体」设计仍待落地（见 docs/spells 下的风系提案）✗。
+     */
+    public static final RegistryObject<MobEffect> WIND_SPIRIT_LORD = WIND_EFFECTS.register(
+            "wind_spirit_lord", MarkerEffect::new);
+
     /** 球离玩家多远。 */
     private static final double ORB_RADIUS = 1.6D;
     /** 每隔几 tick 打一次。 */
@@ -152,23 +179,54 @@ public final class TNWindMechanics {
     private static final double ORB_RANGE = 5.0D;
     /** 每次伤害。 */
     private static final float ORB_DAMAGE = 4.0F;
-    /** 风灵档的额外倍率。 */
-    private static final float SPIRIT_DAMAGE_MULTIPLIER = 2.0F;
     /** 牵引：把敌人往玩家这边拽多少（每 tick）。 */
     private static final double ORB_PULL = 0.12D;
 
-    /** 玩家现在有几个球（0 = 没有）。 */
-    private static int orbCount(ServerPlayer player) {
+    /**
+     * 一个档位：<b>几个球</b> ＋ <b>单次伤害倍率</b> ✓。
+     *
+     * <p>为什么改成一张显式的表：原来档位是散在 {@code orbCount()} 与 {@code tickOrbs()}
+     * 里的几条 if ✗，而 4/5 级跟 3 级共用同一个标记 ⇒ 那几条 if **根本表达不出"4 级更强"**，
+     * 于是 4 级反而更弱（见 {@link #WIND_SPIRIT_II}）✗。现在一档一行，加档位只要加一行 ✓。
+     */
+    private record OrbTier(int orbs, float damageMultiplier) {
+    }
+
+    /**
+     * 当前生效的档位（从最高档往下认，认到第一个就返回）✓。
+     *
+     * <p>数值表（球数 / 倍率都随档位<b>单调递增</b> ✓，改手感就改这里）：
+     * <table border="1">
+     *   <tr><th>档</th><th>法术</th><th>标记</th><th>球</th><th>倍率</th><th>单次伤害</th></tr>
+     *   <tr><td>t1</td><td>召唤风球</td><td>{@code wind_orb_three}</td><td>3</td><td>×1</td><td>4</td></tr>
+     *   <tr><td>t2</td><td>召唤五个风球</td><td>{@code wind_orb_five}</td><td>5</td><td>×1</td><td>4</td></tr>
+     *   <tr><td>t3</td><td>召唤风灵</td><td>{@code wind_spirit}</td><td>5</td><td>×2</td><td>8</td></tr>
+     *   <tr><td>t4</td><td>召唤三个风灵</td><td>{@code wind_spirit_ii}</td><td>5</td><td>×3</td><td>12</td></tr>
+     *   <tr><td>t5</td><td>风灵之主</td><td>{@code wind_spirit_lord}</td><td>5</td><td>×4</td><td>16</td></tr>
+     * </table>
+     *
+     * <p>⚠️ 从最高档往下认是有意的：法术用 {@code apply_mode: SET} 各自设自己的标记，
+     * 低级那次可能还没到期 ⇒ 只按"有没有某个标记"逐级判断会认错档 ✗。
+     *
+     * @return 没有球时返回 {@code null} ✓
+     */
+    private static OrbTier orbTier(ServerPlayer player) {
+        if (has(player, WIND_SPIRIT_LORD)) {
+            return new OrbTier(5, 4.0F);
+        }
+        if (has(player, WIND_SPIRIT_II)) {
+            return new OrbTier(5, 3.0F);
+        }
         if (has(player, WIND_SPIRIT)) {
-            return 5;
+            return new OrbTier(5, 2.0F);
         }
         if (has(player, WIND_ORB_FIVE)) {
-            return 5;
+            return new OrbTier(5, 1.0F);
         }
         if (has(player, WIND_ORB_THREE)) {
-            return 3;
+            return new OrbTier(3, 1.0F);
         }
-        return 0;
+        return null;
     }
 
     private static boolean has(ServerPlayer player, RegistryObject<MobEffect> effect) {
@@ -177,11 +235,11 @@ public final class TNWindMechanics {
 
     /** 绕身球：画球 + 定期打最近的敌人（含牵引）。 */
     private static void tickOrbs(ServerPlayer player, long time) {
-        int count = orbCount(player);
-        if (count == 0) {
+        OrbTier tier = orbTier(player);
+        if (tier == null) {
             return;
         }
-        boolean spirit = has(player, WIND_SPIRIT);
+        int count = tier.orbs();
         // 暗系召唤用的是同一套绕身球，只是粒子要换成暗影感的 —— 有 dark_orb 标记就是暗系
         boolean dark = has(player, DARK_ORB);
         net.minecraft.core.particles.SimpleParticleType orbParticle = dark
@@ -202,7 +260,7 @@ public final class TNWindMechanics {
                 player.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, box,
                         e -> e != player && !(e instanceof net.minecraft.world.entity.player.Player));
         for (net.minecraft.world.entity.LivingEntity target : targets) {
-            float damage = spirit ? ORB_DAMAGE * SPIRIT_DAMAGE_MULTIPLIER : ORB_DAMAGE;
+            float damage = ORB_DAMAGE * tier.damageMultiplier();
             target.hurt(player.damageSources().indirectMagic(player, player), damage);
             // 牵引：往玩家方向拽一点（"风球的攻击有牵引效果"）
             net.minecraft.world.phys.Vec3 pull = player.position().subtract(target.position()).normalize().scale(ORB_PULL);

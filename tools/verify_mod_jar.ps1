@@ -259,6 +259,11 @@ try {
                         'tnc:wind_god',            # 风神降临 5 级专属标记
                         'tnc:gale_slow', 'tnc:gale_haste',
                         'tnc:wind_orb_three', 'tnc:wind_orb_five', 'tnc:wind_spirit',
+                        # summoned-spirit ladder t4/t5 (2026-10-07): tiers 4 and 5
+                        # used to share the tier-3 marker, so tier 4 was strictly
+                        # weaker than tier 3 (shorter duration, longer cooldown,
+                        # same effect) and tier 5 was a byte-for-byte copy of it.
+                        'tnc:wind_spirit_ii', 'tnc:wind_spirit_lord',
                         # dark chain 4 "black fog": our own debuff, replacing the borrowed
                         # tnc:gale_slow (a WIND effect on a dark spell). Registered in TNEffects.
                         'tnc:dark_veil',

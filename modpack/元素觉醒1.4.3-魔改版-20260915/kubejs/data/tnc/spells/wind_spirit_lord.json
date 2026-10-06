@@ -19,8 +19,8 @@
       "action": {
         "type": "STATUS_EFFECT",
         "status_effect": {
-          "effect_id": "tnc:wind_spirit",
-          "duration": 30,
+          "effect_id": "tnc:wind_spirit_lord",
+          "duration": 45,
           "amplifier": 0,
           "apply_mode": "SET",
           "show_particles": false

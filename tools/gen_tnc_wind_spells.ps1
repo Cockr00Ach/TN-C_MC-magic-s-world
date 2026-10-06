@@ -14,6 +14,18 @@
 # Not in JSON (Java, still to do): wind_god_descent's "no cooldown" and
 # "half mana cost" - both tied to the buff being active, see TNWindMechanics.
 #
+# SOUND IDS (fixed 2026-10-07): this template used to reference
+#   spell_engine:generic_wind_casting   (release step) and
+#   spell_engine:generic_wind_release   (release step)
+# and NEITHER EVENT EXISTS. spell_engine's sounds.json only registers 18 events
+# and the wind one is "generic_wind_charging" - there is no wind casting/release
+# pair at all. A sound id that does not resolve is SILENT, with no error in the
+# log, so all five flight-chain spells were casting and releasing in complete
+# silence. Every other wind spell in the pack (the author's own wind_gust /
+# wind_tornado, our gale chain) uses generic_wind_charging - so we use it too.
+# Do NOT fix this by editing the engine's jar (third-party jar = startup crash
+# risk). Shipping our own sounds.json + .ogg would work but needs wind samples.
+#
 # ASCII only (tools/*.ps1 convention).
 
 $ErrorActionPreference = 'Stop'
@@ -64,13 +76,13 @@ function Wind-Spell($name, $tier, $cooldown, $effects) {
   "cast": {
     "duration": 0.4,
     "animation": "spell_engine:one_handed_area_charge",
-    "sound": { "id": "spell_engine:generic_wind_casting", "randomness": 0 },
+    "sound": { "id": "spell_engine:generic_wind_charging", "randomness": 0 },
     "particles": [ $castFx ]
   },
   "release": {
     "target": { "type": "SELF" },
     "animation": "spell_engine:one_handed_area_release",
-    "sound": { "id": "spell_engine:generic_wind_release" }
+    "sound": { "id": "spell_engine:generic_wind_charging" }
   },
   "impact": [
 $impact

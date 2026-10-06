@@ -9,18 +9,50 @@ $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Drawing
 
 $root = Split-Path -Parent $PSScriptRoot
-$pack = Get-ChildItem (Join-Path $root 'modpack') -Directory |
-        Where-Object { Test-Path (Join-Path $_.FullName 'config\openloader\resources\TN-C') } |
-        Select-Object -First 1
-if (-not $pack) { throw 'TN-C resource pack folder not found' }
-$iconDir = Join-Path $pack.FullName 'config\openloader\resources\TN-C\assets\tnc\textures\spell'
-New-Item -ItemType Directory -Force -Path $iconDir | Out-Null
+
+# ---- WHY THIS TARGET IS THE MOD JAR (fixed 2026-10-07) ----------------------
+# This used to write into the pack's config/openloader resource pack. That path
+# is DEPRECATED for our spell assets (see docs/<spell handbook>), and config/ is
+# not part of sync.cmd, so icons generated there did not reliably reach the game
+# instance -- the "generated it but nothing changed in game" trap.
+# Spell icons ship from the mod jar: assets/tnc/textures/spell/<spell id>.png,
+# which is where all the other icons already live.
+# Checked before switching: regenerating the five flight-chain icons into a temp
+# folder reproduced the shipped files BYTE FOR BYTE, so this is a pure move.
+$iconDir = Join-Path $root 'src\main\resources\assets\tnc\textures\spell'
+if (-not (Test-Path $iconDir)) { throw "spell icon dir not found: $iconDir" }
 
 $DEEP = [System.Drawing.Color]::FromArgb(255, 0x2E, 0x6E, 0x8A)
 $MID = [System.Drawing.Color]::FromArgb(255, 0x62, 0xB4, 0xD0)
 $LITE = [System.Drawing.Color]::FromArgb(255, 0xD8, 0xF2, 0xFA)
 $WHITE = [System.Drawing.Color]::FromArgb(255, 0xFF, 0xFF, 0xFF)
 $CLEAR = [System.Drawing.Color]::FromArgb(0, 0, 0, 0)
+
+# ---- shared pixel helpers (script scope, take the Graphics as an argument) --
+function Set-Px($g, $x, $y, $c) {
+    if ($x -ge 0 -and $x -lt 16 -and $y -ge 0 -and $y -lt 16) {
+        $g.FillRectangle((New-Object System.Drawing.SolidBrush $c), $x, $y, 1, 1)
+    }
+}
+function Set-Disk($g, $cx, $cy, $r, $c) {
+    $x0 = [int][Math]::Floor($cx - $r); $x1 = [int][Math]::Ceiling($cx + $r)
+    $y0 = [int][Math]::Floor($cy - $r); $y1 = [int][Math]::Ceiling($cy + $r)
+    for ($y = $y0; $y -le $y1; $y++) {
+        for ($x = $x0; $x -le $x1; $x++) {
+            $dx = $x - $cx; $dy = $y - $cy
+            if (($dx * $dx + $dy * $dy) -le ($r * $r + 0.25)) { Set-Px $g $x $y $c }
+        }
+    }
+}
+function Set-Ring($g, $cx, $cy, $r, $c) {
+    for ($a = 0; $a -lt 360; $a += 5) {
+        $rad = $a * [Math]::PI / 180.0
+        Set-Px $g ([int][Math]::Round($cx + $r * [Math]::Cos($rad))) ([int][Math]::Round($cy + $r * [Math]::Sin($rad))) $c
+    }
+}
+function Set-Streak($g, $x0, $y, $len, $c) {
+    for ($i = 0; $i -lt $len; $i++) { Set-Px $g ($x0 + $i) $y $c }
+}
 
 function Draw-Icon($name, $tier) {
     $bmp = New-Object System.Drawing.Bitmap(16, 16)
@@ -61,10 +93,119 @@ function Draw-Icon($name, $tier) {
     Write-Output ("  {0,-24} {1,5:N0} B" -f "$name.png", (Get-Item $p).Length)
 }
 
+# ---- chain 2 (SUMMON) icons: N orbs around the caster -----------------------
+# t1 = 3 orbs, t2 = 5 orbs, t3 = one big spirit orb, t4 = three spirit orbs,
+# t5 = the spirit lord (big orb + halo + rays).
+function Draw-OrbIcon($name, $tier) {
+    $bmp = New-Object System.Drawing.Bitmap(16, 16)
+    $g = [System.Drawing.Graphics]::FromImage($bmp)
+    $g.Clear($CLEAR)
+    if ($tier -eq 1) {
+        Set-Disk $g 8.0 3.5 1.4 $LITE
+        Set-Disk $g 4.0 11.0 1.4 $LITE
+        Set-Disk $g 12.0 11.0 1.4 $LITE
+        Set-Px $g 8 8 $MID
+    } elseif ($tier -eq 2) {
+        for ($a = 90; $a -lt 450; $a += 72) {
+            $rad = $a * [Math]::PI / 180.0
+            Set-Disk $g (8.0 + 4.6 * [Math]::Cos($rad)) (8.0 + 4.6 * [Math]::Sin($rad)) 1.3 $LITE
+        }
+        Set-Px $g 8 8 $MID
+    } elseif ($tier -eq 3) {
+        Set-Disk $g 8.0 8.0 3.0 $MID
+        Set-Disk $g 8.0 8.0 1.8 $LITE
+        Set-Px $g 8 8 $WHITE
+        Set-Ring $g 8.0 8.0 5.4 $DEEP
+    } elseif ($tier -eq 4) {
+        for ($a = 90; $a -lt 450; $a += 120) {
+            $rad = $a * [Math]::PI / 180.0
+            $ox = 8.0 + 4.4 * [Math]::Cos($rad)
+            $oy = 8.0 + 4.4 * [Math]::Sin($rad)
+            Set-Disk $g $ox $oy 1.7 $LITE
+            Set-Px $g ([int][Math]::Round($ox)) ([int][Math]::Round($oy)) $WHITE
+        }
+        Set-Disk $g 8.0 8.0 1.2 $MID
+    } else {
+        Set-Disk $g 8.0 8.0 3.2 $DEEP
+        Set-Disk $g 8.0 8.0 2.3 $MID
+        Set-Disk $g 8.0 8.0 1.3 $LITE
+        Set-Px $g 8 8 $WHITE
+        Set-Ring $g 8.0 8.0 6.4 $LITE
+        Set-Streak $g 0 8 3 $MID
+        Set-Streak $g 13 8 3 $MID
+        Set-Px $g 8 1 $MID
+        Set-Px $g 8 14 $MID
+    }
+    $g.Dispose()
+    $p = Join-Path $iconDir "$name.png"
+    $bmp.Save($p, [System.Drawing.Imaging.ImageFormat]::Png)
+    $bmp.Dispose()
+    Write-Output ("  {0,-24} {1,5:N0} B" -f "$name.png", (Get-Item $p).Length)
+}
+
+# ---- chain 3 (GALE) icons: blades, then a wall, then the storm --------------
+function Draw-GaleIcon($name, $tier) {
+    $bmp = New-Object System.Drawing.Bitmap(16, 16)
+    $g = [System.Drawing.Graphics]::FromImage($bmp)
+    $g.Clear($CLEAR)
+    if ($tier -eq 1) {
+        Set-Streak $g 2 6 8 $LITE;  Set-Px $g 10 6 $WHITE
+        Set-Streak $g 4 10 7 $MID
+    } elseif ($tier -eq 2) {
+        Set-Streak $g 1 5 10 $LITE; Set-Px $g 11 5 $WHITE
+        Set-Streak $g 3 8 10 $LITE; Set-Px $g 13 8 $WHITE
+        Set-Streak $g 5 11 8 $MID
+    } elseif ($tier -eq 3) {
+        Set-Streak $g 1 4 11 $LITE;  Set-Px $g 12 4 $WHITE
+        Set-Streak $g 2 7 11 $LITE;  Set-Px $g 13 7 $WHITE
+        Set-Streak $g 1 10 11 $LITE; Set-Px $g 12 10 $WHITE
+        Set-Px $g 0 5 $MID
+    } elseif ($tier -eq 4) {
+        # blades plus the vertical bar that becomes the wind wall
+        Set-Streak $g 3 3 11 $LITE;  Set-Px $g 14 3 $WHITE
+        Set-Streak $g 2 6 12 $LITE;  Set-Px $g 14 6 $WHITE
+        Set-Streak $g 3 9 11 $LITE;  Set-Px $g 14 9 $WHITE
+        Set-Streak $g 4 12 10 $MID
+        for ($y = 3; $y -le 12; $y++) { Set-Px $g 0 $y $DEEP }
+    } else {
+        for ($a = 0; $a -lt 720; $a += 10) {
+            $rad = $a * [Math]::PI / 180.0
+            $r = 1.0 + ($a / 720.0) * 4.4
+            $c = if ($r -lt 3.0) { $WHITE } elseif ($r -lt 4.0) { $LITE } else { $MID }
+            Set-Px $g ([int][Math]::Round(8.0 + $r * [Math]::Cos($rad))) ([int][Math]::Round(8.0 + $r * [Math]::Sin($rad))) $c
+        }
+        Set-Streak $g 0 6 4 $LITE
+        Set-Streak $g 12 6 4 $MID
+        for ($x = 3; $x -le 12; $x++) { Set-Px $g $x 1 $DEEP }
+        Set-Px $g 2 2 $DEEP
+        Set-Px $g 13 2 $DEEP
+    }
+    $g.Dispose()
+    $p = Join-Path $iconDir "$name.png"
+    $bmp.Save($p, [System.Drawing.Imaging.ImageFormat]::Png)
+    $bmp.Dispose()
+    Write-Output ("  {0,-24} {1,5:N0} B" -f "$name.png", (Get-Item $p).Length)
+}
+
 Draw-Icon 'wind_field' 1
 Draw-Icon 'wind_speed' 2
 Draw-Icon 'greater_wind_speed' 3
 Draw-Icon 'super_wind_speed' 4
 Draw-Icon 'wind_god_descent' 5
+
+# chain 2 (SUMMON) - the ten wind spells that had NO icon at all until now
+Draw-OrbIcon 'wind_orb' 1
+Draw-OrbIcon 'wind_orb_swarm' 2
+Draw-OrbIcon 'wind_spirit' 3
+Draw-OrbIcon 'triple_wind_spirit' 4
+Draw-OrbIcon 'wind_spirit_lord' 5
+
+# chain 3 (GALE)
+Draw-GaleIcon 'gale' 1
+Draw-GaleIcon 'great_gale' 2
+Draw-GaleIcon 'vast_gale' 3
+Draw-GaleIcon 'giant_gale' 4
+Draw-GaleIcon 'wind_god_gale' 5
+
 Write-Output ''
 Write-Output ('done -> ' + $iconDir)

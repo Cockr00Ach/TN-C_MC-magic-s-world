@@ -18,11 +18,25 @@
 $ErrorActionPreference = 'Stop'
 
 $root = Split-Path -Parent $PSScriptRoot
-$pack = Get-ChildItem (Join-Path $root 'modpack') -Directory |
-        Where-Object { Test-Path (Join-Path $_.FullName 'kubejs\data\tnc\spells') } |
-        Select-Object -First 1
-if (-not $pack) { throw 'modpack kubejs\data\tnc\spells not found' }
-$dest = Join-Path $pack.FullName 'kubejs\data\tnc\spells'
+
+# ---- WHY THIS TARGET IS THE MOD JAR AND NOT kubejs (fixed 2026-10-07) --------
+# These five spells used to be written into the pack's kubejs folder. Two later
+# commits changed the shipped files and this generator was never updated, which
+# made running it a REGRESSION:
+#   * 6b29d3af  moved every spell that references a tnc projectile model out of
+#               kubejs and into the mod jar's data/ -> the real files now live
+#               in src/main/resources/data/tnc/spells. Writing them to kubejs
+#               again creates same-id copies that SHADOW the jar version
+#               (for identical ids, the kubejs data pack wins).
+#   * 56a77813  pinned every model-using spell to the one model id known to
+#               render, tnc:projectile/lightingball. This template still said
+#               tnc:projectile/sun_ray, and no such model file exists -> all
+#               five spells would have rendered purple/black.
+# Keep this script honest: after ANY edit here, run it and then confirm
+#     git diff -- src/main/resources/data/tnc/spells
+# is EMPTY. If it is not empty, the generator and the shipped files disagree.
+$dest = Join-Path $root 'src\main\resources\data\tnc\spells'
+if (-not (Test-Path $dest)) { throw "spell dir not found: $dest" }
 
 function Write-Json($name, $json) {
     $path = Join-Path $dest "$name.json"
@@ -60,7 +74,7 @@ function Gale-Spell($name, $tier, $radius, $seconds, $blades, $coef, $scale, $co
           "perks": { "pierce": $pierce },
           "client_data": {
             "travel_particles": [ $trailFx ],
-            "model": { "model_id": "tnc:projectile/sun_ray", "scale": $scale }
+            "model": { "model_id": "tnc:projectile/lightingball", "orientation": "TOWARDS_MOTION", "scale": $scale }
           }
         }
       }
