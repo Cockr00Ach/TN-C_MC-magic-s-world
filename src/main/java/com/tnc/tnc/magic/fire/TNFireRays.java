@@ -50,6 +50,10 @@ public final class TNFireRays {
         if ("fire_dragon".equals(path)) {
             return castDragon(player, path);
         }
+        // t4 炎魔龙之怒：目标脚下的巨阵（不是光柱 ✓）
+        if ("flame_demon_wrath".equals(path)) {
+            return castFlameDemon(player);
+        }
         FireSpellRules.Ray spec = FireSpellRules.ray(path);
         if (spec == null) {
             return false;
@@ -100,6 +104,30 @@ public final class TNFireRays {
         level.addFreshEntity(dragon);
         return true;
     }
+
+    /**
+     * t4 <b>炎魔龙之怒</b>：在目标脚下放一个 8 秒的巨阵 ✓
+     *
+     * <p>落点：优先落在**锁定目标脚下** ✓；没锁到就落在准星指到的地面 ✓
+     * （和熔岳天倾同一个思路 —— 作者要的是"目标脚下" ✗，不是"在自己脚下" ✗）
+     */
+    private static boolean castFlameDemon(ServerPlayer player) {
+        if (!(player.level() instanceof ServerLevel level)) {
+            return false;
+        }
+        LivingEntity target = acquire(player, FireSpellRules.T4_FIELD_RADIUS + 22.0D);
+        Vec3 at = target != null
+                ? new Vec3(target.getX(), target.getY(), target.getZ())
+                : FireSpellRules.groundBelow(player, FireSpellRules.T4_FIELD_RADIUS + 22.0D);
+        float beam = FireSpellRules.power(player) * BASE_T4_COEFFICIENT * FireSpellRules.BASE_DAMAGE
+                / FireSpellRules.T4_BEAM_DIVISOR;
+        TNFlameDemonField.spawn(level, player, FireSpellRules.T4_FIELD_RADIUS,
+                FireSpellRules.T4_FIELD_TICKS, beam, FireSpellRules.SHAKE_T4_RAY, at);
+        return true;
+    }
+
+    /** t4 的伤害系数（和 id 表分开写，免得改一处漏一处 ✗）。 */
+    private static final float BASE_T4_COEFFICIENT = 5.0F;
 
     /** 这个法术是不是由本类负责（命令/自检用）。 */
     public static boolean handles(String path) {

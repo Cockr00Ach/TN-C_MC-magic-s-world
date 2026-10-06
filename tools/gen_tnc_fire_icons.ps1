@@ -137,7 +137,7 @@ Write-Output 'RAY chain:'
 Icon-Ray 'sun_ray' 1
 Icon-Ray 'blast_ray' 2
 Icon-Ray 'fire_dragon' 3
-Icon-Ray 'explosive_fire_ray' 4
+Icon-Ray 'flame_demon_wrath' 4
 Icon-Ray 'cataclysm_fire_ray' 5
 Write-Output 'BALL chain:'
 Icon-Ball 'fireball' 1

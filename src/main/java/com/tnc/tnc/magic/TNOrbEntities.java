@@ -165,6 +165,23 @@ public final class TNOrbEntities {
                     .build("tnc:light_beam"));
 
     /**
+     * 射线链 t4「炎魔龙之怒」的巨阵实体 ✓
+     *
+     * <p>它自己画：地上那个大法阵 + 东南西北 4 根黑曜石巨柱 + 柱顶 4 颗太阳感圆球 + 4 条激光 ✓
+     * （作者要求"不改地形"✗ ⇒ 柱子是**纯视觉**，一根真方块都不放 ✓）
+     *
+     * <p>{@code updateInterval(1)}：4 条光线的目标 id 要尽快同步给客户端 ✗
+     * —— 晚了激光会"追着上一个目标画" ✗（法阵那轮踩过同样的坑 ✓）
+     */
+    public static final RegistryObject<EntityType<com.tnc.tnc.magic.fire.TNFlameDemonField>> FLAME_DEMON_FIELD =
+            ENTITY_TYPES.register("flame_demon_field", () -> EntityType.Builder
+                    .of(com.tnc.tnc.magic.fire.TNFlameDemonField::new, MobCategory.MISC)
+                    .sized(0.1F, 0.1F)
+                    .clientTrackingRange(16)
+                    .updateInterval(1)
+                    .build("tnc:flame_demon_field"));
+
+    /**
      * ★ 光法第 4 条链「召唤天使」的**战斗天使** ✓（作者 2026-10-02："我制作了一个 fightingangel，你先把他做成怪" ✓）。
      *
      * <p>和上面那位"雕像天使"（{@link #ANGEL}）是两个东西 ✗：那个是第二条链法阵中心的无敌雕像，

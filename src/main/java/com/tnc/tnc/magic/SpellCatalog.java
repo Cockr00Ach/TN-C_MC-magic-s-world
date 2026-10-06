@@ -208,7 +208,7 @@ public final class SpellCatalog {
             fireEntry("sun_ray", Chain.RAY, 1, "烈阳射线"),
             fireEntry("blast_ray", Chain.RAY, 2, "爆炸射线"),
             fireEntry("fire_dragon", Chain.RAY, 3, "火龙术"),
-            fireEntry("explosive_fire_ray", Chain.RAY, 4, "爆炸射线"),
+            fireEntry("flame_demon_wrath", Chain.RAY, 4, "炎魔龙之怒"),
             fireEntry("cataclysm_fire_ray", Chain.RAY, 5, "巨大爆炸射线"),
 
             // ---- 火球线（作者 2026-10-05 定稿）----

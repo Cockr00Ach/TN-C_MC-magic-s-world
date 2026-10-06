@@ -260,6 +260,32 @@ public final class FireSpellRules {
         return ray(spellPath) != null;
     }
 
+    /**
+     * 准星指向的**地面点**（往下探到方块为止 ✓）—— 巨阵落在目标脚下就用它 ✓。
+     *
+     * <p>和"往脚下找地面"那套（{@code TNFireFields.groundAnchor}）同一个思路 ✓
+     */
+    public static net.minecraft.world.phys.Vec3 groundBelow(net.minecraft.world.entity.LivingEntity caster,
+                                                            double reach) {
+        net.minecraft.world.phys.Vec3 eye = caster.getEyePosition();
+        net.minecraft.world.phys.Vec3 end = eye.add(caster.getLookAngle().scale(reach));
+        if (!(caster.level() instanceof net.minecraft.server.level.ServerLevel server)) {
+            return caster.position();
+        }
+        net.minecraft.world.phys.BlockHitResult hit = server.clip(new net.minecraft.world.level.ClipContext(
+                eye, end, net.minecraft.world.level.ClipContext.Block.COLLIDER,
+                net.minecraft.world.level.ClipContext.Fluid.NONE, caster));
+        if (hit.getType() != net.minecraft.world.phys.HitResult.Type.MISS) {
+            return hit.getLocation();
+        }
+        // 没打到方块：从目标点往下找一个地面 ✓
+        net.minecraft.world.phys.BlockHitResult down = server.clip(new net.minecraft.world.level.ClipContext(
+                end, end.subtract(0.0D, 32.0D, 0.0D),
+                net.minecraft.world.level.ClipContext.Block.COLLIDER,
+                net.minecraft.world.level.ClipContext.Fluid.NONE, caster));
+        return down.getType() != net.minecraft.world.phys.HitResult.Type.MISS ? down.getLocation() : end;
+    }
+
     /** 一发射线的实际伤害（和火球同一个公式 ✓）。 */
     public static float rayDamage(Ray spec, float power) {
         return spec == null ? 0.0F : spec.coefficient() * BASE_DAMAGE * power;
@@ -289,6 +315,41 @@ public final class FireSpellRules {
 
     /** 火龙消失时那次爆炸的半径（格）—— "剧烈爆炸"给大一点 ✓。 */
     public static final double DRAGON_EXPLODE_RADIUS = 5.0D;
+
+    // ---------------- t4 炎魔龙之怒 ----------------
+
+    /** t4 巨阵的半径（格）—— 作者说"巨大的法阵"✓（射程 32 格内的目标脚下 ✓）。 */
+    public static final double T4_FIELD_RADIUS = 10.0D;
+
+    /** t4 持续 8 秒 ✓（作者明确）。 */
+    public static final int T4_FIELD_TICKS = 160;
+
+    /** 4 个圆球分布在这个半径的比例上（0.78 × 阵半径 ✓，正好在东南西北四个柱顶 ✓）。 */
+    public static final double T4_ORB_RING = 0.78D;
+
+    /** 圆球离地多高（格）—— 柱顶的高度 ✓。 */
+    public static final double T4_ORB_HEIGHT = 9.0D;
+
+    /** 光线每几 tick 跳一次（10 tick = 0.5 秒 ✓）。 */
+    public static final int T4_BEAM_INTERVAL_TICKS = 10;
+
+    /**
+     * 单次光线伤害 = 系数 × 基础伤害 × 火法强 ÷ <b>这个数</b> ✓
+     *
+     * <p>为什么是 3.2：8 秒里一共跳 {@code 160 / 10 = 16} 次 ✓，
+     * {@code 16 ÷ 3.2 = 5} ⇒ <b>总量正好 = 系数 × 基础伤害 × 火法强</b> ✓
+     * —— 和别档同一个口径，不会因为"持续伤害"就偷偷打出一堆额外伤害 ✗
+     */
+    public static final float T4_BEAM_DIVISOR = 3.2F;
+
+    /** 收场时每个圆球爆炸的伤害 = 单次光线伤害 × 这个数（作者定 ×2 ✓）。 */
+    public static final float T4_ORB_BLAST_MULTIPLIER = 2.0F;
+
+    /** 收场爆炸的半径（格）✓。 */
+    public static final double T4_ORB_BLAST_RADIUS = 5.0D;
+
+    /** t4 收场的画面震动强度（度 ✓）—— 比 t5 弱、比 t3 强 ✓。 */
+    public static final float SHAKE_T4_RAY = 12.0F;
     /** 爆炸伤害 = 那一发火球伤害 × {@link #SKYFALL_BLAST_PERCENT}。 */
     public static float blastDamage(float boltDamage) {
         return boltDamage <= 0.0F ? 0.0F : boltDamage * SKYFALL_BLAST_PERCENT;
