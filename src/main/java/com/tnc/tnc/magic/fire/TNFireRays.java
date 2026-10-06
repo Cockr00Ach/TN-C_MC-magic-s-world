@@ -203,30 +203,10 @@ public final class TNFireRays {
         if (exact != null) {
             return exact;
         }
-        // ② 射线打不中（瞄得偏一点 / 目标在准心边上）⇒ 退化成**瞄准锥**里最近的那个 ✓
-        //    作者 2026-10-01 的光柱索敌就是 35° 锥 ✓；这里对齐同一个手感 ✓
-        //    ⚠️ 为什么要这一层：只靠精确射线的话，"准心差半格"就变成"没目标"✗，
-        //       表现就是"索敌时灵时不灵"✗
-        double cosLimit = Math.cos(Math.toRadians(AIM_CONE_DEGREES));
-        LivingEntity cone = null;
-        double bestScore = Double.MAX_VALUE;
-        for (LivingEntity candidate : near) {
-            Vec3 to = candidate.getBoundingBox().getCenter().subtract(eye);
-            double dist = to.length();
-            if (dist < 1.0E-4D) {
-                return candidate;
-            }
-            double cos = to.normalize().dot(look);
-            if (cos < cosLimit) {
-                continue;                       // 不在瞄准锥里 ✓
-            }
-            // 先比"离准心多远"（cos 越大越正 ✗），再比距离 ⇒ 锥内最贴准心的那个 ✓
-            double score = (1.0D - cos) * 100.0D + dist / Math.max(1.0D, range);
-            if (score < bestScore) {
-                bestScore = score;
-                cone = candidate;
-            }
-        }
-        return cone;
+        // ⚠️ 作者 2026-10-05：「把锥形追踪删了」✓
+        //    原来这里还有一层 35° 瞄准锥兜底 ✗ —— 它会让"瞄偏一点也能锁上"✓，
+        //    但也会出现"锁上了旁边的怪、射线拐过去"✗ 的观感 ✗
+        //    ⇒ 删掉 ✓，现在**只认准心那条线** ✓（和引擎的 CURSOR 同一个判据 ✓）
+        return null;
     }
 }

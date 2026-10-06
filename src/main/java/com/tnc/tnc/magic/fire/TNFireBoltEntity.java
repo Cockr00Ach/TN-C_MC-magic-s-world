@@ -166,6 +166,12 @@ public final class TNFireBoltEntity extends Projectile {
         if (speed <= 0.01D || range <= 0.01D) {
             return 1.0F;                      // 还没出手（成形阶段）→ 不衰减
         }
+        // ⚠️ 射线链 t1/t2：**整段射程都保持满亮度** ✗ ——
+        //    原来从 65% 射程起就开始变淡 ✗，8 格射程里 5.2 格就淡了 ⇒
+        //    看起来就像"射线飞到一半没了"✗（作者报"没有穿透"很可能有这个成分 ✓）
+        if (isRayShot()) {
+            return 1.0F;
+        }
         double progress = (tickCount + partial) * speed / range;
         if (progress <= FADE_START) {
             return 1.0F;
@@ -463,20 +469,11 @@ public final class TNFireBoltEntity extends Projectile {
         ServerLevel server = (ServerLevel) level();
         Vec3 from = position();
         Vec3 motion = getDeltaMovement();
-        // ★ 索敌（作者 2026-10-05 第 6 条）：射线链的这几档会**拐弯追**锁定的目标 ✓
-        //   ⚠️ 只在成形结束之后开始追 ✓（不然刚出手就贴脸转，看不出"射出去"✗）
-        if (penetrates() && tickCount >= formTicks()) {
-            LivingEntity locked = targetEntity();
-            if (locked != null && locked.isAlive() && locked != getOwner()) {
-                Vec3 want = locked.getEyePosition().subtract(position());
-                if (want.lengthSqr() > 1.0E-4D) {
-                    double speed = Math.max(0.05D, motion.length());
-                    motion = turnToward(motion, want.normalize(), HOMING_DEGREES_PER_TICK)
-                            .scale(speed);
-                    setDeltaMovement(motion);
-                }
-            }
-        }
+        // ⚠️ 作者 2026-10-05：「把锥形追踪删了」✓
+        //    原因（实测）：射线锁住第一个目标后会**一直往它拐**✗，
+        //    于是永远对不上第二个目标 ⇒ 表现就是"只有第一个僵尸受伤"✗
+        //    ⇒ 现在射线**走直线** ✓：出手方向 = 准心方向（由 TNFireRays 定 ✓），
+        //      之后不再拐弯 ⇒ 谁在线上谁挨打 ✓，穿透才是干净的 ✓
         // 出手缓冲：刚离手那几 tick 只走一部分，LAUNCH_RAMP_TICKS 内涨到全速。
         // ⚠️ 只改**实际走了多远**，不改 getDeltaMovement() ——
         //    改速度会每 tick 触发一次速度同步包，反而更卡 ✗
@@ -540,6 +537,17 @@ public final class TNFireBoltEntity extends Projectile {
         }
         if (hit != null || wall.getType() != HitResult.Type.MISS) {
             if (hit != null) {
+                // ⚠️ 临时调试（作者报"射线没有穿透"✗）—— 作者放一次，看聊天栏这行就知道
+                //    path 对不对 / penetrates 是不是 true / 已经命中过几个 ✓
+                //    ⚠️ 定位完就删掉这一小段 ✗
+                if (owner instanceof ServerPlayer dbg) {
+                    dbg.displayClientMessage(net.minecraft.network.chat.Component.literal(
+                            "§e[射线调试] path=" + spellPath()
+                                    + " 穿透=" + penetrates()
+                                    + " 已命中=" + dragonHit.size()
+                                    + " 撞墙=" + (wall.getType() != HitResult.Type.MISS)
+                                    + " 剩程=" + (int) remaining), false);
+                }
                 boolean hurt = hit.hurt(server.damageSources().indirectMagic(this, owner), damage);
                 // 焚身：命中就挂（基数 = 这一发实际打出的伤害）。
                 // 已经挂了同级或更高的目标由 TNScorch 自己判「跳过」——这里不用管"不刷新"
