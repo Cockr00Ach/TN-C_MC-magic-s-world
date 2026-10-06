@@ -547,10 +547,37 @@ public final class TNFireBoltEntity extends Projectile {
                 if (piercedHurt && damage > 0.0F && owner instanceof ServerPlayer pCaster) {
                     TNScorch.apply(pierced, pCaster, damage, heavyScorch);
                 }
-                // 穿过去时留一小撮火花（不炸开 ✗，否则看着像"打到就停"✗）
-                server.sendParticles(ParticleTypes.FLAME,
-                        pierced.getX(), pierced.getY() + pierced.getBbHeight() * 0.5D, pierced.getZ(),
-                        3, 0.15D, 0.15D, 0.15D, 0.02D);
+                // ★ t2「爆炸射线」：命中时来一发**小范围爆炸** ✓
+                //   ⚠️ 作者 2026-10-05：「t2 中射线命中时会产生爆炸没有实现」✗
+                //   根因：这段原来挂在"单目标命中"那条路上（`if (hit != null ...)`）✗，
+                //        而射线分支会把 `hit` 置空 ✗ ⇒ 那条路根本不走 ⇒ 爆炸丢了 ✗
+                //   ⚠️ 爆炸倍率用**射线自己的 75%** ✓（火球那套是 50% ✗，不是这个法术的规格 ✗）
+                //   ⚠️ 作者明确「该处爆炸没有震动效果」✗ ⇒ 只做伤害 + 粒子，
+                //       **绝不 spawn 冲击波** ✓（冲击波才会震屏 ✓）
+                if (blastRadius > 0.0D) {
+                    float blast = damage * FireSpellRules.RAY_BLAST_PERCENT;
+                    for (LivingEntity splash : server.getEntitiesOfClass(LivingEntity.class,
+                            FireSpellRules.uprightArea(pierced.position(), blastRadius, 2.0D),
+                            e -> FireSpellRules.hittable(owner, e))) {
+                        splash.invulnerableTime = 0;      // 直击刚把它设成 20，不清会被吞 ✓
+                        splash.hurt(server.damageSources().indirectMagic(this, owner), blast);
+                    }
+                    double bx = pierced.getX();
+                    double by = pierced.getY() + pierced.getBbHeight() * 0.5D;
+                    double bz = pierced.getZ();
+                    server.sendParticles(ParticleTypes.EXPLOSION, bx, by, bz, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+                    server.sendParticles(ParticleTypes.FLAME, bx, by, bz, 26,
+                            blastRadius * 0.5D, blastRadius * 0.4D, blastRadius * 0.5D, 0.06D);
+                    server.sendParticles(ParticleTypes.SMALL_FLAME, bx, by, bz, 14,
+                            blastRadius * 0.6D, blastRadius * 0.5D, blastRadius * 0.6D, 0.08D);
+                    server.sendParticles(ParticleTypes.LAVA, bx, by, bz, 6,
+                            blastRadius * 0.3D, 0.3D, blastRadius * 0.3D, 0.04D);
+                } else {
+                    // 普通射线（t1）：穿过去只留一小撮火花 ✓（不炸开 ✗，否则像"打到就停"✗）
+                    server.sendParticles(ParticleTypes.FLAME,
+                            pierced.getX(), pierced.getY() + pierced.getBbHeight() * 0.5D, pierced.getZ(),
+                            3, 0.15D, 0.15D, 0.15D, 0.02D);
+                }
 
             }
             hit = null;                             // 单目标那段对射线不再生效 ✓
