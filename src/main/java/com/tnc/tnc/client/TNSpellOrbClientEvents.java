@@ -42,6 +42,10 @@ public final class TNSpellOrbClientEvents {
         event.registerEntityRenderer(TNOrbEntities.FIRE_BOLT.get(), TNFireBoltRenderer::new);
         // ★ 熔岩地（火球链 t3 熔岩火球起）：贴地的持续灼烧区域，视觉同样由粒子承担 ✓
         event.registerEntityRenderer(TNOrbEntities.LAVA_FIELD.get(), TNLavaFieldRenderer::new);
+        // 射线链 t4「炎魔龙之怒」的巨阵 ✓
+        // ⚠️ 这一行**千万不能漏** ✗ —— 实体有类型、客户端没渲染器 = 一生成就 NullPointerException 卡退 ✗
+        //    （OrbEntityRendererCoverageTest 就是专门盯这件事的 ✓，它已经拦下过三次真实崩服 ✓）
+        event.registerEntityRenderer(TNOrbEntities.FLAME_DEMON_FIELD.get(), TNFlameDemonRenderer::new);
         // ★ 两座法阵（t4 熔岳天倾的头顶阵 / t5 炎葬的脚下阵）：同样是粒子表达，
         //   共用通用的空渲染器，见 TNParticleOnlyRenderer ✓
         event.registerEntityRenderer(TNOrbEntities.SKYFALL.get(), TNSigilRenderer::skyfall);
