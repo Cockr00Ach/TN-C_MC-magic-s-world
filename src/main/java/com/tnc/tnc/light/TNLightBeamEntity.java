@@ -42,6 +42,24 @@ public class TNLightBeamEntity extends Entity {
 
     /** 形态：0 = 前射（彩虹渐变 ✓），1 = 天降（更亮、白芯更大 ✓）。 */
     public static final int STYLE_RAY = 0;
+
+    /**
+     * 形态 2 = <b>火系射线</b>（作者 2026-10-05 的「打火链」t1 起）✓。
+     *
+     * <p>和 {@link #STYLE_RAY} 的区别只有三处，全都<b>只在火系形态下生效</b>
+     * （光系原有行为一字不改 ✓）：
+     * <ol>
+     *   <li><b>撞方块就截断</b>：光柱会穿墙 ✗，火焰射线打到方块就把长度截在那儿 ✓</li>
+     *   <li><b>截断后提前消散</b>：再活 {@link #FIRE_DISSOLVE_TICKS} tick 就散成火焰粒子消失 ✓
+     *       （作者要求："当无法穿透时，攻击提前消失，不然等出了射程再消失" ✗）</li>
+     *   <li><b>命中判据与灼烧</b>：用火系的 {@code FireSpellRules.hittable}（打所有生物 ✓，
+     *       而不是光系的 isHostile ✗），并且命中挂焚身 ✓</li>
+     * </ol>
+     */
+    public static final int STYLE_FIRE = 2;
+
+    /** 火系形态：撞到方块后再活几 tick 就散掉 ✓。 */
+    public static final int FIRE_DISSOLVE_TICKS = 3;
     public static final int STYLE_DESCENT = 1;
 
     /**
@@ -95,6 +113,49 @@ public class TNLightBeamEntity extends Entity {
 
     /** 伤害只在服务端算 ✓（不进同步 ✓）。 */
     private float damage;
+
+    /**
+     * 火系形态：命中挂几级焚身（0 = 不挂，1 = I 级，2 = II 级）✓。
+     *
+     * <p>只在服务端用（不进同步 ✓）—— 由 Java 侧 spawn 时通过
+     * {@link #configureFire} 设好 ✓
+     * （法术 json 的 SPAWN 动作带不了参数 ✗，所以火系那几档走 Java 派发 ✓）。
+     */
+    private int fireScorch;
+
+    /** 火系形态：已经撞到方块几 tick 了（到 {@link #FIRE_DISSOLVE_TICKS} 就散 ✓）。 */
+    private int fireBlockedTicks;
+
+    /**
+     * 火系形态：命中时要不要额外来一发**小范围爆炸** ✓
+     *
+     * <p>t2「爆炸射线」专用（作者定：爆炸伤害 = 本次伤害 × 75%，范围不要太大，
+     * 而且**这个爆炸没有震动** ✗ —— 所以走普通伤害 + 粒子，**不 spawn 冲击波** ✓）。
+     */
+    private boolean fireBlast;
+
+    /**
+     * 火系形态：**满射程**（格）✓
+     *
+     * <p>⚠️ 光柱的 {@code trackTarget()} 会把长度**缩到锁定目标身上** ✗ ——
+     * 那是"光柱打在目标上"的语义 ✓；但作者要的射线是**穿透**的 ✗
+     * ⇒ 火系形态每 tick 把长度顶回满射程，真正拦截它的是墙面（见 {@link #fireClip}）✓
+     *
+     * <p>出生时从 {@code configure(...)} 的 length 抄一份 ✓
+     */
+    private double fireMaxLength;
+
+    /**
+     * 火系射线专用初始化：切成火焰形态 + 设好命中挂几级焚身 ✓。
+     *
+     * @param scorchLevel 0 = 不挂、1 = 焚身 I（t1~t3）、2 = 焚身 II（t4~t5）
+     */
+    public void configureFire(int scorchLevel, boolean blastOnHit) {
+        this.fireScorch = Math.max(0, Math.min(2, scorchLevel));
+        this.fireBlast = blastOnHit;
+        this.fireMaxLength = this.length();          // 抄下满射程 ✓
+        this.entityData.set(DATA_STYLE, STYLE_FIRE);
+    }
     /** 已经挨过这道光的敌人 ✓（只打一次 ✓）。 */
     private final Set<UUID> hit = new HashSet<>();
     public TNLightBeamEntity(EntityType<? extends TNLightBeamEntity> type, Level level) {
@@ -190,6 +251,16 @@ public class TNLightBeamEntity extends Entity {
             return;
         }
         this.trackTarget();                      // ★ 瞄着敌人：每 tick 重新瞄准 ✓
+        if (this.style() == STYLE_FIRE) {
+            // ★ 火系：把长度**顶回满射程** ⇒ 射线直接穿过去，而不是停在目标身上 ✗
+            //   （trackTarget 会把它缩到目标距离 ✗ —— 那是光柱的语义 ✓）
+            if (this.fireMaxLength > 0.0D) {
+                this.entityData.set(DATA_LENGTH, (int) Math.round(this.fireMaxLength * 100.0D));
+            }
+        }
+        if (this.style() == STYLE_FIRE && this.fireClip()) {
+            return;                              // 已经散掉了 ✓
+        }
         this.damageAlong();
         // ★ 2026-10-01 作者："把烟雾特效去掉" ✗ —— 原来这里每 tick 撒 END_ROD（末端火花）
         //   和 FLASH（起手一团白，看着就像冒烟 ✗）；光柱其实已经是**实体几何**了 ✓，
@@ -284,6 +355,52 @@ public class TNLightBeamEntity extends Entity {
         return this.level().getEntity(id) instanceof LivingEntity living && living.isAlive() ? living : null;
     }
 
+    /**
+     * 火系形态：<b>撞到方块就把长度截在那儿</b>，再活几 tick 就散成火焰粒子消失 ✓。
+     *
+     * <p>作者 2026-10-05：「穿透效果只能穿透生物，不能穿透土块的方块，
+     * 当无法穿透时，攻击提前消失，不然等出了射程在消失，消失是采用散成火焰粒子」✗
+     *
+     * <p>⚠️ 只在火系形态下被调用（光柱仍旧穿墙 ✓，行为不变 ✗）。
+     *
+     * @return true = 这一 tick 已经散掉了 ⇒ 调用方直接 return ✓
+     */
+    private boolean fireClip() {
+        if (!(this.level() instanceof net.minecraft.server.level.ServerLevel server)) {
+            return false;
+        }
+        double len = this.length();
+        if (len <= 0.0D) {
+            return false;
+        }
+        Vec3 from = this.position();
+        Vec3 to = this.endPoint();
+        net.minecraft.world.phys.BlockHitResult wall = server.clip(
+                new net.minecraft.world.level.ClipContext(from, to,
+                        net.minecraft.world.level.ClipContext.Block.COLLIDER,
+                        net.minecraft.world.level.ClipContext.Fluid.NONE, this));
+        if (wall.getType() == net.minecraft.world.phys.HitResult.Type.MISS) {
+            return false;                       // 这一 tick 没撞到：继续飞 ✓
+        }
+        // 撞到了：把光柱截到墙面（视觉上就停在墙上 ✓）
+        double dist = from.distanceTo(wall.getLocation());
+        this.entityData.set(DATA_LENGTH, (int) Math.round(Math.max(0.5D, dist) * 100.0D));
+        if (++this.fireBlockedTicks < FIRE_DISSOLVE_TICKS) {
+            return false;                       // 还没到消散的时候 ✓
+        }
+        // 散成火焰粒子（**散开**，不是原地一坨 ✗）——作者要求就是这个 ✓
+        Vec3 at = wall.getLocation();
+        server.sendParticles(net.minecraft.core.particles.ParticleTypes.FLAME,
+                at.x, at.y, at.z, 60, 0.9D, 0.9D, 0.9D, 0.06D);
+        server.sendParticles(net.minecraft.core.particles.ParticleTypes.LAVA,
+                at.x, at.y, at.z, 20, 0.7D, 0.7D, 0.7D, 0.05D);
+        server.sendParticles(net.minecraft.core.particles.ParticleTypes.SMALL_FLAME,
+                at.x, at.y, at.z, 40, 1.1D, 1.1D, 1.1D, 0.08D);
+        this.discard();
+        return true;
+    }
+
+    /** 实体中心（判伤/瞄准都用它 ✓）。 */
     private static Vec3 center(LivingEntity e) {
         return e.position().add(0.0D, e.getBbHeight() * 0.5D, 0.0D);
     }
@@ -309,13 +426,48 @@ public class TNLightBeamEntity extends Entity {
             }
             // ★ 统一用 isHostile ✓：玩家施法按老规矩（村民/动物/剧情NPC 不打 ✓）；
             //   怪物（阿波罗那种 Boss）施法时**只打玩家** ✓ —— 不然它自己会把自己的小怪一起轰 ✗
-            if (!TNLightBeamMechanics.isHostile(owner, target)) {
+            // 火系形态走火系的判据（打所有生物 ✓）；光系原有行为不变 ✓
+            if (this.style() == STYLE_FIRE) {
+                if (!com.tnc.tnc.magic.fire.FireSpellRules.hittable(owner, target)) {
+                    continue;
+                }
+            } else if (!TNLightBeamMechanics.isHostile(owner, target)) {
                 continue;
             }
             if (!this.hit.add(target.getUUID())) {
                 continue;
             }
             target.hurt(this.level().damageSources().indirectMagic(owner, owner), this.damage);
+            // 火系形态：命中挂焚身 ✓（作者 2026-10-05：t1~t3 = I 级，t4~t5 = II 级 ✓）
+            // ⚠️ TNScorch 只接受玩家施法者（它要按玩家火法强算基数 ✓）⇒ 非玩家就跳过 ✓
+            if (this.style() == STYLE_FIRE && this.fireScorch > 0
+                    && owner instanceof net.minecraft.server.level.ServerPlayer player) {
+                com.tnc.tnc.magic.fire.TNScorch.apply(target, player, this.damage,
+                        this.fireScorch >= 2);
+            }
+            // t2 爆炸射线：命中时额外来一发**小范围爆炸** ✓
+            // ⚠️ 作者要求"该处爆炸没有震动效果" ✗ ⇒ 只做伤害 + 粒子，**不 spawn 冲击波** ✓
+            if (this.style() == STYLE_FIRE && this.fireBlast
+                    && this.level() instanceof ServerLevel server2) {
+                float blast = this.damage * com.tnc.tnc.magic.fire.FireSpellRules.RAY_BLAST_PERCENT;
+                double r = com.tnc.tnc.magic.fire.FireSpellRules.RAY_BLAST_RADIUS;
+                for (LivingEntity victim : server2.getEntitiesOfClass(LivingEntity.class,
+                        target.getBoundingBox().inflate(r))) {
+                    if (victim == owner || !victim.isAlive() || victim == target) {
+                        continue;                        // 直击的那个上面已经打过了 ✓
+                    }
+                    if (!com.tnc.tnc.magic.fire.FireSpellRules.hittable(owner, victim)) {
+                        continue;
+                    }
+                    victim.hurt(this.level().damageSources().indirectMagic(owner, owner), blast);
+                }
+                server2.sendParticles(net.minecraft.core.particles.ParticleTypes.EXPLOSION,
+                        target.getX(), target.getY() + target.getBbHeight() * 0.5D, target.getZ(),
+                        1, 0.0D, 0.0D, 0.0D, 0.0D);
+                server2.sendParticles(net.minecraft.core.particles.ParticleTypes.FLAME,
+                        target.getX(), target.getY() + target.getBbHeight() * 0.5D, target.getZ(),
+                        24, r * 0.5D, r * 0.5D, r * 0.5D, 0.06D);
+            }
         }
     }
 

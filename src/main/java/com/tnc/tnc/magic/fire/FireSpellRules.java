@@ -225,6 +225,174 @@ public final class FireSpellRules {
     /** t5 陨星坠：强烈。 */
     public static final float SHAKE_T5 = 16.0F;
 
+    // ---------------- 射线链（作者 2026-10-05 全新设计，顶替旧的 *_fire_ray）----------------
+
+    /**
+     * 一档「射线」的规格。
+     *
+     * @param coefficient  伤害系数（实际伤害 = 系数 × {@link #BASE_DAMAGE} × 火法强 ✓）
+     * @param range        射程（格）
+     * @param radius       射线半径（格）—— 也就是"多粗"
+     * @param scorchLevel  命中挂几级焚身（1 = I 级、2 = II 级）✓
+     *                     —— 作者定：t1~t3 是 I 级，t4~t5 是 II 级
+     */
+    public record Ray(float coefficient, float range, float radius, int scorchLevel) {
+    }
+
+    /**
+     * 射线链里**已经实装**的档位。<b>加到这里的档才走 Java 派发</b> ✓
+     * （引擎的 SPAWN 动作带不了参数 ✗，所以射线必须由我们自己在 Java 里 spawn ✓）。
+     *
+     * <p>⚠️ 一档一档加：每加一档就把 catalog 里对应的旧法术换掉 ✓
+     * （换之前旧的走引擎那套，换之后走这里 ✓）
+     */
+    private static final Map<String, Ray> RAYS = Map.of(
+            "sun_ray",   new Ray(1.0F, 8.0F, 0.30F, 1),   // t1 烈阳射线
+            "blast_ray", new Ray(2.4F, 8.0F, 0.55F, 1)    // t2 爆炸射线（命中额外小范围爆炸 ✓）
+    );
+
+    /** 这一档射线是不是已经实装（没实装就交回引擎处理 ✓）。 */
+    public static Ray ray(String spellPath) {
+        return spellPath == null ? null : RAYS.get(spellPath);
+    }
+
+    public static boolean isRay(String spellPath) {
+        return ray(spellPath) != null;
+    }
+
+    /**
+     * 准星指向的**地面点**（往下探到方块为止 ✓）—— 巨阵落在目标脚下就用它 ✓。
+     *
+     * <p>和"往脚下找地面"那套（{@code TNFireFields.groundAnchor}）同一个思路 ✓
+     */
+    public static net.minecraft.world.phys.Vec3 groundBelow(net.minecraft.world.entity.LivingEntity caster,
+                                                            double reach) {
+        net.minecraft.world.phys.Vec3 eye = caster.getEyePosition();
+        net.minecraft.world.phys.Vec3 end = eye.add(caster.getLookAngle().scale(reach));
+        if (!(caster.level() instanceof net.minecraft.server.level.ServerLevel server)) {
+            return caster.position();
+        }
+        net.minecraft.world.phys.BlockHitResult hit = server.clip(new net.minecraft.world.level.ClipContext(
+                eye, end, net.minecraft.world.level.ClipContext.Block.COLLIDER,
+                net.minecraft.world.level.ClipContext.Fluid.NONE, caster));
+        if (hit.getType() != net.minecraft.world.phys.HitResult.Type.MISS) {
+            return hit.getLocation();
+        }
+        // 没打到方块：从目标点往下找一个地面 ✓
+        net.minecraft.world.phys.BlockHitResult down = server.clip(new net.minecraft.world.level.ClipContext(
+                end, end.subtract(0.0D, 32.0D, 0.0D),
+                net.minecraft.world.level.ClipContext.Block.COLLIDER,
+                net.minecraft.world.level.ClipContext.Fluid.NONE, caster));
+        return down.getType() != net.minecraft.world.phys.HitResult.Type.MISS ? down.getLocation() : end;
+    }
+
+    /** 一发射线的实际伤害（和火球同一个公式 ✓）。 */
+    public static float rayDamage(Ray spec, float power) {
+        return spec == null ? 0.0F : spec.coefficient() * BASE_DAMAGE * power;
+    }
+
+    /** t2 爆炸射线：命中时的**小范围爆炸**伤害 = 本次伤害 × 这个比例（作者定 75% ✓）。 */
+    public static final float RAY_BLAST_PERCENT = 0.75F;
+
+    /** t2 那个小范围爆炸的半径（格）—— 作者要求"范围不要设定的太大" ✓。 */
+    public static final double RAY_BLAST_RADIUS = 1.6D;
+
+    /**
+     * <b>t3 火龙术</b>的那颗「龙头投射物」✓
+     *
+     * <p>它不是光柱（光柱是"贴在施法者眼睛上的一条光" ✗），而是一个**会飞出去的龙头** ✓
+     * ⇒ 复用 {@code TNFireBoltEntity}（飞行 + 扫掠碰撞都现成 ✓），
+     * 靠 {@code isDragon()} 打开三个专属行为：
+     * 穿透 / 命中不爆 / 消失时剧烈爆炸 ✓
+     *
+     * <p>焚身：{@code heavyScorch = false} ⇒ I 级 ✓（作者定 t1~t3 都是 I 级 ✓）
+     */
+    public static final Bolt DRAGON_BOLT =
+            new Bolt(3.2F, 16.0F, 0.90F, 1, false, false, 0.0D, 0.0F);
+
+    /** 火龙消失时那次爆炸的伤害倍率（作者定：本法术伤害 × 3 ✓）。 */
+    public static final float DRAGON_EXPLODE_MULTIPLIER = 3.0F;
+
+    /** 火龙消失时那次爆炸的半径（格）—— "剧烈爆炸"给大一点 ✓。 */
+    public static final double DRAGON_EXPLODE_RADIUS = 5.0D;
+
+    // ---------------- t5 太阳の审判 ----------------
+
+    /** t5 巨阵的半径（格）—— "巨大的法阵"✓。 */
+    public static final double T5_FIELD_RADIUS = 12.0D;
+
+    /** t5 持续 10 秒 ✓（作者明确）。 */
+    public static final int T5_FIELD_TICKS = 200;
+
+    /** 太阳光球离地多高（格）—— 要"正上方"✓，给得高一点才像悬在天上 ✓。 */
+    public static final double T5_SUN_HEIGHT = 16.0D;
+
+    /** 光线每几 tick 打一轮（20 tick = 1 秒 ✓ ⇒ 10 秒里 10 轮 ✓）。 */
+    public static final int T5_BEAM_INTERVAL_TICKS = 20;
+
+    /** 收场球形爆炸的半径（格）—— 作者定<b>直径 32</b> ⇒ 半径 16 ✓。 */
+    public static final double T5_EXPLODE_RADIUS = 16.0D;
+
+    /**
+     * 破坏方块每 tick 删几个水平层 ✓
+     *
+     * <p>⚠️ 半径 16 的球 ≈ 1.7 万方块 ✗ —— 一 tick 全删会把主线程卡几秒 ✗。
+     * 球的水平层共 {@code 33} 层 ✓，每 tick 删 4 层 ⇒ 约 9 tick 删完 ✓
+     * （观感仍是"整片塌掉"✓，但不会顿 ✗）
+     */
+    public static final int T5_DESTROY_LAYERS_PER_TICK = 4;
+
+    /** 单次光线伤害 = 总伤害 ÷ 这个数（10 轮 ⇒ 光线总量 = 系数 × 基础 × 火法强 ✓）。 */
+    public static final float T5_BEAM_DIVISOR = 10.0F;
+
+    /** t5 的伤害系数（×7 ✓）。 */
+    public static final float T5_COEFFICIENT = 7.0F;
+
+    /** t5 收场爆炸的画面震动强度（度 ✓）—— 作者要"强烈震动"✓，全场最高 ✓。 */
+    public static final float SHAKE_T5_RAY = 20.0F;
+    // ---------------- t4 炎魔龙之怒 ----------------
+
+    /** t4 巨阵的半径（格）—— 作者说"巨大的法阵"✓（射程 32 格内的目标脚下 ✓）。 */
+    public static final double T4_FIELD_RADIUS = 10.0D;
+
+    /** t4 持续 8 秒 ✓（作者明确）。 */
+    public static final int T4_FIELD_TICKS = 160;
+
+    /**
+     * 4 个圆球分布在这个半径的比例上 ✓
+     *
+     * <p>⚠️ 作者 2026-10-05 第 4 条：「t4 中的黑曜石柱在离中心远一点」✓
+     * —— 原来 0.78（贴着阵内 ✗）⇒ 现在 **1.02**（就落在法阵边缘上 ✓）
+     */
+    public static final double T4_ORB_RING = 1.02D;
+
+    /**
+     * 圆球离地多高（格）✓
+     *
+     * <p>⚠️ 作者第 4 条：「高度改为 2/3 左右」✓ —— 原来 9 格 ⇒ 现在 **6 格** ✓
+     */
+    public static final double T4_ORB_HEIGHT = 6.0D;
+
+    /** 光线每几 tick 跳一次（10 tick = 0.5 秒 ✓）。 */
+    public static final int T4_BEAM_INTERVAL_TICKS = 10;
+
+    /**
+     * 单次光线伤害 = 系数 × 基础伤害 × 火法强 ÷ <b>这个数</b> ✓
+     *
+     * <p>为什么是 3.2：8 秒里一共跳 {@code 160 / 10 = 16} 次 ✓，
+     * {@code 16 ÷ 3.2 = 5} ⇒ <b>总量正好 = 系数 × 基础伤害 × 火法强</b> ✓
+     * —— 和别档同一个口径，不会因为"持续伤害"就偷偷打出一堆额外伤害 ✗
+     */
+    public static final float T4_BEAM_DIVISOR = 3.2F;
+
+    /** 收场时每个圆球爆炸的伤害 = 单次光线伤害 × 这个数（作者定 ×2 ✓）。 */
+    public static final float T4_ORB_BLAST_MULTIPLIER = 2.0F;
+
+    /** 收场爆炸的半径（格）✓。 */
+    public static final double T4_ORB_BLAST_RADIUS = 5.0D;
+
+    /** t4 收场的画面震动强度（度 ✓）—— 比 t5 弱、比 t3 强 ✓。 */
+    public static final float SHAKE_T4_RAY = 12.0F;
     /** 爆炸伤害 = 那一发火球伤害 × {@link #SKYFALL_BLAST_PERCENT}。 */
     public static float blastDamage(float boltDamage) {
         return boltDamage <= 0.0F ? 0.0F : boltDamage * SKYFALL_BLAST_PERCENT;
