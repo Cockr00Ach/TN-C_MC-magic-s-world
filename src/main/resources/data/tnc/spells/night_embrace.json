@@ -108,6 +108,16 @@
           "max_speed": 0.1
         }
       ]
+    },
+    {
+      "action": {
+        "type": "SPAWN",
+        "spawn": {
+          "entity_type_id": "tnc:night_grip",
+          "time_to_live_seconds": 6,
+          "delay_ticks": 0
+        }
+      }
     }
   ],
   "area_impact": {

@@ -351,6 +351,42 @@ public final class TNOrbEntities {
                     .updateInterval(20)
                     .build("tnc:drain")) : null;
 
+    /**
+     * ★ <b>黑夜之手 · 抓住不放的那只手</b>（暗系第一条链的重做，2026-10-10）✓
+     *
+     * <p>作者这次要的是《Re:Zero》486 的「不可视之手」那一路：
+     * <b>从自己背后伸出去、抓住目标不放、把目标拽回来、松手前捏碎</b> ✓。
+     * 投射物那一段（引擎的 {@code PROJECTILE} ＋ {@code tnc:projectile/dark_hand} 模型）保持不变 ✗
+     * —— 它负责"伸出去"的观感，作者前面几轮已经验收过 ✓；
+     * 缺的是"抓住之后"：引擎在命中的那一刻就把投射物回收了 ✗，
+     * 所以"抓/拽/捏"必须由一个**留在目标身上**的实体来做 ✓ ⇒ 就是它。
+     *
+     * <p>生成路径与 {@link #DRAIN} 完全同构 ✓：法术 JSON 的 {@code impact} 里一条
+     * {@code SPAWN}（{@code entity_type_id: "tnc:night_grip"}）⇒ 引擎在<b>命中那一刻</b>
+     * 造出它、并回调 {@code SpellSpawnedEntity} 把**施法者**交给我们 ✓
+     * （既有能力，不发明新语义 ✓）。
+     *
+     * <p>⚠️ 它**有画面**（和 drain 不同 ✗）：客户端给它是<b>真的渲染器</b>
+     * （{@code client/TNNightGripRenderer}，用引擎的模型通道画同一只手 ✓）——
+     * 作者本次明确要求「别游戏里做的啥都看不见，特效要做出来」✓。
+     * 数字照旧不能省 ✗：实体类型没有渲染器 = 一生成就 {@code entityrenderer is null} 卡退
+     * （{@code OrbEntityRendererCoverageTest} 会在构建期拦住 ✓）。
+     *
+     * <p>尺寸给 <b>1 × 1</b>：它的包围盒不定义"手多大"（手由渲染器按档位缩放 ✓），
+     * 但**视锥剔除**要按手的大小放大 ⇒ 由实体的
+     * {@code getBoundingBoxForCulling} 负责 ✓（t5 的手有 32 格，不这么做会"中心出屏就整只手消失" ✗）。
+     * {@code updateInterval(1)}：它每 tick 都贴在被抓的目标身上，2 tick 同步一次会一顿一顿 ✗
+     * （环绕雷球与黑雾都因为同一个原因设成 1 ✓）。
+     */
+    public static final RegistryObject<EntityType<TNNightGripEntity>> NIGHT_GRIP =
+            net.minecraftforge.fml.ModList.get().isLoaded("spell_engine")
+            ? ENTITY_TYPES.register("night_grip", () -> EntityType.Builder
+                    .of(TNNightGripEntity::new, MobCategory.MISC)
+                    .sized(1.0F, 1.0F)
+                    .clientTrackingRange(16)
+                    .updateInterval(1)
+                    .build("tnc:night_grip")) : null;
+
     private TNOrbEntities() {
     }
 

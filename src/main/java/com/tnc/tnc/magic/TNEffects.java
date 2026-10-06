@@ -495,6 +495,10 @@ public final class TNEffects {
         //   在 DarkFogMechanics 的静态块里注册 ⇒ 这里显式碰一下它的静态字段，
         //   保证类在"任何施法之前"就被加载 ✓（否则第一次放黑雾会没反应 ✗）。
         DarkFogMechanics.ensureLoaded();
+        // ★ 黑夜之手链的「反噬代价」同理：每放一次扣施法者自己一截血 ＋ 挂"头痛" ✓。
+        //   它接的是引擎的 SPELL_CAST（不是 Forge 总线 ✗），同样必须在"任何施法之前"把类加载起来，
+        //   否则第一次放黑夜之手会**静默不扣血** ✗（作者 2026-10-10：按《Re:Zero》不可视之手重做 ✓）。
+        TNDarkHandMechanics.ensureLoaded();
         // 火系火球链的「焚身」（命中灼伤）—— 自有实体那一套，见 magic/fire/TNScorch
         com.tnc.tnc.magic.fire.TNScorch.register(modEventBus);
     }
