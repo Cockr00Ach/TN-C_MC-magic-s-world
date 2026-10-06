@@ -356,18 +356,20 @@ public final class TNOrbEntities {
      *
      * <p>作者这次要的是《Re:Zero》486 的「不可视之手」那一路：
      * <b>从自己背后伸出去、抓住目标不放、把目标拽回来、松手前捏碎</b> ✓。
-     * 投射物那一段（引擎的 {@code PROJECTILE} ＋ {@code tnc:projectile/dark_hand} 模型）保持不变 ✗
-     * —— 它负责"伸出去"的观感，作者前面几轮已经验收过 ✓；
-     * 缺的是"抓住之后"：引擎在命中的那一刻就把投射物回收了 ✗，
-     * 所以"抓/拽/捏"必须由一个**留在目标身上**的实体来做 ✓ ⇒ 就是它。
+     * 并且 2026-10-10 追加了三条把"引擎投射物"那条路否掉的要求 ✗：
+     * 「手一直在旋转」、「不是掌心对着别人」、「不能所有手都直直飞出去，要有**弯的弧线**」
+     * —— 引擎的 {@code LaunchProperties} 只有 velocity/多发（javap 确认，没有弧线/散射字段 ✗），
+     * 姿态又由引擎的 {@code ALONG_MOTION} 跟着**运动矢量**走 ⇒ 三件事在引擎那边都改不动 ✓。
      *
-     * <p>生成路径与 {@link #DRAIN} 完全同构 ✓：法术 JSON 的 {@code impact} 里一条
-     * {@code SPAWN}（{@code entity_type_id: "tnc:night_grip"}）⇒ 引擎在<b>命中那一刻</b>
-     * 造出它、并回调 {@code SpellSpawnedEntity} 把**施法者**交给我们 ✓
-     * （既有能力，不发明新语义 ✓）。
+     * <p>所以现在<b>飞行这一段也归我们</b> ✓：法术 JSON 改成
+     * {@code release.target.type = "SELF"}（不再产生引擎投射物 ✗），由
+     * {@link TNDarkHandMechanics} 在 {@code SPELL_CAST} 的 RELEASE 上调用
+     * {@link TNNightGripEntity#launch} —— 手从施法者<b>后背</b>出发，沿<b>二次贝塞尔弧线</b>甩向
+     * 瞄准锁定的目标（每只手一条不同的弧 ✓），到了就抓住 ✓。
+     * 这一条也是**已验证**的：本仓有 50 个 SELF 法术，它们都靠同一个事件扣魔力、全部正常工作 ✓。
      *
-     * <p>⚠️ 它**有画面**（和 drain 不同 ✗）：客户端给它是<b>真的渲染器</b>
-     * （{@code client/TNNightGripRenderer}，用引擎的模型通道画同一只手 ✓）——
+     * <p>⚠️ 它**有画面**（不是隐形 ✗）：客户端给它是<b>真的渲染器</b>
+     * （{@code client/TNNightGripRenderer}，用引擎的模型通道画同一只手 ✓，且**掌心一直朝着被抓的人** ✓）——
      * 作者本次明确要求「别游戏里做的啥都看不见，特效要做出来」✓。
      * 数字照旧不能省 ✗：实体类型没有渲染器 = 一生成就 {@code entityrenderer is null} 卡退
      * （{@code OrbEntityRendererCoverageTest} 会在构建期拦住 ✓）。

@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -120,21 +121,35 @@ public class TNNightGripRenderer extends EntityRenderer<TNNightGripEntity> {
     }
 
     /**
-     * 从施法者指向这只手的方向 ✓ —— 也就是"掌心朝着目标"的那个方向。
+     * 手该朝哪个方向 —— 也就是"掌心对着谁" ✓。
      *
-     * <p>施法者由同步字段带过来（{@code entity.ownerEntityId()} ✓）；拿不到
-     * （隔着太远没被同步到、或施法者下线了）就退回"手自己的速度方向/正前方" ✓，
-     * 绝不抛异常 ✗。
+     * <p>★ 优先级（作者 2026-10-10：「不是掌心对着别人」就是这里要修的东西）：
+     * <ol>
+     *   <li><b>被抓的那个人</b> ✓ —— 掌心（模型的 +Z）一直朝着它。这是本渲染器存在的理由：
+     *       重做前姿态由引擎那套逻辑决定（对齐**运动矢量**），homing 一拐弯手就跟着转 ✗；</li>
+     *   <li>没瞄到人 ⇒ 朝"施法者 → 手"的方向（＝甩出去的方向）✓；</li>
+     *   <li>都拿不到 ⇒ 正前方 ✓。绝不抛异常 ✗。</li>
+     * </ol>
+     *
+     * <p>注意方向是 <b>手 → 目标</b>（不是反过来）✗：模型的 +Z 面才是掌心 ✓
+     * （见 {@code tools/gen_dark_hand_model.py} 的几何注释：+Z = 掌心、+Y = 上/手指、
+     * 手腕沿 −Z）⇒ 把 +Z 指向目标，掌心才朝着他 ✓。
      */
     private static Vec3 directionOf(TNNightGripEntity entity) {
-        int ownerId = entity.ownerEntityId();
-        if (ownerId >= 0 && Minecraft.getInstance().level != null) {
-            Entity owner = Minecraft.getInstance().level.getEntity(ownerId);
-            if (owner != null) {
-                Vec3 delta = entity.position().subtract(owner.position());
-                if (delta.lengthSqr() > 1.0E-6D) {
-                    return delta.normalize();
-                }
+        LivingEntity target = living(entity.targetEntityId());
+        if (target != null) {
+            Vec3 toTarget = target.position()
+                    .add(0.0D, target.getBbHeight() * 0.5D, 0.0D)
+                    .subtract(entity.position());
+            if (toTarget.lengthSqr() > 1.0E-6D) {
+                return toTarget.normalize();
+            }
+        }
+        Entity owner = living(entity.ownerEntityId());
+        if (owner != null) {
+            Vec3 fromOwner = entity.position().subtract(owner.position());
+            if (fromOwner.lengthSqr() > 1.0E-6D) {
+                return fromOwner.normalize();
             }
         }
         Vec3 motion = entity.getDeltaMovement();
@@ -142,6 +157,15 @@ public class TNNightGripRenderer extends EntityRenderer<TNNightGripEntity> {
             return motion.normalize();
         }
         return new Vec3(0.0D, 0.0D, 1.0D);
+    }
+
+    /** 按 entity id 在客户端世界里找一个活体（拿不到就 null ✓）。 */
+    private static LivingEntity living(int entityId) {
+        if (entityId < 0 || Minecraft.getInstance().level == null) {
+            return null;
+        }
+        Entity found = Minecraft.getInstance().level.getEntity(entityId);
+        return found instanceof LivingEntity living && living.isAlive() ? living : null;
     }
 
     /**
