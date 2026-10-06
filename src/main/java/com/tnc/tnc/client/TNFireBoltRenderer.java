@@ -157,7 +157,7 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
         //      · 侧面随 age 微微起伏 ⇒ 像素风也能看出"在烧"✓
         //      · 三束绕轴的小火舌 ⇒ 轮廓不呆板 ✓
         //      · 一根细白热内芯贯穿 + 前端伸出 ✓
-        final double half = 0.75D;         // 总长 1.5 格 ✓
+        final double half = 1.5D;          // 总长 3.0 格 ✓（作者 2026-10-05：射线长度 ×2 ✗）
         final double shell = 0.125D;       // 粗 1/4 格 ✓
         final int sides = 14;
         final int segments = 7;
