@@ -145,11 +145,14 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
     /**
      * 条身的**视觉粗细**倍率 ✓
      *
-     * <p>⚠️ 作者 2026-10-05：「瘦一点」✓ —— 视觉上收细到 0.62 倍 ✓
-     * ⚠️ 只影响**画出来的样子** ✗，不改碰撞半径（那是命中判定用的 ✓，
-     *    跟着变细会让"明明打中了却没伤害" ✗）
+     * <p>⚠️ 作者 2026-10-05：「射线太粗了要细点」✓
+     * —— 0.62 → **0.35** ✓（t1 半径 0.30 × 0.35 ≈ 0.105 格 ⇒ 直径约 0.21 格 ✓，
+     *    一根细火舌的样子 ✓）
+     *
+     * <p>⚠️ 只影响**画出来的样子** ✗，不改碰撞半径 ✓
+     * （跟着变细会让"明明打中了却没伤害" ✗）
      */
-    private static final double LANCE_FATNESS = 0.62D;
+    private static final double LANCE_FATNESS = 0.35D;
 
     /** 一圈分几边（像素风 ⇒ 10 边足够，棱角反而更像像素 ✓）。 */
     private static final int LANCE_SIDES = 10;
