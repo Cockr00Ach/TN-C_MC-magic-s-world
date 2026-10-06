@@ -118,24 +118,24 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
         //   ⚠️ 作者 2026-10-05：「把龙后面的圆环即法阵删了」✗
         //   ⇒ 这里**什么都不画** ✓（连成形阶段的法阵也删了 ✓，几何体为零 ✓）
         if ("fire_dragon".equals(entity.spellPath())) {
-            // ★ 2026-10-05：作者选「用你的方法」✓
-            //   ⇒ **自绘贴图 + 自绘几何体** ✓，不依赖任何原版模型 ✗
-            //     （骷髅方块在世界里没有方块模型 ✗；物品模型那条路也没能验证 ✗）
-            //   做法 = 原版粒子/植物那套**交叉双片** ✓：
-            //     一片贴 right×up、一片贴 dir×up ✓ —— 任何角度都至少有一面看得见 ✓
-            //   贴图 = 我们自己那张**赤红像素龙头** ✓
-            float headSize = (float) (3.0D * (0.30D + 0.70D * entity.formProgress(partial)));
-            VertexConsumer headVc = buffers.getBuffer(
+            // ★ 2026-10-05：作者「龙头要朝向前面，而且龙头怎么说二维的」✓
+            //   ⇒ 交叉双片是"永远面向摄像机"的取巧做法 ✗，天生是纸片 ✗
+            //   ⇒ 改成**真正的方块龙头** ✓：头骨 + 前伸的吻 + 下颌 + 两只角，
+            //     一共 5 个**长方体** ✓（方块拼的 ✗，不是光滑曲面 ✓）
+            //     侧面（±right 面）贴我们的赤红像素贴图 ✓，其余面取贴图上一块实色 ✓
+            float grow = (float) (0.30D + 0.70D * entity.formProgress(partial));
+            float k = 3.0F * grow;                     // 整体尺寸：满成形约 3 格 ✓
+            VertexConsumer hv = buffers.getBuffer(
                     net.minecraft.client.renderer.RenderType.entityTranslucentEmissive(DRAGON_HEAD));
-            float hh = headSize * 0.5F;
-            // 片 A：right × up（从正面看是完整的一张 ✓）
-            dragonQuad(headVc, pose,
-                    up.scale(-hh).add(right.scale(-hh)), up.scale(-hh).add(right.scale(hh)),
-                    up.scale(hh).add(right.scale(hh)), up.scale(hh).add(right.scale(-hh)));
-            // 片 B：dir × up（从侧面看是完整的一张 ✓）
-            dragonQuad(headVc, pose,
-                    up.scale(-hh).add(dir.scale(-hh)), up.scale(-hh).add(dir.scale(hh)),
-                    up.scale(hh).add(dir.scale(hh)), up.scale(hh).add(dir.scale(-hh)));
+            // 头骨（略靠后 ✓）
+            dragonBox(hv, pose, dir, up, right, -0.10F, 0.00F, 0.00F, 1.05F, 0.95F, 1.00F, k);
+            // 吻（**前伸** ⇒ 一眼看出头朝前 ✓）
+            dragonBox(hv, pose, dir, up, right, 0.95F, -0.12F, 0.00F, 1.05F, 0.55F, 0.66F, k);
+            // 下颌（吻下方、稍短 ✓）
+            dragonBox(hv, pose, dir, up, right, 0.72F, -0.52F, 0.00F, 0.85F, 0.26F, 0.58F, k);
+            // 两只角（后上方、左右分开 ✓）
+            dragonBox(hv, pose, dir, up, right, -0.55F, 0.78F, 0.36F, 0.55F, 0.62F, 0.22F, k);
+            dragonBox(hv, pose, dir, up, right, -0.55F, 0.78F, -0.36F, 0.55F, 0.62F, 0.22F, k);
             return;
         }
 
@@ -659,14 +659,56 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
      * 用 {@code vertex(x, y, z)} 会被画到世界原点（我踩过 ✗）。
      * ⚠️ 该渲染格式是 NEW_ENTITY ⇒ uv / overlay / uv2 / normal 一个都不能少 ✓
      */
-    private static void dragonQuad(VertexConsumer vc, Matrix4f pose,
-                                   Vec3 a, Vec3 b, Vec3 c, Vec3 d) {
-        quadVertex(vc, pose, a, 0.0F, 1.0F);
-        quadVertex(vc, pose, b, 1.0F, 1.0F);
-        quadVertex(vc, pose, c, 1.0F, 0.0F);
-        quadVertex(vc, pose, d, 0.0F, 0.0F);
+    /**
+     * 画一个**长方体** ✓（方块龙头的积木 ✓）
+     *
+     * <p>局部坐标系 = (前 dir, 上 up, 右 right) ✓ —— 这样"前伸的吻"就是 +前 方向 ✓。
+     *
+     * <p>贴图：<b>左右两个侧面</b>用整张赤红龙头贴图 ✓（从侧面看就是那张脸 ✓），
+     * 其余四个面取贴图上的一块**实色** ✓（省事又不会花 ✗）。
+     *
+     * <p>⚠️ 顶点必须用 {@code vertex(Matrix4f, x, y, z)}（会应用变换的那个 ✗）；
+     * 该渲染格式是 NEW_ENTITY ⇒ uv / overlay / uv2 / normal 缺一不可 ✓
+     */
+    private static void dragonBox(VertexConsumer vc, Matrix4f pose, Vec3 dir, Vec3 up, Vec3 right,
+                                  float cf, float cu, float cr,
+                                  float sf, float su, float sr, float k) {
+        // 8 个角（局部 → 世界 ✓）
+        float f0 = (cf - sf * 0.5F) * k, f1 = (cf + sf * 0.5F) * k;
+        float u0 = (cu - su * 0.5F) * k, u1 = (cu + su * 0.5F) * k;
+        float r0 = (cr - sr * 0.5F) * k, r1 = (cr + sr * 0.5F) * k;
+        Vec3 p000 = local(dir, up, right, f0, u0, r0);
+        Vec3 p001 = local(dir, up, right, f0, u0, r1);
+        Vec3 p010 = local(dir, up, right, f0, u1, r0);
+        Vec3 p011 = local(dir, up, right, f0, u1, r1);
+        Vec3 p100 = local(dir, up, right, f1, u0, r0);
+        Vec3 p101 = local(dir, up, right, f1, u0, r1);
+        Vec3 p110 = local(dir, up, right, f1, u1, r0);
+        Vec3 p111 = local(dir, up, right, f1, u1, r1);
+        // ★ 左右侧面：整张贴图 ✓（从侧面看就是完整的龙头脸 ✓）
+        face(vc, pose, p001, p101, p111, p011, 0.0F, 1.0F, 1.0F, 1.0F, 1.0F, 0.0F, 0.0F, 0.0F);
+        face(vc, pose, p100, p000, p010, p110, 0.0F, 1.0F, 1.0F, 1.0F, 1.0F, 0.0F, 0.0F, 0.0F);
+        // 其余面：取贴图上的一块实色（0.45,0.35 ⇒ 中段赤红 ✓）
+        face(vc, pose, p000, p100, p110, p010, .45F, .35F, .45F, .35F, .45F, .35F, .45F, .35F);
+        face(vc, pose, p101, p001, p011, p111, .45F, .35F, .45F, .35F, .45F, .35F, .45F, .35F);
+        face(vc, pose, p010, p110, p111, p011, .45F, .35F, .45F, .35F, .45F, .35F, .45F, .35F);
+        face(vc, pose, p000, p001, p101, p100, .45F, .35F, .45F, .35F, .45F, .35F, .45F, .35F);
     }
 
+    private static Vec3 local(Vec3 dir, Vec3 up, Vec3 right, double f, double u, double r) {
+        return dir.scale(f).add(up.scale(u)).add(right.scale(r));
+    }
+
+    /** 一个面 = 4 个顶点（uv 两个一组 ✓）。 */
+    private static void face(VertexConsumer vc, Matrix4f pose,
+                             Vec3 a, Vec3 b, Vec3 c, Vec3 d,
+                             float au, float av, float bu, float bv,
+                             float cu, float cv, float du, float dv) {
+        quadVertex(vc, pose, a, au, av);
+        quadVertex(vc, pose, b, bu, bv);
+        quadVertex(vc, pose, c, cu, cv);
+        quadVertex(vc, pose, d, du, dv);
+    }
     private static void quadVertex(VertexConsumer vc, Matrix4f pose, Vec3 p, float u, float v) {
         vc.vertex(pose, (float) p.x, (float) p.y, (float) p.z)
                 .color(255, 255, 255, 255)
