@@ -532,7 +532,36 @@ public final class TNFireBoltEntity extends Projectile {
 
         // 火龙术：这次扫到的目标如果**已经打过**，就当没打中 ✓
         //   ⇒ 于是下面的 if 不成立（只要没撞墙）⇒ 它**继续往前飞** = 穿透 ✓
-        if (penetrates() && hit != null && !dragonHit.add(hit.getUUID())) {
+        // ★ 射线链 t1/t2：**这一 tick 扫描框里的所有生物都打一遍** ✓
+        //   作者 2026-10-05 实测：「并排贴着才算出 2，隔开就只算 1」✗
+        //   根因：下面那段"最近的一个"逻辑**每 tick 只留一个目标** ✗ ——
+        //       两只贴着时，第二只还能在下一 tick 的框里补上 ✓；
+        //       中间隔开时，射线穿过第一只之后第二只**永远进不了同一 tick 的框** ✗ ⇒ 漏掉 ✗
+        //   ⇒ 射线单独走这条"全部命中"的路 ✓（这才是穿透 ✓）
+        if (isRayShot()) {
+            for (LivingEntity pierced : server.getEntitiesOfClass(LivingEntity.class,
+                    new AABB(from, to).inflate(0.4D), e -> FireSpellRules.hittable(owner, e))) {
+                if (!dragonHit.add(pierced.getUUID())) {
+                    continue;                       // 这个目标已经挨过这一发了 ✓
+                }
+                boolean piercedHurt = pierced.hurt(
+                        server.damageSources().indirectMagic(this, owner), damage);
+                if (piercedHurt && damage > 0.0F && owner instanceof ServerPlayer pCaster) {
+                    TNScorch.apply(pierced, pCaster, damage, heavyScorch);
+                }
+                // 穿过去时留一小撮火花（不炸开 ✗，否则看着像"打到就停"✗）
+                server.sendParticles(ParticleTypes.FLAME,
+                        pierced.getX(), pierced.getY() + pierced.getBbHeight() * 0.5D, pierced.getZ(),
+                        3, 0.15D, 0.15D, 0.15D, 0.02D);
+                if (owner instanceof ServerPlayer dbg) {
+                    dbg.displayClientMessage(net.minecraft.network.chat.Component.literal(
+                            "§e[射线调试] 穿透命中 " + dragonHit.size() + " 个"
+                                    + " path=" + spellPath() + " 撞墙=" + (wall.getType() != HitResult.Type.MISS)
+                                    + " 剩程=" + (int) remaining), false);
+                }
+            }
+            hit = null;                             // 单目标那段对射线不再生效 ✓
+        } else if (penetrates() && hit != null && !dragonHit.add(hit.getUUID())) {
             hit = null;
         }
         if (hit != null || wall.getType() != HitResult.Type.MISS) {
