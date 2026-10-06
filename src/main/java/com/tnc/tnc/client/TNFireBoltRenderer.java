@@ -171,30 +171,36 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
         if (fade <= 0.02F) {
             return;
         }
+        // ⚠️ 作者 2026-10-05 按参照图定死：**长 1 个方块、粗 1/4 个方块** ✓
+        //    参照图 = 一根短粗光柱：**外圈暗红外壳 + 内芯白热** ✓ + 像素风的硬边色块 ✓
+        //    ⚠️ 所以这里**不再用 radius**（那是碰撞半径 ✓，和外观解耦 ✓）
+        final double half = 0.5D;          // 长 1 格 ⇒ 前后各半格 ✓
+        final double shell = 0.125D;       // 粗 1/4 格 ⇒ 半径 0.125 ✓
+        final double core = 0.055D;        // 白热内芯 ✓
+        final int sides = 12;
         float[] color = new float[4];
-        // ★ 视觉粗细单独缩放 ⇒ "瘦一点" ✓（不动碰撞半径 ✗）
-        double fat = radius * LANCE_FATNESS;
-        Vec3 prevCenter = null;
-        double prevR = 0.0D;
-        for (int s = 0; s <= LANCE_SEGMENTS; s++) {
-            double t = s / (double) LANCE_SEGMENTS;            // 0 = 尖端, 1 = 尾根 ✓
-            // 沿轴：尖端在 +dir 前方一点，整体向 -dir 铺开 ✓（拖尾在 -dir，见 axisPoint ✓）
-            double along = fat * 0.75D - t * radius * LANCE_LENGTH;
-            double r = fat * (1.0D - 0.72D * t * t);
-            Vec3 center = dir.scale(along);
-            if (prevCenter != null && prevR > 1.0E-4D && r > 1.0E-4D) {
-                PixelFlame.flat(t * 0.92D, color);             // 量化色块 + 不透明 ✓
-                ring(out, pose, right, up, prevCenter, prevR, center, r, color, LANCE_SIDES);
-            }
-            prevCenter = center;
-            prevR = r;
-        }
-        // 尖端那一小块白热（"火舌的头" ✓）
-        PixelFlame.flat(0.0D, color);
-        ring(out, pose, right, up, dir.scale(fat * 0.75D), fat * 0.52D,
-                dir.scale(fat * 1.45D), fat * 0.06D, color, LANCE_SIDES);
-    }
 
+        // ① 外壳：沿长度切 4 段，像素风 ⇒ 一段一个色块（越靠后越暗红 ✓）
+        Vec3 prev = dir.scale(half);
+        for (int s = 1; s <= 4; s++) {
+            Vec3 c = dir.scale(half - s * (2.0D * half / 4.0D));
+            PixelFlame.flat(0.48D + s * 0.11D, color);
+            ring(out, pose, right, up, prev, shell, c, shell, color, sides);
+            prev = c;
+        }
+        // ② 尾部收口（后端不是平的 ⇒ 收成小圆头 ✓）
+        PixelFlame.flat(0.92D, color);
+        ring(out, pose, right, up, dir.scale(-half), shell,
+                dir.scale(-half * 1.10D), shell * 0.35D, color, sides);
+        // ③ 头部亮盖（前端的白热端面 ✓，参照图里最亮的地方 ✓）
+        PixelFlame.flat(0.06D, color);
+        ring(out, pose, right, up, dir.scale(half * 0.98D), shell,
+                dir.scale(half * 1.10D), shell * 0.55D, color, sides);
+        // ④ 白热内芯：一根更细的亮柱，稍微伸出前端 ✓
+        PixelFlame.flat(0.0D, color);
+        ring(out, pose, right, up, dir.scale(half * 1.06D), core,
+                dir.scale(-half * 0.92D), core, color, sides);
+    }
     // ------------------------------------------------------------------
     //  焰体：从核心往后拖出去的渐变锥（参考图的主体）
     // ------------------------------------------------------------------

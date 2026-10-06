@@ -544,14 +544,10 @@ public final class TNFireBoltEntity extends Projectile {
                 if (!dragonHit.add(pierced.getUUID())) {
                     continue;                       // 这个目标已经挨过这一发了 ✓
                 }
-                // ★ 作者 2026-10-05：「射线再细一点命中」✓
-                //   原来只要**进了扫描框**就算命中 ✗（扫描框是 ±0.4 格 ✗）⇒
-                //   擦着边、甚至没碰到也算中 ✗，看着就是"射线很粗"✗
-                //   ⇒ 现在要求**线真的穿过这个碰撞盒** ✓（只给 0.05 的容差 ✓）
-                AABB piercedBox = pierced.getBoundingBox().inflate(0.05D);
-                if (!piercedBox.contains(from) && piercedBox.clip(from, to).isEmpty()) {
-                    continue;
-                }
+                // ⚠️ 作者 2026-10-05：「把之前的命中误差改回去」✓
+                //    —— 之前那版要求"线真的穿过碰撞盒"（容差 0.05 ✗）太严 ✗，
+                //    打起来容易"明明瞄着却穿过去"✗ ⇒ 退回**扫描框判定** ✓
+                //    （扫描框 = AABB(from,to).inflate(0.4) ✓，也就是线两侧各 0.4 格 ✓）
                 boolean piercedHurt = pierced.hurt(
                         server.damageSources().indirectMagic(this, owner), damage);
                 if (piercedHurt && damage > 0.0F && owner instanceof ServerPlayer pCaster) {
