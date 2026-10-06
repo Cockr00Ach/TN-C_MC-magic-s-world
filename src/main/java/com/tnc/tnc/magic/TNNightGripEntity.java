@@ -113,6 +113,20 @@ public class TNNightGripEntity extends Entity {
     /** 每几 tick 捏一次 ✓。 */
     private static final int SQUEEZE_INTERVAL = 10;
 
+    /**
+     * ★ <b>这一击的伤害范围（半径，格）</b> —— 作者 2026-10-10：
+     * 「**手造成伤害的范围扩大**」✓。
+     *
+     * <p>取值沿用重做前法术 JSON 里那份 {@code area_impact.radius}
+     * （2 / 2.5 / 4 / 5.5 / 7）✓ —— 也就是说"手感回到重做前那一档，但由我们自己结算"✓。
+     * 每一次"捏"都会打范围内**所有**活着的非友军（不只是被抓住的那一只 ✓），
+     * 抓住的那一下也会先扫一次 ✓。
+     */
+    private static final double[] RADII = {2.0D, 2.5D, 4.0D, 5.5D, 7.0D};
+
+    /** 手永远从这个高度以上"够到"目标 ⇒ 锚点放在脚下，模型底边贴地 ✓（作者："落地点从中心改到底部"）。 */
+    private static final double ANCHOR_Y = 0.0D;
+
     /** 拽的时候带一点上抬，免得目标卡进地面 ✓。 */
     private static final double PULL_LIFT = 0.22D;
 
@@ -176,6 +190,8 @@ public class TNNightGripEntity extends Entity {
 
     /** 已经进入"抓住"阶段了吗 ✓。 */
     private boolean gripping;
+    /** 抓空落地时那一次范围伤害已经打过了吗 ✓（只打一次，免得每 tick 刷 ✗）。 */
+    private boolean landedSweep;
     /** 抓住阶段已经捏了几次 ✓。 */
     private int squeezes;
     private float dealtTotal;
@@ -225,6 +241,11 @@ public class TNNightGripEntity extends Entity {
         return STATS[Math.max(0, Math.min(STATS.length - 1, tier - 1))];
     }
 
+    /** 这一档的伤害半径（格）✓。 */
+    public double radius() {
+        return RADII[Math.max(0, Math.min(RADII.length - 1, tier - 1))];
+    }
+
     /**
      * 视锥剔除用的包围盒：<b>按档位放大</b> ✓。
      *
@@ -271,8 +292,11 @@ public class TNNightGripEntity extends Entity {
         this.entityData.set(DATA_TARGET, targetId);
 
         LivingEntity target = resolve(targetId);
+        // ★ 落点＝目标的**脚下**（作者 2026-10-10："落地点从中心改到底部"）——
+        //   配合渲染器"模型底边贴着锚点"（见 TNNightGripRenderer）⇒ 整只手是**贴地站住**的 ✓，
+        //   而不是浮在人家胸口中间 ✗。
         Vec3 end = target != null
-                ? target.position().add(0.0D, target.getBbHeight() * 0.5D, 0.0D)
+                ? target.position().add(0.0D, ANCHOR_Y, 0.0D)
                 : caster.getEyePosition().add(caster.getLookAngle().scale(reach()));
         if (target == null) {
             this.aimPoint = end;
@@ -363,7 +387,7 @@ public class TNNightGripEntity extends Entity {
         // （不做"拐弯追踪"，只让这条弧跟着目标平移 ⇒ 不会出现引擎那种一直偏航 ✗）
         LivingEntity target = resolve(targetId);
         Vec3 end = target != null
-                ? target.position().add(0.0D, target.getBbHeight() * 0.5D, 0.0D)
+                ? target.position().add(0.0D, ANCHOR_Y, 0.0D)
                 : (aimPoint != null ? aimPoint : arcEnd);
         arcEnd = end;
         arcControl = controlPoint(arcStart, end, handIndex, handCount);
@@ -381,7 +405,12 @@ public class TNNightGripEntity extends Entity {
             return;
         }
         if (target == null) {
-            // 没瞄到人：停一下再散掉 ✓（"没瞄准就抓不到人"✓）
+            // 没瞄到人：落到准星前方、**扫一次范围伤害**（"甩出去砸了一下"✓），停一下再散掉 ✓
+            if (!landedSweep) {
+                landedSweep = true;
+                burst(position(), Math.max(0.8D, radius() * 0.5D), 24);
+                sweep(null, caster, stats().damage());
+            }
             if (tickCount > FLY_TICKS + FADE_TICKS) {
                 discard();
             }
@@ -408,13 +437,16 @@ public class TNNightGripEntity extends Entity {
         squeezes = 0;
         setPos(gripPos(target, caster));
         burst(target.position().add(0.0D, target.getBbHeight() * 0.5D, 0.0D), 1.0D, 26);
+        // ★ 抓住那一下先扫一遍范围伤害（作者："手造成伤害的范围扩大"✓）
+        //   ≈ 重做前引擎那条 impact.DAMAGE ＋ area_impact，只是现在由我们自己结算 ✓
+        dealtTotal += sweep(target, caster, stats().damage());
         // 失明（沿用重做前的数值 ✓；重做前是引擎的 impact 挂上的，现在由我们自己挂 ✓）
         int blind = BLIND_TICKS[Math.max(0, Math.min(BLIND_TICKS.length - 1, tier - 1))];
         if (blind > 0) {
             target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, blind, 0, false, true));
         }
-        LOGGER.info("TN-C: night hand grip target={} tier={} hands={} hold={}t owner={}",
-                target.getName().getString(), tier, handCount, stats().holdTicks(), casterId);
+        LOGGER.info("TN-C: night hand grip target={} tier={} hands={} hold={}t radius={} owner={}",
+                target.getName().getString(), tier, handCount, stats().holdTicks(), radius(), casterId);
     }
 
     /** ② 抓住阶段（与上一版相同 ✓）。 */
@@ -468,17 +500,24 @@ public class TNNightGripEntity extends Entity {
         discard();
     }
 
-    /** 抓住的位置：目标身上、朝施法者那边退 {@link #PALM_BACKOFF} 格 ✓。 */
+    /**
+     * 手站哪儿：目标**脚下**（不是身体中心 ✗），再从水平方向朝施法者退 {@link #PALM_BACKOFF} 格 ✓。
+     *
+     * <p>作者 2026-10-10：「**落地有点不好看，你把落地点从中心改到底部**」——
+     * 现在锚点在脚底，配合渲染器"模型底边贴锚点"⇒ 一只手掌**贴地立着**按向目标 ✓
+     * （重做前它悬在人家的腰/胸口那个高度，看着像插在身上 ✗）。
+     * 退让方向特意**压平到水平面**✗：不然目标比施法者高时手会往下钻进地里 ✓。
+     */
     private Vec3 gripPos(LivingEntity victim, LivingEntity caster) {
-        Vec3 center = victim.position().add(0.0D, victim.getBbHeight() * 0.5D, 0.0D);
+        Vec3 feet = victim.position().add(0.0D, ANCHOR_Y, 0.0D);
         if (caster == null) {
-            return center;
+            return feet;
         }
-        Vec3 dir = center.subtract(caster.position().add(0.0D, caster.getBbHeight() * 0.5D, 0.0D));
-        if (dir.lengthSqr() < 1.0E-6D) {
-            return center;
+        Vec3 flat = new Vec3(feet.x - caster.getX(), 0.0D, feet.z - caster.getZ());
+        if (flat.lengthSqr() < 1.0E-6D) {
+            return feet;
         }
-        return center.subtract(dir.normalize().scale(PALM_BACKOFF));
+        return feet.subtract(flat.normalize().scale(PALM_BACKOFF));
     }
 
     /** 压制：把目标的水平速度压住 ⇒ 读感是"被攥住动不了"✓。 */
@@ -493,7 +532,45 @@ public class TNNightGripEntity extends Entity {
     }
 
     private float squeeze(LivingEntity victim, LivingEntity caster, float amount) {
-        return dealDamage(victim, caster, amount);
+        return sweep(victim, caster, amount);
+    }
+
+    /**
+     * ★ <b>一次范围伤害（"捏"/"砸"）</b> —— 作者 2026-10-10：「**手造成伤害的范围扩大**」✓。
+     *
+     * <p>以**手自己为中心**、半径按档位（{@link #RADII}）打范围内所有活着的非友军 ✓，
+     * 不只打被抓住的那一只 ✗。抓住的那一下、以及"没瞄到人"落地那一下也各扫一次 ✓
+     * （≈ 重做前引擎那条 {@code impact.DAMAGE} ＋ {@code area_impact} 的合体，
+     * 只是现在由我们自己结算 ✓）。
+     *
+     * <p>注意 AABB 是方的 ⇒ 再按球形筛一遍距离 ✓（不然墙角会莫名其妙挨打 ✗）。
+     *
+     * @param latched 被抓住的那只（只为日志用，可以是 null ✓）
+     */
+    private float sweep(LivingEntity latched, LivingEntity caster, float amount) {
+        if (!(level() instanceof ServerLevel server) || amount <= 0.0F) {
+            return 0.0F;
+        }
+        double radius = radius();
+        AABB box = new AABB(getX() - radius, getY() - radius, getZ() - radius,
+                getX() + radius, getY() + radius, getZ() + radius);
+        float total = 0.0F;
+        int hits = 0;
+        for (LivingEntity candidate : server.getEntitiesOfClass(LivingEntity.class, box,
+                e -> e.isAlive() && !e.isSpectator()
+                        && e != caster
+                        && !(caster != null && e.isAlliedTo(caster)))) {
+            if (candidate.distanceTo(this) > radius) {
+                continue;
+            }
+            total += dealDamage(candidate, caster, amount);
+            hits++;
+        }
+        if (hits > 0) {
+            LOGGER.debug("TN-C: night hand sweep r={} hits={} total={} latched={}",
+                    radius, hits, total, latched == null ? "-" : latched.getName().getString());
+        }
+        return total;
     }
 
     private float crush(LivingEntity victim, LivingEntity caster, float amount) {

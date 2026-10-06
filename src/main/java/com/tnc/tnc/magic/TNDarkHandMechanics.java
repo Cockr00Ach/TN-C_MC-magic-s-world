@@ -163,20 +163,16 @@ public final class TNDarkHandMechanics {
     /**
      * 玩家瞄住的那只敌人（没有就 -1）✓。
      *
-     * <p>★ 用的是<b>准星射线</b>，与雷击 t3、以及 {@code TNDarkAimMechanics} 的瞄准锁定
-     * **同一套判据** ✓ ⇒ 玩家看到"谁被高亮锁定"，抓的就是那一只 ✓。
+     * <p>★ 走 {@link TNAimRay}（原版准星那一套：方块截断 ＋
+     * {@code ProjectileUtil.getEntityHitResult} 实体射线）——
+     * **不要用 {@code player.pick(...)} 判 {@code EntityHitResult}** ✗：
+     * 那个方法只做方块射线，恒不返回实体命中（javap 实证，作者 2026-10-10 的
+     * "无法瞄准敌人"就是它 ✗）。与雷击 t3、以及 {@code TNDarkAimMechanics} 的高亮
+     * 现在是同一套判据 ✓ ⇒ 玩家看到"谁被高亮锁定"，抓的就是那一只 ✓。
      */
     private static int aimedTargetId(ServerPlayer player) {
-        HitResult hit = player.pick(AIM_RANGE, 0.0F, false);
-        if (!(hit instanceof EntityHitResult entityHit)) {
-            return -1;
-        }
-        Entity aimed = entityHit.getEntity();
-        if (aimed == player || !(aimed instanceof LivingEntity living) || !living.isAlive()
-                || living.isSpectator() || living.isAlliedTo(player)) {
-            return -1;
-        }
-        return aimed.getId();
+        LivingEntity aimed = TNAimRay.aimedEnemy(player, AIM_RANGE);
+        return aimed == null ? -1 : aimed.getId();
     }
 
     /**

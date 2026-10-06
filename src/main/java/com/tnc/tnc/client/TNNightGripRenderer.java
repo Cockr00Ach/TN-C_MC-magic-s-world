@@ -82,6 +82,13 @@ public class TNNightGripRenderer extends EntityRenderer<TNNightGripEntity> {
     /** 只在第一次打一行日志，免得每帧刷屏 ✓。 */
     private static boolean logged;
 
+    /**
+     * 模型（{@code tnc:projectile/dark_hand}）的**半高**，单位是格：y 跨度 −13..+13 单位
+     * ⇒ 13/16 = 0.8125 ✓。用来把渲染锚点从"模型中心"挪到"模型底边" ✓
+     * （作者 2026-10-10："落地点从中心改到底部"）。
+     */
+    private static final float HALF_HEIGHT_UNITS = 13.0F / 16.0F;
+
     public TNNightGripRenderer(EntityRendererProvider.Context context) {
         super(context);
         this.shadowRadius = 0.0F;      // 悬空的黑手不投影子 ✓
@@ -105,7 +112,12 @@ public class TNNightGripRenderer extends EntityRenderer<TNNightGripEntity> {
                 (float) -Math.asin(Mth.clamp(direction.y, -1.0D, 1.0D))));
         // ② 按档位放大，再补回引擎内部那 −0.5 格 ✓
         poseStack.scale(scale, scale, scale);
-        poseStack.translate(0.5F, 0.5F, 0.5F);
+        // ③ ★ 锚点：**模型底边**贴在实体位置上（作者 2026-10-10："落地点从中心改到底部"）✓
+        //    模型的 y 跨度是 −13..+13 单位 ⇒ 半高 = 13/16 格；在**缩放后的坐标系**里
+        //    往上抬 13/16 ⇒ 世界里的偏移就是 (13/16)×scale ⇒ 底边正好落在实体原点 ✓。
+        //    （实体那边把锚点放在目标**脚下** ⇒ 合起来就是"一只手掌贴地立着按向目标"✓，
+        //      重做前它是悬在人家的腰/胸口高度，看着像插在身上 ✗。）
+        poseStack.translate(0.5F, 0.5F + HALF_HEIGHT_UNITS, 0.5F);
 
         if (!renderWithEngine(poseStack, buffer, entity)) {
             // 引擎不在/渲染失败：**什么都不画**，但绝不崩 ✓
