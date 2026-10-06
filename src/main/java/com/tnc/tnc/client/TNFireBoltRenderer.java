@@ -43,6 +43,10 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
     /** 不会被真正贴图（几何体自带颜色），指向一张一定存在的原版贴图只为不触发缺图警告。 */
 
 
+    /** 我们自绘的**赤红像素龙头**贴图 ✓（32×32 ✓）。 */
+    private static final ResourceLocation DRAGON_HEAD =
+            ResourceLocation.fromNamespaceAndPath("tnc", "textures/entity/fire_dragon_head.png");
+
     private static final ResourceLocation PLACEHOLDER =
             ResourceLocation.fromNamespaceAndPath("minecraft", "textures/particle/flame.png");
 
@@ -114,42 +118,24 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
         //   ⚠️ 作者 2026-10-05：「把龙后面的圆环即法阵删了」✗
         //   ⇒ 这里**什么都不画** ✓（连成形阶段的法阵也删了 ✓，几何体为零 ✓）
         if ("fire_dragon".equals(entity.spellPath())) {
-            // ⚠️ 作者 2026-10-05：「可不可以把**末影龙的头部模型**拿来用」✓
-            //   ⇒ 直接用原版 **DRAGON_HEAD**（龙头骷髅方块 ✓）：
-            //     · 它是**方盒模型 + 原版贴图** ✓ ⇒ 不是光滑几何体 ✗，风格天然贴合 ✓
-            //     · 造型/颜色零美术成本 ✓
-            //   ⚠️ 骷髅方块自带 ROTATION(0..15) 属性 ✓ —— 正好每档 22.5° ✓，
-            //      拿飞行朝向换算一下，头就会朝着飞行的方向 ✓
-            stack.pushPose();
-            // 骷髅约 0.5 格 ⇒ 乘 6 ≈ 3 格大的头 ✓（作者要"龙要大"✗）
-            float s = 6.0F;
-            stack.scale(s, s, s);
-            stack.translate(0.0D, -0.22D, 0.0D);
-            int rot = Math.floorMod((int) Math.round(entity.getYRot() / 22.5D), 16);
-            net.minecraft.world.level.block.state.BlockState head =
-                    net.minecraft.world.level.block.Blocks.DRAGON_HEAD.defaultBlockState()
-                            .setValue(net.minecraft.world.level.block.SkullBlock.ROTATION, rot);
-            // ⚠️ 作者 2026-10-05：「把龙头颜色改为**赤红色**与身体搭配」✓
-            //   renderSingleBlock 给顶点的颜色**永远是白色** ✗ ⇒ 套一层染色缓冲源 ✓，
-            //   模型/贴图/朝向全不动 ✓，只是整体染成赤红 ✓（见 TintingVertexConsumer ✓）
-            final MultiBufferSource tinted = type -> new TintingVertexConsumer(
-                    buffers.getBuffer(type), 0.98F, 0.26F, 0.08F);
-            // ⚠️ 2026-10-05 实测：「还是没龙头」✗，而日志里**没有任何模型/贴图报错** ✗
-            //   ⇒ 根因：骷髅方块在世界里是**靠 BlockEntityRenderer 画的** ✓，
-            //     它的**方块模型是空的** ✗ ⇒ renderSingleBlock 画不出东西（且不报错 ✗）
-            //   ⇒ 改走**物品模型**路径 ✓ —— 背包里那个龙头是**真正的 3D 模型** ✓，
-            //     由 ItemRenderer 画 ✓（染色缓冲源照样生效 ✓）
-            net.minecraft.world.item.ItemStack headStack =
-                    new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DRAGON_HEAD);
-            net.minecraft.client.renderer.entity.ItemRenderer ir =
-                    net.minecraft.client.Minecraft.getInstance().getItemRenderer();
-            net.minecraft.client.resources.model.BakedModel headModel = ir.getModel(
-                    headStack, null, null, 0);
-            ir.render(headStack, net.minecraft.world.item.ItemDisplayContext.FIXED, false,
-                    stack, tinted,
-                    net.minecraft.client.renderer.LightTexture.FULL_BRIGHT,
-                    net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY, headModel);
-            stack.popPose();
+            // ★ 2026-10-05：作者选「用你的方法」✓
+            //   ⇒ **自绘贴图 + 自绘几何体** ✓，不依赖任何原版模型 ✗
+            //     （骷髅方块在世界里没有方块模型 ✗；物品模型那条路也没能验证 ✗）
+            //   做法 = 原版粒子/植物那套**交叉双片** ✓：
+            //     一片贴 right×up、一片贴 dir×up ✓ —— 任何角度都至少有一面看得见 ✓
+            //   贴图 = 我们自己那张**赤红像素龙头** ✓
+            float headSize = (float) (3.0D * (0.30D + 0.70D * entity.formProgress(partial)));
+            VertexConsumer headVc = buffers.getBuffer(
+                    net.minecraft.client.renderer.RenderType.entityTranslucentEmissive(DRAGON_HEAD));
+            float hh = headSize * 0.5F;
+            // 片 A：right × up（从正面看是完整的一张 ✓）
+            dragonQuad(headVc, pose,
+                    up.scale(-hh).add(right.scale(-hh)), up.scale(-hh).add(right.scale(hh)),
+                    up.scale(hh).add(right.scale(hh)), up.scale(hh).add(right.scale(-hh)));
+            // 片 B：dir × up（从侧面看是完整的一张 ✓）
+            dragonQuad(headVc, pose,
+                    up.scale(-hh).add(dir.scale(-hh)), up.scale(-hh).add(dir.scale(hh)),
+                    up.scale(hh).add(dir.scale(hh)), up.scale(hh).add(dir.scale(-hh)));
             return;
         }
 
@@ -665,6 +651,31 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
 
     /** 龙头的角数（每圈）—— 比焰体细分一些，棱角更像"有骨头的头" ✓。 */
     private static final int DRAGON_SIDES = 16;
+
+    /**
+     * 画一张**带贴图的四边形** ✓（交叉双片的基本单元 ✓）
+     *
+     * <p>⚠️ 顶点必须用 {@code vertex(Matrix4f, x, y, z)} 这个**会自己应用变换**的重载 ✗，
+     * 用 {@code vertex(x, y, z)} 会被画到世界原点（我踩过 ✗）。
+     * ⚠️ 该渲染格式是 NEW_ENTITY ⇒ uv / overlay / uv2 / normal 一个都不能少 ✓
+     */
+    private static void dragonQuad(VertexConsumer vc, Matrix4f pose,
+                                   Vec3 a, Vec3 b, Vec3 c, Vec3 d) {
+        quadVertex(vc, pose, a, 0.0F, 1.0F);
+        quadVertex(vc, pose, b, 1.0F, 1.0F);
+        quadVertex(vc, pose, c, 1.0F, 0.0F);
+        quadVertex(vc, pose, d, 0.0F, 0.0F);
+    }
+
+    private static void quadVertex(VertexConsumer vc, Matrix4f pose, Vec3 p, float u, float v) {
+        vc.vertex(pose, (float) p.x, (float) p.y, (float) p.z)
+                .color(255, 255, 255, 255)
+                .uv(u, v)
+                .overlayCoords(net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY)
+                .uv2(net.minecraft.client.renderer.LightTexture.FULL_BRIGHT)
+                .normal(0.0F, 0.0F, 1.0F)
+                .endVertex();
+    }
 
     /** 连接两圈、每段一个颜色的锥台（焰体的基本积木）。 */
     private static void ring(VertexConsumer out, Matrix4f pose, Vec3 right, Vec3 up,
