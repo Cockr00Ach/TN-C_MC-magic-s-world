@@ -114,6 +114,26 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
         //   ⚠️ 作者 2026-10-05：「把龙后面的圆环即法阵删了」✗
         //   ⇒ 这里**什么都不画** ✓（连成形阶段的法阵也删了 ✓，几何体为零 ✓）
         if ("fire_dragon".equals(entity.spellPath())) {
+            // ⚠️ 作者 2026-10-05：「可不可以把**末影龙的头部模型**拿来用」✓
+            //   ⇒ 直接用原版 **DRAGON_HEAD**（龙头骷髅方块 ✓）：
+            //     · 它是**方盒模型 + 原版贴图** ✓ ⇒ 不是光滑几何体 ✗，风格天然贴合 ✓
+            //     · 造型/颜色零美术成本 ✓
+            //   ⚠️ 骷髅方块自带 ROTATION(0..15) 属性 ✓ —— 正好每档 22.5° ✓，
+            //      拿飞行朝向换算一下，头就会朝着飞行的方向 ✓
+            stack.pushPose();
+            // 骷髅约 0.5 格 ⇒ 乘 6 ≈ 3 格大的头 ✓（作者要"龙要大"✗）
+            float s = 6.0F;
+            stack.scale(s, s, s);
+            stack.translate(0.0D, -0.22D, 0.0D);
+            int rot = Math.floorMod((int) Math.round(entity.getYRot() / 22.5D), 16);
+            net.minecraft.world.level.block.state.BlockState head =
+                    net.minecraft.world.level.block.Blocks.DRAGON_HEAD.defaultBlockState()
+                            .setValue(net.minecraft.world.level.block.SkullBlock.ROTATION, rot);
+            net.minecraft.client.Minecraft.getInstance().getBlockRenderer()
+                    .renderSingleBlock(head, stack, buffers,
+                            net.minecraft.client.renderer.LightTexture.FULL_BRIGHT,
+                            net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY);
+            stack.popPose();
             return;
         }
 

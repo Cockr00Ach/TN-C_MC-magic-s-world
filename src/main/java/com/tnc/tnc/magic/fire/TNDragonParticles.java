@@ -69,7 +69,10 @@ public final class TNDragonParticles {
     private static final double EYE_V = 0.16D;
     private static final double EYE_R = 0.055D;
 
-    /** 轮廓粒子数（越大线越实 ✓）。 */
+    /** 龙头周围的**火焰光晕**粒子数 ✓（头壳本身由渲染器画方块模型 ✓）。 */
+    private static final int AURA_POINTS = 60;
+
+    /** 轮廓粒子数（越大线越实 ✓）—— 现在只对兜底有用 ✗。 */
     private static final int OUTLINE_POINTS = 46;
 
     /** 内部填充粒子数（作者："大量粒子填充" ✓）。 */
@@ -115,48 +118,21 @@ public final class TNDragonParticles {
      */
     public static void emit(ServerLevel level, Vec3 origin, Vec3 dir, Vec3 right, Vec3 up,
                             double age) {
-        // ① 轮廓：沿每条边等距取点 ✓
-        int edges = PROFILE.length / 2;
-        for (int p = 0; p < OUTLINE_POINTS; p++) {
-            // 把 0..1 映射到"沿整圈轮廓"的位置 ✓
-            double t = p / (double) OUTLINE_POINTS * edges;
-            int e = (int) Math.floor(t) % edges;
-            double k = t - Math.floor(t);
-            int i0 = e * 2;
-            int i1 = ((e + 1) % edges) * 2;
-            double u = PROFILE[i0] + (PROFILE[i1] - PROFILE[i0]) * k;
-            double v = PROFILE[i0 + 1] + (PROFILE[i1 + 1] - PROFILE[i0 + 1]) * k;
-            // 轮廓用最亮的白热/亮黄 ✓（像参照图那样勾边 ✓）
-            spawn(level, origin, dir, right, up, u, v, halfWidth(u),
-                    0.55D + 0.45D * Math.sin(age * 0.6D + p), 0, 1);
-        }
+        // ⚠️ 作者 2026-10-05：「身体可以，但头部看不出龙头的感觉，
+        //    可不可以把末影龙的头部模型拿来用」✓
+        //   ⇒ **龙头改由渲染器画原版 DRAGON_HEAD 方块模型** ✓（见 TNFireBoltRenderer ✓）
+        //      所以这里**不再撒头部的轮廓/填充/眼睛粒子** ✗
+        //      只留：① 龙头周围一圈**火焰光晕** ✓（让方块头看着"在烧"✓）
+        //            ② 龙身（作者说"身体可以"⇒ 保留 ✓）
 
-        // ② 内部填充：在轮廓内部随机取点 ✓（拒绝采样 ✓）
-        for (int p = 0; p < FILL_POINTS; p++) {
-            double u = 0.0D;
-            double v = 0.0D;
-            boolean ok = false;
-            for (int attempt = 0; attempt < 8 && !ok; attempt++) {
-                u = -0.62D + Math.random() * 1.62D;
-                v = -0.38D + Math.random() * 0.86D;
-                ok = inside(u, v);
-            }
-            if (!ok) {
-                continue;
-            }
-            // 内部偏暗一档 ⇒ 轮廓亮、内里深，才有"体积"感 ✓
-            spawn(level, origin, dir, right, up, u, v, halfWidth(u) * 0.85D,
-                    0.10D + Math.random() * 0.45D, 2, 1);
+        // ① 龙头周围的光晕（绕着头壳随机撒 ✓，不描形状 ✗）
+        for (int p = 0; p < AURA_POINTS; p++) {
+            double au = -0.45D + Math.random() * 1.35D;          // 头的前后范围 ✓
+            double av = -0.35D + Math.random() * 0.85D;          // 上下 ✓
+            double aw = (Math.random() * 2.0D - 1.0D) * 0.42D;   // 横向（比头壳宽一点 ✓）
+            spawn(level, origin, dir, right, up, au, av,
+                    Math.abs(aw) + 0.10D, 0.35D + Math.random() * 0.5D, 1, 1);
         }
-
-        // ③ 眼睛：一个小环 ✓
-        for (int p = 0; p < 8; p++) {
-            double a = p / 8.0D * Math.PI * 2.0D;
-            spawn(level, origin, dir, right, up,
-                    EYE_U + Math.cos(a) * EYE_R, EYE_V + Math.sin(a) * EYE_R,
-                    halfWidth(EYE_U), 0.0D, 0, 1);
-        }
-
         // ④ 龙身：沿 -前 的蛇形曲线 ✓，**有体积**（每步撒一小团 ✓，不是一条线 ✗）
         for (int p = 0; p < BODY_POINTS; p++) {
             double t = p / (double) BODY_POINTS;                 // 0 = 颈, 1 = 尾尖 ✓
