@@ -667,7 +667,8 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
         }
 
         // ② 龙头：像素贴片（成形阶段从小长到大 ✓）
-        dragonHeadSprite(out, buffers, dir, right, up, DRAGON_HEAD_SIZE * (0.30D + 0.70D * form));
+        dragonHeadSprite(out, buffers, pose, dir, right, up,
+                DRAGON_HEAD_SIZE * (0.30D + 0.70D * form));
 
         // ③ 龙身：5 格长的火尾 ✓
         dragonBody(out, pose, dir, right, up, DRAGON_HEAD_SIZE * 0.20D, age, fade);
@@ -680,7 +681,7 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
      * 原版告示牌/粒子都用"每帧按摄像机摆正" ✓ ⇒ 任何角度都是一张完整龙头 ✓
      */
     private static void dragonHeadSprite(VertexConsumer out, MultiBufferSource buffers,
-                                         Vec3 dir, Vec3 right, Vec3 up, double size) {
+                                         Matrix4f pose, Vec3 dir, Vec3 right, Vec3 up, double size) {
         if (size <= 0.02D) {
             return;
         }
@@ -695,28 +696,35 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
         double h = size * 0.5D;
         float[] none = {1.0F, 1.0F, 1.0F, 1.0F};
         // 片 A：right × up（从飞行方向正面看是完整的 ✓）
-        spriteQuad(vc, none, up.scale(-h).add(right.scale(-h)),
+        spriteQuad(vc, pose, none, up.scale(-h).add(right.scale(-h)),
                 up.scale(-h).add(right.scale(h)),
                 up.scale(h).add(right.scale(h)),
                 up.scale(h).add(right.scale(-h)));
         // 片 B：dir × up（从侧面看是完整的 ✓）
-        spriteQuad(vc, none, up.scale(-h).add(dir.scale(-h)),
+        spriteQuad(vc, pose, none, up.scale(-h).add(dir.scale(-h)),
                 up.scale(-h).add(dir.scale(h)),
                 up.scale(h).add(dir.scale(h)),
                 up.scale(h).add(dir.scale(-h)));
     }
 
     /** 一个带 uv 的四边形（世界/局部坐标由调用方给 ✓；这里只负责顶点格式 ✓）。 */
-    private static void spriteQuad(VertexConsumer vc, float[] rgba,
+    private static void spriteQuad(VertexConsumer vc, Matrix4f pose, float[] rgba,
                                    Vec3 a, Vec3 b, Vec3 c, Vec3 d) {
-        uvVertex(vc, a, 0.0F, 1.0F, rgba);
-        uvVertex(vc, b, 1.0F, 1.0F, rgba);
-        uvVertex(vc, c, 1.0F, 0.0F, rgba);
-        uvVertex(vc, d, 0.0F, 0.0F, rgba);
+        uvVertex(vc, pose, a, 0.0F, 1.0F, rgba);
+        uvVertex(vc, pose, b, 1.0F, 1.0F, rgba);
+        uvVertex(vc, pose, c, 1.0F, 0.0F, rgba);
+        uvVertex(vc, pose, d, 0.0F, 0.0F, rgba);
     }
 
-    private static void uvVertex(VertexConsumer vc, Vec3 p, float u, float v, float[] rgba) {
-        vc.vertex((float) p.x, (float) p.y, (float) p.z)
+    /**
+     * 贴片顶点 ✓
+     *
+     * <p>⚠️ 必须用 {@code vertex(Matrix4f, x, y, z)} 这个**会自己应用变换**的重载 ✗ ——
+     * 用 {@code vertex(x, y, z)} 的话顶点就是**原始局部坐标** ✗，
+     * 贴片会被画到世界原点（龙身边上什么都看不见 ✗）。这是本轮实测报"还是光滑几何体"的根因 ✓
+     */
+    private static void uvVertex(VertexConsumer vc, Matrix4f pose, Vec3 p, float u, float v, float[] rgba) {
+        vc.vertex(pose, (float) p.x, (float) p.y, (float) p.z)
                 .color(rgba[0], rgba[1], rgba[2], rgba[3])
                 .uv(u, v)
                 .overlayCoords(net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY)
