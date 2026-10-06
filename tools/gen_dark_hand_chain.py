@@ -1,39 +1,48 @@
 #!/usr/bin/env python3
-"""黑夜之手链：给五个法术 JSON 补上"抓住不放的那只手"（tnc:night_grip）。
+"""黑夜之手链：把五个法术改成"手由我们自己飞"的形态（弧线 ＋ 掌心朝目标 ＋ 反噬头痛）。
 
-作者 2026-10-10：暗魔法的黑夜之手整个改一下（参考《Re:Zero》486 的不可视之手）。
-投射物那一段保持不变（它负责"伸出去"的观感，作者前面几轮已经验收过）；
-缺的是"抓住之后" —— 引擎在命中的那一刻就把投射物回收了，所以"抓/拽/捏"要有一个
-留在目标身上的实体来做。
+为什么不再用引擎的投射物（作者 2026-10-10 的实机反馈把那条路否掉了）：
+  1. "手一直在旋转"      —— 引擎 SpellProjectileRenderer 在 ALONG_MOTION 下把模型对齐到
+                           **运动矢量**，而 homing 让运动矢量一直拐 ⇒ 手一直偏航；
+  2. "不是掌心对着别人"  —— 姿态由引擎那套决定，我们只能给 orientation / offset 两个字段，定不住；
+  3. "不能所有手都是直直飞出去，要有弯的弧线"
+                         —— 引擎的 LaunchProperties 只有 velocity / extra_launch_count /
+                            extra_launch_delay（javap 确认），**没有弧线、也没有散射角**。
 
-做法与本项目「以伤换伤 · 献祭」那条链**完全相同**（那边已经实机跑过）：
-在 `impact` 里追加一条 `SPAWN`，`entity_type_id` 指向我们自己的实体
-=> 引擎在命中那一刻造出它，并通过 `SpellSpawnedEntity` 回调把施法者交给我们。
-不发明任何新的引擎语义。
+现在：release.target 改成 SELF（不再产生引擎投射物），手由
+`magic/TNDarkHandMechanics` 在 SPELL_CAST 的 RELEASE 上自己甩出去（从后背出发、二次贝塞尔弧线），
+渲染也归我们（client/TNNightGripRenderer ⇒ 掌心一直朝着被抓的人）。
 
-⚠️ 这五个法术住在 **mod jar 的 data/ 里**（不在 kubejs）：
-   改完必须 build -> install-to-pack -> 重启游戏，`sync.cmd push` 够不到它们。
-   生成器：python tools/gen_dark_hand_grip.py
+这个脚本做四件事（幂等，可以反复跑）：
+  * release.target -> { "type": "SELF" }（删掉 projectile 块）
+  * 删掉 area_impact（SELF 配它是硬规则禁止的：引擎会 NPE，因为 position 为 null）
+  * impact 改成一条"反噬头痛"（weakness，作用在**施法者自己**身上；每档时长不同）
+  * range 写成"手最远伸多少格"（与 TNNightGripEntity.reach() 同一个口径：12 + 4 * tier）
 
-Idempotent: 已经有这条 SPAWN 的文件会原样跳过。
+⚠️ 这五个法术住在 **mod jar 的 data/ 里**（不在 kubejs，kubejs 里没有同名文件）：
+   改完必须 build -> install-to-pack -> 重启游戏；`sync.cmd push` 够不到它们。
+
+用法： python tools/gen_dark_hand_chain.py
 """
 
 import json
 import os
 import sys
 
-# 仓库根（本脚本在 tools/ 下）
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SPELL_DIR = os.path.join(REPO, "src", "main", "resources", "data", "tnc", "spells")
 
 # 黑夜之手链五档（t1..t5；id 不改名 => 图标/lang/存档都不受影响）
 CHAIN = ["night_hand", "night_raid", "night_embrace", "black_ruin", "slay_light"]
 
-GRIP_ENTITY = "tnc:night_grip"
+# 反噬"头痛"时长（tick，作用在施法者自己身上）。t1/t2 给 1 tick = 实际没有任何感觉，
+# 只为让 impact 数组非空（引擎空 impact 的用法在本整合包里一例都没有，不去发明 ✗）
+HEADACHE_TICKS = [1, 1, 10, 30, 60]
 
-# 引擎可能在 TTL 之后回收这个实体 => 给足（t5 要抓 3 秒 = 60 tick）；
-# 实体自己到点会 discard，所以给长一点只是保险，不会真的活这么久 ✓
-GRIP_TTL_SECONDS = 6
+
+def reach(tier):
+    """手最远伸多少格 —— 与 magic/TNNightGripEntity.reach() 同一个口径 ✓。"""
+    return 12.0 + 4.0 * tier
 
 
 def main():
@@ -42,7 +51,7 @@ def main():
         return 1
 
     problems = 0
-    for name in CHAIN:
+    for tier, name in enumerate(CHAIN, start=1):
         path = os.path.join(SPELL_DIR, name + ".json")
         if not os.path.isfile(path):
             print("MISSING %s" % path)
@@ -52,47 +61,49 @@ def main():
         with open(path, "r", encoding="utf-8-sig") as fh:
             spell = json.load(fh)
 
-        impacts = spell.get("impact")
-        if not isinstance(impacts, list):
-            print("SKIP %s: no impact list" % name)
+        release = spell.get("release")
+        if not isinstance(release, dict) or "target" not in release:
+            print("SKIP %s: no release.target" % name)
             problems += 1
             continue
 
-        # 本项目的硬规则：impact 里每个元素都必须有 action
-        # （只有 particles 没有 action 的那种会让引擎在 performSpell 里 NPE，
-        #  表现是"有雷声没效果、按了没反应"）
-        for i, entry in enumerate(impacts):
-            if "action" not in entry:
-                print("SKIP %s: impact[%d] has no action (engine NPE risk)" % (name, i))
-                problems += 1
-                break
-        else:
-            already = [
-                entry["action"].get("spawn", {}).get("entity_type_id")
-                for entry in impacts
-                if entry.get("action", {}).get("type") == "SPAWN"
-            ]
-            if GRIP_ENTITY in already:
-                print("%-16s already wired to %s (skip)" % (name, GRIP_ENTITY))
-                continue
+        old_target = release["target"].get("type")
+        had_projectile = "projectile" in release["target"]
+        had_area = "area_impact" in spell
 
-            impacts.append({
-                "action": {
-                    "type": "SPAWN",
-                    "spawn": {
-                        "entity_type_id": GRIP_ENTITY,
-                        "time_to_live_seconds": GRIP_TTL_SECONDS,
-                        "delay_ticks": 0,
-                    },
+        # ── 1. 不再产生引擎投射物：SELF ⇒ 手由 Java 自己飞 ✓
+        release["target"] = {"type": "SELF"}
+
+        # ── 2. SELF 绝不能配顶层 area_impact（引擎会因为 position 为 null 而 NPE ✗）
+        spell.pop("area_impact", None)
+
+        # ── 3. impact 只留一条"反噬头痛"（作用在施法者自己身上 ✓）
+        spell["impact"] = [{
+            "action": {
+                "type": "STATUS_EFFECT",
+                # ★ 必须是 true：这一条要落在**施法者**身上，不是被打的目标 ✓
+                #   （同样写法见「以伤换伤」那条链 2026-10-10 的修正 ✓）
+                "apply_to_caster": True,
+                "status_effect": {
+                    "effect_id": "minecraft:weakness",
+                    "duration": HEADACHE_TICKS[tier - 1],
+                    "amplifier": 0,
+                    "apply_mode": "SET",
+                    "show_particles": False,
                 },
-            })
+            },
+        }]
 
-            with open(path, "w", encoding="utf-8", newline="\n") as fh:
-                json.dump(spell, fh, indent=2, ensure_ascii=False)
-                fh.write("\n")
+        # ── 4. range 写成"手最远伸多少格"（不自欺：不再有 48 格的直线投射物了 ✓）
+        spell["range"] = reach(tier)
 
-            kinds = [entry["action"].get("type") for entry in impacts]
-            print("%-16s impact actions -> %s   (+ %s)" % (name, "/".join(kinds), GRIP_ENTITY))
+        with open(path, "w", encoding="utf-8", newline="\n") as fh:
+            json.dump(spell, fh, indent=2, ensure_ascii=False)
+            fh.write("\n")
+
+        print("%-16s t%d  target %-10s -> SELF   projectile=%-8s area_impact=%-8s range -> %-4.0f headache %dt"
+              % (name, tier, old_target, "dropped" if had_projectile else "none",
+                 "dropped" if had_area else "none", reach(tier), HEADACHE_TICKS[tier - 1]))
 
     print("done, %d problem(s)" % problems)
     return 0 if problems == 0 else 1
