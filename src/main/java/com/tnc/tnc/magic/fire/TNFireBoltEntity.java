@@ -64,6 +64,48 @@ public final class TNFireBoltEntity extends Projectile {
     private boolean heavyScorch;
     /** 命中后是否在落点留下熔岩地（t3 熔岩火球起才有）。 */
     private boolean lavaField;
+
+    /** 「火龙术」（射线链 t3）：穿透 + 命中不爆 + 消失时剧烈爆炸 ✓ */
+    private boolean isDragon() {
+        return "fire_dragon".equals(spellPath());
+    }
+
+    /** 火龙已经打过的目标（穿透：每个目标只结算一次 ✓）。 */
+    private final java.util.Set<java.util.UUID> dragonHit = new java.util.HashSet<>();
+
+    /** 火龙那一下爆炸只炸一次（撞墙 / 到期 都走它 ✓）。 */
+    private boolean dragonExploded;
+
+    /**
+     * 火龙术：<b>消失时那一下剧烈爆炸</b> ✓
+     *
+     * <p>作者 2026-10-05：「当火龙消失时发生一次剧烈爆炸，爆炸会有较为强烈的视角震动，
+     * 该次爆炸伤害是该法术伤害 × 3」✓
+     */
+    private void dragonExplode(net.minecraft.server.level.ServerLevel server) {
+        if (dragonExploded) {
+            return;
+        }
+        dragonExploded = true;
+        Vec3 at = position();
+        float blast = damage * FireSpellRules.DRAGON_EXPLODE_MULTIPLIER;
+        double radius = FireSpellRules.DRAGON_EXPLODE_RADIUS;
+        LivingEntity caster = getOwner() instanceof LivingEntity living ? living : null;
+        for (LivingEntity victim : server.getEntitiesOfClass(LivingEntity.class,
+                FireSpellRules.uprightArea(at, radius, 3.0D),
+                t -> FireSpellRules.hittable(caster, t))) {
+            victim.invulnerableTime = 0;
+            victim.hurt(server.damageSources().indirectMagic(this, getOwner()), blast);
+        }
+        server.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y, at.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+        server.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z, 120, radius * 0.5D, radius * 0.4D, radius * 0.5D, 0.35D);
+        server.sendParticles(ParticleTypes.LAVA, at.x, at.y, at.z, 40, radius * 0.4D, 0.3D, radius * 0.4D, 0.2D);
+        server.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y + 1.0D, at.z, 30, radius * 0.4D, 0.6D, radius * 0.4D, 0.1D);
+        server.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE,
+                SoundSource.PLAYERS, 3.0F, 1.0F);
+        TNShockwaveEntity.blast(server, at, 3.0D + FireSpellRules.SHAKE_T4 * 0.6D,
+                FireSpellRules.SHAKE_T4, getOwner(), 0.0F);
+    }
     /** 命中后的爆炸半径（0 = 不爆炸；t4 熔岳天倾的那些火球才有）。 */
     private double blastRadius;
     /**
@@ -332,6 +374,11 @@ public final class TNFireBoltEntity extends Projectile {
                 || owner instanceof net.minecraft.world.entity.player.Player p
                         && DownedCombat.isDowned(p)
                 || owner.level() != level()) {
+            // ⚠️ 火龙术：**飞完射程消失时的那一下剧烈爆炸**就挂在这儿 ✓
+            //    （这是它唯一的爆炸 —— 命中生物时是不爆的 ✓）
+            if (isDragon() && level() instanceof net.minecraft.server.level.ServerLevel sl) {
+                dragonExplode(sl);
+            }
             discard();
             return;
         }
@@ -395,6 +442,11 @@ public final class TNFireBoltEntity extends Projectile {
             }
         }
 
+        // 火龙术：这次扫到的目标如果**已经打过**，就当没打中 ✓
+        //   ⇒ 于是下面的 if 不成立（只要没撞墙）⇒ 它**继续往前飞** = 穿透 ✓
+        if (isDragon() && hit != null && !dragonHit.add(hit.getUUID())) {
+            hit = null;
+        }
         if (hit != null || wall.getType() != HitResult.Type.MISS) {
             if (hit != null) {
                 boolean hurt = hit.hurt(server.damageSources().indirectMagic(this, owner), damage);
@@ -454,8 +506,16 @@ public final class TNFireBoltEntity extends Projectile {
                 server.sendParticles(ParticleTypes.LAVA, impact.x, impact.y, impact.z, 20,
                         blastRadius * 0.4D, 0.4D, blastRadius * 0.4D, 0.2D);
             }
-            discard();
-            return;
+            // 火龙术：**打到生物不停** ✗ —— 只有撞到方块才在这里结束 ✓
+            if (isDragon() && wall.getType() == HitResult.Type.MISS) {
+                // 继续飞：不 discard、不 return ✓（下面照样推进位置 ✓）
+            } else {
+                if (isDragon() && level() instanceof net.minecraft.server.level.ServerLevel sl2) {
+                    dragonExplode(sl2);            // 撞墙 ⇒ 也是那一下剧烈爆炸 ✓
+                }
+                discard();
+                return;
+            }
         }
 
         setPos(to);

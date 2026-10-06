@@ -270,6 +270,25 @@ public final class FireSpellRules {
 
     /** t2 那个小范围爆炸的半径（格）—— 作者要求"范围不要设定的太大" ✓。 */
     public static final double RAY_BLAST_RADIUS = 1.6D;
+
+    /**
+     * <b>t3 火龙术</b>的那颗「龙头投射物」✓
+     *
+     * <p>它不是光柱（光柱是"贴在施法者眼睛上的一条光" ✗），而是一个**会飞出去的龙头** ✓
+     * ⇒ 复用 {@code TNFireBoltEntity}（飞行 + 扫掠碰撞都现成 ✓），
+     * 靠 {@code isDragon()} 打开三个专属行为：
+     * 穿透 / 命中不爆 / 消失时剧烈爆炸 ✓
+     *
+     * <p>焚身：{@code heavyScorch = false} ⇒ I 级 ✓（作者定 t1~t3 都是 I 级 ✓）
+     */
+    public static final Bolt DRAGON_BOLT =
+            new Bolt(3.2F, 16.0F, 0.90F, 1, false, false, 0.0D, 0.0F);
+
+    /** 火龙消失时那次爆炸的伤害倍率（作者定：本法术伤害 × 3 ✓）。 */
+    public static final float DRAGON_EXPLODE_MULTIPLIER = 3.0F;
+
+    /** 火龙消失时那次爆炸的半径（格）—— "剧烈爆炸"给大一点 ✓。 */
+    public static final double DRAGON_EXPLODE_RADIUS = 5.0D;
     /** 爆炸伤害 = 那一发火球伤害 × {@link #SKYFALL_BLAST_PERCENT}。 */
     public static float blastDamage(float boltDamage) {
         return boltDamage <= 0.0F ? 0.0F : boltDamage * SKYFALL_BLAST_PERCENT;

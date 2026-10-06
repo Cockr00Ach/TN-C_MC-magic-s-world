@@ -207,7 +207,7 @@ public final class SpellCatalog {
             // ---- 火射线线：1 穿透 → 2 更粗 → 3 三向齐发 → 4 命中爆炸 → 5 巨大爆炸 ----
             fireEntry("sun_ray", Chain.RAY, 1, "烈阳射线"),
             fireEntry("blast_ray", Chain.RAY, 2, "爆炸射线"),
-            fireEntry("triple_fire_ray", Chain.RAY, 3, "三条火射线"),
+            fireEntry("fire_dragon", Chain.RAY, 3, "火龙术"),
             fireEntry("explosive_fire_ray", Chain.RAY, 4, "爆炸射线"),
             fireEntry("cataclysm_fire_ray", Chain.RAY, 5, "巨大爆炸射线"),
 

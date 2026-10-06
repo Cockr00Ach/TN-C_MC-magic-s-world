@@ -46,6 +46,10 @@ public final class TNFireRays {
             return false;
         }
         String path = spellId.getPath();
+        // t3 火龙术不是光柱（它会飞出去 ✓）⇒ 单独走投射物那条路 ✓
+        if ("fire_dragon".equals(path)) {
+            return castDragon(player, path);
+        }
         FireSpellRules.Ray spec = FireSpellRules.ray(path);
         if (spec == null) {
             return false;
@@ -67,6 +71,33 @@ public final class TNFireRays {
         // 火焰形态：焚身等级 + t2 命中额外小范围爆炸 ✓
         beam.configureFire(spec.scorchLevel(), "blast_ray".equals(path));
         level.addFreshEntity(beam);
+        return true;
+    }
+
+    /**
+     * t3 <b>火龙术</b>：在面前生成一颗朝准心的龙头，然后冲出去 ✓
+     *
+     * <p>「面前的法阵 + 龙头逐渐成形」交给 {@code TNFireBoltEntity} 的**成形阶段**表现 ✓
+     * （作者要的是"前摇结束时冲出去"✗ —— 引擎前摇期间我们没有钩子 ✗，
+     * 所以把这 15 tick 的成形放在释放之后 ✓，观感一致 ✓）
+     */
+    private static boolean castDragon(ServerPlayer player, String path) {
+        if (!(player.level() instanceof ServerLevel level)) {
+            return false;
+        }
+        LivingEntity target = acquire(player, FireSpellRules.DRAGON_BOLT.range());
+        Vec3 from = player.getEyePosition().add(player.getLookAngle().scale(1.2D))
+                .subtract(0.0D, 0.25D, 0.0D);
+        Vec3 velocity = player.getLookAngle().normalize()
+                .scale(TNFireBoltEntity.LAUNCH_SPEED);
+        TNFireBoltEntity dragon = new TNFireBoltEntity(TNOrbEntities.FIRE_BOLT.get(), level);
+        dragon.configure(player, FireSpellRules.DRAGON_BOLT, "fire_dragon", from, velocity);
+        if (target != null) {
+            // 索敌：飞出去就朝目标咬过去 ✓
+            dragon.setDeltaMovement(target.getEyePosition().subtract(from).normalize()
+                    .scale(TNFireBoltEntity.LAUNCH_SPEED));
+        }
+        level.addFreshEntity(dragon);
         return true;
     }
 
