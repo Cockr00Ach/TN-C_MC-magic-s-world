@@ -140,7 +140,7 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
      *
      * <p>⚠️ 作者 2026-10-05：「t1 的射线再长一点」✓ —— 5.5 → **9.0** ✓
      */
-    private static final double LANCE_LENGTH = 9.0D;
+    private static final double LANCE_LENGTH = 13.0D;
 
     /**
      * 条身的**视觉粗细**倍率 ✓

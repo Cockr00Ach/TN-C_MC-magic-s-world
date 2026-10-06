@@ -544,6 +544,14 @@ public final class TNFireBoltEntity extends Projectile {
                 if (!dragonHit.add(pierced.getUUID())) {
                     continue;                       // 这个目标已经挨过这一发了 ✓
                 }
+                // ★ 作者 2026-10-05：「射线再细一点命中」✓
+                //   原来只要**进了扫描框**就算命中 ✗（扫描框是 ±0.4 格 ✗）⇒
+                //   擦着边、甚至没碰到也算中 ✗，看着就是"射线很粗"✗
+                //   ⇒ 现在要求**线真的穿过这个碰撞盒** ✓（只给 0.05 的容差 ✓）
+                AABB piercedBox = pierced.getBoundingBox().inflate(0.05D);
+                if (!piercedBox.contains(from) && piercedBox.clip(from, to).isEmpty()) {
+                    continue;
+                }
                 boolean piercedHurt = pierced.hurt(
                         server.damageSources().indirectMagic(this, owner), damage);
                 if (piercedHurt && damage > 0.0F && owner instanceof ServerPlayer pCaster) {
@@ -553,12 +561,7 @@ public final class TNFireBoltEntity extends Projectile {
                 server.sendParticles(ParticleTypes.FLAME,
                         pierced.getX(), pierced.getY() + pierced.getBbHeight() * 0.5D, pierced.getZ(),
                         3, 0.15D, 0.15D, 0.15D, 0.02D);
-                if (owner instanceof ServerPlayer dbg) {
-                    dbg.displayClientMessage(net.minecraft.network.chat.Component.literal(
-                            "§e[射线调试] 穿透命中 " + dragonHit.size() + " 个"
-                                    + " path=" + spellPath() + " 撞墙=" + (wall.getType() != HitResult.Type.MISS)
-                                    + " 剩程=" + (int) remaining), false);
-                }
+
             }
             hit = null;                             // 单目标那段对射线不再生效 ✓
         } else if (penetrates() && hit != null && !dragonHit.add(hit.getUUID())) {
@@ -566,17 +569,7 @@ public final class TNFireBoltEntity extends Projectile {
         }
         if (hit != null || wall.getType() != HitResult.Type.MISS) {
             if (hit != null) {
-                // ⚠️ 临时调试（作者报"射线没有穿透"✗）—— 作者放一次，看聊天栏这行就知道
-                //    path 对不对 / penetrates 是不是 true / 已经命中过几个 ✓
-                //    ⚠️ 定位完就删掉这一小段 ✗
-                if (owner instanceof ServerPlayer dbg) {
-                    dbg.displayClientMessage(net.minecraft.network.chat.Component.literal(
-                            "§e[射线调试] path=" + spellPath()
-                                    + " 穿透=" + penetrates()
-                                    + " 已命中=" + dragonHit.size()
-                                    + " 撞墙=" + (wall.getType() != HitResult.Type.MISS)
-                                    + " 剩程=" + (int) remaining), false);
-                }
+
                 boolean hurt = hit.hurt(server.damageSources().indirectMagic(this, owner), damage);
                 // 焚身：命中就挂（基数 = 这一发实际打出的伤害）。
                 // 已经挂了同级或更高的目标由 TNScorch 自己判「跳过」——这里不用管"不刷新"
