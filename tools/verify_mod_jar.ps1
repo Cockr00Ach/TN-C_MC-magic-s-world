@@ -944,6 +944,72 @@ try {
     if ($badModels.Count -eq 0) { Ok 'every item model can be loaded by the vanilla model loader (angles / extents / uv)' }
     else { Fail ('item model(s) the client would refuse to load (=> purple-black cube): ' + ($badModels -join '; ')) }
 
+    # ---------------- D1b8. the SAME check for every OTHER model path we ship --------
+    # 2026-10-10 (author: "启动之后非常的卡啊游戏，加载特别久帧率很低"): triaging the log
+    # found the vanilla loader refusing a model of OURS:
+    #   [ModelManager] Failed to load model tnc:models/projectile/dark_hand.json
+    #   JsonParseException: 'from' specifier exceeds the allowed boundaries: (... -2.375E+1)
+    # The projectile was made longer (a tether was added for the "several hands on a black
+    # line" look), recentre put its bounding box at z=+-29.75, and the loader's window is
+    # only **-16 .. 32** -- so the hand silently vanished in game.
+    #
+    # D1b7 above only covered models/item/**, on the belief that other paths are loaded
+    # differently. That belief is WRONG for projectile models: the log shows the ordinary
+    # ModelManager/ModelBakery path rejecting it, i.e. `assets/tnc/models/projectile/**`
+    # (and the block models) go through the same deserializer and the same limits.
+    # So this gate covers every `assets/tnc/models/**` entry.
+    #
+    # SCOPE NOTE (why it is safe to be strict here): the extents check is UNCONDITIONAL in
+    # BlockElement.Deserializer -- it does not matter whether a model is later drawn by the
+    # engine, because a rejected model never reaches any renderer. A model outside the
+    # window is therefore always a defect for us.
+    #
+    # ★ Two tiers of severity, on evidence from the 2026-10-06 client log:
+    #   * `models/projectile/**` -> HARD FAIL. Proven: the log shows dark_hand rejected by
+    #     ModelManager ("Failed to load model tnc:models/projectile/dark_hand.json"), i.e.
+    #     these go through the ordinary bakery and DO get drawn in game.
+    #   * `models/block/**`, `models/entity/**` -> NOTE (not a failure). Held that way only
+    #     because six such models are ALREADY out of window and are owned by the
+    #     structure/display work, not by the spell work -- see the note text. They are real
+    #     defects (the same log shows `tnc:block/gamble_table`, `scene_table`,
+    #     `tavern_counter`, `tavern_table_2x1`, `dragon_display_light/dark` and
+    #     `entity/dragon_block` all failing), and they are listed every run so they cannot
+    #     be forgotten. Promote them to Fail once that owner has moved them into loading.
+    $badGeom = @()
+    $blockGeom = @()
+    foreach ($entry in ($zip.Entries | Where-Object {
+                $_.FullName -like 'assets/tnc/models/*.json' -and
+                $_.FullName -notlike 'assets/tnc/models/item/*' })) {
+        $er = New-Object System.IO.StreamReader($entry.Open(), [System.Text.Encoding]::UTF8)
+        $text = $er.ReadToEnd(); $er.Close()
+        $model = $null
+        try { $model = ConvertFrom-TncSpellJson $text } catch { continue }   # not a block model
+        if ($null -eq $model.elements) { continue }
+        $lo = [double]::MaxValue
+        $hi = [double]::MinValue
+        foreach ($el in @($model.elements)) {
+            if ($null -eq $el) { continue }
+            foreach ($key in @('from', 'to')) {
+                foreach ($v in @($el.$key)) {
+                    if ($null -eq $v) { continue }
+                    $f = [double]$v
+                    if ($f -lt $lo) { $lo = $f }
+                    if ($f -gt $hi) { $hi = $f }
+                }
+            }
+        }
+        if ($lo -lt -16.0001 -or $hi -gt 32.0001) {
+            $line = "$($entry.FullName) extents $lo..$hi (loader allows -16..32; the WHOLE model then fails to load)"
+            if ($entry.FullName -like 'assets/tnc/models/projectile/*') { $badGeom += $line }
+            else { $blockGeom += $line }
+        }
+    }
+    if ($badGeom.Count -eq 0) { Ok 'every projectile model we ship is inside the loader extents (-16..32)' }
+    else { Fail ('projectile model(s) the client refuses to load (=> the hand INVISIBLE in game): ' + ($badGeom -join '; ')) }
+    if ($blockGeom.Count -gt 0) {
+        Note ("pre-existing, owned by the structure/display work, NOT by the spell work -- these are also rejected by the loader in game: " + ($blockGeom -join '; '))
+    }
+
     # ---------------- D1c. HUD entry point + its keybind ----------------
     # Nothing HUD-side can be clicked (no cursor while playing), so the keybind IS
     # the entry. RegisterKeyMappingsEvent lives on the MOD bus - registering it on

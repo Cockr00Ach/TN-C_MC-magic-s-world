@@ -186,15 +186,28 @@ def build_boxes():
 
     # ---- the tether: a thick black band along -Z, plus a hub at its end ----
     # (dedicated near-black material; wide in x AND y so it is a slab, not a thread)
-    b.append(box([-3.5, -3.5, -30], [3.5, 3.5, -12], "tether"))
-    b.append(box([-5, -5, -32], [5, 5, -29], "tether"))      # the hub knot behind
-    b.append(box([-2, -2, -36], [2, 2, -32], "tether"))      # a tail stub fading back
+    #
+    # ★★ SIZES ARE CAPPED BY THE VANILLA LOADER, NOT BY TASTE (2026-10-10).
+    # BlockElement.Deserializer rejects any `from`/`to` outside **-16 .. 32**, and it
+    # rejects the WHOLE model, not just that one cube. The first fan version had the
+    # tether at z=-30, recentring pushed the box to +-29.75, and the client logged:
+    #     Failed to load model tnc:models/projectile/dark_hand.json
+    #     JsonParseException: 'from' specifier exceeds the allowed boundaries: (... -2.375E+1)
+    # Because recenter() puts the bounding-box CENTRE on the origin, a model longer than
+    # ~32 units cannot be recentred without half of it leaving that window -- so the MODEL
+    # must stay short and the engine `scale` (spell JSON) is what makes it big. That is
+    # exactly why `scale` exists.
+    # Budget: the hands (scale 1.25 below) reach +15, so keep z inside -18 .. +15.
+    b.append(box([-2.6, -2.6, -15.0], [2.6, 2.6, -7.5], "tether"))
+    b.append(box([-3.6, -3.6, -16.0], [3.6, 3.6, -14.5], "tether"))    # hub knot
+    b.append(box([-1.6, -1.6, -17.8], [1.6, 1.6, -15.8], "tether"))    # fading tail
 
     # ---- three hands, fanned about the Z axis ----
+    # 1.25 => each hand reaches +15 units, which keeps the recentred model inside the window
     fans = [
-        (-26.0, 1.0),      # upper-left hand
-        (0.0, 1.0),        # the middle hand, largest
-        (26.0, 1.0),       # lower-right hand
+        (-26.0, 1.25),     # upper-left hand
+        (0.0, 1.25),       # the middle hand
+        (26.0, 1.25),      # lower-right hand
     ]
     for angle, scale in fans:
         b.extend(one_hand(angle, scale))
@@ -283,6 +296,16 @@ def recenter(boxes):
     position. If the geometry hangs forward of the origin (this hand was +4 units on Z),
     the hand swings around a point in front of itself and looks like it is orbiting
     its own wrist. Centring the bbox makes it spin in place.
+
+    ★★ AND THEN CLAMP INTO THE LOADER'S WINDOW (2026-10-10).
+    Vanilla's `BlockElement.Deserializer` rejects any `from`/`to` outside **-16 .. 32**
+    and drops the ENTIRE model if one cube violates it. Centring a model longer than
+    ~32 units therefore guarantees a failure -- which is exactly what happened to the
+    first three-hand version (tether at z=-30 => recentred to +-29.75 => the client
+    logged "Failed to load model tnc:models/projectile/dark_hand.json").
+    This function now refuses to produce an out-of-window model: if the recentred box
+    would not fit, it slides the model so the box fits inside `-15.9 .. 31.9` instead.
+    A slightly off-centre pivot is a cosmetic wobble; an unloaded model is invisible.
     """
     xs0 = min(b["from"][0] for b in boxes)
     xs1 = max(b["to"][0] for b in boxes)
@@ -293,6 +316,35 @@ def recenter(boxes):
     dx = -round((xs0 + xs1) / 2.0, 2)
     dy = -round((ys0 + ys1) / 2.0, 2)
     dz = -round((zs0 + zs1) / 2.0, 2)
+
+    # the vanilla extents window, with a hair of margin
+    LO, HI = -15.9, 31.9
+
+    def fix(lo, hi, shift):
+        """Center if it fits; otherwise sit flush against the window edge.
+
+        Centring keeps the projectile's pivot in the middle of the model (so it spins in
+        place instead of orbiting its own wrist). But the extents window is NOT symmetric
+        about the origin (-16 .. 32), so a model that cannot fit centred still has room on
+        the + side: sliding it flush to LO uses the whole 47.8-unit window instead of the
+        ~31.8 units available when centred. Both branches are deterministic, so re-running
+        the generator does not jitter the geometry.
+        """
+        if (hi - lo) > (HI - LO):
+            raise AssertionError(
+                "model is %.2f units long in one axis but the vanilla loader only allows "
+                "%.2f (-16..32); shrink the model and let the spell JSON `scale` make it big"
+                % (hi - lo, HI - LO))
+        if lo + shift < LO:
+            return round(LO - lo, 2)
+        if hi + shift > HI:
+            return round(HI - hi, 2)
+        return shift
+
+    dx = fix(xs0, xs1, dx)
+    dy = fix(ys0, ys1, dy)
+    dz = fix(zs0, zs1, dz)
+
     if dx == dy == dz == 0:
         return boxes
     for b in boxes:

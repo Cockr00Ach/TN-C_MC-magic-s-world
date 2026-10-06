@@ -66,7 +66,7 @@
             ],
             "model": {
               "model_id": "tnc:projectile/dark_hand",
-              "scale": 4.3,
+              "scale": 6.2,
               "orientation": "TOWARDS_CAMERA"
             }
           }
