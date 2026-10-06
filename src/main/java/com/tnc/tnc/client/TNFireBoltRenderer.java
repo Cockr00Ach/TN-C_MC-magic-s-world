@@ -129,8 +129,13 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
             net.minecraft.world.level.block.state.BlockState head =
                     net.minecraft.world.level.block.Blocks.DRAGON_HEAD.defaultBlockState()
                             .setValue(net.minecraft.world.level.block.SkullBlock.ROTATION, rot);
+            // ⚠️ 作者 2026-10-05：「把龙头颜色改为**赤红色**与身体搭配」✓
+            //   renderSingleBlock 给顶点的颜色**永远是白色** ✗ ⇒ 套一层染色缓冲源 ✓，
+            //   模型/贴图/朝向全不动 ✓，只是整体染成赤红 ✓（见 TintingVertexConsumer ✓）
+            final MultiBufferSource tinted = type -> new TintingVertexConsumer(
+                    buffers.getBuffer(type), 0.98F, 0.26F, 0.08F);
             net.minecraft.client.Minecraft.getInstance().getBlockRenderer()
-                    .renderSingleBlock(head, stack, buffers,
+                    .renderSingleBlock(head, stack, tinted,
                             net.minecraft.client.renderer.LightTexture.FULL_BRIGHT,
                             net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY);
             stack.popPose();
