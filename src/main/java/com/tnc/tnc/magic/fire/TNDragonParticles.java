@@ -175,21 +175,23 @@ public final class TNDragonParticles {
         // ④ 龙身：沿 -前 的蛇形曲线 ✓，**有体积**（每步撒一小团 ✓，不是一条线 ✗）
         // ⚠️ 作者反馈「施法时有卡顿」✗ ⇒ 身体改成**每 2 tick 发一次** ✓
         //    （粒子本身有寿命，隔 tick 发视觉上几乎没差 ✓，负载直接减半 ✓）
-        if (((int) age & 1) != 0) {
-            return;
-        }
-        for (int p = 0; p < BODY_POINTS; p++) {
-            double t = p / (double) BODY_POINTS;                 // 0 = 颈, 1 = 尾尖 ✓
-            double back = 0.25D + t * BODY_LENGTH;               // 以**方块**为单位 ✓
-            double sway = Math.sin(t * 3.4D + age * 0.30D) * 0.75D * t;
-            double bob = Math.cos(t * 2.6D + age * 0.26D) * 0.45D * t;
-            Vec3 at = origin.subtract(dir.scale(back))
-                    .add(right.scale(sway)).add(up.scale(bob));
-            // 越往后越细、越暗 ✓；每步撒 3 颗、带半径 ⇒ 尾巴是**一根有粗有细的火柱** ✓
-            double r = BODY_RADIUS * (1.0D - 0.72D * t);
-            level.sendParticles(dust(0.35D + t * 0.55D, 1.45F),
-                    at.x, at.y, at.z, 3, r, r, r, 0.0D);
-        }
+        // ⚠️ 2026-10-05：这层"隔 tick"**只包住身体** ✓ —— 龙头那几段照旧每 tick 都发 ✓
+        //    （原来它写在龙头之前 ✗ ⇒ 连龙头也被砍半 ✗，作者要的"粒子量再多一点"就落空了 ✗）
+        if (((int) age & 1) == 0) {
+                return;
+            }
+            for (int p = 0; p < BODY_POINTS; p++) {
+                double t = p / (double) BODY_POINTS;                 // 0 = 颈, 1 = 尾尖 ✓
+                double back = 0.25D + t * BODY_LENGTH;               // 以**方块**为单位 ✓
+                double sway = Math.sin(t * 3.4D + age * 0.30D) * 0.75D * t;
+                double bob = Math.cos(t * 2.6D + age * 0.26D) * 0.45D * t;
+                Vec3 at = origin.subtract(dir.scale(back))
+                        .add(right.scale(sway)).add(up.scale(bob));
+                // 越往后越细、越暗 ✓；每步撒 3 颗、带半径 ⇒ 尾巴是**一根有粗有细的火柱** ✓
+                double r = BODY_RADIUS * (1.0D - 0.72D * t);
+                level.sendParticles(dust(0.35D + t * 0.55D, 1.45F),
+                        at.x, at.y, at.z, 3, r, r, r, 0.0D);
+            }
     }
 
     /** 撒一个粒子：把归一化 (u,v) 换算到世界坐标 ✓ + 加一个横向厚度 ✓。 */
