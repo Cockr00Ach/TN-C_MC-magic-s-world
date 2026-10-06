@@ -135,6 +135,17 @@ public class TNLightBeamEntity extends Entity {
     private boolean fireBlast;
 
     /**
+     * 火系形态：**满射程**（格）✓
+     *
+     * <p>⚠️ 光柱的 {@code trackTarget()} 会把长度**缩到锁定目标身上** ✗ ——
+     * 那是"光柱打在目标上"的语义 ✓；但作者要的射线是**穿透**的 ✗
+     * ⇒ 火系形态每 tick 把长度顶回满射程，真正拦截它的是墙面（见 {@link #fireClip}）✓
+     *
+     * <p>出生时从 {@code configure(...)} 的 length 抄一份 ✓
+     */
+    private double fireMaxLength;
+
+    /**
      * 火系射线专用初始化：切成火焰形态 + 设好命中挂几级焚身 ✓。
      *
      * @param scorchLevel 0 = 不挂、1 = 焚身 I（t1~t3）、2 = 焚身 II（t4~t5）
@@ -142,6 +153,7 @@ public class TNLightBeamEntity extends Entity {
     public void configureFire(int scorchLevel, boolean blastOnHit) {
         this.fireScorch = Math.max(0, Math.min(2, scorchLevel));
         this.fireBlast = blastOnHit;
+        this.fireMaxLength = this.length();          // 抄下满射程 ✓
         this.entityData.set(DATA_STYLE, STYLE_FIRE);
     }
     /** 已经挨过这道光的敌人 ✓（只打一次 ✓）。 */
@@ -239,6 +251,13 @@ public class TNLightBeamEntity extends Entity {
             return;
         }
         this.trackTarget();                      // ★ 瞄着敌人：每 tick 重新瞄准 ✓
+        if (this.style() == STYLE_FIRE) {
+            // ★ 火系：把长度**顶回满射程** ⇒ 射线直接穿过去，而不是停在目标身上 ✗
+            //   （trackTarget 会把它缩到目标距离 ✗ —— 那是光柱的语义 ✓）
+            if (this.fireMaxLength > 0.0D) {
+                this.entityData.set(DATA_LENGTH, (int) Math.round(this.fireMaxLength * 100.0D));
+            }
+        }
         if (this.style() == STYLE_FIRE && this.fireClip()) {
             return;                              // 已经散掉了 ✓
         }

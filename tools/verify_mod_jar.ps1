@@ -172,7 +172,7 @@ try {
                   'tnc:lightning_haste', 'tnc:lightning_blink', 'tnc:lightning_wind',
                   'tnc:lightning_recharge', 'tnc:lightning_ascension',
                   # fire 15 (ray 5 + ball 5 + burn 5)
-                  'tnc:fire_ray', 'tnc:thick_fire_ray', 'tnc:triple_fire_ray',
+                  'tnc:sun_ray', 'tnc:blast_ray', 'tnc:triple_fire_ray',
                   'tnc:explosive_fire_ray', 'tnc:cataclysm_fire_ray',
                   'tnc:fireball', 'tnc:great_fireball', 'tnc:lava_fireball',
                   'tnc:molten_skyfall', 'tnc:meteor_fall',

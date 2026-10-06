@@ -580,6 +580,9 @@ public final class TnSpellMechanics {
         com.tnc.tnc.magic.fire.TNFireBoltEntity.cast(player, spellId);
         // 火球链里"不是朝准星扔火球"的那两档（t4 熔岳天倾的头顶法阵 / t5 炎葬的脚下法阵）
         com.tnc.tnc.magic.fire.TNFireFields.cast(player, spellId);
+        // 射线链（火系第 2 条链）：同样要吃"是哪个法术、挂了没"这些参数 ✗
+        // ⇒ 也走 Java 派发（引擎的 SPAWN 带不了参数 ✗）。不是本链的返回 false ✓
+        com.tnc.tnc.magic.fire.TNFireRays.cast(player, spellId);
 
         // 闪电降低冷却：恢复一半蓝量（上限的一半）
         if (path.equals("lightning_recharge")) {

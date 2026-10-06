@@ -134,8 +134,8 @@ function Icon-Burn($name, $tier) {
 
 # ---------- the 15 ----------
 Write-Output 'RAY chain:'
-Icon-Ray 'fire_ray' 1
-Icon-Ray 'thick_fire_ray' 2
+Icon-Ray 'sun_ray' 1
+Icon-Ray 'blast_ray' 2
 Icon-Ray 'triple_fire_ray' 3
 Icon-Ray 'explosive_fire_ray' 4
 Icon-Ray 'cataclysm_fire_ray' 5

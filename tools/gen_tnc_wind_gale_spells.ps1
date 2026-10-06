@@ -60,7 +60,7 @@ function Gale-Spell($name, $tier, $radius, $seconds, $blades, $coef, $scale, $co
           "perks": { "pierce": $pierce },
           "client_data": {
             "travel_particles": [ $trailFx ],
-            "model": { "model_id": "tnc:projectile/fire_ray", "scale": $scale }
+            "model": { "model_id": "tnc:projectile/sun_ray", "scale": $scale }
           }
         }
       }

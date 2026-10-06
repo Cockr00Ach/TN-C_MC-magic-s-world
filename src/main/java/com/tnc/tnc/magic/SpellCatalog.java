@@ -38,7 +38,7 @@ public final class SpellCatalog {
         SPEED("雷速", "加速与位移"),
 
         /** 火射线线：从一条穿透射线，到三条齐发，再到命中就炸。 */
-        RAY("火射线", "穿透的火焰射线"),
+        RAY("射线", "穿透的火焰射线"),
 
         /** 火球线（2026-10-05 重做）：火球术 → 大火球术 → 熔岩火球 → 熔岳天倾 → 炎葬。 */
         BALL("火球", "会飞的火球"),
@@ -205,8 +205,8 @@ public final class SpellCatalog {
             entry("lightning_ascension", Chain.SPEED, 5, "闪电登神"),
 
             // ---- 火射线线：1 穿透 → 2 更粗 → 3 三向齐发 → 4 命中爆炸 → 5 巨大爆炸 ----
-            fireEntry("fire_ray", Chain.RAY, 1, "火射线"),
-            fireEntry("thick_fire_ray", Chain.RAY, 2, "粗火射线"),
+            fireEntry("sun_ray", Chain.RAY, 1, "烈阳射线"),
+            fireEntry("blast_ray", Chain.RAY, 2, "爆炸射线"),
             fireEntry("triple_fire_ray", Chain.RAY, 3, "三条火射线"),
             fireEntry("explosive_fire_ray", Chain.RAY, 4, "爆炸射线"),
             fireEntry("cataclysm_fire_ray", Chain.RAY, 5, "巨大爆炸射线"),
