@@ -10,7 +10,7 @@ Minecraft 1.20.1 / Forge 47.4.22 的魔改工程。给整合包 **元素觉醒 1
 剧情仍由队友的 WhisperingQuests 独立维护，不使用独立G键指南，也不替换剧情界面。
 
 同伴拉取仓库后，先关闭游戏，用PowerShell 7运行 `tools/install-guidebook-update.ps1 -LivePack "自己的实例绝对路径"`，再重启游戏。
-安装器只覆盖自有章节与图标、合并指南分组，不替换模组或清除存档。具体记录见 [玩法指南交付](docs/玩法指南交付-20260929.md)。
+安装器只覆盖自有章节与图标、合并指南分组，不替换模组或清除存档。具体记录见 [玩法指南交付](docs/quests/玩法指南交付-20260929.md)。
 等级、钱袋、房产、委托结算与家庭行为仍在筹备；本批交付任务书框架和说明，不代表这些机制已上线。
 下方2026-09-21清空任务章节的描述是历史记录；本次实际D盘实例有16份既存章节，本批全部保留，没有恢复或清理它们。
 
@@ -61,6 +61,10 @@ FTB 任务界面**没有任何残留**；玩家可见的任务将**只有我们�
 >
 > **验收**：工作区与游戏实例的 `chapters\` 目录**均为空** ✓
 
+> 📌 **文档太多不知道看哪份** → **[`docs/README.md`](docs/README.md)**（**`docs/` 总索引**：
+> 五个入口文档 + 按主题找文档 + 整理规则）。2026-10-06 整理过一次，
+> `docs/` 顶层从 ~95 个文件收到十几个，**移动全部用 `git mv`**。
+>
 > 📌 **每天开工前先看 [`docs/daily-workflow.md`](docs/daily-workflow.md)** ——
 > 里面有一次性设置、日常命令、提交推送流程、以及"出问题对照表"，
 > 可以直接复制粘贴，也可以打印出来贴屏幕上。
@@ -220,7 +224,7 @@ git push -u origin 你的分支名
 
 ## 多专题协作约定
 
-- **法术系统YYY**：docs/当前状态.md、docs/法术专题_交接.md、docs/投射物模型_配方.md、docs/法术制作与测试.md、docs/特殊魔法_设计.md、docs/法术总表_按设计文档.md、docs/美术资产清单.md、docs/实施进度.md、docs/项目交接.md、docs/验收表.md、docs/导图_全法术.png、docs/宝箱传说残卷_物品预览.png、docs/一周目正史_物品预览.png、docs/庄鹊让_候选模型对比.png、docs/庄鹊让_NPC皮肤预览.png、src/main/java/com/tnc/tnc/magic/**、src/main/java/com/tnc/tnc/client/**、src/main/resources/data/tnc/spells/**、src/main/resources/assets/tnc/**、tools/gen_tnc_*.ps1、tools/gen_scroll_lang.ps1、tools/scroll_lang_extra.json、tools/gen_records_lang.ps1、tools/records_lang_extra.json、tools/maid_models.json、tools/sync-tlm-models.ps1、tools/gen_zhuangquerang_skin.ps1、tools/verify_mod_jar.ps1、tools/install-to-pack.ps1。
+- **法术系统YYY**：docs/当前状态.md、docs/法术专题_交接.md、docs/spells/投射物模型_配方.md、docs/spells/法术制作与测试.md、docs/spells/特殊魔法_设计.md、docs/spells/法术总表_按设计文档.md、docs/art/美术资产清单.md、docs/archive/实施进度.md、docs/archive/项目交接.md、docs/archive/验收表.md、docs/导图_全法术.png、docs/宝箱传说残卷_物品预览.png、docs/一周目正史_物品预览.png、docs/庄鹊让_候选模型对比.png、docs/庄鹊让_NPC皮肤预览.png、src/main/java/com/tnc/tnc/magic/**、src/main/java/com/tnc/tnc/client/**、src/main/resources/data/tnc/spells/**、src/main/resources/assets/tnc/**、tools/gen_tnc_*.ps1、tools/gen_scroll_lang.ps1、tools/scroll_lang_extra.json、tools/gen_records_lang.ps1、tools/records_lang_extra.json、tools/maid_models.json、tools/sync-tlm-models.ps1、tools/gen_zhuangquerang_skin.ps1、tools/verify_mod_jar.ps1、tools/install-to-pack.ps1。
   - **也负责**：剧情道具「宝箱传说残卷」六卷 ＋「一周目正史」五张记录纸（物品本体 + 右键阅读）、剧情角色 **庄鹊让**（一周目剧情 NPC `tnc:zhuangquerang` + 二周目可选角色设计）；**剧情文案本身**仍归编剧系统 AAA ✗。
   - **与 NPC 专题共用** `src/main/java/com/tnc/tnc/npc/**` ✓ —— 我按他们的范式**新增**了 `zhuangquerang` 一个 NPC 及该动的接线（实体/属性/刷怪蛋/渲染器/创造页/默认位置/purge 名单/lang）；**不重构、不提交**他们的 WIP ✗。
   - **也碰**：`build.gradle`（`compileOnly fg.deobf` + `flatDir` 仓库）与 `libs\touhoulittlemaid-1.5.2.jar`、`libs\geckolib-4.8.4.jar` —— **只为把女仆模型画在庄鹊让身上** ✓，两个 jar 不进我们的产物 ✗。

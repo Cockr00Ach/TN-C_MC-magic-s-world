@@ -42,7 +42,7 @@ for name in ['install-work','install-live']:
 for name in ['地图页修订预览.png','歸人物页修订预览.png','法杖页修订预览.png','七系法杖修订总览.png','七系冒险者法杖.png']:
     shutil.copy2(WORK/name,OUT/name)
 shutil.copy2(ROOT/'work/revision2/任务书七系排版预览.png',OUT/'七系任务路线修订预览.png')
-shutil.copy2(ROOT/'docs/天空岛内饰交付给建造者.md',OUT/'天空岛内饰交付给建造者.md')
+shutil.copy2(ROOT/'docs/town/天空岛内饰交付给建造者.md',OUT/'天空岛内饰交付给建造者.md')
 report=f'''# 任务书与法杖修订3 · 2026-09-29批次
 
 完成与安装日期：2026-09-30。
@@ -76,6 +76,6 @@ jar SHA256：`{digest}`。
 
 银行贷款/房屋分期和娱乐玩法仍处于上一轮所列设计状态，本次没有新增交易规则。
 '''
-(ROOT/'docs/任务书与法杖修订3-20260929.md').write_text(report,encoding='utf-8')
+(ROOT/'docs/quests/任务书与法杖修订3-20260929.md').write_text(report,encoding='utf-8')
 (OUT/'任务书与法杖修订3-20260929.md').write_text(report,encoding='utf-8')
 print(f'Verified revision3: {tests} tests, 17 chapters, {len(native)} untouched native chapters, installed SHA256 {digest}')
