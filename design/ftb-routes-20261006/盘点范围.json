@@ -1,0 +1,1134 @@
+{
+  "date": "2026-10-06",
+  "method": "Read local active-pack jar assets, crop/seed tags, zh_cn translations and selected class inheritance; no live game registry dump performed.",
+  "jar_count": 281,
+  "candidate_blockstate_count": 4810,
+  "tag_count": 193,
+  "season_mods_detected": [],
+  "mods": [
+    {
+      "file": "0Pack2Reload-Forge-1.20.1-1.0.1.jar",
+      "size": 8537
+    },
+    {
+      "file": "abyssal_corrupter-1.0.0.jar",
+      "size": 250230
+    },
+    {
+      "file": "acceleratedrendering-1.0.14-1.20.1-alpha.jar",
+      "size": 907019
+    },
+    {
+      "file": "accessories-neoforge-1.0.0-beta.48+1.20.1.jar",
+      "size": 1080048
+    },
+    {
+      "file": "accessories_cclayer-7.4.0-beta.18+1.20.1.jar",
+      "size": 388707
+    },
+    {
+      "file": "accessories_tclayer-3.8.1-beta.14+1.20.1.jar",
+      "size": 203357
+    },
+    {
+      "file": "additional_rpg_jewelry-1.1.1-1.20.1.jar",
+      "size": 1485937
+    },
+    {
+      "file": "AdvancedLootInfo-forge-1.20.1-1.12.0.jar",
+      "size": 663089
+    },
+    {
+      "file": "aeroblender-1.20.1-1.0.1-neoforge.jar",
+      "size": 21641
+    },
+    {
+      "file": "aether-redux-2.0.19-1.20.1-neoforge.jar",
+      "size": 29448522
+    },
+    {
+      "file": "aether_no_nerf-1.0.0.jar",
+      "size": 47894
+    },
+    {
+      "file": "alexscaves-2.0.2.jar",
+      "size": 74871657
+    },
+    {
+      "file": "alltheleaks-1.1.1+1.20.1-forge.jar",
+      "size": 1187126
+    },
+    {
+      "file": "almanac-1.20.x-forge-1.0.2.jar",
+      "size": 15906
+    },
+    {
+      "file": "AlwaysEat-5.2.jar",
+      "size": 11372
+    },
+    {
+      "file": "ApothicAttributes-1.20.1-1.3.7.jar",
+      "size": 227511
+    },
+    {
+      "file": "aquamirae-forge-1.20.1-6.4.0.jar",
+      "size": 19073985
+    },
+    {
+      "file": "archers-1.3.0+1.20.1.jar",
+      "size": 1036432
+    },
+    {
+      "file": "architectury-9.2.14-forge.jar",
+      "size": 580602
+    },
+    {
+      "file": "Armor of the Ages-forge-1.20.1-1.3.11.jar",
+      "size": 347665
+    },
+    {
+      "file": "ArmorDamageLimit-1.20.1-1.0.0.jar",
+      "size": 6938
+    },
+    {
+      "file": "artifacts-forge-9.5.19.jar",
+      "size": 850974
+    },
+    {
+      "file": "Ascensio-1.2.jar",
+      "size": 59449
+    },
+    {
+      "file": "async-locator-forge-1.20-1.3.0.jar",
+      "size": 264951
+    },
+    {
+      "file": "ATi Structures V1.4.6.jar",
+      "size": 13115969
+    },
+    {
+      "file": "AtomSweep-forge-1.20.x-0.2.2.jar",
+      "size": 246146
+    },
+    {
+      "file": "AttributeFix-Forge-1.20.1-21.0.5.jar",
+      "size": 19499
+    },
+    {
+      "file": "azurelib-neo-1.20.1-3.1.12.jar",
+      "size": 1066523
+    },
+    {
+      "file": "azurelibarmor-fabric-1.20.1-2.0.14.jar",
+      "size": 427488
+    },
+    {
+      "file": "balm-forge-1.20.1-7.3.42.jar",
+      "size": 561670
+    },
+    {
+      "file": "bbb-forge-2.0pre4.jar",
+      "size": 1890413
+    },
+    {
+      "file": "berserker-class-mod-1.2.6-1.20.1.jar",
+      "size": 522203
+    },
+    {
+      "file": "bettercombat-forge-1.9.0+1.20.1.jar",
+      "size": 1054339
+    },
+    {
+      "file": "beyonddimensions-1.20.1-forge-0.7.27.jar",
+      "size": 1607395
+    },
+    {
+      "file": "blackgoldalliance-1.20.1-1.0.2.1.jar",
+      "size": 6379379
+    },
+    {
+      "file": "block_factorys_bosses-2.1.2-forge-1.20.1.jar",
+      "size": 23963009
+    },
+    {
+      "file": "bookofdragons-1.31-1.20.1.jar",
+      "size": 4343370
+    },
+    {
+      "file": "Bookshelf-Forge-1.20.1-20.2.15.jar",
+      "size": 343925
+    },
+    {
+      "file": "bossesunleashed-1.0.4-hotfix.jar",
+      "size": 8925048
+    },
+    {
+      "file": "bosses_delight-1.0.5.jar",
+      "size": 328724
+    },
+    {
+      "file": "Bountiful-6.0.4+1.20.1-forge.jar",
+      "size": 502662
+    },
+    {
+      "file": "BS_addon_forge-1.20.1-1.4.0.jar",
+      "size": 50172
+    },
+    {
+      "file": "Building Blueprint-1.1.jar",
+      "size": 895315
+    },
+    {
+      "file": "byepregen-1.0.2.2.jar",
+      "size": 34516
+    },
+    {
+      "file": "carrasconlib-forge-1.20.1-0.1.jar",
+      "size": 88348
+    },
+    {
+      "file": "CerbonsAPI-Forge-1.20.1-1.1.0.jar",
+      "size": 241148
+    },
+    {
+      "file": "champions-forge-1.20.1-2.1.12.7.jar",
+      "size": 403329
+    },
+    {
+      "file": "CheatingFreeLocateTeleporting-Forge-1.20.1-1.0.0.jar",
+      "size": 40927
+    },
+    {
+      "file": "chloride-FORGE-mc1.20.1-v1.8.1.jar",
+      "size": 532833
+    },
+    {
+      "file": "cinematiccataclysm-1.0.1-1.20.1.jar",
+      "size": 700109
+    },
+    {
+      "file": "citadel-2.6.3-1.20.1.jar",
+      "size": 3185275
+    },
+    {
+      "file": "cloth-config-11.1.136-forge.jar",
+      "size": 1181413
+    },
+    {
+      "file": "combatroll-forge-1.3.3+1.20.1.jar",
+      "size": 217962
+    },
+    {
+      "file": "Connector-1.0.0-beta.49+1.20.1.jar",
+      "size": 5046108
+    },
+    {
+      "file": "ConquestReforged-forge-1.20.1-1.6.0.jar",
+      "size": 107870881
+    },
+    {
+      "file": "Controlling-forge-1.20.1-12.0.2.jar",
+      "size": 115280
+    },
+    {
+      "file": "Corgilib-Forge-1.20.1-4.0.3.5.jar",
+      "size": 318765
+    },
+    {
+      "file": "coroutil-forge-1.20.1-1.3.7.jar",
+      "size": 64187
+    },
+    {
+      "file": "create-1.20.1-6.0.8.jar",
+      "size": 19170905
+    },
+    {
+      "file": "createbetterfps-1.20.1-1.1.2.jar",
+      "size": 25214
+    },
+    {
+      "file": "cupboard-1.20.1-3.9.jar",
+      "size": 31724
+    },
+    {
+      "file": "customportalapi-1.0.1-forge-1.20.1.jar",
+      "size": 126626
+    },
+    {
+      "file": "deep_aether-1.20.1-1.1.7.jar",
+      "size": 40503987
+    },
+    {
+      "file": "Dimensions-of-Alex's-Caves-1.20.1-1.0.4.jar",
+      "size": 693655
+    },
+    {
+      "file": "DisenchantmentEditTable-1.20-1.1.2.jar",
+      "size": 100605
+    },
+    {
+      "file": "Dodos Mobs 1.0.1 beta.jar",
+      "size": 1197246
+    },
+    {
+      "file": "drippyloadingscreen_forge_3.1.2_MC_1.20.1.jar",
+      "size": 287611
+    },
+    {
+      "file": "dummmmmmy-1.20-2.0.12-forge.jar",
+      "size": 839685
+    },
+    {
+      "file": "Dungeon Now Loading-forge-1.20.1-2.2.jar",
+      "size": 85065508
+    },
+    {
+      "file": "Dungeon-Realm-1.20.1-1.1.8.jar",
+      "size": 4170487
+    },
+    {
+      "file": "DungeonsArise-1.20.x-2.1.58-release.jar",
+      "size": 8762342
+    },
+    {
+      "file": "DungeonsAriseSevenSeas-1.19.2-1.0.2-forge.jar",
+      "size": 248171
+    },
+    {
+      "file": "eeeabsmobs-1.20.1-0.98.1.jar",
+      "size": 29425926
+    },
+    {
+      "file": "efficient_hashing-forge-1.0.0+1.20.1-mod.jar",
+      "size": 23869
+    },
+    {
+      "file": "elainabroom_forge_1.20.1-1.0.6.jar",
+      "size": 85060
+    },
+    {
+      "file": "elemental_wizards_rpg-1.3.8-1.20.1.jar",
+      "size": 1019174
+    },
+    {
+      "file": "embeddium-0.3.31+mc1.20.1.jar",
+      "size": 1320675
+    },
+    {
+      "file": "emi-1.1.24+1.20.1+forge.jar",
+      "size": 1121750
+    },
+    {
+      "file": "Emphasize Armor-1.0 (1).jar",
+      "size": 647120
+    },
+    {
+      "file": "EnchantmentDescriptions-Forge-1.20.1-17.1.21.jar",
+      "size": 66883
+    },
+    {
+      "file": "endrem_forge-5.3.3-R-1.20.1.jar",
+      "size": 889634
+    },
+    {
+      "file": "enhanced_boss_bars-1.20.1-1.0.0.jar",
+      "size": 254629
+    },
+    {
+      "file": "entityculling-forge-1.10.5-mc1.20.1.jar",
+      "size": 1590221
+    },
+    {
+      "file": "Epic Witch Huts v1.3.1.jar",
+      "size": 2200720
+    },
+    {
+      "file": "Explorer's Compass Enhance-1.20.1-forge-1.5.3.jar",
+      "size": 417365
+    },
+    {
+      "file": "explosiveenhancement-1.1.0-1.20.1-client-and-server.jar",
+      "size": 83842
+    },
+    {
+      "file": "extraspellattributes-1.3.2.jar",
+      "size": 232640
+    },
+    {
+      "file": "EZActions-forge-1.20.1-2.0.1.6.jar",
+      "size": 508874
+    },
+    {
+      "file": "fabric-api-0.92.6+1.11.14+1.20.1.jar",
+      "size": 3065813
+    },
+    {
+      "file": "fancymenu_forge_3.9.8_MC_1.20.1.jar",
+      "size": 25772373
+    },
+    {
+      "file": "fancytoasts-forge-1.20.1-1.4.6.jar",
+      "size": 355370
+    },
+    {
+      "file": "FarmersDelight-1.20.1-1.3.2.jar",
+      "size": 3313327
+    },
+    {
+      "file": "fast-ip-ping-v1.0.11-mc1.20.4-forge.jar",
+      "size": 10408
+    },
+    {
+      "file": "fastali-1.0.jar",
+      "size": 14147
+    },
+    {
+      "file": "fdbosses-3.1.0.3-1.20.1.jar",
+      "size": 26329336
+    },
+    {
+      "file": "fdlib-1.0.9-1.20.1.jar",
+      "size": 1647611
+    },
+    {
+      "file": "ferritecore-6.0.1-forge.jar",
+      "size": 123034
+    },
+    {
+      "file": "Find me-1.2.4.jar",
+      "size": 603372
+    },
+    {
+      "file": "flerovium-forge-1.20.1-1.2.19-all.jar",
+      "size": 254081
+    },
+    {
+      "file": "fragmentum-forge-1.20.1-1.3.0.jar",
+      "size": 2733846
+    },
+    {
+      "file": "fromtheshadowsreborn-2.9.jar",
+      "size": 2588486
+    },
+    {
+      "file": "ftb-essentials-forge-2001.2.4.jar",
+      "size": 157732
+    },
+    {
+      "file": "ftb-library-forge-2001.2.13.jar",
+      "size": 780558
+    },
+    {
+      "file": "ftb-quests-forge-2001.4.22.jar",
+      "size": 1255469
+    },
+    {
+      "file": "ftb-teams-forge-2001.3.2.jar",
+      "size": 252579
+    },
+    {
+      "file": "ftb-ultimine-forge-2001.1.8.jar",
+      "size": 129653
+    },
+    {
+      "file": "ftb-xmod-compat-forge-2.1.3.jar",
+      "size": 129725
+    },
+    {
+      "file": "ftbbackups2-forge-1.20-1.0.23.jar",
+      "size": 1954591
+    },
+    {
+      "file": "ftbquestsentityvis-1.7.0-1.20.1-forge.jar",
+      "size": 142249
+    },
+    {
+      "file": "ftbquestsfreezefix-forge-1.0.0-1.20.1.jar",
+      "size": 163803
+    },
+    {
+      "file": "FTBQuestsOptimizer-forge-2.1.0-1.20.1.jar",
+      "size": 12817
+    },
+    {
+      "file": "gazebo-1.1.1+1.20.1.jar",
+      "size": 319890
+    },
+    {
+      "file": "gbf-1.0.2.jar",
+      "size": 118707
+    },
+    {
+      "file": "geckolib-forge-1.20.1-4.8.4.jar",
+      "size": 1038209
+    },
+    {
+      "file": "GPUTape-1.18x-1.21x-1.0.5.1-forge.jar",
+      "size": 20295
+    },
+    {
+      "file": "hadean_breathe-0.24.5-1.20.1-forge.jar",
+      "size": 854160
+    },
+    {
+      "file": "hotai-1.0.jar",
+      "size": 136754
+    },
+    {
+      "file": "iaf_memory_fix-1.0.0.jar",
+      "size": 191730
+    },
+    {
+      "file": "iceandfire-2.1.13-1.20.1-beta-5.jar",
+      "size": 21854126
+    },
+    {
+      "file": "Iceberg-1.20.1-forge-1.1.25.jar",
+      "size": 134551
+    },
+    {
+      "file": "Icterine-forge-1.20.0-1-1.3.0.jar",
+      "size": 38848
+    },
+    {
+      "file": "illageandspillagerespillaged-1.2.8.jar",
+      "size": 33578108
+    },
+    {
+      "file": "IMBlocker-5.5.4-forge+1.17-1.20.4.jar",
+      "size": 203201
+    },
+    {
+      "file": "ImmediatelyFast-Forge-1.5.5+1.20.4.jar",
+      "size": 532063
+    },
+    {
+      "file": "immersive_furniture-forge-0.3.3+1.20.1.jar",
+      "size": 988737
+    },
+    {
+      "file": "immersive_optimization-forge-1.20.1-0.2.0.jar",
+      "size": 57631
+    },
+    {
+      "file": "immersive_paintings-0.6.13+1.20.1-forge.jar",
+      "size": 4856103
+    },
+    {
+      "file": "incontrol-1.20-9.4.6.jar",
+      "size": 361894
+    },
+    {
+      "file": "infinitygolem-1.0.0-forge-1.20.1.jar",
+      "size": 123719
+    },
+    {
+      "file": "integrated_api-1.7.4+1.20.1-forge.jar",
+      "size": 704838
+    },
+    {
+      "file": "integrated_villages-1.3.2+1.20.1-forge.jar",
+      "size": 4665121
+    },
+    {
+      "file": "InventorySorter-1.9.0-1.20.jar",
+      "size": 222894
+    },
+    {
+      "file": "ItemBorders-1.20.1-forge-1.2.2.jar",
+      "size": 20832
+    },
+    {
+      "file": "Jade-1.20.1-Forge-11.13.3.jar",
+      "size": 553487
+    },
+    {
+      "file": "JadeAddons-1.20.1-Forge-5.5.1.jar",
+      "size": 91754
+    },
+    {
+      "file": "jeed-1.20-2.2.5.jar",
+      "size": 159288
+    },
+    {
+      "file": "jerotes-1.20.1-1.3.2.1.jar",
+      "size": 5523619
+    },
+    {
+      "file": "jerotesvillage-1.20.1-1.1.5.19.jar",
+      "size": 79109429
+    },
+    {
+      "file": "Jewelry-1.3.7+1.20.1.jar",
+      "size": 641972
+    },
+    {
+      "file": "jungle_treehouse_village-1.0.0-forge-1.20.1.jar",
+      "size": 68712
+    },
+    {
+      "file": "kaleidoscopecookery-1.4.1-forge+mc1.20.1.jar",
+      "size": 5184400
+    },
+    {
+      "file": "kaleidoscopetavern-1.2.0-forge+mc1.20.1.jar",
+      "size": 1749797
+    },
+    {
+      "file": "kaleidoscope_end-1.0.14-forge+mc1.20.1.jar",
+      "size": 1106181
+    },
+    {
+      "file": "kaleidoscope_nether-1.1.8-forge+mc1.20.1.jar",
+      "size": 1022391
+    },
+    {
+      "file": "Kambrik-6.1.1+1.20.1-forge.jar",
+      "size": 325546
+    },
+    {
+      "file": "kevs_attributes_panel-fabric-1.2.10 (1).jar",
+      "size": 210159
+    },
+    {
+      "file": "Kiwi-1.20.1-Forge-11.10.3.jar",
+      "size": 1677733
+    },
+    {
+      "file": "konkrete_forge_1.8.0_MC_1.20-1.20.1.jar",
+      "size": 625185
+    },
+    {
+      "file": "kotlinforforge-4.12.0-all.jar",
+      "size": 7442998
+    },
+    {
+      "file": "Krypton Reno-forge-1.20.1-26.1.1-1.20.1.jar",
+      "size": 1793920
+    },
+    {
+      "file": "kubejs-forge-2001.6.5-build.26.jar",
+      "size": 1658792
+    },
+    {
+      "file": "leawind_third_person-v2.2.0-mc1.20-1.20.1-forge.jar",
+      "size": 347536
+    },
+    {
+      "file": "legendarymonsters-2.1.22 MC 1.20.1.jar",
+      "size": 44857823
+    },
+    {
+      "file": "legionary-1.0.1-forge-1.20.1.jar",
+      "size": 1985216
+    },
+    {
+      "file": "letmedespawn-1.20.x-forge-1.5.0.jar",
+      "size": 14789
+    },
+    {
+      "file": "Library_of_Exile-1.20.1-2.1.5.jar",
+      "size": 634987
+    },
+    {
+      "file": "lionfishapi-3.0.jar",
+      "size": 101931
+    },
+    {
+      "file": "lithostitched-forge-1.20.1-1.4.11.jar",
+      "size": 476347
+    },
+    {
+      "file": "lne_archers-0.1.9-1.20.1.jar",
+      "size": 1544527
+    },
+    {
+      "file": "lne_paladins-0.1.12-1.20.1.jar",
+      "size": 617865
+    },
+    {
+      "file": "lne_rogues-0.1.6-1.20.1.jar",
+      "size": 651010
+    },
+    {
+      "file": "lne_wizards-0.1.11-1.20.1.jar",
+      "size": 736489
+    },
+    {
+      "file": "lootjs-forge-1.20.1-2.13.1.jar",
+      "size": 242267
+    },
+    {
+      "file": "lootr-forge-1.20-0.7.35.94.jar",
+      "size": 463485
+    },
+    {
+      "file": "loot_n_explore-0.1.12-1.20.1.jar",
+      "size": 1187295
+    },
+    {
+      "file": "lost_aether_content-1.20.1-1.2.3.jar",
+      "size": 20264145
+    },
+    {
+      "file": "lukis-woodland-mansions-v.1.0-1.20-1.20.6.jar",
+      "size": 1455004
+    },
+    {
+      "file": "L_Enders_Cataclysm-3.31.jar",
+      "size": 73916104
+    },
+    {
+      "file": "mebahel-creatures-draugr-1.8.6b-fabric-1.20.1.jar",
+      "size": 8573848
+    },
+    {
+      "file": "mebahel-creatures-dwarven-1.0.7-fabric-1.20.1.jar",
+      "size": 4015477
+    },
+    {
+      "file": "mebahels-api-1.0.20-fabric-1.20.1.jar",
+      "size": 50933
+    },
+    {
+      "file": "melody_forge_1.0.3_MC_1.20.1-1.20.4.jar",
+      "size": 37178
+    },
+    {
+      "file": "minecraft-comes-alive-7.6.26+1.20.1-universal.jar",
+      "size": 13058547
+    },
+    {
+      "file": "modernfix-forge-5.27.66+mc1.20.1.jar",
+      "size": 1002234
+    },
+    {
+      "file": "ModernUI-Forge-1.20.1-3.12.0.1-universal.jar",
+      "size": 25104473
+    },
+    {
+      "file": "monsterexpansion-1.20.1-v0.7.6.jar",
+      "size": 18448166
+    },
+    {
+      "file": "MoogsTemplesReimagined-1.20-1.1.3.jar",
+      "size": 956178
+    },
+    {
+      "file": "moogs_structures-1.20-1.20.4-3.0.1-forge.jar",
+      "size": 338388
+    },
+    {
+      "file": "moonlight-1.20-2.16.31-forge.jar",
+      "size": 1389497
+    },
+    {
+      "file": "morehitboxes-forge-1.20.1-1.9.2.jar",
+      "size": 294405
+    },
+    {
+      "file": "more_rpg_classes-1.2.22-1.20.1.jar",
+      "size": 1388607
+    },
+    {
+      "file": "MouseTweaks-forge-mc1.20.1-2.25.1.jar",
+      "size": 76237
+    },
+    {
+      "file": "mowziesmobs-1.8.2.jar",
+      "size": 36033850
+    },
+    {
+      "file": "mutantmore-1.20.1-early_access-2.0.0.jar",
+      "size": 18499136
+    },
+    {
+      "file": "Necronomicon-Forge-1.6.0+1.20.1.jar",
+      "size": 33251
+    },
+    {
+      "file": "neruina-3.3.3+1.20.1-forge.jar",
+      "size": 1486095
+    },
+    {
+      "file": "obscure_api-18.jar",
+      "size": 1128392
+    },
+    {
+      "file": "obscure_tooltips-forge-1.20.1-3.10.0.jar",
+      "size": 1137730
+    },
+    {
+      "file": "oculus-mc1.20.1-1.8.0.jar",
+      "size": 2851119
+    },
+    {
+      "file": "Oh-The-Biomes-Weve-Gone-Forge-1.8.0.jar",
+      "size": 19043613
+    },
+    {
+      "file": "Oh-The-Trees-Youll-Grow-forge-1.20.1-1.7.0.jar",
+      "size": 171966
+    },
+    {
+      "file": "open-parties-and-claims-forge-1.20.1-0.28.1.jar",
+      "size": 1676573
+    },
+    {
+      "file": "OpenLoader-Forge-1.20.1-19.0.5.jar",
+      "size": 23937
+    },
+    {
+      "file": "owo-lib-0.11.2+1.20.jar",
+      "size": 905421
+    },
+    {
+      "file": "p1neros-dialogue-lib-2.3.0-mc1.20.1-forge.jar",
+      "size": 83337
+    },
+    {
+      "file": "packetfixer-3.3.2-1.18-1.20.4-merged.jar",
+      "size": 188661
+    },
+    {
+      "file": "paladins-1.4.0+1.20.1.jar",
+      "size": 2539988
+    },
+    {
+      "file": "paramagic-fabric-1.20.1-0.0.1-alpha.jar",
+      "size": 1768543
+    },
+    {
+      "file": "Patchouli-1.20.1-85-FORGE.jar",
+      "size": 642732
+    },
+    {
+      "file": "PineappleDelight-1.1.4-1.20.1-forge.jar",
+      "size": 672017
+    },
+    {
+      "file": "Placebo-1.20.1-8.6.3.jar",
+      "size": 282474
+    },
+    {
+      "file": "player-animation-lib-forge-1.0.2-rc1+1.20.jar",
+      "size": 181437
+    },
+    {
+      "file": "polylib-forge-2000.0.3-build.143.jar",
+      "size": 1343694
+    },
+    {
+      "file": "polymorph-forge-0.49.10+1.20.1.jar",
+      "size": 299601
+    },
+    {
+      "file": "prefab-1.10.0.1.jar",
+      "size": 8864470
+    },
+    {
+      "file": "Prism-1.20.1-forge-1.0.5.jar",
+      "size": 52205
+    },
+    {
+      "file": "projectile_damage-forge-3.2.2+1.20.1.jar",
+      "size": 251688
+    },
+    {
+      "file": "puffish_attributes-0.8.2-1.20-forge.jar",
+      "size": 237815
+    },
+    {
+      "file": "puffish_skills-0.18.3-1.20-forge.jar",
+      "size": 615905
+    },
+    {
+      "file": "PuzzlesLib-v8.1.33-1.20.1-Forge.jar",
+      "size": 1342987
+    },
+    {
+      "file": "quick-pack-forge-1.5.0+1.20.1-all-srg.jar",
+      "size": 650791
+    },
+    {
+      "file": "raidcraft-2.3.jar",
+      "size": 836602
+    },
+    {
+      "file": "raidsenhanced-1.0.2-1.20.1.jar",
+      "size": 1684279
+    },
+    {
+      "file": "randomoptimization-1.7.4-all-1.20.1.jar",
+      "size": 799243
+    },
+    {
+      "file": "ranged_weapon_api-1.1.4+1.20.1.jar",
+      "size": 114936
+    },
+    {
+      "file": "resourcefulconfig-forge-1.20.1-2.1.3.jar",
+      "size": 136923
+    },
+    {
+      "file": "rhino-forge-2001.2.3-build.10.jar",
+      "size": 1798244
+    },
+    {
+      "file": "rogues-1.2.0+1.20.1.jar",
+      "size": 1027797
+    },
+    {
+      "file": "royal-variations-[Forge]_1.20.1_2.0.2.jar",
+      "size": 795990
+    },
+    {
+      "file": "RPG_Style_More_Bosses_1.0.3_Forge_1.20.1.jar",
+      "size": 5751685
+    },
+    {
+      "file": "runes-0.9.13+1.20.1.jar",
+      "size": 242139
+    },
+    {
+      "file": "rune_pocket-fabric-1.20.1-1.4.1-arrow-quiver.5.jar",
+      "size": 29949
+    },
+    {
+      "file": "SDMEconomy-1.20.1-forge-2.2.0.jar",
+      "size": 51988
+    },
+    {
+      "file": "SDMShop-forge-1.20.1-7.2.2.jar",
+      "size": 590794
+    },
+    {
+      "file": "sdm_ui_lib-forge-1.20.1-1.8.3.jar",
+      "size": 261631
+    },
+    {
+      "file": "Searchables-forge-1.20.1-1.0.3.jar",
+      "size": 77732
+    },
+    {
+      "file": "servercore-forge-1.5.2+1.20.1.jar",
+      "size": 1508496
+    },
+    {
+      "file": "skinlayers3d-forge-1.11.2-mc1.20.1.jar",
+      "size": 2168901
+    },
+    {
+      "file": "SkyArena-1.3.6-1.20.1.jar",
+      "size": 999094
+    },
+    {
+      "file": "smsn-forge-1.4.3-1.20.1.jar",
+      "size": 134583
+    },
+    {
+      "file": "solcarrot-1.20.1-1.15.1.jar",
+      "size": 104185
+    },
+    {
+      "file": "sophisticatedbackpacks-1.20.1-3.24.66.2095.jar",
+      "size": 1159125
+    },
+    {
+      "file": "sophisticatedcore-1.20.1-1.3.80.2267.jar",
+      "size": 1639821
+    },
+    {
+      "file": "soulslike-weaponry-1.4.8-1.20.1-forge.jar",
+      "size": 54877532
+    },
+    {
+      "file": "spark-1.10.53-forge.jar",
+      "size": 3114590
+    },
+    {
+      "file": "spellanvil-forge-1.20.1-0.0.22-vanilla-item-return-fix.jar",
+      "size": 183278
+    },
+    {
+      "file": "spellbladenext-2.4.0+1.20.1.jar",
+      "size": 866647
+    },
+    {
+      "file": "spell_engine-0.15.12+1.20.1.jar",
+      "size": 1459273
+    },
+    {
+      "file": "spell_power-0.12.0+1.20.1.jar",
+      "size": 184963
+    },
+    {
+      "file": "structurecredits-1.20.1-4.0-forge.jar",
+      "size": 87297
+    },
+    {
+      "file": "structure_gel-1.20.1-2.16.2.jar",
+      "size": 966028
+    },
+    {
+      "file": "structure_layout_optimizer-forge-1.0.11.jar",
+      "size": 246413
+    },
+    {
+      "file": "structure_pool_api-1.0+1.20.1.jar",
+      "size": 271058
+    },
+    {
+      "file": "Summon Bench-1.4.3.jar",
+      "size": 126494
+    },
+    {
+      "file": "supplementaries-1.20-3.1.43-forge.jar",
+      "size": 13667742
+    },
+    {
+      "file": "TerraBlender-forge-1.20.1-3.0.1.10.jar",
+      "size": 107533
+    },
+    {
+      "file": "TES-forge-1.20.1-1.6.1.jar",
+      "size": 133037
+    },
+    {
+      "file": "tnc-1.0.0.jar",
+      "size": 90690081
+    },
+    {
+      "file": "toomanyrecipeviewers-0.9.0+mc.20.1.jar",
+      "size": 1751185
+    },
+    {
+      "file": "torchesbecomesunlight-0.4.9.jar",
+      "size": 66402284
+    },
+    {
+      "file": "touhoulittlemaid-1.5.2-forge+mc1.20.1.jar",
+      "size": 24403507
+    },
+    {
+      "file": "twilightforest-1.20.1-4.3.2508-universal.jar",
+      "size": 23332091
+    },
+    {
+      "file": "TwilightTreehouses-1.20.1-1.0.2.1-forge.jar",
+      "size": 228315
+    },
+    {
+      "file": "txnilib-forge-1.0.24-1.20.1.jar",
+      "size": 3743339
+    },
+    {
+      "file": "vaultpatcher-all-1.5.2.jar",
+      "size": 200922
+    },
+    {
+      "file": "vzling-0.98.5-1.20.1-forge.jar",
+      "size": 457880
+    },
+    {
+      "file": "whispering-1.0.2.jar",
+      "size": 274757
+    },
+    {
+      "file": "whisperingquests-3.2.jar",
+      "size": 297939
+    },
+    {
+      "file": "whisperingstatusbar-1.3.jar",
+      "size": 113028
+    },
+    {
+      "file": "witherreincarnated-1.20.1-1.0.5.jar",
+      "size": 12807443
+    },
+    {
+      "file": "wizards-1.4.1+1.20.1.jar",
+      "size": 2902732
+    },
+    {
+      "file": "xaerominimap-forge-1.20.1-26.4.2.jar",
+      "size": 2195245
+    },
+    {
+      "file": "xaeroworldmap-forge-1.20.1-1.44.2.jar",
+      "size": 1421224
+    },
+    {
+      "file": "YeetusExperimentus-Forge-2.3.0-build.4+mc1.20.1.jar",
+      "size": 568278
+    },
+    {
+      "file": "yet_another_config_lib_v3-3.6.6+1.20.1-forge.jar",
+      "size": 1105891
+    },
+    {
+      "file": "ysjxmodel-1.0.0.jar",
+      "size": 797583
+    },
+    {
+      "file": "ysjxspells-1.0.1.jar",
+      "size": 1493521
+    },
+    {
+      "file": "ysjxteams-1.0.0.jar",
+      "size": 11971
+    },
+    {
+      "file": "ysjx_dimension-1.0.0.jar",
+      "size": 288050498
+    },
+    {
+      "file": "ysjx_weapons-1.0.0.jar",
+      "size": 632613
+    },
+    {
+      "file": "YungsApi-1.20-Forge-4.0.6.jar",
+      "size": 370524
+    },
+    {
+      "file": "YungsBetterEndIsland-1.20-Forge-2.0.6.jar",
+      "size": 387111
+    },
+    {
+      "file": "YungsBetterNetherFortresses-1.20-Forge-2.0.6.jar",
+      "size": 619255
+    },
+    {
+      "file": "zfastnoise-1.0.13+1.20+forge.jar",
+      "size": 666300
+    },
+    {
+      "file": "[传送石碑／指路石] waystones-forge-1.20.1-14.1.20.jar",
+      "size": 533739
+    },
+    {
+      "file": "[天境] aether-1.20.1-1.5.2-neoforge.jar",
+      "size": 39746073
+    },
+    {
+      "file": "[暮色风味乐事] twilightdelight-2.2.2.jar",
+      "size": 1459661
+    },
+    {
+      "file": "[果园乐事] fruitsdelight-1.1.3.jar",
+      "size": 1895935
+    },
+    {
+      "file": "[祸乱鬼魅 [FORGE]] BOMD-Forge-1.20.1-1.1.2.jar",
+      "size": 1753623
+    },
+    {
+      "file": "[自定义局域网联机] lanserverproperties-1.11.1-forge.jar",
+      "size": 44387
+    },
+    {
+      "file": "[通用拼音搜索] jecharacters-1.20.1-forge-4.6.9.jar",
+      "size": 273852
+    }
+  ]
+}

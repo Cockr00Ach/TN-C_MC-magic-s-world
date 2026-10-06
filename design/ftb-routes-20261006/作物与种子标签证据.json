@@ -1,0 +1,1881 @@
+[
+  {
+    "jar": "aether-redux-2.0.19-1.20.1-neoforge.jar",
+    "tag": "data/aether_redux/tags/blocks/mushroom_caps.json",
+    "values": [
+      "aether_redux:jellyshroom_jelly_block",
+      "aether_redux:cloud_cap_block"
+    ]
+  },
+  {
+    "jar": "aether-redux-2.0.19-1.20.1-neoforge.jar",
+    "tag": "data/aether_redux/tags/items/eggs_for_blueberry_pie.json",
+    "values": [
+      "#aether:moa_eggs",
+      "minecraft:egg",
+      {
+        "id": "deep_aether:quail_egg",
+        "required": false
+      }
+    ]
+  },
+  {
+    "jar": "aether-redux-2.0.19-1.20.1-neoforge.jar",
+    "tag": "data/minecraft/tags/blocks/mushroom_grow_block.json",
+    "values": [
+      "aether_redux:avelium"
+    ]
+  },
+  {
+    "jar": "alexscaves-2.0.2.jar",
+    "tag": "data/alexscaves/tags/items/sweet_berries.json",
+    "values": [
+      "alexscaves:giant_sweetberry",
+      "minecraft:sweet_berries"
+    ]
+  },
+  {
+    "jar": "bosses_delight-1.0.5.jar",
+    "tag": "data/bosses_delight/tags/items/crystal_fruit.json",
+    "values": [
+      "bosses_delight:crystal_fruit_slice",
+      "bosses_of_mass_destruction:crystal_fruit"
+    ]
+  },
+  {
+    "jar": "ConquestReforged-forge-1.20.1-1.6.0.jar",
+    "tag": "data/minecraft/tags/blocks/crops.json",
+    "values": [
+      "conquest:hemp",
+      "conquest:tobacco",
+      "conquest:flax",
+      "conquest:barley",
+      "conquest:heirloom_wheat_crops",
+      "conquest:wild_wheat",
+      "conquest:rice",
+      "conquest:corn",
+      "conquest:peas",
+      "conquest:common_beans",
+      "conquest:cabbage",
+      "conquest:turnips",
+      "conquest:wheat",
+      "conquest:potatoes",
+      "conquest:carrots"
+    ]
+  },
+  {
+    "jar": "deep_aether-1.20.1-1.1.7.jar",
+    "tag": "data/deep_aether/tags/blocks/conberry_logs.json",
+    "values": [
+      "deep_aether:conberry_log",
+      "deep_aether:conberry_wood",
+      "deep_aether:stripped_conberry_log",
+      "deep_aether:stripped_conberry_wood"
+    ]
+  },
+  {
+    "jar": "deep_aether-1.20.1-1.1.7.jar",
+    "tag": "data/deep_aether/tags/items/conberry_logs.json",
+    "values": [
+      "deep_aether:conberry_log",
+      "deep_aether:conberry_wood",
+      "deep_aether:stripped_conberry_log",
+      "deep_aether:stripped_conberry_wood"
+    ]
+  },
+  {
+    "jar": "deep_aether-1.20.1-1.1.7.jar",
+    "tag": "data/deep_aether/tags/items/crafts_conberry_planks.json",
+    "values": [
+      "deep_aether:conberry_log",
+      "deep_aether:conberry_wood",
+      "deep_aether:stripped_conberry_log",
+      "deep_aether:stripped_conberry_wood"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/farmersdelight/tags/blocks/mushroom_colonies.json",
+    "values": [
+      "farmersdelight:brown_mushroom_colony",
+      "farmersdelight:red_mushroom_colony"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/farmersdelight/tags/blocks/mushroom_colony_growable_on.json",
+    "values": [
+      "farmersdelight:rich_soil"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/farmersdelight/tags/blocks/wild_crops.json",
+    "values": [
+      "farmersdelight:wild_carrots",
+      "farmersdelight:wild_potatoes",
+      "farmersdelight:wild_beetroots",
+      "farmersdelight:wild_cabbages",
+      "farmersdelight:wild_tomatoes",
+      "farmersdelight:wild_onions",
+      "farmersdelight:wild_rice"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/farmersdelight/tags/items/mushroom_colonies.json",
+    "values": [
+      "farmersdelight:brown_mushroom_colony",
+      "farmersdelight:red_mushroom_colony"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/farmersdelight/tags/items/wild_crops.json",
+    "values": [
+      "farmersdelight:wild_carrots",
+      "farmersdelight:wild_potatoes",
+      "farmersdelight:wild_beetroots",
+      "farmersdelight:wild_cabbages",
+      "farmersdelight:wild_tomatoes",
+      "farmersdelight:wild_onions",
+      "farmersdelight:wild_rice"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/forge/tags/items/berries.json",
+    "values": [
+      "minecraft:sweet_berries",
+      "minecraft:glow_berries"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/forge/tags/items/crops/cabbage.json",
+    "values": [
+      "farmersdelight:cabbage",
+      "farmersdelight:cabbage_leaf"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/forge/tags/items/crops/onion.json",
+    "values": [
+      "farmersdelight:onion"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/forge/tags/items/crops/rice.json",
+    "values": [
+      "farmersdelight:rice"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/forge/tags/items/crops/tomato.json",
+    "values": [
+      "farmersdelight:tomato"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/forge/tags/items/crops.json",
+    "values": [
+      "#forge:crops/cabbage",
+      "#forge:crops/onion",
+      "#forge:crops/rice",
+      "#forge:crops/tomato"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/forge/tags/items/seeds/cabbage.json",
+    "values": [
+      "farmersdelight:cabbage_seeds"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/forge/tags/items/seeds/rice.json",
+    "values": [
+      "farmersdelight:rice"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/forge/tags/items/seeds/tomato.json",
+    "values": [
+      "farmersdelight:tomato_seeds"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/forge/tags/items/seeds.json",
+    "values": [
+      "#forge:seeds/cabbage",
+      "#forge:seeds/rice",
+      "#forge:seeds/tomato"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/forge/tags/items/vegetables/beetroot.json",
+    "values": [
+      "minecraft:beetroot"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/forge/tags/items/vegetables/carrot.json",
+    "values": [
+      "minecraft:carrot"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/forge/tags/items/vegetables/onion.json",
+    "values": [
+      "farmersdelight:onion"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/forge/tags/items/vegetables/potato.json",
+    "values": [
+      "minecraft:potato"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/forge/tags/items/vegetables/tomato.json",
+    "values": [
+      "farmersdelight:tomato"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/forge/tags/items/vegetables.json",
+    "values": [
+      "#forge:vegetables/beetroot",
+      "#forge:vegetables/carrot",
+      "#forge:vegetables/onion",
+      "#forge:vegetables/potato",
+      "#forge:vegetables/tomato"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/minecraft/tags/blocks/crops.json",
+    "values": [
+      "farmersdelight:cabbages",
+      "farmersdelight:onions",
+      "farmersdelight:rice_panicles",
+      "farmersdelight:budding_tomatoes",
+      "farmersdelight:tomatoes",
+      "farmersdelight:tomatoes_on_rope"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/minecraft/tags/blocks/mushroom_grow_block.json",
+    "values": [
+      "farmersdelight:organic_compost",
+      "farmersdelight:rich_soil"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/minecraft/tags/items/villager_plantable_seeds.json",
+    "values": [
+      "farmersdelight:cabbage_seeds",
+      "farmersdelight:tomato_seeds",
+      "farmersdelight:onion"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/sereneseasons/tags/blocks/autumn_crops.json",
+    "values": [
+      "farmersdelight:cabbages",
+      "farmersdelight:onions",
+      "farmersdelight:rice",
+      "farmersdelight:rice_panicles"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/sereneseasons/tags/blocks/spring_crops.json",
+    "values": [
+      "farmersdelight:onions"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/sereneseasons/tags/blocks/summer_crops.json",
+    "values": [
+      "farmersdelight:budding_tomatoes",
+      "farmersdelight:tomatoes",
+      "farmersdelight:tomatoes_on_rope",
+      "farmersdelight:rice",
+      "farmersdelight:rice_panicles"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/sereneseasons/tags/blocks/unbreakable_infertile_crops.json",
+    "values": [
+      "farmersdelight:onions"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/sereneseasons/tags/blocks/winter_crops.json",
+    "values": [
+      "farmersdelight:cabbages"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/sereneseasons/tags/items/autumn_crops.json",
+    "values": [
+      "farmersdelight:cabbage_seeds",
+      "farmersdelight:onion",
+      "farmersdelight:rice"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/sereneseasons/tags/items/spring_crops.json",
+    "values": [
+      "farmersdelight:onion"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/sereneseasons/tags/items/summer_crops.json",
+    "values": [
+      "farmersdelight:tomato_seeds",
+      "farmersdelight:rice"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/sereneseasons/tags/items/winter_crops.json",
+    "values": [
+      "farmersdelight:cabbage_seeds"
+    ]
+  },
+  {
+    "jar": "FarmersDelight-1.20.1-1.3.2.jar",
+    "tag": "data/tconstruct/tags/items/seeds.json",
+    "values": [
+      "farmersdelight:onion"
+    ]
+  },
+  {
+    "jar": "jerotes-1.20.1-1.3.2.1.jar",
+    "tag": "data/jerotes/tags/blocks/crops.json",
+    "values": []
+  },
+  {
+    "jar": "jerotes-1.20.1-1.3.2.1.jar",
+    "tag": "data/jerotes/tags/blocks/crops_attached.json",
+    "values": []
+  },
+  {
+    "jar": "jerotes-1.20.1-1.3.2.1.jar",
+    "tag": "data/jerotes/tags/items/animal_foods/fruit_foods.json",
+    "values": [
+      "#minecraft:fox_food"
+    ]
+  },
+  {
+    "jar": "jerotes-1.20.1-1.3.2.1.jar",
+    "tag": "data/jerotes/tags/items/animal_foods/seed_and_fruit_foods.json",
+    "values": [
+      "#jerotes:animal_foods/fruit_foods",
+      "#jerotes:animal_foods/seed_foods"
+    ]
+  },
+  {
+    "jar": "jerotes-1.20.1-1.3.2.1.jar",
+    "tag": "data/jerotes/tags/items/animal_foods/seed_foods.json",
+    "values": [
+      "#forge:seeds"
+    ]
+  },
+  {
+    "jar": "jerotes-1.20.1-1.3.2.1.jar",
+    "tag": "data/jerotes/tags/items/crops.json",
+    "values": []
+  },
+  {
+    "jar": "jerotes-1.20.1-1.3.2.1.jar",
+    "tag": "data/minecraft/tags/blocks/crops.json",
+    "values": [
+      "#jerotes:crops"
+    ]
+  },
+  {
+    "jar": "jerotesvillage-1.20.1-1.1.5.19.jar",
+    "tag": "data/forge/tags/items/berries.json",
+    "values": [
+      "jerotesvillage:second_round_nigrum",
+      "jerotesvillage:cooked_second_round_nigrum"
+    ]
+  },
+  {
+    "jar": "jerotesvillage-1.20.1-1.1.5.19.jar",
+    "tag": "data/forge/tags/items/crops.json",
+    "values": [
+      "#forge:crops/second_round_nigrum",
+      "#forge:crops/bright_melon"
+    ]
+  },
+  {
+    "jar": "jerotesvillage-1.20.1-1.1.5.19.jar",
+    "tag": "data/forge/tags/items/crops/bright_melon.json",
+    "values": [
+      "jerotesvillage:bright_melon"
+    ]
+  },
+  {
+    "jar": "jerotesvillage-1.20.1-1.1.5.19.jar",
+    "tag": "data/forge/tags/items/crops/second_round_nigrum.json",
+    "values": [
+      "jerotesvillage:second_round_nigrum"
+    ]
+  },
+  {
+    "jar": "jerotesvillage-1.20.1-1.1.5.19.jar",
+    "tag": "data/forge/tags/items/seeds.json",
+    "values": [
+      "#forge:seeds/bright_melon",
+      "#forge:seeds/flavorless_melon"
+    ]
+  },
+  {
+    "jar": "jerotesvillage-1.20.1-1.1.5.19.jar",
+    "tag": "data/forge/tags/items/seeds/bright_melon.json",
+    "values": [
+      "jerotesvillage:bright_melon_seeds"
+    ]
+  },
+  {
+    "jar": "jerotesvillage-1.20.1-1.1.5.19.jar",
+    "tag": "data/forge/tags/items/seeds/flavorless_melon.json",
+    "values": [
+      "jerotesvillage:flavorless_melon_seeds"
+    ]
+  },
+  {
+    "jar": "jerotesvillage-1.20.1-1.1.5.19.jar",
+    "tag": "data/jerotes/tags/blocks/crops.json",
+    "values": [
+      "jerotesvillage:second_round_nigrums",
+      "jerotesvillage:second_round_aloe_crop",
+      "jerotesvillage:bright_melons",
+      "jerotesvillage:flavorless_melon_stem"
+    ]
+  },
+  {
+    "jar": "jerotesvillage-1.20.1-1.1.5.19.jar",
+    "tag": "data/jerotes/tags/blocks/crops_attached.json",
+    "values": [
+      "jerotesvillage:attached_flavorless_melon_stem"
+    ]
+  },
+  {
+    "jar": "jerotesvillage-1.20.1-1.1.5.19.jar",
+    "tag": "data/jerotes/tags/items/crops.json",
+    "values": [
+      "jerotesvillage:second_round_nigrum",
+      "jerotesvillage:bright_melon",
+      "jerotesvillage:second_round_aloe_leaf",
+      "jerotesvillage:green_humanoid_cane_stems"
+    ]
+  },
+  {
+    "jar": "jerotesvillage-1.20.1-1.1.5.19.jar",
+    "tag": "data/minecraft/tags/blocks/replaceable_by_mushrooms.json",
+    "values": [
+      "jerotesvillage:slider_mark",
+      "jerotesvillage:glow_shine",
+      "jerotesvillage:bright_grass",
+      "jerotesvillage:tall_bright_grass",
+      "jerotesvillage:purple_sand_short_dry_grass",
+      "jerotesvillage:purple_sand_tall_dry_grass",
+      "jerotesvillage:stone_leaves_fern",
+      "jerotesvillage:large_stone_leaves_fern",
+      "jerotesvillage:wilderness_thorns",
+      "jerotesvillage:harmonious_dream_bell",
+      "jerotesvillage:purple_black_dead_bush",
+      "jerotesvillage:black_yellow_leaf_litter"
+    ]
+  },
+  {
+    "jar": "kaleidoscopecookery-1.4.1-forge+mc1.20.1.jar",
+    "tag": "data/diet/tags/items/vegetables.json",
+    "values": [
+      "#forge:vegetables"
+    ]
+  },
+  {
+    "jar": "kaleidoscopecookery-1.4.1-forge+mc1.20.1.jar",
+    "tag": "data/eclipticseasons/tags/blocks/crops/average_moist.json",
+    "values": [
+      "kaleidoscope_cookery:tomato_crop",
+      "kaleidoscope_cookery:lettuce_crop",
+      "kaleidoscope_cookery:chili_crop"
+    ]
+  },
+  {
+    "jar": "kaleidoscopecookery-1.4.1-forge+mc1.20.1.jar",
+    "tag": "data/eclipticseasons/tags/blocks/crops/dry_average.json",
+    "values": [
+      "kaleidoscope_cookery:tomato_crop",
+      "kaleidoscope_cookery:chili_crop"
+    ]
+  },
+  {
+    "jar": "kaleidoscopecookery-1.4.1-forge+mc1.20.1.jar",
+    "tag": "data/eclipticseasons/tags/blocks/crops/humid_humid.json",
+    "values": [
+      "kaleidoscope_cookery:rice_crop"
+    ]
+  },
+  {
+    "jar": "kaleidoscopecookery-1.4.1-forge+mc1.20.1.jar",
+    "tag": "data/eclipticseasons/tags/blocks/crops/moist_humid.json",
+    "values": [
+      "kaleidoscope_cookery:lettuce_crop",
+      "kaleidoscope_cookery:rice_crop"
+    ]
+  },
+  {
+    "jar": "kaleidoscopecookery-1.4.1-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/crops.json",
+    "values": [
+      "#forge:crops/chilipepper",
+      "#forge:crops/tomato",
+      "#forge:crops/lettuce",
+      "#forge:crops/rice"
+    ]
+  },
+  {
+    "jar": "kaleidoscopecookery-1.4.1-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/crops/chilipepper.json",
+    "values": [
+      "kaleidoscope_cookery:red_chili",
+      "kaleidoscope_cookery:green_chili"
+    ]
+  },
+  {
+    "jar": "kaleidoscopecookery-1.4.1-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/crops/lettuce.json",
+    "values": [
+      "kaleidoscope_cookery:lettuce"
+    ]
+  },
+  {
+    "jar": "kaleidoscopecookery-1.4.1-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/crops/rice.json",
+    "values": [
+      "kaleidoscope_cookery:rice"
+    ]
+  },
+  {
+    "jar": "kaleidoscopecookery-1.4.1-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/crops/tomato.json",
+    "values": [
+      "kaleidoscope_cookery:tomato"
+    ]
+  },
+  {
+    "jar": "kaleidoscopecookery-1.4.1-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/seeds.json",
+    "values": [
+      "kaleidoscope_cookery:chili_seed",
+      "kaleidoscope_cookery:tomato_seed",
+      "kaleidoscope_cookery:lettuce_seed",
+      "kaleidoscope_cookery:wild_rice",
+      "kaleidoscope_cookery:rice"
+    ]
+  },
+  {
+    "jar": "kaleidoscopecookery-1.4.1-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/seeds/chilipepper.json",
+    "values": [
+      "kaleidoscope_cookery:chili_seed"
+    ]
+  },
+  {
+    "jar": "kaleidoscopecookery-1.4.1-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/seeds/lettuce.json",
+    "values": [
+      "kaleidoscope_cookery:lettuce_seed"
+    ]
+  },
+  {
+    "jar": "kaleidoscopecookery-1.4.1-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/seeds/rice.json",
+    "values": [
+      "kaleidoscope_cookery:rice"
+    ]
+  },
+  {
+    "jar": "kaleidoscopecookery-1.4.1-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/seeds/tomato.json",
+    "values": [
+      "kaleidoscope_cookery:tomato_seed"
+    ]
+  },
+  {
+    "jar": "kaleidoscopecookery-1.4.1-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/vegetables.json",
+    "values": [
+      "#forge:vegetables/chilipepper",
+      "#forge:vegetables/tomato",
+      "#forge:vegetables/lettuce",
+      {
+        "id": "#forge:crops/cabbage",
+        "required": false
+      }
+    ]
+  },
+  {
+    "jar": "kaleidoscopecookery-1.4.1-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/vegetables/chilipepper.json",
+    "values": [
+      "kaleidoscope_cookery:red_chili",
+      "kaleidoscope_cookery:green_chili"
+    ]
+  },
+  {
+    "jar": "kaleidoscopecookery-1.4.1-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/vegetables/lettuce.json",
+    "values": [
+      "kaleidoscope_cookery:lettuce"
+    ]
+  },
+  {
+    "jar": "kaleidoscopecookery-1.4.1-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/vegetables/tomato.json",
+    "values": [
+      "kaleidoscope_cookery:tomato"
+    ]
+  },
+  {
+    "jar": "kaleidoscopecookery-1.4.1-forge+mc1.20.1.jar",
+    "tag": "data/ftbultimine/tags/blocks/single_crop_harvesting_blacklist.json",
+    "values": [
+      "kaleidoscope_cookery:rice_crop"
+    ]
+  },
+  {
+    "jar": "kaleidoscopecookery-1.4.1-forge+mc1.20.1.jar",
+    "tag": "data/kaleidoscope_cookery/tags/items/cookery_mod_seeds.json",
+    "values": [
+      "kaleidoscope_cookery:tomato_seed",
+      "kaleidoscope_cookery:chili_seed",
+      "kaleidoscope_cookery:wild_rice",
+      "kaleidoscope_cookery:lettuce_seed"
+    ]
+  },
+  {
+    "jar": "kaleidoscopecookery-1.4.1-forge+mc1.20.1.jar",
+    "tag": "data/minecraft/tags/blocks/crops.json",
+    "values": [
+      "kaleidoscope_cookery:tomato_crop",
+      "kaleidoscope_cookery:rice_crop",
+      "kaleidoscope_cookery:chili_crop",
+      "kaleidoscope_cookery:lettuce_crop"
+    ]
+  },
+  {
+    "jar": "kaleidoscopecookery-1.4.1-forge+mc1.20.1.jar",
+    "tag": "data/minecraft/tags/items/villager_plantable_seeds.json",
+    "values": [
+      "kaleidoscope_cookery:tomato_seed",
+      "kaleidoscope_cookery:chili_seed",
+      "kaleidoscope_cookery:lettuce_seed"
+    ]
+  },
+  {
+    "jar": "kaleidoscopecookery-1.4.1-forge+mc1.20.1.jar",
+    "tag": "data/sereneseasons/tags/blocks/autumn_crops.json",
+    "values": [
+      "kaleidoscope_cookery:tomato_crop",
+      "kaleidoscope_cookery:rice_crop",
+      "kaleidoscope_cookery:lettuce_crop",
+      "kaleidoscope_cookery:chili_crop"
+    ]
+  },
+  {
+    "jar": "kaleidoscopecookery-1.4.1-forge+mc1.20.1.jar",
+    "tag": "data/sereneseasons/tags/blocks/spring_crops.json",
+    "values": [
+      "kaleidoscope_cookery:lettuce_crop"
+    ]
+  },
+  {
+    "jar": "kaleidoscopecookery-1.4.1-forge+mc1.20.1.jar",
+    "tag": "data/sereneseasons/tags/blocks/summer_crops.json",
+    "values": [
+      "kaleidoscope_cookery:tomato_crop",
+      "kaleidoscope_cookery:rice_crop",
+      "kaleidoscope_cookery:chili_crop"
+    ]
+  },
+  {
+    "jar": "kaleidoscopecookery-1.4.1-forge+mc1.20.1.jar",
+    "tag": "data/sereneseasons/tags/items/autumn_crops.json",
+    "values": [
+      "kaleidoscope_cookery:tomato_seed",
+      "kaleidoscope_cookery:chili_seed",
+      "kaleidoscope_cookery:lettuce_seed",
+      "kaleidoscope_cookery:rice",
+      "kaleidoscope_cookery:wild_rice"
+    ]
+  },
+  {
+    "jar": "kaleidoscopecookery-1.4.1-forge+mc1.20.1.jar",
+    "tag": "data/sereneseasons/tags/items/spring_crops.json",
+    "values": [
+      "kaleidoscope_cookery:lettuce_seed"
+    ]
+  },
+  {
+    "jar": "kaleidoscopecookery-1.4.1-forge+mc1.20.1.jar",
+    "tag": "data/sereneseasons/tags/items/summer_crops.json",
+    "values": [
+      "kaleidoscope_cookery:tomato_seed",
+      "kaleidoscope_cookery:chili_seed",
+      "kaleidoscope_cookery:rice",
+      "kaleidoscope_cookery:wild_rice"
+    ]
+  },
+  {
+    "jar": "kaleidoscopetavern-1.2.0-forge+mc1.20.1.jar",
+    "tag": "data/diet/tags/items/fruits.json",
+    "values": [
+      "kaleidoscope_tavern:grape",
+      "kaleidoscope_tavern:ice_grape",
+      "kaleidoscope_tavern:gold_grape",
+      "kaleidoscope_tavern:green_grape"
+    ]
+  },
+  {
+    "jar": "kaleidoscopetavern-1.2.0-forge+mc1.20.1.jar",
+    "tag": "data/eclipticseasons/tags/blocks/crops/average_moist.json",
+    "values": [
+      "kaleidoscope_tavern:grapevine_trellis",
+      "kaleidoscope_tavern:ice_grapevine_trellis",
+      "kaleidoscope_tavern:gold_grapevine_trellis",
+      "kaleidoscope_tavern:grape_crop",
+      "kaleidoscope_tavern:ice_grape_crop",
+      "kaleidoscope_tavern:gold_grape_crop"
+    ]
+  },
+  {
+    "jar": "kaleidoscopetavern-1.2.0-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/fruits/grapes.json",
+    "values": [
+      "kaleidoscope_tavern:grape"
+    ]
+  },
+  {
+    "jar": "kaleidoscopetavern-1.2.0-forge+mc1.20.1.jar",
+    "tag": "data/sereneseasons/tags/blocks/autumn_crops.json",
+    "values": [
+      "kaleidoscope_tavern:grape_crop"
+    ]
+  },
+  {
+    "jar": "kaleidoscopetavern-1.2.0-forge+mc1.20.1.jar",
+    "tag": "data/sereneseasons/tags/blocks/spring_crops.json",
+    "values": [
+      "kaleidoscope_tavern:grapevine_trellis"
+    ]
+  },
+  {
+    "jar": "kaleidoscopetavern-1.2.0-forge+mc1.20.1.jar",
+    "tag": "data/sereneseasons/tags/blocks/summer_crops.json",
+    "values": [
+      "kaleidoscope_tavern:grapevine_trellis",
+      "kaleidoscope_tavern:gold_grapevine_trellis",
+      "kaleidoscope_tavern:grape_crop",
+      "kaleidoscope_tavern:gold_grape_crop"
+    ]
+  },
+  {
+    "jar": "kaleidoscopetavern-1.2.0-forge+mc1.20.1.jar",
+    "tag": "data/sereneseasons/tags/blocks/winter_crops.json",
+    "values": [
+      "kaleidoscope_tavern:ice_grapevine_trellis",
+      "kaleidoscope_tavern:ice_grape_crop"
+    ]
+  },
+  {
+    "jar": "kaleidoscope_end-1.0.14-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/berries.json",
+    "values": [
+      "minecraft:sweet_berries",
+      "minecraft:glow_berries",
+      "kaleidoscope_end:dream_berry"
+    ]
+  },
+  {
+    "jar": "kaleidoscope_end-1.0.14-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/crops.json",
+    "values": [
+      "#forge:crops/chorus"
+    ]
+  },
+  {
+    "jar": "kaleidoscope_end-1.0.14-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/crops/chorus.json",
+    "values": [
+      "minecraft:chorus_flower"
+    ]
+  },
+  {
+    "jar": "kaleidoscope_end-1.0.14-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/fruits.json",
+    "values": [
+      "#forge:berries",
+      "#forge:fruits/chorus"
+    ]
+  },
+  {
+    "jar": "kaleidoscope_end-1.0.14-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/fruits/chorus.json",
+    "values": [
+      "minecraft:chorus_fruit"
+    ]
+  },
+  {
+    "jar": "kaleidoscope_nether-1.1.8-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/berries.json",
+    "values": [
+      "minecraft:sweet_berries",
+      "minecraft:glow_berries"
+    ]
+  },
+  {
+    "jar": "kaleidoscope_nether-1.1.8-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/crimson_fruits.json",
+    "values": [
+      "#forge:fruits/crimson_fruit"
+    ]
+  },
+  {
+    "jar": "kaleidoscope_nether-1.1.8-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/crops.json",
+    "values": [
+      "#forge:crops/carrot",
+      "#forge:crops/pepper",
+      "#forge:crops/potato"
+    ]
+  },
+  {
+    "jar": "kaleidoscope_nether-1.1.8-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/crops/carrot.json",
+    "values": [
+      "minecraft:carrot"
+    ]
+  },
+  {
+    "jar": "kaleidoscope_nether-1.1.8-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/crops/pepper.json",
+    "values": [
+      "#forge:crops/chilipepper",
+      "#forge:crops/soul_pepper"
+    ]
+  },
+  {
+    "jar": "kaleidoscope_nether-1.1.8-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/crops/potato.json",
+    "values": [
+      "minecraft:potato"
+    ]
+  },
+  {
+    "jar": "kaleidoscope_nether-1.1.8-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/crops/soul_pepper.json",
+    "values": [
+      "kaleidoscope_nether:soul_pepper"
+    ]
+  },
+  {
+    "jar": "kaleidoscope_nether-1.1.8-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/fruits.json",
+    "values": [
+      "#forge:berries",
+      "#forge:fruits/crimson_fruit",
+      "#forge:fruits/poisonous_fruit",
+      "#forge:fruits/warped_fruit"
+    ]
+  },
+  {
+    "jar": "kaleidoscope_nether-1.1.8-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/fruits/crimson_fruit.json",
+    "values": [
+      "kaleidoscope_nether:crimson_fruit"
+    ]
+  },
+  {
+    "jar": "kaleidoscope_nether-1.1.8-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/fruits/poisonous_fruit.json",
+    "values": [
+      "kaleidoscope_nether:poisonous_fruit"
+    ]
+  },
+  {
+    "jar": "kaleidoscope_nether-1.1.8-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/fruits/warped_fruit.json",
+    "values": [
+      "kaleidoscope_nether:warped_fruit"
+    ]
+  },
+  {
+    "jar": "kaleidoscope_nether-1.1.8-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/poisonous_fruits.json",
+    "values": [
+      "#forge:fruits/poisonous_fruit"
+    ]
+  },
+  {
+    "jar": "kaleidoscope_nether-1.1.8-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/vegetables.json",
+    "values": [
+      "#forge:vegetables/carrot",
+      "#forge:vegetables/pepper",
+      "#forge:vegetables/potato"
+    ]
+  },
+  {
+    "jar": "kaleidoscope_nether-1.1.8-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/vegetables/carrot.json",
+    "values": [
+      "minecraft:carrot"
+    ]
+  },
+  {
+    "jar": "kaleidoscope_nether-1.1.8-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/vegetables/pepper.json",
+    "values": [
+      "#forge:vegetables/chilipepper",
+      "#forge:vegetables/soul_pepper"
+    ]
+  },
+  {
+    "jar": "kaleidoscope_nether-1.1.8-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/vegetables/potato.json",
+    "values": [
+      "minecraft:potato"
+    ]
+  },
+  {
+    "jar": "kaleidoscope_nether-1.1.8-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/vegetables/soul_pepper.json",
+    "values": [
+      "kaleidoscope_nether:soul_pepper"
+    ]
+  },
+  {
+    "jar": "kaleidoscope_nether-1.1.8-forge+mc1.20.1.jar",
+    "tag": "data/forge/tags/items/warped_fruits.json",
+    "values": [
+      "#forge:fruits/warped_fruit"
+    ]
+  },
+  {
+    "jar": "kaleidoscope_nether-1.1.8-forge+mc1.20.1.jar",
+    "tag": "data/kaleidoscope_nether/tags/items/fruits.json",
+    "values": [
+      "kaleidoscope_nether:crimson_fruit",
+      "kaleidoscope_nether:warped_fruit",
+      "kaleidoscope_nether:poisonous_fruit"
+    ]
+  },
+  {
+    "jar": "mowziesmobs-1.8.2.jar",
+    "tag": "data/forge/tags/items/seeds.json",
+    "values": [
+      "mowziesmobs:foliaath_seed"
+    ]
+  },
+  {
+    "jar": "mutantmore-1.20.1-early_access-2.0.0.jar",
+    "tag": "data/minecraft/tags/blocks/crops.json",
+    "values": [
+      "mutantmore:mutant_jungle_zombie_vine"
+    ]
+  },
+  {
+    "jar": "Oh-The-Biomes-Weve-Gone-Forge-1.8.0.jar",
+    "tag": "data/biomeswevegone/tags/blocks/bwg_mushroom_placeable.json",
+    "values": [
+      "#minecraft:base_stone_overworld",
+      "#minecraft:dirt",
+      "#minecraft:mushroom_grow_block"
+    ]
+  },
+  {
+    "jar": "Oh-The-Biomes-Weve-Gone-Forge-1.8.0.jar",
+    "tag": "data/biomeswevegone/tags/items/mushrooms.json",
+    "values": [
+      {
+        "id": "#forge:mushrooms",
+        "required": false
+      },
+      "biomeswevegone:green_mushroom",
+      "biomeswevegone:weeping_milkcap",
+      "biomeswevegone:wood_blewit",
+      "minecraft:brown_mushroom",
+      "minecraft:red_mushroom"
+    ]
+  },
+  {
+    "jar": "Oh-The-Biomes-Weve-Gone-Forge-1.8.0.jar",
+    "tag": "data/forge/tags/items/crops.json",
+    "values": [
+      "biomeswevegone:oddion_bulb"
+    ]
+  },
+  {
+    "jar": "Oh-The-Biomes-Weve-Gone-Forge-1.8.0.jar",
+    "tag": "data/forge/tags/items/mushrooms.json",
+    "values": [
+      "biomeswevegone:green_mushroom",
+      "biomeswevegone:weeping_milkcap",
+      "biomeswevegone:wood_blewit"
+    ]
+  },
+  {
+    "jar": "Oh-The-Biomes-Weve-Gone-Forge-1.8.0.jar",
+    "tag": "data/minecraft/tags/blocks/crops.json",
+    "values": [
+      "biomeswevegone:oddion_crop"
+    ]
+  },
+  {
+    "jar": "Oh-The-Biomes-Weve-Gone-Forge-1.8.0.jar",
+    "tag": "data/minecraft/tags/blocks/mushroom_grow_block.json",
+    "values": [
+      "biomeswevegone:podzol_dacite"
+    ]
+  },
+  {
+    "jar": "Oh-The-Biomes-Weve-Gone-Forge-1.8.0.jar",
+    "tag": "data/minecraft/tags/items/villager_plantable_seeds.json",
+    "values": [
+      "biomeswevegone:oddion_bulb"
+    ]
+  },
+  {
+    "jar": "Oh-The-Biomes-Weve-Gone-Forge-1.8.0.jar",
+    "tag": "data/sereneseasons/tags/blocks/autumn_crops.json",
+    "values": [
+      "#biomeswevegone:saplings/birch",
+      "#biomeswevegone:saplings/spruce",
+      "biomeswevegone:brown_zelkova_sapling",
+      "biomeswevegone:cika_sapling",
+      "biomeswevegone:cypress_sapling",
+      "biomeswevegone:ebony_sapling",
+      "biomeswevegone:fir_sapling",
+      "biomeswevegone:holly_sapling",
+      "biomeswevegone:indigo_jacaranda_sapling",
+      "biomeswevegone:ironwood_sapling",
+      "biomeswevegone:jacaranda_sapling",
+      "biomeswevegone:maple_sapling",
+      "biomeswevegone:orchard_sapling",
+      "biomeswevegone:pine_sapling",
+      "biomeswevegone:silver_maple_sapling",
+      "biomeswevegone:skyris_sapling",
+      "biomeswevegone:willow_sapling",
+      "biomeswevegone:witch_hazel_sapling",
+      "biomeswevegone:yucca_sapling",
+      "biomeswevegone:zelkova_sapling"
+    ]
+  },
+  {
+    "jar": "Oh-The-Biomes-Weve-Gone-Forge-1.8.0.jar",
+    "tag": "data/sereneseasons/tags/blocks/spring_crops.json",
+    "values": [
+      "#biomeswevegone:saplings/birch",
+      "#biomeswevegone:saplings/spruce",
+      "biomeswevegone:araucaria_sapling",
+      "biomeswevegone:blueberry_bush",
+      "biomeswevegone:brown_zelkova_sapling",
+      "biomeswevegone:cypress_sapling",
+      "biomeswevegone:ebony_sapling",
+      "biomeswevegone:fir_sapling",
+      "biomeswevegone:holly_sapling",
+      "biomeswevegone:indigo_jacaranda_sapling",
+      "biomeswevegone:ironwood_sapling",
+      "biomeswevegone:jacaranda_sapling",
+      "biomeswevegone:mahogany_sapling",
+      "biomeswevegone:maple_sapling",
+      "biomeswevegone:oddion_crop",
+      "biomeswevegone:orchard_sapling",
+      "biomeswevegone:palm_sapling",
+      "biomeswevegone:pine_sapling",
+      "biomeswevegone:rainbow_eucalyptus_sapling",
+      "biomeswevegone:redwood_sapling",
+      "biomeswevegone:silver_maple_sapling",
+      "biomeswevegone:white_mangrove_sapling",
+      "biomeswevegone:white_sakura_sapling",
+      "biomeswevegone:willow_sapling",
+      "biomeswevegone:witch_hazel_sapling",
+      "biomeswevegone:yellow_sakura_sapling",
+      "biomeswevegone:yucca_sapling",
+      "biomeswevegone:zelkova_sapling"
+    ]
+  },
+  {
+    "jar": "Oh-The-Biomes-Weve-Gone-Forge-1.8.0.jar",
+    "tag": "data/sereneseasons/tags/blocks/summer_crops.json",
+    "values": [
+      "biomeswevegone:araucaria_sapling",
+      "biomeswevegone:baobab_sapling",
+      "biomeswevegone:blue_enchanted_sapling",
+      "biomeswevegone:blueberry_bush",
+      "biomeswevegone:green_enchanted_sapling",
+      "biomeswevegone:indigo_jacaranda_sapling",
+      "biomeswevegone:jacaranda_sapling",
+      "biomeswevegone:mahogany_sapling",
+      "biomeswevegone:oddion_crop",
+      "biomeswevegone:orchard_sapling",
+      "biomeswevegone:palm_sapling",
+      "biomeswevegone:palo_verde_sapling",
+      "biomeswevegone:rainbow_eucalyptus_sapling",
+      "biomeswevegone:redwood_sapling",
+      "biomeswevegone:white_mangrove_sapling",
+      "biomeswevegone:yucca_sapling"
+    ]
+  },
+  {
+    "jar": "Oh-The-Biomes-Weve-Gone-Forge-1.8.0.jar",
+    "tag": "data/sereneseasons/tags/blocks/winter_crops.json",
+    "values": [
+      "#biomeswevegone:saplings/spruce",
+      "biomeswevegone:skyris_sapling"
+    ]
+  },
+  {
+    "jar": "Oh-The-Biomes-Weve-Gone-Forge-1.8.0.jar",
+    "tag": "data/sereneseasons/tags/blocks/year_round_crops.json",
+    "values": [
+      "#biomeswevegone:saplings/oak",
+      "biomeswevegone:aspen_sapling",
+      "biomeswevegone:green_mushroom",
+      "biomeswevegone:red_maple_sapling",
+      "biomeswevegone:weeping_milkcap",
+      "biomeswevegone:wood_blewit"
+    ]
+  },
+  {
+    "jar": "Oh-The-Biomes-Weve-Gone-Forge-1.8.0.jar",
+    "tag": "data/sereneseasons/tags/items/autumn_crops.json",
+    "values": [
+      "#biomeswevegone:saplings/birch",
+      "#biomeswevegone:saplings/spruce",
+      "biomeswevegone:brown_zelkova_sapling",
+      "biomeswevegone:cika_sapling",
+      "biomeswevegone:cypress_sapling",
+      "biomeswevegone:ebony_sapling",
+      "biomeswevegone:fir_sapling",
+      "biomeswevegone:holly_sapling",
+      "biomeswevegone:indigo_jacaranda_sapling",
+      "biomeswevegone:ironwood_sapling",
+      "biomeswevegone:jacaranda_sapling",
+      "biomeswevegone:maple_sapling",
+      "biomeswevegone:orchard_sapling",
+      "biomeswevegone:pine_sapling",
+      "biomeswevegone:silver_maple_sapling",
+      "biomeswevegone:skyris_sapling",
+      "biomeswevegone:willow_sapling",
+      "biomeswevegone:witch_hazel_sapling",
+      "biomeswevegone:yucca_sapling",
+      "biomeswevegone:zelkova_sapling"
+    ]
+  },
+  {
+    "jar": "Oh-The-Biomes-Weve-Gone-Forge-1.8.0.jar",
+    "tag": "data/sereneseasons/tags/items/spring_crops.json",
+    "values": [
+      "#biomeswevegone:saplings/birch",
+      "#biomeswevegone:saplings/spruce",
+      "biomeswevegone:araucaria_sapling",
+      "biomeswevegone:brown_zelkova_sapling",
+      "biomeswevegone:cypress_sapling",
+      "biomeswevegone:ebony_sapling",
+      "biomeswevegone:fir_sapling",
+      "biomeswevegone:holly_sapling",
+      "biomeswevegone:indigo_jacaranda_sapling",
+      "biomeswevegone:ironwood_sapling",
+      "biomeswevegone:jacaranda_sapling",
+      "biomeswevegone:mahogany_sapling",
+      "biomeswevegone:maple_sapling",
+      "biomeswevegone:oddion_bulb",
+      "biomeswevegone:orchard_sapling",
+      "biomeswevegone:palm_sapling",
+      "biomeswevegone:pine_sapling",
+      "biomeswevegone:rainbow_eucalyptus_sapling",
+      "biomeswevegone:redwood_sapling",
+      "biomeswevegone:silver_maple_sapling",
+      "biomeswevegone:white_mangrove_sapling",
+      "biomeswevegone:white_sakura_sapling",
+      "biomeswevegone:willow_sapling",
+      "biomeswevegone:witch_hazel_sapling",
+      "biomeswevegone:yellow_sakura_sapling",
+      "biomeswevegone:yucca_sapling",
+      "biomeswevegone:zelkova_sapling"
+    ]
+  },
+  {
+    "jar": "Oh-The-Biomes-Weve-Gone-Forge-1.8.0.jar",
+    "tag": "data/sereneseasons/tags/items/summer_crops.json",
+    "values": [
+      "biomeswevegone:araucaria_sapling",
+      "biomeswevegone:baobab_sapling",
+      "biomeswevegone:blue_enchanted_sapling",
+      "biomeswevegone:blueberries",
+      "biomeswevegone:green_enchanted_sapling",
+      "biomeswevegone:indigo_jacaranda_sapling",
+      "biomeswevegone:jacaranda_sapling",
+      "biomeswevegone:mahogany_sapling",
+      "biomeswevegone:oddion_bulb",
+      "biomeswevegone:orchard_sapling",
+      "biomeswevegone:palm_sapling",
+      "biomeswevegone:palo_verde_sapling",
+      "biomeswevegone:rainbow_eucalyptus_sapling",
+      "biomeswevegone:redwood_sapling",
+      "biomeswevegone:white_mangrove_sapling",
+      "biomeswevegone:yucca_sapling"
+    ]
+  },
+  {
+    "jar": "Oh-The-Biomes-Weve-Gone-Forge-1.8.0.jar",
+    "tag": "data/sereneseasons/tags/items/winter_crops.json",
+    "values": [
+      "#biomeswevegone:saplings/spruce",
+      "biomeswevegone:skyris_sapling"
+    ]
+  },
+  {
+    "jar": "Oh-The-Biomes-Weve-Gone-Forge-1.8.0.jar",
+    "tag": "data/sereneseasons/tags/items/year_round_crops.json",
+    "values": [
+      "#biomeswevegone:saplings/oak",
+      "biomeswevegone:aspen_sapling",
+      "biomeswevegone:green_mushroom",
+      "biomeswevegone:red_maple_sapling",
+      "biomeswevegone:weeping_milkcap",
+      "biomeswevegone:wood_blewit"
+    ]
+  },
+  {
+    "jar": "PineappleDelight-1.1.4-1.20.1-forge.jar",
+    "tag": "data/c/tags/items/crops/fruits.json",
+    "values": [
+      "pineapple_delight:pineapple"
+    ]
+  },
+  {
+    "jar": "PineappleDelight-1.1.4-1.20.1-forge.jar",
+    "tag": "data/c/tags/items/crops/pineapples.json",
+    "values": [
+      "pineapple_delight:pineapple"
+    ]
+  },
+  {
+    "jar": "PineappleDelight-1.1.4-1.20.1-forge.jar",
+    "tag": "data/c/tags/items/fruits.json",
+    "values": [
+      "pineapple_delight:pineapple",
+      "pineapple_delight:pineapple_side",
+      "pineapple_delight:golden_pineapple"
+    ]
+  },
+  {
+    "jar": "PineappleDelight-1.1.4-1.20.1-forge.jar",
+    "tag": "data/forge/tags/items/crops/fruits.json",
+    "values": [
+      "pineapple_delight:pineapple"
+    ]
+  },
+  {
+    "jar": "PineappleDelight-1.1.4-1.20.1-forge.jar",
+    "tag": "data/forge/tags/items/crops/pineapples.json",
+    "values": [
+      "pineapple_delight:pineapple"
+    ]
+  },
+  {
+    "jar": "PineappleDelight-1.1.4-1.20.1-forge.jar",
+    "tag": "data/forge/tags/items/fruits.json",
+    "values": [
+      "pineapple_delight:pineapple",
+      "pineapple_delight:pineapple_side",
+      "pineapple_delight:golden_pineapple"
+    ]
+  },
+  {
+    "jar": "supplementaries-1.20-3.1.43-forge.jar",
+    "tag": "data/farmersdelight/tags/blocks/mushroom_colony_growable_on.json",
+    "values": [
+      {
+        "id": "supplementaries:planter_rich",
+        "required": false
+      }
+    ]
+  },
+  {
+    "jar": "supplementaries-1.20-3.1.43-forge.jar",
+    "tag": "data/forge/tags/blocks/crops/flax.json",
+    "values": [
+      "supplementaries:flax"
+    ]
+  },
+  {
+    "jar": "supplementaries-1.20-3.1.43-forge.jar",
+    "tag": "data/forge/tags/items/crops.json",
+    "values": [
+      "supplementaries:flax"
+    ]
+  },
+  {
+    "jar": "supplementaries-1.20-3.1.43-forge.jar",
+    "tag": "data/forge/tags/items/crops/flax.json",
+    "values": [
+      "supplementaries:flax"
+    ]
+  },
+  {
+    "jar": "supplementaries-1.20-3.1.43-forge.jar",
+    "tag": "data/forge/tags/items/seeds.json",
+    "values": [
+      "supplementaries:flax_seeds"
+    ]
+  },
+  {
+    "jar": "supplementaries-1.20-3.1.43-forge.jar",
+    "tag": "data/forge/tags/items/seeds/flax.json",
+    "values": [
+      "supplementaries:flax_seeds"
+    ]
+  },
+  {
+    "jar": "supplementaries-1.20-3.1.43-forge.jar",
+    "tag": "data/minecraft/tags/blocks/crops.json",
+    "values": [
+      "supplementaries:flax",
+      {
+        "id": "supplementaries:rope_tomatoes",
+        "required": false
+      },
+      {
+        "id": "supplementaries:stick_tomatoes",
+        "required": false
+      }
+    ]
+  },
+  {
+    "jar": "supplementaries-1.20-3.1.43-forge.jar",
+    "tag": "data/minecraft/tags/blocks/mushroom_grow_block.json",
+    "values": [
+      "#supplementaries:planters"
+    ]
+  },
+  {
+    "jar": "supplementaries-1.20-3.1.43-forge.jar",
+    "tag": "data/minecraft/tags/items/villager_plantable_seeds.json",
+    "values": [
+      "supplementaries:flax_seeds"
+    ]
+  },
+  {
+    "jar": "supplementaries-1.20-3.1.43-forge.jar",
+    "tag": "data/sereneseasons/tags/blocks/spring_crops.json",
+    "values": [
+      "supplementaries:flax"
+    ]
+  },
+  {
+    "jar": "supplementaries-1.20-3.1.43-forge.jar",
+    "tag": "data/sereneseasons/tags/blocks/summer_crops.json",
+    "values": [
+      {
+        "id": "supplementaries:rope_tomatoes",
+        "required": false
+      },
+      {
+        "id": "supplementaries:stick_tomatoes",
+        "required": false
+      }
+    ]
+  },
+  {
+    "jar": "supplementaries-1.20-3.1.43-forge.jar",
+    "tag": "data/sereneseasons/tags/items/spring_crops.json",
+    "values": [
+      "supplementaries:flax",
+      "supplementaries:flax_seeds"
+    ]
+  },
+  {
+    "jar": "tnc-1.0.0.jar",
+    "tag": "data/tnc/tags/blocks/farm_crops.json",
+    "values": [
+      "minecraft:wheat",
+      "minecraft:carrots",
+      "minecraft:potatoes",
+      "minecraft:beetroots",
+      "tnc:road_bell_crop",
+      "tnc:night_gourd_crop",
+      "tnc:tide_reed_crop",
+      {
+        "id": "farmersdelight:tomatoes",
+        "required": false
+      },
+      {
+        "id": "farmersdelight:cabbages",
+        "required": false
+      },
+      {
+        "id": "farmersdelight:onions",
+        "required": false
+      },
+      {
+        "id": "farmersdelight:rice",
+        "required": false
+      }
+    ]
+  },
+  {
+    "jar": "twilightforest-1.20.1-4.3.2508-universal.jar",
+    "tag": "data/minecraft/tags/blocks/mushroom_grow_block.json",
+    "values": [
+      "twilightforest:uberous_soil"
+    ]
+  },
+  {
+    "jar": "ysjxspells-1.0.1.jar",
+    "tag": "data/ysjxspells/tags/items/fruits.json",
+    "values": [
+      "ysjxspells:arcane_fruit",
+      "ysjxspells:fire_fruit",
+      "ysjxspells:frost_fruit",
+      "ysjxspells:healing_fruit",
+      "ysjxspells:water_fruit",
+      "ysjxspells:earth_fruit",
+      "ysjxspells:air_fruit",
+      "ysjxspells:lightning_fruit",
+      "ysjxspells:attack_power_food",
+      "ysjxspells:ranged_damage_fruit"
+    ]
+  },
+  {
+    "jar": "[暮色风味乐事] twilightdelight-2.2.2.jar",
+    "tag": "data/diet/tags/items/fruits.json",
+    "values": [
+      "twilightdelight:berry_stick",
+      "twilightdelight:glowstew",
+      "twilightdelight:torchberry_venison_sandwich"
+    ]
+  },
+  {
+    "jar": "[暮色风味乐事] twilightdelight-2.2.2.jar",
+    "tag": "data/diet/tags/items/vegetables.json",
+    "values": [
+      "twilightdelight:mushgloom_sauce",
+      "twilightdelight:glow_venison_rib_with_pasta",
+      "twilightdelight:mushgloom_meef_pasta",
+      "twilightdelight:liveroot_pork_fried_rice",
+      "twilightdelight:liveroot_venison_noodle_soup",
+      "twilightdelight:thousand_plant_stew",
+      "twilightdelight:borer_tear_soup",
+      "twilightdelight:ghast_brain_salad",
+      "twilightdelight:plate_of_lily_chicken",
+      "twilightdelight:plate_of_meef_wellington"
+    ]
+  },
+  {
+    "jar": "[暮色风味乐事] twilightdelight-2.2.2.jar",
+    "tag": "data/farmersdelight/tags/blocks/mushroom_colonies.json",
+    "values": [
+      "twilightdelight:mushgloom_colony"
+    ]
+  },
+  {
+    "jar": "[暮色风味乐事] twilightdelight-2.2.2.jar",
+    "tag": "data/farmersdelight/tags/items/mushroom_colonies.json",
+    "values": [
+      "twilightdelight:mushgloom_colony"
+    ]
+  },
+  {
+    "jar": "[果园乐事] fruitsdelight-1.1.3.jar",
+    "tag": "data/diet/tags/items/fruits.json",
+    "values": [
+      "fruitsdelight:pear",
+      "fruitsdelight:hawberry",
+      "fruitsdelight:lychee",
+      "fruitsdelight:mango",
+      "fruitsdelight:persimmon",
+      "fruitsdelight:peach",
+      "fruitsdelight:orange",
+      "fruitsdelight:mangosteen",
+      "fruitsdelight:bayberry",
+      "fruitsdelight:kiwi",
+      "fruitsdelight:fig",
+      "fruitsdelight:blueberry",
+      "fruitsdelight:lemon",
+      "fruitsdelight:cranberry",
+      "fruitsdelight:pineapple",
+      "fruitsdelight:apple_jelly",
+      "fruitsdelight:blueberry_jelly",
+      "fruitsdelight:glowberry_jelly",
+      "fruitsdelight:hamimelon_jelly",
+      "fruitsdelight:melon_jelly",
+      "fruitsdelight:hawberry_jelly",
+      "fruitsdelight:lychee_jelly",
+      "fruitsdelight:mango_jelly",
+      "fruitsdelight:orange_jelly",
+      "fruitsdelight:peach_jelly",
+      "fruitsdelight:pear_jelly",
+      "fruitsdelight:persimmon_jelly",
+      "fruitsdelight:pineapple_jelly",
+      "fruitsdelight:lemon_jelly",
+      "fruitsdelight:cranberry_jelly",
+      "fruitsdelight:mangosteen_jelly",
+      "fruitsdelight:sweetberry_jelly",
+      "fruitsdelight:chorus_jelly",
+      "fruitsdelight:bayberry_jelly",
+      "fruitsdelight:kiwi_jelly",
+      "fruitsdelight:fig_jelly",
+      "fruitsdelight:durian_jelly",
+      "fruitsdelight:hamimelon_juice",
+      "fruitsdelight:hawberry_tea",
+      "fruitsdelight:orange_juice",
+      "fruitsdelight:lemon_juice",
+      "fruitsdelight:pear_juice",
+      "fruitsdelight:mango_tea",
+      "fruitsdelight:peach_tea",
+      "fruitsdelight:lychee_cherry_tea",
+      "fruitsdelight:mangosteen_tea",
+      "fruitsdelight:bayberry_soup",
+      "fruitsdelight:kiwi_juice",
+      "fruitsdelight:bellini_cocktail",
+      "fruitsdelight:blueberry_custard",
+      "fruitsdelight:blueberry_muffin",
+      "fruitsdelight:cranberry_muffin",
+      "fruitsdelight:fig_pudding_slice",
+      "fruitsdelight:hamimelon_popsicle",
+      "fruitsdelight:kiwi_popsicle",
+      "fruitsdelight:hamimelon_shaved_ice",
+      "fruitsdelight:hawberry_roll",
+      "fruitsdelight:hawberry_sheet",
+      "fruitsdelight:hawberry_stick",
+      "fruitsdelight:orange_slice",
+      "fruitsdelight:lemon_slice",
+      "fruitsdelight:durian_flesh",
+      "fruitsdelight:baked_pear",
+      "fruitsdelight:baked_durian",
+      "fruitsdelight:pineapple_pie",
+      "fruitsdelight:durian_pie",
+      "fruitsdelight:lemon_tart",
+      "fruitsdelight:fig_tart",
+      "fruitsdelight:mango_milkshake",
+      "fruitsdelight:mango_salad",
+      "fruitsdelight:dried_persimmon",
+      "fruitsdelight:mangosteen_cake",
+      "fruitsdelight:pear_with_rock_sugar",
+      "fruitsdelight:orange_chicken",
+      "fruitsdelight:fig_chicken_stew",
+      "fruitsdelight:orange_marinated_pork",
+      "fruitsdelight:bowl_of_pineapple_fried_rice",
+      "fruitsdelight:pineapple_marinated_pork",
+      "fruitsdelight:lychee_chicken",
+      "fruitsdelight:jelly_bread"
+    ]
+  },
+  {
+    "jar": "[果园乐事] fruitsdelight-1.1.3.jar",
+    "tag": "data/diet/tags/items/vegetables.json",
+    "values": [
+      "fruitsdelight:bowl_of_pineapple_fried_rice"
+    ]
+  },
+  {
+    "jar": "[果园乐事] fruitsdelight-1.1.3.jar",
+    "tag": "data/forge/tags/items/berries.json",
+    "values": [
+      "fruitsdelight:blueberry",
+      "fruitsdelight:cranberry"
+    ]
+  },
+  {
+    "jar": "[果园乐事] fruitsdelight-1.1.3.jar",
+    "tag": "data/forge/tags/items/fruits.json",
+    "values": [
+      "fruitsdelight:pear",
+      "fruitsdelight:hawberry",
+      "fruitsdelight:lychee",
+      "fruitsdelight:mango",
+      "fruitsdelight:persimmon",
+      "fruitsdelight:peach",
+      "fruitsdelight:orange",
+      "fruitsdelight:mangosteen",
+      "fruitsdelight:bayberry",
+      "fruitsdelight:kiwi",
+      "fruitsdelight:fig",
+      "fruitsdelight:blueberry",
+      "fruitsdelight:lemon",
+      "fruitsdelight:cranberry",
+      "fruitsdelight:pineapple"
+    ]
+  },
+  {
+    "jar": "[果园乐事] fruitsdelight-1.1.3.jar",
+    "tag": "data/forge/tags/items/fruits/bayberry.json",
+    "values": [
+      "fruitsdelight:bayberry"
+    ]
+  },
+  {
+    "jar": "[果园乐事] fruitsdelight-1.1.3.jar",
+    "tag": "data/forge/tags/items/fruits/blueberry.json",
+    "values": [
+      "fruitsdelight:blueberry"
+    ]
+  },
+  {
+    "jar": "[果园乐事] fruitsdelight-1.1.3.jar",
+    "tag": "data/forge/tags/items/fruits/cranberry.json",
+    "values": [
+      "fruitsdelight:cranberry"
+    ]
+  },
+  {
+    "jar": "[果园乐事] fruitsdelight-1.1.3.jar",
+    "tag": "data/forge/tags/items/fruits/fig.json",
+    "values": [
+      "fruitsdelight:fig"
+    ]
+  },
+  {
+    "jar": "[果园乐事] fruitsdelight-1.1.3.jar",
+    "tag": "data/forge/tags/items/fruits/hawberry.json",
+    "values": [
+      "fruitsdelight:hawberry"
+    ]
+  },
+  {
+    "jar": "[果园乐事] fruitsdelight-1.1.3.jar",
+    "tag": "data/forge/tags/items/fruits/kiwi.json",
+    "values": [
+      "fruitsdelight:kiwi"
+    ]
+  },
+  {
+    "jar": "[果园乐事] fruitsdelight-1.1.3.jar",
+    "tag": "data/forge/tags/items/fruits/lemon.json",
+    "values": [
+      "fruitsdelight:lemon"
+    ]
+  },
+  {
+    "jar": "[果园乐事] fruitsdelight-1.1.3.jar",
+    "tag": "data/forge/tags/items/fruits/lychee.json",
+    "values": [
+      "fruitsdelight:lychee"
+    ]
+  },
+  {
+    "jar": "[果园乐事] fruitsdelight-1.1.3.jar",
+    "tag": "data/forge/tags/items/fruits/mango.json",
+    "values": [
+      "fruitsdelight:mango"
+    ]
+  },
+  {
+    "jar": "[果园乐事] fruitsdelight-1.1.3.jar",
+    "tag": "data/forge/tags/items/fruits/mangosteen.json",
+    "values": [
+      "fruitsdelight:mangosteen"
+    ]
+  },
+  {
+    "jar": "[果园乐事] fruitsdelight-1.1.3.jar",
+    "tag": "data/forge/tags/items/fruits/orange.json",
+    "values": [
+      "fruitsdelight:orange"
+    ]
+  },
+  {
+    "jar": "[果园乐事] fruitsdelight-1.1.3.jar",
+    "tag": "data/forge/tags/items/fruits/peach.json",
+    "values": [
+      "fruitsdelight:peach"
+    ]
+  },
+  {
+    "jar": "[果园乐事] fruitsdelight-1.1.3.jar",
+    "tag": "data/forge/tags/items/fruits/pear.json",
+    "values": [
+      "fruitsdelight:pear"
+    ]
+  },
+  {
+    "jar": "[果园乐事] fruitsdelight-1.1.3.jar",
+    "tag": "data/forge/tags/items/fruits/persimmon.json",
+    "values": [
+      "fruitsdelight:persimmon"
+    ]
+  },
+  {
+    "jar": "[果园乐事] fruitsdelight-1.1.3.jar",
+    "tag": "data/forge/tags/items/fruits/pineapple.json",
+    "values": [
+      "fruitsdelight:pineapple"
+    ]
+  },
+  {
+    "jar": "[果园乐事] fruitsdelight-1.1.3.jar",
+    "tag": "data/sereneseasons/tags/blocks/autumn_crops.json",
+    "values": [
+      "fruitsdelight:orange_sapling",
+      "fruitsdelight:orange_leaves",
+      "fruitsdelight:apple_sapling",
+      "fruitsdelight:apple_leaves",
+      "fruitsdelight:fig_sapling",
+      "fruitsdelight:fig_leaves",
+      "fruitsdelight:cranberry_bush"
+    ]
+  },
+  {
+    "jar": "[果园乐事] fruitsdelight-1.1.3.jar",
+    "tag": "data/sereneseasons/tags/blocks/spring_crops.json",
+    "values": [
+      "fruitsdelight:pear_sapling",
+      "fruitsdelight:pear_leaves",
+      "fruitsdelight:peach_sapling",
+      "fruitsdelight:peach_leaves",
+      "fruitsdelight:blueberry_bush"
+    ]
+  },
+  {
+    "jar": "[果园乐事] fruitsdelight-1.1.3.jar",
+    "tag": "data/sereneseasons/tags/blocks/summer_crops.json",
+    "values": [
+      "fruitsdelight:lychee_sapling",
+      "fruitsdelight:lychee_leaves",
+      "fruitsdelight:mango_sapling",
+      "fruitsdelight:mango_leaves",
+      "fruitsdelight:mangosteen_sapling",
+      "fruitsdelight:mangosteen_leaves",
+      "fruitsdelight:bayberry_sapling",
+      "fruitsdelight:bayberry_leaves",
+      "fruitsdelight:durian_sapling",
+      "fruitsdelight:durian_leaves",
+      "fruitsdelight:lemon_tree",
+      "fruitsdelight:hamimelon_stem",
+      "fruitsdelight:pineapple"
+    ]
+  },
+  {
+    "jar": "[果园乐事] fruitsdelight-1.1.3.jar",
+    "tag": "data/sereneseasons/tags/blocks/unbreakable_infertile_crops.json",
+    "values": [
+      "fruitsdelight:pear_leaves",
+      "fruitsdelight:pear_sapling",
+      "fruitsdelight:hawberry_leaves",
+      "fruitsdelight:hawberry_sapling",
+      "fruitsdelight:lychee_leaves",
+      "fruitsdelight:lychee_sapling",
+      "fruitsdelight:mango_leaves",
+      "fruitsdelight:mango_sapling",
+      "fruitsdelight:persimmon_leaves",
+      "fruitsdelight:persimmon_sapling",
+      "fruitsdelight:peach_leaves",
+      "fruitsdelight:peach_sapling",
+      "fruitsdelight:orange_leaves",
+      "fruitsdelight:orange_sapling",
+      "fruitsdelight:apple_leaves",
+      "fruitsdelight:apple_sapling",
+      "fruitsdelight:mangosteen_leaves",
+      "fruitsdelight:mangosteen_sapling",
+      "fruitsdelight:bayberry_leaves",
+      "fruitsdelight:bayberry_sapling",
+      "fruitsdelight:kiwi_leaves",
+      "fruitsdelight:kiwi_sapling",
+      "fruitsdelight:fig_leaves",
+      "fruitsdelight:fig_sapling",
+      "fruitsdelight:durian_leaves",
+      "fruitsdelight:durian_sapling",
+      "fruitsdelight:blueberry_bush",
+      "fruitsdelight:lemon_tree",
+      "fruitsdelight:cranberry_bush"
+    ]
+  },
+  {
+    "jar": "[果园乐事] fruitsdelight-1.1.3.jar",
+    "tag": "data/sereneseasons/tags/blocks/winter_crops.json",
+    "values": [
+      "fruitsdelight:hawberry_sapling",
+      "fruitsdelight:hawberry_leaves",
+      "fruitsdelight:persimmon_sapling",
+      "fruitsdelight:persimmon_leaves",
+      "fruitsdelight:kiwi_sapling",
+      "fruitsdelight:kiwi_leaves"
+    ]
+  },
+  {
+    "jar": "[果园乐事] fruitsdelight-1.1.3.jar",
+    "tag": "data/sereneseasons/tags/items/autumn_crops.json",
+    "values": [
+      "fruitsdelight:orange_sapling",
+      "fruitsdelight:apple_sapling",
+      "fruitsdelight:fig_sapling",
+      "fruitsdelight:cranberry"
+    ]
+  },
+  {
+    "jar": "[果园乐事] fruitsdelight-1.1.3.jar",
+    "tag": "data/sereneseasons/tags/items/spring_crops.json",
+    "values": [
+      "fruitsdelight:pear_sapling",
+      "fruitsdelight:peach_sapling",
+      "fruitsdelight:blueberry"
+    ]
+  },
+  {
+    "jar": "[果园乐事] fruitsdelight-1.1.3.jar",
+    "tag": "data/sereneseasons/tags/items/summer_crops.json",
+    "values": [
+      "fruitsdelight:lychee_sapling",
+      "fruitsdelight:mango_sapling",
+      "fruitsdelight:mangosteen_sapling",
+      "fruitsdelight:bayberry_sapling",
+      "fruitsdelight:durian_sapling",
+      "fruitsdelight:lemon_seeds",
+      "fruitsdelight:hamimelon_seeds",
+      "fruitsdelight:pineapple_sapling"
+    ]
+  },
+  {
+    "jar": "[果园乐事] fruitsdelight-1.1.3.jar",
+    "tag": "data/sereneseasons/tags/items/winter_crops.json",
+    "values": [
+      "fruitsdelight:hawberry_sapling",
+      "fruitsdelight:persimmon_sapling",
+      "fruitsdelight:kiwi_sapling"
+    ]
+  }
+]
