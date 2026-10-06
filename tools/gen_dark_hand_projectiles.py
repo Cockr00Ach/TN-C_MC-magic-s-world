@@ -58,19 +58,34 @@ FLIGHT = {
     "slay_light": (0.45, 52.0),
 }
 
-# the dark trail the hand drags behind it (verified ParticleTypes only).
-# ★ 2026-10-10 (author: "手腕跟身体可以有一条黑色的粗的线连接"): the model now carries its
-#   own black tether band, and these batches are the smoke-beam that keeps the line visible
-#   between the flying hand and the caster. squid_ink carries it (the only truly dark
-#   vanilla particle); shadow thickens it; smoke softens the edge.
+# ★★ 2026-10-10 第三版（作者："手发射出去怎么一直在旋转，掌心直直出去就好" +
+#    "三个手掌黏在一起很丑" + "黑带很怪…这个雾很适合放在黑雾那边"）：
+#
+#  1. **朝向 = ALONG_MOTION**（原来是 TOWARDS_CAMERA）✗
+#     TOWARDS_CAMERA 是"朝相机偏航" ⇒ 手飞过去的时候，相机与它的相对角度一直在变，
+#     看起来就**一直在转** ✗。ALONG_MOTION 把模型的 +Z 锁到**飞行方向**上 ⇒
+#     模型相对弹道固定，不再转 ✓；而模型现在是**掌心朝 +Z** 的平板
+#     ⇒ 正好就是"掌心直直朝着前面出去" ✓。
+#     `rotate_degrees_offset` 显式写 0：不要再叠任何自转 ✓。
+#
+#  2. **好几只手 = 多发，靠发射延迟错开** ✓
+#     extra_launch_count 2 ⇒ 一次 3 只手；extra_launch_delay 5 tick ⇒
+#     相邻两只沿弹道差 5 x 0.55 ≈ 2.7 格 ⇒ **不会黏在一起** ✓
+#     （模型里那只手是单独的，所以也不存在"三个掌心互相穿插"✗）。
+#
+#  3. **拖尾只留黑粒子，不要雾、也不要鬼火** ✓
+#     原来的 squid_ink / smoke / shadow 是**黑雾链的材质**（作者说"这个雾很适合放在黑雾那边"）
+#     ⇒ 从这里撤掉 ✓；灵魂火（鬼火）也不要（作者："把鬼火去掉"）✓。
+#     只留**黑焰**（soulsweapons:black_flame，本项目验证过的安全粒子 ✓）
+#     ⇒ "携带黑粒子" ✓ 但不杂 ✓。
 TRAIL = [
-    {"particle_id": "minecraft:squid_ink", "shape": "CIRCLE", "rotation": "LOOK",
+    {"particle_id": "soulsweapons:black_flame", "shape": "CIRCLE", "rotation": "LOOK",
      "origin": "CENTER", "count": 16.0, "min_speed": 0.0, "max_speed": 0.06},
-    {"particle_id": "fromtheshadows:shadow", "shape": "CIRCLE", "rotation": "LOOK",
-     "origin": "CENTER", "count": 12.0, "min_speed": 0.0, "max_speed": 0.05},
-    {"particle_id": "minecraft:smoke", "shape": "CIRCLE", "rotation": "LOOK",
-     "origin": "CENTER", "count": 8.0, "min_speed": 0.0, "max_speed": 0.08},
 ]
+
+# 一次放几只手（额外发数）与相邻间隔 tick
+EXTRA_HANDS = 2
+EXTRA_DELAY_TICKS = 5
 
 
 def main():
@@ -97,12 +112,17 @@ def main():
         launch = target["projectile"]["launch_properties"]
         old_velocity = launch.get("velocity")
         launch["velocity"] = velocity
+        # ★ 一次放好几只手：额外 2 发 + 每发间隔 5 tick ⇒ 沿弹道错开，不黏在一起 ✓
+        launch["extra_launch_count"] = EXTRA_HANDS
+        launch["extra_launch_delay"] = EXTRA_DELAY_TICKS
         spell["range"] = travel_range
 
         model = target["projectile"]["projectile"]["client_data"]["model"]
         old_orientation = model.get("orientation")
-        # ★ the actual fix for "手腕对着别人": stop the tumble, keep the model upright
-        model["orientation"] = "TOWARDS_CAMERA"
+        # ★ 锁到**飞行方向**（不是相机）⇒ 不再看起来一直在转 ✓；模型掌心朝 +Z
+        #   ⇒ 正好是"掌心直直朝前出去" ✓
+        model["orientation"] = "ALONG_MOTION"
+        model["rotate_degrees_offset"] = 0.0
         model.pop("rotate_degrees_per_tick", None)
 
         target["projectile"]["projectile"]["client_data"]["travel_particles"] = TRAIL
@@ -110,9 +130,9 @@ def main():
         with open(path, "w", encoding="utf-8", newline="\n") as fh:
             json.dump(spell, fh, indent=2, ensure_ascii=False)
             fh.write("\n")
-        print("%-16s v %-5s -> %-5s   range %-5s -> %-5s   orientation %-8s -> TOWARDS_CAMERA   trail %d batches"
+        print("%-16s v %-5s -> %-5s   range %-5s -> %-5s   orientation %-14s -> ALONG_MOTION   hands 1 -> %d   trail %d batch(es)"
               % (name, old_velocity, velocity, "?", travel_range,
-                 old_orientation or "none", len(TRAIL)))
+                 old_orientation or "none", EXTRA_HANDS + 1, len(TRAIL)))
 
     print("done, %d problem(s)" % problems)
     return 0 if problems == 0 else 1

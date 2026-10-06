@@ -88,12 +88,15 @@ def batch(pid, shape, origin, count, mn, mx):
 
 
 def cast_fx(tier):
-    """The caster cuts himself open: blood at his feet, soul fire licking up, no fog."""
+    """The caster cuts himself open: **blood only** -- clean, no ghost fire.
+
+    ★ 2026-10-10（作者："血爪的特效要干净啊，把鬼火去掉"）：本链原来撒
+    `minecraft:soul_fire_flame`（灵魂火＝鬼火）+ `soulsweapons:black_flame`（黑焰），
+    在血里混着两团火，看着很杂 ✗ ⇒ **两个都撤掉**，只留血 ✓。
+    """
     return [
         batch(BLOOD, "CIRCLE", "FEET", 14 + 4 * tier, 0.1, 0.5),
         batch(BLOOD, "SPHERE", "CENTER", 10 + 3 * tier, 0.05, 0.3),
-        batch(SOUL_FIRE, "CIRCLE", "FEET", 12 + 4 * tier, 0.1, 0.4),
-        batch(BLACK_FLAME, "CIRCLE", "FEET", 3 + tier, 0.05, 0.2),
     ]
 
 
@@ -105,8 +108,7 @@ def heal_action(coefficient):
             "apply_to_caster": True,
             "heal": {"spell_power_coefficient": coefficient},
         },
-        "particles": [batch(BLOOD, "SPHERE", "CENTER", 24.0, 0.1, 0.5),
-                      batch(SOUL_FIRE, "CIRCLE", "FEET", 16.0, 0.05, 0.3)],
+        "particles": [batch(BLOOD, "SPHERE", "CENTER", 24.0, 0.1, 0.5)],
     }
 
 
@@ -135,7 +137,6 @@ def drain_action():
         },
         "particles": [batch(BLOOD, "CIRCLE", "FEET", 16.0, 0.15, 0.6)],
     }
-
 
 def projectile_target(tier):
     """★ 2026-10-10: the chain becomes a HOMING projectile ("索敌").
@@ -169,16 +170,24 @@ def projectile_target(tier):
                 "extra_launch_delay": 3,
             },
             "projectile": {
-                "homing_angle": round(0.35 + 0.06 * tier, 3),
+                # ★ 2026-10-10（作者："不是范围我直接开技能然后他自己去找敌人，是要玩家瞄住敌人的
+                #   那种"）：引擎的 homing_angle 语义是"**自己去找最近的敌人**" ⇒ 会把
+                #   "没瞄准也照样打中"做出来 ✗。所以把它**调小**（原来 0.41~0.65），
+                #   让没锁定的血爪基本走直线；真正"追我瞄的那一只"由
+                #   `TNDarkAimMechanics` 的 setFollowedTarget 负责 ✓。
+                #   ⚠ 这仍是"没锁定时"的兜底转向；要让没瞄准时**完全**不追，把它设 0.0 ✓。
+                "homing_angle": round(0.16 + 0.03 * tier, 3),
                 "client_data": {
+                    # ★ "一条血线"：只留血，且**速度为 0** ⇒ 粒子留在原地，
+                    #   血爪飞过去就**拉出一条连续的线** ✓（原来混着鬼火，很杂 ✗）
                     "travel_particles": [
-                        batch(BLOOD, "CIRCLE", "CENTER", 14.0 + 3 * tier, 0.0, 0.10),
-                        batch(SOUL_FIRE, "CIRCLE", "CENTER", 8.0 + 2 * tier, 0.0, 0.08),
+                        batch(BLOOD, "CIRCLE", "CENTER", 20.0 + 4 * tier, 0.0, 0.0),
                     ],
                     "model": {
                         "model_id": "tnc:projectile/dark_hand",
                         "scale": round(0.55 + 0.15 * tier, 2),
-                        "orientation": "TOWARDS_CAMERA",
+                        "orientation": "ALONG_MOTION",
+                        "rotate_degrees_offset": 0.0,
                     },
                 },
             },
@@ -207,9 +216,22 @@ def rewrite(spell, effect_id, heal_coef):
                 swapped += 1
             elif current and current.startswith("tnc:blood_"):
                 swapped += 1                      # already migrated (idempotent re-run)
-        # every remaining impact gets a blood-flavoured particle set
-        impact["particles"] = [batch(BLOOD, "CIRCLE", "FEET", 10.0 + 3 * tier, 0.1, 0.4),
-                               batch(SOUL_FIRE, "CIRCLE", "FEET", 8.0 + 2 * tier, 0.05, 0.3)]
+            # ★★ 这些状态效果**必须仍落在施法者自己身上** ✓
+            #   作者 2026-10-10："**以伤换伤是自己也要扣血啊，原有的机制别改**"。
+            #   这条链原本是 `release.target: SELF`，所以全部 impact 都作用在自己身上 ——
+            #   其中 `tnc:blood_*` 是**燃血的驱动**（TNDarkSacrificeMechanics 每 20 tick
+            #   按它扣自己的血）、`tnc:dark_power` 是给**自己**的暗属性增幅 ✓。
+            #   我把它改成投掷物之后，impact 默认作用在**被命中的目标**上 ⇒
+            #   燃血和增幅**跑到了敌人身上** ✗ ⇒ 自己就不扣血了 ✗。
+            #   加 `apply_to_caster: true` 把它们**拨回施法者**，原有机制原样保留 ✓。
+            action["status_effect"]["apply_to_caster"] = True
+        # ★ 命中特效也**只留血**（作者 2026-10-10："血爪的特效要干净啊，把鬼火去掉"）✓
+        #   并且**打得一地血**：脚下一圈血泊（CIRCLE FEET，扩散大）＋ 身上一团（SPHERE CENTER）✓
+        #   作者 2026-10-10："**敌人自身也要爆一地的血粒子怎么没加**"。
+        impact["particles"] = [
+            batch(BLOOD, "CIRCLE", "FEET", 24.0 + 6 * tier, 0.25, 0.9),
+            batch(BLOOD, "SPHERE", "CENTER", 18.0 + 4 * tier, 0.2, 0.7),
+        ]
         kept.append(impact)
     assert swapped == 1, "expected exactly one dark-sacrifice effect in %s" % effect_id
     assert all("action" in i for i in kept), "impact without action -> engine NPE on every cast"

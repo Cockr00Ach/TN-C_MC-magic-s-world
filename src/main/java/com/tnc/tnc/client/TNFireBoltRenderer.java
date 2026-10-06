@@ -41,6 +41,12 @@ import org.joml.Matrix4f;
 public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
 
     /** 不会被真正贴图（几何体自带颜色），指向一张一定存在的原版贴图只为不触发缺图警告。 */
+
+
+    /** 我们自绘的**赤红像素龙头**贴图 ✓（32×32 ✓）。 */
+    private static final ResourceLocation DRAGON_HEAD =
+            ResourceLocation.fromNamespaceAndPath("tnc", "textures/entity/fire_dragon_head.png");
+
     private static final ResourceLocation PLACEHOLDER =
             ResourceLocation.fromNamespaceAndPath("minecraft", "textures/particle/flame.png");
 
@@ -98,6 +104,26 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
 
         // 熔岩火球（t3）与熔岳天倾砸下来的那些：**黑岩外壳 + 熔岩裂缝**（照作者参照图）。
         // 其余档位仍是彗星焰尾。
+        // 射线链 t1/t2：作者 2026-10-05 第 2 条「射线是一段长度有限的线条，
+        // 可以理解为是长条状的火球」✗ ⇒ 画成**一根直的火舌**（不是彗星 ✓）
+        if ("sun_ray".equals(entity.spellPath()) || "blast_ray".equals(entity.spellPath())) {
+            // ⚠️ 作者 2026-10-05：「把 t2 的射线同步下，但颜色深一点」✓
+            //    ⇒ t1/t2 **同一个造型** ✓，只有配色深浅不同 ✓（blast_ray 走深色 ✓）
+            rayLance(out, pose, dir, right, up, age, fade,
+                    "blast_ray".equals(entity.spellPath()));
+            return;
+        }
+
+        // 射线链 t3「火龙术」：**整条龙由 TNDragonParticles 的粒子构成** ✓
+        //   ⚠️ 作者 2026-10-05：「把龙后面的圆环即法阵删了」✗
+        //   ⇒ 这里**什么都不画** ✓（连成形阶段的法阵也删了 ✓，几何体为零 ✓）
+        if ("fire_dragon".equals(entity.spellPath())) {
+            // ★ 2026-10-05：作者「不要龙头了，回退到龙头+龙身全是粒子的状态」✓
+            //   ⇒ 这里**什么都不画** ✓ —— 龙头与龙身全部由 TNDragonParticles 的粒子构成 ✓
+            //     （方块龙头 / 贴片 / 交叉双片 / 成形法阵，全部撤掉 ✗）
+            return;
+        }
+
         if (FireSpellRules.isLavaRock(entity.spellPath())) {
             lavaRock(out, pose, dir, right, up, radius, age, fade);
             return;
@@ -114,6 +140,93 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
         coreBlob(out, pose, dir, right, up, radius, age, fade);
     }
 
+
+    // ------------------------------------------------------------------
+    //  射线链 t1/t2：一根**直的火舌**（作者要的"长条状的火球"）
+    // ------------------------------------------------------------------
+
+    /**
+     * 射线链 t1/t2 的「条状火球」✓
+     *
+     * <p>作者 2026-10-05 第 2 条：「t1 和 t2 中的射线是一段长度有限的线条，
+     * 你可以理解为是长条状的火球」✓
+     * ⇒ 不像彗星那样"一个球 + 一条飘忽的尾巴"✗，而是**一根笔直的火舌** ✓：
+     * 尖端白热、沿轴一节节变暗变细，全长约 {@link #LANCE_LENGTH} 倍半径 ✓
+     * （颜色走像素色板 ⇒ 一节一个色块、硬边 ✓，见 {@link PixelFlame} ✓）
+     */
+    private static void rayLance(VertexConsumer out, Matrix4f pose, Vec3 dir, Vec3 right, Vec3 up,
+                                 double age, float fade, boolean deep) {
+        if (fade <= 0.02F) {
+            return;
+        }
+        // ⚠️ 作者 2026-10-05：①「长度改为 1.5 格」②「美化下建模」
+        //    ③「把 t2 的射线同步下，但颜色深一点」✓
+        //
+        //    造型取自参照图（外圈暗红外壳 + 内芯白热 ✓），但**不是一根直棍** ✗：
+        //      · 前端收尖、尾端收细 ⇒ 一截**水滴形的火舌** ✓
+        //      · 侧面随 age 微微起伏 ⇒ 像素风也能看出"在烧"✓
+        //      · 三束绕轴的小火舌 ⇒ 轮廓不呆板 ✓
+        //      · 一根细白热内芯贯穿 + 前端伸出 ✓
+        final double half = 1.5D;          // 总长 3.0 格 ✓（作者 2026-10-05：射线长度 ×2 ✗）
+        final double shell = 0.125D;       // 粗 1/4 格 ✓
+        final int sides = 14;
+        final int segments = 7;
+        // 深色版（t2）：整条往色板后面挪两档 ⇒ 更暗更红 ✓
+        final double shade = deep ? 0.30D : 0.00D;
+        float[] color = new float[4];
+
+        Vec3 prevCenter = null;
+        double prevR = 0.0D;
+        for (int s = 0; s <= segments; s++) {
+            double t = s / (double) segments;                 // 0 = 前端 ✓ 1 = 尾端 ✓
+            double along = half - t * 2.0D * half;
+            // 前 18% 收尖 / 后 28% 收细 ⇒ 水滴形 ✓
+            double taper;
+            if (t < 0.18D) {
+                taper = 0.52D + 0.48D * (t / 0.18D);
+            } else if (t > 0.72D) {
+                taper = 1.0D - 0.58D * ((t - 0.72D) / 0.28D);
+            } else {
+                taper = 1.0D;
+            }
+            // 侧面起伏（像素风：色块之间硬边 ✓，不是光滑渐变 ✓）
+            double wobble = 1.0D + 0.10D * Math.sin(age * 0.85D + t * 8.5D);
+            double r = shell * taper * wobble;
+            Vec3 center = dir.scale(along);
+            if (prevCenter != null && prevR > 1.0E-4D && r > 1.0E-4D) {
+                PixelFlame.flat(shade + 0.40D + t * 0.46D, color);
+                ring(out, pose, right, up, prevCenter, prevR, center, r, color, sides);
+            }
+            prevCenter = center;
+            prevR = r;
+        }
+
+        // 白热内芯：一根细亮柱，前端略伸出 ✓（参照图里最亮的那条 ✓）
+        PixelFlame.flat(0.0D, color);
+        ring(out, pose, right, up, dir.scale(half * 0.96D), shell * 0.44D,
+                dir.scale(-half * 0.80D), shell * 0.40D, color, 10);
+
+        // 三束绕轴小火舌（像素风：短、硬、一段一个色块 ✓）
+        for (int w = 0; w < 3; w++) {
+            double a = age * 0.30D + w * (Math.PI * 2.0D / 3.0D);
+            Vec3 prev = null;
+            double prevW = 0.0D;
+            for (int s = 0; s <= 3; s++) {
+                double t = 0.20D + s * 0.22D;
+                double along = half - t * 2.0D * half;
+                double off = shell * (1.18D + 0.30D * Math.sin(age * 0.7D + w * 1.7D));
+                Vec3 c = dir.scale(along)
+                        .add(WaterGeometry.radial(right, up, a + t * 1.6D, off));
+                double r = shell * (0.20D - 0.05D * s);
+                if (prev != null && prevW > 1.0E-4D && r > 1.0E-4D) {
+                    PixelFlame.flat(shade + 0.46D + s * 0.14D, color);
+                    ring(out, pose, right, up, prev, prevW, c, r, color, 6);
+                }
+                prev = c;
+                prevW = r;
+            }
+        }
+    }
     // ------------------------------------------------------------------
     //  焰体：从核心往后拖出去的渐变锥（参考图的主体）
     // ------------------------------------------------------------------
@@ -501,24 +614,94 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
      * @param alphaScale 这一层的整体透明度倍率
      */
     private static void flameColor(double t, float alphaScale, float[] dst) {
-        double k;
-        if (t < 0.30D) {                 // 白黄 → 亮橙
-            k = t / 0.30D;
-            dst[0] = 1.00F;
-            dst[1] = (float) (1.00D - 0.32D * k);
-            dst[2] = (float) (0.82D - 0.72D * k);
-        } else if (t < 0.65D) {          // 亮橙 → 橙
-            k = (t - 0.30D) / 0.35D;
-            dst[0] = 1.00F;
-            dst[1] = (float) (0.68D - 0.30D * k);
-            dst[2] = (float) (0.10D - 0.06D * k);
-        } else {                         // 橙 → 深橙红
-            k = (t - 0.65D) / 0.35D;
-            dst[0] = (float) (1.00D - 0.16D * k);
-            dst[1] = (float) (0.38D - 0.24D * k);
-            dst[2] = 0.04F;
+        // ⚠️ 作者 2026-10-05：「不要用仿真渲染改用像素风格」✗
+        //    这里原来按 t 连续插值出无数中间色 + 透明度一路衰减（0.88 的衰减 ✗），
+        //    出来就是"现代特效插件"那种观感 ✗
+        //    ⇒ 改成**量化到离散色板 + 恒定不透明** ✓（色板见 PixelFlame ✓）
+        //    ⚠️ alphaScale 现在只当"整根该不该画"的门 ✓（像素风没有"渐渐透掉"✗）
+        PixelFlame.flat(t, dst);
+        if (alphaScale <= 0.02F) {
+            dst[3] = 0.0F;
         }
-        dst[3] = (float) ((1.0D - 0.88D * t) * alphaScale);
+    }
+
+    // ==================================================================
+    //  射线链 t3「火龙术」：成形法阵 + 火焰龙头（拖尾复用上面的焰体 ✓）
+    // ==================================================================
+
+    /** 龙头各段：沿 +dir 的位置（倍半径）。⚠️ 拖尾在 -dir（见 axisPoint）⇒ 龙头朝 +dir ✓ */
+    private static final double[] DRAGON_SEG_T = {-0.28D, -0.04D, 0.24D, 0.54D, 0.88D};
+    /** 对应的粗细（倍半径）。 */
+    private static final double[] DRAGON_SEG_R = {0.26D, 0.60D, 0.68D, 0.48D, 0.16D};
+
+    /** 龙头的角数（每圈）—— 比焰体细分一些，棱角更像"有骨头的头" ✓。 */
+    private static final int DRAGON_SIDES = 16;
+
+    /**
+     * 画一张**带贴图的四边形** ✓（交叉双片的基本单元 ✓）
+     *
+     * <p>⚠️ 顶点必须用 {@code vertex(Matrix4f, x, y, z)} 这个**会自己应用变换**的重载 ✗，
+     * 用 {@code vertex(x, y, z)} 会被画到世界原点（我踩过 ✗）。
+     * ⚠️ 该渲染格式是 NEW_ENTITY ⇒ uv / overlay / uv2 / normal 一个都不能少 ✓
+     */
+    /**
+     * 画一个**长方体** ✓（方块龙头的积木 ✓）
+     *
+     * <p>局部坐标系 = (前 dir, 上 up, 右 right) ✓ —— 这样"前伸的吻"就是 +前 方向 ✓。
+     *
+     * <p>贴图：<b>左右两个侧面</b>用整张赤红龙头贴图 ✓（从侧面看就是那张脸 ✓），
+     * 其余四个面取贴图上的一块**实色** ✓（省事又不会花 ✗）。
+     *
+     * <p>⚠️ 顶点必须用 {@code vertex(Matrix4f, x, y, z)}（会应用变换的那个 ✗）；
+     * 该渲染格式是 NEW_ENTITY ⇒ uv / overlay / uv2 / normal 缺一不可 ✓
+     */
+    private static void dragonBox(VertexConsumer vc, Matrix4f pose, Vec3 dir, Vec3 up, Vec3 right,
+                                  float cf, float cu, float cr,
+                                  float sf, float su, float sr, float k) {
+        // 8 个角（局部 → 世界 ✓）
+        float f0 = (cf - sf * 0.5F) * k, f1 = (cf + sf * 0.5F) * k;
+        float u0 = (cu - su * 0.5F) * k, u1 = (cu + su * 0.5F) * k;
+        float r0 = (cr - sr * 0.5F) * k, r1 = (cr + sr * 0.5F) * k;
+        Vec3 p000 = local(dir, up, right, f0, u0, r0);
+        Vec3 p001 = local(dir, up, right, f0, u0, r1);
+        Vec3 p010 = local(dir, up, right, f0, u1, r0);
+        Vec3 p011 = local(dir, up, right, f0, u1, r1);
+        Vec3 p100 = local(dir, up, right, f1, u0, r0);
+        Vec3 p101 = local(dir, up, right, f1, u0, r1);
+        Vec3 p110 = local(dir, up, right, f1, u1, r0);
+        Vec3 p111 = local(dir, up, right, f1, u1, r1);
+        // ★ 左右侧面：整张贴图 ✓（从侧面看就是完整的龙头脸 ✓）
+        face(vc, pose, p001, p101, p111, p011, 0.0F, 1.0F, 1.0F, 1.0F, 1.0F, 0.0F, 0.0F, 0.0F);
+        face(vc, pose, p100, p000, p010, p110, 0.0F, 1.0F, 1.0F, 1.0F, 1.0F, 0.0F, 0.0F, 0.0F);
+        // 其余面：取贴图上的一块实色（0.45,0.35 ⇒ 中段赤红 ✓）
+        face(vc, pose, p000, p100, p110, p010, .45F, .35F, .45F, .35F, .45F, .35F, .45F, .35F);
+        face(vc, pose, p101, p001, p011, p111, .45F, .35F, .45F, .35F, .45F, .35F, .45F, .35F);
+        face(vc, pose, p010, p110, p111, p011, .45F, .35F, .45F, .35F, .45F, .35F, .45F, .35F);
+        face(vc, pose, p000, p001, p101, p100, .45F, .35F, .45F, .35F, .45F, .35F, .45F, .35F);
+    }
+
+    private static Vec3 local(Vec3 dir, Vec3 up, Vec3 right, double f, double u, double r) {
+        return dir.scale(f).add(up.scale(u)).add(right.scale(r));
+    }
+
+    /** 一个面 = 4 个顶点（uv 两个一组 ✓）。 */
+    private static void face(VertexConsumer vc, Matrix4f pose,
+                             Vec3 a, Vec3 b, Vec3 c, Vec3 d,
+                             float au, float av, float bu, float bv,
+                             float cu, float cv, float du, float dv) {
+        quadVertex(vc, pose, a, au, av);
+        quadVertex(vc, pose, b, bu, bv);
+        quadVertex(vc, pose, c, cu, cv);
+        quadVertex(vc, pose, d, du, dv);
+    }
+    private static void quadVertex(VertexConsumer vc, Matrix4f pose, Vec3 p, float u, float v) {
+        vc.vertex(pose, (float) p.x, (float) p.y, (float) p.z)
+                .color(255, 255, 255, 255)
+                .uv(u, v)
+                .overlayCoords(net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY)
+                .uv2(net.minecraft.client.renderer.LightTexture.FULL_BRIGHT)
+                .normal(0.0F, 0.0F, 1.0F)
+                .endVertex();
     }
 
     /** 连接两圈、每段一个颜色的锥台（焰体的基本积木）。 */

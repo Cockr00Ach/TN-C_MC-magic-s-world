@@ -29,45 +29,28 @@
       "projectile": {
         "launch_properties": {
           "velocity": 0.45,
-          "extra_launch_count": 4,
-          "extra_launch_delay": 3
+          "extra_launch_count": 2,
+          "extra_launch_delay": 5
         },
         "projectile": {
           "homing_angle": 0.5,
           "client_data": {
             "travel_particles": [
               {
-                "particle_id": "minecraft:squid_ink",
+                "particle_id": "soulsweapons:black_flame",
                 "shape": "CIRCLE",
                 "rotation": "LOOK",
                 "origin": "CENTER",
                 "count": 16.0,
                 "min_speed": 0.0,
                 "max_speed": 0.06
-              },
-              {
-                "particle_id": "fromtheshadows:shadow",
-                "shape": "CIRCLE",
-                "rotation": "LOOK",
-                "origin": "CENTER",
-                "count": 12.0,
-                "min_speed": 0.0,
-                "max_speed": 0.05
-              },
-              {
-                "particle_id": "minecraft:smoke",
-                "shape": "CIRCLE",
-                "rotation": "LOOK",
-                "origin": "CENTER",
-                "count": 8.0,
-                "min_speed": 0.0,
-                "max_speed": 0.08
               }
             ],
             "model": {
               "model_id": "tnc:projectile/dark_hand",
-              "scale": 12.4,
-              "orientation": "TOWARDS_CAMERA"
+              "scale": 19.69,
+              "orientation": "ALONG_MOTION",
+              "rotate_degrees_offset": 0.0
             }
           }
         }

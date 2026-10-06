@@ -47,11 +47,21 @@ public final class TNFireBoltEntity extends Projectile {
     private static final EntityDataAccessor<Float> RADIUS =
             SynchedEntityData.defineId(TNFireBoltEntity.class, EntityDataSerializers.FLOAT);
     /** 射程（格）—— 同步给客户端，客户端靠它算"该在什么时候开始消失"。 */
+    /**
+     * ★ 锁定的目标实体 id（-1 = 没锁 ✓）—— 作者 2026-10-05 第 6 条：
+     * 「施法时的索敌功能没有实现」✗
+     *
+     * <p>根因：之前只把**初速**朝向目标 ⇒ 之后直线飞 ✗，看不出在追 ✗
+     * ⇒ 现在存住目标 ✓，每 tick 限速拐过去 ✓（客户端也能读到 ⇒ 渲染方向跟着拐 ✓）
+     */
+    private static final EntityDataAccessor<Integer> TARGET =
+            SynchedEntityData.defineId(TNFireBoltEntity.class, EntityDataSerializers.INT);
+
+    /** 每 tick 最多朝目标转几度 ✓（和光柱索敌同一个手感：看得见在拐 ✓）。 */
+    private static final double HOMING_DEGREES_PER_TICK = 14.0D;
+
     private static final EntityDataAccessor<Float> RANGE =
             SynchedEntityData.defineId(TNFireBoltEntity.class, EntityDataSerializers.FLOAT);
-
-    /** 飞过射程的这个比例之后开始逐渐消失（见 {@link #fade}）。 */
-    public static final double FADE_START = 0.65D;
 
     /** 出手速度（格/tick）。作者 2026-10-05：从 1.3 降下来，让焰尾看得清。 */
     public static final double LAUNCH_SPEED = 1.0D;
@@ -64,6 +74,74 @@ public final class TNFireBoltEntity extends Projectile {
     private boolean heavyScorch;
     /** 命中后是否在落点留下熔岩地（t3 熔岩火球起才有）。 */
     private boolean lavaField;
+
+    /** 「火龙术」（射线链 t3）：穿透 + 命中不爆 + 消失时剧烈爆炸 ✓ */
+    private boolean isDragon() {
+        return "fire_dragon".equals(spellPath());
+    }
+
+    /**
+     * 射线链 t1/t2（作者 2026-10-05 第 2 条：「射线是一段长度有限的线条，
+     * 你可以理解为是长条状的火球」✓）—— 它们**会飞出去** ✓，外形是一条火焰长条 ✓
+     */
+    private boolean isRayShot() {
+        String path = spellPath();
+        return "sun_ray".equals(path) || "blast_ray".equals(path);
+    }
+
+    /**
+     * <b>会不会穿透生物</b> ✓
+     *
+     * <p>作者 2026-10-05 的全局要求：「穿透效果只能穿透生物，
+     * 不能穿透土块的方块，当无法穿透时攻击提前消失」✓
+     * ⇒ 火龙（t3）与两条射线（t1/t2）都穿生物 ✓；撞到方块一律停下 ✓
+     */
+    private boolean penetrates() {
+        return isDragon() || isRayShot();
+    }
+
+    /** 火龙已经打过的目标（穿透：每个目标只结算一次 ✓）。 */
+    private final java.util.Set<java.util.UUID> dragonHit = new java.util.HashSet<>();
+
+    /** 火龙那一下爆炸只炸一次（撞墙 / 到期 都走它 ✓）。 */
+    private boolean dragonExploded;
+
+    /**
+     * 火龙术：<b>消失时那一下剧烈爆炸</b> ✓
+     *
+     * <p>作者 2026-10-05：「当火龙消失时发生一次剧烈爆炸，爆炸会有较为强烈的视角震动，
+     * 该次爆炸伤害是该法术伤害 × 3」✓
+     */
+    private void dragonExplode(net.minecraft.server.level.ServerLevel server) {
+        if (dragonExploded) {
+            return;
+        }
+        dragonExploded = true;
+        Vec3 at = position();
+        float blast = damage * FireSpellRules.DRAGON_EXPLODE_MULTIPLIER;
+        double radius = FireSpellRules.DRAGON_EXPLODE_RADIUS;
+        LivingEntity caster = getOwner() instanceof LivingEntity living ? living : null;
+        for (LivingEntity victim : server.getEntitiesOfClass(LivingEntity.class,
+                FireSpellRules.uprightArea(at, radius, 3.0D),
+                t -> FireSpellRules.hittable(caster, t))) {
+            victim.invulnerableTime = 0;
+            victim.hurt(server.damageSources().indirectMagic(this, getOwner()), blast);
+        }
+            // ⚠️ 作者 2026-10-05：「最后命中爆炸时加上**大量的粒子**」✓
+            //   原来 FLAME 120 + LAVA 40 + LARGE_SMOKE 30 ≈ 190 颗 ⇒ **翻倍往上** ✓
+            server.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y, at.z, 3, 0.0D, 0.0D, 0.0D, 0.0D);
+            server.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y, at.z, 14, radius * 0.45D, radius * 0.35D, radius * 0.45D, 0.0D);
+            server.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z, 260, radius * 0.55D, radius * 0.45D, radius * 0.55D, 0.42D);
+            server.sendParticles(ParticleTypes.SMALL_FLAME, at.x, at.y, at.z, 150, radius * 0.7D, radius * 0.6D, radius * 0.7D, 0.30D);
+            server.sendParticles(ParticleTypes.LAVA, at.x, at.y, at.z, 90, radius * 0.45D, radius * 0.35D, radius * 0.45D, 0.24D);
+            server.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y + 1.0D, at.z, 70, radius * 0.5D, radius * 0.8D, radius * 0.5D, 0.14D);
+            server.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, at.x, at.y, at.z, 60, radius * 0.4D, radius * 0.35D, radius * 0.4D, 0.20D);
+            server.sendParticles(ParticleTypes.END_ROD, at.x, at.y + 0.5D, at.z, 40, radius * 0.5D, radius * 0.6D, radius * 0.5D, 0.35D);
+        server.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE,
+                SoundSource.PLAYERS, 3.0F, 1.0F);
+        TNShockwaveEntity.blast(server, at, 3.0D + FireSpellRules.SHAKE_T4 * 0.6D,
+                FireSpellRules.SHAKE_T4, getOwner(), 0.0F);
+    }
     /** 命中后的爆炸半径（0 = 不爆炸；t4 熔岳天倾的那些火球才有）。 */
     private double blastRadius;
     /**
@@ -74,31 +152,22 @@ public final class TNFireBoltEntity extends Projectile {
     private float maxHealthPercent;
 
     /**
-     * 距离衰减 <b>1 → 0</b>：飞过射程的 {@link #FADE_START} 之后一路缩到看不见。
+     * 距离衰减 —— <b>现在恒为 1.0</b> ✓
      *
-     * <p>作者 2026-10-05 要求「当火球离开一定距离后会逐渐消失」——
-     * 之前是 {@code remaining <= 0} 时直接 {@code discard()}，火球会"啪"地凭空不见 ✗。
+     * <p>作者 2026-10-05：「出射程前都存在，出射程后散开为火焰粒子」，随后又追加「**都按这样改**」✓
+     * ⇒ <b>所有</b>火系投射物（火球链 + 射线链 + 火龙 + 陨石 ✓）
+     * 一律"出射程前一直存在"✓ —— 不再有任何距离淡出 ✗
      *
-     * <p>怎么算"飞了多远"：射程是同步字段（{@link #RANGE}），
-     * 每 tick 的位移长度从同步的速度拿（{@code getDeltaMovement()}），
-     * 两者相乘即已飞距离 —— 所以<b>不需要每 tick 同步剩余距离</b>，省带宽。
+     * <p>飞出射程那一下由 {@code tick()} 撒一团火焰粒子收尾 ✓（撞方块同理 ✓）；
+     * 火龙例外 ✓ —— 它有自己那一下"剧烈爆炸"✓
      *
-     * @return 1.0 = 还是完整的球；0.0 = 已经该看不见了
+     * <p>⚠️ 原来的 `FADE_START = 0.65` 与整段衰减计算已经**删除** ✓（没有使用者了 ✓）。
+     *
+     * @return 恒为 1.0（保留这个方法是因为渲染器还在调它 ✓）
      */
     public float fade(float partial) {
-        double speed = getDeltaMovement().length();
-        double range = range();
-        if (speed <= 0.01D || range <= 0.01D) {
-            return 1.0F;                      // 还没出手（成形阶段）→ 不衰减
-        }
-        double progress = (tickCount + partial) * speed / range;
-        if (progress <= FADE_START) {
-            return 1.0F;
-        }
-        double k = (progress - FADE_START) / (1.0D - FADE_START);
-        return (float) Math.max(0.0D, 1.0D - k);
+        return 1.0F;
     }
-
     /** 这一发的射程（同步字段）。 */
     public double range() {
         return entityData.get(RANGE);
@@ -115,6 +184,9 @@ public final class TNFireBoltEntity extends Projectile {
      * 摆不出"一颗球"；而且引擎的粒子形状/原点语义没有文档，猜错了就是在脚下冒烟 ✗
      */
     public static final int FORM_TICKS = 3;
+
+    /** 火龙术的成形时长（tick）—— 法阵由外到里描绘 + 龙头渐渐凝出来 ✓（作者要"逐渐出现"✗）。 */
+    public static final int DRAGON_FORM_TICKS = 18;
 
     /**
      * 出手缓冲：离开手之后的这几 tick 里，位移从 {@link #LAUNCH_START_FRACTION} 涨到全速。
@@ -151,6 +223,42 @@ public final class TNFireBoltEntity extends Projectile {
         blastRadius = bolt.blastRadius();
         maxHealthPercent = bolt.maxHealthPercent();
         remaining = bolt.range();
+    }
+
+    /** 锁定一个目标 ⇒ 这一发之后会**拐弯追它** ✓。 */
+    public void lockTarget(LivingEntity target) {
+        entityData.set(TARGET, target == null ? -1 : target.getId());
+    }
+
+    /** 当前锁定的目标（没有/已消失 = null ✓）。 */
+    public LivingEntity targetEntity() {
+        int id = entityData.get(TARGET);
+        if (id < 0 || !(level() instanceof net.minecraft.server.level.ServerLevel server)) {
+            return null;
+        }
+        return server.getEntity(id) instanceof LivingEntity living ? living : null;
+    }
+
+    /**
+     * 把 {@code dir} 朝 {@code want} 转最多 {@code maxDegrees} 度 ✓（返回单位方向 ✓）。
+     *
+     * <p>不用四元数/旋转矩阵：这两个向量都很短，线性插值再归一化在 14 度这种小角度下
+     * 和真正的球面插值肉眼无差 ✓，而且没有三角函数以外的开销 ✓
+     */
+    private static Vec3 turnToward(Vec3 dir, Vec3 want, double maxDegrees) {
+        Vec3 d = dir.normalize();
+        double dot = Math.max(-1.0D, Math.min(1.0D, d.dot(want)));
+        double angle = Math.acos(dot);
+        if (angle < 1.0E-5D) {
+            return want;
+        }
+        double max = Math.toRadians(maxDegrees);
+        if (angle <= max) {
+            return want;
+        }
+        double t = max / angle;
+        Vec3 mixed = d.scale(1.0D - t).add(want.scale(t));
+        return mixed.lengthSqr() < 1.0E-6D ? want : mixed.normalize();
     }
 
     public String spellPath() {
@@ -208,7 +316,11 @@ public final class TNFireBoltEntity extends Projectile {
      * （作者 2026-10-05 反馈「陨石的下落不流畅」）
      */
     private int formTicks() {
-        return skyFall() ? 0 : FORM_TICKS;
+        if (skyFall()) {
+            return 0;
+        }
+        // 火龙术：要"在面前渐渐生成法阵 + 龙头成形"，3 tick 太短 ✗ ⇒ 给足 18 tick（0.9 秒）✓
+        return isDragon() ? DRAGON_FORM_TICKS : FORM_TICKS;
     }
 
     /**
@@ -264,6 +376,7 @@ public final class TNFireBoltEntity extends Projectile {
         entityData.define(SPELL, "");
         entityData.define(RADIUS, 0.35F);
         entityData.define(RANGE, 40.0F);
+        entityData.define(TARGET, -1);
     }
 
     @Override
@@ -332,6 +445,23 @@ public final class TNFireBoltEntity extends Projectile {
                 || owner instanceof net.minecraft.world.entity.player.Player p
                         && DownedCombat.isDowned(p)
                 || owner.level() != level()) {
+            // ⚠️ 火龙术：**飞完射程消失时的那一下剧烈爆炸**就挂在这儿 ✓
+            //    （这是它唯一的爆炸 —— 命中生物时是不爆的 ✓）
+            if (isDragon() && level() instanceof net.minecraft.server.level.ServerLevel sl) {
+                dragonExplode(sl);
+            }
+            // ★ 作者 2026-10-05：「出射程前都存在，出射程后散开为火焰粒子」+「都按这样改」✓
+            //   ⇒ **所有**火系投射物飞到射程尽头都散成一团火焰粒子 ✓
+            //     （火龙除外 ✓ —— 它有自己的"剧烈爆炸"收尾 ✓）
+            if (!isDragon() && level() instanceof net.minecraft.server.level.ServerLevel slRay) {
+                Vec3 at = position();
+                slRay.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z,
+                        44, 0.35D, 0.35D, 0.35D, 0.10D);
+                slRay.sendParticles(ParticleTypes.SMALL_FLAME, at.x, at.y, at.z,
+                        26, 0.45D, 0.45D, 0.45D, 0.13D);
+                slRay.sendParticles(ParticleTypes.LAVA, at.x, at.y, at.z,
+                        8, 0.30D, 0.30D, 0.30D, 0.05D);
+            }
             discard();
             return;
         }
@@ -339,6 +469,11 @@ public final class TNFireBoltEntity extends Projectile {
         ServerLevel server = (ServerLevel) level();
         Vec3 from = position();
         Vec3 motion = getDeltaMovement();
+        // ⚠️ 作者 2026-10-05：「把锥形追踪删了」✓
+        //    原因（实测）：射线锁住第一个目标后会**一直往它拐**✗，
+        //    于是永远对不上第二个目标 ⇒ 表现就是"只有第一个僵尸受伤"✗
+        //    ⇒ 现在射线**走直线** ✓：出手方向 = 准心方向（由 TNFireRays 定 ✓），
+        //      之后不再拐弯 ⇒ 谁在线上谁挨打 ✓，穿透才是干净的 ✓
         // 出手缓冲：刚离手那几 tick 只走一部分，LAUNCH_RAMP_TICKS 内涨到全速。
         // ⚠️ 只改**实际走了多远**，不改 getDeltaMovement() ——
         //    改速度会每 tick 触发一次速度同步包，反而更卡 ✗
@@ -370,6 +505,18 @@ public final class TNFireBoltEntity extends Projectile {
                 }
             }
         }
+        // ★ 作者 2026-10-05：t3 的龙头**和身体**全部改成粒子（"不要用光滑的几何体"✗）
+        //   ⇒ 这里每 tick 撒一次粒子龙 ✓（服务端发 ⇒ 所有玩家都看得见 ✓）
+        //   粒子寿命会自然拖尾 ⇒ 连续撒就成了一条活动的龙 ✓
+        if (isDragon()) {
+            // 方向用实体自带的 safeDirection()（速度为零时它自己兜底成 +Z ✓，
+            // 成形那一瞬速度还是 0 ✓，用它最省事 ✓）
+            Vec3 dragonDir = safeDirection();
+            TNDragonParticles.emit(server, position(), dragonDir,
+                    FireSpellRules.right(dragonDir),
+                    FireSpellRules.right(dragonDir).cross(dragonDir).normalize(),
+                    tickCount);
+        }
         if (!server.hasChunkAt(BlockPos.containing(to))) {
             discard();
             return;
@@ -395,8 +542,75 @@ public final class TNFireBoltEntity extends Projectile {
             }
         }
 
+        // 火龙术：这次扫到的目标如果**已经打过**，就当没打中 ✓
+        //   ⇒ 于是下面的 if 不成立（只要没撞墙）⇒ 它**继续往前飞** = 穿透 ✓
+        // ★ 射线链 t1/t2：**这一 tick 扫描框里的所有生物都打一遍** ✓
+        //   作者 2026-10-05 实测：「并排贴着才算出 2，隔开就只算 1」✗
+        //   根因：下面那段"最近的一个"逻辑**每 tick 只留一个目标** ✗ ——
+        //       两只贴着时，第二只还能在下一 tick 的框里补上 ✓；
+        //       中间隔开时，射线穿过第一只之后第二只**永远进不了同一 tick 的框** ✗ ⇒ 漏掉 ✗
+        //   ⇒ 射线单独走这条"全部命中"的路 ✓（这才是穿透 ✓）
+        if (isRayShot()) {
+            for (LivingEntity pierced : server.getEntitiesOfClass(LivingEntity.class,
+                    new AABB(from, to).inflate(0.4D), e -> FireSpellRules.hittable(owner, e))) {
+                if (!dragonHit.add(pierced.getUUID())) {
+                    continue;                       // 这个目标已经挨过这一发了 ✓
+                }
+                // ⚠️ 作者 2026-10-05：「把之前的命中误差改回去」✓
+                //    —— 之前那版要求"线真的穿过碰撞盒"（容差 0.05 ✗）太严 ✗，
+                //    打起来容易"明明瞄着却穿过去"✗ ⇒ 退回**扫描框判定** ✓
+                //    （扫描框 = AABB(from,to).inflate(0.4) ✓，也就是线两侧各 0.4 格 ✓）
+                boolean piercedHurt = pierced.hurt(
+                        server.damageSources().indirectMagic(this, owner), damage);
+                if (piercedHurt && damage > 0.0F && owner instanceof ServerPlayer pCaster) {
+                    TNScorch.apply(pierced, pCaster, damage, heavyScorch);
+                }
+                // ★ t2「爆炸射线」：命中时来一发**小范围爆炸** ✓
+                //   ⚠️ 作者 2026-10-05：「t2 中射线命中时会产生爆炸没有实现」✗
+                //   根因：这段原来挂在"单目标命中"那条路上（`if (hit != null ...)`）✗，
+                //        而射线分支会把 `hit` 置空 ✗ ⇒ 那条路根本不走 ⇒ 爆炸丢了 ✗
+                //   ⚠️ 爆炸倍率用**射线自己的 75%** ✓（火球那套是 50% ✗，不是这个法术的规格 ✗）
+                //   ⚠️ 作者明确「该处爆炸没有震动效果」✗ ⇒ 只做伤害 + 粒子，
+                //       **绝不 spawn 冲击波** ✓（冲击波才会震屏 ✓）
+                if (blastRadius > 0.0D) {
+                    float blast = damage * FireSpellRules.RAY_BLAST_PERCENT;
+                    for (LivingEntity splash : server.getEntitiesOfClass(LivingEntity.class,
+                            FireSpellRules.uprightArea(pierced.position(), blastRadius, 2.0D),
+                            e -> FireSpellRules.hittable(owner, e))) {
+                        splash.invulnerableTime = 0;      // 直击刚把它设成 20，不清会被吞 ✓
+                        splash.hurt(server.damageSources().indirectMagic(this, owner), blast);
+                    }
+                    double bx = pierced.getX();
+                    double by = pierced.getY() + pierced.getBbHeight() * 0.5D;
+                    double bz = pierced.getZ();
+                    server.sendParticles(ParticleTypes.EXPLOSION, bx, by, bz, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+                    server.sendParticles(ParticleTypes.FLAME, bx, by, bz, 26,
+                            blastRadius * 0.5D, blastRadius * 0.4D, blastRadius * 0.5D, 0.06D);
+                    server.sendParticles(ParticleTypes.SMALL_FLAME, bx, by, bz, 14,
+                            blastRadius * 0.6D, blastRadius * 0.5D, blastRadius * 0.6D, 0.08D);
+                    server.sendParticles(ParticleTypes.LAVA, bx, by, bz, 6,
+                            blastRadius * 0.3D, 0.3D, blastRadius * 0.3D, 0.04D);
+                } else {
+                    // 普通射线（t1）：穿过去只留一小撮火花 ✓（不炸开 ✗，否则像"打到就停"✗）
+                    server.sendParticles(ParticleTypes.FLAME,
+                            pierced.getX(), pierced.getY() + pierced.getBbHeight() * 0.5D, pierced.getZ(),
+                            3, 0.15D, 0.15D, 0.15D, 0.02D);
+                }
+
+            }
+            // ⚠️ 作者 2026-10-05：「**爆炸是额外效果，不会影响射线的穿透**」✓
+            //    ⇒ 这一整段里**不允许**出现 discard() / return / break ✗
+            //      （爆炸、粒子、灼烧都只是"顺手加的效果"✓；
+            //        射线照旧推进位置 ⇒ 继续穿下一个目标 ✓）
+            //    ⇒ 循环结束只是把 hit 置空（让下面"单目标"那段不再重复结算 ✓），
+            //      位置推进在方法末尾照常执行 ✓
+            hit = null;                             // 单目标那段对射线不再生效 ✓
+        } else if (penetrates() && hit != null && !dragonHit.add(hit.getUUID())) {
+            hit = null;
+        }
         if (hit != null || wall.getType() != HitResult.Type.MISS) {
             if (hit != null) {
+
                 boolean hurt = hit.hurt(server.damageSources().indirectMagic(this, owner), damage);
                 // 焚身：命中就挂（基数 = 这一发实际打出的伤害）。
                 // 已经挂了同级或更高的目标由 TNScorch 自己判「跳过」——这里不用管"不刷新"
@@ -414,10 +628,19 @@ public final class TNFireBoltEntity extends Projectile {
                             hit.getMaxHealth() * maxHealthPercent);
                 }
             }
-            server.sendParticles(ParticleTypes.FLAME, impact.x, impact.y, impact.z, 14, 0.25D, 0.25D, 0.25D, 0.06D);
-            // 命中时**炸开**成一团火焰粒子（作者 2026-10-05 要求：不要"啪"地直接消失）。
-            // ⚠️ 纯视觉、**零伤害** —— 真正的爆炸伤害在上面 blastRadius 那一段，两者互不影响
-            spawnImpactBurst(server, impact);
+            // ⚠️ 射线链 t1/t2：**命中生物时不炸粒子** ✗
+            //    原来这里是一团爆开的火焰粒子（"不要啪地消失"的本意 ✓），
+            //    但射线是**穿透**的 —— 打中第一个目标就爆一团，看起来就像"打到就没了"✗
+            //    ⇒ 射线改成只留一小撮火花，真正的爆开留给撞墙那一下 ✓
+            if (isRayShot()) {
+                server.sendParticles(ParticleTypes.FLAME, impact.x, impact.y, impact.z, 3,
+                        0.15D, 0.15D, 0.15D, 0.02D);
+            } else {
+                server.sendParticles(ParticleTypes.FLAME, impact.x, impact.y, impact.z, 14, 0.25D, 0.25D, 0.25D, 0.06D);
+                // 命中时**炸开**成一团火焰粒子（作者 2026-10-05 要求：不要"啪"地直接消失）。
+                // ⚠️ 纯视觉、**零伤害** —— 真正的爆炸伤害在上面 blastRadius 那一段，两者互不影响
+                spawnImpactBurst(server, impact);
+            }
             // 陨星坠：命中时来一场**大范围**的火焰扩散
             // （作者 2026-10-05：「爆开后会产生大量火焰粒子向四周扩散，场景壮观点」）
             if ("meteor_fall".equals(spellPath())) {
@@ -454,8 +677,16 @@ public final class TNFireBoltEntity extends Projectile {
                 server.sendParticles(ParticleTypes.LAVA, impact.x, impact.y, impact.z, 20,
                         blastRadius * 0.4D, 0.4D, blastRadius * 0.4D, 0.2D);
             }
-            discard();
-            return;
+            // 火龙术：**打到生物不停** ✗ —— 只有撞到方块才在这里结束 ✓
+            if (penetrates() && wall.getType() == HitResult.Type.MISS) {
+                // 继续飞：不 discard、不 return ✓（下面照样推进位置 ✓）
+            } else {
+                if (isDragon() && level() instanceof net.minecraft.server.level.ServerLevel sl2) {
+                    dragonExplode(sl2);            // 撞墙 ⇒ 也是那一下剧烈爆炸 ✓
+                }
+                discard();
+                return;
+            }
         }
 
         setPos(to);

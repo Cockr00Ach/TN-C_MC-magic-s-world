@@ -58,17 +58,24 @@ INTENT_BLOCKS = {
 
 
 def model_length_blocks():
-    """How long the CURRENT hand model is along its travel axis, in blocks.
+    """The hand's overall size in blocks = its LARGEST span (not its Z span).
 
-    ★ 2026-10-10: the model was reworked (open grasp) and became longer: 1.88 -> 2.50
-    model-blocks. `scale` multiplies the model, so keeping the old scale numbers would
-    have silently made every tier ~33% bigger than intended. Deriving `scale` from the
-    model's real length keeps the author's per-tier sizes correct across model edits.
+    ★ 2026-10-10: the model became a **palm-forward plate** (palm facing +Z, only 0.56
+    blocks deep along Z but 1.38 x 1.62 across the palm). Measuring "length" along the
+    travel axis would now read 0.56 and produce an absurd scale (~57x at tier 5), so the
+    size metric is the largest of the three spans -- i.e. how big the hand LOOKS ✓.
+
+    (Earlier versions measured Z because the fingers used to point down the travel axis,
+    where Z really was the hand's length.)
     """
     with open(MODEL_PATH, "r", encoding="utf-8-sig") as fh:
         model = json.load(fh)
-    zs = [v for e in model["elements"] for v in (e["from"][2], e["to"][2])]
-    return (max(zs) - min(zs)) / 16.0
+    spans = []
+    for axis in (0, 1, 2):
+        lo = min(e["from"][axis] for e in model["elements"])
+        hi = max(e["to"][axis] for e in model["elements"])
+        spans.append(hi - lo)
+    return max(spans) / 16.0
 
 
 def main():

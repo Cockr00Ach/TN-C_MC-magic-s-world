@@ -98,9 +98,12 @@ public final class TNLightChainMechanics {
     //  ★ 飞行已经并进光耀链（作者 2026-10-02："把光魔法的飞行链删去，加入到光耀里，
     //    释放光耀法术就获得飞行" ✓）—— 原来那条"光翼链"（light_flight /
     //    light_swift_flight / light_wingspan）整个删掉了 ✓
-    //    ⇒ 现在判"能不能飞"就是看身上有没有**光耀链任一条 buff** ✓（见 graceBuffed ✓），
+    //    ⇒ 现在判"能不能飞"靠 {@link #FLIGHT_UNTIL} 那张**显式记账**表 ✓，
     //      飞行时长 = 那一次法术的 buff 时长（12 / 14 / 16 / 18 / 20 秒 ✓），
     //      顺带把玩家背后的光翼也一起点亮（标记 LIGHT_WINGS ✓ 客户端画翅膀那套没变 ✓）
+    //   ★ 2026-10-10（作者："在释放光耀的时候，在范围内的玩家都可以获得翅膀，t4 开始"）：
+    //      范围内的**其他玩家**在 **t4（angel_descent）/ t5（angel_mercy）** 也会被点名 ✓，
+    //      t1~t3 的队友只吃回血 + 减伤 buff、不飞 ✓。
     // ------------------------------------------------------------------
 
     /** 光翼标记的续期（tick）：比 buff 多留一点点，避免"buff 还在、翅膀先掉"✓。 */
@@ -163,20 +166,10 @@ public final class TNLightChainMechanics {
         return find(path) != null || findSummon(path) != null;
     }
 
-    /**
-     * ★ 身上有没有**光耀链**任一条 buff（任一档 ✓）—— 这就是"现在能不能飞"的判据 ✓
-     * （作者 2026-10-02：飞行并进光耀链了 ✓）。
-     *
-     * <p>直接照 {@link #SPELLS} 那张表查 ✓ —— 以后加档/改 buff 都不用再动这里 ✓。
-     */
-    private static boolean graceBuffed(ServerPlayer player) {
-        for (Spell spell : SPELLS) {
-            if (spell.buff().isPresent() && player.hasEffect(spell.buff().get())) {
-                return true;
-            }
-        }
-        return false;
-    }
+    // ★ 2026-10-10：原来这里有一个 `graceBuffed(player)`（"身上有光耀链任一条 buff 就算能飞"）
+    //   —— **已删除** ✗。因为光耀是**范围法术**，范围内的队友也会拿到那个 buff，
+    //   用它当判据会让队友**自己给自己发飞行**，绕开"t4 才开始给队友翅膀"这条规则 ✗。
+    //   现在唯一判据是 {@link #FLIGHT_UNTIL}（只有 {@link #grantGraceFlight} 点过名的才有）✓。
 
     private static boolean has(ServerPlayer player, RegistryObject<MobEffect> effect) {
         return effect.isPresent() && player.hasEffect(effect.get());
@@ -256,8 +249,10 @@ public final class TNLightChainMechanics {
                     ally.addEffect(new MobEffectInstance(spell.buff().get(),
                             spell.buffSeconds() * 20, 0, false, true, true));
                 }
-                // 队友也一起飞 ✓（光耀是范围法术，只给施法者飞会很怪 ✗）
-                if (ally instanceof ServerPlayer mate) {
+                // ★ 队友也一起飞 ✓ —— **但只从 t4 开始** ✓
+                //   作者 2026-10-10："在释放光耀的时候，在范围内的玩家都可以获得翅膀，**t4 开始**"
+                //   （原来是不分档位地给 ✗）。t1~t3 的队友只吃回血 + 减伤 buff，不飞 ✓。
+                if (spell.tier() >= ALLY_FLIGHT_FROM_TIER && ally instanceof ServerPlayer mate) {
                     grantGraceFlight(mate, spell.buffSeconds());
                 }
                 healed++;
@@ -452,16 +447,35 @@ public final class TNLightChainMechanics {
     // ------------------------------------------------------------------
 
     /**
+     * ★★ <b>"谁有资格飞"到什么时候</b>（tick）—— 光耀的赐飞是**限时**的 ✓。
+     *
+     * <p>为什么不能靠"身上有没有光耀 buff"来判断 ✗：光耀是**范围法术**，
+     * 范围内的队友**也会拿到那个 buff** ✓ ⇒ 如果 {@code tickGraceFlight} 用 buff 判断，
+     * 队友就会**自己给自己发飞行**，与"t4 才开始给队友翅膀"这条规则打架 ✗。
+     * 所以资格改成**显式记账**：只有 {@link #grantGraceFlight} 点过名的玩家才有 ✓，
+     * 到点自动收回 ✓。
+     */
+    private static final java.util.Map<java.util.UUID, Long> FLIGHT_UNTIL = new java.util.HashMap<>();
+
+    /**
+     * 从第几档开始，**范围内的其他玩家**也一起获得翅膀 ✓。
+     *
+     * <p>作者 2026-10-10：「在释放光耀的时候，**在范围内的玩家都可以获得翅膀，t4 开始**」✓
+     */
+    private static final int ALLY_FLIGHT_FROM_TIER = 4;
+
+    /**
      * 光耀**释放那一刻**就给飞行 + 点亮光翼 ✓。
      *
      * <p>为什么不靠法术 JSON 里的 {@code STATUS_EFFECT}：那是引擎那条链 ✓（这里也留着，不冲突 ✓），
      * 但"能不能飞"必须由**我们自己的代码**保证 —— 作者实测的那次事故里，
      * 引擎把 buff 挂上了，而负责发飞行的事件根本没跑 ✗（见类注释的事故记录）。
-     * 所以这里<b>自己给一遍</b>：{@code mayfly = true} + 光翼标记 ✓。
+     * 所以这里<b>自己给一遍</b>：{@code mayfly = true} + 光翼标记 + 记下资格到期时间 ✓。
      *
      * @param seconds 这一次的 buff 时长（飞行也跟着它走 ✓）
      */
     private static void grantGraceFlight(ServerPlayer player, int seconds) {
+        FLIGHT_UNTIL.put(player.getUUID(), player.serverLevel().getGameTime() + seconds * 20L);
         if (TNEffects.LIGHT_WINGS.isPresent()) {
             // 光翼标记（客户端拿它画翅膀 ✓）：比 buff 多留 1 秒，避免"buff 还在、翅膀先掉"✗
             player.addEffect(new MobEffectInstance(TNEffects.LIGHT_WINGS.get(),
@@ -475,12 +489,17 @@ public final class TNLightChainMechanics {
      * 每 tick 维持光耀给的飞行 ✓（由 {@code TnSpellMechanics.tickPlayer} 调用 —— <b>那条路已证实活着</b> ✓）。
      *
      * <ul>
-     *   <li>身上还有光耀 buff ⇒ 续光翼标记 ＋ 保证 {@code mayfly} ✓；</li>
-     *   <li>buff 掉了 ⇒ 收标记 ＋ 收回飞行 ✓（创造/旁观不碰 ✗ —— 那不是我们给的 ✓）。</li>
+     *   <li>{@link #FLIGHT_UNTIL} 还没到点 ⇒ 续光翼标记（快到期才续 ✗ 免得每 tick 发包）＋ 保证 {@code mayfly} ✓；</li>
+     *   <li>到点了 ⇒ 收标记 ＋ 收回飞行 ✓（创造/旁观不碰 ✗ —— 那不是我们给的 ✓）。</li>
      * </ul>
+     *
+     * ★ 判据从"有没有光耀 buff"改成"**有没有被点过名**" ✓ ——
+     *   否则范围内的队友会凭 buff 自己给自己发飞行，绕开"t4 开始"这条规则 ✗。
      */
     public static void tickGraceFlight(ServerPlayer player) {
-        if (graceBuffed(player)) {
+        Long until = FLIGHT_UNTIL.get(player.getUUID());
+        boolean entitled = until != null && player.serverLevel().getGameTime() < until;
+        if (entitled) {
             if (TNEffects.LIGHT_WINGS.isPresent()) {
                 // ★ 只在快到期时续（阈值 30 tick ✓）—— 每 tick 都 addEffect 会每 tick 发一次
                 //   同步包 ✗（600 包/半分钟），纯浪费 ✓
@@ -492,6 +511,9 @@ public final class TNLightChainMechanics {
             }
             giveFlight(player, true);
         } else {
+            if (until != null) {
+                FLIGHT_UNTIL.remove(player.getUUID());      // 到点 ⇒ 清账 ✓
+            }
             if (TNEffects.LIGHT_WINGS.isPresent() && player.hasEffect(TNEffects.LIGHT_WINGS.get())) {
                 player.removeEffect(TNEffects.LIGHT_WINGS.get());
             }
