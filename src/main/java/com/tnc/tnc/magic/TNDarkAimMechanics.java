@@ -65,6 +65,37 @@ public final class TNDarkAimMechanics {
     /** 被高亮的实体（entityId）→ 高亮到哪个 gameTime（到期就熄灭）✓。 */
     private static final Map<Integer, Long> GLOWING = new HashMap<>();
 
+    /**
+     * ★ 最近一次锁定的目标 —— **给 `tnc:drain`（抽血结算实体）用** ✓。
+     *
+     * <p>为什么要有它：抽血实体是自己去"命中点附近找最近的活体"的（引擎只把**施法者**
+     * 交给它，不给目标 ✗）。一旦它没找到人，就**立刻 discard ⇒ 一点血都不撒** ✗
+     * （作者 2026-10-10："**敌人自身也要爆一地的血粒子怎么没加**"）。
+     * 现在把"玩家瞄的那一只"直接告诉它 ⇒ 既保证抽对人也保证撒到血 ✓。
+     *
+     * <p>存活 {@link #RECENT_TICKS} 要**盖住整个抽取过程**（{@code CHANNEL_TICKS = 60}）✓。
+     */
+    private static final Map<UUID, Lock> RECENT = new HashMap<>();
+
+    private static final int RECENT_TICKS = 80;
+
+    /**
+     * 这个玩家最近锁定/瞄准的目标 entityId；没有或过期就 -1 ✓。
+     *
+     * @param now 调用方自己的 {@code level.getGameTime()}（本类不持有 level ✓）
+     */
+    public static int recentTargetId(UUID playerId, long now) {
+        Lock lock = RECENT.get(playerId);
+        if (lock == null) {
+            return -1;
+        }
+        if (now > lock.until()) {
+            RECENT.remove(playerId);
+            return -1;
+        }
+        return lock.targetId();
+    }
+
     private record Lock(int targetId, long until) {
     }
 
@@ -97,6 +128,7 @@ public final class TNDarkAimMechanics {
         }
         ServerLevel level = player.serverLevel();
         LOCKS.put(player.getUUID(), new Lock(aimed.getId(), level.getGameTime() + LOCK_TICKS));
+        RECENT.put(player.getUUID(), new Lock(aimed.getId(), level.getGameTime() + RECENT_TICKS));
         highlight(level, aimed);
     }
 
@@ -134,20 +166,32 @@ public final class TNDarkAimMechanics {
         return null;
     }
 
-    /** 把刚生成的血爪绑到"我瞄的那个人"身上 ✓。 */
+    /**
+     * 把刚生成的血爪绑到"我瞄的那个人"身上 ✓。
+     *
+     * <p>★★ 2026-10-10 修正（作者："**以伤换伤没有找谁啊，黑夜之手有**"）：
+     * 原来这里**只认 {@link #LOCKS}** —— 而 LOCKS 只在 {@code SPELL_CAST} 回调里写入，
+     * 如果那条事件在服务端没触发（或时机不对），就**永远锁不上** ✗，
+     * 表现就是"血爪不找人"✗。
+     *
+     * <p>现在改成**双保险**：血爪刚生成那一 tick，如果手上没有锁，
+     * **自己再射线一次**（玩家这时准星基本还指着刚才瞄的敌人 ✓）⇒
+     * 不再依赖施法事件 ✓。没瞄到人就**不锁定** ✓（不是"自己去找最近的敌人" ✗）。
+     */
     private static void applyLock(ServerLevel level, ServerPlayer player, long now) {
         Lock lock = LOCKS.get(player.getUUID());
-        if (lock == null) {
-            return;
-        }
-        if (now > lock.until()) {
-            LOCKS.remove(player.getUUID());
-            return;
-        }
-        Entity target = level.getEntity(lock.targetId());
-        if (!(target instanceof LivingEntity living) || !living.isAlive()) {
-            LOCKS.remove(player.getUUID());
-            return;
+        LivingEntity locked = null;
+        if (lock != null) {
+            if (now > lock.until()) {
+                LOCKS.remove(player.getUUID());
+            } else {
+                Entity target = level.getEntity(lock.targetId());
+                if (target instanceof LivingEntity living && living.isAlive()) {
+                    locked = living;
+                } else {
+                    LOCKS.remove(player.getUUID());
+                }
+            }
         }
         for (SpellProjectile bolt : level.getEntitiesOfClass(SpellProjectile.class,
                 player.getBoundingBox().inflate(24.0D))) {
@@ -158,8 +202,16 @@ public final class TNDarkAimMechanics {
             if (bolt.getOwner() != player || bolt.getFollowedTarget() != null) {
                 continue;
             }
+            // ★ 兜底：施法事件没给我们锁 ⇒ 就现在瞄一次 ✓
+            LivingEntity target = locked != null ? locked : aimedEnemy(player);
+            if (target == null) {
+                return;                 // ★ 没瞄到人 ⇒ 不锁定 ✓（"不是范围自动找敌人" ✗）
+            }
             // ★ 只追这一只（不是引擎默认的"最近的敌人"）✓
-            bolt.setFollowedTarget(living);
+            bolt.setFollowedTarget(target);
+            highlight(level, target);
+            // ★ 同时记进 RECENT：抽血实体据此确定"该抽谁、该在谁身上爆血" ✓
+            RECENT.put(player.getUUID(), new Lock(target.getId(), now + RECENT_TICKS));
             LOCKS.remove(player.getUUID());
             return;
         }

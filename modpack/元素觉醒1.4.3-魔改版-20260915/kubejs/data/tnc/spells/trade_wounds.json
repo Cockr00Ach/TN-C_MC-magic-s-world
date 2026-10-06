@@ -77,7 +77,8 @@
           "duration": 20,
           "amplifier": 0,
           "apply_mode": "SET",
-          "show_particles": true
+          "show_particles": true,
+          "apply_to_caster": true
         }
       },
       "particles": [
@@ -85,9 +86,17 @@
           "particle_id": "fromtheshadows:blood",
           "shape": "CIRCLE",
           "origin": "FEET",
-          "count": 18.0,
-          "min_speed": 0.15,
-          "max_speed": 0.5
+          "count": 30.0,
+          "min_speed": 0.25,
+          "max_speed": 0.9
+        },
+        {
+          "particle_id": "fromtheshadows:blood",
+          "shape": "SPHERE",
+          "origin": "CENTER",
+          "count": 22.0,
+          "min_speed": 0.2,
+          "max_speed": 0.7
         }
       ]
     },
@@ -99,7 +108,8 @@
           "duration": 20,
           "amplifier": 0,
           "apply_mode": "SET",
-          "show_particles": false
+          "show_particles": false,
+          "apply_to_caster": true
         }
       },
       "particles": [
@@ -107,9 +117,17 @@
           "particle_id": "fromtheshadows:blood",
           "shape": "CIRCLE",
           "origin": "FEET",
-          "count": 18.0,
-          "min_speed": 0.15,
-          "max_speed": 0.5
+          "count": 30.0,
+          "min_speed": 0.25,
+          "max_speed": 0.9
+        },
+        {
+          "particle_id": "fromtheshadows:blood",
+          "shape": "SPHERE",
+          "origin": "CENTER",
+          "count": 22.0,
+          "min_speed": 0.2,
+          "max_speed": 0.7
         }
       ]
     },

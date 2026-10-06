@@ -216,8 +216,22 @@ def rewrite(spell, effect_id, heal_coef):
                 swapped += 1
             elif current and current.startswith("tnc:blood_"):
                 swapped += 1                      # already migrated (idempotent re-run)
+            # ★★ 这些状态效果**必须仍落在施法者自己身上** ✓
+            #   作者 2026-10-10："**以伤换伤是自己也要扣血啊，原有的机制别改**"。
+            #   这条链原本是 `release.target: SELF`，所以全部 impact 都作用在自己身上 ——
+            #   其中 `tnc:blood_*` 是**燃血的驱动**（TNDarkSacrificeMechanics 每 20 tick
+            #   按它扣自己的血）、`tnc:dark_power` 是给**自己**的暗属性增幅 ✓。
+            #   我把它改成投掷物之后，impact 默认作用在**被命中的目标**上 ⇒
+            #   燃血和增幅**跑到了敌人身上** ✗ ⇒ 自己就不扣血了 ✗。
+            #   加 `apply_to_caster: true` 把它们**拨回施法者**，原有机制原样保留 ✓。
+            action["status_effect"]["apply_to_caster"] = True
         # ★ 命中特效也**只留血**（作者 2026-10-10："血爪的特效要干净啊，把鬼火去掉"）✓
-        impact["particles"] = [batch(BLOOD, "CIRCLE", "FEET", 14.0 + 4 * tier, 0.15, 0.5)]
+        #   并且**打得一地血**：脚下一圈血泊（CIRCLE FEET，扩散大）＋ 身上一团（SPHERE CENTER）✓
+        #   作者 2026-10-10："**敌人自身也要爆一地的血粒子怎么没加**"。
+        impact["particles"] = [
+            batch(BLOOD, "CIRCLE", "FEET", 24.0 + 6 * tier, 0.25, 0.9),
+            batch(BLOOD, "SPHERE", "CENTER", 18.0 + 4 * tier, 0.2, 0.7),
+        ]
         kept.append(impact)
     assert swapped == 1, "expected exactly one dark-sacrifice effect in %s" % effect_id
     assert all("action" in i for i in kept), "impact without action -> engine NPE on every cast"

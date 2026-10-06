@@ -375,13 +375,30 @@ public class TNDarkDrainEntity extends Entity implements SpellSpawnedEntity {
     }
 
     /**
-     * 找被抽血的那个敌人：优先取<b>离命中点最近、且不是施法者/不是自己人</b>的活体 ✓。
+     * 找被抽血的那个敌人。
      *
-     * <p>为什么不用"引擎告诉我们的目标"：`SpellSpawnedEntity` 的回调**只给施法者** ✗ ——
-     * 目标信息没有传进来。而引擎是在<b>命中点</b>生成这个实体的 ✓，
-     * 所以"命中点附近最近的敌人"就是刚才被打的那个 ✓（投射物命中时两者重合）。
+     * <p><b>第一优先：玩家瞄准/锁定的那一只</b> ✓（作者 2026-10-10：
+     * "**以伤换伤没有找谁啊，黑夜之手有**"、"**敌人自身也要爆一地的血粒子怎么没加**"）。
+     * 索敌那边的 {@link TNDarkAimMechanics} 会把"我瞄的那只"记下来，
+     * 这里直接取 ⇒ **一定抽对人、也一定在他身上爆血** ✓；
+     * 而"附近最近"那条路一旦找不到人，本实体就会立刻 discard ⇒ **一点血都不撒** ✗，
+     * 这正是"没加血粒子"的一种成因 ✓。
+     *
+     * <p>第二优先（兜底）：离命中点最近、且不是施法者/不是自己人的活体 ✓。
+     * 为什么能用"命中点附近"兜底：引擎是在<b>命中点</b>生成这个实体的 ✓，
+     * `SpellSpawnedEntity` 回调**只给施法者**、不给目标 ✗（所以需要第一优先那条路）✓。
      */
     private LivingEntity findVictim(Player owner) {
+        // ① 玩家瞄的那一只 ✓
+        if (owner != null) {
+            int aimed = TNDarkAimMechanics.recentTargetId(owner.getUUID(), level().getGameTime());
+            LivingEntity locked = resolve(aimed);
+            if (locked != null && locked != owner && !locked.isSpectator()
+                    && !(owner != null && locked.isAlliedTo(owner))) {
+                return locked;
+            }
+        }
+        // ② 兜底：命中点附近最近的敌人 ✓
         AABB box = new AABB(
                 getX() - HIT_RADIUS, getY() - HIT_RADIUS, getZ() - HIT_RADIUS,
                 getX() + HIT_RADIUS, getY() + HIT_RADIUS, getZ() + HIT_RADIUS);
