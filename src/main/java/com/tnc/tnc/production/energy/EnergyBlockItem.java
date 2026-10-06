@@ -23,6 +23,7 @@ final class EnergyBlockItem extends BlockItem {
     @Override public void appendHoverText(ItemStack stack, @Nullable Level level,
             List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);
+        tooltip.add(Component.literal("旧版 FE 器件已退役，请使用魔导工坊中的纯魔力装置").withStyle(ChatFormatting.DARK_GRAY));
         tooltip.add(Component.translatable("tooltip.tnc.energy." + kind.name().toLowerCase())
                 .withStyle(ChatFormatting.GRAY));
         var stored = stack.getTagElement("BlockEntityTag");

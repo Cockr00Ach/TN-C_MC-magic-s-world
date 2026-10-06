@@ -19,8 +19,8 @@ import net.minecraft.world.phys.BlockHitResult;
 
 public final class SkyVineRootBlock extends BushBlock implements EntityBlock {
     public static final IntegerProperty AGE=IntegerProperty.create("age",0,4);
-    public SkyVineRootBlock(){super(BlockBehaviour.Properties.copy(Blocks.OAK_SAPLING).noCollission().noOcclusion());registerDefaultState(stateDefinition.any().setValue(AGE,0));}
-    @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block,BlockState> b){b.add(AGE);}
+    public SkyVineRootBlock(){super(BlockBehaviour.Properties.copy(Blocks.OAK_SAPLING).noCollission().noOcclusion());registerDefaultState(stateDefinition.any().setValue(AGE,0).setValue(com.tnc.tnc.life.routes.RoutePlantBlock.WILD,false));}
+    @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block,BlockState> b){b.add(AGE,com.tnc.tnc.life.routes.RoutePlantBlock.WILD);}
     @Override public boolean canSurvive(BlockState s,LevelReader l,BlockPos p){return l.getBlockState(p.below()).is(BlockTags.DIRT)||l.getBlockState(p.below()).is(Blocks.FARMLAND);}
     @Override public BlockEntity newBlockEntity(BlockPos p,BlockState s){return new SkyVineRootEntity(p,s);}
     @Override public void setPlacedBy(Level l,BlockPos p,BlockState s,LivingEntity who,ItemStack stack){if(who instanceof Player player&&l.getBlockEntity(p) instanceof SkyVineRootEntity be)be.setOwner(player.getUUID());}
@@ -29,7 +29,7 @@ public final class SkyVineRootBlock extends BushBlock implements EntityBlock {
         if(l.isClientSide)return InteractionResult.SUCCESS;
         if(!(player instanceof ServerPlayer server)||TownProtection.denied(server,p)||!(l.getBlockEntity(p) instanceof SkyVineRootEntity be))return InteractionResult.FAIL;
         if(player.getItemInHand(hand).is(Items.SHEARS)&&s.getValue(AGE)==4&&be.harvest(server)){
-            player.getItemInHand(hand).hurtAndBreak(1,player,e->e.broadcastBreakEvent(hand));return InteractionResult.CONSUME;
+            com.tnc.tnc.life.routes.RouteProgress.award(server,"harvest/sky_vine");player.getItemInHand(hand).hurtAndBreak(1,player,e->e.broadcastBreakEvent(hand));return InteractionResult.CONSUME;
         }
         player.displayClientMessage(net.minecraft.network.chat.Component.literal(be.status()),true);return InteractionResult.CONSUME;
     }

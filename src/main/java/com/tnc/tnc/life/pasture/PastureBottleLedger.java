@@ -26,6 +26,6 @@ public final class PastureBottleLedger extends SavedData {
         sync(stack);return removed;
     }
     public void sync(ItemStack stack){stack.getOrCreateTag().putInt("StoredMana",amount(stack));}
-    public static PastureBottleLedger load(CompoundTag tag){var ledger=new PastureBottleLedger();for(Tag raw:tag.getList("Bottles",Tag.TAG_COMPOUND)){var t=(CompoundTag)raw;if(t.hasUUID("Id")){int cap=t.getInt("Capacity")==72?72:24;ledger.accounts.put(t.getUUID("Id"),new Balance(cap,Math.max(0,Math.min(cap,t.getInt("Mana")))));}}return ledger;}
+    public static PastureBottleLedger load(CompoundTag tag){var ledger=new PastureBottleLedger();for(Tag raw:tag.getList("Bottles",Tag.TAG_COMPOUND)){var t=(CompoundTag)raw;if(t.hasUUID("Id")){int cap=Math.max(1,Math.min(400,t.getInt("Capacity")));ledger.accounts.put(t.getUUID("Id"),new Balance(cap,Math.max(0,Math.min(cap,t.getInt("Mana")))));}}return ledger;}
     @Override public CompoundTag save(CompoundTag tag){var list=new ListTag();accounts.forEach((id,b)->{var t=new CompoundTag();t.putUUID("Id",id);t.putInt("Capacity",b.capacity);t.putInt("Mana",b.mana);list.add(t);});tag.put("Bottles",list);return tag;}
 }

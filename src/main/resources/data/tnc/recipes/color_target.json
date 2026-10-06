@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " M ",
+    "MLM",
+    " B "
+  ],
+  "key": {
+    "M": {
+      "item": "tnc:spirit_iron"
+    },
+    "L": {
+      "item": "minecraft:red_dye"
+    },
+    "B": {
+      "item": "minecraft:stone_bricks"
+    }
+  },
+  "result": {
+    "item": "tnc:color_target",
+    "count": 1
+  }
+}

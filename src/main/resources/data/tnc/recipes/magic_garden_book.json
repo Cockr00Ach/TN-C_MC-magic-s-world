@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " P ",
+    " B "
+  ],
+  "key": {
+    "P": {
+      "item": "tnc:verdant_vein_seed"
+    },
+    "B": {
+      "item": "minecraft:book"
+    }
+  },
+  "result": {
+    "item": "tnc:magic_garden_book",
+    "count": 1
+  }
+}

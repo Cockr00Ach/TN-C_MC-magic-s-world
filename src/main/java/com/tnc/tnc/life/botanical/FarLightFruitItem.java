@@ -13,6 +13,7 @@ import net.minecraft.world.level.Level;
 
 /** The fruit's light is world light, shared by players; it is not night vision. */
 public final class FarLightFruitItem extends Item {
+    @Override public net.minecraft.world.InteractionResult useOn(net.minecraft.world.item.context.UseOnContext c){return com.tnc.tnc.life.routes.RoutePlanting.plantFruit("farlight_fruit",c);}
     public FarLightFruitItem(){super(new Properties().stacksTo(16));}
     @Override public InteractionResultHolder<ItemStack> use(Level level,Player player,InteractionHand hand){
         ItemStack stack=player.getItemInHand(hand);

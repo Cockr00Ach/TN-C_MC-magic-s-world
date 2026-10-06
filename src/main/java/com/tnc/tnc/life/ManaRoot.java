@@ -51,11 +51,11 @@ public final class ManaRoot {
         public RootBlock() {
             super(BlockBehaviour.Properties.copy(Blocks.WHEAT).noCollission().randomTicks()
                     .lightLevel(state -> state.getValue(FED) == 0 ? 0 : 3 + state.getValue(FED)));
-            registerDefaultState(stateDefinition.any().setValue(AGE, 0).setValue(FED, 0));
+            registerDefaultState(stateDefinition.any().setValue(AGE, 0).setValue(FED, 0).setValue(com.tnc.tnc.life.routes.RoutePlantBlock.WILD,false));
         }
 
         @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-            builder.add(AGE, FED);
+            builder.add(AGE, FED,com.tnc.tnc.life.routes.RoutePlantBlock.WILD);
         }
 
         @Override public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
@@ -78,15 +78,16 @@ public final class ManaRoot {
 
         @Override public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
                                                 InteractionHand hand, BlockHitResult hit) {
-            if (!player.getItemInHand(hand).isEmpty()) return InteractionResult.PASS;
+            if (!player.getItemInHand(hand).isEmpty()&&!player.getItemInHand(hand).is(net.minecraft.world.item.Items.SHEARS)) return InteractionResult.PASS;
             if (level.isClientSide) return InteractionResult.SUCCESS;
             if (!(player instanceof ServerPlayer serverPlayer)) return InteractionResult.PASS;
             if (TownProtection.denied(serverPlayer, pos)) return InteractionResult.FAIL;
             int age = state.getValue(AGE);
             int fed = state.getValue(FED);
             if (age == 3 && fed == FEEDS_TO_GROW) {
-                Block.popResource(level, pos, new ItemStack(TNMod.MANA_ROOT_CORE.get()));
-                level.setBlock(pos, state.setValue(AGE, 0).setValue(FED, 0), 3);
+                Block.popResource(level, pos, player.getItemInHand(hand).is(net.minecraft.world.item.Items.SHEARS)?new ItemStack(TNMod.MANA_ROOT_SEED.get()):new ItemStack(TNMod.MANA_ROOT_CORE.get()));
+                com.tnc.tnc.life.routes.RouteProgress.award(serverPlayer,"harvest/mana_root");
+                level.setBlock(pos, state.setValue(AGE, 0).setValue(FED, 0).setValue(com.tnc.tnc.life.routes.RoutePlantBlock.WILD,false), 3);
                 serverPlayer.displayClientMessage(Component.literal("取下一枚蓄魔根芯。根还活着，可以重新注魔培育。"), true);
                 return InteractionResult.CONSUME;
             }

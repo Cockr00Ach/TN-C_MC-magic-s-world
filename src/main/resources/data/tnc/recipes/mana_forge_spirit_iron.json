@@ -1,0 +1,15 @@
+{
+  "type": "tnc:mana_forging",
+  "ingredients": [
+    {
+      "item": "minecraft:iron_ingot",
+      "count": 1
+    }
+  ],
+  "result": {
+    "item": "tnc:spirit_iron"
+  },
+  "mana": 60,
+  "work_ticks": 120,
+  "category": "materials"
+}

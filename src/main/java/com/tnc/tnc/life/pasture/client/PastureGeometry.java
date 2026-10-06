@@ -13,6 +13,8 @@ public final class PastureGeometry {
     private PastureGeometry() {}
     public static final Map<String, ModelLayerLocation> LAYERS = new LinkedHashMap<>();
     static {
+        LAYERS.put("prismatic_antelope",new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath("tnc","prismatic_antelope"),"main"));
+        LAYERS.put("drumbelly_otter",new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath("tnc","drumbelly_otter"),"main"));
         LAYERS.put("stonebarrow_boar", new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "stonebarrow_boar"), "main"));
         LAYERS.put("emberback_hog", new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "emberback_hog"), "main"));
         LAYERS.put("tideback_newt", new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "tideback_newt"), "main"));
@@ -38,6 +40,8 @@ public final class PastureGeometry {
         LAYERS.put("pillowlight_marten", new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "pillowlight_marten"), "main"));
     }
     public static LayerDefinition layer(String species) {
+        if(species.equals("prismatic_antelope"))return RoutePastureModels.antelope();
+        if(species.equals("drumbelly_otter"))return RoutePastureModels.otter();
         return switch (species) {
             case "stonebarrow_boar" -> stonebarrow_boar();
             case "emberback_hog" -> emberback_hog();
@@ -66,6 +70,7 @@ public final class PastureGeometry {
         };
     }
     public static String[][] bones(String species) {
+        if(species.equals("prismatic_antelope")||species.equals("drumbelly_otter"))return RoutePastureModels.bones(species.equals("prismatic_antelope"));
         return switch (species) {
             case "stonebarrow_boar" -> new String[][]{{"body", "root"}, {"head", "root"}, {"leg_fl", "root"}, {"leg_fr", "root"}, {"leg_bl", "root"}, {"leg_br", "root"}, {"tail", "body"}};
             case "emberback_hog" -> new String[][]{{"body", "root"}, {"head", "root"}, {"vent_l", "body"}, {"vent_r", "body"}, {"resource_heat", "body"}, {"leg_fl", "root"}, {"leg_fr", "root"}, {"leg_bl", "root"}, {"leg_br", "root"}, {"tail", "body"}};

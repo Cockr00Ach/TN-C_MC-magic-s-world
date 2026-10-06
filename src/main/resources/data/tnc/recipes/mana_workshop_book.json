@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " P ",
+    " B "
+  ],
+  "key": {
+    "P": {
+      "item": "minecraft:copper_ingot"
+    },
+    "B": {
+      "item": "minecraft:book"
+    }
+  },
+  "result": {
+    "item": "tnc:mana_workshop_book",
+    "count": 1
+  }
+}

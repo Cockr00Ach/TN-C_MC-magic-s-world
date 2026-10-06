@@ -1,0 +1,11 @@
+package com.tnc.tnc.life.routes;
+import net.minecraft.world.item.*;
+/** A wearable armor item: the powered pack is visible on the player. */
+public final class RouteMechItem extends ArmorItem implements ManaCharged {
+    public RouteMechItem(){super(ArmorMaterials.IRON,Type.CHESTPLATE,new Properties().stacksTo(1));}
+    public int manaCapacity(){return 6000;}
+    @Override public String getArmorTexture(ItemStack stack,net.minecraft.world.entity.Entity entity,net.minecraft.world.entity.EquipmentSlot slot,String type){return "tnc:textures/models/armor/mana_mech_layer_1.png";}
+    @Override public void inventoryTick(ItemStack stack,net.minecraft.world.level.Level l,net.minecraft.world.entity.Entity holder,int slot,boolean selected){if(holder instanceof net.minecraft.server.level.ServerPlayer p){var ledger=RouteChargeLedger.get(p.serverLevel());ledger.sync(stack);if(p.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST)==stack&&p.tickCount%20==0&&p.isSprinting()&&ledger.spend(stack,2))p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SPEED,25,0));}}
+    @Override public void appendHoverText(ItemStack stack,net.minecraft.world.level.Level l,java.util.List<net.minecraft.network.chat.Component> out,TooltipFlag flags){out.add(net.minecraft.network.chat.Component.literal("储魔 "+(stack.hasTag()?stack.getTag().getInt("ChargedMana"):0)+"/6000 · 接入饰品充能台补充"));out.add(net.minecraft.network.chat.Component.literal("右键穿戴；行走免费，机枪使用真实箭及机甲储魔"));}
+    @Override public void initializeClient(java.util.function.Consumer<net.minecraftforge.client.extensions.common.IClientItemExtensions> c){c.accept(new net.minecraftforge.client.extensions.common.IClientItemExtensions(){private net.minecraft.client.model.HumanoidModel<?> model;@Override public net.minecraft.client.model.HumanoidModel<?> getHumanoidArmorModel(net.minecraft.world.entity.LivingEntity entity,ItemStack stack,net.minecraft.world.entity.EquipmentSlot slot,net.minecraft.client.model.HumanoidModel<?> original){if(model==null)model=new net.minecraft.client.model.HumanoidModel<>(net.minecraft.client.Minecraft.getInstance().getEntityModels().bakeLayer(RouteMechModel.LAYER));return model;}});}
+}

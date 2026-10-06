@@ -1,25 +1,21 @@
 {
-  "type": "minecraft:crafting_shapeless",
-  "ingredients": [
-    {
-      "item": "minecraft:iron_bars"
-    },
-    {
-      "item": "minecraft:iron_bars"
-    },
-    {
-      "item": "minecraft:iron_bars"
-    },
-    {
-      "item": "minecraft:iron_bars"
-    },
-    {
-      "item": "minecraft:lead"
-    },
-    {
-      "item": "minecraft:stick"
-    }
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "III",
+    "IBI",
+    "L L"
   ],
+  "key": {
+    "I": {
+      "item": "tnc:spirit_iron"
+    },
+    "B": {
+      "item": "minecraft:glass_bottle"
+    },
+    "L": {
+      "tag": "minecraft:logs"
+    }
+  },
   "result": {
     "item": "tnc:pasture_cage",
     "count": 1

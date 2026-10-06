@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "tnc:prism_horn_shard"
+    },
+    {
+      "item": "tnc:spirit_iron"
+    },
+    {
+      "item": "minecraft:stone_bricks"
+    }
+  ],
+  "result": {
+    "item": "tnc:color_target"
+  }
+}

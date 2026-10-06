@@ -89,10 +89,10 @@ public final class WarningMoss {
             super(BlockBehaviour.Properties.copy(Blocks.MOSS_CARPET).noCollission().randomTicks()
                     .lightLevel(state -> state.getValue(LIT) ? 9 : 0));
             registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH)
-                    .setValue(LIT, false).setValue(AGE, 0));
+                    .setValue(LIT, false).setValue(AGE, 0).setValue(com.tnc.tnc.life.routes.RoutePlantBlock.WILD,false));
         }
         @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-            builder.add(FACING, LIT, AGE);
+            builder.add(FACING, LIT, AGE,com.tnc.tnc.life.routes.RoutePlantBlock.WILD);
         }
         @Override public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
             return switch (state.getValue(FACING)) {
@@ -147,7 +147,8 @@ public final class WarningMoss {
             if (level.isClientSide) return InteractionResult.SUCCESS;
             if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer
                     && TownProtection.denied(serverPlayer, pos)) return InteractionResult.FAIL;
-            Block.popResource(level, pos, new ItemStack(FLAKE));
+            Block.popResource(level, pos, player.getItemInHand(hand).is(net.minecraft.world.item.Items.SHEARS)?new ItemStack(SPORE):new ItemStack(FLAKE));
+            if(player instanceof net.minecraft.server.level.ServerPlayer p)com.tnc.tnc.life.routes.RouteProgress.award(p,"harvest/warning_moss");
             level.setBlock(pos, state.setValue(AGE, 1), 3);
             return InteractionResult.CONSUME;
         }

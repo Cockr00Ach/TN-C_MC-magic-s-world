@@ -29,14 +29,14 @@ public final class MagicForgeScreen extends AbstractContainerScreen<MagicForgeMe
         fill(g,8,26,284,12,0xfff1e9d9);fill(g,8,40,129,90,0xff57504a);fill(g,140,40,1,116,0xffbbab92);
         for(int i=0;i<menu.slots.size();i++){var s=menu.slots.get(i);fill(g,s.x-1,s.y-1,18,18,0xff756a5a);fill(g,s.x,s.y,16,16,i<6?0xffbdaa87:0xffc7bda8);}
         fill(g,73,71,28,5,0xff2d2c2a);fill(g,74,72,26*Math.min(menu.progress(),menu.workTicks())/menu.workTicks(),3,0xffb77f48);
-        fill(g,15,124,114,4,INK);fill(g,16,125,112*menu.charge()/200,2,0xff68c6a5);
+        fill(g,15,124,114,4,INK);fill(g,16,125,112*menu.charge()/MagicForgeBlockEntity.MAX_CHARGE,2,0xff68c6a5);
         var list=visible();for(int row=0;row<3&&scroll+row<list.size();row++)fill(g,RX,RY+row*RH,RW,RH-1,list.get(scroll+row)==menu.selectedIndex()?0xffceb184:0xfff1e8d7);
         for(int l=0;l<3;l++)for(int r=0;r<3;r++)for(int c=0;c<3;c++){int code=menu.cell(ForgeStructure.index(l,r,c));fill(g,156+l*47+c*6,137+r*6,5,5,code==0?0xff5baf84:code==2?0xff8f98a5:0xffce755f);}
     }
     @Override protected void renderLabels(GuiGraphics g,int mx,int my){
         g.drawString(font,"炼金炉",10,8,0xfff7e7c9,false);g.drawString(font,font.plainSubstrByWidth(issue(),275),12,28,menu.formed()?0xff377d5a:0xff985340,false);
         g.drawString(font,"投料",19,46,0xfff4e7d1,false);g.drawString(font,"成品",108,57,0xfff4e7d1,false);g.drawString(font,"升级",108,93,0xfff4e7d1,false);
-        g.drawString(font,"魔力 "+menu.charge()+"/200",16,112,0xffa8efd6,false);
+        g.drawString(font,"魔力 "+menu.charge()+"/"+MagicForgeBlockEntity.MAX_CHARGE,16,112,0xffa8efd6,false);
         var list=visible();for(int row=0;row<3&&scroll+row<list.size();row++){var out=menu.recipes().get(list.get(scroll+row)).getResultItem(minecraft.level.registryAccess());g.renderItem(out,RX+2,RY+row*RH+1);g.drawString(font,font.plainSubstrByWidth(out.getHoverName().getString(),120),RX+21,RY+row*RH+6,INK,false);}
         var selected=menu.selectedIndex()>=0&&menu.selectedIndex()<menu.recipes().size()?menu.recipes().get(menu.selectedIndex()):null;
         g.drawString(font,selected==null?"选择工艺后显示所需材料":"本次需要 "+selected.mana()+" 魔力",RX,119,0xff4a6156,false);

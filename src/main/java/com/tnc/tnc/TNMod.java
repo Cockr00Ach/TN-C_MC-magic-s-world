@@ -191,6 +191,7 @@ public class TNMod
     public TNMod(FMLJavaModLoadingContext context)
     {
         IEventBus modEventBus = context.getModEventBus();
+        com.tnc.tnc.life.routes.RouteContent.register(modEventBus);
 
         // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);

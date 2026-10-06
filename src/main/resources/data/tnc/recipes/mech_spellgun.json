@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " C ",
+    "MTM",
+    " I "
+  ],
+  "key": {
+    "C": {
+      "item": "tnc:storm_crystal"
+    },
+    "M": {
+      "item": "tnc:star_marrow"
+    },
+    "T": {
+      "item": "tnc:mist_cloth"
+    },
+    "I": {
+      "item": "tnc:spirit_iron"
+    }
+  },
+  "result": {
+    "item": "tnc:mech_spellgun",
+    "count": 1
+  }
+}

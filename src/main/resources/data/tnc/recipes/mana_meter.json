@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " C ",
+    " I ",
+    " L "
+  ],
+  "key": {
+    "C": {
+      "item": "minecraft:glass"
+    },
+    "I": {
+      "item": "tnc:spirit_iron"
+    },
+    "L": {
+      "item": "minecraft:stick"
+    }
+  },
+  "result": {
+    "item": "tnc:mana_meter",
+    "count": 1
+  }
+}

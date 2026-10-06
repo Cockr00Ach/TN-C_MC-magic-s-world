@@ -99,6 +99,7 @@ public final class BellwoolSheepEntity extends Animal {
             nuzzleTicks = Math.max(0, nuzzleTicks - 1);
         }
         super.aiStep();
+        if (!level().isClientSide) com.tnc.tnc.life.routes.RouteBellCare.tick(this);
         if (!level().isClientSide && isSheared() && level().getGameTime() >= nextHarvestTick)
             setSheared(false);
         if (!level().isClientSide) lastActiveTick = level().getGameTime();
@@ -155,6 +156,7 @@ public final class BellwoolSheepEntity extends Animal {
 
     @Override public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
+        if(player instanceof ServerPlayer p&&stack.getItem() instanceof com.tnc.tnc.life.pasture.PastureStaffItem&&(caretaker==null||caretaker.equals(p.getUUID()))){stack.getOrCreateTag().putUUID("Animal",getUUID());stack.getOrCreateTag().putString("Dimension",level().dimension().location().toString());return InteractionResult.SUCCESS;}
         if (player instanceof ServerPlayer serverPlayer
                 && (stack.is(Items.SHEARS) || isFood(stack)) && !mayCareFor(serverPlayer)) {
             serverPlayer.displayClientMessage(Component.literal("这只响铃羊有照料者，或当前地块禁止操作。"), true);
@@ -207,6 +209,7 @@ public final class BellwoolSheepEntity extends Animal {
         long now = level().getGameTime();
         setSheared(true);
         nextHarvestTick = now + HARVEST_INTERVAL;
+        com.tnc.tnc.life.routes.RouteProgress.award(player,"harvest/bellwool_sheep");
         lastActiveTick = now;
         level().playSound(null, blockPosition(), SoundEvents.SHEEP_SHEAR,
                 SoundSource.PLAYERS, 0.85F, 1.13F);

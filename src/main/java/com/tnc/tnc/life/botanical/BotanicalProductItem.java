@@ -35,6 +35,7 @@ public final class BotanicalProductItem extends Item {
         return super.use(level,player,hand);
     }
     @Override public InteractionResult useOn(UseOnContext c){if(c.getPlayer()==null)return InteractionResult.PASS;
+        var plant=com.tnc.tnc.life.routes.RoutePlanting.plantFruit(id,c);if(plant!=InteractionResult.PASS)return plant;
         if(id.equals("stone_pattern_leaf")||id.equals("shadow_silk")){var p=c.getPlayer();var l=c.getLevel();if(l.isClientSide)return InteractionResult.SUCCESS;var needed=id.equals("stone_pattern_leaf")?"stone_rubbing_page":"shadow_pattern_card";int paper=find(p,Items.PAPER);if(paper<0)return InteractionResult.FAIL;ItemStack page=new ItemStack(BotanicalContent.PRODUCTS.get(needed));if(c.getItemInHand().hasTag())page.setTag(c.getItemInHand().getTag().copy());p.getInventory().getItem(paper).shrink(1);c.getItemInHand().shrink(1);if(!p.getInventory().add(page))p.drop(page,false);return InteractionResult.CONSUME;}
         return super.useOn(c);
     }

@@ -1,0 +1,93 @@
+{
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "plant": "tnc:block/route_plants",
+    "particle": "tnc:block/route_plants"
+  },
+  "elements": [
+    {
+      "from": [
+        4.0,
+        0,
+        7.99
+      ],
+      "to": [
+        12.0,
+        8,
+        8.01
+      ],
+      "rotation": {
+        "origin": [
+          8,
+          0,
+          8
+        ],
+        "axis": "y",
+        "angle": 45,
+        "rescale": true
+      },
+      "faces": {
+        "north": {
+          "texture": "#plant",
+          "uv": [
+            4,
+            4,
+            8,
+            8
+          ]
+        },
+        "south": {
+          "texture": "#plant",
+          "uv": [
+            4,
+            4,
+            8,
+            8
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        4.0,
+        0,
+        7.99
+      ],
+      "to": [
+        12.0,
+        8,
+        8.01
+      ],
+      "rotation": {
+        "origin": [
+          8,
+          0,
+          8
+        ],
+        "axis": "y",
+        "angle": -45,
+        "rescale": true
+      },
+      "faces": {
+        "north": {
+          "texture": "#plant",
+          "uv": [
+            4,
+            4,
+            8,
+            8
+          ]
+        },
+        "south": {
+          "texture": "#plant",
+          "uv": [
+            4,
+            4,
+            8,
+            8
+          ]
+        }
+      }
+    }
+  ]
+}

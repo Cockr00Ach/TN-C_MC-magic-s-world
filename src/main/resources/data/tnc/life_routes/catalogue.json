@@ -1,0 +1,1879 @@
+{
+  "traditional": [
+    {
+      "name": "小麦",
+      "blocks": [
+        "minecraft:wheat"
+      ],
+      "item": "minecraft:wheat_seeds",
+      "seasons": "春、秋",
+      "mask": 5,
+      "use": "面包、面食、谷草饲料、酒馆供货",
+      "recipes": [
+        "minecraft:bread",
+        "minecraft:cake",
+        "twilightdelight:aurora_pie",
+        "twilightdelight:aurora_cake"
+      ]
+    },
+    {
+      "name": "胡萝卜",
+      "blocks": [
+        "minecraft:carrots"
+      ],
+      "item": "minecraft:carrot",
+      "seasons": "春、秋、冬",
+      "mask": 13,
+      "use": "菜肴、兔类喜食；冬季基础口粮",
+      "recipes": [
+        "小炒肥虫",
+        "Alex 的营养餐",
+        "下界芦苇炖菜",
+        "萝卜羊肉汤"
+      ]
+    },
+    {
+      "name": "马铃薯",
+      "blocks": [
+        "minecraft:potatoes"
+      ],
+      "item": "minecraft:potato",
+      "seasons": "春、秋、冬",
+      "mask": 13,
+      "use": "烤薯、汤、豪豕饲料",
+      "recipes": [
+        "一串土豆",
+        "垒脊焖锅",
+        "极地炖肉",
+        "土豆泥瘤兽排"
+      ]
+    },
+    {
+      "name": "甜菜",
+      "blocks": [
+        "minecraft:beetroots"
+      ],
+      "item": "minecraft:beetroot_seeds",
+      "seasons": "春、秋、冬",
+      "mask": 13,
+      "use": "汤、根菜饲料",
+      "recipes": [
+        "蛀虫精华甜菜汤",
+        "荧光浇汁鹿排配意面",
+        "一串甜菜",
+        "垒脊焖锅"
+      ]
+    },
+    {
+      "name": "西瓜",
+      "blocks": [
+        "minecraft:melon_stem",
+        "minecraft:melon"
+      ],
+      "item": "minecraft:melon_seeds",
+      "seasons": "夏",
+      "mask": 2,
+      "use": "饮品、浮鲸和貂喜食",
+      "recipes": []
+    },
+    {
+      "name": "南瓜",
+      "blocks": [
+        "minecraft:pumpkin_stem",
+        "minecraft:pumpkin"
+      ],
+      "item": "minecraft:pumpkin_seeds",
+      "seasons": "秋",
+      "mask": 4,
+      "use": "派、填馅南瓜、节庆供货",
+      "recipes": [
+        "minecraft:pumpkin_pie",
+        "暮炭慢炖"
+      ]
+    },
+    {
+      "name": "甜浆果",
+      "blocks": [
+        "minecraft:sweet_berry_bush"
+      ],
+      "item": "minecraft:sweet_berries",
+      "seasons": "春、夏",
+      "mask": 3,
+      "use": "甜点、商店供货、蛙/蜗等喜食",
+      "recipes": [
+        "fruitsdelight:sweetberry_jelly",
+        "fruitsdelight:fig_pudding",
+        "海煲",
+        "bosses_delight:magic_frozen_noodles_block"
+      ]
+    },
+    {
+      "name": "发光浆果",
+      "blocks": [
+        "minecraft:cave_vines",
+        "minecraft:cave_vines_plant"
+      ],
+      "item": "minecraft:glow_berries",
+      "seasons": "全年、洞窟",
+      "mask": 15,
+      "use": "地下食物与景观；保留原生藤面要求",
+      "recipes": [
+        "fruitsdelight:glowberry_jelly",
+        "farmersdelight:gleaming_salad_block"
+      ]
+    },
+    {
+      "name": "可可",
+      "blocks": [
+        "minecraft:cocoa"
+      ],
+      "item": "minecraft:cocoa_beans",
+      "seasons": "夏",
+      "mask": 2,
+      "use": "可可食品；保留丛林木附着",
+      "recipes": [
+        "残骸脆脆卷",
+        "farmersdelight:chocolate_pie"
+      ]
+    },
+    {
+      "name": "甘蔗",
+      "blocks": [
+        "minecraft:sugar_cane"
+      ],
+      "item": "minecraft:sugar_cane",
+      "seasons": "春、夏、秋",
+      "mask": 7,
+      "use": "糖、纸、筑狸喜食；冬反季慢长",
+      "recipes": [
+        "捆绑香蕉"
+      ]
+    },
+    {
+      "name": "竹",
+      "blocks": [
+        "minecraft:bamboo",
+        "minecraft:bamboo_sapling"
+      ],
+      "item": "minecraft:bamboo",
+      "seasons": "春、夏、秋",
+      "mask": 7,
+      "use": "材料，不改已有家具只能购买原则",
+      "recipes": []
+    },
+    {
+      "name": "仙人掌",
+      "blocks": [
+        "minecraft:cactus"
+      ],
+      "item": "minecraft:cactus",
+      "seasons": "全年、旱生",
+      "mask": 15,
+      "use": "染料、沙园；不额外编成种粮路线",
+      "recipes": [
+        "additional_rpg_jewelry:cactea_ring"
+      ]
+    },
+    {
+      "name": "棕蘑菇、红蘑菇",
+      "blocks": [
+        "minecraft:brown_mushroom",
+        "minecraft:red_mushroom"
+      ],
+      "item": "minecraft:brown_mushroom",
+      "seasons": "全年、菌床",
+      "mask": 15,
+      "use": "汤、原料；仍有原模组光照/基底规则",
+      "recipes": [
+        "夜行蝠煲",
+        "饺子",
+        "minecraft:mushroom_stew",
+        "minecraft:rabbit_stew"
+      ]
+    },
+    {
+      "name": "海带",
+      "blocks": [
+        "minecraft:kelp",
+        "minecraft:kelp_plant"
+      ],
+      "item": "minecraft:kelp",
+      "seasons": "全年、水生",
+      "mask": 15,
+      "use": "烘干、海园与食品；不套陆地浇水",
+      "recipes": []
+    },
+    {
+      "name": "海泡菜",
+      "blocks": [
+        "minecraft:sea_pickle"
+      ],
+      "item": "minecraft:sea_pickle",
+      "seasons": "全年、水生",
+      "mask": 15,
+      "use": "照明、染料；原生繁殖，不冒充普通 crop",
+      "recipes": []
+    },
+    {
+      "name": "地狱疣",
+      "blocks": [
+        "minecraft:nether_wart"
+      ],
+      "item": "minecraft:nether_wart",
+      "seasons": "全年、下界",
+      "mask": 15,
+      "use": "炼药；灵魂沙条件不变",
+      "recipes": [
+        "炽足兽炖下界疣"
+      ]
+    },
+    {
+      "name": "绯红菌、诡异菌",
+      "blocks": [
+        "minecraft:crimson_fungus",
+        "minecraft:warped_fungus"
+      ],
+      "item": "minecraft:crimson_fungus",
+      "seasons": "全年、下界",
+      "mask": 15,
+      "use": "菌木生产；保留菌岩条件",
+      "recipes": [
+        "下界沙拉",
+        "绯红菌岩浆膏炖肉",
+        "绯红沙拉",
+        "kaleidoscope_cookery:crimson_fungus_pot_soup"
+      ]
+    },
+    {
+      "name": "垂泪藤、缠怨藤",
+      "blocks": [
+        "minecraft:weeping_vines",
+        "minecraft:twisting_vines"
+      ],
+      "item": "minecraft:weeping_vines",
+      "seasons": "全年、下界",
+      "mask": 15,
+      "use": "景观、攀爬；按生长机制适配，不强套 CropBlock",
+      "recipes": [
+        "绯红沙拉"
+      ]
+    },
+    {
+      "name": "紫颂",
+      "blocks": [
+        "minecraft:chorus_flower",
+        "minecraft:chorus_plant"
+      ],
+      "item": "minecraft:chorus_flower",
+      "seasons": "全年、末地",
+      "mask": 15,
+      "use": "果实与建筑材料；保留末地石条件",
+      "recipes": []
+    },
+    {
+      "name": "橡树产苹果",
+      "blocks": [
+        "minecraft:oak_sapling",
+        "minecraft:dark_oak_sapling"
+      ],
+      "item": "minecraft:oak_sapling",
+      "seasons": "树长全年；果实概念秋",
+      "mask": 15,
+      "use": "原版掉落苹果不能简单改果树 age；第一版不减少基础树叶掉落",
+      "recipes": []
+    },
+    {
+      "name": "农夫卷心菜",
+      "blocks": [
+        "farmersdelight:cabbages"
+      ],
+      "item": "farmersdelight:cabbage_seeds",
+      "seasons": "春、秋、冬",
+      "mask": 13,
+      "use": "菜叶、汤和料理；野生卷心菜是发现入口",
+      "recipes": [
+        "farmersdelight:gleaming_salad_block"
+      ]
+    },
+    {
+      "name": "农夫洋葱",
+      "blocks": [
+        "farmersdelight:onions"
+      ],
+      "item": "farmersdelight:onion",
+      "seasons": "春、秋、冬",
+      "mask": 13,
+      "use": "洋葱本身可作种源，配菜和热餐",
+      "recipes": [
+        "小炒肥虫"
+      ]
+    },
+    {
+      "name": "农夫番茄",
+      "blocks": [
+        "farmersdelight:budding_tomatoes",
+        "farmersdelight:tomatoes",
+        "farmersdelight:tomatoes_on_rope"
+      ],
+      "item": "farmersdelight:tomato_seeds",
+      "seasons": "夏、秋",
+      "mask": 6,
+      "use": "同一种作物的状态/支架变体，不拆三任务",
+      "recipes": []
+    },
+    {
+      "name": "农夫水稻",
+      "blocks": [
+        "farmersdelight:rice",
+        "farmersdelight:rice_panicles"
+      ],
+      "item": "farmersdelight:rice",
+      "seasons": "夏、秋",
+      "mask": 6,
+      "use": "水下根、地上穗联动；不能只限顶端生长",
+      "recipes": []
+    },
+    {
+      "name": "农夫红/棕蘑菇菌落",
+      "blocks": [
+        "farmersdelight:red_mushroom_colony",
+        "farmersdelight:brown_mushroom_colony"
+      ],
+      "item": "farmersdelight:red_mushroom_colony",
+      "seasons": "全年",
+      "mask": 15,
+      "use": "两类菌落，生长与采收保留原机制",
+      "recipes": []
+    },
+    {
+      "name": "森罗番茄",
+      "blocks": [
+        "kaleidoscope_cookery:tomato_crop"
+      ],
+      "item": "kaleidoscope_cookery:tomato_seed",
+      "seasons": "夏、秋",
+      "mask": 6,
+      "use": "与农夫番茄来源分别记，食品兼容按实际配方标签",
+      "recipes": []
+    },
+    {
+      "name": "森罗生菜",
+      "blocks": [
+        "kaleidoscope_cookery:lettuce_crop"
+      ],
+      "item": "kaleidoscope_cookery:lettuce_seed",
+      "seasons": "春、秋、冬",
+      "mask": 13,
+      "use": "清爽餐与热锅；不误当农夫卷心菜",
+      "recipes": [
+        "下界芦苇炖菜"
+      ]
+    },
+    {
+      "name": "森罗辣椒",
+      "blocks": [
+        "kaleidoscope_cookery:chili_crop"
+      ],
+      "item": "kaleidoscope_cookery:chili_seed",
+      "seasons": "夏、秋",
+      "mask": 6,
+      "use": "红/绿辣椒是成熟表现与食材，不算两个种植品种",
+      "recipes": []
+    },
+    {
+      "name": "森罗水稻",
+      "blocks": [
+        "kaleidoscope_cookery:rice_crop"
+      ],
+      "item": "kaleidoscope_cookery:rice",
+      "seasons": "夏、秋",
+      "mask": 6,
+      "use": "实际种法单独写；不冒充农夫水下稻根",
+      "recipes": []
+    },
+    {
+      "name": "亚麻",
+      "blocks": [
+        "supplementaries:flax"
+      ],
+      "item": "supplementaries:flax",
+      "seasons": "春、夏",
+      "mask": 3,
+      "use": "亚麻籽→纤维；普通纺织与工坊材料",
+      "recipes": []
+    },
+    {
+      "name": "苹果",
+      "blocks": [
+        "fruitsdelight:apple_sapling",
+        "fruitsdelight:apple_leaves"
+      ],
+      "item": "fruitsdelight:apple_sapling",
+      "seasons": "秋",
+      "mask": 4,
+      "use": "原版苹果、果酱/果冻、食品",
+      "recipes": []
+    },
+    {
+      "name": "杨梅",
+      "blocks": [
+        "fruitsdelight:bayberry_sapling",
+        "fruitsdelight:bayberry_leaves"
+      ],
+      "item": "fruitsdelight:bayberry_sapling",
+      "seasons": "夏",
+      "mask": 2,
+      "use": "杨梅食品、饼干、果酱/果冻",
+      "recipes": []
+    },
+    {
+      "name": "蓝莓",
+      "blocks": [
+        "fruitsdelight:blueberry_bush"
+      ],
+      "item": "fruitsdelight:blueberry_bush",
+      "seasons": "春、夏",
+      "mask": 3,
+      "use": "浆果、果酱/果冻",
+      "recipes": []
+    },
+    {
+      "name": "蔓越莓",
+      "blocks": [
+        "fruitsdelight:cranberry_bush"
+      ],
+      "item": "fruitsdelight:cranberry",
+      "seasons": "秋、冬",
+      "mask": 12,
+      "use": "浆果、果酱/果冻",
+      "recipes": []
+    },
+    {
+      "name": "榴莲",
+      "blocks": [
+        "fruitsdelight:durian_sapling",
+        "fruitsdelight:durian_leaves"
+      ],
+      "item": "fruitsdelight:durian_sapling",
+      "seasons": "夏",
+      "mask": 2,
+      "use": "果肉、烤榴莲、加工",
+      "recipes": []
+    },
+    {
+      "name": "无花果",
+      "blocks": [
+        "fruitsdelight:fig_sapling",
+        "fruitsdelight:fig_leaves"
+      ],
+      "item": "fruitsdelight:fig_sapling",
+      "seasons": "夏、秋",
+      "mask": 6,
+      "use": "鲜果、加工",
+      "recipes": []
+    },
+    {
+      "name": "哈密瓜",
+      "blocks": [
+        "fruitsdelight:hamimelon_stem",
+        "fruitsdelight:attached_hamimelon_stem"
+      ],
+      "item": "fruitsdelight:hamimelon_seeds",
+      "seasons": "夏",
+      "mask": 2,
+      "use": "瓜与加工；连接茎共享进度",
+      "recipes": []
+    },
+    {
+      "name": "山楂",
+      "blocks": [
+        "fruitsdelight:hawberry_sapling",
+        "fruitsdelight:hawberry_leaves"
+      ],
+      "item": "fruitsdelight:hawberry_sapling",
+      "seasons": "秋",
+      "mask": 4,
+      "use": "鲜果与加工",
+      "recipes": []
+    },
+    {
+      "name": "猕猴桃",
+      "blocks": [
+        "fruitsdelight:kiwi_sapling",
+        "fruitsdelight:kiwi_leaves"
+      ],
+      "item": "fruitsdelight:kiwi_sapling",
+      "seasons": "秋、冬",
+      "mask": 12,
+      "use": "鲜果与加工",
+      "recipes": []
+    },
+    {
+      "name": "柠檬",
+      "blocks": [
+        "fruitsdelight:lemon_tree"
+      ],
+      "item": "fruitsdelight:lemon_tree",
+      "seasons": "夏、秋",
+      "mask": 6,
+      "use": "柠檬水与加工；这里不是虚构 lemon_sapling",
+      "recipes": []
+    },
+    {
+      "name": "荔枝",
+      "blocks": [
+        "fruitsdelight:lychee_sapling",
+        "fruitsdelight:lychee_leaves"
+      ],
+      "item": "fruitsdelight:lychee_sapling",
+      "seasons": "夏",
+      "mask": 2,
+      "use": "鲜果与加工",
+      "recipes": []
+    },
+    {
+      "name": "芒果",
+      "blocks": [
+        "fruitsdelight:mango_sapling",
+        "fruitsdelight:mango_leaves"
+      ],
+      "item": "fruitsdelight:mango_sapling",
+      "seasons": "夏",
+      "mask": 2,
+      "use": "鲜果与加工",
+      "recipes": []
+    },
+    {
+      "name": "山竹",
+      "blocks": [
+        "fruitsdelight:mangosteen_sapling",
+        "fruitsdelight:mangosteen_leaves"
+      ],
+      "item": "fruitsdelight:mangosteen_sapling",
+      "seasons": "夏",
+      "mask": 2,
+      "use": "鲜果与加工",
+      "recipes": []
+    },
+    {
+      "name": "橘子",
+      "blocks": [
+        "fruitsdelight:orange_sapling",
+        "fruitsdelight:orange_leaves"
+      ],
+      "item": "fruitsdelight:orange_sapling",
+      "seasons": "秋、冬",
+      "mask": 12,
+      "use": "鲜果与加工",
+      "recipes": []
+    },
+    {
+      "name": "水蜜桃",
+      "blocks": [
+        "fruitsdelight:peach_sapling",
+        "fruitsdelight:peach_leaves"
+      ],
+      "item": "fruitsdelight:peach_sapling",
+      "seasons": "夏",
+      "mask": 2,
+      "use": "鲜果与加工",
+      "recipes": []
+    },
+    {
+      "name": "梨",
+      "blocks": [
+        "fruitsdelight:pear_sapling",
+        "fruitsdelight:pear_leaves"
+      ],
+      "item": "fruitsdelight:pear_sapling",
+      "seasons": "秋",
+      "mask": 4,
+      "use": "烤梨、鲜果与加工",
+      "recipes": []
+    },
+    {
+      "name": "柿子",
+      "blocks": [
+        "fruitsdelight:persimmon_sapling",
+        "fruitsdelight:persimmon_leaves"
+      ],
+      "item": "fruitsdelight:persimmon_sapling",
+      "seasons": "秋、冬",
+      "mask": 12,
+      "use": "鲜果与加工",
+      "recipes": []
+    },
+    {
+      "name": "菠萝",
+      "blocks": [
+        "fruitsdelight:pineapple",
+        "fruitsdelight:wild_pineapple"
+      ],
+      "item": "fruitsdelight:pineapple",
+      "seasons": "夏",
+      "mask": 2,
+      "use": "菠萝饭与加工；野生为发现入口",
+      "recipes": [
+        "fruitsdelight:pineapple_fried_rice"
+      ]
+    },
+    {
+      "name": "凤梨乐事凤梨",
+      "blocks": [
+        "pineapple_delight:pineapple_crop",
+        "pineapple_delight:pineapple_wild_crop"
+      ],
+      "item": "pineapple_delight:pineapple_crop",
+      "seasons": "夏",
+      "mask": 2,
+      "use": "与果园菠萝不是同 ID；现有派、果汁等配方在书中按来源分别列",
+      "recipes": []
+    },
+    {
+      "name": "巨大凤梨",
+      "blocks": [
+        "pineapple_delight:huge_pineapple"
+      ],
+      "item": "pineapple_delight:huge_pineapple",
+      "seasons": "夏，先核实生存成长入口",
+      "mask": 2,
+      "use": "资源存在不等于普通作物能必然长出；先列特色条目，不承诺自动生长",
+      "recipes": []
+    },
+    {
+      "name": "葡萄",
+      "blocks": [
+        "kaleidoscope_tavern:grape_crop",
+        "kaleidoscope_tavern:grapevine_trellis"
+      ],
+      "item": "kaleidoscope_tavern:grape",
+      "seasons": "夏、秋",
+      "mask": 6,
+      "use": "架上与普通株共享品种，进入现有酿造",
+      "recipes": []
+    },
+    {
+      "name": "冰葡萄",
+      "blocks": [
+        "kaleidoscope_tavern:ice_grape_crop",
+        "kaleidoscope_tavern:ice_grapevine_trellis"
+      ],
+      "item": "kaleidoscope_tavern:ice_grape",
+      "seasons": "冬",
+      "mask": 8,
+      "use": "普通来源的特色栽培，不归为 TN-C 魔植",
+      "recipes": []
+    },
+    {
+      "name": "黄金葡萄",
+      "blocks": [
+        "kaleidoscope_tavern:gold_grape_crop",
+        "kaleidoscope_tavern:gold_grapevine_trellis"
+      ],
+      "item": "kaleidoscope_tavern:gold_grape",
+      "seasons": "秋",
+      "mask": 4,
+      "use": "普通来源的稀有果物，保留原获得规则",
+      "recipes": []
+    },
+    {
+      "name": "BWG 蓝莓",
+      "blocks": [
+        "biomeswevegone:blueberry_bush"
+      ],
+      "item": "biomeswevegone:blueberries",
+      "seasons": "春、夏",
+      "mask": 3,
+      "use": "独立于果园蓝莓，种源/果实需核对",
+      "recipes": [
+        "蓝莓派"
+      ]
+    },
+    {
+      "name": "BWG 奇异作物",
+      "blocks": [
+        "biomeswevegone:oddion_crop"
+      ],
+      "item": "biomeswevegone:oddion_bulb",
+      "seasons": "春、秋",
+      "mask": 5,
+      "use": "标签确认 `oddion_bulb` 为产物；食谱查原包",
+      "recipes": [
+        "熟的奇异洋葱球茎"
+      ]
+    },
+    {
+      "name": "BWG 苹果/青苹果果位",
+      "blocks": [
+        "biomeswevegone:apple_fruit",
+        "biomeswevegone:green_apple_fruit"
+      ],
+      "item": "minecraft:apple",
+      "seasons": "秋",
+      "mask": 4,
+      "use": "果树与果位联合处理；不是放一个苹果物品就变树",
+      "recipes": [
+        "fruitsdelight:apple_jelly",
+        "farmersdelight:apple_pie",
+        "水果沙拉",
+        "油醋汁沙拉"
+      ]
+    },
+    {
+      "name": "BWG 猴面包果",
+      "blocks": [
+        "biomeswevegone:baobab_fruit",
+        "biomeswevegone:baobab_sapling"
+      ],
+      "item": "biomeswevegone:baobab_fruit",
+      "seasons": "夏、秋",
+      "mask": 6,
+      "use": "果树产物，生存果实循环需验",
+      "recipes": []
+    },
+    {
+      "name": "BWG 丝兰果",
+      "blocks": [
+        "biomeswevegone:yucca_fruit",
+        "biomeswevegone:yucca_sapling"
+      ],
+      "item": "biomeswevegone:yucca_fruit",
+      "seasons": "夏",
+      "mask": 2,
+      "use": "果树产物，原生旱地规则需验",
+      "recipes": [
+        "熟的丝兰果实"
+      ]
+    },
+    {
+      "name": "BWG 刺梨仙人掌",
+      "blocks": [
+        "biomeswevegone:prickly_pear_cactus"
+      ],
+      "item": "biomeswevegone:prickly_pear_cactus",
+      "seasons": "全年、旱生",
+      "mask": 15,
+      "use": "是否有可再生可食收成需验；不是先写万能水果任务",
+      "recipes": []
+    },
+    {
+      "name": "BWG 绿色蘑菇",
+      "blocks": [
+        "biomeswevegone:green_mushroom"
+      ],
+      "item": "biomeswevegone:green_mushroom",
+      "seasons": "全年、菌床",
+      "mask": 15,
+      "use": "先核实掉落、扩展和食谱；装饰无食谱时放林园条目",
+      "recipes": []
+    },
+    {
+      "name": "BWG 死帽/乳菇",
+      "blocks": [
+        "biomeswevegone:death_cap_mushroom_block",
+        "biomeswevegone:weeping_milkcap_mushroom_block"
+      ],
+      "item": "biomeswevegone:weeping_milkcap_mushroom_block",
+      "seasons": "全年、菌床",
+      "mask": 15,
+      "use": "巨菇块资源已见；小株、再生与食用资格需验，不能把有毒名字当食品",
+      "recipes": []
+    },
+    {
+      "name": "Jerotes 二轮龙葵",
+      "blocks": [
+        "jerotesvillage:second_round_nigrums"
+      ],
+      "item": "jerotesvillage:second_round_nigrum",
+      "seasons": "夏、秋",
+      "mask": 6,
+      "use": "作物标签确认；熟龙葵、龙葵汤已有物品",
+      "recipes": []
+    },
+    {
+      "name": "Jerotes 二轮芦荟",
+      "blocks": [
+        "jerotesvillage:second_round_aloe_crop"
+      ],
+      "item": "jerotesvillage:second_round_aloe",
+      "seasons": "夏",
+      "mask": 2,
+      "use": "作物标签确认；芦荟叶与多级原浆",
+      "recipes": []
+    },
+    {
+      "name": "Jerotes 明路脆瓜",
+      "blocks": [
+        "jerotesvillage:bright_melons"
+      ],
+      "item": "jerotesvillage:bright_melon_seeds",
+      "seasons": "夏",
+      "mask": 2,
+      "use": "明路脆瓜与种子标签确认",
+      "recipes": []
+    },
+    {
+      "name": "Jerotes 无味瓜",
+      "blocks": [
+        "jerotesvillage:flavorless_melon_stem",
+        "jerotesvillage:attached_flavorless_melon_stem"
+      ],
+      "item": "jerotesvillage:flavorless_melon_seeds",
+      "seasons": "夏、秋",
+      "mask": 6,
+      "use": "种子标签确认；不是亮瓜换名",
+      "recipes": []
+    },
+    {
+      "name": "Jerotes 绿人杆",
+      "blocks": [
+        "jerotesvillage:green_humanoid_cane_crop"
+      ],
+      "item": "jerotesvillage:green_humanoid_cane",
+      "seasons": "春、夏",
+      "mask": 3,
+      "use": "叶杆类产物标签确认；用途由原配方查实",
+      "recipes": []
+    },
+    {
+      "name": "天境蓝莓",
+      "blocks": [
+        "aether:berry_bush",
+        "aether:berry_bush_stem"
+      ],
+      "item": "aether:berry_bush",
+      "seasons": "春、夏；原生维度全年",
+      "mask": 15,
+      "use": "栽培与天境土壤规则需验",
+      "recipes": []
+    },
+    {
+      "name": "天境水晶果",
+      "blocks": [
+        "aether:crystal_fruit_leaves"
+      ],
+      "item": "aether:crystal_fruit_leaves",
+      "seasons": "全年、天境",
+      "mask": 15,
+      "use": "果叶不是单独树苗；对应树和天境再生条件需验",
+      "recipes": []
+    },
+    {
+      "name": "Redux 赞莓",
+      "blocks": [
+        "aether_redux:zanberry_bush",
+        "aether_redux:zanberry_bush_stem"
+      ],
+      "item": "aether_redux:zanberry_bush",
+      "seasons": "夏、秋；原生维度全年",
+      "mask": 15,
+      "use": "资源确认；种源与移植条件需验",
+      "recipes": []
+    },
+    {
+      "name": "Redux 水晶果树",
+      "blocks": [
+        "aether_redux:crystal_fruit_sapling",
+        "aether_redux:purple_crystal_fruit_sapling"
+      ],
+      "item": "aether_redux:crystal_fruit_sapling",
+      "seasons": "全年、天境",
+      "mask": 15,
+      "use": "两种树苗资源存在，产物共享/差异需验",
+      "recipes": []
+    },
+    {
+      "name": "深层天境合浆树",
+      "blocks": [
+        "deep_aether:conberry_sapling",
+        "deep_aether:conberry_leaves"
+      ],
+      "item": "deep_aether:conberry_sapling",
+      "seasons": "秋；原生维度全年",
+      "mask": 15,
+      "use": "名字有 berry 不等于一定产食用果，先核实；无收成则转林园",
+      "recipes": []
+    },
+    {
+      "name": "深层天境光罩/云菇",
+      "blocks": [
+        "deep_aether:lightcap_mushrooms"
+      ],
+      "item": "deep_aether:lightcap_mushrooms",
+      "seasons": "全年、天境",
+      "mask": 15,
+      "use": "景观/生产性质需验，不自动归食品",
+      "recipes": []
+    },
+    {
+      "name": "暮色火炬浆果",
+      "blocks": [
+        "twilightforest:torchberry_plant"
+      ],
+      "item": "twilightforest:torchberry_plant",
+      "seasons": "全年、暮色",
+      "mask": 15,
+      "use": "现有食品与探险补给，确认再生种法",
+      "recipes": [
+        "万草煲"
+      ]
+    },
+    {
+      "name": "暮色鬼臼果",
+      "blocks": [
+        "twilightforest:mayapple"
+      ],
+      "item": "twilightforest:mayapple",
+      "seasons": "春、秋；原生维度全年",
+      "mask": 15,
+      "use": "资源存在；可食、再植资格需验",
+      "recipes": []
+    },
+    {
+      "name": "森罗末地梦莓",
+      "blocks": [
+        "kaleidoscope_end:dream_berry_head",
+        "kaleidoscope_end:dream_berry_plant"
+      ],
+      "item": "kaleidoscope_end:dream_berry",
+      "seasons": "全年、末地",
+      "mask": 15,
+      "use": "原生洞穴藤类；头/体共享一品种",
+      "recipes": [
+        "龙息乱烩",
+        "kaleidoscope_end:end_salad"
+      ]
+    },
+    {
+      "name": "森罗末地薄荷",
+      "blocks": [
+        "kaleidoscope_end:ender_mint"
+      ],
+      "item": "kaleidoscope_end:ender_mint",
+      "seasons": "全年、末地",
+      "mask": 15,
+      "use": "薄荷茶方向；原生种植规则需验",
+      "recipes": [
+        "末影薄荷糖",
+        "kaleidoscope_end:dark_dragon_steak",
+        "龙息乱烩",
+        "kaleidoscope_end:end_salad"
+      ]
+    },
+    {
+      "name": "森罗下界灵魂椒",
+      "blocks": [
+        "kaleidoscope_nether:soul_pepper"
+      ],
+      "item": "kaleidoscope_nether:soul_pepper",
+      "seasons": "全年、下界",
+      "mask": 15,
+      "use": "作物标签与独立 Crop 类确认；食用效果查原包",
+      "recipes": []
+    },
+    {
+      "name": "森罗下界迷毒果",
+      "blocks": [
+        "kaleidoscope_nether:poisonous_fruit"
+      ],
+      "item": "kaleidoscope_nether:poisonous_fruit",
+      "seasons": "全年、下界",
+      "mask": 15,
+      "use": "不要把带风险的产物宣传成普通补血果",
+      "recipes": [
+        "剧毒浓汤"
+      ]
+    },
+    {
+      "name": "大麦",
+      "blocks": [
+        "conquest:barley"
+      ],
+      "item": "conquest:barley",
+      "seasons": "春、秋",
+      "mask": 5,
+      "use": "按 JEI 当前配方加工",
+      "recipes": []
+    },
+    {
+      "name": "卷心菜",
+      "blocks": [
+        "conquest:cabbage"
+      ],
+      "item": "conquest:cabbage",
+      "seasons": "春、秋、冬",
+      "mask": 13,
+      "use": "按 JEI 当前配方加工",
+      "recipes": []
+    },
+    {
+      "name": "胡萝卜",
+      "blocks": [
+        "conquest:carrots"
+      ],
+      "item": "conquest:carrots",
+      "seasons": "春、秋、冬",
+      "mask": 13,
+      "use": "按 JEI 当前配方加工",
+      "recipes": []
+    },
+    {
+      "name": "菜豆",
+      "blocks": [
+        "conquest:common_beans"
+      ],
+      "item": "conquest:common_beans",
+      "seasons": "夏、秋",
+      "mask": 6,
+      "use": "按 JEI 当前配方加工",
+      "recipes": []
+    },
+    {
+      "name": "玉米",
+      "blocks": [
+        "conquest:corn"
+      ],
+      "item": "conquest:corn",
+      "seasons": "夏、秋",
+      "mask": 6,
+      "use": "按 JEI 当前配方加工",
+      "recipes": []
+    },
+    {
+      "name": "亚麻",
+      "blocks": [
+        "conquest:flax"
+      ],
+      "item": "conquest:flax",
+      "seasons": "春、夏",
+      "mask": 3,
+      "use": "按 JEI 当前配方加工",
+      "recipes": []
+    },
+    {
+      "name": "传统麦",
+      "blocks": [
+        "conquest:heirloom_wheat_crops"
+      ],
+      "item": "conquest:heirloom_wheat_crops",
+      "seasons": "春、秋",
+      "mask": 5,
+      "use": "按 JEI 当前配方加工",
+      "recipes": []
+    },
+    {
+      "name": "麻类",
+      "blocks": [
+        "conquest:hemp"
+      ],
+      "item": "conquest:hemp",
+      "seasons": "春、夏",
+      "mask": 3,
+      "use": "按 JEI 当前配方加工",
+      "recipes": []
+    },
+    {
+      "name": "豌豆",
+      "blocks": [
+        "conquest:peas"
+      ],
+      "item": "conquest:peas",
+      "seasons": "春、秋、冬",
+      "mask": 13,
+      "use": "按 JEI 当前配方加工",
+      "recipes": []
+    },
+    {
+      "name": "马铃薯",
+      "blocks": [
+        "conquest:potatoes"
+      ],
+      "item": "conquest:potatoes",
+      "seasons": "春、秋、冬",
+      "mask": 13,
+      "use": "按 JEI 当前配方加工",
+      "recipes": []
+    },
+    {
+      "name": "水稻",
+      "blocks": [
+        "conquest:rice"
+      ],
+      "item": "conquest:rice",
+      "seasons": "夏、秋",
+      "mask": 6,
+      "use": "按 JEI 当前配方加工",
+      "recipes": []
+    },
+    {
+      "name": "烟草",
+      "blocks": [
+        "conquest:tobacco"
+      ],
+      "item": "conquest:tobacco",
+      "seasons": "夏；非食物材料",
+      "mask": 2,
+      "use": "按 JEI 当前配方加工",
+      "recipes": []
+    },
+    {
+      "name": "芜菁",
+      "blocks": [
+        "conquest:turnips"
+      ],
+      "item": "conquest:turnips",
+      "seasons": "秋、冬",
+      "mask": 12,
+      "use": "按 JEI 当前配方加工",
+      "recipes": []
+    },
+    {
+      "name": "小麦",
+      "blocks": [
+        "conquest:wheat"
+      ],
+      "item": "conquest:wheat",
+      "seasons": "春、秋",
+      "mask": 5,
+      "use": "按 JEI 当前配方加工",
+      "recipes": []
+    },
+    {
+      "name": "野麦",
+      "blocks": [
+        "conquest:wild_wheat"
+      ],
+      "item": "conquest:wild_wheat",
+      "seasons": "春、秋",
+      "mask": 5,
+      "use": "按 JEI 当前配方加工",
+      "recipes": []
+    },
+    {
+      "name": "捕食/敌对植物",
+      "blocks": [
+        "mowziesmobs:foliaath_seed"
+      ],
+      "item": "mowziesmobs:foliaath_seed",
+      "seasons": "归生物/战斗图鉴",
+      "mask": 15,
+      "use": "不因 seeds 标签就当安全农作物种植任务",
+      "recipes": []
+    }
+  ],
+  "magic": [
+    {
+      "id": "homeward_flower",
+      "name": "归巢花",
+      "seed": "homeward_flower_seed",
+      "product": "homeward_flower_petal",
+      "use": "归途补给；归途缎带（拟新增）",
+      "help": "人工种植需要魔法土与八格内流动魔力。",
+      "discovery": "村路边、旧营地附近；根/芽"
+    },
+    {
+      "id": "warning_moss",
+      "name": "警铃苔",
+      "seed": "warning_moss_spore",
+      "product": "warning_moss_flake",
+      "use": "告示铃；牧场预警材料",
+      "help": "人工种植需要魔法土与八格内流动魔力。",
+      "discovery": "林缘石壁、废屋外墙；根/芽"
+    },
+    {
+      "id": "road_bell_crop",
+      "name": "铃穗草",
+      "seed": "road_bell_seed",
+      "product": "road_bell_ear",
+      "use": "铃穗饲捆；回声花园的自然音源",
+      "help": "人工种植需要魔法土与八格内流动魔力。",
+      "discovery": "平原道路、商队旧径；种＋产"
+    },
+    {
+      "id": "night_gourd_crop",
+      "name": "夜露葫",
+      "seed": "night_gourd_seed",
+      "product": "night_gourd",
+      "use": "防雾旅行补给；夜露料理",
+      "help": "人工种植需要魔法土与八格内流动魔力。",
+      "discovery": "湿润林缘；果种"
+    },
+    {
+      "id": "tide_reed_crop",
+      "name": "听潮苇",
+      "seed": "tide_reed_seed",
+      "product": "tide_reed_stem",
+      "use": "纸；压纹台；调查页",
+      "help": "人工种植需要魔法土与八格内流动魔力。",
+      "discovery": "河岸、湖湾；种＋产"
+    },
+    {
+      "id": "hushcap_mushroom",
+      "name": "静息菇",
+      "seed": "hushcap_spore",
+      "product": "hushcap_slice",
+      "use": "静息补给；菇片料理",
+      "help": "人工种植需要魔法土与八格内流动魔力。",
+      "discovery": "洞口、安静林地；根/芽"
+    },
+    {
+      "id": "rainletter_bush",
+      "name": "雨信蔓",
+      "seed": "rainletter_seed",
+      "product": "rainletter_berry",
+      "use": "旅行饮/补给；果蔬供货",
+      "help": "人工种植需要魔法土与八格内流动魔力。",
+      "discovery": "湿林、雨泽坡；果种"
+    },
+    {
+      "id": "mana_root",
+      "name": "蓄魔根",
+      "seed": "mana_root_seed",
+      "product": "mana_root_core",
+      "use": "便携储运；炉供魔；不算无成本产能",
+      "help": "人工种植需要魔法土与八格内流动魔力。",
+      "discovery": "旧法师营地周边土层；根/芽"
+    },
+    {
+      "id": "verdant_vein",
+      "name": "翠脉枝",
+      "seed": "verdant_vein_seed",
+      "product": "verdant_branch",
+      "use": "起步集露盏；小灯与炉供魔",
+      "help": "人工种植需要魔法土与八格内流动魔力。",
+      "discovery": "新生林缘、肥沃草坡；根/芽"
+    },
+    {
+      "id": "sky_vine",
+      "name": "天穹藤",
+      "seed": "sky_vine_seed",
+      "product": "sky_canopy_fiber",
+      "use": "真实攀爬；壮观景观；拟树冠供魔",
+      "help": "人工种植需要魔法土与八格内流动魔力。",
+      "discovery": "高崖脚、古老林地；种＋产"
+    },
+    {
+      "id": "dawn_disk",
+      "name": "晨晖盘葵",
+      "seed": "dawn_disk_seed",
+      "product": "dawn_honey",
+      "productName": "晨蜜",
+      "help": "栽培不挑环境；成株后经历真实黎明，用空瓶采晨蜜。",
+      "use": "晨蜜早餐；拟光能供给",
+      "discovery": "开阔草坡；根/芽"
+    },
+    {
+      "id": "hearth_pepper",
+      "name": "炉息椒",
+      "seed": "hearth_pepper_seed",
+      "product": "hearth_pepper_fruit",
+      "productName": "暖椒",
+      "help": "栽培不再需要热源；结出的暖椒用于餐食和暖息制作。",
+      "use": "暖椒汤；预热油；暖味远征餐",
+      "discovery": "暖岩坡、温泉外缘；果种"
+    },
+    {
+      "id": "mist_cotton",
+      "name": "雾织棉",
+      "seed": "mist_cotton_seed",
+      "product": "mist_cotton_fiber",
+      "productName": "雾棉",
+      "help": "栽培不挑环境；成株后真实清晨或雨停结绒。",
+      "use": "雾布；折叠雾帐；装备衬料",
+      "discovery": "河谷雾地；种＋产"
+    },
+    {
+      "id": "stone_fern",
+      "name": "岩函蕨",
+      "seed": "stone_fern_seed",
+      "product": "stone_pattern_leaf",
+      "productName": "岩纹叶",
+      "help": "土上也能栽培；根下岩面会改变岩纹记录。",
+      "use": "岩纹拓页；调查档案；部分动物设施材料",
+      "discovery": "露岩山脚；种＋产"
+    },
+    {
+      "id": "mirror_lotus",
+      "name": "镜潭莲",
+      "seed": "mirror_lotus_seed",
+      "product": "mirror_dew",
+      "productName": "镜露",
+      "help": "土上或静水面都可栽培；空瓶采镜露。",
+      "use": "镜莲饮；冷凝壳；量魔镜材料",
+      "discovery": "安静浅湖；根/芽"
+    },
+    {
+      "id": "wish_puff",
+      "name": "灯愿蒲",
+      "seed": "wish_puff_seed",
+      "product": "farlight_fruit",
+      "productName": "远照果",
+      "help": "全天、干土也可栽培；远照果投掷产生临时照明。",
+      "use": "约 50 格范围、20 秒临时照明；洞穴远征补给",
+      "discovery": "夜间可辨的草甸、废路旁；果种"
+    },
+    {
+      "id": "echo_bean",
+      "name": "回声豆",
+      "seed": "echo_bean_seed",
+      "product": "echo_bean_pod",
+      "productName": "回声豆",
+      "help": "不需要先听音才能长成；音符盒三音会记录豆荚音调。",
+      "use": "回音器件；拟节奏供魔，须扣一豆",
+      "discovery": "峡谷、回音洞口；果种"
+    },
+    {
+      "id": "ladder_vine",
+      "name": "梯脊藤",
+      "seed": "ladder_vine_seed",
+      "product": "vine_sinew",
+      "productName": "藤筋",
+      "help": "不需要支架；留四格高空间，每六分钟增一段。",
+      "use": "攀爬藤；织绳；工地脚手用途",
+      "discovery": "断崖脚、旧塔旁；种＋产"
+    },
+    {
+      "id": "frost_chime",
+      "name": "霜鸣蒿",
+      "seed": "frost_chime_seed",
+      "product": "frost_dew",
+      "productName": "霜露",
+      "help": "栽培不需要寒地或冰块；空瓶收两份霜露。",
+      "use": "霜椒餐；冷凝组件",
+      "discovery": "雪地外围、冷泉边；根/芽"
+    },
+    {
+      "id": "salt_ink",
+      "name": "盐墨菌",
+      "seed": "salt_ink_seed",
+      "product": "salt_ink",
+      "productName": "盐墨",
+      "help": "栽培不需要海水或盐盆；成熟采盐墨。",
+      "use": "调查墨；工坊记录器件",
+      "discovery": "海岸洞、盐岩旁；根/芽"
+    },
+    {
+      "id": "wind_sail",
+      "name": "风铃帆草",
+      "seed": "wind_sail_seed",
+      "product": "sail_fiber",
+      "productName": "帆纤维",
+      "help": "低地、室内与雨天都可栽培；收帆纤维。",
+      "use": "缓降布；帆材；拟风能供魔",
+      "discovery": "迎风丘陵；种＋产"
+    },
+    {
+      "id": "sleep_clock",
+      "name": "钟眠草",
+      "seed": "sleep_clock_seed",
+      "product": "sleep_leaf",
+      "productName": "静叶",
+      "help": "栽培不挑环境；成株后主人在两格内的床真实睡醒结叶。",
+      "use": "钟眠茶；旅行状态整理",
+      "discovery": "旧床营地附近；种＋产"
+    },
+    {
+      "id": "shadow_cut",
+      "name": "影裁花",
+      "seed": "shadow_cut_seed",
+      "product": "shadow_silk",
+      "productName": "影绢",
+      "help": "栽培不挑环境；上方遮棚仍可改变八种影纹。",
+      "use": "影纹卡收藏；纺织材料",
+      "discovery": "疏林阴影交界；根/芽"
+    },
+    {
+      "id": "paper_tree",
+      "name": "墨信树",
+      "seed": "paper_tree_seed",
+      "product": "paper_bark",
+      "productName": "纸皮",
+      "help": "不需要书或讲台；只要留三格高空间即可生长。",
+      "use": "信封；调查档案；纸加工",
+      "discovery": "古道、旧驿站遗址附近；种＋产"
+    },
+    {
+      "id": "flight_pod",
+      "name": "换羽荚",
+      "seed": "flight_pod_seed",
+      "product": "rainproof_pod",
+      "productName": "防雨荚壳",
+      "help": "干土也可栽培；采壳后邮羽鹭访株可另寄种。",
+      "use": "防雨种匣；邮鹭协作；不随机给未注册品种",
+      "discovery": "鸟类活动的草坡；果种"
+    },
+    {
+      "id": "honey_cluster",
+      "name": "共生蜜簇",
+      "seed": "honey_cluster_seed",
+      "product": "honey_powder",
+      "productName": "蜜粉",
+      "help": "栽培不挑环境；长成后三次蜂访或授粉刷结蜜粉。",
+      "use": "蜜簇糕；动物精制饲料；拟授粉供魔",
+      "discovery": "花甸、蜂巢附近；根/芽"
+    },
+    {
+      "id": "star_dew",
+      "name": "星露藤",
+      "seed": "star_dew_seed",
+      "product": "star_dew_fruit",
+      "productName": "星露果",
+      "help": "全天与室内都可栽培；果实吃下回复30真实魔力。",
+      "use": "30 魔力补给；星露饮；食物/种源选择",
+      "discovery": "湖边坡、稀疏林；果种"
+    },
+    {
+      "id": "dance_bell",
+      "name": "脉舞铃花",
+      "seed": "dance_bell_seed",
+      "product": "dance_petal",
+      "productName": "舞瓣",
+      "help": "全天可栽培；首次浇水认主，主人近八格会舞动。",
+      "use": "花礼；伴生器件；互动花园",
+      "discovery": "花甸；根/芽"
+    },
+    {
+      "id": "star_rest",
+      "name": "星憩蕊",
+      "seed": "star_rest_seed",
+      "product": "star_rest_dew",
+      "productName": "星憩露",
+      "help": "栽培不挑环境；成熟夜间放三只花灵，归来结露。",
+      "use": "星憩饮；花灵观赏；远征补给",
+      "discovery": "夜间可见的林间空地；根/芽"
+    },
+    {
+      "id": "dream_compost",
+      "name": "沤梦菌",
+      "seed": "dream_compost_seed",
+      "product": "dream_humus",
+      "productName": "梦腐质",
+      "help": "三类有机料发酵90秒；同类只产生180魔力",
+      "use": "采收、厨房加工或对应工坊器件；按 JEI 查看实际配方。"
+    },
+    {
+      "id": "thermal_foldleaf",
+      "name": "温差折叶",
+      "seed": "thermal_foldleaf_seed",
+      "product": "foldleaf_film",
+      "productName": "折叶膜",
+      "help": "真实燃烧炉热面＋冷面；魔导炉不能回供",
+      "use": "采收、厨房加工或对应工坊器件；按 JEI 查看实际配方。"
+    },
+    {
+      "id": "shadow_hour_orchid",
+      "name": "影漏兰",
+      "seed": "shadow_hour_orchid_seed",
+      "product": "shadow_hour_petal",
+      "productName": "影时瓣",
+      "help": "自然日影移动时蓄魔；每日最多八次",
+      "use": "采收、厨房加工或对应工坊器件；按 JEI 查看实际配方。"
+    },
+    {
+      "id": "turnpage_fern",
+      "name": "旋页蕨",
+      "seed": "turnpage_fern_seed",
+      "product": "page_fern_fiber",
+      "productName": "旋页丝",
+      "help": "讲台真实翻新页并消耗纸；30/页、每日240",
+      "use": "采收、厨房加工或对应工坊器件；按 JEI 查看实际配方。"
+    },
+    {
+      "id": "daynight_sandgrain",
+      "name": "昼夜砂穗",
+      "seed": "daynight_sandgrain_seed",
+      "product": "cycle_sandgrain",
+      "productName": "昼夜砂",
+      "help": "白昼和夜晚各感受60秒，再释放360魔力",
+      "use": "采收、厨房加工或对应工坊器件；按 JEI 查看实际配方。"
+    },
+    {
+      "id": "hanging_dewgrass",
+      "name": "垂露丝草",
+      "seed": "hanging_dewgrass_seed",
+      "product": "dewgrass_thread",
+      "productName": "露丝",
+      "help": "真实雨水逐秒蓄能，晴天慢慢放出",
+      "use": "采收、厨房加工或对应工坊器件；按 JEI 查看实际配方。"
+    },
+    {
+      "id": "prism_crown",
+      "name": "虹折冠",
+      "seed": "prism_crown_seed",
+      "product": "prism_crown_petal",
+      "productName": "虹折片",
+      "help": "天然日光通过三色玻璃折射；自身灯不生效",
+      "use": "采收、厨房加工或对应工坊器件；按 JEI 查看实际配方。"
+    },
+    {
+      "id": "ore_sleep_moss",
+      "name": "矿眠苔",
+      "seed": "ore_sleep_moss_seed",
+      "product": "ore_dream_flake",
+      "productName": "矿眠屑",
+      "help": "天然矿脉有限共鸣；同区块每日共享1200",
+      "use": "采收、厨房加工或对应工坊器件；按 JEI 查看实际配方。"
+    },
+    {
+      "id": "storm_crown",
+      "name": "雷纹冠",
+      "seed": "storm_crown_seed",
+      "product": "storm_crown_tip",
+      "productName": "雷冠尖",
+      "help": "自然雷击蓄2400；付费造雷只返实际能量的80%",
+      "use": "采收、厨房加工或对应工坊器件；按 JEI 查看实际配方。"
+    }
+  ],
+  "animals": [
+    {
+      "id": "bellwool_sheep",
+      "name": "响铃羊",
+      "role": "LIVE",
+      "habitat": "LAND",
+      "food": "tnc:bellwool_fodder",
+      "product": "resonant_fleece"
+    },
+    {
+      "id": "stonebarrow_boar",
+      "name": "石垒豪豕",
+      "role": "MEAT",
+      "habitat": "LAND",
+      "food": "minecraft:potato",
+      "product": "stonebarrow_meat"
+    },
+    {
+      "id": "emberback_hog",
+      "name": "暮炭野豕",
+      "role": "MEAT",
+      "habitat": "WARM",
+      "food": "minecraft:carrot",
+      "product": "emberback_meat"
+    },
+    {
+      "id": "tideback_newt",
+      "name": "潮背鳄螈",
+      "role": "MEAT",
+      "habitat": "WATER",
+      "food": "minecraft:cod",
+      "product": "tideback_meat"
+    },
+    {
+      "id": "froststride_fowl",
+      "name": "银霜步禽",
+      "role": "MEAT",
+      "habitat": "LAND",
+      "food": "minecraft:wheat_seeds",
+      "product": "froststride_meat"
+    },
+    {
+      "id": "apiary_toad",
+      "name": "蜂囊腴蛙",
+      "role": "MEAT",
+      "habitat": "WATER",
+      "food": "minecraft:sweet_berries",
+      "product": "honeydew"
+    },
+    {
+      "id": "starfelt_hare",
+      "name": "星茸耳兔",
+      "role": "MEAT",
+      "habitat": "LAND",
+      "food": "minecraft:carrot",
+      "product": "starfelt_meat"
+    },
+    {
+      "id": "dusk_lantern_deer",
+      "name": "暮灯鹿",
+      "role": "LIVE",
+      "habitat": "LAND",
+      "food": "minecraft:apple",
+      "product": "lantern_antler"
+    },
+    {
+      "id": "pattern_shell_snail",
+      "name": "纹壳蜗",
+      "role": "LIVE",
+      "habitat": "WATER",
+      "food": "minecraft:sweet_berries",
+      "product": "shell_glue"
+    },
+    {
+      "id": "post_heron",
+      "name": "邮羽鹭",
+      "role": "LIVE",
+      "habitat": "PERCH",
+      "food": "minecraft:wheat",
+      "product": "flight_feather"
+    },
+    {
+      "id": "watch_mantis",
+      "name": "巡灯螳螂",
+      "role": "LIVE",
+      "habitat": "PERCH",
+      "food": "minecraft:brown_mushroom",
+      "product": "watch_wing"
+    },
+    {
+      "id": "mirrorwing_moth",
+      "name": "镜瓣夜蛾",
+      "role": "LIVE",
+      "habitat": "PERCH",
+      "food": "minecraft:sugar",
+      "product": "mirror_scale"
+    },
+    {
+      "id": "forgegill_tapir",
+      "name": "炉鳃山貘",
+      "role": "ELEMENT",
+      "habitat": "WARM",
+      "food": "minecraft:beetroot",
+      "product": "warm_breath"
+    },
+    {
+      "id": "mistbelly_otter",
+      "name": "雾腹水獭",
+      "role": "ELEMENT",
+      "habitat": "WATER",
+      "food": "minecraft:cod",
+      "product": "spring_concentrate"
+    },
+    {
+      "id": "ringstone_tortoise",
+      "name": "环砾龟",
+      "role": "ELEMENT",
+      "habitat": "LAND",
+      "food": "minecraft:potato",
+      "product": "loam_pebble"
+    },
+    {
+      "id": "papersail_ray",
+      "name": "纸帆魟",
+      "role": "ELEMENT",
+      "habitat": "OPEN",
+      "food": "minecraft:wheat_seeds",
+      "product": "air_plume"
+    },
+    {
+      "id": "wirecall_lizard",
+      "name": "鸣线蜥",
+      "role": "ELEMENT",
+      "habitat": "LAND",
+      "food": "minecraft:spider_eye",
+      "product": "storm_crystal"
+    },
+    {
+      "id": "dewbound_whale",
+      "name": "蓄魔鲸",
+      "role": "ELEMENT",
+      "habitat": "OPEN",
+      "food": "minecraft:melon_slice",
+      "product": "stored_mana"
+    },
+    {
+      "id": "satchelback_runner",
+      "name": "囊背负兽",
+      "role": "HELPER",
+      "habitat": "LAND",
+      "food": "minecraft:bread",
+      "product": "runner_hide"
+    },
+    {
+      "id": "bowlhorn_rhino",
+      "name": "碗角犀",
+      "role": "HELPER",
+      "habitat": "LAND",
+      "food": "minecraft:beetroot",
+      "product": "horn_powder"
+    },
+    {
+      "id": "pageforage_raccoon",
+      "name": "觅页浣兽",
+      "role": "HELPER",
+      "habitat": "LAND",
+      "food": "minecraft:sweet_berries",
+      "product": "forage_paper_hide"
+    },
+    {
+      "id": "patternbuild_beaver",
+      "name": "锦纹筑狸",
+      "role": "HELPER",
+      "habitat": "WATER",
+      "food": "minecraft:sugar_cane",
+      "product": "nest_glue"
+    },
+    {
+      "id": "springhoof_strider",
+      "name": "跃泉蹄兽",
+      "role": "HELPER",
+      "habitat": "LAND",
+      "food": "minecraft:apple",
+      "product": "hoof_glue"
+    },
+    {
+      "id": "prismatic_antelope",
+      "name": "曳彩角羚",
+      "role": "ELEMENT",
+      "habitat": "LAND",
+      "food": "minecraft:honey_bottle",
+      "product": "prism_horn_shard"
+    },
+    {
+      "id": "drumbelly_otter",
+      "name": "鼓腹砂獭",
+      "role": "ELEMENT",
+      "habitat": "LAND",
+      "food": "minecraft:carrot",
+      "product": "sand_otter_fiber"
+    },
+    {
+      "id": "pillowlight_marten",
+      "name": "枕光貂",
+      "role": "HELPER",
+      "habitat": "LAND",
+      "food": "minecraft:melon_slice",
+      "product": "lamp_wax"
+    }
+  ],
+  "machines": [
+    {
+      "id": "mana_infuser",
+      "name": "注能台",
+      "help": "空手按住右键，每秒注入自身5魔力，松开停止；潜行右键开界面放取第一个槽的容器，界面按钮也可注入五秒。普通瓶100，精炼瓶400，桶400。接线可自动装。"
+    },
+    {
+      "id": "dew_collector",
+      "name": "集露盏",
+      "help": "接线供魔后工作；材料放输入位，成品从输出位取。"
+    },
+    {
+      "id": "breath_collector",
+      "name": "集息器",
+      "help": "牧务杖选兽后右键绑定。空手潜行右键切取魔/充能；鲸32、蜥8、貂25魔力/秒各有上限。"
+    },
+    {
+      "id": "color_target",
+      "name": "色靶",
+      "help": "拿染料右键改色。对应角羚12格内无遮挡发射，不伤人、不破坏地形。"
+    },
+    {
+      "id": "mana_thread",
+      "name": "魔导丝",
+      "help": "接线供魔后工作；材料放输入位，成品从输出位取。"
+    },
+    {
+      "id": "radiant_thread",
+      "name": "曜纹导线",
+      "help": "接线供魔后工作；材料放输入位，成品从输出位取。"
+    },
+    {
+      "id": "star_thread",
+      "name": "星髓导线",
+      "help": "接线供魔后工作；材料放输入位，成品从输出位取。"
+    },
+    {
+      "id": "mana_basin",
+      "name": "浅魔池",
+      "help": "接线供魔后工作；材料放输入位，成品从输出位取。"
+    },
+    {
+      "id": "radiant_basin",
+      "name": "曜纹储池",
+      "help": "接线供魔后工作；材料放输入位，成品从输出位取。"
+    },
+    {
+      "id": "star_basin",
+      "name": "星髓储池",
+      "help": "接线供魔后工作；材料放输入位，成品从输出位取。"
+    },
+    {
+      "id": "mana_mirror",
+      "name": "折光镜",
+      "help": "两镜沿六轴对齐，12格无遮挡传能；共享4魔力/秒。"
+    },
+    {
+      "id": "star_mirror",
+      "name": "远折镜",
+      "help": "沿六轴对齐，24格无遮挡，16魔力/秒。"
+    },
+    {
+      "id": "mana_valve",
+      "name": "分流阀",
+      "help": "潜行右键切优先。红石信号可关闭；消费者先获得魔力，余量进储池。"
+    },
+    {
+      "id": "mana_lantern",
+      "name": "魔导灯",
+      "help": "接线供魔后工作；材料放输入位，成品从输出位取。"
+    },
+    {
+      "id": "bright_mana_lantern",
+      "name": "庭院明灯",
+      "help": "接线供魔后工作；材料放输入位，成品从输出位取。"
+    },
+    {
+      "id": "mana_pulp_press",
+      "name": "纸皮压机",
+      "help": "两听潮苇或甘蔗＋相邻水，16魔力、4秒制三纸。"
+    },
+    {
+      "id": "mana_feed_plate",
+      "name": "饲料分盘",
+      "help": "接线供魔后工作；材料放输入位，成品从输出位取。"
+    },
+    {
+      "id": "gentle_irrigator",
+      "name": "轻灌器",
+      "help": "接线供魔后工作；材料放输入位，成品从输出位取。"
+    },
+    {
+      "id": "climate_lantern",
+      "name": "护候灯",
+      "help": "接线供魔后工作；材料放输入位，成品从输出位取。"
+    },
+    {
+      "id": "mana_sawmill",
+      "name": "魔导锯台",
+      "help": "一原木＋12魔力，4秒制六木板。"
+    },
+    {
+      "id": "mist_loom",
+      "name": "雾纱织机",
+      "help": "两雾棉或帆纤维＋30魔力，6秒制雾布。"
+    },
+    {
+      "id": "meal_dryer",
+      "name": "远行烘食器",
+      "help": "一份熟食＋纸＋24魔力，6秒制远行餐。"
+    },
+    {
+      "id": "mana_incubator",
+      "name": "暖卵台",
+      "help": "放自己实际受精卵；0.15魔力/秒加快25%，不会生成新卵。"
+    },
+    {
+      "id": "harvest_arm",
+      "name": "收获臂",
+      "help": "接线供魔后工作；材料放输入位，成品从输出位取。"
+    },
+    {
+      "id": "seed_sorter",
+      "name": "种源分拣器",
+      "help": "接线供魔后工作；材料放输入位，成品从输出位取。"
+    },
+    {
+      "id": "mana_cart_track",
+      "name": "魔导运货轨",
+      "help": "这是沿普通铁轨铺设的魔导驱动座，真实载货矿车每10格花1魔力。"
+    },
+    {
+      "id": "ward_bell",
+      "name": "守望铃",
+      "help": "接线供魔后工作；材料放输入位，成品从输出位取。"
+    },
+    {
+      "id": "accessory_charger",
+      "name": "饰品充能台",
+      "help": "放充能饰品或机甲，接线每秒最多16魔力充入真实账本。"
+    }
+  ]
+}

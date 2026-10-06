@@ -199,7 +199,7 @@ public final class TNSpellClientVisuals {
         }
         // ★ 黑雾的"屏幕变黑"（作者 2026-10-09："敌人包括其他玩家触碰到这个雾……
         //   屏幕得给我黑了，t 级越高屏幕越黑"）✓
-        tickFogDarkness(minecraft);
+        if (net.minecraftforge.fml.ModList.get().isLoaded("spell_engine")) if (net.minecraftforge.fml.ModList.get().isLoaded("spell_engine")) if (net.minecraftforge.fml.ModList.get().isLoaded("spell_engine")) tickFogDarkness(minecraft);
     }
 
     // ------------------------------------------------------------------

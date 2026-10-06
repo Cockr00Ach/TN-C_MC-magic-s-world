@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " P ",
+    " B "
+  ],
+  "key": {
+    "P": {
+      "item": "minecraft:wheat"
+    },
+    "B": {
+      "item": "minecraft:book"
+    }
+  },
+  "result": {
+    "item": "tnc:season_handbook",
+    "count": 1
+  }
+}

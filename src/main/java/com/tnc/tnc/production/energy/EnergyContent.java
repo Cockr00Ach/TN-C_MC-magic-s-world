@@ -73,12 +73,5 @@ public final class EnergyContent {
         });
     }
 
-    @SubscribeEvent public static void creativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (!event.getTabKey().equals(TNMod.TNC_TAB.getKey())) return;
-        event.accept(GENERATOR_ITEM);
-        event.accept(CABLE_ITEM);
-        event.accept(BATTERY_ITEM);
-        event.accept(WORK_LAMP_ITEM);
-        event.accept(PAPER_PRESS_ITEM);
-    }
+    // Legacy IDs stay registered for decoding, but new worlds use RouteContent.
 }

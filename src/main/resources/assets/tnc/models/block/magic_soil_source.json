@@ -1,0 +1,82 @@
+{
+  "textures": {
+    "soil": "tnc:block/magic_soil_atlas",
+    "particle": "tnc:block/magic_soil_atlas"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "up": {
+          "texture": "#soil",
+          "uv": [
+            0,
+            8,
+            8,
+            16
+          ],
+          "cullface": "up"
+        },
+        "down": {
+          "texture": "#soil",
+          "uv": [
+            8,
+            8,
+            16,
+            16
+          ],
+          "cullface": "down"
+        },
+        "north": {
+          "texture": "#soil",
+          "uv": [
+            8,
+            8,
+            16,
+            16
+          ],
+          "cullface": "north"
+        },
+        "south": {
+          "texture": "#soil",
+          "uv": [
+            8,
+            8,
+            16,
+            16
+          ],
+          "cullface": "south"
+        },
+        "east": {
+          "texture": "#soil",
+          "uv": [
+            8,
+            8,
+            16,
+            16
+          ],
+          "cullface": "east"
+        },
+        "west": {
+          "texture": "#soil",
+          "uv": [
+            8,
+            8,
+            16,
+            16
+          ],
+          "cullface": "west"
+        }
+      }
+    }
+  ]
+}

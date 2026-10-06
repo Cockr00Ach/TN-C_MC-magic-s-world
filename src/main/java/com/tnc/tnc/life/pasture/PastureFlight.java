@@ -45,12 +45,13 @@ public final class PastureFlight {
         private boolean choose(){
             BlockPos anchor=animal.flightAnchor();var random=animal.getRandom();
             for(int i=0;i<16;i++){
-                int x=anchor.getX()+random.nextInt(17)-8,z=anchor.getZ()+random.nextInt(17)-8;
+                int x=anchor.getX()+random.nextInt(animal.hasHome()?7:17)-(animal.hasHome()?3:8),z=anchor.getZ()+random.nextInt(animal.hasHome()?7:17)-(animal.hasHome()?3:8);
                 BlockPos column=new BlockPos(x,anchor.getY(),z);
                 if(!animal.level().hasChunkAt(column))continue;
                 int ground=animal.level().getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,x,z);
                 // Inside buildings use local height instead of flying through the roof.
                 int y=animal.level().canSeeSky(animal.blockPosition())?ground+2+random.nextInt(animal.speciesId().equals("dewbound_whale")?5:4):anchor.getY()+random.nextInt(5)-1;
+                if(animal.hasHome())y=Mth.clamp(y,anchor.getY()+1,anchor.getY()+7-(int)Math.ceil(animal.getBbHeight()));
                 y=Mth.clamp(y,animal.level().getMinBuildHeight()+1,animal.level().getMaxBuildHeight()-3);
                 Vec3 candidate=new Vec3(x+.5,y,z+.5);
                 var moved=animal.getBoundingBox().move(candidate.subtract(animal.position()));

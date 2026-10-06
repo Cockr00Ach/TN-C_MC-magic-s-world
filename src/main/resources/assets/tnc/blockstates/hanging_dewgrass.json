@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "age=0": {
+      "model": "tnc:block/hanging_dewgrass_0"
+    },
+    "age=1": {
+      "model": "tnc:block/hanging_dewgrass_1"
+    },
+    "age=2": {
+      "model": "tnc:block/hanging_dewgrass_2"
+    },
+    "age=3": {
+      "model": "tnc:block/hanging_dewgrass_3"
+    }
+  }
+}

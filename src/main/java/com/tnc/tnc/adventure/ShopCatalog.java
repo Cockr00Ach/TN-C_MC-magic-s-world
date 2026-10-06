@@ -83,7 +83,19 @@ public final class ShopCatalog {
         new Goods("runner_hide","负兽革 ×4","tnc:runner_hide",4,32,"牧场工具的皮材。"),
         new Goods("horn_powder","碗角粉 ×4","tnc:horn_powder",4,28,"保养犀角时取得，不必屠杀。"),
         new Goods("forage_paper_hide","浣兽纸皮 ×4","tnc:forage_paper_hide",4,28,"浣兽探索与留养材料。"),
-        new Goods("lamp_wax","枕光灯蜡 ×4","tnc:lamp_wax",4,32,"养貂取蜡，添灯或出售。"));
+        new Goods("lamp_wax","枕光灯蜡 ×4","tnc:lamp_wax",4,32,"养貂取蜡，添灯或出售。"),
+        new Goods("dream_humus","梦腐质 ×4","tnc:dream_humus",4,20,"人工魔法土培育或异兽真实产物，可出售或留作工坊原料。"),
+        new Goods("foldleaf_film","折叶膜 ×4","tnc:foldleaf_film",4,20,"人工魔法土培育或异兽真实产物，可出售或留作工坊原料。"),
+        new Goods("shadow_hour_petal","影时瓣 ×4","tnc:shadow_hour_petal",4,20,"人工魔法土培育或异兽真实产物，可出售或留作工坊原料。"),
+        new Goods("page_fern_fiber","旋页丝 ×4","tnc:page_fern_fiber",4,20,"人工魔法土培育或异兽真实产物，可出售或留作工坊原料。"),
+        new Goods("cycle_sandgrain","昼夜砂 ×4","tnc:cycle_sandgrain",4,20,"人工魔法土培育或异兽真实产物，可出售或留作工坊原料。"),
+        new Goods("dewgrass_thread","露丝 ×4","tnc:dewgrass_thread",4,20,"人工魔法土培育或异兽真实产物，可出售或留作工坊原料。"),
+        new Goods("prism_crown_petal","虹折片 ×4","tnc:prism_crown_petal",4,20,"人工魔法土培育或异兽真实产物，可出售或留作工坊原料。"),
+        new Goods("ore_dream_flake","矿眠屑 ×4","tnc:ore_dream_flake",4,20,"人工魔法土培育或异兽真实产物，可出售或留作工坊原料。"),
+        new Goods("storm_crown_tip","雷冠尖 ×4","tnc:storm_crown_tip",4,20,"人工魔法土培育或异兽真实产物，可出售或留作工坊原料。"),
+        new Goods("prism_horn_shard","彩角碎 ×4","tnc:prism_horn_shard",4,20,"人工魔法土培育或异兽真实产物，可出售或留作工坊原料。"),
+        new Goods("sand_otter_fiber","砂獭纤维 ×4","tnc:sand_otter_fiber",4,20,"人工魔法土培育或异兽真实产物，可出售或留作工坊原料。"));
+
     public static Goods find(List<Goods> list,String id){return list.stream().filter(g->g.id().equals(id)).findFirst().orElse(null);}
     public static int quota(int level){return level>=45?2000:level>=20?1000:500;}
 }

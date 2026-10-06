@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " C ",
+    "MTM",
+    " I "
+  ],
+  "key": {
+    "C": {
+      "item": "tnc:air_plume"
+    },
+    "M": {
+      "item": "tnc:radiant_gold"
+    },
+    "T": {
+      "item": "tnc:mist_cloth"
+    },
+    "I": {
+      "item": "tnc:spirit_iron"
+    }
+  },
+  "result": {
+    "item": "tnc:descent_feather",
+    "count": 1
+  }
+}
