@@ -580,6 +580,12 @@ public final class TNFireBoltEntity extends Projectile {
                 }
 
             }
+            // ⚠️ 作者 2026-10-05：「**爆炸是额外效果，不会影响射线的穿透**」✓
+            //    ⇒ 这一整段里**不允许**出现 discard() / return / break ✗
+            //      （爆炸、粒子、灼烧都只是"顺手加的效果"✓；
+            //        射线照旧推进位置 ⇒ 继续穿下一个目标 ✓）
+            //    ⇒ 循环结束只是把 hit 置空（让下面"单目标"那段不再重复结算 ✓），
+            //      位置推进在方法末尾照常执行 ✓
             hit = null;                             // 单目标那段对射线不再生效 ✓
         } else if (penetrates() && hit != null && !dragonHit.add(hit.getUUID())) {
             hit = null;
