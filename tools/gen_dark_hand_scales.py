@@ -43,27 +43,49 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 #   src/main/resources/data/tnc/spells/ because a kubejs copy of the same id wins
 #   and silently reverts the spell (that is how the model_id was lost once).
 SPELL_DIR = os.path.join(REPO, "src", "main", "resources", "data", "tnc", "spells")
+MODEL_PATH = os.path.join(REPO, "src", "main", "resources", "assets", "tnc",
+                          "models", "projectile", "dark_hand.json")
 
-BASE_SCALE = 0.85                      # tier 1, the chain's reference size
 # chain order: night_hand -> night_raid -> night_embrace -> black_ruin -> slay_light
-# ★ these are SIZE (edge) multipliers, applied literally: scale = BASE_SCALE * multiplier
-MULTIPLIERS = {
-    "night_hand": 1.0,                 # t1 unchanged
-    "night_raid": 2.0,
-    "night_embrace": 5.0,
-    "black_ruin": 10.0,
-    "slay_light": 20.0,
+# ★ the SIZE INTENT, in blocks long (t1 as originally shipped, then x2 / x5 / x10 / x20)
+INTENT_BLOCKS = {
+    "night_hand": 1.60,
+    "night_raid": 3.20,
+    "night_embrace": 8.00,
+    "black_ruin": 16.00,
+    "slay_light": 32.00,
 }
 
-MODEL_LENGTH_BLOCKS = 1.88             # the hand model's length at scale 1
+
+def model_length_blocks():
+    """The hand's overall size in blocks = its LARGEST span (not its Z span).
+
+    ★ 2026-10-10: the model became a **palm-forward plate** (palm facing +Z, only 0.56
+    blocks deep along Z but 1.38 x 1.62 across the palm). Measuring "length" along the
+    travel axis would now read 0.56 and produce an absurd scale (~57x at tier 5), so the
+    size metric is the largest of the three spans -- i.e. how big the hand LOOKS ✓.
+
+    (Earlier versions measured Z because the fingers used to point down the travel axis,
+    where Z really was the hand's length.)
+    """
+    with open(MODEL_PATH, "r", encoding="utf-8-sig") as fh:
+        model = json.load(fh)
+    spans = []
+    for axis in (0, 1, 2):
+        lo = min(e["from"][axis] for e in model["elements"])
+        hi = max(e["to"][axis] for e in model["elements"])
+        spans.append(hi - lo)
+    return max(spans) / 16.0
 
 
 def main():
     if not os.path.isdir(SPELL_DIR):
         print("ERROR: spell dir not found: %s" % SPELL_DIR)
         return 1
+    length = model_length_blocks()
+    print("current dark_hand model length: %.2f blocks (at scale 1.0)" % length)
     problems = 0
-    for name, multiplier in MULTIPLIERS.items():
+    for name, want_blocks in INTENT_BLOCKS.items():
         path = os.path.join(SPELL_DIR, name + ".json")
         if not os.path.isfile(path):
             print("MISSING %s" % path)
@@ -78,14 +100,13 @@ def main():
             problems += 1
             continue
         old = float(model["scale"])
-        new = round(BASE_SCALE * multiplier, 2)
+        new = round(want_blocks / length, 2)
         model["scale"] = new
         with open(path, "w", encoding="utf-8", newline="\n") as fh:
             json.dump(spell, fh, indent=2, ensure_ascii=False)
             fh.write("\n")
-        print("%-16s tier=%d x%-5s scale %-6s -> %-6s (%5.1f blocks long)"
-              % (name, spell["learn"]["tier"], multiplier, old, new,
-                 MODEL_LENGTH_BLOCKS * new))
+        print("%-16s tier=%d  want %5.1f blocks  scale %-6s -> %-6s  (actual %5.2f blocks)"
+              % (name, spell["learn"]["tier"], want_blocks, old, new, length * new))
     print("done, %d problem(s)" % problems)
     return 0 if problems == 0 else 1
 

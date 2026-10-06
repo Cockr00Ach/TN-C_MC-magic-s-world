@@ -88,12 +88,15 @@ def batch(pid, shape, origin, count, mn, mx):
 
 
 def cast_fx(tier):
-    """The caster cuts himself open: blood at his feet, soul fire licking up, no fog."""
+    """The caster cuts himself open: **blood only** -- clean, no ghost fire.
+
+    ★ 2026-10-10（作者："血爪的特效要干净啊，把鬼火去掉"）：本链原来撒
+    `minecraft:soul_fire_flame`（灵魂火＝鬼火）+ `soulsweapons:black_flame`（黑焰），
+    在血里混着两团火，看着很杂 ✗ ⇒ **两个都撤掉**，只留血 ✓。
+    """
     return [
         batch(BLOOD, "CIRCLE", "FEET", 14 + 4 * tier, 0.1, 0.5),
         batch(BLOOD, "SPHERE", "CENTER", 10 + 3 * tier, 0.05, 0.3),
-        batch(SOUL_FIRE, "CIRCLE", "FEET", 12 + 4 * tier, 0.1, 0.4),
-        batch(BLACK_FLAME, "CIRCLE", "FEET", 3 + tier, 0.05, 0.2),
     ]
 
 
@@ -105,8 +108,7 @@ def heal_action(coefficient):
             "apply_to_caster": True,
             "heal": {"spell_power_coefficient": coefficient},
         },
-        "particles": [batch(BLOOD, "SPHERE", "CENTER", 24.0, 0.1, 0.5),
-                      batch(SOUL_FIRE, "CIRCLE", "FEET", 16.0, 0.05, 0.3)],
+        "particles": [batch(BLOOD, "SPHERE", "CENTER", 24.0, 0.1, 0.5)],
     }
 
 
@@ -136,11 +138,69 @@ def drain_action():
         "particles": [batch(BLOOD, "CIRCLE", "FEET", 16.0, 0.15, 0.6)],
     }
 
+def projectile_target(tier):
+    """★ 2026-10-10: the chain becomes a HOMING projectile ("索敌").
+
+    Author: "以伤换伤貌似还没有索敌效果，我希望有索敌".
+
+    The real reason it had none: all five spells were `release.target: SELF` -- they
+    never flew at anything, they just buffed/burned the caster. Turning them into a
+    blood claw that homes onto a victim is what makes "从敌人身上抽血" possible at all;
+    the drain settlement (`tnc:drain`) already lands on whatever the projectile hits.
+
+    Numbers:
+        velocity 0.75        slower than the night-hand claw (0.45-0.55) is for "fly long";
+                             this one should reach the target, so 0.75 reads as a lunge.
+        homing_angle         0.35 flat + 0.06 per tier => t1 0.41 .. t5 0.65 (radians/s),
+                             so higher tiers turn harder and miss less.
+        model.scale          0.55 + 0.15 * tier => t1 0.70 .. t5 1.30. NOT the night-hand
+                             sizes: this is a claw, not the giant hand.
+        orientation          TOWARDS_CAMERA (same reason as the night-hand chain: without
+                             it the engine tumbles the model and the wrist leads half the
+                             time -- the author's "手腕对着别人" complaint).
+    The model reuses `tnc:projectile/dark_hand` (an open grasping claw, regenerated
+    2026-10-10). Ask the author if he wants a separate blood-claw model.
+    """
+    return {
+        "type": "PROJECTILE",
+        "projectile": {
+            "launch_properties": {
+                "velocity": 0.75,
+                "extra_launch_count": 0,
+                "extra_launch_delay": 3,
+            },
+            "projectile": {
+                # ★ 2026-10-10（作者："不是范围我直接开技能然后他自己去找敌人，是要玩家瞄住敌人的
+                #   那种"）：引擎的 homing_angle 语义是"**自己去找最近的敌人**" ⇒ 会把
+                #   "没瞄准也照样打中"做出来 ✗。所以把它**调小**（原来 0.41~0.65），
+                #   让没锁定的血爪基本走直线；真正"追我瞄的那一只"由
+                #   `TNDarkAimMechanics` 的 setFollowedTarget 负责 ✓。
+                #   ⚠ 这仍是"没锁定时"的兜底转向；要让没瞄准时**完全**不追，把它设 0.0 ✓。
+                "homing_angle": round(0.16 + 0.03 * tier, 3),
+                "client_data": {
+                    # ★ "一条血线"：只留血，且**速度为 0** ⇒ 粒子留在原地，
+                    #   血爪飞过去就**拉出一条连续的线** ✓（原来混着鬼火，很杂 ✗）
+                    "travel_particles": [
+                        batch(BLOOD, "CIRCLE", "CENTER", 20.0 + 4 * tier, 0.0, 0.0),
+                    ],
+                    "model": {
+                        "model_id": "tnc:projectile/dark_hand",
+                        "scale": round(0.55 + 0.15 * tier, 2),
+                        "orientation": "ALONG_MOTION",
+                        "rotate_degrees_offset": 0.0,
+                    },
+                },
+            },
+        },
+    }
+
 
 def rewrite(spell, effect_id, heal_coef):
     tier = int(spell["learn"]["tier"])
 
     spell["cast"]["particles"] = cast_fx(tier)
+    # ★ the chain now flies at the enemy instead of buffing only the caster
+    spell["release"]["target"] = projectile_target(tier)
 
     # swap the borrowed fire effect for the dark one, keep the JSON's own duration/amplifier
     swapped = 0
@@ -156,9 +216,8 @@ def rewrite(spell, effect_id, heal_coef):
                 swapped += 1
             elif current and current.startswith("tnc:blood_"):
                 swapped += 1                      # already migrated (idempotent re-run)
-        # every remaining impact gets a blood-flavoured particle set
-        impact["particles"] = [batch(BLOOD, "CIRCLE", "FEET", 10.0 + 3 * tier, 0.1, 0.4),
-                               batch(SOUL_FIRE, "CIRCLE", "FEET", 8.0 + 2 * tier, 0.05, 0.3)]
+        # ★ 命中特效也**只留血**（作者 2026-10-10："血爪的特效要干净啊，把鬼火去掉"）✓
+        impact["particles"] = [batch(BLOOD, "CIRCLE", "FEET", 14.0 + 4 * tier, 0.15, 0.5)]
         kept.append(impact)
     assert swapped == 1, "expected exactly one dark-sacrifice effect in %s" % effect_id
     assert all("action" in i for i in kept), "impact without action -> engine NPE on every cast"

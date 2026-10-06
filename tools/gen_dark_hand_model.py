@@ -15,18 +15,27 @@ WHAT IT WRITES
        (front / side / top / 3-4 view, rendered by this script -- not a screenshot)
 
 MODEL ORIENTATION (the part that is easy to get wrong)
-    The projectile flies along +Z in model space. So the hand is built with its
-    fingers pointing +Z (forward, at the victim) and the wrist at -Z (trailing).
-    The palm is flat in the XZ plane, so it reads correctly from ANY roll angle --
-    unlike a hand designed in the XY plane, which would fly edge-on and look like a stick.
-    The palm faces UP. All six faces are present on every cube, so even if the engine
-    rolls the model the silhouette still reads as a hand.
+    The projectile flies along +Z in model space. The hand is therefore built with its
+    FINGERS pointing +Z (forward, at the victim), the wrist stub at -Z (trailing), and
+    the palm facing down (-Y). Author 2026-10-10 confirmed the intent: "手腕对着别人
+    不是手指" was wrong, and the hand should read as an open grasp with "掌心对着别人".
+
+    ★★ THIS ORIENTATION ONLY HOLDS IF THE SPELL SETS `model.orientation`.
+    With the field absent, the engine TUMBLES the model about the entity position, and
+    then whichever end faces the victim is arbitrary. That is why the five night-hand
+    spells now carry `"orientation": "TOWARDS_CAMERA"` -- the only variant that yaws
+    the model without pitching or rolling it (see tools/gen_dark_hand_projectiles.py).
+    (Same trap as the `flash` lightning on 2026-09-27: "怎么雷电是躺着的".)
+
+SHAPE (2026-10-10 rework: open grasp, not a fist)
+    Compact wrist collar + broad flat palm + four splayed, nearly-straight fingers with
+    forward-hooking claws + a thumb angled across, i.e. the "about to seize" silhouette
+    the author asked for ("有点下界铁掌这个boss的形状").
 
 SIZE
-    bbox x -6..6, y -6..4, z -11..12  =>  0.75 x 0.63 x 1.44 blocks
-    A "scale" of 1.4 in the spell json makes it about 1 block wide and 2 blocks long.
-    Scale knobs per tier are in the spell JSONs, not here -- do not resize the model
-    to change how big a tier looks.
+    (printed by main(); the model is recentred on its own bounding box, so the printed
+     bbox is what the engine sees.) Scale knobs per tier live in the spell JSONs --
+     do not resize the model to change how big a tier looks.
 
 TEXTURE
     32x32, drawn procedurally: bone-white knuckle plates, purple-black shadow between
@@ -37,6 +46,7 @@ ASCII only (PowerShell 5.1 reads non-ASCII .ps1 as ANSI; this is .py but the pro
 rule is the same -- keep tooling ASCII and put text data in json).
 """
 import json
+import math
 import os
 import sys
 
@@ -70,6 +80,10 @@ ATLAS = {
     "knuckle":      ((0, 26, 12, 6), (72, 60, 96), (112, 96, 140), (26, 18, 36)),
     "claw":         ((12, 8, 10, 10), (200, 90, 190), (255, 190, 250), (90, 30, 90)),
     "aura":         ((22, 8, 8, 8), (60, 30, 96), (120, 70, 170), (24, 10, 40)),
+    # ★ the tether: the darkest material in the atlas (author 2026-10-10: "手腕跟身体可以有
+    #   一条黑色的粗的线连接"). Deliberately near-black with almost no edge contrast, so it
+    #   reads as ONE solid black line instead of a stack of shaded cubes.
+    "tether":       ((24, 16, 8, 8), (10, 8, 14), (16, 13, 22), (5, 4, 8)),
 }
 
 # where the next free patch is, for any material not pre-declared (auto-tiled)
@@ -100,12 +114,29 @@ def box(frm, to, mat, uv_face=None):
     # every face gets a same-sized slice of the material patch, picking different
     # corners so faces are distinguishable while looking at the model
     fx, fy = uv_face if uv_face else (0, 0)
-    w = max(1, min(aw, x1 - x0))
-    h = max(1, min(ah, y1 - y0))
-    d = max(1, min(aw, z1 - z0))
-    eh = max(1, min(ah, y1 - y0))
+    # face-region sizes, CLAMPED twice:
+    #   1) to the material patch (so a face never samples a neighbouring material), and
+    #   2) so that (start + size) still fits inside the atlas. The fanned hands are
+    #      ROTATED, so their spans are fractional and can exceed the patch -- without
+    #      this clamp the generator now aborts with "UV out of atlas" (it did, on the
+    #      first run of the fan version).
+    def span(available, start, extent):
+        size = max(1, min(available, int(math.floor(extent))))
+        if start + size > TEX:
+            size = max(1, TEX - start)
+        return size
+
+    w = span(aw, ax + fx, x1 - x0)
+    h = span(ah, ay + fy, y1 - y0)
+    d = span(aw, ax + fx, z1 - z0)
+    eh = h
 
     def face(u, v, uw, vh):
+        # keep the rect inside the atlas on both axes, then guarantee it is non-degenerate
+        u = max(0, min(u, TEX - 1))
+        v = max(0, min(v, TEX - 1))
+        uw = max(1, min(uw, TEX - u))
+        vh = max(1, min(vh, TEX - v))
         return {"uv": [u, v, u + uw, v + vh], "texture": "#0"}
 
     return {
@@ -128,70 +159,96 @@ def box(frm, to, mat, uv_face=None):
 
 
 def build_boxes():
-    """The hand itself: wrist + palm + 5 digits, fingers pointing +Z (direction of flight)."""
+    """Several clawed hands fanning out on a thick black tether.
+
+    Author 2026-10-10: "我希望手腕跟身体可以有一条黑色的粗的线连接，看起来像是从我的背后
+    伸出来的好几只手去抓别人".
+
+    So the shape is now:
+        * a THICK black band running back along -Z from each wrist (the "tether" -- what
+          visually connects the hand to the caster's body while it flies), built from the
+          darkest atlas material so it reads as a solid black line, not a gradient;
+        * THREE complete open hands fanned around the travel axis (-Z... +Z), sharing the
+          same origin, so the silhouette is "several hands reaching out", not one hand.
+
+    WHY THREE HANDS INSIDE ONE MODEL (and not three projectiles):
+        the engine's `launch_properties` can fire extra copies (`extra_launch_count`), but
+        they share one trajectory and ONE divergence -- they stack into a single blob and
+        do not read as separate hands. Modelling the fan is what actually produces the
+        look, and it keeps homing/impact semantics exactly as they are (one projectile).
+        (Checked with javap: LaunchProperties has only velocity / extra_launch_count /
+         extra_launch_delay -- there is no per-copy spread to exploit.)
+
+    Each hand keeps the same anatomy as before (palm, four splayed fingers with
+    forward-hooking claws, thumb), just smaller and rotated about the Z axis.
+    """
     b = []
 
-    # ---- wrist / forearm stub: trailing behind, thinner than the palm ----
-    b.append(box([-4, -2, -11], [4, 2, -4], "wrist"))
-    # a raised ridge along the back of the wrist, so it is not a bare rectangle
-    b.append(box([-2, 1, -10], [2, 3, -5], "back"))
+    # ★★ 2026-10-10 第三版：**一只手，掌心朝 +Z（飞行方向）**
+    #
+    # 作者反馈（这一版就是照它改的）：
+    #   1. "手发射出去怎么一直在旋转，掌心直直出去就好"
+    #      ⇒ 朝向改成 ALONG_MOTION（见 gen_dark_hand_projectiles.py），
+    #        而且模型**掌心必须朝着 +Z** —— 之前掌心朝下、手指朝前，
+    #        配 TOWARDS_CAMERA 会随视角偏航，看起来就在转 ✗。
+    #   2. "三个手掌黏在一起很丑"
+    #      ⇒ 模型里**只放一只手** ✓。"好几只手"改由引擎**多发几发**实现
+    #        （extra_launch_count + extra_launch_delay）⇒ 三只手**沿飞行路径错开**，
+    #        而不是在同一处互相穿插 ✓。
+    #   3. "黑带很怪…可以做一个黑线连接着手腕跟后背"
+    #      ⇒ 模型里那条粗黑带**删掉** ✓。连到施法者的线**不能烤进模型** ——
+    #        手会飞离施法者，静态模型永远够不到他 ✗。改由客户端渲染一条**黑索**
+    #        （见 client/TNDarkCordRenderer.java）✓。
+    #
+    # 几何（模型空间）：
+    #   +Z = 前方（朝着敌人）⇒ **手掌平板的面朝 +Z** ✓
+    #   +Y = 上 ⇒ 手腕在下、手指朝上（像"伸手按住"的姿势）
+    #   +X = 右
+    # 正面看就是一只张开的手掌按过来，手腕沿 -Z 直直拖在后面 ✓。
+    b = []
 
-    # ---- palm: 12 wide, 3 thick, 9 long, palm-up ----
-    b.append(box([-6, -3, -4], [6, 0, 5], "palm"))
-    # heel of the palm (a slightly thicker block at the wrist end)
-    b.append(box([-5, -4, -4], [5, -1, 0], "back"))
+    # 手腕：沿 -Z 直直往后（短，不是前臂）
+    b.append(box([-3, -3, -7], [3, 3, -1], "wrist"))
+    # 手掌平板：它的 +Z 面就是掌心
+    b.append(box([-6.5, -6, -1.5], [6.5, 6, 1.5], "palm"))
+    # 掌根（靠手腕那侧稍厚一点）
+    b.append(box([-5, -7, -2.5], [5, -3, 1.5], "back"))
+    # 掌指关节横条
+    b.append(box([-6.5, 6, -1], [6.5, 8, 1], "knuckle"))
+    b.append(box([-6, 6.5, 1], [6, 8, 2], "back"))
 
-    # ---- knuckle bar: the row the fingers grow out of ----
-    b.append(box([-6, -3, 4], [6, 0, 6], "knuckle"))
-
-    # ---- four fingers, each 3 segments, curling slightly DOWN then forward ----
-    #      x centres spread across the knuckle bar; the middle two are longest
-    finger_x = [(-5, -3), (-2, 0), (1, 3), (4, 6)]
-    lengths = [6, 8, 8, 6]
-    for i, ((xa, xb), ln) in enumerate(zip(finger_x, lengths)):
-        mat = "digit_%d" % min(2, i if i < 3 else 2)
-        y = -3
-        z = 6
-        seg = ln // 3
-        for s in range(3):
-            h = 3 - s          # taper
-            if s == 1:
-                y -= 1         # middle segment drops: the curl
-            if s == 2:
-                y -= 1
-            b.append(box([xa, y, z], [xb, y + h, z + seg], mat))
-            z += seg
-
-    # ---- thumb: shorter, thicker, angled across the palm ----
-    b.append(box([-8, -2, -1], [-6, 1, 3], "digit_2"))
-    b.append(box([-10, -1, 1], [-8, 2, 5], "digit_1"))
-
-    # ---- claws on the fingertips: bright, so the hand reads as hostile ----
-    #      Explicit from/to per claw -- every claw gets 1 unit of thickness in ALL axes,
-    #      because a zero-size axis makes the vanilla model loader drop the cube.
-    #      The spike TAPERS in both x and y on its way forward, so it reads as a claw from
-    #      above AND from the side (a flat 1-unit-tall spike just looks like a blade).
-    claws = [
-        # x0, x1, y0, y1, z0, z1
-        (-5, -3, -4.0, -2.0, 12, 14),
-        (-2, 0, -4.0, -2.0, 14, 16),
-        (1, 3, -4.0, -2.0, 14, 16),
-        (4, 6, -4.0, -2.0, 12, 14),
+    # 四指朝上伸、向外张开：(x0, x1, 长度, 每段外张量)
+    fingers = [
+        (-6.0, -4.0, 15, -0.55),
+        (-2.5, -0.5, 18, -0.15),
+        (0.5, 2.5, 18, 0.15),
+        (4.0, 6.0, 15, 0.55),
     ]
-    for (x0, x1, y0, y1, z0, z1) in claws:
-        # base: full width, thinner than the finger, tucked under the fingertip
-        b.append(box([x0, y0 + 0.5, z0], [x1, y1, z1], "claw"))
-        # spike: narrower + shorter, poking further forward
-        xm0, xm1 = x0 + 0.5, x1 - 0.5
-        if xm1 - xm0 < 1:
-            xm0, xm1 = x0, x1
-        b.append(box([xm0, y0 + 1.0, z1], [xm1, y1, z1 + 3], "claw"))
+    for i, (xa, xb, length, splay) in enumerate(fingers):
+        mat = "digit_%d" % min(2, i if i < 3 else 2)
+        seg = length // 3
+        y = 8.0
+        z = -1.0
+        for s in range(3):
+            h = 2.5
+            dx = splay * (s + 1)
+            dz = -0.15 * s                      # 极轻微向前收，读起来像"要抓"
+            b.append(box([xa + dx, y, z + dz], [xb + dx, y + h, z + dz + 2], mat))
+            y += h
+        # 指尖爪：底座 ＋ 向前钩的尖
+        cx0, cx1 = xa + splay * 3, xb + splay * 3
+        b.append(box([cx0 + 0.25, y, z - 0.5], [cx1 - 0.25, y + 1.5, z + 1.5], "claw"))
+        b.append(box([cx0 + 0.75, y + 1.5, z - 1.0], [cx1 - 0.75, y + 3.5, z + 0.5], "claw"))
 
-    # ---- aura shards: a few floating fragments around the hand (dark magic feel) ----
-    b.append(box([-8, 1, 2], [-6, 3, 4], "aura"))
-    b.append(box([6, 1, 2], [8, 3, 4], "aura"))
-    b.append(box([-2, 2, -7], [2, 4, -5], "aura"))
-    b.append(box([-1, 2, 7], [1, 4, 9], "aura"))
+    # 拇指：从左侧伸出，斜着往上
+    b.append(box([-10, -1, -1], [-6.5, 2, 1], "digit_2"))
+    b.append(box([-12.5, 1, -1], [-10, 4, 1], "digit_1"))
+    b.append(box([-13.5, 4, -1], [-11.5, 6.5, 0.5], "claw"))
+
+    # 几片灵光碎片，免得看起来像一张纸片
+    b.append(box([-8.5, -5, -1], [-7, -3, 1], "aura"))
+    b.append(box([7, -5, -1], [8.5, -3, 1], "aura"))
+    b.append(box([-1.5, 15, -1], [1.5, 17, 1], "aura"))
 
     return b
 
@@ -203,6 +260,16 @@ def recenter(boxes):
     position. If the geometry hangs forward of the origin (this hand was +4 units on Z),
     the hand swings around a point in front of itself and looks like it is orbiting
     its own wrist. Centring the bbox makes it spin in place.
+
+    ★★ AND THEN CLAMP INTO THE LOADER'S WINDOW (2026-10-10).
+    Vanilla's `BlockElement.Deserializer` rejects any `from`/`to` outside **-16 .. 32**
+    and drops the ENTIRE model if one cube violates it. Centring a model longer than
+    ~32 units therefore guarantees a failure -- which is exactly what happened to the
+    first three-hand version (tether at z=-30 => recentred to +-29.75 => the client
+    logged "Failed to load model tnc:models/projectile/dark_hand.json").
+    This function now refuses to produce an out-of-window model: if the recentred box
+    would not fit, it slides the model so the box fits inside `-15.9 .. 31.9` instead.
+    A slightly off-centre pivot is a cosmetic wobble; an unloaded model is invisible.
     """
     xs0 = min(b["from"][0] for b in boxes)
     xs1 = max(b["to"][0] for b in boxes)
@@ -213,6 +280,35 @@ def recenter(boxes):
     dx = -round((xs0 + xs1) / 2.0, 2)
     dy = -round((ys0 + ys1) / 2.0, 2)
     dz = -round((zs0 + zs1) / 2.0, 2)
+
+    # the vanilla extents window, with a hair of margin
+    LO, HI = -15.9, 31.9
+
+    def fix(lo, hi, shift):
+        """Center if it fits; otherwise sit flush against the window edge.
+
+        Centring keeps the projectile's pivot in the middle of the model (so it spins in
+        place instead of orbiting its own wrist). But the extents window is NOT symmetric
+        about the origin (-16 .. 32), so a model that cannot fit centred still has room on
+        the + side: sliding it flush to LO uses the whole 47.8-unit window instead of the
+        ~31.8 units available when centred. Both branches are deterministic, so re-running
+        the generator does not jitter the geometry.
+        """
+        if (hi - lo) > (HI - LO):
+            raise AssertionError(
+                "model is %.2f units long in one axis but the vanilla loader only allows "
+                "%.2f (-16..32); shrink the model and let the spell JSON `scale` make it big"
+                % (hi - lo, HI - LO))
+        if lo + shift < LO:
+            return round(LO - lo, 2)
+        if hi + shift > HI:
+            return round(HI - hi, 2)
+        return shift
+
+    dx = fix(xs0, xs1, dx)
+    dy = fix(ys0, ys1, dy)
+    dz = fix(zs0, zs1, dz)
+
     if dx == dy == dz == 0:
         return boxes
     for b in boxes:

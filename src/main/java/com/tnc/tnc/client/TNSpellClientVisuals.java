@@ -200,6 +200,13 @@ public final class TNSpellClientVisuals {
         // ★ 黑雾的"屏幕变黑"（作者 2026-10-09："敌人包括其他玩家触碰到这个雾……
         //   屏幕得给我黑了，t 级越高屏幕越黑"）✓
         tickFogDarkness(minecraft);
+        // ★★ 黑雾"笼罩别人"（作者 2026-10-10："黑雾我看不见致盲啊，敌人如果被致盲了
+        //   我得不到反馈，起码我瞄准敌人敌人身上应该有致盲buff"）✓
+        //   ★ 这里**必须独立于 tickFogDarkness** ✗：原来它是在"我自己也在雾里"的循环里
+        //     被调用的 ⇒ **施法者站在雾外面就完全看不到敌人被笼罩** ✗，这正是作者报的问题 ✓。
+        //     现在改成：只要附近有怪身上挂着 tnc:dark_fog，就在它身上撒粒子 ✓，
+        //     与我在不在雾里无关 ✓。
+        tickFogShroud(minecraft);
     }
 
     // ------------------------------------------------------------------
@@ -261,6 +268,8 @@ public final class TNSpellClientVisuals {
                 if (value > target) {
                     target = value;
                 }
+                // 注意：笼罩别人**不在这里做** ✗ —— 它现在独立跑（见 tickFogShroud 的注释），
+                // 否则施法者站在雾外面就看不到敌人中致盲 ✓
             }
         }
         // 进去快、出来稍慢 ✓（免得站在边界上闪）
@@ -387,5 +396,69 @@ public final class TNSpellClientVisuals {
     /** 有该效果就返回它的系数，否则返回 1（不动原版数值）。 */
     private static float factor(Player player, RegistryObject<MobEffect> effect, float value) {
         return (effect.isPresent() && player.hasEffect(effect.get())) ? value : 1.0F;
+    }
+
+    // ------------------------------------------------------------------
+    //  ★ 黑雾"笼罩"：沾上雾的人（**除了自己**）身上裹一层黑雾 —— 这就是**致盲的反馈** ✓
+    //
+    //  作者 2026-10-10："黑雾的致盲效果，我希望沾上黑雾的敌人和玩家除了自己都都有黑雾
+    //  笼罩的感觉" ＋ 随后："**黑雾我看不见致盲啊，敌人如果被致盲了我得不到反馈，
+    //  起码我瞄准敌人敌人身上应该有致盲buff**"。
+    //
+    //  ★★ 之前看不见的真因（已修）：这段原来是在"**我自己也在雾里**"的循环里被调用的 ✗
+    //     ⇒ 站在雾外面施法时，敌人中没中致盲**完全没有画面** ✗。
+    //     现在它独立跑：只要**附近**有活体挂着 `tnc:dark_fog`，就在它身上撒粒子 ✓，
+    //     与施法者在不在雾里无关 ✓ —— 这正是"瞄准敌人就能看到他身上有致盲"的效果 ✓。
+    //
+    //  为什么用粒子而不是"给敌人画描边"：粒子是**所有玩家都能看到**的世界效果 ✓，
+    //  而描边/高亮是客户端本地的东西（后面做"索敌高亮"时才用它）✓。
+    //  粒子用 squid_ink + smoke（都验证过是真粒子 ✓），自己跳过 ✗。
+    //
+    //  ⚠ 性能：每个受影响实体每 tick 约 6 颗，硬性限制最多
+    //    {@link #SHROUD_MAX_ENTITIES} 个实体、且只在 {@link #SHROUD_RANGE} 格内 ✓。
+    // ------------------------------------------------------------------
+
+    /** 每 tick 最多给几个实体撒笼罩粒子（防止大场面上百怪）。 */
+    private static final int SHROUD_MAX_ENTITIES = 12;
+
+    /** 一个实体身上每 tick 撒几颗黑雾。 */
+    private static final int SHROUD_PARTICLES = 6;
+
+    /** 只处理玩家这个半径内的受影响实体（更远的本来也看不清）。 */
+    private static final double SHROUD_RANGE = 32.0D;
+
+    private static void tickFogShroud(net.minecraft.client.Minecraft minecraft) {
+        net.minecraft.client.multiplayer.ClientLevel level = minecraft.level;
+        if (level == null || minecraft.player == null
+                || !com.tnc.tnc.magic.TNEffects.DARK_FOG.isPresent()) {
+            return;
+        }
+        java.util.List<net.minecraft.world.entity.LivingEntity> inside =
+                level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class,
+                        minecraft.player.getBoundingBox().inflate(SHROUD_RANGE),
+                        e -> e.isAlive() && e != minecraft.player
+                                && e.hasEffect(com.tnc.tnc.magic.TNEffects.DARK_FOG.get()));
+        int shown = 0;
+        for (net.minecraft.world.entity.LivingEntity entity : inside) {
+            if (shown++ >= SHROUD_MAX_ENTITIES) {
+                break;
+            }
+            double h = entity.getBbHeight();
+            double ex = entity.getX();
+            double ey = entity.getY() + h * 0.5D;
+            double ez = entity.getZ();
+            // 贴身的黑雾：包住整个身高，慢慢散开
+            for (int i = 0; i < SHROUD_PARTICLES; i++) {
+                double ox = (level.random.nextDouble() - 0.5D) * 0.9D;
+                double oy = (level.random.nextDouble() - 0.5D) * h;
+                double oz = (level.random.nextDouble() - 0.5D) * 0.9D;
+                level.addParticle(
+                        (i % 3 == 0)
+                                ? net.minecraft.core.particles.ParticleTypes.SMOKE
+                                : net.minecraft.core.particles.ParticleTypes.SQUID_INK,
+                        ex + ox, ey + oy, ez + oz,
+                        0.0D, 0.012D, 0.0D);
+            }
+        }
     }
 }

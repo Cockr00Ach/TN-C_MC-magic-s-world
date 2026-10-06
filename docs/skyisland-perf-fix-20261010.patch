@@ -1,0 +1,265 @@
+diff --git a/src/main/java/com/tnc/tnc/world/SkyIslandManager.java b/src/main/java/com/tnc/tnc/world/SkyIslandManager.java
+index c50acbdb..a2edd1e6 100644
+--- a/src/main/java/com/tnc/tnc/world/SkyIslandManager.java
++++ b/src/main/java/com/tnc/tnc/world/SkyIslandManager.java
+@@ -16,6 +16,7 @@ import net.minecraft.world.entity.player.Player;
+ import net.minecraft.world.level.ChunkPos;
+ import net.minecraft.world.level.Level;
+ import net.minecraft.world.level.block.Blocks;
++import net.minecraft.world.level.chunk.ChunkStatus;
+ import net.minecraft.world.level.levelgen.Heightmap;
+ import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
+ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+@@ -62,6 +63,64 @@ public final class SkyIslandManager {
+     private static final Set<BlockPos> ACTIVE_RITUALS = new HashSet<>();
+     private static final Map<MinecraftServer,Long> PORTAL_UPGRADES = new WeakHashMap<>();
+     private static final Map<MinecraftServer,Map<BlockPos,Long>> PREVIEWS = new WeakHashMap<>();
++
++    // ------------------------------------------------------------------
++    //  ★★ 2026-10-10 性能修复：不要在服务器主线程上"生成区块"
++    //
++    //  作者报"启动之后非常的卡，加载特别久帧率很低"。查 2026-10-07 的客户端日志，集成服务器
++    //  被拖到 **36128ms / 722 tick 之后**（"Can't keep up! Is the server overloaded?"），
++    //  而且那几次卡顿与 `[TN-C Sky Island] surveyed candidate ...` 完全同时发生。
++    //
++    //  真因（三处，都在本文件里，都是**同步** `ServerLevel.getChunk(...)`）：
++    //    1. `surveyStep` 每个 tick 用 getChunk 在 640~768 格外的候选地**生成**一个区块，
++    //       只为读一次高度图 ⇒ 每个 tick 超时几百毫秒，连续几十个 tick 就把服务器拖垮 ✗；
++    //    2. `chooseGroundPortal` 在一次调用里对 16 个候选 × 9 个采样点 = **144 个区块**
++    //       做同样的同步生成 ⇒ 单次 tick 卡死几十秒 ✗（36 秒就是它）；
++    //    3. `forceAreaChunks` 对整块面积的每个区块同步 getChunk，
++    //       且每个区块都 `setDirty()` 一次 ✗。
++    //
++    //  修法：**申请区块用 ForgeChunkManager 票据（区块系统在工作线程上加载），
++    //  主线程只用 `requireChunk=false` 的非阻塞查询问"到了没有"，没到就下一 tick 再看** ✓。
++    //  样本点/工序在没到之前**不推进**，所以既不会跳过、也不会重复，且不阻塞 ✓。
++    // ------------------------------------------------------------------
++
++    /** 采样期间我们申请过票据的区块（服务端内存，不存档 ✓）。 */
++    private static final Set<Long> SAMPLE_CHUNKS = new HashSet<>();
++
++    /**
++     * 采样票据的 owner。
++     *
++     * <p>必须与 {@link #ticketOwner(SkyIslandSavedData)}（＝岛屿原点）**区分开** ✗：
++     * 勘测阶段原点还是 0,0,0，两者会撞成同一个 owner，
++     * 于是释放采样票据时可能把岛屿自己的票据一起放掉 ✗。
++     */
++    private static final BlockPos SAMPLE_OWNER = new BlockPos(0, -1, 0);
++
++    /**
++     * 这个区块现在能读了吗？不能就顺手申请票据，并返回 false。
++     *
++     * <p>`requireChunk=false` 是整段修复的关键：它是**提问**，不是**阻塞生成** ✓。
++     */
++    private static boolean ensureSampleChunk(ServerLevel level, int chunkX, int chunkZ) {
++        if (level.getChunkSource().getChunk(chunkX, chunkZ, ChunkStatus.FULL, false) != null) {
++            return true;
++        }
++        long packed = ChunkPos.asLong(chunkX, chunkZ);
++        if (SAMPLE_CHUNKS.add(packed)) {
++            ForgeChunkManager.forceChunk(level, TNMod.MODID, SAMPLE_OWNER, chunkX, chunkZ, true, false);
++        }
++        return false;
++    }
++
++    /** 放手所有采样票据（勘测结束 / 关服）✓。 */
++    private static void releaseSampleChunks(ServerLevel level) {
++        for (long packed : SAMPLE_CHUNKS) {
++            ChunkPos chunk = new ChunkPos(packed);
++            ForgeChunkManager.forceChunk(level, TNMod.MODID, SAMPLE_OWNER, chunk.x, chunk.z, false, false);
++        }
++        SAMPLE_CHUNKS.clear();
++    }
++
+     static final class PortalChunksPending extends IOException {
+         PortalChunksPending() { super("正在加载两座传送阵及已有生物，加载完成后自动继续升级"); }
+     }
+@@ -162,6 +221,7 @@ public final class SkyIslandManager {
+         SkyIslandSavedData data = SkyIslandSavedData.get(level);
+         try {
+             releaseActiveChunks(level, data);
++            releaseSampleChunks(level);          // 勘测采样票据也要放掉 ✓
+         } catch (Throwable error) {
+             LOGGER.error("[TN-C Sky Island] could not release chunk tickets during shutdown", error);
+         }
+@@ -224,7 +284,11 @@ public final class SkyIslandManager {
+         int worldX = candidateOriginX + sample.getX();
+         int worldZ = candidateOriginZ + sample.getZ();
+ 
+-        level.getChunk(worldX >> 4, worldZ >> 4);
++        // ★ 非阻塞：没加载就申请票据、本 tick 到此为止，样本计数**不推进** ⇒ 下一 tick 重来同一格 ✓
++        if (!ensureSampleChunk(level, worldX >> 4, worldZ >> 4)) {
++            data.setDirty();
++            return;
++        }
+         int terrainY = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, worldX, worldZ) - 1;
+         int islandBottomY = manifest.worldOriginY() + sample.getY();
+         int overlap = Math.max(0, terrainY - islandBottomY + 1);
+@@ -264,6 +328,13 @@ public final class SkyIslandManager {
+             throw new IllegalStateException("no island candidate was surveyed");
+         }
+ 
++        // ★★ 先把传送阵选址要用的那 16×9 个采样区块**全部申请下来**，没到齐就下一 tick 再来 ✓。
++        //    这一段以前是在 chooseGroundPortal 里逐格同步生成的（最多 144 个区块／一次 tick）
++        //    ⇒ 单次卡死几十秒（日志里的 36128ms 就是它）✗。现在主线程一次都不生成 ✓。
++        if (!portalSiteChunksReady(level, manifest)) {
++            return;                       // 留在 SURVEY 阶段，下一 tick 重新进这里
++        }
++
+         data.originX = data.bestOriginX;
+         data.originY = manifest.worldOriginY();
+         data.originZ = data.bestOriginZ;
+@@ -287,6 +358,31 @@ public final class SkyIslandManager {
+                 data.originX, data.originY, data.originZ,
+                 data.groundPortalX, data.groundPortalY, data.groundPortalZ,
+                 data.bestSurveyScore);
++
++        // 勘测结束 ⇒ 把采样区间的票据全部放掉，别占着内存和存档时间 ✓
++        releaseSampleChunks(level);
++    }
++
++    /**
++     * 传送阵选址要读的那些区块，现在是否都到位了（**不阻塞**）✓。
++     *
++     * <p>一次把全部需要的区块都申请上，而不是边算边等：这样 `chooseGroundPortal` 里那些
++     * {@code getChunk} 全是缓存命中（同一个 tick 内不会掉出内存），
++     * 于是"逐格等 144 个区块"变成"等一次" ✓。
++     */
++    private static boolean portalSiteChunksReady(ServerLevel level, SkyIslandManifest manifest) {
++        BlockPos spawn = level.getSharedSpawnPos();
++        boolean ready = true;
++        for (int[] offset : PORTAL_OFFSETS) {
++            for (int[] sample : PORTAL_SAMPLES) {
++                int x = spawn.getX() + offset[0] + sample[0];
++                int z = spawn.getZ() + offset[1] + sample[1];
++                if (!ensureSampleChunk(level, x >> 4, z >> 4)) {
++                    ready = false;        // 继续把剩下的也申请上（省得一轮只推一个）
++                }
++            }
++        }
++        return ready;
+     }
+ 
+     /** Selects a dry site for the expanded ritual gate without changing the legacy landing offset. */
+@@ -304,6 +400,10 @@ public final class SkyIslandManager {
+             for (int[] sample : PORTAL_SAMPLES) {
+                 int x = centerX + sample[0];
+                 int z = centerZ + sample[1];
++                // ★ 这一句现在是**缓存命中**：{@link #portalSiteChunksReady} 已经在
++                //   finishSurvey 里把这 16×9 个区块全部申请并等到位了 ✓。
++                //   留着它是为了兜住 prepare() 可能碰到的相邻区块，代价只有几个区块、
++                //   而且只在选址那一次 ✓（不再是"144 个区块挤在一个 tick 里同步生成" ✗）。
+                 level.getChunk(x >> 4, z >> 4);
+                 int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1;
+                 minY = Math.min(minY, y);
+@@ -353,7 +453,10 @@ public final class SkyIslandManager {
+         if (level.getGameTime() < data.waitUntilTick) {
+             return;
+         }
+-        ensureActiveChunksLoaded(level, data);
++        // ★ 区块由票据在后台加载；没到位就下一 tick 再来（不推进 nextPiece ⇒ 不跳过 ✓）
++        if (!activeChunksReady(level, data)) {
++            return;
++        }
+ 
+         StructureTemplate template = level.getStructureManager().get(piece.resource())
+                 .orElseThrow(() -> new IOException("missing structure template " + piece.resource()));
+@@ -409,7 +512,9 @@ public final class SkyIslandManager {
+         if (level.getGameTime() < data.waitUntilTick) {
+             return;
+         }
+-        ensureActiveChunksLoaded(level, data);
++        if (!activeChunksReady(level, data)) {
++            return;
++        }
+ 
+         if (!portalEntitiesReady(level,data)) return;
+ 
+@@ -482,8 +587,13 @@ public final class SkyIslandManager {
+         try {
+             forceAreaChunks(level, data, PortalArchitecture.footprintOrigin(island), PortalArchitecture.WIDTH, PortalArchitecture.HEIGHT, PortalArchitecture.WIDTH);
+             forceAreaChunks(level, data, PortalArchitecture.footprintOrigin(ground), PortalArchitecture.WIDTH, PortalArchitecture.HEIGHT, PortalArchitecture.WIDTH);
+-            ensureActiveChunksLoaded(level, data);
+-            // Block chunks load synchronously, saved entities do not. Keep tickets while the
++            if (!activeChunksReady(level, data)) {
++                // 票据还在后台加载这些区块 ⇒ 交给调用方稍后重试（和下面实体未就绪同一条路 ✓）
++                pending = true;
++                PORTAL_UPGRADES.put(server, level.getGameTime() + 2);
++                throw new PortalChunksPending();
++            }
++            // Block chunks load asynchronously now, saved entities do not. Keep tickets while the
+             // entity manager processes its asynchronous inbox on subsequent server ticks.
+             if (!portalEntitiesReady(level,data)) {
+                 pending=true;
+@@ -538,6 +648,7 @@ public final class SkyIslandManager {
+         int maxChunkX = (target.getX() + sizeX - 1) >> 4;
+         int maxChunkZ = (target.getZ() + sizeZ - 1) >> 4;
+         BlockPos owner = ticketOwner(data);
++        boolean claimed = false;
+ 
+         for (int chunkX = minChunkX; chunkX <= maxChunkX; chunkX++) {
+             for (int chunkZ = minChunkZ; chunkZ <= maxChunkZ; chunkZ++) {
+@@ -548,11 +659,18 @@ public final class SkyIslandManager {
+                 // A false return means this exact TN-C owner already had the ticket (for example
+                 // after a crash). It is still ours and must still be tracked for later release.
+                 ForgeChunkManager.forceChunk(level, TNMod.MODID, owner, chunkX, chunkZ, true, false);
+-                level.getChunk(chunkX, chunkZ);
++                // ★ 这里以前还有一句 `level.getChunk(chunkX, chunkZ)`：它会**同步生成**这个区块，
++                //   而本循环是整块面积一起跑的 ⇒ 一次 tick 生成几十上百个区块，服务器直接卡死 ✗。
++                //   现在只挂票据：区块系统会在工作线程上把它们加载好，
++                //   由 {@link #activeChunksReady} 每 tick 非阻塞地问一次"好了没" ✓。
+                 data.activeChunks.add(packed);
+-                data.setDirty();
++                claimed = true;
+             }
+         }
++        // ★ setDirty 从内层循环里挪出来：以前是**每个区块**都标脏一次（整块面积上千次）✗
++        if (claimed) {
++            data.setDirty();
++        }
+     }
+ 
+     private static void releaseActiveChunks(ServerLevel level, SkyIslandSavedData data) {
+@@ -571,12 +689,28 @@ public final class SkyIslandManager {
+         }
+     }
+ 
+-    /** Synchronous guard for crash recovery before touching a template's blocks. */
+-    private static void ensureActiveChunksLoaded(ServerLevel level, SkyIslandSavedData data) {
++    /**
++     * ★ 非阻塞就绪检查：申请过的区块是否都已在内存里。
++     *
++     * <p>这个方法以前叫 {@code ensureActiveChunksLoaded}，实现是对每个申请过的区块调用
++     * `level.getChunk(...)` —— 那是**同步生成/加载**，在岛屿这种大块面积上就是几十秒的卡死 ✗
++     * （日志：`Running 36128ms or 722 ticks behind`）。
++     *
++     * <p>区块本来就已由 {@link #forceAreaChunks} 挂了 ForgeChunkManager 票据，
++     * 那条路会在工作线程上把它们加载好 ✓。所以这里**只需要问一句"到了没"**，
++     * 没到就让调用方下一 tick 再来 —— `requireChunk=false` 就是"问"与"卡"的区别 ✓。
++     */
++    private static boolean activeChunksReady(ServerLevel level, SkyIslandSavedData data) {
++        if (data.activeChunks.isEmpty()) {
++            return false;
++        }
+         for (long packed : data.activeChunks) {
+             ChunkPos chunk = new ChunkPos(packed);
+-            level.getChunk(chunk.x, chunk.z);
++            if (level.getChunkSource().getChunk(chunk.x, chunk.z, ChunkStatus.FULL, false) == null) {
++                return false;
++            }
+         }
++        return true;
+     }
+ 
+     private static BlockPos ticketOwner(SkyIslandSavedData data) {
+@@ -719,6 +853,9 @@ public final class SkyIslandManager {
+     }
+ 
+     private static void teleport(ServerPlayer player, ServerLevel level, BlockPos destination) {
++        // ★ 这一句**保留是有意的** ✗：传送必须落在已加载的区块里，否则玩家可能落进未加载区块。
++        //   代价只有**一个**区块、而且是玩家主动触发（且有三秒冷却）⇒ 不会像勘测那样
++        //   在一个 tick 里生成上百个区块 ✓。
+         level.getChunk(destination.getX() >> 4, destination.getZ() >> 4);
+         ensureLanding(level, destination);
+         player.getPersistentData().putLong(PLAYER_COOLDOWN, level.getGameTime() + PORTAL_COOLDOWN_TICKS);

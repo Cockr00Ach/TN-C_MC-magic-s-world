@@ -112,3 +112,10 @@ forge*changelog.txt
 
 # 本地存档备份（**故意不进 git**）：游戏实例里存档的 FTB 任务进度备份，属于本地产物
 archive/local-save-backup/
+
+# ---------- work/：工具的临时产物与备份（**故意不进 git**，2026-10-06）----------
+# tools/remove-conquest-vanilla-resources.ps1 会在 work/backups/<时间戳>/ 下留
+# Conquest jar 的原始副本与裁剪副本（单个 100+ MB），tools/ 其他脚本也可能往这里
+# 写中间产物。这些是本地一次性材料，不是我们的成果 —— 提交它们会让仓库暴涨，
+# 也违反"只跟踪我们自己写的东西"。需要备份时脚本自己会重建目录。
+work/

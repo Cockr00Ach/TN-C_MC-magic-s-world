@@ -1,7 +1,7 @@
 {
   "school": "SOUL",
   "group": "dark_hand",
-  "range": 34.0,
+  "range": 48.0,
   "learn": {
     "tier": 4
   },
@@ -28,27 +28,29 @@
       "type": "PROJECTILE",
       "projectile": {
         "launch_properties": {
-          "velocity": 1.2,
-          "extra_launch_count": 3,
-          "extra_launch_delay": 3
+          "velocity": 0.48,
+          "extra_launch_count": 2,
+          "extra_launch_delay": 5
         },
         "projectile": {
           "homing_angle": 0.5,
           "client_data": {
             "travel_particles": [
               {
-                "particle_id": "soul",
+                "particle_id": "soulsweapons:black_flame",
                 "shape": "CIRCLE",
                 "rotation": "LOOK",
                 "origin": "CENTER",
-                "count": 4.0,
+                "count": 16.0,
                 "min_speed": 0.0,
-                "max_speed": 0.1
+                "max_speed": 0.06
               }
             ],
             "model": {
               "model_id": "tnc:projectile/dark_hand",
-              "scale": 8.5
+              "scale": 9.85,
+              "orientation": "ALONG_MOTION",
+              "rotate_degrees_offset": 0.0
             }
           }
         }

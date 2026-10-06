@@ -27,7 +27,7 @@ chapters=[json.loads(p.read_text(encoding='utf-8-sig')) for p in (R/'questbook/f
 for c in chapters:
  p=R/'questbook/ftbquests/chapters'/(c['filename']+'.snbt')
  for pack in [work,live]:assert sha(p)==sha(pack/'config/ftbquests/quests/chapters'/p.name)
-copies={W/'七系法器总览.png':'七系法器总览.png',W/'任务书七系排版预览.png':'任务书七系排版预览.png',W/'town-map/天空岛建筑编号.png':'天空岛建筑编号.png',W/'town-map/建筑用途提案.csv':'建筑用途提案.csv',W/'town-map/建筑编号.json':'建筑编号.json',R/'src/main/resources/assets/tnc/textures/guide/gui_world_title.png':'世界页-歸.png',R/'docs/归航银行-借贷与房屋分期设计.md':'归航银行-借贷与房屋分期设计.md',R/'docs/任务书排版与建筑地图修改说明.md':'任务书排版与建筑地图修改说明.md'}
+copies={W/'七系法器总览.png':'七系法器总览.png',W/'任务书七系排版预览.png':'任务书七系排版预览.png',W/'town-map/天空岛建筑编号.png':'天空岛建筑编号.png',W/'town-map/建筑用途提案.csv':'建筑用途提案.csv',W/'town-map/建筑编号.json':'建筑编号.json',R/'src/main/resources/assets/tnc/textures/guide/gui_world_title.png':'世界页-歸.png',R/'docs/quests/归航银行-借贷与房屋分期设计.md':'归航银行-借贷与房屋分期设计.md',R/'docs/quests/任务书排版与建筑地图修改说明.md':'任务书排版与建筑地图修改说明.md'}
 for src,dest in copies.items():shutil.copy2(src,O/dest)
 install_logs='\n'.join((W/p).read_text(encoding='utf-8-sig') for p in ['install-work.log','install-live.log'])
 proof=f'JUnit: {tests} passed, 0 failures, 0 errors\nForge GameTests: 104 passed, actual Bountiful 6.0.4 + Kambrik 6.1.1\nMagic stone startup diagnostics: 30/30\nProduction build: SUCCESSFUL\nJar verifier: PASSED\nSHA256: {digest}\nOriginal FTB chapters unchanged: {len(originals)}\n\n'+install_logs
@@ -76,5 +76,5 @@ jar SHA256：`{digest}`。
 
 按建筑编号调整NPC/玩家房源用途；按预览调整任务书间距、字体和地图节点。贷款与分期见“归航银行-借贷与房屋分期设计.md”，有首付150、5期×74、总付520的具体方案与账本恢复要求，当前没有债务或自动扣息。娱乐后续规则由作者决定。
 '''
-(R/'docs/续作完成报告-20260929.md').write_text(report,encoding='utf-8');(O/'续作完成报告-20260929.md').write_text(report,encoding='utf-8')
+(R/'docs/town/续作完成报告-20260929.md').write_text(report,encoding='utf-8');(O/'续作完成报告-20260929.md').write_text(report,encoding='utf-8')
 print(f'Collected verified revision delivery: {tests} unit tests / 104 GameTests / {len(chapters)} chapters / 35 wands.')
