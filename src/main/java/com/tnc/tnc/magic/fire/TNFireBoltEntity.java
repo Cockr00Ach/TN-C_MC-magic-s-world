@@ -63,9 +63,6 @@ public final class TNFireBoltEntity extends Projectile {
     private static final EntityDataAccessor<Float> RANGE =
             SynchedEntityData.defineId(TNFireBoltEntity.class, EntityDataSerializers.FLOAT);
 
-    /** 飞过射程的这个比例之后开始逐渐消失（见 {@link #fade}）。 */
-    public static final double FADE_START = 0.65D;
-
     /** 出手速度（格/tick）。作者 2026-10-05：从 1.3 降下来，让焰尾看得清。 */
     public static final double LAUNCH_SPEED = 1.0D;
 
@@ -166,16 +163,12 @@ public final class TNFireBoltEntity extends Projectile {
         if (speed <= 0.01D || range <= 0.01D) {
             return 1.0F;                      // 还没出手（成形阶段）→ 不衰减
         }
-        // ⚠️ 作者 2026-10-05：「FADE_START 这个还有吗，如果有把它改成出射程前都存在，
-        //    出射程后散开为火焰粒子」✓
-        //    ⇒ 射线链（含火龙 ✓）**整段射程满亮度** ✓，不参与任何淡出 ✓；
-        //      飞出射程那一下由 tick() 里撒一团火焰粒子收尾 ✓
-        //    ⚠️ `FADE_START` 这个常量仍**服务于火球链** ✓
-        //      （火球"离开一定距离后逐渐消失"是作者 2026-10-05 早先明确要的 ✓，
-        //        属于另一条链的手感 ⇒ 这里不动它 ✗）
-        if (isRayShot() || isDragon()) {
-            return 1.0F;
-        }
+        // ⚠️ 作者 2026-10-05 追加：「都按这样改」✓
+        //    ⇒ **所有**火系投射物（火球链 + 射线链 + 火龙 + 陨石 ✓）
+        //      一律"**出射程前一直存在**"✓ —— 不再有任何距离淡出 ✗
+        //      飞出射程那一下由 tick() 撒一团火焰粒子收尾 ✓（撞方块同理 ✓）
+        //    ⚠️ 所以 `FADE_START` 这个常量已经没有使用者了 ⇒ 一并删掉 ✓
+        return 1.0F;
         double progress = (tickCount + partial) * speed / range;
         if (progress <= FADE_START) {
             return 1.0F;
@@ -466,10 +459,10 @@ public final class TNFireBoltEntity extends Projectile {
             if (isDragon() && level() instanceof net.minecraft.server.level.ServerLevel sl) {
                 dragonExplode(sl);
             }
-            // ★ 作者 2026-10-05：「出射程前都存在，出射程后散开为火焰粒子」✓
-            //   射线链：全程满亮度（不淡出 ✓，见 fade() 里的 isRayShot 分支 ✓），
-            //   飞到射程尽头就**散成一团火焰粒子** ✓ —— 而不是"啪"地凭空不见 ✗
-            if (isRayShot() && level() instanceof net.minecraft.server.level.ServerLevel slRay) {
+            // ★ 作者 2026-10-05：「出射程前都存在，出射程后散开为火焰粒子」+「都按这样改」✓
+            //   ⇒ **所有**火系投射物飞到射程尽头都散成一团火焰粒子 ✓
+            //     （火龙除外 ✓ —— 它有自己的"剧烈爆炸"收尾 ✓）
+            if (!isDragon() && level() instanceof net.minecraft.server.level.ServerLevel slRay) {
                 Vec3 at = position();
                 slRay.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z,
                         44, 0.35D, 0.35D, 0.35D, 0.10D);
