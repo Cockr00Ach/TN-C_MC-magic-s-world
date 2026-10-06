@@ -200,6 +200,13 @@ public final class TNSpellClientVisuals {
         // ★ 黑雾的"屏幕变黑"（作者 2026-10-09："敌人包括其他玩家触碰到这个雾……
         //   屏幕得给我黑了，t 级越高屏幕越黑"）✓
         tickFogDarkness(minecraft);
+        // ★★ 黑雾"笼罩别人"（作者 2026-10-10："黑雾我看不见致盲啊，敌人如果被致盲了
+        //   我得不到反馈，起码我瞄准敌人敌人身上应该有致盲buff"）✓
+        //   ★ 这里**必须独立于 tickFogDarkness** ✗：原来它是在"我自己也在雾里"的循环里
+        //     被调用的 ⇒ **施法者站在雾外面就完全看不到敌人被笼罩** ✗，这正是作者报的问题 ✓。
+        //     现在改成：只要附近有怪身上挂着 tnc:dark_fog，就在它身上撒粒子 ✓，
+        //     与我在不在雾里无关 ✓。
+        tickFogShroud(minecraft);
     }
 
     // ------------------------------------------------------------------
@@ -261,9 +268,8 @@ public final class TNSpellClientVisuals {
                 if (value > target) {
                     target = value;
                 }
-                // ★ 顺便把"雾里其他人被黑雾裹住"那层撒上（作者 2026-10-10）✓
-                //   只在玩家自己在雾里时才做 ⇒ 离得远完全不为它花代价 ✓
-                tickFogShroud(minecraft, fog.getX(), fog.getY(), fog.getZ(), radius);
+                // 注意：笼罩别人**不在这里做** ✗ —— 它现在独立跑（见 tickFogShroud 的注释），
+                // 否则施法者站在雾外面就看不到敌人中致盲 ✓
             }
         }
         // 进去快、出来稍慢 ✓（免得站在边界上闪）
@@ -393,20 +399,23 @@ public final class TNSpellClientVisuals {
     }
 
     // ------------------------------------------------------------------
-    //  ★ 黑雾"笼罩"：沾上雾的人（**除了自己**）身上裹一层黑雾
+    //  ★ 黑雾"笼罩"：沾上雾的人（**除了自己**）身上裹一层黑雾 —— 这就是**致盲的反馈** ✓
     //
     //  作者 2026-10-10："黑雾的致盲效果，我希望沾上黑雾的敌人和玩家除了自己都都有黑雾
-    //  笼罩的感觉"。
+    //  笼罩的感觉" ＋ 随后："**黑雾我看不见致盲啊，敌人如果被致盲了我得不到反馈，
+    //  起码我瞄准敌人敌人身上应该有致盲buff**"。
     //
-    //  为什么是"粒子"而不是"给自己屏幕加黑"：
-    //    * 自己那块已经由 {@link #tickFogDarkness} 的满屏黑幕负责了 ✓；
-    //    * 而"别人被雾裹住"这件事是**看到**的，不是**感觉**的 ⇒ 必须在**他们身上**画东西 ✓。
-    //  所以：每当玩家自己在雾里（说明这个领域正在生效），就把雾里**其他**活体的身上
-    //  撒一层黑雾粒子（squid_ink + smoke，都验证过是真粒子 ✓）。自己跳过 ✗。
+    //  ★★ 之前看不见的真因（已修）：这段原来是在"**我自己也在雾里**"的循环里被调用的 ✗
+    //     ⇒ 站在雾外面施法时，敌人中没中致盲**完全没有画面** ✗。
+    //     现在它独立跑：只要**附近**有活体挂着 `tnc:dark_fog`，就在它身上撒粒子 ✓，
+    //     与施法者在不在雾里无关 ✓ —— 这正是"瞄准敌人就能看到他身上有致盲"的效果 ✓。
     //
-    //  ⚠ 性能：每个受影响实体每 tick 约 6 颗。雾里挤一堆怪时会线性增长 ⇒
-    //    这里硬性限制每 tick 最多给 {@link #SHROUD_MAX_ENTITIES} 个实体撒，
-    //    并且只在"玩家自己也在雾里"时才做（离得远就完全不跑 ✓）。
+    //  为什么用粒子而不是"给敌人画描边"：粒子是**所有玩家都能看到**的世界效果 ✓，
+    //  而描边/高亮是客户端本地的东西（后面做"索敌高亮"时才用它）✓。
+    //  粒子用 squid_ink + smoke（都验证过是真粒子 ✓），自己跳过 ✗。
+    //
+    //  ⚠ 性能：每个受影响实体每 tick 约 6 颗，硬性限制最多
+    //    {@link #SHROUD_MAX_ENTITIES} 个实体、且只在 {@link #SHROUD_RANGE} 格内 ✓。
     // ------------------------------------------------------------------
 
     /** 每 tick 最多给几个实体撒笼罩粒子（防止大场面上百怪）。 */
@@ -415,17 +424,18 @@ public final class TNSpellClientVisuals {
     /** 一个实体身上每 tick 撒几颗黑雾。 */
     private static final int SHROUD_PARTICLES = 6;
 
-    private static void tickFogShroud(net.minecraft.client.Minecraft minecraft, double fogX,
-                                      double fogY, double fogZ, double radius) {
+    /** 只处理玩家这个半径内的受影响实体（更远的本来也看不清）。 */
+    private static final double SHROUD_RANGE = 32.0D;
+
+    private static void tickFogShroud(net.minecraft.client.Minecraft minecraft) {
         net.minecraft.client.multiplayer.ClientLevel level = minecraft.level;
-        if (level == null) {
+        if (level == null || minecraft.player == null
+                || !com.tnc.tnc.magic.TNEffects.DARK_FOG.isPresent()) {
             return;
         }
-        net.minecraft.world.phys.AABB area = new net.minecraft.world.phys.AABB(
-                fogX - radius, fogY - 4.0D, fogZ - radius,
-                fogX + radius, fogY + 8.0D, fogZ + radius);
         java.util.List<net.minecraft.world.entity.LivingEntity> inside =
-                level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, area,
+                level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class,
+                        minecraft.player.getBoundingBox().inflate(SHROUD_RANGE),
                         e -> e.isAlive() && e != minecraft.player
                                 && e.hasEffect(com.tnc.tnc.magic.TNEffects.DARK_FOG.get()));
         int shown = 0;

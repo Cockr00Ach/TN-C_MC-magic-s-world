@@ -337,7 +337,11 @@ def rewrite(spell, name, cfg):
     #     tnc:dark_fog        = 给**所有生物**的真实惩罚（怪物也吃得到 ✓），
     #                           档位越高越重（amplifier 0/1/2）✓
     #   外加客户端那层按档位的黑幕（TNSpellClientVisuals）—— 三层叠出"越深越瞎" ✓
-    impacts.append(status(DARK_FOG, cfg["veil_secs"], cfg["blind_amp"]))
+    #   ★ show_particles=True 是**反馈**的关键（作者 2026-10-10："黑雾我看不见致盲啊，
+    #     敌人如果被致盲了我得不到反馈，起码我瞄准敌人敌人身上应该有致盲buff"）✓
+    #     引擎的 StatusEffect 动作带 `show_particles` 字段（javap 确认）⇒ 打开它，
+    #     受影响实体身上就会冒**原版药水粒子** ⇒ 一眼看得出谁中了致盲 ✓
+    impacts.append(status(DARK_FOG, cfg["veil_secs"], cfg["blind_amp"], show_particles=True))
     if cfg["darkness"]:
         impacts.append(status("minecraft:darkness", cfg["darkness"], 0))
     if cfg["weakness"]:

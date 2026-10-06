@@ -184,109 +184,73 @@ def build_boxes():
     """
     b = []
 
-    # ---- the tether: a thick black band along -Z, plus a hub at its end ----
-    # (dedicated near-black material; wide in x AND y so it is a slab, not a thread)
+    # ★★ 2026-10-10 第三版：**一只手，掌心朝 +Z（飞行方向）**
     #
-    # ★★ SIZES ARE CAPPED BY THE VANILLA LOADER, NOT BY TASTE (2026-10-10).
-    # BlockElement.Deserializer rejects any `from`/`to` outside **-16 .. 32**, and it
-    # rejects the WHOLE model, not just that one cube. The first fan version had the
-    # tether at z=-30, recentring pushed the box to +-29.75, and the client logged:
-    #     Failed to load model tnc:models/projectile/dark_hand.json
-    #     JsonParseException: 'from' specifier exceeds the allowed boundaries: (... -2.375E+1)
-    # Because recenter() puts the bounding-box CENTRE on the origin, a model longer than
-    # ~32 units cannot be recentred without half of it leaving that window -- so the MODEL
-    # must stay short and the engine `scale` (spell JSON) is what makes it big. That is
-    # exactly why `scale` exists.
-    # Budget: the hands (scale 1.25 below) reach +15, so keep z inside -18 .. +15.
-    b.append(box([-2.6, -2.6, -15.0], [2.6, 2.6, -7.5], "tether"))
-    b.append(box([-3.6, -3.6, -16.0], [3.6, 3.6, -14.5], "tether"))    # hub knot
-    b.append(box([-1.6, -1.6, -17.8], [1.6, 1.6, -15.8], "tether"))    # fading tail
+    # 作者反馈（这一版就是照它改的）：
+    #   1. "手发射出去怎么一直在旋转，掌心直直出去就好"
+    #      ⇒ 朝向改成 ALONG_MOTION（见 gen_dark_hand_projectiles.py），
+    #        而且模型**掌心必须朝着 +Z** —— 之前掌心朝下、手指朝前，
+    #        配 TOWARDS_CAMERA 会随视角偏航，看起来就在转 ✗。
+    #   2. "三个手掌黏在一起很丑"
+    #      ⇒ 模型里**只放一只手** ✓。"好几只手"改由引擎**多发几发**实现
+    #        （extra_launch_count + extra_launch_delay）⇒ 三只手**沿飞行路径错开**，
+    #        而不是在同一处互相穿插 ✓。
+    #   3. "黑带很怪…可以做一个黑线连接着手腕跟后背"
+    #      ⇒ 模型里那条粗黑带**删掉** ✓。连到施法者的线**不能烤进模型** ——
+    #        手会飞离施法者，静态模型永远够不到他 ✗。改由客户端渲染一条**黑索**
+    #        （见 client/TNDarkCordRenderer.java）✓。
+    #
+    # 几何（模型空间）：
+    #   +Z = 前方（朝着敌人）⇒ **手掌平板的面朝 +Z** ✓
+    #   +Y = 上 ⇒ 手腕在下、手指朝上（像"伸手按住"的姿势）
+    #   +X = 右
+    # 正面看就是一只张开的手掌按过来，手腕沿 -Z 直直拖在后面 ✓。
+    b = []
 
-    # ---- three hands, fanned about the Z axis ----
-    # 1.25 => each hand reaches +15 units, which keeps the recentred model inside the window
-    fans = [
-        (-26.0, 1.25),     # upper-left hand
-        (0.0, 1.25),       # the middle hand
-        (26.0, 1.25),      # lower-right hand
-    ]
-    for angle, scale in fans:
-        b.extend(one_hand(angle, scale))
+    # 手腕：沿 -Z 直直往后（短，不是前臂）
+    b.append(box([-3, -3, -7], [3, 3, -1], "wrist"))
+    # 手掌平板：它的 +Z 面就是掌心
+    b.append(box([-6.5, -6, -1.5], [6.5, 6, 1.5], "palm"))
+    # 掌根（靠手腕那侧稍厚一点）
+    b.append(box([-5, -7, -2.5], [5, -3, 1.5], "back"))
+    # 掌指关节横条
+    b.append(box([-6.5, 6, -1], [6.5, 8, 1], "knuckle"))
+    b.append(box([-6, 6.5, 1], [6, 8, 2], "back"))
 
-    return b
-
-
-def rot_z(x, y, deg):
-    """Rotate (x, y) about the origin in the XY plane (degrees)."""
-    r = math.radians(deg)
-    c, s = math.cos(r), math.sin(r)
-    return (x * c - y * s, x * s + y * c)
-
-
-def one_hand(angle, scale):
-    """One open, grasping hand, rotated about the Z (travel) axis by `angle`.
-
-    Local space: wrist at -Z, fingers at +Z, palm at -Y. The rotation is applied to the
-    (x, y) of every corner, so the fan spreads in the XY plane while all hands still
-    point down +Z at the victim.
-    """
-    def place(frm, to, mat):
-        # scale about the origin, then rotate about Z, then emit an axis-aligned box
-        pts = []
-        for (px, py, pz) in ((frm[0], frm[1], frm[2]), (to[0], to[1], to[2])):
-            sx, sy = px * scale, py * scale
-            rx, ry = rot_z(sx, sy, angle)
-            pts.append((rx, ry, pz))
-        x0 = min(p[0] for p in pts)
-        x1 = max(p[0] for p in pts)
-        y0 = min(p[1] for p in pts)
-        y1 = max(p[1] for p in pts)
-        v = box([x0, y0, frm[2]], [x1, y1, to[2]], mat)
-        return v
-
-    out = []
-    # wrist collar (short -- the long black band above is the tether)
-    out.append(place([-3.5, -2.5, -14], [3.5, 0.5, -10], "wrist"))
-    # palm
-    out.append(place([-7, -3, -10], [7, 0, 0], "palm"))
-    out.append(place([-5.5, -3.5, -10], [5.5, -1, -7], "back"))
-    # knuckles
-    out.append(place([-7, -3, 0], [7, 0, 2], "knuckle"))
-    out.append(place([-7, -1, 0], [7, 1, 2], "back"))
-
-    # four fingers: nearly straight, splayed INWARD from mirrored bases (a fan),
-    # symmetric about x=0 so the whole fan stays balanced
+    # 四指朝上伸、向外张开：(x0, x1, 长度, 每段外张量)
     fingers = [
-        (-7.5, -5.5, 15, 0.60),
-        (-4.0, -2.0, 18, 0.15),
-        (2.0, 4.0, 18, -0.15),
-        (5.5, 7.5, 15, -0.60),
+        (-6.0, -4.0, 15, -0.55),
+        (-2.5, -0.5, 18, -0.15),
+        (0.5, 2.5, 18, 0.15),
+        (4.0, 6.0, 15, 0.55),
     ]
     for i, (xa, xb, length, splay) in enumerate(fingers):
         mat = "digit_%d" % min(2, i if i < 3 else 2)
         seg = length // 3
-        z = 2.0
-        y = -3.0
+        y = 8.0
+        z = -1.0
         for s in range(3):
-            h = 3 - s * 0.5
+            h = 2.5
             dx = splay * (s + 1)
-            dy = -0.5 * s
-            out.append(place([xa + dx, y + dy, z], [xb + dx, y + dy + h, z + seg], mat))
-            z += seg
-        # claw: base + forward-hooking spike
+            dz = -0.15 * s                      # 极轻微向前收，读起来像"要抓"
+            b.append(box([xa + dx, y, z + dz], [xb + dx, y + h, z + dz + 2], mat))
+            y += h
+        # 指尖爪：底座 ＋ 向前钩的尖
         cx0, cx1 = xa + splay * 3, xb + splay * 3
-        ty = y - 1.0
-        out.append(place([cx0 + 0.25, ty - 0.5, z], [cx1 - 0.25, ty + 1.0, z + 1.5], "claw"))
-        out.append(place([cx0 + 0.75, ty - 1.0, z + 1.5], [cx1 - 0.75, ty + 0.5, z + 3.5], "claw"))
+        b.append(box([cx0 + 0.25, y, z - 0.5], [cx1 - 0.25, y + 1.5, z + 1.5], "claw"))
+        b.append(box([cx0 + 0.75, y + 1.5, z - 1.0], [cx1 - 0.75, y + 3.5, z + 0.5], "claw"))
 
-    # thumb, angled across as if about to close
-    out.append(place([-10, -3, -5], [-8, 0, -1], "digit_2"))
-    out.append(place([-12, -3, -2], [-10, 0, 2], "digit_1"))
-    out.append(place([-12.5, -3.5, 2], [-10.5, -1.5, 4], "claw"))
+    # 拇指：从左侧伸出，斜着往上
+    b.append(box([-10, -1, -1], [-6.5, 2, 1], "digit_2"))
+    b.append(box([-12.5, 1, -1], [-10, 4, 1], "digit_1"))
+    b.append(box([-13.5, 4, -1], [-11.5, 6.5, 0.5], "claw"))
 
-    # a wisp of aura off each hand so the fan separates visually
-    out.append(place([-8.5, 1, -3], [-6.5, 3, -1], "aura"))
-    out.append(place([7, 1, -3], [9, 3, -1], "aura"))
-    return out
+    # 几片灵光碎片，免得看起来像一张纸片
+    b.append(box([-8.5, -5, -1], [-7, -3, 1], "aura"))
+    b.append(box([7, -5, -1], [8.5, -3, 1], "aura"))
+    b.append(box([-1.5, 15, -1], [1.5, 17, 1], "aura"))
+
+    return b
 
 
 def recenter(boxes):

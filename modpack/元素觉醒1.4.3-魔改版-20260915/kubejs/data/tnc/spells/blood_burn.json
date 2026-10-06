@@ -28,22 +28,6 @@
         "count": 16.0,
         "min_speed": 0.05,
         "max_speed": 0.3
-      },
-      {
-        "particle_id": "minecraft:soul_fire_flame",
-        "shape": "CIRCLE",
-        "origin": "FEET",
-        "count": 20.0,
-        "min_speed": 0.1,
-        "max_speed": 0.4
-      },
-      {
-        "particle_id": "soulsweapons:black_flame",
-        "shape": "CIRCLE",
-        "origin": "FEET",
-        "count": 5.0,
-        "min_speed": 0.05,
-        "max_speed": 0.2
       }
     ]
   },
@@ -57,30 +41,23 @@
           "extra_launch_delay": 3
         },
         "projectile": {
-          "homing_angle": 0.47,
+          "homing_angle": 0.22,
           "client_data": {
             "travel_particles": [
               {
                 "particle_id": "fromtheshadows:blood",
                 "shape": "CIRCLE",
                 "origin": "CENTER",
-                "count": 20.0,
+                "count": 28.0,
                 "min_speed": 0.0,
-                "max_speed": 0.1
-              },
-              {
-                "particle_id": "minecraft:soul_fire_flame",
-                "shape": "CIRCLE",
-                "origin": "CENTER",
-                "count": 12.0,
-                "min_speed": 0.0,
-                "max_speed": 0.08
+                "max_speed": 0.0
               }
             ],
             "model": {
               "model_id": "tnc:projectile/dark_hand",
               "scale": 0.85,
-              "orientation": "TOWARDS_CAMERA"
+              "orientation": "ALONG_MOTION",
+              "rotate_degrees_offset": 0.0
             }
           }
         }
@@ -108,17 +85,9 @@
           "particle_id": "fromtheshadows:blood",
           "shape": "CIRCLE",
           "origin": "FEET",
-          "count": 16.0,
-          "min_speed": 0.1,
-          "max_speed": 0.4
-        },
-        {
-          "particle_id": "minecraft:soul_fire_flame",
-          "shape": "CIRCLE",
-          "origin": "FEET",
-          "count": 12.0,
-          "min_speed": 0.05,
-          "max_speed": 0.3
+          "count": 22.0,
+          "min_speed": 0.15,
+          "max_speed": 0.5
         }
       ]
     },
@@ -138,17 +107,9 @@
           "particle_id": "fromtheshadows:blood",
           "shape": "CIRCLE",
           "origin": "FEET",
-          "count": 16.0,
-          "min_speed": 0.1,
-          "max_speed": 0.4
-        },
-        {
-          "particle_id": "minecraft:soul_fire_flame",
-          "shape": "CIRCLE",
-          "origin": "FEET",
-          "count": 12.0,
-          "min_speed": 0.05,
-          "max_speed": 0.3
+          "count": 22.0,
+          "min_speed": 0.15,
+          "max_speed": 0.5
         }
       ]
     },
@@ -188,14 +149,6 @@
           "count": 24.0,
           "min_speed": 0.1,
           "max_speed": 0.5
-        },
-        {
-          "particle_id": "minecraft:soul_fire_flame",
-          "shape": "CIRCLE",
-          "origin": "FEET",
-          "count": 16.0,
-          "min_speed": 0.05,
-          "max_speed": 0.3
         }
       ]
     }

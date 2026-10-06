@@ -104,6 +104,20 @@ public class TNDarkDrainEntity extends Entity implements SpellSpawnedEntity {
     /** 一次吸血的结算分几次扣（分摊到整个咬住过程 ⇒ 血是慢慢被抽干的 ✓）。 */
     private static final int DRAIN_TICKS = 4;
 
+    // ---- ★ 把被抓住的敌人拖回来（作者 2026-10-10："抓住敌人手再把敌人拉回来可以不"）----
+
+    /** 每几 tick 给一次拖拽冲量 ✓（不是每 tick：生物的 travel() 会抢走每 tick 的速度 ✗）。 */
+    private static final int PULL_INTERVAL = 10;
+
+    /** 每次拖拽的冲量大小（格/tick）✓。 */
+    private static final double PULL_STRENGTH = 0.55D;
+
+    /** 拖拽时带一点上抬，免得敌人卡进地面 ✓。 */
+    private static final double PULL_LIFT = 0.22D;
+
+    /** 离施法者多近就不再拽（免得在脸上抖）✓。 */
+    private static final double PULL_STOP_DISTANCE = 2.0D;
+
     /** 每一档的数值。索引 = tier - 1（1..5）✓。
      *
      *  <p>`flat` 是固定点数、`percent` 是最大生命的百分比（0 = 这一档不用百分比）✓，
@@ -203,12 +217,63 @@ public class TNDarkDrainEntity extends Entity implements SpellSpawnedEntity {
             }
         }
 
+        // ★ 抓住就往回拽（作者 2026-10-10："抓住敌人手再把敌人拉回来可以不"）✓
+        if (caster != null && tickCount % PULL_INTERVAL == 0) {
+            pullToward(victim, caster);
+        }
+
         // ★ 一直喷血：每 SPRAY_INTERVAL tick 一轮，前 SPRAY_HEAVY_TICKS 是动脉量级 ✓
         if (tickCount % SPRAY_INTERVAL == 0) {
             boolean heavy = tickCount <= SPRAY_HEAVY_TICKS;
             spray(victim, caster, heavy);
             sprayCaster(caster, heavy);
         }
+    }
+
+    /**
+     * ★ <b>真正的"血"粒子</b>（`fromtheshadows:blood`，本项目验证过的真粒子 ✓）。
+     *
+     * <p>为什么要有这个查表：跨模组的粒子 id **不能写死** ✗ ——
+     * `fromtheshadows:blood` 是那个模组注册的 `SimpleParticleType`，
+     * 如果它没装/改名，直接 `ParticleTypes` 写法会拿到 null 并在撒的时候崩 ✓。
+     * 这里查一次、缓存；拿不到就退回原版的 `crimson_spore`（同样是血红色 ✓），
+     * 所以**永远不可能是 null** ✓。
+     */
+    private static net.minecraft.core.particles.ParticleOptions bloodParticle;
+
+    private static net.minecraft.core.particles.ParticleOptions blood() {
+        if (bloodParticle == null) {
+            var type = net.minecraftforge.registries.ForgeRegistries.PARTICLE_TYPES.getValue(
+                    net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(
+                            "fromtheshadows", "blood"));
+            // ⚠ `ParticleType` 本身**不是** `ParticleOptions`（只有 `SimpleParticleType` 才是）
+            //   ⇒ 必须先 instanceof 再赋值；直接写三元式会"类型不兼容"编译不过 ✗
+            bloodParticle = (type instanceof net.minecraft.core.particles.ParticleOptions options)
+                    ? options
+                    : net.minecraft.core.particles.ParticleTypes.CRIMSON_SPORE;
+        }
+        return bloodParticle;
+    }
+
+    /**
+     * 把被抓住的敌人朝施法者拖（作者："抓住敌人手再把敌人拉回来"）✓
+     *
+     * <p>为什么用"间隔冲量"而不是每 tick 设速度：生物的 {@code travel()} 每 tick 都会按
+     * 自己的意向重设速度 ⇒ 每 tick 设会被它抢走 ✗；间隔给一次较大冲量则确实能把人拖走 ✓
+     * （与击退同一类效果）。
+     *
+     * <p>{@code hurtMarked = true} 不能省 ✗：不加的话服务端改了速度但**客户端不知道** ⇒
+     * 你会看到敌人不动或瞬移 ✓。
+     */
+    private void pullToward(LivingEntity victim, LivingEntity caster) {
+        net.minecraft.world.phys.Vec3 delta = caster.position().subtract(victim.position());
+        if (delta.lengthSqr() < PULL_STOP_DISTANCE * PULL_STOP_DISTANCE) {
+            return;                                  // 已经拉到手边 ⇒ 别再抖 ✓
+        }
+        net.minecraft.world.phys.Vec3 pull = delta.normalize().scale(PULL_STRENGTH)
+                .add(0.0D, PULL_LIFT, 0.0D);
+        victim.setDeltaMovement(victim.getDeltaMovement().add(pull));
+        victim.hurtMarked = true;
     }
 
     /**
@@ -451,10 +516,11 @@ public class TNDarkDrainEntity extends Entity implements SpellSpawnedEntity {
             server.sendParticles(net.minecraft.core.particles.ParticleTypes.DAMAGE_INDICATOR,
                     vx, vy, vz, 5, 0.3D, 0.3D, 0.3D, 0.12D);
         }
-        // ⑤ 暗底色（少量黑雾，和暗系一条线 ✓）
-        server.sendParticles(net.minecraft.core.particles.ParticleTypes.SQUID_INK,
-                vx, vy, vz, (int) Math.round(8 * scale),
-                0.35D, 0.35D, 0.35D, 0.05D);
+        // ⑤ ★ 真正的"血"粒子（作者 2026-10-10："抓到的敌人身上也掉血粒子"）✓
+        //    原来这里是 SQUID_INK（黑雾材质）—— 作者说雾该留给黑雾链 ⇒ 换成真血 ✓
+        server.sendParticles(blood(),
+                vx, vy, vz, (int) Math.round(18 * scale),
+                0.4D, 0.45D, 0.4D, 0.35D);
         // ⑥ 抽回自己：一小撮血朝施法者方向飞（"被吸过来"的方向感 ✓）
         if (caster != null && caster != victim) {
             double dx = caster.getX() - vx;
