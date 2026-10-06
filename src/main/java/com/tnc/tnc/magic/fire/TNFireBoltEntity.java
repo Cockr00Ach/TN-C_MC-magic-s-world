@@ -127,10 +127,16 @@ public final class TNFireBoltEntity extends Projectile {
             victim.invulnerableTime = 0;
             victim.hurt(server.damageSources().indirectMagic(this, getOwner()), blast);
         }
-        server.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y, at.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
-        server.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z, 120, radius * 0.5D, radius * 0.4D, radius * 0.5D, 0.35D);
-        server.sendParticles(ParticleTypes.LAVA, at.x, at.y, at.z, 40, radius * 0.4D, 0.3D, radius * 0.4D, 0.2D);
-        server.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y + 1.0D, at.z, 30, radius * 0.4D, 0.6D, radius * 0.4D, 0.1D);
+            // ⚠️ 作者 2026-10-05：「最后命中爆炸时加上**大量的粒子**」✓
+            //   原来 FLAME 120 + LAVA 40 + LARGE_SMOKE 30 ≈ 190 颗 ⇒ **翻倍往上** ✓
+            server.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y, at.z, 3, 0.0D, 0.0D, 0.0D, 0.0D);
+            server.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y, at.z, 14, radius * 0.45D, radius * 0.35D, radius * 0.45D, 0.0D);
+            server.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z, 260, radius * 0.55D, radius * 0.45D, radius * 0.55D, 0.42D);
+            server.sendParticles(ParticleTypes.SMALL_FLAME, at.x, at.y, at.z, 150, radius * 0.7D, radius * 0.6D, radius * 0.7D, 0.30D);
+            server.sendParticles(ParticleTypes.LAVA, at.x, at.y, at.z, 90, radius * 0.45D, radius * 0.35D, radius * 0.45D, 0.24D);
+            server.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y + 1.0D, at.z, 70, radius * 0.5D, radius * 0.8D, radius * 0.5D, 0.14D);
+            server.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, at.x, at.y, at.z, 60, radius * 0.4D, radius * 0.35D, radius * 0.4D, 0.20D);
+            server.sendParticles(ParticleTypes.END_ROD, at.x, at.y + 0.5D, at.z, 40, radius * 0.5D, radius * 0.6D, radius * 0.5D, 0.35D);
         server.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE,
                 SoundSource.PLAYERS, 3.0F, 1.0F);
         TNShockwaveEntity.blast(server, at, 3.0D + FireSpellRules.SHAKE_T4 * 0.6D,
