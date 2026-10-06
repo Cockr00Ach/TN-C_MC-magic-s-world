@@ -41,6 +41,21 @@ import org.joml.Matrix4f;
 public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
 
     /** 不会被真正贴图（几何体自带颜色），指向一张一定存在的原版贴图只为不触发缺图警告。 */
+    /**
+     * <b>火龙头的像素贴图</b> ✓
+     *
+     * <p>⚠️ 作者 2026-10-05：「t3 的效果我希望和图 1 那样…<b>不要用真实渲染，用像素风格</b>」✓
+     * ⇒ 龙头不再画光滑锥体 ✗，改成**一张 32×32 像素贴片** ✓（原版牌子/粒子同一个路子 ✓）
+     */
+    private static final ResourceLocation DRAGON_HEAD =
+            ResourceLocation.fromNamespaceAndPath("tnc", "textures/entity/fire_dragon_head.png");
+
+    /** 龙头贴片多大（格）—— 作者要「龙要大」✗ ⇒ 3 格 ✓。 */
+    private static final double DRAGON_HEAD_SIZE = 3.0D;
+
+    /** 龙身多长（格）—— 作者要「身体大概 5 个方块长」✓。 */
+    private static final double DRAGON_BODY_BLOCKS = 5.0D;
+
     private static final ResourceLocation PLACEHOLDER =
             ResourceLocation.fromNamespaceAndPath("minecraft", "textures/particle/flame.png");
 
@@ -110,7 +125,8 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
 
         // 射线链 t3「火龙术」：成形阶段画**朝向准心的法阵**，成形后是一颗火焰龙头 ✓
         if ("fire_dragon".equals(entity.spellPath())) {
-            dragon(out, pose, dir, right, up, radius, age, fade, entity.formProgress(partial));
+            dragon(out, stack, buffers, pose, dir, right, up, radius, age, fade,
+                    entity.formProgress(partial));
             return;
         }
 
@@ -627,12 +643,16 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
     /** 龙头的角数（每圈）—— 比焰体细分一些，棱角更像"有骨头的头" ✓。 */
     private static final int DRAGON_SIDES = 16;
 
-    private static void dragon(VertexConsumer out, Matrix4f pose, Vec3 dir, Vec3 right, Vec3 up,
+    private static void dragon(VertexConsumer out, PoseStack stack, MultiBufferSource buffers,
+                               Matrix4f pose, Vec3 dir, Vec3 right, Vec3 up,
                                double radius, double age, float fade, double form) {
+        // ⚠️ 作者 2026-10-05：图 1 = **像素风的大龙头**（平涂贴片 ✗，不是光滑几何体 ✗）
+        //   ① 成形阶段：照旧画**朝向准心的法阵** ✓
+        //   ② 龙头本体：改成**一张像素贴片** ✓，面向摄像机 ✓，约 3 格大 ✓
+        //   ③ 龙身：约 5 格长的火尾 ✓（原几何体保留 ✓）
         float[] color = new float[4];
 
-        // ① 成形阶段：面前那个**朝向准心**的法阵 ✓
-        //    作者要"由外到里一点点出现，表现出描绘的感觉"✗ ⇒ 外环先满、内环依次跟上 ✓
+        // ① 成形法阵（外环先亮、内环依次跟上 ✓）
         if (form < 0.999D) {
             for (int i = 0; i < 3; i++) {
                 double drawn = Math.max(0.0D, Math.min(1.0D, form * 1.7D - i * 0.26D));
@@ -640,57 +660,69 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
                     continue;
                 }
                 double rr = radius * (1.10D + i * 0.72D);
-                flameColor(0.16D + i * 0.24D, 0.60F * fade * (float) drawn, color);
-                // 有厚度的细圆环（可见性比平面圆环稳 ✓）
+                flameColor(0.16D + i * 0.24D, 0.60F * (float) drawn, color);
                 ring(out, pose, right, up, dir.scale(-0.05D * radius), rr * 0.93D,
                         dir.scale(0.05D * radius), rr, color, 48);
             }
         }
 
-        // ② 龙头本体：一串锥台，整体随成形进度长大 ✓
-        double head = radius * (0.35D + 0.65D * form);
-        for (int i = 0; i + 1 < DRAGON_SEG_T.length; i++) {
-            flameColor(0.60D - i * 0.14D, 0.88F * fade, color);
-            ring(out, pose, right, up,
-                    dir.scale(DRAGON_SEG_T[i] * head), DRAGON_SEG_R[i] * head,
-                    dir.scale(DRAGON_SEG_T[i + 1] * head), DRAGON_SEG_R[i + 1] * head,
-                    color, DRAGON_SIDES);
-        }
+        // ② 龙头：像素贴片（成形阶段从小长到大 ✓）
+        dragonHeadSprite(out, buffers, dir, right, up, DRAGON_HEAD_SIZE * (0.30D + 0.70D * form));
 
-        // ③ 下颌：往下偏一点 ⇒ 有"张嘴"的层次 ✓
-        Vec3 jaw = up.scale(-0.24D * head);
-        for (int i = 0; i < 2; i++) {
-            double t0 = 0.12D + i * 0.30D;
-            flameColor(0.72D, 0.72F * fade, color);
-            ring(out, pose, right, up,
-                    dir.scale(t0 * head).add(jaw), 0.28D * head,
-                    dir.scale((t0 + 0.30D) * head).add(jaw), 0.17D * head,
-                    color, 12);
-        }
+        // ③ 龙身：5 格长的火尾 ✓
+        dragonBody(out, pose, dir, right, up, DRAGON_HEAD_SIZE * 0.20D, age, fade);
+    }
 
-        // ④ 两只角：往脑后翘（两段，弯一点更像角 ✓）
-        for (int side = -1; side <= 1; side += 2) {
-            Vec3 root = dir.scale(0.16D * head).add(right.scale(side * 0.28D * head))
-                    .add(up.scale(0.34D * head));
-            Vec3 mid = dir.scale(-0.24D * head).add(right.scale(side * 0.38D * head))
-                    .add(up.scale(0.68D * head));
-            Vec3 tip = dir.scale(-0.62D * head).add(right.scale(side * 0.40D * head))
-                    .add(up.scale(0.96D * head));
-            flameColor(0.58D, 0.82F * fade, color);
-            ring(out, pose, right, up, root, 0.12D * head, mid, 0.070D * head, color, 10);
-            ring(out, pose, right, up, mid, 0.070D * head, tip, 0.012D * head, color, 10);
+    /**
+     * 把 32×32 的龙头贴图铺成一张**面向摄像机**的方片 ✓。
+     *
+     * <p>为什么面向摄像机：固定朝向的贴片从侧面看就是一条线 ✗；
+     * 原版告示牌/粒子都用"每帧按摄像机摆正" ✓ ⇒ 任何角度都是一张完整龙头 ✓
+     */
+    private static void dragonHeadSprite(VertexConsumer out, MultiBufferSource buffers,
+                                         Vec3 dir, Vec3 right, Vec3 up, double size) {
+        if (size <= 0.02D) {
+            return;
         }
+        // ⚠️ 为什么不用"面向摄像机"的单片 ✗：
+        //   派发器在这个 pose 上**已经加过实体自身的旋转**✗，
+        //   再叠一次摄像机朝向会**转两次**（头会歪 ✗）。
+        //   ⇒ 改用原版粒子/植物那套**交叉双片** ✓：
+        //     一片贴在 right/up 平面、一片贴在 dir/up 平面 ✓
+        //     不需要摄像机、任何角度都至少有一面看得见 ✓（MC 的火焰/粒子就是这么做的 ✓）
+        VertexConsumer vc = buffers.getBuffer(
+                net.minecraft.client.renderer.RenderType.entityTranslucentEmissive(DRAGON_HEAD));
+        double h = size * 0.5D;
+        float[] none = {1.0F, 1.0F, 1.0F, 1.0F};
+        // 片 A：right × up（从飞行方向正面看是完整的 ✓）
+        spriteQuad(vc, none, up.scale(-h).add(right.scale(-h)),
+                up.scale(-h).add(right.scale(h)),
+                up.scale(h).add(right.scale(h)),
+                up.scale(h).add(right.scale(-h)));
+        // 片 B：dir × up（从侧面看是完整的 ✓）
+        spriteQuad(vc, none, up.scale(-h).add(dir.scale(-h)),
+                up.scale(-h).add(dir.scale(h)),
+                up.scale(h).add(dir.scale(h)),
+                up.scale(h).add(dir.scale(-h)));
+    }
 
-        // ⑤ 两眼：白热的方块（像素风 ⇒ 实色、不透明、给大一点才看得见 ✓）
-        float[] glow = {1.0F, 0.98F, 0.80F, 1.0F};
-        for (int side = -1; side <= 1; side += 2) {
-            Vec3 eye = dir.scale(0.40D * head).add(right.scale(side * 0.36D * head))
-                    .add(up.scale(0.24D * head));
-            ring(out, pose, right, up, eye.add(dir.scale(-0.09D * head)), 0.16D * head,
-                    eye.add(dir.scale(0.09D * head)), 0.16D * head, glow, 12);
-        }
-        // ⑥ 龙身（作者 2026-10-05 第 3 条：「发射出去后要有身体而不是就一个头」✗）
-        dragonBody(out, pose, dir, right, up, head, age, fade);
+    /** 一个带 uv 的四边形（世界/局部坐标由调用方给 ✓；这里只负责顶点格式 ✓）。 */
+    private static void spriteQuad(VertexConsumer vc, float[] rgba,
+                                   Vec3 a, Vec3 b, Vec3 c, Vec3 d) {
+        uvVertex(vc, a, 0.0F, 1.0F, rgba);
+        uvVertex(vc, b, 1.0F, 1.0F, rgba);
+        uvVertex(vc, c, 1.0F, 0.0F, rgba);
+        uvVertex(vc, d, 0.0F, 0.0F, rgba);
+    }
+
+    private static void uvVertex(VertexConsumer vc, Vec3 p, float u, float v, float[] rgba) {
+        vc.vertex((float) p.x, (float) p.y, (float) p.z)
+                .color(rgba[0], rgba[1], rgba[2], rgba[3])
+                .uv(u, v)
+                .overlayCoords(net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY)
+                .uv2(net.minecraft.client.renderer.LightTexture.FULL_BRIGHT)
+                .normal(0.0F, 0.0F, 1.0F)
+                .endVertex();
     }
 
     /** 龙身分几节 ✓（像素风 ⇒ 节数少、色块大 ✓）。 */
@@ -712,7 +744,8 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
         double prevR = 0.0D;
         for (int s = 0; s <= DRAGON_BODY_SEGMENTS; s++) {
             double t = s / (double) DRAGON_BODY_SEGMENTS;        // 0 = 颈, 1 = 尾尖 ✓
-            double back = 0.28D + t * 3.20D;                     // 沿 -dir 往后铺 ✓
+            // ⚠️ 作者 2026-10-05：「身体大概 5 个方块长」✓ ⇒ 以**方块**为单位铺 ✓
+            double back = 0.30D + t * DRAGON_BODY_BLOCKS;
             double sway = Math.sin(t * 3.4D + age * 0.35D) * head * 0.46D * t;
             double bob = Math.cos(t * 2.6D + age * 0.30D) * head * 0.32D * t;
             Vec3 c = dir.scale(-back * head).add(right.scale(sway)).add(up.scale(bob));
