@@ -138,7 +138,7 @@ Icon-Ray 'sun_ray' 1
 Icon-Ray 'blast_ray' 2
 Icon-Ray 'fire_dragon' 3
 Icon-Ray 'flame_demon_wrath' 4
-Icon-Ray 'cataclysm_fire_ray' 5
+Icon-Ray 'solar_judgment' 5
 Write-Output 'BALL chain:'
 Icon-Ball 'fireball' 1
 Icon-Ball 'great_fireball' 2

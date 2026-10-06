@@ -54,6 +54,10 @@ public final class TNFireRays {
         if ("flame_demon_wrath".equals(path)) {
             return castFlameDemon(player);
         }
+        // t5 太阳の审判：目标下方的巨阵 + 正上方的太阳光球 ✓
+        if ("solar_judgment".equals(path)) {
+            return castSolarJudgment(player);
+        }
         FireSpellRules.Ray spec = FireSpellRules.ray(path);
         if (spec == null) {
             return false;
@@ -123,6 +127,29 @@ public final class TNFireRays {
                 / FireSpellRules.T4_BEAM_DIVISOR;
         TNFlameDemonField.spawn(level, player, FireSpellRules.T4_FIELD_RADIUS,
                 FireSpellRules.T4_FIELD_TICKS, beam, FireSpellRules.SHAKE_T4_RAY, at);
+        return true;
+    }
+
+    /**
+     * t5 <b>太阳の审判</b>：目标下方的 10 秒巨阵 + 正上方太阳光球 ✓
+     *
+     * <p>⚠️ 收场会**真的**破坏方块（直径 32、除基岩外 ✓）—— 作者 2026-10-05 明确要求 ✓
+     */
+    private static boolean castSolarJudgment(ServerPlayer player) {
+        if (!(player.level() instanceof ServerLevel level)) {
+            return false;
+        }
+        LivingEntity target = acquire(player, FireSpellRules.T5_FIELD_RADIUS + 22.0D);
+        Vec3 at = target != null
+                ? new Vec3(target.getX(), target.getY(), target.getZ())
+                : FireSpellRules.groundBelow(player, FireSpellRules.T5_FIELD_RADIUS + 22.0D);
+        float total = FireSpellRules.power(player) * FireSpellRules.T5_COEFFICIENT
+                * FireSpellRules.BASE_DAMAGE;
+        TNSolarJudgmentField.spawn(level, player, FireSpellRules.T5_FIELD_RADIUS,
+                FireSpellRules.T5_FIELD_TICKS,
+                total / FireSpellRules.T5_BEAM_DIVISOR,     // 单次光线 ✓
+                total,                                       // 收场爆炸（和单次光线"等同"的口径见类注释 ✓）
+                FireSpellRules.SHAKE_T5_RAY, at);
         return true;
     }
 

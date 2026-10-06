@@ -102,7 +102,7 @@ Ray-Spell 'blast_ray'      2 1.5 1.5 1.1  1.5 3  0.0 0.5
 # (note moved to PROJECT-STATE; kept ASCII for GBK safety)
 Ray-Spell 'fire_dragon'     3 1.5 1.2 0.8  2.5 2  0.0 0.6
 Ray-Spell 'flame_demon_wrath'  4 1.4 1.6 1.0  3.5 2  3.0 0.7
-Ray-Spell 'cataclysm_fire_ray'  5 1.3 2.4 1.4  8.0 2  6.0 1.0
+Ray-Spell 'solar_judgment'  5 1.3 2.4 1.4  8.0 2  6.0 1.0
 
 # ---------------------------------------------------------------------------
 #  BALL CHAIN - fireball / big / giant / meteor.  REWORKED 2026-10-05:

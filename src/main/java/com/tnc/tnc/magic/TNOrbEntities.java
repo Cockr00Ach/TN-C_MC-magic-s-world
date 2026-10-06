@@ -181,6 +181,15 @@ public final class TNOrbEntities {
                     .updateInterval(1)
                     .build("tnc:flame_demon_field"));
 
+    /** 射线链 t5「太阳の审判」的法阵 + 太阳光球实体 ✓（收场会**真的**炸掉地形 ✗）。 */
+    public static final RegistryObject<EntityType<com.tnc.tnc.magic.fire.TNSolarJudgmentField>> SOLAR_JUDGMENT =
+            ENTITY_TYPES.register("solar_judgment", () -> EntityType.Builder
+                    .of(com.tnc.tnc.magic.fire.TNSolarJudgmentField::new, MobCategory.MISC)
+                    .sized(0.1F, 0.1F)
+                    .clientTrackingRange(16)
+                    .updateInterval(1)
+                    .build("tnc:solar_judgment"));
+
     /**
      * ★ 光法第 4 条链「召唤天使」的**战斗天使** ✓（作者 2026-10-02："我制作了一个 fightingangel，你先把他做成怪" ✓）。
      *

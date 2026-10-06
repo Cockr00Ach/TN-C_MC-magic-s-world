@@ -316,6 +316,40 @@ public final class FireSpellRules {
     /** 火龙消失时那次爆炸的半径（格）—— "剧烈爆炸"给大一点 ✓。 */
     public static final double DRAGON_EXPLODE_RADIUS = 5.0D;
 
+    // ---------------- t5 太阳の审判 ----------------
+
+    /** t5 巨阵的半径（格）—— "巨大的法阵"✓。 */
+    public static final double T5_FIELD_RADIUS = 12.0D;
+
+    /** t5 持续 10 秒 ✓（作者明确）。 */
+    public static final int T5_FIELD_TICKS = 200;
+
+    /** 太阳光球离地多高（格）—— 要"正上方"✓，给得高一点才像悬在天上 ✓。 */
+    public static final double T5_SUN_HEIGHT = 16.0D;
+
+    /** 光线每几 tick 打一轮（20 tick = 1 秒 ✓ ⇒ 10 秒里 10 轮 ✓）。 */
+    public static final int T5_BEAM_INTERVAL_TICKS = 20;
+
+    /** 收场球形爆炸的半径（格）—— 作者定<b>直径 32</b> ⇒ 半径 16 ✓。 */
+    public static final double T5_EXPLODE_RADIUS = 16.0D;
+
+    /**
+     * 破坏方块每 tick 删几个水平层 ✓
+     *
+     * <p>⚠️ 半径 16 的球 ≈ 1.7 万方块 ✗ —— 一 tick 全删会把主线程卡几秒 ✗。
+     * 球的水平层共 {@code 33} 层 ✓，每 tick 删 4 层 ⇒ 约 9 tick 删完 ✓
+     * （观感仍是"整片塌掉"✓，但不会顿 ✗）
+     */
+    public static final int T5_DESTROY_LAYERS_PER_TICK = 4;
+
+    /** 单次光线伤害 = 总伤害 ÷ 这个数（10 轮 ⇒ 光线总量 = 系数 × 基础 × 火法强 ✓）。 */
+    public static final float T5_BEAM_DIVISOR = 10.0F;
+
+    /** t5 的伤害系数（×7 ✓）。 */
+    public static final float T5_COEFFICIENT = 7.0F;
+
+    /** t5 收场爆炸的画面震动强度（度 ✓）—— 作者要"强烈震动"✓，全场最高 ✓。 */
+    public static final float SHAKE_T5_RAY = 20.0F;
     // ---------------- t4 炎魔龙之怒 ----------------
 
     /** t4 巨阵的半径（格）—— 作者说"巨大的法阵"✓（射程 32 格内的目标脚下 ✓）。 */
