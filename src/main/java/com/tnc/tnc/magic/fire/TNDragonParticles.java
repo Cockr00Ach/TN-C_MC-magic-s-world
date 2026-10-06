@@ -70,16 +70,16 @@ public final class TNDragonParticles {
     private static final double EYE_R = 0.055D;
 
     /** 龙头周围的**火焰光晕**粒子数 ✓（头壳本身由渲染器画方块模型 ✓）。 */
-    private static final int AURA_POINTS = 16;   // 作者反馈施法卡顿 ✗ ⇒ 从 60 砍到 16 ✓
+    private static final int AURA_POINTS = 28;
 
     /** 轮廓粒子数（越大线越实 ✓）—— 现在只对兜底有用 ✗。 */
-    private static final int OUTLINE_POINTS = 46;
+    private static final int OUTLINE_POINTS = 78;
 
     /** 内部填充粒子数（作者："大量粒子填充" ✓）。 */
-    private static final int FILL_POINTS = 34;
+    private static final int FILL_POINTS = 60;
 
     /** 龙身粒子数 ✓。 */
-    private static final int BODY_POINTS = 26;   // 同样为降负载 ✗
+    private static final int BODY_POINTS = 34;
 
     /** 头部整体尺寸（格 ✓）—— 作者要"龙要大"✗ ⇒ 3 格 ✓。 */
     public static final double HEAD_SIZE = 3.0D;
@@ -125,11 +125,50 @@ public final class TNDragonParticles {
         //      只留：① 龙头周围一圈**火焰光晕** ✓（让方块头看着"在烧"✓）
         //            ② 龙身（作者说"身体可以"⇒ 保留 ✓）
 
-        // ① 龙头周围的光晕（绕着头壳随机撒 ✓，不描形状 ✗）
+        // ① 轮廓：沿整圈剖面**等距撒粒子** ✓（用粒子"描"出龙头形状 ✓）
+        int edges = PROFILE.length / 2;
+        for (int p = 0; p < OUTLINE_POINTS; p++) {
+            double t = p / (double) OUTLINE_POINTS * edges;
+            int e = (int) Math.floor(t) % edges;
+            double k = t - Math.floor(t);
+            int i0 = e * 2;
+            int i1 = ((e + 1) % edges) * 2;
+            double u = PROFILE[i0] + (PROFILE[i1] - PROFILE[i0]) * k;
+            double v = PROFILE[i0 + 1] + (PROFILE[i1 + 1] - PROFILE[i0 + 1]) * k;
+            spawn(level, origin, dir, right, up, u, v, halfWidth(u),
+                    0.55D + 0.45D * Math.sin(age * 0.6D + p), 0, 1);
+        }
+
+        // ② 内部填充：轮廓内部随机取点 ✓（作者要"大量粒子填充"✓）
+        for (int p = 0; p < FILL_POINTS; p++) {
+            double u = 0.0D;
+            double v = 0.0D;
+            boolean ok = false;
+            for (int attempt = 0; attempt < 10 && !ok; attempt++) {
+                u = -0.62D + Math.random() * 1.62D;
+                v = -0.38D + Math.random() * 0.86D;
+                ok = inside(u, v);
+            }
+            if (!ok) {
+                continue;
+            }
+            spawn(level, origin, dir, right, up, u, v, halfWidth(u) * 0.85D,
+                    0.10D + Math.random() * 0.45D, 2, 1);
+        }
+
+        // ③ 眼睛：一个小环 ✓
+        for (int p = 0; p < 10; p++) {
+            double a = p / 10.0D * Math.PI * 2.0D;
+            spawn(level, origin, dir, right, up,
+                    EYE_U + Math.cos(a) * EYE_R, EYE_V + Math.sin(a) * EYE_R,
+                    halfWidth(EYE_U), 0.0D, 0, 1);
+        }
+
+        // ③b 龙头周围的光晕（让整团火更"厚" ✓）
         for (int p = 0; p < AURA_POINTS; p++) {
-            double au = -0.45D + Math.random() * 1.35D;          // 头的前后范围 ✓
-            double av = -0.35D + Math.random() * 0.85D;          // 上下 ✓
-            double aw = (Math.random() * 2.0D - 1.0D) * 0.42D;   // 横向（比头壳宽一点 ✓）
+            double au = -0.45D + Math.random() * 1.35D;
+            double av = -0.35D + Math.random() * 0.85D;
+            double aw = (Math.random() * 2.0D - 1.0D) * 0.42D;
             spawn(level, origin, dir, right, up, au, av,
                     Math.abs(aw) + 0.10D, 0.35D + Math.random() * 0.5D, 1, 1);
         }
@@ -149,7 +188,7 @@ public final class TNDragonParticles {
             // 越往后越细、越暗 ✓；每步撒 3 颗、带半径 ⇒ 尾巴是**一根有粗有细的火柱** ✓
             double r = BODY_RADIUS * (1.0D - 0.72D * t);
             level.sendParticles(dust(0.35D + t * 0.55D, 1.45F),
-                    at.x, at.y, at.z, 2, r, r, r, 0.0D);
+                    at.x, at.y, at.z, 3, r, r, r, 0.0D);
         }
     }
 

@@ -118,24 +118,9 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
         //   ⚠️ 作者 2026-10-05：「把龙后面的圆环即法阵删了」✗
         //   ⇒ 这里**什么都不画** ✓（连成形阶段的法阵也删了 ✓，几何体为零 ✓）
         if ("fire_dragon".equals(entity.spellPath())) {
-            // ★ 2026-10-05：作者「龙头要朝向前面，而且龙头怎么说二维的」✓
-            //   ⇒ 交叉双片是"永远面向摄像机"的取巧做法 ✗，天生是纸片 ✗
-            //   ⇒ 改成**真正的方块龙头** ✓：头骨 + 前伸的吻 + 下颌 + 两只角，
-            //     一共 5 个**长方体** ✓（方块拼的 ✗，不是光滑曲面 ✓）
-            //     侧面（±right 面）贴我们的赤红像素贴图 ✓，其余面取贴图上一块实色 ✓
-            float grow = (float) (0.30D + 0.70D * entity.formProgress(partial));
-            float k = 2.2F * grow;   // 作者：龙头稍微小一点 ✗（原 3.0 ✓）                     // 整体尺寸：满成形约 3 格 ✓
-            VertexConsumer hv = buffers.getBuffer(
-                    net.minecraft.client.renderer.RenderType.entityTranslucentEmissive(DRAGON_HEAD));
-            // 头骨（略靠后 ✓）
-            dragonBox(hv, pose, dir, up, right, -0.10F, 0.00F, 0.00F, 1.05F, 0.95F, 1.00F, k);
-            // 吻（**前伸** ⇒ 一眼看出头朝前 ✓）
-            dragonBox(hv, pose, dir, up, right, 0.95F, -0.12F, 0.00F, 1.05F, 0.55F, 0.66F, k);
-            // 下颌（吻下方、稍短 ✓）
-            dragonBox(hv, pose, dir, up, right, 0.72F, -0.52F, 0.00F, 0.85F, 0.26F, 0.58F, k);
-            // 两只角（后上方、左右分开 ✓）
-            dragonBox(hv, pose, dir, up, right, -0.55F, 0.78F, 0.36F, 0.55F, 0.62F, 0.22F, k);
-            dragonBox(hv, pose, dir, up, right, -0.55F, 0.78F, -0.36F, 0.55F, 0.62F, 0.22F, k);
+            // ★ 2026-10-05：作者「不要龙头了，回退到龙头+龙身全是粒子的状态」✓
+            //   ⇒ 这里**什么都不画** ✓ —— 龙头与龙身全部由 TNDragonParticles 的粒子构成 ✓
+            //     （方块龙头 / 贴片 / 交叉双片 / 成形法阵，全部撤掉 ✗）
             return;
         }
 
