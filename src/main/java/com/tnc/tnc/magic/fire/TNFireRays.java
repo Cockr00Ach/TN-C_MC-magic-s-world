@@ -10,6 +10,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -37,6 +38,13 @@ public final class TNFireRays {
 
     /** 索敌距离的额外余量（格）—— 比射程多找一点，免得差半格就锁不到 ✓。 */
     private static final double ACQUIRE_SLACK = 1.5D;
+
+    /**
+     * <b>索敌的"瞄准锥"（度 ✓）</b> —— 精确射线打不中时，在这个锥里找最贴准心的生物 ✓。
+     *
+     * <p>对齐光柱那套索敌的 35° 锥 ✓（作者 2026-10-01 定下来的手感 ✓）
+     */
+    private static final double AIM_CONE_DEGREES = 35.0D;
 
     /**
      * @return 真的放出去了才 true
@@ -175,17 +183,50 @@ public final class TNFireRays {
      */
     private static LivingEntity acquire(ServerPlayer player, double range) {
         Vec3 eye = player.getEyePosition();
-        Vec3 end = eye.add(player.getLookAngle().scale(range + ACQUIRE_SLACK));
-        LivingEntity best = null;
-        double closest = Double.MAX_VALUE;
-        for (LivingEntity candidate : player.level().getEntitiesOfClass(LivingEntity.class,
-                new AABB(eye, end).inflate(1.0D), t -> FireSpellRules.hittable(player, t))) {
+        Vec3 look = player.getLookAngle().normalize();
+        Vec3 end = eye.add(look.scale(range + ACQUIRE_SLACK));
+        List<LivingEntity> near = player.level().getEntitiesOfClass(LivingEntity.class,
+                new AABB(eye, end).inflate(1.0D), t -> FireSpellRules.hittable(player, t));
+        if (near.isEmpty()) {
+            return null;
+        }
+        // ① 先按引擎那套：**沿视线精确射线**，取最近的命中 ✓
+        LivingEntity exact = null;
+        double bestDist = Double.MAX_VALUE;
+        for (LivingEntity candidate : near) {
             Optional<Vec3> hit = candidate.getBoundingBox().inflate(0.3D).clip(eye, end);
-            if (hit.isPresent() && hit.get().distanceToSqr(eye) < closest) {
-                closest = hit.get().distanceToSqr(eye);
-                best = candidate;
+            if (hit.isPresent() && hit.get().distanceToSqr(eye) < bestDist) {
+                bestDist = hit.get().distanceToSqr(eye);
+                exact = candidate;
             }
         }
-        return best;
+        if (exact != null) {
+            return exact;
+        }
+        // ② 射线打不中（瞄得偏一点 / 目标在准心边上）⇒ 退化成**瞄准锥**里最近的那个 ✓
+        //    作者 2026-10-01 的光柱索敌就是 35° 锥 ✓；这里对齐同一个手感 ✓
+        //    ⚠️ 为什么要这一层：只靠精确射线的话，"准心差半格"就变成"没目标"✗，
+        //       表现就是"索敌时灵时不灵"✗
+        double cosLimit = Math.cos(Math.toRadians(AIM_CONE_DEGREES));
+        LivingEntity cone = null;
+        double bestScore = Double.MAX_VALUE;
+        for (LivingEntity candidate : near) {
+            Vec3 to = candidate.getBoundingBox().getCenter().subtract(eye);
+            double dist = to.length();
+            if (dist < 1.0E-4D) {
+                return candidate;
+            }
+            double cos = to.normalize().dot(look);
+            if (cos < cosLimit) {
+                continue;                       // 不在瞄准锥里 ✓
+            }
+            // 先比"离准心多远"（cos 越大越正 ✗），再比距离 ⇒ 锥内最贴准心的那个 ✓
+            double score = (1.0D - cos) * 100.0D + dist / Math.max(1.0D, range);
+            if (score < bestScore) {
+                bestScore = score;
+                cone = candidate;
+            }
+        }
+        return cone;
     }
 }
