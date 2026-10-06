@@ -261,6 +261,9 @@ public final class TNSpellClientVisuals {
                 if (value > target) {
                     target = value;
                 }
+                // ★ 顺便把"雾里其他人被黑雾裹住"那层撒上（作者 2026-10-10）✓
+                //   只在玩家自己在雾里时才做 ⇒ 离得远完全不为它花代价 ✓
+                tickFogShroud(minecraft, fog.getX(), fog.getY(), fog.getZ(), radius);
             }
         }
         // 进去快、出来稍慢 ✓（免得站在边界上闪）
@@ -387,5 +390,65 @@ public final class TNSpellClientVisuals {
     /** 有该效果就返回它的系数，否则返回 1（不动原版数值）。 */
     private static float factor(Player player, RegistryObject<MobEffect> effect, float value) {
         return (effect.isPresent() && player.hasEffect(effect.get())) ? value : 1.0F;
+    }
+
+    // ------------------------------------------------------------------
+    //  ★ 黑雾"笼罩"：沾上雾的人（**除了自己**）身上裹一层黑雾
+    //
+    //  作者 2026-10-10："黑雾的致盲效果，我希望沾上黑雾的敌人和玩家除了自己都都有黑雾
+    //  笼罩的感觉"。
+    //
+    //  为什么是"粒子"而不是"给自己屏幕加黑"：
+    //    * 自己那块已经由 {@link #tickFogDarkness} 的满屏黑幕负责了 ✓；
+    //    * 而"别人被雾裹住"这件事是**看到**的，不是**感觉**的 ⇒ 必须在**他们身上**画东西 ✓。
+    //  所以：每当玩家自己在雾里（说明这个领域正在生效），就把雾里**其他**活体的身上
+    //  撒一层黑雾粒子（squid_ink + smoke，都验证过是真粒子 ✓）。自己跳过 ✗。
+    //
+    //  ⚠ 性能：每个受影响实体每 tick 约 6 颗。雾里挤一堆怪时会线性增长 ⇒
+    //    这里硬性限制每 tick 最多给 {@link #SHROUD_MAX_ENTITIES} 个实体撒，
+    //    并且只在"玩家自己也在雾里"时才做（离得远就完全不跑 ✓）。
+    // ------------------------------------------------------------------
+
+    /** 每 tick 最多给几个实体撒笼罩粒子（防止大场面上百怪）。 */
+    private static final int SHROUD_MAX_ENTITIES = 12;
+
+    /** 一个实体身上每 tick 撒几颗黑雾。 */
+    private static final int SHROUD_PARTICLES = 6;
+
+    private static void tickFogShroud(net.minecraft.client.Minecraft minecraft, double fogX,
+                                      double fogY, double fogZ, double radius) {
+        net.minecraft.client.multiplayer.ClientLevel level = minecraft.level;
+        if (level == null) {
+            return;
+        }
+        net.minecraft.world.phys.AABB area = new net.minecraft.world.phys.AABB(
+                fogX - radius, fogY - 4.0D, fogZ - radius,
+                fogX + radius, fogY + 8.0D, fogZ + radius);
+        java.util.List<net.minecraft.world.entity.LivingEntity> inside =
+                level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, area,
+                        e -> e.isAlive() && e != minecraft.player
+                                && e.hasEffect(com.tnc.tnc.magic.TNEffects.DARK_FOG.get()));
+        int shown = 0;
+        for (net.minecraft.world.entity.LivingEntity entity : inside) {
+            if (shown++ >= SHROUD_MAX_ENTITIES) {
+                break;
+            }
+            double h = entity.getBbHeight();
+            double ex = entity.getX();
+            double ey = entity.getY() + h * 0.5D;
+            double ez = entity.getZ();
+            // 贴身的黑雾：包住整个身高，慢慢散开
+            for (int i = 0; i < SHROUD_PARTICLES; i++) {
+                double ox = (level.random.nextDouble() - 0.5D) * 0.9D;
+                double oy = (level.random.nextDouble() - 0.5D) * h;
+                double oz = (level.random.nextDouble() - 0.5D) * 0.9D;
+                level.addParticle(
+                        (i % 3 == 0)
+                                ? net.minecraft.core.particles.ParticleTypes.SMOKE
+                                : net.minecraft.core.particles.ParticleTypes.SQUID_INK,
+                        ex + ox, ey + oy, ez + oz,
+                        0.0D, 0.012D, 0.0D);
+            }
+        }
     }
 }

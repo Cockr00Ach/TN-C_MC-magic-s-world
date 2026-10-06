@@ -207,7 +207,38 @@ public class TNDarkDrainEntity extends Entity implements SpellSpawnedEntity {
         if (tickCount % SPRAY_INTERVAL == 0) {
             boolean heavy = tickCount <= SPRAY_HEAVY_TICKS;
             spray(victim, caster, heavy);
+            sprayCaster(caster, heavy);
         }
+    }
+
+    /**
+     * ★ <b>施法者自己也在落血粒子</b>（作者 2026-10-10："不仅我自身会落血粒子，
+     * 索敌索中的敌人也得会，那种抽血的感觉你懂吧"）。
+     *
+     * <p>为什么两处都要：抽血是**一条通路**——受害者身上喷出来（{@link #spray}）＋
+     * 施法者身上往回落（这里）✓。只有一头有粒子的话，看起来就像"那边在流血"，
+     * 而不是"血被抽到我身上"✗。这里撒得比受害者那边**少一点、慢一点**，
+     * 读起来才像"被吸过来的"而不是"自己也在流血"✓。
+     */
+    private void sprayCaster(LivingEntity caster, boolean heavy) {
+        if (caster == null || !(level() instanceof net.minecraft.server.level.ServerLevel server)) {
+            return;
+        }
+        double cx = caster.getX();
+        double cy = caster.getY() + caster.getBbHeight() * 0.5D;
+        double cz = caster.getZ();
+        double scale = heavy ? 0.7D : 0.35D;
+
+        // 身上滴下来的血（从胸口往下掉 ⇒ "血在回落"✓）
+        server.sendParticles(net.minecraft.core.particles.ParticleTypes.CRIMSON_SPORE,
+                cx, cy + 0.3D, cz, (int) Math.round(12 * scale),
+                0.35D, 0.4D, 0.35D, 0.35D);
+        // 贴地的血泊（一点点）
+        server.sendParticles(new net.minecraft.core.particles.BlockParticleOption(
+                        net.minecraft.core.particles.ParticleTypes.FALLING_DUST,
+                        net.minecraft.world.level.block.Blocks.REDSTONE_BLOCK.defaultBlockState()),
+                cx, caster.getY() + 0.1D, cz, (int) Math.round(6 * scale),
+                0.5D, 0.05D, 0.5D, 0.02D);
     }
 
     /** 收工：报一次总账（吸了多少血 / 回了多少魔力）然后消失 ✓。 */

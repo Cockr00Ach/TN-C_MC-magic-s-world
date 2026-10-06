@@ -137,10 +137,61 @@ def drain_action():
     }
 
 
+def projectile_target(tier):
+    """★ 2026-10-10: the chain becomes a HOMING projectile ("索敌").
+
+    Author: "以伤换伤貌似还没有索敌效果，我希望有索敌".
+
+    The real reason it had none: all five spells were `release.target: SELF` -- they
+    never flew at anything, they just buffed/burned the caster. Turning them into a
+    blood claw that homes onto a victim is what makes "从敌人身上抽血" possible at all;
+    the drain settlement (`tnc:drain`) already lands on whatever the projectile hits.
+
+    Numbers:
+        velocity 0.75        slower than the night-hand claw (0.45-0.55) is for "fly long";
+                             this one should reach the target, so 0.75 reads as a lunge.
+        homing_angle         0.35 flat + 0.06 per tier => t1 0.41 .. t5 0.65 (radians/s),
+                             so higher tiers turn harder and miss less.
+        model.scale          0.55 + 0.15 * tier => t1 0.70 .. t5 1.30. NOT the night-hand
+                             sizes: this is a claw, not the giant hand.
+        orientation          TOWARDS_CAMERA (same reason as the night-hand chain: without
+                             it the engine tumbles the model and the wrist leads half the
+                             time -- the author's "手腕对着别人" complaint).
+    The model reuses `tnc:projectile/dark_hand` (an open grasping claw, regenerated
+    2026-10-10). Ask the author if he wants a separate blood-claw model.
+    """
+    return {
+        "type": "PROJECTILE",
+        "projectile": {
+            "launch_properties": {
+                "velocity": 0.75,
+                "extra_launch_count": 0,
+                "extra_launch_delay": 3,
+            },
+            "projectile": {
+                "homing_angle": round(0.35 + 0.06 * tier, 3),
+                "client_data": {
+                    "travel_particles": [
+                        batch(BLOOD, "CIRCLE", "CENTER", 14.0 + 3 * tier, 0.0, 0.10),
+                        batch(SOUL_FIRE, "CIRCLE", "CENTER", 8.0 + 2 * tier, 0.0, 0.08),
+                    ],
+                    "model": {
+                        "model_id": "tnc:projectile/dark_hand",
+                        "scale": round(0.55 + 0.15 * tier, 2),
+                        "orientation": "TOWARDS_CAMERA",
+                    },
+                },
+            },
+        },
+    }
+
+
 def rewrite(spell, effect_id, heal_coef):
     tier = int(spell["learn"]["tier"])
 
     spell["cast"]["particles"] = cast_fx(tier)
+    # ★ the chain now flies at the enemy instead of buffing only the caster
+    spell["release"]["target"] = projectile_target(tier)
 
     # swap the borrowed fire effect for the dark one, keep the JSON's own duration/amplifier
     swapped = 0

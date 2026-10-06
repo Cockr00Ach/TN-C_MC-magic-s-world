@@ -49,7 +49,42 @@
   },
   "release": {
     "target": {
-      "type": "SELF"
+      "type": "PROJECTILE",
+      "projectile": {
+        "launch_properties": {
+          "velocity": 0.75,
+          "extra_launch_count": 0,
+          "extra_launch_delay": 3
+        },
+        "projectile": {
+          "homing_angle": 0.41,
+          "client_data": {
+            "travel_particles": [
+              {
+                "particle_id": "fromtheshadows:blood",
+                "shape": "CIRCLE",
+                "origin": "CENTER",
+                "count": 17.0,
+                "min_speed": 0.0,
+                "max_speed": 0.1
+              },
+              {
+                "particle_id": "minecraft:soul_fire_flame",
+                "shape": "CIRCLE",
+                "origin": "CENTER",
+                "count": 10.0,
+                "min_speed": 0.0,
+                "max_speed": 0.08
+              }
+            ],
+            "model": {
+              "model_id": "tnc:projectile/dark_hand",
+              "scale": 0.7,
+              "orientation": "TOWARDS_CAMERA"
+            }
+          }
+        }
+      }
     },
     "animation": "spell_engine:one_handed_area_release",
     "sound": {

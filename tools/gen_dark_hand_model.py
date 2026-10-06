@@ -15,18 +15,27 @@ WHAT IT WRITES
        (front / side / top / 3-4 view, rendered by this script -- not a screenshot)
 
 MODEL ORIENTATION (the part that is easy to get wrong)
-    The projectile flies along +Z in model space. So the hand is built with its
-    fingers pointing +Z (forward, at the victim) and the wrist at -Z (trailing).
-    The palm is flat in the XZ plane, so it reads correctly from ANY roll angle --
-    unlike a hand designed in the XY plane, which would fly edge-on and look like a stick.
-    The palm faces UP. All six faces are present on every cube, so even if the engine
-    rolls the model the silhouette still reads as a hand.
+    The projectile flies along +Z in model space. The hand is therefore built with its
+    FINGERS pointing +Z (forward, at the victim), the wrist stub at -Z (trailing), and
+    the palm facing down (-Y). Author 2026-10-10 confirmed the intent: "手腕对着别人
+    不是手指" was wrong, and the hand should read as an open grasp with "掌心对着别人".
+
+    ★★ THIS ORIENTATION ONLY HOLDS IF THE SPELL SETS `model.orientation`.
+    With the field absent, the engine TUMBLES the model about the entity position, and
+    then whichever end faces the victim is arbitrary. That is why the five night-hand
+    spells now carry `"orientation": "TOWARDS_CAMERA"` -- the only variant that yaws
+    the model without pitching or rolling it (see tools/gen_dark_hand_projectiles.py).
+    (Same trap as the `flash` lightning on 2026-09-27: "怎么雷电是躺着的".)
+
+SHAPE (2026-10-10 rework: open grasp, not a fist)
+    Compact wrist collar + broad flat palm + four splayed, nearly-straight fingers with
+    forward-hooking claws + a thumb angled across, i.e. the "about to seize" silhouette
+    the author asked for ("有点下界铁掌这个boss的形状").
 
 SIZE
-    bbox x -6..6, y -6..4, z -11..12  =>  0.75 x 0.63 x 1.44 blocks
-    A "scale" of 1.4 in the spell json makes it about 1 block wide and 2 blocks long.
-    Scale knobs per tier are in the spell JSONs, not here -- do not resize the model
-    to change how big a tier looks.
+    (printed by main(); the model is recentred on its own bounding box, so the printed
+     bbox is what the engine sees.) Scale knobs per tier live in the spell JSONs --
+     do not resize the model to change how big a tier looks.
 
 TEXTURE
     32x32, drawn procedurally: bone-white knuckle plates, purple-black shadow between
@@ -128,70 +137,85 @@ def box(frm, to, mat, uv_face=None):
 
 
 def build_boxes():
-    """The hand itself: wrist + palm + 5 digits, fingers pointing +Z (direction of flight)."""
+    """An OPEN, grasping hand: compact wrist + broad palm + five spread digits.
+
+    Author 2026-10-10: "我希望你把手掌张开也就是弄成要去抓住别人的感觉，然后掌心对着
+    别人冲过去，有点像下界铁掌这个boss的形状".
+
+    ORIENTATION, in model space (see the module docstring):
+        +Z = forward (at the victim)   -Z = the wrist stub
+        +Y = up                        -Y = the palm side
+    So the FINGERS point at the victim, the palm faces down/forward, and the wrist stub
+    is a short collar behind the palm. The previous version had a 7-unit thick forearm
+    block trailing behind a curled fist, which read as "a wrist being thrown".
+
+    WHAT CHANGED (and why)
+        * wrist: 7 units long x 8 wide  ->  5 long x 7 wide (a collar, not an arm), and
+          it is now the SAME height as the palm so the hand has one silhouette.
+        * fingers: were 3 short segments curled DOWN (a fist) -> now longer, laid out
+          nearly straight, and SPREAD OUTWARD so the gaps between them read as an open
+          grasp. Middle two are longest; the outer two splay.
+        * palm: wider (14 vs 12) and flatter, so "open palm" is legible head-on.
+        * claws: point forward past each fingertip and curl slightly down, so the tips
+          read as about to close rather than as five unrelated spikes.
+    """
     b = []
 
-    # ---- wrist / forearm stub: trailing behind, thinner than the palm ----
-    b.append(box([-4, -2, -11], [4, 2, -4], "wrist"))
-    # a raised ridge along the back of the wrist, so it is not a bare rectangle
-    b.append(box([-2, 1, -10], [2, 3, -5], "back"))
+    # ---- wrist: a short collar behind the palm (NOT a forearm) ----
+    b.append(box([-3.5, -2.5, -13], [3.5, 0.5, -8], "wrist"))
+    # a low ridge along the back of the wrist so it is not a bare rectangle
+    b.append(box([-2, 0.5, -12], [2, 1.5, -9], "back"))
 
-    # ---- palm: 12 wide, 3 thick, 9 long, palm-up ----
-    b.append(box([-6, -3, -4], [6, 0, 5], "palm"))
-    # heel of the palm (a slightly thicker block at the wrist end)
-    b.append(box([-5, -4, -4], [5, -1, 0], "back"))
+    # ---- palm: broad and flat; its front face (+Z... the north face) is the 掌心 ----
+    b.append(box([-7, -3, -8], [7, 0, 3], "palm"))
+    # heel of the palm, slightly thicker at the wrist end
+    b.append(box([-5.5, -3.5, -8], [5.5, -1, -4], "back"))
 
     # ---- knuckle bar: the row the fingers grow out of ----
-    b.append(box([-6, -3, 4], [6, 0, 6], "knuckle"))
+    b.append(box([-7, -3, 3], [7, 0, 5], "knuckle"))
+    b.append(box([-7, -1, 3], [7, 1, 5], "back"))     # raised back of the knuckles
 
-    # ---- four fingers, each 3 segments, curling slightly DOWN then forward ----
-    #      x centres spread across the knuckle bar; the middle two are longest
-    finger_x = [(-5, -3), (-2, 0), (1, 3), (4, 6)]
-    lengths = [6, 8, 8, 6]
-    for i, ((xa, xb), ln) in enumerate(zip(finger_x, lengths)):
-        mat = "digit_%d" % min(2, i if i < 3 else 2)
-        y = -3
-        z = 6
-        seg = ln // 3
-        for s in range(3):
-            h = 3 - s          # taper
-            if s == 1:
-                y -= 1         # middle segment drops: the curl
-            if s == 2:
-                y -= 1
-            b.append(box([xa, y, z], [xb, y + h, z + seg], mat))
-            z += seg
-
-    # ---- thumb: shorter, thicker, angled across the palm ----
-    b.append(box([-8, -2, -1], [-6, 1, 3], "digit_2"))
-    b.append(box([-10, -1, 1], [-8, 2, 5], "digit_1"))
-
-    # ---- claws on the fingertips: bright, so the hand reads as hostile ----
-    #      Explicit from/to per claw -- every claw gets 1 unit of thickness in ALL axes,
-    #      because a zero-size axis makes the vanilla model loader drop the cube.
-    #      The spike TAPERS in both x and y on its way forward, so it reads as a claw from
-    #      above AND from the side (a flat 1-unit-tall spike just looks like a blade).
-    claws = [
-        # x0, x1, y0, y1, z0, z1
-        (-5, -3, -4.0, -2.0, 12, 14),
-        (-2, 0, -4.0, -2.0, 14, 16),
-        (1, 3, -4.0, -2.0, 14, 16),
-        (4, 6, -4.0, -2.0, 12, 14),
+    # ---- four fingers: nearly straight, splayed INWARD from symmetrically placed
+    #      bases (an open grasp). The splay signs deliberately mirror about x=0 so the
+    #      open hand is symmetric -- the first cut of this had both outer fingers
+    #      drifting the same way, which made the whole model lopsided.
+    #      (xa, xb) = base span, length, splay per segment
+    fingers = [
+        (-7.5, -5.5, 16, 0.60),     # outermost, nearest the thumb side
+        (-4.0, -2.0, 19, 0.15),
+        (2.0, 4.0, 19, -0.15),
+        (5.5, 7.5, 16, -0.60),      # outermost, pinky side
     ]
-    for (x0, x1, y0, y1, z0, z1) in claws:
-        # base: full width, thinner than the finger, tucked under the fingertip
-        b.append(box([x0, y0 + 0.5, z0], [x1, y1, z1], "claw"))
-        # spike: narrower + shorter, poking further forward
-        xm0, xm1 = x0 + 0.5, x1 - 0.5
-        if xm1 - xm0 < 1:
-            xm0, xm1 = x0, x1
-        b.append(box([xm0, y0 + 1.0, z1], [xm1, y1, z1 + 3], "claw"))
+    for i, (xa, xb, length, splay) in enumerate(fingers):
+        mat = "digit_%d" % min(2, i if i < 3 else 2)
+        seg = length // 3
+        z = 5.0
+        y = -3.0
+        for s in range(3):
+            h = 3 - s * 0.5                       # taper toward the tip
+            # spread: each segment drifts outward and drops very slightly (a relaxed grasp)
+            dx = splay * (s + 1)
+            dy = -0.5 * s
+            b.append(box([xa + dx, y + dy, z], [xb + dx, y + dy + h, z + seg], mat))
+            z += seg
+        # ---- claw at this fingertip: forward and curling down ----
+        cx0, cx1 = xa + splay * 3, xb + splay * 3
+        ty = y + (-0.5 * 2)                        # tip height
+        # base of the claw (thicker, sitting on the fingertip)
+        b.append(box([cx0 + 0.25, ty - 0.5, z], [cx1 - 0.25, ty + 1.0, z + 1.5], "claw"))
+        # spike: narrower, pokes forward and hooks down (still positive in every axis)
+        b.append(box([cx0 + 0.75, ty - 1.0, z + 1.5], [cx1 - 0.75, ty + 0.5, z + 4.0], "claw"))
 
-    # ---- aura shards: a few floating fragments around the hand (dark magic feel) ----
-    b.append(box([-8, 1, 2], [-6, 3, 4], "aura"))
-    b.append(box([6, 1, 2], [8, 3, 4], "aura"))
-    b.append(box([-2, 2, -7], [2, 4, -5], "aura"))
-    b.append(box([-1, 2, 7], [1, 4, 9], "aura"))
+    # ---- thumb: off the left side, angled across as if about to close ----
+    b.append(box([-10, -3, -2], [-8, 0, 2], "digit_2"))
+    b.append(box([-12, -3, 1], [-10, 0, 5], "digit_1"))
+    b.append(box([-12.5, -3.5, 5], [-10.5, -1.5, 7], "claw"))
+
+    # ---- aura shards: a few floating fragments (dark magic feel) ----
+    b.append(box([-9, 1, 0], [-7, 3, 2], "aura"))
+    b.append(box([7, 1, 0], [9, 3, 2], "aura"))
+    b.append(box([-2, 2, -10], [2, 4, -8], "aura"))
+    b.append(box([-1.5, 2, 12], [1.5, 4, 14], "aura"))
 
     return b
 

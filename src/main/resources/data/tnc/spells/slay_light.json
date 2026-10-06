@@ -1,7 +1,7 @@
 {
   "school": "SOUL",
   "group": "dark_hand",
-  "range": 34.0,
+  "range": 52.0,
   "learn": {
     "tier": 5
   },
@@ -28,7 +28,7 @@
       "type": "PROJECTILE",
       "projectile": {
         "launch_properties": {
-          "velocity": 1.1,
+          "velocity": 0.45,
           "extra_launch_count": 4,
           "extra_launch_delay": 3
         },
@@ -37,18 +37,36 @@
           "client_data": {
             "travel_particles": [
               {
-                "particle_id": "soul",
+                "particle_id": "minecraft:squid_ink",
                 "shape": "CIRCLE",
                 "rotation": "LOOK",
                 "origin": "CENTER",
-                "count": 4.0,
+                "count": 10.0,
                 "min_speed": 0.0,
                 "max_speed": 0.1
+              },
+              {
+                "particle_id": "minecraft:smoke",
+                "shape": "CIRCLE",
+                "rotation": "LOOK",
+                "origin": "CENTER",
+                "count": 8.0,
+                "min_speed": 0.0,
+                "max_speed": 0.08
+              },
+              {
+                "particle_id": "fromtheshadows:shadow",
+                "shape": "SPHERE",
+                "origin": "CENTER",
+                "count": 6.0,
+                "min_speed": 0.0,
+                "max_speed": 0.12
               }
             ],
             "model": {
               "model_id": "tnc:projectile/dark_hand",
-              "scale": 17.0
+              "scale": 12.8,
+              "orientation": "TOWARDS_CAMERA"
             }
           }
         }
