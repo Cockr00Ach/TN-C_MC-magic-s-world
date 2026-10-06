@@ -46,6 +46,7 @@ ASCII only (PowerShell 5.1 reads non-ASCII .ps1 as ANSI; this is .py but the pro
 rule is the same -- keep tooling ASCII and put text data in json).
 """
 import json
+import math
 import os
 import sys
 
@@ -79,6 +80,10 @@ ATLAS = {
     "knuckle":      ((0, 26, 12, 6), (72, 60, 96), (112, 96, 140), (26, 18, 36)),
     "claw":         ((12, 8, 10, 10), (200, 90, 190), (255, 190, 250), (90, 30, 90)),
     "aura":         ((22, 8, 8, 8), (60, 30, 96), (120, 70, 170), (24, 10, 40)),
+    # ★ the tether: the darkest material in the atlas (author 2026-10-10: "手腕跟身体可以有
+    #   一条黑色的粗的线连接"). Deliberately near-black with almost no edge contrast, so it
+    #   reads as ONE solid black line instead of a stack of shaded cubes.
+    "tether":       ((24, 16, 8, 8), (10, 8, 14), (16, 13, 22), (5, 4, 8)),
 }
 
 # where the next free patch is, for any material not pre-declared (auto-tiled)
@@ -109,12 +114,29 @@ def box(frm, to, mat, uv_face=None):
     # every face gets a same-sized slice of the material patch, picking different
     # corners so faces are distinguishable while looking at the model
     fx, fy = uv_face if uv_face else (0, 0)
-    w = max(1, min(aw, x1 - x0))
-    h = max(1, min(ah, y1 - y0))
-    d = max(1, min(aw, z1 - z0))
-    eh = max(1, min(ah, y1 - y0))
+    # face-region sizes, CLAMPED twice:
+    #   1) to the material patch (so a face never samples a neighbouring material), and
+    #   2) so that (start + size) still fits inside the atlas. The fanned hands are
+    #      ROTATED, so their spans are fractional and can exceed the patch -- without
+    #      this clamp the generator now aborts with "UV out of atlas" (it did, on the
+    #      first run of the fan version).
+    def span(available, start, extent):
+        size = max(1, min(available, int(math.floor(extent))))
+        if start + size > TEX:
+            size = max(1, TEX - start)
+        return size
+
+    w = span(aw, ax + fx, x1 - x0)
+    h = span(ah, ay + fy, y1 - y0)
+    d = span(aw, ax + fx, z1 - z0)
+    eh = h
 
     def face(u, v, uw, vh):
+        # keep the rect inside the atlas on both axes, then guarantee it is non-degenerate
+        u = max(0, min(u, TEX - 1))
+        v = max(0, min(v, TEX - 1))
+        uw = max(1, min(uw, TEX - u))
+        vh = max(1, min(vh, TEX - v))
         return {"uv": [u, v, u + uw, v + vh], "texture": "#0"}
 
     return {
@@ -137,87 +159,121 @@ def box(frm, to, mat, uv_face=None):
 
 
 def build_boxes():
-    """An OPEN, grasping hand: compact wrist + broad palm + five spread digits.
+    """Several clawed hands fanning out on a thick black tether.
 
-    Author 2026-10-10: "我希望你把手掌张开也就是弄成要去抓住别人的感觉，然后掌心对着
-    别人冲过去，有点像下界铁掌这个boss的形状".
+    Author 2026-10-10: "我希望手腕跟身体可以有一条黑色的粗的线连接，看起来像是从我的背后
+    伸出来的好几只手去抓别人".
 
-    ORIENTATION, in model space (see the module docstring):
-        +Z = forward (at the victim)   -Z = the wrist stub
-        +Y = up                        -Y = the palm side
-    So the FINGERS point at the victim, the palm faces down/forward, and the wrist stub
-    is a short collar behind the palm. The previous version had a 7-unit thick forearm
-    block trailing behind a curled fist, which read as "a wrist being thrown".
+    So the shape is now:
+        * a THICK black band running back along -Z from each wrist (the "tether" -- what
+          visually connects the hand to the caster's body while it flies), built from the
+          darkest atlas material so it reads as a solid black line, not a gradient;
+        * THREE complete open hands fanned around the travel axis (-Z... +Z), sharing the
+          same origin, so the silhouette is "several hands reaching out", not one hand.
 
-    WHAT CHANGED (and why)
-        * wrist: 7 units long x 8 wide  ->  5 long x 7 wide (a collar, not an arm), and
-          it is now the SAME height as the palm so the hand has one silhouette.
-        * fingers: were 3 short segments curled DOWN (a fist) -> now longer, laid out
-          nearly straight, and SPREAD OUTWARD so the gaps between them read as an open
-          grasp. Middle two are longest; the outer two splay.
-        * palm: wider (14 vs 12) and flatter, so "open palm" is legible head-on.
-        * claws: point forward past each fingertip and curl slightly down, so the tips
-          read as about to close rather than as five unrelated spikes.
+    WHY THREE HANDS INSIDE ONE MODEL (and not three projectiles):
+        the engine's `launch_properties` can fire extra copies (`extra_launch_count`), but
+        they share one trajectory and ONE divergence -- they stack into a single blob and
+        do not read as separate hands. Modelling the fan is what actually produces the
+        look, and it keeps homing/impact semantics exactly as they are (one projectile).
+        (Checked with javap: LaunchProperties has only velocity / extra_launch_count /
+         extra_launch_delay -- there is no per-copy spread to exploit.)
+
+    Each hand keeps the same anatomy as before (palm, four splayed fingers with
+    forward-hooking claws, thumb), just smaller and rotated about the Z axis.
     """
     b = []
 
-    # ---- wrist: a short collar behind the palm (NOT a forearm) ----
-    b.append(box([-3.5, -2.5, -13], [3.5, 0.5, -8], "wrist"))
-    # a low ridge along the back of the wrist so it is not a bare rectangle
-    b.append(box([-2, 0.5, -12], [2, 1.5, -9], "back"))
+    # ---- the tether: a thick black band along -Z, plus a hub at its end ----
+    # (dedicated near-black material; wide in x AND y so it is a slab, not a thread)
+    b.append(box([-3.5, -3.5, -30], [3.5, 3.5, -12], "tether"))
+    b.append(box([-5, -5, -32], [5, 5, -29], "tether"))      # the hub knot behind
+    b.append(box([-2, -2, -36], [2, 2, -32], "tether"))      # a tail stub fading back
 
-    # ---- palm: broad and flat; its front face (+Z... the north face) is the 掌心 ----
-    b.append(box([-7, -3, -8], [7, 0, 3], "palm"))
-    # heel of the palm, slightly thicker at the wrist end
-    b.append(box([-5.5, -3.5, -8], [5.5, -1, -4], "back"))
+    # ---- three hands, fanned about the Z axis ----
+    fans = [
+        (-26.0, 1.0),      # upper-left hand
+        (0.0, 1.0),        # the middle hand, largest
+        (26.0, 1.0),       # lower-right hand
+    ]
+    for angle, scale in fans:
+        b.extend(one_hand(angle, scale))
 
-    # ---- knuckle bar: the row the fingers grow out of ----
-    b.append(box([-7, -3, 3], [7, 0, 5], "knuckle"))
-    b.append(box([-7, -1, 3], [7, 1, 5], "back"))     # raised back of the knuckles
+    return b
 
-    # ---- four fingers: nearly straight, splayed INWARD from symmetrically placed
-    #      bases (an open grasp). The splay signs deliberately mirror about x=0 so the
-    #      open hand is symmetric -- the first cut of this had both outer fingers
-    #      drifting the same way, which made the whole model lopsided.
-    #      (xa, xb) = base span, length, splay per segment
+
+def rot_z(x, y, deg):
+    """Rotate (x, y) about the origin in the XY plane (degrees)."""
+    r = math.radians(deg)
+    c, s = math.cos(r), math.sin(r)
+    return (x * c - y * s, x * s + y * c)
+
+
+def one_hand(angle, scale):
+    """One open, grasping hand, rotated about the Z (travel) axis by `angle`.
+
+    Local space: wrist at -Z, fingers at +Z, palm at -Y. The rotation is applied to the
+    (x, y) of every corner, so the fan spreads in the XY plane while all hands still
+    point down +Z at the victim.
+    """
+    def place(frm, to, mat):
+        # scale about the origin, then rotate about Z, then emit an axis-aligned box
+        pts = []
+        for (px, py, pz) in ((frm[0], frm[1], frm[2]), (to[0], to[1], to[2])):
+            sx, sy = px * scale, py * scale
+            rx, ry = rot_z(sx, sy, angle)
+            pts.append((rx, ry, pz))
+        x0 = min(p[0] for p in pts)
+        x1 = max(p[0] for p in pts)
+        y0 = min(p[1] for p in pts)
+        y1 = max(p[1] for p in pts)
+        v = box([x0, y0, frm[2]], [x1, y1, to[2]], mat)
+        return v
+
+    out = []
+    # wrist collar (short -- the long black band above is the tether)
+    out.append(place([-3.5, -2.5, -14], [3.5, 0.5, -10], "wrist"))
+    # palm
+    out.append(place([-7, -3, -10], [7, 0, 0], "palm"))
+    out.append(place([-5.5, -3.5, -10], [5.5, -1, -7], "back"))
+    # knuckles
+    out.append(place([-7, -3, 0], [7, 0, 2], "knuckle"))
+    out.append(place([-7, -1, 0], [7, 1, 2], "back"))
+
+    # four fingers: nearly straight, splayed INWARD from mirrored bases (a fan),
+    # symmetric about x=0 so the whole fan stays balanced
     fingers = [
-        (-7.5, -5.5, 16, 0.60),     # outermost, nearest the thumb side
-        (-4.0, -2.0, 19, 0.15),
-        (2.0, 4.0, 19, -0.15),
-        (5.5, 7.5, 16, -0.60),      # outermost, pinky side
+        (-7.5, -5.5, 15, 0.60),
+        (-4.0, -2.0, 18, 0.15),
+        (2.0, 4.0, 18, -0.15),
+        (5.5, 7.5, 15, -0.60),
     ]
     for i, (xa, xb, length, splay) in enumerate(fingers):
         mat = "digit_%d" % min(2, i if i < 3 else 2)
         seg = length // 3
-        z = 5.0
+        z = 2.0
         y = -3.0
         for s in range(3):
-            h = 3 - s * 0.5                       # taper toward the tip
-            # spread: each segment drifts outward and drops very slightly (a relaxed grasp)
+            h = 3 - s * 0.5
             dx = splay * (s + 1)
             dy = -0.5 * s
-            b.append(box([xa + dx, y + dy, z], [xb + dx, y + dy + h, z + seg], mat))
+            out.append(place([xa + dx, y + dy, z], [xb + dx, y + dy + h, z + seg], mat))
             z += seg
-        # ---- claw at this fingertip: forward and curling down ----
+        # claw: base + forward-hooking spike
         cx0, cx1 = xa + splay * 3, xb + splay * 3
-        ty = y + (-0.5 * 2)                        # tip height
-        # base of the claw (thicker, sitting on the fingertip)
-        b.append(box([cx0 + 0.25, ty - 0.5, z], [cx1 - 0.25, ty + 1.0, z + 1.5], "claw"))
-        # spike: narrower, pokes forward and hooks down (still positive in every axis)
-        b.append(box([cx0 + 0.75, ty - 1.0, z + 1.5], [cx1 - 0.75, ty + 0.5, z + 4.0], "claw"))
+        ty = y - 1.0
+        out.append(place([cx0 + 0.25, ty - 0.5, z], [cx1 - 0.25, ty + 1.0, z + 1.5], "claw"))
+        out.append(place([cx0 + 0.75, ty - 1.0, z + 1.5], [cx1 - 0.75, ty + 0.5, z + 3.5], "claw"))
 
-    # ---- thumb: off the left side, angled across as if about to close ----
-    b.append(box([-10, -3, -2], [-8, 0, 2], "digit_2"))
-    b.append(box([-12, -3, 1], [-10, 0, 5], "digit_1"))
-    b.append(box([-12.5, -3.5, 5], [-10.5, -1.5, 7], "claw"))
+    # thumb, angled across as if about to close
+    out.append(place([-10, -3, -5], [-8, 0, -1], "digit_2"))
+    out.append(place([-12, -3, -2], [-10, 0, 2], "digit_1"))
+    out.append(place([-12.5, -3.5, 2], [-10.5, -1.5, 4], "claw"))
 
-    # ---- aura shards: a few floating fragments (dark magic feel) ----
-    b.append(box([-9, 1, 0], [-7, 3, 2], "aura"))
-    b.append(box([7, 1, 0], [9, 3, 2], "aura"))
-    b.append(box([-2, 2, -10], [2, 4, -8], "aura"))
-    b.append(box([-1.5, 2, 12], [1.5, 4, 14], "aura"))
-
-    return b
+    # a wisp of aura off each hand so the fan separates visually
+    out.append(place([-8.5, 1, -3], [-6.5, 3, -1], "aura"))
+    out.append(place([7, 1, -3], [9, 3, -1], "aura"))
+    return out
 
 
 def recenter(boxes):

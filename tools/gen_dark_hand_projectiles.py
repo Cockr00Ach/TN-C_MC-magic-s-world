@@ -58,14 +58,18 @@ FLIGHT = {
     "slay_light": (0.45, 52.0),
 }
 
-# the dark trail the hand drags behind it (verified ParticleTypes only)
+# the dark trail the hand drags behind it (verified ParticleTypes only).
+# ★ 2026-10-10 (author: "手腕跟身体可以有一条黑色的粗的线连接"): the model now carries its
+#   own black tether band, and these batches are the smoke-beam that keeps the line visible
+#   between the flying hand and the caster. squid_ink carries it (the only truly dark
+#   vanilla particle); shadow thickens it; smoke softens the edge.
 TRAIL = [
     {"particle_id": "minecraft:squid_ink", "shape": "CIRCLE", "rotation": "LOOK",
-     "origin": "CENTER", "count": 10.0, "min_speed": 0.0, "max_speed": 0.10},
+     "origin": "CENTER", "count": 16.0, "min_speed": 0.0, "max_speed": 0.06},
+    {"particle_id": "fromtheshadows:shadow", "shape": "CIRCLE", "rotation": "LOOK",
+     "origin": "CENTER", "count": 12.0, "min_speed": 0.0, "max_speed": 0.05},
     {"particle_id": "minecraft:smoke", "shape": "CIRCLE", "rotation": "LOOK",
      "origin": "CENTER", "count": 8.0, "min_speed": 0.0, "max_speed": 0.08},
-    {"particle_id": "fromtheshadows:shadow", "shape": "SPHERE",
-     "origin": "CENTER", "count": 6.0, "min_speed": 0.0, "max_speed": 0.12},
 ]
 
 
