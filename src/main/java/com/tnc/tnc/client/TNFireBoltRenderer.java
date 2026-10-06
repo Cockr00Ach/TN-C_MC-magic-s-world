@@ -507,24 +507,15 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
      * @param alphaScale 这一层的整体透明度倍率
      */
     private static void flameColor(double t, float alphaScale, float[] dst) {
-        double k;
-        if (t < 0.30D) {                 // 白黄 → 亮橙
-            k = t / 0.30D;
-            dst[0] = 1.00F;
-            dst[1] = (float) (1.00D - 0.32D * k);
-            dst[2] = (float) (0.82D - 0.72D * k);
-        } else if (t < 0.65D) {          // 亮橙 → 橙
-            k = (t - 0.30D) / 0.35D;
-            dst[0] = 1.00F;
-            dst[1] = (float) (0.68D - 0.30D * k);
-            dst[2] = (float) (0.10D - 0.06D * k);
-        } else {                         // 橙 → 深橙红
-            k = (t - 0.65D) / 0.35D;
-            dst[0] = (float) (1.00D - 0.16D * k);
-            dst[1] = (float) (0.38D - 0.24D * k);
-            dst[2] = 0.04F;
+        // ⚠️ 作者 2026-10-05：「不要用仿真渲染改用像素风格」✗
+        //    这里原来按 t 连续插值出无数中间色 + 透明度一路衰减（0.88 的衰减 ✗），
+        //    出来就是"现代特效插件"那种观感 ✗
+        //    ⇒ 改成**量化到离散色板 + 恒定不透明** ✓（色板见 PixelFlame ✓）
+        //    ⚠️ alphaScale 现在只当"整根该不该画"的门 ✓（像素风没有"渐渐透掉"✗）
+        PixelFlame.flat(t, dst);
+        if (alphaScale <= 0.02F) {
+            dst[3] = 0.0F;
         }
-        dst[3] = (float) ((1.0D - 0.88D * t) * alphaScale);
     }
 
     // ==================================================================

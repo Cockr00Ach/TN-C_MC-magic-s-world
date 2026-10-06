@@ -184,14 +184,11 @@ public class TNLightBeamRenderer extends EntityRenderer<TNLightBeamEntity> {
     /** 彩虹色 ✓ —— 色相直接用机制层那份（{@link TNLightBeamMechanics#rainbow} ✓，一处定义 ✓）；天降偏白金 ✓。 */
     private static int[] rainbow(float t, boolean descent, boolean fire) {
         if (fire) {
-            // 火系射线：**橙红 -> 金黄** 的火焰渐变 ✓
-            // ⚠️ 调用处传进来的 t 里已经含了 age*0.02 ⇒ 直接拿它做**沿轴抖动**，
-            //    看起来像在烧 ✓（不需要额外的时间参数 ✓）
-            float f = (float) (0.5D + 0.5D * Math.sin(t * 9.0D));
-            return new int[]{
-                    255,
-                    (int) ((0.44F + 0.34F * f) * 255.0F),   // 0.44 ~ 0.78
-                    (int) ((0.06F + 0.20F * f) * 255.0F)};  // 0.06 ~ 0.26
+            // 火系射线：走**像素色板**（作者 2026-10-05：不要仿真渲染 ✗）
+            // —— 量化成离散色块、不再连续渐变 ✓（和火球/法阵同一套色板 ✓）
+            float[] flat = new float[4];
+            com.tnc.tnc.client.PixelFlame.flat(t * 1.6D, flat);
+            return new int[]{(int) (flat[0] * 255.0F), (int) (flat[1] * 255.0F), (int) (flat[2] * 255.0F)};
         }
         org.joml.Vector3f c = TNLightBeamMechanics.rainbow(t);
         float r = c.x, g = c.y, b = c.z;

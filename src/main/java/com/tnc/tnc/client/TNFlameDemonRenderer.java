@@ -94,9 +94,12 @@ public final class TNFlameDemonRenderer extends EntityRenderer<TNFlameDemonField
     // ------------------------------------------------------------------
 
     private static void drawSigil(VertexConsumer out, Matrix4f pose, double radius, double age, int life) {
-        float endFade = (float) Math.min(1.0D, Math.max(0.0D, (life - age) / 20.0D));
-        // 地面底光（最暗的一层先铺 ✓）
-        WaterGeometry.disk(out, pose, ORIGIN, UP, radius, 0.30F, 0.10F, 0.02F, 0.16F * endFade);
+        // ⚠️ 作者 2026-10-05：不要仿真渲染 ✗ ⇒ 不再"渐渐淡出" ✓，最后 3 tick 整块收掉 ✓
+        if (age > life - 3) {
+            return;
+        }
+        // 地面底光（一整块实色 ✓）
+        WaterGeometry.disk(out, pose, ORIGIN, UP, radius, 0.42F, 0.14F, 0.03F, 1.0F);
         // ⚠️ 作者要"从外到里一点点出现"✗ ⇒ 每环有自己的出现时刻：越靠外越早 ✓
         for (int i = 0; i < 5; i++) {
             double r = radius * (1.0D - i * 0.17D);
@@ -104,15 +107,17 @@ public final class TNFlameDemonRenderer extends EntityRenderer<TNFlameDemonField
             if (appear <= 0.01D) {
                 continue;
             }
-            float a = (0.62F - i * 0.06F) * (float) appear * endFade;
-            WaterGeometry.ring(out, pose, ORIGIN, UP, r, Math.max(0.06D, 0.09D - i * 0.008D),
-                    age * 0.012D, a);
+            // 像素风：一圈要么**整圈画出来**、要么不画 ✓（不再半透明渐变 ✗）
+            // 外环先满、内环依次跟上 ⇒ 仍然是"由外到里描绘"的感觉 ✓
+            if (appear < 0.5D) {
+                continue;
+            }
+            WaterGeometry.ring(out, pose, ORIGIN, UP, r, Math.max(0.09D, 0.13D - i * 0.010D),
+                    age * 0.012D, 1.0F);
         }
         // 阵中心那点热核 ✓
-        double core = Math.min(1.0D, Math.max(0.0D, age / DRAW_TICKS - 0.7D));
-        if (core > 0.01D) {
-            WaterGeometry.disk(out, pose, ORIGIN, UP, radius * 0.22D,
-                    1.0F, 0.72F, 0.22F, (float) (0.75D * core) * endFade);
+        if (age / DRAW_TICKS > 0.7D) {
+            WaterGeometry.disk(out, pose, ORIGIN, UP, radius * 0.22D, 1.0F, 0.72F, 0.22F, 1.0F);
         }
     }
 
@@ -138,8 +143,8 @@ public final class TNFlameDemonRenderer extends EntityRenderer<TNFlameDemonField
             Vec3 q0 = new Vec3(p0.x, height, p0.z);
             Vec3 q1 = new Vec3(p1.x, height, p1.z);
             // 两面都画（免得从里面看是空的 ✗）
-            WaterGeometry.quad(out, pose, p0, p1, q1, q0, OR, OG, OB, 0.96F);
-            WaterGeometry.quad(out, pose, q0, q1, p1, p0, OR, OG, OB, 0.96F);
+            WaterGeometry.quad(out, pose, p0, p1, q1, q0, OR, OG, OB, 1.0F);
+            WaterGeometry.quad(out, pose, q0, q1, p1, p0, OR, OG, OB, 1.0F);
         }
         // 柱顶面
         WaterGeometry.quad(out, pose,
@@ -147,7 +152,7 @@ public final class TNFlameDemonRenderer extends EntityRenderer<TNFlameDemonField
                 new Vec3(at.x + PILLAR_HALF, height, at.z - PILLAR_HALF),
                 new Vec3(at.x + PILLAR_HALF, height, at.z + PILLAR_HALF),
                 new Vec3(at.x - PILLAR_HALF, height, at.z + PILLAR_HALF),
-                0.16F, 0.09F, 0.20F, 0.95F);
+                0.16F, 0.09F, 0.20F, 1.0F);
         // 柱身上爬的熔岩纹（4 条竖亮线 ✓，让柱子不像一根黑棍 ✗）
         for (int i = 0; i < 4; i++) {
             Vec3 p0 = corner[i];
@@ -155,7 +160,7 @@ public final class TNFlameDemonRenderer extends EntityRenderer<TNFlameDemonField
             Vec3 mid = new Vec3((p0.x + p1.x) * 0.5D, 0.0D, (p0.z + p1.z) * 0.5D);
             WaterGeometry.tube(out, pose,
                     new Vec3(mid.x, 0.4D, mid.z), new Vec3(mid.x, height * 0.93D, mid.z),
-                    0.055D, 1.0F, 0.42F, 0.08F, 0.85F);
+                    0.055D, 1.0F, 0.42F, 0.08F, 1.0F);
         }
     }
 
@@ -168,14 +173,14 @@ public final class TNFlameDemonRenderer extends EntityRenderer<TNFlameDemonField
         double r = 0.85D * pulse;
         // 外层暗红（三片正交 ⇒ 从任何角度看都是一团光 ✓）
         for (Vec3 axis : new Vec3[]{UP, AXIS_X, AXIS_Z}) {
-            WaterGeometry.disk(out, pose, at, axis, r * 1.35D, 1.00F, 0.34F, 0.05F, 0.55F);
+            WaterGeometry.disk(out, pose, at, axis, r * 1.35D, 1.00F, 0.34F, 0.05F, 1.0F);
         }
         // 内层亮黄（"太阳"的感觉就靠这一层 ✓）
         for (Vec3 axis : new Vec3[]{UP, AXIS_X, AXIS_Z}) {
-            WaterGeometry.disk(out, pose, at, axis, r * 0.72D, 1.00F, 0.86F, 0.32F, 0.85F);
+            WaterGeometry.disk(out, pose, at, axis, r * 0.72D, 1.00F, 0.86F, 0.32F, 1.0F);
         }
         // 绕着飞的火环（作者要"圆球附近有火焰粒子飞舞"✓ —— 几何环比真粒子更省 ✓）
-        WaterGeometry.ring(out, pose, at, UP, r * 1.9D, 0.13D, age * 0.05D + index, 0.65F);
+        WaterGeometry.ring(out, pose, at, UP, r * 1.9D, 0.13D, age * 0.05D + index, 1.0F);
     }
 
     // ------------------------------------------------------------------
@@ -199,7 +204,7 @@ public final class TNFlameDemonRenderer extends EntityRenderer<TNFlameDemonField
         Vec3 to = target.getPosition(1.0F).add(0.0D, target.getBbHeight() * 0.5D, 0.0D)
                 .subtract(field.position());
         // 外焰壳 + 白热芯：两层管，看着才像"激光"而不是一根橙棍 ✗
-        WaterGeometry.tube(out, pose, orb, to, 0.17D, 1.00F, 0.30F, 0.05F, 0.42F);
-        WaterGeometry.tube(out, pose, orb, to, 0.075D, 1.00F, 0.92F, 0.62F, 0.85F);
+        WaterGeometry.tube(out, pose, orb, to, 0.17D, 1.00F, 0.30F, 0.05F, 1.0F);
+        WaterGeometry.tube(out, pose, orb, to, 0.075D, 1.00F, 0.92F, 0.62F, 1.0F);
     }
 }

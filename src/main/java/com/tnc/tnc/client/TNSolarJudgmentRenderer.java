@@ -79,22 +79,25 @@ public final class TNSolarJudgmentRenderer extends EntityRenderer<TNSolarJudgmen
     // ------------------------------------------------------------------
 
     private static void drawSigil(VertexConsumer out, Matrix4f pose, double radius, double age, int life) {
-        float endFade = (float) Math.min(1.0D, Math.max(0.0D, (life - age) / 24.0D));
-        WaterGeometry.disk(out, pose, ORIGIN, UP, radius, 0.34F, 0.12F, 0.02F, 0.18F * endFade);
+        // 像素风：不淡出，最后 3 tick 整块收掉 ✓（同 t4 ✓）
+        if (age > life - 3) {
+            return;
+        }
+        WaterGeometry.disk(out, pose, ORIGIN, UP, radius, 0.46F, 0.16F, 0.03F, 1.0F);
         for (int i = 0; i < 6; i++) {
             double r = radius * (1.0D - i * 0.15D);
             double appear = Math.min(1.0D, Math.max(0.0D, age / DRAW_TICKS - i * 0.15D));
             if (appear <= 0.01D) {
                 continue;
             }
-            float a = (0.66F - i * 0.06F) * (float) appear * endFade;
-            WaterGeometry.ring(out, pose, ORIGIN, UP, r, Math.max(0.06D, 0.10D - i * 0.008D),
-                    age * 0.010D, a);
+            if (appear < 0.5D) {
+                continue;
+            }
+            WaterGeometry.ring(out, pose, ORIGIN, UP, r, Math.max(0.09D, 0.14D - i * 0.010D),
+                    age * 0.010D, 1.0F);
         }
-        double core = Math.min(1.0D, Math.max(0.0D, age / DRAW_TICKS - 0.72D));
-        if (core > 0.01D) {
-            WaterGeometry.disk(out, pose, ORIGIN, UP, radius * 0.26D,
-                    1.0F, 0.80F, 0.30F, (float) (0.80D * core) * endFade);
+        if (age / DRAW_TICKS > 0.72D) {
+            WaterGeometry.disk(out, pose, ORIGIN, UP, radius * 0.26D, 1.0F, 0.80F, 0.30F, 1.0F);
         }
     }
 
@@ -108,20 +111,20 @@ public final class TNSolarJudgmentRenderer extends EntityRenderer<TNSolarJudgmen
         float pulse = (float) (0.94D + 0.06D * Math.sin(age * 0.16D));
         // 外层暗红球（三片正交 ✓）
         for (Vec3 axis : new Vec3[]{UP, AXIS_X, AXIS_Z}) {
-            WaterGeometry.disk(out, pose, sun, axis, r * 1.5D * pulse, 1.00F, 0.30F, 0.04F, 0.52F);
+            WaterGeometry.disk(out, pose, sun, axis, r * 1.5D * pulse, 1.00F, 0.30F, 0.04F, 1.0F);
         }
         // 中层橙
         for (Vec3 axis : new Vec3[]{UP, AXIS_X, AXIS_Z}) {
-            WaterGeometry.disk(out, pose, sun, axis, r * 1.05D * pulse, 1.00F, 0.62F, 0.12F, 0.70F);
+            WaterGeometry.disk(out, pose, sun, axis, r * 1.05D * pulse, 1.00F, 0.62F, 0.12F, 1.0F);
         }
         // 内层白热核
         for (Vec3 axis : new Vec3[]{UP, AXIS_X, AXIS_Z}) {
-            WaterGeometry.disk(out, pose, sun, axis, r * 0.60D * pulse, 1.00F, 0.96F, 0.72F, 0.92F);
+            WaterGeometry.disk(out, pose, sun, axis, r * 0.60D * pulse, 1.00F, 0.96F, 0.72F, 1.0F);
         }
         // 日冕 + 耀斑（两圈反向转的环 ✓）
-        WaterGeometry.ring(out, pose, sun, UP, r * 2.0D, 0.22D, age * 0.03D, 0.55F);
-        WaterGeometry.ring(out, pose, sun, AXIS_X, r * 2.2D, 0.16D, -age * 0.022D, 0.45F);
-        WaterGeometry.ring(out, pose, sun, AXIS_Z, r * 2.2D, 0.16D, age * 0.026D, 0.45F);
+        WaterGeometry.ring(out, pose, sun, UP, r * 2.0D, 0.22D, age * 0.03D, 1.0F);
+        WaterGeometry.ring(out, pose, sun, AXIS_X, r * 2.2D, 0.16D, -age * 0.022D, 1.0F);
+        WaterGeometry.ring(out, pose, sun, AXIS_Z, r * 2.2D, 0.16D, age * 0.026D, 1.0F);
     }
 
     // ------------------------------------------------------------------
@@ -140,8 +143,8 @@ public final class TNSolarJudgmentRenderer extends EntityRenderer<TNSolarJudgmen
             double rr = radius * (0.25D + 0.68D * ((i * 7 % 11) / 10.0D));
             Vec3 to = new Vec3(Math.cos(angle) * rr, 0.15D, Math.sin(angle) * rr);
             // 外焰壳 + 白热芯（和 t4 的激光同一套观感 ✓）
-            WaterGeometry.tube(out, pose, sun, to, 0.20D, 1.00F, 0.34F, 0.06F, 0.38F);
-            WaterGeometry.tube(out, pose, sun, to, 0.085D, 1.00F, 0.95F, 0.70F, 0.82F);
+            WaterGeometry.tube(out, pose, sun, to, 0.20D, 1.00F, 0.34F, 0.06F, 1.0F);
+            WaterGeometry.tube(out, pose, sun, to, 0.085D, 1.00F, 0.95F, 0.70F, 1.0F);
         }
     }
 }
