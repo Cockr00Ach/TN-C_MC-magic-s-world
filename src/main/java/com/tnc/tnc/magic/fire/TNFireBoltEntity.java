@@ -158,6 +158,9 @@ public final class TNFireBoltEntity extends Projectile {
      */
     public static final int FORM_TICKS = 3;
 
+    /** 火龙术的成形时长（tick）—— 法阵由外到里描绘 + 龙头渐渐凝出来 ✓（作者要"逐渐出现"✗）。 */
+    public static final int DRAGON_FORM_TICKS = 18;
+
     /**
      * 出手缓冲：离开手之后的这几 tick 里，位移从 {@link #LAUNCH_START_FRACTION} 涨到全速。
      *
@@ -250,7 +253,11 @@ public final class TNFireBoltEntity extends Projectile {
      * （作者 2026-10-05 反馈「陨石的下落不流畅」）
      */
     private int formTicks() {
-        return skyFall() ? 0 : FORM_TICKS;
+        if (skyFall()) {
+            return 0;
+        }
+        // 火龙术：要"在面前渐渐生成法阵 + 龙头成形"，3 tick 太短 ✗ ⇒ 给足 18 tick（0.9 秒）✓
+        return isDragon() ? DRAGON_FORM_TICKS : FORM_TICKS;
     }
 
     /**

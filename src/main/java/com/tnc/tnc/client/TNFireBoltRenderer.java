@@ -98,6 +98,12 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
 
         // 熔岩火球（t3）与熔岳天倾砸下来的那些：**黑岩外壳 + 熔岩裂缝**（照作者参照图）。
         // 其余档位仍是彗星焰尾。
+        // 射线链 t3「火龙术」：成形阶段画**朝向准心的法阵**，成形后是一颗火焰龙头 ✓
+        if ("fire_dragon".equals(entity.spellPath())) {
+            dragon(out, pose, dir, right, up, radius, age, fade, entity.formProgress(partial));
+            return;
+        }
+
         if (FireSpellRules.isLavaRock(entity.spellPath())) {
             lavaRock(out, pose, dir, right, up, radius, age, fade);
             return;
@@ -519,6 +525,82 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
             dst[2] = 0.04F;
         }
         dst[3] = (float) ((1.0D - 0.88D * t) * alphaScale);
+    }
+
+    // ==================================================================
+    //  射线链 t3「火龙术」：成形法阵 + 火焰龙头（拖尾复用上面的焰体 ✓）
+    // ==================================================================
+
+    /** 龙头各段：沿 +dir 的位置（倍半径）。⚠️ 拖尾在 -dir（见 axisPoint）⇒ 龙头朝 +dir ✓ */
+    private static final double[] DRAGON_SEG_T = {-0.28D, -0.04D, 0.24D, 0.54D, 0.88D};
+    /** 对应的粗细（倍半径）。 */
+    private static final double[] DRAGON_SEG_R = {0.26D, 0.60D, 0.68D, 0.48D, 0.16D};
+
+    /** 龙头的角数（每圈）—— 比焰体细分一些，棱角更像"有骨头的头" ✓。 */
+    private static final int DRAGON_SIDES = 16;
+
+    private static void dragon(VertexConsumer out, Matrix4f pose, Vec3 dir, Vec3 right, Vec3 up,
+                               double radius, double age, float fade, double form) {
+        float[] color = new float[4];
+
+        // ① 成形阶段：面前那个**朝向准心**的法阵 ✓
+        //    作者要"由外到里一点点出现，表现出描绘的感觉"✗ ⇒ 外环先满、内环依次跟上 ✓
+        if (form < 0.999D) {
+            for (int i = 0; i < 3; i++) {
+                double drawn = Math.max(0.0D, Math.min(1.0D, form * 1.7D - i * 0.26D));
+                if (drawn <= 0.03D) {
+                    continue;
+                }
+                double rr = radius * (1.10D + i * 0.72D);
+                flameColor(0.16D + i * 0.24D, 0.60F * fade * (float) drawn, color);
+                // 有厚度的细圆环（可见性比平面圆环稳 ✓）
+                ring(out, pose, right, up, dir.scale(-0.05D * radius), rr * 0.93D,
+                        dir.scale(0.05D * radius), rr, color, 48);
+            }
+        }
+
+        // ② 龙头本体：一串锥台，整体随成形进度长大 ✓
+        double head = radius * (0.35D + 0.65D * form);
+        for (int i = 0; i + 1 < DRAGON_SEG_T.length; i++) {
+            flameColor(0.60D - i * 0.14D, 0.88F * fade, color);
+            ring(out, pose, right, up,
+                    dir.scale(DRAGON_SEG_T[i] * head), DRAGON_SEG_R[i] * head,
+                    dir.scale(DRAGON_SEG_T[i + 1] * head), DRAGON_SEG_R[i + 1] * head,
+                    color, DRAGON_SIDES);
+        }
+
+        // ③ 下颌：往下偏一点 ⇒ 有"张嘴"的层次 ✓
+        Vec3 jaw = up.scale(-0.24D * head);
+        for (int i = 0; i < 2; i++) {
+            double t0 = 0.12D + i * 0.30D;
+            flameColor(0.72D, 0.72F * fade, color);
+            ring(out, pose, right, up,
+                    dir.scale(t0 * head).add(jaw), 0.28D * head,
+                    dir.scale((t0 + 0.30D) * head).add(jaw), 0.17D * head,
+                    color, 12);
+        }
+
+        // ④ 两只角：往脑后翘（两段，弯一点更像角 ✓）
+        for (int side = -1; side <= 1; side += 2) {
+            Vec3 root = dir.scale(0.16D * head).add(right.scale(side * 0.28D * head))
+                    .add(up.scale(0.34D * head));
+            Vec3 mid = dir.scale(-0.24D * head).add(right.scale(side * 0.38D * head))
+                    .add(up.scale(0.68D * head));
+            Vec3 tip = dir.scale(-0.62D * head).add(right.scale(side * 0.40D * head))
+                    .add(up.scale(0.96D * head));
+            flameColor(0.58D, 0.82F * fade, color);
+            ring(out, pose, right, up, root, 0.12D * head, mid, 0.070D * head, color, 10);
+            ring(out, pose, right, up, mid, 0.070D * head, tip, 0.012D * head, color, 10);
+        }
+
+        // ⑤ 两眼：白热的小亮点 ✓
+        float[] glow = {1.0F, 0.95F, 0.66F, 0.95F * fade};
+        for (int side = -1; side <= 1; side += 2) {
+            Vec3 eye = dir.scale(0.42D * head).add(right.scale(side * 0.34D * head))
+                    .add(up.scale(0.20D * head));
+            ring(out, pose, right, up, eye.add(dir.scale(-0.06D * head)), 0.105D * head,
+                    eye.add(dir.scale(0.06D * head)), 0.105D * head, glow, 10);
+        }
     }
 
     /** 连接两圈、每段一个颜色的锥台（焰体的基本积木）。 */
