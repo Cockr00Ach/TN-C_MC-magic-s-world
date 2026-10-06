@@ -666,105 +666,10 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
             }
         }
 
-        // ② 龙头：像素贴片（成形阶段从小长到大 ✓）
-        dragonHeadSprite(out, buffers, pose, dir, right, up,
-                DRAGON_HEAD_SIZE * (0.30D + 0.70D * form));
-
-        // ③ 龙身：5 格长的火尾 ✓
-        dragonBody(out, pose, dir, right, up, DRAGON_HEAD_SIZE * 0.20D, age, fade);
-    }
-
-    /**
-     * 把 32×32 的龙头贴图铺成一张**面向摄像机**的方片 ✓。
-     *
-     * <p>为什么面向摄像机：固定朝向的贴片从侧面看就是一条线 ✗；
-     * 原版告示牌/粒子都用"每帧按摄像机摆正" ✓ ⇒ 任何角度都是一张完整龙头 ✓
-     */
-    private static void dragonHeadSprite(VertexConsumer out, MultiBufferSource buffers,
-                                         Matrix4f pose, Vec3 dir, Vec3 right, Vec3 up, double size) {
-        if (size <= 0.02D) {
-            return;
-        }
-        // ⚠️ 为什么不用"面向摄像机"的单片 ✗：
-        //   派发器在这个 pose 上**已经加过实体自身的旋转**✗，
-        //   再叠一次摄像机朝向会**转两次**（头会歪 ✗）。
-        //   ⇒ 改用原版粒子/植物那套**交叉双片** ✓：
-        //     一片贴在 right/up 平面、一片贴在 dir/up 平面 ✓
-        //     不需要摄像机、任何角度都至少有一面看得见 ✓（MC 的火焰/粒子就是这么做的 ✓）
-        VertexConsumer vc = buffers.getBuffer(
-                net.minecraft.client.renderer.RenderType.entityTranslucentEmissive(DRAGON_HEAD));
-        double h = size * 0.5D;
-        float[] none = {1.0F, 1.0F, 1.0F, 1.0F};
-        // 片 A：right × up（从飞行方向正面看是完整的 ✓）
-        spriteQuad(vc, pose, none, up.scale(-h).add(right.scale(-h)),
-                up.scale(-h).add(right.scale(h)),
-                up.scale(h).add(right.scale(h)),
-                up.scale(h).add(right.scale(-h)));
-        // 片 B：dir × up（从侧面看是完整的 ✓）
-        spriteQuad(vc, pose, none, up.scale(-h).add(dir.scale(-h)),
-                up.scale(-h).add(dir.scale(h)),
-                up.scale(h).add(dir.scale(h)),
-                up.scale(h).add(dir.scale(-h)));
-    }
-
-    /** 一个带 uv 的四边形（世界/局部坐标由调用方给 ✓；这里只负责顶点格式 ✓）。 */
-    private static void spriteQuad(VertexConsumer vc, Matrix4f pose, float[] rgba,
-                                   Vec3 a, Vec3 b, Vec3 c, Vec3 d) {
-        uvVertex(vc, pose, a, 0.0F, 1.0F, rgba);
-        uvVertex(vc, pose, b, 1.0F, 1.0F, rgba);
-        uvVertex(vc, pose, c, 1.0F, 0.0F, rgba);
-        uvVertex(vc, pose, d, 0.0F, 0.0F, rgba);
-    }
-
-    /**
-     * 贴片顶点 ✓
-     *
-     * <p>⚠️ 必须用 {@code vertex(Matrix4f, x, y, z)} 这个**会自己应用变换**的重载 ✗ ——
-     * 用 {@code vertex(x, y, z)} 的话顶点就是**原始局部坐标** ✗，
-     * 贴片会被画到世界原点（龙身边上什么都看不见 ✗）。这是本轮实测报"还是光滑几何体"的根因 ✓
-     */
-    private static void uvVertex(VertexConsumer vc, Matrix4f pose, Vec3 p, float u, float v, float[] rgba) {
-        vc.vertex(pose, (float) p.x, (float) p.y, (float) p.z)
-                .color(rgba[0], rgba[1], rgba[2], rgba[3])
-                .uv(u, v)
-                .overlayCoords(net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY)
-                .uv2(net.minecraft.client.renderer.LightTexture.FULL_BRIGHT)
-                .normal(0.0F, 0.0F, 1.0F)
-                .endVertex();
-    }
-
-    /** 龙身分几节 ✓（像素风 ⇒ 节数少、色块大 ✓）。 */
-    private static final int DRAGON_BODY_SEGMENTS = 7;
-
-    /**
-     * <b>龙身</b> ✓ —— 作者 2026-10-05 第 3 条：「发射出去后要有身体而不是就一个头」✗
-     *
-     * <p>做法：从颈后沿 <b>-dir</b> 一节节排开（{@link #ring} 锥台 ✓），
-     * 每一节都带<b>蛇形摆动</b>（横向正弦 + 上下余弦，幅度随 t 增大 ✓）
-     * ⇒ 出来是一条**摆着尾巴飞的龙** ✓，而不是"一个头 + 一团糊"✗
-     *
-     * <p>颜色走像素色板、越往后越暗（白热 → 暗红 → 焦黑 ✓）⇒ 硬边色块 ✓
-     */
-    private static void dragonBody(VertexConsumer out, Matrix4f pose, Vec3 dir, Vec3 right, Vec3 up,
-                                   double head, double age, float fade) {
-        float[] color = new float[4];
-        Vec3 prev = null;
-        double prevR = 0.0D;
-        for (int s = 0; s <= DRAGON_BODY_SEGMENTS; s++) {
-            double t = s / (double) DRAGON_BODY_SEGMENTS;        // 0 = 颈, 1 = 尾尖 ✓
-            // ⚠️ 作者 2026-10-05：「身体大概 5 个方块长」✓ ⇒ 以**方块**为单位铺 ✓
-            double back = 0.30D + t * DRAGON_BODY_BLOCKS;
-            double sway = Math.sin(t * 3.4D + age * 0.35D) * head * 0.46D * t;
-            double bob = Math.cos(t * 2.6D + age * 0.30D) * head * 0.32D * t;
-            Vec3 c = dir.scale(-back * head).add(right.scale(sway)).add(up.scale(bob));
-            double r = head * (0.54D - 0.46D * t * t);
-            if (prev != null && prevR > 1.0E-4D && r > 1.0E-4D) {
-                PixelFlame.flat(0.30D + t * 0.60D, color);       // 越往后越暗 ✓
-                ring(out, pose, right, up, prev, prevR, c, r, color, DRAGON_SIDES);
-            }
-            prev = c;
-            prevR = r;
-        }
+        // ⚠️ 作者 2026-10-05：「不要用光滑的几何体（**这是重点**）」✗
+        //   ⇒ 龙头与龙身**不再画任何几何体** ✓（也没有贴片 ✗）
+        //      整条龙由 `TNDragonParticles` 每 tick 撒的**染色粒子**构成 ✓
+        //      这里只保留成形阶段那个**朝准心的法阵** ✓（作者早先明确要的 ✓）
     }
 
     /** 连接两圈、每段一个颜色的锥台（焰体的基本积木）。 */

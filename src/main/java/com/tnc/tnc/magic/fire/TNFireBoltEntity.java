@@ -499,6 +499,18 @@ public final class TNFireBoltEntity extends Projectile {
                 }
             }
         }
+        // ★ 作者 2026-10-05：t3 的龙头**和身体**全部改成粒子（"不要用光滑的几何体"✗）
+        //   ⇒ 这里每 tick 撒一次粒子龙 ✓（服务端发 ⇒ 所有玩家都看得见 ✓）
+        //   粒子寿命会自然拖尾 ⇒ 连续撒就成了一条活动的龙 ✓
+        if (isDragon()) {
+            // 方向用实体自带的 safeDirection()（速度为零时它自己兜底成 +Z ✓，
+            // 成形那一瞬速度还是 0 ✓，用它最省事 ✓）
+            Vec3 dragonDir = safeDirection();
+            TNDragonParticles.emit(server, position(), dragonDir,
+                    FireSpellRules.right(dragonDir),
+                    FireSpellRules.right(dragonDir).cross(dragonDir).normalize(),
+                    tickCount);
+        }
         if (!server.hasChunkAt(BlockPos.containing(to))) {
             discard();
             return;
