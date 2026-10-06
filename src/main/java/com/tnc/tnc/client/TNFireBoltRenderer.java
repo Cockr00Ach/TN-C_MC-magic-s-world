@@ -134,10 +134,21 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
             //   模型/贴图/朝向全不动 ✓，只是整体染成赤红 ✓（见 TintingVertexConsumer ✓）
             final MultiBufferSource tinted = type -> new TintingVertexConsumer(
                     buffers.getBuffer(type), 0.98F, 0.26F, 0.08F);
-            net.minecraft.client.Minecraft.getInstance().getBlockRenderer()
-                    .renderSingleBlock(head, stack, tinted,
-                            net.minecraft.client.renderer.LightTexture.FULL_BRIGHT,
-                            net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY);
+            // ⚠️ 2026-10-05 实测：「还是没龙头」✗，而日志里**没有任何模型/贴图报错** ✗
+            //   ⇒ 根因：骷髅方块在世界里是**靠 BlockEntityRenderer 画的** ✓，
+            //     它的**方块模型是空的** ✗ ⇒ renderSingleBlock 画不出东西（且不报错 ✗）
+            //   ⇒ 改走**物品模型**路径 ✓ —— 背包里那个龙头是**真正的 3D 模型** ✓，
+            //     由 ItemRenderer 画 ✓（染色缓冲源照样生效 ✓）
+            net.minecraft.world.item.ItemStack headStack =
+                    new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DRAGON_HEAD);
+            net.minecraft.client.renderer.entity.ItemRenderer ir =
+                    net.minecraft.client.Minecraft.getInstance().getItemRenderer();
+            net.minecraft.client.resources.model.BakedModel headModel = ir.getModel(
+                    headStack, null, null, 0);
+            ir.render(headStack, net.minecraft.world.item.ItemDisplayContext.FIXED, false,
+                    stack, tinted,
+                    net.minecraft.client.renderer.LightTexture.FULL_BRIGHT,
+                    net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY, headModel);
             stack.popPose();
             return;
         }
