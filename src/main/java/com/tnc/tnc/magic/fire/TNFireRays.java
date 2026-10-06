@@ -66,19 +66,24 @@ public final class TNFireRays {
             return false;
         }
 
+        // ⚠️ 作者 2026-10-05 第 2 条：「t1 和 t2 中的射线是一段长度有限的线条，
+        //    你可以理解为是长条状的火球」✗ ⇒ **不再用光柱** ✗
+        //    （光柱是贴在施法者眼睛上的一条光 ⇒ 看不出"被射出去" ✗）
+        //    改成会飞出去的**条状投射物** ✓：从手前出发、穿透生物、撞方块停下 ✓
         LivingEntity target = acquire(player, spec.range());
-        float damage = FireSpellRules.rayDamage(spec, FireSpellRules.power(player));
-
-        TNLightBeamEntity beam = new TNLightBeamEntity(TNOrbEntities.LIGHT_BEAM.get(), level);
-        // 出生朝向 = 视线方向 ✓（configure 故意不立刻对准目标 ⇒ 之后每 tick 拐过去，看得见索敌 ✓）
-        beam.setYRot(player.getYRot());
-        beam.setXRot(player.getXRot());
-        beam.setPos(player.getEyePosition());
-        beam.configure(player, spec.radius(), spec.range(), damage,
-                RAY_LIFE_TICKS, TNLightBeamEntity.STYLE_FIRE, target);
-        // 火焰形态：焚身等级 + t2 命中额外小范围爆炸 ✓
-        beam.configureFire(spec.scorchLevel(), "blast_ray".equals(path));
-        level.addFreshEntity(beam);
+        FireSpellRules.Bolt bolt = new FireSpellRules.Bolt(
+                spec.coefficient(), spec.range(), spec.radius(), 1,
+                spec.scorchLevel() >= 2, false,
+                "blast_ray".equals(path) ? FireSpellRules.RAY_BLAST_RADIUS : 0.0D, 0.0F);
+        Vec3 look = player.getLookAngle().normalize();
+        // ★ 出手点改到**手前**（作者说"看不出射线被射出"✗ —— 从眼睛里射当然看不出 ✗）
+        Vec3 from = player.getEyePosition().add(look.scale(1.45D)).subtract(0.0D, 0.30D, 0.0D);
+        TNFireBoltEntity shot = new TNFireBoltEntity(TNOrbEntities.FIRE_BOLT.get(), level);
+        shot.configure(player, bolt, path, from, look.scale(TNFireBoltEntity.LAUNCH_SPEED));
+        if (target != null) {
+            shot.lockTarget(target);                 // ★ 索敌 ✓
+        }
+        level.addFreshEntity(shot);
         return true;
     }
 
@@ -101,9 +106,10 @@ public final class TNFireRays {
         TNFireBoltEntity dragon = new TNFireBoltEntity(TNOrbEntities.FIRE_BOLT.get(), level);
         dragon.configure(player, FireSpellRules.DRAGON_BOLT, "fire_dragon", from, velocity);
         if (target != null) {
-            // 索敌：飞出去就朝目标咬过去 ✓
+            // 索敌：先朝目标出手 ✓，之后每 tick 还会**限速拐**过去 ✓（见实体里的追踪 ✓）
             dragon.setDeltaMovement(target.getEyePosition().subtract(from).normalize()
                     .scale(TNFireBoltEntity.LAUNCH_SPEED));
+            dragon.lockTarget(target);
         }
         level.addFreshEntity(dragon);
         return true;

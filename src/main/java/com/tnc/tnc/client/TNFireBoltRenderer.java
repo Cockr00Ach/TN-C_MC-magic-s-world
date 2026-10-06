@@ -98,6 +98,13 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
 
         // 熔岩火球（t3）与熔岳天倾砸下来的那些：**黑岩外壳 + 熔岩裂缝**（照作者参照图）。
         // 其余档位仍是彗星焰尾。
+        // 射线链 t1/t2：作者 2026-10-05 第 2 条「射线是一段长度有限的线条，
+        // 可以理解为是长条状的火球」✗ ⇒ 画成**一根直的火舌**（不是彗星 ✓）
+        if ("sun_ray".equals(entity.spellPath()) || "blast_ray".equals(entity.spellPath())) {
+            rayLance(out, pose, dir, right, up, radius, age, fade);
+            return;
+        }
+
         // 射线链 t3「火龙术」：成形阶段画**朝向准心的法阵**，成形后是一颗火焰龙头 ✓
         if ("fire_dragon".equals(entity.spellPath())) {
             dragon(out, pose, dir, right, up, radius, age, fade, entity.formProgress(partial));
@@ -118,6 +125,56 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
         }
         flameBody(out, pose, dir, right, up, radius, length, age, fade);
         coreBlob(out, pose, dir, right, up, radius, age, fade);
+    }
+
+
+    // ------------------------------------------------------------------
+    //  射线链 t1/t2：一根**直的火舌**（作者要的"长条状的火球"）
+    // ------------------------------------------------------------------
+
+    /** 条身分几段（像素风 ⇒ 段数少一点、色块大一点 ✓）。 */
+    private static final int LANCE_SEGMENTS = 9;
+
+    /** 条身有多长（= 半径的多少倍 ✓）—— "一段长度有限的线条" ✓。 */
+    private static final double LANCE_LENGTH = 5.5D;
+
+    /** 一圈分几边（像素风 ⇒ 10 边足够，棱角反而更像像素 ✓）。 */
+    private static final int LANCE_SIDES = 10;
+
+    /**
+     * 射线链 t1/t2 的「条状火球」✓
+     *
+     * <p>作者 2026-10-05 第 2 条：「t1 和 t2 中的射线是一段长度有限的线条，
+     * 你可以理解为是长条状的火球」✓
+     * ⇒ 不像彗星那样"一个球 + 一条飘忽的尾巴"✗，而是**一根笔直的火舌** ✓：
+     * 尖端白热、沿轴一节节变暗变细，全长约 {@link #LANCE_LENGTH} 倍半径 ✓
+     * （颜色走像素色板 ⇒ 一节一个色块、硬边 ✓，见 {@link PixelFlame} ✓）
+     */
+    private static void rayLance(VertexConsumer out, Matrix4f pose, Vec3 dir, Vec3 right, Vec3 up,
+                                 double radius, double age, float fade) {
+        if (fade <= 0.02F) {
+            return;
+        }
+        float[] color = new float[4];
+        Vec3 prevCenter = null;
+        double prevR = 0.0D;
+        for (int s = 0; s <= LANCE_SEGMENTS; s++) {
+            double t = s / (double) LANCE_SEGMENTS;            // 0 = 尖端, 1 = 尾根 ✓
+            // 沿轴：尖端在 +dir 前方一点，整体向 -dir 铺开 ✓（拖尾在 -dir，见 axisPoint ✓）
+            double along = radius * 0.75D - t * radius * LANCE_LENGTH;
+            double r = radius * (1.0D - 0.72D * t * t);
+            Vec3 center = dir.scale(along);
+            if (prevCenter != null && prevR > 1.0E-4D && r > 1.0E-4D) {
+                PixelFlame.flat(t * 0.92D, color);             // 量化色块 + 不透明 ✓
+                ring(out, pose, right, up, prevCenter, prevR, center, r, color, LANCE_SIDES);
+            }
+            prevCenter = center;
+            prevR = r;
+        }
+        // 尖端那一小块白热（"火舌的头" ✓）
+        PixelFlame.flat(0.0D, color);
+        ring(out, pose, right, up, dir.scale(radius * 0.75D), radius * 0.52D,
+                dir.scale(radius * 1.45D), radius * 0.06D, color, LANCE_SIDES);
     }
 
     // ------------------------------------------------------------------

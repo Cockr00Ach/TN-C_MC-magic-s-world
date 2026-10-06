@@ -47,6 +47,19 @@ public final class TNFireBoltEntity extends Projectile {
     private static final EntityDataAccessor<Float> RADIUS =
             SynchedEntityData.defineId(TNFireBoltEntity.class, EntityDataSerializers.FLOAT);
     /** 射程（格）—— 同步给客户端，客户端靠它算"该在什么时候开始消失"。 */
+    /**
+     * ★ 锁定的目标实体 id（-1 = 没锁 ✓）—— 作者 2026-10-05 第 6 条：
+     * 「施法时的索敌功能没有实现」✗
+     *
+     * <p>根因：之前只把**初速**朝向目标 ⇒ 之后直线飞 ✗，看不出在追 ✗
+     * ⇒ 现在存住目标 ✓，每 tick 限速拐过去 ✓（客户端也能读到 ⇒ 渲染方向跟着拐 ✓）
+     */
+    private static final EntityDataAccessor<Integer> TARGET =
+            SynchedEntityData.defineId(TNFireBoltEntity.class, EntityDataSerializers.INT);
+
+    /** 每 tick 最多朝目标转几度 ✓（和光柱索敌同一个手感：看得见在拐 ✓）。 */
+    private static final double HOMING_DEGREES_PER_TICK = 14.0D;
+
     private static final EntityDataAccessor<Float> RANGE =
             SynchedEntityData.defineId(TNFireBoltEntity.class, EntityDataSerializers.FLOAT);
 
@@ -68,6 +81,26 @@ public final class TNFireBoltEntity extends Projectile {
     /** 「火龙术」（射线链 t3）：穿透 + 命中不爆 + 消失时剧烈爆炸 ✓ */
     private boolean isDragon() {
         return "fire_dragon".equals(spellPath());
+    }
+
+    /**
+     * 射线链 t1/t2（作者 2026-10-05 第 2 条：「射线是一段长度有限的线条，
+     * 你可以理解为是长条状的火球」✓）—— 它们**会飞出去** ✓，外形是一条火焰长条 ✓
+     */
+    private boolean isRayShot() {
+        String path = spellPath();
+        return "sun_ray".equals(path) || "blast_ray".equals(path);
+    }
+
+    /**
+     * <b>会不会穿透生物</b> ✓
+     *
+     * <p>作者 2026-10-05 的全局要求：「穿透效果只能穿透生物，
+     * 不能穿透土块的方块，当无法穿透时攻击提前消失」✓
+     * ⇒ 火龙（t3）与两条射线（t1/t2）都穿生物 ✓；撞到方块一律停下 ✓
+     */
+    private boolean penetrates() {
+        return isDragon() || isRayShot();
     }
 
     /** 火龙已经打过的目标（穿透：每个目标只结算一次 ✓）。 */
@@ -198,6 +231,42 @@ public final class TNFireBoltEntity extends Projectile {
         remaining = bolt.range();
     }
 
+    /** 锁定一个目标 ⇒ 这一发之后会**拐弯追它** ✓。 */
+    public void lockTarget(LivingEntity target) {
+        entityData.set(TARGET, target == null ? -1 : target.getId());
+    }
+
+    /** 当前锁定的目标（没有/已消失 = null ✓）。 */
+    public LivingEntity targetEntity() {
+        int id = entityData.get(TARGET);
+        if (id < 0 || !(level() instanceof net.minecraft.server.level.ServerLevel server)) {
+            return null;
+        }
+        return server.getEntity(id) instanceof LivingEntity living ? living : null;
+    }
+
+    /**
+     * 把 {@code dir} 朝 {@code want} 转最多 {@code maxDegrees} 度 ✓（返回单位方向 ✓）。
+     *
+     * <p>不用四元数/旋转矩阵：这两个向量都很短，线性插值再归一化在 14 度这种小角度下
+     * 和真正的球面插值肉眼无差 ✓，而且没有三角函数以外的开销 ✓
+     */
+    private static Vec3 turnToward(Vec3 dir, Vec3 want, double maxDegrees) {
+        Vec3 d = dir.normalize();
+        double dot = Math.max(-1.0D, Math.min(1.0D, d.dot(want)));
+        double angle = Math.acos(dot);
+        if (angle < 1.0E-5D) {
+            return want;
+        }
+        double max = Math.toRadians(maxDegrees);
+        if (angle <= max) {
+            return want;
+        }
+        double t = max / angle;
+        Vec3 mixed = d.scale(1.0D - t).add(want.scale(t));
+        return mixed.lengthSqr() < 1.0E-6D ? want : mixed.normalize();
+    }
+
     public String spellPath() {
         return entityData.get(SPELL);
     }
@@ -242,6 +311,20 @@ public final class TNFireBoltEntity extends Projectile {
     /** 刚出生那一帧到长满之前都还没有速度，别让 normalize 炸。 */
     public Vec3 safeDirection() {
         Vec3 motion = getDeltaMovement();
+        // ★ 索敌（作者 2026-10-05 第 6 条）：射线链的这几档会**拐弯追**锁定的目标 ✓
+        //   ⚠️ 只在成形结束之后开始追 ✓（不然刚出手就贴脸转，看不出"射出去"✗）
+        if (penetrates() && tickCount >= formTicks()) {
+            LivingEntity locked = targetEntity();
+            if (locked != null && locked.isAlive() && locked != getOwner()) {
+                Vec3 want = locked.getEyePosition().subtract(position());
+                if (want.lengthSqr() > 1.0E-4D) {
+                    double speed = Math.max(0.05D, motion.length());
+                    motion = turnToward(motion, want.normalize(), HOMING_DEGREES_PER_TICK)
+                            .scale(speed);
+                    setDeltaMovement(motion);
+                }
+            }
+        }
         return motion.lengthSqr() < 0.01D ? new Vec3(0.0D, 0.0D, 1.0D) : motion.normalize();
     }
 
@@ -313,6 +396,7 @@ public final class TNFireBoltEntity extends Projectile {
         entityData.define(SPELL, "");
         entityData.define(RADIUS, 0.35F);
         entityData.define(RANGE, 40.0F);
+        entityData.define(TARGET, -1);
     }
 
     @Override
@@ -393,6 +477,20 @@ public final class TNFireBoltEntity extends Projectile {
         ServerLevel server = (ServerLevel) level();
         Vec3 from = position();
         Vec3 motion = getDeltaMovement();
+        // ★ 索敌（作者 2026-10-05 第 6 条）：射线链的这几档会**拐弯追**锁定的目标 ✓
+        //   ⚠️ 只在成形结束之后开始追 ✓（不然刚出手就贴脸转，看不出"射出去"✗）
+        if (penetrates() && tickCount >= formTicks()) {
+            LivingEntity locked = targetEntity();
+            if (locked != null && locked.isAlive() && locked != getOwner()) {
+                Vec3 want = locked.getEyePosition().subtract(position());
+                if (want.lengthSqr() > 1.0E-4D) {
+                    double speed = Math.max(0.05D, motion.length());
+                    motion = turnToward(motion, want.normalize(), HOMING_DEGREES_PER_TICK)
+                            .scale(speed);
+                    setDeltaMovement(motion);
+                }
+            }
+        }
         // 出手缓冲：刚离手那几 tick 只走一部分，LAUNCH_RAMP_TICKS 内涨到全速。
         // ⚠️ 只改**实际走了多远**，不改 getDeltaMovement() ——
         //    改速度会每 tick 触发一次速度同步包，反而更卡 ✗
@@ -451,7 +549,7 @@ public final class TNFireBoltEntity extends Projectile {
 
         // 火龙术：这次扫到的目标如果**已经打过**，就当没打中 ✓
         //   ⇒ 于是下面的 if 不成立（只要没撞墙）⇒ 它**继续往前飞** = 穿透 ✓
-        if (isDragon() && hit != null && !dragonHit.add(hit.getUUID())) {
+        if (penetrates() && hit != null && !dragonHit.add(hit.getUUID())) {
             hit = null;
         }
         if (hit != null || wall.getType() != HitResult.Type.MISS) {
@@ -514,7 +612,7 @@ public final class TNFireBoltEntity extends Projectile {
                         blastRadius * 0.4D, 0.4D, blastRadius * 0.4D, 0.2D);
             }
             // 火龙术：**打到生物不停** ✗ —— 只有撞到方块才在这里结束 ✓
-            if (isDragon() && wall.getType() == HitResult.Type.MISS) {
+            if (penetrates() && wall.getType() == HitResult.Type.MISS) {
                 // 继续飞：不 discard、不 return ✓（下面照样推进位置 ✓）
             } else {
                 if (isDragon() && level() instanceof net.minecraft.server.level.ServerLevel sl2) {
