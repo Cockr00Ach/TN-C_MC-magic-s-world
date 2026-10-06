@@ -34,7 +34,7 @@ import org.joml.Matrix4f;
 public final class TNFlameDemonRenderer extends EntityRenderer<TNFlameDemonField> {
 
     private static final ResourceLocation PLACEHOLDER =
-            ResourceLocation.tryBuild("minecraft", "textures/misc/white.png");
+            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/misc/white.png");
 
     /** 法阵由外到里"描绘"完需要多久（tick ✓）。 */
     private static final double DRAW_TICKS = 34.0D;
