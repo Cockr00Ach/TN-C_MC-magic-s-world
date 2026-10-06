@@ -35,6 +35,14 @@ public final class TNSolarJudgmentRenderer extends EntityRenderer<TNSolarJudgmen
     /** 一次最多画几条光线（`beams()` 可能很大，做个上限免得一帧塞几千根管 ✗）。 */
     private static final int MAX_BEAMS = 24;
 
+    /**
+     * <b>不管有几个目标，至少撒这么多条</b> ✓
+     *
+     * <p>⚠️ 作者第 5 条：「向法阵范围内发出大量射线，而不是就一条」✓
+     * ⇒ 这就是"大量"的下限 ✓（18 条铺满整个法阵 ✓）
+     */
+    private static final int MIN_BEAMS = 18;
+
     private static final Vec3 UP = new Vec3(0.0D, 1.0D, 0.0D);
     private static final Vec3 AXIS_X = new Vec3(1.0D, 0.0D, 0.0D);
     private static final Vec3 AXIS_Z = new Vec3(0.0D, 0.0D, 1.0D);
@@ -83,7 +91,7 @@ public final class TNSolarJudgmentRenderer extends EntityRenderer<TNSolarJudgmen
         if (age > life - 3) {
             return;
         }
-        WaterGeometry.disk(out, pose, ORIGIN, UP, radius, 0.46F, 0.16F, 0.03F, 1.0F);
+        WaterGeometry.disk(out, pose, ORIGIN, UP, radius, 0.66F, 0.26F, 0.05F, 1.0F);
         for (int i = 0; i < 6; i++) {
             double r = radius * (1.0D - i * 0.15D);
             double appear = Math.min(1.0D, Math.max(0.0D, age / DRAW_TICKS - i * 0.15D));
@@ -96,6 +104,23 @@ public final class TNSolarJudgmentRenderer extends EntityRenderer<TNSolarJudgmen
             WaterGeometry.ring(out, pose, ORIGIN, UP, r, Math.max(0.09D, 0.14D - i * 0.010D),
                     age * 0.010D, 1.0F);
         }
+        // ★ 放射状辐条 + 六芒星（作者 2026-10-05 第 7 条：「法阵不清晰」✗）
+        //   根因：光靠几个同心圆，在暗色地面上就是几圈**虚影** ✗，看不出是个法阵 ✗
+        //   ⇒ 加 8 根辐条 + 一个六芒星 ✓ —— 这两个结构一出来，法阵立刻立住了 ✓
+        for (int k = 0; k < 8; k++) {
+            double a = k * Math.PI / 4.0D + age * 0.004D;
+            Vec3 outer = WaterGeometry.radial(AXIS_X, AXIS_Z, a, radius * 0.98D);
+            Vec3 inner = WaterGeometry.radial(AXIS_X, AXIS_Z, a, radius * 0.30D);
+            if (k % 2 == 0) {
+                WaterGeometry.tube(out, pose, inner, outer, 0.055D, 1.0F, 0.66F, 0.16F, 1.0F);
+            }
+        }
+        for (int k = 0; k < 6; k++) {
+            Vec3 p0 = WaterGeometry.radial(AXIS_X, AXIS_Z, k * Math.PI / 3.0D, radius * 0.62D);
+            Vec3 p1 = WaterGeometry.radial(AXIS_X, AXIS_Z, (k + 2) * Math.PI / 3.0D, radius * 0.62D);
+            WaterGeometry.tube(out, pose, p0, p1, 0.045D, 1.0F, 0.80F, 0.26F, 1.0F);
+        }
+
         if (age / DRAW_TICKS > 0.72D) {
             WaterGeometry.disk(out, pose, ORIGIN, UP, radius * 0.26D, 1.0F, 0.80F, 0.30F, 1.0F);
         }
@@ -133,10 +158,11 @@ public final class TNSolarJudgmentRenderer extends EntityRenderer<TNSolarJudgmen
 
     private static void drawBeams(VertexConsumer out, Matrix4f pose, Vec3 sun, double radius,
                                   double age, int beams) {
-        if (beams <= 0) {
-            return;
-        }
-        int n = Math.min(beams, MAX_BEAMS);
+        // ⚠️ 作者 2026-10-05 第 5 条：「圆球向法阵范围内发出大量射线，而不是就一条」✓
+        //    根因：原来光线数 = 阵内敌人数 ✗ ⇒ 只有一只怪时就只画一条 ✗，
+        //    看着完全不像"太阳在审判"✗
+        //    ⇒ 现在**不管有几个目标，都撒出一整片** ✓（目标多时再多画几条 ✓）
+        int n = Math.max(MIN_BEAMS, Math.min(beams, MAX_BEAMS));
         for (int i = 0; i < n; i++) {
             // 落点沿着阵内一条缓慢转动的螺旋铺开 ⇒ 看着像"一直在往下砸"✓
             double angle = age * 0.09D + i * (Math.PI * 2.0D / n) * 1.618D;

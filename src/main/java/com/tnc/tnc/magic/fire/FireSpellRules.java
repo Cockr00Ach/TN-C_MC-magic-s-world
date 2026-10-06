@@ -358,11 +358,20 @@ public final class FireSpellRules {
     /** t4 持续 8 秒 ✓（作者明确）。 */
     public static final int T4_FIELD_TICKS = 160;
 
-    /** 4 个圆球分布在这个半径的比例上（0.78 × 阵半径 ✓，正好在东南西北四个柱顶 ✓）。 */
-    public static final double T4_ORB_RING = 0.78D;
+    /**
+     * 4 个圆球分布在这个半径的比例上 ✓
+     *
+     * <p>⚠️ 作者 2026-10-05 第 4 条：「t4 中的黑曜石柱在离中心远一点」✓
+     * —— 原来 0.78（贴着阵内 ✗）⇒ 现在 **1.02**（就落在法阵边缘上 ✓）
+     */
+    public static final double T4_ORB_RING = 1.02D;
 
-    /** 圆球离地多高（格）—— 柱顶的高度 ✓。 */
-    public static final double T4_ORB_HEIGHT = 9.0D;
+    /**
+     * 圆球离地多高（格）✓
+     *
+     * <p>⚠️ 作者第 4 条：「高度改为 2/3 左右」✓ —— 原来 9 格 ⇒ 现在 **6 格** ✓
+     */
+    public static final double T4_ORB_HEIGHT = 6.0D;
 
     /** 光线每几 tick 跳一次（10 tick = 0.5 秒 ✓）。 */
     public static final int T4_BEAM_INTERVAL_TICKS = 10;

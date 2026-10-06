@@ -39,13 +39,18 @@ public final class TNFlameDemonRenderer extends EntityRenderer<TNFlameDemonField
     /** 法阵由外到里"描绘"完需要多久（tick ✓）。 */
     private static final double DRAW_TICKS = 34.0D;
 
-    /** 柱子半宽（格 ✓）。 */
-    private static final double PILLAR_HALF = 0.42D;
+    /**
+     * 柱子半宽（格 ✓）
+     *
+     * <p>⚠️ 作者 2026-10-05 第 4 条：柱子样式要「末影岛处的方柱形式」✓
+     * ⇒ 干净的四棱方柱、细一点、不带花纹 ✓（原来 0.42 加熔岩竖纹，像工业柱子 ✗）
+     */
+    private static final double PILLAR_HALF = 0.34D;
 
-    /** 黑曜石色（近黑的紫 ✓）。 */
-    private static final float OR = 0.055F;
-    private static final float OG = 0.030F;
-    private static final float OB = 0.085F;
+    /** 黑曜石色（末影岛那种近黑的紫 ✓）。 */
+    private static final float OR = 0.045F;
+    private static final float OG = 0.022F;
+    private static final float OB = 0.075F;
 
     private static final Vec3 UP = new Vec3(0.0D, 1.0D, 0.0D);
     private static final Vec3 AXIS_X = new Vec3(1.0D, 0.0D, 0.0D);
@@ -99,7 +104,7 @@ public final class TNFlameDemonRenderer extends EntityRenderer<TNFlameDemonField
             return;
         }
         // 地面底光（一整块实色 ✓）
-        WaterGeometry.disk(out, pose, ORIGIN, UP, radius, 0.42F, 0.14F, 0.03F, 1.0F);
+        WaterGeometry.disk(out, pose, ORIGIN, UP, radius, 0.62F, 0.24F, 0.05F, 1.0F);
         // ⚠️ 作者要"从外到里一点点出现"✗ ⇒ 每环有自己的出现时刻：越靠外越早 ✓
         for (int i = 0; i < 5; i++) {
             double r = radius * (1.0D - i * 0.17D);
@@ -115,6 +120,23 @@ public final class TNFlameDemonRenderer extends EntityRenderer<TNFlameDemonField
             WaterGeometry.ring(out, pose, ORIGIN, UP, r, Math.max(0.09D, 0.13D - i * 0.010D),
                     age * 0.012D, 1.0F);
         }
+        // ★ 放射状辐条 + 六芒星（作者 2026-10-05 第 7 条：「法阵不清晰」✗）
+        //   根因：光靠几个同心圆，在暗色地面上就是几圈**虚影** ✗，看不出是个法阵 ✗
+        //   ⇒ 加 8 根辐条 + 一个六芒星 ✓ —— 这两个结构一出来，法阵立刻立住了 ✓
+        for (int k = 0; k < 8; k++) {
+            double a = k * Math.PI / 4.0D + age * 0.004D;
+            Vec3 outer = WaterGeometry.radial(AXIS_X, AXIS_Z, a, radius * 0.98D);
+            Vec3 inner = WaterGeometry.radial(AXIS_X, AXIS_Z, a, radius * 0.30D);
+            if (k % 2 == 0) {
+                WaterGeometry.tube(out, pose, inner, outer, 0.055D, 1.0F, 0.66F, 0.16F, 1.0F);
+            }
+        }
+        for (int k = 0; k < 6; k++) {
+            Vec3 p0 = WaterGeometry.radial(AXIS_X, AXIS_Z, k * Math.PI / 3.0D, radius * 0.62D);
+            Vec3 p1 = WaterGeometry.radial(AXIS_X, AXIS_Z, (k + 2) * Math.PI / 3.0D, radius * 0.62D);
+            WaterGeometry.tube(out, pose, p0, p1, 0.045D, 1.0F, 0.80F, 0.26F, 1.0F);
+        }
+
         // 阵中心那点热核 ✓
         if (age / DRAW_TICKS > 0.7D) {
             WaterGeometry.disk(out, pose, ORIGIN, UP, radius * 0.22D, 1.0F, 0.72F, 0.22F, 1.0F);
@@ -153,15 +175,15 @@ public final class TNFlameDemonRenderer extends EntityRenderer<TNFlameDemonField
                 new Vec3(at.x + PILLAR_HALF, height, at.z + PILLAR_HALF),
                 new Vec3(at.x - PILLAR_HALF, height, at.z + PILLAR_HALF),
                 0.16F, 0.09F, 0.20F, 1.0F);
-        // 柱身上爬的熔岩纹（4 条竖亮线 ✓，让柱子不像一根黑棍 ✗）
-        for (int i = 0; i < 4; i++) {
-            Vec3 p0 = corner[i];
-            Vec3 p1 = corner[(i + 1) % 4];
-            Vec3 mid = new Vec3((p0.x + p1.x) * 0.5D, 0.0D, (p0.z + p1.z) * 0.5D);
-            WaterGeometry.tube(out, pose,
-                    new Vec3(mid.x, 0.4D, mid.z), new Vec3(mid.x, height * 0.93D, mid.z),
-                    0.055D, 1.0F, 0.42F, 0.08F, 1.0F);
-        }
+        // ⚠️ 作者第 4 条要"末影岛的方柱形式"✓ ⇒ **不再画熔岩竖纹** ✗
+        //    末影岛那几根就是干干净净一根黑紫方柱 ✓，加了纹路反而像工业设施 ✗
+        // 柱顶一圈亮边（像素风：一条实色棱 ✓）
+        WaterGeometry.quad(out, pose,
+                new Vec3(at.x - PILLAR_HALF, height, at.z - PILLAR_HALF),
+                new Vec3(at.x + PILLAR_HALF, height, at.z - PILLAR_HALF),
+                new Vec3(at.x + PILLAR_HALF, height, at.z + PILLAR_HALF),
+                new Vec3(at.x - PILLAR_HALF, height, at.z + PILLAR_HALF),
+                0.30F, 0.16F, 0.42F, 1.0F);
     }
 
     // ------------------------------------------------------------------

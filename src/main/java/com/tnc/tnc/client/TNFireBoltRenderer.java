@@ -641,13 +641,48 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
             ring(out, pose, right, up, mid, 0.070D * head, tip, 0.012D * head, color, 10);
         }
 
-        // ⑤ 两眼：白热的小亮点 ✓
-        float[] glow = {1.0F, 0.95F, 0.66F, 0.95F * fade};
+        // ⑤ 两眼：白热的方块（像素风 ⇒ 实色、不透明、给大一点才看得见 ✓）
+        float[] glow = {1.0F, 0.98F, 0.80F, 1.0F};
         for (int side = -1; side <= 1; side += 2) {
-            Vec3 eye = dir.scale(0.42D * head).add(right.scale(side * 0.34D * head))
-                    .add(up.scale(0.20D * head));
-            ring(out, pose, right, up, eye.add(dir.scale(-0.06D * head)), 0.105D * head,
-                    eye.add(dir.scale(0.06D * head)), 0.105D * head, glow, 10);
+            Vec3 eye = dir.scale(0.40D * head).add(right.scale(side * 0.36D * head))
+                    .add(up.scale(0.24D * head));
+            ring(out, pose, right, up, eye.add(dir.scale(-0.09D * head)), 0.16D * head,
+                    eye.add(dir.scale(0.09D * head)), 0.16D * head, glow, 12);
+        }
+        // ⑥ 龙身（作者 2026-10-05 第 3 条：「发射出去后要有身体而不是就一个头」✗）
+        dragonBody(out, pose, dir, right, up, head, age, fade);
+    }
+
+    /** 龙身分几节 ✓（像素风 ⇒ 节数少、色块大 ✓）。 */
+    private static final int DRAGON_BODY_SEGMENTS = 7;
+
+    /**
+     * <b>龙身</b> ✓ —— 作者 2026-10-05 第 3 条：「发射出去后要有身体而不是就一个头」✗
+     *
+     * <p>做法：从颈后沿 <b>-dir</b> 一节节排开（{@link #ring} 锥台 ✓），
+     * 每一节都带<b>蛇形摆动</b>（横向正弦 + 上下余弦，幅度随 t 增大 ✓）
+     * ⇒ 出来是一条**摆着尾巴飞的龙** ✓，而不是"一个头 + 一团糊"✗
+     *
+     * <p>颜色走像素色板、越往后越暗（白热 → 暗红 → 焦黑 ✓）⇒ 硬边色块 ✓
+     */
+    private static void dragonBody(VertexConsumer out, Matrix4f pose, Vec3 dir, Vec3 right, Vec3 up,
+                                   double head, double age, float fade) {
+        float[] color = new float[4];
+        Vec3 prev = null;
+        double prevR = 0.0D;
+        for (int s = 0; s <= DRAGON_BODY_SEGMENTS; s++) {
+            double t = s / (double) DRAGON_BODY_SEGMENTS;        // 0 = 颈, 1 = 尾尖 ✓
+            double back = 0.28D + t * 3.20D;                     // 沿 -dir 往后铺 ✓
+            double sway = Math.sin(t * 3.4D + age * 0.35D) * head * 0.46D * t;
+            double bob = Math.cos(t * 2.6D + age * 0.30D) * head * 0.32D * t;
+            Vec3 c = dir.scale(-back * head).add(right.scale(sway)).add(up.scale(bob));
+            double r = head * (0.54D - 0.46D * t * t);
+            if (prev != null && prevR > 1.0E-4D && r > 1.0E-4D) {
+                PixelFlame.flat(0.30D + t * 0.60D, color);       // 越往后越暗 ✓
+                ring(out, pose, right, up, prev, prevR, c, r, color, DRAGON_SIDES);
+            }
+            prev = c;
+            prevR = r;
         }
     }
 
