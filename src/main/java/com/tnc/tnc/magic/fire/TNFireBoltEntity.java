@@ -311,20 +311,6 @@ public final class TNFireBoltEntity extends Projectile {
     /** 刚出生那一帧到长满之前都还没有速度，别让 normalize 炸。 */
     public Vec3 safeDirection() {
         Vec3 motion = getDeltaMovement();
-        // ★ 索敌（作者 2026-10-05 第 6 条）：射线链的这几档会**拐弯追**锁定的目标 ✓
-        //   ⚠️ 只在成形结束之后开始追 ✓（不然刚出手就贴脸转，看不出"射出去"✗）
-        if (penetrates() && tickCount >= formTicks()) {
-            LivingEntity locked = targetEntity();
-            if (locked != null && locked.isAlive() && locked != getOwner()) {
-                Vec3 want = locked.getEyePosition().subtract(position());
-                if (want.lengthSqr() > 1.0E-4D) {
-                    double speed = Math.max(0.05D, motion.length());
-                    motion = turnToward(motion, want.normalize(), HOMING_DEGREES_PER_TICK)
-                            .scale(speed);
-                    setDeltaMovement(motion);
-                }
-            }
-        }
         return motion.lengthSqr() < 0.01D ? new Vec3(0.0D, 0.0D, 1.0D) : motion.normalize();
     }
 
@@ -571,10 +557,19 @@ public final class TNFireBoltEntity extends Projectile {
                             hit.getMaxHealth() * maxHealthPercent);
                 }
             }
-            server.sendParticles(ParticleTypes.FLAME, impact.x, impact.y, impact.z, 14, 0.25D, 0.25D, 0.25D, 0.06D);
-            // 命中时**炸开**成一团火焰粒子（作者 2026-10-05 要求：不要"啪"地直接消失）。
-            // ⚠️ 纯视觉、**零伤害** —— 真正的爆炸伤害在上面 blastRadius 那一段，两者互不影响
-            spawnImpactBurst(server, impact);
+            // ⚠️ 射线链 t1/t2：**命中生物时不炸粒子** ✗
+            //    原来这里是一团爆开的火焰粒子（"不要啪地消失"的本意 ✓），
+            //    但射线是**穿透**的 —— 打中第一个目标就爆一团，看起来就像"打到就没了"✗
+            //    ⇒ 射线改成只留一小撮火花，真正的爆开留给撞墙那一下 ✓
+            if (isRayShot()) {
+                server.sendParticles(ParticleTypes.FLAME, impact.x, impact.y, impact.z, 3,
+                        0.15D, 0.15D, 0.15D, 0.02D);
+            } else {
+                server.sendParticles(ParticleTypes.FLAME, impact.x, impact.y, impact.z, 14, 0.25D, 0.25D, 0.25D, 0.06D);
+                // 命中时**炸开**成一团火焰粒子（作者 2026-10-05 要求：不要"啪"地直接消失）。
+                // ⚠️ 纯视觉、**零伤害** —— 真正的爆炸伤害在上面 blastRadius 那一段，两者互不影响
+                spawnImpactBurst(server, impact);
+            }
             // 陨星坠：命中时来一场**大范围**的火焰扩散
             // （作者 2026-10-05：「爆开后会产生大量火焰粒子向四周扩散，场景壮观点」）
             if ("meteor_fall".equals(spellPath())) {

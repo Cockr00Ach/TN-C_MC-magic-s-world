@@ -135,8 +135,21 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
     /** 条身分几段（像素风 ⇒ 段数少一点、色块大一点 ✓）。 */
     private static final int LANCE_SEGMENTS = 9;
 
-    /** 条身有多长（= 半径的多少倍 ✓）—— "一段长度有限的线条" ✓。 */
-    private static final double LANCE_LENGTH = 5.5D;
+    /**
+     * 条身有多长（= 半径的多少倍 ✓）
+     *
+     * <p>⚠️ 作者 2026-10-05：「t1 的射线再长一点」✓ —— 5.5 → **9.0** ✓
+     */
+    private static final double LANCE_LENGTH = 9.0D;
+
+    /**
+     * 条身的**视觉粗细**倍率 ✓
+     *
+     * <p>⚠️ 作者 2026-10-05：「瘦一点」✓ —— 视觉上收细到 0.62 倍 ✓
+     * ⚠️ 只影响**画出来的样子** ✗，不改碰撞半径（那是命中判定用的 ✓，
+     *    跟着变细会让"明明打中了却没伤害" ✗）
+     */
+    private static final double LANCE_FATNESS = 0.62D;
 
     /** 一圈分几边（像素风 ⇒ 10 边足够，棱角反而更像像素 ✓）。 */
     private static final int LANCE_SIDES = 10;
@@ -156,13 +169,15 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
             return;
         }
         float[] color = new float[4];
+        // ★ 视觉粗细单独缩放 ⇒ "瘦一点" ✓（不动碰撞半径 ✗）
+        double fat = radius * LANCE_FATNESS;
         Vec3 prevCenter = null;
         double prevR = 0.0D;
         for (int s = 0; s <= LANCE_SEGMENTS; s++) {
             double t = s / (double) LANCE_SEGMENTS;            // 0 = 尖端, 1 = 尾根 ✓
             // 沿轴：尖端在 +dir 前方一点，整体向 -dir 铺开 ✓（拖尾在 -dir，见 axisPoint ✓）
-            double along = radius * 0.75D - t * radius * LANCE_LENGTH;
-            double r = radius * (1.0D - 0.72D * t * t);
+            double along = fat * 0.75D - t * radius * LANCE_LENGTH;
+            double r = fat * (1.0D - 0.72D * t * t);
             Vec3 center = dir.scale(along);
             if (prevCenter != null && prevR > 1.0E-4D && r > 1.0E-4D) {
                 PixelFlame.flat(t * 0.92D, color);             // 量化色块 + 不透明 ✓
@@ -173,8 +188,8 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
         }
         // 尖端那一小块白热（"火舌的头" ✓）
         PixelFlame.flat(0.0D, color);
-        ring(out, pose, right, up, dir.scale(radius * 0.75D), radius * 0.52D,
-                dir.scale(radius * 1.45D), radius * 0.06D, color, LANCE_SIDES);
+        ring(out, pose, right, up, dir.scale(fat * 0.75D), fat * 0.52D,
+                dir.scale(fat * 1.45D), fat * 0.06D, color, LANCE_SIDES);
     }
 
     // ------------------------------------------------------------------
