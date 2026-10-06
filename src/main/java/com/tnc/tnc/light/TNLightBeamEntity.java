@@ -127,12 +127,21 @@ public class TNLightBeamEntity extends Entity {
     private int fireBlockedTicks;
 
     /**
+     * 火系形态：命中时要不要额外来一发**小范围爆炸** ✓
+     *
+     * <p>t2「爆炸射线」专用（作者定：爆炸伤害 = 本次伤害 × 75%，范围不要太大，
+     * 而且**这个爆炸没有震动** ✗ —— 所以走普通伤害 + 粒子，**不 spawn 冲击波** ✓）。
+     */
+    private boolean fireBlast;
+
+    /**
      * 火系射线专用初始化：切成火焰形态 + 设好命中挂几级焚身 ✓。
      *
      * @param scorchLevel 0 = 不挂、1 = 焚身 I（t1~t3）、2 = 焚身 II（t4~t5）
      */
-    public void configureFire(int scorchLevel) {
+    public void configureFire(int scorchLevel, boolean blastOnHit) {
         this.fireScorch = Math.max(0, Math.min(2, scorchLevel));
+        this.fireBlast = blastOnHit;
         this.entityData.set(DATA_STYLE, STYLE_FIRE);
     }
     /** 已经挨过这道光的敌人 ✓（只打一次 ✓）。 */
@@ -416,6 +425,29 @@ public class TNLightBeamEntity extends Entity {
                     && owner instanceof net.minecraft.server.level.ServerPlayer player) {
                 com.tnc.tnc.magic.fire.TNScorch.apply(target, player, this.damage,
                         this.fireScorch >= 2);
+            }
+            // t2 爆炸射线：命中时额外来一发**小范围爆炸** ✓
+            // ⚠️ 作者要求"该处爆炸没有震动效果" ✗ ⇒ 只做伤害 + 粒子，**不 spawn 冲击波** ✓
+            if (this.style() == STYLE_FIRE && this.fireBlast
+                    && this.level() instanceof ServerLevel server2) {
+                float blast = this.damage * com.tnc.tnc.magic.fire.FireSpellRules.RAY_BLAST_PERCENT;
+                double r = com.tnc.tnc.magic.fire.FireSpellRules.RAY_BLAST_RADIUS;
+                for (LivingEntity victim : server2.getEntitiesOfClass(LivingEntity.class,
+                        target.getBoundingBox().inflate(r))) {
+                    if (victim == owner || !victim.isAlive() || victim == target) {
+                        continue;                        // 直击的那个上面已经打过了 ✓
+                    }
+                    if (!com.tnc.tnc.magic.fire.FireSpellRules.hittable(owner, victim)) {
+                        continue;
+                    }
+                    victim.hurt(this.level().damageSources().indirectMagic(owner, owner), blast);
+                }
+                server2.sendParticles(net.minecraft.core.particles.ParticleTypes.EXPLOSION,
+                        target.getX(), target.getY() + target.getBbHeight() * 0.5D, target.getZ(),
+                        1, 0.0D, 0.0D, 0.0D, 0.0D);
+                server2.sendParticles(net.minecraft.core.particles.ParticleTypes.FLAME,
+                        target.getX(), target.getY() + target.getBbHeight() * 0.5D, target.getZ(),
+                        24, r * 0.5D, r * 0.5D, r * 0.5D, 0.06D);
             }
         }
     }

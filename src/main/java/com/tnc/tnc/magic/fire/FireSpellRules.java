@@ -225,6 +225,51 @@ public final class FireSpellRules {
     /** t5 陨星坠：强烈。 */
     public static final float SHAKE_T5 = 16.0F;
 
+    // ---------------- 射线链（作者 2026-10-05 全新设计，顶替旧的 *_fire_ray）----------------
+
+    /**
+     * 一档「射线」的规格。
+     *
+     * @param coefficient  伤害系数（实际伤害 = 系数 × {@link #BASE_DAMAGE} × 火法强 ✓）
+     * @param range        射程（格）
+     * @param radius       射线半径（格）—— 也就是"多粗"
+     * @param scorchLevel  命中挂几级焚身（1 = I 级、2 = II 级）✓
+     *                     —— 作者定：t1~t3 是 I 级，t4~t5 是 II 级
+     */
+    public record Ray(float coefficient, float range, float radius, int scorchLevel) {
+    }
+
+    /**
+     * 射线链里**已经实装**的档位。<b>加到这里的档才走 Java 派发</b> ✓
+     * （引擎的 SPAWN 动作带不了参数 ✗，所以射线必须由我们自己在 Java 里 spawn ✓）。
+     *
+     * <p>⚠️ 一档一档加：每加一档就把 catalog 里对应的旧法术换掉 ✓
+     * （换之前旧的走引擎那套，换之后走这里 ✓）
+     */
+    private static final Map<String, Ray> RAYS = Map.of(
+            "sun_ray",   new Ray(1.0F, 8.0F, 0.30F, 1),   // t1 烈阳射线
+            "blast_ray", new Ray(2.4F, 8.0F, 0.55F, 1)    // t2 爆炸射线（命中额外小范围爆炸 ✓）
+    );
+
+    /** 这一档射线是不是已经实装（没实装就交回引擎处理 ✓）。 */
+    public static Ray ray(String spellPath) {
+        return spellPath == null ? null : RAYS.get(spellPath);
+    }
+
+    public static boolean isRay(String spellPath) {
+        return ray(spellPath) != null;
+    }
+
+    /** 一发射线的实际伤害（和火球同一个公式 ✓）。 */
+    public static float rayDamage(Ray spec, float power) {
+        return spec == null ? 0.0F : spec.coefficient() * BASE_DAMAGE * power;
+    }
+
+    /** t2 爆炸射线：命中时的**小范围爆炸**伤害 = 本次伤害 × 这个比例（作者定 75% ✓）。 */
+    public static final float RAY_BLAST_PERCENT = 0.75F;
+
+    /** t2 那个小范围爆炸的半径（格）—— 作者要求"范围不要设定的太大" ✓。 */
+    public static final double RAY_BLAST_RADIUS = 1.6D;
     /** 爆炸伤害 = 那一发火球伤害 × {@link #SKYFALL_BLAST_PERCENT}。 */
     public static float blastDamage(float boltDamage) {
         return boltDamage <= 0.0F ? 0.0F : boltDamage * SKYFALL_BLAST_PERCENT;

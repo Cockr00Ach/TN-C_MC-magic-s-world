@@ -71,6 +71,8 @@ public class TNLightBeamRenderer extends EntityRenderer<TNLightBeamEntity> {
             return;
         }
         boolean descent = beam.style() == TNLightBeamEntity.STYLE_DESCENT;
+        // ★ 火系形态（作者 2026-10-05 的「射线链」）：**橙红壳 + 高热黄白芯** ✓
+        boolean fire = beam.style() == TNLightBeamEntity.STYLE_FIRE;
 
         pose.pushPose();
         // ★ 起点用施法者的眼睛（客户端实时位置 ✓）—— 派发器已经平移到"实体插值后的位置"了，
@@ -89,13 +91,14 @@ public class TNLightBeamRenderer extends EntityRenderer<TNLightBeamEntity> {
 
         // ① 外层彩色壳（沿轴线彩虹 ✓）
         float shell = (float) (radius * grow);
-        tube(vc, m, shell, (float) length, false, age, descent);
-        // ② 内层白芯（粗光才画 ✓；天降那档芯更粗 ✓）
-        float coreFraction = descent ? 0.45F : 0.30F;
-        tube(vc, m, shell * coreFraction, (float) length, true, age, descent);
+        tube(vc, m, shell, (float) length, false, age, descent, fire);
+        // ② 内层芯（粗光才画 ✓；天降那档芯更粗 ✓）
+        //    火系：芯更粗（0.42）+ 更高热 —— 作者要"射线要凝实，能看出是一条射线" ✓
+        float coreFraction = fire ? 0.42F : (descent ? 0.45F : 0.30F);
+        tube(vc, m, shell * coreFraction, (float) length, true, age, descent, fire);
         // ③ 两端的亮圈
-        cap(vc, m, shell, 0.0F, age);
-        cap(vc, m, shell * 1.15F, (float) length, age);
+        cap(vc, m, shell, 0.0F, age, fire);
+        cap(vc, m, shell * 1.15F, (float) length, age, fire);
         pose.popPose();
     }
 
@@ -122,7 +125,7 @@ public class TNLightBeamRenderer extends EntityRenderer<TNLightBeamEntity> {
      * @param white true = 画白芯（不彩虹 ✓）
      */
     private static void tube(VertexConsumer vc, Matrix4f m, float radius, float length,
-                             boolean white, float age, boolean descent) {
+                             boolean white, float age, boolean descent, boolean fire) {
         for (int i = 0; i < SIDES; i++) {
             double a0 = Math.PI * 2.0D * i / SIDES;
             double a1 = Math.PI * 2.0D * (i + 1) / SIDES;
@@ -131,17 +134,21 @@ public class TNLightBeamRenderer extends EntityRenderer<TNLightBeamEntity> {
             float x1 = (float) Math.cos(a1) * radius;
             float y1 = (float) Math.sin(a1) * radius;
             // 颜色：沿轴线走一整圈彩虹 ✓（白芯就纯白 ✓）
-            int[] c0 = white ? new int[]{255, 255, 255} : rainbow(0.0F + age * 0.02F, descent);
-            int[] c1 = white ? new int[]{255, 255, 255} : rainbow(1.0F + age * 0.02F, descent);
-            int alpha = white ? 235 : 205;
+            // 火系的芯是**高热黄白**（不是纯白 ✗）；壳是橙红火焰渐变 ✓
+            int[] c0 = white ? (fire ? new int[]{255, 241, 186} : new int[]{255, 255, 255})
+                    : rainbow(0.0F + age * 0.02F, descent, fire);
+            int[] c1 = white ? (fire ? new int[]{255, 250, 225} : new int[]{255, 255, 255})
+                    : rainbow(1.0F + age * 0.02F, descent, fire);
+            // 火系不透明度更高 ⇒ 看着"凝实"（作者明确要求 ✓）
+            int alpha = white ? (fire ? 245 : 235) : (fire ? 230 : 205);
             quad(vc, m, x0, y0, 0.0F, x1, y1, 0.0F, x1, y1, length, x0, y0, length, c0, c1, alpha, true);
             quad(vc, m, x1, y1, 0.0F, x0, y0, 0.0F, x0, y0, length, x1, y1, length, c0, c1, alpha, false);
         }
     }
 
     /** 两端的一个"亮圈"（把管口堵上，看着像发光的口 ✓）。 */
-    private static void cap(VertexConsumer vc, Matrix4f m, float radius, float z, float age) {
-        int[] c = rainbow(0.5F + age * 0.02F, false);
+    private static void cap(VertexConsumer vc, Matrix4f m, float radius, float z, float age, boolean fire) {
+        int[] c = rainbow(0.5F + age * 0.02F, false, fire);
         double step = Math.PI * 2.0D / SIDES;
         for (int i = 0; i < SIDES; i++) {
             float x0 = (float) Math.cos(step * i) * radius;
@@ -175,7 +182,17 @@ public class TNLightBeamRenderer extends EntityRenderer<TNLightBeamEntity> {
     }
 
     /** 彩虹色 ✓ —— 色相直接用机制层那份（{@link TNLightBeamMechanics#rainbow} ✓，一处定义 ✓）；天降偏白金 ✓。 */
-    private static int[] rainbow(float t, boolean descent) {
+    private static int[] rainbow(float t, boolean descent, boolean fire) {
+        if (fire) {
+            // 火系射线：**橙红 -> 金黄** 的火焰渐变 ✓
+            // ⚠️ 调用处传进来的 t 里已经含了 age*0.02 ⇒ 直接拿它做**沿轴抖动**，
+            //    看起来像在烧 ✓（不需要额外的时间参数 ✓）
+            float f = (float) (0.5D + 0.5D * Math.sin(t * 9.0D));
+            return new int[]{
+                    255,
+                    (int) ((0.44F + 0.34F * f) * 255.0F),   // 0.44 ~ 0.78
+                    (int) ((0.06F + 0.20F * f) * 255.0F)};  // 0.06 ~ 0.26
+        }
         org.joml.Vector3f c = TNLightBeamMechanics.rainbow(t);
         float r = c.x, g = c.y, b = c.z;
         if (descent) {                            // 天降：往白金色靠 ✓
