@@ -69,17 +69,27 @@ TEX = 32   # texture is 32x32; every UV below is in whole pixels of this atlas
 # ----------------------------------------------------------------------------
 #  Keep every material a solid-ish patch with its own shading so a mis-UVed face is
 #  visible at a glance instead of blending in.
+#
+#  ★★ 2026-10-10 调色重做（作者："我想改改贴图，感觉**太花了**，想改的**更暗更黑更邪恶**一点"）:
+#    旧配色是「紫黑肉质 + 亮紫指节 + **洋红爪尖 + 近白高光**」✗ —— 爪子那两个数是全场最亮的，
+#    远看整只手被爪尖和指节的亮紫抢掉，所以"花" ✓。
+#    新配色只有一个思路：**整只手是焦黑的碳，只用冷紫的极窄描边把块面分开，
+#    唯一的暖色留给爪尖的干血暗红** ✓ —— 黑、脏、安静，但手指仍然数得清。
+#    ⚠️ 别把 edge 也压到 0 ✗：手是 31 个方块拼的，块面之间没有一丝明度差 ⇒
+#      远看会糊成**一坨黑**（旧文档当初选亮配色就是为了防这个 ✗）。edge 只比 base 高一点点。
 ATLAS = {
-    # name          (x, y, w, h)   base      edge        accent
-    "wrist":        ((0, 0, 8, 8), (26, 16, 40), (40, 26, 58), (10, 6, 16)),
-    "palm":         ((8, 0, 12, 12), (34, 22, 52), (52, 34, 74), (12, 8, 20)),
-    "back":         ((20, 0, 8, 8), (24, 15, 38), (36, 23, 52), (9, 5, 14)),
-    "digit_0":      ((0, 8, 12, 6), (44, 30, 64), (64, 44, 88), (14, 9, 22)),
-    "digit_1":      ((0, 14, 12, 6), (38, 25, 56), (56, 38, 78), (12, 8, 20)),
-    "digit_2":      ((0, 20, 12, 6), (32, 21, 48), (48, 32, 68), (11, 7, 18)),
-    "knuckle":      ((0, 26, 12, 6), (72, 60, 96), (112, 96, 140), (26, 18, 36)),
-    "claw":         ((12, 8, 10, 10), (200, 90, 190), (255, 190, 250), (90, 30, 90)),
-    "aura":         ((22, 8, 8, 8), (60, 30, 96), (120, 70, 170), (24, 10, 40)),
+    # name          (x, y, w, h)   base        edge        accent
+    "wrist":        ((0, 0, 8, 8), (13, 10, 16), (22, 17, 27), (6, 4, 8)),
+    "palm":         ((8, 0, 12, 12), (17, 13, 21), (28, 21, 34), (8, 6, 10)),
+    "back":         ((20, 0, 8, 8), (12, 9, 15), (20, 15, 24), (5, 4, 7)),
+    "digit_0":      ((0, 8, 12, 6), (21, 15, 25), (34, 24, 40), (8, 6, 11)),
+    "digit_1":      ((0, 14, 12, 6), (18, 13, 22), (29, 20, 35), (7, 5, 9)),
+    "digit_2":      ((0, 20, 12, 6), (15, 11, 19), (25, 17, 29), (6, 4, 8)),
+    "knuckle":      ((0, 26, 12, 6), (24, 17, 28), (38, 27, 43), (9, 6, 12)),
+    # ★ 爪尖：干血的暗红 —— 整张图唯一的暖色，也是唯一还能"读出这是爪子"的地方 ✓
+    "claw":         ((12, 8, 10, 10), (54, 11, 14), (92, 20, 24), (18, 4, 6)),
+    # 灵光碎片：压到几乎看不见的暗紫（旧值 120,70,170 是第二个"花"的来源 ✗）
+    "aura":         ((22, 8, 8, 8), (28, 17, 40), (50, 30, 70), (11, 6, 17)),
     # ★ the tether: the darkest material in the atlas (author 2026-10-10: "手腕跟身体可以有
     #   一条黑色的粗的线连接"). Deliberately near-black with almost no edge contrast, so it
     #   reads as ONE solid black line instead of a stack of shaded cubes.
@@ -88,6 +98,13 @@ ATLAS = {
 
 # where the next free patch is, for any material not pre-declared (auto-tiled)
 _auto_cursor = [0, 16]
+
+# ★★ 整体明度旋钮（2026-10-10 加）：
+#   1.00 = 就用上面表里那套"焦黑 + 干血红"；
+#   想让**整只手**再暗一档写 0.85、想亮回来一点写 1.15 ✓ —— 只改这一个数，其它都不用动。
+#   ⚠️ 别低于 ~0.7 ✗：手是 31 个方块拼的，全部压到接近 0 之后块面之间就没有明度差了，
+#      远看会糊成**一坨黑**（旧配色当初选亮色就是为了防这个 ✗）。
+PALETTE_GAIN = 1.00
 
 
 def atlas_rect(name):
@@ -345,6 +362,10 @@ def build_texture():
 
     def paint(name):
         (x, y, w, h), base, edge, accent = ATLAS[name]
+        # ★ 整体明度旋钮（PALETTE_GAIN）在这里统一生效 ✓
+        base = tuple(min(255, int(v * PALETTE_GAIN)) for v in base)
+        edge = tuple(min(255, int(v * PALETTE_GAIN)) for v in edge)
+        accent = tuple(min(255, int(v * PALETTE_GAIN)) for v in accent)
         for i in range(w):
             for j in range(h):
                 # soft vertical shade + a 1px darker frame
@@ -352,18 +373,22 @@ def build_texture():
                 c = tuple(int(base[k] * (1 - 0.25 * t) + accent[k] * (0.25 * t)) for k in range(3))
                 if i == 0 or j == 0 or i == w - 1 or j == h - 1:
                     c = edge
-                # a couple of lighter speckles so faces are not flat
+                # ★ 2026-10-10：散点从 +28 压到 +10 —— 原来的亮点太多，也是"花"的一部分 ✗
+                #   （只需要"块面不完全是平的"，不需要看得见的噪点）
                 if (i * 7 + j * 13) % 17 == 0:
-                    c = tuple(min(255, v + 28) for v in c)
+                    c = tuple(min(255, v + 10) for v in c)
                 px[x + i, y + j] = (c[0], c[1], c[2], 255)
 
     for name in ATLAS:
         paint(name)
 
-    # claw patch: add a hard white highlight along its centre line
+    # claw patch: ★ 2026-10-10 那条**近白高光**换成暗红细线 ✗
+    #   （旧值 (255,235,255) 是整张图最亮的一笔 —— 远看爪尖一片白，就是"太花"的主犯 ✓；
+    #    现在改成干血的暗红，爪子仍然是整只手上唯一能一眼看到的细节，但不再是白点 ✓）
     (x, y, w, h), base, edge, accent = ATLAS["claw"]
+    ridge = tuple(min(255, int(v * PALETTE_GAIN)) for v in (122, 26, 30))
     for j in range(h):
-        px[x + w // 2, y + j] = (255, 235, 255, 255)
+        px[x + w // 2, y + j] = (ridge[0], ridge[1], ridge[2], 255)
 
     return img
 
