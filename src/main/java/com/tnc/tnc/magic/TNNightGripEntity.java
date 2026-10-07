@@ -16,6 +16,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -372,6 +373,20 @@ public class TNNightGripEntity extends Entity {
     /** 天降：相邻两只手横向错开多少格（免得完全重叠 ✗）。 */
     private static final double SKYFALL_SPREAD = 1.1D;
 
+    // ------------------------------------------------------------------
+    //  ★ 2026-10-10 追加：命中后挂"易伤"（t4 起）
+    //     （作者：「**命中的敌人和其他玩家增加易伤，t4 开始**」）
+    // ------------------------------------------------------------------
+
+    /** 从这一档起，命中会给目标挂易伤 ✓（t1~t3 不挂）。 */
+    private static final int VULN_TIER = 4;
+
+    /** 每档挂几层（amplifier）✓：t4 = 0 层（+15%），t5 = 1 层（+30%）。 */
+    private static final int[] VULN_AMPLIFIER = {0, 0, 0, 0, 1};
+
+    /** 每档挂多久（tick）✓：t4 = 8 秒，t5 = 12 秒（够接一套后续输出 ✓）。 */
+    private static final int[] VULN_TICKS = {0, 0, 0, 160, 240};
+
     /** 模式：0 = 从后背甩出弧线抓住（t1~t4）；1 = 从天而降砸（t5）✓。 */
     private static final int MODE_ARC = 0;
     private static final int MODE_SKYFALL = 1;
@@ -716,13 +731,50 @@ public class TNNightGripEntity extends Entity {
                 continue;
             }
             total += dealDamage(candidate, caster, amount);
+            // ★ t4 起：**命中的敌人**也吃易伤 ✓（作者："命中的敌人和其他玩家增加易伤"）
+            applyVulnerable(candidate);
             hits++;
+        }
+        // ★ t4 起：范围内**其他玩家**也吃易伤 ✓（含队友 —— 作者特意点名"其他玩家"）。
+        //   ⚠️ 这一遍**不造成伤害** ✗：伤害仍然只打敌人/非友军（上面那一遍），
+        //      免得这条链悄悄变成"连队友一起打" ✗。要连队友一起打的话把那两遍并成一遍即可 ✓。
+        if (tier >= VULN_TIER) {
+            for (Player other : server.getEntitiesOfClass(Player.class, box,
+                    e -> e.isAlive() && !e.isSpectator() && e != caster)) {
+                if (other.distanceTo(this) <= radius) {
+                    applyVulnerable(other);
+                }
+            }
         }
         if (hits > 0) {
             LOGGER.debug("TN-C: night hand sweep r={} hits={} total={} latched={}",
                     radius, hits, total, latched == null ? "-" : latched.getName().getString());
         }
         return total;
+    }
+
+    /**
+     * ★ 给目标挂<b>易伤</b>（t4 起）✓ —— 作者 2026-10-10：
+     * 「**命中的敌人和其他玩家增加易伤，t4 开始**」。
+     *
+     * <p>效果本身只是个<b>标记</b>（不发属性、不做事）✗ —— 真正的"受创加重"由
+     * {@code armor/TNIronArmorEvents.onLivingHurt} 里那**一处**统一结算 ✓
+     * （与铁甲 99%、光耀链减伤、光/暗龙鳞甲 50% 是同一个地方、同一条规矩 ✓）。
+     * 幅度：每层 +15% ⇒ {@link #VULN_AMPLIFIER} 让 t4 = +15%、t5 = +30% ✓
+     * （要改数值只改那一处的 {@code VULNERABLE_PER_LEVEL}，或这里的层数/时长 ✓）。
+     */
+    private void applyVulnerable(LivingEntity target) {
+        if (tier < VULN_TIER || target == null || !target.isAlive() || !TNEffects.VULNERABLE.isPresent()) {
+            return;
+        }
+        int index = Math.max(0, Math.min(VULN_TICKS.length - 1, tier - 1));
+        int ticks = VULN_TICKS[index];
+        if (ticks <= 0) {
+            return;
+        }
+        int amplifier = VULN_AMPLIFIER[Math.max(0, Math.min(VULN_AMPLIFIER.length - 1, tier - 1))];
+        // visible = true ⇒ 身上冒暗红粒子：玩家一眼看得出"这只挂了易伤" ✓
+        target.addEffect(new MobEffectInstance(TNEffects.VULNERABLE.get(), ticks, amplifier, false, true));
     }
 
     private float crush(LivingEntity victim, LivingEntity caster, float amount) {
