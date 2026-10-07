@@ -178,106 +178,162 @@ public final class TNWindMechanics {
     public static final RegistryObject<MobEffect> WIND_SPIRIT_LORD = WIND_EFFECTS.register(
             "wind_spirit_lord", MarkerEffect::new);
 
-    /** 球离玩家多远。 */
-    private static final double ORB_RADIUS = 1.6D;
-    /** 每隔几 tick 打一次。 */
-    private static final int ORB_ZAP_INTERVAL = 10;
-    /** 打多远内的敌人。 */
-    private static final double ORB_RANGE = 5.0D;
-    /** 每次伤害。 */
-    private static final float ORB_DAMAGE = 4.0F;
-    /** 牵引：把敌人往玩家这边拽多少（每 tick）。 */
-    private static final double ORB_PULL = 0.12D;
+    // ---------------- 档位表（唯一来源） ----------------
 
     /**
-     * 一个档位：<b>几个球</b> ＋ <b>单次伤害倍率</b> ✓。
+     * 一个档位：<b>档号</b> ＋ <b>几只风灵</b> ＋ <b>单次伤害倍率</b> ＋ <b>渲染缩放</b> ✓。
      *
-     * <p>为什么改成一张显式的表：原来档位是散在 {@code orbCount()} 与 {@code tickOrbs()}
-     * 里的几条 if ✗，而 4/5 级跟 3 级共用同一个标记 ⇒ 那几条 if **根本表达不出"4 级更强"**，
-     * 于是 4 级反而更弱（见 {@link #WIND_SPIRIT_II}）✗。现在一档一行，加档位只要加一行 ✓。
+     * <p>为什么是一张显式的表：原来档位散在几条 if 里 ✗，而 4/5 级跟 3 级共用同一个标记
+     * ⇒ 那几条 if **根本表达不出"4 级更强"**，于是 4 级反而更弱（见 {@link #WIND_SPIRIT_II}）✗。
+     * 现在一档一行 ✓ —— 而且**实体、渲染器、伤害**三边都读这一张表 ✓
+     * （{@code magic/TNWindSpiritEntity} 与 {@code client/TNWindSpiritRenderer} 都调这里的静态取值 ✓）。
      */
-    private record OrbTier(int orbs, float damageMultiplier) {
+    public record OrbTier(int tier, int orbs, float damageMultiplier, double scale) {
     }
+
+    /**
+     * 五档的数值表 ✓（改手感只改这里）。
+     *
+     * <p>★ 2026-10-10 作者："风灵链怎么五个全是放一个围绕着玩家的小风球啊，**风灵呢**" ✗
+     * ⇒ 数量轴按**名字**重新对齐：以前 t3/t4/t5 一律 5 只，名字里的"一只风灵 / 三个风灵 /
+     * 风灵之主"根本没体现 ✗，现在就是 1 / 3 / 5 ✓。
+     *
+     * <table border="1">
+     *   <tr><th>档</th><th>法术</th><th>标记</th><th>风灵</th><th>倍率</th><th>单次伤害</th><th>缩放</th></tr>
+     *   <tr><td>t1</td><td>召唤风球</td><td>{@code wind_orb_three}</td><td>3</td><td>×1.0</td><td>4.0</td><td>0.62</td></tr>
+     *   <tr><td>t2</td><td>召唤五个风球</td><td>{@code wind_orb_five}</td><td>5</td><td>×1.0</td><td>4.0</td><td>0.72</td></tr>
+     *   <tr><td>t3</td><td>召唤风灵</td><td>{@code wind_spirit}</td><td><b>1</b></td><td>×2.2</td><td>8.8</td><td>1.05</td></tr>
+     *   <tr><td>t4</td><td>召唤三个风灵</td><td>{@code wind_spirit_ii}</td><td><b>3</b></td><td>×2.2</td><td>8.8</td><td>1.05</td></tr>
+     *   <tr><td>t5</td><td>风灵之主</td><td>{@code wind_spirit_lord}</td><td>5</td><td>×2.8</td><td>11.2</td><td>1.30</td></tr>
+     * </table>
+     *
+     * <p>★ 每只风灵**各打各的** ✓（{@code TNWindSpiritEntity#zap} 每只各自每 10 tick 打一次
+     * 自己最近的敌人）⇒ "只数多"终于是真的"伤害更高" ✓
+     * —— 旧版是"一轮只打一个然后 break" ✗，球数纯粹是装饰 ✗。
+     */
+    private static final OrbTier[] TIERS = {
+            new OrbTier(1, 3, 1.0F, 0.62D),
+            new OrbTier(2, 5, 1.0F, 0.72D),
+            new OrbTier(3, 1, 2.2F, 1.05D),
+            new OrbTier(4, 3, 2.2F, 1.05D),
+            new OrbTier(5, 5, 2.8F, 1.30D),
+    };
 
     /**
      * 当前生效的档位（从最高档往下认，认到第一个就返回）✓。
      *
-     * <p>数值表（球数 / 倍率都随档位<b>单调递增</b> ✓，改手感就改这里）：
-     * <table border="1">
-     *   <tr><th>档</th><th>法术</th><th>标记</th><th>球</th><th>倍率</th><th>单次伤害</th></tr>
-     *   <tr><td>t1</td><td>召唤风球</td><td>{@code wind_orb_three}</td><td>3</td><td>×1</td><td>4</td></tr>
-     *   <tr><td>t2</td><td>召唤五个风球</td><td>{@code wind_orb_five}</td><td>5</td><td>×1</td><td>4</td></tr>
-     *   <tr><td>t3</td><td>召唤风灵</td><td>{@code wind_spirit}</td><td>5</td><td>×2</td><td>8</td></tr>
-     *   <tr><td>t4</td><td>召唤三个风灵</td><td>{@code wind_spirit_ii}</td><td>5</td><td>×3</td><td>12</td></tr>
-     *   <tr><td>t5</td><td>风灵之主</td><td>{@code wind_spirit_lord}</td><td>5</td><td>×4</td><td>16</td></tr>
-     * </table>
-     *
      * <p>⚠️ 从最高档往下认是有意的：法术用 {@code apply_mode: SET} 各自设自己的标记，
      * 低级那次可能还没到期 ⇒ 只按"有没有某个标记"逐级判断会认错档 ✗。
      *
-     * @return 没有球时返回 {@code null} ✓
+     * @return 一只都没有时返回 {@code null} ✓
      */
     private static OrbTier orbTier(ServerPlayer player) {
         if (has(player, WIND_SPIRIT_LORD)) {
-            return new OrbTier(5, 4.0F);
+            return TIERS[4];
         }
         if (has(player, WIND_SPIRIT_II)) {
-            return new OrbTier(5, 3.0F);
+            return TIERS[3];
         }
         if (has(player, WIND_SPIRIT)) {
-            return new OrbTier(5, 2.0F);
+            return TIERS[2];
         }
         if (has(player, WIND_ORB_FIVE)) {
-            return new OrbTier(5, 1.0F);
+            return TIERS[1];
         }
         if (has(player, WIND_ORB_THREE)) {
-            return new OrbTier(3, 1.0F);
+            return TIERS[0];
         }
         return null;
+    }
+
+    /** 现在有没有风灵在 ✓（实体每 tick 用它决定要不要退场）。 */
+    public static boolean hasSpirits(ServerPlayer player) {
+        return orbTier(player) != null;
+    }
+
+    /** 当前档号 1..5（0 = 没有）✓ —— 实体用它判断"我这一档还算不算数" ✓。 */
+    public static int currentTier(ServerPlayer player) {
+        OrbTier tier = orbTier(player);
+        return tier == null ? 0 : tier.tier();
+    }
+
+    /** 某个档位该有几只风灵 ✓（维护方补数量用它）。 */
+    public static int orbsForTier(int tier) {
+        return TIERS[Math.max(1, Math.min(5, tier)) - 1].orbs();
+    }
+
+    /** 某个档位的伤害倍率 ✓（实体算伤害用它）。 */
+    public static float damageMultiplierForTier(int tier) {
+        return TIERS[Math.max(1, Math.min(5, tier)) - 1].damageMultiplier();
+    }
+
+    /** 某个档位的渲染缩放 ✓（客户端渲染器用它）。 */
+    public static double scaleForTier(int tier) {
+        return TIERS[Math.max(1, Math.min(5, tier)) - 1].scale();
     }
 
     private static boolean has(ServerPlayer player, RegistryObject<MobEffect> effect) {
         return effect.isPresent() && player.hasEffect(effect.get());
     }
 
-    /** 绕身球：画球 + 定期打最近的敌人（含牵引）。 */
-    private static void tickOrbs(ServerPlayer player, long time) {
+    /**
+     * ★ <b>维护场上的风灵实体</b>（"多退少补"）✓ —— 取代了原来那个"每 tick 画云粒子"的写法 ✗。
+     *
+     * <p>为什么逻辑这么短：<b>行为全在实体自己身上</b> ✓（绕圈 / 打人 / 退场都归
+     * {@link TNWindSpiritEntity}）。这里只保证"数量对得上"：
+     * <ol>
+     *   <li>档位没了 ⇒ 把剩下的全收掉 ✓；</li>
+     *   <li>档位变了 ⇒ 旧档的实体<b>自己会退场</b>（它在 {@code tick()} 里比对档号 ✓），这里不用管；</li>
+     *   <li>数一数"当前档号 + 槽位"，缺哪个槽就补一只 ✓。</li>
+     * </ol>
+     *
+     * <p>⚠️ 别把这段并回 {@code onPlayerTick} 的早退之后 ✗（那里状态没变就 return，会一 tick 都不执行）。
+     */
+    private static void tickSpirits(ServerPlayer player) {
         OrbTier tier = orbTier(player);
+        java.util.List<TNWindSpiritEntity> mine = player.serverLevel().getEntitiesOfClass(
+                TNWindSpiritEntity.class, player.getBoundingBox().inflate(24.0D),
+                e -> e.isOwnedBy(player));
         if (tier == null) {
+            for (TNWindSpiritEntity spirit : mine) {
+                spirit.discard();
+            }
             return;
         }
-        int count = tier.orbs();
-        // 暗系召唤**原本**用同一套绕身球、只是把粒子换成暗影感的 ——
-        // 但暗系第 3 条链已改成真召唤实体，现在没有任何法术施加 dark_orb ⇒
-        // 这个分支是死的 ✓（保留原因见 DARK_ORB 的注释）。
-        boolean dark = has(player, DARK_ORB);
-        net.minecraft.core.particles.SimpleParticleType orbParticle = dark
-                ? net.minecraft.core.particles.ParticleTypes.SOUL_FIRE_FLAME
-                : net.minecraft.core.particles.ParticleTypes.CLOUD;
-        for (int i = 0; i < count; i++) {
-            double angle = (time % 80) / 80.0 * Math.PI * 2.0 + i * (Math.PI * 2.0 / count);
-            double x = player.getX() + Math.cos(angle) * ORB_RADIUS;
-            double z = player.getZ() + Math.sin(angle) * ORB_RADIUS;
-            player.serverLevel().sendParticles(orbParticle,
-                    x, player.getY() + 1.0D, z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+        int want = tier.orbs();
+        // 只有"当前档号"的实体才算数（旧档的正在自己退场 ✓）
+        java.util.List<TNWindSpiritEntity> current = new java.util.ArrayList<>();
+        for (TNWindSpiritEntity spirit : mine) {
+            if (spirit.tier() == tier.tier()) {
+                current.add(spirit);
+            }
         }
-        if (time % ORB_ZAP_INTERVAL != 0) {
-            return;
+        if (current.size() > want) {
+            for (int i = want; i < current.size(); i++) {
+                current.get(i).discard();
+            }
+            current = current.subList(0, want);
         }
-        net.minecraft.world.phys.AABB box = player.getBoundingBox().inflate(ORB_RANGE);
-        java.util.List<net.minecraft.world.entity.LivingEntity> targets =
-                player.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, box,
-                        e -> e != player && !(e instanceof net.minecraft.world.entity.player.Player));
-        for (net.minecraft.world.entity.LivingEntity target : targets) {
-            float damage = ORB_DAMAGE * tier.damageMultiplier();
-            target.hurt(player.damageSources().indirectMagic(player, player), damage);
-            // 牵引：往玩家方向拽一点（"风球的攻击有牵引效果"）
-            net.minecraft.world.phys.Vec3 pull = player.position().subtract(target.position()).normalize().scale(ORB_PULL);
-            target.push(pull.x, 0.0D, pull.z);
-            target.hurtMarked = true;
-            player.serverLevel().sendParticles(net.minecraft.core.particles.ParticleTypes.SWEEP_ATTACK,
-                    target.getX(), target.getY() + 1.0D, target.getZ(), 1, 0.0D, 0.0D, 0.0D, 0.0D);
-            break;                                  // 一次只打一个，和"球在打人"的感觉一致
+        if (TNOrbEntities.WIND_SPIRIT == null || !TNOrbEntities.WIND_SPIRIT.isPresent()) {
+            return;                                   // 理论上不会；真发生了也别每 tick 刷空指针 ✗
+        }
+        for (int slot = 0; slot < want; slot++) {
+            boolean present = false;
+            for (TNWindSpiritEntity spirit : current) {
+                if (spirit.slot() == slot) {
+                    present = true;
+                    break;
+                }
+            }
+            if (present) {
+                continue;
+            }
+            TNWindSpiritEntity spirit = TNOrbEntities.WIND_SPIRIT.get().create(player.serverLevel());
+            if (spirit == null) {
+                return;
+            }
+            spirit.bind(player, slot, tier.tier(), slot * 0.7D);
+            player.serverLevel().addFreshEntity(spirit);
         }
     }
 
@@ -344,6 +400,10 @@ public final class TNWindMechanics {
         if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) {
             return;
         }
+        // ★ 脚下的风环（作者 2026-10-10："释放风速之后玩家的脚下一直有风在绕，感觉踩在风上"）——
+        //   ⚠️ 必须放在下面那几处**早退之前** ✗：状态没变时这里会 `return`，
+        //   把每 tick 的视觉一起吃掉（这正是"加在末尾看不到效果"的经典坑 ✓）。
+        tickFootWind(player, player.level().getGameTime());
         boolean creativeLike = player.isCreative() || player.isSpectator();
         boolean shouldFly = permanentFlight(player)
                 || player.hasEffect(WIND_FLIGHT.get())
@@ -361,6 +421,64 @@ public final class TNWindMechanics {
         player.onUpdateAbilities();
     }
 
+    // ---------------- 脚下的风环（"踩在风上"） ----------------
+
+    /** 站在地上时的环：粒子数 / 半径（格）。 */
+    private static final int FOOT_WIND_RING = 6;
+    private static final double FOOT_WIND_RADIUS = 0.48D;
+    /** 真飞起来时更密更宽（"风在托着你"要看得出来 ✓）。 */
+    private static final int FOOT_WIND_RING_FLYING = 10;
+    private static final double FOOT_WIND_RADIUS_FLYING = 0.62D;
+    /** 每隔几 tick 补一道风痕（sweep）—— 只靠 cloud 会像烟，加它才像"风" ✓。 */
+    private static final int FOOT_WIND_SWEEP_INTERVAL = 4;
+    /** 旋转速度：每 tick 转多少弧度（小一点才像"绕"，大了像闪 ✓）。 */
+    private static final double FOOT_WIND_SPIN = 0.18D;
+
+    /**
+     * ★ <b>风速链生效期间，脚下一直有一圈风在绕</b> ✓（作者 2026-10-10）：
+     * 「风速不是后面可以飞吗，我希望释放风速之后玩家的脚下一直有风在绕，感觉踩在风上」。
+     *
+     * <h2>什么时候吹</h2>
+     * 只要"风给了你飞行"就吹 ✓ —— 也就是 {@link #permanentFlight}（4 级起解锁即永久）
+     * 或 {@code tnc:wind_flight} 标记在身（1~3 级的时限飞行）✓。
+     * ⚠️ <b>光翼链的飞行不吹</b> ✗ —— 那是光耀链的翅膀，脚下起风会串味
+     * （两者共用一个 {@code mayfly} 裁决点，见 {@link #onPlayerTick} 的事故注释 ✓）。
+     *
+     * <h2>为什么不放在客户端</h2>
+     * 服务端每 tick {@code sendParticles} 是本项目已有的写法（绕身球 {@code tickOrbs} 就是这么做的 ✓），
+     * 而客户端要判"永久飞行"得读魔法石进度（同步链更长 ✗）⇒ 跟现成的走 ✓。
+     * 开销：站着 6 颗/tick、飞着 10 颗/tick，和绕身球同量级 ✓。
+     */
+    private static void tickFootWind(ServerPlayer player, long time) {
+        if (!(permanentFlight(player) || has(player, WIND_FLIGHT))) {
+            return;
+        }
+        boolean flying = player.getAbilities().flying;
+        net.minecraft.server.level.ServerLevel level = player.serverLevel();
+        int ring = flying ? FOOT_WIND_RING_FLYING : FOOT_WIND_RING;
+        double radius = flying ? FOOT_WIND_RADIUS_FLYING : FOOT_WIND_RADIUS;
+        double phase = time * FOOT_WIND_SPIN;
+        for (int i = 0; i < ring; i++) {
+            double a = phase + i * (Math.PI * 2.0D / ring);
+            level.sendParticles(net.minecraft.core.particles.ParticleTypes.CLOUD,
+                    player.getX() + Math.cos(a) * radius, player.getY() + 0.05D,
+                    player.getZ() + Math.sin(a) * radius,
+                    1, 0.0D, 0.01D, 0.0D, 0.01D);
+        }
+        if (time % FOOT_WIND_SWEEP_INTERVAL == 0) {
+            // 横着的一道风痕（原版 sweep 粒子就是"挥砍的那道弧" ✓ 风刃同款）
+            level.sendParticles(net.minecraft.core.particles.ParticleTypes.SWEEP_ATTACK,
+                    player.getX(), player.getY() + 0.15D, player.getZ(),
+                    1, 0.0D, 0.0D, 0.0D, 0.0D);
+        }
+        if (flying) {
+            // 飞着的时候再补一点向上的白点：风往上托 ✓
+            level.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD,
+                    player.getX(), player.getY() - 0.05D, player.getZ(),
+                    2, 0.26D, 0.02D, 0.26D, 0.02D);
+        }
+    }
+
     /**
      * 光耀链给的飞行在不在身 ✓（作者 2026-10-02：飞行并进光耀链了，光翼链整条删掉 ✓）。
      * 判据就是那个**光翼标记** ✓ —— 光耀 buff 在身时由 {@code TNLightChainMechanics.tickGraceFlight} 挂着 ✓。
@@ -375,14 +493,14 @@ public final class TNWindMechanics {
         return effect.isPresent() && player.hasEffect(effect.get());
     }
 
-    /** 链2：绕身球（另开一个 tick 处理，逻辑上互不影响）。 */
+    /** 链2：风灵实体的维护（另开一个 tick 处理，逻辑上互不影响）。 */
     @SubscribeEvent
     public static void onPlayerTickOrbs(TickEvent.PlayerTickEvent event) {
         if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)
                 || player.level().isClientSide()) {
             return;
         }
-        tickOrbs(player, player.level().getGameTime());
+        tickSpirits(player);
     }
 
     /** 是否已经学会"解锁即永久飞行"（风速链进度 ≥ 4）。 */

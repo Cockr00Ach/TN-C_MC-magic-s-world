@@ -124,26 +124,28 @@ public final class TNProjectileModels {
      * "风刃"看起来是雷球，这是 `投射物模型_配方.md` 末表里登记在案的待办
      * （"土/暗/风 暂用 lightingball，各给一个号即可"）✓。
      *
-     * <p>模型是<b>作者自己的龙卷风</b>（{@code magic_modelandpack} 那一侧：
-     * {@code assets/elemental_wizards_rpg/models/effect/tornado.json}）——
-     * 14 个方块、<b>1.19 × 2.16 × 1.19 格</b>、<b>旋转角全是 0</b>、
-     * {@code from/to} 在 −1.5..17.5 / y −2.5..32 ⇒ <b>在加载窗口 −16..32 之内</b> ✓。
-     * 由 {@code tools/import_author_model.ps1 -Textures} 导入（多贴图模式）。
+     * <h2>中间换过一次模型（记下来，省得下次再找）</h2>
+     * <ol>
+     *   <li>2026-10-10 上午：先导入<b>作者的龙卷风</b>
+     *       （{@code elemental_wizards_rpg/models/effect/tornado.json}，一模型五张 8 帧动画贴图，
+     *       走 {@code import_author_model.ps1 -Textures} 的多贴图模式 ✓）；</li>
+     *   <li>2026-10-10 下午：作者反馈「**这个风刃可以抄一下水法的海浪斩击**」✗ ⇒
+     *       换成 <b>月牙／斩击造型</b>，由 {@code tools/gen_wind_blade_model.py} <b>程序化生成</b> ✓
+     *       （16 个重叠方块沿 170° 圆弧排成新月，中段厚、两端收尖，旋转角 0、UV 全落在整 16 分格上 ✓）。
+     *       ⚠️ 那 5 张龙卷风贴图 + 它们的 {@code .mcmeta} 已**一并删掉** ✗（现在只有一张
+     *       {@code spell_projectile/windblade.png}，32×16、无动画 ✓）。</li>
+     * </ol>
      *
-     * <p>★ <b>五张贴图是动画的</b>：{@code windblade_1..5.png} 是 16×128＝8 帧竖排，
-     * 各自的 {@code .png.mcmeta}（frametime 5）**必须一起发货** ✗ —— 少了它动画就没了
-     * （导入脚本会自动带上）。
+     * <p>★ <b>形状与尺寸</b>：包围盒 <b>1.179 × 0.615 × 0.147 格</b>（宽 × 高 × 厚，
+     * 薄的那一维是 Z ⇒ 正对着飞过来看到的是整个新月 ✓）。五档的 {@code scale} 是
+     * 0.5 / 0.7 / 0.9 / 1.2 / 1.4 ⇒ 风刃宽 <b>0.59 → 1.65 格</b> ✓。
+     * 嫌大/嫌小就改 {@code gen_tnc_wind_gale_spells.ps1} 最后那张表的 scale 一列 ✓；
+     * 想改形状就改生成器里的 {@code R / ARC / half_thick / half_deep} 再重跑 ✓。
      *
      * <p>★ <b>朝向</b>：法术 JSON 里写 {@code "orientation": "TOWARDS_MOTION"}。
      * 已反编译确认（{@code SpellProjectileRenderer}）：两种 motion 朝向**只施加 yaw + pitch**
-     * （{@code atan2(dx,dz)} 与 {@code asin(dy)}）⇒ 这个**竖直的柱体在水平飞行时保持立着** ✓，
-     * 俯冲/上抛时才会跟着倾 ✓（{@code ALONG_MOTION} 与它只差 90° yaw，
-     * 对这种旋转对称的柱体没有可见差别 ✓）。
-     *
-     * <p>★ <b>尺寸</b>：模型比 {@code lightingball}（0.375 格）大 <b>5.76 倍</b>（高 2.16 格）——
-     * 所以五档的 {@code scale} <b>沿用原值</b>（0.5/0.7/0.9/1.2/1.4）⇒ 风刃从
-     * 0.19~0.53 格变成 <b>1.08~3.02 格</b>高 ✓（"巨型风刃风暴"终于真的巨大了 ✓）。
-     * 嫌大/嫌小就改 {@code gen_tnc_wind_gale_spells.ps1} 最后那张表的 scale 一列 ✓。
+     * （{@code atan2(dx,dz)} 与 {@code asin(dy)}）⇒ 新月躺在 XY 平面上飞，
+     * <b>不会翻滚</b>，水平飞行时刀口朝前 ✓。
      */
     public static final String WINDBLADE = "projectile/windblade";
 

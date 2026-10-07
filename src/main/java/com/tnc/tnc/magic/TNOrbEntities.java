@@ -389,6 +389,32 @@ public final class TNOrbEntities {
                     .updateInterval(1)
                     .build("tnc:night_grip")) : null;
 
+    /**
+     * ★ <b>风灵</b>（风系第二条链「风球 / 风灵」的召唤物，2026-10-10）✓
+     *
+     * <p>作者原话：「风灵链怎么五个全是放一个围绕着玩家的小风球啊，**风灵呢**，
+     * 我觉得你可以抄一下小精灵的模型」✗ —— 这一整条链以前是**纯粒子**
+     * （{@code TNWindMechanics.tickOrbs} 每 tick 画 {@code CLOUD} 云），玩家看不见"风灵" ✗。
+     * 现在每一只都是实体（{@link TNWindSpiritEntity}，模型由
+     * {@code tools/gen_wind_sprite_model.py} 程序化生成 ✓）。
+     *
+     * <p>⚠️ 和 {@link #NIGHT_GRIP} 不同，它**不依赖 spell_engine** ✗（渲染走 GeckoLib，
+     * 和暗系召唤物同一套 ✓）⇒ 这里<b>不需要</b> {@code ModList.isLoaded} 的判空守卫 ✓。
+     *
+     * <p>数字照旧不能省 ✗：实体类型没有渲染器 = 一生成就 {@code entityrenderer is null} 卡退
+     * （{@code OrbEntityRendererCoverageTest} 会在构建期拦住 ✓）；
+     * 渲染器注册在 {@code client/TNFogClientRegistration} ✓。
+     * {@code updateInterval(1)}：它每 tick 都在绕圈，2 tick 同步一次会一顿一顿 ✗
+     * （环绕雷球 / 黑雾 / 黑夜之手都是同一个原因设成 1 ✓）。
+     */
+    public static final RegistryObject<EntityType<TNWindSpiritEntity>> WIND_SPIRIT =
+            ENTITY_TYPES.register("wind_spirit", () -> EntityType.Builder
+                    .of(TNWindSpiritEntity::new, MobCategory.MISC)
+                    .sized(0.8F, 0.8F)
+                    .clientTrackingRange(16)
+                    .updateInterval(1)
+                    .build("tnc:wind_spirit"));
+
     private TNOrbEntities() {
     }
 
