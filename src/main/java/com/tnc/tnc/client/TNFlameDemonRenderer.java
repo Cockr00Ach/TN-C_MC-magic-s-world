@@ -48,7 +48,7 @@ public final class TNFlameDemonRenderer extends EntityRenderer<TNFlameDemonField
     private static final double PILLAR_HALF = 0.50D;   // 作者：柱子"从一个方块改为 4 个块"✗ ⇒ 截面 1×1 ✓
 
     /** 柱高（格 ✓）—— 作者要 4 个块 ✗。 */
-    private static final double PILLAR_HEIGHT = 4.0D;
+    private static final double PILLAR_HEIGHT = 6.0D;   // 作者：柱高 6 格 ✗
 
     /** 黑曜石色（末影岛那种近黑的紫 ✓）。 */
     private static final float OR = 0.045F;
@@ -96,7 +96,7 @@ public final class TNFlameDemonRenderer extends EntityRenderer<TNFlameDemonField
         for (int i = 0; i < 4; i++) {
             // ⚠️ orbPosition() 给的是**世界坐标** ✓ ⇒ 减掉实体位置换成相对坐标 ✗
             Vec3 rel = field.orbPosition(i).subtract(field.position());
-            drawPillar(out, pose, rel, age);
+            drawPillar(stack, buffers, rel, age);
             drawSun(out, pose, rel, age, i);
             drawLaser(out, pose, field, rel, i);
         }
@@ -111,45 +111,33 @@ public final class TNFlameDemonRenderer extends EntityRenderer<TNFlameDemonField
     //  ② 黑曜石巨柱（纯视觉）
     // ------------------------------------------------------------------
 
-    private static void drawPillar(VertexConsumer out, Matrix4f pose, Vec3 at, double age) {
-        // 柱脚从地里"升起来"（前 12 tick ✓，作者要"生起"✓）
-        double rise = Math.min(1.0D, age / 12.0D);
-        // ⚠️ 作者 2026-10-05：「四根柱子从一个方块改为 **4 个块**」✓
-        //   原来柱高 = 光球的高度（at.y ✗，约 6 格 ✗）⇒ 现在**固定 4 格** ✓
-        double height = PILLAR_HEIGHT * rise;
-        if (height < 0.2D) {
+    private static void drawPillar(PoseStack stack, MultiBufferSource buffers, Vec3 at, double age) {
+        // ⚠️ 作者 2026-10-05：「柱子高度 6 格，截面改成 2x2，并且**给柱子加上黑曜石的材质**」✓
+        //   ⇒ 不再用"自画四边形 + 单色"✗，改成**直接渲染原版黑曜石方块** ✓：
+        //     贴图、光照、明暗全是原版的 ✓（用 renderSingleBlock ✓）
+        //   ⚠️ 为什么这次 renderSingleBlock 能行 ✗：黑曜石是**普通方块**✓，
+        //     有真正的方块模型 ✓；上次那个龙头骷髅是 BlockEntityRenderer 画的 ✗，
+        //     方块模型是空的 ⇒ 什么都画不出来 ✓
+        //   堆法：3 块（每块缩放到 2×2×2 ✓）⇒ 合起来正好 **2×2×6 格** ✓
+        double rise = Math.min(1.0D, age / 12.0D);      // 柱脚从地里"升起来"（前 12 tick ✓）
+        if (rise <= 0.02D) {
             return;
         }
-        Vec3[] corner = {
-                new Vec3(at.x - PILLAR_HALF, 0.0D, at.z - PILLAR_HALF),
-                new Vec3(at.x + PILLAR_HALF, 0.0D, at.z - PILLAR_HALF),
-                new Vec3(at.x + PILLAR_HALF, 0.0D, at.z + PILLAR_HALF),
-                new Vec3(at.x - PILLAR_HALF, 0.0D, at.z + PILLAR_HALF)};
-        for (int i = 0; i < 4; i++) {
-            Vec3 p0 = corner[i];
-            Vec3 p1 = corner[(i + 1) % 4];
-            Vec3 q0 = new Vec3(p0.x, height, p0.z);
-            Vec3 q1 = new Vec3(p1.x, height, p1.z);
-            // 两面都画（免得从里面看是空的 ✗）
-            WaterGeometry.quad(out, pose, p0, p1, q1, q0, OR, OG, OB, 1.0F);
-            WaterGeometry.quad(out, pose, q0, q1, p1, p0, OR, OG, OB, 1.0F);
+        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+        net.minecraft.world.level.block.state.BlockState obsidian =
+                net.minecraft.world.level.block.Blocks.OBSIDIAN.defaultBlockState();
+        // 半宽 1 格 ⇒ 截面 2×2 ✓（缩放在下面做 ✓）
+        for (int k = 0; k < 3; k++) {
+            stack.pushPose();
+            // 从地面往上摞：第 k 块的中心高度 = (k + 0.5) × 2 × rise ✓
+            stack.translate(at.x - 1.0D, k * 2.0D * rise, at.z - 1.0D);
+            // 水平 2 倍 ⇒ 2 格宽 ✓；竖直 2 倍再乘 rise ⇒ 从地里长出来 ✓
+            stack.scale(2.0F, (float) (2.0D * rise), 2.0F);
+            mc.getBlockRenderer().renderSingleBlock(obsidian, stack, buffers,
+                    net.minecraft.client.renderer.LightTexture.FULL_BRIGHT,
+                    net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY);
+            stack.popPose();
         }
-        // 柱顶面
-        WaterGeometry.quad(out, pose,
-                new Vec3(at.x - PILLAR_HALF, height, at.z - PILLAR_HALF),
-                new Vec3(at.x + PILLAR_HALF, height, at.z - PILLAR_HALF),
-                new Vec3(at.x + PILLAR_HALF, height, at.z + PILLAR_HALF),
-                new Vec3(at.x - PILLAR_HALF, height, at.z + PILLAR_HALF),
-                0.16F, 0.09F, 0.20F, 1.0F);
-        // ⚠️ 作者第 4 条要"末影岛的方柱形式"✓ ⇒ **不再画熔岩竖纹** ✗
-        //    末影岛那几根就是干干净净一根黑紫方柱 ✓，加了纹路反而像工业设施 ✗
-        // 柱顶一圈亮边（像素风：一条实色棱 ✓）
-        WaterGeometry.quad(out, pose,
-                new Vec3(at.x - PILLAR_HALF, height, at.z - PILLAR_HALF),
-                new Vec3(at.x + PILLAR_HALF, height, at.z - PILLAR_HALF),
-                new Vec3(at.x + PILLAR_HALF, height, at.z + PILLAR_HALF),
-                new Vec3(at.x - PILLAR_HALF, height, at.z + PILLAR_HALF),
-                0.30F, 0.16F, 0.42F, 1.0F);
     }
 
     // ------------------------------------------------------------------

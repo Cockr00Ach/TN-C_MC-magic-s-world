@@ -371,7 +371,7 @@ public final class FireSpellRules {
      *
      * <p>⚠️ 作者第 4 条：「高度改为 2/3 左右」✓ —— 原来 9 格 ⇒ 现在 **6 格** ✓
      */
-    public static final double T4_ORB_HEIGHT = 4.0D;
+    public static final double T4_ORB_HEIGHT = 6.0D;
 
     /** 光线每几 tick 跳一次（10 tick = 0.5 秒 ✓）。 */
     public static final int T4_BEAM_INTERVAL_TICKS = 10;
