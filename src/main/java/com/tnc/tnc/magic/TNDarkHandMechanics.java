@@ -1,17 +1,24 @@
 package com.tnc.tnc.magic;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import net.spell_engine.api.event.CombatEvents;
 import net.spell_engine.api.spell.Spell;
 import net.spell_engine.api.spell.SpellInfo;
 import net.spell_engine.internals.casting.SpellCast;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * <b>黑夜之手链的"施法那一刻"</b>：把手甩出去 ＋ 收代价 ✓
@@ -71,8 +78,24 @@ public final class TNDarkHandMechanics {
     /** 每档扣"自己最大生命"的百分比 ✓（索引 = tier − 1；0 = 这一档不反噬）。 */
     private static final double[] BACKLASH_PERCENT = {0.00D, 0.02D, 0.03D, 0.05D, 0.08D};
 
-    /** 每档甩出几只手 ✓（作者：从背后伸出"好几只手"；档位越高越多 ✓）。 */
+    /** 每档甩出几只手 ✓（作者：从背后伸出"好几只手"；档位越高越多 ✓）。**t5 不用它**（见下）。 */
     private static final int[] HANDS = {1, 1, 2, 3, 3};
+
+    // ------------------------------------------------------------------
+    //  ★ 2026-10-10 追加：t5 换形态 —— 「很多只大手从天而降砸向敌人，大手的掌心向下」
+    // ------------------------------------------------------------------
+
+    /** 从这一档起换成"天降"形态 ✓（作者：t5 变成很多个大手从天而降）。 */
+    private static final int SKYFALL_TIER = 5;
+
+    /** 天降同时落几只 ✓（作者："很多个大手"）。 */
+    private static final int SKYFALL_HANDS = 7;
+
+    /** 天降：在瞄准点多大范围里找敌人（一只敌人落一只手 ✓）。 */
+    private static final double SKYFALL_RADIUS = 12.0D;
+
+    /** 天降：敌人不够时，多出来的手撒在中心多大的一个圈上 ✓。 */
+    private static final double SKYFALL_RING = 4.5D;
 
     /** 瞄准射线的长度（格）—— 与雷击 t3 的 {@code player.pick(32, 0, false)} 同一口径 ✓。 */
     private static final double AIM_RANGE = 32.0D;
@@ -134,8 +157,11 @@ public final class TNDarkHandMechanics {
     }
 
     /**
-     * 把这一档的几只手甩出去 ✓ —— 从施法者背后出发、各走各的弧线（见
-     * {@link TNNightGripEntity#launch}）。
+     * 把这一档的手放出去 ✓。
+     *
+     * <p>t1~t4：从施法者背后出发、各走各的弧线（见 {@link TNNightGripEntity#launch}）✓；
+     * <b>t5：换成"很多只大手从天而降砸向敌人"</b> ✓（作者 2026-10-10：
+     * 「t5 变成有很多个大手从天而降砸向敌人，**大手的掌心向下**」）。
      */
     private static void launch(ServerPlayer player, int tier) {
         ServerLevel level = player.serverLevel();
@@ -144,11 +170,14 @@ public final class TNDarkHandMechanics {
             return;
         }
         int targetId = aimedTargetId(player);
+        if (tier >= SKYFALL_TIER) {
+            skyfall(player, level, targetId, tier);
+            return;
+        }
         int count = HANDS[Math.max(0, Math.min(HANDS.length - 1, tier - 1))];
         for (int i = 0; i < count; i++) {
-            TNNightGripEntity hand = TNOrbEntities.NIGHT_GRIP.get().create(level);
+            TNNightGripEntity hand = create(level);
             if (hand == null) {
-                LOGGER.warn("TN-C: night hand could not be created (entity type missing?)");
                 return;
             }
             hand.launch(player, targetId, tier, i, count);
@@ -158,6 +187,93 @@ public final class TNDarkHandMechanics {
         //   它一次说清"这一发几只、有没有瞄到人、扣了多少血" ✓
         LOGGER.info("TN-C: night hand cast tier={} hands={} target={} owner={}",
                 tier, count, targetId < 0 ? "none" : targetId, player.getName().getString());
+    }
+
+    /**
+     * ★ t5：<b>很多只大手从天而降</b>，各自砸一个敌人 ✓
+     * （作者 2026-10-10：「t5 变成有很多个大手从天而降砸向敌人，**大手的掌心向下**」）。
+     *
+     * <p>落点怎么分：以"瞄准点"为中心找最近的敌人，**一只敌人落一只手** ✓；
+     * 敌人不够 {@link #SKYFALL_HANDS} 只 ⇒ 多出来的撒在中心一圈（免得白放 ✗）；
+     * 一个敌人都没有 ⇒ 全部撒在准星前方那一带 ✓（"没瞄到人也砸得到地"）。
+     *
+     * <p>每只手都从落点上方 {@code SKYFALL_HEIGHT}（实体里那个常量）开始压下来，
+     * 落地那一下就是范围重击 ✓ —— 掌心朝下由渲染器按模式决定 ✓。
+     */
+    private static void skyfall(ServerPlayer player, ServerLevel level, int targetId, int tier) {
+        Vec3 center = aimPointOf(player, targetId);
+        List<LivingEntity> victims = victimsNear(level, player, center);
+        int spawned = 0;
+        for (int i = 0; i < SKYFALL_HANDS; i++) {
+            LivingEntity victim = i < victims.size() ? victims.get(i) : null;
+            Vec3 landing = victim != null
+                    ? groundNear(level, victim.position(), 3)
+                    : groundNear(level, ringPoint(center, i - victims.size()), 24);
+            TNNightGripEntity hand = create(level);
+            if (hand == null) {
+                return;
+            }
+            hand.launchSkyfall(player, victim == null ? -1 : victim.getId(), tier, i, SKYFALL_HANDS, landing);
+            level.addFreshEntity(hand);
+            spawned++;
+        }
+        LOGGER.info("TN-C: night hand skyfall tier={} hands={} onEnemies={} center={} owner={}",
+                tier, spawned, victims.size(), center, player.getName().getString());
+    }
+
+    /** 新建一只（失败就统一在这里报一次警告 ✓）。 */
+    private static TNNightGripEntity create(ServerLevel level) {
+        TNNightGripEntity hand = TNOrbEntities.NIGHT_GRIP.get().create(level);
+        if (hand == null) {
+            LOGGER.warn("TN-C: night hand could not be created (entity type missing?)");
+        }
+        return hand;
+    }
+
+    /** 天降的中心：瞄到谁就落在谁那儿；没瞄到 ⇒ 准星前方（被墙截断）那个点 ✓。 */
+    private static Vec3 aimPointOf(ServerPlayer player, int targetId) {
+        Entity aimed = targetId < 0 ? null : player.serverLevel().getEntity(targetId);
+        if (aimed != null) {
+            return aimed.position();
+        }
+        Vec3 eye = player.getEyePosition(1.0F);
+        Vec3 view = player.getViewVector(1.0F);
+        HitResult blockHit = player.pick(AIM_RANGE, 0.0F, false);
+        double limit = blockHit.getType() == HitResult.Type.MISS
+                ? AIM_RANGE
+                : Math.max(0.0D, blockHit.getLocation().distanceTo(eye));
+        return eye.add(view.scale(limit));
+    }
+
+    /** 中心附近最近的敌人（最多 {@link #SKYFALL_HANDS} 只，按距离排 ✓）。 */
+    private static List<LivingEntity> victimsNear(ServerLevel level, ServerPlayer player, Vec3 center) {
+        AABB box = new AABB(
+                center.x - SKYFALL_RADIUS, center.y - SKYFALL_RADIUS, center.z - SKYFALL_RADIUS,
+                center.x + SKYFALL_RADIUS, center.y + SKYFALL_RADIUS, center.z + SKYFALL_RADIUS);
+        List<LivingEntity> found = new ArrayList<>(level.getEntitiesOfClass(LivingEntity.class, box,
+                e -> e.isAlive() && !e.isSpectator() && e != player && !e.isAlliedTo(player)));
+        found.sort(Comparator.comparingDouble(e -> e.position().distanceToSqr(center)));
+        return found.size() > SKYFALL_HANDS ? found.subList(0, SKYFALL_HANDS) : found;
+    }
+
+    /** 多出来的手撒在中心一圈 ✓。 */
+    private static Vec3 ringPoint(Vec3 center, int index) {
+        double angle = (index % SKYFALL_HANDS) / (double) SKYFALL_HANDS * Math.PI * 2.0D;
+        return center.add(Math.cos(angle) * SKYFALL_RING, 0.0D, Math.sin(angle) * SKYFALL_RING);
+    }
+
+    /**
+     * 把落点按到地面上 ✓（往下找不是空气的那层，最多找 maxDrop 格 ✗ 免得掉进洞里没完）——
+     * 和 {@code DarkFogMechanics.groundNear} 同一套做法 ✓。
+     */
+    private static Vec3 groundNear(ServerLevel level, Vec3 at, int maxDrop) {
+        BlockPos pos = BlockPos.containing(at.x, at.y, at.z);
+        int guard = 0;
+        while (guard++ < maxDrop && pos.getY() > level.getMinBuildHeight()
+                && level.getBlockState(pos.below()).isAir()) {
+            pos = pos.below();
+        }
+        return new Vec3(at.x, pos.getY(), at.z);
     }
 
     /**

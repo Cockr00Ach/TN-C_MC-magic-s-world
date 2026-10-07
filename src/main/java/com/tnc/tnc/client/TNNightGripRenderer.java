@@ -74,10 +74,11 @@ public class TNNightGripRenderer extends EntityRenderer<TNNightGripEntity> {
             TNMod.MODID, "textures/spell_projectile/dark_hand.png");
 
     /**
-     * 每档的缩放 —— 与法术 JSON 里那份 {@code scale} **必须一致** ✓（见类注释）。
-     * 索引 = tier − 1。
+     * ★ <b>尺寸不在这里了</b> ✗ —— 2026-10-10 挪到实体里（{@code TNNightGripEntity.SIZE_SCALE} /
+     * {@link TNNightGripEntity#sizeScale()}）当**唯一来源** ✓：
+     * 这样"渲染多大"和"视锥剔除盒子多大"永远一致，不会各说各话 ✗
+     * （作者那天要求「把 t4 的手的尺寸换成 t5 那么大」＝ 那张表的索引 3 改成和索引 4 同值 ✓）。
      */
-    private static final float[] SCALE = {0.98F, 1.97F, 4.92F, 9.85F, 19.69F};
 
     /** 只在第一次打一行日志，免得每帧刷屏 ✓。 */
     private static boolean logged;
@@ -102,22 +103,26 @@ public class TNNightGripRenderer extends EntityRenderer<TNNightGripEntity> {
     @Override
     public void render(TNNightGripEntity entity, float entityYaw, float partialTick, PoseStack poseStack,
                        MultiBufferSource buffer, int packedLight) {
-        float scale = SCALE[Math.max(0, Math.min(SCALE.length - 1, entity.tier() - 1))];
+        // ★ 尺寸从**实体**读（唯一来源 ✓）—— 作者 2026-10-10："把 t4 的手的尺寸换成 t5 那么大"
+        //   （就是 TNNightGripEntity.SIZE_SCALE[3] == SIZE_SCALE[4] ✓）
+        float scale = entity.sizeScale();
+        boolean sky = entity.skyfall();
         Vec3 direction = directionOf(entity);
 
         poseStack.pushPose();
-        // ① 把模型的 +Z（掌心）转到"施法者 → 手"的方向 ✓
+        // ① 把模型的 +Z（掌心）转到目标方向：抓取 ⇒ 朝被抓的人；天降 ⇒ 朝**正下方** ✓
         poseStack.mulPose(com.mojang.math.Axis.YP.rotation((float) Math.atan2(direction.x, direction.z)));
         poseStack.mulPose(com.mojang.math.Axis.XP.rotation(
                 (float) -Math.asin(Mth.clamp(direction.y, -1.0D, 1.0D))));
         // ② 按档位放大，再补回引擎内部那 −0.5 格 ✓
         poseStack.scale(scale, scale, scale);
-        // ③ ★ 锚点：**模型底边**贴在实体位置上（作者 2026-10-10："落地点从中心改到底部"）✓
-        //    模型的 y 跨度是 −13..+13 单位 ⇒ 半高 = 13/16 格；在**缩放后的坐标系**里
-        //    往上抬 13/16 ⇒ 世界里的偏移就是 (13/16)×scale ⇒ 底边正好落在实体原点 ✓。
-        //    （实体那边把锚点放在目标**脚下** ⇒ 合起来就是"一只手掌贴地立着按向目标"✓，
-        //      重做前它是悬在人家的腰/胸口高度，看着像插在身上 ✗。）
-        poseStack.translate(0.5F, 0.5F + HALF_HEIGHT_UNITS, 0.5F);
+        // ③ ★ 锚点（作者 2026-10-10："落地点从中心改到底部"）：
+        //    抓取 ⇒ 抬 13/16 格（模型 y 跨度 ±13 单位），**模型底边**落在实体位置上
+        //            ⇒ 配合实体的"目标脚下"锚点 ⇒ 一只手掌**贴地立着**按向目标 ✓；
+        //    天降 ⇒ **不抬**：此时模型的 +Y（原本的"上"）已经被转成水平了，
+        //            再抬就会把整只手平推出去 ✗；掌心（+Z 面）本来就贴着落点 ✓。
+        //    两处都在**缩放后的坐标系**里平移 ⇒ 世界偏移 = (13/16)×scale ✓。
+        poseStack.translate(0.5F, 0.5F + (sky ? 0.0F : HALF_HEIGHT_UNITS), 0.5F);
 
         if (!renderWithEngine(poseStack, buffer, entity)) {
             // 引擎不在/渲染失败：**什么都不画**，但绝不崩 ✓
@@ -148,6 +153,13 @@ public class TNNightGripRenderer extends EntityRenderer<TNNightGripEntity> {
      * 手腕沿 −Z）⇒ 把 +Z 指向目标，掌心才朝着他 ✓。
      */
     private static Vec3 directionOf(TNNightGripEntity entity) {
+        // ★ 天降（t5）：掌心朝**正下方** ✓ —— 作者 2026-10-10：「t5 变成有很多个大手从天而降
+        //   砸向敌人，**大手的掌心向下**」。
+        //   传 (0,-1,0) 进来，上面那两步旋转就正好把模型的 +Z（掌心）压到正下方 ✓
+        //   （pitch = −asin(−1) = +90°），而手指（+Y）被转成水平 ⇒ 读感是"手掌拍下来" ✓。
+        if (entity.skyfall()) {
+            return new Vec3(0.0D, -1.0D, 0.0D);
+        }
         LivingEntity target = living(entity.targetEntityId());
         if (target != null) {
             Vec3 toTarget = target.position()
