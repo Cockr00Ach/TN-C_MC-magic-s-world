@@ -49,6 +49,18 @@ public class TNMagicCircleRenderer extends EntityRenderer<TNMagicCircleEntity> {
     private static final ResourceLocation DARK_TEXTURE = ResourceLocation.fromNamespaceAndPath(
             TNMod.MODID, "textures/entity/dark_circle.png");
 
+    /**
+     * ★ <b>黑阵</b> —— 暗系黑夜之手链专用的"门"（作者 2026-10-10：
+     * 「给暗魔法专门做一个**黑色的**魔法阵」＋「手伸出去是穿过好几个**竖着的**魔法阵的感觉，从 t3 开始」）✓。
+     *
+     * <p>由 {@code tools/gen_black_circle.py} 生成：近黑＋极暗血红线条，**最亮像素只有 34** ✓。
+     * 这张图走 {@code entityTranslucentEmissive}（不受世界光照影响、按原色显示）⇒
+     * 画出来就是**一道压暗的黑阵**，而不是发光花纹 ✓（作者要的就是"黑"✓）。
+     * ⚠️ 太黑会在夜里几乎看不见 —— 要更清楚就提 {@code gen_black_circle.py} 里的 {@code PALETTE_GAIN} ✓。
+     */
+    private static final ResourceLocation BLACK_TEXTURE = ResourceLocation.fromNamespaceAndPath(
+            TNMod.MODID, "textures/entity/black_circle.png");
+
     public TNMagicCircleRenderer(EntityRendererProvider.Context context) {
         super(context);
         this.shadowRadius = 0.0F;
@@ -70,6 +82,9 @@ public class TNMagicCircleRenderer extends EntityRenderer<TNMagicCircleEntity> {
         }
         if (style == TNMagicCircleEntity.STYLE_DARK) {
             return DARK_TEXTURE;
+        }
+        if (style == TNMagicCircleEntity.STYLE_DARK_HAND) {
+            return BLACK_TEXTURE;
         }
         return TEXTURE;
     }
@@ -112,9 +127,18 @@ public class TNMagicCircleRenderer extends EntityRenderer<TNMagicCircleEntity> {
         float spin = age * (wave ? 6.0F : 1.6F);
 
         poseStack.pushPose();
-        poseStack.translate(0.0D, 0.03D, 0.0D);          // 稍微离地，避免和地面 z-fighting
-        poseStack.mulPose(Axis.YP.rotationDegrees(spin));
-        poseStack.mulPose(Axis.XP.rotationDegrees(90.0F)); // 立着的面片 -> 平铺到地面
+        if (entity.upright()) {
+            // ★ 竖着的阵（作者 2026-10-10："手伸出去是穿过好几个竖着的魔法阵的感觉"）：
+            //   面片本来就在 XY 平面（法线 +Z）⇒ **不要摊平** ✓
+            //   先转到朝向（＝弹道方向，由生成方按 atan2(dx,dz) 算好 ✓），
+            //   再让它**在自己平面里**慢慢转（Zp）⇒ 像一道转着的门，手从中间穿过去 ✓
+            poseStack.mulPose(Axis.YP.rotationDegrees(entity.facingDegrees()));
+            poseStack.mulPose(Axis.ZP.rotationDegrees(spin));
+        } else {
+            poseStack.translate(0.0D, 0.03D, 0.0D);          // 稍微离地，避免和地面 z-fighting
+            poseStack.mulPose(Axis.YP.rotationDegrees(spin));
+            poseStack.mulPose(Axis.XP.rotationDegrees(90.0F)); // 立着的面片 -> 平铺到地面
+        }
         Matrix4f matrix = poseStack.last().pose();
 
         VertexConsumer consumer = buffer.getBuffer(RenderType.entityTranslucentEmissive(textureFor(entity)));

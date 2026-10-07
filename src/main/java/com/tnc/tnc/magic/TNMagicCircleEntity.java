@@ -45,8 +45,37 @@ public class TNMagicCircleEntity extends Entity {
     public static final int STYLE_STORM = 0;
     public static final int STYLE_LIGHT = 1;
     public static final int STYLE_DARK = 2;
+    /**
+     * ★ <b>暗系黑夜之手链的黑阵</b>（作者 2026-10-10：「给暗魔法专门做一个**黑色的**魔法阵」）✓
+     * —— 贴图是 {@code textures/entity/black_circle.png}（近黑＋极暗血红线条，生成器
+     * {@code tools/gen_black_circle.py}）✓。
+     *
+     * <p>它和 {@link #STYLE_DARK} 的区别：那个是**黑雾的边界线**（偏紫、可读性优先）；
+     * 这个是**手穿过去的门**（压暗、氛围优先）✓。
+     */
+    public static final int STYLE_DARK_HAND = 3;
 
     protected static final EntityDataAccessor<Integer> DATA_STYLE =
+            SynchedEntityData.defineId(TNMagicCircleEntity.class, EntityDataSerializers.INT);
+
+    /**
+     * ★ <b>竖着的阵</b>（作者 2026-10-10：「手伸出去是穿过好几个**竖着的**魔法阵的感觉，从 t3 开始」）✓
+     *
+     * <p>0 = 平铺在地面（原来的行为，**黑雾链的边界线仍然走这条** ✓ 向后兼容 ✓）；
+     * 1 = 立起来、面朝 {@link #facingDegrees()} ✓ —— 手沿弹道飞过去时**穿过**它 ✓。
+     */
+    protected static final EntityDataAccessor<Integer> DATA_UPRIGHT =
+            SynchedEntityData.defineId(TNMagicCircleEntity.class, EntityDataSerializers.INT);
+
+    /**
+     * 竖立时的朝向：**直接就是渲染器喂给 {@code Axis.YP.rotationDegrees(...)} 的度数** ✓。
+     *
+     * <p>为什么不复用实体自己的 yaw ✗：MC 的 yaw 约定（0 = +Z、90° = −X）与
+     * {@code Axis.YP} 的旋转方向不是一回事，隔一层换算很容易左右反 ✗。
+     * 这里由生成方按 {@code atan2(dx, dz)}（弹道方向）算好、同步成整数度 ✓ ——
+     * 渲染器拿到就能用，零歧义 ✓（而且阵是旋转对称的 ⇒ 就算差 180° 也看不出来 ✓）。
+     */
+    protected static final EntityDataAccessor<Integer> DATA_FACING =
             SynchedEntityData.defineId(TNMagicCircleEntity.class, EntityDataSerializers.INT);
 
     public TNMagicCircleEntity(EntityType<? extends TNMagicCircleEntity> type, Level level) {
@@ -62,9 +91,30 @@ public class TNMagicCircleEntity extends Entity {
 
     /** 生成后调用一次：半径（格）、存在时长（tick）、样式 ✓。 */
     public void configure(double radius, int lifeTicks, int style) {
+        this.configure(radius, lifeTicks, style, false, 0.0F);
+    }
+
+    /**
+     * 全参数版 ✓：`upright` = 立起来（手穿过去），`facingDegrees` = 立起来时面朝哪边 ✓。
+     *
+     * @param facingDegrees 直接给 {@code Axis.YP.rotationDegrees} 用的度数（见 {@link #DATA_FACING}）
+     */
+    public void configure(double radius, int lifeTicks, int style, boolean upright, float facingDegrees) {
         this.entityData.set(DATA_RADIUS, (int) Math.round(radius * 10.0D));
         this.entityData.set(DATA_LIFE, Math.max(1, lifeTicks));
         this.entityData.set(DATA_STYLE, style);
+        this.entityData.set(DATA_UPRIGHT, upright ? 1 : 0);
+        this.entityData.set(DATA_FACING, Math.round(facingDegrees));
+    }
+
+    /** 是竖着的阵吗（手穿过去的那种 ✓）。 */
+    public boolean upright() {
+        return this.entityData.get(DATA_UPRIGHT) == 1;
+    }
+
+    /** 竖立时的朝向度数（直接喂渲染器的 YP 旋转 ✓）。 */
+    public float facingDegrees() {
+        return this.entityData.get(DATA_FACING);
     }
 
     /** 样式（0 雷 / 1 光 ✓）。 */
@@ -85,6 +135,8 @@ public class TNMagicCircleEntity extends Entity {
         this.entityData.define(DATA_RADIUS, 30);
         this.entityData.define(DATA_LIFE, DEFAULT_LIFE);
         this.entityData.define(DATA_STYLE, STYLE_STORM);
+        this.entityData.define(DATA_UPRIGHT, 0);
+        this.entityData.define(DATA_FACING, 0);
     }
 
     @Override

@@ -248,9 +248,62 @@ public class TNNightGripEntity extends Entity {
         return STATS[Math.max(0, Math.min(STATS.length - 1, tier - 1))];
     }
 
-    /** 这一档的伤害半径（格）✓。 */
+    /**
+     * ★ <b>这一档的伤害半径</b>（格）—— 作者 2026-10-10：「**伤害半径肯定是要的**」✓
+     * ⇒ 取"原表"与"手的半高"里**大的那个** ✓：手越大，打得越远 ✓
+     * （t3 的手从 7.7 格涨到 15.3 格之后，半径也从 4 格跟着涨到 7.7 格 ✓；
+     *  t1/t2 的手还小，就仍然用原表 ⇒ **不会把低档削弱** ✓）。
+     */
     public double radius() {
-        return RADII[Math.max(0, Math.min(RADII.length - 1, tier - 1))];
+        double base = RADII[Math.max(0, Math.min(RADII.length - 1, tier - 1))];
+        return Math.max(base, handHalfExtent());
+    }
+
+    // ------------------------------------------------------------------
+    //  ★ 2026-10-10 追加：t3 起"手穿过一串**竖着的黑阵**"
+    //    作者：「给暗魔法专门做一个**黑色的**魔法阵」＋「手伸出去是穿过好几个**竖着的**魔法阵的感觉，
+    //    从 t3 开始」＋「**t 级越高魔法阵越大**」✓
+    // ------------------------------------------------------------------
+
+    /** 从这一档起，飞行途中留下竖着的黑阵 ✓。 */
+    private static final int SIGIL_TIER = 3;
+
+    /** 法阵半径 = 手的半高 × 这个系数（略大于手 ⇒ 是"穿过它"而不是"塞满它" ✓）；档位越高越大 ✓。 */
+    private static final double SIGIL_FACTOR = 1.15D;
+
+    /** 黑阵活多久（tick）—— 短一点，让"一串门"依次淡掉，而不是糊成一片 ✓。 */
+    private static final int SIGIL_LIFE = 26;
+
+    /** 每几 tick 留一个阵（飞行 12 tick ⇒ 约 6 个 ✓ 就是作者要的"好几个" ✓）。 */
+    private static final int SIGIL_SPACING = 2;
+
+    /** 天降（t5）时：在落点上方这几个高度各铺一个**平铺**的阵 ⇒ 手从上往下穿过它们 ✓。 */
+    private static final double[] SIGIL_RING_HEIGHTS = {5.0D, 11.0D};
+
+    /** 这一档的黑阵多大 ✓（t 级越高越大 ✓）。 */
+    private double sigilRadius() {
+        return handHalfExtent() * SIGIL_FACTOR;
+    }
+
+    /**
+     * 放一个黑阵 ✓。
+     *
+     * @param upright true = 竖着（手沿弹道穿过去 ✓）；false = 平铺（天降时手从上往下穿 ✓）
+     * @param facing  竖立时的朝向度数 —— **直接就是** {@code Axis.YP.rotationDegrees} 要的值 ✓；
+     *                由这里按 {@code atan2(dx, dz)}（弹道方向）算好再同步
+     *                （为什么不复用实体 yaw：见 {@code TNMagicCircleEntity.DATA_FACING} 的注释 ✓）
+     */
+    private void spawnSigil(ServerLevel server, Vec3 at, boolean upright, float facing) {
+        if (TNOrbEntities.MAGIC_CIRCLE == null) {
+            return;
+        }
+        TNMagicCircleEntity sigil = TNOrbEntities.MAGIC_CIRCLE.get().create(server);
+        if (sigil == null) {
+            return;
+        }
+        sigil.configure(sigilRadius(), SIGIL_LIFE, TNMagicCircleEntity.STYLE_DARK_HAND, upright, facing);
+        sigil.moveTo(at.x, at.y, at.z, 0.0F, 0.0F);
+        server.addFreshEntity(sigil);
     }
 
     /**
@@ -547,6 +600,13 @@ public class TNNightGripEntity extends Entity {
      */
     private void fall(LivingEntity caster) {
         Vec3 landing = arcEnd;
+
+        // ★ 天降（t5）：在落点上方铺几个**平铺**的黑阵 ⇒ 大手从天上砸下来、穿过它们 ✓
+        if (tier >= SIGIL_TIER && tickCount == 0 && level() instanceof ServerLevel server) {
+            for (double height : SIGIL_RING_HEIGHTS) {
+                spawnSigil(server, landing.add(0.0D, height, 0.0D), false, 0.0F);
+            }
+        }
         if (position().y - landing.y > SKYFALL_SPEED) {
             setPos(getX(), getY() - SKYFALL_SPEED, getZ());
             fallTrail();
@@ -617,6 +677,14 @@ public class TNNightGripEntity extends Entity {
 
         cord(caster);
         trail();
+
+        // ★ t3 起：沿弹道留下**竖着的黑阵** ⇒ 读感是"手穿过好几个魔法阵伸出去" ✓
+        //   （朝向 = 从起点指向当前手的水平方向 ✓；阵是旋转对称的，差 180° 也看不出来 ✓）
+        if (tier >= SIGIL_TIER && tickCount % SIGIL_SPACING == 0 && level() instanceof ServerLevel server) {
+            Vec3 out = position().subtract(arcStart);
+            float facing = (float) Math.toDegrees(Math.atan2(out.x, out.z));
+            spawnSigil(server, position(), true, facing);
+        }
 
         boolean arrived = progress >= 1.0D
                 || (target != null && position().distanceTo(end) <= GRAB_DISTANCE);
