@@ -82,7 +82,7 @@ public final class TNSolarJudgmentRenderer extends EntityRenderer<TNSolarJudgmen
         //     自己手搓的那套 drawSigil 已删除 ✗（两套法阵叠在一起就是"有问题"的来源 ✗）
         // 出场渐显（照 TNSigilRenderer 的写法 ✓，免得"啪"地凭空出现 ✗）
         float fade = (float) Math.min(1.0D, (field.tickCount + partial) / 8.0D);
-        TNSigilRenderer.drawSigil(out, pose, Vec3.ZERO, 5.0D, true, age, fade);
+        TNSigilRenderer.drawSigil(out, pose, Vec3.ZERO, 15.0D, true, age, fade);  // 作者：t4/t5 法阵都变 3 倍 ✗（5 → 15 ✓）
         drawSun(out, pose, sun, age, radius);
         drawBeams(out, pose, sun, radius, age, field.beams());
     }
