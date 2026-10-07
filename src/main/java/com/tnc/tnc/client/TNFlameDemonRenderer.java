@@ -97,7 +97,9 @@ public final class TNFlameDemonRenderer extends EntityRenderer<TNFlameDemonField
             // ⚠️ orbPosition() 给的是**世界坐标** ✓ ⇒ 减掉实体位置换成相对坐标 ✗
             Vec3 rel = field.orbPosition(i).subtract(field.position());
             drawPillar(stack, buffers, rel, age);
-            drawSun(out, pose, rel, age, i);
+            // ⚠️ 作者 2026-10-05：「柱顶的光球不要用光滑的几何体，用粒子球」✓
+            //   ⇒ 那 3 片正交圆盘**已删除** ✗；光球改由 TNFlameDemonField.tick()
+            //      每 tick 在 orbPosition 处撒**染色粒子球** ✓（服务端发 ⇒ 所有玩家可见 ✓）
             drawLaser(out, pose, field, rel, i);
         }
     }
@@ -144,20 +146,6 @@ public final class TNFlameDemonRenderer extends EntityRenderer<TNFlameDemonField
     //  ③ 柱顶那颗"太阳"（三片正交发光圆盘 + 一圈火环）
     // ------------------------------------------------------------------
 
-    private static void drawSun(VertexConsumer out, Matrix4f pose, Vec3 at, double age, int index) {
-        float pulse = (float) (0.92D + 0.08D * Math.sin(age * 0.22D + index));
-        double r = 0.85D * pulse;
-        // 外层暗红（三片正交 ⇒ 从任何角度看都是一团光 ✓）
-        for (Vec3 axis : new Vec3[]{UP, AXIS_X, AXIS_Z}) {
-            WaterGeometry.disk(out, pose, at, axis, r * 1.35D, 1.00F, 0.34F, 0.05F, 1.0F);
-        }
-        // 内层亮黄（"太阳"的感觉就靠这一层 ✓）
-        for (Vec3 axis : new Vec3[]{UP, AXIS_X, AXIS_Z}) {
-            WaterGeometry.disk(out, pose, at, axis, r * 0.72D, 1.00F, 0.86F, 0.32F, 1.0F);
-        }
-        // 绕着飞的火环（作者要"圆球附近有火焰粒子飞舞"✓ —— 几何环比真粒子更省 ✓）
-        WaterGeometry.ring(out, pose, at, UP, r * 1.9D, 0.13D, age * 0.05D + index, 1.0F);
-    }
 
     // ------------------------------------------------------------------
     //  ④ 激光：从圆球射向这一条线当前锁定的目标

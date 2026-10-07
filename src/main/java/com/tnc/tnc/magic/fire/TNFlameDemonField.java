@@ -140,6 +140,26 @@ public class TNFlameDemonField extends Entity {
 
     @Override
     public void tick() {
+        // ★ 作者 2026-10-05：「柱顶的光球不要用光滑的几何体，用**粒子球**」✓
+        //   ⇒ 渲染器里那 3 片正交圆盘已删 ✗；这里每 tick 在 orbPosition 撒一层染色粒子壳 ✓
+        //     服务端发 ⇒ 所有玩家可见 ✓；粒子寿命会把球"糊"成一个会呼吸的火球 ✓
+        if (level() instanceof net.minecraft.server.level.ServerLevel sl) {
+            for (int i = 0; i < 4; i++) {
+                net.minecraft.world.phys.Vec3 o = orbPosition(i);
+                for (int p = 0; p < ORB_PARTICLES; p++) {
+                    // 球面附近随机取点（半径 0.55~0.85 ⇒ 球壳 ✓，中心也补几颗 ⇒ 有芯 ✓）
+                    double theta = Math.random() * Math.PI * 2.0D;
+                    double phi = Math.acos(2.0D * Math.random() - 1.0D);
+                    double rr = 0.55D + Math.random() * 0.30D;
+                    double dx = Math.sin(phi) * Math.cos(theta) * rr;
+                    double dy = Math.cos(phi) * rr;
+                    double dz = Math.sin(phi) * Math.sin(theta) * rr;
+                    // 取色：靠外偏红、靠内偏白黄（和火系色板一致 ✓）
+                    double shade = (rr - 0.55D) / 0.30D * 0.85D;
+                    fireDust(sl, o.x + dx, o.y + dy, o.z + dz, shade, 1.5F + (float) (1.0D - shade));
+                }
+            }
+        }
         super.tick();
         if (this.level().isClientSide()) {
             return;
@@ -306,5 +326,28 @@ public class TNFlameDemonField extends Entity {
         field.configure(caster, radius, lifeTicks, beamDamage, shake);
         level.addFreshEntity(field);
         return field;
+    }
+
+    /** 柱顶光球的**粒子数**（每颗每 tick ✓）。 */
+    private static final int ORB_PARTICLES = 14;
+
+    /** 撒一颗火系染色粒子（同 PixelFlame 色板 ✓）。 */
+    private static void fireDust(net.minecraft.server.level.ServerLevel sl,
+                                 double x, double y, double z, double shade, float scale) {
+        float r;
+        float g;
+        float b;
+        if (shade < 0.18D) {
+            r = 1.00F; g = 0.96F; b = 0.80F;          // 白热芯 ✓
+        } else if (shade < 0.42D) {
+            r = 1.00F; g = 0.78F; b = 0.30F;          // 亮黄 ✓
+        } else if (shade < 0.68D) {
+            r = 1.00F; g = 0.52F; b = 0.12F;          // 橙 ✓
+        } else {
+            r = 0.86F; g = 0.24F; b = 0.06F;          // 深橙红 ✓
+        }
+        sl.sendParticles(new net.minecraft.core.particles.DustParticleOptions(
+                        new org.joml.Vector3f(r, g, b), scale),
+                x, y, z, 1, 0.02D, 0.02D, 0.02D, 0.0D);
     }
 }
