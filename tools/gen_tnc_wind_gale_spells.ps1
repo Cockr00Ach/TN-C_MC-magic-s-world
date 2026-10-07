@@ -179,16 +179,31 @@ $areaImpact  "cost": { "exhaust": 0.0, "cooldown_duration": $cooldown }
 
 #                       id              tier radius sec blades coef scale cd   pierce
 #
-# scale is measured against WHATEVER model is in the template above. The model
-# changed on 2026-10-10 (lightingball, 0.375 blocks -> windblade, 2.16 blocks tall,
-# i.e. 5.76x bigger), and these numbers were deliberately LEFT ALONE, so the blades
-# went from 0.19..0.53 blocks to 1.08..3.02 blocks tall. Recompute them if you swap
-# the model again:  final size = model size * scale.
-Gale-Spell 'gale'            1 3.0 15.0 0 1.0 0.5 2.5 0
-Gale-Spell 'great_gale'      2 4.0 20.0 0 1.4 0.7 3.5 0
-Gale-Spell 'vast_gale'       3 5.0 30.0 0 1.8 0.9 5.0 0
-Gale-Spell 'giant_gale'      4 6.0 30.0 0 2.2 1.2 7.0 0
-Gale-Spell 'wind_god_gale'   5 7.0 30.0 2 2.6 1.4 10.0 1
+# 2026-10-10 (author): "line model size: t2 x2, t3 x5, tornado x2, t4 x10,
+#   tornado x5, t5 x20 and tornado x8, and spawn TWO tornados, further apart"
+# (the author's original wording is Chinese and is quoted in full in the round-5
+#  record under docs/spells/ -- kept out of this file because every file under
+#  tools/ must stay ASCII-only.)
+#
+# The author's "xN" is a MULTIPLIER against the model's own size, and 1x is the
+# model as generated -- this is the same convention the night-hand chain settled
+# on (TNNightGripEntity: SIZE_MULTIPLIER == the author's words, actual render
+# scale = BASE_SCALE * multiplier). The blade model measures 1.179 blocks wide
+# (tools/gen_wind_blade_model.py), so the scale column below is the multiplier
+# itself and 1.0 == a 1.179-block crescent.
+#
+# NOTE: The t1/t2 rows here and TNTornadoEntity.BLADE_SIZE_MULTIPLIER (t3/t4/t5,
+# which is a Java entity and not an engine projectile) are the SAME ladder split
+# across two mechanisms: 1 / 2 / 5 / 10 / 20. Change one, change the other.
+#
+# NOTE: This column only affects t1/t2. t3+ are SELF spells that summon a tornado,
+# so their `scale` argument is INERT (see $isTornado above) -- it is kept at a
+# harmless value so the generator stays a single readable table.
+Gale-Spell 'gale'            1 3.0 15.0 0 1.0 1.0  2.5 0
+Gale-Spell 'great_gale'      2 4.0 20.0 0 1.4 2.0  3.5 0
+Gale-Spell 'vast_gale'       3 5.0 30.0 0 1.8 5.0  5.0 0
+Gale-Spell 'giant_gale'      4 6.0 30.0 0 2.2 10.0 7.0 0
+Gale-Spell 'wind_god_gale'   5 7.0 30.0 2 2.6 20.0 10.0 1
 
 Write-Output ''
 Write-Output ('done -> ' + $dest)

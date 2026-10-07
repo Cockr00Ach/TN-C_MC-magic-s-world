@@ -35,7 +35,7 @@ import java.util.UUID;
  * —— 作者要的"风刃"就是它 ✓，龙卷风只是换了个发射方式 ✓。
  *
  * <h2>命中</h2>
- * 直线飞 ＋ 每 tick 查一次碰撞盒（{@link #HIT_RADIUS}）✓；
+ * 直线飞 ＋ 每 tick 查一次碰撞盒（{@link #hitRadius()}）✓；
  * 打到人 ⇒ 伤害 ＋ 往外推一点（风刃是"斩"出去的 ✓）⇒ 自己消失 ✓；
  * 撞到方块 ⇒ 消失 ✓（不穿墙 ✗）；飞满 {@link #MAX_LIFE} tick ⇒ 消失 ✓。
  */
@@ -59,14 +59,45 @@ public class TNWindBladeEntity extends Entity {
     private static final EntityDataAccessor<Float> DATA_DAMAGE =
             SynchedEntityData.defineId(TNWindBladeEntity.class, EntityDataSerializers.FLOAT);
 
-    /** 命中判定半径 ✓（月牙很薄，给宽一点才打得到 ✗ 不然老是"穿过去"）。 */
-    private static final double HIT_RADIUS = 1.1D;
+    /**
+     * 这一发的**尺寸倍率** ✓（1.0 = 模型原大小）—— 作者 2026-10-10 给的逐档表：
+     * t3/t4/t5 = <b>5 / 10 / 20 倍</b> ✓。
+     *
+     * <p>为什么要同步：渲染（{@code TNWindBladeRenderer}）和剔除盒子都在客户端读它 ✓
+     * ⇒ 两边读同一个数，永远不会"画多大"和"判定多大"各说各话 ✗。
+     */
+    private static final EntityDataAccessor<Float> DATA_SIZE =
+            SynchedEntityData.defineId(TNWindBladeEntity.class, EntityDataSerializers.FLOAT);
 
-    /** 最长活多久（tick）✓ —— 0.85 格/tick × 40 ≈ 34 格，够飞出视野 ✓。 */
+    /** 命中判定半径的**基准** ✓（1 倍时的值 —— 月牙很薄，给宽一点才打得到 ✗ 不然老是"穿过去"）。 */
+    private static final double BASE_HIT_RADIUS = 1.1D;
+
+    /**
+     * 命中半径的**上限** ✓。
+     *
+     * <p>★ 为什么不跟着尺寸**线性**放大 ✗：20 倍时月牙跨度约 <b>23.6 格</b>，
+     * 线性放大就是 **22 格的判定球** —— 风刃**一出生就够得到龙卷风旁边的怪** ⇒
+     * 当场命中、当场消失，**根本飞不出去** ✗（"持续向外发射风刃"就废了 ✗）。
+     * 所以按 <b>√尺寸</b> 放大（面积直觉）再封顶 ✓：5/10/20 倍 → 约 2.5 / 3.5 / 4.9 格 ✓。
+     */
+    private static final double MAX_HIT_RADIUS = 5.0D;
+
+    /**
+     * 最长活多久（tick）✓ —— 0.85 格/tick × 40 ≈ 34 格，够飞出视野 ✓。
+     *
+     * <p>⚠️ 大尺寸的刃要**多飞一会儿** ✗：它出生点离风眼只有 0.9 格，而判定半径
+     * 20 倍时是 5 格 ⇒ 一出生就可能够到旁边的怪。给足 {@code MAX_LIFE} 才不至于
+     * "刚出门就没了" ✓（真正的保护是 {@link #MAX_HIT_RADIUS} 的封顶 ✓）。
+     */
     private static final int MAX_LIFE = 40;
 
-    /** 渲染缩放 ✓（和 t1/t2 那片的档位表一致：月牙最大跨度 1.179 格 ⇒ 约 1.2 格宽）。 */
-    private static final double SIZE_SCALE = 1.0D;
+    /**
+     * 渲染缩放的**基准** ✓ —— 月牙模型本身最大跨度 1.179 格 ⇒ 1 倍 ≈ 1.2 格宽 ✓。
+     *
+     * <p>口径与黑夜之手那条链一致 ✓：<b>作者说的"倍"就是 {@code SIZE_MULTIPLIER}</b>，
+     * 实际渲染缩放 = {@code BASE_SCALE × 倍率} ✓（见 {@code TNNightGripEntity}）。
+     */
+    private static final double BASE_SCALE = 1.0D;
 
     private UUID ownerId;
 
@@ -82,6 +113,7 @@ public class TNWindBladeEntity extends Entity {
         this.entityData.define(DATA_SPIN_RATE, 20.0F);
         this.entityData.define(DATA_SPIN, 0.0F);
         this.entityData.define(DATA_DAMAGE, 5.0F);
+        this.entityData.define(DATA_SIZE, 1.0F);
     }
 
     /**
@@ -92,10 +124,11 @@ public class TNWindBladeEntity extends Entity {
      * @param speed  速度（格/tick）
      * @param damage 命中伤害
      * @param owner  发射者（可以 null ✓）
+     * @param size   尺寸倍率（1.0 = 原大小 ✓；作者逐档表 t3/t4/t5 = 5/10/20 ✓）
      * @return 生成失败（实体类型没注册）时返回 null ✓
      */
     public static TNWindBladeEntity shoot(ServerLevel level, Vec3 pos, Vec3 dir, double speed,
-                                          float damage, LivingEntity owner) {
+                                          float damage, LivingEntity owner, double size) {
         if (TNOrbEntities.WIND_BLADE == null || !TNOrbEntities.WIND_BLADE.isPresent()) {
             return null;
         }
@@ -108,6 +141,7 @@ public class TNWindBladeEntity extends Entity {
         blade.setPos(pos.x, pos.y, pos.z);
         blade.setDeltaMovement(unit.scale(speed));
         blade.entityData.set(DATA_DAMAGE, damage);
+        blade.entityData.set(DATA_SIZE, (float) size);
         // 朝向：先 yaw 再 pitch（和引擎投射物同一套算法 ✓）
         blade.entityData.set(DATA_YAW, (float) Math.toDegrees(Math.atan2(unit.x, unit.z)));
         blade.entityData.set(DATA_PITCH, (float) -Math.toDegrees(Math.asin(unit.y)));
@@ -164,9 +198,10 @@ public class TNWindBladeEntity extends Entity {
     /** 这一 tick 撞到的第一个人（排除发射者与旁观者模式 ✓）。 */
     private LivingEntity firstHit() {
         LivingEntity owner = owner();
+        double r = hitRadius();
         List<LivingEntity> hits = level().getEntitiesOfClass(LivingEntity.class,
-                new AABB(getX() - HIT_RADIUS, getY() - HIT_RADIUS, getZ() - HIT_RADIUS,
-                        getX() + HIT_RADIUS, getY() + HIT_RADIUS, getZ() + HIT_RADIUS),
+                new AABB(getX() - r, getY() - r, getZ() - r,
+                        getX() + r, getY() + r, getZ() + r),
                 e -> e.isAlive() && e != owner && !e.isSpectator());
         return hits.isEmpty() ? null : hits.get(0);
     }
@@ -198,8 +233,21 @@ public class TNWindBladeEntity extends Entity {
         this.entityData.set(DATA_SPIN_RATE, rate);
     }
 
+    /** 尺寸倍率（1.0 = 原大小 ✓）。 */
+    public float sizeMultiplier() {
+        return this.entityData.get(DATA_SIZE);
+    }
+
+    /** 渲染缩放 = 基准 × 倍率 ✓（渲染器读这个，和判定半径同源 ✓）。 */
     public double sizeScale() {
-        return SIZE_SCALE;
+        return BASE_SCALE * sizeMultiplier();
+    }
+
+    /**
+     * 命中判定半径 ✓ —— 按 <b>√倍率</b> 放大并封顶（理由见 {@link #MAX_HIT_RADIUS} ✗）。
+     */
+    public double hitRadius() {
+        return Math.min(MAX_HIT_RADIUS, BASE_HIT_RADIUS * Math.sqrt(sizeMultiplier()));
     }
 
     /** 发射者（可能已下线 ⇒ null ✓）。 */
@@ -242,6 +290,17 @@ public class TNWindBladeEntity extends Entity {
     @Override
     public boolean isPushable() {
         return false;
+    }
+
+    /**
+     * 视锥剔除用的包围盒：<b>按尺寸放大</b> ✓。
+     *
+     * <p>为什么必须给 ✗：t5 的月牙跨度约 <b>23.6 格</b>，而本实体碰撞箱只有 1 格 ⇒
+     * 原版按碰撞箱剔除 ⇒ 风刃**中心一出屏就整片消失** ✗（黑夜之手同款坑 ✓）。
+     */
+    @Override
+    public AABB getBoundingBoxForCulling() {
+        return super.getBoundingBoxForCulling().inflate(sizeScale() * 0.6D);
     }
 
     @Override

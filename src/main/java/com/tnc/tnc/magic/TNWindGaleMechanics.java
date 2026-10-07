@@ -125,21 +125,45 @@ public final class TNWindGaleMechanics {
         if (flat.lengthSqr() < 1.0E-6D) {
             flat = new Vec3(0.0D, 0.0D, 1.0D);       // 正上/正下看时给个兜底方向 ✓
         }
-        flat = flat.normalize().scale(SPAWN_DISTANCE);
-        Vec3 at = player.position().add(flat);
+        flat = flat.normalize();
 
-        // 找地面 ✓
+        int index = Math.max(3, Math.min(5, tier)) - 3;
+        int count = TNTornadoEntity.TORNADO_COUNT[index];
+        // 垂直方向（用来把 t5 的两个漩涡左右拉开 ✓）
+        Vec3 side = new Vec3(-flat.z, 0.0D, flat.x);
+
+        // ⚠️ 距离必须跟着**尺寸**走 ✗：t5 的漩涡宽约 15 格，若还按老的 3 格摆，
+        // 施法者会直接站在漩涡**里面**（而且被自己的风刃判定够到 ✗）。
+        // 取 "基准 + 外壁半径" ⇒ 近侧外壁刚好擦着施法者身前 ✓。
+        double forward = SPAWN_DISTANCE + TNTornadoEntity.spawnRadiusFor(tier);
+
+        for (int i = 0; i < count; i++) {
+            // count == 1 ⇒ offset 0 ✓；count == 2 ⇒ ±间距/2 ✓
+            double offset = count == 1 ? 0.0D : (i == 0 ? -0.5D : 0.5D) * TNTornadoEntity.PAIR_SEPARATION;
+            Vec3 at = player.position()
+                    .add(flat.scale(forward))
+                    .add(side.scale(offset));
+
+            double y = groundY(level, at);
+            TNTornadoEntity.summon(level, new Vec3(at.x, y, at.z), player, tier);
+        }
+    }
+
+    /**
+     * 从 {@code at} 往下找最多 {@link #GROUND_SEARCH} 格的地面 ✓，返回该放的高度。
+     *
+     * <p>直接放在眼睛高度会让龙卷风浮在空中 ✗（模型底边是贴地的 ✓）；
+     * 找不到地面（比如站在悬崖边）就用原高度 ✓，宁可浮一点也不掉进虚空 ✗。
+     */
+    private static double groundY(ServerLevel level, Vec3 at) {
         net.minecraft.core.BlockPos.MutableBlockPos pos =
                 new net.minecraft.core.BlockPos.MutableBlockPos(at.x, at.y, at.z);
-        double y = at.y;
         for (int i = 0; i <= GROUND_SEARCH; i++) {
             if (!level.getBlockState(pos).isAir()) {
-                y = pos.getY() + 1.0D;               // 站在实心方块顶上 ✓
-                break;
+                return pos.getY() + 1.0D;            // 站在实心方块顶上 ✓
             }
             pos.move(0, -1, 0);
         }
-
-        TNTornadoEntity.summon(level, new Vec3(at.x, y, at.z), player, tier);
+        return at.y;
     }
 }

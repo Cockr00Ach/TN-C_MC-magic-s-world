@@ -62,8 +62,34 @@ public class TNTornadoEntity extends Entity {
     /** 每档每次甩几发风刃 ✓。 */
     public static final int[] BLADES_PER_BURST = { 3, 5, 7 };
 
-    /** 每档的渲染缩放 ✓（模型本体 1.875 格宽 ⇒ t3/t4/t5 ≈ 1.9/2.4/3.0 格）。 */
-    public static final double[] SIZE_SCALE = { 1.0D, 1.3D, 1.6D };
+    /**
+     * 每档龙卷风的渲染缩放 ✓ —— ★ 作者 2026-10-10 逐档表：t3 <b>2 倍</b> / t4 <b>5 倍</b> /
+     * t5 <b>8 倍</b> ✓（索引 = tier − 3）。
+     *
+     * <p>口径和黑夜之手那条链一致 ✓：<b>作者说的"倍"就是倍率本身</b> ⇒ 模型本体
+     * 1.875 格宽 ⇒ 实际约 <b>3.75 / 9.4 / 15 格</b> 宽 ✓。
+     */
+    public static final double[] SIZE_MULTIPLIER = { 2.0D, 5.0D, 8.0D };
+
+    /**
+     * 每档甩出去的风刃**尺寸倍率** ✓ —— 作者逐档表：t3 <b>5</b> / t4 <b>10</b> / t5 <b>20</b> 倍 ✓。
+     *
+     * <p>⚠️ 和 {@link #SIZE_MULTIPLIER} 是**两张表** ✗：龙卷风 2/5/8、它吐的刃 5/10/20 ✓
+     * —— 别合并成一个数（作者是分开给的 ✓）。
+     */
+    public static final double[] BLADE_SIZE_MULTIPLIER = { 5.0D, 10.0D, 20.0D };
+
+    /** 每档召唤几个龙卷风 ✓ —— 只有 t5 是 2 个（作者："t5……并且生成两个龙卷风" ✓）。 */
+    public static final int[] TORNADO_COUNT = { 1, 1, 2 };
+
+    /**
+     * t5 两个龙卷风之间的**间距**（格）✓ —— 作者："间距要大一些" ✓。
+     *
+     * <p>为什么给到 {@value #PAIR_SEPARATION}：t5 的龙卷风是 <b>8 倍</b>、宽约 15 格 ✗
+     * ⇒ 间距小于 15 会**互相穿模**、看着是"一坨" ✗。取 24 格（约 1.6 个直径）
+     * ⇒ 两个漩涡各自清楚、中间留得出空隙 ✓。
+     */
+    public static final double PAIR_SEPARATION = 24.0D;
 
     /** 每档风刃的单发伤害 ✓。 */
     public static final float[] BLADE_DAMAGE = { 5.0F, 6.0F, 7.0F };
@@ -176,22 +202,46 @@ public class TNTornadoEntity extends Entity {
     private void fireBlades(int tier, int age) {
         int count = BLADES_PER_BURST[tier - 3];
         float damage = BLADE_DAMAGE[tier - 3];
+        double size = bladeSizeMultiplier();
         double phase = (age / (double) FIRE_INTERVAL) * 0.7D;   // 每轮错开一点 ✓
+        double spawnR = spawnRadius();
 
         for (int i = 0; i < count; i++) {
             double angle = phase + (Math.PI * 2.0D / count) * i;
             Vec3 dir = new Vec3(Math.cos(angle), Math.tan(BLADE_PITCH), Math.sin(angle)).normalize();
+            // 出生点挪到**漩涡外壁** ✓：不然大尺寸的刃一出生就在风眼里，
+            // 判定半径 5 格 ⇒ 立刻够到被卷进来的怪 ✗（见 TNWindBladeEntity#MAX_HIT_RADIUS）
+            Vec3 at = position().add(Math.cos(angle) * spawnR, 0.9D, Math.sin(angle) * spawnR);
             TNWindBladeEntity blade = TNWindBladeEntity.shoot(
-                    (ServerLevel) level(), position().add(0.0D, 0.9D, 0.0D), dir, BLADE_SPEED, damage, owner());
+                    (ServerLevel) level(), at, dir, BLADE_SPEED, damage, owner(), size);
             if (blade != null) {
                 // 让风刃自己转（视觉：斩击在飞的时候是转的 ✓）
                 blade.setSpinRate((float) (18.0D + random.nextDouble() * 10.0D));
             }
         }
 
-        // 甩刃的一瞬间来一圈风（视觉反馈 ✓）
+        // 甩刃的一瞬间来一圈风（视觉反馈 ✓）—— 半径跟着漩涡大小走 ✓
         ((ServerLevel) level()).sendParticles(net.minecraft.core.particles.ParticleTypes.SWEEP_ATTACK,
-                getX(), getY() + 0.9D, getZ(), 4, 0.8D, 0.2D, 0.8D, 0.0D);
+                getX(), getY() + 0.9D, getZ(), 4, spawnR * 0.6D, 0.2D, spawnR * 0.6D, 0.0D);
+    }
+
+    /**
+     * 风刃的出生半径 ✓ —— 取漩涡的**外壁** ✓。
+     *
+     * <p>模型本体 1.875 格宽 ⇒ 外壁半径 = {@code 0.9375 × 尺寸倍率} ✓
+     * （t3 ≈ 1.9 / t4 ≈ 4.7 / t5 ≈ 7.5 格 ✓）。
+     */
+    public double spawnRadius() {
+        return 0.9375D * sizeScale();
+    }
+
+    /**
+     * 静态版的外壁半径 ✓ —— 给"还没生成出来"的召唤方用 ✓
+     * （{@link TNWindGaleMechanics} 要靠它决定站多远才不会被自己的漩涡吞掉 ✓）。
+     */
+    public static double spawnRadiusFor(int tier) {
+        int index = Mth_clamp(tier, 3, 5) - 3;
+        return 0.9375D * SIZE_MULTIPLIER[index];
     }
 
     /**
@@ -202,9 +252,12 @@ public class TNTornadoEntity extends Entity {
      */
     private void suckIn(int tier) {
         LivingEntity owner = owner();
+        // 半径跟着尺寸走 ✓，高度也跟着（大漩涡更高 ✓）
+        double radius = suckRadius();
+        double halfHeight = 2.0D + 1.5D * (tier - 3);
         List<LivingEntity> targets = level().getEntitiesOfClass(LivingEntity.class,
-                new AABB(getX() - SUCK_RADIUS, getY() - 2.0D, getZ() - SUCK_RADIUS,
-                        getX() + SUCK_RADIUS, getY() + 4.0D, getZ() + SUCK_RADIUS),
+                new AABB(getX() - radius, getY() - halfHeight, getZ() - radius,
+                        getX() + radius, getY() + halfHeight * 2.0D, getZ() + radius),
                 e -> e.isAlive() && e != owner && !(e instanceof Player));
         for (LivingEntity target : targets) {
             Vec3 pull = position().subtract(target.position());
@@ -212,7 +265,7 @@ public class TNTornadoEntity extends Entity {
             if (dist < 0.01D) {
                 continue;
             }
-            double strength = 0.32D * (1.0D - Math.min(1.0D, dist / SUCK_RADIUS));
+            double strength = 0.32D * (1.0D - Math.min(1.0D, dist / radius));
             target.push(pull.x / dist * strength, 0.06D, pull.z / dist * strength);
             target.hurtMarked = true;
             if (tier >= 4) {
@@ -237,9 +290,28 @@ public class TNTornadoEntity extends Entity {
         return getSpin();
     }
 
-    /** 渲染缩放 ✓（渲染器读它，和"甩刃范围"同一档 ✓）。 */
+    /** 渲染缩放 ✓（渲染器读它 ✓）。★ 作者逐档表：2/5/8 倍 ✓。 */
     public double sizeScale() {
-        return SIZE_SCALE[tier() - 3];
+        return SIZE_MULTIPLIER[tier() - 3];
+    }
+
+    /**
+     * 它甩出去的风刃该多大 ✓。★ 作者逐档表：5/10/20 倍 ✓。
+     *
+     * <p>和 {@link #sizeScale()} **不是一个数** ✗ —— 龙卷风 2/5/8、刃 5/10/20 ✓。
+     */
+    public double bladeSizeMultiplier() {
+        return BLADE_SIZE_MULTIPLIER[tier() - 3];
+    }
+
+    /**
+     * 卷人半径 ✓ —— 跟着**尺寸**放大 ✓。
+     *
+     * <p>⚠️ 不放大就会很怪 ✗：t5 的龙卷风宽约 15 格，却只卷 4.5 格内的东西 ⇒
+     * 站在"漩涡里"的怪反而不被卷 ✗。按 √尺寸 放大（面积直觉 ✓），t5 ≈ 9 格 ✓。
+     */
+    public double suckRadius() {
+        return SUCK_RADIUS * Math.sqrt(sizeScale() / SIZE_MULTIPLIER[0]);
     }
 
     private float getSpin() {
@@ -292,6 +364,24 @@ public class TNTornadoEntity extends Entity {
     @Override
     public boolean hurt(DamageSource source, float amount) {
         return false;
+    }
+
+    /**
+     * 视锥剔除用的包围盒：<b>按档位放大</b> ✓。
+     *
+     * <p>为什么必须给 ✗：t5 的龙卷风宽约 <b>15 格</b>，而本实体的碰撞箱只有 1 格 ⇒
+     * 原版按碰撞箱剔除 ⇒ 龙卷风**中心转出屏幕时整根会突然消失** ✗
+     * （黑夜之手/天使踩过同一类坑 ✓，见 {@code TNNightGripEntity#getBoundingBoxForCulling}）。
+     */
+    @Override
+    public AABB getBoundingBoxForCulling() {
+        return super.getBoundingBoxForCulling().inflate(0.9375D * sizeScale());
+    }
+
+    @Override
+    public boolean shouldRenderAtSqrDistance(double distance) {
+        // 龙卷风很大 ✗：按碰撞箱的距离剔除会让它"远远地就没了" ⇒ 放到 96 格 ✓
+        return distance < 96.0D * 96.0D;
     }
 
     @Override
