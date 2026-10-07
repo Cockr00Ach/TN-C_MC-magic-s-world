@@ -1,0 +1,251 @@
+package com.tnc.tnc.magic;
+
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+
+import java.util.List;
+import java.util.UUID;
+
+/**
+ * ★ <b>飞出去的风刃</b>（龙卷风甩出来的那一片，2026-10-10）✓
+ *
+ * <p>作者要的是「龙卷风……<b>持续向外发射风刃</b>」✓ —— 所以这是一个**自己的投射物实体**，
+ * 不走引擎那条投射物路（引擎的投射物必须挂在一次施法上 ✗，而龙卷风是持续生成的，
+ * 没有"那一次施法"可用 ✗）。
+ *
+ * <h2>为什么不用引擎的投射物</h2>
+ * 引擎的 {@code SpellProjectile} 每发都要一个 spell 上下文 ＋ 一次 release 流程；
+ * 龙卷风每 14 tick 就要吐 3~7 发、连吐十几秒 ⇒ 那条路又重又绕 ✗。
+ * 本仓已有自己的投射物先例（火系的 {@code TNFireBoltEntity}、水系的 {@code TNWaterBoltEntity}）✓，
+ * 这里就是同一个做法 ✓。
+ *
+ * <h2>模型</h2>
+ * 用的就是**月牙**（{@code tnc:projectile/windblade} ✓，和 t1/t2 飞出去的那片同一个模型 ✓）
+ * —— 作者要的"风刃"就是它 ✓，龙卷风只是换了个发射方式 ✓。
+ *
+ * <h2>命中</h2>
+ * 直线飞 ＋ 每 tick 查一次碰撞盒（{@link #HIT_RADIUS}）✓；
+ * 打到人 ⇒ 伤害 ＋ 往外推一点（风刃是"斩"出去的 ✓）⇒ 自己消失 ✓；
+ * 撞到方块 ⇒ 消失 ✓（不穿墙 ✗）；飞满 {@link #MAX_LIFE} tick ⇒ 消失 ✓。
+ */
+public class TNWindBladeEntity extends Entity {
+
+    /** 飞行的方向（单位向量）✓ —— 同步给客户端，渲染朝向用。 */
+    private static final EntityDataAccessor<Float> DATA_YAW =
+            SynchedEntityData.defineId(TNWindBladeEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> DATA_PITCH =
+            SynchedEntityData.defineId(TNWindBladeEntity.class, EntityDataSerializers.FLOAT);
+
+    /** 自转速度（度/tick）✓ —— "斩击在飞的时候是转的"。 */
+    private static final EntityDataAccessor<Float> DATA_SPIN_RATE =
+            SynchedEntityData.defineId(TNWindBladeEntity.class, EntityDataSerializers.FLOAT);
+
+    /** 当前自转角 ✓。 */
+    private static final EntityDataAccessor<Float> DATA_SPIN =
+            SynchedEntityData.defineId(TNWindBladeEntity.class, EntityDataSerializers.FLOAT);
+
+    /** 这一发的基础伤害 ✓。 */
+    private static final EntityDataAccessor<Float> DATA_DAMAGE =
+            SynchedEntityData.defineId(TNWindBladeEntity.class, EntityDataSerializers.FLOAT);
+
+    /** 命中判定半径 ✓（月牙很薄，给宽一点才打得到 ✗ 不然老是"穿过去"）。 */
+    private static final double HIT_RADIUS = 1.1D;
+
+    /** 最长活多久（tick）✓ —— 0.85 格/tick × 40 ≈ 34 格，够飞出视野 ✓。 */
+    private static final int MAX_LIFE = 40;
+
+    /** 渲染缩放 ✓（和 t1/t2 那片的档位表一致：月牙最大跨度 1.179 格 ⇒ 约 1.2 格宽）。 */
+    private static final double SIZE_SCALE = 1.0D;
+
+    private UUID ownerId;
+
+    public TNWindBladeEntity(EntityType<? extends TNWindBladeEntity> type, Level level) {
+        super(type, level);
+        this.noPhysics = true;
+    }
+
+    @Override
+    protected void defineSynchedData() {
+        this.entityData.define(DATA_YAW, 0.0F);
+        this.entityData.define(DATA_PITCH, 0.0F);
+        this.entityData.define(DATA_SPIN_RATE, 20.0F);
+        this.entityData.define(DATA_SPIN, 0.0F);
+        this.entityData.define(DATA_DAMAGE, 5.0F);
+    }
+
+    /**
+     * 发射一片风刃 ✓。
+     *
+     * @param pos    出发点
+     * @param dir    方向（会被归一化 ✓）
+     * @param speed  速度（格/tick）
+     * @param damage 命中伤害
+     * @param owner  发射者（可以 null ✓）
+     * @return 生成失败（实体类型没注册）时返回 null ✓
+     */
+    public static TNWindBladeEntity shoot(ServerLevel level, Vec3 pos, Vec3 dir, double speed,
+                                          float damage, LivingEntity owner) {
+        if (TNOrbEntities.WIND_BLADE == null || !TNOrbEntities.WIND_BLADE.isPresent()) {
+            return null;
+        }
+        TNWindBladeEntity blade = TNOrbEntities.WIND_BLADE.get().create(level);
+        if (blade == null) {
+            return null;
+        }
+        Vec3 unit = dir.normalize();
+        blade.ownerId = owner == null ? null : owner.getUUID();
+        blade.setPos(pos.x, pos.y, pos.z);
+        blade.setDeltaMovement(unit.scale(speed));
+        blade.entityData.set(DATA_DAMAGE, damage);
+        // 朝向：先 yaw 再 pitch（和引擎投射物同一套算法 ✓）
+        blade.entityData.set(DATA_YAW, (float) Math.toDegrees(Math.atan2(unit.x, unit.z)));
+        blade.entityData.set(DATA_PITCH, (float) -Math.toDegrees(Math.asin(unit.y)));
+        level.addFreshEntity(blade);
+        return blade;
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+
+        // 自转（客户端也要转 ⇒ 两边都推进 ✓）
+        float rate = this.entityData.get(DATA_SPIN_RATE);
+        float spin = this.entityData.get(DATA_SPIN) + rate;
+        this.entityData.set(DATA_SPIN, spin % 360.0F);
+
+        if (level().isClientSide()) {
+            // 客户端只按服务端给的速度插值移动 ✓（位置由服务端同步）
+            setPos(getX() + getDeltaMovement().x, getY() + getDeltaMovement().y,
+                    getZ() + getDeltaMovement().z);
+            return;
+        }
+
+        // 飞
+        Vec3 motion = getDeltaMovement();
+        Vec3 next = position().add(motion);
+        setPos(next.x, next.y, next.z);
+
+        // 撞方块 ⇒ 散（不穿墙 ✗）
+        if (level().getBlockState(blockPosition()).isSolid()) {
+            burst();
+            discard();
+            return;
+        }
+
+        // 打到人 ⇒ 伤害 ＋ 往外推 ＋ 散
+        LivingEntity target = firstHit();
+        if (target != null) {
+            LivingEntity owner = owner();
+            target.hurt(damageSources().indirectMagic(this, owner), this.entityData.get(DATA_DAMAGE));
+            Vec3 push = motion.normalize().scale(0.35D);
+            target.push(push.x, 0.12D, push.z);
+            target.hurtMarked = true;
+            burst();
+            discard();
+            return;
+        }
+
+        if (tickCount > MAX_LIFE) {
+            discard();
+        }
+    }
+
+    /** 这一 tick 撞到的第一个人（排除发射者与旁观者模式 ✓）。 */
+    private LivingEntity firstHit() {
+        LivingEntity owner = owner();
+        List<LivingEntity> hits = level().getEntitiesOfClass(LivingEntity.class,
+                new AABB(getX() - HIT_RADIUS, getY() - HIT_RADIUS, getZ() - HIT_RADIUS,
+                        getX() + HIT_RADIUS, getY() + HIT_RADIUS, getZ() + HIT_RADIUS),
+                e -> e.isAlive() && e != owner && !e.isSpectator());
+        return hits.isEmpty() ? null : hits.get(0);
+    }
+
+    private void burst() {
+        if (level() instanceof ServerLevel server) {
+            server.sendParticles(net.minecraft.core.particles.ParticleTypes.SWEEP_ATTACK,
+                    getX(), getY(), getZ(), 3, 0.2D, 0.2D, 0.2D, 0.0D);
+            server.sendParticles(net.minecraft.core.particles.ParticleTypes.CLOUD,
+                    getX(), getY(), getZ(), 6, 0.25D, 0.25D, 0.25D, 0.05D);
+        }
+    }
+
+    // ---------------- 渲染要读的 ----------------
+
+    public float bladeYaw() {
+        return this.entityData.get(DATA_YAW);
+    }
+
+    public float bladePitch() {
+        return this.entityData.get(DATA_PITCH);
+    }
+
+    public float spin() {
+        return this.entityData.get(DATA_SPIN);
+    }
+
+    public void setSpinRate(float rate) {
+        this.entityData.set(DATA_SPIN_RATE, rate);
+    }
+
+    public double sizeScale() {
+        return SIZE_SCALE;
+    }
+
+    /** 发射者（可能已下线 ⇒ null ✓）。 */
+    public LivingEntity owner() {
+        if (ownerId == null || !(level() instanceof ServerLevel server)) {
+            return null;
+        }
+        Entity found = server.getEntity(ownerId);
+        return found instanceof LivingEntity living ? living : null;
+    }
+
+    // ---------------- 存盘 / 不吃伤害 ----------------
+
+    @Override
+    protected void readAdditionalSaveData(CompoundTag tag) {
+        this.tickCount = tag.getInt("Age");
+        if (tag.hasUUID("Owner")) {
+            this.ownerId = tag.getUUID("Owner");
+        }
+    }
+
+    @Override
+    protected void addAdditionalSaveData(CompoundTag tag) {
+        tag.putInt("Age", this.tickCount);
+        if (ownerId != null) {
+            tag.putUUID("Owner", ownerId);
+        }
+    }
+
+    @Override
+    public boolean hurt(DamageSource source, float amount) {
+        return false;
+    }
+
+    @Override
+    public boolean isPickable() {
+        return false;
+    }
+
+    @Override
+    public boolean isPushable() {
+        return false;
+    }
+
+    @Override
+    public boolean shouldRenderAtSqrDistance(double distance) {
+        return distance < 64.0D * 64.0D;
+    }
+}

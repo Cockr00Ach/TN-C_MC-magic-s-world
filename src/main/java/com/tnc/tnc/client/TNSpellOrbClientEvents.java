@@ -36,6 +36,11 @@ public final class TNSpellOrbClientEvents {
         //   和暗系召唤物同一套 ✓，**不依赖 spell_engine** ⇒ 所以注册在这里、不是 TNFogClientRegistration ✓）。
         //   ⚠️ 这一行**千万不能漏** ✗ —— 实体有类型、客户端没渲染器 = 一生成就卡退 ✗
         event.registerEntityRenderer(TNOrbEntities.WIND_SPIRIT.get(), TNWindSpiritRenderer::new);
+        // ★ 风系范围风链 t3+：龙卷风 ＋ 它吐出来的风刃（2026-10-10）✓
+        //   作者："t3 开始释放风刃会召唤出一个一直在旋转的龙卷风，然后持续向外发射风刃" ✓
+        //   两个都必须注册 ✗ —— 漏一个就是"一生成就卡退" ✗
+        event.registerEntityRenderer(TNOrbEntities.WIND_TORNADO.get(), TNTornadoRenderer::new);
+        event.registerEntityRenderer(TNOrbEntities.WIND_BLADE.get(), TNWindBladeRenderer::new);
         // 魔法阵与冲击波环共用同一个渲染器（都是"贴地的一张面片"）✓
         event.registerEntityRenderer(TNOrbEntities.MAGIC_CIRCLE.get(), TNMagicCircleRenderer::new);
         event.registerEntityRenderer(TNOrbEntities.SHOCKWAVE.get(), TNMagicCircleRenderer::new);

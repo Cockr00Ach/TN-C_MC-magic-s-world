@@ -415,6 +415,40 @@ public final class TNOrbEntities {
                     .updateInterval(1)
                     .build("tnc:wind_spirit"));
 
+    /**
+     * ★ <b>龙卷风</b>（风系第 3 条链「范围风」t3+ 的召唤物，2026-10-10）✓
+     *
+     * <p>作者原话：「t3 开始释放风刃会<b>召唤出一个一直在旋转的龙卷风</b>，
+     * 然后<b>持续向外发射风刃</b>」✓ —— 它**留在原地**（不是投射物 ✗），
+     * 自己转、自己吐 {@link TNWindBladeEntity} ✓。模型 {@code tnc:projectile/wind_tornado}
+     * 由 {@code tools/gen_wind_tornado_model.py} 程序化生成 ✓。
+     *
+     * <p>尺寸给大一点（2×3 格）✓：模型本体约 1.9 格宽、1.9 格高，
+     * 但视锥剔除盒要**包得住放大后的样子** ✗（t5 会放大到 1.6 倍 ⇒ 3 格宽）。
+     */
+    public static final RegistryObject<EntityType<TNTornadoEntity>> WIND_TORNADO =
+            ENTITY_TYPES.register("wind_tornado", () -> EntityType.Builder
+                    .of(TNTornadoEntity::new, MobCategory.MISC)
+                    .sized(2.0F, 3.0F)
+                    .clientTrackingRange(16)
+                    .updateInterval(1)
+                    .build("tnc:wind_tornado"));
+
+    /**
+     * ★ <b>飞出去的风刃</b>（龙卷风吐出来的那一片，2026-10-10）✓
+     *
+     * <p>为什么要有自己的投射物实体：龙卷风是**持续**吐刃的（每 14 tick 一轮），
+     * 而引擎的投射物必须挂在"某一次施法"上 ✗ —— 这里没有那一次施法可用 ✗。
+     * 本仓火系/水系都已有自己的投射物先例 ✓，同一个做法 ✓。
+     */
+    public static final RegistryObject<EntityType<TNWindBladeEntity>> WIND_BLADE =
+            ENTITY_TYPES.register("wind_blade", () -> EntityType.Builder
+                    .of(TNWindBladeEntity::new, MobCategory.MISC)
+                    .sized(1.2F, 1.2F)
+                    .clientTrackingRange(12)
+                    .updateInterval(1)
+                    .build("tnc:wind_blade"));
+
     private TNOrbEntities() {
     }
 

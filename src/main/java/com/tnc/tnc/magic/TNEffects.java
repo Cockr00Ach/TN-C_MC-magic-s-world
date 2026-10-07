@@ -520,6 +520,10 @@ public final class TNEffects {
         //   它接的是引擎的 SPELL_CAST（不是 Forge 总线 ✗），同样必须在"任何施法之前"把类加载起来，
         //   否则第一次放黑夜之手会**静默不扣血** ✗（作者 2026-10-10：按《Re:Zero》不可视之手重做 ✓）。
         TNDarkHandMechanics.ensureLoaded();
+        // ★ 风系范围风链的「t3+ 召唤龙卷风」同理：接的也是引擎的 SPELL_CAST（不是 Forge 总线 ✗），
+        //   必须在"任何施法之前"把类加载起来，否则第一次放 t3 风刃**只会扣蓝不出龙卷风** ✗
+        //   （作者 2026-10-10：「t3 开始释放风刃会召唤出一个一直在旋转的龙卷风」✓）。
+        TNWindGaleMechanics.ensureLoaded();
         // 火系火球链的「焚身」（命中灼伤）—— 自有实体那一套，见 magic/fire/TNScorch
         com.tnc.tnc.magic.fire.TNScorch.register(modEventBus);
     }

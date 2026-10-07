@@ -51,19 +51,24 @@ $boomFx = '{ "particle_id": "cloud", "shape": "SPHERE", "origin": "CENTER", "cou
 
 # tier 1..5
 function Gale-Spell($name, $tier, $radius, $seconds, $blades, $coef, $scale, $cooldown, $pierce) {
-    Write-Json $name @"
-{
-  "school": "AIR",
-  "group": "gale",
-  "range": 26.0,
-  "learn": { "tier": $tier },
-  "cast": {
-    "duration": 0.5,
-    "animation": "spell_engine:one_handed_projectile_charge",
-    "sound": { "id": "spell_engine:generic_wind_charging", "randomness": 0 },
-    "particles": [ $castFx ]
-  },
-  "release": {
+    # * 2026-10-10 (author): "from t3 on, casting the gale spell summons a tornado that
+    #   keeps spinning and keeps firing wind blades outward".
+    #   -> t3/t4/t5 stop being an engine PROJECTILE and become SELF: the engine spawns
+    #      nothing, and Java (TNWindGaleMechanics, hooked on SPELL_CAST) summons the
+    #      tornado instead. This is the SAME shape as the night-hand chain, which is the
+    #      already-verified template for "tier-dependent summoning".
+    #      Reason it cannot be data-only: the engine's SPAWN action takes a fixed
+    #      entity_type_id and has NO tier field (checked with javap), and the author wants
+    #      t3/t4/t5 to differ (lifetime 8/12/16s, 3/5/7 blades per volley, size 1.0/1.3/1.6).
+    #   -> t1/t2 are untouched: they are still the single flying crescent.
+    $isTornado = ($tier -ge 3)
+
+    if ($isTornado) {
+        $targetJson = @"
+    "target": { "type": "SELF" },
+"@
+    } else {
+        $targetJson = @"
     "target": {
       "type": "PROJECTILE",
       "projectile": {
@@ -79,15 +84,65 @@ function Gale-Spell($name, $tier, $radius, $seconds, $blades, $coef, $scale, $co
         }
       }
     },
-    "animation": "spell_engine:one_handed_projectile_release",
-    "sound": { "id": "spell_engine:generic_wind_charging" }
-  },
-  "impact": [
+"@
+    }
+
+    # SELF spells run their impact ON THE CASTER. The night-hand chain (this repo's
+    # verified SELF template) deliberately has NO DAMAGE action for exactly that reason:
+    # a DAMAGE action on a SELF impact would hurt the player. So for t3+ the damage moves
+    # to the summoned tornado (TNTornadoEntity + the blades it fires), and the impact
+    # keeps only the status effects -- the caster's own gale_haste, plus gale_slow which
+    # the tornado re-applies to enemies around it.
+    if ($isTornado) {
+        $damageAction = ''
+    } else {
+        $damageAction = @"
     {
       "action": { "type": "DAMAGE", "damage": { "spell_power_coefficient": $coef, "knockback": 0.2 } },
       "particles": [ $boomFx ],
       "sound": { "id": "spell_engine:generic_wind_charging", "volume": 0.6 }
     },
+"@
+    }
+
+    # * area_impact MUST BE OMITTED for SELF spells.
+    #   The verify gate caught this: "SELF/CURSOR never fills the area-impact position"
+    #   -> the engine NPEs on EVERY cast. Checked the whole repo: every other SELF spell
+    #   has area_impact=false; these three were the only ones setting it.
+    #   It also makes sense for the design: the tornado IS the area effect now, so the
+    #   spell itself no longer needs an engine-side area burst.
+    if ($isTornado) {
+        $areaImpact = ''
+    } else {
+        $areaImpact = @"
+  "area_impact": {
+    "radius": $radius,
+    "area": { "distance_dropoff": "SQUARED" },
+    "particles": [ $boomFx ],
+    "sound": { "id": "spell_engine:generic_wind_charging", "volume": 0.9 }
+  },
+"@ + "`n"
+    }
+
+    Write-Json $name @"
+{
+  "school": "AIR",
+  "group": "gale",
+  "range": 26.0,
+  "learn": { "tier": $tier },
+  "cast": {
+    "duration": 0.5,
+    "animation": "spell_engine:one_handed_projectile_charge",
+    "sound": { "id": "spell_engine:generic_wind_charging", "randomness": 0 },
+    "particles": [ $castFx ]
+  },
+  "release": {
+$targetJson
+    "animation": "spell_engine:one_handed_projectile_release",
+    "sound": { "id": "spell_engine:generic_wind_charging" }
+  },
+  "impact": [
+$damageAction
     {
       "action": {
         "type": "STATUS_EFFECT",
@@ -117,13 +172,7 @@ function Gale-Spell($name, $tier, $radius, $seconds, $blades, $coef, $scale, $co
       "particles": [ $castFx ]
     }
   ],
-  "area_impact": {
-    "radius": $radius,
-    "area": { "distance_dropoff": "SQUARED" },
-    "particles": [ $boomFx ],
-    "sound": { "id": "spell_engine:generic_wind_charging", "volume": 0.9 }
-  },
-  "cost": { "exhaust": 0.0, "cooldown_duration": $cooldown }
+$areaImpact  "cost": { "exhaust": 0.0, "cooldown_duration": $cooldown }
 }
 "@
 }

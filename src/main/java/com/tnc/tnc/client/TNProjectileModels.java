@@ -149,6 +149,23 @@ public final class TNProjectileModels {
      */
     public static final String WINDBLADE = "projectile/windblade";
 
+    /**
+     * ★ <b>龙卷风</b>（风系范围风链 t3+ 召唤的那个漩涡，2026-10-10）✓
+     *
+     * <p>生成器：{@code tools/gen_wind_tornado_model.py}（**程序化生成** ✓）。
+     * 7 层方环 × 4 片 ＋ 4 块底部碎屑 ＝ 32 个方块，每层扭 {@code 22.5°}、
+     * 自下而上收口（半宽 13.5 → 4 单位）⇒ 一个**漏斗** ✓；
+     * 包围盒 <b>1.875 × 1.938 × 1.875 格</b>，y 从 <b>0</b> 起（底边贴地 ✓，
+     * 引擎把模型 y=0 对到实体位置 ⇒ 不需要像黑夜之手那样抬 13/16 ✓）。
+     *
+     * <p>⚠️ 这个模型**不是投射物** ✗ —— 它挂在 {@code TNTornadoEntity} 上，
+     * 由 {@code TNTornadoRenderer} 走引擎同一条渲染通道画（和 {@link #DARK_FOG} 同理 ✓）。
+     *
+     * <p>它**一直在转**是靠渲染器每帧按实体的 {@code spin()} 绕 Y 转模型 ✓，
+     * 不是模型自带的动画 ✗（所以这个模型是静态的 ✓）。
+     */
+    public static final String WIND_TORNADO = "projectile/wind_tornado";
+
     public static final String[] PROJECTILE_MODELS = {
             // 火系（用户自制）
             "projectile/fireball",
@@ -174,9 +191,12 @@ public final class TNProjectileModels {
             // 暗系黑雾链的"领域"穹顶（生成器：tools/gen_dark_fog_model.py）——
             //   挂在 CLOUD 的 client_data.model 上，不是投射物，但走同一条渲染/烘焙通道 ✓
             DARK_FOG,
-            // 风系范围风链（作者自己的龙卷风，2026-10-10 导入：tools/import_author_model.ps1）
-            //   换掉了以前借用的 lightingball（一个黄色雷球 ✗）
+            // 风系范围风链（月牙斩击，生成器：tools/gen_wind_blade_model.py）
+            //   2026-10-10：从"作者的龙卷风"换成月牙（作者要"抄水法的海浪斩击"）
             WINDBLADE,
+            // 风系范围风链 t3+ 的龙卷风（生成器：tools/gen_wind_tornado_model.py）
+            //   2026-10-10：作者"你做个龙卷风的模型……持续向外发射风刃" ✓
+            WIND_TORNADO,
     };
 
     /**
