@@ -1086,6 +1086,43 @@ try {
     if ($missingTex.Count -eq 0) { Ok 'every texture a projectile model references is shipped in the jar' }
     else { Fail ('projectile model references a texture that is NOT in the jar (in game the model loads but samples a missing sprite; the client only says "Missing textures in model ..."): ' + ($missingTex -join '; ')) }
 
+    # ---------------- D1b10. the two things that make a projectile model UNBAKEABLE ----
+    # Why this exists (2026-10-10, author report: "龙卷风模型是紫黑啊" = "the tornado model
+    # is purple-black"):
+    #   The tornado shipped with `"texture_size": [32, 32]`. The vanilla model spec does
+    #   NOT know that field, so the model is never baked; the engine's CustomModels.render
+    #   then falls back to Forge's MISSING model, which draws as the purple-black cube.
+    #   `docs/spells/投射物模型_配方.md` documents this exact trap for hand exports, and
+    #   tools/import_author_model.ps1 strips it -- but our own generator emitted it and
+    #   nothing checked. Same story for a degenerate face UV: `"uv": [0, 0]` is not a box,
+    #   so every face collapses onto one texel (it renders, but wrong).
+    # Both are cheap to detect and both are fatal-or-wrong on screen, so: HARD FAIL.
+    $badFields = @()
+    foreach ($entry in ($zip.Entries | Where-Object {
+                $_.FullName -like 'assets/tnc/models/projectile/*.json' })) {
+        $er = New-Object System.IO.StreamReader($entry.Open(), [System.Text.Encoding]::UTF8)
+        $text = $er.ReadToEnd(); $er.Close()
+        if ($text -match '"texture_size"\s*:') {
+            $badFields += "$($entry.FullName) has texture_size (vanilla spec rejects the model => it is never baked => purple-black in game)"
+        }
+        $model = $null
+        try { $model = ConvertFrom-TncSpellJson $text } catch { continue }
+        foreach ($el in @($model.elements)) {
+            if ($null -eq $el) { continue }
+            foreach ($faceName in @('north', 'east', 'south', 'west', 'up', 'down')) {
+                $face = $el.faces.$faceName
+                if ($null -eq $face) { continue }
+                if ($null -eq $face.uv) { continue }
+                if (@($face.uv).Count -ne 4) {
+                    $badFields += "$($entry.FullName) face '$faceName' has a $(@($face.uv).Count)-value uv (must be [u1,v1,u2,v2])"
+                    break
+                }
+            }
+        }
+    }
+    if ($badFields.Count -eq 0) { Ok 'every projectile model is bakeable (no texture_size, every face UV is a 4-value box)' }
+    else { Fail ('projectile model(s) that will NOT bake (purple-black in game) or sample the wrong texel: ' + ($badFields -join '; ')) }
+
     # ---------------- D1c. HUD entry point + its keybind ----------------
     # Nothing HUD-side can be clicked (no cursor while playing), so the keybind IS
     # the entry. RegisterKeyMappingsEvent lives on the MOD bus - registering it on
