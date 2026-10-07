@@ -371,7 +371,10 @@ public final class FireSpellRules {
      *
      * <p>⚠️ 作者第 4 条：「高度改为 2/3 左右」✓ —— 原来 9 格 ⇒ 现在 **6 格** ✓
      */
-    public static final double T4_ORB_HEIGHT = 10.0D;
+    // ⚠️ 作者 2026-10-05：「粒子球有部分和柱子重叠了，**把粒子球做高一点和柱子分开**」✓
+    //   柱子高 10 格（5 块 × 2 格 ✗）；光球半径 0.9~1.45 ⇒ 中心给到 **12 格** ✓
+    //   ⇒ 球底 ≈ 10.55 格，柱顶 10 格 ⇒ 中间留出空隙 ✓（顺带它也是射线起点 ✓）
+    public static final double T4_ORB_HEIGHT = 12.0D;
 
     /** 光线每几 tick 跳一次（10 tick = 0.5 秒 ✓）。 */
     public static final int T4_BEAM_INTERVAL_TICKS = 10;
