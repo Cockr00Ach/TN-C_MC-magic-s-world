@@ -130,11 +130,18 @@ public final class TNWindMechanics {
             "wind_god", MarkerEffect::new);
 
     /**
-     * 暗系召唤的标记：暗系的"召唤"链复用绕身球机制，但要看起来像暗影而不是白雾。
+     * 暗系召唤的标记：暗系的"召唤"链**曾经**复用绕身球机制，用一个标记让
+     * {@code tickOrbs} 把粒子换成暗影感的（而不是复制一整套逻辑）。
      *
-     * <p>为什么用标记而不是新机制：绕身球的逻辑（绕圈、打最近的敌人、牵引）是通用且
-     * 已实测的，只有粒子颜色是风系专属的。加一个标记让 tickOrbs 换粒子，
-     * 比复制一整套逻辑划算得多。
+     * <p>⚠️ <b>2026-10-10 核实：这个标记现在没有任何施加方，那段分支是死代码</b> ✗ ——
+     * 全项目（法术 JSON ＋ kubejs 脚本 ＋ Java）里搜不到任何一处写 {@code tnc:dark_orb}；
+     * 暗系第 3 条链已经改成**真召唤实体**了（{@code dark/TNDarkSummonChain} ＋
+     * {@code TNDarkSummonEntity}，五档五个实体），根本不再走绕身球 ✓。
+     *
+     * <p><b>故意保留</b>（而不是删掉）：它的注册是无害的（没有任何东西施加它 ⇒ 永远不生效 ✓），
+     * 而它是"想让某条链借用绕身球但换粒子"的现成扩展点 ✓；删它要连带动暗系那边的文件，
+     * 而暗系的边界属于别人（"别把暗系带崩" ✗）⇒ 留在这里 + 写清楚它现在是死的，成本最低 ✓。
+     * 真要用它：让某条链的法术 JSON 挂上 {@code tnc:dark_orb} 即可，分支立刻活过来 ✓。
      */
     public static final RegistryObject<MobEffect> DARK_ORB = WIND_EFFECTS.register(
             "dark_orb", MarkerEffect::new);
@@ -240,7 +247,9 @@ public final class TNWindMechanics {
             return;
         }
         int count = tier.orbs();
-        // 暗系召唤用的是同一套绕身球，只是粒子要换成暗影感的 —— 有 dark_orb 标记就是暗系
+        // 暗系召唤**原本**用同一套绕身球、只是把粒子换成暗影感的 ——
+        // 但暗系第 3 条链已改成真召唤实体，现在没有任何法术施加 dark_orb ⇒
+        // 这个分支是死的 ✓（保留原因见 DARK_ORB 的注释）。
         boolean dark = has(player, DARK_ORB);
         net.minecraft.core.particles.SimpleParticleType orbParticle = dark
                 ? net.minecraft.core.particles.ParticleTypes.SOUL_FIRE_FLAME

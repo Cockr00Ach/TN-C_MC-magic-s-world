@@ -74,7 +74,7 @@ function Gale-Spell($name, $tier, $radius, $seconds, $blades, $coef, $scale, $co
           "perks": { "pierce": $pierce },
           "client_data": {
             "travel_particles": [ $trailFx ],
-            "model": { "model_id": "tnc:projectile/lightingball", "orientation": "TOWARDS_MOTION", "scale": $scale }
+            "model": { "model_id": "tnc:projectile/windblade", "orientation": "TOWARDS_MOTION", "scale": $scale }
           }
         }
       }
@@ -129,6 +129,12 @@ function Gale-Spell($name, $tier, $radius, $seconds, $blades, $coef, $scale, $co
 }
 
 #                       id              tier radius sec blades coef scale cd   pierce
+#
+# scale is measured against WHATEVER model is in the template above. The model
+# changed on 2026-10-10 (lightingball, 0.375 blocks -> windblade, 2.16 blocks tall,
+# i.e. 5.76x bigger), and these numbers were deliberately LEFT ALONE, so the blades
+# went from 0.19..0.53 blocks to 1.08..3.02 blocks tall. Recompute them if you swap
+# the model again:  final size = model size * scale.
 Gale-Spell 'gale'            1 3.0 15.0 0 1.0 0.5 2.5 0
 Gale-Spell 'great_gale'      2 4.0 20.0 0 1.4 0.7 3.5 0
 Gale-Spell 'vast_gale'       3 5.0 30.0 0 1.8 0.9 5.0 0

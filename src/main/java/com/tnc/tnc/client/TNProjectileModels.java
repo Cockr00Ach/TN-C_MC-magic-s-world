@@ -117,6 +117,36 @@ public final class TNProjectileModels {
      */
     public static final String DARK_FOG = "projectile/dark_fog";
 
+    /**
+     * ★ <b>风系的范围风链</b>（范围风 → 大范围风 → 超大范围风 → 巨型风刃风暴 → 风神风暴）。
+     *
+     * <p>这五档以前全部借用 {@code projectile/lightingball}（一个<b>黄色雷球</b> ✗）——
+     * "风刃"看起来是雷球，这是 `投射物模型_配方.md` 末表里登记在案的待办
+     * （"土/暗/风 暂用 lightingball，各给一个号即可"）✓。
+     *
+     * <p>模型是<b>作者自己的龙卷风</b>（{@code magic_modelandpack} 那一侧：
+     * {@code assets/elemental_wizards_rpg/models/effect/tornado.json}）——
+     * 14 个方块、<b>1.19 × 2.16 × 1.19 格</b>、<b>旋转角全是 0</b>、
+     * {@code from/to} 在 −1.5..17.5 / y −2.5..32 ⇒ <b>在加载窗口 −16..32 之内</b> ✓。
+     * 由 {@code tools/import_author_model.ps1 -Textures} 导入（多贴图模式）。
+     *
+     * <p>★ <b>五张贴图是动画的</b>：{@code windblade_1..5.png} 是 16×128＝8 帧竖排，
+     * 各自的 {@code .png.mcmeta}（frametime 5）**必须一起发货** ✗ —— 少了它动画就没了
+     * （导入脚本会自动带上）。
+     *
+     * <p>★ <b>朝向</b>：法术 JSON 里写 {@code "orientation": "TOWARDS_MOTION"}。
+     * 已反编译确认（{@code SpellProjectileRenderer}）：两种 motion 朝向**只施加 yaw + pitch**
+     * （{@code atan2(dx,dz)} 与 {@code asin(dy)}）⇒ 这个**竖直的柱体在水平飞行时保持立着** ✓，
+     * 俯冲/上抛时才会跟着倾 ✓（{@code ALONG_MOTION} 与它只差 90° yaw，
+     * 对这种旋转对称的柱体没有可见差别 ✓）。
+     *
+     * <p>★ <b>尺寸</b>：模型比 {@code lightingball}（0.375 格）大 <b>5.76 倍</b>（高 2.16 格）——
+     * 所以五档的 {@code scale} <b>沿用原值</b>（0.5/0.7/0.9/1.2/1.4）⇒ 风刃从
+     * 0.19~0.53 格变成 <b>1.08~3.02 格</b>高 ✓（"巨型风刃风暴"终于真的巨大了 ✓）。
+     * 嫌大/嫌小就改 {@code gen_tnc_wind_gale_spells.ps1} 最后那张表的 scale 一列 ✓。
+     */
+    public static final String WINDBLADE = "projectile/windblade";
+
     public static final String[] PROJECTILE_MODELS = {
             // 火系（用户自制）
             "projectile/fireball",
@@ -142,6 +172,9 @@ public final class TNProjectileModels {
             // 暗系黑雾链的"领域"穹顶（生成器：tools/gen_dark_fog_model.py）——
             //   挂在 CLOUD 的 client_data.model 上，不是投射物，但走同一条渲染/烘焙通道 ✓
             DARK_FOG,
+            // 风系范围风链（作者自己的龙卷风，2026-10-10 导入：tools/import_author_model.ps1）
+            //   换掉了以前借用的 lightingball（一个黄色雷球 ✗）
+            WINDBLADE,
     };
 
     /**

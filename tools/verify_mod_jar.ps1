@@ -165,6 +165,11 @@ try {
         else { Fail "class missing from jar: $cls" }
     }
 
+    # ★ ASSET-COVERAGE list: every spell whose json / icon / effect ids / SPAWN ids /
+    #   model id / area rules this gate checks. This is NOT the same thing as "which
+    #   spells the wand assignment file lists" (see $wandListedIds below) -- the two were
+    #   accidentally the same array until 2026-10-10, which is exactly why wind chains 2
+    #   and 3 were never asset-checked at all (see the note under the array).
     $spellIds = @('tnc:spark', 'tnc:lightning_field', 'tnc:lightning_strike', 'tnc:lightning_storm',
                   'tnc:heavenly_thunder', 'tnc:thunder_orb', 'tnc:great_thunder_orb',
                   'tnc:god_descent', 'tnc:explosive_thunder_orb', 'tnc:cataclysm_thunder_orb',
@@ -178,7 +183,7 @@ try {
                   'tnc:molten_skyfall', 'tnc:meteor_fall',
                   'tnc:fire_aspect', 'tnc:ember_burn', 'tnc:blaze_burn',
                   'tnc:inferno_burn', 'tnc:total_burn',
-                  # wind chain 1 (the other 10 wind spells get added when their json exists)
+                  # wind chain 1
                   'tnc:wind_field', 'tnc:wind_speed', 'tnc:greater_wind_speed',
                   'tnc:super_wind_speed', 'tnc:wind_god_descent',
                   # dark chain 4 "black fog" (2026-10-09: real fog particles, the
@@ -189,6 +194,41 @@ try {
                   # burn effects, which add spell_power:fire => the whole chain's reward
                   # was worth zero to a dark spell. Now tnc:blood_* = spell_power:soul.)
                   'tnc:trade_wounds', 'tnc:blood_burn', 'tnc:sacrifice',
+                  'tnc:possess', 'tnc:i_am_god',
+                  # ★ wind chains 2 and 3 -- added 2026-10-10. The old line here read
+                  # "wind chain 1 (the other 10 wind spells get added when their json
+                  # exists)"; their json has existed for a long time, so that note was
+                  # stale and these 10 spells sat OUTSIDE every check this gate performs
+                  # (which is why "10 wind spells have no icon" stayed green).
+                  'tnc:wind_orb', 'tnc:wind_orb_swarm', 'tnc:wind_spirit',
+                  'tnc:triple_wind_spirit', 'tnc:wind_spirit_lord',
+                  'tnc:gale', 'tnc:great_gale', 'tnc:vast_gale',
+                  'tnc:giant_gale', 'tnc:wind_god_gale')
+
+    # The list data/tnc/spell_assignments/magic_wand.json is expected to contain.
+    # Kept SEPARATE on purpose: that file is the wand item's DEFAULT proxy container,
+    # not an exhaustive registry of our spells -- water (20) and earth (20) are absent
+    # from it as well and both are fully playable, so it plainly does not gate casting
+    # (the per-player container is written at runtime from SpellCatalog, with
+    # is_proxy=false => that list is the authoritative one, see SpellEngineBridge).
+    # => extending $spellIds above must NOT be allowed to fail this check, and touching
+    #    this file is a runtime change that needs its own evidence.
+    $wandListedIds = @('tnc:spark', 'tnc:lightning_field', 'tnc:lightning_strike', 'tnc:lightning_storm',
+                  'tnc:heavenly_thunder', 'tnc:thunder_orb', 'tnc:great_thunder_orb',
+                  'tnc:god_descent', 'tnc:explosive_thunder_orb', 'tnc:cataclysm_thunder_orb',
+                  'tnc:lightning_haste', 'tnc:lightning_blink', 'tnc:lightning_wind',
+                  'tnc:lightning_recharge', 'tnc:lightning_ascension',
+                  'tnc:sun_ray', 'tnc:blast_ray', 'tnc:fire_dragon',
+                  'tnc:flame_demon_wrath', 'tnc:solar_judgment',
+                  'tnc:fireball', 'tnc:great_fireball', 'tnc:lava_fireball',
+                  'tnc:molten_skyfall', 'tnc:meteor_fall',
+                  'tnc:fire_aspect', 'tnc:ember_burn', 'tnc:blaze_burn',
+                  'tnc:inferno_burn', 'tnc:total_burn',
+                  'tnc:wind_field', 'tnc:wind_speed', 'tnc:greater_wind_speed',
+                  'tnc:super_wind_speed', 'tnc:wind_god_descent',
+                  'tnc:black_mist', 'tnc:night_grace', 'tnc:dark_city',
+                  'tnc:where_light_cannot_reach', 'tnc:devour_light',
+                  'tnc:trade_wounds', 'tnc:blood_burn', 'tnc:sacrifice',
                   'tnc:possess', 'tnc:i_am_god')
     # only the wand assignment must list everything; pools are per element and are
     # checked separately in the pack-side block below
@@ -198,8 +238,8 @@ try {
         $reader = New-Object System.IO.StreamReader($entry.Open())
         $text = $reader.ReadToEnd()
         $reader.Close()
-        $missing = @($spellIds | Where-Object { $text -notmatch [regex]::Escape($_) })
-        if ($missing.Count -eq 0) { Ok "$asset lists all 15 spells" }
+        $missing = @($wandListedIds | Where-Object { $text -notmatch [regex]::Escape($_) })
+        if ($missing.Count -eq 0) { Ok "$asset lists all $($wandListedIds.Count) spells it is expected to" }
         else { Fail ("$asset is missing: " + ($missing -join ', ')) }
     }
 
@@ -1014,6 +1054,37 @@ try {
     if ($blockGeom.Count -gt 0) {
         Note ("pre-existing, owned by the structure/display work, NOT by the spell work -- these are also rejected by the loader in game: " + ($blockGeom -join '; '))
     }
+
+    # ---------------- D1b9. projectile models must reference textures we ship --------
+    # Why this exists: a projectile model can pass every other check and still draw
+    # WRONG in game, because a texture reference that resolves to nothing makes the
+    # model load but sample a missing sprite. The client says so only in a WARN:
+    #     Missing textures in model tnc:projectile/X: [...]
+    # and the recipe doc's own troubleshooting section tells you to grep for exactly
+    # that line (docs/投射物模型_配方.md). A gate beats grepping a log after the fact.
+    #
+    # Scope: models/projectile/** only -- the spell work owns those, and the block /
+    # entity models belong to the structure/display work (same two-tier split as D1b8).
+    # Only references in OUR namespace are policed: pointing at another mod's texture is
+    # that mod's business (and one such reference shipped once and was caught in the log
+    # instead -- see the berserker_rpg:projectile/lightning_bolt note in the recipe doc).
+    $missingTex = @()
+    foreach ($entry in ($zip.Entries | Where-Object { $_.FullName -like 'assets/tnc/models/projectile/*.json' })) {
+        $er = New-Object System.IO.StreamReader($entry.Open(), [System.Text.Encoding]::UTF8)
+        $text = $er.ReadToEnd(); $er.Close()
+        $model = $null
+        try { $model = ConvertFrom-TncSpellJson $text } catch { continue }
+        if ($null -eq $model.textures) { continue }
+        foreach ($slot in $model.textures.PSObject.Properties) {
+            $ref = [string]$slot.Value
+            if ($ref -notmatch '^tnc:(.+)$') { continue }
+            $want = "assets/tnc/textures/$($Matches[1]).png"
+            $hit = $zip.Entries | Where-Object { $_.FullName -eq $want }
+            if (-not $hit) { $missingTex += "$($entry.FullName) slot '$($slot.Name)' -> $ref (expected $want)" }
+        }
+    }
+    if ($missingTex.Count -eq 0) { Ok 'every texture a projectile model references is shipped in the jar' }
+    else { Fail ('projectile model references a texture that is NOT in the jar (in game the model loads but samples a missing sprite; the client only says "Missing textures in model ..."): ' + ($missingTex -join '; ')) }
 
     # ---------------- D1c. HUD entry point + its keybind ----------------
     # Nothing HUD-side can be clicked (no cursor while playing), so the keybind IS
