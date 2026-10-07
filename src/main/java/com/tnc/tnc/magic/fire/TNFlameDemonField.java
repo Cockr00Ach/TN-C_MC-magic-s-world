@@ -79,6 +79,30 @@ public class TNFlameDemonField extends Entity {
     /** 收场爆炸是否已经做过（只做一次 ✓）。 */
     private boolean collapsed;
 
+    /**
+     * <b>持续锁定的蓄力</b> ✓ —— 作者 2026-10-05：
+     * 「粒子流的规模会**逐渐变大**、伤害也随规模逐渐变为 **1.5 倍**；
+     * 注意规模变大是**持续对一个目标**时才会变大，**换了目标会回到最初的大小**，
+     * 规模的变化**不是永久的**」✓
+     *
+     * <p>实现：每个光球各记一个"已连续锁定多少 tick"✗ ——
+     * 还是同一个目标就 +1（封顶 ✓）；目标变了（或没目标）立刻归零 ✓。
+     * 规模与伤害都用同一条曲线：{@code 1.0 + 0.5 × 蓄力 / BEAM_RAMP_TICKS} ✓
+     * （0 tick ⇒ 1.0 倍；{@link #BEAM_RAMP_TICKS} tick ⇒ 1.5 倍 ✓）
+     *
+     * <p>⚠️ 这个状态**只在服务端** ✓：粒子流本来就是服务端撒的 ✓，
+     * 所以不需要同步字段、也不会被渲染器读到 ✓
+     */
+    private final int[] beamCharge = new int[4];
+
+    /** 蓄力多久到满（tick ✓）—— 40 tick = 2 秒 ✓。 */
+    private static final int BEAM_RAMP_TICKS = 40;
+
+    /** 第 i 条光线现在的规模/伤害倍率（1.0 → 1.5 ✓）。 */
+    private float beamRamp(int i) {
+        return 1.0F + 0.5F * this.beamCharge[i] / (float) BEAM_RAMP_TICKS;
+    }
+
     public TNFlameDemonField(EntityType<? extends TNFlameDemonField> type, Level level) {
         super(type, level);
         this.setNoGravity(true);
@@ -181,9 +205,16 @@ public class TNFlameDemonField extends Entity {
         boolean tickDamage = this.tickCount % FireSpellRules.T4_BEAM_INTERVAL_TICKS == 0;
         for (int i = 0; i < 4; i++) {
             LivingEntity target = this.resolveOrbTarget(server, caster, i);
-            this.entityData.set(DATA_ORB[i], target == null ? -1 : target.getId());
+            int targetId = target == null ? -1 : target.getId();
+            // ⚠️ 这里读到的 DATA_ORB[i] 还是**上一 tick** 的目标 ✓（下面才写 ✓）
+            if (targetId >= 0 && targetId == this.entityData.get(DATA_ORB[i])) {
+                this.beamCharge[i] = Math.min(BEAM_RAMP_TICKS, this.beamCharge[i] + 1);   // 一直锁同一个 ⇒ 蓄力 ✓
+            } else {
+                this.beamCharge[i] = 0;                    // 换目标 / 没目标 ⇒ 回到最初大小 ✓
+            }
+            this.entityData.set(DATA_ORB[i], targetId);
             if (target != null && tickDamage) {
-                this.beamHit(server, caster, target);
+                this.beamHit(server, caster, target, i);
             }
         }
 
@@ -242,12 +273,23 @@ public class TNFlameDemonField extends Entity {
             }
             Vec3 to = target.getPosition(1.0F).add(0.0D, target.getBbHeight() * 0.5D, 0.0D);
             Vec3 delta = to.subtract(at);
-            int steps = (int) Math.max(2.0D, delta.length() * 1.2D);
+            // ★ 规模随蓄力变粗 ✓（作者：「**粒子流的规模会逐渐变大**」✓）
+            //   采样间隔 + 粒子尺寸 + 横向抖动都乘上倍率 ✓ ⇒ 从一根细线长成一道粗流 ✓
+            float ramp = this.beamRamp(i);
+            int steps = (int) Math.max(2.0D, delta.length() * 1.2D * ramp);
             for (int s = 0; s <= steps; s++) {
                 Vec3 p = at.add(delta.scale(s / (double) steps));
+                // 横向抖动：倍率越大越"粗" ✓（像素风 ⇒ 用固定偏移量的随机取点 ✓）
+                double jitter = (ramp - 1.0F) * 0.35D;
+                if (jitter > 0.001D) {
+                    p = p.add((Math.random() * 2.0D - 1.0D) * jitter,
+                            (Math.random() * 2.0D - 1.0D) * jitter,
+                            (Math.random() * 2.0D - 1.0D) * jitter);
+                }
                 // 隔点交替：白热芯 ↔ 橙红外壳 ⇒ 粒子流"在跑"的观感 ✓
                 boolean core = ((this.tickCount + s) & 1) == 0;
-                fireDust(server, p.x, p.y, p.z, core ? 0.05D : 0.70D, core ? 1.9F : 1.5F);
+                float size = (core ? 1.9F : 1.5F) * (0.85F + 0.45F * ramp);
+                fireDust(server, p.x, p.y, p.z, core ? 0.05D : 0.70D, size);
             }
         }
     }
@@ -314,12 +356,14 @@ public class TNFlameDemonField extends Entity {
     }
 
     /** 一次光线跳伤 + 挂焚身 II ✓。 */
-    private void beamHit(ServerLevel server, LivingEntity caster, LivingEntity target) {
+    private void beamHit(ServerLevel server, LivingEntity caster, LivingEntity target, int orbIndex) {
+        // ★ 伤害随蓄力增长：1.0 → 1.5 倍 ✓（作者：「伤害也随规模的变大逐渐变为 1.5」✓）
+        float dmg = this.beamDamage * this.beamRamp(orbIndex);
         target.invulnerableTime = 0;                        // 别被无敌帧吃掉 ✓
-        target.hurt(server.damageSources().indirectMagic(this, caster), this.beamDamage);
+        target.hurt(server.damageSources().indirectMagic(this, caster), dmg);
         // 焚身 II 级（作者定 t4~t5 都是 II 级 ✓）——只有玩家施法才算得出基数 ✓
         if (caster instanceof ServerPlayer player) {
-            TNScorch.apply(target, player, this.beamDamage, true);
+            TNScorch.apply(target, player, dmg, true);
         }
     }
 
