@@ -150,13 +150,15 @@ public class TNFlameDemonField extends Entity {
                     // 球面附近随机取点（半径 0.55~0.85 ⇒ 球壳 ✓，中心也补几颗 ⇒ 有芯 ✓）
                     double theta = Math.random() * Math.PI * 2.0D;
                     double phi = Math.acos(2.0D * Math.random() - 1.0D);
-                    double rr = 0.55D + Math.random() * 0.30D;
+                    // ⚠️ 作者 2026-10-05：「柱子上的粒子球**大点**」✓ ⇒ 球壳半径 0.55~0.85 → 0.9~1.45 ✓
+                    double rr = 0.90D + Math.random() * 0.55D;
                     double dx = Math.sin(phi) * Math.cos(theta) * rr;
                     double dy = Math.cos(phi) * rr;
                     double dz = Math.sin(phi) * Math.sin(theta) * rr;
                     // 取色：靠外偏红、靠内偏白黄（和火系色板一致 ✓）
-                    double shade = (rr - 0.55D) / 0.30D * 0.85D;
-                    fireDust(sl, o.x + dx, o.y + dy, o.z + dz, shade, 1.5F + (float) (1.0D - shade));
+                    double shade = (rr - 0.90D) / 0.55D * 0.85D;
+                    // 粒子本身也做大 ✓（原来 1.5~2.5 ⇒ 现在 2.4~3.4 ✓）
+                    fireDust(sl, o.x + dx, o.y + dy, o.z + dz, shade, 2.4F + (float) (1.0D - shade));
                 }
             }
         }
@@ -407,7 +409,7 @@ public class TNFlameDemonField extends Entity {
     private static final int SIGIL_EMBER_POINTS = 22;
 
     /** 柱顶光球的**粒子数**（每颗每 tick ✓）。 */
-    private static final int ORB_PARTICLES = 14;
+    private static final int ORB_PARTICLES = 18;   // 球做大后粒子也加密 ✓
 
     /** 撒一颗火系染色粒子（同 PixelFlame 色板 ✓）。 */
     private static void fireDust(net.minecraft.server.level.ServerLevel sl,
