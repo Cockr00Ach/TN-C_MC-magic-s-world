@@ -392,15 +392,51 @@ public class TNNightGripEntity extends Entity {
     private static final int MODE_SKYFALL = 1;
 
     /**
-     * ★ <b>每档的手有多大</b>（＝模型缩放；模型本身 1.625 格高 × 这个数）✓。
+     * ★ <b>每档的尺寸倍率（相对 t1 的"边长"倍率）</b> —— 这是**作者的原话**，存的是**意图** ✓。
      *
-     * <p>作者 2026-10-10：「**我想把 t4 的手的尺寸换成 t5 那么大**」✓
-     * ⇒ 索引 3（t4）与索引 4（t5）现在是**同一个值 19.69**（≈ 32 格）✓。
+     * <p>作者 2026-10-10：「**大小我想改改，t2 变成 3 倍，t3 十倍，t4 20 倍，t5 20 倍**」✓
+     * （t1 是 1 倍基准 ✓；上一版是 1 / 2 / 5 / 20 / 20 ⇒ 这次实际动的是 **t2 与 t3** ✓）
      *
-     * <p>⚠️ 这张表是**唯一来源** ✓：客户端渲染器直接读 {@link #sizeScale()}，
-     * 视锥剔除盒子也从它推出来 ⇒ 不会再出现"渲染器和剔除盒子各说各话"的错位 ✗。
+     * <p>⚠️ <b>为什么不直接写最终缩放</b> ✗：2026-10-09 踩过这个坑 —— 当时把"放大 N 倍"当成
+     * 体积倍率去开立方，得出的数肉眼几乎没变化，作者只好又提一次 ✓。
+     * 现在分两层：**这张表是意图**（永远等于作者说的 3/10/20/20 ✓），
+     * 真正给渲染器/剔除盒子用的 {@link #SIZE_SCALE} 由它 × {@link #BASE_SCALE} 算出来 ✓
+     * ⇒ 以后模型再变（比如作者又调了 bbox），只改 BASE_SCALE 一个数，
+     * 作者要的倍率关系不会被悄悄破坏 ✓。
      */
-    private static final float[] SIZE_SCALE = {0.98F, 1.97F, 4.92F, 19.69F, 19.69F};
+    private static final double[] SIZE_MULTIPLIER = {1.0D, 3.0D, 10.0D, 20.0D, 20.0D};
+
+    /**
+     * t1 的基准缩放 —— 让 t1 的手约 **1.5 格** ✓。
+     *
+     * <p>模型（作者 2026-10-10 手改过的那版）最大跨度是 y 的 **1.5625 格**（±12.5 单位）
+     * ⇒ {@code 0.98 × 1.5625 ≈ 1.53 格} ✓。
+     * ⚠️ 换了模型（bbox 变了）就只调这一个数 ✓ —— 上面那张倍率表不用动 ✓。
+     */
+    private static final double BASE_SCALE = 0.98D;
+
+    /**
+     * 每档的模型缩放 = 倍率 × 基准 ✓（渲染器与视锥剔除盒子共用的**唯一来源** ✓）。
+     *
+     * <p>按当前模型（最大跨度 1.5625 格）换算出来的实际大小：
+     * <pre>
+     *   t1  1×  ->  0.98   ≈  1.5 格
+     *   t2  3×  ->  2.94   ≈  4.6 格
+     *   t3 10×  ->  9.80   ≈ 15.3 格
+     *   t4 20×  -> 19.60   ≈ 30.6 格
+     *   t5 20×  -> 19.60   ≈ 30.6 格
+     * </pre>
+     */
+    private static final float[] SIZE_SCALE = buildSizeScale();
+
+    private static float[] buildSizeScale() {
+        // ⚠️ 必须在 SIZE_MULTIPLIER / BASE_SCALE **之后**声明（Java 静态初始化按书写顺序执行 ✗）
+        float[] out = new float[SIZE_MULTIPLIER.length];
+        for (int i = 0; i < out.length; i++) {
+            out[i] = (float) (BASE_SCALE * SIZE_MULTIPLIER[i]);
+        }
+        return out;
+    }
 
     /**
      * ★ 模型（{@code tnc:projectile/dark_hand}）的**半高**，单位是格 ✓
