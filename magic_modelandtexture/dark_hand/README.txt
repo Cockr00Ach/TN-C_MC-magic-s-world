@@ -21,6 +21,18 @@ UV 在图内）；② 把 bbox **居中到原点**（引擎与渲染器都按这
 这个文件夹是"黑夜之手"道具模型的 Blockbench 工作副本。
 用法见下面，两分钟能上手。
 
+【dark_hand.json 是什么（作者放到这里的）】
+  这是模型的**原始导出**（Blockbench 直接导出的 Java 模型，42 方块、坐标与 .bbmodel 完全一致 ✓）。
+  ⚠️ 两处**不能直接拿去发货** ✗：
+    · `"textures": {"0": "dark_hand"}` —— 没命名空间 ⇒ 游戏会去找 `minecraft:dark_hand` ✗
+      （发货那份必须是 `tnc:spell_projectile/dark_hand` ✓）
+    · `"texture_size": [32,32]` ＋ UV 是**半分辨率**（例：down `(3,10,4,11)`，而发货那份是 `(6,20,8,22)`）
+      ⇒ 直接把这份丢进 jar，模型只会取到贴图的**左上四分之一** ✗
+  它就当**来源留档**看 ✓；真正发货的模型由 `tools/import_dark_hand_bbmodel.py` 从 .bbmodel 生成（UV 与
+  32x32 贴图自洽 ✓）。
+  ⚠️ `credit` 只写了 "Made with Blockbench" —— **里面没有任何作者信息** ✗ ⇒ 原作者与授权仍**待确认** ✓
+     （已登记在 docs/法术专题_交接.md 的待办里 ✓）。
+
 【要打开的文件】
   dark_hand.bbmodel   ← 双击 / Blockbench 里 File > Open Model
                         **贴图已经内嵌在里面**，打开就能直接在 Paint 模式刷图
