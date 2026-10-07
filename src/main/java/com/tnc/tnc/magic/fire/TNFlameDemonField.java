@@ -95,12 +95,21 @@ public class TNFlameDemonField extends Entity {
      */
     private final int[] beamCharge = new int[4];
 
-    /** 蓄力多久到满（tick ✓）—— 40 tick = 2 秒 ✓。 */
-    private static final int BEAM_RAMP_TICKS = 40;
+    /**
+     * 蓄力到满要多久（tick ✓）—— <b>法术持续时间的 1/3</b> ✓
+     *
+     * <p>⚠️ 作者 2026-10-05：「蓄满用时改为**改法术持续时间的 1/3**」✓
+     * ⇒ 直接用 {@link #life()}（这座域的持续 tick 数 ✗）除以 3 ✓，
+     * 不再写死 40 ✗ —— 以后改域时长，蓄力节奏自动跟着变 ✓
+     * （t4 现在 life = 160 tick ⇒ 蓄满约 **53 tick ≈ 2.7 秒** ✓）
+     */
+    private int beamRampTicks() {
+        return Math.max(1, this.life() / 3);
+    }
 
     /** 第 i 条光线现在的规模/伤害倍率（1.0 → 1.5 ✓）。 */
     private float beamRamp(int i) {
-        return 1.0F + 0.5F * this.beamCharge[i] / (float) BEAM_RAMP_TICKS;
+        return 1.0F + 0.5F * this.beamCharge[i] / (float) this.beamRampTicks();
     }
 
     public TNFlameDemonField(EntityType<? extends TNFlameDemonField> type, Level level) {
@@ -208,7 +217,7 @@ public class TNFlameDemonField extends Entity {
             int targetId = target == null ? -1 : target.getId();
             // ⚠️ 这里读到的 DATA_ORB[i] 还是**上一 tick** 的目标 ✓（下面才写 ✓）
             if (targetId >= 0 && targetId == this.entityData.get(DATA_ORB[i])) {
-                this.beamCharge[i] = Math.min(BEAM_RAMP_TICKS, this.beamCharge[i] + 1);   // 一直锁同一个 ⇒ 蓄力 ✓
+                this.beamCharge[i] = Math.min(this.beamRampTicks(), this.beamCharge[i] + 1);   // 一直锁同一个 ⇒ 蓄力 ✓
             } else {
                 this.beamCharge[i] = 0;                    // 换目标 / 没目标 ⇒ 回到最初大小 ✓
             }
@@ -276,11 +285,12 @@ public class TNFlameDemonField extends Entity {
             // ★ 规模随蓄力变粗 ✓（作者：「**粒子流的规模会逐渐变大**」✓）
             //   采样间隔 + 粒子尺寸 + 横向抖动都乘上倍率 ✓ ⇒ 从一根细线长成一道粗流 ✓
             float ramp = this.beamRamp(i);
-            int steps = (int) Math.max(2.0D, delta.length() * 1.2D * ramp);
+            int steps = (int) Math.max(2.0D, delta.length() * 1.4D * ramp);
             for (int s = 0; s <= steps; s++) {
                 Vec3 p = at.add(delta.scale(s / (double) steps));
                 // 横向抖动：倍率越大越"粗" ✓（像素风 ⇒ 用固定偏移量的随机取点 ✓）
-                double jitter = (ramp - 1.0F) * 0.35D;
+                // ⚠️ 作者 2026-10-05：「**变粗程度再大点**」✓ ⇒ 0.35 → 0.85 ✓（1.5 倍时横向散到 ±0.425 格 ✓）
+                double jitter = (ramp - 1.0F) * 0.85D;
                 if (jitter > 0.001D) {
                     p = p.add((Math.random() * 2.0D - 1.0D) * jitter,
                             (Math.random() * 2.0D - 1.0D) * jitter,
@@ -288,7 +298,7 @@ public class TNFlameDemonField extends Entity {
                 }
                 // 隔点交替：白热芯 ↔ 橙红外壳 ⇒ 粒子流"在跑"的观感 ✓
                 boolean core = ((this.tickCount + s) & 1) == 0;
-                float size = (core ? 1.9F : 1.5F) * (0.85F + 0.45F * ramp);
+                float size = (core ? 1.9F : 1.5F) * (0.80F + 0.70F * ramp);   // 尺寸系数也加大 ✓
                 fireDust(server, p.x, p.y, p.z, core ? 0.05D : 0.70D, size);
             }
         }
