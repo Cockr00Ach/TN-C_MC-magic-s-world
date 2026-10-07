@@ -84,11 +84,12 @@ public class TNNightGripRenderer extends EntityRenderer<TNNightGripEntity> {
     private static boolean logged;
 
     /**
-     * 模型（{@code tnc:projectile/dark_hand}）的**半高**，单位是格：y 跨度 −13..+13 单位
-     * ⇒ 13/16 = 0.8125 ✓。用来把渲染锚点从"模型中心"挪到"模型底边" ✓
-     * （作者 2026-10-10："落地点从中心改到底部"）。
+     * 模型半高**不在这里** ✗ —— 它是实体的
+     * {@code TNNightGripEntity.MODEL_HALF_HEIGHT_UNITS}（唯一来源 ✓）。
+     * 2026-10-10 作者手改模型之后 y 跨度从 ±13 变成 ±12.5 单位，
+     * 这个数就只能有一个地方能改 ✓（导入脚本 {@code tools/import_dark_hand_bbmodel.py}
+     * 会把该填的值打印出来 ✓）。
      */
-    private static final float HALF_HEIGHT_UNITS = 13.0F / 16.0F;
 
     public TNNightGripRenderer(EntityRendererProvider.Context context) {
         super(context);
@@ -122,7 +123,7 @@ public class TNNightGripRenderer extends EntityRenderer<TNNightGripEntity> {
         //    天降 ⇒ **不抬**：此时模型的 +Y（原本的"上"）已经被转成水平了，
         //            再抬就会把整只手平推出去 ✗；掌心（+Z 面）本来就贴着落点 ✓。
         //    两处都在**缩放后的坐标系**里平移 ⇒ 世界偏移 = (13/16)×scale ✓。
-        poseStack.translate(0.5F, 0.5F + (sky ? 0.0F : HALF_HEIGHT_UNITS), 0.5F);
+        poseStack.translate(0.5F, 0.5F + (sky ? 0.0F : (float) entity.modelHalfHeightUnits()), 0.5F);
 
         if (!renderWithEngine(poseStack, buffer, entity)) {
             // 引擎不在/渲染失败：**什么都不画**，但绝不崩 ✓

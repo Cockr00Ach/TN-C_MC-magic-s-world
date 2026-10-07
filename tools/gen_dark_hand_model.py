@@ -2,10 +2,17 @@
 """
 gen_dark_hand_model.py -- the "HAND OF NIGHT" projectile model (dark magic chain 1).
 
-Author 2026-10-02: "give me a hand model" -- this is the hand of the
-night_hand chain (night_hand -> night_raid -> night_embrace -> black_ruin -> slay_light).
-All five spells currently fire tnc:projectile/lightingball (a yellow ball), which has
-nothing to do with a "hand of night". This replaces it.
+================================================================================
+!!! 2026-10-10 晚起：**本脚本不再是产物来源，别再跑它** !!!
+================================================================================
+作者拿 Blockbench 自己改了模型（方块 31 -> 42、手指重新摆位）并重画了贴图
+（原话：「我现在更新了一下，你依照我的更新更新吧」）
+=> 事实来源变成 `magic_modelandtexture/dark_hand/dark_hand.bbmodel`；
+   把它导回发货文件的是 `tools/import_dark_hand_bbmodel.py`（bbmodel -> 模型 JSON + PNG，带加载器硬约束校验）。
+
+**跑本脚本会**：按下面这套程序化调色板重画整张贴图（覆盖作者手绘的 ✗），
+并按老坐标重建 31 个方块（丢掉作者加的 11 个方块 ✗）。历史/备用保留，正常运行别碰 ✓。
+需要重新程序化生成时（比如要重做一版全新造型），先跟作者确认 ✓。
 
 WHAT IT WRITES
     1. src/main/resources/assets/tnc/models/projectile/dark_hand.json

@@ -266,9 +266,9 @@ public class TNNightGripEntity extends Entity {
     }
 
     public double handHalfExtent() {
-        // 模型半高 = 13/16 格（y 跨度 ±13 单位）⇒ 随档位缩放一起放大 ✓
+        // 模型半高（格）⇒ 随档位缩放一起放大 ✓
         // （原来是个和渲染器各写一份的近似式 0.5+0.35*tier ✗，现在只有一个来源 ✓）
-        return 13.0D / 16.0D * sizeScale();
+        return MODEL_HALF_HEIGHT_UNITS * sizeScale();
     }
 
     /** 手不是可交互实体 ⇒ 别让它挡住玩家/引擎的准星射线 ✓。 */
@@ -401,6 +401,22 @@ public class TNNightGripEntity extends Entity {
      * 视锥剔除盒子也从它推出来 ⇒ 不会再出现"渲染器和剔除盒子各说各话"的错位 ✗。
      */
     private static final float[] SIZE_SCALE = {0.98F, 1.97F, 4.92F, 19.69F, 19.69F};
+
+    /**
+     * ★ 模型（{@code tnc:projectile/dark_hand}）的**半高**，单位是格 ✓
+     * —— 渲染器把"贴地锚点"从模型中心挪到**模型底边**时要用它，**唯一来源就是这里** ✓。
+     *
+     * <p>数值来自模型的 bbox：作者 2026-10-10 用 Blockbench 手改过模型之后
+     * （方块 31 → 42、手指改成朝 +Z 伸）y 跨度是 **±12.5 单位 = 0.78125 格** ✓ ——
+     * 用 {@code tools/import_dark_hand_bbmodel.py} 导入时它会**把该填的数打印出来** ✓
+     * （模型一变，这个数就得跟着改 ✗；导入脚本每次都会提醒 ✓）。
+     */
+    public static final double MODEL_HALF_HEIGHT_UNITS = 0.78125D;
+
+    /** 模型半高（格）—— 给客户端渲染器用 ✓。 */
+    public double modelHalfHeightUnits() {
+        return MODEL_HALF_HEIGHT_UNITS;
+    }
 
     /** 这一档的模型缩放 ✓（渲染器与剔除盒子共用）。 */
     public float sizeScale() {
