@@ -77,7 +77,12 @@ public final class TNSolarJudgmentRenderer extends EntityRenderer<TNSolarJudgmen
         // ⚠️ sunPosition() 是世界坐标 ✓ ⇒ 换相对坐标 ✗
         Vec3 sun = field.sunPosition().subtract(field.position());
 
-        drawSigil(out, pose, radius, age, field.life());
+        // ★ 2026-10-05：作者「t4/t5 中的法阵有问题，不好修就把火球链的法阵拿来用」✓
+        //   ⇒ 直接**复用火球链那座**（TNSigilRenderer，照作者参考图画的那版 ✓）
+        //     自己手搓的那套 drawSigil 已删除 ✗（两套法阵叠在一起就是"有问题"的来源 ✗）
+        // 出场渐显（照 TNSigilRenderer 的写法 ✓，免得"啪"地凭空出现 ✗）
+        float fade = (float) Math.min(1.0D, (field.tickCount + partial) / 8.0D);
+        TNSigilRenderer.drawSigil(out, pose, Vec3.ZERO, 5.0D, true, age, fade);
         drawSun(out, pose, sun, age, radius);
         drawBeams(out, pose, sun, radius, age, field.beams());
     }
@@ -86,45 +91,6 @@ public final class TNSolarJudgmentRenderer extends EntityRenderer<TNSolarJudgmen
     //  ① 巨大法阵（由外到里描绘）
     // ------------------------------------------------------------------
 
-    private static void drawSigil(VertexConsumer out, Matrix4f pose, double radius, double age, int life) {
-        // 像素风：不淡出，最后 3 tick 整块收掉 ✓（同 t4 ✓）
-        if (age > life - 3) {
-            return;
-        }
-        WaterGeometry.disk(out, pose, ORIGIN, UP, radius, 0.66F, 0.26F, 0.05F, 1.0F);
-        for (int i = 0; i < 6; i++) {
-            double r = radius * (1.0D - i * 0.15D);
-            double appear = Math.min(1.0D, Math.max(0.0D, age / DRAW_TICKS - i * 0.15D));
-            if (appear <= 0.01D) {
-                continue;
-            }
-            if (appear < 0.5D) {
-                continue;
-            }
-            WaterGeometry.ring(out, pose, ORIGIN, UP, r, Math.max(0.09D, 0.14D - i * 0.010D),
-                    age * 0.010D, 1.0F);
-        }
-        // ★ 放射状辐条 + 六芒星（作者 2026-10-05 第 7 条：「法阵不清晰」✗）
-        //   根因：光靠几个同心圆，在暗色地面上就是几圈**虚影** ✗，看不出是个法阵 ✗
-        //   ⇒ 加 8 根辐条 + 一个六芒星 ✓ —— 这两个结构一出来，法阵立刻立住了 ✓
-        for (int k = 0; k < 8; k++) {
-            double a = k * Math.PI / 4.0D + age * 0.004D;
-            Vec3 outer = WaterGeometry.radial(AXIS_X, AXIS_Z, a, radius * 0.98D);
-            Vec3 inner = WaterGeometry.radial(AXIS_X, AXIS_Z, a, radius * 0.30D);
-            if (k % 2 == 0) {
-                WaterGeometry.tube(out, pose, inner, outer, 0.055D, 1.0F, 0.66F, 0.16F, 1.0F);
-            }
-        }
-        for (int k = 0; k < 6; k++) {
-            Vec3 p0 = WaterGeometry.radial(AXIS_X, AXIS_Z, k * Math.PI / 3.0D, radius * 0.62D);
-            Vec3 p1 = WaterGeometry.radial(AXIS_X, AXIS_Z, (k + 2) * Math.PI / 3.0D, radius * 0.62D);
-            WaterGeometry.tube(out, pose, p0, p1, 0.045D, 1.0F, 0.80F, 0.26F, 1.0F);
-        }
-
-        if (age / DRAW_TICKS > 0.72D) {
-            WaterGeometry.disk(out, pose, ORIGIN, UP, radius * 0.26D, 1.0F, 0.80F, 0.30F, 1.0F);
-        }
-    }
 
     // ------------------------------------------------------------------
     //  ② 正上方那颗太阳

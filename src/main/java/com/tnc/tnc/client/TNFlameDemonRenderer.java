@@ -84,7 +84,12 @@ public final class TNFlameDemonRenderer extends EntityRenderer<TNFlameDemonField
             return;
         }
 
-        drawSigil(out, pose, radius, age, field.life());
+        // ★ 2026-10-05：作者「t4/t5 中的法阵有问题，不好修就把火球链的法阵拿来用」✓
+        //   ⇒ 直接**复用火球链那座**（TNSigilRenderer，照作者参考图画的那版 ✓）
+        //     自己手搓的那套 drawSigil 已删除 ✗（两套法阵叠在一起就是"有问题"的来源 ✗）
+        // 出场渐显（照 TNSigilRenderer 的写法 ✓，免得"啪"地凭空出现 ✗）
+        float fade = (float) Math.min(1.0D, (field.tickCount + partial) / 8.0D);
+        TNSigilRenderer.drawSigil(out, pose, Vec3.ZERO, 4.0D, true, age, fade);
         for (int i = 0; i < 4; i++) {
             // ⚠️ orbPosition() 给的是**世界坐标** ✓ ⇒ 减掉实体位置换成相对坐标 ✗
             Vec3 rel = field.orbPosition(i).subtract(field.position());
@@ -98,50 +103,6 @@ public final class TNFlameDemonRenderer extends EntityRenderer<TNFlameDemonField
     //  ① 地上那个大法阵（由外到里"描绘"）
     // ------------------------------------------------------------------
 
-    private static void drawSigil(VertexConsumer out, Matrix4f pose, double radius, double age, int life) {
-        // ⚠️ 作者 2026-10-05：不要仿真渲染 ✗ ⇒ 不再"渐渐淡出" ✓，最后 3 tick 整块收掉 ✓
-        if (age > life - 3) {
-            return;
-        }
-        // 地面底光（一整块实色 ✓）
-        WaterGeometry.disk(out, pose, ORIGIN, UP, radius, 0.62F, 0.24F, 0.05F, 1.0F);
-        // ⚠️ 作者要"从外到里一点点出现"✗ ⇒ 每环有自己的出现时刻：越靠外越早 ✓
-        for (int i = 0; i < 5; i++) {
-            double r = radius * (1.0D - i * 0.17D);
-            double appear = Math.min(1.0D, Math.max(0.0D, age / DRAW_TICKS - i * 0.16D));
-            if (appear <= 0.01D) {
-                continue;
-            }
-            // 像素风：一圈要么**整圈画出来**、要么不画 ✓（不再半透明渐变 ✗）
-            // 外环先满、内环依次跟上 ⇒ 仍然是"由外到里描绘"的感觉 ✓
-            if (appear < 0.5D) {
-                continue;
-            }
-            WaterGeometry.ring(out, pose, ORIGIN, UP, r, Math.max(0.09D, 0.13D - i * 0.010D),
-                    age * 0.012D, 1.0F);
-        }
-        // ★ 放射状辐条 + 六芒星（作者 2026-10-05 第 7 条：「法阵不清晰」✗）
-        //   根因：光靠几个同心圆，在暗色地面上就是几圈**虚影** ✗，看不出是个法阵 ✗
-        //   ⇒ 加 8 根辐条 + 一个六芒星 ✓ —— 这两个结构一出来，法阵立刻立住了 ✓
-        for (int k = 0; k < 8; k++) {
-            double a = k * Math.PI / 4.0D + age * 0.004D;
-            Vec3 outer = WaterGeometry.radial(AXIS_X, AXIS_Z, a, radius * 0.98D);
-            Vec3 inner = WaterGeometry.radial(AXIS_X, AXIS_Z, a, radius * 0.30D);
-            if (k % 2 == 0) {
-                WaterGeometry.tube(out, pose, inner, outer, 0.055D, 1.0F, 0.66F, 0.16F, 1.0F);
-            }
-        }
-        for (int k = 0; k < 6; k++) {
-            Vec3 p0 = WaterGeometry.radial(AXIS_X, AXIS_Z, k * Math.PI / 3.0D, radius * 0.62D);
-            Vec3 p1 = WaterGeometry.radial(AXIS_X, AXIS_Z, (k + 2) * Math.PI / 3.0D, radius * 0.62D);
-            WaterGeometry.tube(out, pose, p0, p1, 0.045D, 1.0F, 0.80F, 0.26F, 1.0F);
-        }
-
-        // 阵中心那点热核 ✓
-        if (age / DRAW_TICKS > 0.7D) {
-            WaterGeometry.disk(out, pose, ORIGIN, UP, radius * 0.22D, 1.0F, 0.72F, 0.22F, 1.0F);
-        }
-    }
 
     // ------------------------------------------------------------------
     //  ② 黑曜石巨柱（纯视觉）
