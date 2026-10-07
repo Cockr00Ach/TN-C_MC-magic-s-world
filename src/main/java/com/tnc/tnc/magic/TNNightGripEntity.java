@@ -198,6 +198,9 @@ public class TNNightGripEntity extends Entity {
     private boolean landedSweep;
     /** 天降：砸地发生在哪一 tick（-1 = 还没砸）✓ —— 砸完还要压在地上一下再散。 */
     private int slamTick = -1;
+    /** 这次飞行已经留了几个黑阵 / 上一个阵离起点多远（格）✓ —— 用来按**距离**控制间距 ✓。 */
+    private int sigilsSpawned;
+    private double lastSigilDistance;
     /** 抓住阶段已经捏了几次 ✓。 */
     private int squeezes;
     private float dealtTotal;
@@ -272,13 +275,20 @@ public class TNNightGripEntity extends Entity {
     private static final double SIGIL_FACTOR = 1.15D;
 
     /** 黑阵活多久（tick）—— 短一点，让"一串门"依次淡掉，而不是糊成一片 ✓。 */
-    private static final int SIGIL_LIFE = 26;
+    private static final int SIGIL_LIFE = 30;
 
-    /** 每几 tick 留一个阵（飞行 12 tick ⇒ 约 6 个 ✓ 就是作者要的"好几个" ✓）。 */
-    private static final int SIGIL_SPACING = 2;
+    /**
+     * ★ 两个阵之间至少隔多少格 ✓ —— 作者 2026-10-10：「**魔法阵有点太多了，可以增加间距**」✓
+     *   ⇒ 不再按 tick 放（那样手飞得快就挤成一串 ✗），改成**按距离**：
+     *      手每往前走满 {@link #SIGIL_GAP} 格才留一个 ✓。
+     */
+    private static final double SIGIL_GAP = 8.0D;
 
-    /** 天降（t5）时：在落点上方这几个高度各铺一个**平铺**的阵 ⇒ 手从上往下穿过它们 ✓。 */
-    private static final double[] SIGIL_RING_HEIGHTS = {5.0D, 11.0D};
+    /** 一次施法最多留几个阵 ✓（防止 t4 那种 30 格的大手一飞一路铺满 ✗）。 */
+    private static final int SIGIL_MAX = 3;
+
+    /** 天降（t5）时：只在落点上方这几个高度铺阵 —— 而且**只有第一只手铺** ✓（否则 7 只 ×2 = 14 个 ✗）。 */
+    private static final double[] SIGIL_RING_HEIGHTS = {6.0D, 13.0D};
 
     /** 这一档的黑阵多大 ✓（t 级越高越大 ✓）。 */
     private double sigilRadius() {
@@ -495,8 +505,10 @@ public class TNNightGripEntity extends Entity {
      * ★ 模型（{@code tnc:projectile/dark_hand}）的**半高**，单位是格 ✓
      * —— 渲染器把"贴地锚点"从模型中心挪到**模型底边**时要用它，**唯一来源就是这里** ✓。
      *
-     * <p>数值来自模型的 bbox：作者 2026-10-10 用 Blockbench 手改过模型之后
-     * （方块 31 → 42、手指改成朝 +Z 伸）y 跨度是 **±12.5 单位 = 0.78125 格** ✓ ——
+     * <p>数值来自模型的 bbox：作者 2026-10-10 **提供（导出）**的那版模型
+     * （方块 31 → 42、手指朝 +Z 伸）y 跨度是 **±12.5 单位 = 0.78125 格** ✓ ——
+     * ⚠️ **模型不是作者做的** ✗（作者原话："手的模型不是我做的啊，我帮你导出了"）——
+     * 原作者与授权**待确认**，见交接文档「待办」那一条 ✓。
      * 用 {@code tools/import_dark_hand_bbmodel.py} 导入时它会**把该填的数打印出来** ✓
      * （模型一变，这个数就得跟着改 ✗；导入脚本每次都会提醒 ✓）。
      */
@@ -602,7 +614,8 @@ public class TNNightGripEntity extends Entity {
         Vec3 landing = arcEnd;
 
         // ★ 天降（t5）：在落点上方铺几个**平铺**的黑阵 ⇒ 大手从天上砸下来、穿过它们 ✓
-        if (tier >= SIGIL_TIER && tickCount == 0 && level() instanceof ServerLevel server) {
+        //   ⚠️ **只有第一只手铺** ✗ —— 7 只手各铺两个就是 14 个，作者已经说过"太多了" ✓
+        if (tier >= SIGIL_TIER && tickCount == 0 && handIndex == 0 && level() instanceof ServerLevel server) {
             for (double height : SIGIL_RING_HEIGHTS) {
                 spawnSigil(server, landing.add(0.0D, height, 0.0D), false, 0.0F);
             }
@@ -678,12 +691,18 @@ public class TNNightGripEntity extends Entity {
         cord(caster);
         trail();
 
-        // ★ t3 起：沿弹道留下**竖着的黑阵** ⇒ 读感是"手穿过好几个魔法阵伸出去" ✓
-        //   （朝向 = 从起点指向当前手的水平方向 ✓；阵是旋转对称的，差 180° 也看不出来 ✓）
-        if (tier >= SIGIL_TIER && tickCount % SIGIL_SPACING == 0 && level() instanceof ServerLevel server) {
+        // ★ t3 起：沿弹道留**竖着的黑阵**（＝"手穿过好几个魔法阵"）✓
+        //   ⚠️ 别太密 ✗ —— 作者 2026-10-10：「魔法阵有点太多了，可以增加间距」✓
+        //   ⇒ 按**距离**放（每满 SIGIL_GAP 格一个），且一次最多 SIGIL_MAX 个 ✓
+        if (tier >= SIGIL_TIER && sigilsSpawned < SIGIL_MAX && level() instanceof ServerLevel server) {
             Vec3 out = position().subtract(arcStart);
-            float facing = (float) Math.toDegrees(Math.atan2(out.x, out.z));
-            spawnSigil(server, position(), true, facing);
+            double travelled = out.length();
+            if (sigilsSpawned == 0 || travelled - lastSigilDistance >= SIGIL_GAP) {
+                float facing = (float) Math.toDegrees(Math.atan2(out.x, out.z));
+                spawnSigil(server, position(), true, facing);
+                sigilsSpawned++;
+                lastSigilDistance = travelled;
+            }
         }
 
         boolean arrived = progress >= 1.0D

@@ -2,7 +2,11 @@
 """Import the author's Blockbench-edited dark_hand.bbmodel back into the mod.
 
 作者 2026-10-10 晚：「我现在更新了一下，你依照我的更新更新吧」——
-他在 Blockbench 里**改了模型本身**（手指重新摆位、方块 31 -> 42、爪子也加了几枚）＋ 重画了贴图 ✓。
+他交给我们的是一份**导出的** .bbmodel（方块 31 -> 42、手指重新摆位、爪子加了几枚）＋ 重画过的贴图 ✓。
+
+⚠️ **模型不是作者做的** ✗ —— 作者原话：「**手的模型不是我做的啊，我帮你导出了**」✓
+   ⇒ 原作者与**授权/署名**待确认（本仓规矩：分发前逐个确认授权）；
+      所有文档/注释里**不要**写成"作者手改/作者自制" ✗，写"作者提供（导出）" ✓。
 
 => 从这一刻起，**事实来源是那份 .bbmodel**：
    `tools/gen_dark_hand_model.py`（程序生成几何＋贴图）**不再是**产物来源，**别再跑它**
@@ -173,7 +177,7 @@ def main():
                                        for i in range(3)]
 
     model = {
-        "credit": "Author-edited in Blockbench; imported by tools/import_dark_hand_bbmodel.py",
+        "credit": "Supplied by the project author (exported); original model author unconfirmed ",
         "textures": {"0": TEXTURE_REF, "particle": TEXTURE_REF},
         "elements": elements,
     }

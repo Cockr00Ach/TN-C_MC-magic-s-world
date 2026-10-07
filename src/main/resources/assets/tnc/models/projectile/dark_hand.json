@@ -1,5 +1,5 @@
 {
-  "credit": "Author-edited in Blockbench; imported by tools/import_dark_hand_bbmodel.py",
+  "credit": "Supplied by the project author (exported); original model author unconfirmed ",
   "textures": {
     "0": "tnc:spell_projectile/dark_hand",
     "particle": "tnc:spell_projectile/dark_hand"
