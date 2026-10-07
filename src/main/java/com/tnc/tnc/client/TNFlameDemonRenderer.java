@@ -45,7 +45,10 @@ public final class TNFlameDemonRenderer extends EntityRenderer<TNFlameDemonField
      * <p>⚠️ 作者 2026-10-05 第 4 条：柱子样式要「末影岛处的方柱形式」✓
      * ⇒ 干净的四棱方柱、细一点、不带花纹 ✓（原来 0.42 加熔岩竖纹，像工业柱子 ✗）
      */
-    private static final double PILLAR_HALF = 0.34D;
+    private static final double PILLAR_HALF = 0.50D;   // 作者：柱子"从一个方块改为 4 个块"✗ ⇒ 截面 1×1 ✓
+
+    /** 柱高（格 ✓）—— 作者要 4 个块 ✗。 */
+    private static final double PILLAR_HEIGHT = 4.0D;
 
     /** 黑曜石色（末影岛那种近黑的紫 ✓）。 */
     private static final float OR = 0.045F;
@@ -89,7 +92,7 @@ public final class TNFlameDemonRenderer extends EntityRenderer<TNFlameDemonField
         //     自己手搓的那套 drawSigil 已删除 ✗（两套法阵叠在一起就是"有问题"的来源 ✗）
         // 出场渐显（照 TNSigilRenderer 的写法 ✓，免得"啪"地凭空出现 ✗）
         float fade = (float) Math.min(1.0D, (field.tickCount + partial) / 8.0D);
-        TNSigilRenderer.drawSigil(out, pose, Vec3.ZERO, 4.0D, true, age, fade);
+        TNSigilRenderer.drawSigil(out, pose, Vec3.ZERO, 7.0D, true, age, fade);   // 作者：再大一点 ✗（原 4.0 ✓）
         for (int i = 0; i < 4; i++) {
             // ⚠️ orbPosition() 给的是**世界坐标** ✓ ⇒ 减掉实体位置换成相对坐标 ✗
             Vec3 rel = field.orbPosition(i).subtract(field.position());
@@ -111,7 +114,9 @@ public final class TNFlameDemonRenderer extends EntityRenderer<TNFlameDemonField
     private static void drawPillar(VertexConsumer out, Matrix4f pose, Vec3 at, double age) {
         // 柱脚从地里"升起来"（前 12 tick ✓，作者要"生起"✓）
         double rise = Math.min(1.0D, age / 12.0D);
-        double height = at.y * rise;
+        // ⚠️ 作者 2026-10-05：「四根柱子从一个方块改为 **4 个块**」✓
+        //   原来柱高 = 光球的高度（at.y ✗，约 6 格 ✗）⇒ 现在**固定 4 格** ✓
+        double height = PILLAR_HEIGHT * rise;
         if (height < 0.2D) {
             return;
         }
