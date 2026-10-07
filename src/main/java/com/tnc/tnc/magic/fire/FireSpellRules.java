@@ -389,7 +389,7 @@ public final class FireSpellRules {
     public static final float T4_ORB_BLAST_MULTIPLIER = 2.0F;
 
     /** 收场爆炸的半径（格）✓。 */
-    public static final double T4_ORB_BLAST_RADIUS = 18.0D;
+    public static final double T4_ORB_BLAST_RADIUS = 15.0D;
 
     /** t4 收场的画面震动强度（度 ✓）—— 比 t5 弱、比 t3 强 ✓。 */
     public static final float SHAKE_T4_RAY = 12.0F;

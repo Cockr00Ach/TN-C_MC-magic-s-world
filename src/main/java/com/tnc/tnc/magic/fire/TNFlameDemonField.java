@@ -332,10 +332,17 @@ public class TNFlameDemonField extends Entity {
         LivingEntity caster = server.getEntity(this.casterId()) instanceof LivingEntity living ? living : null;
         float blast = this.beamDamage * FireSpellRules.T4_ORB_BLAST_MULTIPLIER;
         double r = FireSpellRules.T4_ORB_BLAST_RADIUS;
+        // ⚠️ 作者 2026-10-05：「**去重**」✓
+        //   4 颗球的爆炸区域会互相重叠 ✗ ⇒ 靠阵心的目标本来会被打 **4 次**（≈8 倍跳伤 ✗）
+        //   ⇒ 记一个"已炸过"的集合 ✓，同一目标在整场终结爆炸里**只吃一次** ✓
+        java.util.Set<Integer> alreadyBlasted = new java.util.HashSet<>();
         for (int i = 0; i < 4; i++) {
             Vec3 at = this.orbPosition(i);
             for (LivingEntity victim : server.getEntitiesOfClass(LivingEntity.class,
                     FireSpellRules.uprightArea(at, r, r), t -> FireSpellRules.hittable(caster, t))) {
+                if (!alreadyBlasted.add(victim.getId())) {
+                    continue;                        // 前面那颗球已经炸过它了 ✓
+                }
                 victim.invulnerableTime = 0;
                 victim.hurt(server.damageSources().indirectMagic(this, caster), blast);
             }
