@@ -92,7 +92,7 @@ public final class TNFlameDemonRenderer extends EntityRenderer<TNFlameDemonField
         //     自己手搓的那套 drawSigil 已删除 ✗（两套法阵叠在一起就是"有问题"的来源 ✗）
         // 出场渐显（照 TNSigilRenderer 的写法 ✓，免得"啪"地凭空出现 ✗）
         float fade = (float) Math.min(1.0D, (field.tickCount + partial) / 8.0D);
-        TNSigilRenderer.drawSigil(out, pose, Vec3.ZERO, 21.0D, true, age, fade);  // 作者：t4/t5 法阵都变 3 倍 ✗（7 → 21 ✓）
+        TNSigilRenderer.drawSigil(out, pose, Vec3.ZERO, 18.0D, true, age, fade);  // 作者：t4 法阵 18 格 ✗（且伤害域 = 它 ✓）
         for (int i = 0; i < 4; i++) {
             // ⚠️ orbPosition() 给的是**世界坐标** ✓ ⇒ 减掉实体位置换成相对坐标 ✗
             Vec3 rel = field.orbPosition(i).subtract(field.position());

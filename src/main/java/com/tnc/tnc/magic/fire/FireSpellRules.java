@@ -319,7 +319,7 @@ public final class FireSpellRules {
     // ---------------- t5 太阳の审判 ----------------
 
     /** t5 巨阵的半径（格）—— "巨大的法阵"✓。 */
-    public static final double T5_FIELD_RADIUS = 12.0D;
+    public static final double T5_FIELD_RADIUS = 15D;
 
     /** t5 持续 10 秒 ✓（作者明确）。 */
     public static final int T5_FIELD_TICKS = 200;
@@ -353,7 +353,7 @@ public final class FireSpellRules {
     // ---------------- t4 炎魔龙之怒 ----------------
 
     /** t4 巨阵的半径（格）—— 作者说"巨大的法阵"✓（射程 32 格内的目标脚下 ✓）。 */
-    public static final double T4_FIELD_RADIUS = 10.0D;
+    public static final double T4_FIELD_RADIUS = 18D;
 
     /** t4 持续 8 秒 ✓（作者明确）。 */
     public static final int T4_FIELD_TICKS = 160;
@@ -364,7 +364,7 @@ public final class FireSpellRules {
      * <p>⚠️ 作者 2026-10-05 第 4 条：「t4 中的黑曜石柱在离中心远一点」✓
      * —— 原来 0.78（贴着阵内 ✗）⇒ 现在 **1.02**（就落在法阵边缘上 ✓）
      */
-    public static final double T4_ORB_RING = 1.02D;
+    public static final double T4_ORB_RING = 1.06D;
 
     /**
      * 圆球离地多高（格）✓
