@@ -58,41 +58,63 @@ def load_generator():
     return module
 
 
-def material_of(gen, faces):
-    """按面的 UV 落在图集哪一块矩形里，反推材质名 ✓（认不出就退回 cube）。
+def materials_of(gen, faces):
+    """这块方块用到了哪几块贴图区域 ✓（可能不止一块），按**图集声明顺序**排。
 
-    ★ 不能只看"第一个面的 UV 起点落在哪块里" ✗ —— 图集里两块矩形会**重叠**：
-      `palm` 是 x 8..20 / y 0..12，`claw` 是 x 12..22 / y 8..18，
-      爪子那 9 个方块的面 UV 起点是 (12, 8)，**两块都命中** ⇒ 取先出现的会把爪子标成 palm ✗
-      （实测：第一次生成时 9 个 claw 全被标成 palm ✓ 就是这么来的）。
-    正确判据：**整块方块的 UV 跨度被哪块矩形完整包含**，包含的那几块里取**面积最小**的
-    （＝最具体的那块）✓；一个都不完整包含时，退回"中心最近" ✓；再不行才叫 cube ✓。
+    ★ 为什么要分两级判（2026-10-10 踩过两次 ✗）：
+      图集里的矩形**会重叠** —— `claw`(x12..22,y8..18) 与 `palm`(x8..14,y0..12) 就重叠，
+      爪子的面 UV 正好落在重叠区 ⇒ 只按"哪块包含它"去判会随机站错队
+      （拆完 palm 之后它面积变小，9 个爪子一度又被判成 palm ✗）。
+      所以：
+        ① **先看整块方块的 UV 跨度**落在哪块里 —— 唯一命中就用它 ✓（腕/指/爪/灵光都走这条）；
+        ② 一个都没唯一命中，说明这块方块**一面一块贴图**（掌板：south 掌心用 `palm`、
+           north 手背用 `palm_back`）⇒ 逐面判，取并集 ✓；
+      逐面判时同样取"完整包含它的**最小**那块"（最具体 ✓），都不完整包含就取中心最近的 ✓。
     """
     uvs = [f["uv"] for f in faces.values() if "uv" in f]
     if not uvs:
-        return "cube"
+        return ["cube"]
     u0 = min(u[0] for u in uvs)
     v0 = min(u[1] for u in uvs)
     u1 = max(u[2] for u in uvs)
     v1 = max(u[3] for u in uvs)
 
-    containing = []
-    for name, rect in gen.ATLAS.items():
+    def contains(rect, a0, b0, a1, b1):
         x, y, w, h = rect[0]
-        if x <= u0 and u1 <= x + w and y <= v0 and v1 <= y + h:
-            containing.append((w * h, name))
-    if containing:
-        containing.sort()
-        return containing[0][1]
+        return x <= a0 and a1 <= x + w and y <= b0 and b1 <= y + h
 
-    cu, cv = (u0 + u1) / 2.0, (v0 + v1) / 2.0
-    best, best_distance = None, None
-    for name, rect in gen.ATLAS.items():
-        x, y, w, h = rect[0]
-        distance = (cu - (x + w / 2.0)) ** 2 + (cv - (y + h / 2.0)) ** 2
-        if best_distance is None or distance < best_distance:
-            best, best_distance = name, distance
-    return best or "cube"
+    whole = [name for name, rect in gen.ATLAS.items() if contains(rect, u0, v0, u1, v1)]
+    if len(whole) == 1:
+        return whole
+
+    found = []
+    for face in faces.values():
+        if "uv" not in face:
+            continue
+        a0, b0, a1, b1 = face["uv"]
+        best = None
+        for name, rect in gen.ATLAS.items():
+            if contains(rect, a0, b0, a1, b1):
+                area = rect[0][2] * rect[0][3]
+                if best is None or area < best[0]:
+                    best = (area, name)
+        if best is None:
+            cu, cv = (a0 + a1) / 2.0, (b0 + b1) / 2.0
+            distance = None
+            for name, rect in gen.ATLAS.items():
+                x, y, w, h = rect[0]
+                d = (cu - (x + w / 2.0)) ** 2 + (cv - (y + h / 2.0)) ** 2
+                if distance is None or d < distance:
+                    best, distance = (0, name), d
+        if best and best[1] not in found:
+            found.append(best[1])
+
+    if not found:
+        return ["cube"]
+    # 按图集**声明顺序**排 ⇒ 掌板那块的第一块是 `palm`（分组落在 palm 上，最好找 ✓）
+    order = list(gen.ATLAS.keys())
+    found.sort(key=lambda n: order.index(n) if n in order else len(order))
+    return found
 
 
 def build():
@@ -105,7 +127,11 @@ def build():
     elements = []
     by_material = {}
     for src in model["elements"]:
-        mat = material_of(gen, src.get("faces", {}))
+        mats = materials_of(gen, src.get("faces", {}))
+        # 方块名 = 用到的全部材质（掌板会是 `palm+palm_back` ✓）；
+        # 分组按**第一块**（＝最具体/最先遇到的那块）⇒ Outliner 仍然是 9 组，干净 ✓
+        primary = mats[0]
+        name = "+".join(mats)
         rot = src.get("rotation") or {}
         angle = rot.get("angle", 0) or 0
         axis = rot.get("axis", "y")
@@ -118,7 +144,7 @@ def build():
             rotation[2] = angle
 
         element = {
-            "name": mat,
+            "name": name,
             "box_uv": False,
             "render_order": "default",
             "rescale": False,
@@ -139,7 +165,7 @@ def build():
             "uuid": str(uuid.uuid4()),
         }
         elements.append(element)
-        by_material.setdefault(mat, []).append(element["uuid"])
+        by_material.setdefault(primary, []).append(element["uuid"])
 
     # 按材质分组（Blockbench 左侧 outliner 里能整组点选 ✓）
     outliner = []

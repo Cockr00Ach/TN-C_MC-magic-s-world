@@ -80,7 +80,17 @@ TEX = 32   # texture is 32x32; every UV below is in whole pixels of this atlas
 ATLAS = {
     # name          (x, y, w, h)   base        edge        accent
     "wrist":        ((0, 0, 8, 8), (13, 10, 16), (22, 17, 27), (6, 4, 8)),
-    "palm":         ((8, 0, 12, 12), (17, 13, 21), (28, 21, 34), (8, 6, 10)),
+    # ★★ 2026-10-10 第二刀（作者："哪边是掌心" → 要能分开画）：
+    #    原来 `palm` 是一整块 12x12，而**掌板的两个大面共用同一块 UV**
+    #    （north 手背 和 south 掌心 都是 [8,0,20,12]）⇒ 游戏里手心和手背长得一模一样 ✗，
+    #    作者根本认不出哪面是掌心 ✓。
+    #    现在把这块从中间劈成两半：
+    #        palm       x 8..13  ← 掌心那面（south = +Z）+ 其余四个侧面
+    #        palm_back  x 14..19 ← **手背**那面（north = -Z）
+    #    两块面积一样大（6x12 各一），作者就能把两面画得完全不同 ✓。
+    "palm":         ((8, 0, 6, 12), (17, 13, 21), (28, 21, 34), (8, 6, 10)),
+    # 手背：默认比掌心**再暗一档** ⇒ 就算作者还没画，两面也已经能分出来了 ✓
+    "palm_back":    ((14, 0, 6, 12), (13, 10, 16), (21, 16, 25), (6, 4, 9)),
     "back":         ((20, 0, 8, 8), (12, 9, 15), (20, 15, 24), (5, 4, 7)),
     "digit_0":      ((0, 8, 12, 6), (21, 15, 25), (34, 24, 40), (8, 6, 11)),
     "digit_1":      ((0, 14, 12, 6), (18, 13, 22), (29, 20, 35), (7, 5, 9)),
@@ -122,8 +132,14 @@ def atlas_rect(name):
 # ----------------------------------------------------------------------------
 #  geometry helpers
 # ----------------------------------------------------------------------------
-def box(frm, to, mat, uv_face=None):
-    """One axis-aligned cube. frm/to are [x,y,z] in model units (1 unit = 1/16 block)."""
+def box(frm, to, mat, uv_face=None, north_mat=None):
+    """One axis-aligned cube. frm/to are [x,y,z] in model units (1 unit = 1/16 block).
+
+    north_mat: 可选的**手背面专用材质** ✓（2026-10-10 加）。
+      模型的 `north` 面就是 -Z 那一面 —— 对掌板来说它是**手背**，而 `south`（+Z）是**掌心** ✓。
+      默认六个面共用同一块材质 ⇒ 手心和手背一模一样 ✗（作者："哪边是掌心"）。
+      传了 north_mat 之后，只有 north 那一个面改用另一块贴图区域 ⇒ 两面可以画得完全不同 ✓。
+    """
     x0, y0, z0 = frm
     x1, y1, z1 = to
     assert x1 > x0 and y1 > y0 and z1 > z0, "box must have positive size: %r -> %r" % (frm, to)
@@ -156,13 +172,20 @@ def box(frm, to, mat, uv_face=None):
         vh = max(1, min(vh, TEX - v))
         return {"uv": [u, v, u + uw, v + vh], "texture": "#0"}
 
+    # ★ 手背面单独用另一块材质（见 north_mat 的说明）✓
+    if north_mat:
+        nx, ny, nw, nh = atlas_rect(north_mat)
+        north_face = face(nx, ny, span(nw, nx, x1 - x0), span(nh, ny, y1 - y0))
+    else:
+        north_face = face(ax + fx, ay + fy, w, h)
+
     return {
         "from": [x0, y0, z0],
         "to": [x1, y1, z1],
         "rotation": {"angle": 0, "axis": "y", "origin": [x0, y0, z0]},
         "faces": {
             # north/south are the XY faces (size w x h)
-            "north": face(ax + fx, ay + fy, w, h),
+            "north": north_face,
             "south": face(ax + (aw - w - fx) % max(1, aw - w + 1), ay + fy, w, h),
             # east/west are the ZY faces (size d x h)
             "east": face(ax + fx, ay + ((fy + h) % max(1, ah - h + 1)), d, h),
@@ -227,7 +250,9 @@ def build_boxes():
     # 手腕：沿 -Z 直直往后（短，不是前臂）
     b.append(box([-3, -3, -7], [3, 3, -1], "wrist"))
     # 手掌平板：它的 +Z 面就是掌心
-    b.append(box([-6.5, -6, -1.5], [6.5, 6, 1.5], "palm"))
+    # ★ 2026-10-10：**手背（north = -Z）改用 palm_back** ✓ —— 原来两面共用一块 UV，
+    #   游戏里手心和手背一模一样，作者认不出哪面是掌心 ✗（见 ATLAS 里那两块的说明）
+    b.append(box([-6.5, -6, -1.5], [6.5, 6, 1.5], "palm", north_mat="palm_back"))
     # 掌根（靠手腕那侧稍厚一点）
     b.append(box([-5, -7, -2.5], [5, -3, 1.5], "back"))
     # 掌指关节横条
