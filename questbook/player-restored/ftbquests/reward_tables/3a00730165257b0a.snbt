@@ -1,0 +1,27 @@
+{
+	id: "3A00730165257B0A"
+	loot_crate: {
+		color: 16777215
+		drops: {
+			boss: 0
+			monster: 0
+			passive: 0
+		}
+		string_id: "_"
+	}
+	loot_size: 1
+	order_index: 0
+	rewards: [
+		{ count: 64, item: "runes:arcane_stone" }
+		{ count: 64, item: "runes:fire_stone" }
+		{ count: 64, item: "runes:frost_stone" }
+		{ count: 64, item: "runes:healing_stone" }
+		{ count: 64, item: "runes:lightning_stone" }
+		{ count: 64, item: "more_rpg_classes:aqua_stone" }
+		{ count: 64, item: "more_rpg_classes:terra_stone" }
+		{ count: 64, item: "more_rpg_classes:storm_stone" }
+		{ count: 64, item: "minecraft:arrow" }
+		{ count: 64, item: "minecraft:bread" }
+	]
+	title: "符文"
+}

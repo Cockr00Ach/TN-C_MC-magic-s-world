@@ -74,6 +74,9 @@ def main():
  for name,target,text in planned:
   base=target/'config/ftbquests/quests';chapters=base/'chapters';protected={p.name:digest(p) for p in chapters.glob('*.snbt') if p.name not in FILES};b=backup/name;b.mkdir()
   chapters.mkdir(parents=True,exist_ok=True);(target/'mods').mkdir(exist_ok=True)
+  # FTB can save every page after an interrupted load; preserve the whole book,
+  # including player-authored text and layouts, before any routine update.
+  if base.exists():shutil.copytree(base,b/'quests-full')
   files=[target/'mods/tnc-1.0.0.jar',base/'chapter_groups.snbt']+[chapters/f for f in FILES]
   for p in files:
    if p.exists():shutil.copy2(p,b/p.name)

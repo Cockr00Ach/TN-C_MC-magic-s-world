@@ -1,0 +1,1533 @@
+{
+	default_hide_dependency_lines: false
+	default_quest_shape: ""
+	filename: "boss"
+	group: "46D9BF1B84D709E1"
+	icon: "ysjxspells:gaoji"
+	id: "0CC30B6D7AC00611"
+	images: [
+		{
+			height: 15.0d
+			image: "ftbquests:textures/gui/tiaofu4.png"
+			rotation: 0.0d
+			width: 10.0d
+			x: -10.0d
+			y: 9.5d
+		}
+		{
+			height: 15.0d
+			image: "ftbquests:textures/gui/tiaofu4.png"
+			rotation: 0.0d
+			width: 10.0d
+			x: -0.5d
+			y: 9.5d
+		}
+		{
+			height: 15.0d
+			image: "ftbquests:textures/gui/tiaofu4.png"
+			rotation: 0.0d
+			width: 10.0d
+			x: 9.0d
+			y: 9.5d
+		}
+	]
+	order_index: 1
+	quest_links: [ ]
+	quests: [
+		{
+			entity_vis_size: 1.0f
+			id: "7EBEBF97120C1333"
+			subtitle: "&6&l【糖果洞穴维度Boss】&r"
+			tasks: [{
+				entity: "alexscaves:gum_worm"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "0C77434722BCADBC"
+				type: "kill"
+				value: 1L
+			}]
+			x: -13.0d
+			y: 9.0d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "4E396A38BC2E73CD"
+			subtitle: "&6&l【渊海洞穴维度Boss】&r"
+			tasks: [{
+				entity: "alexscaves:hullbreaker"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "4C7B8D01234FD2E9"
+				type: "kill"
+				value: 1L
+			}]
+			x: -11.5d
+			y: 9.0d
+		}
+		{
+			description: ["&e可在JEI搜索生化装置 召唤撼地斯拉"]
+			entity_vis_size: 1.0f
+			id: "0FAFAF1CF9D545E1"
+			subtitle: "&6&l【生化洞穴维度Boss】&r"
+			tasks: [{
+				entity: "alexscaves:tremorzilla"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "398E5920C81ABCA2"
+				type: "kill"
+				value: 1L
+			}]
+			x: -10.0d
+			y: 9.0d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "6B6CFD6D755873D7"
+			subtitle: "&6&l【主世界Boss】&r"
+			tasks: [{
+				entity: "aquamirae:captain_cornelia"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "743806216EE90944"
+				type: "kill"
+				value: 1L
+			}]
+			x: -8.5d
+			y: 9.0d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "6A18C37E35315353"
+			subtitle: "&6&l【该Boss在废弃都市中刷新】&r"
+			tasks: [{
+				entity: "block_factorys_bosses:infernal_dragon"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "450788A635DA0656"
+				type: "kill"
+				value: 1L
+			}]
+			x: -13.0d
+			y: 12.0d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "17D141FCBF6B9B56"
+			subtitle: "&6&l【主世界Boss】&r"
+			tasks: [{
+				entity: "block_factorys_bosses:kraken"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "608124DB88CD8D75"
+				type: "kill"
+				value: 1L
+			}]
+			x: -10.0d
+			y: 13.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "459BD27E4CD08059"
+			subtitle: "&6&l【主世界Boss】&r"
+			tasks: [{
+				id: "08586F4B6D95FB61"
+				item: "block_factorys_bosses:sandworm_spawn_egg"
+				type: "item"
+			}]
+			x: -8.5d
+			y: 13.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "2373702522C73032"
+			subtitle: "&6&l【主世界Boss】&r"
+			tasks: [{
+				entity: "block_factorys_bosses:yeti"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "3D11211E237F4326"
+				type: "kill"
+				value: 1L
+			}]
+			x: -7.0d
+			y: 13.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "431EB682BF370B8C"
+			subtitle: "&6&l【主世界Boss】&r"
+			tasks: [{
+				entity: "cataclysm:ancient_remnant"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "5D67243191D3463F"
+				type: "kill"
+				value: 1L
+			}]
+			x: -13.0d
+			y: 10.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "7B57A85175885A14"
+			subtitle: "&6&l【地狱章节Boss】&r"
+			tasks: [{
+				entity: "cataclysm:netherite_monstrosity"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "71D96023070903AD"
+				type: "kill"
+				value: 1L
+			}]
+			x: -11.5d
+			y: 10.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "453D433C4AF60CA6"
+			subtitle: "&6&l【原始洞穴维度Boss】&r"
+			tasks: [{
+				entity: "cataclysm:the_harbinger"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "18EF8AB40A343015"
+				type: "kill"
+				value: 1L
+			}]
+			x: -10.0d
+			y: 10.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "7F8B2EF5C591CB6B"
+			subtitle: "&6&l【掠夺都市维度Boss】&r"
+			tasks: [{
+				entity: "illageandspillage:freakager"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "13CBD1CB0166B22C"
+				type: "kill"
+				value: 1L
+			}]
+			x: -8.5d
+			y: 10.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "16B24F90D15A606C"
+			subtitle: "&6&l【掠夺都市维度Boss】&r"
+			tasks: [{
+				entity: "illageandspillage:spiritcaller"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "177CE5965E5F4CA6"
+				type: "kill"
+				value: 1L
+			}]
+			x: -11.5d
+			y: 12.0d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "0AEE983454835F70"
+			subtitle: "&6&l【二轮世界章节Boss】&r"
+			tasks: [{
+				entity: "jerotesvillage:bright_land_beast"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "28B3EC7C587C10E2"
+				type: "kill"
+				value: 1L
+			}]
+			x: -11.5d
+			y: 13.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "5B24AC1F3E3EEF02"
+			subtitle: "&6&l【二轮世界章节Boss】&r"
+			tasks: [{
+				entity: "jerotesvillage:corrosiver"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "6FA140C948F9B890"
+				type: "kill"
+				value: 1L
+			}]
+			x: -10.0d
+			y: 12.0d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "4DE72E22E88A77E0"
+			subtitle: "&6&l【二轮世界章节Boss】&r"
+			tasks: [{
+				entity: "jerotesvillage:sediment_lord"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "7D20CA617D05FE3B"
+				type: "kill"
+				value: 1L
+			}]
+			x: -7.0d
+			y: 6.0d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "211E4701F5A2E416"
+			subtitle: "&6&l【天境维度Boss】&r"
+			tasks: [{
+				entity: "legendary_monsters:cloud_golem"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "200F7750E604462E"
+				type: "kill"
+				value: 1L
+			}]
+			x: -7.0d
+			y: 7.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "260DD212D9CCFEE9"
+			subtitle: "&6&l【亡灵堡垒章节Boss】&r"
+			tasks: [{
+				entity: "mebahelcreaturesdraugr:draugr_overlord"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "204C9A45FD605D60"
+				type: "kill"
+				value: 1L
+			}]
+			x: -8.5d
+			y: 7.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "23F905CE387EBD58"
+			subtitle: "&6&l【主世界Boss】&r"
+			tasks: [{
+				entity: "monsterexpansion:leivekilth"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "264A07E7259D4212"
+				type: "kill"
+				value: 1L
+			}]
+			x: -11.5d
+			y: 7.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "072EE3B2169904F9"
+			subtitle: "&6&l【主世界Boss】&r"
+			tasks: [{
+				entity: "monsterexpansion:rakoth"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "2B5A038EECB55AA5"
+				type: "kill"
+				value: 1L
+			}]
+			x: -10.0d
+			y: 7.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "230A12C32188100E"
+			subtitle: "&6&l【异寂空谷维度Boss】&r"
+			tasks: [{
+				entity: "monsterexpansion:rhyza"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "7D9EA38286FF33B9"
+				type: "kill"
+				value: 1L
+			}]
+			x: -8.5d
+			y: 12.0d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "5B2A23E3C5E0B4E4"
+			subtitle: "&6&l【原始洞穴维度Boss】&r"
+			tasks: [{
+				entity: "monsterexpansion:skrythe"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "1BEE7BAE932FE5DF"
+				type: "kill"
+				value: 1L
+			}]
+			x: -13.0d
+			y: 13.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "1AA062AEF9A21A75"
+			subtitle: "&6&l【主世界Boss】&r"
+			tasks: [{
+				entity: "mowziesmobs:frostmaw"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "3AC34D1C4FAC601A"
+				type: "kill"
+				value: 1L
+			}]
+			x: -13.0d
+			y: 6.0d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "2CF3D443CCDBD161"
+			subtitle: "&6&l【主世界Boss】&r"
+			tasks: [{
+				entity: "mowziesmobs:umvuthi"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "336061114CF40252"
+				type: "kill"
+				value: 1L
+			}]
+			x: -11.5d
+			y: 6.0d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "1B793E94158129CC"
+			subtitle: "&6&l【地狱章节Boss】&r"
+			tasks: [{
+				entity: "mutantmore:mutant_blaze"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "2D2F7D01770BAF47"
+				type: "kill"
+				value: 1L
+			}]
+			x: -10.0d
+			y: 6.0d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "7261CF26AA9077E5"
+			subtitle: "&6&l【主世界Boss】&r"
+			tasks: [{
+				entity: "soulsweapons:draugr_boss"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "582F467B93C92F6D"
+				type: "kill"
+				value: 1L
+			}]
+			x: -8.5d
+			y: 6.0d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "6B394E3AC9ED0FEE"
+			subtitle: "&6&l【暮色森林章节Boss】&r"
+			tasks: [{
+				entity: "soulsweapons:night_prowler"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "1322B17835BFDA4A"
+				type: "kill"
+				value: 1L
+			}]
+			x: -7.0d
+			y: 9.0d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "712FF59F593DCB12"
+			subtitle: "&6&l【亡灵堡垒章节Boss】&r"
+			tasks: [{
+				entity: "torchesbecomesunlight:red"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "1807FA08F4AC044C"
+				type: "kill"
+				value: 1L
+			}]
+			x: -13.0d
+			y: 7.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "58467A58A53986C4"
+			subtitle: "&6&l【暮色森林章节Boss】&r"
+			tasks: [{
+				entity: "twilightforest:hydra"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "743F86302B00938B"
+				type: "kill"
+				value: 1L
+			}]
+			x: -7.0d
+			y: 10.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "3A46C5443BB86A04"
+			subtitle: "&6&l【主世界Boss】&r"
+			tasks: [{
+				entity: "abyssal_corrupter:abyssal_corrupter"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "68ECE11835D8041D"
+				type: "kill"
+				value: 1L
+			}]
+			x: -3.5d
+			y: 11.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "174F3B607047E1BC"
+			subtitle: "&6&l【该Boss在副本地牢中刷新】&r"
+			tasks: [{
+				entity: "blackgoldalliance:the_black_gold_marshal"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "1E812E964C49A3F1"
+				type: "kill"
+				value: 1L
+			}]
+			x: -3.5d
+			y: 6.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "11AA62989255512F"
+			subtitle: "&6&l【地狱章节Boss】&r"
+			tasks: [{
+				entity: "block_factorys_bosses:underworld_knight"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "7405B657B16C446A"
+				type: "kill"
+				value: 1L
+			}]
+			x: -3.5d
+			y: 13.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "52C822D8E4F3F044"
+			subtitle: "&6&l【末地章节Boss】&r"
+			tasks: [{
+				entity: "cataclysm:ender_guardian"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "662FCC4D0FD1D2F6"
+				type: "kill"
+				value: 1L
+			}]
+			x: -2.0d
+			y: 13.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "5A05BAFC1C175007"
+			subtitle: "&6&l【地狱章节Boss】&r"
+			tasks: [{
+				entity: "cataclysm:ignis"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "73CD3A94AA109B4B"
+				type: "kill"
+				value: 1L
+			}]
+			x: -2.0d
+			y: 9.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "3BEBA228A97B4B21"
+			subtitle: "&6&l【主世界Boss】&r"
+			tasks: [{
+				entity: "cataclysm:maledictus"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "11F323EDC0B24496"
+				type: "kill"
+				value: 1L
+			}]
+			x: -2.0d
+			y: 8.0d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "1119625CEB48554F"
+			subtitle: "&6&l【该Boss在废弃都市中刷新】&r"
+			tasks: [{
+				entity: "cataclysm:the_leviathan"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "522363D46400A54F"
+				type: "kill"
+				value: 1L
+			}]
+			x: -2.0d
+			y: 6.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "009665E25D9BBCED"
+			subtitle: "&6&l【亡灵堡垒章节Boss】&r"
+			tasks: [{
+				entity: "eeeabsmobs:immortal"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "4FB86C91CCB48002"
+				type: "kill"
+				value: 1L
+			}]
+			x: -0.5d
+			y: 6.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "1065463AEDA8067D"
+			subtitle: "&6&l【该Boss在副本地牢中刷新】&r"
+			tasks: [{
+				entity: "eeeabsmobs:nameless_guardian"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "4A3AF68B7527300D"
+				type: "kill"
+				value: 1L
+			}]
+			x: -0.5d
+			y: 8.0d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "7EC235C05025340F"
+			subtitle: "&6&l【该Boss在副本地牢中刷新】&r"
+			tasks: [{
+				id: "1CE4B4AE00AD12EA"
+				item: "hadean_breathe:hadean_smasher_spawn_egg"
+				type: "item"
+			}]
+			x: -3.5d
+			y: 8.0d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "4993DFB900701F2E"
+			subtitle: "&6&l【掠夺都市维度Boss】&r"
+			tasks: [{
+				entity: "illageandspillage:magispeller"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "3A775E5A82F03BE5"
+				type: "kill"
+				value: 1L
+			}]
+			x: 2.5d
+			y: 6.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "289858D0178C2791"
+			subtitle: "&6&l【二轮世界章节Boss】&r"
+			tasks: [{
+				entity: "jerotesvillage:purple_sand_hag"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "038BF5B334498E1B"
+				type: "kill"
+				value: 1L
+			}]
+			x: 2.5d
+			y: 8.0d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "304BFE311B85F327"
+			subtitle: "&6&l【二轮世界章节Boss】&r"
+			tasks: [{
+				entity: "jerotesvillage:serpon_combat_executer"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "23EB34A37EFF67AA"
+				type: "kill"
+				value: 1L
+			}]
+			x: 1.0d
+			y: 6.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "3905D999E07E01F9"
+			subtitle: "&6&l【二轮世界章节Boss】&r"
+			tasks: [{
+				entity: "jerotesvillage:tyrant_of_the_mountain_realm"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "3FDF45C839443452"
+				type: "kill"
+				value: 1L
+			}]
+			x: 1.0d
+			y: 8.0d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "6FC1DDB8ADEECCB6"
+			subtitle: "&6&l【地狱章节Boss】&r"
+			tasks: [{
+				entity: "minecraft:wither"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "47E802B5D26BE1AB"
+				type: "kill"
+				value: 1L
+			}]
+			x: 2.5d
+			y: 11.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "77CE91173DA0FDCC"
+			subtitle: "&6&l【该Boss在副本地牢中刷新】&r"
+			tasks: [{
+				entity: "monsterexpansion:ignathos"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "275B28265201DF04"
+				type: "kill"
+				value: 1L
+			}]
+			x: -3.5d
+			y: 9.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "028E85155F76CEFA"
+			subtitle: "&6&l【该Boss在副本地牢中刷新】&r"
+			tasks: [{
+				entity: "mutantmore:mutant_wither_skeleton"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "1C59BBC9474E028F"
+				type: "kill"
+				value: 1L
+			}]
+			x: -2.0d
+			y: 11.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "2B673B3B50B470DF"
+			subtitle: "&6&l【异寂空谷维度Boss】&r"
+			tasks: [{
+				entity: "rpg_style_more_bosses:the_exoframe"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "773C8829D8DDBC6A"
+				type: "kill"
+				value: 1L
+			}]
+			x: -0.5d
+			y: 11.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "36CC347DC2CE660C"
+			subtitle: "&6&l【主世界Boss】&r"
+			tasks: [{
+				entity: "soulsweapons:moonknight"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "245BFACDAB8E824F"
+				type: "kill"
+				value: 1L
+			}]
+			x: 2.5d
+			y: 9.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "73DFC68903929E4B"
+			subtitle: "&6&l【主世界Boss】&r"
+			tasks: [{
+				entity: "soulsweapons:returning_knight"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "709823673B28144F"
+				type: "kill"
+				value: 1L
+			}]
+			x: 1.0d
+			y: 9.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "159F6E0BDF209807"
+			subtitle: "&6&l【该Boss在副本地牢中刷新】&r"
+			tasks: [{
+				entity: "torchesbecomesunlight:demons_blade"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "757C5C9DDBB5CF09"
+				type: "kill"
+				value: 1L
+			}]
+			x: 1.0d
+			y: 11.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "55093C07F9622CF0"
+			subtitle: "&6&l【该Boss在废弃都市中刷新】&r"
+			tasks: [{
+				entity: "torchesbecomesunlight:frost_nova"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "26447536FE6674E8"
+				type: "kill"
+				value: 1L
+			}]
+			x: 1.0d
+			y: 13.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "3C25B5F3BB1C1515"
+			subtitle: "&6&l【该Boss在副本地牢中刷新】&r"
+			tasks: [{
+				entity: "torchesbecomesunlight:patriot"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "38747B1E47BE30C9"
+				type: "kill"
+				value: 1L
+			}]
+			x: 2.5d
+			y: 13.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "0B2C4C2339022472"
+			subtitle: "&6&l【该Boss在副本地牢中刷新】&r"
+			tasks: [{
+				entity: "torchesbecomesunlight:pursuer"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "50A827C4051D1536"
+				type: "kill"
+				value: 1L
+			}]
+			x: -0.5d
+			y: 13.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "62D296CD23973CCF"
+			subtitle: "&6&l【该Boss在废弃都市中刷新】&r"
+			tasks: [{
+				entity: "torchesbecomesunlight:rosmontis"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "40633E169A6B2328"
+				type: "kill"
+				value: 1L
+			}]
+			x: -0.5d
+			y: 9.5d
+		}
+		{
+			description: [
+				"&7末地群岛中有概率生成&5图中所示的神秘虫洞&7。找到并进入虫洞后，即可抵达&3「天穹领域」&7。"
+				"{image:ftbquests:textures/gui/chongdong.png width:150 height:150 align:center}"
+			]
+			entity_vis_size: 1.0f
+			id: "759B14686715881A"
+			subtitle: "&6&l【末地章节Boss】&r"
+			tasks: [{
+				entity: "bossesunleashed:celestial_jellyfish"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "34FEDA93C0D28611"
+				type: "kill"
+				value: 1L
+			}]
+			x: 6.0d
+			y: 6.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "1DEBEB1C616A1FA1"
+			subtitle: "&6&l【该Boss在废弃都市中刷新】&r"
+			tasks: [{
+				entity: "cataclysm:scylla"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "22C04C6BB6C3E907"
+				type: "kill"
+				value: 1L
+			}]
+			x: 8.0d
+			y: 6.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "3B15B5CB089BB1EA"
+			subtitle: "&6&l【该Boss在废弃都市中刷新】&r"
+			tasks: [{
+				entity: "eeeabsmobs:realm_warden"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "3CEBCDE090D4EC11"
+				type: "kill"
+				value: 1L
+			}]
+			x: 10.0d
+			y: 6.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "0944B30367BBCF8D"
+			subtitle: "&6&l【该Boss在废弃都市中刷新】&r"
+			tasks: [{
+				entity: "legendary_monsters:posessed_paladin"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "6B1B1965C416DB6D"
+				type: "kill"
+				value: 1L
+			}]
+			x: 12.0d
+			y: 6.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "1CFB526D901B6E14"
+			subtitle: "&6&l【末地章节Boss】&r"
+			tasks: [{
+				entity: "minecraft:ender_dragon"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "513086BAAF941CB5"
+				type: "kill"
+				value: 1L
+			}]
+			x: 8.0d
+			y: 8.0d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "0D3C0B5D4FAE1E68"
+			subtitle: "&6&l【该Boss在废弃都市中刷新】&r"
+			tasks: [{
+				entity: "torchesbecomesunlight:gravestone"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "5B1C22312D0A6839"
+				type: "kill"
+				value: 1L
+			}]
+			x: 10.0d
+			y: 8.0d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "1D2DC73A555DB776"
+			subtitle: "&6&l【末地章节Boss】&r"
+			tasks: [{
+				entity: "legendary_monsters:the_obliterator"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "174FB2CC35872A29"
+				type: "kill"
+				value: 1L
+			}]
+			x: 7.0d
+			y: 13.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "2F2727B0CF7E5749"
+			subtitle: "&6&l【该Boss在废弃都市中刷新】&r"
+			tasks: [{
+				entity: "torchesbecomesunlight:gun_knight_patriot"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "099513A28F454547"
+				type: "kill"
+				value: 1L
+			}]
+			x: 11.0d
+			y: 13.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "161D4F368A60200E"
+			size: 1.5d
+			tasks: [{
+				id: "47654997B16799A0"
+				item: "kubejs:gaojijihuo"
+				type: "item"
+			}]
+			title: "天灾"
+			x: 9.0d
+			y: 11.0d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "31DCC2ADE88E5965"
+			size: 1.5d
+			subtitle: "&f必定掉落随机宝石 ×1–2、随机果实 ×1–3与元素水晶 ×1–3，另有&a30%&f概率掉落法术核心 ×1、&a5%&f概率掉落随机超位法术徽章 ×1。"
+			tasks: [{
+				id: "6E36D0AB462C9E85"
+				item: "kubejs:gaojijihuo"
+				type: "item"
+			}]
+			title: "觉醒魔王级"
+			x: 9.0d
+			y: 5.0d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "5C842C94ED937650"
+			size: 1.5d
+			subtitle: "&f必定掉落随机果实 ×1与元素水晶 ×1–3，另有&a20%&f概率掉落高级水晶 ×1、&a5%&f概率掉落法术核心 ×1、&a1%&f概率掉落随机超位法术徽章 ×1"
+			tasks: [{
+				id: "11619CF464DE91E7"
+				item: "kubejs:jihuo"
+				type: "item"
+			}]
+			title: "魔王级"
+			x: -0.5d
+			y: 5.0d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "616D399D3F047D0B"
+			size: 1.5d
+			subtitle: "&a30%&f概率掉落随机果实 ×1，&a40%&f概率掉落元素水晶"
+			tasks: [{
+				id: "588B69FDAC7D59D5"
+				item: "kubejs:jihuo"
+				type: "item"
+			}]
+			title: "魔王种"
+			x: -10.0d
+			y: 4.5d
+		}
+		{
+			description: [
+				"&r&f目&d地底异教徒&f&f向伪神献祭一只&b夜行蝠&f&f，使其变异为&c遗弃者&f。"
+				""
+				"&r&f一次完整的召唤仪式通常需要&e四只地底异教徒&f共同参与。"
+				""
+				"&r&f你可以将&6铁链&f与&e石砖墙&f配合使用：先用铁链拴住&b夜行蝠&f，再将铁链固定到地底异教徒附近的石砖墙上，随后等待&d地底异教徒&f开始献祭仪式。"
+			]
+			entity_vis_size: 1.0f
+			id: "42C4ECB48C0768C8"
+			subtitle: "&6&l【异寂空谷维度Boss】&r"
+			tasks: [{
+				entity: "alexscaves:forsaken"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "4C86BBADFB3DC15A"
+				type: "kill"
+				value: 1L
+			}]
+			x: -7.0d
+			y: 12.0d
+		}
+	]
+	title: "&cBoss分类"
+}

@@ -1,0 +1,913 @@
+{
+  "id": "2F05312883B25856",
+  "filename": "tnc_field_04_workshop",
+  "title": "&3&l魔导工坊",
+  "icon": "tnc:mana_workshop_book",
+  "group": "544E434C49464531",
+  "order_index": 5,
+  "default_hide_dependency_lines": false,
+  "default_quest_shape": "hexagon",
+  "quests": [
+    {
+      "id": "556D3E34DC594E0A",
+      "title": "&3&l让庭院的魔力流动",
+      "icon": "tnc:mana_workshop_book",
+      "x": 0,
+      "y": -9,
+      "size": 2,
+      "description": [
+        "植物/动物→收集器→线路→储池→工作装置。全程纯魔力、真实余额。",
+        "土中的流动魔力仅灌溉，不再回抽为能源。区块未加载就暂停；不补算离线产能。"
+      ],
+      "tasks": [
+        {
+          "id": "535A1677B65BFA2F",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [],
+      "rewards": [
+        {
+          "id": "29B5C7F7A5E2CB2A",
+          "type": "item",
+          "item": "tnc:mana_workshop_book",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "506970F4B06F183F",
+      "title": "注能台",
+      "icon": "tnc:mana_infuser",
+      "x": -11.25,
+      "y": 2.0,
+      "size": 1.5,
+      "description": [
+        "空手按住右键，每秒注入自身5魔力，松开停止；潜行右键开界面放取第一个槽的容器，界面按钮也可注入五秒。普通瓶100，精炼瓶400，桶400。接线可自动装。",
+        "缓冲500；带宽8魔力/秒。"
+      ],
+      "tasks": [
+        {
+          "id": "7425703A8A53CD06",
+          "type": "item",
+          "item": "tnc:mana_infuser",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "1E7FF8C750509B1F",
+      "title": "集露盏",
+      "icon": "tnc:dew_collector",
+      "x": -6.75,
+      "y": 2.0,
+      "size": 1.5,
+      "description": [
+        "放在获准区域并连接相邻线路；检流尺右键看真实工作状态。",
+        "缓冲100；带宽4魔力/秒。"
+      ],
+      "tasks": [
+        {
+          "id": "6C5634FFEB19E6F8",
+          "type": "item",
+          "item": "tnc:dew_collector",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "2D2FF13BFF0E9C3D",
+      "title": "集息器",
+      "icon": "tnc:breath_collector",
+      "x": -2.25,
+      "y": 2.0,
+      "size": 1.5,
+      "description": [
+        "牧务杖选兽后右键绑定。空手潜行右键切取魔/充能；鲸32、蜥8、貂25魔力/秒各有上限。",
+        "缓冲200；带宽32魔力/秒。"
+      ],
+      "tasks": [
+        {
+          "id": "4FD630AFE3FD82DB",
+          "type": "item",
+          "item": "tnc:breath_collector",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "7E62B912E5298914",
+      "title": "色靶",
+      "icon": "tnc:color_target",
+      "x": 2.25,
+      "y": 2.0,
+      "size": 1.5,
+      "description": [
+        "拿染料右键改色。对应角羚12格内无遮挡发射，不伤人、不破坏地形。",
+        "缓冲200；带宽32魔力/秒。"
+      ],
+      "tasks": [
+        {
+          "id": "3F943E7AA034F626",
+          "type": "item",
+          "item": "tnc:color_target",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "10D594FA04A2BC4A",
+      "title": "魔导丝",
+      "icon": "tnc:mana_thread",
+      "x": 6.75,
+      "y": 2.0,
+      "size": 1.5,
+      "description": [
+        "放在获准区域并连接相邻线路；检流尺右键看真实工作状态。",
+        "缓冲0；带宽8魔力/秒。"
+      ],
+      "tasks": [
+        {
+          "id": "2974D70F934B7124",
+          "type": "item",
+          "item": "tnc:mana_thread",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "1701B42113548932",
+      "title": "曜纹导线",
+      "icon": "tnc:radiant_thread",
+      "x": 11.25,
+      "y": 2.0,
+      "size": 1.5,
+      "description": [
+        "放在获准区域并连接相邻线路；检流尺右键看真实工作状态。",
+        "缓冲0；带宽32魔力/秒。"
+      ],
+      "tasks": [
+        {
+          "id": "02B2EB89789A5B4C",
+          "type": "item",
+          "item": "tnc:radiant_thread",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "1607F33A1DBF48F4",
+      "title": "星髓导线",
+      "icon": "tnc:star_thread",
+      "x": -11.25,
+      "y": 7.7,
+      "size": 1.5,
+      "description": [
+        "放在获准区域并连接相邻线路；检流尺右键看真实工作状态。",
+        "缓冲0；带宽128魔力/秒。"
+      ],
+      "tasks": [
+        {
+          "id": "4AAF4642C757440E",
+          "type": "item",
+          "item": "tnc:star_thread",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "31928A47EADA463E",
+      "title": "浅魔池",
+      "icon": "tnc:mana_basin",
+      "x": -6.75,
+      "y": 7.7,
+      "size": 1.5,
+      "description": [
+        "放在获准区域并连接相邻线路；检流尺右键看真实工作状态。",
+        "缓冲1000；带宽8魔力/秒。"
+      ],
+      "tasks": [
+        {
+          "id": "650813D3EC36FCC0",
+          "type": "item",
+          "item": "tnc:mana_basin",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "64839A20F54A3A32",
+      "title": "曜纹储池",
+      "icon": "tnc:radiant_basin",
+      "x": -2.25,
+      "y": 7.7,
+      "size": 1.5,
+      "description": [
+        "放在获准区域并连接相邻线路；检流尺右键看真实工作状态。",
+        "缓冲8000；带宽32魔力/秒。"
+      ],
+      "tasks": [
+        {
+          "id": "7607D893E69A2E5B",
+          "type": "item",
+          "item": "tnc:radiant_basin",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "6F7F5D445B2F026E",
+      "title": "星髓储池",
+      "icon": "tnc:star_basin",
+      "x": 2.25,
+      "y": 7.7,
+      "size": 1.5,
+      "description": [
+        "放在获准区域并连接相邻线路；检流尺右键看真实工作状态。",
+        "缓冲32000；带宽128魔力/秒。"
+      ],
+      "tasks": [
+        {
+          "id": "63C7BA8CBB0F0477",
+          "type": "item",
+          "item": "tnc:star_basin",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "0DAF7A01862F8C0C",
+      "title": "折光镜",
+      "icon": "tnc:mana_mirror",
+      "x": 6.75,
+      "y": 7.7,
+      "size": 1.5,
+      "description": [
+        "两镜沿六轴对齐，12格无遮挡传能；共享4魔力/秒。",
+        "缓冲200；带宽4魔力/秒。"
+      ],
+      "tasks": [
+        {
+          "id": "52EFB52A08389ADE",
+          "type": "item",
+          "item": "tnc:mana_mirror",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "6A3517288F079D96",
+      "title": "远折镜",
+      "icon": "tnc:star_mirror",
+      "x": 11.25,
+      "y": 7.7,
+      "size": 1.5,
+      "description": [
+        "沿六轴对齐，24格无遮挡，16魔力/秒。",
+        "缓冲400；带宽16魔力/秒。"
+      ],
+      "tasks": [
+        {
+          "id": "764FDD6A029FC2C6",
+          "type": "item",
+          "item": "tnc:star_mirror",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "538D67533171AE5F",
+      "title": "分流阀",
+      "icon": "tnc:mana_valve",
+      "x": -11.25,
+      "y": 13.4,
+      "size": 1.5,
+      "description": [
+        "潜行右键切优先。红石信号可关闭；消费者先获得魔力，余量进储池。",
+        "缓冲200；带宽32魔力/秒。"
+      ],
+      "tasks": [
+        {
+          "id": "41FA345A1A880969",
+          "type": "item",
+          "item": "tnc:mana_valve",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "70253B5F2BC2BF63",
+      "title": "魔导灯",
+      "icon": "tnc:mana_lantern",
+      "x": -6.75,
+      "y": 13.4,
+      "size": 1.5,
+      "description": [
+        "放在获准区域并连接相邻线路；检流尺右键看真实工作状态。",
+        "缓冲20；带宽4魔力/秒。"
+      ],
+      "tasks": [
+        {
+          "id": "34A7330041FCB2A9",
+          "type": "item",
+          "item": "tnc:mana_lantern",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "648DB21C705351D0",
+      "title": "庭院明灯",
+      "icon": "tnc:bright_mana_lantern",
+      "x": -2.25,
+      "y": 13.4,
+      "size": 1.5,
+      "description": [
+        "放在获准区域并连接相邻线路；检流尺右键看真实工作状态。",
+        "缓冲40；带宽4魔力/秒。"
+      ],
+      "tasks": [
+        {
+          "id": "68B105B44FC06878",
+          "type": "item",
+          "item": "tnc:bright_mana_lantern",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "120DBA3E2F462134",
+      "title": "纸皮压机",
+      "icon": "tnc:mana_pulp_press",
+      "x": 2.25,
+      "y": 13.4,
+      "size": 1.5,
+      "description": [
+        "两听潮苇或甘蔗＋相邻水，16魔力、4秒制三纸。",
+        "缓冲200；带宽8魔力/秒。"
+      ],
+      "tasks": [
+        {
+          "id": "6219F30467257AC2",
+          "type": "item",
+          "item": "tnc:mana_pulp_press",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "72B64ED720214A58",
+      "title": "饲料分盘",
+      "icon": "tnc:mana_feed_plate",
+      "x": 6.75,
+      "y": 13.4,
+      "size": 1.5,
+      "description": [
+        "放在获准区域并连接相邻线路；检流尺右键看真实工作状态。",
+        "缓冲100；带宽4魔力/秒。"
+      ],
+      "tasks": [
+        {
+          "id": "691FF4EE5879C4B6",
+          "type": "item",
+          "item": "tnc:mana_feed_plate",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "6AB649A40EE0C748",
+      "title": "轻灌器",
+      "icon": "tnc:gentle_irrigator",
+      "x": 11.25,
+      "y": 13.4,
+      "size": 1.5,
+      "description": [
+        "放在获准区域并连接相邻线路；检流尺右键看真实工作状态。",
+        "缓冲100；带宽4魔力/秒。"
+      ],
+      "tasks": [
+        {
+          "id": "37E27D4A2B9D1C2B",
+          "type": "item",
+          "item": "tnc:gentle_irrigator",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "073937E8D2B8FDAC",
+      "title": "护候灯",
+      "icon": "tnc:climate_lantern",
+      "x": -11.25,
+      "y": 19.1,
+      "size": 1.5,
+      "description": [
+        "放在获准区域并连接相邻线路；检流尺右键看真实工作状态。",
+        "缓冲200；带宽4魔力/秒。"
+      ],
+      "tasks": [
+        {
+          "id": "7D634C192865BBBB",
+          "type": "item",
+          "item": "tnc:climate_lantern",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "02DD110976187C69",
+      "title": "魔导锯台",
+      "icon": "tnc:mana_sawmill",
+      "x": -6.75,
+      "y": 19.1,
+      "size": 1.5,
+      "description": [
+        "一原木＋12魔力，4秒制六木板。",
+        "缓冲200；带宽8魔力/秒。"
+      ],
+      "tasks": [
+        {
+          "id": "338B3D91B5755237",
+          "type": "item",
+          "item": "tnc:mana_sawmill",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "4081F26E635575D2",
+      "title": "雾纱织机",
+      "icon": "tnc:mist_loom",
+      "x": -2.25,
+      "y": 19.1,
+      "size": 1.5,
+      "description": [
+        "两雾棉或帆纤维＋30魔力，6秒制雾布。",
+        "缓冲300；带宽8魔力/秒。"
+      ],
+      "tasks": [
+        {
+          "id": "63E584212AAF6112",
+          "type": "item",
+          "item": "tnc:mist_loom",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "28B1E69BCF7571E2",
+      "title": "远行烘食器",
+      "icon": "tnc:meal_dryer",
+      "x": 2.25,
+      "y": 19.1,
+      "size": 1.5,
+      "description": [
+        "一份熟食＋纸＋24魔力，6秒制远行餐。",
+        "缓冲300；带宽8魔力/秒。"
+      ],
+      "tasks": [
+        {
+          "id": "68AA85560EA54FAD",
+          "type": "item",
+          "item": "tnc:meal_dryer",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "3BF6082DC4EE3BD8",
+      "title": "暖卵台",
+      "icon": "tnc:mana_incubator",
+      "x": 6.75,
+      "y": 19.1,
+      "size": 1.5,
+      "description": [
+        "放自己实际受精卵；0.15魔力/秒加快25%，不会生成新卵。",
+        "缓冲100；带宽4魔力/秒。"
+      ],
+      "tasks": [
+        {
+          "id": "310F60FE5E16563B",
+          "type": "item",
+          "item": "tnc:mana_incubator",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "0927970D1DA2EDCB",
+      "title": "收获臂",
+      "icon": "tnc:harvest_arm",
+      "x": 11.25,
+      "y": 19.1,
+      "size": 1.5,
+      "description": [
+        "放在获准区域并连接相邻线路；检流尺右键看真实工作状态。",
+        "缓冲300；带宽8魔力/秒。"
+      ],
+      "tasks": [
+        {
+          "id": "59C6E25E91F7D396",
+          "type": "item",
+          "item": "tnc:harvest_arm",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "6735C8E240FBCD91",
+      "title": "种源分拣器",
+      "icon": "tnc:seed_sorter",
+      "x": -11.25,
+      "y": 24.8,
+      "size": 1.5,
+      "description": [
+        "放在获准区域并连接相邻线路；检流尺右键看真实工作状态。",
+        "缓冲100；带宽4魔力/秒。"
+      ],
+      "tasks": [
+        {
+          "id": "1F5775A5DAD85AA2",
+          "type": "item",
+          "item": "tnc:seed_sorter",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "0884B721C38DBAFE",
+      "title": "魔导运货轨",
+      "icon": "tnc:mana_cart_track",
+      "x": -6.75,
+      "y": 24.8,
+      "size": 1.5,
+      "description": [
+        "这是沿普通铁轨铺设的魔导驱动座，真实载货矿车每10格花1魔力。",
+        "缓冲200；带宽8魔力/秒。"
+      ],
+      "tasks": [
+        {
+          "id": "41426B3396D068E7",
+          "type": "item",
+          "item": "tnc:mana_cart_track",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "189475013AC8FDD5",
+      "title": "守望铃",
+      "icon": "tnc:ward_bell",
+      "x": -2.25,
+      "y": 24.8,
+      "size": 1.5,
+      "description": [
+        "放在获准区域并连接相邻线路；检流尺右键看真实工作状态。",
+        "缓冲100；带宽4魔力/秒。"
+      ],
+      "tasks": [
+        {
+          "id": "0642BC2C61350152",
+          "type": "item",
+          "item": "tnc:ward_bell",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "0865419C0DECA978",
+      "title": "饰品充能台",
+      "icon": "tnc:accessory_charger",
+      "x": 2.25,
+      "y": 24.8,
+      "size": 1.5,
+      "description": [
+        "放充能饰品或机甲，接线每秒最多16魔力充入真实账本。",
+        "缓冲800；带宽16魔力/秒。"
+      ],
+      "tasks": [
+        {
+          "id": "7E4265B3325E1763",
+          "type": "item",
+          "item": "tnc:accessory_charger",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "6560CD995A7207FE",
+      "title": "看见第一次真实供能",
+      "icon": "tnc:dew_collector",
+      "x": -10.5,
+      "y": 34,
+      "size": 1.2,
+      "description": [
+        "这个节点检测实际转移或加工，而非持有机器。"
+      ],
+      "tasks": [
+        {
+          "id": "4EF3136FE839ACDD",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/network/collected",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "357302D516BECA1D",
+      "title": "存下真实魔力",
+      "icon": "tnc:mana_basin",
+      "x": -3.5,
+      "y": 34,
+      "size": 1.2,
+      "description": [
+        "这个节点检测实际转移或加工，而非持有机器。"
+      ],
+      "tasks": [
+        {
+          "id": "40FD05D9B8CC8E45",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/network/stored",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "565A948393027784",
+      "title": "实际完成一次加工",
+      "icon": "tnc:mana_sawmill",
+      "x": 3.5,
+      "y": 34,
+      "size": 1.2,
+      "description": [
+        "这个节点检测实际转移或加工，而非持有机器。"
+      ],
+      "tasks": [
+        {
+          "id": "7A3309B5D0381EA5",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/network/worked",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "4B57B8F0951161AF",
+      "title": "真正充满一部分饰品",
+      "icon": "tnc:accessory_charger",
+      "x": 10.5,
+      "y": 34,
+      "size": 1.2,
+      "description": [
+        "这个节点检测实际转移或加工，而非持有机器。"
+      ],
+      "tasks": [
+        {
+          "id": "043FCFDA75C1AF7A",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/network/charged",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "6815765AAC6470F3",
+      "title": "归途缎带",
+      "icon": "tnc:homeward_ribbon",
+      "x": -9.0,
+      "y": 41,
+      "size": 1.5,
+      "description": [
+        "容量300。先在饰品充能台充能，再使用。",
+        "副手饰品生效；机甲穿胸甲位。用途与消耗见物品提示。"
+      ],
+      "tasks": [
+        {
+          "id": "60374697B99E6085",
+          "type": "item",
+          "item": "tnc:homeward_ribbon",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "2D81D805BB91262C",
+      "title": "缓降羽饰",
+      "icon": "tnc:descent_feather",
+      "x": -3.0,
+      "y": 41,
+      "size": 1.5,
+      "description": [
+        "容量200。先在饰品充能台充能，再使用。",
+        "副手饰品生效；机甲穿胸甲位。用途与消耗见物品提示。"
+      ],
+      "tasks": [
+        {
+          "id": "1D09EFD7E04E1023",
+          "type": "item",
+          "item": "tnc:descent_feather",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "24CFD523967F1A19",
+      "title": "探矿耳坠",
+      "icon": "tnc:ore_whisper_earring",
+      "x": 3.0,
+      "y": 41,
+      "size": 1.5,
+      "description": [
+        "容量200。先在饰品充能台充能，再使用。",
+        "副手饰品生效；机甲穿胸甲位。用途与消耗见物品提示。"
+      ],
+      "tasks": [
+        {
+          "id": "536EAEAF3FD89991",
+          "type": "item",
+          "item": "tnc:ore_whisper_earring",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "678443D2B1333116",
+      "title": "守露护符",
+      "icon": "tnc:dew_ward_charm",
+      "x": 9.0,
+      "y": 41,
+      "size": 1.5,
+      "description": [
+        "容量300。先在饰品充能台充能，再使用。",
+        "副手饰品生效；机甲穿胸甲位。用途与消耗见物品提示。"
+      ],
+      "tasks": [
+        {
+          "id": "1821033FA9B5EB9B",
+          "type": "item",
+          "item": "tnc:dew_ward_charm",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "39A2CB43ED90FE68",
+      "title": "魔导营造尺",
+      "icon": "tnc:mana_building_ruler",
+      "x": -9.0,
+      "y": 47,
+      "size": 1.5,
+      "description": [
+        "容量600。先在饰品充能台充能，再使用。",
+        "副手饰品生效；机甲穿胸甲位。用途与消耗见物品提示。"
+      ],
+      "tasks": [
+        {
+          "id": "51C3AAB94E9E9CA2",
+          "type": "item",
+          "item": "tnc:mana_building_ruler",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "60B89EFB55CE4DBE",
+      "title": "符文弩",
+      "icon": "tnc:rune_crossbow",
+      "x": -3.0,
+      "y": 47,
+      "size": 1.5,
+      "description": [
+        "容量800。先在饰品充能台充能，再使用。",
+        "副手饰品生效；机甲穿胸甲位。用途与消耗见物品提示。"
+      ],
+      "tasks": [
+        {
+          "id": "2909F29746F48D50",
+          "type": "item",
+          "item": "tnc:rune_crossbow",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "0FDBD7713A4591CB",
+      "title": "魔道机甲",
+      "icon": "tnc:mana_mech",
+      "x": 3.0,
+      "y": 47,
+      "size": 1.5,
+      "description": [
+        "容量6000。先在饰品充能台充能，再使用。",
+        "副手饰品生效；机甲穿胸甲位。用途与消耗见物品提示。"
+      ],
+      "tasks": [
+        {
+          "id": "40966EC1795DFB07",
+          "type": "item",
+          "item": "tnc:mana_mech",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "600CCF0EDDB5DACF",
+      "title": "法术机枪模块",
+      "icon": "tnc:mech_spellgun",
+      "x": 9.0,
+      "y": 47,
+      "size": 1.5,
+      "description": [
+        "由穿戴的魔道机甲供能；模块不单独充能。",
+        "副手饰品生效；机甲穿胸甲位。用途与消耗见物品提示。"
+      ],
+      "tasks": [
+        {
+          "id": "7E6A7A5760B36C92",
+          "type": "item",
+          "item": "tnc:mech_spellgun",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    }
+  ],
+  "images": [],
+  "quest_links": []
+}

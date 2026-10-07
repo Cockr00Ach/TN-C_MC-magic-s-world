@@ -1,0 +1,1368 @@
+{
+	default_hide_dependency_lines: false
+	default_quest_shape: "hexagon"
+	filename: "tnc_equipment"
+	group: "544E434755494445"
+	icon: {
+		Count: 1
+		id: "tnc:astral_outfit_4"
+		tag: {
+			Damage: 0
+		}
+	}
+	id: "544E474100000001"
+	images: [
+		{
+			height: 2.4d
+			image: "tnc:textures/item/gear/bastion_outfit_4.png"
+			rotation: 0.0d
+			width: 2.4d
+			x: -10.5d
+			y: -3.8d
+		}
+		{
+			height: 2.4d
+			image: "tnc:textures/item/gear/bastion_hat_4.png"
+			rotation: 0.0d
+			width: 2.4d
+			x: -7.5d
+			y: -3.8d
+		}
+		{
+			height: 2.4d
+			image: "tnc:textures/item/gear/astral_outfit_4.png"
+			rotation: 0.0d
+			width: 2.4d
+			x: -4.5d
+			y: -3.8d
+		}
+		{
+			height: 2.4d
+			image: "tnc:textures/item/gear/astral_hat_4.png"
+			rotation: 0.0d
+			width: 2.4d
+			x: -1.5d
+			y: -3.8d
+		}
+		{
+			height: 2.4d
+			image: "tnc:textures/item/gear/runic_outfit_4.png"
+			rotation: 0.0d
+			width: 2.4d
+			x: 1.5d
+			y: -3.8d
+		}
+		{
+			height: 2.4d
+			image: "tnc:textures/item/gear/runic_hat_4.png"
+			rotation: 0.0d
+			width: 2.4d
+			x: 4.5d
+			y: -3.8d
+		}
+		{
+			height: 2.4d
+			image: "tnc:textures/item/gear/wanderer_outfit_4.png"
+			rotation: 0.0d
+			width: 2.4d
+			x: 7.5d
+			y: -3.8d
+		}
+		{
+			height: 2.4d
+			image: "tnc:textures/item/gear/wanderer_hat_4.png"
+			rotation: 0.0d
+			width: 2.4d
+			x: 10.5d
+			y: -3.8d
+		}
+	]
+	order_index: 4
+	quest_links: [ ]
+	quests: [
+		{
+			description: [
+				"&f上方穿魔法帽，下方穿完整身甲。身甲包含胸甲、裤子和鞋子的外观与防护，只占一个装备槽。"
+				"&7款式决定用途，阶级决定强度；不按元素限制，可以自由搭配帽子和身甲。"
+				"&e四阶：冒险者 → 精练 → 大师 → 传说。下方各列展示完整款式，点击装备查看属性。"
+				"&f前往28号炉石铁匠铺，右键屋内的铎恩，选身甲或帽子、款式和阶级，准备材料后下单制作。"
+				"&7本页物品目标只检查持有，不收走装备，也不额外发钱。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:astral_outfit_4"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E474200000001"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				id: "544E474300000001"
+				title: "阅读装备说明"
+				type: "checkmark"
+			}]
+			title: "&d&l两件装备，一身行装"
+			x: 0.0d
+			y: -6.2d
+		}
+		{
+			description: [
+				"&d&l冒险者 · 壁垒战甲"
+				""
+				"&f高防御与韧性，适合承受攻击。身甲有少量移速代价。"
+				"&b防御 8 · 移速 −4%"
+				""
+				"&e铎恩制作：Lv1，人工费40铜，制作20秒。"
+				"&7材料清单在铁匠页面显示；备齐材料再确认，订单完成后回来领取。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:bastion_outfit_1"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E474200000002"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E474300000002"
+				item: {
+					Count: 1
+					id: "tnc:bastion_outfit_1"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "冒险者 · 壁垒战甲"
+			x: -10.5d
+			y: -1.7d
+		}
+		{
+			description: [
+				"&d&l精练 · 壁垒战甲"
+				""
+				"&f高防御与韧性，适合承受攻击。身甲有少量移速代价。"
+				"&b防御 11 · 韧性 1 · 移速 −3%"
+				""
+				"&e铎恩制作：Lv20，人工费220铜，制作40秒。"
+				"&7材料清单在铁匠页面显示；备齐材料再确认，订单完成后回来领取。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:bastion_outfit_2"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E474200000003"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E474300000003"
+				item: {
+					Count: 1
+					id: "tnc:bastion_outfit_2"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "精练 · 壁垒战甲"
+			x: -10.5d
+			y: 0.10000000000000009d
+		}
+		{
+			description: [
+				"&d&l大师 · 壁垒战甲"
+				""
+				"&f高防御与韧性，适合承受攻击。身甲有少量移速代价。"
+				"&b防御 13 · 韧性 2 · 移速 −2%"
+				""
+				"&e铎恩制作：Lv45，人工费1200铜，制作70秒。"
+				"&7材料清单在铁匠页面显示；备齐材料再确认，订单完成后回来领取。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:bastion_outfit_3"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E474200000004"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E474300000004"
+				item: {
+					Count: 1
+					id: "tnc:bastion_outfit_3"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "大师 · 壁垒战甲"
+			x: -10.5d
+			y: 1.9000000000000001d
+		}
+		{
+			description: [
+				"&d&l传说 · 壁垒战甲"
+				""
+				"&f高防御与韧性，适合承受攻击。身甲有少量移速代价。"
+				"&b防御 15 · 韧性 3 · 移速 −1%"
+				""
+				"&e铎恩制作：Lv70，人工费6000铜，制作120秒。"
+				"&7材料清单在铁匠页面显示；备齐材料再确认，订单完成后回来领取。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:bastion_outfit_4"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E474200000005"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E474300000005"
+				item: {
+					Count: 1
+					id: "tnc:bastion_outfit_4"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "传说 · 壁垒战甲"
+			x: -10.5d
+			y: 3.7d
+		}
+		{
+			description: [
+				"&d&l冒险者 · 守望宽檐帽"
+				""
+				"&f高防御与韧性，适合承受攻击。身甲有少量移速代价。"
+				"&b防御 2"
+				""
+				"&e铎恩制作：Lv1，人工费40铜，制作20秒。"
+				"&7材料清单在铁匠页面显示；备齐材料再确认，订单完成后回来领取。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:bastion_hat_1"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E474200000006"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E474300000006"
+				item: {
+					Count: 1
+					id: "tnc:bastion_hat_1"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "冒险者 · 守望宽檐帽"
+			x: -7.5d
+			y: -1.7d
+		}
+		{
+			description: [
+				"&d&l精练 · 守望宽檐帽"
+				""
+				"&f高防御与韧性，适合承受攻击。身甲有少量移速代价。"
+				"&b防御 3 · 抗击退 +5%"
+				""
+				"&e铎恩制作：Lv20，人工费220铜，制作40秒。"
+				"&7材料清单在铁匠页面显示；备齐材料再确认，订单完成后回来领取。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:bastion_hat_2"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E474200000007"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E474300000007"
+				item: {
+					Count: 1
+					id: "tnc:bastion_hat_2"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "精练 · 守望宽檐帽"
+			x: -7.5d
+			y: 0.10000000000000009d
+		}
+		{
+			description: [
+				"&d&l大师 · 守望宽檐帽"
+				""
+				"&f高防御与韧性，适合承受攻击。身甲有少量移速代价。"
+				"&b防御 4 · 抗击退 +10%"
+				""
+				"&e铎恩制作：Lv45，人工费1200铜，制作70秒。"
+				"&7材料清单在铁匠页面显示；备齐材料再确认，订单完成后回来领取。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:bastion_hat_3"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E474200000008"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E474300000008"
+				item: {
+					Count: 1
+					id: "tnc:bastion_hat_3"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "大师 · 守望宽檐帽"
+			x: -7.5d
+			y: 1.9000000000000001d
+		}
+		{
+			description: [
+				"&d&l传说 · 守望宽檐帽"
+				""
+				"&f高防御与韧性，适合承受攻击。身甲有少量移速代价。"
+				"&b防御 5 · 抗击退 +15%"
+				""
+				"&e铎恩制作：Lv70，人工费6000铜，制作120秒。"
+				"&7材料清单在铁匠页面显示；备齐材料再确认，订单完成后回来领取。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:bastion_hat_4"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E474200000009"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E474300000009"
+				item: {
+					Count: 1
+					id: "tnc:bastion_hat_4"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "传说 · 守望宽檐帽"
+			x: -7.5d
+			y: 3.7d
+		}
+		{
+			description: [
+				"&d&l冒险者 · 星织长袍"
+				""
+				"&f提升魔力上限，适合连续施法与长时间战斗。"
+				"&b防御 3 · 魔力 +30"
+				""
+				"&e铎恩制作：Lv1，人工费40铜，制作20秒。"
+				"&7材料清单在铁匠页面显示；备齐材料再确认，订单完成后回来领取。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:astral_outfit_1"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E47420000000A"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E47430000000A"
+				item: {
+					Count: 1
+					id: "tnc:astral_outfit_1"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "冒险者 · 星织长袍"
+			x: -4.5d
+			y: -1.7d
+		}
+		{
+			description: [
+				"&d&l精练 · 星织长袍"
+				""
+				"&f提升魔力上限，适合连续施法与长时间战斗。"
+				"&b防御 5 · 魔力 +65"
+				""
+				"&e铎恩制作：Lv20，人工费220铜，制作40秒。"
+				"&7材料清单在铁匠页面显示；备齐材料再确认，订单完成后回来领取。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:astral_outfit_2"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E47420000000B"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E47430000000B"
+				item: {
+					Count: 1
+					id: "tnc:astral_outfit_2"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "精练 · 星织长袍"
+			x: -4.5d
+			y: 0.10000000000000009d
+		}
+		{
+			description: [
+				"&d&l大师 · 星织长袍"
+				""
+				"&f提升魔力上限，适合连续施法与长时间战斗。"
+				"&b防御 7 · 魔力 +110"
+				""
+				"&e铎恩制作：Lv45，人工费1200铜，制作70秒。"
+				"&7材料清单在铁匠页面显示；备齐材料再确认，订单完成后回来领取。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:astral_outfit_3"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E47420000000C"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E47430000000C"
+				item: {
+					Count: 1
+					id: "tnc:astral_outfit_3"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "大师 · 星织长袍"
+			x: -4.5d
+			y: 1.9000000000000001d
+		}
+		{
+			description: [
+				"&d&l传说 · 星织长袍"
+				""
+				"&f提升魔力上限，适合连续施法与长时间战斗。"
+				"&b防御 9 · 魔力 +170"
+				""
+				"&e铎恩制作：Lv70，人工费6000铜，制作120秒。"
+				"&7材料清单在铁匠页面显示；备齐材料再确认，订单完成后回来领取。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:astral_outfit_4"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E47420000000D"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E47430000000D"
+				item: {
+					Count: 1
+					id: "tnc:astral_outfit_4"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "传说 · 星织长袍"
+			x: -4.5d
+			y: 3.7d
+		}
+		{
+			description: [
+				"&d&l冒险者 · 观星尖帽"
+				""
+				"&f提升魔力上限，适合连续施法与长时间战斗。"
+				"&b防御 1 · 魔力 +15"
+				""
+				"&e铎恩制作：Lv1，人工费40铜，制作20秒。"
+				"&7材料清单在铁匠页面显示；备齐材料再确认，订单完成后回来领取。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:astral_hat_1"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E47420000000E"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E47430000000E"
+				item: {
+					Count: 1
+					id: "tnc:astral_hat_1"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "冒险者 · 观星尖帽"
+			x: -1.5d
+			y: -1.7d
+		}
+		{
+			description: [
+				"&d&l精练 · 观星尖帽"
+				""
+				"&f提升魔力上限，适合连续施法与长时间战斗。"
+				"&b防御 1 · 魔力 +30"
+				""
+				"&e铎恩制作：Lv20，人工费220铜，制作40秒。"
+				"&7材料清单在铁匠页面显示；备齐材料再确认，订单完成后回来领取。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:astral_hat_2"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E47420000000F"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E47430000000F"
+				item: {
+					Count: 1
+					id: "tnc:astral_hat_2"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "精练 · 观星尖帽"
+			x: -1.5d
+			y: 0.10000000000000009d
+		}
+		{
+			description: [
+				"&d&l大师 · 观星尖帽"
+				""
+				"&f提升魔力上限，适合连续施法与长时间战斗。"
+				"&b防御 2 · 魔力 +50"
+				""
+				"&e铎恩制作：Lv45，人工费1200铜，制作70秒。"
+				"&7材料清单在铁匠页面显示；备齐材料再确认，订单完成后回来领取。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:astral_hat_3"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E474200000010"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E474300000010"
+				item: {
+					Count: 1
+					id: "tnc:astral_hat_3"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "大师 · 观星尖帽"
+			x: -1.5d
+			y: 1.9000000000000001d
+		}
+		{
+			description: [
+				"&d&l传说 · 观星尖帽"
+				""
+				"&f提升魔力上限，适合连续施法与长时间战斗。"
+				"&b防御 2 · 魔力 +80"
+				""
+				"&e铎恩制作：Lv70，人工费6000铜，制作120秒。"
+				"&7材料清单在铁匠页面显示；备齐材料再确认，订单完成后回来领取。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:astral_hat_4"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E474200000011"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E474300000011"
+				item: {
+					Count: 1
+					id: "tnc:astral_hat_4"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "传说 · 观星尖帽"
+			x: -1.5d
+			y: 3.7d
+		}
+		{
+			description: [
+				"&d&l冒险者 · 秘纹锁甲"
+				""
+				"&f身甲兼顾防御与魔力；法冠提供额外回魔。"
+				"&b防御 7 · 魔力 +15"
+				""
+				"&e铎恩制作：Lv1，人工费40铜，制作20秒。"
+				"&7材料清单在铁匠页面显示；备齐材料再确认，订单完成后回来领取。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:runic_outfit_1"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E474200000012"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E474300000012"
+				item: {
+					Count: 1
+					id: "tnc:runic_outfit_1"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "冒险者 · 秘纹锁甲"
+			x: 1.5d
+			y: -1.7d
+		}
+		{
+			description: [
+				"&d&l精练 · 秘纹锁甲"
+				""
+				"&f身甲兼顾防御与魔力；法冠提供额外回魔。"
+				"&b防御 9 · 魔力 +35"
+				""
+				"&e铎恩制作：Lv20，人工费220铜，制作40秒。"
+				"&7材料清单在铁匠页面显示；备齐材料再确认，订单完成后回来领取。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:runic_outfit_2"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E474200000013"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E474300000013"
+				item: {
+					Count: 1
+					id: "tnc:runic_outfit_2"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "精练 · 秘纹锁甲"
+			x: 1.5d
+			y: 0.10000000000000009d
+		}
+		{
+			description: [
+				"&d&l大师 · 秘纹锁甲"
+				""
+				"&f身甲兼顾防御与魔力；法冠提供额外回魔。"
+				"&b防御 12 · 魔力 +65 · 韧性 1"
+				""
+				"&e铎恩制作：Lv45，人工费1200铜，制作70秒。"
+				"&7材料清单在铁匠页面显示；备齐材料再确认，订单完成后回来领取。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:runic_outfit_3"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E474200000014"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E474300000014"
+				item: {
+					Count: 1
+					id: "tnc:runic_outfit_3"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "大师 · 秘纹锁甲"
+			x: 1.5d
+			y: 1.9000000000000001d
+		}
+		{
+			description: [
+				"&d&l传说 · 秘纹锁甲"
+				""
+				"&f身甲兼顾防御与魔力；法冠提供额外回魔。"
+				"&b防御 14 · 魔力 +100 · 韧性 2"
+				""
+				"&e铎恩制作：Lv70，人工费6000铜，制作120秒。"
+				"&7材料清单在铁匠页面显示；备齐材料再确认，订单完成后回来领取。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:runic_outfit_4"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E474200000015"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E474300000015"
+				item: {
+					Count: 1
+					id: "tnc:runic_outfit_4"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "传说 · 秘纹锁甲"
+			x: 1.5d
+			y: 3.7d
+		}
+		{
+			description: [
+				"&d&l冒险者 · 回响法冠"
+				""
+				"&f身甲兼顾防御与魔力；法冠提供额外回魔。"
+				"&b防御 1 · 每2秒回魔 +1"
+				""
+				"&e铎恩制作：Lv1，人工费40铜，制作20秒。"
+				"&7材料清单在铁匠页面显示；备齐材料再确认，订单完成后回来领取。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:runic_hat_1"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E474200000016"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E474300000016"
+				item: {
+					Count: 1
+					id: "tnc:runic_hat_1"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "冒险者 · 回响法冠"
+			x: 4.5d
+			y: -1.7d
+		}
+		{
+			description: [
+				"&d&l精练 · 回响法冠"
+				""
+				"&f身甲兼顾防御与魔力；法冠提供额外回魔。"
+				"&b防御 2 · 每2秒回魔 +2"
+				""
+				"&e铎恩制作：Lv20，人工费220铜，制作40秒。"
+				"&7材料清单在铁匠页面显示；备齐材料再确认，订单完成后回来领取。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:runic_hat_2"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E474200000017"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E474300000017"
+				item: {
+					Count: 1
+					id: "tnc:runic_hat_2"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "精练 · 回响法冠"
+			x: 4.5d
+			y: 0.10000000000000009d
+		}
+		{
+			description: [
+				"&d&l大师 · 回响法冠"
+				""
+				"&f身甲兼顾防御与魔力；法冠提供额外回魔。"
+				"&b防御 2 · 每2秒回魔 +3"
+				""
+				"&e铎恩制作：Lv45，人工费1200铜，制作70秒。"
+				"&7材料清单在铁匠页面显示；备齐材料再确认，订单完成后回来领取。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:runic_hat_3"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E474200000018"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E474300000018"
+				item: {
+					Count: 1
+					id: "tnc:runic_hat_3"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "大师 · 回响法冠"
+			x: 4.5d
+			y: 1.9000000000000001d
+		}
+		{
+			description: [
+				"&d&l传说 · 回响法冠"
+				""
+				"&f身甲兼顾防御与魔力；法冠提供额外回魔。"
+				"&b防御 3 · 每2秒回魔 +4"
+				""
+				"&e铎恩制作：Lv70，人工费6000铜，制作120秒。"
+				"&7材料清单在铁匠页面显示；备齐材料再确认，订单完成后回来领取。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:runic_hat_4"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E474200000019"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E474300000019"
+				item: {
+					Count: 1
+					id: "tnc:runic_hat_4"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "传说 · 回响法冠"
+			x: 4.5d
+			y: 3.7d
+		}
+		{
+			description: [
+				"&d&l冒险者 · 远行外衣"
+				""
+				"&f轻装提高移速，适合探索、赶路和拉开距离。"
+				"&b防御 4 · 移速 +3%"
+				""
+				"&e铎恩制作：Lv1，人工费40铜，制作20秒。"
+				"&7材料清单在铁匠页面显示；备齐材料再确认，订单完成后回来领取。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:wanderer_outfit_1"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E47420000001A"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E47430000001A"
+				item: {
+					Count: 1
+					id: "tnc:wanderer_outfit_1"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "冒险者 · 远行外衣"
+			x: 7.5d
+			y: -1.7d
+		}
+		{
+			description: [
+				"&d&l精练 · 远行外衣"
+				""
+				"&f轻装提高移速，适合探索、赶路和拉开距离。"
+				"&b防御 6 · 魔力 +10 · 移速 +5%"
+				""
+				"&e铎恩制作：Lv20，人工费220铜，制作40秒。"
+				"&7材料清单在铁匠页面显示；备齐材料再确认，订单完成后回来领取。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:wanderer_outfit_2"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E47420000001B"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E47430000001B"
+				item: {
+					Count: 1
+					id: "tnc:wanderer_outfit_2"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "精练 · 远行外衣"
+			x: 7.5d
+			y: 0.10000000000000009d
+		}
+		{
+			description: [
+				"&d&l大师 · 远行外衣"
+				""
+				"&f轻装提高移速，适合探索、赶路和拉开距离。"
+				"&b防御 8 · 魔力 +20 · 移速 +7%"
+				""
+				"&e铎恩制作：Lv45，人工费1200铜，制作70秒。"
+				"&7材料清单在铁匠页面显示；备齐材料再确认，订单完成后回来领取。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:wanderer_outfit_3"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E47420000001C"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E47430000001C"
+				item: {
+					Count: 1
+					id: "tnc:wanderer_outfit_3"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "大师 · 远行外衣"
+			x: 7.5d
+			y: 1.9000000000000001d
+		}
+		{
+			description: [
+				"&d&l传说 · 远行外衣"
+				""
+				"&f轻装提高移速，适合探索、赶路和拉开距离。"
+				"&b防御 10 · 魔力 +35 · 移速 +9%"
+				""
+				"&e铎恩制作：Lv70，人工费6000铜，制作120秒。"
+				"&7材料清单在铁匠页面显示；备齐材料再确认，订单完成后回来领取。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:wanderer_outfit_4"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E47420000001D"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E47430000001D"
+				item: {
+					Count: 1
+					id: "tnc:wanderer_outfit_4"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "传说 · 远行外衣"
+			x: 7.5d
+			y: 3.7d
+		}
+		{
+			description: [
+				"&d&l冒险者 · 行旅兜帽"
+				""
+				"&f轻装提高移速，适合探索、赶路和拉开距离。"
+				"&b防御 1 · 移速 +2%"
+				""
+				"&e铎恩制作：Lv1，人工费40铜，制作20秒。"
+				"&7材料清单在铁匠页面显示；备齐材料再确认，订单完成后回来领取。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:wanderer_hat_1"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E47420000001E"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E47430000001E"
+				item: {
+					Count: 1
+					id: "tnc:wanderer_hat_1"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "冒险者 · 行旅兜帽"
+			x: 10.5d
+			y: -1.7d
+		}
+		{
+			description: [
+				"&d&l精练 · 行旅兜帽"
+				""
+				"&f轻装提高移速，适合探索、赶路和拉开距离。"
+				"&b防御 2 · 移速 +3%"
+				""
+				"&e铎恩制作：Lv20，人工费220铜，制作40秒。"
+				"&7材料清单在铁匠页面显示；备齐材料再确认，订单完成后回来领取。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:wanderer_hat_2"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E47420000001F"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E47430000001F"
+				item: {
+					Count: 1
+					id: "tnc:wanderer_hat_2"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "精练 · 行旅兜帽"
+			x: 10.5d
+			y: 0.10000000000000009d
+		}
+		{
+			description: [
+				"&d&l大师 · 行旅兜帽"
+				""
+				"&f轻装提高移速，适合探索、赶路和拉开距离。"
+				"&b防御 3 · 移速 +4%"
+				""
+				"&e铎恩制作：Lv45，人工费1200铜，制作70秒。"
+				"&7材料清单在铁匠页面显示；备齐材料再确认，订单完成后回来领取。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:wanderer_hat_3"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E474200000020"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E474300000020"
+				item: {
+					Count: 1
+					id: "tnc:wanderer_hat_3"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "大师 · 行旅兜帽"
+			x: 10.5d
+			y: 1.9000000000000001d
+		}
+		{
+			description: [
+				"&d&l传说 · 行旅兜帽"
+				""
+				"&f轻装提高移速，适合探索、赶路和拉开距离。"
+				"&b防御 3 · 移速 +6%"
+				""
+				"&e铎恩制作：Lv70，人工费6000铜，制作120秒。"
+				"&7材料清单在铁匠页面显示；备齐材料再确认，订单完成后回来领取。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:wanderer_hat_4"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E474200000021"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E474300000021"
+				item: {
+					Count: 1
+					id: "tnc:wanderer_hat_4"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "传说 · 行旅兜帽"
+			x: 10.5d
+			y: 3.7d
+		}
+		{
+			description: [
+				"&5&l修复遗物，重现归墟"
+				""
+				"&f防御16 · 韧性4 · 魔力+200 · 每2秒回魔+4 · 移速+4%。"
+				"&e修复：Lv85，破损的归墟神袍×1、下界之星×1、回响碎片×8、下界合金锭×4、钻石×8；人工费12000铜，制作300秒。"
+				"&7神装仅此一个款式。遗物所在地以后开放，本页不代表现已放入某个遗迹。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:divine_outfit_5"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E474200000022"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E474300000022"
+				item: {
+					Count: 1
+					id: "tnc:divine_outfit_5"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "&5&l神级 · 归墟神袍"
+			x: -2.0d
+			y: 7.8d
+		}
+		{
+			description: [
+				"&5&l断辉重续，群星归位"
+				""
+				"&f防御4 · 魔力+100 · 每2秒回魔+3 · 施法耗蓝−8%。"
+				"&e修复：Lv85，断辉星冠×1、下界之星×1、回响碎片×4、下界合金锭×2、钻石×4；人工费8000铜，制作300秒。"
+				"&d两件神装合穿：普通致命伤保留1点生命，并回复20%魔力，冷却8分钟。"
+				"&7遗物地点以后决定；拿到遗物后交给铎恩修复。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "tnc:divine_hat_5"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E474200000023"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E474300000023"
+				item: {
+					Count: 1
+					id: "tnc:divine_hat_5"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "&5&l神级 · 归墟星冠"
+			x: 2.0d
+			y: 7.8d
+		}
+	]
+	title: "&d&l装备 · 身甲与魔法帽"
+}

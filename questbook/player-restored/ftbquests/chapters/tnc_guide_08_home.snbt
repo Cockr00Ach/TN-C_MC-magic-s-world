@@ -1,0 +1,129 @@
+{
+	default_hide_dependency_lines: true
+	default_quest_shape: "square"
+	filename: "tnc_guide_08_home"
+	group: "544E434755494445"
+	icon: "minecraft:oak_door"
+	id: "544E430108000000"
+	order_index: 13
+	quest_links: [ ]
+	quests: [
+		{
+			description: [
+				"&b&l买房、装修与家庭"
+				"&7把旅费变成一个值得回去的家"
+				""
+				"&e南街空屋、六位邻居与共同生活已开放"
+				""
+				"&f点击章节中的节点阅读说明。勾选只表示看过本节，不代表完成升级、买房或委托。"
+				"&7真实目标请查看七个玩法章节；各系统开放范围见本页状态。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:oak_door"
+			id: "544E430208000000"
+			shape: "square"
+			size: 1.8d
+			tasks: [{
+				id: "544E430308000000"
+				title: "阅读本节（不发放玩法奖励）"
+				type: "checkmark"
+			}]
+			title: "&b&l买房、装修与家庭"
+			x: 0.0d
+			y: 0.0d
+		}
+		{
+			description: [
+				"&e南街空屋、六位邻居与共同生活已开放"
+				""
+				"&b&l自己买下一栋空屋"
+				""
+				"&f住宅必须由玩家购买。先到南街三层空屋看房，再去19号归航银行找米洛确认购买，5银（500铜）。原预置箱若有物品请先取出保管，现场不符预检就拒绝交易且不扣款。"
+				"&f交付保留建筑结构，按白名单移除标注家具和储存用品；编号地图的其他房源是提案，不会批量清空。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:oak_door"
+			id: "544E430208000001"
+			shape: "square"
+			size: 1.0d
+			tasks: [{
+				id: "544E430308000001"
+				title: "阅读本节（不发放玩法奖励）"
+				type: "checkmark"
+			}]
+			title: "自己买下一栋空屋"
+			x: -6.0d
+			y: 3.0d
+		}
+		{
+			description: [
+				"&e南街空屋、六位邻居与共同生活已开放"
+				""
+				"&b&l第一笔家园储蓄"
+				""
+				"&f南街房源5银，一次付清、唯一房主。动态入口及装修边界在服务页显示；本存档已售时其他玩家不扣钱。产权、装修、订单与余额随存档保存。"
+				"&f标准住宅与大宅仍待地图人工标注。公共/剧情城镇和酒馆有破坏保护，野外仍可自己搭营地。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:oak_door"
+			id: "544E430208000002"
+			shape: "square"
+			size: 1.0d
+			tasks: [{
+				id: "544E430308000002"
+				title: "阅读本节（不发放玩法奖励）"
+				type: "checkmark"
+			}]
+			title: "第一笔家园储蓄"
+			x: -3.0d
+			y: 3.0d
+		}
+		{
+			description: [
+				"&e南街空屋、六位邻居与共同生活已开放"
+				""
+				"&b&l与居民相处"
+				""
+				"&f东街与南街三栋住宅中有六位成年邻居，首版使用村民外观。右键后点击互动选项，主手赠一份料理；每20分钟有效时间最多两次，重登不重置。"
+				"&f共餐需两份同菜，一轮一次，保留料理效果并返还容器。好感20熟悉、45朋友、70亲密、85伴侣意愿。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:oak_door"
+			id: "544E430208000003"
+			shape: "square"
+			size: 1.0d
+			tasks: [{
+				id: "544E430308000003"
+				title: "阅读本节（不发放玩法奖励）"
+				type: "checkmark"
+			}]
+			title: "与居民相处"
+			x: 0.0d
+			y: 3.0d
+		}
+		{
+			description: [
+				"&e南街空屋、六位邻居与共同生活已开放"
+				""
+				"&b&l生活由你选择"
+				""
+				"&f共同生活需要亲密70、三种赠食/共餐料理、三次共餐、自购房内两张床与安全空间。你明确邀请后，愿意的成年邻居才入住；一人一位同住者。可明确结束，友情保留。"
+				"&f婚礼、生活日程与孩子属于后续阶段。剧情人物不参与这套关系；独居与友情不会少战斗奖励，远征不扣费、不掉好感。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:oak_door"
+			id: "544E430208000004"
+			shape: "square"
+			size: 1.0d
+			tasks: [{
+				id: "544E430308000004"
+				title: "阅读本节（不发放玩法奖励）"
+				type: "checkmark"
+			}]
+			title: "生活由你选择"
+			x: 3.0d
+			y: 3.0d
+		}
+	]
+	title: "08 - 买房、装修与家庭"
+}

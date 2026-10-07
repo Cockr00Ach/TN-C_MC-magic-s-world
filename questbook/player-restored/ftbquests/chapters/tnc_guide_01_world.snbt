@@ -1,0 +1,189 @@
+{
+	default_hide_dependency_lines: true
+	default_quest_shape: "square"
+	filename: "tnc_guide_01_world"
+	group: "544E434755494445"
+	icon: "minecraft:compass"
+	id: "544E430101000000"
+	images: [{
+		height: 4.2d
+		image: "tnc:textures/guide/gui_world_title.png"
+		rotation: 0.0d
+		width: 12.0d
+		x: 0.0d
+		y: -5.0d
+	}]
+	order_index: 0
+	quest_links: [ ]
+	quests: [
+		{
+			description: [
+				"&6&l归 · 吴归衡"
+				""
+				"&f普通市井家庭的少年，七系亲和皆为三，没有单一主修。"
+				"&f挚友衍不告而别后，他从酒馆出发，去寻找那个没有说清的答案。"
+				""
+				"&7这片世界有剑、铠甲、魔法与未知。远行之外，酒馆、工坊和家也为你留着归处。"
+			]
+			entity_vis_size: 1.0f
+			icon: "kaleidoscope_tavern:son_of_man_painting"
+			id: "544E430201000000"
+			shape: "square"
+			size: 1.8d
+			tasks: [{
+				id: "544E430301000000"
+				title: "阅读本节（不发放玩法奖励）"
+				type: "checkmark"
+			}]
+			title: "&6&l归 · 吴归衡"
+			x: 0.0d
+			y: 0.0d
+		}
+		{
+			description: [
+				"&e魔法石与天空岛已开放"
+				""
+				"&b&l熙永槐 · 盾与归路"
+				""
+				"&f铁匠的儿子，战士。家庭美满，却还没有真正走出过城。"
+				"&f他带着父亲尚未打完的盾踏上旅途，总念叨着早点找到衍、早点回去交差。"
+			]
+			entity_vis_size: 1.0f
+			icon: "kaleidoscope_tavern:father_painting"
+			id: "544E430201000001"
+			shape: "square"
+			size: 1.2d
+			tasks: [{
+				id: "544E430301000001"
+				title: "阅读本节（不发放玩法奖励）"
+				type: "checkmark"
+			}]
+			title: "熙永槐 · 盾与归路"
+			x: -4.0d
+			y: 3.0d
+		}
+		{
+			description: [
+				"&e魔法石与天空岛已开放"
+				""
+				"&b&l庄鹊让 · 典籍与同行"
+				""
+				"&f出身贵族的水系魔法师，与魔法协会及典籍管理有关。"
+				"&f她心怀善意，也认识常来查书的衍。古籍与书架把她带入这段追寻。"
+			]
+			entity_vis_size: 1.0f
+			icon: "kaleidoscope_tavern:master_marisa_painting"
+			id: "544E430201000002"
+			shape: "square"
+			size: 1.2d
+			tasks: [{
+				id: "544E430301000002"
+				title: "阅读本节（不发放玩法奖励）"
+				type: "checkmark"
+			}]
+			title: "庄鹊让 · 典籍与同行"
+			x: 0.0d
+			y: 3.0d
+		}
+		{
+			description: [
+				"&e魔法石与天空岛已开放"
+				""
+				"&b&l周坐望 · 看见的人"
+				""
+				"&f大光魔法师，最初魔法协会的成立者，后来退隐山林。"
+				"&f他曾激活归的魔法石，也看出了归的不同。他习惯先看，而后才开口。"
+			]
+			entity_vis_size: 1.0f
+			icon: "kaleidoscope_tavern:cr019_painting"
+			id: "544E430201000003"
+			shape: "square"
+			size: 1.2d
+			tasks: [{
+				id: "544E430301000003"
+				title: "阅读本节（不发放玩法奖励）"
+				type: "checkmark"
+			}]
+			title: "周坐望 · 看见的人"
+			x: 4.0d
+			y: 3.0d
+		}
+		{
+			description: [
+				"&e魔法石与天空岛已开放"
+				""
+				"&b&l公孙衍 · 不告而别"
+				""
+				"&f归的挚友，从普通市井走出的雷法天才。雷亲和六，无法使用光。"
+				"&f他独自离开，归由此踏上寻找他的路。留下的书架与古籍，是最初的线索。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "endrem:black_eye"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E430201000004"
+			shape: "square"
+			size: 1.2d
+			tasks: [{
+				id: "544E430301000004"
+				title: "阅读本节（不发放玩法奖励）"
+				type: "checkmark"
+			}]
+			title: "公孙衍 · 不告而别"
+			x: -4.0d
+			y: 5.6d
+		}
+		{
+			description: [
+				"&e魔法石与天空岛已开放"
+				""
+				"&b&lSelf · 酒馆的灯"
+				""
+				"&f天空岛41号酒馆里的剧情人物。那杯未动的酒、挚友离开的消息，旅程从这次谈话继续。"
+				"&f先找他听故事和认路；协会登记、制杖、铁匠与银行各由对应人员办理。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:self_spawn_egg"
+			id: "544E430201000005"
+			shape: "square"
+			size: 1.2d
+			tasks: [{
+				id: "544E430301000005"
+				title: "阅读本节（不发放玩法奖励）"
+				type: "checkmark"
+			}]
+			title: "Self · 酒馆的灯"
+			x: 0.0d
+			y: 5.6d
+		}
+		{
+			description: [
+				"&e魔法石与天空岛已开放"
+				""
+				"&b&l城镇的匠人与接待"
+				""
+				"&f艾琳：酒馆协会登记与晋升。莉娅：29号潮生制杖屋。"
+				"&f铎恩：28号炉石铁匠铺。米洛：19号归航银行。"
+				"&f他们各自经营自己的岗位，陪你完成最初的安顿。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:anvil"
+			id: "544E430201000006"
+			shape: "square"
+			size: 1.2d
+			tasks: [{
+				id: "544E430301000006"
+				title: "阅读本节（不发放玩法奖励）"
+				type: "checkmark"
+			}]
+			title: "城镇的匠人与接待"
+			x: 4.0d
+			y: 5.6d
+		}
+	]
+	title: "&6&l歸 · 世界"
+}
