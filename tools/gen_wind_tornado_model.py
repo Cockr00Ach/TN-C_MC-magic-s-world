@@ -19,6 +19,19 @@ on the 4 sides of a square whose radius SHRINKS with height (wide at the bottom,
 narrow at the top = the classic tornado silhouette). Each layer is yaw-rotated
 22.5 degrees more than the one below it, which reads as a spiral twist.
 
+!! TWO THINGS THAT MAKE A MODEL UNBAKEABLE (learned the hard way, 2026-10-10,
+!! the author saw "the tornado model is purple-black"):
+!!   1. NEVER emit "texture_size". Vanilla's model spec does not know the field,
+!!      so the whole model fails to bake, CustomModels.render falls back to the
+!!      missing model, and you get the purple-black checkerboard cube in game.
+!!      tools/import_author_model.ps1 strips it; a hand-written generator must
+!!      simply not write it. (This script wrote it once. Do not re-add it.)
+!!   2. Every face needs a FOUR-VALUE uv box [u1, v1, u2, v2]. A two-value
+!!      "uv": [0, 0] collapses the whole face onto one texel.
+!!      Also: face UVs are in vanilla 0..16 space, NOT pixels -- the painter
+!!      multiplies by (texture size / 16).
+!! verify_mod_jar.ps1 gate D1b10 enforces both.
+
   * rotation angles stay on multiples of 22.5 degrees (the loader's baked-model
     rule recorded in docs/spells/projectile_model_recipe.md)
   * all panels SHARE one UV island on purpose: the twist already comes from the
