@@ -185,6 +185,43 @@ public class TNFlameDemonField extends Entity {
             }
         }
 
+        // ★ 作者 2026-10-05：「**在法阵中加上粒子效果让场景更壮观**」✓
+        //   三样叠起来 ✓：① 贴地一圈缓慢旋转的余烬环 ✓
+        //              ② 从地面往上飘的火星柱 ✓
+        //              ③ 阵心一根会"呼吸"的火柱 ✓
+        {
+            double rr = this.radius();
+            double cx = this.getX();
+            double cy = this.getY();
+            double cz = this.getZ();
+            // ① 贴地余烬环：沿圆周取样，相位随 tickCount 转 ✓
+            for (int k = 0; k < SIGIL_RING_POINTS; k++) {
+                double a = this.tickCount * 0.02D + k * Math.PI * 2.0D / SIGIL_RING_POINTS;
+                double px = cx + Math.cos(a) * rr * 0.98D;
+                double pz = cz + Math.sin(a) * rr * 0.98D;
+                fireDust(server, px, cy + 0.15D + Math.random() * 0.25D, pz,
+                        0.62D + Math.random() * 0.30D, 1.6F);
+            }
+            // ② 从地面往上飘的火星（随机位置 ✓）
+            for (int k = 0; k < SIGIL_EMBER_POINTS; k++) {
+                double a = Math.random() * Math.PI * 2.0D;
+                double d = Math.sqrt(Math.random()) * rr * 0.95D;
+                double px = cx + Math.cos(a) * d;
+                double pz = cz + Math.sin(a) * d;
+                fireDust(server, px, cy + Math.random() * 2.2D, pz,
+                        0.30D + Math.random() * 0.55D, 1.4F);
+            }
+            // ③ 阵心那根"呼吸"火柱 ✓
+            double pulse = 1.0D + 0.18D * Math.sin(this.tickCount * 0.22D);
+            for (int k = 0; k < 6; k++) {
+                double py = cy + 0.3D + k * 0.9D * pulse;
+                double off = 0.55D * (1.0D - k / 7.0D);
+                fireDust(server, cx + (Math.random() * 2.0D - 1.0D) * off, py,
+                        cz + (Math.random() * 2.0D - 1.0D) * off,
+                        k * 0.10D, 1.8F);
+            }
+        }
+
         // ★ 作者 2026-10-05：「发射出来的射线改为**粒子流**」✓
         //   ⇒ 不再由渲染器画两层激光管 ✗（光滑几何体 ✗），改成**服务端沿 orb→目标 撒粒子** ✓
         //     每个采样点一颗 ✓；隔点取"白热芯/橙红外壳"⇒ 有流动感 ✓
@@ -362,6 +399,12 @@ public class TNFlameDemonField extends Entity {
         level.addFreshEntity(field);
         return field;
     }
+
+    /** 柱顶光球的**粒子数**（每颗每 tick ✓）。 */
+    private static final int SIGIL_RING_POINTS = 26;   // 贴地余烬环 ✓
+
+    /** 法阵里从地面往上飘的火星数（每 tick ✓）。 */
+    private static final int SIGIL_EMBER_POINTS = 22;
 
     /** 柱顶光球的**粒子数**（每颗每 tick ✓）。 */
     private static final int ORB_PARTICLES = 14;

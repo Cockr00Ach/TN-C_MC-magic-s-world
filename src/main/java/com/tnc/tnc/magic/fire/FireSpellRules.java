@@ -343,7 +343,7 @@ public final class FireSpellRules {
     public static final int T5_DESTROY_LAYERS_PER_TICK = 4;
 
     /** 单次光线伤害 = 总伤害 ÷ 这个数（10 轮 ⇒ 光线总量 = 系数 × 基础 × 火法强 ✓）。 */
-    public static final float T5_BEAM_DIVISOR = 10.0F;
+    public static final float T5_BEAM_DIVISOR = 6.4F;
 
     /** t5 的伤害系数（×7 ✓）。 */
     public static final float T5_COEFFICIENT = 7.0F;
@@ -353,7 +353,7 @@ public final class FireSpellRules {
     // ---------------- t4 炎魔龙之怒 ----------------
 
     /** t4 巨阵的半径（格）—— 作者说"巨大的法阵"✓（射程 32 格内的目标脚下 ✓）。 */
-    public static final double T4_FIELD_RADIUS = 18D;
+    public static final double T4_FIELD_RADIUS = 15D;
 
     /** t4 持续 8 秒 ✓（作者明确）。 */
     public static final int T4_FIELD_TICKS = 160;
@@ -371,7 +371,7 @@ public final class FireSpellRules {
      *
      * <p>⚠️ 作者第 4 条：「高度改为 2/3 左右」✓ —— 原来 9 格 ⇒ 现在 **6 格** ✓
      */
-    public static final double T4_ORB_HEIGHT = 9.0D;
+    public static final double T4_ORB_HEIGHT = 10.0D;
 
     /** 光线每几 tick 跳一次（10 tick = 0.5 秒 ✓）。 */
     public static final int T4_BEAM_INTERVAL_TICKS = 10;
@@ -383,7 +383,7 @@ public final class FireSpellRules {
      * {@code 16 ÷ 3.2 = 5} ⇒ <b>总量正好 = 系数 × 基础伤害 × 火法强</b> ✓
      * —— 和别档同一个口径，不会因为"持续伤害"就偷偷打出一堆额外伤害 ✗
      */
-    public static final float T4_BEAM_DIVISOR = 3.2F;
+    public static final float T4_BEAM_DIVISOR = 1.42F;
 
     /** 收场时每个圆球爆炸的伤害 = 单次光线伤害 × 这个数（作者定 ×2 ✓）。 */
     public static final float T4_ORB_BLAST_MULTIPLIER = 2.0F;
