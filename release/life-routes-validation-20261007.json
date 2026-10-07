@@ -17,13 +17,14 @@
     "magic_plants": 38,
     "beasts": 26,
     "network_blocks": 28,
+    "ftb_signed_hex_compatible": true,
     "failures": []
   },
   "installation": {
-    "installed_at": "2026-10-07T05:56:04.731844",
+    "installed_at": "2026-10-07T14:32:25.383455",
     "jar_sha256": "a166fd236cab89fab078c1aaad2966b5adf90f21130b07b340a3c09ef56074c7",
-    "backup": "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\work\\backups\\life-routes-20261007-055604",
-    "unit_tests": 167,
+    "backup": "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\work\\backups\\life-routes-20261007-143225",
+    "unit_tests": 168,
     "route_gametests": 22,
     "chapters": [
       "tnc_field_02_botany.snbt",
@@ -166,5 +167,28 @@
     "life-routes-6.png": "094e7c719a67eeaa1ebae06f96cdf893adc11ef694db11fb349010cdf6a57dfa",
     "life-routes-7.png": "cac12ad72dd98d0abb883f56dec85277b5ddb74f29fddb4596acfd6129fcf2f6"
   },
-  "client_checked_at": "2026-10-07T05:55:03.780314"
+  "client_checked_at": "2026-10-07T05:55:03.780314",
+  "ftb_load_hotfix": {
+    "cause": "FTB QuestLink.readData uses signed Long.parseLong(linked_quest,16); 23 generated links exceeded Long.MAX_VALUE",
+    "ftb_version": "2001.4.22",
+    "unit_tests": 168,
+    "regression_failed_before_fix": true,
+    "real_ftb_loading_passed": true,
+    "loader_message": "[14:37:39] [Server thread/INFO] [FTB Quests/]: Loaded 2 chapter groups, 4 chapters, 409 quests, 0 reward tables",
+    "gametests_with_ftb": 22,
+    "game_jar_changed": false,
+    "chapter_sha256": {
+      "tnc_field_02_botany.snbt": "58d0023eb678d4afd6d8649f0072e261646f8973ffba369e1581d778136a638b",
+      "tnc_field_03_pasture.snbt": "b227084ba5fe94e5ae8150f76590c22acb9354579bd68fe8873a9af25cc70753",
+      "tnc_field_04_workshop.snbt": "0324b67cd62c08439e5bd88b6b4765dc7e77962f08e18b9e90de16b967b288ea",
+      "tnc_field_05_seasons.snbt": "dd0e583af6efe01e4a04849fc91faf75cc346874992595bec9a35ea7899d5b9a"
+    },
+    "input_sha256_manifest": {
+      "tnc_field_02_botany.snbt": "58d0023eb678d4afd6d8649f0072e261646f8973ffba369e1581d778136a638b",
+      "tnc_field_03_pasture.snbt": "b227084ba5fe94e5ae8150f76590c22acb9354579bd68fe8873a9af25cc70753",
+      "tnc_field_04_workshop.snbt": "0324b67cd62c08439e5bd88b6b4765dc7e77962f08e18b9e90de16b967b288ea",
+      "tnc_field_05_seasons.snbt": "dd0e583af6efe01e4a04849fc91faf75cc346874992595bec9a35ea7899d5b9a"
+    },
+    "test_log_sha256": "188729d16651eb1d269e484345218923f571de5f00e83a2dc68fc67c6abd41a4"
+  }
 }

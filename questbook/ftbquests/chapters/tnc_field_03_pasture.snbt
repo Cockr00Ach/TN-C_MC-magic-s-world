@@ -1,5 +1,5 @@
 {
-  "id": "C7D4D282D0D35F89",
+  "id": "47D4D282D0D35F89",
   "filename": "tnc_field_03_pasture",
   "title": "&6&l异兽牧场",
   "icon": "tnc:beast_ranch_book",
@@ -9,7 +9,7 @@
   "default_quest_shape": "hexagon",
   "quests": [
     {
-      "id": "96C9B54D8F70D8F9",
+      "id": "16C9B54D8F70D8F9",
       "title": "&6&l与二十六种异兽相处",
       "icon": "tnc:beast_ranch_book",
       "x": 0,
@@ -22,7 +22,7 @@
       ],
       "tasks": [
         {
-          "id": "CDC78062585B8369",
+          "id": "4DC78062585B8369",
           "type": "checkmark"
         }
       ],
@@ -69,7 +69,7 @@
       ],
       "tasks": [
         {
-          "id": "F4086B548D425412",
+          "id": "74086B548D425412",
           "type": "item",
           "item": "tnc:radiant_cage",
           "consume_items": false,
@@ -90,7 +90,7 @@
       ],
       "tasks": [
         {
-          "id": "C59B09C9444891F0",
+          "id": "459B09C9444891F0",
           "type": "item",
           "item": "tnc:star_cage",
           "consume_items": false,
@@ -114,7 +114,7 @@
       ],
       "tasks": [
         {
-          "id": "F6EF6BFCF3501BE7",
+          "id": "76EF6BFCF3501BE7",
           "type": "advancement",
           "advancement": "tnc:life_routes/capture/bellwool_sheep",
           "title": "完成真实操作",
@@ -137,7 +137,7 @@
       "dependencies": []
     },
     {
-      "id": "F2CF1C84CEBF6F74",
+      "id": "72CF1C84CEBF6F74",
       "title": "安置与照料",
       "icon": "tnc:pasture_staff",
       "x": -11.25,
@@ -160,7 +160,7 @@
       ]
     },
     {
-      "id": "D270CCBDE04D90FA",
+      "id": "5270CCBDE04D90FA",
       "title": "第一份产物",
       "icon": "tnc:resonant_fleece",
       "x": -11.25,
@@ -178,7 +178,7 @@
         }
       ],
       "dependencies": [
-        "F2CF1C84CEBF6F74"
+        "72CF1C84CEBF6F74"
       ]
     },
     {
@@ -194,16 +194,16 @@
       ],
       "tasks": [
         {
-          "id": "A0DA140D2ED0BF48",
+          "id": "20DA140D2ED0BF48",
           "type": "checkmark"
         }
       ],
       "dependencies": [
-        "D270CCBDE04D90FA"
+        "5270CCBDE04D90FA"
       ]
     },
     {
-      "id": "F19DA88722D6C3CF",
+      "id": "719DA88722D6C3CF",
       "title": "石垒豪豕",
       "icon": "tnc:stonebarrow_meat",
       "x": -6.75,
@@ -217,7 +217,7 @@
       ],
       "tasks": [
         {
-          "id": "BBD88BED9E09199B",
+          "id": "3BD88BED9E09199B",
           "type": "advancement",
           "advancement": "tnc:life_routes/capture/stonebarrow_boar",
           "title": "完成真实操作",
@@ -240,7 +240,7 @@
       "dependencies": []
     },
     {
-      "id": "AA8383D6FC2999A2",
+      "id": "2A8383D6FC2999A2",
       "title": "安置与照料",
       "icon": "tnc:pasture_staff",
       "x": -6.75,
@@ -252,18 +252,18 @@
       ],
       "tasks": [
         {
-          "id": "D874781CB95D42DF",
+          "id": "5874781CB95D42DF",
           "type": "advancement",
           "advancement": "tnc:life_routes/nest/stonebarrow_boar",
           "title": "完成真实操作"
         }
       ],
       "dependencies": [
-        "F19DA88722D6C3CF"
+        "719DA88722D6C3CF"
       ]
     },
     {
-      "id": "AC8610BADF701C16",
+      "id": "2C8610BADF701C16",
       "title": "第一份产物",
       "icon": "tnc:stonebarrow_meat",
       "x": -6.75,
@@ -274,14 +274,14 @@
       ],
       "tasks": [
         {
-          "id": "C2D3ACA7BA3CECCC",
+          "id": "42D3ACA7BA3CECCC",
           "type": "advancement",
           "advancement": "tnc:life_routes/harvest/stonebarrow_boar",
           "title": "完成真实操作"
         }
       ],
       "dependencies": [
-        "AA8383D6FC2999A2"
+        "2A8383D6FC2999A2"
       ]
     },
     {
@@ -297,12 +297,12 @@
       ],
       "tasks": [
         {
-          "id": "A0AA282BF4A35E9E",
+          "id": "20AA282BF4A35E9E",
           "type": "checkmark"
         }
       ],
       "dependencies": [
-        "AC8610BADF701C16"
+        "2C8610BADF701C16"
       ]
     },
     {
@@ -320,7 +320,7 @@
       ],
       "tasks": [
         {
-          "id": "CA58A1242031FBA5",
+          "id": "4A58A1242031FBA5",
           "type": "advancement",
           "advancement": "tnc:life_routes/capture/emberback_hog",
           "title": "完成真实操作",
@@ -388,7 +388,7 @@
       ]
     },
     {
-      "id": "D3EAEC2B7CEA969E",
+      "id": "53EAEC2B7CEA969E",
       "title": "伙伴的用途",
       "icon": "tnc:emberback_meat",
       "x": -2.25,
@@ -423,7 +423,7 @@
       ],
       "tasks": [
         {
-          "id": "ADC39F08430FF930",
+          "id": "2DC39F08430FF930",
           "type": "advancement",
           "advancement": "tnc:life_routes/capture/tideback_newt",
           "title": "完成真实操作",
@@ -480,7 +480,7 @@
       ],
       "tasks": [
         {
-          "id": "A67C66DAADE3A025",
+          "id": "267C66DAADE3A025",
           "type": "advancement",
           "advancement": "tnc:life_routes/harvest/tideback_newt",
           "title": "完成真实操作"
@@ -491,7 +491,7 @@
       ]
     },
     {
-      "id": "8DA2A1B0D8739800",
+      "id": "0DA2A1B0D8739800",
       "title": "伙伴的用途",
       "icon": "tnc:tideback_meat",
       "x": 2.25,
@@ -503,7 +503,7 @@
       ],
       "tasks": [
         {
-          "id": "B8ADEDA6F9B61B22",
+          "id": "38ADEDA6F9B61B22",
           "type": "checkmark"
         }
       ],
@@ -512,7 +512,7 @@
       ]
     },
     {
-      "id": "ED33A8E636BC094F",
+      "id": "6D33A8E636BC094F",
       "title": "银霜步禽",
       "icon": "tnc:froststride_meat",
       "x": 6.75,
@@ -561,18 +561,18 @@
       ],
       "tasks": [
         {
-          "id": "DB3201260BCBD124",
+          "id": "5B3201260BCBD124",
           "type": "advancement",
           "advancement": "tnc:life_routes/nest/froststride_fowl",
           "title": "完成真实操作"
         }
       ],
       "dependencies": [
-        "ED33A8E636BC094F"
+        "6D33A8E636BC094F"
       ]
     },
     {
-      "id": "88D08B357A896E64",
+      "id": "08D08B357A896E64",
       "title": "第一份产物",
       "icon": "tnc:froststride_meat",
       "x": 6.75,
@@ -583,7 +583,7 @@
       ],
       "tasks": [
         {
-          "id": "B8E2069E32989434",
+          "id": "38E2069E32989434",
           "type": "advancement",
           "advancement": "tnc:life_routes/harvest/froststride_fowl",
           "title": "完成真实操作"
@@ -611,7 +611,7 @@
         }
       ],
       "dependencies": [
-        "88D08B357A896E64"
+        "08D08B357A896E64"
       ]
     },
     {
@@ -652,7 +652,7 @@
       "dependencies": []
     },
     {
-      "id": "EEBEC77E78321351",
+      "id": "6EBEC77E78321351",
       "title": "安置与照料",
       "icon": "tnc:pasture_staff",
       "x": 11.25,
@@ -675,7 +675,7 @@
       ]
     },
     {
-      "id": "D7691827BF2791C9",
+      "id": "57691827BF2791C9",
       "title": "第一份产物",
       "icon": "tnc:honeydew",
       "x": 11.25,
@@ -693,7 +693,7 @@
         }
       ],
       "dependencies": [
-        "EEBEC77E78321351"
+        "6EBEC77E78321351"
       ]
     },
     {
@@ -709,12 +709,12 @@
       ],
       "tasks": [
         {
-          "id": "BF493E611B9A937F",
+          "id": "3F493E611B9A937F",
           "type": "checkmark"
         }
       ],
       "dependencies": [
-        "D7691827BF2791C9"
+        "57691827BF2791C9"
       ]
     },
     {
@@ -755,7 +755,7 @@
       "dependencies": []
     },
     {
-      "id": "C2A3848CD41A043D",
+      "id": "42A3848CD41A043D",
       "title": "安置与照料",
       "icon": "tnc:pasture_staff",
       "x": -11.25,
@@ -767,7 +767,7 @@
       ],
       "tasks": [
         {
-          "id": "C16DE99B1B8F276A",
+          "id": "416DE99B1B8F276A",
           "type": "advancement",
           "advancement": "tnc:life_routes/nest/starfelt_hare",
           "title": "完成真实操作"
@@ -778,7 +778,7 @@
       ]
     },
     {
-      "id": "997465EF802AF35B",
+      "id": "197465EF802AF35B",
       "title": "第一份产物",
       "icon": "tnc:starfelt_meat",
       "x": -11.25,
@@ -796,11 +796,11 @@
         }
       ],
       "dependencies": [
-        "C2A3848CD41A043D"
+        "42A3848CD41A043D"
       ]
     },
     {
-      "id": "B7527544CD620400",
+      "id": "37527544CD620400",
       "title": "伙伴的用途",
       "icon": "tnc:starfelt_meat",
       "x": -11.25,
@@ -812,12 +812,12 @@
       ],
       "tasks": [
         {
-          "id": "FBD508C14021F78C",
+          "id": "7BD508C14021F78C",
           "type": "checkmark"
         }
       ],
       "dependencies": [
-        "997465EF802AF35B"
+        "197465EF802AF35B"
       ]
     },
     {
@@ -870,7 +870,7 @@
       ],
       "tasks": [
         {
-          "id": "C1C0395115BBF812",
+          "id": "41C0395115BBF812",
           "type": "advancement",
           "advancement": "tnc:life_routes/nest/dusk_lantern_deer",
           "title": "完成真实操作"
@@ -903,7 +903,7 @@
       ]
     },
     {
-      "id": "995CD032DBA47C89",
+      "id": "195CD032DBA47C89",
       "title": "伙伴的用途",
       "icon": "tnc:lantern_antler",
       "x": -6.75,
@@ -1027,7 +1027,7 @@
       ]
     },
     {
-      "id": "F81FFF166BD8D2E2",
+      "id": "781FFF166BD8D2E2",
       "title": "邮羽鹭",
       "icon": "tnc:flight_feather",
       "x": 2.25,
@@ -1083,11 +1083,11 @@
         }
       ],
       "dependencies": [
-        "F81FFF166BD8D2E2"
+        "781FFF166BD8D2E2"
       ]
     },
     {
-      "id": "CB78FEF49B5A32F2",
+      "id": "4B78FEF49B5A32F2",
       "title": "第一份产物",
       "icon": "tnc:flight_feather",
       "x": 2.25,
@@ -1098,7 +1098,7 @@
       ],
       "tasks": [
         {
-          "id": "EB97E9C7AE97B64F",
+          "id": "6B97E9C7AE97B64F",
           "type": "advancement",
           "advancement": "tnc:life_routes/harvest/post_heron",
           "title": "完成真实操作"
@@ -1126,7 +1126,7 @@
         }
       ],
       "dependencies": [
-        "CB78FEF49B5A32F2"
+        "4B78FEF49B5A32F2"
       ]
     },
     {
@@ -1201,7 +1201,7 @@
       ],
       "tasks": [
         {
-          "id": "F753894EC8F4F88F",
+          "id": "7753894EC8F4F88F",
           "type": "advancement",
           "advancement": "tnc:life_routes/harvest/watch_mantis",
           "title": "完成真实操作"
@@ -1212,7 +1212,7 @@
       ]
     },
     {
-      "id": "9F7F7E1FA5174782",
+      "id": "1F7F7E1FA5174782",
       "title": "伙伴的用途",
       "icon": "tnc:watch_wing",
       "x": 6.75,
@@ -1282,7 +1282,7 @@
       ],
       "tasks": [
         {
-          "id": "9EF452E1B4381256",
+          "id": "1EF452E1B4381256",
           "type": "advancement",
           "advancement": "tnc:life_routes/nest/mirrorwing_moth",
           "title": "完成真实操作"
@@ -1293,7 +1293,7 @@
       ]
     },
     {
-      "id": "AA0A6810FFC8658C",
+      "id": "2A0A6810FFC8658C",
       "title": "第一份产物",
       "icon": "tnc:mirror_scale",
       "x": 11.25,
@@ -1332,11 +1332,11 @@
         }
       ],
       "dependencies": [
-        "AA0A6810FFC8658C"
+        "2A0A6810FFC8658C"
       ]
     },
     {
-      "id": "AB12D4BA119EFAA2",
+      "id": "2B12D4BA119EFAA2",
       "title": "炉鳃山貘",
       "icon": "tnc:warm_breath",
       "x": -11.25,
@@ -1373,7 +1373,7 @@
       "dependencies": []
     },
     {
-      "id": "D330B31617FF8991",
+      "id": "5330B31617FF8991",
       "title": "安置与照料",
       "icon": "tnc:pasture_staff",
       "x": -11.25,
@@ -1385,18 +1385,18 @@
       ],
       "tasks": [
         {
-          "id": "D921A5B96E7B18F6",
+          "id": "5921A5B96E7B18F6",
           "type": "advancement",
           "advancement": "tnc:life_routes/nest/forgegill_tapir",
           "title": "完成真实操作"
         }
       ],
       "dependencies": [
-        "AB12D4BA119EFAA2"
+        "2B12D4BA119EFAA2"
       ]
     },
     {
-      "id": "9BDDC15020F7F3BD",
+      "id": "1BDDC15020F7F3BD",
       "title": "第一份产物",
       "icon": "tnc:warm_breath",
       "x": -11.25,
@@ -1407,18 +1407,18 @@
       ],
       "tasks": [
         {
-          "id": "A4E3044FB33F58C7",
+          "id": "24E3044FB33F58C7",
           "type": "advancement",
           "advancement": "tnc:life_routes/harvest/forgegill_tapir",
           "title": "完成真实操作"
         }
       ],
       "dependencies": [
-        "D330B31617FF8991"
+        "5330B31617FF8991"
       ]
     },
     {
-      "id": "D240D42DAB123E58",
+      "id": "5240D42DAB123E58",
       "title": "伙伴的用途",
       "icon": "tnc:warm_breath",
       "x": -11.25,
@@ -1430,16 +1430,16 @@
       ],
       "tasks": [
         {
-          "id": "D59B41E6A5CB4890",
+          "id": "559B41E6A5CB4890",
           "type": "checkmark"
         }
       ],
       "dependencies": [
-        "9BDDC15020F7F3BD"
+        "1BDDC15020F7F3BD"
       ]
     },
     {
-      "id": "B0ABAFE5964DFF1B",
+      "id": "30ABAFE5964DFF1B",
       "title": "雾腹水獭",
       "icon": "tnc:spring_concentrate",
       "x": -6.75,
@@ -1453,7 +1453,7 @@
       ],
       "tasks": [
         {
-          "id": "E6133E4DA0CA317D",
+          "id": "66133E4DA0CA317D",
           "type": "advancement",
           "advancement": "tnc:life_routes/capture/mistbelly_otter",
           "title": "完成真实操作",
@@ -1488,14 +1488,14 @@
       ],
       "tasks": [
         {
-          "id": "B36D0425C9E04C4E",
+          "id": "336D0425C9E04C4E",
           "type": "advancement",
           "advancement": "tnc:life_routes/nest/mistbelly_otter",
           "title": "完成真实操作"
         }
       ],
       "dependencies": [
-        "B0ABAFE5964DFF1B"
+        "30ABAFE5964DFF1B"
       ]
     },
     {
@@ -1542,7 +1542,7 @@
       ]
     },
     {
-      "id": "C78E572CEA2EBA46",
+      "id": "478E572CEA2EBA46",
       "title": "环砾龟",
       "icon": "tnc:loam_pebble",
       "x": -2.25,
@@ -1556,7 +1556,7 @@
       ],
       "tasks": [
         {
-          "id": "B3768CBA3B870FB3",
+          "id": "33768CBA3B870FB3",
           "type": "advancement",
           "advancement": "tnc:life_routes/capture/ringstone_tortoise",
           "title": "完成真实操作",
@@ -1598,11 +1598,11 @@
         }
       ],
       "dependencies": [
-        "C78E572CEA2EBA46"
+        "478E572CEA2EBA46"
       ]
     },
     {
-      "id": "C3BF25781B1EF5CA",
+      "id": "43BF25781B1EF5CA",
       "title": "第一份产物",
       "icon": "tnc:loam_pebble",
       "x": -2.25,
@@ -1641,7 +1641,7 @@
         }
       ],
       "dependencies": [
-        "C3BF25781B1EF5CA"
+        "43BF25781B1EF5CA"
       ]
     },
     {
@@ -1659,7 +1659,7 @@
       ],
       "tasks": [
         {
-          "id": "B4C0905AAD6B995A",
+          "id": "34C0905AAD6B995A",
           "type": "advancement",
           "advancement": "tnc:life_routes/capture/satchelback_runner",
           "title": "完成真实操作",
@@ -1705,7 +1705,7 @@
       ]
     },
     {
-      "id": "A4E653189DE67BAD",
+      "id": "24E653189DE67BAD",
       "title": "第一份产物",
       "icon": "tnc:runner_hide",
       "x": 2.25,
@@ -1727,7 +1727,7 @@
       ]
     },
     {
-      "id": "94804C1728E939DA",
+      "id": "14804C1728E939DA",
       "title": "伙伴的用途",
       "icon": "tnc:runner_hide",
       "x": 2.25,
@@ -1739,16 +1739,16 @@
       ],
       "tasks": [
         {
-          "id": "BBADF606E3EFD2B4",
+          "id": "3BADF606E3EFD2B4",
           "type": "checkmark"
         }
       ],
       "dependencies": [
-        "A4E653189DE67BAD"
+        "24E653189DE67BAD"
       ]
     },
     {
-      "id": "EE16EB448640F43E",
+      "id": "6E16EB448640F43E",
       "title": "碗角犀",
       "icon": "tnc:horn_powder",
       "x": 6.75,
@@ -1804,7 +1804,7 @@
         }
       ],
       "dependencies": [
-        "EE16EB448640F43E"
+        "6E16EB448640F43E"
       ]
     },
     {
@@ -1819,7 +1819,7 @@
       ],
       "tasks": [
         {
-          "id": "E111E8B75F2C9283",
+          "id": "6111E8B75F2C9283",
           "type": "advancement",
           "advancement": "tnc:life_routes/harvest/bowlhorn_rhino",
           "title": "完成真实操作"
@@ -1830,7 +1830,7 @@
       ]
     },
     {
-      "id": "C01AA4A926FF1303",
+      "id": "401AA4A926FF1303",
       "title": "伙伴的用途",
       "icon": "tnc:horn_powder",
       "x": 6.75,
@@ -1842,7 +1842,7 @@
       ],
       "tasks": [
         {
-          "id": "9BA9A41B38D0C002",
+          "id": "1BA9A41B38D0C002",
           "type": "checkmark"
         }
       ],
@@ -1851,7 +1851,7 @@
       ]
     },
     {
-      "id": "E7B128F1B5276D42",
+      "id": "67B128F1B5276D42",
       "title": "觅页浣兽",
       "icon": "tnc:forage_paper_hide",
       "x": 11.25,
@@ -1888,7 +1888,7 @@
       "dependencies": []
     },
     {
-      "id": "E1662CF1DA256CAD",
+      "id": "61662CF1DA256CAD",
       "title": "安置与照料",
       "icon": "tnc:pasture_staff",
       "x": 11.25,
@@ -1900,14 +1900,14 @@
       ],
       "tasks": [
         {
-          "id": "C6F76842494585C6",
+          "id": "46F76842494585C6",
           "type": "advancement",
           "advancement": "tnc:life_routes/nest/pageforage_raccoon",
           "title": "完成真实操作"
         }
       ],
       "dependencies": [
-        "E7B128F1B5276D42"
+        "67B128F1B5276D42"
       ]
     },
     {
@@ -1929,7 +1929,7 @@
         }
       ],
       "dependencies": [
-        "E1662CF1DA256CAD"
+        "61662CF1DA256CAD"
       ]
     },
     {
@@ -1991,7 +1991,7 @@
       "dependencies": []
     },
     {
-      "id": "A50DE65D24209411",
+      "id": "250DE65D24209411",
       "title": "安置与照料",
       "icon": "tnc:pasture_staff",
       "x": -11.25,
@@ -2032,11 +2032,11 @@
         }
       ],
       "dependencies": [
-        "A50DE65D24209411"
+        "250DE65D24209411"
       ]
     },
     {
-      "id": "BF1C597B8147178E",
+      "id": "3F1C597B8147178E",
       "title": "伙伴的用途",
       "icon": "tnc:nest_glue",
       "x": -11.25,
@@ -2057,7 +2057,7 @@
       ]
     },
     {
-      "id": "BD2DF859C740E28C",
+      "id": "3D2DF859C740E28C",
       "title": "跃泉蹄兽",
       "icon": "tnc:hoof_glue",
       "x": -6.75,
@@ -2094,7 +2094,7 @@
       "dependencies": []
     },
     {
-      "id": "BAB13FE54A0D3A1A",
+      "id": "3AB13FE54A0D3A1A",
       "title": "安置与照料",
       "icon": "tnc:pasture_staff",
       "x": -6.75,
@@ -2113,7 +2113,7 @@
         }
       ],
       "dependencies": [
-        "BD2DF859C740E28C"
+        "3D2DF859C740E28C"
       ]
     },
     {
@@ -2128,14 +2128,14 @@
       ],
       "tasks": [
         {
-          "id": "D6FBC8CA5CBB5109",
+          "id": "56FBC8CA5CBB5109",
           "type": "advancement",
           "advancement": "tnc:life_routes/harvest/springhoof_strider",
           "title": "完成真实操作"
         }
       ],
       "dependencies": [
-        "BAB13FE54A0D3A1A"
+        "3AB13FE54A0D3A1A"
       ]
     },
     {
@@ -2151,7 +2151,7 @@
       ],
       "tasks": [
         {
-          "id": "C9ECFC4AF257F6A7",
+          "id": "49ECFC4AF257F6A7",
           "type": "checkmark"
         }
       ],
@@ -2219,7 +2219,7 @@
       ]
     },
     {
-      "id": "B569A73D35A08BE9",
+      "id": "3569A73D35A08BE9",
       "title": "第一份产物",
       "icon": "tnc:prism_horn_shard",
       "x": -2.25,
@@ -2241,7 +2241,7 @@
       ]
     },
     {
-      "id": "DAB284D32BCE6966",
+      "id": "5AB284D32BCE6966",
       "title": "伙伴的用途",
       "icon": "tnc:prism_horn_shard",
       "x": -2.25,
@@ -2258,11 +2258,11 @@
         }
       ],
       "dependencies": [
-        "B569A73D35A08BE9"
+        "3569A73D35A08BE9"
       ]
     },
     {
-      "id": "CC7CD91AA6E1E415",
+      "id": "4C7CD91AA6E1E415",
       "title": "鼓腹砂獭",
       "icon": "tnc:sand_otter_fiber",
       "x": 2.25,
@@ -2310,14 +2310,14 @@
       ],
       "tasks": [
         {
-          "id": "AC5B384EF21B0EAC",
+          "id": "2C5B384EF21B0EAC",
           "type": "advancement",
           "advancement": "tnc:life_routes/nest/drumbelly_otter",
           "title": "完成真实操作"
         }
       ],
       "dependencies": [
-        "CC7CD91AA6E1E415"
+        "4C7CD91AA6E1E415"
       ]
     },
     {
@@ -2355,7 +2355,7 @@
       ],
       "tasks": [
         {
-          "id": "80F7A731981EB58D",
+          "id": "00F7A731981EB58D",
           "type": "checkmark"
         }
       ],
@@ -2378,7 +2378,7 @@
       ],
       "tasks": [
         {
-          "id": "997A350FCC5F0110",
+          "id": "197A350FCC5F0110",
           "type": "advancement",
           "advancement": "tnc:life_routes/capture/pillowlight_marten",
           "title": "完成真实操作",
@@ -2413,7 +2413,7 @@
       ],
       "tasks": [
         {
-          "id": "F2F92FE92F75CDCE",
+          "id": "72F92FE92F75CDCE",
           "type": "advancement",
           "advancement": "tnc:life_routes/nest/pillowlight_marten",
           "title": "完成真实操作"
@@ -2458,7 +2458,7 @@
       ],
       "tasks": [
         {
-          "id": "A1ADE08868A53392",
+          "id": "21ADE08868A53392",
           "type": "checkmark"
         }
       ],
@@ -2504,7 +2504,7 @@
       "dependencies": []
     },
     {
-      "id": "CE1A51364C027CAF",
+      "id": "4E1A51364C027CAF",
       "title": "安置与照料",
       "icon": "tnc:pasture_staff",
       "x": -9,
@@ -2516,7 +2516,7 @@
       ],
       "tasks": [
         {
-          "id": "A04CDB44E6710FAA",
+          "id": "204CDB44E6710FAA",
           "type": "advancement",
           "advancement": "tnc:life_routes/nest/dewbound_whale",
           "title": "完成真实操作"
@@ -2527,7 +2527,7 @@
       ]
     },
     {
-      "id": "8896BC5B0B961735",
+      "id": "0896BC5B0B961735",
       "title": "真实取魔",
       "icon": "tnc:mana_bottle",
       "x": -9,
@@ -2545,7 +2545,7 @@
         }
       ],
       "dependencies": [
-        "CE1A51364C027CAF"
+        "4E1A51364C027CAF"
       ]
     },
     {
@@ -2566,11 +2566,11 @@
         }
       ],
       "dependencies": [
-        "8896BC5B0B961735"
+        "0896BC5B0B961735"
       ]
     },
     {
-      "id": "E91662C489F7D850",
+      "id": "691662C489F7D850",
       "title": "纸帆魟",
       "icon": "tnc:air_plume",
       "x": 0,
@@ -2584,7 +2584,7 @@
       ],
       "tasks": [
         {
-          "id": "C87D002800118048",
+          "id": "487D002800118048",
           "type": "advancement",
           "advancement": "tnc:life_routes/capture/papersail_ray",
           "title": "完成真实操作",
@@ -2626,7 +2626,7 @@
         }
       ],
       "dependencies": [
-        "E91662C489F7D850"
+        "691662C489F7D850"
       ]
     },
     {
@@ -2641,7 +2641,7 @@
       ],
       "tasks": [
         {
-          "id": "8407FDDE1C5162ED",
+          "id": "0407FDDE1C5162ED",
           "type": "advancement",
           "advancement": "tnc:life_routes/harvest/papersail_ray",
           "title": "完成真实操作"
@@ -2664,7 +2664,7 @@
       ],
       "tasks": [
         {
-          "id": "99AC7BCE6FD24632",
+          "id": "19AC7BCE6FD24632",
           "type": "checkmark"
         }
       ],
@@ -2673,7 +2673,7 @@
       ]
     },
     {
-      "id": "B644CD1BD4324F29",
+      "id": "3644CD1BD4324F29",
       "title": "鸣线蜥",
       "icon": "tnc:storm_crystal",
       "x": 9,
@@ -2687,7 +2687,7 @@
       ],
       "tasks": [
         {
-          "id": "9BB95A8E1ED7901C",
+          "id": "1BB95A8E1ED7901C",
           "type": "advancement",
           "advancement": "tnc:life_routes/capture/wirecall_lizard",
           "title": "完成真实操作",
@@ -2710,7 +2710,7 @@
       "dependencies": []
     },
     {
-      "id": "B65E42BBD0B102BA",
+      "id": "365E42BBD0B102BA",
       "title": "安置与照料",
       "icon": "tnc:pasture_staff",
       "x": 9,
@@ -2722,18 +2722,18 @@
       ],
       "tasks": [
         {
-          "id": "827EA6EA255208B8",
+          "id": "027EA6EA255208B8",
           "type": "advancement",
           "advancement": "tnc:life_routes/nest/wirecall_lizard",
           "title": "完成真实操作"
         }
       ],
       "dependencies": [
-        "B644CD1BD4324F29"
+        "3644CD1BD4324F29"
       ]
     },
     {
-      "id": "DDABF3D81CB31EEE",
+      "id": "5DABF3D81CB31EEE",
       "title": "第一份产物",
       "icon": "tnc:storm_crystal",
       "x": 9,
@@ -2751,7 +2751,7 @@
         }
       ],
       "dependencies": [
-        "B65E42BBD0B102BA"
+        "365E42BBD0B102BA"
       ]
     },
     {
@@ -2772,7 +2772,7 @@
         }
       ],
       "dependencies": [
-        "DDABF3D81CB31EEE"
+        "5DABF3D81CB31EEE"
       ]
     }
   ],

@@ -36,6 +36,25 @@ class GuidebookTest {
             try(var stream=getClass().getResourceAsStream("/assets/tnc/textures/item/wands/"+name+".png")){assertNotNull(stream);var image=javax.imageio.ImageIO.read(stream);assertEquals(32,image.getWidth());assertEquals(32,image.getHeight());assertTrue(image.getColorModel().hasAlpha());}
         }
     }
+    @Test void lifeRouteIdsLoadWithInstalledFtbSignedHexParser() throws IOException {
+        var ids=new HashSet<String>();var questIds=new HashSet<String>();var references=new ArrayList<String>();
+        for(String name:List.of("tnc_field_02_botany","tnc_field_03_pasture","tnc_field_04_workshop","tnc_field_05_seasons")){
+            var chapter=JsonParser.parseString(Files.readString(Path.of("questbook/ftbquests/chapters/"+name+".snbt"))).getAsJsonObject();
+            String chapterId=chapter.get("id").getAsString();assertTrue(Long.parseLong(chapterId,16)>0);assertTrue(ids.add(chapterId));
+            for(var value:chapter.getAsJsonArray("quests")){
+                var q=value.getAsJsonObject();String id=q.get("id").getAsString();assertTrue(Long.parseLong(id,16)>0,id);assertTrue(ids.add(id));questIds.add(id);
+                for(var t:q.getAsJsonArray("tasks")){String tid=t.getAsJsonObject().get("id").getAsString();assertTrue(Long.parseLong(tid,16)>0,tid);assertTrue(ids.add(tid));}
+                if(q.has("rewards"))for(var t:q.getAsJsonArray("rewards")){String tid=t.getAsJsonObject().get("id").getAsString();assertTrue(Long.parseLong(tid,16)>0,tid);assertTrue(ids.add(tid));}
+                for(var dependency:q.getAsJsonArray("dependencies"))references.add(dependency.getAsString());
+            }
+            for(var value:chapter.getAsJsonArray("quest_links")){
+                var link=value.getAsJsonObject();String id=link.get("id").getAsString();assertTrue(Long.parseLong(id,16)>0,id);assertTrue(ids.add(id));
+                // FTB Quests 2001.4.22 QuestLink.readData calls this exact signed parser.
+                String target=link.get("linked_quest").getAsString();assertTrue(Long.parseLong(target,16)>0,target);references.add(target);
+            }
+        }
+        assertEquals(409,questIds.size());assertTrue(questIds.containsAll(references));
+    }
     private GuidebookContent content() throws IOException {
         var stream=getClass().getResourceAsStream("/assets/tnc/guide/gameplay.json");
         assertNotNull(stream);

@@ -9,7 +9,7 @@
   "default_quest_shape": "hexagon",
   "quests": [
     {
-      "id": "D56D3E34DC594E0A",
+      "id": "556D3E34DC594E0A",
       "title": "&3&l让庭院的魔力流动",
       "icon": "tnc:mana_workshop_book",
       "x": 0,
@@ -28,7 +28,7 @@
       "dependencies": [],
       "rewards": [
         {
-          "id": "A9B5C7F7A5E2CB2A",
+          "id": "29B5C7F7A5E2CB2A",
           "type": "item",
           "item": "tnc:mana_workshop_book",
           "count": 1
@@ -48,7 +48,7 @@
       ],
       "tasks": [
         {
-          "id": "F425703A8A53CD06",
+          "id": "7425703A8A53CD06",
           "type": "item",
           "item": "tnc:mana_infuser",
           "consume_items": false,
@@ -58,7 +58,7 @@
       "dependencies": []
     },
     {
-      "id": "9E7FF8C750509B1F",
+      "id": "1E7FF8C750509B1F",
       "title": "集露盏",
       "icon": "tnc:dew_collector",
       "x": -6.75,
@@ -80,7 +80,7 @@
       "dependencies": []
     },
     {
-      "id": "AD2FF13BFF0E9C3D",
+      "id": "2D2FF13BFF0E9C3D",
       "title": "集息器",
       "icon": "tnc:breath_collector",
       "x": -2.25,
@@ -92,7 +92,7 @@
       ],
       "tasks": [
         {
-          "id": "CFD630AFE3FD82DB",
+          "id": "4FD630AFE3FD82DB",
           "type": "item",
           "item": "tnc:breath_collector",
           "consume_items": false,
@@ -102,7 +102,7 @@
       "dependencies": []
     },
     {
-      "id": "FE62B912E5298914",
+      "id": "7E62B912E5298914",
       "title": "色靶",
       "icon": "tnc:color_target",
       "x": 2.25,
@@ -136,7 +136,7 @@
       ],
       "tasks": [
         {
-          "id": "A974D70F934B7124",
+          "id": "2974D70F934B7124",
           "type": "item",
           "item": "tnc:mana_thread",
           "consume_items": false,
@@ -146,7 +146,7 @@
       "dependencies": []
     },
     {
-      "id": "9701B42113548932",
+      "id": "1701B42113548932",
       "title": "曜纹导线",
       "icon": "tnc:radiant_thread",
       "x": 11.25,
@@ -168,7 +168,7 @@
       "dependencies": []
     },
     {
-      "id": "9607F33A1DBF48F4",
+      "id": "1607F33A1DBF48F4",
       "title": "星髓导线",
       "icon": "tnc:star_thread",
       "x": -11.25,
@@ -224,7 +224,7 @@
       ],
       "tasks": [
         {
-          "id": "F607D893E69A2E5B",
+          "id": "7607D893E69A2E5B",
           "type": "item",
           "item": "tnc:radiant_basin",
           "consume_items": false,
@@ -246,7 +246,7 @@
       ],
       "tasks": [
         {
-          "id": "E3C7BA8CBB0F0477",
+          "id": "63C7BA8CBB0F0477",
           "type": "item",
           "item": "tnc:star_basin",
           "consume_items": false,
@@ -312,7 +312,7 @@
       ],
       "tasks": [
         {
-          "id": "C1FA345A1A880969",
+          "id": "41FA345A1A880969",
           "type": "item",
           "item": "tnc:mana_valve",
           "consume_items": false,
@@ -322,7 +322,7 @@
       "dependencies": []
     },
     {
-      "id": "F0253B5F2BC2BF63",
+      "id": "70253B5F2BC2BF63",
       "title": "魔导灯",
       "icon": "tnc:mana_lantern",
       "x": -6.75,
@@ -344,7 +344,7 @@
       "dependencies": []
     },
     {
-      "id": "E48DB21C705351D0",
+      "id": "648DB21C705351D0",
       "title": "庭院明灯",
       "icon": "tnc:bright_mana_lantern",
       "x": -2.25,
@@ -378,7 +378,7 @@
       ],
       "tasks": [
         {
-          "id": "E219F30467257AC2",
+          "id": "6219F30467257AC2",
           "type": "item",
           "item": "tnc:mana_pulp_press",
           "consume_items": false,
@@ -388,7 +388,7 @@
       "dependencies": []
     },
     {
-      "id": "F2B64ED720214A58",
+      "id": "72B64ED720214A58",
       "title": "饲料分盘",
       "icon": "tnc:mana_feed_plate",
       "x": 6.75,
@@ -400,7 +400,7 @@
       ],
       "tasks": [
         {
-          "id": "E91FF4EE5879C4B6",
+          "id": "691FF4EE5879C4B6",
           "type": "item",
           "item": "tnc:mana_feed_plate",
           "consume_items": false,
@@ -410,7 +410,7 @@
       "dependencies": []
     },
     {
-      "id": "EAB649A40EE0C748",
+      "id": "6AB649A40EE0C748",
       "title": "轻灌器",
       "icon": "tnc:gentle_irrigator",
       "x": 11.25,
@@ -444,7 +444,7 @@
       ],
       "tasks": [
         {
-          "id": "FD634C192865BBBB",
+          "id": "7D634C192865BBBB",
           "type": "item",
           "item": "tnc:climate_lantern",
           "consume_items": false,
@@ -454,7 +454,7 @@
       "dependencies": []
     },
     {
-      "id": "82DD110976187C69",
+      "id": "02DD110976187C69",
       "title": "魔导锯台",
       "icon": "tnc:mana_sawmill",
       "x": -6.75,
@@ -476,7 +476,7 @@
       "dependencies": []
     },
     {
-      "id": "C081F26E635575D2",
+      "id": "4081F26E635575D2",
       "title": "雾纱织机",
       "icon": "tnc:mist_loom",
       "x": -2.25,
@@ -510,7 +510,7 @@
       ],
       "tasks": [
         {
-          "id": "E8AA85560EA54FAD",
+          "id": "68AA85560EA54FAD",
           "type": "item",
           "item": "tnc:meal_dryer",
           "consume_items": false,
@@ -532,7 +532,7 @@
       ],
       "tasks": [
         {
-          "id": "B10F60FE5E16563B",
+          "id": "310F60FE5E16563B",
           "type": "item",
           "item": "tnc:mana_incubator",
           "consume_items": false,
@@ -542,7 +542,7 @@
       "dependencies": []
     },
     {
-      "id": "8927970D1DA2EDCB",
+      "id": "0927970D1DA2EDCB",
       "title": "收获臂",
       "icon": "tnc:harvest_arm",
       "x": 11.25,
@@ -564,7 +564,7 @@
       "dependencies": []
     },
     {
-      "id": "E735C8E240FBCD91",
+      "id": "6735C8E240FBCD91",
       "title": "种源分拣器",
       "icon": "tnc:seed_sorter",
       "x": -11.25,
@@ -586,7 +586,7 @@
       "dependencies": []
     },
     {
-      "id": "8884B721C38DBAFE",
+      "id": "0884B721C38DBAFE",
       "title": "魔导运货轨",
       "icon": "tnc:mana_cart_track",
       "x": -6.75,
@@ -598,7 +598,7 @@
       ],
       "tasks": [
         {
-          "id": "C1426B3396D068E7",
+          "id": "41426B3396D068E7",
           "type": "item",
           "item": "tnc:mana_cart_track",
           "consume_items": false,
@@ -608,7 +608,7 @@
       "dependencies": []
     },
     {
-      "id": "989475013AC8FDD5",
+      "id": "189475013AC8FDD5",
       "title": "守望铃",
       "icon": "tnc:ward_bell",
       "x": -2.25,
@@ -630,7 +630,7 @@
       "dependencies": []
     },
     {
-      "id": "8865419C0DECA978",
+      "id": "0865419C0DECA978",
       "title": "饰品充能台",
       "icon": "tnc:accessory_charger",
       "x": 2.25,
@@ -652,7 +652,7 @@
       "dependencies": []
     },
     {
-      "id": "E560CD995A7207FE",
+      "id": "6560CD995A7207FE",
       "title": "看见第一次真实供能",
       "icon": "tnc:dew_collector",
       "x": -10.5,
@@ -672,7 +672,7 @@
       "dependencies": []
     },
     {
-      "id": "B57302D516BECA1D",
+      "id": "357302D516BECA1D",
       "title": "存下真实魔力",
       "icon": "tnc:mana_basin",
       "x": -3.5,
@@ -683,7 +683,7 @@
       ],
       "tasks": [
         {
-          "id": "C0FD05D9B8CC8E45",
+          "id": "40FD05D9B8CC8E45",
           "type": "advancement",
           "advancement": "tnc:life_routes/network/stored",
           "title": "完成真实操作"
@@ -732,7 +732,7 @@
       "dependencies": []
     },
     {
-      "id": "E815765AAC6470F3",
+      "id": "6815765AAC6470F3",
       "title": "归途缎带",
       "icon": "tnc:homeward_ribbon",
       "x": -9.0,
@@ -754,7 +754,7 @@
       "dependencies": []
     },
     {
-      "id": "AD81D805BB91262C",
+      "id": "2D81D805BB91262C",
       "title": "缓降羽饰",
       "icon": "tnc:descent_feather",
       "x": -3.0,
@@ -788,7 +788,7 @@
       ],
       "tasks": [
         {
-          "id": "D36EAEAF3FD89991",
+          "id": "536EAEAF3FD89991",
           "type": "item",
           "item": "tnc:ore_whisper_earring",
           "consume_items": false,
@@ -820,7 +820,7 @@
       "dependencies": []
     },
     {
-      "id": "B9A2CB43ED90FE68",
+      "id": "39A2CB43ED90FE68",
       "title": "魔导营造尺",
       "icon": "tnc:mana_building_ruler",
       "x": -9.0,
@@ -842,7 +842,7 @@
       "dependencies": []
     },
     {
-      "id": "E0B89EFB55CE4DBE",
+      "id": "60B89EFB55CE4DBE",
       "title": "符文弩",
       "icon": "tnc:rune_crossbow",
       "x": -3.0,
@@ -876,7 +876,7 @@
       ],
       "tasks": [
         {
-          "id": "C0966EC1795DFB07",
+          "id": "40966EC1795DFB07",
           "type": "item",
           "item": "tnc:mana_mech",
           "consume_items": false,

@@ -8,7 +8,11 @@ R=Path(__file__).resolve().parents[1]; RES=R/'src/main/resources'; J=R/'src/main
 PACK=R/'modpack/元素觉醒1.4.3-魔改版-20260915'; LIVE=Path('D:/垃圾桶/PCL 正式版 2.9.3/.minecraft/versions/元素觉醒1.4.3-魔改版-20260915')
 Q=PACK/'config/ftbquests/quests'; GROUP='544E434C49464531'
 def dump(p,x):p.parent.mkdir(parents=True,exist_ok=True);p.write_text(json.dumps(x,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
-def uid(k):return hashlib.sha256(('life-20261007/'+k).encode()).hexdigest()[:16].upper()
+def uid(k):
+ # Installed FTB QuestLink uses Long.parseLong(code, 16), not parseUnsignedLong.
+ # Keep every generated identity and reference in the positive signed-long range.
+ value=int(hashlib.sha256(('life-20261007/'+k).encode()).hexdigest()[:16],16)&0x7FFFFFFFFFFFFFFF
+ return f'{value or 1:016X}'
 def task(k,typ='checkmark',**kw):return dict(id=uid('task/'+k),type=typ,**kw)
 def itemtask(k,item):return task(k,'item',item=item,consume_items=False,title='持有种源或成品（不消耗）')
 def action(k):return task(k,'advancement',advancement='tnc:life_routes/'+k,title='完成真实操作')

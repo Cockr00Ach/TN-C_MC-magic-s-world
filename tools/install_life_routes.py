@@ -40,6 +40,12 @@ def main():
  ap=argparse.ArgumentParser();ap.add_argument('--live',required=True);ap.add_argument('--apply',action='store_true');a=ap.parse_args();live=Path(a.live).resolve();assert (live/'mods').is_dir(),live
  verify();jar=R/'build/libs/tnc-1.0.0.jar';assert jar.is_file()
  final=(R/'work/life-routes-final.log').read_text(encoding='utf8',errors='replace');assert 'All 22 required tests passed' in final and 'BUILD SUCCESSFUL' in final and 'failed!' not in final
+ ftb=(R/'work/ftb-real-loading.log').read_text(encoding='utf8',errors='replace')
+ assert '4 chapters, 409 quests' in ftb and 'All 22 required tests passed' in ftb and 'BUILD SUCCESSFUL' in ftb and 'NumberFormatException' not in ftb,'Actual installed-version FTB load test must pass'
+ tested_input=R/'work/ftb-route-load-input.json';hashes=json.loads(tested_input.read_text(encoding='utf8'))
+ assert (R/'work/ftb-real-loading.log').stat().st_mtime>=tested_input.stat().st_mtime,'FTB test predates prepared inputs'
+ for name in FILES:
+  assert hashes[name]==digest(Q/'chapters'/name),'FTB tested input is stale: '+name
  audit=json.loads((R/'work/life-routes-client-audit.json').read_text(encoding='utf8'));assert audit['screenshots']==8 and not audit['failures']
  latest_source=max(p.stat().st_mtime for root in [R/'src/main/java',R/'src/main/resources'] for p in root.rglob('*') if p.is_file())
  assert jar.stat().st_mtime>=latest_source,'Jar is older than runtime sources; rebuild first'

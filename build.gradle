@@ -138,6 +138,9 @@ minecraft {
         // The gametest system is also enabled by default for other run configs under the /test command.
         gameTestServer {
             property 'forge.enabledGameTestNamespaces', project.hasProperty('lifeRoutesTests') ? 'tncroute' : mod_id
+            if (project.hasProperty('ftbQuestLoadTests')) {
+                workingDirectory project.file('work/ftb-route-load-test')
+            }
             if (project.hasProperty('lifeRoutesTests')) {
                 property 'mixin.env.remapRefMap', 'true'
                 property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
@@ -240,6 +243,13 @@ dependencies {
         runtimeOnly fg.deobf('bountiful:Bountiful:6.0.4')
         runtimeOnly fg.deobf('kambrik:Kambrik:6.1.1')
         runtimeOnly files('libs/kotlinforforge-4.12.0-all.jar')
+    }
+    // Opt-in loading check with the exact installed FTB versions; never bundled.
+    if (project.hasProperty('ftbQuestLoadTests')) {
+        runtimeOnly fg.deobf('architectury:architectury:9.2.14')
+        runtimeOnly fg.deobf('ftbquests:ftb-quests-forge:2001.4.22')
+        runtimeOnly fg.deobf('ftblibrary:ftb-library-forge:2001.2.13')
+        runtimeOnly fg.deobf('ftbteams:ftb-teams-forge:2001.3.2')
     }
     if (project.hasProperty('townLifeTests')) {
         // Annotation-name fixture only; installed MCA jar remains unmodified.

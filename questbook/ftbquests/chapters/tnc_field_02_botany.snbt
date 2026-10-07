@@ -1,5 +1,5 @@
 {
-  "id": "D67EA319F25600FA",
+  "id": "567EA319F25600FA",
   "filename": "tnc_field_02_botany",
   "title": "&b&l魔植花园",
   "icon": "tnc:magic_garden_book",
@@ -29,7 +29,7 @@
       "dependencies": [],
       "rewards": [
         {
-          "id": "B17C5EE32B18D329",
+          "id": "317C5EE32B18D329",
           "type": "item",
           "item": "tnc:magic_garden_book",
           "count": 1
@@ -48,7 +48,7 @@
       ],
       "tasks": [
         {
-          "id": "F202DBA74BE5DE0F",
+          "id": "7202DBA74BE5DE0F",
           "type": "item",
           "item": "tnc:magic_soil_source",
           "consume_items": false,
@@ -90,7 +90,7 @@
       ],
       "tasks": [
         {
-          "id": "B5FB89FED8D105E3",
+          "id": "35FB89FED8D105E3",
           "type": "item",
           "item": "tnc:dew_collector",
           "consume_items": false,
@@ -100,7 +100,7 @@
       "dependencies": []
     },
     {
-      "id": "88E9348762865531",
+      "id": "08E9348762865531",
       "title": "归巢花",
       "icon": "tnc:homeward_flower_seed",
       "x": -11.25,
@@ -112,7 +112,7 @@
       ],
       "tasks": [
         {
-          "id": "BEAA825096FA6F0F",
+          "id": "3EAA825096FA6F0F",
           "type": "item",
           "item": "tnc:homeward_flower_seed",
           "consume_items": false,
@@ -134,14 +134,14 @@
       ],
       "tasks": [
         {
-          "id": "CF3B095EEDC589EF",
+          "id": "4F3B095EEDC589EF",
           "type": "advancement",
           "advancement": "tnc:life_routes/plant/homeward_flower",
           "title": "完成真实操作"
         }
       ],
       "dependencies": [
-        "88E9348762865531"
+        "08E9348762865531"
       ]
     },
     {
@@ -156,7 +156,7 @@
       ],
       "tasks": [
         {
-          "id": "E7D1A816E74EF69C",
+          "id": "67D1A816E74EF69C",
           "type": "advancement",
           "advancement": "tnc:life_routes/harvest/homeward_flower",
           "title": "完成真实操作"
@@ -167,7 +167,7 @@
       ]
     },
     {
-      "id": "9B22C660E1E9D4A1",
+      "id": "1B22C660E1E9D4A1",
       "title": "生活与工坊",
       "icon": "tnc:homeward_flower_petal",
       "x": -11.25,
@@ -188,7 +188,7 @@
       ]
     },
     {
-      "id": "A9D9F144F9E4F6C8",
+      "id": "29D9F144F9E4F6C8",
       "title": "警铃苔",
       "icon": "tnc:warning_moss_spore",
       "x": -6.75,
@@ -222,14 +222,14 @@
       ],
       "tasks": [
         {
-          "id": "95D80F6C38660107",
+          "id": "15D80F6C38660107",
           "type": "advancement",
           "advancement": "tnc:life_routes/plant/warning_moss",
           "title": "完成真实操作"
         }
       ],
       "dependencies": [
-        "A9D9F144F9E4F6C8"
+        "29D9F144F9E4F6C8"
       ]
     },
     {
@@ -255,7 +255,7 @@
       ]
     },
     {
-      "id": "FB7B0217492D52D8",
+      "id": "7B7B0217492D52D8",
       "title": "生活与工坊",
       "icon": "tnc:warning_moss_flake",
       "x": -6.75,
@@ -267,7 +267,7 @@
       ],
       "tasks": [
         {
-          "id": "AFBAAF24CA874AA2",
+          "id": "2FBAAF24CA874AA2",
           "type": "checkmark"
         }
       ],
@@ -288,7 +288,7 @@
       ],
       "tasks": [
         {
-          "id": "CEFA1969FEF7121D",
+          "id": "4EFA1969FEF7121D",
           "type": "item",
           "item": "tnc:road_bell_seed",
           "consume_items": false,
@@ -332,7 +332,7 @@
       ],
       "tasks": [
         {
-          "id": "FEDA22AB358E2128",
+          "id": "7EDA22AB358E2128",
           "type": "advancement",
           "advancement": "tnc:life_routes/harvest/road_bell_crop",
           "title": "完成真实操作"
@@ -376,7 +376,7 @@
       ],
       "tasks": [
         {
-          "id": "E58719069F83C9EE",
+          "id": "658719069F83C9EE",
           "type": "item",
           "item": "tnc:night_gourd_seed",
           "consume_items": false,
@@ -420,7 +420,7 @@
       ],
       "tasks": [
         {
-          "id": "DE9FC63E88A1DAB1",
+          "id": "5E9FC63E88A1DAB1",
           "type": "advancement",
           "advancement": "tnc:life_routes/harvest/night_gourd_crop",
           "title": "完成真实操作"
@@ -431,7 +431,7 @@
       ]
     },
     {
-      "id": "C81F463D11E6B859",
+      "id": "481F463D11E6B859",
       "title": "生活与工坊",
       "icon": "tnc:night_gourd",
       "x": 2.25,
@@ -443,7 +443,7 @@
       ],
       "tasks": [
         {
-          "id": "BD096D3FECC96D6C",
+          "id": "3D096D3FECC96D6C",
           "type": "checkmark"
         }
       ],
@@ -464,7 +464,7 @@
       ],
       "tasks": [
         {
-          "id": "BC7E0014EA067FBB",
+          "id": "3C7E0014EA067FBB",
           "type": "item",
           "item": "tnc:tide_reed_seed",
           "consume_items": false,
@@ -474,7 +474,7 @@
       "dependencies": []
     },
     {
-      "id": "A61C4D0A48F7FC3D",
+      "id": "261C4D0A48F7FC3D",
       "title": "扎下魔法根",
       "icon": "tnc:magic_soil",
       "x": 6.75,
@@ -486,7 +486,7 @@
       ],
       "tasks": [
         {
-          "id": "F74F961BE07CD73C",
+          "id": "774F961BE07CD73C",
           "type": "advancement",
           "advancement": "tnc:life_routes/plant/tide_reed_crop",
           "title": "完成真实操作"
@@ -508,18 +508,18 @@
       ],
       "tasks": [
         {
-          "id": "9FF23DB38C6B30CE",
+          "id": "1FF23DB38C6B30CE",
           "type": "advancement",
           "advancement": "tnc:life_routes/harvest/tide_reed_crop",
           "title": "完成真实操作"
         }
       ],
       "dependencies": [
-        "A61C4D0A48F7FC3D"
+        "261C4D0A48F7FC3D"
       ]
     },
     {
-      "id": "CCB05CC6A753A71C",
+      "id": "4CB05CC6A753A71C",
       "title": "生活与工坊",
       "icon": "tnc:tide_reed_stem",
       "x": 6.75,
@@ -540,7 +540,7 @@
       ]
     },
     {
-      "id": "E55E30F196256693",
+      "id": "655E30F196256693",
       "title": "静息菇",
       "icon": "tnc:hushcap_spore",
       "x": 11.25,
@@ -562,7 +562,7 @@
       "dependencies": []
     },
     {
-      "id": "97739FFB7D3B404F",
+      "id": "17739FFB7D3B404F",
       "title": "扎下魔法根",
       "icon": "tnc:magic_soil",
       "x": 11.25,
@@ -581,11 +581,11 @@
         }
       ],
       "dependencies": [
-        "E55E30F196256693"
+        "655E30F196256693"
       ]
     },
     {
-      "id": "EFD9BE740C10DF9A",
+      "id": "6FD9BE740C10DF9A",
       "title": "亲手收获",
       "icon": "tnc:hushcap_slice",
       "x": 11.25,
@@ -603,7 +603,7 @@
         }
       ],
       "dependencies": [
-        "97739FFB7D3B404F"
+        "17739FFB7D3B404F"
       ]
     },
     {
@@ -624,11 +624,11 @@
         }
       ],
       "dependencies": [
-        "EFD9BE740C10DF9A"
+        "6FD9BE740C10DF9A"
       ]
     },
     {
-      "id": "87A16556931376E4",
+      "id": "07A16556931376E4",
       "title": "雨信蔓",
       "icon": "tnc:rainletter_seed",
       "x": -11.25,
@@ -640,7 +640,7 @@
       ],
       "tasks": [
         {
-          "id": "8E7E222E1FA9CCB1",
+          "id": "0E7E222E1FA9CCB1",
           "type": "item",
           "item": "tnc:rainletter_seed",
           "consume_items": false,
@@ -669,11 +669,11 @@
         }
       ],
       "dependencies": [
-        "87A16556931376E4"
+        "07A16556931376E4"
       ]
     },
     {
-      "id": "CAADF003D079D670",
+      "id": "4AADF003D079D670",
       "title": "亲手收获",
       "icon": "tnc:rainletter_berry",
       "x": -11.25,
@@ -684,7 +684,7 @@
       ],
       "tasks": [
         {
-          "id": "CAB8C5A78586A791",
+          "id": "4AB8C5A78586A791",
           "type": "advancement",
           "advancement": "tnc:life_routes/harvest/rainletter_bush",
           "title": "完成真实操作"
@@ -707,16 +707,16 @@
       ],
       "tasks": [
         {
-          "id": "AB90F59FD4368735",
+          "id": "2B90F59FD4368735",
           "type": "checkmark"
         }
       ],
       "dependencies": [
-        "CAADF003D079D670"
+        "4AADF003D079D670"
       ]
     },
     {
-      "id": "AC0D70AF6D7293F2",
+      "id": "2C0D70AF6D7293F2",
       "title": "蓄魔根",
       "icon": "tnc:mana_root_seed",
       "x": -6.75,
@@ -728,7 +728,7 @@
       ],
       "tasks": [
         {
-          "id": "ED4269602EECF879",
+          "id": "6D4269602EECF879",
           "type": "item",
           "item": "tnc:mana_root_seed",
           "consume_items": false,
@@ -738,7 +738,7 @@
       "dependencies": []
     },
     {
-      "id": "AE0CE808017E5CB9",
+      "id": "2E0CE808017E5CB9",
       "title": "扎下魔法根",
       "icon": "tnc:magic_soil",
       "x": -6.75,
@@ -757,7 +757,7 @@
         }
       ],
       "dependencies": [
-        "AC0D70AF6D7293F2"
+        "2C0D70AF6D7293F2"
       ]
     },
     {
@@ -772,18 +772,18 @@
       ],
       "tasks": [
         {
-          "id": "BC51CA750FDB6AD9",
+          "id": "3C51CA750FDB6AD9",
           "type": "advancement",
           "advancement": "tnc:life_routes/harvest/mana_root",
           "title": "完成真实操作"
         }
       ],
       "dependencies": [
-        "AE0CE808017E5CB9"
+        "2E0CE808017E5CB9"
       ]
     },
     {
-      "id": "95C02340AA2C011F",
+      "id": "15C02340AA2C011F",
       "title": "生活与工坊",
       "icon": "tnc:mana_root_core",
       "x": -6.75,
@@ -804,7 +804,7 @@
       ]
     },
     {
-      "id": "C5BDA146A99A9C80",
+      "id": "45BDA146A99A9C80",
       "title": "翠脉枝",
       "icon": "tnc:verdant_vein_seed",
       "x": -2.25,
@@ -838,18 +838,18 @@
       ],
       "tasks": [
         {
-          "id": "EC24248EDA77DE7C",
+          "id": "6C24248EDA77DE7C",
           "type": "advancement",
           "advancement": "tnc:life_routes/plant/verdant_vein",
           "title": "完成真实操作"
         }
       ],
       "dependencies": [
-        "C5BDA146A99A9C80"
+        "45BDA146A99A9C80"
       ]
     },
     {
-      "id": "C6856C5214FBA1C8",
+      "id": "46856C5214FBA1C8",
       "title": "亲手收获",
       "icon": "tnc:verdant_branch",
       "x": -2.25,
@@ -860,7 +860,7 @@
       ],
       "tasks": [
         {
-          "id": "8229C50678818D85",
+          "id": "0229C50678818D85",
           "type": "advancement",
           "advancement": "tnc:life_routes/harvest/verdant_vein",
           "title": "完成真实操作"
@@ -888,7 +888,7 @@
         }
       ],
       "dependencies": [
-        "C6856C5214FBA1C8"
+        "46856C5214FBA1C8"
       ]
     },
     {
@@ -904,7 +904,7 @@
       ],
       "tasks": [
         {
-          "id": "9AB38E88892621E2",
+          "id": "1AB38E88892621E2",
           "type": "item",
           "item": "tnc:sky_vine_seed",
           "consume_items": false,
@@ -914,7 +914,7 @@
       "dependencies": []
     },
     {
-      "id": "AC3407E2EE31142E",
+      "id": "2C3407E2EE31142E",
       "title": "扎下魔法根",
       "icon": "tnc:magic_soil",
       "x": 2.25,
@@ -926,7 +926,7 @@
       ],
       "tasks": [
         {
-          "id": "817A3D4FA5AF1E83",
+          "id": "017A3D4FA5AF1E83",
           "type": "advancement",
           "advancement": "tnc:life_routes/plant/sky_vine",
           "title": "完成真实操作"
@@ -955,11 +955,11 @@
         }
       ],
       "dependencies": [
-        "AC3407E2EE31142E"
+        "2C3407E2EE31142E"
       ]
     },
     {
-      "id": "9757039B5184C31D",
+      "id": "1757039B5184C31D",
       "title": "生活与工坊",
       "icon": "tnc:sky_canopy_fiber",
       "x": 2.25,
@@ -980,7 +980,7 @@
       ]
     },
     {
-      "id": "912EABCF5F5BDF13",
+      "id": "112EABCF5F5BDF13",
       "title": "晨晖盘葵",
       "icon": "tnc:dawn_disk_seed",
       "x": 6.75,
@@ -992,7 +992,7 @@
       ],
       "tasks": [
         {
-          "id": "D21E9CF1F976916C",
+          "id": "521E9CF1F976916C",
           "type": "item",
           "item": "tnc:dawn_disk_seed",
           "consume_items": false,
@@ -1002,7 +1002,7 @@
       "dependencies": []
     },
     {
-      "id": "DB1D85B6B15AABA8",
+      "id": "5B1D85B6B15AABA8",
       "title": "扎下魔法根",
       "icon": "tnc:magic_soil",
       "x": 6.75,
@@ -1021,11 +1021,11 @@
         }
       ],
       "dependencies": [
-        "912EABCF5F5BDF13"
+        "112EABCF5F5BDF13"
       ]
     },
     {
-      "id": "FB236DDF4B615365",
+      "id": "7B236DDF4B615365",
       "title": "亲手收获",
       "icon": "tnc:dawn_honey",
       "x": 6.75,
@@ -1036,18 +1036,18 @@
       ],
       "tasks": [
         {
-          "id": "C46597A7A2179CB1",
+          "id": "446597A7A2179CB1",
           "type": "advancement",
           "advancement": "tnc:life_routes/harvest/dawn_disk",
           "title": "完成真实操作"
         }
       ],
       "dependencies": [
-        "DB1D85B6B15AABA8"
+        "5B1D85B6B15AABA8"
       ]
     },
     {
-      "id": "EEB5C1483C52E718",
+      "id": "6EB5C1483C52E718",
       "title": "生活与工坊",
       "icon": "tnc:dawn_honey",
       "x": 6.75,
@@ -1059,12 +1059,12 @@
       ],
       "tasks": [
         {
-          "id": "957E25161132C06C",
+          "id": "157E25161132C06C",
           "type": "checkmark"
         }
       ],
       "dependencies": [
-        "FB236DDF4B615365"
+        "7B236DDF4B615365"
       ]
     },
     {
@@ -1080,7 +1080,7 @@
       ],
       "tasks": [
         {
-          "id": "A6F3F34C014E2663",
+          "id": "26F3F34C014E2663",
           "type": "item",
           "item": "tnc:hearth_pepper_seed",
           "consume_items": false,
@@ -1102,7 +1102,7 @@
       ],
       "tasks": [
         {
-          "id": "D54D82649C64FEE1",
+          "id": "554D82649C64FEE1",
           "type": "advancement",
           "advancement": "tnc:life_routes/plant/hearth_pepper",
           "title": "完成真实操作"
@@ -1178,7 +1178,7 @@
       "dependencies": []
     },
     {
-      "id": "8B26B29A10CE7C24",
+      "id": "0B26B29A10CE7C24",
       "title": "扎下魔法根",
       "icon": "tnc:magic_soil",
       "x": -11.25,
@@ -1190,7 +1190,7 @@
       ],
       "tasks": [
         {
-          "id": "EFB6E3E1F10740D1",
+          "id": "6FB6E3E1F10740D1",
           "type": "advancement",
           "advancement": "tnc:life_routes/plant/mist_cotton",
           "title": "完成真实操作"
@@ -1219,11 +1219,11 @@
         }
       ],
       "dependencies": [
-        "8B26B29A10CE7C24"
+        "0B26B29A10CE7C24"
       ]
     },
     {
-      "id": "AC2FEECA8DC7ACC6",
+      "id": "2C2FEECA8DC7ACC6",
       "title": "生活与工坊",
       "icon": "tnc:mist_cotton_fiber",
       "x": -11.25,
@@ -1235,7 +1235,7 @@
       ],
       "tasks": [
         {
-          "id": "F36AB90825066B37",
+          "id": "736AB90825066B37",
           "type": "checkmark"
         }
       ],
@@ -1244,7 +1244,7 @@
       ]
     },
     {
-      "id": "B3F78398C86E2CE6",
+      "id": "33F78398C86E2CE6",
       "title": "岩函蕨",
       "icon": "tnc:stone_fern_seed",
       "x": -6.75,
@@ -1256,7 +1256,7 @@
       ],
       "tasks": [
         {
-          "id": "98830C3ABCA71A2F",
+          "id": "18830C3ABCA71A2F",
           "type": "item",
           "item": "tnc:stone_fern_seed",
           "consume_items": false,
@@ -1266,7 +1266,7 @@
       "dependencies": []
     },
     {
-      "id": "E7AE2E7E36933832",
+      "id": "67AE2E7E36933832",
       "title": "扎下魔法根",
       "icon": "tnc:magic_soil",
       "x": -6.75,
@@ -1285,11 +1285,11 @@
         }
       ],
       "dependencies": [
-        "B3F78398C86E2CE6"
+        "33F78398C86E2CE6"
       ]
     },
     {
-      "id": "8701EA2235E12DC0",
+      "id": "0701EA2235E12DC0",
       "title": "亲手收获",
       "icon": "tnc:stone_pattern_leaf",
       "x": -6.75,
@@ -1307,7 +1307,7 @@
         }
       ],
       "dependencies": [
-        "E7AE2E7E36933832"
+        "67AE2E7E36933832"
       ]
     },
     {
@@ -1328,7 +1328,7 @@
         }
       ],
       "dependencies": [
-        "8701EA2235E12DC0"
+        "0701EA2235E12DC0"
       ]
     },
     {
@@ -1354,7 +1354,7 @@
       "dependencies": []
     },
     {
-      "id": "A3A9BCAF7B521EF6",
+      "id": "23A9BCAF7B521EF6",
       "title": "扎下魔法根",
       "icon": "tnc:magic_soil",
       "x": -2.25,
@@ -1366,7 +1366,7 @@
       ],
       "tasks": [
         {
-          "id": "A597B7E59F53C28E",
+          "id": "2597B7E59F53C28E",
           "type": "advancement",
           "advancement": "tnc:life_routes/plant/mirror_lotus",
           "title": "完成真实操作"
@@ -1395,11 +1395,11 @@
         }
       ],
       "dependencies": [
-        "A3A9BCAF7B521EF6"
+        "23A9BCAF7B521EF6"
       ]
     },
     {
-      "id": "8599AA17C04EB7A1",
+      "id": "0599AA17C04EB7A1",
       "title": "生活与工坊",
       "icon": "tnc:mirror_dew",
       "x": -2.25,
@@ -1411,7 +1411,7 @@
       ],
       "tasks": [
         {
-          "id": "D39A434F8CE10FD2",
+          "id": "539A434F8CE10FD2",
           "type": "checkmark"
         }
       ],
@@ -1420,7 +1420,7 @@
       ]
     },
     {
-      "id": "CAD20C9B988C8526",
+      "id": "4AD20C9B988C8526",
       "title": "灯愿蒲",
       "icon": "tnc:wish_puff_seed",
       "x": 2.25,
@@ -1461,7 +1461,7 @@
         }
       ],
       "dependencies": [
-        "CAD20C9B988C8526"
+        "4AD20C9B988C8526"
       ]
     },
     {
@@ -1476,7 +1476,7 @@
       ],
       "tasks": [
         {
-          "id": "CBD80E774F501C7B",
+          "id": "4BD80E774F501C7B",
           "type": "advancement",
           "advancement": "tnc:life_routes/harvest/wish_puff",
           "title": "完成真实操作"
@@ -1530,7 +1530,7 @@
       "dependencies": []
     },
     {
-      "id": "83091CB08B092036",
+      "id": "03091CB08B092036",
       "title": "扎下魔法根",
       "icon": "tnc:magic_soil",
       "x": 6.75,
@@ -1553,7 +1553,7 @@
       ]
     },
     {
-      "id": "F049696D53309443",
+      "id": "7049696D53309443",
       "title": "亲手收获",
       "icon": "tnc:echo_bean_pod",
       "x": 6.75,
@@ -1571,7 +1571,7 @@
         }
       ],
       "dependencies": [
-        "83091CB08B092036"
+        "03091CB08B092036"
       ]
     },
     {
@@ -1592,11 +1592,11 @@
         }
       ],
       "dependencies": [
-        "F049696D53309443"
+        "7049696D53309443"
       ]
     },
     {
-      "id": "D121C017B8C63C9C",
+      "id": "5121C017B8C63C9C",
       "title": "梯脊藤",
       "icon": "tnc:ladder_vine_seed",
       "x": 11.25,
@@ -1608,7 +1608,7 @@
       ],
       "tasks": [
         {
-          "id": "9C198D594FD6F260",
+          "id": "1C198D594FD6F260",
           "type": "item",
           "item": "tnc:ladder_vine_seed",
           "consume_items": false,
@@ -1630,14 +1630,14 @@
       ],
       "tasks": [
         {
-          "id": "F5364B0B703B4A0D",
+          "id": "75364B0B703B4A0D",
           "type": "advancement",
           "advancement": "tnc:life_routes/plant/ladder_vine",
           "title": "完成真实操作"
         }
       ],
       "dependencies": [
-        "D121C017B8C63C9C"
+        "5121C017B8C63C9C"
       ]
     },
     {
@@ -1652,7 +1652,7 @@
       ],
       "tasks": [
         {
-          "id": "B14C719A419A8B41",
+          "id": "314C719A419A8B41",
           "type": "advancement",
           "advancement": "tnc:life_routes/harvest/ladder_vine",
           "title": "完成真实操作"
@@ -1706,7 +1706,7 @@
       "dependencies": []
     },
     {
-      "id": "A623614167279C94",
+      "id": "2623614167279C94",
       "title": "扎下魔法根",
       "icon": "tnc:magic_soil",
       "x": -11.25,
@@ -1729,7 +1729,7 @@
       ]
     },
     {
-      "id": "D43EA7DF1B6F8357",
+      "id": "543EA7DF1B6F8357",
       "title": "亲手收获",
       "icon": "tnc:frost_dew",
       "x": -11.25,
@@ -1747,11 +1747,11 @@
         }
       ],
       "dependencies": [
-        "A623614167279C94"
+        "2623614167279C94"
       ]
     },
     {
-      "id": "F7CEAF3A45B779AE",
+      "id": "77CEAF3A45B779AE",
       "title": "生活与工坊",
       "icon": "tnc:frost_dew",
       "x": -11.25,
@@ -1768,11 +1768,11 @@
         }
       ],
       "dependencies": [
-        "D43EA7DF1B6F8357"
+        "543EA7DF1B6F8357"
       ]
     },
     {
-      "id": "E4DBB18A3A6CA5CE",
+      "id": "64DBB18A3A6CA5CE",
       "title": "盐墨菌",
       "icon": "tnc:salt_ink_seed",
       "x": -6.75,
@@ -1794,7 +1794,7 @@
       "dependencies": []
     },
     {
-      "id": "E961E8F19ADDACC2",
+      "id": "6961E8F19ADDACC2",
       "title": "扎下魔法根",
       "icon": "tnc:magic_soil",
       "x": -6.75,
@@ -1813,11 +1813,11 @@
         }
       ],
       "dependencies": [
-        "E4DBB18A3A6CA5CE"
+        "64DBB18A3A6CA5CE"
       ]
     },
     {
-      "id": "B8CB0B319CFAC8B6",
+      "id": "38CB0B319CFAC8B6",
       "title": "亲手收获",
       "icon": "tnc:salt_ink",
       "x": -6.75,
@@ -1835,11 +1835,11 @@
         }
       ],
       "dependencies": [
-        "E961E8F19ADDACC2"
+        "6961E8F19ADDACC2"
       ]
     },
     {
-      "id": "BD60A2165A9DA51D",
+      "id": "3D60A2165A9DA51D",
       "title": "生活与工坊",
       "icon": "tnc:salt_ink",
       "x": -6.75,
@@ -1856,7 +1856,7 @@
         }
       ],
       "dependencies": [
-        "B8CB0B319CFAC8B6"
+        "38CB0B319CFAC8B6"
       ]
     },
     {
@@ -1894,7 +1894,7 @@
       ],
       "tasks": [
         {
-          "id": "B096620DB787F941",
+          "id": "3096620DB787F941",
           "type": "advancement",
           "advancement": "tnc:life_routes/plant/wind_sail",
           "title": "完成真实操作"
@@ -1939,7 +1939,7 @@
       ],
       "tasks": [
         {
-          "id": "CE63EB9A48CD5028",
+          "id": "4E63EB9A48CD5028",
           "type": "checkmark"
         }
       ],
@@ -1948,7 +1948,7 @@
       ]
     },
     {
-      "id": "89D1A3D4593702D2",
+      "id": "09D1A3D4593702D2",
       "title": "钟眠草",
       "icon": "tnc:sleep_clock_seed",
       "x": 2.25,
@@ -1982,14 +1982,14 @@
       ],
       "tasks": [
         {
-          "id": "B033E9D54AB05263",
+          "id": "3033E9D54AB05263",
           "type": "advancement",
           "advancement": "tnc:life_routes/plant/sleep_clock",
           "title": "完成真实操作"
         }
       ],
       "dependencies": [
-        "89D1A3D4593702D2"
+        "09D1A3D4593702D2"
       ]
     },
     {
@@ -2070,7 +2070,7 @@
       ],
       "tasks": [
         {
-          "id": "CC1D795E40A9F0CE",
+          "id": "4C1D795E40A9F0CE",
           "type": "advancement",
           "advancement": "tnc:life_routes/plant/shadow_cut",
           "title": "完成真实操作"
@@ -2092,7 +2092,7 @@
       ],
       "tasks": [
         {
-          "id": "E2D76057F10D17D9",
+          "id": "62D76057F10D17D9",
           "type": "advancement",
           "advancement": "tnc:life_routes/harvest/shadow_cut",
           "title": "完成真实操作"
@@ -2115,7 +2115,7 @@
       ],
       "tasks": [
         {
-          "id": "D5547DFBED21A80F",
+          "id": "55547DFBED21A80F",
           "type": "checkmark"
         }
       ],
@@ -2169,7 +2169,7 @@
       ]
     },
     {
-      "id": "CA627C0410A40717",
+      "id": "4A627C0410A40717",
       "title": "亲手收获",
       "icon": "tnc:paper_bark",
       "x": 11.25,
@@ -2180,7 +2180,7 @@
       ],
       "tasks": [
         {
-          "id": "935C7C6E3E1895C6",
+          "id": "135C7C6E3E1895C6",
           "type": "advancement",
           "advancement": "tnc:life_routes/harvest/paper_tree",
           "title": "完成真实操作"
@@ -2208,7 +2208,7 @@
         }
       ],
       "dependencies": [
-        "CA627C0410A40717"
+        "4A627C0410A40717"
       ]
     },
     {
@@ -2224,7 +2224,7 @@
       ],
       "tasks": [
         {
-          "id": "C41612011D111671",
+          "id": "441612011D111671",
           "type": "item",
           "item": "tnc:flight_pod_seed",
           "consume_items": false,
@@ -2234,7 +2234,7 @@
       "dependencies": []
     },
     {
-      "id": "C3455BDE774D3195",
+      "id": "43455BDE774D3195",
       "title": "扎下魔法根",
       "icon": "tnc:magic_soil",
       "x": -11.25,
@@ -2246,7 +2246,7 @@
       ],
       "tasks": [
         {
-          "id": "FC9CFB1F1599E0BC",
+          "id": "7C9CFB1F1599E0BC",
           "type": "advancement",
           "advancement": "tnc:life_routes/plant/flight_pod",
           "title": "完成真实操作"
@@ -2275,11 +2275,11 @@
         }
       ],
       "dependencies": [
-        "C3455BDE774D3195"
+        "43455BDE774D3195"
       ]
     },
     {
-      "id": "9747A16A393D661A",
+      "id": "1747A16A393D661A",
       "title": "生活与工坊",
       "icon": "tnc:rainproof_pod",
       "x": -11.25,
@@ -2300,7 +2300,7 @@
       ]
     },
     {
-      "id": "E2CC006B8A5FBFF1",
+      "id": "62CC006B8A5FBFF1",
       "title": "共生蜜簇",
       "icon": "tnc:honey_cluster_seed",
       "x": -6.75,
@@ -2312,7 +2312,7 @@
       ],
       "tasks": [
         {
-          "id": "95915AF39DDE6462",
+          "id": "15915AF39DDE6462",
           "type": "item",
           "item": "tnc:honey_cluster_seed",
           "consume_items": false,
@@ -2322,7 +2322,7 @@
       "dependencies": []
     },
     {
-      "id": "E788809B041C8CC6",
+      "id": "6788809B041C8CC6",
       "title": "扎下魔法根",
       "icon": "tnc:magic_soil",
       "x": -6.75,
@@ -2334,14 +2334,14 @@
       ],
       "tasks": [
         {
-          "id": "F9DD314741839BD7",
+          "id": "79DD314741839BD7",
           "type": "advancement",
           "advancement": "tnc:life_routes/plant/honey_cluster",
           "title": "完成真实操作"
         }
       ],
       "dependencies": [
-        "E2CC006B8A5FBFF1"
+        "62CC006B8A5FBFF1"
       ]
     },
     {
@@ -2363,11 +2363,11 @@
         }
       ],
       "dependencies": [
-        "E788809B041C8CC6"
+        "6788809B041C8CC6"
       ]
     },
     {
-      "id": "B6E46FEB6E1BF99F",
+      "id": "36E46FEB6E1BF99F",
       "title": "生活与工坊",
       "icon": "tnc:honey_powder",
       "x": -6.75,
@@ -2379,7 +2379,7 @@
       ],
       "tasks": [
         {
-          "id": "83DA539E1A9F726B",
+          "id": "03DA539E1A9F726B",
           "type": "checkmark"
         }
       ],
@@ -2400,7 +2400,7 @@
       ],
       "tasks": [
         {
-          "id": "C79FFD2B65239866",
+          "id": "479FFD2B65239866",
           "type": "item",
           "item": "tnc:star_dew_seed",
           "consume_items": false,
@@ -2444,7 +2444,7 @@
       ],
       "tasks": [
         {
-          "id": "B15A52735695CED0",
+          "id": "315A52735695CED0",
           "type": "advancement",
           "advancement": "tnc:life_routes/harvest/star_dew",
           "title": "完成真实操作"
@@ -2467,7 +2467,7 @@
       ],
       "tasks": [
         {
-          "id": "8655948CE11A4326",
+          "id": "0655948CE11A4326",
           "type": "checkmark"
         }
       ],
@@ -2476,7 +2476,7 @@
       ]
     },
     {
-      "id": "8897792CA16784F6",
+      "id": "0897792CA16784F6",
       "title": "脉舞铃花",
       "icon": "tnc:dance_bell_seed",
       "x": 2.25,
@@ -2488,7 +2488,7 @@
       ],
       "tasks": [
         {
-          "id": "FDD25473FF46D79D",
+          "id": "7DD25473FF46D79D",
           "type": "item",
           "item": "tnc:dance_bell_seed",
           "consume_items": false,
@@ -2510,18 +2510,18 @@
       ],
       "tasks": [
         {
-          "id": "F40D713B95372DBE",
+          "id": "740D713B95372DBE",
           "type": "advancement",
           "advancement": "tnc:life_routes/plant/dance_bell",
           "title": "完成真实操作"
         }
       ],
       "dependencies": [
-        "8897792CA16784F6"
+        "0897792CA16784F6"
       ]
     },
     {
-      "id": "87C6156CB99B3BA0",
+      "id": "07C6156CB99B3BA0",
       "title": "亲手收获",
       "icon": "tnc:dance_petal",
       "x": 2.25,
@@ -2532,7 +2532,7 @@
       ],
       "tasks": [
         {
-          "id": "E3F1D42A0B2631F2",
+          "id": "63F1D42A0B2631F2",
           "type": "advancement",
           "advancement": "tnc:life_routes/harvest/dance_bell",
           "title": "完成真实操作"
@@ -2560,11 +2560,11 @@
         }
       ],
       "dependencies": [
-        "87C6156CB99B3BA0"
+        "07C6156CB99B3BA0"
       ]
     },
     {
-      "id": "E12310C912FB0BCC",
+      "id": "612310C912FB0BCC",
       "title": "星憩蕊",
       "icon": "tnc:star_rest_seed",
       "x": 6.75,
@@ -2586,7 +2586,7 @@
       "dependencies": []
     },
     {
-      "id": "B6AF5CED1E9FAB5A",
+      "id": "36AF5CED1E9FAB5A",
       "title": "扎下魔法根",
       "icon": "tnc:magic_soil",
       "x": 6.75,
@@ -2605,11 +2605,11 @@
         }
       ],
       "dependencies": [
-        "E12310C912FB0BCC"
+        "612310C912FB0BCC"
       ]
     },
     {
-      "id": "DF4F3D9EBE75AF99",
+      "id": "5F4F3D9EBE75AF99",
       "title": "亲手收获",
       "icon": "tnc:star_rest_dew",
       "x": 6.75,
@@ -2620,14 +2620,14 @@
       ],
       "tasks": [
         {
-          "id": "A810992CFD7FD7BC",
+          "id": "2810992CFD7FD7BC",
           "type": "advancement",
           "advancement": "tnc:life_routes/harvest/star_rest",
           "title": "完成真实操作"
         }
       ],
       "dependencies": [
-        "B6AF5CED1E9FAB5A"
+        "36AF5CED1E9FAB5A"
       ]
     },
     {
@@ -2648,11 +2648,11 @@
         }
       ],
       "dependencies": [
-        "DF4F3D9EBE75AF99"
+        "5F4F3D9EBE75AF99"
       ]
     },
     {
-      "id": "DD02353BA95DDAD1",
+      "id": "5D02353BA95DDAD1",
       "title": "沤梦菌",
       "icon": "tnc:dream_compost_seed",
       "x": 11.25,
@@ -2664,7 +2664,7 @@
       ],
       "tasks": [
         {
-          "id": "FAB7D0ACA2BBECC7",
+          "id": "7AB7D0ACA2BBECC7",
           "type": "item",
           "item": "tnc:dream_compost_seed",
           "consume_items": false,
@@ -2674,7 +2674,7 @@
       "dependencies": []
     },
     {
-      "id": "C6BF189394059892",
+      "id": "46BF189394059892",
       "title": "扎下魔法根",
       "icon": "tnc:magic_soil",
       "x": 11.25,
@@ -2693,11 +2693,11 @@
         }
       ],
       "dependencies": [
-        "DD02353BA95DDAD1"
+        "5D02353BA95DDAD1"
       ]
     },
     {
-      "id": "909D688A01423083",
+      "id": "109D688A01423083",
       "title": "亲手收获",
       "icon": "tnc:dream_humus",
       "x": 11.25,
@@ -2715,11 +2715,11 @@
         }
       ],
       "dependencies": [
-        "C6BF189394059892"
+        "46BF189394059892"
       ]
     },
     {
-      "id": "A311C9AB30AED1C8",
+      "id": "2311C9AB30AED1C8",
       "title": "生活与工坊",
       "icon": "tnc:dream_humus",
       "x": 11.25,
@@ -2736,7 +2736,7 @@
         }
       ],
       "dependencies": [
-        "909D688A01423083"
+        "109D688A01423083"
       ]
     },
     {
@@ -2752,7 +2752,7 @@
       ],
       "tasks": [
         {
-          "id": "A77A1D0AB0686885",
+          "id": "277A1D0AB0686885",
           "type": "item",
           "item": "tnc:thermal_foldleaf_seed",
           "consume_items": false,
@@ -2762,7 +2762,7 @@
       "dependencies": []
     },
     {
-      "id": "B6BE22334B55843F",
+      "id": "36BE22334B55843F",
       "title": "扎下魔法根",
       "icon": "tnc:magic_soil",
       "x": -11.25,
@@ -2785,7 +2785,7 @@
       ]
     },
     {
-      "id": "C7715FAA95B4D5CC",
+      "id": "47715FAA95B4D5CC",
       "title": "亲手收获",
       "icon": "tnc:foldleaf_film",
       "x": -11.25,
@@ -2803,11 +2803,11 @@
         }
       ],
       "dependencies": [
-        "B6BE22334B55843F"
+        "36BE22334B55843F"
       ]
     },
     {
-      "id": "92A35B1076F210B7",
+      "id": "12A35B1076F210B7",
       "title": "生活与工坊",
       "icon": "tnc:foldleaf_film",
       "x": -11.25,
@@ -2819,16 +2819,16 @@
       ],
       "tasks": [
         {
-          "id": "E539BF9A112FE4D3",
+          "id": "6539BF9A112FE4D3",
           "type": "checkmark"
         }
       ],
       "dependencies": [
-        "C7715FAA95B4D5CC"
+        "47715FAA95B4D5CC"
       ]
     },
     {
-      "id": "B6DD5AB2B398F71F",
+      "id": "36DD5AB2B398F71F",
       "title": "影漏兰",
       "icon": "tnc:shadow_hour_orchid_seed",
       "x": -6.75,
@@ -2840,7 +2840,7 @@
       ],
       "tasks": [
         {
-          "id": "B920DDA24D8ECC0C",
+          "id": "3920DDA24D8ECC0C",
           "type": "item",
           "item": "tnc:shadow_hour_orchid_seed",
           "consume_items": false,
@@ -2850,7 +2850,7 @@
       "dependencies": []
     },
     {
-      "id": "B295C542B070A25F",
+      "id": "3295C542B070A25F",
       "title": "扎下魔法根",
       "icon": "tnc:magic_soil",
       "x": -6.75,
@@ -2862,14 +2862,14 @@
       ],
       "tasks": [
         {
-          "id": "E0662E00567FD065",
+          "id": "60662E00567FD065",
           "type": "advancement",
           "advancement": "tnc:life_routes/plant/shadow_hour_orchid",
           "title": "完成真实操作"
         }
       ],
       "dependencies": [
-        "B6DD5AB2B398F71F"
+        "36DD5AB2B398F71F"
       ]
     },
     {
@@ -2891,7 +2891,7 @@
         }
       ],
       "dependencies": [
-        "B295C542B070A25F"
+        "3295C542B070A25F"
       ]
     },
     {
@@ -2916,7 +2916,7 @@
       ]
     },
     {
-      "id": "8B280E6A7133DB35",
+      "id": "0B280E6A7133DB35",
       "title": "旋页蕨",
       "icon": "tnc:turnpage_fern_seed",
       "x": -2.25,
@@ -2938,7 +2938,7 @@
       "dependencies": []
     },
     {
-      "id": "923FF68E6C72A0AC",
+      "id": "123FF68E6C72A0AC",
       "title": "扎下魔法根",
       "icon": "tnc:magic_soil",
       "x": -2.25,
@@ -2957,7 +2957,7 @@
         }
       ],
       "dependencies": [
-        "8B280E6A7133DB35"
+        "0B280E6A7133DB35"
       ]
     },
     {
@@ -2979,7 +2979,7 @@
         }
       ],
       "dependencies": [
-        "923FF68E6C72A0AC"
+        "123FF68E6C72A0AC"
       ]
     },
     {
@@ -3004,7 +3004,7 @@
       ]
     },
     {
-      "id": "92D67E792EBFFB3B",
+      "id": "12D67E792EBFFB3B",
       "title": "昼夜砂穗",
       "icon": "tnc:daynight_sandgrain_seed",
       "x": 2.25,
@@ -3016,7 +3016,7 @@
       ],
       "tasks": [
         {
-          "id": "E879300D590D93B8",
+          "id": "6879300D590D93B8",
           "type": "item",
           "item": "tnc:daynight_sandgrain_seed",
           "consume_items": false,
@@ -3026,7 +3026,7 @@
       "dependencies": []
     },
     {
-      "id": "D7D6D6971B4AF165",
+      "id": "57D6D6971B4AF165",
       "title": "扎下魔法根",
       "icon": "tnc:magic_soil",
       "x": 2.25,
@@ -3038,14 +3038,14 @@
       ],
       "tasks": [
         {
-          "id": "DE598B99E1591A5D",
+          "id": "5E598B99E1591A5D",
           "type": "advancement",
           "advancement": "tnc:life_routes/plant/daynight_sandgrain",
           "title": "完成真实操作"
         }
       ],
       "dependencies": [
-        "92D67E792EBFFB3B"
+        "12D67E792EBFFB3B"
       ]
     },
     {
@@ -3060,18 +3060,18 @@
       ],
       "tasks": [
         {
-          "id": "BDA3320613AA667F",
+          "id": "3DA3320613AA667F",
           "type": "advancement",
           "advancement": "tnc:life_routes/harvest/daynight_sandgrain",
           "title": "完成真实操作"
         }
       ],
       "dependencies": [
-        "D7D6D6971B4AF165"
+        "57D6D6971B4AF165"
       ]
     },
     {
-      "id": "BA5FB90C882EC606",
+      "id": "3A5FB90C882EC606",
       "title": "生活与工坊",
       "icon": "tnc:cycle_sandgrain",
       "x": 2.25,
@@ -3114,7 +3114,7 @@
       "dependencies": []
     },
     {
-      "id": "B6D34916232AA3A2",
+      "id": "36D34916232AA3A2",
       "title": "扎下魔法根",
       "icon": "tnc:magic_soil",
       "x": 6.75,
@@ -3148,18 +3148,18 @@
       ],
       "tasks": [
         {
-          "id": "EB2BCD0D38252696",
+          "id": "6B2BCD0D38252696",
           "type": "advancement",
           "advancement": "tnc:life_routes/harvest/hanging_dewgrass",
           "title": "完成真实操作"
         }
       ],
       "dependencies": [
-        "B6D34916232AA3A2"
+        "36D34916232AA3A2"
       ]
     },
     {
-      "id": "DB845AE3E37D573B",
+      "id": "5B845AE3E37D573B",
       "title": "生活与工坊",
       "icon": "tnc:dewgrass_thread",
       "x": 6.75,
@@ -3171,7 +3171,7 @@
       ],
       "tasks": [
         {
-          "id": "95F4E71305F78B68",
+          "id": "15F4E71305F78B68",
           "type": "checkmark"
         }
       ],
@@ -3180,7 +3180,7 @@
       ]
     },
     {
-      "id": "CD252F7FA626BB62",
+      "id": "4D252F7FA626BB62",
       "title": "虹折冠",
       "icon": "tnc:prism_crown_seed",
       "x": 11.25,
@@ -3192,7 +3192,7 @@
       ],
       "tasks": [
         {
-          "id": "AED28F4BCE5EA47C",
+          "id": "2ED28F4BCE5EA47C",
           "type": "item",
           "item": "tnc:prism_crown_seed",
           "consume_items": false,
@@ -3202,7 +3202,7 @@
       "dependencies": []
     },
     {
-      "id": "AED45895D1FED5A4",
+      "id": "2ED45895D1FED5A4",
       "title": "扎下魔法根",
       "icon": "tnc:magic_soil",
       "x": 11.25,
@@ -3221,7 +3221,7 @@
         }
       ],
       "dependencies": [
-        "CD252F7FA626BB62"
+        "4D252F7FA626BB62"
       ]
     },
     {
@@ -3236,18 +3236,18 @@
       ],
       "tasks": [
         {
-          "id": "F1797BC06DEDF69F",
+          "id": "71797BC06DEDF69F",
           "type": "advancement",
           "advancement": "tnc:life_routes/harvest/prism_crown",
           "title": "完成真实操作"
         }
       ],
       "dependencies": [
-        "AED45895D1FED5A4"
+        "2ED45895D1FED5A4"
       ]
     },
     {
-      "id": "A16B430DE28EA4B8",
+      "id": "216B430DE28EA4B8",
       "title": "生活与工坊",
       "icon": "tnc:prism_crown_petal",
       "x": 11.25,
@@ -3259,7 +3259,7 @@
       ],
       "tasks": [
         {
-          "id": "990942324B6CE68E",
+          "id": "190942324B6CE68E",
           "type": "checkmark"
         }
       ],
@@ -3280,7 +3280,7 @@
       ],
       "tasks": [
         {
-          "id": "FDBB56E95F1C5403",
+          "id": "7DBB56E95F1C5403",
           "type": "item",
           "item": "tnc:ore_sleep_moss_seed",
           "consume_items": false,
@@ -3290,7 +3290,7 @@
       "dependencies": []
     },
     {
-      "id": "B7D237684C3FB71E",
+      "id": "37D237684C3FB71E",
       "title": "扎下魔法根",
       "icon": "tnc:magic_soil",
       "x": -11.25,
@@ -3313,7 +3313,7 @@
       ]
     },
     {
-      "id": "99509289C97CCAEA",
+      "id": "19509289C97CCAEA",
       "title": "亲手收获",
       "icon": "tnc:ore_dream_flake",
       "x": -11.25,
@@ -3324,14 +3324,14 @@
       ],
       "tasks": [
         {
-          "id": "E19735C73AF9ED64",
+          "id": "619735C73AF9ED64",
           "type": "advancement",
           "advancement": "tnc:life_routes/harvest/ore_sleep_moss",
           "title": "完成真实操作"
         }
       ],
       "dependencies": [
-        "B7D237684C3FB71E"
+        "37D237684C3FB71E"
       ]
     },
     {
@@ -3347,12 +3347,12 @@
       ],
       "tasks": [
         {
-          "id": "D6BF9FFA8993B7F2",
+          "id": "56BF9FFA8993B7F2",
           "type": "checkmark"
         }
       ],
       "dependencies": [
-        "99509289C97CCAEA"
+        "19509289C97CCAEA"
       ]
     },
     {
@@ -3378,7 +3378,7 @@
       "dependencies": []
     },
     {
-      "id": "BD6688E4B339D52A",
+      "id": "3D6688E4B339D52A",
       "title": "扎下魔法根",
       "icon": "tnc:magic_soil",
       "x": -6.75,
@@ -3390,7 +3390,7 @@
       ],
       "tasks": [
         {
-          "id": "95FF0E413E362D48",
+          "id": "15FF0E413E362D48",
           "type": "advancement",
           "advancement": "tnc:life_routes/plant/storm_crown",
           "title": "完成真实操作"
@@ -3419,11 +3419,11 @@
         }
       ],
       "dependencies": [
-        "BD6688E4B339D52A"
+        "3D6688E4B339D52A"
       ]
     },
     {
-      "id": "81305B41EC1BAC09",
+      "id": "01305B41EC1BAC09",
       "title": "生活与工坊",
       "icon": "tnc:storm_crown_tip",
       "x": -6.75,

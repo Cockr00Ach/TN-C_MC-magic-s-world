@@ -1,5 +1,5 @@
 {
-  "id": "E34D9527A5A462C7",
+  "id": "634D9527A5A462C7",
   "filename": "tnc_field_05_seasons",
   "title": "&a&l四时农圃",
   "icon": "tnc:season_handbook",
@@ -9,7 +9,7 @@
   "default_quest_shape": "hexagon",
   "quests": [
     {
-      "id": "E299385D7C547748",
+      "id": "6299385D7C547748",
       "title": "&a四时 · 把日子种进田里",
       "icon": "tnc:season_handbook",
       "x": 0,
@@ -29,7 +29,7 @@
       "dependencies": [],
       "rewards": [
         {
-          "id": "A1B6C455B9134831",
+          "id": "21B6C455B9134831",
           "type": "item",
           "item": "tnc:season_handbook",
           "count": 1
@@ -37,7 +37,7 @@
       ]
     },
     {
-      "id": "A0FF7CC6591CE6E6",
+      "id": "20FF7CC6591CE6E6",
       "title": "&a&l春 · 农圃",
       "icon": "minecraft:oak_sapling",
       "x": -13.5,
@@ -66,14 +66,14 @@
       ],
       "tasks": [
         {
-          "id": "A64A4524A5A008CE",
+          "id": "264A4524A5A008CE",
           "type": "checkmark"
         }
       ],
       "dependencies": []
     },
     {
-      "id": "DDCE6589A5B93C36",
+      "id": "5DCE6589A5B93C36",
       "title": "&a&l秋 · 农圃",
       "icon": "minecraft:pumpkin",
       "x": 4.5,
@@ -91,7 +91,7 @@
       "dependencies": []
     },
     {
-      "id": "F93BE12E1AFD4BA3",
+      "id": "793BE12E1AFD4BA3",
       "title": "&a&l冬 · 农圃",
       "icon": "minecraft:snowball",
       "x": 13.5,
@@ -124,7 +124,7 @@
       ],
       "tasks": [
         {
-          "id": "82BE3DD0C15FCA35",
+          "id": "02BE3DD0C15FCA35",
           "type": "item",
           "item": "minecraft:wheat_seeds",
           "consume_items": false,
@@ -134,7 +134,7 @@
       "dependencies": []
     },
     {
-      "id": "BB7972A86F790627",
+      "id": "3B7972A86F790627",
       "title": "胡萝卜",
       "icon": "minecraft:carrot",
       "x": -11.65,
@@ -159,7 +159,7 @@
       "dependencies": []
     },
     {
-      "id": "A522230C2C0F38B5",
+      "id": "2522230C2C0F38B5",
       "title": "马铃薯",
       "icon": "minecraft:potato",
       "x": -15.35,
@@ -199,7 +199,7 @@
       ],
       "tasks": [
         {
-          "id": "F7686236F48CFADC",
+          "id": "77686236F48CFADC",
           "type": "item",
           "item": "minecraft:beetroot_seeds",
           "consume_items": false,
@@ -224,7 +224,7 @@
       ],
       "tasks": [
         {
-          "id": "90162F3DEF271E6C",
+          "id": "10162F3DEF271E6C",
           "type": "item",
           "item": "minecraft:melon_seeds",
           "consume_items": false,
@@ -259,7 +259,7 @@
       "dependencies": []
     },
     {
-      "id": "C34C7806C5F955E6",
+      "id": "434C7806C5F955E6",
       "title": "甜浆果",
       "icon": "minecraft:sweet_berries",
       "x": -15.35,
@@ -284,7 +284,7 @@
       "dependencies": []
     },
     {
-      "id": "B160EC9DF66EBA56",
+      "id": "3160EC9DF66EBA56",
       "title": "发光浆果",
       "icon": "minecraft:glow_berries",
       "x": -14.700000000000001,
@@ -299,7 +299,7 @@
       ],
       "tasks": [
         {
-          "id": "CE078AE19E9DA5F4",
+          "id": "4E078AE19E9DA5F4",
           "type": "item",
           "item": "minecraft:glow_berries",
           "consume_items": false,
@@ -309,7 +309,7 @@
       "dependencies": []
     },
     {
-      "id": "B252BA03D6297E9C",
+      "id": "3252BA03D6297E9C",
       "title": "可可",
       "icon": "minecraft:cocoa_beans",
       "x": -6.35,
@@ -324,7 +324,7 @@
       ],
       "tasks": [
         {
-          "id": "8FD44AC008FD385A",
+          "id": "0FD44AC008FD385A",
           "type": "item",
           "item": "minecraft:cocoa_beans",
           "consume_items": false,
@@ -349,7 +349,7 @@
       ],
       "tasks": [
         {
-          "id": "8B1E662677203649",
+          "id": "0B1E662677203649",
           "type": "item",
           "item": "minecraft:sugar_cane",
           "consume_items": false,
@@ -384,7 +384,7 @@
       "dependencies": []
     },
     {
-      "id": "B1C127B400725D93",
+      "id": "31C127B400725D93",
       "title": "仙人掌",
       "icon": "minecraft:cactus",
       "x": -10.5,
@@ -409,7 +409,7 @@
       "dependencies": []
     },
     {
-      "id": "F5F9A55FA92AB03B",
+      "id": "75F9A55FA92AB03B",
       "title": "棕蘑菇、红蘑菇",
       "icon": "minecraft:brown_mushroom",
       "x": -6.300000000000001,
@@ -424,7 +424,7 @@
       ],
       "tasks": [
         {
-          "id": "CEA0B67348C9F251",
+          "id": "4EA0B67348C9F251",
           "type": "item",
           "item": "minecraft:brown_mushroom",
           "consume_items": false,
@@ -434,7 +434,7 @@
       "dependencies": []
     },
     {
-      "id": "D8B96593528A0C3B",
+      "id": "58B96593528A0C3B",
       "title": "海带",
       "icon": "minecraft:kelp",
       "x": -2.1,
@@ -449,7 +449,7 @@
       ],
       "tasks": [
         {
-          "id": "B2B226E3EF8E25CD",
+          "id": "32B226E3EF8E25CD",
           "type": "item",
           "item": "minecraft:kelp",
           "consume_items": false,
@@ -474,7 +474,7 @@
       ],
       "tasks": [
         {
-          "id": "E42BA4B14BEF57FD",
+          "id": "642BA4B14BEF57FD",
           "type": "item",
           "item": "minecraft:sea_pickle",
           "consume_items": false,
@@ -499,7 +499,7 @@
       ],
       "tasks": [
         {
-          "id": "8BDC631A995BC5FD",
+          "id": "0BDC631A995BC5FD",
           "type": "item",
           "item": "minecraft:nether_wart",
           "consume_items": false,
@@ -509,7 +509,7 @@
       "dependencies": []
     },
     {
-      "id": "B85858FECF49A55A",
+      "id": "385858FECF49A55A",
       "title": "绯红菌、诡异菌",
       "icon": "minecraft:crimson_fungus",
       "x": 10.5,
@@ -524,7 +524,7 @@
       ],
       "tasks": [
         {
-          "id": "CFF2245EB6F129A9",
+          "id": "4FF2245EB6F129A9",
           "type": "item",
           "item": "minecraft:crimson_fungus",
           "consume_items": false,
@@ -559,7 +559,7 @@
       "dependencies": []
     },
     {
-      "id": "CA46BAAA031F9E68",
+      "id": "4A46BAAA031F9E68",
       "title": "紫颂",
       "icon": "minecraft:chorus_flower",
       "x": -14.700000000000001,
@@ -584,7 +584,7 @@
       "dependencies": []
     },
     {
-      "id": "D42660FC6744CA20",
+      "id": "542660FC6744CA20",
       "title": "橡树产苹果",
       "icon": "minecraft:oak_sapling",
       "x": -10.5,
@@ -624,7 +624,7 @@
       ],
       "tasks": [
         {
-          "id": "CA4C464475647A36",
+          "id": "4A4C464475647A36",
           "type": "item",
           "item": "farmersdelight:cabbage_seeds",
           "consume_items": false,
@@ -674,7 +674,7 @@
       ],
       "tasks": [
         {
-          "id": "CE5623BC1B0E1F94",
+          "id": "4E5623BC1B0E1F94",
           "type": "item",
           "item": "farmersdelight:tomato_seeds",
           "consume_items": false,
@@ -684,7 +684,7 @@
       "dependencies": []
     },
     {
-      "id": "D37C742A23568929",
+      "id": "537C742A23568929",
       "title": "农夫水稻",
       "icon": "farmersdelight:rice",
       "x": -6.35,
@@ -699,7 +699,7 @@
       ],
       "tasks": [
         {
-          "id": "9DDC35445958B1F2",
+          "id": "1DDC35445958B1F2",
           "type": "item",
           "item": "farmersdelight:rice",
           "consume_items": false,
@@ -734,7 +734,7 @@
       "dependencies": []
     },
     {
-      "id": "EE7966931C8E781B",
+      "id": "6E7966931C8E781B",
       "title": "森罗番茄",
       "icon": "kaleidoscope_cookery:tomato_seed",
       "x": -2.65,
@@ -759,7 +759,7 @@
       "dependencies": []
     },
     {
-      "id": "E707344C8FAA5519",
+      "id": "6707344C8FAA5519",
       "title": "森罗生菜",
       "icon": "kaleidoscope_cookery:lettuce_seed",
       "x": -11.65,
@@ -774,7 +774,7 @@
       ],
       "tasks": [
         {
-          "id": "88A6426836680FFE",
+          "id": "08A6426836680FFE",
           "type": "item",
           "item": "kaleidoscope_cookery:lettuce_seed",
           "consume_items": false,
@@ -784,7 +784,7 @@
       "dependencies": []
     },
     {
-      "id": "9ADF39D0349C4ACB",
+      "id": "1ADF39D0349C4ACB",
       "title": "森罗辣椒",
       "icon": "kaleidoscope_cookery:chili_seed",
       "x": -6.35,
@@ -799,7 +799,7 @@
       ],
       "tasks": [
         {
-          "id": "A0EA5BD319250921",
+          "id": "20EA5BD319250921",
           "type": "item",
           "item": "kaleidoscope_cookery:chili_seed",
           "consume_items": false,
@@ -809,7 +809,7 @@
       "dependencies": []
     },
     {
-      "id": "C3041A03CD6673D8",
+      "id": "43041A03CD6673D8",
       "title": "森罗水稻",
       "icon": "kaleidoscope_cookery:rice",
       "x": -2.65,
@@ -824,7 +824,7 @@
       ],
       "tasks": [
         {
-          "id": "F9C36CA847E9FFCF",
+          "id": "79C36CA847E9FFCF",
           "type": "item",
           "item": "kaleidoscope_cookery:rice",
           "consume_items": false,
@@ -859,7 +859,7 @@
       "dependencies": []
     },
     {
-      "id": "AA870CD228AFC964",
+      "id": "2A870CD228AFC964",
       "title": "苹果",
       "icon": "fruitsdelight:apple_sapling",
       "x": 6.35,
@@ -924,7 +924,7 @@
       ],
       "tasks": [
         {
-          "id": "91A5724C430E1448",
+          "id": "11A5724C430E1448",
           "type": "item",
           "item": "fruitsdelight:blueberry_bush",
           "consume_items": false,
@@ -949,7 +949,7 @@
       ],
       "tasks": [
         {
-          "id": "F241A3F5F598DA7E",
+          "id": "7241A3F5F598DA7E",
           "type": "item",
           "item": "fruitsdelight:cranberry",
           "consume_items": false,
@@ -959,7 +959,7 @@
       "dependencies": []
     },
     {
-      "id": "D6BE1F3914FF2EE8",
+      "id": "56BE1F3914FF2EE8",
       "title": "榴莲",
       "icon": "fruitsdelight:durian_sapling",
       "x": -2.65,
@@ -974,7 +974,7 @@
       ],
       "tasks": [
         {
-          "id": "F3B10CA07F810C70",
+          "id": "73B10CA07F810C70",
           "type": "item",
           "item": "fruitsdelight:durian_sapling",
           "consume_items": false,
@@ -1009,7 +1009,7 @@
       "dependencies": []
     },
     {
-      "id": "A56FED6BA9C8C32C",
+      "id": "256FED6BA9C8C32C",
       "title": "哈密瓜",
       "icon": "fruitsdelight:hamimelon_seeds",
       "x": -2.65,
@@ -1024,7 +1024,7 @@
       ],
       "tasks": [
         {
-          "id": "D73C3AC9F7249FB0",
+          "id": "573C3AC9F7249FB0",
           "type": "item",
           "item": "fruitsdelight:hamimelon_seeds",
           "consume_items": false,
@@ -1049,7 +1049,7 @@
       ],
       "tasks": [
         {
-          "id": "BC6DDF10E5720395",
+          "id": "3C6DDF10E5720395",
           "type": "item",
           "item": "fruitsdelight:hawberry_sapling",
           "consume_items": false,
@@ -1059,7 +1059,7 @@
       "dependencies": []
     },
     {
-      "id": "E916EEEB018BF870",
+      "id": "6916EEEB018BF870",
       "title": "猕猴桃",
       "icon": "fruitsdelight:kiwi_sapling",
       "x": 6.35,
@@ -1074,7 +1074,7 @@
       ],
       "tasks": [
         {
-          "id": "811CAAB311F080C7",
+          "id": "011CAAB311F080C7",
           "type": "item",
           "item": "fruitsdelight:kiwi_sapling",
           "consume_items": false,
@@ -1099,7 +1099,7 @@
       ],
       "tasks": [
         {
-          "id": "88E5FBC64DB232CA",
+          "id": "08E5FBC64DB232CA",
           "type": "item",
           "item": "fruitsdelight:lemon_tree",
           "consume_items": false,
@@ -1124,7 +1124,7 @@
       ],
       "tasks": [
         {
-          "id": "F3DB717900F4877A",
+          "id": "73DB717900F4877A",
           "type": "item",
           "item": "fruitsdelight:lychee_sapling",
           "consume_items": false,
@@ -1134,7 +1134,7 @@
       "dependencies": []
     },
     {
-      "id": "E1B17CC59A16A10B",
+      "id": "61B17CC59A16A10B",
       "title": "芒果",
       "icon": "fruitsdelight:mango_sapling",
       "x": -6.35,
@@ -1159,7 +1159,7 @@
       "dependencies": []
     },
     {
-      "id": "E50123D07507FE95",
+      "id": "650123D07507FE95",
       "title": "山竹",
       "icon": "fruitsdelight:mangosteen_sapling",
       "x": -2.65,
@@ -1199,7 +1199,7 @@
       ],
       "tasks": [
         {
-          "id": "DFCEDEAFC63CAA8D",
+          "id": "5FCEDEAFC63CAA8D",
           "type": "item",
           "item": "fruitsdelight:orange_sapling",
           "consume_items": false,
@@ -1209,7 +1209,7 @@
       "dependencies": []
     },
     {
-      "id": "B7BE99079CFD5F81",
+      "id": "37BE99079CFD5F81",
       "title": "水蜜桃",
       "icon": "fruitsdelight:peach_sapling",
       "x": -6.35,
@@ -1224,7 +1224,7 @@
       ],
       "tasks": [
         {
-          "id": "920B10BC69C447DB",
+          "id": "120B10BC69C447DB",
           "type": "item",
           "item": "fruitsdelight:peach_sapling",
           "consume_items": false,
@@ -1249,7 +1249,7 @@
       ],
       "tasks": [
         {
-          "id": "978E8E8D87E7BF03",
+          "id": "178E8E8D87E7BF03",
           "type": "item",
           "item": "fruitsdelight:pear_sapling",
           "consume_items": false,
@@ -1259,7 +1259,7 @@
       "dependencies": []
     },
     {
-      "id": "CC7D213B142B1D94",
+      "id": "4C7D213B142B1D94",
       "title": "柿子",
       "icon": "fruitsdelight:persimmon_sapling",
       "x": 6.35,
@@ -1299,7 +1299,7 @@
       ],
       "tasks": [
         {
-          "id": "A80D544C28B6D66A",
+          "id": "280D544C28B6D66A",
           "type": "item",
           "item": "fruitsdelight:pineapple",
           "consume_items": false,
@@ -1309,7 +1309,7 @@
       "dependencies": []
     },
     {
-      "id": "D1A8B194D10E3369",
+      "id": "51A8B194D10E3369",
       "title": "凤梨乐事凤梨",
       "icon": "pineapple_delight:pineapple_crop",
       "x": -6.35,
@@ -1324,7 +1324,7 @@
       ],
       "tasks": [
         {
-          "id": "8E7B01847E8DFFD0",
+          "id": "0E7B01847E8DFFD0",
           "type": "item",
           "item": "pineapple_delight:pineapple_crop",
           "consume_items": false,
@@ -1334,7 +1334,7 @@
       "dependencies": []
     },
     {
-      "id": "E39AE8B3220D6945",
+      "id": "639AE8B3220D6945",
       "title": "巨大凤梨",
       "icon": "pineapple_delight:huge_pineapple",
       "x": -2.65,
@@ -1349,7 +1349,7 @@
       ],
       "tasks": [
         {
-          "id": "8B184BBCA1409782",
+          "id": "0B184BBCA1409782",
           "type": "item",
           "item": "pineapple_delight:huge_pineapple",
           "consume_items": false,
@@ -1359,7 +1359,7 @@
       "dependencies": []
     },
     {
-      "id": "F341FE43E607FAD8",
+      "id": "7341FE43E607FAD8",
       "title": "葡萄",
       "icon": "kaleidoscope_tavern:grape",
       "x": -6.35,
@@ -1384,7 +1384,7 @@
       "dependencies": []
     },
     {
-      "id": "B7A4B08E0E035194",
+      "id": "37A4B08E0E035194",
       "title": "冰葡萄",
       "icon": "kaleidoscope_tavern:ice_grape",
       "x": 11.65,
@@ -1474,7 +1474,7 @@
       ],
       "tasks": [
         {
-          "id": "8F2A2998D647ED1D",
+          "id": "0F2A2998D647ED1D",
           "type": "item",
           "item": "biomeswevegone:oddion_bulb",
           "consume_items": false,
@@ -1509,7 +1509,7 @@
       "dependencies": []
     },
     {
-      "id": "96B982703583CAD1",
+      "id": "16B982703583CAD1",
       "title": "BWG 猴面包果",
       "icon": "biomeswevegone:baobab_fruit",
       "x": -6.35,
@@ -1524,7 +1524,7 @@
       ],
       "tasks": [
         {
-          "id": "E053110B69DFEEC7",
+          "id": "6053110B69DFEEC7",
           "type": "item",
           "item": "biomeswevegone:baobab_fruit",
           "consume_items": false,
@@ -1534,7 +1534,7 @@
       "dependencies": []
     },
     {
-      "id": "D5D3AED37F86D889",
+      "id": "55D3AED37F86D889",
       "title": "BWG 丝兰果",
       "icon": "biomeswevegone:yucca_fruit",
       "x": -2.65,
@@ -1574,7 +1574,7 @@
       ],
       "tasks": [
         {
-          "id": "C0341905A8E301CC",
+          "id": "40341905A8E301CC",
           "type": "item",
           "item": "biomeswevegone:prickly_pear_cactus",
           "consume_items": false,
@@ -1584,7 +1584,7 @@
       "dependencies": []
     },
     {
-      "id": "DAFEF0D7338BC3EF",
+      "id": "5AFEF0D7338BC3EF",
       "title": "BWG 绿色蘑菇",
       "icon": "biomeswevegone:green_mushroom",
       "x": 2.1,
@@ -1624,7 +1624,7 @@
       ],
       "tasks": [
         {
-          "id": "D3144E5AB7E47F87",
+          "id": "53144E5AB7E47F87",
           "type": "item",
           "item": "biomeswevegone:weeping_milkcap_mushroom_block",
           "consume_items": false,
@@ -1659,7 +1659,7 @@
       "dependencies": []
     },
     {
-      "id": "DED6C41294D9C55C",
+      "id": "5ED6C41294D9C55C",
       "title": "Jerotes 二轮芦荟",
       "icon": "jerotesvillage:second_round_aloe",
       "x": -2.65,
@@ -1684,7 +1684,7 @@
       "dependencies": []
     },
     {
-      "id": "DDC20FFB6A3F502D",
+      "id": "5DC20FFB6A3F502D",
       "title": "Jerotes 明路脆瓜",
       "icon": "jerotesvillage:bright_melon_seeds",
       "x": -6.35,
@@ -1709,7 +1709,7 @@
       "dependencies": []
     },
     {
-      "id": "B70DDEA74F738BA9",
+      "id": "370DDEA74F738BA9",
       "title": "Jerotes 无味瓜",
       "icon": "jerotesvillage:flavorless_melon_seeds",
       "x": -2.65,
@@ -1724,7 +1724,7 @@
       ],
       "tasks": [
         {
-          "id": "FEF49843817F0ACF",
+          "id": "7EF49843817F0ACF",
           "type": "item",
           "item": "jerotesvillage:flavorless_melon_seeds",
           "consume_items": false,
@@ -1734,7 +1734,7 @@
       "dependencies": []
     },
     {
-      "id": "A52EF00DCC308444",
+      "id": "252EF00DCC308444",
       "title": "Jerotes 绿人杆",
       "icon": "jerotesvillage:green_humanoid_cane",
       "x": -15.35,
@@ -1749,7 +1749,7 @@
       ],
       "tasks": [
         {
-          "id": "EFC337C3C08B5740",
+          "id": "6FC337C3C08B5740",
           "type": "item",
           "item": "jerotesvillage:green_humanoid_cane",
           "consume_items": false,
@@ -1759,7 +1759,7 @@
       "dependencies": []
     },
     {
-      "id": "A481AB97E2AFD391",
+      "id": "2481AB97E2AFD391",
       "title": "天境蓝莓",
       "icon": "aether:berry_bush",
       "x": 10.5,
@@ -1784,7 +1784,7 @@
       "dependencies": []
     },
     {
-      "id": "A71C8A8088B84EE0",
+      "id": "271C8A8088B84EE0",
       "title": "天境水晶果",
       "icon": "aether:crystal_fruit_leaves",
       "x": 14.700000000000001,
@@ -1809,7 +1809,7 @@
       "dependencies": []
     },
     {
-      "id": "81F163452AD8B5F6",
+      "id": "01F163452AD8B5F6",
       "title": "Redux 赞莓",
       "icon": "aether_redux:zanberry_bush",
       "x": -14.700000000000001,
@@ -1824,7 +1824,7 @@
       ],
       "tasks": [
         {
-          "id": "E07184C6F02266E6",
+          "id": "607184C6F02266E6",
           "type": "item",
           "item": "aether_redux:zanberry_bush",
           "consume_items": false,
@@ -1834,7 +1834,7 @@
       "dependencies": []
     },
     {
-      "id": "85D5672CF0BE0209",
+      "id": "05D5672CF0BE0209",
       "title": "Redux 水晶果树",
       "icon": "aether_redux:crystal_fruit_sapling",
       "x": -10.5,
@@ -1849,7 +1849,7 @@
       ],
       "tasks": [
         {
-          "id": "8216CE3E147FC9BD",
+          "id": "0216CE3E147FC9BD",
           "type": "item",
           "item": "aether_redux:crystal_fruit_sapling",
           "consume_items": false,
@@ -1909,7 +1909,7 @@
       "dependencies": []
     },
     {
-      "id": "8A788F7FE2E7530B",
+      "id": "0A788F7FE2E7530B",
       "title": "暮色火炬浆果",
       "icon": "twilightforest:torchberry_plant",
       "x": 2.1,
@@ -1924,7 +1924,7 @@
       ],
       "tasks": [
         {
-          "id": "EBA862BB5AC82F18",
+          "id": "6BA862BB5AC82F18",
           "type": "item",
           "item": "twilightforest:torchberry_plant",
           "consume_items": false,
@@ -1934,7 +1934,7 @@
       "dependencies": []
     },
     {
-      "id": "BC5ED5063EB8742A",
+      "id": "3C5ED5063EB8742A",
       "title": "暮色鬼臼果",
       "icon": "twilightforest:mayapple",
       "x": 6.300000000000001,
@@ -1959,7 +1959,7 @@
       "dependencies": []
     },
     {
-      "id": "E81F1B5C527C879A",
+      "id": "681F1B5C527C879A",
       "title": "森罗末地梦莓",
       "icon": "kaleidoscope_end:dream_berry",
       "x": 10.5,
@@ -1974,7 +1974,7 @@
       ],
       "tasks": [
         {
-          "id": "CA9D26BA5A00ED4C",
+          "id": "4A9D26BA5A00ED4C",
           "type": "item",
           "item": "kaleidoscope_end:dream_berry",
           "consume_items": false,
@@ -2009,7 +2009,7 @@
       "dependencies": []
     },
     {
-      "id": "E968141251B4B89F",
+      "id": "6968141251B4B89F",
       "title": "森罗下界灵魂椒",
       "icon": "kaleidoscope_nether:soul_pepper",
       "x": -14.700000000000001,
@@ -2024,7 +2024,7 @@
       ],
       "tasks": [
         {
-          "id": "F83872390BEF7ED5",
+          "id": "783872390BEF7ED5",
           "type": "item",
           "item": "kaleidoscope_nether:soul_pepper",
           "consume_items": false,
@@ -2034,7 +2034,7 @@
       "dependencies": []
     },
     {
-      "id": "9316B88AFF1E906C",
+      "id": "1316B88AFF1E906C",
       "title": "森罗下界迷毒果",
       "icon": "kaleidoscope_nether:poisonous_fruit",
       "x": -10.5,
@@ -2049,7 +2049,7 @@
       ],
       "tasks": [
         {
-          "id": "E01199F394B37015",
+          "id": "601199F394B37015",
           "type": "item",
           "item": "kaleidoscope_nether:poisonous_fruit",
           "consume_items": false,
@@ -2074,7 +2074,7 @@
       ],
       "tasks": [
         {
-          "id": "BD97FD166AD5C62E",
+          "id": "3D97FD166AD5C62E",
           "type": "item",
           "item": "conquest:barley",
           "consume_items": false,
@@ -2084,7 +2084,7 @@
       "dependencies": []
     },
     {
-      "id": "DA6A4F40163294E6",
+      "id": "5A6A4F40163294E6",
       "title": "卷心菜",
       "icon": "conquest:cabbage",
       "x": -15.35,
@@ -2099,7 +2099,7 @@
       ],
       "tasks": [
         {
-          "id": "810FEB9605A29DF5",
+          "id": "010FEB9605A29DF5",
           "type": "item",
           "item": "conquest:cabbage",
           "consume_items": false,
@@ -2124,7 +2124,7 @@
       ],
       "tasks": [
         {
-          "id": "ACE9975D81AD9D4E",
+          "id": "2CE9975D81AD9D4E",
           "type": "item",
           "item": "conquest:carrots",
           "consume_items": false,
@@ -2134,7 +2134,7 @@
       "dependencies": []
     },
     {
-      "id": "C8EBBED47C724ACE",
+      "id": "48EBBED47C724ACE",
       "title": "菜豆",
       "icon": "conquest:common_beans",
       "x": -2.65,
@@ -2149,7 +2149,7 @@
       ],
       "tasks": [
         {
-          "id": "9D4B36BC77041C0E",
+          "id": "1D4B36BC77041C0E",
           "type": "item",
           "item": "conquest:common_beans",
           "consume_items": false,
@@ -2199,7 +2199,7 @@
       ],
       "tasks": [
         {
-          "id": "99EC09C4B7894987",
+          "id": "19EC09C4B7894987",
           "type": "item",
           "item": "conquest:flax",
           "consume_items": false,
@@ -2224,7 +2224,7 @@
       ],
       "tasks": [
         {
-          "id": "B3066215181AF85C",
+          "id": "33066215181AF85C",
           "type": "item",
           "item": "conquest:heirloom_wheat_crops",
           "consume_items": false,
@@ -2234,7 +2234,7 @@
       "dependencies": []
     },
     {
-      "id": "8DC553C3A7DD823F",
+      "id": "0DC553C3A7DD823F",
       "title": "麻类",
       "icon": "conquest:hemp",
       "x": -15.35,
@@ -2309,7 +2309,7 @@
       "dependencies": []
     },
     {
-      "id": "ADE4267E08CD720B",
+      "id": "2DE4267E08CD720B",
       "title": "水稻",
       "icon": "conquest:rice",
       "x": -2.65,
@@ -2334,7 +2334,7 @@
       "dependencies": []
     },
     {
-      "id": "C246F1B8BF449DC4",
+      "id": "4246F1B8BF449DC4",
       "title": "烟草",
       "icon": "conquest:tobacco",
       "x": -6.35,
@@ -2349,7 +2349,7 @@
       ],
       "tasks": [
         {
-          "id": "DB9342E4987166AA",
+          "id": "5B9342E4987166AA",
           "type": "item",
           "item": "conquest:tobacco",
           "consume_items": false,
@@ -2359,7 +2359,7 @@
       "dependencies": []
     },
     {
-      "id": "DDBD4BEE25EE6749",
+      "id": "5DBD4BEE25EE6749",
       "title": "芜菁",
       "icon": "conquest:turnips",
       "x": 2.65,
@@ -2374,7 +2374,7 @@
       ],
       "tasks": [
         {
-          "id": "BB12DCEBAB7F4109",
+          "id": "3B12DCEBAB7F4109",
           "type": "item",
           "item": "conquest:turnips",
           "consume_items": false,
@@ -2399,7 +2399,7 @@
       ],
       "tasks": [
         {
-          "id": "994BBEA81E259D30",
+          "id": "194BBEA81E259D30",
           "type": "item",
           "item": "conquest:wheat",
           "consume_items": false,
@@ -2424,7 +2424,7 @@
       ],
       "tasks": [
         {
-          "id": "E1595EBF8FDD615E",
+          "id": "61595EBF8FDD615E",
           "type": "item",
           "item": "conquest:wild_wheat",
           "consume_items": false,
@@ -2449,7 +2449,7 @@
       ],
       "tasks": [
         {
-          "id": "A830F57097BB0713",
+          "id": "2830F57097BB0713",
           "type": "item",
           "item": "mowziesmobs:foliaath_seed",
           "consume_items": false,
@@ -2459,7 +2459,7 @@
       "dependencies": []
     },
     {
-      "id": "EF4FFB2C6171BA88",
+      "id": "6F4FFB2C6171BA88",
       "title": "全年种植 · 菌菇、水生与异境",
       "icon": "minecraft:red_mushroom",
       "x": 0,
@@ -2470,7 +2470,7 @@
       ],
       "tasks": [
         {
-          "id": "C77401AD94667D75",
+          "id": "477401AD94667D75",
           "type": "checkmark"
         }
       ],
@@ -2507,7 +2507,7 @@
       ],
       "tasks": [
         {
-          "id": "86A3B24E5CC70699",
+          "id": "06A3B24E5CC70699",
           "type": "advancement",
           "advancement": "tnc:life_routes/traditional/planted",
           "title": "完成真实操作"
@@ -2556,7 +2556,7 @@
       "dependencies": [],
       "rewards": [
         {
-          "id": "8AB1FFB31D465B68",
+          "id": "0AB1FFB31D465B68",
           "type": "item",
           "item": "tnc:season_handbook",
           "count": 1
@@ -2583,29 +2583,29 @@
       "size": 1.2
     },
     {
-      "id": "88DC0BC8EE64AACF",
-      "linked_quest": "BB7972A86F790627",
+      "id": "08DC0BC8EE64AACF",
+      "linked_quest": "3B7972A86F790627",
       "x": 6.35,
       "y": 4.0,
       "size": 1.2
     },
     {
-      "id": "A7A6883BC645AE78",
-      "linked_quest": "BB7972A86F790627",
+      "id": "27A6883BC645AE78",
+      "linked_quest": "3B7972A86F790627",
       "x": 11.65,
       "y": 4.0,
       "size": 1.2
     },
     {
       "id": "5A1B0CFCB56AD5DC",
-      "linked_quest": "A522230C2C0F38B5",
+      "linked_quest": "2522230C2C0F38B5",
       "x": 2.65,
       "y": 7.4,
       "size": 1.2
     },
     {
       "id": "2ACA768E03D0EACB",
-      "linked_quest": "A522230C2C0F38B5",
+      "linked_quest": "2522230C2C0F38B5",
       "x": 15.35,
       "y": 4.0,
       "size": 1.2
@@ -2618,7 +2618,7 @@
       "size": 1.2
     },
     {
-      "id": "8E2DF7E657CEC137",
+      "id": "0E2DF7E657CEC137",
       "linked_quest": "4D8ED573141332FC",
       "x": 11.65,
       "y": 7.4,
@@ -2626,7 +2626,7 @@
     },
     {
       "id": "79F82A2CDE1CBD53",
-      "linked_quest": "C34C7806C5F955E6",
+      "linked_quest": "434C7806C5F955E6",
       "x": -2.65,
       "y": 4.0,
       "size": 1.2
@@ -2653,28 +2653,28 @@
       "size": 1.2
     },
     {
-      "id": "A482D73E56810A72",
+      "id": "2482D73E56810A72",
       "linked_quest": "7F89EC7DFE59D516",
       "x": 2.65,
       "y": 14.2,
       "size": 1.2
     },
     {
-      "id": "99FA7B195C4BF014",
+      "id": "19FA7B195C4BF014",
       "linked_quest": "5F638D6E94919428",
       "x": 6.35,
       "y": 14.2,
       "size": 1.2
     },
     {
-      "id": "89CC45854496FDD4",
+      "id": "09CC45854496FDD4",
       "linked_quest": "5F638D6E94919428",
       "x": 15.35,
       "y": 7.4,
       "size": 1.2
     },
     {
-      "id": "952151FB67433177",
+      "id": "152151FB67433177",
       "linked_quest": "60C13321363D0BC6",
       "x": 2.65,
       "y": 17.6,
@@ -2688,70 +2688,70 @@
       "size": 1.2
     },
     {
-      "id": "98A2C02F3E86DD4F",
+      "id": "18A2C02F3E86DD4F",
       "linked_quest": "6A9A9E97471DDBB5",
       "x": 6.35,
       "y": 17.6,
       "size": 1.2
     },
     {
-      "id": "88414948EC4393BE",
-      "linked_quest": "D37C742A23568929",
+      "id": "08414948EC4393BE",
+      "linked_quest": "537C742A23568929",
       "x": 2.65,
       "y": 21.0,
       "size": 1.2
     },
     {
-      "id": "9D019B852C50D8C0",
-      "linked_quest": "EE7966931C8E781B",
+      "id": "1D019B852C50D8C0",
+      "linked_quest": "6E7966931C8E781B",
       "x": 6.35,
       "y": 21.0,
       "size": 1.2
     },
     {
       "id": "24C7310FB3131FB2",
-      "linked_quest": "E707344C8FAA5519",
+      "linked_quest": "6707344C8FAA5519",
       "x": 2.65,
       "y": 24.4,
       "size": 1.2
     },
     {
-      "id": "CF281F2961313F37",
-      "linked_quest": "E707344C8FAA5519",
+      "id": "4F281F2961313F37",
+      "linked_quest": "6707344C8FAA5519",
       "x": 15.35,
       "y": 10.8,
       "size": 1.2
     },
     {
       "id": "61AB191B6C309320",
-      "linked_quest": "9ADF39D0349C4ACB",
+      "linked_quest": "1ADF39D0349C4ACB",
       "x": 6.35,
       "y": 24.4,
       "size": 1.2
     },
     {
       "id": "0B37EBE3A0644A56",
-      "linked_quest": "C3041A03CD6673D8",
+      "linked_quest": "43041A03CD6673D8",
       "x": 2.65,
       "y": 27.8,
       "size": 1.2
     },
     {
-      "id": "D2A624471240BB49",
+      "id": "52A624471240BB49",
       "linked_quest": "3065B0F7FF5E4F81",
       "x": -6.35,
       "y": 21.0,
       "size": 1.2
     },
     {
-      "id": "A53DC41C5B962E13",
+      "id": "253DC41C5B962E13",
       "linked_quest": "191C4A9266B1D168",
       "x": -6.35,
       "y": 24.4,
       "size": 1.2
     },
     {
-      "id": "E1BA2BA8CAF9BF11",
+      "id": "61BA2BA8CAF9BF11",
       "linked_quest": "658A4245BFC7CECF",
       "x": 11.65,
       "y": 14.2,
@@ -2766,7 +2766,7 @@
     },
     {
       "id": "6468A0D3B524C478",
-      "linked_quest": "E916EEEB018BF870",
+      "linked_quest": "6916EEEB018BF870",
       "x": 15.35,
       "y": 14.2,
       "size": 1.2
@@ -2779,7 +2779,7 @@
       "size": 1.2
     },
     {
-      "id": "C2E5A94E19895641",
+      "id": "42E5A94E19895641",
       "linked_quest": "4DDA1D25494FDE38",
       "x": 11.65,
       "y": 17.6,
@@ -2787,27 +2787,27 @@
     },
     {
       "id": "4A7A4D48337286F8",
-      "linked_quest": "CC7D213B142B1D94",
+      "linked_quest": "4C7D213B142B1D94",
       "x": 15.35,
       "y": 17.6,
       "size": 1.2
     },
     {
-      "id": "9F51ED11D73F327D",
-      "linked_quest": "F341FE43E607FAD8",
+      "id": "1F51ED11D73F327D",
+      "linked_quest": "7341FE43E607FAD8",
       "x": 2.65,
       "y": 44.8,
       "size": 1.2
     },
     {
-      "id": "FA171F2B63B8D358",
+      "id": "7A171F2B63B8D358",
       "linked_quest": "0BA822686A8F4AD2",
       "x": -2.65,
       "y": 44.8,
       "size": 1.2
     },
     {
-      "id": "FA3016104101F41F",
+      "id": "7A3016104101F41F",
       "linked_quest": "1A1DC174C4234B39",
       "x": 2.65,
       "y": 48.199999999999996,
@@ -2815,7 +2815,7 @@
     },
     {
       "id": "00E9119D9E194EBC",
-      "linked_quest": "96B982703583CAD1",
+      "linked_quest": "16B982703583CAD1",
       "x": 2.65,
       "y": 51.6,
       "size": 1.2
@@ -2828,21 +2828,21 @@
       "size": 1.2
     },
     {
-      "id": "8426FAA077697904",
-      "linked_quest": "B70DDEA74F738BA9",
+      "id": "0426FAA077697904",
+      "linked_quest": "370DDEA74F738BA9",
       "x": 2.65,
       "y": 55.0,
       "size": 1.2
     },
     {
       "id": "697F22957E4FFD95",
-      "linked_quest": "A52EF00DCC308444",
+      "linked_quest": "252EF00DCC308444",
       "x": -6.35,
       "y": 58.4,
       "size": 1.2
     },
     {
-      "id": "E3233160FA86D682",
+      "id": "63233160FA86D682",
       "linked_quest": "0E630E12192324F4",
       "x": 6.35,
       "y": 55.0,
@@ -2850,20 +2850,20 @@
     },
     {
       "id": "674486ABF42B9AF4",
-      "linked_quest": "DA6A4F40163294E6",
+      "linked_quest": "5A6A4F40163294E6",
       "x": 2.65,
       "y": 58.4,
       "size": 1.2
     },
     {
-      "id": "D498B1FC1F04201F",
-      "linked_quest": "DA6A4F40163294E6",
+      "id": "5498B1FC1F04201F",
+      "linked_quest": "5A6A4F40163294E6",
       "x": 15.35,
       "y": 21.0,
       "size": 1.2
     },
     {
-      "id": "8A1860C3D258BA86",
+      "id": "0A1860C3D258BA86",
       "linked_quest": "33DDB8C3B957F09A",
       "x": 6.35,
       "y": 58.4,
@@ -2877,21 +2877,21 @@
       "size": 1.2
     },
     {
-      "id": "CF74903FA7CCC06F",
-      "linked_quest": "C8EBBED47C724ACE",
+      "id": "4F74903FA7CCC06F",
+      "linked_quest": "48EBBED47C724ACE",
       "x": 2.65,
       "y": 61.8,
       "size": 1.2
     },
     {
-      "id": "EF456ADC1AAF6818",
+      "id": "6F456ADC1AAF6818",
       "linked_quest": "171373EF528B7193",
       "x": 6.35,
       "y": 61.8,
       "size": 1.2
     },
     {
-      "id": "B13513F1FDF2BA11",
+      "id": "313513F1FDF2BA11",
       "linked_quest": "5284EC0406458820",
       "x": -2.65,
       "y": 61.8,
@@ -2905,14 +2905,14 @@
       "size": 1.2
     },
     {
-      "id": "E5BA19EF522BF5EF",
-      "linked_quest": "8DC553C3A7DD823F",
+      "id": "65BA19EF522BF5EF",
+      "linked_quest": "0DC553C3A7DD823F",
       "x": -6.35,
       "y": 65.19999999999999,
       "size": 1.2
     },
     {
-      "id": "E108DB4A409C874A",
+      "id": "6108DB4A409C874A",
       "linked_quest": "31EE0CFAB9821912",
       "x": 6.35,
       "y": 65.19999999999999,
@@ -2933,7 +2933,7 @@
       "size": 1.2
     },
     {
-      "id": "DC2DD3296066D80D",
+      "id": "5C2DD3296066D80D",
       "linked_quest": "1FDA5DA5EA3071DB",
       "x": 11.65,
       "y": 27.8,
@@ -2941,14 +2941,14 @@
     },
     {
       "id": "2AEF886727B08C74",
-      "linked_quest": "ADE4267E08CD720B",
+      "linked_quest": "2DE4267E08CD720B",
       "x": 6.35,
       "y": 68.6,
       "size": 1.2
     },
     {
       "id": "418767B112906C16",
-      "linked_quest": "DDBD4BEE25EE6749",
+      "linked_quest": "5DBD4BEE25EE6749",
       "x": 15.35,
       "y": 27.8,
       "size": 1.2
