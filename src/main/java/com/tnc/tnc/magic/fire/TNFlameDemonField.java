@@ -185,11 +185,31 @@ public class TNFlameDemonField extends Entity {
             }
         }
 
-        // 圆球附近飞舞的火焰粒子（纯表现，客户端也能做，但放服务端更省事 ✓）
+        // ★ 作者 2026-10-05：「发射出来的射线改为**粒子流**」✓
+        //   ⇒ 不再由渲染器画两层激光管 ✗（光滑几何体 ✗），改成**服务端沿 orb→目标 撒粒子** ✓
+        //     每个采样点一颗 ✓；隔点取"白热芯/橙红外壳"⇒ 有流动感 ✓
+        //   ⚠️ 顺带把原来那圈"圆球附近飞舞的火焰粒子"也并进来 ✗（同一条循环里做 ✓）
         for (int i = 0; i < 4; i++) {
             Vec3 at = this.orbPosition(i);
             server.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z, 4, 0.55D, 0.55D, 0.55D, 0.02D);
             server.sendParticles(ParticleTypes.SMALL_FLAME, at.x, at.y, at.z, 3, 0.7D, 0.7D, 0.7D, 0.03D);
+
+            int id = this.orbTargetId(i);
+            if (id < 0) {
+                continue;                                  // 这条线这一 tick 没锁到东西 ✓
+            }
+            if (!(server.getEntity(id) instanceof LivingEntity target)) {
+                continue;
+            }
+            Vec3 to = target.getPosition(1.0F).add(0.0D, target.getBbHeight() * 0.5D, 0.0D);
+            Vec3 delta = to.subtract(at);
+            int steps = (int) Math.max(2.0D, delta.length() * 1.2D);
+            for (int s = 0; s <= steps; s++) {
+                Vec3 p = at.add(delta.scale(s / (double) steps));
+                // 隔点交替：白热芯 ↔ 橙红外壳 ⇒ 粒子流"在跑"的观感 ✓
+                boolean core = ((this.tickCount + s) & 1) == 0;
+                fireDust(server, p.x, p.y, p.z, core ? 0.05D : 0.70D, core ? 1.9F : 1.5F);
+            }
         }
     }
 
@@ -209,11 +229,19 @@ public class TNFlameDemonField extends Entity {
         return this.nearestInside(server, caster);
     }
 
-    /** 阵内最近的、能打中的生物 ✓。 */
+    /**
+     * 阵内最近的、能打中的生物 ✓ —— <b>优先敌对生物</b> ✓
+     *
+     * <p>⚠️ 作者 2026-10-05：「**优先攻击敌对生物**」✓
+     * ⇒ 先把敌对的分出来（{@code Enemy} 标记的怪 ✓ + 玩家 ✓ —— 这是战斗 mod ✗），
+     * 只在敌对里挑最近的 ✓；一只敌对都没有时，才退回去打中立/被动生物 ✓
+     */
     private LivingEntity nearestInside(ServerLevel server, LivingEntity caster) {
         double r = this.radius();
-        LivingEntity best = null;
+        LivingEntity best = null;              // 非敌对里最近的 ✓
+        LivingEntity bestHostile = null;       // 敌对里最近的 ✓
         double bestDist = Double.MAX_VALUE;
+        double bestHostileDist = Double.MAX_VALUE;
         for (LivingEntity candidate : server.getEntitiesOfClass(LivingEntity.class,
                 new AABB(this.getX() - r, this.getY() - 2.0D, this.getZ() - r,
                         this.getX() + r, this.getY() + FireSpellRules.T4_ORB_HEIGHT + 2.0D, this.getZ() + r),
@@ -222,12 +250,19 @@ public class TNFlameDemonField extends Entity {
                 continue;
             }
             double d = candidate.distanceToSqr(this.getX(), this.getY(), this.getZ());
-            if (d < bestDist) {
+            boolean hostile = candidate instanceof net.minecraft.world.entity.monster.Enemy
+                    || candidate instanceof net.minecraft.world.entity.player.Player;
+            if (hostile) {
+                if (d < bestHostileDist) {
+                    bestHostileDist = d;
+                    bestHostile = candidate;
+                }
+            } else if (d < bestDist) {
                 bestDist = d;
                 best = candidate;
             }
         }
-        return best;
+        return bestHostile != null ? bestHostile : best;
     }
 
     /** 在不在阵内（水平距离 ≤ 半径，且高度别跑太远 ✓）。 */

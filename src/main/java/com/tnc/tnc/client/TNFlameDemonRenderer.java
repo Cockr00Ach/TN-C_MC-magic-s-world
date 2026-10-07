@@ -100,7 +100,7 @@ public final class TNFlameDemonRenderer extends EntityRenderer<TNFlameDemonField
             // ⚠️ 作者 2026-10-05：「柱顶的光球不要用光滑的几何体，用粒子球」✓
             //   ⇒ 那 3 片正交圆盘**已删除** ✗；光球改由 TNFlameDemonField.tick()
             //      每 tick 在 orbPosition 处撒**染色粒子球** ✓（服务端发 ⇒ 所有玩家可见 ✓）
-            drawLaser(out, pose, field, rel, i);
+            // （这条光线现在由 TNFlameDemonField 每 tick 撒**粒子流** ✓，渲染器不再画管 ✗）
         }
     }
 
@@ -151,24 +151,4 @@ public final class TNFlameDemonRenderer extends EntityRenderer<TNFlameDemonField
     //  ④ 激光：从圆球射向这一条线当前锁定的目标
     // ------------------------------------------------------------------
 
-    private static void drawLaser(VertexConsumer out, Matrix4f pose, TNFlameDemonField field,
-                                  Vec3 orb, int index) {
-        Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.level == null) {
-            return;
-        }
-        int id = field.orbTargetId(index);
-        if (id < 0) {
-            return;                                        // 这条线这一 tick 没锁到东西 ✓
-        }
-        Entity target = minecraft.level.getEntity(id);
-        if (target == null) {
-            return;
-        }
-        Vec3 to = target.getPosition(1.0F).add(0.0D, target.getBbHeight() * 0.5D, 0.0D)
-                .subtract(field.position());
-        // 外焰壳 + 白热芯：两层管，看着才像"激光"而不是一根橙棍 ✗
-        WaterGeometry.tube(out, pose, orb, to, 0.17D, 1.00F, 0.30F, 0.05F, 1.0F);
-        WaterGeometry.tube(out, pose, orb, to, 0.075D, 1.00F, 0.92F, 0.62F, 1.0F);
-    }
 }
