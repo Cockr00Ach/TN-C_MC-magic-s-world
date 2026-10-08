@@ -1,0 +1,248 @@
+{
+  "time": "20261007-151245",
+  "backup": "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\work\\backups\\player-quest-recovery-20261007-151245",
+  "saves_changed": false,
+  "jar_changed": false,
+  "chapters": 37,
+  "quests": 1787,
+  "targets": [
+    {
+      "name": "live",
+      "new_chapters_unchanged": {
+        "tnc_field_02_botany.snbt": "a8bcf59600a5b14a7728c023c467cea9f96a8222341dd8f87c2167f73f92e40d",
+        "tnc_field_03_pasture.snbt": "723ff65fc26c6936249ceadc44ef57826865673c53b2a0569354e1ad150287a2",
+        "tnc_field_04_workshop.snbt": "0ccff7562da5f880ef1f6857670efa4714839ada6627c7622eaa102ef4ed0419",
+        "tnc_field_05_seasons.snbt": "d6e6f3103121b932f17936909fd38f69b4228631fbc70a5acdb4365211667349"
+      },
+      "installed_chapter_count": 37
+    },
+    {
+      "name": "mirror",
+      "new_chapters_unchanged": {
+        "tnc_field_02_botany.snbt": "58d0023eb678d4afd6d8649f0072e261646f8973ffba369e1581d778136a638b",
+        "tnc_field_03_pasture.snbt": "b227084ba5fe94e5ae8150f76590c22acb9354579bd68fe8873a9af25cc70753",
+        "tnc_field_04_workshop.snbt": "0324b67cd62c08439e5bd88b6b4765dc7e77962f08e18b9e90de16b967b288ea",
+        "tnc_field_05_seasons.snbt": "dd0e583af6efe01e4a04849fc91faf75cc346874992595bec9a35ea7899d5b9a"
+      },
+      "installed_chapter_count": 41
+    }
+  ],
+  "source_plan": {
+    "chapters": [
+      {
+        "file": "0A14259964475B24.snbt",
+        "source": "work\\backups\\town-life-20261001-204538-225\\quests\\chapters\\0A14259964475B24.snbt",
+        "quests": 145
+      },
+      {
+        "file": "0B6FFA2454FD16AB.snbt",
+        "source": "work\\backups\\town-life-20261001-204538-225\\quests\\chapters\\0B6FFA2454FD16AB.snbt",
+        "quests": 49
+      },
+      {
+        "file": "1325F0684FE975ED.snbt",
+        "source": "work\\backups\\town-life-20261001-204538-225\\quests\\chapters\\1325F0684FE975ED.snbt",
+        "quests": 29
+      },
+      {
+        "file": "2168A1F561C76718.snbt",
+        "source": "work\\backups\\town-life-20261001-204538-225\\quests\\chapters\\2168A1F561C76718.snbt",
+        "quests": 5
+      },
+      {
+        "file": "282E55946FAF4CED.snbt",
+        "source": "work\\backups\\town-life-20261001-204538-225\\quests\\chapters\\282E55946FAF4CED.snbt",
+        "quests": 122
+      },
+      {
+        "file": "3061DAB8FCCB715B.snbt",
+        "source": "work\\backups\\town-life-20261001-204538-225\\quests\\chapters\\3061DAB8FCCB715B.snbt",
+        "quests": 467
+      },
+      {
+        "file": "37C8437D5B9D0F18.snbt",
+        "source": "work\\backups\\town-life-20261001-204538-225\\quests\\chapters\\37C8437D5B9D0F18.snbt",
+        "quests": 16
+      },
+      {
+        "file": "3A49366CC2EE2DA6.snbt",
+        "source": "work\\backups\\town-life-20261001-204538-225\\quests\\chapters\\3A49366CC2EE2DA6.snbt",
+        "quests": 7
+      },
+      {
+        "file": "451ED236A1A84376.snbt",
+        "source": "work\\backups\\town-life-20261001-204538-225\\quests\\chapters\\451ED236A1A84376.snbt",
+        "quests": 68
+      },
+      {
+        "file": "500552A3129FF14C.snbt",
+        "source": "work\\backups\\town-life-20261001-204538-225\\quests\\chapters\\500552A3129FF14C.snbt",
+        "quests": 9
+      },
+      {
+        "file": "5F6818AC32FDA88C.snbt",
+        "source": "work\\backups\\town-life-20261001-204538-225\\quests\\chapters\\5F6818AC32FDA88C.snbt",
+        "quests": 10
+      },
+      {
+        "file": "6DAA3041BE0CA8A9.snbt",
+        "source": "work\\backups\\town-life-20261001-204538-225\\quests\\chapters\\6DAA3041BE0CA8A9.snbt",
+        "quests": 16
+      },
+      {
+        "file": "7D5EC398D4585771.snbt",
+        "source": "work\\backups\\town-life-20261001-204538-225\\quests\\chapters\\7D5EC398D4585771.snbt",
+        "quests": 0
+      },
+      {
+        "file": "a.snbt",
+        "source": "work\\backups\\town-life-20261001-204538-225\\quests\\chapters\\a.snbt",
+        "quests": 25
+      },
+      {
+        "file": "boss.snbt",
+        "source": "work\\backups\\town-life-20261001-204538-225\\quests\\chapters\\boss.snbt",
+        "quests": 67
+      },
+      {
+        "file": "tnc_equipment.snbt",
+        "source": "work\\backups\\town-life-20261001-204538-225\\quests\\chapters\\tnc_equipment.snbt",
+        "quests": 35
+      },
+      {
+        "file": "tnc_field_01_expeditions.snbt",
+        "source": "modpack\\元素觉醒1.4.3-魔改版-20260915\\config\\ftbquests\\quests\\chapters\\tnc_field_01_expeditions.snbt",
+        "quests": 27
+      },
+      {
+        "file": "tnc_field_02_botany.snbt",
+        "source": "questbook\\ftbquests\\chapters\\tnc_field_02_botany.snbt",
+        "quests": 156
+      },
+      {
+        "file": "tnc_field_03_pasture.snbt",
+        "source": "questbook\\ftbquests\\chapters\\tnc_field_03_pasture.snbt",
+        "quests": 108
+      },
+      {
+        "file": "tnc_field_04_workshop.snbt",
+        "source": "questbook\\ftbquests\\chapters\\tnc_field_04_workshop.snbt",
+        "quests": 41
+      },
+      {
+        "file": "tnc_field_05_seasons.snbt",
+        "source": "questbook\\ftbquests\\chapters\\tnc_field_05_seasons.snbt",
+        "quests": 104
+      },
+      {
+        "file": "tnc_guide_01_world.snbt",
+        "source": "work\\backups\\town-life-20261001-204538-225\\quests\\chapters\\tnc_guide_01_world.snbt",
+        "quests": 7
+      },
+      {
+        "file": "tnc_guide_04_ranks.snbt",
+        "source": "work\\backups\\town-life-20261001-204538-225\\quests\\chapters\\tnc_guide_04_ranks.snbt",
+        "quests": 4
+      },
+      {
+        "file": "tnc_guide_05_contracts.snbt",
+        "source": "work\\backups\\town-life-20261001-204538-225\\quests\\chapters\\tnc_guide_05_contracts.snbt",
+        "quests": 5
+      },
+      {
+        "file": "tnc_guide_06_money.snbt",
+        "source": "work\\backups\\town-life-20261001-204538-225\\quests\\chapters\\tnc_guide_06_money.snbt",
+        "quests": 5
+      },
+      {
+        "file": "tnc_guide_07_food.snbt",
+        "source": "work\\backups\\town-life-20261001-204538-225\\quests\\chapters\\tnc_guide_07_food.snbt",
+        "quests": 6
+      },
+      {
+        "file": "tnc_guide_08_home.snbt",
+        "source": "work\\backups\\town-life-20261001-204538-225\\quests\\chapters\\tnc_guide_08_home.snbt",
+        "quests": 5
+      },
+      {
+        "file": "tnc_guide_10_atlas.snbt",
+        "source": "work\\backups\\town-life-20261001-204538-225\\quests\\chapters\\tnc_guide_10_atlas.snbt",
+        "quests": 41
+      },
+      {
+        "file": "tnc_play_00_main.snbt",
+        "source": "work\\backups\\town-life-20261001-204538-225\\quests\\chapters\\tnc_play_00_main.snbt",
+        "quests": 12
+      },
+      {
+        "file": "tnc_play_02_home.snbt",
+        "source": "work\\backups\\town-life-20261001-204538-225\\quests\\chapters\\tnc_play_02_home.snbt",
+        "quests": 9
+      },
+      {
+        "file": "tnc_play_03_elements.snbt",
+        "source": "work\\backups\\town-life-20261001-204538-225\\quests\\chapters\\tnc_play_03_elements.snbt",
+        "quests": 35
+      },
+      {
+        "file": "tnc_play_04_expedition.snbt",
+        "source": "work\\backups\\town-life-20261001-204538-225\\quests\\chapters\\tnc_play_04_expedition.snbt",
+        "quests": 34
+      },
+      {
+        "file": "tnc_play_05_tavern.snbt",
+        "source": "work\\backups\\town-life-20261001-204538-225\\quests\\chapters\\tnc_play_05_tavern.snbt",
+        "quests": 17
+      },
+      {
+        "file": "tnc_play_06_living.snbt",
+        "source": "work\\backups\\town-life-20261001-204538-225\\quests\\chapters\\tnc_play_06_living.snbt",
+        "quests": 27
+      },
+      {
+        "file": "tnc_preserved_02_botany.snbt",
+        "source": "work\\backups\\life-routes-20261007-055604\\live\\tnc_field_02_botany.snbt",
+        "quests": 28,
+        "only_change": "distinct filename to prevent FTB overwriting new chapter"
+      },
+      {
+        "file": "tnc_preserved_03_pasture.snbt",
+        "source": "work\\backups\\life-routes-20261007-055604\\live\\tnc_field_03_pasture.snbt",
+        "quests": 35,
+        "only_change": "distinct filename to prevent FTB overwriting new chapter"
+      },
+      {
+        "file": "tnc_preserved_04_workshop.snbt",
+        "source": "work\\backups\\life-routes-20261007-055604\\live\\tnc_field_04_workshop.snbt",
+        "quests": 11,
+        "only_change": "distinct filename to prevent FTB overwriting new chapter"
+      }
+    ],
+    "total_quests": 1787,
+    "new_chapters_preserved": [
+      "tnc_field_02_botany.snbt",
+      "tnc_field_03_pasture.snbt",
+      "tnc_field_04_workshop.snbt",
+      "tnc_field_05_seasons.snbt"
+    ],
+    "dangling_dependencies": []
+  },
+  "full_ftb_loaded": "[15:20:24] [Server thread/INFO] [FTB Quests/]: Loaded 7 chapter groups, 37 chapters, 1787 quests, 3 reward tables",
+  "full_ftb_gametests": 22,
+  "ftb_log_sha256": "b67c4a9d3209f65e02fee430a3e54a1357180a6094aaaa7125bc48d2ccd8f1e6",
+  "reward_table_recovery": {
+    "backup": "work\\backups\\player-reward-recovery-20261007-161217",
+    "count": 3,
+    "reward_entries": 25,
+    "matches_complete_native_snapshot": true
+  },
+  "final_full_load_test": {
+    "ftb_loading": "passed",
+    "other_gametests": {
+      "passed": 21,
+      "failed": 1,
+      "failed_name": "heldcaptureandcopiedcagereleaseonlyonce"
+    },
+    "scope": "The unrelated capture test failed in this final run; quest loading and source fidelity passed. No animal code changed."
+  }
+}

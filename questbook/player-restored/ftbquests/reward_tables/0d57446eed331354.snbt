@@ -1,0 +1,43 @@
+{
+	id: "0D57446EED331354"
+	loot_size: 1
+	order_index: 1
+	rewards: [
+		{
+			command: "/ascensio level 1"
+			elevate_perms: true
+			icon: "kubejs:jihuo"
+			title: "新手"
+			type: "command"
+		}
+		{
+			command: "/ascensio level 2"
+			elevate_perms: true
+			icon: "kubejs:jihuo"
+			title: "普通"
+			type: "command"
+		}
+		{
+			command: "/ascensio level 3"
+			elevate_perms: true
+			icon: "kubejs:jihuo"
+			title: "困难"
+			type: "command"
+		}
+		{
+			command: "/ascensio level 4"
+			elevate_perms: true
+			icon: "kubejs:jihuo"
+			title: "多人【普通】"
+			type: "command"
+		}
+		{
+			command: "/ascensio level 5"
+			elevate_perms: true
+			icon: "kubejs:jihuo"
+			title: "多人【困难】"
+			type: "command"
+		}
+	]
+	title: "难度"
+}

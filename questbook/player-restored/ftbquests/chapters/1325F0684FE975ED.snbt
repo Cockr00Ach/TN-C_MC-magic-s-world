@@ -1,0 +1,604 @@
+{
+	default_hide_dependency_lines: false
+	default_quest_shape: ""
+	filename: "1325F0684FE975ED"
+	group: "734EA102F1090FA3"
+	icon: "kubejs:moyingshushi"
+	id: "1325F0684FE975ED"
+	images: [{
+		height: 15.0d
+		image: "ftbquests:textures/gui/heng2.png"
+		rotation: 0.0d
+		width: 15.0d
+		x: -1.0d
+		y: -1.5d
+	}]
+	order_index: 4
+	quest_links: [ ]
+	quests: [
+		{
+			entity_vis_size: 1.0f
+			icon: "kubejs:moyingshushi"
+			id: "6F0E38F7FD7382A8"
+			shape: "diamond"
+			size: 1.5d
+			tasks: [{
+				dimension: "minecraft:the_end"
+				id: "290426ED9247A243"
+				type: "dimension"
+			}]
+			title: "前往末地"
+			x: -1.0d
+			y: -1.5d
+		}
+		{
+			dependencies: ["21B820654993DA91"]
+			entity_vis_size: 1.0f
+			id: "093CCA7582C3BF7C"
+			tasks: [{
+				id: "5424634BCC4D00D6"
+				item: {
+					Count: 1
+					id: "endrem:guardian_eye"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -4.0d
+			y: -4.0d
+		}
+		{
+			dependencies: ["64FA96071D18D8E0"]
+			entity_vis_size: 1.0f
+			id: "1D0A8049960FE046"
+			tasks: [{
+				id: "07BD281CB6205F1D"
+				item: {
+					Count: 1
+					id: "endrem:magical_eye"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -2.5d
+			y: -5.0d
+		}
+		{
+			dependencies: ["630F3AE09A0DC44A"]
+			entity_vis_size: 1.0f
+			id: "4D757D64757C53FB"
+			tasks: [{
+				id: "0242FB82D68DFA42"
+				item: {
+					Count: 1
+					id: "endrem:wither_eye"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -1.0d
+			y: -5.0d
+		}
+		{
+			dependencies: ["49D03660D6C550F1"]
+			entity_vis_size: 1.0f
+			id: "5DA90B3CD9B61F9E"
+			tasks: [{
+				id: "2E2891CFC06570B8"
+				item: {
+					Count: 1
+					id: "endrem:witch_eye"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -5.5d
+			y: -4.0d
+		}
+		{
+			dependencies: ["01E673A099E1637D"]
+			entity_vis_size: 1.0f
+			id: "573E6EB4623FB09C"
+			tasks: [{
+				id: "7934B80D0B83AE11"
+				item: {
+					Count: 1
+					id: "endrem:undead_eye"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 0.5d
+			y: -5.0d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "063E06DBF2C02C85"
+			tasks: [{
+				id: "4DCACBF6C91751F0"
+				item: {
+					Count: 1
+					id: "endrem:exotic_eye"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 3.5d
+			y: -4.0d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "0AE8DF60538BA94E"
+			tasks: [{
+				id: "4B862FFCBF7994D8"
+				item: {
+					Count: 1
+					id: "endrem:cryptic_eye"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 3.5d
+			y: -2.5d
+		}
+		{
+			dependencies: ["68A2C4B327C1481B"]
+			entity_vis_size: 1.0f
+			id: "4127E0A30AE46A3C"
+			tasks: [{
+				id: "45E946F00429AD03"
+				item: {
+					Count: 1
+					id: "endrem:evil_eye"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 2.0d
+			y: -4.0d
+		}
+		{
+			dependencies: ["0711741C32EE0D04"]
+			entity_vis_size: 1.0f
+			id: "6B077BC7698AC867"
+			tasks: [{
+				id: "76716583E81F12B5"
+				item: {
+					Count: 1
+					id: "endrem:old_eye"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 2.0d
+			y: 1.0d
+		}
+		{
+			dependencies: ["617F077D742E7131"]
+			entity_vis_size: 1.0f
+			id: "005323FFBE5A8542"
+			tasks: [{
+				id: "608FCBF40A5D57C0"
+				item: {
+					Count: 1
+					id: "endrem:cursed_eye"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 0.5d
+			y: 2.0d
+		}
+		{
+			dependencies: ["4AAB00B2EE154C82"]
+			entity_vis_size: 1.0f
+			id: "4EA33A53948B37AF"
+			tasks: [{
+				id: "73E943ECD828B7FE"
+				item: {
+					Count: 1
+					id: "endrem:nether_eye"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: 3.5d
+			y: 1.0d
+		}
+		{
+			dependencies: ["2FD886159B02D7CA"]
+			entity_vis_size: 1.0f
+			id: "35421EEA0811E33B"
+			tasks: [{
+				id: "279BC9B8C9A3992A"
+				item: {
+					Count: 1
+					id: "endrem:corrupted_eye"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -1.0d
+			y: 2.0d
+		}
+		{
+			dependencies: ["39DB460BE05133D6"]
+			entity_vis_size: 1.0f
+			id: "3BB2AF421A74D0E7"
+			tasks: [{
+				id: "4A867B50E8126F0E"
+				item: {
+					Count: 1
+					id: "endrem:black_eye"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -2.5d
+			y: 2.0d
+		}
+		{
+			dependencies: ["33378DA7343B748D"]
+			entity_vis_size: 1.0f
+			id: "4DB9EF4FF69971B9"
+			tasks: [{
+				id: "00045ADBE7EEA2B5"
+				item: {
+					Count: 1
+					id: "endrem:cold_eye"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -4.0d
+			y: 1.0d
+		}
+		{
+			dependencies: ["4C20BE102BDF51AE"]
+			entity_vis_size: 1.0f
+			id: "4B65D72C6E70CF8D"
+			tasks: [{
+				id: "22F9A9017AC64CC8"
+				item: {
+					Count: 1
+					id: "endrem:lost_eye"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			x: -5.5d
+			y: 1.0d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "21B820654993DA91"
+			subtitle: "&e【主世界生物 结构名 海底遗迹】"
+			tasks: [{
+				entity: "minecraft:elder_guardian"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "58B6E8136EF04655"
+				type: "kill"
+				value: 1L
+			}]
+			x: -4.0d
+			y: -2.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "64FA96071D18D8E0"
+			subtitle: "&e【主线推进Boss】"
+			tasks: [{
+				entity: "minecraft:evoker"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "15625CDD0FF46CA9"
+				type: "kill"
+				value: 1L
+			}]
+			x: -2.5d
+			y: -3.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "630F3AE09A0DC44A"
+			subtitle: "&e【主线推进Boss】"
+			tasks: [{
+				entity: "minecraft:wither"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "1C0967FA76DDB30B"
+				type: "kill"
+				value: 1L
+			}]
+			x: -1.0d
+			y: -3.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "01E673A099E1637D"
+			subtitle: "&e【主线推进Boss】"
+			tasks: [{
+				entity: "eeeabsmobs:immortal"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "30CFE4D80B28D3C0"
+				type: "kill"
+				value: 1L
+			}]
+			x: 0.5d
+			y: -3.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "49D03660D6C550F1"
+			subtitle: "&e【主线推进Boss】"
+			tasks: [{
+				entity: "jerotesvillage:purple_sand_hag"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "513FE10D0C39DCFA"
+				type: "kill"
+				value: 1L
+			}]
+			x: -5.5d
+			y: -2.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "68A2C4B327C1481B"
+			subtitle: "&e【主线推进Boss】"
+			tasks: [{
+				entity: "illageandspillage:magispeller"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "38AD74F9551699B6"
+				type: "kill"
+				value: 1L
+			}]
+			x: 2.0d
+			y: -2.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "617F077D742E7131"
+			subtitle: "&e【主线推进Boss】"
+			tasks: [{
+				entity: "abyssal_corrupter:abyssal_corrupter"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "0ECACE71DB5DB416"
+				type: "kill"
+				value: 1L
+			}]
+			x: 0.5d
+			y: 0.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			icon: "block_factorys_bosses:sandworm_spawn_egg"
+			id: "0711741C32EE0D04"
+			subtitle: "&e主世界Boss【结构名 沙虫巢穴】"
+			tasks: [{
+				entity: "block_factorys_bosses:sandworm"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "3EF9BEED740C82F7"
+				type: "kill"
+				value: 1L
+			}]
+			x: 2.0d
+			y: -0.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "4AAB00B2EE154C82"
+			subtitle: "&e【主线推进Boss】"
+			tasks: [{
+				entity: "bosses_of_mass_destruction:gauntlet"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "150A279D5D66B3E4"
+				type: "kill"
+				value: 1L
+			}]
+			x: 3.5d
+			y: -0.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "2FD886159B02D7CA"
+			subtitle: "&e【主线推进Boss】"
+			tasks: [{
+				entity: "mebahelcreaturesdraugr:draugr_overlord"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "29F6E12A88E8BB2D"
+				type: "kill"
+				value: 1L
+			}]
+			x: -1.0d
+			y: 0.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "39DB460BE05133D6"
+			subtitle: "&e主世界Boss【结构名 冠军墓地】"
+			tasks: [{
+				entity: "soulsweapons:draugr_boss"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "4BD74E35DA3CD05B"
+				type: "kill"
+				value: 1L
+			}]
+			x: -2.5d
+			y: 0.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "33378DA7343B748D"
+			subtitle: "&e【主世界Boss 结构名雪人藏身处】"
+			tasks: [{
+				entity: "block_factorys_bosses:yeti"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "36DD67B2101E9477"
+				type: "kill"
+				value: 1L
+			}]
+			x: -4.0d
+			y: -0.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			id: "4C20BE102BDF51AE"
+			subtitle: "&e【异寂空谷分支Boss】"
+			tasks: [{
+				entity: "eeeabsmobs:corpse_warlock"
+				entity_use_tag: false
+				entity_vis_idle_mode: "USE_GLOBAL"
+				entity_vis_offset_x: 0.0f
+				entity_vis_offset_y: 0.0f
+				entity_vis_rotation: 0.0f
+				entity_vis_silhouette_mode: "NONE"
+				entity_vis_size: 1.0f
+				entity_vis_spin_mode: "USE_GLOBAL"
+				entity_vis_use_as_quest_icon: false
+				entity_vis_walk_mode: "USE_GLOBAL"
+				id: "240FD29D55A785ED"
+				type: "kill"
+				value: 1L
+			}]
+			x: -5.5d
+			y: -0.5d
+		}
+	]
+	title: "&f前往末地"
+}

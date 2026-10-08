@@ -1,0 +1,808 @@
+{
+	default_hide_dependency_lines: false
+	default_quest_shape: "hexagon"
+	filename: "tnc_play_04_expedition"
+	group: "544E434755494445"
+	icon: "minecraft:compass"
+	id: "544E450100000004"
+	order_index: 5
+	quest_links: [ ]
+	quests: [
+		{
+			description: [
+				"&b&l照亮营地"
+				""
+				"&f为下一段旅程准备真实物资。持有检测不消耗；任务路线是可选旅行建议，不要求购买不存在的服务。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:torch"
+			id: "544E450200000058"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				count: 32L
+				id: "544E450300000058"
+				item: "minecraft:torch"
+				type: "item"
+			}]
+			title: "照亮营地"
+			x: -12.0d
+			y: 0.0d
+		}
+		{
+			description: [
+				"&b&l挡住第一击"
+				""
+				"&f为下一段旅程准备真实物资。持有检测不消耗；任务路线是可选旅行建议，不要求购买不存在的服务。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "minecraft:shield"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E450200000059"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E450300000059"
+				item: {
+					Count: 1
+					id: "minecraft:shield"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "挡住第一击"
+			x: -8.0d
+			y: 0.0d
+		}
+		{
+			description: [
+				"&b&l深入矿层"
+				""
+				"&f为下一段旅程准备真实物资。持有检测不消耗；任务路线是可选旅行建议，不要求购买不存在的服务。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "minecraft:iron_pickaxe"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E45020000005A"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E45030000005A"
+				item: {
+					Count: 1
+					id: "minecraft:iron_pickaxe"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "深入矿层"
+			x: -4.0d
+			y: 0.0d
+		}
+		{
+			description: [
+				"&b&l随身水源"
+				""
+				"&f为下一段旅程准备真实物资。持有检测不消耗；任务路线是可选旅行建议，不要求购买不存在的服务。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:water_bucket"
+			id: "544E45020000005B"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E45030000005B"
+				item: "minecraft:water_bucket"
+				type: "item"
+			}]
+			title: "随身水源"
+			x: 0.0d
+			y: 0.0d
+		}
+		{
+			description: [
+				"&b&l水路出发"
+				""
+				"&f为下一段旅程准备真实物资。持有检测不消耗；任务路线是可选旅行建议，不要求购买不存在的服务。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:oak_boat"
+			id: "544E45020000005C"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E45030000005C"
+				item: "minecraft:oak_boat"
+				type: "item"
+			}]
+			title: "水路出发"
+			x: 4.0d
+			y: 0.0d
+		}
+		{
+			description: [
+				"&b&l记住归路"
+				""
+				"&f为下一段旅程准备真实物资。持有检测不消耗；任务路线是可选旅行建议，不要求购买不存在的服务。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:compass"
+			id: "544E45020000005D"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E45030000005D"
+				item: "minecraft:compass"
+				type: "item"
+			}]
+			title: "记住归路"
+			x: 8.0d
+			y: 0.0d
+		}
+		{
+			description: [
+				"&b&l夜间营地"
+				""
+				"&f为下一段旅程准备真实物资。持有检测不消耗；任务路线是可选旅行建议，不要求购买不存在的服务。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:white_bed"
+			id: "544E45020000005E"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E45030000005E"
+				item: "minecraft:white_bed"
+				type: "item"
+			}]
+			title: "夜间营地"
+			x: 12.0d
+			y: 0.0d
+		}
+		{
+			description: [
+				"&b&l一周口粮"
+				""
+				"&f为下一段旅程准备真实物资。持有检测不消耗；任务路线是可选旅行建议，不要求购买不存在的服务。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:bread"
+			id: "544E45020000005F"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				count: 16L
+				id: "544E45030000005F"
+				item: "minecraft:bread"
+				type: "item"
+			}]
+			title: "一周口粮"
+			x: -12.0d
+			y: 4.0d
+		}
+		{
+			description: [
+				"&b&l远行蛋白"
+				""
+				"&f为下一段旅程准备真实物资。持有检测不消耗；任务路线是可选旅行建议，不要求购买不存在的服务。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:cooked_beef"
+			id: "544E450200000060"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				count: 8L
+				id: "544E450300000060"
+				item: "minecraft:cooked_beef"
+				type: "item"
+			}]
+			title: "远行蛋白"
+			x: -8.0d
+			y: 4.0d
+		}
+		{
+			description: [
+				"&b&l危急储备"
+				""
+				"&f为下一段旅程准备真实物资。持有检测不消耗；任务路线是可选旅行建议，不要求购买不存在的服务。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:golden_apple"
+			id: "544E450200000061"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				count: 2L
+				id: "544E450300000061"
+				item: "minecraft:golden_apple"
+				type: "item"
+			}]
+			title: "危急储备"
+			x: -4.0d
+			y: 4.0d
+		}
+		{
+			description: [
+				"&b&l钻石矿脉"
+				""
+				"&f为下一段旅程准备真实物资。持有检测不消耗；任务路线是可选旅行建议，不要求购买不存在的服务。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:diamond"
+			id: "544E450200000062"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				count: 4L
+				id: "544E450300000062"
+				item: "minecraft:diamond"
+				type: "item"
+			}]
+			title: "钻石矿脉"
+			x: 0.0d
+			y: 4.0d
+		}
+		{
+			description: [
+				"&b&l点亮地狱门"
+				""
+				"&f为下一段旅程准备真实物资。持有检测不消耗；任务路线是可选旅行建议，不要求购买不存在的服务。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:obsidian"
+			id: "544E450200000063"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				count: 10L
+				id: "544E450300000063"
+				item: "minecraft:obsidian"
+				type: "item"
+			}]
+			title: "点亮地狱门"
+			x: 4.0d
+			y: 4.0d
+		}
+		{
+			description: [
+				"&b&l火种"
+				""
+				"&f为下一段旅程准备真实物资。持有检测不消耗；任务路线是可选旅行建议，不要求购买不存在的服务。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "minecraft:flint_and_steel"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E450200000064"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E450300000064"
+				item: {
+					Count: 1
+					id: "minecraft:flint_and_steel"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "火种"
+			x: 8.0d
+			y: 4.0d
+		}
+		{
+			description: [
+				"&b&l烈焰堡垒"
+				""
+				"&f为下一段旅程准备真实物资。持有检测不消耗；任务路线是可选旅行建议，不要求购买不存在的服务。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:blaze_rod"
+			id: "544E450200000065"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				count: 4L
+				id: "544E450300000065"
+				item: "minecraft:blaze_rod"
+				type: "item"
+			}]
+			title: "烈焰堡垒"
+			x: 12.0d
+			y: 4.0d
+		}
+		{
+			description: [
+				"&b&l灵魂谷的眼泪"
+				""
+				"&f为下一段旅程准备真实物资。持有检测不消耗；任务路线是可选旅行建议，不要求购买不存在的服务。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:ghast_tear"
+			id: "544E450200000066"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				count: 2L
+				id: "544E450300000066"
+				item: "minecraft:ghast_tear"
+				type: "item"
+			}]
+			title: "灵魂谷的眼泪"
+			x: -12.0d
+			y: 8.0d
+		}
+		{
+			description: [
+				"&b&l酿造储备"
+				""
+				"&f为下一段旅程准备真实物资。持有检测不消耗；任务路线是可选旅行建议，不要求购买不存在的服务。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:nether_wart"
+			id: "544E450200000067"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				count: 8L
+				id: "544E450300000067"
+				item: "minecraft:nether_wart"
+				type: "item"
+			}]
+			title: "酿造储备"
+			x: -8.0d
+			y: 8.0d
+		}
+		{
+			description: [
+				"&b&l末影的线索"
+				""
+				"&f为下一段旅程准备真实物资。持有检测不消耗；任务路线是可选旅行建议，不要求购买不存在的服务。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:ender_pearl"
+			id: "544E450200000068"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				count: 8L
+				id: "544E450300000068"
+				item: "minecraft:ender_pearl"
+				type: "item"
+			}]
+			title: "末影的线索"
+			x: -4.0d
+			y: 8.0d
+		}
+		{
+			description: [
+				"&b&l寻找要塞"
+				""
+				"&f为下一段旅程准备真实物资。持有检测不消耗；任务路线是可选旅行建议，不要求购买不存在的服务。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:ender_eye"
+			id: "544E450200000069"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				count: 12L
+				id: "544E450300000069"
+				item: "minecraft:ender_eye"
+				type: "item"
+			}]
+			title: "寻找要塞"
+			x: 0.0d
+			y: 8.0d
+		}
+		{
+			description: [
+				"&b&l海底远征"
+				""
+				"&f为下一段旅程准备真实物资。持有检测不消耗；任务路线是可选旅行建议，不要求购买不存在的服务。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:prismarine_shard"
+			id: "544E45020000006A"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				count: 8L
+				id: "544E45030000006A"
+				item: "minecraft:prismarine_shard"
+				type: "item"
+			}]
+			title: "海底远征"
+			x: 4.0d
+			y: 8.0d
+		}
+		{
+			description: [
+				"&b&l潮水退去"
+				""
+				"&f为下一段旅程准备真实物资。持有检测不消耗；任务路线是可选旅行建议，不要求购买不存在的服务。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:sponge"
+			id: "544E45020000006B"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E45030000006B"
+				item: "minecraft:sponge"
+				type: "item"
+			}]
+			title: "潮水退去"
+			x: 8.0d
+			y: 8.0d
+		}
+		{
+			description: [
+				"&b&l深暗之声"
+				""
+				"&f为下一段旅程准备真实物资。持有检测不消耗；任务路线是可选旅行建议，不要求购买不存在的服务。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:echo_shard"
+			id: "544E45020000006C"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				count: 2L
+				id: "544E45030000006C"
+				item: "minecraft:echo_shard"
+				type: "item"
+			}]
+			title: "深暗之声"
+			x: 12.0d
+			y: 8.0d
+		}
+		{
+			description: [
+				"&b&l失落的坐标"
+				""
+				"&f为下一段旅程准备真实物资。持有检测不消耗；任务路线是可选旅行建议，不要求购买不存在的服务。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:recovery_compass"
+			id: "544E45020000006D"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E45030000006D"
+				item: "minecraft:recovery_compass"
+				type: "item"
+			}]
+			title: "失落的坐标"
+			x: -12.0d
+			y: 12.0d
+		}
+		{
+			description: [
+				"&b&l远古锻材"
+				""
+				"&f为下一段旅程准备真实物资。持有检测不消耗；任务路线是可选旅行建议，不要求购买不存在的服务。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:netherite_ingot"
+			id: "544E45020000006E"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				count: 2L
+				id: "544E45030000006E"
+				item: "minecraft:netherite_ingot"
+				type: "item"
+			}]
+			title: "远古锻材"
+			x: -8.0d
+			y: 12.0d
+		}
+		{
+			description: [
+				"&b&l末地行囊"
+				""
+				"&f为下一段旅程准备真实物资。持有检测不消耗；任务路线是可选旅行建议，不要求购买不存在的服务。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:shulker_shell"
+			id: "544E45020000006F"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				count: 2L
+				id: "544E45030000006F"
+				item: "minecraft:shulker_shell"
+				type: "item"
+			}]
+			title: "末地行囊"
+			x: -4.0d
+			y: 12.0d
+		}
+		{
+			description: [
+				"&b&l天空归途"
+				""
+				"&f为下一段旅程准备真实物资。持有检测不消耗；任务路线是可选旅行建议，不要求购买不存在的服务。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "minecraft:elytra"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E450200000070"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E450300000070"
+				item: {
+					Count: 1
+					id: "minecraft:elytra"
+					tag: {
+						Damage: 0
+					}
+				}
+				type: "item"
+			}]
+			title: "天空归途"
+			x: 0.0d
+			y: 12.0d
+		}
+		{
+			description: [
+				"&b&l龙息采集"
+				""
+				"&f为下一段旅程准备真实物资。持有检测不消耗；任务路线是可选旅行建议，不要求购买不存在的服务。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:dragon_breath"
+			id: "544E450200000071"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E450300000071"
+				item: "minecraft:dragon_breath"
+				type: "item"
+			}]
+			title: "龙息采集"
+			x: 4.0d
+			y: 12.0d
+		}
+		{
+			description: [
+				"&b&l林地战利品"
+				""
+				"&f为下一段旅程准备真实物资。持有检测不消耗；任务路线是可选旅行建议，不要求购买不存在的服务。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:totem_of_undying"
+			id: "544E450200000072"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E450300000072"
+				item: "minecraft:totem_of_undying"
+				type: "item"
+			}]
+			title: "林地战利品"
+			x: 8.0d
+			y: 12.0d
+		}
+		{
+			description: [
+				"&b&l凋零试炼"
+				""
+				"&f为下一段旅程准备真实物资。持有检测不消耗；任务路线是可选旅行建议，不要求购买不存在的服务。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:nether_star"
+			id: "544E450200000073"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E450300000073"
+				item: "minecraft:nether_star"
+				type: "item"
+			}]
+			title: "凋零试炼"
+			x: 12.0d
+			y: 12.0d
+		}
+		{
+			description: [
+				"&b&l踏入下界"
+				""
+				"&f检测生存玩家实际到达维度/参与击杀；首领目标沿用已有八类首领名单。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:netherrack"
+			id: "544E450200000074"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				advancement: "tnc:onboarding/entered_nether"
+				criterion: "done"
+				id: "544E450300000074"
+				title: "完成真实行为"
+				type: "advancement"
+			}]
+			title: "踏入下界"
+			x: -10.0d
+			y: 18.0d
+		}
+		{
+			description: [
+				"&b&l末地星空"
+				""
+				"&f检测生存玩家实际到达维度/参与击杀；首领目标沿用已有八类首领名单。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:end_stone"
+			id: "544E450200000075"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				advancement: "tnc:onboarding/entered_end"
+				criterion: "done"
+				id: "544E450300000075"
+				title: "完成真实行为"
+				type: "advancement"
+			}]
+			title: "末地星空"
+			x: -6.0d
+			y: 18.0d
+		}
+		{
+			description: [
+				"&b&l二十五次实战"
+				""
+				"&f检测生存玩家实际到达维度/参与击杀；首领目标沿用已有八类首领名单。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "minecraft:iron_sword"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E450200000076"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				advancement: "tnc:onboarding/kills_25"
+				criterion: "done"
+				id: "544E450300000076"
+				title: "完成真实行为"
+				type: "advancement"
+			}]
+			title: "二十五次实战"
+			x: -2.0d
+			y: 18.0d
+		}
+		{
+			description: [
+				"&b&l百战巡猎"
+				""
+				"&f检测生存玩家实际到达维度/参与击杀；首领目标沿用已有八类首领名单。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "minecraft:diamond_sword"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E450200000077"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				advancement: "tnc:onboarding/kills_100"
+				criterion: "done"
+				id: "544E450300000077"
+				title: "完成真实行为"
+				type: "advancement"
+			}]
+			title: "百战巡猎"
+			x: 2.0d
+			y: 18.0d
+		}
+		{
+			description: [
+				"&b&l首领初战"
+				""
+				"&f检测生存玩家实际到达维度/参与击杀；首领目标沿用已有八类首领名单。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:boss_ingredient_1"
+			id: "544E450200000078"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				advancement: "tnc:onboarding/bosses_1"
+				criterion: "done"
+				id: "544E450300000078"
+				title: "完成真实行为"
+				type: "advancement"
+			}]
+			title: "首领初战"
+			x: 6.0d
+			y: 18.0d
+		}
+		{
+			description: [
+				"&b&l八次首领远征"
+				""
+				"&f检测生存玩家实际到达维度/参与击杀；首领目标沿用已有八类首领名单。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:boss_ingredient_2"
+			id: "544E450200000079"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				advancement: "tnc:onboarding/bosses_8"
+				criterion: "done"
+				id: "544E450300000079"
+				title: "完成真实行为"
+				type: "advancement"
+			}]
+			title: "八次首领远征"
+			x: 10.0d
+			y: 18.0d
+		}
+	]
+	title: "&6&l远行 · 补给与遗迹"
+}

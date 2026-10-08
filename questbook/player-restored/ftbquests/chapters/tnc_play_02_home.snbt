@@ -1,0 +1,221 @@
+{
+	default_hide_dependency_lines: false
+	default_quest_shape: "hexagon"
+	filename: "tnc_play_02_home"
+	group: "544E434755494445"
+	icon: "tnc:food_pouch"
+	id: "544E441100000000"
+	order_index: 8
+	quest_links: [ ]
+	quests: [
+		{
+			description: [
+				"&a&l整理旅途行囊"
+				""
+				"&fE背包旁点行囊，检查独立钱袋槽、食物袋槽与五格食物。袋子余额与食物保存在个人账户。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:food_pouch"
+			id: "544E441200000000"
+			shape: "hexagon"
+			size: 1.2d
+			tasks: [{
+				advancement: "tnc:onboarding/pouches"
+				criterion: "done"
+				id: "544E441300000000"
+				title: "完成实际行为"
+				type: "advancement"
+			}]
+			title: "整理旅途行囊"
+			x: -6.0d
+			y: 0.0d
+		}
+		{
+			dependencies: ["544E441200000000"]
+			description: [
+				"&a&l给自己做一顿饭"
+				""
+				"&f普通食用或袋子快捷食用一次，消耗真实食物并返还容器。真死亡后饥饿6/20，请带好补给。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:bread"
+			id: "544E441200000001"
+			shape: "hexagon"
+			size: 1.2d
+			tasks: [{
+				advancement: "tnc:onboarding/meal"
+				criterion: "done"
+				id: "544E441300000001"
+				title: "完成实际行为"
+				type: "advancement"
+			}]
+			title: "给自己做一顿饭"
+			x: -3.0d
+			y: 0.0d
+		}
+		{
+			dependencies: ["544E441200000001"]
+			description: [
+				"&a&l小麦的谢礼"
+				""
+				"&f结算一份原生食材类委托，学农事并获得焦点；旧已接小麦单也兼容。通用魔法不花战斗学习点。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:farm_focus"
+			id: "544E441200000002"
+			shape: "hexagon"
+			size: 1.2d
+			tasks: [{
+				advancement: "tnc:onboarding/farm_learned"
+				criterion: "done"
+				id: "544E441300000002"
+				title: "完成实际行为"
+				type: "advancement"
+			}]
+			title: "小麦的谢礼"
+			x: 0.0d
+			y: 0.0d
+		}
+		{
+			dependencies: ["544E441200000002"]
+			description: [
+				"&a&l初芽"
+				""
+				"&f手持焦点对12格内农田右键，白名单作物促进一个阶段。Lv10/30开放后两阶，潜行右键切换。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:wheat"
+			id: "544E441200000003"
+			shape: "hexagon"
+			size: 1.2d
+			tasks: [{
+				advancement: "tnc:onboarding/farm_cast"
+				criterion: "done"
+				id: "544E441300000003"
+				title: "完成实际行为"
+				type: "advancement"
+			}]
+			title: "初芽"
+			x: 3.0d
+			y: 0.0d
+		}
+		{
+			dependencies: ["544E441200000001"]
+			description: [
+				"&a&l记住一席珍馐"
+				""
+				"&f独立首领珍料＋熟牛肉＋碗。八种珍馐首次各加2生命，同一种不重复加。此为可选远征支线。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:boss_feast_1"
+			id: "544E441200000004"
+			shape: "hexagon"
+			size: 1.2d
+			tasks: [{
+				advancement: "tnc:onboarding/delicacy"
+				criterion: "done"
+				id: "544E441300000004"
+				title: "完成实际行为"
+				type: "advancement"
+			}]
+			title: "记住一席珍馐"
+			x: 6.0d
+			y: 0.0d
+		}
+		{
+			description: [
+				"&a&l向邻居问好"
+				""
+				"&f东街与南街三栋居民房有六位成年邻居；右键后点击互动。剧情人物保持原有身份。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:emerald"
+			id: "544E441200000005"
+			shape: "hexagon"
+			size: 1.2d
+			tasks: [{
+				advancement: "tnc:onboarding/neighbor_met"
+				criterion: "done"
+				id: "544E441300000005"
+				title: "完成实际行为"
+				type: "advancement"
+			}]
+			title: "向邻居问好"
+			x: -6.0d
+			y: 3.0d
+		}
+		{
+			dependencies: ["544E441200000001"]
+			description: [
+				"&a&l属于你的空屋"
+				""
+				"&f攒5银，看房后找19号归航银行米洛，确认购买南街三层空屋。自己布置床、储物和纪念品；独居也可完成。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:oak_door"
+			id: "544E441200000006"
+			shape: "hexagon"
+			size: 1.2d
+			tasks: [{
+				advancement: "tnc:onboarding/home_bought"
+				criterion: "done"
+				id: "544E441300000006"
+				title: "完成实际行为"
+				type: "advancement"
+			}]
+			title: "属于你的空屋"
+			x: -3.0d
+			y: 3.0d
+		}
+		{
+			dependencies: ["544E441200000005"]
+			description: [
+				"&a&l一起吃饭"
+				""
+				"&f主手拿两份同菜，在邻居对话中明确选择共餐。每20分钟有效游戏时间一次，返还容器并保留料理效果。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:mushroom_stew"
+			id: "544E441200000007"
+			shape: "hexagon"
+			size: 1.2d
+			tasks: [{
+				advancement: "tnc:onboarding/shared_meal"
+				criterion: "done"
+				id: "544E441300000007"
+				title: "完成实际行为"
+				type: "advancement"
+			}]
+			title: "一起吃饭"
+			x: 0.0d
+			y: 3.0d
+		}
+		{
+			dependencies: [
+				"544E441200000006"
+				"544E441200000007"
+			]
+			description: [
+				"&a&l自愿的归处"
+				""
+				"&f亲密70、三种菜、三次共餐，自购房内两张床与安全空间。选择邀请，愿意的成年邻居才入住；可结束，友情保留。婚礼与孩子后续开放。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:white_bed"
+			id: "544E441200000008"
+			shape: "hexagon"
+			size: 1.2d
+			tasks: [{
+				advancement: "tnc:onboarding/living_together"
+				criterion: "done"
+				id: "544E441300000008"
+				title: "完成实际行为"
+				type: "advancement"
+			}]
+			title: "自愿的归处"
+			x: 3.0d
+			y: 3.0d
+		}
+	]
+	title: "&a&l归处 · 田园与同行者"
+}
