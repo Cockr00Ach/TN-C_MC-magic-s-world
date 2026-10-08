@@ -77,100 +77,32 @@ public final class TNSolarJudgmentRenderer extends EntityRenderer<TNSolarJudgmen
         // ⚠️ sunPosition() 是世界坐标 ✓ ⇒ 换相对坐标 ✗
         Vec3 sun = field.sunPosition().subtract(field.position());
 
-        drawSigil(out, pose, radius, age, field.life());
-        drawSun(out, pose, sun, age, radius);
-        drawBeams(out, pose, sun, radius, age, field.beams());
+        // ★ 2026-10-05：作者「t4/t5 中的法阵有问题，不好修就把火球链的法阵拿来用」✓
+        //   ⇒ 直接**复用火球链那座**（TNSigilRenderer，照作者参考图画的那版 ✓）
+        //     自己手搓的那套 drawSigil 已删除 ✗（两套法阵叠在一起就是"有问题"的来源 ✗）
+        // 出场渐显（照 TNSigilRenderer 的写法 ✓，免得"啪"地凭空出现 ✗）
+        float fade = (float) Math.min(1.0D, (field.tickCount + partial) / 8.0D);
+        // ★ 2026-10-05：作者「t5 的法阵用 t4 那个，再在 t4 的基础上**多一些线条与粒子**」✓
+        //   ⇒ 第一层照 t4 一样（半径 15 ✓），**再叠一层**略大、反向自转的 ✓
+        //     两层线条交错 ⇒ 比 t4 明显更繁复 ✓
+        TNSigilRenderer.drawSigil(out, pose, Vec3.ZERO, 15.0D, true, age, fade);
+        TNSigilRenderer.drawSigil(out, pose, Vec3.ZERO, 17.5D, true, -age * 1.4D, fade * 0.75F);
+        // （太阳与光束现在都由 TNSolarJudgmentField 每 tick 撒粒子 ✓，渲染器不再画几何体 ✗）
+        // （太阳与光束现在都由 TNSolarJudgmentField 每 tick 撒粒子 ✓，渲染器不再画几何体 ✗）
     }
 
     // ------------------------------------------------------------------
     //  ① 巨大法阵（由外到里描绘）
     // ------------------------------------------------------------------
 
-    private static void drawSigil(VertexConsumer out, Matrix4f pose, double radius, double age, int life) {
-        // 像素风：不淡出，最后 3 tick 整块收掉 ✓（同 t4 ✓）
-        if (age > life - 3) {
-            return;
-        }
-        WaterGeometry.disk(out, pose, ORIGIN, UP, radius, 0.66F, 0.26F, 0.05F, 1.0F);
-        for (int i = 0; i < 6; i++) {
-            double r = radius * (1.0D - i * 0.15D);
-            double appear = Math.min(1.0D, Math.max(0.0D, age / DRAW_TICKS - i * 0.15D));
-            if (appear <= 0.01D) {
-                continue;
-            }
-            if (appear < 0.5D) {
-                continue;
-            }
-            WaterGeometry.ring(out, pose, ORIGIN, UP, r, Math.max(0.09D, 0.14D - i * 0.010D),
-                    age * 0.010D, 1.0F);
-        }
-        // ★ 放射状辐条 + 六芒星（作者 2026-10-05 第 7 条：「法阵不清晰」✗）
-        //   根因：光靠几个同心圆，在暗色地面上就是几圈**虚影** ✗，看不出是个法阵 ✗
-        //   ⇒ 加 8 根辐条 + 一个六芒星 ✓ —— 这两个结构一出来，法阵立刻立住了 ✓
-        for (int k = 0; k < 8; k++) {
-            double a = k * Math.PI / 4.0D + age * 0.004D;
-            Vec3 outer = WaterGeometry.radial(AXIS_X, AXIS_Z, a, radius * 0.98D);
-            Vec3 inner = WaterGeometry.radial(AXIS_X, AXIS_Z, a, radius * 0.30D);
-            if (k % 2 == 0) {
-                WaterGeometry.tube(out, pose, inner, outer, 0.055D, 1.0F, 0.66F, 0.16F, 1.0F);
-            }
-        }
-        for (int k = 0; k < 6; k++) {
-            Vec3 p0 = WaterGeometry.radial(AXIS_X, AXIS_Z, k * Math.PI / 3.0D, radius * 0.62D);
-            Vec3 p1 = WaterGeometry.radial(AXIS_X, AXIS_Z, (k + 2) * Math.PI / 3.0D, radius * 0.62D);
-            WaterGeometry.tube(out, pose, p0, p1, 0.045D, 1.0F, 0.80F, 0.26F, 1.0F);
-        }
-
-        if (age / DRAW_TICKS > 0.72D) {
-            WaterGeometry.disk(out, pose, ORIGIN, UP, radius * 0.26D, 1.0F, 0.80F, 0.30F, 1.0F);
-        }
-    }
 
     // ------------------------------------------------------------------
     //  ② 正上方那颗太阳
     // ------------------------------------------------------------------
 
-    private static void drawSun(VertexConsumer out, Matrix4f pose, Vec3 sun, double age, double radius) {
-        // 太阳比 t4 的球大得多 ✓（作者要"类似太阳的光球"✓）
-        double r = Math.max(2.4D, radius * 0.30D);
-        float pulse = (float) (0.94D + 0.06D * Math.sin(age * 0.16D));
-        // 外层暗红球（三片正交 ✓）
-        for (Vec3 axis : new Vec3[]{UP, AXIS_X, AXIS_Z}) {
-            WaterGeometry.disk(out, pose, sun, axis, r * 1.5D * pulse, 1.00F, 0.30F, 0.04F, 1.0F);
-        }
-        // 中层橙
-        for (Vec3 axis : new Vec3[]{UP, AXIS_X, AXIS_Z}) {
-            WaterGeometry.disk(out, pose, sun, axis, r * 1.05D * pulse, 1.00F, 0.62F, 0.12F, 1.0F);
-        }
-        // 内层白热核
-        for (Vec3 axis : new Vec3[]{UP, AXIS_X, AXIS_Z}) {
-            WaterGeometry.disk(out, pose, sun, axis, r * 0.60D * pulse, 1.00F, 0.96F, 0.72F, 1.0F);
-        }
-        // 日冕 + 耀斑（两圈反向转的环 ✓）
-        WaterGeometry.ring(out, pose, sun, UP, r * 2.0D, 0.22D, age * 0.03D, 1.0F);
-        WaterGeometry.ring(out, pose, sun, AXIS_X, r * 2.2D, 0.16D, -age * 0.022D, 1.0F);
-        WaterGeometry.ring(out, pose, sun, AXIS_Z, r * 2.2D, 0.16D, age * 0.026D, 1.0F);
-    }
 
     // ------------------------------------------------------------------
     //  ③ 大量光线：从太阳往阵内倾泻
     // ------------------------------------------------------------------
 
-    private static void drawBeams(VertexConsumer out, Matrix4f pose, Vec3 sun, double radius,
-                                  double age, int beams) {
-        // ⚠️ 作者 2026-10-05 第 5 条：「圆球向法阵范围内发出大量射线，而不是就一条」✓
-        //    根因：原来光线数 = 阵内敌人数 ✗ ⇒ 只有一只怪时就只画一条 ✗，
-        //    看着完全不像"太阳在审判"✗
-        //    ⇒ 现在**不管有几个目标，都撒出一整片** ✓（目标多时再多画几条 ✓）
-        int n = Math.max(MIN_BEAMS, Math.min(beams, MAX_BEAMS));
-        for (int i = 0; i < n; i++) {
-            // 落点沿着阵内一条缓慢转动的螺旋铺开 ⇒ 看着像"一直在往下砸"✓
-            double angle = age * 0.09D + i * (Math.PI * 2.0D / n) * 1.618D;
-            double rr = radius * (0.25D + 0.68D * ((i * 7 % 11) / 10.0D));
-            Vec3 to = new Vec3(Math.cos(angle) * rr, 0.15D, Math.sin(angle) * rr);
-            // 外焰壳 + 白热芯（和 t4 的激光同一套观感 ✓）
-            WaterGeometry.tube(out, pose, sun, to, 0.20D, 1.00F, 0.34F, 0.06F, 1.0F);
-            WaterGeometry.tube(out, pose, sun, to, 0.085D, 1.00F, 0.95F, 0.70F, 1.0F);
-        }
-    }
 }

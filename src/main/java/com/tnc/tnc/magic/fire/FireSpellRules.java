@@ -319,7 +319,7 @@ public final class FireSpellRules {
     // ---------------- t5 太阳の审判 ----------------
 
     /** t5 巨阵的半径（格）—— "巨大的法阵"✓。 */
-    public static final double T5_FIELD_RADIUS = 12.0D;
+    public static final double T5_FIELD_RADIUS = 15D;
 
     /** t5 持续 10 秒 ✓（作者明确）。 */
     public static final int T5_FIELD_TICKS = 200;
@@ -343,7 +343,7 @@ public final class FireSpellRules {
     public static final int T5_DESTROY_LAYERS_PER_TICK = 4;
 
     /** 单次光线伤害 = 总伤害 ÷ 这个数（10 轮 ⇒ 光线总量 = 系数 × 基础 × 火法强 ✓）。 */
-    public static final float T5_BEAM_DIVISOR = 10.0F;
+    public static final float T5_BEAM_DIVISOR = 6.4F;
 
     /** t5 的伤害系数（×7 ✓）。 */
     public static final float T5_COEFFICIENT = 7.0F;
@@ -353,7 +353,7 @@ public final class FireSpellRules {
     // ---------------- t4 炎魔龙之怒 ----------------
 
     /** t4 巨阵的半径（格）—— 作者说"巨大的法阵"✓（射程 32 格内的目标脚下 ✓）。 */
-    public static final double T4_FIELD_RADIUS = 10.0D;
+    public static final double T4_FIELD_RADIUS = 15D;
 
     /** t4 持续 8 秒 ✓（作者明确）。 */
     public static final int T4_FIELD_TICKS = 160;
@@ -364,14 +364,17 @@ public final class FireSpellRules {
      * <p>⚠️ 作者 2026-10-05 第 4 条：「t4 中的黑曜石柱在离中心远一点」✓
      * —— 原来 0.78（贴着阵内 ✗）⇒ 现在 **1.02**（就落在法阵边缘上 ✓）
      */
-    public static final double T4_ORB_RING = 1.02D;
+    public static final double T4_ORB_RING = 1.06D;
 
     /**
      * 圆球离地多高（格）✓
      *
      * <p>⚠️ 作者第 4 条：「高度改为 2/3 左右」✓ —— 原来 9 格 ⇒ 现在 **6 格** ✓
      */
-    public static final double T4_ORB_HEIGHT = 6.0D;
+    // ⚠️ 作者 2026-10-05：「粒子球有部分和柱子重叠了，**把粒子球做高一点和柱子分开**」✓
+    //   柱子高 10 格（5 块 × 2 格 ✗）；光球半径 0.9~1.45 ⇒ 中心给到 **12 格** ✓
+    //   ⇒ 球底 ≈ 10.55 格，柱顶 10 格 ⇒ 中间留出空隙 ✓（顺带它也是射线起点 ✓）
+    public static final double T4_ORB_HEIGHT = 12.0D;
 
     /** 光线每几 tick 跳一次（10 tick = 0.5 秒 ✓）。 */
     public static final int T4_BEAM_INTERVAL_TICKS = 10;
@@ -383,13 +386,13 @@ public final class FireSpellRules {
      * {@code 16 ÷ 3.2 = 5} ⇒ <b>总量正好 = 系数 × 基础伤害 × 火法强</b> ✓
      * —— 和别档同一个口径，不会因为"持续伤害"就偷偷打出一堆额外伤害 ✗
      */
-    public static final float T4_BEAM_DIVISOR = 3.2F;
+    public static final float T4_BEAM_DIVISOR = 1.42F;
 
     /** 收场时每个圆球爆炸的伤害 = 单次光线伤害 × 这个数（作者定 ×2 ✓）。 */
     public static final float T4_ORB_BLAST_MULTIPLIER = 2.0F;
 
     /** 收场爆炸的半径（格）✓。 */
-    public static final double T4_ORB_BLAST_RADIUS = 5.0D;
+    public static final double T4_ORB_BLAST_RADIUS = 15.0D;
 
     /** t4 收场的画面震动强度（度 ✓）—— 比 t5 弱、比 t3 强 ✓。 */
     public static final float SHAKE_T4_RAY = 12.0F;

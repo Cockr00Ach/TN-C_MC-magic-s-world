@@ -79,6 +79,39 @@ public class TNFlameDemonField extends Entity {
     /** 收场爆炸是否已经做过（只做一次 ✓）。 */
     private boolean collapsed;
 
+    /**
+     * <b>持续锁定的蓄力</b> ✓ —— 作者 2026-10-05：
+     * 「粒子流的规模会**逐渐变大**、伤害也随规模逐渐变为 **1.5 倍**；
+     * 注意规模变大是**持续对一个目标**时才会变大，**换了目标会回到最初的大小**，
+     * 规模的变化**不是永久的**」✓
+     *
+     * <p>实现：每个光球各记一个"已连续锁定多少 tick"✗ ——
+     * 还是同一个目标就 +1（封顶 ✓）；目标变了（或没目标）立刻归零 ✓。
+     * 规模与伤害都用同一条曲线：{@code 1.0 + 0.5 × 蓄力 / BEAM_RAMP_TICKS} ✓
+     * （0 tick ⇒ 1.0 倍；{@link #BEAM_RAMP_TICKS} tick ⇒ 1.5 倍 ✓）
+     *
+     * <p>⚠️ 这个状态**只在服务端** ✓：粒子流本来就是服务端撒的 ✓，
+     * 所以不需要同步字段、也不会被渲染器读到 ✓
+     */
+    private final int[] beamCharge = new int[4];
+
+    /**
+     * 蓄力到满要多久（tick ✓）—— <b>法术持续时间的 1/3</b> ✓
+     *
+     * <p>⚠️ 作者 2026-10-05：「蓄满用时改为**改法术持续时间的 1/3**」✓
+     * ⇒ 直接用 {@link #life()}（这座域的持续 tick 数 ✗）除以 3 ✓，
+     * 不再写死 40 ✗ —— 以后改域时长，蓄力节奏自动跟着变 ✓
+     * （t4 现在 life = 160 tick ⇒ 蓄满约 **53 tick ≈ 2.7 秒** ✓）
+     */
+    private int beamRampTicks() {
+        return Math.max(1, this.life() / 3);
+    }
+
+    /** 第 i 条光线现在的规模/伤害倍率（1.0 → 1.5 ✓）。 */
+    private float beamRamp(int i) {
+        return 1.0F + 0.5F * this.beamCharge[i] / (float) this.beamRampTicks();
+    }
+
     public TNFlameDemonField(EntityType<? extends TNFlameDemonField> type, Level level) {
         super(type, level);
         this.setNoGravity(true);
@@ -140,6 +173,28 @@ public class TNFlameDemonField extends Entity {
 
     @Override
     public void tick() {
+        // ★ 作者 2026-10-05：「柱顶的光球不要用光滑的几何体，用**粒子球**」✓
+        //   ⇒ 渲染器里那 3 片正交圆盘已删 ✗；这里每 tick 在 orbPosition 撒一层染色粒子壳 ✓
+        //     服务端发 ⇒ 所有玩家可见 ✓；粒子寿命会把球"糊"成一个会呼吸的火球 ✓
+        if (level() instanceof net.minecraft.server.level.ServerLevel sl) {
+            for (int i = 0; i < 4; i++) {
+                net.minecraft.world.phys.Vec3 o = orbPosition(i);
+                for (int p = 0; p < ORB_PARTICLES; p++) {
+                    // 球面附近随机取点（半径 0.55~0.85 ⇒ 球壳 ✓，中心也补几颗 ⇒ 有芯 ✓）
+                    double theta = Math.random() * Math.PI * 2.0D;
+                    double phi = Math.acos(2.0D * Math.random() - 1.0D);
+                    // ⚠️ 作者 2026-10-05：「柱子上的粒子球**大点**」✓ ⇒ 球壳半径 0.55~0.85 → 0.9~1.45 ✓
+                    double rr = 0.90D + Math.random() * 0.55D;
+                    double dx = Math.sin(phi) * Math.cos(theta) * rr;
+                    double dy = Math.cos(phi) * rr;
+                    double dz = Math.sin(phi) * Math.sin(theta) * rr;
+                    // 取色：靠外偏红、靠内偏白黄（和火系色板一致 ✓）
+                    double shade = (rr - 0.90D) / 0.55D * 0.85D;
+                    // 粒子本身也做大 ✓（原来 1.5~2.5 ⇒ 现在 2.4~3.4 ✓）
+                    fireDust(sl, o.x + dx, o.y + dy, o.z + dz, shade, 2.4F + (float) (1.0D - shade));
+                }
+            }
+        }
         super.tick();
         if (this.level().isClientSide()) {
             return;
@@ -159,17 +214,93 @@ public class TNFlameDemonField extends Entity {
         boolean tickDamage = this.tickCount % FireSpellRules.T4_BEAM_INTERVAL_TICKS == 0;
         for (int i = 0; i < 4; i++) {
             LivingEntity target = this.resolveOrbTarget(server, caster, i);
-            this.entityData.set(DATA_ORB[i], target == null ? -1 : target.getId());
+            int targetId = target == null ? -1 : target.getId();
+            // ⚠️ 这里读到的 DATA_ORB[i] 还是**上一 tick** 的目标 ✓（下面才写 ✓）
+            if (targetId >= 0 && targetId == this.entityData.get(DATA_ORB[i])) {
+                this.beamCharge[i] = Math.min(this.beamRampTicks(), this.beamCharge[i] + 1);   // 一直锁同一个 ⇒ 蓄力 ✓
+            } else {
+                this.beamCharge[i] = 0;                    // 换目标 / 没目标 ⇒ 回到最初大小 ✓
+            }
+            this.entityData.set(DATA_ORB[i], targetId);
             if (target != null && tickDamage) {
-                this.beamHit(server, caster, target);
+                this.beamHit(server, caster, target, i);
             }
         }
 
-        // 圆球附近飞舞的火焰粒子（纯表现，客户端也能做，但放服务端更省事 ✓）
+        // ★ 作者 2026-10-05：「**在法阵中加上粒子效果让场景更壮观**」✓
+        //   三样叠起来 ✓：① 贴地一圈缓慢旋转的余烬环 ✓
+        //              ② 从地面往上飘的火星柱 ✓
+        //              ③ 阵心一根会"呼吸"的火柱 ✓
+        {
+            double rr = this.radius();
+            double cx = this.getX();
+            double cy = this.getY();
+            double cz = this.getZ();
+            // ① 贴地余烬环：沿圆周取样，相位随 tickCount 转 ✓
+            for (int k = 0; k < SIGIL_RING_POINTS; k++) {
+                double a = this.tickCount * 0.02D + k * Math.PI * 2.0D / SIGIL_RING_POINTS;
+                double px = cx + Math.cos(a) * rr * 0.98D;
+                double pz = cz + Math.sin(a) * rr * 0.98D;
+                fireDust(server, px, cy + 0.15D + Math.random() * 0.25D, pz,
+                        0.62D + Math.random() * 0.30D, 1.6F);
+            }
+            // ② 从地面往上飘的火星（随机位置 ✓）
+            for (int k = 0; k < SIGIL_EMBER_POINTS; k++) {
+                double a = Math.random() * Math.PI * 2.0D;
+                double d = Math.sqrt(Math.random()) * rr * 0.95D;
+                double px = cx + Math.cos(a) * d;
+                double pz = cz + Math.sin(a) * d;
+                fireDust(server, px, cy + Math.random() * 2.2D, pz,
+                        0.30D + Math.random() * 0.55D, 1.4F);
+            }
+            // ③ 阵心那根"呼吸"火柱 ✓
+            double pulse = 1.0D + 0.18D * Math.sin(this.tickCount * 0.22D);
+            for (int k = 0; k < 6; k++) {
+                double py = cy + 0.3D + k * 0.9D * pulse;
+                double off = 0.55D * (1.0D - k / 7.0D);
+                fireDust(server, cx + (Math.random() * 2.0D - 1.0D) * off, py,
+                        cz + (Math.random() * 2.0D - 1.0D) * off,
+                        k * 0.10D, 1.8F);
+            }
+        }
+
+        // ★ 作者 2026-10-05：「发射出来的射线改为**粒子流**」✓
+        //   ⇒ 不再由渲染器画两层激光管 ✗（光滑几何体 ✗），改成**服务端沿 orb→目标 撒粒子** ✓
+        //     每个采样点一颗 ✓；隔点取"白热芯/橙红外壳"⇒ 有流动感 ✓
+        //   ⚠️ 顺带把原来那圈"圆球附近飞舞的火焰粒子"也并进来 ✗（同一条循环里做 ✓）
         for (int i = 0; i < 4; i++) {
             Vec3 at = this.orbPosition(i);
             server.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z, 4, 0.55D, 0.55D, 0.55D, 0.02D);
             server.sendParticles(ParticleTypes.SMALL_FLAME, at.x, at.y, at.z, 3, 0.7D, 0.7D, 0.7D, 0.03D);
+
+            int id = this.orbTargetId(i);
+            if (id < 0) {
+                continue;                                  // 这条线这一 tick 没锁到东西 ✓
+            }
+            if (!(server.getEntity(id) instanceof LivingEntity target)) {
+                continue;
+            }
+            Vec3 to = target.getPosition(1.0F).add(0.0D, target.getBbHeight() * 0.5D, 0.0D);
+            Vec3 delta = to.subtract(at);
+            // ★ 规模随蓄力变粗 ✓（作者：「**粒子流的规模会逐渐变大**」✓）
+            //   采样间隔 + 粒子尺寸 + 横向抖动都乘上倍率 ✓ ⇒ 从一根细线长成一道粗流 ✓
+            float ramp = this.beamRamp(i);
+            int steps = (int) Math.max(2.0D, delta.length() * 1.4D * ramp);
+            for (int s = 0; s <= steps; s++) {
+                Vec3 p = at.add(delta.scale(s / (double) steps));
+                // 横向抖动：倍率越大越"粗" ✓（像素风 ⇒ 用固定偏移量的随机取点 ✓）
+                // ⚠️ 作者 2026-10-05：「**变粗程度再大点**」✓ ⇒ 0.35 → 0.85 ✓（1.5 倍时横向散到 ±0.425 格 ✓）
+                double jitter = (ramp - 1.0F) * 0.85D;
+                if (jitter > 0.001D) {
+                    p = p.add((Math.random() * 2.0D - 1.0D) * jitter,
+                            (Math.random() * 2.0D - 1.0D) * jitter,
+                            (Math.random() * 2.0D - 1.0D) * jitter);
+                }
+                // 隔点交替：白热芯 ↔ 橙红外壳 ⇒ 粒子流"在跑"的观感 ✓
+                boolean core = ((this.tickCount + s) & 1) == 0;
+                float size = (core ? 1.9F : 1.5F) * (0.80F + 0.70F * ramp);   // 尺寸系数也加大 ✓
+                fireDust(server, p.x, p.y, p.z, core ? 0.05D : 0.70D, size);
+            }
         }
     }
 
@@ -189,11 +320,19 @@ public class TNFlameDemonField extends Entity {
         return this.nearestInside(server, caster);
     }
 
-    /** 阵内最近的、能打中的生物 ✓。 */
+    /**
+     * 阵内最近的、能打中的生物 ✓ —— <b>优先敌对生物</b> ✓
+     *
+     * <p>⚠️ 作者 2026-10-05：「**优先攻击敌对生物**」✓
+     * ⇒ 先把敌对的分出来（{@code Enemy} 标记的怪 ✓ + 玩家 ✓ —— 这是战斗 mod ✗），
+     * 只在敌对里挑最近的 ✓；一只敌对都没有时，才退回去打中立/被动生物 ✓
+     */
     private LivingEntity nearestInside(ServerLevel server, LivingEntity caster) {
         double r = this.radius();
-        LivingEntity best = null;
+        LivingEntity best = null;              // 非敌对里最近的 ✓
+        LivingEntity bestHostile = null;       // 敌对里最近的 ✓
         double bestDist = Double.MAX_VALUE;
+        double bestHostileDist = Double.MAX_VALUE;
         for (LivingEntity candidate : server.getEntitiesOfClass(LivingEntity.class,
                 new AABB(this.getX() - r, this.getY() - 2.0D, this.getZ() - r,
                         this.getX() + r, this.getY() + FireSpellRules.T4_ORB_HEIGHT + 2.0D, this.getZ() + r),
@@ -202,12 +341,19 @@ public class TNFlameDemonField extends Entity {
                 continue;
             }
             double d = candidate.distanceToSqr(this.getX(), this.getY(), this.getZ());
-            if (d < bestDist) {
+            boolean hostile = candidate instanceof net.minecraft.world.entity.monster.Enemy
+                    || candidate instanceof net.minecraft.world.entity.player.Player;
+            if (hostile) {
+                if (d < bestHostileDist) {
+                    bestHostileDist = d;
+                    bestHostile = candidate;
+                }
+            } else if (d < bestDist) {
                 bestDist = d;
                 best = candidate;
             }
         }
-        return best;
+        return bestHostile != null ? bestHostile : best;
     }
 
     /** 在不在阵内（水平距离 ≤ 半径，且高度别跑太远 ✓）。 */
@@ -220,12 +366,14 @@ public class TNFlameDemonField extends Entity {
     }
 
     /** 一次光线跳伤 + 挂焚身 II ✓。 */
-    private void beamHit(ServerLevel server, LivingEntity caster, LivingEntity target) {
+    private void beamHit(ServerLevel server, LivingEntity caster, LivingEntity target, int orbIndex) {
+        // ★ 伤害随蓄力增长：1.0 → 1.5 倍 ✓（作者：「伤害也随规模的变大逐渐变为 1.5」✓）
+        float dmg = this.beamDamage * this.beamRamp(orbIndex);
         target.invulnerableTime = 0;                        // 别被无敌帧吃掉 ✓
-        target.hurt(server.damageSources().indirectMagic(this, caster), this.beamDamage);
+        target.hurt(server.damageSources().indirectMagic(this, caster), dmg);
         // 焚身 II 级（作者定 t4~t5 都是 II 级 ✓）——只有玩家施法才算得出基数 ✓
         if (caster instanceof ServerPlayer player) {
-            TNScorch.apply(target, player, this.beamDamage, true);
+            TNScorch.apply(target, player, dmg, true);
         }
     }
 
@@ -238,10 +386,17 @@ public class TNFlameDemonField extends Entity {
         LivingEntity caster = server.getEntity(this.casterId()) instanceof LivingEntity living ? living : null;
         float blast = this.beamDamage * FireSpellRules.T4_ORB_BLAST_MULTIPLIER;
         double r = FireSpellRules.T4_ORB_BLAST_RADIUS;
+        // ⚠️ 作者 2026-10-05：「**去重**」✓
+        //   4 颗球的爆炸区域会互相重叠 ✗ ⇒ 靠阵心的目标本来会被打 **4 次**（≈8 倍跳伤 ✗）
+        //   ⇒ 记一个"已炸过"的集合 ✓，同一目标在整场终结爆炸里**只吃一次** ✓
+        java.util.Set<Integer> alreadyBlasted = new java.util.HashSet<>();
         for (int i = 0; i < 4; i++) {
             Vec3 at = this.orbPosition(i);
             for (LivingEntity victim : server.getEntitiesOfClass(LivingEntity.class,
                     FireSpellRules.uprightArea(at, r, r), t -> FireSpellRules.hittable(caster, t))) {
+                if (!alreadyBlasted.add(victim.getId())) {
+                    continue;                        // 前面那颗球已经炸过它了 ✓
+                }
                 victim.invulnerableTime = 0;
                 victim.hurt(server.damageSources().indirectMagic(this, caster), blast);
             }
@@ -306,5 +461,34 @@ public class TNFlameDemonField extends Entity {
         field.configure(caster, radius, lifeTicks, beamDamage, shake);
         level.addFreshEntity(field);
         return field;
+    }
+
+    /** 柱顶光球的**粒子数**（每颗每 tick ✓）。 */
+    private static final int SIGIL_RING_POINTS = 26;   // 贴地余烬环 ✓
+
+    /** 法阵里从地面往上飘的火星数（每 tick ✓）。 */
+    private static final int SIGIL_EMBER_POINTS = 22;
+
+    /** 柱顶光球的**粒子数**（每颗每 tick ✓）。 */
+    private static final int ORB_PARTICLES = 18;   // 球做大后粒子也加密 ✓
+
+    /** 撒一颗火系染色粒子（同 PixelFlame 色板 ✓）。 */
+    private static void fireDust(net.minecraft.server.level.ServerLevel sl,
+                                 double x, double y, double z, double shade, float scale) {
+        float r;
+        float g;
+        float b;
+        if (shade < 0.18D) {
+            r = 1.00F; g = 0.96F; b = 0.80F;          // 白热芯 ✓
+        } else if (shade < 0.42D) {
+            r = 1.00F; g = 0.78F; b = 0.30F;          // 亮黄 ✓
+        } else if (shade < 0.68D) {
+            r = 1.00F; g = 0.52F; b = 0.12F;          // 橙 ✓
+        } else {
+            r = 0.86F; g = 0.24F; b = 0.06F;          // 深橙红 ✓
+        }
+        sl.sendParticles(new net.minecraft.core.particles.DustParticleOptions(
+                        new org.joml.Vector3f(r, g, b), scale),
+                x, y, z, 1, 0.02D, 0.02D, 0.02D, 0.0D);
     }
 }
