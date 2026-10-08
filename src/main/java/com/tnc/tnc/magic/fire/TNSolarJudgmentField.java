@@ -163,6 +163,46 @@ public class TNSolarJudgmentField extends Entity {
         // 太阳附近往外喷的火焰（纯表现 ✓）
         Vec3 sun = this.sunPosition();
         server.sendParticles(ParticleTypes.FLAME, sun.x, sun.y, sun.z, 8, 1.1D, 0.4D, 1.1D, 0.05D);
+        // ★ 作者 2026-10-05：「将上方的**球体和发射的射线改为粒子状态**；
+        //   球体的粒子密度**由内向外减少**，粒子颜色**内部深、外部浅**」✓
+        //   ① 球体：半径 r = R·u² ⇒ 采样点被挤向圆心 ⇒ **内密外疏** ✓
+        //      颜色按 u 分档：中心暗红 → 橙 → 最外亮黄白 ⇒ **内深外浅** ✓
+        for (int k = 0; k < SUN_POINTS; k++) {
+            double u = Math.random();                     // 0 = 球心、1 = 球面 ✓
+            double rr = SUN_RADIUS * u * u;               // ← 内密外疏的关键 ✓
+            double theta = Math.random() * Math.PI * 2.0D;
+            double phi = Math.acos(2.0D * Math.random() - 1.0D);
+            double dx = Math.sin(phi) * Math.cos(theta) * rr;
+            double dy = Math.cos(phi) * rr;
+            double dz = Math.sin(phi) * Math.sin(theta) * rr;
+            sunDust(server, sun.x + dx, sun.y + dy, sun.z + dz, u);
+        }
+        // ② 射线：从太阳射向法阵外缘（太阳的光芒 ✓），也全是粒子 ✓
+        {
+            double rr = this.radius();
+            int beams = Math.max(6, this.beams());
+            for (int b = 0; b < beams; b++) {
+                double a = this.tickCount * 0.012D + b * Math.PI * 2.0D / beams;
+                Vec3 to = new Vec3(this.getX() + Math.cos(a) * rr * 0.98D,
+                        this.getY() + 0.35D,
+                        this.getZ() + Math.sin(a) * rr * 0.98D);
+                Vec3 delta = to.subtract(sun);
+                int steps = (int) Math.max(3.0D, delta.length() * 1.1D);
+                for (int s = 0; s <= steps; s++) {
+                    Vec3 q = sun.add(delta.scale(s / (double) steps));
+                    // 越靠外越亮（和球体一致：内深外浅 ✓）
+                    sunDust(server, q.x, q.y, q.z, 0.30D + 0.70D * (s / (double) steps));
+                }
+            }
+        }
+        // ③ 法阵里的粒子：比 t4 更多 ✓（作者：「再多一些线条与粒子」✓）
+        for (int k = 0; k < SOLAR_SIGIL_POINTS; k++) {
+            double a = Math.random() * Math.PI * 2.0D;
+            double d = Math.sqrt(Math.random()) * this.radius() * 0.98D;
+            sunDust(server, this.getX() + Math.cos(a) * d,
+                    this.getY() + 0.15D + Math.random() * 3.0D,
+                    this.getZ() + Math.sin(a) * d, 0.55D + Math.random() * 0.45D);
+        }
     }
 
     /** 阵内所有能打的生物 ✓。 */
@@ -300,5 +340,39 @@ public class TNSolarJudgmentField extends Entity {
         double r = this.radius() + 2.0D;
         return new AABB(this.getX() - r, this.getY() - 2.0D, this.getZ() - r,
                 this.getX() + r, this.getY() + FireSpellRules.T5_SUN_HEIGHT + 4.0D, this.getZ() + r);
+    }
+
+    /** 太阳的粒子数（每 tick ✓）—— t5 要比 t4 壮观 ✓。 */
+    private static final int SUN_POINTS = 90;
+
+    /** 法阵里额外撒的粒子数（每 tick ✓）—— 比 t4 更多 ✓。 */
+    private static final int SOLAR_SIGIL_POINTS = 60;
+
+    /** 太阳的半径（格 ✓）。 */
+    private static final double SUN_RADIUS = 5.0D;
+
+    /**
+     * 撒一颗太阳粒子 —— 颜色<b>内深外浅</b> ✓（作者明确要求 ✗）。
+     *
+     * @param u 0 = 球心、1 = 球面 ⇒ 用来分档取色 + 决定粒子大小 ✓
+     */
+    private static void sunDust(net.minecraft.server.level.ServerLevel sl,
+                                double x, double y, double z, double u) {
+        float r;
+        float g;
+        float b;
+        if (u < 0.30D) {
+            r = 0.55F; g = 0.06F; b = 0.03F;      // 内部**深**（暗红）✓
+        } else if (u < 0.60D) {
+            r = 0.90F; g = 0.30F; b = 0.08F;      // 中段橙红 ✓
+        } else if (u < 0.85D) {
+            r = 1.00F; g = 0.62F; b = 0.18F;      // 外圈橙 ✓
+        } else {
+            r = 1.00F; g = 0.96F; b = 0.72F;      // 最外**浅**（亮黄白）✓
+        }
+        float scale = 1.4F + (float) u * 1.4F;    // 外面也更大一点 ✓
+        sl.sendParticles(new net.minecraft.core.particles.DustParticleOptions(
+                        new org.joml.Vector3f(r, g, b), scale),
+                x, y, z, 1, 0.02D, 0.02D, 0.02D, 0.0D);
     }
 }
