@@ -82,7 +82,11 @@ public final class TNSolarJudgmentRenderer extends EntityRenderer<TNSolarJudgmen
         //     自己手搓的那套 drawSigil 已删除 ✗（两套法阵叠在一起就是"有问题"的来源 ✗）
         // 出场渐显（照 TNSigilRenderer 的写法 ✓，免得"啪"地凭空出现 ✗）
         float fade = (float) Math.min(1.0D, (field.tickCount + partial) / 8.0D);
-        // ★ 2026-10-05：作者「t5 的法阵用 t4 那个，再在 t4 的基础上**多一些线条与粒子**」✓         //   ⇒ 第一层照 t4 一样（半径 15 ✓），**再叠一层**略大、反向自转的 ✓         //     两层线条交错 ⇒ 比 t4 明显更繁复 ✓         TNSigilRenderer.drawSigil(out, pose, Vec3.ZERO, 15.0D, true, age, fade);         TNSigilRenderer.drawSigil(out, pose, Vec3.ZERO, 17.5D, true, -age * 1.4D, fade * 0.75F);
+        // ★ 2026-10-05：作者「t5 的法阵用 t4 那个，再在 t4 的基础上**多一些线条与粒子**」✓
+        //   ⇒ 第一层照 t4 一样（半径 15 ✓），**再叠一层**略大、反向自转的 ✓
+        //     两层线条交错 ⇒ 比 t4 明显更繁复 ✓
+        TNSigilRenderer.drawSigil(out, pose, Vec3.ZERO, 15.0D, true, age, fade);
+        TNSigilRenderer.drawSigil(out, pose, Vec3.ZERO, 17.5D, true, -age * 1.4D, fade * 0.75F);
         // （太阳与光束现在都由 TNSolarJudgmentField 每 tick 撒粒子 ✓，渲染器不再画几何体 ✗）
         // （太阳与光束现在都由 TNSolarJudgmentField 每 tick 撒粒子 ✓，渲染器不再画几何体 ✗）
     }
