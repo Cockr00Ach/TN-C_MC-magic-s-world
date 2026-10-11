@@ -1,0 +1,259 @@
+{
+	default_hide_dependency_lines: false
+	default_quest_shape: "hexagon"
+	filename: "tnc_play_00_main"
+	group: "544E434755494445"
+	icon: "minecraft:compass"
+	id: "544E460100000000"
+	order_index: 1
+	quest_links: [ ]
+	quests: [
+		{
+			description: [
+				"&6&l找到天空岛"
+				""
+				"&f沿天空岛邀请与传送阵上岛。你的旅程从这里开始。"
+			]
+			entity_vis_size: 1.0f
+			icon: "waystones:waystone"
+			id: "544E460200000000"
+			shape: "hexagon"
+			size: 1.6d
+			tasks: [{
+				advancement: "tnc:onboarding/arrived"
+				criterion: "done"
+				id: "544E460300000000"
+				title: "完成真实行为"
+				type: "advancement"
+			}]
+			title: "找到天空岛"
+			x: 0.0d
+			y: 0.0d
+		}
+		{
+			dependencies: ["544E460200000000"]
+			description: [
+				"&6&l去酒馆找 Self"
+				""
+				"&f41号酒馆入门上楼北侧找Self。他会介绍原剧情线索、三家商店与委托栏。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:player_head"
+			id: "544E460200000001"
+			shape: "hexagon"
+			size: 1.6d
+			tasks: [{
+				advancement: "tnc:onboarding/met_self"
+				criterion: "done"
+				id: "544E460300000001"
+				title: "完成真实行为"
+				type: "advancement"
+			}]
+			title: "去酒馆找 Self"
+			x: 0.0d
+			y: 3.2d
+		}
+		{
+			dependencies: ["544E460200000001"]
+			description: [
+				"&6&lSelf交给你的材料"
+				""
+				"&f腾出背包，Self一次性交给4木棍与2铜锭；交给莉娅制作基础法器。领取记录按角色保存。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:iron_ingot"
+			id: "544E460200000002"
+			shape: "hexagon"
+			size: 1.2d
+			tasks: [{
+				advancement: "tnc:onboarding/self_materials"
+				criterion: "done"
+				id: "544E460300000002"
+				title: "完成真实行为"
+				type: "advancement"
+			}]
+			title: "Self交给你的材料"
+			x: -5.3999999999999995d
+			y: 6.6d
+		}
+		{
+			dependencies: [
+				"544E460200000001"
+				"544E460200000002"
+			]
+			description: [
+				"&6&l潮生制杖屋 · 第一根法杖"
+				""
+				"&f29号店的莉娅制作法杖。先找酒馆艾琳登记，再带4木棍、2铜锭选任一元素一阶，首次免人工费。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:water_wand_1"
+			id: "544E460200000003"
+			shape: "hexagon"
+			size: 1.2d
+			tasks: [{
+				advancement: "tnc:onboarding/forged"
+				criterion: "done"
+				id: "544E460300000003"
+				title: "完成真实行为"
+				type: "advancement"
+			}]
+			title: "潮生制杖屋 · 第一根法杖"
+			x: -9.0d
+			y: 9.0d
+		}
+		{
+			dependencies: ["5BD6EF95E879FA3E"]
+			description: [
+				"&6&l炉石铁匠铺 · 第一件装备"
+				""
+				"&f28号店找铎恩，粗铁＋煤制作基础铁装备。首件免人工费，保留原版装备属性；法杖交给制杖师。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "minecraft:iron_chestplate"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E460200000004"
+			shape: "hexagon"
+			size: 1.2d
+			tasks: [{
+				advancement: "tnc:onboarding/armored"
+				criterion: "done"
+				id: "544E460300000004"
+				title: "完成真实行为"
+				type: "advancement"
+			}]
+			title: "炉石铁匠铺 · 第一件装备"
+			x: -4.2d
+			y: 12.6d
+		}
+		{
+			dependencies: ["544E460200000001"]
+			description: [
+				"&6&l归航银行 · 安顿下来"
+				""
+				"&f19号银行米洛办理40号空屋的全款购买，500铜。钱袋账户已可存取实体币；存取币已开放；贷款与分期方案详见设计文档，尚未开放。"
+			]
+			entity_vis_size: 1.0f
+			icon: "block_factorys_bosses:coin_pile"
+			id: "544E460200000005"
+			progression_mode: "flexible"
+			shape: "hexagon"
+			size: 1.2d
+			tasks: [{
+				advancement: "tnc:onboarding/home_bought"
+				criterion: "done"
+				id: "544E460300000005"
+				title: "完成真实行为"
+				type: "advancement"
+			}]
+			title: "归航银行 · 安顿下来"
+			x: 2.4d
+			y: 7.199999999999999d
+		}
+		{
+			dependencies: ["544E460200000001"]
+			description: [
+				"&6&l茶灯会馆 · 先认个门"
+				""
+				"&f到34号茶灯会馆附近认路。本次只保留娱乐地点；打牌、赌时刻等规则等作者后续设计，当前没有下注或赢钱。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:jukebox"
+			id: "544E460200000006"
+			shape: "hexagon"
+			size: 1.2d
+			tasks: [{
+				advancement: "tnc:onboarding/visited_entertainment"
+				criterion: "done"
+				id: "544E460300000006"
+				title: "完成真实行为"
+				type: "advancement"
+			}]
+			title: "茶灯会馆 · 先认个门"
+			x: 9.0d
+			y: 9.0d
+		}
+		{
+			dependencies: ["544E460200000001"]
+			entity_vis_size: 1.0f
+			icon: "minecraft:copper_ingot"
+			id: "5BD6EF95E879FA3E"
+			size: 1.2d
+			subtitle: "锻造装备的矿石"
+			tasks: [{
+				id: "4F48F45A1DF8AB00"
+				title: "获得装备材料"
+				type: "checkmark"
+			}]
+			title: "获得装备材料"
+			x: -1.7999999999999998d
+			y: 7.199999999999999d
+		}
+		{
+			dependencies: ["544E460200000005"]
+			description: ["&l买不起房子的话 可以先分期付款哦~"]
+			entity_vis_size: 1.0f
+			id: "19DF099B15CD631B"
+			min_required_dependencies: 1
+			require_sequential_tasks: true
+			size: 1.2d
+			subtitle: "挑选合适你的房子"
+			tasks: [{
+				icon: "prefab:item_house"
+				id: "5281F2031A3DC619"
+				stage: ""
+				type: "gamestage"
+			}]
+			title: "购买一栋房子"
+			x: 3.0d
+			y: 12.5d
+		}
+		{
+			dependencies: ["19DF099B15CD631B"]
+			entity_vis_size: 1.0f
+			icon: "minecraft:spruce_fence_gate"
+			id: "6FC9DFF77B1E9E42"
+			subtitle: "找到你购买的房子"
+			tasks: [{
+				id: "0F052C1D30E2283F"
+				title: "看看你的房子"
+				type: "checkmark"
+			}]
+			x: 0.5d
+			y: 16.0d
+		}
+		{
+			dependencies: ["19DF099B15CD631B"]
+			entity_vis_size: 1.0f
+			icon: "kaleidoscope_tavern:light_gray_sofa"
+			id: "524F59B776760270"
+			subtitle: "挑选合适的家具"
+			tasks: [{
+				id: "34BF8A97F62F4368"
+				title: "为你的房子购买家具"
+				type: "checkmark"
+			}]
+			x: 5.0d
+			y: 16.0d
+		}
+		{
+			dependencies: ["544E460200000003"]
+			entity_vis_size: 1.0f
+			icon: "tnc:magic_wand"
+			id: "2B519B1FDC37CBE6"
+			tasks: [{
+				id: "7D0152CB13051844"
+				title: "释放你的第一次法术"
+				type: "checkmark"
+			}]
+			x: -12.0d
+			y: 12.5d
+		}
+	]
+	title: "&6&l主线 · 找到天空岛"
+}

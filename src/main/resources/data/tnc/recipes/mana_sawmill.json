@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " M ",
+    "MLM",
+    " B "
+  ],
+  "key": {
+    "M": {
+      "item": "tnc:spirit_iron"
+    },
+    "L": {
+      "item": "minecraft:iron_axe"
+    },
+    "B": {
+      "item": "minecraft:stone_bricks"
+    }
+  },
+  "result": {
+    "item": "tnc:mana_sawmill",
+    "count": 1
+  }
+}

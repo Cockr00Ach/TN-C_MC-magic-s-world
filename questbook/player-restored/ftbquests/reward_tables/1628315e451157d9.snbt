@@ -1,0 +1,18 @@
+{
+	id: "1628315E451157D9"
+	loot_size: 1
+	order_index: 2
+	rewards: [
+		{ item: "ysjxspells:fire_crystal" }
+		{ item: "ysjxspells:earth_crystal" }
+		{ item: "ysjxspells:water_crystal" }
+		{ item: "ysjxspells:air_crystal" }
+		{ item: "ysjxspells:arcane_crystal" }
+		{ item: "ysjxspells:frost_crystal" }
+		{ item: "ysjxspells:healing_crystal" }
+		{ item: "ysjxspells:lightning_crystal" }
+		{ item: "ysjxspells:wuli_crystal" }
+		{ item: "ysjxspells:sheshou_crystal" }
+	]
+	title: "元素水晶"
+}

@@ -560,6 +560,127 @@
       "unitWorth": 250,
       "rarity": "UNCOMMON",
       "timeMult": 3.0
+    },
+    "tnc_supply_dream_humus": {
+      "type": "item",
+      "content": "tnc:dream_humus",
+      "amount": {
+        "min": 2,
+        "max": 4
+      },
+      "unitWorth": 160,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_supply_foldleaf_film": {
+      "type": "item",
+      "content": "tnc:foldleaf_film",
+      "amount": {
+        "min": 2,
+        "max": 4
+      },
+      "unitWorth": 160,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_supply_shadow_hour_petal": {
+      "type": "item",
+      "content": "tnc:shadow_hour_petal",
+      "amount": {
+        "min": 2,
+        "max": 4
+      },
+      "unitWorth": 160,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_supply_page_fern_fiber": {
+      "type": "item",
+      "content": "tnc:page_fern_fiber",
+      "amount": {
+        "min": 2,
+        "max": 4
+      },
+      "unitWorth": 160,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_supply_cycle_sandgrain": {
+      "type": "item",
+      "content": "tnc:cycle_sandgrain",
+      "amount": {
+        "min": 2,
+        "max": 4
+      },
+      "unitWorth": 160,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_supply_dewgrass_thread": {
+      "type": "item",
+      "content": "tnc:dewgrass_thread",
+      "amount": {
+        "min": 2,
+        "max": 4
+      },
+      "unitWorth": 160,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_supply_prism_crown_petal": {
+      "type": "item",
+      "content": "tnc:prism_crown_petal",
+      "amount": {
+        "min": 2,
+        "max": 4
+      },
+      "unitWorth": 160,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_supply_ore_dream_flake": {
+      "type": "item",
+      "content": "tnc:ore_dream_flake",
+      "amount": {
+        "min": 2,
+        "max": 4
+      },
+      "unitWorth": 160,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_supply_storm_crown_tip": {
+      "type": "item",
+      "content": "tnc:storm_crown_tip",
+      "amount": {
+        "min": 2,
+        "max": 4
+      },
+      "unitWorth": 160,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_supply_prism_horn_shard": {
+      "type": "item",
+      "content": "tnc:prism_horn_shard",
+      "amount": {
+        "min": 2,
+        "max": 4
+      },
+      "unitWorth": 160,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
+    },
+    "tnc_supply_sand_otter_fiber": {
+      "type": "item",
+      "content": "tnc:sand_otter_fiber",
+      "amount": {
+        "min": 2,
+        "max": 4
+      },
+      "unitWorth": 160,
+      "rarity": "UNCOMMON",
+      "timeMult": 3.0
     }
   }
 }

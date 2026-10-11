@@ -1,0 +1,15 @@
+{
+  "type": "tnc:mana_forging",
+  "ingredients": [
+    {
+      "item": "minecraft:diamond",
+      "count": 1
+    }
+  ],
+  "result": {
+    "item": "tnc:star_marrow"
+  },
+  "mana": 600,
+  "work_ticks": 320,
+  "category": "materials"
+}

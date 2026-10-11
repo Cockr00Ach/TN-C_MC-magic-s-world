@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " M ",
+    "MLM",
+    " B "
+  ],
+  "key": {
+    "M": {
+      "item": "tnc:spirit_iron"
+    },
+    "L": {
+      "item": "tnc:dewgrass_thread"
+    },
+    "B": {
+      "item": "minecraft:stone_bricks"
+    }
+  },
+  "result": {
+    "item": "tnc:climate_lantern",
+    "count": 1
+  }
+}

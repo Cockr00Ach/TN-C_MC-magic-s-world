@@ -80,7 +80,7 @@ public final class UncommonMagicPlants {
                     "暖胃的洞行蕈汤，短暂看清暗处；不是隐身术。");
             RAINLETTER_SEED = new PlantingItem(RAINLETTER,
                     "种在泥土或耕地；雨水会育果，晴天可用清水瓶浇灌。");
-            RAINLETTER_BERRY = new Item(new Item.Properties().food(
+            RAINLETTER_BERRY = new ItemNameBlockItem(RAINLETTER,new Item.Properties().food(
                     new net.minecraft.world.food.FoodProperties.Builder().nutrition(3).saturationMod(0.35F).build()));
             RAINLETTER_CORDIAL = new ReturnContainerFood(new Item.Properties().stacksTo(16)
                     .food(new net.minecraft.world.food.FoodProperties.Builder().nutrition(2)
@@ -123,10 +123,10 @@ public final class UncommonMagicPlants {
         public HushcapBlock() {
             super(BlockBehaviour.Properties.copy(Blocks.BROWN_MUSHROOM).noCollission().randomTicks()
                     .lightLevel(state -> state.getValue(AGE) == 3 && state.getValue(QUIET) == 3 ? 4 : 0));
-            registerDefaultState(stateDefinition.any().setValue(AGE, 0).setValue(QUIET, 0));
+            registerDefaultState(stateDefinition.any().setValue(AGE, 0).setValue(QUIET, 0).setValue(com.tnc.tnc.life.routes.RoutePlantBlock.WILD,false));
         }
         @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-            builder.add(AGE, QUIET);
+            builder.add(AGE, QUIET, com.tnc.tnc.life.routes.RoutePlantBlock.WILD);
         }
         @Override public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
             return SHAPES[state.getValue(AGE)];
@@ -158,10 +158,11 @@ public final class UncommonMagicPlants {
         }
         @Override public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
                                                InteractionHand hand, BlockHitResult hit) {
-            if (state.getValue(AGE) < 3 || state.getValue(QUIET) < 3) return InteractionResult.PASS;
+            if (state.getValue(AGE) < 3) return InteractionResult.PASS;
             if (level.isClientSide) return InteractionResult.SUCCESS;
             if (!permitted(player, pos)) return InteractionResult.FAIL;
             Block.popResource(level, pos, new ItemStack(HUSHCAP_SLICE, 2));
+            if(player instanceof ServerPlayer p)com.tnc.tnc.life.routes.RouteProgress.award(p,"harvest/hushcap_mushroom");
             level.setBlock(pos, state.setValue(AGE, 1).setValue(QUIET, 0), 3);
             return InteractionResult.CONSUME;
         }
@@ -177,10 +178,10 @@ public final class UncommonMagicPlants {
         };
         public RainletterBlock() {
             super(BlockBehaviour.Properties.copy(Blocks.SWEET_BERRY_BUSH).noCollission().randomTicks());
-            registerDefaultState(stateDefinition.any().setValue(AGE, 0).setValue(WET, false));
+            registerDefaultState(stateDefinition.any().setValue(AGE, 0).setValue(WET, false).setValue(com.tnc.tnc.life.routes.RoutePlantBlock.WILD,false));
         }
         @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-            builder.add(AGE, WET);
+            builder.add(AGE, WET, com.tnc.tnc.life.routes.RoutePlantBlock.WILD);
         }
         @Override public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
             return SHAPES[state.getValue(AGE)];
@@ -220,6 +221,7 @@ public final class UncommonMagicPlants {
             if (level.isClientSide) return InteractionResult.SUCCESS;
             if (!permitted(player, pos)) return InteractionResult.FAIL;
             Block.popResource(level, pos, new ItemStack(RAINLETTER_BERRY, 2));
+            if(player instanceof ServerPlayer p)com.tnc.tnc.life.routes.RouteProgress.award(p,"harvest/rainletter_bush");
             level.setBlock(pos, state.setValue(AGE, 1).setValue(WET, false), 3);
             return InteractionResult.CONSUME;
         }

@@ -1,0 +1,707 @@
+{
+  "default_hide_dependency_lines": false,
+  "default_quest_shape": "hexagon",
+  "filename": "tnc_preserved_02_botany",
+  "group": "59249BFD5667691A",
+  "icon": "tnc:dance_bell_seed",
+  "id": "28716AA722E2CC25",
+  "order_index": 3,
+  "quest_links": [],
+  "quests": [
+    {
+      "description": [
+        "&a探索种源 → 普通土栽培 → 收获 → 自用/加工/经营",
+        "&f栽培不挑冷热、光照或水边；巨藤仍需真实空间。",
+        "&7主流程在上方，下面是可任选的品种图鉴。成熟特色互动见各节点。"
+      ],
+      "entity_vis_size": 1.0,
+      "icon": {
+        "Count": 1,
+        "id": "tnc:plant_sample_clip",
+        "tag": {
+          "Damage": 0
+        }
+      },
+      "id": "6080CD69BFD226F3",
+      "shape": "square",
+      "size": 2.0,
+      "tasks": [
+        {
+          "id": "4852CC05DCFE4E7E",
+          "title": "阅读这项实际玩法说明",
+          "type": "checkmark"
+        }
+      ],
+      "title": "&a&l魔法植物 · 找到自己的花园",
+      "x": 0.0,
+      "y": -7.0
+    },
+    {
+      "description": [
+        "栽培不挑环境；成株后经历真实黎明，用空瓶采晨蜜。",
+        "&f首熟12分钟，再熟12分钟；每次晨蜜×1。",
+        "&7成熟后右键留根采收。普通土可栽培；不要求先买天空岛田地。"
+      ],
+      "entity_vis_size": 1.0,
+      "icon": "tnc:dawn_disk_seed",
+      "id": "218616900D77188A",
+      "shape": "hexagon",
+      "size": 1.0,
+      "tasks": [
+        {
+          "consume_items": false,
+          "id": "1021EBA71F88AF48",
+          "item": "tnc:dawn_disk_seed",
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）",
+          "type": "item"
+        }
+      ],
+      "title": "&a晨晖盘葵 · 跨过黎明",
+      "x": -8.0,
+      "y": 6.0
+    },
+    {
+      "description": [
+        "栽培不再需要热源；结出的暖椒用于餐食和暖息制作。",
+        "&f首熟16分钟，再熟8分钟；每次暖椒×2。",
+        "&7成熟后右键留根采收。普通土可栽培；不要求先买天空岛田地。"
+      ],
+      "entity_vis_size": 1.0,
+      "icon": "tnc:hearth_pepper_seed",
+      "id": "5785CFDF3DA3B71A",
+      "shape": "hexagon",
+      "size": 1.0,
+      "tasks": [
+        {
+          "consume_items": false,
+          "id": "6F06EC48934F10F6",
+          "item": "tnc:hearth_pepper_seed",
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）",
+          "type": "item"
+        }
+      ],
+      "title": "&a炉息椒 · 炉边长出的余热",
+      "x": -4.0,
+      "y": 6.0
+    },
+    {
+      "description": [
+        "栽培不挑环境；成株后真实清晨或雨停结绒。",
+        "&f首熟16分钟，再熟8分钟；每次雾棉×2。",
+        "&7成熟后右键留根采收。普通土可栽培；不要求先买天空岛田地。"
+      ],
+      "entity_vis_size": 1.0,
+      "icon": "tnc:mist_cotton_seed",
+      "id": "7EF51307CC8C4808",
+      "shape": "hexagon",
+      "size": 1.0,
+      "tasks": [
+        {
+          "consume_items": false,
+          "id": "3EEEAD8705FA5D21",
+          "item": "tnc:mist_cotton_seed",
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）",
+          "type": "item"
+        }
+      ],
+      "title": "&a雾织棉 · 半阴织雾",
+      "x": 0.0,
+      "y": 6.0
+    },
+    {
+      "description": [
+        "土上也能栽培；根下岩面会改变岩纹记录。",
+        "&f首熟16分钟，再熟8分钟；每次岩纹叶×1。",
+        "&7成熟后右键留根采收。普通土可栽培；不要求先买天空岛田地。"
+      ],
+      "entity_vis_size": 1.0,
+      "icon": "tnc:stone_fern_seed",
+      "id": "4B0468EA51165B1E",
+      "shape": "hexagon",
+      "size": 1.0,
+      "tasks": [
+        {
+          "consume_items": false,
+          "id": "397A1EEE207EEE84",
+          "item": "tnc:stone_fern_seed",
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）",
+          "type": "item"
+        }
+      ],
+      "title": "&a岩函蕨 · 四类表层岩纹",
+      "x": 4.0,
+      "y": 6.0
+    },
+    {
+      "description": [
+        "土上或静水面都可栽培；空瓶采镜露。",
+        "&f首熟16分钟，再熟8分钟；每次镜露×1。",
+        "&7成熟后右键留根采收。普通土可栽培；不要求先买天空岛田地。"
+      ],
+      "entity_vis_size": 1.0,
+      "icon": "tnc:mirror_lotus_seed",
+      "id": "0F4E7EDB692CEDFB",
+      "shape": "hexagon",
+      "size": 1.0,
+      "tasks": [
+        {
+          "consume_items": false,
+          "id": "7D31B578743222DC",
+          "item": "tnc:mirror_lotus_seed",
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）",
+          "type": "item"
+        }
+      ],
+      "title": "&a镜潭莲 · 清水下的镜潭",
+      "x": 8.0,
+      "y": 6.0
+    },
+    {
+      "description": [
+        "全天、干土也可栽培；远照果投掷产生临时照明。",
+        "&f首熟20分钟，再熟10分钟；每次远照果×2。",
+        "&7成熟后右键留根采收。普通土可栽培；不要求先买天空岛田地。"
+      ],
+      "entity_vis_size": 1.0,
+      "icon": "tnc:wish_puff_seed",
+      "id": "2B01F700F23FC0E2",
+      "shape": "hexagon",
+      "size": 1.0,
+      "tasks": [
+        {
+          "consume_items": false,
+          "id": "31D88429F13EDBAB",
+          "item": "tnc:wish_puff_seed",
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）",
+          "type": "item"
+        }
+      ],
+      "title": "&a灯愿蒲 · 把远照果丢出去",
+      "x": -8.0,
+      "y": 10.0
+    },
+    {
+      "description": [
+        "不需要先听音才能长成；音符盒三音会记录豆荚音调。",
+        "&f首熟12分钟，再熟6分钟；每次回声豆×2。",
+        "&7成熟后右键留根采收。普通土可栽培；不要求先买天空岛田地。"
+      ],
+      "entity_vis_size": 1.0,
+      "icon": "tnc:echo_bean_seed",
+      "id": "33434F1FBC8C126E",
+      "shape": "hexagon",
+      "size": 1.0,
+      "tasks": [
+        {
+          "consume_items": false,
+          "id": "3B33B5FA2C8B0E22",
+          "item": "tnc:echo_bean_seed",
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）",
+          "type": "item"
+        }
+      ],
+      "title": "&a回声豆 · 让豆荚听见三音",
+      "x": -4.0,
+      "y": 10.0
+    },
+    {
+      "description": [
+        "不需要支架；留四格高空间，每六分钟增一段。",
+        "&f首熟24分钟，再熟6分钟；每次藤筋×2。",
+        "&7成熟后右键留根采收。普通土可栽培；不要求先买天空岛田地。"
+      ],
+      "entity_vis_size": 1.0,
+      "icon": "tnc:ladder_vine_seed",
+      "id": "1FE3D942D9733451",
+      "shape": "hexagon",
+      "size": 1.0,
+      "tasks": [
+        {
+          "consume_items": false,
+          "id": "19E10AB3819167FD",
+          "item": "tnc:ladder_vine_seed",
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）",
+          "type": "item"
+        }
+      ],
+      "title": "&a梯脊藤 · 搭架向上",
+      "x": 0.0,
+      "y": 10.0
+    },
+    {
+      "description": [
+        "栽培不需要寒地或冰块；空瓶收两份霜露。",
+        "&f首熟16分钟，再熟8分钟；每次霜露×2。",
+        "&7成熟后右键留根采收。普通土可栽培；不要求先买天空岛田地。"
+      ],
+      "entity_vis_size": 1.0,
+      "icon": "tnc:frost_chime_seed",
+      "id": "275B11F331AB26CE",
+      "shape": "hexagon",
+      "size": 1.0,
+      "tasks": [
+        {
+          "consume_items": false,
+          "id": "317416A92758B6AA",
+          "item": "tnc:frost_chime_seed",
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）",
+          "type": "item"
+        }
+      ],
+      "title": "&a霜鸣蒿 · 寒地的露",
+      "x": 4.0,
+      "y": 10.0
+    },
+    {
+      "description": [
+        "栽培不需要海水或盐盆；成熟采盐墨。",
+        "&f首熟16分钟，再熟8分钟；每次盐墨×1。",
+        "&7成熟后右键留根采收。普通土可栽培；不要求先买天空岛田地。"
+      ],
+      "entity_vis_size": 1.0,
+      "icon": "tnc:salt_ink_seed",
+      "id": "4EB629ABABB37376",
+      "shape": "hexagon",
+      "size": 1.0,
+      "tasks": [
+        {
+          "consume_items": false,
+          "id": "5C3F33CE2CC59D42",
+          "item": "tnc:salt_ink_seed",
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）",
+          "type": "item"
+        }
+      ],
+      "title": "&a盐墨菌 · 海风写字",
+      "x": 8.0,
+      "y": 10.0
+    },
+    {
+      "description": [
+        "低地、室内与雨天都可栽培；收帆纤维。",
+        "&f首熟16分钟，再熟8分钟；每次帆纤维×2。",
+        "&7成熟后右键留根采收。普通土可栽培；不要求先买天空岛田地。"
+      ],
+      "entity_vis_size": 1.0,
+      "icon": "tnc:wind_sail_seed",
+      "id": "7BBA6669F6B8ADCB",
+      "shape": "hexagon",
+      "size": 1.0,
+      "tasks": [
+        {
+          "consume_items": false,
+          "id": "759BFB4927A0E3B4",
+          "item": "tnc:wind_sail_seed",
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）",
+          "type": "item"
+        }
+      ],
+      "title": "&a风铃帆草 · 让花床迎风",
+      "x": -8.0,
+      "y": 14.0
+    },
+    {
+      "description": [
+        "栽培不挑环境；成株后主人在两格内的床真实睡醒结叶。",
+        "&f首熟12分钟，再熟12分钟；每次静叶×1。",
+        "&7成熟后右键留根采收。普通土可栽培；不要求先买天空岛田地。"
+      ],
+      "entity_vis_size": 1.0,
+      "icon": "tnc:sleep_clock_seed",
+      "id": "4AF54D8F496F5ECF",
+      "shape": "hexagon",
+      "size": 1.0,
+      "tasks": [
+        {
+          "consume_items": false,
+          "id": "6F71BA88D2C59A43",
+          "item": "tnc:sleep_clock_seed",
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）",
+          "type": "item"
+        }
+      ],
+      "title": "&a钟眠草 · 跟着主人作息",
+      "x": -4.0,
+      "y": 14.0
+    },
+    {
+      "description": [
+        "栽培不挑环境；上方遮棚仍可改变八种影纹。",
+        "&f首熟16分钟，再熟8分钟；每次影绢×1。",
+        "&7成熟后右键留根采收。普通土可栽培；不要求先买天空岛田地。"
+      ],
+      "entity_vis_size": 1.0,
+      "icon": "tnc:shadow_cut_seed",
+      "id": "42653123A34B8B0B",
+      "shape": "hexagon",
+      "size": 1.0,
+      "tasks": [
+        {
+          "consume_items": false,
+          "id": "41B9F267164E9FFD",
+          "item": "tnc:shadow_cut_seed",
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）",
+          "type": "item"
+        }
+      ],
+      "title": "&a影裁花 · 半阴花床的纹样",
+      "x": 0.0,
+      "y": 14.0
+    },
+    {
+      "description": [
+        "不需要书或讲台；只要留三格高空间即可生长。",
+        "&f首熟30分钟，再熟15分钟；每次纸皮×2。",
+        "&7成熟后右键留根采收。普通土可栽培；不要求先买天空岛田地。"
+      ],
+      "entity_vis_size": 1.0,
+      "icon": "tnc:paper_tree_seed",
+      "id": "49FC1830961DCF3C",
+      "shape": "hexagon",
+      "size": 1.0,
+      "tasks": [
+        {
+          "consume_items": false,
+          "id": "68D7A4BD7596C8DC",
+          "item": "tnc:paper_tree_seed",
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）",
+          "type": "item"
+        }
+      ],
+      "title": "&a墨信树 · 把书带进花园",
+      "x": 4.0,
+      "y": 14.0
+    },
+    {
+      "description": [
+        "干土也可栽培；采壳后邮羽鹭访株可另寄种。",
+        "&f首熟16分钟，再熟8分钟；每次防雨荚壳×2。",
+        "&7成熟后右键留根采收。普通土可栽培；不要求先买天空岛田地。"
+      ],
+      "entity_vis_size": 1.0,
+      "icon": "tnc:flight_pod_seed",
+      "id": "679A80D1D5B68F1B",
+      "shape": "hexagon",
+      "size": 1.0,
+      "tasks": [
+        {
+          "consume_items": false,
+          "id": "43C33E0698849481",
+          "item": "tnc:flight_pod_seed",
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）",
+          "type": "item"
+        }
+      ],
+      "title": "&a换羽荚 · 给种子做行囊",
+      "x": 8.0,
+      "y": 14.0
+    },
+    {
+      "description": [
+        "栽培不挑环境；长成后三次蜂访或授粉刷结蜜粉。",
+        "&f首熟12分钟，再熟6分钟；每次蜜粉×2。",
+        "&7成熟后右键留根采收。普通土可栽培；不要求先买天空岛田地。"
+      ],
+      "entity_vis_size": 1.0,
+      "icon": "tnc:honey_cluster_seed",
+      "id": "1A6D584C54AD2E53",
+      "shape": "hexagon",
+      "size": 1.0,
+      "tasks": [
+        {
+          "consume_items": false,
+          "id": "0A03EEC42EB1ECD1",
+          "item": "tnc:honey_cluster_seed",
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）",
+          "type": "item"
+        }
+      ],
+      "title": "&a共生蜜簇 · 养蜂也养花",
+      "x": -8.0,
+      "y": 18.0
+    },
+    {
+      "description": [
+        "全天与室内都可栽培；果实吃下回复30真实魔力。",
+        "&f首熟16分钟，再熟8分钟；每次星露果×2。",
+        "&7成熟后右键留根采收。普通土可栽培；不要求先买天空岛田地。"
+      ],
+      "entity_vis_size": 1.0,
+      "icon": "tnc:star_dew_seed",
+      "id": "0BEE92B72545C562",
+      "shape": "hexagon",
+      "size": 1.0,
+      "tasks": [
+        {
+          "consume_items": false,
+          "id": "7F5D96CDC3925166",
+          "item": "tnc:star_dew_seed",
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）",
+          "type": "item"
+        }
+      ],
+      "title": "&a星露藤 · 夜里长出的法力",
+      "x": -4.0,
+      "y": 18.0
+    },
+    {
+      "description": [
+        "全天可栽培；首次浇水认主，主人近八格会舞动。",
+        "&f首熟12分钟，再熟6分钟；每次舞瓣×2。",
+        "&7成熟后右键留根采收。普通土可栽培；不要求先买天空岛田地。"
+      ],
+      "entity_vis_size": 1.0,
+      "icon": "tnc:dance_bell_seed",
+      "id": "1A5FEAD114DC06E5",
+      "shape": "hexagon",
+      "size": 1.0,
+      "tasks": [
+        {
+          "consume_items": false,
+          "id": "32B46F774D282A6A",
+          "item": "tnc:dance_bell_seed",
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）",
+          "type": "item"
+        }
+      ],
+      "title": "&a脉舞铃花 · 记住主人的花",
+      "x": 0.0,
+      "y": 18.0
+    },
+    {
+      "description": [
+        "栽培不挑环境；成熟夜间放三只花灵，归来结露。",
+        "&f首熟20分钟，再熟20分钟；每次星憩露×1。",
+        "&7成熟后右键留根采收。普通土可栽培；不要求先买天空岛田地。"
+      ],
+      "entity_vis_size": 1.0,
+      "icon": "tnc:star_rest_seed",
+      "id": "1E79CD0CAADFD729",
+      "shape": "hexagon",
+      "size": 1.0,
+      "tasks": [
+        {
+          "consume_items": false,
+          "id": "701988E6437CA1AB",
+          "item": "tnc:star_rest_seed",
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）",
+          "type": "item"
+        }
+      ],
+      "title": "&a星憩蕊 · 三只会回家的花灵",
+      "x": 4.0,
+      "y": 18.0
+    },
+    {
+      "description": [
+        "制作三境调查卷，在相距256格的林地、高地、谷地各观察一次，首次完成得到两粒种源。",
+        "预留9×9空地和上方64格。四游戏日分阶段生长，遇建筑暂停；不替换原有方块，也不强制加载区块。",
+        "成熟用剪刀每游戏日取四天幕纤维与一粒种源。纤维制24格可收回长绳。"
+      ],
+      "entity_vis_size": 1.0,
+      "icon": "tnc:sky_vine_seed",
+      "id": "2A8E7F9556C5EE31",
+      "shape": "hexagon",
+      "size": 1.2,
+      "tasks": [
+        {
+          "consume_items": false,
+          "id": "710473163E6637DD",
+          "item": "tnc:sky_vine_seed",
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）",
+          "type": "item"
+        }
+      ],
+      "title": "&2望天蔓 · 四日通天",
+      "x": -5.0,
+      "y": 24.0
+    },
+    {
+      "description": [
+        "&f20分钟成熟；干土、室内均可。储魔40，每秒补1，每秒最多送1。",
+        "&f发电座紧邻根，或根种在炼金炉口前一格。绿色粒子伴随真实储量扣除。",
+        "&7剪枝回到生长阶段；离线/未加载不凭空生成魔力。"
+      ],
+      "entity_vis_size": 1.0,
+      "icon": "tnc:verdant_vein_seed",
+      "id": "2C55A413C1D7178A",
+      "shape": "hexagon",
+      "size": 1.2,
+      "tasks": [
+        {
+          "consume_items": false,
+          "id": "27CC7AD1CC2D663A",
+          "item": "tnc:verdant_vein_seed",
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）",
+          "type": "item"
+        }
+      ],
+      "title": "&a翠脉枝 · 可见且真实的输送",
+      "x": 0.0,
+      "y": 24.0
+    },
+    {
+      "description": [
+        "雨囊水壶存水、授粉刷有耐久、调律铃与音符盒照料特定植株。",
+        "种匣四品种各16粒；档案夹十二份署名调查页。持有槽锁定，防止把容器装进自己或复制库存。"
+      ],
+      "entity_vis_size": 1.0,
+      "icon": "tnc:rainproof_seed_box",
+      "id": "03CF30AD5B0166A4",
+      "shape": "hexagon",
+      "size": 1.2,
+      "tasks": [
+        {
+          "consume_items": false,
+          "id": "70A5863AD1FCC85D",
+          "item": "tnc:rainproof_seed_box",
+          "title": "背包持有此物（不消耗；不等同于已亲自种养）",
+          "type": "item"
+        }
+      ],
+      "title": "&6种匣、档案与日常照料",
+      "x": 5.0,
+      "y": 24.0
+    },
+    {
+      "dependencies": [
+        "6080CD69BFD226F3"
+      ],
+      "description": [
+        "&f在野外寻找自然样本，采样夹查看可研究种源。",
+        "&f首次发现有十次有效采样保底；不用在新手镇里强行刷植物。"
+      ],
+      "entity_vis_size": 1.0,
+      "icon": {
+        "Count": 1,
+        "id": "tnc:plant_sample_clip",
+        "tag": {
+          "Damage": 0
+        }
+      },
+      "id": "2909503D123F9DEC",
+      "shape": "hexagon",
+      "size": 1.2,
+      "tasks": [
+        {
+          "consume_items": false,
+          "id": "5922F8D2DFD39DBD",
+          "item": {
+            "Count": 1,
+            "id": "tnc:plant_sample_clip",
+            "tag": {
+              "Damage": 0
+            }
+          },
+          "title": "持有成果，不消耗；可通过制作或交易获得",
+          "type": "item"
+        }
+      ],
+      "title": "&a第一步 · 带上采样夹",
+      "x": -6.0,
+      "y": -2.0
+    },
+    {
+      "dependencies": [
+        "2909503D123F9DEC"
+      ],
+      "description": [
+        "&f这条示范路线种星露藤，成熟采果。",
+        "&f果实吃下回复30魔力，也能加工或出售；品种图鉴均为可选。"
+      ],
+      "entity_vis_size": 1.0,
+      "icon": "tnc:star_dew_fruit",
+      "id": "4502687077EF8F1D",
+      "shape": "hexagon",
+      "size": 1.2,
+      "tasks": [
+        {
+          "consume_items": false,
+          "id": "5235FF94D45F4653",
+          "item": "tnc:star_dew_fruit",
+          "title": "持有成果，不消耗；可通过制作或交易获得",
+          "type": "item"
+        }
+      ],
+      "title": "&e第二步 · 第一份实用收获",
+      "x": 0.0,
+      "y": -2.0
+    },
+    {
+      "dependencies": [
+        "4502687077EF8F1D"
+      ],
+      "description": [
+        "&f保留种源，收晨蜜，做早餐；下一次远征带自己的补给。"
+      ],
+      "entity_vis_size": 1.0,
+      "icon": "tnc:morning_honey_breakfast",
+      "id": "6C5A4B094FA80A51",
+      "shape": "hexagon",
+      "size": 1.2,
+      "tasks": [
+        {
+          "consume_items": false,
+          "id": "296A1C494C72C640",
+          "item": "tnc:morning_honey_breakfast",
+          "title": "持有成果，不消耗；可通过制作或交易获得",
+          "type": "item"
+        }
+      ],
+      "title": "&6餐桌分支 · 晨蜜早餐",
+      "x": -5.0,
+      "y": 2.0
+    },
+    {
+      "dependencies": [
+        "4502687077EF8F1D"
+      ],
+      "description": [
+        "&f换羽荚产壳，做四品种种匣；壳胶也来自牧养。",
+        "&f收纳让不同品种有长期经营意义。"
+      ],
+      "entity_vis_size": 1.0,
+      "icon": "tnc:rainproof_seed_box",
+      "id": "5A670D9636D941E6",
+      "shape": "hexagon",
+      "size": 1.2,
+      "tasks": [
+        {
+          "consume_items": false,
+          "id": "6CB2C3FB84BC73ED",
+          "item": "tnc:rainproof_seed_box",
+          "title": "持有成果，不消耗；可通过制作或交易获得",
+          "type": "item"
+        }
+      ],
+      "title": "&b工坊分支 · 防雨种匣",
+      "x": 0.0,
+      "y": 2.0
+    },
+    {
+      "dependencies": [
+        "4502687077EF8F1D"
+      ],
+      "description": [
+        "&f到32号朝夕商行看收购清单，分清自用、加工和供货。",
+        "&7本项手动确认销售体验，奖励来自实际交易；不把持有物品当作已出售。"
+      ],
+      "entity_vis_size": 1.0,
+      "icon": "tnc:hearth_pepper_fruit",
+      "id": "1B153D84AC5CC6CF",
+      "shape": "hexagon",
+      "size": 1.2,
+      "tasks": [
+        {
+          "id": "1E2AB0FA988F8809",
+          "title": "阅读并按步骤尝试（手动确认）",
+          "type": "checkmark"
+        }
+      ],
+      "title": "&e经营分支 · 留一些给商行",
+      "x": 5.0,
+      "y": 2.0
+    }
+  ],
+  "title": "&a&l花园与魔法植物"
+}

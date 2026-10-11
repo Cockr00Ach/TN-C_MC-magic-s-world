@@ -199,14 +199,14 @@ public final class TNSpellClientVisuals {
         }
         // ★ 黑雾的"屏幕变黑"（作者 2026-10-09："敌人包括其他玩家触碰到这个雾……
         //   屏幕得给我黑了，t 级越高屏幕越黑"）✓
-        tickFogDarkness(minecraft);
+        if (net.minecraftforge.fml.ModList.get().isLoaded("spell_engine")) tickFogDarkness(minecraft);
         // ★★ 黑雾"笼罩别人"（作者 2026-10-10："黑雾我看不见致盲啊，敌人如果被致盲了
         //   我得不到反馈，起码我瞄准敌人敌人身上应该有致盲buff"）✓
         //   ★ 这里**必须独立于 tickFogDarkness** ✗：原来它是在"我自己也在雾里"的循环里
         //     被调用的 ⇒ **施法者站在雾外面就完全看不到敌人被笼罩** ✗，这正是作者报的问题 ✓。
         //     现在改成：只要附近有怪身上挂着 tnc:dark_fog，就在它身上撒粒子 ✓，
         //     与我在不在雾里无关 ✓。
-        tickFogShroud(minecraft);
+        if (net.minecraftforge.fml.ModList.get().isLoaded("spell_engine")) tickFogShroud(minecraft);
     }
 
     // ------------------------------------------------------------------

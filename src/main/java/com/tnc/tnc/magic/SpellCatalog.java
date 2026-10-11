@@ -204,10 +204,10 @@ public final class SpellCatalog {
             entry("lightning_recharge", Chain.SPEED, 4, "闪电降低冷却"),
             entry("lightning_ascension", Chain.SPEED, 5, "闪电登神"),
 
-            // ---- 火射线线：1 穿透 → 2 更粗 → 3 三向齐发 → 4 命中爆炸 → 5 巨大爆炸 ----
+            // ---- 火射线线：1 穿透 → 2 更粗 → 3 火龙吐息（穿透 + 终点爆炸）→ 4 炎魔龙之怒（法阵）→ 5 太阳审判（烈日坠）----
             fireEntry("sun_ray", Chain.RAY, 1, "烈阳射线"),
             fireEntry("blast_ray", Chain.RAY, 2, "爆炸射线"),
-            fireEntry("fire_dragon", Chain.RAY, 3, "火龙术"),
+            fireEntry("fire_dragon", Chain.RAY, 3, "火龙吐息"),
             fireEntry("flame_demon_wrath", Chain.RAY, 4, "炎魔龙之怒"),
             fireEntry("solar_judgment", Chain.RAY, 5, "太阳の审判"),
 
@@ -219,7 +219,8 @@ public final class SpellCatalog {
             //     SpellCatalogStructureTest 的「每条链每档恰好一个」是**有依据的**不变量
             //     （同档两个会让 isChainTop 的"一边学一边进"判定算错），
             //     所以按作者决定**只保留大火球术** ✓
-            //   3/4/5 仍是引擎驱动，待换成 熔岩火球 / 熔岳天倾 / 炎葬（下一个分支）----
+            //   3/4/5 也已是自有实体：熔岩火球（落点熔岩地）/ 熔岳天倾（法阵砸落）/ 陨星坠 ✓
+            //   ⚠️ 同档仍只放一个 —— 上面「每条链每档恰好一个」的理由同样适用 ✗
             fireEntry("fireball", Chain.BALL, 1, "火球术"),
             fireEntry("great_fireball", Chain.BALL, 2, "大火球术"),
             fireEntry("lava_fireball", Chain.BALL, 3, "熔岩火球"),

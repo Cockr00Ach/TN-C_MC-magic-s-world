@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " M ",
+    "MLM",
+    " B "
+  ],
+  "key": {
+    "M": {
+      "item": "tnc:spirit_iron"
+    },
+    "L": {
+      "item": "tnc:soft_down"
+    },
+    "B": {
+      "item": "minecraft:stone_bricks"
+    }
+  },
+  "result": {
+    "item": "tnc:mana_incubator",
+    "count": 1
+  }
+}

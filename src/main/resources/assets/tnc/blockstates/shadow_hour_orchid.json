@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "age=0": {
+      "model": "tnc:block/shadow_hour_orchid_0"
+    },
+    "age=1": {
+      "model": "tnc:block/shadow_hour_orchid_1"
+    },
+    "age=2": {
+      "model": "tnc:block/shadow_hour_orchid_2"
+    },
+    "age=3": {
+      "model": "tnc:block/shadow_hour_orchid_3"
+    }
+  }
+}

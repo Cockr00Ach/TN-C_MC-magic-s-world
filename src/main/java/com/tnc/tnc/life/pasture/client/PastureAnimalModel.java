@@ -84,6 +84,9 @@ public final class PastureAnimalModel extends EntityModel<PastureAnimal> {
         }
 
         switch (species) {
+            case "prismatic_antelope" -> {walk(limbSwing,moving,.85F,.6F);turn("ear_l",0,0,Mth.sin(t)*.1F);turn("ear_r",0,0,-Mth.sin(t)*.1F);turn("tail",0,Mth.sin(t*2)*.2F,0);}
+            case "drumbelly_otter" -> {walk(limbSwing,moving,1.2F,.6F);turn("body",moving*.08F,0,Mth.sin(t*3)*moving*.22F);turn("tail",0,Mth.sin(t*2)*.28F,0);}
+
             case "stonebarrow_boar" -> {
                 walk(limbSwing, moving, .72F, .65F);
                 turn("head", work * (.18F + .14F * Mth.sin(t * 4)) - touch * .38F, 0, Mth.sin(t * .7F) * .025F);
