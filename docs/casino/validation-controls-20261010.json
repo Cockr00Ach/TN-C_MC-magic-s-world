@@ -1,0 +1,70 @@
+{
+  "date": "2026-10-10",
+  "batch": "Card suits, physical roulette colour controls, enlarged table and winning fireworks",
+  "unit_tests": [
+    {
+      "name": "com.tnc.tnc.casino.client.CasinoCylinderPlacementProbeTest",
+      "tests": "1",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-10T12:27:07",
+      "hostname": "DESKTOP-TO12FQM",
+      "time": "0.68"
+    },
+    {
+      "name": "com.tnc.tnc.casino.client.CasinoGeometryVertexFormatTest",
+      "tests": "9",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-10T12:27:08",
+      "hostname": "DESKTOP-TO12FQM",
+      "time": "0.048"
+    },
+    {
+      "name": "com.tnc.tnc.casino.machine.CasinoRulesTest",
+      "tests": "5",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-10T12:27:08",
+      "hostname": "DESKTOP-TO12FQM",
+      "time": "0.015"
+    },
+    {
+      "name": "com.tnc.tnc.casino.machine.RouletteControlsTest",
+      "tests": "2",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-10T12:27:08",
+      "hostname": "DESKTOP-TO12FQM",
+      "time": "0.038"
+    }
+  ],
+  "unit_total": 17,
+  "casino_gametests": {
+    "total": 12,
+    "passed": 12,
+    "whole_project_total": 251,
+    "whole_project_failures": [
+      "nightgourdavoidsdaylightandgrowsinshadeandreedrequireswetshore"
+    ]
+  },
+  "client_audit": {
+    "scope": "Actual dev client gallery and visual fireworks; not full modpack gameplay",
+    "firework_particles_during": 2115,
+    "machines": 5,
+    "firework_particles_before": 0,
+    "screenshots": 4,
+    "states_rendered": 15,
+    "failures": []
+  },
+  "installed_jar": "E:\\download\\正式版 2.12.6.1\\.minecraft\\versions\\元素觉醒1.4.3-魔改版-20260915\\mods\\tnc-1.0.0.jar",
+  "installed_sha256": "4dca43bcfdf33c4bb6f60019e563c8ee07a90c8fac2e725701294ea9d8b5fe54",
+  "built_sha256": "4dca43bcfdf33c4bb6f60019e563c8ee07a90c8fac2e725701294ea9d8b5fe54",
+  "backup": "D:/ModTest/work/install-backups/20261010-202742/tnc-1.0.0.jar",
+  "installation_log": "work/casino-controls-install-20261010.log",
+  "full_modpack_startup_tested": false
+}

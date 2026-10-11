@@ -92,9 +92,9 @@ public final class TavernUpgrade {
     }
     public static boolean occupied(ServerLevel level,BlockPos origin){return !level.getEntitiesOfClass(Player.class,new AABB(origin.offset(MIN),origin.offset(MAX).offset(1,1,1)),p->!p.isSpectator()).isEmpty();}
     private static boolean ready(ServerLevel l,BlockPos origin,Plan plan) {
-        var chunks=new HashSet<ChunkPos>();plan.changes.forEach(c->chunks.add(new ChunkPos(origin.offset(c.local))));
-        for(var c:chunks)l.getChunkSource().addRegionTicket(TICKET,c,2,c);
-        TICKETS.put(l.getServer(),chunks);
+        var chunks=TICKETS.get(l.getServer());boolean first=chunks==null;
+        if(first){chunks=new HashSet<ChunkPos>();for(var c:plan.changes)chunks.add(new ChunkPos(origin.offset(c.local)));TICKETS.put(l.getServer(),chunks);}
+        if(first||l.getServer().getTickCount()%20==0)for(var c:chunks)l.getChunkSource().addRegionTicket(TICKET,c,2,c);
         return chunks.stream().allMatch(c->l.hasChunk(c.x,c.z)&&l.areEntitiesLoaded(c.toLong()));
     }
     private static void finish(ServerLevel l,State state,Plan plan) {
@@ -126,7 +126,10 @@ public final class TavernUpgrade {
     public static boolean complete(MinecraftServer server){return State.get(server.overworld()).phase==2;}
     public static void tick(MinecraftServer server) {
         var l=server.overworld();var island=SkyIslandSavedData.get(l);if(!island.isSkyIslandComplete()||!SkyLandscapeUpgrade.complete(server)||l.players().isEmpty())return;
-        var s=State.get(l);if(s.phase<0)return;
+        var s=State.get(l);
+        // Missing dependency failed before any construction; recover once it is restored.
+        recoverMissingDependency(l,s);
+        if(s.phase<0)return;
         try {
             var plan=PLANS.get(server);if(plan==null){plan=load(l);PLANS.put(server,plan);}
             var origin=island.anchorPos("ORIGIN");
@@ -159,6 +162,12 @@ public final class TavernUpgrade {
             var rooms=player.serverLevel()==l?plan.atmosphere.rooms().stream().map(b->b.move(s.origin.getX(),s.origin.getY(),s.origin.getZ())).toList():List.<AABB>of();
             com.tnc.tnc.network.MagicStoneNetwork.CHANNEL.send(net.minecraftforge.network.PacketDistributor.PLAYER.with(()->player),new TavernRoomPacket(player.serverLevel().dimension().location(),rooms));SENT.put(player,key);
         }catch(Exception error){LogUtils.getLogger().error("[TN-C Tavern] room sync failed",error);}
+    }
+    public static boolean recoverMissingDependency(ServerLevel l,State s) {
+        if(s.phase>=0||!s.hash.isEmpty()||!s.error.startsWith("酒馆缺少方块："))return false;
+        var missing=ResourceLocation.tryParse(s.error.substring("酒馆缺少方块：".length()));
+        if(missing==null||!l.registryAccess().registryOrThrow(Registries.BLOCK).containsKey(missing))return false;
+        s.phase=0;s.error="";s.setDirty();return true;
     }
     public static int ensureGuests(ServerLevel l,BlockPos origin,TavernAtmosphere atmosphere) {
         int spawned=0;

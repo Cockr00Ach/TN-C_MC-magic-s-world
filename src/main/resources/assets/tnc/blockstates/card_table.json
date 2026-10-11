@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "facing=north,spinning=true": {
+      "model": "tnc:block/card_table"
+    },
+    "facing=north,spinning=false": {
+      "model": "tnc:block/card_table"
+    },
+    "facing=south,spinning=true": {
+      "model": "tnc:block/card_table"
+    },
+    "facing=south,spinning=false": {
+      "model": "tnc:block/card_table"
+    },
+    "facing=east,spinning=true": {
+      "model": "tnc:block/card_table"
+    },
+    "facing=east,spinning=false": {
+      "model": "tnc:block/card_table"
+    },
+    "facing=west,spinning=true": {
+      "model": "tnc:block/card_table"
+    },
+    "facing=west,spinning=false": {
+      "model": "tnc:block/card_table"
+    }
+  }
+}

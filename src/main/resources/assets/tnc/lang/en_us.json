@@ -404,5 +404,9 @@
   "effect.tnc.blood_god": "I Am God",
   "effect.tnc.burning_body": "Immolation",
   "effect.tnc.fire_cast": "Fire Focus",
-  "effect.tnc.dark_fog": "Dark Fog"
+  "effect.tnc.dark_fog": "Dark Fog",
+  "block.tnc.slot_machine": "Slot Machine",
+  "block.tnc.roulette_table": "Roulette Table",
+  "block.tnc.card_table": "High Card Table",
+  "block.tnc.lucky_wheel": "Fortune Wheel"
 }

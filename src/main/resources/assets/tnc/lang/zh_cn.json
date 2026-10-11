@@ -454,5 +454,9 @@
   "effect.tnc.blood_sacrifice": "献祭",
   "effect.tnc.blood_possess": "夺舍",
   "effect.tnc.blood_god": "我为神",
-  "effect.tnc.dark_fog": "致盲黑雾"
+  "effect.tnc.dark_fog": "致盲黑雾",
+  "block.tnc.slot_machine": "老虎机",
+  "block.tnc.roulette_table": "转盘赌桌",
+  "block.tnc.card_table": "比大小牌桌",
+  "block.tnc.lucky_wheel": "幸运转轮"
 }

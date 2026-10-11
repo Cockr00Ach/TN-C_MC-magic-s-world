@@ -14,6 +14,11 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 public final class SkyIslandEvents {
     @SubscribeEvent
     public void onCommands(RegisterCommandsEvent event) {
+        event.getDispatcher().register(Commands.literal("tnc").then(Commands.literal("skycasino")
+                .requires(s->s.hasPermission(2))
+                .then(Commands.literal("status").executes(c->{c.getSource().sendSuccess(
+                        ()->Component.literal(com.tnc.tnc.casino.machine.SkyCasinoUpgrade.status(c.getSource().getServer())),false);return 1;}))
+                .then(Commands.literal("retry").executes(c->{com.tnc.tnc.casino.machine.SkyCasinoUpgrade.retry(c.getSource().getServer());return 1;}))));
         event.getDispatcher().register(Commands.literal("tnc").then(Commands.literal("skylandscape")
                 .requires(s->s.hasPermission(2))
                 .then(Commands.literal("status").executes(c->{c.getSource().sendSuccess(
@@ -58,6 +63,7 @@ public final class SkyIslandEvents {
             SkyLandscapeUpgrade.tick(event.getServer());
             com.tnc.tnc.tavern.TavernUpgrade.tick(event.getServer());
             com.tnc.tnc.tavern.TavernBasementUpgrade.tick(event.getServer());
+            com.tnc.tnc.casino.machine.SkyCasinoUpgrade.tick(event.getServer());
         }
     }
 
@@ -67,5 +73,6 @@ public final class SkyIslandEvents {
         SkyLandscapeUpgrade.stop(event.getServer());
         com.tnc.tnc.tavern.TavernUpgrade.stop(event.getServer());
         com.tnc.tnc.tavern.TavernBasementUpgrade.stop(event.getServer());
+        com.tnc.tnc.casino.machine.SkyCasinoUpgrade.stop(event.getServer());
     }
 }

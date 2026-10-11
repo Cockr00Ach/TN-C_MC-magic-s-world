@@ -86,6 +86,14 @@ minecraft {
         }
 
         client {
+            if (project.hasProperty('casinoClientAudit')) {
+                workingDirectory project.file('work/casino-client-audit')
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+                property 'tnc.casinoClientAudit', 'true'
+                property 'tnc.casinoAuditReport', file('work/casino-client-audit.json').absolutePath
+                args '--quickPlaySingleplayer', 'casino-gallery', '--width', '1280', '--height', '720'
+            }
             if (project.hasProperty('tavernClientAudit')) {
                 workingDirectory project.file('run-client-ecology-audit')
                 property 'mixin.env.remapRefMap', 'true'
