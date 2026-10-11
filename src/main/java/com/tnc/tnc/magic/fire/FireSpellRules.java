@@ -325,13 +325,13 @@ public final class FireSpellRules {
     public static final int T5_FIELD_TICKS = 200;
 
     /** 太阳光球离地多高（格）—— 要"正上方"✓，给得高一点才像悬在天上 ✓。 */
-    public static final double T5_SUN_HEIGHT = 24.0D;
+    public static final double T5_SUN_HEIGHT = 18.0D;
 
     /** 光线每几 tick 打一轮（20 tick = 1 秒 ✓ ⇒ 10 秒里 10 轮 ✓）。 */
     public static final int T5_BEAM_INTERVAL_TICKS = 20;
 
     /** 收场球形爆炸的半径（格）—— 作者定<b>直径 32</b> ⇒ 半径 16 ✓。 */
-    public static final double T5_EXPLODE_RADIUS = T5_SUN_HEIGHT * 1.5D;
+    public static final double T5_EXPLODE_RADIUS = 25.0D;
 
     /**
      * 破坏方块每 tick 删几个水平层 ✓
@@ -340,7 +340,7 @@ public final class FireSpellRules {
      * 球的水平层共 {@code 33} 层 ✓，每 tick 删 4 层 ⇒ 约 9 tick 删完 ✓
      * （观感仍是"整片塌掉"✓，但不会顿 ✗）
      */
-    public static final int T5_DESTROY_LAYERS_PER_TICK = 1;
+    public static final int T5_DESTROY_LAYERS_PER_TICK = 2;
 
     /** 单次光线伤害 = 总伤害 ÷ 这个数（10 轮 ⇒ 光线总量 = 系数 × 基础 × 火法强 ✓）。 */
     public static final float T5_BEAM_DIVISOR = 6.4F;
