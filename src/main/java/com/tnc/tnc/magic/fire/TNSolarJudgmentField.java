@@ -188,14 +188,22 @@ public class TNSolarJudgmentField extends Entity {
         //   现在每一 tick 重掷方向/长度/仰角，并沿路径加垂直抖动 ⇒ 轨迹永不重复 ✓
         {
             double rr = this.radius();
-            int beams = Math.max(6, this.beams());
+            // [作者 2026-10-05]「射线减少 1/3，并且不要全在一个锥面上移动，中间也是可移动区域」✓
+            //   以前落点固定成「水平 0.45~0.98 个半径、高度只差 ±2.6 格」⇒ 所有射线都贴在太阳
+            //   那一层的**一个很扁的锥面**上飞，太阳正下方那一大块（"中间"）永远是空的 ✗
+            //   现在落点改到**整个锥体内部**取：
+            //     · 水平 d = rr·√u ⇒ 均匀落在圆盘内（中间密、边缘疏 ✓）
+            //     · 高度从贴近阵面一路到贴近太阳 ⇒ 射线会穿过中间，整根锥体都被扫到 ✓
+            //   上限 24 是接手渲染器当年那条 MAX_BEAMS=24 的护栏（beams() = 阵内生物数，
+            //   混战里可能几十 ⇒ 不封顶一 tick 就撒上千颗粒子 ✗）
+            int beams = Math.max(4, Math.min(24, (int) Math.round(this.beams() * 2.0D / 3.0D)));  // 比原来少 1/3 ✓
             for (int b = 0; b < beams; b++) {
                 double a = Math.random() * Math.PI * 2.0D;                   // 随机方向（每 tick 重掷）
-                double reach = rr * (0.45D + 0.53D * Math.random());         // 随机长度
-                double lift = -1.6D + 4.2D * Math.random();                  // 随机仰角
-                Vec3 to = new Vec3(this.getX() + Math.cos(a) * reach,
-                        this.getY() + 0.35D + lift,
-                        this.getZ() + Math.sin(a) * reach);
+                double d = rr * Math.sqrt(Math.random()) * 0.98D;            // 随机落点（圆盘内均匀）
+                double drop = 0.6D + (FireSpellRules.T5_SUN_HEIGHT - 1.6D) * Math.random();  // 随机落点高度
+                Vec3 to = new Vec3(this.getX() + Math.cos(a) * d,
+                        this.getY() + 0.35D + drop,
+                        this.getZ() + Math.sin(a) * d);
                 Vec3 delta = to.subtract(sun);
                 int steps = (int) Math.max(3.0D, delta.length() * (0.9D + 0.6D * Math.random()));
                 // 垂直抖动：中间散得最开、两端收回 ⇒ 每次轨迹都不一样 ✓
