@@ -11,7 +11,7 @@
   "spell.tnc.blast_ray.description": "更粗的穿透射线，命中后再引爆一小片火海。",
   "spell.tnc.fire_dragon.description": "唤出火龙向前喷吐，穿透沿途敌人，抵达终点时炸开。",
   "spell.tnc.flame_demon_wrath.description": "展开15格魔法阵，四根黑曜石柱上的炎球持续轰击阵内敌人；锁定同一目标越久，射线越粗、伤害越高。",
-  "spell.tnc.solar_judgment.description": "展开双层魔法阵并高悬烈日，乱射的光线持续打击阵内敌人；结束时烈日坠落，炸出25格并摧毁地形。",
+  "spell.tnc.solar_judgment.description": "展开双层魔法阵并高悬烈日，阵内敌人持续受到灼烧；结束时烈日坠落，炸出25格并摧毁地形。",
   "spell.tnc.fireball.description": "掷出一枚火球，命中即造成火焰伤害。",
   "spell.tnc.great_fireball.description": "掷出更大的火球，威力更高。",
   "spell.tnc.lava_fireball.description": "掷出熔岩火球，落点留下持续燃烧的熔岩地。",
