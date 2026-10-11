@@ -142,6 +142,11 @@ public class TNSolarJudgmentField extends Entity {
         if (!(server.getEntity(this.casterId()) instanceof LivingEntity caster)
                 || !caster.isAlive() || this.tickCount > this.life()) {
             this.explode(server);
+            // [BUG FIX] 塌方是分帧删的（destroyLayers）—— 这里立刻 discard 的话，
+            // 实体消失后 tick 不再执行，方块一个也删不掉。留着把自己删完再消失。
+            if (this.layersLeft > 0 && this.tickCount <= this.life() + 400) {
+                return;
+            }
             this.discard();
             return;
         }
@@ -229,7 +234,9 @@ public class TNSolarJudgmentField extends Entity {
         }
         this.exploded = true;
         LivingEntity caster = server.getEntity(this.casterId()) instanceof LivingEntity living ? living : null;
-        Vec3 at = this.position();
+        // 作者：「火球爆炸的半径为**火球高度的 1.5 倍**」——半径跟着火球高度走，
+        // 说明爆炸中心就是火球本身，而不是脚下的法阵中心。
+        Vec3 at = this.sunPosition();
 
         // 伤害：整个球体范围 ✓
         for (LivingEntity victim : server.getEntitiesOfClass(LivingEntity.class,
@@ -241,15 +248,15 @@ public class TNSolarJudgmentField extends Entity {
         }
 
         // 表现：大量火焰粒子往外炸 ✓
-        server.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y + 1.0D, at.z,
+        server.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y, at.z,
                 8, 3.0D, 3.0D, 3.0D, 0.0D);
-        server.sendParticles(ParticleTypes.FLAME, at.x, at.y + 1.0D, at.z,
+        server.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z,
                 600, FireSpellRules.T5_EXPLODE_RADIUS * 0.55D, FireSpellRules.T5_EXPLODE_RADIUS * 0.45D,
                 FireSpellRules.T5_EXPLODE_RADIUS * 0.55D, 0.55D);
-        server.sendParticles(ParticleTypes.LAVA, at.x, at.y + 1.0D, at.z,
+        server.sendParticles(ParticleTypes.LAVA, at.x, at.y, at.z,
                 120, FireSpellRules.T5_EXPLODE_RADIUS * 0.5D, FireSpellRules.T5_EXPLODE_RADIUS * 0.4D,
                 FireSpellRules.T5_EXPLODE_RADIUS * 0.5D, 0.3D);
-        server.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y + 3.0D, at.z,
+        server.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y + 2.0D, at.z,
                 140, FireSpellRules.T5_EXPLODE_RADIUS * 0.5D, 2.0D, FireSpellRules.T5_EXPLODE_RADIUS * 0.5D, 0.12D);
         server.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE,
                 SoundSource.PLAYERS, 8.0F, 0.85F);
@@ -268,9 +275,10 @@ public class TNSolarJudgmentField extends Entity {
      */
     private void destroyLayers(ServerLevel server) {
         int radius = (int) Math.floor(FireSpellRules.T5_EXPLODE_RADIUS);
-        int cx = (int) Math.floor(this.getX());
-        int cy = (int) Math.floor(this.getY());
-        int cz = (int) Math.floor(this.getZ());
+        Vec3 center = this.sunPosition();            // 球心 = 火球位置
+        int cx = (int) Math.floor(center.x);
+        int cy = (int) Math.floor(center.y);
+        int cz = (int) Math.floor(center.z);
         int total = radius * 2 + 1;
 
         for (int n = 0; n < FireSpellRules.T5_DESTROY_LAYERS_PER_TICK && this.layersLeft > 0; n++) {
