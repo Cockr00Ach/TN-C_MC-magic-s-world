@@ -573,12 +573,17 @@ public class MagicStoneScreen extends Screen {
     }
 
     /**
-     * 效果摘要：由目录数据自动生成（不手写 105 条描述 ✗）。
-     * 想要更文学化的描述，就得在目录里给每条法术加一个 desc 字段 —— 那是后话 ✓
+     * 效果摘要：优先用手写介绍（lang 里的 {@code spell.tnc.<id>.description}），
+     * 没有手写介绍的档才退回目录数据自动生成（不手写 105 条描述 ✗）。
+     *
+     * <p>⚠️ 判定"有没有手写介绍"靠<b>缺键回显</b>：{@code I18n} 查不到键时返回键名本身，
+     * 所以 `译文 == 键` 就说明这条没写。以前只给 {@code independent()}/水链查译文 ⇒
+     * 火系（射线链、火球链）永远走不到手写介绍，是这次补介绍时一并修的 ✓
      */
     private static String effectSummary(SpellCatalog.Entry entry) {
-        if(entry.independent() || entry.element()==Element.WATER)
-            return Component.translatable("spell.tnc."+entry.id().getPath()+".description").getString();
+        String key = "spell.tnc." + entry.id().getPath() + ".description";
+        String written = Component.translatable(key).getString();
+        if (!written.equals(key)) return written;
         return entry.element().cn() + "系 · " + entry.chain().cn() + "链 · 第 " + entry.tier() + " 级 · "
                 + entry.chain().desc();
     }

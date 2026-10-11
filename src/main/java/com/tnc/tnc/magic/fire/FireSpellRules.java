@@ -298,7 +298,7 @@ public final class FireSpellRules {
     public static final double RAY_BLAST_RADIUS = 1.6D;
 
     /**
-     * <b>t3 火龙术</b>的那颗「龙头投射物」✓
+     * <b>t3 火龙吐息</b>的那颗「龙头投射物」✓
      *
      * <p>它不是光柱（光柱是"贴在施法者眼睛上的一条光" ✗），而是一个**会飞出去的龙头** ✓
      * ⇒ 复用 {@code TNFireBoltEntity}（飞行 + 扫掠碰撞都现成 ✓），
