@@ -15,12 +15,10 @@ import org.joml.Matrix4f;
  * <b>射线链 t5「太阳の审判」的渲染器</b>（作者 2026-10-05 设计）✓
  *
  * <h2>画什么</h2>
- * <ol>
- *   <li><b>脚下那个巨大法阵</b> —— 同样「由外到里一点点出现」✓（和 t4 一致 ✓）</li>
- *   <li><b>正上方那颗太阳光球</b> —— 作者要「类似太阳的光球」✓
- *       （三片正交发光圆盘 + 一圈日冕 + 一圈耀斑 ✓）</li>
- *   <li><b>大量光线</b> —— 从太阳往法阵里倾泻 ✓（作者要"向法阵范围内发射大量光线"✓）</li>
- * </ol>
+ * <p>只画<b>脚下那两座巨大法阵</b>（两层叠着、外层反向自转 ✓）。
+ * <b>太阳光球</b>与<b>从太阳往阵内倾泻的光线</b>都不在这里画 —— 它们已经全改成
+ * {@link TNSolarJudgmentField} 每 tick 撒的粒子 ✓
+ * （作者：「将上方的球体和发射的射线改为粒子状态」✓；射线的数量与落点也在那边 ✓）
  *
  * <p>⚠️ 坐标一律<b>相对实体位置</b> ✗（{@code EntityRenderer} 的 pose 已经平移到实体位置 ✓）
  */
@@ -28,25 +26,6 @@ public final class TNSolarJudgmentRenderer extends EntityRenderer<TNSolarJudgmen
 
     private static final ResourceLocation PLACEHOLDER =
             ResourceLocation.fromNamespaceAndPath("minecraft", "textures/misc/white.png");
-
-    /** 法阵由外到里"描绘"完需要多久（tick ✓）。 */
-    private static final double DRAW_TICKS = 40.0D;
-
-    /** 一次最多画几条光线（`beams()` 可能很大，做个上限免得一帧塞几千根管 ✗）。 */
-    private static final int MAX_BEAMS = 24;
-
-    /**
-     * <b>不管有几个目标，至少撒这么多条</b> ✓
-     *
-     * <p>⚠️ 作者第 5 条：「向法阵范围内发出大量射线，而不是就一条」✓
-     * ⇒ 这就是"大量"的下限 ✓（18 条铺满整个法阵 ✓）
-     */
-    private static final int MIN_BEAMS = 18;
-
-    private static final Vec3 UP = new Vec3(0.0D, 1.0D, 0.0D);
-    private static final Vec3 AXIS_X = new Vec3(1.0D, 0.0D, 0.0D);
-    private static final Vec3 AXIS_Z = new Vec3(0.0D, 0.0D, 1.0D);
-    private static final Vec3 ORIGIN = Vec3.ZERO;
 
     public TNSolarJudgmentRenderer(EntityRendererProvider.Context context) {
         super(context);
@@ -87,22 +66,6 @@ public final class TNSolarJudgmentRenderer extends EntityRenderer<TNSolarJudgmen
         //     两层线条交错 ⇒ 比 t4 明显更繁复 ✓
         TNSigilRenderer.drawSigil(out, pose, Vec3.ZERO, 15.0D, true, age, fade);
         TNSigilRenderer.drawSigil(out, pose, Vec3.ZERO, 17.5D, true, -age * 1.4D, fade * 0.75F);
-        // （太阳与光束现在都由 TNSolarJudgmentField 每 tick 撒粒子 ✓，渲染器不再画几何体 ✗）
-        // （太阳与光束现在都由 TNSolarJudgmentField 每 tick 撒粒子 ✓，渲染器不再画几何体 ✗）
+        // （太阳与光线现在都由 TNSolarJudgmentField 每 tick 撒粒子 ✓，渲染器不再画几何体 ✗）
     }
-
-    // ------------------------------------------------------------------
-    //  ① 巨大法阵（由外到里描绘）
-    // ------------------------------------------------------------------
-
-
-    // ------------------------------------------------------------------
-    //  ② 正上方那颗太阳
-    // ------------------------------------------------------------------
-
-
-    // ------------------------------------------------------------------
-    //  ③ 大量光线：从太阳往阵内倾泻
-    // ------------------------------------------------------------------
-
 }

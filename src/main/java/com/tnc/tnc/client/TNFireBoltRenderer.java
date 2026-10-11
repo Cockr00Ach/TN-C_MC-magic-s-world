@@ -114,7 +114,7 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
             return;
         }
 
-        // 射线链 t3「火龙术」：**整条龙由 TNDragonParticles 的粒子构成** ✓
+        // 射线链 t3「火龙吐息」：**整条龙由 TNDragonParticles 的粒子构成** ✓
         //   ⚠️ 作者 2026-10-05：「把龙后面的圆环即法阵删了」✗
         //   ⇒ 这里**什么都不画** ✓（连成形阶段的法阵也删了 ✓，几何体为零 ✓）
         if ("fire_dragon".equals(entity.spellPath())) {
@@ -626,7 +626,7 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
     }
 
     // ==================================================================
-    //  射线链 t3「火龙术」：成形法阵 + 火焰龙头（拖尾复用上面的焰体 ✓）
+    //  射线链 t3「火龙吐息」：成形法阵 + 火焰龙头（拖尾复用上面的焰体 ✓）
     // ==================================================================
 
     /** 龙头各段：沿 +dir 的位置（倍半径）。⚠️ 拖尾在 -dir（见 axisPoint）⇒ 龙头朝 +dir ✓ */

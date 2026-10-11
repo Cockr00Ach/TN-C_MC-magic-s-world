@@ -48,6 +48,11 @@ import net.minecraft.world.phys.Vec3;
  * <p>光线的跳伤总量 = 系数 × 基础伤害 × 火法强 ✓，收场那次球形爆炸再来同样的量 ✓
  * ⇒ 一次 t5 的总量 ≈ 2 × 系数 ✓（作者要"光线命中伤害与爆炸伤害等同"，
  * 这里实现为"两者用同一个数值"✓，所以最终是两倍 ✓）
+ *
+ * <p><b>判定方式是"区域"，不是"命中"</b> ✓ —— 作者 2026-10-05 明确：
+ * 「伤害判定是位于法阵范围内，和射线是否命中无关」✓。所以跳伤每 1s 直接结算给
+ * <b>阵内所有</b>可打的生物（{@link #insideEntities}），天上那些乱射的射线粒子
+ * 只是表现、与伤害完全无关 ✓（射线条数 {@link #RAY_STREAMS} 也因此是定值 ✓）。
  */
 public class TNSolarJudgmentField extends Entity {
 
@@ -58,10 +63,6 @@ public class TNSolarJudgmentField extends Entity {
     private static final EntityDataAccessor<Integer> DATA_CASTER =
             SynchedEntityData.defineId(TNSolarJudgmentField.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> DATA_SHAKE =
-            SynchedEntityData.defineId(TNSolarJudgmentField.class, EntityDataSerializers.INT);
-
-    /** 这一 tick 有几条光线在打（渲染器照着画 ✓；纯表现，客户端也读得到 ✓）。 */
-    private static final EntityDataAccessor<Integer> DATA_BEAMS =
             SynchedEntityData.defineId(TNSolarJudgmentField.class, EntityDataSerializers.INT);
 
     /** 单次光线伤害（服务端 ✓）。 */
@@ -87,7 +88,6 @@ public class TNSolarJudgmentField extends Entity {
         this.entityData.set(DATA_LIFE, Math.max(1, lifeTicks));
         this.entityData.set(DATA_CASTER, caster == null ? -1 : caster.getId());
         this.entityData.set(DATA_SHAKE, (int) Math.round(shake * 100.0D));
-        this.entityData.set(DATA_BEAMS, 0);
         this.beamDamage = beamDamage;
         this.explodeDamage = explodeDamage;
     }
@@ -108,11 +108,6 @@ public class TNSolarJudgmentField extends Entity {
         return this.entityData.get(DATA_CASTER);
     }
 
-    /** 这一 tick 有几条光线（渲染器拿去画 ✓）。 */
-    public int beams() {
-        return this.entityData.get(DATA_BEAMS);
-    }
-
     /** 太阳光球的位置（法阵正上方 ✓）。 */
     public Vec3 sunPosition() {
         return new Vec3(this.getX(), this.getY() + FireSpellRules.T5_SUN_HEIGHT, this.getZ());
@@ -124,7 +119,6 @@ public class TNSolarJudgmentField extends Entity {
         this.entityData.define(DATA_LIFE, 200);
         this.entityData.define(DATA_CASTER, -1);
         this.entityData.define(DATA_SHAKE, 0);
-        this.entityData.define(DATA_BEAMS, 0);
     }
 
     @Override
@@ -142,22 +136,27 @@ public class TNSolarJudgmentField extends Entity {
         if (!(server.getEntity(this.casterId()) instanceof LivingEntity caster)
                 || !caster.isAlive() || this.tickCount > this.life()) {
             this.explode(server);
+            // [BUG FIX] 塌方是分帧删的（destroyLayers）—— 这里立刻 discard 的话，
+            // 实体消失后 tick 不再执行，方块一个也删不掉。留着把自己删完再消失。
+            if (this.layersLeft > 0 && this.tickCount <= this.life() + 400) {
+                return;
+            }
             this.discard();
             return;
         }
 
-        // 光线：每一跳把阵内**所有**能打的生物各打一次 ✓（"向法阵范围内发射大量光线"✓）
+        // 伤害判定：**只看"在不在法阵里"** ✓ —— 作者 2026-10-05 明确
+        // 「伤害判定是位于法阵范围内，和射线是否命中无关」✓
+        //   ⇒ 每 T5_BEAM_INTERVAL_TICKS(20 = 1s) 把这一跳的伤害结算给**阵内所有**能打的生物 ✓，
+        //     不检测射线轨迹、也不统计命中数 —— 天上那些乱射的粒子纯粹是表现 ✓
         if (this.tickCount % FireSpellRules.T5_BEAM_INTERVAL_TICKS == 0) {
-            int beams = 0;
             for (LivingEntity victim : this.insideEntities(server, caster)) {
                 victim.invulnerableTime = 0;
                 victim.hurt(server.damageSources().indirectMagic(this, caster), this.beamDamage);
                 if (caster instanceof ServerPlayer player) {
                     TNScorch.apply(victim, player, this.beamDamage, true);   // 焚身 II ✓
                 }
-                beams++;
             }
-            this.entityData.set(DATA_BEAMS, beams);
         }
 
         // 太阳附近往外喷的火焰（纯表现 ✓）
@@ -177,21 +176,41 @@ public class TNSolarJudgmentField extends Entity {
             double dz = Math.sin(phi) * Math.sin(theta) * rr;
             sunDust(server, sun.x + dx, sun.y + dy, sun.z + dz, u);
         }
-        // ② 射线：从太阳射向法阵外缘（太阳的光芒 ✓），也全是粒子 ✓
+        // ② 射线：从太阳往外喷的粒子流 ✓
+        //   [作者 2026-10-05]「发射的粒子流会移动，并且不是固定轨迹，采用随机的方式」✓
+        //   旧版是 a = tickCount * 0.012 + b * 2pi/beams ⇒ 机械匀速旋转的固定扇形 ✗
+        //   现在每一 tick 重掷方向/长度/仰角，并沿路径加垂直抖动 ⇒ 轨迹永不重复 ✓
         {
             double rr = this.radius();
-            int beams = Math.max(6, this.beams());
+            // [作者 2026-10-05]「射线减少 1/3，并且不要全在一个锥面上移动，中间也是可移动区域」✓
+            //   以前落点固定成「水平 0.45~0.98 个半径、高度只差 ±2.6 格」⇒ 所有射线都贴在太阳
+            //   那一层的**一个很扁的锥面**上飞，太阳正下方那一大块（"中间"）永远是空的 ✗
+            //   现在落点改到**整个锥体内部**取：
+            //     · 水平 d = rr·√u ⇒ 均匀落在圆盘内（中间密、边缘疏 ✓）
+            //     · 高度从贴近阵面一路到贴近太阳 ⇒ 射线会穿过中间，整根锥体都被扫到 ✓
+            //   数量是**定值**（RAY_STREAMS）✓ —— 以前拿"这一跳打了几个目标"去推条数，
+            //   那等于让表现跟着命中走 ✗；作者 2026-10-05 定死"伤害与射线无关"，
+            //   所以这里彻底断开：阵内有没有目标、打中几个，天上都是同样多的射线 ✓
+            int beams = RAY_STREAMS;
             for (int b = 0; b < beams; b++) {
-                double a = this.tickCount * 0.012D + b * Math.PI * 2.0D / beams;
-                Vec3 to = new Vec3(this.getX() + Math.cos(a) * rr * 0.98D,
-                        this.getY() + 0.35D,
-                        this.getZ() + Math.sin(a) * rr * 0.98D);
+                double a = Math.random() * Math.PI * 2.0D;                   // 随机方向（每 tick 重掷）
+                double d = rr * Math.sqrt(Math.random()) * 0.98D;            // 随机落点（圆盘内均匀）
+                double drop = 0.6D + (FireSpellRules.T5_SUN_HEIGHT - 1.6D) * Math.random();  // 随机落点高度
+                Vec3 to = new Vec3(this.getX() + Math.cos(a) * d,
+                        this.getY() + 0.35D + drop,
+                        this.getZ() + Math.sin(a) * d);
                 Vec3 delta = to.subtract(sun);
-                int steps = (int) Math.max(3.0D, delta.length() * 1.1D);
+                int steps = (int) Math.max(3.0D, delta.length() * (0.9D + 0.6D * Math.random()));
+                // 垂直抖动：中间散得最开、两端收回 ⇒ 每次轨迹都不一样 ✓
+                double ox = (Math.random() - 0.5D) * 1.4D;
+                double oz = (Math.random() - 0.5D) * 1.4D;
                 for (int s = 0; s <= steps; s++) {
-                    Vec3 q = sun.add(delta.scale(s / (double) steps));
+                    double u = s / (double) steps;
+                    Vec3 q = sun.add(delta.scale(u));
+                    double w = Math.sin(u * Math.PI) * 0.9D;
                     // 越靠外越亮（和球体一致：内深外浅 ✓）
-                    sunDust(server, q.x, q.y, q.z, 0.30D + 0.70D * (s / (double) steps));
+                    sunDust(server, q.x + ox * w, q.y + (Math.random() - 0.5D) * 1.3D * w,
+                            q.z + oz * w, 0.30D + 0.70D * u);
                 }
             }
         }
@@ -229,7 +248,9 @@ public class TNSolarJudgmentField extends Entity {
         }
         this.exploded = true;
         LivingEntity caster = server.getEntity(this.casterId()) instanceof LivingEntity living ? living : null;
-        Vec3 at = this.position();
+        // 作者：「火球爆炸的半径为**火球高度的 1.5 倍**」——半径跟着火球高度走，
+        // 说明爆炸中心就是火球本身，而不是脚下的法阵中心。
+        Vec3 at = this.sunPosition();
 
         // 伤害：整个球体范围 ✓
         for (LivingEntity victim : server.getEntitiesOfClass(LivingEntity.class,
@@ -241,15 +262,15 @@ public class TNSolarJudgmentField extends Entity {
         }
 
         // 表现：大量火焰粒子往外炸 ✓
-        server.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y + 1.0D, at.z,
+        server.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y, at.z,
                 8, 3.0D, 3.0D, 3.0D, 0.0D);
-        server.sendParticles(ParticleTypes.FLAME, at.x, at.y + 1.0D, at.z,
+        server.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z,
                 600, FireSpellRules.T5_EXPLODE_RADIUS * 0.55D, FireSpellRules.T5_EXPLODE_RADIUS * 0.45D,
                 FireSpellRules.T5_EXPLODE_RADIUS * 0.55D, 0.55D);
-        server.sendParticles(ParticleTypes.LAVA, at.x, at.y + 1.0D, at.z,
+        server.sendParticles(ParticleTypes.LAVA, at.x, at.y, at.z,
                 120, FireSpellRules.T5_EXPLODE_RADIUS * 0.5D, FireSpellRules.T5_EXPLODE_RADIUS * 0.4D,
                 FireSpellRules.T5_EXPLODE_RADIUS * 0.5D, 0.3D);
-        server.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y + 3.0D, at.z,
+        server.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y + 2.0D, at.z,
                 140, FireSpellRules.T5_EXPLODE_RADIUS * 0.5D, 2.0D, FireSpellRules.T5_EXPLODE_RADIUS * 0.5D, 0.12D);
         server.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE,
                 SoundSource.PLAYERS, 8.0F, 0.85F);
@@ -268,9 +289,10 @@ public class TNSolarJudgmentField extends Entity {
      */
     private void destroyLayers(ServerLevel server) {
         int radius = (int) Math.floor(FireSpellRules.T5_EXPLODE_RADIUS);
-        int cx = (int) Math.floor(this.getX());
-        int cy = (int) Math.floor(this.getY());
-        int cz = (int) Math.floor(this.getZ());
+        Vec3 center = this.sunPosition();            // 球心 = 火球位置
+        int cx = (int) Math.floor(center.x);
+        int cy = (int) Math.floor(center.y);
+        int cz = (int) Math.floor(center.z);
         int total = radius * 2 + 1;
 
         for (int n = 0; n < FireSpellRules.T5_DESTROY_LAYERS_PER_TICK && this.layersLeft > 0; n++) {
@@ -344,6 +366,14 @@ public class TNSolarJudgmentField extends Entity {
 
     /** 太阳的粒子数（每 tick ✓）—— t5 要比 t4 壮观 ✓。 */
     private static final int SUN_POINTS = 90;
+
+    /**
+     * 天上乱射的射线粒子**条数**（定值 ✓）。
+     *
+     * <p>与阵内有没有目标、打中几个**完全无关** ✓ —— 作者 2026-10-05：
+     * 「伤害判定是位于法阵范围内，和射线是否命中无关」✓，射线只是表现 ✓。
+     */
+    private static final int RAY_STREAMS = 12;
 
     /** 法阵里额外撒的粒子数（每 tick ✓）—— 比 t4 更多 ✓。 */
     private static final int SOLAR_SIGIL_POINTS = 60;
