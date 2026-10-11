@@ -182,21 +182,32 @@ public class TNSolarJudgmentField extends Entity {
             double dz = Math.sin(phi) * Math.sin(theta) * rr;
             sunDust(server, sun.x + dx, sun.y + dy, sun.z + dz, u);
         }
-        // ② 射线：从太阳射向法阵外缘（太阳的光芒 ✓），也全是粒子 ✓
+        // ② 射线：从太阳往外喷的粒子流 ✓
+        //   [作者 2026-10-05]「发射的粒子流会移动，并且不是固定轨迹，采用随机的方式」✓
+        //   旧版是 a = tickCount * 0.012 + b * 2pi/beams ⇒ 机械匀速旋转的固定扇形 ✗
+        //   现在每一 tick 重掷方向/长度/仰角，并沿路径加垂直抖动 ⇒ 轨迹永不重复 ✓
         {
             double rr = this.radius();
             int beams = Math.max(6, this.beams());
             for (int b = 0; b < beams; b++) {
-                double a = this.tickCount * 0.012D + b * Math.PI * 2.0D / beams;
-                Vec3 to = new Vec3(this.getX() + Math.cos(a) * rr * 0.98D,
-                        this.getY() + 0.35D,
-                        this.getZ() + Math.sin(a) * rr * 0.98D);
+                double a = Math.random() * Math.PI * 2.0D;                   // 随机方向（每 tick 重掷）
+                double reach = rr * (0.45D + 0.53D * Math.random());         // 随机长度
+                double lift = -1.6D + 4.2D * Math.random();                  // 随机仰角
+                Vec3 to = new Vec3(this.getX() + Math.cos(a) * reach,
+                        this.getY() + 0.35D + lift,
+                        this.getZ() + Math.sin(a) * reach);
                 Vec3 delta = to.subtract(sun);
-                int steps = (int) Math.max(3.0D, delta.length() * 1.1D);
+                int steps = (int) Math.max(3.0D, delta.length() * (0.9D + 0.6D * Math.random()));
+                // 垂直抖动：中间散得最开、两端收回 ⇒ 每次轨迹都不一样 ✓
+                double ox = (Math.random() - 0.5D) * 1.4D;
+                double oz = (Math.random() - 0.5D) * 1.4D;
                 for (int s = 0; s <= steps; s++) {
-                    Vec3 q = sun.add(delta.scale(s / (double) steps));
+                    double u = s / (double) steps;
+                    Vec3 q = sun.add(delta.scale(u));
+                    double w = Math.sin(u * Math.PI) * 0.9D;
                     // 越靠外越亮（和球体一致：内深外浅 ✓）
-                    sunDust(server, q.x, q.y, q.z, 0.30D + 0.70D * (s / (double) steps));
+                    sunDust(server, q.x + ox * w, q.y + (Math.random() - 0.5D) * 1.3D * w,
+                            q.z + oz * w, 0.30D + 0.70D * u);
                 }
             }
         }
