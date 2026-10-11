@@ -187,10 +187,8 @@ public class MagicStoneScreen extends Screen {
             for (SpellCatalog.Entry entry : SpellCatalog.of(shownElement, chain)) {
                 final SpellCatalog.Entry target = entry;
                 MagicStoneLearning.Result state = MagicStoneLearning.check(data, entry);
-                // 未学会的名字要不要遮：只有**王级(3)及以上**才乱码 ✗
-                // —— 冒险者(1)、勇者(2) 是基础，未学也照样显示真名 ✓（用户要求）
-                boolean hideName = !data.hasLearned(entry.id()) && entry.tier() >= 3;
-                String label = hideName ? garble(entry.displayName()) : entry.displayName();
+                // 名字一律显示真名 —— 早期"未学会的 t3+ 显示乱码方块"已按作者要求去掉 ✓
+                String label = entry.displayName();
                 Button button = Button.builder(Component.literal("    "+fitLabel(label, colW - 34)),
                                 clicked -> MagicStoneNetwork.requestUnlock(target.id()))
                         .bounds(colX, rowY, colW - 8, 16)
@@ -358,21 +356,6 @@ public class MagicStoneScreen extends Screen {
         return data.hasLearned(id) ? name : "§c" + name + "（已遗忘）";
     }
 
-    /**
-     * 未学会的法术名字显示成乱码。
-     *
-     * <p>用<b>名字本身</b>推出乱码，所以同一个法术每次打开界面乱码都一样 ✓（不会闪 ✗）；
-     * 学完之后立刻变回真名 ✓。
-     */
-    private static String garble(String name) {
-        final String glyphs = "\u2593\u2592\u2591\u2588\u259a\u259e\u2573\u203B\u2261\u25A0";
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < name.length(); i++) {
-            sb.append(glyphs.charAt(Math.floorMod(name.charAt(i) * 31 + i * 7, glyphs.length())));
-        }
-        return sb.toString();
-    }
-
     /** 法术目录每列多宽（渲染和按钮布局必须用同一个算法，否则又会对不上）。 */
     private int columnWidth(int chainCount) {
         return (panelWidth() - listX() - 12) / Math.max(1, chainCount);
@@ -469,9 +452,8 @@ public class MagicStoneScreen extends Screen {
             int spellY = top + LIST_Y + 16;
             for (SpellCatalog.Entry entry : SpellCatalog.of(shownElement, chain)) {
                 // 法术图标画在按钮左边（super.render 之后画，否则被按钮盖住）
-                if (data.hasLearned(entry.id()) || entry.independent() || entry.tier()<3) {
-                    drawSpellIcon(graphics, entry, colX + 2, spellY + 1);
-                }
+                // 一律画 —— 未学会的 t3+ 以前不画，看上去像"图标坏了"，作者要求统一显示 ✓
+                drawSpellIcon(graphics, entry, colX + 2, spellY + 1);
                 if (isHovering(colX, spellY, colW - 8, 16, mouseX, mouseY)) {
                     MagicStoneLearning.Result state = MagicStoneLearning.check(data, entry);
                     // 消耗要按玩家自己的上限算（随上限等比放大），不然提示和实际扣费对不上
