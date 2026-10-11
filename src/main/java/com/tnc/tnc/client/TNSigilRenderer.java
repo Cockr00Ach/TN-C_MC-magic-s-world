@@ -40,9 +40,10 @@ import org.joml.Matrix4f;
  * <p>{@code grand = true} 时就是"更复杂"的那一座（{@link TNMeteorFallEntity} 的陨星坠）：
  * 光晕多一圈、符文更密、卫星内的花纹更细 ✓
  *
- * <p>配色跟参考图一致：<b>金色线稿</b>，用四档金分层（亮金画主线、中金画环与尖饰、
- * 淡金画符文与内芯、橙金只在外圈光晕里压一点暖）—— 靠亮度差做金色的层次，
- * 走的还是自发光通道，夜里／洞里都亮。
+ * <p>构成照作者给的参考图（金色占卜法阵，存档 {@code docs/art/refs/fire_sigil_reference.png}）。
+ * <b>配色是火系的红橙</b>（作者指定：红与橙为主体）：四档
+ * <b>正红</b>画主线／八角星／中心核、<b>橙</b>画花饰与环、<b>亮橙</b>画符文与星点、
+ * <b>深红</b>只在外圈光晕里压一层 —— 靠亮度差做层次，走的还是自发光通道，夜里／洞里都亮 ✓
  *
  * <p>性能：所有几何体都进 {@code WaterRenderTypes.geometry()} 这一个 QUADS 缓冲。
  * 细管一律 4 侧面、方框每条边只一根管、星点只画一两笔 ——
@@ -54,15 +55,15 @@ public final class TNSigilRenderer<T extends Entity> extends EntityRenderer<T> {
     private static final ResourceLocation PLACEHOLDER =
             ResourceLocation.fromNamespaceAndPath("minecraft", "textures/particle/flame.png");
 
-    // ---- 金色分层（参考图那种"金线 ＋ 淡金芯"）----
-    /** 亮金：主环、八角星、中心核 —— 线稿里最实的那一档。 */
-    private static final float[] MAIN = {1.00F, 0.83F, 0.38F};
-    /** 中金：四向花饰、卫星圆外环、符文带导引环。 */
-    private static final float[] MID = {1.00F, 0.90F, 0.52F};
-    /** 淡金：符文、内芯、星点 —— 近看是浅金，远看融进主线的光里。 */
-    private static final float[] PALE = {1.00F, 0.97F, 0.78F};
-    /** 橙金：只在最外侧那圈柔光晕里用一点，压住"贴纸黄"的塑料感。 */
-    private static final float[] BLOOM = {1.00F, 0.70F, 0.26F};
+    // ---- 红橙分层（火系：正红 ＋ 橙 ＋ 亮橙芯）----
+    /** 正红：主环、八角星、中心核 —— 线稿里最实的那一档，整座阵的"骨架色"。 */
+    private static final float[] MAIN = {1.00F, 0.27F, 0.04F};
+    /** 橙：四向花饰、卫星圆外环、符文带导引环。 */
+    private static final float[] MID = {1.00F, 0.50F, 0.09F};
+    /** 亮橙：符文、内芯、星点 —— 比主线亮两档，远看才不会被红底吃掉 ✗ */
+    private static final float[] PALE = {1.00F, 0.67F, 0.18F};
+    /** 深红：只在最外侧那圈柔光晕里用，像烧红的铁渗出来的一层暗红 ✓ */
+    private static final float[] BLOOM = {1.00F, 0.16F, 0.02F};
 
     private final double radius;
     private final boolean grand;
@@ -225,7 +226,7 @@ public final class TNSigilRenderer<T extends Entity> extends EntityRenderer<T> {
         WaterGeometry.disk(out, pose, center, UP, R * 0.046D,
                 MAIN[0], MAIN[1], MAIN[2], 0.85F * fade);
         WaterGeometry.disk(out, pose, center.add(0.0D, 0.004D, 0.0D), UP, R * 0.022D,
-                1.00F, 1.00F, 0.90F, 0.90F * fade);
+                1.00F, 0.92F, 0.70F, 0.90F * fade);
 
         // ================= 7) 散落的星点 =================
         // 参考图上到处撒着那种小十字亮点（位置按编号算死 ⇒ 每帧一致、不闪 ✓）
