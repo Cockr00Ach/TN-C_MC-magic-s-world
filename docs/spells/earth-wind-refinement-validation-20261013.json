@@ -1,6 +1,6 @@
 {
   "baseHash": "094E7C329A22472F60F713D34C8D54A701DBC81C0343E321C5FBE132EA1F3B26",
-  "releaseHash": "5681E576031C6DC0F83938A667770D018B32DFEF84EED6983A22A10B241A2F73",
+  "releaseHash": "59B35C6F1D94EE076B0C35E09611C29AE4EB6B7EBA3E9639395417B113008A75",
   "entries": [
     "assets/tnc/models/projectile/earth_clod.json",
     "assets/tnc/models/projectile/earth_mud_plate.json",
@@ -64,11 +64,16 @@
   "texture": {
     "asset": "D:\\ModTest\\src\\main\\resources\\assets\\tnc\\textures\\block\\earth_amber_stone.png",
     "tool": "built-in image_gen",
-    "prompt": "Create one square opaque seamless tileable game texture for sophisticated earth magic stone constructs in Minecraft: rich warm umber rock, terracotta ochre planes, chipped sharp mineral facets, delicate restrained metallic amber-gold mineral veins, hand-painted pixel-art inspired material, crisp readable details, seamless edges, flat albedo texture viewed straight on, no objects, no border, no text, no perspective, no shadows or lighting gradient. One coherent stone material, not an atlas. Brown is dominant, gold highlights at cracks, no purple. Suitable wrapping onto rock spears and stone spheres.",
     "pixels": [
       1254,
       1254
-    ]
+    ],
+    "initialGenerationPrompt": "Create one square opaque seamless tileable game texture for sophisticated earth magic stone constructs in Minecraft: rich warm umber rock, terracotta ochre planes, chipped sharp mineral facets, delicate restrained metallic amber-gold mineral veins, hand-painted pixel-art inspired material, crisp readable details, seamless edges, flat albedo texture viewed straight on, no objects, no border, no text, no perspective, no shadows or lighting gradient. One coherent stone material, not an atlas. Brown is dominant, gold highlights at cracks, no purple. Suitable wrapping onto rock spears and stone spheres.",
+    "prompt": "Edit this earth magic texture into a compact true pixel-art Minecraft tile material. Preserve the rich brown/ochre chipped rock facets with restrained fine golden mineral seams, but remove ALL noisy painterly texture. Strong flat color regions, carefully composed crystalline rock planes, exactly a small palette of 12 flat warm earthy colors. Clean crisp chunky pixel blocks, like a very refined 64x64 pixel-art seamless tile enlarged with nearest-neighbor; no antialiasing, no dither, no gradients, no tiny random speckles, no photographic detail. Flat albedo, seamless, opaque square image, no objects, no borders, no text. The overall impression should be finely crafted amber-veined earth magic stone. Low complexity colored regions are essential for efficient game texture compression.",
+    "bytes": 1595309,
+    "sha256": "ADDEA939C792A18BBAB593D6BE32587011E9ED8EBFE9AA31803A3821637533E8",
+    "backup": "D:/ModTest/work/backups/earth-texture-20261013-032214"
   },
-  "backup": "D:/ModTest/work/backups/earth-refinement-20261013-031045"
+  "backup": "D:/ModTest/work/backups/earth-refinement-20261013-031045",
+  "originalValidatedReleaseHash": "5681E576031C6DC0F83938A667770D018B32DFEF84EED6983A22A10B241A2F73"
 }
