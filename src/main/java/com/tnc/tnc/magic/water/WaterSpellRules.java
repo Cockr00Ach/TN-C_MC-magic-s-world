@@ -22,7 +22,7 @@ public final class WaterSpellRules {
     public static int duration(int tier) { return tier == 5 ? 240 : tier == 4 ? 60 : tier == 3 ? 200 : 64; }
     public static double boltRadius(int tier) { return tier == 2 ? .85 : .32; }
     public static final int SLASH_CHANNEL_TICKS = 20;
-    public static final int SLASH_VOLLEY_INTERVAL = 2;
+    public static final int SLASH_VOLLEY_INTERVAL = 1;
     /** 龙滅（水球链 t5）的**水柱 / 破坏半径**＝ 15 格 ✓ —— 多条测试与作者都钉着这个数 ✗。 */
     public static final double DRAGON_RUIN_RADIUS = 15;
     /**
@@ -75,9 +75,9 @@ public final class WaterSpellRules {
     public static net.minecraft.world.phys.AABB uprightArea(Vec3 center,double radius,double height) {
         return new net.minecraft.world.phys.AABB(center.add(-radius,-.25,-radius),center.add(radius,height,radius));
     }
-    /** Ten individually rolled fronts, two ticks apart, all aimed forward. */
-    public static final int SLASH_COUNT = 10;
-    public static final float SLASH_ROLL_STEP = 36F;
+    /** Twenty individually rolled fronts, one tick apart, all aimed forward. */
+    public static final int SLASH_COUNT = 20;
+    public static final float SLASH_ROLL_STEP = 18F;
     public static final float SLASH_ROLL_SPIN = 0F;
     public static float slashRoll(int index) { return Math.floorMod(index,SLASH_COUNT)*SLASH_ROLL_STEP; }
     public static double slashRollRadians(float rollDegrees, double age) { return Math.toRadians(rollDegrees); }
@@ -89,6 +89,8 @@ public final class WaterSpellRules {
     public static java.util.List<Vec3> slashDirections(float yaw) {
         return java.util.List.of(Vec3.directionFromRotation(0,yaw));
     }
+    public static boolean canRestrain(double height) { return height>0 && height<4; }
+    public static final float RAIN_SEAL_OPACITY = .25F;
     public static float damage(int tier) { return switch(tier) { case 2 -> 8; case 4 -> 6; case 5 -> 14; default -> 4; }; }
     public static Vec3 right(Vec3 direction) {
         Vec3 reference = Math.abs(direction.y) > .95 ? new Vec3(0,0,1) : new Vec3(0,1,0);

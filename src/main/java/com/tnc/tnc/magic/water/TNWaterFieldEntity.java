@@ -87,7 +87,7 @@ public final class TNWaterFieldEntity extends Entity {
                 e.entityData.set(PITCH,(float)-Math.toDegrees(Math.asin(direction.y)));
                 // 刃面滚转：环内槽位 × 45° ⇒ 同一批斩击出现 0/45/90/135/180/… 的刃角 ✓
                 if(slash)e.entityData.set(ROLL,WaterSpellRules.slashRoll(i));
-                player.level().addFreshEntity(e);
+                if(player.level().addFreshEntity(e)&&k==1&&target!=null)WaterRestraints.hold(e,target);
             }
             player.serverLevel().playSound(null,BlockPos.containing(at),t==4?SoundEvents.CONDUIT_ACTIVATE:SoundEvents.PLAYER_SPLASH,SoundSource.PLAYERS,t==4?3:1,t==4?.45F:.7F);
             // 施法那一下向前压出一面水墙 ✓（纯表现 ✗，不改伤害/时长 ✗）
@@ -137,7 +137,7 @@ public final class TNWaterFieldEntity extends Entity {
         }
         if(kind()==1 && tier()==5 && tickCount%40==0)
             level.playSound(null,blockPosition(),SoundEvents.PLAYER_SPLASH,SoundSource.PLAYERS,2,.4F);
-        if(kind()==2 && tier()<3 && anchor!=null){var e=level.getEntity(anchor);if(e==null || !e.isAlive()){discard();return;}setPos(e.position());}
+        if(kind()==2 && tier()<3 && anchor!=null){var e=level.getEntity(anchor);if(e==null || !e.isAlive()){discard();return;}}
         if(kind()==3){rain(level,player);return;}
         if(kind()==1)waveFx(level);
         else if(kind()==2)WaterFx.bindFx(level,position(),radius(),height(),tier(),tickCount);
@@ -204,8 +204,10 @@ public final class TNWaterFieldEntity extends Entity {
                     WaterFx.hit(level,enemy.position().add(0,enemy.getBbHeight()*.5,0),delta.normalize(),tier());
                 }
             } else {
-                enemy.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN,10,tier()==1?1:3,false,false));
-                if(tier()>=3) {Vec3 pull=center.subtract(enemy.position()).normalize().scale(.12);enemy.push(pull.x,0,pull.z);}
+                if(WaterSpellRules.canRestrain(enemy.getBbHeight())) {
+                    WaterRestraints.hold(this,enemy);
+                    enemy.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN,2,4,false,false));
+                }
                 if(tickCount%20==0)enemy.hurt(level.damageSources().indirectMagic(this,player),tier()*WaterSpellRules.power(player));
                 if(tier()>=4 && hit.add(enemy.getUUID()) && hit.size()==1)player.addEffect(new MobEffectInstance(MobEffects.ABSORPTION,100,tier()==5?1:0));
                 if(tickCount==life() && tier()==5)enemy.hurt(level.damageSources().indirectMagic(this,player),12*WaterSpellRules.power(player));
@@ -275,6 +277,10 @@ public final class TNWaterFieldEntity extends Entity {
             level().addParticle(net.minecraft.core.particles.ParticleTypes.GLOW,
                     getX()+at.x,getY()+at.y,getZ()+at.z,0,-.12,0);
         }
+    }
+    @Override public void remove(RemovalReason reason) {
+        if(level() instanceof ServerLevel server)WaterRestraints.release(server,getUUID());
+        super.remove(reason);
     }
     @Override public boolean shouldBeSaved(){return false;}
     @Override protected void readAdditionalSaveData(CompoundTag t){discard();}

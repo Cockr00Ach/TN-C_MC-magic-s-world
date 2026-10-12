@@ -1,6 +1,7 @@
 package com.tnc.tnc.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import com.tnc.tnc.TNMod;
 import net.minecraft.client.Minecraft;
@@ -32,19 +33,38 @@ public final class WaterSolidModels {
     }
     private static ResourceLocation id(String name){return ResourceLocation.fromNamespaceAndPath("tnc","water/"+name);}
     static void draw(String name,PoseStack poses,MultiBufferSource buffers) {
+        draw(name,poses,buffers,1);
+    }
+    static void draw(String name,PoseStack poses,MultiBufferSource buffers,float opacity) {
         var mc=Minecraft.getInstance();var model=mc.getModelManager().getModel(id(name));
         poses.pushPose();poses.translate(-.5,0,-.5);
+        var consumer=buffers.getBuffer(opacity<1?WaterModelRenderTypes.alpha():RenderType.eyes(TextureAtlas.LOCATION_BLOCKS));
+        if(opacity<1)consumer=new Alpha(consumer,opacity);
         mc.getItemRenderer().renderModelLists(model,ItemStack.EMPTY,LightTexture.FULL_BRIGHT,
-                OverlayTexture.NO_OVERLAY,poses,buffers.getBuffer(RenderType.eyes(TextureAtlas.LOCATION_BLOCKS)));
+                OverlayTexture.NO_OVERLAY,poses,consumer);
         poses.popPose();
     }
     static void seal(PoseStack poses,MultiBufferSource buffers,Vec3 at,Vec3 normal,double radius,double age,float envelope) {
+        seal(poses,buffers,at,normal,radius,age,envelope,1);
+    }
+    static void seal(PoseStack poses,MultiBufferSource buffers,Vec3 at,Vec3 normal,double radius,double age,float envelope,float opacity) {
         if(envelope<=0)return;
         poses.pushPose();poses.translate(at.x,at.y,at.z);
         poses.mulPose(new Quaternionf().rotationTo(0,1,0,(float)normal.x,(float)normal.y,(float)normal.z));
         poses.mulPose(Axis.YP.rotationDegrees((float)(age*.55)));
         float size=(float)(radius*2*Math.min(1,envelope*3));
         poses.scale(size,(float)(.8+Math.min(radius,8)*.15),size);
-        draw("seal",poses,buffers);poses.popPose();
+        draw("seal",poses,buffers,opacity);poses.popPose();
+    }
+    private record Alpha(VertexConsumer target,float opacity) implements VertexConsumer {
+        public VertexConsumer vertex(double x,double y,double z){target.vertex(x,y,z);return this;}
+        public VertexConsumer color(int r,int g,int b,int a){target.color(r,g,b,Math.round(a*opacity));return this;}
+        public VertexConsumer uv(float u,float v){target.uv(u,v);return this;}
+        public VertexConsumer overlayCoords(int u,int v){target.overlayCoords(u,v);return this;}
+        public VertexConsumer uv2(int u,int v){target.uv2(u,v);return this;}
+        public VertexConsumer normal(float x,float y,float z){target.normal(x,y,z);return this;}
+        public void endVertex(){target.endVertex();}
+        public void defaultColor(int r,int g,int b,int a){target.defaultColor(r,g,b,Math.round(a*opacity));}
+        public void unsetDefaultColor(){target.unsetDefaultColor();}
     }
 }
