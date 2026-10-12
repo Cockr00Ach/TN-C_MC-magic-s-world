@@ -43,7 +43,7 @@ import java.util.UUID;
 
 /** One inventory and one mana ledger for the entire 26-part, hollow forge. */
 public final class MagicForgeBlockEntity extends BlockEntity implements WorldlyContainer, MenuProvider {
-    public static final int MAX_CHARGE = 200;
+    public static final int MAX_CHARGE = 2000;
     public static final int MANA_PER_COIL = 40;
     public static final int FORGE_TICKS = 80;
     public static final int OUTPUT_SLOT = 4;
@@ -311,7 +311,7 @@ public final class MagicForgeBlockEntity extends BlockEntity implements WorldlyC
             invalidateStructure();
             return;
         }
-        if (server.getGameTime() % 20 == 0) drawAdjacentPlant(server);
+        // Plants feed collectors; the forge receives conserved network mana.
         ManaForgeRecipe recipe = chosenRecipe();
         if (recipe == null || charge < recipe.mana()) return;
         int[] costs = recipe.costs(this);

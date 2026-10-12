@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " C ",
+    "MTM",
+    " I "
+  ],
+  "key": {
+    "C": {
+      "item": "tnc:homeward_flower_petal"
+    },
+    "M": {
+      "item": "tnc:radiant_gold"
+    },
+    "T": {
+      "item": "tnc:mist_cloth"
+    },
+    "I": {
+      "item": "tnc:spirit_iron"
+    }
+  },
+  "result": {
+    "item": "tnc:homeward_ribbon",
+    "count": 1
+  }
+}

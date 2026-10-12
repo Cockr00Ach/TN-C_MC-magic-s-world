@@ -14,7 +14,11 @@ class GuidebookTest {
         try(var paths=Files.list(Path.of("questbook/ftbquests/chapters"))){
             for(var file:paths.filter(p->p.getFileName().toString().startsWith("tnc_")).toList()){
                 var chapter=JsonParser.parseString(Files.readString(file)).getAsJsonObject();chapters.add(chapter);assertTrue(ids.add(chapter.get("id").getAsString()));
-                for(var v:chapter.getAsJsonArray("quests")){var q=v.getAsJsonObject();assertTrue(ids.add(q.get("id").getAsString()));quests.add(q.get("id").getAsString());assertEquals(0,q.getAsJsonArray("rewards").size());
+                for(var v:chapter.getAsJsonArray("quests")){var q=v.getAsJsonObject();assertTrue(ids.add(q.get("id").getAsString()));quests.add(q.get("id").getAsString());boolean life=chapter.has("group")&&chapter.get("group").getAsString().equals("544E434C49464531");
+                    if(q.has("rewards"))for(var reward:q.getAsJsonArray("rewards")){
+                        assertTrue(life,"Legacy chapters must not duplicate money rewards");var r=reward.getAsJsonObject();assertTrue(ids.add(r.get("id").getAsString()));
+                        assertEquals("item",r.get("type").getAsString());assertTrue(Set.of("tnc:season_handbook","tnc:magic_garden_book","tnc:beast_ranch_book","tnc:mana_workshop_book").contains(r.get("item").getAsString()));assertEquals(1,r.get("count").getAsInt());
+                    }
                     for(var value:q.getAsJsonArray("tasks")){var t=value.getAsJsonObject();assertTrue(ids.add(t.get("id").getAsString()));
                         if(file.getFileName().toString().startsWith("tnc_play_")){real++;var type=t.get("type").getAsString();assertTrue(Set.of("advancement","item").contains(type));
                             if(type.equals("advancement"))assertNotNull(getClass().getResource("/data/tnc/advancements/"+t.get("advancement").getAsString().split(":")[1]+".json"));
@@ -25,12 +29,31 @@ class GuidebookTest {
                 for(var value:chapter.getAsJsonArray("images")){var tex=value.getAsJsonObject().get("image").getAsString();assertNotNull(getClass().getResource("/assets/"+tex.replace(":","/")),tex);}
             }
         }
-        assertEquals(22,chapters.size());assertEquals(191,real);assertEquals(41,atlas);
+        assertEquals(23,chapters.size());assertEquals(191,real);assertEquals(41,atlas);
         for(var chapter:chapters)for(var value:chapter.getAsJsonArray("quests"))for(var d:value.getAsJsonObject().getAsJsonArray("dependencies"))assertTrue(quests.contains(d.getAsString()),d.toString());
         for(String e:List.of("water","fire","lightning","wind","earth","light","dark"))for(int tier=1;tier<=5;tier++){
             String name=e+"_wand_"+tier;assertNotNull(getClass().getResource("/assets/tnc/models/item/"+name+".json"));
             try(var stream=getClass().getResourceAsStream("/assets/tnc/textures/item/wands/"+name+".png")){assertNotNull(stream);var image=javax.imageio.ImageIO.read(stream);assertEquals(32,image.getWidth());assertEquals(32,image.getHeight());assertTrue(image.getColorModel().hasAlpha());}
         }
+    }
+    @Test void lifeRouteIdsLoadWithInstalledFtbSignedHexParser() throws IOException {
+        var ids=new HashSet<String>();var questIds=new HashSet<String>();var references=new ArrayList<String>();
+        for(String name:List.of("tnc_field_02_botany","tnc_field_03_pasture","tnc_field_04_workshop","tnc_field_05_seasons")){
+            var chapter=JsonParser.parseString(Files.readString(Path.of("questbook/ftbquests/chapters/"+name+".snbt"))).getAsJsonObject();
+            String chapterId=chapter.get("id").getAsString();assertTrue(Long.parseLong(chapterId,16)>0);assertTrue(ids.add(chapterId));
+            for(var value:chapter.getAsJsonArray("quests")){
+                var q=value.getAsJsonObject();String id=q.get("id").getAsString();assertTrue(Long.parseLong(id,16)>0,id);assertTrue(ids.add(id));questIds.add(id);
+                for(var t:q.getAsJsonArray("tasks")){String tid=t.getAsJsonObject().get("id").getAsString();assertTrue(Long.parseLong(tid,16)>0,tid);assertTrue(ids.add(tid));}
+                if(q.has("rewards"))for(var t:q.getAsJsonArray("rewards")){String tid=t.getAsJsonObject().get("id").getAsString();assertTrue(Long.parseLong(tid,16)>0,tid);assertTrue(ids.add(tid));}
+                for(var dependency:q.getAsJsonArray("dependencies"))references.add(dependency.getAsString());
+            }
+            for(var value:chapter.getAsJsonArray("quest_links")){
+                var link=value.getAsJsonObject();String id=link.get("id").getAsString();assertTrue(Long.parseLong(id,16)>0,id);assertTrue(ids.add(id));
+                // FTB Quests 2001.4.22 QuestLink.readData calls this exact signed parser.
+                String target=link.get("linked_quest").getAsString();assertTrue(Long.parseLong(target,16)>0,target);references.add(target);
+            }
+        }
+        assertEquals(409,questIds.size());assertTrue(questIds.containsAll(references));
     }
     private GuidebookContent content() throws IOException {
         var stream=getClass().getResourceAsStream("/assets/tnc/guide/gameplay.json");

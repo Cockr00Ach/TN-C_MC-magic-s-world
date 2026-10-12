@@ -1,0 +1,278 @@
+{
+	default_hide_dependency_lines: false
+	default_quest_shape: ""
+	filename: "37C8437D5B9D0F18"
+	group: "46D9BF1B84D709E1"
+	id: "37C8437D5B9D0F18"
+	images: [{
+		height: 10.0d
+		image: "ftbquests:textures/gui/heng2.png"
+		rotation: 0.0d
+		width: 10.0d
+		x: 8.0d
+		y: -3.5d
+	}]
+	order_index: 0
+	quest_links: [ ]
+	quests: [
+		{
+			description: ["&7连续受到&e相同类型的伤害&7时，逐步获得伤害减免。每次提升&e15%&7，最高可达&e35%&7。受到其他类型的伤害后，减伤效果将重新计算。"]
+			entity_vis_size: 1.0f
+			icon: "kubejs:jihuo"
+			id: "14816233E06A65C4"
+			tasks: [{
+				id: "17AD5C27F00AD807"
+				type: "checkmark"
+			}]
+			title: "适应"
+			x: 5.0d
+			y: -6.5d
+		}
+		{
+			description: ["&7向当前目标发射&e追踪寒冰弹&7。命中后施加&e5秒缓慢 III&7和&e挖掘疲劳 III&7，但不会直接造成伤害。基础发射间隔为&e1秒&7，攻击距离约为&e20格&7。"]
+			entity_vis_size: 1.0f
+			icon: "kubejs:jihuo"
+			id: "2FE063E221776ED3"
+			tasks: [{
+				id: "1115DC4D078B58A5"
+				type: "checkmark"
+			}]
+			title: "极寒"
+			x: 6.5d
+			y: -6.5d
+		}
+		{
+			description: ["&7受到的&e投掷物伤害降低5%&7。"]
+			entity_vis_size: 1.0f
+			icon: "kubejs:jihuo"
+			id: "3421102C67AE8225"
+			tasks: [{
+				id: "39DB5605E26B59B4"
+				type: "checkmark"
+			}]
+			title: "抑制"
+			x: 8.0d
+			y: -6.5d
+		}
+		{
+			description: ["&7约每&e3秒&7在目标脚下生成一片半径&e4格&7的伤害云。伤害云会在&e1秒后激活&7，持续&e10秒&7，并施加&e瞬间伤害 II&7。生效期间，伤害云的范围会逐渐缩小。"]
+			entity_vis_size: 1.0f
+			icon: "kubejs:jihuo"
+			id: "643F0CE3FD95CC0E"
+			tasks: [{
+				id: "0408962A30C58CC7"
+				title: "亵渎"
+				type: "checkmark"
+			}]
+			x: 9.5d
+			y: -6.5d
+		}
+		{
+			description: ["&7向当前目标发射&e追踪火焰弹&7。命中后造成&e1点伤害&7，并将目标点燃&e8秒&7。基础发射间隔为&e1秒&7，攻击距离约为&e20格&7。"]
+			entity_vis_size: 1.0f
+			icon: "kubejs:jihuo"
+			id: "38EBF241F5C48698"
+			tasks: [{
+				id: "48EF05E56A2D65B8"
+				title: "点燃"
+				type: "checkmark"
+			}]
+			x: 11.0d
+			y: -6.5d
+		}
+		{
+			entity_vis_size: 1.0f
+			icon: "kubejs:jihuo"
+			id: "4190E07EAB2BF3B7"
+			tasks: [{
+				id: "69612C92F72E0A17"
+				title: "急速"
+				type: "checkmark"
+			}]
+			x: 5.0d
+			y: -4.5d
+		}
+		{
+			description: ["&7攻击目标时施加&e5倍强度的击退&7，并使其获得&e5秒缓慢 III&7。"]
+			entity_vis_size: 1.0f
+			icon: "kubejs:jihuo"
+			id: "2A4D2B19E4193DA5"
+			tasks: [{
+				id: "4A631B23EE907620"
+				title: "爆震"
+				type: "checkmark"
+			}]
+			x: 6.5d
+			y: -4.5d
+		}
+		{
+			description: ["&7受到伤害后，等待&e3秒&7开始恢复生命，每秒恢复&e1点生命值&7。脱离活动状态超过&e5秒&7后，恢复速度提升至每秒&e5点生命值&7。"]
+			entity_vis_size: 1.0f
+			icon: "kubejs:jihuo"
+			id: "25DBAC872DEE870A"
+			tasks: [{
+				id: "683E6D7236AE74F1"
+				title: "活力"
+				type: "checkmark"
+			}]
+			x: 8.0d
+			y: -4.5d
+		}
+		{
+			description: ["&7周期性将当前目标拉向冠军生物，拉力为&e每刻0.05&7。该效果会持续改变目标的移动速度，形成&e强制牵引&7。"]
+			entity_vis_size: 1.0f
+			icon: "kubejs:jihuo"
+			id: "058E917D5A857484"
+			subtitle: "&c【词条已禁用】"
+			tasks: [{
+				id: "44FD34D3A653A37D"
+				title: "磁力"
+				type: "checkmark"
+			}]
+			x: 11.0d
+			y: -2.5d
+		}
+		{
+			description: [
+				"&7永久获得&e抗火效果&7，并倾向于靠近熔岩、避开水源。攻击目标时："
+				"&e• &7将目标点燃&e10秒"
+				"&e• &7额外造成一次与原攻击伤害&e数值相同的魔法伤害"
+			]
+			entity_vis_size: 1.0f
+			icon: "kubejs:jihuo"
+			id: "236F7AAB92B98906"
+			tasks: [{
+				id: "49887842C2ADFCDF"
+				title: "熔融"
+				type: "checkmark"
+			}]
+			x: 9.5d
+			y: -4.5d
+		}
+		{
+			description: [
+				"&7每次攻击有&e20%概率&7使目标麻痹&e3秒&7。目标已处于麻痹状态时，不会刷新持续时间。"
+				""
+				"&7玩家在麻痹期间&e无法移动、跳跃或潜行&7，并获得&e极高的击退抗性&7。"
+			]
+			entity_vis_size: 1.0f
+			icon: "kubejs:jihuo"
+			id: "3778A9C287455451"
+			tasks: [
+				{
+					id: "49F046C1B6B426C5"
+					item: "whispering:pioneer_core"
+					type: "item"
+				}
+				{
+					id: "2905DB9ABEEB890A"
+					item: "whispering:feng_bao_wang_guan"
+					type: "item"
+				}
+			]
+			title: "瘫痪"
+			x: 11.0d
+			y: -4.5d
+		}
+		{
+			description: [
+				"&7受到带有攻击者来源的伤害时，会向攻击者反射原伤害的&e10%～35%&7，单次反射伤害最高为&e100点&7。"
+				"&7该能力不会反射&e反射伤害&7或&e荆棘伤害&7，但反射伤害&e可以直接击杀攻击者&7。"
+				"&e你可以制作上述的这些饰品来免疫反射词条的伤害"
+			]
+			entity_vis_size: 1.0f
+			icon: "kubejs:jihuo"
+			id: "2D76CD035241F2B1"
+			tasks: [
+				{
+					id: "04BFDE56FB07B1E4"
+					item: "whispering:earthshaker_crystal"
+					type: "item"
+				}
+				{
+					id: "7BD2B8B2C50790D9"
+					item: "whispering:thunder_core"
+					type: "item"
+				}
+				{
+					id: "4BF0F65AAC5BDDFF"
+					item: "whispering:feng_bao_wang_guan"
+					type: "item"
+				}
+				{
+					id: "3351CA04904FDFCB"
+					item: "whispering:immortal_amulet"
+					type: "item"
+				}
+			]
+			title: "反射"
+			x: 5.0d
+			y: -2.5d
+		}
+		{
+			description: ["&7每隔&e2秒&7，有&e18%概率&7切换护盾的开启状态。护盾亮起时，会&e完全抵消除虚空伤害以外的所有攻击&7。"]
+			entity_vis_size: 1.0f
+			icon: "kubejs:jihuo"
+			id: "1E617797FFE7D646"
+			subtitle: "&c【词条已禁用】"
+			tasks: [{
+				id: "7292CD6FFF29905F"
+				title: "保护"
+				type: "checkmark"
+			}]
+			x: 6.5d
+			y: -2.5d
+		}
+		{
+			description: [
+				"&7攻击时有&e40%概率&7对目标施加持续&e10秒&7的创伤。创伤期间："
+				"&e• &7受到的所有伤害提高&e50%"
+				"&e• &7获得的治疗量降低&e50%"
+			]
+			entity_vis_size: 1.0f
+			icon: "kubejs:jihuo"
+			id: "441D45602CD9176C"
+			tasks: [{
+				id: "10D2756549337856"
+				title: "创伤"
+				type: "checkmark"
+			}]
+			x: 8.0d
+			y: -2.5d
+		}
+		{
+			description: [
+				"&7攻击时有&e20%概率&7施加持续&e30秒&7的“能力压制”。目标已拥有该效果时，不会刷新持续时间。"
+				"&7能力压制会使全属性降低&e15%&7："
+			]
+			entity_vis_size: 1.0f
+			icon: "kubejs:jihuo"
+			id: "074249F4FB0C5177"
+			tasks: [{
+				id: "0B5E90BCDE93280E"
+				title: "能力衰弱"
+				type: "checkmark"
+			}]
+			x: 9.5d
+			y: -2.5d
+		}
+		{
+			description: [
+				"&7每次攻击都会对尚未拥有该效果的目标施加持续&e30秒&7的“元素控制”。"
+				"&7元素控制会使全属性降低&e50%&7："
+			]
+			entity_vis_size: 1.0f
+			icon: "kubejs:jihuo"
+			id: "7D2BEBEB183C16A0"
+			tasks: [{
+				id: "1B9F34B22599EDD3"
+				item: "whispering:feng_bao_wang_guan"
+				type: "item"
+			}]
+			title: "元素控制"
+			x: 8.0d
+			y: -0.5d
+		}
+	]
+	title: "&f冠军词条/应对手段"
+}

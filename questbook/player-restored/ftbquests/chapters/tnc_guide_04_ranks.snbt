@@ -1,0 +1,134 @@
+{
+	default_hide_dependency_lines: true
+	default_quest_shape: "square"
+	filename: "tnc_guide_04_ranks"
+	group: "544E434755494445"
+	icon: {
+		Count: 1
+		id: "minecraft:iron_sword"
+		tag: {
+			Damage: 0
+		}
+	}
+	id: "544E430104000000"
+	order_index: 9
+	quest_links: [ ]
+	quests: [
+		{
+			description: [
+				"&b&l让协会记住你"
+				"&7等级积累经历，职称见证贡献"
+				""
+				"&e协会登记与精锐晋升已开放"
+				""
+				"&f点击章节中的节点阅读说明。勾选只表示看过本节，不代表完成升级、买房或委托。"
+				"&7真实目标请查看七个玩法章节；各系统开放范围见本页状态。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "minecraft:iron_sword"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E430204000000"
+			shape: "square"
+			size: 1.8d
+			tasks: [{
+				id: "544E430304000000"
+				title: "阅读本节（不发放玩法奖励）"
+				type: "checkmark"
+			}]
+			title: "&b&l让协会记住你"
+			x: 0.0d
+			y: 0.0d
+		}
+		{
+			description: [
+				"&e协会登记与精锐晋升已开放"
+				""
+				"&b&l六段成长"
+				""
+				"&f酒馆找艾琳登记初级。达到Lv10与100声望再找艾琳晋升精锐。王/帝/龙/冠名职称与专属晋升挑战仍待后续制作。"
+				"&f原生板另有自己的稀有度和信誉级别；不把它冒充为尚未实现的协会C/B/A委托。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "minecraft:iron_sword"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E430204000001"
+			shape: "square"
+			size: 1.0d
+			tasks: [{
+				id: "544E430304000001"
+				title: "阅读本节（不发放玩法奖励）"
+				type: "checkmark"
+			}]
+			title: "六段成长"
+			x: -6.0d
+			y: 3.0d
+		}
+		{
+			description: [
+				"&e协会登记与精锐晋升已开放"
+				""
+				"&b&l不只看数字"
+				""
+				"&f声望来自真实委托结算，击杀本身只发冒险经验。城镇原生报酬每份10声望；旧已接单沿用原价与旧等级声望折算。账户属于角色，FTB队伍共享任务进度不复制个人报酬。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "minecraft:iron_sword"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E430204000002"
+			shape: "square"
+			size: 1.0d
+			tasks: [{
+				id: "544E430304000002"
+				title: "阅读本节（不发放玩法奖励）"
+				type: "checkmark"
+			}]
+			title: "不只看数字"
+			x: -3.0d
+			y: 3.0d
+		}
+		{
+			description: [
+				"&e协会登记与精锐晋升已开放"
+				""
+				"&b&l属于你的名号"
+				""
+				"&f远行章节已提供下界、末地、海底、深暗和首领物资路线；这些是可完成的探索目标。冠名剧情、神法奇遇、婚礼与孩子不会用勾选阅读冒充实现。"
+			]
+			entity_vis_size: 1.0f
+			icon: {
+				Count: 1
+				id: "minecraft:iron_sword"
+				tag: {
+					Damage: 0
+				}
+			}
+			id: "544E430204000003"
+			shape: "square"
+			size: 1.0d
+			tasks: [{
+				id: "544E430304000003"
+				title: "阅读本节（不发放玩法奖励）"
+				type: "checkmark"
+			}]
+			title: "属于你的名号"
+			x: 0.0d
+			y: 3.0d
+		}
+	]
+	title: "04 - 让协会记住你"
+}

@@ -1,0 +1,12 @@
+{
+	default_hide_dependency_lines: false
+	default_quest_shape: ""
+	filename: "7D5EC398D4585771"
+	group: "544E434755494445"
+	icon: "fruitsdelight:bayberry_soup"
+	id: "7D5EC398D4585771"
+	order_index: 14
+	quest_links: [ ]
+	quests: [ ]
+	title: "茶馆娱乐"
+}

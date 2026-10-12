@@ -28,7 +28,7 @@ public final class BotanicalPlantEntity extends BlockEntity {
     public long lastClock=-1;
     public BotanicalPlantEntity(BlockPos p,BlockState s){super(BotanicalContent.PLANT_ENTITY,p,s);}
     public BotanicalSpecies species(){return ((BotanicalBlock)getBlockState().getBlock()).species;}
-    public void plantedBy(UUID id){owner=species()==BotanicalSpecies.DANCE_BELL?null:id;wild=false;changed();}
+    public void plantedBy(UUID id){owner=id;wild=false;changed();}
     public void setWild(){wild=true;growth=species().firstTicks;ready=!species().eventCrop();notes=3;pollinations=3;changed();}
     public void changed(){setChanged();if(level!=null&&!level.isClientSide)level.sendBlockUpdated(worldPosition,getBlockState(),getBlockState(),2);}
     public void water(UUID player,boolean transfer){if(level==null)return;wetUntil=level.getGameTime()+12000;if(species()==BotanicalSpecies.DANCE_BELL&&(owner==null||transfer))owner=player;changed();}
@@ -39,6 +39,8 @@ public final class BotanicalPlantEntity extends BlockEntity {
     private boolean sky(ServerLevel l){return l.canSeeSky(worldPosition);}
     public String reason(ServerLevel l){
         if(!wild) {
+            if(!com.tnc.tnc.life.routes.MagicSoilBlock.isSoil(l.getBlockState(worldPosition.below())))return "需要魔法土或土源";
+            if(!com.tnc.tnc.life.routes.MagicSoilBlock.irrigated(l,worldPosition.below()))return "缺少八格内的流动魔力：保留植株，暂停生长";
             int height=species()==BotanicalSpecies.LADDER_VINE?Math.min(4,Math.max(1,(growth+20)/7200)):species()==BotanicalSpecies.PAPER_TREE?3:1;
             return space(l,height)?"":"上方生长空间被挡住";
         }
@@ -66,14 +68,14 @@ public final class BotanicalPlantEntity extends BlockEntity {
     private boolean space(ServerLevel l,int height){for(int y=1;y<height;y++){BlockPos p=worldPosition.above(y);if(!l.hasChunkAt(p))return false;var state=l.getBlockState(p);if(!state.isAir()&&!state.is(BotanicalContent.VINE_SEGMENT)&&!state.is(BotanicalContent.PAPER_SEGMENT))return false;}return true;}
     private boolean saltHabitat(ServerLevel l){if(adjacent(l,b->b.is(BotanicalContent.SALT_BASIN)||b.is(Blocks.WATER_CAULDRON),4))return true;var key=l.getBiome(worldPosition).unwrapKey();return key.isPresent()&&key.get().location().getPath().contains("ocean")&&wet(l);}
     private int canopy(ServerLevel l){int mask=0;for(int x=-1;x<=1;x++)for(int z=-1;z<=1;z++)if(l.hasChunkAt(worldPosition.offset(x,2,z))&&!l.getBlockState(worldPosition.offset(x,2,z)).isAir())mask|=1<<((x+1)*3+z+1);return mask;}
-    public boolean canHarvest(){return growth>=species().firstTicks&&(!species().eventCrop()||ready)&&(species()!=BotanicalSpecies.HONEY_CLUSTER||pollinations>=3);}
+    public boolean canHarvest(){return growth>=species().firstTicks;}
     public void pollinate(){if(level==null||level.getGameTime()-lastPollination<20||pollinations>=3)return;lastPollination=level.getGameTime();pollinations++;changed();}
     public boolean pollinateOnce(){int before=pollinations;pollinate();return pollinations>before;}
-    public void note(int pitch){if(level==null)return;pattern=Math.max(0,Math.min(24,pitch));notes=Math.min(3,notes+1);changed();}
+    public void note(int pitch){if(level==null)return;pattern=Math.max(0,Math.min(24,pitch));notes=Math.min(3,notes+1);getPersistentData().putInt("DistinctNotes",getPersistentData().getInt("DistinctNotes")|(1<<pattern));changed();}
     public void sleep(UUID id,long day){if(species()!=BotanicalSpecies.SLEEP_CLOCK||owner==null||!owner.equals(id)||growth<species().firstTicks||lastSleep==day)return;lastSleep=day;ready=true;changed();}
-    public void harvest(){var s=species();ready=false;returns=0;pollinations=0;growth=s.firstTicks-s.regrowTicks;if(level instanceof ServerLevel l){updateSegments(l);l.setBlock(worldPosition,getBlockState().setValue(BotanicalBlock.AGE,1),3);}changed();}
-    public String status(){if(!(level instanceof ServerLevel l))return species().help;String why=reason(l);if(growth<species().firstTicks)return species().name+" · "+(growth*100/species().firstTicks)+"% · "+(why.isEmpty()?"正在成长":why);if(species()==BotanicalSpecies.HONEY_CLUSTER&&pollinations<3)return "蜜簇已长成 · 授粉 "+pollinations+"/3";if(!canHarvest())return species().name+"已成株 · "+switch(species()){case DAWN_DISK ->"等待一次真实黎明";case MIST_COTTON ->"等待清晨或雨停结绒";case SLEEP_CLOCK ->"等认养者在床旁睡醒";case STAR_REST ->"花灵夜游中，等待至少两只回归";default -> why;};return "已经成熟 · "+species().help;}
-    public static void tick(ServerLevel l,BlockPos p,BlockState state,BotanicalPlantEntity be){if(l.getGameTime()%20!=0)return;var species=be.species();long now=l.getGameTime();boolean consecutive=be.knownClock&&now-be.lastActiveTick<=40;boolean valid=be.reason(l).isEmpty();
+    public void harvest(){var s=species();getPersistentData().putInt("ManaBuffer",0);ready=false;returns=0;pollinations=0;growth=s.firstTicks-s.regrowTicks;if(level instanceof ServerLevel l){updateSegments(l);l.setBlock(worldPosition,getBlockState().setValue(BotanicalBlock.AGE,1),3);}changed();}
+    public String status(){if(!(level instanceof ServerLevel l))return species().help;String why=reason(l);if(growth<species().firstTicks)return species().name+" · "+(growth*100/species().firstTicks)+"% · "+(why.isEmpty()?"正在成长":why);if(species()==BotanicalSpecies.HONEY_CLUSTER&&pollinations<3&&!canHarvest())return "蜜簇已长成 · 授粉 "+pollinations+"/3";if(!canHarvest())return species().name+"已成株 · "+switch(species()){case DAWN_DISK ->"等待一次真实黎明";case MIST_COTTON ->"等待清晨或雨停结绒";case SLEEP_CLOCK ->"等认养者在床旁睡醒";case STAR_REST ->"花灵夜游中，等待至少两只回归";default -> why;};return "已经成熟 · "+species().help;}
+    public static void tick(ServerLevel l,BlockPos p,BlockState state,BotanicalPlantEntity be){if(l.getGameTime()%20!=0)return;var species=be.species();long now=l.getGameTime();boolean consecutive=be.knownClock&&now-be.lastActiveTick<=40;boolean valid=be.reason(l).isEmpty();if(valid&&!be.wild&&be.owner!=null)com.tnc.tnc.life.routes.RouteSources.draw(l,p,be.owner,0);
         if(valid&&be.growth<species.firstTicks)be.growth=Math.min(species.firstTicks,be.growth+20);
         be.lastActiveTick=now;be.knownClock=true;be.wasGrowing=valid;
         int age=Math.max(be.harvests>0?1:0,Math.min(3,be.growth*3/species.firstTicks)),mode=valid?1:0;

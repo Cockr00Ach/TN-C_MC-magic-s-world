@@ -134,7 +134,7 @@ public final class TNDarkAimMechanics {
 
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) {
+        if (event.phase != TickEvent.Phase.END || !net.minecraftforge.fml.ModList.get().isLoaded("spell_engine")) {
             return;
         }
         if (!(event.player instanceof ServerPlayer player)) {

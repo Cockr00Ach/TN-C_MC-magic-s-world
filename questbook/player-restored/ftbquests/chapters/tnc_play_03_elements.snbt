@@ -1,0 +1,834 @@
+{
+	default_hide_dependency_lines: false
+	default_quest_shape: "hexagon"
+	filename: "tnc_play_03_elements"
+	group: "544E434755494445"
+	icon: "tnc:water_wand_5"
+	id: "544E450100000003"
+	images: [
+		{
+			height: 2.6d
+			image: "tnc:textures/item/wands/water_wand_5.png"
+			rotation: 0.0d
+			width: 2.6d
+			x: -13.5d
+			y: -3.0d
+		}
+		{
+			height: 2.6d
+			image: "tnc:textures/item/wands/fire_wand_5.png"
+			rotation: 0.0d
+			width: 2.6d
+			x: -9.0d
+			y: -3.0d
+		}
+		{
+			height: 2.6d
+			image: "tnc:textures/item/wands/lightning_wand_5.png"
+			rotation: 0.0d
+			width: 2.6d
+			x: -4.5d
+			y: -3.0d
+		}
+		{
+			height: 2.6d
+			image: "tnc:textures/item/wands/wind_wand_5.png"
+			rotation: 0.0d
+			width: 2.6d
+			x: 0.0d
+			y: -3.0d
+		}
+		{
+			height: 2.6d
+			image: "tnc:textures/item/wands/earth_wand_5.png"
+			rotation: 0.0d
+			width: 2.6d
+			x: 4.5d
+			y: -3.0d
+		}
+		{
+			height: 2.6d
+			image: "tnc:textures/item/wands/light_wand_5.png"
+			rotation: 0.0d
+			width: 2.6d
+			x: 9.0d
+			y: -3.0d
+		}
+		{
+			height: 2.6d
+			image: "tnc:textures/item/wands/dark_wand_5.png"
+			rotation: 0.0d
+			width: 2.6d
+			x: 13.5d
+			y: -3.0d
+		}
+	]
+	order_index: 3
+	quest_links: [ ]
+	quests: [
+		{
+			description: [
+				"&b&l水系 · 冒险者法杖"
+				""
+				"&f莉娅订单：Lv1；人工费30铜（首次一阶免费）。材料详见工坊。承载本系已学1～1阶法术，含通用术。升阶保留魔法石知识。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:water_wand_1"
+			id: "544E450200000001"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E450300000001"
+				item: "tnc:water_wand_1"
+				type: "item"
+			}]
+			title: "水系 · 冒险者法杖"
+			x: -13.200000000000001d
+			y: -1.1d
+		}
+		{
+			dependencies: ["544E450200000001"]
+			description: [
+				"&b&l水系 · 精良法杖"
+				""
+				"&f莉娅订单：Lv10；人工费250铜（首次一阶免费）。材料详见工坊。承载本系已学1～2阶法术，含通用术。升阶保留魔法石知识。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:water_wand_2"
+			id: "544E450200000004"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E450300000004"
+				item: "tnc:water_wand_2"
+				type: "item"
+			}]
+			title: "水系 · 精良法杖"
+			x: -13.200000000000001d
+			y: 0.55d
+		}
+		{
+			dependencies: ["544E450200000004"]
+			description: [
+				"&b&l水系 · 王级法杖"
+				""
+				"&f莉娅订单：Lv25；人工费1500铜（首次一阶免费）。材料详见工坊。承载本系已学1～3阶法术，含通用术。升阶保留魔法石知识。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:water_wand_3"
+			id: "544E450200000007"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E450300000007"
+				item: "tnc:water_wand_3"
+				type: "item"
+			}]
+			title: "水系 · 王级法杖"
+			x: -13.200000000000001d
+			y: 2.2d
+		}
+		{
+			dependencies: ["544E450200000007"]
+			description: [
+				"&b&l水系 · 传说法杖"
+				""
+				"&f莉娅订单：Lv50；人工费8000铜（首次一阶免费）。材料详见工坊。承载本系已学1～4阶法术，含通用术。升阶保留魔法石知识。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:water_wand_4"
+			id: "544E45020000000A"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E45030000000A"
+				item: "tnc:water_wand_4"
+				type: "item"
+			}]
+			title: "水系 · 传说法杖"
+			x: -13.200000000000001d
+			y: 3.85d
+		}
+		{
+			dependencies: ["544E45020000000A"]
+			description: [
+				"&b&l傲慢的水龙王"
+				""
+				"&f莉娅订单：Lv85；人工费50000铜（首次一阶免费）。材料详见工坊。承载本系已学1～5阶法术，含通用术。升阶保留魔法石知识。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:water_wand_5"
+			id: "544E45020000000D"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E45030000000D"
+				item: "tnc:water_wand_5"
+				type: "item"
+			}]
+			title: "傲慢的水龙王"
+			x: -13.200000000000001d
+			y: 5.5d
+		}
+		{
+			description: [
+				"&b&l火系 · 冒险者法杖"
+				""
+				"&f莉娅订单：Lv1；人工费30铜（首次一阶免费）。材料详见工坊。承载本系已学1～1阶法术，含通用术。升阶保留魔法石知识。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:fire_wand_1"
+			id: "544E45020000000E"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E45030000000E"
+				item: "tnc:fire_wand_1"
+				type: "item"
+			}]
+			title: "火系 · 冒险者法杖"
+			x: -8.8d
+			y: -1.1d
+		}
+		{
+			dependencies: ["544E45020000000E"]
+			description: [
+				"&b&l火系 · 精良法杖"
+				""
+				"&f莉娅订单：Lv10；人工费250铜（首次一阶免费）。材料详见工坊。承载本系已学1～2阶法术，含通用术。升阶保留魔法石知识。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:fire_wand_2"
+			id: "544E450200000011"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E450300000011"
+				item: "tnc:fire_wand_2"
+				type: "item"
+			}]
+			title: "火系 · 精良法杖"
+			x: -8.8d
+			y: 0.55d
+		}
+		{
+			dependencies: ["544E450200000011"]
+			description: [
+				"&b&l火系 · 王级法杖"
+				""
+				"&f莉娅订单：Lv25；人工费1500铜（首次一阶免费）。材料详见工坊。承载本系已学1～3阶法术，含通用术。升阶保留魔法石知识。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:fire_wand_3"
+			id: "544E450200000014"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E450300000014"
+				item: "tnc:fire_wand_3"
+				type: "item"
+			}]
+			title: "火系 · 王级法杖"
+			x: -8.8d
+			y: 2.2d
+		}
+		{
+			dependencies: ["544E450200000014"]
+			description: [
+				"&b&l火系 · 传说法杖"
+				""
+				"&f莉娅订单：Lv50；人工费8000铜（首次一阶免费）。材料详见工坊。承载本系已学1～4阶法术，含通用术。升阶保留魔法石知识。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:fire_wand_4"
+			id: "544E450200000017"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E450300000017"
+				item: "tnc:fire_wand_4"
+				type: "item"
+			}]
+			title: "火系 · 传说法杖"
+			x: -8.8d
+			y: 3.85d
+		}
+		{
+			dependencies: ["544E450200000017"]
+			description: [
+				"&b&l冠烬烈阳"
+				""
+				"&f莉娅订单：Lv85；人工费50000铜（首次一阶免费）。材料详见工坊。承载本系已学1～5阶法术，含通用术。升阶保留魔法石知识。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:fire_wand_5"
+			id: "544E45020000001A"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E45030000001A"
+				item: "tnc:fire_wand_5"
+				type: "item"
+			}]
+			title: "冠烬烈阳"
+			x: -8.8d
+			y: 5.5d
+		}
+		{
+			description: [
+				"&b&l雷系 · 冒险者法杖"
+				""
+				"&f莉娅订单：Lv1；人工费30铜（首次一阶免费）。材料详见工坊。承载本系已学1～1阶法术，含通用术。升阶保留魔法石知识。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:lightning_wand_1"
+			id: "544E45020000001B"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E45030000001B"
+				item: "tnc:lightning_wand_1"
+				type: "item"
+			}]
+			title: "雷系 · 冒险者法杖"
+			x: -4.4d
+			y: -1.1d
+		}
+		{
+			dependencies: ["544E45020000001B"]
+			description: [
+				"&b&l雷系 · 精良法杖"
+				""
+				"&f莉娅订单：Lv10；人工费250铜（首次一阶免费）。材料详见工坊。承载本系已学1～2阶法术，含通用术。升阶保留魔法石知识。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:lightning_wand_2"
+			id: "544E45020000001E"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E45030000001E"
+				item: "tnc:lightning_wand_2"
+				type: "item"
+			}]
+			title: "雷系 · 精良法杖"
+			x: -4.4d
+			y: 0.55d
+		}
+		{
+			dependencies: ["544E45020000001E"]
+			description: [
+				"&b&l雷系 · 王级法杖"
+				""
+				"&f莉娅订单：Lv25；人工费1500铜（首次一阶免费）。材料详见工坊。承载本系已学1～3阶法术，含通用术。升阶保留魔法石知识。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:lightning_wand_3"
+			id: "544E450200000021"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E450300000021"
+				item: "tnc:lightning_wand_3"
+				type: "item"
+			}]
+			title: "雷系 · 王级法杖"
+			x: -4.4d
+			y: 2.2d
+		}
+		{
+			dependencies: ["544E450200000021"]
+			description: [
+				"&b&l雷系 · 传说法杖"
+				""
+				"&f莉娅订单：Lv50；人工费8000铜（首次一阶免费）。材料详见工坊。承载本系已学1～4阶法术，含通用术。升阶保留魔法石知识。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:lightning_wand_4"
+			id: "544E450200000024"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E450300000024"
+				item: "tnc:lightning_wand_4"
+				type: "item"
+			}]
+			title: "雷系 · 传说法杖"
+			x: -4.4d
+			y: 3.85d
+		}
+		{
+			dependencies: ["544E450200000024"]
+			description: [
+				"&b&l审判的天穹"
+				""
+				"&f莉娅订单：Lv85；人工费50000铜（首次一阶免费）。材料详见工坊。承载本系已学1～5阶法术，含通用术。升阶保留魔法石知识。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:lightning_wand_5"
+			id: "544E450200000027"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E450300000027"
+				item: "tnc:lightning_wand_5"
+				type: "item"
+			}]
+			title: "审判的天穹"
+			x: -4.4d
+			y: 5.5d
+		}
+		{
+			description: [
+				"&b&l风系 · 冒险者法杖"
+				""
+				"&f莉娅订单：Lv1；人工费30铜（首次一阶免费）。材料详见工坊。承载本系已学1～1阶法术，含通用术。升阶保留魔法石知识。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:wind_wand_1"
+			id: "544E450200000028"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E450300000028"
+				item: "tnc:wind_wand_1"
+				type: "item"
+			}]
+			title: "风系 · 冒险者法杖"
+			x: 0.0d
+			y: -1.1d
+		}
+		{
+			dependencies: ["544E450200000028"]
+			description: [
+				"&b&l风系 · 精良法杖"
+				""
+				"&f莉娅订单：Lv10；人工费250铜（首次一阶免费）。材料详见工坊。承载本系已学1～2阶法术，含通用术。升阶保留魔法石知识。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:wind_wand_2"
+			id: "544E45020000002B"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E45030000002B"
+				item: "tnc:wind_wand_2"
+				type: "item"
+			}]
+			title: "风系 · 精良法杖"
+			x: 0.0d
+			y: 0.55d
+		}
+		{
+			dependencies: ["544E45020000002B"]
+			description: [
+				"&b&l风系 · 王级法杖"
+				""
+				"&f莉娅订单：Lv25；人工费1500铜（首次一阶免费）。材料详见工坊。承载本系已学1～3阶法术，含通用术。升阶保留魔法石知识。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:wind_wand_3"
+			id: "544E45020000002E"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E45030000002E"
+				item: "tnc:wind_wand_3"
+				type: "item"
+			}]
+			title: "风系 · 王级法杖"
+			x: 0.0d
+			y: 2.2d
+		}
+		{
+			dependencies: ["544E45020000002E"]
+			description: [
+				"&b&l风系 · 传说法杖"
+				""
+				"&f莉娅订单：Lv50；人工费8000铜（首次一阶免费）。材料详见工坊。承载本系已学1～4阶法术，含通用术。升阶保留魔法石知识。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:wind_wand_4"
+			id: "544E450200000031"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E450300000031"
+				item: "tnc:wind_wand_4"
+				type: "item"
+			}]
+			title: "风系 · 传说法杖"
+			x: 0.0d
+			y: 3.85d
+		}
+		{
+			dependencies: ["544E450200000031"]
+			description: [
+				"&b&l无拘的长风"
+				""
+				"&f莉娅订单：Lv85；人工费50000铜（首次一阶免费）。材料详见工坊。承载本系已学1～5阶法术，含通用术。升阶保留魔法石知识。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:wind_wand_5"
+			id: "544E450200000034"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E450300000034"
+				item: "tnc:wind_wand_5"
+				type: "item"
+			}]
+			title: "无拘的长风"
+			x: 0.0d
+			y: 5.5d
+		}
+		{
+			description: [
+				"&b&l土系 · 冒险者法杖"
+				""
+				"&f莉娅订单：Lv1；人工费30铜（首次一阶免费）。材料详见工坊。承载本系已学1～1阶法术，含通用术。升阶保留魔法石知识。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:earth_wand_1"
+			id: "544E450200000035"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E450300000035"
+				item: "tnc:earth_wand_1"
+				type: "item"
+			}]
+			title: "土系 · 冒险者法杖"
+			x: 4.4d
+			y: -1.1d
+		}
+		{
+			dependencies: ["544E450200000035"]
+			description: [
+				"&b&l土系 · 精良法杖"
+				""
+				"&f莉娅订单：Lv10；人工费250铜（首次一阶免费）。材料详见工坊。承载本系已学1～2阶法术，含通用术。升阶保留魔法石知识。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:earth_wand_2"
+			id: "544E450200000038"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E450300000038"
+				item: "tnc:earth_wand_2"
+				type: "item"
+			}]
+			title: "土系 · 精良法杖"
+			x: 4.4d
+			y: 0.55d
+		}
+		{
+			dependencies: ["544E450200000038"]
+			description: [
+				"&b&l土系 · 王级法杖"
+				""
+				"&f莉娅订单：Lv25；人工费1500铜（首次一阶免费）。材料详见工坊。承载本系已学1～3阶法术，含通用术。升阶保留魔法石知识。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:earth_wand_3"
+			id: "544E45020000003B"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E45030000003B"
+				item: "tnc:earth_wand_3"
+				type: "item"
+			}]
+			title: "土系 · 王级法杖"
+			x: 4.4d
+			y: 2.2d
+		}
+		{
+			dependencies: ["544E45020000003B"]
+			description: [
+				"&b&l土系 · 传说法杖"
+				""
+				"&f莉娅订单：Lv50；人工费8000铜（首次一阶免费）。材料详见工坊。承载本系已学1～4阶法术，含通用术。升阶保留魔法石知识。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:earth_wand_4"
+			id: "544E45020000003E"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E45030000003E"
+				item: "tnc:earth_wand_4"
+				type: "item"
+			}]
+			title: "土系 · 传说法杖"
+			x: 4.4d
+			y: 3.85d
+		}
+		{
+			dependencies: ["544E45020000003E"]
+			description: [
+				"&b&l不动的山君"
+				""
+				"&f莉娅订单：Lv85；人工费50000铜（首次一阶免费）。材料详见工坊。承载本系已学1～5阶法术，含通用术。升阶保留魔法石知识。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:earth_wand_5"
+			id: "544E450200000041"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E450300000041"
+				item: "tnc:earth_wand_5"
+				type: "item"
+			}]
+			title: "不动的山君"
+			x: 4.4d
+			y: 5.5d
+		}
+		{
+			description: [
+				"&b&l光系 · 冒险者法杖"
+				""
+				"&f莉娅订单：Lv1；人工费30铜（首次一阶免费）。材料详见工坊。承载本系已学1～1阶法术，含通用术。光系普通战斗链尚未开放，可承载通用术；不强制学习占位领域。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:light_wand_1"
+			id: "544E450200000042"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E450300000042"
+				item: "tnc:light_wand_1"
+				type: "item"
+			}]
+			title: "光系 · 冒险者法杖"
+			x: 8.8d
+			y: -1.1d
+		}
+		{
+			dependencies: ["544E450200000042"]
+			description: [
+				"&b&l光系 · 精良法杖"
+				""
+				"&f莉娅订单：Lv10；人工费250铜（首次一阶免费）。材料详见工坊。承载本系已学1～2阶法术，含通用术。光系普通战斗链尚未开放，可承载通用术；不强制学习占位领域。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:light_wand_2"
+			id: "544E450200000044"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E450300000044"
+				item: "tnc:light_wand_2"
+				type: "item"
+			}]
+			title: "光系 · 精良法杖"
+			x: 8.8d
+			y: 0.55d
+		}
+		{
+			dependencies: ["544E450200000044"]
+			description: [
+				"&b&l光系 · 王级法杖"
+				""
+				"&f莉娅订单：Lv25；人工费1500铜（首次一阶免费）。材料详见工坊。承载本系已学1～3阶法术，含通用术。光系普通战斗链尚未开放，可承载通用术；不强制学习占位领域。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:light_wand_3"
+			id: "544E450200000046"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E450300000046"
+				item: "tnc:light_wand_3"
+				type: "item"
+			}]
+			title: "光系 · 王级法杖"
+			x: 8.8d
+			y: 2.2d
+		}
+		{
+			dependencies: ["544E450200000046"]
+			description: [
+				"&b&l光系 · 传说法杖"
+				""
+				"&f莉娅订单：Lv50；人工费8000铜（首次一阶免费）。材料详见工坊。承载本系已学1～4阶法术，含通用术。光系普通战斗链尚未开放，可承载通用术；不强制学习占位领域。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:light_wand_4"
+			id: "544E450200000048"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E450300000048"
+				item: "tnc:light_wand_4"
+				type: "item"
+			}]
+			title: "光系 · 传说法杖"
+			x: 8.8d
+			y: 3.85d
+		}
+		{
+			dependencies: ["544E450200000048"]
+			description: [
+				"&b&l不灭的晨星"
+				""
+				"&f莉娅订单：Lv85；人工费50000铜（首次一阶免费）。材料详见工坊。承载本系已学1～5阶法术，含通用术。光系普通战斗链尚未开放，可承载通用术；不强制学习占位领域。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:light_wand_5"
+			id: "544E45020000004A"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E45030000004A"
+				item: "tnc:light_wand_5"
+				type: "item"
+			}]
+			title: "不灭的晨星"
+			x: 8.8d
+			y: 5.5d
+		}
+		{
+			description: [
+				"&b&l暗系 · 冒险者法杖"
+				""
+				"&f莉娅订单：Lv1；人工费30铜（首次一阶免费）。材料详见工坊。承载本系已学1～1阶法术，含通用术。升阶保留魔法石知识。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:dark_wand_1"
+			id: "544E45020000004B"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E45030000004B"
+				item: "tnc:dark_wand_1"
+				type: "item"
+			}]
+			title: "暗系 · 冒险者法杖"
+			x: 13.200000000000001d
+			y: -1.1d
+		}
+		{
+			dependencies: ["544E45020000004B"]
+			description: [
+				"&b&l暗系 · 精良法杖"
+				""
+				"&f莉娅订单：Lv10；人工费250铜（首次一阶免费）。材料详见工坊。承载本系已学1～2阶法术，含通用术。升阶保留魔法石知识。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:dark_wand_2"
+			id: "544E45020000004E"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E45030000004E"
+				item: "tnc:dark_wand_2"
+				type: "item"
+			}]
+			title: "暗系 · 精良法杖"
+			x: 13.200000000000001d
+			y: 0.55d
+		}
+		{
+			dependencies: ["544E45020000004E"]
+			description: [
+				"&b&l暗系 · 王级法杖"
+				""
+				"&f莉娅订单：Lv25；人工费1500铜（首次一阶免费）。材料详见工坊。承载本系已学1～3阶法术，含通用术。升阶保留魔法石知识。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:dark_wand_3"
+			id: "544E450200000051"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E450300000051"
+				item: "tnc:dark_wand_3"
+				type: "item"
+			}]
+			title: "暗系 · 王级法杖"
+			x: 13.200000000000001d
+			y: 2.2d
+		}
+		{
+			dependencies: ["544E450200000051"]
+			description: [
+				"&b&l暗系 · 传说法杖"
+				""
+				"&f莉娅订单：Lv50；人工费8000铜（首次一阶免费）。材料详见工坊。承载本系已学1～4阶法术，含通用术。升阶保留魔法石知识。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:dark_wand_4"
+			id: "544E450200000054"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E450300000054"
+				item: "tnc:dark_wand_4"
+				type: "item"
+			}]
+			title: "暗系 · 传说法杖"
+			x: 13.200000000000001d
+			y: 3.85d
+		}
+		{
+			dependencies: ["544E450200000054"]
+			description: [
+				"&b&l吞夜的君主"
+				""
+				"&f莉娅订单：Lv85；人工费50000铜（首次一阶免费）。材料详见工坊。承载本系已学1～5阶法术，含通用术。升阶保留魔法石知识。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:dark_wand_5"
+			id: "544E450200000057"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				consume_items: false
+				id: "544E450300000057"
+				item: "tnc:dark_wand_5"
+				type: "item"
+			}]
+			title: "吞夜的君主"
+			x: 13.200000000000001d
+			y: 5.5d
+		}
+	]
+	title: "&b&l提升之路 · 七系法器"
+}

@@ -1,0 +1,127 @@
+{
+	default_hide_dependency_lines: true
+	default_quest_shape: "square"
+	filename: "tnc_guide_06_money"
+	group: "544E434755494445"
+	icon: "minecraft:emerald"
+	id: "544E430106000000"
+	order_index: 11
+	quest_links: [ ]
+	quests: [
+		{
+			description: [
+				"&b&l钱袋与交易"
+				"&7第一笔旅费，决定下一次出发"
+				""
+				"&e账户、实体三币与专属钱袋槽已开放"
+				""
+				"&f点击章节中的节点阅读说明。勾选只表示看过本节，不代表完成升级、买房或委托。"
+				"&7真实目标请查看七个玩法章节；各系统开放范围见本页状态。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:emerald"
+			id: "544E430206000000"
+			shape: "square"
+			size: 1.8d
+			tasks: [{
+				id: "544E430306000000"
+				title: "阅读本节（不发放玩法奖励）"
+				type: "checkmark"
+			}]
+			title: "&b&l钱袋与交易"
+			x: 0.0d
+			y: 0.0d
+		}
+		{
+			description: [
+				"&e账户、实体三币与专属钱袋槽已开放"
+				""
+				"&b&l三种币值"
+				""
+				"&f100铜＝1银，100银＝1金。账户以整数铜保存，最高10亿铜；所有交易由服务端校验。绿宝石保持原用途，没有无限兑换入口。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:emerald"
+			id: "544E430206000001"
+			shape: "square"
+			size: 1.0d
+			tasks: [{
+				id: "544E430306000001"
+				title: "阅读本节（不发放玩法奖励）"
+				type: "checkmark"
+			}]
+			title: "三种币值"
+			x: -6.0d
+			y: 3.0d
+		}
+		{
+			description: [
+				"&e账户、实体三币与专属钱袋槽已开放"
+				""
+				"&b&l钱袋属于角色"
+				""
+				"&fE背包旁点“行囊”，看到独立钱袋装备槽、食物袋槽及五格食物。钱袋余额属于你的UUID，复制、丢失或更换袋子不会复制或吞余额。"
+				"&f可取一铜、一银、一金，或存入背包全部实体币。满背包取币不扣钱。账户余额死亡保留，普通背包实体币遵循普通掉落。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:emerald"
+			id: "544E430206000002"
+			shape: "square"
+			size: 1.0d
+			tasks: [{
+				id: "544E430306000002"
+				title: "阅读本节（不发放玩法奖励）"
+				type: "checkmark"
+			}]
+			title: "钱袋属于角色"
+			x: -3.0d
+			y: 3.0d
+		}
+		{
+			description: [
+				"&e账户、实体三币与专属钱袋槽已开放"
+				""
+				"&b&l赚什么，花在哪里"
+				""
+				"&f收入来自原生酒馆委托及旧单归档，支出为七系法器、铁匠装备与500铜住宅。最近五笔流水在档案显示。"
+				"&f19号归航银行可一次存入背包中的实体铜/银/金币，或每次取出一枚指定币；银行与钱袋共用个人余额。借贷和房屋分期是下一阶段设计，当前没有贷款按钮或自动扣息。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:emerald"
+			id: "544E430206000003"
+			shape: "square"
+			size: 1.0d
+			tasks: [{
+				id: "544E430306000003"
+				title: "阅读本节（不发放玩法奖励）"
+				type: "checkmark"
+			}]
+			title: "赚什么，花在哪里"
+			x: 0.0d
+			y: 3.0d
+		}
+		{
+			description: [
+				"&e账户、实体三币与专属钱袋槽已开放"
+				""
+				"&b&l别让第一步被钱卡住"
+				""
+				"&f没有钱也可以接原木、圆石与食材委托。新手教学首次打造免人工费；不存在强制房租或离线扣款。余额属于角色，物理袋子不会凭空产生新钱。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:emerald"
+			id: "544E430206000004"
+			shape: "square"
+			size: 1.0d
+			tasks: [{
+				id: "544E430306000004"
+				title: "阅读本节（不发放玩法奖励）"
+				type: "checkmark"
+			}]
+			title: "别让第一步被钱卡住"
+			x: 3.0d
+			y: 3.0d
+		}
+	]
+	title: "06 - 钱袋与交易"
+}
