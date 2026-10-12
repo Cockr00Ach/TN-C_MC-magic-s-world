@@ -18,14 +18,51 @@ public final class WaterSpellRules {
             case "dragon_howl" -> 4; case "dragon_ruin" -> 5; default -> 0;
         };
     }
-    public static int charge(int tier) { return tier == 5 ? 30 : tier == 4 ? 20 : 10; }
+    public static int charge(int tier) { return tier == 5 ? 24 : tier == 4 ? 2 : 10; }
     public static int duration(int tier) { return tier == 5 ? 240 : tier == 4 ? 60 : tier == 3 ? 200 : 64; }
     public static double boltRadius(int tier) { return tier == 2 ? .85 : .32; }
-    public static final int SLASH_CHANNEL_TICKS = 200;
-    public static final int SLASH_VOLLEY_INTERVAL = 20;
-    public static double radius(int tier) { return tier == 5 ? circleRadius(tier) : .8; }
+    public static final int SLASH_CHANNEL_TICKS = 20;
+    public static final int SLASH_VOLLEY_INTERVAL = 2;
+    /** 龙滅（水球链 t5）的**水柱 / 破坏半径**＝ 15 格 ✓ —— 多条测试与作者都钉着这个数 ✗。 */
+    public static final double DRAGON_RUIN_RADIUS = 15;
+    /**
+     * 龙滅（水球链 t5）的**施法法阵半径** ✓ —— 作者 2026-10-10："t5 的施法法阵的半径
+     * 应该是水柱半径的一倍"，问清后确认是**加大一倍** ⇒ 法阵 = 水柱 ×2 = **30 格** ✓。
+     *
+     * <p>⚠️ <b>只放大法阵</b> ✗：{@link #radius} 仍是 15 ✓ —— 阵放大<b>不改判定、不改伤害、
+     * 不改钻掘半径</b> ✗（否则一次龙滅会挖掉 60 格宽的山 ✗，那不是作者要的 ✗）。
+     */
+    public static final double DRAGON_RUIN_SIGIL_RADIUS = DRAGON_RUIN_RADIUS * 2;
+    /**
+     * 雨滴链（第四条链 · kind==3）的**布局常量** ✓ —— 第九批重做时抽出来的唯一来源 ✗。
+     *
+     * <p>为什么必须共享：天空法阵、落水柱那一圈、雨幕半宽这三样**客户端几何与服务端粒子各画一次** ✗
+     * （{@code WaterRainVisuals} 与 {@code WaterFx.rainFx} / {@code skySeal} ✗）——
+     * 两个地方各写一个魔法数字，改一处就会错位 ✗（水板那批已经踩过一次"环半径没跟着板走"✗）。
+     */
+    public static final int RAIN_SKY_SEAL_LIFT = 4;
+    /** 落水柱所在的那一圈（占领域半径的比例 ✗）：t5 十二道水帘**正好挂在上层天空阵的边上** ✓
+        （上层阵半径 = `.80r` ✗ ⇒ 天洪读作"天空大阵往下倒十二道水" ✓，而不是十二道柱子悬在阵外面 ✗）。 */
+    public static final double RAIN_CURTAIN_RING = .80;
+    /** 雨幕粒子的**半宽**（占领域半径的比例 ✗）：盒角 `.70*√2 ≈ 半径` ⇒ 雨正好落在水面里 ✓，不撒到域外 ✗。 */
+    public static final double RAIN_VOLUME_HALF = .70;
+    /** 天空法阵的高度 ✓（t5 领域高 28 ⇒ 阵在 32 格高 ✗，档位文案写的就是"28格高双层天空法阵"✓）。 */
+    public static double rainSkySealHeight(int tier) { return fieldHeight(3, tier) + RAIN_SKY_SEAL_LIFT; }
+    /** 雨链 t3 水莲的**半径比例** ✓（客户端瓣面与服务端瓣尖粒子共用 ✗）。 */
+    public static final double RAIN_LOTUS_SCALE = .92;
+    /** 水莲张开度（0 合拢 → 1 全开 ✓）：由年龄驱动 ⇒ 莲是"活"的 ✗；两端共用同一条曲线 ✓。 */
+    public static double rainLotusOpen(int tier, int age) {
+        return Math.min(1, age / Math.max(1.0, fieldLife(3, tier) * .30)) * (.94 + .06 * Math.sin(age * .02));
+    }
+    /** 花瓣张开的横向比例 ✓（与 `WaterGeometry.petalPoint` 里那条 spread 同一条公式 ✗）。 */
+    public static double rainLotusSpread(double open) { return .55 + .45 * open; }
+    /** 瓣尖高度 ✓ —— 客户端瓣缘、发光星、服务端瓣尖粒子**三处共用** ✗（各写一遍必然错位 ✗）。 */
+    public static double rainLotusTipHeight(double lotusRadius, double open) {
+        return Math.sin(.58 * Math.PI) * lotusRadius * .40 * open + .40 - .32 * lotusRadius * .55 * open;
+    }
+    public static double radius(int tier) { return tier == 5 ? DRAGON_RUIN_RADIUS : .8; }
     public static double range(int tier) { return tier == 5 ? 96 : tier == 1 ? 40 : 48; }
-    public static double circleRadius(int tier) { return tier == 5 ? 15 : tier == 4 ? 3.5 : 4; }
+    public static double circleRadius(int tier) { return tier == 5 ? DRAGON_RUIN_SIGIL_RADIUS : tier == 4 ? 3.5 : 4; }
     public static double fieldRadius(int kind,int tier) {
         return kind==1?(tier==5?OceanWaveRules.RADIUS:tier==4?8:tier==3?4:3):kind==2?new double[]{5,7,12,18,26}[tier-1]:new double[]{8,12,16,22,32}[tier-1];
     }
@@ -38,11 +75,19 @@ public final class WaterSpellRules {
     public static net.minecraft.world.phys.AABB uprightArea(Vec3 center,double radius,double height) {
         return new net.minecraft.world.phys.AABB(center.add(-radius,-.25,-radius),center.add(radius,height,radius));
     }
-    /** 26 directions, three latitude rings plus both poles; no duplicate vectors. */
+    /** Ten individually rolled fronts, two ticks apart, all aimed forward. */
+    public static final int SLASH_COUNT = 10;
+    public static final float SLASH_ROLL_STEP = 36F;
+    public static final float SLASH_ROLL_SPIN = 0F;
+    public static float slashRoll(int index) { return Math.floorMod(index,SLASH_COUNT)*SLASH_ROLL_STEP; }
+    public static double slashRollRadians(float rollDegrees, double age) { return Math.toRadians(rollDegrees); }
+    public static Vec3 slashArc(Vec3 direction,double roll,double angle,double radius) {
+        Vec3 forward=direction.normalize(),right=right(forward),up=right.cross(forward).normalize();
+        Vec3 across=right.scale(Math.cos(roll)).add(up.scale(Math.sin(roll)));
+        return across.scale(Math.sin(angle)*radius).add(forward.scale(Math.cos(angle)*radius*.30));
+    }
     public static java.util.List<Vec3> slashDirections(float yaw) {
-        var result=new java.util.ArrayList<Vec3>();
-        for(float pitch:new float[]{0,-45,45})for(int i=0;i<8;i++)result.add(Vec3.directionFromRotation(pitch,yaw+i*45));
-        result.add(new Vec3(0,1,0));result.add(new Vec3(0,-1,0));return java.util.List.copyOf(result);
+        return java.util.List.of(Vec3.directionFromRotation(0,yaw));
     }
     public static float damage(int tier) { return switch(tier) { case 2 -> 8; case 4 -> 6; case 5 -> 14; default -> 4; }; }
     public static Vec3 right(Vec3 direction) {
