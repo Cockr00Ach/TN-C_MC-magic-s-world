@@ -2,6 +2,10 @@ package com.tnc.tnc.magic.water;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 class WaterRainModelLayoutTest {
+    @Test void restraintHeightBoundaryAndRainTransparency() {
+        assertTrue(WaterSpellRules.canRestrain(3.999));assertFalse(WaterSpellRules.canRestrain(4));
+        assertFalse(WaterSpellRules.canRestrain(12));assertEquals(.25F,WaterSpellRules.RAIN_SEAL_OPACITY);
+    }
     @Test void luminousDropsStayInsideTheRainFieldAndFall() {
         for(int tier=1;tier<=5;tier++) {
             double r=WaterSpellRules.fieldRadius(3,tier),h=WaterSpellRules.fieldHeight(3,tier);

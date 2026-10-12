@@ -160,9 +160,9 @@ public final class WaterMagicGameTests {
             h.assertTrue(emitter.life()==20,"Controller lasts one second");
             fields.stream().filter(e->!e.isEmitter()).forEach(Entity::discard);
             // ServerLevel advances Entity.tickCount before tick(); direct fixture calls do not.
-            for(int age=2;age<20;age+=2){emitter.tickCount=age;emitter.tick();}
+            for(int age=1;age<20;age++){emitter.tickCount=age;emitter.tick();}
             var fronts=h.getLevel().getEntitiesOfClass(TNWaterFieldEntity.class,p.getBoundingBox().inflate(4),e->!e.isEmitter());
-            h.assertTrue(fronts.size()==9&&fronts.stream().allMatch(e->e.life()==28),"Nine later fronts retain bounded lifetime; count="+fronts.size()+" tick="+emitter.tickCount);
+            h.assertTrue(fronts.size()==19&&fronts.stream().allMatch(e->e.life()==28),"Nineteen later fronts retain bounded lifetime; count="+fronts.size()+" tick="+emitter.tickCount);
             h.getLevel().getEntitiesOfClass(TNWaterFieldEntity.class,p.getBoundingBox().inflate(4)).forEach(Entity::discard);
         }finally{owners.remove(p.getUUID());}h.succeed();
     }
@@ -416,6 +416,27 @@ public final class WaterMagicGameTests {
             for(var z:new Zombie[]{exposed,blocked,outside,below,above,ally})z.discard();
         }
         h.succeed();
+    }
+    @GameTest(template="water_test_large_empty",timeoutTicks=30)
+    public static void prisonStaysFixedAndStopsSmallEnemyKnockback(GameTestHelper h) {
+        var p=caster(h);p.setPos(Vec3.atCenterOf(h.absolutePos(new BlockPos(6,8,2))));p.setYRot(0);p.setXRot(0);
+        var target=zombie(h,p.position().add(0,0,4));
+        TNWaterFieldEntity.cast(p,net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tnc","water_prison"));
+        var field=h.getLevel().getEntitiesOfClass(TNWaterFieldEntity.class,p.getBoundingBox().inflate(12),e->e.kind()==2).get(0);
+        Vec3 cage=field.position(),held=target.position();
+        target.setPos(held.add(0,1,0));WaterRestraints.enforce(h.getLevel());
+        h.assertTrue(target.position().equals(held),"Restraint begins immediately at cast position, before the first field tick");
+        field.affect(h.getLevel(),p);
+        target.setPos(held.add(.4,1,.3));target.setDeltaMovement(new Vec3(.3,.5,.2));
+        WaterRestraints.enforce(h.getLevel());
+        h.assertTrue(target.position().distanceToSqr(held)<1e-8&&target.getDeltaMovement().lengthSqr()==0,"Small enemy cannot jump or be knocked out of its captured position");
+        h.assertTrue(field.position().equals(cage),"Cage never follows hit reaction");
+        var giant=net.minecraft.world.entity.EntityType.GIANT.create(h.getLevel());giant.setPos(held.add(8,0,0));h.getLevel().addFreshEntity(giant);
+        WaterRestraints.hold(field,giant);Vec3 moved=giant.position().add(1,0,0);giant.setPos(moved);WaterRestraints.enforce(h.getLevel());
+        h.assertTrue(giant.position().equals(moved),"Enemies four blocks tall or larger are not position-locked");
+        field.discard();Vec3 free=held.add(1,0,0);target.setPos(free);WaterRestraints.enforce(h.getLevel());
+        h.assertTrue(target.position().equals(free),"Removing the cage immediately releases its restraints");
+        target.discard();giant.discard();h.succeed();
     }
     @GameTest(template="water_test_large_empty",timeoutTicks=30)
     public static void controlAffectsNearbyEnemiesAndHealingUsesExpandedRadius(GameTestHelper h) {

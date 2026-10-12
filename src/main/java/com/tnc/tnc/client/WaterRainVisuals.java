@@ -17,12 +17,12 @@ final class WaterRainVisuals {
 
     static void render(TNWaterFieldEntity e, double age, float fade, PoseStack stack, MultiBufferSource buffers) {
         double distance = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition().distanceTo(e.position());
-        WaterSolidModels.seal(stack,buffers,new Vec3(0,.07,0),UP,e.radius(),age,fade);
+        WaterSolidModels.seal(stack,buffers,new Vec3(0,.07,0),UP,e.radius(),age,fade,com.tnc.tnc.magic.water.WaterSpellRules.RAIN_SEAL_OPACITY);
         stack.pushPose();stack.translate(0,e.height(),0);
         stack.mulPose(com.mojang.math.Axis.YP.rotationDegrees((float)(-age*.3)));
         stack.scale((float)(e.radius()*1.5),2,(float)(e.radius()*1.5));
         WaterSolidModels.draw("rain_crown",stack,buffers);stack.popPose();
-        if(e.tier()==5)WaterSolidModels.seal(stack,buffers,new Vec3(0,e.height()+.15,0),UP,e.radius()*.78,-age,fade);
+        if(e.tier()==5)WaterSolidModels.seal(stack,buffers,new Vec3(0,e.height()+.15,0),UP,e.radius()*.78,-age,fade,com.tnc.tnc.magic.water.WaterSpellRules.RAIN_SEAL_OPACITY);
         int count=com.tnc.tnc.magic.water.WaterRainModelLayout.count(e.tier(),distance<64);
         for(int i=0;i<count;i++) {
             Vec3 p=com.tnc.tnc.magic.water.WaterRainModelLayout.drop(i,e.radius(),e.height(),age);

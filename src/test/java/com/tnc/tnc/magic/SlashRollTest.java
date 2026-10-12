@@ -5,15 +5,15 @@ import org.junit.jupiter.api.Test;
 import java.util.HashSet;
 import static org.junit.jupiter.api.Assertions.*;
 class SlashRollTest {
-    @Test void rapidSequenceContainsTenDistinctAngles() {
+    @Test void rapidSequenceContainsTwentyDistinctAngles() {
         var angles=new HashSet<Float>();
         for(int i=0;i<WaterSpellRules.SLASH_COUNT;i++)angles.add(WaterSpellRules.slashRoll(i));
-        assertEquals(10,angles.size());assertEquals(2,WaterSpellRules.SLASH_VOLLEY_INTERVAL);
+        assertEquals(20,angles.size());assertEquals(1,WaterSpellRules.SLASH_VOLLEY_INTERVAL);
         assertEquals(20,WaterSpellRules.SLASH_CHANNEL_TICKS);
     }
     @Test void curvedLeadingFacePointsForwardAtEveryRoll() {
         for(Vec3 dir:new Vec3[]{new Vec3(0,0,1),new Vec3(1,1,0).normalize(),new Vec3(0,1,0)})
-            for(int i=0;i<10;i++) {
+            for(int i=0;i<20;i++) {
                 double roll=WaterSpellRules.slashRollRadians(WaterSpellRules.slashRoll(i),10);
                 Vec3 middle=WaterSpellRules.slashArc(dir,roll,0,4);
                 assertTrue(middle.dot(dir)>1,"Arc bulges towards aim");
