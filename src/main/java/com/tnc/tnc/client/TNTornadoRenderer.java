@@ -21,16 +21,30 @@ import net.minecraft.resources.ResourceLocation;
  *
  * <h2>★ "一直在旋转"是怎么来的</h2>
  * 模型本身是**静态**的 ✗（生成器只出几何）—— 旋转是这里每帧按实体的
- * {@link TNTornadoEntity#spin()}（服务端每 tick +9°、并同步给客户端 ✓）
+ * {@link TNTornadoEntity#spin()}（服务端每 tick 加 {@link TNTornadoEntity#SPIN_PER_TICK} 度、
+ * 并同步给客户端 ✓）
  * 绕 <b>Y 轴</b>转出来的 ✓。所以转不转、转多快都归实体管 ✓，
  * 客户端不自己计时 ✗（否则两边不同步，/reload 之后会跳一下 ✗）。
  *
- * <h2>★ 引擎内部那 −0.5 格（这个坑踩过）</h2>
- * {@code CustomModels.render} 内部先 {@code translate(−0.5,−0.5,−0.5)}，而那是
- * **已经缩放过**的坐标系 ⇒ 实际偏移 = {@code scale × 0.5} 格 ✓。
- * 本模型的包围盒在 x/z 上居中、y 从 0 起（底边贴地 ✓），所以缩放后补
- * {@code (+0.5, +0.5, +0.5)} 正好把底面中心对到实体原点 ✓
- * （推导见 {@code TNThunderOrbRenderer} 的同名注释 —— 它当初没补，整整歪了 2 格 ✗）。
+ * <h2>★★ 那 −0.5 格：引擎**确实**平移了，但我们**不能**再补一次（2026-10-10 修）</h2>
+ * 作者实机反馈：「**龙卷风怎么不是圆心旋转**」✗ —— 它会绕着身边一个小圈甩。
+ *
+ * <p><b>实测（反编译实例里那份 {@code spell_engine-0.15.12+1.20.1.jar}）</b>：
+ * {@code CustomModels.render} 在画之前**一定有这一句** ——
+ * {@code class_4587.method_22904(-0.5, -0.5, -0.5)}（＝ {@code poseStack.translate(-0.5,-0.5,-0.5)}）✓。
+ * 它把"方块模型空间"（0..16 单位 ＝ 0..1 格、原点在角上）挪成**以原点为中心** ✓。
+ *
+ * <p>而本模型的包围盒是 <b>x/z 以 (8,8) 单位为中心</b>（＝ 0.5 格）⇒ 引擎那一句
+ * **正好把它对到实体中轴** ✓。所以本渲染器**不该再补任何 x/z 平移** ✗
+ * —— 补了就多偏 0.5 格，转起来就变成"绕圈甩" ✗（这就是作者看到的现象 ✓）。
+ *
+ * <p>唯一要补的是 <b>y</b>：本模型的底边在 {@code y=0}（漏斗站在地上 ✓，
+ * 不是居中 ✗），引擎的 −0.5 会把它**沉下去半格** ✗ ⇒ 补回 {@code +0.5}，
+ * 让"模型底边 = 实体脚下" ✓。
+ *
+ * <p>合起来就是 {@code translate(0, +0.5, 0)} ✓ —— x/z 交给引擎、y 自己补。
+ * ⚠️ 别照抄黑夜之手/环绕雷球那两份的 {@code (+0.5,+0.5,+0.5)} ✗：那两份的模型
+ * 是按另一套口径摆的，照抄就会歪（本文件以前就是照抄来的 ✗）。
  */
 public class TNTornadoRenderer extends EntityRenderer<TNTornadoEntity> {
 
@@ -59,11 +73,14 @@ public class TNTornadoRenderer extends EntityRenderer<TNTornadoEntity> {
 
         poseStack.pushPose();
         // ① ★ 转起来 ✓ —— 绕 Y 轴按实体给的转角（+ partialTick 让帧间平滑 ✓）
-        float spin = entity.spin() + (partialTick * 9.0F);
+        //    ⚠️ 那份每 tick 的增量**读实体的常量** ✗ 不要在这里写死数字 ✗
+        //    （以前写死 9.0F ⇒ 作者让"加快三倍"时，这份插值会和同步值错位 ✗）
+        float spin = (float)entity.visualSpin(partialTick);
         poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(spin));
-        // ② 按档位放大，再补回引擎内部那 −0.5 格 ✓
+        // ② 按档位放大
         poseStack.scale(scale, scale, scale);
-        poseStack.translate(0.5F, 0.5F, 0.5F);
+        // ③ 只补 y：x/z 的中轴已经由引擎那句 −0.5 对齐了（见类注释 ✗ 不能再补 ✗）
+        poseStack.translate(0.0F, 0.5F, 0.0F);
 
         renderWithEngine(poseStack, buffer);
         poseStack.popPose();

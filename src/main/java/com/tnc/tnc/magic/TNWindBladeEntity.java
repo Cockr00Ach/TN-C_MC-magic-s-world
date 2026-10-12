@@ -159,9 +159,25 @@ public class TNWindBladeEntity extends Entity {
         this.entityData.set(DATA_SPIN, spin % 360.0F);
 
         if (level().isClientSide()) {
-            // 客户端只按服务端给的速度插值移动 ✓（位置由服务端同步）
-            setPos(getX() + getDeltaMovement().x, getY() + getDeltaMovement().y,
-                    getZ() + getDeltaMovement().z);
+            // ⚠️ **客户端绝对不能再自己挪实体** ✗（作者 2026-10-10：
+            //     「风刃应该是发射出去的啊，什么叫跟着龙卷风一直在那里转动」✗）
+            //
+            //     这里原来有一句 `setPos(getX() + getDeltaMovement()...)` ——
+            //     抛射物的位置由**服务端**算好、每 tick 同步过来
+            //     （见 TNOrbEntities.WIND_BLADE 的 updateInterval(1)），客户端只负责插值 ✓。
+            //     两边各挪一次 ⇒ **客户端的外推和服务端的同步互相打架** ✗
+            //     ⇒ 画面上就是"一顿一顿 / 来回弹"，看着像**卡在龙卷风旁边转** ✗。
+            //
+            //     火系的 TNFireBoltEntity 2026-10-05 已经踩过**同一个坑**并删掉了同一句 ✓
+            //     （那句注释还在那里），本文件当时漏改 ✗ ⇒ 现在对齐 ✓。
+            //
+            //     客户端只留"好看"：给飞出去的刃补一条尾迹，让"射出去"看得见 ✓
+            if (tickCount % 2 == 0 && getDeltaMovement().lengthSqr() > 0.01D) {
+                Vec3 back = getDeltaMovement().normalize().scale(-2.2D);
+                level().addParticle(net.minecraft.core.particles.ParticleTypes.CLOUD,
+                        getX() + back.x, getY() + back.y, getZ() + back.z,
+                        0.0D, 0.0D, 0.0D);
+            }
             return;
         }
 
@@ -247,7 +263,18 @@ public class TNWindBladeEntity extends Entity {
      * 命中判定半径 ✓ —— 按 <b>√倍率</b> 放大并封顶（理由见 {@link #MAX_HIT_RADIUS} ✗）。
      */
     public double hitRadius() {
-        return Math.min(MAX_HIT_RADIUS, BASE_HIT_RADIUS * Math.sqrt(sizeMultiplier()));
+        return hitRadiusFor(sizeMultiplier());
+    }
+
+    /**
+     * 静态版的命中半径 ✓ —— 给**发射方**用 ✓。
+     *
+     * <p>为什么要给 ✗：{@link TNTornadoEntity} 必须把风刃生在**这个半径之外** ✗，
+     * 否则 t3 那种"判定半径比漩涡外壁还大"的情况会让风刃**刚出生就命中、当场消失** ✗
+     * —— 表现就是"刃根本没射出去" ✗。
+     */
+    public static double hitRadiusFor(double sizeMultiplier) {
+        return Math.min(MAX_HIT_RADIUS, BASE_HIT_RADIUS * Math.sqrt(sizeMultiplier));
     }
 
     /** 发射者（可能已下线 ⇒ null ✓）。 */

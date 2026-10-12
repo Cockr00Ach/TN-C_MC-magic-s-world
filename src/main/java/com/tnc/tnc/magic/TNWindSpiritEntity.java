@@ -70,6 +70,8 @@ public class TNWindSpiritEntity extends Entity implements GeoEntity {
     }
 
     /** 档位 1..5（同步给客户端：渲染器按它缩放 ✓）。 */
+    private static final EntityDataAccessor<Integer> DATA_SLOT =
+            SynchedEntityData.defineId(TNWindSpiritEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> DATA_TIER =
             SynchedEntityData.defineId(TNWindSpiritEntity.class, EntityDataSerializers.INT);
 
@@ -103,6 +105,7 @@ public class TNWindSpiritEntity extends Entity implements GeoEntity {
     @Override
     protected void defineSynchedData() {
         this.entityData.define(DATA_TIER, 1);
+        this.entityData.define(DATA_SLOT, 0);
     }
 
     // ---------------- 绑定 / 查询 ----------------
@@ -111,6 +114,7 @@ public class TNWindSpiritEntity extends Entity implements GeoEntity {
     public void bind(ServerPlayer owner, int slot, int tier, double orbitSeed) {
         this.ownerId = owner.getUUID();
         this.slot = slot;
+        this.entityData.set(DATA_SLOT, slot);
         this.orbitSeed = orbitSeed;
         this.entityData.set(DATA_TIER, tier);
     }
@@ -127,7 +131,7 @@ public class TNWindSpiritEntity extends Entity implements GeoEntity {
 
     /** 槽位（0..count-1）—— 决定它在环上的相位 ✓。 */
     public int slot() {
-        return this.slot;
+        return this.entityData.get(DATA_SLOT);
     }
 
     private ServerPlayer resolveOwner() {
@@ -202,6 +206,7 @@ public class TNWindSpiritEntity extends Entity implements GeoEntity {
     @Override
     protected void readAdditionalSaveData(CompoundTag tag) {
         this.slot = tag.getInt("Slot");
+        this.entityData.set(DATA_SLOT, slot);
         this.orbitSeed = tag.getDouble("Seed");
         this.entityData.set(DATA_TIER, Math.max(1, tag.getInt("Tier")));
         if (tag.hasUUID("Owner")) {

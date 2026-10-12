@@ -15,11 +15,43 @@
     "particles": [
       {
         "particle_id": "splash",
+        "shape": "PILLAR",
+        "origin": "FEET",
+        "count": 8,
+        "min_speed": 0.25,
+        "max_speed": 0.85
+      },
+      {
+        "particle_id": "minecraft:squid_ink",
+        "shape": "SPHERE",
+        "origin": "CENTER",
+        "count": 3,
+        "min_speed": 0.1,
+        "max_speed": 0.5
+      },
+      {
+        "particle_id": "minecraft:electric_spark",
+        "shape": "SPHERE",
+        "origin": "CENTER",
+        "count": 4,
+        "min_speed": 0.1,
+        "max_speed": 0.5
+      },
+      {
+        "particle_id": "end_rod",
+        "shape": "PILLAR",
+        "origin": "FEET",
+        "count": 3,
+        "min_speed": 0.1,
+        "max_speed": 0.45
+      },
+      {
+        "particle_id": "minecraft:flash",
         "shape": "CIRCLE",
         "origin": "FEET",
-        "count": 10,
-        "min_speed": 0.1,
-        "max_speed": 0.4
+        "count": 1,
+        "min_speed": 0.0,
+        "max_speed": 0.0
       }
     ]
   },

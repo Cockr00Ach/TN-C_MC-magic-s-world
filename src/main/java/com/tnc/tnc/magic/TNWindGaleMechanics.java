@@ -21,8 +21,8 @@ import org.slf4j.LoggerFactory;
  * 引擎的 {@code SPAWN} impact 动作只能生成一个<b>写死的</b>实体 id ✗
  * （已 {@code javap} 确认字段：{@code entity_type_id / time_to_live_seconds / delay_ticks /
  * location_offset_*} —— <b>没有 tier、没有"按档变化"的字段</b> ✗）。
- * 而作者要的是"t3/t4/t5 各不一样"（寿命 8/12/16 秒、每轮 3/5/7 发、大小 1.0/1.3/1.6 倍）✓
- * ⇒ 只能让 Java 来认档 ✓。
+ * 而作者要的是"t3/t4/t5 各不一样"（寿命 8/12/16 秒、龙卷风 2/5/8 倍、刃 5/10/20 倍、
+ * 每轮 2/3/3 发 ✓）⇒ 只能让 Java 来认档 ✓。
  *
  * <p>做法和黑夜之手**完全一样** ✓（那是本仓已验证的模板）：法术 JSON 改成
  * {@code release.target.type = "SELF"}（不再产生引擎投射物 ✗），Java 在
@@ -49,8 +49,24 @@ public final class TNWindGaleMechanics {
     /** 龙卷风召唤在施法者身前多远 ✓。 */
     private static final double SPAWN_DISTANCE = 3.0D;
 
-    /** 施法者正前方找不到地面时，最多往下/往上找多少格 ✓。 */
-    private static final int GROUND_SEARCH = 4;
+    /**
+     * ★ <b>落地</b>：从落脚点往下最多找多少格 ✓。
+     *
+     * <p>⚠️ 原来是 <b>4</b> ✗ —— 作者 2026-10-10 第二次反馈：「**龙卷风要落地，就是让它自己去找
+     * 最低的平面**」✗。4 格太浅：站在坡上、或者朝下前方放，落点比脚下低好几格 ⇒
+     * 找 4 格没找到 ⇒ 落回原高度 ⇒ 龙卷风**浮在半空中** ✗。
+     * 现在一路往下找**真正的地面**（上限 64 格，或到世界底部为止 ✓）。
+     */
+    private static final int GROUND_SEARCH = 64;
+
+    /**
+     * 落地面之上要留出的**净空**（格）✓。
+     *
+     * <p>为什么要有 ✗：下面第一块有碰撞的方块可能就是"洞里的一块石头"⇒
+     * 直接站上去会把龙卷风**塞进一格高的缝**里 ✗（模型 2~16 格高，穿模、看着像插进地里 ✗）。
+     * 要求上方连着两格空 ⇒ 只会落在**开阔的平面**上 ✓。
+     */
+    private static final int GROUND_CLEARANCE = 2;
 
     static {
         // ★ 挂在引擎自己的事件上（不是 Forge 总线 ✗ —— @SubscribeEvent 会编译通过、运行时静默不触发）
@@ -109,9 +125,9 @@ public final class TNWindGaleMechanics {
      * 在施法者身前召唤龙卷风 ✓。
      *
      * <p>落地点的处理：先按视线方向取身前 {@link #SPAWN_DISTANCE} 格，
-     * 然后**从该点向下找最多 {@link #GROUND_SEARCH} 格**的地面 ✓
+     * 然后**一路往下找最低的那个能站的地面** ✓（草/花/水/树叶都穿过去，见 {@link #groundY}）
      * —— 直接放在眼睛高度会让龙卷风浮在空中 ✗（模型底边是贴地的 ✓）；
-     * 找不到地面（比如站在悬崖边）就用原高度 ✓，宁可浮一点也不掉进虚空 ✗。
+     * 一路找不到地面（悬崖/虚空）就用原高度 ✓，宁可浮一点也不掉进虚空 ✗。
      */
     private static void summonTornado(ServerPlayer player, int tier) {
         if (TNOrbEntities.WIND_TORNADO == null || !TNOrbEntities.WIND_TORNADO.isPresent()) {
@@ -150,20 +166,46 @@ public final class TNWindGaleMechanics {
     }
 
     /**
-     * 从 {@code at} 往下找最多 {@link #GROUND_SEARCH} 格的地面 ✓，返回该放的高度。
+     * 从 {@code at} 往下找**最低的那个能站的地面** ✓，返回该放的高度（方块顶面 ＋1 ✓）。
      *
-     * <p>直接放在眼睛高度会让龙卷风浮在空中 ✗（模型底边是贴地的 ✓）；
-     * 找不到地面（比如站在悬崖边）就用原高度 ✓，宁可浮一点也不掉进虚空 ✗。
+     * <p>规则（尽量简单可预期 ✓）：
+     * <ol>
+     *   <li>一路往下扫，最多 {@link #GROUND_SEARCH} 格、或者扫到世界底部为止 ✓；</li>
+     *   <li>第一块**有碰撞**的方块才算地面 ⇒ 空气/草/花/雪片/水都**穿过去** ✓
+     *       （原来用的是 {@code !isAir()} ✗ ⇒ 一丛草、一朵花都能把龙卷风**架在半空** ✗）；</li>
+     *   <li>**树叶不算地面** ✗ —— 站在树冠上的龙卷风很怪，要落到树底下的真地面 ✓；</li>
+     *   <li>地面之上必须连着 {@link #GROUND_CLEARANCE} 格净空 ✓（免得塞进洞里 ✗）；</li>
+     *   <li>一路都没找到（悬崖/虚空）⇒ 落回原高度 ✓ —— 宁可浮着，也别掉进虚空 ✗。</li>
+     * </ol>
      */
     private static double groundY(ServerLevel level, Vec3 at) {
         net.minecraft.core.BlockPos.MutableBlockPos pos =
                 new net.minecraft.core.BlockPos.MutableBlockPos(at.x, at.y, at.z);
-        for (int i = 0; i <= GROUND_SEARCH; i++) {
-            if (!level.getBlockState(pos).isAir()) {
-                return pos.getY() + 1.0D;            // 站在实心方块顶上 ✓
+        int bottom = level.getMinBuildHeight();
+        for (int i = 0; i <= GROUND_SEARCH && pos.getY() >= bottom; i++) {
+            if (isStandableGround(level, pos)) {
+                return pos.getY() + 1.0D;            // 站在方块顶面 ✓
             }
             pos.move(0, -1, 0);
         }
         return at.y;
+    }
+
+    /** 这一格算不算"能站的地面" ✓（见 {@link #groundY} 的五条规则）。 */
+    private static boolean isStandableGround(ServerLevel level, net.minecraft.core.BlockPos pos) {
+        net.minecraft.world.level.block.state.BlockState state = level.getBlockState(pos);
+        if (state.is(net.minecraft.tags.BlockTags.LEAVES)) {
+            return false;                        // 树叶不算地面 ✗
+        }
+        if (state.getCollisionShape(level, pos).isEmpty()) {
+            return false;                        // 没碰撞 = 穿过去 ✓（空气/草/花/水）
+        }
+        for (int i = 1; i <= GROUND_CLEARANCE; i++) {
+            net.minecraft.core.BlockPos above = pos.above(i);
+            if (!level.getBlockState(above).getCollisionShape(level, above).isEmpty()) {
+                return false;                    // 上面堵着 ⇒ 不是开阔平面 ✗
+            }
+        }
+        return true;
     }
 }

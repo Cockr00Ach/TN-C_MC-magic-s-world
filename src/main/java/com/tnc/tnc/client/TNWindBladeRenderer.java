@@ -26,8 +26,15 @@ import net.minecraft.resources.ResourceLocation;
  * 额外绕模型自身的 <b>Z 轴</b>转（{@link TNWindBladeEntity#spin()}）⇒ 飞出去像"斩"出来的 ✓
  * （作者的水法海浪斩击也是转着飞的 ✓）。转速由发射方给（龙卷风每发随机 18~28°/tick ✓）。
  *
- * <h2>★ 引擎内部那 −0.5 格</h2>
- * 同 {@link TNTornadoRenderer}：缩放后补 {@code (+0.5,+0.5,+0.5)} 抵消 ✓。
+ * <h2>★ 引擎内部那 −0.5 格：这里**不要**再补 ✗（2026-10-10 修）</h2>
+ * 引擎 {@code CustomModels.render} 里那句 {@code translate(-0.5,-0.5,-0.5)}
+ * （反编译实例里那份 spell_engine 核对过 ✓）已经把"方块模型空间"挪成**以原点为中心** ✓。
+ * 而月牙模型的包围盒**正好以 (8,8,8) 单位为中心**（＝ 0.5 格）✓
+ * ⇒ 引擎那一句就把它对到实体原点了 ✓。
+ *
+ * <p>所以这里**一个字都不能补** ✗ —— 以前跟着 {@link TNTornadoRenderer} 补了
+ * {@code (+0.5,+0.5,+0.5)} ⇒ 月牙整体偏出 0.87 格（斜角）✗ ——
+ * 判定在实体中心、画面却偏在半格外，"打中了但看着没打到"就是这么来的 ✗。
  */
 public class TNWindBladeRenderer extends EntityRenderer<TNWindBladeEntity> {
 
@@ -58,9 +65,9 @@ public class TNWindBladeRenderer extends EntityRenderer<TNWindBladeEntity> {
         poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(entity.bladePitch()));
         // ② 自转：绕模型自身那根"薄"的轴（Z）✓
         poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(entity.spin()));
-        // ③ 缩放 ＋ 补回引擎内部那 −0.5 格 ✓
+        // ③ 缩放 —— **不要再 translate** ✗：月牙以 (8,8,8) 单位为中心，
+        //    引擎那句 −0.5 已经把它对到实体原点了（见类注释 ✓）
         poseStack.scale(scale, scale, scale);
-        poseStack.translate(0.5F, 0.5F, 0.5F);
 
         renderWithEngine(poseStack, buffer);
         poseStack.popPose();

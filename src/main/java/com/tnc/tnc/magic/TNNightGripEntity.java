@@ -75,6 +75,8 @@ import net.minecraft.world.phys.Vec3;
  * 弧线的弧度与手感请作者进游戏看，参数就在下面这几张表里 ✓。
  */
 public class TNNightGripEntity extends Entity {
+    private static final net.minecraft.network.syncher.EntityDataAccessor<Integer> DATA_SLOT=net.minecraft.network.syncher.SynchedEntityData.defineId(TNNightGripEntity.class,net.minecraft.network.syncher.EntityDataSerializers.INT);
+    public int handSlot(){return entityData.get(DATA_SLOT);}
 
     // ------------------------------------------------------------------
     //  甩出（弧线）
@@ -149,10 +151,6 @@ public class TNNightGripEntity extends Entity {
     /** 每档最多同时几只（由机制层生成，这里只用来算弧线张开量）✓。 */
     private static final int FALLBACK_TIER = 1;
 
-    /** 黑索最多几个点（防止 t5 的大手拉出几百颗粒子）✓。 */
-    private static final int CORD_MAX_POINTS = 48;
-    /** 黑索两点之间多少格一颗粒子 ✓。 */
-    private static final double CORD_SPACING = 0.35D;
 
     /** 抓空之后在原地散掉用多久（tick）✓。 */
     private static final int FADE_TICKS = 8;
@@ -175,6 +173,9 @@ public class TNNightGripEntity extends Entity {
     /** 模式（0 弧线抓取 / 1 天降砸）⇒ 渲染器据此决定"掌心朝目标"还是"掌心朝正下方" ✓。 */
     private static final EntityDataAccessor<Integer> DATA_MODE =
             SynchedEntityData.defineId(TNNightGripEntity.class, EntityDataSerializers.INT);
+
+    private static final EntityDataAccessor<Boolean> DATA_LAUNCHED =
+            SynchedEntityData.defineId(TNNightGripEntity.class, EntityDataSerializers.BOOLEAN);
 
     // ---- 运行期状态（只在服务端用 ✓）----
 
@@ -199,8 +200,8 @@ public class TNNightGripEntity extends Entity {
     /** 天降：砸地发生在哪一 tick（-1 = 还没砸）✓ —— 砸完还要压在地上一下再散。 */
     private int slamTick = -1;
     /** 这次飞行已经留了几个黑阵 / 上一个阵离起点多远（格）✓ —— 用来按**距离**控制间距 ✓。 */
-    private int sigilsSpawned;
-    private double lastSigilDistance;
+
+
     /** 抓住阶段已经捏了几次 ✓。 */
     private int squeezes;
     private float dealtTotal;
@@ -215,10 +216,12 @@ public class TNNightGripEntity extends Entity {
 
     @Override
     protected void defineSynchedData() {
+        this.entityData.define(DATA_SLOT,0);
         this.entityData.define(DATA_TIER, FALLBACK_TIER);
         this.entityData.define(DATA_OWNER, -1);
         this.entityData.define(DATA_TARGET, -1);
         this.entityData.define(DATA_MODE, MODE_ARC);
+        this.entityData.define(DATA_LAUNCHED, false);
     }
 
     @Override
@@ -233,6 +236,11 @@ public class TNNightGripEntity extends Entity {
     // ------------------------------------------------------------------
     //  对外只读（渲染器/日志用 ✓）
     // ------------------------------------------------------------------
+
+    public boolean launched() { return entityData.get(DATA_LAUNCHED); }
+
+    private int releaseDelay(){return NightHandReleaseRules.delay(handIndex,skyfall());}
+    private int flightAge() { return tickCount-releaseDelay(); }
 
     public int tier() {
         return this.entityData.get(DATA_TIER);
@@ -275,7 +283,7 @@ public class TNNightGripEntity extends Entity {
     private static final double SIGIL_FACTOR = 1.15D;
 
     /** 黑阵活多久（tick）—— 短一点，让"一串门"依次淡掉，而不是糊成一片 ✓。 */
-    private static final int SIGIL_LIFE = 30;
+    private static final int SIGIL_LIFE = 48;
 
     /**
      * ★ 两个阵之间至少隔多少格 ✓ —— 作者 2026-10-10：「**魔法阵有点太多了，可以增加间距**」✓
@@ -325,7 +333,9 @@ public class TNNightGripEntity extends Entity {
      */
     @Override
     public AABB getBoundingBoxForCulling() {
-        return super.getBoundingBoxForCulling().inflate(handHalfExtent());
+        AABB box = super.getBoundingBoxForCulling().inflate(handHalfExtent() * 2.0D);
+        Entity owner = level().getEntity(ownerEntityId());
+        return !skyfall() && owner != null ? box.minmax(owner.getBoundingBox()).inflate(2.0D) : box;
     }
 
     public double handHalfExtent() {
@@ -356,6 +366,7 @@ public class TNNightGripEntity extends Entity {
     public void launch(LivingEntity caster, int targetId, int tier, int handIndex, int handCount) {
         this.tier = Math.max(1, Math.min(STATS.length, tier));
         this.handIndex = handIndex;
+        this.entityData.set(DATA_SLOT,handIndex);
         this.handCount = Math.max(1, handCount);
         this.casterId = caster.getId();
         this.targetId = targetId;
@@ -454,20 +465,30 @@ public class TNNightGripEntity extends Entity {
     private static final int MODE_ARC = 0;
     private static final int MODE_SKYFALL = 1;
 
+    /** 指数底数：每高一档就 ×2.2 ✓（作者 2026-10-08：「指数增长」）。
+     *  ⚠️ 必须写在 {@link #SIZE_MULTIPLIER} **之前** —— Java 静态初始化按书写顺序执行 ✗。 */
+    private static final double SIZE_GROWTH = 2.2D;
+
     /**
-     * ★ <b>每档的尺寸倍率（相对 t1 的"边长"倍率）</b> —— 这是**作者的原话**，存的是**意图** ✓。
+     * ★ <b>2026-10-08 作者："t 级越高手越大，指数增长"</b> ⇒ 这张表改成指数 ✓。
      *
-     * <p>作者 2026-10-10：「**大小我想改改，t2 变成 3 倍，t3 十倍，t4 20 倍，t5 20 倍**」✓
-     * （t1 是 1 倍基准 ✓；上一版是 1 / 2 / 5 / 20 / 20 ⇒ 这次实际动的是 **t2 与 t3** ✓）
+     * <p>旧表是 {@code {1, 3, 10, 20, 20}} —— 线性的，t4 与 t5 还一样大 ✗。
+     * 现在每一档都是上一档的 {@link #SIZE_GROWTH} 倍（2.2×）⇒ 相邻两档**一眼**就能看出差别 ✓，
+     * t5 是 t1 的 <b>23.4 倍</b>、约 <b>35 格</b>（比旧表的 30.6 格更大 ✓）。
      *
-     * <p>⚠️ <b>为什么不直接写最终缩放</b> ✗：2026-10-09 踩过这个坑 —— 当时把"放大 N 倍"当成
-     * 体积倍率去开立方，得出的数肉眼几乎没变化，作者只好又提一次 ✓。
-     * 现在分两层：**这张表是意图**（永远等于作者说的 3/10/20/20 ✓），
-     * 真正给渲染器/剔除盒子用的 {@link #SIZE_SCALE} 由它 × {@link #BASE_SCALE} 算出来 ✓
-     * ⇒ 以后模型再变（比如作者又调了 bbox），只改 BASE_SCALE 一个数，
-     * 作者要的倍率关系不会被悄悄破坏 ✓。
+     * <p>⚠️ 这张表是**意图**（作者说的"指数"），真正给渲染器/剔除盒子用的
+     * {@link #SIZE_SCALE} 由它 × {@link #BASE_SCALE} 算出来 ✓ ——
+     * 以后模型 bbox 再变，只改 {@link #BASE_SCALE} 一个数，指数关系不会被悄悄破坏 ✓。
      */
-    private static final double[] SIZE_MULTIPLIER = {1.0D, 3.0D, 10.0D, 20.0D, 20.0D};
+    private static final double[] SIZE_MULTIPLIER = buildSizeMultipliers();
+
+    private static double[] buildSizeMultipliers() {
+        double[] out = new double[5];
+        for (int i = 0; i < out.length; i++) {
+            out[i] = Math.pow(SIZE_GROWTH, i);
+        }
+        return out;
+    }
 
     /**
      * t1 的基准缩放 —— 让 t1 的手约 **1.5 格** ✓。
@@ -481,14 +502,16 @@ public class TNNightGripEntity extends Entity {
     /**
      * 每档的模型缩放 = 倍率 × 基准 ✓（渲染器与视锥剔除盒子共用的**唯一来源** ✓）。
      *
-     * <p>按当前模型（最大跨度 1.5625 格）换算出来的实际大小：
+     * <p>按当前模型（最大跨度 1.5625 格）与指数底数 2.2 换算出来的实际大小：
      * <pre>
-     *   t1  1×  ->  0.98   ≈  1.5 格
-     *   t2  3×  ->  2.94   ≈  4.6 格
-     *   t3 10×  ->  9.80   ≈ 15.3 格
-     *   t4 20×  -> 19.60   ≈ 30.6 格
-     *   t5 20×  -> 19.60   ≈ 30.6 格
+     *   t1  1.00×  ->  0.98   ≈  1.5 格
+     *   t2  2.20×  ->  2.16   ≈  3.4 格
+     *   t3  4.84×  ->  4.74   ≈  7.4 格
+     *   t4 10.65×  -> 10.44   ≈ 16.3 格
+     *   t5 23.43×  -> 22.96   ≈ 35.9 格   ← 比旧表(30.6)更大，且相邻档一眼能分辨 ✓
      * </pre>
+     * ★ 数一遍就懂为什么要修上一个 bug ✗：客户端以前读的是**服务端字段** ⇒ 每档都按 t1 的
+     * 0.98 画（实机日志 {@code tier=5 ... scale=0.98} 实证）⇒ 五档看起来一模一样 ✗。
      */
     private static final float[] SIZE_SCALE = buildSizeScale();
 
@@ -521,7 +544,14 @@ public class TNNightGripEntity extends Entity {
 
     /** 这一档的模型缩放 ✓（渲染器与剔除盒子共用）。 */
     public float sizeScale() {
-        return SIZE_SCALE[Math.max(0, Math.min(SIZE_SCALE.length - 1, tier - 1))];
+        // ★★ 2026-10-08 实机 bug 修复 ✗✗：这里以前读的是 {@code this.tier} —— 那是
+        //   **只在服务端写的普通字段** ✗，客户端实体上它永远是初始值 1 ⇒ 客户端把每一只手
+        //   都按 **t1 的 0.98** 画 ⇒ **t1~t5 一样大** ✗（作者两轮反馈"大小没变化"的真因）。
+        //   证据：新增的渲染探针在 t5 天降那一下打出 `tier=5 ... scale=0.98` ——
+        //   {@code tier()} 读的是 {@code DATA_TIER}（同步值，=5 ✓），而 sizeScale 读的不是，
+        //   两个数自相矛盾 ⇒ 一眼定位 ✓。
+        //   ⇒ 现在**统一走同步字段** {@link #tier()}（与渲染器/剔除盒子同一个来源 ✓）。
+        return SIZE_SCALE[Math.max(0, Math.min(SIZE_SCALE.length - 1, tier() - 1))];
     }
 
     /** 这只手是天降模式吗（渲染器据此把**掌心朝正下方** ✓）。 */
@@ -541,7 +571,7 @@ public class TNNightGripEntity extends Entity {
         }
         back = back.normalize();
         Vec3 side = new Vec3(-back.z, 0.0D, back.x);          // 水平面内与"后背方向"垂直 ✓
-        double offset = (index - (count - 1) / 2.0D) * ARC_SPREAD * 0.5D;
+        double offset = (index - (count - 1) / 2.0D) * NightHandReleaseRules.spacing(handHalfExtent());
         return caster.position()
                 .add(0.0D, caster.getBbHeight() * BACK_HEIGHT, 0.0D)
                 .add(back.scale(BACK_OFFSET))
@@ -591,6 +621,10 @@ public class TNNightGripEntity extends Entity {
             return;
         }
 
+        // No summoning gates. Each slot starts on its own release beat.
+        if (tickCount<=releaseDelay()) return;
+        entityData.set(DATA_LAUNCHED, true);
+
         // ★ t5：天降砸地（不进抓住阶段 ✗）
         if (skyfall()) {
             fall(caster);
@@ -610,16 +644,24 @@ public class TNNightGripEntity extends Entity {
      * <p>为什么不用自由落体：那样一眨眼就没了、看不出是"手压下来"✗；
      * 匀速 {@link #SKYFALL_SPEED} 约 8 tick 落地 ⇒ 玩家看得清整只手掌心朝下压下来 ✓。
      */
+    private void prepareGates(LivingEntity caster) {
+        if (handIndex != 0 || !(level() instanceof ServerLevel server)) return;
+        Vec3 start = skyfall() ? backPoint(caster, 0, 1) : arcStart;
+        Vec3 direction = skyfall() ? caster.getLookAngle() : arcEnd.subtract(start).normalize();
+        float facing = (float) Math.toDegrees(Math.atan2(direction.x, direction.z));
+        int count = skyfall() || tier < SIGIL_TIER ? 1
+                : Math.min(SIGIL_MAX, 1 + (int) (start.distanceTo(arcEnd) / SIGIL_GAP));
+        for (int i = 0; i < count; i++) {
+            double t = count == 1 ? 0.08D : 0.08D + i * 0.62D / (count - 1);
+            Vec3 base = skyfall() ? start.add(direction.scale(1.5D))
+                    : bezier(start, arcControl, arcEnd, t);
+            spawnSigil(server, base.add(0.0D, handHalfExtent(), 0.0D), true, facing);
+        }
+    }
+
     private void fall(LivingEntity caster) {
         Vec3 landing = arcEnd;
 
-        // ★ 天降（t5）：在落点上方铺几个**平铺**的黑阵 ⇒ 大手从天上砸下来、穿过它们 ✓
-        //   ⚠️ **只有第一只手铺** ✗ —— 7 只手各铺两个就是 14 个，作者已经说过"太多了" ✓
-        if (tier >= SIGIL_TIER && tickCount == 0 && handIndex == 0 && level() instanceof ServerLevel server) {
-            for (double height : SIGIL_RING_HEIGHTS) {
-                spawnSigil(server, landing.add(0.0D, height, 0.0D), false, 0.0F);
-            }
-        }
         if (position().y - landing.y > SKYFALL_SPEED) {
             setPos(getX(), getY() - SKYFALL_SPEED, getZ());
             fallTrail();
@@ -684,26 +726,11 @@ public class TNNightGripEntity extends Entity {
         arcEnd = end;
         arcControl = controlPoint(arcStart, end, handIndex, handCount);
 
-        double progress = Math.min(1.0D, (tickCount + 1) / (double) FLY_TICKS);
+        double progress = Math.min(1.0D, flightAge() / (double) FLY_TICKS);
         double t = 1.0D - (1.0D - progress) * (1.0D - progress);   // 出得快、收得慢 ⇒ 像甩出去的 ✓
         setPos(bezier(arcStart, arcControl, end, t));
 
-        cord(caster);
         trail();
-
-        // ★ t3 起：沿弹道留**竖着的黑阵**（＝"手穿过好几个魔法阵"）✓
-        //   ⚠️ 别太密 ✗ —— 作者 2026-10-10：「魔法阵有点太多了，可以增加间距」✓
-        //   ⇒ 按**距离**放（每满 SIGIL_GAP 格一个），且一次最多 SIGIL_MAX 个 ✓
-        if (tier >= SIGIL_TIER && sigilsSpawned < SIGIL_MAX && level() instanceof ServerLevel server) {
-            Vec3 out = position().subtract(arcStart);
-            double travelled = out.length();
-            if (sigilsSpawned == 0 || travelled - lastSigilDistance >= SIGIL_GAP) {
-                float facing = (float) Math.toDegrees(Math.atan2(out.x, out.z));
-                spawnSigil(server, position(), true, facing);
-                sigilsSpawned++;
-                lastSigilDistance = travelled;
-            }
-        }
 
         boolean arrived = progress >= 1.0D
                 || (target != null && position().distanceTo(end) <= GRAB_DISTANCE);
@@ -717,7 +744,7 @@ public class TNNightGripEntity extends Entity {
                 burst(position(), Math.max(0.8D, radius() * 0.5D), 24);
                 sweep(null, caster, stats().damage());
             }
-            if (tickCount > FLY_TICKS + FADE_TICKS) {
+            if (flightAge() > FLY_TICKS + FADE_TICKS) {
                 discard();
             }
             return;
@@ -758,7 +785,7 @@ public class TNNightGripEntity extends Entity {
     /** ② 抓住阶段（与上一版相同 ✓）。 */
     private void grip(LivingEntity caster) {
         GripStats stats = stats();
-        if (tickCount > FLY_TICKS + stats.holdTicks()) {
+        if (flightAge() > FLY_TICKS + stats.holdTicks()) {
             finish();
             return;
         }
@@ -770,7 +797,7 @@ public class TNNightGripEntity extends Entity {
         setPos(gripPos(victim, caster));
         hold(victim);
 
-        int held = tickCount - FLY_TICKS;
+        int held = flightAge() - FLY_TICKS;
         if (held > 0 && held % SQUEEZE_INTERVAL == 0 && squeezes * SQUEEZE_INTERVAL < stats.holdTicks()) {
             squeezes++;
             dealtTotal += squeeze(victim, caster, stats.damage());
@@ -779,7 +806,6 @@ public class TNNightGripEntity extends Entity {
             pulledTotal += pullToward(victim, caster, stats.pull());
         }
 
-        cord(caster);
         shroud(victim);
         if (tickCount % 2 == 0) {
             burst(position(), 0.45D, 6);
@@ -964,31 +990,6 @@ public class TNNightGripEntity extends Entity {
     // ------------------------------------------------------------------
     //  特效（作者："别啥都看不见，特效要做出来"✓）
     // ------------------------------------------------------------------
-
-    /**
-     * <b>黑索</b>：从施法者后背到手，拉一条黑线 ✓
-     * （作者 2026-10-10：「要那种从我的后背伸出来的感觉……可以做一个黑线连接着手腕跟后背」）。
-     *
-     * <p>为什么是粒子不是真几何线：那要自己写世界空间渲染
-     * （{@code RenderLevelStageEvent} ＋ 自建 RenderType），风险与工作量都大得多 ✗；
-     * 而**密到 {@link #CORD_SPACING} 格间距的粒子本来就成线** ✓。
-     */
-    private void cord(LivingEntity caster) {
-        if (!(level() instanceof ServerLevel server) || caster == null) {
-            return;
-        }
-        Vec3 from = caster.position().add(0.0D, caster.getBbHeight() * BACK_HEIGHT, 0.0D);
-        Vec3 to = position();
-        double distance = from.distanceTo(to);
-        if (distance < 0.2D) {
-            return;
-        }
-        int points = (int) Math.min(CORD_MAX_POINTS, Math.ceil(distance / CORD_SPACING));
-        for (int i = 1; i <= points; i++) {
-            Vec3 at = from.lerp(to, i / (double) points);
-            server.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y, at.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
-        }
-    }
 
     /** 目标身上裹一层黑雾 ⇒ 旁边的人看得见"他被什么抓住了" ✓。 */
     private void shroud(LivingEntity victim) {

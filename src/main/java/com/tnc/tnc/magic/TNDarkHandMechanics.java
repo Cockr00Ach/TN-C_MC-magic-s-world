@@ -79,7 +79,7 @@ public final class TNDarkHandMechanics {
     private static final double[] BACKLASH_PERCENT = {0.00D, 0.02D, 0.03D, 0.05D, 0.08D};
 
     /** 每档甩出几只手 ✓（作者：从背后伸出"好几只手"；档位越高越多 ✓）。**t5 不用它**（见下）。 */
-    private static final int[] HANDS = {1, 1, 2, 3, 3};
+    private static final int[] HANDS = {1, 2, 3, 5, 7};
 
     // ------------------------------------------------------------------
     //  ★ 2026-10-10 追加：t5 换形态 —— 「很多只大手从天而降砸向敌人，大手的掌心向下」
@@ -174,7 +174,7 @@ public final class TNDarkHandMechanics {
             skyfall(player, level, targetId, tier);
             return;
         }
-        int count = HANDS[Math.max(0, Math.min(HANDS.length - 1, tier - 1))];
+        int count = NightHandReleaseRules.count(tier);
         for (int i = 0; i < count; i++) {
             TNNightGripEntity hand = create(level);
             if (hand == null) {

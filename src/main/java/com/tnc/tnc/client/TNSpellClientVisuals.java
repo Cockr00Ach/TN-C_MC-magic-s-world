@@ -178,6 +178,30 @@ public final class TNSpellClientVisuals {
                 flash = f;                      // 顺手一点点白闪 ✓（大光柱砸下来该亮一下 ✓）
             }
         }
+        // ★ 水纹链 t4 海啸 / t5 灭世之海（作者 2026-10-10："t4 释放轻微震动，t5 震动"✓）
+        //   同一个套路 ✓：就近侦测水域实体 ✓、不需要网络包 ✓、按距离衰减 ✓。
+        //   刻意**不是**全程猛晃 ✗ —— 海啸只晃释放那 12 tick ✓；灭世之海释放猛晃一下、
+        //   之后每 20 tick 随浪拍岸轻晃一次 ✓（全程 10 度会晃吐人 ✗，这是 2026-09-29 落雷那次学到的 ✗）。
+        for (com.tnc.tnc.magic.water.TNWaterFieldEntity field : minecraft.level.getEntitiesOfClass(
+                com.tnc.tnc.magic.water.TNWaterFieldEntity.class,
+                minecraft.player.getBoundingBox().inflate(SHAKE_RANGE))) {
+            if (field.isEmitter() || field.kind() != 1 || field.tier() < 4) {
+                continue;
+            }
+            int age = field.age();
+            double d = field.position().distanceTo(minecraft.player.position());
+            double falloff = Math.max(0.0D, 1.0D - d / SHAKE_RANGE);
+            float s;
+            if (field.tier() == 4) {
+                s = age < 12 ? (float) (3.0D * falloff) : 0.0F;
+            } else {
+                s = age < 14 ? (float) (9.0D * falloff)
+                        : (age % 20 < 4 ? (float) (2.6D * falloff) : 0.0F);
+            }
+            if (s > shake) {
+                shake = s;
+            }
+        }
         shake *= 0.88F;         // 衰减
         if (shake < 0.02F) {
             shake = 0.0F;

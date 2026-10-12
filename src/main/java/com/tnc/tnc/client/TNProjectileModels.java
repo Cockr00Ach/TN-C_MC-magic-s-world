@@ -197,6 +197,11 @@ public final class TNProjectileModels {
             // 风系范围风链 t3+ 的龙卷风（生成器：tools/gen_wind_tornado_model.py）
             //   2026-10-10：作者"你做个龙卷风的模型……持续向外发射风刃" ✓
             WIND_TORNADO,
+            "projectile/earth_clod", "projectile/earth_orb", "projectile/earth_shell",
+            "projectile/earth_salvo", "projectile/earth_spear",
+            "projectile/earth_pillar", "projectile/earth_mud_plate", "projectile/earth_root",
+            "projectile/earth_spear_sharp",
+            "projectile/earth_spike_sharp",
     };
 
     /**

@@ -26,7 +26,7 @@ import java.util.UUID;
  * <p>所以这是一个**留在原地**的实体（不是投射物 ✗）：法术 t3+ 改成 {@code SELF} 施法，
  * Java 在施法者身前召唤它，它自己负责：
  * <ol>
- *   <li><b>一直转</b> ✓（{@link #spin()} 每 tick 加 9°，渲染器按它绕 Y 转模型）；</li>
+ *   <li><b>一直转</b> ✓（{@link #spin()} 每 tick 加 {@link #SPIN_PER_TICK} 度，渲染器按它绕 Y 转模型）；</li>
  *   <li><b>持续向外甩风刃</b> ✓（每 {@link #FIRE_INTERVAL} tick 朝
  *       {@link #BLADES_PER_BURST} 个均匀分布的方向各生成一发 {@link TNWindBladeEntity}）；</li>
  *   <li><b>卷人</b> ✓（每 {@link #SUCK_INTERVAL} tick 把范围内敌人往风眼拽一点 ＋ 少量伤害）；</li>
@@ -59,8 +59,18 @@ public class TNTornadoEntity extends Entity {
     /** 每档的寿命（秒）—— 索引 = tier − 3 ✓。 */
     public static final int[] LIFETIME_SECONDS = { 8, 12, 16 };
 
-    /** 每档每次甩几发风刃 ✓。 */
-    public static final int[] BLADES_PER_BURST = { 3, 5, 7 };
+    /**
+     * 每档每次甩几发风刃 ✓。
+     *
+     * <p>⚠️ ★ 作者 2026-10-10 第二次反馈：「**风刃太多了挡视野**」✗ ⇒ 从 {@code 3/5/7}
+     * 砍到 <b>2/3/3</b>，并把 {@link #FIRE_INTERVAL} 从 14 拉到 18 ✓。
+     *
+     * <p><b>同时存在几发</b> ≈ {@code 每轮发数 × 寿命 / 间隔}（寿命 {@code MAX_LIFE} = 40 tick ✓）：
+     * 改之前 t5 ≈ <b>7 × 40/14 ≈ 20 发</b>同屏 ✗（而且每发 23.6 格宽 ⇒ 整个屏幕都是月牙 ✗）；
+     * 改之后 t5 ≈ <b>3 × 40/18 ≈ 6.7 发</b> ✓、t3 ≈ 4.4 发 ✓。
+     * 还嫌多就继续压这两个数（分母是 {@link #FIRE_INTERVAL} ✓）。
+     */
+    public static final int[] BLADES_PER_BURST = { 2, 3, 3 };
 
     /**
      * 每档龙卷风的渲染缩放 ✓ —— ★ 作者 2026-10-10 逐档表：t3 <b>2 倍</b> / t4 <b>5 倍</b> /
@@ -94,20 +104,46 @@ public class TNTornadoEntity extends Entity {
     /** 每档风刃的单发伤害 ✓。 */
     public static final float[] BLADE_DAMAGE = { 5.0F, 6.0F, 7.0F };
 
-    /** 每隔几 tick 甩一轮风刃 ✓。 */
-    private static final int FIRE_INTERVAL = 14;
+    /** 每隔几 tick 甩一轮风刃 ✓（14 → 18：作者说"风刃太多挡视野" ✗，见 {@link #BLADES_PER_BURST}）。 */
+    private static final int FIRE_INTERVAL = 18;
 
     /** 每隔几 tick 卷一次人 ✓。 */
     private static final int SUCK_INTERVAL = 10;
 
     /** 风刃飞出去的速度（格/tick）✓。 */
-    private static final double BLADE_SPEED = 0.85D;
+    private static final double BLADE_SPEED = 1.15D;
+
+    // ---- 模型本体的几何（单位 = 1/16 格）✓ ----
+    // 与 tools/gen_wind_tornado_model.py 顶部的 BASE_RADIUS / TOP_RADIUS /
+    // LAYERS × TWIST_DEG 同源 ✓ —— 粒子和甩刃的出生点都按它算，
+    // 这样"粒子 / 板子 / 风刃"三者的位置永远对得上 ✗ 不会各算各的 ✗。
+
+    /** 漏斗底部的半宽（单位）✓。 */
+    private static final double MODEL_BASE_RADIUS = 13.5D;
+    /** 漏斗顶部的半宽（单位）✓（收口 = 漏斗形 ✓）。 */
+    private static final double MODEL_TOP_RADIUS = 4.0D;
+    /** 漏斗总高（单位）✓。 */
+    private static final double MODEL_HEIGHT = 31.0D;
+    /** 模型自己的总扭转（度）✓ ＝ (7 层 − 1) × 每层 22.5°。 */
+    private static final double MODEL_TWIST_DEG = 6.0D * 22.5D;
+
+    /** 每 tick 撒几颗漩涡粒子 ✓（作者：「最好是混着粒子旋转」✓）。 */
+    private static final int[] SWIRL_PER_TICK = { 4, 8, 12 };
 
     /** 卷人的半径 ✓。 */
     private static final double SUCK_RADIUS = 4.5D;
 
-    /** 每 tick 转角（度）✓ —— 9°/tick ⇒ 一圈 40 tick（2 秒），看得清是"在转" ✓。 */
-    private static final float SPIN_PER_TICK = 9.0F;
+    /**
+     * 每 tick 转角（度）✓。
+     *
+     * <p>★ 作者 2026-10-10 第二次反馈：「**转速加快三倍**」✗ ⇒ 9°/tick → <b>27°/tick</b>
+     * （一圈 <b>40 tick（2 秒）→ 13.3 tick（0.67 秒）</b>）✓。
+     *
+     * <p>⚠️ 这是**唯一**的转速来源 ✗：{@code TNTornadoRenderer} 的帧间插值也读这个常量
+     * （以前渲染器里写死了一份 {@code 9.0F} ✗ —— 改这里不改那里，画面就会和同步值错位 ✗）。
+     * 粒子风的角速度也是从 {@link #spin()} 推的 ⇒ 自动跟着快 3 倍 ✓。
+     */
+    public static final float SPIN_PER_TICK = 27.0F;
 
     /** 甩刃的起始仰角（略微向上，弧线好看一点）✓。 */
     private static final double BLADE_PITCH = -0.12D;
@@ -155,10 +191,13 @@ public class TNTornadoEntity extends Entity {
     @Override
     public void tick() {
         super.tick();
+        if(tickCount>LIFETIME_SECONDS[tier()-3]*20+5){discard();return;}
 
         if (level().isClientSide()) {
-            // 客户端：只推进转角 ✓（服务端也会同步一份，这里插值让旋转平滑 ✓）
+            // 客户端：推进转角（服务端也会同步一份，这里插值让旋转平滑 ✓）
+            // ＋ ★ 撒漩涡粒子 ✓（作者 2026-10-10：「最好是混着粒子旋转，单独板板旋转很丑」✗）
             setSpinRaw(getSpin() + SPIN_PER_TICK);
+            spawnSwirlParticles();
             return;
         }
 
@@ -184,12 +223,80 @@ public class TNTornadoEntity extends Entity {
             suckIn(tier);
         }
 
-        // ⑤ 脚下的风（视觉，服务端发给附近客户端 ✓）
+        // ⑤ 脚下的风环（服务端发，所有客户端都看得到 ✓）
+        //    ★ 主体那层"风幕"粒子在客户端撒（见 spawnSwirlParticles）——
+        //    那层要**精确初速度**，走服务端 sendParticles 只能给随机方向 ✗，而且一颗粒子一个包 ✗。
         if (age % 2 == 0) {
             ServerLevel server = (ServerLevel) level();
             double r = 1.5D + 0.4D * (tier - 3);
             server.sendParticles(net.minecraft.core.particles.ParticleTypes.CLOUD,
                     getX(), getY() + 0.15D, getZ(), 3, r * 0.4D, 0.05D, r * 0.4D, 0.02D);
+        }
+    }
+
+    /**
+     * ★ <b>"混着粒子旋转"</b>（作者 2026-10-10：「最好是混着粒子旋转，单独板板旋转很丑」✗）。
+     *
+     * <p>模型本体只有 7 层 × 4 片薄板 ⇒ 光靠它转就是"几块板在转" ✗。这里每 tick 在
+     * <b>漏斗表面上</b>撒一把风粒子 ✓，位置与转向**全部跟模型同源** ✓：
+     * <ul>
+     *   <li><b>半径</b>按模型的收口插值（13.5 → 4 单位，再 × 档位尺寸 ✓）⇒ 粒子贴着漏斗壁 ✓；</li>
+     *   <li><b>角度</b> = {@link #spin()} ＋ 模型自己的总扭转 × 高度 ⇒
+     *       粒子和板子走**同一条螺旋** ✓（各转各的会当场穿帮 ✗）；</li>
+     *   <li><b>切向速度</b> ⇒ 看着是"被卷着往上走"，而不是"挂在那儿" ✓；</li>
+     *   <li>基座再补一点扬尘 ＋ 偶尔一道 {@code SWEEP_ATTACK} ⇒ 底边不空 ✓。</li>
+     * </ul>
+     *
+     * <p>为什么放在<b>客户端</b>：这一层纯是好看 ✓，不需要同步 ✗ ——
+     * 每颗粒子的位置都要单独指定，走服务端就得**一颗粒子一个包** ✗；
+     * 客户端生成还拿得到**精确初速度** ✓。
+     * 每个客户端都会自己 tick 这个实体 ⇒ <b>所有人都看得到</b> ✓（不是"只有自己看得见" ✗）。
+     */
+    private void spawnSwirlParticles() {
+        int tier = tier();
+        double scale = sizeScale();
+        double baseR = MODEL_BASE_RADIUS / 16.0D * scale;
+        double topR = MODEL_TOP_RADIUS / 16.0D * scale;
+        double height = MODEL_HEIGHT / 16.0D * scale;
+        double spinRad = Math.toRadians(spin());
+        double twist = Math.toRadians(MODEL_TWIST_DEG);
+
+        int count = SWIRL_PER_TICK[tier - 3];
+        for (int i = 0; i < count; i++) {
+            double u = random.nextDouble();                  // 0 = 底、1 = 顶 ✓
+            double radius = baseR + (topR - baseR) * u;
+            // ⚠️ 方向必须和**板子**一致 ✗：渲染器那句是 `Axis.YP.rotationDegrees(spin)`，
+            //    绕 +Y 的右手旋转会把 (cos φ, sin φ) 映到 **φ − spin** ⇒ 模型是**逆着** atan2 转的 ✓。
+            //    模型每层还多扭 22.5°（同样是 − 方向）⇒ 粒子也写成 `−(spin + twist × u)` ✓，
+            //    否则粒子风幕会**逆着**板子的螺旋转，一眼就穿帮 ✗。
+            double angle = -(spinRad + twist * u) + (random.nextDouble() - 0.5D) * 0.35D;
+            double tangential = 0.05D + 0.05D * u;
+            // 切向速度 = 位置对角度的导数 × d(angle)/d(spin)（＝ −1）✓
+            level().addParticle(net.minecraft.core.particles.ParticleTypes.CLOUD,
+                    getX() + Math.cos(angle) * radius,
+                    getY() + 0.15D + u * height,
+                    getZ() + Math.sin(angle) * radius,
+                    Math.sin(angle) * tangential,                // ≈ 切向 ⇒ 看着在"卷" ✓
+                    0.012D + 0.025D * u,                         // 略微上飘 ✓
+                    -Math.cos(angle) * tangential);
+        }
+
+        // 基座扬尘：往外甩一圈，读起来像"从地上卷起来的" ✓（同样跟着 − 方向 ✓）
+        if (tickCount % 2 == 0) {
+            double r = baseR * (0.85D + random.nextDouble() * 0.35D);
+            double a = random.nextDouble() * Math.PI * 2.0D;
+            level().addParticle(net.minecraft.core.particles.ParticleTypes.CLOUD,
+                    getX() + Math.cos(a) * r, getY() + 0.1D, getZ() + Math.sin(a) * r,
+                    Math.sin(a) * 0.09D, 0.035D, -Math.cos(a) * 0.09D);
+        }
+        // 偶尔一道风切 ⇒ 有"刃"的读感 ✓
+        if (tickCount % 7 == 0) {
+            double a = -spinRad;
+            level().addParticle(net.minecraft.core.particles.ParticleTypes.SWEEP_ATTACK,
+                    getX() + Math.cos(a) * baseR * 0.8D,
+                    getY() + height * 0.55D,
+                    getZ() + Math.sin(a) * baseR * 0.8D,
+                    0.0D, 0.0D, 0.0D);
         }
     }
 
@@ -205,13 +312,17 @@ public class TNTornadoEntity extends Entity {
         double size = bladeSizeMultiplier();
         double phase = (age / (double) FIRE_INTERVAL) * 0.7D;   // 每轮错开一点 ✓
         double spawnR = spawnRadius();
+        // ⚠️ 出生点必须在**自己命中半径之外** ✗：t3 的判定半径（≈2.5 格）比外壁（1.9 格）**还大**
+        //    ⇒ 被卷到漩涡边的怪会被"刚出生就命中" ✗，那一发风刃**一枚都飞不出去** ✗
+        //    （表现就是"刃没射出去"✗ —— 见 TNWindBladeEntity#hitRadius 的封顶注释）。
+        spawnR = Math.max(spawnR, TNWindBladeEntity.hitRadiusFor(size) + 0.75D);
+        // 从漏斗**中段**出来 ✓：贴着底边出生看起来像"从地里钻出来" ✗
+        double spawnY = 0.30D * (MODEL_HEIGHT / 16.0D * sizeScale());
 
         for (int i = 0; i < count; i++) {
             double angle = phase + (Math.PI * 2.0D / count) * i;
             Vec3 dir = new Vec3(Math.cos(angle), Math.tan(BLADE_PITCH), Math.sin(angle)).normalize();
-            // 出生点挪到**漩涡外壁** ✓：不然大尺寸的刃一出生就在风眼里，
-            // 判定半径 5 格 ⇒ 立刻够到被卷进来的怪 ✗（见 TNWindBladeEntity#MAX_HIT_RADIUS）
-            Vec3 at = position().add(Math.cos(angle) * spawnR, 0.9D, Math.sin(angle) * spawnR);
+            Vec3 at = position().add(Math.cos(angle) * spawnR, spawnY, Math.sin(angle) * spawnR);
             TNWindBladeEntity blade = TNWindBladeEntity.shoot(
                     (ServerLevel) level(), at, dir, BLADE_SPEED, damage, owner(), size);
             if (blade != null) {
@@ -222,7 +333,7 @@ public class TNTornadoEntity extends Entity {
 
         // 甩刃的一瞬间来一圈风（视觉反馈 ✓）—— 半径跟着漩涡大小走 ✓
         ((ServerLevel) level()).sendParticles(net.minecraft.core.particles.ParticleTypes.SWEEP_ATTACK,
-                getX(), getY() + 0.9D, getZ(), 4, spawnR * 0.6D, 0.2D, spawnR * 0.6D, 0.0D);
+                getX(), getY() + spawnY, getZ(), 4, spawnR * 0.6D, 0.2D, spawnR * 0.6D, 0.0D);
     }
 
     /**
@@ -286,6 +397,9 @@ public class TNTornadoEntity extends Entity {
     }
 
     /** 当前转角（度）✓。 */
+    public double visualSpin(float partialTick) { return visualClock.phase(tickCount,partialTick,getSpin(),SPIN_PER_TICK); }
+    private final WindEarthVisualClock visualClock=new WindEarthVisualClock();
+
     public float spin() {
         return getSpin();
     }

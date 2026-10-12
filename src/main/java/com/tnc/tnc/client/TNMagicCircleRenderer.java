@@ -92,6 +92,8 @@ public class TNMagicCircleRenderer extends EntityRenderer<TNMagicCircleEntity> {
     @Override
     public void render(TNMagicCircleEntity entity, float entityYaw, float partialTick, PoseStack poseStack,
                        MultiBufferSource buffer, int packedLight) {
+        if(entity.style()==TNMagicCircleEntity.STYLE_DARK_HAND)return;
+        if(entity.style()==TNMagicCircleEntity.STYLE_EARTH){EarthSealRenderer.render(entity,partialTick,poseStack,buffer);return;}
         float age = entity.tickCount + partialTick;
         float life = Math.max(1.0F, entity.life());
         float t = Math.min(1.0F, age / life);
@@ -120,6 +122,14 @@ public class TNMagicCircleRenderer extends EntityRenderer<TNMagicCircleEntity> {
                 alpha = u * u * (3.0F - 2.0F * u);                            // smoothstep ✓
             }
         }
+        boolean handGate = entity.style() == TNMagicCircleEntity.STYLE_DARK_HAND;
+        if (handGate) {
+            float formed = com.tnc.tnc.magic.NightHandPresentation.formation(age);
+            radius *= 0.25D + 0.75D * formed;
+            // Hold the complete gate through release and flight, then fade.
+            float fade = Math.max(0.0F, Math.min(1.0F, (life - age) / 16.0F));
+            alpha = formed * fade * fade * (3.0F - 2.0F * fade);
+        }
         if (alpha <= 0.01F || radius <= 0.01D) {
             return;
         }
@@ -141,6 +151,9 @@ public class TNMagicCircleRenderer extends EntityRenderer<TNMagicCircleEntity> {
         }
         Matrix4f matrix = poseStack.last().pose();
 
+        if (handGate) {
+            NightHandGeometry.gate(buffer.getBuffer(NightHandRenderTypes.geometry()), matrix, radius, alpha);
+        }
         VertexConsumer consumer = buffer.getBuffer(RenderType.entityTranslucentEmissive(textureFor(entity)));
         float r = (float) radius;
         drawQuad(consumer, matrix, r, alpha, false);

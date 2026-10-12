@@ -1,0 +1,57 @@
+package com.tnc.tnc.magic;
+import net.minecraft.gametest.framework.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraftforge.gametest.*;
+@GameTestHolder("tnc") @PrefixGameTestTemplate(false)
+public final class ElementSceneGameTests {
+    @GameTest(template="building_test_empty",timeoutTicks=30,batch="element_scenes")
+    public static void giantSpearDropsTheWholeDistanceInOneTick(GameTestHelper h) {
+        var caster=h.spawn(EntityType.VILLAGER,new BlockPos(1,2,1));caster.setNoAi(true);
+        var enemy=h.spawn(EntityType.ZOMBIE,new BlockPos(4,2,4));enemy.setNoAi(true);
+        var e=WindEarthVisualMechanics.ATTACK.get().create(h.getLevel());float hp=enemy.getHealth();
+        e.configure(caster,3,"earth_spear_sharp",enemy.position().add(0,125,0),enemy.position(),25,70,8,35,3,6,h.getLevel().damageSources().magic());
+        e.tickCount=9;e.tick();h.assertTrue(e.done()&&enemy.getHealth()<hp,"Full-height spear falls and damages the target in one tick");
+        caster.discard();enemy.discard();e.discard();h.succeed();
+    }
+    @GameTest(template="building_test_empty",timeoutTicks=30,batch="element_scenes")
+    public static void quakeSpikesRiseSlowlyBeforeHittingAndAlwaysExpire(GameTestHelper h) {
+        var caster=h.spawn(EntityType.VILLAGER,new BlockPos(1,2,1));caster.setNoAi(true);
+        var enemy=h.spawn(EntityType.ZOMBIE,new BlockPos(4,2,4));enemy.setNoAi(true);
+        var end=enemy.position();float hp=enemy.getHealth();
+        var e=WindEarthVisualMechanics.ATTACK.get().create(h.getLevel());
+        e.configure(caster,6,"earth_spike_sharp",end.add(0,-6,0),end,2,6,0,130,3,4,h.getLevel().damageSources().magic());
+        e.tickCount=20;e.tick();
+        h.assertTrue(Math.abs(e.getY()-(end.y-3))<.01&&enemy.getHealth()==hp,"Halfway through the rise, spike remains partially buried and cannot hit early");
+        e.tickCount=40;e.tick();h.assertTrue(e.position().distanceTo(end)<.01&&enemy.getHealth()<hp,"Fully raised spike hits the target");
+        e.tickCount=131;e.tick();h.assertTrue(e.isRemoved(),"No permanent spike remains");
+        caster.discard();enemy.discard();h.succeed();
+    }
+    @GameTest(template="building_test_empty",timeoutTicks=30,batch="element_scenes")
+    public static void raisedSphereHitsGroundTargetsAndDoesNotDamageOwnerOrTerrain(GameTestHelper h) {
+        var caster=h.spawn(EntityType.VILLAGER,new BlockPos(1,2,1));caster.setNoAi(true);
+        var enemy=h.spawn(EntityType.ZOMBIE,new BlockPos(4,2,4));enemy.setNoAi(true);
+        var e=WindEarthVisualMechanics.ATTACK.get().create(h.getLevel());
+        float health=enemy.getHealth(),own=caster.getHealth();
+        var block=h.getLevel().getBlockState(h.absolutePos(new BlockPos(4,1,4)));
+        e.configure(caster,2,"earth_orb",enemy.position().add(0,8,0),enemy.position().add(0,11,0),10,10,0,110,3,5,h.getLevel().damageSources().magic());
+        e.damageCentre=enemy.position();e.tickCount=80;e.tick();
+        h.assertTrue(e.done()&&enemy.getHealth()<health,"Raised orb explosion reaches the ground target");
+        h.assertTrue(caster.getHealth()==own,"No owner damage");
+        h.assertTrue(block==h.getLevel().getBlockState(h.absolutePos(new BlockPos(4,1,4))),"Explosion cannot change terrain");
+        e.tickCount=87;e.tick();h.assertTrue(e.isRemoved(),"Exploded ball cleans up");
+        caster.discard();enemy.discard();h.succeed();
+    }
+    @GameTest(template="building_test_empty",timeoutTicks=30,batch="element_scenes")
+    public static void stoneCannonStopsAtWallAndHasAFiniteLife(GameTestHelper h) {
+        var caster=h.spawn(EntityType.VILLAGER,new BlockPos(1,2,2));caster.setNoAi(true);
+        var enemy=h.spawn(EntityType.ZOMBIE,new BlockPos(6,2,2));enemy.setNoAi(true);
+        h.setBlock(new BlockPos(2,3,2),Blocks.STONE);
+        var e=WindEarthVisualMechanics.ATTACK.get().create(h.getLevel());float hp=enemy.getHealth();
+        e.configure(caster,5,"earth_shell",caster.getEyePosition(),enemy.getEyePosition(),2,2,0,100,3,1,h.getLevel().damageSources().magic());
+        e.tickCount=1;e.tick();h.assertTrue(e.done(),"Cannon projectile hits the first solid wall");
+        h.assertTrue(enemy.getHealth()==hp,"Wall blocks the projectile");
+        caster.discard();enemy.discard();e.discard();h.succeed();
+    }
+}

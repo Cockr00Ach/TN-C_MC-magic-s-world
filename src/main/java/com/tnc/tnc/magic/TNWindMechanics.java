@@ -406,7 +406,7 @@ public final class TNWindMechanics {
         tickFootWind(player, player.level().getGameTime());
         boolean creativeLike = player.isCreative() || player.isSpectator();
         boolean shouldFly = permanentFlight(player)
-                || player.hasEffect(WIND_FLIGHT.get())
+                || player.hasEffect(WIND_FLIGHT.get()) || has(player,WIND_SPEED_III)
                 || lightWings(player);                   // ★ 光翼链：任一档 buff 在身就允许飞 ✓
         if (shouldFly == player.getAbilities().mayfly) {
             return;                                  // 已经是想要的状态，别每 tick 刷同步包
@@ -424,10 +424,10 @@ public final class TNWindMechanics {
     // ---------------- 脚下的风环（"踩在风上"） ----------------
 
     /** 站在地上时的环：粒子数 / 半径（格）。 */
-    private static final int FOOT_WIND_RING = 6;
+    private static final int FOOT_WIND_RING = 3;
     private static final double FOOT_WIND_RADIUS = 0.48D;
     /** 真飞起来时更密更宽（"风在托着你"要看得出来 ✓）。 */
-    private static final int FOOT_WIND_RING_FLYING = 10;
+    private static final int FOOT_WIND_RING_FLYING = 4;
     private static final double FOOT_WIND_RADIUS_FLYING = 0.62D;
     /** 每隔几 tick 补一道风痕（sweep）—— 只靠 cloud 会像烟，加它才像"风" ✓。 */
     private static final int FOOT_WIND_SWEEP_INTERVAL = 4;
@@ -447,12 +447,14 @@ public final class TNWindMechanics {
      * <h2>为什么不放在客户端</h2>
      * 服务端每 tick {@code sendParticles} 是本项目已有的写法（绕身球 {@code tickOrbs} 就是这么做的 ✓），
      * 而客户端要判"永久飞行"得读魔法石进度（同步链更长 ✗）⇒ 跟现成的走 ✓。
-     * 开销：站着 6 颗/tick、飞着 10 颗/tick，和绕身球同量级 ✓。
+     * 主体由客户端连续几何绘制；每 4 tick 仅保留 3/4 颗辅助粒子。
      */
     private static void tickFootWind(ServerPlayer player, long time) {
-        if (!(permanentFlight(player) || has(player, WIND_FLIGHT))) {
+        if (!(has(player,WIND_FLIGHT) || has(player,WIND_SPEED_III))) {
             return;
         }
+        // Continuous client geometry carries the ring; sparse dust is only a secondary accent.
+        if (time % 4 != 0) return;
         boolean flying = player.getAbilities().flying;
         net.minecraft.server.level.ServerLevel level = player.serverLevel();
         int ring = flying ? FOOT_WIND_RING_FLYING : FOOT_WIND_RING;
@@ -506,9 +508,7 @@ public final class TNWindMechanics {
     /** 是否已经学会"解锁即永久飞行"（风速链进度 ≥ 4）。 */
     private static boolean permanentFlight(ServerPlayer player) {
         // MagicStone.get 返回 Optional<MagicStoneData>（和网络同步那边一个用法）
-        return MagicStone.get(player)
-                .map(data -> data.getProgress(Element.WIND, SpellCatalog.Chain.FLIGHT) >= PERMANENT_FLIGHT_TIER)
-                .orElse(false);
+        return false;
     }
 
     /** 供自检/命令用。 */

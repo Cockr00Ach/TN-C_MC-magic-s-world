@@ -1,37 +1,100 @@
 {
   "school": "EARTH",
   "group": "earth_mud",
-  "range": 8,
-  "learn": { "tier": 5 },
+  "range": 16,
+  "learn": {
+    "tier": 5
+  },
   "cast": {
     "duration": 0.8,
     "animation": "spell_engine:one_handed_area_charge",
-    "sound": { "id": "spell_engine:generic_arcane_casting", "randomness": 0 },
-    "particles": [ { "particle_id": "crit", "shape": "CIRCLE", "origin": "FEET", "count": 12.0, "min_speed": 0.1, "max_speed": 0.4 } ]
+    "sound": {
+      "id": "spell_engine:generic_arcane_casting",
+      "randomness": 0
+    },
+    "particles": [
+      {
+        "particle_id": "tnc:earth_dust",
+        "shape": "CIRCLE",
+        "origin": "FEET",
+        "count": 8,
+        "min_speed": 0.08,
+        "max_speed": 0.35
+      }
+    ]
   },
   "release": {
     "target": {
       "type": "CLOUD",
       "cloud": {
         "volume": {
-          "radius": 8,
-          "area": { "distance_dropoff": "SQUARED" }
+          "radius": 16,
+          "area": {
+            "distance_dropoff": "SQUARED"
+          }
         },
         "time_to_live_seconds": 12.0,
         "impact_tick_interval": 20,
         "delay_ticks": 5,
-        "presence_sound": { "id": "block.mud.ambient", "volume": 0.3 },
-        "client_data": { "particles": [ { "particle_id": "crit", "shape": "SPHERE", "origin": "CENTER", "count": 30.0, "min_speed": 0.2, "max_speed": 1.2 } ] },
-        "spawn": { "particles": [ { "particle_id": "crit", "shape": "SPHERE", "origin": "CENTER", "count": 30.0, "min_speed": 0.2, "max_speed": 1.2 } ], "sound": { "id": "block.mud.place", "volume": 1.0 } }
+        "presence_sound": {
+          "id": "block.mud.ambient",
+          "volume": 0.3
+        },
+        "client_data": {
+          "particles": [
+            {
+              "particle_id": "tnc:earth_dust",
+              "shape": "SPHERE",
+              "origin": "CENTER",
+              "count": 3,
+              "min_speed": 0.035,
+              "max_speed": 0.08
+            }
+          ]
+        },
+        "spawn": {
+          "particles": [
+            {
+              "particle_id": "tnc:earth_dust",
+              "shape": "SPHERE",
+              "origin": "CENTER",
+              "count": 8,
+              "min_speed": 0.08,
+              "max_speed": 0.35
+            }
+          ],
+          "sound": {
+            "id": "block.mud.place",
+            "volume": 1.0
+          }
+        }
       }
     },
     "animation": "spell_engine:one_handed_area_release",
-    "sound": { "id": "block.mud.place", "volume": 1.0 }
+    "sound": {
+      "id": "block.mud.place",
+      "volume": 1.0
+    }
   },
   "impact": [
     {
-      "action": { "type": "DAMAGE", "damage": { "spell_power_coefficient": 2, "knockback": 0.0 } },
-      "particles": [ { "particle_id": "crit", "shape": "SPHERE", "origin": "CENTER", "count": 30.0, "min_speed": 0.2, "max_speed": 1.2 } ]
+      "action": {
+        "type": "DAMAGE",
+        "damage": {
+          "spell_power_coefficient": 2,
+          "knockback": 0.0
+        }
+      },
+      "particles": [
+        {
+          "particle_id": "tnc:earth_dust",
+          "shape": "SPHERE",
+          "origin": "CENTER",
+          "count": 8,
+          "min_speed": 0.08,
+          "max_speed": 0.35
+        }
+      ]
     },
     {
       "action": {
@@ -42,11 +105,23 @@
           "duration": 9,
           "amplifier": 0,
           "apply_mode": "SET",
-          "show_particles": true
+          "show_particles": false
         }
       },
-      "particles": [ { "particle_id": "crit", "shape": "SPHERE", "origin": "CENTER", "count": 30.0, "min_speed": 0.2, "max_speed": 1.2 } ]
+      "particles": [
+        {
+          "particle_id": "tnc:earth_dust",
+          "shape": "SPHERE",
+          "origin": "CENTER",
+          "count": 8,
+          "min_speed": 0.08,
+          "max_speed": 0.35
+        }
+      ]
     }
   ],
-  "cost": { "exhaust": 0.0, "cooldown_duration": 12 }
+  "cost": {
+    "exhaust": 0.0,
+    "cooldown_duration": 12
+  }
 }

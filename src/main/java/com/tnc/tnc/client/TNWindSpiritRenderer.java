@@ -21,12 +21,22 @@ public class TNWindSpiritRenderer extends GeoEntityRenderer<TNWindSpiritEntity> 
     }
 
     @Override
+    public void render(TNWindSpiritEntity entity, float yaw, float partial, PoseStack poses,
+                       net.minecraft.client.renderer.MultiBufferSource buffer, int light) {
+        if (entity.tier() >= 3) super.render(entity,yaw,partial,poses,buffer,light);
+        WindEarthVisualBuffers.draw(buffer,(body,glow)->WindEarthGeometry.spirit(body,glow,poses.last().pose(),
+                TNWindMechanics.scaleForTier(entity.tier()) * com.tnc.tnc.magic.WindEarthVisualRules.spiritScale(entity.tier(),entity.slot()),
+                entity.tier()==5 && entity.slot()!=0?4:entity.tier(),entity.tickCount+partial));
+    }
+
+    @Override
     public void scaleModelForRender(float widthScale, float heightScale, PoseStack poseStack,
                                     TNWindSpiritEntity animatable, BakedGeoModel model, boolean isReRender,
                                     float partialTick, int packedLight, int packedOverlay) {
         super.scaleModelForRender(widthScale, heightScale, poseStack, animatable, model,
                 isReRender, partialTick, packedLight, packedOverlay);
-        float s = (float) TNWindMechanics.scaleForTier(animatable.tier());
+        float s = (float) (TNWindMechanics.scaleForTier(animatable.tier())
+                * com.tnc.tnc.magic.WindEarthVisualRules.spiritScale(animatable.tier(),animatable.slot()));
         if (s != 1.0F) {
             poseStack.scale(s, s, s);
         }

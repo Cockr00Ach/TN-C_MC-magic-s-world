@@ -84,6 +84,19 @@ public class TNNightGripRenderer extends EntityRenderer<TNNightGripEntity> {
     private static boolean logged;
 
     /**
+     * ★ <b>阶段 0b 诊断：每只实体只打一次"我按多大画"</b>（作者 2026-10-08 实机反馈
+     * 「t1 到 t5 大小都一样」⇒ 必须证明渲染时读到的 tier/scale 到底是几 ✗）。
+     *
+     * <p>已经用一次探针证明了：模型烘焙成功（{@code isMissingModel=false}）、贴图无误、
+     * 档位数据也对（{@code tier=1..4} 各自生成 1/1/2/3 只手 ✓）。
+     * 那么"大小不变"就只可能出在这条链的<b>最后一跳</b>：
+     * {@code entity.sizeScale()} 读到的值 / 引擎内部那次 {@code -0.5} 平移 / 锚点抬升。
+     * 这里把三个数一次打全，进游戏放一轮五档就能对上表 ✓。
+     */
+    private static final java.util.Set<Integer> SCALE_LOGGED =
+            java.util.Collections.newSetFromMap(new java.util.concurrent.ConcurrentHashMap<>());
+
+    /**
      * 模型半高**不在这里** ✗ —— 它是实体的
      * {@code TNNightGripEntity.MODEL_HALF_HEIGHT_UNITS}（唯一来源 ✓）。
      * 2026-10-10 作者手改模型之后 y 跨度从 ±13 变成 ±12.5 单位，
@@ -104,11 +117,15 @@ public class TNNightGripRenderer extends EntityRenderer<TNNightGripEntity> {
     @Override
     public void render(TNNightGripEntity entity, float entityYaw, float partialTick, PoseStack poseStack,
                        MultiBufferSource buffer, int packedLight) {
-        // ★ 尺寸从**实体**读（唯一来源 ✓）—— 作者 2026-10-10："把 t4 的手的尺寸换成 t5 那么大"
-        //   （就是 TNNightGripEntity.SIZE_SCALE[3] == SIZE_SCALE[4] ✓）
+        // ★ 尺寸从**实体**读（唯一来源 ✓）—— 2026-10-08 修正：这里以前是
+        //   "t1..t5 五档"的线性表（t4==t5），作者要求改成**指数增长**，且
+        //   {@code sizeScale()} 以前读的是**只在服务端写的字段** ⇒ 客户端一律按 t1 画 ✗
+        //   （实机日志实证 `tier=5 ... scale=0.98`）。两处现在都修在实体里 ✓。
+        if (!entity.launched()) return;
         float scale = entity.sizeScale();
         boolean sky = entity.skyfall();
-        Vec3 direction = directionOf(entity);
+        Vec3 direction = directionOf(entity, partialTick);
+        logScaleOnce(entity, scale, sky);
 
         poseStack.pushPose();
         // ① 把模型的 +Z（掌心）转到目标方向：抓取 ⇒ 朝被抓的人；天降 ⇒ 朝**正下方** ✓
@@ -135,6 +152,21 @@ public class TNNightGripRenderer extends EntityRenderer<TNNightGripEntity> {
         }
         poseStack.popPose();
 
+        if (!sky) {
+            LivingEntity owner = living(entity.ownerEntityId());
+            if (owner != null) {
+                Vec3 origin = entity.getPosition(partialTick);
+                Vec3 back = owner.getPosition(partialTick).add(0, owner.getBbHeight() * 0.65D, 0)
+                        .subtract(owner.getLookAngle().multiply(0.55D, 0.0D, 0.55D));
+                // Actual imported wrist centre, in the same rotated coordinates as the model.
+                double yaw = Math.atan2(direction.x, direction.z);
+                double pitch = -Math.asin(Mth.clamp(direction.y, -1.0D, 1.0D));
+                Vec3 wrist = new Vec3(-0.8D / 16, entity.modelHalfHeightUnits() - 6.5D / 16, -6.0D / 16)
+                        .xRot((float) -pitch).yRot((float) yaw).scale(scale);
+                NightHandGeometry.tube(buffer.getBuffer(NightHandRenderTypes.geometry()),poseStack.last().pose(),
+                        back.subtract(origin),wrist,Math.min(.8,.12*scale),entity.handSlot(),false,entity.tickCount+partialTick);
+            }
+        }
         super.render(entity, entityYaw, partialTick, poseStack, buffer, packedLight);
     }
 
@@ -153,7 +185,7 @@ public class TNNightGripRenderer extends EntityRenderer<TNNightGripEntity> {
      * （见 {@code tools/gen_dark_hand_model.py} 的几何注释：+Z = 掌心、+Y = 上/手指、
      * 手腕沿 −Z）⇒ 把 +Z 指向目标，掌心才朝着他 ✓。
      */
-    private static Vec3 directionOf(TNNightGripEntity entity) {
+    private static Vec3 directionOf(TNNightGripEntity entity, float partialTick) {
         // ★ 天降（t5）：掌心朝**正下方** ✓ —— 作者 2026-10-10：「t5 变成有很多个大手从天而降
         //   砸向敌人，**大手的掌心向下**」。
         //   传 (0,-1,0) 进来，上面那两步旋转就正好把模型的 +Z（掌心）压到正下方 ✓
@@ -163,16 +195,16 @@ public class TNNightGripRenderer extends EntityRenderer<TNNightGripEntity> {
         }
         LivingEntity target = living(entity.targetEntityId());
         if (target != null) {
-            Vec3 toTarget = target.position()
+            Vec3 toTarget = target.getPosition(partialTick)
                     .add(0.0D, target.getBbHeight() * 0.5D, 0.0D)
-                    .subtract(entity.position());
+                    .subtract(entity.getPosition(partialTick));
             if (toTarget.lengthSqr() > 1.0E-6D) {
                 return toTarget.normalize();
             }
         }
         Entity owner = living(entity.ownerEntityId());
         if (owner != null) {
-            Vec3 fromOwner = entity.position().subtract(owner.position());
+            Vec3 fromOwner = entity.getPosition(partialTick).subtract(owner.getPosition(partialTick));
             if (fromOwner.lengthSqr() > 1.0E-6D) {
                 return fromOwner.normalize();
             }
@@ -212,10 +244,120 @@ public class TNNightGripRenderer extends EntityRenderer<TNNightGripEntity> {
                 logged = true;
                 LOGGER.info("TN-C: night hand grip <- 引擎渲染路径 {} tier={} layer={} ✓",
                         MODEL_ID, entity.tier(), layer);
+                logWhatTheEngineResolved();
             }
             return true;
         } catch (Throwable t) {
             return false;
         }
+    }
+
+    /**
+     * 每个"档位＋模式"只打一次：渲染时实际用的 tier / scale / 模型实际世界尺寸 ✓。
+     *
+     * <p>这张表就是"大小到底变没变"的**直接答案**：
+     * t1 应该 ≈ 1.5 格、t2 ≈ 3.4、t3 ≈ 7.4、t4 ≈ 16.3、t5 ≈ 35.9（天降 7 只）✓ ——
+     * 指数增长（每档 ×2.2，作者 2026-10-08 的要求 ✓）。
+     * 若日志里五档的 {@code scale} 真的不同、而画面就是不变 ⇒ 问题就不在这条链，
+     * 而在"你看到的那只手不是这个实体"（那就该去查是别的模组/别的实体在画 ✗）。
+     */
+    private static void logScaleOnce(TNNightGripEntity entity, float scale, boolean sky) {
+        try {
+            int key = entity.tier() * 10 + (sky ? 1 : 0);
+            if (!SCALE_LOGGED.add(key)) {
+                return;
+            }
+            double half = com.tnc.tnc.magic.TNNightGripEntity.MODEL_HALF_HEIGHT_UNITS * scale;
+            LOGGER.warn("TN-C/DIAG: hand render tier={} skyfall={} scale={} -> 模型高 {} 单位 = {} 格"
+                            + "（半高 {} 格），锚点抬升 {} 格",
+                    entity.tier(), sky, scale, com.tnc.tnc.magic.TNNightGripEntity.MODEL_HALF_HEIGHT_UNITS * 16.0,
+                    String.format("%.2f", half * 2.0), String.format("%.2f", half),
+                    String.format("%.2f", sky ? 0.0D : half));
+        } catch (Throwable ignored) {
+            // 诊断不允许影响渲染 ✓
+        }
+    }
+
+    /**
+     * ★ <b>阶段 0 诊断（一次性）：引擎到底拿到了哪个模型？</b>
+     *
+     * <p>为什么必须问这一句：{@code CustomModels.render} 里
+     * {@code getModelManager().getModel(id)} 在"没烘焙"时<b>返回的是缺失模型，而不是 null</b>
+     * （javap 实证：{@code if (model == null) { 兜底成物品 } } 那一支根本走不到 ✗）
+     * ⇒ 上面那行"引擎渲染路径 … ✓"的日志<b>只证明这条路被调用了，不证明画的是我们的手</b> ✗。
+     *
+     * <p>所以这里把引擎实际拿到的 {@link net.minecraft.client.resources.model.BakedModel}
+     * 与 {@code getMissingModel()} <b>比对象</b>：
+     * <ul>
+     *   <li>相等 ⇒ 我们的模型<b>压根没被烘焙</b> ⇒ 游戏里看到的永远是紫黑缺失模型
+     *       （与贴图无关，调贴图/调模型都没用 ✗）；</li>
+     *   <li>不等 ⇒ 模型烘焙成功 ⇒ 画出来的<b>就是</b> {@code dark_hand.json}
+     *       ⇒ 观感不对就只能是姿态/尺寸/锚点的问题 ✓。</li>
+     * </ul>
+     * 顺带把模型自己的粒子贴图（{@code particle} 字段指向的那张图）名字打出来 ——
+     * 那是最短的一条"这张模型确实是我们那只手"的证据 ✓。
+     *
+     * <p>只跑一次（和上面同一次），且全程 try/catch：诊断绝不允许把渲染搞崩 ✗。
+     */
+    private static void logWhatTheEngineResolved() {
+        try {
+            net.minecraft.client.resources.model.ModelManager models =
+                    Minecraft.getInstance().getModelManager();
+            net.minecraft.client.resources.model.BakedModel resolved = models.getModel(MODEL_ID);
+            net.minecraft.client.resources.model.BakedModel missing = models.getMissingModel();
+            if (resolved == null) {
+                LOGGER.warn("TN-C/DIAG: night hand model {} -> getModel() 返回 null（异常情况）", MODEL_ID);
+                return;
+            }
+            boolean isMissing = resolved == missing;
+            // 贴图名只是加分项：反射把几种可能的取名方式都试一遍（拿不到不影响主判据 ✓）
+            String particle = "(unreadable)";
+            try {
+                net.minecraft.client.renderer.texture.TextureAtlasSprite sprite = resolved.getParticleIcon();
+                if (sprite != null) {
+                    particle = spriteName(sprite);
+                }
+            } catch (Throwable ignored) {
+                // 同上
+            }
+            LOGGER.warn("TN-C/DIAG: night hand model {} -> baked={} isMissingModel={} class={} particleSprite={}",
+                    MODEL_ID, !isMissing, isMissing, resolved.getClass().getName(), particle);
+            if (isMissing) {
+                LOGGER.warn("TN-C/DIAG: 结论 —— 我们的模型没有被烘焙，游戏里画的是紫黑缺失模型 ✗"
+                        + "（查 TNModelBaking 的 RegisterAdditional 与 TNProjectileModels 的登记表）");
+            } else {
+                LOGGER.warn("TN-C/DIAG: 结论 —— 模型已烘焙，画的就是 dark_hand.json ✓"
+                        + "（观感问题只可能出在姿态/尺寸/锚点，不在模型文件）");
+            }
+        } catch (Throwable t) {
+            LOGGER.warn("TN-C/DIAG: 模型解析诊断失败 ({})", t.toString());
+        }
+    }
+
+    /** 尽力问出这张 sprite 指向的贴图名（原版不同小版本的方法名不一样，故多试几种 ✓）。 */
+    private static String spriteName(Object sprite) {
+        for (String method : new String[]{"getName", "name", "contents"}) {
+            try {
+                Object value = sprite.getClass().getMethod(method).invoke(sprite);
+                if (value == null) {
+                    continue;
+                }
+                if (value instanceof net.minecraft.resources.ResourceLocation id) {
+                    return id.toString();
+                }
+                try {
+                    Object inner = value.getClass().getMethod("name").invoke(value);
+                    if (inner != null) {
+                        return String.valueOf(inner);
+                    }
+                } catch (Throwable ignored) {
+                    // 不是 SpriteContents ⇒ 直接用它的 toString ✓
+                }
+                return String.valueOf(value);
+            } catch (Throwable ignored) {
+                // 试下一种
+            }
+        }
+        return "(unreadable)";
     }
 }

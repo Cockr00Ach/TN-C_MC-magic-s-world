@@ -1,0 +1,74 @@
+{
+  "baseHash": "094E7C329A22472F60F713D34C8D54A701DBC81C0343E321C5FBE132EA1F3B26",
+  "releaseHash": "5681E576031C6DC0F83938A667770D018B32DFEF84EED6983A22A10B241A2F73",
+  "entries": [
+    "assets/tnc/models/projectile/earth_clod.json",
+    "assets/tnc/models/projectile/earth_mud_plate.json",
+    "assets/tnc/models/projectile/earth_orb.json",
+    "assets/tnc/models/projectile/earth_pillar.json",
+    "assets/tnc/models/projectile/earth_root.json",
+    "assets/tnc/models/projectile/earth_salvo.json",
+    "assets/tnc/models/projectile/earth_seal.json",
+    "assets/tnc/models/projectile/earth_shell.json",
+    "assets/tnc/models/projectile/earth_spear.json",
+    "assets/tnc/models/projectile/earth_spear_sharp.json",
+    "assets/tnc/models/projectile/earth_spike_sharp.json",
+    "assets/tnc/particles/earth_dust.json",
+    "assets/tnc/textures/block/earth_amber_stone.png",
+    "com/tnc/tnc/client/EarthDustParticle.class",
+    "com/tnc/tnc/client/EarthSealRenderer$Fade.class",
+    "com/tnc/tnc/client/EarthSealRenderer.class",
+    "com/tnc/tnc/client/EarthSpellModelRenderer.class",
+    "com/tnc/tnc/client/EarthTremorClient.class",
+    "com/tnc/tnc/client/TNDirectSpellModels.class",
+    "com/tnc/tnc/client/TNMagicCircleRenderer.class",
+    "com/tnc/tnc/client/TNTornadoRenderer.class",
+    "com/tnc/tnc/magic/EarthAttackEntity.class",
+    "com/tnc/tnc/magic/EarthAttackMechanics.class",
+    "com/tnc/tnc/magic/EarthModelLayout$Piece.class",
+    "com/tnc/tnc/magic/EarthModelLayout.class",
+    "com/tnc/tnc/magic/EarthParticles.class",
+    "com/tnc/tnc/magic/EarthSpellParticles.class",
+    "com/tnc/tnc/magic/TNMagicCircleEntity.class",
+    "com/tnc/tnc/magic/TNTornadoEntity.class",
+    "com/tnc/tnc/magic/WindEarthVisualClock.class",
+    "com/tnc/tnc/magic/WindEarthVisualMechanics.class",
+    "data/tnc/spells/earth_ball.json",
+    "data/tnc/spells/earth_god_spear.json",
+    "data/tnc/spells/earth_shot.json",
+    "data/tnc/spells/rock_cannon.json",
+    "data/tnc/spells/ten_thousand_rocks.json"
+  ],
+  "changes": [
+    "土弹 T5 尺寸乘五：横向25、纵向70，模型原点在敌人上方125格，枪尖预留约20格；一tick落地",
+    "土动 T4 每条射线突刺间距3.6格",
+    "震星5根突刺宽2高6，40tick缓慢升起；土球尺寸20，40tick后聚合并爆炸；近处短促晃动",
+    "土环增加6块内环岩片，高阶根石浮动，继续跟随脚下旋转",
+    "土系T4/T5使用水系同款120元素实体法阵，棕金岩材，50tick有限寿命",
+    "新增棕色粒子tnc:earth_dust，替换20个土法定义的粒子标识，爆炸用棕色尘土",
+    "龙卷风实体和渲染器成对更新，补齐visualSpin(float):double，旋转时钟不被同步包倒退"
+  ],
+  "verification": {
+    "unitTests": 13,
+    "unitFailures": 0,
+    "gameTestsTotal": 271,
+    "gameTestsFailures": [
+      "nightgourdavoidsdaylightandgrowsinshadeandreedrequireswetshore（此前已有的植物测试失败）"
+    ],
+    "elementSceneTestsPassed": 4,
+    "jarMemberReferencesChecked": 387,
+    "unrelatedJarEntriesPreserved": true,
+    "installedJarVerification": "passed",
+    "graphicalGameplayVerified": false
+  },
+  "texture": {
+    "asset": "D:\\ModTest\\src\\main\\resources\\assets\\tnc\\textures\\block\\earth_amber_stone.png",
+    "tool": "built-in image_gen",
+    "prompt": "Create one square opaque seamless tileable game texture for sophisticated earth magic stone constructs in Minecraft: rich warm umber rock, terracotta ochre planes, chipped sharp mineral facets, delicate restrained metallic amber-gold mineral veins, hand-painted pixel-art inspired material, crisp readable details, seamless edges, flat albedo texture viewed straight on, no objects, no border, no text, no perspective, no shadows or lighting gradient. One coherent stone material, not an atlas. Brown is dominant, gold highlights at cracks, no purple. Suitable wrapping onto rock spears and stone spheres.",
+    "pixels": [
+      1254,
+      1254
+    ]
+  },
+  "backup": "D:/ModTest/work/backups/earth-refinement-20261013-031045"
+}

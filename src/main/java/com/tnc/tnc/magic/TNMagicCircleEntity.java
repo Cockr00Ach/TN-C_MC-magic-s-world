@@ -42,6 +42,7 @@ public class TNMagicCircleEntity extends Entity {
      * <b>雾的边界线</b> —— 半径 = 雾半径、时长 = 雾时长、位置每 tick 跟着雾走 ✓
      * （由 {@link DarkFogCloudEntity} 托管，见那边的 {@code claimBoundaryCircle}）。
      */
+    public static final int STYLE_EARTH = 4;
     public static final int STYLE_STORM = 0;
     public static final int STYLE_LIGHT = 1;
     public static final int STYLE_DARK = 2;
@@ -165,6 +166,12 @@ public class TNMagicCircleEntity extends Entity {
     @Override
     public boolean isAttackable() {
         return false;
+    }
+
+    @Override
+    public net.minecraft.world.phys.AABB getBoundingBoxForCulling() {
+        return style() == STYLE_DARK_HAND ? super.getBoundingBoxForCulling().inflate(radius())
+                : super.getBoundingBoxForCulling();
     }
 
     @Override

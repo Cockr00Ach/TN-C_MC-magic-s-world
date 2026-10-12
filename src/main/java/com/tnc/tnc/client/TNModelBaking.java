@@ -48,7 +48,9 @@ public final class TNModelBaking {
      */
     @SubscribeEvent
     public static void onRegisterAdditional(ModelEvent.RegisterAdditional event) {
+        TNDirectSpellModels.register(event);
         for (String path : MODELS) {
+            if(TNDirectSpellModels.contains(path))continue;
             ResourceLocation id = ResourceLocation.fromNamespaceAndPath(TNMod.MODID, path);
             event.register(new ModelResourceLocation(id, "standalone"));
         }
