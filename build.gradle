@@ -86,6 +86,14 @@ minecraft {
         }
 
         client {
+            if (project.hasProperty('waterModelAudit')) {
+                workingDirectory project.file('work/water-model-audit')
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+                property 'tnc.waterModelAudit', 'true'
+                property 'tnc.waterModelAuditReport', file('work/water-model-audit.json').absolutePath
+                args '--quickPlaySingleplayer', 'casino-gallery', '--width', '1280', '--height', '720'
+            }
             if (project.hasProperty('casinoClientAudit')) {
                 workingDirectory project.file('work/casino-client-audit')
                 property 'mixin.env.remapRefMap', 'true'

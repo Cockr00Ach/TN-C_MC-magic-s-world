@@ -37,20 +37,20 @@ public final class WaterMagicGameTests {
         loaded.forget(id);h.assertTrue(!com.tnc.tnc.magic.SpellCatalog.effectiveIds(loaded).contains(id),"Forget removes it from wand");h.succeed();
     }
     @GameTest(template="building_test_empty",timeoutTicks=30)
-    public static void slashSpawnsAllTwentySixThreeDimensionalDirections(GameTestHelper h) {
-        var p=caster(h);p.setYRot(17);
+    public static void slashFirstFrontAimsForward(GameTestHelper h) {
+        var p=caster(h);p.setYRot(17);p.setXRot(-12);
         TNWaterFieldEntity.cast(p,net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tnc","wave_slash"));
         var fields=h.getLevel().getEntitiesOfClass(TNWaterFieldEntity.class,p.getBoundingBox().inflate(3),e->!e.isEmitter());
-        h.assertTrue(fields.size()==26,"Expected 26 slash fronts, got "+fields.size());
-        h.assertTrue(fields.stream().anyMatch(e->e.direction().y>.99)&&fields.stream().anyMatch(e->e.direction().y<-.99),"Both vertical poles synchronized");
-        var directions=WaterSpellRules.slashDirections(17);
-        h.assertTrue(directions.size()==26,"26 planned directions");
-        for(int i=0;i<directions.size();i++)for(int j=i+1;j<directions.size();j++)h.assertTrue(directions.get(i).distanceToSqr(directions.get(j))>.01,"No duplicate directions");
+        h.assertTrue(fields.size()==1,"Exactly one immediate front");
+        h.assertTrue(fields.get(0).direction().dot(p.getLookAngle())>.999,"Front follows aim including pitch");
         fields.forEach(Entity::discard);h.succeed();
     }
     @GameTest(template="water_test_large_empty",timeoutTicks=30)
     public static void largerBeamReachesBeyondOldRadiusWithinBudget(GameTestHelper h) {
-        h.assertTrue(WaterSpellRules.radius(5)==15&&WaterSpellRules.range(5)==96&&WaterSpellRules.radius(5)==WaterSpellRules.circleRadius(5),"Beam covers the whole main sigil");
+        h.assertTrue(WaterSpellRules.radius(5)==15&&WaterSpellRules.range(5)==96,"Dragon Ruin beam stays fifteen blocks wide and ninety-six long");
+        // 作者 2026-10-10："t5 的施法法阵的半径应该是水柱半径的一倍"（问清后＝加大一倍 ✓）
+        // ⇒ 法阵 30 格、水柱与破坏半径仍是 15 格 ✓ —— 阵放大不改判定/伤害/钻掘 ✗。
+        h.assertTrue(WaterSpellRules.circleRadius(5)==WaterSpellRules.radius(5)*2&&WaterSpellRules.circleRadius(5)==30,"Sigil is twice the water column, not the drill");
         h.assertTrue(WaterSpellRules.radius(4)==.8,"Other water lasers remain unchanged");
         var p=caster(h);Vec3 start=Vec3.atCenterOf(h.absolutePos(new BlockPos(24,24,24)));
         BlockPos outer=BlockPos.containing(start).offset(14,0,0);h.getLevel().setBlockAndUpdate(outer,Blocks.STONE.defaultBlockState());
@@ -67,12 +67,69 @@ public final class WaterMagicGameTests {
         }
         var bore=new WaterTerrainBore(start,new Vec3(0,0,1),WaterSpellRules.radius(5),1);
         int removed=bore.tick(h.getLevel(),p);
-        h.assertTrue(removed==WaterTerrainBore.BLOCK_BUDGET&&bore.length()==0,"Full aperture must not advance before its first slice is committed");
-        for(int i=0;i<10&&bore.length()==0;i++) {
+        // 2026-10-10 改设计：前端不再等"这一层挖完"✗ —— 它按保证速度射出 ✓，隧道在后面追 ✗
+        //（作者选的就是"瞬间射出"，见 水法特效打磨 第八批 ✗）。预算这一条**没松** ✓。
+        h.assertTrue(removed==WaterTerrainBore.BLOCK_BUDGET,"Full aperture still spends its whole per-tick edit budget");
+        h.assertTrue(bore.length()==1,"Visible front launches at once, the tunnel catches up behind it");
+        for(int i=0;i<40&&bore.remainingBlocks()>0;i++) {
             int edits=bore.tick(h.getLevel(),p);
             h.assertTrue(edits<=WaterTerrainBore.BLOCK_BUDGET,"Full aperture retains per-tick edit budget");removed+=edits;
         }
-        h.assertTrue(removed==blocks&&bore.length()==1&&!bore.stopped(),"Pending full-aperture edits complete without loss: "+bore.stopReason());h.succeed();
+        h.assertTrue(removed==blocks&&bore.remainingBlocks()==0&&!bore.stopped(),"Pending full-aperture edits complete without loss: "+bore.stopReason());h.succeed();
+    }
+    @GameTest(template="water_test_large_empty",timeoutTicks=60)
+    public static void prescanCoversTheChargeWindowAtFourSlicesPerTick(GameTestHelper h) {
+        var p=caster(h);Vec3 start=Vec3.atCenterOf(h.absolutePos(new BlockPos(2,5,1)));
+        h.assertTrue(WaterTerrainBore.SCAN_SLICES_PER_TICK*WaterSpellRules.charge(5)>=WaterSpellRules.range(5),
+                "The charge window must be long enough to pre-scan the whole ninety-six block corridor");
+        var bore=new WaterTerrainBore(start,new Vec3(0,0,1),1,24);
+        for(int i=0;i<5;i++)bore.scan(h.getLevel(),p);
+        h.assertTrue(!bore.prescanDone()&&bore.scannedLength()==20,"Scan advances exactly SCAN_SLICES_PER_TICK per tick");
+        for(int i=0;i<10&&!bore.prescanDone();i++)bore.scan(h.getLevel(),p);
+        h.assertTrue(bore.prescanDone()&&bore.scannedLength()==24,"Pre-scan finishes inside the charge window: "+bore.stopReason());
+        h.assertTrue(bore.remainingBlocks()==0,"Empty corridor has nothing to dig");h.succeed();
+    }
+    @GameTest(template="water_test_large_empty",timeoutTicks=60)
+    public static void prescanCostOfTheRealDragonRuinCorridorIsMeasured(GameTestHelper h) {
+        var p=caster(h);Vec3 start=Vec3.atCenterOf(h.absolutePos(new BlockPos(24,24,24)));
+        // 真实 t5 参数：半径 15 × 96 格 ✓ —— 量的是"蓄力期预扫描"每 tick 的账 ✗
+        //（作者 2026-10-10 明确接受"前期加载久一点"✓，但得有个数 ✓）。
+        // ⚠️ 只量 **3 次** scan()（＝12 片 ✗）：连跑 24 次会把 96 片全塞进同一个 tick ✗，
+        //    实测把服务器顶掉 2.3 秒 ✗、还拖累了别的测试序列（踩过一次 ✓）。
+        // 第 1 次含 JIT 预热 ✗ ⇒ 稳态看后两次的较小值 ✓。
+        var bore=new WaterTerrainBore(start,new Vec3(0,0,1),WaterSpellRules.radius(5),WaterSpellRules.range(5));
+        long cold=timeScan(bore,h.getLevel(),p);
+        long warm=Math.min(timeScan(bore,h.getLevel(),p),timeScan(bore,h.getLevel(),p));
+        long slates=(long)Math.ceil(WaterSpellRules.range(5)/WaterTerrainBore.SCAN_SLICES_PER_TICK);
+        System.out.println("TN-C water: Dragon Ruin pre-scan radius="+WaterSpellRules.radius(5)+" range="+WaterSpellRules.range(5)
+                +" cold="+cold+"ms warm="+warm+"ms per scan tick ("+WaterTerrainBore.SCAN_SLICES_PER_TICK+" slices) => whole corridor ~"+(warm*slates)+"ms over "+slates+" charge ticks");
+        h.assertTrue(bore.scannedLength()==3*WaterTerrainBore.SCAN_SLICES_PER_TICK,"Three scan ticks must validate three times SCAN_SLICES_PER_TICK slices");
+        h.assertTrue(warm<60L,"Warm pre-scan must fit one server tick (50ms budget): "+warm+"ms per "+WaterTerrainBore.SCAN_SLICES_PER_TICK+" slices");
+        h.succeed();
+    }
+    private static long timeScan(WaterTerrainBore bore,net.minecraft.server.level.ServerLevel level,ServerPlayer player) {
+        long started=System.nanoTime();bore.scan(level,player);return (System.nanoTime()-started)/1_000_000L;
+    }
+    @GameTest(template="water_test_large_empty",timeoutTicks=60)
+    public static void dragonRuinFrontLaunchesAtOnceWhileTheTunnelCatchesUp(GameTestHelper h) {
+        var p=caster(h);Vec3 start=Vec3.atCenterOf(h.absolutePos(new BlockPos(24,24,24)));
+        int blocks=0;
+        // 12 格长、半径 3 的**实心石头通道** ✓：348 个方块 ⇒ 远超一次 128 的预算 ✗，
+        // 所以"前端射满"与"隧道挖完"必须能分开发生 ✓（这正是作者要的那一条 ✗）。
+        for(int z=0;z<12;z++)for(int x=-3;x<=3;x++)for(int y=-3;y<=3;y++)if(x*x+y*y<=9) {
+            h.getLevel().setBlockAndUpdate(BlockPos.containing(start).offset(x,y,z),Blocks.STONE.defaultBlockState());blocks++;
+        }
+        var bore=new WaterTerrainBore(start,new Vec3(0,0,1),3,12);
+        for(int i=0;i<24;i++)bore.scan(h.getLevel(),p);          // 蓄力期预扫描（24 tick < 30 tick ✓）
+        h.assertTrue(bore.prescanDone()&&bore.remainingBlocks()==blocks,"Pre-scan plans the whole rock corridor");
+        bore.tick(h.getLevel(),p);
+        h.assertTrue(bore.length()==12,"First firing tick fills the short solid corridor: "+bore.length());
+        bore.tick(h.getLevel(),p);
+        h.assertTrue(bore.length()==12,"Two ticks cover the whole twelve block corridor, terrain or not");
+        h.assertTrue(bore.remainingBlocks()>0,"Tunnel is still catching up behind the launched front");
+        for(int i=0;i<20&&bore.remainingBlocks()>0;i++)bore.tick(h.getLevel(),p);
+        h.assertTrue(bore.remainingBlocks()==0&&!bore.stopped(),"Tunnel finishes inside the spell instead of stopping half way: "+bore.stopReason());
+        h.assertTrue(h.getLevel().getBlockState(BlockPos.containing(start).offset(0,0,11)).isAir(),"Deepest planned layer is really gone");h.succeed();
     }
     @GameTest(template="water_test_large_empty",timeoutTicks=30)
     public static void fullApertureBedrockAtEdgeStopsBeforeAnyEdits(GameTestHelper h) {
@@ -100,12 +157,12 @@ public final class WaterMagicGameTests {
             TNWaterFieldEntity.cast(p,net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tnc","wave_slash"));
             var fields=h.getLevel().getEntitiesOfClass(TNWaterFieldEntity.class,p.getBoundingBox().inflate(4));
             var emitter=fields.stream().filter(TNWaterFieldEntity::isEmitter).findFirst().orElseThrow();
-            h.assertTrue(emitter.life()==200,"Controller lasts ten seconds");
+            h.assertTrue(emitter.life()==20,"Controller lasts one second");
             fields.stream().filter(e->!e.isEmitter()).forEach(Entity::discard);
             // ServerLevel advances Entity.tickCount before tick(); direct fixture calls do not.
-            emitter.tickCount=20;emitter.tick();
+            for(int age=2;age<20;age+=2){emitter.tickCount=age;emitter.tick();}
             var fronts=h.getLevel().getEntitiesOfClass(TNWaterFieldEntity.class,p.getBoundingBox().inflate(4),e->!e.isEmitter());
-            h.assertTrue(fronts.size()==26&&fronts.stream().allMatch(e->e.life()==28),"Later volley has all directions and bounded per-front range; count="+fronts.size()+" tick="+emitter.tickCount);
+            h.assertTrue(fronts.size()==9&&fronts.stream().allMatch(e->e.life()==28),"Nine later fronts retain bounded lifetime; count="+fronts.size()+" tick="+emitter.tickCount);
             h.getLevel().getEntitiesOfClass(TNWaterFieldEntity.class,p.getBoundingBox().inflate(4)).forEach(Entity::discard);
         }finally{owners.remove(p.getUUID());}h.succeed();
     }
@@ -389,6 +446,21 @@ public final class WaterMagicGameTests {
         var sea=WaterSpellRules.uprightArea(Vec3.ZERO,64,40);
         h.assertTrue(sea.minY==-.25&&sea.maxY==40,"Sea grows above its floor, not equally underground");h.succeed();
     }
+    @GameTest(template="building_test_empty",timeoutTicks=30)
+    public static void rainChainGeometrySharesOneLayoutSource(GameTestHelper h) {
+        // 第九批（雨滴链五档全部重做 ✗）**只重做表现** ✓ ⇒ 领域数值一个没动 ✓
+        //（半径/时长已由 largerFieldsShareRadiusLifeAndHeight 钉着 ✗，这里补**高度** ✓
+        //  与**客户端几何 / 服务端粒子共用的那三个布局常量** ✗ —— 两边各写一个魔法数字就会错位 ✗）。
+        double[] heights={10,13,16,20.5,28};
+        for(int t=1;t<=5;t++) {
+            h.assertTrue(Math.abs(WaterSpellRules.fieldHeight(3,t)-heights[t-1])<1e-6,"Rain field height tier "+t+" stays "+heights[t-1]);
+            h.assertTrue(Math.abs(WaterSpellRules.rainSkySealHeight(t)-(heights[t-1]+WaterSpellRules.RAIN_SKY_SEAL_LIFT))<1e-6,"Sky seal follows the one shared lift constant");
+        }
+        h.assertTrue(WaterSpellRules.rainSkySealHeight(5)==32,"Tianhong sky seal is the documented thirty-two blocks up");
+        // 雨幕半宽 × √2 ≈ 领域半径 ⇒ 雨正好落在那片**实心水面**上 ✓，不会撒到域外 ✗
+        h.assertTrue(Math.abs(WaterSpellRules.RAIN_VOLUME_HALF*Math.sqrt(2)-1)<.02,"Rain volume corners land on the water surface rim");
+        h.assertTrue(WaterSpellRules.RAIN_CURTAIN_RING>0&&WaterSpellRules.RAIN_CURTAIN_RING<1,"Curtain ring stays inside the field radius");h.succeed();
+    }
     @GameTest(template="water_test_large_empty",timeoutTicks=30)
     public static void dragonLaunchClearsFlatGrassWithoutRemovingProtection(GameTestHelper h) {
         var p=caster(h);p.setPos(Vec3.atCenterOf(h.absolutePos(new BlockPos(24,2,24))).subtract(0,.5,0));p.setYRot(0);p.setXRot(0);
@@ -397,11 +469,15 @@ public final class WaterMagicGameTests {
             h.getLevel().setBlockAndUpdate(h.absolutePos(new BlockPos(x,2,z)),Blocks.GRASS.defaultBlockState());
         }
         TNWaterSpellEntity.cast(p,net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tnc","dragon_ruin"));
-        var cast=h.getLevel().getEntitiesOfClass(TNWaterSpellEntity.class,p.getBoundingBox().inflate(20)).get(0);
+        // ⚠️ 搜索半径必须 ≥ 法阵半径 ✗：炮口按**法阵**(30 格)抬高到地面上方 ⇒ 它离玩家约 30 格 ✗，
+        // 用 20 格找会 IndexOutOfBounds ✗（2026-10-10 法阵加倍后踩到过一次 ✓）。
+        var cast=h.getLevel().getEntitiesOfClass(TNWaterSpellEntity.class,p.getBoundingBox().inflate(WaterSpellRules.circleRadius(5)+8)).get(0);
         var bore=new WaterTerrainBore(cast.position(),cast.direction(),WaterSpellRules.radius(5),1);bore.tick(h.getLevel(),p);
-        Vec3 desired=p.getEyePosition().add(p.getLookAngle().scale(2)).add(0,WaterSpellRules.radius(5)-p.getEyeHeight()+.8,0);
+        Vec3 desired=p.getEyePosition().add(p.getLookAngle().scale(2)).add(0,WaterSpellRules.circleRadius(5)-p.getEyeHeight()+.8,0);
         var obstruction=h.getLevel().clip(new net.minecraft.world.level.ClipContext(p.getEyePosition(),desired,net.minecraft.world.level.ClipContext.Block.COLLIDER,net.minecraft.world.level.ClipContext.Fluid.NONE,p));
-        h.assertTrue(bore.length()>0,"Dragon muzzle must launch above its own ground footprint: "+cast.position()+" eye="+p.getEyePosition()+" dir="+cast.direction()+" look="+p.getLookAngle()+" obstruction="+obstruction+" block="+h.getLevel().getBlockState(obstruction.getBlockPos())+" stop="+bore.stopReason());
+        // 2026-10-10：前端改成"保证速度射出"✗ ⇒ 光看 length()>0 已经证明不了炮口没埋在地里 ✗
+        //（埋着也会立刻射出去 ✗）—— 改成看"炮口那一层还有没有东西要挖" ✓，这才是这条测试的本意 ✓。
+        h.assertTrue(bore.length()>0&&bore.tick(h.getLevel(),p)==0&&!bore.stopped(),"Dragon muzzle must launch above its own ground footprint: "+cast.position()+" eye="+p.getEyePosition()+" dir="+cast.direction()+" look="+p.getLookAngle()+" obstruction="+obstruction+" block="+h.getLevel().getBlockState(obstruction.getBlockPos())+" stop="+bore.stopReason());
         cast.discard();h.succeed();
     }
     @GameTest(template="building_test_empty",timeoutTicks=30)

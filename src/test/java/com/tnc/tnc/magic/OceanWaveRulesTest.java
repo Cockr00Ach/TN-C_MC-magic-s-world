@@ -13,7 +13,9 @@ class OceanWaveRulesTest {
                 double r=OceanWaveRules.frontRadius(age,i);if(r<0)continue;
                 fronts++;assertTrue(r<=64);assertTrue(OceanWaveRules.frontHeight(r)<=40);
             }
-            assertTrue(fronts>0&&fronts<=4,"Continuous finite front count");
+            // 2026-10-10：作者要求"增加频率跟密度" ⇒ PERIOD 16→10、MAX_FRONTS 4→6 ✗。
+            // 这条断言本意是"波前数量有限且始终 ≥1"，原来把上限写死成 4 了 ✗ ⇒ 改成读常量 ✓。
+            assertTrue(fronts>0&&fronts<=OceanWaveRules.MAX_FRONTS,"Continuous finite front count");
         }
         assertEquals(-1,OceanWaveRules.frontRadius(600,0));
         assertTrue(OceanWaveRules.frontRadius(9,0)>OceanWaveRules.frontRadius(8,0));

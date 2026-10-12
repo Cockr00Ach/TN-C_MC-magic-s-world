@@ -3,7 +3,16 @@ package com.tnc.tnc.magic.water;
 /** Shared travelling breakers, not an always-damaging invisible cylinder. */
 public final class OceanWaveRules {
     public static final double RADIUS=64, HEIGHT=40, SPEED=1.4;
-    public static final int LIFE=600, PERIOD=16, MAX_FRONTS=4;
+    public static final int LIFE=600;
+    /**
+     * 波前密度（2026-10-10 作者："灭世之海给我的感觉不强，增加频率跟密度吧"）。
+     *
+     * <p>原来 16 tick 放一道浪、最多 4 道同时存在 ✗ ⇒ 64 格的海面上经常只有 1～2 道浪，
+     * 看着空 ✗。现在 <b>10 tick 一道</b>（频率 +60% ✓）、<b>最多 6 道</b>同时推进 ✓，
+     * 波速 `SPEED` 仍是 1.4 格/tick ✓（不动它：那一项同时被"56 格 40 tick 必中"
+     * 与"20 tick 之前绝不误伤"两条 GameTest 钉住 ✗）。
+     */
+    public static final int PERIOD=10, MAX_FRONTS=6;
     private static final double[] RADIAL={-.32,-.28,-.23,-.17,-.09,0,.10,.19,.25,.27,.24,.16};
     private static final double[] VERTICAL={0,.08,.22,.40,.60,.80,.94,1,.99,.93,.83,.72};
     private OceanWaveRules() {}
