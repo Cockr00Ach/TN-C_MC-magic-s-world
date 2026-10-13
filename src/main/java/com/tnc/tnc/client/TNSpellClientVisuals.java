@@ -251,14 +251,6 @@ public final class TNSpellClientVisuals {
     //  —— 致盲是给"在雾里"的惩罚，压暗是让你**看见**自己在雾里 ✓；两个一起才成立 ✓。
     // ------------------------------------------------------------------
 
-    /**
-     * 每一档的**最大**压暗值（0..1，乘 250 得 alpha）✓。
-     *
-     * <p>t1 25% / t2 35% / t3 50% / t4 65% / t5 80% —— 单调递增，最高档也**不到全瞎** ✗
-     * （连自己脚下都看不见会不好玩；想更黑就把最后一个数字往上加 ✓）。
-     */
-    private static final float[] FOG_DARKNESS_BY_TIER = {0.25F, 0.35F, 0.50F, 0.65F, 0.80F};
-
     /** 出圈之后再留多久才完全恢复（tick）—— 走出来的那一下不该"啪"地亮回来 ✓ */
     private static final float FOG_DARKNESS_RELEASE = 0.12F;
 
@@ -276,7 +268,8 @@ public final class TNSpellClientVisuals {
                     minecraft.player.getBoundingBox().inflate(32.0D))) {
                 double radius = fog.syncedRadius();
                 int tier = fog.syncedTier();
-                if (radius <= 0.5D || tier <= 0 || tier > FOG_DARKNESS_BY_TIER.length) {
+                if (radius <= 0.5D || tier <= 0
+                        || tier > com.tnc.tnc.magic.DarkFogVisibilityRules.tierCount()) {
                     continue;                       // 还没同步下来 / 不是我们的雾 ⇒ 跳过 ✓
                 }
                 double distance = Math.sqrt(
@@ -288,7 +281,9 @@ public final class TNSpellClientVisuals {
                 // 圈心最黑、贴边最浅；再乘一个"高度也影响"的小修正（站高处略淡 ✓）
                 double depth = 1.0D - (distance / radius);
                 double vertical = 1.0D - Math.min(1.0D, Math.abs(fog.getY() - py) / 8.0D);
-                float value = (float) (FOG_DARKNESS_BY_TIER[tier - 1] * depth * (0.55D + 0.45D * vertical));
+                boolean casterOwned = fog.syncedOwnerId() == minecraft.player.getId();
+                float maximum = com.tnc.tnc.magic.DarkFogVisibilityRules.maximumDarkness(tier, casterOwned);
+                float value = (float) (maximum * depth * (0.55D + 0.45D * vertical));
                 if (value > target) {
                     target = value;
                 }
@@ -477,9 +472,7 @@ public final class TNSpellClientVisuals {
                 double oy = (level.random.nextDouble() - 0.5D) * h;
                 double oz = (level.random.nextDouble() - 0.5D) * 0.9D;
                 level.addParticle(
-                        (i % 3 == 0)
-                                ? net.minecraft.core.particles.ParticleTypes.SMOKE
-                                : net.minecraft.core.particles.ParticleTypes.SQUID_INK,
+                        net.minecraft.core.particles.ParticleTypes.SQUID_INK,
                         ex + ox, ey + oy, ez + oz,
                         0.0D, 0.012D, 0.0D);
             }

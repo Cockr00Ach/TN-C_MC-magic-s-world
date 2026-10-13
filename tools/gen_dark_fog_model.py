@@ -185,33 +185,29 @@ def build_texture():
     rng = random.Random(SEED + 7)
 
     shades = {
-        # ★ darkened 2026-10-09 (author: "黑雾感觉不够黑啊" / "the fog is not dark enough").
-        # The dome is the largest solid mass of the field, so this atlas is the strongest
-        # darkness knob available. It used to sit at brightness 20..41 out of 255; it is now
-        # 7..21. Why it matters: SpellCloudRenderer passes CustomModels.render a light value
-        # taken from the ENTITY (`entity.getId()` / eye height), not from the world lightmap,
-        # so the dome is drawn at a fairly bright light no matter where it stands -- a
-        # mid-grey atlas therefore reads as exactly that, mid grey. Keep these near-black.
-        "fog_base": (14, 10, 22),
-        "fog_dark": (8, 6, 13),
-        "fog_mid": (20, 14, 30),
-        "fog_edge": (11, 8, 17),
-        "fog_top": (16, 12, 25),
-        "ember": (196, 74, 214),        # magenta ember, deliberately loud
+        # SpellCloudRenderer can make a merely dark texture read grey in daylight. Keep the
+        # body within 0..6 RGB so lighting cannot wash it out; sparse violet embers preserve
+        # the boundary and direction cues for the caster.
+        "fog_base": (2, 1, 3),
+        "fog_dark": (0, 0, 0),
+        "fog_mid": (4, 2, 6),
+        "fog_edge": (1, 0, 2),
+        "fog_top": (3, 1, 4),
+        "ember": (74, 12, 92),
     }
 
     for mat, (mx, my) in PATCHES.items():
         base = shades[mat]
         for y in range(my, my + PATCH):
             for x in range(mx, mx + PATCH):
-                n = rng.randint(-6, 6)
+                n = rng.randint(-8, 8) if mat == "ember" else rng.randint(-2, 2)
                 px[x, y] = (max(0, base[0] + n), max(0, base[1] + n),
                             max(0, base[2] + n), 255)
         # give embers a hot core so the 4x4 patch does not read as a flat square
         if mat == "ember":
-            px[mx + 1, my + 1] = (255, 190, 255, 255)
-            px[mx + 2, my + 1] = (255, 160, 240, 255)
-            px[mx + 1, my + 2] = (255, 160, 240, 255)
+            px[mx + 1, my + 1] = (142, 48, 170, 255)
+            px[mx + 2, my + 1] = (116, 32, 146, 255)
+            px[mx + 1, my + 2] = (116, 32, 146, 255)
 
     # unused area: leave transparent, so a mis-UVed face shows up as a hole
     return tex

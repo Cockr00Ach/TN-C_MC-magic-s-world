@@ -76,19 +76,19 @@ public class DarkFogCloudEntity extends SpellCloud {
      *
      * <p>为什么要它：法术 JSON 的 `release.target.cloud.client_data.particles` 由**引擎**
      * 每 tick 播放 ✓；但那条路是引擎自己读 JSON 的，我们插不进手 ✗。
-     * 这里补的是"雾在哪、有多浓"最直观的那几颗（贴地墨点 ＋ 魂火 ＋ 烟），
+     * 这里补的是"雾在哪、有多浓"最直观的贴地墨点；不再混入会把黑雾洗成灰色的 smoke，
      * 走的是**服务端撒粒子**（`ServerLevel.sendParticles`）⇒ 不用网络通道、
      * 也不依赖引擎的粒子指令封装 ✓。
      *
-     * <p>★ <b>只用已确认注册过的粒子 id</b> ✗：`minecraft:squid_ink` / `soul_fire_flame` /
-     * `smoke` 都是原版 ✓；`block_factorys_bosses` 那几个（ink_fog 等）**不是**
+     * <p>★ <b>只用已确认注册过的粒子 id</b>：`minecraft:squid_ink` 是原版 ✓；
+     * `block_factorys_bosses` 那几个（ink_fog 等）**不是**
      * ParticleType（那个 mod 注册成了 Bedrock 粒子）⇒ 引擎用它们会
      * ClassCastException 把客户端打崩 ✗（见 `tools/gen_dark_fog_spells.py` 的
      * PARTICLE SAFETY 说明 ✓）。
      */
     private static final int IDLE_PARTICLE_INTERVAL = 4;
     private static final String[] IDLE_PARTICLES = {
-            "minecraft:squid_ink", "minecraft:smoke", "minecraft:soul_fire_flame"
+            "minecraft:squid_ink"
     };
 
     /** 边界法阵（纯表现，不进存档 ✓）。 */
@@ -144,6 +144,11 @@ public class DarkFogCloudEntity extends SpellCloud {
             net.minecraft.network.syncher.SynchedEntityData.defineId(
                     DarkFogCloudEntity.class, net.minecraft.network.syncher.EntityDataSerializers.INT);
 
+    /** 同步施法者实体 id；客户端据此给自己的黑雾保留清晰视野。 */
+    private static final net.minecraft.network.syncher.EntityDataAccessor<Integer> DATA_OWNER_ID =
+            net.minecraft.network.syncher.SynchedEntityData.defineId(
+                    DarkFogCloudEntity.class, net.minecraft.network.syncher.EntityDataSerializers.INT);
+
     @Override
     protected void defineSynchedData() {
         // SpellCloud owns spell id, data index and radius trackers used during spell creation.
@@ -152,6 +157,7 @@ public class DarkFogCloudEntity extends SpellCloud {
         super.m_8097_();
         this.entityData.define(DATA_FOG_TIER, 0);
         this.entityData.define(DATA_FOG_RADIUS, 0);
+        this.entityData.define(DATA_OWNER_ID, -1);
     }
 
     /** 客户端用：这片雾是第几档（0 = 还不知道）✓。 */
@@ -162,6 +168,11 @@ public class DarkFogCloudEntity extends SpellCloud {
     /** 客户端用：这片雾的半径（格；0 = 还不知道）✓。 */
     public double syncedRadius() {
         return this.entityData.get(DATA_FOG_RADIUS) / 100.0D;
+    }
+
+    /** 客户端用：这片雾是谁释放的（-1 = 尚未同步）。 */
+    public int syncedOwnerId() {
+        return this.entityData.get(DATA_OWNER_ID);
     }
 
     /**
@@ -187,6 +198,11 @@ public class DarkFogCloudEntity extends SpellCloud {
         int stored = (int) Math.round(radius * 100.0D);
         if (this.entityData.get(DATA_FOG_RADIUS) != stored) {
             this.entityData.set(DATA_FOG_RADIUS, stored);
+        }
+        LivingEntity owner = resolveOwner();
+        int ownerId = owner == null ? -1 : owner.getId();
+        if (this.entityData.get(DATA_OWNER_ID) != ownerId) {
+            this.entityData.set(DATA_OWNER_ID, ownerId);
         }
     }
 
@@ -326,14 +342,12 @@ public class DarkFogCloudEntity extends SpellCloud {
             if (options == null) {
                 continue;                                   // 那个 id 没注册 ⇒ 跳过（不崩 ✓）
             }
-            int count = i == 0 ? 7 : (i == 1 ? 5 : 2);      // 墨点最多、魂火其次、烟最少
-            double spread = i == 2 ? 1.0D : 0.72D;          // 魂火/墨点更靠里
             // 参数顺序：粒子 / x y z / 数量 / dx dy dz（速度抖动）/ 速度
             server.sendParticles(options,
                     getX(), getY() + 0.35D, getZ(),
-                    count,
-                    radius * spread, 0.6D, radius * spread,
-                    0.02D);
+                    18,
+                    radius * 0.82D, 0.75D, radius * 0.82D,
+                    0.012D);
         }
     }
 
