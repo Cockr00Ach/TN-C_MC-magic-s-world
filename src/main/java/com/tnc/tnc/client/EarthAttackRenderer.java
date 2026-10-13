@@ -11,14 +11,20 @@ public final class EarthAttackRenderer extends EntityRenderer<EarthAttackEntity>
     public EarthAttackRenderer(EntityRendererProvider.Context c){super(c);}
     public ResourceLocation getTextureLocation(EarthAttackEntity e){return ResourceLocation.fromNamespaceAndPath("minecraft","textures/block/stone.png");}
     public void render(EarthAttackEntity e,float yaw,float partial,PoseStack pose,MultiBufferSource buffers,int light) {
-        double age=e.age(partial)-e.waitTicks();if(e.done()||age<0&&e.mode()!=0&&e.mode()!=3)return;
+        double age=e.age(partial)-e.waitTicks();if(e.done()){renderBurst(e,partial,pose,buffers,light);if(e.mode()!=7)return;}if(age<0&&e.mode()!=0&&e.mode()!=3)return;
         float growth=e.mode()==2?(float)Math.max(.04,Math.min(1,age/45)):e.mode()==1?(float)Math.max(.03,Math.min(1,age/8)):1;
         pose.pushPose();if(e.mode()==0||e.mode()==3||e.mode()==5){pose.mulPose(Axis.YP.rotationDegrees(e.getYRot()));pose.mulPose(Axis.XP.rotationDegrees(e.getXRot()));}
         if(e.mode()==0||e.mode()==3||e.mode()==5)pose.scale(e.scale(),e.scale(),e.height());else pose.scale(e.scale()*growth,e.height()*growth,e.scale()*growth);
         pose.translate(0,e.mode()==2?0:.5,0);
-        net.spell_engine.api.render.CustomModels.render(net.spell_engine.client.render.SpellModelHelper.LAYERS.get(net.spell_engine.api.render.LightEmission.NONE),
+        var emission=e.mode()==3?net.spell_engine.api.render.LightEmission.RADIATE:net.spell_engine.api.render.LightEmission.NONE;
+        net.spell_engine.api.render.CustomModels.render(net.spell_engine.client.render.SpellModelHelper.LAYERS.get(emission),
                 Minecraft.getInstance().getItemRenderer(),ResourceLocation.fromNamespaceAndPath("tnc","projectile/"+e.model()),pose,buffers,light,OverlayTexture.NO_OVERLAY);
         pose.popPose();
+        if((e.mode()==0||e.mode()==3||e.mode()==5)&&age>=0)for(int i=0;i<4;i++) {
+            double a=age*.18+i*Math.PI/2,r=Math.max(.7,e.scale()*.18);
+            pose.pushPose();pose.translate(Math.cos(a)*r,Math.sin(a*1.7)*.45,Math.sin(a)*r);pose.scale(.22F,.22F,.22F);
+            draw("earth_clod",pose,buffers,light,net.spell_engine.api.render.LightEmission.NONE);pose.popPose();
+        }
         if(e.mode()==2&&age>=0&&age<45)for(int i=0;i<8;i++) {
             double a=i*Math.PI/4+age*.09,r=(1-growth)*8+.6;
             pose.pushPose();pose.translate(Math.cos(a)*r,-e.height()*(1-growth)*.7,Math.sin(a)*r);
@@ -27,5 +33,20 @@ public final class EarthAttackRenderer extends EntityRenderer<EarthAttackEntity>
                     Minecraft.getInstance().getItemRenderer(),ResourceLocation.fromNamespaceAndPath("tnc","projectile/earth_clod"),pose,buffers,light,OverlayTexture.NO_OVERLAY);
             pose.popPose();
         }
+    }
+    private static void renderBurst(EarthAttackEntity e,float partial,PoseStack pose,MultiBufferSource buffers,int light) {
+        double elapsed=e.age(partial)-e.burstAge();if(elapsed<0||elapsed>14)return;
+        float fade=(float)Math.max(0,1-elapsed/14),size=.28F+.035F*(float)elapsed;
+        for(int i=0;i<18;i++) {
+            double a=i*Math.PI*2/18+i*.71,r=elapsed*(.32+(i%5)*.055);
+            double y=.2+elapsed*(.12+(i%3)*.035)-elapsed*elapsed*.008;
+            pose.pushPose();pose.translate(Math.cos(a)*r,y,Math.sin(a)*r);
+            pose.mulPose(Axis.YP.rotationDegrees((float)(i*37+elapsed*13)));pose.scale(size*fade,size*fade,size*fade);
+            draw(i%3==0?"earth_shell":"earth_clod",pose,buffers,light,net.spell_engine.api.render.LightEmission.NONE);pose.popPose();
+        }
+    }
+    private static void draw(String model,PoseStack pose,MultiBufferSource buffers,int light,net.spell_engine.api.render.LightEmission emission) {
+        net.spell_engine.api.render.CustomModels.render(net.spell_engine.client.render.SpellModelHelper.LAYERS.get(emission),
+                Minecraft.getInstance().getItemRenderer(),ResourceLocation.fromNamespaceAndPath("tnc","projectile/"+model),pose,buffers,light,OverlayTexture.NO_OVERLAY);
     }
 }

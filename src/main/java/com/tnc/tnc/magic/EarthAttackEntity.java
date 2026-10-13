@@ -8,7 +8,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.sounds.*;
+import net.minecraft.world.level.block.Blocks;
 
 /** Timed solid-model attacks. Terrain is never deleted or permanently changed. */
 public final class EarthAttackEntity extends Entity {
@@ -35,10 +37,10 @@ public final class EarthAttackEntity extends Entity {
         setYRot((float)Math.toDegrees(Math.atan2(velocity.x,velocity.z)));
         setXRot((float)-Math.toDegrees(Math.asin(Math.max(-1,Math.min(1,velocity.normalize().y)))));
     }
-    public void tick(){super.tick();if(level().isClientSide())return;
+    public void tick(){super.tick();if(level().isClientSide()){clientFx();return;}
         if(tickCount%5==0)entityData.set(AGE,tickCount);
         var caster=level().getEntity(owner);if(!(caster instanceof LivingEntity living)||!living.isAlive()||tickCount>ttl){discard();return;}
-        if(done()){if(tickCount>hitAt+6)discard();return;}
+        if(done()){if(tickCount>hitAt+14)discard();return;}
         int age=tickCount-waitTicks();if(age<=0)return;
         if(mode()==0||mode()==3||mode()==5) {
             if(age>24){discard();return;}
@@ -59,9 +61,21 @@ public final class EarthAttackEntity extends Entity {
         } else if(mode()==6) {
             double t=Math.min(1,age/40.0);t=t*t*(3-2*t);setPos(start.lerp(end,t));
             if(age==40)hit(living);
+        } else if(mode()==7) {
+            double t=Math.min(1,age/18.0);t=1-Math.pow(1-t,3);setPos(start.lerp(end,t));
+            if(age==18)burst(living);
         } else if(mode()==2) {
             double t=Math.max(0,Math.min(1,age/60.0));t=t*t*(3-2*t);setPos(start.lerp(end,t));
             if(age>=80)burst(living);
+        }
+    }
+    private void clientFx() {
+        int age=tickCount-waitTicks();if(age<0||done())return;
+        int count=mode()==2?4:(mode()==0||mode()==3||mode()==5?3:2);
+        for(int i=0;i<count;i++) {
+            double a=(tickCount*.71+i*Math.PI*2/count),r=mode()==2?Math.max(1,scale()*.22):Math.max(.25,scale()*.12);
+            level().addParticle(EarthParticles.DUST.get(),getX()+Math.cos(a)*r,getY()+.25+Math.sin(a*1.7)*r*.3,getZ()+Math.sin(a)*r,
+                    Math.cos(a)*.025,.035,Math.sin(a)*.025);
         }
     }
     private void hit(LivingEntity caster) {
@@ -76,9 +90,21 @@ public final class EarthAttackEntity extends Entity {
             if(mode()==1||mode()==4||mode()==6)e.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN,60,0));
         }
     }
-    private void burst(LivingEntity caster){hit(caster);entityData.set(DONE,true);hitAt=tickCount;entityData.set(BURST_AGE,tickCount);
-        var server=(ServerLevel)level();server.sendParticles(EarthParticles.DUST.get(),getX(),getY(),getZ(),mode()==2||mode()==3?70:18,radius*.4,Math.min(3,radius*.25),radius*.4,.25);
-        server.playSound(null,getX(),getY(),getZ(),SoundEvents.GENERIC_EXPLODE,SoundSource.PLAYERS,1.2F,.65F);
+    private void burst(LivingEntity caster){hit(caster);
+        Vec3 centre=damageCentre==null?position():damageCentre;
+        setPos(centre);
+        entityData.set(DONE,true);hitAt=tickCount;entityData.set(BURST_AGE,tickCount);
+        var server=(ServerLevel)level();
+        int cloud=mode()==2?150:mode()==3?100:55;
+        server.sendParticles(EarthParticles.DUST.get(),centre.x,centre.y+.35,centre.z,cloud,radius*.5,Math.min(3,radius*.3),radius*.5,.34);
+        server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK,Blocks.COARSE_DIRT.defaultBlockState()),centre.x,centre.y+.25,centre.z,
+                mode()==2?44:22,radius*.35,1.2,radius*.35,.26);
+        for(int i=0;i<24;i++) {
+            double a=i*Math.PI*2/24,s=.35+(i%5)*.08;
+            server.sendParticles(EarthParticles.DUST.get(),centre.x,centre.y+.45,centre.z,0,Math.cos(a)*s,.10+(i%3)*.08,Math.sin(a)*s,1);
+        }
+        server.playSound(null,centre.x,centre.y,centre.z,SoundEvents.GENERIC_EXPLODE,SoundSource.PLAYERS,1.55F,.58F);
+        server.playSound(null,centre.x,centre.y,centre.z,SoundEvents.STONE_BREAK,SoundSource.PLAYERS,1.8F,.72F);
     }
     public net.minecraft.network.protocol.Packet<net.minecraft.network.protocol.game.ClientGamePacketListener> getAddEntityPacket(){return net.minecraftforge.network.NetworkHooks.getEntitySpawningPacket(this);}
     public boolean isPickable(){return false;}public boolean isAttackable(){return false;}

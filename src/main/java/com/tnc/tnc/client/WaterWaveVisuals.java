@@ -104,20 +104,27 @@ final class WaterWaveVisuals {
         return new Vec3(Math.cos(angle)*r,y,Math.sin(angle)*r);
     }
     static void crescent(VertexConsumer out,Matrix4f pose,Vec3 center,Vec3 dir,double r,double time,float alpha,double roll) {
-        // 刃面基绕飞行轴滚转 roll ✓ ⇒ 同一批斩击不再全是竖着的 C ✓（作者 2026-10-10 ✓）
-        Vec3[] basis=WaterGeometry.rolledBasis(dir,roll);Vec3 right=basis[0],up=basis[1];
-        for(int i=0;i<40;i++) {
-            double a=-Math.PI*.55+i*Math.PI*1.1/40,b=-Math.PI*.55+(i+1)*Math.PI*1.1/40;
-            Vec3 p=center.add(WaterSpellRules.slashArc(dir,roll,a,r)),q=center.add(WaterSpellRules.slashArc(dir,roll,b,r));
-            double innerA=r*(.78+.18*Math.pow(Math.abs(a)/(Math.PI*.55),2)),innerB=r*(.78+.18*Math.pow(Math.abs(b)/(Math.PI*.55),2));
-            Vec3 u=q.subtract(dir.scale(.08+.80*Math.pow(Math.cos(b),2))),v=p.subtract(dir.scale(.08+.80*Math.pow(Math.cos(a),2)));
-            Vec3 depth=up.scale(.18);
-            WaterGeometry.quad(out,pose,p,q,u,v,.05F,.5F,.95F,alpha*.6F);
-            WaterGeometry.quad(out,pose,p.subtract(depth),v.subtract(depth),u.subtract(depth),q.subtract(depth),.12F,.75F,1,alpha*.45F);
-            WaterGeometry.quad(out,pose,p,q,q.subtract(depth),p.subtract(depth),.6F,.95F,1,alpha*.85F);
-            // 刃口亮线：一片亮带 ✓（原来半径 .055 的 tube ✗ —— 那是 4 边 ✗，也已经很便宜 ✓，这里再省一半 ✓）
-            WaterGeometry.stroke(out,pose,up,p,q,.055,.85F,.98F,1,alpha);
-            if(i%4==0)WaterGeometry.stroke(out,pose,up,p.add(dir.scale(.08+Math.sin(time*.3+i)*.08)),p.add(dir.scale(.08+Math.sin(time*.3+i)*.08)).add(up.scale(.16)),.045,1,1,1,alpha*.65F);
+        // Tapered three-dimensional water blade: pointed tips, a dark swept belly and a pearl cutting edge.
+        Vec3[] basis=WaterGeometry.rolledBasis(dir,roll);Vec3 up=basis[1];
+        int segments=36;double limit=Math.PI*.58;
+        for(int i=0;i<segments;i++) {
+            double a=-limit+i*limit*2/segments,b=-limit+(i+1)*limit*2/segments;
+            double ta=i/(double)segments,tb=(i+1)/(double)segments;
+            double wa=.035+.78*Math.pow(Math.sin(Math.PI*ta),1.45);
+            double wb=.035+.78*Math.pow(Math.sin(Math.PI*tb),1.45);
+            Vec3 p=center.add(WaterSpellRules.slashArc(dir,roll,a,r));
+            Vec3 q=center.add(WaterSpellRules.slashArc(dir,roll,b,r));
+            Vec3 v=p.subtract(dir.scale(wa)),u=q.subtract(dir.scale(wb));
+            Vec3 thickness=up.scale(.10+.035*Math.sin(Math.PI*(ta+tb)*.5));
+            WaterGeometry.quad(out,pose,p,q,u,v,.015F,.30F,.82F,alpha*.70F);
+            WaterGeometry.quad(out,pose,p.subtract(thickness),v.subtract(thickness),u.subtract(thickness),q.subtract(thickness),.02F,.16F,.55F,alpha*.56F);
+            WaterGeometry.quad(out,pose,p,q,q.subtract(thickness),p.subtract(thickness),.62F,.94F,1,alpha*.92F);
+            WaterGeometry.stroke(out,pose,up,p,q,.040+.018*Math.sin(Math.PI*ta),.90F,.99F,1,alpha);
+            if(i%6==2&&i>4&&i<segments-5) {
+                double flutter=.10+.08*Math.sin(time*.32+i);
+                Vec3 tail=v.subtract(dir.scale(.14+flutter));
+                WaterGeometry.stroke(out,pose,up,v,tail,.028,.32F,.82F,1,alpha*.46F);
+            }
         }
     }
     static void rollingWave(VertexConsumer out,Matrix4f pose,Vec3 center,Vec3 dir,double radius,double height,double time,float alpha,double bulk) {
@@ -231,11 +238,12 @@ final class WaterWaveVisuals {
     static void crescentGlow(VertexConsumer out,Matrix4f pose,Vec3 center,Vec3 dir,double r,double time,float alpha,double roll) {
         // 与 crescent 用同一套滚转基 ✓，否则亮线会和刃面错开 ✗
         Vec3[] basis=WaterGeometry.rolledBasis(dir,roll);Vec3 right=basis[0],up=basis[1];
-        for(int i=0;i<20;i++) {
-            double a=-Math.PI*.55+i*Math.PI*1.1/20,b=-Math.PI*.55+(i+1)*Math.PI*1.1/20;
+        for(int i=0;i<24;i++) {
+            double a=-Math.PI*.58+i*Math.PI*1.16/24,b=-Math.PI*.58+(i+1)*Math.PI*1.16/24;
             Vec3 p=center.add(WaterSpellRules.slashArc(dir,roll,a,r)),q=center.add(WaterSpellRules.slashArc(dir,roll,b,r));
-            WaterGeometry.stroke(out,pose,up,p,q,.05,1,1,1,alpha*.60F);
-            if(i%5==0)WaterGeometry.stroke(out,pose,up,p,p.add(dir.scale(.45)),.035,.8F,1,1,alpha*.45F);
+            float taper=(float)Math.sin(Math.PI*(i+.5)/24);
+            WaterGeometry.stroke(out,pose,up,p,q,.032+.022*taper,.82F,.98F,1,alpha*(.42F+.28F*taper));
+            if(i%6==2)WaterGeometry.stroke(out,pose,up,p,p.subtract(dir.scale(.20+.18*taper)),.026,.45F,.90F,1,alpha*.35F);
         }
     }
 

@@ -11,8 +11,8 @@ public final class ElementSceneGameTests {
         var caster=h.spawn(EntityType.VILLAGER,new BlockPos(1,2,1));caster.setNoAi(true);
         var enemy=h.spawn(EntityType.ZOMBIE,new BlockPos(4,2,4));enemy.setNoAi(true);
         var e=WindEarthVisualMechanics.ATTACK.get().create(h.getLevel());float hp=enemy.getHealth();
-        e.configure(caster,3,"earth_spear_sharp",enemy.position().add(0,125,0),enemy.position(),25,70,8,35,3,6,h.getLevel().damageSources().magic());
-        e.tickCount=9;e.tick();h.assertTrue(e.done()&&enemy.getHealth()<hp,"Full-height spear falls and damages the target in one tick");
+        e.configure(caster,3,"earth_spear_sharp",enemy.position().add(0,125,0),enemy.position(),25,70,14,45,3,6,h.getLevel().damageSources().magic());
+        e.tickCount=15;e.tick();h.assertTrue(e.done()&&enemy.getHealth()<hp,"Full-height spear falls and damages the target in one tick");
         caster.discard();enemy.discard();e.discard();h.succeed();
     }
     @GameTest(template="building_test_empty",timeoutTicks=30,batch="element_scenes")
@@ -40,8 +40,22 @@ public final class ElementSceneGameTests {
         h.assertTrue(e.done()&&enemy.getHealth()<health,"Raised orb explosion reaches the ground target");
         h.assertTrue(caster.getHealth()==own,"No owner damage");
         h.assertTrue(block==h.getLevel().getBlockState(h.absolutePos(new BlockPos(4,1,4))),"Explosion cannot change terrain");
-        e.tickCount=87;e.tick();h.assertTrue(e.isRemoved(),"Exploded ball cleans up");
+        e.tickCount=96;e.tick();h.assertTrue(e.isRemoved(),"Exploded ball cleans up after the visible debris finishes");
         caster.discard();enemy.discard();h.succeed();
+    }
+    @GameTest(template="building_test_empty",timeoutTicks=30,batch="element_scenes")
+    public static void volleyFollowupSpikeRisesFromTheImpactGround(GameTestHelper h) {
+        var caster=h.spawn(EntityType.VILLAGER,new BlockPos(1,2,1));caster.setNoAi(true);
+        var enemy=h.spawn(EntityType.ZOMBIE,new BlockPos(4,2,4));enemy.setNoAi(true);
+        var end=enemy.position();float hp=enemy.getHealth();
+        var e=WindEarthVisualMechanics.ATTACK.get().create(h.getLevel());
+        e.configure(caster,7,"earth_spike_sharp",end.add(0,-10,0),end,6,18,0,100,3,7,h.getLevel().damageSources().magic());
+        e.tickCount=8;e.tick();h.assertTrue(e.getY()<end.y-1&&enemy.getHealth()==hp,"Huge followup spike remains underground while rising");
+        e.tickCount=18;e.tick();
+        h.assertTrue(e.done(),"Huge followup spike must finish its rise and burst");
+        h.assertTrue(e.position().distanceTo(end)<.01,"Huge followup spike must finish exactly at the impact ground; distance="+e.position().distanceTo(end));
+        h.assertTrue(enemy.getHealth()<hp,"Huge followup spike must damage the enemy; before="+hp+" after="+enemy.getHealth());
+        caster.discard();enemy.discard();e.discard();h.succeed();
     }
     @GameTest(template="building_test_empty",timeoutTicks=30,batch="element_scenes")
     public static void stoneCannonStopsAtWallAndHasAFiniteLife(GameTestHelper h) {

@@ -1,6 +1,8 @@
 package com.tnc.tnc.magic;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.spell_engine.api.spell.SpellInfo;
 import net.spell_power.api.*;
@@ -9,7 +11,7 @@ public final class EarthAttackMechanics {
     public static void cast(ServerPlayer player,SpellInfo info,WindEarthVisualRules.Spec spec) {
         int tier=spec.tier(),kind=spec.kind();
         if(!((kind==3&&tier>=3)||(kind==4&&tier>=2)||(kind==5&&tier==5)))return;
-        var aimed=TNAimRay.aimedEnemy(player,40);
+        var aimed=TNAimRay.aimedOrNearCrosshairEnemy(player,48,5);
         Vec3 target=aimed==null?player.pick(36,0,false).getLocation():aimed.position();
         Vec3 forward=new Vec3(player.getLookAngle().x,0,player.getLookAngle().z).normalize();
         if(forward.lengthSqr()<.001)forward=new Vec3(0,0,1);
@@ -19,12 +21,16 @@ public final class EarthAttackMechanics {
         float damage=(float)(power.randomValue()*EarthActionRules.coefficient(kind,tier));
         if(kind==3&&tier>=3) {
             for(int i=0;i<EarthActionRules.shots(tier);i++) {
-                if(tier==5)spawn(player,3,"earth_spear_sharp",target.add(0,125,0),target,25,70,8,35,damage,6,source);
+                if(tier==5)spawn(player,3,"earth_spear_sharp",target.add(0,55,0),target,25,70,20,55,damage,6,source);
                 else {
                     Vec3 start=tier==4?player.position().add(0,3.5+(i/5)*1.8,0).add(side.scale((i%5-2)*1.8))
                             :player.getEyePosition().add(player.getLookAngle().scale(1.2));
                     spawn(player,tier==4?0:5,tier==4?"earth_spear_sharp":"earth_shell",start,target.add(0,.8,0),tier==4?1.4F:2F,tier==4?3F:2F,tier==4?20:i*6,100,damage,tier==4?2.5:3.5,source);
                 }
+            }
+            if(tier==4) {
+                Vec3 impact=groundBelow(player,target);
+                spawn(player,7,"earth_spike_sharp",impact.add(0,-10,0),impact,6,18,42,100,damage,7,source);
             }
         } else if(kind==4&&tier>=2) {
             if(tier==5) {
@@ -44,6 +50,11 @@ public final class EarthAttackMechanics {
             Vec3 centre=player.position();
             spawn(player,2,"earth_orb",centre.add(0,-6,0),centre.add(0,6,0),12,12,0,95,(float)(power.randomValue()*2),spec.radius(),source);
         }
+    }
+    private static Vec3 groundBelow(ServerPlayer caster,Vec3 target) {
+        Vec3 from=target.add(0,3,0),to=target.add(0,-18,0);
+        var hit=caster.level().clip(new ClipContext(from,to,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,caster));
+        return hit.getType()==HitResult.Type.MISS?target:hit.getLocation();
     }
     private static void spawn(ServerPlayer caster,int mode,String model,Vec3 start,Vec3 end,float scale,float height,int wait,int ttl,float damage,double radius,DamageSource source) {
         var entity=WindEarthVisualMechanics.ATTACK.get().create(caster.serverLevel());if(entity==null)return;

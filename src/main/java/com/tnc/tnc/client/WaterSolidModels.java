@@ -20,7 +20,7 @@ import java.util.List;
 /** Normal textured BakedModels on water entities, independent of Spell Engine. */
 @Mod.EventBusSubscriber(modid=TNMod.MODID,value=Dist.CLIENT,bus=Mod.EventBusSubscriber.Bus.MOD)
 public final class WaterSolidModels {
-    public static final List<String> MODELS=List.of("seal","raindrop","rain_crown");
+    public static final List<String> MODELS=List.of("seal","raindrop","rain_crown","sea_god_sword","water_prison_panel");
     @SubscribeEvent public static void register(ModelEvent.RegisterAdditional e) {
         for(String name:MODELS)e.register(id(name));
     }
@@ -55,6 +55,18 @@ public final class WaterSolidModels {
         float size=(float)(radius*2*Math.min(1,envelope*3));
         poses.scale(size,(float)(.8+Math.min(radius,8)*.15),size);
         draw("seal",poses,buffers,opacity);poses.popPose();
+    }
+    static void prisonPanels(PoseStack poses,MultiBufferSource buffers,double radius,double height,int panels,double age,float opacity) {
+        double circumference=Math.PI*2*radius, width=circumference/panels;
+        for(int i=0;i<panels;i++) {
+            double angle=i*Math.PI*2/panels+age*.003;
+            poses.pushPose();
+            poses.translate(Math.cos(angle)*radius*1.018,.08,Math.sin(angle)*radius*1.018);
+            poses.mulPose(Axis.YP.rotationDegrees((float)(90-angle*180/Math.PI)));
+            poses.scale((float)(width/.76),(float)height,.72F);
+            draw("water_prison_panel",poses,buffers,opacity);
+            poses.popPose();
+        }
     }
     private record Alpha(VertexConsumer target,float opacity) implements VertexConsumer {
         public VertexConsumer vertex(double x,double y,double z){target.vertex(x,y,z);return this;}

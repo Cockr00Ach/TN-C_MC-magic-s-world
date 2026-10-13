@@ -80,6 +80,24 @@ public final class TNAimRay {
         return null;
     }
 
+    /** A forgiving combat lock for large overhead spells; still requires a visible enemy near the crosshair. */
+    public static LivingEntity aimedOrNearCrosshairEnemy(ServerPlayer player,double range,double maxMiss) {
+        LivingEntity exact=aimedEnemy(player,range);if(exact!=null)return exact;
+        Vec3 eye=player.getEyePosition(1),view=player.getViewVector(1).normalize();
+        LivingEntity best=null;double score=Double.MAX_VALUE;
+        for(LivingEntity living:player.level().getEntitiesOfClass(LivingEntity.class,
+                player.getBoundingBox().expandTowards(view.scale(range)).inflate(maxMiss),
+                e->isEnemy(player,e)&&player.hasLineOfSight(e))) {
+            Vec3 delta=living.getBoundingBox().getCenter().subtract(eye);
+            double along=delta.dot(view);if(along<=0||along>range)continue;
+            double miss=delta.subtract(view.scale(along)).length();
+            double allowance=Math.min(maxMiss,1.2+along*.09);if(miss>allowance)continue;
+            double candidate=miss+along*.018;
+            if(candidate<score){score=candidate;best=living;}
+        }
+        return best;
+    }
+
     /** 准星指到的那个人是不是敌人（给判断"该不该锁定"用）✓。 */
     public static boolean isEnemy(ServerPlayer player, Entity entity) {
         return entity instanceof LivingEntity living

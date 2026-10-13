@@ -84,7 +84,7 @@ public final class TNWaterFieldRenderer extends EntityRenderer<TNWaterFieldEntit
             double ringR=solid?radius*1.018:radius;
             for(int i=0;i<3;i++)WaterGeometry.ringColor(out,pose,new Vec3(0,.12+h*i/2,0),up,ringR,.12,.01F,.28F,1,fade*.85F);
             if(solid) {
-                WaterGeometry.panelWall(out,pose,Vec3.ZERO,radius,h,panels,age,fade*.95F);
+                WaterSolidModels.prisonPanels(stack,buffers,radius,h,panels,age,fade*.78F);
             } else {
                 for(int i=0;i<8+e.tier()*2;i++) {
                     double a=i*Math.PI*2/(8+e.tier()*2)+age*.003;

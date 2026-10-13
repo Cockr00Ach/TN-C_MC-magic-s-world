@@ -76,6 +76,8 @@ class SpellParticleSafetyTest {
      * 只看到 {@code assets/<ns>/particles/<id>.json} **不算数** ✗（这正是 ink_fog 的坑 ✓）。
      */
     private static final Set<String> VERIFIED_SAFE = Set.of(
+            // 本模组 EarthParticles.DUST: RegistryObject<SimpleParticleType> ✓
+            "tnc:earth_dust",
             // spell_engine: 引擎自己的粒子，引擎到处都在用 ✓
             "spell_engine:electric_arc_a",
             "spell_engine:electric_arc_b",
