@@ -175,13 +175,15 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
         if (damage != null) {
             damage.setBaseValue(damage.getBaseValue() * TNDarkGiantPhase.PHASE_TWO_DAMAGE_MULTIPLIER);
         }
-        // ② 表现：一声闷吼 + 一圈暗紫烟 + 脚下翻上来的魂火 ✓
+        // ② 表现：一声闷吼，裂隙粒子从脚下卷到王冠。
         level.playSound(null, this.getX(), this.getY(), this.getZ(),
                 SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 3.0F, 0.55F);
-        level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, this.getX(), this.getY() + 1.0D, this.getZ(),
-                120, 2.0D, 1.6D, 2.0D, 0.05D);
-        level.sendParticles(ParticleTypes.SMOKE, this.getX(), this.getY() + 0.5D, this.getZ(),
-                80, 2.2D, 1.0D, 2.2D, 0.03D);
+        level.sendParticles(ParticleTypes.REVERSE_PORTAL, this.getX(), this.getY() + 2.5D, this.getZ(),
+                180, 2.2D, 2.8D, 2.2D, 0.12D);
+        level.sendParticles(ParticleTypes.LARGE_SMOKE, this.getX(), this.getY() + 0.5D, this.getZ(),
+                100, 2.5D, 1.2D, 2.5D, 0.035D);
+        level.sendParticles(ParticleTypes.WITCH, this.getX(), this.getY() + 4.5D, this.getZ(),
+                70, 1.8D, 2.8D, 1.8D, 0.06D);
         // ③ 播作者那个"召唤"动作 ✓ —— 虚影就是他召出来的 ✓
         this.playSummon();
         // ④ 告诉附近的人
@@ -289,40 +291,34 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
         if (TNDarkGiantPhase.shouldEnterPhaseTwo(this.getHealth(), this.getMaxHealth(), this.phase())) {
             this.enterPhaseTwo(level);
         }
-        // 脚下冒暗色尘（纯表现，让这尊巨人站在那儿有存在感 ✓）
-        if (this.tickCount % 8 == 0) {
-            level.sendParticles(ParticleTypes.SMOKE, this.getX(), this.getY() + 0.2D, this.getZ(),
-                    6, HITBOX_WIDTH * 0.6D, 0.2D, HITBOX_WIDTH * 0.6D, 0.01D);
-        }
-        // ★ 2026-10-03 作者："虚影存在，boss 可以一直散发着黑色粒子" ✓ ——
-        //   只要在二阶段（＝背后立着虚影 ✓）就**一直**往外冒黑烟 ✓
-        //   （范围按**虚影的体积**给：两倍高 ⇒ 一直冒到 11 格高 ✓，看着像那尊巨影在渗黑气 ✓）
-        if (this.isPhaseTwo()) {
-            this.blackAura(level);
-        }
+        // 一阶段也有贴身的黑雾和裂隙微光；二阶段随两倍虚影扩展到整片身躯。
+        this.blackAura(level);
         this.tickCasting(level);
     }
 
     /**
-     * 二阶段的黑气 ✓（作者要的"一直散发着黑色粒子" ✓）。
+     * 常驻深渊气场。一阶段贴身、低频；二阶段覆盖两倍虚影，但仍限制粒子量。
      *
      * <p>用 {@code LARGE_SMOKE + SQUID_INK}（1.20.1 里最"黑"的两颗 ✓）——
      * 不是 SOUL_FIRE_FLAME ✗（那是青白的 ✗，作者要的是黑的 ✓）。
      * 每 3 tick 冒 4 颗 ⇒ 约 27 颗/秒 ✓（够浓但不会把帧数吃掉 ✗）。
      */
     private void blackAura(ServerLevel level) {
-        if (this.tickCount % 3 != 0) {
+        int interval = this.isPhaseTwo() ? 3 : 6;
+        if (this.tickCount % interval != 0) {
             return;
         }
-        double phantomTop = HITBOX_HEIGHT * TNDarkGiantPhase.PHANTOM_SCALE;   // ≈ 11 格 ✓
-        for (int i = 0; i < 4; i++) {
+        double auraTop = HITBOX_HEIGHT * (this.isPhaseTwo() ? TNDarkGiantPhase.PHANTOM_SCALE : 1.0D);
+        double auraRadius = this.isPhaseTwo() ? 3.6D : 2.2D;
+        int count = this.isPhaseTwo() ? 5 : 2;
+        for (int i = 0; i < count; i++) {
             double angle = this.random.nextDouble() * Math.PI * 2.0D;
-            double radius = 1.2D + this.random.nextDouble() * 2.4D;
+            double radius = 0.8D + this.random.nextDouble() * auraRadius;
             double x = this.getX() + Math.cos(angle) * radius;
             double z = this.getZ() + Math.sin(angle) * radius;
-            double y = this.getY() + 0.3D + this.random.nextDouble() * phantomTop;
-            level.sendParticles(this.random.nextBoolean()
-                            ? ParticleTypes.LARGE_SMOKE : ParticleTypes.SQUID_INK,
+            double y = this.getY() + 0.3D + this.random.nextDouble() * auraTop;
+            level.sendParticles(i % 3 == 0 ? ParticleTypes.REVERSE_PORTAL
+                            : (this.random.nextBoolean() ? ParticleTypes.LARGE_SMOKE : ParticleTypes.SQUID_INK),
                     x, y, z, 1, 0.02D, 0.06D, 0.02D, 0.01D);
         }
     }
@@ -354,8 +350,10 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
         this.playMagic();
         level.playSound(null, this.getX(), this.getY(), this.getZ(),
                 SoundEvents.EVOKER_CAST_SPELL, SoundSource.HOSTILE, 1.6F, 0.7F);
-        level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, this.getX(), this.getY() + 3.0D, this.getZ(),
-                30, 1.2D, 1.0D, 1.2D, 0.04D);
+        level.sendParticles(ParticleTypes.REVERSE_PORTAL, this.getX(), this.getY() + 3.0D, this.getZ(),
+                36, 1.3D, 1.4D, 1.3D, 0.07D);
+        level.sendParticles(ParticleTypes.WITCH, this.getX(), this.getY() + 4.8D, this.getZ(),
+                12, 0.8D, 0.7D, 0.8D, 0.03D);
     }
 
     /** 走的比普通怪慢，但每一步都沉（落地扬尘 ✓）。 */

@@ -3,8 +3,8 @@
 
     Produces the three data files of the boss in one deterministic pass:
       1) src/main/resources/assets/tnc/geo/entity/dark_giant.geo.json
-      2) src/main/resources/assets/tnc/textures/entity/dark_giant_bedrock.png   (128x128 RGBA)
-      3) src/main/resources/assets/tnc/animations/entity/dark_giant.animation.json (empty on purpose)
+      2) src/main/resources/assets/tnc/textures/entity/dark_giant_bedrock.png   (512x512 RGBA)
+      3) src/main/resources/assets/tnc/textures/entity/dark_giant_emissive.png  (glow mask)
 
     Author's ask (2026-10-03): a giant beast-man lord whose armour is BAKED INTO THE MODEL --
     chest plate, abdominal plates, spiked pauldrons, bracers, greaves, boots, a belt with a big
@@ -39,7 +39,7 @@
 #>
 param(
     [string]$Repo = '',
-    [int]$TexSize = 128
+    [int]$TexSize = 512
 )
 
 $ErrorActionPreference = 'Stop'
@@ -48,36 +48,37 @@ Add-Type -AssemblyName System.Drawing
 if (-not $Repo) { $Repo = Split-Path $PSScriptRoot -Parent }
 $GEO_OUT = Join-Path $Repo 'src\main\resources\assets\tnc\geo\entity\dark_giant.geo.json'
 $TEX_OUT = Join-Path $Repo 'src\main\resources\assets\tnc\textures\entity\dark_giant_bedrock.png'
+$EMISSIVE_OUT = Join-Path $Repo 'src\main\resources\assets\tnc\textures\entity\dark_giant_emissive.png'
 $ANI_OUT = Join-Path $Repo 'src\main\resources\assets\tnc\animations\entity\dark_giant.animation.json'
 
 $TEXW = $TexSize
 $TEXH = $TexSize
 
 # ===========================================================================
-#  1. PALETTE  (dark element: blackened steel / leather / fur / bone / crimson)
+#  1. PALETTE  (abyssal black / bruised violet / cold witchfire)
 # ===========================================================================
 function C([int]$r, [int]$g, [int]$b, [int]$a = 255) { [System.Drawing.Color]::FromArgb($a, $r, $g, $b) }
 
 $COL = @{
-    steel     = (C 0x2A 0x2A 0x31)   # blackened steel / dark gunmetal
-    steelHi   = (C 0x55 0x55 0x62)
-    steelLo   = (C 0x1B 0x1B 0x22)
-    steelDark = (C 0x13 0x13 0x18)
-    leather   = (C 0x3A 0x2A 0x22)   # leather straps
-    leatherHi = (C 0x55 0x3E 0x30)
-    leatherLo = (C 0x24 0x19 0x13)
-    fur       = (C 0x24 0x1C 0x18)   # beast fur
-    furHi     = (C 0x3A 0x2D 0x24)
-    furLo     = (C 0x14 0x0F 0x0D)
-    bone      = (C 0xC9 0xBF 0xA6)   # horns / tusks / claws
-    boneHi    = (C 0xE4 0xDC 0xC8)
-    boneLo    = (C 0x96 0x8B 0x72)
-    cloth     = (C 0x5A 0x16 0x20)   # dark crimson cape
-    clothHi   = (C 0x78 0x20 0x2C)
-    clothLo   = (C 0x38 0x0C 0x14)
-    rune      = (C 0x8E 0x1B 0x2A)   # sinister glow (eyes + runes)
-    eye       = (C 0xFF 0x54 0x22)
-    eyeCore   = (C 0xFF 0xDC 0xA0)
+    steel     = (C 0x15 0x12 0x20)   # almost-black obsidian armour
+    steelHi   = (C 0x34 0x29 0x49)
+    steelLo   = (C 0x0C 0x09 0x13)
+    steelDark = (C 0x05 0x04 0x09)
+    leather   = (C 0x20 0x14 0x29)
+    leatherHi = (C 0x3A 0x22 0x4B)
+    leatherLo = (C 0x0D 0x08 0x13)
+    fur       = (C 0x12 0x0D 0x18)
+    furHi     = (C 0x2B 0x1A 0x39)
+    furLo     = (C 0x06 0x04 0x0A)
+    bone      = (C 0x25 0x17 0x37)   # corrupted horn, never bright ivory
+    boneHi    = (C 0x58 0x32 0x74)
+    boneLo    = (C 0x0D 0x08 0x16)
+    cloth     = (C 0x1A 0x08 0x25)
+    clothHi   = (C 0x43 0x16 0x5E)
+    clothLo   = (C 0x08 0x03 0x0E)
+    rune      = (C 0x8B 0x19 0xE6)   # violet rift glow
+    eye       = (C 0xD9 0x43 0xFF)
+    eyeCore   = (C 0xB8 0xF4 0xFF)   # cold core keeps the face readable in darkness
 }
 
 # ===========================================================================
@@ -236,7 +237,10 @@ AddBox 'body' 'chest'       -14   54 -7    28 18 14 'steel'   2
 AddBox 'body' 'pec_r'       -13.5 59 -9.5  12 11 3  'steelHi' 1
 AddBox 'body' 'pec_l'        1.5  59 -9.5  12 11 3  'steelHi' 1
 AddBox 'body' 'chestplate'  -15   55 -9    30 17 2.5 'steel'  1
-AddBox 'body' 'chestrune'   -4    60 -9.5  8  6  1.5 'rune'   1
+AddBox 'body' 'riftcore'    -5.5  58 -10.5 11 11 2.5 'rune'   1
+AddBox 'body' 'riftfang_r'  -10   60 -10   4  3  2   'rune'   1
+AddBox 'body' 'riftfang_l'    6   60 -10   4  3  2   'rune'   1
+AddBox 'body' 'riftvein'     -2   53 -9.5  4  5  1.5 'rune'   1
 AddBox 'body' 'chestplate2' -15   44 -8    30 11 2.5 'steel'  1
 AddBox 'body' 'abdomen'     -12   42 -6    24 12 12 'steel'   1
 AddBox 'body' 'absplate1'   -9    43 -7.5  18 5  2  'steelHi' 1
@@ -245,10 +249,12 @@ AddBox 'body' 'waist'       -12   32 -5.5  24 10 11 'steel'   1
 AddBox 'body' 'belt'        -13   30 -7    26 6  14 'leather' 1
 AddBox 'body' 'buckle'      -4.5  30 -8.5  9  6  3  'steelHi' 1
 
-# cape: stacked slabs (one 18x50x3 slab would cost three times as much atlas)
-AddBox 'cape' 'cape1' -9 57 8.5 18 15 3 'cloth' 1
-AddBox 'cape' 'cape2' -9 42 8.5 18 15 3 'cloth' 1
-AddBox 'cape' 'cape3' -9 22 8.5 18 20 3 'cloth' 1
+# A broad, torn mantle. Split tails leave a ragged silhouette from behind and the sides.
+AddBox 'cape' 'cape1'       -13 57 8.5 26 15 3 'cloth' 1
+AddBox 'cape' 'cape2'       -12 42 8.5 24 15 3 'cloth' 1
+AddBox 'cape' 'capetail_r'  -12 18 8.5 10 24 3 'cloth' 1
+AddBox 'cape' 'capetail_l'    2 22 8.5 10 20 3 'cloth' 1
+AddBox 'cape' 'capetail_mid' -2 27 9.0  4 15 2 'cloth' 1
 
 AddBox 'tail' 'tail1' -4   30 6.5 8 10 5 'fur' 1
 AddBox 'tail' 'tail2' -3.5 20 7   7 10 4 'fur' 1
@@ -265,6 +271,15 @@ AddBox 'head' 'eye_r'  -5   83   -7.5  3  2.5 1 'eye' 1
 AddBox 'head' 'eye_l'   2   83   -7.5  3  2.5 1 'eye' 1
 AddBox 'head' 'ear_r'  -9.5 84   -2    3  4  3  'fur' 1
 AddBox 'head' 'ear_l'   6.5 84   -2    3  4  3  'fur' 1
+
+# Broken abyss crown: three uneven black crystal prongs around a luminous forehead seal.
+AddBox 'head' 'crownbase'   -8 88 -6 16 3 10 'steelLo' 1
+AddBox 'head' 'crown_r1'    -8 91 -4  4  8  4 'bone'    1
+AddBox 'head' 'crown_r2'    -5 96 -3  3  5  3 'rune'    1
+AddBox 'head' 'crown_mid'   -2 91 -5  4 13  4 'bone'    1
+AddBox 'head' 'crown_core'  -1 98 -6  2  5  2 'rune'    1
+AddBox 'head' 'crown_l1'     4 91 -4  4  9  4 'bone'    1
+AddBox 'head' 'foreheadeye' -2 87 -8  4  3  1 'eye'     1
 
 # horns: base + tip per side (out and back), with an iron collar at the root
 foreach ($side in @(@('right', -1.0), @('left', 1.0))) {
@@ -291,10 +306,19 @@ foreach ($side in @(@('right', -1.0), @('left', 1.0))) {
     foreach ($spx in $sx) {
         $tipx = if ($sgn -lt 0) { $spx - 1.5 } else { $spx + 1.5 }
         AddBox "pauldron$tag" "spike_${tag}_$i"    $spx  74 -6 3.5 7 4.5 'steelHi' 1
-        AddBox "pauldron$tag" "spiketip_${tag}_$i" $tipx 81 -5 3.5 5 3.5 'bone'    1
+        AddBox "pauldron$tag" "spiketip_${tag}_$i" $tipx 81 -5 3.5 (7 + $i * 2) 3.5 'bone' 1
         $i++
     }
 }
+
+# Suspended shards make the silhouette supernatural instead of merely armoured. They inherit
+# the torso animation, so they move with the lord without needing another animation track.
+AddBox 'shards' 'shard_r_outer' -39 68 -2 4 12 4 'bone' 1
+AddBox 'shards' 'shard_r_glow'  -38 76 -3 2  5 2 'rune' 1
+AddBox 'shards' 'shard_r_high'  -30 91  3 3  9 3 'bone' 1
+AddBox 'shards' 'shard_l_outer'  35 66 -1 4 14 4 'bone' 1
+AddBox 'shards' 'shard_l_glow'   36 75 -2 2  6 2 'rune' 1
+AddBox 'shards' 'shard_l_high'   27 93  4 3  7 3 'bone' 1
 # ===========================================================================
 #  5. BOX-UV PACKER
 #     A skyline (bottom-left) packer plus a growing binary-tree packer, several sort
@@ -695,10 +719,10 @@ function JNum([double]$x) {
 }
 
 $boneOrder = @('root', 'body', 'head', 'hornright', 'hornleft', 'armright', 'armleft',
-               'pauldronright', 'pauldronleft', 'legright', 'legleft', 'cape', 'tail')
+               'pauldronright', 'pauldronleft', 'legright', 'legleft', 'cape', 'tail', 'shards')
 $boneParent = @{ root = $null; body = 'root'; head = 'body'; hornright = 'head'; hornleft = 'head';
                  armright = 'body'; armleft = 'body'; pauldronright = 'body'; pauldronleft = 'body';
-                 legright = 'body'; legleft = 'body'; cape = 'body'; tail = 'body' }
+                 legright = 'body'; legleft = 'body'; cape = 'body'; tail = 'body'; shards = 'body' }
 $bonePivot = @{
     root          = @(0, 0, 0)
     body          = @(0, 34, 0)
@@ -713,6 +737,7 @@ $bonePivot = @{
     legleft       = @(8, 34, 0)
     cape          = @(0, 74, 8)
     tail          = @(0, 34, 8)
+    shards        = @(0, 66, 0)
 }
 
 $L = New-Object System.Collections.ArrayList
@@ -766,15 +791,30 @@ Em '  ]'
 Em '}'
 
 New-Item -ItemType Directory -Force -Path (Split-Path $GEO_OUT -Parent) | Out-Null
-[System.IO.File]::WriteAllText($GEO_OUT, (($L -join "`r`n") + "`r`n"), (New-Object System.Text.UTF8Encoding $false))
-
-# the animation file is empty on purpose (the renderer is fine with that)
-$a = "{`r`n  `"format_version`": `"1.8.0`",`r`n  `"animations`": {}`r`n}`r`n"
-New-Item -ItemType Directory -Force -Path (Split-Path $ANI_OUT -Parent) | Out-Null
-[System.IO.File]::WriteAllText($ANI_OUT, $a, (New-Object System.Text.UTF8Encoding $false))
+[System.IO.File]::WriteAllText($GEO_OUT, (($L -join "`n") + "`n"), (New-Object System.Text.UTF8Encoding $false))
 
 New-Item -ItemType Directory -Force -Path (Split-Path $TEX_OUT -Parent) | Out-Null
 $script:BMP.Save($TEX_OUT, [System.Drawing.Imaging.ImageFormat]::Png)
+
+# Separate glow mask: only rune/eye cube UVs are opaque. The renderer draws this texture at
+# full brightness, so the armour stays almost black while the rift core, crown and eyes burn.
+$emissive = New-Object System.Drawing.Bitmap $TEXW, $TEXH, ([System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
+for ($y = 0; $y -lt $TEXH; $y++) {
+    for ($x = 0; $x -lt $TEXW; $x++) { $emissive.SetPixel($x, $y, $script:CLEAR) }
+}
+foreach ($r in $placed) {
+    if ($r.cu.mat -notin @('rune', 'eye')) { continue }
+    foreach ($face in @('up', 'down', 'west', 'north', 'east', 'south')) {
+        $rc = FaceRect $r $face
+        for ($j = 0; $j -lt $rc[3]; $j++) {
+            for ($i = 0; $i -lt $rc[2]; $i++) {
+                $emissive.SetPixel($rc[0] + $i, $rc[1] + $j, $script:BMP.GetPixel($rc[0] + $i, $rc[1] + $j))
+            }
+        }
+    }
+}
+$emissive.Save($EMISSIVE_OUT, [System.Drawing.Imaging.ImageFormat]::Png)
+$emissive.Dispose()
 $script:BMP.Dispose()
 
 # ===========================================================================
@@ -800,7 +840,8 @@ foreach ($cu in $CUBES) {
 Write-Output "=== dark_giant assets generated ==="
 Write-Output ("geo       : {0}  ({1} bytes)" -f $GEO_OUT, (Get-Item $GEO_OUT).Length)
 Write-Output ("texture   : {0}  ({1} bytes)" -f $TEX_OUT, (Get-Item $TEX_OUT).Length)
-Write-Output ("animation : {0}  ({1} bytes)" -f $ANI_OUT, (Get-Item $ANI_OUT).Length)
+Write-Output ("emissive  : {0}  ({1} bytes)" -f $EMISSIVE_OUT, (Get-Item $EMISSIVE_OUT).Length)
+Write-Output ("animation : preserved ({0} bytes)" -f (Get-Item $ANI_OUT).Length)
 Write-Output ("cubes     : {0} in {1} bones   (packer: {2}, {3} of {4} rows)" -f `
         $CUBES.Count, $boneOrder.Count, $bestKey, $bestUsed, $TEXH)
 Write-Output ("height    : {0} units = {1} blocks (y {2}..{3}, feet at 0)" -f `
