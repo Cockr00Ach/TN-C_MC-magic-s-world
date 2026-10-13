@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " P ",
+    " B "
+  ],
+  "key": {
+    "P": {
+      "item": "minecraft:hay_block"
+    },
+    "B": {
+      "item": "minecraft:book"
+    }
+  },
+  "result": {
+    "item": "tnc:beast_ranch_book",
+    "count": 1
+  }
+}

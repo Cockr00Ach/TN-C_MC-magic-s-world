@@ -1,0 +1,129 @@
+{
+	default_hide_dependency_lines: true
+	default_quest_shape: "square"
+	filename: "tnc_guide_05_contracts"
+	group: "544E434755494445"
+	icon: "minecraft:book"
+	id: "544E430105000000"
+	order_index: 10
+	quest_links: [ ]
+	quests: [
+		{
+			description: [
+				"&b&l酒馆的委托栏"
+				"&7阶位越高，数量越少，事情越大"
+				""
+				"&e酒馆Bountiful原生委托栏已开放 · 62种目标"
+				""
+				"&f点击章节中的节点阅读说明。勾选只表示看过本节，不代表完成升级、买房或委托。"
+				"&7真实目标请查看七个玩法章节；各系统开放范围见本页状态。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:book"
+			id: "544E430205000000"
+			shape: "square"
+			size: 1.8d
+			tasks: [{
+				id: "544E430305000000"
+				title: "阅读本节（不发放玩法奖励）"
+				type: "checkmark"
+			}]
+			title: "&b&l酒馆的委托栏"
+			x: 0.0d
+			y: 0.0d
+		}
+		{
+			description: [
+				"&e酒馆Bountiful原生委托栏已开放 · 62种目标"
+				""
+				"&b&lE到S，再到世界委托"
+				""
+				"&f酒馆入门上楼北侧，右键Bountiful原生委托栏。三枚城镇敕令提供补给、食材与巡猎三池，共62种不同目标。接取后获得原生纸张；带齐物资或完成纸上击杀，手持纸张右键同一酒馆栏交付。"
+				"&f期限、数量、稀有度与板等级均以原生纸张和栏界面为准。原生委托有期限；旧版三单/一份越阶/不失效规则只适用于遗留旧单，不套在原生纸张上。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:book"
+			id: "544E430205000001"
+			shape: "square"
+			size: 1.0d
+			tasks: [{
+				id: "544E430305000001"
+				title: "阅读本节（不发放玩法奖励）"
+				type: "checkmark"
+			}]
+			title: "E到S，再到世界委托"
+			x: -6.0d
+			y: 3.0d
+		}
+		{
+			description: [
+				"&e酒馆Bountiful原生委托栏已开放 · 62种目标"
+				""
+				"&b&l首版报酬草案"
+				""
+				"&f补给28种：木材、石料、玻璃、金属、矿物、皮革及元素介质。食材22种：粮食、果蔬、肉鱼、烘焙和备料。巡猎12种：僵尸、蜘蛛、骷髅、苦力怕、水尸、沙尸、流浪者、末影人、烈焰人、凋灵骷髅、女巫、掠夺者。"
+				"&f原生物资目标按Bountiful消耗；食材池避开带碗/瓶的料理，不许诺原生不存在的容器返还。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:book"
+			id: "544E430205000002"
+			shape: "square"
+			size: 1.0d
+			tasks: [{
+				id: "544E430305000002"
+				title: "阅读本节（不发放玩法奖励）"
+				type: "checkmark"
+			}]
+			title: "首版报酬草案"
+			x: -3.0d
+			y: 3.0d
+		}
+		{
+			description: [
+				"&e酒馆Bountiful原生委托栏已开放 · 62种目标"
+				""
+				"&b&l远征不等于多杀几百只怪"
+				""
+				"&f报酬以纸张报酬份数计：补给/食材每份30铜、120经验、10声望；巡猎每份40铜、150经验、10声望。真实交付由原生系统消耗纸张；适配器只记个人账户，不在FTB重复发钱。"
+				"&f第一次食材类结算教农事并领焦点。城镇履历记录原生结算次数与永久等级。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:book"
+			id: "544E430205000003"
+			shape: "square"
+			size: 1.0d
+			tasks: [{
+				id: "544E430305000003"
+				title: "阅读本节（不发放玩法奖励）"
+				type: "checkmark"
+			}]
+			title: "远征不等于多杀几百只怪"
+			x: 0.0d
+			y: 3.0d
+		}
+		{
+			description: [
+				"&e酒馆Bountiful原生委托栏已开放 · 62种目标"
+				""
+				"&b&l刷新与组队"
+				""
+				"&f手册委托页直接打开原生栏，仅在酒馆栏旁可用。一次性教学备料单与旧已接单保留归档交付入口；不再从旧菜单接受普通新单。"
+				"&f艾琳只负责登记与晋升，Self介绍道路并推进既有剧情。法杖、装备、银行分别由莉娅、铎恩、米洛办理，不共用Self或酒馆范围授权。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:book"
+			id: "544E430205000004"
+			shape: "square"
+			size: 1.0d
+			tasks: [{
+				id: "544E430305000004"
+				title: "阅读本节（不发放玩法奖励）"
+				type: "checkmark"
+			}]
+			title: "刷新与组队"
+			x: 3.0d
+			y: 3.0d
+		}
+	]
+	title: "05 - 酒馆的委托栏"
+}

@@ -1,0 +1,150 @@
+{
+	default_hide_dependency_lines: true
+	default_quest_shape: "square"
+	filename: "tnc_guide_07_food"
+	group: "544E434755494445"
+	icon: "minecraft:bread"
+	id: "544E430107000000"
+	order_index: 12
+	quest_links: [ ]
+	quests: [
+		{
+			description: [
+				"&b&l田园与餐桌"
+				"&7你的农田，也为旅途提供力量"
+				""
+				"&e五格食物袋、八种珍馐与三阶农事已开放"
+				""
+				"&f点击章节中的节点阅读说明。勾选只表示看过本节，不代表完成升级、买房或委托。"
+				"&7真实目标请查看七个玩法章节；各系统开放范围见本页状态。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:bread"
+			id: "544E430207000000"
+			shape: "square"
+			size: 1.8d
+			tasks: [{
+				id: "544E430307000000"
+				title: "阅读本节（不发放玩法奖励）"
+				type: "checkmark"
+			}]
+			title: "&b&l田园与餐桌"
+			x: 0.0d
+			y: 0.0d
+		}
+		{
+			description: [
+				"&e五格食物袋、八种珍馐与三阶农事已开放"
+				""
+				"&b&l带好路上的饭"
+				""
+				"&f行囊内装备食物袋后五格只接受可食用物品。点击每格“吃”消费一份，保留原料理效果，并返还碗或瓶；满背包时放在脚边。重新开界面不能跳过食用冷却。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:bread"
+			id: "544E430207000001"
+			shape: "square"
+			size: 1.0d
+			tasks: [{
+				id: "544E430307000001"
+				title: "阅读本节（不发放玩法奖励）"
+				type: "checkmark"
+			}]
+			title: "带好路上的饭"
+			x: -6.0d
+			y: 3.0d
+		}
+		{
+			description: [
+				"&e五格食物袋、八种珍馐与三阶农事已开放"
+				""
+				"&b&l意外之后，吃一顿饭"
+				""
+				"&f真正死亡后重生饥饿6/20、饱和归零。倒地被救不是死亡，末地返回也不受此罚；冒险等级、账户余额和已学法术保留。远征带好食物，普通背包物品仍按现有死亡规则处理。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:bread"
+			id: "544E430207000002"
+			shape: "square"
+			size: 1.0d
+			tasks: [{
+				id: "544E430307000002"
+				title: "阅读本节（不发放玩法奖励）"
+				type: "checkmark"
+			}]
+			title: "意外之后，吃一顿饭"
+			x: -3.0d
+			y: 3.0d
+		}
+		{
+			description: [
+				"&e五格食物袋、八种珍馐与三阶农事已开放"
+				""
+				"&b&l首领珍馐与料理评价"
+				""
+				"&f末影龙、凋灵与六位灾变首领额外掉落独立可食珍料，不消耗剧情凭证。珍料＋熟牛肉＋碗制作对应珍馐。八种每种首次吃永久生命+2，最多+16；重复吃不再加上限。"
+				"&f首次品尝显示短评价。邻居有稳定口味；喜欢的赠食收益更高，连续同菜减半。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:bread"
+			id: "544E430207000003"
+			shape: "square"
+			size: 1.0d
+			tasks: [{
+				id: "544E430307000003"
+				title: "阅读本节（不发放玩法奖励）"
+				type: "checkmark"
+			}]
+			title: "首领珍馐与料理评价"
+			x: 0.0d
+			y: 3.0d
+		}
+		{
+			description: [
+				"&e五格食物袋、八种珍馐与三阶农事已开放"
+				""
+				"&b&l通用魔法·农事"
+				""
+				"&f完成原生食材类委托（旧已接小麦单也兼容）学初芽术并领农事焦点，不花战斗学习点。手持焦点瞄准12格内农田右键施放，潜行右键换已开放阶位。Lv10/30开放后两阶。"
+				"&f初芽：3×3、15魔力、30秒冷却。田园：7×7、30秒至多三次、45魔力、60秒冷却。丰穰：9×9、60秒至多四次、120魔力、180秒冷却。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:bread"
+			id: "544E430207000004"
+			shape: "square"
+			size: 1.0d
+			tasks: [{
+				id: "544E430307000004"
+				title: "阅读本节（不发放玩法奖励）"
+				type: "checkmark"
+			}]
+			title: "通用魔法·农事"
+			x: 3.0d
+			y: 3.0d
+		}
+		{
+			description: [
+				"&e五格食物袋、八种珍馐与三阶农事已开放"
+				""
+				"&b&l不仅是提交一组小麦"
+				""
+				"&f仅促进白名单作物一个阶段，不自动播种或收割，不生成矿物；每人一个持续法阵，重叠范围不能叠加。整块田未加载时暂停，不强制加载。"
+				"&f焦点实现首版操作入口，魔法石独立生活页签、久违料理评价和更多田园事件后续完善。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:bread"
+			id: "544E430207000005"
+			shape: "square"
+			size: 1.0d
+			tasks: [{
+				id: "544E430307000005"
+				title: "阅读本节（不发放玩法奖励）"
+				type: "checkmark"
+			}]
+			title: "不仅是提交一组小麦"
+			x: 6.0d
+			y: 3.0d
+		}
+	]
+	title: "07 - 田园与餐桌"
+}

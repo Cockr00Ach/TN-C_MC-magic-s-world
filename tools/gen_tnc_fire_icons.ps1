@@ -160,7 +160,7 @@ function Icon-BlastRay {
     Save-Icon 'blast_ray' $false
 }
 
-# t3 火龙术: dragon head in profile facing right
+# t3 火龙吐息: dragon head in profile facing right
 #   (楔形上颌 + 吻端 + 张开的下颌留缝 + 牙 + 眼 + 后翘的角 + 颈后火苗)
 function Icon-FireDragon {
     New-Icon

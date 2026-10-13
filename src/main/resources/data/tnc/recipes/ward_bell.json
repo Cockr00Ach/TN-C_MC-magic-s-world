@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " M ",
+    "MLM",
+    " B "
+  ],
+  "key": {
+    "M": {
+      "item": "tnc:spirit_iron"
+    },
+    "L": {
+      "item": "tnc:warning_moss_spore"
+    },
+    "B": {
+      "item": "minecraft:stone_bricks"
+    }
+  },
+  "result": {
+    "item": "tnc:ward_bell",
+    "count": 1
+  }
+}

@@ -69,6 +69,7 @@ public final class SkyVineRootEntity extends BlockEntity {
         long now=l.getGameTime();
         if(!be.knownClock){be.lastTick=now;be.knownClock=true;}
         if(be.owner==null)return;
+        if(!com.tnc.tnc.life.routes.MagicSoilBlock.growing(l,p)){be.lastTick=now;be.pause="需要魔法土及八格内流动魔力";return;}
         long dt=Math.min(20,Math.max(0,now-be.lastTick));be.lastTick=now;
         if(now>=be.nextSpaceCheck){be.validSample=be.envelopeClear(l);be.nextSpaceCheck=now+100;}
         if(!be.validSample){be.setChanged();return;}
@@ -101,15 +102,16 @@ public final class SkyVineRootEntity extends BlockEntity {
                 l.sendParticles(net.minecraft.core.particles.ParticleTypes.HAPPY_VILLAGER,p.getX()+.5,p.getY()+be.height,p.getZ()+.5,15,2,1,2,.03);
             }
         }
-        if(now%20==0)be.setChanged();
+        if(now%20==0){be.drawMana(be.owner,0);be.setChanged();}
     }
     public boolean harvest(ServerPlayer player){
         if(owner==null||!owner.equals(player.getUUID())&&!player.isCreative()||height<64||level==null||level.getGameTime()<nextHarvest)return false;
         nextHarvest=level.getGameTime()+24000;setChanged();
         Block.popResource(level,worldPosition,new ItemStack(WonderContent.SKY_FIBER,4));Block.popResource(level,worldPosition,new ItemStack(WonderContent.SKY_VINE_SEED));return true;
     }
+    public int drawMana(UUID actor,int requested){if(!Objects.equals(owner,actor)||height<64||!(level instanceof ServerLevel l)||!com.tnc.tnc.life.routes.MagicSoilBlock.growing(l,worldPosition))return 0;boolean crown=ownLeaf.stream().anyMatch(p->p.getY()>=worldPosition.getY()+56&&l.hasChunkAt(p)&&l.getBlockState(p).is(WonderContent.VINE_LEAF));if(!crown)return 0;var t=getPersistentData();long sec=l.getGameTime()/20;if(t.getLong("ManaSecond")!=sec){t.putLong("ManaSecond",sec);t.putInt("ManaDraw",0);t.putInt("ManaBuffer",Math.min(400,t.getInt("ManaBuffer")+4));}int got=Math.max(0,Math.min(requested,Math.min(4-t.getInt("ManaDraw"),t.getInt("ManaBuffer"))));t.putInt("ManaDraw",t.getInt("ManaDraw")+got);t.putInt("ManaBuffer",t.getInt("ManaBuffer")-got);setChanged();return got;}
     public String status(){return "望天蔓："+(growth*100/96000)+"% · 已长"+height+"格。"+(pause.isEmpty()?"四游戏日长到64格；成熟后用剪刀取天幕纤维。":pause);}
-    @Override public void onLoad(){super.onLoad();if(level instanceof ServerLevel l){long now=l.getGameTime();boolean clear=envelopeClear(l);if(knownClock&&validSample&&clear)growth=Math.min(96000,growth+Math.max(0,now-lastTick)/2);validSample=clear;nextSpaceCheck=now+100;lastTick=now;knownClock=true;setChanged();}}
+    @Override public void onLoad(){super.onLoad();if(level instanceof ServerLevel l){long now=l.getGameTime();boolean clear=envelopeClear(l);validSample=clear;nextSpaceCheck=now+100;lastTick=now;knownClock=true;setChanged();}}
     private boolean inEnvelope(BlockPos p){BlockPos r=p.subtract(worldPosition);return Math.abs(r.getX())<=4&&Math.abs(r.getZ())<=4&&r.getY()>0&&r.getY()<=64;}
     @Override protected void saveAdditional(CompoundTag t){super.saveAdditional(t);if(owner!=null)t.putUUID("Owner",owner);t.putLong("Growth",growth);t.putLong("LastTick",lastTick);t.putBoolean("KnownClock",knownClock);t.putBoolean("ValidSample",validSample);t.putLong("NextHarvest",nextHarvest);t.putInt("Height",height);t.putInt("QueueTarget",queueTarget);t.putInt("Cursor",cursor);t.putLongArray("Queue",queue.stream().mapToLong(BlockPos::asLong).toArray());t.putLongArray("Stem",ownStem.stream().mapToLong(BlockPos::asLong).toArray());t.putLongArray("Leaf",ownLeaf.stream().mapToLong(BlockPos::asLong).toArray());}
     @Override public void load(CompoundTag t){super.load(t);owner=t.hasUUID("Owner")?t.getUUID("Owner"):null;growth=Math.max(0,Math.min(96000,t.getLong("Growth")));lastTick=t.getLong("LastTick");knownClock=t.getBoolean("KnownClock");validSample=t.getBoolean("ValidSample");nextHarvest=t.getLong("NextHarvest");height=Math.max(0,Math.min(64,t.getInt("Height")));queueTarget=Math.max(height,Math.min(64,t.getInt("QueueTarget")));queue.clear();ownStem.clear();ownLeaf.clear();for(long v:t.getLongArray("Queue"))if(queue.size()<2500&&inEnvelope(BlockPos.of(v)))queue.add(BlockPos.of(v));cursor=Math.max(0,Math.min(queue.size(),t.getInt("Cursor")));for(long v:t.getLongArray("Stem"))if(ownStem.size()<2500&&inEnvelope(BlockPos.of(v)))ownStem.add(BlockPos.of(v));for(long v:t.getLongArray("Leaf"))if(ownLeaf.size()<2500&&inEnvelope(BlockPos.of(v)))ownLeaf.add(BlockPos.of(v));}

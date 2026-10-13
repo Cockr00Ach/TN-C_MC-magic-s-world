@@ -1,0 +1,2781 @@
+{
+  "id": "47D4D282D0D35F89",
+  "filename": "tnc_field_03_pasture",
+  "title": "&6&l异兽牧场",
+  "icon": "tnc:beast_ranch_book",
+  "group": "544E434C49464531",
+  "order_index": 4,
+  "default_hide_dependency_lines": false,
+  "default_quest_shape": "hexagon",
+  "quests": [
+    {
+      "id": "16C9B54D8F70D8F9",
+      "title": "&6&l与二十六种异兽相处",
+      "icon": "tnc:beast_ranch_book",
+      "x": 0,
+      "y": -9,
+      "size": 2,
+      "description": [
+        "喂一次喜食取得信任→长按笼捕获→安置→继续照料→牧务杖设窝→食槽喂食。",
+        "灵纹笼3秒、曜纹笼5秒、星髓笼8秒。高档兼容低档；III级先用安抚铃。",
+        "地面9×9，飞行9×9×9；只有玩家明确安排的运输/巡逻会离窝。饥饿停工，不会饿死。"
+      ],
+      "tasks": [
+        {
+          "id": "4DC78062585B8369",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [],
+      "rewards": [
+        {
+          "id": "07C361324BA080E2",
+          "type": "item",
+          "item": "tnc:beast_ranch_book",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "55B4846F072A51F8",
+      "title": "灵纹笼 · I",
+      "icon": "tnc:pasture_cage",
+      "x": -9,
+      "y": -4,
+      "size": 1.2,
+      "description": [
+        "材料在3×3×3魔力炉处理。笼每次装一只，释放后可复用，不复制个体。"
+      ],
+      "tasks": [
+        {
+          "id": "4F06F1D0B3E98CE2",
+          "type": "item",
+          "item": "tnc:pasture_cage",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "288B1610BCDB604E",
+      "title": "曜纹笼 · II",
+      "icon": "tnc:radiant_cage",
+      "x": 0,
+      "y": -4,
+      "size": 1.2,
+      "description": [
+        "材料在3×3×3魔力炉处理。笼每次装一只，释放后可复用，不复制个体。"
+      ],
+      "tasks": [
+        {
+          "id": "74086B548D425412",
+          "type": "item",
+          "item": "tnc:radiant_cage",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "4600D9A2ACD04265",
+      "title": "星髓笼 · III",
+      "icon": "tnc:star_cage",
+      "x": 9,
+      "y": -4,
+      "size": 1.2,
+      "description": [
+        "材料在3×3×3魔力炉处理。笼每次装一只，释放后可复用，不复制个体。"
+      ],
+      "tasks": [
+        {
+          "id": "459B09C9444891F0",
+          "type": "item",
+          "item": "tnc:star_cage",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "4CD427844EEEDD58",
+      "title": "响铃羊",
+      "icon": "tnc:resonant_fleece",
+      "x": -11.25,
+      "y": 3,
+      "size": 1.8,
+      "description": [
+        "长按捕获自动记录。",
+        "铃穗饲捆；草地牧场",
+        "剪响绒，铃饰鸣响",
+        "防冻旅毡；自然节奏花园"
+      ],
+      "tasks": [
+        {
+          "id": "76EF6BFCF3501BE7",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/capture/bellwool_sheep",
+          "title": "完成真实操作",
+          "ftbquestsentityvis_icon": {
+            "enabled": true,
+            "entity": "tnc:bellwool_sheep",
+            "size": 1.0,
+            "offset_x": 0.0,
+            "offset_y": 0.0,
+            "rotation": 25.0,
+            "spin_mode": false,
+            "idle_mode": true,
+            "walk_mode": false,
+            "silhouette_mode": false,
+            "use_as_quest_icon": true,
+            "nbt": "{}"
+          }
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "72CF1C84CEBF6F74",
+      "title": "安置与照料",
+      "icon": "tnc:pasture_staff",
+      "x": -11.25,
+      "y": 5.8,
+      "size": 1.2,
+      "description": [
+        "喜食：tnc:bellwool_fodder",
+        "牧务杖选兽→点自己的栖居标记。窝点须有可达食槽与相应浅水/遮棚/净空。"
+      ],
+      "tasks": [
+        {
+          "id": "542BA49E5927EA8F",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/nest/bellwool_sheep",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "4CD427844EEEDD58"
+      ]
+    },
+    {
+      "id": "5270CCBDE04D90FA",
+      "title": "第一份产物",
+      "icon": "tnc:resonant_fleece",
+      "x": -11.25,
+      "y": 8.6,
+      "size": 1.2,
+      "description": [
+        "活取、真正的掉落或瓶装取魔才记录；肉用种类可正常屠宰。"
+      ],
+      "tasks": [
+        {
+          "id": "5231FCE4D2708A41",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/bellwool_sheep",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "72CF1C84CEBF6F74"
+      ]
+    },
+    {
+      "id": "63B8F84238E2BB11",
+      "title": "伙伴的用途",
+      "icon": "tnc:resonant_fleece",
+      "x": -11.25,
+      "y": 11.4,
+      "size": 1.2,
+      "description": [
+        "防冻旅毡；自然节奏花园",
+        "特殊储魔兽：集息器空手潜行右键切取魔/充能模式；同一余额不可复制。"
+      ],
+      "tasks": [
+        {
+          "id": "20DA140D2ED0BF48",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "5270CCBDE04D90FA"
+      ]
+    },
+    {
+      "id": "719DA88722D6C3CF",
+      "title": "石垒豪豕",
+      "icon": "tnc:stonebarrow_meat",
+      "x": -6.75,
+      "y": 3,
+      "size": 1.8,
+      "description": [
+        "长按捕获自动记录。",
+        "马铃薯；有遮棚地面",
+        "肉、石骨；雨中翻燧石",
+        "肉食热锅；工坊骨材"
+      ],
+      "tasks": [
+        {
+          "id": "3BD88BED9E09199B",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/capture/stonebarrow_boar",
+          "title": "完成真实操作",
+          "ftbquestsentityvis_icon": {
+            "enabled": true,
+            "entity": "tnc:stonebarrow_boar",
+            "size": 1.0,
+            "offset_x": 0.0,
+            "offset_y": 0.0,
+            "rotation": 25.0,
+            "spin_mode": false,
+            "idle_mode": true,
+            "walk_mode": false,
+            "silhouette_mode": false,
+            "use_as_quest_icon": true,
+            "nbt": "{}"
+          }
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "2A8383D6FC2999A2",
+      "title": "安置与照料",
+      "icon": "tnc:pasture_staff",
+      "x": -6.75,
+      "y": 5.8,
+      "size": 1.2,
+      "description": [
+        "喜食：minecraft:potato",
+        "牧务杖选兽→点自己的栖居标记。窝点须有可达食槽与相应浅水/遮棚/净空。"
+      ],
+      "tasks": [
+        {
+          "id": "5874781CB95D42DF",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/nest/stonebarrow_boar",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "719DA88722D6C3CF"
+      ]
+    },
+    {
+      "id": "2C8610BADF701C16",
+      "title": "第一份产物",
+      "icon": "tnc:stonebarrow_meat",
+      "x": -6.75,
+      "y": 8.6,
+      "size": 1.2,
+      "description": [
+        "活取、真正的掉落或瓶装取魔才记录；肉用种类可正常屠宰。"
+      ],
+      "tasks": [
+        {
+          "id": "42D3ACA7BA3CECCC",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/stonebarrow_boar",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "2A8383D6FC2999A2"
+      ]
+    },
+    {
+      "id": "29017AFB6B4E2329",
+      "title": "伙伴的用途",
+      "icon": "tnc:stonebarrow_meat",
+      "x": -6.75,
+      "y": 11.4,
+      "size": 1.2,
+      "description": [
+        "肉食热锅；工坊骨材",
+        "特殊储魔兽：集息器空手潜行右键切取魔/充能模式；同一余额不可复制。"
+      ],
+      "tasks": [
+        {
+          "id": "20AA282BF4A35E9E",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "2C8610BADF701C16"
+      ]
+    },
+    {
+      "id": "42184B76B3BBC014",
+      "title": "暮炭野豕",
+      "icon": "tnc:emberback_meat",
+      "x": -2.25,
+      "y": 3,
+      "size": 1.8,
+      "description": [
+        "长按捕获自动记录。",
+        "胡萝卜；营火暖窝",
+        "暮炭肉、暖脂；主人防冻",
+        "暖炖；暖味远征补给"
+      ],
+      "tasks": [
+        {
+          "id": "4A58A1242031FBA5",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/capture/emberback_hog",
+          "title": "完成真实操作",
+          "ftbquestsentityvis_icon": {
+            "enabled": true,
+            "entity": "tnc:emberback_hog",
+            "size": 1.0,
+            "offset_x": 0.0,
+            "offset_y": 0.0,
+            "rotation": 25.0,
+            "spin_mode": false,
+            "idle_mode": true,
+            "walk_mode": false,
+            "silhouette_mode": false,
+            "use_as_quest_icon": true,
+            "nbt": "{}"
+          }
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "534EF733EDF3809A",
+      "title": "安置与照料",
+      "icon": "tnc:pasture_staff",
+      "x": -2.25,
+      "y": 5.8,
+      "size": 1.2,
+      "description": [
+        "喜食：minecraft:carrot",
+        "牧务杖选兽→点自己的栖居标记。窝点须有可达食槽与相应浅水/遮棚/净空。"
+      ],
+      "tasks": [
+        {
+          "id": "66F11BA84C3F8DE0",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/nest/emberback_hog",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "42184B76B3BBC014"
+      ]
+    },
+    {
+      "id": "6914B3CD035C5D6C",
+      "title": "第一份产物",
+      "icon": "tnc:emberback_meat",
+      "x": -2.25,
+      "y": 8.6,
+      "size": 1.2,
+      "description": [
+        "活取、真正的掉落或瓶装取魔才记录；肉用种类可正常屠宰。"
+      ],
+      "tasks": [
+        {
+          "id": "1332FA56534438C1",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/emberback_hog",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "534EF733EDF3809A"
+      ]
+    },
+    {
+      "id": "53EAEC2B7CEA969E",
+      "title": "伙伴的用途",
+      "icon": "tnc:emberback_meat",
+      "x": -2.25,
+      "y": 11.4,
+      "size": 1.2,
+      "description": [
+        "暖炖；暖味远征补给",
+        "特殊储魔兽：集息器空手潜行右键切取魔/充能模式；同一余额不可复制。"
+      ],
+      "tasks": [
+        {
+          "id": "0DAA8BC80F1EFD9B",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "6914B3CD035C5D6C"
+      ]
+    },
+    {
+      "id": "6323FB898911F2D4",
+      "title": "潮背鳄螈",
+      "icon": "tnc:tideback_meat",
+      "x": 2.25,
+      "y": 3,
+      "size": 1.8,
+      "description": [
+        "长按捕获自动记录。",
+        "鳕鱼；浅池",
+        "潮背肉、水膜；受精卵",
+        "水行浓汤；水膜器件；孵育"
+      ],
+      "tasks": [
+        {
+          "id": "2DC39F08430FF930",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/capture/tideback_newt",
+          "title": "完成真实操作",
+          "ftbquestsentityvis_icon": {
+            "enabled": true,
+            "entity": "tnc:tideback_newt",
+            "size": 1.0,
+            "offset_x": 0.0,
+            "offset_y": 0.0,
+            "rotation": 25.0,
+            "spin_mode": false,
+            "idle_mode": true,
+            "walk_mode": false,
+            "silhouette_mode": false,
+            "use_as_quest_icon": true,
+            "nbt": "{}"
+          }
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "39FE19DAA732ED09",
+      "title": "安置与照料",
+      "icon": "tnc:pasture_staff",
+      "x": 2.25,
+      "y": 5.8,
+      "size": 1.2,
+      "description": [
+        "喜食：minecraft:cod",
+        "牧务杖选兽→点自己的栖居标记。窝点须有可达食槽与相应浅水/遮棚/净空。"
+      ],
+      "tasks": [
+        {
+          "id": "30AA46B58EDB3470",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/nest/tideback_newt",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "6323FB898911F2D4"
+      ]
+    },
+    {
+      "id": "2A487FE6A815BC35",
+      "title": "第一份产物",
+      "icon": "tnc:tideback_meat",
+      "x": 2.25,
+      "y": 8.6,
+      "size": 1.2,
+      "description": [
+        "活取、真正的掉落或瓶装取魔才记录；肉用种类可正常屠宰。"
+      ],
+      "tasks": [
+        {
+          "id": "267C66DAADE3A025",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/tideback_newt",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "39FE19DAA732ED09"
+      ]
+    },
+    {
+      "id": "0DA2A1B0D8739800",
+      "title": "伙伴的用途",
+      "icon": "tnc:tideback_meat",
+      "x": 2.25,
+      "y": 11.4,
+      "size": 1.2,
+      "description": [
+        "水行浓汤；水膜器件；孵育",
+        "特殊储魔兽：集息器空手潜行右键切取魔/充能模式；同一余额不可复制。"
+      ],
+      "tasks": [
+        {
+          "id": "38ADEDA6F9B61B22",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "2A487FE6A815BC35"
+      ]
+    },
+    {
+      "id": "6D33A8E636BC094F",
+      "title": "银霜步禽",
+      "icon": "tnc:froststride_meat",
+      "x": 6.75,
+      "y": 3,
+      "size": 1.8,
+      "description": [
+        "长按捕获自动记录。",
+        "小麦种子；遮棚",
+        "银霜卵；肉、霜骨；受精卵",
+        "卵食料理；冷凝材料；孵育"
+      ],
+      "tasks": [
+        {
+          "id": "41D06710FE8C50AF",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/capture/froststride_fowl",
+          "title": "完成真实操作",
+          "ftbquestsentityvis_icon": {
+            "enabled": true,
+            "entity": "tnc:froststride_fowl",
+            "size": 1.0,
+            "offset_x": 0.0,
+            "offset_y": 0.0,
+            "rotation": 25.0,
+            "spin_mode": false,
+            "idle_mode": true,
+            "walk_mode": false,
+            "silhouette_mode": false,
+            "use_as_quest_icon": true,
+            "nbt": "{}"
+          }
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "5F3F84484F163AAA",
+      "title": "安置与照料",
+      "icon": "tnc:pasture_staff",
+      "x": 6.75,
+      "y": 5.8,
+      "size": 1.2,
+      "description": [
+        "喜食：minecraft:wheat_seeds",
+        "牧务杖选兽→点自己的栖居标记。窝点须有可达食槽与相应浅水/遮棚/净空。"
+      ],
+      "tasks": [
+        {
+          "id": "5B3201260BCBD124",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/nest/froststride_fowl",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "6D33A8E636BC094F"
+      ]
+    },
+    {
+      "id": "08D08B357A896E64",
+      "title": "第一份产物",
+      "icon": "tnc:froststride_meat",
+      "x": 6.75,
+      "y": 8.6,
+      "size": 1.2,
+      "description": [
+        "活取、真正的掉落或瓶装取魔才记录；肉用种类可正常屠宰。"
+      ],
+      "tasks": [
+        {
+          "id": "38E2069E32989434",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/froststride_fowl",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "5F3F84484F163AAA"
+      ]
+    },
+    {
+      "id": "7654DBE305CFED95",
+      "title": "伙伴的用途",
+      "icon": "tnc:froststride_meat",
+      "x": 6.75,
+      "y": 11.4,
+      "size": 1.2,
+      "description": [
+        "卵食料理；冷凝材料；孵育",
+        "特殊储魔兽：集息器空手潜行右键切取魔/充能模式；同一余额不可复制。"
+      ],
+      "tasks": [
+        {
+          "id": "2F45ED642040E895",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "08D08B357A896E64"
+      ]
+    },
+    {
+      "id": "4D3DB36E3188B024",
+      "title": "蜂囊腴蛙",
+      "icon": "tnc:honeydew",
+      "x": 11.25,
+      "y": 3,
+      "size": 1.8,
+      "description": [
+        "长按捕获自动记录。",
+        "甜浆果；浅池",
+        "蜜露；肉、甜脂",
+        "蜜露食品；拟发酵供魔"
+      ],
+      "tasks": [
+        {
+          "id": "1B3874EC05DD5DD4",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/capture/apiary_toad",
+          "title": "完成真实操作",
+          "ftbquestsentityvis_icon": {
+            "enabled": true,
+            "entity": "tnc:apiary_toad",
+            "size": 1.0,
+            "offset_x": 0.0,
+            "offset_y": 0.0,
+            "rotation": 25.0,
+            "spin_mode": false,
+            "idle_mode": true,
+            "walk_mode": false,
+            "silhouette_mode": false,
+            "use_as_quest_icon": true,
+            "nbt": "{}"
+          }
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "6EBEC77E78321351",
+      "title": "安置与照料",
+      "icon": "tnc:pasture_staff",
+      "x": 11.25,
+      "y": 5.8,
+      "size": 1.2,
+      "description": [
+        "喜食：minecraft:sweet_berries",
+        "牧务杖选兽→点自己的栖居标记。窝点须有可达食槽与相应浅水/遮棚/净空。"
+      ],
+      "tasks": [
+        {
+          "id": "2EC6C429B3F596E1",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/nest/apiary_toad",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "4D3DB36E3188B024"
+      ]
+    },
+    {
+      "id": "57691827BF2791C9",
+      "title": "第一份产物",
+      "icon": "tnc:honeydew",
+      "x": 11.25,
+      "y": 8.6,
+      "size": 1.2,
+      "description": [
+        "活取、真正的掉落或瓶装取魔才记录；肉用种类可正常屠宰。"
+      ],
+      "tasks": [
+        {
+          "id": "25D4CA26C6E94C22",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/apiary_toad",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "6EBEC77E78321351"
+      ]
+    },
+    {
+      "id": "2FB392D6A2209399",
+      "title": "伙伴的用途",
+      "icon": "tnc:honeydew",
+      "x": 11.25,
+      "y": 11.4,
+      "size": 1.2,
+      "description": [
+        "蜜露食品；拟发酵供魔",
+        "特殊储魔兽：集息器空手潜行右键切取魔/充能模式；同一余额不可复制。"
+      ],
+      "tasks": [
+        {
+          "id": "3F493E611B9A937F",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "57691827BF2791C9"
+      ]
+    },
+    {
+      "id": "2AAF706D9FFFE7FE",
+      "title": "星茸耳兔",
+      "icon": "tnc:starfelt_meat",
+      "x": -11.25,
+      "y": 17,
+      "size": 1.8,
+      "description": [
+        "长按捕获自动记录。",
+        "胡萝卜；遮棚",
+        "星茸肉、软绒",
+        "远行卷；静息毡"
+      ],
+      "tasks": [
+        {
+          "id": "7E82D6A52C9342FB",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/capture/starfelt_hare",
+          "title": "完成真实操作",
+          "ftbquestsentityvis_icon": {
+            "enabled": true,
+            "entity": "tnc:starfelt_hare",
+            "size": 1.0,
+            "offset_x": 0.0,
+            "offset_y": 0.0,
+            "rotation": 25.0,
+            "spin_mode": false,
+            "idle_mode": true,
+            "walk_mode": false,
+            "silhouette_mode": false,
+            "use_as_quest_icon": true,
+            "nbt": "{}"
+          }
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "42A3848CD41A043D",
+      "title": "安置与照料",
+      "icon": "tnc:pasture_staff",
+      "x": -11.25,
+      "y": 19.8,
+      "size": 1.2,
+      "description": [
+        "喜食：minecraft:carrot",
+        "牧务杖选兽→点自己的栖居标记。窝点须有可达食槽与相应浅水/遮棚/净空。"
+      ],
+      "tasks": [
+        {
+          "id": "416DE99B1B8F276A",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/nest/starfelt_hare",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "2AAF706D9FFFE7FE"
+      ]
+    },
+    {
+      "id": "197465EF802AF35B",
+      "title": "第一份产物",
+      "icon": "tnc:starfelt_meat",
+      "x": -11.25,
+      "y": 22.6,
+      "size": 1.2,
+      "description": [
+        "活取、真正的掉落或瓶装取魔才记录；肉用种类可正常屠宰。"
+      ],
+      "tasks": [
+        {
+          "id": "50639F8F9911BBEC",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/starfelt_hare",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "42A3848CD41A043D"
+      ]
+    },
+    {
+      "id": "37527544CD620400",
+      "title": "伙伴的用途",
+      "icon": "tnc:starfelt_meat",
+      "x": -11.25,
+      "y": 25.4,
+      "size": 1.2,
+      "description": [
+        "远行卷；静息毡",
+        "特殊储魔兽：集息器空手潜行右键切取魔/充能模式；同一余额不可复制。"
+      ],
+      "tasks": [
+        {
+          "id": "7BD508C14021F78C",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "197465EF802AF35B"
+      ]
+    },
+    {
+      "id": "4F6E62E1BD0B6168",
+      "title": "暮灯鹿",
+      "icon": "tnc:lantern_antler",
+      "x": -6.75,
+      "y": 17,
+      "size": 1.8,
+      "description": [
+        "长按捕获自动记录。",
+        "苹果；遮棚",
+        "自然落角",
+        "柔光提灯燃料；拟夜间低功率供魔"
+      ],
+      "tasks": [
+        {
+          "id": "1834A49BFE527BEA",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/capture/dusk_lantern_deer",
+          "title": "完成真实操作",
+          "ftbquestsentityvis_icon": {
+            "enabled": true,
+            "entity": "tnc:dusk_lantern_deer",
+            "size": 1.0,
+            "offset_x": 0.0,
+            "offset_y": 0.0,
+            "rotation": 25.0,
+            "spin_mode": false,
+            "idle_mode": true,
+            "walk_mode": false,
+            "silhouette_mode": false,
+            "use_as_quest_icon": true,
+            "nbt": "{}"
+          }
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "2B8B730B1B7BE5FD",
+      "title": "安置与照料",
+      "icon": "tnc:pasture_staff",
+      "x": -6.75,
+      "y": 19.8,
+      "size": 1.2,
+      "description": [
+        "喜食：minecraft:apple",
+        "牧务杖选兽→点自己的栖居标记。窝点须有可达食槽与相应浅水/遮棚/净空。"
+      ],
+      "tasks": [
+        {
+          "id": "41C0395115BBF812",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/nest/dusk_lantern_deer",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "4F6E62E1BD0B6168"
+      ]
+    },
+    {
+      "id": "47F246A305F78FB7",
+      "title": "第一份产物",
+      "icon": "tnc:lantern_antler",
+      "x": -6.75,
+      "y": 22.6,
+      "size": 1.2,
+      "description": [
+        "活取、真正的掉落或瓶装取魔才记录；肉用种类可正常屠宰。"
+      ],
+      "tasks": [
+        {
+          "id": "341CA2D3C3FE8D73",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/dusk_lantern_deer",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "2B8B730B1B7BE5FD"
+      ]
+    },
+    {
+      "id": "195CD032DBA47C89",
+      "title": "伙伴的用途",
+      "icon": "tnc:lantern_antler",
+      "x": -6.75,
+      "y": 25.4,
+      "size": 1.2,
+      "description": [
+        "柔光提灯燃料；拟夜间低功率供魔",
+        "特殊储魔兽：集息器空手潜行右键切取魔/充能模式；同一余额不可复制。"
+      ],
+      "tasks": [
+        {
+          "id": "402B752920DE5FA2",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "47F246A305F78FB7"
+      ]
+    },
+    {
+      "id": "63C89C8DB32F69FE",
+      "title": "纹壳蜗",
+      "icon": "tnc:shell_glue",
+      "x": -2.25,
+      "y": 17,
+      "size": 1.8,
+      "description": [
+        "长按捕获自动记录。",
+        "甜浆果；浅池",
+        "木刮片活取壳胶；受精卵",
+        "种子包、收纳；孵育"
+      ],
+      "tasks": [
+        {
+          "id": "357222AF46275CF0",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/capture/pattern_shell_snail",
+          "title": "完成真实操作",
+          "ftbquestsentityvis_icon": {
+            "enabled": true,
+            "entity": "tnc:pattern_shell_snail",
+            "size": 1.0,
+            "offset_x": 0.0,
+            "offset_y": 0.0,
+            "rotation": 25.0,
+            "spin_mode": false,
+            "idle_mode": true,
+            "walk_mode": false,
+            "silhouette_mode": false,
+            "use_as_quest_icon": true,
+            "nbt": "{}"
+          }
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "1220F7A0887C4350",
+      "title": "安置与照料",
+      "icon": "tnc:pasture_staff",
+      "x": -2.25,
+      "y": 19.8,
+      "size": 1.2,
+      "description": [
+        "喜食：minecraft:sweet_berries",
+        "牧务杖选兽→点自己的栖居标记。窝点须有可达食槽与相应浅水/遮棚/净空。"
+      ],
+      "tasks": [
+        {
+          "id": "2582F7EA39516F77",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/nest/pattern_shell_snail",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "63C89C8DB32F69FE"
+      ]
+    },
+    {
+      "id": "62F6D765B325D45D",
+      "title": "第一份产物",
+      "icon": "tnc:shell_glue",
+      "x": -2.25,
+      "y": 22.6,
+      "size": 1.2,
+      "description": [
+        "活取、真正的掉落或瓶装取魔才记录；肉用种类可正常屠宰。"
+      ],
+      "tasks": [
+        {
+          "id": "095118D8E40122D8",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/pattern_shell_snail",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "1220F7A0887C4350"
+      ]
+    },
+    {
+      "id": "2208E89568EB4DD7",
+      "title": "伙伴的用途",
+      "icon": "tnc:shell_glue",
+      "x": -2.25,
+      "y": 25.4,
+      "size": 1.2,
+      "description": [
+        "种子包、收纳；孵育",
+        "特殊储魔兽：集息器空手潜行右键切取魔/充能模式；同一余额不可复制。"
+      ],
+      "tasks": [
+        {
+          "id": "39692492C0646D4D",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "62F6D765B325D45D"
+      ]
+    },
+    {
+      "id": "781FFF166BD8D2E2",
+      "title": "邮羽鹭",
+      "icon": "tnc:flight_feather",
+      "x": 2.25,
+      "y": 17,
+      "size": 1.8,
+      "description": [
+        "长按捕获自动记录。",
+        "小麦；净空栖架",
+        "邮羽；两托盘间实际飞运",
+        "邮羽织材；玩家批准的货运路线"
+      ],
+      "tasks": [
+        {
+          "id": "6F1A188F5B57CA3F",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/capture/post_heron",
+          "title": "完成真实操作",
+          "ftbquestsentityvis_icon": {
+            "enabled": true,
+            "entity": "tnc:post_heron",
+            "size": 1.0,
+            "offset_x": 0.0,
+            "offset_y": 0.0,
+            "rotation": 25.0,
+            "spin_mode": false,
+            "idle_mode": true,
+            "walk_mode": false,
+            "silhouette_mode": false,
+            "use_as_quest_icon": true,
+            "nbt": "{}"
+          }
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "45F04AB88076A8A1",
+      "title": "安置与照料",
+      "icon": "tnc:pasture_staff",
+      "x": 2.25,
+      "y": 19.8,
+      "size": 1.2,
+      "description": [
+        "喜食：minecraft:wheat",
+        "牧务杖选兽→点自己的栖居标记。窝点须有可达食槽与相应浅水/遮棚/净空。"
+      ],
+      "tasks": [
+        {
+          "id": "587CD4A7212C46DA",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/nest/post_heron",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "781FFF166BD8D2E2"
+      ]
+    },
+    {
+      "id": "4B78FEF49B5A32F2",
+      "title": "第一份产物",
+      "icon": "tnc:flight_feather",
+      "x": 2.25,
+      "y": 22.6,
+      "size": 1.2,
+      "description": [
+        "活取、真正的掉落或瓶装取魔才记录；肉用种类可正常屠宰。"
+      ],
+      "tasks": [
+        {
+          "id": "6B97E9C7AE97B64F",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/post_heron",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "45F04AB88076A8A1"
+      ]
+    },
+    {
+      "id": "4DDF44A0F9EDBCBD",
+      "title": "伙伴的用途",
+      "icon": "tnc:flight_feather",
+      "x": 2.25,
+      "y": 25.4,
+      "size": 1.2,
+      "description": [
+        "邮羽织材；玩家批准的货运路线",
+        "特殊储魔兽：集息器空手潜行右键切取魔/充能模式；同一余额不可复制。"
+      ],
+      "tasks": [
+        {
+          "id": "59F4123CC16DAB22",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "4B78FEF49B5A32F2"
+      ]
+    },
+    {
+      "id": "1FC97476E6242D69",
+      "title": "巡灯螳螂",
+      "icon": "tnc:watch_wing",
+      "x": 6.75,
+      "y": 17,
+      "size": 1.8,
+      "description": [
+        "长按捕获自动记录。",
+        "棕蘑菇；栖架",
+        "巡灯翅；夜间巡逻预警",
+        "灯具部件；牧场保安"
+      ],
+      "tasks": [
+        {
+          "id": "7B5539F478AD8826",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/capture/watch_mantis",
+          "title": "完成真实操作",
+          "ftbquestsentityvis_icon": {
+            "enabled": true,
+            "entity": "tnc:watch_mantis",
+            "size": 1.0,
+            "offset_x": 0.0,
+            "offset_y": 0.0,
+            "rotation": 25.0,
+            "spin_mode": false,
+            "idle_mode": true,
+            "walk_mode": false,
+            "silhouette_mode": false,
+            "use_as_quest_icon": true,
+            "nbt": "{}"
+          }
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "01A043EB0D6DF137",
+      "title": "安置与照料",
+      "icon": "tnc:pasture_staff",
+      "x": 6.75,
+      "y": 19.8,
+      "size": 1.2,
+      "description": [
+        "喜食：minecraft:brown_mushroom",
+        "牧务杖选兽→点自己的栖居标记。窝点须有可达食槽与相应浅水/遮棚/净空。"
+      ],
+      "tasks": [
+        {
+          "id": "37C6EE28A7317B47",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/nest/watch_mantis",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "1FC97476E6242D69"
+      ]
+    },
+    {
+      "id": "6F96FABB2B631491",
+      "title": "第一份产物",
+      "icon": "tnc:watch_wing",
+      "x": 6.75,
+      "y": 22.6,
+      "size": 1.2,
+      "description": [
+        "活取、真正的掉落或瓶装取魔才记录；肉用种类可正常屠宰。"
+      ],
+      "tasks": [
+        {
+          "id": "7753894EC8F4F88F",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/watch_mantis",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "01A043EB0D6DF137"
+      ]
+    },
+    {
+      "id": "1F7F7E1FA5174782",
+      "title": "伙伴的用途",
+      "icon": "tnc:watch_wing",
+      "x": 6.75,
+      "y": 25.4,
+      "size": 1.2,
+      "description": [
+        "灯具部件；牧场保安",
+        "特殊储魔兽：集息器空手潜行右键切取魔/充能模式；同一余额不可复制。"
+      ],
+      "tasks": [
+        {
+          "id": "7014B3CCCC05E9A0",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "6F96FABB2B631491"
+      ]
+    },
+    {
+      "id": "1F070ED64DA6DC8C",
+      "title": "镜瓣夜蛾",
+      "icon": "tnc:mirror_scale",
+      "x": 11.25,
+      "y": 17,
+      "size": 1.8,
+      "description": [
+        "长按捕获自动记录。",
+        "糖；栖架",
+        "镜鳞；真实授粉助长；受精卵",
+        "镜片；作物协作；拟授粉副产能"
+      ],
+      "tasks": [
+        {
+          "id": "5F73FC2F512CAD2E",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/capture/mirrorwing_moth",
+          "title": "完成真实操作",
+          "ftbquestsentityvis_icon": {
+            "enabled": true,
+            "entity": "tnc:mirrorwing_moth",
+            "size": 1.0,
+            "offset_x": 0.0,
+            "offset_y": 0.0,
+            "rotation": 25.0,
+            "spin_mode": false,
+            "idle_mode": true,
+            "walk_mode": false,
+            "silhouette_mode": false,
+            "use_as_quest_icon": true,
+            "nbt": "{}"
+          }
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "25B87479B877F953",
+      "title": "安置与照料",
+      "icon": "tnc:pasture_staff",
+      "x": 11.25,
+      "y": 19.8,
+      "size": 1.2,
+      "description": [
+        "喜食：minecraft:sugar",
+        "牧务杖选兽→点自己的栖居标记。窝点须有可达食槽与相应浅水/遮棚/净空。"
+      ],
+      "tasks": [
+        {
+          "id": "1EF452E1B4381256",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/nest/mirrorwing_moth",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "1F070ED64DA6DC8C"
+      ]
+    },
+    {
+      "id": "2A0A6810FFC8658C",
+      "title": "第一份产物",
+      "icon": "tnc:mirror_scale",
+      "x": 11.25,
+      "y": 22.6,
+      "size": 1.2,
+      "description": [
+        "活取、真正的掉落或瓶装取魔才记录；肉用种类可正常屠宰。"
+      ],
+      "tasks": [
+        {
+          "id": "28C71FA155716D38",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/mirrorwing_moth",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "25B87479B877F953"
+      ]
+    },
+    {
+      "id": "249721A399433D69",
+      "title": "伙伴的用途",
+      "icon": "tnc:mirror_scale",
+      "x": 11.25,
+      "y": 25.4,
+      "size": 1.2,
+      "description": [
+        "镜片；作物协作；拟授粉副产能",
+        "特殊储魔兽：集息器空手潜行右键切取魔/充能模式；同一余额不可复制。"
+      ],
+      "tasks": [
+        {
+          "id": "274A1176D1C69212",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "2A0A6810FFC8658C"
+      ]
+    },
+    {
+      "id": "2B12D4BA119EFAA2",
+      "title": "炉鳃山貘",
+      "icon": "tnc:warm_breath",
+      "x": -11.25,
+      "y": 31,
+      "size": 1.8,
+      "description": [
+        "长按捕获自动记录。",
+        "甜菜；营火暖窝",
+        "罐装暖息",
+        "防冻补给；拟呼息供魔"
+      ],
+      "tasks": [
+        {
+          "id": "462F4C8DFF281CBA",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/capture/forgegill_tapir",
+          "title": "完成真实操作",
+          "ftbquestsentityvis_icon": {
+            "enabled": true,
+            "entity": "tnc:forgegill_tapir",
+            "size": 1.0,
+            "offset_x": 0.0,
+            "offset_y": 0.0,
+            "rotation": 25.0,
+            "spin_mode": false,
+            "idle_mode": true,
+            "walk_mode": false,
+            "silhouette_mode": false,
+            "use_as_quest_icon": true,
+            "nbt": "{}"
+          }
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "5330B31617FF8991",
+      "title": "安置与照料",
+      "icon": "tnc:pasture_staff",
+      "x": -11.25,
+      "y": 33.8,
+      "size": 1.2,
+      "description": [
+        "喜食：minecraft:beetroot",
+        "牧务杖选兽→点自己的栖居标记。窝点须有可达食槽与相应浅水/遮棚/净空。"
+      ],
+      "tasks": [
+        {
+          "id": "5921A5B96E7B18F6",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/nest/forgegill_tapir",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "2B12D4BA119EFAA2"
+      ]
+    },
+    {
+      "id": "1BDDC15020F7F3BD",
+      "title": "第一份产物",
+      "icon": "tnc:warm_breath",
+      "x": -11.25,
+      "y": 36.6,
+      "size": 1.2,
+      "description": [
+        "活取、真正的掉落或瓶装取魔才记录；肉用种类可正常屠宰。"
+      ],
+      "tasks": [
+        {
+          "id": "24E3044FB33F58C7",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/forgegill_tapir",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "5330B31617FF8991"
+      ]
+    },
+    {
+      "id": "5240D42DAB123E58",
+      "title": "伙伴的用途",
+      "icon": "tnc:warm_breath",
+      "x": -11.25,
+      "y": 39.4,
+      "size": 1.2,
+      "description": [
+        "防冻补给；拟呼息供魔",
+        "特殊储魔兽：集息器空手潜行右键切取魔/充能模式；同一余额不可复制。"
+      ],
+      "tasks": [
+        {
+          "id": "559B41E6A5CB4890",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "1BDDC15020F7F3BD"
+      ]
+    },
+    {
+      "id": "30ABAFE5964DFF1B",
+      "title": "雾腹水獭",
+      "icon": "tnc:spring_concentrate",
+      "x": -6.75,
+      "y": 31,
+      "size": 1.8,
+      "description": [
+        "长按捕获自动记录。",
+        "鳕鱼；浅池与食槽水",
+        "泉浓液，耗真实水",
+        "普通田浇灌；浇水设施材料，不制造免费魔力液"
+      ],
+      "tasks": [
+        {
+          "id": "66133E4DA0CA317D",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/capture/mistbelly_otter",
+          "title": "完成真实操作",
+          "ftbquestsentityvis_icon": {
+            "enabled": true,
+            "entity": "tnc:mistbelly_otter",
+            "size": 1.0,
+            "offset_x": 0.0,
+            "offset_y": 0.0,
+            "rotation": 25.0,
+            "spin_mode": false,
+            "idle_mode": true,
+            "walk_mode": false,
+            "silhouette_mode": false,
+            "use_as_quest_icon": true,
+            "nbt": "{}"
+          }
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "184A8825128ABB08",
+      "title": "安置与照料",
+      "icon": "tnc:pasture_staff",
+      "x": -6.75,
+      "y": 33.8,
+      "size": 1.2,
+      "description": [
+        "喜食：minecraft:cod",
+        "牧务杖选兽→点自己的栖居标记。窝点须有可达食槽与相应浅水/遮棚/净空。"
+      ],
+      "tasks": [
+        {
+          "id": "336D0425C9E04C4E",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/nest/mistbelly_otter",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "30ABAFE5964DFF1B"
+      ]
+    },
+    {
+      "id": "1F313193E5DC99E0",
+      "title": "第一份产物",
+      "icon": "tnc:spring_concentrate",
+      "x": -6.75,
+      "y": 36.6,
+      "size": 1.2,
+      "description": [
+        "活取、真正的掉落或瓶装取魔才记录；肉用种类可正常屠宰。"
+      ],
+      "tasks": [
+        {
+          "id": "3B51E53088FD9653",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/mistbelly_otter",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "184A8825128ABB08"
+      ]
+    },
+    {
+      "id": "3425B59643C3A92B",
+      "title": "伙伴的用途",
+      "icon": "tnc:spring_concentrate",
+      "x": -6.75,
+      "y": 39.4,
+      "size": 1.2,
+      "description": [
+        "普通田浇灌；浇水设施材料，不制造免费魔力液",
+        "特殊储魔兽：集息器空手潜行右键切取魔/充能模式；同一余额不可复制。"
+      ],
+      "tasks": [
+        {
+          "id": "22C2CD54AC3F8FCD",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "1F313193E5DC99E0"
+      ]
+    },
+    {
+      "id": "478E572CEA2EBA46",
+      "title": "环砾龟",
+      "icon": "tnc:loam_pebble",
+      "x": -2.25,
+      "y": 31,
+      "size": 1.8,
+      "description": [
+        "长按捕获自动记录。",
+        "马铃薯；遮棚",
+        "壤砾",
+        "有限次催长；土壤设施材料"
+      ],
+      "tasks": [
+        {
+          "id": "33768CBA3B870FB3",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/capture/ringstone_tortoise",
+          "title": "完成真实操作",
+          "ftbquestsentityvis_icon": {
+            "enabled": true,
+            "entity": "tnc:ringstone_tortoise",
+            "size": 1.0,
+            "offset_x": 0.0,
+            "offset_y": 0.0,
+            "rotation": 25.0,
+            "spin_mode": false,
+            "idle_mode": true,
+            "walk_mode": false,
+            "silhouette_mode": false,
+            "use_as_quest_icon": true,
+            "nbt": "{}"
+          }
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "7C238CDB2183B9C6",
+      "title": "安置与照料",
+      "icon": "tnc:pasture_staff",
+      "x": -2.25,
+      "y": 33.8,
+      "size": 1.2,
+      "description": [
+        "喜食：minecraft:potato",
+        "牧务杖选兽→点自己的栖居标记。窝点须有可达食槽与相应浅水/遮棚/净空。"
+      ],
+      "tasks": [
+        {
+          "id": "1B74B2FD00CD86AD",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/nest/ringstone_tortoise",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "478E572CEA2EBA46"
+      ]
+    },
+    {
+      "id": "43BF25781B1EF5CA",
+      "title": "第一份产物",
+      "icon": "tnc:loam_pebble",
+      "x": -2.25,
+      "y": 36.6,
+      "size": 1.2,
+      "description": [
+        "活取、真正的掉落或瓶装取魔才记录；肉用种类可正常屠宰。"
+      ],
+      "tasks": [
+        {
+          "id": "738DB7516BC798DE",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/ringstone_tortoise",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "7C238CDB2183B9C6"
+      ]
+    },
+    {
+      "id": "1D41543EA9E523B2",
+      "title": "伙伴的用途",
+      "icon": "tnc:loam_pebble",
+      "x": -2.25,
+      "y": 39.4,
+      "size": 1.2,
+      "description": [
+        "有限次催长；土壤设施材料",
+        "特殊储魔兽：集息器空手潜行右键切取魔/充能模式；同一余额不可复制。"
+      ],
+      "tasks": [
+        {
+          "id": "4B16A473E740B1A0",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "43BF25781B1EF5CA"
+      ]
+    },
+    {
+      "id": "6379463B12FCB5AB",
+      "title": "囊背负兽",
+      "icon": "tnc:runner_hide",
+      "x": 2.25,
+      "y": 31,
+      "size": 1.8,
+      "description": [
+        "长按捕获自动记录。",
+        "面包；遮棚",
+        "负兽革；实际四格载货",
+        "收纳材料；玩家批准的地面货运"
+      ],
+      "tasks": [
+        {
+          "id": "34C0905AAD6B995A",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/capture/satchelback_runner",
+          "title": "完成真实操作",
+          "ftbquestsentityvis_icon": {
+            "enabled": true,
+            "entity": "tnc:satchelback_runner",
+            "size": 1.0,
+            "offset_x": 0.0,
+            "offset_y": 0.0,
+            "rotation": 25.0,
+            "spin_mode": false,
+            "idle_mode": true,
+            "walk_mode": false,
+            "silhouette_mode": false,
+            "use_as_quest_icon": true,
+            "nbt": "{}"
+          }
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "0D244E85C8BB88BC",
+      "title": "安置与照料",
+      "icon": "tnc:pasture_staff",
+      "x": 2.25,
+      "y": 33.8,
+      "size": 1.2,
+      "description": [
+        "喜食：minecraft:bread",
+        "牧务杖选兽→点自己的栖居标记。窝点须有可达食槽与相应浅水/遮棚/净空。"
+      ],
+      "tasks": [
+        {
+          "id": "50AEFD40F01ECE41",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/nest/satchelback_runner",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "6379463B12FCB5AB"
+      ]
+    },
+    {
+      "id": "24E653189DE67BAD",
+      "title": "第一份产物",
+      "icon": "tnc:runner_hide",
+      "x": 2.25,
+      "y": 36.6,
+      "size": 1.2,
+      "description": [
+        "活取、真正的掉落或瓶装取魔才记录；肉用种类可正常屠宰。"
+      ],
+      "tasks": [
+        {
+          "id": "3510D6FE5F5346B2",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/satchelback_runner",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "0D244E85C8BB88BC"
+      ]
+    },
+    {
+      "id": "14804C1728E939DA",
+      "title": "伙伴的用途",
+      "icon": "tnc:runner_hide",
+      "x": 2.25,
+      "y": 39.4,
+      "size": 1.2,
+      "description": [
+        "收纳材料；玩家批准的地面货运",
+        "特殊储魔兽：集息器空手潜行右键切取魔/充能模式；同一余额不可复制。"
+      ],
+      "tasks": [
+        {
+          "id": "3BADF606E3EFD2B4",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "24E653189DE67BAD"
+      ]
+    },
+    {
+      "id": "6E16EB448640F43E",
+      "title": "碗角犀",
+      "icon": "tnc:horn_powder",
+      "x": 6.75,
+      "y": 31,
+      "size": 1.8,
+      "description": [
+        "长按捕获自动记录。",
+        "甜菜；足够地面空间",
+        "碗角粉；批准田地逐格翻地",
+        "土壤器件；开荒助手"
+      ],
+      "tasks": [
+        {
+          "id": "533485ECB32EF423",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/capture/bowlhorn_rhino",
+          "title": "完成真实操作",
+          "ftbquestsentityvis_icon": {
+            "enabled": true,
+            "entity": "tnc:bowlhorn_rhino",
+            "size": 1.0,
+            "offset_x": 0.0,
+            "offset_y": 0.0,
+            "rotation": 25.0,
+            "spin_mode": false,
+            "idle_mode": true,
+            "walk_mode": false,
+            "silhouette_mode": false,
+            "use_as_quest_icon": true,
+            "nbt": "{}"
+          }
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "67E738A59570EFAF",
+      "title": "安置与照料",
+      "icon": "tnc:pasture_staff",
+      "x": 6.75,
+      "y": 33.8,
+      "size": 1.2,
+      "description": [
+        "喜食：minecraft:beetroot",
+        "牧务杖选兽→点自己的栖居标记。窝点须有可达食槽与相应浅水/遮棚/净空。"
+      ],
+      "tasks": [
+        {
+          "id": "3DC4EAC8BADD09DA",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/nest/bowlhorn_rhino",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "6E16EB448640F43E"
+      ]
+    },
+    {
+      "id": "52D7462D38ED3FC6",
+      "title": "第一份产物",
+      "icon": "tnc:horn_powder",
+      "x": 6.75,
+      "y": 36.6,
+      "size": 1.2,
+      "description": [
+        "活取、真正的掉落或瓶装取魔才记录；肉用种类可正常屠宰。"
+      ],
+      "tasks": [
+        {
+          "id": "6111E8B75F2C9283",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/bowlhorn_rhino",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "67E738A59570EFAF"
+      ]
+    },
+    {
+      "id": "401AA4A926FF1303",
+      "title": "伙伴的用途",
+      "icon": "tnc:horn_powder",
+      "x": 6.75,
+      "y": 39.4,
+      "size": 1.2,
+      "description": [
+        "土壤器件；开荒助手",
+        "特殊储魔兽：集息器空手潜行右键切取魔/充能模式；同一余额不可复制。"
+      ],
+      "tasks": [
+        {
+          "id": "1BA9A41B38D0C002",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "52D7462D38ED3FC6"
+      ]
+    },
+    {
+      "id": "67B128F1B5276D42",
+      "title": "觅页浣兽",
+      "icon": "tnc:forage_paper_hide",
+      "x": 11.25,
+      "y": 31,
+      "size": 1.8,
+      "description": [
+        "长按捕获自动记录。",
+        "甜浆果；遮棚",
+        "纸皮；捡真实种子、换已发现种源",
+        "档案材料；种源整理伙伴"
+      ],
+      "tasks": [
+        {
+          "id": "1472E0396293DED6",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/capture/pageforage_raccoon",
+          "title": "完成真实操作",
+          "ftbquestsentityvis_icon": {
+            "enabled": true,
+            "entity": "tnc:pageforage_raccoon",
+            "size": 1.0,
+            "offset_x": 0.0,
+            "offset_y": 0.0,
+            "rotation": 25.0,
+            "spin_mode": false,
+            "idle_mode": true,
+            "walk_mode": false,
+            "silhouette_mode": false,
+            "use_as_quest_icon": true,
+            "nbt": "{}"
+          }
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "61662CF1DA256CAD",
+      "title": "安置与照料",
+      "icon": "tnc:pasture_staff",
+      "x": 11.25,
+      "y": 33.8,
+      "size": 1.2,
+      "description": [
+        "喜食：minecraft:sweet_berries",
+        "牧务杖选兽→点自己的栖居标记。窝点须有可达食槽与相应浅水/遮棚/净空。"
+      ],
+      "tasks": [
+        {
+          "id": "46F76842494585C6",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/nest/pageforage_raccoon",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "67B128F1B5276D42"
+      ]
+    },
+    {
+      "id": "6AFAFB82F21490DC",
+      "title": "第一份产物",
+      "icon": "tnc:forage_paper_hide",
+      "x": 11.25,
+      "y": 36.6,
+      "size": 1.2,
+      "description": [
+        "活取、真正的掉落或瓶装取魔才记录；肉用种类可正常屠宰。"
+      ],
+      "tasks": [
+        {
+          "id": "23D04C0E6EFDD808",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/pageforage_raccoon",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "61662CF1DA256CAD"
+      ]
+    },
+    {
+      "id": "68484BB3BB41BDAD",
+      "title": "伙伴的用途",
+      "icon": "tnc:forage_paper_hide",
+      "x": 11.25,
+      "y": 39.4,
+      "size": 1.2,
+      "description": [
+        "档案材料；种源整理伙伴",
+        "特殊储魔兽：集息器空手潜行右键切取魔/充能模式；同一余额不可复制。"
+      ],
+      "tasks": [
+        {
+          "id": "60A198E96EC497A1",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "6AFAFB82F21490DC"
+      ]
+    },
+    {
+      "id": "2722625F5131A101",
+      "title": "锦纹筑狸",
+      "icon": "tnc:nest_glue",
+      "x": -11.25,
+      "y": 45,
+      "size": 1.8,
+      "description": [
+        "长按捕获自动记录。",
+        "甘蔗；浅池",
+        "巢胶；耗真实栅栏修记忆缺口",
+        "设施粘合；护栏助手"
+      ],
+      "tasks": [
+        {
+          "id": "466B07D9DC08442D",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/capture/patternbuild_beaver",
+          "title": "完成真实操作",
+          "ftbquestsentityvis_icon": {
+            "enabled": true,
+            "entity": "tnc:patternbuild_beaver",
+            "size": 1.0,
+            "offset_x": 0.0,
+            "offset_y": 0.0,
+            "rotation": 25.0,
+            "spin_mode": false,
+            "idle_mode": true,
+            "walk_mode": false,
+            "silhouette_mode": false,
+            "use_as_quest_icon": true,
+            "nbt": "{}"
+          }
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "250DE65D24209411",
+      "title": "安置与照料",
+      "icon": "tnc:pasture_staff",
+      "x": -11.25,
+      "y": 47.8,
+      "size": 1.2,
+      "description": [
+        "喜食：minecraft:sugar_cane",
+        "牧务杖选兽→点自己的栖居标记。窝点须有可达食槽与相应浅水/遮棚/净空。"
+      ],
+      "tasks": [
+        {
+          "id": "67C7A982D0E61D86",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/nest/patternbuild_beaver",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "2722625F5131A101"
+      ]
+    },
+    {
+      "id": "0A66D0DCE175ACC4",
+      "title": "第一份产物",
+      "icon": "tnc:nest_glue",
+      "x": -11.25,
+      "y": 50.6,
+      "size": 1.2,
+      "description": [
+        "活取、真正的掉落或瓶装取魔才记录；肉用种类可正常屠宰。"
+      ],
+      "tasks": [
+        {
+          "id": "24095B87C5679A43",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/patternbuild_beaver",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "250DE65D24209411"
+      ]
+    },
+    {
+      "id": "3F1C597B8147178E",
+      "title": "伙伴的用途",
+      "icon": "tnc:nest_glue",
+      "x": -11.25,
+      "y": 53.4,
+      "size": 1.2,
+      "description": [
+        "设施粘合；护栏助手",
+        "特殊储魔兽：集息器空手潜行右键切取魔/充能模式；同一余额不可复制。"
+      ],
+      "tasks": [
+        {
+          "id": "1861B60C4391B97F",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "0A66D0DCE175ACC4"
+      ]
+    },
+    {
+      "id": "3D2DF859C740E28C",
+      "title": "跃泉蹄兽",
+      "icon": "tnc:hoof_glue",
+      "x": -6.75,
+      "y": 45,
+      "size": 1.8,
+      "description": [
+        "长按捕获自动记录。",
+        "苹果；遮棚与合法跑道",
+        "蹄胶；鞍骑乘和跃步",
+        "移动伙伴；拟运动供魔"
+      ],
+      "tasks": [
+        {
+          "id": "5D15E93C46D7DB19",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/capture/springhoof_strider",
+          "title": "完成真实操作",
+          "ftbquestsentityvis_icon": {
+            "enabled": true,
+            "entity": "tnc:springhoof_strider",
+            "size": 1.0,
+            "offset_x": 0.0,
+            "offset_y": 0.0,
+            "rotation": 25.0,
+            "spin_mode": false,
+            "idle_mode": true,
+            "walk_mode": false,
+            "silhouette_mode": false,
+            "use_as_quest_icon": true,
+            "nbt": "{}"
+          }
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "3AB13FE54A0D3A1A",
+      "title": "安置与照料",
+      "icon": "tnc:pasture_staff",
+      "x": -6.75,
+      "y": 47.8,
+      "size": 1.2,
+      "description": [
+        "喜食：minecraft:apple",
+        "牧务杖选兽→点自己的栖居标记。窝点须有可达食槽与相应浅水/遮棚/净空。"
+      ],
+      "tasks": [
+        {
+          "id": "43909C5F541FCA2E",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/nest/springhoof_strider",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "3D2DF859C740E28C"
+      ]
+    },
+    {
+      "id": "74980A515D9657C5",
+      "title": "第一份产物",
+      "icon": "tnc:hoof_glue",
+      "x": -6.75,
+      "y": 50.6,
+      "size": 1.2,
+      "description": [
+        "活取、真正的掉落或瓶装取魔才记录；肉用种类可正常屠宰。"
+      ],
+      "tasks": [
+        {
+          "id": "56FBC8CA5CBB5109",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/springhoof_strider",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "3AB13FE54A0D3A1A"
+      ]
+    },
+    {
+      "id": "2AB957F65FEBB048",
+      "title": "伙伴的用途",
+      "icon": "tnc:hoof_glue",
+      "x": -6.75,
+      "y": 53.4,
+      "size": 1.2,
+      "description": [
+        "移动伙伴；拟运动供魔",
+        "特殊储魔兽：集息器空手潜行右键切取魔/充能模式；同一余额不可复制。"
+      ],
+      "tasks": [
+        {
+          "id": "49ECFC4AF257F6A7",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "74980A515D9657C5"
+      ]
+    },
+    {
+      "id": "70BC459B46139E7C",
+      "title": "曳彩角羚",
+      "icon": "tnc:prism_horn_shard",
+      "x": -2.25,
+      "y": 45,
+      "size": 1.8,
+      "description": [
+        "长按捕获自动记录。",
+        "LAND",
+        "minecraft:honey_bottle"
+      ],
+      "tasks": [
+        {
+          "id": "1F87654A33813C8A",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/capture/prismatic_antelope",
+          "title": "完成真实操作",
+          "ftbquestsentityvis_icon": {
+            "enabled": true,
+            "entity": "tnc:prismatic_antelope",
+            "size": 1.0,
+            "offset_x": 0.0,
+            "offset_y": 0.0,
+            "rotation": 25.0,
+            "spin_mode": false,
+            "idle_mode": true,
+            "walk_mode": false,
+            "silhouette_mode": false,
+            "use_as_quest_icon": true,
+            "nbt": "{}"
+          }
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "4639AD1E28A85E12",
+      "title": "安置与照料",
+      "icon": "tnc:pasture_staff",
+      "x": -2.25,
+      "y": 47.8,
+      "size": 1.2,
+      "description": [
+        "喜食：minecraft:honey_bottle",
+        "牧务杖选兽→点自己的栖居标记。窝点须有可达食槽与相应浅水/遮棚/净空。"
+      ],
+      "tasks": [
+        {
+          "id": "0535BD9764B138BC",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/nest/prismatic_antelope",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "70BC459B46139E7C"
+      ]
+    },
+    {
+      "id": "3569A73D35A08BE9",
+      "title": "第一份产物",
+      "icon": "tnc:prism_horn_shard",
+      "x": -2.25,
+      "y": 50.6,
+      "size": 1.2,
+      "description": [
+        "活取、真正的掉落或瓶装取魔才记录；肉用种类可正常屠宰。"
+      ],
+      "tasks": [
+        {
+          "id": "444A248ECF865C52",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/prismatic_antelope",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "4639AD1E28A85E12"
+      ]
+    },
+    {
+      "id": "5AB284D32BCE6966",
+      "title": "伙伴的用途",
+      "icon": "tnc:prism_horn_shard",
+      "x": -2.25,
+      "y": 53.4,
+      "size": 1.2,
+      "description": [
+        "产物用于器件、料理与经营。",
+        "特殊储魔兽：集息器空手潜行右键切取魔/充能模式；同一余额不可复制。"
+      ],
+      "tasks": [
+        {
+          "id": "16562C13F70A2530",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "3569A73D35A08BE9"
+      ]
+    },
+    {
+      "id": "4C7CD91AA6E1E415",
+      "title": "鼓腹砂獭",
+      "icon": "tnc:sand_otter_fiber",
+      "x": 2.25,
+      "y": 45,
+      "size": 1.8,
+      "description": [
+        "长按捕获自动记录。",
+        "LAND",
+        "minecraft:carrot"
+      ],
+      "tasks": [
+        {
+          "id": "0FF44290EED29DA5",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/capture/drumbelly_otter",
+          "title": "完成真实操作",
+          "ftbquestsentityvis_icon": {
+            "enabled": true,
+            "entity": "tnc:drumbelly_otter",
+            "size": 1.0,
+            "offset_x": 0.0,
+            "offset_y": 0.0,
+            "rotation": 25.0,
+            "spin_mode": false,
+            "idle_mode": true,
+            "walk_mode": false,
+            "silhouette_mode": false,
+            "use_as_quest_icon": true,
+            "nbt": "{}"
+          }
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "203BF63C4BE706BD",
+      "title": "安置与照料",
+      "icon": "tnc:pasture_staff",
+      "x": 2.25,
+      "y": 47.8,
+      "size": 1.2,
+      "description": [
+        "喜食：minecraft:carrot",
+        "牧务杖选兽→点自己的栖居标记。窝点须有可达食槽与相应浅水/遮棚/净空。"
+      ],
+      "tasks": [
+        {
+          "id": "2C5B384EF21B0EAC",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/nest/drumbelly_otter",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "4C7CD91AA6E1E415"
+      ]
+    },
+    {
+      "id": "213D18ABD26C48A3",
+      "title": "第一份产物",
+      "icon": "tnc:sand_otter_fiber",
+      "x": 2.25,
+      "y": 50.6,
+      "size": 1.2,
+      "description": [
+        "活取、真正的掉落或瓶装取魔才记录；肉用种类可正常屠宰。"
+      ],
+      "tasks": [
+        {
+          "id": "5B9845C38C987B10",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/drumbelly_otter",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "203BF63C4BE706BD"
+      ]
+    },
+    {
+      "id": "5970053BDEAABADC",
+      "title": "伙伴的用途",
+      "icon": "tnc:sand_otter_fiber",
+      "x": 2.25,
+      "y": 53.4,
+      "size": 1.2,
+      "description": [
+        "产物用于器件、料理与经营。",
+        "特殊储魔兽：集息器空手潜行右键切取魔/充能模式；同一余额不可复制。"
+      ],
+      "tasks": [
+        {
+          "id": "00F7A731981EB58D",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "213D18ABD26C48A3"
+      ]
+    },
+    {
+      "id": "03B821DBA402FF60",
+      "title": "枕光貂",
+      "icon": "tnc:lamp_wax",
+      "x": 6.75,
+      "y": 45,
+      "size": 1.8,
+      "description": [
+        "长按捕获自动记录。",
+        "西瓜片；遮棚",
+        "灯蜡；实际耗魔照明",
+        "夜间伙伴；照明消费端"
+      ],
+      "tasks": [
+        {
+          "id": "197A350FCC5F0110",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/capture/pillowlight_marten",
+          "title": "完成真实操作",
+          "ftbquestsentityvis_icon": {
+            "enabled": true,
+            "entity": "tnc:pillowlight_marten",
+            "size": 1.0,
+            "offset_x": 0.0,
+            "offset_y": 0.0,
+            "rotation": 25.0,
+            "spin_mode": false,
+            "idle_mode": true,
+            "walk_mode": false,
+            "silhouette_mode": false,
+            "use_as_quest_icon": true,
+            "nbt": "{}"
+          }
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "015AF5B9D84FE2C3",
+      "title": "安置与照料",
+      "icon": "tnc:pasture_staff",
+      "x": 6.75,
+      "y": 47.8,
+      "size": 1.2,
+      "description": [
+        "喜食：minecraft:melon_slice",
+        "牧务杖选兽→点自己的栖居标记。窝点须有可达食槽与相应浅水/遮棚/净空。"
+      ],
+      "tasks": [
+        {
+          "id": "72F92FE92F75CDCE",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/nest/pillowlight_marten",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "03B821DBA402FF60"
+      ]
+    },
+    {
+      "id": "3CAA4EF6AD61D01E",
+      "title": "第一份产物",
+      "icon": "tnc:lamp_wax",
+      "x": 6.75,
+      "y": 50.6,
+      "size": 1.2,
+      "description": [
+        "活取、真正的掉落或瓶装取魔才记录；肉用种类可正常屠宰。"
+      ],
+      "tasks": [
+        {
+          "id": "34984539639D3625",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/pillowlight_marten",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "015AF5B9D84FE2C3"
+      ]
+    },
+    {
+      "id": "72C3B720BFACDCF4",
+      "title": "伙伴的用途",
+      "icon": "tnc:lamp_wax",
+      "x": 6.75,
+      "y": 53.4,
+      "size": 1.2,
+      "description": [
+        "夜间伙伴；照明消费端",
+        "特殊储魔兽：集息器空手潜行右键切取魔/充能模式；同一余额不可复制。"
+      ],
+      "tasks": [
+        {
+          "id": "21ADE08868A53392",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "3CAA4EF6AD61D01E"
+      ]
+    },
+    {
+      "id": "35C06F2AD0F24E37",
+      "title": "蓄魔鲸",
+      "icon": "tnc:mana_bottle",
+      "x": -9,
+      "y": 59,
+      "size": 2,
+      "description": [
+        "长按捕获自动记录。",
+        "西瓜片；露天大净空、近水",
+        "活体蓄魔、瓶装采集",
+        "大型储魔/供能；特殊区独立大列"
+      ],
+      "tasks": [
+        {
+          "id": "72A2CA6AAF5E6C19",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/capture/dewbound_whale",
+          "title": "完成真实操作",
+          "ftbquestsentityvis_icon": {
+            "enabled": true,
+            "entity": "tnc:dewbound_whale",
+            "size": 1.0,
+            "offset_x": 0.0,
+            "offset_y": 0.0,
+            "rotation": 25.0,
+            "spin_mode": false,
+            "idle_mode": true,
+            "walk_mode": false,
+            "silhouette_mode": false,
+            "use_as_quest_icon": true,
+            "nbt": "{}"
+          }
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "4E1A51364C027CAF",
+      "title": "安置与照料",
+      "icon": "tnc:pasture_staff",
+      "x": -9,
+      "y": 61.8,
+      "size": 1.2,
+      "description": [
+        "喜食：minecraft:melon_slice",
+        "牧务杖选兽→点自己的栖居标记。窝点须有可达食槽与相应浅水/遮棚/净空。"
+      ],
+      "tasks": [
+        {
+          "id": "204CDB44E6710FAA",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/nest/dewbound_whale",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "35C06F2AD0F24E37"
+      ]
+    },
+    {
+      "id": "0896BC5B0B961735",
+      "title": "真实取魔",
+      "icon": "tnc:mana_bottle",
+      "x": -9,
+      "y": 64.6,
+      "size": 1.2,
+      "description": [
+        "活取、真正的掉落或瓶装取魔才记录；肉用种类可正常屠宰。"
+      ],
+      "tasks": [
+        {
+          "id": "5C2F1BBF0F8EACD5",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/dewbound_whale",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "4E1A51364C027CAF"
+      ]
+    },
+    {
+      "id": "3BD08FC1C367B19B",
+      "title": "伙伴的用途",
+      "icon": "tnc:mana_bottle",
+      "x": -9,
+      "y": 67.4,
+      "size": 1.2,
+      "description": [
+        "大型储魔/供能；特殊区独立大列",
+        "特殊储魔兽：集息器空手潜行右键切取魔/充能模式；同一余额不可复制。"
+      ],
+      "tasks": [
+        {
+          "id": "263846C16BBF5730",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "0896BC5B0B961735"
+      ]
+    },
+    {
+      "id": "691662C489F7D850",
+      "title": "纸帆魟",
+      "icon": "tnc:air_plume",
+      "x": 0,
+      "y": 59,
+      "size": 2,
+      "description": [
+        "长按捕获自动记录。",
+        "小麦种子；露天净空",
+        "风翎；漂浮滑翔",
+        "风瓶与缓降；拟风流供魔，放特殊区"
+      ],
+      "tasks": [
+        {
+          "id": "487D002800118048",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/capture/papersail_ray",
+          "title": "完成真实操作",
+          "ftbquestsentityvis_icon": {
+            "enabled": true,
+            "entity": "tnc:papersail_ray",
+            "size": 1.0,
+            "offset_x": 0.0,
+            "offset_y": 0.0,
+            "rotation": 25.0,
+            "spin_mode": false,
+            "idle_mode": true,
+            "walk_mode": false,
+            "silhouette_mode": false,
+            "use_as_quest_icon": true,
+            "nbt": "{}"
+          }
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "15706B528D8AD9EB",
+      "title": "安置与照料",
+      "icon": "tnc:pasture_staff",
+      "x": 0,
+      "y": 61.8,
+      "size": 1.2,
+      "description": [
+        "喜食：minecraft:wheat_seeds",
+        "牧务杖选兽→点自己的栖居标记。窝点须有可达食槽与相应浅水/遮棚/净空。"
+      ],
+      "tasks": [
+        {
+          "id": "3BE1152CA0CC8052",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/nest/papersail_ray",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "691662C489F7D850"
+      ]
+    },
+    {
+      "id": "6FEF2CC7DC7E6B9F",
+      "title": "第一份产物",
+      "icon": "tnc:air_plume",
+      "x": 0,
+      "y": 64.6,
+      "size": 1.2,
+      "description": [
+        "活取、真正的掉落或瓶装取魔才记录；肉用种类可正常屠宰。"
+      ],
+      "tasks": [
+        {
+          "id": "0407FDDE1C5162ED",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/papersail_ray",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "15706B528D8AD9EB"
+      ]
+    },
+    {
+      "id": "1C92563948197356",
+      "title": "伙伴的用途",
+      "icon": "tnc:air_plume",
+      "x": 0,
+      "y": 67.4,
+      "size": 1.2,
+      "description": [
+        "风瓶与缓降；拟风流供魔，放特殊区",
+        "特殊储魔兽：集息器空手潜行右键切取魔/充能模式；同一余额不可复制。"
+      ],
+      "tasks": [
+        {
+          "id": "19AC7BCE6FD24632",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "6FEF2CC7DC7E6B9F"
+      ]
+    },
+    {
+      "id": "3644CD1BD4324F29",
+      "title": "鸣线蜥",
+      "icon": "tnc:storm_crystal",
+      "x": 9,
+      "y": 59,
+      "size": 2,
+      "description": [
+        "长按捕获自动记录。",
+        "蜘蛛眼；遮棚，雷雨安全布置",
+        "雷鸣晶，旧版 FE 行为拟改纯魔力",
+        "能量储运；不是凭空生产晶体，放特殊区"
+      ],
+      "tasks": [
+        {
+          "id": "1BB95A8E1ED7901C",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/capture/wirecall_lizard",
+          "title": "完成真实操作",
+          "ftbquestsentityvis_icon": {
+            "enabled": true,
+            "entity": "tnc:wirecall_lizard",
+            "size": 1.0,
+            "offset_x": 0.0,
+            "offset_y": 0.0,
+            "rotation": 25.0,
+            "spin_mode": false,
+            "idle_mode": true,
+            "walk_mode": false,
+            "silhouette_mode": false,
+            "use_as_quest_icon": true,
+            "nbt": "{}"
+          }
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "365E42BBD0B102BA",
+      "title": "安置与照料",
+      "icon": "tnc:pasture_staff",
+      "x": 9,
+      "y": 61.8,
+      "size": 1.2,
+      "description": [
+        "喜食：minecraft:spider_eye",
+        "牧务杖选兽→点自己的栖居标记。窝点须有可达食槽与相应浅水/遮棚/净空。"
+      ],
+      "tasks": [
+        {
+          "id": "027EA6EA255208B8",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/nest/wirecall_lizard",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "3644CD1BD4324F29"
+      ]
+    },
+    {
+      "id": "5DABF3D81CB31EEE",
+      "title": "第一份产物",
+      "icon": "tnc:storm_crystal",
+      "x": 9,
+      "y": 64.6,
+      "size": 1.2,
+      "description": [
+        "活取、真正的掉落或瓶装取魔才记录；肉用种类可正常屠宰。"
+      ],
+      "tasks": [
+        {
+          "id": "647CF280C49899E6",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/wirecall_lizard",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "365E42BBD0B102BA"
+      ]
+    },
+    {
+      "id": "78BB2F102D9CB49B",
+      "title": "伙伴的用途",
+      "icon": "tnc:storm_crystal",
+      "x": 9,
+      "y": 67.4,
+      "size": 1.2,
+      "description": [
+        "能量储运；不是凭空生产晶体，放特殊区",
+        "特殊储魔兽：集息器空手潜行右键切取魔/充能模式；同一余额不可复制。"
+      ],
+      "tasks": [
+        {
+          "id": "1AB90AEFBEB9D27D",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "5DABF3D81CB31EEE"
+      ]
+    }
+  ],
+  "images": [],
+  "quest_links": []
+}

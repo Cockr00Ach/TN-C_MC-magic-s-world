@@ -1,0 +1,387 @@
+{
+	default_hide_dependency_lines: false
+	default_quest_shape: "hexagon"
+	filename: "tnc_play_05_tavern"
+	group: "544E434755494445"
+	icon: "bountiful:bountyboard"
+	id: "544E450100000005"
+	order_index: 6
+	quest_links: [ ]
+	quests: [
+		{
+			description: [
+				"&b&l酒馆履历 · 1次"
+				""
+				"&f完成实际Bountiful城镇纸张交付。账户奖励只在原生结算时发放；本任务书不重复送钱。"
+			]
+			entity_vis_size: 1.0f
+			icon: "bountiful:bounty"
+			id: "544E45020000007A"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				advancement: "tnc:onboarding/bounties_1"
+				criterion: "done"
+				id: "544E45030000007A"
+				title: "完成真实行为"
+				type: "advancement"
+			}]
+			title: "酒馆履历 · 1次"
+			x: -10.0d
+			y: 0.0d
+		}
+		{
+			description: [
+				"&b&l酒馆履历 · 5次"
+				""
+				"&f完成实际Bountiful城镇纸张交付。账户奖励只在原生结算时发放；本任务书不重复送钱。"
+			]
+			entity_vis_size: 1.0f
+			icon: "bountiful:bounty"
+			id: "544E45020000007B"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				advancement: "tnc:onboarding/bounties_5"
+				criterion: "done"
+				id: "544E45030000007B"
+				title: "完成真实行为"
+				type: "advancement"
+			}]
+			title: "酒馆履历 · 5次"
+			x: -6.0d
+			y: 0.0d
+		}
+		{
+			description: [
+				"&b&l酒馆履历 · 10次"
+				""
+				"&f完成实际Bountiful城镇纸张交付。账户奖励只在原生结算时发放；本任务书不重复送钱。"
+			]
+			entity_vis_size: 1.0f
+			icon: "bountiful:bounty"
+			id: "544E45020000007C"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				advancement: "tnc:onboarding/bounties_10"
+				criterion: "done"
+				id: "544E45030000007C"
+				title: "完成真实行为"
+				type: "advancement"
+			}]
+			title: "酒馆履历 · 10次"
+			x: -2.0d
+			y: 0.0d
+		}
+		{
+			description: [
+				"&b&l酒馆履历 · 25次"
+				""
+				"&f完成实际Bountiful城镇纸张交付。账户奖励只在原生结算时发放；本任务书不重复送钱。"
+			]
+			entity_vis_size: 1.0f
+			icon: "bountiful:bounty"
+			id: "544E45020000007D"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				advancement: "tnc:onboarding/bounties_25"
+				criterion: "done"
+				id: "544E45030000007D"
+				title: "完成真实行为"
+				type: "advancement"
+			}]
+			title: "酒馆履历 · 25次"
+			x: 2.0d
+			y: 0.0d
+		}
+		{
+			description: [
+				"&b&l酒馆履历 · 50次"
+				""
+				"&f完成实际Bountiful城镇纸张交付。账户奖励只在原生结算时发放；本任务书不重复送钱。"
+			]
+			entity_vis_size: 1.0f
+			icon: "bountiful:bounty"
+			id: "544E45020000007E"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				advancement: "tnc:onboarding/bounties_50"
+				criterion: "done"
+				id: "544E45030000007E"
+				title: "完成真实行为"
+				type: "advancement"
+			}]
+			title: "酒馆履历 · 50次"
+			x: 6.0d
+			y: 0.0d
+		}
+		{
+			description: [
+				"&b&l酒馆履历 · 100次"
+				""
+				"&f完成实际Bountiful城镇纸张交付。账户奖励只在原生结算时发放；本任务书不重复送钱。"
+			]
+			entity_vis_size: 1.0f
+			icon: "bountiful:bounty"
+			id: "544E45020000007F"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				advancement: "tnc:onboarding/bounties_100"
+				criterion: "done"
+				id: "544E45030000007F"
+				title: "完成真实行为"
+				type: "advancement"
+			}]
+			title: "酒馆履历 · 100次"
+			x: 10.0d
+			y: 0.0d
+		}
+		{
+			description: [
+				"&b&l冒险等级 · Lv5"
+				""
+				"&f通过真实讨伐与委托获得永久经验。附魔消费不会降低冒险等级。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:experience_bottle"
+			id: "544E450200000080"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				advancement: "tnc:onboarding/level_5"
+				criterion: "done"
+				id: "544E450300000080"
+				title: "完成真实行为"
+				type: "advancement"
+			}]
+			title: "冒险等级 · Lv5"
+			x: -14.0d
+			y: 6.0d
+		}
+		{
+			description: [
+				"&b&l冒险等级 · Lv10"
+				""
+				"&f通过真实讨伐与委托获得永久经验。附魔消费不会降低冒险等级。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:experience_bottle"
+			id: "544E450200000081"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				advancement: "tnc:onboarding/level_10"
+				criterion: "done"
+				id: "544E450300000081"
+				title: "完成真实行为"
+				type: "advancement"
+			}]
+			title: "冒险等级 · Lv10"
+			x: -10.0d
+			y: 6.0d
+		}
+		{
+			description: [
+				"&b&l冒险等级 · Lv20"
+				""
+				"&f通过真实讨伐与委托获得永久经验。附魔消费不会降低冒险等级。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:experience_bottle"
+			id: "544E450200000082"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				advancement: "tnc:onboarding/level_20"
+				criterion: "done"
+				id: "544E450300000082"
+				title: "完成真实行为"
+				type: "advancement"
+			}]
+			title: "冒险等级 · Lv20"
+			x: -6.0d
+			y: 6.0d
+		}
+		{
+			description: [
+				"&b&l冒险等级 · Lv30"
+				""
+				"&f通过真实讨伐与委托获得永久经验。附魔消费不会降低冒险等级。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:experience_bottle"
+			id: "544E450200000083"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				advancement: "tnc:onboarding/level_30"
+				criterion: "done"
+				id: "544E450300000083"
+				title: "完成真实行为"
+				type: "advancement"
+			}]
+			title: "冒险等级 · Lv30"
+			x: -2.0d
+			y: 6.0d
+		}
+		{
+			description: [
+				"&b&l冒险等级 · Lv50"
+				""
+				"&f通过真实讨伐与委托获得永久经验。附魔消费不会降低冒险等级。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:experience_bottle"
+			id: "544E450200000084"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				advancement: "tnc:onboarding/level_50"
+				criterion: "done"
+				id: "544E450300000084"
+				title: "完成真实行为"
+				type: "advancement"
+			}]
+			title: "冒险等级 · Lv50"
+			x: 2.0d
+			y: 6.0d
+		}
+		{
+			description: [
+				"&b&l冒险等级 · Lv70"
+				""
+				"&f通过真实讨伐与委托获得永久经验。附魔消费不会降低冒险等级。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:experience_bottle"
+			id: "544E450200000085"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				advancement: "tnc:onboarding/level_70"
+				criterion: "done"
+				id: "544E450300000085"
+				title: "完成真实行为"
+				type: "advancement"
+			}]
+			title: "冒险等级 · Lv70"
+			x: 6.0d
+			y: 6.0d
+		}
+		{
+			description: [
+				"&b&l冒险等级 · Lv85"
+				""
+				"&f通过真实讨伐与委托获得永久经验。附魔消费不会降低冒险等级。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:experience_bottle"
+			id: "544E450200000086"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				advancement: "tnc:onboarding/level_85"
+				criterion: "done"
+				id: "544E450300000086"
+				title: "完成真实行为"
+				type: "advancement"
+			}]
+			title: "冒险等级 · Lv85"
+			x: 10.0d
+			y: 6.0d
+		}
+		{
+			description: [
+				"&b&l冒险等级 · Lv100"
+				""
+				"&f通过真实讨伐与委托获得永久经验。附魔消费不会降低冒险等级。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:experience_bottle"
+			id: "544E450200000087"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				advancement: "tnc:onboarding/level_100"
+				criterion: "done"
+				id: "544E450300000087"
+				title: "完成真实行为"
+				type: "advancement"
+			}]
+			title: "冒险等级 · Lv100"
+			x: 14.0d
+			y: 6.0d
+		}
+		{
+			description: [
+				"&b&l艾琳 · 协会接待"
+				""
+				"&f找到并右键对应独立NPC。Self保持原有剧情身份。"
+			]
+			entity_vis_size: 1.0f
+			icon: "tnc:adventure_handbook"
+			id: "544E450200000088"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				advancement: "tnc:onboarding/met_guild"
+				criterion: "done"
+				id: "544E450300000088"
+				title: "完成真实行为"
+				type: "advancement"
+			}]
+			title: "艾琳 · 协会接待"
+			x: -4.0d
+			y: 11.0d
+		}
+		{
+			description: [
+				"&b&l莉娅 · 潮生制杖屋"
+				""
+				"&f找到并右键对应独立NPC。Self保持原有剧情身份。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:anvil"
+			id: "544E450200000089"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				advancement: "tnc:onboarding/met_smith"
+				criterion: "done"
+				id: "544E450300000089"
+				title: "完成真实行为"
+				type: "advancement"
+			}]
+			title: "莉娅 · 潮生制杖屋"
+			x: 0.0d
+			y: 11.0d
+		}
+		{
+			description: [
+				"&b&l米洛 · 归航银行"
+				""
+				"&f找到并右键对应独立NPC。Self保持原有剧情身份。"
+			]
+			entity_vis_size: 1.0f
+			icon: "minecraft:map"
+			id: "544E45020000008A"
+			shape: "hexagon"
+			size: 1.1d
+			tasks: [{
+				advancement: "tnc:onboarding/met_broker"
+				criterion: "done"
+				id: "544E45030000008A"
+				title: "完成真实行为"
+				type: "advancement"
+			}]
+			title: "米洛 · 归航银行"
+			x: 4.0d
+			y: 11.0d
+		}
+	]
+	title: "&e&l城镇履历 · 酒馆与岗位"
+}

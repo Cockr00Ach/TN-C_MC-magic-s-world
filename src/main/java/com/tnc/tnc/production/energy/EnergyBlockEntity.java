@@ -117,6 +117,7 @@ public final class EnergyBlockEntity extends BlockEntity {
 
     @Override public <T> LazyOptional<T> getCapability(Capability<T> capability,
             @Nullable Direction side) {
+        if (capability == ForgeCapabilities.ENERGY) return LazyOptional.empty();
         if (capability == ForgeCapabilities.ITEM_HANDLER && kind == Kind.PRESS
                 && side != null && !isRemoved() && level instanceof ServerLevel server
                 && server.getBlockEntity(worldPosition) == this && owner != null
@@ -205,27 +206,7 @@ public final class EnergyBlockEntity extends BlockEntity {
     }
 
     public String interact(ServerPlayer player, ItemStack held, boolean sneaking) {
-        if (kind == Kind.PRESS) return interactPress(player, held, sneaking);
-        if (kind == Kind.LAMP) return interactLamp(player, held, sneaking);
-        if (kind != Kind.GENERATOR || sneaking) return status();
-        if (held.is(TNMod.MANA_ROOT_CORE.get())) {
-            if (MAX_MANA - mana < ManaRoot.CORE_FORGE_MANA)
-                return "魔力仓须空出30格才可投入根芯；" + status();
-            if (!player.getAbilities().instabuild) held.shrink(1);
-            addMana(ManaRoot.CORE_FORGE_MANA);
-            chargeFx(player.serverLevel(), player);
-            return "根芯释放30魔力；" + status();
-        }
-        if (!held.isEmpty()) return status();
-        var stone = MagicStone.getOrNull(player);
-        if (stone == null) return "魔法石尚未醒来，无法注入；" + status();
-        int accepted = Math.min(25, Math.min(stone.getMana(), MAX_MANA - mana));
-        if (accepted <= 0) return "魔力不足或发电座已满；" + status();
-        if (!stone.spendMana(accepted)) return "魔力不足，未扣除。";
-        addMana(accepted);
-        MagicStoneNetwork.syncTo(player);
-        chargeFx(player.serverLevel(), player);
-        return "注入" + accepted + "魔力；" + status();
+        return "旧版 FE 器件已退役；请使用注能台、魔导丝和纯魔力工坊。";
     }
 
     private static boolean itemId(ItemStack stack, String path) {
@@ -330,13 +311,8 @@ public final class EnergyBlockEntity extends BlockEntity {
     static void serverTick(Level level, BlockPos pos, BlockState state, EnergyBlockEntity node) {
         if (!(level instanceof ServerLevel server) || node.owner == null
                 || !EnergyPermissions.mayOperate(server, pos, node.owner)) return;
-        switch (node.kind) {
-            case GENERATOR -> node.tickGenerator(server);
-            case BATTERY -> node.tickBattery(server);
-            case LAMP -> node.tickLamp(server);
-            case PRESS -> node.tickPress(server);
-            case CABLE -> { }
-        }
+        // Legacy IDs remain readable, but FE conversion and direct plant extraction
+        // are retired. The pure mana network owns all new transfers.
     }
 
     private void tickGenerator(ServerLevel level) {
