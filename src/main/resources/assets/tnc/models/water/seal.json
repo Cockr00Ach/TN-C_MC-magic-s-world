@@ -3,9 +3,9 @@
   "ambientocclusion": false,
   "textures": {
     "deep": "minecraft:block/blue_concrete",
-    "water": "minecraft:block/cyan_concrete",
-    "light": "minecraft:block/white_concrete",
-    "pearl": "minecraft:block/white_concrete",
+    "water": "minecraft:block/blue_concrete",
+    "light": "minecraft:block/gold_block",
+    "pearl": "minecraft:block/light_blue_concrete",
     "particle": "minecraft:block/cyan_concrete"
   },
   "elements": [

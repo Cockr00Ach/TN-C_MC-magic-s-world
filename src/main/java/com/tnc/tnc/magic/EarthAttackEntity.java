@@ -29,6 +29,7 @@ public final class EarthAttackEntity extends Entity {
     public int mode(){return entityData.get(MODE);}public int waitTicks(){return entityData.get(WAIT);}
     public String model(){return entityData.get(MODEL);}public float scale(){return entityData.get(SCALE);}public float height(){return entityData.get(HEIGHT);}
     public int burstAge(){return entityData.get(BURST_AGE);}
+    public int burstLife(){return mode()==2?24:14;}
     public boolean done(){return entityData.get(DONE);}public double age(float partial){return clock.phase(tickCount,partial,entityData.get(AGE),1);}
     public void configure(LivingEntity caster,int mode,String model,Vec3 start,Vec3 end,float scale,float height,int wait,int ttl,float damage,double radius,DamageSource source) {
         owner=caster.getId();this.start=start;this.end=end;this.ttl=ttl;this.damage=damage;this.radius=radius;this.source=source;
@@ -39,8 +40,8 @@ public final class EarthAttackEntity extends Entity {
     }
     public void tick(){super.tick();if(level().isClientSide()){clientFx();return;}
         if(tickCount%5==0)entityData.set(AGE,tickCount);
-        var caster=level().getEntity(owner);if(!(caster instanceof LivingEntity living)||!living.isAlive()||tickCount>ttl){discard();return;}
-        if(done()){if(tickCount>hitAt+14)discard();return;}
+        var caster=level().getEntity(owner);if(!(caster instanceof LivingEntity living)||!living.isAlive()||tickCount>ttl&&!done()){discard();return;}
+        if(done()){if(tickCount>hitAt+burstLife())discard();return;}
         int age=tickCount-waitTicks();if(age<=0)return;
         if(mode()==0||mode()==3||mode()==5) {
             if(age>24){discard();return;}
@@ -66,7 +67,22 @@ public final class EarthAttackEntity extends Entity {
             if(age==18)burst(living);
         } else if(mode()==2) {
             double t=Math.max(0,Math.min(1,age/60.0));t=t*t*(3-2*t);setPos(start.lerp(end,t));
+            if(age<80&&tickCount%2==0)attract(living,age);
             if(age>=80)burst(living);
+        }
+    }
+    private void attract(LivingEntity caster,int age) {
+        Vec3 centre=damageCentre==null?end:damageCentre;
+        double reach=Math.max(radius*1.7,scale()*.75);
+        for(var enemy:level().getEntitiesOfClass(LivingEntity.class,AABB.ofSize(centre,reach*2,reach*2,reach*2),
+                e->e.isAlive()&&e!=caster&&!e.isAlliedTo(caster)&&!e.isSpectator())) {
+            Vec3 delta=centre.subtract(enemy.position());double distance=delta.length();
+            if(distance<1.2||distance>reach||!caster.hasLineOfSight(enemy))continue;
+            double force=.10+Math.min(1,age/60.0)*.16;
+            Vec3 pull=new Vec3(delta.x,0,delta.z).normalize().scale(force);
+            Vec3 motion=enemy.getDeltaMovement().scale(.72).add(pull);
+            if(motion.horizontalDistance()> .65)motion=new Vec3(motion.x,0,motion.z).normalize().scale(.65).add(0,Math.min(.12,motion.y),0);
+            enemy.setDeltaMovement(motion);enemy.hurtMarked=true;
         }
     }
     private void clientFx() {
@@ -86,7 +102,7 @@ public final class EarthAttackEntity extends Entity {
             Vec3 closest=new Vec3(net.minecraft.util.Mth.clamp(centre.x,box.minX,box.maxX),net.minecraft.util.Mth.clamp(centre.y,box.minY,box.maxY),net.minecraft.util.Mth.clamp(centre.z,box.minZ,box.maxZ));
             if(closest.distanceToSqr(centre)>radius*radius)continue;
             e.invulnerableTime=0;e.hurt(source==null?level().damageSources().indirectMagic(this,caster):source,damage);
-            Vec3 delta=e.position().subtract(position()).normalize();e.setDeltaMovement(e.getDeltaMovement().add(delta.scale(.3)).add(0,.25,0));e.hurtMarked=true;
+            Vec3 delta=e.position().subtract(centre).normalize();e.setDeltaMovement(e.getDeltaMovement().add(delta.scale(mode()==2?1.35:.3)).add(0,mode()==2?.65:.25,0));e.hurtMarked=true;
             if(mode()==1||mode()==4||mode()==6)e.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN,60,0));
         }
     }
@@ -95,12 +111,17 @@ public final class EarthAttackEntity extends Entity {
         setPos(centre);
         entityData.set(DONE,true);hitAt=tickCount;entityData.set(BURST_AGE,tickCount);
         var server=(ServerLevel)level();
-        int cloud=mode()==2?150:mode()==3?100:55;
+        int cloud=mode()==2?260:mode()==3?100:55;
+        if(mode()==2) {
+            server.sendParticles(ParticleTypes.EXPLOSION_EMITTER,centre.x,centre.y+1,centre.z,1,0,0,0,0);
+            server.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE,centre.x,centre.y+1,centre.z,54,radius*.35,2,radius*.35,.14);
+        }
         server.sendParticles(EarthParticles.DUST.get(),centre.x,centre.y+.35,centre.z,cloud,radius*.5,Math.min(3,radius*.3),radius*.5,.34);
         server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK,Blocks.COARSE_DIRT.defaultBlockState()),centre.x,centre.y+.25,centre.z,
-                mode()==2?44:22,radius*.35,1.2,radius*.35,.26);
-        for(int i=0;i<24;i++) {
-            double a=i*Math.PI*2/24,s=.35+(i%5)*.08;
+                mode()==2?88:22,radius*.35,1.2,radius*.35,mode()==2?.65:.26);
+        int rays=mode()==2?48:24;
+        for(int i=0;i<rays;i++) {
+            double a=i*Math.PI*2/rays,s=(mode()==2?.85:.35)+(i%5)*.08;
             server.sendParticles(EarthParticles.DUST.get(),centre.x,centre.y+.45,centre.z,0,Math.cos(a)*s,.10+(i%3)*.08,Math.sin(a)*s,1);
         }
         server.playSound(null,centre.x,centre.y,centre.z,SoundEvents.GENERIC_EXPLODE,SoundSource.PLAYERS,1.55F,.58F);

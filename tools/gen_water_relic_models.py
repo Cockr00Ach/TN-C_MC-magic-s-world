@@ -29,7 +29,6 @@ def write(name, elements):
 
 # Tip at y=0 and pommel at y=64. Rendered at x16 scale, so the final sword is 64 blocks tall.
 sword = [
-    box([7.55, 0, 7.55], [8.45, 6, 8.45], "light", False),
     box([6.65, 5, 7.2], [9.35, 15, 8.8], "blue", False),
     box([5.4, 13, 6.9], [10.6, 42.5, 9.1], "blue", False),
     box([7.2, 7, 6.55], [8.8, 43.5, 9.45], "light", False),

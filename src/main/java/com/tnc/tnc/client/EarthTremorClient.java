@@ -17,8 +17,9 @@ public final class EarthTremorClient {
         for(var blast:mc.level.getEntitiesOfClass(com.tnc.tnc.magic.EarthAttackEntity.class,mc.player.getBoundingBox().inflate(40),e->e.done()&&(e.mode()==2||e.mode()==3))) {
             double elapsed=blast.age((float)event.getPartialTick())-blast.burstAge();
             double distance=mc.player.position().distanceTo(blast.position());
-            float peak=blast.mode()==2?4.2F:blast.mode()==3?3.2F:2.4F;
-            if(elapsed>=0&&elapsed<10&&distance<48)strength=Math.max(strength,(float)(peak*(1-elapsed/10)*(1-distance/48)));
+            float peak=blast.mode()==2?6.5F:blast.mode()==3?3.2F:2.4F;
+            double duration=blast.mode()==2?18:10;
+            if(elapsed>=0&&elapsed<duration&&distance<48)strength=Math.max(strength,(float)(peak*(1-elapsed/duration)*(1-distance/48)));
         }
         double time=mc.level.getGameTime()+event.getPartialTick();
         event.setPitch(event.getPitch()+(float)Math.sin(time*1.17)*strength);

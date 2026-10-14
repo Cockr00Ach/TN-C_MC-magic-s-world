@@ -35,11 +35,20 @@ public final class EarthAttackRenderer extends EntityRenderer<EarthAttackEntity>
         }
     }
     private static void renderBurst(EarthAttackEntity e,float partial,PoseStack pose,MultiBufferSource buffers,int light) {
-        double elapsed=e.age(partial)-e.burstAge();if(elapsed<0||elapsed>14)return;
-        float fade=(float)Math.max(0,1-elapsed/14),size=.28F+.035F*(float)elapsed;
-        for(int i=0;i<18;i++) {
-            double a=i*Math.PI*2/18+i*.71,r=elapsed*(.32+(i%5)*.055);
-            double y=.2+elapsed*(.12+(i%3)*.035)-elapsed*elapsed*.008;
+        double elapsed=e.age(partial)-e.burstAge();if(elapsed<0||elapsed>e.burstLife())return;
+        boolean giant=e.mode()==2;
+        float fade=(float)Math.max(0,1-elapsed/e.burstLife()),size=giant?.6F:.28F;
+        if(giant) {
+            var out=buffers.getBuffer(WaterRenderTypes.geometry());
+            for(int ring=0;ring<2;ring++) {
+                double radius=Math.max(.2,(elapsed-ring*2)*.95);
+                WaterGeometry.ringColor(out,pose.last().pose(),new net.minecraft.world.phys.Vec3(0,.25+ring*.2,0),new net.minecraft.world.phys.Vec3(0,1,0),radius,1.2-ring*.35,.72F,.42F,.12F,fade*.8F,48);
+            }
+        }
+        int pieces=giant?42:18;
+        for(int i=0;i<pieces;i++) {
+            double a=i*Math.PI*2/pieces+i*.71,r=elapsed*((giant?.6:.32)+(i%5)*.055);
+            double y=.2+elapsed*((giant?.30:.12)+(i%3)*.065)-elapsed*elapsed*.012;
             pose.pushPose();pose.translate(Math.cos(a)*r,y,Math.sin(a)*r);
             pose.mulPose(Axis.YP.rotationDegrees((float)(i*37+elapsed*13)));pose.scale(size*fade,size*fade,size*fade);
             draw(i%3==0?"earth_shell":"earth_clod",pose,buffers,light,net.spell_engine.api.render.LightEmission.NONE);pose.popPose();

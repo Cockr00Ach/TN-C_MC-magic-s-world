@@ -13,6 +13,8 @@ def save(name,parts):
     OUT.mkdir(parents=True,exist_ok=True)
     model={'credit':'TN-C water models; tools/gen_water_solid_models.py','ambientocclusion':False,
            'textures':dict(TEXTURES,particle=TEXTURES['water']),'elements':parts}
+    if name=='seal':
+        model['textures'].update(water='minecraft:block/blue_concrete',light='minecraft:block/gold_block',pearl='minecraft:block/light_blue_concrete')
     (OUT/(name+'.json')).write_text(json.dumps(model,ensure_ascii=False,indent=2)+'\n',encoding='utf8')
 seal=[]
 for radius,width,y,tex in [(7.6,.34,0,'deep'),(7.25,.25,.20,'light'),(5.7,.25,.12,'water'),(2.4,.28,.23,'light')]:

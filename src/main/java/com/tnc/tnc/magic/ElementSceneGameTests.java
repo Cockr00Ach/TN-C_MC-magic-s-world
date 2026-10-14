@@ -7,6 +7,19 @@ import net.minecraftforge.gametest.*;
 @GameTestHolder("tnc") @PrefixGameTestTemplate(false)
 public final class ElementSceneGameTests {
     @GameTest(template="building_test_empty",timeoutTicks=30,batch="element_scenes")
+    public static void giantOrbPullsEnemiesButLeavesItsOwnerUntouched(GameTestHelper h) {
+        var caster=h.spawn(EntityType.VILLAGER,new BlockPos(1,2,1));caster.setNoAi(true);
+        var enemy=h.spawn(EntityType.ZOMBIE,new BlockPos(6,2,4));enemy.setNoAi(true);
+        var centre=h.absoluteVec(new net.minecraft.world.phys.Vec3(4,2,4));
+        var orb=WindEarthVisualMechanics.ATTACK.get().create(h.getLevel());
+        orb.configure(caster,2,"earth_orb",centre.add(0,8,0),centre.add(0,12,0),12,12,0,110,3,8,h.getLevel().damageSources().magic());
+        orb.damageCentre=centre;var own=caster.getDeltaMovement();float hp=enemy.getHealth();
+        orb.tickCount=20;orb.tick();
+        h.assertTrue(enemy.getDeltaMovement().dot(centre.subtract(enemy.position()))>0,"Giant orb pulls nearby enemies inward");
+        h.assertTrue(caster.getDeltaMovement().equals(own)&&enemy.getHealth()==hp,"Attraction leaves owner untouched and deals no early damage");
+        caster.discard();enemy.discard();orb.discard();h.succeed();
+    }
+    @GameTest(template="building_test_empty",timeoutTicks=30,batch="element_scenes")
     public static void giantSpearDropsTheWholeDistanceInOneTick(GameTestHelper h) {
         var caster=h.spawn(EntityType.VILLAGER,new BlockPos(1,2,1));caster.setNoAi(true);
         var enemy=h.spawn(EntityType.ZOMBIE,new BlockPos(4,2,4));enemy.setNoAi(true);
@@ -40,7 +53,7 @@ public final class ElementSceneGameTests {
         h.assertTrue(e.done()&&enemy.getHealth()<health,"Raised orb explosion reaches the ground target");
         h.assertTrue(caster.getHealth()==own,"No owner damage");
         h.assertTrue(block==h.getLevel().getBlockState(h.absolutePos(new BlockPos(4,1,4))),"Explosion cannot change terrain");
-        e.tickCount=96;e.tick();h.assertTrue(e.isRemoved(),"Exploded ball cleans up after the visible debris finishes");
+        e.tickCount=106;e.tick();h.assertTrue(e.isRemoved(),"Exploded ball cleans up after the visible debris finishes");
         caster.discard();enemy.discard();h.succeed();
     }
     @GameTest(template="building_test_empty",timeoutTicks=30,batch="element_scenes")
