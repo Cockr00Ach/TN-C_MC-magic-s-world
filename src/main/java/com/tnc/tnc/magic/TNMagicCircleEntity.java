@@ -43,6 +43,7 @@ public class TNMagicCircleEntity extends Entity {
      * （由 {@link DarkFogCloudEntity} 托管，见那边的 {@code claimBoundaryCircle}）。
      */
     public static final int STYLE_EARTH = 4;
+    public static final int STYLE_WIND = 5;
     public static final int STYLE_STORM = 0;
     public static final int STYLE_LIGHT = 1;
     public static final int STYLE_DARK = 2;

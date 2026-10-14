@@ -93,6 +93,7 @@ public class TNMagicCircleRenderer extends EntityRenderer<TNMagicCircleEntity> {
     public void render(TNMagicCircleEntity entity, float entityYaw, float partialTick, PoseStack poseStack,
                        MultiBufferSource buffer, int packedLight) {
         if(entity.style()==TNMagicCircleEntity.STYLE_DARK_HAND)return;
+        if(entity.style()==TNMagicCircleEntity.STYLE_WIND||entity.style()==TNMagicCircleEntity.STYLE_LIGHT){ElementSealRenderer.render(entity,partialTick,poseStack,buffer);return;}
         if(entity.style()==TNMagicCircleEntity.STYLE_EARTH){EarthSealRenderer.render(entity,partialTick,poseStack,buffer);return;}
         float age = entity.tickCount + partialTick;
         float life = Math.max(1.0F, entity.life());
