@@ -47,7 +47,7 @@ final class SeaGodSwordVisuals {
         stack.translate(0,tip-modelScale*5D/48D,0);
         stack.mulPose(com.mojang.math.Axis.YP.rotationDegrees((float)(age*.35)));
         stack.scale(modelScale,modelScale,modelScale);
-        WaterSolidModels.draw("sea_god_sword",stack,buffers,1);
+        WaterSolidModels.draw("sea_god_sword",stack,buffers,.75F);
         stack.popPose();
         var out=buffers.getBuffer(WaterRenderTypes.geometry());var pose=stack.last().pose();
         double spin=age*.006;

@@ -15,9 +15,27 @@ public final class ElementSceneGameTests {
         orb.configure(caster,2,"earth_orb",centre.add(0,8,0),centre.add(0,12,0),12,12,0,110,3,8,h.getLevel().damageSources().magic());
         orb.damageCentre=centre;var own=caster.getDeltaMovement();float hp=enemy.getHealth();
         orb.tickCount=20;orb.tick();
-        h.assertTrue(enemy.getDeltaMovement().dot(centre.subtract(enemy.position()))>0,"Giant orb pulls nearby enemies inward");
+        h.assertTrue(enemy.getDeltaMovement().dot(orb.position().subtract(enemy.getBoundingBox().getCenter()))>0,"Giant orb pulls toward its current airborne center");
+        h.assertTrue(enemy.getDeltaMovement().y>.16,"Upward suction must overcome gravity, not just move targets horizontally");
         h.assertTrue(caster.getDeltaMovement().equals(own)&&enemy.getHealth()==hp,"Attraction leaves owner untouched and deals no early damage");
         caster.discard();enemy.discard();orb.discard();h.succeed();
+    }
+    @GameTest(template="building_test_empty",timeoutTicks=30,batch="element_scenes")
+    public static void highOrbCapturesGroundEnemiesAndPullsAirborneEnemiesDown(GameTestHelper h) {
+        var caster=h.spawn(EntityType.VILLAGER,new BlockPos(1,2,1));caster.setNoAi(true);
+        var ground=h.spawn(EntityType.ZOMBIE,new BlockPos(6,2,4));ground.setNoAi(true);
+        var above=h.spawn(EntityType.ZOMBIE,new BlockPos(6,2,5));above.setNoAi(true);
+        var centre=h.absoluteVec(new net.minecraft.world.phys.Vec3(4,2,4));
+        above.setPos(centre.add(1,23,0));
+        var orb=WindEarthVisualMechanics.ATTACK.get().create(h.getLevel());
+        orb.configure(caster,2,"earth_orb",centre.add(0,14,0),centre.add(0,18,0),20,20,40,135,3,9,h.getLevel().damageSources().magic());
+        orb.damageCentre=centre;orb.tickCount=100;orb.tick();
+        h.assertTrue(ground.getDeltaMovement().y>1.2,"Triple-speed suction must lift ground targets toward the high orb");
+        h.assertTrue(above.getDeltaMovement().y<-.8,"Triple-speed suction must pull targets above the ball downward");
+        above.setPos(orb.position().add(1,0,0));float hp=above.getHealth();
+        orb.tickCount=120;orb.tick();
+        h.assertTrue(above.getHealth()<hp,"Explosion must hit enemies gathered at the airborne ball, outside the ground blast");
+        caster.discard();ground.discard();above.discard();orb.discard();h.succeed();
     }
     @GameTest(template="building_test_empty",timeoutTicks=30,batch="element_scenes")
     public static void giantSpearDropsTheWholeDistanceInOneTick(GameTestHelper h) {
