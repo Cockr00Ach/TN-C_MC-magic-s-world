@@ -51,6 +51,7 @@ ASCII only. Usage: python tools/gen_dark_fog_spells.py
 import json
 import os
 import sys
+from restore_dark_fog_particles import batches as persistent_fog_batches
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -306,7 +307,7 @@ def rewrite(spell, name, cfg):
     cloud = spell["release"]["target"]["cloud"]
     cloud["entity_type_id"] = FOG_ENTITY
     cloud["client_data"] = {
-        "particles": fog_batches(radius, tier),
+        "particles": persistent_fog_batches(radius, tier),
         # ★ the dome. scale = radius in blocks (see tools/gen_dark_fog_model.py);
         #   rotate slowly so the fog churns, and do NOT set light_emission so it
         #   stays dark instead of glowing (the embers are in the texture).

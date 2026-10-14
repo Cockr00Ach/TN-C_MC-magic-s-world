@@ -73,101 +73,20 @@
             {
               "particle_id": "minecraft:squid_ink",
               "shape": "CIRCLE",
-              "origin": "FEET",
-              "count": 22.0,
+              "origin": "CENTER",
+              "count": 10,
               "min_speed": 0.005,
-              "max_speed": 0.04,
-              "extent": 5.0
+              "max_speed": 0.025,
+              "extent": 4.6000000000000005
             },
             {
-              "particle_id": "fromtheshadows:shadow",
-              "shape": "CIRCLE",
-              "origin": "FEET",
-              "count": 10.0,
+              "particle_id": "minecraft:large_smoke",
+              "shape": "SPHERE",
+              "origin": "CENTER",
+              "count": 4,
               "min_speed": 0.005,
-              "max_speed": 0.04,
-              "extent": 5.0
-            },
-            {
-              "particle_id": "minecraft:smoke",
-              "shape": "CIRCLE",
-              "origin": "FEET",
-              "count": 4.0,
-              "min_speed": 0.005,
-              "max_speed": 0.04,
-              "extent": 5.0
-            },
-            {
-              "particle_id": "minecraft:squid_ink",
-              "shape": "SPHERE",
-              "origin": "CENTER",
-              "count": 10.0,
-              "min_speed": 0.02,
-              "max_speed": 0.16,
-              "extent": 3.5
-            },
-            {
-              "particle_id": "fromtheshadows:shadow",
-              "shape": "SPHERE",
-              "origin": "CENTER",
-              "count": 6.0,
-              "min_speed": 0.02,
-              "max_speed": 0.14,
-              "extent": 3.5
-            },
-            {
-              "particle_id": "fromtheshadows:shadow",
-              "shape": "SPHERE",
-              "origin": "CENTER",
-              "count": 10.0,
-              "min_speed": 0.01,
-              "max_speed": 0.08,
-              "extent": 4.25
-            },
-            {
-              "particle_id": "minecraft:smoke",
-              "shape": "SPHERE",
-              "origin": "CENTER",
-              "count": 2.0,
-              "min_speed": 0.01,
-              "max_speed": 0.08,
-              "extent": 3.5
-            },
-            {
-              "particle_id": "minecraft:soul",
-              "shape": "SPHERE",
-              "origin": "CENTER",
-              "count": 1.0,
-              "min_speed": 0.01,
-              "max_speed": 0.06,
-              "extent": 2.75
-            },
-            {
-              "particle_id": "minecraft:squid_ink",
-              "shape": "CIRCLE",
-              "origin": "CENTER",
-              "count": 8.0,
-              "min_speed": 0.01,
-              "max_speed": 0.05,
-              "extent": 5.25
-            },
-            {
-              "particle_id": "fromtheshadows:shadow",
-              "shape": "CIRCLE",
-              "origin": "FEET",
-              "count": 6.0,
-              "min_speed": 0.02,
-              "max_speed": 0.08,
-              "extent": 5.0
-            },
-            {
-              "particle_id": "soulsweapons:black_flame",
-              "shape": "CIRCLE",
-              "origin": "FEET",
-              "count": 1.0,
-              "min_speed": 0.02,
-              "max_speed": 0.08,
-              "extent": 3.0
+              "max_speed": 0.025,
+              "extent": 2.25
             }
           ],
           "model": {
