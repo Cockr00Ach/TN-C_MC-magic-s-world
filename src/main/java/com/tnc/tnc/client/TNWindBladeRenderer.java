@@ -61,10 +61,8 @@ public class TNWindBladeRenderer extends EntityRenderer<TNWindBladeEntity> {
 
         poseStack.pushPose();
         // ① 朝向：yaw（绕 Y）→ pitch（绕已经转过去的 X）✓
-        poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(entity.bladeYaw()));
-        poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(entity.bladePitch()));
-        // ② 自转：绕模型自身那根"薄"的轴（Z）✓
-        poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(entity.spin()));
+        // Lock the launch normal; spin only in the blade's own plane, with frame interpolation.
+        poseStack.mulPose(WindBladeVisualPose.rotation(entity.bladeYaw(),entity.bladePitch(),entity.visualSpin(partialTick)));
         // ③ 缩放 —— **不要再 translate** ✗：月牙以 (8,8,8) 单位为中心，
         //    引擎那句 −0.5 已经把它对到实体原点了（见类注释 ✓）
         poseStack.scale(scale, scale, scale);

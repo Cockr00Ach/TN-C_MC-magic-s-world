@@ -146,6 +146,11 @@ public class TNWindBladeEntity extends Entity {
         blade.entityData.set(DATA_YAW, (float) Math.toDegrees(Math.atan2(unit.x, unit.z)));
         blade.entityData.set(DATA_PITCH, (float) -Math.toDegrees(Math.asin(unit.y)));
         level.addFreshEntity(blade);
+        // One compact launch burst; ongoing trails remain client-side and bounded.
+        level.sendParticles(net.minecraft.core.particles.ParticleTypes.CLOUD,pos.x,pos.y,pos.z,
+                8,.20,.20,.20,.055);
+        level.sendParticles(net.minecraft.core.particles.ParticleTypes.SWEEP_ATTACK,pos.x,pos.y,pos.z,
+                1,.10,.10,.10,0);
         return blade;
     }
 
@@ -153,10 +158,8 @@ public class TNWindBladeEntity extends Entity {
     public void tick() {
         super.tick();
 
-        // 自转（客户端也要转 ⇒ 两边都推进 ✓）
-        float rate = this.entityData.get(DATA_SPIN_RATE);
-        float spin = this.entityData.get(DATA_SPIN) + rate;
-        this.entityData.set(DATA_SPIN, spin % 360.0F);
+        // Spin follows local visual age. Advancing a synced angle on both sides caused corrections
+        // to fight the client animation and made the blade appear to turn discontinuously.
 
         if (level().isClientSide()) {
             // ⚠️ **客户端绝对不能再自己挪实体** ✗（作者 2026-10-10：
@@ -173,10 +176,16 @@ public class TNWindBladeEntity extends Entity {
             //
             //     客户端只留"好看"：给飞出去的刃补一条尾迹，让"射出去"看得见 ✓
             if (tickCount % 2 == 0 && getDeltaMovement().lengthSqr() > 0.01D) {
-                Vec3 back = getDeltaMovement().normalize().scale(-2.2D);
-                level().addParticle(net.minecraft.core.particles.ParticleTypes.CLOUD,
-                        getX() + back.x, getY() + back.y, getZ() + back.z,
-                        0.0D, 0.0D, 0.0D);
+                Vec3 direction=getDeltaMovement().normalize();
+                Vec3 side=direction.cross(new Vec3(0,1,0));
+                if(side.lengthSqr()<1E-6)side=new Vec3(1,0,0);
+                side=side.normalize();
+                double width=Math.min(1.5,.18+sizeMultiplier()*.06);
+                for(int i=-1;i<=1;i+=2) {
+                    Vec3 at=position().subtract(direction.scale(.55)).add(side.scale(width*i));
+                    level().addParticle(net.minecraft.core.particles.ParticleTypes.CLOUD,
+                            at.x,at.y,at.z,-direction.x*.025,.012,-direction.z*.025);
+                }
             }
             return;
         }
@@ -242,7 +251,11 @@ public class TNWindBladeEntity extends Entity {
     }
 
     public float spin() {
-        return this.entityData.get(DATA_SPIN);
+        return visualSpin(0);
+    }
+
+    public float visualSpin(float partialTick) {
+        return ((tickCount+partialTick)*this.entityData.get(DATA_SPIN_RATE))%360F;
     }
 
     public void setSpinRate(float rate) {

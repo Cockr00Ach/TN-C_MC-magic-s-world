@@ -72,16 +72,23 @@ public final class EarthAttackEntity extends Entity {
         }
     }
     private void attract(LivingEntity caster,int age) {
-        Vec3 centre=damageCentre==null?end:damageCentre;
+        Vec3 centre=position();
+        Vec3 ground=damageCentre==null?end:damageCentre;
         double reach=Math.max(radius*1.7,scale()*.75);
-        for(var enemy:level().getEntitiesOfClass(LivingEntity.class,AABB.ofSize(centre,reach*2,reach*2,reach*2),
+        // Keep catching ground targets as the sphere rises, and retain lifted targets near it.
+        var area=AABB.ofSize(centre,reach*2,reach*2,reach*2).minmax(AABB.ofSize(ground,reach*2,reach*2,reach*2));
+        for(var enemy:level().getEntitiesOfClass(LivingEntity.class,area,
                 e->e.isAlive()&&e!=caster&&!e.isAlliedTo(caster)&&!e.isSpectator())) {
-            Vec3 delta=centre.subtract(enemy.position());double distance=delta.length();
-            if(distance<1.2||distance>reach||!caster.hasLineOfSight(enemy))continue;
-            double force=.10+Math.min(1,age/60.0)*.16;
-            Vec3 pull=new Vec3(delta.x,0,delta.z).normalize().scale(force);
+            Vec3 body=enemy.getBoundingBox().getCenter();
+            Vec3 delta=centre.subtract(body);double distance=delta.length();
+            if(Math.min(distance,ground.distanceTo(body))>reach||!caster.hasLineOfSight(enemy))continue;
+            double force=3*(.18+Math.min(1,age/60.0)*.28)*Math.min(1,distance/2);
+            Vec3 pull=delta.normalize().scale(force);
+            // Attraction runs every two ticks: counter gravity so upward suction can lift mobs.
+            if(delta.y>-.25&&!enemy.isNoGravity())pull=pull.add(0,.16,0);
             Vec3 motion=enemy.getDeltaMovement().scale(.72).add(pull);
-            if(motion.horizontalDistance()> .65)motion=new Vec3(motion.x,0,motion.z).normalize().scale(.65).add(0,Math.min(.12,motion.y),0);
+            double speedLimit=Math.min(3*.85,Math.max(.16,distance*.5));
+            if(motion.lengthSqr()>speedLimit*speedLimit)motion=motion.normalize().scale(speedLimit);
             enemy.setDeltaMovement(motion);enemy.hurtMarked=true;
         }
     }
@@ -96,13 +103,21 @@ public final class EarthAttackEntity extends Entity {
     }
     private void hit(LivingEntity caster) {
         Vec3 centre=damageCentre==null?position():damageCentre;
-        for(var e:level().getEntitiesOfClass(LivingEntity.class,AABB.ofSize(centre,radius*2,radius*2,radius*2),
+        var area=AABB.ofSize(centre,radius*2,radius*2,radius*2);
+        if(mode()==2)area=area.minmax(AABB.ofSize(position(),radius*2,radius*2,radius*2));
+        for(var e:level().getEntitiesOfClass(LivingEntity.class,area,
                 e->e.isAlive()&&e!=caster&&!e.isAlliedTo(caster)&&!e.isSpectator())) {
             var box=e.getBoundingBox();
             Vec3 closest=new Vec3(net.minecraft.util.Mth.clamp(centre.x,box.minX,box.maxX),net.minecraft.util.Mth.clamp(centre.y,box.minY,box.maxY),net.minecraft.util.Mth.clamp(centre.z,box.minZ,box.maxZ));
-            if(closest.distanceToSqr(centre)>radius*radius)continue;
+            Vec3 impactCentre=centre;
+            if(closest.distanceToSqr(centre)>radius*radius) {
+                if(mode()!=2)continue;
+                Vec3 airborneClosest=new Vec3(net.minecraft.util.Mth.clamp(getX(),box.minX,box.maxX),net.minecraft.util.Mth.clamp(getY(),box.minY,box.maxY),net.minecraft.util.Mth.clamp(getZ(),box.minZ,box.maxZ));
+                if(airborneClosest.distanceToSqr(position())>radius*radius)continue;
+                impactCentre=position();
+            }
             e.invulnerableTime=0;e.hurt(source==null?level().damageSources().indirectMagic(this,caster):source,damage);
-            Vec3 delta=e.position().subtract(centre).normalize();e.setDeltaMovement(e.getDeltaMovement().add(delta.scale(mode()==2?1.35:.3)).add(0,mode()==2?.65:.25,0));e.hurtMarked=true;
+            Vec3 delta=e.position().subtract(impactCentre).normalize();e.setDeltaMovement(e.getDeltaMovement().add(delta.scale(mode()==2?1.35:.3)).add(0,mode()==2?.65:.25,0));e.hurtMarked=true;
             if(mode()==1||mode()==4||mode()==6)e.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN,60,0));
         }
     }

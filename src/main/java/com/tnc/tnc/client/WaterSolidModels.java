@@ -39,14 +39,14 @@ public final class WaterSolidModels {
         var mc=Minecraft.getInstance();var model=mc.getModelManager().getModel(id(name));
         poses.pushPose();poses.translate(-.5,0,-.5);
         boolean solidRelic=name.equals("sea_god_sword")||name.equals("raindrop");
-        var consumer=buffers.getBuffer(solidRelic?RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS):opacity<1?WaterModelRenderTypes.alpha():RenderType.eyes(TextureAtlas.LOCATION_BLOCKS));
+        var consumer=buffers.getBuffer(opacity<1?WaterModelRenderTypes.alpha():solidRelic?RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS):RenderType.eyes(TextureAtlas.LOCATION_BLOCKS));
         if(opacity<1)consumer=new Alpha(consumer,opacity);
         mc.getItemRenderer().renderModelLists(model,ItemStack.EMPTY,LightTexture.FULL_BRIGHT,
                 OverlayTexture.NO_OVERLAY,poses,consumer);
         if(name.equals("sea_god_sword")||name.equals("seal")) {
             // Full light-map brightness alone does not create the additive glow.
             var emission=new Alpha(buffers.getBuffer(RenderType.eyes(TextureAtlas.LOCATION_BLOCKS)),
-                    name.equals("sea_god_sword")?.45F:Math.max(.42F,opacity*.7F));
+                    name.equals("sea_god_sword")?.45F*opacity:Math.max(.42F,opacity*.7F));
             mc.getItemRenderer().renderModelLists(model,ItemStack.EMPTY,LightTexture.FULL_BRIGHT,
                     OverlayTexture.NO_OVERLAY,poses,emission);
         }
