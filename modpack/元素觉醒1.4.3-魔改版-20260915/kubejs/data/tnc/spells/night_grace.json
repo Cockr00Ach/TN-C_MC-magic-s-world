@@ -69,26 +69,7 @@
           "volume": 0.25
         },
         "client_data": {
-          "particles": [
-            {
-              "particle_id": "minecraft:squid_ink",
-              "shape": "CIRCLE",
-              "origin": "CENTER",
-              "count": 10,
-              "min_speed": 0.005,
-              "max_speed": 0.025,
-              "extent": 4.6000000000000005
-            },
-            {
-              "particle_id": "minecraft:large_smoke",
-              "shape": "SPHERE",
-              "origin": "CENTER",
-              "count": 4,
-              "min_speed": 0.005,
-              "max_speed": 0.025,
-              "extent": 2.25
-            }
-          ],
+          "particles": [],
           "model": {
             "model_id": "tnc:projectile/dark_fog",
             "scale": 2.0,

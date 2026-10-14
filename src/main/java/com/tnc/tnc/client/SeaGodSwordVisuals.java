@@ -41,9 +41,11 @@ final class SeaGodSwordVisuals {
 
         // One registered baked model: real blue crystal planes, gold guard/edge and pearl core.
         stack.pushPose();
-        stack.translate(0,tip,0);
-        stack.mulPose(com.mojang.math.Axis.YP.rotationDegrees((float)(age*.35)));
+        // The remaining blade begins at authored Y=5 (normalized by 3).
+        // Anchor that surface to the impact height after removing the thin tip.
         float modelScale=48F*64F/66F;
+        stack.translate(0,tip-modelScale*5D/48D,0);
+        stack.mulPose(com.mojang.math.Axis.YP.rotationDegrees((float)(age*.35)));
         stack.scale(modelScale,modelScale,modelScale);
         WaterSolidModels.draw("sea_god_sword",stack,buffers,1);
         stack.popPose();

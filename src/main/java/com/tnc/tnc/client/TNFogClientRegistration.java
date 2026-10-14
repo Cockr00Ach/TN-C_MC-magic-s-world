@@ -10,7 +10,7 @@ final class TNFogClientRegistration {
     private TNFogClientRegistration() {}
     static void register(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(TNOrbEntities.FOG.get(),
-                context -> new net.spell_engine.client.render.SpellCloudRenderer<DarkFogCloudEntity>(context));
+                DarkMistRenderer::new);
         event.registerEntityRenderer(TNOrbEntities.DRAIN.get(), DarkSiphonRenderer::new);
         // ★ 黑夜之手的"抓住不放的那只手"（2026-10-10 重做）—— 它**要看得见** ✓
         //   （作者：「他名字虽然叫做不可视，但你别游戏里做的啥都看不见，我们还是要做出来要的特效的」）。
