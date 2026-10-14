@@ -2,11 +2,9 @@
 from __future__ import annotations
 
 import json
-import math
-import random
 from pathlib import Path
 
-from PIL import Image, ImageDraw
+from water_leviathan_materials import paint_atlas
 
 ROOT = Path(__file__).resolve().parents[1]
 GEO = ROOT / "src/main/resources/assets/tnc/geo/entity/water_leviathan.geo.json"
@@ -15,18 +13,6 @@ TEX = ROOT / "src/main/resources/assets/tnc/textures/entity/water_leviathan_bedr
 GLOW = ROOT / "src/main/resources/assets/tnc/textures/entity/water_leviathan_emissive.png"
 PREVIEW = ROOT / "docs/previews/water_leviathan_preview.png"
 ATLAS = 1024
-
-COLORS = {
-    "abyss": (4, 25, 39, 255),
-    "scale": (7, 48, 70, 255),
-    "blue": (10, 91, 128, 255),
-    "blue_glow": (28, 192, 232, 255),
-    "gold": (190, 139, 43, 255),
-    "gold_glow": (255, 218, 104, 255),
-    "bone": (178, 196, 184, 255),
-    "mouth": (70, 15, 28, 255),
-}
-EMISSIVE = {"blue_glow", "gold_glow"}
 
 bones: list[dict] = []
 cubes: list[dict] = []
@@ -55,7 +41,7 @@ body = bone("body", "root", [0, 34, 0])
 box(body, "torso_core", [-28, 18, -34], [56, 35, 72], "abyss")
 box(body, "torso_scale", [-32, 24, -30], [64, 26, 58], "scale")
 box(body, "chest_mass", [-35, 20, -43], [70, 36, 35], "abyss")
-box(body, "belly_keel", [-22, 12, -30], [44, 12, 60], "blue")
+box(body, "belly_keel", [-22, 12, -30], [44, 12, 60], "belly")
 for z in (-29, -14, 1, 16, 29):
     box(body, f"spine_plate_{z}", [-20, 50, z], [40, 5, 10], "gold")
     box(body, f"spine_rune_{z}", [-11, 55, z + 2], [22, 2, 6], "blue_glow")
@@ -64,14 +50,16 @@ for x in (-31, 25):
 
 neck = bone("neck", "body", [0, 37, -37], [-8, 0, 0])
 box(neck, "neck_core", [-29, 20, -58], [58, 34, 28], "scale")
-box(neck, "throat", [-22, 12, -58], [44, 15, 28], "blue")
+box(neck, "throat", [-22, 12, -58], [44, 15, 28], "belly")
 box(neck, "neck_collar", [-34, 40, -51], [68, 7, 14], "gold")
 box(neck, "neck_rune", [-18, 47, -48], [36, 2, 8], "gold_glow")
 
 head = bone("head", "neck", [0, 37, -56])
 box(head, "skull", [-27, 22, -82], [54, 32, 36], "abyss")
 box(head, "brow", [-31, 39, -84], [62, 12, 25], "scale")
-box(head, "snout", [-24, 23, -105], [48, 22, 30], "abyss")
+box(head, "snout_rear", [-24, 23, -91], [48, 22, 16], "abyss")
+box(head, "snout_mid", [-21, 23, -103], [42, 21, 12], "scale")
+box(head, "snout_tip", [-18, 24, -109], [36, 19, 6], "abyss")
 box(head, "nose_armor", [-18, 42, -104], [36, 6, 30], "gold")
 box(head, "forehead_gem", [-7, 49, -82], [14, 6, 16], "blue_glow", 0.2)
 box(head, "eye_left", [14, 36, -106], [7, 4, 2], "gold_glow", 0.2)
@@ -82,11 +70,13 @@ for side in (-1, 1):
     box(head, f"gill_glow_{side}", [sx + (1 if side < 0 else 2), 31, -61], [4, 12, 3], "blue_glow")
 
 jaw = bone("jaw", "head", [0, 28, -77])
-box(jaw, "lower_jaw", [-25, 13, -103], [50, 11, 34], "mouth")
-box(jaw, "jaw_armor", [-28, 11, -94], [56, 6, 22], "gold")
+box(jaw, "lower_jaw", [-25, 9, -103], [50, 8, 34], "scale")
+box(jaw, "inner_gums", [-22, 17, -101], [44, 2, 29], "mouth")
+box(jaw, "tongue", [-9, 19, -96], [18, 2, 17], "mouth")
+box(jaw, "jaw_armor", [-28, 6, -94], [56, 5, 22], "gold")
 for i, x in enumerate(range(-20, 21, 8)):
-    box(jaw, f"lower_tooth_{i}", [x, 22, -102], [4, 9, 5], "bone")
-    box(head, f"upper_tooth_{i}", [x, 20, -101], [4, 9, 5], "bone")
+    box(jaw, f"lower_tooth_{i}", [x, 18, -102], [4, 7, 5], "bone")
+    box(head, f"upper_tooth_{i}", [x, 16, -101], [4, 9, 5], "bone")
 
 for side in (-1, 1):
     horn = bone(f"horn_{'left' if side > 0 else 'right'}", "head", [side * 23, 49, -68], [0, 0, side * -18])
@@ -143,6 +133,57 @@ for side in (-1, 1):
         box(gill, f"gill_plate_{side}_{i}", [side*28-3, 25, -50+i*7], [6, 22, 5], "gold")
         box(gill, f"gill_light_{side}_{i}", [side*28-2, 27, -51+i*7], [4, 17, 2], "blue_glow")
 
+# Individual scutes, sensory ridges and fin rays add readable large-scale details.
+for i, z in enumerate(range(-32, 33, 8)):
+    box(body, f"ventral_scute_{i}", [-23, 10, z], [46, 3, 6], "belly")
+    box(body, f"ventral_keystone_{i}", [-4, 9, z+1], [8, 2, 4], "gold")
+for side in (-1, 1):
+    # Gold brow sockets frame the slit eyes. Cheek fins make the skull feel predatory.
+    brow = bone(f"brow_arch_{side}", "head", [side*18, 42, -103], [0, 0, side*-12])
+    box(brow, f"brow_rim_{side}", [side*18-8, 41, -107], [16, 3, 4], "gold")
+    box(head, f"nostril_{side}", [side*9-3, 28, -106], [6, 3, 2], "abyss")
+    cheek = bone(f"cheek_blade_{side}", "head", [side*29, 33, -64], [18, side*-20, side*-22])
+    box(cheek, f"cheek_blade_base_{side}", [side*29-3, 31, -64], [6, 6, 17], "gold")
+    box(cheek, f"cheek_blade_end_{side}", [side*29-2, 32, -47], [4, 4, 11], "blue")
+    tusk = bone(f"jaw_tusk_{side}", "jaw", [side*23, 18, -98], [0, 0, side*-15])
+    box(tusk, f"jaw_tusk_base_{side}", [side*23-3, 17, -99], [6, 12, 6], "bone")
+    box(tusk, f"jaw_tusk_tip_{side}", [side*23-2, 29, -98], [4, 6, 4], "bone")
+    # Three rows of shoulder tiles form a transition from blue scales to golden gills.
+    for row in range(2):
+        for i in range(5):
+            box(body, f"shoulder_tile_{side}_{row}_{i}",
+                [side*35-(2 if side<0 else 0), 23+row*12, -38+i*7],
+                [2, 9, 6], "scale" if row else "belly")
+    # Thin fin rays sit on the existing animated fin bones; no extra particle entities.
+    for front, length, base_z in ((True, 45, -35), (False, 38, 12)):
+        fin = next(b for b in bones if b["name"] == f"fin_{'front' if front else 'rear'}_{side}")
+        wing_name = f"{'front' if front else 'rear'}_fin_wing_{side}"
+        wing = next(c for c in fin["cubes"] if c["name"] == wing_name)
+        fin["cubes"].remove(wing)
+        cubes.remove(wing)
+        # A stepped taper replaces each rectangular paddle with a swept fin outline.
+        for strip in range(5):
+            width = length//5
+            xpos = (53 if front else 49)+strip*width
+            xpos = xpos if side>0 else -xpos-width
+            depth = 30-strip*4
+            zpos = base_z+strip*3
+            box(fin, f"fin_membrane_{front}_{side}_{strip}", [xpos, 18 if front else 17, zpos],
+                [width, 3, depth], "blue")
+            box(fin, f"fin_ray_{front}_{side}_{strip}", [xpos, 21 if front else 20, zpos],
+                [width, 1, 2], "gold")
+    for i, z in enumerate(range(-28, 30, 12)):
+        # Small gemstone settings interrupt the large side armour panels.
+        xpos = side*35-(2 if side<0 else 0)
+        box(body, f"flank_setting_{side}_{i}", [xpos, 38, z], [2, 7, 7], "gold")
+        box(body, f"flank_jewel_{side}_{i}", [xpos+side, 40, z+2], [2, 3, 3], "blue_glow")
+
+for parent, base_y, zs in ((tail1, 45, (40, 52, 64)), (tail2, 42, (76, 90, 104)),
+                           (tail3, 39, (115, 130, 144))):
+    for z in zs:
+        box(parent, f"tail_ridge_mount_{z}", [-7, base_y, z], [14, 3, 6], "gold")
+        box(parent, f"tail_ridge_pearl_{z}", [-2, base_y+3, z+1], [4, 3, 4], "blue_glow")
+
 # Pack standard Bedrock box UV footprints.
 x = y = row_h = 2
 for c in sorted(cubes, key=lambda q: -(q["size"][1] + q["size"][2])):
@@ -157,22 +198,7 @@ for c in sorted(cubes, key=lambda q: -(q["size"][1] + q["size"][2])):
     x += fw
     row_h = max(row_h, fh)
 
-rng = random.Random(0x1E71A7)
-texture = Image.new("RGBA", (ATLAS, ATLAS), (0, 0, 0, 0))
-glow = Image.new("RGBA", (ATLAS, ATLAS), (0, 0, 0, 0))
-tp, gp = texture.load(), glow.load()
-for c in cubes:
-    x0, y0, w, h = c["footprint"]
-    base = COLORS[c["material"]]
-    for py in range(y0, y0 + h):
-        for px in range(x0, x0 + w):
-            noise = rng.randint(-10, 10) if c["material"] not in EMISSIVE else rng.randint(-4, 5)
-            edge = px in (x0, x0 + w - 1) or py in (y0, y0 + h - 1)
-            factor = 0.68 if edge else 1.0
-            color = tuple(max(0, min(255, int((base[k] + noise) * factor))) for k in range(3)) + (255,)
-            tp[px, py] = color
-            if c["material"] in EMISSIVE:
-                gp[px, py] = base
+texture, glow = paint_atlas(cubes, ATLAS)
 
 for b in bones:
     for c in b["cubes"]:
@@ -246,7 +272,7 @@ texture.save(TEX)
 glow.save(GLOW)
 
 # Render the exported geometry rather than an unrelated silhouette sketch.
-from preview_water_leviathan import render_preview
+from leviathan_textured_preview import render_preview
 render_preview(GEO, TEX, PREVIEW)
 print(json.dumps({"bones": len(bones), "cubes": len(cubes), "geo": str(GEO),
                   "preview": str(PREVIEW)}, indent=2))
