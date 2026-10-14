@@ -1,6 +1,7 @@
 package com.tnc.tnc.boss;
 
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -15,24 +16,27 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.SmoothSwimmingMoveControl;
-import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.ai.control.FlyingMoveControl;
+import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
-import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.ai.navigation.AmphibiousPathNavigation;
+import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
+import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.HitResult;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.AnimatableManager;
@@ -43,7 +47,7 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 
 /**
  * 圣渊利维坦：深海兽形水系首领。深蓝鳞甲和外露獠牙负责“凶兽”，蓝金圣甲、
- * 发光额冠和脊柱符文负责“神圣”。它能在陆地完成验收，也能水下呼吸。
+ * 发光额冠和脊柱符文负责“神圣”。水中游泳，离水后飞行，始终不用地面步行寻路。
  */
 public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
     public static final float MAX_HP = 4200.0F;
@@ -67,18 +71,52 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
     private int pendingAction = ACTION_NONE;
     private int actionTicks;
     private int attackCooldown = 70;
+    private PathNavigation airNavigation;
+    private PathNavigation waterNavigation;
+    private boolean swimmingMovement;
 
     public TNWaterLeviathanEntity(EntityType<? extends TNWaterLeviathanEntity> type, Level level) {
         super(type, level);
-        this.moveControl = new SmoothSwimmingMoveControl(this, 85, 10, 0.02F, 0.1F, true);
+        this.airNavigation = this.navigation;
+        this.waterNavigation = new WaterBoundPathNavigation(this, level);
+        this.moveControl = new FlyingMoveControl(this, 12, true);
+        this.setNoGravity(true);
         this.xpReward = 1200;
     }
 
     @Override
     protected PathNavigation createNavigation(Level level) {
-        AmphibiousPathNavigation navigation = new AmphibiousPathNavigation(this, level);
-        navigation.setCanFloat(true);
+        FlyingPathNavigation navigation = new FlyingPathNavigation(this, level);
+        navigation.setCanOpenDoors(false);
+        navigation.setCanPassDoors(false);
+        navigation.setCanFloat(false);
         return navigation;
+    }
+
+    @Override
+    public void tick() {
+        this.setNoGravity(this.isAlive());
+        if (!this.level().isClientSide && this.swimmingMovement != this.isInWater()) {
+            this.navigation.stop();
+            this.swimmingMovement = this.isInWater();
+            this.navigation = this.swimmingMovement ? this.waterNavigation : this.airNavigation;
+            this.moveControl = this.swimmingMovement
+                    ? new SmoothSwimmingMoveControl(this, 85, 10, 0.035F, 0.1F, false)
+                    : new FlyingMoveControl(this, 12, true);
+        }
+        super.tick();
+        this.fallDistance = 0.0F;
+    }
+
+    @Override
+    public void travel(Vec3 input) {
+        if (this.isEffectiveAi() && this.isAlive()) {
+            this.moveRelative(this.isInWater() ? 0.035F : 0.045F, input);
+            this.move(MoverType.SELF, this.getDeltaMovement());
+            this.setDeltaMovement(this.getDeltaMovement().scale(this.isInWater() ? 0.88D : 0.91D));
+        } else {
+            super.travel(input);
+        }
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -86,6 +124,7 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
                 .add(Attributes.MAX_HEALTH, MAX_HP)
                 .add(Attributes.ATTACK_DAMAGE, 26.0D)
                 .add(Attributes.MOVEMENT_SPEED, 0.19D)
+                .add(Attributes.FLYING_SPEED, 0.30D)
                 .add(Attributes.FOLLOW_RANGE, 56.0D)
                 .add(Attributes.ARMOR, 18.0D)
                 .add(Attributes.ARMOR_TOUGHNESS, 10.0D)
@@ -124,9 +163,7 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
 
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.05D, true));
-        this.goalSelector.addGoal(7, new RandomStrollGoal(this, 0.72D));
+        this.goalSelector.addGoal(2, new LeviathanMoveGoal());
         this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 56.0F));
         this.goalSelector.addGoal(9, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
@@ -206,6 +243,8 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
         if (speed != null) speed.setBaseValue(speed.getBaseValue() * 1.18D);
         AttributeInstance damage = this.getAttribute(Attributes.ATTACK_DAMAGE);
         if (damage != null) damage.setBaseValue(damage.getBaseValue() * 1.25D);
+        AttributeInstance flight = this.getAttribute(Attributes.FLYING_SPEED);
+        if (flight != null) flight.setBaseValue(flight.getBaseValue() * 1.18D);
 
         this.triggerAnim(ACTION_CONTROLLER, "roar");
         level.playSound(null, this.getX(), this.getY(), this.getZ(),
@@ -329,11 +368,12 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         controllers.add(new AnimationController<>(this, "move", 4, state -> {
-            if (state.isMoving() || this.isInWater()) {
-                state.getController().setAnimationSpeed(this.isInWater() ? 1.2F : 0.82F);
+            if (this.isInWater()) {
+                state.getController().setAnimationSpeed(1.15F);
                 return state.setAndContinue(RawAnimation.begin().thenLoop("swim"));
             }
-            return state.setAndContinue(RawAnimation.begin().thenLoop("idle"));
+            state.getController().setAnimationSpeed(state.isMoving() ? 1.0F : 0.72F);
+            return state.setAndContinue(RawAnimation.begin().thenLoop("glide"));
         }));
         AnimationController<TNWaterLeviathanEntity> action = new AnimationController<>(
                 this, ACTION_CONTROLLER, 2, state -> PlayState.STOP);
@@ -359,5 +399,87 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
 
     public static ResourceLocation animationResource() {
         return ResourceLocation.fromNamespaceAndPath("tnc", "animations/entity/water_leviathan.animation.json");
+    }
+
+    /** One three-dimensional movement goal; neither mode asks for a walkable ground node. */
+    private final class LeviathanMoveGoal extends Goal {
+        private int repath;
+        private int biteCooldown;
+        private Vec3 destination;
+
+        private LeviathanMoveGoal() {
+            this.setFlags(java.util.EnumSet.of(Flag.MOVE, Flag.LOOK));
+        }
+
+        @Override public boolean canUse() { return true; }
+        @Override public boolean requiresUpdateEveryTick() { return true; }
+        @Override public void stop() { navigation.stop(); }
+
+        @Override public void tick() {
+            if (biteCooldown > 0) --biteCooldown;
+            var target = getTarget();
+            boolean chasing = target != null && target.isAlive() && canStrike(target);
+            if (chasing) {
+                getLookControl().setLookAt(target, 12.0F, 12.0F);
+                if (pendingAction == ACTION_NONE && biteCooldown == 0 && distanceToSqr(target) < 36.0D
+                        && hasLineOfSight(target)) {
+                    doHurtTarget(target);
+                    biteCooldown = 26;
+                }
+            }
+            if (pendingAction != ACTION_NONE) {
+                navigation.stop();
+                setDeltaMovement(getDeltaMovement().scale(0.8D));
+                return;
+            }
+            if (chasing && swimmingMovement) {
+                // Large water mobs can finish a path while their feet are still below
+                // its final node. Keep depth control independent of that path tolerance.
+                double depth = target.getY()+(target.isInWater() ? 0 : 3.0D)-getY();
+                double vertical = LeviathanMovementRules.swimVerticalAcceleration(depth);
+                Vec3 velocity = getDeltaMovement();
+                setDeltaMovement(velocity.x,
+                        net.minecraft.util.Mth.clamp(velocity.y+vertical, -0.20D, 0.20D), velocity.z);
+            }
+            if (--repath > 0) return;
+            repath = 12;
+            if (chasing) {
+                destination = swimmingMovement
+                        ? target.position().add(0, target.isInWater() ? 0 : 3.0D, 0)
+                        : target.position().add(0, LeviathanMovementRules.AIR_TARGET_HEIGHT, 0);
+            } else if (destination == null || position().distanceToSqr(destination) < 9.0D
+                    || tickCount % 120 < 12) {
+                destination = position().add((random.nextDouble()-0.5D)*16.0D,
+                        (random.nextDouble()-0.5D)*3.0D, (random.nextDouble()-0.5D)*16.0D);
+            }
+            if (!level().hasChunkAt(BlockPos.containing(destination))) {
+                navigation.stop();
+                destination = null;
+                return;
+            }
+            if (!swimmingMovement) {
+                double floor = nearbyFloor();
+                destination = new Vec3(destination.x,
+                        LeviathanMovementRules.airDestinationY(destination.y, floor,
+                                level().getMaxBuildHeight()-HITBOX_HEIGHT-1), destination.z);
+            }
+            double speed = chasing ? 1.0D : 0.60D;
+            if (!navigation.moveTo(destination.x, destination.y, destination.z, speed)) {
+                // Direct steering also permits crossing the air/water boundary when the
+                // current medium's pathfinder cannot yet accept the next medium's node.
+                moveControl.setWantedPosition(destination.x, destination.y, destination.z, speed);
+            }
+        }
+
+        private double nearbyFloor() {
+            double floor = getY()-10.0D;
+            for (double[] offset : new double[][]{{0, 0}, {-2, 0}, {2, 0}, {0, -2}, {0, 2}}) {
+                Vec3 from = position().add(offset[0], 0.25D, offset[1]);
+                HitResult hit = level().clip(new ClipContext(from, from.add(0, -10, 0),
+                        ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, TNWaterLeviathanEntity.this));
+                if (hit.getType() != HitResult.Type.MISS) floor = Math.max(floor, hit.getLocation().y);
+            }
+            return floor;
+        }
     }
 }

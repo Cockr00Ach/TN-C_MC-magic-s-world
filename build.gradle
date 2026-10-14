@@ -154,6 +154,11 @@ minecraft {
         // The gametest system is also enabled by default for other run configs under the /test command.
         gameTestServer {
             property 'forge.enabledGameTestNamespaces', project.hasProperty('lifeRoutesTests') ? 'tncroute' : mod_id
+            if (project.hasProperty('leviathanTests')) {
+                property 'forge.enabledGameTestNamespaces', 'tncleviathan'
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+            }
             if (project.hasProperty('ftbQuestLoadTests')) {
                 workingDirectory project.file('work/ftb-route-load-test')
             }
@@ -244,6 +249,9 @@ dependencies {
 
     testImplementation platform('org.junit:junit-bom:5.10.2')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    if (project.hasProperty('leviathanTests')) {
+        runtimeOnly fg.deobf('geckolib:geckolib:4.8.4')
+    }
     if (project.hasProperty('tavernClientAudit')) {
         // Dev-only nested Fabric API SRG names must also match Mojmap; game jar untouched.
         runtimeOnly files('work/tavern-fixtures/conquest-dev.jar')

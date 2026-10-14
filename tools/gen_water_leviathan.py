@@ -262,6 +262,21 @@ animations = {
     },
 }
 
+# A separate slow fin-and-tail cycle makes hovering read as flight rather than walking.
+animations["animations"]["glide"] = {
+    "loop": True, "animation_length": 2.8, "bones": {
+        "body": {"position": {"0": [0, 0, 0], "1.4": [0, 0.7, 0], "2.8": [0, 0, 0]}},
+        "tail1": {"rotation": {"0": [0, -5, 0], "1.4": [0, 5, 0], "2.8": [0, -5, 0]}},
+        "tail2": {"rotation": {"0": [0, 9, 0], "1.4": [0, -9, 0], "2.8": [0, 9, 0]}},
+        "tail3": {"rotation": {"0": [0, 14, 0], "1.4": [0, -14, 0], "2.8": [0, 14, 0]}},
+    },
+}
+for side in (-1, 1):
+    for part, amplitude in (("front", 9), ("rear", 6)):
+        animations["animations"]["glide"]["bones"][f"fin_{part}_{side}"] = {
+            "rotation": {"0": [0, 0, side*amplitude], "1.4": [0, 0, -side*amplitude],
+                         "2.8": [0, 0, side*amplitude]}}
+
 for path in (GEO, ANIM, TEX, GLOW, PREVIEW):
     path.parent.mkdir(parents=True, exist_ok=True)
 with GEO.open("w", encoding="utf-8", newline="\n") as handle:
