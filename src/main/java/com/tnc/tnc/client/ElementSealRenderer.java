@@ -9,6 +9,7 @@ final class ElementSealRenderer {
         boolean wind=e.style()==TNMagicCircleEntity.STYLE_WIND;
         double age=e.tickCount+partial,r=e.radius(),spin=age*(wind?.022:.008);
         float alpha=(float)Math.max(0,Math.min(1,(e.life()-age)/18));
+        if(wind){WindSolidModels.seal(r,age,alpha,p,b);return;}
         var out=b.getBuffer(WaterRenderTypes.geometry());var m=p.last().pose();
         Vec3 c=new Vec3(0,.08,0),up=new Vec3(0,1,0);
         float red=wind?.30F:1,green=wind?.90F:.78F,blue=wind?.86F:.32F;
