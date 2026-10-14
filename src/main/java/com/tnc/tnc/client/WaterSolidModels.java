@@ -43,6 +43,13 @@ public final class WaterSolidModels {
         if(opacity<1)consumer=new Alpha(consumer,opacity);
         mc.getItemRenderer().renderModelLists(model,ItemStack.EMPTY,LightTexture.FULL_BRIGHT,
                 OverlayTexture.NO_OVERLAY,poses,consumer);
+        if(name.equals("sea_god_sword")||name.equals("seal")) {
+            // Full light-map brightness alone does not create the additive glow.
+            var emission=new Alpha(buffers.getBuffer(RenderType.eyes(TextureAtlas.LOCATION_BLOCKS)),
+                    name.equals("sea_god_sword")?.45F:Math.max(.42F,opacity*.7F));
+            mc.getItemRenderer().renderModelLists(model,ItemStack.EMPTY,LightTexture.FULL_BRIGHT,
+                    OverlayTexture.NO_OVERLAY,poses,emission);
+        }
         poses.popPose();
     }
     static void seal(PoseStack poses,MultiBufferSource buffers,Vec3 at,Vec3 normal,double radius,double age,float envelope) {

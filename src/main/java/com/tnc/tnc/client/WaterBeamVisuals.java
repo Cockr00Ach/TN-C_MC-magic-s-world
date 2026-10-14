@@ -13,7 +13,7 @@ final class WaterBeamVisuals {
         double r=WaterSpellRules.radius(tier);
         Vec3 end=dir.scale(length),right=WaterSpellRules.right(dir),up=right.cross(dir).normalize();
         int segments=detail?32:16;
-        WaterGeometry.tube(body,pose,Vec3.ZERO,end,r,.025F,.42F,.96F,fade*.52F,segments);
+        WaterGeometry.tube(body,pose,Vec3.ZERO,end,r,.03F,.25F,.98F,fade*.52F,segments);
         WaterGeometry.tube(glow,pose,Vec3.ZERO,end,r*.10,.55F,.92F,1,fade*.32F,detail?12:8);
         int strands=detail?3:2;
         double step=tier==5?(detail?4:8):(detail?2:4);
@@ -22,7 +22,8 @@ final class WaterBeamVisuals {
             double b=z2*.32-age*.24+strand*Math.PI*2/strands;
             Vec3 p=dir.scale(z).add(WaterGeometry.radial(right,up,a,r*.96));
             Vec3 q=dir.scale(z2).add(WaterGeometry.radial(right,up,b,r*.96));
-            WaterGeometry.stroke(body,pose,dir,p,q,tier==5?.18:.035,.48F,.9F,1,fade*.7F);
+            boolean violet=(strand+(int)(z/step))%10==9;
+            WaterGeometry.stroke(body,pose,dir,p,q,tier==5?.18:.035,violet?.58F:.25F,violet?.14F:.65F,1,fade*.7F);
         }
         double spacing=tier==5?16:8;
         for(double z=(age*1.4)%spacing;z<length;z+=spacing)

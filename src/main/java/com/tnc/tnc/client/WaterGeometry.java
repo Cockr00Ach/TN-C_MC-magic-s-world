@@ -471,6 +471,7 @@ final class WaterGeometry {
      */
     static void waterColumn(VertexConsumer out,Matrix4f pose,Vec3 base,double radius,double height,double time,
                             double twist,float r,float g,float b,float alpha) {
+        r=.03F;g=.25F;b=.98F;
         Vec3 top=base.add(0,height,0);
         // 第十批：三层管显式给边数 ✗（老判据 radius≥.1 就是 24 边＝96 顶点 ✗，四根柱子光管身就 1.2k ✗）
         tube(out,pose,base,top,radius,r,g,b,alpha*.28F,14);
@@ -487,7 +488,8 @@ final class WaterGeometry {
             Vec3 tangent=new Vec3(-Math.sin(a),0,Math.cos(a));
             Vec3 low=base.add(Math.cos(a)*rr,height*t,Math.sin(a)*rr),high=base.add(Math.cos(a+.07)*rr,height*u,Math.sin(a+.07)*rr);
             double width=radius*.018;
-            quad(out,pose,low.subtract(tangent.scale(width)),low.add(tangent.scale(width)),high.add(tangent.scale(width)),high.subtract(tangent.scale(width)),.35F,.85F,1,alpha*.52F);
+            boolean violet=(strand*4+step)%10==9;
+            quad(out,pose,low.subtract(tangent.scale(width)),low.add(tangent.scale(width)),high.add(tangent.scale(width)),high.subtract(tangent.scale(width)),violet?.58F:.22F,violet?.14F:.62F,1,alpha*.52F);
         }
         double pulse=(time*.10+twist)%1;
         ringColor(out,pose,base.add(0,height*pulse,0),UP,radius*1.08,radius*.045,.50F,.92F,1,alpha*.6F,32);
