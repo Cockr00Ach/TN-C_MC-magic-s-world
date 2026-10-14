@@ -61,6 +61,11 @@ public final class TNNpcAttributes {
             () -> new net.minecraftforge.common.ForgeSpawnEggItem(
                     TNNpcs.DARK_GIANT, 0x261A2E, 0x8E2B24, new Item.Properties()));
 
+    /** 深渊海蓝 + 圣甲金。正式生成入口后仍保留刷怪蛋用于验收模型与招式。 */
+    public static final RegistryObject<Item> WATER_LEVIATHAN_SPAWN_EGG = SPAWN_EGGS.register(
+            "water_leviathan_spawn_egg", () -> new net.minecraftforge.common.ForgeSpawnEggItem(
+                    TNNpcs.WATER_LEVIATHAN, 0x06283F, 0xD9B44A, new Item.Properties()));
+
     private TNNpcAttributes() {
     }
 
@@ -81,6 +86,8 @@ public final class TNNpcAttributes {
         event.put(TNNpcs.APOLLO.get(), com.tnc.tnc.boss.TNApolloEntity.createAttributes().build());
         // ★ 暗系巨人领主（作者 2026-10-03 ✓）—— 生物必须在这里有属性，漏了生成即崩 ✗
         event.put(TNNpcs.DARK_GIANT.get(), com.tnc.tnc.boss.TNDarkGiantEntity.createAttributes().build());
+        event.put(TNNpcs.WATER_LEVIATHAN.get(),
+                com.tnc.tnc.boss.TNWaterLeviathanEntity.createAttributes().build());
         event.put(TNNpcs.ZUOWANG.get(), TnDialogueNpc.attributes().build());
         // ★ 光天使（光系第二条链召唤的雕像 ✓）——**生物必须在这里有属性，漏了生成即崩** ✗
         event.put(com.tnc.tnc.magic.TNOrbEntities.ANGEL.get(),

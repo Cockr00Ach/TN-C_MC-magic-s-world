@@ -84,5 +84,7 @@ public final class TNNpcClientEvents {
         // ★ 暗系巨人领主（作者 2026-10-03 ✓）：4.5 格高的巨人，渲染器只做整体缩放 ✓
         event.registerEntityRenderer(com.tnc.tnc.npc.TNNpcs.DARK_GIANT.get(),
                 ctx -> new com.tnc.tnc.boss.client.TNDarkGiantRenderer(ctx));
+        event.registerEntityRenderer(com.tnc.tnc.npc.TNNpcs.WATER_LEVIATHAN.get(),
+                com.tnc.tnc.boss.client.TNWaterLeviathanRenderer::new);
     }
 }

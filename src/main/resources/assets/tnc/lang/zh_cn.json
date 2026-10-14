@@ -580,5 +580,7 @@
   "entity.tnc.prismatic_antelope": "曳彩角羚",
   "item.tnc.prismatic_antelope_spawn_egg": "曳彩角羚刷怪蛋",
   "entity.tnc.drumbelly_otter": "鼓腹砂獭",
-  "item.tnc.drumbelly_otter_spawn_egg": "鼓腹砂獭刷怪蛋"
+  "item.tnc.drumbelly_otter_spawn_egg": "鼓腹砂獭刷怪蛋",
+  "entity.tnc.water_leviathan": "圣渊利维坦",
+  "item.tnc.water_leviathan_spawn_egg": "圣渊利维坦刷怪蛋"
 }

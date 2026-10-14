@@ -154,6 +154,15 @@ public final class TNNpcs {
                     .clientTrackingRange(16)
                     .build("tnc:dark_giant"));
 
+    /** 圣渊利维坦：十二格长的蓝金深海巨兽，陆地与水下都可作战。 */
+    public static final RegistryObject<EntityType<com.tnc.tnc.boss.TNWaterLeviathanEntity>> WATER_LEVIATHAN =
+            ENTITY_TYPES.register("water_leviathan", () -> EntityType.Builder
+                    .of(com.tnc.tnc.boss.TNWaterLeviathanEntity::new, MobCategory.MONSTER)
+                    .sized(com.tnc.tnc.boss.TNWaterLeviathanEntity.HITBOX_WIDTH,
+                            com.tnc.tnc.boss.TNWaterLeviathanEntity.HITBOX_HEIGHT)
+                    .clientTrackingRange(20)
+                    .build("tnc:water_leviathan"));
+
     private TNNpcs() {
     }
 
