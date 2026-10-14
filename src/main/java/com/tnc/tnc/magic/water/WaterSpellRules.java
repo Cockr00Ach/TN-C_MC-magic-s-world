@@ -115,6 +115,14 @@ public final class WaterSpellRules {
         return Math.abs(axis.x)*half.x+Math.abs(axis.y)*half.y+Math.abs(axis.z)*half.z;
     }
     public static boolean enemy(LivingEntity caster, LivingEntity target) {
+        if (caster==null || target==null) return false;
+        if (caster instanceof com.tnc.tnc.boss.TNWaterLeviathanEntity) {
+            return target != caster && target.isAlive() && !target.isAlliedTo(caster)
+                    && !caster.isAlliedTo(target)
+                    && !(target instanceof com.tnc.tnc.boss.TNWaterLeviathanEntity)
+                    && !(target instanceof Player p && (p.isCreative() || p.isSpectator()
+                        || com.tnc.tnc.combat.DownedCombat.isDowned(p)));
+        }
         if (target == caster || !target.isAlive() || target.isAlliedTo(caster) || caster.isAlliedTo(target)
                 || target instanceof Player || target instanceof TamableAnimal pet && pet.isTame()) return false;
         return target instanceof Enemy || target instanceof Mob mob && mob.getTarget() == caster;

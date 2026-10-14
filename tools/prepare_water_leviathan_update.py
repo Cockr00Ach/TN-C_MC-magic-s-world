@@ -32,7 +32,17 @@ MOVEMENT_ENTRIES = {
     "com/tnc/tnc/boss/client/LeviathanFlightVisuals.class",
     "assets/tnc/animations/entity/water_leviathan.animation.json",
 }
-ENTRIES |= MOVEMENT_ENTRIES
+SPELL_ENTRIES = {
+    "com/tnc/tnc/boss/TNWaterLeviathanEntity.class",
+    "com/tnc/tnc/boss/TNWaterLeviathanEntity$LeviathanMoveGoal.class",
+    "com/tnc/tnc/boss/LeviathanSpellRules.class",
+    "com/tnc/tnc/boss/LeviathanSpells.class",
+    "com/tnc/tnc/magic/water/WaterSpellOwners.class",
+    "com/tnc/tnc/magic/water/TNWaterSpellEntity.class",
+    "com/tnc/tnc/magic/water/TNWaterFieldEntity.class",
+    "com/tnc/tnc/magic/water/WaterSpellRules.class",
+}
+ENTRIES |= MOVEMENT_ENTRIES | SPELL_ENTRIES
 
 
 def digest(path: Path) -> str:
@@ -95,5 +105,9 @@ if __name__ == "__main__":
     p.add_argument("--output", type=Path, required=True)
     p.add_argument("--report", type=Path, required=True)
     p.add_argument("--movement-only", action="store_true")
+    p.add_argument("--spells-only", action="store_true")
     a = p.parse_args()
-    main(a.base, a.built, a.output, a.report, MOVEMENT_ENTRIES if a.movement_only else ENTRIES)
+    if a.movement_only and a.spells_only:
+        p.error("choose one update scope")
+    main(a.base, a.built, a.output, a.report,
+         SPELL_ENTRIES if a.spells_only else MOVEMENT_ENTRIES if a.movement_only else ENTRIES)

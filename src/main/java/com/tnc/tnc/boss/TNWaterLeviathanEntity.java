@@ -57,8 +57,7 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
     private static final int PHASE_ONE = 1;
     private static final int PHASE_TWO = 2;
     private static final int ACTION_NONE = 0;
-    private static final int ACTION_BREATH = 1;
-    private static final int ACTION_TAIL = 2;
+    private static final int ACTION_SPELL = 1;
     private static final String ACTION_CONTROLLER = "action";
 
     private static final EntityDataAccessor<Integer> DATA_PHASE =
@@ -71,6 +70,10 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
     private int pendingAction = ACTION_NONE;
     private int actionTicks;
     private int attackCooldown = 70;
+    private String pendingSpell;
+    private int basicCasts;
+    private int specialCooldown;
+    private int nextSpecial;
     private PathNavigation airNavigation;
     private PathNavigation waterNavigation;
     private boolean swimmingMovement;
@@ -149,6 +152,8 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putInt("LeviathanPhase", this.phase());
+        tag.putInt("LeviathanSpecialCooldown", specialCooldown);
+        tag.putInt("LeviathanNextSpecial", nextSpecial);
     }
 
     @Override
@@ -158,6 +163,9 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
                 tag.getInt("LeviathanPhase") >= PHASE_TWO ? PHASE_TWO : PHASE_ONE);
         // Attributes are already restored by LivingEntity; never multiply them again on reload.
         this.pendingAction = ACTION_NONE;
+        this.pendingSpell = null;
+        this.specialCooldown = Math.max(0,tag.getInt("LeviathanSpecialCooldown"));
+        this.nextSpecial = Math.floorMod(tag.getInt("LeviathanNextSpecial"),3);
         this.attackCooldown = 70;
     }
 
@@ -238,6 +246,7 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
     private void enterPhaseTwo(ServerLevel level) {
         this.entityData.set(DATA_PHASE, PHASE_TWO);
         this.pendingAction = ACTION_NONE;
+        this.pendingSpell = null;
         this.attackCooldown = 50;
         AttributeInstance speed = this.getAttribute(Attributes.MOVEMENT_SPEED);
         if (speed != null) speed.setBaseValue(speed.getBaseValue() * 1.18D);
@@ -276,87 +285,40 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
     }
 
     private void tickSpecialAttack(ServerLevel level) {
+        if (this.specialCooldown>0) --this.specialCooldown;
+        var target=this.getTarget();
         if (this.pendingAction != ACTION_NONE) {
             if (--this.actionTicks <= 0) {
-                if (this.pendingAction == ACTION_BREATH) {
-                    this.releaseTidalBreath(level);
-                } else {
-                    this.releaseTailSweep(level);
+                boolean cast=target!=null && this.canStrike(target) && this.hasLineOfSight(target)
+                        && LeviathanSpells.cast(this,target,this.pendingSpell);
+                if (cast) {
+                    if (LeviathanSpellRules.BASIC.equals(this.pendingSpell)) {
+                        this.basicCasts=Math.min(3,this.basicCasts+1);
+                    } else {
+                        this.specialCooldown=LeviathanSpellRules.specialCooldown(this.pendingSpell,this.isPhaseTwo());
+                        this.basicCasts=0;
+                        this.nextSpecial=(this.nextSpecial+1)%3;
+                    }
                 }
                 this.pendingAction = ACTION_NONE;
-                this.attackCooldown = this.isPhaseTwo() ? 42 : 68;
+                this.pendingSpell=null;
+                this.attackCooldown=LeviathanSpellRules.recovery(this.isPhaseTwo());
             }
             return;
         }
 
-        if (this.getTarget() == null || !this.getTarget().isAlive()
-                || !this.hasLineOfSight(this.getTarget()) || --this.attackCooldown > 0) return;
-        double distance = this.distanceTo(this.getTarget());
-        if (distance <= 8.5D && this.random.nextBoolean()) {
-            this.pendingAction = ACTION_TAIL;
-            this.actionTicks = 18;
-            this.triggerAnim(ACTION_CONTROLLER, "tail");
-            level.playSound(null, this.getX(), this.getY(), this.getZ(),
-                    SoundEvents.TRIDENT_RIPTIDE_2, SoundSource.HOSTILE, 2.3F, 0.72F);
-        } else {
-            this.pendingAction = ACTION_BREATH;
-            this.actionTicks = 30;
-            this.triggerAnim(ACTION_CONTROLLER, "breath");
-            level.playSound(null, this.getX(), this.getY(), this.getZ(),
-                    SoundEvents.CONDUIT_ACTIVATE, SoundSource.HOSTILE, 2.5F, 0.58F);
-            level.sendParticles(ParticleTypes.END_ROD, this.getX(), this.getY() + 2.6D, this.getZ(),
-                    28, 1.1D, 0.65D, 1.1D, 0.04D);
-        }
-    }
-
-    /** Twenty-block blue-gold cone. The long telegraph gives players time to dodge sideways. */
-    private void releaseTidalBreath(ServerLevel level) {
-        Vec3 origin = this.getEyePosition();
-        Vec3 forward = this.getLookAngle().normalize();
-        float damage = this.isPhaseTwo() ? 38.0F : 28.0F;
-        for (net.minecraft.world.entity.LivingEntity victim : level.getEntitiesOfClass(
-                net.minecraft.world.entity.LivingEntity.class, this.getBoundingBox().inflate(22.0D),
-                this::canStrike)) {
-            Vec3 offset = victim.getEyePosition().subtract(origin);
-            double distance = offset.length();
-            if (distance <= 20.0D && distance > 0.1D && offset.normalize().dot(forward) >= 0.68D
-                    && this.hasLineOfSight(victim)) {
-                victim.hurt(this.damageSources().mobAttack(this), damage);
-                victim.push(forward.x * 1.2D, 0.35D, forward.z * 1.2D);
-            }
-        }
-        for (int step = 1; step <= 20; step++) {
-            Vec3 p = origin.add(forward.scale(step));
-            double spread = 0.10D + step * 0.055D;
-            level.sendParticles(step % 3 == 0 ? ParticleTypes.END_ROD : ParticleTypes.SPLASH,
-                    p.x, p.y, p.z, 8, spread, spread, spread, 0.08D);
-        }
-        level.playSound(null, this.getX(), this.getY(), this.getZ(),
-                SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 2.6F, 0.82F);
-    }
-
-    /** Close-range 360-degree tail sweep with a visible ring and strong horizontal knockback. */
-    private void releaseTailSweep(ServerLevel level) {
-        float damage = this.isPhaseTwo() ? 34.0F : 25.0F;
-        for (net.minecraft.world.entity.LivingEntity victim : level.getEntitiesOfClass(
-                net.minecraft.world.entity.LivingEntity.class, this.getBoundingBox().inflate(8.0D),
-                this::canStrike)) {
-            Vec3 away = victim.position().subtract(this.position());
-            if (away.horizontalDistanceSqr() <= 64.0D && Math.abs(away.y) <= 4.0D
-                    && this.hasLineOfSight(victim)) {
-                victim.hurt(this.damageSources().mobAttack(this), damage);
-                Vec3 push = away.lengthSqr() < 0.01D ? new Vec3(1.0D, 0.0D, 0.0D) : away.normalize();
-                victim.push(push.x * 2.0D, 0.55D, push.z * 2.0D);
-            }
-        }
-        for (int degree = 0; degree < 360; degree += 10) {
-            double angle = Math.toRadians(degree);
-            level.sendParticles(degree % 30 == 0 ? ParticleTypes.END_ROD : ParticleTypes.SPLASH,
-                    this.getX() + Math.cos(angle) * 7.0D, this.getY() + 0.45D,
-                    this.getZ() + Math.sin(angle) * 7.0D, 2, 0.12D, 0.08D, 0.12D, 0.03D);
-        }
-        level.playSound(null, this.getX(), this.getY(), this.getZ(),
-                SoundEvents.TRIDENT_THUNDER, SoundSource.HOSTILE, 2.2F, 1.15F);
+        if (target==null || !this.canStrike(target) || this.distanceToSqr(target)>48.0D*48.0D
+                || !this.hasLineOfSight(target) || --this.attackCooldown>0) return;
+        this.pendingSpell=LeviathanSpellRules.next(this.basicCasts,this.specialCooldown,this.nextSpecial);
+        this.pendingAction=ACTION_SPELL;
+        this.actionTicks=LeviathanSpellRules.windup(this.pendingSpell,this.isPhaseTwo());
+        this.getLookControl().setLookAt(target, 30, 30);
+        this.triggerAnim(ACTION_CONTROLLER, "breath");
+        boolean basic=LeviathanSpellRules.BASIC.equals(this.pendingSpell);
+        level.playSound(null,this.getX(),this.getY(),this.getZ(),SoundEvents.CONDUIT_ACTIVATE,
+                SoundSource.HOSTILE,basic?1.4F:2.5F,basic?0.9F:0.58F);
+        level.sendParticles(ParticleTypes.END_ROD,this.getX(),this.getY()+2.6D,this.getZ(),
+                basic?8:28,1.1D,0.65D,1.1D,0.04D);
     }
 
     private boolean canStrike(net.minecraft.world.entity.LivingEntity victim) {
@@ -404,7 +366,6 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
     /** One three-dimensional movement goal; neither mode asks for a walkable ground node. */
     private final class LeviathanMoveGoal extends Goal {
         private int repath;
-        private int biteCooldown;
         private Vec3 destination;
 
         private LeviathanMoveGoal() {
@@ -416,16 +377,11 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
         @Override public void stop() { navigation.stop(); }
 
         @Override public void tick() {
-            if (biteCooldown > 0) --biteCooldown;
             var target = getTarget();
             boolean chasing = target != null && target.isAlive() && canStrike(target);
             if (chasing) {
                 getLookControl().setLookAt(target, 12.0F, 12.0F);
-                if (pendingAction == ACTION_NONE && biteCooldown == 0 && distanceToSqr(target) < 36.0D
-                        && hasLineOfSight(target)) {
-                    doHurtTarget(target);
-                    biteCooldown = 26;
-                }
+
             }
             if (pendingAction != ACTION_NONE) {
                 navigation.stop();

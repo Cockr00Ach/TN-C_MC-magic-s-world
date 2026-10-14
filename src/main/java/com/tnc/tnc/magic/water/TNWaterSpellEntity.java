@@ -65,6 +65,26 @@ public final class TNWaterSpellEntity extends Entity {
         }
         player.serverLevel().addFreshEntity(cast);
     }
+    public static boolean castBoss(com.tnc.tnc.boss.TNWaterLeviathanEntity caster,
+                                   LivingEntity target, String spell) {
+        int tier=WaterSpellRules.tier(spell);
+        if (!(caster.level() instanceof ServerLevel level) || !caster.isAlive()
+                || (tier!=3 && tier!=5) || !WaterSpellRules.enemy(caster,target)) return false;
+        for (var old : level.getEntitiesOfClass(TNWaterSpellEntity.class,caster.getBoundingBox().inflate(128)))
+            if (caster.getUUID().equals(old.owner)) old.discard();
+        var cast=TNOrbEntities.WATER_SPELL.get().create(level);
+        if (cast==null) return false;
+        Vec3 forward=target.getBoundingBox().getCenter().subtract(caster.getEyePosition()).normalize();
+        Vec3 at=caster.getEyePosition().add(forward.scale(6.5D));
+        if (tier==5) at=at.add(0,WaterSpellRules.circleRadius(5),0);
+        Vec3 direction=target.getBoundingBox().getCenter().subtract(at).normalize();
+        cast.owner=caster.getUUID(); cast.barrageAim=target.getBoundingBox().getCenter();
+        cast.setPos(at); cast.entityData.set(TIER,tier);
+        cast.entityData.set(YAW,(float)Math.toDegrees(Math.atan2(-direction.x,direction.z)));
+        cast.entityData.set(PITCH,(float)-Math.toDegrees(Math.asin(direction.y)));
+        return level.addFreshEntity(cast);
+    }
+
     static void bolt(LivingEntity player,int tier,Vec3 at,Vec3 velocity) {
         var bolt=TNOrbEntities.WATER_BOLT.get().create(player.level());
         if(bolt!=null) { bolt.configure(player,tier,at,velocity);player.level().addFreshEntity(bolt); }
@@ -79,21 +99,22 @@ public final class TNWaterSpellEntity extends Entity {
     @Override public void tick() {
         super.tick(); if(level().isClientSide)return;
         ServerLevel level=(ServerLevel)level();
-        ServerPlayer player=owner==null?null:level.getServer().getPlayerList().getPlayer(owner);
-        if(player==null || !player.isAlive() || com.tnc.tnc.combat.DownedCombat.isDowned(player) || player.isSpectator() || player.level()!=level || player.distanceToSqr(this)>128*128) {discard();return;}
+        LivingEntity player=WaterSpellOwners.resolve(level,owner);
+        if(player==null || player.distanceToSqr(this)>128*128) {discard();return;}
+        ServerPlayer terrainCaster=player instanceof ServerPlayer p?p:null;
         entityData.set(AGE,tickCount);
         Vec3 dir=direction();
         int charge=WaterSpellRules.charge(tier());
         // 龙滅：**蓄力期跑预扫描**（作者 2026-10-10："不管是前期加载久一点"✓）——
         // 整条 96 格通道在这里一次性验证完 ✗（每格 4 片、24 tick 扫完 ✓ < 30 tick 蓄力 ✓），
         // 前端才可能"一开火就射出 96 格" ✓。纯服务端 ✗：不加法阵时长、不改魔力门槛 ✓。
-        if(tier()==5) {
+        if(tier()==5 && terrainCaster!=null) {
             if(bore==null)bore=new WaterTerrainBore(position(),dir,WaterSpellRules.radius(tier()),WaterSpellRules.range(tier()));
-            bore.scan(level,player);
+            bore.scan(level,terrainCaster);
         }
         // 正常情况蓄力 30 tick 结束、预扫描也早在第 24 tick 扫完 ✓；
         // 万一没扫完（服务器卡 / 前方区块没加载 ✗）就**继续蓄力**✗ —— 绝不在"还没验证完"的情况下开火 ✓。
-        boolean charging=tickCount<charge||(tier()==5&&!bore.prescanDone());
+        boolean charging=tickCount<charge||(tier()==5&&terrainCaster!=null&&!bore.prescanDone());
         if(charging) {
             // 蓄力：水元素螺旋收进法阵中心 ✓（纯表现 ✗，不影响蓄力时长/魔力门槛 ✗）
             if(tickCount%2==0) WaterFx.charge(level,position(),dir,WaterSpellRules.circleRadius(tier()),tickCount,Math.max(charge,Math.max(1,tickCount)));
@@ -123,16 +144,16 @@ public final class TNWaterSpellEntity extends Entity {
             return;
         }
         double len;
-        if(tier()==5) {
+        if(tier()==5 && terrainCaster!=null) {
             if(bore==null)bore=new WaterTerrainBore(position(),dir,WaterSpellRules.radius(tier()),WaterSpellRules.range(tier()));
             bore.setRemainingTicks(WaterSpellRules.duration(tier())-active);   // 自适应追挖预算 ✓
-            bore.tick(level,player);len=bore.length();
+            bore.tick(level,terrainCaster);len=bore.length();
             if(bore.stopped()&&!blocked()) {
                 entityData.set(BLOCKED,true);
-                player.displayClientMessage(net.minecraft.network.chat.Component.literal("§b龙滅受阻："+bore.stopReason()+"。请换到开阔处施放。"),true);
+                terrainCaster.displayClientMessage(net.minecraft.network.chat.Component.literal("§b龙滅受阻："+bore.stopReason()+"。请换到开阔处施放。"),true);
                 level.playSound(null,blockPosition(),SoundEvents.ANVIL_LAND,SoundSource.PLAYERS,.7F,.55F);
             }
-        } else len=clearLength(level,dir);
+        } else len=tier()==5?bossBeamLength(level,dir):clearLength(level,dir);
         entityData.set(LENGTH,(float)len);
         // 光束表面流动 + 末端喷发 ✓，长度用的是服务端真实长度 ✗。
         // 2026-10-10 起：t5 的"真实长度"是**保证射出速度的前端** ✓（预扫描过的授权通道 ✗），
@@ -151,12 +172,25 @@ public final class TNWaterSpellEntity extends Entity {
                 // 保护边界之外依旧不可能被打到 ✗ —— 前端根本越不过那个切片 ✓。
 
                 if(along>=0 && along<=len && WaterSpellRules.segmentDistanceSquared(center,position(),dir,len)<=hitRadius*hitRadius
-                        && (tier()==5||TNWaterFieldEntity.clearSight(level,position(),center)))
+                        && (tier()==5&&terrainCaster!=null||TNWaterFieldEntity.clearSight(level,position(),center)))
                     target.hurt(level.damageSources().indirectMagic(this,player),WaterSpellRules.damage(tier())*WaterSpellRules.power(player));
             }
         }
         if(active%20==0 && len>0)level.playSound(null,blockPosition(),SoundEvents.WATER_AMBIENT,SoundSource.PLAYERS,1.2F,.65F);
     }
+    /** Mob beam shares the real T5 aperture and damage, but has no player drilling authority. */
+    private double bossBeamLength(ServerLevel level,Vec3 dir) {
+        double length=WaterSpellRules.range(5);
+        for(int step=0;step<=length;step++) {
+            if(!level.hasChunkAt(BlockPos.containing(position().add(dir.scale(step))))) {
+                length=Math.max(0,step-1); break;
+            }
+        }
+        var hit=level.clip(new ClipContext(position(),position().add(dir.scale(length)),
+                ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,this));
+        return hit.getType()==HitResult.Type.MISS?length:position().distanceTo(hit.getLocation());
+    }
+
     private double clearLength(ServerLevel level,Vec3 dir) {
         double length=WaterSpellRules.range(tier());
         for(int i=0;i<=length;i++)if(!level.hasChunkAt(BlockPos.containing(position().add(dir.scale(i))))) {length=Math.max(0,i-1);break;}

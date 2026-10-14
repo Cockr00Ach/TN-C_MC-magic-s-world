@@ -96,6 +96,41 @@ public final class TNWaterFieldEntity extends Entity {
         }
         return false;
     }
+    /** Boss casts share the real wave/crypt model, timeline and effects with player magic. */
+    public static boolean castBoss(com.tnc.tnc.boss.TNWaterLeviathanEntity caster,
+                                   LivingEntity target, String spell) {
+        if (!(caster.level() instanceof ServerLevel level) || !caster.isAlive()
+                || !WaterSpellRules.enemy(caster, target)) return false;
+        boolean crypt = spell.equals("sea_god_crypt");
+        if (!crypt && !spell.equals("tsunami")) return false;
+        if (crypt) for (var old : level.getEntitiesOfClass(TNWaterFieldEntity.class,
+                caster.getBoundingBox().inflate(128))) {
+            if (caster.getUUID().equals(old.owner) && old.kind()==2) old.discard();
+        }
+        Vec3 toward = target.position().subtract(caster.position()).multiply(1, 0, 1);
+        Vec3 direction = toward.lengthSqr()<0.01D
+                ? Vec3.directionFromRotation(0, caster.getYRot()) : toward.normalize();
+        Vec3 at = crypt ? target.position() : caster.position().add(direction.scale(4.0D));
+        if (!crypt && !caster.isInWater()) {
+            var ground = level.clip(new ClipContext(at.add(0, 1, 0), at.add(0, -16, 0),
+                    ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, caster));
+            if (ground.getType()!=HitResult.Type.MISS) at = ground.getLocation().add(0, 0.1D, 0);
+        }
+        if (!level.hasChunkAt(BlockPos.containing(at))) return false;
+        var field = TNOrbEntities.WATER_FIELD.get().create(level);
+        if (field==null) return false;
+        field.owner=caster.getUUID(); field.setPos(at);
+        field.entityData.set(KIND, crypt ? 2 : 1);
+        field.entityData.set(TIER, crypt ? 5 : 4);
+        field.entityData.set(YAW, (float)Math.toDegrees(Math.atan2(-direction.x, direction.z)));
+        field.entityData.set(PITCH, 0.0F);
+        boolean added = level.addFreshEntity(field);
+        if (added && !crypt) WaterFx.waveCast(level, at, direction, 4);
+        level.playSound(null, BlockPos.containing(at), crypt ? SoundEvents.CONDUIT_ACTIVATE
+                : SoundEvents.PLAYER_SPLASH, SoundSource.HOSTILE, crypt ? 3 : 1.5F, 0.55F);
+        return added;
+    }
+
     public static LivingEntity aimEnemy(ServerPlayer player,double range) {
         Vec3 from=player.getEyePosition(),end=from.add(player.getLookAngle().scale(range));
         var wall=player.level().clip(new ClipContext(from,end,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,player));
@@ -112,13 +147,14 @@ public final class TNWaterFieldEntity extends Entity {
         super.tick();
         if(level().isClientSide) { clientRain(); return; }
         ServerLevel level=(ServerLevel)level();
-        var player=owner==null?null:level.getServer().getPlayerList().getPlayer(owner);
-        if(player==null || !player.isAlive() || com.tnc.tnc.combat.DownedCombat.isDowned(player) || player.isSpectator() || player.level()!=level || player.distanceToSqr(this)>128*128 || tickCount>life()){discard();return;}
+        LivingEntity player=WaterSpellOwners.resolve(level,owner);
+        if(player==null || player.distanceToSqr(this)>128*128 || tickCount>life()){discard();return;}
         entityData.set(AGE,tickCount);
         if(isEmitter()) {
+            if (!(player instanceof ServerPlayer serverPlayer)) { discard(); return; }
             setPos(player.getEyePosition());
             if(tickCount<life()&&tickCount%WaterSpellRules.SLASH_VOLLEY_INTERVAL==0) {
-                emitSlash(player,tickCount/WaterSpellRules.SLASH_VOLLEY_INTERVAL);
+                emitSlash(serverPlayer,tickCount/WaterSpellRules.SLASH_VOLLEY_INTERVAL);
                 // Each rapidly emitted front has a short hand splash.
                 WaterFx.waveCast(level,position(),player.getLookAngle(),3);
             }
@@ -138,7 +174,7 @@ public final class TNWaterFieldEntity extends Entity {
         if(kind()==1 && tier()==5 && tickCount%40==0)
             level.playSound(null,blockPosition(),SoundEvents.PLAYER_SPLASH,SoundSource.PLAYERS,2,.4F);
         if(kind()==2 && tier()<3 && anchor!=null){var e=level.getEntity(anchor);if(e==null || !e.isAlive()){discard();return;}}
-        if(kind()==3){rain(level,player);return;}
+        if(kind()==3){if(player instanceof ServerPlayer p)rain(level,p);else discard();return;}
         if(kind()==1)waveFx(level);
         else if(kind()==2)WaterFx.bindFx(level,position(),radius(),height(),tier(),tickCount);
         affect(level,player);
@@ -174,7 +210,8 @@ public final class TNWaterFieldEntity extends Entity {
         level().addFreshEntity(front);
     }
     /** Shared real effect body; owner/lifecycle guards remain in tick(). */
-    void affect(ServerLevel level,ServerPlayer player) {
+    void affect(ServerLevel level,ServerPlayer player) { affect(level,(LivingEntity)player); }
+    void affect(ServerLevel level,LivingEntity player) {
         Vec3 center=waveCenter(tickCount),previous=waveCenter(tickCount-1);
         if(!level.hasChunkAt(BlockPos.containing(center))) {discard();return;}
         if(kind()==1 && tier()>1 && tier()<5) {
@@ -215,7 +252,8 @@ public final class TNWaterFieldEntity extends Entity {
         }
     }
     /** One burst per scheduled sword, never once per animation frame. */
-    void seaGodSwordImpact(ServerLevel level,ServerPlayer player) {
+    void seaGodSwordImpact(ServerLevel level,ServerPlayer player) { seaGodSwordImpact(level,(LivingEntity)player); }
+    void seaGodSwordImpact(ServerLevel level,LivingEntity player) {
         int index=SeaGodSwordRules.impactIndex(tickCount);
         if(isRemoved() || kind()!=2 || tier()!=5 || index<0 || index<=lastSwordImpact)return;
         lastSwordImpact=index;
