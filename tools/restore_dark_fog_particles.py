@@ -1,14 +1,12 @@
-"""Restore bounded native mist batches without changing combat or caster vision."""
+"""Use DarkMistRenderer's continuous vapor instead of ink particle emissions."""
 import json
 from pathlib import Path
 
 SPELLS=('black_mist','night_grace','where_light_cannot_reach','dark_city','devour_light')
 def batches(radius,tier):
-    def batch(pid,shape,count,extent):
-        return {'particle_id':pid,'shape':shape,'origin':'CENTER','count':count,
-                'min_speed':.005,'max_speed':.025,'extent':extent}
-    return [batch('minecraft:squid_ink','CIRCLE',6+tier*2,radius*.92),
-            batch('minecraft:large_smoke','SPHERE',2+tier,radius*.45)]
+    # The cloud entity now draws broad soft sheets every frame at the synced radius.
+    # Emitting ink here would overlay the unwanted black specks on that fog.
+    return []
 
 def restore(directory):
     for name in SPELLS:
