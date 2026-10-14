@@ -46,6 +46,7 @@ public final class WindEarthVisualRenderer extends EntityRenderer<WindEarthVisua
             earthModels.render(entity,age,envelope,poses,buffers,light,ground);
             poses.popPose();return;
         }
+        if(entity.kind()==0){WindSolidModels.flight(entity.tier(),age,envelope,poses,buffers);poses.popPose();return;}
         var matrix=poses.last().pose();var terrain=ground;float alpha=envelope;
         WindEarthVisualBuffers.draw(buffers,(body,glow)->WindEarthGeometry.spell(body,glow,matrix,
                 entity.kind(),entity.tier(),entity.radius(),age,alpha,terrain));

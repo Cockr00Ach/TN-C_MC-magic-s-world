@@ -32,7 +32,12 @@ public final class WindEarthVisualMechanics {
         if(args==null||args.action()!=SpellCast.Action.RELEASE||!(args.caster() instanceof ServerPlayer player)
                 ||args.spell()==null||!"tnc".equals(args.spell().id().getNamespace()))return;
         var spec=WindEarthVisualRules.find(args.spell().id().getPath());
-        if(spec==null||spec.kind()==WindEarthVisualRules.WIND_GALE||spec.kind()==WindEarthVisualRules.WIND_FLIGHT)return;
+        if(spec==null)return;
+        if(spec.kind()<=2) {
+            var seal=TNOrbEntities.MAGIC_CIRCLE.get().create(player.serverLevel());
+            if(seal!=null){seal.configure(1.5+spec.tier()*.35,45,TNMagicCircleEntity.STYLE_WIND);seal.setPos(player.position().add(0,.06,0));player.serverLevel().addFreshEntity(seal);}
+        }
+        if(spec.kind()==WindEarthVisualRules.WIND_GALE||spec.kind()==WindEarthVisualRules.WIND_FLIGHT)return;
         if(spec.kind()>=3&&spec.tier()>=4) {
             var circle=TNOrbEntities.MAGIC_CIRCLE.get().create(player.serverLevel());
             if(circle!=null){circle.configure(spec.tier()==5?5:3.5,50,TNMagicCircleEntity.STYLE_EARTH);circle.setPos(player.position().add(0,.06,0));player.serverLevel().addFreshEntity(circle);}

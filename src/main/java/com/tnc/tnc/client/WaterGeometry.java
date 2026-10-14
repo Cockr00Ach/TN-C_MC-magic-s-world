@@ -480,6 +480,17 @@ final class WaterGeometry {
             ringColor(out,pose,base.add(0,height*(i==1?.42:.78),0),UP,radius*(i==1?1.08:1.16),radius*.10,r+.20F,g+.20F,1,alpha*(i==1?.62F:.72F),40);
         ringColor(out,pose,top,UP,radius*1.30,radius*.16,r+.30F,g+.30F,1,alpha*.85F,40);
         spiralBand(out,pose,base,radius*1.10,height,2.2,time+twist,radius*.30,.18,16,r,g,b,alpha*.70F);
+        // Fine streams are single strips rather than additional high-sided tubes.
+        for(int strand=0;strand<8;strand++)for(int step=0;step<4;step++) {
+            double a=strand*Math.PI/4+twist+time*.014,t=step/4.0,u=(step+1)/4.0;
+            double rr=radius*(1.025+.035*Math.sin(time*.08+t*7+strand));
+            Vec3 tangent=new Vec3(-Math.sin(a),0,Math.cos(a));
+            Vec3 low=base.add(Math.cos(a)*rr,height*t,Math.sin(a)*rr),high=base.add(Math.cos(a+.07)*rr,height*u,Math.sin(a+.07)*rr);
+            double width=radius*.018;
+            quad(out,pose,low.subtract(tangent.scale(width)),low.add(tangent.scale(width)),high.add(tangent.scale(width)),high.subtract(tangent.scale(width)),.35F,.85F,1,alpha*.52F);
+        }
+        double pulse=(time*.10+twist)%1;
+        ringColor(out,pose,base.add(0,height*pulse,0),UP,radius*1.08,radius*.045,.50F,.92F,1,alpha*.6F,32);
     }
 
     /**

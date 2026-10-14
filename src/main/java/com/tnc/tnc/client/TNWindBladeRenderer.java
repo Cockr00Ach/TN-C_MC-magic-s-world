@@ -78,8 +78,7 @@ public class TNWindBladeRenderer extends EntityRenderer<TNWindBladeEntity> {
     private static void renderWithEngine(PoseStack poseStack, MultiBufferSource buffer) {
         try {
             net.minecraft.client.renderer.RenderType layer =
-                    net.spell_engine.client.render.SpellModelHelper.LAYERS
-                            .get(net.spell_engine.api.render.LightEmission.RADIATE);
+                    net.minecraft.client.renderer.RenderType.entityTranslucent(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS);
             net.spell_engine.api.render.CustomModels.render(layer,
                     net.minecraft.client.Minecraft.getInstance().getItemRenderer(), MODEL_ID,
                     poseStack, buffer, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
