@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "CGC",
+    "IBI",
+    "LGL"
+  ],
+  "key": {
+    "I": {
+      "item": "tnc:spirit_iron"
+    },
+    "G": {
+      "item": "tnc:radiant_gold"
+    },
+    "C": {
+      "item": "tnc:star_marrow"
+    },
+    "B": {
+      "item": "minecraft:glass_bottle"
+    },
+    "L": {
+      "tag": "minecraft:logs"
+    }
+  },
+  "result": {
+    "item": "tnc:star_cage",
+    "count": 1
+  }
+}

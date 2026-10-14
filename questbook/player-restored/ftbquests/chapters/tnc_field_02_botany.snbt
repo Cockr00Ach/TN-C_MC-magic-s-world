@@ -1,0 +1,3449 @@
+{
+  "id": "567EA319F25600FA",
+  "filename": "tnc_field_02_botany",
+  "title": "&b&l魔植花园",
+  "icon": "tnc:magic_garden_book",
+  "group": "544E434C49464531",
+  "order_index": 3,
+  "default_hide_dependency_lines": false,
+  "default_quest_shape": "hexagon",
+  "quests": [
+    {
+      "id": "410864CF5F7F9E70",
+      "title": "&b&l把野外奇迹带回家",
+      "icon": "tnc:magic_garden_book",
+      "x": 0,
+      "y": -10,
+      "size": 2,
+      "description": [
+        "三十八株各有一列。探索与经营可自行选，不锁主线。",
+        "人工株种在魔法土/源上，不需要再锄；八格内有流动魔力才继续生长。",
+        "果实可直接种；根芽用普通剪刀取；挖根至少返一份种源。不需要采样夹。"
+      ],
+      "tasks": [
+        {
+          "id": "63F1AC816F16EA00",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [],
+      "rewards": [
+        {
+          "id": "317C5EE32B18D329",
+          "type": "item",
+          "item": "tnc:magic_garden_book",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "6BB4090F816D1DA5",
+      "title": "土源 · 十秒铺田",
+      "icon": "tnc:magic_soil_source",
+      "x": -9,
+      "y": -5,
+      "size": 1.2,
+      "description": [
+        "八泥土＋一满100魔力瓶；同层9×9的泥土转为魔法土，返空瓶。不转草地或建筑。"
+      ],
+      "tasks": [
+        {
+          "id": "7202DBA74BE5DE0F",
+          "type": "item",
+          "item": "tnc:magic_soil_source",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "68EA14E06DCF2926",
+      "title": "流动魔力 · 八格灌溉",
+      "icon": "tnc:flowing_mana_bucket",
+      "x": 0,
+      "y": -5,
+      "size": 1.2,
+      "description": [
+        "注能台花400真实魔力装满桶；亦可由四个独立满瓶与一桶合成。不建立无限水源。"
+      ],
+      "tasks": [
+        {
+          "id": "4A909B4DDF509AB2",
+          "type": "item",
+          "item": "tnc:flowing_mana_bucket",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "609C0FC34ED3339F",
+      "title": "花园也会供能",
+      "icon": "tnc:dew_collector",
+      "x": 9,
+      "y": -5,
+      "size": 1.2,
+      "description": [
+        "集露盏只收周围3×3×3真实供魔植株。成熟、环境窗口和实际饲料决定产能。"
+      ],
+      "tasks": [
+        {
+          "id": "35FB89FED8D105E3",
+          "type": "item",
+          "item": "tnc:dew_collector",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "08E9348762865531",
+      "title": "归巢花",
+      "icon": "tnc:homeward_flower_seed",
+      "x": -11.25,
+      "y": 3,
+      "size": 1.8,
+      "description": [
+        "村路边、旧营地附近；根/芽",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "3EAA825096FA6F0F",
+          "type": "item",
+          "item": "tnc:homeward_flower_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "6162C25B47C5CF05",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": -11.25,
+      "y": 5.8,
+      "size": 1.2,
+      "description": [
+        "人工种植需要魔法土与八格内流动魔力。",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "4F3B095EEDC589EF",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/homeward_flower",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "08E9348762865531"
+      ]
+    },
+    {
+      "id": "3E3F59B24EA4A9B5",
+      "title": "亲手收获",
+      "icon": "tnc:homeward_flower_petal",
+      "x": -11.25,
+      "y": 8.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "67D1A816E74EF69C",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/homeward_flower",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "6162C25B47C5CF05"
+      ]
+    },
+    {
+      "id": "1B22C660E1E9D4A1",
+      "title": "生活与工坊",
+      "icon": "tnc:homeward_flower_petal",
+      "x": -11.25,
+      "y": 11.4,
+      "size": 1.2,
+      "description": [
+        "归途补给；归途缎带",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "4C20503AC89BF4B5",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "3E3F59B24EA4A9B5"
+      ]
+    },
+    {
+      "id": "29D9F144F9E4F6C8",
+      "title": "警铃苔",
+      "icon": "tnc:warning_moss_spore",
+      "x": -6.75,
+      "y": 3,
+      "size": 1.8,
+      "description": [
+        "林缘石壁、废屋外墙；根/芽",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "0A8C3A3222B2D1D8",
+          "type": "item",
+          "item": "tnc:warning_moss_spore",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "3A909597C36E6940",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": -6.75,
+      "y": 5.8,
+      "size": 1.2,
+      "description": [
+        "人工种植需要魔法土与八格内流动魔力。",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "15D80F6C38660107",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/warning_moss",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "29D9F144F9E4F6C8"
+      ]
+    },
+    {
+      "id": "063D3C0D2F1CB99C",
+      "title": "亲手收获",
+      "icon": "tnc:warning_moss_flake",
+      "x": -6.75,
+      "y": 8.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "2D36E2D40DC8B771",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/warning_moss",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "3A909597C36E6940"
+      ]
+    },
+    {
+      "id": "7B7B0217492D52D8",
+      "title": "生活与工坊",
+      "icon": "tnc:warning_moss_flake",
+      "x": -6.75,
+      "y": 11.4,
+      "size": 1.2,
+      "description": [
+        "告示铃；牧场预警材料",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "2FBAAF24CA874AA2",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "063D3C0D2F1CB99C"
+      ]
+    },
+    {
+      "id": "3579E9ADF9ECE95B",
+      "title": "铃穗草",
+      "icon": "tnc:road_bell_seed",
+      "x": -2.25,
+      "y": 3,
+      "size": 1.8,
+      "description": [
+        "平原道路、商队旧径；种＋产",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "4EFA1969FEF7121D",
+          "type": "item",
+          "item": "tnc:road_bell_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "705A0BD749407DC6",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": -2.25,
+      "y": 5.8,
+      "size": 1.2,
+      "description": [
+        "人工种植需要魔法土与八格内流动魔力。",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "41528D898E8FDC2B",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/road_bell_crop",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "3579E9ADF9ECE95B"
+      ]
+    },
+    {
+      "id": "610806511F756255",
+      "title": "亲手收获",
+      "icon": "tnc:road_bell_ear",
+      "x": -2.25,
+      "y": 8.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "7EDA22AB358E2128",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/road_bell_crop",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "705A0BD749407DC6"
+      ]
+    },
+    {
+      "id": "2E4B87F1E4912C3B",
+      "title": "生活与工坊",
+      "icon": "tnc:road_bell_ear",
+      "x": -2.25,
+      "y": 11.4,
+      "size": 1.2,
+      "description": [
+        "铃穗饲捆；回声花园的自然音源",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "6D8DCB8B4DAB654D",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "610806511F756255"
+      ]
+    },
+    {
+      "id": "062580FD8F5A48B4",
+      "title": "夜露葫",
+      "icon": "tnc:night_gourd_seed",
+      "x": 2.25,
+      "y": 3,
+      "size": 1.8,
+      "description": [
+        "湿润林缘；果种",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "658719069F83C9EE",
+          "type": "item",
+          "item": "tnc:night_gourd_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "407B87B0CFE38BAD",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": 2.25,
+      "y": 5.8,
+      "size": 1.2,
+      "description": [
+        "人工种植需要魔法土与八格内流动魔力。",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "751EEA34A7EA107C",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/night_gourd_crop",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "062580FD8F5A48B4"
+      ]
+    },
+    {
+      "id": "0F5AD676E7B6E6DF",
+      "title": "亲手收获",
+      "icon": "tnc:night_gourd",
+      "x": 2.25,
+      "y": 8.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "5E9FC63E88A1DAB1",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/night_gourd_crop",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "407B87B0CFE38BAD"
+      ]
+    },
+    {
+      "id": "481F463D11E6B859",
+      "title": "生活与工坊",
+      "icon": "tnc:night_gourd",
+      "x": 2.25,
+      "y": 11.4,
+      "size": 1.2,
+      "description": [
+        "防雾旅行补给；夜露料理",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "3D096D3FECC96D6C",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "0F5AD676E7B6E6DF"
+      ]
+    },
+    {
+      "id": "316C8AB1A4BAA8B1",
+      "title": "听潮苇",
+      "icon": "tnc:tide_reed_seed",
+      "x": 6.75,
+      "y": 3,
+      "size": 1.8,
+      "description": [
+        "河岸、湖湾；种＋产",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "3C7E0014EA067FBB",
+          "type": "item",
+          "item": "tnc:tide_reed_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "261C4D0A48F7FC3D",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": 6.75,
+      "y": 5.8,
+      "size": 1.2,
+      "description": [
+        "人工种植需要魔法土与八格内流动魔力。",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "774F961BE07CD73C",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/tide_reed_crop",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "316C8AB1A4BAA8B1"
+      ]
+    },
+    {
+      "id": "5AD368CF162EF0FA",
+      "title": "亲手收获",
+      "icon": "tnc:tide_reed_stem",
+      "x": 6.75,
+      "y": 8.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "1FF23DB38C6B30CE",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/tide_reed_crop",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "261C4D0A48F7FC3D"
+      ]
+    },
+    {
+      "id": "4CB05CC6A753A71C",
+      "title": "生活与工坊",
+      "icon": "tnc:tide_reed_stem",
+      "x": 6.75,
+      "y": 11.4,
+      "size": 1.2,
+      "description": [
+        "纸；压纹台；调查页",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "56D8CED211163269",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "5AD368CF162EF0FA"
+      ]
+    },
+    {
+      "id": "655E30F196256693",
+      "title": "静息菇",
+      "icon": "tnc:hushcap_spore",
+      "x": 11.25,
+      "y": 3,
+      "size": 1.8,
+      "description": [
+        "洞口、安静林地；根/芽",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "78A1BF049FF75C6A",
+          "type": "item",
+          "item": "tnc:hushcap_spore",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "17739FFB7D3B404F",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": 11.25,
+      "y": 5.8,
+      "size": 1.2,
+      "description": [
+        "人工种植需要魔法土与八格内流动魔力。",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "12361602DA461BF3",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/hushcap_mushroom",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "655E30F196256693"
+      ]
+    },
+    {
+      "id": "6FD9BE740C10DF9A",
+      "title": "亲手收获",
+      "icon": "tnc:hushcap_slice",
+      "x": 11.25,
+      "y": 8.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "61220488AA473BC1",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/hushcap_mushroom",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "17739FFB7D3B404F"
+      ]
+    },
+    {
+      "id": "6BC5911E79AC7C7F",
+      "title": "生活与工坊",
+      "icon": "tnc:hushcap_slice",
+      "x": 11.25,
+      "y": 11.4,
+      "size": 1.2,
+      "description": [
+        "静息补给；菇片料理",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "31F8212ECB46C651",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "6FD9BE740C10DF9A"
+      ]
+    },
+    {
+      "id": "07A16556931376E4",
+      "title": "雨信蔓",
+      "icon": "tnc:rainletter_seed",
+      "x": -11.25,
+      "y": 17,
+      "size": 1.8,
+      "description": [
+        "湿林、雨泽坡；果种",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "0E7E222E1FA9CCB1",
+          "type": "item",
+          "item": "tnc:rainletter_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "1CB4D146B193804D",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": -11.25,
+      "y": 19.8,
+      "size": 1.2,
+      "description": [
+        "人工种植需要魔法土与八格内流动魔力。",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "3CE2381BD85407C8",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/rainletter_bush",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "07A16556931376E4"
+      ]
+    },
+    {
+      "id": "4AADF003D079D670",
+      "title": "亲手收获",
+      "icon": "tnc:rainletter_berry",
+      "x": -11.25,
+      "y": 22.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "4AB8C5A78586A791",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/rainletter_bush",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "1CB4D146B193804D"
+      ]
+    },
+    {
+      "id": "2FA1C40347F81823",
+      "title": "生活与工坊",
+      "icon": "tnc:rainletter_berry",
+      "x": -11.25,
+      "y": 25.4,
+      "size": 1.2,
+      "description": [
+        "旅行饮/补给；果蔬供货",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "2B90F59FD4368735",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "4AADF003D079D670"
+      ]
+    },
+    {
+      "id": "2C0D70AF6D7293F2",
+      "title": "蓄魔根",
+      "icon": "tnc:mana_root_seed",
+      "x": -6.75,
+      "y": 17,
+      "size": 1.8,
+      "description": [
+        "旧法师营地周边土层；根/芽",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "6D4269602EECF879",
+          "type": "item",
+          "item": "tnc:mana_root_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "2E0CE808017E5CB9",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": -6.75,
+      "y": 19.8,
+      "size": 1.2,
+      "description": [
+        "人工种植需要魔法土与八格内流动魔力。",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "326F8B26D24A8895",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/mana_root",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "2C0D70AF6D7293F2"
+      ]
+    },
+    {
+      "id": "3410D47D659E395A",
+      "title": "亲手收获",
+      "icon": "tnc:mana_root_core",
+      "x": -6.75,
+      "y": 22.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "3C51CA750FDB6AD9",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/mana_root",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "2E0CE808017E5CB9"
+      ]
+    },
+    {
+      "id": "15C02340AA2C011F",
+      "title": "生活与工坊",
+      "icon": "tnc:mana_root_core",
+      "x": -6.75,
+      "y": 25.4,
+      "size": 1.2,
+      "description": [
+        "便携储运；炉供魔；不算无成本产能",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "153F4319E46A8CD8",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "3410D47D659E395A"
+      ]
+    },
+    {
+      "id": "45BDA146A99A9C80",
+      "title": "翠脉枝",
+      "icon": "tnc:verdant_vein_seed",
+      "x": -2.25,
+      "y": 17,
+      "size": 1.8,
+      "description": [
+        "新生林缘、肥沃草坡；根/芽",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "0705C822FD57167D",
+          "type": "item",
+          "item": "tnc:verdant_vein_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "3AB14D93E9F295B0",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": -2.25,
+      "y": 19.8,
+      "size": 1.2,
+      "description": [
+        "人工种植需要魔法土与八格内流动魔力。",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "6C24248EDA77DE7C",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/verdant_vein",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "45BDA146A99A9C80"
+      ]
+    },
+    {
+      "id": "46856C5214FBA1C8",
+      "title": "亲手收获",
+      "icon": "tnc:verdant_branch",
+      "x": -2.25,
+      "y": 22.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "0229C50678818D85",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/verdant_vein",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "3AB14D93E9F295B0"
+      ]
+    },
+    {
+      "id": "536DDB7D436D49ED",
+      "title": "生活与工坊",
+      "icon": "tnc:verdant_branch",
+      "x": -2.25,
+      "y": 25.4,
+      "size": 1.2,
+      "description": [
+        "起步集露盏；小灯与炉供魔",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "3B958D4AC9742C1E",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "46856C5214FBA1C8"
+      ]
+    },
+    {
+      "id": "10862D135729953C",
+      "title": "天穹藤",
+      "icon": "tnc:sky_vine_seed",
+      "x": 2.25,
+      "y": 17,
+      "size": 1.8,
+      "description": [
+        "高崖脚、古老林地；种＋产",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "1AB38E88892621E2",
+          "type": "item",
+          "item": "tnc:sky_vine_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "2C3407E2EE31142E",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": 2.25,
+      "y": 19.8,
+      "size": 1.2,
+      "description": [
+        "人工种植需要魔法土与八格内流动魔力。",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "017A3D4FA5AF1E83",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/sky_vine",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "10862D135729953C"
+      ]
+    },
+    {
+      "id": "1D62ED14BB196B54",
+      "title": "亲手收获",
+      "icon": "tnc:sky_canopy_fiber",
+      "x": 2.25,
+      "y": 22.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "3D69EC46F1E4EA7C",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/sky_vine",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "2C3407E2EE31142E"
+      ]
+    },
+    {
+      "id": "1757039B5184C31D",
+      "title": "生活与工坊",
+      "icon": "tnc:sky_canopy_fiber",
+      "x": 2.25,
+      "y": 25.4,
+      "size": 1.2,
+      "description": [
+        "真实攀爬；壮观景观；树冠供魔",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "66625116BB4F81D3",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "1D62ED14BB196B54"
+      ]
+    },
+    {
+      "id": "112EABCF5F5BDF13",
+      "title": "晨晖盘葵",
+      "icon": "tnc:dawn_disk_seed",
+      "x": 6.75,
+      "y": 17,
+      "size": 1.8,
+      "description": [
+        "开阔草坡；根/芽",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "521E9CF1F976916C",
+          "type": "item",
+          "item": "tnc:dawn_disk_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "5B1D85B6B15AABA8",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": 6.75,
+      "y": 19.8,
+      "size": 1.2,
+      "description": [
+        "栽培不挑环境；成株后经历真实黎明，用空瓶采晨蜜。",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "36ABFEF62D3FDC2F",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/dawn_disk",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "112EABCF5F5BDF13"
+      ]
+    },
+    {
+      "id": "7B236DDF4B615365",
+      "title": "亲手收获",
+      "icon": "tnc:dawn_honey",
+      "x": 6.75,
+      "y": 22.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "446597A7A2179CB1",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/dawn_disk",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "5B1D85B6B15AABA8"
+      ]
+    },
+    {
+      "id": "6EB5C1483C52E718",
+      "title": "生活与工坊",
+      "icon": "tnc:dawn_honey",
+      "x": 6.75,
+      "y": 25.4,
+      "size": 1.2,
+      "description": [
+        "晨蜜早餐；光能供给",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "157E25161132C06C",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "7B236DDF4B615365"
+      ]
+    },
+    {
+      "id": "759073C8632149AB",
+      "title": "炉息椒",
+      "icon": "tnc:hearth_pepper_seed",
+      "x": 11.25,
+      "y": 17,
+      "size": 1.8,
+      "description": [
+        "暖岩坡、温泉外缘；果种",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "26F3F34C014E2663",
+          "type": "item",
+          "item": "tnc:hearth_pepper_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "47E95984F58A2D5F",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": 11.25,
+      "y": 19.8,
+      "size": 1.2,
+      "description": [
+        "栽培不再需要热源；结出的暖椒用于餐食和暖息制作。",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "554D82649C64FEE1",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/hearth_pepper",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "759073C8632149AB"
+      ]
+    },
+    {
+      "id": "1E4A1417EF819405",
+      "title": "亲手收获",
+      "icon": "tnc:hearth_pepper_fruit",
+      "x": 11.25,
+      "y": 22.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "2035533A5E470F18",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/hearth_pepper",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "47E95984F58A2D5F"
+      ]
+    },
+    {
+      "id": "01990E720E961B12",
+      "title": "生活与工坊",
+      "icon": "tnc:hearth_pepper_fruit",
+      "x": 11.25,
+      "y": 25.4,
+      "size": 1.2,
+      "description": [
+        "暖椒汤；预热油；暖味远征餐",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "1CB3A61A97357AAE",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "1E4A1417EF819405"
+      ]
+    },
+    {
+      "id": "1C454FD6A09E4A2D",
+      "title": "雾织棉",
+      "icon": "tnc:mist_cotton_seed",
+      "x": -11.25,
+      "y": 31,
+      "size": 1.8,
+      "description": [
+        "河谷雾地；种＋产",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "6F55184BA2091882",
+          "type": "item",
+          "item": "tnc:mist_cotton_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "0B26B29A10CE7C24",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": -11.25,
+      "y": 33.8,
+      "size": 1.2,
+      "description": [
+        "栽培不挑环境；成株后真实清晨或雨停结绒。",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "6FB6E3E1F10740D1",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/mist_cotton",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "1C454FD6A09E4A2D"
+      ]
+    },
+    {
+      "id": "31DE26B3E66D77EC",
+      "title": "亲手收获",
+      "icon": "tnc:mist_cotton_fiber",
+      "x": -11.25,
+      "y": 36.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "5314A3FD2BFC7800",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/mist_cotton",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "0B26B29A10CE7C24"
+      ]
+    },
+    {
+      "id": "2C2FEECA8DC7ACC6",
+      "title": "生活与工坊",
+      "icon": "tnc:mist_cotton_fiber",
+      "x": -11.25,
+      "y": 39.4,
+      "size": 1.2,
+      "description": [
+        "雾布；折叠雾帐；装备衬料",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "736AB90825066B37",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "31DE26B3E66D77EC"
+      ]
+    },
+    {
+      "id": "33F78398C86E2CE6",
+      "title": "岩函蕨",
+      "icon": "tnc:stone_fern_seed",
+      "x": -6.75,
+      "y": 31,
+      "size": 1.8,
+      "description": [
+        "露岩山脚；种＋产",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "18830C3ABCA71A2F",
+          "type": "item",
+          "item": "tnc:stone_fern_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "67AE2E7E36933832",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": -6.75,
+      "y": 33.8,
+      "size": 1.2,
+      "description": [
+        "土上也能栽培；根下岩面会改变岩纹记录。",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "24719A7A6F05B699",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/stone_fern",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "33F78398C86E2CE6"
+      ]
+    },
+    {
+      "id": "0701EA2235E12DC0",
+      "title": "亲手收获",
+      "icon": "tnc:stone_pattern_leaf",
+      "x": -6.75,
+      "y": 36.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "598CC1F0B3CE19BB",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/stone_fern",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "67AE2E7E36933832"
+      ]
+    },
+    {
+      "id": "01DADC47A47F295F",
+      "title": "生活与工坊",
+      "icon": "tnc:stone_pattern_leaf",
+      "x": -6.75,
+      "y": 39.4,
+      "size": 1.2,
+      "description": [
+        "岩纹拓页；调查档案；部分动物设施材料",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "06E84756DEC6644E",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "0701EA2235E12DC0"
+      ]
+    },
+    {
+      "id": "5A7AC3967D8854B5",
+      "title": "镜潭莲",
+      "icon": "tnc:mirror_lotus_seed",
+      "x": -2.25,
+      "y": 31,
+      "size": 1.8,
+      "description": [
+        "安静浅湖；根/芽",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "3415A34103B64AC3",
+          "type": "item",
+          "item": "tnc:mirror_lotus_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "23A9BCAF7B521EF6",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": -2.25,
+      "y": 33.8,
+      "size": 1.2,
+      "description": [
+        "土上或静水面都可栽培；空瓶采镜露。",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "2597B7E59F53C28E",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/mirror_lotus",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "5A7AC3967D8854B5"
+      ]
+    },
+    {
+      "id": "46593AF07B387089",
+      "title": "亲手收获",
+      "icon": "tnc:mirror_dew",
+      "x": -2.25,
+      "y": 36.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "2BF56073F8CFCDF8",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/mirror_lotus",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "23A9BCAF7B521EF6"
+      ]
+    },
+    {
+      "id": "0599AA17C04EB7A1",
+      "title": "生活与工坊",
+      "icon": "tnc:mirror_dew",
+      "x": -2.25,
+      "y": 39.4,
+      "size": 1.2,
+      "description": [
+        "镜莲饮；冷凝壳；量魔镜材料",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "539A434F8CE10FD2",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "46593AF07B387089"
+      ]
+    },
+    {
+      "id": "4AD20C9B988C8526",
+      "title": "灯愿蒲",
+      "icon": "tnc:wish_puff_seed",
+      "x": 2.25,
+      "y": 31,
+      "size": 1.8,
+      "description": [
+        "夜间可辨的草甸、废路旁；果种",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "18E0B759DDD58D8F",
+          "type": "item",
+          "item": "tnc:wish_puff_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "37F09F3AFC50AEF2",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": 2.25,
+      "y": 33.8,
+      "size": 1.2,
+      "description": [
+        "全天、干土也可栽培；远照果投掷产生临时照明。",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "2BB6B9655A5AB857",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/wish_puff",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "4AD20C9B988C8526"
+      ]
+    },
+    {
+      "id": "2201CFF58BE55698",
+      "title": "亲手收获",
+      "icon": "tnc:farlight_fruit",
+      "x": 2.25,
+      "y": 36.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "4BD80E774F501C7B",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/wish_puff",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "37F09F3AFC50AEF2"
+      ]
+    },
+    {
+      "id": "48FDBFBCDC52F71F",
+      "title": "生活与工坊",
+      "icon": "tnc:farlight_fruit",
+      "x": 2.25,
+      "y": 39.4,
+      "size": 1.2,
+      "description": [
+        "约 50 格范围、20 秒临时照明；洞穴远征补给",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "75DF0F840DF686E3",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "2201CFF58BE55698"
+      ]
+    },
+    {
+      "id": "42406F930F3EEC8C",
+      "title": "回声豆",
+      "icon": "tnc:echo_bean_seed",
+      "x": 6.75,
+      "y": 31,
+      "size": 1.8,
+      "description": [
+        "峡谷、回音洞口；果种",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "2FC6EFBD8E146C70",
+          "type": "item",
+          "item": "tnc:echo_bean_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "03091CB08B092036",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": 6.75,
+      "y": 33.8,
+      "size": 1.2,
+      "description": [
+        "不需要先听音才能长成；音符盒三音会记录豆荚音调。",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "284F613CF005BC5C",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/echo_bean",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "42406F930F3EEC8C"
+      ]
+    },
+    {
+      "id": "7049696D53309443",
+      "title": "亲手收获",
+      "icon": "tnc:echo_bean_pod",
+      "x": 6.75,
+      "y": 36.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "6015B27D2EF10FB0",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/echo_bean",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "03091CB08B092036"
+      ]
+    },
+    {
+      "id": "3A3FC97A048A30CF",
+      "title": "生活与工坊",
+      "icon": "tnc:echo_bean_pod",
+      "x": 6.75,
+      "y": 39.4,
+      "size": 1.2,
+      "description": [
+        "回音器件；节奏供魔，须扣一豆",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "4C81C23F83B49C42",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "7049696D53309443"
+      ]
+    },
+    {
+      "id": "5121C017B8C63C9C",
+      "title": "梯脊藤",
+      "icon": "tnc:ladder_vine_seed",
+      "x": 11.25,
+      "y": 31,
+      "size": 1.8,
+      "description": [
+        "断崖脚、旧塔旁；种＋产",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "1C198D594FD6F260",
+          "type": "item",
+          "item": "tnc:ladder_vine_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "268404D46E060078",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": 11.25,
+      "y": 33.8,
+      "size": 1.2,
+      "description": [
+        "不需要支架；留四格高空间，每六分钟增一段。",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "75364B0B703B4A0D",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/ladder_vine",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "5121C017B8C63C9C"
+      ]
+    },
+    {
+      "id": "0BBB39536E29D0C0",
+      "title": "亲手收获",
+      "icon": "tnc:vine_sinew",
+      "x": 11.25,
+      "y": 36.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "314C719A419A8B41",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/ladder_vine",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "268404D46E060078"
+      ]
+    },
+    {
+      "id": "542E09C7F2CC1FAA",
+      "title": "生活与工坊",
+      "icon": "tnc:vine_sinew",
+      "x": 11.25,
+      "y": 39.4,
+      "size": 1.2,
+      "description": [
+        "攀爬藤；织绳；工地脚手用途",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "50C093E80AE1F5F7",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "0BBB39536E29D0C0"
+      ]
+    },
+    {
+      "id": "328786097C591A78",
+      "title": "霜鸣蒿",
+      "icon": "tnc:frost_chime_seed",
+      "x": -11.25,
+      "y": 45,
+      "size": 1.8,
+      "description": [
+        "雪地外围、冷泉边；根/芽",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "0272C37D7A3248F8",
+          "type": "item",
+          "item": "tnc:frost_chime_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "2623614167279C94",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": -11.25,
+      "y": 47.8,
+      "size": 1.2,
+      "description": [
+        "栽培不需要寒地或冰块；空瓶收两份霜露。",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "2B6623B81CCB7B52",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/frost_chime",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "328786097C591A78"
+      ]
+    },
+    {
+      "id": "543EA7DF1B6F8357",
+      "title": "亲手收获",
+      "icon": "tnc:frost_dew",
+      "x": -11.25,
+      "y": 50.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "25C3B266945D87A8",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/frost_chime",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "2623614167279C94"
+      ]
+    },
+    {
+      "id": "77CEAF3A45B779AE",
+      "title": "生活与工坊",
+      "icon": "tnc:frost_dew",
+      "x": -11.25,
+      "y": 53.4,
+      "size": 1.2,
+      "description": [
+        "霜椒餐；冷凝组件",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "42BDE068EA455DFC",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "543EA7DF1B6F8357"
+      ]
+    },
+    {
+      "id": "64DBB18A3A6CA5CE",
+      "title": "盐墨菌",
+      "icon": "tnc:salt_ink_seed",
+      "x": -6.75,
+      "y": 45,
+      "size": 1.8,
+      "description": [
+        "海岸洞、盐岩旁；根/芽",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "2DDF7D5B23D563C5",
+          "type": "item",
+          "item": "tnc:salt_ink_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "6961E8F19ADDACC2",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": -6.75,
+      "y": 47.8,
+      "size": 1.2,
+      "description": [
+        "栽培不需要海水或盐盆；成熟采盐墨。",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "7BF9FBFD6F0393C5",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/salt_ink",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "64DBB18A3A6CA5CE"
+      ]
+    },
+    {
+      "id": "38CB0B319CFAC8B6",
+      "title": "亲手收获",
+      "icon": "tnc:salt_ink",
+      "x": -6.75,
+      "y": 50.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "6403875710685B98",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/salt_ink",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "6961E8F19ADDACC2"
+      ]
+    },
+    {
+      "id": "3D60A2165A9DA51D",
+      "title": "生活与工坊",
+      "icon": "tnc:salt_ink",
+      "x": -6.75,
+      "y": 53.4,
+      "size": 1.2,
+      "description": [
+        "调查墨；工坊记录器件",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "12DE515C6AE1A413",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "38CB0B319CFAC8B6"
+      ]
+    },
+    {
+      "id": "5D81AF23C6EC968E",
+      "title": "风铃帆草",
+      "icon": "tnc:wind_sail_seed",
+      "x": -2.25,
+      "y": 45,
+      "size": 1.8,
+      "description": [
+        "迎风丘陵；种＋产",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "3C521F98A1AA856B",
+          "type": "item",
+          "item": "tnc:wind_sail_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "3E14F02007B042E4",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": -2.25,
+      "y": 47.8,
+      "size": 1.2,
+      "description": [
+        "低地、室内与雨天都可栽培；收帆纤维。",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "3096620DB787F941",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/wind_sail",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "5D81AF23C6EC968E"
+      ]
+    },
+    {
+      "id": "231EF3D45F66D643",
+      "title": "亲手收获",
+      "icon": "tnc:sail_fiber",
+      "x": -2.25,
+      "y": 50.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "01F29A5E0F7B2C96",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/wind_sail",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "3E14F02007B042E4"
+      ]
+    },
+    {
+      "id": "31407F91A59A5045",
+      "title": "生活与工坊",
+      "icon": "tnc:sail_fiber",
+      "x": -2.25,
+      "y": 53.4,
+      "size": 1.2,
+      "description": [
+        "缓降布；帆材；风能供魔",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "4E63EB9A48CD5028",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "231EF3D45F66D643"
+      ]
+    },
+    {
+      "id": "09D1A3D4593702D2",
+      "title": "钟眠草",
+      "icon": "tnc:sleep_clock_seed",
+      "x": 2.25,
+      "y": 45,
+      "size": 1.8,
+      "description": [
+        "旧床营地附近；种＋产",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "1FF143207400D401",
+          "type": "item",
+          "item": "tnc:sleep_clock_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "13CB628F716263D8",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": 2.25,
+      "y": 47.8,
+      "size": 1.2,
+      "description": [
+        "栽培不挑环境；成株后主人在两格内的床真实睡醒结叶。",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "3033E9D54AB05263",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/sleep_clock",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "09D1A3D4593702D2"
+      ]
+    },
+    {
+      "id": "38DD184CC0B7C0E7",
+      "title": "亲手收获",
+      "icon": "tnc:sleep_leaf",
+      "x": 2.25,
+      "y": 50.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "1E610542D01065D9",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/sleep_clock",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "13CB628F716263D8"
+      ]
+    },
+    {
+      "id": "00B320590535DC70",
+      "title": "生活与工坊",
+      "icon": "tnc:sleep_leaf",
+      "x": 2.25,
+      "y": 53.4,
+      "size": 1.2,
+      "description": [
+        "钟眠茶；旅行状态整理",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "7928A8EC8A1F15BE",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "38DD184CC0B7C0E7"
+      ]
+    },
+    {
+      "id": "51A9ED354F71F565",
+      "title": "影裁花",
+      "icon": "tnc:shadow_cut_seed",
+      "x": 6.75,
+      "y": 45,
+      "size": 1.8,
+      "description": [
+        "疏林阴影交界；根/芽",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "5FFF1E55D78D04F9",
+          "type": "item",
+          "item": "tnc:shadow_cut_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "66E4EE0B062BFD3B",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": 6.75,
+      "y": 47.8,
+      "size": 1.2,
+      "description": [
+        "栽培不挑环境；上方遮棚仍可改变八种影纹。",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "4C1D795E40A9F0CE",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/shadow_cut",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "51A9ED354F71F565"
+      ]
+    },
+    {
+      "id": "704676B1DBAE044F",
+      "title": "亲手收获",
+      "icon": "tnc:shadow_silk",
+      "x": 6.75,
+      "y": 50.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "62D76057F10D17D9",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/shadow_cut",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "66E4EE0B062BFD3B"
+      ]
+    },
+    {
+      "id": "6744B3E38285035F",
+      "title": "生活与工坊",
+      "icon": "tnc:shadow_silk",
+      "x": 6.75,
+      "y": 53.4,
+      "size": 1.2,
+      "description": [
+        "影纹卡收藏；纺织材料",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "55547DFBED21A80F",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "704676B1DBAE044F"
+      ]
+    },
+    {
+      "id": "5E218E8049FA2036",
+      "title": "墨信树",
+      "icon": "tnc:paper_tree_seed",
+      "x": 11.25,
+      "y": 45,
+      "size": 1.8,
+      "description": [
+        "古道、旧驿站遗址附近；种＋产",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "04DCC043A9D082F4",
+          "type": "item",
+          "item": "tnc:paper_tree_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "49C74B5B236229A8",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": 11.25,
+      "y": 47.8,
+      "size": 1.2,
+      "description": [
+        "不需要书或讲台；只要留三格高空间即可生长。",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "0C8E335C5FD2375B",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/paper_tree",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "5E218E8049FA2036"
+      ]
+    },
+    {
+      "id": "4A627C0410A40717",
+      "title": "亲手收获",
+      "icon": "tnc:paper_bark",
+      "x": 11.25,
+      "y": 50.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "135C7C6E3E1895C6",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/paper_tree",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "49C74B5B236229A8"
+      ]
+    },
+    {
+      "id": "5CE3966049F14AA5",
+      "title": "生活与工坊",
+      "icon": "tnc:paper_bark",
+      "x": 11.25,
+      "y": 53.4,
+      "size": 1.2,
+      "description": [
+        "信封；调查档案；纸加工",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "5D59B2C0B0CAA3EA",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "4A627C0410A40717"
+      ]
+    },
+    {
+      "id": "570F4B69356FAA71",
+      "title": "换羽荚",
+      "icon": "tnc:flight_pod_seed",
+      "x": -11.25,
+      "y": 59,
+      "size": 1.8,
+      "description": [
+        "鸟类活动的草坡；果种",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "441612011D111671",
+          "type": "item",
+          "item": "tnc:flight_pod_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "43455BDE774D3195",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": -11.25,
+      "y": 61.8,
+      "size": 1.2,
+      "description": [
+        "干土也可栽培；采壳后邮羽鹭访株可另寄种。",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "7C9CFB1F1599E0BC",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/flight_pod",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "570F4B69356FAA71"
+      ]
+    },
+    {
+      "id": "6E2A219F2D6EF3BE",
+      "title": "亲手收获",
+      "icon": "tnc:rainproof_pod",
+      "x": -11.25,
+      "y": 64.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "15C2835CD5D9AB62",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/flight_pod",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "43455BDE774D3195"
+      ]
+    },
+    {
+      "id": "1747A16A393D661A",
+      "title": "生活与工坊",
+      "icon": "tnc:rainproof_pod",
+      "x": -11.25,
+      "y": 67.4,
+      "size": 1.2,
+      "description": [
+        "防雨种匣；邮鹭协作；不随机给未注册品种",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "0E6B884C5F970E36",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "6E2A219F2D6EF3BE"
+      ]
+    },
+    {
+      "id": "62CC006B8A5FBFF1",
+      "title": "共生蜜簇",
+      "icon": "tnc:honey_cluster_seed",
+      "x": -6.75,
+      "y": 59,
+      "size": 1.8,
+      "description": [
+        "花甸、蜂巢附近；根/芽",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "15915AF39DDE6462",
+          "type": "item",
+          "item": "tnc:honey_cluster_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "6788809B041C8CC6",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": -6.75,
+      "y": 61.8,
+      "size": 1.2,
+      "description": [
+        "栽培不挑环境；长成后三次蜂访或授粉刷结蜜粉。",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "79DD314741839BD7",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/honey_cluster",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "62CC006B8A5FBFF1"
+      ]
+    },
+    {
+      "id": "2C97084486B975FA",
+      "title": "亲手收获",
+      "icon": "tnc:honey_powder",
+      "x": -6.75,
+      "y": 64.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "0846C570757A3579",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/honey_cluster",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "6788809B041C8CC6"
+      ]
+    },
+    {
+      "id": "36E46FEB6E1BF99F",
+      "title": "生活与工坊",
+      "icon": "tnc:honey_powder",
+      "x": -6.75,
+      "y": 67.4,
+      "size": 1.2,
+      "description": [
+        "蜜簇糕；动物精制饲料；授粉供魔",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "03DA539E1A9F726B",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "2C97084486B975FA"
+      ]
+    },
+    {
+      "id": "6D973F28F81BC7F7",
+      "title": "星露藤",
+      "icon": "tnc:star_dew_seed",
+      "x": -2.25,
+      "y": 59,
+      "size": 1.8,
+      "description": [
+        "湖边坡、稀疏林；果种",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "479FFD2B65239866",
+          "type": "item",
+          "item": "tnc:star_dew_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "0F48DD1D447B668E",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": -2.25,
+      "y": 61.8,
+      "size": 1.2,
+      "description": [
+        "全天与室内都可栽培；果实吃下回复30真实魔力。",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "6325DB850129B79F",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/star_dew",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "6D973F28F81BC7F7"
+      ]
+    },
+    {
+      "id": "0CADFA2894C12542",
+      "title": "亲手收获",
+      "icon": "tnc:star_dew_fruit",
+      "x": -2.25,
+      "y": 64.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "315A52735695CED0",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/star_dew",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "0F48DD1D447B668E"
+      ]
+    },
+    {
+      "id": "16E741F020F20629",
+      "title": "生活与工坊",
+      "icon": "tnc:star_dew_fruit",
+      "x": -2.25,
+      "y": 67.4,
+      "size": 1.2,
+      "description": [
+        "30 魔力补给；星露饮；食物/种源选择",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "0655948CE11A4326",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "0CADFA2894C12542"
+      ]
+    },
+    {
+      "id": "0897792CA16784F6",
+      "title": "脉舞铃花",
+      "icon": "tnc:dance_bell_seed",
+      "x": 2.25,
+      "y": 59,
+      "size": 1.8,
+      "description": [
+        "花甸；根/芽",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "7DD25473FF46D79D",
+          "type": "item",
+          "item": "tnc:dance_bell_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "20E64B7868596141",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": 2.25,
+      "y": 61.8,
+      "size": 1.2,
+      "description": [
+        "全天可栽培；首次浇水认主，主人近八格会舞动。",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "740D713B95372DBE",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/dance_bell",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "0897792CA16784F6"
+      ]
+    },
+    {
+      "id": "07C6156CB99B3BA0",
+      "title": "亲手收获",
+      "icon": "tnc:dance_petal",
+      "x": 2.25,
+      "y": 64.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "63F1D42A0B2631F2",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/dance_bell",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "20E64B7868596141"
+      ]
+    },
+    {
+      "id": "07076944C402F0C5",
+      "title": "生活与工坊",
+      "icon": "tnc:dance_petal",
+      "x": 2.25,
+      "y": 67.4,
+      "size": 1.2,
+      "description": [
+        "花礼；伴生器件；互动花园",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "6A0E88D379D9D5B0",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "07C6156CB99B3BA0"
+      ]
+    },
+    {
+      "id": "612310C912FB0BCC",
+      "title": "星憩蕊",
+      "icon": "tnc:star_rest_seed",
+      "x": 6.75,
+      "y": 59,
+      "size": 1.8,
+      "description": [
+        "夜间可见的林间空地；根/芽",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "73ABB3EB375824AF",
+          "type": "item",
+          "item": "tnc:star_rest_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "36AF5CED1E9FAB5A",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": 6.75,
+      "y": 61.8,
+      "size": 1.2,
+      "description": [
+        "栽培不挑环境；成熟夜间放三只花灵，归来结露。",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "3F4F291A6D5AAB22",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/star_rest",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "612310C912FB0BCC"
+      ]
+    },
+    {
+      "id": "5F4F3D9EBE75AF99",
+      "title": "亲手收获",
+      "icon": "tnc:star_rest_dew",
+      "x": 6.75,
+      "y": 64.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "2810992CFD7FD7BC",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/star_rest",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "36AF5CED1E9FAB5A"
+      ]
+    },
+    {
+      "id": "4CA0B40B01AAA811",
+      "title": "生活与工坊",
+      "icon": "tnc:star_rest_dew",
+      "x": 6.75,
+      "y": 67.4,
+      "size": 1.2,
+      "description": [
+        "星憩饮；花灵观赏；远征补给",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "074833108EBE1289",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "5F4F3D9EBE75AF99"
+      ]
+    },
+    {
+      "id": "5D02353BA95DDAD1",
+      "title": "沤梦菌",
+      "icon": "tnc:dream_compost_seed",
+      "x": 11.25,
+      "y": 59,
+      "size": 1.8,
+      "description": [
+        "野外对应林地、草坡、河岸或山地寻找自然株。",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "7AB7D0ACA2BBECC7",
+          "type": "item",
+          "item": "tnc:dream_compost_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "46BF189394059892",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": 11.25,
+      "y": 61.8,
+      "size": 1.2,
+      "description": [
+        "三类有机料发酵90秒；同类只产生180魔力",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "772FECF3EE060DAE",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/dream_compost",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "5D02353BA95DDAD1"
+      ]
+    },
+    {
+      "id": "109D688A01423083",
+      "title": "亲手收获",
+      "icon": "tnc:dream_humus",
+      "x": 11.25,
+      "y": 64.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "516431B4EA48A6E4",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/dream_compost",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "46BF189394059892"
+      ]
+    },
+    {
+      "id": "2311C9AB30AED1C8",
+      "title": "生活与工坊",
+      "icon": "tnc:dream_humus",
+      "x": 11.25,
+      "y": 67.4,
+      "size": 1.2,
+      "description": [
+        "采收、厨房加工或对应工坊器件；按 JEI 查看实际配方。",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "5FDE12EC5DD55E6A",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "109D688A01423083"
+      ]
+    },
+    {
+      "id": "05BD93482B0F0686",
+      "title": "温差折叶",
+      "icon": "tnc:thermal_foldleaf_seed",
+      "x": -11.25,
+      "y": 73,
+      "size": 1.8,
+      "description": [
+        "野外对应林地、草坡、河岸或山地寻找自然株。",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "277A1D0AB0686885",
+          "type": "item",
+          "item": "tnc:thermal_foldleaf_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "36BE22334B55843F",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": -11.25,
+      "y": 75.8,
+      "size": 1.2,
+      "description": [
+        "真实燃烧炉热面＋冷面；魔导炉不能回供",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "1E4FF69757A43C8D",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/thermal_foldleaf",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "05BD93482B0F0686"
+      ]
+    },
+    {
+      "id": "47715FAA95B4D5CC",
+      "title": "亲手收获",
+      "icon": "tnc:foldleaf_film",
+      "x": -11.25,
+      "y": 78.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "07021184480AAFB5",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/thermal_foldleaf",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "36BE22334B55843F"
+      ]
+    },
+    {
+      "id": "12A35B1076F210B7",
+      "title": "生活与工坊",
+      "icon": "tnc:foldleaf_film",
+      "x": -11.25,
+      "y": 81.4,
+      "size": 1.2,
+      "description": [
+        "采收、厨房加工或对应工坊器件；按 JEI 查看实际配方。",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "6539BF9A112FE4D3",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "47715FAA95B4D5CC"
+      ]
+    },
+    {
+      "id": "36DD5AB2B398F71F",
+      "title": "影漏兰",
+      "icon": "tnc:shadow_hour_orchid_seed",
+      "x": -6.75,
+      "y": 73,
+      "size": 1.8,
+      "description": [
+        "野外对应林地、草坡、河岸或山地寻找自然株。",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "3920DDA24D8ECC0C",
+          "type": "item",
+          "item": "tnc:shadow_hour_orchid_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "3295C542B070A25F",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": -6.75,
+      "y": 75.8,
+      "size": 1.2,
+      "description": [
+        "自然日影移动时蓄魔；每日最多八次",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "60662E00567FD065",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/shadow_hour_orchid",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "36DD5AB2B398F71F"
+      ]
+    },
+    {
+      "id": "15D9115D83382355",
+      "title": "亲手收获",
+      "icon": "tnc:shadow_hour_petal",
+      "x": -6.75,
+      "y": 78.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "65DB4D2E63DC8FD6",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/shadow_hour_orchid",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "3295C542B070A25F"
+      ]
+    },
+    {
+      "id": "02B7150C56A7E07C",
+      "title": "生活与工坊",
+      "icon": "tnc:shadow_hour_petal",
+      "x": -6.75,
+      "y": 81.4,
+      "size": 1.2,
+      "description": [
+        "采收、厨房加工或对应工坊器件；按 JEI 查看实际配方。",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "1C44F814D0A66B31",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "15D9115D83382355"
+      ]
+    },
+    {
+      "id": "0B280E6A7133DB35",
+      "title": "旋页蕨",
+      "icon": "tnc:turnpage_fern_seed",
+      "x": -2.25,
+      "y": 73,
+      "size": 1.8,
+      "description": [
+        "野外对应林地、草坡、河岸或山地寻找自然株。",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "27EC83D404F7D3E8",
+          "type": "item",
+          "item": "tnc:turnpage_fern_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "123FF68E6C72A0AC",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": -2.25,
+      "y": 75.8,
+      "size": 1.2,
+      "description": [
+        "讲台真实翻新页并消耗纸；30/页、每日240",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "5B68C5BA707B683F",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/turnpage_fern",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "0B280E6A7133DB35"
+      ]
+    },
+    {
+      "id": "68030ADA05051749",
+      "title": "亲手收获",
+      "icon": "tnc:page_fern_fiber",
+      "x": -2.25,
+      "y": 78.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "6855305798D4940D",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/turnpage_fern",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "123FF68E6C72A0AC"
+      ]
+    },
+    {
+      "id": "0A6BD49E9BA3469E",
+      "title": "生活与工坊",
+      "icon": "tnc:page_fern_fiber",
+      "x": -2.25,
+      "y": 81.4,
+      "size": 1.2,
+      "description": [
+        "采收、厨房加工或对应工坊器件；按 JEI 查看实际配方。",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "137555F23040A95F",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "68030ADA05051749"
+      ]
+    },
+    {
+      "id": "12D67E792EBFFB3B",
+      "title": "昼夜砂穗",
+      "icon": "tnc:daynight_sandgrain_seed",
+      "x": 2.25,
+      "y": 73,
+      "size": 1.8,
+      "description": [
+        "野外对应林地、草坡、河岸或山地寻找自然株。",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "6879300D590D93B8",
+          "type": "item",
+          "item": "tnc:daynight_sandgrain_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "57D6D6971B4AF165",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": 2.25,
+      "y": 75.8,
+      "size": 1.2,
+      "description": [
+        "白昼和夜晚各感受60秒，再释放360魔力",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "5E598B99E1591A5D",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/daynight_sandgrain",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "12D67E792EBFFB3B"
+      ]
+    },
+    {
+      "id": "47A6B2BD085DEAF0",
+      "title": "亲手收获",
+      "icon": "tnc:cycle_sandgrain",
+      "x": 2.25,
+      "y": 78.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "3DA3320613AA667F",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/daynight_sandgrain",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "57D6D6971B4AF165"
+      ]
+    },
+    {
+      "id": "3A5FB90C882EC606",
+      "title": "生活与工坊",
+      "icon": "tnc:cycle_sandgrain",
+      "x": 2.25,
+      "y": 81.4,
+      "size": 1.2,
+      "description": [
+        "采收、厨房加工或对应工坊器件；按 JEI 查看实际配方。",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "7D2684E9A83784A6",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "47A6B2BD085DEAF0"
+      ]
+    },
+    {
+      "id": "4FF176E5FFC1059D",
+      "title": "垂露丝草",
+      "icon": "tnc:hanging_dewgrass_seed",
+      "x": 6.75,
+      "y": 73,
+      "size": 1.8,
+      "description": [
+        "野外对应林地、草坡、河岸或山地寻找自然株。",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "69EB017AF7E875F0",
+          "type": "item",
+          "item": "tnc:hanging_dewgrass_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "36D34916232AA3A2",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": 6.75,
+      "y": 75.8,
+      "size": 1.2,
+      "description": [
+        "真实雨水逐秒蓄能，晴天慢慢放出",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "4E8408A6914A92AB",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/hanging_dewgrass",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "4FF176E5FFC1059D"
+      ]
+    },
+    {
+      "id": "46F263AE1EA2B89C",
+      "title": "亲手收获",
+      "icon": "tnc:dewgrass_thread",
+      "x": 6.75,
+      "y": 78.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "6B2BCD0D38252696",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/hanging_dewgrass",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "36D34916232AA3A2"
+      ]
+    },
+    {
+      "id": "5B845AE3E37D573B",
+      "title": "生活与工坊",
+      "icon": "tnc:dewgrass_thread",
+      "x": 6.75,
+      "y": 81.4,
+      "size": 1.2,
+      "description": [
+        "采收、厨房加工或对应工坊器件；按 JEI 查看实际配方。",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "15F4E71305F78B68",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "46F263AE1EA2B89C"
+      ]
+    },
+    {
+      "id": "4D252F7FA626BB62",
+      "title": "虹折冠",
+      "icon": "tnc:prism_crown_seed",
+      "x": 11.25,
+      "y": 73,
+      "size": 1.8,
+      "description": [
+        "野外对应林地、草坡、河岸或山地寻找自然株。",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "2ED28F4BCE5EA47C",
+          "type": "item",
+          "item": "tnc:prism_crown_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "2ED45895D1FED5A4",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": 11.25,
+      "y": 75.8,
+      "size": 1.2,
+      "description": [
+        "天然日光通过三色玻璃折射；自身灯不生效",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "75A07862FB5B49BB",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/prism_crown",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "4D252F7FA626BB62"
+      ]
+    },
+    {
+      "id": "6464B21C59503759",
+      "title": "亲手收获",
+      "icon": "tnc:prism_crown_petal",
+      "x": 11.25,
+      "y": 78.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "71797BC06DEDF69F",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/prism_crown",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "2ED45895D1FED5A4"
+      ]
+    },
+    {
+      "id": "216B430DE28EA4B8",
+      "title": "生活与工坊",
+      "icon": "tnc:prism_crown_petal",
+      "x": 11.25,
+      "y": 81.4,
+      "size": 1.2,
+      "description": [
+        "采收、厨房加工或对应工坊器件；按 JEI 查看实际配方。",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "190942324B6CE68E",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "6464B21C59503759"
+      ]
+    },
+    {
+      "id": "285011662079AF71",
+      "title": "矿眠苔",
+      "icon": "tnc:ore_sleep_moss_seed",
+      "x": -11.25,
+      "y": 87,
+      "size": 1.8,
+      "description": [
+        "野外对应林地、草坡、河岸或山地寻找自然株。",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "7DBB56E95F1C5403",
+          "type": "item",
+          "item": "tnc:ore_sleep_moss_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "37D237684C3FB71E",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": -11.25,
+      "y": 89.8,
+      "size": 1.2,
+      "description": [
+        "天然矿脉有限共鸣；同区块每日共享1200",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "511148498F203126",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/ore_sleep_moss",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "285011662079AF71"
+      ]
+    },
+    {
+      "id": "19509289C97CCAEA",
+      "title": "亲手收获",
+      "icon": "tnc:ore_dream_flake",
+      "x": -11.25,
+      "y": 92.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "619735C73AF9ED64",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/ore_sleep_moss",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "37D237684C3FB71E"
+      ]
+    },
+    {
+      "id": "7F4CB03E881A0414",
+      "title": "生活与工坊",
+      "icon": "tnc:ore_dream_flake",
+      "x": -11.25,
+      "y": 95.4,
+      "size": 1.2,
+      "description": [
+        "采收、厨房加工或对应工坊器件；按 JEI 查看实际配方。",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "56BF9FFA8993B7F2",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "19509289C97CCAEA"
+      ]
+    },
+    {
+      "id": "4E9E138C1CA734F4",
+      "title": "雷纹冠",
+      "icon": "tnc:storm_crown_seed",
+      "x": -6.75,
+      "y": 87,
+      "size": 1.8,
+      "description": [
+        "野外对应林地、草坡、河岸或山地寻找自然株。",
+        "不消耗种源。留一份种回家，采一份用于生活。"
+      ],
+      "tasks": [
+        {
+          "id": "5AAFA9F4FD1303D7",
+          "type": "item",
+          "item": "tnc:storm_crown_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "3D6688E4B339D52A",
+      "title": "扎下魔法根",
+      "icon": "tnc:magic_soil",
+      "x": -6.75,
+      "y": 89.8,
+      "size": 1.2,
+      "description": [
+        "自然雷击蓄2400；玩家制造的雷击不计入产能",
+        "亲手种下记录；生长不分春夏秋冬。"
+      ],
+      "tasks": [
+        {
+          "id": "15FF0E413E362D48",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/storm_crown",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "4E9E138C1CA734F4"
+      ]
+    },
+    {
+      "id": "61C0A9734ADD0AFD",
+      "title": "亲手收获",
+      "icon": "tnc:storm_crown_tip",
+      "x": -6.75,
+      "y": 92.6,
+      "size": 1.2,
+      "description": [
+        "成熟收获会真实记录。液体产物须拿空瓶；取芽用剪刀。"
+      ],
+      "tasks": [
+        {
+          "id": "719D711D1FF055DA",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/harvest/storm_crown",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [
+        "3D6688E4B339D52A"
+      ]
+    },
+    {
+      "id": "01305B41EC1BAC09",
+      "title": "生活与工坊",
+      "icon": "tnc:storm_crown_tip",
+      "x": -6.75,
+      "y": 95.4,
+      "size": 1.2,
+      "description": [
+        "采收、厨房加工或对应工坊器件；按 JEI 查看实际配方。",
+        "本节点为用途说明；打开 JEI 查看全部实际配方。"
+      ],
+      "tasks": [
+        {
+          "id": "06F442259437AA8B",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "61C0A9734ADD0AFD"
+      ]
+    }
+  ],
+  "images": [],
+  "quest_links": []
+}

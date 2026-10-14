@@ -54,7 +54,7 @@ public final class TNFireRays {
             return false;
         }
         String path = spellId.getPath();
-        // t3 火龙术不是光柱（它会飞出去 ✓）⇒ 单独走投射物那条路 ✓
+        // t3 火龙吐息不是光柱（它会飞出去 ✓）⇒ 单独走投射物那条路 ✓
         if ("fire_dragon".equals(path)) {
             return castDragon(player, path);
         }
@@ -96,7 +96,7 @@ public final class TNFireRays {
     }
 
     /**
-     * t3 <b>火龙术</b>：在面前生成一颗朝准心的龙头，然后冲出去 ✓
+     * t3 <b>火龙吐息</b>：在面前生成一颗朝准心的龙头，然后冲出去 ✓
      *
      * <p>「面前的法阵 + 龙头逐渐成形」交给 {@code TNFireBoltEntity} 的**成形阶段**表现 ✓
      * （作者要的是"前摇结束时冲出去"✗ —— 引擎前摇期间我们没有钩子 ✗，

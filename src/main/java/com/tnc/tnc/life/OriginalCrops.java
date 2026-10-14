@@ -176,12 +176,12 @@ public final class OriginalCrops {
     }
 
     private static BlockState wildState(Block block) {
-        if(block==com.tnc.tnc.life.ecology.EcologyContent.VERDANT)return block.defaultBlockState().setValue(com.tnc.tnc.life.ecology.VerdantVeinBlock.AGE,3);
+        if(block==com.tnc.tnc.life.ecology.EcologyContent.VERDANT)return block.defaultBlockState().setValue(com.tnc.tnc.life.routes.RoutePlantBlock.WILD,true).setValue(com.tnc.tnc.life.ecology.VerdantVeinBlock.AGE,3);
         if (block == UncommonMagicPlants.HUSHCAP)
-            return block.defaultBlockState().setValue(UncommonMagicPlants.HushcapBlock.AGE, 3)
+            return block.defaultBlockState().setValue(com.tnc.tnc.life.routes.RoutePlantBlock.WILD,true).setValue(UncommonMagicPlants.HushcapBlock.AGE, 3)
                     .setValue(UncommonMagicPlants.HushcapBlock.QUIET, 3);
         if (block == UncommonMagicPlants.RAINLETTER)
-            return block.defaultBlockState().setValue(UncommonMagicPlants.RainletterBlock.AGE, 3)
+            return block.defaultBlockState().setValue(com.tnc.tnc.life.routes.RoutePlantBlock.WILD,true).setValue(UncommonMagicPlants.RainletterBlock.AGE, 3)
                     .setValue(UncommonMagicPlants.RainletterBlock.WET, true);
         return block.defaultBlockState();
     }
@@ -317,7 +317,7 @@ public final class OriginalCrops {
                 ROAD_BELL_EAR = new Item(new Item.Properties().food(new net.minecraft.world.food.FoodProperties.Builder()
                         .nutrition(3).saturationMod(0.35F).build()));
                 NIGHT_GOURD_SEED = new ItemNameBlockItem(NIGHT_GOURD_CROP, new Item.Properties());
-                NIGHT_GOURD = new Item(new Item.Properties().food(new net.minecraft.world.food.FoodProperties.Builder()
+                NIGHT_GOURD = new ItemNameBlockItem(NIGHT_GOURD_CROP,new Item.Properties().food(new net.minecraft.world.food.FoodProperties.Builder()
                         .nutrition(4).saturationMod(0.45F).build()));
                 TIDE_REED_SEED = new ItemNameBlockItem(TIDE_REED_CROP, new Item.Properties());
                 TIDE_REED_STEM = new Item(new Item.Properties());

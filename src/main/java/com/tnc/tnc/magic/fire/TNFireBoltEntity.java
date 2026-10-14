@@ -75,7 +75,7 @@ public final class TNFireBoltEntity extends Projectile {
     /** 命中后是否在落点留下熔岩地（t3 熔岩火球起才有）。 */
     private boolean lavaField;
 
-    /** 「火龙术」（射线链 t3）：穿透 + 命中不爆 + 消失时剧烈爆炸 ✓ */
+    /** 「火龙吐息」（射线链 t3）：穿透 + 命中不爆 + 消失时剧烈爆炸 ✓ */
     private boolean isDragon() {
         return "fire_dragon".equals(spellPath());
     }
@@ -107,7 +107,7 @@ public final class TNFireBoltEntity extends Projectile {
     private boolean dragonExploded;
 
     /**
-     * 火龙术：<b>消失时那一下剧烈爆炸</b> ✓
+     * 火龙吐息：<b>消失时那一下剧烈爆炸</b> ✓
      *
      * <p>作者 2026-10-05：「当火龙消失时发生一次剧烈爆炸，爆炸会有较为强烈的视角震动，
      * 该次爆炸伤害是该法术伤害 × 3」✓
@@ -185,7 +185,7 @@ public final class TNFireBoltEntity extends Projectile {
      */
     public static final int FORM_TICKS = 3;
 
-    /** 火龙术的成形时长（tick）—— 法阵由外到里描绘 + 龙头渐渐凝出来 ✓（作者要"逐渐出现"✗）。 */
+    /** 火龙吐息的成形时长（tick）—— 法阵由外到里描绘 + 龙头渐渐凝出来 ✓（作者要"逐渐出现"✗）。 */
     public static final int DRAGON_FORM_TICKS = 18;
 
     /**
@@ -319,7 +319,7 @@ public final class TNFireBoltEntity extends Projectile {
         if (skyFall()) {
             return 0;
         }
-        // 火龙术：要"在面前渐渐生成法阵 + 龙头成形"，3 tick 太短 ✗ ⇒ 给足 18 tick（0.9 秒）✓
+        // 火龙吐息：要"在面前渐渐生成法阵 + 龙头成形"，3 tick 太短 ✗ ⇒ 给足 18 tick（0.9 秒）✓
         return isDragon() ? DRAGON_FORM_TICKS : FORM_TICKS;
     }
 
@@ -445,7 +445,7 @@ public final class TNFireBoltEntity extends Projectile {
                 || owner instanceof net.minecraft.world.entity.player.Player p
                         && DownedCombat.isDowned(p)
                 || owner.level() != level()) {
-            // ⚠️ 火龙术：**飞完射程消失时的那一下剧烈爆炸**就挂在这儿 ✓
+            // ⚠️ 火龙吐息：**飞完射程消失时的那一下剧烈爆炸**就挂在这儿 ✓
             //    （这是它唯一的爆炸 —— 命中生物时是不爆的 ✓）
             if (isDragon() && level() instanceof net.minecraft.server.level.ServerLevel sl) {
                 dragonExplode(sl);
@@ -542,7 +542,7 @@ public final class TNFireBoltEntity extends Projectile {
             }
         }
 
-        // 火龙术：这次扫到的目标如果**已经打过**，就当没打中 ✓
+        // 火龙吐息：这次扫到的目标如果**已经打过**，就当没打中 ✓
         //   ⇒ 于是下面的 if 不成立（只要没撞墙）⇒ 它**继续往前飞** = 穿透 ✓
         // ★ 射线链 t1/t2：**这一 tick 扫描框里的所有生物都打一遍** ✓
         //   作者 2026-10-05 实测：「并排贴着才算出 2，隔开就只算 1」✗
@@ -677,7 +677,7 @@ public final class TNFireBoltEntity extends Projectile {
                 server.sendParticles(ParticleTypes.LAVA, impact.x, impact.y, impact.z, 20,
                         blastRadius * 0.4D, 0.4D, blastRadius * 0.4D, 0.2D);
             }
-            // 火龙术：**打到生物不停** ✗ —— 只有撞到方块才在这里结束 ✓
+            // 火龙吐息：**打到生物不停** ✗ —— 只有撞到方块才在这里结束 ✓
             if (penetrates() && wall.getType() == HitResult.Type.MISS) {
                 // 继续飞：不 discard、不 return ✓（下面照样推进位置 ✓）
             } else {

@@ -219,10 +219,10 @@ public final class HomewardFlower {
         public FlowerBlock() {
             super(BlockBehaviour.Properties.copy(Blocks.POPPY).noCollission()
                     .lightLevel(state -> state.getValue(BLOOMING) ? 4 : 0));
-            registerDefaultState(stateDefinition.any().setValue(BLOOMING, false));
+            registerDefaultState(stateDefinition.any().setValue(BLOOMING, false).setValue(com.tnc.tnc.life.routes.RoutePlantBlock.WILD,false));
         }
         @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-            builder.add(BLOOMING);
+            builder.add(BLOOMING,com.tnc.tnc.life.routes.RoutePlantBlock.WILD);
         }
         @Override public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
             return SHAPE;
@@ -245,8 +245,9 @@ public final class HomewardFlower {
             if (level.isClientSide) return InteractionResult.SUCCESS;
             if (!(player instanceof ServerPlayer owner) || com.tnc.tnc.home.TownProtection.denied(owner,pos))
                 return InteractionResult.FAIL;
-            Block.popResource(level, pos, new ItemStack(PETAL, 2));
-            level.setBlock(pos, state.setValue(BLOOMING, false), 3);
+            Block.popResource(level, pos, player.getItemInHand(hand).is(net.minecraft.world.item.Items.SHEARS)?new ItemStack(SEED):new ItemStack(PETAL, 2));
+            com.tnc.tnc.life.routes.RouteProgress.award(owner,"harvest/homeward_flower");
+            level.setBlock(pos, state.setValue(BLOOMING, false).setValue(com.tnc.tnc.life.routes.RoutePlantBlock.WILD,false), 3);
             return InteractionResult.CONSUME;
         }
         @Override public void onRemove(BlockState state,Level level,BlockPos pos,BlockState next,boolean moving){
@@ -262,7 +263,7 @@ public final class HomewardFlower {
     public static final class HomeSeedItem extends ItemNameBlockItem {
         public HomeSeedItem(Block block) { super(block, new Item.Properties()); }
         @Override public void appendHoverText(ItemStack stack, Level level, List<Component> text, TooltipFlag flag) {
-            text.add(Component.literal("可种在普通野外或自己的田地；潜行空手右键花株设置露营归处。"));
+            text.add(Component.literal("在获准野外或自家田地的魔法土上种植，八格内放流动魔力；潜行空手右键花株设置露营归处。"));
             text.add(Component.literal("远行512格，走动并停留一分钟；回到归处16格内开放，每游戏日最多三朵。"));
         }
         @Override public InteractionResult place(BlockPlaceContext context) {

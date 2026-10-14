@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "GIG",
+    "LBL",
+    "GIG"
+  ],
+  "key": {
+    "I": {
+      "item": "tnc:spirit_iron"
+    },
+    "G": {
+      "item": "tnc:radiant_gold"
+    },
+    "B": {
+      "item": "minecraft:glass_bottle"
+    },
+    "L": {
+      "tag": "minecraft:logs"
+    }
+  },
+  "result": {
+    "item": "tnc:radiant_cage",
+    "count": 1
+  }
+}

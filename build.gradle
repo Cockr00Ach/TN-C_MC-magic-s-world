@@ -102,6 +102,13 @@ minecraft {
                 property 'tnc.casinoAuditReport', file('work/casino-client-audit.json').absolutePath
                 args '--quickPlaySingleplayer', 'casino-gallery', '--width', '1280', '--height', '720'
             }
+            if (project.hasProperty('lifeRoutesVisualAudit')) {
+                workingDirectory project.file('run-client-ecology-audit')
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+                property 'tnc.lifeRoutesVisualAudit', 'true'
+                args '--quickPlaySingleplayer', 'ecology-gui-feedback', '--width', '1280', '--height', '720'
+            }
             if (project.hasProperty('tavernClientAudit')) {
                 workingDirectory project.file('run-client-ecology-audit')
                 property 'mixin.env.remapRefMap', 'true'
@@ -146,7 +153,14 @@ minecraft {
         // By default, the server will crash when no gametests are provided.
         // The gametest system is also enabled by default for other run configs under the /test command.
         gameTestServer {
-            property 'forge.enabledGameTestNamespaces', mod_id
+            property 'forge.enabledGameTestNamespaces', project.hasProperty('lifeRoutesTests') ? 'tncroute' : mod_id
+            if (project.hasProperty('ftbQuestLoadTests')) {
+                workingDirectory project.file('work/ftb-route-load-test')
+            }
+            if (project.hasProperty('lifeRoutesTests')) {
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+            }
             if (project.hasProperty('townServicesTests') || project.hasProperty('buildingGameTests') || project.hasProperty('townLifeTests')) {
                 property 'mixin.env.remapRefMap', 'true'
                 property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
@@ -245,6 +259,13 @@ dependencies {
         runtimeOnly fg.deobf('bountiful:Bountiful:6.0.4')
         runtimeOnly fg.deobf('kambrik:Kambrik:6.1.1')
         runtimeOnly files('libs/kotlinforforge-4.12.0-all.jar')
+    }
+    // Opt-in loading check with the exact installed FTB versions; never bundled.
+    if (project.hasProperty('ftbQuestLoadTests')) {
+        runtimeOnly fg.deobf('architectury:architectury:9.2.14')
+        runtimeOnly fg.deobf('ftbquests:ftb-quests-forge:2001.4.22')
+        runtimeOnly fg.deobf('ftblibrary:ftb-library-forge:2001.2.13')
+        runtimeOnly fg.deobf('ftbteams:ftb-teams-forge:2001.3.2')
     }
     if (project.hasProperty('townLifeTests')) {
         // Annotation-name fixture only; installed MCA jar remains unmodified.

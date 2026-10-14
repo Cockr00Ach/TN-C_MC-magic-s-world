@@ -57,7 +57,7 @@ public final class PastureProductItem extends Item {
                 if(id.equals("air_plume")||id.equals("wind_bottle")){p.setDeltaMovement(p.getDeltaMovement().add(0,.5,0));p.hurtMarked=true;p.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING,120,0));eatOne(p,held);}
                 if(id.equals("warm_breath")){p.getPersistentData().putLong("TncWarmUntil",level.getGameTime()+1200);p.setTicksFrozen(0);eatOne(p,held);if(!p.isCreative()){var jar=new ItemStack(PastureRegistry.item("empty_breath_jar"));if(held.isEmpty())return InteractionResultHolder.consume(jar);give(p,jar);}}
                 if(id.equals("quiet_felt")){p.getPersistentData().putLong("TncQuietUntil",level.getGameTime()+600);eatOne(p,held);}
-                if(id.equals("calming_bell")){int count=0;for(var a:level.getEntitiesOfClass(PastureAnimal.class,p.getBoundingBox().inflate(12),a->a.mayCareFor(p))){a.calmFor(100);count++;}p.displayClientMessage(Component.literal("安畜铃响过，附近 "+count+" 只牲畜安静停步五秒。"),true);}
+                if(id.equals("calming_bell")){int count=0;for(var a:level.getEntitiesOfClass(PastureAnimal.class,p.getBoundingBox().inflate(12),a->a.mayCareFor(p))){a.calmFor(200);count++;}p.displayClientMessage(Component.literal("安畜铃响过，附近 "+count+" 只牲畜安静停步十秒。"),true);}
                 p.getCooldowns().addCooldown(this,80);
             }
             return InteractionResultHolder.sidedSuccess(held,level.isClientSide);
@@ -74,11 +74,11 @@ public final class PastureProductItem extends Item {
         BlockPos at=c.getClickedPos();var level=p.serverLevel();ItemStack held=c.getItemInHand();
         if(TownProtection.denied(p,at))return InteractionResult.FAIL;
         if(id.equals("climbing_cord"))return com.tnc.tnc.life.wonders.WonderRopes.use(c,12);
-        if(id.equals("storm_crystal")&&level.getBlockEntity(at) instanceof EnergyBlockEntity node&&node.mayUse(p)){
+        if(id.equals("storm_crystal")&&level.getBlockEntity(at) instanceof com.tnc.tnc.life.routes.RouteNodeEntity node&&node.mayUse(p)){
             int reserve=held.hasTag()&&held.getTag().contains("CrystalFE")?held.getTag().getInt("CrystalFE"):50;
-            reserve=Math.max(0,Math.min(50,reserve));int accepted=node.addEnergy(reserve);
+            reserve=Math.max(0,Math.min(50,reserve));int accepted=node.receive(reserve);
             if(accepted>0){int left=reserve-accepted;if(left==0)eatOne(p,held);else if(held.getCount()==1)held.getOrCreateTag().putInt("CrystalFE",left);else{held.shrink(1);ItemStack remainder=new ItemStack(this);remainder.getOrCreateTag().putInt("CrystalFE",left);give(p,remainder);}}
-            p.displayClientMessage(Component.literal("雷余晶送入 "+accepted+" FE。剩余电量随晶体保存。"),true);return InteractionResult.CONSUME;
+            p.displayClientMessage(Component.literal("雷余晶送入 "+accepted+" 魔力。剩余魔力随晶体保存。"),true);return InteractionResult.CONSUME;
         }
         if(id.equals("loam_pebble")||id.equals("spring_concentrate")){
             int capacity=id.equals("spring_concentrate")?4:1;
@@ -107,7 +107,7 @@ public final class PastureProductItem extends Item {
         }
     }
     @Override public void appendHoverText(ItemStack stack,Level level,List<Component> text,TooltipFlag flags){
-        text.add(Component.literal(switch(id){case"storm_crystal"->"右键蓄能设备转入最多50FE；只消耗实际接收的电量。";case"spring_concentrate"->"四次浇灌植物/耕地，每次保湿十分钟，用尽返瓶。";case"loam_pebble"->"一次保湿十分钟，不凭空造水或矿。";case"soft_lantern"->"真实移动光；落角供12分钟、灯蜡供4分钟。";case"air_plume","wind_bottle"->"一阵向上的气流，缓降6秒；一次消耗。";case"warm_breath"->"保暖一分钟；使用后返空暖息罐。";case"quiet_felt"->"脚步振动静30秒；攻击即结束。";case"climbing_cord"->"右键布12格真实攀绳，潜行右键收回；不拆别人方块。";default->"原创牧养产物，用于料理、牧场工具、工坊或商行供货。";}));
+        text.add(Component.literal(switch(id){case"storm_crystal"->"右键蓄能设备转入最多50点纯魔力；只消耗实际接收的电量。";case"spring_concentrate"->"四次浇灌植物/耕地，每次保湿十分钟，用尽返瓶。";case"loam_pebble"->"一次保湿十分钟，不凭空造水或矿。";case"soft_lantern"->"真实移动光；落角供12分钟、灯蜡供4分钟。";case"air_plume","wind_bottle"->"一阵向上的气流，缓降6秒；一次消耗。";case"warm_breath"->"保暖一分钟；使用后返空暖息罐。";case"quiet_felt"->"脚步振动静30秒；攻击即结束。";case"climbing_cord"->"右键布12格真实攀绳，潜行右键收回；不拆别人方块。";default->"原创牧养产物，用于料理、牧场工具、工坊或商行供货。";}));
     }
     @Override public boolean hasCraftingRemainingItem(ItemStack stack){return Set.of("warm_breath","spring_concentrate","honeydew").contains(id)||super.hasCraftingRemainingItem(stack);}
     @Override public ItemStack getCraftingRemainingItem(ItemStack stack){return switch(id){case"warm_breath"->new ItemStack(PastureRegistry.item("empty_breath_jar"));case"spring_concentrate","honeydew"->new ItemStack(Items.GLASS_BOTTLE);default->super.getCraftingRemainingItem(stack);};}

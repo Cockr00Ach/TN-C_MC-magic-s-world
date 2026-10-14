@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "age=0": {
+      "model": "tnc:block/turnpage_fern_0"
+    },
+    "age=1": {
+      "model": "tnc:block/turnpage_fern_1"
+    },
+    "age=2": {
+      "model": "tnc:block/turnpage_fern_2"
+    },
+    "age=3": {
+      "model": "tnc:block/turnpage_fern_3"
+    }
+  }
+}

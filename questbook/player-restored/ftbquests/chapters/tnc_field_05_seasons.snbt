@@ -1,0 +1,2971 @@
+{
+  "id": "634D9527A5A462C7",
+  "filename": "tnc_field_05_seasons",
+  "title": "&a&l四时农圃",
+  "icon": "tnc:season_handbook",
+  "group": "544E434C49464531",
+  "order_index": 2,
+  "default_hide_dependency_lines": false,
+  "default_quest_shape": "hexagon",
+  "quests": [
+    {
+      "id": "6299385D7C547748",
+      "title": "&a四时 · 把日子种进田里",
+      "icon": "tnc:season_handbook",
+      "x": 0,
+      "y": -16,
+      "size": 2,
+      "description": [
+        "每季七个游戏日。应季100%、相邻季60%、反季25%。换季不会毁掉作物。",
+        "普通植物保持原种法，任何获准的野外地块都能种。睡觉推进农历，生长累计真实运行时间。",
+        "下面每栏是应季品种；多季作物在对应季节也有入口，共用一个完成记录。"
+      ],
+      "tasks": [
+        {
+          "id": "303EA1A6C9FE30A5",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [],
+      "rewards": [
+        {
+          "id": "21B6C455B9134831",
+          "type": "item",
+          "item": "tnc:season_handbook",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "20FF7CC6591CE6E6",
+      "title": "&a&l春 · 农圃",
+      "icon": "minecraft:oak_sapling",
+      "x": -13.5,
+      "y": 0,
+      "size": 1.8,
+      "description": [
+        "应季正常生长；打开品种节点看种源和厨房用途。"
+      ],
+      "tasks": [
+        {
+          "id": "45D619FB19EFB559",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "3CB3807925E7EFE9",
+      "title": "&a&l夏 · 农圃",
+      "icon": "minecraft:melon",
+      "x": -4.5,
+      "y": 0,
+      "size": 1.8,
+      "description": [
+        "应季正常生长；打开品种节点看种源和厨房用途。"
+      ],
+      "tasks": [
+        {
+          "id": "264A4524A5A008CE",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "5DCE6589A5B93C36",
+      "title": "&a&l秋 · 农圃",
+      "icon": "minecraft:pumpkin",
+      "x": 4.5,
+      "y": 0,
+      "size": 1.8,
+      "description": [
+        "应季正常生长；打开品种节点看种源和厨房用途。"
+      ],
+      "tasks": [
+        {
+          "id": "4C009AD53E29900E",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "793BE12E1AFD4BA3",
+      "title": "&a&l冬 · 农圃",
+      "icon": "minecraft:snowball",
+      "x": 13.5,
+      "y": 0,
+      "size": 1.8,
+      "description": [
+        "应季正常生长；打开品种节点看种源和厨房用途。"
+      ],
+      "tasks": [
+        {
+          "id": "0EB9E8988687C873",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "660CC7F2B836FAD9",
+      "title": "小麦",
+      "icon": "minecraft:wheat_seeds",
+      "x": -15.35,
+      "y": 4.0,
+      "size": 1.2,
+      "description": [
+        "适种：春、秋",
+        "种源：minecraft:wheat_seeds",
+        "用途：面包、面食、谷草饲料、酒馆供货",
+        "原模组配方例：minecraft:bread、minecraft:cake、twilightdelight:aurora_pie、twilightdelight:aurora_cake",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "02BE3DD0C15FCA35",
+          "type": "item",
+          "item": "minecraft:wheat_seeds",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "3B7972A86F790627",
+      "title": "胡萝卜",
+      "icon": "minecraft:carrot",
+      "x": -11.65,
+      "y": 4.0,
+      "size": 1.2,
+      "description": [
+        "适种：春、秋、冬",
+        "种源：minecraft:carrot",
+        "用途：菜肴、兔类喜食；冬季基础口粮",
+        "原模组配方例：小炒肥虫、Alex 的营养餐、下界芦苇炖菜、萝卜羊肉汤",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "0074069FB64B4BB6",
+          "type": "item",
+          "item": "minecraft:carrot",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "2522230C2C0F38B5",
+      "title": "马铃薯",
+      "icon": "minecraft:potato",
+      "x": -15.35,
+      "y": 7.4,
+      "size": 1.2,
+      "description": [
+        "适种：春、秋、冬",
+        "种源：minecraft:potato",
+        "用途：烤薯、汤、豪豕饲料",
+        "原模组配方例：一串土豆、垒脊焖锅、极地炖肉、土豆泥瘤兽排",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "475633F66D414E43",
+          "type": "item",
+          "item": "minecraft:potato",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "4D8ED573141332FC",
+      "title": "甜菜",
+      "icon": "minecraft:beetroot_seeds",
+      "x": -11.65,
+      "y": 7.4,
+      "size": 1.2,
+      "description": [
+        "适种：春、秋、冬",
+        "种源：minecraft:beetroot_seeds",
+        "用途：汤、根菜饲料",
+        "原模组配方例：蛀虫精华甜菜汤、荧光浇汁鹿排配意面、一串甜菜、垒脊焖锅",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "77686236F48CFADC",
+          "type": "item",
+          "item": "minecraft:beetroot_seeds",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "0A7D39AB1B0B5A64",
+      "title": "西瓜",
+      "icon": "minecraft:melon_seeds",
+      "x": -6.35,
+      "y": 4.0,
+      "size": 1.2,
+      "description": [
+        "适种：夏",
+        "种源：minecraft:melon_seeds",
+        "用途：饮品、浮鲸和貂喜食",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "10162F3DEF271E6C",
+          "type": "item",
+          "item": "minecraft:melon_seeds",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "7C5611AF833FBED1",
+      "title": "南瓜",
+      "icon": "minecraft:pumpkin_seeds",
+      "x": 2.65,
+      "y": 10.8,
+      "size": 1.2,
+      "description": [
+        "适种：秋",
+        "种源：minecraft:pumpkin_seeds",
+        "用途：派、填馅南瓜、节庆供货",
+        "原模组配方例：minecraft:pumpkin_pie、暮炭慢炖",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "154FBBA18D426D42",
+          "type": "item",
+          "item": "minecraft:pumpkin_seeds",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "434C7806C5F955E6",
+      "title": "甜浆果",
+      "icon": "minecraft:sweet_berries",
+      "x": -15.35,
+      "y": 10.8,
+      "size": 1.2,
+      "description": [
+        "适种：春、夏",
+        "种源：minecraft:sweet_berries",
+        "用途：甜点、商店供货、蛙/蜗等喜食",
+        "原模组配方例：fruitsdelight:sweetberry_jelly、fruitsdelight:fig_pudding、海煲、bosses_delight:magic_frozen_noodles_block",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "205AA34BF68AEBFA",
+          "type": "item",
+          "item": "minecraft:sweet_berries",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "3160EC9DF66EBA56",
+      "title": "发光浆果",
+      "icon": "minecraft:glow_berries",
+      "x": -14.700000000000001,
+      "y": 83.39999999999999,
+      "size": 1.2,
+      "description": [
+        "适种：全年、洞窟",
+        "种源：minecraft:glow_berries",
+        "用途：地下食物与景观；保留原生藤面要求",
+        "原模组配方例：fruitsdelight:glowberry_jelly、farmersdelight:gleaming_salad_block",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "4E078AE19E9DA5F4",
+          "type": "item",
+          "item": "minecraft:glow_berries",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "3252BA03D6297E9C",
+      "title": "可可",
+      "icon": "minecraft:cocoa_beans",
+      "x": -6.35,
+      "y": 7.4,
+      "size": 1.2,
+      "description": [
+        "适种：夏",
+        "种源：minecraft:cocoa_beans",
+        "用途：可可食品；保留丛林木附着",
+        "原模组配方例：残骸脆脆卷、farmersdelight:chocolate_pie",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "0FD44AC008FD385A",
+          "type": "item",
+          "item": "minecraft:cocoa_beans",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "5ED7E6027B23CA95",
+      "title": "甘蔗",
+      "icon": "minecraft:sugar_cane",
+      "x": -11.65,
+      "y": 10.8,
+      "size": 1.2,
+      "description": [
+        "适种：春、夏、秋",
+        "种源：minecraft:sugar_cane",
+        "用途：糖、纸、筑狸喜食；冬反季慢长",
+        "原模组配方例：捆绑香蕉",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "0B1E662677203649",
+          "type": "item",
+          "item": "minecraft:sugar_cane",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "7F89EC7DFE59D516",
+      "title": "竹",
+      "icon": "minecraft:bamboo",
+      "x": -15.35,
+      "y": 14.2,
+      "size": 1.2,
+      "description": [
+        "适种：春、夏、秋",
+        "种源：minecraft:bamboo",
+        "用途：材料，不改已有家具只能购买原则",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "5F3394B4A095C4CD",
+          "type": "item",
+          "item": "minecraft:bamboo",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "31C127B400725D93",
+      "title": "仙人掌",
+      "icon": "minecraft:cactus",
+      "x": -10.5,
+      "y": 83.39999999999999,
+      "size": 1.2,
+      "description": [
+        "适种：全年、旱生",
+        "种源：minecraft:cactus",
+        "用途：染料、沙园；不额外编成种粮路线",
+        "原模组配方例：additional_rpg_jewelry:cactea_ring",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "49ECBBAE847BC10B",
+          "type": "item",
+          "item": "minecraft:cactus",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "75F9A55FA92AB03B",
+      "title": "棕蘑菇、红蘑菇",
+      "icon": "minecraft:brown_mushroom",
+      "x": -6.300000000000001,
+      "y": 83.39999999999999,
+      "size": 1.2,
+      "description": [
+        "适种：全年、菌床",
+        "种源：minecraft:brown_mushroom",
+        "用途：汤、原料；仍有原模组光照/基底规则",
+        "原模组配方例：夜行蝠煲、饺子、minecraft:mushroom_stew、minecraft:rabbit_stew",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "4EA0B67348C9F251",
+          "type": "item",
+          "item": "minecraft:brown_mushroom",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "58B96593528A0C3B",
+      "title": "海带",
+      "icon": "minecraft:kelp",
+      "x": -2.1,
+      "y": 83.39999999999999,
+      "size": 1.2,
+      "description": [
+        "适种：全年、水生",
+        "种源：minecraft:kelp",
+        "用途：烘干、海园与食品；不套陆地浇水",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "32B226E3EF8E25CD",
+          "type": "item",
+          "item": "minecraft:kelp",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "7B83C8AD0CA0F03E",
+      "title": "海泡菜",
+      "icon": "minecraft:sea_pickle",
+      "x": 2.1,
+      "y": 83.39999999999999,
+      "size": 1.2,
+      "description": [
+        "适种：全年、水生",
+        "种源：minecraft:sea_pickle",
+        "用途：照明、染料；原生繁殖，不冒充普通 crop",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "642BA4B14BEF57FD",
+          "type": "item",
+          "item": "minecraft:sea_pickle",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "6127F9C24F268939",
+      "title": "地狱疣",
+      "icon": "minecraft:nether_wart",
+      "x": 6.300000000000001,
+      "y": 83.39999999999999,
+      "size": 1.2,
+      "description": [
+        "适种：全年、下界",
+        "种源：minecraft:nether_wart",
+        "用途：炼药；灵魂沙条件不变",
+        "原模组配方例：炽足兽炖下界疣",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "0BDC631A995BC5FD",
+          "type": "item",
+          "item": "minecraft:nether_wart",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "385858FECF49A55A",
+      "title": "绯红菌、诡异菌",
+      "icon": "minecraft:crimson_fungus",
+      "x": 10.5,
+      "y": 83.39999999999999,
+      "size": 1.2,
+      "description": [
+        "适种：全年、下界",
+        "种源：minecraft:crimson_fungus",
+        "用途：菌木生产；保留菌岩条件",
+        "原模组配方例：下界沙拉、绯红菌岩浆膏炖肉、绯红沙拉、kaleidoscope_cookery:crimson_fungus_pot_soup",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "4FF2245EB6F129A9",
+          "type": "item",
+          "item": "minecraft:crimson_fungus",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "6B85F5AECD64354F",
+      "title": "垂泪藤、缠怨藤",
+      "icon": "minecraft:weeping_vines",
+      "x": 14.700000000000001,
+      "y": 83.39999999999999,
+      "size": 1.2,
+      "description": [
+        "适种：全年、下界",
+        "种源：minecraft:weeping_vines",
+        "用途：景观、攀爬；按生长机制适配，不强套 CropBlock",
+        "原模组配方例：绯红沙拉",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "1C34C4E8F2C5D6D5",
+          "type": "item",
+          "item": "minecraft:weeping_vines",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "4A46BAAA031F9E68",
+      "title": "紫颂",
+      "icon": "minecraft:chorus_flower",
+      "x": -14.700000000000001,
+      "y": 86.8,
+      "size": 1.2,
+      "description": [
+        "适种：全年、末地",
+        "种源：minecraft:chorus_flower",
+        "用途：果实与建筑材料；保留末地石条件",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "62D1EFF1E9B1F736",
+          "type": "item",
+          "item": "minecraft:chorus_flower",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "542660FC6744CA20",
+      "title": "橡树产苹果",
+      "icon": "minecraft:oak_sapling",
+      "x": -10.5,
+      "y": 86.8,
+      "size": 1.2,
+      "description": [
+        "适种：树长全年；果实概念秋",
+        "种源：minecraft:oak_sapling",
+        "用途：原版掉落苹果不能简单改果树 age；第一版不减少基础树叶掉落",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "0AB5E34A2245A6C4",
+          "type": "item",
+          "item": "minecraft:oak_sapling",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "5F638D6E94919428",
+      "title": "农夫卷心菜",
+      "icon": "farmersdelight:cabbage_seeds",
+      "x": -11.65,
+      "y": 14.2,
+      "size": 1.2,
+      "description": [
+        "适种：春、秋、冬",
+        "种源：farmersdelight:cabbage_seeds",
+        "用途：菜叶、汤和料理；野生卷心菜是发现入口",
+        "原模组配方例：farmersdelight:gleaming_salad_block",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "4A4C464475647A36",
+          "type": "item",
+          "item": "farmersdelight:cabbage_seeds",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "60C13321363D0BC6",
+      "title": "农夫洋葱",
+      "icon": "farmersdelight:onion",
+      "x": -15.35,
+      "y": 17.6,
+      "size": 1.2,
+      "description": [
+        "适种：春、秋、冬",
+        "种源：farmersdelight:onion",
+        "用途：洋葱本身可作种源，配菜和热餐",
+        "原模组配方例：小炒肥虫",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "55F2B2DA1114223E",
+          "type": "item",
+          "item": "farmersdelight:onion",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "6A9A9E97471DDBB5",
+      "title": "农夫番茄",
+      "icon": "farmersdelight:tomato_seeds",
+      "x": -2.65,
+      "y": 10.8,
+      "size": 1.2,
+      "description": [
+        "适种：夏、秋",
+        "种源：farmersdelight:tomato_seeds",
+        "用途：同一种作物的状态/支架变体，不拆三任务",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "4E5623BC1B0E1F94",
+          "type": "item",
+          "item": "farmersdelight:tomato_seeds",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "537C742A23568929",
+      "title": "农夫水稻",
+      "icon": "farmersdelight:rice",
+      "x": -6.35,
+      "y": 14.2,
+      "size": 1.2,
+      "description": [
+        "适种：夏、秋",
+        "种源：farmersdelight:rice",
+        "用途：水下根、地上穗联动；不能只限顶端生长",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "1DDC35445958B1F2",
+          "type": "item",
+          "item": "farmersdelight:rice",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "1A1F168F4AE1F47C",
+      "title": "农夫红/棕蘑菇菌落",
+      "icon": "farmersdelight:red_mushroom_colony",
+      "x": -6.300000000000001,
+      "y": 86.8,
+      "size": 1.2,
+      "description": [
+        "适种：全年",
+        "种源：farmersdelight:red_mushroom_colony",
+        "用途：两类菌落，生长与采收保留原机制",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "0F1128302FAA1A72",
+          "type": "item",
+          "item": "farmersdelight:red_mushroom_colony",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "6E7966931C8E781B",
+      "title": "森罗番茄",
+      "icon": "kaleidoscope_cookery:tomato_seed",
+      "x": -2.65,
+      "y": 14.2,
+      "size": 1.2,
+      "description": [
+        "适种：夏、秋",
+        "种源：kaleidoscope_cookery:tomato_seed",
+        "用途：与农夫番茄来源分别记，食品兼容按实际配方标签",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "6A631A83B6F9D201",
+          "type": "item",
+          "item": "kaleidoscope_cookery:tomato_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "6707344C8FAA5519",
+      "title": "森罗生菜",
+      "icon": "kaleidoscope_cookery:lettuce_seed",
+      "x": -11.65,
+      "y": 17.6,
+      "size": 1.2,
+      "description": [
+        "适种：春、秋、冬",
+        "种源：kaleidoscope_cookery:lettuce_seed",
+        "用途：清爽餐与热锅；不误当农夫卷心菜",
+        "原模组配方例：下界芦苇炖菜",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "08A6426836680FFE",
+          "type": "item",
+          "item": "kaleidoscope_cookery:lettuce_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "1ADF39D0349C4ACB",
+      "title": "森罗辣椒",
+      "icon": "kaleidoscope_cookery:chili_seed",
+      "x": -6.35,
+      "y": 17.6,
+      "size": 1.2,
+      "description": [
+        "适种：夏、秋",
+        "种源：kaleidoscope_cookery:chili_seed",
+        "用途：红/绿辣椒是成熟表现与食材，不算两个种植品种",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "20EA5BD319250921",
+          "type": "item",
+          "item": "kaleidoscope_cookery:chili_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "43041A03CD6673D8",
+      "title": "森罗水稻",
+      "icon": "kaleidoscope_cookery:rice",
+      "x": -2.65,
+      "y": 17.6,
+      "size": 1.2,
+      "description": [
+        "适种：夏、秋",
+        "种源：kaleidoscope_cookery:rice",
+        "用途：实际种法单独写；不冒充农夫水下稻根",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "79C36CA847E9FFCF",
+          "type": "item",
+          "item": "kaleidoscope_cookery:rice",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "3065B0F7FF5E4F81",
+      "title": "亚麻",
+      "icon": "supplementaries:flax",
+      "x": -15.35,
+      "y": 21.0,
+      "size": 1.2,
+      "description": [
+        "适种：春、夏",
+        "种源：supplementaries:flax",
+        "用途：亚麻籽→纤维；普通纺织与工坊材料",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "6C0210779792C79D",
+          "type": "item",
+          "item": "supplementaries:flax",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "2A870CD228AFC964",
+      "title": "苹果",
+      "icon": "fruitsdelight:apple_sapling",
+      "x": 6.35,
+      "y": 27.8,
+      "size": 1.2,
+      "description": [
+        "适种：秋",
+        "种源：fruitsdelight:apple_sapling",
+        "用途：原版苹果、果酱/果冻、食品",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "1E8BF5750801D2FE",
+          "type": "item",
+          "item": "fruitsdelight:apple_sapling",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "0E6E1E46B32BB256",
+      "title": "杨梅",
+      "icon": "fruitsdelight:bayberry_sapling",
+      "x": -2.65,
+      "y": 21.0,
+      "size": 1.2,
+      "description": [
+        "适种：夏",
+        "种源：fruitsdelight:bayberry_sapling",
+        "用途：杨梅食品、饼干、果酱/果冻",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "709F294CFEAC2C17",
+          "type": "item",
+          "item": "fruitsdelight:bayberry_sapling",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "191C4A9266B1D168",
+      "title": "蓝莓",
+      "icon": "fruitsdelight:blueberry_bush",
+      "x": -11.65,
+      "y": 21.0,
+      "size": 1.2,
+      "description": [
+        "适种：春、夏",
+        "种源：fruitsdelight:blueberry_bush",
+        "用途：浆果、果酱/果冻",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "11A5724C430E1448",
+          "type": "item",
+          "item": "fruitsdelight:blueberry_bush",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "658A4245BFC7CECF",
+      "title": "蔓越莓",
+      "icon": "fruitsdelight:cranberry",
+      "x": 2.65,
+      "y": 31.2,
+      "size": 1.2,
+      "description": [
+        "适种：秋、冬",
+        "种源：fruitsdelight:cranberry",
+        "用途：浆果、果酱/果冻",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "7241A3F5F598DA7E",
+          "type": "item",
+          "item": "fruitsdelight:cranberry",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "56BE1F3914FF2EE8",
+      "title": "榴莲",
+      "icon": "fruitsdelight:durian_sapling",
+      "x": -2.65,
+      "y": 24.4,
+      "size": 1.2,
+      "description": [
+        "适种：夏",
+        "种源：fruitsdelight:durian_sapling",
+        "用途：果肉、烤榴莲、加工",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "73B10CA07F810C70",
+          "type": "item",
+          "item": "fruitsdelight:durian_sapling",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "1FFE552DF235975C",
+      "title": "无花果",
+      "icon": "fruitsdelight:fig_sapling",
+      "x": -6.35,
+      "y": 27.8,
+      "size": 1.2,
+      "description": [
+        "适种：夏、秋",
+        "种源：fruitsdelight:fig_sapling",
+        "用途：鲜果、加工",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "030E604E9F3113D8",
+          "type": "item",
+          "item": "fruitsdelight:fig_sapling",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "256FED6BA9C8C32C",
+      "title": "哈密瓜",
+      "icon": "fruitsdelight:hamimelon_seeds",
+      "x": -2.65,
+      "y": 27.8,
+      "size": 1.2,
+      "description": [
+        "适种：夏",
+        "种源：fruitsdelight:hamimelon_seeds",
+        "用途：瓜与加工；连接茎共享进度",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "573C3AC9F7249FB0",
+          "type": "item",
+          "item": "fruitsdelight:hamimelon_seeds",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "1822C0547559DFCD",
+      "title": "山楂",
+      "icon": "fruitsdelight:hawberry_sapling",
+      "x": 2.65,
+      "y": 34.599999999999994,
+      "size": 1.2,
+      "description": [
+        "适种：秋",
+        "种源：fruitsdelight:hawberry_sapling",
+        "用途：鲜果与加工",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "3C6DDF10E5720395",
+          "type": "item",
+          "item": "fruitsdelight:hawberry_sapling",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "6916EEEB018BF870",
+      "title": "猕猴桃",
+      "icon": "fruitsdelight:kiwi_sapling",
+      "x": 6.35,
+      "y": 34.599999999999994,
+      "size": 1.2,
+      "description": [
+        "适种：秋、冬",
+        "种源：fruitsdelight:kiwi_sapling",
+        "用途：鲜果与加工",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "011CAAB311F080C7",
+          "type": "item",
+          "item": "fruitsdelight:kiwi_sapling",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "52C56B93B0FB253D",
+      "title": "柠檬",
+      "icon": "fruitsdelight:lemon_tree",
+      "x": -6.35,
+      "y": 31.2,
+      "size": 1.2,
+      "description": [
+        "适种：夏、秋",
+        "种源：fruitsdelight:lemon_tree",
+        "用途：柠檬水与加工；这里不是虚构 lemon_sapling",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "08E5FBC64DB232CA",
+          "type": "item",
+          "item": "fruitsdelight:lemon_tree",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "4DE63D91EB40FDA7",
+      "title": "荔枝",
+      "icon": "fruitsdelight:lychee_sapling",
+      "x": -2.65,
+      "y": 31.2,
+      "size": 1.2,
+      "description": [
+        "适种：夏",
+        "种源：fruitsdelight:lychee_sapling",
+        "用途：鲜果与加工",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "73DB717900F4877A",
+          "type": "item",
+          "item": "fruitsdelight:lychee_sapling",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "61B17CC59A16A10B",
+      "title": "芒果",
+      "icon": "fruitsdelight:mango_sapling",
+      "x": -6.35,
+      "y": 34.599999999999994,
+      "size": 1.2,
+      "description": [
+        "适种：夏",
+        "种源：fruitsdelight:mango_sapling",
+        "用途：鲜果与加工",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "6BCAC659CC3AF44E",
+          "type": "item",
+          "item": "fruitsdelight:mango_sapling",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "650123D07507FE95",
+      "title": "山竹",
+      "icon": "fruitsdelight:mangosteen_sapling",
+      "x": -2.65,
+      "y": 34.599999999999994,
+      "size": 1.2,
+      "description": [
+        "适种：夏",
+        "种源：fruitsdelight:mangosteen_sapling",
+        "用途：鲜果与加工",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "74A31E8CB0681220",
+          "type": "item",
+          "item": "fruitsdelight:mangosteen_sapling",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "4DDA1D25494FDE38",
+      "title": "橘子",
+      "icon": "fruitsdelight:orange_sapling",
+      "x": 6.35,
+      "y": 38.0,
+      "size": 1.2,
+      "description": [
+        "适种：秋、冬",
+        "种源：fruitsdelight:orange_sapling",
+        "用途：鲜果与加工",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "5FCEDEAFC63CAA8D",
+          "type": "item",
+          "item": "fruitsdelight:orange_sapling",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "37BE99079CFD5F81",
+      "title": "水蜜桃",
+      "icon": "fruitsdelight:peach_sapling",
+      "x": -6.35,
+      "y": 38.0,
+      "size": 1.2,
+      "description": [
+        "适种：夏",
+        "种源：fruitsdelight:peach_sapling",
+        "用途：鲜果与加工",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "120B10BC69C447DB",
+          "type": "item",
+          "item": "fruitsdelight:peach_sapling",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "7349EB9DE69FDCA6",
+      "title": "梨",
+      "icon": "fruitsdelight:pear_sapling",
+      "x": 2.65,
+      "y": 41.4,
+      "size": 1.2,
+      "description": [
+        "适种：秋",
+        "种源：fruitsdelight:pear_sapling",
+        "用途：烤梨、鲜果与加工",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "178E8E8D87E7BF03",
+          "type": "item",
+          "item": "fruitsdelight:pear_sapling",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "4C7D213B142B1D94",
+      "title": "柿子",
+      "icon": "fruitsdelight:persimmon_sapling",
+      "x": 6.35,
+      "y": 41.4,
+      "size": 1.2,
+      "description": [
+        "适种：秋、冬",
+        "种源：fruitsdelight:persimmon_sapling",
+        "用途：鲜果与加工",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "7CF20D5AA6CFA134",
+          "type": "item",
+          "item": "fruitsdelight:persimmon_sapling",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "44FC02C8D9D387DB",
+      "title": "菠萝",
+      "icon": "fruitsdelight:pineapple",
+      "x": -2.65,
+      "y": 38.0,
+      "size": 1.2,
+      "description": [
+        "适种：夏",
+        "种源：fruitsdelight:pineapple",
+        "用途：菠萝饭与加工；野生为发现入口",
+        "原模组配方例：fruitsdelight:pineapple_fried_rice",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "280D544C28B6D66A",
+          "type": "item",
+          "item": "fruitsdelight:pineapple",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "51A8B194D10E3369",
+      "title": "凤梨乐事凤梨",
+      "icon": "pineapple_delight:pineapple_crop",
+      "x": -6.35,
+      "y": 41.4,
+      "size": 1.2,
+      "description": [
+        "适种：夏",
+        "种源：pineapple_delight:pineapple_crop",
+        "用途：与果园菠萝不是同 ID；现有派、果汁等配方在书中按来源分别列",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "0E7B01847E8DFFD0",
+          "type": "item",
+          "item": "pineapple_delight:pineapple_crop",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "639AE8B3220D6945",
+      "title": "巨大凤梨",
+      "icon": "pineapple_delight:huge_pineapple",
+      "x": -2.65,
+      "y": 41.4,
+      "size": 1.2,
+      "description": [
+        "适种：夏，先核实生存成长入口",
+        "种源：pineapple_delight:huge_pineapple",
+        "用途：资源存在不等于普通作物能必然长出；先列特色条目，不承诺自动生长",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "0B184BBCA1409782",
+          "type": "item",
+          "item": "pineapple_delight:huge_pineapple",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "7341FE43E607FAD8",
+      "title": "葡萄",
+      "icon": "kaleidoscope_tavern:grape",
+      "x": -6.35,
+      "y": 44.8,
+      "size": 1.2,
+      "description": [
+        "适种：夏、秋",
+        "种源：kaleidoscope_tavern:grape",
+        "用途：架上与普通株共享品种，进入现有酿造",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "71E5E8507676D644",
+          "type": "item",
+          "item": "kaleidoscope_tavern:grape",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "37A4B08E0E035194",
+      "title": "冰葡萄",
+      "icon": "kaleidoscope_tavern:ice_grape",
+      "x": 11.65,
+      "y": 21.0,
+      "size": 1.2,
+      "description": [
+        "适种：冬",
+        "种源：kaleidoscope_tavern:ice_grape",
+        "用途：普通来源的特色栽培，不归为 TN-C 魔植",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "4CAE5062AC99FF64",
+          "type": "item",
+          "item": "kaleidoscope_tavern:ice_grape",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "7B04B7E637E8B38E",
+      "title": "黄金葡萄",
+      "icon": "kaleidoscope_tavern:gold_grape",
+      "x": 6.35,
+      "y": 44.8,
+      "size": 1.2,
+      "description": [
+        "适种：秋",
+        "种源：kaleidoscope_tavern:gold_grape",
+        "用途：普通来源的稀有果物，保留原获得规则",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "0C89CBB2F687A430",
+          "type": "item",
+          "item": "kaleidoscope_tavern:gold_grape",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "0BA822686A8F4AD2",
+      "title": "BWG 蓝莓",
+      "icon": "biomeswevegone:blueberries",
+      "x": -15.35,
+      "y": 24.4,
+      "size": 1.2,
+      "description": [
+        "适种：春、夏",
+        "种源：biomeswevegone:blueberries",
+        "用途：独立于果园蓝莓，种源/果实需核对",
+        "原模组配方例：蓝莓派",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "1CBBEF00F535CA41",
+          "type": "item",
+          "item": "biomeswevegone:blueberries",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "1A1DC174C4234B39",
+      "title": "BWG 奇异作物",
+      "icon": "biomeswevegone:oddion_bulb",
+      "x": -11.65,
+      "y": 24.4,
+      "size": 1.2,
+      "description": [
+        "适种：春、秋",
+        "种源：biomeswevegone:oddion_bulb",
+        "用途：标签确认 `oddion_bulb` 为产物；食谱查原包",
+        "原模组配方例：熟的奇异洋葱球茎",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "0F2A2998D647ED1D",
+          "type": "item",
+          "item": "biomeswevegone:oddion_bulb",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "65095C78DA23D162",
+      "title": "BWG 苹果/青苹果果位",
+      "icon": "minecraft:apple",
+      "x": 6.35,
+      "y": 48.199999999999996,
+      "size": 1.2,
+      "description": [
+        "适种：秋",
+        "种源：minecraft:apple",
+        "用途：果树与果位联合处理；不是放一个苹果物品就变树",
+        "原模组配方例：fruitsdelight:apple_jelly、farmersdelight:apple_pie、水果沙拉、油醋汁沙拉",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "22ECFA24B6024DDF",
+          "type": "item",
+          "item": "minecraft:apple",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "16B982703583CAD1",
+      "title": "BWG 猴面包果",
+      "icon": "biomeswevegone:baobab_fruit",
+      "x": -6.35,
+      "y": 48.199999999999996,
+      "size": 1.2,
+      "description": [
+        "适种：夏、秋",
+        "种源：biomeswevegone:baobab_fruit",
+        "用途：果树产物，生存果实循环需验",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "6053110B69DFEEC7",
+          "type": "item",
+          "item": "biomeswevegone:baobab_fruit",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "55D3AED37F86D889",
+      "title": "BWG 丝兰果",
+      "icon": "biomeswevegone:yucca_fruit",
+      "x": -2.65,
+      "y": 48.199999999999996,
+      "size": 1.2,
+      "description": [
+        "适种：夏",
+        "种源：biomeswevegone:yucca_fruit",
+        "用途：果树产物，原生旱地规则需验",
+        "原模组配方例：熟的丝兰果实",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "22A8A5DA0350847A",
+          "type": "item",
+          "item": "biomeswevegone:yucca_fruit",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "448331984B2D463A",
+      "title": "BWG 刺梨仙人掌",
+      "icon": "biomeswevegone:prickly_pear_cactus",
+      "x": -2.1,
+      "y": 86.8,
+      "size": 1.2,
+      "description": [
+        "适种：全年、旱生",
+        "种源：biomeswevegone:prickly_pear_cactus",
+        "用途：是否有可再生可食收成需验；不是先写万能水果任务",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "40341905A8E301CC",
+          "type": "item",
+          "item": "biomeswevegone:prickly_pear_cactus",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "5AFEF0D7338BC3EF",
+      "title": "BWG 绿色蘑菇",
+      "icon": "biomeswevegone:green_mushroom",
+      "x": 2.1,
+      "y": 86.8,
+      "size": 1.2,
+      "description": [
+        "适种：全年、菌床",
+        "种源：biomeswevegone:green_mushroom",
+        "用途：先核实掉落、扩展和食谱；装饰无食谱时放林园条目",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "1C1608190438D879",
+          "type": "item",
+          "item": "biomeswevegone:green_mushroom",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "5249C314B142371B",
+      "title": "BWG 死帽/乳菇",
+      "icon": "biomeswevegone:weeping_milkcap_mushroom_block",
+      "x": 6.300000000000001,
+      "y": 86.8,
+      "size": 1.2,
+      "description": [
+        "适种：全年、菌床",
+        "种源：biomeswevegone:weeping_milkcap_mushroom_block",
+        "用途：巨菇块资源已见；小株、再生与食用资格需验，不能把有毒名字当食品",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "53144E5AB7E47F87",
+          "type": "item",
+          "item": "biomeswevegone:weeping_milkcap_mushroom_block",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "7F5B28BCBBE323C7",
+      "title": "Jerotes 二轮龙葵",
+      "icon": "jerotesvillage:second_round_nigrum",
+      "x": -6.35,
+      "y": 51.6,
+      "size": 1.2,
+      "description": [
+        "适种：夏、秋",
+        "种源：jerotesvillage:second_round_nigrum",
+        "用途：作物标签确认；熟龙葵、龙葵汤已有物品",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "66E2ADF3FCA96071",
+          "type": "item",
+          "item": "jerotesvillage:second_round_nigrum",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "5ED6C41294D9C55C",
+      "title": "Jerotes 二轮芦荟",
+      "icon": "jerotesvillage:second_round_aloe",
+      "x": -2.65,
+      "y": 51.6,
+      "size": 1.2,
+      "description": [
+        "适种：夏",
+        "种源：jerotesvillage:second_round_aloe",
+        "用途：作物标签确认；芦荟叶与多级原浆",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "7DA0F545BB420A3F",
+          "type": "item",
+          "item": "jerotesvillage:second_round_aloe",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "5DC20FFB6A3F502D",
+      "title": "Jerotes 明路脆瓜",
+      "icon": "jerotesvillage:bright_melon_seeds",
+      "x": -6.35,
+      "y": 55.0,
+      "size": 1.2,
+      "description": [
+        "适种：夏",
+        "种源：jerotesvillage:bright_melon_seeds",
+        "用途：明路脆瓜与种子标签确认",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "49DF0E06224219C3",
+          "type": "item",
+          "item": "jerotesvillage:bright_melon_seeds",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "370DDEA74F738BA9",
+      "title": "Jerotes 无味瓜",
+      "icon": "jerotesvillage:flavorless_melon_seeds",
+      "x": -2.65,
+      "y": 55.0,
+      "size": 1.2,
+      "description": [
+        "适种：夏、秋",
+        "种源：jerotesvillage:flavorless_melon_seeds",
+        "用途：种子标签确认；不是亮瓜换名",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "7EF49843817F0ACF",
+          "type": "item",
+          "item": "jerotesvillage:flavorless_melon_seeds",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "252EF00DCC308444",
+      "title": "Jerotes 绿人杆",
+      "icon": "jerotesvillage:green_humanoid_cane",
+      "x": -15.35,
+      "y": 27.8,
+      "size": 1.2,
+      "description": [
+        "适种：春、夏",
+        "种源：jerotesvillage:green_humanoid_cane",
+        "用途：叶杆类产物标签确认；用途由原配方查实",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "6FC337C3C08B5740",
+          "type": "item",
+          "item": "jerotesvillage:green_humanoid_cane",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "2481AB97E2AFD391",
+      "title": "天境蓝莓",
+      "icon": "aether:berry_bush",
+      "x": 10.5,
+      "y": 86.8,
+      "size": 1.2,
+      "description": [
+        "适种：春、夏；原生维度全年",
+        "种源：aether:berry_bush",
+        "用途：栽培与天境土壤规则需验",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "75FE653D23F55C92",
+          "type": "item",
+          "item": "aether:berry_bush",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "271C8A8088B84EE0",
+      "title": "天境水晶果",
+      "icon": "aether:crystal_fruit_leaves",
+      "x": 14.700000000000001,
+      "y": 86.8,
+      "size": 1.2,
+      "description": [
+        "适种：全年、天境",
+        "种源：aether:crystal_fruit_leaves",
+        "用途：果叶不是单独树苗；对应树和天境再生条件需验",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "65269E368AF69421",
+          "type": "item",
+          "item": "aether:crystal_fruit_leaves",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "01F163452AD8B5F6",
+      "title": "Redux 赞莓",
+      "icon": "aether_redux:zanberry_bush",
+      "x": -14.700000000000001,
+      "y": 90.19999999999999,
+      "size": 1.2,
+      "description": [
+        "适种：夏、秋；原生维度全年",
+        "种源：aether_redux:zanberry_bush",
+        "用途：资源确认；种源与移植条件需验",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "607184C6F02266E6",
+          "type": "item",
+          "item": "aether_redux:zanberry_bush",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "05D5672CF0BE0209",
+      "title": "Redux 水晶果树",
+      "icon": "aether_redux:crystal_fruit_sapling",
+      "x": -10.5,
+      "y": 90.19999999999999,
+      "size": 1.2,
+      "description": [
+        "适种：全年、天境",
+        "种源：aether_redux:crystal_fruit_sapling",
+        "用途：两种树苗资源存在，产物共享/差异需验",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "0216CE3E147FC9BD",
+          "type": "item",
+          "item": "aether_redux:crystal_fruit_sapling",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "67F8C8BFC605B089",
+      "title": "深层天境合浆树",
+      "icon": "deep_aether:conberry_sapling",
+      "x": -6.300000000000001,
+      "y": 90.19999999999999,
+      "size": 1.2,
+      "description": [
+        "适种：秋；原生维度全年",
+        "种源：deep_aether:conberry_sapling",
+        "用途：名字有 berry 不等于一定产食用果，先核实；无收成则转林园",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "16A4F3E339A99A34",
+          "type": "item",
+          "item": "deep_aether:conberry_sapling",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "68445DDE23C2D25D",
+      "title": "深层天境光罩/云菇",
+      "icon": "deep_aether:lightcap_mushrooms",
+      "x": -2.1,
+      "y": 90.19999999999999,
+      "size": 1.2,
+      "description": [
+        "适种：全年、天境",
+        "种源：deep_aether:lightcap_mushrooms",
+        "用途：景观/生产性质需验，不自动归食品",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "490E3C00DCFCE7E5",
+          "type": "item",
+          "item": "deep_aether:lightcap_mushrooms",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "0A788F7FE2E7530B",
+      "title": "暮色火炬浆果",
+      "icon": "twilightforest:torchberry_plant",
+      "x": 2.1,
+      "y": 90.19999999999999,
+      "size": 1.2,
+      "description": [
+        "适种：全年、暮色",
+        "种源：twilightforest:torchberry_plant",
+        "用途：现有食品与探险补给，确认再生种法",
+        "原模组配方例：万草煲",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "6BA862BB5AC82F18",
+          "type": "item",
+          "item": "twilightforest:torchberry_plant",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "3C5ED5063EB8742A",
+      "title": "暮色鬼臼果",
+      "icon": "twilightforest:mayapple",
+      "x": 6.300000000000001,
+      "y": 90.19999999999999,
+      "size": 1.2,
+      "description": [
+        "适种：春、秋；原生维度全年",
+        "种源：twilightforest:mayapple",
+        "用途：资源存在；可食、再植资格需验",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "0054D480C0185781",
+          "type": "item",
+          "item": "twilightforest:mayapple",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "681F1B5C527C879A",
+      "title": "森罗末地梦莓",
+      "icon": "kaleidoscope_end:dream_berry",
+      "x": 10.5,
+      "y": 90.19999999999999,
+      "size": 1.2,
+      "description": [
+        "适种：全年、末地",
+        "种源：kaleidoscope_end:dream_berry",
+        "用途：原生洞穴藤类；头/体共享一品种",
+        "原模组配方例：龙息乱烩、kaleidoscope_end:end_salad",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "4A9D26BA5A00ED4C",
+          "type": "item",
+          "item": "kaleidoscope_end:dream_berry",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "15057311F6E1455A",
+      "title": "森罗末地薄荷",
+      "icon": "kaleidoscope_end:ender_mint",
+      "x": 14.700000000000001,
+      "y": 90.19999999999999,
+      "size": 1.2,
+      "description": [
+        "适种：全年、末地",
+        "种源：kaleidoscope_end:ender_mint",
+        "用途：薄荷茶方向；原生种植规则需验",
+        "原模组配方例：末影薄荷糖、kaleidoscope_end:dark_dragon_steak、龙息乱烩、kaleidoscope_end:end_salad",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "470C9E83E1FBDBB7",
+          "type": "item",
+          "item": "kaleidoscope_end:ender_mint",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "6968141251B4B89F",
+      "title": "森罗下界灵魂椒",
+      "icon": "kaleidoscope_nether:soul_pepper",
+      "x": -14.700000000000001,
+      "y": 93.6,
+      "size": 1.2,
+      "description": [
+        "适种：全年、下界",
+        "种源：kaleidoscope_nether:soul_pepper",
+        "用途：作物标签与独立 Crop 类确认；食用效果查原包",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "783872390BEF7ED5",
+          "type": "item",
+          "item": "kaleidoscope_nether:soul_pepper",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "1316B88AFF1E906C",
+      "title": "森罗下界迷毒果",
+      "icon": "kaleidoscope_nether:poisonous_fruit",
+      "x": -10.5,
+      "y": 93.6,
+      "size": 1.2,
+      "description": [
+        "适种：全年、下界",
+        "种源：kaleidoscope_nether:poisonous_fruit",
+        "用途：不要把带风险的产物宣传成普通补血果",
+        "原模组配方例：剧毒浓汤",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "601199F394B37015",
+          "type": "item",
+          "item": "kaleidoscope_nether:poisonous_fruit",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "0E630E12192324F4",
+      "title": "大麦",
+      "icon": "conquest:barley",
+      "x": -11.65,
+      "y": 27.8,
+      "size": 1.2,
+      "description": [
+        "适种：春、秋",
+        "种源：conquest:barley",
+        "用途：按 JEI 当前配方加工",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "3D97FD166AD5C62E",
+          "type": "item",
+          "item": "conquest:barley",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "5A6A4F40163294E6",
+      "title": "卷心菜",
+      "icon": "conquest:cabbage",
+      "x": -15.35,
+      "y": 31.2,
+      "size": 1.2,
+      "description": [
+        "适种：春、秋、冬",
+        "种源：conquest:cabbage",
+        "用途：按 JEI 当前配方加工",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "010FEB9605A29DF5",
+          "type": "item",
+          "item": "conquest:cabbage",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "33DDB8C3B957F09A",
+      "title": "胡萝卜",
+      "icon": "conquest:carrots",
+      "x": -11.65,
+      "y": 31.2,
+      "size": 1.2,
+      "description": [
+        "适种：春、秋、冬",
+        "种源：conquest:carrots",
+        "用途：按 JEI 当前配方加工",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "2CE9975D81AD9D4E",
+          "type": "item",
+          "item": "conquest:carrots",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "48EBBED47C724ACE",
+      "title": "菜豆",
+      "icon": "conquest:common_beans",
+      "x": -2.65,
+      "y": 58.4,
+      "size": 1.2,
+      "description": [
+        "适种：夏、秋",
+        "种源：conquest:common_beans",
+        "用途：按 JEI 当前配方加工",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "1D4B36BC77041C0E",
+          "type": "item",
+          "item": "conquest:common_beans",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "171373EF528B7193",
+      "title": "玉米",
+      "icon": "conquest:corn",
+      "x": -6.35,
+      "y": 61.8,
+      "size": 1.2,
+      "description": [
+        "适种：夏、秋",
+        "种源：conquest:corn",
+        "用途：按 JEI 当前配方加工",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "2AD093EBD523C40B",
+          "type": "item",
+          "item": "conquest:corn",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "5284EC0406458820",
+      "title": "亚麻",
+      "icon": "conquest:flax",
+      "x": -15.35,
+      "y": 34.599999999999994,
+      "size": 1.2,
+      "description": [
+        "适种：春、夏",
+        "种源：conquest:flax",
+        "用途：按 JEI 当前配方加工",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "19EC09C4B7894987",
+          "type": "item",
+          "item": "conquest:flax",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "2F26D53590726521",
+      "title": "传统麦",
+      "icon": "conquest:heirloom_wheat_crops",
+      "x": -11.65,
+      "y": 34.599999999999994,
+      "size": 1.2,
+      "description": [
+        "适种：春、秋",
+        "种源：conquest:heirloom_wheat_crops",
+        "用途：按 JEI 当前配方加工",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "33066215181AF85C",
+          "type": "item",
+          "item": "conquest:heirloom_wheat_crops",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "0DC553C3A7DD823F",
+      "title": "麻类",
+      "icon": "conquest:hemp",
+      "x": -15.35,
+      "y": 38.0,
+      "size": 1.2,
+      "description": [
+        "适种：春、夏",
+        "种源：conquest:hemp",
+        "用途：按 JEI 当前配方加工",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "0034AFBA37B33DFD",
+          "type": "item",
+          "item": "conquest:hemp",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "31EE0CFAB9821912",
+      "title": "豌豆",
+      "icon": "conquest:peas",
+      "x": -11.65,
+      "y": 38.0,
+      "size": 1.2,
+      "description": [
+        "适种：春、秋、冬",
+        "种源：conquest:peas",
+        "用途：按 JEI 当前配方加工",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "043E29FCE0CB69EA",
+          "type": "item",
+          "item": "conquest:peas",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "1FDA5DA5EA3071DB",
+      "title": "马铃薯",
+      "icon": "conquest:potatoes",
+      "x": -15.35,
+      "y": 41.4,
+      "size": 1.2,
+      "description": [
+        "适种：春、秋、冬",
+        "种源：conquest:potatoes",
+        "用途：按 JEI 当前配方加工",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "2BBEE30BD2647740",
+          "type": "item",
+          "item": "conquest:potatoes",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "2DE4267E08CD720B",
+      "title": "水稻",
+      "icon": "conquest:rice",
+      "x": -2.65,
+      "y": 65.19999999999999,
+      "size": 1.2,
+      "description": [
+        "适种：夏、秋",
+        "种源：conquest:rice",
+        "用途：按 JEI 当前配方加工",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "51859FA0F101BFE7",
+          "type": "item",
+          "item": "conquest:rice",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "4246F1B8BF449DC4",
+      "title": "烟草",
+      "icon": "conquest:tobacco",
+      "x": -6.35,
+      "y": 68.6,
+      "size": 1.2,
+      "description": [
+        "适种：夏；非食物材料",
+        "种源：conquest:tobacco",
+        "用途：按 JEI 当前配方加工",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "5B9342E4987166AA",
+          "type": "item",
+          "item": "conquest:tobacco",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "5DBD4BEE25EE6749",
+      "title": "芜菁",
+      "icon": "conquest:turnips",
+      "x": 2.65,
+      "y": 72.0,
+      "size": 1.2,
+      "description": [
+        "适种：秋、冬",
+        "种源：conquest:turnips",
+        "用途：按 JEI 当前配方加工",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "3B12DCEBAB7F4109",
+          "type": "item",
+          "item": "conquest:turnips",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "702909A010445421",
+      "title": "小麦",
+      "icon": "conquest:wheat",
+      "x": -11.65,
+      "y": 41.4,
+      "size": 1.2,
+      "description": [
+        "适种：春、秋",
+        "种源：conquest:wheat",
+        "用途：按 JEI 当前配方加工",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "194BBEA81E259D30",
+          "type": "item",
+          "item": "conquest:wheat",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "53B0E6C351E8847F",
+      "title": "野麦",
+      "icon": "conquest:wild_wheat",
+      "x": -15.35,
+      "y": 44.8,
+      "size": 1.2,
+      "description": [
+        "适种：春、秋",
+        "种源：conquest:wild_wheat",
+        "用途：按 JEI 当前配方加工",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "61595EBF8FDD615E",
+          "type": "item",
+          "item": "conquest:wild_wheat",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "234207AC0A5B2108",
+      "title": "捕食/敌对植物",
+      "icon": "mowziesmobs:foliaath_seed",
+      "x": -6.300000000000001,
+      "y": 93.6,
+      "size": 1.2,
+      "description": [
+        "适种：归生物/战斗图鉴",
+        "种源：mowziesmobs:foliaath_seed",
+        "用途：不因 seeds 标签就当安全农作物种植任务",
+        "原模组配方例：用 JEI 查看原模组的采收、烹调与加工配方。",
+        "整合包启用的配方以 JEI 为准。"
+      ],
+      "tasks": [
+        {
+          "id": "2830F57097BB0713",
+          "type": "item",
+          "item": "mowziesmobs:foliaath_seed",
+          "consume_items": false,
+          "title": "持有种源或成品（不消耗）"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "6F4FFB2C6171BA88",
+      "title": "全年种植 · 菌菇、水生与异境",
+      "icon": "minecraft:red_mushroom",
+      "x": 0,
+      "y": 80.39999999999999,
+      "size": 1.8,
+      "description": [
+        "这些植物保持原种法；全年可种并不取消原模组自己的生长机制。"
+      ],
+      "tasks": [
+        {
+          "id": "477401AD94667D75",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "55F9367F977E3BD7",
+      "title": "Redux Aevyrn 灌木",
+      "icon": "minecraft:flowering_azalea",
+      "x": 0,
+      "y": 100.99999999999999,
+      "size": 1.2,
+      "description": [
+        "野外景观植物：aether_redux:aevyrn_bush",
+        "当前资源里未找到可作为独立种源的物品，因此列为探索说明，不要求取得不存在的种子。"
+      ],
+      "tasks": [
+        {
+          "id": "43FBE28E0563C47E",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "4B44AFC81C031BEF",
+      "title": "种下一株",
+      "icon": "minecraft:iron_hoe",
+      "x": -9,
+      "y": -13,
+      "size": 1.2,
+      "description": [
+        "亲手放下普通作物，自动记录。"
+      ],
+      "tasks": [
+        {
+          "id": "06A3B24E5CC70699",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/traditional/planted",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "6622872660EB033A",
+      "title": "第一份熟成",
+      "icon": "minecraft:wheat",
+      "x": 0,
+      "y": -13,
+      "size": 1.2,
+      "description": [
+        "亲手采收成熟 CropBlock 作物，自动记录。"
+      ],
+      "tasks": [
+        {
+          "id": "19302AB002A0A98A",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/traditional/harvested",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "id": "10398F1BF45EDEF2",
+      "title": "厨房开火",
+      "icon": "minecraft:bread",
+      "x": 9,
+      "y": -13,
+      "size": 1.2,
+      "description": [
+        "在工作台制作一份真正的食物。烹锅配方可自由尝试。"
+      ],
+      "tasks": [
+        {
+          "id": "48C7F67B3530BCA6",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/traditional/cooked",
+          "title": "完成真实操作"
+        }
+      ],
+      "dependencies": [],
+      "rewards": [
+        {
+          "id": "0AB1FFB31D465B68",
+          "type": "item",
+          "item": "tnc:season_handbook",
+          "count": 1
+        }
+      ]
+    }
+  ],
+  "images": [
+    {
+      "image": "tnc:textures/guide/seasons-banner.png",
+      "x": 0.0,
+      "y": -8.0,
+      "width": 35.0,
+      "height": 12.38,
+      "rotation": 0.0
+    }
+  ],
+  "quest_links": [
+    {
+      "id": "6D37383C35D3CA73",
+      "linked_quest": "660CC7F2B836FAD9",
+      "x": 2.65,
+      "y": 4.0,
+      "size": 1.2
+    },
+    {
+      "id": "08DC0BC8EE64AACF",
+      "linked_quest": "3B7972A86F790627",
+      "x": 6.35,
+      "y": 4.0,
+      "size": 1.2
+    },
+    {
+      "id": "27A6883BC645AE78",
+      "linked_quest": "3B7972A86F790627",
+      "x": 11.65,
+      "y": 4.0,
+      "size": 1.2
+    },
+    {
+      "id": "5A1B0CFCB56AD5DC",
+      "linked_quest": "2522230C2C0F38B5",
+      "x": 2.65,
+      "y": 7.4,
+      "size": 1.2
+    },
+    {
+      "id": "2ACA768E03D0EACB",
+      "linked_quest": "2522230C2C0F38B5",
+      "x": 15.35,
+      "y": 4.0,
+      "size": 1.2
+    },
+    {
+      "id": "539C4BA384D87C0C",
+      "linked_quest": "4D8ED573141332FC",
+      "x": 6.35,
+      "y": 7.4,
+      "size": 1.2
+    },
+    {
+      "id": "0E2DF7E657CEC137",
+      "linked_quest": "4D8ED573141332FC",
+      "x": 11.65,
+      "y": 7.4,
+      "size": 1.2
+    },
+    {
+      "id": "79F82A2CDE1CBD53",
+      "linked_quest": "434C7806C5F955E6",
+      "x": -2.65,
+      "y": 4.0,
+      "size": 1.2
+    },
+    {
+      "id": "69BF11B598FAE0B1",
+      "linked_quest": "5ED7E6027B23CA95",
+      "x": -2.65,
+      "y": 7.4,
+      "size": 1.2
+    },
+    {
+      "id": "4DC9A47FC115F6B9",
+      "linked_quest": "5ED7E6027B23CA95",
+      "x": 6.35,
+      "y": 10.8,
+      "size": 1.2
+    },
+    {
+      "id": "6B7565624E2ECFDA",
+      "linked_quest": "7F89EC7DFE59D516",
+      "x": -6.35,
+      "y": 10.8,
+      "size": 1.2
+    },
+    {
+      "id": "2482D73E56810A72",
+      "linked_quest": "7F89EC7DFE59D516",
+      "x": 2.65,
+      "y": 14.2,
+      "size": 1.2
+    },
+    {
+      "id": "19FA7B195C4BF014",
+      "linked_quest": "5F638D6E94919428",
+      "x": 6.35,
+      "y": 14.2,
+      "size": 1.2
+    },
+    {
+      "id": "09CC45854496FDD4",
+      "linked_quest": "5F638D6E94919428",
+      "x": 15.35,
+      "y": 7.4,
+      "size": 1.2
+    },
+    {
+      "id": "152151FB67433177",
+      "linked_quest": "60C13321363D0BC6",
+      "x": 2.65,
+      "y": 17.6,
+      "size": 1.2
+    },
+    {
+      "id": "086098F7EB56D623",
+      "linked_quest": "60C13321363D0BC6",
+      "x": 11.65,
+      "y": 10.8,
+      "size": 1.2
+    },
+    {
+      "id": "18A2C02F3E86DD4F",
+      "linked_quest": "6A9A9E97471DDBB5",
+      "x": 6.35,
+      "y": 17.6,
+      "size": 1.2
+    },
+    {
+      "id": "08414948EC4393BE",
+      "linked_quest": "537C742A23568929",
+      "x": 2.65,
+      "y": 21.0,
+      "size": 1.2
+    },
+    {
+      "id": "1D019B852C50D8C0",
+      "linked_quest": "6E7966931C8E781B",
+      "x": 6.35,
+      "y": 21.0,
+      "size": 1.2
+    },
+    {
+      "id": "24C7310FB3131FB2",
+      "linked_quest": "6707344C8FAA5519",
+      "x": 2.65,
+      "y": 24.4,
+      "size": 1.2
+    },
+    {
+      "id": "4F281F2961313F37",
+      "linked_quest": "6707344C8FAA5519",
+      "x": 15.35,
+      "y": 10.8,
+      "size": 1.2
+    },
+    {
+      "id": "61AB191B6C309320",
+      "linked_quest": "1ADF39D0349C4ACB",
+      "x": 6.35,
+      "y": 24.4,
+      "size": 1.2
+    },
+    {
+      "id": "0B37EBE3A0644A56",
+      "linked_quest": "43041A03CD6673D8",
+      "x": 2.65,
+      "y": 27.8,
+      "size": 1.2
+    },
+    {
+      "id": "52A624471240BB49",
+      "linked_quest": "3065B0F7FF5E4F81",
+      "x": -6.35,
+      "y": 21.0,
+      "size": 1.2
+    },
+    {
+      "id": "253DC41C5B962E13",
+      "linked_quest": "191C4A9266B1D168",
+      "x": -6.35,
+      "y": 24.4,
+      "size": 1.2
+    },
+    {
+      "id": "61BA2BA8CAF9BF11",
+      "linked_quest": "658A4245BFC7CECF",
+      "x": 11.65,
+      "y": 14.2,
+      "size": 1.2
+    },
+    {
+      "id": "0E7A9A898046C99D",
+      "linked_quest": "1FFE552DF235975C",
+      "x": 6.35,
+      "y": 31.2,
+      "size": 1.2
+    },
+    {
+      "id": "6468A0D3B524C478",
+      "linked_quest": "6916EEEB018BF870",
+      "x": 15.35,
+      "y": 14.2,
+      "size": 1.2
+    },
+    {
+      "id": "48C4DB5F28DBB84D",
+      "linked_quest": "52C56B93B0FB253D",
+      "x": 2.65,
+      "y": 38.0,
+      "size": 1.2
+    },
+    {
+      "id": "42E5A94E19895641",
+      "linked_quest": "4DDA1D25494FDE38",
+      "x": 11.65,
+      "y": 17.6,
+      "size": 1.2
+    },
+    {
+      "id": "4A7A4D48337286F8",
+      "linked_quest": "4C7D213B142B1D94",
+      "x": 15.35,
+      "y": 17.6,
+      "size": 1.2
+    },
+    {
+      "id": "1F51ED11D73F327D",
+      "linked_quest": "7341FE43E607FAD8",
+      "x": 2.65,
+      "y": 44.8,
+      "size": 1.2
+    },
+    {
+      "id": "7A171F2B63B8D358",
+      "linked_quest": "0BA822686A8F4AD2",
+      "x": -2.65,
+      "y": 44.8,
+      "size": 1.2
+    },
+    {
+      "id": "7A3016104101F41F",
+      "linked_quest": "1A1DC174C4234B39",
+      "x": 2.65,
+      "y": 48.199999999999996,
+      "size": 1.2
+    },
+    {
+      "id": "00E9119D9E194EBC",
+      "linked_quest": "16B982703583CAD1",
+      "x": 2.65,
+      "y": 51.6,
+      "size": 1.2
+    },
+    {
+      "id": "0DF1FABC4FEBC1D8",
+      "linked_quest": "7F5B28BCBBE323C7",
+      "x": 6.35,
+      "y": 51.6,
+      "size": 1.2
+    },
+    {
+      "id": "0426FAA077697904",
+      "linked_quest": "370DDEA74F738BA9",
+      "x": 2.65,
+      "y": 55.0,
+      "size": 1.2
+    },
+    {
+      "id": "697F22957E4FFD95",
+      "linked_quest": "252EF00DCC308444",
+      "x": -6.35,
+      "y": 58.4,
+      "size": 1.2
+    },
+    {
+      "id": "63233160FA86D682",
+      "linked_quest": "0E630E12192324F4",
+      "x": 6.35,
+      "y": 55.0,
+      "size": 1.2
+    },
+    {
+      "id": "674486ABF42B9AF4",
+      "linked_quest": "5A6A4F40163294E6",
+      "x": 2.65,
+      "y": 58.4,
+      "size": 1.2
+    },
+    {
+      "id": "5498B1FC1F04201F",
+      "linked_quest": "5A6A4F40163294E6",
+      "x": 15.35,
+      "y": 21.0,
+      "size": 1.2
+    },
+    {
+      "id": "0A1860C3D258BA86",
+      "linked_quest": "33DDB8C3B957F09A",
+      "x": 6.35,
+      "y": 58.4,
+      "size": 1.2
+    },
+    {
+      "id": "170A9FCACCDC012E",
+      "linked_quest": "33DDB8C3B957F09A",
+      "x": 11.65,
+      "y": 24.4,
+      "size": 1.2
+    },
+    {
+      "id": "4F74903FA7CCC06F",
+      "linked_quest": "48EBBED47C724ACE",
+      "x": 2.65,
+      "y": 61.8,
+      "size": 1.2
+    },
+    {
+      "id": "6F456ADC1AAF6818",
+      "linked_quest": "171373EF528B7193",
+      "x": 6.35,
+      "y": 61.8,
+      "size": 1.2
+    },
+    {
+      "id": "313513F1FDF2BA11",
+      "linked_quest": "5284EC0406458820",
+      "x": -2.65,
+      "y": 61.8,
+      "size": 1.2
+    },
+    {
+      "id": "795A10F262A53806",
+      "linked_quest": "2F26D53590726521",
+      "x": 2.65,
+      "y": 65.19999999999999,
+      "size": 1.2
+    },
+    {
+      "id": "65BA19EF522BF5EF",
+      "linked_quest": "0DC553C3A7DD823F",
+      "x": -6.35,
+      "y": 65.19999999999999,
+      "size": 1.2
+    },
+    {
+      "id": "6108DB4A409C874A",
+      "linked_quest": "31EE0CFAB9821912",
+      "x": 6.35,
+      "y": 65.19999999999999,
+      "size": 1.2
+    },
+    {
+      "id": "74EA17AB58A8AC32",
+      "linked_quest": "31EE0CFAB9821912",
+      "x": 15.35,
+      "y": 24.4,
+      "size": 1.2
+    },
+    {
+      "id": "575369570D19D138",
+      "linked_quest": "1FDA5DA5EA3071DB",
+      "x": 2.65,
+      "y": 68.6,
+      "size": 1.2
+    },
+    {
+      "id": "5C2DD3296066D80D",
+      "linked_quest": "1FDA5DA5EA3071DB",
+      "x": 11.65,
+      "y": 27.8,
+      "size": 1.2
+    },
+    {
+      "id": "2AEF886727B08C74",
+      "linked_quest": "2DE4267E08CD720B",
+      "x": 6.35,
+      "y": 68.6,
+      "size": 1.2
+    },
+    {
+      "id": "418767B112906C16",
+      "linked_quest": "5DBD4BEE25EE6749",
+      "x": 15.35,
+      "y": 27.8,
+      "size": 1.2
+    },
+    {
+      "id": "4D3834A4F1621629",
+      "linked_quest": "702909A010445421",
+      "x": 6.35,
+      "y": 72.0,
+      "size": 1.2
+    },
+    {
+      "id": "60AB0D3A2C498C05",
+      "linked_quest": "53B0E6C351E8847F",
+      "x": 2.65,
+      "y": 75.39999999999999,
+      "size": 1.2
+    }
+  ]
+}

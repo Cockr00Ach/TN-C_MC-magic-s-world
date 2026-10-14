@@ -1,1 +1,1 @@
-{"required":true,"minVersion":"0.8.5","package":"com.tnc.tnc.mixin","compatibilityLevel":"JAVA_17","mixins":["TownFurnitureCraftMixin"],"injectors":{"defaultRequire":1}}
+{"required":true,"minVersion":"0.8.5","package":"com.tnc.tnc.mixin","compatibilityLevel":"JAVA_17","mixins":["TownFurnitureCraftMixin","RouteCropStateMixin","RouteCraftSlotMixin","RouteCraftPickupMixin","RouteCraftQuickMoveMixin"],"injectors":{"defaultRequire":1}}

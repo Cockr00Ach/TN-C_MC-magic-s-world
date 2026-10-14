@@ -1,0 +1,15 @@
+{
+  "type": "tnc:mana_forging",
+  "ingredients": [
+    {
+      "item": "minecraft:gold_ingot",
+      "count": 1
+    }
+  ],
+  "result": {
+    "item": "tnc:radiant_gold"
+  },
+  "mana": 180,
+  "work_ticks": 200,
+  "category": "materials"
+}

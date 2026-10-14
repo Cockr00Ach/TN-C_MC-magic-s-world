@@ -1,0 +1,29 @@
+{
+  "chapter_groups": [
+    {
+      "id": "544E434755494445",
+      "title": "&b&l世界观"
+    },
+    {
+      "id": "16A3BF08B404CCE1",
+      "title": "&e提升之路"
+    },
+    {
+      "id": "734EA102F1090FA3",
+      "title": "&f世界地图"
+    },
+    {
+      "id": "46D9BF1B84D709E1",
+      "title": "&f挑战目录"
+    },
+    {
+      "id": "59249BFD5667691A",
+      "title": "&f休闲分类"
+    },
+    {
+      "id": "544E434C49464531",
+      "title": "&b&lRouchNao · 生活与魔导",
+      "collapse": false
+    }
+  ]
+}

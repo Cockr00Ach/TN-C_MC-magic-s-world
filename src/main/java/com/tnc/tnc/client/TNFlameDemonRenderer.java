@@ -45,7 +45,10 @@ public final class TNFlameDemonRenderer extends EntityRenderer<TNFlameDemonField
      * <p>⚠️ 作者 2026-10-05 第 4 条：柱子样式要「末影岛处的方柱形式」✓
      * ⇒ 干净的四棱方柱、细一点、不带花纹 ✓（原来 0.42 加熔岩竖纹，像工业柱子 ✗）
      */
-    private static final double PILLAR_HALF = 0.34D;
+    private static final double PILLAR_HALF = 0.50D;   // 作者：柱子"从一个方块改为 4 个块"✗ ⇒ 截面 1×1 ✓
+
+    /** 柱高（格 ✓）—— 作者要 4 个块 ✗。 */
+    private static final double PILLAR_HEIGHT = 6.0D;   // 作者：柱高 6 格 ✗
 
     /** 黑曜石色（末影岛那种近黑的紫 ✓）。 */
     private static final float OR = 0.045F;
@@ -84,13 +87,20 @@ public final class TNFlameDemonRenderer extends EntityRenderer<TNFlameDemonField
             return;
         }
 
-        drawSigil(out, pose, radius, age, field.life());
+        // ★ 2026-10-05：作者「t4/t5 中的法阵有问题，不好修就把火球链的法阵拿来用」✓
+        //   ⇒ 直接**复用火球链那座**（TNSigilRenderer，照作者参考图画的那版 ✓）
+        //     自己手搓的那套 drawSigil 已删除 ✗（两套法阵叠在一起就是"有问题"的来源 ✗）
+        // 出场渐显（照 TNSigilRenderer 的写法 ✓，免得"啪"地凭空出现 ✗）
+        float fade = (float) Math.min(1.0D, (field.tickCount + partial) / 8.0D);
+        TNSigilRenderer.drawSigil(out, pose, Vec3.ZERO, 15.0D, true, age, fade);  // 作者：t4 法阵 15 格 ✗（伤害域 = 它 ✓）
         for (int i = 0; i < 4; i++) {
             // ⚠️ orbPosition() 给的是**世界坐标** ✓ ⇒ 减掉实体位置换成相对坐标 ✗
             Vec3 rel = field.orbPosition(i).subtract(field.position());
-            drawPillar(out, pose, rel, age);
-            drawSun(out, pose, rel, age, i);
-            drawLaser(out, pose, field, rel, i);
+            drawPillar(stack, buffers, rel, age);
+            // ⚠️ 作者 2026-10-05：「柱顶的光球不要用光滑的几何体，用粒子球」✓
+            //   ⇒ 那 3 片正交圆盘**已删除** ✗；光球改由 TNFlameDemonField.tick()
+            //      每 tick 在 orbPosition 处撒**染色粒子球** ✓（服务端发 ⇒ 所有玩家可见 ✓）
+            // （这条光线现在由 TNFlameDemonField 每 tick 撒**粒子流** ✓，渲染器不再画管 ✗）
         }
     }
 
@@ -98,135 +108,49 @@ public final class TNFlameDemonRenderer extends EntityRenderer<TNFlameDemonField
     //  ① 地上那个大法阵（由外到里"描绘"）
     // ------------------------------------------------------------------
 
-    private static void drawSigil(VertexConsumer out, Matrix4f pose, double radius, double age, int life) {
-        // ⚠️ 作者 2026-10-05：不要仿真渲染 ✗ ⇒ 不再"渐渐淡出" ✓，最后 3 tick 整块收掉 ✓
-        if (age > life - 3) {
-            return;
-        }
-        // 地面底光（一整块实色 ✓）
-        WaterGeometry.disk(out, pose, ORIGIN, UP, radius, 0.62F, 0.24F, 0.05F, 1.0F);
-        // ⚠️ 作者要"从外到里一点点出现"✗ ⇒ 每环有自己的出现时刻：越靠外越早 ✓
-        for (int i = 0; i < 5; i++) {
-            double r = radius * (1.0D - i * 0.17D);
-            double appear = Math.min(1.0D, Math.max(0.0D, age / DRAW_TICKS - i * 0.16D));
-            if (appear <= 0.01D) {
-                continue;
-            }
-            // 像素风：一圈要么**整圈画出来**、要么不画 ✓（不再半透明渐变 ✗）
-            // 外环先满、内环依次跟上 ⇒ 仍然是"由外到里描绘"的感觉 ✓
-            if (appear < 0.5D) {
-                continue;
-            }
-            WaterGeometry.ring(out, pose, ORIGIN, UP, r, Math.max(0.09D, 0.13D - i * 0.010D),
-                    age * 0.012D, 1.0F);
-        }
-        // ★ 放射状辐条 + 六芒星（作者 2026-10-05 第 7 条：「法阵不清晰」✗）
-        //   根因：光靠几个同心圆，在暗色地面上就是几圈**虚影** ✗，看不出是个法阵 ✗
-        //   ⇒ 加 8 根辐条 + 一个六芒星 ✓ —— 这两个结构一出来，法阵立刻立住了 ✓
-        for (int k = 0; k < 8; k++) {
-            double a = k * Math.PI / 4.0D + age * 0.004D;
-            Vec3 outer = WaterGeometry.radial(AXIS_X, AXIS_Z, a, radius * 0.98D);
-            Vec3 inner = WaterGeometry.radial(AXIS_X, AXIS_Z, a, radius * 0.30D);
-            if (k % 2 == 0) {
-                WaterGeometry.tube(out, pose, inner, outer, 0.055D, 1.0F, 0.66F, 0.16F, 1.0F);
-            }
-        }
-        for (int k = 0; k < 6; k++) {
-            Vec3 p0 = WaterGeometry.radial(AXIS_X, AXIS_Z, k * Math.PI / 3.0D, radius * 0.62D);
-            Vec3 p1 = WaterGeometry.radial(AXIS_X, AXIS_Z, (k + 2) * Math.PI / 3.0D, radius * 0.62D);
-            WaterGeometry.tube(out, pose, p0, p1, 0.045D, 1.0F, 0.80F, 0.26F, 1.0F);
-        }
-
-        // 阵中心那点热核 ✓
-        if (age / DRAW_TICKS > 0.7D) {
-            WaterGeometry.disk(out, pose, ORIGIN, UP, radius * 0.22D, 1.0F, 0.72F, 0.22F, 1.0F);
-        }
-    }
 
     // ------------------------------------------------------------------
     //  ② 黑曜石巨柱（纯视觉）
     // ------------------------------------------------------------------
 
-    private static void drawPillar(VertexConsumer out, Matrix4f pose, Vec3 at, double age) {
-        // 柱脚从地里"升起来"（前 12 tick ✓，作者要"生起"✓）
-        double rise = Math.min(1.0D, age / 12.0D);
-        double height = at.y * rise;
-        if (height < 0.2D) {
+    private static void drawPillar(PoseStack stack, MultiBufferSource buffers, Vec3 at, double age) {
+        // ⚠️ 作者 2026-10-05：「柱子高度 6 格，截面改成 2x2，并且**给柱子加上黑曜石的材质**」✓
+        //   ⇒ 不再用"自画四边形 + 单色"✗，改成**直接渲染原版黑曜石方块** ✓：
+        //     贴图、光照、明暗全是原版的 ✓（用 renderSingleBlock ✓）
+        //   ⚠️ 为什么这次 renderSingleBlock 能行 ✗：黑曜石是**普通方块**✓，
+        //     有真正的方块模型 ✓；上次那个龙头骷髅是 BlockEntityRenderer 画的 ✗，
+        //     方块模型是空的 ⇒ 什么都画不出来 ✓
+        //   堆法：3 块（每块缩放到 2×2×2 ✓）⇒ 合起来正好 **2×2×6 格** ✓
+        double rise = Math.min(1.0D, age / 12.0D);      // 柱脚从地里"升起来"（前 12 tick ✓）
+        if (rise <= 0.02D) {
             return;
         }
-        Vec3[] corner = {
-                new Vec3(at.x - PILLAR_HALF, 0.0D, at.z - PILLAR_HALF),
-                new Vec3(at.x + PILLAR_HALF, 0.0D, at.z - PILLAR_HALF),
-                new Vec3(at.x + PILLAR_HALF, 0.0D, at.z + PILLAR_HALF),
-                new Vec3(at.x - PILLAR_HALF, 0.0D, at.z + PILLAR_HALF)};
-        for (int i = 0; i < 4; i++) {
-            Vec3 p0 = corner[i];
-            Vec3 p1 = corner[(i + 1) % 4];
-            Vec3 q0 = new Vec3(p0.x, height, p0.z);
-            Vec3 q1 = new Vec3(p1.x, height, p1.z);
-            // 两面都画（免得从里面看是空的 ✗）
-            WaterGeometry.quad(out, pose, p0, p1, q1, q0, OR, OG, OB, 1.0F);
-            WaterGeometry.quad(out, pose, q0, q1, p1, p0, OR, OG, OB, 1.0F);
+        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+        net.minecraft.world.level.block.state.BlockState obsidian =
+                net.minecraft.world.level.block.Blocks.OBSIDIAN.defaultBlockState();
+        // 半宽 1 格 ⇒ 截面 2×2 ✓（缩放在下面做 ✓）
+        // ⚠️ 作者 2026-10-05：「柱高 **10**」✓ ⇒ 摞 **5 块 × 每块 2 格** = 10 格 ✓
+        //    （用 5×2 而不是 3×3.33 ：竖直方向不拉伸材质 ✓，黑曜石纹理保持原样 ✓）
+        for (int k = 0; k < 5; k++) {
+            stack.pushPose();
+            // 从地面往上摞：第 k 块的中心高度 = k × 2 × rise ✓
+            stack.translate(at.x - 1.0D, k * 2.0D * rise, at.z - 1.0D);
+            // 水平 2 倍 ⇒ 2 格宽 ✓；竖直 2 倍再乘 rise ⇒ 从地里长出来 ✓
+            stack.scale(2.0F, (float) (2.0D * rise), 2.0F);
+            mc.getBlockRenderer().renderSingleBlock(obsidian, stack, buffers,
+                    net.minecraft.client.renderer.LightTexture.FULL_BRIGHT,
+                    net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY);
+            stack.popPose();
         }
-        // 柱顶面
-        WaterGeometry.quad(out, pose,
-                new Vec3(at.x - PILLAR_HALF, height, at.z - PILLAR_HALF),
-                new Vec3(at.x + PILLAR_HALF, height, at.z - PILLAR_HALF),
-                new Vec3(at.x + PILLAR_HALF, height, at.z + PILLAR_HALF),
-                new Vec3(at.x - PILLAR_HALF, height, at.z + PILLAR_HALF),
-                0.16F, 0.09F, 0.20F, 1.0F);
-        // ⚠️ 作者第 4 条要"末影岛的方柱形式"✓ ⇒ **不再画熔岩竖纹** ✗
-        //    末影岛那几根就是干干净净一根黑紫方柱 ✓，加了纹路反而像工业设施 ✗
-        // 柱顶一圈亮边（像素风：一条实色棱 ✓）
-        WaterGeometry.quad(out, pose,
-                new Vec3(at.x - PILLAR_HALF, height, at.z - PILLAR_HALF),
-                new Vec3(at.x + PILLAR_HALF, height, at.z - PILLAR_HALF),
-                new Vec3(at.x + PILLAR_HALF, height, at.z + PILLAR_HALF),
-                new Vec3(at.x - PILLAR_HALF, height, at.z + PILLAR_HALF),
-                0.30F, 0.16F, 0.42F, 1.0F);
     }
 
     // ------------------------------------------------------------------
     //  ③ 柱顶那颗"太阳"（三片正交发光圆盘 + 一圈火环）
     // ------------------------------------------------------------------
 
-    private static void drawSun(VertexConsumer out, Matrix4f pose, Vec3 at, double age, int index) {
-        float pulse = (float) (0.92D + 0.08D * Math.sin(age * 0.22D + index));
-        double r = 0.85D * pulse;
-        // 外层暗红（三片正交 ⇒ 从任何角度看都是一团光 ✓）
-        for (Vec3 axis : new Vec3[]{UP, AXIS_X, AXIS_Z}) {
-            WaterGeometry.disk(out, pose, at, axis, r * 1.35D, 1.00F, 0.34F, 0.05F, 1.0F);
-        }
-        // 内层亮黄（"太阳"的感觉就靠这一层 ✓）
-        for (Vec3 axis : new Vec3[]{UP, AXIS_X, AXIS_Z}) {
-            WaterGeometry.disk(out, pose, at, axis, r * 0.72D, 1.00F, 0.86F, 0.32F, 1.0F);
-        }
-        // 绕着飞的火环（作者要"圆球附近有火焰粒子飞舞"✓ —— 几何环比真粒子更省 ✓）
-        WaterGeometry.ring(out, pose, at, UP, r * 1.9D, 0.13D, age * 0.05D + index, 1.0F);
-    }
 
     // ------------------------------------------------------------------
     //  ④ 激光：从圆球射向这一条线当前锁定的目标
     // ------------------------------------------------------------------
 
-    private static void drawLaser(VertexConsumer out, Matrix4f pose, TNFlameDemonField field,
-                                  Vec3 orb, int index) {
-        Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.level == null) {
-            return;
-        }
-        int id = field.orbTargetId(index);
-        if (id < 0) {
-            return;                                        // 这条线这一 tick 没锁到东西 ✓
-        }
-        Entity target = minecraft.level.getEntity(id);
-        if (target == null) {
-            return;
-        }
-        Vec3 to = target.getPosition(1.0F).add(0.0D, target.getBbHeight() * 0.5D, 0.0D)
-                .subtract(field.position());
-        // 外焰壳 + 白热芯：两层管，看着才像"激光"而不是一根橙棍 ✗
-        WaterGeometry.tube(out, pose, orb, to, 0.17D, 1.00F, 0.30F, 0.05F, 1.0F);
-        WaterGeometry.tube(out, pose, orb, to, 0.075D, 1.00F, 0.92F, 0.62F, 1.0F);
-    }
 }
