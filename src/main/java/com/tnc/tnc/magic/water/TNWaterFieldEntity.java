@@ -39,6 +39,7 @@ public final class TNWaterFieldEntity extends Entity {
     public int swordImpactIndex(int age){int index=SeaGodSwordRules.impactIndex(age);return index>=swordCount()?-1:index;}
     private boolean swordCue(int age,int first){return bossCrypt()?age==first:SeaGodSwordRules.cue(age,first);}
     private UUID owner,anchor;
+    private TNWaterSpellEntity bindingBeam;
     private int lastSwordImpact=-1;
     private boolean seaWeatherStarted;
     private final Set<UUID> hit=new HashSet<>();
@@ -48,7 +49,7 @@ public final class TNWaterFieldEntity extends Entity {
     public double radius(){return WaterSpellRules.fieldRadius(kind(),tier());}
     public boolean isEmitter(){return entityData.get(EMITTER);}
     public float roll(){return entityData.get(ROLL);}
-    public int life(){return bossCrypt()?200:isEmitter()?WaterSpellRules.SLASH_CHANNEL_TICKS:WaterSpellRules.fieldLife(kind(),tier());}
+    public int life(){return entityData.get(BOSS_CAST) && kind()==2 && tier()==2 ? WaterSpellRules.charge(5)+200 : bossCrypt()?200:isEmitter()?WaterSpellRules.SLASH_CHANNEL_TICKS:WaterSpellRules.fieldLife(kind(),tier());}
     public double height(){return WaterSpellRules.fieldHeight(kind(),tier());}
     public Vec3 waveCenter(double age){return kind()==1 && tier()>1 && tier()<5?position().add(direction().scale(age*(tier()==3?1.35:tier()==4?.5:.8))):position();}
     public static boolean cast(ServerPlayer player,ResourceLocation spell) {
@@ -146,6 +147,20 @@ public final class TNWaterFieldEntity extends Entity {
         return added;
     }
 
+    static TNWaterFieldEntity bossPrison(com.tnc.tnc.boss.TNWaterLeviathanEntity caster,
+                                         LivingEntity target,TNWaterSpellEntity beam) {
+        var field=TNOrbEntities.WATER_FIELD.get().create(caster.level());
+        if(field==null)return null;
+        field.owner=caster.getUUID();field.anchor=target.getUUID();field.bindingBeam=beam;
+        field.setPos(target.position());field.entityData.set(KIND,2);field.entityData.set(TIER,2);
+        field.entityData.set(BOSS_CAST,true);
+        if(!caster.level().addFreshEntity(field))return null;
+        WaterRestraints.hold(field,target);
+        ((ServerLevel)caster.level()).playSound(null,target.blockPosition(),SoundEvents.PLAYER_SPLASH,
+                SoundSource.HOSTILE,1.5F,.65F);
+        return field;
+    }
+
     public static LivingEntity aimEnemy(ServerPlayer player,double range) {
         Vec3 from=player.getEyePosition(),end=from.add(player.getLookAngle().scale(range));
         var wall=player.level().clip(new ClipContext(from,end,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,player));
@@ -162,6 +177,7 @@ public final class TNWaterFieldEntity extends Entity {
         super.tick();
         if(level().isClientSide) { clientRain(); return; }
         ServerLevel level=(ServerLevel)level();
+        if(bindingBeam!=null && bindingBeam.isRemoved()){discard();return;}
         LivingEntity player=WaterSpellOwners.resolve(level,owner);
         double ownerRange=player instanceof com.tnc.tnc.boss.TNWaterLeviathanEntity
                 ? com.tnc.tnc.boss.TNWaterLeviathanEntity.FIELD_OWNER_RANGE : 128;

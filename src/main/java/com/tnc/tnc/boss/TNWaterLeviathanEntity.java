@@ -137,7 +137,7 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
             tickChannel(server);
         }
         previousCastTilt = castTilt;
-        castTilt += net.minecraft.util.Mth.clamp((castPose()==3 ? 1F : 0F)-castTilt,-0.075F,0.075F);
+        castTilt += net.minecraft.util.Mth.clamp((castPose()==2 || castPose()==3 ? 1F : 0F)-castTilt,-0.20F,0.20F);
         previousFlightPitch=flightPitch;previousFlightBank=flightBank;
         Vec3 drift=position().subtract(xo,yo,zo);
         float lean=drift.lengthSqr()<0.0001 ? 0 : net.minecraft.util.Mth.clamp(
@@ -207,8 +207,8 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
     }
     private void moveRitualToward(Vec3 destination) {
         Vec3 delta=destination.subtract(position());
-        Vec3 wanted=delta.normalize().scale(Math.min(2.2D,delta.length()*0.18D));
-        ritualVelocity=ritualVelocity.lerp(wanted,0.22D);
+        Vec3 wanted=delta.normalize().scale(Math.min(4.8D,delta.length()*0.24D));
+        ritualVelocity=ritualVelocity.lerp(wanted,0.40D);
         move(MoverType.SELF,ritualVelocity);
     }
 
@@ -254,7 +254,7 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
                 moveRitualToward(channelPosition);
             }
         } else setPos(channelPosition);
-        setXRot(castPose()==3 ? 90F : spell instanceof com.tnc.tnc.magic.water.TNWaterSpellEntity beam
+        setXRot(castPose()==2 || castPose()==3 ? 90F : spell instanceof com.tnc.tnc.magic.water.TNWaterSpellEntity beam
                 ? (float)-Math.toDegrees(Math.asin(beam.direction().y)) : 0F);
     }
 

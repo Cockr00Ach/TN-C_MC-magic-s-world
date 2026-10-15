@@ -13,7 +13,7 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.*;
 
-/** Swept single-hit water projectile: no area damage or chain reaction. */
+/** Swept water projectile; boss shots pierce each enemy once and stop at terrain. */
 public final class TNWaterBoltEntity extends Projectile {
     private static final EntityDataAccessor<Integer> TIER=SynchedEntityData.defineId(TNWaterBoltEntity.class,EntityDataSerializers.INT);
     private static final EntityDataAccessor<Float> SPELL_SCALE=SynchedEntityData.defineId(TNWaterBoltEntity.class,EntityDataSerializers.FLOAT);
@@ -21,6 +21,7 @@ public final class TNWaterBoltEntity extends Projectile {
     public double visualRadius(){return WaterSpellRules.boltRadius(tier())*spellScale();}
     public double collisionRadius(){return spellScale()>1 ? visualRadius() : .15D;}
     public void setSpellScale(float scale){entityData.set(SPELL_SCALE,net.minecraft.util.Mth.clamp(scale,1F,20F));}
+    private final java.util.Set<java.util.UUID> pierced=new java.util.HashSet<>();
     private float damage;
     private double remaining=48;
     public TNWaterBoltEntity(EntityType<? extends TNWaterBoltEntity> type,Level level) { super(type,level); setNoGravity(true); }
@@ -57,10 +58,15 @@ public final class TNWaterBoltEntity extends Projectile {
                 }
         }
         LivingEntity hit=null; Vec3 impact=limit; double closest=from.distanceToSqr(limit)+1e-7;
-        for(LivingEntity target:level.getEntitiesOfClass(LivingEntity.class,new AABB(from,to).inflate(Math.max(.4,collisionRadius())),t->WaterSpellRules.enemy(owner,t))) {
+        for(LivingEntity target:level.getEntitiesOfClass(LivingEntity.class,new AABB(from,to).inflate(Math.max(.4,collisionRadius())),t->WaterSpellRules.enemy(owner,t) && !pierced.contains(t.getUUID()))) {
             var box=target.getBoundingBox().inflate(collisionRadius());
             var point=box.contains(from) ? java.util.Optional.of(from) : box.clip(from,limit);
-            if(point.isPresent() && point.get().distanceToSqr(from)<closest) { closest=point.get().distanceToSqr(from);hit=target;impact=point.get(); }
+            if(point.isPresent() && owner instanceof com.tnc.tnc.boss.TNWaterLeviathanEntity) {
+                if(pierced.add(target.getUUID())) {
+                    target.hurt(level.damageSources().indirectMagic(this,owner),damage);
+                    WaterFx.impact(level,point.get(),motion.normalize().scale(-1),tier());
+                }
+            } else if(point.isPresent() && point.get().distanceToSqr(from)<closest) { closest=point.get().distanceToSqr(from);hit=target;impact=point.get(); }
         }
         if(hit!=null || blocked) {
             if(hit!=null) hit.hurt(level.damageSources().indirectMagic(this,owner),damage);

@@ -115,23 +115,35 @@ public final class LeviathanSpellGameTests {
         var boss=boss(h); var enemy=target(h); var at=boss.position();
         h.assertTrue(LeviathanSpells.cast(boss,enemy,"dragon_ruin"),"T5 created");
         final TNWaterSpellEntity[] beamRef={null};
+        final TNWaterFieldEntity[] prison={null};
+        final var locked=enemy.position();
         h.runAtTickTime(2,()->{
             beamRef[0]=(TNWaterSpellEntity)h.getLevel().getEntity(boss.channelId());
             h.assertTrue(beamRef[0]!=null && beamRef[0].duration()==200,"Boss beam lasts 200 active ticks");
             assertMouthAperture(h,boss,beamRef[0]);
+            prison[0]=h.getLevel().getEntitiesOfClass(TNWaterFieldEntity.class,enemy.getBoundingBox().inflate(3))
+                    .stream().filter(e->e.kind()==2 && e.tier()==2).findFirst().orElseThrow();
+            h.assertTrue(beamRef[0].firedAt()<0,"Prison is active before T5 fires");
         });
         h.assertTrue(WaterSpellRules.duration(5)==240,"Player beam duration is preserved");
         h.runAtTickTime(90,()->{
-            boss.setDeltaMovement(1,1,1);
+            boss.setDeltaMovement(1,1,1);enemy.setDeltaMovement(1,1,1);
             h.assertTrue(boss.mouthOpen(),"Mouth must remain open after the old breath animation ends");
         });
         h.runAtTickTime(210,()->{
+            h.assertTrue(!prison[0].isRemoved() && enemy.position().distanceToSqr(locked)<.01,
+                    "Prison holds the victim throughout the beam, including attempted knockback");
             h.assertTrue(!beamRef[0].isRemoved() && boss.mouthOpen(),"Still channeling near the end");
             h.assertTrue(boss.position().distanceToSqr(at)<0.001,"Channel anchors the boss against drift");
         });
         h.runAtTickTime(230,()->{
+            h.assertTrue(prison[0].isRemoved(),"Water prison ends with the beam");
+            enemy.setPos(enemy.position().add(2,0,0));
             h.assertTrue(beamRef[0].isRemoved() && !boss.mouthOpen(),"Mouth closes when the real beam ends");
-            boss.discard(); enemy.discard(); h.succeed();
+        });
+        h.runAtTickTime(233,()->{
+            h.assertTrue(enemy.position().distanceToSqr(locked)>1,"No residual restraint after T5 ends");
+            boss.discard();enemy.discard();h.succeed();
         });
     }
 
@@ -145,7 +157,11 @@ public final class LeviathanSpellGameTests {
             h.assertTrue(field!=null && field.life()==200 && field.swordCount()==1,"Boss crypt is ten seconds and one sword; field="+field+" channel="+boss.channelId()+" pose="+boss.castPose()+" alive="+boss.isAlive()+" at="+boss.position());
             h.assertTrue(field.swordImpactIndex(140)==0 && field.swordImpactIndex(200)==-1,"Only the first impact is scheduled");
         });
-        h.runAtTickTime(95,()->{
+        h.runAtTickTime(8,()->{
+            h.assertTrue(boss.castPose()==2 && boss.getXRot()==90F && boss.castTilt(1)>.99F,
+                    "Boss turns head-down during ascent within a quarter second");
+        });
+        h.runAtTickTime(55,()->{
             h.assertTrue(boss.castPose()==3 && boss.mouthOpen(),"Arrives before the sword appears and opens its mouth; pose="+boss.castPose()+" boss="+boss.position()+" station="+fieldRef[0].skySealCenter()+" removed="+fieldRef[0].isRemoved()+" age="+fieldRef[0].age());
             h.assertTrue(boss.position().distanceTo(fieldRef[0].skySealCenter())<boss.MOUTH_FORWARD+boss.APERTURE_GAP+1,"Boss is stationed at the actual sky seal");
             h.assertTrue(boss.aperturePosition(boss.getYRot(),90F).distanceTo(fieldRef[0].skySealCenter())<0.01,
@@ -162,9 +178,9 @@ public final class LeviathanSpellGameTests {
             boss.setNoAi(false);
         });
         final float[] hpAfterReturn={1000};
-        h.runAtTickTime(310,()->{
+        h.runAtTickTime(260,()->{
             h.assertTrue(!boss.isReturningFromSky() && boss.distanceTo(enemy)<48,
-                    "Boss must come back down to the victim within five seconds");
+                    "Boss must come back down to the victim within three seconds");
             h.assertTrue(boss.getTarget()==enemy,"The original victim is reacquired outside the high-altitude follow range");
             hpAfterReturn[0]=enemy.getHealth();
         });
@@ -195,6 +211,38 @@ public final class LeviathanSpellGameTests {
         h.runAtTickTime(25,()->{
             h.assertTrue(!boss.mouthOpen(),"Interrupted spells must release the pose");
             boss.discard(); enemy.discard(); h.succeed();
+        });
+    }
+    @GameTest(template="leviathan_empty",timeoutTicks=35)
+    public static void bossBoltsPierceEnemiesOnceAndStopAtWalls(GameTestHelper h) {
+        var boss=boss(h);var first=target(h);var second=target(h);
+        var start=h.absoluteVec(new net.minecraft.world.phys.Vec3(20.5,28,15));
+        first.setPos(start.add(0,0,4));second.setPos(start.add(0,0,10));
+        var shot=com.tnc.tnc.magic.TNOrbEntities.WATER_BOLT.get().create(h.getLevel());
+        shot.configure(boss,1,start,new net.minecraft.world.phys.Vec3(0,0,1));h.getLevel().addFreshEntity(shot);
+        var wall=BlockPos.containing(start.add(0,0,18));h.getLevel().setBlockAndUpdate(wall,Blocks.STONE.defaultBlockState());
+        h.runAtTickTime(7,()->{
+            h.assertTrue(first.getHealth()==996 && !shot.isRemoved(),"First victim takes one hit without consuming the ball");
+            first.invulnerableTime=0;first.setPos(shot.position().add(0,0,1));
+        });
+        h.runAtTickTime(15,()->h.assertTrue(first.getHealth()==996 && second.getHealth()==996 && !shot.isRemoved(),
+                "A ball pierces multiple enemies but never damages the same enemy twice"));
+        h.runAtTickTime(24,()->{
+            h.assertTrue(shot.isRemoved(),"Terrain still stops a piercing boss projectile");
+            boss.discard();first.discard();second.discard();h.succeed();
+        });
+    }
+    @GameTest(template="leviathan_empty",timeoutTicks=35)
+    public static void interruptedT5ImmediatelyReleasesPrison(GameTestHelper h) {
+        var boss=boss(h);var enemy=target(h);var at=enemy.position();
+        h.assertTrue(LeviathanSpells.cast(boss,enemy,"dragon_ruin"),"T5 created");
+        h.runAtTickTime(5,()->h.getLevel().getEntity(boss.channelId()).discard());
+        h.runAtTickTime(8,()->enemy.setPos(at.add(3,0,0)));
+        h.runAtTickTime(12,()->{
+            h.assertTrue(enemy.position().distanceToSqr(at)>4,"Interrupted beam immediately releases its prison lease");
+            h.assertTrue(h.getLevel().getEntitiesOfClass(TNWaterFieldEntity.class,enemy.getBoundingBox().inflate(8))
+                    .stream().noneMatch(e->e.kind()==2 && e.tier()==2),"Interrupted prison model is removed");
+            boss.discard();enemy.discard();h.succeed();
         });
     }
     private static void assertMouthAperture(GameTestHelper h,TNWaterLeviathanEntity boss,TNWaterSpellEntity spell) {

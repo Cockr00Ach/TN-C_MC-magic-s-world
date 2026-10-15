@@ -27,6 +27,7 @@ public final class TNWaterSpellEntity extends Entity {
     private static final EntityDataAccessor<Integer> FIRED_AT=SynchedEntityData.defineId(TNWaterSpellEntity.class,EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> BOSS_CAST=SynchedEntityData.defineId(TNWaterSpellEntity.class,EntityDataSerializers.BOOLEAN);
     private UUID owner;
+    private TNWaterFieldEntity prison;
     private Vec3 barrageAim;
     private WaterTerrainBore bore;
     /** 真正开火的那一 tick ✓ —— 龙滅的蓄力可能因为"预扫描还没扫完"多花几 tick ✗，
@@ -98,7 +99,12 @@ public final class TNWaterSpellEntity extends Entity {
         cast.setPos(at); cast.entityData.set(TIER,tier);
         cast.entityData.set(YAW,(float)Math.toDegrees(Math.atan2(-direction.x,direction.z)));
         cast.entityData.set(PITCH,(float)-Math.toDegrees(Math.asin(direction.y)));
+        if(tier==5) {
+            cast.prison=TNWaterFieldEntity.bossPrison(caster,target,cast);
+            if(cast.prison==null)return false;
+        }
         boolean added=level.addFreshEntity(cast);
+        if(!added && cast.prison!=null)cast.prison.discard();
         if (added) caster.beginChannel(cast,target,caster.position(),cast.entityData.get(YAW));
         return added;
     }
@@ -233,6 +239,10 @@ public final class TNWaterSpellEntity extends Entity {
             }
         }
         return length;
+    }
+    @Override public void remove(RemovalReason reason) {
+        if(!level().isClientSide && prison!=null) {prison.discard();prison=null;}
+        super.remove(reason);
     }
     @Override public boolean shouldBeSaved(){return false;}
     @Override protected void readAdditionalSaveData(CompoundTag tag){discard();}

@@ -67,6 +67,7 @@ SIZE_ENTRIES = {
     "assets/tnc/lang/en_us.json",
 }
 COMBAT_ENTRIES = {
+    "com/tnc/tnc/boss/client/LeviathanCameraEffects.class",
     "com/tnc/tnc/boss/client/TNWaterLeviathanRenderer.class",
     "com/tnc/tnc/boss/TNWaterLeviathanEntity.class",
     "com/tnc/tnc/boss/TNWaterLeviathanEntity$LeviathanMoveGoal.class",
