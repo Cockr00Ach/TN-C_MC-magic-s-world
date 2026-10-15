@@ -73,7 +73,8 @@ def digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def main(base: Path, built: Path, output: Path, report: Path, entries=ENTRIES) -> None:
+def main(base: Path, built: Path, output: Path, report: Path, entries=ENTRIES,
+         translation_keys=("entity.tnc.water_leviathan", "item.tnc.water_leviathan_spawn_egg")) -> None:
     if output.exists() or output.resolve() in (base.resolve(), built.resolve()):
         raise ValueError("output must be a new, separate jar")
     base_hash = digest(base)
@@ -92,7 +93,7 @@ def main(base: Path, built: Path, output: Path, report: Path, entries=ENTRIES) -
                     if name in {"assets/tnc/lang/zh_cn.json", "assets/tnc/lang/en_us.json"}:
                         translations = json.loads(old.read(name))
                         updates = json.loads(data)
-                        for key in ("entity.tnc.water_leviathan", "item.tnc.water_leviathan_spawn_egg"):
+                        for key in translation_keys:
                             translations[key] = updates[key]
                         data = (json.dumps(translations, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
                     result.writestr(copy.copy(replacement), data)

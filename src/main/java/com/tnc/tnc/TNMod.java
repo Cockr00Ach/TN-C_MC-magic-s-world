@@ -156,6 +156,7 @@ public class TNMod
             .icon(() -> SWORD.get().getDefaultInstance())
             .displayItems((parameters, output) -> {
                 output.accept(SWORD.get());
+                output.accept(TNC_IRON_ARMOR.get());
                 // Legacy chaos_seal stays registered for save compatibility; learned magic replaces it.
                 output.accept(WAND.get());
                 com.tnc.tnc.adventure.ElementWands.ITEMS.values().forEach(i->output.accept(i.get()));
