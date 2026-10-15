@@ -2,8 +2,8 @@ package com.tnc.tnc.boss;
 
 /** World-independent flight clearance and particle budgets, also used by focused tests. */
 public final class LeviathanMovementRules {
-    public static final double AIR_TARGET_HEIGHT = 2.8D;
-    public static final double FLOOR_CLEARANCE = 3.0D;
+    public static final double AIR_TARGET_HEIGHT = 2.8D*TNWaterLeviathanEntity.SIZE_SCALE;
+    public static final double FLOOR_CLEARANCE = 3.0D*TNWaterLeviathanEntity.SIZE_SCALE;
     public static final int MIST_INTERVAL = 3;
     public static final int MIST_PER_BOSS = 4;
     public static final int MIST_TOTAL_BUDGET = 12;

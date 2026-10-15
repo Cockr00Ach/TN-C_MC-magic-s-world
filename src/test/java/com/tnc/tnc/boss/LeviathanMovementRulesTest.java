@@ -17,8 +17,8 @@ class LeviathanMovementRulesTest {
         }
     }
     @Test void groundTargetsCannotPullTheBossOntoTheGround() {
-        assertEquals(67.0D, LeviathanMovementRules.airDestinationY(64, 64, 310));
-        assertEquals(103.0D, LeviathanMovementRules.airDestinationY(70, 100, 310));
+        assertEquals(76.0D, LeviathanMovementRules.airDestinationY(64, 64, 310));
+        assertEquals(112.0D, LeviathanMovementRules.airDestinationY(70, 100, 310));
         assertEquals(140.0D, LeviathanMovementRules.airDestinationY(140, 100, 310));
     }
 

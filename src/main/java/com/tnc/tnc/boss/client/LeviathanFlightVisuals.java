@@ -26,20 +26,21 @@ public final class LeviathanFlightVisuals {
                 ? 2 : LeviathanMovementRules.MIST_TOTAL_BUDGET;
         for (var entity : mc.level.entitiesForRendering()) {
             if (!(entity instanceof TNWaterLeviathanEntity boss) || !boss.isAlive()
-                    || boss.isInWater() || boss.distanceToSqr(mc.player)>80.0D*80.0D) continue;
-            Vec3 forward = Vec3.directionFromRotation(0, boss.yBodyRot);
-            Vec3 side = new Vec3(forward.z, 0, -forward.x);
+                    || boss.isInWater() || boss.distanceToSqr(mc.player)>160.0D*160.0D) continue;
+            Vec3 forward = Vec3.directionFromRotation(boss.castingPitch(1), boss.yBodyRot);
+            Vec3 up = Vec3.directionFromRotation(boss.castingPitch(1)-90F, boss.yBodyRot);
+            Vec3 side = Vec3.directionFromRotation(0,boss.yBodyRot+90);
             for (int i=0; i<LeviathanMovementRules.MIST_PER_BOSS && remaining>0; i++, remaining--) {
-                double along = -7.5D+mc.level.random.nextDouble()*10.0D;
-                double across = (mc.level.random.nextDouble()-0.5D)*4.0D;
+                double along = (-7.5D+mc.level.random.nextDouble()*10.0D)*boss.SIZE_SCALE;
+                double across = (mc.level.random.nextDouble()-0.5D)*4.0D*boss.SIZE_SCALE;
                 Vec3 at = boss.position().add(forward.scale(along)).add(side.scale(across))
-                        .add(0, 0.12D+mc.level.random.nextDouble()*0.35D, 0);
+                        .add(up.scale((0.12D+mc.level.random.nextDouble()*0.35D)*boss.SIZE_SCALE));
                 Vec3 drift = boss.getDeltaMovement().scale(0.14D).add(0, -0.018D, 0);
                 Particle cloud = mc.particleEngine.createParticle(ParticleTypes.CLOUD,
                         at.x, at.y, at.z, drift.x, drift.y, drift.z);
                 if (cloud != null) {
                     cloud.setColor(0.07F, 0.32F+mc.level.random.nextFloat()*0.12F, 0.88F);
-                    cloud.scale(3.5F);
+                    cloud.scale(3.5F*boss.SIZE_SCALE);
                     cloud.setLifetime(LeviathanMovementRules.MIST_LIFETIME);
                     cloud.setParticleSpeed(drift.x, drift.y, drift.z);
                 }

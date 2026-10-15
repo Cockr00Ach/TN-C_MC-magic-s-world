@@ -14,12 +14,16 @@ import net.minecraftforge.gametest.*;
 @PrefixGameTestTemplate(false)
 public final class LeviathanSpellGameTests {
     private static TNWaterLeviathanEntity boss(GameTestHelper h) {
-        var boss=h.spawn(TNNpcs.WATER_LEVIATHAN.get(),new BlockPos(20,4,8));
-        boss.setNoAi(true); return boss;
+        clearAscentCorridor(h);
+        var boss=h.spawn(TNNpcs.WATER_LEVIATHAN.get(),new BlockPos(20,4,10));
+        boss.setNoAi(true);
+        h.assertTrue(Math.abs(boss.getBbWidth()-19.2F)<0.01 && Math.abs(boss.getBbHeight()-16.4F)<0.01,
+                "Collision dimensions are four times the original on the real registered entity");
+        return boss;
     }
 
     private static LivingEntity target(GameTestHelper h) {
-        var target=h.spawn(EntityType.VILLAGER,new BlockPos(20,4,28));
+        var target=h.spawn(EntityType.VILLAGER,new BlockPos(20,4,47));
         target.setNoAi(true); target.setNoGravity(true);
         target.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1000);
         target.setHealth(1000); return target;
@@ -51,7 +55,7 @@ public final class LeviathanSpellGameTests {
             afterBarrage[0]=enemy.getHealth();
             h.assertTrue(LeviathanSpells.cast(boss,enemy,"dragon_ruin"),"T5 beam created");
             var beam=h.getLevel().getEntitiesOfClass(TNWaterSpellEntity.class,boss.getBoundingBox().inflate(80))
-                    .stream().filter(e->e.tier()==5).findFirst().orElseThrow();
+                    .stream().filter(e->e.getUUID().equals(boss.channelId()) && e.tier()==5).findFirst().orElseThrow();
             marker[0]=BlockPos.containing(beam.position().add(beam.direction().scale(8))
                     .add(WaterSpellRules.right(beam.direction()).scale(10)));
             h.getLevel().setBlockAndUpdate(marker[0],Blocks.STONE.defaultBlockState());
@@ -74,15 +78,20 @@ public final class LeviathanSpellGameTests {
     }
 
     private static void clearAscentCorridor(GameTestHelper h) {
+        // Large spell origins cross the original fixture's first chunk; keep the whole arena ticking.
+        BlockPos low=h.absolutePos(new BlockPos(4,0,-40)),high=h.absolutePos(new BlockPos(40,0,65));
+        for (int cx=Math.floorDiv(low.getX(),16);cx<=Math.floorDiv(high.getX(),16);cx++)
+            for (int cz=Math.floorDiv(low.getZ(),16);cz<=Math.floorDiv(high.getZ(),16);cz++)
+                h.getLevel().setChunkForced(cx,cz,true);
+
         // The 48-high fixture starts underground. Clear the entire ascent corridor into open sky.
-        for (BlockPos p : BlockPos.betweenClosed(h.absolutePos(new BlockPos(16,2,4)),
-                h.absolutePos(new BlockPos(24,145,34))))
+        for (BlockPos p : BlockPos.betweenClosed(h.absolutePos(new BlockPos(8,2,-8)),
+                h.absolutePos(new BlockPos(32,190,64))))
             if (!h.getLevel().getBlockState(p).isAir()) h.getLevel().setBlock(p,Blocks.AIR.defaultBlockState(),2);
     }
 
     @GameTest(template="leviathan_empty",timeoutTicks=185)
     public static void cryptKeepsItsRealSwordTimelineWithAMobCaster(GameTestHelper h) {
-        clearAscentCorridor(h);
         var boss=boss(h); var enemy=target(h); float hp=boss.getHealth();
         h.assertTrue(LeviathanSpells.cast(boss,enemy,"sea_god_crypt"),"T5 crypt created");
         h.runAtTickTime(155,()->{
@@ -119,18 +128,17 @@ public final class LeviathanSpellGameTests {
 
     @GameTest(template="leviathan_empty",timeoutTicks=455)
     public static void cryptAscendsToSealFacesDownAndEndsAfterOneSword(GameTestHelper h) {
-        clearAscentCorridor(h);
         var boss=boss(h); var enemy=target(h);
         h.assertTrue(LeviathanSpells.cast(boss,enemy,"sea_god_crypt"),"Crypt created");
         final TNWaterFieldEntity[] fieldRef={null};
         h.runAtTickTime(2,()->{
             var field=(TNWaterFieldEntity)h.getLevel().getEntity(boss.channelId()); fieldRef[0]=field;
-            h.assertTrue(field!=null && field.life()==200 && field.swordCount()==1,"Boss crypt is ten seconds and one sword");
+            h.assertTrue(field!=null && field.life()==200 && field.swordCount()==1,"Boss crypt is ten seconds and one sword; field="+field+" channel="+boss.channelId()+" pose="+boss.castPose()+" alive="+boss.isAlive()+" at="+boss.position());
             h.assertTrue(field.swordImpactIndex(140)==0 && field.swordImpactIndex(200)==-1,"Only the first impact is scheduled");
         });
         h.runAtTickTime(95,()->{
             h.assertTrue(boss.castPose()==3 && boss.mouthOpen(),"Arrives before the sword appears and opens its mouth; pose="+boss.castPose()+" boss="+boss.position()+" station="+fieldRef[0].skySealCenter()+" removed="+fieldRef[0].isRemoved()+" age="+fieldRef[0].age());
-            h.assertTrue(boss.position().distanceTo(fieldRef[0].skySealCenter())<8,"Boss is stationed at the actual sky seal");
+            h.assertTrue(boss.position().distanceTo(fieldRef[0].skySealCenter())<boss.MOUTH_FORWARD+boss.APERTURE_GAP+1,"Boss is stationed at the actual sky seal");
             h.assertTrue(boss.aperturePosition(boss.getYRot(),90F).distanceTo(fieldRef[0].skySealCenter())<0.01,
                     "The sky seal is just in front of the downward-facing mouth");
             h.assertTrue(boss.getLookAngle().dot(new net.minecraft.world.phys.Vec3(0,-1,0))>0.99,
@@ -141,12 +149,12 @@ public final class LeviathanSpellGameTests {
             h.assertTrue(fieldRef[0].isRemoved() && !boss.mouthOpen(),"Crypt and mouth end together");
             h.assertTrue(boss.isReturningFromSky(),"Crypt ends with an active return flight");
             // Move the victim after the ritual: return must follow them, not the old field.
-            enemy.setPos(h.absoluteVec(new net.minecraft.world.phys.Vec3(20.5,4,24.5)));
+            enemy.setPos(h.absoluteVec(new net.minecraft.world.phys.Vec3(20.5,4,44.5)));
             boss.setNoAi(false);
         });
         final float[] hpAfterReturn={1000};
         h.runAtTickTime(310,()->{
-            h.assertTrue(!boss.isReturningFromSky() && boss.distanceTo(enemy)<24,
+            h.assertTrue(!boss.isReturningFromSky() && boss.distanceTo(enemy)<48,
                     "Boss must come back down to the victim within five seconds");
             h.assertTrue(boss.getTarget()==enemy,"The original victim is reacquired outside the high-altitude follow range");
             hpAfterReturn[0]=enemy.getHealth();
@@ -176,6 +184,6 @@ public final class LeviathanSpellGameTests {
         var mouth=boss.mouthPosition(boss.getYRot(),boss.castingPitch(1));
         var gap=spell.position().subtract(mouth);
         h.assertTrue(Math.abs(gap.length()-boss.APERTURE_GAP)<0.01 && gap.normalize().dot(spell.direction())>0.999,
-                "Spell aperture must be 0.85 blocks ahead of the actual pitched mouth");
+                "Spell aperture must remain scaled and ahead of the actual pitched mouth");
     }
 }

@@ -54,7 +54,19 @@ CHANNEL_ENTRIES = {
     "com/tnc/tnc/client/SeaGodSwordVisuals.class",
     "assets/tnc/animations/entity/water_leviathan.animation.json",
 }
-ENTRIES |= MOVEMENT_ENTRIES | SPELL_ENTRIES | CHANNEL_ENTRIES
+SIZE_ENTRIES = {
+    "com/tnc/tnc/boss/TNWaterLeviathanEntity.class",
+    "com/tnc/tnc/boss/TNWaterLeviathanEntity$LeviathanMoveGoal.class",
+    "com/tnc/tnc/boss/client/TNWaterLeviathanRenderer.class",
+    "com/tnc/tnc/magic/water/TNWaterFieldEntity.class",
+    "com/tnc/tnc/magic/water/TNWaterSpellEntity.class",
+    "com/tnc/tnc/npc/TNNpcs.class",
+    "com/tnc/tnc/boss/LeviathanMovementRules.class",
+    "com/tnc/tnc/boss/client/LeviathanFlightVisuals.class",
+    "assets/tnc/lang/zh_cn.json",
+    "assets/tnc/lang/en_us.json",
+}
+ENTRIES |= MOVEMENT_ENTRIES | SPELL_ENTRIES | CHANNEL_ENTRIES | SIZE_ENTRIES
 
 
 def digest(path: Path) -> str:
@@ -122,8 +134,9 @@ if __name__ == "__main__":
     p.add_argument("--movement-only", action="store_true")
     p.add_argument("--spells-only", action="store_true")
     p.add_argument("--channel-only", action="store_true")
+    p.add_argument("--size-only", action="store_true")
     a = p.parse_args()
-    if sum((a.movement_only,a.spells_only,a.channel_only))>1:
+    if sum((a.movement_only,a.spells_only,a.channel_only,a.size_only))>1:
         p.error("choose one update scope")
     main(a.base, a.built, a.output, a.report,
-         CHANNEL_ENTRIES if a.channel_only else SPELL_ENTRIES if a.spells_only else MOVEMENT_ENTRIES if a.movement_only else ENTRIES)
+         SIZE_ENTRIES if a.size_only else CHANNEL_ENTRIES if a.channel_only else SPELL_ENTRIES if a.spells_only else MOVEMENT_ENTRIES if a.movement_only else ENTRIES)

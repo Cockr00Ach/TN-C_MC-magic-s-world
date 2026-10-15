@@ -118,9 +118,9 @@ public final class TNWaterFieldEntity extends Entity {
         Vec3 toward = target.position().subtract(caster.position()).multiply(1, 0, 1);
         Vec3 direction = toward.lengthSqr()<0.01D
                 ? Vec3.directionFromRotation(0, caster.getYRot()) : toward.normalize();
-        Vec3 at = crypt ? target.position() : caster.position().add(direction.scale(4.0D));
+        Vec3 at = crypt ? target.position() : caster.position().add(direction.scale(caster.MOUTH_FORWARD+caster.APERTURE_GAP));
         if (!crypt && !caster.isInWater()) {
-            var ground = level.clip(new ClipContext(at.add(0, 1, 0), at.add(0, -16, 0),
+            var ground = level.clip(new ClipContext(at.add(0, 1, 0), at.add(0, -16*caster.SIZE_SCALE, 0),
                     ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, caster));
             if (ground.getType()!=HitResult.Type.MISS) at = ground.getLocation().add(0, 0.1D, 0);
         }
@@ -129,7 +129,7 @@ public final class TNWaterFieldEntity extends Entity {
         if (field==null) return false;
         field.owner=caster.getUUID(); field.setPos(at);
         field.entityData.set(BOSS_CAST,true);
-        field.entityData.set(SKY_HEIGHT,(float)Math.max(8,Math.min(116,level.getMaxBuildHeight()-at.y-24)));
+        field.entityData.set(SKY_HEIGHT,(float)Math.max(8,Math.min(116,level.getMaxBuildHeight()-at.y-caster.MOUTH_FORWARD-caster.APERTURE_GAP-24*caster.SIZE_SCALE)));
         field.entityData.set(KIND, crypt ? 2 : 1);
         field.entityData.set(TIER, crypt ? 5 : 4);
         field.entityData.set(YAW, (float)Math.toDegrees(Math.atan2(-direction.x, direction.z)));
@@ -162,7 +162,9 @@ public final class TNWaterFieldEntity extends Entity {
         if(level().isClientSide) { clientRain(); return; }
         ServerLevel level=(ServerLevel)level();
         LivingEntity player=WaterSpellOwners.resolve(level,owner);
-        if(player==null || player.distanceToSqr(this)>128*128 || tickCount>life()){discard();return;}
+        double ownerRange=player instanceof com.tnc.tnc.boss.TNWaterLeviathanEntity
+                ? com.tnc.tnc.boss.TNWaterLeviathanEntity.FIELD_OWNER_RANGE : 128;
+        if(player==null || player.distanceToSqr(this)>ownerRange*ownerRange || tickCount>life()){discard();return;}
         entityData.set(AGE,tickCount);
         if(isEmitter()) {
             if (!(player instanceof ServerPlayer serverPlayer)) { discard(); return; }

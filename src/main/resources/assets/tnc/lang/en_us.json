@@ -409,6 +409,6 @@
   "block.tnc.roulette_table": "Roulette Table",
   "block.tnc.card_table": "High Card Table",
   "block.tnc.lucky_wheel": "Fortune Wheel",
-  "entity.tnc.water_leviathan": "Hallowed Abyss Leviathan",
-  "item.tnc.water_leviathan_spawn_egg": "Hallowed Abyss Leviathan Spawn Egg"
+  "entity.tnc.water_leviathan": "Bluegold Abyss Beast",
+  "item.tnc.water_leviathan_spawn_egg": "Bluegold Abyss Beast Spawn Egg"
 }

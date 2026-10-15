@@ -15,7 +15,8 @@ public final class TNWaterLeviathanRenderer extends GeoEntityRenderer<TNWaterLev
 
     public TNWaterLeviathanRenderer(EntityRendererProvider.Context context) {
         super(context, new TNWaterLeviathanGeoModel());
-        this.shadowRadius = 3.2F;
+        this.withScale(TNWaterLeviathanEntity.SIZE_SCALE);
+        this.shadowRadius = 3.2F*TNWaterLeviathanEntity.SIZE_SCALE;
         this.addRenderLayer(new TNWaterLeviathanEmissiveLayer(this));
     }
 }
