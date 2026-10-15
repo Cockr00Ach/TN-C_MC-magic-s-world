@@ -358,8 +358,8 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
             double radius=getBbWidth()*(.48+random.nextDouble()*.28);
             double x=getX()+Math.cos(angle)*radius,z=getZ()+Math.sin(angle)*radius;
             double y=getY()+getBbHeight()*(layer+random.nextDouble())/6;
-            level().addParticle(dust,x,y,z,-Math.sin(angle)*.06,.06+random.nextDouble()*.05,Math.cos(angle)*.06);
-            if(i==0)level().addParticle(ParticleTypes.SQUID_INK,x,y,z,0,.035,0);
+            level().addParticle(dust,true,x,y,z,-Math.sin(angle)*.06,.06+random.nextDouble()*.05,Math.cos(angle)*.06);
+            if(i==0)level().addParticle(ParticleTypes.SQUID_INK,true,x,y,z,0,.035,0);
         }
     }
 
