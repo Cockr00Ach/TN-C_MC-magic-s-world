@@ -11,7 +11,8 @@ public final class EarthAttackRenderer extends EntityRenderer<EarthAttackEntity>
     public EarthAttackRenderer(EntityRendererProvider.Context c){super(c);}
     public ResourceLocation getTextureLocation(EarthAttackEntity e){return ResourceLocation.fromNamespaceAndPath("minecraft","textures/block/stone.png");}
     public void render(EarthAttackEntity e,float yaw,float partial,PoseStack pose,MultiBufferSource buffers,int light) {
-        double age=e.age(partial)-e.waitTicks();if(e.done()){renderBurst(e,partial,pose,buffers,light);if(e.mode()!=7)return;}if(age<0&&e.mode()!=0&&e.mode()!=3)return;
+        double age=e.age(partial)-e.waitTicks();if(e.done()){renderBurst(e,partial,pose,buffers,light);if(e.mode()!=7&&e.mode()!=3)return;}if(age<0&&e.mode()!=0&&e.mode()!=3)return;
+        if(e.mode()==3){renderSkySpear(e,partial,age,pose,buffers);return;}
         float growth=e.mode()==2?(float)Math.max(.04,Math.min(1,age/45)):e.mode()==1?(float)Math.max(.03,Math.min(1,age/8)):1;
         pose.pushPose();if(e.mode()==0||e.mode()==3||e.mode()==5){pose.mulPose(Axis.YP.rotationDegrees(e.getYRot()));pose.mulPose(Axis.XP.rotationDegrees(e.getXRot()));}
         if(e.mode()==0||e.mode()==3||e.mode()==5)pose.scale(e.scale(),e.scale(),e.height());else pose.scale(e.scale()*growth,e.height()*growth,e.scale()*growth);
@@ -33,6 +34,18 @@ public final class EarthAttackRenderer extends EntityRenderer<EarthAttackEntity>
                     Minecraft.getInstance().getItemRenderer(),ResourceLocation.fromNamespaceAndPath("tnc","projectile/earth_clod"),pose,buffers,light,OverlayTexture.NO_OVERLAY);
             pose.popPose();
         }
+    }
+    private static void renderSkySpear(EarthAttackEntity e,float partial,double age,PoseStack pose,MultiBufferSource buffers) {
+        if(e.done()&&e.age(partial)-e.burstAge()>8)return;
+        pose.pushPose();
+        // The network entity stays near the target; the visible point is suspended above it.
+        pose.translate(0,!e.done()&&age<=0?e.dropHeight():0,0);
+        EarthSpearLayout.apply(pose,e.scale(),e.height());
+        var mc=Minecraft.getInstance();
+        var model=mc.getModelManager().getModel(ResourceLocation.fromNamespaceAndPath("tnc","projectile/earth_spear_sharp"));
+        mc.getItemRenderer().renderModelLists(model,net.minecraft.world.item.ItemStack.EMPTY,LightTexture.FULL_BRIGHT,
+                OverlayTexture.NO_OVERLAY,pose,buffers.getBuffer(RenderType.entityCutoutNoCull(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS)));
+        pose.popPose();
     }
     private static void renderBurst(EarthAttackEntity e,float partial,PoseStack pose,MultiBufferSource buffers,int light) {
         double elapsed=e.age(partial)-e.burstAge();if(elapsed<0||elapsed>e.burstLife())return;
