@@ -18,6 +18,7 @@ final class TNDarkGiantCasting {
     public static boolean cast(LivingEntity caster,TNDarkGiantSpells.Move move){
         if(!(caster.level() instanceof ServerLevel level))return false;
         var target=caster instanceof Mob mob?mob.getTarget():null;
+        if(target==null||!target.isAlive()||target.distanceToSqr(caster)>TNDarkGiantSpells.CAST_RANGE*TNDarkGiantSpells.CAST_RANGE)return false;
         return switch(move.chain()){
             case 0 -> summon(level,caster,target,move.tier());
             case 2 -> fog(level,caster,move.path());
@@ -41,18 +42,19 @@ final class TNDarkGiantCasting {
     }
     private static boolean siphon(ServerLevel level,LivingEntity caster){
         if(TNOrbEntities.DRAIN==null)return false;
-        double range=DarkSiphonRules.range(3)+Math.max(0,caster.getBbWidth()*.5-1);
+        double range=TNDarkGiantSpells.CAST_RANGE;
         level.getEntitiesOfClass(TNDarkDrainEntity.class,caster.getBoundingBox().inflate(range),d->d.casterId()==caster.getId())
                 .forEach(net.minecraft.world.entity.Entity::discard);
         var victims=level.getEntitiesOfClass(LivingEntity.class,caster.getBoundingBox().inflate(range),
                 e->e!=caster&&e.isAlive()&&!e.isSpectator()&&!e.isAlliedTo(caster)
                         &&!(e instanceof TNDarkSummonEntity)&&!(e instanceof net.minecraft.world.entity.player.Player p&&p.isCreative())
                         &&e.distanceToSqr(caster)<=range*range&&caster.hasLineOfSight(e));
-        victims.sort(Comparator.comparingDouble(e->e.distanceToSqr(caster)));
+        var primary=caster instanceof Mob mob?mob.getTarget():null;
+        victims.sort(Comparator.comparingDouble(e->e==primary?-1:e.distanceToSqr(caster)));
         int spawned=0;
         for(var victim:victims.subList(0,Math.min(victims.size(),DarkSiphonRules.targets(3)))){
             var drain=TNOrbEntities.DRAIN.get().create(level);if(drain==null)continue;
-            drain.configureSiphon(caster,victim,3);level.addFreshEntity(drain);spawned++;
+            drain.configureSiphon(caster,victim,3,range);level.addFreshEntity(drain);spawned++;
         }
         return spawned>0;
     }

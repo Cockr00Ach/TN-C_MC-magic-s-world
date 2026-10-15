@@ -7,6 +7,15 @@ import net.minecraftforge.gametest.*;
 @GameTestHolder("tnc") @PrefixGameTestTemplate(false)
 public final class DarkGiantScaleGameTests {
     @GameTest(template="building_test_empty",timeoutTicks=20,batch="dark_giant_scale")
+    public static void existingGiantsUpgradeTheirSavedDetectionRange(GameTestHelper h){
+        var boss=TNNpcs.DARK_GIANT.get().create(h.getLevel());
+        boss.setNoAi(true);
+        var follow=boss.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.FOLLOW_RANGE);
+        follow.setBaseValue(40);boss.aiStep();
+        h.assertTrue(Math.abs(follow.getBaseValue()-128)<.001,"Old saved giants acquire targets at the upgraded range");
+        boss.discard();h.succeed();
+    }
+    @GameTest(template="building_test_empty",timeoutTicks=20,batch="dark_giant_scale")
     public static void summonsKeepTheirMobOwnerAndObeyItsTarget(GameTestHelper h){
         var owner=h.spawn(net.minecraft.world.entity.EntityType.ZOMBIE,new net.minecraft.core.BlockPos(1,2,1));
         owner.setNoAi(true);
