@@ -48,9 +48,9 @@ public final class WaterModelClientAudit {
         }
         if(++frames<35||saving)return;
         if(!saved) {saving=true;Screenshot.grab(mc.gameDirectory,"water-models-"+page+".png",mc.getMainRenderTarget(),m->{saved=true;saving=false;});return;}
-        if(++page<2){frames=0;saved=false;return;}
+        if(++page<3){frames=0;saved=false;return;}
         Files.writeString(Path.of(System.getProperty("tnc.waterModelAuditReport")),new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(
-                Map.of("rain_tiers",5,"models",5,"slash_angles",20,"screenshots",2,"failures",failures,"scope","Actual isolated dev-client rendering, not full-pack FPS")));
+                Map.of("rain_tiers",5,"models",5,"seal_depth_cases",4,"slash_angles",20,"screenshots",3,"failures",failures,"scope","Actual isolated dev-client rendering, not full-pack FPS")));
         mc.stop();
     }
     @SuppressWarnings("unchecked") private static void data(TNWaterFieldEntity e,String field,Object value)throws Exception {
@@ -60,8 +60,34 @@ public final class WaterModelClientAudit {
     private static final class Gallery extends Screen {
         Gallery(){super(Component.literal("Water model audit"));}
         @Override public boolean isPauseScreen(){return false;}
+        private void sealDepth(GuiGraphics g) {
+            g.fill(0,0,width,height,0xFF101B27);
+            g.drawString(font,"SEAL DEPTH / opaque boss behind / opaque wall in front",24,18,0xB4F3FF,false);
+            for(int i=0;i<4;i++) {
+                int cellW=width/4,x=i*cellW;
+                g.drawString(font,new String[]{"BEHIND: drawn first","BEHIND: drawn last","WALL: drawn first","WALL: drawn last"}[i],x+12,60,0xCBF6FF,false);
+                g.flush();var poses=g.pose();poses.pushPose();poses.translate(x+cellW*.5,height*.55,150);
+                poses.scale(cellW*.36F,-cellW*.36F,cellW*.36F);
+                var buffers=minecraft.renderBuffers().bufferSource();
+                boolean wall=i>=2,first=i%2==0;
+                if(first)depthBlock(poses,buffers,wall);
+                WaterSolidModels.seal(poses,buffers,Vec3.ZERO,new Vec3(0,0,1),1,40,1);
+                buffers.endBatch();
+                if(!first)depthBlock(poses,buffers,wall);
+                poses.popPose();
+            }
+        }
+        private void depthBlock(com.mojang.blaze3d.vertex.PoseStack poses,
+                                net.minecraft.client.renderer.MultiBufferSource.BufferSource buffers,boolean wall) {
+            poses.pushPose();poses.translate(-1.1,-1.1,wall?.4:-.8);poses.scale(2.2F,2.2F,.2F);
+            minecraft.getBlockRenderer().renderSingleBlock(net.minecraft.world.level.block.Blocks.MAGENTA_CONCRETE.defaultBlockState(),
+                    poses,buffers,net.minecraft.client.renderer.LightTexture.FULL_BRIGHT,
+                    net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY);
+            buffers.endBatch();poses.popPose();
+        }
         @Override public void render(GuiGraphics g,int mx,int my,float partial) {
             g.fill(0,0,width,height,0xFF101B27);
+            if(page==2){sealDepth(g);return;}
             g.drawString(font,page==0?"WATER / SOLID RAIN MODELS / TIERS 1-5":"WATER / FORWARD SLASH / 20 DISTINCT ROLLS",24,18,0xB4F3FF,false);
             int count=page==0?8:20;
             for(int i=0;i<count;i++) {

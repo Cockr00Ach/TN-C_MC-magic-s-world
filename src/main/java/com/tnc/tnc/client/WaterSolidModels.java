@@ -38,7 +38,10 @@ public final class WaterSolidModels {
     static void draw(String name,PoseStack poses,MultiBufferSource buffers,float opacity) {
         var mc=Minecraft.getInstance();var model=mc.getModelManager().getModel(id(name));
         poses.pushPose();poses.translate(-.5,0,-.5);
-        boolean solidRelic=name.equals("sea_god_sword")||name.equals("raindrop");
+        // The seal is an open mesh: its blue/gold strokes need opaque depth writes.
+        // Additive-only strokes can be erased by an opaque boss rendered afterwards.
+        // Empty spaces stay transparent; emission below still supplies the glow.
+        boolean solidRelic=name.equals("seal")||name.equals("sea_god_sword")||name.equals("raindrop");
         var consumer=buffers.getBuffer(opacity<1?WaterModelRenderTypes.alpha():solidRelic?RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS):RenderType.eyes(TextureAtlas.LOCATION_BLOCKS));
         if(opacity<1)consumer=new Alpha(consumer,opacity);
         mc.getItemRenderer().renderModelLists(model,ItemStack.EMPTY,LightTexture.FULL_BRIGHT,
