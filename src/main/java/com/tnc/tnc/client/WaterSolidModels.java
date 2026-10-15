@@ -45,8 +45,8 @@ public final class WaterSolidModels {
                 OverlayTexture.NO_OVERLAY,poses,consumer);
         if(name.equals("sea_god_sword")||name.equals("seal")) {
             // Full light-map brightness alone does not create the additive glow.
-            var emission=new Alpha(buffers.getBuffer(RenderType.eyes(TextureAtlas.LOCATION_BLOCKS)),
-                    name.equals("sea_god_sword")?.45F*opacity:Math.max(.42F,opacity*.7F));
+            var emission=new Alpha(buffers.getBuffer(WaterModelRenderTypes.emission()),
+                    name.equals("sea_god_sword")?.85F:Math.max(.42F,opacity*.7F));
             mc.getItemRenderer().renderModelLists(model,ItemStack.EMPTY,LightTexture.FULL_BRIGHT,
                     OverlayTexture.NO_OVERLAY,poses,emission);
         }

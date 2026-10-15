@@ -32,6 +32,12 @@ public final class TNWaterFieldRenderer extends EntityRenderer<TNWaterFieldEntit
         var out=buffers.getBuffer(WaterRenderTypes.geometry());var pose=stack.last().pose();double radius=e.radius();Vec3 up=new Vec3(0,1,0);
         if(e.kind()==1) {
             Vec3 center=e.waveCenter(age).subtract(e.position());
+            if(e.tier()==4) {
+                boolean near=net.minecraft.client.Minecraft.getInstance().gameRenderer.getMainCamera().getPosition().distanceToSqr(e.waveCenter(age))<64*64;
+                TsunamiVisuals.render(stack,buffers,center,e.direction(),radius,8,age,fade,near);
+                WaterGeometry.richCircle(buffers,stack,new Vec3(0,.05,0),up,8,animation,fade*.9F,3);
+                return;
+            }
             if(e.tier()==1) {
                 // 第十批：地面三环原来每圈 96 段（384 顶点 ✗）⇒ 改成 48 段 ✓
                 for(int i=0;i<3;i++)WaterGeometry.ring(out,pose,new Vec3(0,.1+i*.12,0),up,Math.min(radius,age*.2+i*.3),.09,0,fade,48);
@@ -47,7 +53,10 @@ public final class TNWaterFieldRenderer extends EntityRenderer<TNWaterFieldEntit
             } else {
                 if(e.tier()==3)WaterWaveVisuals.crescent(out,pose,center,e.direction(),radius,age,fade,WaterSpellRules.slashRollRadians(e.roll(),age));
                 // t4 海啸：浪体与浪花水柱都加粗一倍 ✓（作者 2026-10-10"水柱可以加粗一倍"✗）；t2 水波保持 1 倍 ✓
-                else WaterWaveVisuals.rollingWave(out,pose,center,e.direction(),radius,e.tier()==4?8:2,age,fade,e.tier()==4?2.0:1.0);
+                else {
+                    double waveHeight=e.tier()==4?8:2,bulk=e.tier()==4?2.0:1.0;
+                    WaterWaveVisuals.rollingWave(out,pose,center,e.direction(),radius,waveHeight,age,fade,bulk);
+                }
             }
             // t4/t5 释放时在**脚下**铺一个自发光法阵 ✓（作者 2026-10-10："水波链释放 t4t5 脚下要生成魔法阵"✗）
             // 只用 3 个子阵 ✗：这两个阵要和大浪一起画，子阵给 6 个纯属白烧 GPU ✗
@@ -79,12 +88,12 @@ public final class TNWaterFieldRenderer extends EntityRenderer<TNWaterFieldEntit
                它已有空中大阵＋落剑，再加一圈半径 26 的水板墙会糊掉 ✓）。 */
             double h=e.height();
             int panels=WaterGeometry.panelCount(radius);
-            boolean solid=e.tier()<=4;
+            boolean solid=true;
             // 水板档的环要贴着板面走 ✗（panelWall 把板画在 radius*1.018 ✗），否则环会切进板里 ✗
             double ringR=solid?radius*1.018:radius;
             for(int i=0;i<3;i++)WaterGeometry.ringColor(out,pose,new Vec3(0,.12+h*i/2,0),up,ringR,.12,.01F,.28F,1,fade*.85F);
             if(solid) {
-                WaterSolidModels.prisonPanels(stack,buffers,radius,h,panels,age,fade*.78F);
+                // Textured panels are submitted after all colored geometry below.
             } else {
                 for(int i=0;i<8+e.tier()*2;i++) {
                     double a=i*Math.PI*2/(8+e.tier()*2)+age*.003;
@@ -94,6 +103,12 @@ public final class TNWaterFieldRenderer extends EntityRenderer<TNWaterFieldEntit
                 for(int i=0;i<2;i++)WaterGeometry.spiral(out,pose,Vec3.ZERO,up,radius*.97,h,-age*.022+i*Math.PI,.01F,.2F,.82F,fade*.65F);
             }
             WaterGeometry.ringColor(out,pose,new Vec3(0,.08,0),up,radius,.22,.42F,.12F,.95F,fade*.9F);
+            if(e.tier()==5) {
+                // Sea God's Crypt: restrained gold inlays around the dim panel cage.
+                for(int stripe=0;stripe<3;stripe++)
+                    WaterGeometry.ringColor(out,pose,new Vec3(0,h*(.24+stripe*.27),0),up,ringR,.11,
+                            .74F,.48F,.08F,fade*.58F);
+            }
             /* ---- 加色发光层（2026-10-10 第五批次 · 水缚链）----
                本批之前 kind==2 一条加色线都没有 ✗ ⇒ 水牢在夜里是"黑笼子"✗。
                只推亮三处标志物 ✓：三环的环边、立柱顶端（水板档改成板缝＋板顶 ✓）、底部主环 ✓；
@@ -107,12 +122,12 @@ public final class TNWaterFieldRenderer extends EntityRenderer<TNWaterFieldEntit
                 double span=Math.PI*2/panels;
                 // 半径必须和 panelWall 里的 radius+bow 一致 ✗（bow=radius*.018 ✗），否则亮缝会和板缝错开 ✗
                 double seamR=radius*1.018;
-                for(int p=0;p<panels;p++) {
+                for(int p=0;p<panels;p+=2) {
                     double a=p*span+age*.003;
                     Vec3 seam=new Vec3(Math.cos(a)*seamR,0,Math.sin(a)*seamR);
-                    WaterGeometry.tube(glow,gpose,seam.add(0,.12,0),seam.add(0,h,0),.055,.34F,.80F,1,fade*.42F*pulse);
+                    WaterGeometry.tube(glow,gpose,seam.add(0,.12,0),seam.add(0,h,0),.04,.18F,.45F,.62F,fade*.10F*pulse);
                 }
-                WaterGeometry.ringColor(glow,gpose,new Vec3(0,h,0),up,radius,.26,.45F,.90F,1,fade*.62F*pulse);
+                WaterGeometry.ringColor(glow,gpose,new Vec3(0,h,0),up,radius,.18,.22F,.48F,.68F,fade*.16F*pulse);
             } else {
                 for(int i=0;i<8+e.tier()*2;i+=2) {
                     double a=i*Math.PI*2/(8+e.tier()*2)+age*.003;
@@ -125,6 +140,7 @@ public final class TNWaterFieldRenderer extends EntityRenderer<TNWaterFieldEntit
         // 第十批：显式 3 个子阵 ✗ —— 半径 ≥6 的默认是 6 个 ✗，而水缚链 t5 冥穴半径 26 ✗
         //（每个子阵原来是一座完整 sigil ✗ ⇒ 光这一句就上万顶点 ✗）
         if(e.kind()==2)WaterGeometry.richCircle(buffers,stack,new Vec3(0,.06,0),up,radius,animation,fade*.65F,3);
+        if(e.kind()==2)WaterSolidModels.prisonPanels(stack,buffers,radius,e.height(),WaterGeometry.panelCount(radius),age,fade*.78F);
         if(e.kind()==2 && e.tier()==5)SeaGodSwordVisuals.render(age,animation,radius,fade,stack,buffers,e.swordCount(),e.skySealHeight());
     }
 }
