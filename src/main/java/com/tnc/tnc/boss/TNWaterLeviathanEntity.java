@@ -63,6 +63,15 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
     private static final EntityDataAccessor<Integer> DATA_PHASE =
             SynchedEntityData.defineId(TNWaterLeviathanEntity.class, EntityDataSerializers.INT);
 
+    private static final EntityDataAccessor<Integer> CAST_POSE =
+            SynchedEntityData.defineId(TNWaterLeviathanEntity.class, EntityDataSerializers.INT);
+    private java.util.UUID channel, channelTarget, returnTarget;
+    private Vec3 channelPosition;
+    private net.minecraft.world.entity.Entity channelEntity;
+    private float channelYaw;
+    private int returnTicks;
+    private float castTilt, previousCastTilt;
+
     private final ServerBossEvent bossEvent = new ServerBossEvent(this.getDisplayName(),
             BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.NOTCHED_10);
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
@@ -109,10 +118,14 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
         }
         super.tick();
         this.fallDistance = 0.0F;
+        if (this.level() instanceof ServerLevel server) tickChannel(server);
+        previousCastTilt = castTilt;
+        castTilt += net.minecraft.util.Mth.clamp((castPose()==3 ? 1F : 0F)-castTilt,-0.1F,0.1F);
     }
 
     @Override
     public void travel(Vec3 input) {
+        if (channel != null) { this.setDeltaMovement(Vec3.ZERO); return; }
         if (this.isEffectiveAi() && this.isAlive()) {
             this.moveRelative(this.isInWater() ? 0.035F : 0.045F, input);
             this.move(MoverType.SELF, this.getDeltaMovement());
@@ -138,6 +151,52 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(DATA_PHASE, PHASE_ONE);
+        this.entityData.define(CAST_POSE, 0);
+    }
+
+    public java.util.UUID channelId() { return channel; }
+    public int castPose() { return entityData.get(CAST_POSE); }
+    public boolean mouthOpen() { return castPose()==1 || castPose()==3; }
+    public float castTilt(float partial) { return net.minecraft.util.Mth.lerp(partial,previousCastTilt,castTilt); }
+
+    /** The spell owns this state: interruption, death and its natural end all release it. */
+    public void beginChannel(net.minecraft.world.entity.Entity spell, net.minecraft.world.entity.LivingEntity target,
+                             Vec3 station, float yaw) {
+        channel=spell.getUUID(); channelEntity=spell; channelTarget=target.getUUID(); channelPosition=station;
+        channelYaw=yaw;
+        entityData.set(CAST_POSE,spell instanceof com.tnc.tnc.magic.water.TNWaterFieldEntity ? 2 : 1);
+        navigation.stop(); setDeltaMovement(Vec3.ZERO);
+    }
+
+    private void tickChannel(ServerLevel server) {
+        if (channel==null) {
+            if (returnTicks>0 && --returnTicks>=0 && returnTarget!=null && server.getEntity(returnTarget) instanceof net.minecraft.world.entity.LivingEntity target
+                    && canStrike(target)) setTarget(target);
+            return;
+        }
+        // Newly added effects may still be queued until the entity tick loop ends.
+        var spell=channelEntity;
+        if (!isAlive() || spell==null || spell.isRemoved()) {
+            channel=null; channelEntity=null; channelPosition=null; entityData.set(CAST_POSE,0);
+            setXRot(0F);
+            returnTarget=channelTarget; returnTicks=600;
+            attackCooldown=LeviathanSpellRules.recovery(isPhaseTwo());
+            return;
+        }
+        navigation.stop(); setDeltaMovement(Vec3.ZERO);
+        setYRot(channelYaw); setYHeadRot(channelYaw); setYBodyRot(channelYaw);
+        if (castPose()==2) {
+            Vec3 delta=channelPosition.subtract(position());
+            double distance=delta.length();
+            if (distance<0.65D) {
+                setPos(channelPosition); entityData.set(CAST_POSE,3);
+            } else {
+                // Arrive before the sword appears, even from sea level. Collision remains physical.
+                move(MoverType.SELF,delta.scale(Math.min(2.2D,distance*0.2D)/distance));
+            }
+        } else setPos(channelPosition);
+        setXRot(castPose()==3 ? 90F : spell instanceof com.tnc.tnc.magic.water.TNWaterSpellEntity beam
+                ? (float)-Math.toDegrees(Math.asin(beam.direction().y)) : 0F);
     }
 
     public int phase() {
@@ -200,7 +259,7 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
 
     @Override
     public AABB getBoundingBoxForCulling() {
-        return super.getBoundingBoxForCulling().inflate(7.0D, 3.0D, 7.0D);
+        return super.getBoundingBoxForCulling().inflate(9.0D, 12.0D, 9.0D);
     }
 
     @Override
@@ -286,6 +345,7 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
 
     private void tickSpecialAttack(ServerLevel level) {
         if (this.specialCooldown>0) --this.specialCooldown;
+        if (channel!=null) return;
         var target=this.getTarget();
         if (this.pendingAction != ACTION_NONE) {
             if (--this.actionTicks <= 0) {
@@ -344,6 +404,8 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
         action.triggerableAnim("breath", RawAnimation.begin().thenPlay("breath"));
         action.triggerableAnim("tail", RawAnimation.begin().thenPlay("tail_sweep"));
         controllers.add(action);
+        controllers.add(new AnimationController<>(this,"mouth",4,state ->
+                state.setAndContinue(RawAnimation.begin().thenLoop(mouthOpen() ? "mouth_open" : "mouth_closed"))));
     }
 
     @Override
@@ -377,6 +439,7 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
         @Override public void stop() { navigation.stop(); }
 
         @Override public void tick() {
+            if (channel!=null) { navigation.stop(); return; }
             var target = getTarget();
             boolean chasing = target != null && target.isAlive() && canStrike(target);
             if (chasing) {

@@ -16,7 +16,7 @@ public final class TNWaterSpellRenderer extends EntityRenderer<TNWaterSpellEntit
                     .inflate(WaterSpellRules.circleRadius(e.tier())*1.3));}
     @Override public void render(TNWaterSpellEntity e,float yaw,float partial,PoseStack stack,MultiBufferSource buffers,int light) {
         double age=e.age()+partial,charge=WaterSpellRules.charge(e.tier());
-        float fade=e.firedAt()<0?1:(float)Math.min(1,(e.firedAt()+WaterSpellRules.duration(e.tier())-age)/10);
+        float fade=e.firedAt()<0?1:(float)Math.min(1,(e.firedAt()+e.duration()-age)/10);
         if(fade<=0)return;
         Vec3 dir=e.direction();
         double animation=e.visualAge(partial);

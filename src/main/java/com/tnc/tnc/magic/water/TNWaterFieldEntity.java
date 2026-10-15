@@ -30,6 +30,14 @@ public final class TNWaterFieldEntity extends Entity {
     private static final EntityDataAccessor<Boolean> EMITTER=SynchedEntityData.defineId(TNWaterFieldEntity.class,EntityDataSerializers.BOOLEAN);
     /** 刃面滚转（度）✓：让一批斩击不再是清一色竖着的 C ✗。只影响表现 ✗，判定与它无关 ✓。 */
     private static final EntityDataAccessor<Float> ROLL=SynchedEntityData.defineId(TNWaterFieldEntity.class,EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Boolean> BOSS_CAST=SynchedEntityData.defineId(TNWaterFieldEntity.class,EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Float> SKY_HEIGHT=SynchedEntityData.defineId(TNWaterFieldEntity.class,EntityDataSerializers.FLOAT);
+    public boolean bossCrypt(){return entityData.get(BOSS_CAST) && kind()==2 && tier()==5;}
+    public int swordCount(){return bossCrypt()?1:SeaGodSwordRules.COUNT;}
+    public float skySealHeight(){return entityData.get(SKY_HEIGHT);}
+    public Vec3 skySealCenter(){return position().add(0,skySealHeight(),0);}
+    public int swordImpactIndex(int age){int index=SeaGodSwordRules.impactIndex(age);return index>=swordCount()?-1:index;}
+    private boolean swordCue(int age,int first){return bossCrypt()?age==first:SeaGodSwordRules.cue(age,first);}
     private UUID owner,anchor;
     private int lastSwordImpact=-1;
     private boolean seaWeatherStarted;
@@ -40,7 +48,7 @@ public final class TNWaterFieldEntity extends Entity {
     public double radius(){return WaterSpellRules.fieldRadius(kind(),tier());}
     public boolean isEmitter(){return entityData.get(EMITTER);}
     public float roll(){return entityData.get(ROLL);}
-    public int life(){return isEmitter()?WaterSpellRules.SLASH_CHANNEL_TICKS:WaterSpellRules.fieldLife(kind(),tier());}
+    public int life(){return bossCrypt()?200:isEmitter()?WaterSpellRules.SLASH_CHANNEL_TICKS:WaterSpellRules.fieldLife(kind(),tier());}
     public double height(){return WaterSpellRules.fieldHeight(kind(),tier());}
     public Vec3 waveCenter(double age){return kind()==1 && tier()>1 && tier()<5?position().add(direction().scale(age*(tier()==3?1.35:tier()==4?.5:.8))):position();}
     public static boolean cast(ServerPlayer player,ResourceLocation spell) {
@@ -120,11 +128,16 @@ public final class TNWaterFieldEntity extends Entity {
         var field = TNOrbEntities.WATER_FIELD.get().create(level);
         if (field==null) return false;
         field.owner=caster.getUUID(); field.setPos(at);
+        field.entityData.set(BOSS_CAST,true);
+        field.entityData.set(SKY_HEIGHT,(float)Math.max(8,Math.min(116,level.getMaxBuildHeight()-at.y-24)));
         field.entityData.set(KIND, crypt ? 2 : 1);
         field.entityData.set(TIER, crypt ? 5 : 4);
         field.entityData.set(YAW, (float)Math.toDegrees(Math.atan2(-direction.x, direction.z)));
         field.entityData.set(PITCH, 0.0F);
         boolean added = level.addFreshEntity(field);
+        if (added && crypt) caster.beginChannel(field,target,
+                field.skySealCenter().add(0,6.5D,0).subtract(direction.scale(1.7D)),
+                field.entityData.get(YAW));
         if (added && !crypt) WaterFx.waveCast(level, at, direction, 4);
         level.playSound(null, BlockPos.containing(at), crypt ? SoundEvents.CONDUIT_ACTIVATE
                 : SoundEvents.PLAYER_SPLASH, SoundSource.HOSTILE, crypt ? 3 : 1.5F, 0.55F);
@@ -142,7 +155,7 @@ public final class TNWaterFieldEntity extends Entity {
         }
         return closest;
     }
-    @Override protected void defineSynchedData(){entityData.define(KIND,1);entityData.define(TIER,1);entityData.define(AGE,0);entityData.define(YAW,0F);entityData.define(PITCH,0F);entityData.define(EMITTER,false);entityData.define(ROLL,0F);}
+    @Override protected void defineSynchedData(){entityData.define(BOSS_CAST,false);entityData.define(SKY_HEIGHT,116F);entityData.define(KIND,1);entityData.define(TIER,1);entityData.define(AGE,0);entityData.define(YAW,0F);entityData.define(PITCH,0F);entityData.define(EMITTER,false);entityData.define(ROLL,0F);}
     @Override public void tick() {
         super.tick();
         if(level().isClientSide) { clientRain(); return; }
@@ -162,12 +175,12 @@ public final class TNWaterFieldEntity extends Entity {
             if(tickCount>=life())discard();
             return;
         }
-        if(kind()==2 && tier()==5 && SeaGodSwordRules.cue(tickCount,SeaGodSwordRules.APPEAR_TICK)) {
+        if(kind()==2 && tier()==5 && swordCue(tickCount,SeaGodSwordRules.APPEAR_TICK)) {
             level.playSound(null,blockPosition(),SoundEvents.CONDUIT_ACTIVATE,SoundSource.PLAYERS,2,.45F);
             // 剑在 64 格高处出现那一下 ✓（客户端同期画剑 ✗）
             WaterFx.cryptCue(level,position(),radius(),false);
         }
-        if(kind()==2 && tier()==5 && SeaGodSwordRules.cue(tickCount,SeaGodSwordRules.DROP_TICK)) {
+        if(kind()==2 && tier()==5 && swordCue(tickCount,SeaGodSwordRules.DROP_TICK)) {
             level.playSound(null,blockPosition(),SoundEvents.TRIDENT_RIPTIDE_3,SoundSource.PLAYERS,2,.6F);
             WaterFx.cryptCue(level,position(),radius(),true);
         }
@@ -179,6 +192,7 @@ public final class TNWaterFieldEntity extends Entity {
         else if(kind()==2)WaterFx.bindFx(level,position(),radius(),height(),tier(),tickCount);
         affect(level,player);
         finishSea(level);
+        if(bossCrypt() && tickCount>=life()) discard();
     }
     /**
      * 水纹链粒子（纯表现 ✗，不改伤害/时长/判定 ✗）。
@@ -254,7 +268,7 @@ public final class TNWaterFieldEntity extends Entity {
     /** One burst per scheduled sword, never once per animation frame. */
     void seaGodSwordImpact(ServerLevel level,ServerPlayer player) { seaGodSwordImpact(level,(LivingEntity)player); }
     void seaGodSwordImpact(ServerLevel level,LivingEntity player) {
-        int index=SeaGodSwordRules.impactIndex(tickCount);
+        int index=swordImpactIndex(tickCount);
         if(isRemoved() || kind()!=2 || tier()!=5 || index<0 || index<=lastSwordImpact)return;
         lastSwordImpact=index;
         Vec3 center=position();double r=radius();

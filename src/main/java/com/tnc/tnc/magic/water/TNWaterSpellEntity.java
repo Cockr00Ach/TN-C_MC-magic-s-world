@@ -25,6 +25,7 @@ public final class TNWaterSpellEntity extends Entity {
     private static final EntityDataAccessor<Float> PITCH=SynchedEntityData.defineId(TNWaterSpellEntity.class,EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Boolean> BLOCKED=SynchedEntityData.defineId(TNWaterSpellEntity.class,EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> FIRED_AT=SynchedEntityData.defineId(TNWaterSpellEntity.class,EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> BOSS_CAST=SynchedEntityData.defineId(TNWaterSpellEntity.class,EntityDataSerializers.BOOLEAN);
     private UUID owner;
     private Vec3 barrageAim;
     private WaterTerrainBore bore;
@@ -76,26 +77,29 @@ public final class TNWaterSpellEntity extends Entity {
         if (cast==null) return false;
         Vec3 forward=target.getBoundingBox().getCenter().subtract(caster.getEyePosition()).normalize();
         Vec3 at=caster.getEyePosition().add(forward.scale(6.5D));
-        if (tier==5) at=at.add(0,WaterSpellRules.circleRadius(5),0);
         Vec3 direction=target.getBoundingBox().getCenter().subtract(at).normalize();
+        cast.entityData.set(BOSS_CAST,true);
         cast.owner=caster.getUUID(); cast.barrageAim=target.getBoundingBox().getCenter();
         cast.setPos(at); cast.entityData.set(TIER,tier);
         cast.entityData.set(YAW,(float)Math.toDegrees(Math.atan2(-direction.x,direction.z)));
         cast.entityData.set(PITCH,(float)-Math.toDegrees(Math.asin(direction.y)));
-        return level.addFreshEntity(cast);
+        boolean added=level.addFreshEntity(cast);
+        if (added) caster.beginChannel(cast,target,caster.position(),cast.entityData.get(YAW));
+        return added;
     }
 
     static void bolt(LivingEntity player,int tier,Vec3 at,Vec3 velocity) {
         var bolt=TNOrbEntities.WATER_BOLT.get().create(player.level());
         if(bolt!=null) { bolt.configure(player,tier,at,velocity);player.level().addFreshEntity(bolt); }
     }
+    public int duration(){return entityData.get(BOSS_CAST) && tier()==5 ? 200 : WaterSpellRules.duration(tier());}
     public int tier(){return entityData.get(TIER);}
     public int age(){return entityData.get(AGE);}
     public int firedAt(){return entityData.get(FIRED_AT);}
     public float length(){return entityData.get(LENGTH);}
     public boolean blocked(){return entityData.get(BLOCKED);}
     public Vec3 direction(){return Vec3.directionFromRotation(entityData.get(PITCH),entityData.get(YAW));}
-    @Override protected void defineSynchedData(){entityData.define(FIRED_AT,-1);entityData.define(TIER,3);entityData.define(AGE,0);entityData.define(LENGTH,0F);entityData.define(YAW,0F);entityData.define(PITCH,0F);entityData.define(BLOCKED,false);}
+    @Override protected void defineSynchedData(){entityData.define(BOSS_CAST,false);entityData.define(FIRED_AT,-1);entityData.define(TIER,3);entityData.define(AGE,0);entityData.define(LENGTH,0F);entityData.define(YAW,0F);entityData.define(PITCH,0F);entityData.define(BLOCKED,false);}
     @Override public void tick() {
         super.tick(); if(level().isClientSide)return;
         ServerLevel level=(ServerLevel)level();
@@ -127,7 +131,7 @@ public final class TNWaterSpellEntity extends Entity {
             WaterFx.aperture(level,position(),dir,WaterSpellRules.circleRadius(tier()));
         }
         int active=tickCount-fireTick;
-        if(active>=WaterSpellRules.duration(tier())) { discard();return; }
+        if(active>=duration()) { discard();return; }
         if(tier()==3) {
             if(active%4==0) {
                 Vec3 right=WaterSpellRules.right(dir),up=right.cross(dir).normalize();

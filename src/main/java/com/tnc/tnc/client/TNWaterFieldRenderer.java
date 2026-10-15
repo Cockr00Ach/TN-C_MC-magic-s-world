@@ -125,6 +125,6 @@ public final class TNWaterFieldRenderer extends EntityRenderer<TNWaterFieldEntit
         // 第十批：显式 3 个子阵 ✗ —— 半径 ≥6 的默认是 6 个 ✗，而水缚链 t5 冥穴半径 26 ✗
         //（每个子阵原来是一座完整 sigil ✗ ⇒ 光这一句就上万顶点 ✗）
         if(e.kind()==2)WaterGeometry.richCircle(buffers,stack,new Vec3(0,.06,0),up,radius,animation,fade*.65F,3);
-        if(e.kind()==2 && e.tier()==5)SeaGodSwordVisuals.render(age,animation,radius,fade,stack,buffers);
+        if(e.kind()==2 && e.tier()==5)SeaGodSwordVisuals.render(age,animation,radius,fade,stack,buffers,e.swordCount(),e.skySealHeight());
     }
 }

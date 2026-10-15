@@ -73,14 +73,84 @@ public final class LeviathanSpellGameTests {
         });
     }
 
+    private static void clearAscentCorridor(GameTestHelper h) {
+        // The 48-high fixture starts underground. Clear the entire ascent corridor into open sky.
+        for (BlockPos p : BlockPos.betweenClosed(h.absolutePos(new BlockPos(16,2,4)),
+                h.absolutePos(new BlockPos(24,145,34))))
+            if (!h.getLevel().getBlockState(p).isAir()) h.getLevel().setBlock(p,Blocks.AIR.defaultBlockState(),2);
+    }
+
     @GameTest(template="leviathan_empty",timeoutTicks=185)
     public static void cryptKeepsItsRealSwordTimelineWithAMobCaster(GameTestHelper h) {
+        clearAscentCorridor(h);
         var boss=boss(h); var enemy=target(h); float hp=boss.getHealth();
         h.assertTrue(LeviathanSpells.cast(boss,enemy,"sea_god_crypt"),"T5 crypt created");
         h.runAtTickTime(155,()->{
             h.assertTrue(enemy.getHealth()<=1000-SeaGodSwordRules.DAMAGE,
                     "Boss crypt must survive until the real descending sword strikes");
             h.assertTrue(boss.getHealth()==hp,"Caster inside its own crypt is immune");
+            boss.discard(); enemy.discard(); h.succeed();
+        });
+    }
+    @GameTest(template="leviathan_empty",timeoutTicks=245)
+    public static void beamHoldsMouthAndPositionUntilTenSecondsOfFiringEnd(GameTestHelper h) {
+        var boss=boss(h); var enemy=target(h); var at=boss.position();
+        h.assertTrue(LeviathanSpells.cast(boss,enemy,"dragon_ruin"),"T5 created");
+        final TNWaterSpellEntity[] beamRef={null};
+        h.runAtTickTime(2,()->{
+            beamRef[0]=(TNWaterSpellEntity)h.getLevel().getEntity(boss.channelId());
+            h.assertTrue(beamRef[0]!=null && beamRef[0].duration()==200,"Boss beam lasts 200 active ticks");
+        });
+        h.assertTrue(WaterSpellRules.duration(5)==240,"Player beam duration is preserved");
+        h.runAtTickTime(90,()->{
+            boss.setDeltaMovement(1,1,1);
+            h.assertTrue(boss.mouthOpen(),"Mouth must remain open after the old breath animation ends");
+        });
+        h.runAtTickTime(210,()->{
+            h.assertTrue(!beamRef[0].isRemoved() && boss.mouthOpen(),"Still channeling near the end");
+            h.assertTrue(boss.position().distanceToSqr(at)<0.001,"Channel anchors the boss against drift");
+        });
+        h.runAtTickTime(230,()->{
+            h.assertTrue(beamRef[0].isRemoved() && !boss.mouthOpen(),"Mouth closes when the real beam ends");
+            boss.discard(); enemy.discard(); h.succeed();
+        });
+    }
+
+    @GameTest(template="leviathan_empty",timeoutTicks=225)
+    public static void cryptAscendsToSealFacesDownAndEndsAfterOneSword(GameTestHelper h) {
+        clearAscentCorridor(h);
+        var boss=boss(h); var enemy=target(h);
+        h.assertTrue(LeviathanSpells.cast(boss,enemy,"sea_god_crypt"),"Crypt created");
+        final TNWaterFieldEntity[] fieldRef={null};
+        h.runAtTickTime(2,()->{
+            var field=(TNWaterFieldEntity)h.getLevel().getEntity(boss.channelId()); fieldRef[0]=field;
+            h.assertTrue(field!=null && field.life()==200 && field.swordCount()==1,"Boss crypt is ten seconds and one sword");
+            h.assertTrue(field.swordImpactIndex(140)==0 && field.swordImpactIndex(200)==-1,"Only the first impact is scheduled");
+        });
+        h.runAtTickTime(95,()->{
+            h.assertTrue(boss.castPose()==3 && boss.mouthOpen(),"Arrives before the sword appears and opens its mouth; pose="+boss.castPose()+" boss="+boss.position()+" station="+fieldRef[0].skySealCenter()+" removed="+fieldRef[0].isRemoved()+" age="+fieldRef[0].age());
+            h.assertTrue(boss.position().distanceTo(fieldRef[0].skySealCenter())<8,"Boss is stationed at the actual sky seal");
+            h.assertTrue(boss.getLookAngle().dot(new net.minecraft.world.phys.Vec3(0,-1,0))>0.99,
+                    "Boss faces the same downward direction as the falling sword");
+        });
+        h.runAtTickTime(195,()->h.assertTrue(boss.mouthOpen() && !fieldRef[0].isRemoved(),"Holds the pose until the crypt ends"));
+        h.runAtTickTime(210,()->{
+            h.assertTrue(fieldRef[0].isRemoved() && !boss.mouthOpen(),"Crypt and mouth end together");
+            boss.discard(); enemy.discard(); h.succeed();
+        });
+    }
+
+    @GameTest(template="leviathan_empty",timeoutTicks=45)
+    public static void barrageInterruptionReleasesTheMouthPose(GameTestHelper h) {
+        var boss=boss(h); var enemy=target(h); var at=boss.position();
+        h.assertTrue(LeviathanSpells.cast(boss,enemy,"dragon_roar"),"T3 created");
+        var spellId=boss.channelId();
+        h.runAtTickTime(20,()->{
+            h.assertTrue(boss.mouthOpen() && boss.position().distanceToSqr(at)<0.001,"T3 holds its mouth and body");
+            h.getLevel().getEntity(spellId).discard();
+        });
+        h.runAtTickTime(25,()->{
+            h.assertTrue(!boss.mouthOpen(),"Interrupted spells must release the pose");
             boss.discard(); enemy.discard(); h.succeed();
         });
     }

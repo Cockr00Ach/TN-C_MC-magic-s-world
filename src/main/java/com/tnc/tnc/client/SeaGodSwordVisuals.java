@@ -12,18 +12,21 @@ final class SeaGodSwordVisuals {
     private static final Vec3 UP=new Vec3(0,1,0);
     private SeaGodSwordVisuals() {}
     static void render(double age,double animation,double radius,float fieldFade,PoseStack stack,MultiBufferSource buffers) {
+        render(age,animation,radius,fieldFade,stack,buffers,SeaGodSwordRules.COUNT,116);
+    }
+    static void render(double age,double animation,double radius,float fieldFade,PoseStack stack,MultiBufferSource buffers,int count,double sealHeight) {
         float sealFade=0;
-        for(int strike=0;strike<SeaGodSwordRules.COUNT;strike++) {
+        for(int strike=0;strike<count;strike++) {
             double phase=age-strike*SeaGodSwordRules.INTERVAL;
             if(SeaGodSwordRules.visible(phase))sealFade=Math.max(sealFade,fieldFade*SeaGodSwordRules.opacity(phase));
         }
         // Consecutive swords share the same two stationary sky seals.
         if(sealFade>0) {
-            WaterGeometry.richCircle(buffers,stack,new Vec3(0,116,0),UP,36,animation,sealFade,3);
-            WaterGeometry.richCircle(buffers,stack,new Vec3(0,112,0),UP,24,-animation,sealFade*.85F,3);
+            WaterGeometry.richCircle(buffers,stack,new Vec3(0,sealHeight,0),UP,36,animation,sealFade,3);
+            WaterGeometry.richCircle(buffers,stack,new Vec3(0,sealHeight-4,0),UP,24,-animation,sealFade*.85F,3);
         }
         // Finite barrage: at most two visible swords, sharing the same server schedule.
-        for(int strike=0;strike<SeaGodSwordRules.COUNT;strike++) {
+        for(int strike=0;strike<count;strike++) {
             double phase=age-strike*SeaGodSwordRules.INTERVAL;
             if(SeaGodSwordRules.visible(phase))renderSword(phase,radius,fieldFade,stack,buffers);
         }

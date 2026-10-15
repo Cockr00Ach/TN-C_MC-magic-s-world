@@ -666,6 +666,44 @@
           }
         }
       }
+    },
+    "mouth_open": {
+      "loop": true,
+      "animation_length": 2,
+      "bones": {
+        "jaw": {
+          "rotation": {
+            "0.0": [
+              32,
+              0,
+              0
+            ],
+            "1.0": [
+              34,
+              0,
+              0
+            ],
+            "2.0": [
+              32,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "mouth_closed": {
+      "loop": true,
+      "animation_length": 1,
+      "bones": {
+        "jaw": {
+          "rotation": [
+            0,
+            0,
+            0
+          ]
+        }
+      }
     }
   }
 }

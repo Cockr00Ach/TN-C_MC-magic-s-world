@@ -263,6 +263,11 @@ animations = {
 }
 
 # A separate slow fin-and-tail cycle makes hovering read as flight rather than walking.
+animations["animations"]["mouth_open"] = {
+    "loop": True, "animation_length": 2,
+    "bones": {"jaw": {"rotation": {"0.0": [32,0,0], "1.0": [34,0,0], "2.0": [32,0,0]}}}}
+animations["animations"]["mouth_closed"] = {
+    "loop": True, "animation_length": 1, "bones": {"jaw": {"rotation": [0,0,0]}}}
 animations["animations"]["glide"] = {
     "loop": True, "animation_length": 2.8, "bones": {
         "body": {"position": {"0": [0, 0, 0], "1.4": [0, 0.7, 0], "2.8": [0, 0, 0]}},
