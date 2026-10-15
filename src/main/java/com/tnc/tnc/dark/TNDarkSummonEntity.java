@@ -157,7 +157,22 @@ public class TNDarkSummonEntity extends Monster implements GeoEntity {
     }
 
     public void setScale(double scale) {
-        this.entityData.set(DATA_SCALE, (int) Math.round(Mth.clamp(scale, 0.1D, 8.0D) * 100.0D));
+        this.entityData.set(DATA_SCALE, (int) Math.round(Mth.clamp(scale, 0.1D, 16.0D) * 100.0D));
+    }
+
+    @Override
+    public net.minecraft.world.entity.EntityDimensions getDimensions(net.minecraft.world.entity.Pose pose){
+        return getType().getDimensions().scale((float)scale());
+    }
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> key){
+        super.onSyncedDataUpdated(key);
+        if(DATA_SCALE.equals(key))refreshDimensions();
+    }
+
+    @Override
+    public net.minecraft.world.phys.AABB getBoundingBoxForCulling(){
+        return super.getBoundingBoxForCulling().inflate(Math.max(0,scale()-1)*3);
     }
 
     public void setOwner(UUID owner) {

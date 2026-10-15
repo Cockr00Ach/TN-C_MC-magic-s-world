@@ -65,18 +65,19 @@ final class TNDarkGiantCasting {
         // Refresh rather than accumulating damaging domains on every cast.
         level.getEntitiesOfClass(DarkFogCloudEntity.class,caster.getBoundingBox().inflate(32),f->f.isOwnedBy(caster))
                 .forEach(net.minecraft.world.entity.Entity::discard);
-        var cloud=TNOrbEntities.FOG.get().create(level);if(cloud==null)return false;
+        var cloud=new TNDarkGiantFog(TNOrbEntities.FOG.get(),level);
+        cloud.prepare(spell);
         var original=SpellPower.getSpellPower(spell.school,caster);
         var power=new SpellPower.Result(spell.school,Math.max(10,original.baseValue()),original.criticalChance(),original.criticalDamage());
         cloud.setOwner(caster);cloud.setPos(caster.position());
-        cloud.onCreatedFromSpell(id,spell.release.target.cloud,new SpellHelper.ImpactContext().position(caster.position()).power(power));
+        cloud.onCreatedFromSpell(id,cloud.getSpell().release.target.cloud,new SpellHelper.ImpactContext().position(caster.position()).power(power));
         level.addFreshEntity(cloud);return true;
     }
     private static boolean summon(ServerLevel level,LivingEntity caster,LivingEntity target,int tier){
         var mine=level.getEntitiesOfClass(TNDarkSummonEntity.class,caster.getBoundingBox().inflate(128),e->caster.getUUID().equals(e.owner()));
         mine.sort(Comparator.comparingInt(net.minecraft.world.entity.Entity::getId));
         for(int i=0;i<Math.max(0,mine.size()+3-6);i++)mine.get(i).discard();
-        double radius=caster.getBbWidth()+4;
+        double radius=caster.getBbWidth()+14;
         int spawned=0;
         for(int i=0;i<3;i++){
             var type=i==0?(tier==5?TNOrbEntities.EVIL_GOD.get():TNOrbEntities.DARK_KING.get())
@@ -86,7 +87,7 @@ final class TNDarkGiantCasting {
             double x=caster.getX()+Math.cos(angle)*radius,z=caster.getZ()+Math.sin(angle)*radius;
             var pos=net.minecraft.core.BlockPos.containing(x,caster.getY()+3,z);
             for(int drop=0;drop<12&&level.isEmptyBlock(pos.below());drop++)pos=pos.below();
-            summon.setOwner(caster.getUUID());summon.setScale(1);summon.setLifetime((tier==5?70:50)*20);
+            summon.setOwner(caster.getUUID());summon.setScale(10);summon.setLifetime((tier==5?70:50)*20);
             summon.moveTo(x,pos.getY(),z,caster.getYRot(),0);summon.setTarget(target);
             level.addFreshEntity(summon);spawned++;
         }
