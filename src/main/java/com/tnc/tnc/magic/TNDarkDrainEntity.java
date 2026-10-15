@@ -207,7 +207,7 @@ public class TNDarkDrainEntity extends Entity implements SpellSpawnedEntity {
 
         LivingEntity victim = resolve(victimId);
         LivingEntity caster = resolve(casterId);
-        if (victim == null || caster == null || victim.distanceToSqr(caster)>Math.pow(DarkSiphonRules.range(tier),2)
+        if (victim == null || caster == null || victim.distanceToSqr(caster)>Math.pow(DarkSiphonRules.range(tier)+Math.max(0,caster.getBbWidth()*.5-1),2)
                 ||!caster.hasLineOfSight(victim)) {
             // 抽干了 / 目标没了 ⇒ 收工（但把这一口已经抽到的账报完 ✓）
             finish();

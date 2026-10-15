@@ -15,10 +15,17 @@ import software.bernie.geckolib.renderer.GeoEntityRenderer;
 public class TNDarkGiantRenderer extends GeoEntityRenderer<TNDarkGiantEntity> {
     public TNDarkGiantRenderer(EntityRendererProvider.Context context) {
         super(context, new TNDarkGiantGeoModel());
-        this.shadowRadius = 1.6F;
+        this.shadowRadius = 12F;
         this.addRenderLayer(new TNDarkGiantEmissiveLayer(this));
         // ★ 二阶段的背后虚影 ✓（作者 2026-10-03）；一阶段这一层什么都不画 ✓
         this.addRenderLayer(new TNDarkGiantPhantomLayer(this));
+    }
+
+    @Override
+    public void render(TNDarkGiantEntity entity,float yaw,float partial,PoseStack pose,
+                       net.minecraft.client.renderer.MultiBufferSource buffers,int light){
+        super.render(entity,yaw,partial,pose,buffers,light);
+        TNDarkGiantMist.render(entity,partial,pose,buffers,light,this.entityRenderDispatcher);
     }
 
     @Override
