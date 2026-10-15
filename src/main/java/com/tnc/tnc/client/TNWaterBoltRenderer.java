@@ -11,9 +11,11 @@ import org.joml.Matrix4f;
 
 public final class TNWaterBoltRenderer extends EntityRenderer<TNWaterBoltEntity> {
     public TNWaterBoltRenderer(EntityRendererProvider.Context ctx){super(ctx);shadowRadius=0;}
-    @Override public boolean shouldRender(TNWaterBoltEntity e,net.minecraft.client.renderer.culling.Frustum f,double x,double y,double z){return e.distanceToSqr(x,y,z)<128*128 && f.isVisible(e.getBoundingBox().inflate(4));}
+    @Override public boolean shouldRender(TNWaterBoltEntity e,net.minecraft.client.renderer.culling.Frustum f,double x,double y,double z){return e.distanceToSqr(x,y,z)<128*128 && f.isVisible(e.getBoundingBox().inflate(4*e.spellScale()));}
     @Override public ResourceLocation getTextureLocation(TNWaterBoltEntity e){return ResourceLocation.fromNamespaceAndPath("minecraft","textures/block/water_still.png");}
     @Override public void render(TNWaterBoltEntity e,float yaw,float partial,PoseStack stack,MultiBufferSource buffers,int light) {
+        stack.pushPose();
+        stack.scale(e.spellScale(),e.spellScale(),e.spellScale());
         var out=buffers.getBuffer(WaterRenderTypes.geometry());var pose=stack.last().pose();
         Vec3 dir=e.getDeltaMovement().normalize();if(dir.lengthSqr()<.5)dir=new Vec3(0,0,1);
         Vec3 right=WaterSpellRules.right(dir),up=right.cross(dir).normalize();double radius=WaterSpellRules.boltRadius(e.tier());
@@ -42,6 +44,7 @@ public final class TNWaterBoltRenderer extends EntityRenderer<TNWaterBoltEntity>
         WaterGeometry.disk(glow,gpose,Vec3.ZERO,dir,radius*1.02,.45F,.90F,1,.34F*pulse,24);
         WaterGeometry.tube(glow,gpose,Vec3.ZERO,dir.scale(-tail*.85),radius*.30,.72F,1,1,.30F*pulse);
         if(e.tier()==2)WaterGeometry.ringColor(glow,gpose,dir.scale(-.5),dir,radius*1.2,.06,.60F,1,1,.40F*pulse);
+        stack.popPose();
     }
     /** 水球本体：一张经线×纬线的封闭球面 ✓（原来是内联在 render 里的一大段 ✗）。 */
     private static void sphere(VertexConsumer out,Matrix4f pose,Vec3 dir,Vec3 right,Vec3 up,double radius,float r,float g,float b,float alpha) {

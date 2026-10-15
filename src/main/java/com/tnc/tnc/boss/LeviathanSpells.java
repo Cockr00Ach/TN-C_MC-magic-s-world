@@ -11,8 +11,8 @@ public final class LeviathanSpells {
     public static boolean cast(TNWaterLeviathanEntity boss, LivingEntity target, String spell) {
         if (target==null || !boss.isAlive() || !target.isAlive()) return false;
         return switch(spell) {
-            case "tsunami", "sea_god_crypt" -> TNWaterFieldEntity.castBoss(boss,target,spell);
-            case "dragon_roar", "dragon_ruin" -> TNWaterSpellEntity.castBoss(boss,target,spell);
+            case "sea_god_crypt" -> TNWaterFieldEntity.castBoss(boss,target,spell);
+            case "leviathan_water_orb", "dragon_roar", "dragon_ruin" -> TNWaterSpellEntity.castBoss(boss,target,spell);
             default -> false;
         };
     }

@@ -282,6 +282,10 @@ for side in (-1, 1):
             "rotation": {"0": [0, 0, side*amplitude], "1.4": [0, 0, -side*amplitude],
                          "2.8": [0, 0, side*amplitude]}}
 
+# Smooth, phase-delayed tail propagation and a wide, sustained jaw pose.
+from leviathan_animation_curves import refine_animations
+refine_animations(animations)
+
 for path in (GEO, ANIM, TEX, GLOW, PREVIEW):
     path.parent.mkdir(parents=True, exist_ok=True)
 with GEO.open("w", encoding="utf-8", newline="\n") as handle:

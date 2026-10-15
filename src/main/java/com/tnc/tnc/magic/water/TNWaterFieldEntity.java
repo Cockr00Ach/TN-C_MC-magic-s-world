@@ -129,7 +129,8 @@ public final class TNWaterFieldEntity extends Entity {
         if (field==null) return false;
         field.owner=caster.getUUID(); field.setPos(at);
         field.entityData.set(BOSS_CAST,true);
-        field.entityData.set(SKY_HEIGHT,(float)Math.max(8,Math.min(116,level.getMaxBuildHeight()-at.y-caster.MOUTH_FORWARD-caster.APERTURE_GAP-24*caster.SIZE_SCALE)));
+        // Sword and sky seals keep their authored world layout, independent of the caster's size.
+        field.entityData.set(SKY_HEIGHT,116F);
         field.entityData.set(KIND, crypt ? 2 : 1);
         field.entityData.set(TIER, crypt ? 5 : 4);
         field.entityData.set(YAW, (float)Math.toDegrees(Math.atan2(-direction.x, direction.z)));

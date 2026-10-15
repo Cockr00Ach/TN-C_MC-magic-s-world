@@ -68,14 +68,16 @@ public final class TNWaterSpellEntity extends Entity {
     }
     public static boolean castBoss(com.tnc.tnc.boss.TNWaterLeviathanEntity caster,
                                    LivingEntity target, String spell) {
-        int tier=WaterSpellRules.tier(spell);
+        boolean basic=com.tnc.tnc.boss.LeviathanSpellRules.BASIC.equals(spell);
+        int tier=basic?1:WaterSpellRules.tier(spell);
         if (!(caster.level() instanceof ServerLevel level) || !caster.isAlive()
-                || (tier!=3 && tier!=5) || !WaterSpellRules.enemy(caster,target)) return false;
-        for (var old : level.getEntitiesOfClass(TNWaterSpellEntity.class,caster.getBoundingBox().inflate(128)))
+                || (tier!=3 && tier!=5 && !basic) || !WaterSpellRules.enemy(caster,target)) return false;
+        if (!basic) for (var old : level.getEntitiesOfClass(TNWaterSpellEntity.class,caster.getBoundingBox().inflate(128)))
             if (caster.getUUID().equals(old.owner)) old.discard();
         var cast=TNOrbEntities.WATER_SPELL.get().create(level);
         if (cast==null) return false;
-        Vec3 aim=target.getBoundingBox().getCenter().subtract(caster.position());
+        Vec3 targetAim=target.getBoundingBox().getCenter().add(0,basic?WaterSpellRules.boltRadius(1)*20*.75:0,0);
+        Vec3 aim=targetAim.subtract(caster.position());
         float yaw=(float)Math.toDegrees(Math.atan2(-aim.x,aim.z));
         // Account for the mouth's height in the rotated model so the beam still meets its target.
         double length=Math.max(caster.MOUTH_HEIGHT+0.01D,aim.length());
@@ -83,6 +85,14 @@ public final class TNWaterSpellEntity extends Entity {
         float pitch=(float)-Math.toDegrees(elevation);
         Vec3 direction=Vec3.directionFromRotation(pitch,yaw);
         Vec3 at=caster.aperturePosition(yaw,pitch);
+        if (basic) {
+            var shot=TNOrbEntities.WATER_BOLT.get().create(level);
+            if(shot==null)return false;
+            shot.configure(caster,1,at,direction.scale(1.5D));shot.setSpellScale(20F);
+            boolean added=level.addFreshEntity(shot);
+            if(added) caster.beginBasicShot(yaw,pitch);
+            return added;
+        }
         cast.entityData.set(BOSS_CAST,true);
         cast.owner=caster.getUUID(); cast.barrageAim=target.getBoundingBox().getCenter();
         cast.setPos(at); cast.entityData.set(TIER,tier);
@@ -93,10 +103,13 @@ public final class TNWaterSpellEntity extends Entity {
         return added;
     }
 
-    static void bolt(LivingEntity player,int tier,Vec3 at,Vec3 velocity) {
+    static void bolt(LivingEntity player,int tier,Vec3 at,Vec3 velocity) { bolt(player,tier,at,velocity,1F); }
+    static void bolt(LivingEntity player,int tier,Vec3 at,Vec3 velocity,float scale) {
         var bolt=TNOrbEntities.WATER_BOLT.get().create(player.level());
-        if(bolt!=null) { bolt.configure(player,tier,at,velocity);player.level().addFreshEntity(bolt); }
+        if(bolt!=null) { bolt.configure(player,tier,at,velocity);bolt.setSpellScale(scale);player.level().addFreshEntity(bolt); }
     }
+    public float spellScale(){return entityData.get(BOSS_CAST) && tier()==3 ? 3F : 1F;}
+    public double circleRadius(){return WaterSpellRules.circleRadius(tier())*spellScale();}
     public int duration(){return entityData.get(BOSS_CAST) && tier()==5 ? 200 : WaterSpellRules.duration(tier());}
     public int tier(){return entityData.get(TIER);}
     public int age(){return entityData.get(AGE);}
@@ -126,14 +139,14 @@ public final class TNWaterSpellEntity extends Entity {
         boolean charging=tickCount<charge||(tier()==5&&terrainCaster!=null&&!bore.prescanDone());
         if(charging) {
             // 蓄力：水元素螺旋收进法阵中心 ✓（纯表现 ✗，不影响蓄力时长/魔力门槛 ✗）
-            if(tickCount%2==0) WaterFx.charge(level,position(),dir,WaterSpellRules.circleRadius(tier()),tickCount,Math.max(charge,Math.max(1,tickCount)));
+            if(tickCount%2==0) WaterFx.charge(level,position(),dir,circleRadius(),tickCount,Math.max(charge,Math.max(1,tickCount)));
             return;
         }
         if(fireTick<0) {
             fireTick=tickCount;entityData.set(FIRED_AT,fireTick);
             level.playSound(null,blockPosition(),SoundEvents.CONDUIT_ACTIVATE,SoundSource.PLAYERS,1.5F,tier()==5?.5F:.85F);
             WaterFx.muzzle(level,position(),dir,tier());
-            WaterFx.aperture(level,position(),dir,WaterSpellRules.circleRadius(tier()));
+            WaterFx.aperture(level,position(),dir,circleRadius());
         }
         int active=tickCount-fireTick;
         if(active>=duration()) { discard();return; }
@@ -142,12 +155,12 @@ public final class TNWaterSpellEntity extends Entity {
                 Vec3 right=WaterSpellRules.right(dir),up=right.cross(dir).normalize();
                 for(int i=0;i<3;i++) {
                     double angle=(active/4*3+i)*2.399963;
-                    Vec3 at=position().add(right.scale(Math.cos(angle)*2.8)).add(up.scale(Math.sin(angle)*2.8));
+                    Vec3 at=position().add(right.scale(Math.cos(angle)*2.8*spellScale())).add(up.scale(Math.sin(angle)*2.8*spellScale()));
                     Vec3 aim=barrageAim!=null?barrageAim:position().add(dir.scale(38));
-                    bolt(player,3,at,aim.subtract(at).normalize().scale(1.8));
+                    bolt(player,3,at,aim.subtract(at).normalize().scale(1.8),spellScale());
                 }
                 // 阵面环绕水花 + 阵口喷发 ✓；单发弹幕本身已有拖尾 ✗，这里不逐发喷 ✓
-                WaterFx.sigil(level,position(),dir,WaterSpellRules.circleRadius(3)*.85,active);
+                WaterFx.sigil(level,position(),dir,circleRadius()*.85,active);
                 WaterFx.muzzle(level,position(),dir,1);
             }
             return;

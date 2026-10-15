@@ -1,8 +1,8 @@
 package com.tnc.tnc.boss;
 
-/** Frequent T4 tsunami casts alternate with three less frequent, fully telegraphed special spells. */
+/** Frequent giant water-orb shots alternate with three less frequent, fully telegraphed special spells. */
 public final class LeviathanSpellRules {
-    public static final String BASIC = "tsunami";
+    public static final String BASIC = "leviathan_water_orb";
     private static final String[] SPECIALS = {"dragon_roar", "sea_god_crypt", "dragon_ruin"};
     private LeviathanSpellRules() {}
 

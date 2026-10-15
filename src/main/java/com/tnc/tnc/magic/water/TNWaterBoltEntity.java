@@ -16,15 +16,20 @@ import net.minecraft.world.phys.*;
 /** Swept single-hit water projectile: no area damage or chain reaction. */
 public final class TNWaterBoltEntity extends Projectile {
     private static final EntityDataAccessor<Integer> TIER=SynchedEntityData.defineId(TNWaterBoltEntity.class,EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Float> SPELL_SCALE=SynchedEntityData.defineId(TNWaterBoltEntity.class,EntityDataSerializers.FLOAT);
+    public float spellScale(){return entityData.get(SPELL_SCALE);}
+    public double visualRadius(){return WaterSpellRules.boltRadius(tier())*spellScale();}
+    public double collisionRadius(){return spellScale()>1 ? visualRadius() : .15D;}
+    public void setSpellScale(float scale){entityData.set(SPELL_SCALE,net.minecraft.util.Mth.clamp(scale,1F,20F));}
     private float damage;
     private double remaining=48;
     public TNWaterBoltEntity(EntityType<? extends TNWaterBoltEntity> type,Level level) { super(type,level); setNoGravity(true); }
     public void configure(LivingEntity owner,int tier,Vec3 at,Vec3 velocity) {
         setOwner(owner); entityData.set(TIER,tier); setPos(at); setDeltaMovement(velocity);
-        damage=WaterSpellRules.damage(tier)*WaterSpellRules.power(owner); remaining=WaterSpellRules.range(tier);
+        damage=WaterSpellRules.damage(tier)*WaterSpellRules.power(owner); remaining=owner instanceof com.tnc.tnc.boss.TNWaterLeviathanEntity ? 96 : WaterSpellRules.range(tier);
     }
     public int tier() { return entityData.get(TIER); }
-    @Override protected void defineSynchedData() { entityData.define(TIER,1); }
+    @Override protected void defineSynchedData() { entityData.define(TIER,1);entityData.define(SPELL_SCALE,1F); }
     @Override public void tick() {
         super.tick();
         if(level().isClientSide) {
@@ -39,13 +44,25 @@ public final class TNWaterBoltEntity extends Projectile {
         if(!level.hasChunkAt(net.minecraft.core.BlockPos.containing(to))) { discard(); return; }
         BlockHitResult wall=level.clip(new ClipContext(from,to,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,this));
         Vec3 limit=wall.getType()==HitResult.Type.MISS ? to : wall.getLocation();
+        boolean blocked=wall.getType()!=HitResult.Type.MISS;
+        if(spellScale()>1) {
+            double distance=from.distanceToSqr(limit);
+            for(var shape:level.getBlockCollisions(this,new AABB(from,to).inflate(collisionRadius())))
+                for(AABB solid:shape.toAabbs()) {
+                    var contact=solid.inflate(collisionRadius()).clip(from,to);
+                    if(solid.inflate(collisionRadius()).contains(from)) contact=java.util.Optional.of(from);
+                    if(contact.isPresent() && from.distanceToSqr(contact.get())<=distance) {
+                        limit=contact.get();distance=from.distanceToSqr(limit);blocked=true;
+                    }
+                }
+        }
         LivingEntity hit=null; Vec3 impact=limit; double closest=from.distanceToSqr(limit)+1e-7;
-        for(LivingEntity target:level.getEntitiesOfClass(LivingEntity.class,new AABB(from,to).inflate(.4),t->WaterSpellRules.enemy(owner,t))) {
-            var box=target.getBoundingBox().inflate(.15);
+        for(LivingEntity target:level.getEntitiesOfClass(LivingEntity.class,new AABB(from,to).inflate(Math.max(.4,collisionRadius())),t->WaterSpellRules.enemy(owner,t))) {
+            var box=target.getBoundingBox().inflate(collisionRadius());
             var point=box.contains(from) ? java.util.Optional.of(from) : box.clip(from,limit);
             if(point.isPresent() && point.get().distanceToSqr(from)<closest) { closest=point.get().distanceToSqr(from);hit=target;impact=point.get(); }
         }
-        if(hit!=null || wall.getType()!=HitResult.Type.MISS) {
+        if(hit!=null || blocked) {
             if(hit!=null) hit.hurt(level.damageSources().indirectMagic(this,owner),damage);
             // 水花朝被打中的面翻回来（normal = 入射方向的反向）✓
             WaterFx.impact(level,impact,motion.normalize().scale(-1),tier());
@@ -65,7 +82,7 @@ public final class TNWaterBoltEntity extends Projectile {
         if(dir.lengthSqr()<.5)dir=new Vec3(0,0,1);
         dir=dir.normalize();
         Vec3 right=WaterSpellRules.right(dir),up=right.cross(dir).normalize();
-        double radius=WaterSpellRules.boltRadius(tier());
+        double radius=visualRadius();
         boolean heavy=tier()==2;
         int drops=heavy?10:tier()==3?3:5;
         int glints=heavy?3:tier()==3?1:2;

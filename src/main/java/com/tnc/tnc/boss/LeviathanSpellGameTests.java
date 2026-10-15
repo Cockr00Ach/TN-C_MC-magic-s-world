@@ -30,17 +30,26 @@ public final class LeviathanSpellGameTests {
     }
 
     @GameTest(template="leviathan_empty",timeoutTicks=65)
-    public static void realTsunamiHitsEnemiesButNotTheCaster(GameTestHelper h) {
+    public static void giantWaterOrbReplacesTsunamiAndUsesItsFullHitRadius(GameTestHelper h) {
         var boss=boss(h); var enemy=target(h); float hp=boss.getHealth();
-        var player=h.makeMockSurvivalPlayer();
-        h.assertTrue(WaterSpellRules.enemy(boss,player),"Boss water spells must hit survival players");
-        h.assertTrue(!WaterSpellRules.enemy(boss,boss),"Boss cannot hit itself");
-        h.assertTrue(!WaterSpellRules.enemy(player,enemy),"Player water cannot start harming friendly villagers");
-        h.assertTrue(LeviathanSpells.cast(boss,enemy,"tsunami"),"T4 tsunami entity created");
+        boss.setPos(boss.position().add(0,11.2,0));
+        enemy.setPos(enemy.position().add(0,0,13));
+        h.assertTrue(!LeviathanSpells.cast(boss,enemy,"tsunami"),"Tsunami is removed from the boss spell dispatcher");
+        h.assertTrue(LeviathanSpells.cast(boss,enemy,LeviathanSpellRules.BASIC),"Giant water orb is fired");
+        h.runAtTickTime(2,()->{
+            var shot=h.getLevel().getEntitiesOfClass(TNWaterBoltEntity.class,boss.getBoundingBox().inflate(80))
+                    .stream().filter(e->e.getOwner()==boss && e.tier()==1).findFirst().orElseThrow();
+            h.assertTrue(shot.spellScale()==20F && Math.abs(shot.visualRadius()-6.4D)<0.001,
+                    "Basic water orb is twenty times the standard ball");
+            h.assertTrue(shot.collisionRadius()==shot.visualRadius(),"Huge ball has a matching swept hit radius");
+            h.assertTrue(boss.mouthOpen(),"The beast opens its mouth to spit the ordinary orb");
+            enemy.setPos(enemy.position().add(4.5D,0,0)); // Only a genuinely large swept ball can hit this sidestep.
+            h.assertTrue(h.getLevel().getEntitiesOfClass(TNWaterFieldEntity.class,boss.getBoundingBox().inflate(80))
+                    .stream().noneMatch(e->e.kind()==1),"No tsunami field is created");
+        });
         h.runAtTickTime(40,()->{
-            h.assertTrue(enemy.getHealth()<1000 && boss.getHealth()==hp,
-                    "Real boss-owned wave must persist and damage enemies without hitting its owner");
-            boss.discard(); enemy.discard(); h.succeed();
+            h.assertTrue(enemy.getHealth()<1000 && boss.getHealth()==hp,"Real giant orb hits without damaging its caster");
+            boss.discard();enemy.discard();h.succeed();
         });
     }
 
@@ -170,6 +179,14 @@ public final class LeviathanSpellGameTests {
         var boss=boss(h); var enemy=target(h); var at=boss.position();
         h.assertTrue(LeviathanSpells.cast(boss,enemy,"dragon_roar"),"T3 created");
         var spellId=boss.channelId();
+        h.runAtTickTime(2,()->{
+            var cast=(TNWaterSpellEntity)h.getLevel().getEntity(spellId);
+            h.assertTrue(cast.spellScale()==3F && cast.circleRadius()==WaterSpellRules.circleRadius(3)*3,
+                    "Boss T3 aperture is three times the player's");
+        });
+        h.runAtTickTime(11,()->h.assertTrue(h.getLevel().getEntitiesOfClass(TNWaterBoltEntity.class,
+                boss.getBoundingBox().inflate(100)).stream().anyMatch(e->e.getOwner()==boss && e.tier()==3 && e.spellScale()==3F),
+                "T3 uses real three-times-size synchronized projectile entities"));
         h.runAtTickTime(20,()->{
             h.assertTrue(boss.mouthOpen() && boss.position().distanceToSqr(at)<0.001,"T3 holds its mouth and body");
             assertMouthAperture(h,boss,(TNWaterSpellEntity)h.getLevel().getEntity(spellId));
@@ -185,5 +202,25 @@ public final class LeviathanSpellGameTests {
         var gap=spell.position().subtract(mouth);
         h.assertTrue(Math.abs(gap.length()-boss.APERTURE_GAP)<0.01 && gap.normalize().dot(spell.direction())>0.999,
                 "Spell aperture must remain scaled and ahead of the actual pitched mouth");
+    }
+    @GameTest(template="leviathan_empty",timeoutTicks=115)
+    public static void cryptSkyLayoutStaysFixedAtHighAltitudeWhileBossFindsIt(GameTestHelper h) {
+        var boss=boss(h);var enemy=target(h);
+        boss.setPos(boss.getX(),192,boss.getZ());enemy.setPos(enemy.getX(),192,enemy.getZ());
+        h.assertTrue(LeviathanSpells.cast(boss,enemy,"sea_god_crypt"),"High-altitude crypt created");
+        final TNWaterFieldEntity[] field={null};final net.minecraft.world.phys.Vec3[] origin={null};
+        h.runAtTickTime(2,()->{
+            field[0]=(TNWaterFieldEntity)h.getLevel().getEntity(boss.channelId());origin[0]=field[0].position();
+            h.assertTrue(field[0].skySealHeight()==116F && field[0].skySealCenter().y==308,
+                    "Fixed sword/sky-seal layout is not lowered to fit the giant caster");
+        });
+        h.runAtTickTime(98,()->{
+            h.assertTrue(boss.castPose()==3,"Boss flies to the independently fixed sky seal");
+            h.assertTrue(field[0].position().equals(origin[0]) && field[0].skySealCenter().y==308,
+                    "The field and sky seal do not follow the moving boss");
+            h.assertTrue(boss.aperturePosition(boss.getYRot(),90).distanceTo(field[0].skySealCenter())<.01,
+                    "Boss moves its mouth to the fixed seal rather than moving the seal to its mouth");
+            boss.discard();enemy.discard();h.succeed();
+        });
     }
 }
