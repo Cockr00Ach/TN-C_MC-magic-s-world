@@ -309,8 +309,6 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
         if (TNDarkGiantPhase.shouldEnterPhaseTwo(this.getHealth(), this.getMaxHealth(), this.phase())) {
             this.enterPhaseTwo(level);
         }
-        // 一阶段也有贴身的黑雾和裂隙微光；二阶段随两倍虚影扩展到整片身躯。
-        // Continuous black vapor is rendered locally, independent of particle settings.
         this.tickCasting(level);
     }
 
@@ -349,10 +347,27 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
                 12, 0.8D, 0.7D, 0.8D, 0.03D);
     }
 
+    /** Client-local black motes; a fixed emission rate avoids per-particle network packets. */
+    private void blackAuraParticles() {
+        if(!level().isClientSide()||!isAlive()||isInvisible()||tickCount%3!=0)return;
+        var dust=new net.minecraft.core.particles.DustParticleOptions(
+                new org.joml.Vector3f(.004F,.003F,.006F),isPhaseTwo()?3.5F:2.8F);
+        int perLayer=isPhaseTwo()?3:2;
+        for(int layer=0;layer<6;layer++)for(int i=0;i<perLayer;i++){
+            double angle=tickCount*.035+layer*.9+i*Math.PI*2/perLayer+random.nextDouble()*.6;
+            double radius=getBbWidth()*(.48+random.nextDouble()*.28);
+            double x=getX()+Math.cos(angle)*radius,z=getZ()+Math.sin(angle)*radius;
+            double y=getY()+getBbHeight()*(layer+random.nextDouble())/6;
+            level().addParticle(dust,x,y,z,-Math.sin(angle)*.06,.06+random.nextDouble()*.05,Math.cos(angle)*.06);
+            if(i==0)level().addParticle(ParticleTypes.SQUID_INK,x,y,z,0,.035,0);
+        }
+    }
+
     /** 走的比普通怪慢，但每一步都沉（落地扬尘 ✓）。 */
     @Override
     public void tick() {
         super.tick();
+        this.blackAuraParticles();
         if (this.level() instanceof ServerLevel level && this.tickCount % 20 == 0
                 && this.getDeltaMovement().horizontalDistanceSqr() > 1.0E-4D) {
             level.playSound(null, this.getX(), this.getY(), this.getZ(),

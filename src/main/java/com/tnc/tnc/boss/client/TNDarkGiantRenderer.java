@@ -22,13 +22,6 @@ public class TNDarkGiantRenderer extends GeoEntityRenderer<TNDarkGiantEntity> {
     }
 
     @Override
-    public void render(TNDarkGiantEntity entity,float yaw,float partial,PoseStack pose,
-                       net.minecraft.client.renderer.MultiBufferSource buffers,int light){
-        super.render(entity,yaw,partial,pose,buffers,light);
-        TNDarkGiantMist.render(entity,partial,pose,buffers,light,this.entityRenderDispatcher);
-    }
-
-    @Override
     public void scaleModelForRender(float widthScale, float heightScale, PoseStack poseStack,
                                     TNDarkGiantEntity animatable, BakedGeoModel model, boolean isReRender,
                                     float partialTick, int packedLight, int packedOverlay) {
