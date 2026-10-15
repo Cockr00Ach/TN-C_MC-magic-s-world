@@ -10,7 +10,7 @@ public final class TNWaterLeviathanRenderer extends GeoEntityRenderer<TNWaterLev
     protected void applyRotations(TNWaterLeviathanEntity entity, com.mojang.blaze3d.vertex.PoseStack stack,
                                   float age, float yaw, float partial) {
         super.applyRotations(entity,stack,age,yaw,partial);
-        stack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(-90F*entity.castTilt(partial)));
+        stack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(-entity.castingPitch(partial)));
     }
 
     public TNWaterLeviathanRenderer(EntityRendererProvider.Context context) {

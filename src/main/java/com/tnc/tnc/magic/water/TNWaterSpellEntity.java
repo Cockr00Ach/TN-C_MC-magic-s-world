@@ -75,9 +75,14 @@ public final class TNWaterSpellEntity extends Entity {
             if (caster.getUUID().equals(old.owner)) old.discard();
         var cast=TNOrbEntities.WATER_SPELL.get().create(level);
         if (cast==null) return false;
-        Vec3 forward=target.getBoundingBox().getCenter().subtract(caster.getEyePosition()).normalize();
-        Vec3 at=caster.getEyePosition().add(forward.scale(6.5D));
-        Vec3 direction=target.getBoundingBox().getCenter().subtract(at).normalize();
+        Vec3 aim=target.getBoundingBox().getCenter().subtract(caster.position());
+        float yaw=(float)Math.toDegrees(Math.atan2(-aim.x,aim.z));
+        // Account for the mouth's height in the rotated model so the beam still meets its target.
+        double length=Math.max(caster.MOUTH_HEIGHT+0.01D,aim.length());
+        double elevation=Math.atan2(aim.y,aim.horizontalDistance())-Math.asin(caster.MOUTH_HEIGHT/length);
+        float pitch=(float)-Math.toDegrees(elevation);
+        Vec3 direction=Vec3.directionFromRotation(pitch,yaw);
+        Vec3 at=caster.aperturePosition(yaw,pitch);
         cast.entityData.set(BOSS_CAST,true);
         cast.owner=caster.getUUID(); cast.barrageAim=target.getBoundingBox().getCenter();
         cast.setPos(at); cast.entityData.set(TIER,tier);

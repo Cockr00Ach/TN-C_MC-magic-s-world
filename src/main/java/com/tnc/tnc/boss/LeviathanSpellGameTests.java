@@ -100,6 +100,7 @@ public final class LeviathanSpellGameTests {
         h.runAtTickTime(2,()->{
             beamRef[0]=(TNWaterSpellEntity)h.getLevel().getEntity(boss.channelId());
             h.assertTrue(beamRef[0]!=null && beamRef[0].duration()==200,"Boss beam lasts 200 active ticks");
+            assertMouthAperture(h,boss,beamRef[0]);
         });
         h.assertTrue(WaterSpellRules.duration(5)==240,"Player beam duration is preserved");
         h.runAtTickTime(90,()->{
@@ -116,7 +117,7 @@ public final class LeviathanSpellGameTests {
         });
     }
 
-    @GameTest(template="leviathan_empty",timeoutTicks=225)
+    @GameTest(template="leviathan_empty",timeoutTicks=455)
     public static void cryptAscendsToSealFacesDownAndEndsAfterOneSword(GameTestHelper h) {
         clearAscentCorridor(h);
         var boss=boss(h); var enemy=target(h);
@@ -130,12 +131,28 @@ public final class LeviathanSpellGameTests {
         h.runAtTickTime(95,()->{
             h.assertTrue(boss.castPose()==3 && boss.mouthOpen(),"Arrives before the sword appears and opens its mouth; pose="+boss.castPose()+" boss="+boss.position()+" station="+fieldRef[0].skySealCenter()+" removed="+fieldRef[0].isRemoved()+" age="+fieldRef[0].age());
             h.assertTrue(boss.position().distanceTo(fieldRef[0].skySealCenter())<8,"Boss is stationed at the actual sky seal");
+            h.assertTrue(boss.aperturePosition(boss.getYRot(),90F).distanceTo(fieldRef[0].skySealCenter())<0.01,
+                    "The sky seal is just in front of the downward-facing mouth");
             h.assertTrue(boss.getLookAngle().dot(new net.minecraft.world.phys.Vec3(0,-1,0))>0.99,
                     "Boss faces the same downward direction as the falling sword");
         });
         h.runAtTickTime(195,()->h.assertTrue(boss.mouthOpen() && !fieldRef[0].isRemoved(),"Holds the pose until the crypt ends"));
         h.runAtTickTime(210,()->{
             h.assertTrue(fieldRef[0].isRemoved() && !boss.mouthOpen(),"Crypt and mouth end together");
+            h.assertTrue(boss.isReturningFromSky(),"Crypt ends with an active return flight");
+            // Move the victim after the ritual: return must follow them, not the old field.
+            enemy.setPos(h.absoluteVec(new net.minecraft.world.phys.Vec3(20.5,4,24.5)));
+            boss.setNoAi(false);
+        });
+        final float[] hpAfterReturn={1000};
+        h.runAtTickTime(310,()->{
+            h.assertTrue(!boss.isReturningFromSky() && boss.distanceTo(enemy)<24,
+                    "Boss must come back down to the victim within five seconds");
+            h.assertTrue(boss.getTarget()==enemy,"The original victim is reacquired outside the high-altitude follow range");
+            hpAfterReturn[0]=enemy.getHealth();
+        });
+        h.runAtTickTime(440,()->{
+            h.assertTrue(enemy.getHealth()<hpAfterReturn[0],"Boss resumes actual frequent attacks after descending");
             boss.discard(); enemy.discard(); h.succeed();
         });
     }
@@ -147,11 +164,18 @@ public final class LeviathanSpellGameTests {
         var spellId=boss.channelId();
         h.runAtTickTime(20,()->{
             h.assertTrue(boss.mouthOpen() && boss.position().distanceToSqr(at)<0.001,"T3 holds its mouth and body");
+            assertMouthAperture(h,boss,(TNWaterSpellEntity)h.getLevel().getEntity(spellId));
             h.getLevel().getEntity(spellId).discard();
         });
         h.runAtTickTime(25,()->{
             h.assertTrue(!boss.mouthOpen(),"Interrupted spells must release the pose");
             boss.discard(); enemy.discard(); h.succeed();
         });
+    }
+    private static void assertMouthAperture(GameTestHelper h,TNWaterLeviathanEntity boss,TNWaterSpellEntity spell) {
+        var mouth=boss.mouthPosition(boss.getYRot(),boss.castingPitch(1));
+        var gap=spell.position().subtract(mouth);
+        h.assertTrue(Math.abs(gap.length()-boss.APERTURE_GAP)<0.01 && gap.normalize().dot(spell.direction())>0.999,
+                "Spell aperture must be 0.85 blocks ahead of the actual pitched mouth");
     }
 }

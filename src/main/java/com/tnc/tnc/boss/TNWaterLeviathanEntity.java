@@ -65,11 +65,18 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
 
     private static final EntityDataAccessor<Integer> CAST_POSE =
             SynchedEntityData.defineId(TNWaterLeviathanEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Float> CAST_PITCH =
+            SynchedEntityData.defineId(TNWaterLeviathanEntity.class, EntityDataSerializers.FLOAT);
+    public static final double MOUTH_FORWARD = 109.0D/16.0D;
+    public static final double MOUTH_HEIGHT = 1.35D;
+    public static final double APERTURE_GAP = 0.85D;
     private java.util.UUID channel, channelTarget, returnTarget;
     private Vec3 channelPosition;
     private net.minecraft.world.entity.Entity channelEntity;
     private float channelYaw;
     private int returnTicks;
+    private boolean returningFromSky;
+    private Vec3 returnPosition;
     private float castTilt, previousCastTilt;
 
     private final ServerBossEvent bossEvent = new ServerBossEvent(this.getDisplayName(),
@@ -125,7 +132,7 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
 
     @Override
     public void travel(Vec3 input) {
-        if (channel != null) { this.setDeltaMovement(Vec3.ZERO); return; }
+        if (channel != null || returningFromSky) { this.setDeltaMovement(Vec3.ZERO); return; }
         if (this.isEffectiveAi() && this.isAlive()) {
             this.moveRelative(this.isInWater() ? 0.035F : 0.045F, input);
             this.move(MoverType.SELF, this.getDeltaMovement());
@@ -152,6 +159,7 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
         super.defineSynchedData();
         this.entityData.define(DATA_PHASE, PHASE_ONE);
         this.entityData.define(CAST_POSE, 0);
+        this.entityData.define(CAST_PITCH, 0F);
     }
 
     public java.util.UUID channelId() { return channel; }
@@ -159,17 +167,34 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
     public boolean mouthOpen() { return castPose()==1 || castPose()==3; }
     public float castTilt(float partial) { return net.minecraft.util.Mth.lerp(partial,previousCastTilt,castTilt); }
 
+    public boolean isReturningFromSky() { return returningFromSky; }
+    public float castingPitch(float partial) {
+        return castPose()==1 ? entityData.get(CAST_PITCH) : 90F*castTilt(partial);
+    }
+    public Vec3 mouthPosition(float yaw,float pitch) {
+        return position().add(Vec3.directionFromRotation(pitch,yaw).scale(MOUTH_FORWARD))
+                .add(Vec3.directionFromRotation(pitch-90F,yaw).scale(MOUTH_HEIGHT));
+    }
+    public Vec3 aperturePosition(float yaw,float pitch) {
+        return mouthPosition(yaw,pitch).add(Vec3.directionFromRotation(pitch,yaw).scale(APERTURE_GAP));
+    }
+
     /** The spell owns this state: interruption, death and its natural end all release it. */
     public void beginChannel(net.minecraft.world.entity.Entity spell, net.minecraft.world.entity.LivingEntity target,
                              Vec3 station, float yaw) {
         channel=spell.getUUID(); channelEntity=spell; channelTarget=target.getUUID(); channelPosition=station;
         channelYaw=yaw;
+        if (spell instanceof com.tnc.tnc.magic.water.TNWaterFieldEntity) returnPosition=position();
+        returningFromSky=false;
+        entityData.set(CAST_PITCH,spell instanceof com.tnc.tnc.magic.water.TNWaterSpellEntity beam
+                ? (float)-Math.toDegrees(Math.asin(beam.direction().y)) : 0F);
         entityData.set(CAST_POSE,spell instanceof com.tnc.tnc.magic.water.TNWaterFieldEntity ? 2 : 1);
         navigation.stop(); setDeltaMovement(Vec3.ZERO);
     }
 
     private void tickChannel(ServerLevel server) {
         if (channel==null) {
+            if (returningFromSky) { tickSkyReturn(server); return; }
             if (returnTicks>0 && --returnTicks>=0 && returnTarget!=null && server.getEntity(returnTarget) instanceof net.minecraft.world.entity.LivingEntity target
                     && canStrike(target)) setTarget(target);
             return;
@@ -177,6 +202,7 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
         // Newly added effects may still be queued until the entity tick loop ends.
         var spell=channelEntity;
         if (!isAlive() || spell==null || spell.isRemoved()) {
+            returningFromSky=isAlive() && (castPose()==2 || castPose()==3);
             channel=null; channelEntity=null; channelPosition=null; entityData.set(CAST_POSE,0);
             setXRot(0F);
             returnTarget=channelTarget; returnTicks=600;
@@ -199,6 +225,34 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
                 ? (float)-Math.toDegrees(Math.asin(beam.direction().y)) : 0F);
     }
 
+    private void tickSkyReturn(ServerLevel server) {
+        if (!isAlive()) { returningFromSky=false; return; }
+        net.minecraft.world.entity.LivingEntity target=returnTarget!=null
+                && server.getEntity(returnTarget) instanceof net.minecraft.world.entity.LivingEntity living
+                && canStrike(living) ? living : getTarget();
+        if (target==null || !canStrike(target)) {
+            target=server.getEntitiesOfClass(ServerPlayer.class,getBoundingBox().inflate(160),this::canStrike)
+                    .stream().min(java.util.Comparator.comparingDouble(this::distanceToSqr)).orElse(null);
+        }
+        Vec3 destination=returnPosition==null ? position().add(0,-8,0) : returnPosition.add(0,2.8D,0);
+        if (target!=null && canStrike(target)) {
+            setTarget(target); returnTarget=target.getUUID(); returnTicks=600;
+            Vec3 away=position().subtract(target.position()).multiply(1,0,1);
+            if (away.lengthSqr()<1) away=Vec3.directionFromRotation(0,getYRot()).scale(-1);
+            destination=target.position().add(away.normalize().scale(14)).add(0,2.8D,0);
+        }
+        navigation.stop(); setDeltaMovement(Vec3.ZERO); setXRot(0F);
+        Vec3 delta=destination.subtract(position());
+        if (delta.lengthSqr()<6.25D) {
+            returningFromSky=false; returnPosition=null; attackCooldown=10;
+            return;
+        }
+        // Follow the victim's current location rather than the old stationary crypt field.
+        if (level().hasChunkAt(BlockPos.containing(destination)))
+            move(MoverType.SELF,delta.normalize().scale(Math.min(2.2D,delta.length()*0.2D)));
+        if (target!=null) getLookControl().setLookAt(target,30,30);
+    }
+
     public int phase() {
         return this.entityData.get(DATA_PHASE);
     }
@@ -213,6 +267,14 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
         tag.putInt("LeviathanPhase", this.phase());
         tag.putInt("LeviathanSpecialCooldown", specialCooldown);
         tag.putInt("LeviathanNextSpecial", nextSpecial);
+        if (returnPosition!=null && (returningFromSky || castPose()==2 || castPose()==3)) {
+            tag.putBoolean("LeviathanSkyReturn",true);
+            tag.putDouble("LeviathanReturnX",returnPosition.x);
+            tag.putDouble("LeviathanReturnY",returnPosition.y);
+            tag.putDouble("LeviathanReturnZ",returnPosition.z);
+            java.util.UUID victim=channelTarget!=null ? channelTarget : returnTarget;
+            if (victim!=null) tag.putUUID("LeviathanReturnTarget",victim);
+        }
     }
 
     @Override
@@ -226,6 +288,11 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
         this.specialCooldown = Math.max(0,tag.getInt("LeviathanSpecialCooldown"));
         this.nextSpecial = Math.floorMod(tag.getInt("LeviathanNextSpecial"),3);
         this.attackCooldown = 70;
+        channel=null; channelEntity=null; channelPosition=null; entityData.set(CAST_POSE,0);
+        returningFromSky=tag.getBoolean("LeviathanSkyReturn");
+        returnPosition=returningFromSky ? new Vec3(tag.getDouble("LeviathanReturnX"),
+                tag.getDouble("LeviathanReturnY"),tag.getDouble("LeviathanReturnZ")) : null;
+        returnTarget=tag.hasUUID("LeviathanReturnTarget") ? tag.getUUID("LeviathanReturnTarget") : null;
     }
 
     @Override
@@ -345,7 +412,7 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
 
     private void tickSpecialAttack(ServerLevel level) {
         if (this.specialCooldown>0) --this.specialCooldown;
-        if (channel!=null) return;
+        if (channel!=null || returningFromSky) return;
         var target=this.getTarget();
         if (this.pendingAction != ACTION_NONE) {
             if (--this.actionTicks <= 0) {
@@ -439,7 +506,7 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
         @Override public void stop() { navigation.stop(); }
 
         @Override public void tick() {
-            if (channel!=null) { navigation.stop(); return; }
+            if (channel!=null || returningFromSky) { navigation.stop(); return; }
             var target = getTarget();
             boolean chasing = target != null && target.isAlive() && canStrike(target);
             if (chasing) {

@@ -136,7 +136,8 @@ public final class TNWaterFieldEntity extends Entity {
         field.entityData.set(PITCH, 0.0F);
         boolean added = level.addFreshEntity(field);
         if (added && crypt) caster.beginChannel(field,target,
-                field.skySealCenter().add(0,6.5D,0).subtract(direction.scale(1.7D)),
+                field.skySealCenter().add(0,caster.MOUTH_FORWARD+caster.APERTURE_GAP,0)
+                        .subtract(direction.scale(caster.MOUTH_HEIGHT)),
                 field.entityData.get(YAW));
         if (added && !crypt) WaterFx.waveCast(level, at, direction, 4);
         level.playSound(null, BlockPos.containing(at), crypt ? SoundEvents.CONDUIT_ACTIVATE
