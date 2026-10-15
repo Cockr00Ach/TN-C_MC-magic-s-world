@@ -77,14 +77,18 @@ public class TNLightBeamRenderer extends EntityRenderer<TNLightBeamEntity> {
         pose.pushPose();
         // ★ 起点用施法者的眼睛（客户端实时位置 ✓）—— 派发器已经平移到"实体插值后的位置"了，
         //   所以这里补一个差值平移 ✓（否则边跑边放会看到光柱从身后追上来 ✗）。
-        Vec3 origin = originOf(beam);
+        Vec3 origin = originOf(beam,partialTick);
         Vec3 dispatched = beam.getPosition(partialTick);
         pose.translate(origin.x - dispatched.x, origin.y - dispatched.y, origin.z - dispatched.z);
-        // ★ 朝向用**实体自己那份**（服务端每 tick 限速转向 ✓ ⇒ 看得见它拐向敌人 ✓，这就是"索敌"✓）。
-        //   为什么不在客户端直接对准目标：那样会**瞬间贴上去** ✗，看不出在追 ✗
-        //   （雷球是引擎投射物的 homing_angle，也是"拐弯"而不是瞬移 ✓）。
-        pose.mulPose(Axis.YP.rotationDegrees(-Mth.lerp(partialTick, beam.yRotO, beam.getYRot())));
-        pose.mulPose(Axis.XP.rotationDegrees(Mth.lerp(partialTick, beam.xRotO, beam.getXRot())));
+        // Manual light rays follow the current view; other beam styles retain entity interpolation.
+        if(beam.style()==TNLightBeamEntity.STYLE_RAY) {
+            Vec3 direction=beam.aimedDirection(partialTick);
+            pose.mulPose(Axis.YP.rotationDegrees(-com.tnc.tnc.light.TNLightBeamMechanics.yawFor(direction)));
+            pose.mulPose(Axis.XP.rotationDegrees(com.tnc.tnc.light.TNLightBeamMechanics.pitchFor(direction)));
+        } else {
+            pose.mulPose(Axis.YP.rotationDegrees(-Mth.lerp(partialTick, beam.yRotO, beam.getYRot())));
+            pose.mulPose(Axis.XP.rotationDegrees(Mth.lerp(partialTick, beam.xRotO, beam.getXRot())));
+        }
 
         VertexConsumer vc = buffers.getBuffer(RenderType.entityTranslucentEmissive(WHITE));
         Matrix4f m = pose.last().pose();
@@ -108,10 +112,10 @@ public class TNLightBeamRenderer extends EntityRenderer<TNLightBeamEntity> {
      * <p>为什么不用实体自己的位置：非生物实体的位置在客户端是**3 tick 插值**的 ✗，
      * 拿它当起点的话，边跑边放会看到"光柱从身后追上来"✗。施法者就在本地时位置是精确的 ✓。
      */
-    private static Vec3 originOf(TNLightBeamEntity beam) {
+    private static Vec3 originOf(TNLightBeamEntity beam,float partialTick) {
         if (beam.style() == TNLightBeamEntity.STYLE_RAY
                 && beam.level().getEntity(beam.casterId()) instanceof LivingEntity caster) {
-            return caster.getEyePosition();
+            return caster.getEyePosition(partialTick);
         }
         return beam.position();
     }

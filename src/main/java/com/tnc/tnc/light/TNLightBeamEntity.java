@@ -156,6 +156,8 @@ public class TNLightBeamEntity extends Entity {
         this.fireMaxLength = this.length();          // 抄下满射程 ✓
         this.entityData.set(DATA_STYLE, STYLE_FIRE);
     }
+    private static final EntityDataAccessor<Float> DATA_FAN_OFFSET=
+            SynchedEntityData.defineId(TNLightBeamEntity.class,EntityDataSerializers.FLOAT);
     /** 已经挨过这道光的敌人 ✓（只打一次 ✓）。 */
     private final Set<UUID> hit = new HashSet<>();
     public TNLightBeamEntity(EntityType<? extends TNLightBeamEntity> type, Level level) {
@@ -174,8 +176,8 @@ public class TNLightBeamEntity extends Entity {
         this.entityData.set(DATA_CASTER, caster == null ? -1 : caster.getId());
         this.entityData.set(DATA_TARGET, target == null ? -1 : target.getId());
         this.damage = damage;
-        // ★ 这里**故意不立刻对准目标**：出生时朝向 = 施法方向 ✓，之后每 tick limited 拐向目标 ✓
-        //   ⇒ 看得见"索敌"的过程（雷球的 homing 也是这样拐的 ✓）。
+        // Light rays use manual look direction; descent columns retain their marked position.
+        // Target metadata remains available for legacy fire rays only.
     }
 
     /** 锁定目标的 id（-1 = 没锁 ✓）。 */
@@ -186,6 +188,12 @@ public class TNLightBeamEntity extends Entity {
     /** 施法者的实体 id（-1 = 找不到 ✓）—— 渲染器要用它拿"眼睛位置" ✓。 */
     public int casterId() {
         return this.entityData.get(DATA_CASTER);
+    }
+    public void setFanOffset(float degrees){this.entityData.set(DATA_FAN_OFFSET,degrees);}
+    public Vec3 aimedDirection(float partialTick) {
+        if(style()==STYLE_RAY&&level().getEntity(casterId()) instanceof LivingEntity caster)
+            return LightBeamAim.direction(caster.getViewVector(partialTick),entityData.get(DATA_FAN_OFFSET));
+        return getLookAngle();
     }
 
     /** 画面震动强度（度 ✓；0 = 不震 ✓）。 */
@@ -205,7 +213,7 @@ public class TNLightBeamEntity extends Entity {
 
     /** 是不是在"瞄着某个敌人" ✓（渲染器要用它做平滑跟随 ✓）。 */
     public boolean tracking() {
-        return this.targetId() >= 0;
+        return this.style()==STYLE_FIRE && this.targetId() >= 0;
     }
 
     public double radius() {
@@ -238,6 +246,7 @@ public class TNLightBeamEntity extends Entity {
         this.entityData.define(DATA_CASTER, -1);
         this.entityData.define(DATA_TARGET, -1);
         this.entityData.define(DATA_SHAKE, 0);
+        this.entityData.define(DATA_FAN_OFFSET,0F);
     }
 
     @Override
@@ -250,7 +259,14 @@ public class TNLightBeamEntity extends Entity {
             this.discard();
             return;
         }
-        this.trackTarget();                      // ★ 瞄着敌人：每 tick 重新瞄准 ✓
+        if(style()==STYLE_RAY) {
+            if(!(level().getEntity(casterId()) instanceof LivingEntity caster)||!caster.isAlive()){discard();return;}
+            setPos(caster.getEyePosition());
+            Vec3 direction=aimedDirection(1);
+            setYRot(TNLightBeamMechanics.yawFor(direction));
+            setXRot(TNLightBeamMechanics.pitchFor(direction));
+        } else if(style()==STYLE_FIRE)trackTarget();
+        // Descent beams keep the position and vertical direction chosen with their ground seal.
         if (this.style() == STYLE_FIRE) {
             // ★ 火系：把长度**顶回满射程** ⇒ 射线直接穿过去，而不是停在目标身上 ✗
             //   （trackTarget 会把它缩到目标距离 ✗ —— 那是光柱的语义 ✓）
@@ -267,20 +283,7 @@ public class TNLightBeamEntity extends Entity {
         //   这些粒子只会互相干扰 ✗ ⇒ 整块删掉，光柱就是干干净净一根柱子 ✓（要加回来说一声 ✓）。
     }
 
-    /**
-     * ★ <b>瞄着敌人</b>（作者 2026-10-01："就像雷球那样索敌" ✓）——
-     * 雷球的索敌是引擎投射物的 {@code homing_angle: 0.5}（发射后**拐弯追人** ✓），
-     * 所以这里也做成"**拐弯**"而不是"一出来就瞬间对准"✗：
-     * 每 tick 只把朝向往目标转最多 {@link #TURN_PER_TICK} 度 ✓ —— 手感和雷球一致 ✓，而且**看得出在追** ✓。
-     *
-     * <ul>
-     *   <li><b>前射形态</b>：起点**跟着施法者的眼睛走**（人动光也动 ✓），朝向每 tick 往目标拐 ✓，
-     *       长度 = 到目标的距离 ✓；</li>
-     *   <li><b>天降形态</b>：整根柱子**悬在目标头顶**跟着平移 ✓，永远竖直向下 ✓；</li>
-     *   <li><b>目标死了</b>：在**当前朝向**的锥（{@link TNLightBeamMechanics#HOMING_CONE_DEGREES} ✓）
-     *       里再找一个最近的 ✓ 继续追（雷球也是这个意思 ✓）；实在没有就保持原方向飞完 ✓。</li>
-     * </ul>
-     */
+    /** Legacy fire-ray homing. Light rays and descent columns never enter this path. */
     private void trackTarget() {
         LivingEntity target = this.targetEntity();
         if (target == null) {
