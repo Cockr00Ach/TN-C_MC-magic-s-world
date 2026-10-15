@@ -4,6 +4,7 @@ import copy
 import hashlib
 import json
 import zipfile
+from audit_mod_runtime import audit
 from pathlib import Path
 
 
@@ -93,6 +94,9 @@ def main(base: Path, built: Path, output: Path, report: Path, entries=ENTRIES) -
         with zipfile.ZipFile(output) as result:
             if result.testzip() is not None:
                 raise ValueError("candidate jar CRC failure")
+            missing_classes, missing_members = audit({n: result.read(n) for n in result.namelist() if n.endswith(".class")})
+            if missing_classes or missing_members:
+                raise ValueError(f"Incomplete installed runtime; repair before updating: {missing_classes}; {missing_members}")
             for name in old.namelist():
                 if name not in entries and result.read(name) != old.read(name):
                     raise ValueError(f"unrelated entry changed: {name}")
