@@ -122,6 +122,8 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
     private int pendingTicks;
     /** 两招之间歇多久 ✓（二阶段更凶 ⇒ 歇得更短 ✓）。 */
     private int castCooldown = 80;
+    private int completedCasts;
+    private int previousMove=-1;
     private static final int COOLDOWN_PHASE_ONE = 90;
     private static final int COOLDOWN_PHASE_TWO = 45;
 
@@ -142,7 +144,7 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
                 .add(Attributes.MAX_HEALTH, MAX_HP)
                 .add(Attributes.ATTACK_DAMAGE, 18.0D)
                 .add(Attributes.MOVEMENT_SPEED, 0.16D)      // 巨人走得慢而沉 ✓（和 walk 动画的步幅配套 ✓ 见 gen_dark_giant_walk.ps1 ✓）
-                .add(Attributes.FOLLOW_RANGE, 40.0D)
+                .add(Attributes.FOLLOW_RANGE, TNDarkGiantSpells.FOLLOW_RANGE)
                 .add(Attributes.ARMOR, 12.0D)               // 通身盔甲 ⇒ 护甲给高 ✓
                 .add(Attributes.ARMOR_TOUGHNESS, 6.0D)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0D); // 巨人推不动 ✓
@@ -252,7 +254,7 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.0D, true));
         this.goalSelector.addGoal(7, new RandomStrollGoal(this, 0.7D));
-        this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 40.0F));
+        this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, (float)TNDarkGiantSpells.FOLLOW_RANGE));
         this.goalSelector.addGoal(9, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
@@ -301,6 +303,8 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
         if (!(this.level() instanceof ServerLevel level)) {
             return;
         }
+        var follow=getAttribute(Attributes.FOLLOW_RANGE);
+        if(follow!=null&&follow.getBaseValue()<TNDarkGiantSpells.FOLLOW_RANGE)follow.setBaseValue(TNDarkGiantSpells.FOLLOW_RANGE);
         this.bossEvent.setName(this.getDisplayName());
         this.bossEvent.setProgress(Math.max(0.0F, Math.min(1.0F,
                 this.getHealth() / Math.max(1.0F, this.getMaxHealth()))));
@@ -319,17 +323,20 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
             var motion=getDeltaMovement();setDeltaMovement(0,motion.y,0);
             if(getTarget()!=null)this.getLookControl().setLookAt(getTarget(),30,30);
             if (--this.pendingTicks <= 0) {
-                TNDarkGiantSpells.cast(this, this.pendingMove);
+                boolean cast=TNDarkGiantSpells.cast(this, this.pendingMove);
+                if(cast){this.previousMove=this.pendingMove;this.completedCasts++;}
                 this.pendingMove = -1;
                 this.entityData.set(DATA_CASTING,false);
-                this.castCooldown = this.isPhaseTwo() ? COOLDOWN_PHASE_TWO : COOLDOWN_PHASE_ONE;
+                this.castCooldown = cast?(this.isPhaseTwo()?COOLDOWN_PHASE_TWO:COOLDOWN_PHASE_ONE):20;
             }
             return;
         }
-        if (this.getTarget() == null || --this.castCooldown > 0) {
+        if (this.getTarget() == null || !this.getTarget().isAlive()
+                ||distanceToSqr(this.getTarget())>TNDarkGiantSpells.CAST_RANGE*TNDarkGiantSpells.CAST_RANGE
+                ||!hasLineOfSight(this.getTarget()) || --this.castCooldown > 0) {
             return;
         }
-        this.startCast(TNDarkGiantSpells.pick(this.random), level);
+        this.startCast(TNDarkGiantSpells.pick(this.random,this.completedCasts,this.previousMove), level);
     }
 
     /** 起手：播作者的施法动作（{@code playmagic} ✓）＋ 攒一撮暗火 ✓。 */

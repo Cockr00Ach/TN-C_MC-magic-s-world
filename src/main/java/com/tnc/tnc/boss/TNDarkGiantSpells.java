@@ -4,6 +4,7 @@ import net.minecraft.world.entity.LivingEntity;
 
 /** Boss casts use the same hand, drain, fog and summon entities as the player chains. */
 public final class TNDarkGiantSpells {
+    public static final double CAST_RANGE=96, FOLLOW_RANGE=128;
     private static final int SUMMON=0,HAND=1,FOG=2,SIPHON=3;
     public record Move(String path,int tier,int chain,int castTicks,int weight,String name) {}
     private static final Move[] MOVES={
@@ -18,10 +19,19 @@ public final class TNDarkGiantSpells {
     private TNDarkGiantSpells(){}
     public static int count(){return MOVES.length;}
     public static Move move(int index){return MOVES[Math.max(0,Math.min(MOVES.length-1,index))];}
-    public static int pick(net.minecraft.util.RandomSource random){
-        int total=0;for(var m:MOVES)total+=m.weight();
+    public static int pick(net.minecraft.util.RandomSource random){return weightedPick(random,-1,true);}
+    /** Start with siphon; alternate the two T3 moves once every three completed casts. */
+    public static int pick(net.minecraft.util.RandomSource random,int completedCasts,int previous){
+        if(completedCasts%3==0)return (completedCasts/3)%2==0?6:2;
+        return weightedPick(random,previous,false);
+    }
+    private static int weightedPick(net.minecraft.util.RandomSource random,int previous,boolean includeTierThree){
+        int total=0;
+        for(int i=0;i<MOVES.length;i++)if(i!=previous&&(includeTierThree||MOVES[i].tier()!=3))total+=MOVES[i].weight();
         int roll=random.nextInt(total);
-        for(int i=0;i<MOVES.length;i++){roll-=MOVES[i].weight();if(roll<0)return i;}
+        for(int i=0;i<MOVES.length;i++)if(i!=previous&&(includeTierThree||MOVES[i].tier()!=3)){
+            roll-=MOVES[i].weight();if(roll<0)return i;
+        }
         return 0;
     }
     public static String animation(Move move){

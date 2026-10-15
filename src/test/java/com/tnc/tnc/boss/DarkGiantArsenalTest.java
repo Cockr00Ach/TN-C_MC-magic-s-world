@@ -6,6 +6,22 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DarkGiantArsenalTest {
+    @Test void everyThreeCastsIncludeAnAlternatingTierThreeAndAvoidBackToBackRepeats(){
+        for(int seed=0;seed<100;seed++){
+            var random=net.minecraft.util.RandomSource.create(seed);
+            int previous=-1;
+            for(int cast=0;cast<60;cast++){
+                int selected=TNDarkGiantSpells.pick(random,cast,previous);
+                var move=TNDarkGiantSpells.move(selected);
+                assertNotEquals(previous,selected);
+                if(cast%3==0){
+                    assertEquals(3,move.tier());
+                    assertEquals((cast/3)%2==0?"sacrifice":"night_embrace",move.path());
+                }else assertTrue(move.tier()>=4);
+                previous=selected;
+            }
+        }
+    }
     @Test void requestedTiersMatchTheActualPackAndEveryMoveHasAnAnimatedWindup() throws Exception {
         var expected=java.util.Map.of("black_ruin",4,"slay_light",5,"devour_light",5,"sacrifice",3,"evil_god",5);
         Path pack;
