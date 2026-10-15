@@ -18,23 +18,28 @@ public final class EarthAttackEntity extends Entity {
             WAIT=SynchedEntityData.defineId(EarthAttackEntity.class,EntityDataSerializers.INT),AGE=SynchedEntityData.defineId(EarthAttackEntity.class,EntityDataSerializers.INT),BURST_AGE=SynchedEntityData.defineId(EarthAttackEntity.class,EntityDataSerializers.INT);
     private static final EntityDataAccessor<String> MODEL=SynchedEntityData.defineId(EarthAttackEntity.class,EntityDataSerializers.STRING);
     private static final EntityDataAccessor<Float> SCALE=SynchedEntityData.defineId(EarthAttackEntity.class,EntityDataSerializers.FLOAT),
-            HEIGHT=SynchedEntityData.defineId(EarthAttackEntity.class,EntityDataSerializers.FLOAT);
+            HEIGHT=SynchedEntityData.defineId(EarthAttackEntity.class,EntityDataSerializers.FLOAT),
+            DROP_HEIGHT=SynchedEntityData.defineId(EarthAttackEntity.class,EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Boolean> DONE=SynchedEntityData.defineId(EarthAttackEntity.class,EntityDataSerializers.BOOLEAN);
     private Vec3 start=Vec3.ZERO,end=Vec3.ZERO,velocity=Vec3.ZERO;
     private int owner=-1,ttl=100,hitAt=-1;private float damage;private double radius;
     private DamageSource source;private final WindEarthVisualClock clock=new WindEarthVisualClock();
     Vec3 damageCentre;
     public EarthAttackEntity(EntityType<? extends EarthAttackEntity> type,Level level){super(type,level);noPhysics=true;setNoGravity(true);}
-    protected void defineSynchedData(){entityData.define(MODE,0);entityData.define(WAIT,0);entityData.define(AGE,0);entityData.define(BURST_AGE,-100);entityData.define(MODEL,"earth_clod");entityData.define(SCALE,1F);entityData.define(HEIGHT,1F);entityData.define(DONE,false);}
+    protected void defineSynchedData(){entityData.define(MODE,0);entityData.define(WAIT,0);entityData.define(AGE,0);entityData.define(BURST_AGE,-100);entityData.define(MODEL,"earth_clod");entityData.define(SCALE,1F);entityData.define(HEIGHT,1F);entityData.define(DROP_HEIGHT,0F);entityData.define(DONE,false);}
     public int mode(){return entityData.get(MODE);}public int waitTicks(){return entityData.get(WAIT);}
     public String model(){return entityData.get(MODEL);}public float scale(){return entityData.get(SCALE);}public float height(){return entityData.get(HEIGHT);}
+    public float dropHeight(){return entityData.get(DROP_HEIGHT);}
     public int burstAge(){return entityData.get(BURST_AGE);}
     public int burstLife(){return mode()==2?24:14;}
     public boolean done(){return entityData.get(DONE);}public double age(float partial){return clock.phase(tickCount,partial,entityData.get(AGE),1);}
     public void configure(LivingEntity caster,int mode,String model,Vec3 start,Vec3 end,float scale,float height,int wait,int ttl,float damage,double radius,DamageSource source) {
         owner=caster.getId();this.start=start;this.end=end;this.ttl=ttl;this.damage=damage;this.radius=radius;this.source=source;
         entityData.set(MODE,mode);entityData.set(MODEL,model);entityData.set(SCALE,scale);entityData.set(HEIGHT,height);entityData.set(WAIT,wait);
-        velocity=end.subtract(start).normalize().scale(mode==3?start.distanceTo(end)+2:1.8);setPos(start);
+        entityData.set(DROP_HEIGHT,mode==3?(float)Math.max(0,start.y-end.y):0F);
+        velocity=end.subtract(start).normalize().scale(mode==3?start.distanceTo(end)+2:1.8);
+        // Track the target on the ground while the renderer shows the suspended spear above it.
+        setPos(mode==3?end:start);
         setYRot((float)Math.toDegrees(Math.atan2(velocity.x,velocity.z)));
         setXRot((float)-Math.toDegrees(Math.asin(Math.max(-1,Math.min(1,velocity.normalize().y)))));
     }
@@ -46,14 +51,16 @@ public final class EarthAttackEntity extends Entity {
         if(mode()==0||mode()==3||mode()==5) {
             if(age>24){discard();return;}
             if(age==1)((ServerLevel)level()).playSound(null,position().x,position().y,position().z,SoundEvents.GENERIC_EXPLODE,SoundSource.PLAYERS,.65F,1.2F);
-            Vec3 next=position().add(velocity);
-            var wall=level().clip(new ClipContext(position(),next,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,this));
+            Vec3 origin=mode()==3?start:position();
+            Vec3 next=origin.add(velocity);
+            var wall=level().clip(new ClipContext(origin,next,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,this));
             if(wall.getType()!=HitResult.Type.MISS)next=wall.getLocation();
             LivingEntity target=null;double best=Double.MAX_VALUE;
-            for(var e:level().getEntitiesOfClass(LivingEntity.class,getBoundingBox().expandTowards(velocity).inflate(.8),
+            var pathBounds=mode()==3?new AABB(origin,next).inflate(.8):getBoundingBox().expandTowards(velocity).inflate(.8);
+            for(var e:level().getEntitiesOfClass(LivingEntity.class,pathBounds,
                     e->e.isAlive()&&e!=living&&!e.isAlliedTo(living)&&!e.isSpectator())) {
-                var hit=e.getBoundingBox().inflate(.4).clip(position(),next);
-                if(hit.isPresent()&&position().distanceToSqr(hit.get())<best){target=e;best=position().distanceToSqr(hit.get());next=hit.get();}
+                var hit=e.getBoundingBox().inflate(.4).clip(origin,next);
+                if(hit.isPresent()&&origin.distanceToSqr(hit.get())<best){target=e;best=origin.distanceToSqr(hit.get());next=hit.get();}
             }
             setPos(next);
             if(target!=null||wall.getType()!=HitResult.Type.MISS||mode()==3&&age>=1)burst(living);
@@ -145,6 +152,13 @@ public final class EarthAttackEntity extends Entity {
     public net.minecraft.network.protocol.Packet<net.minecraft.network.protocol.game.ClientGamePacketListener> getAddEntityPacket(){return net.minecraftforge.network.NetworkHooks.getEntitySpawningPacket(this);}
     public boolean isPickable(){return false;}public boolean isAttackable(){return false;}
     public boolean shouldRenderAtSqrDistance(double distance){return distance<512*512;}
-    public AABB getBoundingBoxForCulling(){return super.getBoundingBoxForCulling().inflate(Math.max(scale(),height())*2+3);}
+    public AABB getBoundingBoxForCulling(){
+        if(mode()==3) {
+            double lift=done()?0:dropHeight();
+            double half=scale()*.5+1;
+            return new AABB(getX()-half,getY()-1,getZ()-half,getX()+half,getY()+lift+height()+1,getZ()+half);
+        }
+        return super.getBoundingBoxForCulling().inflate(Math.max(scale(),height())*2+3);
+    }
     protected void readAdditionalSaveData(CompoundTag tag){discard();}protected void addAdditionalSaveData(CompoundTag tag){}
 }

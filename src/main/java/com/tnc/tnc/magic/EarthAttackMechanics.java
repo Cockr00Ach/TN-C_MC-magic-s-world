@@ -21,7 +21,7 @@ public final class EarthAttackMechanics {
         float damage=(float)(power.randomValue()*EarthActionRules.coefficient(kind,tier));
         if(kind==3&&tier>=3) {
             for(int i=0;i<EarthActionRules.shots(tier);i++) {
-                if(tier==5)spawn(player,3,"earth_spear_sharp",target.add(0,55,0),target,25,70,20,55,damage,6,source);
+                if(tier==5)spawn(player,3,"earth_spear_sharp",target.add(0,55,0),target,25,70,40,80,damage,6,source);
                 else {
                     Vec3 start=tier==4?player.position().add(0,3.5+(i/5)*1.8,0).add(side.scale((i%5-2)*1.8))
                             :player.getEyePosition().add(player.getLookAngle().scale(1.2));

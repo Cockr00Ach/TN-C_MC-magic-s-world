@@ -43,6 +43,11 @@ public final class ElementSceneGameTests {
         var enemy=h.spawn(EntityType.ZOMBIE,new BlockPos(4,2,4));enemy.setNoAi(true);
         var e=WindEarthVisualMechanics.ATTACK.get().create(h.getLevel());float hp=enemy.getHealth();
         e.configure(caster,3,"earth_spear_sharp",enemy.position().add(0,125,0),enemy.position(),25,70,14,45,3,6,h.getLevel().damageSources().magic());
+        h.assertTrue(e.position().distanceTo(enemy.position())<.01,"Sky spear network anchor stays at the target instead of above the player tracking area");
+        h.assertTrue(Math.abs(e.dropHeight()-125)<.01,"Suspension height must be synced separately from the ground anchor");
+        var bounds=e.getBoundingBoxForCulling();
+        h.assertTrue(bounds.minY<=enemy.getY()&&bounds.maxY>=enemy.getY()+125+70,"Culling bounds cover the full sky spear and its fall path");
+        e.tickCount=14;e.tick();h.assertTrue(!e.done()&&enemy.getHealth()==hp,"Spear remains suspended throughout the windup");
         e.tickCount=15;e.tick();h.assertTrue(e.done()&&enemy.getHealth()<hp,"Full-height spear falls and damages the target in one tick");
         caster.discard();enemy.discard();e.discard();h.succeed();
     }
