@@ -230,6 +230,8 @@ dependencies {
 
     testImplementation platform('org.junit:junit-bom:5.10.2')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation fg.deobf('geckolib:geckolib:4.8.4')
+    testRuntimeOnly files(zipTree('libs/geckolib-4.8.4.jar').matching { include 'META-INF/jarjar/*.jar' })
     if (project.hasProperty('tavernClientAudit')) {
         // Dev-only nested Fabric API SRG names must also match Mojmap; game jar untouched.
         runtimeOnly files('work/tavern-fixtures/conquest-dev.jar')

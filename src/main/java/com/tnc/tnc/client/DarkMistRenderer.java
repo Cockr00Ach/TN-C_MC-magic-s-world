@@ -36,7 +36,7 @@ public final class DarkMistRenderer extends EntityRenderer<DarkFogCloudEntity> {
     @Override public ResourceLocation getTextureLocation(DarkFogCloudEntity entity) { return vapor; }
     @Override public boolean shouldRender(DarkFogCloudEntity entity, Frustum frustum, double x, double y, double z) {
         double r = entity.syncedRadius();
-        return entity.distanceToSqr(x,y,z) < 128*128 && frustum.isVisible(
+        return entity.distanceToSqr(x,y,z) < (r+128)*(r+128) && frustum.isVisible(
                 new AABB(entity.getX()-r,entity.getY()-.5,entity.getZ()-r,
                         entity.getX()+r,entity.getY()+6,entity.getZ()+r));
     }
@@ -48,23 +48,25 @@ public final class DarkMistRenderer extends EntityRenderer<DarkFogCloudEntity> {
         float appear = (float)Math.min(1,age/12);
         int tier = Math.max(1,entity.syncedTier());
         Vec3 camera = entityRenderDispatcher.camera.getPosition().subtract(entity.getPosition(partial));
-        // Fixed geometry budget: 57 broad overlapping sheets, no accumulating particles.
-        var sheets = new java.util.ArrayList<Vec3>(57);
-        for (int layer=0;layer<3;layer++) for (int i=0;i<19;i++) {
-            double angle=i*2.399963+layer*1.7+age*.0015;
-            double distance=radius*.69*Math.sqrt(i/18D);
+        // Boss domains use a fixed-budget rim; the enlarged interior has no sheets or particles.
+        boolean domain=radius>64;
+        int layers=domain?2:3,segments=domain?32:19;
+        var sheets = new java.util.ArrayList<Vec3>(layers*segments);
+        for (int layer=0;layer<layers;layer++) for (int i=0;i<segments;i++) {
+            double angle=(domain?i*Math.PI*2/segments:i*2.399963)+layer*(domain?.08:1.7)+age*.0015;
+            double distance=domain?radius*.96:radius*.69*Math.sqrt(i/18D);
             sheets.add(new Vec3(Math.cos(angle)*distance,
                     .65+layer*(.65+tier*.07)+Math.sin(age*.025+i*1.7+layer)*.16,
                     Math.sin(angle)*distance));
         }
         sheets.sort(java.util.Comparator.comparingDouble((Vec3 p)->p.distanceToSqr(camera)).reversed());
         VertexConsumer out=buffers.getBuffer(RenderType.entityTranslucent(vapor));
-        float halfWidth=(float)Math.max(1.2,radius*.38);
-        float halfHeight=1.1F+tier*.1F;
+        float halfWidth=(float)Math.max(1.2,radius*(domain?.08:.38));
+        float halfHeight=domain?3.2F:1.1F+tier*.1F;
         for (Vec3 center:sheets) {
             // A camera passing through a sheet must not see a hard black screen.
             float near=(float)Math.min(1,center.distanceTo(camera)/1.4);
-            float alpha=appear*(.43F+tier*.022F)*near;
+            float alpha=appear*(domain?.42F:.43F+tier*.022F)*near;
             pose.pushPose();
             pose.translate(center.x,center.y,center.z);
             pose.mulPose(entityRenderDispatcher.cameraOrientation());

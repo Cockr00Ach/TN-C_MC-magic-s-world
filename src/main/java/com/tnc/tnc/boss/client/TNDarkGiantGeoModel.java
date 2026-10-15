@@ -13,6 +13,12 @@ import software.bernie.geckolib.model.GeoModel;
  */
 public class TNDarkGiantGeoModel extends GeoModel<TNDarkGiantEntity> {
     @Override
+    public software.bernie.geckolib.cache.object.BakedGeoModel getBakedModel(ResourceLocation resource){
+        var model=super.getBakedModel(resource);
+        DarkGiantArmorMesh.apply(model);
+        return model;
+    }
+    @Override
     public ResourceLocation getModelResource(TNDarkGiantEntity a) { return TNDarkGiantEntity.modelResource(); }
     @Override
     public ResourceLocation getTextureResource(TNDarkGiantEntity a) { return TNDarkGiantEntity.textureResource(); }

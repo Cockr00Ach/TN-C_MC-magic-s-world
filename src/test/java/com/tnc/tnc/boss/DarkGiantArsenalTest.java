@@ -6,6 +6,26 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DarkGiantArsenalTest {
+    @Test void newLegRigHasIndependentKneesAndParallelFeet() throws Exception {
+        var geo=JsonParser.parseString(Files.readString(Path.of("src/main/resources/assets/tnc/geo/entity/dark_giant.geo.json")))
+                .getAsJsonObject().getAsJsonArray("minecraft:geometry").get(0).getAsJsonObject();
+        var bones=new java.util.HashMap<String,com.google.gson.JsonObject>();
+        geo.getAsJsonArray("bones").forEach(b->bones.put(b.getAsJsonObject().get("name").getAsString(),b.getAsJsonObject()));
+        var animations=JsonParser.parseString(Files.readString(Path.of("src/main/resources/assets/tnc/animations/entity/dark_giant.animation.json")))
+                .getAsJsonObject().getAsJsonObject("animations");
+        assertTrue(animations.has("idle"));
+        for(String side:new String[]{"right","left"}){
+            assertEquals("leg"+side,bones.get("shin"+side).get("parent").getAsString());
+            assertEquals("shin"+side,bones.get("foot"+side).get("parent").getAsString());
+            for(String part:new String[]{"leg","shin","foot"}){
+                var track=animations.getAsJsonObject("walk").getAsJsonObject("bones").getAsJsonObject(part+side).getAsJsonObject("rotation");
+                for(var frame:track.entrySet()){
+                    assertEquals(0,frame.getValue().getAsJsonArray().get(1).getAsDouble(),.001);
+                    assertEquals(0,frame.getValue().getAsJsonArray().get(2).getAsDouble(),.001);
+                }
+            }
+        }
+    }
     @Test void everyThreeCastsIncludeAnAlternatingTierThreeAndAvoidBackToBackRepeats(){
         for(int seed=0;seed<100;seed++){
             var random=net.minecraft.util.RandomSource.create(seed);
@@ -13,11 +33,12 @@ class DarkGiantArsenalTest {
             for(int cast=0;cast<60;cast++){
                 int selected=TNDarkGiantSpells.pick(random,cast,previous);
                 var move=TNDarkGiantSpells.move(selected);
-                assertNotEquals(previous,selected);
+                if(selected!=3)assertNotEquals(previous,selected);
                 if(cast%3==0){
                     assertEquals(3,move.tier());
                     assertEquals((cast/3)%2==0?"sacrifice":"night_embrace",move.path());
-                }else assertTrue(move.tier()>=4);
+                }else if(cast%3==1)assertEquals("black_ruin",move.path());
+                else assertTrue(move.tier()>=4);
                 previous=selected;
             }
         }

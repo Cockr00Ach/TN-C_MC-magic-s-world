@@ -11,7 +11,7 @@ public final class TNDarkGiantSpells {
         new Move("dark_king",4,SUMMON,56,2,"暗之国王"),
         new Move("evil_god",5,SUMMON,56,2,"邪神"),
         new Move("night_embrace",3,HAND,44,2,"黑夜之手 T3"),
-        new Move("black_ruin",4,HAND,44,3,"黑夜之手 T4"),
+        new Move("black_ruin",4,HAND,44,12,"黑夜之手 T4"),
         new Move("slay_light",5,HAND,56,3,"黑夜之手 T5"),
         new Move("devour_light",5,FOG,52,2,"黑雾 T5"),
         new Move("sacrifice",3,SIPHON,44,3,"以伤换伤 T3")
@@ -23,13 +23,14 @@ public final class TNDarkGiantSpells {
     /** Start with siphon; alternate the two T3 moves once every three completed casts. */
     public static int pick(net.minecraft.util.RandomSource random,int completedCasts,int previous){
         if(completedCasts%3==0)return (completedCasts/3)%2==0?6:2;
+        if(completedCasts%3==1)return 3;
         return weightedPick(random,previous,false);
     }
     private static int weightedPick(net.minecraft.util.RandomSource random,int previous,boolean includeTierThree){
         int total=0;
-        for(int i=0;i<MOVES.length;i++)if(i!=previous&&(includeTierThree||MOVES[i].tier()!=3))total+=MOVES[i].weight();
+        for(int i=0;i<MOVES.length;i++)if((i!=previous||i==3)&&(includeTierThree||MOVES[i].tier()!=3))total+=MOVES[i].weight();
         int roll=random.nextInt(total);
-        for(int i=0;i<MOVES.length;i++)if(i!=previous&&(includeTierThree||MOVES[i].tier()!=3)){
+        for(int i=0;i<MOVES.length;i++)if((i!=previous||i==3)&&(includeTierThree||MOVES[i].tier()!=3)){
             roll-=MOVES[i].weight();if(roll<0)return i;
         }
         return 0;

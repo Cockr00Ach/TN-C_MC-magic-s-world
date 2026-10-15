@@ -15,6 +15,6 @@ public final class DarkSiphonRenderer extends EntityRenderer<TNDarkDrainEntity> 
         Vec3 origin=e.getPosition(partial),start=victim.getPosition(partial).add(0,victim.getBbHeight()*.55,0).subtract(origin),
                 end=caster.getPosition(partial).add(0,caster.getBbHeight()*.62,0).subtract(origin);
         for(int i=0;i<DarkSiphonRules.strands(e.tier());i++)NightHandGeometry.tube(buffers.getBuffer(NightHandRenderTypes.geometry()),
-                pose.last().pose(),start,end,.035+e.tier()*.006,i,true,e.tickCount+partial);
+                pose.last().pose(),start,end,(.035+e.tier()*.006)*(caster instanceof com.tnc.tnc.boss.TNDarkGiantEntity?10:1),i,true,e.tickCount+partial);
     }
 }

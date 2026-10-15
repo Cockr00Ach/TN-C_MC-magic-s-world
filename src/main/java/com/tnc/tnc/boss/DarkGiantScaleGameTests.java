@@ -7,6 +7,15 @@ import net.minecraftforge.gametest.*;
 @GameTestHolder("tnc") @PrefixGameTestTemplate(false)
 public final class DarkGiantScaleGameTests {
     @GameTest(template="building_test_empty",timeoutTicks=20,batch="dark_giant_scale")
+    public static void tenfoldSummonsHaveMatchingCollisionDimensions(GameTestHelper h){
+        var summon=com.tnc.tnc.magic.TNOrbEntities.DARK_KING.get().create(h.getLevel());
+        summon.setScale(10);
+        h.assertTrue(Math.abs(summon.scale()-10)<.001,"Summon scale is not clamped to the old eightfold limit");
+        h.assertTrue(Math.abs(summon.getBbWidth()-9)<.001&&Math.abs(summon.getBbHeight()-20)<.001,
+                "Model scale and collision dimensions agree");
+        summon.discard();h.succeed();
+    }
+    @GameTest(template="building_test_empty",timeoutTicks=20,batch="dark_giant_scale")
     public static void existingGiantsUpgradeTheirSavedDetectionRange(GameTestHelper h){
         var boss=TNNpcs.DARK_GIANT.get().create(h.getLevel());
         boss.setNoAi(true);

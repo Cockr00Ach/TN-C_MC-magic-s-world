@@ -391,7 +391,8 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
             if (state.isMoving()&&!isCasting()) {
                 return state.setAndContinue(RawAnimation.begin().thenLoop(ANIM_WALK));
             }
-            return PlayState.STOP;   // 站着 = 模型的静止姿 ✓（作者还没导 idle ✓）
+            if(isCasting())return PlayState.STOP;
+            return state.setAndContinue(RawAnimation.begin().thenLoop("idle"));
         });
         controllers.add(move);
 
