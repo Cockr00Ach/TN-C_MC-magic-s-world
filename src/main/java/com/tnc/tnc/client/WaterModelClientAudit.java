@@ -48,9 +48,9 @@ public final class WaterModelClientAudit {
         }
         if(++frames<35||saving)return;
         if(!saved) {saving=true;Screenshot.grab(mc.gameDirectory,"water-models-"+page+".png",mc.getMainRenderTarget(),m->{saved=true;saving=false;});return;}
-        if(++page<4){frames=0;saved=false;return;}
+        if(++page<5){frames=0;saved=false;return;}
         Files.writeString(Path.of(System.getProperty("tnc.waterModelAuditReport")),new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(
-                Map.of("rain_tiers",5,"models",5,"seal_depth_cases",4,"sword_path_frames",4,"slash_angles",20,"screenshots",4,"failures",failures,"scope","Actual isolated dev-client rendering, not full-pack FPS")));
+                Map.of("rain_tiers",5,"models",5,"water_transparency_cases",6,"seal_depth_cases",4,"sword_path_frames",4,"slash_angles",20,"screenshots",5,"failures",failures,"scope","Actual isolated dev-client rendering, not full-pack FPS")));
         mc.stop();
     }
     @SuppressWarnings("unchecked") private static void data(TNWaterFieldEntity e,String field,Object value)throws Exception {
@@ -101,10 +101,40 @@ public final class WaterModelClientAudit {
                 buffers.endBatch();poses.popPose();
             }
         }
+        private void waterTransparency(GuiGraphics g) {
+            g.fill(0,0,width,height,0xFF101B27);
+            g.drawString(font,"WATER + SEAL / late transparency / background boss and foreground wall",24,18,0xB4F3FF,false);
+            for(int i=0;i<6;i++) {
+                int col=i%3,row=i/3,cellW=width/3,cellH=(height-65)/2;
+                g.drawString(font,(row==0?"BALL + SEAL / ":"T5 BEAM / ")+new String[]{"BOSS FIRST","BOSS LAST","WALL LAST"}[col],col*cellW+12,55+row*cellH,0xCBF6FF,false);
+                g.flush();var poses=g.pose();poses.pushPose();poses.translate((col+.5)*cellW,75+(row+.5)*cellH,150);
+                poses.scale(cellW*.36F,-cellW*.36F,cellW*.36F);
+                var buffers=minecraft.renderBuffers().bufferSource();
+                WaterTransparencyPass.begin();
+                if(col==0)depthBlock(poses,buffers,false);
+                if(row==0) {
+                    WaterSolidModels.seal(poses,buffers,Vec3.ZERO,new Vec3(0,0,1),.8,40,1);
+                    poses.pushPose();poses.translate(0,0,.5);
+                    var bolt=TNOrbEntities.WATER_BOLT.get().create(minecraft.level);bolt.setDeltaMovement(0,0,1);
+                    minecraft.getEntityRenderDispatcher().getRenderer(bolt).render(bolt,0,0,poses,buffers,15728880);
+                    poses.popPose();
+                } else {
+                    poses.pushPose();poses.translate(-.72,0,.4);poses.scale(.015F,.015F,.015F);
+                    WaterVisualBuffers.draw(WaterTransparencyPass.route(buffers),(body,glow)->WaterBeamVisuals.render(
+                            body,glow,poses.last().pose(),5,new Vec3(1,0,0),96,40,1,true));
+                    poses.popPose();
+                }
+                buffers.endBatch();
+                if(col==1)depthBlock(poses,buffers,false);
+                if(col==2){poses.pushPose();poses.translate(0,0,1);depthBlock(poses,buffers,true);poses.popPose();}
+                WaterTransparencyPass.finish();poses.popPose();
+            }
+        }
         @Override public void render(GuiGraphics g,int mx,int my,float partial) {
             g.fill(0,0,width,height,0xFF101B27);
             if(page==2){sealDepth(g);return;}
             if(page==3){swordPath(g);return;}
+            if(page==4){waterTransparency(g);return;}
             g.drawString(font,page==0?"WATER / SOLID RAIN MODELS / TIERS 1-5":"WATER / FORWARD SLASH / 20 DISTINCT ROLLS",24,18,0xB4F3FF,false);
             int count=page==0?8:20;
             for(int i=0;i<count;i++) {
