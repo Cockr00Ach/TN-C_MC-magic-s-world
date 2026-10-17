@@ -582,5 +582,9 @@
   "entity.tnc.drumbelly_otter": "鼓腹砂獭",
   "item.tnc.drumbelly_otter_spawn_egg": "鼓腹砂獭刷怪蛋",
   "entity.tnc.water_leviathan": "蓝金水渊兽",
-  "item.tnc.water_leviathan_spawn_egg": "蓝金水渊兽刷怪蛋"
+  "item.tnc.water_leviathan_spawn_egg": "蓝金水渊兽刷怪蛋",
+  "item.tnc.purity_amulet": "净世护符",
+  "tooltip.tnc.purity_amulet.equip": "§7佩戴于项链／护符槽或副手",
+  "tooltip.tnc.purity_amulet.immunity": "§b免疫所有负面与中立异常状态，清除已有异常",
+  "tooltip.tnc.purity_amulet.benefits": "§7保留增益；免疫领主血线定身与牵引"
 }
