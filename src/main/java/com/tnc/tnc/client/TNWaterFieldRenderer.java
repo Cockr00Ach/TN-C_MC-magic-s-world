@@ -22,6 +22,7 @@ public final class TNWaterFieldRenderer extends EntityRenderer<TNWaterFieldEntit
         double below=e.kind()==1&&e.tier()==3?r:1;
         return f.isVisible(new net.minecraft.world.phys.AABB(e.position(),center).inflate(r,below,r).expandTowards(0,h,0));}
     @Override public void render(TNWaterFieldEntity e,float yaw,float partial,PoseStack stack,MultiBufferSource buffers,int light) {
+        buffers=WaterTransparencyPass.route(buffers);
         if(e.isEmitter()) {
             WaterSolidModels.seal(stack,buffers,e.direction().scale(.7),e.direction(),1.1,e.visualAge(partial),1);
             return;
@@ -141,6 +142,6 @@ public final class TNWaterFieldRenderer extends EntityRenderer<TNWaterFieldEntit
         //（每个子阵原来是一座完整 sigil ✗ ⇒ 光这一句就上万顶点 ✗）
         if(e.kind()==2)WaterGeometry.richCircle(buffers,stack,new Vec3(0,.06,0),up,radius,animation,fade*.65F,3);
         if(e.kind()==2)WaterSolidModels.prisonPanels(stack,buffers,radius,e.height(),WaterGeometry.panelCount(radius),age,fade*.78F);
-        if(e.kind()==2 && e.tier()==5)SeaGodSwordVisuals.render(age,animation,radius,fade,stack,buffers,e.swordCount(),e.skySealHeight());
+        if(e.kind()==2 && e.tier()==5)SeaGodSwordVisuals.render(age,animation,radius,fade,stack,buffers,e.swordCount(),e.skySealHeight(),e.bossCrypt());
     }
 }

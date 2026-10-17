@@ -1,0 +1,52 @@
+{
+  "school": "AIR",
+  "group": "wind_weapon",
+  "range": 96,
+  "learn": {
+    "tier": 4
+  },
+  "cast": {
+    "duration": 1.08,
+    "animation": "spell_engine:one_handed_area_charge",
+    "sound": {
+      "id": "spell_engine:generic_wind_charging"
+    },
+    "particles": [
+      {
+        "particle_id": "minecraft:cloud",
+        "shape": "CIRCLE",
+        "origin": "FEET",
+        "count": 5,
+        "min_speed": 0.03,
+        "max_speed": 0.12
+      }
+    ]
+  },
+  "release": {
+    "target": {
+      "type": "SELF"
+    },
+    "animation": "spell_engine:one_handed_area_release",
+    "sound": {
+      "id": "minecraft:entity.player.attack.sweep"
+    }
+  },
+  "impact": [
+    {
+      "action": {
+        "type": "STATUS_EFFECT",
+        "status_effect": {
+          "effect_id": "tnc:wind_cast_1_4",
+          "duration": 0.05,
+          "amplifier": 0,
+          "apply_mode": "SET",
+          "show_particles": false
+        }
+      }
+    }
+  ],
+  "cost": {
+    "exhaust": 0,
+    "cooldown_duration": 14
+  }
+}

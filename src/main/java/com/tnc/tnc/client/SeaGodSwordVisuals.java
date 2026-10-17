@@ -15,6 +15,9 @@ final class SeaGodSwordVisuals {
         render(age,animation,radius,fieldFade,stack,buffers,SeaGodSwordRules.COUNT,116);
     }
     static void render(double age,double animation,double radius,float fieldFade,PoseStack stack,MultiBufferSource buffers,int count,double sealHeight) {
+        render(age,animation,radius,fieldFade,stack,buffers,count,sealHeight,false);
+    }
+    static void render(double age,double animation,double radius,float fieldFade,PoseStack stack,MultiBufferSource buffers,int count,double sealHeight,boolean bossCast) {
         float sealFade=0;
         for(int strike=0;strike<count;strike++) {
             double phase=age-strike*SeaGodSwordRules.INTERVAL;
@@ -26,8 +29,8 @@ final class SeaGodSwordVisuals {
             WaterGeometry.richCircle(buffers,stack,new Vec3(0,sealHeight-4,0),UP,24,-animation,sealFade*.85F,3);
         }
         // Stationary gateways along the blade's actual 64-block descent, not on the moving sword.
-        // Repeated player strikes share the same five models instead of duplicating them.
-        for(int i=0;i<SeaGodSwordRules.PATH_SEAL_COUNT;i++) {
+        // Only boss crypts receive these extra gateways; player swords retain their original presentation.
+        if(bossCast)for(int i=0;i<SeaGodSwordRules.PATH_SEAL_COUNT;i++) {
             float pathFade=0;
             for(int strike=0;strike<count;strike++)
                 pathFade=Math.max(pathFade,fieldFade*SeaGodSwordRules.pathSealOpacity(age-strike*SeaGodSwordRules.INTERVAL,i));

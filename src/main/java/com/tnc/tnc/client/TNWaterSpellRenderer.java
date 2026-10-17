@@ -15,6 +15,7 @@ public final class TNWaterSpellRenderer extends EntityRenderer<TNWaterSpellEntit
             new net.minecraft.world.phys.AABB(e.position(),e.position().add(e.direction().scale(e.length())))
                     .inflate(e.circleRadius()*1.3));}
     @Override public void render(TNWaterSpellEntity e,float yaw,float partial,PoseStack stack,MultiBufferSource buffers,int light) {
+        buffers=WaterTransparencyPass.route(buffers);
         double age=e.age()+partial,charge=WaterSpellRules.charge(e.tier());
         float fade=e.firedAt()<0?1:(float)Math.min(1,(e.firedAt()+e.duration()-age)/10);
         if(fade<=0)return;

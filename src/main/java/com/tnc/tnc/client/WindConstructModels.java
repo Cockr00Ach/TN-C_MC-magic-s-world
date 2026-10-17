@@ -18,9 +18,10 @@ public final class WindConstructModels {
     public static ResourceLocation id(String name){return ResourceLocation.fromNamespaceAndPath("tnc","wind/arsenal/"+name);}
     public static void draw(String name,PoseStack p,MultiBufferSource b,float alpha){
         p.pushPose();p.translate(-.5,-.5,-.5);
-        var mc=Minecraft.getInstance();
+        var mc=Minecraft.getInstance();boolean metal=name.equals("sword")||name.equals("spear");
+        var layer=metal&&alpha>=.97F?RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS):WindModelRenderTypes.alpha();
         mc.getItemRenderer().renderModelLists(mc.getModelManager().getModel(id(name)),ItemStack.EMPTY,
-                LightTexture.FULL_BRIGHT,OverlayTexture.NO_OVERLAY,p,new Tint(b.getBuffer(WindModelRenderTypes.alpha()),alpha));
+                LightTexture.FULL_BRIGHT,OverlayTexture.NO_OVERLAY,p,new Tint(b.getBuffer(layer),alpha,metal));
         p.popPose();
     }
     public static void weapon(int form,PoseStack p,MultiBufferSource b,float alpha,boolean tip){
@@ -65,9 +66,9 @@ public final class WindConstructModels {
             p.scale(.48F,.48F,.48F);weapon(form,p,b,.78F,false);p.popPose();
         }
     }
-    private record Tint(VertexConsumer out,float alpha) implements VertexConsumer {
+    private record Tint(VertexConsumer out,float alpha,boolean metal) implements VertexConsumer {
         public VertexConsumer vertex(double x,double y,double z){out.vertex(x,y,z);return this;}
-        public VertexConsumer color(int r,int g,int b,int a){out.color((int)(r*.72F),g,(int)(b*.94F),(int)(a*alpha));return this;}
+        public VertexConsumer color(int r,int g,int b,int a){out.color(metal?r:(int)(r*.72F),g,metal?b:(int)(b*.94F),(int)(a*alpha));return this;}
         public VertexConsumer uv(float u,float v){out.uv(u,v);return this;}
         public VertexConsumer overlayCoords(int u,int v){out.overlayCoords(u,v);return this;}
         public VertexConsumer uv2(int u,int v){out.uv2(u,v);return this;}

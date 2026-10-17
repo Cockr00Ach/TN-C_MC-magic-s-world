@@ -4,6 +4,21 @@
     "tnc:wind_speed",
     "tnc:greater_wind_speed",
     "tnc:super_wind_speed",
-    "tnc:wind_god_descent"
+    "tnc:wind_god_descent",
+    "tnc:gale",
+    "tnc:great_gale",
+    "tnc:vast_gale",
+    "tnc:giant_gale",
+    "tnc:wind_god_gale",
+    "tnc:wind_ball_1",
+    "tnc:wind_ball_2",
+    "tnc:wind_ball_3",
+    "tnc:wind_ball_4",
+    "tnc:wind_ball_5",
+    "tnc:wind_weapon_1",
+    "tnc:wind_weapon_2",
+    "tnc:wind_weapon_3",
+    "tnc:wind_weapon_4",
+    "tnc:wind_weapon_5"
   ]
 }

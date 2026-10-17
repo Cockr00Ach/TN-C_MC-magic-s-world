@@ -228,21 +228,7 @@ public final class TNWindMechanics {
      * @return 一只都没有时返回 {@code null} ✓
      */
     private static OrbTier orbTier(ServerPlayer player) {
-        if (has(player, WIND_SPIRIT_LORD)) {
-            return TIERS[4];
-        }
-        if (has(player, WIND_SPIRIT_II)) {
-            return TIERS[3];
-        }
-        if (has(player, WIND_SPIRIT)) {
-            return TIERS[2];
-        }
-        if (has(player, WIND_ORB_FIVE)) {
-            return TIERS[1];
-        }
-        if (has(player, WIND_ORB_THREE)) {
-            return TIERS[0];
-        }
+        // Legacy registry entries remain readable, but retired summon effects never create spirits.
         return null;
     }
 
