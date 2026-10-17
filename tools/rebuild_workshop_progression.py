@@ -36,6 +36,7 @@ def build():
    path=RES/'data/tnc/advancements/life_routes'/(adv+'.json')
    if not path.exists():dump(path,{'criteria':{'performed':{'trigger':'minecraft:impossible'}}})
   q={'id':ident,'title':title,'icon':icon,'x':x,'y':y,'size':size,'description':description,'tasks':[task],'dependencies':[keys.get(d,d) for d in deps]}
+  q['hide_dependency_lines']=key.startswith(('node/','accessory/','workshop/source/','workshop/animal/')) and abs(x)>12 and y>75
   quests.append(q);return key
  def device(id,x,y,deps,details):
   label=name('tnc:'+id)
@@ -51,7 +52,7 @@ def build():
   raws.append(add('workshop/raw/'+item,title,item,x,5,['拿到材料即可记录，不收走。','另外备好圆石、熔炉、玻璃瓶、空桶、泥土、线和石砖。'],[prep],item=item,count=count))
  parts=[]
  for x,id,count in [(-15,'forge_firebrick',24),(-5,'magic_forge',1),(5,'forge_core',1),(15,'forge_exhaust',1)]:
-  parts.append(add('workshop/part/'+id,name('tnc:'+id)+' ×'+str(count),'tnc:'+id,x,12,[recipe(id),'炉体需要24炉砖＋1炉口＋1炉核＋1排烟顶。配方还会消耗炉砖，建议先做40炉砖。'],raws,item='tnc:'+id,count=count))
+  parts.append(add('workshop/part/'+id,name('tnc:'+id)+' ×'+str(count),'tnc:'+id,x,12,[recipe(id),'炉体需要24炉砖＋1炉口＋1炉核＋1排烟顶。配方还会消耗炉砖，建议先做40炉砖。'],([raws[0]] if id=='forge_firebrick' else [raws[1],raws[2]] if id=='forge_core' else ['workshop/part/forge_firebrick']),item='tnc:'+id,count=count))
  forge=add('workshop/forge','&6搭好 3×3×3 魔力炉','tnc:magic_forge',0,20,
   ['每行从左到右看，先认清炉口正面朝向：','底层：砖砖砖 / 砖砖砖 / 砖砖砖','中层：砖砖砖 / 砖核砖 / 砖炉砖','顶层：砖砖砖 / 砖烟砖 / 砖砖砖',
    '共24砖、1炉核、1炉口、1排烟顶；没有空心格。右键炉口开GUI，结构示意全部通过才算成型。'],parts,adv='workshop/forge_formed',size=2)
@@ -124,6 +125,16 @@ def build():
 
 def main():
  chapter=build()
+ # Keep existing IDs but teach the two-ended topology instead of obsolete copper wire.
+ replacements={'魔导丝':'青辉导魔晶纤','曜纹导线':'霞金导魔晶纤','星髓导线':'虹星导魔晶纤'}
+ for quest in chapter['quests']:
+  for key in ['title','subtitle','description']:
+   if key not in quest:continue
+   def fix(text):
+    for old,new in replacements.items():text=text.replace(old,new)
+    return text
+   quest[key]=[fix(line) for line in quest[key]] if isinstance(quest[key],list) else fix(quest[key])
+  if quest.get('icon')=='tnc:mana_thread':quest['description'].append('每段晶纤最多两个接口；可转弯、竖接和连机器。分支请用独立的分流装置，晶纤不会自动六向连接。')
  for base in [ROOT/'questbook/ftbquests/chapters',ROOT/'modpack/元素觉醒1.4.3-魔改版-20260915/config/ftbquests/quests/chapters']:dump(base/FILE,chapter)
  print('Workshop progression:',len(chapter['quests']),'quests')
 

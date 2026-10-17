@@ -170,6 +170,7 @@ minecraft {
                 property 'mixin.env.remapRefMap', 'true'
                 property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
             }
+            if (project.hasProperty('heroskandRealmTests')) property 'forge.enabledGameTestNamespaces', 'tncrealm'
             if (project.hasProperty('fullLandmarkTests')) property 'tnc.fullLandmarkTests', 'true'
             if (project.hasProperty('fullSkyIslandTests')) {
                 property 'tnc.fullSkyIslandTests', 'true'
@@ -252,6 +253,10 @@ dependencies {
     testImplementation fg.deobf('geckolib:geckolib:4.8.4')
     testRuntimeOnly files(zipTree('libs/geckolib-4.8.4.jar').matching { include 'META-INF/jarjar/*.jar' })
     if (project.hasProperty('leviathanTests')) {
+        runtimeOnly fg.deobf('geckolib:geckolib:4.8.4')
+    }
+    if (project.hasProperty('heroskandRealmTests')) {
+        runtimeOnly files('work/tavern-fixtures/conquest-dev.jar')
         runtimeOnly fg.deobf('geckolib:geckolib:4.8.4')
     }
     if (project.hasProperty('tavernClientAudit')) {

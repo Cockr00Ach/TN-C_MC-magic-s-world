@@ -13,7 +13,7 @@ public final class RouteGameTests {
         var owner=AdventureGameTests.player(h).getUUID();var source=node(h,RouteKind.POOL,new BlockPos(1,2,1),owner);source.mana=16;
         var valve=node(h,RouteKind.VALVE,new BlockPos(2,2,1),owner);valve.priority=2;
         var wire=node(h,RouteKind.WIRE,new BlockPos(3,2,1),owner);
-        var lamp=node(h,RouteKind.LAMP,new BlockPos(4,2,1),owner);var machine=node(h,RouteKind.SAWMILL,new BlockPos(3,2,2),owner);
+        var lamp=node(h,RouteKind.LAMP,new BlockPos(4,2,1),owner);var machine=node(h,RouteKind.SAWMILL,new BlockPos(2,2,2),owner);
         for(var n:java.util.List.of(source,valve,wire,lamp,machine))RouteNetwork.add(h.getLevel(),n.getBlockPos());
         RouteNetwork.tickNetwork(h.getLevel());RouteNetwork.tickNetwork(h.getLevel());
         h.assertTrue(source.mana>=8,"repeated same-second settlement must share the same eight-mana source budget");
@@ -82,7 +82,27 @@ public final class RouteGameTests {
     }
     @GameTest(template="empty",timeoutTicks=40) public static void wildSpecimensKeepSupportedProperties(GameTestHelper h){RouteWildSpecimensGameTests.everySpecialSpecimenUsesItsOwnSupportedStateProperties(h);}
     @GameTest(template="empty",timeoutTicks=40) public static void wildSkyVinePlacesWithoutCrash(GameTestHelper h){RouteWildSpecimensGameTests.actualSkyVineGenerationOnDirtDoesNotCrashTheServerTick(h);}
-    private static RouteNodeEntity node(GameTestHelper h,RouteKind kind,BlockPos local,java.util.UUID owner){var p=h.absolutePos(local);h.getLevel().setBlock(p,RouteContent.NODES.get(kind.id).get().defaultBlockState(),3);var n=(RouteNodeEntity)h.getLevel().getBlockEntity(p);n.owner=owner;return n;}
+
+    @GameTest(template="empty",timeoutTicks=40) public static void crystalFiberRejectsThirdBranch(GameTestHelper h){
+        var owner=AdventureGameTests.player(h).getUUID();var a=node(h,RouteKind.POOL,new BlockPos(1,2,2),owner);a.mana=100;
+        var fiber=node(h,RouteKind.WIRE,new BlockPos(2,2,2),owner);var b=node(h,RouteKind.SAWMILL,new BlockPos(3,2,2),owner);
+        var branch=node(h,RouteKind.LAMP,new BlockPos(2,2,3),owner);for(var n:java.util.List.of(a,fiber,b,branch))RouteNetwork.add(h.getLevel(),n.getBlockPos());
+        RouteNetwork.tickNetwork(h.getLevel());h.assertTrue(b.mana>0&&branch.mana==0,"third socket must not be visible OR secretly conduct mana");
+        var state=h.getLevel().getBlockState(fiber.getBlockPos());h.assertTrue(RouteWireBlock.ARMS.values().stream().filter(state::getValue).count()==2,"fiber has exactly two endpoints");h.succeed();
+    }
+    @GameTest(template="empty",timeoutTicks=40) public static void crystalFiberTurnsAndClimbsIntoMachine(GameTestHelper h){
+        var owner=AdventureGameTests.player(h).getUUID();var a=node(h,RouteKind.POOL,new BlockPos(1,2,1),owner);a.mana=100;
+        var x=node(h,RouteKind.WIRE,new BlockPos(2,2,1),owner);var y=node(h,RouteKind.WIRE,new BlockPos(2,3,1),owner);var sink=node(h,RouteKind.SAWMILL,new BlockPos(2,3,2),owner);
+        for(var n:java.util.List.of(a,x,y,sink))RouteNetwork.add(h.getLevel(),n.getBlockPos());RouteNetwork.tickNetwork(h.getLevel());
+        h.assertTrue(sink.mana>0&&a.mana+sink.mana==100,"vertical and corner route reaches the machine and conserves mana");
+        h.assertTrue(RouteConnections.connects(h.getLevel(),x.getBlockPos(),y.getBlockPos())&&RouteConnections.connects(h.getLevel(),y.getBlockPos(),x.getBlockPos()),"both ends agree on the vertical link");h.succeed();
+    }
+    @GameTest(template="empty",timeoutTicks=40) public static void crystalFiberReconnectsAfterEndpointRemoved(GameTestHelper h){
+        var owner=AdventureGameTests.player(h).getUUID();var a=node(h,RouteKind.POOL,new BlockPos(1,2,2),owner);var wire=node(h,RouteKind.WIRE,new BlockPos(2,2,2),owner);var old=node(h,RouteKind.SAWMILL,new BlockPos(3,2,2),owner);var replacement=node(h,RouteKind.LAMP,new BlockPos(2,2,3),owner);
+        h.getLevel().setBlock(old.getBlockPos(),Blocks.AIR.defaultBlockState(),3);a.mana=50;for(var n:java.util.List.of(a,wire,replacement))RouteNetwork.add(h.getLevel(),n.getBlockPos());RouteNetwork.tickNetwork(h.getLevel());h.assertTrue(replacement.mana>0,"freed second endpoint reconnects to a nearby replacement");h.succeed();
+    }
+
+    private static RouteNodeEntity node(GameTestHelper h,RouteKind kind,BlockPos local,java.util.UUID owner){var p=h.absolutePos(local);h.getLevel().setBlock(p,RouteContent.NODES.get(kind.id).get().defaultBlockState(),3);var n=(RouteNodeEntity)h.getLevel().getBlockEntity(p);n.owner=owner;if(n.getBlockState().getBlock() instanceof RouteWireBlock w)w.refresh(h.getLevel(),p);for(var d:Direction.values())if(h.getLevel().getBlockState(p.relative(d)).getBlock() instanceof RouteWireBlock w)w.refresh(h.getLevel(),p.relative(d));return n;}
     private static ItemStack full(GameTestHelper h){var b=new ItemStack(PastureRegistry.item("mana_bottle"));PastureBottleLedger.get(h.getLevel()).deposit(b,100,100);return b;}
     private static CraftingMenu crafting(GameTestHelper h,net.minecraft.server.level.ServerPlayer p,ItemStack b){var menu=new CraftingMenu(1,p.getInventory(),ContainerLevelAccess.create(h.getLevel(),h.absolutePos(new BlockPos(2,1,2))));for(int i=1;i<=9;i++)menu.getSlot(i).set(i==5?b:new ItemStack(Items.DIRT,2));p.containerMenu=menu;menu.slotsChanged(menu.getSlot(1).container);return menu;}
     @GameTest(template="empty",timeoutTicks=40) public static void normalTakeDebitsAndReturnsBottle(GameTestHelper h){var p=AdventureGameTests.player(h);var bottle=full(h);var menu=crafting(h,p,bottle);h.assertTrue(menu.getSlot(0).hasItem(),"full bottle produces soil source");menu.clicked(0,0,ClickType.PICKUP,p);h.assertTrue(menu.getCarried().is(RouteContent.SOIL_SOURCE.get().asItem()),"pickup gets actual source");h.assertTrue(PastureBottleLedger.get(h.getLevel()).amount(bottle)==0,"one real 100M debit");h.assertTrue(menu.getSlot(5).getItem().getItem() instanceof ManaBottleItem,"empty bottle remains");h.assertTrue(menu.getSlot(0).getItem().isEmpty(),"stale recipe disappears");h.succeed();}

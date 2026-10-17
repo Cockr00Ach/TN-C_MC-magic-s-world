@@ -418,5 +418,14 @@
   "tooltip.tnc.purity_amulet.immunity": "§bRejects harmful and neutral effects; cleanses existing effects",
   "tooltip.tnc.purity_amulet.benefits": "§7Keeps buffs; resists the Dark Giant siphon restraint",
   "entity.tnc.stone_lancer": "Panyue, the Stone Lancer",
-  "item.tnc.stone_lancer_spawn_egg": "Stone Lancer Spawn Egg"
+  "item.tnc.stone_lancer_spawn_egg": "Stone Lancer Spawn Egg",
+  "item.tnc.mana_thread": "Azure Mana Fiber",
+  "block.tnc.mana_thread": "Azure Mana Fiber",
+  "item.tnc.radiant_thread": "Dawn Mana Fiber",
+  "block.tnc.radiant_thread": "Dawn Mana Fiber",
+  "item.tnc.star_thread": "Iridescent Mana Fiber",
+  "block.tnc.star_thread": "Iridescent Mana Fiber",
+  "key.tnc.mana_sight": "Toggle Mana Sight",
+  "hud.tnc.mana_sight": "Mana Sight · %s to close",
+  "block.tnc.heroskand_gate": "Heroskand Realm Gate"
 }

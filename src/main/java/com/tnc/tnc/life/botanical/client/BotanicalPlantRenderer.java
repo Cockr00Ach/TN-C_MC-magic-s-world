@@ -13,7 +13,11 @@ public final class BotanicalPlantRenderer implements BlockEntityRenderer<Botanic
     public static void model(String name,PoseStack pose,MultiBufferSource buffers,int light){var mc=Minecraft.getInstance();var model=mc.getModelManager().getModel(BotanicalContent.id("block/"+name));mc.getBlockRenderer().getModelRenderer().renderModel(pose.last(),buffers.getBuffer(RenderType.cutout()),null,model,1,1,1,light,OverlayTexture.NO_OVERLAY);}
     public static void drawPlant(net.minecraft.world.level.block.state.BlockState state,PoseStack pose,MultiBufferSource buffers,int light){
         var mc=Minecraft.getInstance();var model=mc.getBlockRenderer().getBlockModel(state);
-        mc.getBlockRenderer().getModelRenderer().renderModel(pose.last(),buffers.getBuffer(RenderType.cutout()),state,model,1,1,1,light,OverlayTexture.NO_OVERLAY);
+        var output=buffers.getBuffer(RenderType.cutout());
+        for(int side=0;side<7;side++)for(var quad:model.getQuads(state,side==6?null:net.minecraft.core.Direction.values()[side],net.minecraft.util.RandomSource.create(42))){
+            int color=quad.isTinted()?PlantPalette.color(state,quad.getTintIndex()):0xffffff;
+            output.putBulkData(pose.last(),quad,(color>>16&255)/255f,(color>>8&255)/255f,(color&255)/255f,quad.getTintIndex()==4?15728880:light,OverlayTexture.NO_OVERLAY);
+        }
     }
     @Override public int getViewDistance(){return 32;}
     @Override public void render(BotanicalPlantEntity be,float partial,PoseStack pose,MultiBufferSource buffers,int light,int overlay){

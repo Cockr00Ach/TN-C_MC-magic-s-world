@@ -477,12 +477,12 @@
   "item.tnc.breath_collector": "集息器",
   "block.tnc.color_target": "色靶",
   "item.tnc.color_target": "色靶",
-  "block.tnc.mana_thread": "魔导丝",
-  "item.tnc.mana_thread": "魔导丝",
-  "block.tnc.radiant_thread": "曜纹导线",
-  "item.tnc.radiant_thread": "曜纹导线",
-  "block.tnc.star_thread": "星髓导线",
-  "item.tnc.star_thread": "星髓导线",
+  "block.tnc.mana_thread": "青辉导魔晶纤",
+  "item.tnc.mana_thread": "青辉导魔晶纤",
+  "block.tnc.radiant_thread": "霞金导魔晶纤",
+  "item.tnc.radiant_thread": "霞金导魔晶纤",
+  "block.tnc.star_thread": "虹星导魔晶纤",
+  "item.tnc.star_thread": "虹星导魔晶纤",
   "block.tnc.mana_basin": "浅魔池",
   "item.tnc.mana_basin": "浅魔池",
   "block.tnc.radiant_basin": "曜纹储池",
@@ -589,5 +589,8 @@
   "tooltip.tnc.purity_amulet.immunity": "§b免疫所有负面与中立异常状态，清除已有异常",
   "tooltip.tnc.purity_amulet.benefits": "§7保留增益；免疫领主血线定身与牵引",
   "entity.tnc.stone_lancer": "磐岳 · 岩枪古像",
-  "item.tnc.stone_lancer_spawn_egg": "磐岳 · 岩枪古像 刷怪蛋"
+  "item.tnc.stone_lancer_spawn_egg": "磐岳 · 岩枪古像 刷怪蛋",
+  "key.tnc.mana_sight": "切换魔力视",
+  "hud.tnc.mana_sight": "魔力视 · %s 关闭",
+  "block.tnc.heroskand_gate": "赫萝斯堪德界门"
 }

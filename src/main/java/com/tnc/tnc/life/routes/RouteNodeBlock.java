@@ -10,7 +10,7 @@ import net.minecraft.world.level.block.entity.*;
 import net.minecraft.world.level.block.state.*;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.*;
-public final class RouteNodeBlock extends Block implements EntityBlock {
+public class RouteNodeBlock extends Block implements EntityBlock {
     public final RouteKind kind;
     public static final net.minecraft.world.level.block.state.properties.BooleanProperty LIT=net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT;
     public RouteNodeBlock(RouteKind kind){super(BlockBehaviour.Properties.copy(Blocks.COPPER_BLOCK).strength(2).noOcclusion().lightLevel(s->s.getValue(LIT)?kind==RouteKind.LAMP?11:kind==RouteKind.BRIGHT_LAMP?15:0:0));this.kind=kind;registerDefaultState(stateDefinition.any().setValue(LIT,false));}
@@ -20,7 +20,7 @@ public final class RouteNodeBlock extends Block implements EntityBlock {
     @Override public boolean isSignalSource(BlockState s){return kind==RouteKind.ALARM;}
     @Override public int getSignal(BlockState s,BlockGetter l,BlockPos p,Direction d){return kind==RouteKind.ALARM&&s.getValue(LIT)?15:0;}
     @Override public VoxelShape getShape(BlockState s,BlockGetter l,BlockPos p,CollisionContext c){return kind.wire()?Block.box(5,0,5,11,4,11):Block.box(1,0,1,15,12,15);}
-    @Override public void setPlacedBy(Level l,BlockPos p,BlockState s,LivingEntity actor,ItemStack item){if(actor!=null&&l.getBlockEntity(p) instanceof RouteNodeEntity be){be.owner=actor.getUUID();be.setChanged();}}
+    @Override public void setPlacedBy(Level l,BlockPos p,BlockState s,LivingEntity actor,ItemStack item){if(actor!=null&&l.getBlockEntity(p) instanceof RouteNodeEntity be){be.owner=actor.getUUID();be.setChanged();if(this instanceof RouteWireBlock wire)wire.refresh(l,p);for(var d:Direction.values()){var q=p.relative(d);if(l.getBlockState(q).getBlock() instanceof RouteWireBlock wire)wire.refresh(l,q);}}}
     @Override public InteractionResult use(BlockState s,Level l,BlockPos p,Player player,InteractionHand hand,BlockHitResult hit){if(l.isClientSide)return InteractionResult.SUCCESS;if(!(player instanceof net.minecraft.server.level.ServerPlayer sp)||!(l.getBlockEntity(p) instanceof RouteNodeEntity be)||!be.mayUse(sp))return InteractionResult.FAIL;
         if(kind==RouteKind.COLOR_TARGET&&player.getItemInHand(hand).getItem() instanceof net.minecraft.world.item.DyeItem dye){be.targetColor=dye.getDyeColor().getId();be.setChanged();player.displayClientMessage(net.minecraft.network.chat.Component.literal("色靶已调为 "+dye.getDyeColor().getName()+"；染料不消耗"),true);return InteractionResult.CONSUME;}
         if(player.getItemInHand(hand).getItem() instanceof RouteMeterItem)return InteractionResult.PASS;

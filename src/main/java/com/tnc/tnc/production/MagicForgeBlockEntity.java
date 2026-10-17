@@ -293,6 +293,7 @@ public final class MagicForgeBlockEntity extends BlockEntity implements WorldlyC
 
     private void lineFx(BlockPos from, BlockPos to, boolean green) {
         if (!(level instanceof ServerLevel server)) return;
+        com.tnc.tnc.mana.sight.ManaSightServer.transfer(server,from,to,1);
         for (int n = 0; n <= 8; n++) {
             double t = n / 8.0;
             double x = from.getX() + .5 + (to.getX() - from.getX()) * t;

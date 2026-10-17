@@ -28,7 +28,7 @@ public final class RoutePlantEntity extends BlockEntity {
             case ORE->RouteOreLedger.get(l).drawNatural(l,p,2);
             case STORM->0;
         };
-        be.remainder+=generated;int whole=(int)be.remainder;be.remainder-=whole;be.mana=Math.min(be.kind().capacity,be.mana+whole);be.setChanged();
+        be.remainder+=generated;int whole=(int)be.remainder;be.remainder-=whole;com.tnc.tnc.mana.sight.ManaSightServer.emission(l,p,Math.min(whole,be.kind().capacity-be.mana));be.mana=Math.min(be.kind().capacity,be.mana+whole);be.setChanged();
     }
     public int draw(int maximum){int amount=Math.min(mana,Math.min(maximum,kind()==NewPlantKind.SHADOW||kind()==NewPlantKind.PAGE?4:(int)Math.ceil(kind().rate)));mana-=amount;if(amount>0)setChanged();return amount;}
     public void naturalLightning(){mana=Math.min(kind().capacity,mana+2400);setChanged();}

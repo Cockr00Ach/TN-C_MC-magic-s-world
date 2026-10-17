@@ -27,6 +27,7 @@
         }
       ],
       "dependencies": [],
+      "hide_dependency_lines": false,
       "rewards": [
         {
           "id": "29B5C7F7A5E2CB2A",
@@ -54,7 +55,8 @@
       ],
       "dependencies": [
         "556D3E34DC594E0A"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "3628D627544A9D07",
@@ -78,7 +80,8 @@
       ],
       "dependencies": [
         "51C393E5CACBF40C"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "2AD3C76E0F140854",
@@ -102,7 +105,8 @@
       ],
       "dependencies": [
         "51C393E5CACBF40C"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "017BF3C5625743E3",
@@ -126,7 +130,8 @@
       ],
       "dependencies": [
         "51C393E5CACBF40C"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "46295CFE3D6D7CD7",
@@ -150,7 +155,8 @@
       ],
       "dependencies": [
         "51C393E5CACBF40C"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "64C8BC608FD21532",
@@ -174,7 +180,8 @@
       ],
       "dependencies": [
         "51C393E5CACBF40C"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "520F58FC8BA47B66",
@@ -197,12 +204,9 @@
         }
       ],
       "dependencies": [
-        "3628D627544A9D07",
-        "2AD3C76E0F140854",
-        "017BF3C5625743E3",
-        "46295CFE3D6D7CD7",
-        "64C8BC608FD21532"
-      ]
+        "3628D627544A9D07"
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "24BCD04A33178419",
@@ -225,12 +229,9 @@
         }
       ],
       "dependencies": [
-        "3628D627544A9D07",
-        "2AD3C76E0F140854",
-        "017BF3C5625743E3",
-        "46295CFE3D6D7CD7",
-        "64C8BC608FD21532"
-      ]
+        "520F58FC8BA47B66"
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "27B2650DC851D58B",
@@ -253,12 +254,10 @@
         }
       ],
       "dependencies": [
-        "3628D627544A9D07",
         "2AD3C76E0F140854",
-        "017BF3C5625743E3",
-        "46295CFE3D6D7CD7",
-        "64C8BC608FD21532"
-      ]
+        "017BF3C5625743E3"
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "11B6C82ACAD2C64F",
@@ -281,12 +280,9 @@
         }
       ],
       "dependencies": [
-        "3628D627544A9D07",
-        "2AD3C76E0F140854",
-        "017BF3C5625743E3",
-        "46295CFE3D6D7CD7",
-        "64C8BC608FD21532"
-      ]
+        "520F58FC8BA47B66"
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "7D60A71F6A193FCD",
@@ -314,7 +310,8 @@
         "24BCD04A33178419",
         "27B2650DC851D58B",
         "11B6C82ACAD2C64F"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "25205D9825874232",
@@ -337,7 +334,8 @@
       ],
       "dependencies": [
         "7D60A71F6A193FCD"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "565A87C89E89BEE8",
@@ -348,7 +346,7 @@
       "size": 1.4,
       "description": [
         "炉内：铁锭×1＋60M→灵纹铁×1。",
-        "后面集露盏、浅魔池、锯台和魔导丝各用3块，检流尺另用1块，逐步补够即可。"
+        "后面集露盏、浅魔池、锯台和青辉导魔晶纤各用3块，检流尺另用1块，逐步补够即可。"
       ],
       "tasks": [
         {
@@ -361,7 +359,8 @@
       ],
       "dependencies": [
         "25205D9825874232"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "506970F4B06F183F",
@@ -387,7 +386,8 @@
       ],
       "dependencies": [
         "565A87C89E89BEE8"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "5CFDF4F5D8A3DC9B",
@@ -411,7 +411,8 @@
       ],
       "dependencies": [
         "506970F4B06F183F"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "29A14581E9660ABA",
@@ -436,7 +437,8 @@
       ],
       "dependencies": [
         "506970F4B06F183F"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "18AE0EB90323F986",
@@ -461,7 +463,8 @@
       ],
       "dependencies": [
         "5CFDF4F5D8A3DC9B"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "7CD500C3DAA046C9",
@@ -485,7 +488,8 @@
       "dependencies": [
         "18AE0EB90323F986",
         "29A14581E9660ABA"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "41DA31AE742CBF35",
@@ -509,7 +513,8 @@
       ],
       "dependencies": [
         "7CD500C3DAA046C9"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "30C62EBBB479FDA3",
@@ -533,7 +538,8 @@
       ],
       "dependencies": [
         "18AE0EB90323F986"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "1E7FF8C750509B1F",
@@ -558,11 +564,12 @@
       ],
       "dependencies": [
         "41DA31AE742CBF35"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "10D594FA04A2BC4A",
-      "title": "魔导丝",
+      "title": "青辉导魔晶纤",
       "icon": "tnc:mana_thread",
       "x": 0,
       "y": 63,
@@ -570,7 +577,8 @@
       "description": [
         "制作材料：灵纹铁×3；线×1；石砖×1。",
         "每份配方产4根，逐格相邻放置，不允许中间空一格。",
-        "入门带宽8M/秒。无所谓电压、正负极和接头方向；是魔力线路，不是FE电。"
+        "入门带宽8M/秒。无所谓电压、正负极和接头方向；是魔力线路，不是FE电。",
+        "每段晶纤最多两个接口；可转弯、竖接和连机器。分支请用独立的分流装置，晶纤不会自动六向连接。"
       ],
       "tasks": [
         {
@@ -584,7 +592,8 @@
       "dependencies": [
         "7CD500C3DAA046C9",
         "565A87C89E89BEE8"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "31928A47EADA463E",
@@ -596,7 +605,7 @@
       "description": [
         "制作材料：灵纹铁×3；黏土球×1；石砖×1。",
         "沿线放浅魔池，容量1000M。",
-        "俯视示例：翠脉枝→相邻集露盏→魔导丝→浅魔池。普通储池不是新的能源来源。"
+        "俯视示例：翠脉枝→相邻集露盏→青辉导魔晶纤→浅魔池。普通储池不是新的能源来源。"
       ],
       "tasks": [
         {
@@ -609,7 +618,8 @@
       ],
       "dependencies": [
         "10D594FA04A2BC4A"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "1FDB5A84D8383CA0",
@@ -634,7 +644,8 @@
       ],
       "dependencies": [
         "565A87C89E89BEE8"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "6560CD995A7207FE",
@@ -658,7 +669,8 @@
       "dependencies": [
         "1E7FF8C750509B1F",
         "10D594FA04A2BC4A"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "357302D516BECA1D",
@@ -681,7 +693,8 @@
       "dependencies": [
         "31928A47EADA463E",
         "6560CD995A7207FE"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "02DD110976187C69",
@@ -706,7 +719,8 @@
       ],
       "dependencies": [
         "357302D516BECA1D"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "565A948393027784",
@@ -728,7 +742,8 @@
       ],
       "dependencies": [
         "02DD110976187C69"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "602353B521B2FA38",
@@ -749,7 +764,8 @@
       ],
       "dependencies": [
         "6560CD995A7207FE"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "084DA9753CFD121D",
@@ -760,7 +776,7 @@
       "size": 1.4,
       "description": [
         "成熟、白天、露天时每秒1M。把集露盏放根边，不用消耗燃料。",
-        "共同接法：种好并成熟→根部相邻集露盏→魔导丝→储池/机器。"
+        "共同接法：种好并成熟→根部相邻集露盏→青辉导魔晶纤→储池/机器。"
       ],
       "tasks": [
         {
@@ -773,7 +789,8 @@
       ],
       "dependencies": [
         "602353B521B2FA38"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "2D30746D49BFB135",
@@ -784,7 +801,7 @@
       "size": 1.4,
       "description": [
         "成株露天，来风方向无遮挡。普通风约1M/秒、雨天约3M/秒；根边不要挤满同种帆草。",
-        "共同接法：种好并成熟→根部相邻集露盏→魔导丝→储池/机器。"
+        "共同接法：种好并成熟→根部相邻集露盏→青辉导魔晶纤→储池/机器。"
       ],
       "tasks": [
         {
@@ -797,7 +814,8 @@
       ],
       "dependencies": [
         "602353B521B2FA38"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "7CD2AF9482590EAA",
@@ -808,7 +826,7 @@
       "size": 1.4,
       "description": [
         "根边三格内敲出3种不同音高，再拿自己的豆荚右键喂入；随后6秒每秒2M。不是一直无料发电。",
-        "共同接法：种好并成熟→根部相邻集露盏→魔导丝→储池/机器。"
+        "共同接法：种好并成熟→根部相邻集露盏→青辉导魔晶纤→储池/机器。"
       ],
       "tasks": [
         {
@@ -821,7 +839,8 @@
       ],
       "dependencies": [
         "602353B521B2FA38"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "27BD5F2891E5016E",
@@ -832,7 +851,7 @@
       "size": 1.4,
       "description": [
         "成熟后喂有机料；三类料发酵90秒总计300M，同类料总计180M。",
-        "共同接法：种好并成熟→根部相邻集露盏→魔导丝→储池/机器。"
+        "共同接法：种好并成熟→根部相邻集露盏→青辉导魔晶纤→储池/机器。"
       ],
       "tasks": [
         {
@@ -845,7 +864,8 @@
       ],
       "dependencies": [
         "602353B521B2FA38"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "0EB0A2EAE6FDCCE7",
@@ -856,7 +876,7 @@
       "size": 1.4,
       "description": [
         "成株旁放真正燃烧的普通熔炉和水或冰，每秒2M。魔力炉不能作为无限回供热源。",
-        "共同接法：种好并成熟→根部相邻集露盏→魔导丝→储池/机器。"
+        "共同接法：种好并成熟→根部相邻集露盏→青辉导魔晶纤→储池/机器。"
       ],
       "tasks": [
         {
@@ -869,7 +889,8 @@
       ],
       "dependencies": [
         "602353B521B2FA38"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "5F081F12068468D7",
@@ -880,7 +901,7 @@
       "size": 1.4,
       "description": [
         "真实露天雨水每秒蓄2M，晴天缓慢输出已积累的余额。",
-        "共同接法：种好并成熟→根部相邻集露盏→魔导丝→储池/机器。"
+        "共同接法：种好并成熟→根部相邻集露盏→青辉导魔晶纤→储池/机器。"
       ],
       "tasks": [
         {
@@ -893,7 +914,8 @@
       ],
       "dependencies": [
         "602353B521B2FA38"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "36EBC3CD3DC3B76F",
@@ -914,7 +936,8 @@
       ],
       "dependencies": [
         "565A948393027784"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "52FE5035B99FBA74",
@@ -938,7 +961,8 @@
       ],
       "dependencies": [
         "36EBC3CD3DC3B76F"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "0435840C246CB393",
@@ -962,7 +986,8 @@
       ],
       "dependencies": [
         "52FE5035B99FBA74"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "2D2FF13BFF0E9C3D",
@@ -988,7 +1013,8 @@
       ],
       "dependencies": [
         "0435840C246CB393"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "12D6F6F1B3566F89",
@@ -1009,7 +1035,8 @@
       ],
       "dependencies": [
         "2D2FF13BFF0E9C3D"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "2C718C554B614CB7",
@@ -1030,7 +1057,8 @@
       ],
       "dependencies": [
         "2D2FF13BFF0E9C3D"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "1343DF07E07FC5BB",
@@ -1051,7 +1079,8 @@
       ],
       "dependencies": [
         "2D2FF13BFF0E9C3D"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "7B525E70986489DC",
@@ -1072,7 +1101,8 @@
       ],
       "dependencies": [
         "2D2FF13BFF0E9C3D"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "7E62B912E5298914",
@@ -1097,7 +1127,8 @@
       ],
       "dependencies": [
         "2D2FF13BFF0E9C3D"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "7B19FE35DBD85821",
@@ -1118,7 +1149,8 @@
       ],
       "dependencies": [
         "565A948393027784"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "273E8A9A18BDEE11",
@@ -1142,7 +1174,8 @@
       ],
       "dependencies": [
         "7B19FE35DBD85821"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "4B10906F339AEBF6",
@@ -1166,7 +1199,8 @@
       ],
       "dependencies": [
         "273E8A9A18BDEE11"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "712D403D8FCA4F9B",
@@ -1186,7 +1220,8 @@
       ],
       "dependencies": [
         "273E8A9A18BDEE11"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "0959D18AA4CC388C",
@@ -1206,7 +1241,8 @@
       ],
       "dependencies": [
         "273E8A9A18BDEE11"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "5835C4798390A0B9",
@@ -1226,7 +1262,8 @@
       ],
       "dependencies": [
         "273E8A9A18BDEE11"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "120DBA3E2F462134",
@@ -1250,7 +1287,8 @@
       ],
       "dependencies": [
         "712D403D8FCA4F9B"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "4081F26E635575D2",
@@ -1274,7 +1312,8 @@
       ],
       "dependencies": [
         "712D403D8FCA4F9B"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "28B1E69BCF7571E2",
@@ -1298,7 +1337,8 @@
       ],
       "dependencies": [
         "712D403D8FCA4F9B"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "0927970D1DA2EDCB",
@@ -1322,7 +1362,8 @@
       ],
       "dependencies": [
         "0959D18AA4CC388C"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "72B64ED720214A58",
@@ -1346,7 +1387,8 @@
       ],
       "dependencies": [
         "0959D18AA4CC388C"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "3BF6082DC4EE3BD8",
@@ -1370,7 +1412,8 @@
       ],
       "dependencies": [
         "0959D18AA4CC388C"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "6AB649A40EE0C748",
@@ -1394,7 +1437,8 @@
       ],
       "dependencies": [
         "0959D18AA4CC388C"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "073937E8D2B8FDAC",
@@ -1418,7 +1462,8 @@
       ],
       "dependencies": [
         "0959D18AA4CC388C"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "6735C8E240FBCD91",
@@ -1442,11 +1487,12 @@
       ],
       "dependencies": [
         "0959D18AA4CC388C"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "1701B42113548932",
-      "title": "曜纹导线",
+      "title": "霞金导魔晶纤",
       "icon": "tnc:radiant_thread",
       "x": 18,
       "y": 123,
@@ -1466,7 +1512,8 @@
       ],
       "dependencies": [
         "5835C4798390A0B9"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "64839A20F54A3A32",
@@ -1490,7 +1537,8 @@
       ],
       "dependencies": [
         "5835C4798390A0B9"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "538D67533171AE5F",
@@ -1514,7 +1562,8 @@
       ],
       "dependencies": [
         "5835C4798390A0B9"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "0DAF7A01862F8C0C",
@@ -1538,7 +1587,8 @@
       ],
       "dependencies": [
         "5835C4798390A0B9"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "0884B721C38DBAFE",
@@ -1562,7 +1612,8 @@
       ],
       "dependencies": [
         "5835C4798390A0B9"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "70253B5F2BC2BF63",
@@ -1586,7 +1637,8 @@
       ],
       "dependencies": [
         "565A948393027784"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "648DB21C705351D0",
@@ -1610,7 +1662,8 @@
       ],
       "dependencies": [
         "565A948393027784"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "189475013AC8FDD5",
@@ -1634,7 +1687,8 @@
       ],
       "dependencies": [
         "565A948393027784"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "32716571D6748CD3",
@@ -1659,7 +1713,8 @@
       ],
       "dependencies": [
         "4081F26E635575D2"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "0865419C0DECA978",
@@ -1684,7 +1739,8 @@
       ],
       "dependencies": [
         "273E8A9A18BDEE11"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "4B57B8F0951161AF",
@@ -1705,7 +1761,8 @@
       ],
       "dependencies": [
         "0865419C0DECA978"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "6815765AAC6470F3",
@@ -1731,7 +1788,8 @@
       "dependencies": [
         "0865419C0DECA978",
         "32716571D6748CD3"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "2D81D805BB91262C",
@@ -1757,7 +1815,8 @@
       "dependencies": [
         "0865419C0DECA978",
         "32716571D6748CD3"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "24CFD523967F1A19",
@@ -1783,7 +1842,8 @@
       "dependencies": [
         "0865419C0DECA978",
         "32716571D6748CD3"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "678443D2B1333116",
@@ -1809,11 +1869,12 @@
       "dependencies": [
         "0865419C0DECA978",
         "32716571D6748CD3"
-      ]
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "1607F33A1DBF48F4",
-      "title": "星髓导线",
+      "title": "虹星导魔晶纤",
       "icon": "tnc:star_thread",
       "x": 20,
       "y": 169,
@@ -1833,7 +1894,8 @@
       ],
       "dependencies": [
         "4B10906F339AEBF6"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "6F7F5D445B2F026E",
@@ -1857,7 +1919,8 @@
       ],
       "dependencies": [
         "4B10906F339AEBF6"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "6A3517288F079D96",
@@ -1881,7 +1944,8 @@
       ],
       "dependencies": [
         "4B10906F339AEBF6"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "39A2CB43ED90FE68",
@@ -1907,7 +1971,8 @@
         "273E8A9A18BDEE11",
         "0865419C0DECA978",
         "32716571D6748CD3"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "60B89EFB55CE4DBE",
@@ -1933,7 +1998,8 @@
         "273E8A9A18BDEE11",
         "0865419C0DECA978",
         "32716571D6748CD3"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "0FDBD7713A4591CB",
@@ -1959,7 +2025,8 @@
         "4B10906F339AEBF6",
         "0865419C0DECA978",
         "32716571D6748CD3"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "600CCF0EDDB5DACF",
@@ -1983,7 +2050,8 @@
       ],
       "dependencies": [
         "0FDBD7713A4591CB"
-      ]
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "70614BC6E64CEBFA",
@@ -2008,7 +2076,8 @@
       ],
       "dependencies": [
         "565A948393027784"
-      ]
+      ],
+      "hide_dependency_lines": false
     }
   ],
   "images": [],
