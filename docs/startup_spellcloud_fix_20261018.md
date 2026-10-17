@@ -16,3 +16,7 @@
 保留编译目录中的占位类执行 `jar -x compileJava -x processResources -x reobfJar`，
 生成包中外部命名空间类数量为零。打包验证的完整产物没有用于安装。
 另修复 PCL 启动测试脚本对中文 Windows 导出 GBK 批处理的解码。
+
+正式环境复测：使用 PCL 原有启动配置启动进程 38816，05:42:25 日志确认玩家
+登录存档，05:42:28 完成客户端与服务器握手。未再出现 `ConfigurableKnockback`
+缺失错误，客户端保持运行。
