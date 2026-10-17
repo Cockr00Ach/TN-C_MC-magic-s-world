@@ -1,0 +1,103 @@
+package com.tnc.tnc.boss.earth;
+
+import com.tnc.tnc.boss.GiantApproachGoal;
+import com.tnc.tnc.boss.GiantSimulation;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.*;
+import net.minecraft.server.level.*;
+import net.minecraft.sounds.*;
+import net.minecraft.world.BossEvent;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.*;
+import net.minecraft.world.entity.ai.goal.*;
+import net.minecraft.world.entity.ai.goal.target.*;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.*;
+import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.core.animation.*;
+import software.bernie.geckolib.core.object.PlayState;
+import software.bernie.geckolib.util.GeckoLibUtil;
+
+/** Rock-built boss with fixed attack budgets; the world terrain is never destroyed. */
+public final class StoneLancerEntity extends Monster implements GeoEntity {
+    private static final EntityDataAccessor<Boolean> CASTING=SynchedEntityData.defineId(StoneLancerEntity.class,EntityDataSerializers.BOOLEAN);
+    private final AnimatableInstanceCache cache=GeckoLibUtil.createInstanceCache(this);
+    private final ServerBossEvent bar=new ServerBossEvent(getDisplayName(),BossEvent.BossBarColor.YELLOW,BossEvent.BossBarOverlay.PROGRESS);
+    final java.util.List<com.tnc.tnc.magic.EarthAttackEntity> attacks=new java.util.ArrayList<>();
+    private int cooldown=60,pending=-1,windup,casts;
+    private Vec3 aim=Vec3.ZERO;
+    public StoneLancerEntity(EntityType<? extends StoneLancerEntity> type,Level level){super(type,level);xpReward=650;setPersistenceRequired();}
+    public static AttributeSupplier.Builder attributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,1000)
+            .add(Attributes.ATTACK_DAMAGE,22).add(Attributes.ARMOR,16).add(Attributes.ARMOR_TOUGHNESS,8)
+            .add(Attributes.MOVEMENT_SPEED,.17).add(Attributes.FOLLOW_RANGE,88).add(Attributes.KNOCKBACK_RESISTANCE,1);}
+    @Override protected void defineSynchedData(){super.defineSynchedData();entityData.define(CASTING,false);}
+    public boolean isCasting(){return entityData.get(CASTING);}
+    public boolean enraged(){return getHealth()<=getMaxHealth()*.5F;}
+    public static int moveFor(int casts){return new int[]{0,1,0,2,1,3}[Math.floorMod(casts,6)];}
+    public static int moveFor(int casts,double distanceSquared){
+        int move=moveFor(casts);
+        if(move==1&&distanceSquared>22*22)move=0;
+        if(move==0&&distanceSquared>40*40)move=2+Math.floorMod(casts,2);
+        return move;
+    }
+    @Override protected void registerGoals(){
+        goalSelector.addGoal(0,new FloatGoal(this));goalSelector.addGoal(2,new GiantApproachGoal(this,.9,()->!isCasting()));
+        goalSelector.addGoal(8,new LookAtPlayerGoal(this,Player.class,64));goalSelector.addGoal(9,new RandomLookAroundGoal(this));
+        targetSelector.addGoal(1,new HurtByTargetGoal(this));targetSelector.addGoal(2,new NearestAttackableTargetGoal<>(this,Player.class,true));
+    }
+    @Override public void aiStep(){
+        super.aiStep();if(!(level() instanceof ServerLevel server)||!isAlive())return;
+        bar.setName(getDisplayName());bar.setProgress(getHealth()/getMaxHealth());
+        if(tickCount%20==0)attacks.removeIf(e->!e.isAlive());
+        if(pending>=0){
+            getNavigation().stop();setDeltaMovement(0,getDeltaMovement().y,0);
+            if(getTarget()!=null)getLookControl().setLookAt(getTarget(),30,30);
+            if(--windup<=0){StoneLancerCombat.release(this,pending,aim);pending=-1;entityData.set(CASTING,false);casts++;cooldown=enraged()?55:85;}
+            return;
+        }
+        if(cooldown>0){cooldown--;return;}
+        var target=getTarget();if(target==null||!target.isAlive()||distanceToSqr(target)>72*72||!hasLineOfSight(target))return;
+        beginCast(moveFor(casts,distanceToSqr(target)),target.position());
+    }
+    void beginCast(int move,Vec3 target){
+        double dx=target.x-getX(),dz=target.z-getZ();setYRot((float)Math.toDegrees(Math.atan2(-dx,dz)));yBodyRot=getYRot();
+        pending=move;aim=StoneLancerCombat.ground(this,target);windup=new int[]{28,32,44,36}[move];
+        entityData.set(CASTING,true);getNavigation().stop();triggerAnim("action",new String[]{"volley","fissure","sky","core"}[move]);
+        StoneLancerCombat.seal(this,position(),5,windup+16);
+        if(move==2)StoneLancerCombat.seal(this,aim,4,windup+24);
+        level().playSound(null,blockPosition(),SoundEvents.IRON_GOLEM_REPAIR,SoundSource.HOSTILE,1.5F,.55F);
+    }
+    @Override public boolean doHurtTarget(Entity target){
+        boolean hit=super.doHurtTarget(target);if(hit){triggerAnim("action","melee");playSound(SoundEvents.IRON_GOLEM_ATTACK,1.4F,.6F);}return hit;
+    }
+    @Override protected AABB makeBoundingBox(){return GiantSimulation.active(this)?GiantSimulation.bounds(this):super.makeBoundingBox();}
+    @Override public void move(MoverType type,Vec3 motion){GiantSimulation.run(this,()->super.move(type,motion));}
+    @Override protected void checkInsideBlocks(){GiantSimulation.run(this,()->super.checkInsideBlocks());}
+    @Override public void updateFluidHeightAndDoFluidPushing(java.util.function.Predicate<net.minecraft.world.level.material.FluidState> p){GiantSimulation.run(this,()->super.updateFluidHeightAndDoFluidPushing(p));}
+    @Override public AABB getBoundingBoxForCulling(){return super.getBoundingBoxForCulling().inflate(5,2,5).expandTowards(0,6,0);}
+    @Override public boolean removeWhenFarAway(double distance){return false;}
+    @Override public void startSeenByPlayer(ServerPlayer p){super.startSeenByPlayer(p);bar.addPlayer(p);}
+    @Override public void stopSeenByPlayer(ServerPlayer p){super.stopSeenByPlayer(p);bar.removePlayer(p);}
+    @Override public void remove(RemovalReason reason){bar.removeAllPlayers();for(var e:attacks)if(e.isAlive())e.discard();attacks.clear();super.remove(reason);}
+    @Override public void die(DamageSource source){triggerAnim("action","death");super.die(source);}
+    @Override protected void dropCustomDeathLoot(DamageSource source,int looting,boolean recentlyHit){super.dropCustomDeathLoot(source,looting,recentlyHit);spawnAtLocation(Items.RAW_GOLD,16);spawnAtLocation(Items.DIAMOND,4);}
+    @Override public void addAdditionalSaveData(CompoundTag tag){super.addAdditionalSaveData(tag);tag.putInt("StoneCasts",casts);tag.putInt("StoneCooldown",cooldown);}
+    @Override public void readAdditionalSaveData(CompoundTag tag){super.readAdditionalSaveData(tag);casts=Math.max(0,tag.getInt("StoneCasts"));cooldown=Math.max(20,Math.min(100,tag.getInt("StoneCooldown")));pending=-1;entityData.set(CASTING,false);}
+    @Override public void tick(){
+        super.tick();
+        if(level().isClientSide&&isAlive()&&tickCount%5==0&&walkAnimation.isMoving())for(int i=0;i<2;i++)
+            level().addParticle(new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK,net.minecraft.world.level.block.Blocks.TUFF.defaultBlockState()),getX()+(random.nextDouble()-.5)*3,getY()+.15,getZ()+(random.nextDouble()-.5)*3,0,.03,0);
+        if(!level().isClientSide&&tickCount%24==0&&getDeltaMovement().horizontalDistanceSqr()>.0001)playSound(SoundEvents.IRON_GOLEM_STEP,1.8F,.55F);
+    }
+    @Override public AnimatableInstanceCache getAnimatableInstanceCache(){return cache;}
+    @Override public void registerControllers(AnimatableManager.ControllerRegistrar c){
+        c.add(new AnimationController<>(this,"move",6,s->isCasting()?PlayState.STOP:s.setAndContinue(RawAnimation.begin().thenLoop(s.isMoving()?"march":"idle"))));
+        var action=new AnimationController<StoneLancerEntity>(this,"action",2,s->PlayState.STOP);
+        for(String a:new String[]{"volley","fissure","sky","core","melee","death"})action.triggerableAnim(a,RawAnimation.begin().thenPlay(a));c.add(action);
+    }
+}
