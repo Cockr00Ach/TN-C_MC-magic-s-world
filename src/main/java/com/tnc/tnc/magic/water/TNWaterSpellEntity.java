@@ -200,7 +200,7 @@ public final class TNWaterSpellEntity extends Entity {
                 // 保护边界之外依旧不可能被打到 ✗ —— 前端根本越不过那个切片 ✓。
 
                 if(along>=0 && along<=len && WaterSpellRules.segmentDistanceSquared(center,position(),dir,len)<=hitRadius*hitRadius
-                        && (tier()==5&&terrainCaster!=null||TNWaterFieldEntity.clearSight(level,position(),center)))
+                        && (tier()==5&&(terrainCaster!=null||entityData.get(BOSS_CAST))||TNWaterFieldEntity.clearSight(level,position(),center)))
                     target.hurt(level.damageSources().indirectMagic(this,player),WaterSpellRules.damage(tier())*WaterSpellRules.power(player));
             }
         }
@@ -214,9 +214,8 @@ public final class TNWaterSpellEntity extends Entity {
                 length=Math.max(0,step-1); break;
             }
         }
-        var hit=level.clip(new ClipContext(position(),position().add(dir.scale(length)),
-                ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,this));
-        return hit.getType()==HitResult.Type.MISS?length:position().distanceTo(hit.getLocation());
+        // Boss T5 phases through terrain without mining it; never force-load chunks.
+        return length;
     }
 
     private double clearLength(ServerLevel level,Vec3 dir) {

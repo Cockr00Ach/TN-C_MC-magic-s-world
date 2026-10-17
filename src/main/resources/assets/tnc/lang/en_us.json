@@ -412,5 +412,11 @@
   "entity.tnc.water_leviathan": "Bluegold Abyss Beast",
   "item.tnc.water_leviathan_spawn_egg": "Bluegold Abyss Beast Spawn Egg",
   "item.tnc.beast_bone_meal": "Beastbone Growth Dust",
-  "block.tnc.mana_feed_plate": "Automatic Feeder"
+  "block.tnc.mana_feed_plate": "Automatic Feeder",
+  "item.tnc.purity_amulet": "Purity Amulet",
+  "tooltip.tnc.purity_amulet.equip": "§7Equip in necklace/charm slot or offhand",
+  "tooltip.tnc.purity_amulet.immunity": "§bRejects harmful and neutral effects; cleanses existing effects",
+  "tooltip.tnc.purity_amulet.benefits": "§7Keeps buffs; resists the Dark Giant siphon restraint",
+  "entity.tnc.stone_lancer": "Panyue, the Stone Lancer",
+  "item.tnc.stone_lancer_spawn_egg": "Stone Lancer Spawn Egg"
 }

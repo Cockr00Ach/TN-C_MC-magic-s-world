@@ -18,14 +18,13 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
-import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.AnimatableManager;
@@ -124,6 +123,8 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
     private int castCooldown = 80;
     private int completedCasts;
     private int previousMove=-1;
+    private DarkGiantSkyCast skyCast;
+    public net.minecraft.world.phys.Vec3 skyfallLanding(){return skyCast==null?null:skyCast.landing;}
     private static final int COOLDOWN_PHASE_ONE = 90;
     private static final int COOLDOWN_PHASE_TWO = 45;
 
@@ -137,6 +138,21 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
     public net.minecraft.world.entity.EntityDimensions getDimensions(net.minecraft.world.entity.Pose pose) {
         return net.minecraft.world.entity.EntityDimensions.scalable(HITBOX_WIDTH,HITBOX_HEIGHT);
     }
+
+    @Override protected net.minecraft.world.phys.AABB makeBoundingBox(){
+        return com.tnc.tnc.boss.GiantSimulation.active(this)?com.tnc.tnc.boss.GiantSimulation.bounds(this):super.makeBoundingBox();
+    }
+    @Override public void move(net.minecraft.world.entity.MoverType type,Vec3 motion){
+        if(getBbWidth()>4)com.tnc.tnc.boss.GiantSimulation.run(this,()->super.move(type,motion));else super.move(type,motion);
+    }
+    @Override protected void checkInsideBlocks(){
+        if(getBbWidth()>4)com.tnc.tnc.boss.GiantSimulation.run(this,()->super.checkInsideBlocks());else super.checkInsideBlocks();
+    }
+    @Override public void updateFluidHeightAndDoFluidPushing(java.util.function.Predicate<net.minecraft.world.level.material.FluidState> predicate){
+        if(getBbWidth()>4)com.tnc.tnc.boss.GiantSimulation.run(this,()->super.updateFluidHeightAndDoFluidPushing(predicate));
+        else super.updateFluidHeightAndDoFluidPushing(predicate);
+    }
+
     public boolean isCasting(){return this.entityData.get(DATA_CASTING);}
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -252,8 +268,7 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.0D, true));
-        this.goalSelector.addGoal(7, new RandomStrollGoal(this, 0.7D));
+        this.goalSelector.addGoal(2, new GiantApproachGoal(this,1.0D,()->!isCasting()));
         this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, (float)TNDarkGiantSpells.FOLLOW_RANGE));
         this.goalSelector.addGoal(9, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
@@ -318,15 +333,20 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
 
     /** Wind up, release once, then cool down; movement pauses during the gesture. */
     private void tickCasting(ServerLevel level) {
+        if(skyCast!=null&&pendingMove<0){
+            if(skyCast.recover(this)){skyCast=null;entityData.set(DATA_CASTING,false);}
+            return;
+        }
         if (this.pendingMove >= 0) {
             this.getNavigation().stop();
-            var motion=getDeltaMovement();setDeltaMovement(0,motion.y,0);
+            if(skyCast!=null)skyCast.windup(this);
+            else{var motion=getDeltaMovement();setDeltaMovement(0,motion.y,0);}
             if(getTarget()!=null)this.getLookControl().setLookAt(getTarget(),30,30);
             if (--this.pendingTicks <= 0) {
                 boolean cast=TNDarkGiantSpells.cast(this, this.pendingMove);
                 if(cast){this.previousMove=this.pendingMove;this.completedCasts++;}
                 this.pendingMove = -1;
-                this.entityData.set(DATA_CASTING,false);
+                this.entityData.set(DATA_CASTING,skyCast!=null);
                 this.castCooldown = cast?(this.isPhaseTwo()?COOLDOWN_PHASE_TWO:COOLDOWN_PHASE_ONE):20;
             }
             return;
@@ -340,7 +360,9 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
     }
 
     /** 起手：播作者的施法动作（{@code playmagic} ✓）＋ 攒一撮暗火 ✓。 */
-    private void startCast(int move, ServerLevel level) {
+    void startCast(int move, ServerLevel level) {
+        if("slay_light".equals(TNDarkGiantSpells.move(move).path())&&getTarget()!=null)
+            skyCast=new DarkGiantSkyCast(this,getTarget().position());
         this.pendingMove = move;
         this.pendingTicks = TNDarkGiantSpells.move(move).castTicks();
         this.entityData.set(DATA_CASTING,true);
@@ -354,17 +376,38 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
                 12, 0.8D, 0.7D, 0.8D, 0.03D);
     }
 
+    @Override
+    public void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag){
+        super.addAdditionalSaveData(tag);
+        if(skyCast!=null){
+            tag.putBoolean("TncSkyReturning",true);tag.putBoolean("TncSkyNoGravity",skyCast.previousGravity);
+            tag.putDouble("TncSkyHomeX",skyCast.home.x);tag.putDouble("TncSkyHomeY",skyCast.home.y);tag.putDouble("TncSkyHomeZ",skyCast.home.z);
+        }
+    }
+    @Override
+    public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag){
+        super.readAdditionalSaveData(tag);
+        if(tag.getBoolean("TncSkyReturning")){
+            setPos(tag.getDouble("TncSkyHomeX"),tag.getDouble("TncSkyHomeY"),tag.getDouble("TncSkyHomeZ"));
+            setNoGravity(tag.getBoolean("TncSkyNoGravity"));fallDistance=0;
+        }
+    }
+    @Override public void remove(net.minecraft.world.entity.Entity.RemovalReason reason){
+        if(skyCast!=null){skyCast.close(this);skyCast=null;}
+        super.remove(reason);
+    }
+
     /** Client-local black motes; a fixed emission rate avoids per-particle network packets. */
     private void blackAuraParticles() {
-        if(!level().isClientSide()||!isAlive()||isInvisible()||tickCount%3!=0)return;
+        if(!level().isClientSide()||!isAlive()||isInvisible()||tickCount%4!=0)return;
         var dust=new net.minecraft.core.particles.DustParticleOptions(
                 new org.joml.Vector3f(.004F,.003F,.006F),isPhaseTwo()?3.5F:2.8F);
         int perLayer=isPhaseTwo()?3:2;
-        for(int layer=0;layer<6;layer++)for(int i=0;i<perLayer;i++){
+        for(int layer=0;layer<4;layer++)for(int i=0;i<perLayer;i++){
             double angle=tickCount*.035+layer*.9+i*Math.PI*2/perLayer+random.nextDouble()*.6;
             double radius=getBbWidth()*(.48+random.nextDouble()*.28);
             double x=getX()+Math.cos(angle)*radius,z=getZ()+Math.sin(angle)*radius;
-            double y=getY()+getBbHeight()*(layer+random.nextDouble())/6;
+            double y=getY()+getBbHeight()*(layer+random.nextDouble())/4;
             level().addParticle(dust,true,x,y,z,-Math.sin(angle)*.06,.06+random.nextDouble()*.05,Math.cos(angle)*.06);
             if(i==0)level().addParticle(ParticleTypes.SQUID_INK,true,x,y,z,0,.035,0);
         }

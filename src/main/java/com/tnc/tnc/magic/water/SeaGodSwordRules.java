@@ -6,6 +6,15 @@ public final class SeaGodSwordRules {
     public static final int FIELD_LIFE=600, INTERVAL=60, COUNT=1+(FIELD_LIFE-1-IMPACT_TICK)/INTERVAL;
     public static final double LENGTH=64, DROP_HEIGHT=64;
     public static final float DAMAGE=60;
+    public static final int PATH_SEAL_COUNT=5, PATH_SEAL_SPACING=12;
+    public static double pathSealHeight(int index) { return (index+1)*PATH_SEAL_SPACING; }
+    /** Reveal from the sky downwards; every seal is ready before the sword drops. */
+    public static float pathSealOpacity(double age,int index) {
+        if(index<0 || index>=PATH_SEAL_COUNT || age<APPEAR_TICK || age>=END_TICK)return 0;
+        double start=APPEAR_TICK+(PATH_SEAL_COUNT-1-index)*3;
+        return (float)Math.max(0,Math.min(1,Math.min((age-start)/8,(END_TICK-age)/20)));
+    }
+
     private SeaGodSwordRules() {}
     public static int impactIndex(int age) {
         if(age<IMPACT_TICK || age>=FIELD_LIFE || (age-IMPACT_TICK)%INTERVAL!=0)return -1;

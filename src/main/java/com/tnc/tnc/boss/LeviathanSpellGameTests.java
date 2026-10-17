@@ -58,24 +58,29 @@ public final class LeviathanSpellGameTests {
         var boss=boss(h); var enemy=target(h);
         h.assertTrue(LeviathanSpells.cast(boss,enemy,"dragon_roar"),"T3 barrage created");
         final float[] afterBarrage={1000};
-        final BlockPos[] marker={null};
+        final BlockPos[] marker={null}, bedrock={null};
         h.runAtTickTime(45,()->{
             h.assertTrue(enemy.getHealth()<1000,"Actual barrage bolts must hit with a mob owner");
             afterBarrage[0]=enemy.getHealth();
             h.assertTrue(LeviathanSpells.cast(boss,enemy,"dragon_ruin"),"T5 beam created");
             var beam=h.getLevel().getEntitiesOfClass(TNWaterSpellEntity.class,boss.getBoundingBox().inflate(80))
                     .stream().filter(e->e.getUUID().equals(boss.channelId()) && e.tier()==5).findFirst().orElseThrow();
-            marker[0]=BlockPos.containing(beam.position().add(beam.direction().scale(8))
-                    .add(WaterSpellRules.right(beam.direction()).scale(10)));
+            marker[0]=BlockPos.containing(beam.position().add(beam.direction().scale(3)));
             h.getLevel().setBlockAndUpdate(marker[0],Blocks.STONE.defaultBlockState());
+            bedrock[0]=BlockPos.containing(beam.position().add(beam.direction().scale(4)));
+            h.getLevel().setBlockAndUpdate(bedrock[0],Blocks.BEDROCK.defaultBlockState());
+            for(int step=0;step<=96;step+=8) {
+                var p=BlockPos.containing(beam.position().add(beam.direction().scale(step)));
+                h.getLevel().setChunkForced(Math.floorDiv(p.getX(),16),Math.floorDiv(p.getZ(),16),true);
+            }
         });
         h.runAtTickTime(100,()->{
-            h.assertTrue(enemy.getHealth()<afterBarrage[0],"T5 beam deals real damage after charge");
+            h.assertTrue(enemy.getHealth()<=afterBarrage[0]-14,"Boss T5 damages a victim behind stone and bedrock");
             h.assertTrue(h.getLevel().getEntitiesOfClass(TNWaterSpellEntity.class,
                     boss.getBoundingBox().inflate(80)).stream()
-                    .anyMatch(e->e.tier()==5 && e.firedAt()>=0 && e.length()>0),
-                    "The actual T5 beam must finish charging and acquire a real length");
-            h.assertTrue(h.getLevel().getBlockState(marker[0]).is(Blocks.STONE),
+                    .anyMatch(e->e.tier()==5 && e.firedAt()>=0 && Math.abs(e.length()-WaterSpellRules.range(5))<.01),
+                    "Boss T5 retains its entire range through terrain");
+            h.assertTrue(h.getLevel().getBlockState(marker[0]).is(Blocks.STONE) && h.getLevel().getBlockState(bedrock[0]).is(Blocks.BEDROCK),
                     "Mob beam cannot borrow a player's drilling permissions");
             boss.discard(); enemy.discard();
         });

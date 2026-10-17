@@ -42,8 +42,8 @@ final class NightHandGeometry {
                 Vec3 n1 = u.scale(Math.cos(angle1)).add(v.scale(Math.sin(angle1)));
                 // Restrained edge shading gives the black limb volume, rather than a flat ribbon.
                 int shade = side == 1 || side == 2 ? 30 : 8;
-                int red=blood?80+(int)(40*(.5+.5*Math.cos(t0*32-age*.45))):shade;
-                int green=blood?7:shade-3,blue=blood?13:shade+8;
+                int red=blood?42+(int)(28*(.5+.5*Math.cos(t0*32-age*.45))):shade;
+                int green=blood?3:shade-3,blue=blood?8:shade+8;
                 vertex(out,pose,a.add(n0.scale(r0)),red,green,blue,250);
                 vertex(out,pose,b.add(n0.scale(r1)),red,green,blue,250);
                 vertex(out,pose,b.add(n1.scale(r1)),red,green,blue,250);
