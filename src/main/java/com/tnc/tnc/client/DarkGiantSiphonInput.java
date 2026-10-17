@@ -11,6 +11,9 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(modid="tnc",value=Dist.CLIENT)
 public final class DarkGiantSiphonInput {
     @SubscribeEvent public static void movement(MovementInputUpdateEvent event){
+        // Minimal Forge dev clients do not include the optional Fabric spell engine.
+        // Do not resolve spell-spawned entity classes before confirming it is present.
+        if(!net.minecraftforge.fml.ModList.get().isLoaded("spell_engine"))return;
         var player=event.getEntity();
         if(com.tnc.tnc.equipment.PurityAmulet.equipped(player))return;
         boolean bound=player.level().getEntitiesOfClass(TNDarkDrainEntity.class,player.getBoundingBox().inflate(4),

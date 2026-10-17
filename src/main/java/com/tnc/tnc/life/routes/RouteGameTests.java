@@ -78,8 +78,10 @@ public final class RouteGameTests {
         h.getLevel().setBlock(at,com.tnc.tnc.life.botanical.BotanicalContent.BLOCKS.get("dawn_disk").defaultBlockState(),3);
         var dawn=(com.tnc.tnc.life.botanical.BotanicalPlantEntity)h.getLevel().getBlockEntity(at);dawn.owner=p.getUUID();dust.setCount(4);
         for(int i=0;i<3;i++)p.gameMode.useItemOn(p,h.getLevel(),dust,net.minecraft.world.InteractionHand.MAIN_HAND,hit);
-        h.assertTrue(dawn.growth==dawn.species().firstTicks&&!dawn.ready,"dust matures event crops without bypassing their dawn/sprite/sleep harvest triggers");h.succeed();
+        h.assertTrue(dawn.growth==dawn.species().firstTicks&&!dawn.ready,"growth dust must not fabricate dawn, sprite or sleep event flags");h.succeed();
     }
+    @GameTest(template="empty",timeoutTicks=40) public static void wildSpecimensKeepSupportedProperties(GameTestHelper h){RouteWildSpecimensGameTests.everySpecialSpecimenUsesItsOwnSupportedStateProperties(h);}
+    @GameTest(template="empty",timeoutTicks=40) public static void wildSkyVinePlacesWithoutCrash(GameTestHelper h){RouteWildSpecimensGameTests.actualSkyVineGenerationOnDirtDoesNotCrashTheServerTick(h);}
     private static RouteNodeEntity node(GameTestHelper h,RouteKind kind,BlockPos local,java.util.UUID owner){var p=h.absolutePos(local);h.getLevel().setBlock(p,RouteContent.NODES.get(kind.id).get().defaultBlockState(),3);var n=(RouteNodeEntity)h.getLevel().getBlockEntity(p);n.owner=owner;return n;}
     private static ItemStack full(GameTestHelper h){var b=new ItemStack(PastureRegistry.item("mana_bottle"));PastureBottleLedger.get(h.getLevel()).deposit(b,100,100);return b;}
     private static CraftingMenu crafting(GameTestHelper h,net.minecraft.server.level.ServerPlayer p,ItemStack b){var menu=new CraftingMenu(1,p.getInventory(),ContainerLevelAccess.create(h.getLevel(),h.absolutePos(new BlockPos(2,1,2))));for(int i=1;i<=9;i++)menu.getSlot(i).set(i==5?b:new ItemStack(Items.DIRT,2));p.containerMenu=menu;menu.slotsChanged(menu.getSlot(1).container);return menu;}

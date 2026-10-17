@@ -28,7 +28,8 @@ def main():
   INPUT.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n','utf8');print('Prepared full current book:',chapters,'chapters; only workshop replaced in test copy');return
  data=json.loads(INPUT.read_text('utf8'));assert data['live']==str(live);assert data['workshop']==digest(SOURCE)
  expected=len(re.findall(r'@GameTest\(', (R/'src/main/java/com/tnc/tnc/life/routes/RouteGameTests.java').read_text('utf8')))
- for filename in ['life-rework-build.log','life-rework-ftb.log']:
+ # The final combined command runs unit tests, build, real FTB GameTests and native client.
+ for filename in ['life-rework-ftb.log']:
   log=R/'work'/filename;text=log.read_text('utf8',errors='replace');assert f'All {expected} required tests passed' in text and 'BUILD SUCCESSFUL' in text and 'failed!' not in text,filename
   if filename.endswith('ftb.log'):
    assert log.stat().st_mtime>=INPUT.stat().st_mtime and str(data['chapter_count'])+' chapters,' in text
