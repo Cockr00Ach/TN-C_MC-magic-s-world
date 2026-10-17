@@ -412,5 +412,7 @@
   "item.tnc.purity_amulet": "Purity Amulet",
   "tooltip.tnc.purity_amulet.equip": "§7Equip in necklace/charm slot or offhand",
   "tooltip.tnc.purity_amulet.immunity": "§bRejects harmful and neutral effects; cleanses existing effects",
-  "tooltip.tnc.purity_amulet.benefits": "§7Keeps buffs; resists the Dark Giant siphon restraint"
+  "tooltip.tnc.purity_amulet.benefits": "§7Keeps buffs; resists the Dark Giant siphon restraint",
+  "entity.tnc.stone_lancer": "Panyue, the Stone Lancer",
+  "item.tnc.stone_lancer_spawn_egg": "Stone Lancer Spawn Egg"
 }

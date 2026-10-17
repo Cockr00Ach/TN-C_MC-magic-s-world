@@ -462,5 +462,7 @@
   "item.tnc.purity_amulet": "净世护符",
   "tooltip.tnc.purity_amulet.equip": "§7佩戴于项链／护符槽或副手",
   "tooltip.tnc.purity_amulet.immunity": "§b免疫所有负面与中立异常状态，清除已有异常",
-  "tooltip.tnc.purity_amulet.benefits": "§7保留增益；免疫领主血线定身与牵引"
+  "tooltip.tnc.purity_amulet.benefits": "§7保留增益；免疫领主血线定身与牵引",
+  "entity.tnc.stone_lancer": "磐岳 · 岩枪古像",
+  "item.tnc.stone_lancer_spawn_egg": "磐岳 · 岩枪古像 刷怪蛋"
 }
