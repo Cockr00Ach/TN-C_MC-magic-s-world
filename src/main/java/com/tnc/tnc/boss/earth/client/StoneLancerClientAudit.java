@@ -17,7 +17,7 @@ import java.util.*;
 /** Optional isolated GPU gallery, disabled and omitted from scoped game releases. */
 @Mod.EventBusSubscriber(modid="tnc",value=Dist.CLIENT)
 public final class StoneLancerClientAudit {
-    private static boolean started,saving;
+    private static boolean started,saving,predictionVerified;
     private static volatile boolean saved;
     private static int frames;
     private static final List<String> failures=new ArrayList<>();
@@ -39,7 +39,7 @@ public final class StoneLancerClientAudit {
         if(mc.level==null||mc.player==null||mc.getOverlay()!=null)return;
         if(!started){
             started=true;mc.options.pauseOnLostFocus=false;mc.options.guiScale().set(1);mc.resizeDisplay();
-            for(String name:new String[]{"earth_spear_sharp","earth_spike_sharp","earth_orb","earth_clod","earth_shell"}){
+            for(String name:new String[]{"earth_spear_sharp","earth_spike_sharp","earth_orb","earth_clod","earth_shell","gravity_core"}){
                 var model=mc.getModelManager().getModel(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tnc","projectile/stone_lancer_"+name));
                 if(model==mc.getModelManager().getMissingModel()||model.getParticleIcon().contents().name().getPath().equals("missingno"))failures.add("Missing boss attack model: "+name);
             }
@@ -47,11 +47,28 @@ public final class StoneLancerClientAudit {
             mc.setScreen(new Gallery());
         }
         for(var boss:bosses)boss.tickCount++;
-        if(++frames==14)for(int i=1;i<3;i++)bosses.get(i).getAnimatableInstanceCache().getManagerForId(bosses.get(i).getId()).tryTriggerAnimation("action","volley");
+        if(!predictionVerified&&mc.level.getGameTime()%2==0){
+            predictionVerified=true;
+            var core=StoneLancerRegistration.ATTACK.create(mc.level);
+            var at=mc.player.position().add(100,30,0);
+            core.configure(bosses.get(0),2,"stone_lancer_gravity_core",at,at,150,150,0,104,44,135,mc.level.damageSources().magic());
+            core.age(0);core.tickCount=30;
+            var oldMotion=mc.player.getDeltaMovement();var oldField=StoneLancerTremor.gravityField;
+            try{
+                StoneLancerTremor.gravityField=core;mc.player.setDeltaMovement(3.9,0,0);
+                StoneLancerGravityClient.tick(new TickEvent.ClientTickEvent(TickEvent.Phase.START));
+                var motion=mc.player.getDeltaMovement();
+                if(motion.x<=3.9||motion.y<=0||motion.length()>12.001)failures.add("Local player gravity prediction failed: "+motion);
+                core.discard();mc.player.setDeltaMovement(0,0,0);
+                StoneLancerGravityClient.tick(new TickEvent.ClientTickEvent(TickEvent.Phase.START));
+                if(mc.player.getDeltaMovement().lengthSqr()!=0)failures.add("Removed core continued pulling the local player");
+            }finally{mc.player.setDeltaMovement(oldMotion);StoneLancerTremor.gravityField=oldField;}
+        }
+        if(++frames==14)for(int i=1;i<3;i++)bosses.get(i).getAnimatableInstanceCache().getManagerForId(bosses.get(i).getId()).tryTriggerAnimation("action",i==1?"emerge_core":"gravity_core");
         if(frames<40)return;
         if(!saving){saving=true;Screenshot.grab(mc.gameDirectory,"stone_lancer_full.png",mc.getMainRenderTarget(),m->saved=true);return;}
         if(!saved)return;
-        var report=Map.of("failures",failures,"renderer",mc.getEntityRenderDispatcher().getRenderer(bosses.get(0)).getClass().getName(),"scope","Real isolated dev-client model rendering; no full-pack FPS claim");
+        var report=Map.of("failures",failures,"renderer",mc.getEntityRenderDispatcher().getRenderer(bosses.get(0)).getClass().getName(),"attackModels",6,"localPlayerPrediction",predictionVerified,"poses",List.of("idle","emerge_core","gravity_core"),"scope","Real isolated dev-client model rendering; no full-pack FPS claim");
         Files.writeString(Path.of(System.getProperty("tnc.stoneLancerAuditReport")),new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(report));mc.stop();
     }
     private static final class Gallery extends Screen {
@@ -62,7 +79,7 @@ public final class StoneLancerClientAudit {
             for(int i=0;i<3;i++){
                 int cell=width/3,x=i*cell;
                 g.fill(x+12,65,x+cell-12,height-40,0xFF263039);
-                g.drawString(font,new String[]{"FRONT / SPEAR ARMS","THREE QUARTER / FORWARD CAST","PROFILE / FORWARD CAST"}[i],x+24,82,0xE8C68D,false);
+                g.drawString(font,new String[]{"FRONT / SPEAR ARMS","EMERGENCE / CONTINUOUS CORE POSE","PROFILE / GIANT GRAVITY CHANNEL"}[i],x+24,82,0xE8C68D,false);
                 try{
                     g.flush();
                     var rotation=Axis.ZP.rotationDegrees(180);rotation.mul(Axis.YP.rotationDegrees(i==0?0:i==1?42:90));
