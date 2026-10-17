@@ -32,16 +32,11 @@ public final class WindEarthVisualRules {
         Map.entry("star_quake", new Spec(4, 5, 9.000D, 324, false, "minecraft:slowness")),
         Map.entry("super_wind_speed", new Spec(0, 4, 1.700D, 600, true, "tnc:wind_speed_iii,tnc:wind_power_ii")),
         Map.entry("ten_thousand_rocks", new Spec(3, 4, 2.100D, 48, false, "")),
-        Map.entry("triple_wind_spirit", new Spec(1, 4, 2.400D, 48, false, "tnc:wind_spirit_ii")),
         Map.entry("vast_gale", new Spec(2, 3, 1.850D, 36, false, "tnc:gale_slow,tnc:gale_haste")),
         Map.entry("wind_field", new Spec(0, 1, 1.100D, 100, true, "tnc:wind_flight")),
         Map.entry("wind_god_descent", new Spec(0, 5, 1.900D, 600, true, "tnc:wind_speed_iii,tnc:wind_power_ii,tnc:wind_god")),
         Map.entry("wind_god_gale", new Spec(2, 5, 2.350D, 48, false, "tnc:gale_slow,tnc:gale_haste")),
-        Map.entry("wind_orb", new Spec(1, 1, 1.650D, 36, false, "tnc:wind_orb_three")),
-        Map.entry("wind_orb_swarm", new Spec(1, 2, 1.900D, 36, false, "tnc:wind_orb_five")),
-        Map.entry("wind_speed", new Spec(0, 2, 1.300D, 100, true, "tnc:wind_flight,tnc:wind_speed_i")),
-        Map.entry("wind_spirit", new Spec(1, 3, 2.150D, 36, false, "tnc:wind_spirit")),
-        Map.entry("wind_spirit_lord", new Spec(1, 5, 2.650D, 48, false, "tnc:wind_spirit_lord"))
+        Map.entry("wind_speed", new Spec(0, 2, 1.300D, 100, true, "tnc:wind_flight,tnc:wind_speed_i"))
     );
     private WindEarthVisualRules() {}
     public static double spiritScale(int tier,int slot) {return tier==5?(slot==0?1.25:.85):1.0;}

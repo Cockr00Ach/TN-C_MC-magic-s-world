@@ -28,11 +28,33 @@ public final class ManaFluid {
     private static boolean safe(BlockState state){return state.isAir()||state.getBlock()==RouteContent.MANA_LIQUID.get();}
     public static final class Source extends ForgeFlowingFluid.Source {
         public Source(Properties p){super(p);}
+        @Override protected java.util.Map<Direction,FluidState> getSpread(Level l,BlockPos p,BlockState state){
+            var preferred=super.getSpread(l,p,state);
+            preferred.entrySet().removeIf(e->!safe(l.getBlockState(p.relative(e.getKey())))||!withinBoundary(l,p,p.relative(e.getKey())));
+            // Vanilla prefers the shortest route to a drop. If every preferred drop is
+            // across a protected boundary, still allow the legal level floor to fill.
+            if(preferred.isEmpty()&&l instanceof net.minecraft.server.level.ServerLevel server&&com.tnc.tnc.home.HousingService.ownedAt(server,p)!=null){
+                for(var d:Direction.Plane.HORIZONTAL){var q=p.relative(d);var target=l.getBlockState(q);var next=getNewLiquid(l,q,target);
+                    if(!next.isEmpty()&&canSpreadTo(l,p,state,d,q,target,target.getFluidState(),next.getType()))preferred.put(d,next);
+                }
+            }return preferred;
+        }
         @Override protected boolean canSpreadTo(BlockGetter l,BlockPos from,BlockState a,Direction d,BlockPos to,BlockState b,FluidState fluid,Fluid f){return safe(b)&&withinBoundary(l,from,to)&&super.canSpreadTo(l,from,a,d,to,b,fluid,f);}
         @Override protected void spreadTo(LevelAccessor l,BlockPos p,BlockState s,Direction d,FluidState f){if(safe(s))super.spreadTo(l,p,s,d,f);}
     }
     public static final class Flowing extends ForgeFlowingFluid.Flowing {
         public Flowing(Properties p){super(p);}
+        @Override protected java.util.Map<Direction,FluidState> getSpread(Level l,BlockPos p,BlockState state){
+            var preferred=super.getSpread(l,p,state);
+            preferred.entrySet().removeIf(e->!safe(l.getBlockState(p.relative(e.getKey())))||!withinBoundary(l,p,p.relative(e.getKey())));
+            // Vanilla prefers the shortest route to a drop. If every preferred drop is
+            // across a protected boundary, still allow the legal level floor to fill.
+            if(preferred.isEmpty()&&l instanceof net.minecraft.server.level.ServerLevel server&&com.tnc.tnc.home.HousingService.ownedAt(server,p)!=null){
+                for(var d:Direction.Plane.HORIZONTAL){var q=p.relative(d);var target=l.getBlockState(q);var next=getNewLiquid(l,q,target);
+                    if(!next.isEmpty()&&canSpreadTo(l,p,state,d,q,target,target.getFluidState(),next.getType()))preferred.put(d,next);
+                }
+            }return preferred;
+        }
         @Override protected boolean canSpreadTo(BlockGetter l,BlockPos from,BlockState a,Direction d,BlockPos to,BlockState b,FluidState fluid,Fluid f){return safe(b)&&withinBoundary(l,from,to)&&super.canSpreadTo(l,from,a,d,to,b,fluid,f);}
         @Override protected void spreadTo(LevelAccessor l,BlockPos p,BlockState s,Direction d,FluidState f){if(safe(s))super.spreadTo(l,p,s,d,f);}
     }

@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 public class MagicStoneNetwork {
 
     // v3 adds downed/rescue packets. Reject stale clients instead of silently losing combat state.
-    private static final String PROTOCOL_VERSION = "6";
+    private static final String PROTOCOL_VERSION = "7";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "main"),
@@ -35,6 +35,9 @@ public class MagicStoneNetwork {
         CHANNEL.messageBuilder(com.tnc.tnc.tavern.TavernRoomPacket.class,203,NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.tnc.tnc.tavern.TavernRoomPacket::encode).decoder(com.tnc.tnc.tavern.TavernRoomPacket::decode)
                 .consumerMainThread(com.tnc.tnc.tavern.TavernRoomPacket::handle).add();
+        CHANNEL.messageBuilder(com.tnc.tnc.casino.CasinoRoomPacket.class,204,NetworkDirection.PLAY_TO_CLIENT).encoder(com.tnc.tnc.casino.CasinoRoomPacket::encode).decoder(com.tnc.tnc.casino.CasinoRoomPacket::decode).consumerMainThread(com.tnc.tnc.casino.CasinoRoomPacket::handle).add();
+        CHANNEL.messageBuilder(com.tnc.tnc.mana.sight.ManaSightToggle.class,205,NetworkDirection.PLAY_TO_SERVER).encoder(com.tnc.tnc.mana.sight.ManaSightToggle::encode).decoder(com.tnc.tnc.mana.sight.ManaSightToggle::decode).consumerMainThread(com.tnc.tnc.mana.sight.ManaSightToggle::handle).add();
+        CHANNEL.messageBuilder(com.tnc.tnc.mana.sight.ManaFlowPacket.class,206,NetworkDirection.PLAY_TO_CLIENT).encoder(com.tnc.tnc.mana.sight.ManaFlowPacket::encode).decoder(com.tnc.tnc.mana.sight.ManaFlowPacket::decode).consumerMainThread(com.tnc.tnc.mana.sight.ManaFlowPacket::handle).add();
         int id = 0;
         CHANNEL.messageBuilder(SyncMagicStone.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(SyncMagicStone::encode)

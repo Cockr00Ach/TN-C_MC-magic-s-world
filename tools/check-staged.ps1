@@ -72,7 +72,9 @@ foreach ($f in $staged) {
 # jar WITH music - see src/main/resources/assets/tnc/sounds/music/).
 # Everything else still obeys $MaxMB.
 # The three user-provided inn tracks are also intentional build resources.
-$sizeExempt = '^src/main/resources/assets/tnc/sounds/(music/travel/.*|tavern/(wander_ward(_1)?|tavern_third))\.ogg$'
+# Original generated 1254px GUI plate (2.74 MiB), retained without lossy edits.
+# Exact-path exception only; other images and generated artifacts keep the 2 MB guard.
+$sizeExempt = '^(src/main/resources/assets/tnc/sounds/(music/travel/.*|tavern/(wander_ward(_1)?|tavern_third))\.ogg|src/main/resources/assets/tnc/textures/gui/arcane_grimoire\.png)$'
 
 $totalBytes = 0
 foreach ($f in $staged) {

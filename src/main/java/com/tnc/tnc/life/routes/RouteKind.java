@@ -2,7 +2,7 @@ package com.tnc.tnc.life.routes;
 /** Mana and bandwidth are expressed in M/second; fractional consumption is retained. */
 public enum RouteKind {
     INFUSER("mana_infuser","注能台",500,8),COLLECTOR("dew_collector","集露盏",100,4),ANIMAL_COLLECTOR("breath_collector","集息器",200,32),COLOR_TARGET("color_target","色靶",200,32),
-    WIRE("mana_thread","魔导丝",0,8),GOLD_WIRE("radiant_thread","曜纹导线",0,32),CRYSTAL_WIRE("star_thread","星髓导线",0,128),
+    WIRE("mana_thread","青辉导魔晶纤",0,8),GOLD_WIRE("radiant_thread","霞金导魔晶纤",0,32),CRYSTAL_WIRE("star_thread","虹星导魔晶纤",0,128),
     POOL("mana_basin","浅魔池",1000,8),RESERVOIR("radiant_basin","曜纹储池",8000,32),VAULT("star_basin","星髓储池",32000,128),
     MIRROR("mana_mirror","折光镜",200,4),FAR_MIRROR("star_mirror","远折镜",400,16),VALVE("mana_valve","分流阀",200,32),
     LAMP("mana_lantern","魔导灯",20,4),BRIGHT_LAMP("bright_mana_lantern","庭院明灯",40,4),PAPER_PRESS("mana_pulp_press","纸皮压机",200,8),FEED_PLATE("mana_feed_plate","自动投料器",100,4),

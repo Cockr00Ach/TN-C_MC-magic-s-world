@@ -15,7 +15,7 @@ public final class RouteSources {
                 case ECHO_BEAN->{int seconds=t.getInt("BeanSeconds");if(seconds>0){t.putInt("BeanSeconds",seconds-1);yield 2;}yield 0;}
                 case HONEY_CLUSTER->{int seconds=t.getInt("HoneySeconds");if(seconds>0){t.putInt("HoneySeconds",seconds-1);yield .6;}yield 0;}
                 default->0;
-            };double remainder=t.getDouble("ManaFraction")+generated;int whole=(int)remainder;t.putDouble("ManaFraction",remainder-whole);t.putInt("ManaBuffer",Math.min(120,t.getInt("ManaBuffer")+whole));t.putInt("ManaDraw",0);plant.setChanged();}
+            };double remainder=t.getDouble("ManaFraction")+generated;int whole=(int)remainder;t.putDouble("ManaFraction",remainder-whole);com.tnc.tnc.mana.sight.ManaSightServer.emission(l,p,Math.min(whole,120-t.getInt("ManaBuffer")));t.putInt("ManaBuffer",Math.min(120,t.getInt("ManaBuffer")+whole));t.putInt("ManaDraw",0);plant.setChanged();}
             int output=switch(plant.species()){case WIND_SAIL->3;case DAWN_DISK,DANCE_BELL,HONEY_CLUSTER->1;case ECHO_BEAN->2;default->0;};int got=Math.min(maximum,Math.min(t.getInt("ManaBuffer"),Math.max(0,output-t.getInt("ManaDraw"))));t.putInt("ManaBuffer",t.getInt("ManaBuffer")-got);t.putInt("ManaDraw",t.getInt("ManaDraw")+got);plant.setChanged();return got;
         }
         if(raw instanceof com.tnc.tnc.life.wonders.SkyVineRootEntity vine)return vine.drawMana(owner,maximum);

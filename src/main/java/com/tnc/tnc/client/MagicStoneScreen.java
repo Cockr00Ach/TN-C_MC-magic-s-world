@@ -32,8 +32,8 @@ public class MagicStoneScreen extends Screen {
     private static final int COLOR_TITLE = 0xFFF2DFC4;    // warm cream
     private static final int COLOR_TEXT = 0xFFDCC9B0;      // light tan
     private static final int COLOR_DIM = 0xFF9A8570;        // muted brown
-    private static final int COLOR_OK = 0xFF6BE06B;
-    private static final int COLOR_BAD = 0xFFE06B6B;
+    private static final int COLOR_OK = 0xFF96CDBA;
+    private static final int COLOR_BAD = 0xFFD79282;
 
     private static final int LIST_X = 186;
     private static final int LIST_Y = 62;
@@ -394,12 +394,7 @@ public class MagicStoneScreen extends Screen {
 
         // 面板外框：模仿法术按钮那种"多层金框"（按钮是整合包资源包给的斜面风格）
         // 由外到内四层：深棕 -> 亮金 -> 中金 -> 面板底色，看起来和按钮是一套的 ✓
-        int bx0 = left - 4, by0 = top - 4, bx1 = left + panelW + 4, by1 = top + PANEL_H + 4;
-        graphics.fill(bx0, by0, bx1, by1, 0xFF2A1B0E);                 // 最外层深棕描边
-        graphics.fill(bx0 + 1, by0 + 1, bx1 - 1, by1 - 1, 0xFFF2D48A); // 亮金高光
-        graphics.fill(bx0 + 2, by0 + 2, bx1 - 2, by1 - 2, 0xFFB98A46); // 中金
-        graphics.fill(bx0 + 3, by0 + 3, bx1 - 3, by1 - 3, 0xFF6E4A22); // 内层暗金
-        graphics.fill(left, top, left + panelW, top + PANEL_H, COLOR_PANEL);
+        com.tnc.tnc.client.ui.ArcaneGui.frame(graphics,left-4,top-4,panelW+8,PANEL_H+8);
         graphics.drawCenteredString(this.font, this.title, left + panelW / 2, top + 8, COLOR_TITLE);
 
         MagicStoneData data = clientData();

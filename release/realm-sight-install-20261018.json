@@ -1,0 +1,30 @@
+{
+  "installed_at": "2026-10-18T05:59:50.008847",
+  "jar_sha256": "b850273d37af28ddc507f8040ff5bd611131fb629e22365e08c6d12db232209a",
+  "jar_bytes": 109942827,
+  "unit_tests": 267,
+  "route_game_tests": 31,
+  "native_screenshots": 31,
+  "plants_checked": 38,
+  "protected_quest_files_unchanged": 41,
+  "replaced_chapters": [
+    "tnc_field_04_workshop.snbt"
+  ],
+  "workshop_quests": 83,
+  "retired_items": 14,
+  "fiber_max_endpoints": 2,
+  "mana_sight_default_key": "F8",
+  "heroskand_pieces": 3617,
+  "castle_full_generation_verified": true,
+  "casino_track_seconds": 111.30839,
+  "backup": "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\work\\backups\\realm-sight-20261018-055949",
+  "live": "D:\\垃圾桶\\PCL 正式版 2.9.3\\.minecraft\\versions\\元素觉醒1.4.3-魔改版-20260915",
+  "saves_modified": false,
+  "island_templates_modified": false,
+  "arcane_gui_screens": 13,
+  "mana_sight_actual_flows": 4,
+  "heroskand_source_blocks": 9043448,
+  "heroskand_chunks": 2160,
+  "heroskand_missing_pieces": 0,
+  "heroskand_mismatched_blocks": 0
+}

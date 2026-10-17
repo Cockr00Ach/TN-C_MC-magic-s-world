@@ -86,6 +86,12 @@ minecraft {
         }
 
         client {
+            if (project.hasProperty('windTwoChainsAudit')) {
+                workingDirectory project.file('work/wind-two-chains-client-audit')
+                property 'tnc.windTwoChainsAudit', 'true'
+                property 'tnc.windTwoChainsAuditReport', file('work/wind-two-chains-client-audit.json').absolutePath
+                args '--quickPlaySingleplayer', 'casino-gallery', '--width', '1800', '--height', '900'
+            }
             if (project.hasProperty('windArsenalAudit')) {
                 workingDirectory project.file('work/wind-arsenal-client-audit')
                 property 'tnc.windArsenalAudit', 'true'
@@ -184,6 +190,7 @@ minecraft {
                 property 'mixin.env.remapRefMap', 'true'
                 property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
             }
+            if (project.hasProperty('heroskandRealmTests')) property 'forge.enabledGameTestNamespaces', 'tncrealm'
             if (project.hasProperty('fullLandmarkTests')) property 'tnc.fullLandmarkTests', 'true'
             if (project.hasProperty('fullSkyIslandTests')) {
                 property 'tnc.fullSkyIslandTests', 'true'
@@ -268,6 +275,10 @@ dependencies {
     if (project.hasProperty('leviathanTests')) {
         runtimeOnly fg.deobf('geckolib:geckolib:4.8.4')
     }
+    if (project.hasProperty('heroskandRealmTests')) {
+        runtimeOnly files('work/tavern-fixtures/conquest-dev.jar')
+        runtimeOnly fg.deobf('geckolib:geckolib:4.8.4')
+    }
     if (project.hasProperty('tavernClientAudit')) {
         // Dev-only nested Fabric API SRG names must also match Mojmap; game jar untouched.
         runtimeOnly files('work/tavern-fixtures/conquest-dev.jar')
@@ -336,6 +347,11 @@ tasks.named('processResources', ProcessResources).configure {
 
 // Example for how to get properties into the manifest for reading at runtime.
 tasks.named('jar', Jar).configure {
+    // Native previews may compile dependency fixtures into the shared output.
+    // Never ship those classes: split packages hide the actual dependency on Forge.
+    exclude { entry ->
+        entry.path.endsWith('.class') && !entry.path.startsWith('com/tnc/tnc/')
+    }
     manifest {
         attributes([
                 'Specification-Title'     : mod_id,

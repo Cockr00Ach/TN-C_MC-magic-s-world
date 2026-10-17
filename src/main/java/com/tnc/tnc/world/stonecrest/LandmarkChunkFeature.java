@@ -21,7 +21,13 @@ public final class LandmarkChunkFeature extends Feature<NoneFeatureConfiguration
     private static final Map<IndexKey,Map<Long,List<StonecrestManifest.Piece>>> INDEX=new ConcurrentHashMap<>();
     public LandmarkChunkFeature() { super(NoneFeatureConfiguration.CODEC); }
     @Override public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
-        if (!(context.level() instanceof WorldGenRegion region) || !LandmarkGenerationMode.enabled(region.getLevel())) return false;
+        if (!(context.level() instanceof WorldGenRegion region)) return false;
+        if(region.getLevel().dimension().equals(HeroskandRealm.KEY)){
+            var site=new LandmarkSites.Site("heroskand_estate_v2",HeroskandRealm.ORIGIN,new ChunkPos(HeroskandRealm.ORIGIN));
+            if(!site.intersects(region.getCenter(),0))return false;
+            placeSlice(region,region.getCenter(),site);return true;
+        }
+        if(!LandmarkGenerationMode.enabled(region.getLevel()))return false;
         boolean placed=false;
         for (var site:LandmarkSites.touching(region.getLevel(),region.getCenter(),0)) {
             placeSlice(region,region.getCenter(),site); placed=true;

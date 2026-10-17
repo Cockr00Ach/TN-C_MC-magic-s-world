@@ -1,7 +1,57 @@
 {
-  "variants": {
-    "": {
-      "model": "tnc:block/radiant_thread"
+  "multipart": [
+    {
+      "apply": {
+        "model": "tnc:block/fiber_radiant_thread_core"
+      }
+    },
+    {
+      "when": {
+        "west": "true"
+      },
+      "apply": {
+        "model": "tnc:block/fiber_radiant_thread_west"
+      }
+    },
+    {
+      "when": {
+        "east": "true"
+      },
+      "apply": {
+        "model": "tnc:block/fiber_radiant_thread_east"
+      }
+    },
+    {
+      "when": {
+        "down": "true"
+      },
+      "apply": {
+        "model": "tnc:block/fiber_radiant_thread_down"
+      }
+    },
+    {
+      "when": {
+        "up": "true"
+      },
+      "apply": {
+        "model": "tnc:block/fiber_radiant_thread_up"
+      }
+    },
+    {
+      "when": {
+        "north": "true"
+      },
+      "apply": {
+        "model": "tnc:block/fiber_radiant_thread_north"
+      }
+    },
+    {
+      "when": {
+        "south": "true"
+      },
+      "apply": {
+        "model": "tnc:block/fiber_radiant_thread_south"
+      }
     }
-  }
+  ]
 }
