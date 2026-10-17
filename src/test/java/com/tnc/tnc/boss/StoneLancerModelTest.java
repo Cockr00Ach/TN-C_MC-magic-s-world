@@ -42,6 +42,34 @@ class StoneLancerModelTest {
         var tip=model.getBone("lance_point_down_1").orElseThrow().getCubes().get(0);StoneLancerMesh.apply(model);
         assertSame(tip,model.getBone("lance_point_down_1").orElseThrow().getCubes().get(0),"Resource retrieval must not repeatedly rebuild spear meshes");
     }
+    @Test void giantArmorHasRealReliefWithinTheMeshBudget() throws Exception {
+        var path=java.nio.file.Path.of("src/main/resources/assets/tnc/geo/entity/stone_lancer.geo.json");
+        var raw=software.bernie.geckolib.util.JsonUtil.GEO_GSON.fromJson(java.nio.file.Files.readString(path),software.bernie.geckolib.loading.json.raw.Model.class);
+        var model=new software.bernie.geckolib.loading.object.BakedModelFactory.Builtin().constructGeoModel(software.bernie.geckolib.loading.object.GeometryTree.fromModel(raw));
+        StoneLancerMesh.apply(model);
+        var pending=new java.util.ArrayDeque<>(model.topLevelBones());
+        int bones=0,cubes=0,vertices=0;
+        while(!pending.isEmpty()) {
+            var bone=pending.removeFirst();bones++;pending.addAll(bone.getChildBones());
+            for(var cube:bone.getCubes()) {
+                cubes++;
+                for(var face:cube.quads()) {
+                    assertTrue(face.normal().isFinite());
+                    assertEquals(1,face.normal().length(),.001);
+                    for(var vertex:face.vertices()) {
+                        vertices++;
+                        assertTrue(vertex.position().isFinite());
+                        assertTrue(vertex.texU()>=0 && vertex.texU()<=1 && vertex.texV()>=0 && vertex.texV()<=1,
+                                "Every beveled detail stays inside the material atlas: "+bone.getName());
+                    }
+                }
+            }
+        }
+        assertEquals(32,bones,"The existing casting and walking rig is preserved");
+        assertTrue(cubes>=150 && cubes<=224,"Giant armor needs geometric relief within a finite piece budget");
+        assertTrue(vertices<=20000,"One giant must stay inside its baked vertex budget");
+    }
+
     @Test void animationTracksOnlyAddressBonesInTheProductionRig() throws Exception {
         var parser=new com.google.gson.Gson();var root=java.nio.file.Path.of("src/main/resources/assets/tnc");
         var geo=parser.fromJson(java.nio.file.Files.readString(root.resolve("geo/entity/stone_lancer.geo.json")),com.google.gson.JsonObject.class);
