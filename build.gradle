@@ -86,6 +86,12 @@ minecraft {
         }
 
         client {
+            if (project.hasProperty('windArsenalAudit')) {
+                workingDirectory project.file('work/wind-arsenal-client-audit')
+                property 'tnc.windArsenalAudit', 'true'
+                property 'tnc.windArsenalAuditReport', file('work/wind-arsenal-client-audit.json').absolutePath
+                args '--width', '1800', '--height', '900'
+            }
             if (project.hasProperty('waterModelAudit')) {
                 workingDirectory project.file('work/water-model-audit')
                 property 'mixin.env.remapRefMap', 'true'

@@ -23,8 +23,10 @@ public class TNWindSpiritRenderer extends GeoEntityRenderer<TNWindSpiritEntity> 
     @Override
     public void render(TNWindSpiritEntity entity, float yaw, float partial, PoseStack poses,
                        net.minecraft.client.renderer.MultiBufferSource buffer, int light) {
-        if(entity.tier()>=3)super.render(entity,yaw,partial,poses,buffer,net.minecraft.client.renderer.LightTexture.FULL_BRIGHT);
-        else WindEarthVisualBuffers.draw(buffer,(body,glow)->WindEarthGeometry.spirit(body,glow,poses.last().pose(),TNWindMechanics.scaleForTier(entity.tier()),entity.tier(),entity.tickCount+partial));
+        if(entity.tier()>=3){
+            super.render(entity,yaw,partial,poses,buffer,net.minecraft.client.renderer.LightTexture.FULL_BRIGHT);
+            WindConstructModels.escorts(entity,partial,poses,buffer);
+        } else WindConstructModels.orb(entity.tier(),entity.level().getGameTime()+partial,poses,buffer);
     }
 
     @Override
