@@ -57,20 +57,27 @@ public final class WindTwoChainsClientAudit {
             for(int i=0;i<6;i++){
                 int cell=width/3,row=i/3,col=i%3,x=col*cell,y=55+row*(height-85)/2,h=(height-85)/2-12;
                 g.fill(x+12,y,x+cell-12,y+h,0xFF233A46);
-                g.drawString(font,new String[]{"COMPRESSING WIND CORE / T5","T1 / 3 SWORDS","T2 / 10 SWORDS","T3 / 5 SPEARS + VULNERABILITY","T4 / 20 SWORDS + 10 SPEARS / TARGET SEAL","T5 / 3 SWORDS + 2 SPEARS / TRUE 20X SCALE"}[i],x+22,y+15,0xC9F7E7,false);
+                g.drawString(font,new String[]{"WINGBLADE / SPELL + HELD RELIC","WINDLANCE / SPELL + HELD RELIC","T2 / ORBIT ATTACK","T4 / THREE ORBIT REVOLUTIONS","T5 / SEQUENTIAL SEAL ASCENT / SCALE 60","T5 / GIANT COMPRESSING WIND CORE"}[i],x+22,y+15,0xC9F7E7,false);
                 boolean pushed=false;
                 try{
-                    Entity entity=i==0?ball:volleys.get(i-1);int snapshot=i==0?30:i<=3?10:30;age(entity,snapshot);
                     g.flush();g.pose().pushPose();pushed=true;g.pose().translate(x+cell/2,y+h/2+20,450);
-                    float scale=i==0?Math.min(cell/6F,h/6F):i<=3?Math.min(cell/5F,h/4.5F):i==4?h/30F:h/115F;
-                    g.pose().scale(scale,-scale,scale);g.pose().mulPose(Axis.XP.rotationDegrees(12));g.pose().mulPose(Axis.YP.rotationDegrees(-25));
-                    if(i>=4){var relative=((WindVolleyEntity)entity).aimPoint().subtract(entity.position());g.pose().translate(-relative.x,-(i==5?45:12),-relative.z);}
-                    mc.getEntityRenderDispatcher().setRenderShadow(false);
-                    mc.getEntityRenderDispatcher().render(entity,0,0,0,0,partial,g.pose(),buffer,net.minecraft.client.renderer.LightTexture.FULL_BRIGHT);buffer.endBatch();
+                    if(i<2){
+                        g.pose().scale(100,-100,100);g.pose().mulPose(Axis.XP.rotationDegrees(72));g.pose().mulPose(Axis.YP.rotationDegrees(-25));
+                        WindConstructModels.weapon(i+1,g.pose(),buffer,.99F,false);buffer.endBatch();
+                        var item=new net.minecraft.world.item.ItemStack(i==0?WindRelicItems.SWORD:WindRelicItems.SPEAR);
+                        if(mc.getItemRenderer().getModel(item,mc.level,mc.player,0)==mc.getModelManager().getMissingModel())throw new IllegalStateException("Held item model missing");
+                    }else{
+                        Entity entity=i==5?ball:volleys.get(i==2?1:i==3?3:4);age(entity,i==5?10:i==4?65:60);
+                        float scale=i==5?2:i==4?1.3F:9;
+                        g.pose().scale(scale,-scale,scale);g.pose().mulPose(Axis.XP.rotationDegrees(12));g.pose().mulPose(Axis.YP.rotationDegrees(-25));
+                        if(entity instanceof WindVolleyEntity volley){var relative=volley.aimPoint().subtract(entity.position());g.pose().translate(-relative.x,-(i==4?65:8),-relative.z);}
+                        mc.getEntityRenderDispatcher().setRenderShadow(false);
+                        mc.getEntityRenderDispatcher().render(entity,0,0,0,0,partial,g.pose(),buffer,net.minecraft.client.renderer.LightTexture.FULL_BRIGHT);buffer.endBatch();
+                    }
                 }catch(Throwable t){if(!failures.contains(t.toString()))failures.add(t.toString());}
                 finally{if(pushed)g.pose().popPose();mc.getEntityRenderDispatcher().setRenderShadow(true);}
             }
-            g.drawString(font,"Each volley uses one entity | Each blade has its own swept collision | Old summon chain retired",25,height-20,0x91BFB2,false);
+            g.drawString(font,"Native layered models / engraved metal / held item models checked / bounded wind trails",25,height-20,0x91BFB2,false);
         }
     }
 }
