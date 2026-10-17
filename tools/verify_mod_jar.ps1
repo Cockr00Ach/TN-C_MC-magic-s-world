@@ -71,6 +71,15 @@ Ok ("artifact present ({0:N0} bytes)" -f (Get-Item $JarPath).Length)
 
 $zip = [System.IO.Compression.ZipFile]::OpenRead($JarPath)
 try {
+    # Dependency preview fixtures create split packages in Forge's module loader.
+    $foreignClasses = @($zip.Entries | Where-Object {
+        $_.FullName.EndsWith('.class') -and -not $_.FullName.StartsWith('com/tnc/tnc/')
+    })
+    if ($foreignClasses.Count) {
+        throw ('Foreign dependency classes in TN-C JAR (preview fixture / split package): ' +
+            (($foreignClasses | ForEach-Object { $_.FullName }) -join ', '))
+    }
+    Ok 'all packaged classes belong to TN-C; no dependency preview fixtures'
     # ---------------- B. mods.toml ----------------
     $tomlEntry = $zip.Entries | Where-Object { $_.FullName -eq 'META-INF/mods.toml' }
     if (-not $tomlEntry) {

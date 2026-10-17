@@ -9,7 +9,14 @@ if (@(Get-TncJavaProcesses).Count) {throw 'A Java process is already running; no
 $pack=[IO.Path]::GetFullPath($LivePack).TrimEnd('\')
 # Reuse the launcher's own command, without printing, copying or saving credentials.
 # Never execute the batch's other commands or invoke a shell with its text.
-$lines=@(Get-Content -LiteralPath $LauncherBatch -Encoding UTF8 | Where-Object {$_ -match '^"[^"\r\n]*javaw?\.exe"\s+'})
+$batchBytes=[IO.File]::ReadAllBytes($LauncherBatch)
+try {
+    $batchText=(New-Object Text.UTF8Encoding($false,$true)).GetString($batchBytes)
+} catch [Text.DecoderFallbackException] {
+    # PCL on Chinese Windows exports its batch in the Windows ANSI code page.
+    $batchText=[Text.Encoding]::GetEncoding(936).GetString($batchBytes)
+}
+$lines=@($batchText -split '\r?\n' | Where-Object {$_ -match '^"[^"\r\n]*javaw?\.exe"\s+'})
 if($lines.Count -ne 1){throw 'Expected exactly one quoted Java launch command.'}
 if($lines[0] -notmatch '^"(?<exe>[^"\r\n]+)"\s+(?<args>.+)$'){throw 'Unsupported launcher syntax.'}
 $javaExe=$Matches.exe

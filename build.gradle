@@ -305,6 +305,11 @@ tasks.named('processResources', ProcessResources).configure {
 
 // Example for how to get properties into the manifest for reading at runtime.
 tasks.named('jar', Jar).configure {
+    // Native previews may compile dependency fixtures into the shared output.
+    // Never ship those classes: split packages hide the actual dependency on Forge.
+    exclude { entry ->
+        entry.path.endsWith('.class') && !entry.path.startsWith('com/tnc/tnc/')
+    }
     manifest {
         attributes([
                 'Specification-Title'     : mod_id,
