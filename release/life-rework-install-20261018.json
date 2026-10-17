@@ -1,0 +1,19 @@
+{
+  "installed_at": "2026-10-18T00:37:41.541066",
+  "jar_sha256": "276e33bce19256f92a25f0c6b59382912ed66151ac71046850495987e4759eb4",
+  "jar_bytes": 103999113,
+  "unit_tests": 261,
+  "route_game_tests": 28,
+  "native_screenshots": 15,
+  "plants_checked": 38,
+  "protected_quest_files_unchanged": 41,
+  "replaced_chapters": [
+    "tnc_field_04_workshop.snbt"
+  ],
+  "workshop_quests": 83,
+  "retired_items": 14,
+  "backup": "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\work\\backups\\life-rework-20261018-003741",
+  "live": "D:\\垃圾桶\\PCL 正式版 2.9.3\\.minecraft\\versions\\元素觉醒1.4.3-魔改版-20260915",
+  "saves_modified": false,
+  "island_templates_modified": false
+}
