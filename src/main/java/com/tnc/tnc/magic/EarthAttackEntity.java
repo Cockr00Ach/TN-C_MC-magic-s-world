@@ -29,6 +29,7 @@ public final class EarthAttackEntity extends Entity {
     protected void defineSynchedData(){entityData.define(MODE,0);entityData.define(WAIT,0);entityData.define(AGE,0);entityData.define(BURST_AGE,-100);entityData.define(MODEL,"earth_clod");entityData.define(SCALE,1F);entityData.define(HEIGHT,1F);entityData.define(DROP_HEIGHT,0F);entityData.define(DONE,false);}
     public int mode(){return entityData.get(MODE);}public int waitTicks(){return entityData.get(WAIT);}
     public String model(){return entityData.get(MODEL);}public float scale(){return entityData.get(SCALE);}public float height(){return entityData.get(HEIGHT);}
+    public boolean gravityCore(){return model().equals("stone_lancer_gravity_core");}
     public float dropHeight(){return entityData.get(DROP_HEIGHT);}
     public int burstAge(){return entityData.get(BURST_AGE);}
     public int burstLife(){return mode()==2?24:14;}
@@ -82,14 +83,22 @@ public final class EarthAttackEntity extends Entity {
     private void attract(LivingEntity caster,int age) {
         Vec3 centre=position();
         Vec3 ground=damageCentre==null?end:damageCentre;
-        double reach=Math.max(radius*1.7,scale()*.75);
+        double reach=gravityCore()?420:Math.max(radius*1.7,scale()*.75);
         // Keep catching ground targets as the sphere rises, and retain lifted targets near it.
         var area=AABB.ofSize(centre,reach*2,reach*2,reach*2).minmax(AABB.ofSize(ground,reach*2,reach*2,reach*2));
-        for(var enemy:level().getEntitiesOfClass(LivingEntity.class,area,
-                e->e.isAlive()&&e!=caster&&!e.isAlliedTo(caster)&&!e.isSpectator())) {
+        var enemies=level().getEntitiesOfClass(LivingEntity.class,area,
+                e->e.isAlive()&&e!=caster&&!e.isAlliedTo(caster)&&!e.isSpectator());
+        if(gravityCore())enemies.sort(java.util.Comparator.<LivingEntity>comparingInt(e->e instanceof net.minecraft.world.entity.player.Player?0:1).thenComparingDouble(e->e.distanceToSqr(centre)));
+        int pulled=0;
+        for(var enemy:enemies) {
             Vec3 body=enemy.getBoundingBox().getCenter();
             Vec3 delta=centre.subtract(body);double distance=delta.length();
-            if(Math.min(distance,ground.distanceTo(body))>reach||!caster.hasLineOfSight(enemy))continue;
+            if(Math.min(distance,ground.distanceTo(body))>reach||!gravityCore()&&!caster.hasLineOfSight(enemy))continue;
+            if(gravityCore()&&pulled++>=64)break;
+            if(gravityCore()){
+                enemy.setDeltaMovement(com.tnc.tnc.boss.earth.StoneGravityPull.motion(enemy.getDeltaMovement(),delta,enemy.isNoGravity(),age));
+                enemy.hurtMarked=true;continue;
+            }
             double force=3*(.18+Math.min(1,age/60.0)*.28)*Math.min(1,distance/2);
             Vec3 pull=delta.normalize().scale(force);
             // Attraction runs every two ticks: counter gravity so upward suction can lift mobs.

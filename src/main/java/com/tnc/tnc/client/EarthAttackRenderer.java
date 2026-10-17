@@ -16,7 +16,9 @@ public final class EarthAttackRenderer extends EntityRenderer<EarthAttackEntity>
         float growth=e.mode()==2?(float)Math.max(.04,Math.min(1,age/45)):e.mode()==1?(float)Math.max(.03,Math.min(1,age/8)):1;
         pose.pushPose();if(e.mode()==0||e.mode()==3||e.mode()==5){pose.mulPose(Axis.YP.rotationDegrees(e.getYRot()));pose.mulPose(Axis.XP.rotationDegrees(e.getXRot()));}
         if(e.mode()==0||e.mode()==3||e.mode()==5)pose.scale(e.scale(),e.scale(),e.height());else pose.scale(e.scale()*growth,e.height()*growth,e.scale()*growth);
-        pose.translate(0,e.mode()==2?0:.5,0);
+        if(e.model().startsWith("stone_lancer_")&&(e.mode()==0||e.mode()==5))
+            pose.translate(0,0,-1.5); // Centered model tip Z=1.5 stays on the swept impact point.
+        else pose.translate(0,e.mode()==2?0:.5,0);
         var emission=e.mode()==3?net.spell_engine.api.render.LightEmission.RADIATE:net.spell_engine.api.render.LightEmission.NONE;
         draw(e.model(),pose,buffers,light,emission);
         pose.popPose();
@@ -26,7 +28,7 @@ public final class EarthAttackRenderer extends EntityRenderer<EarthAttackEntity>
             draw("earth_clod",pose,buffers,light,net.spell_engine.api.render.LightEmission.NONE);pose.popPose();
         }
         if(e.mode()==2&&age>=0&&age<45)for(int i=0;i<8;i++) {
-            double a=i*Math.PI/4+age*.09,r=((1-growth)*8+.6)*(e.model().startsWith("stone_lancer_")?5:1);
+            double a=i*Math.PI/4+age*.09,r=((1-growth)*8+.6)*(e.gravityCore()?15:e.model().startsWith("stone_lancer_")?5:1);
             pose.pushPose();pose.translate(Math.cos(a)*r,-e.height()*(1-growth)*.7,Math.sin(a)*r);
             pose.mulPose(Axis.YP.rotationDegrees((float)(a*180/Math.PI)));pose.scale(.55F,.55F,.55F);
             net.spell_engine.api.render.CustomModels.render(net.spell_engine.client.render.SpellModelHelper.LAYERS.get(net.spell_engine.api.render.LightEmission.NONE),
@@ -48,7 +50,7 @@ public final class EarthAttackRenderer extends EntityRenderer<EarthAttackEntity>
     }
     private static void renderBurst(EarthAttackEntity e,float partial,PoseStack pose,MultiBufferSource buffers,int light) {
         double elapsed=e.age(partial)-e.burstAge();if(elapsed<0||elapsed>e.burstLife())return;
-        pose.pushPose();if(e.model().startsWith("stone_lancer_"))pose.scale(5,5,5);
+        pose.pushPose();if(e.model().startsWith("stone_lancer_")){float size=e.gravityCore()?15:5;pose.scale(size,size,size);}
         boolean giant=e.mode()==2;
         float fade=(float)Math.max(0,1-elapsed/e.burstLife()),size=giant?.6F:.28F;
         if(giant) {

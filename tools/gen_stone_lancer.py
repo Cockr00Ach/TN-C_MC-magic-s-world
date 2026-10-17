@@ -75,6 +75,12 @@ def generate():
   for c in b['cubes']:
    for key in ['origin','size','pivot']:
     if key in c:c[key]=[round(v*s,4) for v,s in zip(c[key],[1.35,.62,1.5])]
+   # Preserve aspect ratio using final face dimensions, rather than stretching square UVs.
+   for face,uv in c['uv'].items():
+    u=128 if uv['uv'][0]>=128 else 0;v=128 if uv['uv'][1]>=128 else 0
+    sx,sy,sz=c['size'];w,h=(sx,sy) if face in ['north','south'] else (sz,sy) if face in ['east','west'] else (sx,sz)
+    density=min(.95,118/max(w,h));uw,uh=max(1,w*density),max(1,h*density)
+    uv.update(uv=[round(u+random.uniform(2,126-uw),3),round(v+random.uniform(2,126-uh),3)],uv_size=[round(uw,3),round(uh,3)])
   if b['name'] in ['glow_core','glow_eyes']:
    for c in b['cubes']:
     for face in c['uv'].values():face.update(uv=[151,142],uv_size=[35,31])
@@ -106,6 +112,28 @@ def generate():
   channel(b,'glow_core','scale',[(0,[1,1,1]),(release,[1.12,1.12,1.12]),(length,[1,1,1])])
  b=clip('death',1)
  channel(b,'root','position',[(0,[0,0,0]),(.65,[0,-12,0]),(1,[0,-30,0])]);channel(b,'torso','rotation',[(0,[0,0,0]),(.65,[35,0,8]),(1,[65,0,12])])
+ b=clip('burrow',1.2)
+ channel(b,'torso','rotation',[(0,[0,0,0]),(.45,[18,0,0]),(1.2,[28,0,0])])
+ for s in [-1,1]:
+  channel(b,'arm_'+str(s),'rotation',[(0,[0,0,s*7]),(.45,[-48,0,s*-12]),(.85,[-12,0,s*5]),(1.2,[0,0,s*7])])
+ b=clip('emerge_core',1.4)
+ channel(b,'torso','rotation',[(0,[28,0,0]),(.7,[5,0,0]),(1.4,[-6,0,0])])
+ for s in [-1,1]:
+  channel(b,'arm_'+str(s),'rotation',[(0,[0,0,s*7]),(.8,[-45,0,s*-25]),(1.4,[-80,0,s*-45])])
+  channel(b,'fore_'+str(s),'rotation',[(0,[0,0,0]),(1.4,[-12,0,0])])
+ channel(b,'glow_core','scale',[(0,[1,1,1]),(1.4,[1.1,1.1,1.1])])
+ b=clip('core_followup',2)
+ channel(b,'torso','rotation',[(0,[-6,0,0]),(1.2,[5,0,0]),(2,[0,0,0])])
+ for s in [-1,1]:
+  channel(b,'arm_'+str(s),'rotation',[(0,[-80,0,s*-45]),(1.2,[-80,0,s*-45]),(2,[0,0,s*7])])
+  channel(b,'fore_'+str(s),'rotation',[(0,[-12,0,0]),(1.2,[-25,0,0]),(2,[0,0,0])])
+ channel(b,'glow_core','scale',[(0,[1.1,1.1,1.1]),(1.2,[1.25,1.25,1.25]),(2,[1,1,1])])
+ b=clip('gravity_core',7.2)
+ channel(b,'torso','rotation',[(0,[0,0,0]),(2,[-8,0,0]),(6.8,[-8,0,0]),(7.2,[0,0,0])])
+ for s in [-1,1]:
+  channel(b,'arm_'+str(s),'rotation',[(0,[0,0,s*7]),(2,[-112,0,s*-48]),(6.8,[-112,0,s*-48]),(7.2,[0,0,s*7])])
+  channel(b,'fore_'+str(s),'rotation',[(0,[0,0,0]),(2,[-12,0,0]),(6.8,[-12,0,0]),(7.2,[0,0,0])])
+ channel(b,'glow_core','scale',[(0,[1,1,1]),(3,[1.3,1.3,1.3]),(6.8,[1.3,1.3,1.3]),(7.2,[1,1,1])])
  out=ROOT/'src/main/resources/assets/tnc/animations/entity/stone_lancer.animation.json';out.write_text(json.dumps({'format_version':'1.8.0','animations':animations},indent=2),encoding='utf-8',newline='\n')
  print(len(bones),'bones;',sum(len(b['cubes']) for b in bones),'rock pieces;',len(animations),'animation clips')
 if __name__=='__main__':generate()

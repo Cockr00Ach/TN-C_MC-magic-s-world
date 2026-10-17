@@ -23,7 +23,7 @@ final class StoneLancerCombat {
         if(move==0){
             int count=b.enraged()?8:6;
             for(int i=0;i<count;i++){
-                Vec3 at=b.position().add(0,16.43+(i/2)*2,0).add(side.scale(i%2==0?14:-14));
+                Vec3 at=b.position().add(0,b.getBbHeight()+26+(i/2)*8,0).add(side.scale(i%2==0?12:-12));
                 spawn(b,0,"earth_spear_sharp",at,target.add(0,5,0),1.5F,3.7F,i*3,90,16,2.2);
             }
         }else if(move==1){
@@ -32,7 +32,8 @@ final class StoneLancerCombat {
                 spawn(b,1,"earth_spike_sharp",p,p,1.7F,4+step*.5F,step*4,65,18,2.6);
             }
         }else if(move==2)spawn(b,3,"earth_spear_sharp",target.add(0,190,0),target,8,25,20,60,38,6);
-        else if(move==3)spawn(b,2,"earth_orb",target.add(0,-20,0),target.add(0,45,0),10,10,0,104,32,9);
+        else if(move==3||move==5)spawn(b,2,"earth_orb",target.add(0,-20,0),target.add(0,45,0),10,10,0,104,32,9);
+        else if(move==6)spawn(b,2,"gravity_core",b.position().add(0,28,0),b.position().add(0,85,0),30,30,0,104,44,27);
         else if(move==4){
             b.startQuake();seal(b,b.position(),StoneLancerEntity.QUAKE_RADIUS,80);
             // Six directions, four expanding fronts: fixed 24-entity ceiling even at 200 blocks.
@@ -45,8 +46,9 @@ final class StoneLancerCombat {
     }
     private static void spawn(StoneLancerEntity b,int mode,String model,Vec3 from,Vec3 to,float width,float height,int wait,int life,float damage,double radius){
         b.attacks.removeIf(e->!e.isAlive());if(b.attacks.size()>=MAX_ATTACKS)b.attacks.remove(0).discard();
-        var e=WindEarthVisualMechanics.ATTACK.get().create(b.level());if(e==null)return;
-        e.configure(b,mode,"stone_lancer_"+model,from,to,width*5,height*5,wait,life,damage,radius*5,b.level().damageSources().indirectMagic(e,b));
+        var e=StoneLancerRegistration.ATTACK.create(b.level());if(e==null)return;
+        float rockScale=(model.equals("earth_orb")||model.equals("gravity_core"))?5:10;
+        e.configure(b,mode,"stone_lancer_"+model,from,to,width*rockScale,height*rockScale,wait,life,damage,radius*rockScale,b.level().damageSources().indirectMagic(e,b));
         if(b.level().addFreshEntity(e))b.attacks.add(e);
     }
 }

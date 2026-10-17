@@ -15,12 +15,16 @@ import net.minecraftforge.registries.RegisterEvent;
 @Mod.EventBusSubscriber(modid="tnc",bus=Mod.EventBusSubscriber.Bus.MOD)
 public final class StoneLancerRegistration {
     public static EntityType<StoneLancerEntity> TYPE;
+    public static EntityType<com.tnc.tnc.magic.EarthAttackEntity> ATTACK;
     public static Item EGG;
     @SubscribeEvent public static void register(RegisterEvent e){
         e.register(Registries.ENTITY_TYPE,h->{
             TYPE=EntityType.Builder.<StoneLancerEntity>of(StoneLancerEntity::new,MobCategory.MONSTER)
                     .sized(29.7F,26.66F).fireImmune().clientTrackingRange(32).updateInterval(2).build("tnc:stone_lancer");
             h.register(ResourceLocation.fromNamespaceAndPath("tnc","stone_lancer"),TYPE);
+            ATTACK=EntityType.Builder.<com.tnc.tnc.magic.EarthAttackEntity>of(com.tnc.tnc.magic.EarthAttackEntity::new,MobCategory.MISC)
+                    .sized(.4F,.4F).clientTrackingRange(32).updateInterval(2).noSave().build("tnc:stone_lancer_attack");
+            h.register(ResourceLocation.fromNamespaceAndPath("tnc","stone_lancer_attack"),ATTACK);
         });
         e.register(Registries.ITEM,h->{
             EGG=new ForgeSpawnEggItem(()->TYPE,0x53463A,0xE8AF4E,new Item.Properties());

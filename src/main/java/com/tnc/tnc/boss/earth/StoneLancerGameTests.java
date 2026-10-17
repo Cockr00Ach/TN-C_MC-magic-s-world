@@ -26,7 +26,8 @@ public final class StoneLancerGameTests {
         for(int move=0;move<4;move++)StoneLancerCombat.release(boss,move,target);
         h.assertTrue(boss.attacks.size()==23,"Six lances, fifteen spikes, one sky spear and one core orb are created");
         var sky=boss.attacks.stream().filter(e->e.mode()==3).findFirst().orElseThrow();
-        h.assertTrue(sky.dropHeight()==190&&sky.height()==125&&sky.scale()==40,"The visible sky spear is actually suspended above the target");
+        h.assertTrue(sky.dropHeight()==190&&sky.height()==250&&sky.scale()==80,"The suspended sky spear has doubled width and length");
+        h.assertTrue(boss.attacks.stream().filter(e->e.mode()==0).allMatch(e->e.getY()>=boss.getY()+boss.getBbHeight()+25&&e.scale()==15),"The doubled volley forms above the boss's head");
         h.assertTrue(boss.attacks.stream().allMatch(e->e.noPhysics&&!e.isAttackable()&&e.waitTicks()<30),"Attacks are timed visual entities rather than permanent world blocks");
         for(int i=0;i<6;i++)StoneLancerCombat.release(boss,0,target);
         h.assertTrue(boss.attacks.size()==StoneLancerCombat.MAX_ATTACKS,"Repeated skills cannot exceed the entity budget");

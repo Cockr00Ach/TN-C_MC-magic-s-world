@@ -13,11 +13,12 @@ import net.minecraftforge.fml.common.Mod;
 public final class StoneLancerTremor {
     private static float impulse;
     private static net.minecraft.client.multiplayer.ClientLevel world;
+    static com.tnc.tnc.magic.EarthAttackEntity gravityField;
     @SubscribeEvent public static void tick(TickEvent.ClientTickEvent e){
         if(e.phase!=TickEvent.Phase.END)return;
         var mc=Minecraft.getInstance();
-        if(mc.level!=world){world=mc.level;impulse=0;}
-        if(mc.level==null||mc.player==null){impulse=0;return;}
+        if(mc.level!=world){world=mc.level;impulse=0;gravityField=null;}
+        if(mc.level==null||mc.player==null){impulse=0;gravityField=null;return;}
         impulse*=.82F;
         if(mc.level.getGameTime()%5!=0)return;
         for(var boss:mc.level.getEntitiesOfClass(StoneLancerEntity.class,mc.player.getBoundingBox().inflate(220),b->b.isAlive())){
@@ -29,10 +30,16 @@ public final class StoneLancerTremor {
             if(age>=0&&ringDistance<StoneLancerEntity.QUAKE_RADIUS)
                 impulse=Math.max(impulse,(float)(4.5*(1-ringDistance/260)*(1-age/100)));
         }
-        for(var blast:mc.level.getEntitiesOfClass(com.tnc.tnc.magic.EarthAttackEntity.class,mc.player.getBoundingBox().inflate(240),
-                b->b.done()&&b.model().startsWith("stone_lancer_")&&(b.mode()==2||b.mode()==3))){
+        gravityField=null;
+        for(var blast:mc.level.getEntitiesOfClass(com.tnc.tnc.magic.EarthAttackEntity.class,mc.player.getBoundingBox().inflate(440),
+                b->(b.done()||b.gravityCore())&&b.model().startsWith("stone_lancer_")&&(b.mode()==2||b.mode()==3))){
+            if(!blast.done()){
+                if(gravityField==null||blast.distanceToSqr(mc.player)<gravityField.distanceToSqr(mc.player))gravityField=blast;
+                continue;
+            }
             double age=blast.age(0)-blast.burstAge(),distance=mc.player.position().distanceTo(blast.position());
-            if(age>=0&&age<20&&distance<240)impulse=Math.max(impulse,(float)(5*(1-age/20)*(1-distance/240)));
+            double range=blast.gravityCore()?420:240;
+            if(age>=0&&age<20&&distance<range)impulse=Math.max(impulse,(float)(5*(1-age/20)*(1-distance/range)));
         }
     }
     @SubscribeEvent public static void camera(ViewportEvent.ComputeCameraAngles e){
