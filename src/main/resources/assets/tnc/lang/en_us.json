@@ -269,10 +269,10 @@
   "item.tnc.refined_mana_bottle": "Refined Mana Bottle",
   "block.tnc.pasture_trough": "Pasture Trough",
   "block.tnc.habitat_marker": "Habitat Marker",
-  "block.tnc.pasture_tray": "Pasture Tray",
+  "block.tnc.pasture_tray": "Ranch Cargo Crate",
   "block.tnc.egg_rack": "Egg Rack",
   "block.tnc.dew_rack": "Dew Rack",
-  "block.tnc.charging_perch": "Charging Perch",
+  "block.tnc.charging_perch": "Floating Roost",
   "block.tnc.mana_bottle_base": "Mana Bottle Base",
   "block.tnc.pasture_glow": "Pasture Glow",
   "item.tnc.stonebarrow_meat": "Stonebarrow Meat",
@@ -410,5 +410,13 @@
   "block.tnc.card_table": "High Card Table",
   "block.tnc.lucky_wheel": "Fortune Wheel",
   "entity.tnc.water_leviathan": "Bluegold Abyss Beast",
-  "item.tnc.water_leviathan_spawn_egg": "Bluegold Abyss Beast Spawn Egg"
+  "item.tnc.water_leviathan_spawn_egg": "Bluegold Abyss Beast Spawn Egg",
+  "item.tnc.beast_bone_meal": "Beastbone Growth Dust",
+  "block.tnc.mana_feed_plate": "Automatic Feeder",
+  "item.tnc.purity_amulet": "Purity Amulet",
+  "tooltip.tnc.purity_amulet.equip": "§7Equip in necklace/charm slot or offhand",
+  "tooltip.tnc.purity_amulet.immunity": "§bRejects harmful and neutral effects; cleanses existing effects",
+  "tooltip.tnc.purity_amulet.benefits": "§7Keeps buffs; resists the Dark Giant siphon restraint",
+  "entity.tnc.stone_lancer": "Panyue, the Stone Lancer",
+  "item.tnc.stone_lancer_spawn_egg": "Stone Lancer Spawn Egg"
 }

@@ -40,7 +40,7 @@ public final class TavernGuestRenderer extends MobRenderer<TavernGuestEntity,Vil
     }
     @Override public ResourceLocation getTextureLocation(TavernGuestEntity guest){return ResourceLocation.fromNamespaceAndPath("minecraft","textures/entity/villager/villager.png");}
     @Override public void render(TavernGuestEntity guest,float yaw,float partial,PoseStack pose,MultiBufferSource buffer,int light) {
-        pose.pushPose();pose.translate(0,-.704,0);super.render(guest,yaw,partial,pose,buffer,light);pose.popPose();
+        pose.pushPose();pose.translate(0,-.704,0);super.render(guest,yaw,partial,pose,buffer,light);pose.popPose();TavernChatter.render(guest,partial,pose,buffer);
     }
     @Override protected void scale(TavernGuestEntity guest,PoseStack pose,float partial){pose.scale(.9375F,.9375F,.9375F);}
 }

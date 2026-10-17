@@ -225,7 +225,7 @@ public final class HomewardFlower {
             builder.add(BLOOMING,com.tnc.tnc.life.routes.RoutePlantBlock.WILD);
         }
         @Override public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-            return SHAPE;
+            return Block.box(3,0,3,13,state.getValue(BLOOMING)?15:7,13);
         }
         @Override public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
             BlockState soil = level.getBlockState(pos.below());

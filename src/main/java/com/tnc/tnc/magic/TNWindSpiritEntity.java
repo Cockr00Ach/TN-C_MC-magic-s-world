@@ -74,6 +74,11 @@ public class TNWindSpiritEntity extends Entity implements GeoEntity {
             SynchedEntityData.defineId(TNWindSpiritEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> DATA_TIER =
             SynchedEntityData.defineId(TNWindSpiritEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Long> WIND_ATTACK = SynchedEntityData.defineId(TNWindSpiritEntity.class, EntityDataSerializers.LONG);
+    private static final EntityDataAccessor<Integer> WIND_FORM = SynchedEntityData.defineId(TNWindSpiritEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Float> WIND_DX = SynchedEntityData.defineId(TNWindSpiritEntity.class, EntityDataSerializers.FLOAT),
+            WIND_DY = SynchedEntityData.defineId(TNWindSpiritEntity.class, EntityDataSerializers.FLOAT),
+            WIND_DZ = SynchedEntityData.defineId(TNWindSpiritEntity.class, EntityDataSerializers.FLOAT);
 
     /** 环绕半径（格）—— 风灵贴着玩家转，比雷球（6 格）近得多 ✓。 */
     private static final double ORBIT_RADIUS = 1.9D;
@@ -83,12 +88,6 @@ public class TNWindSpiritEntity extends Entity implements GeoEntity {
     private static final int ORBIT_PERIOD = 80;
     /** 几 tick 打一次最近的敌人（每只风灵**各打各的** ⇒ 只数多 = 伤害高 ✓）。 */
     private static final int ZAP_INTERVAL = 10;
-    /** 打多远内的敌人。 */
-    private static final double ZAP_RANGE = 5.0D;
-    /** 基础单次伤害（真正的伤害 = 它 × 档位倍率 ✓）。 */
-    private static final float BASE_DAMAGE = 4.0F;
-    /** 牵引：把敌人往玩家这边拽多少（每 tick）—— 沿用原来"风球有牵引"的手感 ✓。 */
-    private static final double PULL = 0.12D;
 
     private UUID ownerId;
     private int slot;
@@ -106,6 +105,16 @@ public class TNWindSpiritEntity extends Entity implements GeoEntity {
     protected void defineSynchedData() {
         this.entityData.define(DATA_TIER, 1);
         this.entityData.define(DATA_SLOT, 0);
+        entityData.define(WIND_ATTACK,-1000L);entityData.define(WIND_FORM,0);
+        entityData.define(WIND_DX,0F);entityData.define(WIND_DY,0F);entityData.define(WIND_DZ,1F);
+    }
+
+    public long windAttackTime(){return entityData.get(WIND_ATTACK);}
+    public int windWeaponForm(){return entityData.get(WIND_FORM);}
+    public Vec3 windAttackDirection(){return new Vec3(entityData.get(WIND_DX),entityData.get(WIND_DY),entityData.get(WIND_DZ));}
+    public void markWindAttack(int form,Vec3 direction){
+        entityData.set(WIND_ATTACK,level().getGameTime());entityData.set(WIND_FORM,form);
+        entityData.set(WIND_DX,(float)direction.x);entityData.set(WIND_DY,(float)direction.y);entityData.set(WIND_DZ,(float)direction.z);
     }
 
     // ---------------- 绑定 / 查询 ----------------
@@ -179,27 +188,12 @@ public class TNWindSpiritEntity extends Entity implements GeoEntity {
         }
     }
 
-    /** 打最近的敌人 + 往主人这边拽一点 ✓（沿用原机制的手感）。 */
+    /** Orb crescents and elemental weapons share one real projectile damage path. */
     private void zap(ServerPlayer owner) {
-        AABB box = getBoundingBox().inflate(ZAP_RANGE);
-        List<LivingEntity> targets = this.level().getEntitiesOfClass(LivingEntity.class, box,
-                e -> e != owner && !(e instanceof Player) && e.isAlive() && !e.isSpectator());
-        if (targets.isEmpty()) {
-            return;
-        }
-        LivingEntity target = targets.get(0);
-        float damage = BASE_DAMAGE * TNWindMechanics.damageMultiplierForTier(tier());
-        target.hurt(owner.damageSources().indirectMagic(owner, owner), damage);
-        Vec3 pull = owner.position().subtract(target.position()).normalize().scale(PULL);
-        target.push(pull.x, 0.0D, pull.z);
-        target.hurtMarked = true;
-        if (this.level() instanceof ServerLevel serverLevel) {
-            serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.SWEEP_ATTACK,
-                    target.getX(), target.getY() + 1.0D, target.getZ(), 1, 0.0D, 0.0D, 0.0D, 0.0D);
-            serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.CLOUD,
-                    getX(), getY(), getZ(), 2, 0.05D, 0.05D, 0.05D, 0.01D);
-        }
+        com.tnc.tnc.magic.wind.WindArsenal.attack(this, owner);
     }
+
+    @Override public AABB getBoundingBoxForCulling(){return super.getBoundingBoxForCulling().inflate(2.2);}
 
     // ---------------- 存档 ----------------
 

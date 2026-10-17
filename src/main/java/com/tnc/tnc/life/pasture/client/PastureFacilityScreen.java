@@ -32,7 +32,7 @@ public final class PastureFacilityScreen extends AbstractContainerScreen<Pasture
         }
     }
     @Override protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
-        String[] names={"牧场食槽", "栖居标记", "授权托盘", "牧卵架", "采露架", "充电栖架", "魔瓶座", "行旅微光"};
+        String[] names={"牧场食槽", "栖居标记", "驿站货箱", "牧卵架", "采露架", "浮空栖架", "魔瓶座", "行旅微光"};
         int kind=Math.max(0, Math.min(names.length-1, menu.data(0)));
         g.drawString(font, names[kind], 8, 7, 0xfff0e6c1, false);
         g.drawString(font, "库存 " + menu.data(3) + "份", 12, 58, INK, false);

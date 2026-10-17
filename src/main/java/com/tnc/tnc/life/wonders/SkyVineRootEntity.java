@@ -24,6 +24,10 @@ public final class SkyVineRootEntity extends BlockEntity {
     private long nextSpaceCheck;
     public SkyVineRootEntity(BlockPos p,BlockState s){super(WonderContent.VINE_ENTITY,p,s);}
     public void setOwner(UUID id){owner=id;setChanged();}
+    public boolean fertilize(boolean full){
+        if(growth>=96000)return false;
+        growth=Math.min(96000,full?96000:growth+24000);setChanged();return true;
+    }
     public UUID owner(){return owner;}
     public void retire(){if(level instanceof ServerLevel l)VineCleanupData.get(l).retire(ownStem,ownLeaf,owner);}
     static int targetHeight(long growth){return growth>=96000?64:growth>=72000?40:growth>=48000?24:growth>=24000?12:0;}

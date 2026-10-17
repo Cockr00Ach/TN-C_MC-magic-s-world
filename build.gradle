@@ -86,6 +86,12 @@ minecraft {
         }
 
         client {
+            if (project.hasProperty('windArsenalAudit')) {
+                workingDirectory project.file('work/wind-arsenal-client-audit')
+                property 'tnc.windArsenalAudit', 'true'
+                property 'tnc.windArsenalAuditReport', file('work/wind-arsenal-client-audit.json').absolutePath
+                args '--width', '1800', '--height', '900'
+            }
             if (project.hasProperty('waterModelAudit')) {
                 workingDirectory project.file('work/water-model-audit')
                 property 'mixin.env.remapRefMap', 'true'
@@ -160,7 +166,7 @@ minecraft {
                 property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
             }
             if (project.hasProperty('ftbQuestLoadTests')) {
-                workingDirectory project.file('work/ftb-route-load-test')
+                workingDirectory project.file(project.findProperty('ftbQuestLoadDir') ?: 'work/ftb-route-load-test')
             }
             if (project.hasProperty('lifeRoutesTests')) {
                 property 'mixin.env.remapRefMap', 'true'

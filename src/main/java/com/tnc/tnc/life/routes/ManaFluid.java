@@ -6,15 +6,34 @@ import net.minecraft.world.level.material.*;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
 /** Water-like flow without uprooting the crops it irrigates or replacing other fluids. */
 public final class ManaFluid {
+    public static boolean allowedInOwnedGarden(BlockGetter world,BlockPos target,Direction flow,FluidState fluid){
+        if(!(world instanceof net.minecraft.server.level.ServerLevel level)||fluid.getFluidType()!=RouteContent.MANA_TYPE.get())return false;
+        var to=com.tnc.tnc.home.HousingService.ownedAt(level,target);
+        var from=com.tnc.tnc.home.HousingService.ownedAt(level,target.relative(flow.getOpposite()));
+        if(to==null||from==null)return false;
+        var a=com.tnc.tnc.home.HousingService.home(level.getServer(),to.id());
+        var b=com.tnc.tnc.home.HousingService.home(level.getServer(),from.id());
+        return !a.getBoolean("Preparing")&&!b.getBoolean("Preparing")&&a.hasUUID("Owner")&&b.hasUUID("Owner")&&a.getUUID("Owner").equals(b.getUUID("Owner"));
+    }
+    private static boolean withinBoundary(BlockGetter world,BlockPos from,BlockPos to){
+        if(!(world instanceof net.minecraft.server.level.ServerLevel level))return true;
+        var a=com.tnc.tnc.home.HousingService.ownedAt(level,from);
+        var b=com.tnc.tnc.home.HousingService.ownedAt(level,to);
+        if(a==null&&b==null)return true;
+        if(a==null||b==null)return false;
+        var ar=com.tnc.tnc.home.HousingService.home(level.getServer(),a.id());
+        var br=com.tnc.tnc.home.HousingService.home(level.getServer(),b.id());
+        return !ar.getBoolean("Preparing")&&!br.getBoolean("Preparing")&&ar.hasUUID("Owner")&&br.hasUUID("Owner")&&ar.getUUID("Owner").equals(br.getUUID("Owner"));
+    }
     private static boolean safe(BlockState state){return state.isAir()||state.getBlock()==RouteContent.MANA_LIQUID.get();}
     public static final class Source extends ForgeFlowingFluid.Source {
         public Source(Properties p){super(p);}
-        @Override protected boolean canSpreadTo(BlockGetter l,BlockPos from,BlockState a,Direction d,BlockPos to,BlockState b,FluidState fluid,Fluid f){return safe(b)&&super.canSpreadTo(l,from,a,d,to,b,fluid,f);}
+        @Override protected boolean canSpreadTo(BlockGetter l,BlockPos from,BlockState a,Direction d,BlockPos to,BlockState b,FluidState fluid,Fluid f){return safe(b)&&withinBoundary(l,from,to)&&super.canSpreadTo(l,from,a,d,to,b,fluid,f);}
         @Override protected void spreadTo(LevelAccessor l,BlockPos p,BlockState s,Direction d,FluidState f){if(safe(s))super.spreadTo(l,p,s,d,f);}
     }
     public static final class Flowing extends ForgeFlowingFluid.Flowing {
         public Flowing(Properties p){super(p);}
-        @Override protected boolean canSpreadTo(BlockGetter l,BlockPos from,BlockState a,Direction d,BlockPos to,BlockState b,FluidState fluid,Fluid f){return safe(b)&&super.canSpreadTo(l,from,a,d,to,b,fluid,f);}
+        @Override protected boolean canSpreadTo(BlockGetter l,BlockPos from,BlockState a,Direction d,BlockPos to,BlockState b,FluidState fluid,Fluid f){return safe(b)&&withinBoundary(l,from,to)&&super.canSpreadTo(l,from,a,d,to,b,fluid,f);}
         @Override protected void spreadTo(LevelAccessor l,BlockPos p,BlockState s,Direction d,FluidState f){if(safe(s))super.spreadTo(l,p,s,d,f);}
     }
 }

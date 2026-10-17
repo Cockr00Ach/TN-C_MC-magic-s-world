@@ -18,7 +18,9 @@ public final class RoutePlantBlock extends BushBlock implements EntityBlock {
     public static final IntegerProperty AGE=IntegerProperty.create("age",0,3);
     public static final BooleanProperty WILD=BooleanProperty.create("wild");
     public final NewPlantKind kind;
-    public RoutePlantBlock(NewPlantKind kind){super(BlockBehaviour.Properties.copy(Blocks.FERN).noCollission().noOcclusion().lightLevel(s->s.getValue(AGE)==3?2:0));this.kind=kind;registerDefaultState(stateDefinition.any().setValue(AGE,0).setValue(WILD,false));}
+    public RoutePlantBlock(NewPlantKind kind){super(BlockBehaviour.Properties.copy(Blocks.FERN).offsetType(BlockBehaviour.OffsetType.NONE).noCollission().noOcclusion().lightLevel(s->s.getValue(AGE)==3?2:0));this.kind=kind;registerDefaultState(stateDefinition.any().setValue(AGE,0).setValue(WILD,false));}
+    @Override public RenderShape getRenderShape(BlockState state){return RenderShape.ENTITYBLOCK_ANIMATED;}
+    @Override public net.minecraft.world.phys.shapes.VoxelShape getShape(BlockState state,BlockGetter world,BlockPos pos,net.minecraft.world.phys.shapes.CollisionContext context){return Block.box(3,0,3,13,4+state.getValue(AGE)*4,13);}
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block,BlockState> b){b.add(AGE,WILD);}
     @Override public boolean canSurvive(BlockState s,LevelReader l,BlockPos p){return s.getValue(WILD)?l.getBlockState(p.below()).is(net.minecraft.tags.BlockTags.DIRT)||l.getBlockState(p.below()).is(net.minecraft.tags.BlockTags.BASE_STONE_OVERWORLD):MagicSoilBlock.isSoil(l.getBlockState(p.below()));}
     @Override public BlockEntity newBlockEntity(BlockPos p,BlockState s){return new RoutePlantEntity(p,s);}

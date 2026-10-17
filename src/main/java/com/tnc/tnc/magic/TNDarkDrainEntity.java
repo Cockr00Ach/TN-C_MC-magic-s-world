@@ -218,6 +218,8 @@ public class TNDarkDrainEntity extends Entity implements SpellSpawnedEntity {
             finish();
             return;
         }
+        if(caster instanceof com.tnc.tnc.boss.TNDarkGiantEntity&&victim instanceof net.minecraft.world.entity.player.Player)
+            com.tnc.tnc.boss.DarkGiantSiphonControl.apply(caster,victim);
         // 贴住受害者：它被推走/被打飞/被击退时，血柱跟着走 ✓
         setPos(victim.getX(), victim.getY() + victim.getBbHeight() * 0.45D, victim.getZ());
 

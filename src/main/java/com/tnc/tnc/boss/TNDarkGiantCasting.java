@@ -18,6 +18,8 @@ final class TNDarkGiantCasting {
     public static boolean cast(LivingEntity caster,TNDarkGiantSpells.Move move){
         if(!(caster.level() instanceof ServerLevel level))return false;
         var target=caster instanceof Mob mob?mob.getTarget():null;
+        if(caster instanceof TNDarkGiantEntity giant&&"slay_light".equals(move.path())&&giant.skyfallLanding()!=null)
+            return hands(level,caster,target,5);
         if(target==null||!target.isAlive()||target.distanceToSqr(caster)>TNDarkGiantSpells.CAST_RANGE*TNDarkGiantSpells.CAST_RANGE)return false;
         return switch(move.chain()){
             case 0 -> summon(level,caster,target,move.tier());
@@ -33,8 +35,9 @@ final class TNDarkGiantCasting {
             var hand=TNOrbEntities.NIGHT_GRIP.get().create(level);if(hand==null)return false;
             if(tier>=5){
                 double angle=i*Math.PI*2/count;
-                Vec3 landing=i==0?target.position():target.position().add(Math.cos(angle)*4.5,0,Math.sin(angle)*4.5);
-                hand.launchSkyfall(caster,i==0?target.getId():-1,tier,i,count,landing);
+                Vec3 center=caster instanceof TNDarkGiantEntity giant&&giant.skyfallLanding()!=null?giant.skyfallLanding():target.position();
+                Vec3 landing=i==0?center:center.add(Math.cos(angle)*4.5,0,Math.sin(angle)*4.5);
+                hand.launchSkyfall(caster,i==0&&target!=null?target.getId():-1,tier,i,count,landing);
             }else hand.launch(caster,target.getId(),tier,i,count);
             level.addFreshEntity(hand);
         }
