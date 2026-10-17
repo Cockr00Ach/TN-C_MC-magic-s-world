@@ -1,0 +1,16 @@
+{
+  "installed_at": "2026-10-17T15:20:57.267340",
+  "base_commit": "351b90be",
+  "compile_fix": "DarkFogCloudEntity.isOwnedBy, delegates to actual engine owner UUID",
+  "jar_sha256": "404993954a1ff340f71424983d54d7b6c15e502a25d9e5cee3bba9c663478c35",
+  "jar_bytes": 102048303,
+  "unit_tests": 248,
+  "runtime_overrides": 50,
+  "protected_quest_files_unchanged": 42,
+  "backup": "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\work\\backups\\runtime-20261017-152056",
+  "saves_modified": false,
+  "live": "D:\\垃圾桶\\PCL 正式版 2.9.3\\.minecraft\\versions\\元素觉醒1.4.3-魔改版-20260915",
+  "client_started": false,
+  "runtime_reference_audit": "no missing classes or members",
+  "tavern_palette": "no missing blocks in interior or basement"
+}
