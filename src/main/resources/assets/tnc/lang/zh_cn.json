@@ -458,5 +458,9 @@
   "block.tnc.slot_machine": "老虎机",
   "block.tnc.roulette_table": "转盘赌桌",
   "block.tnc.card_table": "比大小牌桌",
-  "block.tnc.lucky_wheel": "幸运转轮"
+  "block.tnc.lucky_wheel": "幸运转轮",
+  "item.tnc.purity_amulet": "净世护符",
+  "tooltip.tnc.purity_amulet.equip": "§7佩戴于项链／护符槽或副手",
+  "tooltip.tnc.purity_amulet.immunity": "§b免疫所有负面与中立异常状态，清除已有异常",
+  "tooltip.tnc.purity_amulet.benefits": "§7保留增益；免疫领主血线定身与牵引"
 }

@@ -15,6 +15,7 @@ public final class DarkGiantSiphonControl {
         return new Vec3(pull.x,Math.max(-.06,Math.min(.11,(targetY-victim.y)*.08)),pull.z);
     }
     public static void apply(LivingEntity boss,LivingEntity victim){
+        if(com.tnc.tnc.equipment.PurityAmulet.equipped(victim))return;
         victim.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN,4,10,false,false,false));
         victim.addEffect(new MobEffectInstance(MobEffects.LEVITATION,4,0,false,false,false));
         victim.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING,30,0,false,false,false));

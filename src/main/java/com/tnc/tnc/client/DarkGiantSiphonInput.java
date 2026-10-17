@@ -12,6 +12,7 @@ import net.minecraftforge.fml.common.Mod;
 public final class DarkGiantSiphonInput {
     @SubscribeEvent public static void movement(MovementInputUpdateEvent event){
         var player=event.getEntity();
+        if(com.tnc.tnc.equipment.PurityAmulet.equipped(player))return;
         boolean bound=player.level().getEntitiesOfClass(TNDarkDrainEntity.class,player.getBoundingBox().inflate(4),
                 drain->drain.isAlive()&&drain.victimId()==player.getId()
                         &&player.level().getEntity(drain.casterId()) instanceof TNDarkGiantEntity boss&&boss.isAlive()).size()>0;

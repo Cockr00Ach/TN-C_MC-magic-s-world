@@ -408,5 +408,9 @@
   "block.tnc.slot_machine": "Slot Machine",
   "block.tnc.roulette_table": "Roulette Table",
   "block.tnc.card_table": "High Card Table",
-  "block.tnc.lucky_wheel": "Fortune Wheel"
+  "block.tnc.lucky_wheel": "Fortune Wheel",
+  "item.tnc.purity_amulet": "Purity Amulet",
+  "tooltip.tnc.purity_amulet.equip": "§7Equip in necklace/charm slot or offhand",
+  "tooltip.tnc.purity_amulet.immunity": "§bRejects harmful and neutral effects; cleanses existing effects",
+  "tooltip.tnc.purity_amulet.benefits": "§7Keeps buffs; resists the Dark Giant siphon restraint"
 }
