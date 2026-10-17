@@ -18,14 +18,13 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
-import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.AnimatableManager;
@@ -139,6 +138,21 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
     public net.minecraft.world.entity.EntityDimensions getDimensions(net.minecraft.world.entity.Pose pose) {
         return net.minecraft.world.entity.EntityDimensions.scalable(HITBOX_WIDTH,HITBOX_HEIGHT);
     }
+
+    @Override protected net.minecraft.world.phys.AABB makeBoundingBox(){
+        return com.tnc.tnc.boss.GiantSimulation.active(this)?com.tnc.tnc.boss.GiantSimulation.bounds(this):super.makeBoundingBox();
+    }
+    @Override public void move(net.minecraft.world.entity.MoverType type,Vec3 motion){
+        if(getBbWidth()>4)com.tnc.tnc.boss.GiantSimulation.run(this,()->super.move(type,motion));else super.move(type,motion);
+    }
+    @Override protected void checkInsideBlocks(){
+        if(getBbWidth()>4)com.tnc.tnc.boss.GiantSimulation.run(this,()->super.checkInsideBlocks());else super.checkInsideBlocks();
+    }
+    @Override public void updateFluidHeightAndDoFluidPushing(java.util.function.Predicate<net.minecraft.world.level.material.FluidState> predicate){
+        if(getBbWidth()>4)com.tnc.tnc.boss.GiantSimulation.run(this,()->super.updateFluidHeightAndDoFluidPushing(predicate));
+        else super.updateFluidHeightAndDoFluidPushing(predicate);
+    }
+
     public boolean isCasting(){return this.entityData.get(DATA_CASTING);}
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -254,8 +268,7 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.0D, true));
-        this.goalSelector.addGoal(7, new RandomStrollGoal(this, 0.7D));
+        this.goalSelector.addGoal(2, new GiantApproachGoal(this,1.0D,()->!isCasting()));
         this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, (float)TNDarkGiantSpells.FOLLOW_RANGE));
         this.goalSelector.addGoal(9, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
@@ -386,15 +399,15 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
 
     /** Client-local black motes; a fixed emission rate avoids per-particle network packets. */
     private void blackAuraParticles() {
-        if(!level().isClientSide()||!isAlive()||isInvisible()||tickCount%3!=0)return;
+        if(!level().isClientSide()||!isAlive()||isInvisible()||tickCount%4!=0)return;
         var dust=new net.minecraft.core.particles.DustParticleOptions(
                 new org.joml.Vector3f(.004F,.003F,.006F),isPhaseTwo()?3.5F:2.8F);
         int perLayer=isPhaseTwo()?3:2;
-        for(int layer=0;layer<6;layer++)for(int i=0;i<perLayer;i++){
+        for(int layer=0;layer<4;layer++)for(int i=0;i<perLayer;i++){
             double angle=tickCount*.035+layer*.9+i*Math.PI*2/perLayer+random.nextDouble()*.6;
             double radius=getBbWidth()*(.48+random.nextDouble()*.28);
             double x=getX()+Math.cos(angle)*radius,z=getZ()+Math.sin(angle)*radius;
-            double y=getY()+getBbHeight()*(layer+random.nextDouble())/6;
+            double y=getY()+getBbHeight()*(layer+random.nextDouble())/4;
             level().addParticle(dust,true,x,y,z,-Math.sin(angle)*.06,.06+random.nextDouble()*.05,Math.cos(angle)*.06);
             if(i==0)level().addParticle(ParticleTypes.SQUID_INK,true,x,y,z,0,.035,0);
         }
