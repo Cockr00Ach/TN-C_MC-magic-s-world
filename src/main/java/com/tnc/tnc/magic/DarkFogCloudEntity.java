@@ -39,6 +39,11 @@ import net.spell_engine.entity.SpellCloud;
  */
 public class DarkFogCloudEntity extends SpellCloud {
 
+    /** Fog is a nonphysical spell volume; never scan its entire domain for water currents. */
+    @Override
+    public void updateFluidHeightAndDoFluidPushing(java.util.function.Predicate<net.minecraft.world.level.material.FluidState> predicate) {
+    }
+
     /** 与 {@code TnSpellMechanics.FOG_GROUP} 一致（那边也用它挑法术）。 */
     public static final String FOG_GROUP = "dark_fog";
 
