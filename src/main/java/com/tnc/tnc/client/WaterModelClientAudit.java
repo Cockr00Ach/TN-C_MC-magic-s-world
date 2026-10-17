@@ -87,17 +87,17 @@ public final class WaterModelClientAudit {
         }
         private void swordPath(GuiGraphics g) {
             g.fill(0,0,width,height,0xFF101B27);
-            g.drawString(font,"SWORD GATEWAYS / fixed 12-block spacing / pre-drop and descent",24,18,0xB4F3FF,false);
-            double[] ages={122,130,137,144};
+            g.drawString(font,"CRYPT / BOSS-ONLY GATEWAYS / PLAYER ORIGINAL SWORD",24,18,0xB4F3FF,false);
+            double[] ages={122,137,122,137};
             for(int i=0;i<ages.length;i++) {
                 int cellW=width/4,x=i*cellW;
-                g.drawString(font,"TICK "+(int)ages[i],x+12,55,0xCBF6FF,false);
+                g.drawString(font,(i<2?"BOSS / ":"PLAYER / ")+"TICK "+(int)ages[i],x+12,55,0xCBF6FF,false);
                 g.flush();var poses=g.pose();poses.pushPose();poses.translate(x+cellW*.5,height*.88,150);
                 float scale=Math.min(cellW/82F,(height-100)/145F);
                 poses.scale(scale,-scale,scale);poses.mulPose(Axis.XP.rotationDegrees(12));
                 poses.mulPose(Axis.YP.rotationDegrees(20));
                 var buffers=minecraft.renderBuffers().bufferSource();
-                SeaGodSwordVisuals.render(ages[i],ages[i],26,1,poses,buffers,1,116);
+                SeaGodSwordVisuals.render(ages[i],ages[i],26,1,poses,buffers,i<2?1:com.tnc.tnc.magic.water.SeaGodSwordRules.COUNT,116,i<2);
                 buffers.endBatch();poses.popPose();
             }
         }
