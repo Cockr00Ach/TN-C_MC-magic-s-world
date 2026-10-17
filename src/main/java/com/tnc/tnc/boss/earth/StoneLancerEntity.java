@@ -29,25 +29,35 @@ public final class StoneLancerEntity extends Monster implements GeoEntity {
     private final AnimatableInstanceCache cache=GeckoLibUtil.createInstanceCache(this);
     private final ServerBossEvent bar=new ServerBossEvent(getDisplayName(),BossEvent.BossBarColor.YELLOW,BossEvent.BossBarOverlay.PROGRESS);
     final java.util.List<com.tnc.tnc.magic.EarthAttackEntity> attacks=new java.util.ArrayList<>();
+    public static final float SCALE=5;
+    public static final double QUAKE_RADIUS=200;
+    private int quakeTicks;
+    private Vec3 quakeCentre=Vec3.ZERO;
+    private final java.util.Set<java.util.UUID> quakeHits=new java.util.HashSet<>();
+    public float quakeAge(float partial){return quakeTicks>0?80-quakeTicks+partial:-1;}
+    public Vec3 quakeCentre(){return quakeCentre;}
+    public void startQuake(){quakeTicks=80;quakeCentre=position();quakeHits.clear();level().broadcastEntityEvent(this,(byte)61);}
+    @Override public void handleEntityEvent(byte event){if(event==61){quakeTicks=80;quakeCentre=position();}else super.handleEntityEvent(event);}
     private int cooldown=60,pending=-1,windup,casts;
     private Vec3 aim=Vec3.ZERO;
     public StoneLancerEntity(EntityType<? extends StoneLancerEntity> type,Level level){super(type,level);xpReward=650;setPersistenceRequired();}
     public static AttributeSupplier.Builder attributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,1000)
             .add(Attributes.ATTACK_DAMAGE,22).add(Attributes.ARMOR,16).add(Attributes.ARMOR_TOUGHNESS,8)
-            .add(Attributes.MOVEMENT_SPEED,.17).add(Attributes.FOLLOW_RANGE,88).add(Attributes.KNOCKBACK_RESISTANCE,1);}
+            .add(Attributes.MOVEMENT_SPEED,.17).add(Attributes.FOLLOW_RANGE,400).add(Attributes.KNOCKBACK_RESISTANCE,1);}
     @Override protected void defineSynchedData(){super.defineSynchedData();entityData.define(CASTING,false);}
     public boolean isCasting(){return entityData.get(CASTING);}
     public boolean enraged(){return getHealth()<=getMaxHealth()*.5F;}
-    public static int moveFor(int casts){return new int[]{0,1,0,2,1,3}[Math.floorMod(casts,6)];}
+    public static int moveFor(int casts){return new int[]{0,1,4,2,1,3}[Math.floorMod(casts,6)];}
     public static int moveFor(int casts,double distanceSquared){
         int move=moveFor(casts);
-        if(move==1&&distanceSquared>22*22)move=0;
-        if(move==0&&distanceSquared>40*40)move=2+Math.floorMod(casts,2);
+        if(move==4&&distanceSquared>200*200)move=2;
+        if(move==1&&distanceSquared>110*110)move=0;
+        if(move==0&&distanceSquared>200*200)move=2+Math.floorMod(casts,2);
         return move;
     }
     @Override protected void registerGoals(){
         goalSelector.addGoal(0,new FloatGoal(this));goalSelector.addGoal(2,new GiantApproachGoal(this,.9,()->!isCasting()));
-        goalSelector.addGoal(8,new LookAtPlayerGoal(this,Player.class,64));goalSelector.addGoal(9,new RandomLookAroundGoal(this));
+        goalSelector.addGoal(8,new LookAtPlayerGoal(this,Player.class,320));goalSelector.addGoal(9,new RandomLookAroundGoal(this));
         targetSelector.addGoal(1,new HurtByTargetGoal(this));targetSelector.addGoal(2,new NearestAttackableTargetGoal<>(this,Player.class,true));
     }
     @Override public void aiStep(){
@@ -61,15 +71,15 @@ public final class StoneLancerEntity extends Monster implements GeoEntity {
             return;
         }
         if(cooldown>0){cooldown--;return;}
-        var target=getTarget();if(target==null||!target.isAlive()||distanceToSqr(target)>72*72||!hasLineOfSight(target))return;
+        var target=getTarget();if(target==null||!target.isAlive()||distanceToSqr(target)>360*360||!hasLineOfSight(target))return;
         beginCast(moveFor(casts,distanceToSqr(target)),target.position());
     }
     void beginCast(int move,Vec3 target){
         double dx=target.x-getX(),dz=target.z-getZ();setYRot((float)Math.toDegrees(Math.atan2(-dx,dz)));yBodyRot=getYRot();
-        pending=move;aim=StoneLancerCombat.ground(this,target);windup=new int[]{28,32,44,36}[move];
-        entityData.set(CASTING,true);getNavigation().stop();triggerAnim("action",new String[]{"volley","fissure","sky","core"}[move]);
-        StoneLancerCombat.seal(this,position(),5,windup+16);
-        if(move==2)StoneLancerCombat.seal(this,aim,4,windup+24);
+        pending=move;aim=StoneLancerCombat.ground(this,target);windup=new int[]{28,32,44,36,32}[move];
+        entityData.set(CASTING,true);getNavigation().stop();triggerAnim("action",new String[]{"volley","fissure","sky","core","fissure"}[move]);
+        StoneLancerCombat.seal(this,position(),25,windup+16);
+        if(move==2)StoneLancerCombat.seal(this,aim,20,windup+24);
         level().playSound(null,blockPosition(),SoundEvents.IRON_GOLEM_REPAIR,SoundSource.HOSTILE,1.5F,.55F);
     }
     @Override public boolean doHurtTarget(Entity target){
@@ -79,7 +89,7 @@ public final class StoneLancerEntity extends Monster implements GeoEntity {
     @Override public void move(MoverType type,Vec3 motion){GiantSimulation.run(this,()->super.move(type,motion));}
     @Override protected void checkInsideBlocks(){GiantSimulation.run(this,()->super.checkInsideBlocks());}
     @Override public void updateFluidHeightAndDoFluidPushing(java.util.function.Predicate<net.minecraft.world.level.material.FluidState> p){GiantSimulation.run(this,()->super.updateFluidHeightAndDoFluidPushing(p));}
-    @Override public AABB getBoundingBoxForCulling(){return super.getBoundingBoxForCulling().inflate(5,2,5).expandTowards(0,6,0);}
+    @Override public AABB getBoundingBoxForCulling(){return super.getBoundingBoxForCulling().inflate(20,10,20).expandTowards(0,40,0);}
     @Override public boolean removeWhenFarAway(double distance){return false;}
     @Override public void startSeenByPlayer(ServerPlayer p){super.startSeenByPlayer(p);bar.addPlayer(p);}
     @Override public void stopSeenByPlayer(ServerPlayer p){super.stopSeenByPlayer(p);bar.removePlayer(p);}
@@ -92,7 +102,18 @@ public final class StoneLancerEntity extends Monster implements GeoEntity {
         super.tick();
         if(level().isClientSide&&isAlive()&&tickCount%5==0&&walkAnimation.isMoving())for(int i=0;i<2;i++)
             level().addParticle(new net.minecraft.core.particles.BlockParticleOption(net.minecraft.core.particles.ParticleTypes.BLOCK,net.minecraft.world.level.block.Blocks.TUFF.defaultBlockState()),getX()+(random.nextDouble()-.5)*3,getY()+.15,getZ()+(random.nextDouble()-.5)*3,0,.03,0);
-        if(!level().isClientSide&&tickCount%24==0&&getDeltaMovement().horizontalDistanceSqr()>.0001)playSound(SoundEvents.IRON_GOLEM_STEP,1.8F,.55F);
+        if(!level().isClientSide&&tickCount%18==0&&!isCasting()&&onGround()&&getDeltaMovement().horizontalDistanceSqr()>.0001)playSound(SoundEvents.IRON_GOLEM_STEP,4F,.45F);
+        if(quakeTicks>0){
+            quakeTicks--;
+            if(!level().isClientSide&&quakeTicks%5==0){
+                double front=QUAKE_RADIUS*(80-quakeTicks)/80.0;
+                for(var enemy:level().getEntitiesOfClass(LivingEntity.class,new AABB(quakeCentre,quakeCentre).inflate(QUAKE_RADIUS,24,QUAKE_RADIUS),
+                        e->e!=this&&e.isAlive()&&!e.isSpectator()&&!e.isAlliedTo(this))){
+                    double distance=enemy.position().subtract(quakeCentre).horizontalDistance();
+                    if(distance<=front&&quakeHits.add(enemy.getUUID())){enemy.hurt(damageSources().mobAttack(this),26);enemy.push(0,.8,0);enemy.hurtMarked=true;}
+                }
+            }
+        }
     }
     @Override public AnimatableInstanceCache getAnimatableInstanceCache(){return cache;}
     @Override public void registerControllers(AnimatableManager.ControllerRegistrar c){

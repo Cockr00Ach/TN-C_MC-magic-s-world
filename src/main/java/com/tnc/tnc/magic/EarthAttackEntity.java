@@ -37,7 +37,7 @@ public final class EarthAttackEntity extends Entity {
         owner=caster.getId();this.start=start;this.end=end;this.ttl=ttl;this.damage=damage;this.radius=radius;this.source=source;
         entityData.set(MODE,mode);entityData.set(MODEL,model);entityData.set(SCALE,scale);entityData.set(HEIGHT,height);entityData.set(WAIT,wait);
         entityData.set(DROP_HEIGHT,mode==3?(float)Math.max(0,start.y-end.y):0F);
-        velocity=end.subtract(start).normalize().scale(mode==3?start.distanceTo(end)+2:1.8);
+        velocity=end.subtract(start).normalize().scale(mode==3?start.distanceTo(end)+2:model.startsWith("stone_lancer_")?9:1.8);
         // Track the target on the ground while the renderer shows the suspended spear above it.
         setPos(mode==3?end:start);
         setYRot((float)Math.toDegrees(Math.atan2(velocity.x,velocity.z)));
@@ -56,10 +56,11 @@ public final class EarthAttackEntity extends Entity {
             var wall=level().clip(new ClipContext(origin,next,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,this));
             if(wall.getType()!=HitResult.Type.MISS)next=wall.getLocation();
             LivingEntity target=null;double best=Double.MAX_VALUE;
-            var pathBounds=mode()==3?new AABB(origin,next).inflate(.8):getBoundingBox().expandTowards(velocity).inflate(.8);
+            double hitWidth=model().startsWith("stone_lancer_")?4:.8;
+            var pathBounds=mode()==3?new AABB(origin,next).inflate(hitWidth):getBoundingBox().expandTowards(velocity).inflate(hitWidth);
             for(var e:level().getEntitiesOfClass(LivingEntity.class,pathBounds,
                     e->e.isAlive()&&e!=living&&!e.isAlliedTo(living)&&!e.isSpectator())) {
-                var hit=e.getBoundingBox().inflate(.4).clip(origin,next);
+                var hit=e.getBoundingBox().inflate(hitWidth*.5).clip(origin,next);
                 if(hit.isPresent()&&origin.distanceToSqr(hit.get())<best){target=e;best=origin.distanceToSqr(hit.get());next=hit.get();}
             }
             setPos(next);
