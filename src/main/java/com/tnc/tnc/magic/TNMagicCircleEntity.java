@@ -47,6 +47,8 @@ public class TNMagicCircleEntity extends Entity {
     public static final int STYLE_STORM = 0;
     public static final int STYLE_LIGHT = 1;
     public static final int STYLE_DARK = 2;
+    /** Airborne boss seal, independent of fog boundary ownership. */
+    public static final int STYLE_DARK_RITUAL = 6;
     /**
      * ★ <b>暗系黑夜之手链的黑阵</b>（作者 2026-10-10：「给暗魔法专门做一个**黑色的**魔法阵」）✓
      * —— 贴图是 {@code textures/entity/black_circle.png}（近黑＋极暗血红线条，生成器
@@ -171,12 +173,13 @@ public class TNMagicCircleEntity extends Entity {
 
     @Override
     public net.minecraft.world.phys.AABB getBoundingBoxForCulling() {
-        return style() == STYLE_DARK_HAND ? super.getBoundingBoxForCulling().inflate(radius())
-                : super.getBoundingBoxForCulling();
+        return upright()?super.getBoundingBoxForCulling().inflate(radius())
+                :super.getBoundingBoxForCulling().inflate(radius(),.2,radius());
     }
 
     @Override
     public boolean shouldRenderAtSqrDistance(double distanceSqr) {
-        return distanceSqr < 16384.0D;
+        double distance=128+radius();
+        return distanceSqr < distance*distance;
     }
 }
