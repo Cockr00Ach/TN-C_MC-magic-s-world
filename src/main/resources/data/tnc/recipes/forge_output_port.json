@@ -1,5 +1,27 @@
 {
-  "type": "minecraft:crafting_shapeless",
-  "ingredients": [{"item": "tnc:forge_firebrick"}, {"item": "minecraft:iron_ingot"}],
-  "result": {"item": "tnc:forge_output_port", "count": 1}
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:false"
+        }
+      ],
+      "recipe": {
+        "type": "minecraft:crafting_shapeless",
+        "ingredients": [
+          {
+            "item": "tnc:forge_firebrick"
+          },
+          {
+            "item": "minecraft:iron_ingot"
+          }
+        ],
+        "result": {
+          "item": "tnc:forge_output_port",
+          "count": 1
+        }
+      }
+    }
+  ]
 }

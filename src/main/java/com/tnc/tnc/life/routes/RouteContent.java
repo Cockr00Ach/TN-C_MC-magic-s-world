@@ -38,6 +38,7 @@ public final class RouteContent {
     public static final Map<String,RegistryObject<? extends Block>> PLANTS=new LinkedHashMap<>();
     public static final Map<String,RegistryObject<Item>> GOODS=new LinkedHashMap<>();
     static {
+        GOODS.put("beast_bone_meal",ITEMS.register("beast_bone_meal",BeastBoneMealItem::new));
         ITEMS.register("magic_soil",()->new BlockItem(SOIL.get(),new Item.Properties()));
         ITEMS.register("magic_soil_source",()->new BlockItem(SOIL_SOURCE.get(),new Item.Properties()));
         for(RouteKind kind:RouteKind.values()){
@@ -60,7 +61,7 @@ public final class RouteContent {
     public static final DeferredRegister<net.minecraft.world.inventory.MenuType<?>> MENUS=DeferredRegister.create(ForgeRegistries.MENU_TYPES,"tnc");
     public static final RegistryObject<net.minecraft.world.inventory.MenuType<RouteMenu>> MENU=MENUS.register("mana_route",()->net.minecraftforge.common.extensions.IForgeMenuType.create(RouteMenu::new));
     public static void register(IEventBus bus){RouteInputNetwork.register();BLOCKS.register(bus);ITEMS.register(bus);ENTITIES.register(bus);FLUID_TYPES.register(bus);FLUIDS.register(bus);MENUS.register(bus);RECIPES.register(bus);bus.addListener(RouteContent::creative);}
-    private static void creative(net.minecraftforge.event.BuildCreativeModeTabContentsEvent e){if(e.getTabKey().equals(TNMod.TNC_TAB.getKey())){ITEMS.getEntries().forEach(i->e.accept(i.get()));}}
+    private static void creative(net.minecraftforge.event.BuildCreativeModeTabContentsEvent e){if(e.getTabKey().equals(TNMod.TNC_TAB.getKey())){ITEMS.getEntries().stream().map(RegistryObject::get).filter(i->!RetiredLifeContent.hidden(i)).forEach(e::accept);}}
     public static Item item(String id){var own=GOODS.get(id);return own!=null?own.get():ForgeRegistries.ITEMS.getValue(net.minecraft.resources.ResourceLocation.tryParse(id.contains(":")?id:"tnc:"+id));}
     private RouteContent(){}
 }

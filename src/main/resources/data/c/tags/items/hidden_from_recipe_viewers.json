@@ -1,0 +1,19 @@
+{
+  "replace": false,
+  "values": [
+    "tnc:mana_generator",
+    "tnc:mana_battery",
+    "tnc:mana_work_lamp",
+    "tnc:mana_paper_press",
+    "tnc:mana_cable",
+    "tnc:dew_rack",
+    "tnc:mana_bottle_base",
+    "tnc:egg_rack",
+    "tnc:plant_sample_clip",
+    "tnc:forge_copper_frame",
+    "tnc:forge_input_port",
+    "tnc:forge_output_port",
+    "tnc:forge_mana_injector",
+    "tnc:insulating_forge_clay"
+  ]
+}

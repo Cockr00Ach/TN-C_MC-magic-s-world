@@ -155,6 +155,8 @@ helps={'mana_infuser':'空手按住右键，每秒注入自身5魔力，松开�
 for i,(id,name,cap,rate) in enumerate(nodes):quest(workshop,'node/'+id,name,'tnc:'+id,(i%6-2.5)*4.5,2+(i//6)*5.7,[helps.get(id,'放在获准区域并连接相邻线路；检流尺右键看真实工作状态。'),f'缓冲{cap}；带宽{rate}魔力/秒。'],itemtask('node/'+id,'tnc:'+id),size=1.5)
 for i,(id,label,key) in enumerate([('dew_collector','看见第一次真实供能','network/collected'),('mana_basin','存下真实魔力','network/stored'),('mana_sawmill','实际完成一次加工','network/worked'),('accessory_charger','真正充满一部分饰品','network/charged')]):quest(workshop,'network/'+key,label,'tnc:'+id,(i-1.5)*7,34,['这个节点检测实际转移或加工，而非持有机器。'],action(key))
 for i,(id,name,cap) in enumerate(re.findall(r'\w+\("([a-z_]+)","([^"]+)",(\d+)\)',(J/'routes/RouteAccessory.java').read_text(encoding='utf-8'))):quest(workshop,'accessory/'+id,name,'tnc:'+id,(i%4-1.5)*6,41+(i//4)*6,[('由穿戴的魔道机甲供能；模块不单独充能。' if id=='mech_spellgun' else f'容量{cap}。先在饰品充能台充能，再使用。'),'副手饰品生效；机甲穿胸甲位。用途与消耗见物品提示。'],itemtask('accessory/'+id,'tnc:'+id),size=1.5)
+from rebuild_workshop_progression import build as staged_workshop
+workshop=staged_workshop()
 from install_life_routes import groups as append_life_group
 existing_group=(Q/'chapter_groups.snbt').read_text(encoding='utf-8-sig') if (Q/'chapter_groups.snbt').exists() else '{chapter_groups: []}'
 (Q/'chapter_groups.snbt').parent.mkdir(parents=True,exist_ok=True)
@@ -162,6 +164,7 @@ existing_group=(Q/'chapter_groups.snbt').read_text(encoding='utf-8-sig') if (Q/'
 for c in [season,garden,beasts,workshop]:
  dump(Q/'chapters'/f"{c['filename']}.snbt",c)
  dump(R/'questbook/ftbquests/chapters'/f"{c['filename']}.snbt",c)
-dump(RES/'data/tnc/life_routes/catalogue.json',dict(traditional=traditional,magic=magic,animals=animals,machines=[dict(id=i,name=n,help=helps.get(i,'接线供魔后工作；材料放输入位，成品从输出位取。')) for i,n,_,_ in nodes]))
+staged_nodes={q['tasks'][0]['item'].split(':')[1]:q for q in workshop['quests'] if q['tasks'][0]['type']=='item'}
+dump(RES/'data/tnc/life_routes/catalogue.json',dict(traditional=traditional,magic=magic,animals=animals,machines=[dict(id=i,name=staged_nodes[i]['title'],help='\n'.join(staged_nodes[i]['description'])) for i,n,_,_ in nodes]))
 dump(R/'work/life-routes-unresolved-icons.json',unresolved)
 print(f'Four chapters: {sum(len(c["quests"]) for c in [season,garden,beasts,workshop])} quests; {len(traditional)} traditional entries; {len(magic)} magic plants; {len(animals)} beasts. Unresolved traditional icons: {len(unresolved)}')

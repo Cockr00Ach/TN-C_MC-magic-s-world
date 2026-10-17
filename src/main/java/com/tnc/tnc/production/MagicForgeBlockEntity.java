@@ -99,6 +99,7 @@ public final class MagicForgeBlockEntity extends BlockEntity implements WorldlyC
             wasFormed = formed;
             frameVisuals(formed);
             if (formed && level instanceof ServerLevel server) {
+                if(owner!=null)com.tnc.tnc.life.routes.RouteProgress.awardOwner(server,owner,"workshop/forge_formed");
                 BlockPos chamber = worldPosition.relative(front().getOpposite());
                 server.sendParticles(ParticleTypes.END_ROD, chamber.getX() + .5, chamber.getY() + .5,
                         chamber.getZ() + .5, 24, .7, .7, .7, .04);
@@ -260,6 +261,7 @@ public final class MagicForgeBlockEntity extends BlockEntity implements WorldlyC
         if (!magic.spendMana(amount)) return "魔力不足。";
         lineFx(player.blockPosition(), source, false);
         addCharge(amount, source);
+        com.tnc.tnc.life.routes.RouteProgress.award(player,"workshop/manual_forge");
         MagicStoneNetwork.syncTo(player);
         return "注入 " + amount + " 魔力，炉内现有 " + charge + "/" + MAX_CHARGE + "。";
     }

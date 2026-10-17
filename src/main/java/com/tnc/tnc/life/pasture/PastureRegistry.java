@@ -42,5 +42,5 @@ public final class PastureRegistry {
     }
     @SubscribeEvent public static void spawnPlacement(net.minecraftforge.event.entity.SpawnPlacementRegisterEvent event){TYPES.values().forEach(type->event.register(type,net.minecraft.world.entity.SpawnPlacements.Type.ON_GROUND,net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,PastureEcology::canSpawn,net.minecraftforge.event.entity.SpawnPlacementRegisterEvent.Operation.REPLACE));}
     @SubscribeEvent public static void attributes(net.minecraftforge.event.entity.EntityAttributeCreationEvent event){TYPES.values().forEach(type->event.put(type,PastureAnimal.attributes().build()));}
-    @SubscribeEvent public static void creative(net.minecraftforge.event.BuildCreativeModeTabContentsEvent event){if(event.getTabKey().equals(TNMod.TNC_TAB.getKey()))ITEMS.values().forEach(event::accept);}
+    @SubscribeEvent public static void creative(net.minecraftforge.event.BuildCreativeModeTabContentsEvent event){if(event.getTabKey().equals(TNMod.TNC_TAB.getKey()))ITEMS.values().stream().filter(i->!com.tnc.tnc.life.routes.RetiredLifeContent.hidden(i)).forEach(event::accept);}
 }

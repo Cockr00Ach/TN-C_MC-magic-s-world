@@ -53,7 +53,7 @@ class GuidebookTest {
                 String target=link.get("linked_quest").getAsString();assertTrue(Long.parseLong(target,16)>0,target);references.add(target);
             }
         }
-        assertEquals(409,questIds.size());assertTrue(questIds.containsAll(references));
+        assertEquals(451,questIds.size());assertTrue(questIds.containsAll(references));
     }
     private GuidebookContent content() throws IOException {
         var stream=getClass().getResourceAsStream("/assets/tnc/guide/gameplay.json");

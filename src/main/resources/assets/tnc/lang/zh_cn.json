@@ -331,10 +331,10 @@
   "item.tnc.refined_mana_bottle": "精练魔力瓶",
   "block.tnc.pasture_trough": "牧场食槽",
   "block.tnc.habitat_marker": "栖居标记",
-  "block.tnc.pasture_tray": "牧场托盘",
+  "block.tnc.pasture_tray": "驿站货箱",
   "block.tnc.egg_rack": "孵卵架",
   "block.tnc.dew_rack": "采露架",
-  "block.tnc.charging_perch": "充电栖架",
+  "block.tnc.charging_perch": "浮空栖架",
   "block.tnc.mana_bottle_base": "脉冲魔瓶座",
   "block.tnc.pasture_glow": "枕光微光",
   "item.tnc.stonebarrow_meat": "垒脊肉",
@@ -501,8 +501,8 @@
   "item.tnc.bright_mana_lantern": "庭院明灯",
   "block.tnc.mana_pulp_press": "纸皮压机",
   "item.tnc.mana_pulp_press": "纸皮压机",
-  "block.tnc.mana_feed_plate": "饲料分盘",
-  "item.tnc.mana_feed_plate": "饲料分盘",
+  "block.tnc.mana_feed_plate": "自动投料器",
+  "item.tnc.mana_feed_plate": "自动投料器",
   "block.tnc.gentle_irrigator": "轻灌器",
   "item.tnc.gentle_irrigator": "轻灌器",
   "block.tnc.climate_lantern": "护候灯",
@@ -582,5 +582,6 @@
   "entity.tnc.drumbelly_otter": "鼓腹砂獭",
   "item.tnc.drumbelly_otter_spawn_egg": "鼓腹砂獭刷怪蛋",
   "entity.tnc.water_leviathan": "蓝金水渊兽",
-  "item.tnc.water_leviathan_spawn_egg": "蓝金水渊兽刷怪蛋"
+  "item.tnc.water_leviathan_spawn_egg": "蓝金水渊兽刷怪蛋",
+  "item.tnc.beast_bone_meal": "异兽骨粉"
 }

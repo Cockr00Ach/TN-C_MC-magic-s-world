@@ -22,6 +22,11 @@ public final class VerdantVeinBlockEntity extends BlockEntity implements OwnedMa
     private boolean knownClock,wasGrowing;
     public VerdantVeinBlockEntity(BlockPos p,BlockState s){super(EcologyContent.VERDANT_ENTITY,p,s);}
     @Nullable @Override public UUID manaOwner(){return owner;}
+    public boolean fertilize(boolean full){
+        if(!(level instanceof ServerLevel l)||growth>=24000)return false;
+        growth=Math.min(24000,full?24000:growth+8000);
+        l.setBlock(worldPosition,getBlockState().setValue(VerdantVeinBlock.AGE,growth/8000),3);setChanged();return true;
+    }
     public int storedMana(){return mana;}
     public void setOwner(UUID id){if(owner==null){owner=id;setChanged();}}
     static boolean wet(ServerLevel l,BlockPos p){for(Direction d:Direction.Plane.HORIZONTAL)if(l.getFluidState(p.below().relative(d)).is(FluidTags.WATER))return true;return l.isRainingAt(p);}
