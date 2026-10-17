@@ -86,6 +86,12 @@ minecraft {
         }
 
         client {
+            if (project.hasProperty('windTwoChainsAudit')) {
+                workingDirectory project.file('work/wind-two-chains-client-audit')
+                property 'tnc.windTwoChainsAudit', 'true'
+                property 'tnc.windTwoChainsAuditReport', file('work/wind-two-chains-client-audit.json').absolutePath
+                args '--quickPlaySingleplayer', 'casino-gallery', '--width', '1800', '--height', '900'
+            }
             if (project.hasProperty('windArsenalAudit')) {
                 workingDirectory project.file('work/wind-arsenal-client-audit')
                 property 'tnc.windArsenalAudit', 'true'

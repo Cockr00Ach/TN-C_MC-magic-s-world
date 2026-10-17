@@ -611,7 +611,11 @@ public class MagicStoneData {
 
     /** 进度：某元素某条链的已学等级 0–5。 */
     public int getProgress(Element element, SpellCatalog.Chain chain) {
-        return progress[element.ordinal()][chain.ordinal()];
+        int value = progress[element.ordinal()][chain.ordinal()];
+        // Preserve the retired summon chain's learned tiers only in its wind-ball replacement.
+        if(element == Element.WIND && chain == SpellCatalog.Chain.WIND_BALL)
+            value = Math.max(value, progress[element.ordinal()][SpellCatalog.Chain.SUMMON.ordinal()]);
+        return value;
     }
 
     /** 设置：**主链**的进度（兼容旧调用）。 */
@@ -919,6 +923,11 @@ public class MagicStoneData {
     /** Preserve ownership, custom keys and explicit forgetting across the fireball-chain rename. */
     private static String currentSpellId(String id) {
         return switch (id) {
+            case "tnc:wind_orb" -> "tnc:wind_ball_1";
+            case "tnc:wind_orb_swarm" -> "tnc:wind_ball_2";
+            case "tnc:wind_spirit" -> "tnc:wind_ball_3";
+            case "tnc:triple_wind_spirit" -> "tnc:wind_ball_4";
+            case "tnc:wind_spirit_lord" -> "tnc:wind_ball_5";
             case "tnc:giant_fireball" -> "tnc:lava_fireball";
             case "tnc:self_destruct" -> "tnc:molten_skyfall";
             case "tnc:meteor_fireball" -> "tnc:meteor_fall";

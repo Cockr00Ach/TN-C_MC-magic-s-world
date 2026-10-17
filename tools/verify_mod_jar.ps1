@@ -200,8 +200,8 @@ try {
                   # exists)"; their json has existed for a long time, so that note was
                   # stale and these 10 spells sat OUTSIDE every check this gate performs
                   # (which is why "10 wind spells have no icon" stayed green).
-                  'tnc:wind_orb', 'tnc:wind_orb_swarm', 'tnc:wind_spirit',
-                  'tnc:triple_wind_spirit', 'tnc:wind_spirit_lord',
+                  'tnc:wind_ball_1', 'tnc:wind_ball_2', 'tnc:wind_ball_3', 'tnc:wind_ball_4', 'tnc:wind_ball_5',
+                  'tnc:wind_weapon_1', 'tnc:wind_weapon_2', 'tnc:wind_weapon_3', 'tnc:wind_weapon_4', 'tnc:wind_weapon_5',
                   'tnc:gale', 'tnc:great_gale', 'tnc:vast_gale',
                   'tnc:giant_gale', 'tnc:wind_god_gale')
 
@@ -323,6 +323,20 @@ try {
                         # Registered all along but MISSING from this whitelist -- the check
                         # only stayed green because no dark spell was in $spellIds yet.
                         'tnc:dark_power')
+
+        # Wind release markers are registered by a two-chain/five-tier RegisterEvent loop.
+        # Require the packaged registration, marker and release bridge before accepting IDs.
+        $windRegistration = Get-ClassText 'com/tnc/tnc/magic/wind/WindChainRegistration.class'
+        $windMarker = Get-ClassText 'com/tnc/tnc/magic/wind/WindChainRegistration$CastMarker.class'
+        $windBridge = Get-ClassText 'com/tnc/tnc/magic/wind/WindChainSpells.class'
+        if ($windRegistration -and $windRegistration.Contains('wind_cast_') -and
+                $windRegistration.Contains('net/minecraftforge/registries/RegisterEvent') -and
+                $windRegistration.Contains('WindChainRegistration$CastMarker') -and
+                $windMarker -and $windBridge -and $windBridge.Contains('MobEffectEvent$Added')) {
+            foreach ($chain in 0..1) {
+                foreach ($tier in 1..5) { $registered += "tnc:wind_cast_${chain}_${tier}" }
+            }
+        }
 
         # ★ SPAWN actions: the entity id must be one WE register, otherwise the engine
         # silently spawns nothing (or the vanilla default) and the whole mechanic is a

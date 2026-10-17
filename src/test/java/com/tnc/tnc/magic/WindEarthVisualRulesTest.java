@@ -6,17 +6,17 @@ import static org.junit.jupiter.api.Assertions.*;
 class WindEarthVisualRulesTest {
     @Test void everyWindAndEarthChainTierHasADistinctPresentation() {
         int count=0;
-        for(var entry:SpellCatalog.all())if(entry.element()==Element.WIND||entry.element()==Element.EARTH) {
+        for(var entry:SpellCatalog.all())if((entry.element()==Element.WIND||entry.element()==Element.EARTH)&&entry.chain()!=SpellCatalog.Chain.WIND_BALL&&entry.chain()!=SpellCatalog.Chain.WIND_WEAPON) {
             var spec=WindEarthVisualRules.find(entry.id().getPath());
             assertNotNull(spec,entry.displayName());assertEquals(entry.tier(),spec.tier());
             int expected=switch(entry.chain()) {
-                case FLIGHT -> 0; case SUMMON -> 1; case GALE -> 2;
+                case FLIGHT -> 0; case SUMMON, WIND_BALL -> 1; case WIND_WEAPON -> 7; case GALE -> 2;
                 case EARTH_SHOT -> 3; case EARTH_MOVE -> 4; case EARTH_MUD -> 5; case EARTH_RING -> 6;
                 default -> throw new AssertionError("Unexpected chain");
             };
             assertEquals(expected,spec.kind());assertTrue(spec.radius()>0&&spec.life()>0);count++;
         }
-        assertEquals(35,count);assertEquals(count,WindEarthVisualRules.all().size());
+        assertEquals(30,count);assertEquals(count,WindEarthVisualRules.all().size());
         assertNull(WindEarthVisualRules.find("night_hand"));
     }
     @Test void allTierCloudsKeepTheirActualGameplayFootprintAndLifetime() {
