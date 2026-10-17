@@ -38,7 +38,7 @@ public final class WindChainSpells {
             var target=aim(owner,96);
             if(target==null&&tier<4)target=level.getEntitiesOfClass(LivingEntity.class,owner.getBoundingBox().inflate(32),v->enemy(v,owner)&&owner.hasLineOfSight(v)&&v.position().subtract(owner.position()).normalize().dot(owner.getLookAngle())>.15)
                     .stream().min(Comparator.comparingDouble(v->v.distanceToSqr(owner))).orElse(null);
-            if(tier>=4&&target==null){if(owner instanceof net.minecraft.server.level.ServerPlayer p)p.displayClientMessage(net.minecraft.network.chat.Component.literal("请先瞄准敌人"),true);return null;}
+            if(target==null){if(owner instanceof net.minecraft.server.level.ServerPlayer p)p.displayClientMessage(net.minecraft.network.chat.Component.literal("璇峰厛鐬勫噯鏁屼汉"),true);return null;}
             var volley=WindChainRegistration.VOLLEY.create(level);if(volley==null)return null;
             volley.configure(owner,tier,target);entity=volley;
         }

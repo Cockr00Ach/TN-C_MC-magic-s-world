@@ -26,17 +26,18 @@ public final class WindChainRenderers {
         @Override public ResourceLocation getTextureLocation(WindVolleyEntity e){return TextureAtlas.LOCATION_BLOCKS;}
         @Override public void render(WindVolleyEntity e,float yaw,float partial,PoseStack p,MultiBufferSource b,int light){
             double age=e.visualAge(partial);float alpha=(float)Math.min(1,age/8);
-            if(e.tier()>=4){p.pushPose();var marker=e.aimPoint().subtract(e.position());p.translate(marker.x,marker.y+.05,marker.z);WindSolidModels.seal(e.tier()==5?11:5,age,alpha,p,b);p.popPose();}
+            if(e.tier()>=1){p.pushPose();var marker=e.aimPoint().subtract(e.position());p.translate(marker.x,marker.y+.05,marker.z);WindSolidModels.seal(e.tier()==5?34:5+e.tier(),age,alpha,p,b);p.popPose();}
             for(int slot=0;slot<e.count();slot++){
-                double end=WindChainRules.launch(e.tier())+e.flightTime();
-                if(e.done(slot)&&(e.tier()<4||age<end))continue;var at=e.weaponAt(slot,age).subtract(e.position());
-                double turn=Math.max(0,Math.min(1,(age-18)/12))*Math.PI;
-                var direction=e.tier()==5||e.tier()==4&&age>=30?new net.minecraft.world.phys.Vec3(0,-1,0):e.tier()==4&&age>=18?new net.minecraft.world.phys.Vec3(0,Math.cos(turn),Math.sin(turn)):age<18?new net.minecraft.world.phys.Vec3(0,1,0):e.impact(slot).subtract(e.launchPoint(slot)).normalize();
+                double end=e.endTime(slot);
+                if(!e.visible(slot,age)||e.done(slot)&&age<end)continue;
+                var at=e.weaponAt(slot,age).subtract(e.position());
+                var direction=e.direction(slot,age);
+                if(direction.lengthSqr()<.001)direction=new net.minecraft.world.phys.Vec3(0,-1,0);
                 p.pushPose();p.translate(at.x,at.y,at.z);
                 p.mulPose(new Quaternionf().rotationTo(0,0,1,(float)direction.x,(float)direction.y,(float)direction.z));
                 p.mulPose(Axis.ZP.rotationDegrees((float)(age*3%360)));float scale=WindChainRules.modelScale(e.tier());p.scale(scale,scale,scale);
                 float fade=(float)Math.max(0,Math.min(1,(end+8-age)/8));
-                WindConstructModels.weapon(WindChainRules.form(e.tier(),slot),p,b,.83F*alpha*fade,true);p.popPose();
+                WindConstructModels.weapon(WindChainRules.form(e.tier(),slot),p,b,.98F*alpha*fade,true);p.popPose();
             }
         }
     }

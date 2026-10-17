@@ -430,13 +430,15 @@
   "spell.tnc.wind_ball_5.name": "Wind Ball 5",
   "spell.tnc.wind_ball_5.description": "Lift caught enemies while compressing, then detonate.",
   "spell.tnc.wind_weapon_1.name": "Wind Weapon 1",
-  "spell.tnc.wind_weapon_1.description": "Form 3 flying swords, then launch.",
+  "spell.tnc.wind_weapon_1.description": "3 double-size blades orbit and lunge, then plunge.",
   "spell.tnc.wind_weapon_2.name": "Wind Weapon 2",
-  "spell.tnc.wind_weapon_2.description": "Form and launch 10 swords.",
+  "spell.tnc.wind_weapon_2.description": "10 triple-size blades orbit and lunge, then plunge.",
   "spell.tnc.wind_weapon_3.name": "Wind Weapon 3",
-  "spell.tnc.wind_weapon_3.description": "Launch 5 spears; apply vulnerability for 10 seconds.",
+  "spell.tnc.wind_weapon_3.description": "5 fivefold spears orbit and plunge, applying vulnerability.",
   "spell.tnc.wind_weapon_4.name": "Wind Weapon 4",
-  "spell.tnc.wind_weapon_4.description": "Aim at an enemy: 20 swords and 10 spears descend over a seal.",
+  "spell.tnc.wind_weapon_4.description": "20 swords and 10 spears at fivefold scale orbit before plunging.",
   "spell.tnc.wind_weapon_5.name": "Wind Weapon 5",
-  "spell.tnc.wind_weapon_5.description": "Aim at an enemy: 3 swords and 2 spears descend at 20 times normal model size."
+  "spell.tnc.wind_weapon_5.description": "3 swords and 2 spears at sixtyfold scale rise from a seal, then plunge sequentially.",
+  "item.tnc.wind_relic_sword": "Gale Sovereign Wingblade",
+  "item.tnc.wind_relic_spear": "Skybreaker Windlance"
 }

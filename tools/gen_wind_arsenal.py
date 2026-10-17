@@ -43,3 +43,7 @@ save('chakram',ring(6.2,36,0,math.tau,.8)+ring(5.4,28,0,math.tau,.25,'edge')+[
     box(7.65,13.8,7.65,.7,2,.7,'core'),box(7.65,.2,7.65,.7,2,.7,'core'),
     box(.2,7.65,7.65,2,.7,.7,'core'),box(13.8,7.65,7.65,2,.7,.7,'core')])
 print('Generated six native wind models')
+
+# Keep the current detailed sword and spear authoritative when regenerating base constructs.
+import runpy
+runpy.run_path(str(Path(__file__).with_name('gen_wind_relic_weapons.py')))

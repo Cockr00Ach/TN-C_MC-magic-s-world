@@ -601,13 +601,15 @@
   "spell.tnc.wind_ball_5.name": "升空风暴",
   "spell.tnc.wind_ball_5.description": "压缩时持续升空，将敌人吸至高空后爆炸。",
   "spell.tnc.wind_weapon_1.name": "风之三剑",
-  "spell.tnc.wind_weapon_1.description": "幻化三柄飞剑环绕身边，随后齐射敌人。",
+  "spell.tnc.wind_weapon_1.description": "幻化三柄放大两倍的风翼圣剑，环绕目标多圈突刺后升空砸下。",
   "spell.tnc.wind_weapon_2.name": "十剑齐发",
-  "spell.tnc.wind_weapon_2.description": "幻化十柄飞剑齐射敌人。",
+  "spell.tnc.wind_weapon_2.description": "幻化十柄放大三倍的圣剑，环绕目标攻击后砸下。",
   "spell.tnc.wind_weapon_3.name": "破甲风矛",
-  "spell.tnc.wind_weapon_3.description": "幻化五柄长矛射向敌人，命中施加十秒易伤。",
+  "spell.tnc.wind_weapon_3.description": "幻化五柄放大五倍的长矛，环绕目标突刺后砸下，施加十秒易伤。",
   "spell.tnc.wind_weapon_4.name": "天降风兵",
-  "spell.tnc.wind_weapon_4.description": "瞄准敌人后，在其脚下生成法阵，二十剑与十矛从天而降。",
+  "spell.tnc.wind_weapon_4.description": "二十剑与十矛放大五倍，围绕目标攻击多圈后升空砸下。",
   "spell.tnc.wind_weapon_5.name": "风神兵临",
-  "spell.tnc.wind_weapon_5.description": "瞄准敌人后，三剑两矛从天而降，兵器模型放大二十倍。"
+  "spell.tnc.wind_weapon_5.description": "三剑两矛依次从脚下法阵升空，再陆续砸下；模型为普通兵器六十倍。",
+  "item.tnc.wind_relic_sword": "岚皇·风翼圣剑",
+  "item.tnc.wind_relic_spear": "穹极·贯风神矛"
 }
