@@ -297,6 +297,12 @@ public class DarkFogCloudEntity extends SpellCloud {
      * 引擎自己的 {@code SpellCloud.tick} 也是拿它去结算范围伤害的 ✓；
      * 换维度时它会自己按 UUID 重新解析 ✓，所以这里直接用就够了，不用再存一份 ✗。
      */
+    /** Allows recasting to replace only this caster's existing fog domain. */
+    public boolean isOwnedBy(LivingEntity caster) {
+        LivingEntity owner = resolveOwner();
+        return caster != null && owner != null && caster.getUUID().equals(owner.getUUID());
+    }
+
     private LivingEntity resolveOwner() {
         Entity owner = this.m_19749_();
         return owner instanceof LivingEntity living ? living : null;

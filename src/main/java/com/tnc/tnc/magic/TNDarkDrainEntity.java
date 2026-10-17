@@ -75,7 +75,12 @@ public class TNDarkDrainEntity extends Entity implements SpellSpawnedEntity {
     @Override public net.minecraft.world.phys.AABB getBoundingBoxForCulling(){
         var owner=level().getEntity(casterId());return owner==null?super.getBoundingBoxForCulling():super.getBoundingBoxForCulling().minmax(owner.getBoundingBox()).inflate(4);
     }
+    private double siphonRange;
     public void configureSiphon(LivingEntity caster,LivingEntity victim,int tier) {
+        configureSiphon(caster,victim,tier,DarkSiphonRules.range(tier)+Math.max(0,caster.getBbWidth()*.5-1));
+    }
+    public void configureSiphon(LivingEntity caster,LivingEntity victim,int tier,double range) {
+        this.siphonRange=range;
         this.casterId=caster.getId();this.victimId=victim.getId();this.tier=Math.max(1,Math.min(5,tier));
         entityData.set(VICTIM,victimId);entityData.set(CASTER,casterId);entityData.set(TIER,this.tier);
         setPos(victim.position());
@@ -207,7 +212,7 @@ public class TNDarkDrainEntity extends Entity implements SpellSpawnedEntity {
 
         LivingEntity victim = resolve(victimId);
         LivingEntity caster = resolve(casterId);
-        if (victim == null || caster == null || victim.distanceToSqr(caster)>Math.pow(DarkSiphonRules.range(tier),2)
+        if (victim == null || caster == null || victim.distanceToSqr(caster)>Math.pow(siphonRange>0?siphonRange:DarkSiphonRules.range(tier)+Math.max(0,caster.getBbWidth()*.5-1),2)
                 ||!caster.hasLineOfSight(victim)) {
             // 抽干了 / 目标没了 ⇒ 收工（但把这一口已经抽到的账报完 ✓）
             finish();

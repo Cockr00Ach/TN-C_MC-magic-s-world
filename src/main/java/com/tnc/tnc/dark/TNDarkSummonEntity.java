@@ -157,7 +157,22 @@ public class TNDarkSummonEntity extends Monster implements GeoEntity {
     }
 
     public void setScale(double scale) {
-        this.entityData.set(DATA_SCALE, (int) Math.round(Mth.clamp(scale, 0.1D, 8.0D) * 100.0D));
+        this.entityData.set(DATA_SCALE, (int) Math.round(Mth.clamp(scale, 0.1D, 16.0D) * 100.0D));
+    }
+
+    @Override
+    public net.minecraft.world.entity.EntityDimensions getDimensions(net.minecraft.world.entity.Pose pose){
+        return getType().getDimensions().scale((float)scale());
+    }
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> key){
+        super.onSyncedDataUpdated(key);
+        if(DATA_SCALE.equals(key))refreshDimensions();
+    }
+
+    @Override
+    public net.minecraft.world.phys.AABB getBoundingBoxForCulling(){
+        return super.getBoundingBoxForCulling().inflate(Math.max(0,scale()-1)*3);
     }
 
     public void setOwner(UUID owner) {
@@ -257,21 +272,26 @@ public class TNDarkSummonEntity extends Monster implements GeoEntity {
         if (this.ownerId == null) {
             return;
         }
-        Player owner = level.getPlayerByUUID(this.ownerId);
-        if (owner == null || !owner.isAlive() || owner.level() != this.level()) {
+        Entity ownerEntity = level.getEntity(this.ownerId);
+        if (!(ownerEntity instanceof LivingEntity owner) || !owner.isAlive() || owner.level() != this.level()) {
             this.discard();
             return;
         }
+        if(owner instanceof net.minecraft.world.entity.Mob ownerMob){
+            LivingEntity commanded=ownerMob.getTarget();
+            this.setTarget(commanded!=null&&commanded.isAlive()&&commanded!=this&&!commanded.isAlliedTo(owner)?commanded:null);
+        }
+        double escort=owner instanceof com.tnc.tnc.boss.TNDarkGiantEntity?owner.getBbWidth()+4:HOVER_DISTANCE;
         double d = this.distanceTo(owner);
-        if (d > TELEPORT_DISTANCE) {
+        if (d > TELEPORT_DISTANCE+(owner instanceof net.minecraft.world.entity.Mob?escort:0)) {
             this.getNavigation().stop();
-            this.teleportTo(owner.getX(), owner.getY() + HOVER_HEIGHT, owner.getZ());
+            this.teleportTo(owner.getX()+(owner instanceof net.minecraft.world.entity.Mob?escort:0), owner.getY() + HOVER_HEIGHT, owner.getZ());
         } else if (this.getTarget() == null) {
             double angle = Math.toRadians(owner.getYRot() + 135.0F);
             this.getMoveControl().setWantedPosition(
-                    owner.getX() + Math.cos(angle) * HOVER_DISTANCE,
+                    owner.getX() + Math.cos(angle) * escort,
                     owner.getY() + HOVER_HEIGHT + Math.sin(this.tickCount * 0.09D) * 0.15D,
-                    owner.getZ() + Math.sin(angle) * HOVER_DISTANCE, 1.0D);
+                    owner.getZ() + Math.sin(angle) * escort, 1.0D);
         } else if (this.tickCount % 20 == 0) {
             this.triggerAnim("action", "attack");
         }

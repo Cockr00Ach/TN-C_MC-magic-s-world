@@ -72,11 +72,11 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
      * 渲染缩放（1.0 = 原样 ✓）—— 模型实测：脚底 y=0 → 头顶（含角）y=97 单位 ≈ <b>6 格</b> ✓，
      * <b>肩宽 64 单位 = 4 格</b> ✓（宽高比 1.5 ⇒ 作者要的"粗壮 / 雄壮"，不是竹竿 ✓；玩家是 3.0）。
      */
-    public static final double MODEL_SCALE = 1.0D;
+    public static final double MODEL_SCALE = 10.0D;
 
     /** 碰撞箱（宽 × 高，格 ✓）—— 量自模型（肩甲外缘 4 格 · 头顶 5.6 格 ✓），不然会穿墙/浮空 ✗。 */
-    public static final float HITBOX_WIDTH = 2.4F;
-    public static final float HITBOX_HEIGHT = 5.6F;
+    public static final float HITBOX_WIDTH = 24.0F;
+    public static final float HITBOX_HEIGHT = 56.0F;
 
     // ---- 作者的三个动作片段 + 我们补的走路 ✓ ----
     /**
@@ -106,6 +106,9 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
     private static final EntityDataAccessor<Integer> DATA_PHASE =
             SynchedEntityData.defineId(TNDarkGiantEntity.class, EntityDataSerializers.INT);
 
+    private static final EntityDataAccessor<Boolean> DATA_CASTING =
+            SynchedEntityData.defineId(TNDarkGiantEntity.class, EntityDataSerializers.BOOLEAN);
+
     /** 顶部血条（作者要"boss 那种血量条"✓）。 */
     private final ServerBossEvent bossEvent = new ServerBossEvent(this.getDisplayName(),
             BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.PROGRESS);
@@ -119,20 +122,29 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
     private int pendingTicks;
     /** 两招之间歇多久 ✓（二阶段更凶 ⇒ 歇得更短 ✓）。 */
     private int castCooldown = 80;
+    private int completedCasts;
+    private int previousMove=-1;
     private static final int COOLDOWN_PHASE_ONE = 90;
     private static final int COOLDOWN_PHASE_TWO = 45;
 
     public TNDarkGiantEntity(EntityType<? extends TNDarkGiantEntity> type, Level level) {
         super(type, level);
         this.xpReward = 800;
+        this.refreshDimensions();
     }
+
+    @Override
+    public net.minecraft.world.entity.EntityDimensions getDimensions(net.minecraft.world.entity.Pose pose) {
+        return net.minecraft.world.entity.EntityDimensions.scalable(HITBOX_WIDTH,HITBOX_HEIGHT);
+    }
+    public boolean isCasting(){return this.entityData.get(DATA_CASTING);}
 
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MAX_HEALTH, MAX_HP)
                 .add(Attributes.ATTACK_DAMAGE, 18.0D)
                 .add(Attributes.MOVEMENT_SPEED, 0.16D)      // 巨人走得慢而沉 ✓（和 walk 动画的步幅配套 ✓ 见 gen_dark_giant_walk.ps1 ✓）
-                .add(Attributes.FOLLOW_RANGE, 40.0D)
+                .add(Attributes.FOLLOW_RANGE, TNDarkGiantSpells.FOLLOW_RANGE)
                 .add(Attributes.ARMOR, 12.0D)               // 通身盔甲 ⇒ 护甲给高 ✓
                 .add(Attributes.ARMOR_TOUGHNESS, 6.0D)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0D); // 巨人推不动 ✓
@@ -142,6 +154,7 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(DATA_PHASE, TNDarkGiantPhase.PHASE_ONE);
+        this.entityData.define(DATA_CASTING,false);
     }
 
     // ------------------------------------------------------------------
@@ -221,11 +234,18 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
      */
     @Override
     public boolean doHurtTarget(net.minecraft.world.entity.Entity target) {
+        if(isCasting())return false;
         boolean hit = super.doHurtTarget(target);
         if (hit && !this.level().isClientSide()) {
             this.playStomp();
         }
         return hit;
+    }
+
+    @Override
+    public boolean isAlliedTo(net.minecraft.world.entity.Entity entity){
+        return entity instanceof com.tnc.tnc.dark.TNDarkSummonEntity summon && getUUID().equals(summon.owner())
+                ||super.isAlliedTo(entity);
     }
 
     // ---- 目标/行为 ----
@@ -234,7 +254,7 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.0D, true));
         this.goalSelector.addGoal(7, new RandomStrollGoal(this, 0.7D));
-        this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 40.0F));
+        this.goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, (float)TNDarkGiantSpells.FOLLOW_RANGE));
         this.goalSelector.addGoal(9, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
@@ -259,9 +279,9 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
     public net.minecraft.world.phys.AABB getBoundingBoxForCulling() {
         net.minecraft.world.phys.AABB box = super.getBoundingBoxForCulling();
         if (!this.isPhaseTwo()) {
-            return box;
+            return box.inflate(12,4,12).expandTowards(0,8,0);
         }
-        return box.inflate(4.0D, 3.0D, 4.0D).expandTowards(0.0D, HITBOX_HEIGHT * 2.0D, 0.0D);
+        return box.inflate(40.0D, 30.0D, 40.0D).expandTowards(0.0D, HITBOX_HEIGHT * 2.0D, 0.0D);
     }
 
     // ---- 顶部 BOSS 血条 ----
@@ -283,6 +303,8 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
         if (!(this.level() instanceof ServerLevel level)) {
             return;
         }
+        var follow=getAttribute(Attributes.FOLLOW_RANGE);
+        if(follow!=null&&follow.getBaseValue()<TNDarkGiantSpells.FOLLOW_RANGE)follow.setBaseValue(TNDarkGiantSpells.FOLLOW_RANGE);
         this.bossEvent.setName(this.getDisplayName());
         this.bossEvent.setProgress(Math.max(0.0F, Math.min(1.0F,
                 this.getHealth() / Math.max(1.0F, this.getMaxHealth()))));
@@ -291,63 +313,39 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
         if (TNDarkGiantPhase.shouldEnterPhaseTwo(this.getHealth(), this.getMaxHealth(), this.phase())) {
             this.enterPhaseTwo(level);
         }
-        // 一阶段也有贴身的黑雾和裂隙微光；二阶段随两倍虚影扩展到整片身躯。
-        this.blackAura(level);
         this.tickCasting(level);
     }
 
-    /**
-     * 常驻深渊气场。一阶段贴身、低频；二阶段覆盖两倍虚影，但仍限制粒子量。
-     *
-     * <p>用 {@code LARGE_SMOKE + SQUID_INK}（1.20.1 里最"黑"的两颗 ✓）——
-     * 不是 SOUL_FIRE_FLAME ✗（那是青白的 ✗，作者要的是黑的 ✓）。
-     * 每 3 tick 冒 4 颗 ⇒ 约 27 颗/秒 ✓（够浓但不会把帧数吃掉 ✗）。
-     */
-    private void blackAura(ServerLevel level) {
-        int interval = this.isPhaseTwo() ? 3 : 6;
-        if (this.tickCount % interval != 0) {
-            return;
-        }
-        double auraTop = HITBOX_HEIGHT * (this.isPhaseTwo() ? TNDarkGiantPhase.PHANTOM_SCALE : 1.0D);
-        double auraRadius = this.isPhaseTwo() ? 3.6D : 2.2D;
-        int count = this.isPhaseTwo() ? 5 : 2;
-        for (int i = 0; i < count; i++) {
-            double angle = this.random.nextDouble() * Math.PI * 2.0D;
-            double radius = 0.8D + this.random.nextDouble() * auraRadius;
-            double x = this.getX() + Math.cos(angle) * radius;
-            double z = this.getZ() + Math.sin(angle) * radius;
-            double y = this.getY() + 0.3D + this.random.nextDouble() * auraTop;
-            level.sendParticles(i % 3 == 0 ? ParticleTypes.REVERSE_PORTAL
-                            : (this.random.nextBoolean() ? ParticleTypes.LARGE_SMOKE : ParticleTypes.SQUID_INK),
-                    x, y, z, 1, 0.02D, 0.06D, 0.02D, 0.01D);
-        }
-    }
-
-    /**
-     * 出招的节奏 ✓（照阿波罗那套：**起手 → 作者的施法动画播完才生效** ✓）。
-     *
-     * <p>没目标不放 ✗；两招之间有冷却 ✓；正在起手时这一 tick 不干别的 ✓。
-     */
+    /** Wind up, release once, then cool down; movement pauses during the gesture. */
     private void tickCasting(ServerLevel level) {
         if (this.pendingMove >= 0) {
+            this.getNavigation().stop();
+            var motion=getDeltaMovement();setDeltaMovement(0,motion.y,0);
+            if(getTarget()!=null)this.getLookControl().setLookAt(getTarget(),30,30);
             if (--this.pendingTicks <= 0) {
-                TNDarkGiantSpells.cast(this, this.pendingMove);
+                boolean cast=TNDarkGiantSpells.cast(this, this.pendingMove);
+                if(cast){this.previousMove=this.pendingMove;this.completedCasts++;}
                 this.pendingMove = -1;
-                this.castCooldown = this.isPhaseTwo() ? COOLDOWN_PHASE_TWO : COOLDOWN_PHASE_ONE;
+                this.entityData.set(DATA_CASTING,false);
+                this.castCooldown = cast?(this.isPhaseTwo()?COOLDOWN_PHASE_TWO:COOLDOWN_PHASE_ONE):20;
             }
             return;
         }
-        if (this.getTarget() == null || --this.castCooldown > 0) {
+        if (this.getTarget() == null || !this.getTarget().isAlive()
+                ||distanceToSqr(this.getTarget())>TNDarkGiantSpells.CAST_RANGE*TNDarkGiantSpells.CAST_RANGE
+                ||!hasLineOfSight(this.getTarget()) || --this.castCooldown > 0) {
             return;
         }
-        this.startCast(TNDarkGiantSpells.pick(this.random), level);
+        this.startCast(TNDarkGiantSpells.pick(this.random,this.completedCasts,this.previousMove), level);
     }
 
     /** 起手：播作者的施法动作（{@code playmagic} ✓）＋ 攒一撮暗火 ✓。 */
     private void startCast(int move, ServerLevel level) {
         this.pendingMove = move;
         this.pendingTicks = TNDarkGiantSpells.move(move).castTicks();
-        this.playMagic();
+        this.entityData.set(DATA_CASTING,true);
+        this.getNavigation().stop();
+        this.triggerAnim(CONTROLLER_ACTION,TNDarkGiantSpells.animation(TNDarkGiantSpells.move(move)));
         level.playSound(null, this.getX(), this.getY(), this.getZ(),
                 SoundEvents.EVOKER_CAST_SPELL, SoundSource.HOSTILE, 1.6F, 0.7F);
         level.sendParticles(ParticleTypes.REVERSE_PORTAL, this.getX(), this.getY() + 3.0D, this.getZ(),
@@ -356,10 +354,27 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
                 12, 0.8D, 0.7D, 0.8D, 0.03D);
     }
 
+    /** Client-local black motes; a fixed emission rate avoids per-particle network packets. */
+    private void blackAuraParticles() {
+        if(!level().isClientSide()||!isAlive()||isInvisible()||tickCount%3!=0)return;
+        var dust=new net.minecraft.core.particles.DustParticleOptions(
+                new org.joml.Vector3f(.004F,.003F,.006F),isPhaseTwo()?3.5F:2.8F);
+        int perLayer=isPhaseTwo()?3:2;
+        for(int layer=0;layer<6;layer++)for(int i=0;i<perLayer;i++){
+            double angle=tickCount*.035+layer*.9+i*Math.PI*2/perLayer+random.nextDouble()*.6;
+            double radius=getBbWidth()*(.48+random.nextDouble()*.28);
+            double x=getX()+Math.cos(angle)*radius,z=getZ()+Math.sin(angle)*radius;
+            double y=getY()+getBbHeight()*(layer+random.nextDouble())/6;
+            level().addParticle(dust,true,x,y,z,-Math.sin(angle)*.06,.06+random.nextDouble()*.05,Math.cos(angle)*.06);
+            if(i==0)level().addParticle(ParticleTypes.SQUID_INK,true,x,y,z,0,.035,0);
+        }
+    }
+
     /** 走的比普通怪慢，但每一步都沉（落地扬尘 ✓）。 */
     @Override
     public void tick() {
         super.tick();
+        this.blackAuraParticles();
         if (this.level() instanceof ServerLevel level && this.tickCount % 20 == 0
                 && this.getDeltaMovement().horizontalDistanceSqr() > 1.0E-4D) {
             level.playSound(null, this.getX(), this.getY(), this.getZ(),
@@ -373,10 +388,11 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
         // 二阶段走得更快 ⇒ 动画也跟着快 15% ✓（不然会"滑步" ✗ 见那个脚本里的算术 ✓）
         AnimationController<TNDarkGiantEntity> move = new AnimationController<>(this, "move", 5, state -> {
             state.getController().setAnimationSpeed(this.isPhaseTwo() ? 1.15F : 1.0F);
-            if (state.isMoving()) {
+            if (state.isMoving()&&!isCasting()) {
                 return state.setAndContinue(RawAnimation.begin().thenLoop(ANIM_WALK));
             }
-            return PlayState.STOP;   // 站着 = 模型的静止姿 ✓（作者还没导 idle ✓）
+            if(isCasting())return PlayState.STOP;
+            return state.setAndContinue(RawAnimation.begin().thenLoop("idle"));
         });
         controllers.add(move);
 
@@ -386,6 +402,8 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
         action.triggerableAnim("magic", RawAnimation.begin().thenPlay(ANIM_MAGIC));
         action.triggerableAnim("summon", RawAnimation.begin().thenPlay(ANIM_SUMMON));
         action.triggerableAnim("stomp", RawAnimation.begin().thenPlay(ANIM_STOMP));
+        for(String clip:new String[]{"cast_hands","cast_sky_hands","cast_mist","cast_siphon","command_army"})
+            action.triggerableAnim(clip,RawAnimation.begin().thenPlay(clip));
         controllers.add(action);
     }
 
