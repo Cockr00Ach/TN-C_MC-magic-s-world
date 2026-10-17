@@ -224,7 +224,7 @@ public final class TravelMusicController {
 
     /** Used by the client MusicManager mixin to disable only vanilla background music. */
     public static boolean shouldSuppressVanillaMusic() {
-        return inWorld && (!catalog.isEmpty()||com.tnc.tnc.tavern.client.TavernMusicController.inside(Minecraft.getInstance()));
+        return inWorld && (!catalog.isEmpty()||com.tnc.tnc.tavern.client.TavernMusicController.inside(Minecraft.getInstance())||com.tnc.tnc.casino.client.CasinoMusicController.inside(Minecraft.getInstance()));
     }
 
     private static ResourceLocation nextTrack() {

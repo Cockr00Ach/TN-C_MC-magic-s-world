@@ -57,23 +57,23 @@ public final class BankScreen extends Screen {
     private int lines(GuiGraphics g,String s,int y,int color){for(var line:font.split(Component.literal(s),w-32)){if(y>=top+h-(confirmation.isEmpty()?24:58))break;g.drawString(font,line,left+16,y,color,false);y+=11;}return y;}
     private String debt(BankAccount.Debt d,BankAccount a){return !d.active()?"暂无欠款":"剩余"+d.remaining()+"铜 · 每次"+d.nextAmount()+"铜 · "+(d.overdue(a.onlineTicks)?"本期未付":"约"+(d.ticksUntilNext(a.onlineTicks)+1199)/1200+"分钟后还款");}
     @Override public void render(GuiGraphics g,int mx,int my,float partial){
-        renderBackground(g);g.fill(left-2,top-2,left+w+2,top+h+2,0xFFA48254);g.fill(left,top,left+w,top+h,0xFFF1E7D5);g.fill(left,top,left+w,top+32,0xFF182C42);g.drawString(font,title,left+14,top+12,0xFFF5E6CB,false);
+        renderBackground(g);com.tnc.tnc.client.ui.ArcaneGui.frame(g,left,top,w,h);g.drawString(font,title,left+14,top+12,0xFFF5E6CB,false);
         var p=profile();var b=p.bank;
-        g.drawString(font,"钱袋 "+p.coins()+"铜   存款 "+b.savings+"铜",left+16,top+39,0xFF182C42,false);
-        g.drawString(font,"日息约"+b.interestPrincipal()*data.getInt("BankInterestPercent")/100+"铜 · 日薪"+(p.registered()?data.getInt("BankWage"):0)+"铜",left+16,top+52,0xFF246E78,false);
+        g.drawString(font,"钱袋 "+p.coins()+"铜   存款 "+b.savings+"铜",left+16,top+39,0xffe5d6ba,false);
+        g.drawString(font,"日息约"+b.interestPrincipal()*data.getInt("BankInterestPercent")/100+"铜 · 日薪"+(p.registered()?data.getInt("BankWage"):0)+"铜",left+16,top+52,0xff8cc8c8,false);
         if(!confirmation.isEmpty()){
             var text=font.split(Component.literal(confirmation),w-32);int view=Math.max(11,h-161);
             confirmLimit=Math.max(0,text.size()*11-view);confirmScroll=Math.min(confirmScroll,confirmLimit);
             g.enableScissor(left+16,top+99,left+w-16,top+99+view);
-            for(int i=0;i<text.size();i++)g.drawString(font,text.get(i),left+16,top+99+i*11-confirmScroll,0xFF544737,false);
-            g.disableScissor();if(confirmLimit>0)g.drawString(font,"滚轮查看完整条款",left+16,top+h-60,0xFF246E78,false);
+            for(int i=0;i<text.size();i++)g.drawString(font,text.get(i),left+16,top+99+i*11-confirmScroll,0xffc8bba6,false);
+            g.disableScissor();if(confirmLimit>0)g.drawString(font,"滚轮查看完整条款",left+16,top+h-60,0xff8cc8c8,false);
         }
         else if(page<2){
-            int y=lines(g,page==0?"随时存取，每现实天"+data.getInt("BankInterestPercent")+"%利息，离线也算。":"取回钱袋无需手续费。取银币用钱袋兑换1枚实体银币。",top+149,0xFF544737);
-            if(h>=240){y=lines(g,"最多1万铜计息；借来的本金不赚利息。",y+7,0xFF635A4A);lines(g,p.registered()?"协会工资每日自动入钱袋，离线期间登录后补结。":"到酒馆找艾琳登记，开始领取每日工资。",y+7,0xFF246E78);}
-        }else if(page==2){int y=lines(g,debt(b.loan,b),top+125,0xFF246E78);lines(g,"借款只加一次10%费用。离线不催款，钱不够只暂停新借款。",y+8,0xFF635A4A);}
-        else {var house=data.getCompound("Housing");int y=lines(g,house.hasUUID("Owner")?(house.getBoolean("Mine")?"你的南街住宅 · "+(house.getBoolean("Mortgage")?"分期还款中":"产权已结清"):"南街住宅已售出"):"40号南街住宅：全款3000，分期首付900。",top+125,0xFF246E78);y=lines(g,debt(b.mortgage,b),y+7,0xFF635A4A);if(h>=250)lines(g,"房屋位置："+house.getString("Entry"),y+8,0xFF635A4A);}
-        if(!notice.isEmpty()){String shortText=font.plainSubstrByWidth(notice,w-32);g.drawString(font,shortText,left+16,top+h-17,0xFF7B452B,false);if(my>=top+h-22&&mx>=left&&mx<left+w)g.renderTooltip(font,font.split(Component.literal(notice),Math.min(300,width-24)),mx,my);}
+            int y=lines(g,page==0?"随时存取，每现实天"+data.getInt("BankInterestPercent")+"%利息，离线也算。":"取回钱袋无需手续费。取银币用钱袋兑换1枚实体银币。",top+149,0xffc8bba6);
+            if(h>=240){y=lines(g,"最多1万铜计息；借来的本金不赚利息。",y+7,0xffb5aa98);lines(g,p.registered()?"协会工资每日自动入钱袋，离线期间登录后补结。":"到酒馆找艾琳登记，开始领取每日工资。",y+7,0xff8cc8c8);}
+        }else if(page==2){int y=lines(g,debt(b.loan,b),top+125,0xff8cc8c8);lines(g,"借款只加一次10%费用。离线不催款，钱不够只暂停新借款。",y+8,0xffb5aa98);}
+        else {var house=data.getCompound("Housing");int y=lines(g,house.hasUUID("Owner")?(house.getBoolean("Mine")?"你的南街住宅 · "+(house.getBoolean("Mortgage")?"分期还款中":"产权已结清"):"南街住宅已售出"):"40号南街住宅：全款3000，分期首付900。",top+125,0xff8cc8c8);y=lines(g,debt(b.mortgage,b),y+7,0xffb5aa98);if(h>=250)lines(g,"房屋位置："+house.getString("Entry"),y+8,0xffb5aa98);}
+        if(!notice.isEmpty()){String shortText=font.plainSubstrByWidth(notice,w-32);g.drawString(font,shortText,left+16,top+h-17,0xffd8a27b,false);if(my>=top+h-22&&mx>=left&&mx<left+w)g.renderTooltip(font,font.split(Component.literal(notice),Math.min(300,width-24)),mx,my);}
         super.render(g,mx,my,partial);
     }
     @Override public void tick(){if(amount!=null)amount.tick();if(++ticks%20==0)send(AdventurePackets.Action.REQUEST,"");}

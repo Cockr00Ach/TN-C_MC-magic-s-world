@@ -35,7 +35,7 @@ def main():
    assert log.stat().st_mtime>=INPUT.stat().st_mtime and str(data['chapter_count'])+' chapters,' in text
    assert 'NumberFormatException' not in text and 'Failed to load quests' not in text
  realm_log=(R/'work/heroskand-realm-tests.log').read_text('utf8',errors='replace');assert 'All 1 required tests passed' in realm_log and 'missingPieces=0' in realm_log and 'BUILD SUCCESSFUL' in realm_log
- audit_path=R/'work/life-routes-client-audit.json';audit=json.loads(audit_path.read_text('utf8'));assert audit['plants']==38 and audit['screenshots']==17 and not audit['failures']
+ audit_path=R/'work/life-routes-client-audit.json';audit=json.loads(audit_path.read_text('utf8'));assert audit['plants']==38 and audit['screenshots']==31 and audit['arcane_gui_screens']==13 and audit['mana_sight_actual_flows']>0 and audit['casino_full_track_loop_verified'] and not audit['failures']
  jar=R/'build/libs/tnc-1.0.0.jar';latest=max(p.stat().st_mtime for d in ['src/main/java','src/main/resources'] for p in (R/d).rglob('*') if p.is_file())
  assert jar.stat().st_mtime>=latest and audit_path.stat().st_mtime>=latest,'Rebuild and rerun native client audit after source changes'
  units=0
@@ -50,6 +50,6 @@ def main():
  protected={p:h for p,h in data['live_book'].items() if p!='chapters/'+CHAPTER};after=book_hashes(base)
  assert len(after)==len(data['live_book']) and all(after[p]==h for p,h in protected.items());assert digest(dest)==digest(jar)
  mirror=R/'modpack'/live.name;shutil.copy2(jar,mirror/'mods/tnc-1.0.0.jar')
- receipt={'installed_at':datetime.datetime.now().isoformat(),'jar_sha256':digest(jar),'jar_bytes':jar.stat().st_size,'unit_tests':units,'route_game_tests':expected,'native_screenshots':audit['screenshots'],'plants_checked':38,'protected_quest_files_unchanged':len(protected),'replaced_chapters':[CHAPTER],'workshop_quests':len(json.loads(SOURCE.read_text('utf8'))['quests']),'retired_items':14,'fiber_max_endpoints':2,'mana_sight_default_key':'F8','heroskand_pieces':3617,'castle_full_generation_verified':True,'casino_track_seconds':111.30839,'backup':str(backup),'live':str(live),'saves_modified':False,'island_templates_modified':False}
+ receipt={'installed_at':datetime.datetime.now().isoformat(),'jar_sha256':digest(jar),'jar_bytes':jar.stat().st_size,'unit_tests':units,'route_game_tests':expected,'native_screenshots':audit['screenshots'],'arcane_gui_screens':audit['arcane_gui_screens'],'mana_sight_actual_flows':audit['mana_sight_actual_flows'],'heroskand_source_blocks':9043448,'heroskand_chunks':2160,'heroskand_missing_pieces':0,'heroskand_mismatched_blocks':0,'plants_checked':38,'protected_quest_files_unchanged':len(protected),'replaced_chapters':[CHAPTER],'workshop_quests':len(json.loads(SOURCE.read_text('utf8'))['quests']),'retired_items':14,'fiber_max_endpoints':2,'mana_sight_default_key':'F8','heroskand_pieces':3617,'castle_full_generation_verified':True,'casino_track_seconds':111.30839,'backup':str(backup),'live':str(live),'saves_modified':False,'island_templates_modified':False}
  output=R/'release/realm-sight-install-20261018.json';output.write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n','utf8');print(json.dumps(receipt,ensure_ascii=False,indent=2))
 if __name__=='__main__':main()

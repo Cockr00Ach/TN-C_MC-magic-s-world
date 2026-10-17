@@ -37,10 +37,9 @@ public final class ForgeGuideScreen extends Screen {
         renderBackground(g);
         int left = (width - 256) / 2;
         int top = (height - 202) / 2;
-        g.fill(left - 3, top - 3, left + 259, top + 205, 0xff342622);
-        g.fill(left, top, left + 256, top + 202, 0xffdac8a6);
-        g.fill(left + 6, top + 28, left + 250, top + 169, 0xfff1e6cf);
-        g.drawCenteredString(font, "工匠札记  ·  " + (page + 1) + "/4", width / 2, top + 11, 0xff523a2e);
+        com.tnc.tnc.client.ui.ArcaneGui.frame(g,left-3,top-3,262,208);
+        g.fill(left + 6, top + 28, left + 250, top + 169, 0xff1c2229);
+        g.drawCenteredString(font, "工匠札记  ·  " + (page + 1) + "/4", width / 2, top + 11, 0xffead3a7);
         if (page == 0) intro(g, left, top);
         if (page == 1) layers(g, left, top);
         if (page == 2) operation(g, left, top);
@@ -50,7 +49,7 @@ public final class ForgeGuideScreen extends Screen {
 
     private void lines(GuiGraphics g, int x, int y, String... lines) {
         for (int i = 0; i < lines.length; i++)
-            g.drawString(font, lines[i], x, y + i * 15, 0xff493b32, false);
+            g.drawString(font, lines[i], x, y + i * 15, 0xffd6c9b4, false);
     }
 
     private void intro(GuiGraphics g, int left, int top) {
@@ -67,17 +66,17 @@ public final class ForgeGuideScreen extends Screen {
     private void layers(GuiGraphics g, int left, int top) {
         for (int layer = 0; layer < 3; layer++) {
             int x = left + 18 + layer * 78;
-            g.drawString(font, NAMES[layer], x - 1, top + 37, 0xff694b35, false);
+            g.drawString(font, NAMES[layer], x - 1, top + 37, 0xffc0aa84, false);
             for (int row = 0; row < 3; row++) for (int col = 0; col < 3; col++) {
                 ForgeStructure.Part part = ForgeStructure.expected(ForgeStructure.index(layer, row, col));
-                int color = part == ForgeStructure.Part.AIR ? 0xfff1e6cf
+                int color = part == ForgeStructure.Part.AIR ? 0xff1c2229
                         : part == ForgeStructure.Part.FRAME ? 0xffa57742
                         : part == ForgeStructure.Part.BRICK ? 0xff5d5960 : 0xff5eab9c;
                 int cx = x + col * 16, cy = top + 53 + row * 16;
                 g.fill(cx, cy, cx + 15, cy + 15, 0xff372e2a);
                 g.fill(cx + 1, cy + 1, cx + 14, cy + 14, color);
                 g.drawCenteredString(font, code(part), cx + 8, cy + 3,
-                        part == ForgeStructure.Part.AIR ? 0xff57483c : 0xffffffff);
+                        part == ForgeStructure.Part.AIR ? 0xffc6b59b : 0xffffffff);
             }
         }
         lines(g, left + 17, top + 113,
