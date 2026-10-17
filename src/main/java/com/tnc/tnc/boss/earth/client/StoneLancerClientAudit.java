@@ -39,11 +39,16 @@ public final class StoneLancerClientAudit {
         if(mc.level==null||mc.player==null||mc.getOverlay()!=null)return;
         if(!started){
             started=true;mc.options.pauseOnLostFocus=false;mc.options.guiScale().set(1);mc.resizeDisplay();
+            for(String name:new String[]{"earth_spear_sharp","earth_spike_sharp","earth_orb","earth_clod","earth_shell"}){
+                var model=mc.getModelManager().getModel(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tnc","projectile/stone_lancer_"+name));
+                if(model==mc.getModelManager().getMissingModel()||model.getParticleIcon().contents().name().getPath().equals("missingno"))failures.add("Missing boss attack model: "+name);
+            }
             for(int i=0;i<3;i++){var boss=StoneLancerRegistration.TYPE.create(mc.level);boss.setNoAi(true);boss.setPos(mc.player.position());boss.yBodyRot=180;boss.yBodyRotO=180;boss.setYRot(180);boss.setYHeadRot(180);bosses.add(boss);}
             mc.setScreen(new Gallery());
         }
         for(var boss:bosses)boss.tickCount++;
-        if(++frames<40)return;
+        if(++frames==14)for(int i=1;i<3;i++)bosses.get(i).getAnimatableInstanceCache().getManagerForId(bosses.get(i).getId()).tryTriggerAnimation("action","volley");
+        if(frames<40)return;
         if(!saving){saving=true;Screenshot.grab(mc.gameDirectory,"stone_lancer_full.png",mc.getMainRenderTarget(),m->saved=true);return;}
         if(!saved)return;
         var report=Map.of("failures",failures,"renderer",mc.getEntityRenderDispatcher().getRenderer(bosses.get(0)).getClass().getName(),"scope","Real isolated dev-client model rendering; no full-pack FPS claim");
@@ -57,7 +62,7 @@ public final class StoneLancerClientAudit {
             for(int i=0;i<3;i++){
                 int cell=width/3,x=i*cell;
                 g.fill(x+12,65,x+cell-12,height-40,0xFF263039);
-                g.drawString(font,new String[]{"FRONT / SPEAR ARMS","THREE QUARTER / EARTH CORE","PROFILE / CRYSTAL RIDGE"}[i],x+24,82,0xE8C68D,false);
+                g.drawString(font,new String[]{"FRONT / SPEAR ARMS","THREE QUARTER / FORWARD CAST","PROFILE / FORWARD CAST"}[i],x+24,82,0xE8C68D,false);
                 try{
                     g.flush();
                     var rotation=Axis.ZP.rotationDegrees(180);rotation.mul(Axis.YP.rotationDegrees(i==0?0:i==1?42:90));
@@ -66,7 +71,7 @@ public final class StoneLancerClientAudit {
                         // Inventory rendering starts only 50 GUI units from the clipping plane;
                         // a large rock body needs more depth than a player model.
                         g.pose().translate(0,0,450);
-                        InventoryScreen.renderEntityInInventory(g,x+cell/2,(int)(height*.84),Math.max(20,Math.min((height-150)/11,(width/3-36)/9)),rotation,null,bosses.get(i));
+                        InventoryScreen.renderEntityInInventory(g,x+cell/2,(int)(height*.76),Math.max(3,Math.min((height-150)/34,(width/3-36)/60)),rotation,null,bosses.get(i));
                     } finally {g.pose().popPose();}
                 }catch(Throwable failure){var message=failure.toString();if(!failures.contains(message))failures.add(message);}
             }

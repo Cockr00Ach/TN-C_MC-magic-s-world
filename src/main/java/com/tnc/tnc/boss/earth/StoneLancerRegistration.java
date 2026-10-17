@@ -19,7 +19,7 @@ public final class StoneLancerRegistration {
     @SubscribeEvent public static void register(RegisterEvent e){
         e.register(Registries.ENTITY_TYPE,h->{
             TYPE=EntityType.Builder.<StoneLancerEntity>of(StoneLancerEntity::new,MobCategory.MONSTER)
-                    .sized(4.4F,8.6F).fireImmune().clientTrackingRange(12).updateInterval(2).build("tnc:stone_lancer");
+                    .sized(29.7F,26.66F).fireImmune().clientTrackingRange(32).updateInterval(2).build("tnc:stone_lancer");
             h.register(ResourceLocation.fromNamespaceAndPath("tnc","stone_lancer"),TYPE);
         });
         e.register(Registries.ITEM,h->{

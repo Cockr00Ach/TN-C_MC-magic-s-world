@@ -56,6 +56,25 @@ def generate():
  for j in range(4):
   spike=bone('back_point_up_'+str(j),[(j-1.5)*13,104,20],'torso',[28+abs(j-1.5)*10,0,(j-1.5)*-10]);cube(spike,[(j-1.5)*13-5,101,17],[10,37-abs(j-1.5)*7,14],1 if j%2 else 2)
  for b in bones:
+  if b['name'] in ['head','glow_eyes'] or b.get('parent')=='head':
+   # Keep the face readable above the broad chest instead of burying it in the shoulders.
+   b['pivot']=[b['pivot'][0],b['pivot'][1]+8,b['pivot'][2]-10]
+   for c in b['cubes']:
+    for key in ['origin','pivot']:
+     if key in c:c[key]=[c[key][0],c[key][1]+8,c[key][2]-10]
+  # Short, broad silhouette. Arm pieces get a second thickness pass about their pivots.
+  arm_part=any(k in b['name'] for k in ['arm_', 'fore_', 'lance_', 'shoulder_'])
+  if arm_part:
+   for c in b['cubes']:
+    for axis in [0,2]:
+     centre=c['origin'][axis]+c['size'][axis]/2
+     c['size'][axis]*=1.45
+     c['origin'][axis]=centre-c['size'][axis]/2
+  for key in ['pivot']:
+   if key in b:b[key]=[round(v*s,4) for v,s in zip(b[key],[1.35,.62,1.5])]
+  for c in b['cubes']:
+   for key in ['origin','size','pivot']:
+    if key in c:c[key]=[round(v*s,4) for v,s in zip(c[key],[1.35,.62,1.5])]
   if b['name'] in ['glow_core','glow_eyes']:
    for c in b['cubes']:
     for face in c['uv'].values():face.update(uv=[151,142],uv_size=[35,31])
@@ -79,10 +98,10 @@ def generate():
  for name,length,release in [('volley',2.1,1.4),('fissure',2.5,1.6),('sky',2.8,2.2),('core',2.6,1.8),('melee',1.2,.4)]:
   b=clip(name,length)
   for s in [-1,1]:
-   pose={'volley':[78,0,s*-12],'fissure':[153,0,s*-15],'sky':[148,0,s*-38],'core':[80,0,s*-45],'melee':[65,0,s*-8]}[name]
-   strike=[18,0,s*8] if name=='fissure' else [104,0,s*-10] if name in ['volley','melee'] else pose
+   pose={'volley':[-78,0,s*-12],'fissure':[-153,0,s*-15],'sky':[-148,0,s*-38],'core':[-80,0,s*-45],'melee':[-65,0,s*-8]}[name]
+   strike=[-18,0,s*8] if name=='fissure' else [-104,0,s*-10] if name in ['volley','melee'] else pose
    channel(b,'arm_'+str(s),'rotation',[(0,[0,0,s*7]),(release*.65,pose),(release-.07,pose),(release,strike),(length,[0,0,s*7])])
-   channel(b,'fore_'+str(s),'rotation',[(0,[0,0,0]),(release*.65,[12,0,0]),(release,[25,0,0]),(length,[0,0,0])])
+   channel(b,'fore_'+str(s),'rotation',[(0,[0,0,0]),(release*.65,[-12,0,0]),(release,[-25,0,0]),(length,[0,0,0])])
   channel(b,'torso','rotation',[(0,[0,0,0]),(release*.7,[-6,0,0]),(release,[15 if name=='fissure' else 5,0,0]),(length,[0,0,0])])
   channel(b,'glow_core','scale',[(0,[1,1,1]),(release,[1.12,1.12,1.12]),(length,[1,1,1])])
  b=clip('death',1)

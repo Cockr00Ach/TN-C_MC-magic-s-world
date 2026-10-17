@@ -28,4 +28,20 @@ class StoneLancerModelTest {
         var anim=parser.fromJson(java.nio.file.Files.readString(root.resolve("animations/entity/stone_lancer.animation.json")),com.google.gson.JsonObject.class).getAsJsonObject("animations");
         assertEquals(8,anim.size());for(var clip:anim.entrySet())for(String name:clip.getValue().getAsJsonObject().getAsJsonObject("bones").keySet())assertTrue(names.contains(name),name);
     }
+    @Test void castingRaisesTheLancesForwardAndRigIsSquat() throws Exception {
+        var parser=new com.google.gson.Gson();var root=java.nio.file.Path.of("src/main/resources/assets/tnc");
+        var geo=parser.fromJson(java.nio.file.Files.readString(root.resolve("geo/entity/stone_lancer.geo.json")),com.google.gson.JsonObject.class);
+        var bones=geo.getAsJsonArray("minecraft:geometry").get(0).getAsJsonObject().getAsJsonArray("bones");
+        for(var entry:bones){var b=entry.getAsJsonObject();
+            if(b.get("name").getAsString().equals("torso")){var size=b.getAsJsonArray("cubes").get(0).getAsJsonObject().getAsJsonArray("size");assertTrue(size.get(0).getAsDouble()>size.get(1).getAsDouble()*2);}
+            if(b.get("name").getAsString().equals("fore_1")){var size=b.getAsJsonArray("cubes").get(0).getAsJsonObject().getAsJsonArray("size");assertTrue(size.get(0).getAsDouble()>40);}
+        }
+        var anim=parser.fromJson(java.nio.file.Files.readString(root.resolve("animations/entity/stone_lancer.animation.json")),com.google.gson.JsonObject.class).getAsJsonObject("animations");
+        for(String clip:new String[]{"volley","fissure","sky","core","melee"})for(int sign:new int[]{-1,1}){
+            var track=anim.getAsJsonObject(clip).getAsJsonObject("bones").getAsJsonObject("arm_"+sign).getAsJsonObject("rotation");
+            assertTrue(track.entrySet().stream().anyMatch(e->e.getValue().getAsJsonArray().get(0).getAsDouble()<-60));
+            assertTrue(track.entrySet().stream().allMatch(e->e.getValue().getAsJsonArray().get(0).getAsDouble()<=0));
+        }
+    }
+
 }
