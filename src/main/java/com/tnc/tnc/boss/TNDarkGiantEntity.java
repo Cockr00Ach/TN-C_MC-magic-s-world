@@ -124,6 +124,8 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
     private int castCooldown = 80;
     private int completedCasts;
     private int previousMove=-1;
+    private DarkGiantSkyCast skyCast;
+    public net.minecraft.world.phys.Vec3 skyfallLanding(){return skyCast==null?null:skyCast.landing;}
     private static final int COOLDOWN_PHASE_ONE = 90;
     private static final int COOLDOWN_PHASE_TWO = 45;
 
@@ -318,15 +320,20 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
 
     /** Wind up, release once, then cool down; movement pauses during the gesture. */
     private void tickCasting(ServerLevel level) {
+        if(skyCast!=null&&pendingMove<0){
+            if(skyCast.recover(this)){skyCast=null;entityData.set(DATA_CASTING,false);}
+            return;
+        }
         if (this.pendingMove >= 0) {
             this.getNavigation().stop();
-            var motion=getDeltaMovement();setDeltaMovement(0,motion.y,0);
+            if(skyCast!=null)skyCast.windup(this);
+            else{var motion=getDeltaMovement();setDeltaMovement(0,motion.y,0);}
             if(getTarget()!=null)this.getLookControl().setLookAt(getTarget(),30,30);
             if (--this.pendingTicks <= 0) {
                 boolean cast=TNDarkGiantSpells.cast(this, this.pendingMove);
                 if(cast){this.previousMove=this.pendingMove;this.completedCasts++;}
                 this.pendingMove = -1;
-                this.entityData.set(DATA_CASTING,false);
+                this.entityData.set(DATA_CASTING,skyCast!=null);
                 this.castCooldown = cast?(this.isPhaseTwo()?COOLDOWN_PHASE_TWO:COOLDOWN_PHASE_ONE):20;
             }
             return;
@@ -340,7 +347,9 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
     }
 
     /** 起手：播作者的施法动作（{@code playmagic} ✓）＋ 攒一撮暗火 ✓。 */
-    private void startCast(int move, ServerLevel level) {
+    void startCast(int move, ServerLevel level) {
+        if("slay_light".equals(TNDarkGiantSpells.move(move).path())&&getTarget()!=null)
+            skyCast=new DarkGiantSkyCast(this,getTarget().position());
         this.pendingMove = move;
         this.pendingTicks = TNDarkGiantSpells.move(move).castTicks();
         this.entityData.set(DATA_CASTING,true);
@@ -352,6 +361,27 @@ public class TNDarkGiantEntity extends Monster implements GeoEntity {
                 36, 1.3D, 1.4D, 1.3D, 0.07D);
         level.sendParticles(ParticleTypes.WITCH, this.getX(), this.getY() + 4.8D, this.getZ(),
                 12, 0.8D, 0.7D, 0.8D, 0.03D);
+    }
+
+    @Override
+    public void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag){
+        super.addAdditionalSaveData(tag);
+        if(skyCast!=null){
+            tag.putBoolean("TncSkyReturning",true);tag.putBoolean("TncSkyNoGravity",skyCast.previousGravity);
+            tag.putDouble("TncSkyHomeX",skyCast.home.x);tag.putDouble("TncSkyHomeY",skyCast.home.y);tag.putDouble("TncSkyHomeZ",skyCast.home.z);
+        }
+    }
+    @Override
+    public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag){
+        super.readAdditionalSaveData(tag);
+        if(tag.getBoolean("TncSkyReturning")){
+            setPos(tag.getDouble("TncSkyHomeX"),tag.getDouble("TncSkyHomeY"),tag.getDouble("TncSkyHomeZ"));
+            setNoGravity(tag.getBoolean("TncSkyNoGravity"));fallDistance=0;
+        }
+    }
+    @Override public void remove(net.minecraft.world.entity.Entity.RemovalReason reason){
+        if(skyCast!=null){skyCast.close(this);skyCast=null;}
+        super.remove(reason);
     }
 
     /** Client-local black motes; a fixed emission rate avoids per-particle network packets. */

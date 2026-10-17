@@ -80,7 +80,7 @@ public class TNMagicCircleRenderer extends EntityRenderer<TNMagicCircleEntity> {
         if (style == TNMagicCircleEntity.STYLE_LIGHT) {
             return LIGHT_TEXTURE;
         }
-        if (style == TNMagicCircleEntity.STYLE_DARK) {
+        if (style == TNMagicCircleEntity.STYLE_DARK || style == TNMagicCircleEntity.STYLE_DARK_RITUAL) {
             return DARK_TEXTURE;
         }
         if (style == TNMagicCircleEntity.STYLE_DARK_HAND) {
