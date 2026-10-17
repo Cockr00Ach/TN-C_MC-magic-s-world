@@ -127,7 +127,9 @@ public final class SpellCatalog {
          *
          * <p>⚠️ 和其它新链一样：**必须追加在枚举末尾** ✗（存档按链的序数存进度 ✗）。
          */
-        DARK_DRAGON("暗龙", "放出一条暗龙向前冲（暗系第五条链）");
+        DARK_DRAGON("暗龙", "放出一条暗龙向前冲（暗系第五条链）"),
+        WIND_BALL("风球", "吸引、压缩与升空爆炸"),
+        WIND_WEAPON("风兵", "幻化飞剑、长矛与天降兵器");
 
         private final String cn;
         private final String desc;
@@ -244,11 +246,17 @@ public final class SpellCatalog {
 
             // ---- 风球线：1 三个风球 → 2 五个风球 → 3 风灵 → 4 三个风灵
             //              → 5 用户还没定，先占位（名字/效果待确认） ----
-            windEntry("wind_orb", Chain.SUMMON, 1, "召唤风球"),
-            windEntry("wind_orb_swarm", Chain.SUMMON, 2, "召唤五个风球"),
-            windEntry("wind_spirit", Chain.SUMMON, 3, "召唤风灵"),
-            windEntry("triple_wind_spirit", Chain.SUMMON, 4, "召唤三个风灵"),
-            windEntry("wind_spirit_lord", Chain.SUMMON, 5, "风灵之主"),
+
+            windEntry("wind_ball_1", Chain.WIND_BALL, 1, "风球"),
+            windEntry("wind_ball_2", Chain.WIND_BALL, 2, "大风球"),
+            windEntry("wind_ball_3", Chain.WIND_BALL, 3, "压缩风球"),
+            windEntry("wind_ball_4", Chain.WIND_BALL, 4, "风压核心"),
+            windEntry("wind_ball_5", Chain.WIND_BALL, 5, "升空风暴"),
+            windEntry("wind_weapon_1", Chain.WIND_WEAPON, 1, "风之三剑"),
+            windEntry("wind_weapon_2", Chain.WIND_WEAPON, 2, "十剑齐发"),
+            windEntry("wind_weapon_3", Chain.WIND_WEAPON, 3, "破甲风矛"),
+            windEntry("wind_weapon_4", Chain.WIND_WEAPON, 4, "天降风兵"),
+            windEntry("wind_weapon_5", Chain.WIND_WEAPON, 5, "风神兵临"),
 
             // ---- 范围风线：1 范围风+小风刃 → 2 大范围20s+中风刃 → 3 超大30s+大风刃
             //              → 4 超大30s+巨型风刃 → 5 三个巨型风刃+无视防御 ----

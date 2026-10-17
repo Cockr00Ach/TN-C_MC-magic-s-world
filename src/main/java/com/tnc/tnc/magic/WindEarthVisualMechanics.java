@@ -33,6 +33,8 @@ public final class WindEarthVisualMechanics {
                 ||args.spell()==null||!"tnc".equals(args.spell().id().getNamespace()))return;
         var spec=WindEarthVisualRules.find(args.spell().id().getPath());
         if(spec==null)return;
+        // Replacement chains own their moving fields, target seals and lifetimes.
+        if(args.spell().id().getPath().startsWith("wind_ball_")||args.spell().id().getPath().startsWith("wind_weapon_"))return;
         if(spec.kind()<=2) {
             var seal=TNOrbEntities.MAGIC_CIRCLE.get().create(player.serverLevel());
             if(seal!=null){seal.configure(1.5+spec.tier()*.35,45,TNMagicCircleEntity.STYLE_WIND);seal.setPos(player.position().add(0,.06,0));player.serverLevel().addFreshEntity(seal);}
