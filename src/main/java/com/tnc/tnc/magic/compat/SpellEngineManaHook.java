@@ -154,6 +154,10 @@ public final class SpellEngineManaHook {
                     player.displayClientMessage(Component.literal(
                             "§c[TN-C] 魔力不足（" + data.getMana() + " / " + cost + "）§7—— 现在收手还来得及"), true);
                 }
+                // 燃烧链：起手就把火绕上身（作者 2026-10-11：动画从火焰粒子改为真实建模的火焰围绕）。
+                // ⚠️ 必须挂在这里而不是下面 onSpellCast ✗ —— 那是"放出"时才调一次的，
+                //    起手 0.6 秒里人要是一直没火，动画就没了 ✓
+                com.tnc.tnc.magic.fire.TNBurnAuraEntity.ensureAura(player, entry);
                 return;
             }
 

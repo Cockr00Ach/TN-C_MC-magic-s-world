@@ -67,6 +67,19 @@ public final class TNOrbEntities {
                     .sized(.1F,.1F).clientTrackingRange(16).updateInterval(2).build("tnc:meteor_fall"));
 
     /**
+     * 燃烧链起手时"围着自己的那圈火"（作者 2026-10-11 要求：不要粒子、要真实建模）。
+     *
+     * <p>{@code updateInterval(1)}：它每 tick 贴着施法者走，起手时人还在移动，
+     * 同步慢了火会"飘在身后" ✗（和 {@link TNSkyfallEntity} 同一个理由）。
+     *
+     * <p>尺寸给 0.1 见方：碰撞毫无意义（{@code isPickable}/{@code isAttackable} 都是 false），
+     * 真正的显示范围由渲染器和 {@code getBoundingBoxForCulling} 决定 ✓。
+     */
+    public static final RegistryObject<EntityType<com.tnc.tnc.magic.fire.TNBurnAuraEntity>> BURN_AURA =
+            ENTITY_TYPES.register("burn_aura", () -> EntityType.Builder.of(com.tnc.tnc.magic.fire.TNBurnAuraEntity::new, MobCategory.MISC)
+                    .sized(.1F,.1F).clientTrackingRange(10).updateInterval(1).build("tnc:burn_aura"));
+
+    /**
      * 环绕雷球。
      *
      * <p>{@code updateInterval(2)}：位置每 2 tick 同步一次 —— 环绕是持续运动的，
