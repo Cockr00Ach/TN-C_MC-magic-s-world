@@ -14,21 +14,19 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
 /**
- * <b>燃烧链</b>的施法起手表现：一团<b>把自己围起来的火</b>（作者 2026-10-11 要求）。
+ * <b>燃烧链</b>的施法起手表现：一圈<b>把自己围起来的火</b>。
  *
- * <p>作者原话：「修改燃烧链的释放动画，动画从火焰粒子变为出现火焰围绕，
- * 高等级法术的火焰规模大于低等级的，<b>采用真实建模</b>」。
+ * <p>作者 2026-10-18：「燃烧链的特效改用粒子效果，不用真实建模了」——
+ * 于是这个实体从"画几何体"退回成<b>纯粒子发射器</b>：它自己不画任何东西
+ * （客户端挂的是 {@code TNParticleOnlyRenderer} 空渲染器），
+ * 每 tick 在服务端往施法者周围撒真实粒子，档位越高圈越大、火越旺 ✓
  *
- * <h2>为什么另开一个实体，而不是继续用 JSON 里的 {@code cast.particles}</h2>
- * 那条 {@code flame CIRCLE FEET} 是 spell_engine 在起手时撒的<b>原版粒子</b>，
- * 只能撒点、不能画模型 ⇒ 要"真实建模"就只能在客户端用几何体画。
- * 而几何体要么挂在实体上（{@code EntityRenderer}）、要么挂在玩家身上（{@code RenderPlayerEvent}）——
- * 这里选实体：位置跟着施法者走，档位/存活期走 {@code SynchedEntityData} 同步，
- * 和 {@link TNSkyfallEntity} / {@code TNMagicCircleEntity} 是同一套做法 ✓。
+ * <h2>为什么还要一个实体</h2>
+ * 几何体没了，但"跟着施法者走、持续 1.2 秒、按档位变规模"这三件事还是要有人做：
+ * 一次 RELEASE 只回一次事件，光靠事件只能撒一下 ✗ 所以留一个轻量实体专门打粒子 ✓
  *
  * <h2>生长规则（档位越高规模越大）</h2>
- * 渲染器按 {@link #tier()} 决定火焰圈的<b>数量 / 半径 / 高度 / 火苗粗细</b>，
- * 见 {@code TNBurnAuraRenderer} 顶部那张表；本类只管"跟着谁、活多久、第几档"。
+ * 圈半径 / 火苗高度 / 粒子数量都按 {@link #tier()} 递增，见 {@link #burn(ServerLevel)}。
  *
  * <p>⚠️ 纯表现实体：不存档（{@link #shouldBeSaved()} false）、不可选中、无碰撞。
  */
@@ -110,7 +108,6 @@ public final class TNBurnAuraEntity extends Entity {
     public void tick() {
         super.tick();
         if (level().isClientSide()) {
-            // 画由 TNBurnAuraRenderer 负责，服务端没有窗口期要算 ✓
             return;
         }
         // 施法者没了（下线/死亡/换维度）就跟着消失，别留一团野火 ✗
@@ -121,6 +118,54 @@ public final class TNBurnAuraEntity extends Entity {
         }
         // 每 tick 贴到施法者脚下：起手时人是能走的，火得跟着走 ✓
         setPos(caster.getX(), caster.getY(), caster.getZ());
+        if (level() instanceof ServerLevel server) {
+            burn(server);
+        }
+    }
+
+    /**
+     * 往施法者周围撒一圈火粒子 —— <b>这就是燃烧链的全部表现</b>（作者 2026-10-18 改回粒子）。
+     *
+     * <p>三层：
+     * <ol>
+     *   <li><b>贴着地面的火圈</b>：{@code 5 + tier*3} 颗（8~20），半径 {@code 0.55 + tier*0.16}（0.71~1.35 格）</li>
+     *   <li><b>往上窜的火舌</b>：{@code 3 + tier*2} 颗（5~13），撒在整个圆柱体内，高度到 {@code 0.85 + tier*0.28}（1.13~2.25 格）</li>
+     *   <li><b>t3 起再加熔岩火星</b>：{@code tier-2} 颗（1~3），会往下掉 ⇒ 看得出"火在往上燎"</li>
+     * </ol>
+     *
+     * <p>火圈整体按 {@code tickCount * 0.35} 的角速度慢慢转，不是死的 ✓
+     */
+    private void burn(ServerLevel server) {
+        int tier = tier();
+        double radius = 0.55D + tier * 0.16D;
+        double height = 0.85D + tier * 0.28D;
+
+        int ring = 5 + tier * 3;
+        for (int i = 0; i < ring; i++) {
+            double a = (i + tickCount * 0.35D) * Math.PI * 2.0D / ring;
+            server.sendParticles(net.minecraft.core.particles.ParticleTypes.FLAME,
+                    getX() + Math.cos(a) * radius, getY() + 0.10D + Math.random() * 0.45D,
+                    getZ() + Math.sin(a) * radius,
+                    1, 0.02D, 0.05D, 0.02D, 0.008D);
+        }
+
+        int rising = 3 + tier * 2;
+        for (int i = 0; i < rising; i++) {
+            double a = Math.random() * Math.PI * 2.0D;
+            double r = radius * 0.85D * Math.sqrt(Math.random());
+            server.sendParticles(i % 3 == 0
+                            ? net.minecraft.core.particles.ParticleTypes.SMALL_FLAME
+                            : net.minecraft.core.particles.ParticleTypes.FLAME,
+                    getX() + Math.cos(a) * r, getY() + 0.15D + Math.random() * height,
+                    getZ() + Math.sin(a) * r,
+                    1, 0.08D, 0.18D, 0.08D, 0.010D);
+        }
+
+        if (tier >= 3) {
+            server.sendParticles(net.minecraft.core.particles.ParticleTypes.LAVA,
+                    getX(), getY() + 0.30D + Math.random() * height, getZ(),
+                    tier - 2, radius * 0.70D, 0.30D, radius * 0.70D, 0.0D);
+        }
     }
 
     @Override

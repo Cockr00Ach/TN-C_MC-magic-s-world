@@ -796,12 +796,16 @@ public final class TNFireBoltEntity extends Projectile {
      * 半径直接取 {@link FireSpellRules} 里 METEOR_BOLT 的爆炸半径（8 格），
      * 所以"炸多远就烧多大"是同一个数 ✓ 不会出现焦土比伤害范围大/小 ✗
      *
-     * <p>三圈构成（d = 到落点的水平距离 / 爆炸半径）：
+     * <p><b>真的挖坑</b>（作者 2026-10-18：「破坏地形的效果被删了，加回来」）：
+     * 每列按 {@code depth = 5 * (1 - d²)} 往下挖空 —— 中心 5 格、边缘 0 格 ⇒ 碗形弹坑 ✓
+     * 挖到基岩或带方块实体的方块就停 ✗
+     *
+     * <p>坑底材质（d = 到落点的水平距离 / 爆炸半径）：
      * <ul>
      *   <li>{@code d < 0.30}：坑底一整滩岩浆（底下垫黑曜石，免得岩浆把地底接着啃穿）</li>
-     *   <li>{@code 0.30 ~ 0.52}：一圈黑曜石 —— 熔了又凝住的坑壁</li>
-     *   <li>{@code 0.52 ~ 0.78}：黑曜石为主、夹岩浆缝（约 1/4 是岩浆）</li>
-     *   <li>{@code 0.78 ~ 1.00}：只剩稀疏的焦壳（约 1/3），边沿不能糊死，否则像贴了张黑饼 ✗</li>
+     *   <li>{@code 0.30 ~ 0.55}：一圈黑曜石 —— 熔了又凝住的坑底</li>
+     *   <li>{@code 0.55 ~ 1.00}：黑曜石为主、夹岩浆缝（约 1/5 是岩浆）</li>
+     *   <li>{@code d 接近 1.0}：不挖，只铺稀疏焦壳（约 1/3），边沿不能糊死，否则像贴了张黑饼 ✗</li>
      * </ul>
      *
      * <p>全部 {@code flag = 2}（不触发邻居更新）：岩浆原地待着不流、黑曜石不惊动红石；
@@ -828,22 +832,59 @@ public final class TNFireBoltEntity extends Projectile {
                 if (ground.is(Blocks.BEDROCK) || ground.hasBlockEntity()) {
                     continue;
                 }
+                // ★ 作者 2026-10-18：「破坏地形的效果被删了，加回来」⇒ **真的挖一个碗形弹坑** ✓
+                //   depth 按 (1-d²) 衰减：中心最深、边缘不收口 ⇒ 是"坑"不是"平底锅" ✓
+                int depth = (int) Math.round(CRATER_DEPTH * (1.0D - d * d));
                 int roll = Math.floorMod((dx * 73856093) ^ (dz * 19349663), 100);
-                if (d < 0.30D) {
-                    server.setBlock(top.below(), Blocks.OBSIDIAN.defaultBlockState(), 2);
-                    server.setBlock(top, Blocks.LAVA.defaultBlockState(), 2);
-                } else if (d < 0.52D) {
-                    server.setBlock(top.below(), Blocks.OBSIDIAN.defaultBlockState(), 2);
-                    server.setBlock(top, Blocks.OBSIDIAN.defaultBlockState(), 2);
-                } else if (d < 0.78D) {
-                    server.setBlock(top, roll < 72 ? Blocks.OBSIDIAN.defaultBlockState() : Blocks.LAVA.defaultBlockState(), 2);
-                } else if (roll < 34) {
-                    server.setBlock(top, Blocks.OBSIDIAN.defaultBlockState(), 2);
+                if (depth <= 0) {
+                    // 最外圈不挖，只铺稀疏焦壳
+                    if (roll < 34) {
+                        server.setBlock(top, Blocks.OBSIDIAN.defaultBlockState(), 2);
+                    }
+                    clearAbove(server, top, 2);
+                    continue;
                 }
-                // 焦壳顶上不能还长着草/花
-                clearAbove(server, top, 2);
+                BlockPos floor = dig(server, top, depth);
+                if (floor == null) {
+                    continue;
+                }
+                // 坑底材质：中心岩浆池 / 坑壁黑曜石 / 外圈黑曜石夹岩浆缝
+                if (d < 0.30D) {
+                    server.setBlock(floor.below(), Blocks.OBSIDIAN.defaultBlockState(), 2);
+                    server.setBlock(floor, Blocks.LAVA.defaultBlockState(), 2);
+                } else if (d < 0.55D) {
+                    server.setBlock(floor.below(), Blocks.OBSIDIAN.defaultBlockState(), 2);
+                    server.setBlock(floor, Blocks.OBSIDIAN.defaultBlockState(), 2);
+                } else {
+                    server.setBlock(floor, roll < 78 ? Blocks.OBSIDIAN.defaultBlockState() : Blocks.LAVA.defaultBlockState(), 2);
+                }
+                // 挖开之后，上方原先是草/花的地方要清掉，否则悬在半空 ✗
+                clearAbove(server, floor, depth + 3);
             }
         }
+    }
+
+    /** 弹坑中心最深几格（8 格半径的坑挖 5 格深）。 */
+    private static final int CRATER_DEPTH = 5;
+
+    /**
+     * 从地表往下挖 {@code depth} 格，返回挖掉的最底那一格（整个洞挖空）。
+     *
+     * <p>挖到<b>基岩</b>或<b>带方块实体的方块</b>就停 —— 前者不可破坏 ✓，
+     * 后者（箱子/刷怪笼/告示牌…）直接删会连内容一起丢 ✗
+     */
+    private static BlockPos dig(ServerLevel server, BlockPos top, int depth) {
+        BlockPos last = null;
+        for (int i = 0; i < depth; i++) {
+            BlockPos p = top.below(i);
+            BlockState s = server.getBlockState(p);
+            if (s.is(Blocks.BEDROCK) || s.hasBlockEntity()) {
+                break;
+            }
+            server.setBlock(p, Blocks.AIR.defaultBlockState(), 2);
+            last = p;
+        }
+        return last;
     }
 
     /** 找这一列的地表：从落点往上 2 格开始往下扫 9 格。 */
