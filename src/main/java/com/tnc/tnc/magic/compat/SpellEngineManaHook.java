@@ -148,6 +148,18 @@ public final class SpellEngineManaHook {
 
             int cost = com.tnc.tnc.equipment.MageGear.spellCost(player,entry.manaCostFor(data.getMaxMana()));
 
+            // 燃烧链：把火绕到施法者身上（作者 2026-10-11：动画从火焰粒子改为真实建模的火焰围绕）。
+            // ⚠️ 必须放在这个"两种 action 都会走到"的位置。
+            //    2026-10-18 实测游戏日志：燃烧链的 SPELL_CAST **只会以 action=RELEASE 到达**，
+            //    一次施法只来一行、CHANNEL 从来不出现：
+            //      TN-C: SPELL_CAST spell=tnc:blaze_burn action=RELEASE caster=nachan ours=true
+            //    原先这段挂在下面对 CHANNEL 的分支里 ⇒ 一次都没执行过，游戏里当然看不到火 ✗
+            boolean auraSpawned = com.tnc.tnc.magic.fire.TNBurnAuraEntity.ensureAura(player, entry);
+            if (entry.chain() == SpellCatalog.Chain.BURN) {
+                // 一行日志换"到底有没有点起火来"的证据（每次施法一行，不刷屏）
+                LOGGER.info("TN-C: burn aura tier={} spawned={}", entry.tier(), auraSpawned);
+            }
+
             if (args.action() == net.spell_engine.internals.casting.SpellCast.Action.CHANNEL) {
                 // 起手阶段：不够就先警告（只在进度刚开始时提示一次，避免刷屏）
                 if (data.getMana()<cost && args.progress() <= 0.05F) {

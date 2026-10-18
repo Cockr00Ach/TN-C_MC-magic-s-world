@@ -161,7 +161,37 @@ public class TNSolarJudgmentField extends Entity {
 
         // 太阳附近往外喷的火焰（纯表现 ✓）
         Vec3 sun = this.sunPosition();
-        server.sendParticles(ParticleTypes.FLAME, sun.x, sun.y, sun.z, 8, 1.1D, 0.4D, 1.1D, 0.05D);
+        server.sendParticles(ParticleTypes.FLAME, sun.x, sun.y, sun.z, 6, 1.1D, 0.4D, 1.1D, 0.05D);
+        // ★ 作者 2026-10-18「优化下太阳の审判的特效」⇒ 太阳改成"亮核 + 球体 + 光晕环"三层 ✓
+        //   ① 亮核：贴着球心的一大团近白热尘 —— 旧版全是 1.4~2.8 的尘、中心没有更亮的东西，
+        //      整颗球读起来是"一团橙雾"✗；有了亮核才有"一颗太阳"的重心 ✓
+        for (int k = 0; k < SUN_CORE_POINTS; k++) {
+            double rr = SUN_RADIUS * 0.24D * Math.sqrt(Math.random());
+            double theta = Math.random() * Math.PI * 2.0D;
+            double phi = Math.acos(2.0D * Math.random() - 1.0D);
+            dust(server,
+                    sun.x + Math.sin(phi) * Math.cos(theta) * rr,
+                    sun.y + Math.cos(phi) * rr,
+                    sun.z + Math.sin(phi) * Math.sin(theta) * rr,
+                    1.00F, 0.99F, 0.92F, 4.2F);
+        }
+        //   ② 光晕环：两圈反向自转的光带（隔 tick 出 ⇒ 开销减半 ✓）
+        if (this.tickCount % 2 == 0) {
+            double spin = this.tickCount * 0.035D;
+            for (int ring = 0; ring < 2; ring++) {
+                double rad = SUN_RADIUS * (ring == 0 ? 1.10D : 1.26D);
+                double tilt = ring == 0 ? 0.42D : -0.28D;
+                double dir = ring == 0 ? 1.0D : -1.0D;
+                for (int k = 0; k < HALO_POINTS; k++) {
+                    double a = spin * dir + k * Math.PI * 2.0D / HALO_POINTS;
+                    dust(server,
+                            sun.x + Math.cos(a) * rad,
+                            sun.y + Math.sin(a * 2.0D + spin) * tilt,
+                            sun.z + Math.sin(a) * rad,
+                            1.00F, 0.80F, 0.34F, 2.6F);
+                }
+            }
+        }
         // ★ 作者 2026-10-05：「将上方的**球体和发射的射线改为粒子状态**；
         //   球体的粒子密度**由内向外减少**，粒子颜色**内部深、外部浅**」✓
         //   ① 球体：半径 r = R·u² ⇒ 采样点被挤向圆心 ⇒ **内密外疏** ✓
@@ -200,7 +230,11 @@ public class TNSolarJudgmentField extends Entity {
                         this.getY() + 0.35D + drop,
                         this.getZ() + Math.sin(a) * d);
                 Vec3 delta = to.subtract(sun);
-                int steps = (int) Math.max(3.0D, delta.length() * (0.9D + 0.6D * Math.random()));
+                // 采样点数**夹在 3..RAY_STEPS_MAX**：旧版按长度 0.9~1.5 倍算，长射线能到 27 个点，
+                // 12 条一起撒就是 300+ 粒子/tick ✗（作者 2026-10-18 说"优化"，
+                // 这里既省开销、也让每条的亮度更集中 ✓）
+                int steps = (int) Math.max(3.0D, Math.min(RAY_STEPS_MAX,
+                        delta.length() * (0.55D + 0.35D * Math.random())));
                 // 垂直抖动：中间散得最开、两端收回 ⇒ 每次轨迹都不一样 ✓
                 double ox = (Math.random() - 0.5D) * 1.4D;
                 double oz = (Math.random() - 0.5D) * 1.4D;
@@ -212,15 +246,36 @@ public class TNSolarJudgmentField extends Entity {
                     sunDust(server, q.x + ox * w, q.y + (Math.random() - 0.5D) * 1.3D * w,
                             q.z + oz * w, 0.30D + 0.70D * u);
                 }
+                // 落点：法阵地面上一记小闪光 + 溅起的火星 ⇒ 射线才像"打下来"而不是"飘过去"✓
+                double gx = this.getX() + Math.cos(a) * d;
+                double gz = this.getZ() + Math.sin(a) * d;
+                double gy = this.getY() + 0.28D;
+                dust(server, gx, gy, gz, 1.00F, 0.90F, 0.56F, 3.0F);
+                server.sendParticles(ParticleTypes.FLAME, gx, gy, gz, 3, 0.16D, 0.10D, 0.16D, 0.02D);
+                server.sendParticles(ParticleTypes.SMALL_FLAME, gx, gy + 0.10D, gz, 2,
+                        0.22D, 0.16D, 0.22D, 0.03D);
             }
         }
-        // ③ 法阵里的粒子：比 t4 更多 ✓（作者：「再多一些线条与粒子」✓）
+        // ③ 法阵里的粒子：贴地的火星带**缓慢自转** ✓
+        //   （旧版是纯随机散点 ⇒ 看着"死"✗；现在每颗都挂在一条匀速转动的环带上 ✓）
+        double sigilSpin = this.tickCount * 0.045D;
         for (int k = 0; k < SOLAR_SIGIL_POINTS; k++) {
-            double a = Math.random() * Math.PI * 2.0D;
-            double d = Math.sqrt(Math.random()) * this.radius() * 0.98D;
+            double a = sigilSpin + k * Math.PI * 2.0D / SOLAR_SIGIL_POINTS
+                    + (Math.random() - 0.5D) * 0.25D;
+            double d = this.radius() * (0.24D + 0.74D * Math.random());
             sunDust(server, this.getX() + Math.cos(a) * d,
-                    this.getY() + 0.15D + Math.random() * 3.0D,
+                    this.getY() + 0.12D + Math.random() * 0.55D,
                     this.getZ() + Math.sin(a) * d, 0.55D + Math.random() * 0.45D);
+        }
+        // ④ 每秒（= 伤害跳）推一圈从阵心外扩到阵缘的光环 ⇒ "这一秒挨了一下"看得见 ✓
+        int pulse = this.tickCount % FireSpellRules.T5_BEAM_INTERVAL_TICKS;
+        if (pulse % 2 == 0) {
+            double d = this.radius() * (pulse / (double) FireSpellRules.T5_BEAM_INTERVAL_TICKS);
+            for (int k = 0; k < PULSE_POINTS; k++) {
+                double a = k * Math.PI * 2.0D / PULSE_POINTS + sigilSpin;
+                dust(server, this.getX() + Math.cos(a) * d, this.getY() + 0.22D,
+                        this.getZ() + Math.sin(a) * d, 1.00F, 0.62F, 0.20F, 2.8F);
+            }
         }
     }
 
@@ -364,19 +419,38 @@ public class TNSolarJudgmentField extends Entity {
                 this.getX() + r, this.getY() + FireSpellRules.T5_SUN_HEIGHT + 4.0D, this.getZ() + r);
     }
 
-    /** 太阳的粒子数（每 tick ✓）—— t5 要比 t4 壮观 ✓。 */
-    private static final int SUN_POINTS = 90;
+    /**
+     * 太阳"球体"的粒子数（每 tick ✓）。
+     *
+     * <p>⚠️ 2026-10-18 从 90 降到 66 —— 作者同时要求"优化特效"，
+     * 而旧版整套是 ~400 粒子/tick（球 90 + 射线 12×约 20 + 阵内 60），
+     * 卡的根源就在这儿 ✗。现在总数压到 ~250/tick，但多了亮核、光晕环、落点闪光 ✓
+     */
+    private static final int SUN_POINTS = 66;
 
     /**
      * 天上乱射的射线粒子**条数**（定值 ✓）。
      *
      * <p>与阵内有没有目标、打中几个**完全无关** ✓ —— 作者 2026-10-05：
      * 「伤害判定是位于法阵范围内，和射线是否命中无关」✓，射线只是表现 ✓。
+     * 2026-10-18 从 12 降到 10（省开销；每条末端补了落点闪光，观感反而更实 ✓）。
      */
-    private static final int RAY_STREAMS = 12;
+    private static final int RAY_STREAMS = 10;
 
-    /** 法阵里额外撒的粒子数（每 tick ✓）—— 比 t4 更多 ✓。 */
-    private static final int SOLAR_SIGIL_POINTS = 60;
+    /** 每条射线最多采样几个点（越少越省；末端另有一颗放大 + 落点闪光补足 ✓）。 */
+    private static final int RAY_STEPS_MAX = 12;
+
+    /** 法阵里额外撒的粒子数（每 tick ✓）。 */
+    private static final int SOLAR_SIGIL_POINTS = 44;
+
+    /** 太阳亮核的粒子数（每 tick，近白热、大颗粒 ✓）。 */
+    private static final int SUN_CORE_POINTS = 6;
+
+    /** 每圈光晕环的粒子数（两圈，隔 tick 出 ✓）。 */
+    private static final int HALO_POINTS = 14;
+
+    /** 每秒外扩那圈光环的粒子数 ✓。 */
+    private static final int PULSE_POINTS = 24;
 
     /** 太阳的半径（格 ✓）。 */
     private static final double SUN_RADIUS = 5.0D;
@@ -401,6 +475,12 @@ public class TNSolarJudgmentField extends Entity {
             r = 1.00F; g = 0.96F; b = 0.72F;      // 最外**浅**（亮黄白）✓
         }
         float scale = 1.4F + (float) u * 1.4F;    // 外面也更大一点 ✓
+        dust(sl, x, y, z, r, g, b, scale);
+    }
+
+    /** 撒一颗指定颜色的尘 ✓（亮核 / 光晕环 / 落点闪光 / 外扩光环都用它）。 */
+    private static void dust(ServerLevel sl, double x, double y, double z,
+                             float r, float g, float b, float scale) {
         sl.sendParticles(new net.minecraft.core.particles.DustParticleOptions(
                         new org.joml.Vector3f(r, g, b), scale),
                 x, y, z, 1, 0.02D, 0.02D, 0.02D, 0.0D);
