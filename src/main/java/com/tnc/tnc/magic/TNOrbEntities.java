@@ -80,6 +80,18 @@ public final class TNOrbEntities {
                     .sized(.1F,.1F).clientTrackingRange(10).updateInterval(1).build("tnc:burn_aura"));
 
     /**
+     * 陨星坠落地时**甩出来的真实岩浆**（火球链 t5）。
+     *
+     * <p>它自己不画任何东西 —— 表现全在它每 tick 放/擦的那块岩浆方块上
+     * （见 {@code magic/fire/TNMeteorSplashEntity}），所以渲染器是空的 ✓
+     *
+     * <p>{@code updateInterval(1)}：岩浆一 tick 挪一格，同步慢了就会看到"跳格"✗
+     */
+    public static final RegistryObject<EntityType<com.tnc.tnc.magic.fire.TNMeteorSplashEntity>> METEOR_SPLASH =
+            ENTITY_TYPES.register("meteor_splash", () -> EntityType.Builder.of(com.tnc.tnc.magic.fire.TNMeteorSplashEntity::new, MobCategory.MISC)
+                    .sized(.1F,.1F).clientTrackingRange(10).updateInterval(1).build("tnc:meteor_splash"));
+
+    /**
      * 环绕雷球。
      *
      * <p>{@code updateInterval(2)}：位置每 2 tick 同步一次 —— 环绕是持续运动的，

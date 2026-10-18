@@ -65,6 +65,9 @@ public final class TNSpellOrbClientEvents {
         event.registerEntityRenderer(TNOrbEntities.METEOR_FALL.get(), TNSigilRenderer::meteorFall);
         // ★ 燃烧链起手那圈火（作者 2026-10-11：粒子 → 真实建模）：贴图火苗十字片绕身 ✓
         event.registerEntityRenderer(TNOrbEntities.BURN_AURA.get(), TNBurnAuraRenderer::new);
+        // ★ 陨星坠溅出来的岩浆（作者 2026-10-18：要**真实**的岩浆）：空渲染器 ✓
+        //   表现全在它每 tick 摆出去又收回来的岩浆方块上，自己不画东西 ✓
+        event.registerEntityRenderer(TNOrbEntities.METEOR_SPLASH.get(), TNMeteorSplashRenderer::new);
         // ★ 光天使（光系第二条链 t3/t4/t5 ✓）：半透明 + 自发光，见 TNAngelRenderer ✓
         event.registerEntityRenderer(TNOrbEntities.ANGEL.get(), com.tnc.tnc.light.client.TNAngelRenderer::new);
         // ★ 实体光柱（光系第三条链「光线」✓）：一整根棱柱 + 彩虹顶点色，见 TNLightBeamRenderer ✓

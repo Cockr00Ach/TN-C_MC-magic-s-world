@@ -19,6 +19,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -645,6 +647,12 @@ public final class TNFireBoltEntity extends Projectile {
             // （作者 2026-10-05：「爆开后会产生大量火焰粒子向四周扩散，场景壮观点」）
             if ("meteor_fall".equals(spellPath())) {
                 meteorImpactBurst(server, impact);
+                // 作者 2026-10-18：「要求在火球爆炸后再爆炸范围内出现黑曜石和岩浆，
+                // 并且爆炸时也会有岩浆飞出，**这里的岩浆是真实的不是用来修饰的**」
+                // ① 地形：范围内铺黑曜石 + 真实岩浆
+                meteorCrater(server, impact);
+                // ② 飞出来的岩浆：每 tick 真放一块岩浆方块再擦掉 ⇒ 会烧人、会发光、落地留滩
+                TNMeteorSplashEntity.cast(server, impact, server.getRandom());
             }
             // 声音 + 震屏（作者 2026-10-05）：t3 响亮爆炸+轻微震动 / t4 巨大爆炸+轰鸣+较强烈 /
             // t5 巨大爆炸+轰鸣+强烈 —— 逐档加强，不会出现低档比高档猛 ✗
@@ -778,6 +786,90 @@ public final class TNFireBoltEntity extends Projectile {
             server.sendParticles(ParticleTypes.FLAME,
                     at.x + Math.cos(a) * blast, at.y + 0.25D, at.z + Math.sin(a) * blast,
                     4, 0.25D, 0.25D, 0.25D, 0.08D);
+        }
+    }
+
+    /**
+     * 陨星坠落地后的地形：爆炸范围内铺**黑曜石**与**真实的岩浆**。
+     *
+     * <p>作者 2026-10-18：「要求在火球爆炸后再爆炸范围内出现黑曜石和岩浆」。
+     * 半径直接取 {@link FireSpellRules} 里 METEOR_BOLT 的爆炸半径（8 格），
+     * 所以"炸多远就烧多大"是同一个数 ✓ 不会出现焦土比伤害范围大/小 ✗
+     *
+     * <p>三圈构成（d = 到落点的水平距离 / 爆炸半径）：
+     * <ul>
+     *   <li>{@code d < 0.30}：坑底一整滩岩浆（底下垫黑曜石，免得岩浆把地底接着啃穿）</li>
+     *   <li>{@code 0.30 ~ 0.52}：一圈黑曜石 —— 熔了又凝住的坑壁</li>
+     *   <li>{@code 0.52 ~ 0.78}：黑曜石为主、夹岩浆缝（约 1/4 是岩浆）</li>
+     *   <li>{@code 0.78 ~ 1.00}：只剩稀疏的焦壳（约 1/3），边沿不能糊死，否则像贴了张黑饼 ✗</li>
+     * </ul>
+     *
+     * <p>全部 {@code flag = 2}（不触发邻居更新）：岩浆原地待着不流、黑曜石不惊动红石；
+     * 与太阳审判塌方地形的写法一致 ✓
+     *
+     * <p>跳过基岩与带方块实体的方块（箱子/告示牌等，替换会丢内容 ✗）；
+     * 伪随机按 (dx,dz) 定死 ⇒ 同一个坑反复砸也长一个样，不会"闪来闪去" ✓
+     */
+    private void meteorCrater(ServerLevel server, Vec3 at) {
+        double radius = FireSpellRules.METEOR_BOLT.blastRadius();
+        BlockPos center = BlockPos.containing(at);
+        int span = (int) Math.ceil(radius);
+        for (int dx = -span; dx <= span; dx++) {
+            for (int dz = -span; dz <= span; dz++) {
+                double d = Math.sqrt((double) (dx * dx + dz * dz)) / radius;
+                if (d > 1.0D) {
+                    continue;
+                }
+                BlockPos top = surfaceAt(server, center, dx, dz);
+                if (top == null) {
+                    continue;
+                }
+                BlockState ground = server.getBlockState(top);
+                if (ground.is(Blocks.BEDROCK) || ground.hasBlockEntity()) {
+                    continue;
+                }
+                int roll = Math.floorMod((dx * 73856093) ^ (dz * 19349663), 100);
+                if (d < 0.30D) {
+                    server.setBlock(top.below(), Blocks.OBSIDIAN.defaultBlockState(), 2);
+                    server.setBlock(top, Blocks.LAVA.defaultBlockState(), 2);
+                } else if (d < 0.52D) {
+                    server.setBlock(top.below(), Blocks.OBSIDIAN.defaultBlockState(), 2);
+                    server.setBlock(top, Blocks.OBSIDIAN.defaultBlockState(), 2);
+                } else if (d < 0.78D) {
+                    server.setBlock(top, roll < 72 ? Blocks.OBSIDIAN.defaultBlockState() : Blocks.LAVA.defaultBlockState(), 2);
+                } else if (roll < 34) {
+                    server.setBlock(top, Blocks.OBSIDIAN.defaultBlockState(), 2);
+                }
+                // 焦壳顶上不能还长着草/花
+                clearAbove(server, top, 2);
+            }
+        }
+    }
+
+    /** 找这一列的地表：从落点往上 2 格开始往下扫 9 格。 */
+    private static BlockPos surfaceAt(ServerLevel server, BlockPos center, int dx, int dz) {
+        for (int dy = 2; dy >= -9; dy--) {
+            BlockPos p = center.offset(dx, dy, dz);
+            if (!server.isLoaded(p)) {
+                return null;
+            }
+            BlockState s = server.getBlockState(p);
+            if (!s.isAir() && s.getFluidState().isEmpty()) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+    /** 把地表上方 up 格内的草/花/雪清掉（流体、基岩、带方块实体的不动）。 */
+    private static void clearAbove(ServerLevel server, BlockPos top, int up) {
+        for (int k = 1; k <= up; k++) {
+            BlockPos q = top.above(k);
+            BlockState s = server.getBlockState(q);
+            if (s.isAir() || !s.getFluidState().isEmpty() || s.hasBlockEntity() || s.is(Blocks.BEDROCK)) {
+                continue;
+            }
+            server.setBlock(q, Blocks.AIR.defaultBlockState(), 2);
         }
     }
 
