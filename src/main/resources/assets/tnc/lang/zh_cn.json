@@ -558,8 +558,8 @@
   "item.tnc.dew_ward_charm": "守露护符",
   "item.tnc.mana_building_ruler": "魔导营造尺",
   "item.tnc.rune_crossbow": "符文弩",
-  "item.tnc.mana_mech": "魔道机甲",
-  "item.tnc.mech_spellgun": "法术机枪模块",
+  "item.tnc.mana_mech": "天穹式魔导铠",
+  "item.tnc.mech_spellgun": "六联晶铳",
   "block.tnc.magic_soil": "魔法土",
   "block.tnc.magic_soil_source": "魔法土源",
   "block.tnc.flowing_mana": "流动魔力",
@@ -614,5 +614,9 @@
   "spell.tnc.wind_weapon_5.name": "风神兵临",
   "spell.tnc.wind_weapon_5.description": "三剑两矛依次从脚下法阵升空，再陆续砸下；模型为普通兵器六十倍。",
   "item.tnc.wind_relic_sword": "岚皇·风翼圣剑",
-  "item.tnc.wind_relic_spear": "穹极·贯风神矛"
+  "item.tnc.wind_relic_spear": "穹极·贯风神矛",
+  "key.categories.tnc_mech": "天穹式魔导铠",
+  "key.tnc.mech_dash": "推进冲刺 / 潜行环域震荡",
+  "key.tnc.mech_shield": "折光屏障",
+  "key.tnc.mech_overdrive": "星炉过载"
 }

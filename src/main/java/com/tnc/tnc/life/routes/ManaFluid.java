@@ -31,9 +31,9 @@ public final class ManaFluid {
         @Override protected java.util.Map<Direction,FluidState> getSpread(Level l,BlockPos p,BlockState state){
             var preferred=super.getSpread(l,p,state);
             preferred.entrySet().removeIf(e->!safe(l.getBlockState(p.relative(e.getKey())))||!withinBoundary(l,p,p.relative(e.getKey())));
-            // Vanilla prefers the shortest route to a drop. If every preferred drop is
-            // across a protected boundary, still allow the legal level floor to fill.
-            if(preferred.isEmpty()&&l instanceof net.minecraft.server.level.ServerLevel server&&com.tnc.tnc.home.HousingService.ownedAt(server,p)!=null){
+            // A protected garden must fill its legal level floor even if vanilla selects
+            // a nearer downhill route. Never let the protected edge starve irrigation.
+            if(l instanceof net.minecraft.server.level.ServerLevel server&&com.tnc.tnc.home.HousingService.ownedAt(server,p)!=null){
                 for(var d:Direction.Plane.HORIZONTAL){var q=p.relative(d);var target=l.getBlockState(q);var next=getNewLiquid(l,q,target);
                     if(!next.isEmpty()&&canSpreadTo(l,p,state,d,q,target,target.getFluidState(),next.getType()))preferred.put(d,next);
                 }
@@ -47,9 +47,9 @@ public final class ManaFluid {
         @Override protected java.util.Map<Direction,FluidState> getSpread(Level l,BlockPos p,BlockState state){
             var preferred=super.getSpread(l,p,state);
             preferred.entrySet().removeIf(e->!safe(l.getBlockState(p.relative(e.getKey())))||!withinBoundary(l,p,p.relative(e.getKey())));
-            // Vanilla prefers the shortest route to a drop. If every preferred drop is
-            // across a protected boundary, still allow the legal level floor to fill.
-            if(preferred.isEmpty()&&l instanceof net.minecraft.server.level.ServerLevel server&&com.tnc.tnc.home.HousingService.ownedAt(server,p)!=null){
+            // A protected garden must fill its legal level floor even if vanilla selects
+            // a nearer downhill route. Never let the protected edge starve irrigation.
+            if(l instanceof net.minecraft.server.level.ServerLevel server&&com.tnc.tnc.home.HousingService.ownedAt(server,p)!=null){
                 for(var d:Direction.Plane.HORIZONTAL){var q=p.relative(d);var target=l.getBlockState(q);var next=getNewLiquid(l,q,target);
                     if(!next.isEmpty()&&canSpreadTo(l,p,state,d,q,target,target.getFluidState(),next.getType()))preferred.put(d,next);
                 }

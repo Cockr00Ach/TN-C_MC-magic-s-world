@@ -1,0 +1,27 @@
+{
+  "installed_at": "2026-10-18T14:44:29.304005",
+  "live": "D:\\垃圾桶\\PCL 正式版 2.9.3\\.minecraft\\versions\\元素觉醒1.4.3-魔改版-20260915",
+  "jar_sha256": "0feaefcfac77c7a61e6f89bedccfbb5e5bbe2cd19a70e212f8f19ca999b686a9",
+  "jar_bytes": 110035595,
+  "unit_tests": 268,
+  "game_tests": 41,
+  "native_shader_audit": {
+    "failures": [],
+    "max_particles": 3660,
+    "max_actual_flows": 8,
+    "emitted_transfer_particles": 32118,
+    "screenshots": 16,
+    "mech_and_mirror_scenes": true,
+    "motion_frames": 60,
+    "shader_pack": "ComplementaryUnbound_r5.6.1",
+    "oculus_opaque_passes_skipped": 4571,
+    "scope": "Isolated actual Minecraft client rendering and server-confirmed machine flow"
+  },
+  "protected_quest_files_unchanged": 41,
+  "replaced_chapters": [
+    "tnc_field_04_workshop.snbt"
+  ],
+  "backup": "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\work\\backups\\skyward-20261018-144428",
+  "saves_modified": false,
+  "island_templates_modified": false
+}

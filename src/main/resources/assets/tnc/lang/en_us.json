@@ -449,5 +449,11 @@
   "spell.tnc.wind_weapon_5.name": "Wind Weapon 5",
   "spell.tnc.wind_weapon_5.description": "3 swords and 2 spears at sixtyfold scale rise from a seal, then plunge sequentially.",
   "item.tnc.wind_relic_sword": "Gale Sovereign Wingblade",
-  "item.tnc.wind_relic_spear": "Skybreaker Windlance"
+  "item.tnc.wind_relic_spear": "Skybreaker Windlance",
+  "item.tnc.mana_mech": "Skyward Arcane Armor",
+  "item.tnc.mech_spellgun": "Sixfold Crystal Gatling",
+  "key.categories.tnc_mech": "Skyward Armor",
+  "key.tnc.mech_dash": "Thruster dash / Sneak: nova",
+  "key.tnc.mech_shield": "Refractive barrier",
+  "key.tnc.mech_overdrive": "Star-core overdrive"
 }

@@ -8,7 +8,7 @@ public enum RouteKind {
     LAMP("mana_lantern","魔导灯",20,4),BRIGHT_LAMP("bright_mana_lantern","庭院明灯",40,4),PAPER_PRESS("mana_pulp_press","纸皮压机",200,8),FEED_PLATE("mana_feed_plate","自动投料器",100,4),
     IRRIGATOR("gentle_irrigator","轻灌器",100,4),GREENHOUSE("climate_lantern","护候灯",200,4),SAWMILL("mana_sawmill","魔导锯台",200,8),LOOM("mist_loom","雾纱织机",300,8),
     DRYER("meal_dryer","远行烘食器",300,8),INCUBATOR("mana_incubator","暖卵台",100,4),HARVESTER("harvest_arm","收获臂",300,8),SEED_SORTER("seed_sorter","种源分拣器",100,4),
-    CART_TRACK("mana_cart_track","魔导运货轨",200,8),ALARM("ward_bell","守望铃",100,4),CHARGER("accessory_charger","饰品充能台",800,16);
+    CART_TRACK("mana_cart_track","魔导运货轨",200,8),ALARM("ward_bell","守望铃",100,4),CHARGER("accessory_charger","饰品充能台",800,128);
     public final String id,name;public final int capacity,rate;
     RouteKind(String id,String name,int capacity,int rate){this.id=id;this.name=name;this.capacity=capacity;this.rate=rate;}
     public boolean wire(){return this==WIRE||this==GOLD_WIRE||this==CRYSTAL_WIRE;}

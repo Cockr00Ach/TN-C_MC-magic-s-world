@@ -17,6 +17,9 @@ def build():
   file=RES/'data/tnc/recipes'/(id+'.json')
   if not file.exists():return '材料与配方请按JEI实际显示准备。'
   r=json.loads(file.read_text(encoding='utf-8-sig'));counts=collections.Counter()
+  if r.get('type')=='tnc:mana_forging':
+   for ing in r['ingredients']:counts[ing['item']]+=ing.get('count',1)
+   return '魔力炉：'+'；'.join(name(k)+'×'+str(v) for k,v in counts.items())+'；'+str(r['mana'])+'M，'+str(r['work_ticks']/20)+'秒。'
   if 'pattern' in r:
    for key,count in collections.Counter(''.join(r['pattern']).replace(' ','')).items():
     ing=r['key'][key];counts[ing.get('item',ing.get('tag',''))]+=count
@@ -104,17 +107,17 @@ def build():
  ('radiant_thread',18,123,2,'提高主干到32M/秒；需要露丝。大量供魔株经过一条线仍共享这一带宽。'),
  ('radiant_basin',18,130,2,'中阶储池8000M、32M/秒；靠近用能区，承接低负载时的余量。'),
  ('mana_valve',18,137,2,'潜行右键切优先顺序；外部红石信号可关断。没有阀也能完成基础供魔。'),
- ('mana_mirror',18,144,2,'两镜沿六轴对齐，12格无遮挡；共享4M/秒。是跨空隙传能，不是放大器。'),
+ ('mana_mirror',18,144,2,'持检流尺潜行右键先选镜A，再选镜B；同一主人，12格内无遮挡，可斜向或跨高度。镜头自动相向，4M/秒；空手潜行右键解除。'),
  ('mana_cart_track',18,151,2,'沿普通铁轨布置驱动座，推动载真实物品的货车；行进每10格耗1M。')]
  for id,x,y,branch,detail in devices:device(id,x,y,[heads[branch]],[detail])
  for i,(id,detail) in enumerate([('mana_lantern','每秒0.05M持续照明，最早可做的日常用能之一。'),('bright_mana_lantern','每秒0.1M，照亮庭院。'),('ward_bell','九格内发现敌意生物时耗2M响铃，输出短红石信号。')]):device(id,-42,120+i*7,[worked],[detail])
  cloth=add('workshop/cloth','雾布 · 充能工具的共同材料','tnc:mist_cloth',-26,144,['左侧雾纱织机：两份雾棉纤维或帆纤维＋30M，6秒制一份雾布。','归途缎带、缓降羽饰、耳坠、护符、建筑尺、符弩和机甲都需要它。','先做这份材料，再沿连线制作后面的工具。'],['node/mist_loom'],item='tnc:mist_cloth')
- charge=device('accessory_charger',-10,170,[gold],['接上魔力线路，充能饰品或机甲放第一输入格，每秒实际转入最多16M。','它负责物品充能，不负责动物喂食，也不是旧魔力瓶底座。'])
+ charge=device('accessory_charger',-10,170,[gold],['接上魔力线路，物品放第一输入格。普通饰品最多16M/秒；魔导铠最多128M/秒，仍受供能与线路带宽限制。','它负责物品充能，不负责动物喂食，也不是旧魔力瓶底座。'])
  charged=add('network/network/charged','&b完成一次真实物品充能','tnc:accessory_charger',-10,177,['观察饰品上的储量增长，真实完成转移后记录。'],[charge],adv='network/charged')
  for i,(id,detail) in enumerate([('homeward_ribbon','充入120M、脱战10秒后回到自己买下的房屋。'),('descent_feather','放副手，下降时耗2M/秒缓降。'),('ore_whisper_earring','每次15M，提示八格内矿物方向。'),('dew_ward_charm','放副手，受伤时花费魔力减伤，有冷却。')]):
   add('accessory/'+id,name('tnc:'+id),'tnc:'+id,-28+i*6,184,[recipe(id),detail,'先制作，再到上方充能台充能；不能用空饰品测试效果。'],[charge,cloth],item='tnc:'+id)
- for i,(id,detail) in enumerate([('star_thread','128M/秒的高阶主干，只有实际产能提高后才需要。'),('star_basin','32000M高阶储池，容量大也要慢慢积累。'),('star_mirror','六轴对齐24格、16M/秒，适合跨庭院传输。')]):device(id,20,169+i*7,[crystal],[detail])
- for i,(id,detail) in enumerate([('mana_building_ruler','使用真实建筑材料，每块3M；普通五格直线，潜行三格框。'),('rune_crossbow','手持发射，消耗实际箭和25M，先到充能台补足余额。'),('mana_mech','在充能台充入最多6000M，右键穿胸甲位；步行免费，冲刺耗魔。'),('mech_spellgun','必须穿机甲后长按右键，每发耗机甲20M和真实箭；最多8秒连射、冷却4秒。')]):
+ for i,(id,detail) in enumerate([('star_thread','128M/秒的高阶主干，只有实际产能提高后才需要。'),('star_basin','32000M高阶储池，容量大也要慢慢积累。'),('star_mirror','持检流尺潜行右键配对，两面远折镜24格、16M/秒，可斜向跨高度；混用普通镜时范围取较小端。中间有实心墙会停机，拆除后恢复。')]):device(id,20,169+i*7,[crystal],[detail])
+ for i,(id,detail) in enumerate([('mana_building_ruler','使用真实建筑材料，每块3M；普通五格直线，潜行三格框。'),('rune_crossbow','手持发射，消耗实际箭和25M，先到充能台补足余额。'),('mana_mech','在魔力炉锻造整套机铠，充能台充至最多12000M。只占胸甲位，显示完整头身四肢。V突进（150M）；B屏障（200M启动，8秒内挡下80%伤害，每点挡伤另耗35M）；G过载（1000M，8秒）；潜行V震荡（800M，只伤敌对生物，不破坏地形）。技能有独立冷却。'),('mech_spellgun','穿天穹式魔导铠后长按右键，六联晶铳每秒10发、每发12M，不消耗箭。潜行右键轮换水/火/雷/风/土/光/暗；过载期间每秒20发、每发18M。持续射击会积热，过热自动排放3秒。机铠无储魔时无法开火，也不会偷偷扣个人魔力。')]):
   add('accessory/'+id,name('tnc:'+id),'tnc:'+id,20,192+i*7,[recipe(id),detail],([crystal,charge,cloth] if id=='mana_mech' else ['accessory/mana_mech'] if id=='mech_spellgun' else [gold,charge,cloth]),item='tnc:'+id)
  add('workshop/checklist','&3检修清单 · 不工作时按顺序查','tnc:mana_meter',0,220,
   ['①种下去了但不长：魔法土？八格内灌溉？上方空间够吗？','②花不供魔：成熟？自己的？这种花的日照/声音/投料条件满足吗？',
