@@ -176,34 +176,20 @@ public final class TNFireBoltEntity extends Projectile {
     }
 
     /**
-     * <b>成形阶段</b>的长度（tick）—— 作者 2026-10-05 要求「先形成一个球形再发射出去」。
+     * <b>成长阶段</b>的长度（tick）—— 只管"这颗球现在长到多大"（渲染器用 {@link #formProgress}）✓
      *
-     * <p>这 5 tick（0.25 秒）里火球<b>停在手前不动、也不判定命中</b>，
-     * 渲染器把它从 25% 大小长到 100%（见 {@link #formProgress}），
-     * 长满的那一帧喷一次火星表示"射出去了"，然后才开始飞。
+     * <p>⚠️ 作者 2026-10-18：「火球链和射线链中 t1~t3 的发射过程都不流畅」——
+     * 旧版这 3 tick 里球是<b>悬在手前不动</b>的（不判定命中、也不飞），
+     * 之后还有 4 tick 的出手缓冲（速度从 30% 涨到全速），
+     * 合起来读作「先顿一下、再猛地窜出去」✗
      *
-     * <p>为什么不靠法术 JSON 的 {@code cast.particles} 做这件事：那只能摆粒子，
-     * 摆不出"一颗球"；而且引擎的粒子形状/原点语义没有文档，猜错了就是在脚下冒烟 ✗
+     * <p>⇒ 现在<b>悬停只留给火龙吐息</b>（见 {@link #hoverTicks}）：
+     * 手扔的火球 / 射线<b>一出生就是全速直线</b>，成长只体现在大小上 ✓
      */
     public static final int FORM_TICKS = 3;
 
     /** 火龙吐息的成形时长（tick）—— 法阵由外到里描绘 + 龙头渐渐凝出来 ✓（作者要"逐渐出现"✗）。 */
     public static final int DRAGON_FORM_TICKS = 18;
-
-    /**
-     * 出手缓冲：离开手之后的这几 tick 里，位移从 {@link #LAUNCH_START_FRACTION} 涨到全速。
-     *
-     * <p>⚠️ 作者 2026-10-05 实测「火球术、大火球术和熔岩火球的产生和发射过程不流畅」——
-     * 原因是原来<b>一离手就走满 1 格/tick（= 20 格/秒）</b>：
-     * 球先在手里悬停 5 tick 不动，然后"啪"地一下弹到满速，看着就是一顿 ✗
-     * 现在给它一段加速，读起来才像"被推出去" ✓
-     *
-     * <p>⚠️ 只对手抛的火球生效；<b>天上掉下来的陨石不加速</b>
-     * （自由落体越落越快才合理，减速反而怪 ✗）—— 见 {@code meteorLike()}
-     */
-    public static final int LAUNCH_RAMP_TICKS = 4;
-    /** 刚离手时走全速的几成。0.30 = 第一 tick 只走 30%，第 4 tick 起满速。 */
-    public static final double LAUNCH_START_FRACTION = 0.30D;
 
     public TNFireBoltEntity(EntityType<? extends TNFireBoltEntity> type, Level level) {
         super(type, level);
@@ -311,11 +297,12 @@ public final class TNFireBoltEntity extends Projectile {
     }
 
     /**
-     * 这一档的<b>成形时长</b>（tick）。
+     * 这一档的<b>成长时长</b>（tick）—— 只决定渲染器把球从 25% 长到 100% 用多久 ✓
      *
-     * <p>手扔的火球要"先在手里凝成一颗球再射出去"，所以有 {@link #FORM_TICKS} 的悬停；
-     * 但<b>陨星坠的陨石不能有</b> —— 它是从天而降的，悬在天上不动 6 tick 会明显顿一下 ✗
-     * （作者 2026-10-05 反馈「陨石的下落不流畅」）
+     * <p>⚠️ 它<b>不再等于"悬停时长"</b>了（作者 2026-10-18「发射过程不流畅」）：
+     * 手扔的火球与射线在成长的这 3 tick 里**已经在飞**，只是球还小 ✓
+     *
+     * <p>陨星坠的陨石直接返回 0 —— 它是从天而降的，不需要"凝形"✓
      */
     private int formTicks() {
         if (skyFall()) {
@@ -326,15 +313,22 @@ public final class TNFireBoltEntity extends Projectile {
     }
 
     /**
+     * <b>悬停</b>（停在手前不飞、不判定命中）的 tick 数 —— <b>只有火龙吐息是 18</b>，其余一律 0 ✓
+     *
+     * <p>⚠️ 作者 2026-10-18：「火球链和射线链中 t1~t3 的发射过程都不流畅」。
+     * 旧版所有手扔的法术都悬停 {@link #FORM_TICKS} 个 tick 再叠 4 tick 加速，
+     * 看着就是"顿一下 → 突然窜出去"✗。现在只有火龙那种"要当面凝出龙头"的才悬停 ✓
+     */
+    private int hoverTicks() {
+        return isDragon() ? DRAGON_FORM_TICKS : 0;
+    }
+
+    /**
      * 「从天上砸下来」的那些（t4 熔岳天倾的火球 + t5 的陨石/伴随陨石）。
      *
-     * <p>它们<b>不是从手里推出去</b>的 ✗ ⇒ 既不做成形悬停、也不加出手缓冲：
-     * <ul>
-     *   <li>悬停 3 tick 会看着"顿一下" ✗</li>
-     *   <li>出手缓冲会让下落**先慢后快** ✗ —— 作者 2026-10-05 说「下落流畅点」，
-     *       落到一半突然加速正是"不流畅" ✗</li>
-     * </ul>
-     * ⇒ 它们一律<b>匀速直接砸</b> ✓（只有手扔的火球保留"凝聚 + 推出去"那套 ✓）
+     * <p>它们<b>不是从手里推出去</b>的 ✗ ⇒ 不做成长、也不悬停，直接匀速砸 ✓
+     * （作者 2026-10-05「陨石的下落不流畅」；2026-10-18 又把所有出手缓冲全删了，
+     * 现在全链都是等速直线，不再有"先慢后快"✓）
      */
     private boolean skyFall() {
         String path = spellPath();
@@ -385,9 +379,10 @@ public final class TNFireBoltEntity extends Projectile {
     public void tick() {
         super.tick();
 
-        // ---------------- 成形阶段：先在手前凝成一颗球，再射出去 ----------------
-        // 这 5 tick 里**不移动、也不判定命中**（火球还在手里），渲染器负责让它长大
-        if (tickCount <= formTicks()) {
+        // ---------------- 悬停成形：只有火龙吐息会停在手前 ----------------
+        // ⚠️ 作者 2026-10-18：t1~t3 的发射"不流畅"就是这一段的锅 —— 以前**所有**手扔的法术
+        //    都在这儿钉 3 tick 不动，现在只有火龙（hoverTicks()=18）走这里 ✓
+        if (tickCount <= hoverTicks()) {
             if (level().isClientSide) {
                 // 往中心收拢的几粒火星 —— "凝聚"的感觉
                 if (tickCount % 2 == 0) {
@@ -424,6 +419,20 @@ public final class TNFireBoltEntity extends Projectile {
             //    作者 2026-10-05 明确指出"不要一个球外面一些火焰粒子"，
             //    所以这里从"每 2 tick 撒 4 颗 + 一颗 LAVA"减到"每 3 tick 在尾后留一颗小火星"，
             //    并且**删掉了 LAVA 粒子**（它是一坨，看着像旁边多长了一颗小球 ✗）
+            // 还在长大的那几 tick：几粒往球心收拢的火星 —— "凝聚"的感觉 ✓
+            // （这段以前挂在"悬停阶段"里；悬停取消后必须挪到这儿，
+            //   否则 t1~t3 会完全看不到"成形"，只剩一颗凭空满大小的球 ✗）
+            float grow = formProgress(0.0F);
+            if (grow < 1.0F && tickCount % 2 == 0) {
+                double r = radius() * (1.5D - grow);
+                for (int i = 0; i < 3; i++) {
+                    double a = tickCount * 0.9D + i * Math.PI * 2.0D / 3.0D;
+                    level().addParticle(ParticleTypes.SMALL_FLAME,
+                            getX() + Math.cos(a) * r, getY() + Math.sin(a) * r * 0.6D,
+                            getZ() + Math.sin(a) * r,
+                            -Math.cos(a) * 0.04D, 0.01D, -Math.sin(a) * 0.04D);
+                }
+            }
             if (tickCount % 3 == 0 && getDeltaMovement().lengthSqr() > 0.01D) {
                 Vec3 tail = getDeltaMovement().normalize().scale(-radius() * 3.0D);
                 level().addParticle(ParticleTypes.SMALL_FLAME,
@@ -476,16 +485,13 @@ public final class TNFireBoltEntity extends Projectile {
         //    于是永远对不上第二个目标 ⇒ 表现就是"只有第一个僵尸受伤"✗
         //    ⇒ 现在射线**走直线** ✓：出手方向 = 准心方向（由 TNFireRays 定 ✓），
         //      之后不再拐弯 ⇒ 谁在线上谁挨打 ✓，穿透才是干净的 ✓
-        // 出手缓冲：刚离手那几 tick 只走一部分，LAUNCH_RAMP_TICKS 内涨到全速。
+        // 出手缓冲**已删**（作者 2026-10-18「火球链和射线链 t1~t3 的发射过程都不流畅」）：
+        //   旧版离手后 4 tick 里速度从 30% 涨到 100%，速度每 tick 都在变
+        //   ⇒ 读起来是"先慢后快、一顿一顿"✗
+        //   现在**等速直线**：一出生就是 LAUNCH_SPEED 格/tick，轨迹是一条干净的直线 ✓
         // ⚠️ 只改**实际走了多远**，不改 getDeltaMovement() ——
         //    改速度会每 tick 触发一次速度同步包，反而更卡 ✗
-        Vec3 step = motion;
-        if (!skyFall()) {
-            double ramp = Math.min(1.0D,
-                    (tickCount - formTicks()) / (double) LAUNCH_RAMP_TICKS);
-            step = motion.scale(LAUNCH_START_FRACTION + (1.0D - LAUNCH_START_FRACTION) * ramp);
-        }
-        Vec3 to = from.add(step);
+        Vec3 to = from.add(motion);
 
         // 陨星坠的陨石：身周冒火 + **身后铺一条拖尾**
         // （作者 2026-10-05：「我没有看到陨石」→ 先加粒子；又要求「下落过程可以带点拖尾」→ 再铺长）
@@ -698,7 +704,7 @@ public final class TNFireBoltEntity extends Projectile {
         }
 
         setPos(to);
-        remaining -= step.length();
+        remaining -= to.distanceTo(from);      // 这一 tick 实际走了多远（= motion 的长度，出手缓冲已删）
     }
 
     /**
