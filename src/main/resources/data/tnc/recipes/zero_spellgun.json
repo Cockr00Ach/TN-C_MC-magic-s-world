@@ -1,0 +1,27 @@
+{
+  "type": "tnc:mana_forging",
+  "ingredients": [
+    {
+      "item": "tnc:mech_spellgun",
+      "count": 1
+    },
+    {
+      "item": "tnc:star_marrow",
+      "count": 8
+    },
+    {
+      "item": "tnc:radiant_gold",
+      "count": 12
+    },
+    {
+      "item": "tnc:storm_crystal",
+      "count": 6
+    }
+  ],
+  "result": {
+    "item": "tnc:zero_spellgun"
+  },
+  "mana": 1800,
+  "work_ticks": 800,
+  "category": "workshop"
+}

@@ -1,0 +1,77 @@
+{
+  "installed_at": "2026-10-18T20:41:57.214207",
+  "live": "D:\\垃圾桶\\PCL 正式版 2.9.3\\.minecraft\\versions\\元素觉醒1.4.3-魔改版-20260915",
+  "jar_sha256": "f259abe4645f94cac424fb01ed6a99239178731c0fa5ff2c88cd619fc85b7024",
+  "jar_bytes": 110096348,
+  "unit_tests": 271,
+  "game_tests": 52,
+  "native_report": {
+    "forms": [
+      {
+        "personal_before": 350,
+        "shots": 166,
+        "attributed_spell_damage": 276.0,
+        "target_health_delta": 76.0,
+        "spell": "water_cannon",
+        "seconds": 16.6,
+        "remaining_mana": 48,
+        "target_damage": 276.0,
+        "personal_after": 350
+      },
+      {
+        "personal_before": 350,
+        "shots": 166,
+        "attributed_spell_damage": 614.99994,
+        "target_health_delta": 437.80005,
+        "spell": "great_fireball",
+        "seconds": 16.6,
+        "remaining_mana": 48,
+        "target_damage": 614.99994,
+        "personal_after": 350
+      },
+      {
+        "personal_before": 350,
+        "shots": 166,
+        "attributed_spell_damage": 280.0004,
+        "target_health_delta": 79.996826,
+        "spell": "earth_ball",
+        "seconds": 16.6,
+        "remaining_mana": 48,
+        "target_damage": 280.0004,
+        "personal_after": 350
+      },
+      {
+        "personal_before": 350,
+        "shots": 166,
+        "attributed_spell_damage": 316.34998,
+        "target_health_delta": 116.352905,
+        "spell": "great_thunder_orb",
+        "seconds": 16.6,
+        "remaining_mana": 48,
+        "target_damage": 316.34998,
+        "personal_after": 350
+      },
+      {
+        "personal_before": 350,
+        "shots": 166,
+        "attributed_spell_damage": 1202.5,
+        "target_health_delta": 1000.0,
+        "spell": "wind_ball_2",
+        "seconds": 16.6,
+        "remaining_mana": 48,
+        "target_damage": 1202.5,
+        "personal_after": 350
+      }
+    ],
+    "scope": "Isolated complete PCL pack; real held-right-click and real target damage",
+    "full_spell_engine": true,
+    "failures": [],
+    "screenshots": 12
+  },
+  "protected_quest_files_unchanged": 42,
+  "backup": "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\work\\backups\\zero-spellgun-20261018-204156",
+  "saves_modified": false,
+  "island_templates_modified": false,
+  "new_item": "tnc:zero_spellgun",
+  "crystal_gun_preserved": true
+}
