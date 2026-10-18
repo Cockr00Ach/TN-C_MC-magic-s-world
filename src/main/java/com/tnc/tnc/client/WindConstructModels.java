@@ -28,6 +28,30 @@ public final class WindConstructModels {
         p.pushPose();if(tip&&(form==1||form==2))p.translate(0,0,-1);
         draw(NAMES[2+Math.max(0,Math.min(3,form))],p,b,alpha);p.popPose();
     }
+    /** Spell instances share the held weapon mesh, with translucent wind light over the whole blade. */
+    public static void phantomWeapon(int form,double age,PoseStack p,MultiBufferSource b,float envelope,boolean tip){
+        p.pushPose();if(tip&&(form==1||form==2))p.translate(0,0,-1);
+        String name=NAMES[2+Math.max(0,Math.min(3,form))];
+        p.translate(-.5,-.5,-.5);
+        var mc=Minecraft.getInstance();var model=mc.getModelManager().getModel(id(name));
+        mc.getItemRenderer().renderModelLists(model,ItemStack.EMPTY,LightTexture.FULL_BRIGHT,OverlayTexture.NO_OVERLAY,
+                p,new WindLight(b.getBuffer(WindModelRenderTypes.alpha()),.78F*envelope));
+        float glow=(.15F+.025F*(float)Math.sin(age*.09))*envelope;
+        mc.getItemRenderer().renderModelLists(model,ItemStack.EMPTY,LightTexture.FULL_BRIGHT,OverlayTexture.NO_OVERLAY,
+                p,new WindLight(b.getBuffer(WindModelRenderTypes.emission()),glow));
+        p.popPose();
+    }
+    private record WindLight(VertexConsumer out,float alpha) implements VertexConsumer {
+        public VertexConsumer vertex(double x,double y,double z){out.vertex(x,y,z);return this;}
+        public VertexConsumer color(int r,int g,int b,int a){out.color(Math.min(255,(int)(r*.58F+28)),Math.min(255,(int)(g*.80F+48)),Math.min(255,(int)(b*.75F+65)),(int)(a*alpha));return this;}
+        public VertexConsumer uv(float u,float v){out.uv(u,v);return this;}
+        public VertexConsumer overlayCoords(int u,int v){out.overlayCoords(u,v);return this;}
+        public VertexConsumer uv2(int u,int v){out.uv2(u,v);return this;}
+        public VertexConsumer normal(float x,float y,float z){out.normal(x,y,z);return this;}
+        public void endVertex(){out.endVertex();}
+        public void defaultColor(int r,int g,int b,int a){out.defaultColor(Math.min(255,(int)(r*.58F+28)),Math.min(255,(int)(g*.80F+48)),Math.min(255,(int)(b*.75F+65)),(int)(a*alpha));}
+        public void unsetDefaultColor(){out.unsetDefaultColor();}
+    }
     public static void orb(int tier,double age,PoseStack p,MultiBufferSource b){
         p.pushPose();p.translate(0,.2,0);float s=.72F+tier*.08F;p.scale(s,s,s);
         p.pushPose();p.mulPose(Axis.YP.rotationDegrees((float)(age*2%360)));draw("core",p,b,.88F);p.popPose();

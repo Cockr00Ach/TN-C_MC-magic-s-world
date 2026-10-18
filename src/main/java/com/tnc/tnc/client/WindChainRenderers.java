@@ -35,9 +35,22 @@ public final class WindChainRenderers {
                 if(direction.lengthSqr()<.001)direction=new net.minecraft.world.phys.Vec3(0,-1,0);
                 p.pushPose();p.translate(at.x,at.y,at.z);
                 p.mulPose(new Quaternionf().rotationTo(0,0,1,(float)direction.x,(float)direction.y,(float)direction.z));
-                p.mulPose(Axis.ZP.rotationDegrees((float)(age*3%360)));float scale=WindChainRules.modelScale(e.tier());p.scale(scale,scale,scale);
+                float scale=WindChainRules.modelScale(e.tier());p.scale(scale,scale,scale);
                 float fade=(float)Math.max(0,Math.min(1,(end+8-age)/8));
-                WindConstructModels.weapon(WindChainRules.form(e.tier(),slot),p,b,.98F*alpha*fade,true);p.popPose();
+                WindConstructModels.phantomWeapon(WindChainRules.form(e.tier(),slot),age,p,b,alpha*fade,true);p.popPose();
+            }
+            // A bounded set of inward cutting currents, rather than making the weapons lunge.
+            if(e.tier()<5&&age>=38&&age<100){
+                int cuts=Math.min(6,e.count());
+                for(int i=0;i<cuts;i++){
+                    int slot=i*e.count()/cuts;double t=((age-38+i*2)%12)/12;
+                    var start=e.orbitPoint(slot,age);var end=e.aimPoint().add(0,1.3,0);
+                    var at=start.lerp(end,t).subtract(e.position());var direction=end.subtract(start).normalize();
+                    p.pushPose();p.translate(at.x,at.y,at.z);
+                    p.mulPose(new Quaternionf().rotationTo(0,0,1,(float)direction.x,(float)direction.y,(float)direction.z));
+                    float s=.65F+e.tier()*.16F;p.scale(s,s,s);
+                    WindConstructModels.draw("crescent",p,b,(float)(Math.sin(t*Math.PI)*.55));p.popPose();
+                }
             }
         }
     }

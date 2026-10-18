@@ -16,7 +16,7 @@ import java.nio.file.*;
 public final class WindRelicClientAudit {
     private static boolean shown,saving;private static volatile boolean saved;private static int frames;
     @SubscribeEvent public static void tick(TickEvent.ClientTickEvent event)throws Exception{
-        if(!Boolean.getBoolean("tnc.windTwoChainsAudit")||event.phase!=TickEvent.Phase.END)return;
+        if(!(Boolean.getBoolean("tnc.windTwoChainsAudit")||Boolean.getBoolean("tnc.windPhantomAudit"))||event.phase!=TickEvent.Phase.END)return;
         var mc=Minecraft.getInstance();if(mc.getOverlay()!=null)return;
         org.lwjgl.glfw.GLFW.glfwHideWindow(mc.getWindow().getWindow());
         if(!shown){
@@ -24,8 +24,8 @@ public final class WindRelicClientAudit {
             shown=true;mc.options.guiScale().set(1);mc.resizeDisplay();mc.setScreen(new Gallery());
         }
         if(++frames<35)return;
-        if(!saving){saving=true;Screenshot.grab(mc.gameDirectory,"wind_relics.png",mc.getMainRenderTarget(),m->saved=true);return;}
-        if(saved){Files.writeString(Path.of("D:/ModTest/work/wind-relic-native-preview.json"),"{\"bakedModelsRendered\":true,\"worldRequired\":false}");mc.stop();}
+        if(!saving){saving=true;Screenshot.grab(mc.gameDirectory,Boolean.getBoolean("tnc.windPhantomAudit")?"wind_phantoms.png":"wind_relics.png",mc.getMainRenderTarget(),m->saved=true);return;}
+        if(saved){Files.writeString(Path.of(Boolean.getBoolean("tnc.windPhantomAudit")?"D:/ModTest/work/wind-phantom-native-preview.json":"D:/ModTest/work/wind-relic-native-preview.json"),"{\"bakedModelsRendered\":true,\"worldRequired\":false}");mc.stop();}
     }
     private static final class Gallery extends Screen {
         Gallery(){super(Component.literal("Wind relics"));}
@@ -39,7 +39,8 @@ public final class WindRelicClientAudit {
                 g.flush();g.pose().pushPose();g.pose().translate(x+width/6,height*.53,400);
                 float scale=i==2?180:210;g.pose().scale(scale,-scale,scale);
                 g.pose().mulPose(Axis.XP.rotationDegrees(i==2?15:-75));g.pose().mulPose(Axis.YP.rotationDegrees(-20));
-                if(i<2)WindConstructModels.weapon(i+1,g.pose(),buffers,.99F,false);
+                if(i<2&&Boolean.getBoolean("tnc.windPhantomAudit"))WindConstructModels.phantomWeapon(i+1,40,g.pose(),buffers,1,false);
+                else if(i<2)WindConstructModels.weapon(i+1,g.pose(),buffers,.99F,false);
                 else WindConstructModels.orb(2,40,g.pose(),buffers);
                 buffers.endBatch();g.pose().popPose();
             }
