@@ -1,26 +1,27 @@
 {
-  "type": "minecraft:crafting_shaped",
-  "pattern": [
-    " C ",
-    "MTM",
-    " I "
-  ],
-  "key": {
-    "C": {
-      "item": "tnc:storm_crystal"
+  "type": "tnc:mana_forging",
+  "ingredients": [
+    {
+      "item": "tnc:star_marrow",
+      "count": 4
     },
-    "M": {
-      "item": "tnc:star_marrow"
+    {
+      "item": "tnc:spirit_iron",
+      "count": 12
     },
-    "T": {
-      "item": "tnc:mist_cloth"
+    {
+      "item": "tnc:storm_crystal",
+      "count": 4
     },
-    "I": {
-      "item": "tnc:spirit_iron"
+    {
+      "item": "tnc:mist_cloth",
+      "count": 4
     }
-  },
+  ],
   "result": {
-    "item": "tnc:mech_spellgun",
-    "count": 1
-  }
+    "item": "tnc:mech_spellgun"
+  },
+  "mana": 1200,
+  "work_ticks": 640,
+  "category": "workshop"
 }

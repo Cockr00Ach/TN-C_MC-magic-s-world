@@ -1,0 +1,8 @@
+{
+  "type": "forge:add_features",
+  "biomes": "tnc:heroskand",
+  "features": [
+    "tnc:landmark_chunk"
+  ],
+  "step": "top_layer_modification"
+}

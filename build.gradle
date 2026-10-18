@@ -86,12 +86,72 @@ minecraft {
         }
 
         client {
+            if (project.hasProperty('windTwoChainsAudit')) {
+                workingDirectory project.file('work/wind-two-chains-client-audit')
+                property 'tnc.windTwoChainsAudit', 'true'
+                property 'tnc.windTwoChainsAuditReport', file('work/wind-two-chains-client-audit.json').absolutePath
+                args '--quickPlaySingleplayer', 'casino-gallery', '--width', '1800', '--height', '900'
+            }
+            if (project.hasProperty('windArsenalAudit')) {
+                workingDirectory project.file('work/wind-arsenal-client-audit')
+                property 'tnc.windArsenalAudit', 'true'
+                property 'tnc.windArsenalAuditReport', file('work/wind-arsenal-client-audit.json').absolutePath
+                args '--width', '1800', '--height', '900'
+            }
+            if (project.hasProperty('stoneMaterialAudit')) {
+                workingDirectory project.file('work/stone-material-audit')
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+                property 'tnc.stoneLancerAudit', 'true'
+                property 'tnc.stoneLancerAuditReport', file('work/stone-material-audit.json').absolutePath
+                args '--quickPlaySingleplayer', 'casino-gallery', '--width', '1800', '--height', '900'
+            }
+            if (project.hasProperty('waterModelAudit')) {
+                workingDirectory project.file('work/water-model-audit')
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+                property 'tnc.waterModelAudit', 'true'
+                property 'tnc.waterModelAuditReport', file('work/water-model-audit.json').absolutePath
+                args '--quickPlaySingleplayer', 'casino-gallery', '--width', '1280', '--height', '720'
+            }
+            if (project.hasProperty('casinoClientAudit')) {
+                workingDirectory project.file('work/casino-client-audit')
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+                property 'tnc.casinoClientAudit', 'true'
+                property 'tnc.casinoAuditReport', file('work/casino-client-audit.json').absolutePath
+                args '--quickPlaySingleplayer', 'casino-gallery', '--width', '1280', '--height', '720'
+            }
             if (project.hasProperty('lifeRoutesVisualAudit')) {
                 workingDirectory project.file('run-client-ecology-audit')
                 property 'mixin.env.remapRefMap', 'true'
                 property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
                 property 'tnc.lifeRoutesVisualAudit', 'true'
                 args '--quickPlaySingleplayer', 'ecology-gui-feedback', '--width', '1280', '--height', '720'
+            }
+            if (project.hasProperty('magicStoneUiAudit')) {
+                workingDirectory project.file('run-client-ecology-audit')
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+                property 'tnc.magicStoneUiAudit', 'true'
+                property 'tnc.magicStoneUiAuditOutput', file('work/magic-stone-ui-audit').absolutePath
+                args '--quickPlaySingleplayer', 'ecology-gui-feedback', '--width', '1600', '--height', '900'
+                jvmArgs '-Xmx6G'
+            }
+            if (project.hasProperty('manaSightAudit')) {
+                workingDirectory project.file('run-client-ecology-audit')
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+                property 'tnc.manaSightAudit', 'true'
+                if (project.hasProperty('mechAudit')) property 'tnc.mechAudit', 'true'
+                if (project.hasProperty('chargeAudit')) property 'tnc.chargeAudit', 'true'
+                property 'tnc.manaSightAuditOutput', file('work/mana-sight-particles-audit').absolutePath
+                args '--quickPlaySingleplayer', 'ecology-gui-feedback', '--width', '1600', '--height', '900'
+                jvmArgs '-Xmx6G'
+                if (project.hasProperty('manaSightShaderAudit')) {
+                    property 'tnc.manaSightAuditShader', 'ComplementaryUnbound_r5.6.1'
+                    property 'tnc.manaSightAuditOutput', file('work/mana-sight-shader-audit').absolutePath
+                }
             }
             if (project.hasProperty('tavernClientAudit')) {
                 workingDirectory project.file('run-client-ecology-audit')
@@ -138,8 +198,13 @@ minecraft {
         // The gametest system is also enabled by default for other run configs under the /test command.
         gameTestServer {
             property 'forge.enabledGameTestNamespaces', project.hasProperty('lifeRoutesTests') ? 'tncroute' : mod_id
+            if (project.hasProperty('leviathanTests')) {
+                property 'forge.enabledGameTestNamespaces', 'tncleviathan'
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+            }
             if (project.hasProperty('ftbQuestLoadTests')) {
-                workingDirectory project.file('work/ftb-route-load-test')
+                workingDirectory project.file(project.findProperty('ftbQuestLoadDir') ?: 'work/ftb-route-load-test')
             }
             if (project.hasProperty('lifeRoutesTests')) {
                 property 'mixin.env.remapRefMap', 'true'
@@ -149,6 +214,7 @@ minecraft {
                 property 'mixin.env.remapRefMap', 'true'
                 property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
             }
+            if (project.hasProperty('heroskandRealmTests')) property 'forge.enabledGameTestNamespaces', 'tncrealm'
             if (project.hasProperty('fullLandmarkTests')) property 'tnc.fullLandmarkTests', 'true'
             if (project.hasProperty('fullSkyIslandTests')) {
                 property 'tnc.fullSkyIslandTests', 'true'
@@ -188,6 +254,11 @@ repositories {
 }
 
 dependencies {
+    // Optional local visual audit only. The production pack already provides these mods.
+    if (project.hasProperty('manaSightShaderAudit')) {
+        runtimeOnly fg.deobf('tncaudit:oculus:1.8.0')
+        runtimeOnly fg.deobf('tncaudit:embeddium:0.3.31')
+    }
     // Specify the version of Minecraft to use.
     // Any artifact can be supplied so long as it has a "userdev" classifier artifact and is a compatible patcher artifact.
     // The "userdev" classifier will be requested and setup by ForgeGradle.
@@ -228,6 +299,15 @@ dependencies {
 
     testImplementation platform('org.junit:junit-bom:5.10.2')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation fg.deobf('geckolib:geckolib:4.8.4')
+    testRuntimeOnly files(zipTree('libs/geckolib-4.8.4.jar').matching { include 'META-INF/jarjar/*.jar' })
+    if (project.hasProperty('leviathanTests')) {
+        runtimeOnly fg.deobf('geckolib:geckolib:4.8.4')
+    }
+    if (project.hasProperty('heroskandRealmTests')) {
+        runtimeOnly files('work/tavern-fixtures/conquest-dev.jar')
+        runtimeOnly fg.deobf('geckolib:geckolib:4.8.4')
+    }
     if (project.hasProperty('tavernClientAudit')) {
         // Dev-only nested Fabric API SRG names must also match Mojmap; game jar untouched.
         runtimeOnly files('work/tavern-fixtures/conquest-dev.jar')
@@ -235,7 +315,7 @@ dependencies {
     }
     // Optional headless building smoke tests need the same NPC animation API as the pack.
     // Compile-only keeps normal distribution unchanged; enable with -PbuildingGameTests.
-    if (project.hasProperty('buildingGameTests')) {
+    if (project.hasProperty('buildingGameTests') || project.hasProperty('magicStoneUiAudit')) {
         runtimeOnly fg.deobf('geckolib:geckolib:4.8.4')
     }
     // Uses unmodified existing pack jars in an isolated GameTest world.
@@ -296,6 +376,11 @@ tasks.named('processResources', ProcessResources).configure {
 
 // Example for how to get properties into the manifest for reading at runtime.
 tasks.named('jar', Jar).configure {
+    // Native previews may compile dependency fixtures into the shared output.
+    // Never ship those classes: split packages hide the actual dependency on Forge.
+    exclude { entry ->
+        entry.path.endsWith('.class') && !entry.path.startsWith('com/tnc/tnc/')
+    }
     manifest {
         attributes([
                 'Specification-Title'     : mod_id,

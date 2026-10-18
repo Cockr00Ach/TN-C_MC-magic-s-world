@@ -1,6 +1,5 @@
 package com.tnc.tnc.magic;
 
-import com.tnc.tnc.TNMod;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -12,6 +11,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -19,73 +20,115 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.spell_engine.api.entity.SpellSpawnedEntity;
-import net.spell_engine.api.spell.Spell;
-
-import java.util.List;
 
 /**
- * <b>抓住不放的黑手</b> —— 暗系第一条链「黑夜之手」重做的抓取端 ✓
- * （作者 2026-10-10：「抓住敌人手再把敌人拉回来可以不」＋
- * 「暗魔法的黑夜之手可能要整个改一下」，参考《Re:Zero》486 的不可视之手）。
+ * <b>黑夜之手：一只从施法者背后甩出去、抓住人不放的手</b> ✓
+ * （作者 2026-10-10：「暗魔法的黑夜之手可能要整个改一下」，参考《Re:Zero》486 的不可视之手 ✓）。
  *
- * <h2>它补的是"飞出去的手"缺的那一半</h2>
- * 重做前这条链只有"飞出去 + 撞一下"✗ —— 撞完引擎就把投射物回收了，
- * 于是<b>没有"抓住"这件事</b>：不抓、不拽、不持续伤害，"手"只是个伤害球 ✓。
- * 现在：投射物照旧飞出去（那一段的观感作者已经验收过 ✓），
- * <b>命中那一刻</b>由引擎生成本实体 ⇒ 手"抓住"目标并留在那儿：
+ * <h2>为什么要我们自己飞（这是本文件存在的全部理由）</h2>
+ * 之前这条路是<b>引擎的投射物</b>（spell JSON 的 {@code release.target.type = PROJECTILE}）。
+ * 作者 2026-10-10 的实机反馈把这条路判死了 ✗：
  * <ol>
- *   <li><b>压制</b>：每 tick 把目标的水平速度压住（被攥住的感觉 ✓）；</li>
- *   <li><b>捏</b>：每 {@link #SQUEEZE_INTERVAL} tick 结算一次伤害（不是"一下就没" ✓）；</li>
- *   <li><b>拽</b>：t3 起把目标一段段拖向施法者（引擎把 SPAWN 实体放在命中点 ⇒
- *       它本来就在目标身上 ✓）；</li>
- *   <li><b>捏碎</b>：t5 在松手那一刻追加一次爆发（"捏"的第二段 ✓）；</li>
- *   <li><b>特效</b>：从施法者<b>后背</b>拉一条黑索到手的位置 ✓（作者 10-10 要的
- *       "从我的后背伸出来"）＋ 目标身上裹一层黑雾 ✓ —— 作者本次特别强调
- *       "别游戏里做的啥都看不见"，所以这里的粒子是**加量**的 ✗ 不是减量 ✓。</li>
+ *   <li><b>「手一直在旋转」</b> ✗ —— 引擎的 {@code SpellProjectileRenderer} 在
+ *       {@code ALONG_MOTION} 下把模型对齐到<b>运动矢量</b>，而 {@code homing} 让运动矢量
+ *       每一 tick 都在拐 ⇒ 手就一直在偏航（反编译确认：那一段是
+ *       {@code atan2} ＋ 两次 {@code Axis.rotation} 的连续量）；</li>
+ *   <li><b>「不是掌心对着别人」</b> ✗ —— 姿态由引擎那一套决定，我们只能给两个字段
+ *       （{@code orientation} / {@code rotate_degrees_offset}），定不住"掌心朝目标"；</li>
+ *   <li><b>「不能所有手都是直直飞出去，要有弯的弧线」</b> ✗✗ —— 引擎的
+ *       {@code LaunchProperties} <b>只有</b> {@code velocity / extra_launch_count /
+ *       extra_launch_delay}（javap 确认），<b>没有散射角、也没有弧线</b>；
+ *       {@code extra_launch_*} 只是"沿同一条直线多发几发"⇒ 三只手永远是一条直线 ✗。</li>
  * </ol>
+ * ⇒ 三件事都指向同一个结论：<b>飞行这一段必须由我们自己拥有</b>。
  *
- * <h2>为什么用 {@code SPAWN} 而不是自己监听施法</h2>
- * 引擎正好留了一个干净的接口（本项目已经在「以伤换伤 · 献祭」那条链上<b>实机用过</b> ✓）：
+ * <h2>现在这只手怎么动</h2>
  * <pre>
- * interface SpellSpawnedEntity {
- *     void onCreatedFromSpell(LivingEntity caster, ResourceLocation spellId, Spell$Impact$Action$Spawn spawn);
- * }
+ *   ① 甩出（FLY）：从施法者<b>后背</b>出发，沿<b>二次贝塞尔弧线</b>甩向目标
+ *      （起点 = 后背，控制点 = 中点 ＋ 侧向张开 ＋ 上抛，终点 = 目标）
+ *      ⇒ 每只手一条**不同的弧**，"从背后伸出来好几只手"的观感 ✓；
+ *   ② 抓住（GRIP）：到了就贴住目标 —— 压制它的移动、每 {@link #SQUEEZE_INTERVAL} tick
+ *      捏一次、t3 起往回拽、t5 松手前捏碎 ✓（这一段与上一版相同 ✓）。
  * </pre>
- * 法术 JSON 的 {@code impact} 里加一条 {@code SPAWN}（{@code entity_type_id: "tnc:night_grip"}）⇒
- * <b>命中那一刻</b>引擎会造出本实体、并**把施法者一起交给我们** ✓
- * （反编译 {@code SpellHelper.performImpact} 确认：它会 {@code instanceof SpellSpawnedEntity} 然后回调 ✓）。
- * 于是"抓住 ＋ 拖回来 ＋ 捏碎"这三件引擎做不到的事，全落在 {@link #onCreatedFromSpell} 与
- * {@link #tick()} 里 ✓ —— 完全相同的一套做法见 {@link TNDarkDrainEntity} ✓。
  *
- * <h2>数值表（想调手感只改这一张表）</h2>
+ * <h2>几个刻意的决定</h2>
+ * <ul>
+ *   <li><b>朝向不用"运动方向"</b> ✗：手飞的时候让掌心<b>一直朝着目标</b>
+ *       （渲染器用同步字段 {@link #DATA_TARGET} 算方向）⇒ 从任何角度看都不该出现"翻滚"✓；</li>
+ *   <li><b>不需要自己写命中判定</b> ✓：目标在施法那一刻就由瞄准锁定下来了（见
+ *       {@link TNDarkHandMechanics} ⇒ 与作者要的"玩家瞄住敌人"一致 ✓），
+ *       飞行途中只需按它的当前位置收弧、到了就抓 ✓；</li>
+ *   <li><b>没瞄到人也能用</b> ✓：这时手沿弧线飞到准星前方 {@code range} 处，然后散掉 ✓
+ *       （"没瞄准就抓不到人"的手感 ✓）。</li>
+ * </ul>
+ *
+ * <h2>数值表（想调手感只改这几张表）</h2>
  * <pre>
- *   档  法术            抓住时长   每段伤害   拽（格/10t）  末尾捏碎
- *   t1  night_hand      1.0 s      2.0        —            —
- *   t2  night_raid      1.5 s      3.0        —            —
- *   t3  night_embrace   2.0 s      4.0        0.35         —
- *   t4  black_ruin      2.5 s      5.5        0.45         —
- *   t5  slay_light      3.0 s      7.0        0.55         10.0
+ *   档  法术            甩出  抓住时长   每段捏   拽(格/10t)  末尾捏碎
+ *   t1  night_hand      0.6s   1.0 s     2.0      —          —
+ *   t2  night_raid      0.6s   1.5 s     3.0      —          —
+ *   t3  night_embrace   0.6s   2.0 s     4.0      0.35       —
+ *   t4  black_ruin      0.6s   2.5 s     5.5      0.45       —
+ *   t5  slay_light      0.6s   3.0 s     7.0      0.55       10.0
  * </pre>
- * ⚠️ <b>未实机验收</b>（开发环境看不到画面）：可静态核对的部分都核了，手感请作者进游戏试 ✓。
+ * ⚠️ <b>未实机验收</b>（开发环境看不到画面）：几何、字段、闸门这些静态能核的都核了 ✓；
+ * 弧线的弧度与手感请作者进游戏看，参数就在下面这几张表里 ✓。
  */
-public class TNNightGripEntity extends Entity implements SpellSpawnedEntity {
+public class TNNightGripEntity extends Entity {
+    private static final net.minecraft.network.syncher.EntityDataAccessor<Integer> DATA_SLOT=net.minecraft.network.syncher.SynchedEntityData.defineId(TNNightGripEntity.class,net.minecraft.network.syncher.EntityDataSerializers.INT);
+    public int handSlot(){return entityData.get(DATA_SLOT);}
 
     // ------------------------------------------------------------------
-    //  数值表
+    //  甩出（弧线）
+    // ------------------------------------------------------------------
+
+    /** 甩出用多久（tick）：12 tick = 0.6 秒，与法术 JSON 的 {@code cast.duration} 对齐 ✓。 */
+    private static final int FLY_TICKS = 12;
+
+    /** 弧线控制点抬多高（格）⇒ 手"甩"出去而不是直线推出去 ✓。 */
+    private static final double ARC_LIFT = 1.35D;
+
+    /** 相邻两只手的弧线左右分开多少格（作者："好几只手"✓）。 */
+    private static final double ARC_SPREAD = 1.9D;
+
+    /** 每只手再额外错开一点上抛量，免得几条弧完全平行 ✓。 */
+    private static final double ARC_LIFT_STEP = 0.45D;
+
+    /** 起点从施法者后背再往外挪一点 ⇒ 明确是"从背后出来"的 ✓。 */
+    private static final double BACK_OFFSET = 0.55D;
+
+    /** 起点高度（占身高比例）✓。 */
+    private static final double BACK_HEIGHT = 0.65D;
+
+    // ------------------------------------------------------------------
+    //  抓住（与上一版相同的部分）
     // ------------------------------------------------------------------
 
     /** 每档：抓住多久（tick）· 每段伤害 · 每次拽多远（0 = 不拽）· 末尾捏碎伤害（0 = 不捏）。 */
     private static final GripStats[] STATS = {
-            new GripStats(20, 2.0F, 0.00D, 0.0F),   // t1 黑夜之手：抓住拉一下
+            new GripStats(20, 2.0F, 0.00D, 0.0F),   // t1 黑夜之手
             new GripStats(30, 3.0F, 0.00D, 0.0F),   // t2 黑夜之袭
             new GripStats(40, 4.0F, 0.35D, 0.0F),   // t3 黑夜之拥：开始往回拽
             new GripStats(50, 5.5F, 0.45D, 0.0F),   // t4 黑之破灭
             new GripStats(60, 7.0F, 0.55D, 10.0F),  // t5 戮光：松手前捏碎
     };
 
-    /** 每几 tick 捏一次 ✓（和 {@code TNDarkDrainEntity.PULL_INTERVAL} 同一个节奏）。 */
+    /** 每几 tick 捏一次 ✓。 */
     private static final int SQUEEZE_INTERVAL = 10;
+
+    /**
+     * ★ <b>这一击的伤害范围（半径，格）</b> —— 作者 2026-10-10：
+     * 「**手造成伤害的范围扩大**」✓。
+     *
+     * <p>取值沿用重做前法术 JSON 里那份 {@code area_impact.radius}
+     * （2 / 2.5 / 4 / 5.5 / 7）✓ —— 也就是说"手感回到重做前那一档，但由我们自己结算"✓。
+     * 每一次"捏"都会打范围内**所有**活着的非友军（不只是被抓住的那一只 ✓），
+     * 抓住的那一下也会先扫一次 ✓。
+     */
+    private static final double[] RADII = {2.0D, 2.5D, 4.0D, 5.5D, 7.0D};
+
+    /** 手永远从这个高度以上"够到"目标 ⇒ 锚点放在脚下，模型底边贴地 ✓（作者："落地点从中心改到底部"）。 */
+    private static final double ANCHOR_Y = 0.0D;
 
     /** 拽的时候带一点上抬，免得目标卡进地面 ✓。 */
     private static final double PULL_LIFT = 0.22D;
@@ -93,50 +136,75 @@ public class TNNightGripEntity extends Entity implements SpellSpawnedEntity {
     /** 离施法者多近就不再拽（免得在脸上抖）✓。 */
     private static final double PULL_STOP_DISTANCE = 2.0D;
 
-    /** 被攥住时水平速度每一 tick 压到原来的多少 ✓（越小越"动不了"）。 */
+    /** 被攥住时水平速度每一 tick 压到原来的多少 ✓。 */
     private static final double HELD_DRAG = 0.35D;
 
-    /** 手掌心相对目标中心往施法者那边退多少格（让"掌面按在他身上"而不是穿过去）✓。 */
+    /** 手到这个距离以内就算"够到了"，进入抓住阶段 ✓。 */
+    private static final double GRAB_DISTANCE = 1.6D;
+
+    /** 抓住以后掌心相对目标中心往施法者那边退多少格 ✓。 */
     private static final double PALM_BACKOFF = 0.5D;
 
-    /** 没在目录里查到档位时用的兜底 ✓。 */
+    /** 抓住期间给目标挂的失明时长（tick/档）—— 沿用重做前的数值 ✓。 */
+    private static final int[] BLIND_TICKS = {60, 80, 100, 140, 180};
+
+    /** 每档最多同时几只（由机制层生成，这里只用来算弧线张开量）✓。 */
     private static final int FALLBACK_TIER = 1;
 
-    /** 黑索最多几个点（防止 t5 的大手拉出几百颗粒子）✓。 */
-    private static final int CORD_MAX_POINTS = 48;
 
-    /** 黑索两点之间多少格一颗粒子 ✓（沿用 {@code TNDarkHandCord} 的观感）。 */
-    private static final double CORD_SPACING = 0.35D;
-
-    /** 起点往外挪一点 ⇒ 看起来是**从后背**出来，而不是从脚底 ✓。 */
-    private static final double BACK_OFFSET = 0.45D;
+    /** 抓空之后在原地散掉用多久（tick）✓。 */
+    private static final int FADE_TICKS = 8;
 
     private record GripStats(int holdTicks, float damage, double pull, float crush) {
     }
 
     // ------------------------------------------------------------------
-    //  同步字段（客户端渲染器要用：缩放看 tier、朝向看 owner 在哪边 ✓）
+    //  同步字段（客户端渲染器要用）
     // ------------------------------------------------------------------
 
     private static final EntityDataAccessor<Integer> DATA_TIER =
             SynchedEntityData.defineId(TNNightGripEntity.class, EntityDataSerializers.INT);
-    /** 施法者的 entity id ⇒ 渲染器据此把"掌心"转向目标（从施法者指向本实体）✓。 */
+    /** 施法者 entity id ⇒ 渲染器据此算"从哪边伸出来的" ✓。 */
     private static final EntityDataAccessor<Integer> DATA_OWNER =
             SynchedEntityData.defineId(TNNightGripEntity.class, EntityDataSerializers.INT);
+    /** 目标 entity id ⇒ **渲染器让掌心一直朝着它** ✓（-1 = 没瞄到人）。 */
+    private static final EntityDataAccessor<Integer> DATA_TARGET =
+            SynchedEntityData.defineId(TNNightGripEntity.class, EntityDataSerializers.INT);
+    /** 模式（0 弧线抓取 / 1 天降砸）⇒ 渲染器据此决定"掌心朝目标"还是"掌心朝正下方" ✓。 */
+    private static final EntityDataAccessor<Integer> DATA_MODE =
+            SynchedEntityData.defineId(TNNightGripEntity.class, EntityDataSerializers.INT);
 
-    // ---- 运行期状态（只在服务端用，不进存档 ✓）----
+    private static final EntityDataAccessor<Boolean> DATA_LAUNCHED =
+            SynchedEntityData.defineId(TNNightGripEntity.class, EntityDataSerializers.BOOLEAN);
 
-    /** 被抓住的目标（只存 id：跨 tick 拿着旧引用会指向死掉的实体 ✗）。 */
-    private int victimId = -1;
-    /** 施法者（同上 ✓）。 */
+    // ---- 运行期状态（只在服务端用 ✓）----
+
     private int casterId = -1;
-    /** 档位（生成那一刻定下来 ✓）。 */
+    private int targetId = -1;
     private int tier = FALLBACK_TIER;
-    /** 已经捏过几次 ✓。 */
+    /** 这一段弧线是这一批里的第几只 / 共几只 ⇒ 决定侧向张开量与上抛错开 ✓。 */
+    private int handIndex;
+    private int handCount = 1;
+    /** 没瞄到人时，手飞到哪儿停（提前算好，免得中途东张西望 ✗）。 */
+    private Vec3 aimPoint;
+
+    // 弧线三个控制点（甩出那一刻定下来，之后每一 tick 只求值 ✓）
+    private Vec3 arcStart = Vec3.ZERO;
+    private Vec3 arcControl = Vec3.ZERO;
+    private Vec3 arcEnd = Vec3.ZERO;
+
+    /** 已经进入"抓住"阶段了吗 ✓。 */
+    private boolean gripping;
+    /** 抓空落地时那一次范围伤害已经打过了吗 ✓（只打一次，免得每 tick 刷 ✗）。 */
+    private boolean landedSweep;
+    /** 天降：砸地发生在哪一 tick（-1 = 还没砸）✓ —— 砸完还要压在地上一下再散。 */
+    private int slamTick = -1;
+    /** 这次飞行已经留了几个黑阵 / 上一个阵离起点多远（格）✓ —— 用来按**距离**控制间距 ✓。 */
+
+
+    /** 抓住阶段已经捏了几次 ✓。 */
     private int squeezes;
-    /** 累计捏掉多少血（最后报一次总账 ✓）。 */
     private float dealtTotal;
-    /** 捏碎/拽累计走了多远（给日志用 ✓）。 */
     private double pulledTotal;
 
     public TNNightGripEntity(EntityType<? extends TNNightGripEntity> type, Level level) {
@@ -148,8 +216,12 @@ public class TNNightGripEntity extends Entity implements SpellSpawnedEntity {
 
     @Override
     protected void defineSynchedData() {
+        this.entityData.define(DATA_SLOT,0);
         this.entityData.define(DATA_TIER, FALLBACK_TIER);
         this.entityData.define(DATA_OWNER, -1);
+        this.entityData.define(DATA_TARGET, -1);
+        this.entityData.define(DATA_MODE, MODE_ARC);
+        this.entityData.define(DATA_LAUNCHED, false);
     }
 
     @Override
@@ -162,20 +234,94 @@ public class TNNightGripEntity extends Entity implements SpellSpawnedEntity {
     }
 
     // ------------------------------------------------------------------
-    //  对外只读（渲染器与日志用 ✓）
+    //  对外只读（渲染器/日志用 ✓）
     // ------------------------------------------------------------------
+
+    public boolean launched() { return entityData.get(DATA_LAUNCHED); }
+
+    private int releaseDelay(){return NightHandReleaseRules.delay(handIndex,skyfall());}
+    private int flightAge() { return tickCount-releaseDelay(); }
 
     public int tier() {
         return this.entityData.get(DATA_TIER);
     }
 
-    /** 施法者的 entity id（客户端渲染器用它算朝向 ✓）；-1 = 不知道。 */
     public int ownerEntityId() {
         return this.entityData.get(DATA_OWNER);
     }
 
+    /** 目标 entity id（渲染器据此让掌心朝目标 ✓）；-1 = 这次没瞄到人。 */
+    public int targetEntityId() {
+        return this.entityData.get(DATA_TARGET);
+    }
+
     public GripStats stats() {
         return STATS[Math.max(0, Math.min(STATS.length - 1, tier - 1))];
+    }
+
+    /**
+     * ★ <b>这一档的伤害半径</b>（格）—— 作者 2026-10-10：「**伤害半径肯定是要的**」✓
+     * ⇒ 取"原表"与"手的半高"里**大的那个** ✓：手越大，打得越远 ✓
+     * （t3 的手从 7.7 格涨到 15.3 格之后，半径也从 4 格跟着涨到 7.7 格 ✓；
+     *  t1/t2 的手还小，就仍然用原表 ⇒ **不会把低档削弱** ✓）。
+     */
+    public double radius() {
+        double base = RADII[Math.max(0, Math.min(RADII.length - 1, tier - 1))];
+        return Math.max(base, handHalfExtent());
+    }
+
+    // ------------------------------------------------------------------
+    //  ★ 2026-10-10 追加：t3 起"手穿过一串**竖着的黑阵**"
+    //    作者：「给暗魔法专门做一个**黑色的**魔法阵」＋「手伸出去是穿过好几个**竖着的**魔法阵的感觉，
+    //    从 t3 开始」＋「**t 级越高魔法阵越大**」✓
+    // ------------------------------------------------------------------
+
+    /** 从这一档起，飞行途中留下竖着的黑阵 ✓。 */
+    private static final int SIGIL_TIER = 3;
+
+    /** 法阵半径 = 手的半高 × 这个系数（略大于手 ⇒ 是"穿过它"而不是"塞满它" ✓）；档位越高越大 ✓。 */
+    private static final double SIGIL_FACTOR = 1.15D;
+
+    /** 黑阵活多久（tick）—— 短一点，让"一串门"依次淡掉，而不是糊成一片 ✓。 */
+    private static final int SIGIL_LIFE = 48;
+
+    /**
+     * ★ 两个阵之间至少隔多少格 ✓ —— 作者 2026-10-10：「**魔法阵有点太多了，可以增加间距**」✓
+     *   ⇒ 不再按 tick 放（那样手飞得快就挤成一串 ✗），改成**按距离**：
+     *      手每往前走满 {@link #SIGIL_GAP} 格才留一个 ✓。
+     */
+    private static final double SIGIL_GAP = 8.0D;
+
+    /** 一次施法最多留几个阵 ✓（防止 t4 那种 30 格的大手一飞一路铺满 ✗）。 */
+    private static final int SIGIL_MAX = 3;
+
+    /** 天降（t5）时：只在落点上方这几个高度铺阵 —— 而且**只有第一只手铺** ✓（否则 7 只 ×2 = 14 个 ✗）。 */
+    private static final double[] SIGIL_RING_HEIGHTS = {6.0D, 13.0D};
+
+    /** 这一档的黑阵多大 ✓（t 级越高越大 ✓）。 */
+    private double sigilRadius() {
+        return handHalfExtent() * SIGIL_FACTOR;
+    }
+
+    /**
+     * 放一个黑阵 ✓。
+     *
+     * @param upright true = 竖着（手沿弹道穿过去 ✓）；false = 平铺（天降时手从上往下穿 ✓）
+     * @param facing  竖立时的朝向度数 —— **直接就是** {@code Axis.YP.rotationDegrees} 要的值 ✓；
+     *                由这里按 {@code atan2(dx, dz)}（弹道方向）算好再同步
+     *                （为什么不复用实体 yaw：见 {@code TNMagicCircleEntity.DATA_FACING} 的注释 ✓）
+     */
+    private void spawnSigil(ServerLevel server, Vec3 at, boolean upright, float facing) {
+        if (TNOrbEntities.MAGIC_CIRCLE == null) {
+            return;
+        }
+        TNMagicCircleEntity sigil = TNOrbEntities.MAGIC_CIRCLE.get().create(server);
+        if (sigil == null) {
+            return;
+        }
+        sigil.configure(sigilRadius(), SIGIL_LIFE, TNMagicCircleEntity.STYLE_DARK_HAND, upright, facing);
+        sigil.moveTo(at.x, at.y, at.z, 0.0F, 0.0F);
+        server.addFreshEntity(sigil);
     }
 
     /**
@@ -187,61 +333,274 @@ public class TNNightGripEntity extends Entity implements SpellSpawnedEntity {
      */
     @Override
     public AABB getBoundingBoxForCulling() {
-        return super.getBoundingBoxForCulling().inflate(handHalfExtent());
+        AABB box = super.getBoundingBoxForCulling().inflate(handHalfExtent() * 2.0D);
+        Entity owner = level().getEntity(ownerEntityId());
+        return !skyfall() && owner != null ? box.minmax(owner.getBoundingBox()).inflate(2.0D) : box;
     }
 
-    /** 这个档位的手有多大（格，半径）—— 与渲染器 {@code TNNightGripRenderer.SCALE} 同一张表的口径 ✓。 */
     public double handHalfExtent() {
-        return 0.5D + 0.35D * Math.max(1, tier);
+        // 模型半高（格）⇒ 随档位缩放一起放大 ✓
+        // （原来是个和渲染器各写一份的近似式 0.5+0.35*tier ✗，现在只有一个来源 ✓）
+        return MODEL_HALF_HEIGHT_UNITS * sizeScale();
     }
 
-    /** 手不是可交互实体 ⇒ 别让它挡住玩家/引擎的准星射线（本项目其它法术实体同样处理 ✓）。 */
+    /** 手不是可交互实体 ⇒ 别让它挡住玩家/引擎的准星射线 ✓。 */
     @Override
     public boolean isPickable() {
         return false;
     }
 
     // ------------------------------------------------------------------
-    //  生成：引擎在"命中那一刻"回调这里 ✓
+    //  甩出：由机制层在"施法那一刻"调用 ✓
     // ------------------------------------------------------------------
 
-    @Override
-    public void onCreatedFromSpell(LivingEntity caster, ResourceLocation spellId,
-                                   Spell.Impact.Action.Spawn spawn) {
-        if (level().isClientSide()) {
-            return;
-        }
-        tier = tierOf(spellId);
-        this.entityData.set(DATA_TIER, tier);
-        casterId = caster == null ? -1 : caster.getId();
+    /**
+     * 安排一次甩出 ✓（由 {@link TNDarkHandMechanics} 在 SPELL_CAST 的 RELEASE 上调用）。
+     *
+     * @param caster    施法者（服务端实体）
+     * @param targetId  瞄准锁定的目标 entity id；-1 = 没瞄到人
+     * @param tier      档位 1..5
+     * @param handIndex 这一批里的第几只（0 起）
+     * @param handCount 这一批共几只
+     */
+    public void launch(LivingEntity caster, int targetId, int tier, int handIndex, int handCount) {
+        this.tier = Math.max(1, Math.min(STATS.length, tier));
+        this.handIndex = handIndex;
+        this.entityData.set(DATA_SLOT,handIndex);
+        this.handCount = Math.max(1, handCount);
+        this.casterId = caster.getId();
+        this.targetId = targetId;
+        this.entityData.set(DATA_TIER, this.tier);
         this.entityData.set(DATA_OWNER, casterId);
+        this.entityData.set(DATA_TARGET, targetId);
 
-        LivingEntity victim = findVictim(caster);
-        if (victim == null) {
-            // 没抓到人（打在方块上/打空了）⇒ 立刻收工，别留一只空手在那儿 ✗
-            discard();
-            return;
+        LivingEntity target = resolve(targetId);
+        // ★ 落点＝目标的**脚下**（作者 2026-10-10："落地点从中心改到底部"）——
+        //   配合渲染器"模型底边贴着锚点"（见 TNNightGripRenderer）⇒ 整只手是**贴地站住**的 ✓，
+        //   而不是浮在人家胸口中间 ✗。
+        Vec3 end = target != null
+                ? target.position().add(0.0D, ANCHOR_Y, 0.0D)
+                : caster.getEyePosition().add(caster.getLookAngle().scale(reach()));
+        if (target == null) {
+            this.aimPoint = end;
         }
-        victimId = victim.getId();
-        setPos(gripPos(victim, caster));
-
-        // 抓住那一下来一团黑雾（"啪"地攥住 ✓）
-        burst(victim.position().add(0.0D, victim.getBbHeight() * 0.5D, 0.0D), 1.0D, 26);
-        LOGGER.info("TN-C: night hand grip target={} tier={} hold={}t owner={}",
-                victim.getName().getString(), tier, stats().holdTicks(), casterId);
+        this.arcStart = backPoint(caster, handIndex, handCount);
+        this.arcEnd = end;
+        this.arcControl = controlPoint(arcStart, end, handIndex, handCount);
+        setPos(arcStart);
     }
 
-    /** 施法者 vs 目标：把"抓住"的位置放在目标身上、但朝施法者那边退 {@link #PALM_BACKOFF} 格 ✓。 */
-    private Vec3 gripPos(LivingEntity victim, LivingEntity caster) {
-        Vec3 center = victim.position().add(0.0D, victim.getBbHeight() * 0.5D, 0.0D);
-        if (caster == null) {
-            return center;
+    /**
+     * 安排一次「天降」✓ —— t5 专用（作者 2026-10-10：「t5 变成有很多个大手从天而降砸向敌人，
+     * **大手的掌心向下**」）。
+     *
+     * <p>和 {@link #launch} 的区别：不进"抓住"阶段 ✗ —— 从落点**正上方**压下来，
+     * 落地那一下就是一记范围重击（{@link #slam}），然后再压在地上 {@link #SLAM_LINGER} tick ✓。
+     * 掌心朝下由**渲染器**按模式决定（见 {@code TNNightGripRenderer}）✓。
+     *
+     * @param landing 落点（一般是某个敌人的脚下；没瞄到人时是准星前方的地面 ✓）
+     */
+    public void launchSkyfall(LivingEntity caster, int targetId, int tier,
+                              int handIndex, int handCount, Vec3 landing) {
+        this.tier = Math.max(1, Math.min(STATS.length, tier));
+        this.handIndex = handIndex;
+        this.handCount = Math.max(1, handCount);
+        this.casterId = caster.getId();
+        this.targetId = targetId;
+        this.entityData.set(DATA_TIER, this.tier);
+        this.entityData.set(DATA_OWNER, casterId);
+        this.entityData.set(DATA_TARGET, targetId);
+        this.entityData.set(DATA_MODE, MODE_SKYFALL);
+
+        // 相邻两只手在水平面上错开一点（编号奇偶分别偏 x / z）⇒ 不会叠成一只 ✗
+        double offset = (handIndex - (handCount - 1) / 2.0D) * SKYFALL_SPREAD;
+        boolean alongX = handIndex % 2 == 0;
+        Vec3 start = landing.add(alongX ? offset : -offset, SKYFALL_HEIGHT, alongX ? -offset : offset);
+        this.arcStart = start;
+        this.arcEnd = landing;
+        setPos(start);
+    }
+
+    /** 手最远伸多少格（没瞄到人时用它决定落在哪 ✓）。 */
+    private double reach() {
+        return 12.0D + 4.0D * tier;
+    }
+
+    // ------------------------------------------------------------------
+    //  ★ 2026-10-10 追加：t5 换形态 —— 「很多只大手从天而降、掌心向下砸向敌人」
+    //     （作者：「t5 变成有很多个大手从天而降砸向敌人，**大手的掌心向下**」✓）
+    //     t5 不再"飞出去抓住"，而是**从天上压下来砸**：落地一下范围伤害，然后压在地上一下再散 ✓。
+    // ------------------------------------------------------------------
+
+    /** 天降：从落点上方多高开始落（格）✓（与落雷"目标正上方 24 格"同一量级）。 */
+    private static final double SKYFALL_HEIGHT = 26.0D;
+
+    /** 天降：下落速度（格/tick）✓ —— 不是自由落体，是"压下来"：约 8 tick 落地，看得清整只手 ✓。 */
+    private static final double SKYFALL_SPEED = 3.2D;
+
+    /** 天降：砸到之后还压在地上多久（tick）✓（"掌心按着地"那一下）。 */
+    private static final int SLAM_LINGER = 12;
+
+    /** 天降：砸下去那一下的伤害倍率（相对该档每段伤害）✓。 */
+    private static final double SLAM_DAMAGE_MULT = 1.6D;
+
+    /** 天降：相邻两只手横向错开多少格（免得完全重叠 ✗）。 */
+    private static final double SKYFALL_SPREAD = 1.1D;
+
+    // ------------------------------------------------------------------
+    //  ★ 2026-10-10 追加：命中后挂"易伤"（t4 起）
+    //     （作者：「**命中的敌人和其他玩家增加易伤，t4 开始**」）
+    // ------------------------------------------------------------------
+
+    /** 从这一档起，命中会给目标挂易伤 ✓（t1~t3 不挂）。 */
+    private static final int VULN_TIER = 4;
+
+    /** 每档挂几层（amplifier）✓：t4 = 0 层（+15%），t5 = 1 层（+30%）。 */
+    private static final int[] VULN_AMPLIFIER = {0, 0, 0, 0, 1};
+
+    /** 每档挂多久（tick）✓：t4 = 8 秒，t5 = 12 秒（够接一套后续输出 ✓）。 */
+    private static final int[] VULN_TICKS = {0, 0, 0, 160, 240};
+
+    /** 模式：0 = 从后背甩出弧线抓住（t1~t4）；1 = 从天而降砸（t5）✓。 */
+    private static final int MODE_ARC = 0;
+    private static final int MODE_SKYFALL = 1;
+
+    /** 指数底数：每高一档就 ×2.2 ✓（作者 2026-10-08：「指数增长」）。
+     *  ⚠️ 必须写在 {@link #SIZE_MULTIPLIER} **之前** —— Java 静态初始化按书写顺序执行 ✗。 */
+    private static final double SIZE_GROWTH = 2.2D;
+
+    /**
+     * ★ <b>2026-10-08 作者："t 级越高手越大，指数增长"</b> ⇒ 这张表改成指数 ✓。
+     *
+     * <p>旧表是 {@code {1, 3, 10, 20, 20}} —— 线性的，t4 与 t5 还一样大 ✗。
+     * 现在每一档都是上一档的 {@link #SIZE_GROWTH} 倍（2.2×）⇒ 相邻两档**一眼**就能看出差别 ✓，
+     * t5 是 t1 的 <b>23.4 倍</b>、约 <b>35 格</b>（比旧表的 30.6 格更大 ✓）。
+     *
+     * <p>⚠️ 这张表是**意图**（作者说的"指数"），真正给渲染器/剔除盒子用的
+     * {@link #SIZE_SCALE} 由它 × {@link #BASE_SCALE} 算出来 ✓ ——
+     * 以后模型 bbox 再变，只改 {@link #BASE_SCALE} 一个数，指数关系不会被悄悄破坏 ✓。
+     */
+    private static final double[] SIZE_MULTIPLIER = buildSizeMultipliers();
+
+    private static double[] buildSizeMultipliers() {
+        double[] out = new double[5];
+        for (int i = 0; i < out.length; i++) {
+            out[i] = Math.pow(SIZE_GROWTH, i);
         }
-        Vec3 dir = center.subtract(caster.position().add(0.0D, caster.getBbHeight() * 0.5D, 0.0D));
-        if (dir.lengthSqr() < 1.0E-6D) {
-            return center;
+        return out;
+    }
+
+    /**
+     * t1 的基准缩放 —— 让 t1 的手约 **1.5 格** ✓。
+     *
+     * <p>模型（作者 2026-10-10 手改过的那版）最大跨度是 y 的 **1.5625 格**（±12.5 单位）
+     * ⇒ {@code 0.98 × 1.5625 ≈ 1.53 格} ✓。
+     * ⚠️ 换了模型（bbox 变了）就只调这一个数 ✓ —— 上面那张倍率表不用动 ✓。
+     */
+    private static final double BASE_SCALE = 0.98D;
+
+    /**
+     * 每档的模型缩放 = 倍率 × 基准 ✓（渲染器与视锥剔除盒子共用的**唯一来源** ✓）。
+     *
+     * <p>按当前模型（最大跨度 1.5625 格）与指数底数 2.2 换算出来的实际大小：
+     * <pre>
+     *   t1  1.00×  ->  0.98   ≈  1.5 格
+     *   t2  2.20×  ->  2.16   ≈  3.4 格
+     *   t3  4.84×  ->  4.74   ≈  7.4 格
+     *   t4 10.65×  -> 10.44   ≈ 16.3 格
+     *   t5 23.43×  -> 22.96   ≈ 35.9 格   ← 比旧表(30.6)更大，且相邻档一眼能分辨 ✓
+     * </pre>
+     * ★ 数一遍就懂为什么要修上一个 bug ✗：客户端以前读的是**服务端字段** ⇒ 每档都按 t1 的
+     * 0.98 画（实机日志 {@code tier=5 ... scale=0.98} 实证）⇒ 五档看起来一模一样 ✗。
+     */
+    private static final float[] SIZE_SCALE = buildSizeScale();
+
+    private static float[] buildSizeScale() {
+        // ⚠️ 必须在 SIZE_MULTIPLIER / BASE_SCALE **之后**声明（Java 静态初始化按书写顺序执行 ✗）
+        float[] out = new float[SIZE_MULTIPLIER.length];
+        for (int i = 0; i < out.length; i++) {
+            out[i] = (float) (BASE_SCALE * SIZE_MULTIPLIER[i]);
         }
-        return center.subtract(dir.normalize().scale(PALM_BACKOFF));
+        return out;
+    }
+
+    /**
+     * ★ 模型（{@code tnc:projectile/dark_hand}）的**半高**，单位是格 ✓
+     * —— 渲染器把"贴地锚点"从模型中心挪到**模型底边**时要用它，**唯一来源就是这里** ✓。
+     *
+     * <p>数值来自模型的 bbox：作者 2026-10-10 **提供（导出）**的那版模型
+     * （方块 31 → 42、手指朝 +Z 伸）y 跨度是 **±12.5 单位 = 0.78125 格** ✓ ——
+     * ⚠️ **模型不是作者做的** ✗（作者原话："手的模型不是我做的啊，我帮你导出了"）——
+     * 原作者与授权**待确认**，见交接文档「待办」那一条 ✓。
+     * 用 {@code tools/import_dark_hand_bbmodel.py} 导入时它会**把该填的数打印出来** ✓
+     * （模型一变，这个数就得跟着改 ✗；导入脚本每次都会提醒 ✓）。
+     */
+    public static final double MODEL_HALF_HEIGHT_UNITS = 0.78125D;
+
+    /** 模型半高（格）—— 给客户端渲染器用 ✓。 */
+    public double modelHalfHeightUnits() {
+        return MODEL_HALF_HEIGHT_UNITS;
+    }
+
+    /** 这一档的模型缩放 ✓（渲染器与剔除盒子共用）。 */
+    public float sizeScale() {
+        // ★★ 2026-10-08 实机 bug 修复 ✗✗：这里以前读的是 {@code this.tier} —— 那是
+        //   **只在服务端写的普通字段** ✗，客户端实体上它永远是初始值 1 ⇒ 客户端把每一只手
+        //   都按 **t1 的 0.98** 画 ⇒ **t1~t5 一样大** ✗（作者两轮反馈"大小没变化"的真因）。
+        //   证据：新增的渲染探针在 t5 天降那一下打出 `tier=5 ... scale=0.98` ——
+        //   {@code tier()} 读的是 {@code DATA_TIER}（同步值，=5 ✓），而 sizeScale 读的不是，
+        //   两个数自相矛盾 ⇒ 一眼定位 ✓。
+        //   ⇒ 现在**统一走同步字段** {@link #tier()}（与渲染器/剔除盒子同一个来源 ✓）。
+        return SIZE_SCALE[Math.max(0, Math.min(SIZE_SCALE.length - 1, tier() - 1))];
+    }
+
+    /** 这只手是天降模式吗（渲染器据此把**掌心朝正下方** ✓）。 */
+    public boolean skyfall() {
+        return this.entityData.get(DATA_MODE) == MODE_SKYFALL;
+    }
+
+    /**
+     * 起点：施法者<b>后背</b>，并按"这一批里的第几只"左右错开 ⇒
+     * 三只手是从肩胛两侧分别出来的，不是同一个点 ✗。
+     */
+    private Vec3 backPoint(LivingEntity caster, int index, int count) {
+        Vec3 look = caster.getLookAngle();
+        Vec3 back = new Vec3(-look.x, 0.0D, -look.z);
+        if (back.lengthSqr() < 1.0E-6D) {
+            back = new Vec3(0.0D, 0.0D, 1.0D);
+        }
+        back = back.normalize();
+        Vec3 side = new Vec3(-back.z, 0.0D, back.x);          // 水平面内与"后背方向"垂直 ✓
+        double offset = (index - (count - 1) / 2.0D) * NightHandReleaseRules.spacing(handHalfExtent());
+        return caster.position()
+                .add(0.0D, caster.getBbHeight() * BACK_HEIGHT, 0.0D)
+                .add(back.scale(BACK_OFFSET))
+                .add(side.scale(offset));
+    }
+
+    /**
+     * 弧线的控制点：中点 ＋ 侧向张开 ＋ 上抛 ✓。
+     *
+     * <p>二次贝塞尔 {@code B(t) = (1−t)²P0 + 2(1−t)tP1 + t²P2} 的形状**完全由 P1 决定** ✓ ——
+     * 把 P1 往侧面推、往上抬，手就是**甩**出去的弧线（而不是直线 ✗）；
+     * 每只手的侧向/上抛量都不同 ⇒ 几条弧线不重合 ✓（这正是作者要的"弯的弧线"✓）。
+     */
+    private Vec3 controlPoint(Vec3 from, Vec3 to, int index, int count) {
+        Vec3 mid = from.add(to).scale(0.5D);
+        Vec3 dir = to.subtract(from);
+        Vec3 flat = new Vec3(dir.x, 0.0D, dir.z);
+        Vec3 side = flat.lengthSqr() < 1.0E-6D
+                ? new Vec3(1.0D, 0.0D, 0.0D)
+                : new Vec3(-flat.normalize().z, 0.0D, flat.normalize().x);
+        double offset = (index - (count - 1) / 2.0D) * ARC_SPREAD;
+        double lift = ARC_LIFT + ARC_LIFT_STEP * (index % 3);
+        return mid.add(side.scale(offset)).add(0.0D, lift, 0.0D);
+    }
+
+    /** 贝塞尔求值 ✓。 */
+    private static Vec3 bezier(Vec3 p0, Vec3 p1, Vec3 p2, double t) {
+        double u = 1.0D - t;
+        return p0.scale(u * u).add(p1.scale(2.0D * u * t)).add(p2.scale(t * t));
     }
 
     // ------------------------------------------------------------------
@@ -254,37 +613,199 @@ public class TNNightGripEntity extends Entity implements SpellSpawnedEntity {
         if (this.level().isClientSide()) {
             return;
         }
-        GripStats stats = stats();
-        if (tickCount > stats.holdTicks()) {
-            finish(stats);
-            return;
-        }
-
-        LivingEntity victim = resolve(victimId);
         LivingEntity caster = resolve(casterId);
-        if (victim == null || !victim.isAlive()) {
-            finish(stats);
+
+        // 施法者死了/下线了 ⇒ 手立刻散掉 ✓
+        if (caster == null) {
+            discard();
             return;
         }
 
-        // ① 贴住目标（它被推走/被打飞时手跟着走 ✓）＋ 压制它的移动（"被攥住"✓）
+        // No summoning gates. Each slot starts on its own release beat.
+        if (tickCount<=releaseDelay()) return;
+        entityData.set(DATA_LAUNCHED, true);
+
+        // ★ t5：天降砸地（不进抓住阶段 ✗）
+        if (skyfall()) {
+            fall(caster);
+            return;
+        }
+        if (!gripping) {
+            fly(caster);
+            return;
+        }
+        grip(caster);
+    }
+
+    /**
+     * ③ <b>天降阶段</b>：从落点正上方匀速压下来，落地就是"砸"✓
+     * （作者 2026-10-10：「t5 变成有很多个大手从天而降砸向敌人」）。
+     *
+     * <p>为什么不用自由落体：那样一眨眼就没了、看不出是"手压下来"✗；
+     * 匀速 {@link #SKYFALL_SPEED} 约 8 tick 落地 ⇒ 玩家看得清整只手掌心朝下压下来 ✓。
+     */
+    private void prepareGates(LivingEntity caster) {
+        if (handIndex != 0 || !(level() instanceof ServerLevel server)) return;
+        Vec3 start = skyfall() ? backPoint(caster, 0, 1) : arcStart;
+        Vec3 direction = skyfall() ? caster.getLookAngle() : arcEnd.subtract(start).normalize();
+        float facing = (float) Math.toDegrees(Math.atan2(direction.x, direction.z));
+        int count = skyfall() || tier < SIGIL_TIER ? 1
+                : Math.min(SIGIL_MAX, 1 + (int) (start.distanceTo(arcEnd) / SIGIL_GAP));
+        for (int i = 0; i < count; i++) {
+            double t = count == 1 ? 0.08D : 0.08D + i * 0.62D / (count - 1);
+            Vec3 base = skyfall() ? start.add(direction.scale(1.5D))
+                    : bezier(start, arcControl, arcEnd, t);
+            spawnSigil(server, base.add(0.0D, handHalfExtent(), 0.0D), true, facing);
+        }
+    }
+
+    private void fall(LivingEntity caster) {
+        Vec3 landing = arcEnd;
+
+        if (position().y - landing.y > SKYFALL_SPEED) {
+            setPos(getX(), getY() - SKYFALL_SPEED, getZ());
+            fallTrail();
+            return;
+        }
+        setPos(landing.x, landing.y, landing.z);
+        if (!landedSweep) {
+            landedSweep = true;
+            slam(caster);
+        }
+        if (slamTick >= 0 && tickCount > slamTick + SLAM_LINGER) {
+            discard();
+        }
+    }
+
+    /** 下落拖尾：一条黑的竖直烟柱（"很多只大手压下来"的压迫感 ✓）。 */
+    private void fallTrail() {
+        if (!(level() instanceof ServerLevel server)) {
+            return;
+        }
+        server.sendParticles(black(), getX(), getY(), getZ(), 10, 0.3D, 0.6D, 0.3D, 0.03D);
+        server.sendParticles(ParticleTypes.SMOKE, getX(), getY() + 0.6D, getZ(), 6, 0.35D, 0.8D, 0.35D, 0.02D);
+        server.sendParticles(ParticleTypes.SQUID_INK, getX(), getY(), getZ(), 4, 0.2D, 0.4D, 0.2D, 0.0D);
+    }
+
+    /**
+     * 砸地那一下 ✓：一次性范围重击 ＋ 扬尘/黑雾/闷响，然后压在地上 {@link #SLAM_LINGER} tick。
+     *
+     * <p>半径与"捏"用同一张表（{@link #RADII}）✓；伤害 = 该档每段伤害 × {@link #SLAM_DAMAGE_MULT}
+     * （只打一下，所以给得比"每 0.5 秒捏一次"重 ✓）。
+     */
+    private void slam(LivingEntity caster) {
+        slamTick = tickCount;
+        float dealt = sweep(null, caster, (float) (stats().damage() * SLAM_DAMAGE_MULT));
+        dealtTotal += dealt;
+        if (level() instanceof ServerLevel server) {
+            Vec3 at = position();
+            double r = Math.max(1.2D, radius());
+            server.sendParticles(ParticleTypes.SMOKE, at.x, at.y + 0.4D, at.z,
+                    40, r * 0.35D, 0.25D, r * 0.35D, 0.06D);
+            server.sendParticles(black(), at.x, at.y + 0.3D, at.z,
+                    50, r * 0.4D, 0.2D, r * 0.4D, 0.05D);
+            server.sendParticles(ParticleTypes.SOUL, at.x, at.y + 0.5D, at.z,
+                    12, r * 0.25D, 0.2D, r * 0.25D, 0.02D);
+            server.playSound(null, at.x, at.y, at.z, SoundEvents.WITHER_BREAK_BLOCK,
+                    SoundSource.PLAYERS, 1.0F, 0.55F);
+            server.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE,
+                    SoundSource.PLAYERS, 0.5F, 1.4F);
+        }
+        LOGGER.info("TN-C: night hand slam tier={} r={} dealt={} at={}",
+                tier, radius(), dealt, position());
+    }
+
+    /** ① 甩出阶段：沿弧线走 FLY_TICKS 帧，到了就抓 ✓。 */
+    private void fly(LivingEntity caster) {
+        // 手飞的时候目标可能在动 ⇒ 终点与控制点每 tick 按目标当前位置重算
+        // （不做"拐弯追踪"，只让这条弧跟着目标平移 ⇒ 不会出现引擎那种一直偏航 ✗）
+        LivingEntity target = resolve(targetId);
+        Vec3 end = target != null
+                ? target.position().add(0.0D, ANCHOR_Y, 0.0D)
+                : (aimPoint != null ? aimPoint : arcEnd);
+        arcEnd = end;
+        arcControl = controlPoint(arcStart, end, handIndex, handCount);
+
+        double progress = Math.min(1.0D, flightAge() / (double) FLY_TICKS);
+        double t = 1.0D - (1.0D - progress) * (1.0D - progress);   // 出得快、收得慢 ⇒ 像甩出去的 ✓
+        setPos(bezier(arcStart, arcControl, end, t));
+
+        trail();
+
+        boolean arrived = progress >= 1.0D
+                || (target != null && position().distanceTo(end) <= GRAB_DISTANCE);
+        if (!arrived) {
+            return;
+        }
+        if (target == null) {
+            // 没瞄到人：落到准星前方、**扫一次范围伤害**（"甩出去砸了一下"✓），停一下再散掉 ✓
+            if (!landedSweep) {
+                landedSweep = true;
+                burst(position(), Math.max(0.8D, radius() * 0.5D), 24);
+                sweep(null, caster, stats().damage());
+            }
+            if (flightAge() > FLY_TICKS + FADE_TICKS) {
+                discard();
+            }
+            return;
+        }
+        startGripping(target, caster);
+    }
+
+    /** 抓空时最后几帧的收尾（在 {@link #fly} 里已经 discard 了，这里只补特效）✓。 */
+    private void trail() {
+        if (!(level() instanceof ServerLevel server)) {
+            return;
+        }
+        server.sendParticles(black(), getX(), getY(), getZ(), 6, 0.18D, 0.18D, 0.18D, 0.01D);
+        if (tickCount % 3 == 0) {
+            server.sendParticles(ParticleTypes.SOUL, getX(), getY(), getZ(), 2, 0.12D, 0.12D, 0.12D, 0.0D);
+        }
+    }
+
+    /** 到点了 ⇒ 进入抓住阶段 ✓。 */
+    private void startGripping(LivingEntity target, LivingEntity caster) {
+        gripping = true;
+        // 抓住那一刻归零计时 ⇒ 抓住时长与飞行时长互不挤占 ✓
+        squeezes = 0;
+        setPos(gripPos(target, caster));
+        burst(target.position().add(0.0D, target.getBbHeight() * 0.5D, 0.0D), 1.0D, 26);
+        // ★ 抓住那一下先扫一遍范围伤害（作者："手造成伤害的范围扩大"✓）
+        //   ≈ 重做前引擎那条 impact.DAMAGE ＋ area_impact，只是现在由我们自己结算 ✓
+        dealtTotal += sweep(target, caster, stats().damage());
+        // 失明（沿用重做前的数值 ✓；重做前是引擎的 impact 挂上的，现在由我们自己挂 ✓）
+        int blind = BLIND_TICKS[Math.max(0, Math.min(BLIND_TICKS.length - 1, tier - 1))];
+        if (blind > 0) {
+            target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, blind, 0, false, true));
+        }
+        LOGGER.info("TN-C: night hand grip target={} tier={} hands={} hold={}t radius={} owner={}",
+                target.getName().getString(), tier, handCount, stats().holdTicks(), radius(), casterId);
+    }
+
+    /** ② 抓住阶段（与上一版相同 ✓）。 */
+    private void grip(LivingEntity caster) {
+        GripStats stats = stats();
+        if (flightAge() > FLY_TICKS + stats.holdTicks()) {
+            finish();
+            return;
+        }
+        LivingEntity victim = resolve(targetId);
+        if (victim == null || !victim.isAlive()) {
+            finish();
+            return;
+        }
         setPos(gripPos(victim, caster));
         hold(victim);
 
-        // ② 捏：每 SQUEEZE_INTERVAL tick 一次（不是"一下就没" ✓）
-        if (tickCount % SQUEEZE_INTERVAL == 0 && squeezes * SQUEEZE_INTERVAL < stats.holdTicks()) {
+        int held = flightAge() - FLY_TICKS;
+        if (held > 0 && held % SQUEEZE_INTERVAL == 0 && squeezes * SQUEEZE_INTERVAL < stats.holdTicks()) {
             squeezes++;
-            float dealt = squeeze(victim, caster, stats.damage());
-            dealtTotal += dealt;
+            dealtTotal += squeeze(victim, caster, stats.damage());
         }
-
-        // ③ 拽：t3 起往回拖（作者："抓住敌人手再把敌人拉回来"✓）
-        if (caster != null && stats.pull() > 0.0D && tickCount % SQUEEZE_INTERVAL == 0) {
+        if (stats.pull() > 0.0D && held > 0 && held % SQUEEZE_INTERVAL == 0) {
             pulledTotal += pullToward(victim, caster, stats.pull());
         }
 
-        // ④ 特效：黑索（后背 → 手）＋ 目标身上裹黑雾 ＋ 手周围的黑气 ✓
-        cord(caster);
         shroud(victim);
         if (tickCount % 2 == 0) {
             burst(position(), 0.45D, 6);
@@ -292,87 +813,172 @@ public class TNNightGripEntity extends Entity implements SpellSpawnedEntity {
     }
 
     /** 收工：t5 先捏碎，再消失 ✓。 */
-    private void finish(GripStats stats) {
-        LivingEntity victim = resolve(victimId);
+    private void finish() {
+        LivingEntity victim = resolve(targetId);
         LivingEntity caster = resolve(casterId);
+        GripStats stats = stats();
         if (victim != null && victim.isAlive() && stats.crush() > 0.0F) {
-            float dealt = crush(victim, caster, stats.crush());
-            dealtTotal += dealt;
+            dealtTotal += crush(victim, caster, stats.crush());
         }
-        if (dealtTotal > 0.0F) {
-            LivingEntity owner = resolve(casterId);
-            if (owner instanceof net.minecraft.server.level.ServerPlayer player) {
-                player.displayClientMessage(Component.literal(String.format(
-                        "§5[TN-C] §r黑夜之手 · 共捏碎 §c%.1f§r 点生命%s",
-                        dealtTotal,
-                        pulledTotal > 0.01D ? String.format(" · 已拖回 §d%.1f§r 格", pulledTotal) : ""))
-                        .withStyle(net.minecraft.ChatFormatting.RESET), true);
-            }
+        if (dealtTotal > 0.0F && caster instanceof net.minecraft.server.level.ServerPlayer player) {
+            player.displayClientMessage(Component.literal(String.format(
+                    "§5[TN-C] §r黑夜之手 · 共捏碎 §c%.1f§r 点生命%s",
+                    dealtTotal,
+                    pulledTotal > 0.01D ? String.format(" · 已拖回 §d%.1f§r 格", pulledTotal) : ""))
+                    .withStyle(net.minecraft.ChatFormatting.RESET), true);
         }
-        LOGGER.info("TN-C: night hand grip end tier={} squeeze={} dealt={} pulled={}",
+        LOGGER.info("TN-C: night hand end tier={} squeeze={} dealt={} pulled={}",
                 tier, squeezes, dealtTotal, String.format("%.2f", pulledTotal));
         discard();
     }
 
-    /** 压制：把目标的水平速度压住 ⇒ 读感是"被攥住动不了"✓（不挂原版减速效果，免得冒药水粒子 ✗）。 */
+    /**
+     * 手站哪儿：目标**脚下**（不是身体中心 ✗），再从水平方向朝施法者退 {@link #PALM_BACKOFF} 格 ✓。
+     *
+     * <p>作者 2026-10-10：「**落地有点不好看，你把落地点从中心改到底部**」——
+     * 现在锚点在脚底，配合渲染器"模型底边贴锚点"⇒ 一只手掌**贴地立着**按向目标 ✓
+     * （重做前它悬在人家的腰/胸口那个高度，看着像插在身上 ✗）。
+     * 退让方向特意**压平到水平面**✗：不然目标比施法者高时手会往下钻进地里 ✓。
+     */
+    private Vec3 gripPos(LivingEntity victim, LivingEntity caster) {
+        Vec3 feet = victim.position().add(0.0D, ANCHOR_Y, 0.0D);
+        if (caster == null) {
+            return feet;
+        }
+        Vec3 flat = new Vec3(feet.x - caster.getX(), 0.0D, feet.z - caster.getZ());
+        if (flat.lengthSqr() < 1.0E-6D) {
+            return feet;
+        }
+        return feet.subtract(flat.normalize().scale(PALM_BACKOFF));
+    }
+
+    /** 压制：把目标的水平速度压住 ⇒ 读感是"被攥住动不了"✓。 */
     private void hold(LivingEntity victim) {
         Vec3 delta = victim.getDeltaMovement();
         double dampedX = delta.x * HELD_DRAG;
         double dampedZ = delta.z * HELD_DRAG;
         if (Math.abs(dampedX - delta.x) > 1.0E-4D || Math.abs(dampedZ - delta.z) > 1.0E-4D) {
             victim.setDeltaMovement(dampedX, delta.y, dampedZ);
-            victim.hurtMarked = true;      // 服务端改了速度必须告诉客户端，否则看起来没被抓住 ✓
+            victim.hurtMarked = true;
         }
     }
 
-    /**
-     * 捏一下。
-     *
-     * <p>⚠️ 这里**必须先把受伤窗口清 0** ✗ —— 和 {@code TNDarkSacrificeMechanics} 的燃血
-     * 同一个原因：{@code hurt()} 在 {@code invulnerableTime > 0}（刚被打过/刚被烧过）时
-     * 会被**静默丢掉**，表现就是"有时掉有时不掉" ✗（作者 10-09 抓到过这个现象）。
-     */
     private float squeeze(LivingEntity victim, LivingEntity caster, float amount) {
-        return dealDamage(victim, caster, amount, "squeeze");
+        return sweep(victim, caster, amount);
     }
 
-    /** t5 松手前那一下 ✓。 */
+    /**
+     * ★ <b>一次范围伤害（"捏"/"砸"）</b> —— 作者 2026-10-10：「**手造成伤害的范围扩大**」✓。
+     *
+     * <p>以**手自己为中心**、半径按档位（{@link #RADII}）打范围内所有活着的非友军 ✓，
+     * 不只打被抓住的那一只 ✗。抓住的那一下、以及"没瞄到人"落地那一下也各扫一次 ✓
+     * （≈ 重做前引擎那条 {@code impact.DAMAGE} ＋ {@code area_impact} 的合体，
+     * 只是现在由我们自己结算 ✓）。
+     *
+     * <p>注意 AABB 是方的 ⇒ 再按球形筛一遍距离 ✓（不然墙角会莫名其妙挨打 ✗）。
+     *
+     * @param latched 被抓住的那只（只为日志用，可以是 null ✓）
+     */
+    private float sweep(LivingEntity latched, LivingEntity caster, float amount) {
+        if (!(level() instanceof ServerLevel server) || amount <= 0.0F) {
+            return 0.0F;
+        }
+        double radius = radius();
+        AABB box = new AABB(getX() - radius, getY() - radius, getZ() - radius,
+                getX() + radius, getY() + radius, getZ() + radius);
+        float total = 0.0F;
+        int hits = 0;
+        for (LivingEntity candidate : server.getEntitiesOfClass(LivingEntity.class, box,
+                e -> e.isAlive() && !e.isSpectator()
+                        && e != caster
+                        && !(caster != null && e.isAlliedTo(caster)))) {
+            if (candidate.distanceTo(this) > radius) {
+                continue;
+            }
+            total += dealDamage(candidate, caster, amount);
+            // ★ t4 起：**命中的敌人**也吃易伤 ✓（作者："命中的敌人和其他玩家增加易伤"）
+            applyVulnerable(candidate);
+            hits++;
+        }
+        // ★ t4 起：范围内**其他玩家**也吃易伤 ✓（含队友 —— 作者特意点名"其他玩家"）。
+        //   ⚠️ 这一遍**不造成伤害** ✗：伤害仍然只打敌人/非友军（上面那一遍），
+        //      免得这条链悄悄变成"连队友一起打" ✗。要连队友一起打的话把那两遍并成一遍即可 ✓。
+        if (tier >= VULN_TIER) {
+            for (Player other : server.getEntitiesOfClass(Player.class, box,
+                    e -> e.isAlive() && !e.isSpectator() && e != caster)) {
+                if (other.distanceTo(this) <= radius) {
+                    applyVulnerable(other);
+                }
+            }
+        }
+        if (hits > 0) {
+            LOGGER.debug("TN-C: night hand sweep r={} hits={} total={} latched={}",
+                    radius, hits, total, latched == null ? "-" : latched.getName().getString());
+        }
+        return total;
+    }
+
+    /**
+     * ★ 给目标挂<b>易伤</b>（t4 起）✓ —— 作者 2026-10-10：
+     * 「**命中的敌人和其他玩家增加易伤，t4 开始**」。
+     *
+     * <p>效果本身只是个<b>标记</b>（不发属性、不做事）✗ —— 真正的"受创加重"由
+     * {@code armor/TNIronArmorEvents.onLivingHurt} 里那**一处**统一结算 ✓
+     * （与铁甲 99%、光耀链减伤、光/暗龙鳞甲 50% 是同一个地方、同一条规矩 ✓）。
+     * 幅度：每层 +15% ⇒ {@link #VULN_AMPLIFIER} 让 t4 = +15%、t5 = +30% ✓
+     * （要改数值只改那一处的 {@code VULNERABLE_PER_LEVEL}，或这里的层数/时长 ✓）。
+     */
+    private void applyVulnerable(LivingEntity target) {
+        if (tier < VULN_TIER || target == null || !target.isAlive() || !TNEffects.VULNERABLE.isPresent()) {
+            return;
+        }
+        int index = Math.max(0, Math.min(VULN_TICKS.length - 1, tier - 1));
+        int ticks = VULN_TICKS[index];
+        if (ticks <= 0) {
+            return;
+        }
+        int amplifier = VULN_AMPLIFIER[Math.max(0, Math.min(VULN_AMPLIFIER.length - 1, tier - 1))];
+        // visible = true ⇒ 身上冒暗红粒子：玩家一眼看得出"这只挂了易伤" ✓
+        target.addEffect(new MobEffectInstance(TNEffects.VULNERABLE.get(), ticks, amplifier, false, true));
+    }
+
     private float crush(LivingEntity victim, LivingEntity caster, float amount) {
         burst(victim.position().add(0.0D, victim.getBbHeight() * 0.5D, 0.0D), 1.6D, 60);
         if (level() instanceof ServerLevel server) {
             server.playSound(null, victim.getX(), victim.getY(), victim.getZ(),
                     SoundEvents.WITHER_BREAK_BLOCK, SoundSource.PLAYERS, 0.9F, 0.65F);
         }
-        return dealDamage(victim, caster, amount, "crush");
+        return dealDamage(victim, caster, amount);
     }
 
-    /** 真正扣血（统一出口，方便日后要加"永不致死"之类的规则 ✓）。 */
-    private float dealDamage(LivingEntity victim, LivingEntity caster, float amount, String kind) {
+    /**
+     * 真正扣血。
+     *
+     * <p>⚠️ 扣之前**必须先把目标的受伤窗口清 0** ✗ —— 和 {@code TNDarkSacrificeMechanics}
+     * 的燃血同一个原因：{@code hurt()} 在 {@code invulnerableTime > 0}（刚被打过）时会被
+     * **静默丢掉** ⇒ 表现是"有时掉有时不掉" ✗（作者 10-09 抓到过这个现象 ✓）。
+     */
+    private float dealDamage(LivingEntity victim, LivingEntity caster, float amount) {
         if (amount <= 0.0F) {
             return 0.0F;
         }
         float before = victim.getHealth();
         victim.invulnerableTime = 0;
         boolean landed = victim.hurt(level().damageSources().indirectMagic(this, caster), amount);
-        float dealt = landed ? Math.max(0.0F, before - victim.getHealth()) : 0.0F;
-        LOGGER.debug("TN-C: night hand {} target={} amount={} landed={} dealt={}",
-                kind, victim.getName().getString(), amount, landed, dealt);
-        return dealt;
+        return landed ? Math.max(0.0F, before - victim.getHealth()) : 0.0F;
     }
 
     /**
      * 把被抓住的目标朝施法者拖 ✓（作者 2026-10-10："抓住敌人手再把敌人拉回来"）。
      *
      * <p>为什么用"间隔冲量"而不是每 tick 设速度：生物的 {@code travel()} 每 tick 都会按
-     * 自己的意向重设速度 ⇒ 每 tick 设会被它抢走 ✗；间隔给一次较大冲量则确实能把人拖走 ✓
-     * （与击退同一类效果）。{@code hurtMarked} 不能省 ✗（否则服务端改了速度客户端不知道 ✓）。
-     *
-     * @return 实际拽动了多远（格）
+     * 自己的意向重设速度 ⇒ 每 tick 设会被它抢走 ✗；{@code hurtMarked} 不能省 ✗
+     * （否则服务端改了速度客户端不知道 ✓）。
      */
     private double pullToward(LivingEntity victim, LivingEntity caster, double strength) {
         Vec3 delta = caster.position().subtract(victim.position());
         if (delta.lengthSqr() < PULL_STOP_DISTANCE * PULL_STOP_DISTANCE) {
-            return 0.0D;                            // 已经拉到手边 ⇒ 别再抖 ✓
+            return 0.0D;
         }
         double moved = Math.min(strength, Math.max(0.0D, delta.length() - PULL_STOP_DISTANCE));
         Vec3 pull = delta.normalize().scale(moved).add(0.0D, PULL_LIFT, 0.0D);
@@ -382,49 +988,10 @@ public class TNNightGripEntity extends Entity implements SpellSpawnedEntity {
     }
 
     // ------------------------------------------------------------------
-    //  特效（作者本次明确："别啥都看不见"，所以这部分是加量的 ✓）
+    //  特效（作者："别啥都看不见，特效要做出来"✓）
     // ------------------------------------------------------------------
 
-    /**
-     * <b>黑索</b>：从施法者的<b>后背</b>到当前手的位置拉一条黑线 ✓
-     * （作者 2026-10-10：「要那种从我的后背伸出来的感觉……可以做一个黑线连接着手腕跟后背」）。
-     *
-     * <p>为什么还是粒子而不是真几何线：那要自己写世界空间渲染
-     * （{@code RenderLevelStageEvent} ＋ 自建 RenderType），风险与工作量都大得多 ✗；
-     * 而**密到 {@link #CORD_SPACING} 格间距的粒子本来就成线** ✓
-     * （与 {@code TNDarkHandCord} 同一套观感 ✓ —— 区别只是那条线是给"飞出去的手"用的，
-     * 本实体自己就是那只手 ✓）。
-     */
-    private void cord(LivingEntity caster) {
-        if (!(level() instanceof ServerLevel server) || caster == null) {
-            return;
-        }
-        Vec3 from = backPoint(caster);
-        Vec3 to = position();
-        double distance = from.distanceTo(to);
-        if (distance < 0.2D) {
-            return;
-        }
-        int points = (int) Math.min(CORD_MAX_POINTS, Math.ceil(distance / CORD_SPACING));
-        for (int i = 1; i <= points; i++) {
-            Vec3 at = from.lerp(to, i / (double) points);
-            server.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y, at.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
-        }
-    }
-
-    /** 施法者后背那一点（沿视线反方向外移 {@link #BACK_OFFSET} 格、身高 65% 处）✓。 */
-    private Vec3 backPoint(LivingEntity caster) {
-        Vec3 look = caster.getLookAngle();
-        Vec3 back = new Vec3(-look.x, 0.0D, -look.z);
-        if (back.lengthSqr() < 1.0E-6D) {
-            back = new Vec3(0.0D, 0.0D, 1.0D);
-        }
-        return caster.position()
-                .add(0.0D, caster.getBbHeight() * 0.65D, 0.0D)
-                .add(back.normalize().scale(BACK_OFFSET));
-    }
-
-    /** 目标身上裹一层黑雾 ⇒ 站在旁边的人**看得见**"他被什么抓住了" ✓。 */
+    /** 目标身上裹一层黑雾 ⇒ 旁边的人看得见"他被什么抓住了" ✓。 */
     private void shroud(LivingEntity victim) {
         if (!(level() instanceof ServerLevel server)) {
             return;
@@ -438,7 +1005,6 @@ public class TNNightGripEntity extends Entity implements SpellSpawnedEntity {
         }
     }
 
-    /** 一小团黑气 ＋ 一点灵魂火（手的"存在感"✓）。 */
     private void burst(Vec3 at, double radius, int count) {
         if (!(level() instanceof ServerLevel server)) {
             return;
@@ -451,11 +1017,8 @@ public class TNNightGripEntity extends Entity implements SpellSpawnedEntity {
     /**
      * 跨模组的黑粒子：查一次、缓存，拿不到就退回原版 `squid_ink` ✓。
      *
-     * <p>⚠️ 粒子 id **不能写死** ✗（铁律第十三条：{@code assets/<ns>/particles/<id>.json} 存在
-     * 证明不了任何事，必须是真 {@code ParticleType}）；而且
-     * {@code ParticleType} 本身**不是** {@code ParticleOptions}（只有 {@code SimpleParticleType} 才是）
-     * ⇒ 必须先 {@code instanceof} 再赋值，直接写三元式**编译不过** ✗
-     * （同一个坑见 {@code TNDarkDrainEntity.blood()} ✓）。
+     * <p>⚠️ 粒子 id 不能写死 ✗（铁律第十三条）；且 {@code ParticleType} 本身**不是**
+     * {@code ParticleOptions}（只有 {@code SimpleParticleType} 才是）⇒ 必须先 {@code instanceof} ✓。
      */
     private static ParticleOptions blackParticle;
 
@@ -486,50 +1049,5 @@ public class TNNightGripEntity extends Entity implements SpellSpawnedEntity {
         }
         Entity e = server.getEntity(entityId);
         return e instanceof LivingEntity living && living.isAlive() ? living : null;
-    }
-
-    /** 档位：从法术 id 反查目录（拿不到就退到 t1）✓。 */
-    private static int tierOf(ResourceLocation spellId) {
-        if (spellId == null) {
-            return FALLBACK_TIER;
-        }
-        SpellCatalog.Entry entry = SpellCatalog.byId(spellId);
-        return entry == null || entry.tier() <= 0 ? FALLBACK_TIER : entry.tier();
-    }
-
-    /**
-     * 抓谁：<b>命中点附近最近的敌人</b> ✓。
-     *
-     * <p>为什么用"命中点附近"就够：引擎是在**命中点**生成本实体的 ✓
-     * （{@code SPAWN} 的语义就是把实体放在被打中的地方）⇒ 受害者本来就在脚下 ✓。
-     * 这与 {@code TNDarkDrainEntity.findVictim} 的**兜底那条路**同源 ✓；
-     * 那边多了一条"优先取玩家瞄准的那只"（{@code TNDarkAimMechanics.recentTargetId}）——
-     * 本实体**故意不接它** ✗：那条 API 所在的文件此刻正被另一个会话改着（协作铁律：
-     * 别把新代码挂到正在被别人写的文件上 ✗），而引擎已经把我们放在命中点，
-     * "最近那只"与"瞄的那只"在实际手感里是同一只 ✓。
-     */
-    private LivingEntity findVictim(LivingEntity caster) {
-        double radius = 3.0D;
-        AABB box = new AABB(
-                getX() - radius, getY() - radius, getZ() - radius,
-                getX() + radius, getY() + radius, getZ() + radius);
-        List<LivingEntity> found = level().getEntitiesOfClass(LivingEntity.class, box,
-                e -> e.isAlive() && e != caster && !e.isSpectator()
-                        && !(caster instanceof Player owner && e.isAlliedTo(owner)));
-        LivingEntity best = null;
-        double bestDistance = Double.MAX_VALUE;
-        for (LivingEntity candidate : found) {
-            double distance = candidate.distanceToSqr(this);
-            if (distance < bestDistance) {
-                bestDistance = distance;
-                best = candidate;
-            }
-        }
-        return best;
-    }
-
-    /** 本模组 id（保留给日志/调试，和别的法术实体一致 ✓）。 */
-    public static ResourceLocation id() {
-        return ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "night_grip");
     }
 }

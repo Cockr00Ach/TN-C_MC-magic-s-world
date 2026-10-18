@@ -155,15 +155,23 @@ public final class TNDarkAimMechanics {
         }
     }
 
-    /** 准星指到的那个敌人；指到方块/空气就返回 null ✓。 */
+    /**
+     * 准星指到的那个敌人；指到方块/空气就返回 null ✓。
+     *
+     * <p>★★ 2026-10-10 修复（作者："**现在黑夜之手怎么无法瞄准敌人了**"）：
+     * 原来这里是
+     * <pre>HitResult hit = player.pick(AIM_RANGE, 0.0F, false);
+     * if (hit instanceof EntityHitResult …)</pre>
+     * —— 而 {@code Entity.pick} <b>只做方块射线</b>（javap 实证：它内部只有
+     * {@code level.clip}，返回的永远是 {@code BlockHitResult}）✗
+     * ⇒ 那个 {@code instanceof EntityHitResult} <b>恒为 false</b>，
+     * 也就是"瞄准锁定/高亮索敌"从来没能靠这条射线生效过 ✗。
+     * 现在统一走 {@link TNAimRay#aimedEnemy}（原版准星那一套：方块截断 ＋
+     * {@code ProjectileUtil.getEntityHitResult} 实体射线）✓ ——
+     * 本方法保留只是为了让调用点别改，逻辑一行都不再自己写 ✓。
+     */
     private static LivingEntity aimedEnemy(ServerPlayer player) {
-        HitResult hit = player.pick(AIM_RANGE, 0.0F, false);
-        if (hit instanceof EntityHitResult entityHit
-                && entityHit.getEntity() instanceof LivingEntity living
-                && living != player && living.isAlive()) {
-            return living;
-        }
-        return null;
+        return TNAimRay.aimedEnemy(player, AIM_RANGE);
     }
 
     /**

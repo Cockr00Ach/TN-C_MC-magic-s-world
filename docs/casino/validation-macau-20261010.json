@@ -1,0 +1,50 @@
+{
+  "date": "2026-10-10",
+  "style": "Macau casino inspired walnut/burgundy/emerald/champagne gold",
+  "unit_tests": [
+    {
+      "name": "com.tnc.tnc.casino.client.CasinoCylinderPlacementProbeTest",
+      "tests": "1",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-10T11:49:43",
+      "hostname": "DESKTOP-TO12FQM",
+      "time": "0.89"
+    },
+    {
+      "name": "com.tnc.tnc.casino.client.CasinoGeometryVertexFormatTest",
+      "tests": "8",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-10T11:49:43",
+      "hostname": "DESKTOP-TO12FQM",
+      "time": "0.057"
+    },
+    {
+      "name": "com.tnc.tnc.casino.machine.CasinoRulesTest",
+      "tests": "5",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "timestamp": "2026-10-10T11:49:43",
+      "hostname": "DESKTOP-TO12FQM",
+      "time": "0.024"
+    }
+  ],
+  "unit_total": 14,
+  "client_gallery": {
+    "scope": "Actual dev client gallery; not full modpack gameplay",
+    "machines": 5,
+    "failures": [],
+    "states_rendered": 15,
+    "screenshots": 3
+  },
+  "installed_jar": "E:\\download\\正式版 2.12.6.1\\.minecraft\\versions\\元素觉醒1.4.3-魔改版-20260915\\mods\\tnc-1.0.0.jar",
+  "installed_sha256": "a844e1058901efdda7f913e76e3a4117acbfc9bd133dda0c0a72f39c1cca8b20",
+  "built_sha256": "a844e1058901efdda7f913e76e3a4117acbfc9bd133dda0c0a72f39c1cca8b20",
+  "backup": "D:/ModTest/work/install-backups/20261010-195212/tnc-1.0.0.jar",
+  "installation_log": "work/casino-macau-install-20261010.log",
+  "full_modpack_startup_tested": false
+}

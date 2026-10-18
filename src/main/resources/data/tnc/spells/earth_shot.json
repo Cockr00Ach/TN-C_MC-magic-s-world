@@ -2,42 +2,111 @@
   "school": "EARTH",
   "group": "earth_shot",
   "range": 36.0,
-  "learn": { "tier": 1 },
+  "learn": {
+    "tier": 1
+  },
   "cast": {
     "duration": 0.6,
     "animation": "spell_engine:one_handed_projectile_charge",
-    "sound": { "id": "spell_engine:generic_arcane_casting", "randomness": 0 },
-    "particles": [ { "particle_id": "crit", "shape": "SPHERE", "origin": "CENTER", "count": 25.0, "min_speed": 0.2, "max_speed": 1.0 } ]
+    "sound": {
+      "id": "spell_engine:generic_arcane_casting",
+      "randomness": 0
+    },
+    "particles": [
+      {
+        "particle_id": "tnc:earth_dust",
+        "shape": "SPHERE",
+        "origin": "CENTER",
+        "count": 4,
+        "min_speed": 0.08,
+        "max_speed": 0.35
+      }
+    ]
   },
   "release": {
     "target": {
       "type": "PROJECTILE",
       "projectile": {
-        "launch_properties": { "velocity": 1.2, "extra_launch_count": 0, "extra_launch_delay": 3 },
+        "launch_properties": {
+          "velocity": 1.2,
+          "extra_launch_count": 0,
+          "extra_launch_delay": 3
+        },
         "projectile": {
           "homing_angle": 0.2,
           "client_data": {
-            "travel_particles": [ { "particle_id": "crit", "shape": "SPHERE", "origin": "CENTER", "count": 25.0, "min_speed": 0.2, "max_speed": 1.0 } ],
-            "model": { "model_id": "tnc:projectile/lightingball", "scale": 0.7 }
+            "travel_particles": [
+              {
+                "particle_id": "tnc:earth_dust",
+                "shape": "SPHERE",
+                "origin": "CENTER",
+                "count": 2,
+                "min_speed": 0.035,
+                "max_speed": 0.08
+              }
+            ],
+            "model": {
+              "model_id": "tnc:projectile/earth_clod",
+              "scale": 1.4,
+              "orientation": "TOWARDS_MOTION",
+              "light_emission": "NONE"
+            }
           }
         }
       }
     },
     "animation": "spell_engine:one_handed_projectile_release",
-    "sound": { "id": "spell_engine:generic_arcane_release" }
+    "sound": {
+      "id": "spell_engine:generic_arcane_release"
+    }
   },
   "impact": [
     {
-      "action": { "type": "DAMAGE", "damage": { "spell_power_coefficient": 1.1, "knockback": 0.4 } },
-      "particles": [ { "particle_id": "crit", "shape": "SPHERE", "origin": "CENTER", "count": 25.0, "min_speed": 0.2, "max_speed": 1.0 } ],
-      "sound": { "id": "block.stone.break", "volume": 0.8 }
+      "action": {
+        "type": "DAMAGE",
+        "damage": {
+          "spell_power_coefficient": 1.1,
+          "knockback": 0.4
+        }
+      },
+      "particles": [
+        {
+          "particle_id": "tnc:earth_dust",
+          "shape": "SPHERE",
+          "origin": "CENTER",
+          "count": 4,
+          "min_speed": 0.08,
+          "max_speed": 0.35
+        }
+      ],
+      "sound": {
+        "id": "block.stone.break",
+        "volume": 0.8
+      }
     }
   ],
   "area_impact": {
     "radius": 2,
-    "area": { "distance_dropoff": "SQUARED" },
-    "particles": [ { "particle_id": "crit", "shape": "SPHERE", "origin": "CENTER", "count": 25.0, "min_speed": 0.2, "max_speed": 1.0 } ],
-    "sound": { "id": "block.stone.break", "volume": 1.0 }
+    "area": {
+      "distance_dropoff": "SQUARED"
+    },
+    "particles": [
+      {
+        "particle_id": "tnc:earth_dust",
+        "shape": "SPHERE",
+        "origin": "CENTER",
+        "count": 4,
+        "min_speed": 0.08,
+        "max_speed": 0.35
+      }
+    ],
+    "sound": {
+      "id": "block.stone.break",
+      "volume": 1.0
+    }
   },
-  "cost": { "exhaust": 0.0, "cooldown_duration": 1.5 }
+  "cost": {
+    "exhaust": 0.0,
+    "cooldown_duration": 1.5
+  }
 }

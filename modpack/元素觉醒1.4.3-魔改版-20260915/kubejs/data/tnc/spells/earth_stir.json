@@ -2,12 +2,26 @@
   "school": "EARTH",
   "group": "earth_move",
   "range": 16.0,
-  "learn": { "tier": 1 },
+  "learn": {
+    "tier": 1
+  },
   "cast": {
     "duration": 0.7,
     "animation": "spell_engine:one_handed_area_charge",
-    "sound": { "id": "spell_engine:generic_arcane_casting", "randomness": 0 },
-    "particles": [ { "particle_id": "crit", "shape": "CIRCLE", "origin": "FEET", "count": 12.0, "min_speed": 0.1, "max_speed": 0.4 } ]
+    "sound": {
+      "id": "spell_engine:generic_arcane_casting",
+      "randomness": 0
+    },
+    "particles": [
+      {
+        "particle_id": "tnc:earth_dust",
+        "shape": "CIRCLE",
+        "origin": "FEET",
+        "count": 4,
+        "min_speed": 0.08,
+        "max_speed": 0.35
+      }
+    ]
   },
   "release": {
     "target": {
@@ -15,24 +29,76 @@
       "cloud": {
         "volume": {
           "radius": 4,
-          "area": { "distance_dropoff": "SQUARED" }
+          "area": {
+            "distance_dropoff": "SQUARED"
+          }
         },
         "time_to_live_seconds": 8,
         "impact_tick_interval": 20,
         "delay_ticks": 4,
-        "presence_sound": { "id": "block.stone.step", "volume": 0.3 },
-        "client_data": { "particles": [ { "particle_id": "crit", "shape": "SPHERE", "origin": "CENTER", "count": 20.0, "min_speed": 0.2, "max_speed": 0.9 } ] },
-        "spawn": { "particles": [ { "particle_id": "crit", "shape": "SPHERE", "origin": "CENTER", "count": 20.0, "min_speed": 0.2, "max_speed": 0.9 } ], "sound": { "id": "block.stone.break", "volume": 1.0 } }
+        "presence_sound": {
+          "id": "block.stone.step",
+          "volume": 0.3
+        },
+        "client_data": {
+          "particles": [
+            {
+              "particle_id": "tnc:earth_dust",
+              "shape": "SPHERE",
+              "origin": "CENTER",
+              "count": 2,
+              "min_speed": 0.035,
+              "max_speed": 0.08
+            }
+          ]
+        },
+        "spawn": {
+          "particles": [
+            {
+              "particle_id": "tnc:earth_dust",
+              "shape": "SPHERE",
+              "origin": "CENTER",
+              "count": 4,
+              "min_speed": 0.08,
+              "max_speed": 0.35
+            }
+          ],
+          "sound": {
+            "id": "block.stone.break",
+            "volume": 1.0
+          }
+        }
       }
     },
     "animation": "spell_engine:one_handed_area_release",
-    "sound": { "id": "block.stone.break", "volume": 1.0 }
+    "sound": {
+      "id": "block.stone.break",
+      "volume": 1.0
+    }
   },
   "impact": [
     {
-      "action": { "type": "DAMAGE", "damage": { "spell_power_coefficient": 0.7, "knockback": 0.5 } },
-      "particles": [ { "particle_id": "crit", "shape": "SPHERE", "origin": "CENTER", "count": 20.0, "min_speed": 0.2, "max_speed": 0.9 } ],
-      "sound": { "id": "block.stone.break", "volume": 0.7 }
+      "action": {
+        "type": "DAMAGE",
+        "damage": {
+          "spell_power_coefficient": 0.7,
+          "knockback": 0.5
+        }
+      },
+      "particles": [
+        {
+          "particle_id": "tnc:earth_dust",
+          "shape": "SPHERE",
+          "origin": "CENTER",
+          "count": 4,
+          "min_speed": 0.08,
+          "max_speed": 0.35
+        }
+      ],
+      "sound": {
+        "id": "block.stone.break",
+        "volume": 0.7
+      }
     },
     {
       "action": {
@@ -43,11 +109,23 @@
           "duration": 3,
           "amplifier": 0,
           "apply_mode": "SET",
-          "show_particles": true
+          "show_particles": false
         }
       },
-      "particles": [ { "particle_id": "crit", "shape": "CIRCLE", "origin": "FEET", "count": 12.0, "min_speed": 0.1, "max_speed": 0.4 } ]
+      "particles": [
+        {
+          "particle_id": "tnc:earth_dust",
+          "shape": "CIRCLE",
+          "origin": "FEET",
+          "count": 4,
+          "min_speed": 0.08,
+          "max_speed": 0.35
+        }
+      ]
     }
   ],
-  "cost": { "exhaust": 0.0, "cooldown_duration": 3 }
+  "cost": {
+    "exhaust": 0.0,
+    "cooldown_duration": 3
+  }
 }

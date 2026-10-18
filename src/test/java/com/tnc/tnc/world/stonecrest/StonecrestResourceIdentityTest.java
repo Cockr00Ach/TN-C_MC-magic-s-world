@@ -18,12 +18,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class StonecrestResourceIdentityTest {
     @Test
-    void newWorldsUseCompletePalaceWhileLegacyManifestStaysAvailable() throws IOException {
+    void newWorldGateUsesIsolatedCompletePalaceWhileLegacyManifestStaysAvailable() throws IOException {
         try (var stream=getClass().getResourceAsStream("/data/tnc/worldgen/structure/stonecrest_fortress.json");
              var reader=new InputStreamReader(stream,StandardCharsets.UTF_8)) {
             var root=new Gson().fromJson(reader,JsonObject.class);
             org.junit.jupiter.api.Assertions.assertEquals("tnc:large_landmark",root.get("type").getAsString());
-            org.junit.jupiter.api.Assertions.assertEquals("heroskand_estate_v2",root.get("asset").getAsString());
+            org.junit.jupiter.api.Assertions.assertEquals("heroskand_gateway_site",root.get("asset").getAsString());
         }
         try (var stream=getClass().getResourceAsStream("/data/tnc/buildings/heroskand_estate_v2.json");
              var reader=new InputStreamReader(stream,StandardCharsets.UTF_8)) {

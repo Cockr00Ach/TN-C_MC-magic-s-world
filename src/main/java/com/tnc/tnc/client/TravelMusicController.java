@@ -98,7 +98,8 @@ public final class TravelMusicController {
         SoundManager sounds = minecraft.getSoundManager();
 
         // Indoors the inn owns the channel, including its initial ten seconds of silence.
-        if(com.tnc.tnc.tavern.client.TavernMusicController.tick(minecraft)){
+        boolean casinoMusic=com.tnc.tnc.casino.client.CasinoMusicController.tick(minecraft);
+        if(com.tnc.tnc.tavern.client.TavernMusicController.tick(minecraft)||casinoMusic){
             if(currentTrack!=null)sounds.stop(currentTrack);currentTrack=null;currentAge=0;waitTicks=100;
             if(bossTrack!=null)sounds.stop(bossTrack);bossTrack=null;bossAge=0;return;
         }
@@ -223,7 +224,7 @@ public final class TravelMusicController {
 
     /** Used by the client MusicManager mixin to disable only vanilla background music. */
     public static boolean shouldSuppressVanillaMusic() {
-        return inWorld && (!catalog.isEmpty()||com.tnc.tnc.tavern.client.TavernMusicController.inside(Minecraft.getInstance()));
+        return inWorld && (!catalog.isEmpty()||com.tnc.tnc.tavern.client.TavernMusicController.inside(Minecraft.getInstance())||com.tnc.tnc.casino.client.CasinoMusicController.inside(Minecraft.getInstance()));
     }
 
     private static ResourceLocation nextTrack() {
@@ -251,6 +252,7 @@ public final class TravelMusicController {
             return;
         }
         com.tnc.tnc.tavern.client.TavernMusicController.disconnect(minecraft);
+        com.tnc.tnc.casino.client.CasinoMusicController.disconnect(minecraft);
         if (currentTrack != null) {
             minecraft.getSoundManager().stop(currentTrack);
         }

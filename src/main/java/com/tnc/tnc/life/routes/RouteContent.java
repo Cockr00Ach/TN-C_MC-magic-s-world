@@ -38,10 +38,12 @@ public final class RouteContent {
     public static final Map<String,RegistryObject<? extends Block>> PLANTS=new LinkedHashMap<>();
     public static final Map<String,RegistryObject<Item>> GOODS=new LinkedHashMap<>();
     static {
+        GOODS.put("creative_mana_prism",ITEMS.register("creative_mana_prism",CreativeManaPrismItem::new));
+        GOODS.put("beast_bone_meal",ITEMS.register("beast_bone_meal",BeastBoneMealItem::new));
         ITEMS.register("magic_soil",()->new BlockItem(SOIL.get(),new Item.Properties()));
         ITEMS.register("magic_soil_source",()->new BlockItem(SOIL_SOURCE.get(),new Item.Properties()));
         for(RouteKind kind:RouteKind.values()){
-            var block=BLOCKS.register(kind.id,()->new RouteNodeBlock(kind));NODES.put(kind.id,block);
+            var block=BLOCKS.register(kind.id,()->kind.wire()?new RouteWireBlock(kind):(kind==RouteKind.MIRROR||kind==RouteKind.FAR_MIRROR)?new RouteMirrorBlock(kind):new RouteNodeBlock(kind));NODES.put(kind.id,block);
             GOODS.put(kind.id,ITEMS.register(kind.id,()->new BlockItem(block.get(),new Item.Properties())));
         }
         for(NewPlantKind kind:NewPlantKind.values()){
@@ -59,8 +61,8 @@ public final class RouteContent {
     public static final RegistryObject<BlockEntityType<RoutePlantEntity>> PLANT_ENTITY=ENTITIES.register("mana_route_plant",()->BlockEntityType.Builder.of(RoutePlantEntity::new,PLANTS.values().stream().map(RegistryObject::get).toArray(Block[]::new)).build(null));
     public static final DeferredRegister<net.minecraft.world.inventory.MenuType<?>> MENUS=DeferredRegister.create(ForgeRegistries.MENU_TYPES,"tnc");
     public static final RegistryObject<net.minecraft.world.inventory.MenuType<RouteMenu>> MENU=MENUS.register("mana_route",()->net.minecraftforge.common.extensions.IForgeMenuType.create(RouteMenu::new));
-    public static void register(IEventBus bus){RouteInputNetwork.register();BLOCKS.register(bus);ITEMS.register(bus);ENTITIES.register(bus);FLUID_TYPES.register(bus);FLUIDS.register(bus);MENUS.register(bus);RECIPES.register(bus);bus.addListener(RouteContent::creative);}
-    private static void creative(net.minecraftforge.event.BuildCreativeModeTabContentsEvent e){if(e.getTabKey().equals(TNMod.TNC_TAB.getKey())){ITEMS.getEntries().forEach(i->e.accept(i.get()));}}
+    public static void register(IEventBus bus){RouteInputNetwork.register();com.tnc.tnc.life.routes.mech.MechNetwork.register();BLOCKS.register(bus);ITEMS.register(bus);ENTITIES.register(bus);FLUID_TYPES.register(bus);FLUIDS.register(bus);MENUS.register(bus);RECIPES.register(bus);bus.addListener(RouteContent::creative);}
+    private static void creative(net.minecraftforge.event.BuildCreativeModeTabContentsEvent e){if(e.getTabKey().equals(TNMod.TNC_TAB.getKey())){ITEMS.getEntries().stream().map(RegistryObject::get).filter(i->!RetiredLifeContent.hidden(i)).forEach(e::accept);}}
     public static Item item(String id){var own=GOODS.get(id);return own!=null?own.get():ForgeRegistries.ITEMS.getValue(net.minecraft.resources.ResourceLocation.tryParse(id.contains(":")?id:"tnc:"+id));}
     private RouteContent(){}
 }

@@ -1,0 +1,53 @@
+{
+  "source_commit": "c5a589f78215875721086c812e728406b96afcf1",
+  "installed": {
+    "installed_at": "2026-10-18T00:37:41.541066",
+    "jar_sha256": "276e33bce19256f92a25f0c6b59382912ed66151ac71046850495987e4759eb4",
+    "jar_bytes": 103999113,
+    "unit_tests": 261,
+    "route_game_tests": 28,
+    "native_screenshots": 15,
+    "plants_checked": 38,
+    "protected_quest_files_unchanged": 41,
+    "replaced_chapters": [
+      "tnc_field_04_workshop.snbt"
+    ],
+    "workshop_quests": 83,
+    "retired_items": 14,
+    "backup": "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\work\\backups\\life-rework-20261018-003741",
+    "live": "D:\\垃圾桶\\PCL 正式版 2.9.3\\.minecraft\\versions\\元素觉醒1.4.3-魔改版-20260915",
+    "saves_modified": false,
+    "island_templates_modified": false
+  },
+  "actual_ftb_load": {
+    "groups": 7,
+    "chapters": 37,
+    "quests": 1829,
+    "reward_tables": 3
+  },
+  "client": {
+    "new_items": 67,
+    "plants": 38,
+    "network_blocks": 28,
+    "animal_types": 25,
+    "screenshots": 15,
+    "failures": [],
+    "scope": "Actual native client models and GUI, isolated development world; full PCL playthrough remains user testing."
+  },
+  "native_models": {
+    "species": 38,
+    "variants": 423,
+    "existing_inventory_pngs_changed_by_rework": false
+  },
+  "final_command": "gradlew.bat test build runGameTestServer runClient -PlifeRoutesTests -PbuildingGameTests -PftbQuestLoadTests -PftbQuestLoadDir=work/life-rework-ftb-test -PlifeRoutesVisualAudit --offline",
+  "final_log_sha256": "a9578696ded059d664fc13478c10fb2b5f59276961b39e2889b7ad07891508d3",
+  "workshop_sha256": "1780ea2b46c8353cf8fb0d05a1b73a651095baecb868147673365958188a0e4b",
+  "merged_collaborator_tip": "0046ebbc",
+  "review_findings_fixed": [
+    "growth item ordinary right-click dispatch",
+    "all alternative recipes producing retired items",
+    "actual registered cable ID in EMI hidden tag",
+    "minimal-client missing Spell Engine guard"
+  ],
+  "scope": "Native isolated Forge/FTB rendering and game tests, followed by verified PCL file install. Full-pack interactive playthrough remains user testing."
+}

@@ -45,5 +45,5 @@ public final class BotanicalContent {
         PRODUCTS.put("rainproof_seed_box",new PortableFieldItem(false));PRODUCTS.put("survey_archive_folder",new PortableFieldItem(true));PRODUCTS.put("climbing_rope",new ClimbingRopeItem());for(String key:new String[]{"rainproof_seed_box","survey_archive_folder","climbing_rope"})h.register(id(key),PRODUCTS.get(key));
         h.register(id("field_frame"),new net.minecraft.world.item.BlockItem(FIELD_FRAME,new Item.Properties()));h.register(id("salt_basin"),new net.minecraft.world.item.BlockItem(SALT_BASIN,new Item.Properties()));});
     }
-    @SubscribeEvent public static void creative(BuildCreativeModeTabContentsEvent e){if(e.getTabKey().equals(TNMod.TNC_TAB.getKey())){SEEDS.values().forEach(e::accept);PRODUCTS.values().forEach(e::accept);TOOLS.values().forEach(e::accept);e.accept(FIELD_FRAME);e.accept(SALT_BASIN);}}
+    @SubscribeEvent public static void creative(BuildCreativeModeTabContentsEvent e){if(e.getTabKey().equals(TNMod.TNC_TAB.getKey())){SEEDS.values().forEach(e::accept);PRODUCTS.values().forEach(e::accept);TOOLS.values().stream().filter(i->!com.tnc.tnc.life.routes.RetiredLifeContent.hidden(i)).forEach(e::accept);e.accept(FIELD_FRAME);e.accept(SALT_BASIN);}}
 }

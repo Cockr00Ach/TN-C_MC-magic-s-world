@@ -35,6 +35,7 @@ import java.util.List;
 public final class VerdantVeinBlock extends BushBlock implements EntityBlock,ManaPlantSource {
     public static final IntegerProperty AGE=IntegerProperty.create("age",0,3),GLOW=IntegerProperty.create("glow",0,2);
     public VerdantVeinBlock(){super(BlockBehaviour.Properties.copy(Blocks.OAK_SAPLING).noCollission().lightLevel(s->s.getValue(GLOW)*3));registerDefaultState(stateDefinition.any().setValue(AGE,0).setValue(GLOW,0).setValue(com.tnc.tnc.life.routes.RoutePlantBlock.WILD,false));}
+    @Override public net.minecraft.world.phys.shapes.VoxelShape getShape(BlockState s,net.minecraft.world.level.BlockGetter l,BlockPos p,net.minecraft.world.phys.shapes.CollisionContext c){return Block.box(3,0,3,13,4+s.getValue(AGE)*4,13);}
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block,BlockState> b){b.add(AGE,GLOW,com.tnc.tnc.life.routes.RoutePlantBlock.WILD);}
     @Override public boolean canSurvive(BlockState s,LevelReader l,BlockPos p){var soil=l.getBlockState(p.below());return soil.is(BlockTags.DIRT)||soil.is(Blocks.FARMLAND);}
     @Override public BlockEntity newBlockEntity(BlockPos p,BlockState s){return new VerdantVeinBlockEntity(p,s);}

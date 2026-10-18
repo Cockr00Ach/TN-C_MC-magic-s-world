@@ -42,9 +42,17 @@ public class TNMod
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
 
 
-    /** 场景道具：4x2 赌博桌（可放置 ✓，形状见 TNGambleTableBlock 的尺寸契约）。 */
+    /**
+     * 场景道具：4x2 赌博桌（可放置 ✓）。
+     *
+     * <p>⚠️ 2026-10-10 搬到 {@code casino/machine/TNGambleTableBlock} ✓：它原来是纯方块、
+     * 几何走 {@code models/block/gamble_table.json} ✗，而那份模型 extents 是 {@code 0..64}
+     * ⇒ 被加载器拒绝 ⇒ <b>这张桌子在游戏里从来没显示过</b> ✗。
+     * 现在改成"方块实体 + 代码自绘"，和老虎机/转盘桌同一套 ✓。
+     * <b>id 保持 {@code tnc:gamble_table} 不变</b> ✓（存档里已经放下的桌子靠它 ✓）。
+     */
     public static final RegistryObject<Block> GAMBLE_TABLE =
-            BLOCKS.register("gamble_table", com.tnc.tnc.prop.TNGambleTableBlock::new);
+            BLOCKS.register("gamble_table", com.tnc.tnc.casino.machine.TNGambleTableBlock::new);
     public static final RegistryObject<Block> MANA_ROOT =
             BLOCKS.register("mana_root", com.tnc.tnc.life.ManaRoot.RootBlock::new);
     public static final RegistryObject<Item> GAMBLE_TABLE_ITEM =
@@ -148,6 +156,7 @@ public class TNMod
             .icon(() -> SWORD.get().getDefaultInstance())
             .displayItems((parameters, output) -> {
                 output.accept(SWORD.get());
+                output.accept(TNC_IRON_ARMOR.get());
                 // Legacy chaos_seal stays registered for save compatibility; learned magic replaces it.
                 output.accept(WAND.get());
                 com.tnc.tnc.adventure.ElementWands.ITEMS.values().forEach(i->output.accept(i.get()));
@@ -159,6 +168,9 @@ public class TNMod
                 output.accept(BELLWOOL_FODDER.get());output.accept(RESONANT_FLEECE.get());
                 output.accept(MANA_ROOT_SEED.get());output.accept(MANA_ROOT_CORE.get());
                 output.accept(COPPER_COIN.get());output.accept(SILVER_COIN.get());output.accept(GOLD_COIN.get());
+                // ★ 赌博桌（4x2 场景道具）—— 一直注册着却**从来没进过创造页** ✗，
+                //   所以连拿都拿不到（只能 /give）✓。2026-10-10 补上 ✓。
+                output.accept(GAMBLE_TABLE_ITEM.get());
                 DELICACIES.forEach(i->output.accept(i.get()));
                 BOSS_INGREDIENTS.forEach(i->output.accept(i.get()));
                 // 剧情道具「宝箱传说残卷」六卷（卷一拆成上下卷）—— 方便验收时直接拿 ✓
@@ -182,6 +194,7 @@ public class TNMod
                 output.accept(com.tnc.tnc.npc.TNNpcAttributes.ZUOWANG_SPAWN_EGG.get());
                 // BOSS 刷怪蛋（暗系巨人）—— 同样是验收用，正式上线走召唤/剧情
                 output.accept(com.tnc.tnc.npc.TNNpcAttributes.DARK_GIANT_SPAWN_EGG.get());
+                output.accept(com.tnc.tnc.npc.TNNpcAttributes.WATER_LEVIATHAN_SPAWN_EGG.get());
             }).build());
 
     // ------------------------------------------------------------------
@@ -225,6 +238,18 @@ public class TNMod
         com.tnc.tnc.npc.TNNpcAttributes.register(modEventBus);
         // 法术召唤物/环绕物实体（环绕雷球）
         com.tnc.tnc.magic.TNOrbEntities.register(modEventBus);
+
+        // 赌场机器（老虎机）—— 方块 / 方块实体类型 / 物品三样都在 TNCasinoRegistry 里，
+        // 它自己带 @Mod.EventBusSubscriber(MOD)，所以**必须**在这里强制把类加载一次 ✗：
+        // Java 类懒加载 ⇒ 没有任何代码"提到"它时，那个类的静态 @SubscribeEvent 根本不会被扫到
+        // ⇒ 注册事件不触发 ⇒ 方块/物品/方块实体**静默不存在**（jar 里有类、游戏里没有）。
+        // 同一个坑本工程已经踩过：TNScrolls 的头注释记着"不能靠静态块" ✓。
+        // 用 Class.forName 而不是引用某个字段：前者顺便把"类名写错"变成一条明确的启动期日志 ✓。
+        try {
+            Class.forName("com.tnc.tnc.casino.machine.TNCasinoRegistry");
+        } catch (ClassNotFoundException e) {
+            LOGGER.error("TN-C: casino registry class is missing - slot machine will not exist", e);
+        }
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);

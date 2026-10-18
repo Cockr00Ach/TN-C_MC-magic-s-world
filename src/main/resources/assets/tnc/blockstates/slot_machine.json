@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "facing=north,spinning=false": {
+      "model": "tnc:block/slot_machine"
+    },
+    "facing=north,spinning=true": {
+      "model": "tnc:block/slot_machine"
+    },
+    "facing=east,spinning=false": {
+      "model": "tnc:block/slot_machine"
+    },
+    "facing=east,spinning=true": {
+      "model": "tnc:block/slot_machine"
+    },
+    "facing=south,spinning=false": {
+      "model": "tnc:block/slot_machine"
+    },
+    "facing=south,spinning=true": {
+      "model": "tnc:block/slot_machine"
+    },
+    "facing=west,spinning=false": {
+      "model": "tnc:block/slot_machine"
+    },
+    "facing=west,spinning=true": {
+      "model": "tnc:block/slot_machine"
+    }
+  }
+}

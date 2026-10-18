@@ -63,6 +63,29 @@ import java.util.List;
  * 手感（抽多少、回多少）请作者进游戏试，按上表调 ✓。
  */
 public class TNDarkDrainEntity extends Entity implements SpellSpawnedEntity {
+    private static final net.minecraft.network.syncher.EntityDataAccessor<Integer> VICTIM=
+            net.minecraft.network.syncher.SynchedEntityData.defineId(TNDarkDrainEntity.class,net.minecraft.network.syncher.EntityDataSerializers.INT);
+    private static final net.minecraft.network.syncher.EntityDataAccessor<Integer> CASTER=
+            net.minecraft.network.syncher.SynchedEntityData.defineId(TNDarkDrainEntity.class,net.minecraft.network.syncher.EntityDataSerializers.INT);
+    private static final net.minecraft.network.syncher.EntityDataAccessor<Integer> TIER=
+            net.minecraft.network.syncher.SynchedEntityData.defineId(TNDarkDrainEntity.class,net.minecraft.network.syncher.EntityDataSerializers.INT);
+    public int victimId(){return entityData.get(VICTIM);}
+    public int casterId(){return entityData.get(CASTER);}
+    public int tier(){return entityData.get(TIER);}
+    @Override public net.minecraft.world.phys.AABB getBoundingBoxForCulling(){
+        var owner=level().getEntity(casterId());return owner==null?super.getBoundingBoxForCulling():super.getBoundingBoxForCulling().minmax(owner.getBoundingBox()).inflate(4);
+    }
+    private double siphonRange;
+    public void configureSiphon(LivingEntity caster,LivingEntity victim,int tier) {
+        configureSiphon(caster,victim,tier,DarkSiphonRules.range(tier)+Math.max(0,caster.getBbWidth()*.5-1));
+    }
+    public void configureSiphon(LivingEntity caster,LivingEntity victim,int tier,double range) {
+        this.siphonRange=range;
+        this.casterId=caster.getId();this.victimId=victim.getId();this.tier=Math.max(1,Math.min(5,tier));
+        entityData.set(VICTIM,victimId);entityData.set(CASTER,casterId);entityData.set(TIER,this.tier);
+        setPos(victim.position());
+    }
+    @Override public net.minecraft.network.protocol.Packet<net.minecraft.network.protocol.game.ClientGamePacketListener> getAddEntityPacket(){return net.minecraftforge.network.NetworkHooks.getEntitySpawningPacket(this);}
 
     /** 扣血后至少给对方留这么多血 ⇒ 这一下永远打不死人 ✓。 */
     private static final float MIN_HEALTH_LEFT = 4.0F;
@@ -164,7 +187,7 @@ public class TNDarkDrainEntity extends Entity implements SpellSpawnedEntity {
 
     @Override
     protected void defineSynchedData() {
-        // 不需要同步任何东西：结算全在服务端一次做完 ✓
+        entityData.define(VICTIM,-1);entityData.define(CASTER,-1);entityData.define(TIER,1);
     }
 
     @Override
@@ -189,11 +212,14 @@ public class TNDarkDrainEntity extends Entity implements SpellSpawnedEntity {
 
         LivingEntity victim = resolve(victimId);
         LivingEntity caster = resolve(casterId);
-        if (victim == null || !victim.isAlive()) {
+        if (victim == null || caster == null || victim.distanceToSqr(caster)>Math.pow(siphonRange>0?siphonRange:DarkSiphonRules.range(tier)+Math.max(0,caster.getBbWidth()*.5-1),2)
+                ||!caster.hasLineOfSight(victim)) {
             // 抽干了 / 目标没了 ⇒ 收工（但把这一口已经抽到的账报完 ✓）
             finish();
             return;
         }
+        if(caster instanceof com.tnc.tnc.boss.TNDarkGiantEntity&&victim instanceof net.minecraft.world.entity.player.Player)
+            com.tnc.tnc.boss.DarkGiantSiphonControl.apply(caster,victim);
         // 贴住受害者：它被推走/被打飞/被击退时，血柱跟着走 ✓
         setPos(victim.getX(), victim.getY() + victim.getBbHeight() * 0.45D, victim.getZ());
 
@@ -217,17 +243,7 @@ public class TNDarkDrainEntity extends Entity implements SpellSpawnedEntity {
             }
         }
 
-        // ★ 抓住就往回拽（作者 2026-10-10："抓住敌人手再把敌人拉回来可以不"）✓
-        if (caster != null && tickCount % PULL_INTERVAL == 0) {
-            pullToward(victim, caster);
-        }
-
-        // ★ 一直喷血：每 SPRAY_INTERVAL tick 一轮，前 SPRAY_HEAVY_TICKS 是动脉量级 ✓
-        if (tickCount % SPRAY_INTERVAL == 0) {
-            boolean heavy = tickCount <= SPRAY_HEAVY_TICKS;
-            spray(victim, caster, heavy);
-            sprayCaster(caster, heavy);
-        }
+        // Siphon moves blood toward the owner; it no longer drags the enemy's body or sprays large bursts.
     }
 
     /**
@@ -346,10 +362,11 @@ public class TNDarkDrainEntity extends Entity implements SpellSpawnedEntity {
             return;
         }
         victimId = victim.getId();
+        entityData.set(VICTIM,victimId);entityData.set(CASTER,casterId);entityData.set(TIER,tier);
         setPos(victim.getX(), victim.getY() + victim.getBbHeight() * 0.45D, victim.getZ());
 
         // 开喷第一口（量最大的一口）✓
-        spray(victim, caster, true);
+        // Persistent directional blood streams are rendered locally by DarkSiphonParticles.
     }
 
     private DrainStats stats() {

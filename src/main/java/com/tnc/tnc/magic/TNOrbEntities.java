@@ -351,6 +351,104 @@ public final class TNOrbEntities {
                     .updateInterval(20)
                     .build("tnc:drain")) : null;
 
+    /**
+     * ★ <b>黑夜之手 · 抓住不放的那只手</b>（暗系第一条链的重做，2026-10-10）✓
+     *
+     * <p>作者这次要的是《Re:Zero》486 的「不可视之手」那一路：
+     * <b>从自己背后伸出去、抓住目标不放、把目标拽回来、松手前捏碎</b> ✓。
+     * 并且 2026-10-10 追加了三条把"引擎投射物"那条路否掉的要求 ✗：
+     * 「手一直在旋转」、「不是掌心对着别人」、「不能所有手都直直飞出去，要有**弯的弧线**」
+     * —— 引擎的 {@code LaunchProperties} 只有 velocity/多发（javap 确认，没有弧线/散射字段 ✗），
+     * 姿态又由引擎的 {@code ALONG_MOTION} 跟着**运动矢量**走 ⇒ 三件事在引擎那边都改不动 ✓。
+     *
+     * <p>所以现在<b>飞行这一段也归我们</b> ✓：法术 JSON 改成
+     * {@code release.target.type = "SELF"}（不再产生引擎投射物 ✗），由
+     * {@link TNDarkHandMechanics} 在 {@code SPELL_CAST} 的 RELEASE 上调用
+     * {@link TNNightGripEntity#launch} —— 手从施法者<b>后背</b>出发，沿<b>二次贝塞尔弧线</b>甩向
+     * 瞄准锁定的目标（每只手一条不同的弧 ✓），到了就抓住 ✓。
+     * 这一条也是**已验证**的：本仓有 50 个 SELF 法术，它们都靠同一个事件扣魔力、全部正常工作 ✓。
+     *
+     * <p>⚠️ 它**有画面**（不是隐形 ✗）：客户端给它是<b>真的渲染器</b>
+     * （{@code client/TNNightGripRenderer}，用引擎的模型通道画同一只手 ✓，且**掌心一直朝着被抓的人** ✓）——
+     * 作者本次明确要求「别游戏里做的啥都看不见，特效要做出来」✓。
+     * 数字照旧不能省 ✗：实体类型没有渲染器 = 一生成就 {@code entityrenderer is null} 卡退
+     * （{@code OrbEntityRendererCoverageTest} 会在构建期拦住 ✓）。
+     *
+     * <p>尺寸给 <b>1 × 1</b>：它的包围盒不定义"手多大"（手由渲染器按档位缩放 ✓），
+     * 但**视锥剔除**要按手的大小放大 ⇒ 由实体的
+     * {@code getBoundingBoxForCulling} 负责 ✓（t5 的手有 32 格，不这么做会"中心出屏就整只手消失" ✗）。
+     * {@code updateInterval(1)}：它每 tick 都贴在被抓的目标身上，2 tick 同步一次会一顿一顿 ✗
+     * （环绕雷球与黑雾都因为同一个原因设成 1 ✓）。
+     */
+    public static final RegistryObject<EntityType<TNNightGripEntity>> NIGHT_GRIP =
+            net.minecraftforge.fml.ModList.get().isLoaded("spell_engine")
+            ? ENTITY_TYPES.register("night_grip", () -> EntityType.Builder
+                    .of(TNNightGripEntity::new, MobCategory.MISC)
+                    .sized(1.0F, 1.0F)
+                    .clientTrackingRange(16)
+                    .updateInterval(1)
+                    .build("tnc:night_grip")) : null;
+
+    /**
+     * ★ <b>风灵</b>（风系第二条链「风球 / 风灵」的召唤物，2026-10-10）✓
+     *
+     * <p>作者原话：「风灵链怎么五个全是放一个围绕着玩家的小风球啊，**风灵呢**，
+     * 我觉得你可以抄一下小精灵的模型」✗ —— 这一整条链以前是**纯粒子**
+     * （{@code TNWindMechanics.tickOrbs} 每 tick 画 {@code CLOUD} 云），玩家看不见"风灵" ✗。
+     * 现在每一只都是实体（{@link TNWindSpiritEntity}，模型由
+     * {@code tools/gen_wind_sprite_model.py} 程序化生成 ✓）。
+     *
+     * <p>⚠️ 和 {@link #NIGHT_GRIP} 不同，它**不依赖 spell_engine** ✗（渲染走 GeckoLib，
+     * 和暗系召唤物同一套 ✓）⇒ 这里<b>不需要</b> {@code ModList.isLoaded} 的判空守卫 ✓。
+     *
+     * <p>数字照旧不能省 ✗：实体类型没有渲染器 = 一生成就 {@code entityrenderer is null} 卡退
+     * （{@code OrbEntityRendererCoverageTest} 会在构建期拦住 ✓）；
+     * 渲染器注册在 {@code client/TNFogClientRegistration} ✓。
+     * {@code updateInterval(1)}：它每 tick 都在绕圈，2 tick 同步一次会一顿一顿 ✗
+     * （环绕雷球 / 黑雾 / 黑夜之手都是同一个原因设成 1 ✓）。
+     */
+    public static final RegistryObject<EntityType<TNWindSpiritEntity>> WIND_SPIRIT =
+            ENTITY_TYPES.register("wind_spirit", () -> EntityType.Builder
+                    .of(TNWindSpiritEntity::new, MobCategory.MISC)
+                    .sized(0.8F, 0.8F)
+                    .clientTrackingRange(16)
+                    .updateInterval(1)
+                    .build("tnc:wind_spirit"));
+
+    /**
+     * ★ <b>龙卷风</b>（风系第 3 条链「范围风」t3+ 的召唤物，2026-10-10）✓
+     *
+     * <p>作者原话：「t3 开始释放风刃会<b>召唤出一个一直在旋转的龙卷风</b>，
+     * 然后<b>持续向外发射风刃</b>」✓ —— 它**留在原地**（不是投射物 ✗），
+     * 自己转、自己吐 {@link TNWindBladeEntity} ✓。模型 {@code tnc:projectile/wind_tornado}
+     * 由 {@code tools/gen_wind_tornado_model.py} 程序化生成 ✓。
+     *
+     * <p>尺寸给大一点（2×3 格）✓：模型本体约 1.9 格宽、1.9 格高，
+     * 但视锥剔除盒要**包得住放大后的样子** ✗（t5 会放大到 1.6 倍 ⇒ 3 格宽）。
+     */
+    public static final RegistryObject<EntityType<TNTornadoEntity>> WIND_TORNADO =
+            ENTITY_TYPES.register("wind_tornado", () -> EntityType.Builder
+                    .of(TNTornadoEntity::new, MobCategory.MISC)
+                    .sized(2.0F, 3.0F)
+                    .clientTrackingRange(16)
+                    .updateInterval(1)
+                    .build("tnc:wind_tornado"));
+
+    /**
+     * ★ <b>飞出去的风刃</b>（龙卷风吐出来的那一片，2026-10-10）✓
+     *
+     * <p>为什么要有自己的投射物实体：龙卷风是**持续**吐刃的（每 14 tick 一轮），
+     * 而引擎的投射物必须挂在"某一次施法"上 ✗ —— 这里没有那一次施法可用 ✗。
+     * 本仓火系/水系都已有自己的投射物先例 ✓，同一个做法 ✓。
+     */
+    public static final RegistryObject<EntityType<TNWindBladeEntity>> WIND_BLADE =
+            ENTITY_TYPES.register("wind_blade", () -> EntityType.Builder
+                    .of(TNWindBladeEntity::new, MobCategory.MISC)
+                    .sized(1.2F, 1.2F)
+                    .clientTrackingRange(12)
+                    .updateInterval(1)
+                    .build("tnc:wind_blade"));
+
     private TNOrbEntities() {
     }
 

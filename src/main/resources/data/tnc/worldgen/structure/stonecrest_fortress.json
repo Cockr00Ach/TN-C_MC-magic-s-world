@@ -1,6 +1,6 @@
 {
   "type": "tnc:large_landmark",
-  "asset": "heroskand_estate_v2",
+  "asset": "heroskand_gateway_site",
   "biomes": "#tnc:has_structure/imported_buildings",
   "step": "surface_structures",
   "spawn_overrides": {},

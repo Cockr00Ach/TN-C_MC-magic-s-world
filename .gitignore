@@ -27,6 +27,10 @@ out
 # ---------- gradle / 构建产物 ----------
 build
 .gradle
+# 本机（DSH 沙箱）用的本地 GRADLE_USER_HOME —— 里面有 ~3.6 GB 的依赖缓存，
+# 是为了绕开「沙箱不允许写 C:\Users\<用户>\.gradle」而拷进工作区的 ✗。
+# 它**绝不能进版本库**（`.gradle` 那条管不到它，名字不是 `.gradle`）。
+.gradle-home
 
 # ---------- 运行环境（dev 服务器、世界存档、日志）----------
 run

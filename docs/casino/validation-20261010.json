@@ -1,0 +1,18 @@
+{
+  "screenshots": 3,
+  "states_rendered": 15,
+  "failures": [],
+  "machines": 5,
+  "scope": "Actual dev client gallery; not full modpack gameplay",
+  "date": "2026-10-10",
+  "casino_junit_tests": 13,
+  "casino_gametests": 9,
+  "full_project_gametests": 248,
+  "unrelated_failures": [
+    "WaterVisualsCostTest.rainChainStaysWithinBudget: 5024 vertices over budget",
+    "nightgourdavoidsdaylightandgrowsinshadeandreedrequireswetshore: sheltered growth fixture assertion"
+  ],
+  "artifact_content_checks": "passed under Windows PowerShell 5.1",
+  "installed_copy": "not updated; old instance differs from new artifact",
+  "junit_final": 13
+}

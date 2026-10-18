@@ -9,14 +9,19 @@ if (@(Get-TncJavaProcesses).Count) {throw 'A Java process is already running; no
 $pack=[IO.Path]::GetFullPath($LivePack).TrimEnd('\')
 # Reuse the launcher's own command, without printing, copying or saving credentials.
 # Never execute the batch's other commands or invoke a shell with its text.
-$lines=@(Get-Content -LiteralPath $LauncherBatch -Encoding UTF8 | Where-Object {$_ -match '^"[^"\r\n]*javaw?\.exe"\s+'})
-if($lines.Count -ne 1){throw 'Expected exactly one quoted Java launch command.'}
-if($lines[0] -notmatch '^"(?<exe>[^"\r\n]+)"\s+(?<args>.+)$'){throw 'Unsupported launcher syntax.'}
-$javaExe=$Matches.exe
-$javaArguments=$Matches.args
-if(-not (Test-Path -LiteralPath $javaExe)){throw 'Launcher Java executable is missing.'}
-if($javaArguments -notmatch '--gameDir\s+"(?<dir>[^"\r\n]+)"'){throw 'Expected an explicit gameDir.'}
-if([IO.Path]::GetFullPath($Matches.dir).TrimEnd('\') -ne $pack){throw 'Launcher targets a different instance.'}
+$validated=$false
+# PCL writes GBK on some Windows installations; validate the instance after decoding.
+foreach($encoding in @([Text.Encoding]::UTF8,[Text.Encoding]::GetEncoding(936))){
+    $lines=@([IO.File]::ReadAllLines($LauncherBatch,$encoding) | Where-Object {$_ -match '^"[^"\r\n]*javaw?\.exe"\s+'})
+    if($lines.Count -ne 1){continue}
+    if($lines[0] -notmatch '^"(?<exe>[^"\r\n]+)"\s+(?<args>.+)$'){continue}
+    $javaExe=$Matches.exe
+    $javaArguments=$Matches.args
+    if($javaArguments -notmatch '--gameDir\s+"(?<dir>[^"\r\n]+)"'){continue}
+    if([IO.Path]::GetFullPath($Matches.dir).TrimEnd('\') -eq $pack){$validated=$true;break}
+}
+if(-not $validated){throw 'No launch command targets this instance with a supported encoding.'}
+if(-not(Test-Path -LiteralPath $javaExe)){throw 'Launcher Java executable is missing.'}
 if($World){
     if($World -match '["\\/\r\n]' -or $World -eq '..'){throw 'World must be one existing save folder name.'}
     if(-not (Test-Path -LiteralPath (Join-Path (Join-Path $pack 'saves') $World))){throw 'Save not found.'}

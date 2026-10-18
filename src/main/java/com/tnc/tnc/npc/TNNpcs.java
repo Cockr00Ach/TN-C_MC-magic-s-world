@@ -154,6 +154,15 @@ public final class TNNpcs {
                     .clientTrackingRange(16)
                     .build("tnc:dark_giant"));
 
+    /** 蓝金水渊兽：四倍体型，水下游泳、离水飞行。 */
+    public static final RegistryObject<EntityType<com.tnc.tnc.boss.TNWaterLeviathanEntity>> WATER_LEVIATHAN =
+            ENTITY_TYPES.register("water_leviathan", () -> EntityType.Builder
+                    .of(com.tnc.tnc.boss.TNWaterLeviathanEntity::new, MobCategory.MONSTER)
+                    .sized(com.tnc.tnc.boss.TNWaterLeviathanEntity.HITBOX_WIDTH,
+                            com.tnc.tnc.boss.TNWaterLeviathanEntity.HITBOX_HEIGHT)
+                    .clientTrackingRange(20)
+                    .build("tnc:water_leviathan"));
+
     private TNNpcs() {
     }
 

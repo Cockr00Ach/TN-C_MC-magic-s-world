@@ -117,6 +117,55 @@ public final class TNProjectileModels {
      */
     public static final String DARK_FOG = "projectile/dark_fog";
 
+    /**
+     * ★ <b>风系的范围风链</b>（范围风 → 大范围风 → 超大范围风 → 巨型风刃风暴 → 风神风暴）。
+     *
+     * <p>这五档以前全部借用 {@code projectile/lightingball}（一个<b>黄色雷球</b> ✗）——
+     * "风刃"看起来是雷球，这是 `投射物模型_配方.md` 末表里登记在案的待办
+     * （"土/暗/风 暂用 lightingball，各给一个号即可"）✓。
+     *
+     * <h2>中间换过一次模型（记下来，省得下次再找）</h2>
+     * <ol>
+     *   <li>2026-10-10 上午：先导入<b>作者的龙卷风</b>
+     *       （{@code elemental_wizards_rpg/models/effect/tornado.json}，一模型五张 8 帧动画贴图，
+     *       走 {@code import_author_model.ps1 -Textures} 的多贴图模式 ✓）；</li>
+     *   <li>2026-10-10 下午：作者反馈「**这个风刃可以抄一下水法的海浪斩击**」✗ ⇒
+     *       换成 <b>月牙／斩击造型</b>，由 {@code tools/gen_wind_blade_model.py} <b>程序化生成</b> ✓
+     *       （16 个重叠方块沿 170° 圆弧排成新月，中段厚、两端收尖，旋转角 0、UV 全落在整 16 分格上 ✓）。
+     *       ⚠️ 那 5 张龙卷风贴图 + 它们的 {@code .mcmeta} 已**一并删掉** ✗（现在只有一张
+     *       {@code spell_projectile/windblade.png}，32×16、无动画 ✓）。</li>
+     * </ol>
+     *
+     * <p>★ <b>形状与尺寸</b>：包围盒 <b>1.179 × 0.615 × 0.147 格</b>（宽 × 高 × 厚，
+     * 薄的那一维是 Z ⇒ 正对着飞过来看到的是整个新月 ✓）。五档的 {@code scale} 是
+     * 0.5 / 0.7 / 0.9 / 1.2 / 1.4 ⇒ 风刃宽 <b>0.59 → 1.65 格</b> ✓。
+     * 嫌大/嫌小就改 {@code gen_tnc_wind_gale_spells.ps1} 最后那张表的 scale 一列 ✓；
+     * 想改形状就改生成器里的 {@code R / ARC / half_thick / half_deep} 再重跑 ✓。
+     *
+     * <p>★ <b>朝向</b>：法术 JSON 里写 {@code "orientation": "TOWARDS_MOTION"}。
+     * 已反编译确认（{@code SpellProjectileRenderer}）：两种 motion 朝向**只施加 yaw + pitch**
+     * （{@code atan2(dx,dz)} 与 {@code asin(dy)}）⇒ 新月躺在 XY 平面上飞，
+     * <b>不会翻滚</b>，水平飞行时刀口朝前 ✓。
+     */
+    public static final String WINDBLADE = "projectile/windblade";
+
+    /**
+     * ★ <b>龙卷风</b>（风系范围风链 t3+ 召唤的那个漩涡，2026-10-10）✓
+     *
+     * <p>生成器：{@code tools/gen_wind_tornado_model.py}（**程序化生成** ✓）。
+     * 7 层方环 × 4 片 ＋ 4 块底部碎屑 ＝ 32 个方块，每层扭 {@code 22.5°}、
+     * 自下而上收口（半宽 13.5 → 4 单位）⇒ 一个**漏斗** ✓；
+     * 包围盒 <b>1.875 × 1.938 × 1.875 格</b>，y 从 <b>0</b> 起（底边贴地 ✓，
+     * 引擎把模型 y=0 对到实体位置 ⇒ 不需要像黑夜之手那样抬 13/16 ✓）。
+     *
+     * <p>⚠️ 这个模型**不是投射物** ✗ —— 它挂在 {@code TNTornadoEntity} 上，
+     * 由 {@code TNTornadoRenderer} 走引擎同一条渲染通道画（和 {@link #DARK_FOG} 同理 ✓）。
+     *
+     * <p>它**一直在转**是靠渲染器每帧按实体的 {@code spin()} 绕 Y 转模型 ✓，
+     * 不是模型自带的动画 ✗（所以这个模型是静态的 ✓）。
+     */
+    public static final String WIND_TORNADO = "projectile/wind_tornado";
+
     public static final String[] PROJECTILE_MODELS = {
             // 火系（用户自制）
             "projectile/fireball",
@@ -142,6 +191,17 @@ public final class TNProjectileModels {
             // 暗系黑雾链的"领域"穹顶（生成器：tools/gen_dark_fog_model.py）——
             //   挂在 CLOUD 的 client_data.model 上，不是投射物，但走同一条渲染/烘焙通道 ✓
             DARK_FOG,
+            // 风系范围风链（月牙斩击，生成器：tools/gen_wind_blade_model.py）
+            //   2026-10-10：从"作者的龙卷风"换成月牙（作者要"抄水法的海浪斩击"）
+            WINDBLADE,
+            // 风系范围风链 t3+ 的龙卷风（生成器：tools/gen_wind_tornado_model.py）
+            //   2026-10-10：作者"你做个龙卷风的模型……持续向外发射风刃" ✓
+            WIND_TORNADO,
+            "projectile/earth_clod", "projectile/earth_orb", "projectile/earth_shell",
+            "projectile/earth_salvo", "projectile/earth_spear",
+            "projectile/earth_pillar", "projectile/earth_mud_plate", "projectile/earth_root",
+            "projectile/earth_spear_sharp",
+            "projectile/earth_spike_sharp",
     };
 
     /**

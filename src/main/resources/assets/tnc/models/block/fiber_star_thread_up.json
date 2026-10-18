@@ -1,0 +1,333 @@
+{
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "skin": "tnc:block/art_violet",
+    "accent": "tnc:block/art_ice",
+    "white": "tnc:block/art_cotton",
+    "glass": "tnc:block/energy_glass",
+    "particle": "tnc:block/art_violet"
+  },
+  "elements": [
+    {
+      "from": [
+        8.143704566931858,
+        9.479999999999999,
+        7.837793349817682
+      ],
+      "to": [
+        9.103704566931858,
+        11.08,
+        8.797793349817683
+      ],
+      "faces": {
+        "north": {
+          "texture": "#skin"
+        },
+        "south": {
+          "texture": "#skin"
+        },
+        "east": {
+          "texture": "#skin"
+        },
+        "west": {
+          "texture": "#skin"
+        },
+        "up": {
+          "texture": "#skin"
+        },
+        "down": {
+          "texture": "#skin"
+        }
+      }
+    },
+    {
+      "from": [
+        6.896295433068142,
+        9.479999999999999,
+        7.202206650182317
+      ],
+      "to": [
+        7.8562954330681425,
+        11.08,
+        8.162206650182318
+      ],
+      "faces": {
+        "north": {
+          "texture": "#accent"
+        },
+        "south": {
+          "texture": "#accent"
+        },
+        "east": {
+          "texture": "#accent"
+        },
+        "west": {
+          "texture": "#accent"
+        },
+        "up": {
+          "texture": "#accent"
+        },
+        "down": {
+          "texture": "#accent"
+        }
+      }
+    },
+    {
+      "from": [
+        7.629504125528161,
+        10.639999999999999,
+        8.211381838416596
+      ],
+      "to": [
+        8.589504125528162,
+        12.24,
+        9.171381838416597
+      ],
+      "faces": {
+        "north": {
+          "texture": "#skin"
+        },
+        "south": {
+          "texture": "#skin"
+        },
+        "east": {
+          "texture": "#skin"
+        },
+        "west": {
+          "texture": "#skin"
+        },
+        "up": {
+          "texture": "#skin"
+        },
+        "down": {
+          "texture": "#skin"
+        }
+      }
+    },
+    {
+      "from": [
+        7.410495874471838,
+        10.639999999999999,
+        6.828618161583403
+      ],
+      "to": [
+        8.370495874471839,
+        12.24,
+        7.788618161583404
+      ],
+      "faces": {
+        "north": {
+          "texture": "#accent"
+        },
+        "south": {
+          "texture": "#accent"
+        },
+        "east": {
+          "texture": "#accent"
+        },
+        "west": {
+          "texture": "#accent"
+        },
+        "up": {
+          "texture": "#accent"
+        },
+        "down": {
+          "texture": "#accent"
+        }
+      }
+    },
+    {
+      "from": [
+        7.025025253169417,
+        11.799999999999999,
+        8.014974746830584
+      ],
+      "to": [
+        7.985025253169416,
+        13.4,
+        8.974974746830584
+      ],
+      "faces": {
+        "north": {
+          "texture": "#skin"
+        },
+        "south": {
+          "texture": "#skin"
+        },
+        "east": {
+          "texture": "#skin"
+        },
+        "west": {
+          "texture": "#skin"
+        },
+        "up": {
+          "texture": "#skin"
+        },
+        "down": {
+          "texture": "#skin"
+        }
+      }
+    },
+    {
+      "from": [
+        8.014974746830582,
+        11.799999999999999,
+        7.025025253169417
+      ],
+      "to": [
+        8.974974746830583,
+        13.4,
+        7.985025253169416
+      ],
+      "faces": {
+        "north": {
+          "texture": "#accent"
+        },
+        "south": {
+          "texture": "#accent"
+        },
+        "east": {
+          "texture": "#accent"
+        },
+        "west": {
+          "texture": "#accent"
+        },
+        "up": {
+          "texture": "#accent"
+        },
+        "down": {
+          "texture": "#accent"
+        }
+      }
+    },
+    {
+      "from": [
+        6.828618161583403,
+        12.959999999999999,
+        7.410495874471838
+      ],
+      "to": [
+        7.788618161583404,
+        14.56,
+        8.370495874471839
+      ],
+      "faces": {
+        "north": {
+          "texture": "#skin"
+        },
+        "south": {
+          "texture": "#skin"
+        },
+        "east": {
+          "texture": "#skin"
+        },
+        "west": {
+          "texture": "#skin"
+        },
+        "up": {
+          "texture": "#skin"
+        },
+        "down": {
+          "texture": "#skin"
+        }
+      }
+    },
+    {
+      "from": [
+        8.211381838416596,
+        12.959999999999999,
+        7.629504125528161
+      ],
+      "to": [
+        9.171381838416597,
+        14.56,
+        8.589504125528162
+      ],
+      "faces": {
+        "north": {
+          "texture": "#accent"
+        },
+        "south": {
+          "texture": "#accent"
+        },
+        "east": {
+          "texture": "#accent"
+        },
+        "west": {
+          "texture": "#accent"
+        },
+        "up": {
+          "texture": "#accent"
+        },
+        "down": {
+          "texture": "#accent"
+        }
+      }
+    },
+    {
+      "from": [
+        7.202206650182317,
+        14.12,
+        6.896295433068143
+      ],
+      "to": [
+        8.162206650182318,
+        15.72,
+        7.8562954330681425
+      ],
+      "faces": {
+        "north": {
+          "texture": "#skin"
+        },
+        "south": {
+          "texture": "#skin"
+        },
+        "east": {
+          "texture": "#skin"
+        },
+        "west": {
+          "texture": "#skin"
+        },
+        "up": {
+          "texture": "#skin"
+        },
+        "down": {
+          "texture": "#skin"
+        }
+      }
+    },
+    {
+      "from": [
+        7.837793349817682,
+        14.12,
+        8.143704566931858
+      ],
+      "to": [
+        8.797793349817683,
+        15.72,
+        9.103704566931858
+      ],
+      "faces": {
+        "north": {
+          "texture": "#accent"
+        },
+        "south": {
+          "texture": "#accent"
+        },
+        "east": {
+          "texture": "#accent"
+        },
+        "west": {
+          "texture": "#accent"
+        },
+        "up": {
+          "texture": "#accent"
+        },
+        "down": {
+          "texture": "#accent"
+        }
+      }
+    }
+  ]
+}

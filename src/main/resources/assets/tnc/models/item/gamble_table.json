@@ -1,1 +1,7 @@
-{ "parent": "tnc:block/gamble_table" }
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "tnc:item/casino_gamble_table",
+    "particle": "tnc:item/casino_gamble_table"
+  }
+}

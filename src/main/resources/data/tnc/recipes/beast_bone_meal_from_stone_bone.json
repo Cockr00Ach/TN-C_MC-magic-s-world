@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "tnc:stone_bone"
+    }
+  ],
+  "result": {
+    "item": "tnc:beast_bone_meal",
+    "count": 4
+  }
+}

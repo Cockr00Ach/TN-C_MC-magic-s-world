@@ -261,6 +261,27 @@ public final class TNEffects {
                 return effect;
             });
 
+    /**
+     * <b>易伤</b> —— 暗系第一条链「黑夜之手」t4 起，命中后挂在目标身上的"受创加重" ✓
+     * （作者 2026-10-10：「**命中的敌人和其他玩家增加易伤，t4 开始**」）。
+     *
+     * <h2>为什么必须是一个我们自己的效果</h2>
+     * 原版 1.20.1 <b>没有</b>"受到伤害增加"这种效果 ✗（只有抗性提升这类减伤）；
+     * 而"给别人加易伤"这件事也不能靠 {@code spell_power} —— 那个属性影响的是
+     * <b>他自己打出去的伤害</b>，不是他挨打时吃到的伤害 ✗✗。
+     * 所以：本效果只当一个<b>标记</b>（不发属性、不做事）✓，
+     * 真正的"受创加重"由 {@code armor/TNIronArmorEvents.onLivingHurt} 里那**一处**统一结算 ✓
+     * —— 与铁甲 99% / 光耀链减伤、光/暗龙鳞甲 50% 是同一个地方、同一条规矩 ✓。
+     *
+     * <p>它和那些减伤是**不同轴**的（那是 keep ≤ 1、这是 taken ≥ 1）⇒ 相乘是刻意的 ✓：
+     * 一个 99% 减伤的敌人吃到 t5 的易伤，仍然只吃 1% × 1.30 ≈ 1.3% ✓。
+     *
+     * <p>颜色用暗血红紫（{@code 0x8E1E3C}，与献祭线同族）⇒ 敌方身上那圈粒子一眼能认出
+     * "这是暗系的易伤"✓；amplifier 0/1 分别对应 t4（+15%）与 t5（+30%）✓。
+     */
+    public static final RegistryObject<MobEffect> VULNERABLE = EFFECTS.register("vulnerable",
+            () -> new MobEffect(MobEffectCategory.HARMFUL, 0x8E1E3C) {});
+
     // ------------------------------------------------------------------
     //  暗系第二条链「以伤换伤 · 献祭」（作者 2026-10-09："你还可以再优化一下以伤换伤"）
     //
@@ -495,6 +516,16 @@ public final class TNEffects {
         //   在 DarkFogMechanics 的静态块里注册 ⇒ 这里显式碰一下它的静态字段，
         //   保证类在"任何施法之前"就被加载 ✓（否则第一次放黑雾会没反应 ✗）。
         DarkFogMechanics.ensureLoaded();
+        // ★ 黑夜之手链的「反噬代价」同理：每放一次扣施法者自己一截血 ＋ 挂"头痛" ✓。
+        //   它接的是引擎的 SPELL_CAST（不是 Forge 总线 ✗），同样必须在"任何施法之前"把类加载起来，
+        //   否则第一次放黑夜之手会**静默不扣血** ✗（作者 2026-10-10：按《Re:Zero》不可视之手重做 ✓）。
+        TNDarkHandMechanics.ensureLoaded();
+        if(net.minecraftforge.fml.ModList.get().isLoaded("spell_engine"))DarkSiphonMechanics.ensureLoaded();
+        // ★ 风系范围风链的「t3+ 召唤龙卷风」同理：接的也是引擎的 SPELL_CAST（不是 Forge 总线 ✗），
+        //   必须在"任何施法之前"把类加载起来，否则第一次放 t3 风刃**只会扣蓝不出龙卷风** ✗
+        //   （作者 2026-10-10：「t3 开始释放风刃会召唤出一个一直在旋转的龙卷风」✓）。
+        TNWindGaleMechanics.ensureLoaded();
+        WindEarthVisualMechanics.register(modEventBus);
         // 火系火球链的「焚身」（命中灼伤）—— 自有实体那一套，见 magic/fire/TNScorch
         com.tnc.tnc.magic.fire.TNScorch.register(modEventBus);
     }

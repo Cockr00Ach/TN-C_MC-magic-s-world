@@ -17,9 +17,33 @@
         "particle_id": "splash",
         "shape": "CIRCLE",
         "origin": "FEET",
+        "count": 24,
+        "min_speed": 0.15,
+        "max_speed": 0.5
+      },
+      {
+        "particle_id": "cloud",
+        "shape": "CIRCLE",
+        "origin": "FEET",
+        "count": 14,
+        "min_speed": 0.05,
+        "max_speed": 0.3
+      },
+      {
+        "particle_id": "crit",
+        "shape": "CIRCLE",
+        "origin": "FEET",
+        "count": 12,
+        "min_speed": 0.05,
+        "max_speed": 0.3
+      },
+      {
+        "particle_id": "end_rod",
+        "shape": "CIRCLE",
+        "origin": "FEET",
         "count": 10,
-        "min_speed": 0.1,
-        "max_speed": 0.4
+        "min_speed": 0.05,
+        "max_speed": 0.25
       }
     ]
   },

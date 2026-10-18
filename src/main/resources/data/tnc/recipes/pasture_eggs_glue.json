@@ -1,27 +1,39 @@
 {
-  "type": "minecraft:crafting_shapeless",
-  "ingredients": [
+  "type": "forge:conditional",
+  "recipes": [
     {
-      "tag": "minecraft:planks"
-    },
-    {
-      "tag": "minecraft:planks"
-    },
-    {
-      "tag": "minecraft:planks"
-    },
-    {
-      "tag": "minecraft:planks"
-    },
-    {
-      "item": "minecraft:hay_block"
-    },
-    {
-      "item": "tnc:nest_glue"
+      "conditions": [
+        {
+          "type": "forge:false"
+        }
+      ],
+      "recipe": {
+        "type": "minecraft:crafting_shapeless",
+        "ingredients": [
+          {
+            "tag": "minecraft:planks"
+          },
+          {
+            "tag": "minecraft:planks"
+          },
+          {
+            "tag": "minecraft:planks"
+          },
+          {
+            "tag": "minecraft:planks"
+          },
+          {
+            "item": "minecraft:hay_block"
+          },
+          {
+            "item": "tnc:nest_glue"
+          }
+        ],
+        "result": {
+          "item": "tnc:egg_rack",
+          "count": 1
+        }
+      }
     }
-  ],
-  "result": {
-    "item": "tnc:egg_rack",
-    "count": 1
-  }
+  ]
 }

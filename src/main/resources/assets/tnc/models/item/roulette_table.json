@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "tnc:item/casino_roulette_table",
+    "particle": "tnc:item/casino_roulette_table"
+  }
+}

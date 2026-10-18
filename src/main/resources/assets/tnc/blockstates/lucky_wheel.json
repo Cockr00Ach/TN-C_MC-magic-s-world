@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "facing=north,spinning=true": {
+      "model": "tnc:block/lucky_wheel"
+    },
+    "facing=north,spinning=false": {
+      "model": "tnc:block/lucky_wheel"
+    },
+    "facing=south,spinning=true": {
+      "model": "tnc:block/lucky_wheel"
+    },
+    "facing=south,spinning=false": {
+      "model": "tnc:block/lucky_wheel"
+    },
+    "facing=east,spinning=true": {
+      "model": "tnc:block/lucky_wheel"
+    },
+    "facing=east,spinning=false": {
+      "model": "tnc:block/lucky_wheel"
+    },
+    "facing=west,spinning=true": {
+      "model": "tnc:block/lucky_wheel"
+    },
+    "facing=west,spinning=false": {
+      "model": "tnc:block/lucky_wheel"
+    }
+  }
+}

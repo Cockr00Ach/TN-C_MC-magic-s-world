@@ -99,6 +99,8 @@ public final class AdventureScreen extends Screen {
         }
         button("关闭",left+panelWidth-64,top+12,48,this::onClose,true);
     }
+    private boolean richPreview(){return panelWidth>=400&&panelHeight>=300;}
+    private void preview(GuiGraphics g,net.minecraft.world.item.ItemStack item,int y){int x=left+panelWidth-78;com.tnc.tnc.client.ui.ArcaneGui.sigil(g,x,y,45,minecraft.level.getGameTime(),.3f);g.pose().pushPose();g.pose().translate(x-28,y-28,0);g.pose().scale(3.5f,3.5f,1);g.renderItem(item,0,0);g.pose().popPose();}
     private boolean compactGear(){return tab==4&&panelHeight<260;}
     private Set<String> active(){var ids=new HashSet<String>();for(var c:data.getList("Contracts",10))ids.add(((CompoundTag)c).getString("ID"));return ids;}
     private int rows(){return Math.max(1,(panelHeight-192)/36);}
@@ -112,11 +114,11 @@ public final class AdventureScreen extends Screen {
         return entity==null?"目标敌人":entity.getDescription().getString();
     }
     private void text(GuiGraphics g,String text,int x,int y,int color){g.drawString(font,text,x,y,color,false);}
-    private int paragraph(GuiGraphics g,String s,int y,int color){for(var line:font.split(Component.literal(s),panelWidth-40)){g.drawString(font,line,left+20,y,color,false);y+=12;}bodyLastY=Math.max(bodyLastY,y);return y;}
+    private int paragraph(GuiGraphics g,String s,int y,int color){for(var line:font.split(Component.literal(s),(tab==2||tab==4)&&richPreview()?panelWidth-170:panelWidth-40)){g.drawString(font,line,left+20,y,color,false);y+=12;}bodyLastY=Math.max(bodyLastY,y);return y;}
     @Override public void render(GuiGraphics g,int mx,int my,float partial) {
-        renderBackground(g);g.fill(left-2,top-2,left+panelWidth+2,top+panelHeight+2,0xFFA48257);g.fill(left,top,left+panelWidth,top+panelHeight,0xFFF1E7D5);
-        g.fill(left,top,left+panelWidth,top+38,0xFF182C42);text(g,panel.title(),left+16,top+14,0xF7E8CF);
-        if(!compactGear())text(g,panel.subtitle(),left+20,top+49,0x246E78);
+        renderBackground(g);com.tnc.tnc.client.ui.ArcaneGui.frame(g,left,top,panelWidth,panelHeight);
+        text(g,panel.title(),left+16,top+14,0xF7E8CF);
+        if(!compactGear())text(g,panel.subtitle(),left+20,top+49,0x8cc8c8);
         var p=profile();boolean local=data.getBoolean("AtService");
         String hoveredDetail=null;
         int bodyStart=top+(tab==2?135:tab==4?(compactGear()?70:153):tab==1?101:78),bodyEnd=top+panelHeight-(tab==3?99:tab==1?60:compactGear()?48:76);
@@ -124,27 +126,27 @@ public final class AdventureScreen extends Screen {
         g.enableScissor(left+12,bodyStart,left+panelWidth-12,Math.max(bodyStart+1,bodyEnd));g.pose().pushPose();g.pose().translate(0,-bodyScroll,0);
         if(tab==0) {
             int y=top+82;int lv=p.level();long next=lv>=100?0:AdventureRules.levelCost(lv),earned=p.xp()-AdventureRules.xpAtLevel(lv);
-            text(g,"Lv."+lv+"   "+(data.getInt("Rank")==0?"初级":"精锐")+"冒险者",left+20,y,0x182C42);y+=20;
-            text(g,lv>=100?"冒险成长已满级":"本级经验 "+earned+" / "+next+"   ·   声望 "+p.reputation(),left+20,y,0x544737);y+=18;
-            int bar=panelWidth-40;g.fill(left+20,y,left+20+bar,y+5,0xFFD6CBB9);g.fill(left+20,y,left+20+(int)(bar*(lv>=100?1:earned/(double)next)),y+5,0xFF408B92);y+=17;
-            text(g,"余额  "+AdventureRules.money(p.coins()),left+20,y,0x544737);y+=20;
+            text(g,"Lv."+lv+"   "+(data.getInt("Rank")==0?"初级":"精锐")+"冒险者",left+20,y,0xe5d6ba);y+=20;
+            text(g,lv>=100?"冒险成长已满级":"本级经验 "+earned+" / "+next+"   ·   声望 "+p.reputation(),left+20,y,0xc8bba6);y+=18;
+            int bar=panelWidth-40;g.fill(left+20,y,left+20+bar,y+5,0xff151b22);g.fill(left+20,y,left+20+(int)(bar*(lv>=100?1:earned/(double)next)),y+5,0xFF408B92);y+=17;
+            text(g,"余额  "+AdventureRules.money(p.coins()),left+20,y,0xc8bba6);y+=20;
             if(panel==ServicePanel.GUILD) {
-                y=paragraph(g,"艾琳为你办理协会登记与晋升。精锐晋升需要Lv10与100声望；接取和交付委托请右键旁边的酒馆委托栏。",y,0x635A4A);
+                y=paragraph(g,"艾琳为你办理协会登记与晋升。精锐晋升需要Lv10与100声望；接取和交付委托请右键旁边的酒馆委托栏。",y,0xb5aa98);
             } else {
-                y=paragraph(g,"这是你的个人冒险档案。存取与购房请找银行，制作与提货请找相应匠人。",y,0x635A4A);
-                y=paragraph(g,data.getString("Directions"),y+8,0x246E78);
-                y+=10;for(var entry:data.getList("Ledger",8)){text(g,entry.getAsString(),left+20,y,0x635A4A);y+=12;}
+                y=paragraph(g,"这是你的个人冒险档案。存取与购房请找银行，制作与提货请找相应匠人。",y,0xb5aa98);
+                y=paragraph(g,data.getString("Directions"),y+8,0x8cc8c8);
+                y+=10;for(var entry:data.getList("Ledger",8)){text(g,entry.getAsString(),left+20,y,0xb5aa98);y+=12;}
             }
             bodyLastY=Math.max(bodyLastY,y);
         } else if(tab==1) {
-            paragraph(g,"原生栏接取纸张，手持完成的委托右键酒馆栏交付。数量与期限见纸张；下方为教学/旧单归档。",top+103,0x635A4A);
+            paragraph(g,"原生栏接取纸张，手持完成的委托右键酒馆栏交付。数量与期限见纸张；下方为教学/旧单归档。",top+103,0xb5aa98);
             int rows=rows();var active=active();
             for(int i=page*rows;i<Math.min(visible.size(),(page+1)*rows);i++) {
                 var c=visible.get(i);int y=top+136+(i-page*rows)*36;
-                text(g,c.title(),left+20,y,0x182C42);
+                text(g,c.title(),left+20,y,0xe5d6ba);
                 int required=c.kills()>0?c.kills():c.materials().stream().mapToInt(ContractCatalog.Material::count).sum();
                 String line=active.contains(c.id())?"进行中 "+data.getCompound("Counts").getInt(c.id())+" / "+required:"经验 "+c.xp()+" · 声望 "+c.reputation()+" · "+c.coins()+"铜";
-                text(g,line,left+20,y+13,0x635A4A);
+                text(g,line,left+20,y+13,0xb5aa98);
                 bodyLastY=Math.max(bodyLastY,y+30);
                 if(mx>=left+16&&mx<left+panelWidth-88&&my+bodyScroll>=y&&my+bodyScroll<y+32){
                     String detail=c.kills()>0?"接单后击杀 "+enemyName(c.enemy())+" × "+c.kills()+"。完成后回馆结算。":c.materials().stream().map(m->materialName(m)+" × "+m.count()).reduce((a,b)->a+"，"+b).orElse("")+"。提交消耗材料，返还碗/瓶。";
@@ -152,34 +154,34 @@ public final class AdventureScreen extends Screen {
                 }
             }
         } else if(tab==2) {
-            var d=design();g.pose().pushPose();g.pose().translate(left+20,top+137,0);g.pose().scale(2,2,1);g.renderItem(ElementWands.stack(d),0,0);g.pose().popPose();
-            text(g,d.name(),left+63,top+138,0x182C42);text(g,"Lv"+new int[]{0,1,10,25,50,85}[tier]+" · "+d.seconds()+"秒 · "+d.fee()+"铜",left+63,top+155,0x246E78);
+            var d=design();if(richPreview()){preview(g,ElementWands.stack(d),top+190);}else {g.pose().pushPose();g.pose().translate(left+20,top+137,0);g.pose().scale(2,2,1);g.renderItem(ElementWands.stack(d),0,0);g.pose().popPose();}
+            text(g,d.name(),left+(richPreview()?20:63),top+138,0xe5d6ba);text(g,"Lv"+new int[]{0,1,10,25,50,85}[tier]+" · "+d.seconds()+"秒 · "+d.fee()+"铜",left+(richPreview()?20:63),top+155,0x8cc8c8);
             String mats=d.materials().stream().map(m->materialName(m)+"×"+m.count()).reduce((a,b)->a+" / "+b).orElse("");
-            int y=paragraph(g,mats,top+177,0x635A4A);
-            y=paragraph(g,"首次一阶免人工费。承载本系已学1～"+tier+"阶和通用术；低阶法器不抹除知识。光系普通战斗链待开放。",y+7,0x635A4A);
+            int y=paragraph(g,mats,top+177,0xb5aa98);
+            y=paragraph(g,"首次一阶免人工费。承载本系已学1～"+tier+"阶和通用术；低阶法器不抹除知识。光系普通战斗链待开放。",y+7,0xb5aa98);
             var ordered=ElementWands.find(data.getString("SmithDesign"));long ready=data.getLong("SmithReady");String state=ready<0?"去潮生制杖屋找莉娅下单。":"订单："+(ordered==null?"铁匠/旧法杖订单":ordered.name())+" · "+(ready<=data.getLong("ActiveTicks")?"完成可领取":"剩余 "+(ready-data.getLong("ActiveTicks")+19)/20+" 秒");
-            paragraph(g,state,y+8,0x246E78);
+            paragraph(g,state,y+8,0x8cc8c8);
         } else if(tab==3) {
-            var house=data.getCompound("Housing");int y=paragraph(g,"南街三层空屋 · 30银（3000铜）",top+82,0x182C42);
-            y=paragraph(g,house.getBoolean("Preparing")?house.getString("Status"):house.getBoolean("Mine")?"你的住宅：装修与物品长期保留。":house.hasUUID("Owner")?"本存档房源已售出，其他玩家无需付款。":"先看房，找归航银行米洛确认全款购买。分期与借贷尚未开放。",y+8,0x635A4A);
-            y=paragraph(g,"入口："+house.getString("Entry"),y+8,0x246E78);
-            y=paragraph(g,"装修边界："+house.getString("Boundary"),y+8,0x635A4A);
-            paragraph(g,"账户余额："+AdventureRules.money(p.coins())+"。银行存取与钱袋共用余额；实体币不重复记账。",y+8,0x635A4A);
+            var house=data.getCompound("Housing");int y=paragraph(g,"南街三层空屋 · 30银（3000铜）",top+82,0xe5d6ba);
+            y=paragraph(g,house.getBoolean("Preparing")?house.getString("Status"):house.getBoolean("Mine")?"你的住宅：装修与物品长期保留。":house.hasUUID("Owner")?"本存档房源已售出，其他玩家无需付款。":"先看房，找归航银行米洛确认全款购买。分期与借贷尚未开放。",y+8,0xb5aa98);
+            y=paragraph(g,"入口："+house.getString("Entry"),y+8,0x8cc8c8);
+            y=paragraph(g,"装修边界："+house.getString("Boundary"),y+8,0xb5aa98);
+            paragraph(g,"账户余额："+AdventureRules.money(p.coins())+"。银行存取与钱袋共用余额；实体币不重复记账。",y+8,0xb5aa98);
         } else {
-            var d=gear();var r=EquipmentOrders.find(d.id());int gearY=top+(compactGear()?72:155);g.renderItem(com.tnc.tnc.equipment.MageGear.stack(d),left+20,gearY);
-            text(g,d.name(),left+48,gearY,0x182C42);text(g,"Lv"+r.level()+" · "+r.seconds()+"秒 · "+r.fee()+"铜",left+48,gearY+18,0x246E78);
-            int y=paragraph(g,d.detail(),gearY+39,0x635A4A);
-            y=paragraph(g,r.materials().stream().map(m->materialName(m)+"×"+m.count()).reduce((a,b)->a+" / "+b).orElse(""),y+5,0x635A4A);
-            y=paragraph(g,d.divine()?"修复需要破损遗物；遗物获取地点尚未开放。":"首次冒险者装备免人工费。帽子与身甲可自由混搭，身甲已包含裤鞋。",y+5,0x635A4A);
+            var d=gear();var r=EquipmentOrders.find(d.id());int gearY=top+(compactGear()?72:155);if(richPreview())preview(g,com.tnc.tnc.equipment.MageGear.stack(d),gearY+34);else g.renderItem(com.tnc.tnc.equipment.MageGear.stack(d),left+20,gearY);
+            text(g,d.name(),left+(richPreview()?20:48),gearY,0xe5d6ba);text(g,"Lv"+r.level()+" · "+r.seconds()+"秒 · "+r.fee()+"铜",left+(richPreview()?20:48),gearY+18,0x8cc8c8);
+            int y=paragraph(g,d.detail(),gearY+39,0xb5aa98);
+            y=paragraph(g,r.materials().stream().map(m->materialName(m)+"×"+m.count()).reduce((a,b)->a+" / "+b).orElse(""),y+5,0xb5aa98);
+            y=paragraph(g,d.divine()?"修复需要破损遗物；遗物获取地点尚未开放。":"首次冒险者装备免人工费。帽子与身甲可自由混搭，身甲已包含裤鞋。",y+5,0xb5aa98);
             var equipment=EquipmentOrders.find(data.getString("SmithDesign"));var wand=ElementWands.find(data.getString("SmithDesign"));
             String pending=equipment!=null?new net.minecraft.world.item.ItemStack(equipment.item()).getHoverName().getString():wand!=null?wand.name():"旧基础杖";
-            paragraph(g,data.getLong("SmithReady")<0?"当前没有订单。":"已有订单："+pending+"；请回原商家领取。",y+10,0x246E78);
+            paragraph(g,data.getLong("SmithReady")<0?"当前没有订单。":"已有订单："+pending+"；请回原商家领取。",y+10,0x8cc8c8);
         }
         g.pose().popPose();g.disableScissor();scrollLimit=Math.max(0,bodyLastY-bodyEnd+4);
-        if(tab==1)text(g,"原生栏已完成 "+data.getInt("NativeBounties")+" 次",left+170,top+panelHeight-46,0x635A4A);
-        if(scrollLimit>0&&!compactGear())text(g,"滚轮查看更多",left+panelWidth-90,bodyEnd+2,0x635A4A);
+        if(tab==1)text(g,"原生栏已完成 "+data.getInt("NativeBounties")+" 次",left+170,top+panelHeight-46,0xb5aa98);
+        if(scrollLimit>0&&!compactGear())text(g,"滚轮查看更多",left+panelWidth-90,bodyEnd+2,0xb5aa98);
         if(!notice.isEmpty()){
-            String shortNotice=font.plainSubstrByWidth(notice,panelWidth-40);text(g,shortNotice,left+20,top+panelHeight-20,0x7B452B);
+            String shortNotice=font.plainSubstrByWidth(notice,panelWidth-40);text(g,shortNotice,left+20,top+panelHeight-20,0xd8a27b);
             if(mx>=left+20&&mx<=left+panelWidth-20&&my>=top+panelHeight-24&&my<top+panelHeight)g.renderTooltip(font,font.split(Component.literal(notice),Math.min(320,width-40)),mx,my);
         }
         super.render(g,mx,my,partial);

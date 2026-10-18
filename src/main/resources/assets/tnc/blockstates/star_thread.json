@@ -1,7 +1,57 @@
 {
-  "variants": {
-    "": {
-      "model": "tnc:block/star_thread"
+  "multipart": [
+    {
+      "apply": {
+        "model": "tnc:block/fiber_star_thread_core"
+      }
+    },
+    {
+      "when": {
+        "west": "true"
+      },
+      "apply": {
+        "model": "tnc:block/fiber_star_thread_west"
+      }
+    },
+    {
+      "when": {
+        "east": "true"
+      },
+      "apply": {
+        "model": "tnc:block/fiber_star_thread_east"
+      }
+    },
+    {
+      "when": {
+        "down": "true"
+      },
+      "apply": {
+        "model": "tnc:block/fiber_star_thread_down"
+      }
+    },
+    {
+      "when": {
+        "up": "true"
+      },
+      "apply": {
+        "model": "tnc:block/fiber_star_thread_up"
+      }
+    },
+    {
+      "when": {
+        "north": "true"
+      },
+      "apply": {
+        "model": "tnc:block/fiber_star_thread_north"
+      }
+    },
+    {
+      "when": {
+        "south": "true"
+      },
+      "apply": {
+        "model": "tnc:block/fiber_star_thread_south"
+      }
     }
-  }
+  ]
 }

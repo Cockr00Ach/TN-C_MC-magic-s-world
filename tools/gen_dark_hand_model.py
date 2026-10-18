@@ -2,10 +2,19 @@
 """
 gen_dark_hand_model.py -- the "HAND OF NIGHT" projectile model (dark magic chain 1).
 
-Author 2026-10-02: "give me a hand model" -- this is the hand of the
-night_hand chain (night_hand -> night_raid -> night_embrace -> black_ruin -> slay_light).
-All five spells currently fire tnc:projectile/lightingball (a yellow ball), which has
-nothing to do with a "hand of night". This replaces it.
+================================================================================
+!!! 2026-10-10 晚起：**本脚本不再是产物来源，别再跑它** !!!
+================================================================================
+作者交给我们的是一份**导出的**模型（方块 31 -> 42、手指重新摆位）并重画了贴图
+（原话：「我现在更新了一下，你依照我的更新更新吧」）
+=> 事实来源变成 `magic_modelandtexture/dark_hand/dark_hand.bbmodel`；
+   把它导回发货文件的是 `tools/import_dark_hand_bbmodel.py`（bbmodel -> 模型 JSON + PNG，带加载器硬约束校验）。
+   ⚠️ **那份模型不是作者做的** ✗（作者原话：「手的模型不是我做的啊，我帮你导出了」）——
+      原作者与授权待确认 ✓。
+
+**跑本脚本会**：按下面这套程序化调色板重画整张贴图（覆盖作者手绘的 ✗），
+并按老坐标重建 31 个方块（丢掉作者加的 11 个方块 ✗）。历史/备用保留，正常运行别碰 ✓。
+需要重新程序化生成时（比如要重做一版全新造型），先跟作者确认 ✓。
 
 WHAT IT WRITES
     1. src/main/resources/assets/tnc/models/projectile/dark_hand.json
@@ -69,25 +78,72 @@ TEX = 32   # texture is 32x32; every UV below is in whole pixels of this atlas
 # ----------------------------------------------------------------------------
 #  Keep every material a solid-ish patch with its own shading so a mis-UVed face is
 #  visible at a glance instead of blending in.
+#
+#  ★★ 2026-10-10 调色重做（作者："我想改改贴图，感觉**太花了**，想改的**更暗更黑更邪恶**一点"）:
+#    旧配色是「紫黑肉质 + 亮紫指节 + **洋红爪尖 + 近白高光**」✗ —— 爪子那两个数是全场最亮的，
+#    远看整只手被爪尖和指节的亮紫抢掉，所以"花" ✓。
+#    新配色只有一个思路：**整只手是焦黑的碳，只用冷紫的极窄描边把块面分开，
+#    唯一的暖色留给爪尖的干血暗红** ✓ —— 黑、脏、安静，但手指仍然数得清。
+#    ⚠️ 别把 edge 也压到 0 ✗：手是 31 个方块拼的，块面之间没有一丝明度差 ⇒
+#      远看会糊成**一坨黑**（旧文档当初选亮配色就是为了防这个 ✗）。edge 只比 base 高一点点。
+#  ★★ 2026-10-10 第三刀：**整张图集重排**（作者："blockbench 模型没变化" ✓ 他是对的 ✗）
+#
+#  查出来的两个根问题（都不是"配色不够暗"，是排布本身错了 ✗）：
+#   1) **矩形互相重叠** ✗：旧排布里 `palm`(8..20,0..12) 与 `claw`(12..22,8..18)、
+#      与 `digit_0`(0..12,8..14) 都压在一起 ⇒ ① 同一批像素被两块材质共用，
+#      **作者画爪子会同时改到手背** ✗；② 实测亮度被爪尖那条高光带拉回去
+#      （手背块 max 46.7 比掌心 45.6 还亮 ✗）⇒ 怎么调 base 都"看不出区别" ✓。
+#   2) **掌心的贴图区比例不对** ✗：掌板那个大面是 **13 单位宽 × 12 高**，
+#      而我第一版劈出来的两块只有 6×12 ⇒ 画上去会被**横向拉伸 2.2 倍** ✗✗。
+#  ⇒ 现在：掌/背各给一块 **13x12**（正好等于那个面 ✓ 1:1 不拉伸），其余材质按需要缩小后
+#    重新铺满 32x32，**任何两块都不重叠** ✓（下面有断言，重叠会直接报错 ✓）。
 ATLAS = {
-    # name          (x, y, w, h)   base      edge        accent
-    "wrist":        ((0, 0, 8, 8), (26, 16, 40), (40, 26, 58), (10, 6, 16)),
-    "palm":         ((8, 0, 12, 12), (34, 22, 52), (52, 34, 74), (12, 8, 20)),
-    "back":         ((20, 0, 8, 8), (24, 15, 38), (36, 23, 52), (9, 5, 14)),
-    "digit_0":      ((0, 8, 12, 6), (44, 30, 64), (64, 44, 88), (14, 9, 22)),
-    "digit_1":      ((0, 14, 12, 6), (38, 25, 56), (56, 38, 78), (12, 8, 20)),
-    "digit_2":      ((0, 20, 12, 6), (32, 21, 48), (48, 32, 68), (11, 7, 18)),
-    "knuckle":      ((0, 26, 12, 6), (72, 60, 96), (112, 96, 140), (26, 18, 36)),
-    "claw":         ((12, 8, 10, 10), (200, 90, 190), (255, 190, 250), (90, 30, 90)),
-    "aura":         ((22, 8, 8, 8), (60, 30, 96), (120, 70, 170), (24, 10, 40)),
-    # ★ the tether: the darkest material in the atlas (author 2026-10-10: "手腕跟身体可以有
-    #   一条黑色的粗的线连接"). Deliberately near-black with almost no edge contrast, so it
-    #   reads as ONE solid black line instead of a stack of shaded cubes.
-    "tether":       ((24, 16, 8, 8), (10, 8, 14), (16, 13, 22), (5, 4, 8)),
+    # name          (x, y, w, h)      base           edge           accent
+    "palm":         ((0, 0, 13, 12),  (24, 18, 27),  (40, 30, 45),  (11, 8, 14)),
+    "palm_back":    ((13, 0, 13, 12), (5, 4, 8),     (8, 7, 12),    (2, 2, 3)),
+    "claw":         ((0, 12, 8, 8),   (54, 11, 14),  (92, 20, 24),  (18, 4, 6)),
+    "aura":         ((8, 12, 6, 6),   (28, 17, 40),  (50, 30, 70),  (11, 6, 17)),
+    "wrist":        ((14, 12, 8, 8),  (13, 10, 16),  (22, 17, 27),  (6, 4, 8)),
+    "back":         ((22, 12, 8, 8),  (12, 9, 15),   (20, 15, 24),  (5, 4, 7)),
+    "digit_0":      ((0, 20, 6, 4),   (21, 15, 25),  (34, 24, 40),  (8, 6, 11)),
+    "digit_1":      ((6, 20, 6, 4),   (18, 13, 22),  (29, 20, 35),  (7, 5, 9)),
+    "digit_2":      ((12, 20, 6, 4),  (15, 11, 19),  (25, 17, 29),  (6, 4, 8)),
+    "knuckle":      ((18, 20, 6, 4),  (24, 17, 28),  (38, 27, 43),  (9, 6, 12)),
+    # ★ tether：全图最暗的一档（作者 2026-10-10："手腕跟身体可以有一条黑色的粗的线连接"）。
+    #   ⚠️ 现在**没有方块用它**（那条黑带已删，改由粒子黑索承担 ✓），留着当备用区域 ✓
+    "tether":       ((24, 20, 8, 8),  (10, 8, 14),   (16, 13, 22),  (5, 4, 8)),
 }
+
+
+def _assert_no_overlap():
+    """★ 图集里任何两块矩形都不许重叠 ✓ —— 重叠会让两块材质共用像素
+    （作者画 A 会同时改到 B ✗），而且会像 2026-10-10 那次一样把亮度统计彻底带偏 ✗。
+
+    这条断言是**故意留的**：以后往 ATLAS 里加材质、或者挪某一块的坐标，
+    一旦压到别人身上，生成器会**当场报错**，而不是安静地画出一张互相污染的图 ✓。
+    """
+    names = list(ATLAS)
+    for i in range(len(names)):
+        for j in range(i + 1, len(names)):
+            ax, ay, aw, ah = ATLAS[names[i]][0]
+            bx, by, bw, bh = ATLAS[names[j]][0]
+            if ax < bx + bw and bx < ax + aw and ay < by + bh and by < ay + ah:
+                raise AssertionError(
+                    "atlas overlap: %s %s vs %s %s" % (names[i], ATLAS[names[i]][0],
+                                                       names[j], ATLAS[names[j]][0]))
+
+
+_assert_no_overlap()
 
 # where the next free patch is, for any material not pre-declared (auto-tiled)
 _auto_cursor = [0, 16]
+
+# ★★ 整体明度旋钮（2026-10-10 加）：
+#   1.00 = 就用上面表里那套"焦黑 + 干血红"；
+#   想让**整只手**再暗一档写 0.85、想亮回来一点写 1.15 ✓ —— 只改这一个数，其它都不用动。
+#   ⚠️ 别低于 ~0.7 ✗：手是 31 个方块拼的，全部压到接近 0 之后块面之间就没有明度差了，
+#      远看会糊成**一坨黑**（旧配色当初选亮色就是为了防这个 ✗）。
+PALETTE_GAIN = 1.00
 
 
 def atlas_rect(name):
@@ -105,8 +161,14 @@ def atlas_rect(name):
 # ----------------------------------------------------------------------------
 #  geometry helpers
 # ----------------------------------------------------------------------------
-def box(frm, to, mat, uv_face=None):
-    """One axis-aligned cube. frm/to are [x,y,z] in model units (1 unit = 1/16 block)."""
+def box(frm, to, mat, uv_face=None, north_mat=None):
+    """One axis-aligned cube. frm/to are [x,y,z] in model units (1 unit = 1/16 block).
+
+    north_mat: 可选的**手背面专用材质** ✓（2026-10-10 加）。
+      模型的 `north` 面就是 -Z 那一面 —— 对掌板来说它是**手背**，而 `south`（+Z）是**掌心** ✓。
+      默认六个面共用同一块材质 ⇒ 手心和手背一模一样 ✗（作者："哪边是掌心"）。
+      传了 north_mat 之后，只有 north 那一个面改用另一块贴图区域 ⇒ 两面可以画得完全不同 ✓。
+    """
     x0, y0, z0 = frm
     x1, y1, z1 = to
     assert x1 > x0 and y1 > y0 and z1 > z0, "box must have positive size: %r -> %r" % (frm, to)
@@ -139,13 +201,20 @@ def box(frm, to, mat, uv_face=None):
         vh = max(1, min(vh, TEX - v))
         return {"uv": [u, v, u + uw, v + vh], "texture": "#0"}
 
+    # ★ 手背面单独用另一块材质（见 north_mat 的说明）✓
+    if north_mat:
+        nx, ny, nw, nh = atlas_rect(north_mat)
+        north_face = face(nx, ny, span(nw, nx, x1 - x0), span(nh, ny, y1 - y0))
+    else:
+        north_face = face(ax + fx, ay + fy, w, h)
+
     return {
         "from": [x0, y0, z0],
         "to": [x1, y1, z1],
         "rotation": {"angle": 0, "axis": "y", "origin": [x0, y0, z0]},
         "faces": {
             # north/south are the XY faces (size w x h)
-            "north": face(ax + fx, ay + fy, w, h),
+            "north": north_face,
             "south": face(ax + (aw - w - fx) % max(1, aw - w + 1), ay + fy, w, h),
             # east/west are the ZY faces (size d x h)
             "east": face(ax + fx, ay + ((fy + h) % max(1, ah - h + 1)), d, h),
@@ -210,7 +279,9 @@ def build_boxes():
     # 手腕：沿 -Z 直直往后（短，不是前臂）
     b.append(box([-3, -3, -7], [3, 3, -1], "wrist"))
     # 手掌平板：它的 +Z 面就是掌心
-    b.append(box([-6.5, -6, -1.5], [6.5, 6, 1.5], "palm"))
+    # ★ 2026-10-10：**手背（north = -Z）改用 palm_back** ✓ —— 原来两面共用一块 UV，
+    #   游戏里手心和手背一模一样，作者认不出哪面是掌心 ✗（见 ATLAS 里那两块的说明）
+    b.append(box([-6.5, -6, -1.5], [6.5, 6, 1.5], "palm", north_mat="palm_back"))
     # 掌根（靠手腕那侧稍厚一点）
     b.append(box([-5, -7, -2.5], [5, -3, 1.5], "back"))
     # 掌指关节横条
@@ -345,6 +416,10 @@ def build_texture():
 
     def paint(name):
         (x, y, w, h), base, edge, accent = ATLAS[name]
+        # ★ 整体明度旋钮（PALETTE_GAIN）在这里统一生效 ✓
+        base = tuple(min(255, int(v * PALETTE_GAIN)) for v in base)
+        edge = tuple(min(255, int(v * PALETTE_GAIN)) for v in edge)
+        accent = tuple(min(255, int(v * PALETTE_GAIN)) for v in accent)
         for i in range(w):
             for j in range(h):
                 # soft vertical shade + a 1px darker frame
@@ -352,18 +427,47 @@ def build_texture():
                 c = tuple(int(base[k] * (1 - 0.25 * t) + accent[k] * (0.25 * t)) for k in range(3))
                 if i == 0 or j == 0 or i == w - 1 or j == h - 1:
                     c = edge
-                # a couple of lighter speckles so faces are not flat
+                # ★ 2026-10-10：散点从 +28 压到 +10 —— 原来的亮点太多，也是"花"的一部分 ✗
+                #   （只需要"块面不完全是平的"，不需要看得见的噪点）
                 if (i * 7 + j * 13) % 17 == 0:
-                    c = tuple(min(255, v + 28) for v in c)
+                    c = tuple(min(255, v + 10) for v in c)
                 px[x + i, y + j] = (c[0], c[1], c[2], 255)
 
     for name in ATLAS:
         paint(name)
 
-    # claw patch: add a hard white highlight along its centre line
+    # claw patch: ★ 2026-10-10 那条**近白高光**换成暗红细线 ✗
+    #   （旧值 (255,235,255) 是整张图最亮的一笔 —— 远看爪尖一片白，就是"太花"的主犯 ✓；
+    #    现在改成干血的暗红，爪子仍然是整只手上唯一能一眼看到的细节，但不再是白点 ✓）
     (x, y, w, h), base, edge, accent = ATLAS["claw"]
+    ridge = tuple(min(255, int(v * PALETTE_GAIN)) for v in (122, 26, 30))
     for j in range(h):
-        px[x + w // 2, y + j] = (255, 235, 255, 255)
+        px[x + w // 2, y + j] = (ridge[0], ridge[1], ridge[2], 255)
+
+    # ------------------------------------------------------------------
+    #  ★★ 2026-10-10 第四刀：**在掌心上画一个显眼的记号** ✓
+    #
+    #  作者的原话是「这个没变啊你在干嘛」✗ —— 而文件其实**已经是新的**了
+    #  （掌/背两块 UV 确实分开了、亮度差 4.4 倍），问题在于：
+    #    · 形状**故意没变**（一个方块都没加 ✗）⇒ 3D 视图里轮廓完全一样；
+    #    · 两块又都是近黑色，差别只是"亮度 23 vs 5" ✗ —— 掌心那块只有 13x12 像素、
+    #      在 Blockbench 默认视角下就指甲盖大 ⇒ **看不出来是正常的** ✓。
+    #  ⇒ 光靠调色永远说不清"哪面是掌心"，干脆**画一个记号**：
+    #      掌心 = 一枚血红的"封印"（一个环 ＋ 三道掌纹），**手背留空** ✓
+    #    这样在 Blockbench 里转一圈、或者在游戏里放一次，都是**一眼**的事 ✓。
+    #    ⚠️ 这是**临时记号**，不是最终美术 ✗ —— 作者随后会把自己的画整块覆盖上去 ✓；
+    #      而且它用的颜色（血红 0xB02226）就是整张图最亮的一档 ⇒ 无论世界多黑都看得见 ✓。
+    # ------------------------------------------------------------------
+    from PIL import ImageDraw
+    (px0, py0, pw, ph), *_ = ATLAS["palm"]
+    seal = (214, 46, 50)
+    draw = ImageDraw.Draw(img)
+    cx = px0 + pw // 2
+    cy = py0 + ph // 2
+    draw.ellipse([px0 + 2, py0 + 2, px0 + pw - 3, py0 + ph - 3], outline=seal)
+    for dx in (-3, 0, 3):                      # 三道"掌纹"
+        draw.line([cx + dx, cy - 3, cx + dx, cy + 2], fill=seal)
+    draw.point((cx, py0 + 1), fill=seal)       # 顶端一点，方向感 ✓
 
     return img
 

@@ -6,7 +6,7 @@
     "tier": 5
   },
   "cast": {
-    "duration": 2,
+    "duration": 0.8,
     "animation": "spell_engine:one_handed_projectile_charge",
     "sound": {
       "id": "spell_engine:generic_arcane_casting",
@@ -15,11 +15,43 @@
     "particles": [
       {
         "particle_id": "splash",
-        "shape": "CIRCLE",
+        "shape": "PILLAR",
         "origin": "FEET",
         "count": 10,
-        "min_speed": 0.1,
+        "min_speed": 0.25,
+        "max_speed": 1.6
+      },
+      {
+        "particle_id": "minecraft:electric_spark",
+        "shape": "SPHERE",
+        "origin": "CENTER",
+        "count": 8,
+        "min_speed": 0.25,
+        "max_speed": 1.4
+      },
+      {
+        "particle_id": "end_rod",
+        "shape": "CIRCLE",
+        "origin": "FEET",
+        "count": 3,
+        "min_speed": 0.12,
+        "max_speed": 0.7
+      },
+      {
+        "particle_id": "cloud",
+        "shape": "CIRCLE",
+        "origin": "FEET",
+        "count": 3,
+        "min_speed": 0.08,
         "max_speed": 0.4
+      },
+      {
+        "particle_id": "minecraft:flash",
+        "shape": "SPHERE",
+        "origin": "CENTER",
+        "count": 1,
+        "min_speed": 0.0,
+        "max_speed": 0.1
       }
     ]
   },

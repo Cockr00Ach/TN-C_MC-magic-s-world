@@ -1,7 +1,7 @@
 {
   "id": "2F05312883B25856",
   "filename": "tnc_field_04_workshop",
-  "title": "&3&l魔导工坊",
+  "title": "&3&l魔导工坊 · 从第一炉到庭院供能",
   "icon": "tnc:mana_workshop_book",
   "group": "544E434C49464531",
   "order_index": 5,
@@ -10,14 +10,15 @@
   "quests": [
     {
       "id": "556D3E34DC594E0A",
-      "title": "&3&l让庭院的魔力流动",
+      "title": "&3&l从第一炉开始",
       "icon": "tnc:mana_workshop_book",
       "x": 0,
-      "y": -9,
+      "y": -6,
       "size": 2,
       "description": [
-        "植物/动物→收集器→线路→储池→工作装置。全程纯魔力、真实余额。",
-        "土中的流动魔力仅灌溉，不再回抽为能源。区块未加载就暂停；不补算离线产能。"
+        "沿中间主干依次完成：备料→搭炉→灵纹铁→魔法土与灌溉→供魔花园→第一次自动加工。",
+        "之后再向两侧选择牧场供能、生产、农业与远行分支。不用把所有机器做一遍。",
+        "蓝色的魔力既能装瓶，也能经过线路输送。田里的液体只负责灌溉，不能抽回去无限供能。"
       ],
       "tasks": [
         {
@@ -26,6 +27,7 @@
         }
       ],
       "dependencies": [],
+      "hide_dependency_lines": false,
       "rewards": [
         {
           "id": "29B5C7F7A5E2CB2A",
@@ -36,876 +38,2046 @@
       ]
     },
     {
+      "id": "51C393E5CACBF40C",
+      "title": "&6阶段一 · 备料，不急着做机器",
+      "icon": "minecraft:crafting_table",
+      "x": 0,
+      "y": 0,
+      "size": 1.9,
+      "description": [
+        "本阶段没有任何动植物发电前置。先准备普通材料，做第一座手动注魔的炉。"
+      ],
+      "tasks": [
+        {
+          "id": "1F4F98D67440844E",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "556D3E34DC594E0A"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "3628D627544A9D07",
+      "title": "砖与圆石 · 炉体",
+      "icon": "minecraft:brick",
+      "x": -18,
+      "y": 5,
+      "size": 1.4,
+      "description": [
+        "拿到材料即可记录，不收走。",
+        "另外备好圆石、熔炉、玻璃瓶、空桶、泥土、线和石砖。"
+      ],
+      "tasks": [
+        {
+          "id": "116EB84319DDF778",
+          "type": "item",
+          "item": "minecraft:brick",
+          "count": 10,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "51C393E5CACBF40C"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "2AD3C76E0F140854",
+      "title": "铜锭 · 炉核与注能台",
+      "icon": "minecraft:copper_ingot",
+      "x": -9,
+      "y": 5,
+      "size": 1.4,
+      "description": [
+        "拿到材料即可记录，不收走。",
+        "另外备好圆石、熔炉、玻璃瓶、空桶、泥土、线和石砖。"
+      ],
+      "tasks": [
+        {
+          "id": "11D5653DA85A0D40",
+          "type": "item",
+          "item": "minecraft:copper_ingot",
+          "count": 3,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "51C393E5CACBF40C"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "017BF3C5625743E3",
+      "title": "紫水晶 · 炉核",
+      "icon": "minecraft:amethyst_shard",
+      "x": 0,
+      "y": 5,
+      "size": 1.4,
+      "description": [
+        "拿到材料即可记录，不收走。",
+        "另外备好圆石、熔炉、玻璃瓶、空桶、泥土、线和石砖。"
+      ],
+      "tasks": [
+        {
+          "id": "5A3EB57178DAB87B",
+          "type": "item",
+          "item": "minecraft:amethyst_shard",
+          "count": 4,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "51C393E5CACBF40C"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "46295CFE3D6D7CD7",
+      "title": "铁锭 · 第一份灵纹铁",
+      "icon": "minecraft:iron_ingot",
+      "x": 9,
+      "y": 5,
+      "size": 1.4,
+      "description": [
+        "拿到材料即可记录，不收走。",
+        "另外备好圆石、熔炉、玻璃瓶、空桶、泥土、线和石砖。"
+      ],
+      "tasks": [
+        {
+          "id": "43A868D7C466C1EB",
+          "type": "item",
+          "item": "minecraft:iron_ingot",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "51C393E5CACBF40C"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "64C8BC608FD21532",
+      "title": "玻璃 · 注能台",
+      "icon": "minecraft:glass",
+      "x": 18,
+      "y": 5,
+      "size": 1.4,
+      "description": [
+        "拿到材料即可记录，不收走。",
+        "另外备好圆石、熔炉、玻璃瓶、空桶、泥土、线和石砖。"
+      ],
+      "tasks": [
+        {
+          "id": "467F0374D8811C64",
+          "type": "item",
+          "item": "minecraft:glass",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "51C393E5CACBF40C"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "520F58FC8BA47B66",
+      "title": "耐火炉砖 ×24",
+      "icon": "tnc:forge_firebrick",
+      "x": -15,
+      "y": 12,
+      "size": 1.4,
+      "description": [
+        "制作材料：minecraft:brick×1；minecraft:cobblestone×1。",
+        "炉体需要24炉砖＋1炉口＋1炉核＋1排烟顶。配方还会消耗炉砖，建议先做40炉砖。"
+      ],
+      "tasks": [
+        {
+          "id": "0609F44F3CC1E06B",
+          "type": "item",
+          "item": "tnc:forge_firebrick",
+          "count": 24,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "3628D627544A9D07"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "24BCD04A33178419",
+      "title": "载魔锻造炉 ×1",
+      "icon": "tnc:magic_forge",
+      "x": -5,
+      "y": 12,
+      "size": 1.4,
+      "description": [
+        "制作材料：耐火炉砖×8；minecraft:furnace×1。",
+        "炉体需要24炉砖＋1炉口＋1炉核＋1排烟顶。配方还会消耗炉砖，建议先做40炉砖。"
+      ],
+      "tasks": [
+        {
+          "id": "1C1D8CBF187CF75C",
+          "type": "item",
+          "item": "tnc:magic_forge",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "520F58FC8BA47B66"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "27B2650DC851D58B",
+      "title": "魔力炉核 ×1",
+      "icon": "tnc:forge_core",
+      "x": 5,
+      "y": 12,
+      "size": 1.4,
+      "description": [
+        "制作材料：紫水晶碎片×4；铜锭×1。",
+        "炉体需要24炉砖＋1炉口＋1炉核＋1排烟顶。配方还会消耗炉砖，建议先做40炉砖。"
+      ],
+      "tasks": [
+        {
+          "id": "4AE0815D95A01289",
+          "type": "item",
+          "item": "tnc:forge_core",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "2AD3C76E0F140854",
+        "017BF3C5625743E3"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "11B6C82ACAD2C64F",
+      "title": "排烟顶 ×1",
+      "icon": "tnc:forge_exhaust",
+      "x": 15,
+      "y": 12,
+      "size": 1.4,
+      "description": [
+        "制作材料：耐火炉砖×7。",
+        "炉体需要24炉砖＋1炉口＋1炉核＋1排烟顶。配方还会消耗炉砖，建议先做40炉砖。"
+      ],
+      "tasks": [
+        {
+          "id": "2FE72A5C9FEA556E",
+          "type": "item",
+          "item": "tnc:forge_exhaust",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "520F58FC8BA47B66"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "7D60A71F6A193FCD",
+      "title": "&6搭好 3×3×3 魔力炉",
+      "icon": "tnc:magic_forge",
+      "x": 0,
+      "y": 20,
+      "size": 2,
+      "description": [
+        "每行从左到右看，先认清炉口正面朝向：",
+        "底层：砖砖砖 / 砖砖砖 / 砖砖砖",
+        "中层：砖砖砖 / 砖核砖 / 砖炉砖",
+        "顶层：砖砖砖 / 砖烟砖 / 砖砖砖",
+        "共24砖、1炉核、1炉口、1排烟顶；没有空心格。右键炉口开GUI，结构示意全部通过才算成型。"
+      ],
+      "tasks": [
+        {
+          "id": "31C0123F9DB0F25B",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/workshop/forge_formed"
+        }
+      ],
+      "dependencies": [
+        "520F58FC8BA47B66",
+        "24BCD04A33178419",
+        "27B2650DC851D58B",
+        "11B6C82ACAD2C64F"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "25205D9825874232",
+      "title": "&e先亲手注入魔力",
+      "icon": "tnc:magic_forge",
+      "x": 0,
+      "y": 26,
+      "size": 1.4,
+      "description": [
+        "打开炉口GUI，点击注入自身魔力，每次最多25M，确实扣玩家余额。",
+        "第一块灵纹铁要60M：注入三次，放铁锭，选择灵纹铁配方。",
+        "此时不用种花、不用抓动物，也不用任何旧注能口。"
+      ],
+      "tasks": [
+        {
+          "id": "2871C413E669DE76",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/workshop/manual_forge"
+        }
+      ],
+      "dependencies": [
+        "7D60A71F6A193FCD"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "565A87C89E89BEE8",
+      "title": "&f第一块灵纹铁",
+      "icon": "tnc:spirit_iron",
+      "x": 0,
+      "y": 32,
+      "size": 1.4,
+      "description": [
+        "炉内：铁锭×1＋60M→灵纹铁×1。",
+        "后面集露盏、浅魔池、锯台和青辉导魔晶纤各用3块，检流尺另用1块，逐步补够即可。"
+      ],
+      "tasks": [
+        {
+          "id": "054832B2D2762810",
+          "type": "item",
+          "item": "tnc:spirit_iron",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "25205D9825874232"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
       "id": "506970F4B06F183F",
       "title": "注能台",
       "icon": "tnc:mana_infuser",
-      "x": -11.25,
-      "y": 2.0,
-      "size": 1.5,
+      "x": 0,
+      "y": 38,
+      "size": 1.4,
       "description": [
-        "空手按住右键，每秒注入自身5魔力，松开停止；潜行右键开界面放取第一个槽的容器，界面按钮也可注入五秒。普通瓶100，精炼瓶400，桶400。接线可自动装。",
-        "缓冲500；带宽8魔力/秒。"
+        "制作材料：玻璃×1；铜锭×2；石头×3。",
+        "阶段二：先解决容器、魔法土与灌溉。",
+        "潜行右键开面板，将空玻璃瓶放第一个输入格。",
+        "关闭面板后空手持续按右键，或用GUI注能按钮，每秒从自己身上转入5M。普通瓶100M，桶400M。"
       ],
       "tasks": [
         {
           "id": "7425703A8A53CD06",
           "type": "item",
           "item": "tnc:mana_infuser",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
+          "count": 1,
+          "consume_items": false
         }
       ],
-      "dependencies": []
+      "dependencies": [
+        "565A87C89E89BEE8"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "5CFDF4F5D8A3DC9B",
+      "title": "&b装满第一瓶 · 100M",
+      "icon": "tnc:mana_bottle",
+      "x": -8,
+      "y": 44,
+      "size": 1.4,
+      "description": [
+        "普通魔力瓶容量100。用注能台实装100M，通常需20秒。",
+        "创造栏里拿出的空瓶也必须注入余额，不能靠复制NBT得到更多能源。"
+      ],
+      "tasks": [
+        {
+          "id": "4AC30020165EB579",
+          "type": "item",
+          "item": "tnc:mana_bottle",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "506970F4B06F183F"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "29A14581E9660ABA",
+      "title": "&b田边的流动魔力",
+      "icon": "tnc:flowing_mana_bucket",
+      "x": 8,
+      "y": 44,
+      "size": 1.4,
+      "description": [
+        "空桶放注能台，注入400M得到魔力桶；也可用4个独立满瓶＋空桶合成。",
+        "像水一样沿地面流向低处。把它放在田边沟槽中，不要直接往植株上倒。",
+        "流动只允许在自己的产权区域内延续，不会淹到公共镇区或邻居家。"
+      ],
+      "tasks": [
+        {
+          "id": "000F1473BAA05C86",
+          "type": "item",
+          "item": "tnc:flowing_mana_bucket",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "506970F4B06F183F"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "18AE0EB90323F986",
+      "title": "&a魔法土源 · 一次准备一块田",
+      "icon": "tnc:magic_soil_source",
+      "x": -8,
+      "y": 50,
+      "size": 1.4,
+      "description": [
+        "工作台：8份泥土围1个满魔力瓶，扣100M并退回原空瓶。",
+        "把土源放在地面，同一高度9×9范围内获准修改的泥土在10秒后变成魔法土。",
+        "草地、石路、建筑不会被替换；土和土源都无需锄地。"
+      ],
+      "tasks": [
+        {
+          "id": "0025D1AFB9E5FD1C",
+          "type": "item",
+          "item": "tnc:magic_soil_source",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "5CFDF4F5D8A3DC9B"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "7CD500C3DAA046C9",
+      "title": "&b完成第一次魔力灌溉",
+      "icon": "tnc:magic_soil",
+      "x": 0,
+      "y": 56,
+      "size": 1.8,
+      "description": [
+        "在田边放魔力桶。魔法土八格内、有同高度或高一格的魔力液体，就能种魔植。",
+        "灌溉后的土会溢出细小青蓝微光；缺水时植株保留，只暂停成长。",
+        "不要把收集器放在液体里；液体灌溉与收集器输能是两件事。"
+      ],
+      "tasks": [
+        {
+          "id": "1CF1B9E2BAB86B28",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/workshop/poured_mana"
+        }
+      ],
+      "dependencies": [
+        "18AE0EB90323F986",
+        "29A14581E9660ABA"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "41DA31AE742CBF35",
+      "title": "&a先种两株翠脉枝",
+      "icon": "tnc:verdant_vein_seed",
+      "x": -16,
+      "y": 62,
+      "size": 1.4,
+      "description": [
+        "从野外寻找或委托指引取得种源，带回种在魔法土上。",
+        "翠脉枝成株后每2秒积累1M，最多40M；不需要再喂别的材料。",
+        "异兽骨粉右键推进一阶段；创造模式潜行右键直接成株，方便你观察。",
+        "仍需合法地块、魔法土和灌溉。"
+      ],
+      "tasks": [
+        {
+          "id": "74477C05BA055DF7",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/plant/verdant_vein"
+        }
+      ],
+      "dependencies": [
+        "7CD500C3DAA046C9"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "30C62EBBB479FDA3",
+      "title": "试种工具 · 异兽骨粉",
+      "icon": "tnc:beast_bone_meal",
+      "x": -25,
+      "y": 56,
+      "size": 1.4,
+      "description": [
+        "石骨或霜骨可磨4份，角粉可磨2份；起步用普通骨粉＋紫水晶也能做2份。",
+        "只催生长，不灌满植株魔力，不替代其供魔触发。"
+      ],
+      "tasks": [
+        {
+          "id": "58A08550256BD0C9",
+          "type": "item",
+          "item": "tnc:beast_bone_meal",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "18AE0EB90323F986"
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "1E7FF8C750509B1F",
       "title": "集露盏",
       "icon": "tnc:dew_collector",
-      "x": -6.75,
-      "y": 2.0,
-      "size": 1.5,
+      "x": -8,
+      "y": 63,
+      "size": 1.4,
       "description": [
-        "放在获准区域并连接相邻线路；检流尺右键看真实工作状态。",
-        "缓冲100；带宽4魔力/秒。"
+        "制作材料：灵纹铁×3；绿脉枝种子×1；石砖×1。",
+        "集露盏收根部周围3×3×3内、同属自己的成熟植物。",
+        "建议与植株根方块放同一高度，别埋进土下。一个盏最高收4M/秒，弱供魔株不会被强行变成4M/秒。"
       ],
       "tasks": [
         {
           "id": "6C5634FFEB19E6F8",
           "type": "item",
           "item": "tnc:dew_collector",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
+          "count": 1,
+          "consume_items": false
         }
       ],
-      "dependencies": []
-    },
-    {
-      "id": "2D2FF13BFF0E9C3D",
-      "title": "集息器",
-      "icon": "tnc:breath_collector",
-      "x": -2.25,
-      "y": 2.0,
-      "size": 1.5,
-      "description": [
-        "牧务杖选兽后右键绑定。空手潜行右键切取魔/充能；鲸32、蜥8、貂25魔力/秒各有上限。",
-        "缓冲200；带宽32魔力/秒。"
+      "dependencies": [
+        "41DA31AE742CBF35"
       ],
-      "tasks": [
-        {
-          "id": "4FD630AFE3FD82DB",
-          "type": "item",
-          "item": "tnc:breath_collector",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
-        }
-      ],
-      "dependencies": []
-    },
-    {
-      "id": "7E62B912E5298914",
-      "title": "色靶",
-      "icon": "tnc:color_target",
-      "x": 2.25,
-      "y": 2.0,
-      "size": 1.5,
-      "description": [
-        "拿染料右键改色。对应角羚12格内无遮挡发射，不伤人、不破坏地形。",
-        "缓冲200；带宽32魔力/秒。"
-      ],
-      "tasks": [
-        {
-          "id": "3F943E7AA034F626",
-          "type": "item",
-          "item": "tnc:color_target",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
-        }
-      ],
-      "dependencies": []
+      "hide_dependency_lines": false
     },
     {
       "id": "10D594FA04A2BC4A",
-      "title": "魔导丝",
+      "title": "青辉导魔晶纤",
       "icon": "tnc:mana_thread",
-      "x": 6.75,
-      "y": 2.0,
-      "size": 1.5,
+      "x": 0,
+      "y": 63,
+      "size": 1.4,
       "description": [
-        "放在获准区域并连接相邻线路；检流尺右键看真实工作状态。",
-        "缓冲0；带宽8魔力/秒。"
+        "制作材料：灵纹铁×3；线×1；石砖×1。",
+        "每份配方产4根，逐格相邻放置，不允许中间空一格。",
+        "入门带宽8M/秒。无所谓电压、正负极和接头方向；是魔力线路，不是FE电。",
+        "每段晶纤最多两个接口；可转弯、竖接和连机器。分支请用独立的分流装置，晶纤不会自动六向连接。"
       ],
       "tasks": [
         {
           "id": "2974D70F934B7124",
           "type": "item",
           "item": "tnc:mana_thread",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
+          "count": 1,
+          "consume_items": false
         }
       ],
-      "dependencies": []
-    },
-    {
-      "id": "1701B42113548932",
-      "title": "曜纹导线",
-      "icon": "tnc:radiant_thread",
-      "x": 11.25,
-      "y": 2.0,
-      "size": 1.5,
-      "description": [
-        "放在获准区域并连接相邻线路；检流尺右键看真实工作状态。",
-        "缓冲0；带宽32魔力/秒。"
+      "dependencies": [
+        "7CD500C3DAA046C9",
+        "565A87C89E89BEE8"
       ],
-      "tasks": [
-        {
-          "id": "02B2EB89789A5B4C",
-          "type": "item",
-          "item": "tnc:radiant_thread",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
-        }
-      ],
-      "dependencies": []
-    },
-    {
-      "id": "1607F33A1DBF48F4",
-      "title": "星髓导线",
-      "icon": "tnc:star_thread",
-      "x": -11.25,
-      "y": 7.7,
-      "size": 1.5,
-      "description": [
-        "放在获准区域并连接相邻线路；检流尺右键看真实工作状态。",
-        "缓冲0；带宽128魔力/秒。"
-      ],
-      "tasks": [
-        {
-          "id": "4AAF4642C757440E",
-          "type": "item",
-          "item": "tnc:star_thread",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
-        }
-      ],
-      "dependencies": []
+      "hide_dependency_lines": false
     },
     {
       "id": "31928A47EADA463E",
       "title": "浅魔池",
       "icon": "tnc:mana_basin",
-      "x": -6.75,
-      "y": 7.7,
-      "size": 1.5,
+      "x": 8,
+      "y": 63,
+      "size": 1.4,
       "description": [
-        "放在获准区域并连接相邻线路；检流尺右键看真实工作状态。",
-        "缓冲1000；带宽8魔力/秒。"
+        "制作材料：灵纹铁×3；黏土球×1；石砖×1。",
+        "沿线放浅魔池，容量1000M。",
+        "俯视示例：翠脉枝→相邻集露盏→青辉导魔晶纤→浅魔池。普通储池不是新的能源来源。"
       ],
       "tasks": [
         {
           "id": "650813D3EC36FCC0",
           "type": "item",
           "item": "tnc:mana_basin",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
+          "count": 1,
+          "consume_items": false
         }
       ],
-      "dependencies": []
+      "dependencies": [
+        "10D594FA04A2BC4A"
+      ],
+      "hide_dependency_lines": false
     },
     {
-      "id": "64839A20F54A3A32",
-      "title": "曜纹储池",
-      "icon": "tnc:radiant_basin",
-      "x": -2.25,
-      "y": 7.7,
-      "size": 1.5,
+      "id": "1FDB5A84D8383CA0",
+      "title": "检流尺",
+      "icon": "tnc:mana_meter",
+      "x": 18,
+      "y": 63,
+      "size": 1.4,
       "description": [
-        "放在获准区域并连接相邻线路；检流尺右键看真实工作状态。",
-        "缓冲8000；带宽32魔力/秒。"
+        "制作材料：玻璃×1；灵纹铁×1；minecraft:stick×1。",
+        "右键机器，看当前余额、实际流入/流出和停机原因。",
+        "不亮先查：植物是否成熟和有灌溉→是不是自己的→收集距离→线路是否连续→机器输出是否塞满。"
       ],
       "tasks": [
         {
-          "id": "7607D893E69A2E5B",
+          "id": "443DC6FA9DE46C6F",
           "type": "item",
-          "item": "tnc:radiant_basin",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
+          "item": "tnc:mana_meter",
+          "count": 1,
+          "consume_items": false
         }
       ],
-      "dependencies": []
+      "dependencies": [
+        "565A87C89E89BEE8"
+      ],
+      "hide_dependency_lines": false
     },
     {
-      "id": "6F7F5D445B2F026E",
-      "title": "星髓储池",
-      "icon": "tnc:star_basin",
-      "x": 2.25,
-      "y": 7.7,
-      "size": 1.5,
+      "id": "6560CD995A7207FE",
+      "title": "&a看见第一次真实供能",
+      "icon": "tnc:dew_collector",
+      "x": -6,
+      "y": 70,
+      "size": 1.4,
       "description": [
-        "放在获准区域并连接相邻线路；检流尺右键看真实工作状态。",
-        "缓冲32000；带宽128魔力/秒。"
+        "阶段三：让成熟植物给线路供魔，再驱动第一台机器。",
+        "收集到真实魔力后自动完成，拿着盏不算。",
+        "翠脉枝40秒最多产生20M左右，两株可减少等待；更多产能方式在左侧供魔支线。"
       ],
       "tasks": [
         {
-          "id": "63C7BA8CBB0F0477",
-          "type": "item",
-          "item": "tnc:star_basin",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
+          "id": "686A10D5FC7570B2",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/network/collected"
         }
       ],
-      "dependencies": []
+      "dependencies": [
+        "1E7FF8C750509B1F",
+        "10D594FA04A2BC4A"
+      ],
+      "hide_dependency_lines": false
     },
     {
-      "id": "0DAF7A01862F8C0C",
-      "title": "折光镜",
-      "icon": "tnc:mana_mirror",
-      "x": 6.75,
-      "y": 7.7,
-      "size": 1.5,
+      "id": "357302D516BECA1D",
+      "title": "&b浅魔池里有了余额",
+      "icon": "tnc:mana_basin",
+      "x": 6,
+      "y": 70,
+      "size": 1.4,
       "description": [
-        "两镜沿六轴对齐，12格无遮挡传能；共享4魔力/秒。",
-        "缓冲200；带宽4魔力/秒。"
+        "等魔力实际进入浅魔池后完成。",
+        "如果消费者先拿走了魔力，先暂时断开机器，确认储池能增长。"
       ],
       "tasks": [
         {
-          "id": "52EFB52A08389ADE",
-          "type": "item",
-          "item": "tnc:mana_mirror",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
+          "id": "06073405D0B29C30",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/network/stored"
         }
       ],
-      "dependencies": []
-    },
-    {
-      "id": "6A3517288F079D96",
-      "title": "远折镜",
-      "icon": "tnc:star_mirror",
-      "x": 11.25,
-      "y": 7.7,
-      "size": 1.5,
-      "description": [
-        "沿六轴对齐，24格无遮挡，16魔力/秒。",
-        "缓冲400；带宽16魔力/秒。"
+      "dependencies": [
+        "31928A47EADA463E",
+        "6560CD995A7207FE"
       ],
-      "tasks": [
-        {
-          "id": "764FDD6A029FC2C6",
-          "type": "item",
-          "item": "tnc:star_mirror",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
-        }
-      ],
-      "dependencies": []
-    },
-    {
-      "id": "538D67533171AE5F",
-      "title": "分流阀",
-      "icon": "tnc:mana_valve",
-      "x": -11.25,
-      "y": 13.4,
-      "size": 1.5,
-      "description": [
-        "潜行右键切优先。红石信号可关闭；消费者先获得魔力，余量进储池。",
-        "缓冲200；带宽32魔力/秒。"
-      ],
-      "tasks": [
-        {
-          "id": "41FA345A1A880969",
-          "type": "item",
-          "item": "tnc:mana_valve",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
-        }
-      ],
-      "dependencies": []
-    },
-    {
-      "id": "70253B5F2BC2BF63",
-      "title": "魔导灯",
-      "icon": "tnc:mana_lantern",
-      "x": -6.75,
-      "y": 13.4,
-      "size": 1.5,
-      "description": [
-        "放在获准区域并连接相邻线路；检流尺右键看真实工作状态。",
-        "缓冲20；带宽4魔力/秒。"
-      ],
-      "tasks": [
-        {
-          "id": "34A7330041FCB2A9",
-          "type": "item",
-          "item": "tnc:mana_lantern",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
-        }
-      ],
-      "dependencies": []
-    },
-    {
-      "id": "648DB21C705351D0",
-      "title": "庭院明灯",
-      "icon": "tnc:bright_mana_lantern",
-      "x": -2.25,
-      "y": 13.4,
-      "size": 1.5,
-      "description": [
-        "放在获准区域并连接相邻线路；检流尺右键看真实工作状态。",
-        "缓冲40；带宽4魔力/秒。"
-      ],
-      "tasks": [
-        {
-          "id": "68B105B44FC06878",
-          "type": "item",
-          "item": "tnc:bright_mana_lantern",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
-        }
-      ],
-      "dependencies": []
-    },
-    {
-      "id": "120DBA3E2F462134",
-      "title": "纸皮压机",
-      "icon": "tnc:mana_pulp_press",
-      "x": 2.25,
-      "y": 13.4,
-      "size": 1.5,
-      "description": [
-        "两听潮苇或甘蔗＋相邻水，16魔力、4秒制三纸。",
-        "缓冲200；带宽8魔力/秒。"
-      ],
-      "tasks": [
-        {
-          "id": "6219F30467257AC2",
-          "type": "item",
-          "item": "tnc:mana_pulp_press",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
-        }
-      ],
-      "dependencies": []
-    },
-    {
-      "id": "72B64ED720214A58",
-      "title": "饲料分盘",
-      "icon": "tnc:mana_feed_plate",
-      "x": 6.75,
-      "y": 13.4,
-      "size": 1.5,
-      "description": [
-        "放在获准区域并连接相邻线路；检流尺右键看真实工作状态。",
-        "缓冲100；带宽4魔力/秒。"
-      ],
-      "tasks": [
-        {
-          "id": "691FF4EE5879C4B6",
-          "type": "item",
-          "item": "tnc:mana_feed_plate",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
-        }
-      ],
-      "dependencies": []
-    },
-    {
-      "id": "6AB649A40EE0C748",
-      "title": "轻灌器",
-      "icon": "tnc:gentle_irrigator",
-      "x": 11.25,
-      "y": 13.4,
-      "size": 1.5,
-      "description": [
-        "放在获准区域并连接相邻线路；检流尺右键看真实工作状态。",
-        "缓冲100；带宽4魔力/秒。"
-      ],
-      "tasks": [
-        {
-          "id": "37E27D4A2B9D1C2B",
-          "type": "item",
-          "item": "tnc:gentle_irrigator",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
-        }
-      ],
-      "dependencies": []
-    },
-    {
-      "id": "073937E8D2B8FDAC",
-      "title": "护候灯",
-      "icon": "tnc:climate_lantern",
-      "x": -11.25,
-      "y": 19.1,
-      "size": 1.5,
-      "description": [
-        "放在获准区域并连接相邻线路；检流尺右键看真实工作状态。",
-        "缓冲200；带宽4魔力/秒。"
-      ],
-      "tasks": [
-        {
-          "id": "7D634C192865BBBB",
-          "type": "item",
-          "item": "tnc:climate_lantern",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
-        }
-      ],
-      "dependencies": []
+      "hide_dependency_lines": false
     },
     {
       "id": "02DD110976187C69",
       "title": "魔导锯台",
       "icon": "tnc:mana_sawmill",
-      "x": -6.75,
-      "y": 19.1,
-      "size": 1.5,
+      "x": 0,
+      "y": 77,
+      "size": 1.4,
       "description": [
-        "一原木＋12魔力，4秒制六木板。",
-        "缓冲200；带宽8魔力/秒。"
+        "制作材料：灵纹铁×3；铁斧×1；石砖×1。",
+        "锯台与线路相邻。GUI第一个输入格放1原木，成品格留空间。",
+        "每次扣12M，4秒加工成6木板。没有魔力会等，不吞原料。"
       ],
       "tasks": [
         {
           "id": "338B3D91B5755237",
           "type": "item",
           "item": "tnc:mana_sawmill",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
+          "count": 1,
+          "consume_items": false
         }
       ],
-      "dependencies": []
+      "dependencies": [
+        "357302D516BECA1D"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "565A948393027784",
+      "title": "&6第一份自动加工成品",
+      "icon": "tnc:mana_sawmill",
+      "x": 0,
+      "y": 84,
+      "size": 1.8,
+      "description": [
+        "让锯台实际做出一次木板：这一步把植物→魔力→线路→机器串起来。",
+        "接下来可将线路接到魔力炉口旁，从手动注魔过渡到花园给炉子供能。"
+      ],
+      "tasks": [
+        {
+          "id": "1D454AD9E57FA682",
+          "type": "advancement",
+          "advancement": "tnc:life_routes/network/worked"
+        }
+      ],
+      "dependencies": [
+        "02DD110976187C69"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "602353B521B2FA38",
+      "title": "&a供魔支线 · 花园不是只放着好看",
+      "icon": "tnc:dawn_disk_seed",
+      "x": -31,
+      "y": 70,
+      "size": 1.8,
+      "description": [
+        "以下是不同的实际供魔方式，选择适合院子的即可。",
+        "所有产能只在区块加载时计算，果实收获可能清空植株能量缓冲。"
+      ],
+      "tasks": [
+        {
+          "id": "5B7B9EE1FDBB82E5",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "6560CD995A7207FE"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "084DA9753CFD121D",
+      "title": "晨晖盘葵 · 日照",
+      "icon": "tnc:dawn_disk_seed",
+      "x": -31,
+      "y": 77,
+      "size": 1.4,
+      "description": [
+        "成熟、白天、露天时每秒1M。把集露盏放根边，不用消耗燃料。",
+        "共同接法：种好并成熟→根部相邻集露盏→青辉导魔晶纤→储池/机器。"
+      ],
+      "tasks": [
+        {
+          "id": "7C5F4D80E61370BD",
+          "type": "item",
+          "item": "tnc:dawn_disk_seed",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "602353B521B2FA38"
+      ],
+      "hide_dependency_lines": true
+    },
+    {
+      "id": "2D30746D49BFB135",
+      "title": "风铃帆草 · 自然风",
+      "icon": "tnc:wind_sail_seed",
+      "x": -31,
+      "y": 82,
+      "size": 1.4,
+      "description": [
+        "成株露天，来风方向无遮挡。普通风约1M/秒、雨天约3M/秒；根边不要挤满同种帆草。",
+        "共同接法：种好并成熟→根部相邻集露盏→青辉导魔晶纤→储池/机器。"
+      ],
+      "tasks": [
+        {
+          "id": "4C7D5F100E540E27",
+          "type": "item",
+          "item": "tnc:wind_sail_seed",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "602353B521B2FA38"
+      ],
+      "hide_dependency_lines": true
+    },
+    {
+      "id": "7CD2AF9482590EAA",
+      "title": "回声豆 · 用声音开工",
+      "icon": "tnc:echo_bean_seed",
+      "x": -31,
+      "y": 87,
+      "size": 1.4,
+      "description": [
+        "根边三格内敲出3种不同音高，再拿自己的豆荚右键喂入；随后6秒每秒2M。不是一直无料发电。",
+        "共同接法：种好并成熟→根部相邻集露盏→青辉导魔晶纤→储池/机器。"
+      ],
+      "tasks": [
+        {
+          "id": "603B7C69329271E3",
+          "type": "item",
+          "item": "tnc:echo_bean_seed",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "602353B521B2FA38"
+      ],
+      "hide_dependency_lines": true
+    },
+    {
+      "id": "27BD5F2891E5016E",
+      "title": "沤梦菌 · 有机循环",
+      "icon": "tnc:dream_compost_seed",
+      "x": -31,
+      "y": 92,
+      "size": 1.4,
+      "description": [
+        "成熟后喂有机料；三类料发酵90秒总计300M，同类料总计180M。",
+        "共同接法：种好并成熟→根部相邻集露盏→青辉导魔晶纤→储池/机器。"
+      ],
+      "tasks": [
+        {
+          "id": "622CFF0FB1F6BC47",
+          "type": "item",
+          "item": "tnc:dream_compost_seed",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "602353B521B2FA38"
+      ],
+      "hide_dependency_lines": true
+    },
+    {
+      "id": "0EB0A2EAE6FDCCE7",
+      "title": "温差折叶 · 冷热两侧",
+      "icon": "tnc:thermal_foldleaf_seed",
+      "x": -31,
+      "y": 97,
+      "size": 1.4,
+      "description": [
+        "成株旁放真正燃烧的普通熔炉和水或冰，每秒2M。魔力炉不能作为无限回供热源。",
+        "共同接法：种好并成熟→根部相邻集露盏→青辉导魔晶纤→储池/机器。"
+      ],
+      "tasks": [
+        {
+          "id": "2C631F3675942DFC",
+          "type": "item",
+          "item": "tnc:thermal_foldleaf_seed",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "602353B521B2FA38"
+      ],
+      "hide_dependency_lines": true
+    },
+    {
+      "id": "5F081F12068468D7",
+      "title": "垂露丝草 · 留住雨水",
+      "icon": "tnc:hanging_dewgrass_seed",
+      "x": -31,
+      "y": 102,
+      "size": 1.4,
+      "description": [
+        "真实露天雨水每秒蓄2M，晴天缓慢输出已积累的余额。",
+        "共同接法：种好并成熟→根部相邻集露盏→青辉导魔晶纤→储池/机器。"
+      ],
+      "tasks": [
+        {
+          "id": "03EA0C8A83B3046B",
+          "type": "item",
+          "item": "tnc:hanging_dewgrass_seed",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "602353B521B2FA38"
+      ],
+      "hide_dependency_lines": true
+    },
+    {
+      "id": "36EBC3CD3DC3B76F",
+      "title": "&6供魔支线 · 先有牧场，再谈取魔",
+      "icon": "tnc:pasture_staff",
+      "x": 31,
+      "y": 94,
+      "size": 1.8,
+      "description": [
+        "基础只用饲料槽喂食。认养后用牧务杖选兽，再点自己的栖居标记设窝。",
+        "然后牧务杖选兽→右键集息器绑定，保持12格内。集息器默认取魔，潜行空手右键可切充能。"
+      ],
+      "tasks": [
+        {
+          "id": "6D4EE837025536E7",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "565A948393027784"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "52FE5035B99FBA74",
+      "title": "捕获与安置工具",
+      "icon": "tnc:pasture_cage",
+      "x": 25,
+      "y": 101,
+      "size": 1.4,
+      "description": [
+        "制作材料：灵纹铁×5；minecraft:glass_bottle×1；任意原木×2。",
+        "灵纹笼负责低阶，曜纹笼负责中阶，星髓笼负责稀有兽。先按动物页完成信任，再长按捕获。"
+      ],
+      "tasks": [
+        {
+          "id": "2CC7896991EAE4E3",
+          "type": "item",
+          "item": "tnc:pasture_cage",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "36EBC3CD3DC3B76F"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "0435840C246CB393",
+      "title": "饲料槽 · 唯一基础喂食设施",
+      "icon": "tnc:pasture_trough",
+      "x": 37,
+      "y": 101,
+      "size": 1.4,
+      "description": [
+        "制作材料：minecraft:planks×5；minecraft:stick×2。",
+        "放在窝点可达处，右键投入该动物喜食；空手打开库存。普通饲养不需要再做各种盘。"
+      ],
+      "tasks": [
+        {
+          "id": "58235455233960BD",
+          "type": "item",
+          "item": "tnc:pasture_trough",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "52FE5035B99FBA74"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "2D2FF13BFF0E9C3D",
+      "title": "集息器",
+      "icon": "tnc:breath_collector",
+      "x": 31,
+      "y": 108,
+      "size": 1.4,
+      "description": [
+        "制作材料：灵纹铁×3；空暖息罐×1；石砖×1。",
+        "牧务杖选自己的兽，再点此器绑定，默认从动物取魔。",
+        "生产型：喂食槽持续提供真实食物，移动/夜行/暖息等行为将饲料额度转成魔力。",
+        "储魔型：蓄魔鲸、鸣线蜥取的是已有储量，不是无料无限发电。"
+      ],
+      "tasks": [
+        {
+          "id": "4FD630AFE3FD82DB",
+          "type": "item",
+          "item": "tnc:breath_collector",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "0435840C246CB393"
+      ],
+      "hide_dependency_lines": true
+    },
+    {
+      "id": "12D6F6F1B3566F89",
+      "title": "跃泉蹄兽 · 跑动供魔",
+      "icon": "tnc:springhoof_strider_spawn_egg",
+      "x": 31,
+      "y": 115,
+      "size": 1.4,
+      "description": [
+        "提供合适窝点与食物，让它在允许范围内行走；每份饲料有120M工作额度，移动才释放。",
+        "请从异兽牧场页看捕获、喜食与栖居要求；刷怪蛋仅作图标，不要求玩家合成。"
+      ],
+      "tasks": [
+        {
+          "id": "455188AEA69A32A3",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "2D2FF13BFF0E9C3D"
+      ],
+      "hide_dependency_lines": true
+    },
+    {
+      "id": "2C718C554B614CB7",
+      "title": "炉鳃山貘 · 暖息供魔",
+      "icon": "tnc:forgegill_tapir_spawn_egg",
+      "x": 31,
+      "y": 120,
+      "size": 1.4,
+      "description": [
+        "温暖、吃饱并启用工作后，定期积累暖息魔力；集息器将工作缓冲取出。",
+        "请从异兽牧场页看捕获、喜食与栖居要求；刷怪蛋仅作图标，不要求玩家合成。"
+      ],
+      "tasks": [
+        {
+          "id": "5CBF76E782AB69CC",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "2D2FF13BFF0E9C3D"
+      ],
+      "hide_dependency_lines": true
+    },
+    {
+      "id": "1343DF07E07FC5BB",
+      "title": "鼓腹砂獭 · 滚动供魔",
+      "icon": "tnc:drumbelly_otter_spawn_egg",
+      "x": 31,
+      "y": 125,
+      "size": 1.4,
+      "description": [
+        "提供活动空间，滚动累计8格释放40M，每份食物最多转200M。",
+        "请从异兽牧场页看捕获、喜食与栖居要求；刷怪蛋仅作图标，不要求玩家合成。"
+      ],
+      "tasks": [
+        {
+          "id": "1D9A83209788B8BF",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "2D2FF13BFF0E9C3D"
+      ],
+      "hide_dependency_lines": true
+    },
+    {
+      "id": "7B525E70986489DC",
+      "title": "蓄魔鲸 · 活体储池",
+      "icon": "tnc:dewbound_whale_spawn_egg",
+      "x": 31,
+      "y": 130,
+      "size": 1.4,
+      "description": [
+        "先从你的网络充进去，再取出来；输入/输出最高32M每秒，容量16000M，不自发产生能量。",
+        "请从异兽牧场页看捕获、喜食与栖居要求；刷怪蛋仅作图标，不要求玩家合成。"
+      ],
+      "tasks": [
+        {
+          "id": "446A5C44C0E65FC2",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "2D2FF13BFF0E9C3D"
+      ],
+      "hide_dependency_lines": true
+    },
+    {
+      "id": "7E62B912E5298914",
+      "title": "色靶",
+      "icon": "tnc:color_target",
+      "x": 43,
+      "y": 135,
+      "size": 1.4,
+      "description": [
+        "制作材料：灵纹铁×3；minecraft:red_dye×1；石砖×1。",
+        "仅供曳彩角羚使用。绑定后看器件提示的偏好颜色，拿对应染料右键改色。",
+        "角羚吃饱后向色靶释放不破坏地形的能量，必须保持12格内和无遮挡。"
+      ],
+      "tasks": [
+        {
+          "id": "3F943E7AA034F626",
+          "type": "item",
+          "item": "tnc:color_target",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "2D2FF13BFF0E9C3D"
+      ],
+      "hide_dependency_lines": true
+    },
+    {
+      "id": "7B19FE35DBD85821",
+      "title": "&6阶段四 · 按用途扩建",
+      "icon": "tnc:radiant_gold",
+      "x": 0,
+      "y": 94,
+      "size": 2,
+      "description": [
+        "基础循环完成后再开下面的分支。",
+        "机器任务里第一行总是制作材料，后面写操作、耗魔与产物；不用把每个分支都走完。"
+      ],
+      "tasks": [
+        {
+          "id": "1F3189D50452873F",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "565A948393027784"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "273E8A9A18BDEE11",
+      "title": "曜纹金 · 中阶材料",
+      "icon": "tnc:radiant_gold",
+      "x": -8,
+      "y": 101,
+      "size": 1.4,
+      "description": [
+        "魔力炉：金锭×1＋180M→曜纹金×1。",
+        "先给炉口接上庭院线路，可以继续手动补魔。用于更高带宽、织机和充能。"
+      ],
+      "tasks": [
+        {
+          "id": "29ADDD0FCA35386C",
+          "type": "item",
+          "item": "tnc:radiant_gold",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "7B19FE35DBD85821"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "4B10906F339AEBF6",
+      "title": "星髓晶 · 高阶材料",
+      "icon": "tnc:star_marrow",
+      "x": 8,
+      "y": 101,
+      "size": 1.4,
+      "description": [
+        "魔力炉：钻石×1＋600M→星髓晶×1。",
+        "先建立稳定产能与储池，再做这条高阶分支，不把鲸或水桶当免费能源。"
+      ],
+      "tasks": [
+        {
+          "id": "286A9E1DD33165F6",
+          "type": "item",
+          "item": "tnc:star_marrow",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "273E8A9A18BDEE11"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "712D403D8FCA4F9B",
+      "title": "&e生产线 · 纸、布和旅粮",
+      "icon": "tnc:mana_pulp_press",
+      "x": -18,
+      "y": 116,
+      "size": 1.8,
+      "description": [
+        "从上面的材料阶段接入，按自己的生活需要选择。"
+      ],
+      "tasks": [
+        {
+          "id": "4B8AAFDDD987C503",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "273E8A9A18BDEE11"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "0959D18AA4CC388C",
+      "title": "&a农牧线 · 省事，不代替照料",
+      "icon": "tnc:harvest_arm",
+      "x": 0,
+      "y": 116,
+      "size": 1.8,
+      "description": [
+        "从上面的材料阶段接入，按自己的生活需要选择。"
+      ],
+      "tasks": [
+        {
+          "id": "12934B3CA7789B50",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "273E8A9A18BDEE11"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "5835C4798390A0B9",
+      "title": "&b工程线 · 管好传输和储存",
+      "icon": "tnc:radiant_thread",
+      "x": 18,
+      "y": 116,
+      "size": 1.8,
+      "description": [
+        "从上面的材料阶段接入，按自己的生活需要选择。"
+      ],
+      "tasks": [
+        {
+          "id": "1EEB5C534E2E45DE",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "273E8A9A18BDEE11"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "120DBA3E2F462134",
+      "title": "纸皮压机",
+      "icon": "tnc:mana_pulp_press",
+      "x": -18,
+      "y": 123,
+      "size": 1.4,
+      "description": [
+        "制作材料：灵纹铁×3；旋页丝×1；石砖×1。",
+        "两甘蔗或听潮苇放输入格，旁边一格要有普通清水；16M、4秒制3纸。"
+      ],
+      "tasks": [
+        {
+          "id": "6219F30467257AC2",
+          "type": "item",
+          "item": "tnc:mana_pulp_press",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "712D403D8FCA4F9B"
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "4081F26E635575D2",
       "title": "雾纱织机",
       "icon": "tnc:mist_loom",
-      "x": -2.25,
-      "y": 19.1,
-      "size": 1.5,
+      "x": -18,
+      "y": 130,
+      "size": 1.4,
       "description": [
-        "两雾棉或帆纤维＋30魔力，6秒制雾布。",
-        "缓冲300；带宽8魔力/秒。"
+        "制作材料：曜纹金×3；雾棉×1；石砖×1。",
+        "两雾织棉纤维或帆纤维放第一格；30M、6秒制1雾布。"
       ],
       "tasks": [
         {
           "id": "63E584212AAF6112",
           "type": "item",
           "item": "tnc:mist_loom",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
+          "count": 1,
+          "consume_items": false
         }
       ],
-      "dependencies": []
+      "dependencies": [
+        "712D403D8FCA4F9B"
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "28B1E69BCF7571E2",
       "title": "远行烘食器",
       "icon": "tnc:meal_dryer",
-      "x": 2.25,
-      "y": 19.1,
-      "size": 1.5,
+      "x": -18,
+      "y": 137,
+      "size": 1.4,
       "description": [
-        "一份熟食＋纸＋24魔力，6秒制远行餐。",
-        "缓冲300；带宽8魔力/秒。"
+        "制作材料：灵纹铁×3；minecraft:smoker×1；石砖×1。",
+        "第一格放营养值至少6的食物，第二格放纸；24M、6秒制远行餐。"
       ],
       "tasks": [
         {
           "id": "68AA85560EA54FAD",
           "type": "item",
           "item": "tnc:meal_dryer",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
+          "count": 1,
+          "consume_items": false
         }
       ],
-      "dependencies": []
-    },
-    {
-      "id": "3BF6082DC4EE3BD8",
-      "title": "暖卵台",
-      "icon": "tnc:mana_incubator",
-      "x": 6.75,
-      "y": 19.1,
-      "size": 1.5,
-      "description": [
-        "放自己实际受精卵；0.15魔力/秒加快25%，不会生成新卵。",
-        "缓冲100；带宽4魔力/秒。"
+      "dependencies": [
+        "712D403D8FCA4F9B"
       ],
-      "tasks": [
-        {
-          "id": "310F60FE5E16563B",
-          "type": "item",
-          "item": "tnc:mana_incubator",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
-        }
-      ],
-      "dependencies": []
+      "hide_dependency_lines": true
     },
     {
       "id": "0927970D1DA2EDCB",
       "title": "收获臂",
       "icon": "tnc:harvest_arm",
-      "x": 11.25,
-      "y": 19.1,
-      "size": 1.5,
+      "x": 0,
+      "y": 123,
+      "size": 1.4,
       "description": [
-        "放在获准区域并连接相邻线路；检流尺右键看真实工作状态。",
-        "缓冲300；带宽8魔力/秒。"
+        "制作材料：灵纹铁×3；minecraft:iron_hoe×1；石砖×1。",
+        "面前9×9范围成熟原版作物，库存留种后补种；每株4M，两个成品格都要留空间。"
       ],
       "tasks": [
         {
           "id": "59C6E25E91F7D396",
           "type": "item",
           "item": "tnc:harvest_arm",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
+          "count": 1,
+          "consume_items": false
         }
       ],
-      "dependencies": []
+      "dependencies": [
+        "0959D18AA4CC388C"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "72B64ED720214A58",
+      "title": "自动投料器",
+      "icon": "tnc:mana_feed_plate",
+      "x": 0,
+      "y": 130,
+      "size": 1.4,
+      "description": [
+        "制作材料：灵纹铁×3；梦腐质×1；石砖×1。",
+        "这是后期自动投料器，基础喂食不需要它。放在自己的饲料槽旁，输入真实食物；每次耗1M向槽分配最多8份。"
+      ],
+      "tasks": [
+        {
+          "id": "691FF4EE5879C4B6",
+          "type": "item",
+          "item": "tnc:mana_feed_plate",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "0959D18AA4CC388C"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "3BF6082DC4EE3BD8",
+      "title": "暖卵台",
+      "icon": "tnc:mana_incubator",
+      "x": 0,
+      "y": 137,
+      "size": 1.4,
+      "description": [
+        "制作材料：灵纹铁×3；柔茸×1；石砖×1。",
+        "放自己动物产出的真实受精卵。无魔力仍基础孵化，有魔力0.15M/秒提高25%速度；不凭空生产卵。"
+      ],
+      "tasks": [
+        {
+          "id": "310F60FE5E16563B",
+          "type": "item",
+          "item": "tnc:mana_incubator",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "0959D18AA4CC388C"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "6AB649A40EE0C748",
+      "title": "轻灌器",
+      "icon": "tnc:gentle_irrigator",
+      "x": 0,
+      "y": 144,
+      "size": 1.4,
+      "description": [
+        "制作材料：灵纹铁×3；minecraft:bucket×1；石砖×1。",
+        "9×9普通耕地缺水时每10秒最多8M灌溉。只服务传统作物，不能替代魔植的流动魔力。"
+      ],
+      "tasks": [
+        {
+          "id": "37E27D4A2B9D1C2B",
+          "type": "item",
+          "item": "tnc:gentle_irrigator",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "0959D18AA4CC388C"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "073937E8D2B8FDAC",
+      "title": "护候灯",
+      "icon": "tnc:climate_lantern",
+      "x": 0,
+      "y": 151,
+      "size": 1.4,
+      "description": [
+        "制作材料：灵纹铁×3；露丝×1；石砖×1。",
+        "在完整封闭的9×9传统温室里，每秒0.4M使作物不受反季减速。魔植本来就不分四季。"
+      ],
+      "tasks": [
+        {
+          "id": "7D634C192865BBBB",
+          "type": "item",
+          "item": "tnc:climate_lantern",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "0959D18AA4CC388C"
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "6735C8E240FBCD91",
       "title": "种源分拣器",
       "icon": "tnc:seed_sorter",
-      "x": -11.25,
-      "y": 24.8,
-      "size": 1.5,
+      "x": 0,
+      "y": 158,
+      "size": 1.4,
       "description": [
-        "放在获准区域并连接相邻线路；检流尺右键看真实工作状态。",
-        "缓冲100；带宽4魔力/秒。"
+        "制作材料：灵纹铁×3；minecraft:wheat_seeds×1；石砖×1。",
+        "把成批种子放输入格，耗5M搬到成品格；属于仓储便捷旁支，不是采种前置。"
       ],
       "tasks": [
         {
           "id": "1F5775A5DAD85AA2",
           "type": "item",
           "item": "tnc:seed_sorter",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
+          "count": 1,
+          "consume_items": false
         }
       ],
-      "dependencies": []
+      "dependencies": [
+        "0959D18AA4CC388C"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "1701B42113548932",
+      "title": "霞金导魔晶纤",
+      "icon": "tnc:radiant_thread",
+      "x": 18,
+      "y": 123,
+      "size": 1.4,
+      "description": [
+        "制作材料：曜纹金×3；露丝×1；石砖×1。",
+        "提高主干到32M/秒；需要露丝。大量供魔株经过一条线仍共享这一带宽。"
+      ],
+      "tasks": [
+        {
+          "id": "02B2EB89789A5B4C",
+          "type": "item",
+          "item": "tnc:radiant_thread",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "5835C4798390A0B9"
+      ],
+      "hide_dependency_lines": true
+    },
+    {
+      "id": "64839A20F54A3A32",
+      "title": "曜纹储池",
+      "icon": "tnc:radiant_basin",
+      "x": 18,
+      "y": 130,
+      "size": 1.4,
+      "description": [
+        "制作材料：曜纹金×3；折叶膜×1；石砖×1。",
+        "中阶储池8000M、32M/秒；靠近用能区，承接低负载时的余量。"
+      ],
+      "tasks": [
+        {
+          "id": "7607D893E69A2E5B",
+          "type": "item",
+          "item": "tnc:radiant_basin",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "5835C4798390A0B9"
+      ],
+      "hide_dependency_lines": true
+    },
+    {
+      "id": "538D67533171AE5F",
+      "title": "分流阀",
+      "icon": "tnc:mana_valve",
+      "x": 18,
+      "y": 137,
+      "size": 1.4,
+      "description": [
+        "制作材料：灵纹铁×3；影时瓣×1；石砖×1。",
+        "潜行右键切优先顺序；外部红石信号可关断。没有阀也能完成基础供魔。"
+      ],
+      "tasks": [
+        {
+          "id": "41FA345A1A880969",
+          "type": "item",
+          "item": "tnc:mana_valve",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "5835C4798390A0B9"
+      ],
+      "hide_dependency_lines": true
+    },
+    {
+      "id": "0DAF7A01862F8C0C",
+      "title": "折光镜",
+      "icon": "tnc:mana_mirror",
+      "x": 18,
+      "y": 144,
+      "size": 1.4,
+      "description": [
+        "制作材料：灵纹铁×3；镜鳞×1；石砖×1。",
+        "持检流尺潜行右键先选镜A，再选镜B；同一主人，12格内无遮挡，可斜向或跨高度。镜头自动相向，4M/秒；空手潜行右键解除。"
+      ],
+      "tasks": [
+        {
+          "id": "52EFB52A08389ADE",
+          "type": "item",
+          "item": "tnc:mana_mirror",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "5835C4798390A0B9"
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "0884B721C38DBAFE",
       "title": "魔导运货轨",
       "icon": "tnc:mana_cart_track",
-      "x": -6.75,
-      "y": 24.8,
-      "size": 1.5,
+      "x": 18,
+      "y": 151,
+      "size": 1.4,
       "description": [
-        "这是沿普通铁轨铺设的魔导驱动座，真实载货矿车每10格花1魔力。",
-        "缓冲200；带宽8魔力/秒。"
+        "制作材料：灵纹铁×3；minecraft:rail×1；石砖×1。",
+        "沿普通铁轨布置驱动座，推动载真实物品的货车；行进每10格耗1M。"
       ],
       "tasks": [
         {
           "id": "41426B3396D068E7",
           "type": "item",
           "item": "tnc:mana_cart_track",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
+          "count": 1,
+          "consume_items": false
         }
       ],
-      "dependencies": []
+      "dependencies": [
+        "5835C4798390A0B9"
+      ],
+      "hide_dependency_lines": true
+    },
+    {
+      "id": "70253B5F2BC2BF63",
+      "title": "魔导灯",
+      "icon": "tnc:mana_lantern",
+      "x": -42,
+      "y": 120,
+      "size": 1.4,
+      "description": [
+        "制作材料：灵纹铁×3；minecraft:torch×1；石砖×1。",
+        "每秒0.05M持续照明，最早可做的日常用能之一。"
+      ],
+      "tasks": [
+        {
+          "id": "34A7330041FCB2A9",
+          "type": "item",
+          "item": "tnc:mana_lantern",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "565A948393027784"
+      ],
+      "hide_dependency_lines": true
+    },
+    {
+      "id": "648DB21C705351D0",
+      "title": "庭院明灯",
+      "icon": "tnc:bright_mana_lantern",
+      "x": -42,
+      "y": 127,
+      "size": 1.4,
+      "description": [
+        "制作材料：灵纹铁×3；minecraft:glowstone_dust×1；石砖×1。",
+        "每秒0.1M，照亮庭院。"
+      ],
+      "tasks": [
+        {
+          "id": "68B105B44FC06878",
+          "type": "item",
+          "item": "tnc:bright_mana_lantern",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "565A948393027784"
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "189475013AC8FDD5",
       "title": "守望铃",
       "icon": "tnc:ward_bell",
-      "x": -2.25,
-      "y": 24.8,
-      "size": 1.5,
+      "x": -42,
+      "y": 134,
+      "size": 1.4,
       "description": [
-        "放在获准区域并连接相邻线路；检流尺右键看真实工作状态。",
-        "缓冲100；带宽4魔力/秒。"
+        "制作材料：灵纹铁×3；警路苔孢子×1；石砖×1。",
+        "九格内发现敌意生物时耗2M响铃，输出短红石信号。"
       ],
       "tasks": [
         {
           "id": "0642BC2C61350152",
           "type": "item",
           "item": "tnc:ward_bell",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
+          "count": 1,
+          "consume_items": false
         }
       ],
-      "dependencies": []
+      "dependencies": [
+        "565A948393027784"
+      ],
+      "hide_dependency_lines": true
+    },
+    {
+      "id": "32716571D6748CD3",
+      "title": "雾布 · 充能工具的共同材料",
+      "icon": "tnc:mist_cloth",
+      "x": -26,
+      "y": 144,
+      "size": 1.4,
+      "description": [
+        "左侧雾纱织机：两份雾棉纤维或帆纤维＋30M，6秒制一份雾布。",
+        "归途缎带、缓降羽饰、耳坠、护符、建筑尺、符弩和机甲都需要它。",
+        "先做这份材料，再沿连线制作后面的工具。"
+      ],
+      "tasks": [
+        {
+          "id": "631BA6B0AF901307",
+          "type": "item",
+          "item": "tnc:mist_cloth",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "4081F26E635575D2"
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "0865419C0DECA978",
       "title": "饰品充能台",
       "icon": "tnc:accessory_charger",
-      "x": 2.25,
-      "y": 24.8,
-      "size": 1.5,
+      "x": -10,
+      "y": 170,
+      "size": 1.4,
       "description": [
-        "放充能饰品或机甲，接线每秒最多16魔力充入真实账本。",
-        "缓冲800；带宽16魔力/秒。"
+        "制作材料：曜纹金×3；矿眠屑×1；石砖×1。",
+        "接上魔力线路，物品放第一输入格。普通饰品最多16M/秒；魔导铠最多128M/秒，仍受供能与线路带宽限制。",
+        "它负责物品充能，不负责动物喂食，也不是旧魔力瓶底座。"
       ],
       "tasks": [
         {
           "id": "7E4265B3325E1763",
           "type": "item",
           "item": "tnc:accessory_charger",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
+          "count": 1,
+          "consume_items": false
         }
       ],
-      "dependencies": []
-    },
-    {
-      "id": "6560CD995A7207FE",
-      "title": "看见第一次真实供能",
-      "icon": "tnc:dew_collector",
-      "x": -10.5,
-      "y": 34,
-      "size": 1.2,
-      "description": [
-        "这个节点检测实际转移或加工，而非持有机器。"
+      "dependencies": [
+        "273E8A9A18BDEE11"
       ],
-      "tasks": [
-        {
-          "id": "4EF3136FE839ACDD",
-          "type": "advancement",
-          "advancement": "tnc:life_routes/network/collected",
-          "title": "完成真实操作"
-        }
-      ],
-      "dependencies": []
-    },
-    {
-      "id": "357302D516BECA1D",
-      "title": "存下真实魔力",
-      "icon": "tnc:mana_basin",
-      "x": -3.5,
-      "y": 34,
-      "size": 1.2,
-      "description": [
-        "这个节点检测实际转移或加工，而非持有机器。"
-      ],
-      "tasks": [
-        {
-          "id": "40FD05D9B8CC8E45",
-          "type": "advancement",
-          "advancement": "tnc:life_routes/network/stored",
-          "title": "完成真实操作"
-        }
-      ],
-      "dependencies": []
-    },
-    {
-      "id": "565A948393027784",
-      "title": "实际完成一次加工",
-      "icon": "tnc:mana_sawmill",
-      "x": 3.5,
-      "y": 34,
-      "size": 1.2,
-      "description": [
-        "这个节点检测实际转移或加工，而非持有机器。"
-      ],
-      "tasks": [
-        {
-          "id": "7A3309B5D0381EA5",
-          "type": "advancement",
-          "advancement": "tnc:life_routes/network/worked",
-          "title": "完成真实操作"
-        }
-      ],
-      "dependencies": []
+      "hide_dependency_lines": false
     },
     {
       "id": "4B57B8F0951161AF",
-      "title": "真正充满一部分饰品",
+      "title": "&b完成一次真实物品充能",
       "icon": "tnc:accessory_charger",
-      "x": 10.5,
-      "y": 34,
-      "size": 1.2,
+      "x": -10,
+      "y": 177,
+      "size": 1.4,
       "description": [
-        "这个节点检测实际转移或加工，而非持有机器。"
+        "观察饰品上的储量增长，真实完成转移后记录。"
       ],
       "tasks": [
         {
-          "id": "043FCFDA75C1AF7A",
+          "id": "6D8C2D619430B02E",
           "type": "advancement",
-          "advancement": "tnc:life_routes/network/charged",
-          "title": "完成真实操作"
+          "advancement": "tnc:life_routes/network/charged"
         }
       ],
-      "dependencies": []
+      "dependencies": [
+        "0865419C0DECA978"
+      ],
+      "hide_dependency_lines": false
     },
     {
       "id": "6815765AAC6470F3",
       "title": "归途缎带",
       "icon": "tnc:homeward_ribbon",
-      "x": -9.0,
-      "y": 41,
-      "size": 1.5,
+      "x": -28,
+      "y": 184,
+      "size": 1.4,
       "description": [
-        "容量300。先在饰品充能台充能，再使用。",
-        "副手饰品生效；机甲穿胸甲位。用途与消耗见物品提示。"
+        "制作材料：归巢花瓣×1；曜纹金×2；雾布×1；灵纹铁×1。",
+        "充入120M、脱战10秒后回到自己买下的房屋。",
+        "先制作，再到上方充能台充能；不能用空饰品测试效果。"
       ],
       "tasks": [
         {
           "id": "60374697B99E6085",
           "type": "item",
           "item": "tnc:homeward_ribbon",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
+          "count": 1,
+          "consume_items": false
         }
       ],
-      "dependencies": []
+      "dependencies": [
+        "0865419C0DECA978",
+        "32716571D6748CD3"
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "2D81D805BB91262C",
       "title": "缓降羽饰",
       "icon": "tnc:descent_feather",
-      "x": -3.0,
-      "y": 41,
-      "size": 1.5,
+      "x": -22,
+      "y": 184,
+      "size": 1.4,
       "description": [
-        "容量200。先在饰品充能台充能，再使用。",
-        "副手饰品生效；机甲穿胸甲位。用途与消耗见物品提示。"
+        "制作材料：空羽囊×1；曜纹金×2；雾布×1；灵纹铁×1。",
+        "放副手，下降时耗2M/秒缓降。",
+        "先制作，再到上方充能台充能；不能用空饰品测试效果。"
       ],
       "tasks": [
         {
           "id": "1D09EFD7E04E1023",
           "type": "item",
           "item": "tnc:descent_feather",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
+          "count": 1,
+          "consume_items": false
         }
       ],
-      "dependencies": []
+      "dependencies": [
+        "0865419C0DECA978",
+        "32716571D6748CD3"
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "24CFD523967F1A19",
       "title": "探矿耳坠",
       "icon": "tnc:ore_whisper_earring",
-      "x": 3.0,
-      "y": 41,
-      "size": 1.5,
+      "x": -16,
+      "y": 184,
+      "size": 1.4,
       "description": [
-        "容量200。先在饰品充能台充能，再使用。",
-        "副手饰品生效；机甲穿胸甲位。用途与消耗见物品提示。"
+        "制作材料：矿眠屑×1；曜纹金×2；雾布×1；灵纹铁×1。",
+        "每次15M，提示八格内矿物方向。",
+        "先制作，再到上方充能台充能；不能用空饰品测试效果。"
       ],
       "tasks": [
         {
           "id": "536EAEAF3FD89991",
           "type": "item",
           "item": "tnc:ore_whisper_earring",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
+          "count": 1,
+          "consume_items": false
         }
       ],
-      "dependencies": []
+      "dependencies": [
+        "0865419C0DECA978",
+        "32716571D6748CD3"
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "678443D2B1333116",
       "title": "守露护符",
       "icon": "tnc:dew_ward_charm",
-      "x": 9.0,
-      "y": 41,
-      "size": 1.5,
+      "x": -10,
+      "y": 184,
+      "size": 1.4,
       "description": [
-        "容量300。先在饰品充能台充能，再使用。",
-        "副手饰品生效；机甲穿胸甲位。用途与消耗见物品提示。"
+        "制作材料：灯鹿落角×1；曜纹金×2；雾布×1；灵纹铁×1。",
+        "放副手，受伤时花费魔力减伤，有冷却。",
+        "先制作，再到上方充能台充能；不能用空饰品测试效果。"
       ],
       "tasks": [
         {
           "id": "1821033FA9B5EB9B",
           "type": "item",
           "item": "tnc:dew_ward_charm",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
+          "count": 1,
+          "consume_items": false
         }
       ],
-      "dependencies": []
+      "dependencies": [
+        "0865419C0DECA978",
+        "32716571D6748CD3"
+      ],
+      "hide_dependency_lines": false
+    },
+    {
+      "id": "1607F33A1DBF48F4",
+      "title": "虹星导魔晶纤",
+      "icon": "tnc:star_thread",
+      "x": 20,
+      "y": 169,
+      "size": 1.4,
+      "description": [
+        "制作材料：星髓晶×3；雷冠尖×1；石砖×1。",
+        "128M/秒的高阶主干，只有实际产能提高后才需要。"
+      ],
+      "tasks": [
+        {
+          "id": "4AAF4642C757440E",
+          "type": "item",
+          "item": "tnc:star_thread",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "4B10906F339AEBF6"
+      ],
+      "hide_dependency_lines": true
+    },
+    {
+      "id": "6F7F5D445B2F026E",
+      "title": "星髓储池",
+      "icon": "tnc:star_basin",
+      "x": 20,
+      "y": 176,
+      "size": 1.4,
+      "description": [
+        "制作材料：星髓晶×3；昼夜砂×1；石砖×1。",
+        "32000M高阶储池，容量大也要慢慢积累。"
+      ],
+      "tasks": [
+        {
+          "id": "63C7BA8CBB0F0477",
+          "type": "item",
+          "item": "tnc:star_basin",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "4B10906F339AEBF6"
+      ],
+      "hide_dependency_lines": true
+    },
+    {
+      "id": "6A3517288F079D96",
+      "title": "远折镜",
+      "icon": "tnc:star_mirror",
+      "x": 20,
+      "y": 183,
+      "size": 1.4,
+      "description": [
+        "制作材料：星髓晶×3；虹折片×1；石砖×1。",
+        "持检流尺潜行右键配对，两面远折镜24格、16M/秒，可斜向跨高度；混用普通镜时范围取较小端。中间有实心墙会停机，拆除后恢复。"
+      ],
+      "tasks": [
+        {
+          "id": "764FDD6A029FC2C6",
+          "type": "item",
+          "item": "tnc:star_mirror",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "dependencies": [
+        "4B10906F339AEBF6"
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "39A2CB43ED90FE68",
       "title": "魔导营造尺",
       "icon": "tnc:mana_building_ruler",
-      "x": -9.0,
-      "y": 47,
-      "size": 1.5,
+      "x": 20,
+      "y": 192,
+      "size": 1.4,
       "description": [
-        "容量600。先在饰品充能台充能，再使用。",
-        "副手饰品生效；机甲穿胸甲位。用途与消耗见物品提示。"
+        "制作材料：minecraft:iron_pickaxe×1；曜纹金×2；雾布×1；灵纹铁×1。",
+        "使用真实建筑材料，每块3M；普通五格直线，潜行三格框。"
       ],
       "tasks": [
         {
           "id": "51C3AAB94E9E9CA2",
           "type": "item",
           "item": "tnc:mana_building_ruler",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
+          "count": 1,
+          "consume_items": false
         }
       ],
-      "dependencies": []
+      "dependencies": [
+        "273E8A9A18BDEE11",
+        "0865419C0DECA978",
+        "32716571D6748CD3"
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "60B89EFB55CE4DBE",
       "title": "符文弩",
       "icon": "tnc:rune_crossbow",
-      "x": -3.0,
-      "y": 47,
-      "size": 1.5,
+      "x": 20,
+      "y": 199,
+      "size": 1.4,
       "description": [
-        "容量800。先在饰品充能台充能，再使用。",
-        "副手饰品生效；机甲穿胸甲位。用途与消耗见物品提示。"
+        "制作材料：minecraft:crossbow×1；曜纹金×2；雾布×1；灵纹铁×1。",
+        "手持发射，消耗实际箭和25M，先到充能台补足余额。"
       ],
       "tasks": [
         {
           "id": "2909F29746F48D50",
           "type": "item",
           "item": "tnc:rune_crossbow",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
+          "count": 1,
+          "consume_items": false
         }
       ],
-      "dependencies": []
+      "dependencies": [
+        "273E8A9A18BDEE11",
+        "0865419C0DECA978",
+        "32716571D6748CD3"
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "0FDBD7713A4591CB",
-      "title": "魔道机甲",
+      "title": "天穹式魔导铠",
       "icon": "tnc:mana_mech",
-      "x": 3.0,
-      "y": 47,
-      "size": 1.5,
+      "x": 20,
+      "y": 206,
+      "size": 1.4,
       "description": [
-        "容量6000。先在饰品充能台充能，再使用。",
-        "副手饰品生效；机甲穿胸甲位。用途与消耗见物品提示。"
+        "魔力炉：星髓晶×8；曜纹金×12；雾布×8；曜纹储池×1；1800M，48.0秒。",
+        "在魔力炉锻造整套机铠，充能台充至最多12000M。只占胸甲位，显示完整头身四肢。V突进（150M）；B屏障（200M启动，8秒内挡下80%伤害，每点挡伤另耗35M）；G过载（1000M，8秒）；潜行V震荡（800M，只伤敌对生物，不破坏地形）。技能有独立冷却。"
       ],
       "tasks": [
         {
           "id": "40966EC1795DFB07",
           "type": "item",
           "item": "tnc:mana_mech",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
+          "count": 1,
+          "consume_items": false
         }
       ],
-      "dependencies": []
+      "dependencies": [
+        "4B10906F339AEBF6",
+        "0865419C0DECA978",
+        "32716571D6748CD3"
+      ],
+      "hide_dependency_lines": true
     },
     {
       "id": "600CCF0EDDB5DACF",
-      "title": "法术机枪模块",
+      "title": "六联晶铳",
       "icon": "tnc:mech_spellgun",
-      "x": 9.0,
-      "y": 47,
-      "size": 1.5,
+      "x": 20,
+      "y": 213,
+      "size": 1.4,
       "description": [
-        "由穿戴的魔道机甲供能；模块不单独充能。",
-        "副手饰品生效；机甲穿胸甲位。用途与消耗见物品提示。"
+        "魔力炉：星髓晶×4；灵纹铁×12；雷余晶×4；雾布×4；1200M，32.0秒。",
+        "穿天穹式魔导铠后长按右键，六联晶铳每秒10发、每发12M，不消耗箭。潜行右键轮换水/火/雷/风/土/光/暗；过载期间每秒20发、每发18M。持续射击会积热，过热自动排放3秒。机铠无储魔时无法开火，也不会偷偷扣个人魔力。"
       ],
       "tasks": [
         {
           "id": "7E6A7A5760B36C92",
           "type": "item",
           "item": "tnc:mech_spellgun",
-          "consume_items": false,
-          "title": "持有种源或成品（不消耗）"
+          "count": 1,
+          "consume_items": false
         }
       ],
-      "dependencies": []
+      "dependencies": [
+        "0FDBD7713A4591CB"
+      ],
+      "hide_dependency_lines": true
+    },
+    {
+      "id": "70614BC6E64CEBFA",
+      "title": "&3检修清单 · 不工作时按顺序查",
+      "icon": "tnc:mana_meter",
+      "x": 0,
+      "y": 220,
+      "size": 1.8,
+      "description": [
+        "①种下去了但不长：魔法土？八格内灌溉？上方空间够吗？",
+        "②花不供魔：成熟？自己的？这种花的日照/声音/投料条件满足吗？",
+        "③盏有魔力、机器没有：线路相邻连续？接到炉口而不是外墙？同一产权和主人？",
+        "④动物没出力：已认养设窝？食槽够得着？集息器绑对了吗？鲸是否只是没充电？",
+        "⑤有魔力不加工：材料放对输入格？输出堵住？纸机旁有清水？库存和配方数量足够？",
+        "⑥供魔时断时续：先用储池缓冲；产能不够就增加来源，不能只靠换粗线。"
+      ],
+      "tasks": [
+        {
+          "id": "514BE9CDFF1F9662",
+          "type": "checkmark"
+        }
+      ],
+      "dependencies": [
+        "565A948393027784"
+      ],
+      "hide_dependency_lines": false
     }
   ],
   "images": [],

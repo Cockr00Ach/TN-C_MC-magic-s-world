@@ -248,7 +248,7 @@ public final class TNLightBeamMechanics {
      */
     public static float yawFor(Vec3 dir) {
         Vec3 d = dir.normalize();
-        return (float) (Mth.atan2(d.x, d.z) * (180.0F / (float) Math.PI));
+        return (float) (-Mth.atan2(d.x, d.z) * (180.0F / (float) Math.PI));
     }
 
     /** 方向 → MC 的 pitch（度 ✓）。 */
@@ -338,15 +338,7 @@ public final class TNLightBeamMechanics {
     }
 
     /** 找一个目标（最近的 ✓）；没有就返回 null ⇒ 调用方回退成"顺着视线射" ✓。 */
-    private static LivingEntity findTarget(LivingEntity caster, Spell spell, double lengthScale) {
-        ServerLevel level = (ServerLevel) caster.level();
-        double reach = Math.max(12.0D, spell.reach() * Math.max(1.0D, lengthScale));
-        List<LivingEntity> candidates = level.getEntitiesOfClass(LivingEntity.class,
-                caster.getBoundingBox().inflate(reach));
-        List<LivingEntity> targets = coneTargets(caster, candidates, caster.getLookAngle(),
-                reach, AIM_CONE_DEGREES);
-        return targets.isEmpty() ? null : targets.get(0);
-    }
+
 
     /**
      * ★ <b>拉开落点</b>（作者 2026-10-01："t5的技能每个设定一个最低分散距离，不然都叠在一起不大好看" ✓）。
@@ -475,25 +467,21 @@ public final class TNLightBeamMechanics {
     private static void castForward(LivingEntity caster, Spell spell, double lengthScale, double sizeScale) {
         ServerLevel level = (ServerLevel) caster.level();
         Vec3 from = caster.getEyePosition();
-        LivingEntity target = findTarget(caster, spell, lengthScale);
-        Vec3 center = caster.getLookAngle();
-        if (target != null) {
-            center = target.position().add(0.0D, target.getBbHeight() * 0.5D, 0.0D).subtract(from).normalize();
-        }
-        List<Vec3> dirs = fanDirections(center, spell.rays(), spell.spreadDeg());
-        for (Vec3 dir : dirs) {
-            spawn(level, caster, from, dir, spell, TNLightBeamEntity.STYLE_RAY, target, lengthScale, sizeScale);
+        List<Vec3> dirs = fanDirections(caster.getLookAngle(), spell.rays(), spell.spreadDeg());
+        for (int i=0;i<dirs.size();i++) {
+            spawn(level,caster,from,dirs.get(i),spell,TNLightBeamEntity.STYLE_RAY,null,lengthScale,sizeScale,
+                    (float)LightBeamAim.offset(i,dirs.size(),spell.spreadDeg()));
         }
         play(level, from, spell.tier() >= 3 ? SoundEvents.BEACON_ACTIVATE : SoundEvents.AMETHYST_BLOCK_CHIME);
         if (caster instanceof ServerPlayer player) {
             player.displayClientMessage(Component.literal("§e[TN-C] §r" + name(spell)
                     + " §7（" + spell.rays() + " 道实体光线，每道粗 "
                     + String.format(java.util.Locale.ROOT, "%.1f", spell.radius() * 2.0D) + " 格"
-                    + (target == null ? "，无目标" : "，锁定 " + target.getName().getString()) + "）"), true);
+                    + "，随面朝方向）"), true);
         }
         LOGGER.info("TN-C/light: 光线 {} rays={} radius={} dmg={} caster={} target={}",
                 spell.path(), spell.rays(), spell.radius(), spell.damage(), caster.getName().getString(),
-                target == null ? "none" : target.getName().getString());
+                "manual-look");
     }
 
     /**
@@ -505,10 +493,11 @@ public final class TNLightBeamMechanics {
     private static void castSky(LivingEntity caster, Spell spell, double sizeScale) {
         ServerLevel level = (ServerLevel) caster.level();
         double reach = Math.max(16.0D, spell.reach());
-        List<LivingEntity> candidates = level.getEntitiesOfClass(LivingEntity.class,
-                caster.getBoundingBox().inflate(reach));
-        List<LivingEntity> targets = coneTargets(caster, candidates, caster.getLookAngle(),
-                reach, AIM_CONE_DEGREES);
+        List<LivingEntity> targets=List.of();
+        if(!(caster instanceof ServerPlayer)) {
+            List<LivingEntity> candidates=level.getEntitiesOfClass(LivingEntity.class,caster.getBoundingBox().inflate(reach));
+            targets=coneTargets(caster,candidates,caster.getLookAngle(),reach,AIM_CONE_DEGREES);
+        }
 
         // ★ 落点：先按"锁到的敌人脚下"排 ✓，然后交给 spreadSpots 拉开（最低分散距离 minGap ✓）——
         //   怪扎堆时宁可少放几根，也不让五根 27 格宽的柱子糊成一坨 ✗（作者 2026-10-01 ✓）。
@@ -519,20 +508,6 @@ public final class TNLightBeamMechanics {
         Vec3 fallback = aimPoint(caster, spell.reach());
         List<Vec3> spots = spreadSpots(wanted, fallback, spell.circles(),
                 Math.max(BARRAGE_RING, spell.minGap()), spell.minGap());
-        List<LivingEntity> locked = new ArrayList<>();
-        // 每个落点记下"当初是冲着谁去的" ✓（锁到人的那些会一直跟着那个人 ✓）
-        for (Vec3 spot : spots) {
-            LivingEntity best = null;
-            double bestDist = Double.MAX_VALUE;
-            for (LivingEntity target : targets) {
-                double d = target.position().distanceTo(spot);
-                if (d < bestDist) {
-                    bestDist = d;
-                    best = target;
-                }
-            }
-            locked.add(bestDist <= Math.max(6.0D, spell.minGap()) ? best : null);
-        }
 
         for (int i = 0; i < spots.size(); i++) {
             Vec3 at = spots.get(i);
@@ -545,18 +520,17 @@ public final class TNLightBeamMechanics {
             circle(level, at.x, ground + 0.04D, at.z,
                     spell.radius() * sizeScale * SKY_CIRCLE_SCALE * 0.8D, 0.0F);
             // ③ 光柱：等 SKY_DELAY + i*SKY_STAGGER 才落 ✓（t5 一根接一根 ✓）
-            //    锁了人的那些会**一直跟着那个人**（实体自己每 tick 重新瞄准 ✓）
-            LivingEntity lockedTarget = i < locked.size() ? locked.get(i) : null;
+            //    The marked location is immutable throughout the delay and beam lifetime.
             PENDING.add(new Pending(level, caster, new Vec3(at.x, ground + SKY_HEIGHT, at.z),
                     new Vec3(0.0D, -1.0D, 0.0D), spell, TNLightBeamEntity.STYLE_DESCENT,
-                    SKY_DELAY + i * SKY_STAGGER, lockedTarget, sizeScale));
+                    SKY_DELAY + i * SKY_STAGGER, null, sizeScale));
         }
         play(level, caster.position(), SoundEvents.TRIDENT_THUNDER);
         if (caster instanceof ServerPlayer player) {
             player.displayClientMessage(Component.literal("§e[TN-C] §r" + name(spell)
                     + " §7（天上 " + spots.size() + " 个阵，1 秒后落下，每道粗 "
                     + String.format(java.util.Locale.ROOT, "%.1f", spell.radius() * sizeScale * 2.0D) + " 格"
-                    + (targets.isEmpty() ? "，无目标" : "，锁定 " + Math.min(targets.size(), spell.circles()) + " 个目标")
+                    + "，落点固定"
                     + "）"), true);
         }
         LOGGER.info("TN-C/light: 光柱 {} circles={} radius={} delay={}t dmg={} targets={} caster={}",
@@ -581,12 +555,17 @@ public final class TNLightBeamMechanics {
      * 锁定 {@code target} 之后，**接下来每一 tick 的重新瞄准由实体自己负责** ✓
      * （{@link TNLightBeamEntity#tick} ✓），所以这里只要给一个正确的初值 ✓。
      */
-    private static void spawn(ServerLevel level, LivingEntity caster, Vec3 from, Vec3 dir,
+    private static TNLightBeamEntity spawn(ServerLevel level, LivingEntity caster, Vec3 from, Vec3 dir,
                               Spell spell, int style, LivingEntity target, double lengthScale,
                               double sizeScale) {
+        return spawn(level,caster,from,dir,spell,style,target,lengthScale,sizeScale,0);
+    }
+    private static TNLightBeamEntity spawn(ServerLevel level, LivingEntity caster, Vec3 from, Vec3 dir,
+                              Spell spell, int style, LivingEntity target, double lengthScale,
+                              double sizeScale,float fanOffset) {
         TNLightBeamEntity beam = TNOrbEntities.LIGHT_BEAM.get().create(level);
         if (beam == null) {
-            return;
+            return null;
         }
         Vec3 d = dir.normalize();
         beam.moveTo(from.x, from.y, from.z, yawFor(d), pitchFor(d));
@@ -598,8 +577,10 @@ public final class TNLightBeamMechanics {
         }
         // ★ 半径乘 sizeScale ✓（天使那发 t4 传 0.2 = 缩小五倍 ✓）
         beam.configure(caster, spell.radius() * sizeScale, length, spell.damage(), BEAM_LIFE, style, target);
+        beam.setFanOffset(fanOffset);
         beam.setShake(spell.shake());            // ★ 画面震动（作者 2026-10-01："并且加上画面震动"✓）
         level.addFreshEntity(beam);
+        return beam;
     }
 
     /**
