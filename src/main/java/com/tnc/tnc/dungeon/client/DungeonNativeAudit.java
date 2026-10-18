@@ -23,6 +23,7 @@ public final class DungeonNativeAudit {
     private static final List<String> failures=new ArrayList<>();private static final Map<String,Object> results=new LinkedHashMap<>();
     private static Path folder(){return Path.of(System.getProperty("tnc.dungeonAuditOutput")).toAbsolutePath();}
     @SubscribeEvent public static void tick(TickEvent.ClientTickEvent e)throws Exception{
+      if(Boolean.getBoolean("tnc.dungeonUiAudit")){DungeonUiNativeAudit.tick(e);return;}
       if(!Boolean.getBoolean("tnc.dungeonAudit")||e.phase!=TickEvent.Phase.END)return;var mc=Minecraft.getInstance();org.lwjgl.glfw.GLFW.glfwHideWindow(mc.getWindow().getWindow());if(mc.options.enableVsync().get()){mc.options.enableVsync().set(false);mc.getWindow().updateVsync(false);}if(mc.level==null||mc.player==null||mc.getOverlay()!=null)return;
       if(mc.screen!=null&&mc.screen.getClass().getName().contains(".mca.")){for(var child:mc.screen.children())if(child instanceof net.minecraft.client.gui.components.Button b&&b.active&&Set.of("完成","接受","某处","下一步","Done","Next","Accept").contains(b.getMessage().getString())){b.onPress();break;}return;}
       if(!started&&++startup<100)return;if(!started){started=true;Files.createDirectories(folder());mc.options.pauseOnLostFocus=false;mc.options.guiScale().set(2);mc.options.renderDistance().set(6);mc.options.hideGui=false;mc.options.setCameraType(CameraType.FIRST_PERSON);prepare(mc);return;}

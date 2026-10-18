@@ -1,4 +1,4 @@
-param([Parameter(Mandatory=$true)][string]$LauncherBatch,[Parameter(Mandatory=$true)][string]$LivePack,[Parameter(Mandatory=$true)][string]$AuditRoot,[Parameter(Mandatory=$true)][string]$Output,[string]$OffscreenAgent="")
+param([Parameter(Mandatory=$true)][string]$LauncherBatch,[Parameter(Mandatory=$true)][string]$LivePack,[Parameter(Mandatory=$true)][string]$AuditRoot,[Parameter(Mandatory=$true)][string]$Output,[string]$OffscreenAgent="",[switch]$UiOnly)
 $ErrorActionPreference='Stop'
 if([string]::IsNullOrWhiteSpace($OffscreenAgent)){$OffscreenAgent=Join-Path (Split-Path $PSScriptRoot -Parent) 'work/offscreen-agent/offscreen-audit.jar'}
 $live=[IO.Path]::GetFullPath($LivePack).TrimEnd('\')
@@ -20,6 +20,7 @@ $javaArguments=[regex]::Replace($javaArguments,'--width\s+\d+','--width 1600')
 $javaArguments=[regex]::Replace($javaArguments,'--height\s+\d+','--height 900')
 if(-not(Test-Path -LiteralPath $OffscreenAgent)){throw 'Build tools/OffscreenAuditAgent.java first'}
 $javaArguments='-Dtnc.dungeonAudit=true "-javaagent:'+[IO.Path]::GetFullPath($OffscreenAgent)+'" "-Dtnc.dungeonAuditOutput='+[IO.Path]::GetFullPath($Output)+'" '+$javaArguments+' --quickPlaySingleplayer zero-forge'
+if($UiOnly){$javaArguments='-Dtnc.dungeonUiAudit=true '+$javaArguments}
 $p=Start-Process -FilePath $javaExe -ArgumentList $javaArguments -WorkingDirectory $audit -WindowStyle Hidden -RedirectStandardOutput (Join-Path $audit "dungeon-audit-jvm-stdout.log") -RedirectStandardError (Join-Path $audit "dungeon-audit-jvm-stderr.log") -PassThru
 Write-Output ('Isolated Dungeon audit started; process ID: '+$p.Id)
 if($p.WaitForExit(1000)){Write-Output ('Audit exited early with code '+$p.ExitCode)}

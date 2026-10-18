@@ -38,11 +38,22 @@ public final class ArcaneGui {
  private static void point(com.mojang.blaze3d.vertex.VertexConsumer v,org.joml.Matrix4f m,double x,double y,int c){v.vertex(m,(float)x,(float)y,0).color(c>>16&255,c>>8&255,c&255,c>>>24).endVertex();}
  public static void ring(GuiGraphics g,double x,double y,double rx,double ry,double angle,int color){double c=Math.cos(angle),s=Math.sin(angle);for(int i=0;i<64;i++){double a=i*Math.PI/32,b=(i+1)*Math.PI/32;double ax=Math.cos(a)*rx,ay=Math.sin(a)*ry,bx=Math.cos(b)*rx,by=Math.sin(b)*ry;line(g,x+ax*c-ay*s,y+ax*s+ay*c,x+bx*c-by*s,y+bx*s+by*c,.7,color);}}
  public static void sigil(GuiGraphics g,int x,int y,int radius,double time,float strength){
+  sigil(g,x,y,radius,time,strength,false);
+ }
+ /** Optional feathered aura for larger, uncluttered service illustrations. */
+ public static void sigil(GuiGraphics g,int x,int y,int radius,double time,float strength,boolean softAura){
   ring(g,x,y,radius,radius,0,0x706b624e);ring(g,x,y,radius-3,radius-3,0,0xa49c8057);
   ring(g,x,y,radius*.92,radius*.33,time*.006,0xb7baa47f);ring(g,x,y,radius*.83,radius*.30,-time*.008+.8,0xa973ccdd);
   for(int i=0;i<8;i++){double a=i*Math.PI/4+time*.001;line(g,x+Math.cos(a)*(radius-1),y+Math.sin(a)*(radius-1),x+Math.cos(a)*(radius+2),y+Math.sin(a)*(radius+2),1,GOLD);}
   int h=Math.max(7,radius/2),w=Math.max(3,radius/5);double pulse=.6+.4*Math.sin(time*.04);int glow=(int)(70+50*pulse+50*strength);
-  line(g,x,y-h-2,x,y+h+2,w*3,(glow<<24)|0x5faad9);var v=g.bufferSource().getBuffer(RenderType.gui());var m=g.pose().last().pose();
+  if(softAura){
+   var aura=g.bufferSource().getBuffer(RenderType.gui());var matrix=g.pose().last().pose();
+   for(int i=0;i<16;i++){double a=i*Math.PI/8,b=(i+1)*Math.PI/8;
+    point(aura,matrix,x,y,(glow<<24)|0x5faad9);point(aura,matrix,x+Math.cos(b)*w*4,y+Math.sin(b)*(h+15),0x005faad9);
+    point(aura,matrix,x+Math.cos(a)*w*4,y+Math.sin(a)*(h+15),0x005faad9);point(aura,matrix,x,y,(glow<<24)|0x5faad9);
+   }
+  }else line(g,x,y-h-2,x,y+h+2,w*3,(glow<<24)|0x5faad9);
+  var v=g.bufferSource().getBuffer(RenderType.gui());var m=g.pose().last().pose();
   point(v,m,x,y-h,0xffd5ffff);point(v,m,x-w,y,0xff80b7e3);point(v,m,x,y+h,0xff4282bc);point(v,m,x,y,0xffb8ffff);
   point(v,m,x,y-h,0xffb9ffff);point(v,m,x,y,0xff8bc4f3);point(v,m,x,y+h,0xffd9ffff);point(v,m,x+w,y,0xff568ab2);
   line(g,x,y-h,x-w,y,.7,0xffd6ffff);line(g,x-w,y,x,y+h,.7,0xffb8eaf8);line(g,x,y+h,x+w,y,.7,0xffc6f6ff);line(g,x+w,y,x,y-h,.7,0xffd6ffff);
