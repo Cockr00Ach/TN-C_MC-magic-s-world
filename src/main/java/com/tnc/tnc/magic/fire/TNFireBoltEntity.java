@@ -183,12 +183,12 @@ public final class TNFireBoltEntity extends Projectile {
      * 之后还有 4 tick 的出手缓冲（速度从 30% 涨到全速），
      * 合起来读作「先顿一下、再猛地窜出去」✗
      *
-     * <p>⇒ 现在<b>悬停只留给火龙吐息</b>（见 {@link #hoverTicks}）：
-     * 手扔的火球 / 射线<b>一出生就是全速直线</b>，成长只体现在大小上 ✓
+     * <p>⇒ 作者 2026-10-18 又追加「火龙吐息给不要悬停」⇒ <b>全链一个都不悬停了</b>：
+     * 所有投射物一出生就是等速直线，成长只体现在大小上 ✓
      */
     public static final int FORM_TICKS = 3;
 
-    /** 火龙吐息的成形时长（tick）—— 法阵由外到里描绘 + 龙头渐渐凝出来 ✓（作者要"逐渐出现"✗）。 */
+    /** 火龙吐息的<b>成长</b>时长（tick）—— 粒子龙一节一节凝出来，给足 18 tick 才看得见 ✓（但不再悬停 ✓）。 */
     public static final int DRAGON_FORM_TICKS = 18;
 
     public TNFireBoltEntity(EntityType<? extends TNFireBoltEntity> type, Level level) {
@@ -299,8 +299,8 @@ public final class TNFireBoltEntity extends Projectile {
     /**
      * 这一档的<b>成长时长</b>（tick）—— 只决定渲染器把球从 25% 长到 100% 用多久 ✓
      *
-     * <p>⚠️ 它<b>不再等于"悬停时长"</b>了（作者 2026-10-18「发射过程不流畅」）：
-     * 手扔的火球与射线在成长的这 3 tick 里**已经在飞**，只是球还小 ✓
+     * <p>⚠️ 它<b>不等于"悬停时长"</b>（作者 2026-10-18 全链取消悬停）：
+     * 所有投射物在成长的这 3 tick 里**已经在飞**，只是球还小 ✓
      *
      * <p>陨星坠的陨石直接返回 0 —— 它是从天而降的，不需要"凝形"✓
      */
@@ -308,19 +308,8 @@ public final class TNFireBoltEntity extends Projectile {
         if (skyFall()) {
             return 0;
         }
-        // 火龙吐息：要"在面前渐渐生成法阵 + 龙头成形"，3 tick 太短 ✗ ⇒ 给足 18 tick（0.9 秒）✓
+        // 火龙吐息：粒子龙是一节一节长出来的，给足 18 tick 让"凝形"看得见 ✓（但不再悬停 ✓）
         return isDragon() ? DRAGON_FORM_TICKS : FORM_TICKS;
-    }
-
-    /**
-     * <b>悬停</b>（停在手前不飞、不判定命中）的 tick 数 —— <b>只有火龙吐息是 18</b>，其余一律 0 ✓
-     *
-     * <p>⚠️ 作者 2026-10-18：「火球链和射线链中 t1~t3 的发射过程都不流畅」。
-     * 旧版所有手扔的法术都悬停 {@link #FORM_TICKS} 个 tick 再叠 4 tick 加速，
-     * 看着就是"顿一下 → 突然窜出去"✗。现在只有火龙那种"要当面凝出龙头"的才悬停 ✓
-     */
-    private int hoverTicks() {
-        return isDragon() ? DRAGON_FORM_TICKS : 0;
     }
 
     /**
@@ -379,39 +368,9 @@ public final class TNFireBoltEntity extends Projectile {
     public void tick() {
         super.tick();
 
-        // ---------------- 悬停成形：只有火龙吐息会停在手前 ----------------
-        // ⚠️ 作者 2026-10-18：t1~t3 的发射"不流畅"就是这一段的锅 —— 以前**所有**手扔的法术
-        //    都在这儿钉 3 tick 不动，现在只有火龙（hoverTicks()=18）走这里 ✓
-        if (tickCount <= hoverTicks()) {
-            if (level().isClientSide) {
-                // 往中心收拢的几粒火星 —— "凝聚"的感觉
-                if (tickCount % 2 == 0) {
-                    double r = radius() * (1.5D - formProgress(0.0F));
-                    for (int i = 0; i < 3; i++) {
-                        double a = tickCount * 0.9D + i * Math.PI * 2.0D / 3.0D;
-                        level().addParticle(ParticleTypes.SMALL_FLAME,
-                                getX() + Math.cos(a) * r, getY() + Math.sin(a) * r * 0.6D,
-                                getZ() + Math.sin(a) * r,
-                                -Math.cos(a) * 0.04D, 0.01D, -Math.sin(a) * 0.04D);
-                    }
-                }
-            } else {
-                // ⚠️ 成形期间**别完全钉死**：原来这里一点不挪，球就在手里悬着，
-                //    然后突然满速弹出去 —— 作者说的"产生过程不流畅"就有这一半 ✗
-                //    现在让它一边长大一边**微微向前漂**（12% 速度），读起来像"正在被推出去" ✓
-                if (formTicks() > 0) {
-                    setPos(position().add(getDeltaMovement().scale(0.12D)));
-                }
-                // 长满的那一帧喷一次火星：给"射出去了"一个明确的瞬间。
-                // ⚠️ 这里原来是 `else if (tickCount == FORM_TICKS)` ——
-                //    被上面的 `tickCount <= formTicks()` 整个吃掉了，**从来没触发过** ✗
-                if (tickCount == formTicks()) {
-                    ((ServerLevel) level()).sendParticles(ParticleTypes.FLAME,
-                            getX(), getY(), getZ(), 18, 0.14D, 0.14D, 0.14D, 0.10D);
-                }
-            }
-            return;
-        }
+        // ⚠️ 作者 2026-10-18：**全链都不要悬停** ——
+        //    火球/射线 t1~t3 嫌顿，火龙吐息原来要在手前钉 18 tick 凝形，也一起去掉 ✓
+        //    ⇒ 现在没有任何法术停在手里：一出生就是等速直线，飞出去的同时粒子龙自己长出来 ✓
 
         // ---------------- 客户端：只负责好看 ----------------
         if (level().isClientSide) {
@@ -478,6 +437,12 @@ public final class TNFireBoltEntity extends Projectile {
         }
 
         ServerLevel server = (ServerLevel) level();
+        // 长满的那一帧喷一次火星：给"射出去了"一个明确的瞬间 ✓
+        // （原来挂在"悬停成形"那段里；悬停删掉后挪到这儿，观感保留）
+        if (formTicks() > 0 && tickCount == formTicks()) {
+            server.sendParticles(ParticleTypes.FLAME, getX(), getY(), getZ(),
+                    18, 0.14D, 0.14D, 0.14D, 0.10D);
+        }
         Vec3 from = position();
         Vec3 motion = getDeltaMovement();
         // ⚠️ 作者 2026-10-05：「把锥形追踪删了」✓
