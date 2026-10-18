@@ -44,7 +44,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * <h2>为什么不用「挂在效果上的数值」</h2>
  * 原版 {@code MobEffectInstance} 只带 amplifier / duration，<b>放不下"这一发打了多少"</b>。
  * 而每个敌人身上的焚身数值都可能不同（同一发法术打不同目标、或不同法术打同一目标），
- * 所以数值存在服务端的 {@link #STATES} 里（和 {@code TNFireMechanics.TOTAL_BURN_TRACKER} 同一写法）。
+ * 所以数值存在服务端的 {@link #STATES} 里（和 {@code TNDarkSacrificeMechanics} 的
+ * 服务端状态表同一写法；{@code TNFireMechanics.TOTAL_BURN_TRACKER} 已于 2026-10-11 随火系重做删除）。
  * 原版效果本体只负责<b>图标与被动的时长显示</b>。
  *
  * <h2>谁调用 {@link #apply}</h2>

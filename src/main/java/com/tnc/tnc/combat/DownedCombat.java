@@ -193,9 +193,9 @@ public final class DownedCombat {
             data(p).putBoolean("downed",false);release(p);RESCUES.remove(p.getUUID());
             WIPING.add(p.getUUID());
             try {
-                // Bypass secondary resurrection for the explicitly requested whole-party defeat.
-                p.removeEffect(com.tnc.tnc.magic.TNFireMechanics.BLAZE_BURN.get());
-                p.removeEffect(com.tnc.tnc.magic.TNFireMechanics.INFERNO_BURN.get());
+                // 这里原来要先剥掉火系燃烧线的"原地复活"（BLAZE_BURN / INFERNO_BURN），
+                // 否则全队倒地会被那两档拦下来。2026-10-11 燃烧线重做后**已经没有复活**，
+                // 所以那两行删掉了 ✓（暗系献祭线仍有复活，属于另一条链的事，本处不管）。
                 p.setHealth(0);p.die(p.damageSources().genericKill());
             } finally {WIPING.remove(p.getUUID());send(p,0,0,"全队倒地",p.getId());}
         }

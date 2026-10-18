@@ -569,8 +569,10 @@ public final class TnSpellMechanics {
         // 真的放出去了 ⇒ 消掉"放行了却没放出来"的哑火待定项 ✓（见 ManaGate.PENDING）
         ManaGate.noteCastHappened(player);
 
-        // ⚠️ 2026-10-05：火系的"施法瞬间"机制（自爆）已随火球链重做删除（那一档换成了熔岳天倾），
-        //    所以这里不再调 TNFireMechanics.onSpellCast —— 燃烧线现在只有每 tick 的维护。
+        // ⚠️ 2026-10-05：火系的"施法瞬间"机制（自爆）已随火球链重做删除（那一档换成了熔岳天倾）。
+        //    2026-10-11 燃烧线又整条重做成"以伤换伤"（{@link TNFireMechanics}）——
+        //    它的两半（火伤加成 / 挨打加成）都靠效果本身 + 伤害事件，**不需要施法瞬间的钩子** ✓，
+        //    所以这里仍然不调 TNFireMechanics。
         com.tnc.tnc.magic.water.TNWaterSpellEntity.cast(player, spellId);
         com.tnc.tnc.magic.water.TNWaterFieldEntity.cast(player, spellId);
         com.tnc.tnc.magic.water.ChaosSilence.cast(player, spellId);

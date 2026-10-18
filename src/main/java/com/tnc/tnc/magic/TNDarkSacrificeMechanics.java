@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * <ul>
  *   <li>暗系法术**一点都吃不到**那个加成 ⇒ "烧自己的血"换来的对暗系毫无用处 ✗；</li>
  *   <li>更糟的是 `tnc:fire_aspect` 在火系里是"<b>不燃血</b>"档
- *       （见 {@code TNFireMechanics.burnPercentPerSecond}）⇒ <b>t1 连血都不掉</b> ✗；</li>
+ *       （当时见 {@code TNFireMechanics.burnPercentPerSecond}；火系 2026-10-11 重做后该方法已删）⇒ <b>t1 连血都不掉</b> ✗；</li>
  *   <li>`tnc:total_burn`（我为神）把血锁在 1 还**给了无敌**，而它本来加的火伤对暗系是 0 ✗
  *       ⇒ t5 成了纯白嫖。</li>
  * </ul>
@@ -48,10 +48,16 @@ import java.util.concurrent.ConcurrentHashMap;
  * 所以放一次 t2 会把 t1 的 +10% 顶掉，不会出现"四档加成全叠在身上"。这一点是这次特意确认的 ✓。
  *
  * <h2>和火系那条链的关系</h2>
- * 两条链**各自独立、数值相同、加成分属不同学派** ✓ —— 燃血判定看的是各自那组效果，
- * 所以同时挂着火系燃烧和暗系献祭时，只有高的那个在扣血 ✓（不会翻倍）。
- * 共用的是 {@link TNFireMechanics#burnPercentPerSecond} 那条"永不致死"的规则 ✓
- * （保底留 1 点，作者当初确认过的 ✓）。
+ * 两条链**各自独立、加成分属不同学派** ✓ —— 燃血判定只看暗系自己那组效果，
+ * 所以同时挂着火系燃烧和暗系献祭时，只有暗系那份在扣血 ✓（不会翻倍）。
+ *
+ * <p>⚠️ 2026-10-11 火系燃烧线<b>整条重做</b>（燎肤/灼脉/焚元/烬魂/殉命）：它现在
+ * <b>不再燃血、不再原地复活、不再血锁无敌</b>，代价换成"自身受到的一切伤害 +10%~+80%"
+ * （见 {@link TNFireMechanics}）⇒ 两条链连<b>代价的形式</b>都不同了：
+ * 暗系按秒扣血、火系挨打更疼 ✓，各算各的，同时挂着就是两份代价（两套 buff 两套代价 ✓）。
+ *
+ * <p>沿用的旧规则只剩一条：<b>扣血永不致死、保底留 1 点</b> ✓（作者当初确认过的 ✓）。
+ * 那条"永不致死"的实现现在只在本类里（火系已经用不上了）。
  */
 @Mod.EventBusSubscriber(modid = TNMod.MODID)
 public final class TNDarkSacrificeMechanics {
