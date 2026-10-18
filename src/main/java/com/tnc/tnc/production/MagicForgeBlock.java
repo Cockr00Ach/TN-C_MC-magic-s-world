@@ -77,6 +77,7 @@ public final class MagicForgeBlock extends BaseEntityBlock {
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
                                  InteractionHand hand, BlockHitResult hit) {
+        if(player.getItemInHand(hand).getItem() instanceof com.tnc.tnc.life.routes.CreativeManaPrismItem)return InteractionResult.PASS;
         if (level.isClientSide) return InteractionResult.SUCCESS;
         if (!(player instanceof ServerPlayer serverPlayer)
                 || !(level.getBlockEntity(pos) instanceof MagicForgeBlockEntity forge)) return InteractionResult.PASS;

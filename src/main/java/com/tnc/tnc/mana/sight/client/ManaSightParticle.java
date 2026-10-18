@@ -11,19 +11,6 @@ import net.minecraft.world.phys.Vec3;
 
 /** Soft textured grains go through Minecraft/Oculus' ordinary transparent particle pipeline. */
 final class ManaSightParticle extends TextureSheetParticle {
-    // Native atlas and shader. Oculus 1.8 queues unknown types in BOTH phases; omit opaque geometry.
-    // Additive blend gives luminous feathered edges instead of dark smoke halos in daylight.
-    private static boolean skipOpaque;
-    private static final ParticleRenderType GLOW=new ParticleRenderType(){
-        public void begin(com.mojang.blaze3d.vertex.BufferBuilder b,net.minecraft.client.renderer.texture.TextureManager t){
-            skipOpaque=ManaParticleShaderCompat.opaquePass();
-            ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT.begin(b,t);
-            com.mojang.blaze3d.systems.RenderSystem.depthMask(false);
-            com.mojang.blaze3d.systems.RenderSystem.blendFunc(com.mojang.blaze3d.platform.GlStateManager.SourceFactor.SRC_ALPHA,com.mojang.blaze3d.platform.GlStateManager.DestFactor.ONE);
-        }
-        public void end(com.mojang.blaze3d.vertex.Tesselator t){t.end();com.mojang.blaze3d.systems.RenderSystem.defaultBlendFunc();com.mojang.blaze3d.systems.RenderSystem.depthMask(true);}
-        public String toString(){return "TN_C_MANA_SIGHT_PARTICLES";}
-    };
     final long born;
     private final Vec3 start,target;
     private final double phase,radius,angle;
@@ -41,7 +28,7 @@ final class ManaSightParticle extends TextureSheetParticle {
         setColor((color>>16&255)/255f,(color>>8&255)/255f,(color&255)/255f);setSprite(sprites.get(texture,2));
     }
     double distanceToSqr(Vec3 at){return at.distanceToSqr(x,y,z);}
-    @Override public ParticleRenderType getRenderType(){return GLOW;}
+    @Override public ParticleRenderType getRenderType(){return ManaRadiance.TYPES[Math.floorMod((int)phase,2)];}
     @Override protected int getLightColor(float partial){return LightTexture.FULL_BRIGHT;}
     @Override public void tick(){
         xo=x;yo=y;zo=z;oRoll=roll;
@@ -59,9 +46,17 @@ final class ManaSightParticle extends TextureSheetParticle {
         roll=(float)(phase+age*.005);
     }
     @Override public void render(VertexConsumer out,Camera camera,float partial){
-        if(skipOpaque||sightOnly&&!ManaSightClient.enabled()||Minecraft.getInstance().level!=level)return;
-        float previous=alpha;double d=camera.getPosition().distanceTo(new Vec3(x,y,z));
-        alpha*=(sightOnly?ManaSightParticles.fade():1)*Mth.clamp((float)((48-d)/10),0,1)*Mth.clamp((float)((d-.35)/1.1),0,1);
-        if(alpha>.01f)super.render(out,camera,partial);alpha=previous;
+        if(ManaRadiance.skipOpaque||sightOnly&&!ManaSightClient.enabled()||Minecraft.getInstance().level!=level)return;
+        float previous=alpha;double d=camera.getPosition().distanceTo(new Vec3(x,y,z)),range=sightOnly?ManaSightParticles.range():64;
+        alpha*=(sightOnly?ManaSightParticles.fade():1)*Mth.clamp((float)((range-d)/18),0,1)*Mth.clamp((float)((d-.35)/1.1),0,1);
+        if(alpha>.01f)renderRadiant(out,camera,partial,(float)d);alpha=previous;
+    }
+    private void renderRadiant(VertexConsumer out,Camera camera,float partial,float distance){
+        var eye=camera.getPosition();float px=(float)(Mth.lerp(partial,xo,x)-eye.x),py=(float)(Mth.lerp(partial,yo,y)-eye.y),pz=(float)(Mth.lerp(partial,zo,z)-eye.z);
+        var rotation=new org.joml.Quaternionf(camera.rotation()).rotateZ(Mth.lerp(partial,oRoll,roll));
+        float scale=getQuadSize(partial)*(sightOnly?Mth.clamp(.85f+distance/60,1,2):1);
+        org.joml.Vector3f[] corners={new org.joml.Vector3f(-1,-1,0),new org.joml.Vector3f(-1,1,0),new org.joml.Vector3f(1,1,0),new org.joml.Vector3f(1,-1,0)};
+        float[] us={getU1(),getU1(),getU0(),getU0()},vs={getV1(),getV0(),getV0(),getV1()};
+        for(int i=0;i<4;i++){var v=corners[i].rotate(rotation).mul(scale);out.vertex(px+v.x,py+v.y,pz+v.z).color(rCol,gCol,bCol,alpha).uv(us[i],vs[i]).overlayCoords(net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY).uv2(LightTexture.FULL_BRIGHT).normal(0,1,0).endVertex();}
     }
 }

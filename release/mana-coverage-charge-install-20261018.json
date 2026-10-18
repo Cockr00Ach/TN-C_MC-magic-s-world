@@ -1,0 +1,53 @@
+{
+  "installed_at": "2026-10-18T16:31:42.686123",
+  "live": "D:\\垃圾桶\\PCL 正式版 2.9.3\\.minecraft\\versions\\元素觉醒1.4.3-魔改版-20260915",
+  "jar_sha256": "cb397a9cadc941fdec52bcd7bee49942a6c68047dea513ee2f07336d92f410af",
+  "jar_bytes": 110049817,
+  "unit_tests": 268,
+  "game_tests": 47,
+  "native_reports": {
+    "shader": {
+      "failures": [],
+      "max_particles": 18128,
+      "max_native_particles": 18064,
+      "max_actual_flows": 8,
+      "emitted_transfer_particles": 39880,
+      "screenshots": 10,
+      "max_distance": 105.25688568386538,
+      "configured_range": 96,
+      "particle_limit": 24000,
+      "charger_manual_received": 20,
+      "infuser_manual_received": 20,
+      "mech_and_mirror_scenes": false,
+      "motion_frames": 60,
+      "shader_pack": "ComplementaryUnbound_r5.6.1",
+      "oculus_opaque_passes_skipped": 4950,
+      "scope": "Isolated actual Minecraft client rendering and server-confirmed machine flow"
+    },
+    "vanilla": {
+      "failures": [],
+      "max_particles": 18070,
+      "max_native_particles": 18008,
+      "max_actual_flows": 8,
+      "emitted_transfer_particles": 29466,
+      "screenshots": 10,
+      "max_distance": 106.64164925746127,
+      "configured_range": 96,
+      "particle_limit": 24000,
+      "charger_manual_received": 20,
+      "infuser_manual_received": 20,
+      "mech_and_mirror_scenes": false,
+      "motion_frames": 60,
+      "shader_pack": "none",
+      "oculus_opaque_passes_skipped": 0,
+      "scope": "Isolated actual Minecraft client rendering and server-confirmed machine flow"
+    }
+  },
+  "protected_quest_files_unchanged": 42,
+  "replaced_chapters": [],
+  "backup": "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\work\\backups\\mana-coverage-charge-20261018-163142",
+  "saves_modified": false,
+  "island_templates_modified": false,
+  "shader_files_modified": false,
+  "test_item": "tnc:creative_mana_prism"
+}

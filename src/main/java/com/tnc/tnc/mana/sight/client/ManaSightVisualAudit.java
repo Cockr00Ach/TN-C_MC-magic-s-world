@@ -19,8 +19,10 @@ public final class ManaSightVisualAudit {
     private static boolean started,captured;
     private static volatile boolean ready;
     private static volatile boolean saving;
-    private static int ticks,stage,frames,maxParticles,maxFlows;
+    private static int ticks,stage,frames,maxParticles,maxFlows,maxNativeParticles;
     private static final List<String> failures=new ArrayList<>();
+    private static double maxDistance;private static volatile int charged,infused,checkedChargeStage=-1;private static int requestedChargeStage=-1;private static volatile net.minecraft.core.BlockPos chargePos;
+    private static final boolean CHARGE=Boolean.getBoolean("tnc.chargeAudit");
     private static final boolean MECH=Boolean.getBoolean("tnc.mechAudit");
     private static net.minecraft.world.entity.monster.Zombie target;
     private static Path folder(){return Path.of(System.getProperty("tnc.manaSightAuditOutput","../work/mana-sight-particles-audit")).toAbsolutePath();}
@@ -30,18 +32,23 @@ public final class ManaSightVisualAudit {
         if(mc.level==null||mc.player==null||mc.getOverlay()!=null)return;
         if(!started){started=true;Files.createDirectories(folder());mc.setScreen(null);mc.getTutorial().setStep(net.minecraft.client.tutorial.TutorialSteps.NONE);mc.options.guiScale().set(2);mc.options.pauseOnLostFocus=false;mc.resizeDisplay();setup(mc);return;}
         if(!ready||saving)return;
-        ++ticks;maxParticles=Math.max(maxParticles,ManaSightParticles.count());maxFlows=Math.max(maxFlows,ManaSightClient.activeCount());
-        if(ManaSightParticles.count()>5200)failures.add("Particle hard cap exceeded");
-        int delay=switch(stage){case 0,6->40;case 1->25;case 12,14->12;case 13->25;default->100;};
+        ++ticks;maxNativeParticles=Math.max(maxNativeParticles,Integer.parseInt(mc.particleEngine.countParticles()));maxParticles=Math.max(maxParticles,ManaSightParticles.count());maxFlows=Math.max(maxFlows,ManaSightClient.activeCount());
+        maxDistance=Math.max(maxDistance,ManaSightParticles.farthest());
+        if(ManaSightParticles.count()>ManaSightParticles.limit())failures.add("Particle hard cap exceeded");
+        int delay=switch(stage){case 0,6->40;case 1->25;case 12,14->12;case 13->25;case 8,9->100;default->60;};
         if(ticks==20)mc.gui.getChat().clearMessages(false);
+        if(CHARGE&&stage>=8&&ticks==25&&mc.screen instanceof RouteClient.Screen screen){if(screen.getMenu().kind()!=(stage==8?RouteKind.CHARGER:RouteKind.INFUSER))failures.add("Incorrect kind at GUI init");mc.gameMode.handleInventoryButtonClick(screen.getMenu().containerId,0);}
         if(stage==3&&ticks%2==0&&frames<60){grab(mc,"motion-"+String.format("%03d",frames++)+".png");return;}
         if(ticks<delay||stage==3&&frames<60)return;
-        if(!captured){grab(mc,stage+"-"+new String[]{"normal","activation","daylight","motion","transfer","night","off","reenter","mech-front","mech-back","mech-firstperson-fire","mech-barrier","mech-dash","mech-overdrive","mech-nova","paired-mirrors"}[stage]+".png");captured=true;return;}
+        if(!captured){grab(mc,stage+"-"+(CHARGE&&stage>=8?(stage==8?"charger-manual":"infuser-manual"):new String[]{"normal","activation","daylight","motion","transfer","night","off","reenter","mech-front","mech-back","mech-firstperson-fire","mech-barrier","mech-dash","mech-overdrive","mech-nova","paired-mirrors"}[stage])+".png");captured=true;return;}
         if(stage==6&&ManaSightParticles.sightCount()!=0)failures.add("Owned particles survived toggle off");
-        if(++stage==(MECH?16:8)){
+        if(CHARGE&&stage>=8){if(requestedChargeStage!=stage){int phase=stage;requestedChargeStage=phase;mc.getSingleplayerServer().execute(()->{var l=mc.getSingleplayerServer().getPlayerList().getPlayers().get(0).serverLevel();var be=(RouteNodeEntity)l.getBlockEntity(chargePos);if(be==null)failures.add("Charge fixture missing");else if(phase==8)charged=RouteChargeLedger.get(l).amount(be.inventory.getItem(0));else infused=be.mana;checkedChargeStage=phase;});}if(checkedChargeStage!=stage)return;}
+        if(++stage==(CHARGE?10:MECH?16:8)){
+            if(maxParticles<16000||maxNativeParticles<16000||maxDistance<72)failures.add("Expanded particle field insufficient");
+            if(CHARGE&&(charged<=0||infused<=0))failures.add("Manual charging GUI did not transfer real mana");
             if(maxParticles<300)failures.add("Particle field failed to populate");
             if(maxFlows==0||ManaSightParticles.emittedTransfers()==0)failures.add("No server-confirmed transfer particles");
-            var report=new LinkedHashMap<String,Object>();report.put("failures",failures);report.put("max_particles",maxParticles);report.put("max_actual_flows",maxFlows);report.put("emitted_transfer_particles",ManaSightParticles.emittedTransfers());report.put("screenshots",MECH?16:8);report.put("mech_and_mirror_scenes",MECH);report.put("motion_frames",frames);report.put("shader_pack",System.getProperty("tnc.manaSightAuditShader","none"));report.put("oculus_opaque_passes_skipped",ManaParticleShaderCompat.skippedOpaquePasses);report.put("scope","Isolated actual Minecraft client rendering and server-confirmed machine flow");
+            var report=new LinkedHashMap<String,Object>();report.put("failures",failures);report.put("max_particles",maxParticles);report.put("max_native_particles",maxNativeParticles);report.put("max_actual_flows",maxFlows);report.put("emitted_transfer_particles",ManaSightParticles.emittedTransfers());report.put("screenshots",CHARGE?10:MECH?16:8);report.put("max_distance",maxDistance);report.put("configured_range",ManaSightParticles.range());report.put("particle_limit",ManaSightParticles.limit());report.put("charger_manual_received",charged);report.put("infuser_manual_received",infused);report.put("mech_and_mirror_scenes",MECH);report.put("motion_frames",frames);report.put("shader_pack",System.getProperty("tnc.manaSightAuditShader","none"));report.put("oculus_opaque_passes_skipped",ManaParticleShaderCompat.skippedOpaquePasses);report.put("scope","Isolated actual Minecraft client rendering and server-confirmed machine flow");
             Files.writeString(folder().resolve("report.json"),new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(report));mc.stop();return;
         }
         ticks=0;captured=false;
@@ -49,9 +56,12 @@ public final class ManaSightVisualAudit {
         if(stage==4)mc.getSingleplayerServer().execute(()->mc.getSingleplayerServer().getPlayerList().getPlayers().get(0).connection.teleport(1028.5,223,1035.5,180,25));
         if(stage==5)mc.getSingleplayerServer().execute(()->{mc.getSingleplayerServer().overworld().setDayTime(18000);mc.getSingleplayerServer().getPlayerList().getPlayers().get(0).connection.teleport(1028.5,223,1041.5,180,-5);});
         if(stage==6)ManaSightClient.setEnabled(false);
-        if(MECH&&stage>=8)mechStage(mc);
+        if(CHARGE&&stage>=8)chargeStage(mc);else if(MECH&&stage>=8)mechStage(mc);
 
     }
+    private static void chargeStage(Minecraft mc){mc.setScreen(null);ManaSightClient.setEnabled(false);mc.getSingleplayerServer().execute(()->{
+        var p=mc.getSingleplayerServer().getPlayerList().getPlayers().get(0);var l=p.serverLevel();var pos=new BlockPos(1031,221,1034);chargePos=pos;var kind=stage==8?RouteKind.CHARGER:RouteKind.INFUSER;l.setBlock(pos,RouteContent.NODES.get(kind.id).get().defaultBlockState(),3);var n=(RouteNodeEntity)l.getBlockEntity(pos);n.owner=p.getUUID();n.mana=0;n.inventory.clearContent();n.inventory.setItem(0,new ItemStack(stage==8?RouteContent.item("mana_mech"):net.minecraft.world.item.Items.GLASS_BOTTLE));p.connection.teleport(1031.5,222,1036.5,180,20);var stone=com.tnc.tnc.magic.MagicStone.getOrNull(p);stone.addMana(100);net.minecraftforge.network.NetworkHooks.openScreen(p,n,b->{b.writeBlockPos(pos);b.writeVarInt(kind.ordinal());});
+    });}
     private static void mechStage(Minecraft mc){
         if(stage==8){
             var gun=new ItemStack(RouteContent.item("mech_spellgun"));

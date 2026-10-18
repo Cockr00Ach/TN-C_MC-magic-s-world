@@ -135,6 +135,7 @@ minecraft {
                 property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
                 property 'tnc.manaSightAudit', 'true'
                 if (project.hasProperty('mechAudit')) property 'tnc.mechAudit', 'true'
+                if (project.hasProperty('chargeAudit')) property 'tnc.chargeAudit', 'true'
                 property 'tnc.manaSightAuditOutput', file('work/mana-sight-particles-audit').absolutePath
                 args '--quickPlaySingleplayer', 'ecology-gui-feedback', '--width', '1600', '--height', '900'
                 jvmArgs '-Xmx6G'

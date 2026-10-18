@@ -455,5 +455,6 @@
   "key.categories.tnc_mech": "Skyward Armor",
   "key.tnc.mech_dash": "Thruster dash / Sneak: nova",
   "key.tnc.mech_shield": "Refractive barrier",
-  "key.tnc.mech_overdrive": "Star-core overdrive"
+  "key.tnc.mech_overdrive": "Star-core overdrive",
+  "item.tnc.creative_mana_prism": "Creative Mana Prism (Testing)"
 }
