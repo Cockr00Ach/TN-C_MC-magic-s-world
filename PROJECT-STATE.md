@@ -1589,17 +1589,22 @@ TN-C effects registered: [tnc:lightning_haste, tnc:lightning_wind, tnc:orbiting_
 
 #### 4.21.2 数值（都在 `TNFireMechanics` 顶部两张表）
 
-| 档 | 法术 | 效果 id | 火系法术伤害 | 自身受到伤害 |
-|---|---|---|---|---|
-| 1 | 燎肤 | `fire_aspect` | +10% | +10% |
-| 2 | 灼脉 | `ember_burn` | +25% | +20% |
-| 3 | 焚元 | `blaze_burn` | +75% | +35% |
-| 4 | 烬魂 | `inferno_burn` | +150% | +55% |
-| 5 | 殉命 | `total_burn` | +200% | +80% |
+| 档 | 法术 | 效果 id | 火系法术伤害 | 自身受到伤害 | 结束后反噬（最大生命） |
+|---|---|---|---|---|---|
+| 1 | 燎肤 | `fire_aspect` | +10% | +10% | 20% |
+| 2 | 灼脉 | `ember_burn` | +25% | +20% | 40% |
+| 3 | 焚元 | `blaze_burn` | +75% | +35% | 60% |
+| 4 | 烬魂 | `inferno_burn` | +150% | +55% | 80% |
+| 5 | 殉命 | `total_burn` | +200% | +80% | 100% |
 
 - **火伤**走属性 `spell_power:fire`（`AttributeModifier.Operation.MULTIPLY_BASE`），**只加火系**
 - **受伤**走 `LivingHurtEvent`：`amount` 已经是过完护甲/抗性的最终伤害 ⇒ 轻甲重甲都是同一个百分比
-- 两半都**取身上最高的那一档、不叠加**（`apply_mode: SET` 也保证不会两档同时挂着）
+- **结束反噬**：效果**自然结束**那一刻扣"最大生命 × 比例"，**永不致死**（保底留 1 点），
+  随后给 **抗性提升 V 3 秒**（= 100% 减伤，即无敌）。
+  判定靠每 tick 比对"上一 tick 还挂着哪一档"，不用 `MobEffectEvent.Expired/Remove`
+  （1.20.1 两者会重复触发 ⇒ 会结算两次）；观察者/创造模式跳过。
+  扣血走 `hurt()` 而非 `setHealth()`（后者绕过受伤窗口，连打会被静默丢弃）
+- 三半都**取身上最高的那一档、不叠加**（`apply_mode: SET` 也保证不会两档同时挂着）
 - **效果 id 一个没改**（KubeJS 那 5 个法术 json 按 id 引用效果），改的只有**显示名**与**机制**
 - **（2026-10-11 移除）** 燃血 / 原地复活 / 完全燃烧血锁无敌 —— 理由见上；
   一并删掉断言"火系复活优先于倒地"的 GameTest `fireRevivalTakesPrecedenceInRealEventBusOrder`

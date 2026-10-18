@@ -228,8 +228,9 @@ public final class SpellCatalog {
             fireEntry("meteor_fall", Chain.BALL, 5, "陨星坠"),
 
             // ---- 燃烧线（2026-10-11 重做）：以伤换伤 —— 火伤越高，自己挨打越疼
-            //   1 燎肤(+10%火伤/+10%受伤) → 2 灼脉(+25%/+20%) → 3 焚元(+75%/+35%)
-            //   → 4 烬魂(+150%/+55%) → 5 殉命(+200%/+80%) ----
+            //   1 燎肤(+10%火伤/+10%受伤/结束反噬20%最大生命) → 2 灼脉(+25%/+20%/40%)
+            //   → 3 焚元(+75%/+35%/60%) → 4 烬魂(+150%/+55%/80%) → 5 殉命(+200%/+80%/100%)
+            //   反噬永不致死（保底 1 点血），随后 3 秒无敌；见 TNFireMechanics#backfire ----
             fireEntry("fire_aspect", Chain.BURN, 1, "燎肤"),
             fireEntry("ember_burn", Chain.BURN, 2, "灼脉"),
             fireEntry("blaze_burn", Chain.BURN, 3, "焚元"),
