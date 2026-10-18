@@ -678,5 +678,8 @@
   "block.tnc.light_boss_runestone_5": "圣光·日轮纹石·5阶",
   "block.tnc.light_boss_runestone_6": "圣光·日轮纹石·6阶",
   "block.tnc.light_boss_runestone_7": "圣光·日轮纹石·7阶",
-  "block.tnc.light_boss_runestone_8": "圣光·日轮纹石·8阶"
+  "block.tnc.light_boss_runestone_8": "圣光·日轮纹石·8阶",
+  "item.tnc.earth_arena_keystone": "地核战场钥石",
+  "dimension.tnc.earth_arena": "地核群山",
+  "biome.tnc.earth_arena": "地核群山"
 }

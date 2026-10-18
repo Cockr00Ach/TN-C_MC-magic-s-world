@@ -1,0 +1,15 @@
+{
+  "has_precipitation": false,
+  "temperature": 1.5,
+  "downfall": 0,
+  "effects": {
+    "sky_color": 13212227,
+    "fog_color": 13346409,
+    "water_color": 10388057,
+    "water_fog_color": 6700065
+  },
+  "spawners": {},
+  "spawn_costs": {},
+  "carvers": {},
+  "features": []
+}

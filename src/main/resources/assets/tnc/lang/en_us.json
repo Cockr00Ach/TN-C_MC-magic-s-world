@@ -505,5 +505,8 @@
   "block.tnc.light_boss_runestone_5": "Radiant Halo Runestone 5",
   "block.tnc.light_boss_runestone_6": "Radiant Halo Runestone 6",
   "block.tnc.light_boss_runestone_7": "Radiant Halo Runestone 7",
-  "block.tnc.light_boss_runestone_8": "Radiant Halo Runestone 8"
+  "block.tnc.light_boss_runestone_8": "Radiant Halo Runestone 8",
+  "item.tnc.earth_arena_keystone": "Earth Arena Keystone",
+  "dimension.tnc.earth_arena": "Earthcore Mountains",
+  "biome.tnc.earth_arena": "Earthcore Mountains"
 }
