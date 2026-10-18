@@ -27,20 +27,22 @@ import org.joml.Matrix4f;
  *       不会转个身就变成一张纸 ✗；</li>
  *   <li><b>外焰壳</b>：比主火圈更外、更矮、更透的一层，<b>反向自转</b> ⇒ 火焰有前后层次、有厚度；</li>
  *   <li><b>内芯</b>：贴身处几簇更矮更亮的火，视线穿过外焰能看到，"人被包住"；</li>
- *   <li><b>螺旋火舌</b>：t3 起从脚边盘升到头顶的连续带（每段扭转、宽度渐细、顶端渐隐）；</li>
+ *   <li><b>上升火柱</b>：t3 起多出来的一根「火焰绕着人往上烧」的柱子 —— 一圈往上爬的火苗
+ *       + 两条对缠的螺旋火带，柱高烧过头顶，越高越细越淡。作者 2026-10-18：
+ *       「燃烧链的特效重复度过高，要求 t3 后面的法术有火焰围绕人物上升的效果」；</li>
  *   <li><b>火星</b>：几何体做的小火片往上飘（按 age 取模循环，相位由序号算死 ⇒ 不闪）；</li>
  *   <li><b>两圈冲击环</b>：起手第 0~5 tick 一圈往外撑开的亮环；<b>释放</b>最后 4 tick 再来一圈更大的
  *       + 整团火膨胀 —— "放出去"那一下才有动作。</li>
  * </ol>
  *
- * <h2>档位表（5 档，规模逐档变大）</h2>
+ * <h2>档位表（5 档，规模逐档变大；t3 起多一根上升火柱）</h2>
  * <pre>
- *   档  主火簇  圈半径  火苗高  火苗宽  外焰壳  内芯  火舌  火星
- *   1     5     0.56    0.80    0.34     -      -     -     3
- *   2     7     0.67    0.97    0.39     5      -     -     6
- *   3     9     0.79    1.15    0.43     7      3     2     9
- *   4    11     0.90    1.32    0.47     9      5     3    12
- *   5    13     1.02    1.50    0.52    11      7     4    15
+ *   档  主火簇  圈半径  火苗高  火苗宽  外焰壳  内芯   火柱(苗数/柱高/圈数)  火星
+ *   1     5     0.56    0.80    0.34     -      -           -              3
+ *   2     7     0.67    0.97    0.39     5      -           -              6
+ *   3     9     0.79    1.15    0.43     7      3    10 / 1.85 / 0.85       9
+ *   4    11     0.90    1.32    0.47     9      5    14 / 2.37 / 1.70      12
+ *   5    13     1.02    1.50    0.52    11      7    18 / 2.90 / 2.55      15
  * </pre>
  *
  * <h2>为什么分两个 {@link RenderType}</h2>
@@ -138,9 +140,10 @@ public final class TNBurnAuraRenderer extends EntityRenderer<TNBurnAuraEntity> {
             }
         }
 
-        // ⑤ 螺旋火舌（t3 起）：从脚边盘到头顶
+        // ⑤ 上升火柱（t3 起）：火苗绕着身体往上爬，越高越细越淡
+        //    作者 2026-10-18：「燃烧链的特效重复度过高，要求 t3 后面的法术有火焰围绕人物上升的效果」✓
         if (tier >= 3) {
-            ribbons(glow, pose, age, tier, ringR, baseH);
+            risingColumn(solid, glow, pose, age, tier, baseH, grow);
         }
 
         // ⑥ 火星（几何体小片，往上飘）
@@ -218,6 +221,19 @@ public final class TNBurnAuraRenderer extends EntityRenderer<TNBurnAuraEntity> {
      */
     private static void flame(VertexConsumer out, Matrix4f pose, double a, double ringR,
                               double w, double h, double lean, float alpha) {
+        flameAt(out, pose, a, ringR, w, h, lean, 0.0D, 1.0F, 1.0F, 1.0F, alpha);
+    }
+
+    /**
+     * 同 {@link #flame}，但可以<b>从 y 高度起始</b>（火柱里往上爬的火苗）并<b>带一个色偏</b>
+     * （越高档越白热 ⇒ 五档一眼能分出强弱，不是同一团火换个大小 ✗）。
+     *
+     * @param yBase 这簇火的根部高度（0 = 地面）
+     * @param tr    颜色乘数（贴图本身是白芯橙边，乘上去就偏色）
+     */
+    private static void flameAt(VertexConsumer out, Matrix4f pose, double a, double ringR,
+                                double w, double h, double lean, double yBase,
+                                float tr, float tg, float tb, float alpha) {
         double cx = Math.cos(a) * ringR;
         double cz = Math.sin(a) * ringR;
         double rx = Math.cos(a);
@@ -234,8 +250,8 @@ public final class TNBurnAuraRenderer extends EntityRenderer<TNBurnAuraEntity> {
                 double t1 = (seg + 1) / 3.0D;
                 double hw0 = w * 0.5D * taper(t0);
                 double hw1 = w * 0.5D * taper(t1);
-                double y0 = h * t0;
-                double y1 = h * t1;
+                double y0 = yBase + h * t0;
+                double y1 = yBase + h * t1;
                 double o0 = lean * t0 * t0;
                 double o1 = lean * t1 * t1;
                 // v 从 1（火根）到 0（火尖），按段取对应的一小截贴图
@@ -246,7 +262,7 @@ public final class TNBurnAuraRenderer extends EntityRenderer<TNBurnAuraEntity> {
                         cx + ux * hw0 + rx * o0, y0, cz + uz * hw0 + rz * o0,
                         cx + ux * hw1 + rx * o1, y1, cz + uz * hw1 + rz * o1,
                         cx + ux * -hw1 + rx * o1, y1, cz + uz * -hw1 + rz * o1,
-                        0.04F, v0, 0.96F, v1, 1.0F, 1.0F, 1.0F, alpha);
+                        0.04F, v0, 0.96F, v1, tr, tg, tb, alpha);
             }
         }
     }
@@ -256,38 +272,72 @@ public final class TNBurnAuraRenderer extends EntityRenderer<TNBurnAuraEntity> {
         return 1.0D - 0.85D * Math.pow(t, 0.7D);
     }
 
-    // ------------------------------------------------------------------ ⑤ 螺旋火舌
+    // ------------------------------------------------------------------ ⑤ 上升火柱
 
-    /** 从脚边绕到头顶的连续火带：每段一段扭转、宽度渐细、alpha 往上衰减。 */
-    private static void ribbons(VertexConsumer out, Matrix4f pose, double age, int tier,
-                                double ringR, double baseH) {
-        int count = tier - 1;                      // 2 / 3 / 4
-        int segs = 7;
-        for (int r = 0; r < count; r++) {
-            double base = -age * 0.09D + r * Math.PI * 2.0D / count;
-            double topH = baseH * 1.55D;
-            for (int s = 0; s < segs; s++) {
-                double t0 = s / (double) segs;
-                double t1 = (s + 1) / (double) segs;
-                double a0 = base + t0 * 1.5D;
-                double a1 = base + t1 * 1.5D;
-                double r0 = ringR * (0.82D + 0.30D * t0);
-                double r1 = ringR * (0.82D + 0.30D * t1);
-                double hw0 = 0.075D * (1.0D - 0.75D * t0);
-                double hw1 = 0.075D * (1.0D - 0.75D * t1);
+    /**
+     * t3 起的「火焰绕着人往上烧」：<b>一圈往上爬的火苗</b> + <b>两条对缠的螺旋火带</b>。
+     *
+     * <p>作者 2026-10-18：「燃烧链的特效重复度过高，要求 t3 后面的法术有火焰围绕人物上升的效果」。
+     * ⇒ 五档不再只是"同一团火放大"，t3 起多出这根<b>会往上走的火柱</b>：
+     * <ul>
+     *   <li>柱高 {@code 1.85 / 2.37 / 2.90} 格 —— 玩家 1.8 格，t4/t5 的火会烧过头顶；</li>
+     *   <li>火苗数 {@code 10 / 14 / 18}，每根按自己的相位从脚边爬到柱顶再"被空气吃掉"（越高越细越淡）；</li>
+     *   <li>整根柱子缓慢自转、同时越往上越往内收，绕的圈数 {@code 0.85 / 1.70 / 2.55} 圈；</li>
+     *   <li>配色往白热推（t3 橙 → t5 白亮）⇒ 一眼看出档次。</li>
+     * </ul>
+     */
+    private static void risingColumn(VertexConsumer solid, VertexConsumer glow, Matrix4f pose,
+                                     double age, int tier, double baseH, double grow) {
+        int strips = 10 + (tier - 3) * 4;                       // 10 / 14 / 18
+        double colH = (baseH * 1.55D + (tier - 3) * 0.55D) * grow;   // ≈1.85 / 2.37 / 2.90
+        double colR = (0.42D + tier * 0.055D) * grow;           // ≈0.59 / 0.64 / 0.70
+        double turns = 0.85D + (tier - 3) * 0.85D;              // 0.85 / 1.70 / 2.55 圈
+        // 越高档越白热：t5 是"白亮"，t3 还是橙红
+        float tr = 1.0F;
+        float tg = tier >= 5 ? 0.96F : (tier >= 4 ? 0.86F : 0.78F);
+        float tb = tier >= 5 ? 0.80F : (tier >= 4 ? 0.52F : 0.34F);
+
+        // ① 往上爬的火苗
+        for (int i = 0; i < strips; i++) {
+            // 每根火苗自己的爬升进度：0 = 脚边、1 = 柱顶，越过柱顶就重来（所以一直在循环上升）
+            double phase = (age * 0.030D + i / (double) strips) % 1.0D;
+            double ang = age * 0.055D + phase * turns * Math.PI * 2.0D + i * 0.79D;
+            double wobble = 0.86D + 0.14D * Math.sin(age * 0.62D + i * 2.1D);
+            double w = (0.19D + 0.09D * (1.0D - phase)) * wobble;
+            double h = (0.40D + 0.34D * (1.0D - phase)) * wobble;
+            double r = colR * (0.92D + 0.14D * Math.sin(phase * 3.4D + i * 1.1D));
+            // 越往上越淡：火苗是被空气吃掉的，不是被截断的 ✗
+            float alpha = (float) (0.95D * Math.min(1.0D, (1.0D - phase) * 2.6D));
+            flameAt(solid, pose, ang, r, w, h, colR * 0.22D, phase * colH, tr, tg, tb, alpha);
+        }
+
+        // ② 对缠的螺旋火带：单根火苗只是"往上飘"，加两条带子才看得出来在"绕"
+        int strands = tier >= 5 ? 3 : 2;
+        int segs = 18;
+        for (int s = 0; s < strands; s++) {
+            double base = age * 0.055D + s * Math.PI * 2.0D / strands;
+            for (int k = 0; k < segs; k++) {
+                double t0 = k / (double) segs;
+                double t1 = (k + 1) / (double) segs;
+                double a0 = base + t0 * turns * Math.PI * 2.0D;
+                double a1 = base + t1 * turns * Math.PI * 2.0D;
+                double y0 = t0 * colH;
+                double y1 = t1 * colH;
+                double hw0 = 0.085D * (1.0D - 0.78D * t0);
+                double hw1 = 0.085D * (1.0D - 0.78D * t1);
                 double ux0 = -Math.sin(a0), uz0 = Math.cos(a0);
                 double ux1 = -Math.sin(a1), uz1 = Math.cos(a1);
-                double y0 = topH * t0;
-                double y1 = topH * t1;
+                double r0 = colR * (1.00D + 0.10D * t0);
+                double r1 = colR * (1.00D + 0.10D * t1);
                 // 顶端渐隐：火舌往上是被"烧掉"的
-                float aA = (float) (0.85D * (1.0D - 0.95D * t0));
-                float aB = (float) (0.85D * (1.0D - 0.95D * t1));
-                quadGrad(out, pose,
+                float aA = (float) (0.80D * (1.0D - 0.92D * t0));
+                float aB = (float) (0.80D * (1.0D - 0.92D * t1));
+                quadGrad(glow, pose,
                         Math.cos(a0) * r0 + ux0 * -hw0, y0, Math.sin(a0) * r0 + uz0 * -hw0,
                         Math.cos(a0) * r0 + ux0 * hw0, y0, Math.sin(a0) * r0 + uz0 * hw0,
                         Math.cos(a1) * r1 + ux1 * hw1, y1, Math.sin(a1) * r1 + uz1 * hw1,
                         Math.cos(a1) * r1 + ux1 * -hw1, y1, Math.sin(a1) * r1 + uz1 * -hw1,
-                        0.30F, 0.86F, 0.70F, 0.34F, aA, aB);
+                        0.30F, 0.88F, 0.72F, 0.30F, aA, aB);
             }
         }
     }
