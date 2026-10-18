@@ -1,0 +1,34 @@
+{
+  "installed_at": "2026-10-19T02:27:18.845590",
+  "jar_sha256": "0cc19494d12e53c62a25c5491998c24b4a747df2475ea38857ade6a9430bd54c",
+  "jar_bytes": 113395546,
+  "files": {
+    "mods/tnc-1.0.0.jar": "0cc19494d12e53c62a25c5491998c24b4a747df2475ea38857ade6a9430bd54c",
+    "config/ftbquests/quests/chapters/tnc_dungeons.snbt": "51965343c157fcd7b2584633980cb3683410dd9bae967bd833a50203a1328032"
+  },
+  "unit_tests": 277,
+  "dungeon_game_tests": 16,
+  "native_report": {
+    "five_floors_completed": true,
+    "unlock": 6,
+    "real_enemy_kills": 29,
+    "failure_kept_inventory": true,
+    "failure_lost_only_six_tokens": true,
+    "desert_gate_pieces": 16,
+    "crypt_gate_pieces": 18,
+    "tide_gate_pieces": 15,
+    "astral_gate_pieces": 18,
+    "failures": [],
+    "families": 10,
+    "variants": 28,
+    "themes": 4,
+    "scope": "Isolated full PCL runtime; original rendering, real five-floor encounters and failure ledger"
+  },
+  "screenshots": 16,
+  "protected_quest_files_unchanged": 42,
+  "backup": "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\work\\backups\\dungeons-20261019-022718",
+  "saves_modified": false,
+  "island_templates_modified": false,
+  "upstream": "607b2b6d",
+  "third_party_gate_assets": "Local runtime package only; source geometry not uploaded to Git"
+}

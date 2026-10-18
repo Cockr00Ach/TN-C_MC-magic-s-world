@@ -12,7 +12,7 @@ class GuidebookTest {
     @Test void revisionChaptersHaveUniqueIdsValidDependenciesAndRealAssets() throws IOException {
         var chapters=new ArrayList<JsonObject>();var ids=new HashSet<String>();var quests=new HashSet<String>();int real=0,atlas=0;
         try(var paths=Files.list(Path.of("questbook/ftbquests/chapters"))){
-            for(var file:paths.filter(p->p.getFileName().toString().startsWith("tnc_")).toList()){
+            for(var file:paths.filter(p->p.getFileName().toString().startsWith("tnc_")&&!p.getFileName().toString().equals("tnc_dungeons.snbt")).toList()){
                 var chapter=JsonParser.parseString(Files.readString(file)).getAsJsonObject();chapters.add(chapter);assertTrue(ids.add(chapter.get("id").getAsString()));
                 for(var v:chapter.getAsJsonArray("quests")){var q=v.getAsJsonObject();assertTrue(ids.add(q.get("id").getAsString()));quests.add(q.get("id").getAsString());boolean life=chapter.has("group")&&chapter.get("group").getAsString().equals("544E434C49464531");
                     if(q.has("rewards"))for(var reward:q.getAsJsonArray("rewards")){

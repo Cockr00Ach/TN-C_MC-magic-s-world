@@ -251,7 +251,7 @@ public final class ManaGate {
         if (!(player instanceof ServerPlayer serverPlayer)) {
             return false;
         }
-        if(com.tnc.tnc.combat.DownedCombat.isDowned(serverPlayer))return true;
+        if((com.tnc.tnc.combat.DownedCombat.isDowned(serverPlayer)||com.tnc.tnc.dungeon.DungeonService.recovering(serverPlayer)))return true;
         // 只管 TN-C 自己的法术
         SpellCatalog.Entry entry = SpellCatalog.byId(spellId);
         if (entry == null) {

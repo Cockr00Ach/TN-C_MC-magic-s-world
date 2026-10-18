@@ -1,0 +1,209 @@
+{
+  "unit_tests": {
+    "passed": 277,
+    "failed": 0
+  },
+  "dungeon_and_original_rescue_game_tests": {
+    "passed": 16,
+    "failed": 0
+  },
+  "native_full_pack": {
+    "five_floors_completed": true,
+    "unlock": 6,
+    "real_enemy_kills": 29,
+    "failure_kept_inventory": true,
+    "failure_lost_only_six_tokens": true,
+    "desert_gate_pieces": 16,
+    "crypt_gate_pieces": 18,
+    "tide_gate_pieces": 15,
+    "astral_gate_pieces": 18,
+    "failures": [],
+    "families": 10,
+    "variants": 28,
+    "themes": 4,
+    "scope": "Isolated full PCL runtime; original rendering, real five-floor encounters and failure ledger"
+  },
+  "legacy_mixed_namespace_attempt": {
+    "passed_as_release_gate": false,
+    "failed_required_tests": 36,
+    "failures": [
+      {
+        "case": "playergrowsrootandforgegetslessmanathaninvested",
+        "reason": "A nearly full forge refuses the core without eating it"
+      },
+      {
+        "case": "savingcrystaleightlitticksandremovalkeepexacttime",
+        "reason": "Installation moves one actual crystal into the lamp"
+      },
+      {
+        "case": "focuslensactuallyraisesblocklightandcanbedetached",
+        "reason": "Base lamp emits real light twelve"
+      },
+      {
+        "case": "allnineteencultivarsgrowonordinarydrysoilunderaroof",
+        "reason": "dawn_disk accepts ordinary dry soil"
+      },
+      {
+        "case": "ownedpreparedfieldgrowstreeandvineofflinebutpublictownandotherownerscannot",
+        "reason": "java.lang.NullPointerException"
+      },
+      {
+        "case": "flowercreatesthreerealspritesreloaddoesnotduplicateanddayreturnsproducedew",
+        "reason": "Mature flower creates three independently registered saved entities; count=0, reason=��Ҫħ��������Դ, day=false, growth=24000, lastTick=80, now=97, ticking=true, sameEntity=true, removed=false, status=ENTITY_TICKING, entitiesLoaded=true, valid=true"
+      },
+      {
+        "case": "lotusseednormalairuseplantsabovewaterandkeepsthewatersource",
+        "reason": "Normal Item.use raycast actually plants one lotus in the water-surface air"
+      },
+      {
+        "case": "cultivatedpeppergrowswithoutheatandreloadcannotinventevents",
+        "reason": "Cannot assign field \"growth\" because \"be\" is null"
+      },
+      {
+        "case": "dismantledmachinerejectscachedenergyanditemhandles",
+        "reason": "java.lang.IllegalStateException"
+      },
+      {
+        "case": "matureownedplantfeedsrealgeneratorstorage",
+        "reason": "Cannot invoke \"com.tnc.tnc.life.ecology.VerdantVeinBlockEntity.saveWithoutMetadata()\" because \"plant\" is null"
+      },
+      {
+        "case": "paperpressrequiresandconsumesrealreedswaterandfe",
+        "reason": "A real water bucket fills exactly eight measured units"
+      },
+      {
+        "case": "foreignneighborcannotuseorcacheenergycapability",
+        "reason": "java.lang.IllegalStateException"
+      },
+      {
+        "case": "networkandexternalextractionshareonebudget",
+        "reason": "java.lang.IllegalStateException"
+      },
+      {
+        "case": "lampspendsexactlyonefeforfourlitticks",
+        "reason": "One FE must illuminate the full four-tick work cycle"
+      },
+      {
+        "case": "skyhandshaveanoversizedairbornesealandsafereturn",
+        "reason": "An oversized seal appears at the feet in the sky"
+      },
+      {
+        "case": "spellselfeffectsreleaseexactlyonecastandeverytierregisters",
+        "reason": "One effect application produces exactly one finite cast"
+      },
+      {
+        "case": "compressedballliftsinydamagesandexplodesonlyonce",
+        "reason": "The actual attraction includes vertical velocity"
+      },
+      {
+        "case": "repeatedcastshaveafixedbudgetandfinitelifetime",
+        "reason": "The budget fixture has an unobstructed target"
+      },
+      {
+        "case": "hushcapacceptscultivateddirtandretainsquietbehaviourandrenewal",
+        "reason": "Cultivated hushcap accepts ordinary soil"
+      },
+      {
+        "case": "reloadcreditscultivatedgrowthoncebutneverofflinemana",
+        "reason": "Cannot invoke \"com.tnc.tnc.life.ecology.VerdantVeinBlockEntity.saveWithoutMetadata()\" because \"be\" is null"
+      },
+      {
+        "case": "cultivatedplantproducesrealmanaeveninshadewithoutwater",
+        "reason": "Cannot invoke \"com.tnc.tnc.life.ecology.VerdantVeinBlockEntity.storedMana()\" because \"be\" is null"
+      },
+      {
+        "case": "removingvinerootcleansonlyitsrecordedplantblocksacrosssave",
+        "reason": "Root cleanup resumes after save and only removes recorded matching vine blocks"
+      },
+      {
+        "case": "normalblockrightclickreallytransfersbottledmana",
+        "reason": "Normal right-click reaches the item consumer before the block swallows it"
+      },
+      {
+        "case": "vinequeueresumesitsoriginalstageandneverexceedstheenvelope",
+        "reason": "A resumed12-block queue cannot claim24-block height after the clock advances: ��������50% �� �ѳ�0����Ҫħ�������˸�������ħ��"
+      },
+      {
+        "case": "allindependentspecieskeepidentityandtwodayorlongeryoung",
+        "reason": "Twenty-three new registered species supplement existing independent bellwool"
+      },
+      {
+        "case": "cageticketissingleuseandentityinventoryretainspermanentuuid",
+        "reason": "Owner can move a real animal into persistent escrow"
+      },
+      {
+        "case": "electricalperchconsumesonehundredtostoreeightyandcrystalsdebitfifty",
+        "reason": "Charging cannot invent FE from food"
+      },
+      {
+        "case": "palaceepochkeepsexistingnativeworldsontheiroriginalasset",
+        "reason": "Dev generator does not exercise new palace discovery"
+      },
+      {
+        "case": "eldenandpalaceusethesamenormalworldsiteaslocate",
+        "reason": "No normal-world valid site tested: stonecrest_fortress rawValid=0 attempts=289"
+      },
+      {
+        "case": "nightgourdavoidsdaylightandgrowsinshadeandreedrequireswetshore",
+        "reason": "Tide reed roots next to shallow water"
+      },
+      {
+        "case": "flowerrequiresactivetravelandhonorsownershipanddailycap",
+        "reason": "One qualified arrival blooms at most three planted buds"
+      },
+      {
+        "case": "warningmossanddoorlanternrespondtoloadedhostiles",
+        "reason": "Moss anchors to a real stone wall"
+      },
+      {
+        "case": "nohouseplayercanplantbindandbloomatwildernesscamp",
+        "reason": "A no-house survival player can actually plant a seed outdoors"
+      },
+      {
+        "case": "alternateremoteresponsechannelstriplecoreandpullsdistantvictimsupward",
+        "reason": "The second distant encounter chooses a stationary core cast"
+      },
+      {
+        "case": "highorbcapturesgroundenemiesandpullsairborneenemiesdown",
+        "reason": "Triple-speed suction must pull targets above the ball downward"
+      },
+      {
+        "case": "giantspeardropsthewholedistanceinonetick",
+        "reason": "Full-height spear falls and damages the target in one tick"
+      }
+    ],
+    "note": "Includes outdated normal-soil cultivation assumptions and tests requiring dedicated generation profiles. This attempt was not counted as passing; no claim that the full legacy suite passed."
+  },
+  "review": "Two read-only review passes, corrected offline reward, fixed encounter size, recovery spell gate and queue races; no remaining P1/P2 found in the reviewed changes.",
+  "limitations": [
+    "No live four-human endurance session",
+    "Dedicated Boss mechanics deferred by user",
+    "First five floors executed in full runtime; all 30 floors graph-tested, milestone data implemented"
+  ],
+  "jar_sha256": "0cc19494d12e53c62a25c5491998c24b4a747df2475ea38857ade6a9430bd54c",
+  "native_gate_block_check": {
+    "desert": {
+      "blocks": 13572,
+      "matching": 13572,
+      "mismatches": {}
+    },
+    "crypt": {
+      "blocks": 10286,
+      "matching": 10286,
+      "mismatches": {}
+    },
+    "tide": {
+      "blocks": 19239,
+      "matching": 19239,
+      "mismatches": {}
+    },
+    "astral": {
+      "blocks": 16970,
+      "matching": 16969,
+      "mismatches": {
+        "minecraft:cave_vines -> minecraft:cave_vines_plant": 1
+      }
+    }
+  },
+  "native_gate_block_check_note": "All 60067 blueprint positions present. One cave_vines tip naturally became cave_vines_plant while the world ticked; no geometry is missing."
+}

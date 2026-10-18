@@ -1,0 +1,8 @@
+{
+  "type": "tnc:dungeon_gate",
+  "theme": "tide",
+  "biomes": "#tnc:dungeon/tide",
+  "spawn_overrides": {},
+  "step": "surface_structures",
+  "terrain_adaptation": "beard_thin"
+}

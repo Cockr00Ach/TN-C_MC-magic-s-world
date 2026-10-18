@@ -11,6 +11,8 @@ public final class CombatTeams {
     private static boolean initialized,failed;
     private static Method api,manager,loaded,teamForPlayer,isParty,id;
     public static String group(ServerPlayer player) {
+        String dungeon=com.tnc.tnc.dungeon.DungeonService.rescueGroup(player);
+        if(dungeon!=null)return dungeon;
         if(ModList.get().isLoaded("ftbteams")&&!failed) {
             try {
                 if(!initialized) {

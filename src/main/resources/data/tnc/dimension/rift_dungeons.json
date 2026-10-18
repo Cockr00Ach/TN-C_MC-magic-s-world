@@ -1,0 +1,18 @@
+{
+  "type": "tnc:rift_dungeons",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "tnc:rift_dungeons",
+      "features": false,
+      "lakes": false,
+      "structure_overrides": [],
+      "layers": [
+        {
+          "block": "minecraft:bedrock",
+          "height": 1
+        }
+      ]
+    }
+  }
+}
