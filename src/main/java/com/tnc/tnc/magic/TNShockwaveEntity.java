@@ -85,6 +85,22 @@ public class TNShockwaveEntity extends TNMagicCircleEntity {
         return this.exempt != null && this.exempt.equals(entity.getUUID());
     }
 
+    /**
+     * 这一发<b>要不要推人</b>（默认 true）。
+     *
+     * <p>⚠️ 作者 2026-10-18：「火球链中 t3 和 t4 的火球爆炸时的击飞效果删去」✗ ——
+     * 那两档要的是**只有震屏、不把人掀飞** ⇒ 关掉推力，冲击波实体本身照旧生成
+     * （客户端靠它算震屏 ✓），只是不碰任何活物 ✓
+     *
+     * <p>只在服务端 tick 里读，客户端不用知道 ⇒ 普通字段即可（这类纯表现实体不存档 ✓）。
+     */
+    private boolean pushEnabled = true;
+
+    /** 服务端设这一发推不推人（false = 只震屏 ✓）。 */
+    public void configurePush(boolean push) {
+        this.pushEnabled = push;
+    }
+
     public TNShockwaveEntity(EntityType<? extends TNShockwaveEntity> type, Level level) {
         super(type, level);
         this.configure(MAX_RADIUS, LIFE);
@@ -141,9 +157,20 @@ public class TNShockwaveEntity extends TNMagicCircleEntity {
         return wave;
     }
 
+    /** 同上，但可以指定「推不推人」—— {@code false} = 只震屏、不击飞 ✓（作者 2026-10-18）。 */
+    public static TNShockwaveEntity blast(ServerLevel level, Vec3 at, double radius,
+                                          float shake, Entity exempt, float flash, boolean push) {
+        TNShockwaveEntity wave = blast(level, at, radius, shake, exempt, flash);
+        wave.configurePush(push);
+        return wave;
+    }
+
     @Override
     public void tick() {
         super.tick();
+        if (!this.pushEnabled) {
+            return;             // 只震屏、不推人 ✓
+        }
         if (this.level().isClientSide() || this.tickCount > PUSH_TICKS) {
             return;
         }
