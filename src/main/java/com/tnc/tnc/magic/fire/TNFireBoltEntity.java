@@ -930,6 +930,9 @@ public final class TNFireBoltEntity extends Projectile {
         // 震屏：复用冲击波实体；半径跟着强度走，视觉上也分得出大小 ✓
                 // ⚠️ 最后一个参数 0 = 不发白闪 ✗ —— 作者 2026-10-05：「把震动时的界面变灰删去」
         //    （那个"变灰"是 TNSpellClientVisuals 在 flash 时盖的白色 ✗）
-        TNShockwaveEntity.blast(server, at, 3.0D + shake * 0.6D, shake, getOwner(), 0.0F);
+        // ⚠️ 作者 2026-10-18：「火球链中 t3 和 t4 的火球爆炸时的击飞效果删去」✗
+        //    ⇒ t3 熔岩火球 / t4 熔岳天倾 只震屏、不把人掀飞；t5 陨星坠照旧掀飞 ✓
+        boolean push = "meteor_fall".equals(path);
+        TNShockwaveEntity.blast(server, at, 3.0D + shake * 0.6D, shake, getOwner(), 0.0F, push);
     }
 }
