@@ -37,8 +37,9 @@ public final class WindVolleyEntity extends Entity {
     }
     public Vec3 orbitPoint(int slot,double age){
         double a=(age-38)*Math.PI*2/24+slot*Math.PI*2/count();
-        double r=(entityData.get(SPAN)+WindChainRules.modelScale(tier())*.7)*(.22+.78*Math.pow(Math.cos(a*1.5),2));
-        return aimPoint().add(Math.cos(a)*r,3+(slot%3)*1.7+Math.sin(a*2)*1.6,Math.sin(a)*r);
+        double r=entityData.get(SPAN)+WindChainRules.modelScale(tier())*.7;
+        double height=Math.max(1.25,Math.min(24,entityData.get(SPAN)*.25));
+        return aimPoint().add(Math.cos(a)*r,height+(slot%3)*.30,Math.sin(a)*r);
     }
     public Vec3 launchPoint(int slot){return impact(slot).add(0,WindChainRules.skyHeight(tier()),0);}
     public int flightTime(){return tier()==5?18:16;}
@@ -72,9 +73,8 @@ public final class WindVolleyEntity extends Entity {
             Vec3 aim=aimPoint();if(age<18)setPos(owner.position());
             aimAt(target==null?aim:target.position());
             if(tier()<5&&age>=38&&age<100&&age%12==0&&target!=null){
-                // Three orbit revolutions include inward lunges; damage once per attack beat.
-                boolean touch=false;for(int slot=0;slot<count();slot++)if(target.getBoundingBox().inflate(WindChainRules.modelScale(tier())*.6).contains(weaponAt(slot,age)))touch=true;
-                if(touch){target.invulnerableTime=0;target.hurt(level().damageSources().indirectMagic(this,owner),WindChainRules.weaponDamage(tier(),1)*.65F);
+                // The weapons stay on their circular track; inward wind cuts carry the attack.
+                if(target.getBoundingBox().distanceToSqr(aimPoint())<=1){target.invulnerableTime=0;target.hurt(level().damageSources().indirectMagic(this,owner),WindChainRules.weaponDamage(tier(),1)*.65F);
                     if(WindChainRules.spears(tier())>0)target.addEffect(new MobEffectInstance(TNEffects.VULNERABLE.get(),200,0,false,true,true));}
             }
             return;
