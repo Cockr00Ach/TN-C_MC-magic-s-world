@@ -38,6 +38,7 @@ public final class RouteContent {
     public static final Map<String,RegistryObject<? extends Block>> PLANTS=new LinkedHashMap<>();
     public static final Map<String,RegistryObject<Item>> GOODS=new LinkedHashMap<>();
     static {
+        GOODS.put("zero_spellgun",ITEMS.register("zero_spellgun",com.tnc.tnc.life.routes.mech.ZeroGunItem::new));
         GOODS.put("creative_mana_prism",ITEMS.register("creative_mana_prism",CreativeManaPrismItem::new));
         GOODS.put("beast_bone_meal",ITEMS.register("beast_bone_meal",BeastBoneMealItem::new));
         ITEMS.register("magic_soil",()->new BlockItem(SOIL.get(),new Item.Properties()));

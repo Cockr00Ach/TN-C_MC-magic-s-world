@@ -10,6 +10,30 @@ import net.minecraftforge.gametest.*;
 @GameTestHolder("tnc") @PrefixGameTestTemplate(false)
 public final class WindTwoChainGameTests {
     @GameTest(template="building_test_empty",timeoutTicks=30,batch="wind_two_chains")
+    public static void orbitStaysCircularAndLevelWhileWindCutsDamageBeforeTheDrop(GameTestHelper h){
+        var owner=h.spawn(EntityType.VILLAGER,new BlockPos(2,190,2));owner.setNoAi(true);
+        var enemy=h.spawn(EntityType.ZOMBIE,new BlockPos(2,190,12));enemy.setNoAi(true);
+        enemy.getAttribute(Attributes.MAX_HEALTH).setBaseValue(2000);enemy.setHealth(2000);
+        for(int tier=1;tier<=4;tier++){
+            var cast=WindChainRegistration.VOLLEY.create(h.getLevel());cast.configure(owner,tier,enemy);
+            for(int slot=0;slot<cast.count();slot++){
+                var first=cast.weaponAt(slot,38).subtract(cast.aimPoint());
+                double radius=Math.sqrt(first.x*first.x+first.z*first.z);
+                for(double age=38;age<99;age+=.5){
+                    var offset=cast.weaponAt(slot,age).subtract(cast.aimPoint());
+                    h.assertTrue(Math.abs(Math.sqrt(offset.x*offset.x+offset.z*offset.z)-radius)<.001,"Orbit cannot lunge inward or outward");
+                    h.assertTrue(Math.abs(offset.y-first.y)<.001,"Each weapon stays on its own level circular track");
+                    var radial=new net.minecraft.world.phys.Vec3(offset.x,0,offset.z).normalize();
+                    h.assertTrue(Math.abs(radial.dot(cast.direction(slot,age)))<.03,"The weapon points along the circular motion");
+                }
+            }
+            float health=enemy.getHealth();for(int i=0;i<99;i++)cast.tick();
+            h.assertTrue(enemy.getHealth()<health,"Wind cuts still damage during orbit before the final drop");
+            cast.discard();
+        }
+        owner.discard();enemy.discard();h.succeed();
+    }
+    @GameTest(template="building_test_empty",timeoutTicks=30,batch="wind_two_chains")
     public static void spellSelfEffectsReleaseExactlyOneCastAndEveryTierRegisters(GameTestHelper h){
         var owner=h.spawn(EntityType.VILLAGER,new BlockPos(2,40,2));owner.setNoAi(true);owner.setYRot(0);owner.setXRot(0);
         var target=h.spawn(EntityType.ZOMBIE,new BlockPos(2,40,12));target.setNoAi(true);

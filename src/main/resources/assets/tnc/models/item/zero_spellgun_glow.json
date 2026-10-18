@@ -1,0 +1,160 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "metal": "tnc:item/mech_metal",
+    "ceramic": "tnc:item/mech_ceramic",
+    "gold": "tnc:item/mech_gold",
+    "glow": "tnc:item/mech_glow"
+  },
+  "elements": [
+    {
+      "from": [
+        7.4,
+        15.95,
+        -7.6
+      ],
+      "to": [
+        8.6,
+        16.13,
+        -4.6
+      ],
+      "faces": {
+        "north": {
+          "texture": "#glow",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "tintindex": 0
+        },
+        "south": {
+          "texture": "#glow",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "tintindex": 0
+        },
+        "east": {
+          "texture": "#glow",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "tintindex": 0
+        },
+        "west": {
+          "texture": "#glow",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "tintindex": 0
+        },
+        "up": {
+          "texture": "#glow",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "tintindex": 0
+        },
+        "down": {
+          "texture": "#glow",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "tintindex": 0
+        }
+      }
+    },
+    {
+      "from": [
+        6.8,
+        13.5,
+        -10.2
+      ],
+      "to": [
+        9.2,
+        14.0,
+        -9.95
+      ],
+      "faces": {
+        "north": {
+          "texture": "#glow",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "tintindex": 0
+        },
+        "south": {
+          "texture": "#glow",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "tintindex": 0
+        },
+        "east": {
+          "texture": "#glow",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "tintindex": 0
+        },
+        "west": {
+          "texture": "#glow",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "tintindex": 0
+        },
+        "up": {
+          "texture": "#glow",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "tintindex": 0
+        },
+        "down": {
+          "texture": "#glow",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "tintindex": 0
+        }
+      }
+    }
+  ],
+  "gui_light": "front"
+}

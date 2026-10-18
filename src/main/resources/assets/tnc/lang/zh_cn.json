@@ -629,5 +629,6 @@
   "key.tnc.mech_dash": "推进冲刺 / 潜行环域震荡",
   "key.tnc.mech_shield": "折光屏障",
   "key.tnc.mech_overdrive": "星炉过载",
-  "item.tnc.creative_mana_prism": "创世魔力棱晶（创造测试）"
+  "item.tnc.creative_mana_prism": "创世魔力棱晶（创造测试）",
+  "item.tnc.zero_spellgun": "零式"
 }
