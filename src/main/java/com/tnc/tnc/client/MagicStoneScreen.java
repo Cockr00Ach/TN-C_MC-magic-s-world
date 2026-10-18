@@ -24,8 +24,8 @@ import java.util.List;
 public class MagicStoneScreen extends Screen {
 
     private static final int PANEL_W = 600;   // Four water routes when the window is wide enough.
-    private static final int PANEL_H = 224;
-    private static final int ROW_H = 22;
+    private static final int PANEL_H = 288;
+    private static final int ROW_H = 24;
 
     private static final int COLOR_PANEL = 0xE62A1F16;   // dark brown
     private static final int COLOR_BORDER = 0xFF8A6A42;  // brown-gold border
@@ -36,13 +36,17 @@ public class MagicStoneScreen extends Screen {
     private static final int COLOR_BAD = 0xFFD79282;
 
     private static final int LIST_X = 186;
-    private static final int LIST_Y = 62;
+    private static final int LIST_Y = 104;
 
     /**
      * 只在第一次 init 时拉数据。
      * 否则会死循环：init → 请求同步 → 服务端回包 → 刷新界面（rebuildWidgets → init）→ 又请求同步 …
      */
     private boolean syncRequested;
+    private float uiScale = 1;
+    private List<net.minecraft.util.FormattedCharSequence> pendingTooltip;
+
+    float uiScale() { return uiScale; }
 
     /** 界面当前显示哪个元素的法术（底部的雷/火切换按钮改它）。 */
     private Element shownElement = Element.LIGHTNING;
@@ -113,6 +117,12 @@ public class MagicStoneScreen extends Screen {
 
     @Override
     protected void init() {
+        // Always use the physical GUI viewport: server refreshes also call init().
+        int actualW = minecraft.getWindow().getGuiScaledWidth();
+        int actualH = minecraft.getWindow().getGuiScaledHeight();
+        uiScale = Math.max(.2f, Math.min(1, Math.min((actualW - 16f) / 300, (actualH - 16f) / PANEL_H)));
+        width = (int) Math.ceil(actualW / uiScale);
+        height = (int) Math.ceil(actualH / uiScale);
         if (!syncRequested) {
             syncRequested = true;
             MagicStoneNetwork.requestSync();
@@ -131,14 +141,15 @@ public class MagicStoneScreen extends Screen {
 
     /** 顶部两个页签：学习（花点数解锁） / 配键（哪个键放哪个法术）。 */
     private void initTabs() {
-        // 放在"魔法点数"那一行下面（top+40 起），避开左上角两行文字和中间的分隔线
-        int y = top() + 42;
+        // Information, navigation and spell lists have separate vertical bands.
+        int y = top() + 76;
+        int tabW = Math.min(50, (listX() - 28) / 2);
         addRenderableWidget(Button.builder(Component.literal(bindTab ? "学习" : "§l学习"),
                         b -> { bindTab = false; rebuildWidgets(); })
-                .bounds(left() + 12, y, 50, 15).build());
+                .bounds(left() + 12, y, tabW, 16).build());
         addRenderableWidget(Button.builder(Component.literal(bindTab ? "§l配键" : "配键"),
                         b -> { bindTab = true; bindSlot = -1; rebuildWidgets(); })
-                .bounds(left() + 66, y, 50, 15).build());
+                .bounds(left() + 16 + tabW, y, tabW, 16).build());
     }
 
     /**
@@ -191,7 +202,7 @@ public class MagicStoneScreen extends Screen {
                 String label = entry.displayName();
                 Button button = Button.builder(Component.literal("    "+fitLabel(label, colW - 34)),
                                 clicked -> MagicStoneNetwork.requestUnlock(target.id()))
-                        .bounds(colX, rowY, colW - 8, 16)
+                        .bounds(colX, rowY, colW - 8, 20)
                         .build();
                 button.active = state == MagicStoneLearning.Result.OK;
                 addRenderableWidget(button);
@@ -210,7 +221,7 @@ public class MagicStoneScreen extends Screen {
      */
     private void initBindTab(MagicStoneData data) {
         int page = data.getLoadoutPage();
-        int panelH = PANEL_H;
+        int footerW = (listX() - 28) / 2;
 
         // 左列：9 个槽（第一页第 1 个是右键位）
         for (int i = 0; i < MagicStoneData.SLOTS_PER_PAGE; i++) {
@@ -219,7 +230,7 @@ public class MagicStoneScreen extends Screen {
             String key = i == 0 ? "右键" : String.valueOf(i + 1);
             var bound = data.getSlot(global);
             String label = (selected ? "§e▶ " : "§7") + key + " §r" + boundName(bound, data);
-            Button slot = Button.builder(Component.literal(label), b -> {
+            Button slot = Button.builder(Component.literal(fitLabel(label, listX() - 32)), b -> {
                         bindSlot = (bindSlot == global) ? -1 : global;
                         rebuildWidgets();
                     })
@@ -229,11 +240,11 @@ public class MagicStoneScreen extends Screen {
         }
 
         // 切页（只改服务端的"当前页"，它会把新一页写进法杖）
-        addRenderableWidget(Button.builder(Component.literal("切页 §7(默认数字键 1)"), b -> {
+        addRenderableWidget(Button.builder(Component.literal("切页"), b -> {
                     MagicStoneNetwork.requestNextPage();
                     bindSlot = -1;
                 })
-                .bounds(left() + 12, top() + PANEL_H - 24, listX() - 24, 16).build());
+                .bounds(left() + 12, top() + PANEL_H - 24, footerW, 16).build());
 
         // 右列：元素筛选（只列有链的元素）—— 最后补一个「独立」，否则乱魔没地方配 ✓
         int tabX = left() + listX();
@@ -286,11 +297,11 @@ public class MagicStoneScreen extends Screen {
                                 }
                                 MagicStoneNetwork.requestSetSlot(bindSlot, target.id());
                             })
-                    .bounds(colX, rowY, colW - 8, 15)
+                    .bounds(colX, rowY, colW - 8, 18)
                     .build();
             button.active = bindSlot >= 0 && !bound;
             addRenderableWidget(button);
-            bindRects.put(entry, new int[]{colX, rowY, colW - 8, 15});
+            bindRects.put(entry, new int[]{colX, rowY, colW - 8, 18});
         }
 
         // 滚动提示（只在真的放不下时出现）
@@ -308,18 +319,18 @@ public class MagicStoneScreen extends Screen {
         }
 
         // 清空选中槽
-        Button clear = Button.builder(Component.literal("清空选中的键"), b -> {
+        Button clear = Button.builder(Component.literal("清空"), b -> {
                     if (bindSlot >= 0) {
                         MagicStoneNetwork.requestClearSlot(bindSlot);
                     }
                 })
-                .bounds(left() + panelWidth() - 110, top() + PANEL_H - 24, 100, 16).build();
+                .bounds(left() + 16 + footerW, top() + PANEL_H - 24, footerW, 16).build();
         clear.active = bindSlot >= 0;
         addRenderableWidget(clear);
     }
 
     /** 配键列表一行多高（比学习页的 ROW_H 矮一点，为了多塞几行）。 */
-    private static final int BIND_ROW_H = 16;
+    private static final int BIND_ROW_H = 18;
 
     /** 配键页左列"一个键位"那一行多高（按钮 14 高 + 2 间隙）。 */
     private static final int BIND_SLOT_ROW_H = 16;
@@ -387,15 +398,27 @@ public class MagicStoneScreen extends Screen {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(graphics);
+        pendingTooltip = null;
+        graphics.pose().pushPose();
+        graphics.pose().scale(uiScale, uiScale, 1);
+        try {
+            renderPanel(graphics, (int) (mouseX / uiScale), (int) (mouseY / uiScale), partialTick);
+        } finally {
+            graphics.pose().popPose();
+        }
+        // Tooltip placement and text stay in the actual viewport, outside the fitted panel pose.
+        if (pendingTooltip != null) graphics.renderTooltip(this.font, pendingTooltip, mouseX, mouseY);
+    }
 
+    private void renderPanel(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         int left = left();
         int top = top();
         int panelW = panelWidth();
 
         // 面板外框：模仿法术按钮那种"多层金框"（按钮是整合包资源包给的斜面风格）
         // 由外到内四层：深棕 -> 亮金 -> 中金 -> 面板底色，看起来和按钮是一套的 ✓
-        com.tnc.tnc.client.ui.ArcaneGui.frame(graphics,left-4,top-4,panelW+8,PANEL_H+8);
-        graphics.drawCenteredString(this.font, this.title, left + panelW / 2, top + 8, COLOR_TITLE);
+        com.tnc.tnc.client.ui.ArcaneGui.proportionalFrame(graphics,left-4,top-4,panelW+8,PANEL_H+8);
+        graphics.drawCenteredString(this.font, this.title, left + panelW / 2, top + 28, COLOR_TITLE);
 
         MagicStoneData data = clientData();
         if (data == null) {
@@ -406,13 +429,13 @@ public class MagicStoneScreen extends Screen {
 
         // 顶部：魔力 + 魔法点数
         graphics.drawString(this.font, "魔力  " + data.getMana() + " / " + data.getMaxMana(),
-                left + 12, top + 28, COLOR_TEXT, false);
-        graphics.drawString(this.font, "魔法点数  " + data.getPointsAvailable(Config.pointThresholds) + " 可用"
+                left + 12, top + 46, COLOR_TEXT, false);
+        graphics.drawString(this.font, fitLabel("魔法点数  " + data.getPointsAvailable(Config.pointThresholds) + " 可用"
                         + "（总 " + data.getPointsTotal(Config.pointThresholds)
-                        + " · 已投 " + data.getPointsSpent() + "）",
-                left + 12, top + 41, COLOR_TEXT, false);
-        graphics.fill(left + 8, top + 54, left + panelWidth() - 8, top + 55, 0x50C9A063);
-        graphics.fill(left + listX() - 8, top + 58, left + listX() - 7, top + PANEL_H - 8, 0x50C9A063);
+                        + " · 已投 " + data.getPointsSpent() + "）", panelW - 24),
+                left + 12, top + 59, COLOR_TEXT, false);
+        graphics.fill(left + 8, top + 72, left + panelWidth() - 8, top + 73, 0x50C9A063);
+        graphics.fill(left + listX() - 8, top + 94, left + listX() - 7, top + PANEL_H - 8, 0x50C9A063);
 
         if (bindTab) {
             drawBindTab(graphics, data, mouseX, mouseY, left, top, panelW);
@@ -422,18 +445,18 @@ public class MagicStoneScreen extends Screen {
         // 左列：元素亲和度 —— 用户画的水晶贴图 + 42 个亲和力点（点位由用户标注，见 AffinityWidget）
         // 用户要求：等比例放大到占满左下框约 80%，且**不要任何文字** ✗
         int affinityScale=Math.max(1,Math.min(3,(listX()-20)/33));
-        AffinityWidget.render(graphics,left+(listX()-33*affinityScale)/2,top()+71,affinityScale,data::getAffinity);
+        AffinityWidget.render(graphics,left+(listX()-33*affinityScale)/2,top()+113,affinityScale,data::getAffinity);
 
         // 法术目录：**每条链一列**（雷系现在有主链/雷球/雷速三条，15 个法术挤一列会跑出面板）
         // 每行的按钮在 init() 里创建（名字就是按钮的标签），这里只画表头和悬停提示。
         List<SpellCatalog.Chain> chains = visibleChains();
         int colW = columnWidth(chains.size());
         String heading=shownElement==null?"独立魔法 · 无元素亲和限制":shownElement.cn()+"系法术 · 每链最高档";
-        graphics.drawString(this.font,fitLabel(heading,panelW-listX()-64),left+listX(),top+LIST_Y-14,COLOR_TITLE,false);
+        graphics.drawString(this.font,fitLabel(heading,panelW-listX()-64),left+listX(),top+LIST_Y-10,COLOR_TITLE,false);
         int chainIndex = 0;
         for (SpellCatalog.Chain chain : chains) {
             int colX = left + listX() + chainIndex * colW;
-            graphics.drawString(this.font, chain.cn(), colX, top + LIST_Y, COLOR_TITLE, false);
+            graphics.drawString(this.font, fitLabel(chain.cn(), colW - 8), colX, top + LIST_Y, COLOR_TITLE, false);
             chainIndex++;
         }
 
@@ -448,8 +471,8 @@ public class MagicStoneScreen extends Screen {
             for (SpellCatalog.Entry entry : SpellCatalog.of(shownElement, chain)) {
                 // 法术图标画在按钮左边（super.render 之后画，否则被按钮盖住）
                 // 一律画 —— 未学会的 t3+ 以前不画，看上去像"图标坏了"，作者要求统一显示 ✓
-                drawSpellIcon(graphics, entry, colX + 2, spellY + 1);
-                if (isHovering(colX, spellY, colW - 8, 16, mouseX, mouseY)) {
+                drawSpellIcon(graphics, entry, colX + 2, spellY + 2);
+                if (isHovering(colX, spellY, colW - 8, 20, mouseX, mouseY)) {
                     MagicStoneLearning.Result state = MagicStoneLearning.check(data, entry);
                     // 消耗要按玩家自己的上限算（随上限等比放大），不然提示和实际扣费对不上
                     String tooltip=entry.fullName()
@@ -461,10 +484,7 @@ public class MagicStoneScreen extends Screen {
                                     + "\n§7前置 " + (entry.tier() <= 1 ? "无（链的第 1 级）"
                                             : "先学本链第 " + (entry.tier() - 1) + " 级")
                                     + "\n§7状态 " + stateText(state, entry);
-                    var lines=new java.util.ArrayList<net.minecraft.util.FormattedCharSequence>();
-                    for(String line:tooltip.split("\n"))
-                        lines.addAll(this.font.split(Component.literal(line),Math.max(100,Math.min(300,this.width-24))));
-                    graphics.renderTooltip(this.font,lines,mouseX,mouseY);
+                    renderLines(graphics, tooltip, mouseX, mouseY);
                 }
                 spellY += ROW_H;
             }
@@ -487,9 +507,9 @@ public class MagicStoneScreen extends Screen {
         graphics.drawString(this.font, fitLabel("配键 · 第 " + (page + 1) + "/"
                         + MagicStoneData.PAGE_COUNT + " 页 · 本页 " + bound + "/"
                         + MagicStoneData.SLOTS_PER_PAGE + " 个", listX() - 26),
-                left + 12, top + LIST_Y - 14, COLOR_TITLE, false);
+                left + 12, top + LIST_Y - 10, COLOR_TITLE, false);
         graphics.drawString(this.font,
-                bindSlot < 0 ? "§7先点左边一个键" : "§e已选中，点右边的法术放上去",
+                fitLabel(bindSlot < 0 ? "先选左侧键位" : "再选右侧法术", listX() - 26),
                 left + 12, top + PANEL_H - 38, bindSlot < 0 ? COLOR_DIM : 0xFFFFD479, false);
 
         String heading = shownElement == null ? "独立魔法"
@@ -497,10 +517,21 @@ public class MagicStoneScreen extends Screen {
         if (bindScrollRows() > 1) {
             heading = heading + " §7(" + (bindScroll + 1) + "/" + bindScrollRows() + " 滚轮/▲▼)";
         }
-        graphics.drawString(this.font, fitLabel(heading, panelW - listX() - 20),
-                left + listX(), top + LIST_Y - 14, COLOR_TITLE, false);
+        graphics.drawString(this.font, fitLabel(heading, panelW - listX() - (bindScrollRows() > 1 ? 64 : 20)),
+                left + listX(), top + LIST_Y - 10, COLOR_TITLE, false);
 
         super.render(graphics, mouseX, mouseY, 0.0F);
+
+        for (var icon : bindRects.entrySet()) {
+            int[] r = icon.getValue();
+            drawSpellIcon(graphics, icon.getKey(), r[0] + 2, r[1] + 1);
+        }
+
+        int footerW = (listX() - 28) / 2;
+        if (isHovering(left + 12, top + PANEL_H - 24, footerW, 16, mouseX, mouseY))
+            renderLines(graphics, "切换法术页（默认数字键 1）", mouseX, mouseY);
+        if (isHovering(left + 16 + footerW, top + PANEL_H - 24, footerW, 16, mouseX, mouseY))
+            renderLines(graphics, "清空左侧选中的键位", mouseX, mouseY);
 
         // 槽位行高必须和 drawBindTab 里的悬停判定用同一个常量（对不上的话提示会串行）
         for (int i = 0; i < MagicStoneData.SLOTS_PER_PAGE; i++) {
@@ -536,9 +567,9 @@ public class MagicStoneScreen extends Screen {
     private void renderLines(GuiGraphics graphics, String text, int mouseX, int mouseY) {
         var lines = new java.util.ArrayList<net.minecraft.util.FormattedCharSequence>();
         for (String line : text.split("\n")) {
-            lines.addAll(this.font.split(Component.literal(line), Math.max(100, Math.min(300, this.width - 24))));
+            lines.addAll(this.font.split(Component.literal(line), Math.max(100, Math.min(300, minecraft.getWindow().getGuiScaledWidth() - 24))));
         }
-        graphics.renderTooltip(this.font, lines, mouseX, mouseY);
+        pendingTooltip = lines;
     }
 
     /** 把法术图标画在按钮左边（16x16，贴图路径 = assets/tnc/textures/spell/<id>.png）。 */
@@ -546,7 +577,8 @@ public class MagicStoneScreen extends Screen {
                                       SpellCatalog.Entry entry, int x, int y) {
         net.minecraft.resources.ResourceLocation icon = net.minecraft.resources.ResourceLocation
                 .fromNamespaceAndPath("tnc", "textures/spell/" + entry.id().getPath() + ".png");
-        graphics.blit(icon, x, y, 0.0F, 0.0F, 16, 16, 16, 16);
+        // Full normalized UVs support both existing 16px and 32px artwork.
+        graphics.blit(icon, x, y, 16, 16, 0.0F, 0.0F, 1, 1, 1, 1);
     }
 
     /**
@@ -610,6 +642,19 @@ public class MagicStoneScreen extends Screen {
         return false;
     }
 
+    @Override public boolean mouseClicked(double x, double y, int button) {
+        return super.mouseClicked(x / uiScale, y / uiScale, button);
+    }
+    @Override public boolean mouseReleased(double x, double y, int button) {
+        return super.mouseReleased(x / uiScale, y / uiScale, button);
+    }
+    @Override public boolean mouseDragged(double x, double y, int button, double dx, double dy) {
+        return super.mouseDragged(x / uiScale, y / uiScale, button, dx / uiScale, dy / uiScale);
+    }
+    @Override public void mouseMoved(double x, double y) {
+        super.mouseMoved(x / uiScale, y / uiScale);
+    }
+
     /**
      * 鼠标滚轮滚配键列表。
      *
@@ -626,6 +671,6 @@ public class MagicStoneScreen extends Screen {
             }
             return true;
         }
-        return super.mouseScrolled(mouseX, mouseY, delta);
+        return super.mouseScrolled(mouseX / uiScale, mouseY / uiScale, delta);
     }
 }

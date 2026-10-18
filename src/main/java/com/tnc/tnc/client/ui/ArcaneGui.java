@@ -13,6 +13,26 @@ public final class ArcaneGui {
   int d=Math.min(16,Math.min(w,h)/4),s=SIZE/6;int[] ds={d,w-2*d,d},hs={d,h-2*d,d},ss={s,SIZE-2*s,s};int yy=y,v=0;
   for(int row=0;row<3;row++){int xx=x,u=0;for(int col=0;col<3;col++){g.blit(FRAME,xx,yy,ds[col],hs[row],(float)u,(float)v,ss[col],ss[row],SIZE,SIZE);xx+=ds[col];u+=ss[col];}yy+=hs[row];v+=ss[row];}
  }
+ /** Tile straight rails and uniformly scale ornaments; never stretch a round crest into an ellipse. */
+ public static void proportionalFrame(GuiGraphics g,int x,int y,int w,int h){
+  g.fill(x-2,y-2,x+w+2,y+h+2,0xe6000000);
+  g.blit(FRAME,x+8,y+8,w-16,h-16,240f,240f,774,774,SIZE,SIZE);
+  for(int dx=24;dx<w-24;dx+=20){
+   int n=Math.min(20,w-24-dx),sw=n*8;
+   g.blit(FRAME,x+dx,y,n,12,330f,0f,sw,96,SIZE,SIZE);
+   g.blit(FRAME,x+dx,y+h-12,n,12,330f,SIZE-96f,sw,96,SIZE,SIZE);
+  }
+  for(int dy=24;dy<h-24;dy+=20){
+   int n=Math.min(20,h-24-dy),sh=n*8;
+   g.blit(FRAME,x,y+dy,12,n,0f,270f,96,sh,SIZE,SIZE);
+   g.blit(FRAME,x+w-12,y+dy,12,n,SIZE-96f,270f,96,sh,SIZE,SIZE);
+  }
+  for(int cx=0;cx<2;cx++)for(int cy=0;cy<2;cy++)
+   g.blit(FRAME,x+cx*(w-24),y+cy*(h-24),24,24,cx*(SIZE-209f),cy*(SIZE-209f),209,209,SIZE,SIZE);
+  // Source crops retain their original aspect ratio, including the central moon ornament.
+  g.blit(FRAME,x+(w-30)/2,y,30,25,515f,0f,225,184,SIZE,SIZE);
+  g.blit(FRAME,x+(w-14)/2,y+h-13,14,13,570f,1150f,114,104,SIZE,SIZE);
+ }
  public static void slot(GuiGraphics g,int x,int y){g.fill(x-2,y-2,x+18,y+18,0xff302b24);g.fill(x-1,y-1,x+17,y+17,0xff8e7653);g.fill(x,y,x+16,y+16,0xff14191f);for(int dx:new int[]{-2,15})for(int dy:new int[]{-2,15})g.fill(x+dx,y+dy,x+dx+3,y+dy+3,0xffc1a677);}
  public static void line(GuiGraphics g,double ax,double ay,double bx,double by,double width,int color){double dx=bx-ax,dy=by-ay,len=Math.hypot(dx,dy);if(len<.0001)return;double sx=-dy/len*width*.5,sy=dx/len*width*.5;var v=g.bufferSource().getBuffer(RenderType.gui());var m=g.pose().last().pose();point(v,m,bx+sx,by+sy,color);point(v,m,bx-sx,by-sy,color);point(v,m,ax-sx,ay-sy,color);point(v,m,ax+sx,ay+sy,color);}
  private static void point(com.mojang.blaze3d.vertex.VertexConsumer v,org.joml.Matrix4f m,double x,double y,int c){v.vertex(m,(float)x,(float)y,0).color(c>>16&255,c>>8&255,c&255,c>>>24).endVertex();}

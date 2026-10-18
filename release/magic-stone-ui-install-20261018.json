@@ -1,0 +1,75 @@
+{
+  "installed_at": "2026-10-18T17:23:33.983664",
+  "live": "D:\\垃圾桶\\PCL 正式版 2.9.3\\.minecraft\\versions\\元素觉醒1.4.3-魔改版-20260915",
+  "jar_sha256": "dcceeb3c0f8eb0f0abef427104fb0574c3fb5f071a9d7be4ba9f2e21c7e62f1a",
+  "jar_bytes": 110058894,
+  "unit_tests": 268,
+  "native_report": {
+    "hover_frames": 50,
+    "scenes": [
+      {
+        "viewport": "800x450",
+        "buttons": 30,
+        "page": "water-learn",
+        "fit": 1.0,
+        "stage": 0
+      },
+      {
+        "viewport": "800x450",
+        "buttons": 25,
+        "page": "water-bind",
+        "fit": 1.0,
+        "stage": 1
+      },
+      {
+        "viewport": "624x260",
+        "buttons": 30,
+        "page": "water-learn",
+        "fit": 0.8472222,
+        "stage": 2
+      },
+      {
+        "viewport": "624x260",
+        "buttons": 25,
+        "page": "water-bind",
+        "fit": 0.8472222,
+        "stage": 3
+      },
+      {
+        "viewport": "427x240",
+        "buttons": 30,
+        "page": "water-learn",
+        "fit": 0.7777778,
+        "stage": 4
+      },
+      {
+        "viewport": "427x240",
+        "buttons": 25,
+        "page": "water-bind",
+        "fit": 0.7777778,
+        "stage": 5
+      },
+      {
+        "viewport": "960x360",
+        "buttons": 30,
+        "page": "water-learn",
+        "fit": 1.0,
+        "stage": 6
+      },
+      {
+        "viewport": "960x360",
+        "buttons": 25,
+        "page": "water-bind",
+        "fit": 1.0,
+        "stage": 7
+      }
+    ],
+    "failures": [],
+    "screenshots": 8,
+    "physical_clicks": 12
+  },
+  "protected_quest_files_unchanged": 42,
+  "saves_modified": false,
+  "island_templates_modified": false,
+  "backup": "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\work\\backups\\magic-stone-ui-20261018-172333"
+}

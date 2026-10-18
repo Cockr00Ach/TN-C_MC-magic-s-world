@@ -129,6 +129,15 @@ minecraft {
                 property 'tnc.lifeRoutesVisualAudit', 'true'
                 args '--quickPlaySingleplayer', 'ecology-gui-feedback', '--width', '1280', '--height', '720'
             }
+            if (project.hasProperty('magicStoneUiAudit')) {
+                workingDirectory project.file('run-client-ecology-audit')
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+                property 'tnc.magicStoneUiAudit', 'true'
+                property 'tnc.magicStoneUiAuditOutput', file('work/magic-stone-ui-audit').absolutePath
+                args '--quickPlaySingleplayer', 'ecology-gui-feedback', '--width', '1600', '--height', '900'
+                jvmArgs '-Xmx6G'
+            }
             if (project.hasProperty('manaSightAudit')) {
                 workingDirectory project.file('run-client-ecology-audit')
                 property 'mixin.env.remapRefMap', 'true'
@@ -306,7 +315,7 @@ dependencies {
     }
     // Optional headless building smoke tests need the same NPC animation API as the pack.
     // Compile-only keeps normal distribution unchanged; enable with -PbuildingGameTests.
-    if (project.hasProperty('buildingGameTests')) {
+    if (project.hasProperty('buildingGameTests') || project.hasProperty('magicStoneUiAudit')) {
         runtimeOnly fg.deobf('geckolib:geckolib:4.8.4')
     }
     // Uses unmodified existing pack jars in an isolated GameTest world.
