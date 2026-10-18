@@ -112,18 +112,6 @@ public final class CombatGameTests {
         }finally{cleanup(h,p);}h.succeed();
     }
     @GameTest(template="building_test_empty",timeoutTicks=30)
-    public static void fireRevivalTakesPrecedenceInRealEventBusOrder(GameTestHelper h) {
-        var p=player(h,"f"+UUID.randomUUID().toString().substring(0,10),2);
-        try {
-            p.addEffect(new net.minecraft.world.effect.MobEffectInstance(com.tnc.tnc.magic.TNFireMechanics.BLAZE_BURN.get(),300));
-            p.setHealth(0);
-            var event=new LivingDeathEvent(p,p.damageSources().generic());
-            net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(event);
-            h.assertTrue(event.isCanceled()&&!DownedCombat.isDowned(p)&&p.getHealth()==p.getMaxHealth(),"Fire death prevention runs before downed fallback");
-            h.assertTrue(DownedCombat.data(p).getLong("soloUntil")==0,"Fire revival does not consume the solo passive");
-        }finally{cleanup(h,p);}h.succeed();
-    }
-    @GameTest(template="building_test_empty",timeoutTicks=30)
     public static void totemPreventsDeathBeforeSoloPassive(GameTestHelper h) {
         var p=player(h,"t"+UUID.randomUUID().toString().substring(0,10),2);
         try {

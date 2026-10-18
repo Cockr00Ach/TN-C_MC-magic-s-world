@@ -227,13 +227,14 @@ public final class SpellCatalog {
             fireEntry("molten_skyfall", Chain.BALL, 4, "熔岳天倾"),
             fireEntry("meteor_fall", Chain.BALL, 5, "陨星坠"),
 
-            // ---- 燃烧线：1 附着(+10%) → 2 初级(+25%) → 3 中级(+75%,15s复活)
-            //              → 4 高级(+150%,20s复活) → 5 完全燃烧(血1+无敌15s+200%) ----
-            fireEntry("fire_aspect", Chain.BURN, 1, "火附着"),
-            fireEntry("ember_burn", Chain.BURN, 2, "初级燃烧"),
-            fireEntry("blaze_burn", Chain.BURN, 3, "中级燃烧"),
-            fireEntry("inferno_burn", Chain.BURN, 4, "高级燃烧"),
-            fireEntry("total_burn", Chain.BURN, 5, "完全燃烧"),
+            // ---- 燃烧线（2026-10-11 重做）：以伤换伤 —— 火伤越高，自己挨打越疼
+            //   1 燎肤(+10%火伤/+10%受伤) → 2 灼脉(+25%/+20%) → 3 焚元(+75%/+35%)
+            //   → 4 烬魂(+150%/+55%) → 5 殉命(+200%/+80%) ----
+            fireEntry("fire_aspect", Chain.BURN, 1, "燎肤"),
+            fireEntry("ember_burn", Chain.BURN, 2, "灼脉"),
+            fireEntry("blaze_burn", Chain.BURN, 3, "焚元"),
+            fireEntry("inferno_burn", Chain.BURN, 4, "烬魂"),
+            fireEntry("total_burn", Chain.BURN, 5, "殉命"),
 
             // ---- 风速线：1 起飞5s → 2 起飞5s+速100% → 3 起飞15s+速150%+风伤50%
             //              → 4 永久起飞+速300%30s+风伤100% → 5 再加无冷却+蓝耗减半 ----
