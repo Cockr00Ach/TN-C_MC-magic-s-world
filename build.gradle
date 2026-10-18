@@ -86,6 +86,14 @@ minecraft {
         }
 
         client {
+            if (project.hasProperty('elementBlocksAudit')) {
+                workingDirectory project.file('work/element-blocks-audit')
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+                property 'tnc.elementBlocksAudit', 'true'
+                property 'tnc.elementBlocksAuditReport', file('work/element-blocks-audit.json').absolutePath
+                args '--width', '1800', '--height', '1100'
+            }
             if (project.hasProperty('windTwoChainsAudit')) {
                 workingDirectory project.file('work/wind-two-chains-client-audit')
                 property 'tnc.windTwoChainsAudit', 'true'
@@ -202,6 +210,10 @@ minecraft {
                 property 'forge.enabledGameTestNamespaces', 'tncleviathan'
                 property 'mixin.env.remapRefMap', 'true'
                 property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+            }
+            if (project.hasProperty('elementBlockTests')) {
+                property 'forge.enabledGameTestNamespaces', 'tncelementblocks'
+                workingDirectory project.file('work/element-blocks-tests')
             }
             if (project.hasProperty('ftbQuestLoadTests')) {
                 workingDirectory project.file(project.findProperty('ftbQuestLoadDir') ?: 'work/ftb-route-load-test')

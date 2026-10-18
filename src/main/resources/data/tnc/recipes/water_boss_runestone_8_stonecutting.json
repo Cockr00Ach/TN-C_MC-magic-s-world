@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "tag": "tnc:boss_runestones/water"
+  },
+  "result": "tnc:water_boss_runestone_8",
+  "count": 1
+}
