@@ -37,10 +37,11 @@ public final class TNBurnAuraEntity extends Entity {
     /**
      * 一团火活多久（tick）。
      *
-     * <p>燃烧链 5 个法术的 {@code cast.duration} 都是 0.6 秒 = 12 tick，
-     * 这里给到 16 tick：让"放出"那一瞬间火还没散，衔接得上 ✓
+     * <p>2026-10-18 起这团火是<b>放出瞬间</b>点起来的（SPELL_CAST 对燃烧链只以 RELEASE 到达，
+     * 起手那 0.6 秒里引擎不回事件），所以时长按"放出后还能看多久"给：
+     * 24 tick = 1.2 秒，够看清一圈火绕上来又不至于挡视线 ✓
      */
-    public static final int AURA_LIFE_TICKS = 16;
+    public static final int AURA_LIFE_TICKS = 24;
 
     private static final EntityDataAccessor<Integer> DATA_TIER =
             SynchedEntityData.defineId(TNBurnAuraEntity.class, EntityDataSerializers.INT);
@@ -67,25 +68,27 @@ public final class TNBurnAuraEntity extends Entity {
     }
 
     /**
-     * 施法起手：如果这位施法者身上还没有火，就点一团。
+     * 施法时点一团火：如果这位施法者身上还没有火，就点一团。
      *
-     * <p>为什么先查一遍：{@code SpellCast.Action.CHANNEL} 是<b>每 tick 回一次</b>的，
-     * 不查就会 12 tick 里叠出 12 团火（肉眼是白到看不清的一团，还白烧 12 份渲染开销）✗
+     * <p>为什么先查一遍：不管引擎那边一次施法回几次事件（RELEASE 现在只回一次，
+     * 但 CHANNEL 之类的路径可能每 tick 回一次），这里都能兜住 ——
+     * 不查就会叠出好几团火（肉眼是白到看不清的一团，还白烧几份渲染开销）✗
      */
-    public static void ensureAura(ServerPlayer player, SpellCatalog.Entry entry) {
+    public static boolean ensureAura(ServerPlayer player, SpellCatalog.Entry entry) {
         if (player == null || entry == null) {
-            return;
+            return false;
         }
         if (entry.chain() != SpellCatalog.Chain.BURN) {
-            return;
+            return false;
         }
         ServerLevel level = player.serverLevel();
         boolean already = !level.getEntitiesOfClass(TNBurnAuraEntity.class,
                 player.getBoundingBox().inflate(3.0D), a -> a.caster == player).isEmpty();
         if (already) {
-            return;
+            return false;
         }
         cast(level, player, entry.tier(), AURA_LIFE_TICKS);
+        return true;
     }
 
     /** 1~5 档，渲染器据此决定火焰规模。 */
