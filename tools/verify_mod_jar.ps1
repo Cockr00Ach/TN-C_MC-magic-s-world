@@ -95,8 +95,22 @@ try {
         if ($toml -match 'authors="YourNameHere') { Write-Host "  [note]    mods.toml still has the MDK placeholder author" }
     }
 
+    foreach ($realmResource in @(
+        'data/tnc/dimension/earth_arena.json',
+        'data/tnc/dimension_type/earth_arena.json',
+        'data/tnc/worldgen/biome/earth_arena.json',
+        'assets/tnc/models/item/earth_arena_keystone.json'
+    )) {
+        if ($zip.GetEntry($realmResource)) { Ok "earth arena resource present: $realmResource" }
+        else { Fail "earth arena resource missing: $realmResource (incomplete release)" }
+    }
     # ---------------- C. expected classes ----------------
     $expectedClasses = @(
+        'com/tnc/tnc/world/eartharena/EarthArena.class',
+        'com/tnc/tnc/world/eartharena/EarthArenaChunkGenerator.class',
+        'com/tnc/tnc/world/eartharena/EarthArenaEncounter.class',
+        'com/tnc/tnc/building/ElementBossBlocks.class',
+        'com/tnc/tnc/mixin/EarthArenaLevelMixin.class',
         'com/tnc/tnc/TNMod.class',
         'com/tnc/tnc/Config.class',
         'com/tnc/tnc/magic/Element.class',

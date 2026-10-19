@@ -14,6 +14,15 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 @GameTestHolder("tnceartharena") @PrefixGameTestTemplate(false)
 public final class EarthArenaGameTests {
+    @GameTest(template="earth_arena_empty",timeoutTicks=30)
+    public static void realmCommandsAndRequiredContentRemainRegistered(GameTestHelper helper){
+        var root=helper.getLevel().getServer().getCommands().getDispatcher().getRoot().getChild("tnc");
+        helper.assertTrue(root!=null&&root.getChild("earth")!=null&&root.getChild("eartharena")!=null,"Both earth realm travel commands are present");
+        helper.assertTrue(helper.getLevel().getServer().getLevel(EarthArena.KEY)!=null,"Saved earth dimension identifier remains loadable");
+        helper.assertTrue(EarthArena.KEYSTONE!=null&&EarthArena.PLATFORM!=null&&EarthArena.DARK_PLATFORM!=null,"Keystone and both protected arena floor blocks exist");
+        for(int shade=1;shade<=8;shade++)helper.assertTrue(ElementBossBlocks.block("earth",shade)!=null,"Every mountain runestone shade is registered");
+        helper.succeed();
+    }
     @GameTest(template = "earth_arena_empty", timeoutTicks = 1200)
     public static void dedicatedRealmGeneratesSolidMountainsAndYellowSky(GameTestHelper helper) {
         var realm = helper.getLevel().getServer().getLevel(EarthArena.KEY);

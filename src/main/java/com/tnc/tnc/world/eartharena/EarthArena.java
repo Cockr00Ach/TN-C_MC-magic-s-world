@@ -66,6 +66,8 @@ public final class EarthArena {
 
     @SubscribeEvent public static void stopped(net.minecraftforge.event.server.ServerStoppedEvent event) { PENDING.clear(); }
     @SubscribeEvent public static void commands(RegisterCommandsEvent event) {
+        event.getDispatcher().register(literal("tnc").then(literal("earth").requires(source -> source.hasPermission(2))
+                .executes(context -> { travel(context.getSource().getPlayerOrException()); return 1; })));
         event.getDispatcher().register(literal("tnc").then(literal("eartharena").requires(source -> source.hasPermission(2))
                 .executes(context -> { travel(context.getSource().getPlayerOrException()); return 1; })));
     }
