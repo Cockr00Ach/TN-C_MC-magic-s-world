@@ -1,11 +1,11 @@
 {
   "sources": [
-    "art\\materials\\stone_lancer_individual_plates_20261019_upper.png",
-    "art\\materials\\stone_lancer_individual_plates_20261019_lower.png"
+    "art/materials/stone_lancer_readable_plates_20261019_upper.png",
+    "art/materials/stone_lancer_readable_plates_20261019_lower.png"
   ],
   "source_sha256": [
-    "3582f10c9f18adc257c70bbdfc5eaf726a84fc32106cc511cd9ccf2d3c388984",
-    "5fe30ad9c6efb9173d9103b46046bac459c7162907c9201507a0d8644c8b084f"
+    "9ebc6d397955cfe099f592f77b28e6c82ea1db5c850d541eb69052f9316ad1cf",
+    "93c9278d62c329d8d0b3d6213c2d83826b1216d5027e1ddff8cebc1b50f56a97"
   ],
   "atlas": [
     2048,
@@ -16,17 +16,19 @@
   "faces": 1146,
   "used_height": 1007,
   "materials": {
-    "0": 129,
-    "1": 40,
-    "2": 19,
-    "3": 3
+    "limestone": 39,
+    "slate": 47,
+    "basalt": 64,
+    "foundation": 30,
+    "inlaid": 8,
+    "amber": 3
   },
   "assignments": [
     {
       "bone": "pelvis",
       "cube": 0,
-      "source_cell": 144,
-      "material": "basalt",
+      "source_cell": 160,
+      "material": "foundation",
       "faces": {
         "up": [
           1160,
@@ -69,8 +71,8 @@
     {
       "bone": "pelvis",
       "cube": 1,
-      "source_cell": 0,
-      "material": "greige",
+      "source_cell": 48,
+      "material": "slate",
       "faces": {
         "up": [
           2,
@@ -113,8 +115,8 @@
     {
       "bone": "pelvis",
       "cube": 2,
-      "source_cell": 1,
-      "material": "greige",
+      "source_cell": 49,
+      "material": "slate",
       "faces": {
         "north": [
           1520,
@@ -157,8 +159,8 @@
     {
       "bone": "pelvis",
       "cube": 3,
-      "source_cell": 2,
-      "material": "greige",
+      "source_cell": 50,
+      "material": "slate",
       "faces": {
         "north": [
           314,
@@ -201,8 +203,8 @@
     {
       "bone": "pelvis",
       "cube": 4,
-      "source_cell": 3,
-      "material": "greige",
+      "source_cell": 51,
+      "material": "slate",
       "faces": {
         "north": [
           1610,
@@ -245,8 +247,8 @@
     {
       "bone": "pelvis",
       "cube": 5,
-      "source_cell": 4,
-      "material": "greige",
+      "source_cell": 52,
+      "material": "slate",
       "faces": {
         "north": [
           404,
@@ -289,8 +291,8 @@
     {
       "bone": "pelvis",
       "cube": 6,
-      "source_cell": 5,
-      "material": "greige",
+      "source_cell": 53,
+      "material": "slate",
       "faces": {
         "north": [
           1700,
@@ -333,8 +335,8 @@
     {
       "bone": "pelvis",
       "cube": 7,
-      "source_cell": 6,
-      "material": "greige",
+      "source_cell": 54,
+      "material": "slate",
       "faces": {
         "north": [
           494,
@@ -377,8 +379,8 @@
     {
       "bone": "pelvis",
       "cube": 8,
-      "source_cell": 145,
-      "material": "basalt",
+      "source_cell": 55,
+      "material": "slate",
       "faces": {
         "up": [
           1844,
@@ -421,8 +423,8 @@
     {
       "bone": "pelvis",
       "cube": 9,
-      "source_cell": 146,
-      "material": "basalt",
+      "source_cell": 56,
+      "material": "slate",
       "faces": {
         "up": [
           1880,
@@ -465,8 +467,8 @@
     {
       "bone": "torso",
       "cube": 0,
-      "source_cell": 147,
-      "material": "basalt",
+      "source_cell": 161,
+      "material": "foundation",
       "faces": {
         "up": [
           1530,
@@ -509,8 +511,8 @@
     {
       "bone": "torso",
       "cube": 1,
-      "source_cell": 7,
-      "material": "greige",
+      "source_cell": 162,
+      "material": "foundation",
       "faces": {
         "north": [
           546,
@@ -553,8 +555,8 @@
     {
       "bone": "torso",
       "cube": 2,
-      "source_cell": 8,
-      "material": "greige",
+      "source_cell": 163,
+      "material": "foundation",
       "faces": {
         "up": [
           666,
@@ -597,8 +599,8 @@
     {
       "bone": "torso",
       "cube": 3,
-      "source_cell": 9,
-      "material": "greige",
+      "source_cell": 164,
+      "material": "foundation",
       "faces": {
         "up": [
           1836,
@@ -641,8 +643,8 @@
     {
       "bone": "torso",
       "cube": 4,
-      "source_cell": 148,
-      "material": "basalt",
+      "source_cell": 165,
+      "material": "foundation",
       "faces": {
         "up": [
           1094,
@@ -685,8 +687,8 @@
     {
       "bone": "torso",
       "cube": 5,
-      "source_cell": 10,
-      "material": "greige",
+      "source_cell": 166,
+      "material": "foundation",
       "faces": {
         "north": [
           692,
@@ -729,8 +731,8 @@
     {
       "bone": "torso",
       "cube": 6,
-      "source_cell": 11,
-      "material": "greige",
+      "source_cell": 167,
+      "material": "foundation",
       "faces": {
         "up": [
           778,
@@ -773,8 +775,8 @@
     {
       "bone": "torso",
       "cube": 7,
-      "source_cell": 12,
-      "material": "greige",
+      "source_cell": 168,
+      "material": "foundation",
       "faces": {
         "up": [
           1948,
@@ -817,8 +819,8 @@
     {
       "bone": "torso",
       "cube": 8,
-      "source_cell": 149,
-      "material": "basalt",
+      "source_cell": 169,
+      "material": "foundation",
       "faces": {
         "up": [
           1228,
@@ -861,8 +863,8 @@
     {
       "bone": "torso",
       "cube": 9,
-      "source_cell": 13,
-      "material": "greige",
+      "source_cell": 0,
+      "material": "limestone",
       "faces": {
         "north": [
           588,
@@ -905,8 +907,8 @@
     {
       "bone": "torso",
       "cube": 10,
-      "source_cell": 14,
-      "material": "greige",
+      "source_cell": 1,
+      "material": "limestone",
       "faces": {
         "up": [
           1604,
@@ -949,8 +951,8 @@
     {
       "bone": "torso",
       "cube": 11,
-      "source_cell": 15,
-      "material": "greige",
+      "source_cell": 2,
+      "material": "limestone",
       "faces": {
         "north": [
           664,
@@ -993,8 +995,8 @@
     {
       "bone": "torso",
       "cube": 12,
-      "source_cell": 150,
-      "material": "basalt",
+      "source_cell": 3,
+      "material": "limestone",
       "faces": {
         "up": [
           1644,
@@ -1037,8 +1039,8 @@
     {
       "bone": "torso",
       "cube": 13,
-      "source_cell": 16,
-      "material": "greige",
+      "source_cell": 4,
+      "material": "limestone",
       "faces": {
         "north": [
           740,
@@ -1081,8 +1083,8 @@
     {
       "bone": "torso",
       "cube": 14,
-      "source_cell": 17,
-      "material": "greige",
+      "source_cell": 5,
+      "material": "limestone",
       "faces": {
         "up": [
           1684,
@@ -1125,8 +1127,8 @@
     {
       "bone": "torso",
       "cube": 15,
-      "source_cell": 18,
-      "material": "greige",
+      "source_cell": 6,
+      "material": "limestone",
       "faces": {
         "up": [
           700,
@@ -1169,8 +1171,8 @@
     {
       "bone": "torso",
       "cube": 16,
-      "source_cell": 19,
-      "material": "greige",
+      "source_cell": 7,
+      "material": "limestone",
       "faces": {
         "north": [
           816,
@@ -1213,8 +1215,8 @@
     {
       "bone": "torso",
       "cube": 17,
-      "source_cell": 20,
-      "material": "greige",
+      "source_cell": 8,
+      "material": "limestone",
       "faces": {
         "up": [
           1724,
@@ -1257,8 +1259,8 @@
     {
       "bone": "torso",
       "cube": 18,
-      "source_cell": 21,
-      "material": "greige",
+      "source_cell": 9,
+      "material": "limestone",
       "faces": {
         "north": [
           892,
@@ -1301,8 +1303,8 @@
     {
       "bone": "torso",
       "cube": 19,
-      "source_cell": 151,
-      "material": "basalt",
+      "source_cell": 10,
+      "material": "limestone",
       "faces": {
         "up": [
           1764,
@@ -1345,8 +1347,8 @@
     {
       "bone": "torso",
       "cube": 20,
-      "source_cell": 22,
-      "material": "greige",
+      "source_cell": 11,
+      "material": "limestone",
       "faces": {
         "north": [
           968,
@@ -1389,8 +1391,8 @@
     {
       "bone": "torso",
       "cube": 21,
-      "source_cell": 23,
-      "material": "greige",
+      "source_cell": 12,
+      "material": "limestone",
       "faces": {
         "up": [
           1804,
@@ -1433,8 +1435,8 @@
     {
       "bone": "torso",
       "cube": 22,
-      "source_cell": 24,
-      "material": "greige",
+      "source_cell": 13,
+      "material": "limestone",
       "faces": {
         "up": [
           822,
@@ -1477,8 +1479,8 @@
     {
       "bone": "torso",
       "cube": 23,
-      "source_cell": 25,
-      "material": "greige",
+      "source_cell": 14,
+      "material": "limestone",
       "faces": {
         "north": [
           1988,
@@ -1521,8 +1523,8 @@
     {
       "bone": "torso",
       "cube": 24,
-      "source_cell": 26,
-      "material": "greige",
+      "source_cell": 15,
+      "material": "limestone",
       "faces": {
         "north": [
           54,
@@ -1565,8 +1567,8 @@
     {
       "bone": "torso",
       "cube": 25,
-      "source_cell": 27,
-      "material": "greige",
+      "source_cell": 16,
+      "material": "limestone",
       "faces": {
         "north": [
           158,
@@ -1609,8 +1611,8 @@
     {
       "bone": "torso",
       "cube": 26,
-      "source_cell": 28,
-      "material": "greige",
+      "source_cell": 17,
+      "material": "limestone",
       "faces": {
         "north": [
           262,
@@ -1653,8 +1655,8 @@
     {
       "bone": "torso",
       "cube": 27,
-      "source_cell": 29,
-      "material": "greige",
+      "source_cell": 18,
+      "material": "limestone",
       "faces": {
         "north": [
           366,
@@ -1697,8 +1699,8 @@
     {
       "bone": "torso",
       "cube": 28,
-      "source_cell": 30,
-      "material": "greige",
+      "source_cell": 19,
+      "material": "limestone",
       "faces": {
         "north": [
           470,
@@ -1741,8 +1743,8 @@
     {
       "bone": "core_frame",
       "cube": 0,
-      "source_cell": 192,
-      "material": "inlaid",
+      "source_cell": 170,
+      "material": "foundation",
       "faces": {
         "north": [
           198,
@@ -1785,8 +1787,8 @@
     {
       "bone": "core_frame",
       "cube": 1,
-      "source_cell": 31,
-      "material": "greige",
+      "source_cell": 20,
+      "material": "limestone",
       "faces": {
         "north": [
           1124,
@@ -1829,8 +1831,8 @@
     {
       "bone": "core_frame",
       "cube": 2,
-      "source_cell": 32,
-      "material": "greige",
+      "source_cell": 21,
+      "material": "limestone",
       "faces": {
         "north": [
           1164,
@@ -1873,8 +1875,8 @@
     {
       "bone": "core_frame",
       "cube": 3,
-      "source_cell": 33,
-      "material": "greige",
+      "source_cell": 22,
+      "material": "limestone",
       "faces": {
         "north": [
           1204,
@@ -1917,8 +1919,8 @@
     {
       "bone": "core_frame",
       "cube": 4,
-      "source_cell": 34,
-      "material": "greige",
+      "source_cell": 23,
+      "material": "limestone",
       "faces": {
         "north": [
           1244,
@@ -1961,7 +1963,7 @@
     {
       "bone": "glow_core",
       "cube": 0,
-      "source_cell": 224,
+      "source_cell": 208,
       "material": "amber",
       "faces": {
         "north": [
@@ -2005,7 +2007,7 @@
     {
       "bone": "glow_veins",
       "cube": 0,
-      "source_cell": 193,
+      "source_cell": 192,
       "material": "inlaid",
       "faces": {
         "north": [
@@ -2049,7 +2051,7 @@
     {
       "bone": "glow_veins",
       "cube": 1,
-      "source_cell": 194,
+      "source_cell": 193,
       "material": "inlaid",
       "faces": {
         "north": [
@@ -2093,7 +2095,7 @@
     {
       "bone": "glow_veins",
       "cube": 2,
-      "source_cell": 195,
+      "source_cell": 194,
       "material": "inlaid",
       "faces": {
         "north": [
@@ -2137,7 +2139,7 @@
     {
       "bone": "glow_veins",
       "cube": 3,
-      "source_cell": 196,
+      "source_cell": 195,
       "material": "inlaid",
       "faces": {
         "north": [
@@ -2181,8 +2183,8 @@
     {
       "bone": "head",
       "cube": 0,
-      "source_cell": 152,
-      "material": "basalt",
+      "source_cell": 171,
+      "material": "foundation",
       "faces": {
         "up": [
           690,
@@ -2225,8 +2227,8 @@
     {
       "bone": "head",
       "cube": 1,
-      "source_cell": 35,
-      "material": "greige",
+      "source_cell": 24,
+      "material": "limestone",
       "faces": {
         "up": [
           1926,
@@ -2269,8 +2271,8 @@
     {
       "bone": "head",
       "cube": 2,
-      "source_cell": 36,
-      "material": "greige",
+      "source_cell": 25,
+      "material": "limestone",
       "faces": {
         "up": [
           908,
@@ -2313,8 +2315,8 @@
     {
       "bone": "head",
       "cube": 3,
-      "source_cell": 37,
-      "material": "greige",
+      "source_cell": 26,
+      "material": "limestone",
       "faces": {
         "up": [
           84,
@@ -2357,8 +2359,8 @@
     {
       "bone": "head",
       "cube": 4,
-      "source_cell": 38,
-      "material": "greige",
+      "source_cell": 172,
+      "material": "foundation",
       "faces": {
         "up": [
           136,
@@ -2401,7 +2403,7 @@
     {
       "bone": "head",
       "cube": 5,
-      "source_cell": 153,
+      "source_cell": 96,
       "material": "basalt",
       "faces": {
         "north": [
@@ -2445,8 +2447,8 @@
     {
       "bone": "head",
       "cube": 6,
-      "source_cell": 39,
-      "material": "greige",
+      "source_cell": 27,
+      "material": "limestone",
       "faces": {
         "up": [
           1860,
@@ -2489,8 +2491,8 @@
     {
       "bone": "head",
       "cube": 7,
-      "source_cell": 40,
-      "material": "greige",
+      "source_cell": 28,
+      "material": "limestone",
       "faces": {
         "up": [
           806,
@@ -2533,8 +2535,8 @@
     {
       "bone": "head",
       "cube": 8,
-      "source_cell": 41,
-      "material": "greige",
+      "source_cell": 29,
+      "material": "limestone",
       "faces": {
         "east": [
           1746,
@@ -2577,8 +2579,8 @@
     {
       "bone": "head",
       "cube": 9,
-      "source_cell": 154,
-      "material": "basalt",
+      "source_cell": 30,
+      "material": "limestone",
       "faces": {
         "up": [
           1920,
@@ -2621,8 +2623,8 @@
     {
       "bone": "head",
       "cube": 10,
-      "source_cell": 42,
-      "material": "greige",
+      "source_cell": 31,
+      "material": "limestone",
       "faces": {
         "up": [
           796,
@@ -2665,8 +2667,8 @@
     {
       "bone": "head",
       "cube": 11,
-      "source_cell": 43,
-      "material": "greige",
+      "source_cell": 32,
+      "material": "limestone",
       "faces": {
         "up": [
           892,
@@ -2709,8 +2711,8 @@
     {
       "bone": "head",
       "cube": 12,
-      "source_cell": 44,
-      "material": "greige",
+      "source_cell": 33,
+      "material": "limestone",
       "faces": {
         "east": [
           1794,
@@ -2753,8 +2755,8 @@
     {
       "bone": "head",
       "cube": 13,
-      "source_cell": 155,
-      "material": "basalt",
+      "source_cell": 34,
+      "material": "limestone",
       "faces": {
         "up": [
           1958,
@@ -2797,8 +2799,8 @@
     {
       "bone": "head",
       "cube": 14,
-      "source_cell": 45,
-      "material": "greige",
+      "source_cell": 35,
+      "material": "limestone",
       "faces": {
         "up": [
           852,
@@ -2841,8 +2843,8 @@
     {
       "bone": "head",
       "cube": 15,
-      "source_cell": 46,
-      "material": "greige",
+      "source_cell": 36,
+      "material": "limestone",
       "faces": {
         "up": [
           1790,
@@ -2885,8 +2887,8 @@
     {
       "bone": "head",
       "cube": 16,
-      "source_cell": 47,
-      "material": "greige",
+      "source_cell": 37,
+      "material": "limestone",
       "faces": {
         "up": [
           1858,
@@ -2929,8 +2931,8 @@
     {
       "bone": "head",
       "cube": 17,
-      "source_cell": 48,
-      "material": "greige",
+      "source_cell": 38,
+      "material": "limestone",
       "faces": {
         "north": [
           194,
@@ -2973,7 +2975,7 @@
     {
       "bone": "glow_eyes",
       "cube": 0,
-      "source_cell": 225,
+      "source_cell": 209,
       "material": "amber",
       "faces": {
         "up": [
@@ -3017,7 +3019,7 @@
     {
       "bone": "glow_eyes",
       "cube": 1,
-      "source_cell": 226,
+      "source_cell": 210,
       "material": "amber",
       "faces": {
         "up": [
@@ -3061,7 +3063,7 @@
     {
       "bone": "crown_point_up_-1",
       "cube": 0,
-      "source_cell": 197,
+      "source_cell": 196,
       "material": "inlaid",
       "faces": {
         "east": [
@@ -3105,8 +3107,8 @@
     {
       "bone": "leg_-1",
       "cube": 0,
-      "source_cell": 156,
-      "material": "basalt",
+      "source_cell": 173,
+      "material": "foundation",
       "faces": {
         "up": [
           188,
@@ -3149,8 +3151,8 @@
     {
       "bone": "leg_-1",
       "cube": 1,
-      "source_cell": 49,
-      "material": "greige",
+      "source_cell": 97,
+      "material": "basalt",
       "faces": {
         "up": [
           1362,
@@ -3193,8 +3195,8 @@
     {
       "bone": "leg_-1",
       "cube": 2,
-      "source_cell": 50,
-      "material": "greige",
+      "source_cell": 98,
+      "material": "basalt",
       "faces": {
         "north": [
           1914,
@@ -3237,8 +3239,8 @@
     {
       "bone": "leg_-1",
       "cube": 3,
-      "source_cell": 51,
-      "material": "greige",
+      "source_cell": 99,
+      "material": "basalt",
       "faces": {
         "north": [
           1980,
@@ -3281,7 +3283,7 @@
     {
       "bone": "leg_-1",
       "cube": 4,
-      "source_cell": 157,
+      "source_cell": 100,
       "material": "basalt",
       "faces": {
         "north": [
@@ -3325,8 +3327,8 @@
     {
       "bone": "leg_-1",
       "cube": 5,
-      "source_cell": 52,
-      "material": "greige",
+      "source_cell": 101,
+      "material": "basalt",
       "faces": {
         "north": [
           2,
@@ -3369,8 +3371,8 @@
     {
       "bone": "leg_-1",
       "cube": 6,
-      "source_cell": 53,
-      "material": "greige",
+      "source_cell": 102,
+      "material": "basalt",
       "faces": {
         "north": [
           68,
@@ -3413,7 +3415,7 @@
     {
       "bone": "leg_-1",
       "cube": 7,
-      "source_cell": 158,
+      "source_cell": 103,
       "material": "basalt",
       "faces": {
         "north": [
@@ -3457,8 +3459,8 @@
     {
       "bone": "foot_-1",
       "cube": 0,
-      "source_cell": 54,
-      "material": "greige",
+      "source_cell": 174,
+      "material": "foundation",
       "faces": {
         "up": [
           854,
@@ -3501,8 +3503,8 @@
     {
       "bone": "foot_-1",
       "cube": 1,
-      "source_cell": 159,
-      "material": "basalt",
+      "source_cell": 57,
+      "material": "slate",
       "faces": {
         "up": [
           952,
@@ -3545,8 +3547,8 @@
     {
       "bone": "foot_-1",
       "cube": 2,
-      "source_cell": 55,
-      "material": "greige",
+      "source_cell": 104,
+      "material": "basalt",
       "faces": {
         "up": [
           1412,
@@ -3589,8 +3591,8 @@
     {
       "bone": "foot_-1",
       "cube": 3,
-      "source_cell": 56,
-      "material": "greige",
+      "source_cell": 105,
+      "material": "basalt",
       "faces": {
         "up": [
           1458,
@@ -3633,8 +3635,8 @@
     {
       "bone": "foot_-1",
       "cube": 4,
-      "source_cell": 57,
-      "material": "greige",
+      "source_cell": 106,
+      "material": "basalt",
       "faces": {
         "up": [
           1504,
@@ -3677,8 +3679,8 @@
     {
       "bone": "foot_-1",
       "cube": 5,
-      "source_cell": 160,
-      "material": "basalt",
+      "source_cell": 58,
+      "material": "slate",
       "faces": {
         "up": [
           1284,
@@ -3721,8 +3723,8 @@
     {
       "bone": "foot_-1",
       "cube": 6,
-      "source_cell": 161,
-      "material": "basalt",
+      "source_cell": 59,
+      "material": "slate",
       "faces": {
         "up": [
           1324,
@@ -3765,8 +3767,8 @@
     {
       "bone": "foot_-1",
       "cube": 7,
-      "source_cell": 162,
-      "material": "basalt",
+      "source_cell": 60,
+      "material": "slate",
       "faces": {
         "up": [
           1364,
@@ -3809,8 +3811,8 @@
     {
       "bone": "foot_-1",
       "cube": 8,
-      "source_cell": 58,
-      "material": "greige",
+      "source_cell": 61,
+      "material": "slate",
       "faces": {
         "up": [
           1310,
@@ -3853,8 +3855,8 @@
     {
       "bone": "foot_-1",
       "cube": 9,
-      "source_cell": 59,
-      "material": "greige",
+      "source_cell": 62,
+      "material": "slate",
       "faces": {
         "up": [
           1382,
@@ -3897,8 +3899,8 @@
     {
       "bone": "foot_-1",
       "cube": 10,
-      "source_cell": 60,
-      "material": "greige",
+      "source_cell": 63,
+      "material": "slate",
       "faces": {
         "up": [
           1454,
@@ -3941,8 +3943,8 @@
     {
       "bone": "foot_-1",
       "cube": 11,
-      "source_cell": 61,
-      "material": "greige",
+      "source_cell": 64,
+      "material": "slate",
       "faces": {
         "up": [
           1526,
@@ -3985,8 +3987,8 @@
     {
       "bone": "arm_-1",
       "cube": 0,
-      "source_cell": 62,
-      "material": "greige",
+      "source_cell": 175,
+      "material": "foundation",
       "faces": {
         "up": [
           2,
@@ -4029,8 +4031,8 @@
     {
       "bone": "arm_-1",
       "cube": 1,
-      "source_cell": 163,
-      "material": "basalt",
+      "source_cell": 176,
+      "material": "foundation",
       "faces": {
         "up": [
           58,
@@ -4073,8 +4075,8 @@
     {
       "bone": "arm_-1",
       "cube": 2,
-      "source_cell": 63,
-      "material": "greige",
+      "source_cell": 177,
+      "material": "foundation",
       "faces": {
         "up": [
           1585,
@@ -4117,8 +4119,8 @@
     {
       "bone": "arm_-1",
       "cube": 3,
-      "source_cell": 64,
-      "material": "greige",
+      "source_cell": 65,
+      "material": "slate",
       "faces": {
         "north": [
           1042,
@@ -4161,8 +4163,8 @@
     {
       "bone": "arm_-1",
       "cube": 4,
-      "source_cell": 65,
-      "material": "greige",
+      "source_cell": 66,
+      "material": "slate",
       "faces": {
         "north": [
           1132,
@@ -4205,8 +4207,8 @@
     {
       "bone": "arm_-1",
       "cube": 5,
-      "source_cell": 66,
-      "material": "greige",
+      "source_cell": 67,
+      "material": "slate",
       "faces": {
         "north": [
           1222,
@@ -4249,8 +4251,8 @@
     {
       "bone": "arm_-1",
       "cube": 6,
-      "source_cell": 67,
-      "material": "greige",
+      "source_cell": 68,
+      "material": "slate",
       "faces": {
         "up": [
           721,
@@ -4293,8 +4295,8 @@
     {
       "bone": "arm_-1",
       "cube": 7,
-      "source_cell": 68,
-      "material": "greige",
+      "source_cell": 69,
+      "material": "slate",
       "faces": {
         "up": [
           829,
@@ -4337,8 +4339,8 @@
     {
       "bone": "arm_-1",
       "cube": 8,
-      "source_cell": 69,
-      "material": "greige",
+      "source_cell": 70,
+      "material": "slate",
       "faces": {
         "up": [
           1934,
@@ -4381,8 +4383,8 @@
     {
       "bone": "arm_-1",
       "cube": 9,
-      "source_cell": 70,
-      "material": "greige",
+      "source_cell": 71,
+      "material": "slate",
       "faces": {
         "north": [
           650,
@@ -4425,8 +4427,8 @@
     {
       "bone": "arm_-1",
       "cube": 10,
-      "source_cell": 71,
-      "material": "greige",
+      "source_cell": 72,
+      "material": "slate",
       "faces": {
         "up": [
           937,
@@ -4469,8 +4471,8 @@
     {
       "bone": "arm_-1",
       "cube": 11,
-      "source_cell": 72,
-      "material": "greige",
+      "source_cell": 73,
+      "material": "slate",
       "faces": {
         "up": [
           1045,
@@ -4513,8 +4515,8 @@
     {
       "bone": "arm_-1",
       "cube": 12,
-      "source_cell": 164,
-      "material": "basalt",
+      "source_cell": 74,
+      "material": "slate",
       "faces": {
         "up": [
           1970,
@@ -4557,8 +4559,8 @@
     {
       "bone": "arm_-1",
       "cube": 13,
-      "source_cell": 73,
-      "material": "greige",
+      "source_cell": 75,
+      "material": "slate",
       "faces": {
         "north": [
           748,
@@ -4601,8 +4603,8 @@
     {
       "bone": "fore_-1",
       "cube": 0,
-      "source_cell": 165,
-      "material": "basalt",
+      "source_cell": 178,
+      "material": "foundation",
       "faces": {
         "up": [
           454,
@@ -4645,8 +4647,8 @@
     {
       "bone": "fore_-1",
       "cube": 1,
-      "source_cell": 74,
-      "material": "greige",
+      "source_cell": 179,
+      "material": "foundation",
       "faces": {
         "up": [
           1162,
@@ -4689,8 +4691,8 @@
     {
       "bone": "fore_-1",
       "cube": 2,
-      "source_cell": 198,
-      "material": "inlaid",
+      "source_cell": 180,
+      "material": "foundation",
       "faces": {
         "up": [
           386,
@@ -4733,8 +4735,8 @@
     {
       "bone": "fore_-1",
       "cube": 3,
-      "source_cell": 75,
-      "material": "greige",
+      "source_cell": 107,
+      "material": "basalt",
       "faces": {
         "north": [
           978,
@@ -4777,8 +4779,8 @@
     {
       "bone": "fore_-1",
       "cube": 4,
-      "source_cell": 76,
-      "material": "greige",
+      "source_cell": 108,
+      "material": "basalt",
       "faces": {
         "up": [
           2030,
@@ -4821,8 +4823,8 @@
     {
       "bone": "fore_-1",
       "cube": 5,
-      "source_cell": 77,
-      "material": "greige",
+      "source_cell": 109,
+      "material": "basalt",
       "faces": {
         "north": [
           1056,
@@ -4865,8 +4867,8 @@
     {
       "bone": "fore_-1",
       "cube": 6,
-      "source_cell": 78,
-      "material": "greige",
+      "source_cell": 110,
+      "material": "basalt",
       "faces": {
         "up": [
           18,
@@ -4909,8 +4911,8 @@
     {
       "bone": "fore_-1",
       "cube": 7,
-      "source_cell": 79,
-      "material": "greige",
+      "source_cell": 111,
+      "material": "basalt",
       "faces": {
         "north": [
           1134,
@@ -4953,7 +4955,7 @@
     {
       "bone": "fore_-1",
       "cube": 8,
-      "source_cell": 166,
+      "source_cell": 112,
       "material": "basalt",
       "faces": {
         "up": [
@@ -4997,8 +4999,8 @@
     {
       "bone": "fore_-1",
       "cube": 9,
-      "source_cell": 80,
-      "material": "greige",
+      "source_cell": 113,
+      "material": "basalt",
       "faces": {
         "north": [
           1212,
@@ -5041,7 +5043,7 @@
     {
       "bone": "fore_-1",
       "cube": 10,
-      "source_cell": 167,
+      "source_cell": 114,
       "material": "basalt",
       "faces": {
         "up": [
@@ -5085,8 +5087,8 @@
     {
       "bone": "fore_-1",
       "cube": 11,
-      "source_cell": 81,
-      "material": "greige",
+      "source_cell": 115,
+      "material": "basalt",
       "faces": {
         "north": [
           1290,
@@ -5129,8 +5131,8 @@
     {
       "bone": "fore_-1",
       "cube": 12,
-      "source_cell": 82,
-      "material": "greige",
+      "source_cell": 116,
+      "material": "basalt",
       "faces": {
         "up": [
           114,
@@ -5173,8 +5175,8 @@
     {
       "bone": "fore_-1",
       "cube": 13,
-      "source_cell": 83,
-      "material": "greige",
+      "source_cell": 117,
+      "material": "basalt",
       "faces": {
         "north": [
           1368,
@@ -5217,8 +5219,8 @@
     {
       "bone": "fore_-1",
       "cube": 14,
-      "source_cell": 84,
-      "material": "greige",
+      "source_cell": 118,
+      "material": "basalt",
       "faces": {
         "up": [
           146,
@@ -5261,8 +5263,8 @@
     {
       "bone": "fore_-1",
       "cube": 15,
-      "source_cell": 85,
-      "material": "greige",
+      "source_cell": 119,
+      "material": "basalt",
       "faces": {
         "up": [
           1622,
@@ -5305,8 +5307,8 @@
     {
       "bone": "fore_-1",
       "cube": 16,
-      "source_cell": 86,
-      "material": "greige",
+      "source_cell": 120,
+      "material": "basalt",
       "faces": {
         "up": [
           1698,
@@ -5349,8 +5351,8 @@
     {
       "bone": "fore_-1",
       "cube": 17,
-      "source_cell": 199,
-      "material": "inlaid",
+      "source_cell": 121,
+      "material": "basalt",
       "faces": {
         "up": [
           178,
@@ -5393,8 +5395,8 @@
     {
       "bone": "fore_-1",
       "cube": 18,
-      "source_cell": 200,
-      "material": "inlaid",
+      "source_cell": 122,
+      "material": "basalt",
       "faces": {
         "up": [
           312,
@@ -5437,8 +5439,8 @@
     {
       "bone": "lance_point_down_-1",
       "cube": 0,
-      "source_cell": 87,
-      "material": "greige",
+      "source_cell": 123,
+      "material": "basalt",
       "faces": {
         "up": [
           860,
@@ -5481,7 +5483,7 @@
     {
       "bone": "glow_arm_-1",
       "cube": 0,
-      "source_cell": 201,
+      "source_cell": 197,
       "material": "inlaid",
       "faces": {
         "north": [
@@ -5525,8 +5527,8 @@
     {
       "bone": "arm_brace_point_down_-1",
       "cube": 0,
-      "source_cell": 88,
-      "material": "greige",
+      "source_cell": 124,
+      "material": "basalt",
       "faces": {
         "up": [
           1426,
@@ -5569,8 +5571,8 @@
     {
       "bone": "shoulder_point_up_-1_0",
       "cube": 0,
-      "source_cell": 202,
-      "material": "inlaid",
+      "source_cell": 125,
+      "material": "basalt",
       "faces": {
         "up": [
           1212,
@@ -5613,7 +5615,7 @@
     {
       "bone": "shoulder_point_up_-1_1",
       "cube": 0,
-      "source_cell": 168,
+      "source_cell": 126,
       "material": "basalt",
       "faces": {
         "up": [
@@ -5657,7 +5659,7 @@
     {
       "bone": "crown_point_up_1",
       "cube": 0,
-      "source_cell": 203,
+      "source_cell": 198,
       "material": "inlaid",
       "faces": {
         "east": [
@@ -5701,8 +5703,8 @@
     {
       "bone": "leg_1",
       "cube": 0,
-      "source_cell": 169,
-      "material": "basalt",
+      "source_cell": 181,
+      "material": "foundation",
       "faces": {
         "up": [
           312,
@@ -5745,8 +5747,8 @@
     {
       "bone": "leg_1",
       "cube": 1,
-      "source_cell": 89,
-      "material": "greige",
+      "source_cell": 127,
+      "material": "basalt",
       "faces": {
         "up": [
           1508,
@@ -5789,8 +5791,8 @@
     {
       "bone": "leg_1",
       "cube": 2,
-      "source_cell": 90,
-      "material": "greige",
+      "source_cell": 128,
+      "material": "basalt",
       "faces": {
         "north": [
           134,
@@ -5833,8 +5835,8 @@
     {
       "bone": "leg_1",
       "cube": 3,
-      "source_cell": 91,
-      "material": "greige",
+      "source_cell": 129,
+      "material": "basalt",
       "faces": {
         "north": [
           200,
@@ -5877,7 +5879,7 @@
     {
       "bone": "leg_1",
       "cube": 4,
-      "source_cell": 170,
+      "source_cell": 130,
       "material": "basalt",
       "faces": {
         "north": [
@@ -5921,8 +5923,8 @@
     {
       "bone": "leg_1",
       "cube": 5,
-      "source_cell": 92,
-      "material": "greige",
+      "source_cell": 131,
+      "material": "basalt",
       "faces": {
         "north": [
           266,
@@ -5965,8 +5967,8 @@
     {
       "bone": "leg_1",
       "cube": 6,
-      "source_cell": 93,
-      "material": "greige",
+      "source_cell": 132,
+      "material": "basalt",
       "faces": {
         "north": [
           332,
@@ -6009,7 +6011,7 @@
     {
       "bone": "leg_1",
       "cube": 7,
-      "source_cell": 171,
+      "source_cell": 133,
       "material": "basalt",
       "faces": {
         "north": [
@@ -6053,8 +6055,8 @@
     {
       "bone": "foot_1",
       "cube": 0,
-      "source_cell": 94,
-      "material": "greige",
+      "source_cell": 182,
+      "material": "foundation",
       "faces": {
         "up": [
           1008,
@@ -6097,8 +6099,8 @@
     {
       "bone": "foot_1",
       "cube": 1,
-      "source_cell": 172,
-      "material": "basalt",
+      "source_cell": 76,
+      "material": "slate",
       "faces": {
         "up": [
           1082,
@@ -6141,8 +6143,8 @@
     {
       "bone": "foot_1",
       "cube": 2,
-      "source_cell": 95,
-      "material": "greige",
+      "source_cell": 134,
+      "material": "basalt",
       "faces": {
         "up": [
           1550,
@@ -6185,8 +6187,8 @@
     {
       "bone": "foot_1",
       "cube": 3,
-      "source_cell": 96,
-      "material": "greige",
+      "source_cell": 135,
+      "material": "basalt",
       "faces": {
         "up": [
           1596,
@@ -6229,8 +6231,8 @@
     {
       "bone": "foot_1",
       "cube": 4,
-      "source_cell": 97,
-      "material": "greige",
+      "source_cell": 136,
+      "material": "basalt",
       "faces": {
         "up": [
           1642,
@@ -6273,8 +6275,8 @@
     {
       "bone": "foot_1",
       "cube": 5,
-      "source_cell": 173,
-      "material": "basalt",
+      "source_cell": 77,
+      "material": "slate",
       "faces": {
         "up": [
           1404,
@@ -6317,8 +6319,8 @@
     {
       "bone": "foot_1",
       "cube": 6,
-      "source_cell": 174,
-      "material": "basalt",
+      "source_cell": 78,
+      "material": "slate",
       "faces": {
         "up": [
           1444,
@@ -6361,8 +6363,8 @@
     {
       "bone": "foot_1",
       "cube": 7,
-      "source_cell": 175,
-      "material": "basalt",
+      "source_cell": 79,
+      "material": "slate",
       "faces": {
         "up": [
           1484,
@@ -6405,8 +6407,8 @@
     {
       "bone": "foot_1",
       "cube": 8,
-      "source_cell": 98,
-      "material": "greige",
+      "source_cell": 80,
+      "material": "slate",
       "faces": {
         "up": [
           1598,
@@ -6449,8 +6451,8 @@
     {
       "bone": "foot_1",
       "cube": 9,
-      "source_cell": 99,
-      "material": "greige",
+      "source_cell": 81,
+      "material": "slate",
       "faces": {
         "up": [
           1670,
@@ -6493,8 +6495,8 @@
     {
       "bone": "foot_1",
       "cube": 10,
-      "source_cell": 100,
-      "material": "greige",
+      "source_cell": 82,
+      "material": "slate",
       "faces": {
         "up": [
           1742,
@@ -6537,8 +6539,8 @@
     {
       "bone": "foot_1",
       "cube": 11,
-      "source_cell": 101,
-      "material": "greige",
+      "source_cell": 83,
+      "material": "slate",
       "faces": {
         "up": [
           1814,
@@ -6581,8 +6583,8 @@
     {
       "bone": "arm_1",
       "cube": 0,
-      "source_cell": 102,
-      "material": "greige",
+      "source_cell": 183,
+      "material": "foundation",
       "faces": {
         "up": [
           228,
@@ -6625,8 +6627,8 @@
     {
       "bone": "arm_1",
       "cube": 1,
-      "source_cell": 176,
-      "material": "basalt",
+      "source_cell": 184,
+      "material": "foundation",
       "faces": {
         "up": [
           222,
@@ -6669,8 +6671,8 @@
     {
       "bone": "arm_1",
       "cube": 2,
-      "source_cell": 103,
-      "material": "greige",
+      "source_cell": 185,
+      "material": "foundation",
       "faces": {
         "up": [
           1719,
@@ -6713,8 +6715,8 @@
     {
       "bone": "arm_1",
       "cube": 3,
-      "source_cell": 104,
-      "material": "greige",
+      "source_cell": 84,
+      "material": "slate",
       "faces": {
         "north": [
           1312,
@@ -6757,8 +6759,8 @@
     {
       "bone": "arm_1",
       "cube": 4,
-      "source_cell": 105,
-      "material": "greige",
+      "source_cell": 85,
+      "material": "slate",
       "faces": {
         "north": [
           1402,
@@ -6801,8 +6803,8 @@
     {
       "bone": "arm_1",
       "cube": 5,
-      "source_cell": 106,
-      "material": "greige",
+      "source_cell": 86,
+      "material": "slate",
       "faces": {
         "north": [
           1492,
@@ -6845,8 +6847,8 @@
     {
       "bone": "arm_1",
       "cube": 6,
-      "source_cell": 107,
-      "material": "greige",
+      "source_cell": 87,
+      "material": "slate",
       "faces": {
         "up": [
           1153,
@@ -6889,8 +6891,8 @@
     {
       "bone": "arm_1",
       "cube": 7,
-      "source_cell": 108,
-      "material": "greige",
+      "source_cell": 88,
+      "material": "slate",
       "faces": {
         "up": [
           1261,
@@ -6933,8 +6935,8 @@
     {
       "bone": "arm_1",
       "cube": 8,
-      "source_cell": 109,
-      "material": "greige",
+      "source_cell": 89,
+      "material": "slate",
       "faces": {
         "up": [
           2006,
@@ -6977,8 +6979,8 @@
     {
       "bone": "arm_1",
       "cube": 9,
-      "source_cell": 110,
-      "material": "greige",
+      "source_cell": 90,
+      "material": "slate",
       "faces": {
         "north": [
           846,
@@ -7021,8 +7023,8 @@
     {
       "bone": "arm_1",
       "cube": 10,
-      "source_cell": 111,
-      "material": "greige",
+      "source_cell": 91,
+      "material": "slate",
       "faces": {
         "up": [
           1369,
@@ -7065,8 +7067,8 @@
     {
       "bone": "arm_1",
       "cube": 11,
-      "source_cell": 112,
-      "material": "greige",
+      "source_cell": 92,
+      "material": "slate",
       "faces": {
         "up": [
           1477,
@@ -7109,8 +7111,8 @@
     {
       "bone": "arm_1",
       "cube": 12,
-      "source_cell": 177,
-      "material": "basalt",
+      "source_cell": 93,
+      "material": "slate",
       "faces": {
         "up": [
           2,
@@ -7153,8 +7155,8 @@
     {
       "bone": "arm_1",
       "cube": 13,
-      "source_cell": 113,
-      "material": "greige",
+      "source_cell": 94,
+      "material": "slate",
       "faces": {
         "north": [
           944,
@@ -7197,8 +7199,8 @@
     {
       "bone": "fore_1",
       "cube": 0,
-      "source_cell": 178,
-      "material": "basalt",
+      "source_cell": 186,
+      "material": "foundation",
       "faces": {
         "up": [
           654,
@@ -7241,8 +7243,8 @@
     {
       "bone": "fore_1",
       "cube": 1,
-      "source_cell": 114,
-      "material": "greige",
+      "source_cell": 187,
+      "material": "foundation",
       "faces": {
         "up": [
           1346,
@@ -7285,8 +7287,8 @@
     {
       "bone": "fore_1",
       "cube": 2,
-      "source_cell": 204,
-      "material": "inlaid",
+      "source_cell": 188,
+      "material": "foundation",
       "faces": {
         "up": [
           538,
@@ -7329,8 +7331,8 @@
     {
       "bone": "fore_1",
       "cube": 3,
-      "source_cell": 115,
-      "material": "greige",
+      "source_cell": 137,
+      "material": "basalt",
       "faces": {
         "north": [
           1446,
@@ -7373,8 +7375,8 @@
     {
       "bone": "fore_1",
       "cube": 4,
-      "source_cell": 116,
-      "material": "greige",
+      "source_cell": 138,
+      "material": "basalt",
       "faces": {
         "up": [
           178,
@@ -7417,8 +7419,8 @@
     {
       "bone": "fore_1",
       "cube": 5,
-      "source_cell": 117,
-      "material": "greige",
+      "source_cell": 139,
+      "material": "basalt",
       "faces": {
         "north": [
           1524,
@@ -7461,8 +7463,8 @@
     {
       "bone": "fore_1",
       "cube": 6,
-      "source_cell": 118,
-      "material": "greige",
+      "source_cell": 140,
+      "material": "basalt",
       "faces": {
         "up": [
           210,
@@ -7505,8 +7507,8 @@
     {
       "bone": "fore_1",
       "cube": 7,
-      "source_cell": 119,
-      "material": "greige",
+      "source_cell": 141,
+      "material": "basalt",
       "faces": {
         "north": [
           1602,
@@ -7549,7 +7551,7 @@
     {
       "bone": "fore_1",
       "cube": 8,
-      "source_cell": 179,
+      "source_cell": 142,
       "material": "basalt",
       "faces": {
         "up": [
@@ -7593,8 +7595,8 @@
     {
       "bone": "fore_1",
       "cube": 9,
-      "source_cell": 120,
-      "material": "greige",
+      "source_cell": 143,
+      "material": "basalt",
       "faces": {
         "north": [
           1680,
@@ -7637,7 +7639,7 @@
     {
       "bone": "fore_1",
       "cube": 10,
-      "source_cell": 180,
+      "source_cell": 144,
       "material": "basalt",
       "faces": {
         "up": [
@@ -7681,8 +7683,8 @@
     {
       "bone": "fore_1",
       "cube": 11,
-      "source_cell": 121,
-      "material": "greige",
+      "source_cell": 145,
+      "material": "basalt",
       "faces": {
         "north": [
           1758,
@@ -7725,8 +7727,8 @@
     {
       "bone": "fore_1",
       "cube": 12,
-      "source_cell": 122,
-      "material": "greige",
+      "source_cell": 146,
+      "material": "basalt",
       "faces": {
         "up": [
           306,
@@ -7769,8 +7771,8 @@
     {
       "bone": "fore_1",
       "cube": 13,
-      "source_cell": 123,
-      "material": "greige",
+      "source_cell": 147,
+      "material": "basalt",
       "faces": {
         "north": [
           1836,
@@ -7813,8 +7815,8 @@
     {
       "bone": "fore_1",
       "cube": 14,
-      "source_cell": 124,
-      "material": "greige",
+      "source_cell": 148,
+      "material": "basalt",
       "faces": {
         "up": [
           338,
@@ -7857,8 +7859,8 @@
     {
       "bone": "fore_1",
       "cube": 15,
-      "source_cell": 125,
-      "material": "greige",
+      "source_cell": 149,
+      "material": "basalt",
       "faces": {
         "up": [
           1774,
@@ -7901,8 +7903,8 @@
     {
       "bone": "fore_1",
       "cube": 16,
-      "source_cell": 126,
-      "material": "greige",
+      "source_cell": 150,
+      "material": "basalt",
       "faces": {
         "up": [
           1850,
@@ -7945,8 +7947,8 @@
     {
       "bone": "fore_1",
       "cube": 17,
-      "source_cell": 205,
-      "material": "inlaid",
+      "source_cell": 151,
+      "material": "basalt",
       "faces": {
         "up": [
           446,
@@ -7989,8 +7991,8 @@
     {
       "bone": "fore_1",
       "cube": 18,
-      "source_cell": 206,
-      "material": "inlaid",
+      "source_cell": 152,
+      "material": "basalt",
       "faces": {
         "up": [
           580,
@@ -8033,8 +8035,8 @@
     {
       "bone": "lance_point_down_1",
       "cube": 0,
-      "source_cell": 127,
-      "material": "greige",
+      "source_cell": 153,
+      "material": "basalt",
       "faces": {
         "up": [
           1010,
@@ -8077,7 +8079,7 @@
     {
       "bone": "glow_arm_1",
       "cube": 0,
-      "source_cell": 207,
+      "source_cell": 199,
       "material": "inlaid",
       "faces": {
         "north": [
@@ -8121,8 +8123,8 @@
     {
       "bone": "arm_brace_point_down_1",
       "cube": 0,
-      "source_cell": 128,
-      "material": "greige",
+      "source_cell": 154,
+      "material": "basalt",
       "faces": {
         "up": [
           1524,
@@ -8165,8 +8167,8 @@
     {
       "bone": "shoulder_point_up_1_0",
       "cube": 0,
-      "source_cell": 208,
-      "material": "inlaid",
+      "source_cell": 155,
+      "material": "basalt",
       "faces": {
         "up": [
           1408,
@@ -8209,7 +8211,7 @@
     {
       "bone": "shoulder_point_up_1_1",
       "cube": 0,
-      "source_cell": 181,
+      "source_cell": 156,
       "material": "basalt",
       "faces": {
         "up": [
@@ -8253,8 +8255,8 @@
     {
       "bone": "back_point_up_0",
       "cube": 0,
-      "source_cell": 209,
-      "material": "inlaid",
+      "source_cell": 189,
+      "material": "foundation",
       "faces": {
         "up": [
           1654,
@@ -8297,7 +8299,7 @@
     {
       "bone": "back_point_up_1",
       "cube": 0,
-      "source_cell": 182,
+      "source_cell": 157,
       "material": "basalt",
       "faces": {
         "up": [
@@ -8341,8 +8343,8 @@
     {
       "bone": "back_point_up_2",
       "cube": 0,
-      "source_cell": 210,
-      "material": "inlaid",
+      "source_cell": 158,
+      "material": "basalt",
       "faces": {
         "up": [
           1794,
@@ -8385,7 +8387,7 @@
     {
       "bone": "back_point_up_3",
       "cube": 0,
-      "source_cell": 183,
+      "source_cell": 159,
       "material": "basalt",
       "faces": {
         "up": [
