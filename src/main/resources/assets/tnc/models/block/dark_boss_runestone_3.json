@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "tnc:block/dark_boss_runestone_3"
+  }
+}

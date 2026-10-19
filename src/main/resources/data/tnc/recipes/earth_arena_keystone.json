@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["RRR", "RGR", "RRR"],
+  "key": {
+    "R": {"tag": "tnc:boss_runestones/earth"},
+    "G": {"item": "minecraft:gold_ingot"}
+  },
+  "result": {"item": "tnc:earth_arena_keystone"}
+}

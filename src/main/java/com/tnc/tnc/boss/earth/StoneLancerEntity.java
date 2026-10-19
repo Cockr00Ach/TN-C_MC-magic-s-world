@@ -28,6 +28,8 @@ public final class StoneLancerEntity extends Monster implements GeoEntity {
     private static final EntityDataAccessor<Boolean> CASTING=SynchedEntityData.defineId(StoneLancerEntity.class,EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> BURROW=SynchedEntityData.defineId(StoneLancerEntity.class,EntityDataSerializers.INT);
     private static final EntityDataAccessor<Long> BURROW_START=SynchedEntityData.defineId(StoneLancerEntity.class,EntityDataSerializers.LONG);
+    private static final EntityDataAccessor<Boolean> ARENA_BOUND=SynchedEntityData.defineId(StoneLancerEntity.class,EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> ARENA_AWAKE=SynchedEntityData.defineId(StoneLancerEntity.class,EntityDataSerializers.BOOLEAN);
     private final StoneLancerBurrow burrow=new StoneLancerBurrow(this);
     private final AnimatableInstanceCache cache=GeckoLibUtil.createInstanceCache(this);
     private final ServerBossEvent bar=new ServerBossEvent(getDisplayName(),BossEvent.BossBarColor.YELLOW,BossEvent.BossBarOverlay.PROGRESS);
@@ -35,6 +37,20 @@ public final class StoneLancerEntity extends Monster implements GeoEntity {
     public static final float SCALE=5;
     public static final double QUAKE_RADIUS=200;
     private int quakeTicks;
+    public boolean isArenaBound(){return entityData.get(ARENA_BOUND)||getPersistentData().getBoolean("TncEarthArenaGuardian");}
+    public boolean arenaAwake(){return entityData.get(ARENA_AWAKE);}
+    public void bindToArena(){getPersistentData().putBoolean("TncEarthArenaGuardian",true);entityData.set(ARENA_BOUND,true);setArenaAwake(false);setPersistenceRequired();setNoGravity(true);}
+    public void setArenaAwake(boolean awake){
+        if(!isArenaBound())return;
+        entityData.set(ARENA_BOUND,true);
+        if(arenaAwake()!=awake||!awake&&(!isNoAi()||pending>=0)){
+            for(var attack:attacks)if(attack.isAlive())attack.discard();attacks.clear();
+            burrow.reset();pending=-1;coreChannel=0;quakeTicks=0;setCasting(false);cooldown=awake?35:60;
+            if(!awake){setHealth(getMaxHealth());setTarget(null);}
+        }
+        entityData.set(ARENA_AWAKE,awake);setNoAi(!awake);setNoGravity(true);getNavigation().stop();setDeltaMovement(Vec3.ZERO);
+        if(!awake)bar.removeAllPlayers();
+    }
     private Vec3 quakeCentre=Vec3.ZERO;
     private final java.util.Set<java.util.UUID> quakeHits=new java.util.HashSet<>();
     public float quakeAge(float partial){return quakeTicks>0?80-quakeTicks+partial:-1;}
@@ -47,7 +63,7 @@ public final class StoneLancerEntity extends Monster implements GeoEntity {
     public static AttributeSupplier.Builder attributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,1000)
             .add(Attributes.ATTACK_DAMAGE,22).add(Attributes.ARMOR,16).add(Attributes.ARMOR_TOUGHNESS,8)
             .add(Attributes.MOVEMENT_SPEED,.17).add(Attributes.FOLLOW_RANGE,400).add(Attributes.KNOCKBACK_RESISTANCE,1);}
-    @Override protected void defineSynchedData(){super.defineSynchedData();entityData.define(CASTING,false);entityData.define(BURROW,0);entityData.define(BURROW_START,0L);}
+    @Override protected void defineSynchedData(){super.defineSynchedData();entityData.define(CASTING,false);entityData.define(BURROW,0);entityData.define(BURROW_START,0L);entityData.define(ARENA_BOUND,false);entityData.define(ARENA_AWAKE,false);}
     public int burrowPhase(){return entityData.get(BURROW);}
     void setBurrowPhase(int phase){entityData.set(BURROW_START,level().getGameTime());entityData.set(BURROW,phase);}
     void setCasting(boolean value){entityData.set(CASTING,value);}
@@ -59,8 +75,8 @@ public final class StoneLancerEntity extends Monster implements GeoEntity {
         double t=Math.min(1,age/(phase==1?24.0:28.0));t=t*t*(3-2*t);
         return phase==1?-36*t:phase==2?-36:-36*(1-t);
     }
-    @Override public boolean isInvulnerableTo(DamageSource source){return burrowPhase()==2&&!source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)||super.isInvulnerableTo(source);}
-    @Override public boolean isPushable(){return burrowPhase()==0&&super.isPushable();}
+    @Override public boolean isInvulnerableTo(DamageSource source){return isArenaBound()&&!arenaAwake()||burrowPhase()==2&&!source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)||super.isInvulnerableTo(source);}
+    @Override public boolean isPushable(){return !isArenaBound()&&burrowPhase()==0&&super.isPushable();}
     @Override public boolean isPickable(){return burrowPhase()!=2&&super.isPickable();}
     public boolean isCasting(){return entityData.get(CASTING);}
     public boolean enraged(){return getHealth()<=getMaxHealth()*.5F;}
@@ -76,17 +92,28 @@ public final class StoneLancerEntity extends Monster implements GeoEntity {
     boolean tryDistantResponse(LivingEntity target){
         if(target==null||!target.isAlive()||target.isSpectator()||target.level()!=level()||distantCooldown>0||isCasting()||burrowPhase()!=0)return false;
         double distance=distanceToSqr(target);if(distance<=80*80||distance>360*360)return false;
-        if(distantMoveFor(distantResponses)==6&&hasLineOfSight(target))beginCast(6,target.position());
+        if(isArenaBound()) {if(!hasLineOfSight(target))return false;beginCast(6,target.position());}
+        else if(distantMoveFor(distantResponses)==6&&hasLineOfSight(target))beginCast(6,target.position());
         else if(!beginBurrow(target))return false;
         distantResponses++;distantCooldown=260;return true;
     }
     @Override protected void registerGoals(){
-        goalSelector.addGoal(0,new FloatGoal(this));goalSelector.addGoal(2,new GiantApproachGoal(this,.9,()->!isCasting()));
+        goalSelector.addGoal(0,new FloatGoal(this));goalSelector.addGoal(2,new GiantApproachGoal(this,.9,()->!isCasting()&&!isArenaBound()));
         goalSelector.addGoal(8,new LookAtPlayerGoal(this,Player.class,320));goalSelector.addGoal(9,new RandomLookAroundGoal(this));
         targetSelector.addGoal(1,new HurtByTargetGoal(this));targetSelector.addGoal(2,new NearestAttackableTargetGoal<>(this,Player.class,true));
     }
     @Override public void aiStep(){
         super.aiStep();if(!(level() instanceof ServerLevel server)||!isAlive())return;
+        if(isArenaBound()){
+            double centreX=com.tnc.tnc.world.eartharena.EarthArenaLayout.X+.5, centreY=com.tnc.tnc.world.eartharena.EarthArenaLayout.FLOOR+1;
+            if(distanceToSqr(centreX,centreY,.5)>.000001)setPos(centreX,centreY,.5);
+            getNavigation().stop();setDeltaMovement(Vec3.ZERO);
+            if(!arenaAwake())return;
+            if(!com.tnc.tnc.world.eartharena.EarthArenaEncounter.participant(getTarget()))setTarget(null);
+            for(var player:server.players()){
+                if(com.tnc.tnc.world.eartharena.EarthArenaEncounter.participant(player))bar.addPlayer(player);else bar.removePlayer(player);
+            }
+        }
         bar.setName(getDisplayName());bar.setProgress(getHealth()/getMaxHealth());
         if(tickCount%20==0)attacks.removeIf(e->!e.isAlive());
         if(distantCooldown>0)distantCooldown--;
@@ -119,12 +146,12 @@ public final class StoneLancerEntity extends Monster implements GeoEntity {
         boolean hit=super.doHurtTarget(target);if(hit){triggerAnim("action","melee");playSound(SoundEvents.IRON_GOLEM_ATTACK,1.4F,.6F);}return hit;
     }
     @Override protected AABB makeBoundingBox(){return GiantSimulation.active(this)?GiantSimulation.bounds(this):super.makeBoundingBox();}
-    @Override public void move(MoverType type,Vec3 motion){GiantSimulation.run(this,()->super.move(type,motion));}
+    @Override public void move(MoverType type,Vec3 motion){if(isArenaBound()){setDeltaMovement(Vec3.ZERO);return;}GiantSimulation.run(this,()->super.move(type,motion));}
     @Override protected void checkInsideBlocks(){GiantSimulation.run(this,()->super.checkInsideBlocks());}
     @Override public void updateFluidHeightAndDoFluidPushing(java.util.function.Predicate<net.minecraft.world.level.material.FluidState> p){GiantSimulation.run(this,()->super.updateFluidHeightAndDoFluidPushing(p));}
     @Override public AABB getBoundingBoxForCulling(){return super.getBoundingBoxForCulling().inflate(20,10,20).expandTowards(0,40,0).expandTowards(0,-40,0);}
     @Override public boolean removeWhenFarAway(double distance){return false;}
-    @Override public void startSeenByPlayer(ServerPlayer p){super.startSeenByPlayer(p);bar.addPlayer(p);}
+    @Override public void startSeenByPlayer(ServerPlayer p){super.startSeenByPlayer(p);if(!isArenaBound()||arenaAwake()&&com.tnc.tnc.world.eartharena.EarthArenaEncounter.participant(p))bar.addPlayer(p);}
     @Override public void stopSeenByPlayer(ServerPlayer p){super.stopSeenByPlayer(p);bar.removePlayer(p);}
     @Override public void remove(RemovalReason reason){burrow.reset();bar.removeAllPlayers();for(var e:attacks)if(e.isAlive())e.discard();attacks.clear();super.remove(reason);}
     @Override public void die(DamageSource source){burrow.reset();triggerAnim("action","death");super.die(source);}

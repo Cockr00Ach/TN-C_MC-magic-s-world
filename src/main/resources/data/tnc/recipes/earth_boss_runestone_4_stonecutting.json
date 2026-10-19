@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "tag": "tnc:boss_runestones/earth"
+  },
+  "result": "tnc:earth_boss_runestone_4",
+  "count": 1
+}

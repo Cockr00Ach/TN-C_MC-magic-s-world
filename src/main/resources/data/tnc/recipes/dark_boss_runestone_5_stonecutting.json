@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "tag": "tnc:boss_runestones/dark"
+  },
+  "result": "tnc:dark_boss_runestone_5",
+  "count": 1
+}

@@ -198,6 +198,12 @@ minecraft {
         // The gametest system is also enabled by default for other run configs under the /test command.
         gameTestServer {
             property 'forge.enabledGameTestNamespaces', project.hasProperty('lifeRoutesTests') ? 'tncroute' : mod_id
+            if (project.hasProperty('earthArenaTests')) {
+                property 'forge.enabledGameTestNamespaces', 'tnceartharena'
+                workingDirectory project.file('work/earth-arena-recovery-tests-20261019')
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+            }
             if (project.hasProperty('leviathanTests')) {
                 property 'forge.enabledGameTestNamespaces', 'tncleviathan'
                 property 'mixin.env.remapRefMap', 'true'

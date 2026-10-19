@@ -1,0 +1,8 @@
+{
+  "type": "tnc:earth_arena",
+  "generator": {
+    "type": "tnc:earth_arena",
+    "biome_source": {"type": "minecraft:fixed", "biome": "tnc:earth_arena"},
+    "terrain_seed": 20261018
+  }
+}
