@@ -34,14 +34,16 @@ def armor_role(name, index):
         return 'foundation' if index == 0 else 'limestone'
     if name == 'pelvis':
         return 'foundation' if index == 0 else 'slate'
+    if name.startswith('shoulder_point_'):
+        return 'slate'
     if name.startswith('arm_') and not name.startswith('arm_brace'):
-        return 'foundation' if index < 3 else 'slate'
+        return 'foundation' if index in (0, 2) else 'slate'
     if name.startswith('fore_'):
-        return 'foundation' if index < 3 else 'basalt'
+        return 'foundation' if index in (1, 2) else 'slate' if index == 0 else 'basalt'
     if name.startswith('leg_'):
         return 'foundation' if index == 0 else 'basalt'
     if name.startswith('foot_'):
-        return 'foundation' if index == 0 else 'basalt' if 2 <= index <= 4 else 'slate'
+        return 'foundation' if index in (0, 1, 11) else 'basalt' if 2 <= index <= 6 else 'slate'
     if name == 'back_point_up_0':
         return 'foundation'
     return 'basalt'
@@ -88,6 +90,58 @@ def taller_head(bones):
         head['cubes'].append({'origin': [center[i]-size[i]/2 for i in range(3)],
                               'size': list(size), 'pivot': list(center), 'rotation': [4, 0, turn],
                               'uv': {f: {'uv': [0, 0], 'uv_size': [1, 1]} for f in FACES}})
+
+
+def fill_sketched_mass(bones):
+    """Match the user's green silhouette: larger head, rising pauldrons, thick elbows.
+
+    Re-sculpt existing pieces so the animation rig and mesh count remain stable.
+    Called once after the standard proportions and anatomical separation pass.
+    """
+    by_name = {b['name']: b for b in bones}
+    for bone in bones:
+        if bone['name'] != 'head' and bone.get('parent') != 'head':
+            continue
+        def enlarge(v):
+            return [round(v[0]*1.25, 4), round(71+(v[1]-71)*1.25, 4),
+                    round(-18+(v[2]+18)*1.25, 4)]
+        bone['pivot'] = enlarge(bone['pivot'])
+        for cube in bone.get('cubes', []):
+            cube['origin'] = enlarge(cube['origin'])
+            cube['size'] = [round(v*1.25, 4) for v in cube['size']]
+            if 'pivot' in cube:
+                cube['pivot'] = enlarge(cube['pivot'])
+
+    def thicken(cube, factors, shift=(0, 0, 0)):
+        center = [cube['origin'][i]+cube['size'][i]/2+shift[i] for i in range(3)]
+        cube['size'] = [round(v*f, 4) for v, f in zip(cube['size'], factors)]
+        cube['origin'] = [round(center[i]-cube['size'][i]/2, 4) for i in range(3)]
+        if 'pivot' in cube:
+            cube['pivot'] = [round(v+d, 4) for v, d in zip(cube['pivot'], shift)]
+
+    for sign in (-1, 1):
+        arm = by_name[f'arm_{sign}']
+        # Solid upper-arm mass bridges the previous shoulder/forearm pinch.
+        thicken(arm['cubes'][1], (1.25, 1.55, 1.18), (-sign*2, -1, -2))
+        thicken(arm['cubes'][2], (1.15, 1.3, 1.2), (-sign*1.5, -1, -2))
+        fore = by_name[f'fore_{sign}']
+        thicken(fore['cubes'][0], (1.12, 1.5, 1.1), (-sign*1.5, 2, -3))
+        # Widen the existing upper lip to wrap around the enlarged elbow cuff.
+        for index in (15, 16):
+            thicken(fore['cubes'][index], (1.12, 1.35, 1.08), (-sign*1.5, 2, -1))
+
+        # Two overlapping true stone pyramids form a broad rising ridge, rather
+        # than needle spikes or thin planes. They remain parented to the shoulder.
+        for j, (cx, base, width, height, depth, z) in enumerate(((56, 68, 38, 35, 37, -1),
+                                                               (76, 67, 31, 25, 35, 3))):
+            bone = by_name[f'shoulder_point_up_{sign}_{j}']
+            bone['pivot'] = [sign*cx, base, z]
+            bone['rotation'] = [5+j*2, 0, sign*(5+j*7)]
+            cube = bone['cubes'][0]
+            cube['origin'] = [sign*cx-width/2, base, z-depth/2]
+            cube['size'] = [width, height, depth]
+            cube.pop('rotation', None)
+            cube.pop('pivot', None)
 
 
 def pack(bones):

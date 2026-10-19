@@ -86,9 +86,10 @@ def generate():
     for face in c['uv'].values():face.update(uv=[151,142],uv_size=[35,31])
  from refine_stone_lancer_geometry import refine
  refine(bones)
- from stone_lancer_piece_atlas import taller_head, separate_silhouette, pack, ATLAS
+ from stone_lancer_piece_atlas import taller_head, separate_silhouette, fill_sketched_mass, pack, ATLAS
  taller_head(bones)
  separate_silhouette(bones)
+ fill_sketched_mass(bones)
  pack(bones)
  geo={'format_version':'1.12.0','minecraft:geometry':[{'description':{'identifier':'geometry.tnc.stone_lancer','texture_width':ATLAS,'texture_height':ATLAS,'visible_bounds_width':13,'visible_bounds_height':12,'visible_bounds_offset':[0,5,0]},'bones':bones}]}
  out=ROOT/'src/main/resources/assets/tnc/geo/entity/stone_lancer.geo.json';out.write_text(json.dumps(geo,indent=2),encoding='utf-8',newline='\n')
