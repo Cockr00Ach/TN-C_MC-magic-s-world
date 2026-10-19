@@ -59,8 +59,12 @@ public final class EarthArenaChunkGenerator extends ChunkGenerator {
 
     public static BlockState material(int x, int y, int z, int top, int offset) {
         if (EarthArenaLayout.platform(x,z) && y >= EarthArenaLayout.FLOOR - 6)
-            return EarthArena.PLATFORM.defaultBlockState();
+            return y >= EarthArenaLayout.FLOOR - 2 ? platformSurface(x,z) : EarthArena.PLATFORM.defaultBlockState();
         return palette()[EarthArenaTerrain.shade(y,top,offset)-1];
+    }
+
+    private static BlockState platformSurface(int x,int z) {
+        return (EarthArenaLayout.blackTile(x,z) ? EarthArena.DARK_PLATFORM : EarthArena.PLATFORM).defaultBlockState();
     }
 
     @Override public CompletableFuture<ChunkAccess> fillFromNoise(Executor executor, Blender blender, RandomState random, StructureManager structures, ChunkAccess chunk) {
@@ -74,8 +78,9 @@ public final class EarthArenaChunkGenerator extends ChunkGenerator {
                 int top = Math.min(chunk.getMaxBuildHeight() - 1, EarthArenaTerrain.height(startX + x, startZ + z, terrainSeed));
                 int offset = EarthArenaTerrain.layerOffset(startX + x, startZ + z, terrainSeed);
                 boolean platform = EarthArenaLayout.platform(startX+x,startZ+z);
+                BlockState tile = platform ? platformSurface(startX+x,startZ+z) : null;
                 for (int y = chunk.getMinBuildHeight(); y <= top; y++)
-                    chunk.setBlockState(cursor.set(x, y, z), platform && y>=EarthArenaLayout.FLOOR-6 ? EarthArena.PLATFORM.defaultBlockState() : states[EarthArenaTerrain.shade(y,top,offset)-1], false);
+                    chunk.setBlockState(cursor.set(x, y, z), platform && y>=EarthArenaLayout.FLOOR-6 ? y>=EarthArenaLayout.FLOOR-2 ? tile : EarthArena.PLATFORM.defaultBlockState() : states[EarthArenaTerrain.shade(y,top,offset)-1], false);
                 BlockState cap = material(startX+x,top,startZ+z,top,offset);
                 floor.update(x, top, z, cap);
                 surface.update(x, top, z, cap);

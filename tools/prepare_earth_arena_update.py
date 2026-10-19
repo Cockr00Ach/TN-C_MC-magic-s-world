@@ -22,6 +22,9 @@ def prepare(base, built, output, report):
         "assets/tnc/blockstates/earth_arena_pillar_stone.json",
         "assets/tnc/models/block/earth_arena_pillar_stone.json",
         "assets/tnc/models/item/earth_arena_pillar_stone.json",
+        "assets/tnc/blockstates/earth_arena_black_pillar_stone.json",
+        "assets/tnc/models/block/earth_arena_black_pillar_stone.json",
+        "assets/tnc/models/item/earth_arena_black_pillar_stone.json",
         "assets/tnc/textures/block/earth_amber_stone.png",
         "com/tnc/tnc/boss/earth/StoneLancerEntity.class",
         "com/tnc/tnc/mixin/EarthArenaLevelMixin.class",
@@ -39,7 +42,7 @@ def prepare(base, built, output, report):
                     data=(json.dumps(mixins,indent=2)+"\n").encode()
                 jar.writestr(name,data)
         main(base, adapted, output, report, entries=entries, translation_keys=(
-            "item.tnc.earth_arena_keystone", "dimension.tnc.earth_arena", "biome.tnc.earth_arena", "block.tnc.earth_arena_pillar_stone"))
+            "item.tnc.earth_arena_keystone", "dimension.tnc.earth_arena", "biome.tnc.earth_arena", "block.tnc.earth_arena_pillar_stone", "block.tnc.earth_arena_black_pillar_stone"))
     evidence=json.loads(report.read_text(encoding="utf-8"))
     evidence.update(built=str(built),built_sha256=digest(built))
     report.write_text(json.dumps(evidence,ensure_ascii=False,indent=2),encoding="utf-8")

@@ -32,6 +32,7 @@ public final class EarthArena {
     private static final Set<UUID> PENDING = new HashSet<>();
     public static Item KEYSTONE;
     public static net.minecraft.world.level.block.Block PLATFORM;
+    public static net.minecraft.world.level.block.Block DARK_PLATFORM;
     public static ResourceLocation id(String name) { return ResourceLocation.fromNamespaceAndPath("tnc", name); }
 
     @Mod.EventBusSubscriber(modid = "tnc", bus = Mod.EventBusSubscriber.Bus.MOD)
@@ -41,10 +42,14 @@ public final class EarthArena {
                 PLATFORM = new net.minecraft.world.level.block.Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.of()
                         .mapColor(net.minecraft.world.level.material.MapColor.TERRACOTTA_BROWN).strength(-1, 3600000).sound(net.minecraft.world.level.block.SoundType.STONE));
                 helper.register(id("earth_arena_pillar_stone"), PLATFORM);
+                DARK_PLATFORM = new net.minecraft.world.level.block.Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(PLATFORM)
+                        .mapColor(net.minecraft.world.level.material.MapColor.COLOR_BLACK));
+                helper.register(id("earth_arena_black_pillar_stone"), DARK_PLATFORM);
             });
             event.register(Registries.CHUNK_GENERATOR, helper -> helper.register(id("earth_arena"), EarthArenaChunkGenerator.CODEC));
             event.register(Registries.ITEM, helper -> {
                 helper.register(id("earth_arena_pillar_stone"), new net.minecraft.world.item.BlockItem(PLATFORM, new Item.Properties()));
+                helper.register(id("earth_arena_black_pillar_stone"), new net.minecraft.world.item.BlockItem(DARK_PLATFORM, new Item.Properties()));
                 KEYSTONE = new Item(new Item.Properties().stacksTo(1)) {
                     @Override public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
                         if (player instanceof ServerPlayer serverPlayer) travel(serverPlayer);
@@ -55,7 +60,7 @@ public final class EarthArena {
             });
         }
         @SubscribeEvent public static void creative(net.minecraftforge.event.BuildCreativeModeTabContentsEvent event) {
-            if (event.getTabKey().equals(TNMod.TNC_TAB.getKey())) { event.accept(KEYSTONE); event.accept(PLATFORM); }
+            if (event.getTabKey().equals(TNMod.TNC_TAB.getKey())) { event.accept(KEYSTONE); event.accept(PLATFORM); event.accept(DARK_PLATFORM); }
         }
     }
 

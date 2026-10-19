@@ -2,7 +2,7 @@ package com.tnc.tnc.world.eartharena;
 
 /** Fixed basin and boss dais, immediately east of the arrival point. */
 public final class EarthArenaLayout {
-    public static final int X = 128, Z = 0, RADIUS = 112, FLOOR = 160, VERSION = 2;
+    public static final int X = 128, Z = 0, RADIUS = 112, FLOOR = 160, VERSION = 3;
     public static final String CHUNK_VERSION = "TncEarthArenaLayout";
     private EarthArenaLayout() {}
     public static double distance(double x, double z) { return Math.hypot(x - (X + .5), z - (Z + .5)); }
@@ -10,6 +10,10 @@ public final class EarthArenaLayout {
         return distance(x,z) <= RADIUS && y >= FLOOR - 2 && y <= FLOOR + 100;
     }
     public static boolean platform(int x, int z) { return Math.hypot(x - X, z - Z) <= RADIUS; }
+    public static boolean blackTile(int x, int z) {
+        double radius = Math.hypot(x - X, z - Z);
+        return radius >= RADIUS - 3 || radius >= 14 && ((int)Math.floor(radius)) % 16 < 2;
+    }
     public static int height(int x, int z, int natural) {
         double r = Math.hypot(x - X, z - Z);
         if (r <= RADIUS) return FLOOR;

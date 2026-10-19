@@ -24,6 +24,7 @@ public final class EarthArenaGameTests {
         Set<Block> palette = new HashSet<>();
         for (int shade = 1; shade <= 8; shade++) palette.add(ElementBossBlocks.block("earth", shade));
         palette.add(EarthArena.PLATFORM);
+        palette.add(EarthArena.DARK_PLATFORM);
         int[][] samples = {{8,8}, {15,15}, {16,16}, {-1,-1}, {-16,-16}, {-17,-17}, {256,128}, {-320,192}};
         CompletableFuture<?>[] loads = new CompletableFuture<?>[samples.length];
         for (int i = 0; i < samples.length; i++) loads[i] = realm.getChunkSource().getChunkFuture(samples[i][0] >> 4, samples[i][1] >> 4, net.minecraft.world.level.chunk.ChunkStatus.FULL, true);

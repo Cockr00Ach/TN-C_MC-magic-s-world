@@ -578,5 +578,6 @@
   "item.tnc.tidal_shell_crystal": "Tidal Shell Crystal",
   "item.tnc.star_dream_shard": "Star Dream Shard",
   "item.tnc.dungeon_memento": "Dungeon Memento",
-  "block.tnc.earth_arena_pillar_stone": "Arena Pillar Amberstone"
+  "block.tnc.earth_arena_pillar_stone": "Arena Pillar Amberstone",
+  "block.tnc.earth_arena_black_pillar_stone": "Arena Black Pillar Stone"
 }
