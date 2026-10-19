@@ -487,6 +487,10 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.bossEvent.removeAllPlayers();
         this.pendingBlasts.clear();
         this.blastCountdown = 0;
+        // death 动画 1.8 秒 = 36 tick，但原版尸体 20 tick 就消失 ⇒ 把死亡计时往前推 16 tick，
+        // 让倒地动作完整播完再移除（移除时机完全由 deathTime 驱动，不额外挂逻辑）。
+        this.deathTime = -16;
+        this.triggerAnim(ACTION_CONTROLLER, "death");
         super.die(source);
     }
 
@@ -510,6 +514,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         action.triggerableAnim("bite", RawAnimation.begin().thenPlay("bite"));
         action.triggerableAnim("slam", RawAnimation.begin().thenPlay("slam"));
         action.triggerableAnim("transition", RawAnimation.begin().thenPlay("transition"));
+        action.triggerableAnim("death", RawAnimation.begin().thenPlay("death"));
         controllers.add(action);
     }
 

@@ -217,7 +217,18 @@ def shade(c, k):
     return tuple(max(0, min(255, int(v * k))) for v in c)
 
 
-def paint_face(img, rect, theme, rng, glow, is_top, is_bottom):
+HOT_KEYS = ("magma", "magma_hot", "core", "ember")
+
+
+def glow_of(c):
+    """亮到能自发光的颜色返回自身（写进发光层），其余返回 None。"""
+    for k in HOT_KEYS:
+        if c == ROCK[k]:
+            return c
+    return None
+
+
+def paint_face(img, gimg, rect, theme, rng, glow, is_top, is_bottom):
     x0, y0, w, h = rect
     if w <= 0 or h <= 0:
         return
@@ -226,6 +237,7 @@ def paint_face(img, rect, theme, rng, glow, is_top, is_bottom):
     dark = ROCK[theme["dark"]]
     accent = ROCK[theme["accent"]]
     px = img.load()
+    gpx = gimg.load() if gimg is not None else None
     flat = theme.get("flat", False)
     k_top = 1.06 if is_top else (0.86 if is_bottom else 1.0)
     for y in range(h):
@@ -251,6 +263,9 @@ def paint_face(img, rect, theme, rng, glow, is_top, is_bottom):
             if x == 0 or y == 0 or x == w - 1 or y == h - 1:
                 c = shade(c, 0.72)
             px[x0 + x, y0 + y] = c + (255,)
+            if gpx is not None:
+                gv = c if flat else glow_of(c)
+                gpx[x0 + x, y0 + y] = (gv if gv else (0, 0, 0)) + (255,)
 
     # 裂缝：短折线，一阶段暗红、二阶段亮岩浆
     cracks = theme.get("crack", 0)
@@ -266,6 +281,9 @@ def paint_face(img, rect, theme, rng, glow, is_top, is_bottom):
                 if glow and rng.random() < 0.45:
                     col = ROCK["magma"] if rng.random() < 0.6 else ROCK["magma_hot"]
                 px[x0 + cx, y0 + cy] = col + (255,)
+                if gpx is not None:
+                    gv = glow_of(col)
+                    gpx[x0 + cx, y0 + cy] = (gv if gv else (0, 0, 0)) + (255,)
                 cx += rng.choice((0, 1))
                 cy += rng.choice((-1, 0, 1)) if s % 2 else 0
 
@@ -279,6 +297,7 @@ def paint_face(img, rect, theme, rng, glow, is_top, is_bottom):
 
 def build_texture(phase):
     img = Image.new("RGBA", (SHEET, SHEET), (0, 0, 0, 0))
+    gimg = Image.new("RGBA", (SHEET, SHEET), (0, 0, 0, 255))
     packer = Packer(SHEET)
     rng = random.Random(20261019 + (0 if phase["glow"] else 7))
     uvs = {}
@@ -288,14 +307,14 @@ def build_texture(phase):
         uvs[name] = (u, v)
         theme = THEMES[theme_name]
         for face, rect in face_rects(u, v, w, h, d).items():
-            paint_face(img, rect, theme, rng, phase["glow"],
+            paint_face(img, gimg, rect, theme, rng, phase["glow"],
                        face == "up", face == "down")
-    return img, uvs
+    return img, gimg, uvs
 
 
 # ---------------------------------------------------------------- geo.json --
 def build_geo(phase):
-    img, uvs = build_texture(phase)
+    img, gimg, uvs = build_texture(phase)
     bones = []
     for name, pivot, parent in BONES:
         cubes = []
@@ -328,7 +347,7 @@ def build_geo(phase):
             "bones": bones,
         }],
     }
-    return geo, img, uvs
+    return geo, img, gimg, uvs
 
 
 # ------------------------------------------------------------ animation ----
@@ -563,11 +582,14 @@ def write_json(path, payload):
 def main():
     os.makedirs(ART, exist_ok=True)
     for key, phase in PHASES.items():
-        geo, img, uvs = build_geo(phase)
+        geo, img, gimg, uvs = build_geo(phase)
         phase["uvs"] = uvs
         tex_path = os.path.join(ASSETS, "textures", "entity", phase["texture"])
         os.makedirs(os.path.dirname(tex_path), exist_ok=True)
         img.save(tex_path, "PNG", optimize=True)
+        glow_path = os.path.join(ASSETS, "textures", "entity",
+                                 phase["texture"].replace(".png", "_glow.png"))
+        gimg.save(glow_path, "PNG", optimize=True)
         geo_path = os.path.join(ASSETS, "geo", "entity",
                                 "volcanic_tortoise_" + key + ".geo.json")
         write_json(geo_path, geo)

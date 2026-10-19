@@ -9,5 +9,6 @@ public final class VolcanicTortoiseRenderer extends GeoEntityRenderer<VolcanicTo
     public VolcanicTortoiseRenderer(EntityRendererProvider.Context context) {
         super(context, new VolcanicTortoiseGeoModel());
         this.shadowRadius = 2.1F;
+        this.addRenderLayer(new VolcanicTortoiseEmissiveLayer(this));
     }
 }
