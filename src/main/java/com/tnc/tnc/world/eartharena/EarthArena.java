@@ -31,13 +31,20 @@ public final class EarthArena {
     public static final ResourceKey<Level> KEY = ResourceKey.create(Registries.DIMENSION, id("earth_arena"));
     private static final Set<UUID> PENDING = new HashSet<>();
     public static Item KEYSTONE;
+    public static net.minecraft.world.level.block.Block PLATFORM;
     public static ResourceLocation id(String name) { return ResourceLocation.fromNamespaceAndPath("tnc", name); }
 
     @Mod.EventBusSubscriber(modid = "tnc", bus = Mod.EventBusSubscriber.Bus.MOD)
     public static final class Content {
         @SubscribeEvent public static void register(RegisterEvent event) {
+            event.register(Registries.BLOCK, helper -> {
+                PLATFORM = new net.minecraft.world.level.block.Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.of()
+                        .mapColor(net.minecraft.world.level.material.MapColor.TERRACOTTA_BROWN).strength(-1, 3600000).sound(net.minecraft.world.level.block.SoundType.STONE));
+                helper.register(id("earth_arena_pillar_stone"), PLATFORM);
+            });
             event.register(Registries.CHUNK_GENERATOR, helper -> helper.register(id("earth_arena"), EarthArenaChunkGenerator.CODEC));
             event.register(Registries.ITEM, helper -> {
+                helper.register(id("earth_arena_pillar_stone"), new net.minecraft.world.item.BlockItem(PLATFORM, new Item.Properties()));
                 KEYSTONE = new Item(new Item.Properties().stacksTo(1)) {
                     @Override public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
                         if (player instanceof ServerPlayer serverPlayer) travel(serverPlayer);
@@ -48,7 +55,7 @@ public final class EarthArena {
             });
         }
         @SubscribeEvent public static void creative(net.minecraftforge.event.BuildCreativeModeTabContentsEvent event) {
-            if (event.getTabKey().equals(TNMod.TNC_TAB.getKey())) event.accept(KEYSTONE);
+            if (event.getTabKey().equals(TNMod.TNC_TAB.getKey())) { event.accept(KEYSTONE); event.accept(PLATFORM); }
         }
     }
 
@@ -79,7 +86,7 @@ public final class EarthArena {
             saved.putString("EarthArenaReturnDimension", player.level().dimension().location().toString());
             saved.putDouble("EarthArenaReturnX", player.getX()); saved.putDouble("EarthArenaReturnY", player.getY()); saved.putDouble("EarthArenaReturnZ", player.getZ());
             saved.putFloat("EarthArenaReturnYaw", player.getYRot()); saved.putFloat("EarthArenaReturnPitch", player.getXRot());
-            location = new Vec3(8.5, 0, 8.5); yaw = 135; pitch = 0;
+            location = new Vec3(8.5, 0, 8.5); yaw = -90; pitch = 0;
         }
         ServerLevel target = destination;
         Vec3 point = location;
@@ -87,15 +94,20 @@ public final class EarthArena {
         player.sendSystemMessage(Component.literal(returning ? "正在返回原来的位置……" : "正在进入地核战场……"));
         target.getChunkSource().getChunkFuture(net.minecraft.util.Mth.floor(point.x) >> 4, net.minecraft.util.Mth.floor(point.z) >> 4, ChunkStatus.FULL, true)
                 .whenCompleteAsync((chunk, error) -> {
-                    try {
                         if (error != null || chunk == null || chunk.left().isEmpty() || player.hasDisconnected() || player.isRemoved()) {
                             if (!player.hasDisconnected()) player.sendSystemMessage(Component.literal("战场加载未完成，请稍后重试。"));
+                            PENDING.remove(player.getUUID());
                             return;
                         }
-                        double y = returning ? point.y : target.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, 8, 8) + .1;
-                        player.teleportTo(target, point.x, y, point.z, finalYaw, finalPitch);
-                        player.setDeltaMovement(Vec3.ZERO); player.fallDistance = 0;
-                    } finally { PENDING.remove(player.getUUID()); }
+                        var ready=returning?java.util.concurrent.CompletableFuture.<Void>completedFuture(null):EarthArenaUpgrade.ready(target.getChunk(net.minecraft.util.Mth.floor(point.x)>>4,net.minecraft.util.Mth.floor(point.z)>>4));
+                        ready.whenCompleteAsync((ignored,upgradeError)->{
+                            try{
+                                if(upgradeError!=null||player.hasDisconnected()||player.isRemoved()||!player.isAlive())return;
+                                double y = returning ? point.y : target.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, 8, 8) + .1;
+                                player.teleportTo(target, point.x, y, point.z, finalYaw, finalPitch);
+                                player.setDeltaMovement(Vec3.ZERO); player.fallDistance = 0;
+                            }finally{PENDING.remove(player.getUUID());}
+                        },server);
                 }, server);
     }
 }

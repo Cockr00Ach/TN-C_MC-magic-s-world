@@ -28,4 +28,12 @@ class EarthArenaTerrainTest {
         }
         assertEquals(8, shades.size());
     }
+
+    @Test void giantDiscIsCircularFlatNearTheEntranceAndSurroundedByABasin(){
+        for(int x=16;x<=240;x++)for(int z=-112;z<=112;z++)if(EarthArenaLayout.platform(x,z))assertEquals(160,EarthArenaTerrain.height(x,z,20261018));
+        assertTrue(EarthArenaLayout.platform(128+112,0));assertFalse(EarthArenaLayout.platform(128+112,1));
+        assertFalse(EarthArenaLayout.inside(8.5,158,8.5));assertTrue(EarthArenaLayout.inside(32.5,161,.5));
+        assertTrue(EarthArenaLayout.distance(8.5,8.5)-EarthArenaLayout.RADIUS<12,"Only a short walk from the entrance");
+        assertEquals(156,EarthArenaTerrain.height(128,130,20261018));
+    }
 }

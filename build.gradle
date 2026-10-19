@@ -87,7 +87,7 @@ minecraft {
 
         client {
             if (project.hasProperty('earthArenaAudit')) {
-                workingDirectory project.file('work/earth-arena-audit')
+                workingDirectory project.file(project.findProperty('earthArenaAuditDir') ?: 'work/earth-arena-audit')
                 property 'mixin.env.remapRefMap', 'true'
                 property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
                 property 'tnc.earthArenaAudit', 'true'
