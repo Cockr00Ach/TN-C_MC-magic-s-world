@@ -60,15 +60,15 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     public static final float PHASE_TWO_HEALTH_FRACTION = 0.5F;
 
     /** 碰撞箱（方块）。模型是长的，但 AABB 只能是方形，取宽度那一档。 */
-    public static final float HITBOX_WIDTH = 3.4F;
-    public static final float HITBOX_HEIGHT = 2.7F;
+    public static final float HITBOX_WIDTH = 5.4F;
+    public static final float HITBOX_HEIGHT = 4.3F;
 
     /** 撕咬判定距离（格）。 */
-    public static final double BITE_RANGE = 5.2D;
+    public static final double BITE_RANGE = 8.5D;
     /** 重踏半径（格）。 */
-    public static final double SLAM_RADIUS = 6.0D;
+    public static final double SLAM_RADIUS = 9.5D;
     /** 二阶段火山弹的落点散布半径（格）。 */
-    public static final double ERUPTION_SPREAD = 5.0D;
+    public static final double ERUPTION_SPREAD = 8.0D;
 
     private static final int PHASE_ONE = 1;
     private static final int PHASE_TWO = 2;
@@ -182,7 +182,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
 
     @Override
     public AABB getBoundingBoxForCulling() {
-        return super.getBoundingBoxForCulling().inflate(2.0D, 1.0D, 2.0D);
+        return super.getBoundingBoxForCulling().inflate(3.2D, 2.2D, 3.2D);
     }
 
     // ------------------------------------------------------------------ AI ----

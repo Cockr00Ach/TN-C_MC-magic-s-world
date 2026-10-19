@@ -8,7 +8,7 @@ import software.bernie.geckolib.renderer.GeoEntityRenderer;
 public final class VolcanicTortoiseRenderer extends GeoEntityRenderer<VolcanicTortoiseEntity> {
     public VolcanicTortoiseRenderer(EntityRendererProvider.Context context) {
         super(context, new VolcanicTortoiseGeoModel());
-        this.shadowRadius = 2.1F;
+        this.shadowRadius = 3.4F;
         this.addRenderLayer(new VolcanicTortoiseEmissiveLayer(this));
     }
 }
