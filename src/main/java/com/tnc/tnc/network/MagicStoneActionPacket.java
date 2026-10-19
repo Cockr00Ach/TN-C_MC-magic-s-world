@@ -94,7 +94,7 @@ public class MagicStoneActionPacket {
      * 施法/读条/冷却/动画/魔力闸门全部原样复用引擎那套 ✓。
      */
     private void handleSetPage(ServerPlayer player) {
-        if (com.tnc.tnc.combat.DownedCombat.isDowned(player)) {
+        if ((com.tnc.tnc.combat.DownedCombat.isDowned(player)||com.tnc.tnc.dungeon.DungeonService.recovering(player))) {
             return;
         }
         MagicStoneData data = MagicStone.getOrNull(player);
@@ -117,7 +117,7 @@ public class MagicStoneActionPacket {
 
     /** 配键：把某个法术放进某个槽。 */
     private void handleSetSlot(ServerPlayer player) {
-        if (com.tnc.tnc.combat.DownedCombat.isDowned(player)) {
+        if ((com.tnc.tnc.combat.DownedCombat.isDowned(player)||com.tnc.tnc.dungeon.DungeonService.recovering(player))) {
             return;
         }
         MagicStoneData data = MagicStone.getOrNull(player);
@@ -145,7 +145,7 @@ public class MagicStoneActionPacket {
 
     /** 清空某个槽。 */
     private void handleClearSlot(ServerPlayer player) {
-        if (com.tnc.tnc.combat.DownedCombat.isDowned(player)) {
+        if ((com.tnc.tnc.combat.DownedCombat.isDowned(player)||com.tnc.tnc.dungeon.DungeonService.recovering(player))) {
             return;
         }
         MagicStoneData data = MagicStone.getOrNull(player);
@@ -171,7 +171,7 @@ public class MagicStoneActionPacket {
     }
 
     private void handleUnlock(ServerPlayer player) {
-        if(com.tnc.tnc.combat.DownedCombat.isDowned(player))return;
+        if((com.tnc.tnc.combat.DownedCombat.isDowned(player)||com.tnc.tnc.dungeon.DungeonService.recovering(player)))return;
         ResourceLocation id = ResourceLocation.tryParse(spellId);
         if (id == null) {
             return;

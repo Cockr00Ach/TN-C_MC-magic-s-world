@@ -1,0 +1,7 @@
+{
+  "dimension": "tnc:earth_arena",
+  "keyRoundTrip": true,
+  "failures": [],
+  "arenaFrames": 405,
+  "scope": "Real isolated client terrain/sky render and actual keystone entry/return"
+}

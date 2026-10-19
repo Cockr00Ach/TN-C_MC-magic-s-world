@@ -1,0 +1,8 @@
+{
+  "type": "tnc:dungeon_gate",
+  "theme": "astral",
+  "biomes": "#tnc:dungeon/astral",
+  "spawn_overrides": {},
+  "step": "surface_structures",
+  "terrain_adaptation": "beard_thin"
+}

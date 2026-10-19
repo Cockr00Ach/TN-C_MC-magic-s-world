@@ -5,6 +5,36 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class StoneLancerModelTest {
+    @Test void eachArmorFaceOwnsItsTextureIslandAndHeadHasVerticalVolume() throws Exception {
+        var root=java.nio.file.Path.of("src/main/resources/assets/tnc");
+        var geo=new com.google.gson.Gson().fromJson(java.nio.file.Files.readString(root.resolve("geo/entity/stone_lancer.geo.json")),com.google.gson.JsonObject.class)
+                .getAsJsonArray("minecraft:geometry").get(0).getAsJsonObject();
+        var description=geo.getAsJsonObject("description");
+        var texture=javax.imageio.ImageIO.read(root.resolve("textures/entity/stone_lancer.png").toFile());
+        assertEquals(texture.getWidth(),description.get("texture_width").getAsInt());
+        assertEquals(texture.getHeight(),description.get("texture_height").getAsInt());
+        var islands=new java.util.ArrayList<double[]>();
+        for(var entry:geo.getAsJsonArray("bones")) {
+            var bone=entry.getAsJsonObject();
+            double bottom=Double.POSITIVE_INFINITY,top=-bottom,left=bottom,right=-bottom;
+            for(var value:bone.getAsJsonArray("cubes")) {
+                var cube=value.getAsJsonObject();var origin=cube.getAsJsonArray("origin");var size=cube.getAsJsonArray("size");
+                bottom=Math.min(bottom,origin.get(1).getAsDouble());top=Math.max(top,origin.get(1).getAsDouble()+size.get(1).getAsDouble());
+                left=Math.min(left,origin.get(0).getAsDouble());right=Math.max(right,origin.get(0).getAsDouble()+size.get(0).getAsDouble());
+                for(var face:cube.getAsJsonObject("uv").entrySet()) {
+                    var uv=face.getValue().getAsJsonObject();var at=uv.getAsJsonArray("uv");var span=uv.getAsJsonArray("uv_size");
+                    double x=at.get(0).getAsDouble(),y=at.get(1).getAsDouble(),w=span.get(0).getAsDouble(),h=span.get(1).getAsDouble();
+                    assertTrue(w>0 && h>0 && x>=0 && y>=0 && x+w<=texture.getWidth() && y+h<=texture.getHeight());
+                    for(var old:islands)assertFalse(x<old[2] && x+w>old[0] && y<old[3] && y+h>old[1],
+                            "Individually painted armor faces must never share or overlap UV regions");
+                    islands.add(new double[]{x,y,x+w,y+h});
+                }
+            }
+            if(bone.get("name").getAsString().equals("head"))assertTrue(top-bottom>(right-left)*.7,"Cranium and jaw must not become a flattened horizontal mask");
+        }
+        assertTrue(islands.size()>1000);
+    }
+
     @Test void wideStoneFacesKeepTheirAspectRatioAndEmergenceJoinsTheCorePose() throws Exception {
         var gson=new com.google.gson.Gson();var root=java.nio.file.Path.of("src/main/resources/assets/tnc");
         var geo=gson.fromJson(java.nio.file.Files.readString(root.resolve("geo/entity/stone_lancer.geo.json")),com.google.gson.JsonObject.class);

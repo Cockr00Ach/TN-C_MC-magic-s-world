@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "tag": "tnc:boss_runestones/thunder_violet"
+  },
+  "result": "tnc:thunder_violet_boss_runestone_5",
+  "count": 1
+}

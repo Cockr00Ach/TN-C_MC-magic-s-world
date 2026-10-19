@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "tnc:block/water_boss_runestone_8"
+  }
+}

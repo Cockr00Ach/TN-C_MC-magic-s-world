@@ -5,7 +5,7 @@ import java.nio.charset.StandardCharsets;
 /** Test JVM only: retain normal game rendering/event polling, omit hidden-window presentation. */
 public final class OffscreenAuditAgent {
     public static void premain(String ignored,Instrumentation instrumentation){
-        if(!Boolean.getBoolean("tnc.zeroAudit"))throw new IllegalStateException("Offscreen agent requires the isolated Zero audit flag");
+        if(!Boolean.getBoolean("tnc.zeroAudit")&&!Boolean.getBoolean("tnc.dungeonAudit"))throw new IllegalStateException("Offscreen agent requires the isolated Zero audit flag");
         instrumentation.addTransformer(new ClassFileTransformer(){
             @Override public byte[] transform(ClassLoader loader,String name,Class<?> type,ProtectionDomain domain,byte[] bytes){
                 if(!"com/mojang/blaze3d/systems/RenderSystem".equals(name))return null;

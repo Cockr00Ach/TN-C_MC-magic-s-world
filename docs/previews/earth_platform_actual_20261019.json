@@ -1,0 +1,27 @@
+{
+  "scope": "Real isolated client terrain/sky render and actual keystone entry/return",
+  "arenaFrames": 405,
+  "failures": [],
+  "keyRoundTrip": true,
+  "dimension": "tnc:earth_arena",
+  "platform": {
+    "diameter": 225,
+    "radius": 112,
+    "centre": [
+      128.5,
+      161,
+      0.5
+    ],
+    "texture": "tnc:block/earth_amber_stone",
+    "entranceWalkBlocks": 10
+  },
+  "validation": {
+    "terrainUnitTests": 3,
+    "realGameTests": 2,
+    "legacyUpgrade": true,
+    "dimensionProtection": true,
+    "guardianAnchored": true,
+    "rangedCastingPreserved": true,
+    "temporaryTicketsExpire": true
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "type": "tnc:dungeon_gate",
+  "theme": "desert",
+  "biomes": "#tnc:dungeon/desert",
+  "spawn_overrides": {},
+  "step": "surface_structures",
+  "terrain_adaptation": "beard_thin"
+}

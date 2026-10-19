@@ -1,0 +1,121 @@
+{
+  "installed_at": "2026-10-19T05:56:23.382279",
+  "jar_sha256": "e36d0d93e4d730168e525e4c4b7c2708d536d42601bda3640e0d1459a63dfed5",
+  "jar_bytes": 113408149,
+  "files": {
+    "mods/tnc-1.0.0.jar": "e36d0d93e4d730168e525e4c4b7c2708d536d42601bda3640e0d1459a63dfed5"
+  },
+  "unit_tests": 277,
+  "native_ui_report": {
+    "screenshots": 14,
+    "scenes": [
+      {
+        "name": "gate-all-segments",
+        "framebuffer_width": 1600,
+        "framebuffer_height": 900,
+        "gui_height": 450,
+        "gui_width": 800
+      },
+      {
+        "name": "gate-locked-member",
+        "framebuffer_width": 1600,
+        "framebuffer_height": 900,
+        "gui_height": 450,
+        "gui_width": 800
+      },
+      {
+        "name": "merchant",
+        "framebuffer_width": 1600,
+        "framebuffer_height": 900,
+        "gui_height": 450,
+        "gui_width": 800
+      },
+      {
+        "name": "wish-lamps",
+        "framebuffer_width": 1600,
+        "framebuffer_height": 900,
+        "gui_height": 450,
+        "gui_width": 800
+      },
+      {
+        "name": "treasure",
+        "framebuffer_width": 1600,
+        "framebuffer_height": 900,
+        "gui_height": 450,
+        "gui_width": 800
+      },
+      {
+        "name": "rest",
+        "framebuffer_width": 1600,
+        "framebuffer_height": 900,
+        "gui_height": 450,
+        "gui_width": 800
+      },
+      {
+        "name": "handbook",
+        "framebuffer_width": 1600,
+        "framebuffer_height": 900,
+        "gui_height": 450,
+        "gui_width": 800
+      },
+      {
+        "name": "optional-encounter",
+        "framebuffer_width": 1600,
+        "framebuffer_height": 900,
+        "gui_height": 450,
+        "gui_width": 800
+      },
+      {
+        "name": "cartographer",
+        "framebuffer_width": 1600,
+        "framebuffer_height": 900,
+        "gui_height": 450,
+        "gui_width": 800
+      },
+      {
+        "name": "old-door",
+        "framebuffer_width": 1600,
+        "framebuffer_height": 900,
+        "gui_height": 450,
+        "gui_width": 800
+      },
+      {
+        "name": "homeward",
+        "framebuffer_width": 1600,
+        "framebuffer_height": 900,
+        "gui_height": 450,
+        "gui_width": 800
+      },
+      {
+        "name": "large-gui-scale",
+        "framebuffer_width": 1600,
+        "framebuffer_height": 900,
+        "gui_height": 300,
+        "gui_width": 534
+      },
+      {
+        "name": "small-window",
+        "framebuffer_width": 1024,
+        "framebuffer_height": 640,
+        "gui_height": 320,
+        "gui_width": 512
+      },
+      {
+        "name": "progress-hud",
+        "framebuffer_width": 1024,
+        "framebuffer_height": 640,
+        "gui_height": 320,
+        "gui_width": 512
+      }
+    ],
+    "failures": [],
+    "screen_class_sha256": "24233314756d7e50b9be6458d7e042ecaa03c901303507e92de16e7b14d724fa",
+    "scope": "Original full-pack rendering; UI fixture data only; no server actions or world edits"
+  },
+  "protected_quest_files_unchanged": 43,
+  "backup": "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\work\\backups\\dungeon-ui-20261019-055622",
+  "saves_modified": false,
+  "island_templates_modified": false,
+  "monster_behavior_modified": false,
+  "scope": "Dungeon screens and HUD only; previous gameplay verification remains in dungeons-validation-20261019.json"
+}
