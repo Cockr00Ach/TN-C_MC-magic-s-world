@@ -115,6 +115,14 @@ minecraft {
                 property 'tnc.windArsenalAuditReport', file('work/wind-arsenal-client-audit.json').absolutePath
                 args '--width', '1800', '--height', '900'
             }
+            if (project.hasProperty('windGeneralAudit')) {
+                workingDirectory project.file('work/wind-general-audit')
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+                property 'tnc.windGeneralAudit', 'true'
+                property 'tnc.windGeneralAuditReport', file('work/wind-general-audit.json').absolutePath
+                args '--quickPlaySingleplayer', 'wind-gallery', '--width', '1800', '--height', '1000'
+            }
             if (project.hasProperty('stoneMaterialAudit')) {
                 workingDirectory project.file('work/stone-material-audit')
                 property 'mixin.env.remapRefMap', 'true'

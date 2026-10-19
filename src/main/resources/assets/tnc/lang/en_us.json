@@ -579,5 +579,7 @@
   "item.tnc.star_dream_shard": "Star Dream Shard",
   "item.tnc.dungeon_memento": "Dungeon Memento",
   "block.tnc.earth_arena_pillar_stone": "Arena Pillar Amberstone",
-  "block.tnc.earth_arena_black_pillar_stone": "Arena Black Pillar Stone"
+  "block.tnc.earth_arena_black_pillar_stone": "Arena Black Pillar Stone",
+  "entity.tnc.wind_general": "Wind General",
+  "item.tnc.wind_general_spawn_egg": "Wind General Model Preview Spawn Egg"
 }

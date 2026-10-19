@@ -752,5 +752,7 @@
   "item.tnc.star_dream_shard": "眠星碎片",
   "item.tnc.dungeon_memento": "地下城纪念物",
   "block.tnc.earth_arena_pillar_stone": "战台·土柱琥珀岩",
-  "block.tnc.earth_arena_black_pillar_stone": "战台·黑土柱岩"
+  "block.tnc.earth_arena_black_pillar_stone": "战台·黑土柱岩",
+  "entity.tnc.wind_general": "御风将军",
+  "item.tnc.wind_general_spawn_egg": "御风将军（模型预览）刷怪蛋"
 }
