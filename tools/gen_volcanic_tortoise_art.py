@@ -247,6 +247,47 @@ CUBES_P2 += [
     ("head", "eye_glow_r", (-13, 32, -79), (4, 5, 3), "lava"),
 ]
 
+
+def _fix_coplanar(cubes):
+    """让相邻方块的共面面错开 0.02 单位。
+
+    堆叠/贴合的两个方块如果某个面正好落在同一个平面（例如壳缘顶面 vs 甲片底面、
+    腹甲侧面 vs 大腿侧面），两个面都会画出来，深度相同 ⇒ 深度测试打平，屏幕上出现
+    密集条纹/闪烁。这里把"体积较小的那个"沿该轴往较大方块的中心推 0.02 单位，
+    肉眼看不出位移，但共面消失。
+    """
+    items = [[b, n, [float(x) for x in o], [int(x) for x in s], th] for (b, n, o, s, th) in cubes]
+    vol = [it[3][0] * it[3][1] * it[3][2] for it in items]
+    for _ in range(10):
+        changed = False
+        for i in range(len(items)):
+            for j in range(i + 1, len(items)):
+                for axis in range(3):
+                    a, b = items[i], items[j]
+                    a0, a1 = a[2][axis], a[2][axis] + a[3][axis]
+                    b0, b1 = b[2][axis], b[2][axis] + b[3][axis]
+                    planes = [(a1, b0, +1), (a0, b1, -1), (a0, b0, 0), (a1, b1, 0)]
+                    for pa, pb, push in planes:
+                        if abs(pa - pb) > 1e-9:
+                            continue
+                        o1, o2 = [k for k in range(3) if k != axis]
+                        if (min(a[2][o1] + a[3][o1], b[2][o1] + b[3][o1]) - max(a[2][o1], b[2][o1]) <= 0.5
+                                or min(a[2][o2] + a[3][o2], b[2][o2] + b[3][o2]) - max(a[2][o2], b[2][o2]) <= 0.5):
+                            continue
+                        small, big = (i, j) if vol[i] <= vol[j] else (j, i)
+                        if push == 0:
+                            ca = items[small][2][axis] + items[small][3][axis] / 2.0
+                            cb = items[big][2][axis] + items[big][3][axis] / 2.0
+                            push = 1 if cb > ca else -1
+                        items[small][2][axis] += 0.02 * push
+                        vol[small] = items[small][3][0] * items[small][3][1] * items[small][3][2]
+                        changed = True
+                        break
+        if not changed:
+            break
+    return [(it[0], it[1], tuple(it[2]), tuple(it[3]), it[4]) for it in items]
+
+
 PHASES = {
     "phase1": {
         "cubes": CUBES_P1,
@@ -261,6 +302,10 @@ PHASES = {
         "glow": True,
     },
 }
+
+# 相邻方块的共面面错开（否则关光影下会看到密集条纹/闪烁）
+for _ph in PHASES.values():
+    _ph["cubes"] = _fix_coplanar(_ph["cubes"])
 
 
 # ---------------------------------------------------------------- UV 打包 --
