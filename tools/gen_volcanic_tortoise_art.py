@@ -87,8 +87,9 @@ THEMES = {
     # ---- 二阶段专用 ----
     "lava": {"base": "magma", "grain": "magma_hot", "dark": "ember", "accent": "core",
              "crack": 0, "flat": True},
-    "lava_rock": {"base": "obsidian", "grain": "basalt", "dark": "obsidian_dk",
-                  "accent": "magma", "crack": 6, "strata": True, "scales": True},
+    # 二阶段山体：仍是可辨认的深灰/灰褐岩石（不是黑曜石黑），裂缝才用岩浆色
+    "lava_rock": {"base": "rock", "grain": "rock_lt", "dark": "basalt",
+                  "accent": "magma", "crack": 5, "strata": True, "scales": True},
     "lava_groove": {"base": "magma", "grain": "magma_hot", "dark": "ember", "accent": "core",
                     "crack": 0},
     "spike": {"base": "rock", "grain": "rock_lt", "dark": "basalt", "accent": "magma",
@@ -132,42 +133,6 @@ CUBES_P1 = [
     # --- 龟壳穹顶两级（保住"龟"的轮廓，火山从它上面长出来）---
     ("shell", "dome1", (-34, 33, -34), (68, 6, 68), "shell_hi"),
     ("shell", "dome2", (-26, 39, -26), (52, 5, 52), "shell"),
-    # --- 火山锥：六级，每级各收 5~6 单位，坡度接近真火山而不是直上直下的塔 ---
-    ("shell", "volc1", (-22, 44, -22), (44, 5, 44), "shell_low"),
-    ("shell", "volc2", (-19, 49, -19), (38, 5, 38), "shell_low"),
-    ("shell", "volc3", (-16, 54, -16), (32, 5, 32), "shell_low"),
-    ("shell", "volc4", (-13, 59, -13), (26, 5, 26), "shell_low"),
-    # --- 火山口：上面两级做成"环"，中间是通的竖井，往上看能看见岩浆 ---
-    ("shell", "ring5_f", (-10, 64, -10), (20, 5, 4), "shell"),
-    ("shell", "ring5_b", (-10, 64, 6), (20, 5, 4), "shell"),
-    ("shell", "ring5_l", (6, 64, -6), (4, 5, 12), "shell"),
-    ("shell", "ring5_r", (-10, 64, -6), (4, 5, 12), "shell"),
-    ("shell", "lip_f", (-9, 69, -9), (18, 5, 4), "shell_hi"),
-    ("shell", "lip_b", (-9, 69, 5), (18, 5, 4), "shell_hi"),
-    ("shell", "lip_l", (5, 69, -5), (4, 5, 10), "shell_hi"),
-    ("shell", "lip_r", (-9, 69, -5), (4, 5, 10), "shell_hi"),
-    # --- 熔岩沟槽：四级坡面各四面，顺着坡往下淌 ---
-    ("shell", "groove_f1", (-2, 44, -24), (4, 5, 3), "groove"),
-    ("shell", "groove_f2", (-2, 49, -21), (4, 5, 3), "groove"),
-    ("shell", "groove_f3", (-2, 54, -18), (4, 5, 3), "groove"),
-    ("shell", "groove_f4", (-2, 59, -15), (4, 5, 3), "groove"),
-    ("shell", "groove_b1", (-2, 44, 21), (4, 5, 3), "groove"),
-    ("shell", "groove_b2", (-2, 49, 18), (4, 5, 3), "groove"),
-    ("shell", "groove_b3", (-2, 54, 15), (4, 5, 3), "groove"),
-    ("shell", "groove_b4", (-2, 59, 12), (4, 5, 3), "groove"),
-    ("shell", "groove_l1", (22, 44, -2), (3, 5, 4), "groove"),
-    ("shell", "groove_l2", (19, 49, -2), (3, 5, 4), "groove"),
-    ("shell", "groove_l3", (16, 54, -2), (3, 5, 4), "groove"),
-    ("shell", "groove_l4", (13, 59, -2), (3, 5, 4), "groove"),
-    ("shell", "groove_r1", (-25, 44, -2), (3, 5, 4), "groove"),
-    ("shell", "groove_r2", (-22, 49, -2), (3, 5, 4), "groove"),
-    ("shell", "groove_r3", (-19, 54, -2), (3, 5, 4), "groove"),
-    ("shell", "groove_r4", (-16, 59, -2), (3, 5, 4), "groove"),
-    # --- 溢流：口沿上漫出来的岩浆（侧面一眼就能看见）---
-    ("shell", "spill_f", (-4, 74, -9), (8, 2, 5), "groove"),
-    ("shell", "spill_b", (-4, 74, 4), (8, 2, 5), "groove"),
-    # --- 火山口里的岩浆（挂 whorl 骨骼，idle 里慢慢转）---
-    ("whorl", "lava_pool", (-6, 66, -6), (12, 3, 12), "lava"),
     # --- 脖子 / 头 ---
     ("neck", "neck", (-14, 20, -50), (28, 18, 20), "shell_low"),
     ("head", "head", (-16, 20, -76), (32, 24, 26), "head"),
@@ -189,43 +154,94 @@ CUBES_P1 = [
     ("tail", "tail2", (-4, 11, 45), (8, 8, 12), "tail"),
 ]
 
-# 二阶段：同骨架同尺寸；山体/壳面换熔岩岩板、沟槽灌满岩浆、口沿与头部长刺
-CUBES_P2 = [c for c in CUBES_P1 if not (
-    c[1].startswith("groove_") or c[1].startswith("spill_")
-    or c[1] in ("lava_pool", "eye_l", "eye_r", "brow",
-                "volc1", "volc2", "volc3", "volc4", "dome2"))]
+# --- 火山：不再是一圈圈同心方台，改成不对称的岩块堆 ---
+# 设计要点（对应作者 2026-10-19 的反馈）：
+#   * 正面(-Z)/背面(+Z)/左右(+X/-X) 坡度不同：背面 bt_b 高、+X 陡壁、-X 低台、正面有突出山嘴
+#   * 岩块高低错落、部分外挑（slab1 / ldg1 / ldg2）形成断层与岩台，水平边缘不环绕一整圈
+#   * 火山口口沿高低不一（78/77/76/75/74），正面留一道缺口，岩浆面 y=71 低于全部口沿
+#   * 两条主熔岩通道（正面 ch_a*、+X 侧 ch_c*）+ 一条支流（ch_b*），宽窄不一、被 occl* 岩块遮住
+VOLCANO_P1 = [
+    # 山脚：四个方向伸出长度/高度都不同，并且包住龟壳穹顶（不再是"壳上摆一座独立建筑"）
+    ("shell", "ap_f", (-30, 41, -34), (60, 7, 22), "shell_low"),
+    ("shell", "ap_b", (-28, 41, 10), (56, 8, 20), "shell_low"),
+    ("shell", "ap_x", (-36, 41, -16), (14, 9, 34), "shell_low"),
+    ("shell", "ap_y", (20, 41, -18), (14, 6, 36), "shell_low"),
+    # 主山体：每层高度(9/4/6/9/7/5)与内缩量(6/2/4/3)都不一样，且逐层偏心
+    ("shell", "m_low", (-24, 47, -24), (48, 9, 46), "shell_low"),
+    ("shell", "m_mid", (-20, 56, -18), (38, 4, 34), "shell"),
+    ("shell", "m_mid2", (-26, 54, -26), (20, 6, 14), "shell_low"),
+    ("shell", "m_up", (-16, 60, -14), (30, 9, 26), "shell"),
+    ("shell", "m_up2", (2, 58, -24), (12, 7, 14), "shell_low"),
+    ("shell", "m_top", (-13, 67, -10), (24, 5, 24), "shell"),
+    # 四向各不相同：正面山嘴、背面高扶壁、+X 陡壁、-X 低台
+    ("shell", "bt_f", (-16, 44, -30), (20, 9, 8), "shell_low"),
+    ("shell", "bt_f2", (2, 46, -28), (9, 7, 7), "shell_low"),
+    ("shell", "bt_b", (-10, 52, 18), (18, 11, 8), "shell"),
+    ("shell", "bt_x", (18, 45, -10), (9, 12, 18), "shell_low"),
+    ("shell", "bt_y", (-30, 48, -4), (8, 6, 20), "shell_low"),
+    # 岩台 / 内凹台阶 / 外挑岩板（外挑让轮廓出现断层）
+    ("shell", "ldg1", (-30, 55, 4), (12, 4, 12), "shell"),
+    ("shell", "ldg2", (6, 58, -20), (10, 4, 9), "shell"),
+    ("shell", "step1", (-18, 64, -8), (7, 5, 9), "shell"),
+    ("shell", "step2", (14, 62, 2), (6, 4, 8), "shell"),
+    ("shell", "slab1", (-8, 64, -18), (12, 3, 8), "shell"),
+    # 火山口口沿：五段，顶面 78/77/76/75/75 高低不一，正面 x -2..2 留缺口
+    ("shell", "rim_b", (-13, 71, 6), (26, 7, 8), "shell"),
+    ("shell", "rim_x", (-17, 71, -8), (7, 6, 14), "shell"),
+    ("shell", "rim_y", (6, 71, -9), (7, 4, 14), "shell"),
+    ("shell", "rim_f1", (-13, 71, -14), (11, 5, 7), "shell_hi"),
+    ("shell", "rim_f2", (2, 71, -15), (8, 4, 7), "shell_hi"),
+    # 口内岩浆：y 67..71，比最低口沿(75)低 4 格，侧面看不到、俯视能看到
+    ("whorl", "lava_pool", (-11, 67, -7), (17, 4, 13), "lava"),
+    # 正面主通道：上窄下宽
+    ("shell", "ch_a1", (-1, 64, -17), (4, 8, 7), "groove"),
+    ("shell", "ch_a2", (-1, 57, -21), (4, 8, 6), "groove"),
+    ("shell", "ch_a3", (-2, 50, -25), (5, 8, 6), "groove"),
+    ("shell", "ch_a4", (-3, 44, -29), (6, 7, 7), "groove"),
+    ("shell", "spill_n", (-1, 70, -16), (4, 2, 4), "groove"),
+    # 支流：更细，半途分叉
+    ("shell", "ch_b1", (5, 58, -19), (3, 6, 6), "groove"),
+    ("shell", "ch_b2", (7, 52, -23), (3, 6, 6), "groove"),
+    ("shell", "ch_b3", (9, 46, -26), (3, 6, 6), "groove"),
+    # +X 侧通道：最细最长
+    ("shell", "ch_c1", (10, 66, -6), (3, 5, 8), "groove"),
+    ("shell", "ch_c2", (12, 60, -9), (3, 6, 7), "groove"),
+    ("shell", "ch_c3", (13, 54, -12), (3, 6, 7), "groove"),
+    ("shell", "ch_c4", (14, 48, -15), (3, 6, 6), "groove"),
+    # 挡住通道的岩块：让岩浆断断续续
+    ("shell", "occl1", (-8, 56, -22), (8, 6, 6), "shell"),
+    ("shell", "occl2", (2, 50, -24), (6, 5, 5), "shell"),
+]
+
+CUBES_P1 = CUBES_P1 + VOLCANO_P1
+
+# 二阶段：同骨架同尺寸，但山体裂开、岩甲外错、熔岩灌满
+_VOLC_NAMES = set(c[1] for c in VOLCANO_P1)
+VOLCANO_P2 = []
+for _bone, _name, _o, _s, _theme in VOLCANO_P1:
+    _ox, _oy, _oz = _o
+    _t = "lava" if _theme == "lava" else (
+        "lava_rock" if _theme in ("shell", "shell_low", "shell_hi") else "lava_groove")
+    if _name.startswith("rim_") or _name in ("slab1", "ldg2", "bt_f"):
+        _sign = 1 if _ox > 0 else -1
+        _ox += _sign * 2
+        _oy += 1
+    VOLCANO_P2.append((_bone, _name, (_ox, _oy, _oz), _s, _t))
+VOLCANO_P2 += [
+    ("shell", "cr_x", (-22, 74, -8), (6, 5, 16), "lava"),
+    ("shell", "cr_y", (8, 72, -10), (6, 4, 16), "lava"),
+    ("shell", "fic_a", (-9, 52, -26), (4, 14, 5), "lava"),
+    ("shell", "fic_b", (11, 54, -18), (4, 12, 5), "lava"),
+]
+
+CUBES_P2 = [c for c in CUBES_P1 if c[1] not in _VOLC_NAMES and c[1] != "dome2"]
+CUBES_P2.append(("shell", "dome2", (-26, 39, -26), (52, 5, 52), "lava_rock"))
+CUBES_P2 += VOLCANO_P2
 CUBES_P2 += [
-    ("shell", "dome2", (-26, 39, -26), (52, 5, 52), "lava_rock"),
-    ("shell", "volc1", (-22, 44, -22), (44, 5, 44), "lava_rock"),
-    ("shell", "volc2", (-19, 49, -19), (38, 5, 38), "lava_rock"),
-    ("shell", "volc3", (-16, 54, -16), (32, 5, 32), "lava_rock"),
-    ("shell", "volc4", (-13, 59, -13), (26, 5, 26), "lava_rock"),
-    ("shell", "groove_f1", (-2, 44, -24), (5, 5, 3), "lava_groove"),
-    ("shell", "groove_f2", (-2, 49, -21), (5, 5, 3), "lava_groove"),
-    ("shell", "groove_f3", (-2, 54, -18), (5, 5, 3), "lava_groove"),
-    ("shell", "groove_f4", (-2, 59, -15), (5, 5, 3), "lava_groove"),
-    ("shell", "groove_b1", (-2, 44, 21), (5, 5, 3), "lava_groove"),
-    ("shell", "groove_b2", (-2, 49, 18), (5, 5, 3), "lava_groove"),
-    ("shell", "groove_b3", (-2, 54, 15), (5, 5, 3), "lava_groove"),
-    ("shell", "groove_b4", (-2, 59, 12), (5, 5, 3), "lava_groove"),
-    ("shell", "groove_l1", (22, 44, -2), (3, 5, 5), "lava_groove"),
-    ("shell", "groove_l2", (19, 49, -2), (3, 5, 5), "lava_groove"),
-    ("shell", "groove_l3", (16, 54, -2), (3, 5, 5), "lava_groove"),
-    ("shell", "groove_l4", (13, 59, -2), (3, 5, 5), "lava_groove"),
-    ("shell", "groove_r1", (-25, 44, -2), (3, 5, 5), "lava_groove"),
-    ("shell", "groove_r2", (-22, 49, -2), (3, 5, 5), "lava_groove"),
-    ("shell", "groove_r3", (-19, 54, -2), (3, 5, 5), "lava_groove"),
-    ("shell", "groove_r4", (-16, 59, -2), (3, 5, 5), "lava_groove"),
-    ("shell", "spill_f", (-5, 74, -9), (10, 2, 5), "lava"),
-    ("shell", "spill_b", (-5, 74, 4), (10, 2, 5), "lava"),
-    ("whorl", "lava_pool", (-7, 65, -7), (14, 4, 14), "lava"),
-    ("whorl", "lava_pool_hi", (-4, 69, -4), (8, 2, 8), "lava"),
-    # 山体岩刺：四面各一根 + 顶上一根
     ("shell", "spike_f", (-3, 44, -26), (6, 16, 6), "spike"),
     ("shell", "spike_b", (-3, 44, 20), (6, 16, 6), "spike"),
     ("shell", "spike_l", (20, 44, -3), (6, 16, 6), "spike"),
     ("shell", "spike_r", (-26, 44, -3), (6, 16, 6), "spike"),
-    ("shell", "spike_top", (-4, 74, -4), (8, 9, 8), "spike"),
     ("head", "crest", (-6, 44, -76), (12, 9, 14), "spike"),
     ("head", "eye_glow_l", (9, 32, -79), (4, 5, 3), "lava"),
     ("head", "eye_glow_r", (-13, 32, -79), (4, 5, 3), "lava"),
@@ -338,7 +354,7 @@ def paint_face(img, gimg, rect, theme, rng, glow, is_top, is_bottom):
             px[x0 + x, y0 + y] = c + (255,)
             if gpx is not None:
                 gv = c if flat else glow_of(c)
-                gpx[x0 + x, y0 + y] = (gv if gv else (0, 0, 0)) + (255,)
+                gpx[x0 + x, y0 + y] = (gv + (255,)) if gv else (0, 0, 0, 0)
 
     # 鳞片 / 岩板：每 6 像素一道暗线，靠格子撑出层次（不用纯黑）
     if theme.get("scales") and not flat and w > 8 and h > 8:
@@ -367,7 +383,7 @@ def paint_face(img, gimg, rect, theme, rng, glow, is_top, is_bottom):
                 px[x0 + cx, y0 + cy] = col + (255,)
                 if gpx is not None:
                     gv = glow_of(col)
-                    gpx[x0 + cx, y0 + cy] = (gv if gv else (0, 0, 0)) + (255,)
+                    gpx[x0 + cx, y0 + cy] = (gv + (255,)) if gv else (0, 0, 0, 0)
                 cx += rng.choice((0, 1))
                 cy += rng.choice((-1, 0, 1)) if s % 2 else 0
 
@@ -392,7 +408,8 @@ def paint_face(img, gimg, rect, theme, rng, glow, is_top, is_bottom):
 
 def build_texture(phase):
     img = Image.new("RGBA", (SHEET, SHEET), (0, 0, 0, 0))
-    gimg = Image.new("RGBA", (SHEET, SHEET), (0, 0, 0, 255))
+    # 发光层底色必须是**全透明**：不透明黑会把整个模型盖成黑的（二阶段纯黑就是这个 bug）
+    gimg = Image.new("RGBA", (SHEET, SHEET), (0, 0, 0, 0))
     packer = Packer(SHEET)
     rng = random.Random(20261019 + (0 if phase["glow"] else 7))
     uvs = {}
