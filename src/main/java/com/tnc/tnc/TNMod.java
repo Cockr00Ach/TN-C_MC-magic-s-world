@@ -238,6 +238,7 @@ public class TNMod
         com.tnc.tnc.npc.TNNpcAttributes.register(modEventBus);
         // 法术召唤物/环绕物实体（环绕雷球）
         com.tnc.tnc.magic.TNOrbEntities.register(modEventBus);
+        com.tnc.tnc.dungeon.DungeonMobRegistration.register(modEventBus);
 
         // 赌场机器（老虎机）—— 方块 / 方块实体类型 / 物品三样都在 TNCasinoRegistry 里，
         // 它自己带 @Mod.EventBusSubscriber(MOD)，所以**必须**在这里强制把类加载一次 ✗：

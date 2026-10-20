@@ -1,0 +1,16 @@
+{
+  "affects": "MOB",
+  "data": {
+    "attribute_id": "minecraft:generic.armor",
+    "number_range": {
+      "max": 0.6,
+      "min": 0.3
+    },
+    "operation": "MULTIPLY_TOTAL",
+    "uuid": "7f3c1a4e-9b2d-4c58-8a10-6d5e2f9b7c31"
+  },
+  "id": "tnc_armored",
+  "modid": "library_of_exile",
+  "serializer": "attribute_mob_affix",
+  "weight": 800
+}

@@ -1,0 +1,79 @@
+{
+  "id": "cement",
+  "mobs": [
+    {
+      "mob_id": "eeeabsmobs:immortal_golem",
+      "weight": 1000
+    },
+    {
+      "mob_id": "eeeabsmobs:immortal_skeleton",
+      "weight": 1000
+    },
+    {
+      "mob_id": "eeeabsmobs:immortal_archer",
+      "weight": 1000
+    },
+    {
+      "mob_id": "eeeabsmobs:immortal_mage",
+      "weight": 1000
+    },
+    {
+      "mob_id": "eeeabsmobs:immortal_warrior",
+      "weight": 1000
+    },
+    {
+      "mob_id": "mebahelcreaturesdraugr:draugr",
+      "weight": 1000
+    },
+    {
+      "mob_id": "mebahelcreaturesdraugr:draugr_archer",
+      "weight": 1000
+    },
+    {
+      "mob_id": "mebahelcreaturesdraugr:skeleton_warrior",
+      "weight": 1000
+    },
+    {
+      "mob_id": "eeeabsmobs:immortal_knight",
+      "weight": 100
+    },
+    {
+      "mob_id": "eeeabsmobs:immortal_shaman",
+      "weight": 100
+    },
+    {
+      "mob_id": "eeeabsmobs:immortal_executioner",
+      "weight": 100
+    },
+    {
+      "mob_id": "mebahelcreaturesdraugr:draugr_wight",
+      "weight": 100
+    },
+    {
+      "mob_id": "mebahelcreaturesdraugr:draugr_scourge",
+      "weight": 100
+    },
+    {
+      "mob_id": "mebahelcreaturesdraugr:infernal_draugr",
+      "weight": 100
+    },
+    {
+      "mob_id": "tnc:steam_sentinel",
+      "weight": 120
+    },
+    {
+      "mob_id": "tnc:rust_hook_butcher",
+      "weight": 150
+    },
+    {
+      "mob_id": "tnc:orc_brute",
+      "weight": 110
+    }
+  ],
+  "tags": {
+    "tags": [
+      "yuansu_cement"
+    ]
+  },
+  "weight": 1000
+}

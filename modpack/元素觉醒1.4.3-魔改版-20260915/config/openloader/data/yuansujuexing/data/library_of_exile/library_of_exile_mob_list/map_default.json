@@ -1,0 +1,99 @@
+{
+  "id": "map_default",
+  "mobs": [
+    {
+      "mob_id": "minecraft:zombie",
+      "weight": 400
+    },
+    {
+      "mob_id": "minecraft:skeleton",
+      "weight": 250
+    },
+    {
+      "mob_id": "minecraft:spider",
+      "weight": 150
+    },
+    {
+      "mob_id": "minecraft:pillager",
+      "weight": 150
+    },
+    {
+      "mob_id": "tnc:lantern_boar",
+      "weight": 130
+    },
+    {
+      "mob_id": "tnc:bone_crossbowman",
+      "weight": 130
+    },
+    {
+      "mob_id": "tnc:sewer_crawler",
+      "weight": 110
+    },
+    {
+      "mob_id": "tnc:goblin_skirmisher",
+      "weight": 110
+    },
+    {
+      "mob_id": "tnc:grave_grub",
+      "weight": 110
+    },
+    {
+      "mob_id": "tnc:rust_hook_butcher",
+      "weight": 90
+    },
+    {
+      "mob_id": "tnc:ash_flinger",
+      "weight": 90
+    },
+    {
+      "mob_id": "tnc:kobold_miner",
+      "weight": 90
+    },
+    {
+      "mob_id": "tnc:frost_weaver",
+      "weight": 75
+    },
+    {
+      "mob_id": "tnc:umbral_binder",
+      "weight": 75
+    },
+    {
+      "mob_id": "tnc:copper_fusilier",
+      "weight": 75
+    },
+    {
+      "mob_id": "tnc:tentacle_horror",
+      "weight": 70
+    },
+    {
+      "mob_id": "tnc:orc_brute",
+      "weight": 60
+    },
+    {
+      "mob_id": "tnc:ash_monk",
+      "weight": 55
+    },
+    {
+      "mob_id": "tnc:steam_sentinel",
+      "weight": 55
+    },
+    {
+      "mob_id": "tnc:minotaur_warden",
+      "weight": 45
+    },
+    {
+      "mob_id": "minecraft:witch",
+      "weight": 25
+    },
+    {
+      "mob_id": "minecraft:slime",
+      "weight": 25
+    }
+  ],
+  "tags": {
+    "tags": [
+      "map"
+    ]
+  },
+  "weight": 1000
+}

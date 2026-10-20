@@ -1,0 +1,59 @@
+{
+  "id": "tent",
+  "mobs": [
+    {
+      "mob_id": "torchesbecomesunlight:preparation_op",
+      "weight": 1000
+    },
+    {
+      "mob_id": "torchesbecomesunlight:tainted_carcass",
+      "weight": 1000
+    },
+    {
+      "mob_id": "torchesbecomesunlight:distorted_caster",
+      "weight": 1000
+    },
+    {
+      "mob_id": "torchesbecomesunlight:patrol_captain",
+      "weight": 1000
+    },
+    {
+      "mob_id": "torchesbecomesunlight:fallen_snowpriest",
+      "weight": 100
+    },
+    {
+      "mob_id": "torchesbecomesunlight:shattered_champion",
+      "weight": 100
+    },
+    {
+      "mob_id": "torchesbecomesunlight:pathfinder_ballistarius",
+      "weight": 100
+    },
+    {
+      "mob_id": "torchesbecomesunlight:war_phantom",
+      "weight": 100
+    },
+    {
+      "mob_id": "torchesbecomesunlight:tactical_defender",
+      "weight": 100
+    },
+    {
+      "mob_id": "tnc:ash_monk",
+      "weight": 120
+    },
+    {
+      "mob_id": "tnc:umbral_binder",
+      "weight": 120
+    },
+    {
+      "mob_id": "tnc:kobold_miner",
+      "weight": 80
+    }
+  ],
+  "tags": {
+    "tags": [
+      "yuansu_tent"
+    ]
+  },
+  "weight": 1000
+}

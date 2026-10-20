@@ -1,0 +1,21 @@
+{
+  "id": "spider_forest",
+  "mobs": [
+    {
+      "mob_id": "tnc:sewer_crawler",
+      "weight": 600
+    },
+    {
+      "mob_id": "tnc:moss_carapace_spider",
+      "weight": 250
+    },
+    {
+      "mob_id": "minecraft:cave_spider",
+      "weight": 150
+    }
+  ],
+  "tags": {
+    "tags": []
+  },
+  "weight": 1000
+}
