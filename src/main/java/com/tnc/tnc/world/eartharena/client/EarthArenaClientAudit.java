@@ -70,8 +70,8 @@ public final class EarthArenaClientAudit {
                 positioned = true;
                 server.execute(() -> {
                     var player = server.getPlayerList().getPlayer(mc.player.getUUID());
-                    player.setGameMode(GameType.SPECTATOR);
-                    player.teleportTo(player.serverLevel(), .5, 265, -80.5, -115, 10);
+                    player.setGameMode(GameType.CREATIVE);player.getAbilities().flying=true;player.onUpdateAbilities();
+                    player.teleportTo(player.serverLevel(), -25.5, 340, 80.5, -117, 46);
                 });
             }
             if (++arenaFrames < 400 || mc.level.getChunkSource().getLoadedChunksCount() < 300) return;

@@ -12,8 +12,9 @@ public final class EarthArenaTerrain {
         double ridge = 1 - Math.abs(2 * noise(wx / 235, wz / 235, seed + 47) - 1);
         double detail = 1 - Math.abs(2 * noise(wx / 83, wz / 83, seed + 71) - 1);
         double broad = noise(wx / 490, wz / 490, seed + 97);
-        return (int)Math.round(91 + 73 * broad + 163 * Math.pow(ridge, 2.6)
+        int natural = (int)Math.round(91 + 73 * broad + 163 * Math.pow(ridge, 2.6)
                 + 31 * detail + 10 * noise(wx / 27, wz / 27, seed + 131));
+        return EarthArenaLayout.height(x, z, natural);
     }
 
     public static int layerOffset(int x, int z, long seed) {

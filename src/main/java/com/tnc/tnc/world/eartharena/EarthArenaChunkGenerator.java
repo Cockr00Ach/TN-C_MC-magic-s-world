@@ -34,6 +34,7 @@ public final class EarthArenaChunkGenerator extends ChunkGenerator {
             Codec.LONG.optionalFieldOf("terrain_seed", EarthArenaTerrain.DEFAULT_SEED).forGetter(g -> g.terrainSeed)
     ).apply(instance, EarthArenaChunkGenerator::new));
     private final long terrainSeed;
+    private static volatile BlockState[] cachedPalette;
 
     public EarthArenaChunkGenerator(BiomeSource biomes, long seed) { super(biomes); terrainSeed = seed; }
     @Override protected Codec<? extends ChunkGenerator> codec() { return CODEC; }
@@ -48,10 +49,22 @@ public final class EarthArenaChunkGenerator extends ChunkGenerator {
     @Override public void applyCarvers(WorldGenRegion region, long seed, RandomState random, BiomeManager biomes, StructureManager structures, ChunkAccess chunk, GenerationStep.Carving step) {}
     @Override public void spawnOriginalMobs(WorldGenRegion region) {}
 
-    private BlockState[] palette() {
+    private static BlockState[] palette() {
+        if (cachedPalette != null) return cachedPalette;
         BlockState[] states = new BlockState[8];
         for (int i = 0; i < 8; i++) states[i] = ElementBossBlocks.block("earth", i + 1).defaultBlockState();
+        cachedPalette = states;
         return states;
+    }
+
+    public static BlockState material(int x, int y, int z, int top, int offset) {
+        if (EarthArenaLayout.platform(x,z) && y >= EarthArenaLayout.FLOOR - 6)
+            return y >= EarthArenaLayout.FLOOR - 2 ? platformSurface(x,z) : EarthArena.PLATFORM.defaultBlockState();
+        return palette()[EarthArenaTerrain.shade(y,top,offset)-1];
+    }
+
+    private static BlockState platformSurface(int x,int z) {
+        return (EarthArenaLayout.blackTile(x,z) ? EarthArena.DARK_PLATFORM : EarthArena.PLATFORM).defaultBlockState();
     }
 
     @Override public CompletableFuture<ChunkAccess> fillFromNoise(Executor executor, Blender blender, RandomState random, StructureManager structures, ChunkAccess chunk) {
@@ -64,9 +77,11 @@ public final class EarthArenaChunkGenerator extends ChunkGenerator {
             for (int x = 0; x < 16; x++) for (int z = 0; z < 16; z++) {
                 int top = Math.min(chunk.getMaxBuildHeight() - 1, EarthArenaTerrain.height(startX + x, startZ + z, terrainSeed));
                 int offset = EarthArenaTerrain.layerOffset(startX + x, startZ + z, terrainSeed);
+                boolean platform = EarthArenaLayout.platform(startX+x,startZ+z);
+                BlockState tile = platform ? platformSurface(startX+x,startZ+z) : null;
                 for (int y = chunk.getMinBuildHeight(); y <= top; y++)
-                    chunk.setBlockState(cursor.set(x, y, z), states[EarthArenaTerrain.shade(y, top, offset) - 1], false);
-                BlockState cap = states[EarthArenaTerrain.shade(top, top, offset) - 1];
+                    chunk.setBlockState(cursor.set(x, y, z), platform && y>=EarthArenaLayout.FLOOR-6 ? y>=EarthArenaLayout.FLOOR-2 ? tile : EarthArena.PLATFORM.defaultBlockState() : states[EarthArenaTerrain.shade(y,top,offset)-1], false);
+                BlockState cap = material(startX+x,top,startZ+z,top,offset);
                 floor.update(x, top, z, cap);
                 surface.update(x, top, z, cap);
             }
@@ -82,7 +97,7 @@ public final class EarthArenaChunkGenerator extends ChunkGenerator {
         Arrays.fill(column, Blocks.AIR.defaultBlockState());
         int top = EarthArenaTerrain.height(x, z, terrainSeed), offset = EarthArenaTerrain.layerOffset(x, z, terrainSeed);
         for (int y = level.getMinBuildHeight(); y <= Math.min(top, level.getMaxBuildHeight() - 1); y++)
-            column[y - level.getMinBuildHeight()] = states[EarthArenaTerrain.shade(y, top, offset) - 1];
+            column[y - level.getMinBuildHeight()] = material(x,y,z,top,offset);
         return new NoiseColumn(level.getMinBuildHeight(), column);
     }
     @Override public void addDebugScreenInfo(List<String> lines, RandomState random, BlockPos pos) {

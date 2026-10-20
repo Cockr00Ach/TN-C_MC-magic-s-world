@@ -37,6 +37,12 @@ public final class StoneLancerClientAudit {
         if(!Boolean.getBoolean("tnc.stoneLancerAudit")||e.phase!=TickEvent.Phase.END)return;
         var mc=Minecraft.getInstance();org.lwjgl.glfw.GLFW.glfwHideWindow(mc.getWindow().getWindow());
         if(mc.level==null||mc.player==null||mc.getOverlay()!=null)return;
+        // A hidden/minimized GLFW surface can report a 1x1 framebuffer on Windows.
+        // Give the isolated gallery a real render target before counting frames.
+        if(mc.getWindow().getWidth()<1600 || mc.getWindow().getHeight()<800){
+            mc.getWindow().setWindowed(1800,900);
+            mc.getWindow().setWidth(1800);mc.getWindow().setHeight(900);mc.resizeDisplay();
+        }
         if(!started){
             started=true;mc.options.pauseOnLostFocus=false;mc.options.guiScale().set(1);mc.resizeDisplay();
             for(String name:new String[]{"earth_spear_sharp","earth_spike_sharp","earth_orb","earth_clod","earth_shell","gravity_core"}){
@@ -68,7 +74,7 @@ public final class StoneLancerClientAudit {
         if(frames<40)return;
         if(!saving){saving=true;Screenshot.grab(mc.gameDirectory,"stone_lancer_full.png",mc.getMainRenderTarget(),m->saved=true);return;}
         if(!saved)return;
-        var report=Map.of("failures",failures,"renderer",mc.getEntityRenderDispatcher().getRenderer(bosses.get(0)).getClass().getName(),"attackModels",6,"localPlayerPrediction",predictionVerified,"poses",List.of("idle","emerge_core","gravity_core"),"scope","Real isolated dev-client model rendering; no full-pack FPS claim");
+        var report=Map.of("failures",failures,"renderer",mc.getEntityRenderDispatcher().getRenderer(bosses.get(0)).getClass().getName(),"attackModels",6,"localPlayerPrediction",predictionVerified,"poses",List.of("idle","emerge_core","gravity_core"),"framebuffer",List.of(mc.getMainRenderTarget().width,mc.getMainRenderTarget().height),"scope","Real isolated dev-client model rendering; no full-pack FPS claim");
         Files.writeString(Path.of(System.getProperty("tnc.stoneLancerAuditReport")),new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(report));mc.stop();
     }
     private static final class Gallery extends Screen {
