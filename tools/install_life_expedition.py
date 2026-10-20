@@ -6,6 +6,7 @@ import hashlib
 import json
 import re
 import shutil
+import subprocess
 import xml.etree.ElementTree as ET
 import zipfile
 from install_life_routes import running
@@ -47,12 +48,16 @@ def main():
     assert dungeon_log.stat().st_mtime >= latest and 'BUILD SUCCESSFUL' in dungeon_content
     dungeon_count = re.search(r'All (\d+) required tests passed', dungeon_content)
     assert dungeon_count and int(dungeon_count[1]) >= 14, 'Expected actual dungeon regression tests'
+    earth_log = ROOT / 'work/life-expedition-earth-tests.log'
+    earth_content = earth_log.read_text('utf8', errors='replace')
+    assert earth_log.stat().st_mtime >= latest and 'BUILD SUCCESSFUL' in earth_content
+    assert 'All 3 required tests passed' in earth_content, 'Merged earth arena regression tests required'
     tests = 0
     for path in (ROOT / 'build/test-results/test').glob('TEST-*.xml'):
         root = ET.parse(path).getroot()
         assert int(root.attrib['failures']) == int(root.attrib['errors']) == 0
         tests += int(root.attrib['tests'])
-    assert tests >= 295, 'Expected complete unit suite'
+    assert tests >= 299, 'Expected complete merged unit suite'
     report_path = ROOT / 'work/life-expedition-native/report.json'
     report = json.loads(report_path.read_text('utf8'))
     assert report_path.stat().st_mtime >= latest and not report['failures']
@@ -63,6 +68,11 @@ def main():
         for name, value in report['class_sha256'].items():
             assert hashlib.sha256(archive.read(name.replace('.', '/') + '.class')).hexdigest() == value
         assert len([n for n in archive.namelist() if n.startswith('data/tnc/structures/dungeon_gates/') and n.endswith('.nbt')]) == 67
+        for required in ['data/tnc/dimension/earth_arena.json',
+                         'com/tnc/tnc/world/eartharena/EarthArenaEncounter.class',
+                         'com/tnc/tnc/boss/wind/WindGeneralEntity.class',
+                         'com/tnc/tnc/boss/fire/VolcanicTortoiseEntity.class']:
+            assert required in archive.namelist(), 'Collaborator content missing: ' + required
     assert (live / 'mods/tnc-1.0.0.jar').is_file() and mirror.is_dir()
     assert not running(live), 'Minecraft/test JVM running; close before replacing the jar'
     targets = [('live', live), ('mirror', mirror)]
@@ -76,7 +86,7 @@ def main():
         configs[name] = config
     if not args.apply:
         print(json.dumps({'validated': True, 'unit_tests': tests, 'journey_tests': 11,
-                          'dungeon_tests': int(dungeon_count[1]), 'native_screenshots': 11,
+                  'dungeon_tests': int(dungeon_count[1]), 'earth_tests': 3, 'native_screenshots': 11,
                           'protected_quest_files': len(before['live'])}, ensure_ascii=False))
         return
     stamp = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
@@ -108,7 +118,9 @@ def main():
         installed.append({'target': name, 'root': str(pack), 'protected_quest_files_unchanged': len(before[name])})
     files = {'mods/tnc-1.0.0.jar': sha(jar), CHAPTER: sha(chapter)}
     validation = {'validated_at': datetime.datetime.now().isoformat(), 'jar_sha256': sha(jar),
+                  'source_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
                   'unit_tests': tests, 'journey_gametests': 11, 'dungeon_gametests': int(dungeon_count[1]),
+                  'earth_arena_gametests': 3, 'collaborator_installer_two_consecutive_applies': True,
                   'native': report, 'native_ftb_quests': 22, 'review': 'Two independent read-only reviewers; important findings fixed and regression-tested'}
     receipt = {'installed_at': datetime.datetime.now().isoformat(), 'jar_sha256': sha(jar),
                'jar_bytes': jar.stat().st_size, 'files': files, 'mca_config_patch': PATCH,

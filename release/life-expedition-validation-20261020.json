@@ -1,9 +1,12 @@
 {
-  "validated_at": "2026-10-20T22:29:11.363050",
-  "jar_sha256": "838be75643a7e7d89f590fb925caed4ea84733b1bbdb5112a9ef3715368f4576",
-  "unit_tests": 295,
+  "validated_at": "2026-10-21T00:05:09.041064",
+  "jar_sha256": "8b670e036d9d1aa3176dc730db0f1937bd3a97681a810bc803e9a91a699ee80f",
+  "source_commit": "db206f612b7bdb104fad1078c472914bab84d130",
+  "unit_tests": 299,
   "journey_gametests": 11,
   "dungeon_gametests": 17,
+  "earth_arena_gametests": 3,
+  "collaborator_installer_two_consecutive_applies": true,
   "native": {
     "screenshots": 11,
     "checks": {
@@ -36,6 +39,5 @@
     }
   },
   "native_ftb_quests": 22,
-  "review": "Two independent read-only reviewers; important findings fixed and regression-tested",
-  "collaborator_installer_two_consecutive_applies": true
+  "review": "Two independent read-only reviewers; important findings fixed and regression-tested"
 }
