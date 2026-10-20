@@ -1,0 +1,11 @@
+{
+  "title": "屋檐蛛影",
+  "story": "替送货人清理4只蜘蛛，保留小镇外的道路。",
+  "kind": "kill",
+  "target": "minecraft:spider",
+  "count": 4,
+  "level": 1,
+  "coins": 70,
+  "xp": 75,
+  "cooldown_seconds": 1800
+}

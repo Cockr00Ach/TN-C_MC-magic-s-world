@@ -31,7 +31,7 @@ public final class NativeBountiful {
         try{
             var completed=com.google.gson.JsonParser.parseString(be.saveWithoutMetadata().getString("completed")).getAsJsonObject();
             var value=completed.get(p.getUUID().toString());if(value==null)return;int count=Math.max(0,Math.min(1_000_000,value.getAsInt()));var a=AdventureService.profile(p);
-            if(count>a.nativeBounties){a.nativeBounties=count;AdventureSavedData.get(p.server).setDirty();}
+            if(count>a.paperBounties){a.paperBounties=count;a.nativeBounties=Math.min(1_000_000,a.paperBounties+a.electronicBounties);AdventureSavedData.get(p.server).setDirty();}
             for(int n:new int[]{1,5,10,25,50,100})if(a.nativeBounties>=n)AdventureService.milestone(p,"bounties_"+n);
         }catch(IllegalStateException|com.google.gson.JsonParseException|NumberFormatException ex){/* Third-party data is never rewritten by this adapter. */}
     }

@@ -1,0 +1,603 @@
+{
+  "id": "37B7FFAC33E9E92C",
+  "filename": "tnc_alchemy",
+  "title": "&3&l魔焰药典",
+  "icon": "tnc:spellflame_cauldron",
+  "group": "544E434C49464531",
+  "order_index": 13,
+  "default_hide_dependency_lines": false,
+  "default_quest_shape": "circle",
+  "images": [
+    {
+      "image": "tnc:textures/guide/alchemy_banner.png",
+      "x": 0,
+      "y": -10,
+      "width": 12,
+      "height": 6.75,
+      "rotation": 0.0
+    }
+  ],
+  "quests": [
+    {
+      "id": "72711F5C4C10E8B8",
+      "title": "&b&l魔焰药典",
+      "icon": "tnc:spellflame_cauldron",
+      "x": 0,
+      "y": -5,
+      "description": [
+        "魔药学使用植物、药焰与玻璃瓶，拥有独立炼制流程；邻接魔力科技只作可选辅助。",
+        "不必选择职业，不消耗学习点。农业、交易和远征都能为药学供给材料。"
+      ],
+      "dependencies": [],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "367A36241D7ABE01",
+          "type": "checkmark"
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "1C56E1FCB3544A06",
+      "title": "&6焰蕊盐 · 植物的火种",
+      "icon": "tnc:ember_blossom_salt",
+      "x": -2,
+      "y": -3,
+      "description": [
+        "暖椒＋木炭＋荧石粉，合成4份焰蕊盐。",
+        "一份盐提供1200刻实际炼制燃时；停工不白烧。无须接魔力电。"
+      ],
+      "dependencies": [
+        "72711F5C4C10E8B8"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "3521D40097CA7E02",
+          "type": "item",
+          "item": "tnc:ember_blossom_salt",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "5CF0513B72B21975",
+      "title": "&3第一口药釜",
+      "icon": "tnc:spellflame_cauldron",
+      "x": 0,
+      "y": -1,
+      "description": [
+        "铜锭×2、铁锭×3、炼药锅×1，按JEI合成魔焰炼药釜。",
+        "左侧四格可放三种不同材料（顺序无关）；右侧空瓶、成品；下方焰蕊盐。",
+        "燧石右键点燃；学习任意火系法术后，可在GUI花5法力点出魔焰，也能用火法术命中釜体。",
+        "普通火耗时为魔焰的1.5倍。点火不烧屋，不破坏地形。"
+      ],
+      "dependencies": [
+        "1C56E1FCB3544A06"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "3C6B7AA200209F8E",
+          "type": "item",
+          "item": "tnc:spellflame_cauldron",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "1B12CFACD8FCFB9C",
+      "title": "&b回春露",
+      "icon": "tnc:elixir_bloom",
+      "x": -6,
+      "y": 2,
+      "description": [
+        "恢复8生命。",
+        "投入：闪烁的西瓜片 ＋ 归巢花瓣 ＋ 小麦；再放空玻璃瓶与焰蕊盐。",
+        "魔焰炼制 8 秒；普通火为1.5倍。",
+        "所有魔药共用8秒冷却；重复饮用不永久叠加属性。"
+      ],
+      "dependencies": [
+        "5CF0513B72B21975"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "37018C79D27F99AA",
+          "type": "item",
+          "item": "tnc:elixir_bloom",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "6A4A1E744ED9C984",
+      "title": "&b凝泉饮",
+      "icon": "tnc:elixir_spring",
+      "x": -6,
+      "y": 5,
+      "description": [
+        "立即恢复30法力。",
+        "投入：雨书莓果 ＋ 糖 ＋ 海带；再放空玻璃瓶与焰蕊盐。",
+        "魔焰炼制 8 秒；普通火为1.5倍。",
+        "所有魔药共用8秒冷却；重复饮用不永久叠加属性。"
+      ],
+      "dependencies": [
+        "1B12CFACD8FCFB9C"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "0E11A4C76E1A69D5",
+          "type": "item",
+          "item": "tnc:elixir_spring",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "30BF0CD153FF2FD6",
+      "title": "&b醒神星露",
+      "icon": "tnc:elixir_awaken",
+      "x": -6,
+      "y": 8,
+      "description": [
+        "立即恢复60法力。",
+        "投入：星露果 ＋ 虹折片 ＋ 蜂蜜瓶；再放空玻璃瓶与焰蕊盐。",
+        "魔焰炼制 13 秒；普通火为1.5倍。",
+        "所有魔药共用8秒冷却；重复饮用不永久叠加属性。"
+      ],
+      "dependencies": [
+        "6A4A1E744ED9C984"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "1C0901A1C5BDB1B6",
+          "type": "item",
+          "item": "tnc:elixir_awaken",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "5E6A583BAA260D09",
+      "title": "&b续魔灵酊",
+      "icon": "tnc:elixir_flow",
+      "x": -6,
+      "y": 11,
+      "description": [
+        "60秒内每秒恢复1法力。",
+        "投入：蓄魔根芯 ＋ 雨书莓果 ＋ 红石粉；再放空玻璃瓶与焰蕊盐。",
+        "魔焰炼制 11 秒；普通火为1.5倍。",
+        "所有魔药共用8秒冷却；重复饮用不永久叠加属性。"
+      ],
+      "dependencies": [
+        "30BF0CD153FF2FD6"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "22667C1FE7A0D3FE",
+          "type": "item",
+          "item": "tnc:elixir_flow",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "2F6B730407C1D31F",
+      "title": "&b锐锋琥珀",
+      "icon": "tnc:elixir_edge",
+      "x": -2,
+      "y": 2,
+      "description": [
+        "60秒力量I。",
+        "投入：岩纹叶 ＋ 铁粒 ＋ 甜浆果；再放空玻璃瓶与焰蕊盐。",
+        "魔焰炼制 11 秒；普通火为1.5倍。",
+        "所有魔药共用8秒冷却；重复饮用不永久叠加属性。"
+      ],
+      "dependencies": [
+        "5CF0513B72B21975"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "0A9CE5CE1B8B729D",
+          "type": "item",
+          "item": "tnc:elixir_edge",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "066A8C78E05F028D",
+      "title": "&b迅步风饮",
+      "icon": "tnc:elixir_stride",
+      "x": -2,
+      "y": 5,
+      "description": [
+        "90秒速度I。",
+        "投入：舞瓣 ＋ 糖 ＋ 羽毛；再放空玻璃瓶与焰蕊盐。",
+        "魔焰炼制 10 秒；普通火为1.5倍。",
+        "所有魔药共用8秒冷却；重复饮用不永久叠加属性。"
+      ],
+      "dependencies": [
+        "2F6B730407C1D31F"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "16DA00AB063699D2",
+          "type": "item",
+          "item": "tnc:elixir_stride",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "310D04FDED60FE8C",
+      "title": "&b坚肤石蜜",
+      "icon": "tnc:elixir_shell",
+      "x": -2,
+      "y": 8,
+      "description": [
+        "60秒抗性I。",
+        "投入：岩纹叶 ＋ 鳞甲 ＋ 蜂蜜瓶；再放空玻璃瓶与焰蕊盐。",
+        "魔焰炼制 13 秒；普通火为1.5倍。",
+        "所有魔药共用8秒冷却；重复饮用不永久叠加属性。"
+      ],
+      "dependencies": [
+        "066A8C78E05F028D"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "2F92AF73F858988D",
+          "type": "item",
+          "item": "tnc:elixir_shell",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "74819CD1FC7D471C",
+      "title": "&b元素共鸣酊",
+      "icon": "tnc:elixir_focus",
+      "x": -2,
+      "y": 11,
+      "description": [
+        "45秒内每秒恢复2法力。",
+        "投入：虹折片 ＋ 雷冠尖 ＋ 紫水晶碎片；再放空玻璃瓶与焰蕊盐。",
+        "魔焰炼制 15 秒；普通火为1.5倍。",
+        "所有魔药共用8秒冷却；重复饮用不永久叠加属性。"
+      ],
+      "dependencies": [
+        "310D04FDED60FE8C"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "1F1124B628B71E8A",
+          "type": "item",
+          "item": "tnc:elixir_focus",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "7720C8C542D99E4E",
+      "title": "&b避火绯露",
+      "icon": "tnc:elixir_cinder",
+      "x": 2,
+      "y": 2,
+      "description": [
+        "120秒抗火。",
+        "投入：暖椒 ＋ 岩浆膏 ＋ 下界疣；再放空玻璃瓶与焰蕊盐。",
+        "魔焰炼制 11 秒；普通火为1.5倍。",
+        "所有魔药共用8秒冷却；重复饮用不永久叠加属性。"
+      ],
+      "dependencies": [
+        "5CF0513B72B21975"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "31AF0A038C978DE1",
+          "type": "item",
+          "item": "tnc:elixir_cinder",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "6B63D49268EC407E",
+      "title": "&b潮息珍液",
+      "icon": "tnc:elixir_tide",
+      "x": 2,
+      "y": 5,
+      "description": [
+        "120秒水下呼吸。",
+        "投入：雨书莓果 ＋ 河豚 ＋ 海带；再放空玻璃瓶与焰蕊盐。",
+        "魔焰炼制 11 秒；普通火为1.5倍。",
+        "所有魔药共用8秒冷却；重复饮用不永久叠加属性。"
+      ],
+      "dependencies": [
+        "7720C8C542D99E4E"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "7542CD0A8EDDCD0C",
+          "type": "item",
+          "item": "tnc:elixir_tide",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "785CDB385EB16662",
+      "title": "&b轻羽浮沫",
+      "icon": "tnc:elixir_feather",
+      "x": 2,
+      "y": 8,
+      "description": [
+        "90秒缓降。",
+        "投入：舞瓣 ＋ 羽毛 ＋ 幻翼膜；再放空玻璃瓶与焰蕊盐。",
+        "魔焰炼制 11 秒；普通火为1.5倍。",
+        "所有魔药共用8秒冷却；重复饮用不永久叠加属性。"
+      ],
+      "dependencies": [
+        "6B63D49268EC407E"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "324B2EF8201423A4",
+          "type": "item",
+          "item": "tnc:elixir_feather",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "146B9E0FB4F7AD9B",
+      "title": "&b净秽清酿",
+      "icon": "tnc:elixir_cleanse",
+      "x": 2,
+      "y": 11,
+      "description": [
+        "清除中毒、凋零和饥饿。",
+        "投入：归巢花瓣 ＋ 奶桶 ＋ 发光浆果；再放空玻璃瓶与焰蕊盐。",
+        "魔焰炼制 9 秒；普通火为1.5倍。",
+        "所有魔药共用8秒冷却；重复饮用不永久叠加属性。"
+      ],
+      "dependencies": [
+        "785CDB385EB16662"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "3A79E0FFB4A79AC2",
+          "type": "item",
+          "item": "tnc:elixir_cleanse",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "63E93EC2CFBC9146",
+      "title": "&b夜航蓝酊",
+      "icon": "tnc:elixir_night",
+      "x": 6,
+      "y": 2,
+      "description": [
+        "180秒夜视。",
+        "投入：影时瓣 ＋ 金胡萝卜 ＋ 棕色蘑菇；再放空玻璃瓶与焰蕊盐。",
+        "魔焰炼制 10 秒；普通火为1.5倍。",
+        "所有魔药共用8秒冷却；重复饮用不永久叠加属性。"
+      ],
+      "dependencies": [
+        "5CF0513B72B21975"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "3225DB20C8EEF0D7",
+          "type": "item",
+          "item": "tnc:elixir_night",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "132E1AD549D39481",
+      "title": "&b回声显影剂",
+      "icon": "tnc:elixir_echo",
+      "x": 6,
+      "y": 5,
+      "description": [
+        "90秒显影隐匣；打开魔力视看清线索。",
+        "投入：虹折片 ＋ 回响碎片 ＋ 影时瓣；再放空玻璃瓶与焰蕊盐。",
+        "魔焰炼制 13 秒；普通火为1.5倍。",
+        "所有魔药共用8秒冷却；重复饮用不永久叠加属性。",
+        "F8打开魔力视，寻找遗庭宝藏房侧面的隐匣；显影剂将可见距离从24格提高到52格。",
+        "隐匣按玩家记录、每匣只领一次，满包会保留。"
+      ],
+      "dependencies": [
+        "63E93EC2CFBC9146"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "1F386570CFF10FAC",
+          "type": "item",
+          "item": "tnc:elixir_echo",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "36DF0BBEC9FB9AE9",
+      "title": "&b归途暖饮",
+      "icon": "tnc:elixir_hearth",
+      "x": 6,
+      "y": 8,
+      "description": [
+        "恢复8饱食及30秒再生I。",
+        "投入：归巢花瓣 ＋ 蜂蜜瓶 ＋ 面包；再放空玻璃瓶与焰蕊盐。",
+        "魔焰炼制 9 秒；普通火为1.5倍。",
+        "所有魔药共用8秒冷却；重复饮用不永久叠加属性。"
+      ],
+      "dependencies": [
+        "132E1AD549D39481"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "0A25ABA24C5BEABC",
+          "type": "item",
+          "item": "tnc:elixir_hearth",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "663B041069375DE4",
+      "title": "&b复苏晨曦",
+      "icon": "tnc:elixir_revive",
+      "x": 6,
+      "y": 11,
+      "description": [
+        "恢复12生命与90秒伤害吸收I。",
+        "投入：星露果 ＋ 金苹果 ＋ 归巢花瓣；再放空玻璃瓶与焰蕊盐。",
+        "魔焰炼制 16 秒；普通火为1.5倍。",
+        "所有魔药共用8秒冷却；重复饮用不永久叠加属性。"
+      ],
+      "dependencies": [
+        "36DF0BBEC9FB9AE9"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "3135B8CAA249CD36",
+          "type": "item",
+          "item": "tnc:elixir_revive",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "12E04A8893D50EFB",
+      "title": "&6让魔焰更稳定",
+      "icon": "tnc:mana_basin",
+      "x": -3,
+      "y": 16,
+      "description": [
+        "炼药釜紧邻自己有权限使用的魔力装置，每秒可取1真实魔力，额外推进10刻炼制。",
+        "这是选配恒温：晶纤、储池、植物或动物供能沿用原魔力工坊，断能时照常用魔焰炼制。"
+      ],
+      "dependencies": [
+        "5E6A583BAA260D09",
+        "74819CD1FC7D471C"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "42DB23A3B4A78C62",
+          "type": "item",
+          "item": "tnc:mana_basin",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "233C9D8AF8E0FDE9",
+      "title": "&3出发之前",
+      "icon": "tnc:elixir_spring",
+      "x": 3,
+      "y": 16,
+      "description": [
+        "在地下城大厅选段，进入远征备战；队员也可点整理行囊或输入 /prepare。",
+        "27格私人暂存永久保存。收纳按钮只搬主背包，快捷栏和穿戴保留。",
+        "右侧4格魔药按从左到右消耗；默认H快捷饮用，可在控制设置改键。",
+        "全员确认后，队长再次选择同一段启程；药品和背包物品都是真实的，不复制。"
+      ],
+      "dependencies": [
+        "132E1AD549D39481",
+        "36DF0BBEC9FB9AE9"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "56607E2E2FA579C4",
+          "type": "checkmark"
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "4C27A7CB3C554E44",
+      "title": "&6有人等你归来",
+      "icon": "minecraft:bread",
+      "x": 3,
+      "y": 19,
+      "description": [
+        "酒馆委托栏点击接单，自动记录真实讨伐和下层进度，回栏交付。",
+        "与伴侣在住处重聚，会回应委托、平安归来与孩子的问候。",
+        "潜行右键伴侣或输入 /family 打开家庭页；两份同种、饱食度至少4的食物可共餐。",
+        "共餐每个世界运行日一次，不回家不会惩罚关系；普通右键仍是MCA的送礼、婚姻与育儿。"
+      ],
+      "dependencies": [
+        "233C9D8AF8E0FDE9"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "16B19DFCCDDF58C3",
+          "type": "checkmark"
+        }
+      ],
+      "rewards": []
+    }
+  ]
+}

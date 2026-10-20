@@ -9,6 +9,7 @@
     "tnc:forge_mana_injector",
     "tnc:forge_exhaust",
     "tnc:forge_core",
-    "#tnc:boss_runestones"
+    "#tnc:boss_runestones",
+    "tnc:spellflame_cauldron"
   ]
 }

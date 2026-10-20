@@ -1,0 +1,11 @@
+{
+  "title": "绿影巡查",
+  "story": "地下城的哥布林斥候越来越多，清理6名战士。",
+  "kind": "kill",
+  "target": "tnc:goblin_warrior",
+  "count": 6,
+  "level": 1,
+  "coins": 110,
+  "xp": 120,
+  "cooldown_seconds": 1800
+}

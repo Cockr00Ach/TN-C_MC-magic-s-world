@@ -582,6 +582,7 @@ public final class TNFireBoltEntity extends Projectile {
             hit = null;
         }
         if (hit != null || wall.getType() != HitResult.Type.MISS) {
+            if(wall.getType()!=HitResult.Type.MISS&&level() instanceof ServerLevel fireLevel)com.tnc.tnc.alchemy.AlchemyEntity.igniteNear(fireLevel,wall.getBlockPos(),getOwner());
             if (hit != null) {
 
                 boolean hurt = hit.hurt(server.damageSources().indirectMagic(this, owner), damage);

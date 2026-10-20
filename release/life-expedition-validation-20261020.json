@@ -1,0 +1,41 @@
+{
+  "validated_at": "2026-10-20T22:29:11.363050",
+  "jar_sha256": "838be75643a7e7d89f590fb925caed4ea84733b1bbdb5112a9ef3715368f4576",
+  "unit_tests": 295,
+  "journey_gametests": 11,
+  "dungeon_gametests": 17,
+  "native": {
+    "screenshots": 11,
+    "checks": {
+      "actual_ftb_chapter_loaded": true,
+      "mca_initialization_no_destiny_buffs": true,
+      "character_screen": true,
+      "posted-commissions_screen": true,
+      "native_commission_goal": true,
+      "accepted-commission_screen": true,
+      "alchemy-desk_screen": true,
+      "client_cauldron_working_synced": true,
+      "expedition-preparation_screen": true,
+      "generated_hidden_cache": true,
+      "mana_sight_enabled": true,
+      "native_real_mca_spouse": true,
+      "native_home_recognized": true,
+      "native_child_observed": true,
+      "family-at-home_screen": true,
+      "native_name_input_accepts_unicode": true,
+      "small-character_screen": true,
+      "small-alchemy_screen": true
+    },
+    "failures": [],
+    "scope": "Disposable full PCL pack; actual network screens, MCA spouse and child, brewing and generated dungeon hidden cache",
+    "class_sha256": {
+      "com.tnc.tnc.journey.client.JourneyScreen": "a89933d2c40603af916b8c23ff92fe1f9ca44477d8e2fc62ddfeb4e6ca2e5750",
+      "com.tnc.tnc.journey.client.PreparationScreen": "49be9f70897dc946052a33219c3b09069d91aa5ac4b457f1126bc2409587c40d",
+      "com.tnc.tnc.alchemy.client.AlchemyScreen": "6ab28b67bae2f470eacf76d61c960d40b2d2d9a57ec88aac668b23a70c963f3a",
+      "com.tnc.tnc.alchemy.client.AlchemyRenderer": "64acf0eaea395707e29083884c97b5daccc504a58aa88b0449111e2487b77172"
+    }
+  },
+  "native_ftb_quests": 22,
+  "review": "Two independent read-only reviewers; important findings fixed and regression-tested",
+  "collaborator_installer_two_consecutive_applies": true
+}

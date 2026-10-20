@@ -1,0 +1,57 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "tnc:spellflame_cauldron",
+          "functions": [
+            {
+              "function": "minecraft:copy_nbt",
+              "source": "block_entity",
+              "ops": [
+                {
+                  "source": "Items",
+                  "target": "BlockEntityTag.Items",
+                  "op": "replace"
+                },
+                {
+                  "source": "Progress",
+                  "target": "BlockEntityTag.Progress",
+                  "op": "replace"
+                },
+                {
+                  "source": "Burn",
+                  "target": "BlockEntityTag.Burn",
+                  "op": "replace"
+                },
+                {
+                  "source": "Fire",
+                  "target": "BlockEntityTag.Fire",
+                  "op": "replace"
+                },
+                {
+                  "source": "Job",
+                  "target": "BlockEntityTag.Job",
+                  "op": "replace"
+                },
+                {
+                  "source": "Color",
+                  "target": "BlockEntityTag.Color",
+                  "op": "replace"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ]
+    }
+  ]
+}

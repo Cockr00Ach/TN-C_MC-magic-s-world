@@ -13,6 +13,7 @@ public final class ManaSightServer {
  private static final Set<UUID> SUBSCRIBERS=new HashSet<>();
  private static final Map<ServerLevel,LinkedHashMap<Edge,Integer>> QUEUES=new WeakHashMap<>();
  public static void subscribe(ServerPlayer p,boolean enabled){if(enabled)SUBSCRIBERS.add(p.getUUID());else SUBSCRIBERS.remove(p.getUUID());}
+ public static boolean enabled(ServerPlayer p){return SUBSCRIBERS.contains(p.getUUID());}
  public static void record(ServerLevel l,Vec3 from,Vec3 to,int amount,int color,int kind){if(amount<=0||SUBSCRIBERS.isEmpty())return;
   boolean interested=l.players().stream().filter(p->SUBSCRIBERS.contains(p.getUUID())).anyMatch(p->(p.position().distanceToSqr(from)<96*96||p.position().distanceToSqr(to)<96*96));if(!interested)return;
   var f=new ManaFlow(from,to,Math.min(65535,amount),color,kind);if(!f.valid())return;var q=QUEUES.computeIfAbsent(l,k->new LinkedHashMap<>());var key=new Edge(from,to,color,kind);if(q.size()<512||q.containsKey(key))q.merge(key,f.amount(),(a,b)->Math.min(65535,a+b));

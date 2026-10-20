@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "tnc:block/echo_hidden_cache"
+    }
+  }
+}

@@ -11,7 +11,7 @@ public final class AdventureProfile {
     public long divineReadyAt;
     public final BankAccount bank=new BankAccount();
     String smithDesign="";
-    int nativeBounties;
+    int nativeBounties,paperBounties,electronicBounties;
     int adventureKills,bossKills;
     final Set<String> milestones = new LinkedHashSet<>();
     final Set<String> paidOffers = new LinkedHashSet<>();
@@ -22,6 +22,8 @@ public final class AdventureProfile {
     public long xp() { return xp; }
     public long coins() { return coins; }
     public int reputation() { return reputation; }
+    public int commissions(){return nativeBounties;}
+    public void recordCommission(){reputation=Math.min(1_000_000,reputation+5);electronicBounties=Math.min(1_000_000,electronicBounties+1);nativeBounties=Math.min(1_000_000,paperBounties+electronicBounties);}
     public boolean registered() { return registered; }
     public boolean hasMilestone(String id) { return milestones.contains(id); }
     public int learningPoints() { return learningBase + level() / 10 * 5; }

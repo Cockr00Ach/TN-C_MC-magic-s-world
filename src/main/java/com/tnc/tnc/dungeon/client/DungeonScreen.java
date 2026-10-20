@@ -44,7 +44,8 @@ public final class DungeonScreen extends Screen {
                 for(int i=0;i<6;i++){int floor=1+i*5;boolean open=floor<=unlocked;
                     options.add(new Option(26+(i%2)*144,123+(i/2)*50,134,42,"第 "+floor+"—"+(floor+4)+" 层",!open?"尚未解锁":leader?"已解锁 · 启程":"等待队长选择",open?Items.ENDER_PEARL:Items.IRON_NUGGET,"start",floor,open&&leader));
                 }
-                options.add(new Option(26,285,278,26,"返回野外界门","",Items.ENDER_EYE,"leave",0,true));
+                options.add(new Option(26,285,134,26,"返回野外界门","",Items.ENDER_EYE,"leave",0,true));
+                options.add(new Option(170,285,134,26,"整理行囊·备战","",Items.BUNDLE,"prepare",0,true));
             }
             case "cache"->option(232,"收下这份旅途馈赠","背包满时，奖励会为你保留",Items.CHEST,"claim",0);
             case "rest"->{option(148,"在灯下整备","恢复生命，补充食物与40法力",Items.LANTERN,"rest",0);option(204,"保存旅途 · 返回界门","保留当前挑战，下次继续",Items.ENDER_EYE,"leave",0);}

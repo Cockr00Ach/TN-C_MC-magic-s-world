@@ -1,0 +1,11 @@
+{
+  "title": "黄沙勘路",
+  "story": "记录黄沙遗庭3次真实下层经历。",
+  "kind": "floor",
+  "target": "desert",
+  "count": 3,
+  "level": 1,
+  "coins": 120,
+  "xp": 130,
+  "cooldown_seconds": 1800
+}

@@ -1,0 +1,11 @@
+{
+  "title": "旧钟下的路",
+  "story": "穿过锁钟地牢的3层，回来说说你听见的钟声。",
+  "kind": "floor",
+  "target": "crypt",
+  "count": 3,
+  "level": 1,
+  "coins": 120,
+  "xp": 130,
+  "cooldown_seconds": 1800
+}

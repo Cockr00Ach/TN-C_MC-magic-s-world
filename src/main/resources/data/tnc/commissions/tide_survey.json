@@ -1,0 +1,11 @@
+{
+  "title": "潮声探路",
+  "story": "在沉潮回廊通过3层，替商队记下安全的路线。",
+  "kind": "floor",
+  "target": "tide",
+  "count": 3,
+  "level": 1,
+  "coins": 120,
+  "xp": 130,
+  "cooldown_seconds": 1800
+}

@@ -30,7 +30,8 @@ public final class DungeonNetwork {
     public static void hud(ServerPlayer p,DungeonData.Run r,DungeonGraph.Room room){CHANNEL.send(PacketDistributor.PLAYER.with(()->p),new State(state(p,r,room),false));}
     private static void act(ServerPlayer p,Action action){var session=SESSIONS.get(p.getUUID());var r=DungeonService.run(p);if(session==null||session.token!=action.token||session.until<p.server.overworld().getGameTime()||!p.isAlive()||DungeonService.recovering(p)||com.tnc.tnc.combat.DownedCombat.isDowned(p)||session.run!=null&&(r==null||!r.id.equals(session.run)||r.floor!=session.floor)||!session.kind.equals("guide")&&!DungeonService.near(p,session.origin,8))return;
       var room=DungeonService.room(p);if(session.room>=0&&(room==null||room.id()!=session.room))return;String a=action.action;
-      if(a.equals("start")&&session.kind.equals("gate"))DungeonService.start(p,action.value);
+      if(a.equals("start")&&session.kind.equals("gate"))com.tnc.tnc.journey.Preparation.choose(p,action.value);
+      else if(a.equals("prepare")&&session.kind.equals("gate"))com.tnc.tnc.journey.Preparation.open(p,com.tnc.tnc.journey.Preparation.selectedFloor(p));
       else if(a.equals("leave")&&!session.kind.equals("guide"))DungeonService.leave(p);
       else if(a.equals("abandon")&&session.kind.equals("gate"))DungeonService.abandon(p);
       else if(a.equals("claim")&&session.kind.equals("cache")&&room!=null)DungeonRewards.claim(p,r,room);
