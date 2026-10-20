@@ -509,5 +509,15 @@
   "dimension.tnc.earth_arena": "Earthcore Mountains",
   "biome.tnc.earth_arena": "Earthcore Mountains",
   "block.tnc.earth_arena_pillar_stone": "Arena Pillar Amberstone",
-  "block.tnc.earth_arena_black_pillar_stone": "Arena Black Pillar Stone"
+  "block.tnc.earth_arena_black_pillar_stone": "Arena Black Pillar Stone",
+  "entity.tnc.goblin_skirmisher": "Goblin Skirmisher",
+  "entity.tnc.kobold_miner": "Kobold Miner",
+  "entity.tnc.orc_brute": "Orc Brute",
+  "entity.tnc.minotaur_warden": "Minotaur Warden",
+  "entity.tnc.tentacle_horror": "Tentacle Horror",
+  "item.tnc.goblin_skirmisher_spawn_egg": "Goblin Skirmisher Spawn Egg",
+  "item.tnc.kobold_miner_spawn_egg": "Kobold Miner Spawn Egg",
+  "item.tnc.orc_brute_spawn_egg": "Orc Brute Spawn Egg",
+  "item.tnc.minotaur_warden_spawn_egg": "Minotaur Warden Spawn Egg",
+  "item.tnc.tentacle_horror_spawn_egg": "Tentacle Horror Spawn Egg"
 }

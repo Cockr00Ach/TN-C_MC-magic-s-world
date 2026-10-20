@@ -682,5 +682,15 @@
   "dimension.tnc.earth_arena": "地核群山",
   "biome.tnc.earth_arena": "地核群山",
   "block.tnc.earth_arena_pillar_stone": "战台·土柱琥珀岩",
-  "block.tnc.earth_arena_black_pillar_stone": "战台·黑土柱岩"
+  "block.tnc.earth_arena_black_pillar_stone": "战台·黑土柱岩",
+  "entity.tnc.goblin_skirmisher": "哥布林游击手",
+  "entity.tnc.kobold_miner": "狗头人矿工",
+  "entity.tnc.orc_brute": "兽人蛮兵",
+  "entity.tnc.minotaur_warden": "牛头人守卫",
+  "entity.tnc.tentacle_horror": "触手恐魔",
+  "item.tnc.goblin_skirmisher_spawn_egg": "哥布林游击手刷怪蛋",
+  "item.tnc.kobold_miner_spawn_egg": "狗头人矿工刷怪蛋",
+  "item.tnc.orc_brute_spawn_egg": "兽人蛮兵刷怪蛋",
+  "item.tnc.minotaur_warden_spawn_egg": "牛头人守卫刷怪蛋",
+  "item.tnc.tentacle_horror_spawn_egg": "触手恐魔刷怪蛋"
 }
