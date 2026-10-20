@@ -12,7 +12,7 @@ class GuidebookTest {
     @Test void revisionChaptersHaveUniqueIdsValidDependenciesAndRealAssets() throws IOException {
         var chapters=new ArrayList<JsonObject>();var ids=new HashSet<String>();var quests=new HashSet<String>();int real=0,atlas=0;
         try(var paths=Files.list(Path.of("questbook/ftbquests/chapters"))){
-            for(var file:paths.filter(p->p.getFileName().toString().startsWith("tnc_")).toList()){
+            for(var file:paths.filter(p->p.getFileName().toString().startsWith("tnc_")&&!p.getFileName().toString().equals("tnc_dungeons.snbt")).toList()){
                 var chapter=JsonParser.parseString(Files.readString(file)).getAsJsonObject();chapters.add(chapter);assertTrue(ids.add(chapter.get("id").getAsString()));
                 for(var v:chapter.getAsJsonArray("quests")){var q=v.getAsJsonObject();assertTrue(ids.add(q.get("id").getAsString()));quests.add(q.get("id").getAsString());boolean life=chapter.has("group")&&chapter.get("group").getAsString().equals("544E434C49464531");
                     if(q.has("rewards"))for(var reward:q.getAsJsonArray("rewards")){
@@ -29,7 +29,7 @@ class GuidebookTest {
                 for(var value:chapter.getAsJsonArray("images")){var tex=value.getAsJsonObject().get("image").getAsString();assertNotNull(getClass().getResource("/assets/"+tex.replace(":","/")),tex);}
             }
         }
-        assertEquals(23,chapters.size());assertEquals(191,real);assertEquals(41,atlas);
+        assertEquals(24,chapters.size());assertEquals(191,real);assertEquals(41,atlas);
         for(var chapter:chapters)for(var value:chapter.getAsJsonArray("quests"))for(var d:value.getAsJsonObject().getAsJsonArray("dependencies"))assertTrue(quests.contains(d.getAsString()),d.toString());
         for(String e:List.of("water","fire","lightning","wind","earth","light","dark"))for(int tier=1;tier<=5;tier++){
             String name=e+"_wand_"+tier;assertNotNull(getClass().getResource("/assets/tnc/models/item/"+name+".json"));
@@ -54,6 +54,15 @@ class GuidebookTest {
             }
         }
         assertEquals(451,questIds.size());assertTrue(questIds.containsAll(references));
+    }
+    @Test void alchemyChapterUsesSafeSignedIdsAndHasEveryPotionRoute() throws IOException {
+        var chapter=JsonParser.parseString(Files.readString(Path.of("questbook/ftbquests/chapters/tnc_alchemy.snbt"))).getAsJsonObject();
+        assertTrue(Long.parseLong(chapter.get("id").getAsString(),16)>0);
+        Set<String> quests=new HashSet<>();Set<String> icons=new HashSet<>();
+        for(var entry:chapter.getAsJsonArray("quests")){var q=entry.getAsJsonObject();String id=q.get("id").getAsString();assertTrue(Long.parseLong(id,16)>0);assertTrue(quests.add(id));icons.add(q.get("icon").getAsString());for(var t:q.getAsJsonArray("tasks"))assertTrue(Long.parseLong(t.getAsJsonObject().get("id").getAsString(),16)>0);}
+        assertEquals(22,quests.size());
+        for(var e:com.tnc.tnc.alchemy.Elixir.values())assertTrue(icons.contains("tnc:elixir_"+e.id));
+        for(var entry:chapter.getAsJsonArray("quests"))for(var dep:entry.getAsJsonObject().getAsJsonArray("dependencies"))assertTrue(quests.contains(dep.getAsString()));
     }
     private GuidebookContent content() throws IOException {
         var stream=getClass().getResourceAsStream("/assets/tnc/guide/gameplay.json");

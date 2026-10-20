@@ -41,7 +41,7 @@ public final class TownServices {
         return !p.serverLevel().getEntitiesOfClass(TownServiceNpc.class,new AABB(p.blockPosition()).inflate(8),n->n.isAlive()&&n.role().equals(role)&&n.distanceToSqr(p)<=64).isEmpty();
     }
     public static boolean atBoard(ServerPlayer p){var b=board(p.server.overworld());return p.serverLevel()==p.server.overworld()&&p.isAlive()&&!p.isSpectator()&&!com.tnc.tnc.combat.DownedCombat.isDowned(p)&&b!=null&&b.closerToCenterThan(p.position(),8)&&p.serverLevel().hasChunkAt(b);}
-    public static boolean openBoard(ServerPlayer p){var b=board(p.serverLevel());if(!atBoard(p)||b==null)return false;var be=p.serverLevel().getBlockEntity(b);if(be instanceof MenuProvider menu){p.openMenu(menu);return true;}return false;}
+    public static boolean openBoard(ServerPlayer p){if(!atBoard(p))return false;com.tnc.tnc.journey.CommissionService.open(p);return true;}
     public static void open(ServerPlayer p,TownServiceNpc npc){
         if(!near(p,npc.role()))return;AdventureService.milestone(p,"met_"+npc.role());AdventureService.sync(p,true,"",npc.role());
         if(npc.role().equals("guild"))p.sendSystemMessage(Component.literal("登记在这里办理；接单与交付请右键旁边的Bountiful委托栏。"));
@@ -148,7 +148,7 @@ public final class TownServices {
         if(!(e.getEntity() instanceof ServerPlayer p)||!atBoard(p)||!e.getPos().equals(board(p.serverLevel())))return;
         AdventureService.milestone(p,"visited_board");
         if(!AdventureService.profile(p).registered()){e.setCanceled(true);p.sendSystemMessage(Component.literal("先与协会接待员艾琳登记，再使用委托栏。"));}
-        else if(p.isShiftKeyDown()){e.setCanceled(true);BossCommissions.visitBoard(p);}
+        else if(!NativeBountiful.isTownPaper(e.getItemStack())){e.setCanceled(true);e.setCancellationResult(net.minecraft.world.InteractionResult.SUCCESS);com.tnc.tnc.journey.CommissionService.open(p);}
     }
     private static boolean profileReady(ServerPlayer p){return atBoard(p)&&AdventureService.profile(p).registered();}
 }

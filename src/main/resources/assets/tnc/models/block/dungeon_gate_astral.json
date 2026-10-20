@@ -1,0 +1,41 @@
+{
+  "render_type": "minecraft:translucent",
+  "textures": {
+    "portal": "tnc:block/dungeon_gate_astral",
+    "particle": "tnc:block/dungeon_gate_astral"
+  },
+  "elements": [
+    {
+      "to": [
+        16,
+        16,
+        9
+      ],
+      "faces": {
+        "north": {
+          "texture": "#portal",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#portal",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        }
+      },
+      "from": [
+        0,
+        0,
+        7
+      ]
+    }
+  ]
+}

@@ -33,7 +33,7 @@ public final class AdventureSavedData extends SavedData {
         p.divineReadyAt=Math.max(0,t.getLong("DivineReadyAt"));
         p.bank.load(t.getCompound("Bank"));
         p.smithReady=t.contains("SmithReady")?t.getLong("SmithReady"):-1; p.smithFree=t.getBoolean("SmithFree");
-        p.smithDesign=t.getString("SmithDesign");p.nativeBounties=Math.max(0,t.getInt("NativeBounties"));p.adventureKills=Math.max(0,t.getInt("AdventureKills"));p.bossKills=Math.max(0,t.getInt("BossKills"));
+        p.smithDesign=t.getString("SmithDesign");p.electronicBounties=Math.max(0,Math.min(1_000_000,t.getInt("ElectronicBounties")));p.paperBounties=Math.max(0,Math.min(1_000_000,t.contains("PaperBounties")?t.getInt("PaperBounties"):t.getInt("NativeBounties")));p.nativeBounties=Math.min(1_000_000,p.paperBounties+p.electronicBounties);p.adventureKills=Math.max(0,t.getInt("AdventureKills"));p.bossKills=Math.max(0,t.getInt("BossKills"));
         p.completedEpoch=t.contains("CompletedEpoch")?t.getLong("CompletedEpoch"):-1;
         for (Tag v:t.getList("Milestones",Tag.TAG_STRING)) p.milestones.add(v.getAsString());
         for (Tag v:t.getList("PaidOffers",Tag.TAG_STRING)) p.paidOffers.add(v.getAsString());
@@ -48,7 +48,7 @@ public final class AdventureSavedData extends SavedData {
         var t=new CompoundTag(); t.putLong("XP",p.xp);t.putLong("Coins",p.coins);t.putInt("Reputation",p.reputation);
         t.putInt("Rank",p.rank);t.putInt("LearningBase",p.learningBase);t.putBoolean("Registered",p.registered);
         t.putBoolean("Crafted",p.crafted);t.putLong("SmithReady",p.smithReady);t.putBoolean("SmithFree",p.smithFree);
-        t.putString("SmithDesign",p.smithDesign);t.putInt("NativeBounties",p.nativeBounties);
+        t.putString("SmithDesign",p.smithDesign);t.putInt("NativeBounties",p.nativeBounties);t.putInt("PaperBounties",p.paperBounties);t.putInt("ElectronicBounties",p.electronicBounties);
         t.putBoolean("ArmorCrafted",p.armorCrafted);
         t.putLong("DivineReadyAt",p.divineReadyAt);
         t.put("Bank",p.bank.save());

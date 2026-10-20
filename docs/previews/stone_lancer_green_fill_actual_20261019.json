@@ -1,0 +1,26 @@
+{
+  "scope": "Real isolated dev-client model rendering; no full-pack FPS claim",
+  "poses": [
+    "idle",
+    "emerge_core",
+    "gravity_core"
+  ],
+  "localPlayerPrediction": true,
+  "framebuffer": [
+    1800,
+    900
+  ],
+  "attackModels": 6,
+  "renderer": "com.tnc.tnc.boss.earth.client.StoneLancerRenderer",
+  "failures": [],
+  "reference": "model-source/stone_lancer/user_green_fill_20261019.png",
+  "pieces": 191,
+  "model_tests": {
+    "tests": 6,
+    "failures": 0,
+    "errors": 0
+  },
+  "head_scale": 1.25,
+  "shoulder_crests": "Four existing pyramids broadened into descending overlapping rocky pauldrons",
+  "elbows": "Upper arm width x1.25 and height x1.55, forearm cuff width x1.12 and height x1.5; visible slate surfaces"
+}

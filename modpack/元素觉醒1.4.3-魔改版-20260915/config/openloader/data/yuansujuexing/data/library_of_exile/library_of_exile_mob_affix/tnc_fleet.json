@@ -1,0 +1,16 @@
+{
+  "affects": "MOB",
+  "data": {
+    "attribute_id": "minecraft:generic.movement_speed",
+    "number_range": {
+      "max": 0.35,
+      "min": 0.15
+    },
+    "operation": "MULTIPLY_TOTAL",
+    "uuid": "2c9d6b83-15e7-4a04-b6f9-8d3a5c1e47b2"
+  },
+  "id": "tnc_fleet",
+  "modid": "library_of_exile",
+  "serializer": "attribute_mob_affix",
+  "weight": 750
+}

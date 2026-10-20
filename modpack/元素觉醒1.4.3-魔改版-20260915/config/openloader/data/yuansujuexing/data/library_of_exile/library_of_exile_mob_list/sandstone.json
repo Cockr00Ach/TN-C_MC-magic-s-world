@@ -1,0 +1,127 @@
+{
+  "id": "sandstone",
+  "mobs": [
+    {
+      "mob_id": "jerotesvillage:explorer",
+      "weight": 1000
+    },
+    {
+      "mob_id": "jerotesvillage:executioner",
+      "weight": 1000
+    },
+    {
+      "mob_id": "jerotesvillage:mapmaker",
+      "weight": 1000
+    },
+    {
+      "mob_id": "jerotesvillage:defector",
+      "weight": 1000
+    },
+    {
+      "mob_id": "jerotesvillage:banner_bearer",
+      "weight": 1000
+    },
+    {
+      "mob_id": "jerotesvillage:blaster",
+      "weight": 1000
+    },
+    {
+      "mob_id": "jerotesvillage:trumpeter",
+      "weight": 1000
+    },
+    {
+      "mob_id": "jerotesvillage:cycloner",
+      "weight": 1000
+    },
+    {
+      "mob_id": "jerotesvillage:javelin_thrower",
+      "weight": 1000
+    },
+    {
+      "mob_id": "jerotesvillage:zombie_keeper",
+      "weight": 1000
+    },
+    {
+      "mob_id": "jerotesvillage:bitter_cold_sorcerer",
+      "weight": 1000
+    },
+    {
+      "mob_id": "jerotesvillage:fire_spitter",
+      "weight": 1000
+    },
+    {
+      "mob_id": "jerotesvillage:wild_finder",
+      "weight": 1000
+    },
+    {
+      "mob_id": "jerotesvillage:submariner",
+      "weight": 1000
+    },
+    {
+      "mob_id": "jerotesvillage:lamp_wizard",
+      "weight": 1000
+    },
+    {
+      "mob_id": "illageandspillage:igniter",
+      "weight": 1000
+    },
+    {
+      "mob_id": "illageandspillage:engineer",
+      "weight": 1000
+    },
+    {
+      "mob_id": "illageandspillage:twittollager",
+      "weight": 1000
+    },
+    {
+      "mob_id": "illageandspillage:preserver",
+      "weight": 1000
+    },
+    {
+      "mob_id": "jerotesvillage:slavery_supervisor",
+      "weight": 100
+    },
+    {
+      "mob_id": "jerotesvillage:firepower_pourer",
+      "weight": 100
+    },
+    {
+      "mob_id": "jerotesvillage:ax_crazy",
+      "weight": 100
+    },
+    {
+      "mob_id": "jerotesvillage:adventurer",
+      "weight": 100
+    },
+    {
+      "mob_id": "illageandspillage:crocofang",
+      "weight": 150
+    },
+    {
+      "mob_id": "raidsenhanced:golem_of_last_resort",
+      "weight": 300
+    },
+    {
+      "mob_id": "raidsenhanced:zapper",
+      "weight": 300
+    },
+    {
+      "mob_id": "tnc:bone_crossbowman",
+      "weight": 150
+    },
+    {
+      "mob_id": "tnc:ash_flinger",
+      "weight": 150
+    },
+    {
+      "mob_id": "tnc:minotaur_warden",
+      "weight": 110
+    }
+  ],
+  "tags": {
+    "tags": [
+      "yuansu_sandstone"
+    ]
+  },
+  "weight": 1000
+}

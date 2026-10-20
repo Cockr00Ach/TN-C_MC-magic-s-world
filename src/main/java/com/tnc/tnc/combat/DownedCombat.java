@@ -39,6 +39,8 @@ public final class DownedCombat {
         return saved.getCompound(KEY);
     }
     public static boolean isDowned(Player p) { return data(p).getBoolean("downed"); }
+    /** Instance recovery may move a downed body to the team's current floor without reviving it. */
+    public static void relocateAnchor(ServerPlayer p,net.minecraft.server.level.ServerLevel level,net.minecraft.core.BlockPos at){if(!isDowned(p))return;var tag=data(p);tag.putDouble("x",at.getX()+.5);tag.putDouble("y",at.getY());tag.putDouble("z",at.getZ()+.5);tag.putString("dimension",level.dimension().location().toString());}
     private static long now(ServerPlayer p) { return p.server.overworld().getGameTime(); }
     public static boolean eligible(ServerPlayer p) { return !p.isCreative()&&!p.isSpectator(); }
     public static void ensureHealth(ServerPlayer p) {
@@ -57,9 +59,10 @@ public final class DownedCombat {
         String group=CombatTeams.group(p);
         long present=p.server.getPlayerList().getPlayers().stream().filter(DownedCombat::eligible)
                 .filter(q->(q==p||q.isAlive())&&CombatTeams.group(q).equals(group)).count();
-        boolean solo=present<=1;
+        boolean dungeon=com.tnc.tnc.dungeon.DungeonService.active(p);
+        boolean solo=dungeon?com.tnc.tnc.dungeon.DungeonService.solo(p):present<=1;
         var tag=data(p);long tick=now(p);
-        if(solo&&!CombatRules.canSoloDown(tick,tag.getLong("soloUntil")))return false;
+        if(solo&&(dungeon?!com.tnc.tnc.dungeon.DungeonService.takeSoloDown(p):!CombatRules.canSoloDown(tick,tag.getLong("soloUntil"))))return false;
         tag.putBoolean("downed",true);tag.putBoolean("solo",solo);tag.putString("group",group);
         if(solo)tag.putLong("soloUntil",tick+CombatRules.SOLO_COOLDOWN);
         tag.putDouble("x",p.getX());tag.putDouble("y",p.getY());tag.putDouble("z",p.getZ());
@@ -89,7 +92,7 @@ public final class DownedCombat {
         HELD.put(p.getUUID(),now(p));
     }
     public static boolean canRescue(ServerPlayer helper,ServerPlayer target) {
-        if(!eligible(helper)||!helper.isAlive()||!isDowned(target))return false;
+        if(com.tnc.tnc.dungeon.DungeonService.recovering(helper)||!eligible(helper)||!helper.isAlive()||!isDowned(target))return false;
         if(helper==target)return data(target).getBoolean("solo");
         if(isDowned(helper)||data(target).getBoolean("solo")||helper.level()!=target.level()
                 || !CombatTeams.group(helper).equals(data(target).getString("group"))
@@ -123,7 +126,10 @@ public final class DownedCombat {
     }
     @SubscribeEvent(priority=EventPriority.LOWEST)
     public static void death(LivingDeathEvent e) {
-        if(e.getEntity() instanceof ServerPlayer p&&!e.isCanceled()&&enter(p))e.setCanceled(true);
+        if(e.getEntity() instanceof ServerPlayer p&&!e.isCanceled()){
+            if(enter(p))e.setCanceled(true);
+            else if(com.tnc.tnc.dungeon.DungeonService.active(p)){e.setCanceled(true);com.tnc.tnc.dungeon.DungeonService.fail(p);}
+        }
     }
     @SubscribeEvent(priority=EventPriority.HIGHEST)
     public static void attack(LivingAttackEvent e) {
@@ -189,6 +195,7 @@ public final class DownedCombat {
         }
     }
     public static void wipe(List<ServerPlayer> members) {
+        if(!members.isEmpty()&&com.tnc.tnc.dungeon.DungeonService.active(members.get(0))){com.tnc.tnc.dungeon.DungeonService.fail(members.get(0));return;}
         for(var p:members)if(isDowned(p)) {
             data(p).putBoolean("downed",false);release(p);RESCUES.remove(p.getUUID());
             WIPING.add(p.getUUID());

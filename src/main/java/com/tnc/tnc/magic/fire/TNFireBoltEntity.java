@@ -19,6 +19,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -174,34 +176,20 @@ public final class TNFireBoltEntity extends Projectile {
     }
 
     /**
-     * <b>成形阶段</b>的长度（tick）—— 作者 2026-10-05 要求「先形成一个球形再发射出去」。
+     * <b>成长阶段</b>的长度（tick）—— 只管"这颗球现在长到多大"（渲染器用 {@link #formProgress}）✓
      *
-     * <p>这 5 tick（0.25 秒）里火球<b>停在手前不动、也不判定命中</b>，
-     * 渲染器把它从 25% 大小长到 100%（见 {@link #formProgress}），
-     * 长满的那一帧喷一次火星表示"射出去了"，然后才开始飞。
+     * <p>⚠️ 作者 2026-10-18：「火球链和射线链中 t1~t3 的发射过程都不流畅」——
+     * 旧版这 3 tick 里球是<b>悬在手前不动</b>的（不判定命中、也不飞），
+     * 之后还有 4 tick 的出手缓冲（速度从 30% 涨到全速），
+     * 合起来读作「先顿一下、再猛地窜出去」✗
      *
-     * <p>为什么不靠法术 JSON 的 {@code cast.particles} 做这件事：那只能摆粒子，
-     * 摆不出"一颗球"；而且引擎的粒子形状/原点语义没有文档，猜错了就是在脚下冒烟 ✗
+     * <p>⇒ 作者 2026-10-18 又追加「火龙吐息给不要悬停」⇒ <b>全链一个都不悬停了</b>：
+     * 所有投射物一出生就是等速直线，成长只体现在大小上 ✓
      */
     public static final int FORM_TICKS = 3;
 
-    /** 火龙吐息的成形时长（tick）—— 法阵由外到里描绘 + 龙头渐渐凝出来 ✓（作者要"逐渐出现"✗）。 */
+    /** 火龙吐息的<b>成长</b>时长（tick）—— 粒子龙一节一节凝出来，给足 18 tick 才看得见 ✓（但不再悬停 ✓）。 */
     public static final int DRAGON_FORM_TICKS = 18;
-
-    /**
-     * 出手缓冲：离开手之后的这几 tick 里，位移从 {@link #LAUNCH_START_FRACTION} 涨到全速。
-     *
-     * <p>⚠️ 作者 2026-10-05 实测「火球术、大火球术和熔岩火球的产生和发射过程不流畅」——
-     * 原因是原来<b>一离手就走满 1 格/tick（= 20 格/秒）</b>：
-     * 球先在手里悬停 5 tick 不动，然后"啪"地一下弹到满速，看着就是一顿 ✗
-     * 现在给它一段加速，读起来才像"被推出去" ✓
-     *
-     * <p>⚠️ 只对手抛的火球生效；<b>天上掉下来的陨石不加速</b>
-     * （自由落体越落越快才合理，减速反而怪 ✗）—— 见 {@code meteorLike()}
-     */
-    public static final int LAUNCH_RAMP_TICKS = 4;
-    /** 刚离手时走全速的几成。0.30 = 第一 tick 只走 30%，第 4 tick 起满速。 */
-    public static final double LAUNCH_START_FRACTION = 0.30D;
 
     public TNFireBoltEntity(EntityType<? extends TNFireBoltEntity> type, Level level) {
         super(type, level);
@@ -309,30 +297,27 @@ public final class TNFireBoltEntity extends Projectile {
     }
 
     /**
-     * 这一档的<b>成形时长</b>（tick）。
+     * 这一档的<b>成长时长</b>（tick）—— 只决定渲染器把球从 25% 长到 100% 用多久 ✓
      *
-     * <p>手扔的火球要"先在手里凝成一颗球再射出去"，所以有 {@link #FORM_TICKS} 的悬停；
-     * 但<b>陨星坠的陨石不能有</b> —— 它是从天而降的，悬在天上不动 6 tick 会明显顿一下 ✗
-     * （作者 2026-10-05 反馈「陨石的下落不流畅」）
+     * <p>⚠️ 它<b>不等于"悬停时长"</b>（作者 2026-10-18 全链取消悬停）：
+     * 所有投射物在成长的这 3 tick 里**已经在飞**，只是球还小 ✓
+     *
+     * <p>陨星坠的陨石直接返回 0 —— 它是从天而降的，不需要"凝形"✓
      */
     private int formTicks() {
         if (skyFall()) {
             return 0;
         }
-        // 火龙吐息：要"在面前渐渐生成法阵 + 龙头成形"，3 tick 太短 ✗ ⇒ 给足 18 tick（0.9 秒）✓
+        // 火龙吐息：粒子龙是一节一节长出来的，给足 18 tick 让"凝形"看得见 ✓（但不再悬停 ✓）
         return isDragon() ? DRAGON_FORM_TICKS : FORM_TICKS;
     }
 
     /**
      * 「从天上砸下来」的那些（t4 熔岳天倾的火球 + t5 的陨石/伴随陨石）。
      *
-     * <p>它们<b>不是从手里推出去</b>的 ✗ ⇒ 既不做成形悬停、也不加出手缓冲：
-     * <ul>
-     *   <li>悬停 3 tick 会看着"顿一下" ✗</li>
-     *   <li>出手缓冲会让下落**先慢后快** ✗ —— 作者 2026-10-05 说「下落流畅点」，
-     *       落到一半突然加速正是"不流畅" ✗</li>
-     * </ul>
-     * ⇒ 它们一律<b>匀速直接砸</b> ✓（只有手扔的火球保留"凝聚 + 推出去"那套 ✓）
+     * <p>它们<b>不是从手里推出去</b>的 ✗ ⇒ 不做成长、也不悬停，直接匀速砸 ✓
+     * （作者 2026-10-05「陨石的下落不流畅」；2026-10-18 又把所有出手缓冲全删了，
+     * 现在全链都是等速直线，不再有"先慢后快"✓）
      */
     private boolean skyFall() {
         String path = spellPath();
@@ -383,38 +368,9 @@ public final class TNFireBoltEntity extends Projectile {
     public void tick() {
         super.tick();
 
-        // ---------------- 成形阶段：先在手前凝成一颗球，再射出去 ----------------
-        // 这 5 tick 里**不移动、也不判定命中**（火球还在手里），渲染器负责让它长大
-        if (tickCount <= formTicks()) {
-            if (level().isClientSide) {
-                // 往中心收拢的几粒火星 —— "凝聚"的感觉
-                if (tickCount % 2 == 0) {
-                    double r = radius() * (1.5D - formProgress(0.0F));
-                    for (int i = 0; i < 3; i++) {
-                        double a = tickCount * 0.9D + i * Math.PI * 2.0D / 3.0D;
-                        level().addParticle(ParticleTypes.SMALL_FLAME,
-                                getX() + Math.cos(a) * r, getY() + Math.sin(a) * r * 0.6D,
-                                getZ() + Math.sin(a) * r,
-                                -Math.cos(a) * 0.04D, 0.01D, -Math.sin(a) * 0.04D);
-                    }
-                }
-            } else {
-                // ⚠️ 成形期间**别完全钉死**：原来这里一点不挪，球就在手里悬着，
-                //    然后突然满速弹出去 —— 作者说的"产生过程不流畅"就有这一半 ✗
-                //    现在让它一边长大一边**微微向前漂**（12% 速度），读起来像"正在被推出去" ✓
-                if (formTicks() > 0) {
-                    setPos(position().add(getDeltaMovement().scale(0.12D)));
-                }
-                // 长满的那一帧喷一次火星：给"射出去了"一个明确的瞬间。
-                // ⚠️ 这里原来是 `else if (tickCount == FORM_TICKS)` ——
-                //    被上面的 `tickCount <= formTicks()` 整个吃掉了，**从来没触发过** ✗
-                if (tickCount == formTicks()) {
-                    ((ServerLevel) level()).sendParticles(ParticleTypes.FLAME,
-                            getX(), getY(), getZ(), 18, 0.14D, 0.14D, 0.14D, 0.10D);
-                }
-            }
-            return;
-        }
+        // ⚠️ 作者 2026-10-18：**全链都不要悬停** ——
+        //    火球/射线 t1~t3 嫌顿，火龙吐息原来要在手前钉 18 tick 凝形，也一起去掉 ✓
+        //    ⇒ 现在没有任何法术停在手里：一出生就是等速直线，飞出去的同时粒子龙自己长出来 ✓
 
         // ---------------- 客户端：只负责好看 ----------------
         if (level().isClientSide) {
@@ -422,6 +378,20 @@ public final class TNFireBoltEntity extends Projectile {
             //    作者 2026-10-05 明确指出"不要一个球外面一些火焰粒子"，
             //    所以这里从"每 2 tick 撒 4 颗 + 一颗 LAVA"减到"每 3 tick 在尾后留一颗小火星"，
             //    并且**删掉了 LAVA 粒子**（它是一坨，看着像旁边多长了一颗小球 ✗）
+            // 还在长大的那几 tick：几粒往球心收拢的火星 —— "凝聚"的感觉 ✓
+            // （这段以前挂在"悬停阶段"里；悬停取消后必须挪到这儿，
+            //   否则 t1~t3 会完全看不到"成形"，只剩一颗凭空满大小的球 ✗）
+            float grow = formProgress(0.0F);
+            if (grow < 1.0F && tickCount % 2 == 0) {
+                double r = radius() * (1.5D - grow);
+                for (int i = 0; i < 3; i++) {
+                    double a = tickCount * 0.9D + i * Math.PI * 2.0D / 3.0D;
+                    level().addParticle(ParticleTypes.SMALL_FLAME,
+                            getX() + Math.cos(a) * r, getY() + Math.sin(a) * r * 0.6D,
+                            getZ() + Math.sin(a) * r,
+                            -Math.cos(a) * 0.04D, 0.01D, -Math.sin(a) * 0.04D);
+                }
+            }
             if (tickCount % 3 == 0 && getDeltaMovement().lengthSqr() > 0.01D) {
                 Vec3 tail = getDeltaMovement().normalize().scale(-radius() * 3.0D);
                 level().addParticle(ParticleTypes.SMALL_FLAME,
@@ -467,6 +437,12 @@ public final class TNFireBoltEntity extends Projectile {
         }
 
         ServerLevel server = (ServerLevel) level();
+        // 长满的那一帧喷一次火星：给"射出去了"一个明确的瞬间 ✓
+        // （原来挂在"悬停成形"那段里；悬停删掉后挪到这儿，观感保留）
+        if (formTicks() > 0 && tickCount == formTicks()) {
+            server.sendParticles(ParticleTypes.FLAME, getX(), getY(), getZ(),
+                    18, 0.14D, 0.14D, 0.14D, 0.10D);
+        }
         Vec3 from = position();
         Vec3 motion = getDeltaMovement();
         // ⚠️ 作者 2026-10-05：「把锥形追踪删了」✓
@@ -474,16 +450,13 @@ public final class TNFireBoltEntity extends Projectile {
         //    于是永远对不上第二个目标 ⇒ 表现就是"只有第一个僵尸受伤"✗
         //    ⇒ 现在射线**走直线** ✓：出手方向 = 准心方向（由 TNFireRays 定 ✓），
         //      之后不再拐弯 ⇒ 谁在线上谁挨打 ✓，穿透才是干净的 ✓
-        // 出手缓冲：刚离手那几 tick 只走一部分，LAUNCH_RAMP_TICKS 内涨到全速。
+        // 出手缓冲**已删**（作者 2026-10-18「火球链和射线链 t1~t3 的发射过程都不流畅」）：
+        //   旧版离手后 4 tick 里速度从 30% 涨到 100%，速度每 tick 都在变
+        //   ⇒ 读起来是"先慢后快、一顿一顿"✗
+        //   现在**等速直线**：一出生就是 LAUNCH_SPEED 格/tick，轨迹是一条干净的直线 ✓
         // ⚠️ 只改**实际走了多远**，不改 getDeltaMovement() ——
         //    改速度会每 tick 触发一次速度同步包，反而更卡 ✗
-        Vec3 step = motion;
-        if (!skyFall()) {
-            double ramp = Math.min(1.0D,
-                    (tickCount - formTicks()) / (double) LAUNCH_RAMP_TICKS);
-            step = motion.scale(LAUNCH_START_FRACTION + (1.0D - LAUNCH_START_FRACTION) * ramp);
-        }
-        Vec3 to = from.add(step);
+        Vec3 to = from.add(motion);
 
         // 陨星坠的陨石：身周冒火 + **身后铺一条拖尾**
         // （作者 2026-10-05：「我没有看到陨石」→ 先加粒子；又要求「下落过程可以带点拖尾」→ 再铺长）
@@ -609,6 +582,7 @@ public final class TNFireBoltEntity extends Projectile {
             hit = null;
         }
         if (hit != null || wall.getType() != HitResult.Type.MISS) {
+            if(wall.getType()!=HitResult.Type.MISS&&level() instanceof ServerLevel fireLevel)com.tnc.tnc.alchemy.AlchemyEntity.igniteNear(fireLevel,wall.getBlockPos(),getOwner());
             if (hit != null) {
 
                 boolean hurt = hit.hurt(server.damageSources().indirectMagic(this, owner), damage);
@@ -645,6 +619,12 @@ public final class TNFireBoltEntity extends Projectile {
             // （作者 2026-10-05：「爆开后会产生大量火焰粒子向四周扩散，场景壮观点」）
             if ("meteor_fall".equals(spellPath())) {
                 meteorImpactBurst(server, impact);
+                // 作者 2026-10-18：「要求在火球爆炸后再爆炸范围内出现黑曜石和岩浆，
+                // 并且爆炸时也会有岩浆飞出，**这里的岩浆是真实的不是用来修饰的**」
+                // ① 地形：范围内铺黑曜石 + 真实岩浆
+                meteorCrater(server, impact);
+                // ② 飞出来的岩浆：每 tick 真放一块岩浆方块再擦掉 ⇒ 会烧人、会发光、落地留滩
+                TNMeteorSplashEntity.cast(server, impact, server.getRandom());
             }
             // 声音 + 震屏（作者 2026-10-05）：t3 响亮爆炸+轻微震动 / t4 巨大爆炸+轰鸣+较强烈 /
             // t5 巨大爆炸+轰鸣+强烈 —— 逐档加强，不会出现低档比高档猛 ✗
@@ -690,7 +670,7 @@ public final class TNFireBoltEntity extends Projectile {
         }
 
         setPos(to);
-        remaining -= step.length();
+        remaining -= to.distanceTo(from);      // 这一 tick 实际走了多远（= motion 的长度，出手缓冲已删）
     }
 
     /**
@@ -782,6 +762,131 @@ public final class TNFireBoltEntity extends Projectile {
     }
 
     /**
+     * 陨星坠落地后的地形：爆炸范围内铺**黑曜石**与**真实的岩浆**。
+     *
+     * <p>作者 2026-10-18：「要求在火球爆炸后再爆炸范围内出现黑曜石和岩浆」。
+     * 半径直接取 {@link FireSpellRules} 里 METEOR_BOLT 的爆炸半径（8 格），
+     * 所以"炸多远就烧多大"是同一个数 ✓ 不会出现焦土比伤害范围大/小 ✗
+     *
+     * <p><b>真的挖坑</b>（作者 2026-10-18：「破坏地形的效果被删了，加回来」）：
+     * 每列按 {@code depth = 5 * (1 - d²)} 往下挖空 —— 中心 5 格、边缘 0 格 ⇒ 碗形弹坑 ✓
+     * 挖到基岩或带方块实体的方块就停 ✗
+     *
+     * <p>坑底材质（d = 到落点的水平距离 / 爆炸半径）：
+     * <ul>
+     *   <li>{@code d < 0.30}：坑底一整滩岩浆（底下垫黑曜石，免得岩浆把地底接着啃穿）</li>
+     *   <li>{@code 0.30 ~ 0.55}：一圈黑曜石 —— 熔了又凝住的坑底</li>
+     *   <li>{@code 0.55 ~ 1.00}：黑曜石为主、夹岩浆缝（约 1/5 是岩浆）</li>
+     *   <li>{@code d 接近 1.0}：不挖，只铺稀疏焦壳（约 1/3），边沿不能糊死，否则像贴了张黑饼 ✗</li>
+     * </ul>
+     *
+     * <p>全部 {@code flag = 2}（不触发邻居更新）：岩浆原地待着不流、黑曜石不惊动红石；
+     * 与太阳审判塌方地形的写法一致 ✓
+     *
+     * <p>跳过基岩与带方块实体的方块（箱子/告示牌等，替换会丢内容 ✗）；
+     * 伪随机按 (dx,dz) 定死 ⇒ 同一个坑反复砸也长一个样，不会"闪来闪去" ✓
+     */
+    private void meteorCrater(ServerLevel server, Vec3 at) {
+        double radius = FireSpellRules.METEOR_BOLT.blastRadius();
+        BlockPos center = BlockPos.containing(at);
+        int span = (int) Math.ceil(radius);
+        for (int dx = -span; dx <= span; dx++) {
+            for (int dz = -span; dz <= span; dz++) {
+                double d = Math.sqrt((double) (dx * dx + dz * dz)) / radius;
+                if (d > 1.0D) {
+                    continue;
+                }
+                BlockPos top = surfaceAt(server, center, dx, dz);
+                if (top == null) {
+                    continue;
+                }
+                BlockState ground = server.getBlockState(top);
+                if (ground.is(Blocks.BEDROCK) || ground.hasBlockEntity()) {
+                    continue;
+                }
+                // ★ 作者 2026-10-18：「破坏地形的效果被删了，加回来」⇒ **真的挖一个碗形弹坑** ✓
+                //   depth 按 (1-d²) 衰减：中心最深、边缘不收口 ⇒ 是"坑"不是"平底锅" ✓
+                int depth = (int) Math.round(CRATER_DEPTH * (1.0D - d * d));
+                int roll = Math.floorMod((dx * 73856093) ^ (dz * 19349663), 100);
+                if (depth <= 0) {
+                    // 最外圈不挖，只铺稀疏焦壳
+                    if (roll < 34) {
+                        server.setBlock(top, Blocks.OBSIDIAN.defaultBlockState(), 2);
+                    }
+                    clearAbove(server, top, 2);
+                    continue;
+                }
+                BlockPos floor = dig(server, top, depth);
+                if (floor == null) {
+                    continue;
+                }
+                // 坑底材质：中心岩浆池 / 坑壁黑曜石 / 外圈黑曜石夹岩浆缝
+                if (d < 0.30D) {
+                    server.setBlock(floor.below(), Blocks.OBSIDIAN.defaultBlockState(), 2);
+                    server.setBlock(floor, Blocks.LAVA.defaultBlockState(), 2);
+                } else if (d < 0.55D) {
+                    server.setBlock(floor.below(), Blocks.OBSIDIAN.defaultBlockState(), 2);
+                    server.setBlock(floor, Blocks.OBSIDIAN.defaultBlockState(), 2);
+                } else {
+                    server.setBlock(floor, roll < 78 ? Blocks.OBSIDIAN.defaultBlockState() : Blocks.LAVA.defaultBlockState(), 2);
+                }
+                // 挖开之后，上方原先是草/花的地方要清掉，否则悬在半空 ✗
+                clearAbove(server, floor, depth + 3);
+            }
+        }
+    }
+
+    /** 弹坑中心最深几格（8 格半径的坑挖 5 格深）。 */
+    private static final int CRATER_DEPTH = 5;
+
+    /**
+     * 从地表往下挖 {@code depth} 格，返回挖掉的最底那一格（整个洞挖空）。
+     *
+     * <p>挖到<b>基岩</b>或<b>带方块实体的方块</b>就停 —— 前者不可破坏 ✓，
+     * 后者（箱子/刷怪笼/告示牌…）直接删会连内容一起丢 ✗
+     */
+    private static BlockPos dig(ServerLevel server, BlockPos top, int depth) {
+        BlockPos last = null;
+        for (int i = 0; i < depth; i++) {
+            BlockPos p = top.below(i);
+            BlockState s = server.getBlockState(p);
+            if (s.is(Blocks.BEDROCK) || s.hasBlockEntity()) {
+                break;
+            }
+            server.setBlock(p, Blocks.AIR.defaultBlockState(), 2);
+            last = p;
+        }
+        return last;
+    }
+
+    /** 找这一列的地表：从落点往上 2 格开始往下扫 9 格。 */
+    private static BlockPos surfaceAt(ServerLevel server, BlockPos center, int dx, int dz) {
+        for (int dy = 2; dy >= -9; dy--) {
+            BlockPos p = center.offset(dx, dy, dz);
+            if (!server.isLoaded(p)) {
+                return null;
+            }
+            BlockState s = server.getBlockState(p);
+            if (!s.isAir() && s.getFluidState().isEmpty()) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+    /** 把地表上方 up 格内的草/花/雪清掉（流体、基岩、带方块实体的不动）。 */
+    private static void clearAbove(ServerLevel server, BlockPos top, int up) {
+        for (int k = 1; k <= up; k++) {
+            BlockPos q = top.above(k);
+            BlockState s = server.getBlockState(q);
+            if (s.isAir() || !s.getFluidState().isEmpty() || s.hasBlockEntity() || s.is(Blocks.BEDROCK)) {
+                continue;
+            }
+            server.setBlock(q, Blocks.AIR.defaultBlockState(), 2);
+        }
+    }
+
+    /**
      * 命中时的「动静」：<b>声音 + 震屏</b>（作者 2026-10-05 要求，且必须逐档加强 ✗）。
      *
      * <ul>
@@ -826,6 +931,9 @@ public final class TNFireBoltEntity extends Projectile {
         // 震屏：复用冲击波实体；半径跟着强度走，视觉上也分得出大小 ✓
                 // ⚠️ 最后一个参数 0 = 不发白闪 ✗ —— 作者 2026-10-05：「把震动时的界面变灰删去」
         //    （那个"变灰"是 TNSpellClientVisuals 在 flash 时盖的白色 ✗）
-        TNShockwaveEntity.blast(server, at, 3.0D + shake * 0.6D, shake, getOwner(), 0.0F);
+        // ⚠️ 作者 2026-10-18：「火球链中 t3 和 t4 的火球爆炸时的击飞效果删去」✗
+        //    ⇒ t3 熔岩火球 / t4 熔岳天倾 只震屏、不把人掀飞；t5 陨星坠照旧掀飞 ✓
+        boolean push = "meteor_fall".equals(path);
+        TNShockwaveEntity.blast(server, at, 3.0D + shake * 0.6D, shake, getOwner(), 0.0F, push);
     }
 }

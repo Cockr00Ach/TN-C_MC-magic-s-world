@@ -22,11 +22,20 @@ $effDir = Join-Path $assets 'textures\mob_effect'
 New-Item -ItemType Directory -Force -Path $iconDir | Out-Null
 New-Item -ItemType Directory -Force -Path $effDir | Out-Null
 
+# The pack copy OVERRIDES the jar, so both have to be written or the game keeps
+# showing the old art. src/ is what ships inside tnc-1.0.0.jar.
+$srcAssets = Join-Path $root 'src\main\resources\assets\tnc'
+$srcIconDir = Join-Path $srcAssets 'textures\spell'
+$srcEffDir = Join-Path $srcAssets 'textures\mob_effect'
+New-Item -ItemType Directory -Force -Path $srcIconDir | Out-Null
+New-Item -ItemType Directory -Force -Path $srcEffDir | Out-Null
+
 $DARK  = [System.Drawing.Color]::FromArgb(255, 0x7A, 0x14, 0x08)
 $RED   = [System.Drawing.Color]::FromArgb(255, 0xD0, 0x38, 0x10)
 $ORNG  = [System.Drawing.Color]::FromArgb(255, 0xF0, 0x82, 0x20)
 $YEL   = [System.Drawing.Color]::FromArgb(255, 0xFF, 0xD0, 0x50)
 $WHITE = [System.Drawing.Color]::FromArgb(255, 0xFF, 0xF6, 0xD8)
+$VOID  = [System.Drawing.Color]::FromArgb(255, 0x2A, 0x0A, 0x06)   # near-black silhouette (body inside fire)
 $CLEAR = [System.Drawing.Color]::FromArgb(0, 0, 0, 0)
 
 # ---------- shared drawing helpers ----------
@@ -63,6 +72,7 @@ function Save-Icon($name, $asEffect) {
     $script:GFX.Dispose()
     $p = Join-Path $iconDir "$name.png"
     $script:BMP.Save($p, [System.Drawing.Imaging.ImageFormat]::Png)
+    $script:BMP.Save((Join-Path $srcIconDir "$name.png"), [System.Drawing.Imaging.ImageFormat]::Png)
     $script:BMP.Dispose()
     $size = (Get-Item $p).Length
     if ($asEffect) {
@@ -74,6 +84,7 @@ function Save-Icon($name, $asEffect) {
         $g2.DrawImage($img, 1, 1, 16, 16)
         $g2.Dispose(); $img.Dispose()
         $e.Save((Join-Path $effDir "$name.png"), [System.Drawing.Imaging.ImageFormat]::Png)
+        $e.Save((Join-Path $srcEffDir "$name.png"), [System.Drawing.Imaging.ImageFormat]::Png)
         $e.Dispose()
     }
     Write-Output ("  {0,-24} {1,5:N0} B{2}" -f "$name.png", $size, $(if ($asEffect) { '  +effect' } else { '' }))
@@ -99,38 +110,231 @@ function Icon-Ray($name, $tier) {
     Save-Icon $name $false
 }
 
-# ---------- BALL chain: growing fireball; t4 = burst, t5 = meteor with a tail ----------
-function Icon-Ball($name, $tier) {
+# ---------- pixel-map painter ----------
+# Every BALL/BURN icon is drawn as a literal 16x16 character map: at this size a
+# hand-placed map reads far better than a procedural circle, and the whole
+# silhouette of a tier fits on one screen for review.
+#   .  transparent      k  dark red        r  red            o  orange
+#   y  yellow           w  white/cream     n  near-black (body silhouette)
+$MAPCOLORS = @{
+    '.' = $CLEAR
+    'k' = $DARK
+    'r' = $RED
+    'o' = $ORNG
+    'y' = $YEL
+    'w' = $WHITE
+    'n' = $VOID
+}
+function Icon-Map($name, $rows, $asEffect) {
+    if ($rows.Count -ne 16) { throw "$name : needs 16 rows, got $($rows.Count)" }
     New-Icon
-    if ($tier -eq 4) {
-        Disc 8 8 7                                     # self destruct: whole icon is the blast
-        for ($i = 0; $i -lt 8; $i++) {
-            $a = $i * [Math]::PI / 4.0
-            Px (8 + [int][Math]::Round(6 * [Math]::Cos($a))) (8 + [int][Math]::Round(6 * [Math]::Sin($a))) $WHITE
+    for ($y = 0; $y -lt 16; $y++) {
+        $line = [string]$rows[$y]
+        if ($line.Length -ne 16) { throw "$name : row $y is $($line.Length) chars" }
+        for ($x = 0; $x -lt 16; $x++) {
+            $c = $MAPCOLORS[[string]$line[$x]]
+            if ($null -eq $c) { throw "$name : unknown colour '$($line[$x])' on row $y" }
+            Px $x $y $c
         }
-    } elseif ($tier -eq 5) {
-        Disc 8 10 5                                    # meteor: ball low + tail up
-        for ($y = 0; $y -lt 6; $y++) { Px 8 $y $ORNG; Px 7 $y $RED; Px 9 $y $RED }
-    } else {
-        Disc 8 8 (3 + $tier)
     }
-    Save-Icon $name $false
+    Save-Icon $name $asEffect
 }
 
-# ---------- BURN chain: one flame per tier level, plus a halo at t3+ ----------
-function Icon-Burn($name, $tier) {
-    New-Icon
-    $xs = if ($tier -ge 4) { @(1, 6, 11) } elseif ($tier -eq 3) { @(2, 7, 12) } elseif ($tier -eq 2) { @(3, 9) } else { @(6) }
-    foreach ($x in $xs) { Flake $x 5 }
-    if ($tier -ge 3) {                                  # revive halo
-        for ($a = 0; $a -lt 360; $a += 20) {
-            $rad = $a * [Math]::PI / 180.0
-            Px (8 + [int][Math]::Round(7 * [Math]::Cos($rad))) (8 + [int][Math]::Round(7 * [Math]::Sin($rad))) $YEL
-        }
-    }
-    if ($tier -eq 5) { Px 8 0 $WHITE; Px 7 1 $WHITE; Px 9 1 $WHITE }
-    Save-Icon $name $true                               # burning chain are all effects
+# ---------- BALL chain (2026-10-11 redesign) ----------
+# One silhouette per tier: single ball -> flaming ball -> molten ball with drips
+# -> meteor smashing a molten mountain -> long-tailed meteor.
+$BALL_MAPS = @{
+    'fireball' = @(
+        '................',
+        '................',
+        '................',
+        '......kkk.......',
+        '.....krrrk......',
+        '....krooork.o...',
+        '....kroyork.....',
+        '..o.kroyork.....',
+        '....krooork.....',
+        '.....krrrk......',
+        '......kkk.......',
+        '................',
+        '................',
+        '................',
+        '................',
+        '................'
+    )
+    'great_fireball' = @(
+        '................',
+        '.......w........',
+        '......yyy.......',
+        '......ooo.......',
+        '......rrr.......',
+        '......kkk.......',
+        '.....krrrk......',
+        '....krooork.....',
+        '...kroyyyork.o..',
+        '...kroywyork....',
+        '...kroyyyork....',
+        '..o.krooork.....',
+        '.....krrrk......',
+        '......kkk.......',
+        '................',
+        '................'
+    )
+    'lava_fireball' = @(
+        '................',
+        '................',
+        '................',
+        '......kkk.......',
+        '.....krrrk......',
+        '....krooork.....',
+        '....kroyork.....',
+        '....kroyork.....',
+        '....krooork.....',
+        '.....krrrk......',
+        '...r...r...r....',
+        '...o...o...o....',
+        '...y...y...y....',
+        '................',
+        '................',
+        '................'
+    )
+    'molten_skyfall' = @(
+        '................',
+        '......kkk.......',
+        '.....krrrk......',
+        '.....kryrk......',
+        '.....krrrk......',
+        '......kkk.......',
+        '.......r........',
+        '.......o........',
+        '.......y........',
+        '.....y.y.y......',
+        '......nnn.......',
+        '.....nnnnn......',
+        '....nnnnnnnn....',
+        '..nnnnnnnnnnnn..',
+        '.nnnnnynnnonnnn.',
+        'onnnnonnnnonnnno'
+    )
+    'meteor_fall' = @(
+        '.k..............',
+        '.kk.............',
+        '.kry............',
+        '.krro...........',
+        '..krry..........',
+        '..kroo..........',
+        '...krooy........',
+        '....kroo........',
+        '.......kkk......',
+        '......krrrk.....',
+        '.....krooork....',
+        '.....kroyork....',
+        '.....krooork....',
+        '......krrrk.....',
+        '.......kkk......',
+        '.....y..o..y....'
+    )
 }
+
+# ---------- BURN chain (2026-10-11 redesign) ----------
+# The chain is "hurt yourself for power", so every icon is the CASTER's own body
+# (near-black silhouette) and the tier says where the fire has got to:
+# skin -> blood -> core -> soul -> the whole body.
+$BURN_MAPS = @{
+    'fire_aspect' = @(
+        '................',
+        '......nnn.......',
+        '......nnn.......',
+        '......nnn...w...',
+        '.......n....y...',
+        '.....nnnnn..o...',
+        '...nnnnnnnnnr...',
+        '...nnnnnnnnn.o..',
+        '...nnnnnnnnn....',
+        '.....nnnnn......',
+        '.....nnnnn......',
+        '.....nnnnn......',
+        '.....nn.nn......',
+        '.....nn.nn......',
+        '.....nn.nn......',
+        '....nnn.nnn.....'
+    )
+    'ember_burn' = @(
+        '....y......y....',
+        '......nrn.......',
+        '......nyn.......',
+        '......nnn.......',
+        '.......n........',
+        '.....nnrnn......',
+        '...nnnnrnnnn....',
+        '...nnynrnynn....',
+        '...nnnnrnnnn....',
+        '.....nnrnn......',
+        '.....nnynn......',
+        '.....nnrnn......',
+        '.....nn.nn......',
+        '.....nn.nn......',
+        '.....nn.nn......',
+        '....nnn.nnn.....'
+    )
+    'blaze_burn' = @(
+        '................',
+        '......nnn.......',
+        '......nnn.......',
+        '......nnn.......',
+        '.......n........',
+        '.....nnnnn......',
+        '...nnnnnnnnn....',
+        '...nnnnynnnn....',
+        '...nnoywyonn....',
+        '.....nnynn......',
+        '.....nnrnn......',
+        '.....nnnnn......',
+        '.....nn.nn......',
+        '.....nn.nn......',
+        '.....nn.nn......',
+        '....nnn.nnn.....'
+    )
+    'inferno_burn' = @(
+        '.....y....y.....',
+        '......nyn.......',
+        '......ywy.......',
+        '......nnn.......',
+        '.......n........',
+        '.....nnnnn......',
+        '...nnnnnnnnn....',
+        '...nnrnnnnnn....',
+        '...nnnnnnnrn....',
+        '.....nnnnn......',
+        '.....nnnnn......',
+        '.....nnrnn......',
+        '.....nn.nn......',
+        '.....nn.nn......',
+        '.....nn.nn......',
+        '....nnn.nnn.....'
+    )
+    'total_burn' = @(
+        '.......y........',
+        '......nnn.......',
+        '..o...nnn...o...',
+        '..r...nnn...r...',
+        '.......n........',
+        '....ynnnnny.....',
+        '...rnnnnnnnr....',
+        '..onnnnnnnnno...',
+        '...nnnnwnnnn....',
+        '.....nnnnn......',
+        '.....nnnnn......',
+        '.....nnnnn......',
+        '....rnn.nnr.....',
+        '.....nn.nn......',
+        '.....nn.nn......',
+        '....nnn.nnn.....'
+    )
+}
+
+function Icon-Ball($name, $tier) { Icon-Map $name $BALL_MAPS[$name] $false }
+function Icon-Burn($name, $tier) { Icon-Map $name $BURN_MAPS[$name] $true }
 
 # ---------- RAY chain (2026-10-05 redesign): each tier gets its OWN icon ----------
 function HLine($x0, $x1, $y, $c) { for ($x = $x0; $x -le $x1; $x++) { Px $x $y $c } }

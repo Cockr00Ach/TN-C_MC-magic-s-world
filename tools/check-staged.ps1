@@ -86,6 +86,7 @@ $authoredDragonAssets = @(
 )
 
 $totalBytes = 0
+$mergeHead = @(& git -C $repoRoot rev-parse -q --verify MERGE_HEAD 2>$null)
 foreach ($f in $staged) {
     $full = Join-Path $repoRoot ($f -replace '/', '\')
     if (-not (Test-Path -LiteralPath $full)) { continue }
@@ -94,6 +95,14 @@ foreach ($f in $staged) {
     if (($f -replace '\\', '/') -match $sizeExempt) { continue }
     if (($authoredDragonAssets -contains ($f -replace '\\', '/')) -and $len -le 20MB) { continue }
     if ($len -gt ($MaxMB * 1MB)) {
+        # A merge may bring in assets already published by its other parent.
+        # Identical staged blobs add no new large object; modified/new blobs
+        # still obey the normal size guard. Forbidden paths remain blocked.
+        if ($mergeHead.Count -eq 1) {
+            $parentBlob = @(& git -C $repoRoot rev-parse --verify ('{0}:{1}' -f $mergeHead[0], $f) 2>$null)
+            $stagedBlob = @(& git -C $repoRoot rev-parse --verify (':' + $f) 2>$null)
+            if ($parentBlob.Count -eq 1 -and $stagedBlob.Count -eq 1 -and $parentBlob[0] -eq $stagedBlob[0]) { continue }
+        }
         $problems.Add(("  [too big]   {0}`n              -> {1:N1} MB (limit {2} MB)" -f $f, ($len / 1MB), $MaxMB))
     }
 }

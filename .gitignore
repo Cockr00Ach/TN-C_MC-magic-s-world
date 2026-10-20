@@ -126,3 +126,6 @@ archive/local-save-backup/
 # 写中间产物。这些是本地一次性材料，不是我们的成果 —— 提交它们会让仓库暴涨，
 # 也违反"只跟踪我们自己写的东西"。需要备份时脚本自己会重建目录。
 work/
+
+# Python tooling caches
+__pycache__/

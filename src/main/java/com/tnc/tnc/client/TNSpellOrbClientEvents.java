@@ -63,6 +63,12 @@ public final class TNSpellOrbClientEvents {
         //   共用通用的空渲染器，见 TNParticleOnlyRenderer ✓
         event.registerEntityRenderer(TNOrbEntities.SKYFALL.get(), TNSigilRenderer::skyfall);
         event.registerEntityRenderer(TNOrbEntities.METEOR_FALL.get(), TNSigilRenderer::meteorFall);
+        // ★ 燃烧链起手那圈火：**纯粒子**（作者 2026-10-18：「改用粒子效果，不用真实建模了」）
+        //   实体只负责每 tick 在服务端撒粒子，客户端挂空渲染器 ✓
+        event.registerEntityRenderer(TNOrbEntities.BURN_AURA.get(), ctx -> new TNParticleOnlyRenderer<>(ctx));
+        // ★ 陨星坠溅出来的岩浆（作者 2026-10-18：要**真实**的岩浆）：空渲染器 ✓
+        //   表现全在它每 tick 摆出去又收回来的岩浆方块上，自己不画东西 ✓
+        event.registerEntityRenderer(TNOrbEntities.METEOR_SPLASH.get(), TNMeteorSplashRenderer::new);
         // ★ 光天使（光系第二条链 t3/t4/t5 ✓）：半透明 + 自发光，见 TNAngelRenderer ✓
         event.registerEntityRenderer(TNOrbEntities.ANGEL.get(), com.tnc.tnc.light.client.TNAngelRenderer::new);
         // ★ 实体光柱（光系第三条链「光线」✓）：一整根棱柱 + 彩虹顶点色，见 TNLightBeamRenderer ✓

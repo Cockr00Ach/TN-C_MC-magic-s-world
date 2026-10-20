@@ -1,0 +1,11 @@
+{
+  "title": "路灯下的脚步",
+  "story": "清理路边6只僵尸，让晚归的人安心。",
+  "kind": "kill",
+  "target": "minecraft:zombie",
+  "count": 6,
+  "level": 1,
+  "coins": 75,
+  "xp": 80,
+  "cooldown_seconds": 1800
+}

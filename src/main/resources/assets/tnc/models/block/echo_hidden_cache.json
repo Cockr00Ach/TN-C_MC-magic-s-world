@@ -1,0 +1,10 @@
+{
+  "textures": {
+    "ceramic": "tnc:block/alchemy_ceramic",
+    "bronze": "tnc:block/alchemy_bronze",
+    "glow": "tnc:block/alchemy_glow",
+    "wood": "tnc:block/alchemy_wood",
+    "particle": "tnc:block/alchemy_ceramic"
+  },
+  "elements": []
+}

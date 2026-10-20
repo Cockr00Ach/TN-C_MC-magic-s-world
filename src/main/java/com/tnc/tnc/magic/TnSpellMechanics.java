@@ -563,7 +563,7 @@ public final class TnSpellMechanics {
      * @param data    玩家数据（回蓝要改它）
      */
     public static void onSpellCast(ServerPlayer player, ResourceLocation spellId, MagicStoneData data) {
-        if(com.tnc.tnc.combat.DownedCombat.isDowned(player))return;
+        if((com.tnc.tnc.combat.DownedCombat.isDowned(player)||com.tnc.tnc.dungeon.DungeonService.recovering(player)))return;
         String path = spellId.getPath();
 
         // 真的放出去了 ⇒ 消掉"放行了却没放出来"的哑火待定项 ✓（见 ManaGate.PENDING）

@@ -1,0 +1,37 @@
+{
+  "scope": "Real isolated dev-client model rendering; no full-pack FPS claim",
+  "poses": [
+    "idle",
+    "emerge_core",
+    "gravity_core"
+  ],
+  "localPlayerPrediction": true,
+  "framebuffer": [
+    1800,
+    900
+  ],
+  "attackModels": 6,
+  "renderer": "com.tnc.tnc.boss.earth.client.StoneLancerRenderer",
+  "failures": [],
+  "pieces": 191,
+  "independent_uv_faces": 1146,
+  "materials": {
+    "limestone": 39,
+    "slate": 47,
+    "basalt": 64,
+    "foundation": 30,
+    "inlaid": 8,
+    "amber": 3
+  },
+  "model_tests": {
+    "tests": 6,
+    "failures": 0,
+    "errors": 0
+  },
+  "silhouette": {
+    "arms_outward_model_units": 8,
+    "arms_lowered_model_units": 2,
+    "head_raised_model_units": 2
+  },
+  "texture": "2048x2048 RGB; quiet surfaces with part-based value hierarchy"
+}

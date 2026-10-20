@@ -1,0 +1,641 @@
+{
+  "id": "3EC7D29F9C9EBD63",
+  "filename": "tnc_dungeons",
+  "title": "&3&l门后的三十层",
+  "icon": "tnc:dungeon_handbook",
+  "group": "46D9BF1B84D709E1",
+  "order_index": 12,
+  "default_hide_dependency_lines": false,
+  "default_quest_shape": "hexagon",
+  "images": [],
+  "quests": [
+    {
+      "id": "5BF6B62ED1287860",
+      "title": "&b&l门后的三十层",
+      "icon": "tnc:dungeon_handbook",
+      "x": 0,
+      "y": -3,
+      "description": [
+        "先在酒馆原生委托栏潜行右键，领取勘察手册和四座野外界门的寻找指引。",
+        "每个主题30层，每5层保存进度；正常退出后可继续原挑战。",
+        "进入每层八间随机相连的房间，清场开门。找到下层界碑可提前下层，岔路藏着宝匣和奇遇。"
+      ],
+      "dependencies": [],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "7802516673EBC740",
+          "type": "checkmark"
+        }
+      ],
+      "rewards": [
+        {
+          "id": "254644CF0E10DC75",
+          "type": "item",
+          "item": "tnc:dungeon_handbook",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "52E6B5B8610A351A",
+      "title": "&3穿过野外界门",
+      "icon": "minecraft:ender_eye",
+      "x": 0,
+      "y": 0,
+      "description": [
+        "野外门是传送阵，进入后到独立地下城的安全大厅。",
+        "队长在大厅选择已解锁的五层段。队友可在同一大门或各自入口大厅接受邀请：/dungeon invite 玩家；/dungeon accept。",
+        "单人每五层段一次倒地自救；多人只能队友救，全队同时倒地才失败。",
+        "失败保留装备、背包和经验，仅损失本段未结算遗币20%。银行存款不受影响。"
+      ],
+      "dependencies": [
+        "5BF6B62ED1287860"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "1DA6C5722D4F90FD",
+          "type": "advancement",
+          "advancement": "tnc:dungeon/entered"
+        }
+      ]
+    },
+    {
+      "id": "6A09910920FB95BB",
+      "title": "&e黄沙遗庭 · 第5层",
+      "icon": "tnc:dungeon_gate_desert",
+      "x": -7.5,
+      "y": 4,
+      "description": [
+        "完成黄沙遗庭第5层的守关试炼。",
+        "当前是可游玩的基础守关者，专属Boss模型和机制后续设计。",
+        "守关完成会结算遗币，解锁下一个五层段。回酒馆委托栏潜行右键交勘察记录领取铜币。",
+        "宝匣里的主题材料和收藏可以带回家；本段祝福只持续到当前五层段结束。"
+      ],
+      "dependencies": [
+        "52E6B5B8610A351A"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "2B910B2540876F49",
+          "type": "advancement",
+          "advancement": "tnc:dungeon/desert_5"
+        }
+      ]
+    },
+    {
+      "id": "37D8A3F0D77CD25B",
+      "title": "&e黄沙遗庭 · 第10层",
+      "icon": "tnc:dungeon_gate_desert",
+      "x": -7.5,
+      "y": 7,
+      "description": [
+        "完成黄沙遗庭第10层的守关试炼。",
+        "当前是可游玩的基础守关者，专属Boss模型和机制后续设计。",
+        "守关完成会结算遗币，解锁下一个五层段。回酒馆委托栏潜行右键交勘察记录领取铜币。",
+        "宝匣里的主题材料和收藏可以带回家；本段祝福只持续到当前五层段结束。"
+      ],
+      "dependencies": [
+        "6A09910920FB95BB"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "00F6253B87BF9495",
+          "type": "advancement",
+          "advancement": "tnc:dungeon/desert_10"
+        }
+      ]
+    },
+    {
+      "id": "1B8E5BFBA38E4D41",
+      "title": "&e黄沙遗庭 · 第15层",
+      "icon": "tnc:dungeon_gate_desert",
+      "x": -7.5,
+      "y": 10,
+      "description": [
+        "完成黄沙遗庭第15层的守关试炼。",
+        "当前是可游玩的基础守关者，专属Boss模型和机制后续设计。",
+        "守关完成会结算遗币，解锁下一个五层段。回酒馆委托栏潜行右键交勘察记录领取铜币。",
+        "宝匣里的主题材料和收藏可以带回家；本段祝福只持续到当前五层段结束。"
+      ],
+      "dependencies": [
+        "37D8A3F0D77CD25B"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "25F0A8EF71332B82",
+          "type": "advancement",
+          "advancement": "tnc:dungeon/desert_15"
+        }
+      ]
+    },
+    {
+      "id": "6F8CD970B6EAFEDD",
+      "title": "&e黄沙遗庭 · 第20层",
+      "icon": "tnc:dungeon_gate_desert",
+      "x": -7.5,
+      "y": 13,
+      "description": [
+        "完成黄沙遗庭第20层的守关试炼。",
+        "当前是可游玩的基础守关者，专属Boss模型和机制后续设计。",
+        "守关完成会结算遗币，解锁下一个五层段。回酒馆委托栏潜行右键交勘察记录领取铜币。",
+        "宝匣里的主题材料和收藏可以带回家；本段祝福只持续到当前五层段结束。"
+      ],
+      "dependencies": [
+        "1B8E5BFBA38E4D41"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "39E857C305B858F4",
+          "type": "advancement",
+          "advancement": "tnc:dungeon/desert_20"
+        }
+      ]
+    },
+    {
+      "id": "71F6E042AE529397",
+      "title": "&e黄沙遗庭 · 第25层",
+      "icon": "tnc:dungeon_gate_desert",
+      "x": -7.5,
+      "y": 16,
+      "description": [
+        "完成黄沙遗庭第25层的守关试炼。",
+        "当前是可游玩的基础守关者，专属Boss模型和机制后续设计。",
+        "守关完成会结算遗币，解锁下一个五层段。回酒馆委托栏潜行右键交勘察记录领取铜币。",
+        "宝匣里的主题材料和收藏可以带回家；本段祝福只持续到当前五层段结束。"
+      ],
+      "dependencies": [
+        "6F8CD970B6EAFEDD"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "7ED96D30F21A5556",
+          "type": "advancement",
+          "advancement": "tnc:dungeon/desert_25"
+        }
+      ]
+    },
+    {
+      "id": "0208D7D97F2F95AD",
+      "title": "&e黄沙遗庭 · 第30层",
+      "icon": "tnc:dungeon_gate_desert",
+      "x": -7.5,
+      "y": 19,
+      "description": [
+        "完成黄沙遗庭第30层的守关试炼。",
+        "当前是可游玩的基础守关者，专属Boss模型和机制后续设计。",
+        "守关完成会结算遗币，解锁下一个五层段。回酒馆委托栏潜行右键交勘察记录领取铜币。",
+        "宝匣里的主题材料和收藏可以带回家；本段祝福只持续到当前五层段结束。"
+      ],
+      "dependencies": [
+        "71F6E042AE529397"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "3E844E0FC4D867B3",
+          "type": "advancement",
+          "advancement": "tnc:dungeon/desert_30"
+        }
+      ]
+    },
+    {
+      "id": "65D969EB120E0BAA",
+      "title": "&e锁钟地牢 · 第5层",
+      "icon": "tnc:dungeon_gate_crypt",
+      "x": -2.5,
+      "y": 4,
+      "description": [
+        "完成锁钟地牢第5层的守关试炼。",
+        "当前是可游玩的基础守关者，专属Boss模型和机制后续设计。",
+        "守关完成会结算遗币，解锁下一个五层段。回酒馆委托栏潜行右键交勘察记录领取铜币。",
+        "宝匣里的主题材料和收藏可以带回家；本段祝福只持续到当前五层段结束。"
+      ],
+      "dependencies": [
+        "52E6B5B8610A351A"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "6D740B6607D614C9",
+          "type": "advancement",
+          "advancement": "tnc:dungeon/crypt_5"
+        }
+      ]
+    },
+    {
+      "id": "79ADDC683F208A0F",
+      "title": "&e锁钟地牢 · 第10层",
+      "icon": "tnc:dungeon_gate_crypt",
+      "x": -2.5,
+      "y": 7,
+      "description": [
+        "完成锁钟地牢第10层的守关试炼。",
+        "当前是可游玩的基础守关者，专属Boss模型和机制后续设计。",
+        "守关完成会结算遗币，解锁下一个五层段。回酒馆委托栏潜行右键交勘察记录领取铜币。",
+        "宝匣里的主题材料和收藏可以带回家；本段祝福只持续到当前五层段结束。"
+      ],
+      "dependencies": [
+        "65D969EB120E0BAA"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "250CCBD435038186",
+          "type": "advancement",
+          "advancement": "tnc:dungeon/crypt_10"
+        }
+      ]
+    },
+    {
+      "id": "42FBE0425E162760",
+      "title": "&e锁钟地牢 · 第15层",
+      "icon": "tnc:dungeon_gate_crypt",
+      "x": -2.5,
+      "y": 10,
+      "description": [
+        "完成锁钟地牢第15层的守关试炼。",
+        "当前是可游玩的基础守关者，专属Boss模型和机制后续设计。",
+        "守关完成会结算遗币，解锁下一个五层段。回酒馆委托栏潜行右键交勘察记录领取铜币。",
+        "宝匣里的主题材料和收藏可以带回家；本段祝福只持续到当前五层段结束。"
+      ],
+      "dependencies": [
+        "79ADDC683F208A0F"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "3193D9DA105C66DF",
+          "type": "advancement",
+          "advancement": "tnc:dungeon/crypt_15"
+        }
+      ]
+    },
+    {
+      "id": "4F21BC2DABB4E84B",
+      "title": "&e锁钟地牢 · 第20层",
+      "icon": "tnc:dungeon_gate_crypt",
+      "x": -2.5,
+      "y": 13,
+      "description": [
+        "完成锁钟地牢第20层的守关试炼。",
+        "当前是可游玩的基础守关者，专属Boss模型和机制后续设计。",
+        "守关完成会结算遗币，解锁下一个五层段。回酒馆委托栏潜行右键交勘察记录领取铜币。",
+        "宝匣里的主题材料和收藏可以带回家；本段祝福只持续到当前五层段结束。"
+      ],
+      "dependencies": [
+        "42FBE0425E162760"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "66F3E2BAECF4E529",
+          "type": "advancement",
+          "advancement": "tnc:dungeon/crypt_20"
+        }
+      ]
+    },
+    {
+      "id": "507E33BDE6856AE8",
+      "title": "&e锁钟地牢 · 第25层",
+      "icon": "tnc:dungeon_gate_crypt",
+      "x": -2.5,
+      "y": 16,
+      "description": [
+        "完成锁钟地牢第25层的守关试炼。",
+        "当前是可游玩的基础守关者，专属Boss模型和机制后续设计。",
+        "守关完成会结算遗币，解锁下一个五层段。回酒馆委托栏潜行右键交勘察记录领取铜币。",
+        "宝匣里的主题材料和收藏可以带回家；本段祝福只持续到当前五层段结束。"
+      ],
+      "dependencies": [
+        "4F21BC2DABB4E84B"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "6FEF3A2A3BB9ECBF",
+          "type": "advancement",
+          "advancement": "tnc:dungeon/crypt_25"
+        }
+      ]
+    },
+    {
+      "id": "050CD81538AFD34E",
+      "title": "&e锁钟地牢 · 第30层",
+      "icon": "tnc:dungeon_gate_crypt",
+      "x": -2.5,
+      "y": 19,
+      "description": [
+        "完成锁钟地牢第30层的守关试炼。",
+        "当前是可游玩的基础守关者，专属Boss模型和机制后续设计。",
+        "守关完成会结算遗币，解锁下一个五层段。回酒馆委托栏潜行右键交勘察记录领取铜币。",
+        "宝匣里的主题材料和收藏可以带回家；本段祝福只持续到当前五层段结束。"
+      ],
+      "dependencies": [
+        "507E33BDE6856AE8"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "4EDE3C5DE9384973",
+          "type": "advancement",
+          "advancement": "tnc:dungeon/crypt_30"
+        }
+      ]
+    },
+    {
+      "id": "703D0E452C2BF52F",
+      "title": "&e沉潮回廊 · 第5层",
+      "icon": "tnc:dungeon_gate_tide",
+      "x": 2.5,
+      "y": 4,
+      "description": [
+        "完成沉潮回廊第5层的守关试炼。",
+        "当前是可游玩的基础守关者，专属Boss模型和机制后续设计。",
+        "守关完成会结算遗币，解锁下一个五层段。回酒馆委托栏潜行右键交勘察记录领取铜币。",
+        "宝匣里的主题材料和收藏可以带回家；本段祝福只持续到当前五层段结束。"
+      ],
+      "dependencies": [
+        "52E6B5B8610A351A"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "43A373C6A8A22B00",
+          "type": "advancement",
+          "advancement": "tnc:dungeon/tide_5"
+        }
+      ]
+    },
+    {
+      "id": "377DB832062B56BB",
+      "title": "&e沉潮回廊 · 第10层",
+      "icon": "tnc:dungeon_gate_tide",
+      "x": 2.5,
+      "y": 7,
+      "description": [
+        "完成沉潮回廊第10层的守关试炼。",
+        "当前是可游玩的基础守关者，专属Boss模型和机制后续设计。",
+        "守关完成会结算遗币，解锁下一个五层段。回酒馆委托栏潜行右键交勘察记录领取铜币。",
+        "宝匣里的主题材料和收藏可以带回家；本段祝福只持续到当前五层段结束。"
+      ],
+      "dependencies": [
+        "703D0E452C2BF52F"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "3E79823260E80E35",
+          "type": "advancement",
+          "advancement": "tnc:dungeon/tide_10"
+        }
+      ]
+    },
+    {
+      "id": "03FF601FCB8C0E99",
+      "title": "&e沉潮回廊 · 第15层",
+      "icon": "tnc:dungeon_gate_tide",
+      "x": 2.5,
+      "y": 10,
+      "description": [
+        "完成沉潮回廊第15层的守关试炼。",
+        "当前是可游玩的基础守关者，专属Boss模型和机制后续设计。",
+        "守关完成会结算遗币，解锁下一个五层段。回酒馆委托栏潜行右键交勘察记录领取铜币。",
+        "宝匣里的主题材料和收藏可以带回家；本段祝福只持续到当前五层段结束。"
+      ],
+      "dependencies": [
+        "377DB832062B56BB"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "14CD60FDFC440FCA",
+          "type": "advancement",
+          "advancement": "tnc:dungeon/tide_15"
+        }
+      ]
+    },
+    {
+      "id": "646092C70C89940C",
+      "title": "&e沉潮回廊 · 第20层",
+      "icon": "tnc:dungeon_gate_tide",
+      "x": 2.5,
+      "y": 13,
+      "description": [
+        "完成沉潮回廊第20层的守关试炼。",
+        "当前是可游玩的基础守关者，专属Boss模型和机制后续设计。",
+        "守关完成会结算遗币，解锁下一个五层段。回酒馆委托栏潜行右键交勘察记录领取铜币。",
+        "宝匣里的主题材料和收藏可以带回家；本段祝福只持续到当前五层段结束。"
+      ],
+      "dependencies": [
+        "03FF601FCB8C0E99"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "116628731E7A1F92",
+          "type": "advancement",
+          "advancement": "tnc:dungeon/tide_20"
+        }
+      ]
+    },
+    {
+      "id": "5E02A3329AC5CE12",
+      "title": "&e沉潮回廊 · 第25层",
+      "icon": "tnc:dungeon_gate_tide",
+      "x": 2.5,
+      "y": 16,
+      "description": [
+        "完成沉潮回廊第25层的守关试炼。",
+        "当前是可游玩的基础守关者，专属Boss模型和机制后续设计。",
+        "守关完成会结算遗币，解锁下一个五层段。回酒馆委托栏潜行右键交勘察记录领取铜币。",
+        "宝匣里的主题材料和收藏可以带回家；本段祝福只持续到当前五层段结束。"
+      ],
+      "dependencies": [
+        "646092C70C89940C"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "77AB8E937FE71CEA",
+          "type": "advancement",
+          "advancement": "tnc:dungeon/tide_25"
+        }
+      ]
+    },
+    {
+      "id": "75B5A81D4F10A7A1",
+      "title": "&e沉潮回廊 · 第30层",
+      "icon": "tnc:dungeon_gate_tide",
+      "x": 2.5,
+      "y": 19,
+      "description": [
+        "完成沉潮回廊第30层的守关试炼。",
+        "当前是可游玩的基础守关者，专属Boss模型和机制后续设计。",
+        "守关完成会结算遗币，解锁下一个五层段。回酒馆委托栏潜行右键交勘察记录领取铜币。",
+        "宝匣里的主题材料和收藏可以带回家；本段祝福只持续到当前五层段结束。"
+      ],
+      "dependencies": [
+        "5E02A3329AC5CE12"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "10BCF58F89D06AA7",
+          "type": "advancement",
+          "advancement": "tnc:dungeon/tide_30"
+        }
+      ]
+    },
+    {
+      "id": "19456029869DA8E6",
+      "title": "&e星眠幻庭 · 第5层",
+      "icon": "tnc:dungeon_gate_astral",
+      "x": 7.5,
+      "y": 4,
+      "description": [
+        "完成星眠幻庭第5层的守关试炼。",
+        "当前是可游玩的基础守关者，专属Boss模型和机制后续设计。",
+        "守关完成会结算遗币，解锁下一个五层段。回酒馆委托栏潜行右键交勘察记录领取铜币。",
+        "宝匣里的主题材料和收藏可以带回家；本段祝福只持续到当前五层段结束。"
+      ],
+      "dependencies": [
+        "52E6B5B8610A351A"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "2983D30EEF066D9F",
+          "type": "advancement",
+          "advancement": "tnc:dungeon/astral_5"
+        }
+      ]
+    },
+    {
+      "id": "2C5DD09F189BA96B",
+      "title": "&e星眠幻庭 · 第10层",
+      "icon": "tnc:dungeon_gate_astral",
+      "x": 7.5,
+      "y": 7,
+      "description": [
+        "完成星眠幻庭第10层的守关试炼。",
+        "当前是可游玩的基础守关者，专属Boss模型和机制后续设计。",
+        "守关完成会结算遗币，解锁下一个五层段。回酒馆委托栏潜行右键交勘察记录领取铜币。",
+        "宝匣里的主题材料和收藏可以带回家；本段祝福只持续到当前五层段结束。"
+      ],
+      "dependencies": [
+        "19456029869DA8E6"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "01CE92A48F9FF34F",
+          "type": "advancement",
+          "advancement": "tnc:dungeon/astral_10"
+        }
+      ]
+    },
+    {
+      "id": "67AE348CD71C3AA5",
+      "title": "&e星眠幻庭 · 第15层",
+      "icon": "tnc:dungeon_gate_astral",
+      "x": 7.5,
+      "y": 10,
+      "description": [
+        "完成星眠幻庭第15层的守关试炼。",
+        "当前是可游玩的基础守关者，专属Boss模型和机制后续设计。",
+        "守关完成会结算遗币，解锁下一个五层段。回酒馆委托栏潜行右键交勘察记录领取铜币。",
+        "宝匣里的主题材料和收藏可以带回家；本段祝福只持续到当前五层段结束。"
+      ],
+      "dependencies": [
+        "2C5DD09F189BA96B"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "4B741B436971EBC7",
+          "type": "advancement",
+          "advancement": "tnc:dungeon/astral_15"
+        }
+      ]
+    },
+    {
+      "id": "27882EC31CAFFB1A",
+      "title": "&e星眠幻庭 · 第20层",
+      "icon": "tnc:dungeon_gate_astral",
+      "x": 7.5,
+      "y": 13,
+      "description": [
+        "完成星眠幻庭第20层的守关试炼。",
+        "当前是可游玩的基础守关者，专属Boss模型和机制后续设计。",
+        "守关完成会结算遗币，解锁下一个五层段。回酒馆委托栏潜行右键交勘察记录领取铜币。",
+        "宝匣里的主题材料和收藏可以带回家；本段祝福只持续到当前五层段结束。"
+      ],
+      "dependencies": [
+        "67AE348CD71C3AA5"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "7B39400379CBF0E6",
+          "type": "advancement",
+          "advancement": "tnc:dungeon/astral_20"
+        }
+      ]
+    },
+    {
+      "id": "1197AE1233895957",
+      "title": "&e星眠幻庭 · 第25层",
+      "icon": "tnc:dungeon_gate_astral",
+      "x": 7.5,
+      "y": 16,
+      "description": [
+        "完成星眠幻庭第25层的守关试炼。",
+        "当前是可游玩的基础守关者，专属Boss模型和机制后续设计。",
+        "守关完成会结算遗币，解锁下一个五层段。回酒馆委托栏潜行右键交勘察记录领取铜币。",
+        "宝匣里的主题材料和收藏可以带回家；本段祝福只持续到当前五层段结束。"
+      ],
+      "dependencies": [
+        "27882EC31CAFFB1A"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "5E316487CD4E4468",
+          "type": "advancement",
+          "advancement": "tnc:dungeon/astral_25"
+        }
+      ]
+    },
+    {
+      "id": "7EFD91758242C6CB",
+      "title": "&e星眠幻庭 · 第30层",
+      "icon": "tnc:dungeon_gate_astral",
+      "x": 7.5,
+      "y": 19,
+      "description": [
+        "完成星眠幻庭第30层的守关试炼。",
+        "当前是可游玩的基础守关者，专属Boss模型和机制后续设计。",
+        "守关完成会结算遗币，解锁下一个五层段。回酒馆委托栏潜行右键交勘察记录领取铜币。",
+        "宝匣里的主题材料和收藏可以带回家；本段祝福只持续到当前五层段结束。"
+      ],
+      "dependencies": [
+        "1197AE1233895957"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "67E50C0787535B5B",
+          "type": "advancement",
+          "advancement": "tnc:dungeon/astral_30"
+        }
+      ]
+    }
+  ]
+}

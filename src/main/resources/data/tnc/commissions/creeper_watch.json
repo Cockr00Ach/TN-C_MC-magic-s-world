@@ -1,0 +1,11 @@
+{
+  "title": "别让它靠近仓库",
+  "story": "在野外讨伐3只苦力怕。别在小镇试爆。",
+  "kind": "kill",
+  "target": "minecraft:creeper",
+  "count": 3,
+  "level": 1,
+  "coins": 105,
+  "xp": 100,
+  "cooldown_seconds": 1800
+}

@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "tnc:dungeon_gate_crypt",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 96,
+    "separation": 64,
+    "salt": 54720310
+  }
+}

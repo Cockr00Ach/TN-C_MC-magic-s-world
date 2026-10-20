@@ -58,6 +58,7 @@ public final class AdventureEvents {
             for(int n:new int[]{1,8})if(profile.bossKills>=n)AdventureService.milestone(p,"bosses_"+n);
             for(var progress:profile.contracts.values()){var c=ContractCatalog.find(progress.id);if(c.enemy().equals(mob))progress.kills=Math.min(c.kills(),progress.kills+1);}
             BossCommissions.recordParticipant(p,mob);
+            com.tnc.tnc.journey.CommissionService.progress(p,"kill",mob);
             AdventureSavedData.get(p.server).setDirty();AdventureService.refreshGrowth(p);
         }
     }

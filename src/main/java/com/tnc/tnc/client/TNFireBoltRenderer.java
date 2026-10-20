@@ -107,9 +107,10 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
         // 射线链 t1/t2：作者 2026-10-05 第 2 条「射线是一段长度有限的线条，
         // 可以理解为是长条状的火球」✗ ⇒ 画成**一根直的火舌**（不是彗星 ✓）
         if ("sun_ray".equals(entity.spellPath()) || "blast_ray".equals(entity.spellPath())) {
-            // ⚠️ 作者 2026-10-05：「把 t2 的射线同步下，但颜色深一点」✓
-            //    ⇒ t1/t2 **同一个造型** ✓，只有配色深浅不同 ✓（blast_ray 走深色 ✓）
-            rayLance(out, pose, dir, right, up, age, fade,
+            // 作者 2026-10-18：「射线链 t1/t2 的建模同样采用真实建模」✓
+            //   ⇒ 从"一圈圈刷渐变的旋转体"换成**贴图火柱**（{@link TNFireballModel#lance}）✓
+            //   ⚠️ 作者 2026-10-05：「把 t2 的射线同步下，但颜色深一点」⇒ 同一造型、配色深一档 ✓
+            TNFireballModel.lance(buffers, pose, dir, right, up, age, fade,
                     "blast_ray".equals(entity.spellPath()));
             return;
         }
@@ -129,6 +130,14 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
             return;
         }
 
+        // 作者 2026-10-18：「火球链 t1/t2 的建模同样采用真实建模」✓
+        //   ⇒ 贴图火球 + 向后拖的火舌（{@link TNFireballModel#fireball}）✓
+        //     t3 以上（熔岩火球起）仍走下面原来那套，没动 ✓
+        if ("fireball".equals(entity.spellPath()) || "great_fireball".equals(entity.spellPath())) {
+            TNFireballModel.fireball(buffers, pose, dir, right, up, radius, age, fade);
+            return;
+        }
+
         double length = radius * TAIL_LENGTH_FACTOR;
 
         // 画法顺序 = 从"最外层/最暗"到"最亮"，让白热核最后压上去。
@@ -138,94 +147,6 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
         }
         flameBody(out, pose, dir, right, up, radius, length, age, fade);
         coreBlob(out, pose, dir, right, up, radius, age, fade);
-    }
-
-
-    // ------------------------------------------------------------------
-    //  射线链 t1/t2：一根**直的火舌**（作者要的"长条状的火球"）
-    // ------------------------------------------------------------------
-
-    /**
-     * 射线链 t1/t2 的「条状火球」✓
-     *
-     * <p>作者 2026-10-05 第 2 条：「t1 和 t2 中的射线是一段长度有限的线条，
-     * 你可以理解为是长条状的火球」✓
-     * ⇒ 不像彗星那样"一个球 + 一条飘忽的尾巴"✗，而是**一根笔直的火舌** ✓：
-     * 尖端白热、沿轴一节节变暗变细，全长约 {@link #LANCE_LENGTH} 倍半径 ✓
-     * （颜色走像素色板 ⇒ 一节一个色块、硬边 ✓，见 {@link PixelFlame} ✓）
-     */
-    private static void rayLance(VertexConsumer out, Matrix4f pose, Vec3 dir, Vec3 right, Vec3 up,
-                                 double age, float fade, boolean deep) {
-        if (fade <= 0.02F) {
-            return;
-        }
-        // ⚠️ 作者 2026-10-05：①「长度改为 1.5 格」②「美化下建模」
-        //    ③「把 t2 的射线同步下，但颜色深一点」✓
-        //
-        //    造型取自参照图（外圈暗红外壳 + 内芯白热 ✓），但**不是一根直棍** ✗：
-        //      · 前端收尖、尾端收细 ⇒ 一截**水滴形的火舌** ✓
-        //      · 侧面随 age 微微起伏 ⇒ 像素风也能看出"在烧"✓
-        //      · 三束绕轴的小火舌 ⇒ 轮廓不呆板 ✓
-        //      · 一根细白热内芯贯穿 + 前端伸出 ✓
-        final double half = 1.5D;          // 总长 3.0 格 ✓（作者 2026-10-05：射线长度 ×2 ✗）
-        final double shell = 0.125D;       // 粗 1/4 格 ✓
-        final int sides = 14;
-        final int segments = 7;
-        // 深色版（t2）：整条往色板后面挪两档 ⇒ 更暗更红 ✓
-        final double shade = deep ? 0.30D : 0.00D;
-        float[] color = new float[4];
-
-        Vec3 prevCenter = null;
-        double prevR = 0.0D;
-        for (int s = 0; s <= segments; s++) {
-            double t = s / (double) segments;                 // 0 = 前端 ✓ 1 = 尾端 ✓
-            double along = half - t * 2.0D * half;
-            // 前 18% 收尖 / 后 28% 收细 ⇒ 水滴形 ✓
-            double taper;
-            if (t < 0.18D) {
-                taper = 0.52D + 0.48D * (t / 0.18D);
-            } else if (t > 0.72D) {
-                taper = 1.0D - 0.58D * ((t - 0.72D) / 0.28D);
-            } else {
-                taper = 1.0D;
-            }
-            // 侧面起伏（像素风：色块之间硬边 ✓，不是光滑渐变 ✓）
-            double wobble = 1.0D + 0.10D * Math.sin(age * 0.85D + t * 8.5D);
-            double r = shell * taper * wobble;
-            Vec3 center = dir.scale(along);
-            if (prevCenter != null && prevR > 1.0E-4D && r > 1.0E-4D) {
-                PixelFlame.flat(shade + 0.40D + t * 0.46D, color);
-                ring(out, pose, right, up, prevCenter, prevR, center, r, color, sides);
-            }
-            prevCenter = center;
-            prevR = r;
-        }
-
-        // 白热内芯：一根细亮柱，前端略伸出 ✓（参照图里最亮的那条 ✓）
-        PixelFlame.flat(0.0D, color);
-        ring(out, pose, right, up, dir.scale(half * 0.96D), shell * 0.44D,
-                dir.scale(-half * 0.80D), shell * 0.40D, color, 10);
-
-        // 三束绕轴小火舌（像素风：短、硬、一段一个色块 ✓）
-        for (int w = 0; w < 3; w++) {
-            double a = age * 0.30D + w * (Math.PI * 2.0D / 3.0D);
-            Vec3 prev = null;
-            double prevW = 0.0D;
-            for (int s = 0; s <= 3; s++) {
-                double t = 0.20D + s * 0.22D;
-                double along = half - t * 2.0D * half;
-                double off = shell * (1.18D + 0.30D * Math.sin(age * 0.7D + w * 1.7D));
-                Vec3 c = dir.scale(along)
-                        .add(WaterGeometry.radial(right, up, a + t * 1.6D, off));
-                double r = shell * (0.20D - 0.05D * s);
-                if (prev != null && prevW > 1.0E-4D && r > 1.0E-4D) {
-                    PixelFlame.flat(shade + 0.46D + s * 0.14D, color);
-                    ring(out, pose, right, up, prev, prevW, c, r, color, 6);
-                }
-                prev = c;
-                prevW = r;
-            }
-        }
     }
     // ------------------------------------------------------------------
     //  焰体：从核心往后拖出去的渐变锥（参考图的主体）

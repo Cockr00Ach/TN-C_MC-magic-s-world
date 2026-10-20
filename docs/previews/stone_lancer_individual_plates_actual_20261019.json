@@ -1,0 +1,21 @@
+{
+  "poses": [
+    "idle",
+    "emerge_core",
+    "gravity_core"
+  ],
+  "scope": "Real isolated dev-client model rendering; no full-pack FPS claim",
+  "failures": [],
+  "renderer": "com.tnc.tnc.boss.earth.client.StoneLancerRenderer",
+  "attackModels": 6,
+  "localPlayerPrediction": true,
+  "pieces": 191,
+  "independent_uv_faces": 1146,
+  "model_tests": {
+    "tests": 6,
+    "failures": 0,
+    "errors": 0
+  },
+  "head_change": "Cranium and mask height x1.62; width x0.94; depth x1.1; three new lower-jaw/chin plates",
+  "texture": "2048x2048 RGB, individual per-piece source plates; no shared face UVs"
+}

@@ -1,0 +1,11 @@
+{
+  "title": "骨哨声",
+  "story": "巡路人说，夜里有弓弦在树后响。讨伐5只骷髅。",
+  "kind": "kill",
+  "target": "minecraft:skeleton",
+  "count": 5,
+  "level": 1,
+  "coins": 90,
+  "xp": 100,
+  "cooldown_seconds": 1800
+}

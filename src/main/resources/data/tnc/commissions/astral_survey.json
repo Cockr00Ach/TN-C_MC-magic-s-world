@@ -1,0 +1,11 @@
+{
+  "title": "星光的岔路",
+  "story": "在星眠幻庭通过3层，观测门后的回声。",
+  "kind": "floor",
+  "target": "astral",
+  "count": 3,
+  "level": 1,
+  "coins": 120,
+  "xp": 130,
+  "cooldown_seconds": 1800
+}

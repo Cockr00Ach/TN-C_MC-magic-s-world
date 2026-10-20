@@ -1,0 +1,35 @@
+{
+  "id": "green",
+  "mobs": [
+    {
+      "mob_id": "minecraft:slime",
+      "weight": 280
+    },
+    {
+      "mob_id": "tnc:tentacle_horror",
+      "weight": 220
+    },
+    {
+      "mob_id": "minecraft:creeper",
+      "weight": 220
+    },
+    {
+      "mob_id": "tnc:ash_flinger",
+      "weight": 180
+    },
+    {
+      "mob_id": "tnc:grave_grub",
+      "weight": 140
+    },
+    {
+      "mob_id": "minecraft:phantom",
+      "weight": 90
+    }
+  ],
+  "tags": {
+    "tags": [
+      "has_flying_mobs"
+    ]
+  },
+  "weight": 1000
+}

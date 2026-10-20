@@ -1,0 +1,21 @@
+{
+  "renderer": "com.tnc.tnc.boss.wind.client.WindGeneralRenderer",
+  "failures": [],
+  "framebuffer": [
+    1800,
+    1000
+  ],
+  "scope": "Real isolated client model preview: front, three-quarter and side; model-first, no combat encounter",
+  "pieces": 255,
+  "head_cuboids": 45,
+  "bones": 40,
+  "texture_colors": 22,
+  "construction": "Original cuboids with layered/angled silhouette; geometric eyes, brows, nose, jaw and hair; flat block palette",
+  "model_tests": {
+    "tests": 2,
+    "failures": 0,
+    "errors": 0
+  },
+  "preview_item": "tnc:wind_general_spawn_egg",
+  "model_scope": "Character appearance, idle/walk and cloth/plume animations; no boss combat behavior"
+}

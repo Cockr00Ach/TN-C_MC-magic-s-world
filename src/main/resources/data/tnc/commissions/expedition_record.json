@@ -1,0 +1,11 @@
+{
+  "title": "远行的第一页",
+  "story": "不拘主题，累计通过5层地下城。",
+  "kind": "floor",
+  "target": "*",
+  "count": 5,
+  "level": 1,
+  "coins": 165,
+  "xp": 180,
+  "cooldown_seconds": 1800
+}

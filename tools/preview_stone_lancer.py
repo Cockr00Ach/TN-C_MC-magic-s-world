@@ -19,6 +19,7 @@ def rotation(v):
 
 def model(path):
     g=json.loads(path.read_text(encoding='utf-8-sig'))['minecraft:geometry'][0]
+    texture_width=g['description']['texture_width'];texture_height=g['description']['texture_height']
     bones={b['name']:b for b in g['bones']};transforms={}
     def matrix(name):
         if name in transforms:return transforms[name]
@@ -51,7 +52,7 @@ def model(path):
                 uv=cube.get('uv',{})
                 if isinstance(uv,dict):
                     q=uv[face];u,v=q['uv'];uw,vh=q['uv_size'];u0,u1=sorted([u,u+uw]);v0,v1=sorted([v,v+vh])
-                    x0,x1=[int(a/256*texture.shape[1]) for a in [u0,u1]];y0,y1=[int(a/256*texture.shape[0]) for a in [v0,v1]]
+                    x0,x1=[int(a/texture_width*texture.shape[1]) for a in [u0,u1]];y0,y1=[int(a/texture_height*texture.shape[0]) for a in [v0,v1]]
                     patch=texture[max(0,y0):max(y0+1,y1),max(0,x0):max(x0+1,x1)]
                     color=patch.mean(axis=(0,1)) if patch.size else np.array([.13,.12,.17])
                 else:color=np.array([.13,.12,.17])

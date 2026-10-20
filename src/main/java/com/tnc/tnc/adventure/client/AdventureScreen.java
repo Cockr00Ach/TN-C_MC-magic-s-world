@@ -56,7 +56,7 @@ public final class AdventureScreen extends Screen {
         } else if(tab==1) {
             var active=active();
             local=data.getBoolean("AtBoard");
-            button("打开Bountiful原生栏",left+18,top+76,165,()->send(AdventurePackets.Action.OPEN_BOARD,""),local&&p.registered());
+            button("打开酒馆委托栏",left+18,top+76,165,()->send(AdventurePackets.Action.OPEN_BOARD,""),local&&p.registered());
             visible=ContractCatalog.ALL.stream().filter(c->active.contains(c.id())||(c.teaching()&&!p.hasMilestone("teaching_paid")))
                     .sorted(Comparator.comparingInt(c->active.contains(c.id())?0:1)).toList();
             int rows=rows();page=Math.max(0,Math.min(page,(visible.size()-1)/rows));

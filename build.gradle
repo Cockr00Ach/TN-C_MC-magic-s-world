@@ -104,6 +104,23 @@ minecraft {
                 property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
                 args '--quickPlaySingleplayer', 'casino-gallery', '--width', '1800', '--height', '1000'
             }
+            if (project.hasProperty('earthArenaAudit')) {
+                workingDirectory project.file(project.findProperty('earthArenaAuditDir') ?: 'work/earth-arena-audit')
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+                property 'tnc.earthArenaAudit', 'true'
+                property 'tnc.earthArenaAuditReport', file('work/earth-arena-audit.json').absolutePath
+                args '--quickPlaySingleplayer', 'earth-gallery', '--width', '1600', '--height', '900'
+                jvmArgs '-Xmx6G'
+            }
+            if (project.hasProperty('elementBlocksAudit')) {
+                workingDirectory project.file('work/element-blocks-audit')
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+                property 'tnc.elementBlocksAudit', 'true'
+                property 'tnc.elementBlocksAuditReport', file('work/element-blocks-audit.json').absolutePath
+                args '--width', '1800', '--height', '1100'
+            }
             if (project.hasProperty('windTwoChainsAudit')) {
                 workingDirectory project.file('work/wind-two-chains-client-audit')
                 property 'tnc.windTwoChainsAudit', 'true'
@@ -115,6 +132,14 @@ minecraft {
                 property 'tnc.windArsenalAudit', 'true'
                 property 'tnc.windArsenalAuditReport', file('work/wind-arsenal-client-audit.json').absolutePath
                 args '--width', '1800', '--height', '900'
+            }
+            if (project.hasProperty('windGeneralAudit')) {
+                workingDirectory project.file('work/wind-general-audit')
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+                property 'tnc.windGeneralAudit', 'true'
+                property 'tnc.windGeneralAuditReport', file('work/wind-general-audit.json').absolutePath
+                args '--quickPlaySingleplayer', 'wind-gallery', '--width', '1800', '--height', '1000'
             }
             if (project.hasProperty('stoneMaterialAudit')) {
                 workingDirectory project.file('work/stone-material-audit')
@@ -147,7 +172,7 @@ minecraft {
                 property 'tnc.lifeRoutesVisualAudit', 'true'
                 args '--quickPlaySingleplayer', 'ecology-gui-feedback', '--width', '1280', '--height', '720'
             }
-            if (project.hasProperty('magicStoneUiAudit')) {
+            if (project.hasProperty('magicStoneUiAudit') || project.hasProperty('journeyTests')) {
                 workingDirectory project.file('run-client-ecology-audit')
                 property 'mixin.env.remapRefMap', 'true'
                 property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
@@ -216,9 +241,8 @@ minecraft {
         // The gametest system is also enabled by default for other run configs under the /test command.
         gameTestServer {
             property 'forge.enabledGameTestNamespaces', project.hasProperty('lifeRoutesTests') ? 'tncroute' : mod_id
-            if (project.hasProperty('earthArenaTests')) {
-                property 'forge.enabledGameTestNamespaces', 'tnceartharena'
-                workingDirectory project.file('work/earth-arena-recovery-tests-20261019')
+            if (project.hasProperty('dungeonMobTests')) {
+                property 'forge.enabledGameTestNamespaces', 'tncdungeon'
                 property 'mixin.env.remapRefMap', 'true'
                 property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
             }
@@ -232,6 +256,16 @@ minecraft {
                 property 'mixin.env.remapRefMap', 'true'
                 property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
             }
+            if (project.hasProperty('elementBlockTests')) {
+                property 'forge.enabledGameTestNamespaces', 'tncelementblocks'
+                workingDirectory project.file('work/element-blocks-tests')
+            }
+            if (project.hasProperty('earthArenaTests')) {
+                property 'forge.enabledGameTestNamespaces', 'tnceartharena'
+                workingDirectory project.file('work/earth-arena-tests')
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+            }
             if (project.hasProperty('ftbQuestLoadTests')) {
                 workingDirectory project.file(project.findProperty('ftbQuestLoadDir') ?: 'work/ftb-route-load-test')
             }
@@ -239,17 +273,13 @@ minecraft {
                 property 'mixin.env.remapRefMap', 'true'
                 property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
             }
-            if (project.hasProperty('townServicesTests') || project.hasProperty('buildingGameTests') || project.hasProperty('townLifeTests')) {
+            if (project.hasProperty('townServicesTests') || project.hasProperty('buildingGameTests') || project.hasProperty('townLifeTests') || project.hasProperty('journeyTests')) {
                 property 'mixin.env.remapRefMap', 'true'
                 property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
             }
             if (project.hasProperty('heroskandRealmTests')) property 'forge.enabledGameTestNamespaces', 'tncrealm'
-            // 地下城小怪 17 只的 GameTest（2026-10-21）：只跑本批，十几秒出结果。
-            if (project.hasProperty('dungeonMobTests')) {
-                property 'forge.enabledGameTestNamespaces', 'tncdungeon'
-                property 'mixin.env.remapRefMap', 'true'
-                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
-            }
+            if (project.hasProperty('dungeonTests')) property 'forge.enabledGameTestNamespaces', 'tncdungeon'
+            if (project.hasProperty('journeyTests')) {property 'forge.enabledGameTestNamespaces', 'tncjourney';workingDirectory project.file('work/journey-server-tests')}
             if (project.hasProperty('fullLandmarkTests')) property 'tnc.fullLandmarkTests', 'true'
             if (project.hasProperty('fullSkyIslandTests')) {
                 property 'tnc.fullSkyIslandTests', 'true'
@@ -272,6 +302,8 @@ minecraft {
 
 // Include resources generated by data generators.
 sourceSets.main.resources { srcDir 'src/generated/resources' }
+// User-supplied third-party gate assets are kept in a local cache, never public source control.
+sourceSets.main.resources { srcDir 'work/dungeon-gate-resources' }
 
 repositories {
     // Put repositories for dependencies here
@@ -332,6 +364,9 @@ dependencies {
     compileOnly fg.deobf('touhoulittlemaid:touhoulittlemaid:1.5.2')
     compileOnly fg.deobf('geckolib:geckolib:4.8.4')
 
+    if (project.hasProperty('dungeonMobTests')) {
+        runtimeOnly fg.deobf('geckolib:geckolib:4.8.4')
+    }
     testImplementation platform('org.junit:junit-bom:5.10.2')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation fg.deobf('geckolib:geckolib:4.8.4')
@@ -350,7 +385,7 @@ dependencies {
     }
     // Optional headless building smoke tests need the same NPC animation API as the pack.
     // Compile-only keeps normal distribution unchanged; enable with -PbuildingGameTests.
-    if (project.hasProperty('buildingGameTests') || project.hasProperty('magicStoneUiAudit')) {
+    if (project.hasProperty('buildingGameTests') || project.hasProperty('magicStoneUiAudit') || project.hasProperty('journeyTests')) {
         runtimeOnly fg.deobf('geckolib:geckolib:4.8.4')
     }
     // 地下城小怪 17 只：无头 GameTest 要真跑 GeckoLib 实体（模型/控制器在服务端也要解析），
@@ -372,7 +407,7 @@ dependencies {
         runtimeOnly fg.deobf('ftblibrary:ftb-library-forge:2001.2.13')
         runtimeOnly fg.deobf('ftbteams:ftb-teams-forge:2001.3.2')
     }
-    if (project.hasProperty('townLifeTests')) {
+    if (project.hasProperty('townLifeTests') || project.hasProperty('journeyTests')) {
         // Annotation-name fixture only; installed MCA jar remains unmodified.
         runtimeOnly fg.deobf('mca:mca-dev:7.6.26')
         runtimeOnly fg.deobf('architectury:architectury:9.2.14')
