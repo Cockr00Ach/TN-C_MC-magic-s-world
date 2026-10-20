@@ -153,6 +153,10 @@ public class DarkFogCloudEntity extends SpellCloud {
     private static final net.minecraft.network.syncher.EntityDataAccessor<Integer> DATA_OWNER_ID =
             net.minecraft.network.syncher.SynchedEntityData.defineId(
                     DarkFogCloudEntity.class, net.minecraft.network.syncher.EntityDataSerializers.INT);
+    /** Explicit owner sync: guarantees caster-only vision even if SpellCloud delays owner resolution. */
+    private static final net.minecraft.network.syncher.EntityDataAccessor<java.util.Optional<java.util.UUID>> DATA_FOG_OWNER =
+            net.minecraft.network.syncher.SynchedEntityData.defineId(
+                    DarkFogCloudEntity.class, net.minecraft.network.syncher.EntityDataSerializers.OPTIONAL_UUID);
 
     @Override
     protected void defineSynchedData() {
@@ -163,6 +167,7 @@ public class DarkFogCloudEntity extends SpellCloud {
         this.entityData.define(DATA_FOG_TIER, 0);
         this.entityData.define(DATA_FOG_RADIUS, 0);
         this.entityData.define(DATA_OWNER_ID, -1);
+        this.entityData.define(DATA_FOG_OWNER, java.util.Optional.empty());
     }
 
     /** 客户端用：这片雾是第几档（0 = 还不知道）✓。 */
@@ -208,6 +213,11 @@ public class DarkFogCloudEntity extends SpellCloud {
         int ownerId = owner == null ? -1 : owner.getId();
         if (this.entityData.get(DATA_OWNER_ID) != ownerId) {
             this.entityData.set(DATA_OWNER_ID, ownerId);
+        }
+        java.util.Optional<java.util.UUID> ownerUuid = owner == null
+                ? java.util.Optional.empty() : java.util.Optional.of(owner.getUUID());
+        if (!this.entityData.get(DATA_FOG_OWNER).equals(ownerUuid)) {
+            this.entityData.set(DATA_FOG_OWNER, ownerUuid);
         }
     }
 
@@ -265,7 +275,6 @@ public class DarkFogCloudEntity extends SpellCloud {
 
         placeCircle();
         purgeExtraCircles();
-        idleParticles();
         syncAppearance();
 
         if (!isDarkFog() || tickCount < FOLLOW_GRACE_TICKS) {
@@ -304,13 +313,25 @@ public class DarkFogCloudEntity extends SpellCloud {
      */
     /** Allows recasting to replace only this caster's existing fog domain. */
     public boolean isOwnedBy(LivingEntity caster) {
-        LivingEntity owner = resolveOwner();
-        return caster != null && owner != null && caster.getUUID().equals(owner.getUUID());
+        return isOwnedBy((Entity) caster);
     }
 
     private LivingEntity resolveOwner() {
         Entity owner = this.m_19749_();
         return owner instanceof LivingEntity living ? living : null;
+    }
+
+    /** Client-safe ownership check used for caster-only vision and outlines. */
+    public boolean isOwnedBy(Entity candidate) {
+        if (candidate == null) {
+            return false;
+        }
+        java.util.Optional<java.util.UUID> synced = this.entityData.get(DATA_FOG_OWNER);
+        if (synced.isPresent()) {
+            return synced.get().equals(candidate.getUUID());
+        }
+        Entity owner = this.m_19749_();
+        return owner != null && owner.getUUID().equals(candidate.getUUID());
     }
 
     /** 延迟到"本 tick 之后再删"的法阵（见 {@link #purgeExtraCircles} 的说明 ✓）。 */

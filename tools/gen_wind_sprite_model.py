@@ -49,6 +49,10 @@ BODY = ((0, 0), (6, 7, 6))
 CREST = ((0, 20), (2, 3, 2))
 WING = ((16, 0), (7, 4, 2))
 TAIL = ((32, 0), (2, 2, 6))
+HEAD = ((0, 32), (5, 5, 5))
+ARM = ((20, 32), (2, 5, 2))
+LOWER_WING = ((32, 20), (5, 5, 1))
+HALO = ((48, 20), (2, 2, 8))
 
 BODY_COL = (186, 232, 246)
 BODY_TOP = (226, 248, 255)
@@ -57,6 +61,7 @@ EYE = (28, 92, 124)
 WING_COL = (232, 250, 255, 205)
 TAIL_COL = (198, 238, 250, 220)
 CREST_COL = (255, 255, 255)
+GOLD = (224, 188, 92, 235)
 
 
 def build_geo():
@@ -77,13 +82,23 @@ def build_geo():
         {"name": "root", "pivot": [0, 0, 0]},
         # body sits on the origin: a small egg, 6 x 7 x 6
         cube("body", BODY[0], BODY[1], (-3, 2, -3), (0, 6, 0)),
+        cube("head", HEAD[0], HEAD[1], (-2.5, 8.5, -2.8), (0, 10, 0), parent="body"),
         # crest: a little tuft on top (the "wind" flick)
         cube("crest", CREST[0], CREST[1], (-1, 9, -1), (0, 9, 0)),
         # wings: pivot at the shoulder so a Z rotation flaps them
         cube("wing_left", WING[0], WING[1], (3, 4, -1), (3, 6, 0)),
         cube("wing_right", WING[0], WING[1], (-10, 4, -1), (-3, 6, 0)),
+        cube("wing_left_lower", LOWER_WING[0], LOWER_WING[1], (7, 1, 0), (7, 5, 0), parent="wing_left"),
+        cube("wing_right_lower", LOWER_WING[0], LOWER_WING[1], (-12, 1, 0), (-7, 5, 0), parent="wing_right"),
+        cube("arm_left", ARM[0], ARM[1], (3, 2, -3), (3, 7, -1), parent="body"),
+        cube("arm_right", ARM[0], ARM[1], (-5, 2, -3), (-3, 7, -1), parent="body"),
         # tail: a short streamer trailing behind (-Z)
         cube("tail", TAIL[0], TAIL[1], (-1, 3, -9), (0, 4, -3)),
+        cube("tail_left", TAIL[0], TAIL[1], (1, 1, -10), (2, 4, -3), parent="body"),
+        cube("tail_right", TAIL[0], TAIL[1], (-3, 1, -10), (-2, 4, -3), parent="body"),
+        # A slim gilded halo gives the higher-tier sprite a deliberate, crafted silhouette.
+        cube("halo_left", HALO[0], HALO[1], (-6, 8, 2), (-5, 10, 1), parent="body"),
+        cube("halo_right", HALO[0], HALO[1], (4, 8, 2), (5, 10, 1), parent="body"),
     ]
     return {
         "format_version": "1.12.0",
@@ -105,7 +120,7 @@ def build_animation():
     """Sampled keyframes (the project's dark_imp.animation.json does the same)."""
     steps = 18
     length = 1.8
-    body_pos, body_rot, wl, wr, crest, tail = {}, {}, {}, {}, {}, {}
+    body_pos, body_rot, wl, wr, crest, tail, tail_l, tail_r = {}, {}, {}, {}, {}, {}, {}, {}
     for i in range(steps + 1):
         t = length * i / float(steps)
         k = "%.2f" % t
@@ -120,6 +135,8 @@ def build_animation():
         # crest + tail sway a little slower, tail opposite the crest
         crest[k] = [0.0, 0.0, round(9.0 * math.sin(ph * 2.0 + 1.2), 3)]
         tail[k] = [round(7.0 * math.sin(ph * 2.0), 3), 0.0, round(-6.0 * math.sin(ph * 2.0 + 0.9), 3)]
+        tail_l[k] = [round(11.0 * math.sin(ph * 2.0 + .5), 3), 0.0, round(8.0 * math.sin(ph + .4), 3)]
+        tail_r[k] = [round(11.0 * math.sin(ph * 2.0 - .5), 3), 0.0, round(-8.0 * math.sin(ph - .4), 3)]
     return {
         "format_version": "1.8.0",
         "animations": {
@@ -132,6 +149,8 @@ def build_animation():
                     "wing_right": {"rotation": wr},
                     "crest": {"rotation": crest},
                     "tail": {"rotation": tail},
+                    "tail_left": {"rotation": tail_l},
+                    "tail_right": {"rotation": tail_r},
                 },
             },
         },
@@ -170,8 +189,17 @@ def build_texture():
 
     # crest: white tuft
     paint_box(d, CREST[0], CREST[1], CREST_COL)
+    paint_box(d, HEAD[0], HEAD[1], BODY_COL, BODY_TOP, BODY_LOW)
+    # sharper face with a central wind-gem
+    hu,hv=HEAD[0]
+    d.rectangle([hu+5,hv+6,hu+6,hv+7],fill=EYE)
+    d.rectangle([hu+8,hv+6,hu+9,hv+7],fill=EYE)
+    d.rectangle([hu+7,hv+4,hu+7,hv+5],fill=GOLD)
+    paint_box(d, ARM[0], ARM[1], BODY_LOW, BODY_COL, BODY_LOW)
     # wings: near white, translucent
     paint_box(d, WING[0], WING[1], WING_COL, (255, 255, 255, 225), (206, 238, 250, 180))
+    paint_box(d, LOWER_WING[0], LOWER_WING[1], (205, 244, 255, 180), (255, 255, 255, 215), (128, 204, 230, 145))
+    paint_box(d, HALO[0], HALO[1], GOLD, (255, 230, 132, 245), (170, 126, 48, 210))
     # tail: fading streamer (alpha drops towards the tip)
     u, v = TAIL[0]
     paint_box(d, TAIL[0], TAIL[1], TAIL_COL)

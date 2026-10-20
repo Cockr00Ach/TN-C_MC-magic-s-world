@@ -91,8 +91,9 @@ PREVIEW_PATH = os.path.join(ROOT, "docs", "previews", "wind_tornado_preview.png"
 # The loader window is -16..32, so the total height must stay <= 32 units.
 LAYERS = 7              # how many stacked rings
 PANELS = 4              # panels per ring (4 = a square tube)
-BASE_RADIUS = 13.5      # bottom half-width
-TOP_RADIUS = 4.0        # top half-width
+# Inverted storm silhouette requested by the author: tight foot, broad crown.
+BASE_RADIUS = 4.0       # bottom half-width
+TOP_RADIUS = 13.5       # top half-width
 LAYER_STEP = 4.25       # vertical distance between layers
 PANEL_HEIGHT = 5.5      # panel height (> LAYER_STEP so the layers overlap)
 PANEL_WIDTH = 11.0      # how wide each panel is
@@ -127,7 +128,7 @@ TEX_W, TEX_H = 32, 32
 
 
 def layer_radius(i):
-    """Radius of layer i: linear taper from BASE_RADIUS down to TOP_RADIUS."""
+    """Radius of layer i: linear flare from the small base to the broad crown."""
     if LAYERS <= 1:
         return BASE_RADIUS
     t = i / float(LAYERS - 1)

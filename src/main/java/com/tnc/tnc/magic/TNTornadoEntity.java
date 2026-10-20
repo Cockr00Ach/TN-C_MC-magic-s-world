@@ -119,9 +119,9 @@ public class TNTornadoEntity extends Entity {
     // 这样"粒子 / 板子 / 风刃"三者的位置永远对得上 ✗ 不会各算各的 ✗。
 
     /** 漏斗底部的半宽（单位）✓。 */
-    private static final double MODEL_BASE_RADIUS = 13.5D;
+    private static final double MODEL_BASE_RADIUS = 4.0D;
     /** 漏斗顶部的半宽（单位）✓（收口 = 漏斗形 ✓）。 */
-    private static final double MODEL_TOP_RADIUS = 4.0D;
+    private static final double MODEL_TOP_RADIUS = 13.5D;
     /** 漏斗总高（单位）✓。 */
     private static final double MODEL_HEIGHT = 31.0D;
     /** 模型自己的总扭转（度）✓ ＝ (7 层 − 1) × 每层 22.5°。 */

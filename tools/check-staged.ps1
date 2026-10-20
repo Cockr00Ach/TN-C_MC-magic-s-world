@@ -76,6 +76,15 @@ foreach ($f in $staged) {
 # Exact-path exception only; other images and generated artifacts keep the 2 MB guard.
 $sizeExempt = '^(src/main/resources/assets/tnc/sounds/(music/travel/.*|tavern/(wander_ward(_1)?|tavern_third))\.ogg|src/main/resources/assets/tnc/textures/gui/arcane_grimoire\.png)$'
 
+# Authored dragon source models and the runtime mesh are intentional project
+# resources, not third-party packs. Exact paths only, still capped at 20 MiB.
+$authoredDragonAssets = @(
+    'model-source/ink-celestial-dragon/ink_celestial_dragon.bbmodel',
+    'model-source/ink-celestial-dragon/ink_celestial_dragon_flight.bbmodel',
+    'model-source/ink-celestial-dragon/ink_celestial_dragon.glb',
+    'src/main/resources/assets/tnc/meshes/ink_celestial_dragon.mesh'
+)
+
 $totalBytes = 0
 foreach ($f in $staged) {
     $full = Join-Path $repoRoot ($f -replace '/', '\')
@@ -83,6 +92,7 @@ foreach ($f in $staged) {
     $len = (Get-Item -LiteralPath $full).Length
     $totalBytes += $len
     if (($f -replace '\\', '/') -match $sizeExempt) { continue }
+    if (($authoredDragonAssets -contains ($f -replace '\\', '/')) -and $len -le 20MB) { continue }
     if ($len -gt ($MaxMB * 1MB)) {
         $problems.Add(("  [too big]   {0}`n              -> {1:N1} MB (limit {2} MB)" -f $f, ($len / 1MB), $MaxMB))
     }

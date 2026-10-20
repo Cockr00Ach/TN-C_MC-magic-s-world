@@ -1,0 +1,22 @@
+墨鹤 / 水墨维度 V6
+2026-10-18
+
+本次修正：山水是平铺在地面上的画，不是立体山、树或建筑。
+地面保留黑灰白方块的大笔画底层，客户端在地面上叠加高清透明山峦与云雾绘画，地形没有高度变化。不把同一图像再次量化成方块叠在下面，避免加载范围边界形成深浅接缝。
+上一版立体景物停止生成，只对与旧生成图案匹配的方块分批清理；存在不匹配方块的整列保留。
+墨球爆炸后留下半透明山云画影约 6 秒，随后淡出，不重复伤害；施法者死亡后已经完成的画影仍会自然淡出。
+
+素材来源：内置 imagegen 生成的原创山云贴片；参考用户给的传统山水画风格，没有直接裁掉原参考图的水印或题字。
+项目素材：src/main/resources/assets/tnc/textures/environment/ink_shanshui_atlas.png
+为消除生成图的微小色偏，客户端加载材质时统一转成严格 R=G=B 的灰度，保留 alpha。
+四个图块分别为近景山峰、远山、两种流云；布局有镜像与尺度变化。
+
+内置工具生成提示词：
+Use case: stylized-concept. Asset type: one production game texture atlas for a Minecraft ink-painting realm: a flat 2D sheet of four separate Chinese shanshui painting cutouts arranged in an exact 2 by 2 equal quadrant grid. Each quadrant has wide transparent padding on every side and nothing crosses the quadrant borders. Top left: magnificent tall overlapping craggy ink mountain cluster with hand brushed rock striations and dry brush dots. Top right: wide distant mountain ridge fading through mist, multiple subtle overlapping peaks. Bottom left: flowing elongated Chinese painted cloud bank, graceful curling wisps and layered soft white mist with gray ink edges. Bottom right: a second flowing mist cloud bank with sweeping gray-black wisps. Genuine transparent background, no paper rectangle, no ground plane or cast shadow, no checkerboard baked in. Strictly achromatic black white and neutral grays, absolutely no beige green blue or other color. Refined traditional Chinese ink wash painting, high detail feathered brushwork and diluted ink gradients, ethereal. These will be placed flat on a white floor as a gigantic painting and also displayed as semi-transparent magical mountain and cloud afterimages after a boss explosion. Pure 2D painted sprites, not voxel objects, not 3D renders. No text, no calligraphy characters, no stamps, no border, no watermark, no people, no buildings. Keep every cutout self contained with soft edges fading into transparent space. Square atlas, equal quadrants, high resolution.
+
+验证：地面和残影完成原生客户端检查；服务器 6 项测试通过；最终 292 项单元测试全部通过。
+客户端验证结果和截图位于 work/ink-crane-client-audit 和 docs/previews。
+
+安装：仅合入 42 个水墨相关条目，其他 16626 个条目与安装前逐字节相同。
+安装 SHA256：0F4289D06436AAE5E60EABEA2417FD3772E97E3735BD42A7DC432ACECA5FCAA7
+旧版备份：D:/ModTest/work/install-backups/ink-painting-v6-20261018-1642/tnc-1.0.0.jar

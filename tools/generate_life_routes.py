@@ -6,7 +6,7 @@ def write(path,value):
     p=S/path;p.parent.mkdir(parents=True,exist_ok=True);p.write_text(json.dumps(value,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 # Exact IDs from the approved inventory. Saplings grow all year; only fruit leaves are seasonal.
 seasons={}
-for line in (R/'docs/传统植物盘点与四季安排-20261006.md').read_text(encoding='utf-8').splitlines():
+for line in (R/'docs/life/传统植物盘点与四季安排-20261006.md').read_text(encoding='utf-8').splitlines():
     if not line.startswith('|') or '`' not in line:continue
     columns=line.split('|');season_column=columns[3] if len(columns)>4 else ''
     mask=15 if '全年' in season_column else sum(1<<i for i,n in enumerate('春夏秋冬') if n in season_column)

@@ -48,7 +48,7 @@ def resolve(code):
  candidates += [f'{ns}:{stem}_seeds',f'{ns}:{stem}_seed',f'{ns}:{stem}',f'{ns}:{stem}_sapling']
  return next((c for c in candidates if c and (c in models or c.startswith('minecraft:'))),None)
 traditional=[]; seen=set(); unresolved=[]
-for line in (R/'docs/传统植物盘点与四季安排-20261006.md').read_text(encoding='utf-8').splitlines():
+for line in (R/'docs/life/传统植物盘点与四季安排-20261006.md').read_text(encoding='utf-8').splitlines():
  if not line.startswith('|') or '`' not in line:continue
  cells=line.split('|');codes=[];ns=''
  for code in re.findall(r'`([^`]+)`',cells[2]):
@@ -114,7 +114,7 @@ for file in ['botanical/BotanicalSpecies.java','routes/NewPlantKind.java']:
   quoted=re.findall(r'"([^"]+)"',line)
   magic.append(dict(id=a,name=b,seed=a+'_seed',product=c,productName=d,help=quoted[-1],use='采收、厨房加工或对应工坊器件；按 JEI 查看实际配方。'))
 table={}
-for line in (R/'docs/魔植与异兽逐品种任务规格-20261006.md').read_text(encoding='utf-8').splitlines():
+for line in (R/'docs/life/魔植与异兽逐品种任务规格-20261006.md').read_text(encoding='utf-8').splitlines():
  if line.startswith('|') and '`' in line:
   cols=line.split('|');m=re.search(r'`([a-z_]+)`',cols[1])
   if m:table[m.group(1)]=[re.sub('`','',c.strip()) for c in cols[2:-1]]

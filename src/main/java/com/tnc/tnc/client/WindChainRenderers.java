@@ -30,6 +30,7 @@ public final class WindChainRenderers {
             for(int slot=0;slot<e.count();slot++){
                 double end=e.endTime(slot);
                 if(!e.visible(slot,age)||e.done(slot)&&age<end)continue;
+                WindWeaponTrails.volley(e,slot,age,p,b,alpha);
                 var at=e.weaponAt(slot,age).subtract(e.position());
                 var direction=e.direction(slot,age);
                 if(direction.lengthSqr()<.001)direction=new net.minecraft.world.phys.Vec3(0,-1,0);

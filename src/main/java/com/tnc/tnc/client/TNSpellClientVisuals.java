@@ -230,7 +230,7 @@ public final class TNSpellClientVisuals {
         //     被调用的 ⇒ **施法者站在雾外面就完全看不到敌人被笼罩** ✗，这正是作者报的问题 ✓。
         //     现在改成：只要附近有怪身上挂着 tnc:dark_fog，就在它身上撒粒子 ✓，
         //     与我在不在雾里无关 ✓。
-        if (net.minecraftforge.fml.ModList.get().isLoaded("spell_engine")) tickFogShroud(minecraft);
+        if (net.minecraftforge.fml.ModList.get().isLoaded("spell_engine")) tickFogCasterVision(minecraft);
     }
 
     // ------------------------------------------------------------------
@@ -266,6 +266,10 @@ public final class TNSpellClientVisuals {
             for (com.tnc.tnc.magic.DarkFogCloudEntity fog : minecraft.level.getEntitiesOfClass(
                     com.tnc.tnc.magic.DarkFogCloudEntity.class,
                     minecraft.player.getBoundingBox().inflate(32.0D))) {
+                // The caster keeps clear sight inside their own field.
+                if (fog.isOwnedBy(minecraft.player)) {
+                    continue;
+                }
                 double radius = fog.syncedRadius();
                 int tier = fog.syncedTier();
                 if (radius <= 0.5D || tier <= 0
@@ -431,51 +435,67 @@ public final class TNSpellClientVisuals {
     //
     //  为什么用粒子而不是"给敌人画描边"：粒子是**所有玩家都能看到**的世界效果 ✓，
     //  而描边/高亮是客户端本地的东西（后面做"索敌高亮"时才用它）✓。
-    //  粒子用 squid_ink + smoke（都验证过是真粒子 ✓），自己跳过 ✗。
-    //
-    //  ⚠ 性能：每个受影响实体每 tick 约 6 颗，硬性限制最多
-    //    {@link #SHROUD_MAX_ENTITIES} 个实体、且只在 {@link #SHROUD_RANGE} 格内 ✓。
+    //  现在改为施法者客户端本地描边：不发包、不生成粒子，也不会让旁观玩家看到索敌信息。
     // ------------------------------------------------------------------
 
     /** 每 tick 最多给几个实体撒笼罩粒子（防止大场面上百怪）。 */
     private static final int SHROUD_MAX_ENTITIES = 12;
 
-    /** 一个实体身上每 tick 撒几颗黑雾。 */
-    private static final int SHROUD_PARTICLES = 6;
-
     /** 只处理玩家这个半径内的受影响实体（更远的本来也看不清）。 */
     private static final double SHROUD_RANGE = 32.0D;
 
-    private static void tickFogShroud(net.minecraft.client.Minecraft minecraft) {
+    private static final java.util.Map<Integer, Boolean> FOG_LOCAL_GLOW = new java.util.HashMap<>();
+
+    /**
+     * Caster-only tactical vision. No particles are spawned: affected enemies are outlined only
+     * on the client that owns the fog, and their previous glow flag is restored afterwards.
+     */
+    private static void tickFogCasterVision(net.minecraft.client.Minecraft minecraft) {
         net.minecraft.client.multiplayer.ClientLevel level = minecraft.level;
-        if (level == null || minecraft.player == null
-                || !com.tnc.tnc.magic.TNEffects.DARK_FOG.isPresent()) {
+        if (level == null || minecraft.player == null) {
+            clearFogLocalGlow(level);
             return;
         }
-        java.util.List<net.minecraft.world.entity.LivingEntity> inside =
-                level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class,
-                        minecraft.player.getBoundingBox().inflate(SHROUD_RANGE),
-                        e -> e.isAlive() && e != minecraft.player
-                                && e.hasEffect(com.tnc.tnc.magic.TNEffects.DARK_FOG.get()));
+        java.util.Set<Integer> wanted = new java.util.HashSet<>();
         int shown = 0;
-        for (net.minecraft.world.entity.LivingEntity entity : inside) {
-            if (shown++ >= SHROUD_MAX_ENTITIES) {
-                break;
+        for (com.tnc.tnc.magic.DarkFogCloudEntity fog : level.getEntitiesOfClass(
+                com.tnc.tnc.magic.DarkFogCloudEntity.class,
+                minecraft.player.getBoundingBox().inflate(SHROUD_RANGE),
+                f -> f.isAlive() && f.isOwnedBy(minecraft.player))) {
+            double radius = fog.syncedRadius();
+            if (radius <= 0.5D) continue;
+            for (net.minecraft.world.entity.LivingEntity entity : level.getEntitiesOfClass(
+                    net.minecraft.world.entity.LivingEntity.class,
+                    fog.getBoundingBox().inflate(radius, Math.max(6.0D, radius), radius),
+                    e -> e.isAlive() && e != minecraft.player && !e.isSpectator()
+                            && !e.isAlliedTo(minecraft.player) && !minecraft.player.isAlliedTo(e)
+                            && e.distanceToSqr(fog) <= radius * radius)) {
+                if (shown++ >= SHROUD_MAX_ENTITIES) break;
+                wanted.add(entity.getId());
+                if (!FOG_LOCAL_GLOW.containsKey(entity.getId())) {
+                    FOG_LOCAL_GLOW.put(entity.getId(), entity.isCurrentlyGlowing());
+                }
+                entity.setGlowingTag(true);
             }
-            double h = entity.getBbHeight();
-            double ex = entity.getX();
-            double ey = entity.getY() + h * 0.5D;
-            double ez = entity.getZ();
-            // 贴身的黑雾：包住整个身高，慢慢散开
-            for (int i = 0; i < SHROUD_PARTICLES; i++) {
-                double ox = (level.random.nextDouble() - 0.5D) * 0.9D;
-                double oy = (level.random.nextDouble() - 0.5D) * h;
-                double oz = (level.random.nextDouble() - 0.5D) * 0.9D;
-                level.addParticle(
-                        net.minecraft.core.particles.ParticleTypes.SQUID_INK,
-                        ex + ox, ey + oy, ez + oz,
-                        0.0D, 0.012D, 0.0D);
+            if (shown >= SHROUD_MAX_ENTITIES) break;
+        }
+        var iterator = FOG_LOCAL_GLOW.entrySet().iterator();
+        while (iterator.hasNext()) {
+            var entry = iterator.next();
+            if (wanted.contains(entry.getKey())) continue;
+            net.minecraft.world.entity.Entity entity = level.getEntity(entry.getKey());
+            if (entity != null) entity.setGlowingTag(entry.getValue());
+            iterator.remove();
+        }
+    }
+
+    private static void clearFogLocalGlow(net.minecraft.client.multiplayer.ClientLevel level) {
+        if (level != null) {
+            for (var entry : FOG_LOCAL_GLOW.entrySet()) {
+                net.minecraft.world.entity.Entity entity = level.getEntity(entry.getKey());
+                if (entity != null) entity.setGlowingTag(entry.getValue());
             }
         }
+        FOG_LOCAL_GLOW.clear();
     }
 }

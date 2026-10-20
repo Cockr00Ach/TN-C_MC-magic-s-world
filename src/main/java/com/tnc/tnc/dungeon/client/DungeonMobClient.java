@@ -29,7 +29,7 @@ public final class DungeonMobClient {
     public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
         for (DungeonSpecies species : DungeonSpecies.values()) {
             event.registerEntityRenderer(DungeonMobRegistration.type(species).get(),
-                    DungeonMobRenderer::new);
+                    DungeonMinionRenderer::new);
         }
         event.registerEntityRenderer(DungeonMobRegistration.BOLT.get(), ThrownItemRenderer::new);
     }

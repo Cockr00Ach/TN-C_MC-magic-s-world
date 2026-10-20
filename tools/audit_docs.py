@@ -15,7 +15,7 @@ Read-only. Prints a classification plus a reference table.
 USAGE
 =====
     python tools/audit_docs.py
-    python tools/audit_docs.py --md-out docs/_doc-inventory.md
+    python tools/audit_docs.py --md-out docs/misc/_doc-inventory.md
 """
 
 import argparse

@@ -1,0 +1,19 @@
+{
+  "mesh_parts": 497,
+  "triangles": 140414,
+  "vertices": 93614,
+  "bounds_blocks": [
+    [
+      -11.24,
+      -0.83,
+      -3.95
+    ],
+    [
+      9.06,
+      19.55,
+      3.7
+    ]
+  ],
+  "body_length_blocks": 66.11,
+  "format": "Free mesh BBModel + GLB; no cubes; not yet a GeckoLib runtime entity"
+}

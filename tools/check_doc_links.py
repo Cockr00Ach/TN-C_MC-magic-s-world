@@ -9,7 +9,13 @@ tools/reorganize_docs.py moved 86 documents into topic folders. A link written a
 `当前状态.md` (same folder) or `../剧情总纲.md` breaks the moment the file moves.
 
 This scans every .md for markdown links / bare .md mentions and reports the ones that
-no longer resolve.
+no longer resolve. Two things are deliberately NOT treated as mentions: anything inside
+a ``` fenced block, and a backticked filename used as a link *label*
+(`[`foo.md`](spells/foo.md)`) -- the target is what matters there, not the label.
+
+Exit code is 1 only when a real clickable link is broken; a broken bare mention is
+printed as `[bare]` but is not a failure (those are usually prose referring to an
+archived document by name).
 
 USAGE
 =====
@@ -25,6 +31,7 @@ SKIP_DIRS = {".git", "build", ".gradle", ".idea", ".jdk17", "run", "run-data",
              "node_modules", "__pycache__", "work", ".dsh-tmp", "libs"}
 LINK = re.compile(r"\[[^\]]*\]\(([^)]+\.md)\)")
 BARE = re.compile(r"`([^`\n]+\.md)`")
+FENCE = re.compile(r"```.*?```", re.S)
 
 
 def repo_root():
@@ -47,8 +54,13 @@ def main():
                     text = f.read()
             except OSError:
                 continue
-            targets = set(LINK.findall(text)) | set(BARE.findall(text))
-            for t in targets:
+            clean = FENCE.sub("", text)
+            link_targets = set(LINK.findall(clean))
+            # a backticked name inside a link label is a *label*, not a bare mention:
+            # `[`foo.md`](spells/foo.md)` must not be reported as a broken `foo.md`.
+            bare_targets = set(BARE.findall(LINK.sub("", clean)))
+            for t, kind in ([(x, "link") for x in link_targets]
+                            + [(x, "bare") for x in bare_targets]):
                 if t.startswith(("http://", "https://", "mailto:")):
                     continue
                 t = t.split("#")[0].strip()
@@ -59,13 +71,16 @@ def main():
                 cands = [os.path.join(repo, t.replace("/", os.sep)),
                          os.path.join(dirpath, t.replace("/", os.sep))]
                 if not any(os.path.exists(c) for c in cands):
-                    broken.append((rel, t))
+                    broken.append((rel, t, kind))
 
+    links_bad = [b for b in broken if b[2] == "link"]
     print("links/bare mentions checked: %d" % checked)
-    print("unresolved: %d" % len(broken))
-    for rel, t in broken:
-        print("   %s  ->  %s" % (rel, t))
-    return 1 if broken else 0
+    print("unresolved: %d   (real links: %d, bare mentions: %d)"
+          % (len(broken), len(links_bad), len(broken) - len(links_bad)))
+    for rel, t, kind in broken:
+        print("   [%s] %s  ->  %s" % (kind, rel, t))
+    # only a broken *clickable* link is a real failure; bare mentions are prose
+    return 1 if links_bad else 0
 
 
 if __name__ == "__main__":

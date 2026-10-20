@@ -31,6 +31,9 @@ build
 # 是为了绕开「沙箱不允许写 C:\Users\<用户>\.gradle」而拷进工作区的 ✗。
 # 它**绝不能进版本库**（`.gradle` 那条管不到它，名字不是 `.gradle`）。
 .gradle-home
+.gradle-user/
+__pycache__/
+*.pyc
 
 # ---------- 运行环境（dev 服务器、世界存档、日志）----------
 run

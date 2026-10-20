@@ -11,9 +11,9 @@ import software.bernie.geckolib.renderer.GeoEntityRenderer;
  *
  * <p>影子半径按体型给（0.4 起步），否则蜘蛛那种趴地的怪脚下一团大黑影很出戏。
  */
-public class DungeonMobRenderer extends GeoEntityRenderer<TNDungeonMob> {
+public class DungeonMinionRenderer extends GeoEntityRenderer<TNDungeonMob> {
 
-    public DungeonMobRenderer(EntityRendererProvider.Context context) {
+    public DungeonMinionRenderer(EntityRendererProvider.Context context) {
         super(context, new DungeonMobGeoModel());
         this.shadowRadius = 0.45F;
     }

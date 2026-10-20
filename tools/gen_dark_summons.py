@@ -17,7 +17,8 @@ import json, os, random
 from PIL import Image
 
 MODID = "tnc"
-CLOTH, TATT, EYE, WISP, BLADE, CROWN = (0, 0), (16, 0), (32, 0), (48, 0), (64, 0), (80, 0)
+CLOTH, TATT, EYE, WISP, BLADE, CROWN, BONE, MAW = \
+    (0, 0), (16, 0), (32, 0), (48, 0), (64, 0), (80, 0), (96, 0), (112, 0)
 
 def cube(f, t, uv):
     return {"origin": [f[0], f[1], f[2]], "size": [t[0]-f[0], t[1]-f[1], t[2]-f[2]], "uv": [uv[0], uv[1]]}
@@ -37,6 +38,10 @@ def spec(tier):
                 box(0, 2, 0, 9, 6, 8, CLOTH), box(0, 7, 0, 7, 4, 6, CLOTH), box(0, 0, 0, 6, 3, 5, TATT)]},
             {"name": "eyeL", "parent": "blob", "pivot": [-2, 8, -4], "cubes": [box(-2, 8, -4, 2, 1, 1, EYE)]},
             {"name": "eyeR", "parent": "blob", "pivot": [2, 8, -4], "cubes": [box(2, 8, -4, 2, 1, 1, EYE)]},
+            {"name": "maw", "parent": "blob", "pivot": [0, 6, -4], "cubes": [
+                box(0, 5, -5, 6, 2, 1, MAW), box(-2, 5, -6, 1, 2, 1, BONE), box(2, 5, -6, 1, 2, 1, BONE)]},
+            {"name": "hornL", "parent": "blob", "pivot": [-3, 10, 0], "cubes": [cube((-5, 9, -1), (-3, 14, 1), BONE)]},
+            {"name": "hornR", "parent": "blob", "pivot": [3, 10, 0], "cubes": [cube((3, 9, -1), (5, 14, 1), BONE)]},
             {"name": "wisp", "parent": "blob", "pivot": [0, 4, 4], "cubes": [box(0, 0, 5, 3, 5, 2, WISP)]},
         ]
     if tier == 2:
@@ -51,7 +56,14 @@ def spec(tier):
             {"name": "armLeft", "parent": "body", "pivot": [4, 18, 0], "cubes": [box(6, 11, 0, 3, 7, 3, CLOTH)]},
             {"name": "head", "parent": "body", "pivot": [0, 19, 0], "cubes": [
                 box(0, 22, 0, 9, 7, 9, CLOTH), box(0, 28, 0, 5, 2, 5, TATT),
-                box(-2, 22, -5, 2, 1, 1, EYE), box(2, 22, -5, 2, 1, 1, EYE)]},
+                box(-2, 22, -5, 2, 1, 1, EYE), box(2, 22, -5, 2, 1, 1, EYE),
+                box(0, 19, -5, 7, 3, 2, MAW)]},
+            {"name": "hornL", "parent": "head", "pivot": [-3, 28, 0], "cubes": [cube((-6, 27, -1), (-3, 35, 1), BONE)]},
+            {"name": "hornR", "parent": "head", "pivot": [3, 28, 0], "cubes": [cube((3, 27, -1), (6, 35, 1), BONE)]},
+            {"name": "spines", "parent": "body", "pivot": [0, 18, 3], "cubes": [
+                cube((-1, 14, 3), (1, 18, 8), BONE), cube((-1, 19, 3), (1, 23, 7), BONE)]},
+            {"name": "clawR", "parent": "armRight", "pivot": [-6, 11, 0], "cubes": [cube((-8, 8, -3), (-6, 12, -1), BONE)]},
+            {"name": "clawL", "parent": "armLeft", "pivot": [6, 11, 0], "cubes": [cube((6, 8, -3), (8, 12, -1), BONE)]},
             {"name": "wisp", "parent": "body", "pivot": [0, 12, 3], "cubes": [box(0, 6, 4, 3, 7, 2, WISP)]},
         ]
     if tier == 3:
@@ -62,6 +74,8 @@ def spec(tier):
                                                c["size"][1], c["size"][2]]) for c in bone["cubes"]]
         b.append({"name": "cape", "parent": "body", "pivot": [0, 19, 3], "cubes": [box(0, 4, 4, 13, 15, 1, CLOTH)]})
         b.append({"name": "blade2", "parent": "armLeft", "pivot": [6, 11, 0], "cubes": [cube((6, 2, -1), (7, 12, 0), BLADE)]})
+        b.append({"name": "shoulderSpikes", "parent": "body", "pivot": [0, 19, 0], "cubes": [
+            cube((-9, 17, -1), (-5, 23, 1), BONE), cube((5, 17, -1), (9, 23, 1), BONE)]})
         return b
     if tier == 4:
         b = spec(3)
@@ -69,6 +83,7 @@ def spec(tier):
             box(0, 29, 0, 10, 1, 10, CROWN),
             box(0, 30, -4, 2, 2, 2, CROWN), box(0, 30, 4, 2, 2, 2, CROWN),
             box(-4, 30, 0, 2, 2, 2, CROWN), box(4, 30, 0, 2, 2, 2, CROWN)]})
+        b.append({"name": "chestEye", "parent": "body", "pivot": [0, 18, -4], "cubes": [box(0, 17, -5, 5, 3, 1, EYE)]})
         return b
     # t5: huge, three eyes, six arms, a ring
     bones = [
@@ -78,7 +93,16 @@ def spec(tier):
         {"name": "body", "parent": "root", "pivot": [0, 14, 0], "cubes": [box(0, 14, 0, 14, 12, 8, CLOTH)]},
         {"name": "head", "parent": "body", "pivot": [0, 26, 0], "cubes": [
             box(0, 26, 0, 12, 10, 12, CLOTH), box(0, 35, 0, 8, 3, 8, TATT),
-            box(-3, 30, -7, 3, 2, 1, EYE), box(3, 30, -7, 3, 2, 1, EYE), box(0, 33, -7, 3, 2, 1, EYE)]},
+            box(-3, 30, -7, 3, 2, 1, EYE), box(3, 30, -7, 3, 2, 1, EYE), box(0, 33, -7, 3, 2, 1, EYE),
+            box(0, 26, -7, 10, 3, 2, MAW)]},
+        {"name": "horns", "parent": "head", "pivot": [0, 35, 0], "cubes": [
+            cube((-10, 33, -2), (-5, 44, 2), BONE), cube((5, 33, -2), (10, 44, 2), BONE),
+            cube((-3, 36, 3), (-1, 45, 6), BONE), cube((1, 36, 3), (3, 45, 6), BONE)]},
+        {"name": "ribEye", "parent": "body", "pivot": [0, 20, -5], "cubes": [
+            box(0, 18, -6, 7, 5, 1, EYE), cube((-8, 16, -5), (-6, 26, -3), BONE), cube((6, 16, -5), (8, 26, -3), BONE)]},
+        {"name": "backSpines", "parent": "body", "pivot": [0, 20, 4], "cubes": [
+            cube((-1, 12, 4), (1, 18, 11), BONE), cube((-1, 20, 4), (1, 27, 12), BONE),
+            cube((-1, 28, 4), (1, 34, 10), BONE)]},
         {"name": "ring", "parent": "head", "pivot": [0, 37, 0], "cubes": [
             box(0, 37, -6, 14, 1, 1, CROWN), box(0, 37, 6, 14, 1, 1, CROWN),
             box(-7, 37, 0, 1, 1, 12, CROWN), box(7, 37, 0, 1, 1, 12, CROWN)]},
@@ -90,11 +114,15 @@ def spec(tier):
                       "cubes": [box(sx, yy - 7, 0, 4, 8, 4, CLOTH)]})
         bones.append({"name": "bladeR%d" % (i + 1), "parent": "armR%d" % (i + 1), "pivot": [sx - 1, yy - 7, 0],
                       "cubes": [cube((sx - 3, yy - 16, -1), (sx - 2, yy - 6, 0), BLADE)]})
+        bones.append({"name": "clawR%d" % (i + 1), "parent": "armR%d" % (i + 1), "pivot": [sx, yy - 7, 0],
+                      "cubes": [cube((sx - 4, yy - 11, -4), (sx - 1, yy - 6, -2), BONE)]})
     for i, (sx, yy) in enumerate([(9, 22), (9, 18), (9, 14)]):
         bones.append({"name": "armL%d" % (i + 1), "parent": "body", "pivot": [sx, yy, 0],
                       "cubes": [box(sx, yy - 7, 0, 4, 8, 4, CLOTH)]})
         bones.append({"name": "bladeL%d" % (i + 1), "parent": "armL%d" % (i + 1), "pivot": [sx + 1, yy - 7, 0],
                       "cubes": [cube((sx + 2, yy - 16, -1), (sx + 3, yy - 6, 0), BLADE)]})
+        bones.append({"name": "clawL%d" % (i + 1), "parent": "armL%d" % (i + 1), "pivot": [sx, yy - 7, 0],
+                      "cubes": [cube((sx + 1, yy - 11, -4), (sx + 4, yy - 6, -2), BONE)]})
     return bones
 
 NAMES = {1: "dark_imp", 2: "dark_guard", 3: "dark_lord", 4: "dark_king", 5: "evil_god"}
@@ -130,6 +158,8 @@ def texture():
     fill(48, 16, 16, lambda x, y, w, h: (150, 90, 220, max(0, int(200 * (1.0 - y / float(h))))))
     fill(64, 16, 16, lambda x, y, w, h: (206, 210, 226, 255) if x % 3 else (120, 124, 140, 255))
     fill(80, 16, 16, lambda x, y, w, h: (208, 172, 92, 255) if (x + y) % 3 else (150, 120, 60, 255))
+    fill(96, 16, 16, lambda x, y, w, h: (174, 166, 156, 255) if (x + y) % 4 else (92, 82, 86, 255))
+    fill(112, 16, 16, lambda x, y, w, h: (86, 6, 28, 255) if y < h - 3 else (224, 202, 178, 255))
     return img
 
 def main():

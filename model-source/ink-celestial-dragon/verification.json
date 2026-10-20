@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "mesh_parts": 497,
+  "vertices": 93614,
+  "triangles": 140414,
+  "cube_elements": 0,
+  "five_toed_paws": 4,
+  "matching_bbmodel_glb_geometry": true,
+  "checks": [
+    "finite vertices",
+    "valid mesh face references and UVs",
+    "unique editable groups",
+    "embedded palette PNG",
+    "GLB binary bounds/accessors",
+    "matching triangle counts",
+    "four five-toed paws"
+  ]
+}

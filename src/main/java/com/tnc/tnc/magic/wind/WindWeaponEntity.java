@@ -14,6 +14,8 @@ public final class WindWeaponEntity extends Entity {
             TIER=SynchedEntityData.defineId(WindWeaponEntity.class,EntityDataSerializers.INT),AGE=SynchedEntityData.defineId(WindWeaponEntity.class,EntityDataSerializers.INT);
     private final WindEarthVisualClock clock=new WindEarthVisualClock();
     private LivingEntity owner;private Vec3 origin=Vec3.ZERO;private float damage;private int age;
+    private final java.util.Deque<Vec3> trail=new java.util.ArrayDeque<>();
+    public Iterable<Vec3> trail(){return trail;}
     public WindWeaponEntity(EntityType<? extends WindWeaponEntity> type,Level level){super(type,level);noPhysics=true;setNoGravity(true);}
     @Override protected void defineSynchedData(){entityData.define(FORM,0);entityData.define(TIER,1);entityData.define(AGE,0);}
     public int form(){return entityData.get(FORM);}public int tier(){return entityData.get(TIER);}
@@ -29,7 +31,7 @@ public final class WindWeaponEntity extends Entity {
         if(isRemoved())return;
         super.tick();
         if(level().isClientSide){
-            if(tickCount%3==0)level().addParticle(net.minecraft.core.particles.ParticleTypes.CLOUD,getX(),getY(),getZ(),0,.015,0);
+            trail.addFirst(position());while(trail.size()>26)trail.removeLast();
             return;
         }
         if(owner==null||!owner.isAlive()||owner.level()!=level()||++age>WindArsenalRules.LIFE){discard();return;}
@@ -55,7 +57,7 @@ public final class WindWeaponEntity extends Entity {
             discard();
         }
     }
-    @Override public AABB getBoundingBoxForCulling(){return super.getBoundingBoxForCulling().inflate(3);}
+    @Override public AABB getBoundingBoxForCulling(){return super.getBoundingBoxForCulling().inflate(44);}
     @Override public boolean shouldRenderAtSqrDistance(double d){return d<128*128;}
     @Override public boolean isPickable(){return false;}
     @Override public boolean isAttackable(){return false;}

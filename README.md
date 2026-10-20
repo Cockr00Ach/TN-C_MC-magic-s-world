@@ -224,12 +224,12 @@ git push -u origin 你的分支名
 
 ## 多专题协作约定
 
-- **法术系统YYY**：docs/当前状态.md、docs/法术专题_交接.md、docs/spells/投射物模型_配方.md、docs/spells/法术制作与测试.md、docs/spells/特殊魔法_设计.md、docs/spells/法术总表_按设计文档.md、docs/art/美术资产清单.md、docs/archive/实施进度.md、docs/archive/项目交接.md、docs/archive/验收表.md、docs/导图_全法术.png、docs/宝箱传说残卷_物品预览.png、docs/一周目正史_物品预览.png、docs/庄鹊让_候选模型对比.png、docs/庄鹊让_NPC皮肤预览.png、src/main/java/com/tnc/tnc/magic/**、src/main/java/com/tnc/tnc/client/**、src/main/resources/data/tnc/spells/**、src/main/resources/assets/tnc/**、tools/gen_tnc_*.ps1、tools/gen_scroll_lang.ps1、tools/scroll_lang_extra.json、tools/gen_records_lang.ps1、tools/records_lang_extra.json、tools/maid_models.json、tools/sync-tlm-models.ps1、tools/gen_zhuangquerang_skin.ps1、tools/verify_mod_jar.ps1、tools/install-to-pack.ps1。
+- **法术系统YYY**：docs/当前状态.md、docs/法术专题_交接.md、docs/spells/投射物模型_配方.md、docs/spells/法术制作与测试.md、docs/spells/特殊魔法_设计.md、docs/spells/法术总表_按设计文档.md、docs/art/美术资产清单.md、docs/archive/实施进度.md、docs/archive/项目交接.md、docs/archive/验收表.md、docs/previews/导图_全法术.png、docs/previews/宝箱传说残卷_物品预览.png、docs/previews/一周目正史_物品预览.png、docs/previews/庄鹊让_候选模型对比.png、docs/previews/庄鹊让_NPC皮肤预览.png、src/main/java/com/tnc/tnc/magic/**、src/main/java/com/tnc/tnc/client/**、src/main/resources/data/tnc/spells/**、src/main/resources/assets/tnc/**、tools/gen_tnc_*.ps1、tools/gen_scroll_lang.ps1、tools/scroll_lang_extra.json、tools/gen_records_lang.ps1、tools/records_lang_extra.json、tools/maid_models.json、tools/sync-tlm-models.ps1、tools/gen_zhuangquerang_skin.ps1、tools/verify_mod_jar.ps1、tools/install-to-pack.ps1。
   - **也负责**：剧情道具「宝箱传说残卷」六卷 ＋「一周目正史」五张记录纸（物品本体 + 右键阅读）、剧情角色 **庄鹊让**（一周目剧情 NPC `tnc:zhuangquerang` + 二周目可选角色设计）；**剧情文案本身**仍归编剧系统 AAA ✗。
   - **与 NPC 专题共用** `src/main/java/com/tnc/tnc/npc/**` ✓ —— 我按他们的范式**新增**了 `zhuangquerang` 一个 NPC 及该动的接线（实体/属性/刷怪蛋/渲染器/创造页/默认位置/purge 名单/lang）；**不重构、不提交**他们的 WIP ✗。
   - **也碰**：`build.gradle`（`compileOnly fg.deobf` + `flatDir` 仓库）与 `libs\touhoulittlemaid-1.5.2.jar`、`libs\geckolib-4.8.4.jar` —— **只为把女仆模型画在庄鹊让身上** ✓，两个 jar 不进我们的产物 ✗。
 - **编剧系统 AAA**（agent dsh · 会话主题「文书」）：剧情唯一事实来源 `剧情总纲.md`。**只产文本，不实现** —— 新机制/新物品写「需求单」。
-- **动画系统MMM**（agent dsh · 会话主题「动画系统MMM」，2026-09-22 建立）：`docs/动画专题_交接.md`（**本专题入口**）、`docs/NPC动作产线_Blockbench配方.md`（**动作怎么做的配方**）、`tools/gen_npc_bedrock.py`、`assets/tnc/geo/entity/*.geo.json`、`assets/tnc/textures/entity/*_bedrock.png`、`assets/tnc/animations/entity/*.animation.json`（**与 YYY 共用，见下**）。
+- **动画系统MMM**（agent dsh · 会话主题「动画系统MMM」，2026-09-22 建立）：`docs/动画专题_交接.md`（**本专题入口**）、`docs/tools/NPC动作产线_Blockbench配方.md`（**动作怎么做的配方**）、`tools/gen_npc_bedrock.py`、`assets/tnc/geo/entity/*.geo.json`、`assets/tnc/textures/entity/*_bedrock.png`、`assets/tnc/animations/entity/*.animation.json`（**与 YYY 共用，见下**）。
   - **职责**：**表现剧情的动画** —— 剧本里的 `（…）` 动作提示要在游戏里**真的做出来**：NPC 动作（待机/点头/抬手/推/合簿/转身/走动）＋ 场景调度（谁、什么时候、做什么）＋ 过场镜头。
     上游是 `剧情\开场_分离之后.md` 附注点名的那**七处动作提示**（那杯酒／钱压杯下／推登记簿／合上登记簿／后屋声响／塞盾／回头看烟）。
   - **不碰**：法术/数值/投射物模型/法术图标与贴图（法术系统YYY）、剧情设定与文案（编剧系统 AAA）、任务正文（任务系统BBB）、地图与结构资产（地图专题）。
@@ -237,6 +237,13 @@ git push -u origin 你的分支名
     要加动作**先打招呼、请对方加**（照 `README` §四「最容易被抢改的文件，改之前先说一声」）✓，方向反过来同样成立：他们往现有动画里加东西也先知会我 ✓。
   - **边界（别做重）**：**玩家**自己的跑动/待机/施法全套动作 ✗ 与**法术施法动画**（法术 JSON 的 `animation` 字段 → spell_engine 的 `spell_animations`）✗ **都不在我这儿**，别当成我的活。
   - **也碰**（2026-09-22，**只读**）：`data/tnc/dialogues/*.txt` 与 `dialogue/**`（动画要靠**对话剧本的时间轴**触发，只读不改台词）✗；**台词与剧情文案本身**仍归编剧系统 AAA ✗。
+- **整包 jar 更新**（agent dsh · 会话主题「jar更新」，2026-10-08 建立）：`docs/整包jar更新_交接.md`（**本专题入口**）。
+  - **职责**：**作者每完成一个话题，由本专题把整个包更新到位** —— 编译 → `verify_mod_jar.ps1` → `install-to-pack.ps1` → **读实例的 `logs/debug.log` 与 `crash-reports/` 复核** → 交证据 ✓。
+    **唯一的产出是"能正常进游戏"** ✓（§三/§四 记了为什么"编译过＋闸门过＋装机一致"**不等于**能进游戏 ✗）。
+  - **不碰**：各专题的 Java / 法术 JSON / 任务 / 剧本 / 模型 / 数值 ✗ —— 谁的东西谁改 ✓。
+    但**装机前后发现"游戏根本进不去"级别的故障时，本专题必查到底并把结论交回对应专题** ✓（2026-10-08 那次赌场崩溃就是 ✓）。
+  - **也不碰**：`tools/install-to-pack.ps1`、`tools/verify_mod_jar.ps1` 的**检查项** ✗ ——
+    那两个脚本由**法术系统YYY**维护 ✓（多专题共用的闸门，改前先打招呼 ✓）；本专题只**跑**它们 ✓。
 - **地图/结构专题**：docs/地图接入进度.md、地图生成/结构资产相关文件。
 - **任务系统BBB**（agent dsh · 会话主题「任务系统BBB」）：`docs/任务系统_交接.md`、`config/ftbquests/quests/chapters/**`、`config/ftbquests/quests/chapter_groups.snbt`、`config/whisperingquests/ftbq_bindings.json`、`archive/author-quest-content/**`。
   - **职责**：把编剧系统 AAA 的剧情文本**实施**成 FTB 任务正文（`剧情总纲.md` §零 写明"把任务写进 `config/ftbquests/` —— 队友实施"）。
