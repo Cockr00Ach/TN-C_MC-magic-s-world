@@ -657,11 +657,18 @@ def build_geo(phase):
             r = rot.get(cname)
             if r:
                 axis, ang, piv = r
-                cube["rotation"] = {
-                    "origin": [round(piv[i] * sc, 3) for i in range(3)],
-                    "axis": axis,
-                    "angle": ang,
-                }
+                # Bedrock 1.12.0 / GeckoLib 的 Cube.rotation 必须是**长度 3 的数组**（欧拉角，度），
+                # 旋转中心另放在 "pivot"。写成 {"axis":...,"angle":...} 会让 GeckoLib
+                # 抛 JsonSyntaxException: Expected rotation to be a JsonArray，直接把游戏崩掉。
+                rx, ry, rz = 0.0, 0.0, 0.0
+                if axis == "x":
+                    rx = float(ang)
+                elif axis == "y":
+                    ry = float(ang)
+                else:
+                    rz = float(ang)
+                cube["rotation"] = [round(rx, 3), round(ry, 3), round(rz, 3)]
+                cube["pivot"] = [round(piv[i] * sc, 3) for i in range(3)]
             cubes.append(cube)
         entry = {"name": name, "pivot": [round(pivot[i] * sc, 3) for i in range(3)]}
         if parent:
