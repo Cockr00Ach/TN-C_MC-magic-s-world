@@ -94,6 +94,17 @@ THEMES = {
                     "crack": 0},
     "spike": {"base": "rock", "grain": "rock_lt", "dark": "basalt", "accent": "magma",
               "crack": 4},
+    # ---- 二阶段专用（追加） ----
+    "p2_rock": {"base": "basalt", "grain": "rock", "dark": "obsidian",
+                "accent": "magma_dim", "crack": 4, "strata": True, "scales": True},
+    "p2_shell": {"base": "rock", "grain": "rock_lt", "dark": "basalt",
+                 "accent": "mustard", "crack": 3, "strata": True, "scales": True},
+    "lava_hot": {"base": "magma_hot", "grain": "core", "dark": "magma", "accent": "core",
+                 "crack": 0, "flat": True},
+    "lava_mid": {"base": "magma", "grain": "magma_hot", "dark": "ember", "accent": "core",
+                 "crack": 0, "flat": True},
+    "lava_dim": {"base": "magma_dim", "grain": "ember", "dark": "obsidian", "accent": "magma",
+                 "crack": 2, "flat": True},
 }
 
 # ---------------------------------------------------------------- 骨骼 ----
@@ -215,28 +226,179 @@ VOLCANO_P1 = [
 
 CUBES_P1 = CUBES_P1 + VOLCANO_P1
 
-# 二阶段：同骨架同尺寸，但山体裂开、岩甲外错、熔岩灌满
-_VOLC_NAMES = set(c[1] for c in VOLCANO_P1)
-VOLCANO_P2 = []
-for _bone, _name, _o, _s, _theme in VOLCANO_P1:
-    _ox, _oy, _oz = _o
-    _t = "lava" if _theme == "lava" else (
-        "lava_rock" if _theme in ("shell", "shell_low", "shell_hi") else "lava_groove")
-    if _name.startswith("rim_") or _name in ("slab1", "ldg2", "bt_f"):
-        _sign = 1 if _ox > 0 else -1
-        _ox += _sign * 2
-        _oy += 1
-    VOLCANO_P2.append((_bone, _name, (_ox, _oy, _oz), _s, _t))
-VOLCANO_P2 += [
-    ("shell", "cr_x", (-22, 74, -8), (6, 5, 16), "lava"),
-    ("shell", "cr_y", (8, 72, -10), (6, 4, 16), "lava"),
-    ("shell", "fic_a", (-9, 52, -26), (4, 14, 5), "lava"),
-    ("shell", "fic_b", (11, 54, -18), (4, 12, 5), "lava"),
+# ==== 二阶段：崩裂的火山 / 掀开的壳侧岩甲 / 前压的冲撞姿态 ====
+# 作者 2026-10-20 要求：关光影、关粒子、关发光时也要一眼分出一二阶段。
+# 所以二阶段不再"由一阶段逐条派生"，而是自成一套几何：
+#   * 山体去阶梯化：三大块偏心堆叠 + 口沿炸开（正面右侧整段缺失）+ 熔岩核心外露
+#   * 5 组断裂岩脊，带 rotation，像被掀起的岩层（与主体相连，不是浮空碎石）
+#   * 壳侧前后各一块大岩甲，绕根部向外掀起（独立骨骼 plate_l / plate_r，供转阶段动画）
+#   * 头：眉脊下压压住眼睛、眼睛变窄并内嵌、上下颌分开留嘴缝、下颌三颗粗獠牙
+#   * 站姿：前肢更粗并外撑、前肩压低、火山抬到最高 ⇒ 前低后高的剪影
+#   * 熔岩亮度分三档：火山口/主裂口 lava_hot、通道 lava_mid、末端小裂纹 lava_dim
+# 全部按 P2_SCALE 放大（相对一阶段 1.2 倍，只乘这一次，不在旧缩放上叠乘）。
+P2_SCALE = 1.2
+
+BONES_P2 = [
+    ("root", (0, 0, 0), None),
+    ("body", (0, 20, 0), "root"),
+    ("shell", (0, 31, 0), "body"),
+    ("whorl", (0, 70, 0), "shell"),
+    ("neck", (0, 20, -36), "body"),
+    ("head", (0, 22, -58), "neck"),
+    ("jaw", (0, 16, -58), "head"),
+    ("tail", (0, 18, 32), "body"),
+    ("leg_fl", (34, 18, -32), "body"),
+    ("leg_fr", (-34, 18, -32), "body"),
+    ("leg_bl", (33, 18, 24), "body"),
+    ("leg_br", (-33, 18, 24), "body"),
+    ("plate_l", (38, 27, 0), "shell"),
+    ("plate_r", (-38, 27, 0), "shell"),
 ]
 
-CUBES_P2 = [c for c in CUBES_P1 if c[1] not in _VOLC_NAMES and c[1] != "dome2"]
-CUBES_P2.append(("shell", "dome2", (-26, 39, -26), (52, 5, 52), "lava_rock"))
-CUBES_P2 += VOLCANO_P2
+# 名字 -> (旋转轴, 角度(度), 旋转中心)
+ROT_P2 = {
+    "plate_l_f": ("z", -24, (36, 31, -21)),
+    "plate_l_b": ("z", -17, (36, 31, 20)),
+    "plate_r_f": ("z", 24, (-36, 31, -21)),
+    "plate_r_b": ("z", 17, (-36, 31, 20)),
+    "rg1": ("z", 17, (-16, 74, -12)),
+    "rg2": ("z", -13, (13, 76, -8)),
+    "rg3": ("x", 11, (-2, 81, 15)),
+    "rg4": ("x", -9, (-1, 90, -8)),
+    "rg5": ("z", -9, (19, 62, 8)),
+    "brow": ("x", -11, (0, 44, -77)),
+    "lojaw": ("x", 9, (0, 16, -85)),
+}
+
+P2_CUBES = [
+    # ---------------- 躯干：加宽加厚，前胸与胯部各垫一层 ----------------
+    ("body", "belly", (-28, 13, -34), (56, 13, 68), "belly"),
+    ("body", "chest", (-25, 20, -42), (50, 10, 16), "p2_rock"),
+    ("body", "hip", (-23, 20, 26), (46, 10, 14), "p2_rock"),
+
+    # ---------------- 壳：只留一级穹顶，边缘交给会掀起的岩甲 ----------------
+    ("shell", "rim_core", (-38, 24, -32), (76, 9, 64), "shell_low"),
+    ("shell", "rim_f", (-28, 24, -40), (56, 9, 9), "shell_low"),
+    ("shell", "rim_b", (-26, 24, 31), (52, 10, 9), "shell_low"),
+    ("shell", "dome1", (-32, 33, -32), (64, 7, 64), "shell_hi"),
+
+    # ---------------- 壳侧大岩甲：向外掀起（独立骨骼） ----------------
+    ("plate_l", "plate_l_f", (34, 27, -34), (17, 9, 26), "p2_shell"),
+    ("plate_l", "plate_l_b", (34, 27, 8), (16, 9, 24), "p2_shell"),
+    ("plate_r", "plate_r_f", (-51, 27, -34), (17, 9, 26), "p2_shell"),
+    ("plate_r", "plate_r_b", (-50, 27, 8), (16, 9, 24), "p2_shell"),
+    # 岩甲被撑开后的熔岩裂隙（夹在壳与岩甲之间，最深最亮）
+    ("shell", "gap_l1", (33, 25, -30), (5, 8, 22), "lava_mid"),
+    ("shell", "gap_l2", (33, 25, 4), (5, 8, 20), "lava_mid"),
+    ("shell", "gap_r1", (-38, 25, -30), (5, 8, 22), "lava_mid"),
+    ("shell", "gap_r2", (-38, 25, 4), (5, 8, 20), "lava_mid"),
+
+    # ---------------- 火山：三大块偏心堆叠（不是同心台阶） ----------------
+    ("shell", "vb_1", (-22, 40, -22), (44, 12, 40), "p2_rock"),
+    ("shell", "vb_2", (-16, 40, -32), (22, 9, 12), "p2_rock"),
+    ("shell", "vb_3", (13, 40, -6), (11, 9, 22), "p2_rock"),
+    ("shell", "vm_1", (-16, 52, -16), (32, 14, 30), "p2_rock"),
+    ("shell", "vm_2", (-6, 52, -28), (15, 9, 11), "p2_rock"),
+    ("shell", "vm_3", (11, 49, 4), (10, 8, 13), "p2_rock"),
+    ("shell", "vu_1", (-11, 66, -11), (22, 14, 22), "p2_rock"),
+    ("shell", "vu_2", (2, 64, -21), (10, 8, 10), "p2_rock"),
+
+    ("shell", "vw_1", (-7, 80, -7), (14, 10, 14), "p2_rock"),
+
+    # ---------------- 火山口：口沿炸开，正面右侧整段缺失 ----------------
+    ("shell", "cw_b", (-9, 90, 2), (18, 13, 9), "p2_rock"),
+    ("shell", "cw_l", (-10, 91, -6), (7, 11, 12), "p2_rock"),
+    ("shell", "cw_r", (3, 88, -5), (7, 15, 13), "p2_rock"),
+    ("shell", "cw_f", (-9, 90, -9), (7, 9, 6), "p2_rock"),
+    # 缺口处往外翻的一块残沿（不对齐任何一侧）
+    ("shell", "cw_lip", (-1, 94, -10), (7, 5, 6), "p2_shell"),
+
+    # ---------------- 火山口内部：熔岩核心（最高一档亮度） ----------------
+    ("whorl", "lava_core", (-5, 86, -5), (11, 10, 11), "lava_hot"),
+    ("whorl", "lava_deep", (-3, 83, -3), (8, 4, 8), "lava_mid"),
+    ("whorl", "lava_spill", (-2, 90, -10), (6, 3, 6), "lava_hot"),
+
+    # ---------------- 5 组断裂岩脊（撕裂、掀起的岩层） ----------------
+    ("shell", "rg1", (-24, 66, -19), (16, 16, 15), "p2_rock"),
+    ("shell", "rg2", (7, 68, -15), (13, 17, 14), "p2_rock"),
+    ("shell", "rg3", (-9, 72, 8), (14, 18, 14), "p2_rock"),
+    ("shell", "rg4", (-6, 84, -14), (10, 12, 11), "p2_rock"),
+    ("shell", "rg5", (13, 56, 2), (12, 13, 13), "p2_rock"),
+
+    # ---------------- 山体两侧大裂口：侧面也能看见壳里有熔岩 ----------------
+    ("shell", "fis_r_rock", (23, 42, -3), (7, 15, 17), "p2_rock"),
+    ("whorl", "fis_r_lava", (24, 42, -2), (5, 13, 15), "lava_mid"),
+    ("shell", "fis_l_rock", (-31, 44, 0), (7, 13, 15), "p2_rock"),
+    ("whorl", "fis_l_lava", (-30, 44, 1), (5, 11, 13), "lava_mid"),
+
+    # ---------------- 熔岩通道：三组粗细不一，非对称 ----------------
+    ("shell", "ch1", (-2, 66, -15), (8, 20, 8), "lava_mid"),
+    ("shell", "ch2", (-2, 54, -21), (9, 13, 8), "lava_mid"),
+    ("shell", "ch3", (-3, 44, -28), (10, 10, 8), "lava_mid"),
+    ("shell", "ch4", (-5, 41, -33), (12, 4, 7), "lava_dim"),
+    ("shell", "chb1", (9, 56, -12), (5, 9, 6), "lava_dim"),
+    ("shell", "chb2", (11, 48, -16), (5, 9, 6), "lava_dim"),
+    ("shell", "chb3", (13, 41, -20), (5, 8, 6), "lava_dim"),
+    ("shell", "chc1", (17, 52, -6), (3, 8, 6), "lava_dim"),
+    ("shell", "chc2", (19, 45, -9), (3, 7, 6), "lava_dim"),
+    # 挡住通道的岩块：让岩浆断断续续
+    ("shell", "oc1", (-6, 54, -24), (8, 6, 6), "p2_rock"),
+    ("shell", "oc2", (4, 47, -26), (6, 5, 5), "p2_rock"),
+
+    # ---------------- 颈 / 头：前伸压低、眉脊下压、上下颌分开 ----------------
+    ("neck", "neck", (-15, 18, -56), (30, 20, 22), "p2_rock"),
+    ("neck", "neck_pl1", (-18, 30, -54), (36, 6, 12), "p2_shell"),
+    ("neck", "neck_pl2", (-18, 22, -56), (36, 6, 12), "p2_rock"),
+    ("neck", "neck_lava", (-7, 20, -55), (14, 3, 4), "lava_dim"),
+    ("head", "head", (-17, 18, -82), (34, 26, 26), "p2_rock"),
+    ("head", "brow", (-19, 38, -86), (38, 6, 18), "p2_shell"),
+    ("head", "eye_l", (6, 31, -84), (5, 2, 3), "eye"),
+    ("head", "eye_r", (-11, 31, -84), (5, 2, 3), "eye"),
+    ("head", "cheek_l", (10, 23, -80), (7, 9, 10), "p2_rock"),
+    ("head", "cheek_r", (-17, 23, -80), (7, 9, 10), "p2_rock"),
+    ("head", "upjaw", (-14, 16, -92), (28, 10, 14), "p2_rock"),
+    ("head", "mouth_lava", (-8, 15, -90), (16, 3, 5), "lava_dim"),
+    ("jaw", "lojaw", (-13, 7, -92), (26, 9, 14), "p2_rock"),
+    ("jaw", "fang1", (-9, 13, -94), (4, 7, 4), "jaw"),
+    ("jaw", "fang2", (-2, 13, -94), (4, 7, 4), "jaw"),
+    ("jaw", "fang3", (5, 13, -94), (4, 7, 4), "jaw"),
+
+    # ---------------- 尾：更粗更短 ----------------
+    ("tail", "tail1", (-8, 14, 32), (16, 12, 14), "p2_rock"),
+    ("tail", "tail2", (-5, 8, 44), (10, 9, 12), "p2_rock"),
+
+    # ---------------- 前肢：更粗、外撑、分段、宽脚掌带岩爪 ----------------
+    ("leg_fl", "sh_fl", (20, 22, -42), (28, 8, 22), "p2_shell"),
+    ("leg_fl", "up_fl", (24, 10, -38), (22, 15, 20), "p2_rock"),
+    ("leg_fl", "lo_fl", (27, 2, -36), (18, 10, 18), "p2_rock"),
+    ("leg_fl", "ft_fl", (21, 0, -40), (28, 5, 26), "p2_rock"),
+    ("leg_fl", "cl_fl1", (23, 0, -47), (6, 4, 6), "foot"),
+    ("leg_fl", "cl_fl2", (33, 0, -45), (6, 4, 6), "foot"),
+    ("leg_fl", "cl_fl3", (42, 0, -42), (6, 4, 6), "foot"),
+    ("leg_fr", "sh_fr", (-48, 22, -42), (28, 8, 22), "p2_shell"),
+    ("leg_fr", "up_fr", (-46, 10, -38), (22, 15, 20), "p2_rock"),
+    ("leg_fr", "lo_fr", (-45, 2, -36), (18, 10, 18), "p2_rock"),
+    ("leg_fr", "ft_fr", (-49, 0, -40), (28, 5, 26), "p2_rock"),
+    ("leg_fr", "cl_fr1", (-29, 0, -47), (6, 4, 6), "foot"),
+    ("leg_fr", "cl_fr2", (-39, 0, -45), (6, 4, 6), "foot"),
+    ("leg_fr", "cl_fr3", (-48, 0, -42), (6, 4, 6), "foot"),
+
+    # ---------------- 后肢：比前肢略窄，仍要分段 ----------------
+    ("leg_bl", "sh_bl", (22, 22, 18), (26, 8, 20), "p2_shell"),
+    ("leg_bl", "up_bl", (25, 10, 16), (20, 15, 20), "p2_rock"),
+    ("leg_bl", "lo_bl", (27, 2, 14), (16, 10, 18), "p2_rock"),
+    ("leg_bl", "ft_bl", (23, 0, 10), (26, 5, 24), "p2_rock"),
+    ("leg_bl", "cl_bl1", (25, 0, 6), (6, 4, 6), "foot"),
+    ("leg_bl", "cl_bl2", (38, 0, 10), (6, 4, 6), "foot"),
+    ("leg_br", "sh_br", (-48, 22, 18), (26, 8, 20), "p2_shell"),
+    ("leg_br", "up_br", (-45, 10, 16), (20, 15, 20), "p2_rock"),
+    ("leg_br", "lo_br", (-43, 2, 14), (16, 10, 18), "p2_rock"),
+    ("leg_br", "ft_br", (-49, 0, 10), (26, 5, 24), "p2_rock"),
+    ("leg_br", "cl_br1", (-31, 0, 6), (6, 4, 6), "foot"),
+    ("leg_br", "cl_br2", (-44, 0, 10), (6, 4, 6), "foot"),
+]
+
+CUBES_P2 = P2_CUBES
 CUBES_P2 += [
     ("shell", "spike_f", (-3, 44, -26), (6, 16, 6), "spike"),
     ("shell", "spike_b", (-3, 44, 20), (6, 16, 6), "spike"),
@@ -300,6 +462,9 @@ PHASES = {
         "identifier": "geometry.tnc.volcanic_tortoise_phase2",
         "texture": "volcanic_tortoise_phase2.png",
         "glow": True,
+        "bones": BONES_P2,
+        "rot": ROT_P2,
+        "scale": P2_SCALE,
     },
 }
 
@@ -458,8 +623,10 @@ def build_texture(phase):
     packer = Packer(SHEET)
     rng = random.Random(20261019 + (0 if phase["glow"] else 7))
     uvs = {}
+    # 贴图布局必须用"最终立方体尺寸"（含阶段缩放），否则 box-UV 的六个面会错位
+    sc = phase.get("scale", 1.0)
     for bone, name, origin, size, theme_name in phase["cubes"]:
-        w, h, d = size
+        w, h, d = [int(round(v * sc)) for v in size]
         u, v = packer.alloc(2 * (w + d), d + h)
         uvs[name] = (u, v)
         theme = THEMES[theme_name]
@@ -473,19 +640,30 @@ def build_texture(phase):
 def build_geo(phase):
     img, gimg, uvs = build_texture(phase)
     bones = []
-    for name, pivot, parent in BONES:
+    sc = phase.get("scale", 1.0)
+    rot = phase.get("rot", {})
+    for name, pivot, parent in phase.get("bones", BONES):
         cubes = []
         for bone, cname, origin, size, theme_name in phase["cubes"]:
             if bone != name:
                 continue
             u, v = uvs[cname]
-            cubes.append({
+            cube = {
                 "name": cname,
-                "origin": list(origin),
-                "size": list(size),
+                "origin": [round(origin[i] * sc, 3) for i in range(3)],
+                "size": [int(round(size[i] * sc)) for i in range(3)],
                 "uv": [u, v],
-            })
-        entry = {"name": name, "pivot": list(pivot)}
+            }
+            r = rot.get(cname)
+            if r:
+                axis, ang, piv = r
+                cube["rotation"] = {
+                    "origin": [round(piv[i] * sc, 3) for i in range(3)],
+                    "axis": axis,
+                    "angle": ang,
+                }
+            cubes.append(cube)
+        entry = {"name": name, "pivot": [round(pivot[i] * sc, 3) for i in range(3)]}
         if parent:
             entry["parent"] = parent
         entry["cubes"] = cubes
@@ -558,23 +736,36 @@ def build_animations():
                               "1.4": [0, 0, 0]}},
     })
 
-    transition = once_anim(2.0, {
-        "body": {"position": {"0": [0, 0, 0], "0.5": [0, 4, 0], "1.1": [0, 4, 0],
-                              "1.6": [0, 1.5, 0], "2.0": [0, 0, 0]},
-                 "rotation": {"0": [0, 0, 0], "0.5": [-14, 0, 0], "1.1": [-14, 0, 0],
-                              "1.6": [4, 0, 0], "2.0": [0, 0, 0]}},
-        "shell": {"rotation": {"0": [0, 0, 0], "0.5": [-8, 0, 0], "1.1": [-8, 0, 0],
-                               "2.0": [0, 0, 0]}},
-        "whorl": {"rotation": {"0": [0, 0, 0], "0.9": [0, 180, 0], "1.6": [0, 320, 0],
-                               "2.0": [0, 360, 0]}},
-        "neck": {"rotation": {"0": [0, 0, 0], "0.4": [-26, 0, 0], "1.2": [-26, 0, 0],
-                              "2.0": [0, 0, 0]}},
-        "head": {"rotation": {"0": [0, 0, 0], "0.4": [-12, 0, 0], "1.2": [-12, 0, 0],
-                              "1.7": [10, 0, 0], "2.0": [0, 0, 0]}},
-        "leg_fl": {"rotation": {"0": [0, 0, 0], "0.6": [-12, 0, 0], "1.4": [-12, 0, 0],
-                                "2.0": [0, 0, 0]}},
-        "leg_fr": {"rotation": {"0": [0, 0, 0], "0.6": [-12, 0, 0], "1.4": [-12, 0, 0],
-                                "2.0": [0, 0, 0]}},
+    # 转阶段 3.4s 四拍：①停步低头、四肢外撑 ②下沉+震动、裂隙渐亮
+    #                  ③壳侧岩甲与口沿向外掀开 ④口部短促喷发、抬头咆哮
+    transition = once_anim(3.4, {
+        "body": {"position": {"0": [0, 0, 0], "0.5": [0, -1.2, 0], "1.4": [0, -2.0, 0],
+                              "1.6": [0, -1.6, 0], "1.8": [0, -2.2, 0], "2.0": [0, -1.7, 0],
+                              "2.4": [0, 1.0, 0], "3.0": [0, 0.4, 0], "3.4": [0, 0, 0]},
+                 "rotation": {"0": [0, 0, 0], "0.6": [8, 0, 0], "1.6": [10, 0, 0],
+                              "2.0": [12, 0, 0], "2.6": [-8, 0, 0], "3.4": [0, 0, 0]}},
+        "shell": {"rotation": {"0": [0, 0, 0], "1.6": [5, 0, 0], "2.0": [7, 0, 0],
+                               "2.6": [-4, 0, 0], "3.4": [0, 0, 0]}},
+        "whorl": {"rotation": {"0": [0, 0, 0], "1.6": [0, 120, 0], "2.6": [0, 300, 0],
+                               "3.4": [0, 360, 0]}},
+        "plate_l": {"rotation": {"0": [0, 0, 0], "2.0": [0, 0, 0], "2.6": [0, 0, -26],
+                                 "3.4": [0, 0, -22]}},
+        "plate_r": {"rotation": {"0": [0, 0, 0], "2.0": [0, 0, 0], "2.6": [0, 0, 26],
+                                 "3.4": [0, 0, 22]}},
+        "neck": {"rotation": {"0": [0, 0, 0], "0.6": [22, 0, 0], "1.8": [24, 0, 0],
+                              "2.6": [-20, 0, 0], "3.4": [-6, 0, 0]}},
+        "head": {"rotation": {"0": [0, 0, 0], "0.6": [14, 0, 0], "1.8": [16, 0, 0],
+                              "2.6": [-16, 0, 0], "3.4": [-4, 0, 0]}},
+        "jaw": {"rotation": {"0": [0, 0, 0], "1.8": [0, 0, 0], "2.6": [-18, 0, 0],
+                             "3.0": [6, 0, 0], "3.4": [0, 0, 0]}},
+        "leg_fl": {"rotation": {"0": [0, 0, 0], "0.8": [0, 0, -10], "1.8": [-8, 0, -12],
+                                "2.6": [4, 0, -8], "3.4": [0, 0, 0]}},
+        "leg_fr": {"rotation": {"0": [0, 0, 0], "0.8": [0, 0, 10], "1.8": [-8, 0, 12],
+                                "2.6": [4, 0, 8], "3.4": [0, 0, 0]}},
+        "leg_bl": {"rotation": {"0": [0, 0, 0], "1.8": [6, 0, 0], "3.4": [0, 0, 0]}},
+        "leg_br": {"rotation": {"0": [0, 0, 0], "1.8": [6, 0, 0], "3.4": [0, 0, 0]}},
+        "tail": {"rotation": {"0": [0, 0, 0], "1.8": [-10, 0, 0], "2.6": [12, 0, 0],
+                              "3.4": [0, 0, 0]}},
     })
 
     death = once_anim(1.8, {
