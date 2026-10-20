@@ -443,7 +443,7 @@ CUBES_P2 += [
     ("shell", "spike_b", (-3, 44, 20), (6, 16, 6), "spike"),
     ("shell", "spike_l", (20, 44, -3), (6, 16, 6), "spike"),
     ("shell", "spike_r", (-26, 44, -3), (6, 16, 6), "spike"),
-    ("head", "crest", (-6, 44, -76), (12, 9, 14), "spike"),
+    ("head", "crest", (-6, 41, -73), (14, 9, 15), "spike"),
     ("head", "eye_glow_l", (9, 32, -79), (4, 5, 3), "lava"),
     ("head", "eye_glow_r", (-13, 32, -79), (4, 5, 3), "lava"),
 ]
