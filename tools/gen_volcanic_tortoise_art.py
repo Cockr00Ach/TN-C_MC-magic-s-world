@@ -19,6 +19,14 @@
 六个面的位置由 MC 标准布局决定，因此贴图与模型不会错位。
 
 用法：  python tools/gen_volcanic_tortoise_art.py
+
+⚠️ 2026-10-22 作者在 Blockbench 里手改了 phase2 的前裙岩板 `ch3` / `ch4`
+   （ch3 前移 2 单位；ch4 加高 1、加深 2，并把这两个方块的 UV 改成逐面
+   per-face，保持手改后贴图不拉伸走样）。这两处只落在
+   `geo/entity/volcanic_tortoise_phase2.geo.json` 与
+   `art/volcanic_tortoise/volcanic_tortoise_phase2.bbmodel` 里，
+   **没有**回写本脚本的 CUBES_P2 表；重跑本脚本会把手改覆盖掉。
+   下次要重生成，先按第 5 节的接管流程把 bbmodel 作为事实来源导入，别再直接跑本脚本。
 """
 
 from __future__ import annotations
