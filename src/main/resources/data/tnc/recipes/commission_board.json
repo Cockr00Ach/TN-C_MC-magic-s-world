@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "CCC",
+    "PPP",
+    "CCC"
+  ],
+  "key": {
+    "C": {
+      "item": "minecraft:dark_oak_planks"
+    },
+    "P": {
+      "item": "minecraft:paper"
+    }
+  },
+  "result": {
+    "item": "tnc:commission_board"
+  }
+}

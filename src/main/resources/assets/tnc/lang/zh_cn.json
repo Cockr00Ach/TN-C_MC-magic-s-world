@@ -787,5 +787,7 @@
   "block.tnc.spellflame_cauldron": "魔焰炼药釜",
   "item.tnc.elixir_edge": "锐锋琥珀",
   "key.tnc.elixir_sip": "饮用携行魔药",
-  "item.tnc.elixir_echo": "回声显影剂"
+  "item.tnc.elixir_echo": "回声显影剂",
+  "item.tnc.ritual_stirrer": "铜枝搅拌棒",
+  "block.tnc.commission_board": "旧铜纸签委托栏"
 }

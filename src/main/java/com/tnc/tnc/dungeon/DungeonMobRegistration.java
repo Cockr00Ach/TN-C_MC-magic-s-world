@@ -42,12 +42,12 @@ public final class DungeonMobRegistration {
 
     /** 远程怪共用的弹体（弩箭 / 火罐）。 */
     public static final RegistryObject<EntityType<DungeonBoltEntity>> BOLT = ENTITY_TYPES.register(
-            "dungeon_bolt",
+            "dungeon_creature_bolt",
             () -> EntityType.Builder
                     .<DungeonBoltEntity>of(DungeonBoltEntity::new, MobCategory.MISC)
                     .sized(0.35F, 0.35F)
                     .clientTrackingRange(6)
-                    .build("tnc:dungeon_bolt"));
+                    .build("tnc:dungeon_creature_bolt"));
 
     private static final Map<DungeonSpecies, RegistryObject<EntityType<TNDungeonMob>>> MOB_TYPES =
             new EnumMap<>(DungeonSpecies.class);

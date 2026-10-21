@@ -205,6 +205,7 @@ public class TNMod
     {
         IEventBus modEventBus = context.getModEventBus();
         com.tnc.tnc.life.routes.RouteContent.register(modEventBus);
+        com.tnc.tnc.dungeon.DungeonMobRegistration.register(modEventBus);
 
         // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);

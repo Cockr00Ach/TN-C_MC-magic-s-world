@@ -614,5 +614,7 @@
   "item.tnc.elixir_revive": "复苏晨曦",
   "entity.tnc.volcanic_tortoise": "Volcanic Tortoise",
   "item.tnc.wind_general_spawn_egg": "Wind General Model Preview Spawn Egg",
-  "item.tnc.elixir_flow": "续魔灵酊"
+  "item.tnc.elixir_flow": "续魔灵酊",
+  "item.tnc.ritual_stirrer": "铜枝搅拌棒",
+  "block.tnc.commission_board": "旧铜纸签委托栏"
 }

@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=south": {
+      "model": "tnc:block/commission_board",
+      "y": 0
+    },
+    "facing=west": {
+      "model": "tnc:block/commission_board",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "tnc:block/commission_board",
+      "y": 180
+    },
+    "facing=east": {
+      "model": "tnc:block/commission_board",
+      "y": 270
+    }
+  }
+}

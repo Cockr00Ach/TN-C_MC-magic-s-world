@@ -97,3 +97,7 @@ quest('home','&6有人等你归来','minecraft:bread',3,19,['酒馆委托栏点�
 write(R/'questbook/ftbquests/chapters/tnc_alchemy.snbt',dict(id=uid('chapter'),filename='tnc_alchemy',title='&3&l魔焰药典',icon='tnc:spellflame_cauldron',group='544E434C49464531',order_index=13,default_hide_dependency_lines=False,default_quest_shape='circle',images=[dict(image='tnc:textures/guide/alchemy_banner.png',x=0,y=-10,width=12,height=6.75,rotation=0.0)],quests=quests))
 write(R/'work/life-expedition-catalog.json',dict(elixirs=elixirs,commissions=len(offers),quests=len(quests)))
 print(f'Built {len(elixirs)} distinct potion icons, original cauldron/cache models, {len(offers)} commissions and {len(quests)} new quests')
+
+# The physical ritual supersedes the original desk UI and generated bottle placeholders.
+import runpy
+runpy.run_path(str(R / "tools/build_ritual_alchemy_assets.py"), run_name="__main__")

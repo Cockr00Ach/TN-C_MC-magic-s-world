@@ -22,4 +22,6 @@ public enum Elixir {
     Elixir(String id,String name,int color,String help,int seconds,int ticks,String...ingredients){this.id=id;this.name=name;this.color=color;this.help=help;this.seconds=seconds;this.ticks=ticks;this.ingredients=List.of(ingredients);}
     public static Elixir find(String id){return Arrays.stream(values()).filter(e->e.id.equals(id)).findFirst().orElse(null);}
     public boolean matches(List<String> input){var expected=new ArrayList<>(ingredients);var actual=new ArrayList<>(input);Collections.sort(expected);Collections.sort(actual);return expected.equals(actual);}
+    /** Visual and aroma families are semantic, independent of catalog order. */
+    public int effectFamily(){return switch(this){case BLOOM,CLEANSE,HEARTH,REVIVE->0;case SPRING,AWAKEN,FLOW,FOCUS,NIGHT,ECHO->1;case EDGE,SHELL,CINDER->2;case STRIDE,TIDE,FEATHER->3;};}
 }

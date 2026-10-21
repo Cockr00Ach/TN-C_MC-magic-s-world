@@ -27,6 +27,8 @@ public final class NativeBountiful {
     }
     public static void refreshCount(ServerPlayer p){
         var pos=TownServices.board(p.server.overworld());if(pos==null||!p.server.overworld().hasChunkAt(pos))return;
+        var record=AdventureSavedData.get(p.server).housing.getCompound("TownServices");
+        if(record.contains("LegacyPaperPos",4))pos=net.minecraft.core.BlockPos.of(record.getLong("LegacyPaperPos"));
         var be=p.server.overworld().getBlockEntity(pos);if(be==null||!be.getClass().getName().equals("io.ejekta.bountiful.content.board.BoardBlockEntity"))return;
         try{
             var completed=com.google.gson.JsonParser.parseString(be.saveWithoutMetadata().getString("completed")).getAsJsonObject();

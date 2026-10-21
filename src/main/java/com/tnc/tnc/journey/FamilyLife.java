@@ -29,7 +29,16 @@ public final class FamilyLife {
     }
     public static void initialize(ServerPlayer p){if(!McaResidents.available())return;try{
         var config=Class.forName("forge.net.mca.Config").getMethod("getInstance").invoke(null);config.getClass().getField("launchIntoDestiny").setBoolean(config,false);config.getClass().getField("allowDestinyTeleportation").setBoolean(config,false);
-        var d=mca(p);d.getClass().getMethod("setEntityDataSet",boolean.class).invoke(d,true);
+        var d=mca(p);var record=JourneyData.get(p.server).player(p.getUUID());
+        if(!record.getBoolean("AdultStartV1")){
+            var tag=((CompoundTag)d.getClass().getMethod("getEntityData").invoke(d)).copy();
+            var adult=(Enum<?>)Class.forName("forge.net.mca.entity.ai.relationship.AgeState").getField("ADULT").get(null);
+            tag.putInt("ageState",adult.ordinal());tag.putInt("Age",0);
+            d.getClass().getMethod("setEntityData",CompoundTag.class).invoke(d,tag);
+            ((net.minecraft.world.level.saveddata.SavedData)d).setDirty();
+            record.putBoolean("AdultStartV1",true);JourneyData.get(p.server).setDirty();
+        }
+        d.getClass().getMethod("setEntityDataSet",boolean.class).invoke(d,true);
     }catch(Exception ex){error(ex);}}
     public static CompoundTag profile(ServerPlayer p){var t=new CompoundTag();var saved=JourneyData.get(p.server).player(p.getUUID());var magic=MagicStone.getOrNull(p);
         t.putString("Name",saved.getString("Name").isBlank()?p.getGameProfile().getName():saved.getString("Name"));t.putBoolean("Named",saved.getBoolean("Named"));t.putDouble("Attack",p.getAttributeValue(Attributes.ATTACK_DAMAGE));t.putDouble("Health",p.getMaxHealth());t.putDouble("Armor",p.getArmorValue());t.putDouble("Speed",p.getAttributeValue(Attributes.MOVEMENT_SPEED));t.putInt("Mana",magic==null?0:magic.getMana());t.putInt("MaxMana",magic==null?0:magic.getMaxMana());var a=new CompoundTag();for(var e:Element.values())a.putInt(e.id(),magic==null?0:magic.getAffinity(e));t.put("Affinity",a);return t;

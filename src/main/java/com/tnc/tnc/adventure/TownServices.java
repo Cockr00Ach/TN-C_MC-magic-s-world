@@ -40,11 +40,11 @@ public final class TownServices {
         if(p.serverLevel()!=p.server.overworld()||!p.isAlive()||p.isSpectator()||com.tnc.tnc.combat.DownedCombat.isDowned(p))return false;
         return !p.serverLevel().getEntitiesOfClass(TownServiceNpc.class,new AABB(p.blockPosition()).inflate(8),n->n.isAlive()&&n.role().equals(role)&&n.distanceToSqr(p)<=64).isEmpty();
     }
-    public static boolean atBoard(ServerPlayer p){var b=board(p.server.overworld());return p.serverLevel()==p.server.overworld()&&p.isAlive()&&!p.isSpectator()&&!com.tnc.tnc.combat.DownedCombat.isDowned(p)&&b!=null&&b.closerToCenterThan(p.position(),8)&&p.serverLevel().hasChunkAt(b);}
+    public static boolean atBoard(ServerPlayer p){var b=board(p.server.overworld());return p.serverLevel()==p.server.overworld()&&p.isAlive()&&!p.isSpectator()&&!com.tnc.tnc.combat.DownedCombat.isDowned(p)&&b!=null&&b.closerToCenterThan(p.position(),16)&&p.serverLevel().hasChunkAt(b);}
     public static boolean openBoard(ServerPlayer p){if(!atBoard(p))return false;com.tnc.tnc.journey.CommissionService.open(p);return true;}
     public static void open(ServerPlayer p,TownServiceNpc npc){
         if(!near(p,npc.role()))return;AdventureService.milestone(p,"met_"+npc.role());AdventureService.sync(p,true,"",npc.role());
-        if(npc.role().equals("guild"))p.sendSystemMessage(Component.literal("登记在这里办理；接单与交付请右键旁边的Bountiful委托栏。"));
+        if(npc.role().equals("guild"))p.sendSystemMessage(Component.literal("登记在这里办理；接单与交付请右键旁边的旧铜纸签委托栏。"));
     }
     public static com.tnc.tnc.dialogue.DialogueScript introduce(ServerPlayer p,com.tnc.tnc.dialogue.DialogueScript original){
         var profile=AdventureService.profile(p);boolean first=!profile.hasMilestone("met_self");
@@ -110,7 +110,25 @@ public final class TownServices {
         var store=AdventureSavedData.get(s);if(!store.housing.contains("TownServices",10))store.housing.put("TownServices",new CompoundTag());var records=store.housing.getCompound("TownServices");
         for(var post:POSTS){if(!postReady(post,com.tnc.tnc.world.SkyLandscapeUpgrade.complete(s))||(post.role.equals("guild")&&!com.tnc.tnc.tavern.TavernUpgrade.complete(s)))continue;var record=records.getCompound(post.role);if(ensurePost(l,o,post,record)){records.put(post.role,record);store.setDirty();}}
         if(!com.tnc.tnc.world.SkyLandscapeUpgrade.complete(s)||!com.tnc.tnc.tavern.TavernUpgrade.complete(s))return;
-        var b=board(l);if(b==null||!l.hasChunkAt(b)||records.getBoolean("BoardInstalled"))return;
+        var b=board(l);if(b==null||!l.hasChunkAt(b))return;
+        var current=l.getBlockState(b);var id=ForgeRegistries.BLOCKS.getKey(current.getBlock());
+        if(current.is(com.tnc.tnc.alchemy.AlchemyContent.BOARD))return;
+        if(current.isAir()||id!=null&&id.toString().equals("bountiful:bountyboard")){
+            var old=l.getBlockEntity(b);if(old!=null){
+                for(var player:l.players())if(player.containerMenu.getClass().getName().contains("BoardScreenHandler")&&player.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(b))<1024)player.closeContainer();
+                var saved=old.saveWithFullMetadata();records.put("LegacyPaperBoard",saved);store.setDirty();
+                BlockPos side=null;for(var candidate:java.util.List.of(b.above(2),b.east(2),b.west(2)))if(l.getBlockState(candidate).isAir()){side=candidate;break;}
+                if(side==null)return; // Keep original legacy inventories when there is no safe side position.
+                l.setBlock(side,current,3);var moved=l.getBlockEntity(side);if(moved==null)return;
+                var copy=saved.copy();copy.putInt("x",side.getX());copy.putInt("y",side.getY());copy.putInt("z",side.getZ());moved.load(copy);moved.setChanged();l.sendBlockUpdated(side,current,current,3);
+                records.putLong("LegacyPaperPos",side.asLong());store.setDirty();
+                // Clear source inventories before old block onRemove to avoid duplicate inventory drops.
+                l.removeBlockEntity(b);
+            }
+            l.setBlock(b,com.tnc.tnc.alchemy.AlchemyContent.BOARD.defaultBlockState(),3);
+            records.putBoolean("BoardInstalled",true);records.putBoolean("BoardPlaced",true);store.setDirty();return;
+        }
+        if(records.getBoolean("BoardInstalled"))return;
         var block=ForgeRegistries.BLOCKS.getValue(ResourceLocation.parse("bountiful:bountyboard"));
         if(block==null||block==net.minecraft.world.level.block.Blocks.AIR)return;
         // Never replace source furniture or player work. A safe empty spot is found before placement.
@@ -143,12 +161,21 @@ public final class TownServices {
         }catch(ReflectiveOperationException error){com.mojang.logging.LogUtils.getLogger().error("TN-C Bountiful decree setup failed; board retained for inspection",error);return false;}
     }
     private static <T extends Comparable<T>> net.minecraft.world.level.block.state.BlockState direction(net.minecraft.world.level.block.state.BlockState s,net.minecraft.world.level.block.state.properties.Property<T> p,String value){return p.getValue(value).map(v->s.setValue(p,v)).orElse(s);}
+    public static boolean isTownBoard(ServerLevel l,BlockPos clicked){
+        var b=board(l);if(b==null||!b.closerThan(clicked,12))return false;
+        var block=l.getBlockState(clicked).getBlock();var id=ForgeRegistries.BLOCKS.getKey(block);
+        return block==com.tnc.tnc.alchemy.AlchemyContent.BOARD||id!=null&&id.toString().equals("bountiful:bountyboard");
+    }
     @SubscribeEvent(priority=net.minecraftforge.eventbus.api.EventPriority.HIGHEST) public static void use(PlayerInteractEvent.RightClickBlock e){
-        if(e.getEntity() instanceof ServerPlayer p&&NativeBountiful.isTownPaper(e.getItemStack())&&(!e.getPos().equals(board(p.server.overworld()))||!profileReady(p))){e.setCanceled(true);p.sendSystemMessage(Component.literal("这张城镇委托请回酒馆原生委托栏交付；先完成协会登记。"));return;}
-        if(!(e.getEntity() instanceof ServerPlayer p)||!atBoard(p)||!e.getPos().equals(board(p.serverLevel())))return;
-        AdventureService.milestone(p,"visited_board");
-        if(!AdventureService.profile(p).registered()){e.setCanceled(true);p.sendSystemMessage(Component.literal("先与协会接待员艾琳登记，再使用委托栏。"));}
-        else if(!NativeBountiful.isTownPaper(e.getItemStack())){e.setCanceled(true);e.setCancellationResult(net.minecraft.world.InteractionResult.SUCCESS);com.tnc.tnc.journey.CommissionService.open(p);}
+        if(!(e.getEntity() instanceof ServerPlayer p))return;
+        if(NativeBountiful.isTownPaper(e.getItemStack())&&(!atBoard(p)||!isTownBoard(p.serverLevel(),e.getPos())||!AdventureService.profile(p).registered())){
+            e.setCanceled(true);e.setCancellationResult(net.minecraft.world.InteractionResult.FAIL);p.sendSystemMessage(Component.literal("旧城镇委托纸请回酒馆旧纸交付栏结算；先向艾琳登记。"));return;
+        }
+        if(!atBoard(p)||!isTownBoard(p.serverLevel(),e.getPos()))return;
+        var id=ForgeRegistries.BLOCKS.getKey(p.serverLevel().getBlockState(e.getPos()).getBlock());
+        if(NativeBountiful.isTownPaper(e.getItemStack())&&id!=null&&id.toString().equals("bountiful:bountyboard")&&profileReady(p))return;
+        e.setCanceled(true);e.setCancellationResult(net.minecraft.world.InteractionResult.SUCCESS);
+        AdventureService.milestone(p,"visited_board");com.tnc.tnc.journey.CommissionService.open(p);
     }
     private static boolean profileReady(ServerPlayer p){return atBoard(p)&&AdventureService.profile(p).registered();}
 }

@@ -41,6 +41,31 @@
                   "source": "Color",
                   "target": "BlockEntityTag.Color",
                   "op": "replace"
+                },
+                {
+                  "source": "Water",
+                  "target": "BlockEntityTag.Water",
+                  "op": "replace"
+                },
+                {
+                  "source": "Stirs",
+                  "target": "BlockEntityTag.Stirs",
+                  "op": "replace"
+                },
+                {
+                  "source": "StirredAt",
+                  "target": "BlockEntityTag.StirredAt",
+                  "op": "replace"
+                },
+                {
+                  "source": "Ready",
+                  "target": "BlockEntityTag.Ready",
+                  "op": "replace"
+                },
+                {
+                  "source": "Burst",
+                  "target": "BlockEntityTag.Burst",
+                  "op": "replace"
                 }
               ]
             }
