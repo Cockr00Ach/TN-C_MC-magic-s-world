@@ -156,10 +156,9 @@ public final class TravelMusicController {
      * 原版那首 boss 曲本身不循环 ✗，而战斗可能打很久 ⇒ 靠这里续 ✓。
      */
     private static boolean tickBossMusic(Minecraft minecraft, SoundManager sounds) {
-        boolean bossNear = minecraft.level != null && minecraft.player != null
-                && !minecraft.level.getEntitiesOfClass(
-                        com.tnc.tnc.boss.YanDarkBossEntity.class,
-                        minecraft.player.getBoundingBox().inflate(BOSS_MUSIC_RANGE)).isEmpty();
+        ResourceLocation selectedMusic = BossBattleMusicSelector.select(minecraft,
+                bossTrack == null ? null : bossTrack.getLocation(), BOSS_MUSIC_RANGE);
+        boolean bossNear = selectedMusic != null;
 
         if (!bossNear) {
             if (bossTrack != null) {                     // boss 走了/死了：收掉 boss 曲，旅行音乐恢复 ✓
@@ -171,6 +170,11 @@ public final class TravelMusicController {
             return false;
         }
 
+        if (bossTrack != null && !bossTrack.getLocation().equals(selectedMusic)) {
+            sounds.stop(bossTrack);
+            bossTrack = null;
+            bossAge = 0;
+        }
         if (currentTrack != null) {                      // 旅行音乐让位 ✓
             sounds.stop(currentTrack);
             currentTrack = null;
@@ -188,7 +192,7 @@ public final class TravelMusicController {
             return true;
         }
         bossTrack = new SimpleSoundInstance(
-                BOSS_MUSIC,
+                selectedMusic,
                 SoundSource.MUSIC,
                 1.0F,
                 1.0F,
@@ -203,7 +207,7 @@ public final class TravelMusicController {
         );
         bossAge = 0;
         sounds.play(bossTrack);
-        LOGGER.info("[TN-C Music] boss music {} (dark boss nearby)", BOSS_MUSIC);
+        LOGGER.info("[TN-C Music] boss music {}", selectedMusic);
         return true;
     }
 

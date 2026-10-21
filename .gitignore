@@ -132,3 +132,5 @@ __pycache__/
 
 # Local Yan battle music, supplied separately.
 /src/main/resources/assets/tnc/sounds/music/boss/yan_crywolf.ogg
+/src/main/resources/assets/tnc/sounds/music/boss/earth_dawn.ogg
+/src/main/resources/assets/tnc/sounds/music/boss/wind_phoenix.ogg
