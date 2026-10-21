@@ -59,5 +59,5 @@ for i,(it,n,title) in enumerate(foods):route.append(node(title+'料理','minecra
 for i in range(1,9):route.append(node(f'首领珍馐 · 第{i}席',f'tnc:boss_feast_{i}',-14+(i-1)*4,10,'独立首领珍料＋熟牛肉＋碗制作。每种首次品尝永久生命+2；仅持有此节点不会发放生命奖励。',item=f'tnc:boss_feast_{i}'))
 for i,(it,n,title) in enumerate([('chest',4,'收纳'),('oak_planks',64,'装修用材'),('lantern',8,'暖灯'),('flower_pot',4,'窗台'),('bookshelf',6,'书房'),('painting',2,'纪念墙'),('white_bed',2,'安稳的床'),('composter',2,'庭院')]):route.append(node(title,'minecraft:'+it,-14+i*4,16,'自购空屋后自行布置。持有任务不越过产权保护，不自动替玩家装修。',item='minecraft:'+it,count=n))
 chapter(6,'living','&a&l归处续篇 · 厨房与装点','tnc:food_pouch',route)
-write(ROOT/'docs/town-progression-manifest.json',{'new_gameplay_nodes':serial,'bountiful_objective_entries':sum(map(len,groups.values())),'chapters':[3,4,5,6],'wand_items':35})
+write(ROOT/'docs/town/town-progression-manifest.json',{'new_gameplay_nodes':serial,'bountiful_objective_entries':sum(map(len,groups.values())),'chapters':[3,4,5,6],'wand_items':35})
 print('New real gameplay nodes:',serial,'native objectives:',sum(map(len,groups.values())))

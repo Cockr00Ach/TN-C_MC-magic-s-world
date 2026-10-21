@@ -27,27 +27,32 @@ def write(name, elements):
                "textures": TEXTURES, "elements": elements}
     (OUT / f"{name}.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
-# Tip at y=0 and pommel at y=64. Rendered at x16 scale, so the final sword is 64 blocks tall.
+# Broad two-handed executioner sword: long two-hand grip, heavy quillons, ricasso and fuller.
+# The authored length is normalized for vanilla baking and restored by the renderer.
 sword = [
-    box([6.65, 5, 7.2], [9.35, 15, 8.8], "blue", False),
-    box([5.4, 13, 6.9], [10.6, 42.5, 9.1], "blue", False),
-    box([7.2, 7, 6.55], [8.8, 43.5, 9.45], "light", False),
-    box([4.85, 17, 7.0], [5.65, 42, 9.0], "gold", False),
-    box([10.35, 17, 7.0], [11.15, 42, 9.0], "gold", False),
-    box([5.1, 41.5, 6.55], [10.9, 44.5, 9.45], "gold", False),
-    box([-4.5, 44, 7.0], [20.5, 47.2, 9.0], "gold", False),
-    box([-6, 43.1, 7.25], [-3.5, 48.2, 8.75], "light", False),
-    box([19.5, 43.1, 7.25], [22, 48.2, 8.75], "light", False),
-    box([-2.5, 46.6, 7.35], [2.5, 50.1, 8.65], "blue", False,
+    # Broad double-edged blade and a raised central fuller.
+    box([6.2, 5, 7.0], [9.8, 13, 9.0], "blue", False),
+    box([4.0, 12, 6.55], [12.0, 43.5, 9.45], "blue", False),
+    box([7.0, 6, 6.15], [9.0, 44.5, 9.85], "light", False),
+    box([3.35, 17, 6.7], [4.35, 42.5, 9.3], "gold", False),
+    box([11.65, 17, 6.7], [12.65, 42.5, 9.3], "gold", False),
+    # Ricasso and oversized crossguard make the silhouette read as a greatsword.
+    box([3.6, 41.5, 6.1], [12.4, 46.0, 9.9], "gold", False),
+    box([-7.5, 44.5, 6.65], [23.5, 48.5, 9.35], "gold", False),
+    box([-9.0, 43.5, 7.0], [-6.2, 50.0, 9.0], "light", False),
+    box([22.2, 43.5, 7.0], [25.0, 50.0, 9.0], "light", False),
+    box([-4.0, 47.0, 7.0], [2.2, 51.5, 9.0], "blue", False,
         {"origin": [0, 47.5, 8], "axis": "z", "angle": -22.5, "rescale": True}),
-    box([13.5, 46.6, 7.35], [18.5, 50.1, 8.65], "blue", False,
+    box([13.8, 47.0, 7.0], [20.0, 51.5, 9.0], "blue", False,
         {"origin": [16, 47.5, 8], "axis": "z", "angle": 22.5, "rescale": True}),
-    box([6.65, 47, 6.9], [9.35, 59.5, 9.1], "deep", True),
-    box([6.2, 48.5, 6.45], [9.8, 50, 9.55], "gold", False),
-    box([6.2, 52.5, 6.45], [9.8, 54, 9.55], "gold", False),
-    box([6.2, 56.5, 6.45], [9.8, 58, 9.55], "gold", False),
-    box([5.5, 59, 6.5], [10.5, 63, 9.5], "gold", False),
-    box([6.5, 62, 7], [9.5, 66, 9], "light", False),
+    # A true two-hand grip, nearly half a blade-width longer than the old hilt.
+    box([6.35, 48, 6.8], [9.65, 70.0, 9.2], "deep", True),
+    box([5.9, 50.0, 6.35], [10.1, 52.0, 9.65], "gold", False),
+    box([5.9, 56.0, 6.35], [10.1, 58.0, 9.65], "gold", False),
+    box([5.9, 62.0, 6.35], [10.1, 64.0, 9.65], "gold", False),
+    box([5.9, 68.0, 6.35], [10.1, 70.0, 9.65], "gold", False),
+    box([5.0, 69.5, 6.2], [11.0, 74.0, 9.8], "gold", False),
+    box([6.25, 73.0, 6.8], [9.75, 78.0, 9.2], "light", False),
 ]
 # Vanilla BlockElement coordinates must stay within -16..32. Keep the authored
 # silhouette, normalize it for baking, and restore the giant size in the renderer.

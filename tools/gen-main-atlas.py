@@ -37,6 +37,6 @@ for n in ch['quests']:
     label=n['title'];dr.text((x,y+23 if iswand else y+12),label,font=f,anchor='mt',fill='#efe1bb' if iswand else '#adbdc5')
 im.save(ROOT/'work/revision2/任务书七系排版预览.png')
 print('Generated main hub, numbered native atlas, title and layout preview.')
-manifest=ROOT/'docs/town-progression-manifest.json';data=json.loads(manifest.read_text(encoding='utf-8'))
+manifest=ROOT/'docs/town/town-progression-manifest.json';data=json.loads(manifest.read_text(encoding='utf-8'))
 data.update(total_real_gameplay_nodes=191,opening_hub_nodes=7,total_chapters=17,numbered_atlas_nodes=41)
 write(manifest,data)

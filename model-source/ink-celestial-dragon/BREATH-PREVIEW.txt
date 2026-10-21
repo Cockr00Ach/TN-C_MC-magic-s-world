@@ -1,0 +1,28 @@
+墨龙吐墨柱 / 第一版原生渲染预览
+
+2026-10-19 后续已完成战斗接入与三倍本体；当前状态见 docs/ink/ink-dragon-combat-v2.md。以下是早期预览阶段的历史记录。
+
+预览范围：先确认外观，不包含伤害、攻击 AI、动作状态同步或正式包安装。
+墨柱沿模型局部 -X 轴从嘴部 (-7.65, 14.14, 0) 喷出。
+展示长度 34 格，运行渲染接口限制最长 48 格。
+浓墨波动核心、旋转笔刷片、飞白细纹、飞溅墨丝；无持久粒子实体。
+
+可复用渲染：
+src/main/java/com/tnc/tnc/world/ink/client/InkDragonBreathVisuals.java
+隔离客户端预览：
+src/main/java/com/tnc/tnc/world/ink/client/InkDragonBreathAudit.java
+
+复现：Java 17，GRADLE_USER_HOME 指向项目 .gradle-user。
+gradlew.bat test runClient -PinkCraneVisualAudit -PinkDragonMeshAudit -PinkDragonBreathAudit -x downloadAssets --no-parallel --offline -Dnet.minecraftforge.gradle.check.certs=false
+
+原生截图：preview_breath_native_v1.png
+报告：work/ink-dragon-breath-native-report.json
+飞行巡游/身体摆动仍为待完成事项，本预览不代表已实现。
+
+第二版：空中定向喷吐与触地墨气喷发。
+预览截图：preview_breath_ground_v2.png
+报告：work/ink-dragon-breath-ground-report.json
+aimed() 接收嘴部位置、碰撞位置与碰撞面法线，对齐墨柱及喷发面。
+当前预览用固定落点演示，不代表已经接上动态索敌、地形射线或伤害。
+落点不规则淡墨铺开，卷起墨气片，墨丝向外飞溅，约 10 格扩散半径。
+正式安装与飞行 AI 仍未完成，勿把预览构建直接覆盖到正式整合包。

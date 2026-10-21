@@ -4,11 +4,21 @@ reorganize_docs.py  --  tidy the workspace documents into topic folders.
 
 PRINCIPLE
 =========
-Move, never delete. Living documents (with a maintainer header, no date in the
-name) KEEP their current path, because other sessions and javadoc comments point at
-them and a moved path breaks muscle memory. Everything dated -- the implementation
-records, fix reports and one-off snapshots that pile up -- goes under docs/archive/.
-Topic-specific design notes go to topic folders.
+Move, never delete. The first level of docs/ holds ONLY entry documents: the index,
+the living handovers (`*_交接.md`), the two fact sources (`当前状态.md`,
+`地图接入进度.md`) and the daily workflow. Everything else lives in a topic folder:
+dated implementation records and fix reports go to their topic (`spells/`,
+`casino/`, `life/`, `ink/`, ...), one-off records with no topic go to `misc/`,
+superseded snapshots go to `archive/`, and every image goes to `previews/`.
+
+Living documents KEEP their current path, because other sessions and javadoc
+comments point at them and a moved path breaks muscle memory. Dated files are free
+to move -- after each move, run `python tools/check_doc_links.py` and fix the
+references (tools that read a doc by path must be updated too).
+
+The MOVES table below is the single source of truth for the mapping, and doubles as
+a move log: re-running is idempotent, entries whose source is already gone and whose
+destination exists are reported as "done" and skipped.
 
 Everything uses `git mv`, so history and blame follow the file.
 
@@ -141,6 +151,68 @@ MOVES = {
     "docs/遗忘后无法学习修复-20260929.md": "docs/misc/遗忘后无法学习修复-20260929.md",
     "docs/下一位Agent完整交接-20260929.md": "docs/misc/下一位Agent完整交接-20260929.md",
     "docs/specs/20260930-counter-and-wand-fixes.md": "docs/misc/20260930-counter-and-wand-fixes.md",
+
+    # ===============================================================
+    # 2026-10-20 第二批：10-06 整理之后又堆起来的一级文件。
+    # 一级目录只留入口文档；新主题另开目录（boss / ink / life / perf）。
+    # ===============================================================
+
+    # ---- spells：风系两条链、暗手三轮、魔法石界面、火法合并 ----
+    "docs/wind_two_chains_20261018.md": "docs/spells/wind_two_chains_20261018.md",
+    "docs/wind_relic_refinement_20261018.md": "docs/spells/wind_relic_refinement_20261018.md",
+    "docs/wind_arsenal_20261018.md": "docs/spells/wind_arsenal_20261018.md",
+    "docs/wind_phantom_weapons_20261018.md": "docs/spells/wind_phantom_weapons_20261018.md",
+    "docs/手与血爪与索敌-20261010.md": "docs/spells/手与血爪与索敌-20261010.md",
+    "docs/手掌方向与索敌吸血-20261010.md": "docs/spells/手掌方向与索敌吸血-20261010.md",
+    "docs/手掌黑线多手-20261010.md": "docs/spells/手掌黑线多手-20261010.md",
+    "docs/魔法石界面布局修复-20261018.md": "docs/spells/魔法石界面布局修复-20261018.md",
+    "docs/同伙火法合并与新世界测试-20261005.md": "docs/spells/同伙火法合并与新世界测试-20261005.md",
+
+    # ---- boss：巨兽 / 巨像 Boss / 地核战场（2026-10-17 起的新主题）----
+    "docs/stone_lancer_heavy_20261017.md": "docs/boss/stone_lancer_heavy_20261017.md",
+    "docs/stone_lancer_burrow_20261017.md": "docs/boss/stone_lancer_burrow_20261017.md",
+    "docs/dark_giant_upperbody_20261018.md": "docs/boss/dark_giant_upperbody_20261018.md",
+    "docs/earth_arena_recovery_20261019.md": "docs/boss/earth_arena_recovery_20261019.md",
+
+    # ---- ink：水墨系 Boss / 坐骑（墨鹤、墨龙）----
+    "docs/ink-crane-v5.md": "docs/ink/ink-crane-v5.md",
+    "docs/ink-dragon-combat-v2.md": "docs/ink/ink-dragon-combat-v2.md",
+    "docs/ink-dragon-flight-v3.md": "docs/ink/ink-dragon-flight-v3.md",
+    "docs/ink-dragon-ground-observation-v4.md": "docs/ink/ink-dragon-ground-observation-v4.md",
+
+    # ---- life：四条生活路线 / 魔植 / 工坊 / 魔力视 ----
+    # 这几篇互相引用成一簇，整簇一起搬，相对链接才不会断。
+    "docs/FTB四条生活路线与魔力体系方案-20261006.md": "docs/life/FTB四条生活路线与魔力体系方案-20261006.md",
+    "docs/传统植物盘点与四季安排-20261006.md": "docs/life/传统植物盘点与四季安排-20261006.md",
+    "docs/魔植与异兽逐品种任务规格-20261006.md": "docs/life/魔植与异兽逐品种任务规格-20261006.md",
+    "docs/四条生活路线实装与测试说明-20261007.md": "docs/life/四条生活路线实装与测试说明-20261007.md",
+    "docs/生活路线验证记录-20261007.md": "docs/life/生活路线验证记录-20261007.md",
+    "docs/玩法路线与修复-20261018.md": "docs/life/玩法路线与修复-20261018.md",
+    "docs/魔力视与独立城堡-测试说明-20261018.md": "docs/life/魔力视与独立城堡-测试说明-20261018.md",
+
+    # ---- perf：启动 / 加载 / 卡顿 排查 ----
+    "docs/启动卡顿排查-20261010.md": "docs/perf/启动卡顿排查-20261010.md",
+    "docs/地图卡顿_勘测阻塞生成-20261010.md": "docs/perf/地图卡顿_勘测阻塞生成-20261010.md",
+    "docs/skyisland-perf-fix-20261010.patch": "docs/perf/skyisland-perf-fix-20261010.patch",
+    "docs/Conquest换官方版-20261010.md": "docs/perf/Conquest换官方版-20261010.md",
+    "docs/startup_spellcloud_fix_20261018.md": "docs/perf/startup_spellcloud_fix_20261018.md",
+
+    # ---- quests ----
+    "docs/玩家任务书恢复说明-20261007.md": "docs/quests/玩家任务书恢复说明-20261007.md",
+
+    # ---- town：被 tools/ 读写的进度清单也归主题目录 ----
+    "docs/town-progression-manifest.json": "docs/town/town-progression-manifest.json",
+
+    # ---- 配图一律进 previews/（旧规则是"留在一级目录别动"，2026-10-20 起改掉）----
+    "docs/一周目正史_物品预览.png": "docs/previews/一周目正史_物品预览.png",
+    "docs/宝箱传说残卷_物品预览.png": "docs/previews/宝箱传说残卷_物品预览.png",
+    "docs/导图_全法术.png": "docs/previews/导图_全法术.png",
+    "docs/庄鹊让_NPC皮肤预览.png": "docs/previews/庄鹊让_NPC皮肤预览.png",
+    "docs/庄鹊让_候选模型对比.png": "docs/previews/庄鹊让_候选模型对比.png",
+    "docs/魔法阵_贴图预览.png": "docs/previews/魔法阵_贴图预览.png",
+
+    # ---- 生成物（audit_docs.py 的产出，别当文档读）----
+    "docs/_doc-inventory.md": "docs/misc/_doc-inventory.md",
 }
 
 
@@ -161,20 +233,25 @@ def main(argv):
             continue
         src = os.path.join(repo, old.replace("/", os.sep))
         dst = os.path.join(repo, new.replace("/", os.sep))
-        if not os.path.isfile(src):
+        if not os.path.isfile(src) and os.path.isfile(dst):
+            # an earlier run already moved it: the entry stays as move history
+            plan.append(("done", old, new))
+        elif not os.path.isfile(src):
             plan.append(("MISSING", old, new))
         elif os.path.exists(dst):
             plan.append(("EXISTS", old, new))
         else:
             plan.append(("move", old, new))
 
-    bad = [p for p in plan if p[0] != "move"]
-    print("planned moves: %d   problems: %d" % (len([p for p in plan if p[0] == 'move']), len(bad)))
+    bad = [p for p in plan if p[0] in ("MISSING", "EXISTS")]
+    todo = [p for p in plan if p[0] == "move"]
+    print("planned moves: %d   already moved: %d   problems: %d"
+          % (len(todo), len(plan) - len(todo) - len(bad), len(bad)))
     for kind, old, new in plan:
         if kind == "move":
-            print("  %-62s -> %s" % (old, new))
+            print("  %-64s -> %s" % (old, new))
     for kind, old, new in bad:
-        print("  [%s] %s" % (kind, old))
+        print("  [%s] %s -> %s" % (kind, old, new))
 
     if not args.apply:
         print("\ndry run only. Re-run with --apply to move them.")

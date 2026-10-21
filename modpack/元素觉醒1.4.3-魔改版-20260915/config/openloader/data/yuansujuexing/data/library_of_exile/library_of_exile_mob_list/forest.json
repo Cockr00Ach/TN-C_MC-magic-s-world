@@ -1,0 +1,32 @@
+{
+  "id": "forest",
+  "mobs": [
+    {
+      "mob_id": "tnc:sewer_crawler",
+      "weight": 380
+    },
+    {
+      "mob_id": "tnc:moss_carapace_spider",
+      "weight": 250
+    },
+    {
+      "mob_id": "tnc:goblin_skirmisher",
+      "weight": 220
+    },
+    {
+      "mob_id": "minecraft:cave_spider",
+      "weight": 150
+    },
+    {
+      "mob_id": "minecraft:witch",
+      "weight": 100
+    }
+  ],
+  "tags": {
+    "tags": [
+      "forest",
+      "harvest"
+    ]
+  },
+  "weight": 1000
+}

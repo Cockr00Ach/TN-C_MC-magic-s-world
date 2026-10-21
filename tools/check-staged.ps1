@@ -76,14 +76,33 @@ foreach ($f in $staged) {
 # Exact-path exception only; other images and generated artifacts keep the 2 MB guard.
 $sizeExempt = '^(src/main/resources/assets/tnc/sounds/(music/travel/.*|tavern/(wander_ward(_1)?|tavern_third))\.ogg|src/main/resources/assets/tnc/textures/gui/arcane_grimoire\.png)$'
 
+# Authored dragon source models and the runtime mesh are intentional project
+# resources, not third-party packs. Exact paths only, still capped at 20 MiB.
+$authoredDragonAssets = @(
+    'model-source/ink-celestial-dragon/ink_celestial_dragon.bbmodel',
+    'model-source/ink-celestial-dragon/ink_celestial_dragon_flight.bbmodel',
+    'model-source/ink-celestial-dragon/ink_celestial_dragon.glb',
+    'src/main/resources/assets/tnc/meshes/ink_celestial_dragon.mesh'
+)
+
 $totalBytes = 0
+$mergeHead = @(& git -C $repoRoot rev-parse -q --verify MERGE_HEAD 2>$null)
 foreach ($f in $staged) {
     $full = Join-Path $repoRoot ($f -replace '/', '\')
     if (-not (Test-Path -LiteralPath $full)) { continue }
     $len = (Get-Item -LiteralPath $full).Length
     $totalBytes += $len
     if (($f -replace '\\', '/') -match $sizeExempt) { continue }
+    if (($authoredDragonAssets -contains ($f -replace '\\', '/')) -and $len -le 20MB) { continue }
     if ($len -gt ($MaxMB * 1MB)) {
+        # A merge may bring in assets already published by its other parent.
+        # Identical staged blobs add no new large object; modified/new blobs
+        # still obey the normal size guard. Forbidden paths remain blocked.
+        if ($mergeHead.Count -eq 1) {
+            $parentBlob = @(& git -C $repoRoot rev-parse --verify ('{0}:{1}' -f $mergeHead[0], $f) 2>$null)
+            $stagedBlob = @(& git -C $repoRoot rev-parse --verify (':' + $f) 2>$null)
+            if ($parentBlob.Count -eq 1 -and $stagedBlob.Count -eq 1 -and $parentBlob[0] -eq $stagedBlob[0]) { continue }
+        }
         $problems.Add(("  [too big]   {0}`n              -> {1:N1} MB (limit {2} MB)" -f $f, ($len / 1MB), $MaxMB))
     }
 }

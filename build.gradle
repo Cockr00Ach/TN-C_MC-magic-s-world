@@ -86,6 +86,24 @@ minecraft {
         }
 
         client {
+            if (project.hasProperty('inkCraneVisualAudit')) {
+                if (project.hasProperty('inkPaintingWorldAudit')) property 'tnc.inkPaintingWorldAudit', 'true'
+                if (project.hasProperty('inkWingedTigerAudit')) property 'tnc.inkTigerAudit', 'true'
+                if (project.hasProperty('inkTigerPoseAudit')) property 'tnc.inkTigerPoseAudit', 'true'
+                if (project.hasProperty('inkDragonMeshAudit')) property 'tnc.inkDragonAudit', 'true'
+                if (project.hasProperty('inkDragonBreathAudit')) property 'tnc.inkDragonBreathAudit', 'true'
+                if (project.hasProperty('inkDragonDiveAudit')) property 'tnc.inkDragonDiveAudit', 'true'
+                if (project.hasProperty('inkDragonCombatAudit')) property 'tnc.inkDragonCombatAudit', 'true'
+                if (project.hasProperty('inkDragonFlightAudit')) property 'tnc.inkDragonFlightAudit', 'true'
+                if (project.hasProperty('inkDragonVisibilityAudit')) property 'tnc.inkDragonVisibilityAudit', 'true'
+                if (project.hasProperty('inkDragonWorldAudit')) property 'tnc.inkDragonWorldAudit', 'true'
+                workingDirectory project.file('work/ink-crane-client-audit')
+                property 'tnc.inkCraneVisualAudit', 'true'
+                property 'tnc.inkCraneVisualAuditReport', file('work/ink-crane-client-audit-report.json').absolutePath
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+                args '--quickPlaySingleplayer', 'casino-gallery', '--width', '1800', '--height', '1000'
+            }
             if (project.hasProperty('earthArenaAudit')) {
                 workingDirectory project.file(project.findProperty('earthArenaAuditDir') ?: 'work/earth-arena-audit')
                 property 'mixin.env.remapRefMap', 'true'
@@ -223,14 +241,18 @@ minecraft {
         // The gametest system is also enabled by default for other run configs under the /test command.
         gameTestServer {
             property 'forge.enabledGameTestNamespaces', project.hasProperty('lifeRoutesTests') ? 'tncroute' : mod_id
-            if (project.hasProperty('earthArenaTests')) {
-                property 'forge.enabledGameTestNamespaces', 'tnceartharena'
-                workingDirectory project.file('work/earth-arena-recovery-tests-20261019')
+            if (project.hasProperty('dungeonMobTests')) {
+                property 'forge.enabledGameTestNamespaces', 'tncdungeon'
                 property 'mixin.env.remapRefMap', 'true'
                 property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
             }
             if (project.hasProperty('leviathanTests')) {
                 property 'forge.enabledGameTestNamespaces', 'tncleviathan'
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+            }
+            if (project.hasProperty('inkCraneTests')) {
+                property 'forge.enabledGameTestNamespaces', 'tncink'
                 property 'mixin.env.remapRefMap', 'true'
                 property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
             }
@@ -241,6 +263,8 @@ minecraft {
             if (project.hasProperty('earthArenaTests')) {
                 property 'forge.enabledGameTestNamespaces', 'tnceartharena'
                 workingDirectory project.file('work/earth-arena-tests')
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
             }
             if (project.hasProperty('ftbQuestLoadTests')) {
                 workingDirectory project.file(project.findProperty('ftbQuestLoadDir') ?: 'work/ftb-route-load-test')
@@ -347,11 +371,14 @@ dependencies {
     compileOnly fg.deobf('touhoulittlemaid:touhoulittlemaid:1.5.2')
     compileOnly fg.deobf('geckolib:geckolib:4.8.4')
 
+    if (project.hasProperty('dungeonMobTests')) {
+        runtimeOnly fg.deobf('geckolib:geckolib:4.8.4')
+    }
     testImplementation platform('org.junit:junit-bom:5.10.2')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation fg.deobf('geckolib:geckolib:4.8.4')
     testRuntimeOnly files(zipTree('libs/geckolib-4.8.4.jar').matching { include 'META-INF/jarjar/*.jar' })
-    if (project.hasProperty('leviathanTests')) {
+    if (project.hasProperty('leviathanTests') || project.hasProperty('inkCraneTests') || project.hasProperty('inkCraneVisualAudit')) {
         runtimeOnly fg.deobf('geckolib:geckolib:4.8.4')
     }
     if (project.hasProperty('heroskandRealmTests')) {
@@ -366,6 +393,12 @@ dependencies {
     // Optional headless building smoke tests need the same NPC animation API as the pack.
     // Compile-only keeps normal distribution unchanged; enable with -PbuildingGameTests.
     if (project.hasProperty('buildingGameTests') || project.hasProperty('magicStoneUiAudit') || project.hasProperty('journeyTests') || project.hasProperty('dungeonMobTests')) {
+        runtimeOnly fg.deobf('geckolib:geckolib:4.8.4')
+    }
+    // 地下城小怪 17 只：无头 GameTest 要真跑 GeckoLib 实体（模型/控制器在服务端也要解析），
+    // 所以同样按需把 GeckoLib 塞进运行时 —— 只有 -PdungeonMobTests 时才生效，
+    // 出厂 jar 仍然不打包它（运行时由整合包提供）。
+    if (project.hasProperty('dungeonMobTests')) {
         runtimeOnly fg.deobf('geckolib:geckolib:4.8.4')
     }
     // Uses unmodified existing pack jars in an isolated GameTest world.

@@ -1,0 +1,25 @@
+{
+  "id": "generic_undead",
+  "mobs": [
+    {
+      "mob_id": "tnc:bone_crossbowman",
+      "weight": 400
+    },
+    {
+      "mob_id": "minecraft:zombie",
+      "weight": 300
+    },
+    {
+      "mob_id": "minecraft:skeleton",
+      "weight": 200
+    },
+    {
+      "mob_id": "minecraft:husk",
+      "weight": 100
+    }
+  ],
+  "tags": {
+    "tags": []
+  },
+  "weight": 1000
+}

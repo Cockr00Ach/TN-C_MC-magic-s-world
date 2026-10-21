@@ -36,19 +36,21 @@ public final class WaterSolidModels {
         draw(name,poses,buffers,1);
     }
     static void draw(String name,PoseStack poses,MultiBufferSource buffers,float opacity) {
+        draw(name,poses,buffers,opacity,1.0F,LightTexture.FULL_BRIGHT);
+    }
+    static void draw(String name,PoseStack poses,MultiBufferSource buffers,float opacity,float brightness,int packedLight) {
         var mc=Minecraft.getInstance();var model=mc.getModelManager().getModel(id(name));
         poses.pushPose();poses.translate(-.5,0,-.5);
-        // The seal is an open mesh: its blue/gold strokes need opaque depth writes.
-        // Additive-only strokes can be erased by an opaque boss rendered afterwards.
-        // Empty spaces stay transparent; emission below still supplies the glow.
+// Open seal strokes keep depth writes while dimmed models retain local tinting.
+        boolean translucent=opacity<1 || brightness<1;
         boolean solidRelic=name.equals("seal")||name.equals("sea_god_sword")||name.equals("raindrop");
-        var consumer=buffers.getBuffer(opacity<1?WaterModelRenderTypes.alpha():solidRelic?RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS):RenderType.eyes(TextureAtlas.LOCATION_BLOCKS));
-        if(opacity<1)consumer=new Alpha(consumer,opacity);
-        mc.getItemRenderer().renderModelLists(model,ItemStack.EMPTY,LightTexture.FULL_BRIGHT,
+        var consumer=buffers.getBuffer(translucent?WaterModelRenderTypes.alpha():solidRelic?RenderType.entityCutoutNoCull(TextureAtlas.LOCATION_BLOCKS):RenderType.eyes(TextureAtlas.LOCATION_BLOCKS));
+        if(translucent)consumer=new TintAlpha(consumer,brightness,opacity);
+        mc.getItemRenderer().renderModelLists(model,ItemStack.EMPTY,packedLight,
                 OverlayTexture.NO_OVERLAY,poses,consumer);
         if(name.equals("sea_god_sword")||name.equals("seal")) {
             // Full light-map brightness alone does not create the additive glow.
-            var emission=new Alpha(buffers.getBuffer(WaterModelRenderTypes.emission()),
+            var emission=new TintAlpha(buffers.getBuffer(WaterModelRenderTypes.emission()),1,
                     name.equals("sea_god_sword")?.85F:Math.max(.42F,opacity*.7F));
             mc.getItemRenderer().renderModelLists(model,ItemStack.EMPTY,LightTexture.FULL_BRIGHT,
                     OverlayTexture.NO_OVERLAY,poses,emission);
@@ -67,7 +69,8 @@ public final class WaterSolidModels {
         poses.scale(size,(float)(.8+Math.min(radius,8)*.15),size);
         draw("seal",poses,buffers,opacity);poses.popPose();
     }
-    static void prisonPanels(PoseStack poses,MultiBufferSource buffers,double radius,double height,int panels,double age,float opacity) {
+    static void prisonPanels(PoseStack poses,MultiBufferSource buffers,double radius,double height,int panels,double age,
+                             float opacity,float brightness,int packedLight) {
         double circumference=Math.PI*2*radius, width=circumference/panels;
         for(int i=0;i<panels;i++) {
             double angle=i*Math.PI*2/panels+age*.003;
@@ -75,19 +78,23 @@ public final class WaterSolidModels {
             poses.translate(Math.cos(angle)*radius*1.018,.08,Math.sin(angle)*radius*1.018);
             poses.mulPose(Axis.YP.rotationDegrees((float)(90-angle*180/Math.PI)));
             poses.scale((float)(width/.76),(float)height,.72F);
-            draw("water_prison_panel",poses,buffers,opacity);
+            draw("water_prison_panel",poses,buffers,opacity,brightness,packedLight);
             poses.popPose();
         }
     }
-    private record Alpha(VertexConsumer target,float opacity) implements VertexConsumer {
+    /** Preview/backward-compatible overload; gameplay passes explicit dimming and scene light. */
+    static void prisonPanels(PoseStack poses,MultiBufferSource buffers,double radius,double height,int panels,double age,float opacity) {
+        prisonPanels(poses,buffers,radius,height,panels,age,opacity,1.0F,LightTexture.FULL_BRIGHT);
+    }
+    private record TintAlpha(VertexConsumer target,float brightness,float opacity) implements VertexConsumer {
         public VertexConsumer vertex(double x,double y,double z){target.vertex(x,y,z);return this;}
-        public VertexConsumer color(int r,int g,int b,int a){target.color(r,g,b,Math.round(a*opacity));return this;}
+        public VertexConsumer color(int r,int g,int b,int a){target.color(Math.round(r*brightness),Math.round(g*brightness),Math.round(b*brightness),Math.round(a*opacity));return this;}
         public VertexConsumer uv(float u,float v){target.uv(u,v);return this;}
         public VertexConsumer overlayCoords(int u,int v){target.overlayCoords(u,v);return this;}
         public VertexConsumer uv2(int u,int v){target.uv2(u,v);return this;}
         public VertexConsumer normal(float x,float y,float z){target.normal(x,y,z);return this;}
         public void endVertex(){target.endVertex();}
-        public void defaultColor(int r,int g,int b,int a){target.defaultColor(r,g,b,Math.round(a*opacity));}
+        public void defaultColor(int r,int g,int b,int a){target.defaultColor(Math.round(r*brightness),Math.round(g*brightness),Math.round(b*brightness),Math.round(a*opacity));}
         public void unsetDefaultColor(){target.unsetDefaultColor();}
     }
 }

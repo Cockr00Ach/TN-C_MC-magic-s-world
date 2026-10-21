@@ -1,4 +1,4 @@
-# TN-C mod jar verifier
+﻿# TN-C mod jar verifier
 #
 #   Checks the built mod jar BEFORE the game is started, so that a
 #   "compiles fine but silently does nothing" mistake cannot slip through.
@@ -138,7 +138,27 @@ try {
         'com/tnc/tnc/client/MagicStoneScreen.class',
         'com/tnc/tnc/client/MagicStoneClientEvents.class',
         'com/tnc/tnc/client/MagicStoneHud.class',
-        'com/tnc/tnc/client/MagicStoneKeys.class'
+        'com/tnc/tnc/client/MagicStoneKeys.class',
+        # casino machines (slot machine + roulette table + the 4x2 gamble table).
+        # All geometry is drawn in code (see casino/client/TNCasinoGeometry), so the
+        # CLIENT renderer classes matter as much as the server ones: a missing
+        # renderer makes the machine completely invisible with no error in the log.
+        # The gamble table is here because it USED to rely on models/block/
+        # gamble_table.json, whose extents (0..64) exceed the loader limit (-16..32),
+        # so it silently never rendered at all.
+        'com/tnc/tnc/casino/machine/TNCasinoRegistry.class',
+        'com/tnc/tnc/casino/machine/TNCasinoMachineBlock.class',
+        'com/tnc/tnc/casino/machine/TNSlotMachineBlock.class',
+        'com/tnc/tnc/casino/machine/TNSlotMachineEntity.class',
+        'com/tnc/tnc/casino/machine/TNRouletteTableBlock.class',
+        'com/tnc/tnc/casino/machine/TNRouletteTableEntity.class',
+        'com/tnc/tnc/casino/machine/TNGambleTableBlock.class',
+        'com/tnc/tnc/casino/machine/TNGambleTableEntity.class',
+        'com/tnc/tnc/casino/client/TNCasinoClient.class',
+        'com/tnc/tnc/casino/client/TNSlotMachineRenderer.class',
+        'com/tnc/tnc/casino/client/TNRouletteRenderer.class',
+        'com/tnc/tnc/casino/client/TNGambleTableRenderer.class',
+        'com/tnc/tnc/casino/client/TNCasinoGeometry.class'
     )
     function Get-ClassText([string]$entryName) {
         $entry = $zip.Entries | Where-Object { $_.FullName -eq $entryName }
@@ -1123,29 +1143,48 @@ try {
     if ($missingTex.Count -eq 0) { Ok 'every texture a projectile model references is shipped in the jar' }
     else { Fail ('projectile model references a texture that is NOT in the jar (in game the model loads but samples a missing sprite; the client only says "Missing textures in model ..."): ' + ($missingTex -join '; ')) }
 
-    # ---------------- D1b10. the two things that make a projectile model UNBAKEABLE ----
+    # ---------------- D1b10. the things that make a projectile model UNBAKEABLE ----
     # Why this exists (2026-10-10, author report: "龙卷风模型是紫黑啊" = "the tornado model
     # is purple-black"):
-    #   The tornado shipped with `"texture_size": [32, 32]`. The vanilla model spec does
-    #   NOT know that field, so the model is never baked; the engine's CustomModels.render
-    #   then falls back to Forge's MISSING model, which draws as the purple-black cube.
-    #   `docs/spells/投射物模型_配方.md` documents this exact trap for hand exports, and
-    #   tools/import_author_model.ps1 strips it -- but our own generator emitted it and
-    #   nothing checked. Same story for a degenerate face UV: `"uv": [0, 0]` is not a box,
-    #   so every face collapses onto one texel (it renders, but wrong).
-    # Both are cheap to detect and both are fatal-or-wrong on screen, so: HARD FAIL.
+    #   a) ROTATION ANGLE. ★ This is what actually did it. BlockElement's deserializer
+    #      THROWS on any angle outside the five vanilla knows:
+    #          JsonParseException: Invalid rotation 67.5 found,
+    #                              only -45/-22.5/0/22.5/45 allowed
+    #      One throw makes the WHOLE model unbakeable: ModelBakery logs
+    #      "Failed to load model tnc:models/projectile/X.json", falls back to the missing
+    #      model, and the game draws the purple-black cube.
+    #      The generator's own guard said "multiples of 22.5 degrees", which is WRONG --
+    #      90 and 135 are multiples of 22.5 and are still rejected -- so the tornado's
+    #      7-layer twist (up to 135 degrees) sailed straight through every existing check
+    #      and shipped twice. Hence this gate.
+    #   b) "texture_size". Non-standard for the vanilla model spec. The first diagnosis
+    #      blamed this field for the purple-black; the log's actual exception was (a).
+    #      It stays banned anyway -- the recipe doc's export table says to delete it and
+    #      tools/import_author_model.ps1 strips it on import.
+    #   c) A degenerate face UV: `"uv": [0, 0]` is not a box, so the face collapses onto
+    #      one texel (it renders, but wrong).
+    # All three are cheap to detect and fatal-or-wrong on screen, so: HARD FAIL.
+    $legalAngles = @(-45.0, -22.5, 0.0, 22.5, 45.0)
     $badFields = @()
     foreach ($entry in ($zip.Entries | Where-Object {
                 $_.FullName -like 'assets/tnc/models/projectile/*.json' })) {
         $er = New-Object System.IO.StreamReader($entry.Open(), [System.Text.Encoding]::UTF8)
         $text = $er.ReadToEnd(); $er.Close()
         if ($text -match '"texture_size"\s*:') {
-            $badFields += "$($entry.FullName) has texture_size (vanilla spec rejects the model => it is never baked => purple-black in game)"
+            $badFields += "$($entry.FullName) has texture_size (non-standard: the recipe doc's export table says delete it)"
         }
         $model = $null
         try { $model = ConvertFrom-TncSpellJson $text } catch { continue }
         foreach ($el in @($model.elements)) {
             if ($null -eq $el) { continue }
+            $rot = $el.rotation
+            if ($null -ne $rot -and $null -ne $rot.angle) {
+                $legal = $false
+                foreach ($a in $legalAngles) { if ([double]$rot.angle -eq $a) { $legal = $true } }
+                if (-not $legal) {
+                    $badFields += "$($entry.FullName) has element rotation angle $($rot.angle), not one of -45/-22.5/0/22.5/45 (vanilla throws 'Invalid rotation' => the WHOLE model never bakes => purple-black in game)"
+                }
+            }
             foreach ($faceName in @('north', 'east', 'south', 'west', 'up', 'down')) {
                 $face = $el.faces.$faceName
                 if ($null -eq $face) { continue }
@@ -1157,7 +1196,7 @@ try {
             }
         }
     }
-    if ($badFields.Count -eq 0) { Ok 'every projectile model is bakeable (no texture_size, every face UV is a 4-value box)' }
+    if ($badFields.Count -eq 0) { Ok 'every projectile model is bakeable (rotation angles legal, no texture_size, every face UV is a 4-value box)' }
     else { Fail ('projectile model(s) that will NOT bake (purple-black in game) or sample the wrong texel: ' + ($badFields -join '; ')) }
 
     # ---------------- D1c. HUD entry point + its keybind ----------------
@@ -1256,7 +1295,14 @@ try {
                          'com/tnc/tnc/magic/MagicStoneDiagnostics.class',
                          'com/tnc/tnc/Config.class',
                          'com/tnc/tnc/command/MagicStoneCommand.class',
-                         'com/tnc/tnc/client/MagicStoneClientEvents.class')) {
+                         'com/tnc/tnc/client/MagicStoneClientEvents.class',
+                         # casino: the registry must be annotated or the blocks/items/
+                         # block-entity types are never registered (machine does not
+                         # exist at all); the client class must be annotated or the
+                         # renderers are never registered (machine exists but is
+                         # completely invisible, still with no error in the log).
+                         'com/tnc/tnc/casino/machine/TNCasinoRegistry.class',
+                         'com/tnc/tnc/casino/client/TNCasinoClient.class')) {
         $text = Get-ClassText $class
         if ($null -eq $text) { continue }
         if ($text.Contains($annotation)) { Ok "has @Mod.EventBusSubscriber: $class" }
@@ -1453,6 +1499,36 @@ if (-not $chkPython) {
         }
     }
     $ErrorActionPreference = $savedEap
+}
+
+# ---------------- G2. coin family: re-imported models + the seven marks ----------------
+# 2026-10-08, after the first attempt shipped the author's three files unchanged, the author
+# reported again ("游戏里金银铜三个币模型都有问题，只有金币的模型是正确的"):
+#   * gold_coin.json carried a LEGACY `{"x":0,"y":-90,"z":0}` rotation block -- 1.20.1 wants
+#     "angle"+"axis" and throws on the whole model -> purple-black cube;
+#   * copper/silver had been baked with the INVERTED Y rotation, so their four rim blades
+#     sat on the coin's corner (x 18..20 / z 11..25) instead of on its rim (x 16..18 / z 1..15).
+# tools/gen_coin_models.py re-imports the coin models from the authored source (and derives
+# silver/copper from gold); tools/coin_marks.py keeps gold's seven marks identical on all
+# three textures ("这七个像素点在银铜币上都要保留").  Both are green only when it is still so.
+if (-not $chkPython) {
+    Note "python not on PATH -- SKIPPED the coin model / coin mark checkers"
+} else {
+    $savedEap2 = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    foreach ($coinCheck in @(@('gen_coin_models.py', '--check'), @('coin_marks.py', '--check'))) {
+        $coinName = $coinCheck[0]
+        $coinPath = Join-Path $PSScriptRoot $coinName
+        if (-not (Test-Path $coinPath)) { Fail "missing checker: tools\$coinName"; continue }
+        $coinOut = @(& python $coinPath $coinCheck[1] 2>&1)
+        if ($LASTEXITCODE -eq 0) {
+            Ok "$coinName $($coinCheck[1]) passed"
+        } else {
+            Fail "$coinName $($coinCheck[1]) failed -- do NOT install this build:"
+            foreach ($coinLine in $coinOut) { Write-Host "            $coinLine" }
+        }
+    }
+    $ErrorActionPreference = $savedEap2
 }
 
 Write-Host ''

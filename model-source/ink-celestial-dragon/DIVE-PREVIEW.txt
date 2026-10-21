@@ -1,0 +1,22 @@
+墨龙三倍虚影与巨墨球俯冲 / 原生渲染时间轴预览
+
+2026-10-19 后续已接入服务器战斗与三倍本体；当前状态见 docs/ink/ink-dragon-combat-v2.md。以下为历史预览说明。
+
+用户要求：龙飞往高空，幻化出三倍虚影，脚下凝聚巨墨球；虚影与球一同冲向玩家并爆开。
+当前交付：视觉原型与纯逻辑时间轴，尚未接服务器战斗、索敌、飞行 AI 或伤害，也未安装正式包。
+
+时间轴（游戏 tick）：
+0-40：预留上升阶段（本体飞行仍待接入）；
+40-80：完整精模三倍半透明龙影形成，脚下墨球由外部墨丝汇聚；
+80-110：龙影与墨球共用一条插值轨迹俯冲至落点；
+110-150：龙影与球消失，墨气喷发、墨丝与墨晕向外扩散。
+
+源码：
+src/main/java/com/tnc/tnc/world/ink/InkDragonDiveRules.java
+src/main/java/com/tnc/tnc/world/ink/client/InkDragonDiveVisuals.java
+src/main/java/com/tnc/tnc/world/ink/client/InkDragonDiveAudit.java
+虚影复用原模型及 GPU 缓冲，不生成第二份精模资源。
+
+预览：preview_dive_native_v1.png
+验证：work/ink-dragon-dive-native-report.json
+复现：Java 17；gradlew.bat test runClient -PinkCraneVisualAudit -PinkDragonMeshAudit -PinkDragonDiveAudit -x downloadAssets --no-parallel --offline -Dnet.minecraftforge.gradle.check.certs=false

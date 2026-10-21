@@ -1,0 +1,16 @@
+{
+  "affects": "MOB",
+  "data": {
+    "attribute_id": "minecraft:generic.attack_damage",
+    "number_range": {
+      "max": 0.45,
+      "min": 0.2
+    },
+    "operation": "MULTIPLY_TOTAL",
+    "uuid": "b58e2d71-4a6f-4d93-9c07-1e8a4b6d2f55"
+  },
+  "id": "tnc_vicious",
+  "modid": "library_of_exile",
+  "serializer": "attribute_mob_affix",
+  "weight": 700
+}
