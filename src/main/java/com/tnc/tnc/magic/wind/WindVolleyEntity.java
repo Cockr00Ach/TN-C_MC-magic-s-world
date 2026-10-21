@@ -14,9 +14,12 @@ public final class WindVolleyEntity extends Entity {
     private static final EntityDataAccessor<Integer> TIER=SynchedEntityData.defineId(WindVolleyEntity.class,EntityDataSerializers.INT);
     private static final EntityDataAccessor<Long> START=SynchedEntityData.defineId(WindVolleyEntity.class,EntityDataSerializers.LONG),DONE=SynchedEntityData.defineId(WindVolleyEntity.class,EntityDataSerializers.LONG);
     private static final EntityDataAccessor<Float> TX=SynchedEntityData.defineId(WindVolleyEntity.class,EntityDataSerializers.FLOAT),TY=SynchedEntityData.defineId(WindVolleyEntity.class,EntityDataSerializers.FLOAT),TZ=SynchedEntityData.defineId(WindVolleyEntity.class,EntityDataSerializers.FLOAT),SPAN=SynchedEntityData.defineId(WindVolleyEntity.class,EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> BOSS_SCALE=SynchedEntityData.defineId(WindVolleyEntity.class,EntityDataSerializers.FLOAT);
+    public void setBossScale(float value){entityData.set(BOSS_SCALE,Math.max(1,Math.min(5,value)));}
+    public float bossScale(){return entityData.get(BOSS_SCALE);}
     private LivingEntity owner,target;private int age,finishedAt=-1;
     public WindVolleyEntity(EntityType<? extends WindVolleyEntity> type,Level level){super(type,level);noPhysics=true;setNoGravity(true);}
-    @Override protected void defineSynchedData(){entityData.define(TIER,1);entityData.define(START,0L);entityData.define(DONE,0L);entityData.define(TX,0F);entityData.define(TY,0F);entityData.define(TZ,0F);entityData.define(SPAN,5F);}
+    @Override protected void defineSynchedData(){entityData.define(BOSS_SCALE,1F);entityData.define(TIER,1);entityData.define(START,0L);entityData.define(DONE,0L);entityData.define(TX,0F);entityData.define(TY,0F);entityData.define(TZ,0F);entityData.define(SPAN,5F);}
     public int tier(){return entityData.get(TIER);}public int count(){return WindChainRules.count(tier());}
     public double visualAge(float partial){return Math.max(0,level().getGameTime()+partial-entityData.get(START));}
     public boolean done(int slot){return (entityData.get(DONE)&(1L<<slot))!=0;}

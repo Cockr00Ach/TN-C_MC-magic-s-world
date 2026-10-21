@@ -47,6 +47,25 @@ public final class CanglanWarlordRenderer extends GeoEntityRenderer<CanglanWarlo
         withScale(CanglanWarlordAttackRules.BODY_SCALE);
         this.shadowRadius = 2.0F;
     }
+    @Override public RenderType getRenderType(CanglanWarlordEntity e,net.minecraft.resources.ResourceLocation texture,MultiBufferSource b,float partial) {
+        return e.phase()==2 ? RenderType.entityTranslucent(texture) : super.getRenderType(e,texture,b,partial);
+    }
+    @Override public software.bernie.geckolib.core.object.Color getRenderColor(CanglanWarlordEntity e,float partial,int light) {
+        return e.phase()==2 ? software.bernie.geckolib.core.object.Color.ofRGBA(.55F,.95F,1F,.48F) : super.getRenderColor(e,partial,light);
+    }
+    @Override public void render(CanglanWarlordEntity e,float yaw,float partial,PoseStack pose,MultiBufferSource buffers,int light) {
+        pose.pushPose();float scale=e.battleScale();pose.scale(scale,scale,scale);
+        pose.pushPose();
+        pose.mulPose(Axis.YP.rotationDegrees(180-yaw));pose.translate(0,5.5,.9);
+        pose.mulPose(Axis.XP.rotationDegrees(90));pose.mulPose(Axis.YP.rotationDegrees((e.tickCount+partial)*1.2F));
+        pose.scale(4.2F,1,4.2F);pose.translate(-.5,0,-.5);
+        var mc=net.minecraft.client.Minecraft.getInstance();
+        mc.getItemRenderer().renderModelLists(mc.getModelManager().getModel(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tnc","wind/seal")),
+                net.minecraft.world.item.ItemStack.EMPTY,LightTexture.FULL_BRIGHT,net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY,
+                pose,buffers.getBuffer(RenderType.entityTranslucent(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS)));
+        pose.popPose();
+        super.render(e,yaw,partial,pose,buffers,e.phase()==2?LightTexture.FULL_BRIGHT:light);pose.popPose();
+    }
 
     @Override
     public void renderRecursively(PoseStack pose, CanglanWarlordEntity entity, GeoBone bone,
@@ -59,7 +78,7 @@ public final class CanglanWarlordRenderer extends GeoEntityRenderer<CanglanWarlo
         super.renderRecursively(pose, entity, bone, type, buffers, out, reRender,
                 partial, boneLight, overlay, red, green, blue, alpha);
         if (!reRender && name.equals("weapon_1")) {
-            drawBlade(pose, entity, buffers);
+            drawBlade(pose, bone, entity, buffers);
         }
     }
 
@@ -67,14 +86,22 @@ public final class CanglanWarlordRenderer extends GeoEntityRenderer<CanglanWarlo
      * Draws the phase's arsenal blade on the anchor. The anchor bone itself stays
      * empty, so every pose the animator authored for the fist carries the blade
      * for free — the clip's wrist keys do the aiming.
+     *
+     * <p>{@code super.renderRecursively} has already popped the anchor's own transform by
+     * the time this runs, so the pose is re-seated on the anchor's pivot first
+     * ({@link WindConstructModels#atBone}); without that the blade hangs off the hand bone
+     * and the wrist keys of all thirteen clips do nothing in game, which is exactly what the
+     * offline blade solver assumed they did.
      */
-    private void drawBlade(PoseStack pose, CanglanWarlordEntity entity, MultiBufferSource buffers) {
+    private void drawBlade(PoseStack pose, GeoBone bone, CanglanWarlordEntity entity,
+                           MultiBufferSource buffers) {
         if (!entity.isAlive()) {
             return;
         }
         boolean spear = entity.weaponForm() == SPEAR_FORM;
         int form = spear ? SPEAR_FORM : SWORD_FORM;
         pose.pushPose();
+        WindConstructModels.atBone(pose, bone);
         // Item-model +Z is the blade: roll it upright, then cant it forward so it
         // reads as held rather than mounted flat on the back of the hand.
         pose.mulPose(Axis.ZP.rotationDegrees(spear ? SPEAR_ROLL : SWORD_ROLL));
@@ -82,7 +109,8 @@ public final class CanglanWarlordRenderer extends GeoEntityRenderer<CanglanWarlo
         pose.translate(0.0F, 0.0F, spear ? SPEAR_GRIP : SWORD_GRIP);
         float scale = spear ? SPEAR_SCALE : SWORD_SCALE;
         pose.scale(scale, scale, scale);
-        WindConstructModels.weapon(form, pose, buffers, 0.96F, false);
+        if(entity.phase()==2) WindConstructModels.phantomWeapon(form,entity.tickCount,pose,buffers,.68F,false);
+        else WindConstructModels.weapon(form, pose, buffers, 0.96F, false);
         pose.popPose();
     }
 

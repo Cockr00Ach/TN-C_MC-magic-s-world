@@ -26,6 +26,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * by spawning the boss and watching it swing a sword it is not holding.
  */
 class CanglanWarlordModelTest {
+    @Test
+    void warGodMovesCompleteTheirActualAnimationBeforeRecovery() throws Exception {
+        JsonObject animations=clips();
+        for(int move:new int[]{1,5,9,10,11,12}) {
+            String clip=CanglanWarGodRules.animation(move);
+            assertEquals(CanglanWarGodRules.duration(move),
+                    Math.round(animations.getAsJsonObject(clip).get("animation_length").getAsDouble()*20),clip);
+        }
+    }
     private static final Path ROOT = Path.of("src/main/resources/assets/tnc");
     private static final Gson GSON = new Gson();
 

@@ -8,7 +8,7 @@ public final class WireBossMusicMethod {
         ClassReader original = new ClassReader(Files.readAllBytes(Path.of(args[0])));
         ClassReader compiled = new ClassReader(Files.readAllBytes(Path.of(args[1])));
         ClassWriter output = new ClassWriter(original, 0);
-        String method = "tickBossMusic";
+        String method = args.length > 3 ? args[3] : "tickBossMusic";
         int[] counts = {0, 0};
         original.accept(new ClassVisitor(Opcodes.ASM9, output) {
             @Override public MethodVisitor visitMethod(int access, String name, String desc,
@@ -28,7 +28,9 @@ public final class WireBossMusicMethod {
                 super.visitEnd();
             }
         }, 0);
-        if (counts[0] != 1 || counts[1] != 1) throw new IllegalStateException("Unexpected method count");
+        boolean allowAdd = args.length > 4 && args[4].equals("allow-add");
+        if ((counts[0] != 1 && !(allowAdd && counts[0] == 0)) || counts[1] != 1)
+            throw new IllegalStateException("Unexpected method count");
         Files.write(Path.of(args[2]), output.toByteArray());
     }
 }

@@ -37,27 +37,7 @@ import software.bernie.geckolib.core.animation.RawAnimation;
 import software.bernie.geckolib.core.object.PlayState;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
-/**
- * 苍岚战将 / Canglan Warlord — a slate-and-mist warlord of the wind school, six and
- * three quarter blocks tall, carrying the wind arsenal's sword in phase one and
- * its long spear in phase two, with a round gale buckler on the left forearm.
- *
- * <p>It owns no weapon geometry: an empty {@code weapon_1} anchor sits on the
- * right fist and {@code CanglanWarlordRenderer} draws the same arsenal blade the
- * player's wind magic conjures, so the boss's palette and its weapon's palette
- * are literally the same relic-metal texture.
- *
- * <p>The fight is deliberately legible: every swing is a committed move that
- * telegraphs for half a clip before it connects, and the boss never free-forms
- * damage. Phase one is the sword duel — cleaves, an overhead, a shield bash. At
- * half health it roars, the gale crest streams harder and the sword is replaced
- * by the spear: longer reach, a lunging thrust, a spinning sweep, and a throw
- * that lets the whole spear leave the hand.
- *
- * <p>Everything that hurts the player lives in {@link CanglanWarlordCombat}; the
- * client only reads {@link #canglanMove()}, {@link #phase()} and {@link #weaponForm()}
- * to pick a GeckoLib clip and an arsenal form.
- */
+/** Wind war-god: corporeal duel, ten linked echoes, then a fivefold phantom after the first defeat. */
 public final class CanglanWarlordEntity extends Monster implements GeoEntity {
     private static final EntityDataAccessor<Integer> DATA_MOVE = SynchedEntityData.defineId(
             CanglanWarlordEntity.class, EntityDataSerializers.INT);
@@ -127,13 +107,29 @@ public final class CanglanWarlordEntity extends Monster implements GeoEntity {
         return CanglanWarlordAttackRules.formFor(phase());
     }
 
+    public float battleScale() { return CanglanWarGodRules.scale(phase()); }
+    public int anchorCount() { return combat.anchorCount(); }
+    CanglanWarlordCombat battle() { return combat; }
+    @Override public net.minecraft.world.entity.EntityDimensions getDimensions(net.minecraft.world.entity.Pose pose) {
+        return super.getDimensions(pose).scale(entityData.get(DATA_PHASE) == 2 ? 5F : 1F);
+    }
+    @Override public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
+        super.onSyncedDataUpdated(key);
+        if (DATA_PHASE.equals(key)) refreshDimensions();
+    }
+    @Override public boolean hurt(DamageSource source, float amount) {
+        if (!level().isClientSide && shiftTicks > 0) return false;
+        if (!level().isClientSide && amount > 0 && combat.dodge(source)) return false;
+        return super.hurt(source, amount);
+    }
+
     /** Called by the roar so the buff cannot be stacked by spam. */
     void setRoarCooldown(int ticks) {
         roarCooldown = Math.max(roarCooldown, ticks);
     }
 
     public boolean busy() {
-        return combat.busy();
+        return canglanMove() != 0 || combat.busy();
     }
 
     /** True while the phase-shift roar owns the boss. */
@@ -151,7 +147,7 @@ public final class CanglanWarlordEntity extends Monster implements GeoEntity {
         goalSelector.addGoal(0, new FloatGoal(this));
         // Direct steering: a 6.4-block body must never run an A* search across the arena.
         goalSelector.addGoal(2, new GiantApproachGoal(this, 0.95D,
-                () -> !busy() && shiftTicks == 0 && spawnTicks == 0));
+                () -> getTarget() == null && !busy() && shiftTicks == 0 && spawnTicks == 0));
         goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 48.0F));
         goalSelector.addGoal(9, new RandomLookAroundGoal(this));
         targetSelector.addGoal(1, new HurtByTargetGoal(this));
@@ -182,7 +178,7 @@ public final class CanglanWarlordEntity extends Monster implements GeoEntity {
         if (!isAlive()) {
             return;
         }
-        bossBar.setName(getDisplayName());
+        bossBar.setName(phase()==2 ? getDisplayName().copy().append(" · 风神虚像") : getDisplayName());
         bossBar.setProgress(getHealth() / getMaxHealth());
         if (tickPhaseShift()) {
             return;
@@ -229,14 +225,21 @@ public final class CanglanWarlordEntity extends Monster implements GeoEntity {
             getNavigation().stop();
             setDeltaMovement(0.0D, getDeltaMovement().y, 0.0D);
             shiftTicks--;
+            if (shiftTicks == 0) setCanglanMove(0);
             return true;
         }
-        if (!CanglanWarlordAttackRules.shouldShift(phase(), getHealth(), getMaxHealth())) {
-            return false;
-        }
+        return false;
+    }
+
+    private boolean ascend() {
+        spawnTicks = 0;
+        spawned = true;
         shiftTicks = CanglanWarlordAttackRules.PHASE_SHIFT_LENGTH;
         entityData.set(DATA_PHASE, CanglanWarlordAttackRules.PHASE_SPEAR);
-        combat.cancel();
+        combat.cleanup();
+        setCanglanMove(13);
+        setHealth(getMaxHealth());
+        refreshDimensions();
         triggerAnim("action", "phase_shift");
         level().playSound(null, blockPosition(), SoundEvents.ENDER_DRAGON_GROWL,
                 SoundSource.HOSTILE, 3.4F, 0.82F);
@@ -282,13 +285,13 @@ public final class CanglanWarlordEntity extends Monster implements GeoEntity {
         double height = getBbHeight();
         if (tickCount % 4 == 0) {
             level().addParticle(ParticleTypes.CLOUD,
-                    getRandomX(0.85D), getY() + random.nextDouble() * height, getRandomX(0.85D),
+                    getRandomX(0.85D), getY() + random.nextDouble() * height, getRandomZ(0.85D),
                     0.0D, 0.015D, 0.0D);
         }
         if (tickCount % 6 == 0) {
             level().addParticle(ParticleTypes.END_ROD,
                     getRandomX(0.6D), getY() + random.nextDouble() * height * 0.95D,
-                    getRandomX(0.6D), 0.0D, 0.02D, 0.0D);
+                    getRandomZ(0.6D), 0.0D, 0.02D, 0.0D);
         }
         if (isSpearPhase() && tickCount % 3 == 0) {
             double eyeY = getY() + height * 0.855D;
@@ -332,13 +335,15 @@ public final class CanglanWarlordEntity extends Monster implements GeoEntity {
 
     @Override
     public void remove(RemovalReason reason) {
+        if (!level().isClientSide) combat.cleanup();
         bossBar.removeAllPlayers();
         super.remove(reason);
     }
 
     @Override
     public void die(DamageSource source) {
-        combat.cancel();
+        if (phase() == 1 && !source.is(net.minecraft.world.damagesource.DamageTypes.GENERIC_KILL)) { ascend(); return; }
+        combat.cleanup();
         shiftTicks = 0;
         spawnTicks = 0;
         bossBar.removeAllPlayers();
@@ -361,6 +366,7 @@ public final class CanglanWarlordEntity extends Monster implements GeoEntity {
         super.readAdditionalSaveData(tag);
         entityData.set(DATA_PHASE, Math.max(CanglanWarlordAttackRules.PHASE_SWORD,
                 Math.min(CanglanWarlordAttackRules.PHASE_SPEAR, tag.getInt("CanglanWarlordPhase"))));
+        refreshDimensions();
         // A reload always resumes from a safe stand-still, never mid-swing.
         setCanglanMove(CanglanWarlordAttackRules.IDLE);
         shiftTicks = 0;
@@ -380,7 +386,7 @@ public final class CanglanWarlordEntity extends Monster implements GeoEntity {
                 state -> PlayState.STOP);
         for (String clip : new String[]{"cleave_left", "cleave_right", "overhead", "thrust",
                 "sweep", "spear_throw", "shield_bash", "war_cry", "phase_shift", "spawn",
-                "death"}) {
+                "death", "cyclone", "sky_arsenal", "gale_cut", "wind_step"}) {
             action.triggerableAnim(clip, RawAnimation.begin().thenPlay(clip));
         }
         controllers.add(action);

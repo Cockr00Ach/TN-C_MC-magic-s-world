@@ -16,7 +16,7 @@ public final class WindChainSpells {
         if(!event.getEntity().level().isClientSide&&event.getEffectInstance().getEffect() instanceof WindChainRegistration.CastMarker marker)
             cast(event.getEntity(),marker.chain,marker.tier);
     }
-    public static boolean enemy(LivingEntity e,LivingEntity owner){return e!=owner&&!(e instanceof Player)&&e.isAlive()&&!e.isSpectator()&&!e.isAlliedTo(owner);}
+    public static boolean enemy(LivingEntity e,LivingEntity owner){return e!=owner&&(!(owner instanceof Player)||!(e instanceof Player))&&e.isAlive()&&!e.isSpectator()&&!e.isAlliedTo(owner);}
     public static LivingEntity aim(LivingEntity owner,double range){
         Vec3 eye=owner.getEyePosition(),end=eye.add(owner.getLookAngle().scale(range));
         var wall=owner.level().clip(new ClipContext(eye,end,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,owner));

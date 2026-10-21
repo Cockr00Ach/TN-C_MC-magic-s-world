@@ -15,5 +15,10 @@ public final class CanglanWarlordClientRegistration {
     @SubscribeEvent
     public static void renderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(CanglanWarlordRegistration.CANGLAN_WARLORD, CanglanWarlordRenderer::new);
+        event.registerEntityRenderer(CanglanWarlordRegistration.ECHO, CanglanEchoRenderer::new);
+        event.registerEntityRenderer(CanglanWarlordRegistration.TEMPEST, CanglanTempestRenderer::new);
+    }
+    @SubscribeEvent public static void models(net.minecraftforge.client.event.ModelEvent.RegisterAdditional event) {
+        event.register(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tnc","projectile/canglan_gale_wave"));
     }
 }

@@ -36,7 +36,7 @@ public final class WindChainRenderers {
                 if(direction.lengthSqr()<.001)direction=new net.minecraft.world.phys.Vec3(0,-1,0);
                 p.pushPose();p.translate(at.x,at.y,at.z);
                 p.mulPose(new Quaternionf().rotationTo(0,0,1,(float)direction.x,(float)direction.y,(float)direction.z));
-                float scale=WindChainRules.modelScale(e.tier());p.scale(scale,scale,scale);
+                float scale=WindChainRules.modelScale(e.tier())*e.bossScale();p.scale(scale,scale,scale);
                 float fade=(float)Math.max(0,Math.min(1,(end+8-age)/8));
                 WindConstructModels.phantomWeapon(WindChainRules.form(e.tier(),slot),age,p,b,alpha*fade,true);p.popPose();
             }
