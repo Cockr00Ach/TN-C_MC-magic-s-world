@@ -1,0 +1,37 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "tnc:abyss_mana_tower",
+          "functions": [
+            {
+              "function": "minecraft:copy_nbt",
+              "source": "block_entity",
+              "ops": [
+                {
+                  "source": "ForgeData",
+                  "target": "BlockEntityTag.ForgeData",
+                  "op": "replace"
+                },
+                {
+                  "source": "Mana",
+                  "target": "BlockEntityTag.Mana",
+                  "op": "replace"
+                },
+                {
+                  "source": "Owner",
+                  "target": "BlockEntityTag.Owner",
+                  "op": "replace"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

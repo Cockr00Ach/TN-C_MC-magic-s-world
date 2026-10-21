@@ -1,0 +1,24 @@
+{
+  "type": "tnc:mana_forging",
+  "ingredients": [
+    {
+      "item": "tnc:star_marrow",
+      "count": 4
+    },
+    {
+      "item": "tnc:star_mirror",
+      "count": 1
+    },
+    {
+      "item": "minecraft:phantom_membrane",
+      "count": 4
+    }
+  ],
+  "result": {
+    "item": "tnc:sky_mana_launch_ring",
+    "count": 1
+  },
+  "mana": 160,
+  "work_ticks": 100,
+  "category": "workshop"
+}

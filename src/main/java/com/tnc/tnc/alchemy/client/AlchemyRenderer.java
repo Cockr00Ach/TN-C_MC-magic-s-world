@@ -45,6 +45,22 @@ public final class AlchemyRenderer implements BlockEntityRenderer<AlchemyEntity>
         if(be.fire==2&&be.water>0&&(be.burn>0||!be.inventory.getItem(4).isEmpty()))for(int i=0;i<3;i++){
             double a=time*.07+i*2.094;var from=heart.add(Math.cos(a)*.24,-.53,Math.sin(a)*.24);
             effect(from,from.add(0,.3,0),i==0?0xffcb68:0x53e5d0,1,3,.085f,18);}
+        boolean sight=com.tnc.tnc.mana.sight.client.ManaSightClient.enabled();
+        if(sight&&be.water>0){
+            int thermal=com.tnc.tnc.arcana.RitualRules.temperatureColor(be.temperature);
+            for(int j=0;j<14;j++){double a=time*(be.temperature<360?.006:.045)+j*Math.PI/7;
+                double wobble=be.temperature>800?Math.sin(a*13+time)*.16:Math.sin(a*2+time*.04)*.055;
+                var at=heart.add(Math.cos(a)*.58,.05+wobble,Math.sin(a)*.58);effect(at,at.add(0,.04,0),thermal,0,0,.04f,16);}
+            for(int k=0;k<3;k++)if(!be.inventory.getItem(k).isEmpty()){
+                double drift=(1-be.vortex_sync/100.)*.38,side=k*Math.PI*2/3;
+                var center=heart.add(Math.cos(side)*drift,.18,Math.sin(side)*drift);
+                int[] tones={be.color,0xffd88d,0xa5deff};
+                for(int j=0;j<8;j++){double a=time*.09*(k==1?-1:1)+j*Math.PI/4;
+                    var at=center.add(Math.cos(a)*(.1+k*.065),Math.sin(a*2)*.025,Math.sin(a)*(.1+k*.065));effect(at,center,tones[k],j==0?1:0,1,.035f,16);}
+            }
+            if(be.perfectRemaining>0)for(int j=0;j<8;j++)effect(heart.add(0,.4,0),heart.add(0,.4,0),0xfff4bd,1,0,.35f,10);
+        }
+        if(!sight){if(be.working&&tick%4==0)effect(heart,heart.add(0,.65,0),be.color,2,3,.16f,25);return;}
         if(!be.working&&be.burst==0){if(fill>0&&tick%8==0)effect(heart,heart.add(0,.3,0),be.color,0,3,.04f,24);return;}
         int family=recipe==null?0:recipe.effectFamily();
         double reach=recipe!=null&&recipe.ticks>=260?3.8:2.1;

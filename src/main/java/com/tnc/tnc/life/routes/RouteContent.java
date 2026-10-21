@@ -44,7 +44,7 @@ public final class RouteContent {
         ITEMS.register("magic_soil",()->new BlockItem(SOIL.get(),new Item.Properties()));
         ITEMS.register("magic_soil_source",()->new BlockItem(SOIL_SOURCE.get(),new Item.Properties()));
         for(RouteKind kind:RouteKind.values()){
-            var block=BLOCKS.register(kind.id,()->kind.wire()?new RouteWireBlock(kind):(kind==RouteKind.MIRROR||kind==RouteKind.FAR_MIRROR)?new RouteMirrorBlock(kind):new RouteNodeBlock(kind));NODES.put(kind.id,block);
+            var block=BLOCKS.register(kind.id,()->kind.wire()?new RouteWireBlock(kind):(kind==RouteKind.MIRROR||kind==RouteKind.FAR_MIRROR||kind==RouteKind.DIMENSION_PRISM)?new RouteMirrorBlock(kind):new RouteNodeBlock(kind));NODES.put(kind.id,block);
             GOODS.put(kind.id,ITEMS.register(kind.id,()->new BlockItem(block.get(),new Item.Properties())));
         }
         for(NewPlantKind kind:NewPlantKind.values()){

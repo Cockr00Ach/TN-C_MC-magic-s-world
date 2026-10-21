@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:stick"
+    },
+    {
+      "item": "minecraft:amethyst_shard"
+    },
+    {
+      "item": "tnc:star_marrow"
+    }
+  ],
+  "result": {
+    "item": "tnc:symbiosis_marker"
+  }
+}

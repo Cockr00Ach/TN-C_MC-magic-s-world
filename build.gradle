@@ -273,19 +273,21 @@ minecraft {
                 property 'mixin.env.remapRefMap', 'true'
                 property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
             }
-            if (project.hasProperty('townServicesTests') || project.hasProperty('buildingGameTests') || project.hasProperty('townLifeTests') || project.hasProperty('journeyTests')) {
+            if (project.hasProperty('townServicesTests') || project.hasProperty('buildingGameTests') || project.hasProperty('townLifeTests') || project.hasProperty('journeyTests') || project.hasProperty('arcanaTests')) {
                 property 'mixin.env.remapRefMap', 'true'
                 property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
             }
             if (project.hasProperty('heroskandRealmTests')) property 'forge.enabledGameTestNamespaces', 'tncrealm'
             if (project.hasProperty('dungeonTests')) property 'forge.enabledGameTestNamespaces', 'tncdungeon'
             if (project.hasProperty('journeyTests')) {property 'forge.enabledGameTestNamespaces', 'tncjourney';workingDirectory project.file('work/journey-server-tests')}
+            if (project.hasProperty('arcanaTests')) {property 'forge.enabledGameTestNamespaces', 'tncarcana';workingDirectory project.file('work/deep-arcana-server-tests')}
             // 地下城小怪 17 只的 GameTest（2026-10-21）：只跑本批，十几秒出结果。
             if (project.hasProperty('dungeonMobTests')) {
                 property 'forge.enabledGameTestNamespaces', 'tncdungeon'
                 property 'mixin.env.remapRefMap', 'true'
                 property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
             }
+            if (project.hasProperty('deepArcanaRegression')) {property 'forge.enabledGameTestNamespaces','tncarcana,tncjourney,tncdungeon';workingDirectory project.file('work/deep-arcana-regression-tests')}
             if (project.hasProperty('fullLandmarkTests')) property 'tnc.fullLandmarkTests', 'true'
             if (project.hasProperty('fullSkyIslandTests')) {
                 property 'tnc.fullSkyIslandTests', 'true'
@@ -392,7 +394,7 @@ dependencies {
     }
     // Optional headless building smoke tests need the same NPC animation API as the pack.
     // Compile-only keeps normal distribution unchanged; enable with -PbuildingGameTests.
-    if (project.hasProperty('buildingGameTests') || project.hasProperty('magicStoneUiAudit') || project.hasProperty('journeyTests') || project.hasProperty('dungeonMobTests')) {
+    if (project.hasProperty('buildingGameTests') || project.hasProperty('magicStoneUiAudit') || project.hasProperty('journeyTests') || project.hasProperty('dungeonMobTests') || project.hasProperty('arcanaTests')) {
         runtimeOnly fg.deobf('geckolib:geckolib:4.8.4')
     }
     // 地下城小怪 17 只：无头 GameTest 要真跑 GeckoLib 实体（模型/控制器在服务端也要解析），

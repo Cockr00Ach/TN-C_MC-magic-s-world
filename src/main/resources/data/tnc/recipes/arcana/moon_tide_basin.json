@@ -1,0 +1,24 @@
+{
+  "type": "tnc:mana_forging",
+  "ingredients": [
+    {
+      "item": "tnc:mana_basin",
+      "count": 1
+    },
+    {
+      "item": "tnc:star_marrow",
+      "count": 2
+    },
+    {
+      "item": "minecraft:prismarine_crystals",
+      "count": 4
+    }
+  ],
+  "result": {
+    "item": "tnc:moon_tide_basin",
+    "count": 1
+  },
+  "mana": 160,
+  "work_ticks": 100,
+  "category": "workshop"
+}

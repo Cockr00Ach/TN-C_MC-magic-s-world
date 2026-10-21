@@ -1,0 +1,24 @@
+{
+  "type": "tnc:mana_forging",
+  "ingredients": [
+    {
+      "item": "tnc:gentle_irrigator",
+      "count": 1
+    },
+    {
+      "item": "tnc:radiant_gold",
+      "count": 2
+    },
+    {
+      "item": "minecraft:glass_bottle",
+      "count": 3
+    }
+  ],
+  "result": {
+    "item": "tnc:arcane_sprinkler",
+    "count": 1
+  },
+  "mana": 160,
+  "work_ticks": 100,
+  "category": "workshop"
+}

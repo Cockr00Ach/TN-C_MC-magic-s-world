@@ -1,0 +1,24 @@
+{
+  "type": "tnc:mana_forging",
+  "ingredients": [
+    {
+      "item": "tnc:void_parasitic_seed",
+      "count": 1
+    },
+    {
+      "item": "minecraft:moss_block",
+      "count": 8
+    },
+    {
+      "item": "minecraft:emerald",
+      "count": 4
+    }
+  ],
+  "result": {
+    "item": "tnc:emerald_lifemoss",
+    "count": 1
+  },
+  "mana": 160,
+  "work_ticks": 100,
+  "category": "workshop"
+}

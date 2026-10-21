@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "tnc:block/geothermal_mana_core"
+    }
+  }
+}

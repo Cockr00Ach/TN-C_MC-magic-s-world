@@ -12,7 +12,7 @@ public final class RoutePlantEntity extends BlockEntity {
     public RoutePlantEntity(BlockPos p,BlockState s){super(RouteContent.PLANT_ENTITY.get(),p,s);}
     public NewPlantKind kind(){return ((RoutePlantBlock)getBlockState().getBlock()).kind;}
     public boolean feed(ServerPlayer p,ItemStack held){if(owner!=null&&!owner.equals(p.getUUID()))return false;if(kind()==NewPlantKind.COMPOST&&feedSeconds<90&&organic.size()<3&&(held.isEdible()||held.is(Items.WHEAT)||held.is(Items.BROWN_MUSHROOM)||held.is(Items.RED_MUSHROOM)||held.is(net.minecraft.tags.ItemTags.LEAVES))){String id=net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(held.getItem()).toString();organic.add(id);if(!p.isCreative())held.shrink(1);feedSeconds+=30;setChanged();return true;}return false;}
-    public static void tick(ServerLevel l,BlockPos p,RoutePlantEntity be){if(l.getGameTime()%20!=0)return;var state=l.getBlockState(p);boolean wild=state.getValue(RoutePlantBlock.WILD);boolean growing=wild||MagicSoilBlock.growing(l,p);if(!growing)return;
+    public static void tick(ServerLevel l,BlockPos p,RoutePlantEntity be){if(l.getGameTime()%20!=0)return;var state=l.getBlockState(p);boolean wild=state.getValue(RoutePlantBlock.WILD);boolean growing=wild||MagicSoilBlock.growing(l,p);com.tnc.tnc.arcana.ArcanaEcology.tickPlant(l,p,be);if(be.isRemoved())return;if(!growing)return;
         if(be.growth<18000){be.growth=Math.min(18000,be.growth+20);int age=be.growth*3/18000;if(state.getValue(RoutePlantBlock.AGE)!=age)l.setBlock(p,state.setValue(RoutePlantBlock.AGE,age),3);be.setChanged();return;}
         if(wild||!RouteAccess.allowed(l,p,be.owner))return;
         int room=be.kind().capacity-be.mana;int packet=switch(be.kind()){case SHADOW->60;case PAGE->30;case CYCLE,STORM->6;default->4;};if(room<packet)return;
@@ -26,12 +26,14 @@ public final class RoutePlantEntity extends BlockEntity {
             case DEW->l.isRainingAt(p.above())?2:0;
             case PRISM->{Set<String> colors=new HashSet<>();if(l.isDay()&&l.getBrightness(net.minecraft.world.level.LightLayer.SKY,p)>=12)for(var d:Direction.Plane.HORIZONTAL){var id=net.minecraftforge.registries.ForgeRegistries.BLOCKS.getKey(l.getBlockState(p.relative(d)).getBlock());if(id!=null&&id.getPath().endsWith("_stained_glass"))colors.add(id.toString());}yield colors.size()>=3?3:0;}
             case ORE->RouteOreLedger.get(l).drawNatural(l,p,2);
-            case STORM->0;
+            case STORM->0;case STEAM->8;
         };
-        be.remainder+=generated;int whole=(int)be.remainder;be.remainder-=whole;com.tnc.tnc.mana.sight.ManaSightServer.emission(l,p,Math.min(whole,be.kind().capacity-be.mana));be.mana=Math.min(be.kind().capacity,be.mana+whole);be.setChanged();
+        be.remainder+=generated*com.tnc.tnc.arcana.ArcanaEcology.factor(l,be);int whole=(int)be.remainder;be.remainder-=whole;com.tnc.tnc.mana.sight.ManaSightServer.emission(l,p,Math.min(whole,be.kind().capacity-be.mana));be.mana=Math.min(be.kind().capacity,be.mana+whole);be.setChanged();
     }
-    public int draw(int maximum){int amount=Math.min(mana,Math.min(maximum,kind()==NewPlantKind.SHADOW||kind()==NewPlantKind.PAGE?4:(int)Math.ceil(kind().rate)));mana-=amount;if(amount>0)setChanged();return amount;}
-    public void naturalLightning(){mana=Math.min(kind().capacity,mana+2400);setChanged();}
+    public int draw(int maximum){int amount=Math.min(mana,Math.min(maximum,kind()==NewPlantKind.SHADOW||kind()==NewPlantKind.PAGE?4:(int)Math.ceil(kind().rate*(level instanceof ServerLevel l?com.tnc.tnc.arcana.ArcanaEcology.factor(l,this):1))));mana-=amount;if(amount>0)setChanged();return amount;}
+    @Override public net.minecraft.nbt.CompoundTag getUpdateTag(){return saveWithoutMetadata();}
+    @Override public net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket getUpdatePacket(){return net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket.create(this);}
+    public void naturalLightning(){mana=Math.min(kind().capacity,mana+(int)(2400*(level instanceof ServerLevel l?com.tnc.tnc.arcana.ArcanaEcology.factor(l,this):1)));setChanged();}
     @Override protected void saveAdditional(CompoundTag t){super.saveAdditional(t);if(owner!=null)t.putUUID("Owner",owner);t.putInt("Growth",growth);t.putInt("Mana",mana);t.putDouble("Remainder",remainder);t.putInt("Day",daytime);t.putInt("Night",nighttime);t.putInt("Cycle",cycle);t.putLong("Epoch",epoch);t.putInt("Shadow",shadowEvents);t.putInt("LastShadow",lastShadow);t.putInt("Feed",feedSeconds);t.putLong("LastPage",lastPage);var o=new ListTag();organic.forEach(s->o.add(StringTag.valueOf(s)));t.put("Organic",o);var list=new ListTag();pages.forEach(s->list.add(StringTag.valueOf(s)));t.put("Pages",list);}
     @Override public void load(CompoundTag t){super.load(t);owner=t.hasUUID("Owner")?t.getUUID("Owner"):null;growth=Math.max(0,Math.min(18000,t.getInt("Growth")));mana=Math.max(0,Math.min(kind().capacity,t.getInt("Mana")));remainder=Math.max(0,Math.min(.999,t.getDouble("Remainder")));daytime=Math.min(60,t.getInt("Day"));nighttime=Math.min(60,t.getInt("Night"));cycle=Math.min(60,t.getInt("Cycle"));epoch=t.getLong("Epoch");shadowEvents=t.getInt("Shadow");lastShadow=t.getInt("LastShadow");feedSeconds=Math.max(0,Math.min(90,t.getInt("Feed")));lastPage=t.getLong("LastPage");organic.clear();for(Tag raw:t.getList("Organic",8))if(organic.size()<3)organic.add(raw.getAsString());pages.clear();for(Tag raw:t.getList("Pages",8))if(pages.size()<8)pages.add(raw.getAsString());}
 }

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:bread"
+    },
+    {
+      "item": "minecraft:honey_bottle"
+    },
+    {
+      "item": "tnc:star_dew_fruit"
+    }
+  ],
+  "result": {
+    "item": "tnc:moon_honey_cake"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "tnc:ecology_restraint_cage",
+          "functions": [
+            {
+              "function": "minecraft:copy_nbt",
+              "source": "block_entity",
+              "ops": [
+                {
+                  "source": "ForgeData.ElementMana",
+                  "target": "BlockEntityTag.ForgeData.ElementMana",
+                  "op": "replace"
+                },
+                {
+                  "source": "Mana",
+                  "target": "BlockEntityTag.Mana",
+                  "op": "replace"
+                },
+                {
+                  "source": "Owner",
+                  "target": "BlockEntityTag.Owner",
+                  "op": "replace"
+                },
+                {
+                  "source": "ForgeData.SpecimenToken",
+                  "target": "BlockEntityTag.ForgeData.SpecimenToken",
+                  "op": "replace"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

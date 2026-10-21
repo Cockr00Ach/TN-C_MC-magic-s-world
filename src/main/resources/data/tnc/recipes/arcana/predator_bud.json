@@ -1,0 +1,24 @@
+{
+  "type": "tnc:mana_forging",
+  "ingredients": [
+    {
+      "item": "tnc:void_parasitic_seed",
+      "count": 1
+    },
+    {
+      "item": "minecraft:ender_pearl",
+      "count": 4
+    },
+    {
+      "item": "minecraft:bone",
+      "count": 8
+    }
+  ],
+  "result": {
+    "item": "tnc:predator_bud",
+    "count": 1
+  },
+  "mana": 160,
+  "work_ticks": 100,
+  "category": "workshop"
+}

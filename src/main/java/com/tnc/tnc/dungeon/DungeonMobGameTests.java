@@ -47,7 +47,24 @@ public final class DungeonMobGameTests {
 
     /** 一个站着不动的靶子（村民 20 血），并把它设成怪的目标。 */
     private static Villager dummy(GameTestHelper helper, TNDungeonMob mob, int x, int z) {
-        Villager villager = helper.spawn(EntityType.VILLAGER, at(x, z));
+        // MCA cancels vanilla villagers at EntityJoinLevel and queues a replacement.
+        // Exercise a real, present resident instead of an unregistered vanilla object.
+        Villager villager;
+        if (com.tnc.tnc.home.McaResidents.available()) {
+            try {
+                BlockPos pos = helper.absolutePos(at(x, z));
+                villager = com.tnc.tnc.home.McaResidents.create(helper.getLevel(),
+                        com.tnc.tnc.home.ResidentService.ALL.get(1), pos, UUID.randomUUID());
+                villager.setPos(pos.getX() + .5D, pos.getY(), pos.getZ() + .5D);
+                helper.assertTrue(helper.getLevel().addFreshEntity(villager), "MCA dummy joins level");
+            } catch (ReflectiveOperationException ex) {
+                throw new IllegalStateException("Cannot create actual MCA combat dummy", ex);
+            }
+        } else {
+            villager = helper.spawn(EntityType.VILLAGER, at(x, z));
+        }
+        helper.assertTrue(helper.getLevel().getEntity(villager.getUUID()) == villager,
+                "Combat dummy must be registered in the actual world");
         villager.setNoAi(true);
         mob.setTarget(villager);
         return villager;

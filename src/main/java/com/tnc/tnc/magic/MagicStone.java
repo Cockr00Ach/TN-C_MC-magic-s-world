@@ -251,6 +251,7 @@ public class MagicStone {
                 int bonus = com.tnc.tnc.equipment.MageGear.regen(serverPlayer);
                 int gearRegen = (int)(((long)serverPlayer.tickCount*bonus/40)-((long)(serverPlayer.tickCount-interval)*bonus/40));
                 int regen = Config.manaRegenFor(data.getMaxMana())+gearRegen;
+                if(com.tnc.tnc.arcana.ArcanaPhysiology.clearChannels(serverPlayer))regen=(int)Math.ceil(regen*1.5);
                 if (regen > 0) {
                     int before = data.getMana();
                     data.addMana(regen);
@@ -314,7 +315,9 @@ public class MagicStone {
     /** 取不到就当场创建一个（正常情况下不会走到这里）。 */
     @Nullable
     public static MagicStoneData getOrNull(Player player) {
-        return get(player).orElse(null);
+        var data=get(player).orElse(null);
+        if(data!=null&&player instanceof ServerPlayer p)data.setManaFreedom(com.tnc.tnc.arcana.ArcanaPhysiology.data(p).getLong("MealSunUntil")>com.tnc.tnc.arcana.ArcanaPhysiology.now(p));
+        return data;
     }
 
     // ------------------------------------------------------------------

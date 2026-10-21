@@ -1,0 +1,68 @@
+{
+  "installed_at": "2026-10-21T15:58:05.555863",
+  "jar_sha256": "704ad27c357ce246e1e0b3d3a830f294c3eb806706e0163a654c4caeb054398a",
+  "source_commit_before_release": "362cbc2878009a55efa43fe3a555f528ddb314f6",
+  "unit_tests": 397,
+  "combined_game_tests": 68,
+  "native_screenshots": 21,
+  "native": {
+    "screenshots": 21,
+    "checks": {
+      "actual_ftb_chapter_loaded": true,
+      "actual_deep_arcana_chapter_loaded": true,
+      "mca_initialization_no_destiny_buffs": true,
+      "character_screen": true,
+      "actual_board_block_interaction": true,
+      "posted-commissions_screen": true,
+      "native_commission_goal": true,
+      "accepted-commission_screen": true,
+      "native_water_pour": true,
+      "alchemy-desk_screen": true,
+      "client_cauldron_working_synced": true,
+      "expedition-preparation_screen": true,
+      "generated_hidden_cache": true,
+      "mana_sight_enabled": true,
+      "native_real_mca_spouse": true,
+      "native_home_recognized": true,
+      "native_child_observed": true,
+      "family-at-home_screen": true,
+      "native_name_input_accepts_unicode": true,
+      "small-character_screen": true,
+      "small-alchemy_screen": true,
+      "arcana-collection_native": true,
+      "arcana-devices_native": true,
+      "arcana-sight_native": true,
+      "aurora-night_native": true,
+      "higher-contract_native": true,
+      "living-armor_native": true,
+      "arcana_camera_not_punished_19": true,
+      "critical-tower_native": true,
+      "arcana_camera_not_punished_20": true
+    },
+    "failures": [],
+    "scope": "Disposable full PCL pack; FTB chapter loading, real screens, alchemy fusion, MCA family, deep arcana devices, living armor and aurora",
+    "class_sha256": {
+      "com.tnc.tnc.journey.client.JourneyScreen": "a89933d2c40603af916b8c23ff92fe1f9ca44477d8e2fc62ddfeb4e6ca2e5750",
+      "com.tnc.tnc.journey.client.PreparationScreen": "49be9f70897dc946052a33219c3b09069d91aa5ac4b457f1126bc2409587c40d",
+      "com.tnc.tnc.alchemy.client.AlchemyScreen": "0de879ef81a503f2f074cf614835e53829858e4285ed8a5bdb62201623d375a9",
+      "com.tnc.tnc.alchemy.client.AlchemyRenderer": "0917db91235ca5d3b58cbfab429bb1daf5187c219a3fbf9b1b02e1f43c7d7241",
+      "com.tnc.tnc.arcana.client.ArcanaClient": "9af79efd2c147eb8d0aa3cc12e9810719fe8b5617061b01866992c09491cc2e9",
+      "com.tnc.tnc.arcana.client.ArcanaDeviceVisual": "e86ac684ff795a5bf181ecc329f9fecadb13dbe1171be63ea6377ad18d01501b",
+      "com.tnc.tnc.arcana.client.ArcanaArmorModels": "046f800b96f4e4f9db9679ff964c229d5f55326d26d804a05fe6051d9769cde3",
+      "com.tnc.tnc.arcana.client.AuroraRenderer": "3a66896e7fd29416589b2602040f6fd14a09cc6d230d9591034789f0b60e874c"
+    }
+  },
+  "protected_quests": {
+    "live": 43,
+    "mirror": 47
+  },
+  "files": {
+    "mods/tnc-1.0.0.jar": "704ad27c357ce246e1e0b3d3a830f294c3eb806706e0163a654c4caeb054398a",
+    "config/ftbquests/quests/chapters/tnc_alchemy.snbt": "aa8bdf983f2c11cc414b4338eb9e0e40e413f726f6785f33d327b545c82615f6",
+    "config/ftbquests/quests/chapters/tnc_deep_arcana.snbt": "14c18bce5dd4b178f462019f4e2c6ea9454c7c723007cbd52e306b18df226817"
+  },
+  "backup": "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\work\\backups\\deep-arcana-20261021-155803",
+  "saves_modified": false,
+  "island_templates_modified": false,
+  "additional_third_party_jars": []
+}

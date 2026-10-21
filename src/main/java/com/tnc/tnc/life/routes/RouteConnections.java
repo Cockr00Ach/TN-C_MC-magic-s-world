@@ -4,7 +4,7 @@ import net.minecraft.world.level.BlockGetter;
 import com.tnc.tnc.production.MagicForgeBlockEntity;
 /** The displayed socket and the actual network share the same endpoints. */
 public final class RouteConnections {
- public static boolean compatible(BlockGetter l,BlockPos a,BlockPos b){if(l instanceof net.minecraft.world.level.LevelReader reader&&!reader.hasChunkAt(b))return false;var x=l.getBlockEntity(a);var y=l.getBlockEntity(b);if(!(y instanceof RouteNodeEntity)&&!(y instanceof MagicForgeBlockEntity))return false;
+ public static boolean compatible(BlockGetter l,BlockPos a,BlockPos b){if(l instanceof net.minecraft.world.level.LevelReader reader&&!reader.hasChunkAt(b))return false;var x=l.getBlockEntity(a);var y=l.getBlockEntity(b);if(!(y instanceof RouteNodeEntity)&&!(y instanceof MagicForgeBlockEntity)){return x instanceof RouteNodeEntity n&&com.tnc.tnc.arcana.ArcanaTowerPorts.brickSocket(l,a,b,n.owner);}
   java.util.UUID owner=x instanceof RouteNodeEntity n?n.owner:x instanceof MagicForgeBlockEntity f?f.owner():null;
   java.util.UUID other=y instanceof RouteNodeEntity n?n.owner:y instanceof MagicForgeBlockEntity f?f.owner():null;
   return owner==null||other==null||owner.equals(other);

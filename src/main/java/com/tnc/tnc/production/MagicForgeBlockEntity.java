@@ -317,13 +317,14 @@ public final class MagicForgeBlockEntity extends BlockEntity implements WorldlyC
         // Plants feed collectors; the forge receives conserved network mana.
         ManaForgeRecipe recipe = chosenRecipe();
         if (recipe == null || charge < recipe.mana()) return;
+        if(!com.tnc.tnc.arcana.ArcanaCrafting.allowed(server,this,recipe))return;
         int[] costs = recipe.costs(this);
         if (costs == null) return;
         ItemStack output = items.get(OUTPUT_SLOT);
         ItemStack produced = recipe.getResultItem(server.registryAccess());
         if (!output.isEmpty() && (!ItemStack.isSameItemSameTags(output, produced)
                 || output.getCount() + produced.getCount() > output.getMaxStackSize())) return;
-        progress++;
+        progress+=getPersistentData().getLong("OverloadBoostUntil")>server.getGameTime()&&server.getGameTime()%2==0?2:1;
         if (server.getGameTime() % 8 == 0) {
             BlockPos chamber = worldPosition.relative(front().getOpposite());
             server.sendParticles(ParticleTypes.SMALL_FLAME, chamber.getX() + .5, chamber.getY() + .45,
@@ -337,7 +338,7 @@ public final class MagicForgeBlockEntity extends BlockEntity implements WorldlyC
         if (progress >= workTicks()) {
             // Inventory and mana are rechecked immediately before the atomic server mutation.
             costs = recipe.costs(this);
-            if (costs != null && charge >= recipe.mana() && formed()) {
+            if (costs != null && charge >= recipe.mana() && formed() && com.tnc.tnc.arcana.ArcanaCrafting.pay(server,this,recipe)) {
                 for (int slot = 0; slot < 4; slot++) if (costs[slot] > 0) items.get(slot).shrink(costs[slot]);
                 if (output.isEmpty()) items.set(OUTPUT_SLOT, produced.copy());
                 else output.grow(produced.getCount());

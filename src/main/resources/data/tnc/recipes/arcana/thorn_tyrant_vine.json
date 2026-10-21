@@ -1,0 +1,24 @@
+{
+  "type": "tnc:mana_forging",
+  "ingredients": [
+    {
+      "item": "tnc:void_parasitic_seed",
+      "count": 1
+    },
+    {
+      "item": "minecraft:sweet_berries",
+      "count": 8
+    },
+    {
+      "item": "tnc:spirit_iron",
+      "count": 4
+    }
+  ],
+  "result": {
+    "item": "tnc:thorn_tyrant_vine",
+    "count": 1
+  },
+  "mana": 160,
+  "work_ticks": 100,
+  "category": "workshop"
+}

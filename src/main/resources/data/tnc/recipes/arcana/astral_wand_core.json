@@ -1,0 +1,24 @@
+{
+  "type": "tnc:mana_forging",
+  "ingredients": [
+    {
+      "item": "tnc:star_marrow",
+      "count": 8
+    },
+    {
+      "item": "tnc:shadow_mana_crystal",
+      "count": 4
+    },
+    {
+      "item": "minecraft:nether_star",
+      "count": 1
+    }
+  ],
+  "result": {
+    "item": "tnc:astral_wand_core",
+    "count": 1
+  },
+  "mana": 1000,
+  "work_ticks": 100,
+  "category": "workshop"
+}

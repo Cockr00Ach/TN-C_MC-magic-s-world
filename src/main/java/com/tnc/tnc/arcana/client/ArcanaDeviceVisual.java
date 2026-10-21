@@ -1,0 +1,49 @@
+package com.tnc.tnc.arcana.client;
+
+import com.tnc.tnc.arcana.*;
+import com.tnc.tnc.life.routes.*;
+import com.tnc.tnc.mana.sight.client.*;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.core.BlockPos;
+
+public final class ArcanaDeviceVisual {
+    private static final net.minecraft.client.model.geom.ModelPart SPIRIT=com.tnc.tnc.arcana.client.ArcanaEntityModel.layer(true).bakeRoot();
+    private static final java.util.Map<RouteNodeEntity,Long> LAST=new java.util.WeakHashMap<>();
+    public static void render(RouteNodeEntity n,float partial,PoseStack pose,MultiBufferSource buffers,int light,int overlay){
+        if(n.getLevel()==null)return;var mc=Minecraft.getInstance();var renderer=mc.getItemRenderer();
+        if(n.kind()==RouteKind.MEAL_PLATE)for(int i=0;i<9;i++){
+            var stack=n.inventory.getItem(i);if(stack.isEmpty())continue;pose.pushPose();pose.translate(.25+(i%3)*.25,.14,.25+(i/3)*.25);pose.mulPose(Axis.XP.rotationDegrees(90));pose.scale(.23f,.23f,.23f);renderer.renderStatic(stack,ItemDisplayContext.FIXED,light,overlay,pose,buffers,n.getLevel(),i);pose.popPose();
+        }
+        if(n.kind()==RouteKind.NURTURE&&!n.inventory.getItem(0).isEmpty()){
+            pose.pushPose();pose.translate(.5,1,.5);pose.mulPose(Axis.YP.rotationDegrees((n.getLevel().getGameTime()+partial)*1.5f));pose.scale(.6f,.6f,.6f);renderer.renderStatic(n.inventory.getItem(0),ItemDisplayContext.FIXED,0xf000f0,overlay,pose,buffers,n.getLevel(),0);pose.popPose();
+        }
+        if(n.kind()==RouteKind.NURTURE&&ManaSightClient.enabled()&&!n.inventory.getItem(0).isEmpty()){
+            String element=n.inventory.getItem(0).getItem() instanceof com.tnc.tnc.adventure.ElementWands.Wand w?w.design.element().id():"water";
+            int color=switch(element){case "fire"->0xff954f;case "water"->0x69dfff;case "lightning"->0xe1d483;case "earth"->0xcbaa64;case "dark"->0xa98aff;default->0x7aefc8;};
+            double age=n.getLevel().getGameTime()+partial;SPIRIT.getAllParts().forEach(net.minecraft.client.model.geom.ModelPart::resetPose);for(int i=0;i<3;i++)SPIRIT.getChild("ring"+i).yRot+=(float)age*.025f*(i%2==0?1:-1);
+            pose.pushPose();pose.translate(.5,1.85+Math.sin(age*.04)*.05,.5);pose.scale(.22f,-.22f,.22f);SPIRIT.render(pose,buffers.getBuffer(net.minecraft.client.renderer.RenderType.eyes(net.minecraft.resources.ResourceLocation.parse("tnc:textures/block/alchemy_glow.png"))),0xf000f0,overlay,(color>>16&255)/255f,(color>>8&255)/255f,(color&255)/255f,1);pose.popPose();
+        }
+        long now=n.getLevel().getGameTime();if(LAST.getOrDefault(n,-1L)==now)return;LAST.put(n,now);
+        boolean sight=ManaSightClient.enabled();var center=Vec3.atCenterOf(n.getBlockPos());
+        if(n.kind()==RouteKind.MEAL_PLATE&&sight){boolean good=ArcanaMeals.active(n),bad=ArcanaMeals.conflict(n);for(int i=0;i<(good?12:bad?4:0);i++){double angle=now*.03+i*Math.PI/6;var at=center.add(Math.cos(angle)*.42,-.32,Math.sin(angle)*.42);ManaSightParticles.effect(at,at.add(0,.18,0),good?0xffdc79:0xf05e53,1,0,.035f,22);}}
+        if(n.kind()==RouteKind.NURTURE&&sight&&!n.inventory.getItem(0).isEmpty()){
+            int c=n.inventory.getItem(0).getOrCreateTag().getString("SpiritElement").equals("fire")?0xff9b59:0x8df3e0;
+            for(int i=0;i<5;i++){double a=now*.08+i*Math.PI*.4;var at=center.add(Math.cos(a)*.25,1.05+Math.sin(a*2)*.12,Math.sin(a)*.25);ManaSightParticles.effect(at,center.add(0,1.45,0),c,i==0?1:0,0,.055f,24);}
+        }
+        if(n.kind()==RouteKind.ABYSS_TOWER&&sight){int stage=n.getPersistentData().getInt("OverloadStage"),c=stage>=2?0xff304d:stage==1?0xffad45:0x5ce4cb;
+            for(int i=0;i<5+stage*7;i++){double a=i*Math.PI*.4+now*(stage>=2?.18:.03),h=(i%7)*.35;var at=center.add(Math.cos(a)*(1+stage*.25),h,Math.sin(a)*(1+stage*.25));ManaSightParticles.effect(at,at.add(-Math.sin(a)*.3,.5,Math.cos(a)*.3),c,i%6==0?1:2,3,.08f+stage*.02f,30);}
+        }
+        if((n.kind()==RouteKind.SOLAR||n.kind()==RouteKind.LUNAR)&&sight&&n.inRate+n.mana>0){int c=n.kind()==RouteKind.SOLAR?0xffdb83:0xc9e9ff;for(int i=0;i<6;i++){double a=now*.03+i;var at=center.add(Math.cos(a)*.4,3+i*2,Math.sin(a)*.4);ManaSightParticles.effect(at,center.add(0,.4,0),c,1,3,.08f,45);}}
+        if(ArcanaHighway.ring(n)&&n.getPersistentData().getLong("SkyActiveUntil")>now&&n.getPersistentData().contains("SkyTarget")){
+            var end=ArcanaHighway.center(BlockPos.of(n.getPersistentData().getLong("SkyTarget")));var start=ArcanaHighway.center(n.getBlockPos());var axis=end.subtract(start).normalize();var u=axis.cross(new Vec3(0,1,0));if(u.lengthSqr()<.01)u=new Vec3(1,0,0);u=u.normalize();var v=axis.cross(u).normalize();
+            for(int i=0;i<(sight?18:3);i++){double phase=(now*.025+i/18.)%1,angle=now*.07+i*2.4;var at=start.lerp(end,phase).add(u.scale(Math.cos(angle)*.78)).add(v.scale(Math.sin(angle)*.78));int color=java.awt.Color.HSBtoRGB((float)((phase+now*.001)%1),.45f,1)&0xffffff;ManaSightParticles.effect(at,at.add(axis.scale(1.5)),color,i%4==0?1:0,3,sight?.08f:.025f,30);}
+            for(var item:n.getLevel().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,new net.minecraft.world.phys.AABB(start,end).inflate(1.2)))if(item.getPersistentData().hasUUID("SkyOwner")){for(int i=0;i<3;i++){double a=now*.2+i*2.09;var at=item.position().add(Math.cos(a)*.25,.2,Math.sin(a)*.25);ManaSightParticles.effect(at,at.add(0,.08,0),0xa4efff,1,3,.035f,16);}}
+        }
+    }
+    private ArcanaDeviceVisual(){}
+}

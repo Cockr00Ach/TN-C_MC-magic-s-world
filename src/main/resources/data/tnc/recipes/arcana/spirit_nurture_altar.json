@@ -1,0 +1,24 @@
+{
+  "type": "tnc:mana_forging",
+  "ingredients": [
+    {
+      "item": "tnc:star_marrow",
+      "count": 4
+    },
+    {
+      "item": "tnc:accessory_charger",
+      "count": 1
+    },
+    {
+      "item": "minecraft:crying_obsidian",
+      "count": 2
+    }
+  ],
+  "result": {
+    "item": "tnc:spirit_nurture_altar",
+    "count": 1
+  },
+  "mana": 160,
+  "work_ticks": 100,
+  "category": "workshop"
+}

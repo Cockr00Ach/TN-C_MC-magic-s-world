@@ -43,7 +43,7 @@ class LifeReworkTest {
     @Test void retiredViewerEntriesHaveNoUnconditionalAlternativeRecipes()throws Exception{
         Set<String> retired=new HashSet<>();for(var v:read(RES.resolve("data/c/tags/items/hidden_from_recipe_viewers.json")).getAsJsonArray("values"))retired.add(v.getAsString());
         assertEquals(14,retired.size());assertFalse(retired.contains("tnc:pasture_tray"));
-        try(var files=Files.list(RES.resolve("data/tnc/recipes"))){for(var file:files.toList()){
+        try(var files=Files.walk(RES.resolve("data/tnc/recipes")).filter(Files::isRegularFile)){for(var file:files.toList()){
             var recipe=read(file);boolean disabled=recipe.has("type")&&recipe.get("type").getAsString().equals("forge:conditional")&&recipe.getAsJsonArray("recipes").get(0).getAsJsonObject().getAsJsonArray("conditions").get(0).getAsJsonObject().get("type").getAsString().equals("forge:false");
             if(!disabled)for(String id:retired)assertFalse(recipe.toString().contains("\""+id+"\""),file+" still uses retired content "+id);
         }}

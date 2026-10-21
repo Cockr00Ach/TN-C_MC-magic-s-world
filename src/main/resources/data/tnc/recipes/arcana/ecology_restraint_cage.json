@@ -1,0 +1,24 @@
+{
+  "type": "tnc:mana_forging",
+  "ingredients": [
+    {
+      "item": "tnc:spirit_iron",
+      "count": 6
+    },
+    {
+      "item": "tnc:radiant_gold",
+      "count": 2
+    },
+    {
+      "item": "minecraft:amethyst_shard",
+      "count": 1
+    }
+  ],
+  "result": {
+    "item": "tnc:ecology_restraint_cage",
+    "count": 1
+  },
+  "mana": 160,
+  "work_ticks": 100,
+  "category": "workshop"
+}

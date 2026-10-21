@@ -1,0 +1,24 @@
+{
+  "type": "tnc:mana_forging",
+  "ingredients": [
+    {
+      "item": "minecraft:spyglass",
+      "count": 1
+    },
+    {
+      "item": "tnc:spirit_iron",
+      "count": 2
+    },
+    {
+      "item": "minecraft:amethyst_shard",
+      "count": 4
+    }
+  ],
+  "result": {
+    "item": "tnc:arcane_observatory",
+    "count": 1
+  },
+  "mana": 160,
+  "work_ticks": 100,
+  "category": "workshop"
+}

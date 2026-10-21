@@ -30,7 +30,9 @@ public final class BotanicalPlantRenderer implements BlockEntityRenderer<Botanic
             if(be.owner==null)strength=player.distanceToSqr(be.getBlockPos().getCenter())<64?.25f:0;
             sway=Mth.sin(time*.12f)*Math.min(1,strength)*8;
         }
-        pose.pushPose();pose.translate(.5,.12,.5);pose.mulPose(Axis.ZP.rotationDegrees(sway));pose.translate(-.5,-.12,-.5);
+        float size=be.getPersistentData().contains("ArcanaScale")?be.getPersistentData().getFloat("ArcanaScale"):1;
+        if(be.getPersistentData().getLong("OverdraftUntil")>be.getLevel().getGameTime())sway=(float)Math.sin((be.getLevel().getGameTime()+partial)*.32)*5;
+        pose.pushPose();pose.translate(.5,0,.5);pose.scale(size,size,size);pose.translate(-.5,0,-.5);pose.translate(.5,.12,.5);pose.mulPose(Axis.ZP.rotationDegrees(sway));pose.translate(-.5,-.12,-.5);
         drawPlant(be.getBlockState(),pose,buffers,light);pose.popPose();
     }
 }

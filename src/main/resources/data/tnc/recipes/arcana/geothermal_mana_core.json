@@ -1,0 +1,24 @@
+{
+  "type": "tnc:mana_forging",
+  "ingredients": [
+    {
+      "item": "tnc:spirit_iron",
+      "count": 4
+    },
+    {
+      "item": "minecraft:magma_block",
+      "count": 1
+    },
+    {
+      "item": "minecraft:amethyst_shard",
+      "count": 2
+    }
+  ],
+  "result": {
+    "item": "tnc:geothermal_mana_core",
+    "count": 1
+  },
+  "mana": 160,
+  "work_ticks": 100,
+  "category": "workshop"
+}

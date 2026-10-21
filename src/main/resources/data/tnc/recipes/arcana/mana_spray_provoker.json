@@ -1,0 +1,24 @@
+{
+  "type": "tnc:mana_forging",
+  "ingredients": [
+    {
+      "item": "tnc:spirit_iron",
+      "count": 2
+    },
+    {
+      "item": "minecraft:bucket",
+      "count": 1
+    },
+    {
+      "item": "minecraft:dispenser",
+      "count": 1
+    }
+  ],
+  "result": {
+    "item": "tnc:mana_spray_provoker",
+    "count": 1
+  },
+  "mana": 160,
+  "work_ticks": 100,
+  "category": "workshop"
+}

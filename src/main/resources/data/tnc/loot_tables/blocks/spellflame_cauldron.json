@@ -66,6 +66,51 @@
                   "source": "Burst",
                   "target": "BlockEntityTag.Burst",
                   "op": "replace"
+                },
+                {
+                  "source": "RitualVersion",
+                  "target": "BlockEntityTag.RitualVersion",
+                  "op": "replace"
+                },
+                {
+                  "source": "HasIgnited",
+                  "target": "BlockEntityTag.HasIgnited",
+                  "op": "replace"
+                },
+                {
+                  "source": "temperature",
+                  "target": "BlockEntityTag.temperature",
+                  "op": "replace"
+                },
+                {
+                  "source": "vortex_sync",
+                  "target": "BlockEntityTag.vortex_sync",
+                  "op": "replace"
+                },
+                {
+                  "source": "Overheated",
+                  "target": "BlockEntityTag.Overheated",
+                  "op": "replace"
+                },
+                {
+                  "source": "PerfectRemaining",
+                  "target": "BlockEntityTag.PerfectRemaining",
+                  "op": "replace"
+                },
+                {
+                  "source": "Ruined",
+                  "target": "BlockEntityTag.Ruined",
+                  "op": "replace"
+                },
+                {
+                  "source": "ReadyQuality",
+                  "target": "BlockEntityTag.ReadyQuality",
+                  "op": "replace"
+                },
+                {
+                  "source": "HeatedAt",
+                  "target": "BlockEntityTag.HeatedAt",
+                  "op": "replace"
                 }
               ]
             }

@@ -13,7 +13,9 @@ public final class RoutePlantRenderer implements BlockEntityRenderer<RoutePlantE
         if(plant.getLevel()==null)return;
         boolean mature=plant.getBlockState().getValue(RoutePlantBlock.AGE)==3;
         float sway=mature?(float)Math.sin((plant.getLevel().getGameTime()+partial)*.035+plant.getBlockPos().getX())*.7f:0;
-        pose.pushPose();pose.translate(.5,.12,.5);pose.mulPose(Axis.ZP.rotationDegrees(sway));pose.translate(-.5,-.12,-.5);
+        float size=plant.getPersistentData().contains("ArcanaScale")?plant.getPersistentData().getFloat("ArcanaScale"):1;
+        if(plant.getPersistentData().getLong("OverdraftUntil")>plant.getLevel().getGameTime())sway=(float)Math.sin((plant.getLevel().getGameTime()+partial)*.32)*5;
+        pose.pushPose();pose.translate(.5,0,.5);pose.scale(size,size,size);pose.translate(-.5,0,-.5);pose.translate(.5,.12,.5);pose.mulPose(Axis.ZP.rotationDegrees(sway));pose.translate(-.5,-.12,-.5);
         com.tnc.tnc.life.botanical.client.BotanicalPlantRenderer.drawPlant(plant.getBlockState(),pose,buffers,light);pose.popPose();
     }
 }

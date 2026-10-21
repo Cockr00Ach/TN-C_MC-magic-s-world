@@ -8,10 +8,17 @@ public enum RouteKind {
     LAMP("mana_lantern","魔导灯",20,4),BRIGHT_LAMP("bright_mana_lantern","庭院明灯",40,4),PAPER_PRESS("mana_pulp_press","纸皮压机",200,8),FEED_PLATE("mana_feed_plate","自动投料器",100,4),
     IRRIGATOR("gentle_irrigator","轻灌器",100,4),GREENHOUSE("climate_lantern","护候灯",200,4),SAWMILL("mana_sawmill","魔导锯台",200,8),LOOM("mist_loom","雾纱织机",300,8),
     DRYER("meal_dryer","远行烘食器",300,8),INCUBATOR("mana_incubator","暖卵台",100,4),HARVESTER("harvest_arm","收获臂",300,8),SEED_SORTER("seed_sorter","种源分拣器",100,4),
-    CART_TRACK("mana_cart_track","魔导运货轨",200,8),ALARM("ward_bell","守望铃",100,4),CHARGER("accessory_charger","饰品充能台",800,128);
+    CART_TRACK("mana_cart_track","魔导运货轨",200,8),ALARM("ward_bell","守望铃",100,4),CHARGER("accessory_charger","饰品充能台",800,128),
+    ABYSS_TOWER("abyss_mana_tower","深渊魔力聚能塔",1000000,4096),RELIEF("mana_relief_valve","魔力泄压阀",16000,512),
+    GEOTHERMAL("geothermal_mana_core","地热魔力核心",4000,64),SPRAYER("arcane_sprinkler","魔力农田喷灌塔",2000,64),
+    SOLAR("corona_focusing_mirror","日冕聚焦巨镜",16000,512),LUNAR("moon_tide_basin","月华潮汐水盘",16000,512),OBSERVATORY("arcane_observatory","观星台",100,8),
+    NURTURE("spirit_nurture_altar","魔力温养祭坛",16000,512),MEAL_PLATE("carved_mana_platter","雕花魔力餐盘",1000,64),
+    RESTRAINT("ecology_restraint_cage","魔力生态拘束笼",2000,128),PRESSURE_PLATE("mana_pressure_tread","魔力压电踏板",1000,128),PROVOKER("mana_spray_provoker","喷水挑衅器",1000,64),HOOD("living_mana_hood","活体吸魔罩",4000,256),
+    SKY_LAUNCHER("sky_mana_launch_ring","定向魔力喷射环",8000,512),SKY_RELAY("sky_mana_relay_ring","魔力导流中继环",1000,256),
+    DIMENSION_PRISM("dimensional_mana_prism","高维魔力棱镜",64000,4096),SINGULARITY("singularity_mana_core","奇点魔力核心",2000000000,8192);
     public final String id,name;public final int capacity,rate;
     RouteKind(String id,String name,int capacity,int rate){this.id=id;this.name=name;this.capacity=capacity;this.rate=rate;}
     public boolean wire(){return this==WIRE||this==GOLD_WIRE||this==CRYSTAL_WIRE;}
-    public boolean storage(){return this==POOL||this==RESERVOIR||this==VAULT;}
-    public boolean supply(){return storage()||this==COLLECTOR||this==ANIMAL_COLLECTOR||this==COLOR_TARGET||this==INFUSER||this==MIRROR||this==FAR_MIRROR||this==VALVE;}
+    public boolean storage(){return this==POOL||this==RESERVOIR||this==VAULT||this==ABYSS_TOWER||this==SINGULARITY;}
+    public boolean supply(){return storage()||this==COLLECTOR||this==ANIMAL_COLLECTOR||this==COLOR_TARGET||this==INFUSER||this==MIRROR||this==FAR_MIRROR||this==VALVE||this==SOLAR||this==LUNAR||this==DIMENSION_PRISM||this==PRESSURE_PLATE||this==HOOD;}
 }

@@ -45,8 +45,8 @@
       "x": -2,
       "y": -3,
       "description": [
-        "暖椒＋木炭＋荧石粉，合成4份焰蕊盐。",
-        "一份盐提供1200刻实际炼制燃时；停工不白烧。无须接魔力电。"
+        "暖椒+木炭+荧石粉，制作四份焰蕊盐。",
+        "每份燃烧1200刻。点火后会持续升温，需观察温度控制；停下搅拌不会自动熄火。"
       ],
       "dependencies": [
         "72711F5C4C10E8B8"
@@ -70,11 +70,11 @@
       "x": 0,
       "y": -1,
       "description": [
-        "铜锭×2、铁锭×3、炼药锅×1，按JEI合成。",
-        "水桶右键倒水，一桶可炼三剂。三种原料各一份丢进锅口，也可手持右键投放。",
-        "加入焰蕊盐，再用实际火系法术（如火球）命中锅身点火。燧石、火焰弹物品和GUI均不能点火。",
-        "浸润、融合、凝结三阶段，按提示空手或铜枝搅拌棒右键。每阶段搅拌一次；暂停不损失材料。",
-        "完成后用空玻璃瓶盛取。潜行空手取回原料；手持书右键查看药典。"
+        "水桶倒水，一桶炼三剂。投三种材料各一份，再加焰蕊盐，用火系法术命中点燃。",
+        "按F8看热环：360~620翠绿温区才能融合，水/冰法术降220温度。超过800持续五秒会炸锅并冒毒雾。",
+        "浸润、融合、凝结各搅拌一次。不同药性漩涡逐步向中心靠拢。",
+        "60~89%融合封釜是标准；100%同心闪星后1.5秒内用封魔盖（或潜行持法杖）右键收汁，是大师品。",
+        "提前封釜是30%次品；融合后继续烧则变古怪废液。封釜后用空瓶盛取，书只打开药典。"
       ],
       "dependencies": [
         "1C56E1FCB3544A06"
@@ -596,6 +596,174 @@
         {
           "id": "16B19DFCCDDF58C3",
           "type": "checkmark"
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "589C596B01390309",
+      "title": "&a农用 · 狂躁透支",
+      "icon": "tnc:overdraft_elixir",
+      "x": -6,
+      "y": 13,
+      "description": [
+        "tnc:hearth_pepper_fruit、红石、烈焰粉，三种各一份。",
+        "同样在药釜加水、投入焰蕊盐、用火法点燃，在魔力视下控温搅拌后封釜收汁。",
+        "用途见「深层魔法·世界的回响」。"
+      ],
+      "dependencies": [],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "4E3F65D9B47067E0",
+          "type": "item",
+          "item": "tnc:overdraft_elixir",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "20737E3881F6C2E7",
+      "title": "&a农用 · 巨人化",
+      "icon": "tnc:gigantism_elixir",
+      "x": -4,
+      "y": 13,
+      "description": [
+        "tnc:mana_root_core、棕色蘑菇、骨粉，三种各一份。",
+        "同样在药釜加水、投入焰蕊盐、用火法点燃，在魔力视下控温搅拌后封釜收汁。",
+        "用途见「深层魔法·世界的回响」。"
+      ],
+      "dependencies": [],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "5D36F9D1AF568F3A",
+          "type": "item",
+          "item": "tnc:gigantism_elixir",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "5B982C9D3B968D37",
+      "title": "&a农用 · 微缩",
+      "icon": "tnc:miniature_elixir",
+      "x": -2,
+      "y": 13,
+      "description": [
+        "tnc:rainletter_berry、发酵蛛眼、糖，三种各一份。",
+        "同样在药釜加水、投入焰蕊盐、用火法点燃，在魔力视下控温搅拌后封釜收汁。",
+        "用途见「深层魔法·世界的回响」。"
+      ],
+      "dependencies": [],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "4335F6FA4D32B822",
+          "type": "item",
+          "item": "tnc:miniature_elixir",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "3645A132EB008461",
+      "title": "&a农用 · 属性扭曲",
+      "icon": "tnc:flame_twist_elixir",
+      "x": 0,
+      "y": 13,
+      "description": [
+        "tnc:hearth_pepper_fruit、岩浆膏、紫水晶碎片，三种各一份。",
+        "同样在药釜加水、投入焰蕊盐、用火法点燃，在魔力视下控温搅拌后封釜收汁。",
+        "用途见「深层魔法·世界的回响」。"
+      ],
+      "dependencies": [],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "6C0B52FB53AC9071",
+          "type": "item",
+          "item": "tnc:flame_twist_elixir",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "4305A3C83B819CC5",
+      "title": "&a农用 · 分裂",
+      "icon": "tnc:fission_elixir",
+      "x": 2,
+      "y": 13,
+      "description": [
+        "tnc:honey_powder、黏液球、发光浆果，三种各一份。",
+        "同样在药釜加水、投入焰蕊盐、用火法点燃，在魔力视下控温搅拌后封釜收汁。",
+        "用途见「深层魔法·世界的回响」。"
+      ],
+      "dependencies": [],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "3F7CDBAC980A9FFC",
+          "type": "item",
+          "item": "tnc:fission_elixir",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "4C3D0D8ED0035A47",
+      "title": "&a农用 · 缩水捕捉",
+      "icon": "tnc:capture_shrink_elixir",
+      "x": 4,
+      "y": 13,
+      "description": [
+        "tnc:shadow_hour_petal、发酵蛛眼、线，三种各一份。",
+        "同样在药釜加水、投入焰蕊盐、用火法点燃，在魔力视下控温搅拌后封釜收汁。",
+        "用途见「深层魔法·世界的回响」。"
+      ],
+      "dependencies": [],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "7053DF7A176315AE",
+          "type": "item",
+          "item": "tnc:capture_shrink_elixir",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "62EE1844A0AC7483",
+      "title": "&a农用 · 舒缓浴盐",
+      "icon": "tnc:soothing_bath_salt",
+      "x": 6,
+      "y": 13,
+      "description": [
+        "tnc:homeward_flower_petal、海晶砂粒、蜂蜜瓶，三种各一份。",
+        "同样在药釜加水、投入焰蕊盐、用火法点燃，在魔力视下控温搅拌后封釜收汁。",
+        "用途见「深层魔法·世界的回响」。"
+      ],
+      "dependencies": [],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "529B3D132875AEF5",
+          "type": "item",
+          "item": "tnc:soothing_bath_salt",
+          "count": 1,
+          "consume_items": false
         }
       ],
       "rewards": []

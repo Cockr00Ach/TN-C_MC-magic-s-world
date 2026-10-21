@@ -29,7 +29,7 @@ class GuidebookTest {
                 for(var value:chapter.getAsJsonArray("images")){var tex=value.getAsJsonObject().get("image").getAsString();assertNotNull(getClass().getResource("/assets/"+tex.replace(":","/")),tex);}
             }
         }
-        assertEquals(24,chapters.size());assertEquals(191,real);assertEquals(41,atlas);
+        assertEquals(25,chapters.size());assertEquals(191,real);assertEquals(41,atlas);
         for(var chapter:chapters)for(var value:chapter.getAsJsonArray("quests"))for(var d:value.getAsJsonObject().getAsJsonArray("dependencies"))assertTrue(quests.contains(d.getAsString()),d.toString());
         for(String e:List.of("water","fire","lightning","wind","earth","light","dark"))for(int tier=1;tier<=5;tier++){
             String name=e+"_wand_"+tier;assertNotNull(getClass().getResource("/assets/tnc/models/item/"+name+".json"));
@@ -60,8 +60,8 @@ class GuidebookTest {
         assertTrue(Long.parseLong(chapter.get("id").getAsString(),16)>0);
         Set<String> quests=new HashSet<>();Set<String> icons=new HashSet<>();
         for(var entry:chapter.getAsJsonArray("quests")){var q=entry.getAsJsonObject();String id=q.get("id").getAsString();assertTrue(Long.parseLong(id,16)>0);assertTrue(quests.add(id));icons.add(q.get("icon").getAsString());for(var t:q.getAsJsonArray("tasks"))assertTrue(Long.parseLong(t.getAsJsonObject().get("id").getAsString(),16)>0);}
-        assertEquals(22,quests.size());
-        for(var e:com.tnc.tnc.alchemy.Elixir.values())assertTrue(icons.contains("tnc:elixir_"+e.id));
+        assertEquals(29,quests.size());
+        for(var e:com.tnc.tnc.alchemy.Elixir.values())assertTrue(icons.contains("tnc:"+e.outputId()));
         for(var entry:chapter.getAsJsonArray("quests"))for(var dep:entry.getAsJsonObject().getAsJsonArray("dependencies"))assertTrue(quests.contains(dep.getAsString()));
     }
     private GuidebookContent content() throws IOException {

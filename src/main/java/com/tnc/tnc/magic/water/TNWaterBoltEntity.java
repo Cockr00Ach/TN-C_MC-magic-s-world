@@ -46,6 +46,7 @@ public final class TNWaterBoltEntity extends Projectile {
         BlockHitResult wall=level.clip(new ClipContext(from,to,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,this));
         Vec3 limit=wall.getType()==HitResult.Type.MISS ? to : wall.getLocation();
         boolean blocked=wall.getType()!=HitResult.Type.MISS;
+        if(blocked)com.tnc.tnc.alchemy.AlchemyEntity.coolNear(level,wall.getBlockPos(),getOwner());
         if(spellScale()>1) {
             double distance=from.distanceToSqr(limit);
             for(var shape:level.getBlockCollisions(this,new AABB(from,to).inflate(collisionRadius())))
