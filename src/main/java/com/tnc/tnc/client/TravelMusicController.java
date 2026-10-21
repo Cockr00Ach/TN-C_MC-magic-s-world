@@ -48,7 +48,7 @@ public final class TravelMusicController {
      * 不走 {@code SoundEvents} 常量：那个常量在这里是 {@code Holder} 形态、取不到 id ✗。
      */
     private static final ResourceLocation BOSS_MUSIC =
-            ResourceLocation.fromNamespaceAndPath("minecraft", "music.dragon");
+            ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "music.boss.yan_crywolf");
     /** 多近算"在打 boss"（格）✓ —— 比 64 格施法距离略小一点，免得刚看见就切音乐 ✓ */
     private static final double BOSS_MUSIC_RANGE = 56.0D;
     private static SoundInstance bossTrack;

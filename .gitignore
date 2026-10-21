@@ -129,3 +129,6 @@ work/
 
 # Python tooling caches
 __pycache__/
+
+# Local Yan battle music, supplied separately.
+/src/main/resources/assets/tnc/sounds/music/boss/yan_crywolf.ogg
