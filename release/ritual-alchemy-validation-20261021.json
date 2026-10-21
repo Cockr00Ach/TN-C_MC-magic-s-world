@@ -1,0 +1,44 @@
+{
+  "validated_at": "2026-10-21T09:49:49.534712",
+  "jar_sha256": "c941f7d740145d119041780a1d428e91377072454bb479947ab1bea078017799",
+  "source_commit": "ca92c819a88c6c959457587327e314c17c05ae09",
+  "unit_tests": 305,
+  "journey_gametests": 15,
+  "dungeon_gametests": 29,
+  "installer_uses_previous_verified_allowlist_protocol": true,
+  "native": {
+    "screenshots": 14,
+    "checks": {
+      "actual_ftb_chapter_loaded": true,
+      "mca_initialization_no_destiny_buffs": true,
+      "character_screen": true,
+      "actual_board_block_interaction": true,
+      "posted-commissions_screen": true,
+      "native_commission_goal": true,
+      "accepted-commission_screen": true,
+      "native_water_pour": true,
+      "alchemy-desk_screen": true,
+      "client_cauldron_working_synced": true,
+      "expedition-preparation_screen": true,
+      "generated_hidden_cache": true,
+      "mana_sight_enabled": true,
+      "native_real_mca_spouse": true,
+      "native_home_recognized": true,
+      "native_child_observed": true,
+      "family-at-home_screen": true,
+      "native_name_input_accepts_unicode": true,
+      "small-character_screen": true,
+      "small-alchemy_screen": true
+    },
+    "failures": [],
+    "scope": "Disposable full PCL pack; actual network screens, MCA spouse and child, brewing and generated dungeon hidden cache",
+    "class_sha256": {
+      "com.tnc.tnc.journey.client.JourneyScreen": "a89933d2c40603af916b8c23ff92fe1f9ca44477d8e2fc62ddfeb4e6ca2e5750",
+      "com.tnc.tnc.journey.client.PreparationScreen": "49be9f70897dc946052a33219c3b09069d91aa5ac4b457f1126bc2409587c40d",
+      "com.tnc.tnc.alchemy.client.AlchemyScreen": "222d6f90ac69af84c88f2e72cdecf3a10e3d7d032bb4e5c3a1a68724fb6cedec",
+      "com.tnc.tnc.alchemy.client.AlchemyRenderer": "f44dabe16224e2d6fa148dff86c8fb1ee81efb684f1e1ff4433a989e195d5355"
+    }
+  },
+  "native_ftb_quests": 22,
+  "review": "Independent read-only review; fuel recovery, legacy board safety and effect classification findings fixed"
+}
