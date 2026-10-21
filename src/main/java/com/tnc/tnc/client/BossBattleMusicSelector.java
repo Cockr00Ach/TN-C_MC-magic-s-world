@@ -25,6 +25,13 @@ public final class BossBattleMusicSelector {
             };
             if (track == null) continue;
             ResourceLocation music = ResourceLocation.fromNamespaceAndPath("tnc", "music.boss." + track);
+            // Local audio is intentionally not in Git. A source-only update must retain
+            // usable battle music until the collaborator supplies their audio overlay.
+            if (!minecraft.getSoundManager().getAvailableSounds().contains(music)
+                    || minecraft.getResourceManager().getResource(ResourceLocation.fromNamespaceAndPath("tnc",
+                        "sounds/music/boss/" + track + ".ogg")).isEmpty()) {
+                music = ResourceLocation.fromNamespaceAndPath("minecraft", "music.dragon");
+            }
             // Keep the current encounter's music while its boss remains nearby.
             if (music.equals(playing)) return music;
             double distance = minecraft.player.distanceToSqr(entity);

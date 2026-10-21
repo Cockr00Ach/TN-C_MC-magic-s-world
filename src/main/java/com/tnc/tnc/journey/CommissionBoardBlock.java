@@ -19,7 +19,7 @@ public final class CommissionBoardBlock extends HorizontalDirectionalBlock {
     @Override public BlockState getStateForPlacement(BlockPlaceContext c){return defaultBlockState().setValue(FACING,c.getHorizontalDirection().getOpposite());}
     @Override public VoxelShape getShape(BlockState s,BlockGetter l,BlockPos p,CollisionContext c){return s.getValue(FACING).getAxis()==Direction.Axis.Z?Block.box(0,0,5,16,16,11):Block.box(5,0,0,11,16,16);}
     @Override public InteractionResult use(BlockState s,Level l,BlockPos pos,Player p,InteractionHand hand,BlockHitResult hit){
-        if(p instanceof ServerPlayer player&&TownServices.atBoard(player))CommissionService.open(player);
+        if(p instanceof ServerPlayer player)CommissionService.openAt(player,pos);
         return InteractionResult.sidedSuccess(l.isClientSide);
     }
 }

@@ -41,7 +41,7 @@ public final class TownServices {
         return !p.serverLevel().getEntitiesOfClass(TownServiceNpc.class,new AABB(p.blockPosition()).inflate(8),n->n.isAlive()&&n.role().equals(role)&&n.distanceToSqr(p)<=64).isEmpty();
     }
     public static boolean atBoard(ServerPlayer p){var b=board(p.server.overworld());return p.serverLevel()==p.server.overworld()&&p.isAlive()&&!p.isSpectator()&&!com.tnc.tnc.combat.DownedCombat.isDowned(p)&&b!=null&&b.closerToCenterThan(p.position(),16)&&p.serverLevel().hasChunkAt(b);}
-    public static boolean openBoard(ServerPlayer p){if(!atBoard(p))return false;com.tnc.tnc.journey.CommissionService.open(p);return true;}
+    public static boolean openBoard(ServerPlayer p){if(!atBoard(p))return false;return com.tnc.tnc.journey.CommissionService.openAt(p,board(p.server.overworld()));}
     public static void open(ServerPlayer p,TownServiceNpc npc){
         if(!near(p,npc.role()))return;AdventureService.milestone(p,"met_"+npc.role());AdventureService.sync(p,true,"",npc.role());
         if(npc.role().equals("guild"))p.sendSystemMessage(Component.literal("登记在这里办理；接单与交付请右键旁边的旧铜纸签委托栏。"));
@@ -175,7 +175,7 @@ public final class TownServices {
         var id=ForgeRegistries.BLOCKS.getKey(p.serverLevel().getBlockState(e.getPos()).getBlock());
         if(NativeBountiful.isTownPaper(e.getItemStack())&&id!=null&&id.toString().equals("bountiful:bountyboard")&&profileReady(p))return;
         e.setCanceled(true);e.setCancellationResult(net.minecraft.world.InteractionResult.SUCCESS);
-        AdventureService.milestone(p,"visited_board");com.tnc.tnc.journey.CommissionService.open(p);
+        AdventureService.milestone(p,"visited_board");com.tnc.tnc.journey.CommissionService.openAt(p,e.getPos());
     }
     private static boolean profileReady(ServerPlayer p){return atBoard(p)&&AdventureService.profile(p).registered();}
 }

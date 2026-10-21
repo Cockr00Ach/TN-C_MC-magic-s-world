@@ -30,6 +30,7 @@ public final class ArcanaDeviceVisual {
         }
         long now=n.getLevel().getGameTime();if(LAST.getOrDefault(n,-1L)==now)return;LAST.put(n,now);
         boolean sight=ManaSightClient.enabled();var center=Vec3.atCenterOf(n.getBlockPos());
+        if(n.kind()==RouteKind.MEAL_PLATE)for(int i=0;i<9;i++){var stack=n.inventory.getItem(i);if(!ArcanaMeals.allowed(stack))continue;int color=ArcanaMeals.color(ArcanaMeals.taste(stack));if(!sight&&now%3!=i%3)continue;for(int k=0;k<(sight?3:1);k++){double a=now*.045+k*Math.PI*2/3;var at=Vec3.atLowerCornerOf(n.getBlockPos()).add(.25+(i%3)*.25+Math.cos(a)*.065,.18,.25+(i/3)*.25+Math.sin(a)*.065);ManaSightParticles.effect(at,at.add(0,.25,0),color,k==0?1:0,3,sight?.035f:.022f,25);}}
         if(n.kind()==RouteKind.MEAL_PLATE&&sight){boolean good=ArcanaMeals.active(n),bad=ArcanaMeals.conflict(n);for(int i=0;i<(good?12:bad?4:0);i++){double angle=now*.03+i*Math.PI/6;var at=center.add(Math.cos(angle)*.42,-.32,Math.sin(angle)*.42);ManaSightParticles.effect(at,at.add(0,.18,0),good?0xffdc79:0xf05e53,1,0,.035f,22);}}
         if(n.kind()==RouteKind.NURTURE&&sight&&!n.inventory.getItem(0).isEmpty()){
             int c=n.inventory.getItem(0).getOrCreateTag().getString("SpiritElement").equals("fire")?0xff9b59:0x8df3e0;
@@ -41,7 +42,7 @@ public final class ArcanaDeviceVisual {
         if((n.kind()==RouteKind.SOLAR||n.kind()==RouteKind.LUNAR)&&sight&&n.inRate+n.mana>0){int c=n.kind()==RouteKind.SOLAR?0xffdb83:0xc9e9ff;for(int i=0;i<6;i++){double a=now*.03+i;var at=center.add(Math.cos(a)*.4,3+i*2,Math.sin(a)*.4);ManaSightParticles.effect(at,center.add(0,.4,0),c,1,3,.08f,45);}}
         if(ArcanaHighway.ring(n)&&n.getPersistentData().getLong("SkyActiveUntil")>now&&n.getPersistentData().contains("SkyTarget")){
             var end=ArcanaHighway.center(BlockPos.of(n.getPersistentData().getLong("SkyTarget")));var start=ArcanaHighway.center(n.getBlockPos());var axis=end.subtract(start).normalize();var u=axis.cross(new Vec3(0,1,0));if(u.lengthSqr()<.01)u=new Vec3(1,0,0);u=u.normalize();var v=axis.cross(u).normalize();
-            for(int i=0;i<(sight?18:3);i++){double phase=(now*.025+i/18.)%1,angle=now*.07+i*2.4;var at=start.lerp(end,phase).add(u.scale(Math.cos(angle)*.78)).add(v.scale(Math.sin(angle)*.78));int color=java.awt.Color.HSBtoRGB((float)((phase+now*.001)%1),.45f,1)&0xffffff;ManaSightParticles.effect(at,at.add(axis.scale(1.5)),color,i%4==0?1:0,3,sight?.08f:.025f,30);}
+            int grains=Math.min(120,(int)Math.ceil(start.distanceTo(end)*(sight?5:2)));for(int i=0;i<grains;i++){double phase=(now*.004+i/(double)grains)%1,angle=now*.018+i*2.4;var at=start.lerp(end,phase).add(u.scale(Math.cos(angle)*.7)).add(v.scale(Math.sin(angle)*.7));int color=java.awt.Color.HSBtoRGB((float)((phase*.4+now*.0003)%1),.34f,1)&0xffffff;ManaSightParticles.effect(at,at.add(axis.scale(.75)),color,i%9==0?1:0,3,sight?.065f:.035f,48);}
             for(var item:n.getLevel().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,new net.minecraft.world.phys.AABB(start,end).inflate(1.2)))if(item.getPersistentData().hasUUID("SkyOwner")){for(int i=0;i<3;i++){double a=now*.2+i*2.09;var at=item.position().add(Math.cos(a)*.25,.2,Math.sin(a)*.25);ManaSightParticles.effect(at,at.add(0,.08,0),0xa4efff,1,3,.035f,16);}}
         }
     }

@@ -18,7 +18,7 @@ public final class ArcanaDevices {
     public static boolean jammed(ServerLevel l,UUID owner,BlockPos pos){var p=owner==null?null:l.getServer().getPlayerList().getPlayer(owner);return p!=null&&p.serverLevel()==l&&p.distanceToSqr(Vec3.atCenterOf(pos))<=25&&ArcanaPhysiology.toxicity(p)>80&&l.getGameTime()%100<40;}
     public static void tick(ServerLevel l,RouteNodeEntity n){if(!advanced(n))return;long now=l.getGameTime();var t=n.getPersistentData();ArcanaSky.tick(l);
         switch(n.kind()){
-            case ABYSS_TOWER->tower(l,n);
+            case ABYSS_TOWER->{ArcanaAmbientIntake.collect(l,n);tower(l,n);}
             case SOLAR,LUNAR->{boolean aurora=ArcanaSky.aurora(l);boolean valid=l.canSeeSky(n.getBlockPos().above())&&(n.kind()==RouteKind.SOLAR?l.isDay():!l.isDay());int made=valid?(int)Math.round((n.kind()==RouteKind.SOLAR?24:16*RitualRules.moonFactor(l.getMoonPhase()))*(aurora?6:1)):0;
                 if(n.kind()==RouteKind.SOLAR&&n.getBlockPos().getY()<l.getSeaLevel()+16)made=0;
                 int accepted=n.receive(made);String aspect=aurora?"astral":n.kind()==RouteKind.SOLAR?"solar":"lunar";ArcanaEnergy.credit(n,aspect,accepted);n.status=valid?aspect+" · "+accepted+" M/s":"需要露天、正确昼夜；日镜须高于海平面16格";
@@ -32,7 +32,7 @@ public final class ArcanaDevices {
             case RESTRAINT,HOOD,PROVOKER,PRESSURE_PLATE->ArcanaCages.tick(l,n);
             case SKY_LAUNCHER,SKY_RELAY->ArcanaHighway.tick(l,n);
             case RELIEF->n.status="潜行空手开启泄压：抽取三格内聚能塔5000M，过载下降20点";
-            case SINGULARITY->{long balance=Math.max(0,t.getLong("SingularityBalance"));if(n.mana>1000000){int stored=n.extract(n.mana-1000000);balance=balance>Long.MAX_VALUE-stored?Long.MAX_VALUE:balance+stored;}if(n.mana<500000&&balance>0){int take=(int)Math.min(balance,1000000-n.mana);n.receive(take);balance-=take;}t.putLong("SingularityBalance",balance);n.status="奇点实存 "+balance+" + 缓冲 "+n.mana+" M";}
+            case SINGULARITY->{ArcanaAmbientIntake.collect(l,n);long balance=Math.max(0,t.getLong("SingularityBalance"));if(n.mana>1000000){int stored=n.extract(n.mana-1000000);balance=balance>Long.MAX_VALUE-stored?Long.MAX_VALUE:balance+stored;}if(n.mana<500000&&balance>0){int take=(int)Math.min(balance,1000000-n.mana);n.receive(take);balance-=take;}t.putLong("SingularityBalance",balance);n.status="奇点实存 "+balance+" + 缓冲 "+n.mana+" M · 直收 "+t.getInt("AmbientRate")+"/秒";}
             default->{}
         }
         n.setChanged();l.sendBlockUpdated(n.getBlockPos(),n.getBlockState(),n.getBlockState(),3);
@@ -56,7 +56,7 @@ public final class ArcanaDevices {
     }}
     private static void tower(ServerLevel l,RouteNodeEntity n){var t=n.getPersistentData();long now=l.getGameTime();boolean formed=formed(l,n.getBlockPos());if(formed!=t.getBoolean("ShellFormed")){t.putBoolean("ShellFormed",formed);for(var at:BlockPos.betweenClosed(n.getBlockPos().offset(-2,-1,-2),n.getBlockPos().offset(2,3,2)))if(l.hasChunkAt(at)&&ArcanaTowerPorts.socket(n.getBlockPos(),at)&&l.getBlockState(at).getBlock() instanceof RouteWireBlock wire)wire.refresh(l,at);}
         if(t.hasUUID("Devourer")&&ArcanaDisasters.get(l).dead(t.getUUID("Devourer"))){t.remove("Devourer");t.putDouble("overload_level",40);}
-        double pressure=RitualRules.pressure(t.getDouble("overload_level"),n.inRate,formed);t.putDouble("overload_level",pressure);int stage=RitualRules.pressureStage(pressure);t.putInt("OverloadStage",stage);n.status=!formed?"未成型 · 3×3周边三层聚能砖，中心上方两格留空":"过载 "+(int)pressure+"% · 进流 "+n.inRate+"/320M/s";
+        double pressure=RitualRules.pressure(t.getDouble("overload_level"),n.inRate+t.getInt("AmbientRate"),formed);t.putDouble("overload_level",pressure);int stage=RitualRules.pressureStage(pressure);t.putInt("OverloadStage",stage);n.status=!formed?"未成型 · 3×3周边三层聚能砖，中心上方两格留空":"过载 "+(int)pressure+"% · 进流 "+(n.inRate+t.getInt("AmbientRate"))+"/320M/s · 直收 "+t.getInt("AmbientRate")+"M/s";
         if(stage==1||stage==2)boostConnected(l,n,now+30);
         if(stage>=2&&formed){if(now%100==0){for(var p:l.players())if(p.distanceToSqr(Vec3.atCenterOf(n.getBlockPos()))<1024){p.playNotifySound(net.minecraft.sounds.SoundEvents.WARDEN_HEARTBEAT,net.minecraft.sounds.SoundSource.BLOCKS,.6f,.7f);if(com.tnc.tnc.mana.sight.ManaSightServer.enabled(p)){var state=new CompoundTag();state.putString("Type","overload");state.putLong("Until",now+100);state.putInt("Stage",stage);ArcanaNetwork.sync(p,state);}}}
             for(int i=0;i<3;i++){var at=n.getBlockPos().offset(l.random.nextInt(65)-32,l.random.nextInt(9)-4,l.random.nextInt(65)-32);if(l.hasChunkAt(at)&&RouteAccess.allowed(l,at,n.owner)&&l.getBlockState(at).is(Blocks.GRASS_BLOCK))l.setBlock(at,ArcanaContent.RED_GRASS.defaultBlockState(),3);}

@@ -14,8 +14,8 @@ public final class AlchemyScreen extends ArcaneContainerScreen<AlchemyMenu> {
         ArcaneGui.proportionalFrame(g,leftPos,topPos,imageWidth,imageHeight);g.pose().pushPose();g.pose().translate(leftPos,topPos,0);
         g.drawString(font,"魔焰药典",24,21,ArcaneGui.GOLD,false);g.drawString(font,"在锅边炼制 · 书页只供查阅",24,37,ArcaneGui.DIM,false);
         g.fill(193,56,194,235,0x886f644c);
-        String[] names={"01  倒入清水","02  投放药材","03  火法点燃","04  控温搅拌","05  封釜收汁"};
-        String[] help={"水桶右键，一桶可炼三剂。","三种材料各一份，投入锅口。加入焰蕊盐。","火球等火系法术命中釜体。燧石与普通火无效。","魔力视观察热环，绿温360~620。水法降温，各阶段搅拌。","漩涡同心后1.5秒内，用封魔盖右键。再用空瓶盛取。"};
+        String[] names={"01  倒入清水","02  投放药材","03  火法点燃","04  观察融合","05  封盖续煮"};
+        String[] help={"水桶右键，一桶可炼三剂。","三味药材各一份，右键或丢进锅口。","火球等火系法术命中釜体。燧石与普通火无效。","魔力视下漩涡自动靠拢。锅周翠绿适温，蓝冷红热。","同心星光时盖锅锁定药性。保持绿温再煮六秒，用空瓶盛药。"};
         int y=60;for(int i=0;i<names.length;i++){g.drawString(font,names[i],24,y,ArcaneGui.CYAN,false);int z=y+12;for(var line:font.split(Component.literal(help[i]),155)){g.drawString(font,line,24,z,ArcaneGui.DIM,false);z+=10;}y+=35;}
         var e=Elixir.values()[selected];g.pose().pushPose();g.pose().translate(246,55,0);g.pose().scale(3,3,1);g.renderItem(new ItemStack(AlchemyContent.POTIONS.get(e)),0,0);g.pose().popPose();
         g.drawCenteredString(font,Component.literal(e.name),268,109,ArcaneGui.TEXT);int z=125;

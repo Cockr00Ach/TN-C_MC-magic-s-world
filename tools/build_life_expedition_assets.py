@@ -101,3 +101,7 @@ print(f'Built {len(elixirs)} distinct potion icons, original cauldron/cache mode
 # The physical ritual supersedes the original desk UI and generated bottle placeholders.
 import runpy
 runpy.run_path(str(R / "tools/build_ritual_alchemy_assets.py"), run_name="__main__")
+
+# Apply the current physical-cauldron and plant-only meal design after historical generation.
+from revise_arcana_feedback_assets import run as revise_arcana_feedback
+revise_arcana_feedback()

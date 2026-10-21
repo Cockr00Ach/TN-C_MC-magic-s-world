@@ -9,31 +9,49 @@ import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import com.tnc.tnc.mana.sight.client.ManaSightClient;
 
-/** A sky-dome curtain, independent of particle distance and world chunk loading. */
+/** Open, softly feathered auroral folds across the upper sky. No enclosing polygon fence. */
 @net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid="tnc",value=net.minecraftforge.api.distmarker.Dist.CLIENT)
 public final class AuroraRenderer {
+    public static long renderedQuads;
+    private static VertexBuffer skyBuffer;
+    public static String projectionDiagnostic="";
     @SubscribeEvent public static void sky(RenderLevelStageEvent e){
-        if(e.getStage()!=RenderLevelStageEvent.Stage.AFTER_SKY||!ArcanaClient.aurora)return;
+        if(e.getStage()!=RenderLevelStageEvent.Stage.AFTER_LEVEL||!ArcanaClient.aurora)return;
         var mc=Minecraft.getInstance();if(mc.level==null||mc.player==null)return;
-        double time=(mc.level.getGameTime()+e.getPartialTick())*.0015;boolean sight=ManaSightClient.enabled();
-        var pose=e.getPoseStack();pose.pushPose();
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);RenderSystem.enableBlend();RenderSystem.disableCull();RenderSystem.depthMask(false);
-        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA,GlStateManager.DestFactor.ONE);
-        var b=Tesselator.getInstance().getBuilder();b.begin(VertexFormat.Mode.QUADS,DefaultVertexFormat.POSITION_COLOR);
-        for(int curtain=0;curtain<(sight?5:1);curtain++)for(int i=0;i<180;i++)for(int row=0;row<6;row++){
-            double a=i*Math.PI*2/180,an=(i+1)*Math.PI*2/180;
-            double r=125+curtain*19,wave=Math.sin(a*3+time+curtain)*13+Math.cos(a*7-time*.6)*6;
-            double wn=Math.sin(an*3+time+curtain)*13+Math.cos(an*7-time*.6)*6;
-            double top=100+curtain*12+wave,topN=100+curtain*12+wn;
-            int color=java.awt.Color.HSBtoRGB((float)((a/Math.PI*.23+curtain*.11+time*.014)%1),.52f,1);
-            float alpha=(sight?.22f:.018f)*(1-row/6f)*(float)(.48+.52*Math.pow(Math.sin(a*19+time),2));
-            float y=(float)(top-row*10),yn=(float)(topN-row*10);
-            var m=pose.last().pose();float x=(float)(Math.cos(a)*r),z=(float)(Math.sin(a)*r),xn=(float)(Math.cos(an)*r),zn=(float)(Math.sin(an)*r);
-            int red=color>>16&255,green=color>>8&255,blue=color&255;
-            b.vertex(m,x,y,z).color(red,green,blue,(int)(alpha*255)).endVertex();b.vertex(m,xn,yn,zn).color(red,green,blue,(int)(alpha*255)).endVertex();
-            b.vertex(m,xn,yn-10,zn).color(red,green,blue,(int)(alpha*.7*255)).endVertex();b.vertex(m,x,y-10,z).color(red,green,blue,(int)(alpha*.7*255)).endVertex();
-        }
-        BufferUploader.drawWithShader(b.end());RenderSystem.depthMask(true);RenderSystem.enableCull();RenderSystem.defaultBlendFunc();RenderSystem.disableBlend();pose.popPose();
+        double time=(mc.level.getGameTime()+e.getPartialTick())*.0018;boolean sight=ManaSightClient.enabled();var pose=e.getPoseStack();pose.pushPose();
+        float fogStart=RenderSystem.getShaderFogStart(),fogEnd=RenderSystem.getShaderFogEnd();RenderSystem.setShaderFogStart(10000);RenderSystem.setShaderFogEnd(12000);
+        RenderSystem.setShaderColor(1,1,1,1);RenderSystem.setShader(GameRenderer::getPositionColorShader);RenderSystem.enableDepthTest();RenderSystem.enableBlend();RenderSystem.disableCull();RenderSystem.depthMask(false);RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA,GlStateManager.DestFactor.ONE);
+        try{var b=Tesselator.getInstance().getBuilder();b.begin(VertexFormat.Mode.QUADS,DefaultVertexFormat.POSITION_COLOR);
+            int columns=256,rows=24;
+            for(int layer=0;layer<3;layer++)for(int i=0;i<columns;i++)for(int j=0;j<rows;j++){
+                double u=i/(double)columns,un=(i+1)/(double)columns,v=j/(double)rows,vn=(j+1)/(double)rows;
+                sample(b,pose,u,v,time,layer,sight);sample(b,pose,un,v,time,layer,sight);sample(b,pose,un,vn,time,layer,sight);sample(b,pose,u,vn,time,layer,sight);
+            }
+            if(skyBuffer==null)skyBuffer=new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
+            skyBuffer.bind();skyBuffer.upload(b.end());
+            // Camera-centred sky coordinates need one explicit view transform. The shader pack
+            // also changes RenderSystem's global model-view; pretransforming vertices then using
+            // BufferUploader.drawWithShader applies an unrelated world transform a second time.
+            var view=new org.joml.Matrix4f().rotateX((float)Math.toRadians(e.getCamera().getXRot())).rotateY((float)Math.toRadians(e.getCamera().getYRot()+180));
+            skyBuffer.drawWithShader(view,e.getProjectionMatrix(),GameRenderer.getPositionColorShader());VertexBuffer.unbind();
+            var clip=new org.joml.Vector4f(0,125,-170,1).mul(view).mul(e.getProjectionMatrix());
+            if(projectionDiagnostic.isEmpty())projectionDiagnostic="camera="+e.getCamera().getYRot()+","+e.getCamera().getXRot()+";ndc="+(clip.x/clip.w)+","+(clip.y/clip.w)+","+(clip.z/clip.w);
+            renderedQuads+=3L*columns*rows;
+        }finally{RenderSystem.setShaderFogStart(fogStart);RenderSystem.setShaderFogEnd(fogEnd);RenderSystem.depthMask(true);RenderSystem.enableCull();RenderSystem.defaultBlendFunc();RenderSystem.disableBlend();pose.popPose();}
+    }
+    private static void sample(BufferBuilder b,PoseStack pose,double u,double v,double time,int layer,boolean sight){
+        double along=(u-.5)*560,heading=.12+layer*.92,fold=Math.sin(u*8.2+time+layer)*44+Math.sin(u*18.4-time*.4+layer)*13;
+        double transverse=-170+layer*85+fold+Math.sin(v*3+u*9+time)*v*18;
+        double x=Math.cos(heading)*along-Math.sin(heading)*transverse,z=Math.sin(heading)*along+Math.cos(heading)*transverse;
+        double y=150+layer*14+Math.sin(u*8.2+time+layer)*24-v*(50+Math.sin(u*9-time)*17);
+        // Every neighboring cell samples the same density: no seams, shelves or hard top/bottom edges.
+        double fringe=Math.pow(Math.sin(Math.PI*v),1.7),end=Math.pow(Math.sin(Math.PI*u),1.8);
+        double ray=.42+.58*Math.pow(.5+.5*Math.sin(u*180+Math.sin(u*31+time)*1.5-time*.8),3);
+        double veil=.45+.55*Math.pow(.5+.5*Math.sin(u*11-time*.35+layer),2);
+        double alpha=(sight?.52:.025)*fringe*end*ray*veil;
+        float hue=(float)(.35+.14*(.5+.5*Math.sin(u*4+time*.1+layer))+.16*Math.pow(v,2));
+        int color=java.awt.Color.HSBtoRGB(hue,(float)(.52-.12*v),1);
+        b.vertex((float)x,(float)y,(float)z).color(color>>16&255,color>>8&255,color&255,(int)(255*alpha)).endVertex();
     }
     private AuroraRenderer(){}
 }
