@@ -15,7 +15,9 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -62,6 +64,9 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     /** 碰撞箱（方块）。模型是长的，但 AABB 只能是方形，取宽度那一档。 */
     public static final float HITBOX_WIDTH = 5.4F;
     public static final float HITBOX_HEIGHT = 4.3F;
+    /** 二阶段模型整体放到 1.2 倍（作者 2026-10-20 要求），碰撞箱跟着换。 */
+    public static final float HITBOX_WIDTH_P2 = 6.6F;
+    public static final float HITBOX_HEIGHT_P2 = 6.4F;
 
     /** 撕咬判定距离（格）。 */
     public static final double BITE_RANGE = 8.5D;
@@ -83,7 +88,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     /** 动作时长（tick）。 */
     private static final int BITE_TICKS = 14;
     private static final int SLAM_TICKS = 26;
-    private static final int TRANSITION_TICKS = 44;
+    private static final int TRANSITION_TICKS = 68; // 3.4s 四拍（停步低头 / 下沉震动 / 岩甲掀开 / 口部喷发）
     private static final int ERUPTION_TICKS = 46;
 
     /** 命中结算发生在动作的第几 tick —— 对应动画里"砸到地"的那一帧。 */
@@ -181,8 +186,15 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     }
 
     @Override
+    public EntityDimensions getDimensions(Pose pose) {
+        return this.isPhaseTwo()
+                ? EntityDimensions.scalable(HITBOX_WIDTH_P2, HITBOX_HEIGHT_P2)
+                : EntityDimensions.scalable(HITBOX_WIDTH, HITBOX_HEIGHT);
+    }
+
+    @Override
     public AABB getBoundingBoxForCulling() {
-        return super.getBoundingBoxForCulling().inflate(3.2D, 2.2D, 3.2D);
+        return super.getBoundingBoxForCulling().inflate(4.2D, 3.6D, 4.2D);
     }
 
     // ------------------------------------------------------------------ AI ----
@@ -322,6 +334,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
             return;
         }
         this.entityData.set(DATA_PHASE, PHASE_TWO);
+        this.refreshDimensions();
         this.startAction(ACTION_TRANSITION);
         this.setInvulnerable(true);
         this.getNavigation().stop();
