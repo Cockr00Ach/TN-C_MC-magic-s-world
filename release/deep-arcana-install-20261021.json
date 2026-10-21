@@ -1,12 +1,12 @@
 {
-  "installed_at": "2026-10-21T15:58:05.555863",
-  "jar_sha256": "704ad27c357ce246e1e0b3d3a830f294c3eb806706e0163a654c4caeb054398a",
-  "source_commit_before_release": "362cbc2878009a55efa43fe3a555f528ddb314f6",
+  "installed_at": "2026-10-21T17:40:33.496394",
+  "jar_sha256": "2c26bae7556bfe41ea6f52a91b2b4f4743964cc4410385a98e2a7c37e74b7788",
+  "source_commit_before_release": "bd857d1729bb1baddbacde1a1fe066471f0f9006",
   "unit_tests": 397,
-  "combined_game_tests": 68,
-  "native_screenshots": 21,
+  "combined_game_tests": 71,
+  "native_screenshots": 22,
   "native": {
-    "screenshots": 21,
+    "screenshots": 22,
     "checks": {
       "actual_ftb_chapter_loaded": true,
       "actual_deep_arcana_chapter_loaded": true,
@@ -37,7 +37,11 @@
       "living-armor_native": true,
       "arcana_camera_not_punished_19": true,
       "critical-tower_native": true,
-      "arcana_camera_not_punished_20": true
+      "arcana_camera_not_punished_20": true,
+      "ghost_gui_preview_excluded": true,
+      "sanity-ghosts_native": true,
+      "actual_posed_ghost_mesh_rendered": true,
+      "arcana_camera_not_punished_21": true
     },
     "failures": [],
     "scope": "Disposable full PCL pack; FTB chapter loading, real screens, alchemy fusion, MCA family, deep arcana devices, living armor and aurora",
@@ -49,7 +53,8 @@
       "com.tnc.tnc.arcana.client.ArcanaClient": "9af79efd2c147eb8d0aa3cc12e9810719fe8b5617061b01866992c09491cc2e9",
       "com.tnc.tnc.arcana.client.ArcanaDeviceVisual": "e86ac684ff795a5bf181ecc329f9fecadb13dbe1171be63ea6377ad18d01501b",
       "com.tnc.tnc.arcana.client.ArcanaArmorModels": "046f800b96f4e4f9db9679ff964c229d5f55326d26d804a05fe6051d9769cde3",
-      "com.tnc.tnc.arcana.client.AuroraRenderer": "3a66896e7fd29416589b2602040f6fd14a09cc6d230d9591034789f0b60e874c"
+      "com.tnc.tnc.arcana.client.AuroraRenderer": "3a66896e7fd29416589b2602040f6fd14a09cc6d230d9591034789f0b60e874c",
+      "com.tnc.tnc.arcana.client.ArcanaGhosts": "69ff3c1a8dbdeeec526bfd29b46b206ffb9953ee3db10d3bbe88de761d0207ab"
     }
   },
   "protected_quests": {
@@ -57,11 +62,11 @@
     "mirror": 47
   },
   "files": {
-    "mods/tnc-1.0.0.jar": "704ad27c357ce246e1e0b3d3a830f294c3eb806706e0163a654c4caeb054398a",
+    "mods/tnc-1.0.0.jar": "2c26bae7556bfe41ea6f52a91b2b4f4743964cc4410385a98e2a7c37e74b7788",
     "config/ftbquests/quests/chapters/tnc_alchemy.snbt": "aa8bdf983f2c11cc414b4338eb9e0e40e413f726f6785f33d327b545c82615f6",
     "config/ftbquests/quests/chapters/tnc_deep_arcana.snbt": "14c18bce5dd4b178f462019f4e2c6ea9454c7c723007cbd52e306b18df226817"
   },
-  "backup": "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\work\\backups\\deep-arcana-20261021-155803",
+  "backup": "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\work\\backups\\deep-arcana-20261021-174032",
   "saves_modified": false,
   "island_templates_modified": false,
   "additional_third_party_jars": []

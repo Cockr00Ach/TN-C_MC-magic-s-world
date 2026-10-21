@@ -19,5 +19,8 @@ public final class ArcanaNativeScenes {
   if(scene==18){var spirit=ArcanaContent.SPIRIT.create(l);spirit.owner=p.getUUID();spirit.setPos(p.getX(),p.getY(),p.getZ()-3);l.addFreshEntity(spirit);ArcanaPhysiology.data(p).putDouble("vision_sanity",90);var packet=new net.minecraft.nbt.CompoundTag();packet.putString("Type","contract");packet.putInt("Entity",spirit.getId());ArcanaNetwork.sync(p,packet);}
   if(scene==19){p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST,new ItemStack(ArcanaContent.item("thorn_tyrant_vine")));}
   if(scene==20){var n=(RouteNodeEntity)l.getBlockEntity(base.offset(-6,0,-3));n.getPersistentData().putDouble("overload_level",90);n.setChanged();var b=ArcanaContent.DEVOURER.create(l);b.owner=p.getUUID();b.setPos(base.getX()+1,base.getY()+1,base.getZ()-1);b.setNoAi(true);l.addFreshEntity(b);}
+  if(scene==21){ArcanaPhysiology.data(p).putDouble("vision_sanity",100);ArcanaPhysiology.data(p).putLong("NextSpirit",Long.MAX_VALUE);
+   for(int i=0;i<3;i++){var a=(i==1?net.minecraft.world.entity.EntityType.SHEEP:net.minecraft.world.entity.EntityType.COW).create(l);a.setNoAi(true);a.setInvulnerable(true);a.setPos(base.getX()-2+i*2,base.getY(),base.getZ()+5);l.addFreshEntity(a);}
+  }
  }
 }

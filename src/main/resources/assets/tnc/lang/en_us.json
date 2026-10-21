@@ -724,5 +724,7 @@
   "block.tnc.sky_mana_launch_ring": "定向魔力喷射环",
   "block.tnc.sky_mana_relay_ring": "魔力导流中继环",
   "block.tnc.dimensional_mana_prism": "高维魔力棱镜",
-  "block.tnc.singularity_mana_core": "奇点魔力核心"
+  "block.tnc.singularity_mana_core": "奇点魔力核心",
+  "effect.tnc.mana_corrosion": "Mana Corrosion",
+  "entity.tnc.arcana_waste_flask": "Waste Flask"
 }

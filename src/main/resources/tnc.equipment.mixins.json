@@ -9,7 +9,8 @@
     "TwoSlotPlayerEquipMixin"
   ],
   "client": [
-    "TwoSlotInventoryScreenMixin"
+    "TwoSlotInventoryScreenMixin",
+    "ArcanaGhostRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1
