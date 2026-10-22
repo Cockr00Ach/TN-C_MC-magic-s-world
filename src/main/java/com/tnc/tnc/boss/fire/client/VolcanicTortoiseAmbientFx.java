@@ -10,6 +10,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
@@ -17,12 +18,15 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.bernie.geckolib.core.animation.AnimatableManager;
 import software.bernie.geckolib.core.animation.AnimationController;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -32,19 +36,24 @@ import java.util.WeakHashMap;
  * <p>只有两种表现：壳顶火山口持续冒出的细烟，和壳面主要裂隙间或崩出的火星。
  * 不做小喷发、不改动画、不加伤害、不动地形。
  *
- * <p>全部在客户端生成：
- * <ul>
- *   <li>服务端不发包，附近有几个玩家都不会被放大；</li>
- *   <li>按 client tick 生成，帧率高低不改变频率；</li>
- *   <li>距离越远越稀，超过 {@link Tuning#MAX_DISTANCE} 完全不生成。</li>
- * </ul>
+ * <p>全部在客户端生成，按 client tick 生成，距离越远越稀。
  *
- * <p>位置不是写死的实体坐标，而是渲染时从 {@code shell}/{@code whorl} 骨骼矩阵取出的
- * 当前火山口/裂隙世界坐标（见 {@link VolcanicTortoiseAnchorLayer}）。因此阶段、朝向、
- * 缩放、攻击与转阶段的骨骼动作都会自然跟随。
+ * <p><b>坐标系</b>：GeckoLib 的骨骼矩阵来自实体渲染的 poseStack，vanilla 在渲染实体前
+ * 已经把坐标平移了 -camera，所以矩阵是<b>相机相对</b>的。写回世界坐标时必须加上
+ * 渲染当帧的相机位置（{@link Anchor#cameraPos}），否则粒子会落在离 Boss 很远的地方
+ * ——这正是 2026-10-22 首次实机“完全看不到”的原因。
  */
 @Mod.EventBusSubscriber(modid = "tnc", value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class VolcanicTortoiseAmbientFx {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger("TN-C/tortoise-ambient");
+
+    /**
+     * 临时调试开关：启动参数加 {@code -Dtnc.tortoise.ambient.debug=true} 才会生效。
+     * 打开后会在 Boss 包围盒顶部固定位置强制生成肉眼可见的原版烟/火，并每秒打一行日志；
+     * 默认关闭，正式构建不受影响。验证完成后按计划整段删除。
+     */
+    private static final boolean DEBUG = Boolean.getBoolean("tnc.tortoise.ambient.debug");
 
     // ============================================================ 可调参数 ==
     // 想调浓淡/快慢，只改这一块即可；下面所有逻辑都从这里取值。
@@ -65,7 +74,7 @@ public final class VolcanicTortoiseAmbientFx {
         /** 每个 client tick 的全局粒子预算；帧率再高也不会超。 */
         static final int MAX_PARTICLES_PER_TICK = 8;
 
-        // ---- 生成频率（每秒个数，按 20 tick/s 折算成每 tick 概率） ---------
+        // ---- 生成频率（每秒个数，按 20 tick/s 折算成每 tick 的小数累计） ---
 
         /** 一阶段：轻烟 5/s、火星 8/s。 */
         static final float SMOKE_PER_SECOND_P1 = 5.0F;
@@ -112,14 +121,14 @@ public final class VolcanicTortoiseAmbientFx {
         static final double SPARK_RADIAL_MAX = 0.045D;
         /** 火星生成点抖动（格）。 */
         static final double SPARK_SPREAD = 0.12D;
-        /** 火星里从裂隙出来的比例，其余从火山口。 */
-        static final float SPARK_FISSURE_CHANCE = 0.70F;
+        /** 火星来源：火山口为主，裂隙少量。 */
+        static final float SPARK_FISSURE_CHANCE = 0.30F;
 
         // ---- 状态抑制 -----------------------------------------------------
 
         /** 攻击动作期间保留的比例（降频但不完全停）。 */
         static final float ATTACK_RATE_SCALE = 0.35F;
-        /** 转阶段后暂停多少 tick（68 tick 动画 + 余韵）。 */
+        /** 转阶段后暂停多少 tick（68 tick 动画 + 余韵）；只在阶段变化那一次设置。 */
         static final int TRANSITION_PAUSE_TICKS = 80;
 
         // ---- 锚点（模型单位，1 格 = 16 单位） -----------------------------
@@ -154,18 +163,29 @@ public final class VolcanicTortoiseAmbientFx {
 
     /** 渲染时写入、tick 时读取；WeakHashMap 不阻止实体卸载。 */
     private static final Map<VolcanicTortoiseEntity, Anchor> ANCHORS = new WeakHashMap<>();
-    /** 转阶段暂停计时：记录上次看到的阶段与解除暂停的时间。 */
-    private static final Map<VolcanicTortoiseEntity, PhaseWatch> PHASES = new WeakHashMap<>();
+    /** 每只 Boss 的频率累计器、调试计数、阶段观察。 */
+    private static final Map<VolcanicTortoiseEntity, FxState> STATES = new WeakHashMap<>();
 
     private static final class Anchor {
+        /** 骨骼矩阵：相机相对坐标（vanilla 实体渲染已经平移 -camera）。 */
         Matrix4f shell;
         Matrix4f whorl;
+        /** 抓取该帧的相机世界坐标，用来把相机相对矩阵还原成世界坐标。 */
+        Vec3 cameraPos;
         int entityTick;
     }
 
-    private static final class PhaseWatch {
+    private static final class FxState {
         int phase = -1;
         long resumeAt;
+        float smokeAcc;
+        float sparkAcc;
+        int smokeThisSecond;
+        int sparkThisSecond;
+        long secondMark;
+        int updates;
+        String skip = "ok";
+        long debugUntil;
     }
 
     private VolcanicTortoiseAmbientFx() {
@@ -177,7 +197,7 @@ public final class VolcanicTortoiseAmbientFx {
      * 由 {@link VolcanicTortoiseAnchorLayer} 在对应骨骼的 poseStack 上调用。
      *
      * @param boneName "shell" 或 "whorl"
-     * @param pose     已包含实体位置、朝向、缩放与骨骼旋转的矩阵
+     * @param pose     相机相对的骨骼矩阵（已含实体位置/朝向/缩放/骨骼动画）
      */
     static void captureBone(VolcanicTortoiseEntity entity, String boneName, PoseStack pose) {
         Anchor anchor = ANCHORS.computeIfAbsent(entity, ignored -> new Anchor());
@@ -187,6 +207,8 @@ public final class VolcanicTortoiseAmbientFx {
         } else if ("shell".equals(boneName)) {
             anchor.shell = copy;
         }
+        // 相机位置必须和矩阵同一帧抓取，否则快速移动时会有偏移。
+        anchor.cameraPos = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
         anchor.entityTick = entity.tickCount;
     }
 
@@ -204,16 +226,16 @@ public final class VolcanicTortoiseAmbientFx {
         Level level = mc.level;
         long now = level.getGameTime();
 
-        // 只处理最近的几个 Boss；排序保证预算优先给离玩家最近的那只。
         if (!(level instanceof ClientLevel clientLevel)) {
             return;
         }
+
+        // 只处理最近的几个 Boss；排序保证预算优先给离玩家最近的那只。
         List<VolcanicTortoiseEntity> bosses = new ArrayList<>();
         for (Entity entity : clientLevel.entitiesForRendering()) {
-            if (entity instanceof VolcanicTortoiseEntity boss && boss.isAlive() && !boss.isRemoved()) {
-                if (mc.player.distanceToSqr(boss) <= Tuning.MAX_DISTANCE * Tuning.MAX_DISTANCE) {
-                    bosses.add(boss);
-                }
+            if (entity instanceof VolcanicTortoiseEntity boss && !boss.isRemoved()
+                    && mc.player.distanceToSqr(boss) <= Tuning.MAX_DISTANCE * Tuning.MAX_DISTANCE) {
+                bosses.add(boss);
             }
         }
         if (bosses.isEmpty()) {
@@ -223,19 +245,11 @@ public final class VolcanicTortoiseAmbientFx {
         int count = Math.min(Tuning.MAX_BOSSES, bosses.size());
 
         int budget = budget(mc);
-        for (int i = 0; i < count && budget > 0; i++) {
+        for (int i = 0; i < count; i++) {
             VolcanicTortoiseEntity boss = bosses.get(i);
-            Anchor anchor = ANCHORS.get(boss);
-            if (anchor == null || anchor.whorl == null || anchor.shell == null
-                    || boss.tickCount - anchor.entityTick > 4) {
-                continue;
-            }
-            double distance = Math.sqrt(mc.player.distanceToSqr(boss));
-            float proximity = proximity(distance);
-            if (proximity <= 0.0F) {
-                continue;
-            }
-            budget = tickBoss(mc, boss, anchor, now, proximity, budget);
+            FxState state = STATES.computeIfAbsent(boss, ignored -> new FxState());
+            state.updates++;
+            budget = tickBoss(mc, boss, state, now, budget);
         }
     }
 
@@ -258,71 +272,115 @@ public final class VolcanicTortoiseAmbientFx {
         return Mth.clamp(1.0F - (float) t, 0.0F, 1.0F);
     }
 
-    private static int tickBoss(Minecraft mc, VolcanicTortoiseEntity boss, Anchor anchor,
-                                long now, float proximity, int budget) {
-        // 死亡/移除：不再冒烟冒火，并把残留锚点清掉。
-        if (!boss.isAlive() || boss.isDeadOrDying()) {
-            ANCHORS.remove(boss);
-            PHASES.remove(boss);
-            return budget;
-        }
-
-        float stateScale = stateScale(boss, now);
-        if (stateScale <= 0.0F) {
-            return budget;
-        }
-
-        boolean phaseTwo = boss.isPhaseTwo();
+    private static int tickBoss(Minecraft mc, VolcanicTortoiseEntity boss, FxState state,
+                                long now, int budget) {
         Level level = mc.level;
+        boolean phaseTwo = boss.isPhaseTwo();
+
+        // ---- 阶段观察：只在阶段变化的那一 tick 设置一次暂停 -----------------
+        if (state.phase != boss.phase()) {
+            if (state.phase != -1) {
+                state.resumeAt = now + Tuning.TRANSITION_PAUSE_TICKS;
+            }
+            state.phase = boss.phase();
+            state.smokeAcc = level.random.nextFloat();
+            state.sparkAcc = level.random.nextFloat();
+        }
+
+        // ---- 逐项判定跳过原因（日志用，不改变逻辑） -------------------------
+        Anchor anchor = ANCHORS.get(boss);
+        double distance = Math.sqrt(mc.player.distanceToSqr(boss));
+        float proximity = proximity(distance);
+        boolean dead = !boss.isAlive() || boss.isDeadOrDying();
+        boolean paused = now < state.resumeAt;
+        boolean attacking = actionPlaying(boss);
+
+        if (dead) {
+            state.skip = "dead";
+            ANCHORS.remove(boss);
+            return budget;
+        }
+        if (anchor == null || anchor.whorl == null || anchor.shell == null || anchor.cameraPos == null) {
+            state.skip = "no-anchor";
+            debugTick(mc, boss, state, now, null, null);
+            return budget;
+        }
+        if (boss.tickCount - anchor.entityTick > 4) {
+            state.skip = "stale-anchor";
+            debugTick(mc, boss, state, now, null, null);
+            return budget;
+        }
+        if (proximity <= 0.0F) {
+            state.skip = "distance";
+            debugTick(mc, boss, state, now, null, null);
+            return budget;
+        }
+        if (paused) {
+            state.skip = "transition-pause";
+            debugTick(mc, boss, state, now, null, craterWorld(anchor, phaseTwo));
+            return budget;
+        }
+        state.skip = attacking ? "attack" : "ok";
+        float stateScale = attacking ? Tuning.ATTACK_RATE_SCALE : 1.0F;
+
+        // ---- 世界坐标（相机相对矩阵 + 相机位置） ----------------------------
+        Vec3 crater = craterWorld(anchor, phaseTwo);
+
+        // ---- 调试：固定世界位置强制生成，绕过距离/预算/动作抑制 -------------
+        if (DEBUG) {
+            debugFixedPosition(mc, boss, state, now);
+        }
+
         float rateScale = proximity * stateScale;
 
-        Vec3 crater = transform(anchor.whorl, Tuning.CRATER_MODEL[phaseTwo ? 1 : 0]);
-
-        // 轻烟：只从壳顶火山口，持续、细、短命。
+        // ---- 轻烟：小数累计，5/s 就是每 tick +0.25，不会取整成 0 -------------
         float smokeRate = (phaseTwo ? Tuning.SMOKE_PER_SECOND_P2 : Tuning.SMOKE_PER_SECOND_P1) * rateScale;
-        if (budget > 0 && level.random.nextFloat() < smokeRate / 20.0F) {
+        state.smokeAcc += smokeRate / 20.0F;
+        while (state.smokeAcc >= 1.0F && budget > 0) {
             spawnSmoke(level, crater);
+            state.smokeAcc -= 1.0F;
+            state.smokeThisSecond++;
             budget--;
         }
+        if (state.smokeAcc > 4.0F) {
+            state.smokeAcc = 4.0F; // 预算不够时不要无限积压
+        }
 
-        // 火星：七成从裂隙、三成从火山口，间歇崩出。
+        // ---- 火星：火山口为主、裂隙少量 -------------------------------------
         float sparkRate = (phaseTwo ? Tuning.SPARK_PER_SECOND_P2 : Tuning.SPARK_PER_SECOND_P1) * rateScale;
-        if (budget > 0 && level.random.nextFloat() < sparkRate / 20.0F) {
+        state.sparkAcc += sparkRate / 20.0F;
+        while (state.sparkAcc >= 1.0F && budget > 0) {
             Vec3 at = crater;
             if (level.random.nextFloat() < Tuning.SPARK_FISSURE_CHANCE) {
                 float[][] fissures = Tuning.FISSURES_MODEL[phaseTwo ? 1 : 0];
-                at = transform(anchor.shell, fissures[level.random.nextInt(fissures.length)]);
+                at = transform(anchor, anchor.shell, fissures[level.random.nextInt(fissures.length)]);
             }
             spawnSpark(level, at);
+            state.sparkAcc -= 1.0F;
+            state.sparkThisSecond++;
             budget--;
         }
+        if (state.sparkAcc > 4.0F) {
+            state.sparkAcc = 4.0F;
+        }
 
+        debugTick(mc, boss, state, now, crater, crater);
         return budget;
     }
 
-    /**
-     * 动作状态对生成频率的抑制：
-     * 死亡 0（已在上层拦掉）、转阶段 0（暂停）、普通攻击 0.35（降频）、其余 1。
-     */
-    private static float stateScale(VolcanicTortoiseEntity boss, long now) {
-        PhaseWatch watch = PHASES.computeIfAbsent(boss, ignored -> new PhaseWatch());
-        if (watch.phase != boss.phase()) {
-            if (watch.phase != -1) {
-                watch.resumeAt = now + Tuning.TRANSITION_PAUSE_TICKS;
-            }
-            watch.phase = boss.phase();
-        }
-        if (now < watch.resumeAt) {
-            return 0.0F;
-        }
-        return actionPlaying(boss) ? Tuning.ATTACK_RATE_SCALE : 1.0F;
+    /** 火山口世界坐标：相机相对矩阵变换后加上抓取时的相机位置。 */
+    private static Vec3 craterWorld(Anchor anchor, boolean phaseTwo) {
+        return transform(anchor, anchor.whorl, Tuning.CRATER_MODEL[phaseTwo ? 1 : 0]);
     }
 
-    /** 模型单位 -> 世界坐标；矩阵已包含实体朝向、位置、缩放和骨骼动画。 */
-    private static Vec3 transform(Matrix4f matrix, float[] modelUnits) {
+    /**
+     * 模型单位 -> 世界坐标。
+     * 矩阵是相机相对的（vanilla 渲染实体前平移了 -camera），所以必须加回相机世界坐标。
+     */
+    private static Vec3 transform(Anchor anchor, Matrix4f matrix, float[] modelUnits) {
         Vector3f point = matrix.transformPosition(new Vector3f(
                 modelUnits[0] / 16.0F, modelUnits[1] / 16.0F, modelUnits[2] / 16.0F));
-        return new Vec3(point.x, point.y, point.z);
+        return anchor.cameraPos.add(point.x, point.y, point.z);
     }
 
     // =========================================================== 粒子生成 ==
@@ -332,7 +390,6 @@ public final class VolcanicTortoiseAmbientFx {
         double x = at.x + (level.random.nextDouble() - 0.5D) * Tuning.SMOKE_SPREAD;
         double z = at.z + (level.random.nextDouble() - 0.5D) * Tuning.SMOKE_SPREAD;
         double y = at.y + 0.10D + level.random.nextDouble() * 0.08D;
-        // 先给一个很小的横向初速，粒子自身还会继续上浮，形成轻微横移的烟柱。
         double vx = (level.random.nextDouble() - 0.5D) * Tuning.SMOKE_DRIFT;
         double vz = (level.random.nextDouble() - 0.5D) * Tuning.SMOKE_DRIFT;
         double vy = Tuning.SMOKE_RISE_MIN
@@ -385,5 +442,67 @@ public final class VolcanicTortoiseAmbientFx {
         }
         AnimationController<?> action = manager.getAnimationControllers().get("action");
         return action != null && action.isPlayingTriggeredAnimation();
+    }
+
+    // ====================================================== 临时调试（可删） ==
+
+    /**
+     * 调试第一阶段：在 Boss 包围盒顶部上方约 1 格的世界坐标，用原版烟/火强制生成，
+     * 绕过距离、预算、动作抑制，持续约 5 秒。只用于判断“客户端到底能不能出粒子”。
+     */
+    private static void debugFixedPosition(Minecraft mc, VolcanicTortoiseEntity boss, FxState state, long now) {
+        AABB box = boss.getBoundingBox();
+        if (state.debugUntil == 0L) {
+            state.debugUntil = now + 100L; // 5 秒
+        }
+        if (now >= state.debugUntil) {
+            return;
+        }
+        Vec3 at = new Vec3((box.minX + box.maxX) * 0.5D, box.maxY + 1.0D, (box.minZ + box.maxZ) * 0.5D);
+        for (int i = 0; i < 2; i++) {
+            Particle p = mc.particleEngine.createParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE,
+                    at.x + (mc.level.random.nextDouble() - 0.5D) * 0.4D,
+                    at.y + mc.level.random.nextDouble() * 0.2D,
+                    at.z + (mc.level.random.nextDouble() - 0.5D) * 0.4D,
+                    0.0D, 0.02D, 0.0D);
+            if (p != null) {
+                p.setLifetime(40);
+                p.scale(1.2F);
+            }
+            Particle f = mc.particleEngine.createParticle(ParticleTypes.FLAME,
+                    at.x, at.y + 0.2D, at.z, 0.0D, 0.03D, 0.0D);
+            if (f != null) {
+                f.setLifetime(20);
+                f.scale(0.9F);
+            }
+        }
+        state.smokeThisSecond += 2;
+    }
+
+    /** 每秒一行，不逐粒子/逐帧刷日志。 */
+    private static void debugTick(Minecraft mc, VolcanicTortoiseEntity boss, FxState state,
+                                  long now, Vec3 crater, Vec3 ignored) {
+        if (!DEBUG) {
+            return;
+        }
+        if (state.secondMark == 0L) {
+            state.secondMark = now;
+        }
+        if (now - state.secondMark < 20L) {
+            return;
+        }
+        Anchor anchor = ANCHORS.get(boss);
+        String anchorText = anchor == null ? "-" : fmt(craterWorld(anchor, boss.isPhaseTwo()));
+        LOGGER.info("TN-C/tortoise-ambient: id={} phase={} updates={} anchor={} cam={} smoke/s={} spark/s={} skip={}",
+                boss.getId(), boss.phase(), state.updates, anchorText,
+                anchor == null ? "-" : fmt(anchor.cameraPos),
+                state.smokeThisSecond, state.sparkThisSecond, state.skip);
+        state.smokeThisSecond = 0;
+        state.sparkThisSecond = 0;
+        state.secondMark = now;
+    }
+
+    private static String fmt(Vec3 v) {
+        return String.format(Locale.ROOT, "(%.2f,%.2f,%.2f)", v.x, v.y, v.z);
     }
 }
