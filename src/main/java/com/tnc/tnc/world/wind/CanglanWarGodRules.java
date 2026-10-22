@@ -13,10 +13,15 @@ public final class CanglanWarGodRules {
             case 3, 6 -> WAVE;
             case 4 -> ARSENAL_4;
             case 7 -> ARSENAL_5;
-            default -> distance < 7 * scale ? 1 : WAVE;
+            default -> distance < 32 * scale ? 1 : WAVE;
         };
     }
-    public static int duration(int move) { return move == TORNADO ? 48 : move >= ARSENAL_4 ? 62 : move == WAVE ? 30 : move == 5 ? 48 : 20; }
-    public static String animation(int move) { return move == TORNADO || move == 5 ? "cyclone" : move >= ARSENAL_4 ? "sky_arsenal" : move == WAVE ? "gale_cut" : "cleave_left"; }
+    public static int duration(int move) { return move == TORNADO ? 48 : move >= ARSENAL_4 ? 46 : move == WAVE ? 30 : move == 5 ? 80 : move == 1 ? 34 : 20; }
+    public static String animation(int move) { return move == TORNADO ? "cyclone" : move == 5 ? "sweep" : move >= ARSENAL_4 ? "sky_arsenal" : move == WAVE ? "gale_cut" : "thrust"; }
+    /** Authored root-Z curve in blocks, extracted from the user's thrust clip. */
+    public static double thrustDistance(int age) {
+        double seconds = Math.max(0, Math.min(20, age)) / 20D;
+        return seconds <= .0417 ? .125 * seconds / .0417 : .125 + 30.625 * (seconds - .0417) / .9583;
+    }
     private CanglanWarGodRules() {}
 }

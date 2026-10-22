@@ -14,6 +14,8 @@ final class CanglanWarlordCombat {
     private final CanglanWarlordEntity boss;
     private int move, age, cycle, cooldown=30, stepCooldown=8, dodgeCooldown, recallAge=-1;
     private LivingEntity target;
+    private Vec3 thrustDirection=Vec3.ZERO;
+    private final Set<Integer> thrustVictims=new HashSet<>();
     private Vec3 travelTo;
     private int travelTicks;
     private final List<CanglanEchoEntity> anchors=new ArrayList<>();
@@ -29,6 +31,12 @@ final class CanglanWarlordCombat {
     boolean begin(int requested,LivingEntity victim){
         if(busy()||requested==0||victim==null||!victim.isAlive())return false;
         move=requested;target=victim;age=0;boss.setCanglanMove(move);
+        thrustVictims.clear();
+        if(move==1){
+            thrustDirection=victim.position().subtract(boss.position()).multiply(1,0,1).normalize();
+            float yaw=(float)Math.toDegrees(Math.atan2(-thrustDirection.x,thrustDirection.z));
+            boss.setYRot(yaw);boss.yBodyRot=yaw;boss.setYHeadRot(yaw);
+        }
         boss.getNavigation().stop();boss.triggerAnim("action",CanglanWarGodRules.animation(move));
         boss.level().playSound(null,boss.blockPosition(),SoundEvents.ENDER_DRAGON_FLAP,SoundSource.HOSTILE,2,.8F);
         return true;
@@ -38,8 +46,9 @@ final class CanglanWarlordCombat {
         if(dodgeCooldown>0)--dodgeCooldown;
         if(travelTicks>0&&travelTo!=null){
             Vec3 next=boss.position().lerp(travelTo,1D/travelTicks);
-            if(boss.level().noCollision(boss,boss.getBoundingBox().move(next.subtract(boss.position()))))boss.setPos(next.x,next.y,next.z);
-            else travelTicks=1;
+            Vec3 before=boss.position();
+            boss.move(MoverType.SELF,next.subtract(before));
+            if(boss.position().distanceToSqr(next)>.01)travelTicks=1;
             boss.setDeltaMovement(Vec3.ZERO);--travelTicks;if(travelTicks==0)boss.setCanglanMove(0);return;
         }
         if(recallAge>=0){tickRecall();return;}
@@ -55,7 +64,7 @@ final class CanglanWarlordCombat {
         }
         if(target==null||!target.isAlive()){cancel();return;}
         boss.getNavigation().stop();boss.setDeltaMovement(0,boss.getDeltaMovement().y,0);
-        if(age<10){
+        if(age<10&&move!=1){
             boss.getLookControl().setLookAt(target,60,30);
             var delta=target.position().subtract(boss.position());
             float yaw=(float)Math.toDegrees(Math.atan2(-delta.x,delta.z));
@@ -63,17 +72,42 @@ final class CanglanWarlordCombat {
             boss.yBodyRot=boss.getYRot();boss.setYHeadRot(boss.getYRot());
         }
         float scale=boss.battleScale();
-        if((move==1&&age==10)||(move==5&&(age==12||age==22)))strike(boss.position(),move==5?8*scale:7*scale,move==5);
+        if(move==1 && age<20) advanceThrust(scale);
+        if(move==1 && age==24) strikeThrust(boss.position(),boss.position(),scale);
+        if(move==5 && (age==60||age==66))strike(boss.position(),8*scale,true);
         if(move==CanglanWarGodRules.TORNADO&&age==26){strike(boss.position(),9*scale,true);gale(boss.position(),false);}
         if(move==CanglanWarGodRules.WAVE&&age==15){
             Vec3 dir=target.position().subtract(boss.position()).multiply(1,0,1).normalize();
             var e=CanglanTempestEntity.spawn(boss,boss.position().add(0,.25,0),dir,false,scale,55);spells.add(e);
         }
-        if((move==11||move==12)&&age==32&&spells.stream().filter(e->e instanceof WindVolleyEntity).count()<2){
+        if((move==11||move==12)&&age==30&&spells.stream().filter(e->e instanceof WindVolleyEntity).count()<2){
             var volley=WindChainRegistration.VOLLEY.create(boss.level());
             if(volley!=null){volley.configure(boss,move==11?4:5,target);volley.setBossScale(scale);boss.level().addFreshEntity(volley);spells.add(volley);}
         }
         if(++age>=CanglanWarGodRules.duration(move)){boolean arsenal=move>=11;cancel();cooldown=arsenal?35:18;}
+    }
+    private void advanceThrust(float scale){
+        Vec3 from=boss.position();
+        double distance=(CanglanWarGodRules.thrustDistance(age+1)-CanglanWarGodRules.thrustDistance(age))*scale;
+        Vec3 delta=thrustDirection.scale(distance);
+        AABB swept=boss.getBoundingBox().expandTowards(delta);
+        if(!boss.level().hasChunksAt(net.minecraft.core.BlockPos.containing(swept.minX,swept.minY,swept.minZ),
+                net.minecraft.core.BlockPos.containing(swept.maxX,swept.maxY,swept.maxZ)))return;
+        boss.move(MoverType.SELF,delta);
+        strikeThrust(from,boss.position(),scale);
+    }
+    private void strikeThrust(Vec3 from,Vec3 to,float scale){
+        double reach=3.5*scale;
+        Vec3 line=to.subtract(from).multiply(1,0,1);
+        for(var e:boss.level().getEntitiesOfClass(LivingEntity.class,new AABB(from,to).inflate(reach,8*scale,reach),
+                v->v!=boss&&v.isAlive()&&!v.isSpectator()&&!boss.isAlliedTo(v)&&!thrustVictims.contains(v.getId()))){
+            Vec3 d=e.position().subtract(from).multiply(1,0,1);
+            double t=line.lengthSqr()<1E-6?0:net.minecraft.util.Mth.clamp(d.dot(line)/line.lengthSqr(),0,1);
+            if(d.subtract(line.scale(t)).lengthSqr()>reach*reach||!boss.hasLineOfSight(e))continue;
+            if(e.hurt(boss.level().damageSources().mobAttack(boss),(float)boss.getAttributeValue(Attributes.ATTACK_DAMAGE)*(boss.phase()==2?1.25F:1))){
+                thrustVictims.add(e.getId());e.push(thrustDirection.x*.5,.15,thrustDirection.z*.5);e.hurtMarked=true;
+            }
+        }
     }
     boolean dodge(net.minecraft.world.damagesource.DamageSource source){
         if(dodgeCooldown>0||boss.shifting()||boss.rising()||recallAge>=0||source.getEntity()==boss)return false;
@@ -88,8 +122,16 @@ final class CanglanWarlordCombat {
         Vec3 dir=delta.normalize();
         if(dodge)dir=new Vec3(-dir.z,0,dir.x).scale(boss.getRandom().nextBoolean()?1:-1);
         else if(delta.length()<8*boss.battleScale())dir=new Vec3(-dir.z,0,dir.x);
-        double length=Math.min(dodge?10:15,Math.max(6,delta.length()-4));
+        double length=5*Math.min(dodge?10:15,Math.max(6,delta.length()-4));
         Vec3 from=boss.position(),to=from.add(dir.scale(length));
+        // Stay inside loaded chunks before ray clipping; a long dash must not load terrain.
+        while(length>=3){
+            AABB area=boss.getBoundingBox().expandTowards(to.subtract(from));
+            if(boss.level().hasChunksAt(net.minecraft.core.BlockPos.containing(area.minX,area.minY,area.minZ),
+                    net.minecraft.core.BlockPos.containing(area.maxX,area.maxY,area.maxZ)))break;
+            length-=2;to=from.add(dir.scale(length));
+        }
+        if(length<3)return false;
         var hit=boss.level().clip(new ClipContext(from.add(0,1,0),to.add(0,1,0),ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,boss));
         if(hit.getType()!=HitResult.Type.MISS)to=hit.getLocation().subtract(dir.scale(1.6)).subtract(0,1,0);
         if(from.distanceToSqr(to)<9||!boss.level().hasChunkAt(net.minecraft.core.BlockPos.containing(to)))return false;
@@ -131,7 +173,7 @@ final class CanglanWarlordCombat {
         }
         ((ServerLevel)boss.level()).sendParticles(net.minecraft.core.particles.ParticleTypes.SWEEP_ATTACK,at.x,at.y+1,at.z,8,reach*.35,.5,reach*.35,.02);
     }
-    void cancel(){move=0;age=0;target=null;boss.setCanglanMove(0);cooldown=18;}
+    void cancel(){thrustVictims.clear();move=0;age=0;target=null;boss.setCanglanMove(0);cooldown=18;}
     void clearAnchors(){for(var e:anchors)e.discard();anchors.clear();recallAge=-1;}
     void cleanup(){travelTicks=0;travelTo=null;cancel();clearAnchors();for(var e:spells)e.discard();spells.clear();}
 }

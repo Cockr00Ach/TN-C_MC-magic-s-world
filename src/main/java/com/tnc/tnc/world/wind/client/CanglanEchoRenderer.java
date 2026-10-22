@@ -14,7 +14,7 @@ public final class CanglanEchoRenderer extends GeoEntityRenderer<CanglanEchoEnti
  private org.joml.Matrix4f gripPose;private org.joml.Matrix3f gripNormal;
  public CanglanEchoRenderer(EntityRendererProvider.Context c){super(c,new Model());shadowRadius=0;}
  public RenderType getRenderType(CanglanEchoEntity e,ResourceLocation t,MultiBufferSource b,float p){return RenderType.entityTranslucent(t);}
- public Color getRenderColor(CanglanEchoEntity e,float p,int light){return Color.ofRGBA(.62F,.94F,1F,.30F*e.opacity(p));}
+ public Color getRenderColor(CanglanEchoEntity e,float p,int light){return Color.ofRGBA(.62F,.94F,1F,.65F*e.opacity(p));}
  protected void applyRotations(CanglanEchoEntity e,PoseStack p,float age,float yaw,float partial){p.mulPose(Axis.YP.rotationDegrees(180-e.getYRot()));}
  public void render(CanglanEchoEntity e,float yaw,float partial,PoseStack p,MultiBufferSource b,int light){
   gripPose=null;gripNormal=null;
@@ -29,7 +29,7 @@ public final class CanglanEchoRenderer extends GeoEntityRenderer<CanglanEchoEnti
    }
   }
   p.pushPose();float scale=e.visualScale();p.scale(scale,scale,scale);super.render(e,yaw,partial,p,b,LightTexture.FULL_BRIGHT);
-  if(gripPose!=null){boolean spear=true;float size=spear?2.4F:2.1F;p.pushPose();p.last().pose().set(gripPose);p.last().normal().set(gripNormal);p.mulPose(Axis.ZP.rotationDegrees(spear?4:-8));p.mulPose(Axis.XP.rotationDegrees(spear?-80:-76));p.translate(0,0,spear?1.2:1.155);p.scale(size,size,size);WindConstructModels.phantomWeapon(spear?2:1,e.tickCount+partial,p,b,.45F*e.opacity(partial),false);p.popPose();}
+  if(gripPose!=null){boolean spear=true;float size=spear?2.4F:2.1F;p.pushPose();p.last().pose().set(gripPose);p.last().normal().set(gripNormal);p.mulPose(Axis.ZP.rotationDegrees(spear?4:-8));p.mulPose(Axis.XP.rotationDegrees(spear?-80:-76));p.translate(0,0,spear?1.2:1.155);p.scale(size,size,size);WindConstructModels.phantomWeapon(spear?2:1,e.tickCount+partial,p,b,.68F*e.opacity(partial),false);p.popPose();}
   p.popPose();
  }
  public void renderRecursively(PoseStack p,CanglanEchoEntity e,GeoBone bone,RenderType type,MultiBufferSource b,VertexConsumer out,boolean re,float partial,int light,int overlay,float red,float green,float blue,float alpha){
@@ -38,7 +38,7 @@ public final class CanglanEchoRenderer extends GeoEntityRenderer<CanglanEchoEnti
  }
  private static final class Model extends GeoModel<CanglanEchoEntity>{
   private ResourceLocation id(String s){return ResourceLocation.fromNamespaceAndPath("tnc",s);}
-  public ResourceLocation getModelResource(CanglanEchoEntity e){return id("geo/entity/canglan_echo.geo.json");}
+  public ResourceLocation getModelResource(CanglanEchoEntity e){return id("geo/entity/canglan_warlord.geo.json");}
   public ResourceLocation getTextureResource(CanglanEchoEntity e){return id("textures/entity/canglan_warlord.png");}
   public ResourceLocation getAnimationResource(CanglanEchoEntity e){return id("animations/entity/canglan_warlord.animation.json");}
  }

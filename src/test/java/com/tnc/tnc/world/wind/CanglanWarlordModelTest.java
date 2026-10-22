@@ -63,6 +63,29 @@ class CanglanWarlordModelTest {
                     Math.round(animations.getAsJsonObject(clip).get("animation_length").getAsDouble()*20),clip);
         }
     }
+    @Test
+    void authoredHoldAndNewAnimationsKeepTheirOriginalTracks() throws Exception {
+        Path source=Path.of("model-source/canglan_warlord/user-animation-20261022");
+        JsonObject model=GSON.fromJson(Files.readString(source.resolve("canglan_warlord_with_spear.editor.geo.json")),JsonObject.class)
+                .getAsJsonArray("minecraft:geometry").get(0).getAsJsonObject();
+        for(var bone:model.getAsJsonArray("bones")) {
+            var b=bone.getAsJsonObject();String name=b.get("name").getAsString();
+            if(!name.startsWith("editor_spear_") && b.has("rotation"))assertEquals(b.get("rotation"),bones().get(name).get("rotation"),name);
+        }
+        JsonObject original=GSON.fromJson(Files.readString(source.resolve("canglan_warlord_with_spear.editor.animationnew.json")),JsonObject.class).getAsJsonObject("animations");
+        for(var pair:Map.of("突刺","thrust","横扫","sweep","释放武器链t4t5","sky_arsenal").entrySet()) {
+            JsonObject expected=original.getAsJsonObject(pair.getKey()).deepCopy();expected.addProperty("loop",false);
+            if(pair.getValue().equals("thrust"))expected.getAsJsonObject("bones").getAsJsonObject("root").remove("position");
+            assertEquals(expected,clips().get(pair.getValue()),pair.getKey()+" authored motion was changed");
+        }
+        double previous=0;
+        for(int tick=0;tick<=40;tick++) {
+            double distance=CanglanWarGodRules.thrustDistance(tick);
+            assertTrue(distance>=previous&&distance<=30.75001);previous=distance;
+        }
+        assertEquals(30.75,CanglanWarGodRules.thrustDistance(20),.00001);
+        assertFalse(clips().getAsJsonObject("thrust").getAsJsonObject("bones").getAsJsonObject("root").has("position"),"Root movement must belong to entity collision");
+    }
     private static final Path ROOT = Path.of("src/main/resources/assets/tnc");
     private static final Gson GSON = new Gson();
 

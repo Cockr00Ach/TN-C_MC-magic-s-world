@@ -27,7 +27,7 @@ public final class CanglanWarlordRegistration {
     public static void register(RegisterEvent event) {
         event.register(Registries.ENTITY_TYPE, helper -> {
             ECHO = EntityType.Builder.<CanglanEchoEntity>of(CanglanEchoEntity::new, MobCategory.MISC)
-                    .sized(.1F,.1F).clientTrackingRange(24).updateInterval(2).noSave().build("tnc:canglan_echo");
+                    .sized(.1F,.1F).clientTrackingRange(32).updateInterval(2).noSave().build("tnc:canglan_echo");
             TEMPEST = EntityType.Builder.<CanglanTempestEntity>of(CanglanTempestEntity::new, MobCategory.MISC)
                     .sized(.5F,.5F).clientTrackingRange(24).updateInterval(1).noSave().build("tnc:canglan_tempest");
             helper.register(ResourceLocation.fromNamespaceAndPath("tnc","canglan_echo"),ECHO);

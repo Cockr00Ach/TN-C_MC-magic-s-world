@@ -1,0 +1,18 @@
+{
+  "clips": {
+    "突刺": "thrust",
+    "释放武器链t4t5": "sky_arsenal",
+    "横扫": "sweep"
+  },
+  "thrust_root_motion": {
+    "distance_blocks": 30.75,
+    "seconds": 1,
+    "collision_checked": true
+  },
+  "sha256": {
+    "canglan_warlord_spear_editor.png": "6455cce9a9930748b114a825f9f481ba507d788ef686ad6b8a9637c136f39a7a",
+    "canglan_warlord_with_spear.editor.animationnew.json": "1f7002c0a3552cb502e3d252f214825e006f7c1f47d7c0cb03382e181547cf7d",
+    "canglan_warlord_with_spear.editor.geo.json": "6b35d229d18e5c77144386ad2341c17a7613fce589aa0aea81859104c6f93605",
+    "runtime_before.animation.json": "37c1d7c85de6aa2919d16bbae29f8f85526bb5b3ea437c21a0ad51cf4a18502b"
+  }
+}

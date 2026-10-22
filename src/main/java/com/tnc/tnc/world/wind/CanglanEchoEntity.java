@@ -31,6 +31,7 @@ public final class CanglanEchoEntity extends Entity implements GeoEntity {
  public void registerControllers(AnimatableManager.ControllerRegistrar c){c.add(new AnimationController<>(this,"echo",4,s->s.setAndContinue(RawAnimation.begin().thenLoop(active()?"cyclone":poseAnimation()))));}
  public AnimatableInstanceCache getAnimatableInstanceCache(){return cache;}
  protected void readAdditionalSaveData(CompoundTag n){discard();}protected void addAdditionalSaveData(CompoundTag n){}
+ @Override public boolean shouldRenderAtSqrDistance(double distance){return distance<512D*512D;}
  public AABB getBoundingBoxForCulling(){return super.getBoundingBoxForCulling().expandTowards(link()).inflate(12*visualScale(),8*visualScale(),12*visualScale());}
  public net.minecraft.network.protocol.Packet<net.minecraft.network.protocol.game.ClientGamePacketListener> getAddEntityPacket(){return net.minecraftforge.network.NetworkHooks.getEntitySpawningPacket(this);}
 }

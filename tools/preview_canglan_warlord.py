@@ -132,7 +132,7 @@ def build_faces(geometry, texture, pose):
         entry = bones[name]
         pivot = np.array(entry.get("pivot", [0, 0, 0]), dtype=float)
         anim = pose.get(name, {})
-        rot = rotation(anim.get("rotation", entry.get("rotation", [0, 0, 0])))
+        rot = rotation(np.array(entry.get("rotation", [0, 0, 0])) + np.array(anim.get("rotation", [0, 0, 0])))
         offset = np.array(anim.get("position", [0, 0, 0]), dtype=float)
         local = translate(offset) @ translate(pivot) @ np.block(
             [[rot, np.zeros((3, 1))], [np.zeros((1, 3)), np.ones((1, 1))]]

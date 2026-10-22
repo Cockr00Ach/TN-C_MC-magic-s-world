@@ -10,6 +10,63 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 @GameTestHolder("tncdungeon")
 @PrefixGameTestTemplate(false)
 public final class CanglanWarlordGameTests {
+    @GameTest(template="building_test_empty", timeoutTicks=50, batch="canglan_authored_thrust")
+    public static void authoredThrustStopsAtWallAndOnlyHitsOnce(GameTestHelper helper) {
+        var boss=helper.spawn(CanglanWarlordRegistration.CANGLAN_WARLORD,new BlockPos(3,1,2));
+        boss.setNoAi(true);boss.setNoGravity(true);
+        var target=helper.spawn(EntityType.IRON_GOLEM,new BlockPos(3,1,6));target.setNoAi(true);target.setNoGravity(true);
+        // Clear the tall boss's corridor and erect a wall beyond the target.
+        for(int x=0;x<7;x++)for(int y=1;y<9;y++)for(int z=0;z<13;z++)
+            helper.setBlock(new BlockPos(x,y,z),z==10?net.minecraft.world.level.block.Blocks.STONE:net.minecraft.world.level.block.Blocks.AIR);
+        float before=target.getHealth();boss.setTarget(target);
+        helper.assertTrue(boss.battle().begin(1,target),"Authored thrust did not start");
+        double start=boss.getZ();
+        for(int i=0;i<34;i++){target.invulnerableTime=0;boss.battle().tick();}
+        double wall=helper.absolutePos(new BlockPos(3,1,10)).getZ();
+        helper.assertTrue(boss.getZ()>start+1,"Root motion remained visual-only");
+        helper.assertTrue(boss.getBoundingBox().maxZ<=wall+.001,"Thrust crossed wall");
+        helper.assertTrue(target.getHealth()<before && target.getHealth()>=before-29,"Thrust hit repeatedly or missed");
+        helper.assertTrue(!boss.battle().busy(),"Thrust did not finish with authored clip");
+        boss.battle().cleanup();helper.succeed();
+    }
+    @GameTest(template="building_test_empty", timeoutTicks=40, batch="canglan_echo_visibility")
+    public static void tinyAnchorUsesFullBossVisibilityDistance(GameTestHelper helper) {
+        var boss=helper.spawn(CanglanWarlordRegistration.CANGLAN_WARLORD,new BlockPos(2,1,2));boss.setNoAi(true);
+        var echo=CanglanWarlordRegistration.ECHO.create(helper.getLevel());echo.configure(boss,boss.position(),0,1);
+        helper.assertTrue(echo.shouldRenderAtSqrDistance(128D*128D),"Tiny anchor still culls a visible full-sized boss mesh");
+        helper.assertTrue(!echo.shouldRenderAtSqrDistance(600D*600D),"Anchor draw distance is unbounded");
+        helper.assertTrue(CanglanWarlordRegistration.ECHO.clientTrackingRange()==32,"Long steps outpace anchor tracking");
+        echo.discard();helper.succeed();
+    }
+    @GameTest(template="building_test_empty", timeoutTicks=40, batch="canglan_seeking_cyclone")
+    public static void cycloneSeeksThenStopsOnItsTarget(GameTestHelper helper) {
+        var boss=helper.spawn(CanglanWarlordRegistration.CANGLAN_WARLORD,new BlockPos(2,1,2));boss.setNoAi(true);boss.setNoGravity(true);
+        var target=helper.spawn(EntityType.IRON_GOLEM,new BlockPos(2,1,9));target.setNoAi(true);target.setNoGravity(true);boss.setTarget(target);
+        var cyclone=CanglanTempestEntity.spawn(boss,boss.position(),net.minecraft.world.phys.Vec3.ZERO,true,1,60);
+        double start=cyclone.getZ();float health=target.getHealth();
+        for(int i=0;i<12;i++){cyclone.tickCount++;cyclone.tick();}
+        helper.assertTrue(cyclone.getZ()>start+1,"Cyclone stayed at the cast point");
+        helper.assertTrue(cyclone.anchored(),"Cyclone did not stop on target contact");
+        helper.assertTrue(target.getHealth()<health,"Contact stopped outside the damage area");
+        var at=cyclone.position();for(int i=0;i<5;i++){cyclone.tickCount++;cyclone.tick();}
+        helper.assertTrue(cyclone.position().distanceToSqr(at)<.00001,"Contact cyclone kept chasing");
+        cyclone.discard();boss.battle().cleanup();helper.succeed();
+    }
+    @GameTest(template="building_test_empty", timeoutTicks=40, batch="canglan_fusing_cyclone")
+    public static void nearbyCyclonesMergeOnceWithoutConsumingAnotherBossSpell(GameTestHelper helper) {
+        var boss=helper.spawn(CanglanWarlordRegistration.CANGLAN_WARLORD,new BlockPos(2,1,2));boss.setNoAi(true);boss.setNoGravity(true);
+        var other=helper.spawn(CanglanWarlordRegistration.CANGLAN_WARLORD,new BlockPos(5,1,2));other.setNoAi(true);other.setNoGravity(true);
+        var a=CanglanTempestEntity.spawn(boss,boss.position(),net.minecraft.world.phys.Vec3.ZERO,true,1,25);
+        var b=CanglanTempestEntity.spawn(boss,boss.position().add(4.4,0,0),net.minecraft.world.phys.Vec3.ZERO,true,2,25);
+        var foreign=CanglanTempestEntity.spawn(other,boss.position(),net.minecraft.world.phys.Vec3.ZERO,true,1,25);
+        for(int i=0;i<4;i++){a.tickCount++;a.tick();}
+        helper.assertTrue(b.isRemoved()&&!a.isRemoved(),"Merge kept both source entities");
+        helper.assertTrue(Math.abs(a.visualScale()-Math.sqrt(5))<.001,"Merged model did not grow");
+        helper.assertTrue(!foreign.isRemoved(),"Fusion consumed another boss spell");
+        for(int i=0;i<40;i++){a.tickCount++;a.tick();}
+        helper.assertTrue(a.isRemoved(),"Fusion became permanent");
+        foreign.discard();boss.battle().cleanup();other.battle().cleanup();helper.succeed();
+    }
     // MCA replaces vanilla villagers during joining; use an ordinary real animal as damage/AI fixture.
     @GameTest(template="building_test_empty", timeoutTicks=40, batch="canglan_walking")
     public static void normalApproachIsEnabledAfterEntryButNotDuringWindStep(GameTestHelper helper) {

@@ -74,8 +74,8 @@ public final class CanglanWarlordAttackRules {
     // ---- durations (ticks) ----
     public static final int CLEAVE_LENGTH = 20;
     public static final int OVERHEAD_LENGTH = 28;
-    public static final int THRUST_LENGTH = 24;
-    public static final int SWEEP_LENGTH = 34;
+    public static final int THRUST_LENGTH = 34;
+    public static final int SWEEP_LENGTH = 80;
     public static final int SPEAR_THROW_LENGTH = 30;
     public static final int BASH_LENGTH = 22;
     public static final int GALE_ROAR_LENGTH = 44;
@@ -86,9 +86,9 @@ public final class CanglanWarlordAttackRules {
     // ---- the tick inside each move at which damage is actually dealt ----
     public static final int CLEAVE_HIT = 10;
     public static final int OVERHEAD_HIT = 16;
-    public static final int THRUST_HIT = 12;
-    public static final int SWEEP_HIT_FIRST = 12;
-    public static final int SWEEP_HIT_SECOND = 20;
+    public static final int THRUST_HIT = 24;
+    public static final int SWEEP_HIT_FIRST = 60;
+    public static final int SWEEP_HIT_SECOND = 66;
     public static final int BASH_HIT = 10;
     public static final int SPEAR_THROW_HIT = 12;
     /** The roar peaks late: players get half the clip to back out of the shockwave. */
