@@ -141,7 +141,7 @@ public final class CanglanWarlordEntity extends Monster implements GeoEntity {
     public boolean rising() {
         return spawnTicks > 0;
     }
-    boolean canApproach() { return !busy() && shiftTicks == 0 && spawnTicks == 0; }
+    boolean canApproach() { return !combat.testing() && !busy() && shiftTicks == 0 && spawnTicks == 0; }
 
     @Override
     protected void registerGoals() {

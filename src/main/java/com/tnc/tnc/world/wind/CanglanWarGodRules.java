@@ -3,6 +3,7 @@ package com.tnc.tnc.world.wind;
 /** Bounded encounter budgets and shared visual/gameplay scale. */
 public final class CanglanWarGodRules {
     public static final int TORNADO = 9, WAVE = 10, ARSENAL_4 = 11, ARSENAL_5 = 12;
+    public static final int MAX_CONSECUTIVE_STEPS = 3;
     public static final int ANCHORS = 10, ANCHOR_LIFETIME = 1200, DODGE_COOLDOWN = 70;
     public static final float DODGE_CHANCE = .28F;
     public static float scale(int phase) { return phase == 2 ? 5F : 1F; }
