@@ -34,7 +34,8 @@ import java.util.WeakHashMap;
  * 水平只做小范围抖动。火山口在中轴上，所以不需要朝向参与；也不使用骨骼矩阵，
  * 避免“相机相对 / 骨骼 pivot”两种坐标空间混用带来的错位。
  *
- * <p>只有两种表现：壳顶火山口持续冒出的细烟，和火山口内崩出的短小火星。
+ * <p>只有两种表现：壳顶火山口持续冒出的细烟，和火星（火山口为主，外壳裂隙少量）。
+ * 裂隙点位是模型局部坐标，按身体朝向旋转后贴在壳体表面，不用渲染矩阵。
  * 不做小喷发、不改动画、不加伤害、不动地形、不点燃方块。
  *
  * <p>全部在客户端生成，按 client tick 稳定步进，距离越远越稀。
@@ -118,8 +119,17 @@ public final class VolcanicTortoiseAmbientFx {
                 {1.00F, 0.62F, 0.12F},
                 {1.00F, 0.86F, 0.40F}
         };
-        /** 这一轮先关掉裂隙火星，只保留火山口，便于确认定位。 */
-        static final boolean FISSURE_SPARKS_ENABLED = false;
+
+        // ---- 裂隙火星 -----------------------------------------------------
+
+        /** 打开裂隙火星。点位见 {@link #FISSURES_P1} / {@link #FISSURES_P2}，都贴在外壳表面。 */
+        static final boolean FISSURE_SPARKS_ENABLED = true;
+        /** 火星里有多大比例从裂隙出，其余从火山口出。 */
+        static final float FISSURE_SPARK_SHARE = 0.30F;
+        /** 裂隙火星离表面很近，散开要小，避免钻进石头里。 */
+        static final double FISSURE_SPREAD = 0.05D;
+        static final double FISSURE_OUTWARD_MIN = 0.030D;
+        static final double FISSURE_OUTWARD_MAX = 0.090D;
 
         // ---- 状态抑制 -----------------------------------------------------
 
@@ -127,6 +137,38 @@ public final class VolcanicTortoiseAmbientFx {
         /** 转阶段后停多少 tick；只在阶段变化那一次设置。 */
         static final int TRANSITION_PAUSE_TICKS = 80;
     }
+
+    /**
+     * 一处裂隙发射点，用实体局部坐标表示（单位：格）。
+     *
+     * <p>x 向右、y 从脚下起、z 向模型背面（模型正脸朝 -z）。这里是「模型原始坐标」，
+     * 不是骨骼 pivot、也不是相机空间——运行时按 entity 的 {@code yBodyRot} 绕 Y 轴旋转后加到实体坐标上，
+     * 所以巨龟转身时裂隙跟着转，不需要任何渲染矩阵。
+     *
+     * <p>这些点是从 geo 里外壳（shell/whorl/body）方块的朝外面中心算出来的：取面中心后再沿法线外移 0.6 单位
+     * （0.0375 格），并逐个验证过不落在任何方块内部（含腿、头、颈），因此不会浮空、也不会埋进石头。
+     */
+    private record Fissure(double x, double y, double z) {
+    }
+
+    /** 一阶段外壳侧面的裂隙点（高度 2.78~3.03 格）。 */
+    private static final Fissure[] FISSURES_P1 = {
+            new Fissure(1.9125D, 2.7812D, -1.4375D),
+            new Fissure(-1.7875D, 2.8125D, 1.2500D),
+            new Fissure(-1.0375D, 3.0325D, -1.6250D),
+            new Fissure(1.7875D, 2.8125D, 1.2500D),
+            new Fissure(0.0000D, 2.8125D, 1.9125D)
+    };
+
+    /** 二阶段外壳侧面的裂隙点（高度 5.25~5.85 格）。 */
+    private static final Fissure[] FISSURES_P2 = {
+            new Fissure(-2.2125D, 5.3125D, -0.5735D),
+            new Fissure(1.9125D, 5.4000D, -0.4563D),
+            new Fissure(-0.2000D, 5.8500D, 2.0375D),
+            new Fissure(-1.6125D, 5.3593D, 0.8297D),
+            new Fissure(1.1125D, 5.2515D, -1.3875D),
+            new Fissure(-1.0750D, 5.3593D, 1.3985D)
+    };
 
     private static final class FxState {
         int phase = -1;
@@ -261,11 +303,17 @@ public final class VolcanicTortoiseAmbientFx {
             state.smokeAcc = 4.0F;
         }
 
-        // ---- 火星：全部从火山口 ============================================
+        // ---- 火星：火山口为主，裂隙少量 =====================================
         float sparkRate = (phaseTwo ? Tuning.SPARK_PER_SECOND_P2 : Tuning.SPARK_PER_SECOND_P1) * rateScale;
         state.sparkAcc += sparkRate / 20.0F;
         while (state.sparkAcc >= 1.0F && budget > 0) {
-            spawnSpark(level, vent, phaseTwo);
+            boolean fissure = Tuning.FISSURE_SPARKS_ENABLED
+                    && level.random.nextFloat() < Tuning.FISSURE_SPARK_SHARE;
+            if (fissure) {
+                spawnFissureSpark(level, boss, phaseTwo);
+            } else {
+                spawnSpark(level, vent, phaseTwo);
+            }
             state.sparkAcc -= 1.0F;
             state.sparkThisSecond++;
             budget--;
@@ -333,6 +381,62 @@ public final class VolcanicTortoiseAmbientFx {
         particle.scale(scale);
         particle.setColor(color[0], color[1], color[2]);
         particle.setParticleSpeed(vx, vy, vz);
+    }
+
+    /**
+     * 裂隙火星：从外壳表面的固定点位冒出，向外、向上飞。
+     * 点位是实体局部坐标，按 {@code yBodyRot} 旋转后加到实体位置上，所以巨龟转身/移动时不会脱离壳体。
+     */
+    private static void spawnFissureSpark(Level level, VolcanicTortoiseEntity boss, boolean phaseTwo) {
+        Fissure[] points = phaseTwo ? FISSURES_P2 : FISSURES_P1;
+        Fissure point = points[level.random.nextInt(points.length)];
+        float yaw = boss.yBodyRot;
+
+        double[] local = rotateYaw(point.x(), point.z(), yaw);
+        double x = boss.getX() + local[0] + (level.random.nextDouble() - 0.5D) * Tuning.FISSURE_SPREAD;
+        double z = boss.getZ() + local[1] + (level.random.nextDouble() - 0.5D) * Tuning.FISSURE_SPREAD;
+        double y = boss.getY() + point.y() + 0.02D + level.random.nextDouble() * 0.04D;
+
+        // 朝外方向：取点位在壳体上的径向，随身体一起转。
+        double radius = Math.sqrt(point.x() * point.x() + point.z() * point.z());
+        double[] outwardDir = rotateYaw(point.x() / radius, point.z() / radius, yaw);
+        double outward = Tuning.FISSURE_OUTWARD_MIN
+                + level.random.nextDouble() * (Tuning.FISSURE_OUTWARD_MAX - Tuning.FISSURE_OUTWARD_MIN);
+        double vx = outwardDir[0] * outward;
+        double vz = outwardDir[1] * outward;
+        double upMin = (phaseTwo ? Tuning.SPARK_UP_MIN_P2 : Tuning.SPARK_UP_MIN_P1) * 0.7D;
+        double upMax = (phaseTwo ? Tuning.SPARK_UP_MAX_P2 : Tuning.SPARK_UP_MAX_P1) * 0.7D;
+        double vy = upMin + level.random.nextDouble() * (upMax - upMin);
+
+        float[] color = Tuning.SPARK_COLORS[level.random.nextInt(Tuning.SPARK_COLORS.length)];
+        Particle particle = Minecraft.getInstance().particleEngine.createParticle(
+                level.random.nextFloat() < 0.3F ? ParticleTypes.FLAME : ParticleTypes.SMALL_FLAME,
+                x, y, z, vx, vy, vz);
+        if (particle == null) {
+            return;
+        }
+        int lifeMin = phaseTwo ? Tuning.SPARK_LIFE_MIN_P2 : Tuning.SPARK_LIFE_MIN_P1;
+        int lifeMax = phaseTwo ? Tuning.SPARK_LIFE_MAX_P2 : Tuning.SPARK_LIFE_MAX_P1;
+        particle.setLifetime(lifeMin + level.random.nextInt(lifeMax - lifeMin + 1));
+        float scale = Tuning.SPARK_SCALE_MIN
+                + level.random.nextFloat() * (Tuning.SPARK_SCALE_MAX - Tuning.SPARK_SCALE_MIN);
+        if (phaseTwo && level.random.nextFloat() < 0.3F) {
+            scale += Tuning.SPARK_SCALE_P2_BONUS;
+        }
+        particle.scale(scale);
+        particle.setColor(color[0], color[1], color[2]);
+        particle.setParticleSpeed(vx, vy, vz);
+    }
+
+    /**
+     * 把模型局部 (x, z) 按实体身体朝向转成世界水平偏移。
+     * 与 {@code LivingEntityRenderer} 的 {@code 180° - yaw} 约定一致：yaw=0 时模型 -z（正脸）朝世界 +z。
+     */
+    private static double[] rotateYaw(double x, double z, float yawDegrees) {
+        double angle = (180.0D - yawDegrees) * (Math.PI / 180.0D);
+        double cos = Math.cos(angle);
+        double sin = Math.sin(angle);
+        return new double[]{x * cos + z * sin, -x * sin + z * cos};
     }
 
     private static void marker(Level level, Vec3 at, long now) {
