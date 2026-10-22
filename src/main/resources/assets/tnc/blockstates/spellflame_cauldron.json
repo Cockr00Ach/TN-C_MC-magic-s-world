@@ -1,7 +1,16 @@
 {
   "variants": {
-    "": {
+    "part=0": {
       "model": "tnc:block/spellflame_cauldron"
+    },
+    "part=1": {
+      "model": "minecraft:block/air"
+    },
+    "part=2": {
+      "model": "minecraft:block/air"
+    },
+    "part=3": {
+      "model": "minecraft:block/air"
     }
   }
 }

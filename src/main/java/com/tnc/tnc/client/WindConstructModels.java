@@ -16,6 +16,16 @@ import org.joml.Quaternionf;
 public final class WindConstructModels {
     public static final String[] NAMES={"core","cage","crescent","sword","spear","chakram"};
     public static ResourceLocation id(String name){return ResourceLocation.fromNamespaceAndPath("tnc","wind/arsenal/"+name);}
+    public static void atBone(PoseStack pose, software.bernie.geckolib.cache.object.GeoBone bone){
+        pose.translate(bone.getPosX()/16.0F,bone.getPosY()/16.0F,bone.getPosZ()/16.0F);
+        pose.translate(bone.getPivotX()/16.0F,bone.getPivotY()/16.0F,bone.getPivotZ()/16.0F);
+        if(bone.getRotZ()!=0.0F)pose.mulPose(Axis.ZP.rotation(bone.getRotZ()));
+        if(bone.getRotY()!=0.0F)pose.mulPose(Axis.YP.rotation(bone.getRotY()));
+        if(bone.getRotX()!=0.0F)pose.mulPose(Axis.XP.rotation(bone.getRotX()));
+        if(bone.getScaleX()!=1.0F||bone.getScaleY()!=1.0F||bone.getScaleZ()!=1.0F){
+            pose.scale(bone.getScaleX(),bone.getScaleY(),bone.getScaleZ());
+        }
+    }
     public static void draw(String name,PoseStack p,MultiBufferSource b,float alpha){
         p.pushPose();p.translate(-.5,-.5,-.5);
         var mc=Minecraft.getInstance();boolean metal=name.equals("sword")||name.equals("spear");

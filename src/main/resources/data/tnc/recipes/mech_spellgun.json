@@ -6,16 +6,16 @@
       "count": 4
     },
     {
+      "item": "minecraft:netherite_ingot",
+      "count": 1
+    },
+    {
+      "item": "minecraft:blaze_rod",
+      "count": 4
+    },
+    {
       "item": "tnc:spirit_iron",
-      "count": 12
-    },
-    {
-      "item": "tnc:storm_crystal",
-      "count": 4
-    },
-    {
-      "item": "tnc:mist_cloth",
-      "count": 4
+      "count": 8
     }
   ],
   "result": {

@@ -43,3 +43,11 @@ for i,(icon,title,recipe) in enumerate(farm):
  alchemy['quests'].append({'id':uid(key),'title':'&a农用 · '+title,'icon':'tnc:'+icon,'x':-6+i*2,'y':13,'description':[recipe+'，三种各一份。','同样在药釜加水、投入焰蕊盐、用火法点燃，在魔力视下控温搅拌后封釜收汁。','用途见「深层魔法·世界的回响」。'],'dependencies':[],'hide_dependency_lines':True,'tasks':[{'id':uid(key+'task'),'type':'item','item':'tnc:'+icon,'count':1,'consume_items':False}],'rewards':[]})
 write(p,alchemy)
 print('Deep arcana quests:',len(quests),'Alchemy:',len(alchemy['quests']))
+
+# Apply the current physical-cauldron and plant-only meal design after historical generation.
+from revise_arcana_feedback_assets import run as revise_arcana_feedback
+revise_arcana_feedback()
+
+# Keep the approved all-stage blueprint authoritative after historical asset generation.
+import build_magic_progression as _magic_blueprint
+_magic_blueprint.run()

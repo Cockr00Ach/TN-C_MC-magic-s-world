@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "tnc:rainletter_berry",
+    "tnc:dewgrass_thread",
+    "minecraft:kelp",
+    "minecraft:dried_kelp",
+    "minecraft:cod",
+    "minecraft:salmon",
+    "minecraft:cooked_cod",
+    "minecraft:cooked_salmon"
+  ]
+}

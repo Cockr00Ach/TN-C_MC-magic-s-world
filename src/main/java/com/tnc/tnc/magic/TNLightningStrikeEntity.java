@@ -426,7 +426,7 @@ public class TNLightningStrikeEntity extends Entity {
             if (dx * dx + dy * dy + dz * dz > this.landRadius * this.landRadius) {
                 continue;                       // 以**爆心**算距离（不是以球心 ✗）
             }
-            target.hurt(level.damageSources().indirectMagic(owner, owner), this.landDamage);
+            target.hurt(level.damageSources().indirectMagic(this, owner), this.landDamage);
         }
 
         // ★ **落地才是"爆炸"**（作者 2026-09-29："怎么刚放出来就爆炸，应该等球落地" ✓）

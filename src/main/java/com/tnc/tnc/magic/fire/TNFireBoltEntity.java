@@ -201,16 +201,16 @@ public final class TNFireBoltEntity extends Projectile {
                           Vec3 at, Vec3 velocity) {
         setOwner(owner);
         entityData.set(SPELL, spellPath);
-        entityData.set(RADIUS, bolt.radius());
+        entityData.set(RADIUS, bolt.radius()*com.tnc.tnc.arcana.ArcanaBeacon.scale(owner));
         entityData.set(RANGE, bolt.range());
         setPos(at);
         setDeltaMovement(velocity);
         damage = FireSpellRules.damage(bolt, FireSpellRules.power(owner));
         heavyScorch = bolt.heavyScorch();
         lavaField = bolt.lavaField();
-        blastRadius = bolt.blastRadius();
+        blastRadius = bolt.blastRadius()*com.tnc.tnc.arcana.ArcanaBeacon.scale(owner);
         maxHealthPercent = bolt.maxHealthPercent();
-        remaining = bolt.range();
+        remaining = bolt.range()*com.tnc.tnc.arcana.ArcanaBeacon.scale(owner);
     }
 
     /** 锁定一个目标 ⇒ 这一发之后会**拐弯追它** ✓。 */

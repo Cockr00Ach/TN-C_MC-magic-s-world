@@ -12,13 +12,16 @@
     {
       "item": "minecraft:crying_obsidian",
       "count": 2
+    },
+    {
+      "item": "tnc:pure_medicinal_powder",
+      "count": 2
     }
   ],
   "result": {
-    "item": "tnc:spirit_nurture_altar",
-    "count": 1
+    "item": "tnc:spirit_nurture_altar"
   },
   "mana": 160,
-  "work_ticks": 100,
+  "work_ticks": 120,
   "category": "workshop"
 }

@@ -1,0 +1,23 @@
+{
+  "type": "tnc:mana_forging",
+  "ingredients": [
+    {
+      "item": "tnc:radiant_gold",
+      "count": 4
+    },
+    {
+      "item": "minecraft:copper_ingot",
+      "count": 4
+    },
+    {
+      "item": "tnc:foldleaf_film",
+      "count": 2
+    }
+  ],
+  "result": {
+    "item": "tnc:elixir_fumigator"
+  },
+  "mana": 160,
+  "work_ticks": 120,
+  "category": "workshop"
+}

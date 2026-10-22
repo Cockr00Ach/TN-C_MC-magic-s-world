@@ -19,7 +19,7 @@ package com.tnc.tnc.world.wind;
  * The boss models no weapon at all. It carries an empty {@code weapon_1} anchor
  * on its right fist, and the renderer draws the same wind arsenal blade the
  * player's wind spells conjure: the sword ({@link #FORM_SWORD}) in phase one and
- * the long spear ({@link #FORM_SPEAR}) after the half-health shift. That is why
+ * the long spear ({@link #FORM_SPEAR}) after the first defeat. That is why
  * the two phases are called {@link #PHASE_SWORD} and {@link #PHASE_SPEAR}.
  *
  * <p>Every {@code *_LENGTH} here is exactly the matching GeckoLib clip length in
@@ -47,7 +47,7 @@ public final class CanglanWarlordAttackRules {
     public static final int PHASE_SWORD = 1;
     public static final int PHASE_SPEAR = 2;
     /** Half health, the same threshold the wind warden and the leviathan use. */
-    public static final float PHASE_TWO_THRESHOLD = 0.5F;
+    public static final float PHASE_TWO_THRESHOLD = 0.0F;
     /** Below this the boss will spend one move on a gale roar if it has not roared yet. */
     public static final float GALE_ROAR_THRESHOLD = 0.35F;
 
@@ -74,8 +74,8 @@ public final class CanglanWarlordAttackRules {
     // ---- durations (ticks) ----
     public static final int CLEAVE_LENGTH = 20;
     public static final int OVERHEAD_LENGTH = 28;
-    public static final int THRUST_LENGTH = 24;
-    public static final int SWEEP_LENGTH = 34;
+    public static final int THRUST_LENGTH = 34;
+    public static final int SWEEP_LENGTH = 80;
     public static final int SPEAR_THROW_LENGTH = 30;
     public static final int BASH_LENGTH = 22;
     public static final int GALE_ROAR_LENGTH = 44;
@@ -86,9 +86,9 @@ public final class CanglanWarlordAttackRules {
     // ---- the tick inside each move at which damage is actually dealt ----
     public static final int CLEAVE_HIT = 10;
     public static final int OVERHEAD_HIT = 16;
-    public static final int THRUST_HIT = 12;
-    public static final int SWEEP_HIT_FIRST = 12;
-    public static final int SWEEP_HIT_SECOND = 20;
+    public static final int THRUST_HIT = 24;
+    public static final int SWEEP_HIT_FIRST = 60;
+    public static final int SWEEP_HIT_SECOND = 66;
     public static final int BASH_HIT = 10;
     public static final int SPEAR_THROW_HIT = 12;
     /** The roar peaks late: players get half the clip to back out of the shockwave. */
@@ -148,7 +148,7 @@ public final class CanglanWarlordAttackRules {
     /** True when the boss should swap sword for spear and play the shift clip. */
     public static boolean shouldShift(int phase, float health, float maxHealth) {
         return phase == PHASE_SWORD && health <= maxHealth * PHASE_TWO_THRESHOLD
-                && health > 0.0F;
+                ;
     }
 
     /**
@@ -158,7 +158,7 @@ public final class CanglanWarlordAttackRules {
      */
     public static boolean shouldRoar(int phase, float health, float maxHealth, int roarCooldown) {
         return phase == PHASE_SPEAR && roarCooldown <= 0
-                && health <= maxHealth * GALE_ROAR_THRESHOLD && health > 0.0F;
+                && health <= maxHealth * GALE_ROAR_THRESHOLD && health > 0;
     }
 
     /** Which moves the current phase owns. The buckler works in both. */

@@ -37,7 +37,7 @@ public final class BotanicalPlantEntity extends BlockEntity {
     private boolean wet(ServerLevel l){if(l.getGameTime()<wetUntil||l.isRainingAt(worldPosition))return true;for(Direction d:Direction.Plane.HORIZONTAL)if(l.getFluidState(worldPosition.below().relative(d)).is(FluidTags.WATER))return true;return false;}
     private boolean adjacent(ServerLevel l,java.util.function.Predicate<BlockState> predicate,int r){for(BlockPos p:BlockPos.betweenClosed(worldPosition.offset(-r,-1,-r),worldPosition.offset(r,1,r)))if(l.hasChunkAt(p)&&predicate.test(l.getBlockState(p)))return true;return false;}
     private boolean sky(ServerLevel l){return l.canSeeSky(worldPosition);}
-    public String reason(ServerLevel l){
+    public String reason(ServerLevel l){if(!com.tnc.tnc.arcana.ArcanaRealms.powered(l,worldPosition))return "异界无魔荒漠 · 跨维绿洲之外无法生长";
         if(!wild) {
             if(!com.tnc.tnc.life.routes.MagicSoilBlock.isSoil(l.getBlockState(worldPosition.below())))return "需要魔法土或土源";
             if(!com.tnc.tnc.life.routes.MagicSoilBlock.irrigated(l,worldPosition.below()))return "缺少八格内的流动魔力：保留植株，暂停生长";

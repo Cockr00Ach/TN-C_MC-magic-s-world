@@ -65,4 +65,12 @@ public class SpellHelperManaGateMixin {
             cir.setReturnValue(net.spell_engine.internals.casting.SpellCast.Attempt.none());
         }
     }
+    private static final String PERFORM="performSpell(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/resources/ResourceLocation;Ljava/util/List;Lnet/spell_engine/internals/casting/SpellCast$Action;F)V";
+    @Inject(method=PERFORM,at=@At("HEAD"),remap=false,require=1)
+    private static void tnc$openSponsor(net.minecraft.world.level.Level level,Player player,ResourceLocation id,java.util.List<net.minecraft.world.entity.Entity> targets,net.spell_engine.internals.casting.SpellCast.Action action,float progress,org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci){if(player instanceof net.minecraft.server.level.ServerPlayer p)com.tnc.tnc.arcana.ArcanaBeacon.enter(p,id,action==net.spell_engine.internals.casting.SpellCast.Action.RELEASE);}
+    @Inject(method=PERFORM,at=@At(value="FIELD",target="Lnet/spell_engine/api/spell/Spell;release:Lnet/spell_engine/api/spell/Spell$Release;",opcode=org.objectweb.asm.Opcodes.GETFIELD,ordinal=0),remap=false,require=1)
+    private static void tnc$reserveSponsor(net.minecraft.world.level.Level level,Player player,ResourceLocation id,java.util.List<net.minecraft.world.entity.Entity> targets,net.spell_engine.internals.casting.SpellCast.Action action,float progress,org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci){if(player instanceof net.minecraft.server.level.ServerPlayer p)com.tnc.tnc.arcana.ArcanaBeacon.provision(p);}
+    @Inject(method=PERFORM,at=@At("RETURN"),remap=false,require=1)
+    private static void tnc$closeSponsor(net.minecraft.world.level.Level level,Player player,ResourceLocation id,java.util.List<net.minecraft.world.entity.Entity> targets,net.spell_engine.internals.casting.SpellCast.Action action,float progress,org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci){if(player instanceof net.minecraft.server.level.ServerPlayer p)com.tnc.tnc.arcana.ArcanaBeacon.leave(p);}
+
 }

@@ -29,9 +29,22 @@ public final class ArcanaEquipment {
         var wand=p.getMainHandItem();if(!(wand.getItem() instanceof com.tnc.tnc.adventure.ElementWands.Wand)||!wand.hasTag())return;var t=wand.getTag();if(!t.hasUUID("SpiritOwner")||!p.getUUID().equals(t.getUUID("SpiritOwner"))||!t.contains("SpiritAffix"))return;
         long now=ArcanaPhysiology.now(p);var state=ArcanaPhysiology.data(p);if(state.getLong("SpiritProcUntil")>now||p.getRandom().nextFloat()>=.2)return;var mana=com.tnc.tnc.magic.MagicStone.getOrNull(p);if(mana==null||!mana.spendMana(15))return;
         projectile.getPersistentData().putBoolean("SpiritProc",true);state.putLong("SpiritProcUntil",now+200);
-        if(t.getString("SpiritAffix").equals("meteor_echo"))com.tnc.tnc.magic.fire.TNMeteorFallEntity.cast(p.serverLevel(),p,e.getRayTraceResult().getLocation());
+        if(t.getString("SpiritAffix").startsWith("element_"))awaken(p,e.getRayTraceResult().getLocation(),t.getString("SpiritElement"));
+        else if(t.getString("SpiritAffix").equals("meteor_echo"))com.tnc.tnc.magic.fire.TNMeteorFallEntity.cast(p.serverLevel(),p,e.getRayTraceResult().getLocation());
         else for(var ally:p.serverLevel().getEntitiesOfClass(ServerPlayer.class,p.getBoundingBox().inflate(6)))if(ally==p||p.isAlliedTo(ally))ally.heal(4);
         com.tnc.tnc.network.MagicStoneNetwork.syncTo(p);com.tnc.tnc.journey.JourneyData.get(p.server).setDirty();
+    }
+    public static void awaken(ServerPlayer p,net.minecraft.world.phys.Vec3 at,String element){var l=p.serverLevel();var foes=l.getEntitiesOfClass(Monster.class,new net.minecraft.world.phys.AABB(at,at).inflate(5),m->m.isAlive()&&!(m instanceof DimensionalSpirit)&&!m.getPersistentData().hasUUID("CageOwner")&&!p.isAlliedTo(m));
+        switch(element){
+            case "fire"->com.tnc.tnc.magic.fire.TNMeteorFallEntity.cast(l,p,at);
+            case "water"->{for(var ally:l.getEntitiesOfClass(ServerPlayer.class,p.getBoundingBox().inflate(8),a->a==p||p.isAlliedTo(a)))ally.heal(5);for(var m:foes)m.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN,100,3));}
+            case "wind"->{var vortex=com.tnc.tnc.magic.wind.WindChainRegistration.BALL.create(l);if(vortex!=null){vortex.configure(p,3);vortex.setPos(at);vortex.anchor();l.addFreshEntity(vortex);}}
+            case "lightning"->{for(var m:foes.stream().limit(3).toList()){var bolt=net.minecraft.world.entity.EntityType.LIGHTNING_BOLT.create(l);if(bolt!=null){bolt.setPos(m.position());bolt.setVisualOnly(true);l.addFreshEntity(bolt);}m.hurt(p.damageSources().indirectMagic(p,p),16);}}
+            case "earth"->{p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.ABSORPTION,200,1));for(var m:foes){m.hurt(p.damageSources().indirectMagic(p,p),8);var away=m.position().subtract(at).normalize();m.push(away.x,.6,away.z);}}
+            case "light"->{for(var ally:l.getEntitiesOfClass(ServerPlayer.class,p.getBoundingBox().inflate(8),a->a==p||p.isAlliedTo(a)))ally.heal(6);for(var m:foes)m.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.GLOWING,200));}
+            case "dark"->{for(var m:foes.stream().limit(3).toList()){m.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.WITHER,120,1));m.hurt(p.damageSources().indirectMagic(p,p),8);}var magic=com.tnc.tnc.magic.MagicStone.getOrNull(p);if(magic!=null)magic.addMana(12);}
+            default->{}
+        }
     }
     @SubscribeEvent public static void fall(net.minecraftforge.event.entity.living.LivingFallEvent e){if(e.getEntity() instanceof ServerPlayer p&&(tailwind(p)||ArcanaPhysiology.data(p).getLong("SkyGraceUntil")>ArcanaPhysiology.now(p)))e.setDamageMultiplier(0);}
     private ArcanaEquipment(){}

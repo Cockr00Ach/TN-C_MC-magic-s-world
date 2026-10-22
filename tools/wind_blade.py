@@ -25,8 +25,8 @@ TEXTURE = ASSETS / "textures/item/wind_relic_metal.png"
 # Mirrors CanglanWarlordRenderer.drawWeapon; the shift seats the fist on the haft
 # instead of on the butt cap.
 GEAR = {
-    1: ("sword", 2.10, 0.25, -76.0, -8.0),
-    2: ("spear", 2.40, 0.55, -80.0, 4.0),
+    1: ("sword", 2.10, 2.10 * (0.5 + 0.8 / 16), -76.0, -8.0),
+    2: ("spear", 2.40, 2.40 * 0.5, -80.0, 4.0),
 }
 
 FACES = {
@@ -133,7 +133,7 @@ def anchor_for(matrices, bones, x, z, name="weapon_1"):
     offset = np.zeros(3)
     base = matrices[entry["parent"]] @ _translate(offset) @ _translate(pivot)
     rotation = np.eye(4)
-    rotation[:3, :3] = _rotation((x, 0.0, z))
+    rotation[:3, :3] = _rotation((-x, 0.0, -z))
     return base @ rotation
 
 
@@ -145,13 +145,13 @@ def _shaped(form):
     if form in _SHAPED:
         return _SHAPED[form]
     model, texture, scale, shift, rx, rz = load(form)
-    rotation = _rotation((rx, 0.0, rz))
+    rotation = _rotation((rx, 0.0, -rz))
     placement = rotation @ np.array([0.0, 0.0, shift])
     points = []
     colours = []
     for element in model.get("elements", []):
         for face, (quad, uv) in _element_quads(element).items():
-            blocks = quad / 16.0 - 0.5            # item model space -> blocks
+            blocks = (quad / 16.0 - 0.5) * np.array([-1,1,1])            # item model space -> blocks
             shaped = (rotation @ (blocks * scale).T).T + placement
             points.append(shaped * 16.0)          # blocks -> geometry units
             colours.append(_uv_colour(texture, uv))
@@ -184,7 +184,7 @@ def tip(form, matrices, bones, name="weapon_1"):
     """The blade point: (world point, distance from the weapon bone's pivot)."""
     anchor = _anchor(matrices, bones, name)
     model, _texture, scale, shift, rx, rz = load(form)
-    rotation = _rotation((rx, 0.0, rz))
+    rotation = _rotation((rx, 0.0, -rz))
     placement = rotation @ np.array([0.0, 0.0, shift])
     points = []
     for element in model.get("elements", []):
@@ -202,7 +202,7 @@ def tip(form, matrices, bones, name="weapon_1"):
     corners = np.concatenate(points)
     # the blade tip is the vertex furthest along the model's own +Z axis
     index = int(np.argmax(corners[:, 2]))
-    geometry = (rotation @ ((corners / 16.0 - 0.5) * scale).T).T + placement
+    geometry = (rotation @ ((corners / 16.0 - 0.5) * np.array([-1,1,1]) * scale).T).T + placement
     world = (anchor @ np.column_stack(
         [geometry * 16.0, np.ones(len(geometry))]).T).T[:, :3]
     point = world[index]

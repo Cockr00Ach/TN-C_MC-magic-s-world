@@ -19,6 +19,7 @@ public final class RoutePlantBlock extends BushBlock implements EntityBlock {
     public static final BooleanProperty WILD=BooleanProperty.create("wild");
     public final NewPlantKind kind;
     public RoutePlantBlock(NewPlantKind kind){super(BlockBehaviour.Properties.copy(Blocks.FERN).offsetType(BlockBehaviour.OffsetType.NONE).noCollission().noOcclusion().lightLevel(s->s.getValue(AGE)==3?2:0));this.kind=kind;registerDefaultState(stateDefinition.any().setValue(AGE,0).setValue(WILD,false));}
+    @Override public BlockState getStateForPlacement(net.minecraft.world.item.context.BlockPlaceContext c){if(c.getLevel() instanceof net.minecraft.server.level.ServerLevel l&&!com.tnc.tnc.arcana.ArcanaRealms.powered(l,c.getClickedPos()))return null;return super.getStateForPlacement(c);}
     @Override public RenderShape getRenderShape(BlockState state){return RenderShape.ENTITYBLOCK_ANIMATED;}
     @Override public net.minecraft.world.phys.shapes.VoxelShape getShape(BlockState state,BlockGetter world,BlockPos pos,net.minecraft.world.phys.shapes.CollisionContext context){return Block.box(3,0,3,13,4+state.getValue(AGE)*4,13);}
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block,BlockState> b){b.add(AGE,WILD);}

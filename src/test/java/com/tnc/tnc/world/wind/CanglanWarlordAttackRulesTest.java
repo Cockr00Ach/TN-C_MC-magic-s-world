@@ -18,19 +18,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class CanglanWarlordAttackRulesTest {
 
     @Test
-    void halfHealthSwapsTheSwordForTheSpear() {
-        assertEquals(CanglanWarlordAttackRules.PHASE_SWORD,
-                CanglanWarlordAttackRules.phaseFor(701.0F, 1200.0F), "过半血还在持剑");
-        assertEquals(CanglanWarlordAttackRules.PHASE_SPEAR,
-                CanglanWarlordAttackRules.phaseFor(600.0F, 1200.0F), "正好半血必须换矛");
-        assertEquals(CanglanWarlordAttackRules.PHASE_SPEAR,
-                CanglanWarlordAttackRules.phaseFor(1.0F, 1200.0F));
-        assertTrue(CanglanWarlordAttackRules.shouldShift(
-                CanglanWarlordAttackRules.PHASE_SWORD, 600.0F, 1200.0F), "持剑半血要触发换相");
-        assertFalse(CanglanWarlordAttackRules.shouldShift(
-                CanglanWarlordAttackRules.PHASE_SPEAR, 600.0F, 1200.0F), "已经换过就不该再触发");
-        assertFalse(CanglanWarlordAttackRules.shouldShift(
-                CanglanWarlordAttackRules.PHASE_SWORD, 0.0F, 1200.0F), "死亡帧不该触发换相");
+    void ghostFormHasFiveTimesTheBodyAndWeaponScale() {
+        assertEquals(1F,CanglanWarGodRules.scale(1));
+        assertEquals(5F,CanglanWarGodRules.scale(2));
+        assertEquals(10,CanglanWarGodRules.ANCHORS);
     }
 
     @Test

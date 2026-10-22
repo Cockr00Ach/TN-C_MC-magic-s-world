@@ -72,7 +72,7 @@ public final class ManaRoot {
         }
 
         @Override public void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-            if (isRandomlyTicking(state) && random.nextInt(3) == 0)
+            if (com.tnc.tnc.arcana.ArcanaRealms.powered(level,pos)&&isRandomlyTicking(state) && random.nextInt(3) == 0)
                 level.setBlock(pos, state.setValue(AGE, state.getValue(AGE) + 1), 2);
         }
 

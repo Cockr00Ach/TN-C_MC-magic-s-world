@@ -23,12 +23,12 @@ public final class RouteMirrorLinks {
         unlink(l,x);unlink(l,y);x.mirrorTarget=b.immutable();y.mirrorTarget=a.immutable();sync(l,x);sync(l,y);return "";
     }
     public static void unlink(ServerLevel l,RouteNodeEntity n){
-        var old=n.mirrorTarget;n.mirrorTarget=null;sync(l,n);
+        com.tnc.tnc.arcana.ArcanaRealms.unlink(l,n.getBlockPos());com.tnc.tnc.arcana.ArcanaRealms.unpin(l,n);var old=n.mirrorTarget;n.mirrorTarget=null;n.getPersistentData().remove("MirrorTargetDimension");sync(l,n);
         if(old!=null&&l.hasChunkAt(old)&&l.getBlockEntity(old) instanceof RouteNodeEntity other&&n.getBlockPos().equals(other.mirrorTarget)){other.mirrorTarget=null;sync(l,other);}
     }
     private static void sync(ServerLevel l,RouteNodeEntity n){n.setChanged();l.sendBlockUpdated(n.getBlockPos(),n.getBlockState(),n.getBlockState(),3);}
     public static BlockPos remote(ServerLevel l,RouteNodeEntity n){
-        var q=n.mirrorTarget;if(q==null||!l.hasChunkAt(q)||!(l.getBlockEntity(q) instanceof RouteNodeEntity peer)||!mirror(peer)||n.owner==null||!n.owner.equals(peer.owner)||!n.getBlockPos().equals(peer.mirrorTarget))return null;
+        if(n.getPersistentData().contains("MirrorTargetDimension")&&!n.getPersistentData().getString("MirrorTargetDimension").equals(l.dimension().location().toString()))return null;var q=n.mirrorTarget;if(q==null||!l.hasChunkAt(q)||!(l.getBlockEntity(q) instanceof RouteNodeEntity peer)||!mirror(peer)||n.owner==null||!n.owner.equals(peer.owner)||!n.getBlockPos().equals(peer.mirrorTarget))return null;
         return n.getBlockPos().distSqr(q)<=Math.pow(Math.min(range(n),range(peer)),2)&&RouteAccess.allowed(l,q,n.owner)&&(n.kind()==RouteKind.DIMENSION_PRISM&&peer.kind()==RouteKind.DIMENSION_PRISM||clear(l,n.getBlockPos(),q))?q:null;
     }
     public static boolean clear(ServerLevel l,BlockPos a,BlockPos b){

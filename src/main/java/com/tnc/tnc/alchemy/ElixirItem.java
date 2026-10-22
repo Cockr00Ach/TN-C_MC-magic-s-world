@@ -29,12 +29,12 @@ public final class ElixirItem extends Item {
             case ECHO->effect(p,AlchemyContent.ECHO,90,scale,master);
         }
         com.tnc.tnc.arcana.ArcanaPhysiology.drink(p,quality);
-        for(var elixir:AlchemyContent.POTIONS.values())p.getCooldowns().addCooldown(elixir,160);if(magic!=null)com.tnc.tnc.network.MagicStoneNetwork.syncTo(p);
+        for(var elixir:AlchemyContent.POTIONS.values())p.getCooldowns().addCooldown(elixir,p.hasEffect(com.tnc.tnc.arcana.ArcanaMealEffects.HARMONY)?80:160);if(magic!=null)com.tnc.tnc.network.MagicStoneNetwork.syncTo(p);
         p.serverLevel().sendParticles(new net.minecraft.core.particles.DustParticleOptions(org.joml.Vector3f.class.cast(new org.joml.Vector3f((k.color>>16&255)/255f,(k.color>>8&255)/255f,(k.color&255)/255f)),1.3f),p.getX(),p.getY()+1,p.getZ(),16,.3,.5,.3,.03);
         p.playSound(net.minecraft.sounds.SoundEvents.AMETHYST_BLOCK_CHIME,.8f,1.2f);
         if(!p.getAbilities().instabuild){s.shrink(1);if(!s.isEmpty()&&!p.getInventory().add(new ItemStack(Items.GLASS_BOTTLE)))p.drop(new ItemStack(Items.GLASS_BOTTLE),false);}return true;
     }
     private static void effect(Player p,MobEffect e,int seconds,double scale,boolean master){p.addEffect(new MobEffectInstance(e,Math.max(1,(int)(seconds*20*scale)),master?1:0));}
     @Override public Component getName(ItemStack s){if(!s.hasTag()||!s.getTag().contains("RitualQuality"))return super.getName(s);int q=s.getTag().getInt("RitualQuality");return Component.literal((q==2?"臻品·大师 ":q==0?"浑浊次品 ":"标准 ")+kind.name);}
-    @Override public void appendHoverText(ItemStack s,Level l,List<Component> lines,TooltipFlag flag){if(s.hasTag()&&s.getTag().contains("RitualQuality")){int q=s.getTag().getInt("RitualQuality");lines.add(Component.literal(q==2?"药效200% · 时长双倍 · 摄入应激+2":q==0?"药效30% · 淤积+25":"药效100% · 淤积+10").withStyle(net.minecraft.ChatFormatting.GOLD));}lines.add(Component.literal(kind.help).withStyle(net.minecraft.ChatFormatting.AQUA));lines.add(Component.literal("饮用24刻 · 所有魔药共用8秒冷却").withStyle(net.minecraft.ChatFormatting.GRAY));}
+    @Override public void appendHoverText(ItemStack s,Level l,List<Component> lines,TooltipFlag flag){if(s.hasTag()&&s.getTag().contains("RitualQuality")){int q=s.getTag().getInt("RitualQuality");lines.add(Component.literal(q==2?"药效200% · 时长双倍 · 零淤积":q==0?"药效30% · 淤积+25":"药效100% · 淤积+10").withStyle(net.minecraft.ChatFormatting.GOLD));}lines.add(Component.literal(kind.help).withStyle(net.minecraft.ChatFormatting.AQUA));lines.add(Component.literal("饮用24刻 · 所有魔药共用8秒冷却").withStyle(net.minecraft.ChatFormatting.GRAY));}
 }

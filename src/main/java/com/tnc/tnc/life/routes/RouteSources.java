@@ -5,7 +5,7 @@ import net.minecraft.server.level.ServerLevel;
 import com.tnc.tnc.life.botanical.*;
 /** One shared per-root balance, saved with the root, so collectors cannot multiply output. */
 public final class RouteSources {
-    public static int draw(ServerLevel l,BlockPos p,UUID owner,int maximum){var raw=l.getBlockEntity(p);
+    public static int draw(ServerLevel l,BlockPos p,UUID owner,int maximum){if(!com.tnc.tnc.arcana.ArcanaRealms.powered(l,p))return 0;var raw=l.getBlockEntity(p);
         if(raw instanceof RoutePlantEntity plant){if(!owner.equals(plant.owner)||!MagicSoilBlock.growing(l,p)||plant.growth<18000)return 0;var data=plant.getPersistentData();long sec=l.getGameTime()/20;if(data.getLong("DrawSecond")!=sec){data.putLong("DrawSecond",sec);data.putInt("DrawUsed",0);}int limit=plant.kind()==NewPlantKind.SHADOW||plant.kind()==NewPlantKind.PAGE?4:(int)Math.ceil(plant.kind().rate);limit=(int)Math.ceil(limit*com.tnc.tnc.arcana.ArcanaEcology.factor(l,plant));int got=plant.draw(Math.min(maximum,Math.max(0,limit-data.getInt("DrawUsed"))));data.putInt("DrawUsed",data.getInt("DrawUsed")+got);return got;}
         if(raw instanceof com.tnc.tnc.life.ecology.VerdantVeinBlockEntity plant){return owner.equals(plant.manaOwner())&&MagicSoilBlock.growing(l,p)?plant.drawMana(maximum):0;}
         if(raw instanceof BotanicalPlantEntity plant){if(!owner.equals(plant.owner)||plant.growth<plant.species().firstTicks||!plant.reason(l).isEmpty())return 0;var t=plant.getPersistentData();long sec=l.getGameTime()/20;if(t.getLong("ManaSecond")!=sec){t.putLong("ManaSecond",sec);double generated=t.getInt("ManaBuffer")>=120?0:switch(plant.species()){

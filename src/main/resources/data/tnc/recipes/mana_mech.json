@@ -6,22 +6,22 @@
       "count": 8
     },
     {
-      "item": "tnc:radiant_gold",
-      "count": 12
+      "item": "minecraft:netherite_ingot",
+      "count": 2
+    },
+    {
+      "item": "minecraft:blaze_rod",
+      "count": 4
     },
     {
       "item": "tnc:mist_cloth",
       "count": 8
-    },
-    {
-      "item": "tnc:radiant_basin",
-      "count": 1
     }
   ],
   "result": {
     "item": "tnc:mana_mech"
   },
-  "mana": 1800,
-  "work_ticks": 960,
+  "mana": 1600,
+  "work_ticks": 800,
   "category": "workshop"
 }

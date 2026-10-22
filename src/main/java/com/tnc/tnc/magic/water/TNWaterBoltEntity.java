@@ -27,7 +27,7 @@ public final class TNWaterBoltEntity extends Projectile {
     public TNWaterBoltEntity(EntityType<? extends TNWaterBoltEntity> type,Level level) { super(type,level); setNoGravity(true); }
     public void configure(LivingEntity owner,int tier,Vec3 at,Vec3 velocity) {
         setOwner(owner); entityData.set(TIER,tier); setPos(at); setDeltaMovement(velocity);
-        damage=WaterSpellRules.damage(tier)*WaterSpellRules.power(owner); remaining=owner instanceof com.tnc.tnc.boss.TNWaterLeviathanEntity ? 96 : WaterSpellRules.range(tier);
+        damage=WaterSpellRules.damage(tier)*WaterSpellRules.power(owner); remaining=owner instanceof com.tnc.tnc.boss.TNWaterLeviathanEntity ? 96 : WaterSpellRules.range(tier)*com.tnc.tnc.arcana.ArcanaBeacon.scale(owner);
     }
     public int tier() { return entityData.get(TIER); }
     @Override protected void defineSynchedData() { entityData.define(TIER,1);entityData.define(SPELL_SCALE,1F); }

@@ -3,7 +3,7 @@ package com.tnc.tnc.arcana;
 public final class RitualRules {
     public static final int COLD=360,HOT=620,DANGER=800,PERFECT_TICKS=30;
     public enum Quality {
-        CLOUDY(.3,25),STANDARD(1,10),MASTER(2,2),WASTE(0,0);
+        CLOUDY(.3,25),STANDARD(1,10),MASTER(2,0),WASTE(0,0);
         public final double potency;public final int toxicity;
         Quality(double potency,int toxicity){this.potency=potency;this.toxicity=toxicity;}
     }
@@ -13,7 +13,7 @@ public final class RitualRules {
         return sync>=60?Quality.STANDARD:Quality.CLOUDY;
     }
     public static boolean sweet(int t){return t>=COLD&&t<=HOT;}
-    public static int temperatureColor(int t){return t<COLD?0x315a9c:t<=HOT?0x53f7a9:t<DANGER?0xffb63c:0xff303e;}
+    public static int temperatureColor(int t){return t<COLD?0x315a9c:t<=HOT?0x53f7a9:0xff303e;}
     public static int pressureStage(double pressure){return pressure<=40?0:pressure<=75?1:pressure<100?2:3;}
     public static double pressure(double old,int acceptedPerSecond,boolean formed){
         if(!formed)return Math.max(0,old-.15);

@@ -32,6 +32,7 @@ public final class BotanicalBlock extends BushBlock implements EntityBlock {
     public static final net.minecraft.world.level.block.state.properties.BooleanProperty WILD=net.minecraft.world.level.block.state.properties.BooleanProperty.create("wild");
     public final BotanicalSpecies species;
     public BotanicalBlock(BotanicalSpecies species){super(BlockBehaviour.Properties.copy(Blocks.FERN).offsetType(BlockBehaviour.OffsetType.NONE).noCollission().noOcclusion().lightLevel(s->s.getValue(AGE)==3&&(species==BotanicalSpecies.STAR_DEW||species==BotanicalSpecies.STAR_REST||species==BotanicalSpecies.WISH_PUFF)?3:0));this.species=species;registerDefaultState(stateDefinition.any().setValue(AGE,0).setValue(MODE,0).setValue(WILD,false));}
+    @Override public BlockState getStateForPlacement(net.minecraft.world.item.context.BlockPlaceContext c){if(c.getLevel() instanceof net.minecraft.server.level.ServerLevel l&&!com.tnc.tnc.arcana.ArcanaRealms.powered(l,c.getClickedPos()))return null;return super.getStateForPlacement(c);}
     @Override public RenderShape getRenderShape(BlockState state){return RenderShape.ENTITYBLOCK_ANIMATED;}
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block,BlockState> b){b.add(AGE,MODE,WILD);}
     @Override public VoxelShape getShape(BlockState s,net.minecraft.world.level.BlockGetter l,BlockPos p,CollisionContext c){return species==BotanicalSpecies.MIRROR_LOTUS?Block.box(1,0,1,15,6,15):Block.box(2,0,2,14,5+s.getValue(AGE)*3,14);}

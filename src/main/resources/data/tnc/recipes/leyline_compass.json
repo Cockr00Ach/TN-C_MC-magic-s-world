@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "tnc:spirit_iron"
+    },
+    {
+      "item": "tnc:spirit_iron"
+    },
+    {
+      "item": "tnc:spirit_iron"
+    },
+    {
+      "item": "minecraft:compass"
+    },
+    {
+      "item": "minecraft:amethyst_shard"
+    },
+    {
+      "item": "minecraft:amethyst_shard"
+    }
+  ],
+  "result": {
+    "item": "tnc:leyline_compass",
+    "count": 1
+  }
+}

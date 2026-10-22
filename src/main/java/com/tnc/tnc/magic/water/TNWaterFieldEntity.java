@@ -38,6 +38,7 @@ public final class TNWaterFieldEntity extends Entity {
     public Vec3 skySealCenter(){return position().add(0,skySealHeight(),0);}
     public int swordImpactIndex(int age){int index=SeaGodSwordRules.impactIndex(age);return index>=swordCount()?-1:index;}
     private boolean swordCue(int age,int first){return bossCrypt()?age==first:SeaGodSwordRules.cue(age,first);}
+    private static final EntityDataAccessor<Float> SCALE=SynchedEntityData.defineId(TNWaterFieldEntity.class,EntityDataSerializers.FLOAT);
     private UUID owner,anchor;
     private TNWaterSpellEntity bindingBeam;
     private int lastSwordImpact=-1;
@@ -46,11 +47,11 @@ public final class TNWaterFieldEntity extends Entity {
     public TNWaterFieldEntity(EntityType<? extends TNWaterFieldEntity> type,Level level){super(type,level);noPhysics=true;setNoGravity(true);}
     public int kind(){return entityData.get(KIND);} public int tier(){return entityData.get(TIER);}public int age(){return entityData.get(AGE);}
     public Vec3 direction(){return Vec3.directionFromRotation(entityData.get(PITCH),entityData.get(YAW));}
-    public double radius(){return WaterSpellRules.fieldRadius(kind(),tier());}
+    public double radius(){return WaterSpellRules.fieldRadius(kind(),tier())*entityData.get(SCALE);}
     public boolean isEmitter(){return entityData.get(EMITTER);}
     public float roll(){return entityData.get(ROLL);}
     public int life(){return entityData.get(BOSS_CAST) && kind()==2 && tier()==2 ? WaterSpellRules.charge(5)+200 : bossCrypt()?200:isEmitter()?WaterSpellRules.SLASH_CHANNEL_TICKS:WaterSpellRules.fieldLife(kind(),tier());}
-    public double height(){return WaterSpellRules.fieldHeight(kind(),tier());}
+    public double height(){return WaterSpellRules.fieldHeight(kind(),tier())*entityData.get(SCALE);}
     public Vec3 waveCenter(double age){return kind()==1 && tier()>1 && tier()<5?position().add(direction().scale(age*(tier()==3?1.35:tier()==4?.5:.8))):position();}
     public static boolean cast(ServerPlayer player,ResourceLocation spell) {
         if(!spell.getNamespace().equals("tnc"))return false;
@@ -76,7 +77,7 @@ public final class TNWaterFieldEntity extends Entity {
                     if(player.getUUID().equals(old.owner)&&old.kind()==1&&old.tier()==3)old.discard();
                 var emitter=TNOrbEntities.WATER_FIELD.get().create(player.level());
                 if(emitter!=null) {
-                    emitter.owner=player.getUUID();emitter.setPos(at);emitter.entityData.set(TIER,3);
+                    emitter.entityData.set(SCALE,com.tnc.tnc.arcana.ArcanaBeacon.scale(player));emitter.owner=player.getUUID();emitter.setPos(at);emitter.entityData.set(TIER,3);
                     emitter.entityData.set(EMITTER,true);emitter.entityData.set(YAW,player.getYRot());emitter.entityData.set(PITCH,player.getXRot());player.level().addFreshEntity(emitter);
                     emitter.emitSlash(player,0);
                 }
@@ -89,7 +90,7 @@ public final class TNWaterFieldEntity extends Entity {
             int count=directions.size();
             for(int i=0;i<count;i++) {
                 var e=TNOrbEntities.WATER_FIELD.get().create(player.level());if(e==null)continue;
-                e.owner=player.getUUID();e.anchor=target==null?null:target.getUUID();e.setPos(at);
+                e.entityData.set(SCALE,com.tnc.tnc.arcana.ArcanaBeacon.scale(player));e.owner=player.getUUID();e.anchor=target==null?null:target.getUUID();e.setPos(at);
                 Vec3 direction=directions.get(i);
                 e.entityData.set(KIND,k+1);e.entityData.set(TIER,t+1);
                 e.entityData.set(YAW,(float)Math.toDegrees(Math.atan2(-direction.x,direction.z)));
@@ -172,7 +173,7 @@ public final class TNWaterFieldEntity extends Entity {
         }
         return closest;
     }
-    @Override protected void defineSynchedData(){entityData.define(BOSS_CAST,false);entityData.define(SKY_HEIGHT,116F);entityData.define(KIND,1);entityData.define(TIER,1);entityData.define(AGE,0);entityData.define(YAW,0F);entityData.define(PITCH,0F);entityData.define(EMITTER,false);entityData.define(ROLL,0F);}
+    @Override protected void defineSynchedData(){entityData.define(SCALE,1F);entityData.define(BOSS_CAST,false);entityData.define(SKY_HEIGHT,116F);entityData.define(KIND,1);entityData.define(TIER,1);entityData.define(AGE,0);entityData.define(YAW,0F);entityData.define(PITCH,0F);entityData.define(EMITTER,false);entityData.define(ROLL,0F);}
     @Override public void tick() {
         super.tick();
         if(level().isClientSide) { clientRain(); return; }
@@ -236,7 +237,7 @@ public final class TNWaterFieldEntity extends Entity {
         if(index>=WaterSpellRules.SLASH_COUNT)return;
         Vec3 direction=player.getLookAngle().normalize();
         var front=TNOrbEntities.WATER_FIELD.get().create(level());if(front==null)return;
-        front.owner=owner;front.setPos(player.getEyePosition().add(direction.scale(.65)));
+        front.entityData.set(SCALE,entityData.get(SCALE));if(entityData.get(SCALE)>1)front.getPersistentData().putFloat("BeaconScale",entityData.get(SCALE));front.owner=owner;front.setPos(player.getEyePosition().add(direction.scale(.65)));
         front.entityData.set(TIER,3);
         front.entityData.set(YAW,(float)Math.toDegrees(Math.atan2(-direction.x,direction.z)));
         front.entityData.set(PITCH,(float)-Math.toDegrees(Math.asin(direction.y)));

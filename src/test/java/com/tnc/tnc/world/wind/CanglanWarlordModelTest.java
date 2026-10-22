@@ -26,6 +26,66 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * by spawning the boss and watching it swing a sword it is not holding.
  */
 class CanglanWarlordModelTest {
+    @Test
+    void rendererSeatsTheHandleRatherThanTheBladeRootAtThePalm() throws Exception {
+        String renderer=Files.readString(Path.of("src/main/java/com/tnc/tnc/world/wind/client/CanglanWarlordRenderer.java"));
+        for(String form:new String[]{"SWORD","SPEAR"}) {
+            var scalePattern=java.util.regex.Pattern.compile(form+"_SCALE = ([0-9.]+)F").matcher(renderer);
+            var gripPattern=java.util.regex.Pattern.compile(form+"_GRIP = ([0-9.]+)F").matcher(renderer);
+            assertTrue(scalePattern.find());assertTrue(gripPattern.find());
+            double scale=Double.parseDouble(scalePattern.group(1)),offset=Double.parseDouble(gripPattern.group(1));
+            double handleZ=form.equals("SWORD")?-.8:0;
+            assertEquals(0,offset+scale*(handleZ/16-.5),.00001,form+" handle centre misses palm");
+        }
+    }
+    @Test
+    void animationsNeverContainAliasedStartingKeyframes() throws Exception {
+        for(var animation:clips().entrySet())for(var bone:animation.getValue().getAsJsonObject().getAsJsonObject("bones").entrySet()) {
+            for(var channel:bone.getValue().getAsJsonObject().entrySet()) {
+                var seen=new java.util.HashSet<Double>();
+                for(String key:channel.getValue().getAsJsonObject().keySet())assertTrue(seen.add(Double.parseDouble(key)),animation.getKey()+" aliases time "+key);
+            }
+        }
+    }
+    @Test
+    void shieldIsRemovedAndThreeEchoStancesAreDistinct() throws Exception {
+        assertTrue(bones().get("shield").getAsJsonArray("cubes").isEmpty());
+        var animations=clips();
+        assertFalse(animations.get("echo_guard").equals(animations.get("echo_lunge")));
+        assertFalse(animations.get("echo_lunge").equals(animations.get("echo_recover")));
+    }
+    @Test
+    void warGodMovesCompleteTheirActualAnimationBeforeRecovery() throws Exception {
+        JsonObject animations=clips();
+        for(int move:new int[]{1,5,9,10,11,12}) {
+            String clip=CanglanWarGodRules.animation(move);
+            assertEquals(CanglanWarGodRules.duration(move),
+                    Math.round(animations.getAsJsonObject(clip).get("animation_length").getAsDouble()*20),clip);
+        }
+    }
+    @Test
+    void authoredHoldAndNewAnimationsKeepTheirOriginalTracks() throws Exception {
+        Path source=Path.of("model-source/canglan_warlord/user-animation-20261022");
+        JsonObject model=GSON.fromJson(Files.readString(source.resolve("canglan_warlord_with_spear.editor.geo.json")),JsonObject.class)
+                .getAsJsonArray("minecraft:geometry").get(0).getAsJsonObject();
+        for(var bone:model.getAsJsonArray("bones")) {
+            var b=bone.getAsJsonObject();String name=b.get("name").getAsString();
+            if(!name.startsWith("editor_spear_") && b.has("rotation"))assertEquals(b.get("rotation"),bones().get(name).get("rotation"),name);
+        }
+        JsonObject original=GSON.fromJson(Files.readString(source.resolve("canglan_warlord_with_spear.editor.animationnew.json")),JsonObject.class).getAsJsonObject("animations");
+        for(var pair:Map.of("突刺","thrust","横扫","sweep","释放武器链t4t5","sky_arsenal").entrySet()) {
+            JsonObject expected=original.getAsJsonObject(pair.getKey()).deepCopy();expected.addProperty("loop",false);
+            if(pair.getValue().equals("thrust"))expected.getAsJsonObject("bones").getAsJsonObject("root").remove("position");
+            assertEquals(expected,clips().get(pair.getValue()),pair.getKey()+" authored motion was changed");
+        }
+        double previous=0;
+        for(int tick=0;tick<=40;tick++) {
+            double distance=CanglanWarGodRules.thrustDistance(tick);
+            assertTrue(distance>=previous&&distance<=30.75001);previous=distance;
+        }
+        assertEquals(30.75,CanglanWarGodRules.thrustDistance(20),.00001);
+        assertFalse(clips().getAsJsonObject("thrust").getAsJsonObject("bones").getAsJsonObject("root").has("position"),"Root movement must belong to entity collision");
+    }
     private static final Path ROOT = Path.of("src/main/resources/assets/tnc");
     private static final Gson GSON = new Gson();
 
@@ -81,7 +141,7 @@ class CanglanWarlordModelTest {
         for (var entry : clips.entrySet()) {
             JsonObject animation = entry.getValue().getAsJsonObject();
             boolean loop = animation.has("loop") && animation.get("loop").getAsBoolean();
-            boolean shouldLoop = Set.of("idle", "walk").contains(entry.getKey());
+            boolean shouldLoop = Set.of("idle", "walk", "phantom_idle", "echo_guard", "echo_lunge", "echo_recover").contains(entry.getKey());
             assertEquals(shouldLoop, loop, entry.getKey() + " 的循环标记不对");
         }
     }
@@ -173,7 +233,7 @@ class CanglanWarlordModelTest {
                 maxX = Math.max(maxX, origin.get(0).getAsDouble() + size.get(0).getAsDouble());
             }
         }
-        assertTrue(cubes >= 400, "方块预算过低：" + cubes);
+        assertTrue(cubes >= 320, "移除盾牌后仍应保留完整分层盔甲：" + cubes);
         // 108 units tall = 6.75 blocks; a little slack for rotated crest tips
         double height = maxY - minY;
         assertTrue(height >= 100.0D && height <= 118.0D,

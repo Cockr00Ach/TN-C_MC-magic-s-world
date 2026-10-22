@@ -27,7 +27,7 @@ public final class ManaSightParticles {
     private static ClientLevel effectLevel;private static long lastPrune=Long.MIN_VALUE;
     private static SpriteSet sprites;
     private static ClientLevel level;
-    private static int ticks, cursor, emitted;
+    private static boolean wasDead;private static int ticks, cursor, emitted;
     private static float fade;
 
     @SubscribeEvent public static void register(RegisterParticleProvidersEvent event){
@@ -56,6 +56,7 @@ public final class ManaSightParticles {
         return ((int)(r+(255-r)*blend)<<16)|((int)(g+(255-g)*blend)<<8)|(int)(b+(255-b)*blend);
     }
     private static void add(Vec3 at,Vec3 target,int color,int texture,int motion,float size,float opacity,int lifetime,double phase){
+        if((motion==0||motion==1)&&!com.tnc.tnc.arcana.client.ManaRealmRenderer.naturalAt(at))return;
         if(sprites==null||count()>=limit()||!level.hasChunkAt(BlockPos.containing(at))||level.getBlockState(BlockPos.containing(at)).isSolidRender(level,BlockPos.containing(at)))return;
         var p=new ManaSightParticle(level,at,target,tint(color),texture,motion,size,opacity,lifetime,phase,sprites);
         OWNED.add(p);Minecraft.getInstance().particleEngine.add(p);
@@ -64,9 +65,9 @@ public final class ManaSightParticles {
         if(level!=world){clear();level=world;}fade=entrance;while(OWNED.size()+EFFECTS.size()>limit()){var list=OWNED.isEmpty()?EFFECTS:OWNED;list.remove(0).remove();}
         OWNED.removeIf(p->{boolean expired=!p.isAlive()||world.getGameTime()-p.born>200||p.distanceToSqr(eye)>110*110;if(expired)p.remove();return expired;});
         if(sprites==null)return;
-        int quality=limit(), fill=ticks++==0?1800:0;double reach=range()-6;
+        boolean dead=com.tnc.tnc.arcana.client.ArcanaClient.deadMana;int quality=limit(), fill=ticks++==0?1800:0;double reach=range()-6;
         // Reserve a quarter of the budget for real, server-confirmed interaction.
-        int ambientBudget=Math.max(0,quality*3/4-EFFECTS.size());
+        int ambientBudget=dead?0:Math.max(0,quality*3/4-EFFECTS.size());if(dead&&!wasDead){OWNED.forEach(ManaSightParticle::remove);OWNED.clear();}wasDead=dead;
         for(int i=0;i<fill+85&&OWNED.size()<ambientBudget;i++){
             double a=unit()*Math.PI*2,r=3+Math.sqrt(unit())*reach;
             Vec3 at=eye.add(Math.cos(a)*r,-10+unit()*48,Math.sin(a)*r);

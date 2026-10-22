@@ -13,5 +13,5 @@ public final class RouteConnections {
   if(l.getBlockState(a).getBlock() instanceof RouteWireBlock&&!l.getBlockState(a).getValue(RouteWireBlock.ARMS.get(direction)))return false;
   return !(l.getBlockState(b).getBlock() instanceof RouteWireBlock)||l.getBlockState(b).getValue(RouteWireBlock.ARMS.get(direction.getOpposite()));
  }
- public static boolean relay(RouteNodeEntity n){return n.kind().wire()||n.kind().supply();}
+ public static boolean relay(RouteNodeEntity n){return n.kind().wire()||n.kind().supply()&&n.kind()!=RouteKind.PHASE_SHIFTER;}
 }

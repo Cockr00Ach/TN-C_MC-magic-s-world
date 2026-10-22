@@ -69,7 +69,7 @@ public final class TNSpellClientVisuals {
                 return;
             }
             net.spell_engine.internals.SpellCooldownManager manager = caster.getCooldownManager();
-            manager.update();
+            manager.update();if(minecraft.player.hasEffect(com.tnc.tnc.arcana.ArcanaMealEffects.MEALS[0])&&minecraft.player.tickCount%5==0)manager.update();
             // ★ 实测日志（作者 2026-09-29："释放一遍之后没有第二遍了"）：每 2 秒把我们法术的
             //   客户端冷却进度打一行 —— "进度在下降" ⇒ 替引擎 tick 生效了 ✓；
             //   "一直 1.00" ⇒ 还没生效 ✗（那就继续往下查别的取消条件）。

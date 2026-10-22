@@ -170,7 +170,7 @@ public final class SpellEngineManaHook {
             }
 
             // 真正放出去了：数值怎么变交给纯逻辑层（ManaCharge），这里只负责提示与同步
-            ManaCharge.Result result = ManaCharge.applyCost(data,cost);
+            boolean sponsored=com.tnc.tnc.arcana.ArcanaBeacon.pay(player,entry,cost);ManaCharge.Result result = sponsored?new ManaCharge.Result(ManaCharge.Outcome.DEDUCTED,data.getMana(),data.getMana(),0,0):ManaCharge.applyCost(data,cost);
             if (result.outcome() == ManaCharge.Outcome.DEDUCTED) {
                 com.tnc.tnc.adventure.AdventureService.milestone(player,"cast");
             }
@@ -178,7 +178,7 @@ public final class SpellEngineManaHook {
             // 做法是"扣完之后返还一半"，而不是去改 ManaCharge 的签名 ——
             // 那边只有数据、拿不到玩家，改签名会牵动自检里 4 处调用，
             // 而且"减半"和"返还一半"在数值上完全等价。
-            if (result.outcome() == ManaCharge.Outcome.DEDUCTED
+            if (!sponsored && result.outcome() == ManaCharge.Outcome.DEDUCTED
                     && com.tnc.tnc.magic.TNWindMechanics.WIND_GOD.isPresent()
                     && player.hasEffect(com.tnc.tnc.magic.TNWindMechanics.WIND_GOD.get())) {
                 int fullCost = cost;

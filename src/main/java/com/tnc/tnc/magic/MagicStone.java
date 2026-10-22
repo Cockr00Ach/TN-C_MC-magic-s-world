@@ -247,7 +247,7 @@ public class MagicStone {
             }
         }
         get(serverPlayer).ifPresent(data -> {
-            if (data.getMana() < data.getMaxMana()) {
+            if (com.tnc.tnc.arcana.ArcanaRealms.powered(serverPlayer.serverLevel(),serverPlayer.blockPosition()) && data.getMana() < data.getMaxMana()) {
                 int bonus = com.tnc.tnc.equipment.MageGear.regen(serverPlayer);
                 int gearRegen = (int)(((long)serverPlayer.tickCount*bonus/40)-((long)(serverPlayer.tickCount-interval)*bonus/40));
                 int regen = Config.manaRegenFor(data.getMaxMana())+gearRegen;
@@ -316,6 +316,7 @@ public class MagicStone {
     @Nullable
     public static MagicStoneData getOrNull(Player player) {
         var data=get(player).orElse(null);
+        if(data!=null&&player instanceof ServerPlayer p)data.setManaBlocked(p.hasEffect(com.tnc.tnc.arcana.ArcanaMealEffects.NO_MAGIC));
         if(data!=null&&player instanceof ServerPlayer p)data.setManaFreedom(com.tnc.tnc.arcana.ArcanaPhysiology.data(p).getLong("MealSunUntil")>com.tnc.tnc.arcana.ArcanaPhysiology.now(p));
         return data;
     }

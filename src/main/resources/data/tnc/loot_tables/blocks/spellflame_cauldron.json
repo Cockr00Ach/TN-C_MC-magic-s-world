@@ -48,16 +48,6 @@
                   "op": "replace"
                 },
                 {
-                  "source": "Stirs",
-                  "target": "BlockEntityTag.Stirs",
-                  "op": "replace"
-                },
-                {
-                  "source": "StirredAt",
-                  "target": "BlockEntityTag.StirredAt",
-                  "op": "replace"
-                },
-                {
                   "source": "Ready",
                   "target": "BlockEntityTag.Ready",
                   "op": "replace"
@@ -111,6 +101,21 @@
                   "source": "HeatedAt",
                   "target": "BlockEntityTag.HeatedAt",
                   "op": "replace"
+                },
+                {
+                  "source": "Sealed",
+                  "target": "BlockEntityTag.Sealed",
+                  "op": "replace"
+                },
+                {
+                  "source": "CookTicks",
+                  "target": "BlockEntityTag.CookTicks",
+                  "op": "replace"
+                },
+                {
+                  "source": "FrozenJob",
+                  "target": "BlockEntityTag.FrozenJob",
+                  "op": "replace"
                 }
               ]
             }
@@ -120,6 +125,13 @@
       "conditions": [
         {
           "condition": "minecraft:survives_explosion"
+        },
+        {
+          "condition": "minecraft:block_state_property",
+          "block": "tnc:spellflame_cauldron",
+          "properties": {
+            "part": "0"
+          }
         }
       ]
     }

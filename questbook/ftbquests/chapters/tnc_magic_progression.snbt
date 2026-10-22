@@ -1,0 +1,601 @@
+{
+  "id": "662EE66DA1916AAF",
+  "filename": "tnc_magic_progression",
+  "title": "&b&l魔导纪行 · T0—T4",
+  "icon": "tnc:elemental_phase_shifter",
+  "group": "544E434C49464531",
+  "order_index": 12,
+  "default_hide_dependency_lines": false,
+  "default_quest_shape": "circle",
+  "images": [],
+  "quest_links": [],
+  "quests": [
+    {
+      "id": "11F5CD04562ED4DD",
+      "title": "&b&lT0 · 从自身到天地",
+      "icon": "tnc:mana_infuser",
+      "x": 0,
+      "y": 0,
+      "description": [
+        "本章按总纲分T0—T4。M是储量，M/s是产能或带宽；同株、同兽共享真实余额。",
+        "F8观察供魔、药锅、餐盘和异界绿洲。亲手种植与喂养为主，自动农具仅可选。"
+      ],
+      "dependencies": [],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "6012FFB449C11934",
+          "type": "checkmark"
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "4C6A007C0496ED2A",
+      "title": "&b先装满第一瓶",
+      "icon": "tnc:mana_bottle",
+      "x": 0,
+      "y": 2,
+      "description": [
+        "注能台500M / 8M/s。空手保持右键每秒注5M，潜行右键开面板。",
+        "左一格放玻璃瓶，100M成满瓶；铁桶需400M，得到可流动的魔力。"
+      ],
+      "dependencies": [
+        "11F5CD04562ED4DD"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "4D3F6622AEA3CC7C",
+          "type": "item",
+          "item": "tnc:mana_bottle",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "428ED58716999D06",
+      "title": "&b九乘九的第一片魔圃",
+      "icon": "tnc:magic_soil_source",
+      "x": 0,
+      "y": 4,
+      "description": [
+        "八泥土与一满魔力瓶合成土源；放下十秒转化同高9×9泥土。",
+        "魔植直接种在土源或魔法土，无需锄地。八格内放流动魔力，观察湿润蓝绿微光。"
+      ],
+      "dependencies": [
+        "4C6A007C0496ED2A"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "3B37FA3505C70207",
+          "type": "item",
+          "item": "tnc:magic_soil_source",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "409C98E8D6266D03",
+      "title": "&6T1 · 手注首炉，打破启动循环",
+      "icon": "tnc:magic_forge",
+      "x": 0,
+      "y": 6,
+      "description": [
+        "搭3×3×3：底层9砖，中层7砖＋炉口＋炉核，顶层8砖＋排烟顶。",
+        "第一炉无需集露网络！铁锭入炉，玩家手动注入60M，6秒产灵纹铁；再制造采集器和晶纤。"
+      ],
+      "dependencies": [
+        "428ED58716999D06"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "23833E353914DB26",
+          "type": "item",
+          "item": "tnc:magic_forge",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "58952A7A480DC654",
+      "title": "&b第一条守恒网络",
+      "icon": "tnc:mana_thread",
+      "x": 0,
+      "y": 8,
+      "description": [
+        "成熟产魔植物旁一格放集露盏（100M/4M/s），晶纤8M/s，浅魔池1000M/8M/s。",
+        "晶纤可转弯升降，普通双端。整条路径取最窄带宽；检流尺看缺魔或断路。",
+        "守望铃与魔导灯验证第一条网络；基础池永不过载。"
+      ],
+      "dependencies": [
+        "409C98E8D6266D03"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "0F5803B225F763E0",
+          "type": "item",
+          "item": "tnc:mana_thread",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "4640AD2135F82E6A",
+      "title": "&a提纯，不只是堆材料",
+      "icon": "tnc:mana_extractor",
+      "x": -3,
+      "y": 10,
+      "description": [
+        "200M/8M/s。GUI左一放原料，右侧取出；一份15M，需3秒。",
+        "根类产蓄魔根芯，叶花果产纯净药粉，纤维产草木魔力丝；巨型魔果切八份原产物。"
+      ],
+      "dependencies": [
+        "58952A7A480DC654"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "66D446E8FA028BA8",
+          "type": "item",
+          "item": "tnc:mana_extractor",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "04A21980E7D135E1",
+      "title": "&c控温：火与水的两只手",
+      "icon": "tnc:elemental_igniter",
+      "x": -3,
+      "y": 12,
+      "description": [
+        "200M/8M/s，贴四方药锅放置。空手左拍升60温，右拍降60温；每次扣5M，间隔半秒。",
+        "这是魔法火流；打火石、普通火源均不能点锅。可以继续使用自己的火、水魔法。"
+      ],
+      "dependencies": [
+        "4640AD2135F82E6A"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "0C2480361B5BCF90",
+          "type": "item",
+          "item": "tnc:elemental_igniter",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "70B77B9125AD3018",
+      "title": "&d看漩涡，决定封盖的一刻",
+      "icon": "tnc:spellflame_cauldron",
+      "x": -3,
+      "y": 14,
+      "description": [
+        "四格药锅倒水，投三味药；F8蓝冷、绿360—620、红热。",
+        "自动漩涡融合；100%闪星1.5秒内封盖为大师，淤积0。标准10，次品25。",
+        "四格封魔盖锁定品质，保持绿温续煮6秒，玻璃瓶装取。全部药方详见魔药章节。"
+      ],
+      "dependencies": [
+        "04A21980E7D135E1"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "28DA1BD8EC5367CC",
+          "type": "item",
+          "item": "tnc:spellflame_cauldron",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "7A1E17EC190BA4F5",
+      "title": "&6沿地脉去发现",
+      "icon": "tnc:leyline_compass",
+      "x": 3,
+      "y": 16,
+      "description": [
+        "400M/8M/s。右键耗200M，F8金色指引30秒，范围500格。",
+        "只指向已生成且尚未探索的真实稀有魔植或地下城入口；附近没有目标不扣魔力。"
+      ],
+      "dependencies": [
+        "58952A7A480DC654"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "545569F73C0C17AB",
+          "type": "item",
+          "item": "tnc:leyline_compass",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "705CBE6A8D74E863",
+      "title": "&6T2 · 曜纹生态",
+      "icon": "tnc:radiant_gold",
+      "x": 0,
+      "y": 18,
+      "description": [
+        "金锭＋180M炼曜纹金；霞金晶纤32M/s、曜纹储池8000M。",
+        "捕获原创异兽、牧务杖设9×9窝，亲手喂食；与对应成熟魔植近六格，双方产能＋20%。"
+      ],
+      "dependencies": [
+        "70B77B9125AD3018",
+        "7A1E17EC190BA4F5"
+      ],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "516ED6058998F391",
+          "type": "item",
+          "item": "tnc:radiant_gold",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "0CF85AEEFF1E88D4",
+      "title": "&a让照料结成馈赠",
+      "icon": "tnc:beast_resonance_pedestal",
+      "x": -3,
+      "y": 20,
+      "description": [
+        "400M/16M/s。置于集息器或色靶旁，亲喂后实际抽取异兽魔力才可凝宝。",
+        "镜瓣夜蛾凝镜鳞、曳彩角羚凝角片、星绒兽凝柔茸、鸣线蜥凝雷余晶。",
+        "只收同主人真实喂养波长，每次照料最多一份；输出格留空。"
+      ],
+      "dependencies": [
+        "705CBE6A8D74E863"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "3C98F11A762EC9CB",
+          "type": "item",
+          "item": "tnc:beast_resonance_pedestal",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "3ED77FE6D813A988",
+      "title": "&d用药雾点化万物",
+      "icon": "tnc:elixir_fumigator",
+      "x": -3,
+      "y": 22,
+      "description": [
+        "1000M/32M/s，左一放魔药，附近3×3熏蒸。每次40M、10秒，一药一目标，返空瓶。",
+        "扭曲药雾80%把水生魔植变蒸气魔莲；巨人药使魔植巨果化，分裂药洗礼幼兽精英。",
+        "坚肤药预处理金锭或钻石；这种实物矿坯入锻炉时该炉配方耗魔减半。"
+      ],
+      "dependencies": [
+        "0CF85AEEFF1E88D4"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "64B426BD6F7B5662",
+          "type": "item",
+          "item": "tnc:elixir_fumigator",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "19EE11A9EB8F9E0A",
+      "title": "&e五行药膳 · 日常自由配膳",
+      "icon": "tnc:carved_mana_platter",
+      "x": 3,
+      "y": 24,
+      "description": [
+        "只需2—9格，无需每次摆满！F8看食材红火、蓝水、青风、黄土、暖金甘味。",
+        "上下左右相邻：风火加冷却、火土加甲、土甘加血、甘水排毒回蓝、水风轻身水行。",
+        "水火、风土直接邻接会反胃禁魔。甘味居中可桥接，获得10分钟百味调和。",
+        "九格齐五类、零冲突、至少六生和线：3分钟微型太阳，法杖零耗，邻近自家机器供魔＋25%加速。"
+      ],
+      "dependencies": [
+        "705CBE6A8D74E863"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "26AF11D43BB93F9D",
+          "type": "item",
+          "item": "tnc:carved_mana_platter",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "41A341B36CDC31D8",
+      "title": "&b有冒险，也要回家泡澡",
+      "icon": "tnc:geothermal_mana_core",
+      "x": 3,
+      "y": 26,
+      "description": [
+        "接魔力、投舒缓浴盐，五格内源水成为温泉。每秒1M排2淤积。",
+        "排空获1世界日经脉通畅，自然回蓝＋50%，魔力视不涨精神压力。"
+      ],
+      "dependencies": [
+        "19EE11A9EB8F9E0A"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "7F591C484283BC5B",
+          "type": "item",
+          "item": "tnc:geothermal_mana_core",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "68C3897E286AF730",
+      "title": "&bT3 · 向星空借力",
+      "icon": "tnc:star_marrow",
+      "x": 0,
+      "y": 28,
+      "description": [
+        "钻石＋600M炼星髓晶；虹星晶纤128M/s，星髓储池32000M。",
+        "日镜露天高于海面16格，白天24M/s；月盘夜间16M/s乘月相0.2—3。观星台预报极光。"
+      ],
+      "dependencies": [
+        "3ED77FE6D813A988",
+        "19EE11A9EB8F9E0A"
+      ],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "70BE1A6F4ACA50E1",
+          "type": "item",
+          "item": "tnc:star_marrow",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "70A5E609B314C194",
+      "title": "&d天体魔力，折射为七系",
+      "icon": "tnc:elemental_phase_shifter",
+      "x": -3,
+      "y": 30,
+      "description": [
+        "4000M/256M/s，只把太阳／太阴魔力1:1转相，信物不消耗，任意更换。",
+        "暖椒火；雨书莓水；雷冠尖雷；舞瓣风；岩纹叶土；影时瓣暗；曦蜜或荧石光。",
+        "用晶纤送出有颜色的实际元素魔力；普通未分类魔力不能凭空转化。"
+      ],
+      "dependencies": [
+        "68C3897E286AF730"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "0AD16665D00122EC",
+          "type": "item",
+          "item": "tnc:elemental_phase_shifter",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "50B7B41D6D3647A3",
+      "title": "&6王杖，只接受同源滋养",
+      "icon": "tnc:spirit_nurture_altar",
+      "x": -3,
+      "y": 32,
+      "description": [
+        "右键插王级及以上法杖。只收对应元素，最高256M/s，累计10000M。",
+        "满进度后持下界之星、龙息或真实Boss突破核右键，耗一颗觉醒元素神技。",
+        "异属性拒入并冒黑烟；不投喂魔药。潜行空手可取回法杖，温养留在实物上。"
+      ],
+      "dependencies": [
+        "70A5E609B314C194"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "06CA7ACDA5BE8C27",
+          "type": "item",
+          "item": "tnc:spirit_nurture_altar",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "4D9427DC88C5A9AB",
+      "title": "&3怪物工坊与天路",
+      "icon": "tnc:ecology_restraint_cage",
+      "x": 3,
+      "y": 34,
+      "description": [
+        "缩水药抓回残血非Boss怪，拘束笼必须持续供魔。史莱姆踏板、火怪挑衅吸魔、暗影折光各循习性。",
+        "标记杖先点发射环再逐点中继，每段≤20格，≤16段，8M/s/段；持续柔和托送人和气泡包裹。",
+        "饰品台128M/s为奇物和机铠补充真实储量，机炮由机铠供能。"
+      ],
+      "dependencies": [
+        "68C3897E286AF730"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "2960C6C309FCF5D9",
+          "type": "item",
+          "item": "tnc:ecology_restraint_cage",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "25D0F706D6B35B61",
+      "title": "&5T4 · 高维之门",
+      "icon": "tnc:forbidden_scroll",
+      "x": 0,
+      "y": 36,
+      "description": [
+        "F8持续三分钟后精神压力积累，超过80%可遇高维魔灵。",
+        "用生命、经验、武器耐久或完美共鸣酊交换古卷／高维棱镜。读古卷解锁禁忌工程。"
+      ],
+      "dependencies": [
+        "50B7B41D6D3647A3",
+        "4D9427DC88C5A9AB"
+      ],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "3B2733ACAC18A8A1",
+          "type": "item",
+          "item": "tnc:forbidden_scroll",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "53C630B1BBF074B2",
+      "title": "&b百万魔力，不只为了过载",
+      "icon": "tnc:abyss_mana_tower",
+      "x": 0,
+      "y": 38,
+      "description": [
+        "24聚能砖绕核心三层，中心上方两格留空；100万M/4096M/s，能直接收附近自有产魔生态。",
+        "四正途：100M/s维持跨维绿洲；30万M经观星台强开极光；64格王杖代付＋50%威力；邻充能台闪充机铠。",
+        "输入≤320M/s稳定。过载狩猎为可选旁支，基础魔力池不受影响。"
+      ],
+      "dependencies": [
+        "25D0F706D6B35B61"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "64D677AC78249DCB",
+          "type": "item",
+          "item": "tnc:abyss_mana_tower",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "2DA2E8E0C86C3DF1",
+      "title": "&3把魔力带进异界",
+      "icon": "tnc:dimensional_mana_prism",
+      "x": 0,
+      "y": 40,
+      "description": [
+        "先完成整合包原有维度解锁：邪恶之眼开下界，不朽护符开末地。",
+        "下界与末地默认无自然魔力：无法自然回蓝、种魔植或采集。药剂与随身余额仍可用。",
+        "主世界塔旁放高维棱镜，用检流尺潜行选中；带另一面到下界或末地再点，跨维互绑。",
+        "塔真实每秒扣100M维持，目标48格成为魔力绿洲，F8看球形软光边界。维护断供则绿洲消退。"
+      ],
+      "dependencies": [
+        "53C630B1BBF074B2"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "18CBC33243857759",
+          "type": "item",
+          "item": "tnc:dimensional_mana_prism",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "35BEA0A9B88A165C",
+      "title": "&6业火重工与星界武装",
+      "icon": "tnc:zero_spellgun",
+      "x": 0,
+      "y": 42,
+      "description": [
+        "下界绿洲锻炉：下界合金、星髓与烈焰材料，锻天穹机铠、六联晶铳。",
+        "末地绿洲，或主世界露天极光并送入星界魔力：锻零式、星界杖心、极光羽翼。",
+        "先建分基地和跨维供魔，再开启终局武装；这些设备不取代种植、牧养与炼药。"
+      ],
+      "dependencies": [
+        "2DA2E8E0C86C3DF1"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "5AAFC7FE433D204E",
+          "type": "item",
+          "item": "tnc:zero_spellgun",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "49F1AAC2E70D7FA7",
+      "title": "&c可选：深红崩坏的猎手",
+      "icon": "tnc:singularity_mana_core",
+      "x": 3,
+      "y": 44,
+      "description": [
+        "高流量推过载；橙区锻炉＋50%，泄压阀耗5000M降20点并排毒。",
+        "100%非破坏冲击并召虚空巨兽，优先吸食机器魔力；击杀掉坍缩奇点。",
+        "奇点核心上限精确20亿M；没有隐藏无限账本。"
+      ],
+      "dependencies": [
+        "53C630B1BBF074B2"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "30875F463FA478EF",
+          "type": "item",
+          "item": "tnc:singularity_mana_core",
+          "count": 1,
+          "consume_items": false
+        }
+      ],
+      "rewards": []
+    }
+  ]
+}

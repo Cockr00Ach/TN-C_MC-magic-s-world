@@ -49,7 +49,7 @@ public final class ElementWands {
         Wand(Design d){super(new Properties().stacksTo(1).rarity(d.tier>=4?Rarity.EPIC:d.tier>=2?Rarity.RARE:Rarity.UNCOMMON));design=d;}
         @Override public void appendHoverText(ItemStack stack,Level level,List<Component> lines,TooltipFlag flag){
             lines.add(Component.literal("承载同元素1～"+design.tier+"阶已学法术；知识保存在魔法石"));
-            lines.add(Component.literal("前往铸器师打造；神杖不会自动授予神法"));
+            lines.add(Component.literal("前往铸器师打造；神杖不会自动授予神法"));if(stack.hasTag()&&stack.getTag().contains("SpiritMana"))lines.add(Component.literal("同源温养 "+stack.getTag().getInt("SpiritMana")+" /10000M"));if(stack.hasTag()&&stack.getTag().contains("SpiritAffix"))lines.add(Component.literal("器灵觉醒 · "+design.element.cn()+"元素神技"));
         }
     }
 }

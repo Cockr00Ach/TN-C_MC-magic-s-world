@@ -12,5 +12,5 @@ public final class RouteNodeRenderer implements net.minecraft.client.renderer.bl
         if(be.mirrorTarget!=null){var d=be.mirrorTarget.subtract(be.getBlockPos());yaw=Math.atan2(-d.getX(),-d.getZ());pitch=Math.atan2(d.getY(),Math.hypot(d.getX(),d.getZ()));}
         pose.pushPose();pose.translate(.5,.75,.5);pose.mulPose(com.mojang.math.Axis.YP.rotation((float)yaw));pose.mulPose(com.mojang.math.Axis.XP.rotation((float)pitch));pose.translate(-.5,-.75,-.5);
         dispatcher.renderModel(pose.last(),vertices,state,head,1,1,1,light,overlay);pose.popPose();return;
-    }if(be.kind()!=RouteKind.INFUSER&&be.kind()!=RouteKind.CHARGER)return;var stack=be.inventory.getItem(0);if(stack.isEmpty())return;pose.pushPose();pose.translate(.5,be.kind()==RouteKind.INFUSER?.93:.77,.5);pose.scale(.45f,.45f,.45f);renderer.renderStatic(stack,net.minecraft.world.item.ItemDisplayContext.GROUND,light,overlay,pose,buffer,be.getLevel(),0);pose.popPose();}
+    }if(be.kind()!=RouteKind.INFUSER&&be.kind()!=RouteKind.CHARGER&&!com.tnc.tnc.arcana.ArcanaTechnology.device(be))return;var stack=be.inventory.getItem(0);if(stack.isEmpty())return;pose.pushPose();pose.translate(.5,be.kind()==RouteKind.INFUSER?.93:.77,.5);pose.scale(.45f,.45f,.45f);renderer.renderStatic(stack,net.minecraft.world.item.ItemDisplayContext.GROUND,light,overlay,pose,buffer,be.getLevel(),0);pose.popPose();}
 }
