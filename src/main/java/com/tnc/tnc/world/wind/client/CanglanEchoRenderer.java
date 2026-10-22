@@ -29,7 +29,7 @@ public final class CanglanEchoRenderer extends GeoEntityRenderer<CanglanEchoEnti
    }
   }
   p.pushPose();float scale=e.visualScale();p.scale(scale,scale,scale);super.render(e,yaw,partial,p,b,LightTexture.FULL_BRIGHT);
-  if(gripPose!=null){boolean spear=e.visualScale()>1;float size=spear?2.4F:2.1F;p.pushPose();p.last().pose().set(gripPose);p.last().normal().set(gripNormal);p.mulPose(Axis.ZP.rotationDegrees(spear?4:-8));p.mulPose(Axis.XP.rotationDegrees(spear?-80:-76));p.translate(0,0,spear?1.2:1.155);p.scale(size,size,size);WindConstructModels.phantomWeapon(spear?2:1,e.tickCount+partial,p,b,.45F*e.opacity(partial),false);p.popPose();}
+  if(gripPose!=null){boolean spear=true;float size=spear?2.4F:2.1F;p.pushPose();p.last().pose().set(gripPose);p.last().normal().set(gripNormal);p.mulPose(Axis.ZP.rotationDegrees(spear?4:-8));p.mulPose(Axis.XP.rotationDegrees(spear?-80:-76));p.translate(0,0,spear?1.2:1.155);p.scale(size,size,size);WindConstructModels.phantomWeapon(spear?2:1,e.tickCount+partial,p,b,.45F*e.opacity(partial),false);p.popPose();}
   p.popPose();
  }
  public void renderRecursively(PoseStack p,CanglanEchoEntity e,GeoBone bone,RenderType type,MultiBufferSource b,VertexConsumer out,boolean re,float partial,int light,int overlay,float red,float green,float blue,float alpha){

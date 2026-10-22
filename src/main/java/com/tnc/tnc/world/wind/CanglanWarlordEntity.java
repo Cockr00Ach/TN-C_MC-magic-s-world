@@ -104,7 +104,7 @@ public final class CanglanWarlordEntity extends Monster implements GeoEntity {
 
     /** The wind arsenal form the renderer must draw in the right hand right now. */
     public int weaponForm() {
-        return CanglanWarlordAttackRules.formFor(phase());
+        return CanglanWarlordAttackRules.FORM_SPEAR;
     }
 
     public float battleScale() { return CanglanWarGodRules.scale(phase()); }

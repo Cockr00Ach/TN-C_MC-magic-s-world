@@ -1,0 +1,7 @@
+﻿沧澜战神动画编辑包
+
+推荐：Blockbench 安装 GeckoLib 插件，打开 canglan_warlord_with_spear.editor.geo.json，加载 canglan_warlord_spear_editor.png，再导入 canglan_warlord.animation.json。
+这是带长矛的编辑预览，长矛跟随 weapon_1。editor_spear_* 是预览零件，请保留，通常只需 K 手臂、手掌和 weapon_1。
+原始模型 canglan_warlord.geo.json 与贴图 canglan_warlord.png 也已附上，骨骼名与游戏一致。
+完成后请发回动画 JSON，保留现有动画名和骨骼名。若新增动作，告诉我名称即可接入。
+带 editor 的模型和合并贴图仅供编辑预览，游戏仍使用独立渲染的长矛；不要用编辑模型覆盖游戏原始模型，否则会出现两把长矛。
