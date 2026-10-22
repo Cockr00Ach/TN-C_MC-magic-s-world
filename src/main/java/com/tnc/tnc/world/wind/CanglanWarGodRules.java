@@ -17,6 +17,10 @@ public final class CanglanWarGodRules {
             default -> distance < 32 * scale ? 1 : WAVE;
         };
     }
+    /** Include absorption hearts; exactly half is not below half. Check before any sweep damage. */
+    public static boolean executionHealth(float health,float absorption,float maximum){
+        return maximum>0&&health>0&&health+Math.max(0,absorption)<maximum*.5F;
+    }
     public static double sweepRange(float scale){return 7D*scale;}
     /** Tactical landing offset from the caster: two spacing moves, then a melee entry. */
     public static double[] stepOffset(double awayX,double awayZ,float scale,int stage,boolean dodge,int side){

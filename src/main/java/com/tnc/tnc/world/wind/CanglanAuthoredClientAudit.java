@@ -22,7 +22,7 @@ public final class CanglanAuthoredClientAudit {
  private static final List<CanglanEchoEntity> echoes=new ArrayList<>();
  private static final List<String> failures=new ArrayList<>();
  private static volatile int cameraBossId=-1;private static int cameraTicks,activeCameraTicks;private static boolean cameraRequested,cameraStarted,cameraCaptured;
- private static int ticks,stage,waiting;private static boolean saving,opening;private static volatile boolean saved;
+ private static double maxCameraTurn;private static float lastCameraYaw;private static int ticks,stage,waiting;private static boolean saving,opening;private static volatile boolean saved;
  @Mod.EventBusSubscriber(modid="tnc",value=Dist.CLIENT,bus=Mod.EventBusSubscriber.Bus.MOD)
  public static final class Setup {
   @SubscribeEvent public static void setup(net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent e){if(Boolean.getBoolean("tnc.canglanAuthoredAudit"))e.enqueueWork(()->{
@@ -114,6 +114,8 @@ public final class CanglanAuthoredClientAudit {
   }
   if(com.tnc.tnc.world.wind.client.CanglanCinematicCamera.active()){
    cameraStarted=true;activeCameraTicks++;
+   float yaw=mc.getCameraEntity().getYRot();if(activeCameraTicks>12)maxCameraTurn=Math.max(maxCameraTurn,Math.abs(net.minecraft.util.Mth.wrapDegrees(yaw-lastCameraYaw)));lastCameraYaw=yaw;
+   if(activeCameraTicks==35)Screenshot.grab(mc.gameDirectory,"canglan-stable-camera-windup.png",mc.getMainRenderTarget(),m->{});
    if(activeCameraTicks==35&&com.tnc.tnc.world.wind.client.CanglanCinematicCamera.aimAlignment()<.99)failures.add("Cinematic does not aim at boss");
    if(activeCameraTicks==64){
     Screenshot.grab(mc.gameDirectory,"canglan-cinematic-finisher.png",mc.getMainRenderTarget(),m->{});cameraCaptured=true;
@@ -122,9 +124,10 @@ public final class CanglanAuthoredClientAudit {
   }
   if((cameraStarted&&!com.tnc.tnc.world.wind.client.CanglanCinematicCamera.active())||cameraTicks>220){
    if(!cameraStarted||!cameraCaptured)failures.add("Cinematic did not run to impact");
+   if(maxCameraTurn>10)failures.add("Cinematic camera rotates too fast: "+maxCameraTurn);
    boolean restored=mc.getCameraEntity()==mc.player;if(!restored)failures.add("Camera did not restore player");
    if(org.lwjgl.opengl.GL11.glGetError()!=0)failures.add("OpenGL error in effects preview");
-   Files.writeString(Path.of(System.getProperty("tnc.canglanAuthoredReport")),new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(Map.of("failures",failures,"screenshots",8,"cameraRestored",restored,"scope","Actual Minecraft geometry, eye emission, flow links, spear tip samples and S2C cinematic camera; creative preview uses finisher camera flag, execution damage tested on server")));
+   Files.writeString(Path.of(System.getProperty("tnc.canglanAuthoredReport")),new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(Map.of("failures",failures,"screenshots",9,"maxCameraTurnPerTick",maxCameraTurn,"cameraRestored",restored,"scope","Actual Minecraft geometry, eye emission, flow links, spear tip samples and S2C cinematic camera; creative preview uses finisher camera flag, execution damage tested on server")));
    stage=8;mc.getSingleplayerServer().execute(()->{var e=mc.getSingleplayerServer().overworld().getEntity(cameraBossId);if(e!=null)e.discard();});mc.stop();
   }
  }

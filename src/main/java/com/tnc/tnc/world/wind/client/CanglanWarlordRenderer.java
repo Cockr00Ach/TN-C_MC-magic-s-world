@@ -28,6 +28,9 @@ import software.bernie.geckolib.renderer.GeoEntityRenderer;
 public final class CanglanWarlordRenderer extends GeoEntityRenderer<CanglanWarlordEntity> {
     private static final java.util.Map<CanglanWarlordEntity,net.minecraft.world.phys.Vec3> FACING=new java.util.WeakHashMap<>();
     public static net.minecraft.world.phys.Vec3 facing(CanglanWarlordEntity e){return FACING.getOrDefault(e,net.minecraft.world.phys.Vec3.directionFromRotation(0,e.yBodyRot));}
+    private static final java.util.Map<CanglanWarlordEntity,net.minecraft.world.phys.Vec3> FACE=new java.util.WeakHashMap<>(),TIP=new java.util.WeakHashMap<>();
+    public static net.minecraft.world.phys.Vec3 face(CanglanWarlordEntity e){return FACE.getOrDefault(e,new net.minecraft.world.phys.Vec3(0,5.5*e.battleScale(),0));}
+    public static net.minecraft.world.phys.Vec3 tip(CanglanWarlordEntity e){return TIP.getOrDefault(e,face(e));}
     private org.joml.Matrix4f entityFrameInverse;
     private net.minecraft.world.phys.Vec3 spearTip;
     private org.joml.Matrix4f eyePose;
@@ -107,7 +110,9 @@ public final class CanglanWarlordRenderer extends GeoEntityRenderer<CanglanWarlo
             pose.pushPose();WindConstructModels.atBone(pose,bone);
             var direction=new org.joml.Vector3f(0,0,-1);
             new org.joml.Matrix4f(entityFrameInverse).mul(pose.last().pose()).transformDirection(direction).normalize();
-            FACING.put(entity,new net.minecraft.world.phys.Vec3(direction.x,direction.y,direction.z));pose.popPose();
+            FACING.put(entity,new net.minecraft.world.phys.Vec3(direction.x,direction.y,direction.z));
+            var point=new org.joml.Vector3f();new org.joml.Matrix4f(entityFrameInverse).mul(pose.last().pose()).transformPosition(point);
+            FACE.put(entity,new net.minecraft.world.phys.Vec3(point.x,point.y,point.z));pose.popPose();
         }
         if (!reRender && name.equals("weapon_1")) {
             // Cache the animated palm without changing texture buffers mid-body.
@@ -149,7 +154,7 @@ public final class CanglanWarlordRenderer extends GeoEntityRenderer<CanglanWarlo
             // Current shared spear's real tip is (8,8,25.11) in 1/16-block item units.
             var tip=new org.joml.Vector3f(0,0,1.069375F);
             new org.joml.Matrix4f(entityFrameInverse).mul(pose.last().pose()).transformPosition(tip);
-            spearTip=new net.minecraft.world.phys.Vec3(tip.x,tip.y,tip.z);
+            spearTip=new net.minecraft.world.phys.Vec3(tip.x,tip.y,tip.z);TIP.put(entity,spearTip);
         }
         if(entity.phase()==2) WindConstructModels.phantomWeapon(form,entity.tickCount,pose,buffers,.68F,false);
         else WindConstructModels.weapon(form, pose, buffers, 0.96F, false);

@@ -25,4 +25,11 @@ class CanglanFootworkRulesTest {
    assertNotEquals(5,CanglanWarGodRules.choose(1,8*scale,scale));
   }
  }
+ @Test void executionRequiresStrictlyBelowHalfIncludingGoldenHearts(){
+  assertFalse(CanglanWarGodRules.executionHealth(20,0,20));
+  assertFalse(CanglanWarGodRules.executionHealth(11,0,20));
+  assertFalse(CanglanWarGodRules.executionHealth(10,0,20));
+  assertFalse(CanglanWarGodRules.executionHealth(8,4,20));
+  assertTrue(CanglanWarGodRules.executionHealth(9,0,20));
+ }
 }

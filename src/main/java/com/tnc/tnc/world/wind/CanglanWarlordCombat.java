@@ -51,7 +51,7 @@ final class CanglanWarlordCombat {
         meleeEntry=false;move=requested;target=victim;age=0;boss.setCanglanMove(move);
         thrustVictims.clear();
         if(move==5){
-            executionTarget=victim.getHealth()<=victim.getMaxHealth()*.5F&&!victim.isInvulnerable()
+            executionTarget=CanglanWarGodRules.executionHealth(victim.getHealth(),victim.getAbsorptionAmount(),victim.getMaxHealth())&&!victim.isInvulnerable()
                     &&(!(victim instanceof net.minecraft.world.entity.player.Player p)||!p.isCreative())?victim:null;
             if(victim instanceof net.minecraft.server.level.ServerPlayer p){cinematicPlayer=p;CanglanCinematicNetwork.send(p,boss,80,executionTarget!=null);}
         }
@@ -109,7 +109,7 @@ final class CanglanWarlordCombat {
         if(move==1 && age<20) advanceThrust(scale);
         if(move==1 && age==24) strikeThrust(boss.position(),boss.position(),scale);
         if(move==5 && age==66)executeSweep();
-        if(move==5 && (age==60||age==66))strike(boss.position(),8*scale,true);
+        if(move==5 && age==66)strike(boss.position(),8*scale,true);
         if(move==CanglanWarGodRules.TORNADO&&age==26){strike(boss.position(),9*scale,true);gale(boss.position(),false);}
         if(move==CanglanWarGodRules.WAVE&&age==15){
             Vec3 dir=target.position().subtract(boss.position()).multiply(1,0,1).normalize();
@@ -123,10 +123,11 @@ final class CanglanWarlordCombat {
     }
     private void executeSweep(){
         LivingEntity victim=executionTarget;
-        if(victim==null||!victim.isAlive()||victim.getHealth()>victim.getMaxHealth()*.5F||victim.isInvulnerable()
+        if(victim==null||!victim.isAlive()||!CanglanWarGodRules.executionHealth(victim.getHealth(),victim.getAbsorptionAmount(),victim.getMaxHealth())||victim.isInvulnerable()
                 ||!canSweep(victim)||!boss.hasLineOfSight(victim))return;
         if(victim instanceof net.minecraft.world.entity.player.Player p&&(p.isCreative()||p.isSpectator()))return;
         if(victim.hurt(boss.level().damageSources().mobAttack(boss),Float.MAX_VALUE)){
+            thrustVictims.add(victim.getId());
             boss.level().playSound(null,victim.blockPosition(),SoundEvents.TRIDENT_THUNDER,SoundSource.HOSTILE,1.8F,.8F);
             ((ServerLevel)boss.level()).sendParticles(net.minecraft.core.particles.ParticleTypes.SWEEP_ATTACK,victim.getX(),victim.getY()+1,victim.getZ(),12,1,1,1,.05);
         }
@@ -219,11 +220,13 @@ final class CanglanWarlordCombat {
     private void strike(Vec3 at,double reach,boolean circle){
         Vec3 facing=Vec3.directionFromRotation(0,boss.getYRot());
         for(var e:boss.level().getEntitiesOfClass(LivingEntity.class,new AABB(at,at).inflate(reach,8*boss.battleScale(),reach),v->v!=boss&&v.isAlive()&&!v.isSpectator()&&!boss.isAlliedTo(v))){
-            if(move==5&&age==60&&e==executionTarget)continue;
+            if(move==5&&thrustVictims.contains(e.getId()))continue;
             Vec3 d=e.position().subtract(at);if(d.horizontalDistance()>reach)continue;
             if(!circle&&d.normalize().dot(facing)<-.1)continue;
             if(!boss.hasLineOfSight(e))continue;
-            e.hurt(boss.level().damageSources().mobAttack(boss),(float)boss.getAttributeValue(Attributes.ATTACK_DAMAGE)*(boss.phase()==2?1.25F:1));
+            float damage=(float)boss.getAttributeValue(Attributes.ATTACK_DAMAGE)*(boss.phase()==2?1.25F:1);
+            if(move==5)damage=Math.min(damage,e.getMaxHealth()*.45F);
+            e.hurt(boss.level().damageSources().mobAttack(boss),damage);
             Vec3 push=d.normalize().scale(.5);e.push(push.x,.2,push.z);e.hurtMarked=true;
         }
         ((ServerLevel)boss.level()).sendParticles(net.minecraft.core.particles.ParticleTypes.SWEEP_ATTACK,at.x,at.y+1,at.z,8,reach*.35,.5,reach*.35,.02);

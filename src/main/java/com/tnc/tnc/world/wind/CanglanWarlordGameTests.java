@@ -127,6 +127,31 @@ public final class CanglanWarlordGameTests {
         for(int tick=40;tick<67;tick++)boss.battle().tick();
         helper.assertTrue(escaped.isAlive(),"Execution hit a target that escaped melee reach");boss.battle().cleanup();helper.succeed();
     }
+    @GameTest(template="building_test_empty", timeoutTicks=40, batch="canglan_execution_boundary")
+    public static void healthyHalfAndAbsorptionTargetsNeverReceiveExecution(GameTestHelper helper) {
+        var boss=helper.spawn(CanglanWarlordRegistration.CANGLAN_WARLORD,new BlockPos(2,1,2));boss.setNoAi(true);boss.setNoGravity(true);
+        for(float health:new float[]{100,51,50,40}){
+            var victim=helper.spawn(EntityType.IRON_GOLEM,new BlockPos(2,1,8));victim.setNoAi(true);victim.setNoGravity(true);victim.setHealth(health);
+            if(health==40)victim.setAbsorptionAmount(20);
+            boss.setTarget(victim);helper.assertTrue(boss.battle().begin(5,victim),"Boundary sweep did not start");
+            for(int tick=0;tick<67;tick++)boss.battle().tick();
+            helper.assertTrue(victim.isAlive(),"Healthy, half-health or golden-heart target was executed: "+health);
+            boss.battle().cleanup();victim.discard();
+        }
+        var fragile=helper.spawn(EntityType.IRON_GOLEM,new BlockPos(2,1,8));fragile.setNoAi(true);fragile.setNoGravity(true);
+        fragile.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(20);fragile.setHealth(20);boss.setTarget(fragile);
+        boss.battle().begin(5,fragile);for(int tick=0;tick<67;tick++)boss.battle().tick();
+        helper.assertTrue(fragile.getHealth()>=11,"Normal sweep one-shot an unarmoured full-health 20 HP target");boss.battle().cleanup();fragile.discard();
+        // A normal sweep cannot promote itself to execution when health falls during windup.
+        var victim=helper.spawn(EntityType.IRON_GOLEM,new BlockPos(2,1,8));victim.setNoAi(true);victim.setNoGravity(true);boss.setTarget(victim);
+        boss.battle().begin(5,victim);victim.setHealth(40);
+        for(int tick=0;tick<67;tick++)boss.battle().tick();
+        helper.assertTrue(victim.isAlive(),"Normal sweep promoted to execution during windup");boss.battle().cleanup();victim.discard();
+        var healed=helper.spawn(EntityType.IRON_GOLEM,new BlockPos(2,1,8));healed.setNoAi(true);healed.setNoGravity(true);healed.setHealth(40);boss.setTarget(healed);
+        boss.battle().begin(5,healed);healed.setHealth(80);
+        for(int tick=0;tick<67;tick++)boss.battle().tick();
+        helper.assertTrue(healed.isAlive(),"Healed target was still executed");boss.battle().cleanup();helper.succeed();
+    }
     @GameTest(template="building_test_empty", timeoutTicks=40, batch="canglan_awareness")
     public static void savedBossAlsoReceivesLongRangeAwareness(GameTestHelper helper) {
         var boss=helper.spawn(CanglanWarlordRegistration.CANGLAN_WARLORD,new BlockPos(2,1,2));boss.setNoAi(true);
