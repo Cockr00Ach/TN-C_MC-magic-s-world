@@ -71,7 +71,7 @@ public final class CanglanWarlordEntity extends Monster implements GeoEntity {
                 .add(Attributes.ARMOR, 16.0D)
                 .add(Attributes.ARMOR_TOUGHNESS, 10.0D)
                 .add(Attributes.MOVEMENT_SPEED, 0.26D)
-                .add(Attributes.FOLLOW_RANGE, 64.0D)
+                .add(Attributes.FOLLOW_RANGE, 256.0D)
                 // Wind is light on its feet but still a six-block wall of plate:
                 // knockback barely moves it, and only the player's own weight does.
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.9D);
@@ -141,7 +141,7 @@ public final class CanglanWarlordEntity extends Monster implements GeoEntity {
     public boolean rising() {
         return spawnTicks > 0;
     }
-    boolean canApproach() { return !busy() && shiftTicks == 0 && spawnTicks == 0; }
+    boolean canApproach() { return !combat.testing() && !busy() && shiftTicks == 0 && spawnTicks == 0; }
 
     @Override
     protected void registerGoals() {
@@ -152,12 +152,16 @@ public final class CanglanWarlordEntity extends Monster implements GeoEntity {
         goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 48.0F));
         goalSelector.addGoal(9, new RandomLookAroundGoal(this));
         targetSelector.addGoal(1, new HurtByTargetGoal(this));
-        targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
+        targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true).setUnseenMemoryTicks(200));
     }
 
     @Override
     public void aiStep() {
         super.aiStep();
+        if(!level().isClientSide){
+            var awareness=getAttribute(Attributes.FOLLOW_RANGE);
+            if(awareness!=null&&awareness.getBaseValue()<256)awareness.setBaseValue(256);
+        }
         // The spawn rise ticks down on both sides so the client's idle controller
         // knows to stay quiet for exactly as long as the server does.
         if (spawnTicks > 0) {
@@ -191,7 +195,7 @@ public final class CanglanWarlordEntity extends Monster implements GeoEntity {
         combat.tick();
         LivingEntity watched = getTarget();
         if (watched == null) {
-            watched = level().getNearestPlayer(this, 32.0D);
+            watched = level().getNearestPlayer(this, 256.0D);
         }
         if (watched != null && hasLineOfSight(watched)) {
             getLookControl().setLookAt(watched, 30.0F, 20.0F);

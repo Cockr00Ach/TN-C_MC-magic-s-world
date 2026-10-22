@@ -19,7 +19,7 @@ public final class CanglanTempestEntity extends Entity {
  @Override public void onSyncedDataUpdated(EntityDataAccessor<?> key){super.onSyncedDataUpdated(key);if(SCALE.equals(key)&&tickCount<2)oldDisplayScale=displayScale=visualScale();}
  public static CanglanTempestEntity spawn(CanglanWarlordEntity owner,Vec3 at,Vec3 direction,boolean tornado,float scale,int life){
   var e=CanglanWarlordRegistration.TEMPEST.create(owner.level());if(e==null)throw new IllegalStateException("Tempest not registered");
-  e.owner=owner;e.seekTarget=owner.getTarget();e.life=life;e.entityData.set(SCALE,scale);e.entityData.set(TORNADO,tornado);e.setPos(at);e.velocity=direction.normalize().scale(1.5);e.setYRot((float)Math.toDegrees(Math.atan2(-direction.x,direction.z)));owner.level().addFreshEntity(e);return e;
+  e.owner=owner;e.seekTarget=owner.getTarget();e.life=life;e.entityData.set(SCALE,tornado?scale*2:scale);e.entityData.set(TORNADO,tornado);e.setPos(at);e.velocity=direction.normalize().scale(1.5);e.setYRot((float)Math.toDegrees(Math.atan2(-direction.x,direction.z)));owner.level().addFreshEntity(e);return e;
  }
  private boolean enemy(LivingEntity v){return v!=owner&&v.isAlive()&&!v.isSpectator()&&!owner.isAlliedTo(v);}
  public void tick(){
@@ -33,7 +33,7 @@ public final class CanglanTempestEntity extends Entity {
    if(seekTarget==null)seekTarget=level().getNearestPlayer(this,128);
    if(seekTarget!=null&&enemy(seekTarget)){
     Vec3 delta=seekTarget.position().subtract(from).multiply(1,0,1);
-    double speed=Math.min(4,2.2*Math.sqrt(visualScale()));
+    double speed=Math.min(4,2.2*Math.sqrt(visualScale()/2));
     to=from.add(delta.normalize().scale(Math.min(speed,delta.length())));
    }
   }
@@ -58,17 +58,17 @@ public final class CanglanTempestEntity extends Entity {
   setPos(to);
   if(tornado()&&tickCount%4==0)fuseNearby();
   if(tickCount%6!=0)return;
-  double r=(tornado()?2.7:6)*visualScale();int budget=0;
-  for(var v:level().getEntitiesOfClass(LivingEntity.class,new AABB(from,position()).inflate(r,tornado()?6*visualScale():2*visualScale(),r),this::enemy)){
+  double r=(tornado()?2.7:8.5)*visualScale();int budget=0;
+  for(var v:level().getEntitiesOfClass(LivingEntity.class,new AABB(from,position()).inflate(r,tornado()?6*visualScale():5*visualScale(),r),this::enemy)){
    if(++budget>32)break;if(!owner.hasLineOfSight(v))continue;
-   float damage=tornado()?5*Math.max(1,Math.min(3,visualScale()/(1.25F*owner.battleScale()))):18;
+   float damage=tornado()?5*Math.max(1,Math.min(3,visualScale()/(2.5F*owner.battleScale()))):18;
    v.hurt(level().damageSources().indirectMagic(this,owner),damage);
    if(tornado()){Vec3 d=position().subtract(v.position()).multiply(1,0,1).normalize().scale(.18);v.push(d.x,.12,d.z);v.hurtMarked=true;}
   }
  }
  private void fuseNearby(){
   boolean combined=false;int budget=0;
-  for(var other:level().getEntitiesOfClass(CanglanTempestEntity.class,getBoundingBox().inflate(6*owner.battleScale()+1.5*visualScale()),e->e!=this&&!e.isRemoved()&&e.tornado()&&e.owner==owner&&e.getId()>getId())){
+  for(var other:level().getEntitiesOfClass(CanglanTempestEntity.class,getBoundingBox().inflate(12*owner.battleScale()+1.5*visualScale()),e->e!=this&&!e.isRemoved()&&e.tornado()&&e.owner==owner&&e.getId()>getId())){
    if(++budget>12)break;
    if(position().distanceToSqr(other.position())>Math.pow(1.5*(visualScale()+other.visualScale()),2))continue;
    float a=visualScale(),b=other.visualScale();
@@ -76,7 +76,7 @@ public final class CanglanTempestEntity extends Entity {
     if(other.anchored()){setPos(other.position());entityData.set(ANCHORED,true);}
     else setPos(position().lerp(other.position(),b*b/(a*a+b*b)));
    }
-   entityData.set(SCALE,Math.min(4*owner.battleScale(),(float)Math.sqrt(a*a+b*b)));
+   entityData.set(SCALE,Math.min(8*owner.battleScale(),(float)Math.sqrt(a*a+b*b)));
    life=tickCount+Math.min(120,Math.max(life-tickCount,other.life-other.tickCount));
    if(seekTarget==null)seekTarget=other.seekTarget;
    other.discard();combined=true;

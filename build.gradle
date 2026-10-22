@@ -288,7 +288,7 @@ minecraft {
                 property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
             }
             if (project.hasProperty('deepArcanaRegression')) {property 'forge.enabledGameTestNamespaces','tncarcana,tncjourney,tncdungeon';workingDirectory project.file('work/deep-arcana-regression-tests')}
-            if (project.hasProperty('magicProgressionRegression')) {property 'forge.enabledGameTestNamespaces','tncarcana,tncjourney,tncdungeon,tncroute';workingDirectory project.file('work/deep-arcana-regression-tests')}
+            if (project.hasProperty('magicProgressionRegression')) {property 'forge.enabledGameTestNamespaces','tncarcana,tncjourney,tncdungeon,tncroute,tnccanglan';workingDirectory project.file('work/deep-arcana-regression-tests')}
             if (project.hasProperty('fullLandmarkTests')) property 'tnc.fullLandmarkTests', 'true'
             if (project.hasProperty('fullSkyIslandTests')) {
                 property 'tnc.fullSkyIslandTests', 'true'

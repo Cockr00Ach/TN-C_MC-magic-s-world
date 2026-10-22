@@ -34,6 +34,7 @@ from __future__ import annotations
 import base64
 import io
 import json
+import math
 import os
 import random
 
@@ -761,15 +762,34 @@ def build_animations():
         "tail": {"rotation": {"0": [0, -6, 0], "0.5": [0, 6, 0], "1.0": [0, -6, 0]}},
     })
 
-    idle = loop_anim(2.6, {
-        "body": {"position": {"0": [0, 0, 0], "1.3": [0, 0.7, 0], "2.6": [0, 0, 0]}},
-        "shell": {"rotation": {"0": [0, 0, 0], "1.3": [0.8, 0, 0], "2.6": [0, 0, 0]}},
-        "whorl": {"rotation": {"0": [0, 0, 0], "1.3": [0, 7, 0], "2.6": [0, 0, 0]}},
-        "neck": {"rotation": {"0": [4, 0, 0], "1.3": [-2, 0, 0], "2.6": [4, 0, 0]}},
-        "head": {"rotation": {"0": [0, 0, 0], "0.9": [-5, 4, 0], "1.7": [2, -4, 0],
-                              "2.6": [0, 0, 0]}},
-        "tail": {"rotation": {"0": [0, -5, 0], "1.3": [0, 5, 0], "2.6": [0, -5, 0]}},
-    })
+    # 2026-10-22 待机呼吸：4 秒（80 tick）一个循环。
+    #  - 身体（shell + body 各 0.55 单位）缓慢上抬回落；腿不在 shell 下，保持接地。
+    #  - 壳 pitch 1.2°，山体（whorl）只轻微起伏，不单独摇晃。
+    #  - 颈/头小幅跟随，幅度低于身体主动作；默认闭嘴，不碰 jaw。
+    #  - 二阶段岩甲在 idle_p2 里围绕当前外翻角（±22°）做 ±1° 呼吸，左右相位差 0.4 秒。
+    def breathe_plate(base, phase):
+        keys = {}
+        for step in range(11):
+            t = round(step * 0.4, 1)
+            angle = base + math.sin(2.0 * math.pi * (t - phase) / 4.0)
+            keys[f"{t:.1f}"] = [0, 0, round(angle, 2)]
+        return {"rotation": keys}
+
+    idle_bones = {
+        "body": {"position": {"0": [0, 0, 0], "2.0": [0, 0.55, 0], "4.0": [0, 0, 0]}},
+        "shell": {"position": {"0": [0, 0, 0], "2.0": [0, 0.55, 0], "4.0": [0, 0, 0]},
+                  "rotation": {"0": [0, 0, 0], "2.0": [1.2, 0, 0], "4.0": [0, 0, 0]}},
+        "whorl": {"rotation": {"0": [0, 0, 0], "2.0": [0, 5, 0], "4.0": [0, 0, 0]}},
+        "neck": {"rotation": {"0": [4, 0, 0], "2.0": [2, 0, 0], "4.0": [4, 0, 0]}},
+        "head": {"rotation": {"0": [0, 0, 0], "1.4": [-3, 3, 0], "2.6": [1.5, -3, 0],
+                              "4.0": [0, 0, 0]}},
+        "tail": {"rotation": {"0": [0, -5, 0], "2.0": [0, 5, 0], "4.0": [0, -5, 0]}},
+    }
+    idle = loop_anim(4.0, idle_bones)
+    idle_p2_bones = dict(idle_bones)
+    idle_p2_bones["plate_l"] = breathe_plate(-22.0, 0.0)
+    idle_p2_bones["plate_r"] = breathe_plate(22.0, 0.4)
+    idle_p2 = loop_anim(4.0, idle_p2_bones)
 
     slam = once_anim(1.4, {
         "body": {"position": {"0": [0, 0, 0], "0.35": [0, 3.5, 0], "0.5": [0, -2.5, 0],
@@ -852,6 +872,7 @@ def build_animations():
         "format_version": "1.8.0",
         "animations": {
             "idle": idle,
+            "idle_p2": idle_p2,
             "walk": walk,
             "slam": slam,
             "bite": bite,

@@ -26,6 +26,17 @@ import software.bernie.geckolib.renderer.GeoEntityRenderer;
  * rig audit measured it.
  */
 public final class CanglanWarlordRenderer extends GeoEntityRenderer<CanglanWarlordEntity> {
+    private static final java.util.Map<CanglanWarlordEntity,net.minecraft.world.phys.Vec3> FACING=new java.util.WeakHashMap<>();
+    public static net.minecraft.world.phys.Vec3 facing(CanglanWarlordEntity e){return FACING.getOrDefault(e,net.minecraft.world.phys.Vec3.directionFromRotation(0,e.yBodyRot));}
+    private static final java.util.Map<CanglanWarlordEntity,net.minecraft.world.phys.Vec3> FACE=new java.util.WeakHashMap<>(),TIP=new java.util.WeakHashMap<>();
+    public static net.minecraft.world.phys.Vec3 face(CanglanWarlordEntity e){return FACE.getOrDefault(e,new net.minecraft.world.phys.Vec3(0,5.5*e.battleScale(),0));}
+    public static net.minecraft.world.phys.Vec3 tip(CanglanWarlordEntity e){return TIP.getOrDefault(e,face(e));}
+    private org.joml.Matrix4f entityFrameInverse;
+    private net.minecraft.world.phys.Vec3 spearTip;
+    private org.joml.Matrix4f eyePose;
+    private org.joml.Matrix3f eyeNormal;
+    private GeoBone eyeBone;
+    private static final net.minecraft.resources.ResourceLocation EYES=net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tnc","textures/entity/canglan_eyes_emissive.png");
     private org.joml.Matrix4f gripPose;
     private org.joml.Matrix3f gripNormal;
     private GeoBone gripBone;
@@ -59,7 +70,8 @@ public final class CanglanWarlordRenderer extends GeoEntityRenderer<CanglanWarlo
         return e.phase()==2 ? software.bernie.geckolib.core.object.Color.ofRGBA(.55F,.95F,1F,.48F) : super.getRenderColor(e,partial,light);
     }
     @Override public void render(CanglanWarlordEntity e,float yaw,float partial,PoseStack pose,MultiBufferSource buffers,int light) {
-        gripPose=null;gripNormal=null;gripBone=null;
+        gripPose=null;gripNormal=null;gripBone=null;eyePose=null;eyeNormal=null;eyeBone=null;spearTip=null;
+        entityFrameInverse=new org.joml.Matrix4f(pose.last().pose()).invert();
         pose.pushPose();float scale=e.battleScale();pose.scale(scale,scale,scale);
         pose.pushPose();
         pose.mulPose(Axis.YP.rotationDegrees(180-e.yBodyRot));pose.translate(0,5.5,.9);
@@ -71,8 +83,16 @@ public final class CanglanWarlordRenderer extends GeoEntityRenderer<CanglanWarlo
                 pose,buffers.getBuffer(RenderType.entityTranslucent(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS)));
         pose.popPose();
         super.render(e,yaw,partial,pose,buffers,e.phase()==2?LightTexture.FULL_BRIGHT:light);
+        if(eyePose!=null){
+            pose.pushPose();pose.last().pose().set(eyePose);pose.last().normal().set(eyeNormal);
+            RenderType glow=RenderType.eyes(EYES);
+            super.renderRecursively(pose,e,eyeBone,glow,buffers,buffers.getBuffer(glow),true,partial,
+                    LightTexture.FULL_BRIGHT,net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY,1,1,1,1);
+            pose.popPose();
+        }
         if(gripPose!=null)drawBlade(pose,gripBone,e,buffers);
         pose.popPose();
+        if(spearTip!=null)CanglanSpearTrail.render(e,spearTip,partial,pose,buffers);
     }
 
     @Override
@@ -85,6 +105,15 @@ public final class CanglanWarlordRenderer extends GeoEntityRenderer<CanglanWarlo
         int boneLight = name.equals("eyes") ? LightTexture.FULL_BRIGHT : light;
         super.renderRecursively(pose, entity, bone, type, buffers, out, reRender,
                 partial, boneLight, overlay, red, green, blue, alpha);
+        if(!reRender&&name.equals("eyes")){
+            eyePose=new org.joml.Matrix4f(pose.last().pose());eyeNormal=new org.joml.Matrix3f(pose.last().normal());eyeBone=bone;
+            pose.pushPose();WindConstructModels.atBone(pose,bone);
+            var direction=new org.joml.Vector3f(0,0,-1);
+            new org.joml.Matrix4f(entityFrameInverse).mul(pose.last().pose()).transformDirection(direction).normalize();
+            FACING.put(entity,new net.minecraft.world.phys.Vec3(direction.x,direction.y,direction.z));
+            var point=new org.joml.Vector3f();new org.joml.Matrix4f(entityFrameInverse).mul(pose.last().pose()).transformPosition(point);
+            FACE.put(entity,new net.minecraft.world.phys.Vec3(point.x,point.y,point.z));pose.popPose();
+        }
         if (!reRender && name.equals("weapon_1")) {
             // Cache the animated palm without changing texture buffers mid-body.
             pose.pushPose();WindConstructModels.atBone(pose, bone);
@@ -121,6 +150,12 @@ public final class CanglanWarlordRenderer extends GeoEntityRenderer<CanglanWarlo
         pose.translate(0.0F, 0.0F, spear ? SPEAR_GRIP : SWORD_GRIP);
         float scale = spear ? SPEAR_SCALE : SWORD_SCALE;
         pose.scale(scale, scale, scale);
+        if(spear){
+            // Current shared spear's real tip is (8,8,25.11) in 1/16-block item units.
+            var tip=new org.joml.Vector3f(0,0,1.069375F);
+            new org.joml.Matrix4f(entityFrameInverse).mul(pose.last().pose()).transformPosition(tip);
+            spearTip=new net.minecraft.world.phys.Vec3(tip.x,tip.y,tip.z);TIP.put(entity,spearTip);
+        }
         if(entity.phase()==2) WindConstructModels.phantomWeapon(form,entity.tickCount,pose,buffers,.68F,false);
         else WindConstructModels.weapon(form, pose, buffers, 0.96F, false);
         pose.popPose();
