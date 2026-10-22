@@ -38,7 +38,9 @@ public final class CanglanTestCommands {
         if(mode.equals("stop")){boss.battle().pauseTest();source.sendSuccess(()->Component.literal("测试已暂停，当前招式、龙卷风和锚点已清理。用 resume 恢复正常战斗。"),false);return 1;}
         Integer skill=SKILLS.get(StringArgumentType.getString(c,"skill"));if(skill==null)throw BAD_SKILL.create();
         if(boss.rising()||boss.shifting())throw ENTRANCE.create();
-        boss.battle().testAttack(skill,source.getPlayerOrException(),mode.equals("loop"));
+        var player=source.getPlayerOrException();
+        if(skill==5&&!boss.battle().canSweep(player))throw new SimpleCommandExceptionType(Component.literal("横扫只能在近距离释放，请靠近 Boss 后再测试。 ")).create();
+        boss.battle().testAttack(skill,player,mode.equals("loop"));
         source.sendSuccess(()->Component.literal(mode.equals("loop")?"正在循环测试该招式；用 /tnc canglan stop 暂停。":"开始单次测试，完成后待机；用 /tnc canglan resume 恢复正常战斗。"),false);return 1;
     }
 }

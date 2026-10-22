@@ -41,7 +41,7 @@ public final class CanglanWarlordGameTests {
     @GameTest(template="building_test_empty", timeoutTicks=40, batch="canglan_seeking_cyclone")
     public static void cycloneSeeksThenStopsOnItsTarget(GameTestHelper helper) {
         var boss=helper.spawn(CanglanWarlordRegistration.CANGLAN_WARLORD,new BlockPos(2,1,2));boss.setNoAi(true);boss.setNoGravity(true);
-        var target=helper.spawn(EntityType.IRON_GOLEM,new BlockPos(2,1,9));target.setNoAi(true);target.setNoGravity(true);boss.setTarget(target);
+        var target=helper.spawn(EntityType.IRON_GOLEM,new BlockPos(2,1,14));target.setNoAi(true);target.setNoGravity(true);boss.setTarget(target);
         var cyclone=CanglanTempestEntity.spawn(boss,boss.position(),net.minecraft.world.phys.Vec3.ZERO,true,1,60);
         double start=cyclone.getZ();float health=target.getHealth();
         for(int i=0;i<12;i++){cyclone.tickCount++;cyclone.tick();}
@@ -62,7 +62,7 @@ public final class CanglanWarlordGameTests {
         var foreign=CanglanTempestEntity.spawn(other,boss.position(),net.minecraft.world.phys.Vec3.ZERO,true,1,25);
         for(int i=0;i<4;i++){a.tickCount++;a.tick();}
         helper.assertTrue(b.isRemoved()&&!a.isRemoved(),"Merge kept both source entities");
-        helper.assertTrue(Math.abs(a.visualScale()-Math.sqrt(5))<.001,"Merged model did not grow");
+        helper.assertTrue(Math.abs(a.visualScale()-Math.sqrt(20))<.001,"Merged model did not grow");
         helper.assertTrue(!foreign.isRemoved(),"Fusion consumed another boss spell");
         for(int i=0;i<40;i++){a.tickCount++;a.tick();}
         helper.assertTrue(a.isRemoved(),"Fusion became permanent");
@@ -74,7 +74,8 @@ public final class CanglanWarlordGameTests {
         var victim=helper.spawn(EntityType.IRON_GOLEM,new BlockPos(5,60,2));victim.setNoAi(true);victim.setNoGravity(true);boss.setTarget(victim);
         int wait=boss.battle().cooldown();
         for(int step=0;step<3;step++){
-            victim.setPos(boss.position().add(step%2==0?20:-20,0,0));
+            double gap=step==0?6:step==1?8:20;
+            victim.setPos(boss.position().add(step%2==0?gap:-gap,0,0));
             helper.assertTrue(boss.battle().windStep(victim,false),"Valid wind step was rejected");
             if(step==0)helper.assertTrue(boss.battle().cooldown()==wait,"Wind step restarted attack cooldown");
             for(int tick=0;tick<6&&boss.canglanMove()==14;tick++)boss.battle().tick();
@@ -92,7 +93,7 @@ public final class CanglanWarlordGameTests {
     public static void commandsRehearseOnlyChosenAttackAndRestoreNormalBattle(GameTestHelper helper) {
         var boss=helper.spawn(CanglanWarlordRegistration.CANGLAN_WARLORD,new BlockPos(2,1,2));boss.setNoAi(true);boss.setNoGravity(true);
         var tag=new net.minecraft.nbt.CompoundTag();boss.saveWithoutId(tag);tag.putBoolean("CanglanWarlordSpawned",true);boss.readAdditionalSaveData(tag);
-        var player=net.minecraftforge.common.util.FakePlayerFactory.getMinecraft(helper.getLevel());player.setInvulnerable(true);player.setPos(boss.position().add(8,0,0));
+        var player=net.minecraftforge.common.util.FakePlayerFactory.getMinecraft(helper.getLevel());player.setInvulnerable(true);player.setPos(boss.position().add(6,0,0));
         var source=player.createCommandSourceStack().withPermission(4);var commands=helper.getLevel().getServer().getCommands();String id=boss.getUUID().toString();
         helper.assertTrue(commands.performPrefixedCommand(source,"tnc canglan attack sweep "+id)==1,"Attack test command was not registered");
         helper.assertTrue(boss.battle().move()==5&&boss.battle().testing()&&!boss.canApproach(),"Single attack did not own the boss");
@@ -104,6 +105,34 @@ public final class CanglanWarlordGameTests {
         helper.assertTrue(commands.performPrefixedCommand(source,"tnc canglan stop "+id)==1&&boss.battle().move()==0,"Stop did not cancel rehearsal");
         helper.assertTrue(commands.performPrefixedCommand(source,"tnc canglan resume "+id)==1&&!boss.battle().testing(),"Resume left test mode active");
         boss.battle().cleanup();helper.succeed();
+    }
+    @GameTest(template="building_test_empty", timeoutTicks=40, batch="canglan_melee_range")
+    public static void sweepOnlyStartsNearItsVictim(GameTestHelper helper) {
+        var boss=helper.spawn(CanglanWarlordRegistration.CANGLAN_WARLORD,new BlockPos(2,1,2));boss.setNoAi(true);
+        var victim=helper.spawn(EntityType.IRON_GOLEM,new BlockPos(2,1,12));victim.setNoAi(true);
+        helper.assertTrue(!boss.battle().begin(5,victim),"Sweep started outside melee range");
+        victim.setPos(boss.position().add(6,0,0));helper.assertTrue(boss.battle().begin(5,victim),"Close sweep was rejected");
+        boss.battle().cleanup();helper.succeed();
+    }
+    @GameTest(template="building_test_empty", timeoutTicks=40, batch="canglan_execution")
+    public static void lowHealthSweepExecutesOnlyIfVictimStaysWithinReach(GameTestHelper helper) {
+        var boss=helper.spawn(CanglanWarlordRegistration.CANGLAN_WARLORD,new BlockPos(2,1,2));boss.setNoAi(true);boss.setNoGravity(true);
+        var victim=helper.spawn(EntityType.IRON_GOLEM,new BlockPos(2,1,8));victim.setNoAi(true);victim.setNoGravity(true);victim.setHealth(40);boss.setTarget(victim);
+        helper.assertTrue(boss.battle().begin(5,victim),"Execution sweep was not accepted");
+        for(int tick=0;tick<67;tick++)boss.battle().tick();
+        helper.assertTrue(!victim.isAlive(),"Low-health target survived execution impact");boss.battle().cleanup();
+        var escaped=helper.spawn(EntityType.IRON_GOLEM,new BlockPos(2,1,8));escaped.setNoAi(true);escaped.setNoGravity(true);escaped.setHealth(40);boss.setTarget(escaped);
+        helper.assertTrue(boss.battle().begin(5,escaped),"Second execution did not start");
+        for(int tick=0;tick<40;tick++)boss.battle().tick();escaped.setPos(boss.position().add(25,0,0));
+        for(int tick=40;tick<67;tick++)boss.battle().tick();
+        helper.assertTrue(escaped.isAlive(),"Execution hit a target that escaped melee reach");boss.battle().cleanup();helper.succeed();
+    }
+    @GameTest(template="building_test_empty", timeoutTicks=40, batch="canglan_awareness")
+    public static void savedBossAlsoReceivesLongRangeAwareness(GameTestHelper helper) {
+        var boss=helper.spawn(CanglanWarlordRegistration.CANGLAN_WARLORD,new BlockPos(2,1,2));boss.setNoAi(true);
+        var range=boss.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.FOLLOW_RANGE);
+        helper.assertTrue(range.getBaseValue()>=256,"New boss detection range is too short");
+        range.setBaseValue(64);boss.aiStep();helper.assertTrue(range.getBaseValue()>=256,"Saved boss retained the old short detection range");helper.succeed();
     }
     // MCA replaces vanilla villagers during joining; use an ordinary real animal as damage/AI fixture.
     @GameTest(template="building_test_empty", timeoutTicks=40, batch="canglan_walking")

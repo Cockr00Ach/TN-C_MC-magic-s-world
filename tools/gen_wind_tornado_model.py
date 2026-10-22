@@ -62,7 +62,7 @@ def build():
             streak=.68+.12*math.sin(v*19+u*6)+.08*math.sin(v*35-u*9)
             end=math.sin(math.pi*u)**.30
             alpha=int(205*edge*end*max(.18,streak))
-            image.putpixel((x,y),(190+int(35*edge),221+int(21*edge),239+int(13*edge),alpha))
+            image.putpixel((x,y),(75+int(85*edge),212+int(40*edge),145+int(65*edge),alpha))
     image.save(TEXTURE)
     print(f'Curved tornado: {len(quads)*2} baked quads; two nested layers of 3 ribbons; OBJ/MTL/texture generated')
 
