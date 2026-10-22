@@ -520,7 +520,10 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
             if (state.isMoving()) {
                 return state.setAndContinue(RawAnimation.begin().thenLoop("walk"));
             }
-            return state.setAndContinue(RawAnimation.begin().thenLoop("idle"));
+            // 一阶段没有外翻岩甲骨骼，用不含 plate 通道的 idle；
+            // 二阶段用 idle_p2，在 ±22° 基础外翻角上叠加 ±1° 的缓慢呼吸。
+            return state.setAndContinue(
+                    RawAnimation.begin().thenLoop(this.isPhaseTwo() ? "idle_p2" : "idle"));
         }));
         AnimationController<VolcanicTortoiseEntity> action = new AnimationController<>(
                 this, ACTION_CONTROLLER, 2, state -> PlayState.STOP);
