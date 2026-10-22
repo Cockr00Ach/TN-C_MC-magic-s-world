@@ -30,7 +30,7 @@ public final class VerdantVeinBlockEntity extends BlockEntity implements OwnedMa
     public int storedMana(){return mana;}
     public void setOwner(UUID id){if(owner==null){owner=id;setChanged();}}
     static boolean wet(ServerLevel l,BlockPos p){for(Direction d:Direction.Plane.HORIZONTAL)if(l.getFluidState(p.below().relative(d)).is(FluidTags.WATER))return true;return l.isRainingAt(p);}
-    static boolean valid(ServerLevel l,BlockPos p){return l.hasChunkAt(p)&&(l.getBlockState(p).hasProperty(com.tnc.tnc.life.routes.RoutePlantBlock.WILD)&&l.getBlockState(p).getValue(com.tnc.tnc.life.routes.RoutePlantBlock.WILD)||com.tnc.tnc.life.routes.MagicSoilBlock.growing(l,p));}
+    static boolean valid(ServerLevel l,BlockPos p){return com.tnc.tnc.arcana.ArcanaRealms.powered(l,p)&&l.hasChunkAt(p)&&(l.getBlockState(p).hasProperty(com.tnc.tnc.life.routes.RoutePlantBlock.WILD)&&l.getBlockState(p).getValue(com.tnc.tnc.life.routes.RoutePlantBlock.WILD)||com.tnc.tnc.life.routes.MagicSoilBlock.growing(l,p));}
     public static void tick(ServerLevel l,BlockPos p,BlockState s,VerdantVeinBlockEntity be){
         if(l.getGameTime()%20!=0)return;
         int age=s.getValue(VerdantVeinBlock.AGE);

@@ -180,6 +180,7 @@ public final class TnSpellMechanics {
      */
     private static final double DIVINE_AIM_DEGREES = 35.0D;
     private static final Map<UUID, Long> DIVINE_UNTIL = new ConcurrentHashMap<>();
+    private static final Map<UUID, Float> DIVINE_BOOST = new ConcurrentHashMap<>(), STORM_BOOST = new ConcurrentHashMap<>();
     /** 这一次施法是否已经铺过球了（防止窗口内每 tick 重复铺 ✓）。 */
     private static final java.util.Set<UUID> DIVINE_FIRED = java.util.concurrent.ConcurrentHashMap.newKeySet();
 
@@ -340,6 +341,7 @@ public final class TnSpellMechanics {
         }
         if (time > until) {
             DIVINE_UNTIL.remove(player.getUUID());
+            DIVINE_BOOST.remove(player.getUUID());
             DIVINE_FIRED.remove(player.getUUID());
             return;
         }
@@ -347,14 +349,15 @@ public final class TnSpellMechanics {
             return;
         }
         ServerLevel level = player.serverLevel();
+        float beacon=DIVINE_BOOST.getOrDefault(player.getUUID(),1F);
         // 锚点：**玩家正在瞄的那个敌人**优先，其次准星落点 ✓
         net.minecraft.world.phys.Vec3 look = player.getViewVector(1.0F).normalize();
         net.minecraft.world.phys.Vec3 eye = player.getEyePosition();
         double bestDot = Math.cos(Math.toRadians(DIVINE_AIM_DEGREES));
         net.minecraft.world.phys.Vec3 anchor = null;
         for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class,
-                player.getBoundingBox().inflate(DIVINE_RADIUS))) {
-            if (!isDivineTarget(player, target) || target.distanceTo(player) > DIVINE_RADIUS) {
+                player.getBoundingBox().inflate(DIVINE_RADIUS*beacon))) {
+            if (!isDivineTarget(player, target) || target.distanceTo(player) > DIVINE_RADIUS*beacon) {
                 continue;
             }
             net.minecraft.world.phys.Vec3 to = target.position()
@@ -396,16 +399,17 @@ public final class TnSpellMechanics {
         //    球心要抬起"球半径"那么多，否则半个球埋进地里 ✗（而爆心仍然是地面上的锚点 ✓）
         TNLightningStrikeEntity ball = TNOrbEntities.LIGHTNING_STRIKE.get().create(level);
         if (ball != null) {
-            double ballRadius = DIVINE_BALL_MODEL_BLOCKS * DIVINE_BALL_SCALE / 2.0D;
+            double ballRadius = DIVINE_BALL_MODEL_BLOCKS * DIVINE_BALL_SCALE*beacon / 2.0D;
             ball.asBall();
             ball.setFallSpeed(DIVINE_BALL_FALL);
-            ball.configure(DIVINE_BALL_SCALE, DIVINE_BALL_LIFE, anchor.y + ballRadius, 12.0D);
-            ball.setLandImpact(player, DIVINE_BALL_DAMAGE, DIVINE_BALL_BLAST);
+            ball.configure(DIVINE_BALL_SCALE*beacon, DIVINE_BALL_LIFE, anchor.y + ballRadius, 12.0D);
+            ball.setLandImpact(player, DIVINE_BALL_DAMAGE, DIVINE_BALL_BLAST*beacon);
+            if(beacon>1)ball.getPersistentData().putFloat("BeaconScale",beacon);
             ball.moveTo(anchor.x, anchor.y + ballRadius, anchor.z, 0.0F, 0.0F);
             level.addFreshEntity(ball);
         }
         // 锚点脚下那张阵：半径 15 格（球现在 23.6 格直径 ⇒ 8 格的阵整个压在球底下、看不见 ✗）
-        spawnMagicCircleAt(level, anchor, DIVINE_CIRCLE_RADIUS, DIVINE_CIRCLE_LIFE);
+        spawnMagicCircleAt(level, anchor, DIVINE_CIRCLE_RADIUS*beacon, DIVINE_CIRCLE_LIFE);
     }
 
     /**
@@ -432,15 +436,17 @@ public final class TnSpellMechanics {
         }
         if (time > until || !has(player, TNEffects.LIGHTNING_STORM)) {
             STORM_UNTIL.remove(player.getUUID());
+            STORM_BOOST.remove(player.getUUID());
             return;
         }
         if (time % STORM_INTERVAL != 0) {
             return;
         }
         ServerLevel level = player.serverLevel();
+        float beacon=STORM_BOOST.getOrDefault(player.getUUID(),1F);
         java.util.List<LivingEntity> targets = new java.util.ArrayList<>(level.getEntitiesOfClass(
-                LivingEntity.class, player.getBoundingBox().inflate(STORM_RADIUS)));
-        targets.removeIf(t -> !isEnemy(player, t) || t.distanceTo(player) > STORM_RADIUS);
+                LivingEntity.class, player.getBoundingBox().inflate(STORM_RADIUS*beacon)));
+        targets.removeIf(t -> !isEnemy(player, t) || t.distanceTo(player) > STORM_RADIUS*beacon);
         if (targets.isEmpty()) {
             // 没敌人也别让"雷暴"哑掉：在半空随机劈一道，纯视觉 ✓
             double a = level.random.nextDouble() * Math.PI * 2.0D;
@@ -451,7 +457,7 @@ public final class TnSpellMechanics {
         java.util.Collections.shuffle(targets);
         int n = Math.min(STORM_TARGETS_PER_WAVE, targets.size());
         for (int i = 0; i < n; i++) {
-            strikeEnemy(level, player, targets.get(i), STORM_DAMAGE);
+            strikeEnemy(level, player, targets.get(i), STORM_DAMAGE*beacon);
         }
     }
 
@@ -625,6 +631,7 @@ public final class TnSpellMechanics {
             //   按下去只有引擎那一下冲击波，三尊神和大雷球一颗都不出现 ✗。
             DIVINE_FIRED.remove(player.getUUID());       // 新的一次施法 -> 允许再铺一次 ✓
             DIVINE_UNTIL.put(player.getUUID(), player.level().getGameTime() + DIVINE_WINDOW);
+            DIVINE_BOOST.put(player.getUUID(),com.tnc.tnc.arcana.ArcanaBeacon.scale(player));
             spawnMagicCircle(player, 8.0D, 200);          // 自己脚下一张小的 ＋ 锚点一张大的 ✓
             circleOwn = true;
             // 施法那一刻天就黑下来 ✓（作者 2026-09-29：t5 = 雷雨天 + 三尊神 + 一颗慢速大雷球）
@@ -657,6 +664,7 @@ public final class TnSpellMechanics {
             circleOwn = true;
             // 雷暴：窗口 200 tick，期间每 15 tick 劈一轮，一直劈到结束 ✓
             STORM_UNTIL.put(player.getUUID(), player.level().getGameTime() + STORM_WINDOW);
+            STORM_BOOST.put(player.getUUID(),com.tnc.tnc.arcana.ArcanaBeacon.scale(player));
         } else if (path.equals("heavenly_thunder")) {
             spawnMagicCircle(player, 14.0D, 210);        // t5 天雷
             circleOwn = true;
@@ -943,6 +951,7 @@ public final class TnSpellMechanics {
         try {
             ((net.spell_engine.internals.casting.SpellCasterEntity) player)
                     .getCooldownManager().update();
+            if(player.hasEffect(com.tnc.tnc.arcana.ArcanaMealEffects.MEALS[0])&&player.tickCount%5==0)((net.spell_engine.internals.casting.SpellCasterEntity)player).getCooldownManager().update();
         } catch (Throwable ignored) {
             // 引擎缺失：什么都不做 ✓
         }

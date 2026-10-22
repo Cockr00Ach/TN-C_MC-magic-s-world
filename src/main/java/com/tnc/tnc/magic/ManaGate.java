@@ -251,6 +251,7 @@ public final class ManaGate {
         if (!(player instanceof ServerPlayer serverPlayer)) {
             return false;
         }
+        if(serverPlayer.hasEffect(com.tnc.tnc.arcana.ArcanaMealEffects.NO_MAGIC))return true;
         if((com.tnc.tnc.combat.DownedCombat.isDowned(serverPlayer)||com.tnc.tnc.dungeon.DungeonService.recovering(serverPlayer)))return true;
         // 只管 TN-C 自己的法术
         SpellCatalog.Entry entry = SpellCatalog.byId(spellId);
@@ -273,7 +274,7 @@ public final class ManaGate {
             com.tnc.tnc.adventure.AdventureService.milestone(serverPlayer,"learned");
         }
         Decision decision = evaluateCost(data, entry, com.tnc.tnc.Config.requireLearnedToCast,
-                com.tnc.tnc.Config.requireWandToCast, supported,com.tnc.tnc.equipment.MageGear.spellCost(serverPlayer,entry.manaCostFor(data.getMaxMana())));
+                com.tnc.tnc.Config.requireWandToCast, supported,com.tnc.tnc.arcana.ArcanaBeacon.affordable(serverPlayer,entry,com.tnc.tnc.equipment.MageGear.spellCost(serverPlayer,entry.manaCostFor(data.getMaxMana())))?0:com.tnc.tnc.equipment.MageGear.spellCost(serverPlayer,entry.manaCostFor(data.getMaxMana())));
         if (decision == Decision.ALLOW) {
             // ★ 诊断（作者 2026-09-29："投篮没法再释放了"）：**放行也留一行**。
             //   反过来读更有用：玩家说"按了没反应"时，日志里**既没有 BLOCKED 也没有 ALLOW**

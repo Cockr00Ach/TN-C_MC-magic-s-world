@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "tnc:spirit_iron"
+    },
+    {
+      "item": "tnc:spirit_iron"
+    },
+    {
+      "item": "minecraft:copper_ingot"
+    },
+    {
+      "item": "minecraft:copper_ingot"
+    },
+    {
+      "item": "tnc:forge_core"
+    }
+  ],
+  "result": {
+    "item": "tnc:elemental_igniter",
+    "count": 1
+  }
+}

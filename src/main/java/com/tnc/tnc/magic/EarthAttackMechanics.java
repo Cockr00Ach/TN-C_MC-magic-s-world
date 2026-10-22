@@ -58,7 +58,7 @@ public final class EarthAttackMechanics {
     }
     private static void spawn(ServerPlayer caster,int mode,String model,Vec3 start,Vec3 end,float scale,float height,int wait,int ttl,float damage,double radius,DamageSource source) {
         var entity=WindEarthVisualMechanics.ATTACK.get().create(caster.serverLevel());if(entity==null)return;
-        entity.configure(caster,mode,model,start,end,scale,height,wait,ttl,damage,radius,source);caster.serverLevel().addFreshEntity(entity);
+        entity.configure(caster,mode,model,start,end,scale,height,wait,ttl,damage,radius*com.tnc.tnc.arcana.ArcanaBeacon.scale(caster),source);entity.getPersistentData().putFloat("BeaconScale",com.tnc.tnc.arcana.ArcanaBeacon.scale(caster));caster.serverLevel().addFreshEntity(entity);
         if(mode==2)entity.damageCentre=new Vec3(end.x,end.y-(wait>0?18:6),end.z);
     }
 }

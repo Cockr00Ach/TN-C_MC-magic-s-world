@@ -47,3 +47,7 @@ print('Deep arcana quests:',len(quests),'Alchemy:',len(alchemy['quests']))
 # Apply the current physical-cauldron and plant-only meal design after historical generation.
 from revise_arcana_feedback_assets import run as revise_arcana_feedback
 revise_arcana_feedback()
+
+# Keep the approved all-stage blueprint authoritative after historical asset generation.
+import build_magic_progression as _magic_blueprint
+_magic_blueprint.run()

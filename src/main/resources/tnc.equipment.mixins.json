@@ -6,7 +6,8 @@
   "mixins": [
     "TwoSlotInventoryMixin",
     "TwoSlotArmorUseMixin",
-    "TwoSlotPlayerEquipMixin"
+    "TwoSlotPlayerEquipMixin",
+    "ArcanaWaterWalkMixin"
   ],
   "client": [
     "TwoSlotInventoryScreenMixin",

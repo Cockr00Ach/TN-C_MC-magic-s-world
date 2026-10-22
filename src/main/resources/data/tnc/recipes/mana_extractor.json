@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "tnc:spirit_iron"
+    },
+    {
+      "item": "tnc:spirit_iron"
+    },
+    {
+      "item": "tnc:spirit_iron"
+    },
+    {
+      "item": "minecraft:amethyst_shard"
+    },
+    {
+      "item": "minecraft:stone_bricks"
+    }
+  ],
+  "result": {
+    "item": "tnc:mana_extractor",
+    "count": 1
+  }
+}

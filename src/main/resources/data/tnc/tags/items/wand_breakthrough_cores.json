@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:nether_star",
+    "minecraft:dragon_breath",
+    "tnc:collapsed_mana_singularity",
+    "tnc:sunwheel_shard",
+    "tnc:old_bell_bronze",
+    "tnc:tidal_shell_crystal",
+    "tnc:star_dream_shard"
+  ]
+}

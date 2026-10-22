@@ -9,7 +9,7 @@ public enum Elixir {
     EDGE("edge","锐锋琥珀",0xf1ad57,"60秒力量I",60,220,"tnc:stone_pattern_leaf","minecraft:iron_nugget","minecraft:sweet_berries"),
     STRIDE("stride","迅步风饮",0x99dfa6,"90秒速度I",90,200,"tnc:dance_petal","minecraft:sugar","minecraft:feather"),
     SHELL("shell","坚肤石蜜",0xb6aa82,"60秒抗性I",60,260,"tnc:stone_pattern_leaf","minecraft:scute","minecraft:honey_bottle"),
-    FOCUS("focus","元素共鸣酊",0xa4beff,"45秒内每秒恢复2法力",45,300,"tnc:prism_crown_petal","tnc:storm_crown_tip","minecraft:amethyst_shard"),
+    FOCUS("focus","元素共鸣酊",0xa4beff,"45秒内每秒恢复2法力",45,300,"tnc:prism_crown_petal","tnc:storm_crown_tip","tnc:pure_medicinal_powder"),
     CINDER("cinder","避火绯露",0xf28140,"120秒抗火",120,220,"tnc:hearth_pepper_fruit","minecraft:magma_cream","minecraft:nether_wart"),
     TIDE("tide","潮息珍液",0x62b6c8,"120秒水下呼吸",120,220,"tnc:rainletter_berry","minecraft:pufferfish","minecraft:kelp"),
     FEATHER("feather","轻羽浮沫",0xd9edb6,"90秒缓降",90,220,"tnc:dance_petal","minecraft:feather","minecraft:phantom_membrane"),

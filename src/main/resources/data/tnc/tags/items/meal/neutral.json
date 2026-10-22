@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "tnc:homeward_flower_petal",
+    "tnc:star_dew_fruit",
+    "tnc:steam_lotus_heart",
+    "tnc:dawn_honey",
+    "minecraft:honey_bottle",
+    "minecraft:golden_apple"
+  ]
+}

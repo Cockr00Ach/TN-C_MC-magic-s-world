@@ -541,5 +541,6 @@ Java逻辑改完必须编译并替换运行包JAR；只改仓库源码不会自�
 - 本轮2×2药锅、直接采集塔、平滑天路与新极光须以验证安装完成后的版本测试；此文不替代实装验收记录。
 '''
 OUT=R/'docs/魔法科技与魔药玩法总览及扩展设计-20261022.md'
-OUT.write_text(text,'utf8')
+prefix='> 阶段零历史快照：全阶段总纲已更新实现。当前规则请读 [魔导纪行全阶段实装手册](魔导纪行全阶段实装手册-20261022.md)。本页保留先前设备与设计记录；餐盘、温养、跨维和大师药以新手册为准。\n\n'
+OUT.write_text(prefix+text,'utf8')
 print(json.dumps({'document':str(OUT),'characters':len(text),'devices':len(ks),'elixirs':len(elixirs)},ensure_ascii=False))

@@ -2,20 +2,20 @@
   "type": "tnc:mana_forging",
   "ingredients": [
     {
-      "item": "tnc:mech_spellgun",
-      "count": 1
-    },
-    {
       "item": "tnc:star_marrow",
       "count": 8
     },
     {
-      "item": "tnc:radiant_gold",
-      "count": 12
+      "item": "minecraft:netherite_ingot",
+      "count": 2
     },
     {
-      "item": "tnc:storm_crystal",
-      "count": 6
+      "item": "minecraft:dragon_breath",
+      "count": 1
+    },
+    {
+      "item": "minecraft:chorus_fruit",
+      "count": 8
     }
   ],
   "result": {

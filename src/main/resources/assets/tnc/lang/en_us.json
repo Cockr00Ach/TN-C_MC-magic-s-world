@@ -724,5 +724,20 @@
   "block.tnc.dimensional_mana_prism": "高维魔力棱镜",
   "block.tnc.singularity_mana_core": "奇点魔力核心",
   "effect.tnc.mana_corrosion": "Mana Corrosion",
-  "entity.tnc.arcana_waste_flask": "Waste Flask"
+  "entity.tnc.arcana_waste_flask": "Waste Flask",
+  "block.tnc.mana_extractor": "Mana Extractor",
+  "block.tnc.elemental_igniter": "Elemental Igniter",
+  "block.tnc.leyline_compass": "Leyline Compass",
+  "block.tnc.beast_resonance_pedestal": "Beast Resonance Pedestal",
+  "block.tnc.elixir_fumigator": "Elixir Fumigator",
+  "block.tnc.elemental_phase_shifter": "Elemental Phase Shifter",
+  "item.tnc.pure_medicinal_powder": "Purified Medicinal Powder",
+  "item.tnc.botanical_mana_filament": "Botanical Mana Filament",
+  "effect.tnc.meal_blazing": "Meal Blazing",
+  "effect.tnc.meal_rooted": "Meal Rooted",
+  "effect.tnc.meal_vitality": "Meal Vitality",
+  "effect.tnc.meal_clarity": "Meal Clarity",
+  "effect.tnc.meal_gale": "Meal Gale",
+  "effect.tnc.meal_harmony": "Meal Harmony",
+  "effect.tnc.meal_no_magic": "Meal No Magic"
 }

@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "tnc:stone_pattern_leaf",
+    "tnc:mana_root_core",
+    "tnc:ore_dream_flake",
+    "minecraft:potato",
+    "minecraft:baked_potato",
+    "minecraft:brown_mushroom",
+    "minecraft:red_mushroom"
+  ]
+}

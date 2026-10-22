@@ -472,7 +472,7 @@ public class MagicStoneData {
     //  魔力值 / 魔法点数
     // ------------------------------------------------------------------
 
-    private transient boolean manaFreedom;
+    private transient boolean manaFreedom,manaBlocked;public void setManaBlocked(boolean b){manaBlocked=b;}
     public void setManaFreedom(boolean active){manaFreedom=active;}
     public int getMana() {
         return manaFreedom?maxMana:mana;
@@ -488,6 +488,7 @@ public class MagicStoneData {
 
     /** 施法消耗；不够就返回 false（调用方决定怎么提示）。 */
     public boolean spendMana(int cost) {
+        if(manaBlocked)return false;
         if(manaFreedom)return cost>=0&&cost<=maxMana;
         if (cost < 0 || mana < cost) {
             return false;

@@ -19,7 +19,7 @@ public final class ArcanaPhysiology {
         p.displayClientMessage(net.minecraft.network.chat.Component.literal("魔力淤积过高，先去魔导温泉排毒。"),true);return false;
     }
     public static double potency(ServerPlayer p,RitualRules.Quality q){return q.potency*(toxicity(p)>50?.5:1);}
-    public static void drink(ServerPlayer p,RitualRules.Quality q){toxic(p,q.toxicity);if(q==RitualRules.Quality.MASTER)data(p).putLong("MasterAuraUntil",now(p)+1200);}
+    public static void drink(ServerPlayer p,RitualRules.Quality q){toxic(p,p.hasEffect(ArcanaMealEffects.HARMONY)?(q.toxicity+1)/2:q.toxicity);if(q==RitualRules.Quality.MASTER)data(p).putLong("MasterAuraUntil",now(p)+1200);}
     public static void detox(ServerPlayer p,int amount){int old=toxicity(p);if(old==0)return;toxic(p,-amount);if(toxicity(p)==0){data(p).putLong("ClearUntil",now(p)+24000);p.displayClientMessage(net.minecraft.network.chat.Component.literal("经脉通畅 · 一日内回魔加快50%，魔力视精神免耗"),true);}}
     @SubscribeEvent public static void tick(TickEvent.PlayerTickEvent e){if(e.phase!=TickEvent.Phase.END||!(e.player instanceof ServerPlayer p)||p.tickCount%20!=0||!p.isAlive()||p.isSpectator())return;
         var t=data(p);long now=now(p);boolean sight=com.tnc.tnc.mana.sight.ManaSightServer.enabled(p);
@@ -29,10 +29,10 @@ public final class ArcanaPhysiology {
         t.putDouble("vision_sanity",sanity);
         if(toxicity(p)>50){p.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN,30,0,false,false));if(p.tickCount%100==0)p.serverLevel().sendParticles(net.minecraft.core.particles.ParticleTypes.SMOKE,p.getX(),p.getEyeY()-.15,p.getZ(),5,.12,.1,.12,.02);}
         if(sight&&!clearChannels(p)){var look=p.getLookAngle();boolean glaring=luminousGaze(p,look);if(glaring){sanity=Math.min(100,sanity+.45);t.putDouble("vision_sanity",sanity);}}
-        if(t.getLong("MealSunUntil")>now){var m=MagicStone.getOrNull(p);if(m!=null){m.addMana(m.getMaxMana());for(var pos:com.tnc.tnc.life.routes.RouteNetwork.positions(p.serverLevel()))if(pos.distToCenterSqr(p.position())<25&&p.serverLevel().hasChunkAt(pos)&&p.serverLevel().getBlockEntity(pos) instanceof com.tnc.tnc.life.routes.RouteNodeEntity n&&p.getUUID().equals(n.owner)){int received=n.receive(8);com.tnc.tnc.arcana.ArcanaEnergy.credit(n,"solar",received);n.getPersistentData().putLong("OverloadBoostUntil",p.level().getGameTime()+25);}com.tnc.tnc.network.MagicStoneNetwork.syncTo(p);}}
+        if(t.getLong("MealSunUntil")>now){var m=MagicStone.getOrNull(p);if(m!=null){m.addMana(m.getMaxMana());ArcanaMeals.radiate(p);com.tnc.tnc.network.MagicStoneNetwork.syncTo(p);}}
         if(p.isInWater())ArcanaDevices.bathe(p);
-        ArcanaEquipment.tick(p);ArcanaSpirits.tick(p,sight,sanity);
-        var packet=new CompoundTag();packet.putString("Type","physiology");packet.putInt("Toxicity",toxicity(p));packet.putDouble("Sanity",sanity);packet.putBoolean("Clear",clearChannels(p));packet.putBoolean("Bathing",t.getLong("BathingUntil")>now);packet.putBoolean("Sun",t.getLong("MealSunUntil")>now);packet.putBoolean("MasterAura",t.getLong("MasterAuraUntil")>now);packet.putBoolean("Aurora",ArcanaSky.aurora(p.serverLevel()));ArcanaNetwork.sync(p,packet);JourneyData.get(p.server).setDirty();
+        ArcanaMealEffects.tick(p);LeylineDiscoveries.guide(p);ArcanaEquipment.tick(p);ArcanaSpirits.tick(p,sight,sanity);
+        var packet=new CompoundTag();packet.putString("Type","physiology");packet.putBoolean("DeadMana",ArcanaRealms.barren(p.level())&&!ArcanaRealms.powered(p.serverLevel(),p.blockPosition()));packet.putLongArray("Oases",ArcanaRealms.nearby(p));packet.putInt("Toxicity",toxicity(p));packet.putDouble("Sanity",sanity);packet.putBoolean("Clear",clearChannels(p));packet.putBoolean("Bathing",t.getLong("BathingUntil")>now);packet.putBoolean("Sun",t.getLong("MealSunUntil")>now);packet.putBoolean("MasterAura",t.getLong("MasterAuraUntil")>now);packet.putBoolean("Aurora",ArcanaSky.aurora(p.serverLevel()));ArcanaNetwork.sync(p,packet);JourneyData.get(p.server).setDirty();
     }
     private static boolean luminousGaze(ServerPlayer p,net.minecraft.world.phys.Vec3 look){
         if(p.serverLevel().isDay()&&p.serverLevel().canSeeSky(p.blockPosition())&&look.y>.92)return true;

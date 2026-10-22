@@ -110,6 +110,8 @@ public final class MagicForgeBlockEntity extends BlockEntity implements WorldlyC
         return report;
     }
 
+    @Override public void onLoad(){super.onLoad();if(level instanceof ServerLevel l)com.tnc.tnc.life.routes.RouteNetwork.add(l,worldPosition);}
+    @Override public void setRemoved(){if(level instanceof ServerLevel l)com.tnc.tnc.life.routes.RouteNetwork.remove(l,worldPosition);super.setRemoved();}
     public void invalidateStructure() { lastScanTick = Long.MIN_VALUE; }
 
     public ForgeStructure.Scan report() {
@@ -224,6 +226,7 @@ public final class MagicForgeBlockEntity extends BlockEntity implements WorldlyC
         return progress > 0 ? Math.max(1, Math.min(14, progress * 14 / Math.max(1, workTicks()))) : 0;
     }
 
+    public int effectiveMana(ManaForgeRecipe recipe){var costs=recipe.costs(this);if(costs==null)return recipe.mana();boolean any=false;for(int i=0;i<4;i++)if(costs[i]>0){var stack=items.get(i);if(!(stack.is(net.minecraft.world.item.Items.GOLD_INGOT)||stack.is(net.minecraft.world.item.Items.DIAMOND))||!stack.hasTag()||!stack.getTag().getBoolean("ManaPretempered"))return recipe.mana();any=true;}return any?(recipe.mana()+1)/2:recipe.mana();}
     private int workTicks() {
         ManaForgeRecipe recipe = chosenRecipe();
         int base = recipe == null ? FORGE_TICKS : recipe.workTicks();
@@ -316,7 +319,7 @@ public final class MagicForgeBlockEntity extends BlockEntity implements WorldlyC
         }
         // Plants feed collectors; the forge receives conserved network mana.
         ManaForgeRecipe recipe = chosenRecipe();
-        if (recipe == null || charge < recipe.mana()) return;
+        if (recipe == null || charge < effectiveMana(recipe)) return;
         if(!com.tnc.tnc.arcana.ArcanaCrafting.allowed(server,this,recipe))return;
         int[] costs = recipe.costs(this);
         if (costs == null) return;
@@ -324,7 +327,7 @@ public final class MagicForgeBlockEntity extends BlockEntity implements WorldlyC
         ItemStack produced = recipe.getResultItem(server.registryAccess());
         if (!output.isEmpty() && (!ItemStack.isSameItemSameTags(output, produced)
                 || output.getCount() + produced.getCount() > output.getMaxStackSize())) return;
-        progress+=getPersistentData().getLong("OverloadBoostUntil")>server.getGameTime()&&server.getGameTime()%2==0?2:1;
+        progress+=getPersistentData().getLong("OverloadBoostUntil")>server.getGameTime()&&server.getGameTime()%2==0||getPersistentData().getLong("MealBoostUntil")>server.getGameTime()&&server.getGameTime()%4==0?2:1;
         if (server.getGameTime() % 8 == 0) {
             BlockPos chamber = worldPosition.relative(front().getOpposite());
             server.sendParticles(ParticleTypes.SMALL_FLAME, chamber.getX() + .5, chamber.getY() + .45,
@@ -338,11 +341,11 @@ public final class MagicForgeBlockEntity extends BlockEntity implements WorldlyC
         if (progress >= workTicks()) {
             // Inventory and mana are rechecked immediately before the atomic server mutation.
             costs = recipe.costs(this);
-            if (costs != null && charge >= recipe.mana() && formed() && com.tnc.tnc.arcana.ArcanaCrafting.pay(server,this,recipe)) {
-                for (int slot = 0; slot < 4; slot++) if (costs[slot] > 0) items.get(slot).shrink(costs[slot]);
+            if (costs != null && charge >= effectiveMana(recipe) && formed() && com.tnc.tnc.arcana.ArcanaCrafting.pay(server,this,recipe)) {
+                int paidMana=effectiveMana(recipe);for (int slot = 0; slot < 4; slot++) if (costs[slot] > 0) items.get(slot).shrink(costs[slot]);
                 if (output.isEmpty()) items.set(OUTPUT_SLOT, produced.copy());
                 else output.grow(produced.getCount());
-                charge -= recipe.mana();
+                charge -= paidMana;
                 spendUpgrade();
                 completeFx(server);
             }

@@ -13,13 +13,14 @@ public final class WindBallEntity extends Entity {
     private static final EntityDataAccessor<Integer> TIER=SynchedEntityData.defineId(WindBallEntity.class,EntityDataSerializers.INT),
             PHASE=SynchedEntityData.defineId(WindBallEntity.class,EntityDataSerializers.INT);
     private static final EntityDataAccessor<Long> START=SynchedEntityData.defineId(WindBallEntity.class,EntityDataSerializers.LONG);
+    private static final EntityDataAccessor<Float> SCALE=SynchedEntityData.defineId(WindBallEntity.class,EntityDataSerializers.FLOAT);
     private LivingEntity owner;private int age,phaseAge;
     public WindBallEntity(EntityType<? extends WindBallEntity> type,Level level){super(type,level);noPhysics=true;setNoGravity(true);}
-    @Override protected void defineSynchedData(){entityData.define(TIER,1);entityData.define(PHASE,0);entityData.define(START,0L);}
+    @Override protected void defineSynchedData(){entityData.define(SCALE,1F);entityData.define(TIER,1);entityData.define(PHASE,0);entityData.define(START,0L);}
     public int tier(){return entityData.get(TIER);}public int phase(){return entityData.get(PHASE);}
     public double phaseAge(float partial){return Math.max(0,level().getGameTime()+partial-entityData.get(START));}
-    public double radius(float partial){return phase()==0?WindChainRules.ballRadius(tier()):phase()==2?WindChainRules.ballRadius(tier())*(1+phaseAge(partial)*.3):WindChainRules.ballSize(tier(),phaseAge(partial));}
-    public void configure(LivingEntity caster,int tier){owner=caster;entityData.set(TIER,WindChainRules.tier(tier));setPos(caster.getEyePosition().add(caster.getLookAngle().scale(1.5)));setDeltaMovement(caster.getLookAngle().scale(1.25));entityData.set(START,level().getGameTime());}
+    public double radius(float partial){return entityData.get(SCALE)*(phase()==0?WindChainRules.ballRadius(tier()):phase()==2?WindChainRules.ballRadius(tier())*(1+phaseAge(partial)*.3):WindChainRules.ballSize(tier(),phaseAge(partial)));}
+    public void configure(LivingEntity caster,int tier){owner=caster;entityData.set(SCALE,com.tnc.tnc.arcana.ArcanaBeacon.scale(caster));if(entityData.get(SCALE)>1)getPersistentData().putFloat("BeaconScale",entityData.get(SCALE));entityData.set(TIER,WindChainRules.tier(tier));setPos(caster.getEyePosition().add(caster.getLookAngle().scale(1.5)));setDeltaMovement(caster.getLookAngle().scale(1.25));entityData.set(START,level().getGameTime());}
     public void anchor(){if(phase()!=0)return;phaseAge=0;entityData.set(PHASE,1);entityData.set(START,level().getGameTime());setDeltaMovement(Vec3.ZERO);}
     @Override public void tick(){
         if(isRemoved())return;super.tick();if(level().isClientSide)return;
@@ -38,7 +39,7 @@ public final class WindBallEntity extends Entity {
         ++phaseAge;
         if(phase()==2){if(phaseAge>=12)discard();return;}
         if(tier()==5)setPos(position().add(0,.48,0));
-        double reach=WindChainRules.pullRange(tier());
+        double reach=WindChainRules.pullRange(tier())*entityData.get(SCALE);
         var enemies=level().getEntitiesOfClass(LivingEntity.class,getBoundingBox().inflate(reach),e->WindChainSpells.enemy(e,owner));
         enemies.sort(java.util.Comparator.comparingDouble(e->e.distanceToSqr(this)));
         for(int i=0;i<Math.min(24,enemies.size());i++){
@@ -54,7 +55,7 @@ public final class WindBallEntity extends Entity {
         }
     }
     private void explode(){
-        double range=Math.min(112,WindChainRules.ballRadius(tier())*3);
+        double range=Math.min(168,WindChainRules.ballRadius(tier())*3*entityData.get(SCALE));
         int hits=0;for(var e:level().getEntitiesOfClass(LivingEntity.class,getBoundingBox().inflate(range),v->WindChainSpells.enemy(v,owner))){
             if(e.distanceToSqr(this)>range*range||++hits>32)continue;
             WindPullControl.cancel(e);
