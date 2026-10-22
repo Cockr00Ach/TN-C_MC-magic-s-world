@@ -5,13 +5,16 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.ParticleStatus;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
+import net.minecraft.commands.Commands;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -51,6 +54,13 @@ public final class VolcanicTortoiseAmbientFx {
      * 默认关闭，正式构建不受影响。
      */
     private static final boolean CRATER_DEBUG = Boolean.getBoolean("tnc.tortoise.crater.debug");
+
+    /**
+     * 小喷发调试入口开关：启动参数加 {@code -Dtnc.tortoise.eruption.debug=true} 才会注册
+     * {@code /tnc_erupt} 客户端命令。命令只对 48 格内最近的一只火山巨龟触发一次正式小喷发，
+     * 且仍然遵守存活 / 攻击 / 转阶段限制。默认关闭，正式构建里没有这个命令。
+     */
+    private static final boolean ERUPTION_DEBUG = Boolean.getBoolean("tnc.tortoise.eruption.debug");
 
     // ============================================================ 可调参数 ==
     // 所有数值集中在这里；调浓淡、快慢、大小、颜色只改这一块。
@@ -136,6 +146,56 @@ public final class VolcanicTortoiseAmbientFx {
         static final float ATTACK_RATE_SCALE = 0.35F;
         /** 转阶段后停多少 tick；只在阶段变化那一次设置。 */
         static final int TRANSITION_PAUSE_TICKS = 80;
+
+        // ---- 无伤害环境小喷发 ---------------------------------------------
+
+        static final boolean ERUPTION_ENABLED = true;
+        /** 两次喷发的随机间隔（tick）：一阶段 12~20 秒，二阶段 7~12 秒。 */
+        static final int ERUPT_INTERVAL_MIN_P1 = 12 * 20;
+        static final int ERUPT_INTERVAL_MAX_P1 = 20 * 20;
+        static final int ERUPT_INTERVAL_MIN_P2 = 7 * 20;
+        static final int ERUPT_INTERVAL_MAX_P2 = 12 * 20;
+        /** 蓄亮窗口（tick），口内熔岩短暂变亮。 */
+        static final int ERUPT_CHARGE_MIN = 2;
+        static final int ERUPT_CHARGE_MAX = 4;
+        /** 喷出窗口（tick），所有额外火星都在这几 tick 内分批放完。 */
+        static final int ERUPT_BURST_MIN = 4;
+        static final int ERUPT_BURST_MAX = 8;
+        /** 一次喷发的额外火星总数。 */
+        static final int ERUPT_SPARKS_MIN_P1 = 12;
+        static final int ERUPT_SPARKS_MAX_P1 = 18;
+        static final int ERUPT_SPARKS_MIN_P2 = 20;
+        static final int ERUPT_SPARKS_MAX_P2 = 28;
+        /** 一次喷发的额外烟总数。 */
+        static final int ERUPT_SMOKE_MIN_P1 = 2;
+        static final int ERUPT_SMOKE_MAX_P1 = 3;
+        static final int ERUPT_SMOKE_MIN_P2 = 3;
+        static final int ERUPT_SMOKE_MAX_P2 = 4;
+        /** 喷发烟的寿命（tick）。 */
+        static final int ERUPT_SMOKE_LIFE_MIN = 10;
+        static final int ERUPT_SMOKE_LIFE_MAX = 18;
+        static final float ERUPT_SMOKE_SCALE_MIN = 0.35F;
+        static final float ERUPT_SMOKE_SCALE_MAX = 0.55F;
+        static final double ERUPT_SMOKE_RISE_MIN = 0.030D;
+        static final double ERUPT_SMOKE_RISE_MAX = 0.070D;
+        static final double ERUPT_SMOKE_SPREAD = 0.14D;
+        /** 喷发火星：比常规火星更快更高，形成“噗”的一下。 */
+        static final double ERUPT_SPARK_UP_MIN_P1 = 0.34D;
+        static final double ERUPT_SPARK_UP_MAX_P1 = 0.52D;
+        static final double ERUPT_SPARK_UP_MIN_P2 = 0.40D;
+        static final double ERUPT_SPARK_UP_MAX_P2 = 0.60D;
+        static final double ERUPT_SPARK_OUTWARD_MIN = 0.030D;
+        static final double ERUPT_SPARK_OUTWARD_MAX = 0.100D;
+        static final double ERUPT_SPARK_SPREAD = 0.18D;
+        static final float ERUPT_SPARK_SCALE_MIN = 0.55F;
+        static final float ERUPT_SPARK_SCALE_MAX = 1.10F;
+        static final float ERUPT_SPARK_SCALE_BONUS = 0.15F;
+        static final int ERUPT_SPARK_LIFE_MIN = 10;
+        static final int ERUPT_SPARK_LIFE_MAX = 18;
+        /** 喷发期间常规粒子降到这个比例，结束后自然恢复。 */
+        static final float ERUPT_REGULAR_SCALE = 0.20F;
+        /** 喷出结束后的收尾窗口（tick），补完剩余轻烟。 */
+        static final int ERUPT_TAIL_TICKS = 6;
     }
 
     /**
@@ -179,6 +239,20 @@ public final class VolcanicTortoiseAmbientFx {
         int sparkThisSecond;
         long secondMark;
         String skip = "ok";
+
+        // ---- 小喷发调度（按实体保存，互不影响） -------------------------
+
+        /** 下一次允许开始的 gameTime；0 表示还没排过。 */
+        long nextEruptionAt;
+        /** 本次喷发的开始 gameTime；-1 表示当前没有喷发。 */
+        long eruptionStart = -1L;
+        int eruptCharge;
+        int eruptBurst;
+        int eruptSparksTotal;
+        int eruptSmokeTotal;
+        int eruptSmokeLeft;
+        /** 上一次 tick 的 gameTime，用来识别“离开又回来”的空档。 */
+        long lastTickAt;
     }
 
     private static final Map<VolcanicTortoiseEntity, FxState> STATES = new WeakHashMap<>();
@@ -278,7 +352,6 @@ public final class VolcanicTortoiseAmbientFx {
         }
         boolean attacking = actionPlaying(boss);
         state.skip = attacking ? "attack" : "ok";
-        float rateScale = proximity * (attacking ? Tuning.ATTACK_RATE_SCALE : 1.0F);
 
         if (CRATER_DEBUG) {
             // 调试：停掉正式粒子，只在火山口中心打标记，便于玩家确认定位。
@@ -288,9 +361,40 @@ public final class VolcanicTortoiseAmbientFx {
             return budget;
         }
 
+        // 很长时间没 tick（切维度、重新加载、离开追踪范围再回来）不补发：重排一次间隔。
+        if (state.lastTickAt != 0L && now - state.lastTickAt > 40L) {
+            state.eruptionStart = -1L;
+            state.nextEruptionAt = now + interval(level.random, phaseTwo);
+        }
+        state.lastTickAt = now;
+
+        if (state.nextEruptionAt == 0L) {
+            state.nextEruptionAt = now + interval(level.random, phaseTwo);
+        }
+
+        // ---- 小喷发调度：同一实体不重叠，攻击就顺延，绝不累计多次 ----------
+        if (state.eruptionStart >= 0L) {
+            if (attacking) {
+                // 喷发中途开始攻击：停止后续生成，已生成的粒子自然消失。
+                state.eruptionStart = -1L;
+                state.nextEruptionAt = now + interval(level.random, phaseTwo);
+            } else {
+                budget = tickEruption(level, boss, state, now, phaseTwo, budget);
+            }
+        } else if (now >= state.nextEruptionAt && !attacking) {
+            startEruption(level, state, now, phaseTwo);
+            budget = tickEruption(level, boss, state, now, phaseTwo, budget);
+        }
+        boolean erupting = state.eruptionStart >= 0L;
+
         Vec3 vent = crater(boss, phaseTwo, level.random);
 
         // ---- 轻烟：小数累计，5/s 就是每 tick +0.25 -------------------------
+        float rateScale = proximity * (attacking ? Tuning.ATTACK_RATE_SCALE : 1.0F);
+        if (erupting) {
+            // 喷发期间压低常规粒子，避免两套效果叠成浓烟。
+            rateScale *= Tuning.ERUPT_REGULAR_SCALE;
+        }
         float smokeRate = (phaseTwo ? Tuning.SMOKE_PER_SECOND_P2 : Tuning.SMOKE_PER_SECOND_P1) * rateScale;
         state.smokeAcc += smokeRate / 20.0F;
         while (state.smokeAcc >= 1.0F && budget > 0) {
@@ -323,6 +427,89 @@ public final class VolcanicTortoiseAmbientFx {
         }
 
         logDebug(mc, boss, state, now, vent, phaseTwo);
+        return budget;
+    }
+
+    /** 抽取下一次喷发间隔：一阶段 12~20 秒，二阶段 7~12 秒。 */
+    private static int interval(RandomSource random, boolean phaseTwo) {
+        int min = phaseTwo ? Tuning.ERUPT_INTERVAL_MIN_P2 : Tuning.ERUPT_INTERVAL_MIN_P1;
+        int max = phaseTwo ? Tuning.ERUPT_INTERVAL_MAX_P2 : Tuning.ERUPT_INTERVAL_MAX_P1;
+        return min + random.nextInt(max - min + 1);
+    }
+
+    /** 开始一次喷发：只随机一次节奏与总量，之后按 tick 分批放完。 */
+    private static void startEruption(ClientLevel level, FxState state, long now, boolean phaseTwo) {
+        RandomSource random = level.random;
+        state.eruptionStart = now;
+        state.eruptCharge = Tuning.ERUPT_CHARGE_MIN
+                + random.nextInt(Tuning.ERUPT_CHARGE_MAX - Tuning.ERUPT_CHARGE_MIN + 1);
+        state.eruptBurst = Tuning.ERUPT_BURST_MIN
+                + random.nextInt(Tuning.ERUPT_BURST_MAX - Tuning.ERUPT_BURST_MIN + 1);
+        int sparksMin = phaseTwo ? Tuning.ERUPT_SPARKS_MIN_P2 : Tuning.ERUPT_SPARKS_MIN_P1;
+        int sparksMax = phaseTwo ? Tuning.ERUPT_SPARKS_MAX_P2 : Tuning.ERUPT_SPARKS_MAX_P1;
+        state.eruptSparksTotal = sparksMin + random.nextInt(sparksMax - sparksMin + 1);
+        int smokeMin = phaseTwo ? Tuning.ERUPT_SMOKE_MIN_P2 : Tuning.ERUPT_SMOKE_MIN_P1;
+        int smokeMax = phaseTwo ? Tuning.ERUPT_SMOKE_MAX_P2 : Tuning.ERUPT_SMOKE_MAX_P1;
+        state.eruptSmokeTotal = smokeMin + random.nextInt(smokeMax - smokeMin + 1);
+        state.eruptSmokeLeft = state.eruptSmokeTotal;
+    }
+
+    /**
+     * 推进一次喷发：蓄亮 → 短促喷出 → 快速收尾。
+     * 所有火星在喷出窗口内按“每 tick 基础数 + 前几 tick 补余数”分批放，不会一 tick 全放完。
+     */
+    private static int tickEruption(ClientLevel level, VolcanicTortoiseEntity boss, FxState state,
+                                    long now, boolean phaseTwo, int budget) {
+        int elapsed = (int) (now - state.eruptionStart);
+        int charge = state.eruptCharge;
+        int burst = state.eruptBurst;
+
+        if (elapsed < charge) {
+            state.skip = "erupt-charge";
+            Vec3 at = crater(boss, phaseTwo, level.random);
+            glow(level, at, 2);
+            return budget;
+        }
+
+        int b = elapsed - charge;
+        if (b < burst) {
+            state.skip = "erupt-burst";
+            int base = state.eruptSparksTotal / burst;
+            int remainder = state.eruptSparksTotal % burst;
+            int count = base + (b < remainder ? 1 : 0);
+            for (int i = 0; i < count && budget > 0; i++) {
+                spawnEruptionSpark(level, crater(boss, phaseTwo, level.random), phaseTwo);
+                budget--;
+            }
+            if (b == 0) {
+                glow(level, crater(boss, phaseTwo, level.random), 2);
+                if (state.eruptSmokeLeft > 0) {
+                    spawnEruptionSmoke(level, crater(boss, phaseTwo, level.random), phaseTwo);
+                    state.eruptSmokeLeft--;
+                }
+            } else if (b == 1) {
+                glow(level, crater(boss, phaseTwo, level.random), 1);
+            }
+            return budget;
+        }
+
+        // 收尾：剩余轻烟每 2 tick 补一个；补完且过了最短收尾就结束。
+        int t = b - burst;
+        boolean smokeDone = state.eruptSmokeLeft <= 0;
+        boolean finished = t >= Tuning.ERUPT_TAIL_TICKS || (smokeDone && t >= 2);
+        if (finished) {
+            state.eruptionStart = -1L;
+            state.nextEruptionAt = now + interval(level.random, phaseTwo);
+            state.smokeAcc = 0.0F;
+            state.sparkAcc = 0.0F;
+            state.skip = "ok";
+            return budget;
+        }
+        state.skip = "erupt-tail";
+        if (!smokeDone && t % 2 == 0) {
+            spawnEruptionSmoke(level, crater(boss, phaseTwo, level.random), phaseTwo);
+            state.eruptSmokeLeft--;
+        }
         return budget;
     }
 
@@ -450,6 +637,155 @@ public final class VolcanicTortoiseAmbientFx {
             mc.particleEngine.createParticle(ParticleTypes.END_ROD,
                     at.x + Math.cos(a) * 0.4D, at.y, at.z + Math.sin(a) * 0.4D, 0.0D, 0.0D, 0.0D);
         }
+    }
+
+    /**
+     * 喷发蓄亮：只在火山口内部叠几颗短命、偏白的火焰粒子，让口内熔岩“亮一下”。
+     * 发光层本身已经是全亮，单纯加光照看不出差别，所以用局部小范围叠加表现。
+     */
+    private static void glow(ClientLevel level, Vec3 at, int count) {
+        Minecraft mc = Minecraft.getInstance();
+        RandomSource random = level.random;
+        for (int i = 0; i < count; i++) {
+            double x = at.x + (random.nextDouble() - 0.5D) * Tuning.CRATER_JITTER;
+            double z = at.z + (random.nextDouble() - 0.5D) * Tuning.CRATER_JITTER;
+            double y = at.y + 0.02D + random.nextDouble() * 0.08D;
+            Particle particle = mc.particleEngine.createParticle(ParticleTypes.FLAME, x, y, z, 0.0D, 0.012D, 0.0D);
+            if (particle == null) {
+                continue;
+            }
+            particle.setLifetime(3 + random.nextInt(4));
+            particle.scale(1.8F + random.nextFloat() * 0.9F);
+            particle.setColor(1.0F, 0.95F, 0.72F);
+            particle.setParticleSpeed(0.0D, 0.012D, 0.0D);
+        }
+    }
+
+    /** 喷发火星：速度与高度明显高于常规火星，形成一次短促的“噗发”。 */
+    private static void spawnEruptionSpark(ClientLevel level, Vec3 at, boolean phaseTwo) {
+        Minecraft mc = Minecraft.getInstance();
+        RandomSource random = level.random;
+        double x = at.x + (random.nextDouble() - 0.5D) * Tuning.ERUPT_SPARK_SPREAD;
+        double z = at.z + (random.nextDouble() - 0.5D) * Tuning.ERUPT_SPARK_SPREAD;
+        double y = at.y + 0.04D + random.nextDouble() * 0.10D;
+        double angle = random.nextDouble() * Math.PI * 2.0D;
+        double outward = Tuning.ERUPT_SPARK_OUTWARD_MIN
+                + random.nextDouble() * (Tuning.ERUPT_SPARK_OUTWARD_MAX - Tuning.ERUPT_SPARK_OUTWARD_MIN);
+        double vx = Math.cos(angle) * outward;
+        double vz = Math.sin(angle) * outward;
+        double upMin = phaseTwo ? Tuning.ERUPT_SPARK_UP_MIN_P2 : Tuning.ERUPT_SPARK_UP_MIN_P1;
+        double upMax = phaseTwo ? Tuning.ERUPT_SPARK_UP_MAX_P2 : Tuning.ERUPT_SPARK_UP_MAX_P1;
+        double vy = upMin + random.nextDouble() * (upMax - upMin);
+
+        float[] color = random.nextFloat() < 0.25F
+                ? new float[]{1.00F, 0.93F, 0.62F}
+                : Tuning.SPARK_COLORS[random.nextInt(Tuning.SPARK_COLORS.length)];
+        Particle particle = mc.particleEngine.createParticle(
+                random.nextFloat() < 0.6F ? ParticleTypes.FLAME : ParticleTypes.SMALL_FLAME,
+                x, y, z, vx, vy, vz);
+        if (particle == null) {
+            return;
+        }
+        particle.setLifetime(Tuning.ERUPT_SPARK_LIFE_MIN
+                + random.nextInt(Tuning.ERUPT_SPARK_LIFE_MAX - Tuning.ERUPT_SPARK_LIFE_MIN + 1));
+        float scale = Tuning.ERUPT_SPARK_SCALE_MIN
+                + random.nextFloat() * (Tuning.ERUPT_SPARK_SCALE_MAX - Tuning.ERUPT_SPARK_SCALE_MIN);
+        if (random.nextFloat() < 0.3F) {
+            scale += Tuning.ERUPT_SPARK_SCALE_BONUS;
+        }
+        if (phaseTwo) {
+            scale += 0.10F;
+        }
+        particle.scale(scale);
+        particle.setColor(color[0], color[1], color[2]);
+        particle.setParticleSpeed(vx, vy, vz);
+    }
+
+    /** 喷发附带的短命轻烟：少量、很快消失，不会长期挡住火山口。 */
+    private static void spawnEruptionSmoke(ClientLevel level, Vec3 at, boolean phaseTwo) {
+        Minecraft mc = Minecraft.getInstance();
+        RandomSource random = level.random;
+        double x = at.x + (random.nextDouble() - 0.5D) * Tuning.ERUPT_SMOKE_SPREAD;
+        double z = at.z + (random.nextDouble() - 0.5D) * Tuning.ERUPT_SMOKE_SPREAD;
+        double y = at.y + 0.08D + random.nextDouble() * 0.10D;
+        double vx = (random.nextDouble() - 0.5D) * 0.03D;
+        double vz = (random.nextDouble() - 0.5D) * 0.03D;
+        double vy = Tuning.ERUPT_SMOKE_RISE_MIN
+                + random.nextDouble() * (Tuning.ERUPT_SMOKE_RISE_MAX - Tuning.ERUPT_SMOKE_RISE_MIN);
+        Particle particle = mc.particleEngine.createParticle(ParticleTypes.SMOKE, x, y, z, vx, vy, vz);
+        if (particle == null) {
+            return;
+        }
+        particle.setLifetime(Tuning.ERUPT_SMOKE_LIFE_MIN
+                + random.nextInt(Tuning.ERUPT_SMOKE_LIFE_MAX - Tuning.ERUPT_SMOKE_LIFE_MIN + 1));
+        particle.scale(Tuning.ERUPT_SMOKE_SCALE_MIN
+                + random.nextFloat() * (Tuning.ERUPT_SMOKE_SCALE_MAX - Tuning.ERUPT_SMOKE_SCALE_MIN));
+        particle.setColor(0.46F, 0.43F, 0.40F);
+        particle.setParticleSpeed(vx, vy, vz);
+    }
+
+    // ========================================================= 调试入口 ==
+
+    /** 调试命令只注册在客户端，并且需要 {@code -Dtnc.tortoise.eruption.debug=true}。 */
+    @SubscribeEvent
+    public static void onRegisterClientCommands(RegisterClientCommandsEvent event) {
+        if (!ERUPTION_DEBUG) {
+            return;
+        }
+        event.getDispatcher().register(Commands.literal("tnc_erupt").executes(context -> {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.level == null || mc.player == null) {
+                return 0;
+            }
+            VolcanicTortoiseEntity nearest = null;
+            double best = 48.0D * 48.0D;
+            for (Entity entity : mc.level.entitiesForRendering()) {
+                if (entity instanceof VolcanicTortoiseEntity boss && !boss.isRemoved()) {
+                    double d = mc.player.distanceToSqr(boss);
+                    if (d <= best) {
+                        best = d;
+                        nearest = boss;
+                    }
+                }
+            }
+            if (nearest == null) {
+                context.getSource().sendFailure(Component.literal("48 格内没有火山巨龟。"));
+                return 0;
+            }
+            VolcanicTortoiseEntity target = nearest;
+            String refused = forceEruption(target);
+            if (refused == null) {
+                context.getSource().sendSuccess(
+                        () -> Component.literal("已触发一次小喷发：" + target.getName().getString()), false);
+                return 1;
+            }
+            context.getSource().sendFailure(Component.literal("没有触发：" + refused));
+            return 0;
+        }));
+    }
+
+    /** 手动触发一次正式小喷发；返回 null 表示已触发，否则返回拒绝原因。 */
+    private static String forceEruption(VolcanicTortoiseEntity boss) {
+        if (!boss.isAlive() || boss.isDeadOrDying()) {
+            return "实体已死亡";
+        }
+        if (!(boss.level() instanceof ClientLevel level)) {
+            return "不在客户端世界";
+        }
+        long now = level.getGameTime();
+        FxState state = STATES.computeIfAbsent(boss, ignored -> new FxState());
+        state.phase = boss.phase();
+        if (now < state.resumeAt) {
+            return "正在转阶段";
+        }
+        if (actionPlaying(boss)) {
+            return "正在攻击";
+        }
+        if (state.eruptionStart >= 0L) {
+            return "上一次喷发还没结束";
+        }
+        startEruption(level, state, now, boss.isPhaseTwo());
+        return null;
     }
 
     // =========================================================== 动作检测 ==
