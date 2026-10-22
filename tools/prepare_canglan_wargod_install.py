@@ -23,7 +23,7 @@ def prepare(live, built, output):
                     str(root / "tools/WireBossMusicMethod.java")], check=True)
     with zipfile.ZipFile(base) as src, zipfile.ZipFile(built) as compiled:
         classes = {n for n in compiled.namelist() if n.startswith("com/tnc/tnc/world/wind/")
-                   and "/Canglan" in n and n.endswith(".class") and "GameTests" not in n}
+                   and "/Canglan" in n and n.endswith(".class") and "GameTests" not in n and "ClientAudit" not in n}
         classes |= {"com/tnc/tnc/magic/wind/WindVolleyEntity.class", "com/tnc/tnc/client/WindChainRenderers$Volley.class"}
         assert len(classes) >= 15, classes
         payload = {n: compiled.read(n) for n in classes}

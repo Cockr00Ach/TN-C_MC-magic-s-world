@@ -27,6 +27,34 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class CanglanWarlordModelTest {
     @Test
+    void rendererSeatsTheHandleRatherThanTheBladeRootAtThePalm() throws Exception {
+        String renderer=Files.readString(Path.of("src/main/java/com/tnc/tnc/world/wind/client/CanglanWarlordRenderer.java"));
+        for(String form:new String[]{"SWORD","SPEAR"}) {
+            var scalePattern=java.util.regex.Pattern.compile(form+"_SCALE = ([0-9.]+)F").matcher(renderer);
+            var gripPattern=java.util.regex.Pattern.compile(form+"_GRIP = ([0-9.]+)F").matcher(renderer);
+            assertTrue(scalePattern.find());assertTrue(gripPattern.find());
+            double scale=Double.parseDouble(scalePattern.group(1)),offset=Double.parseDouble(gripPattern.group(1));
+            double handleZ=form.equals("SWORD")?-.8:0;
+            assertEquals(0,offset+scale*(handleZ/16-.5),.00001,form+" handle centre misses palm");
+        }
+    }
+    @Test
+    void animationsNeverContainAliasedStartingKeyframes() throws Exception {
+        for(var animation:clips().entrySet())for(var bone:animation.getValue().getAsJsonObject().getAsJsonObject("bones").entrySet()) {
+            for(var channel:bone.getValue().getAsJsonObject().entrySet()) {
+                var seen=new java.util.HashSet<Double>();
+                for(String key:channel.getValue().getAsJsonObject().keySet())assertTrue(seen.add(Double.parseDouble(key)),animation.getKey()+" aliases time "+key);
+            }
+        }
+    }
+    @Test
+    void shieldIsRemovedAndThreeEchoStancesAreDistinct() throws Exception {
+        assertTrue(bones().get("shield").getAsJsonArray("cubes").isEmpty());
+        var animations=clips();
+        assertFalse(animations.get("echo_guard").equals(animations.get("echo_lunge")));
+        assertFalse(animations.get("echo_lunge").equals(animations.get("echo_recover")));
+    }
+    @Test
     void warGodMovesCompleteTheirActualAnimationBeforeRecovery() throws Exception {
         JsonObject animations=clips();
         for(int move:new int[]{1,5,9,10,11,12}) {
@@ -90,7 +118,7 @@ class CanglanWarlordModelTest {
         for (var entry : clips.entrySet()) {
             JsonObject animation = entry.getValue().getAsJsonObject();
             boolean loop = animation.has("loop") && animation.get("loop").getAsBoolean();
-            boolean shouldLoop = Set.of("idle", "walk").contains(entry.getKey());
+            boolean shouldLoop = Set.of("idle", "walk", "phantom_idle", "echo_guard", "echo_lunge", "echo_recover").contains(entry.getKey());
             assertEquals(shouldLoop, loop, entry.getKey() + " 的循环标记不对");
         }
     }
@@ -182,7 +210,7 @@ class CanglanWarlordModelTest {
                 maxX = Math.max(maxX, origin.get(0).getAsDouble() + size.get(0).getAsDouble());
             }
         }
-        assertTrue(cubes >= 400, "方块预算过低：" + cubes);
+        assertTrue(cubes >= 320, "移除盾牌后仍应保留完整分层盔甲：" + cubes);
         // 108 units tall = 6.75 blocks; a little slack for rotated crest tips
         double height = maxY - minY;
         assertTrue(height >= 100.0D && height <= 118.0D,

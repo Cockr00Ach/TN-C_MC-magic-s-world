@@ -11,6 +11,17 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 @PrefixGameTestTemplate(false)
 public final class CanglanWarlordGameTests {
     // MCA replaces vanilla villagers during joining; use an ordinary real animal as damage/AI fixture.
+    @GameTest(template="building_test_empty", timeoutTicks=40, batch="canglan_walking")
+    public static void normalApproachIsEnabledAfterEntryButNotDuringWindStep(GameTestHelper helper) {
+        var boss=helper.spawn(CanglanWarlordRegistration.CANGLAN_WARLORD,new BlockPos(2,1,2));boss.setNoAi(true);
+        var target=helper.spawn(EntityType.COW,new BlockPos(3,1,2));target.setNoAi(true);boss.setTarget(target);
+        var goal=new com.tnc.tnc.boss.GiantApproachGoal(boss,.95,boss::canApproach);
+        helper.assertTrue(!goal.canUse(),"Entry pose must not walk");
+        var tag=new net.minecraft.nbt.CompoundTag();boss.saveWithoutId(tag);tag.putBoolean("CanglanWarlordSpawned",true);boss.readAdditionalSaveData(tag);
+        helper.assertTrue(goal.canUse(),"A live target must enable ordinary approach");
+        boss.setCanglanMove(14);helper.assertTrue(!goal.canUse(),"Wind step must own movement");
+        helper.succeed();
+    }
     @GameTest(template="building_test_empty", timeoutTicks=100, batch="canglan_registration")
     public static void firstDeathRestoresHealthAsFivefoldGhost(GameTestHelper helper) {
         var boss=helper.spawn(CanglanWarlordRegistration.CANGLAN_WARLORD,new BlockPos(2,1,2));

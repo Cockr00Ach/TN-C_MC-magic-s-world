@@ -55,7 +55,13 @@ final class CanglanWarlordCombat {
         }
         if(target==null||!target.isAlive()){cancel();return;}
         boss.getNavigation().stop();boss.setDeltaMovement(0,boss.getDeltaMovement().y,0);
-        if(age<10)boss.getLookControl().setLookAt(target,60,30);
+        if(age<10){
+            boss.getLookControl().setLookAt(target,60,30);
+            var delta=target.position().subtract(boss.position());
+            float yaw=(float)Math.toDegrees(Math.atan2(-delta.x,delta.z));
+            boss.setYRot(net.minecraft.util.Mth.rotLerp(.45F,boss.getYRot(),yaw));
+            boss.yBodyRot=boss.getYRot();boss.setYHeadRot(boss.getYRot());
+        }
         float scale=boss.battleScale();
         if((move==1&&age==10)||(move==5&&(age==12||age==22)))strike(boss.position(),move==5?8*scale:7*scale,move==5);
         if(move==CanglanWarGodRules.TORNADO&&age==26){strike(boss.position(),9*scale,true);gale(boss.position(),false);}

@@ -54,7 +54,9 @@ for _v in (KEY, FILL, RIM):
 
 
 def rotation(degrees):
-    x, y, z = np.radians(degrees)
+    # GeckoLib bakes animation X/Y negated and model X mirrored. In the
+    # authored geometry frame this becomes (-X,+Y,-Z), not raw Euler angles.
+    x, y, z = np.radians(np.array(degrees) * np.array([-1,1,-1]))
     cx, sx = np.cos(x), np.sin(x)
     cy, sy = np.cos(y), np.sin(y)
     cz, sz = np.cos(z), np.sin(z)
@@ -262,7 +264,7 @@ def main():
             ("BACK / cape, banner, pauldrons", 1, "back", 4),
             ("ABOVE 3/4 / pauldrons, banner", 1, "threequarter", 32),
             ("HEAD / mask, horns, cloth crest", None, "threequarter", 8),
-            ("PHASE 2 / spear + gale buckler", 2, "threequarter", 6),
+            ("PHASE 2 / spear / open-hand guard", 2, "threequarter", 6),
         ]
         pose = sample(clips, "idle", 1.0)
         body, matrices, bones = build_faces(geometry, texture, pose)

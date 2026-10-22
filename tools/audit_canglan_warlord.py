@@ -9,6 +9,7 @@ and then asserts the things that otherwise only show up as a broken boss in game
 """
 import json
 import math
+import re
 import sys
 from pathlib import Path
 
@@ -22,6 +23,8 @@ import wind_blade  # noqa: E402
 GEO = ROOT / "src/main/resources/assets/tnc/geo/entity/canglan_warlord.geo.json"
 ANIM = ROOT / "src/main/resources/assets/tnc/animations/entity/canglan_warlord.animation.json"
 TEX = ROOT / "src/main/resources/assets/tnc/textures/entity/canglan_warlord.png"
+RENDERER = (ROOT / "src/main/java/com/tnc/tnc/world/wind/client/"
+                   "CanglanWarlordRenderer.java")
 
 # clip -> (ticks, is_loop) -- the tick budgets must match CanglanWarlordAttackRules
 EXPECTED = {
@@ -34,7 +37,7 @@ EXPECTED = {
 # the frames on which the boss actually connects, per clip, and which weapon it is
 # holding then: form 1 = wind arsenal sword (phase one), 2 = spear (phase two)
 HIT_FRAMES = {"cleave_left": (1, [0.5]), "cleave_right": (1, [0.5]), "overhead": (1, [0.8]),
-              "shield_bash": (1, [0.5]), "thrust": (2, [0.6]), "sweep": (2, [0.6, 1.0]),
+              "thrust": (2, [0.6]), "sweep": (2, [0.6, 1.0]),
               "spear_throw": (2, [0.6])}
 # phi: 0 = blade straight back, -90 = straight up, +/-180 = straight forward,
 # +90 = straight down. Each attack has a target aim and a tolerance in degrees.
@@ -228,6 +231,9 @@ def main():
     # phase will actually be holding. tools/solve_wrist.py owns the wrist table
     # that keeps this clean.
     for clip in clips:
+        # The live renderer hides held weapons as soon as the entity is dead.
+        if clip == "death":
+            continue
         seconds = float(clips[clip]["animation_length"])
         forms = CLIP_FORMS.get(clip, BOTH_FORMS)
         worst_hits = 0
@@ -256,6 +262,13 @@ def main():
         matrices = matrix_of(geometry, preview.sample(clips, clip, time))
         blade = np.concatenate([poly for poly, _, _ in
                                 wind_blade.place(1, matrices, bones_by_name)])
+        hand = (matrices["weapon_1"] @ np.append(bones_by_name["weapon_1"]["pivot"],1.0))[:3]
+        elbow = (matrices["fore_1"] @ np.append(bones_by_name["fore_1"]["pivot"],1.0))[:3]
+        tip, _ = wind_blade.tip(1, matrices, bones_by_name)
+        # User's profile reference: elbow hangs, fist bends forward, blade points
+        # forward and up. In authored geometry front is -Z, height is +Y.
+        if hand[2] >= elbow[2]-6 or tip[2] >= hand[2]-12 or tip[1] <= hand[1]+12:
+            errors.append(f"{clip} t={time}: guard must bend forward and aim forward/up")
         for part in ("pauldron_1", "head", "chest", "banner_a", "crest_c"):
             p_low, p_high = aabb(bone_points(geometry, matrices[part], part))
             inside = int(((blade > p_low) & (blade < p_high)).all(axis=1).sum())
@@ -287,12 +300,8 @@ def main():
         if max(far) > 16.0:
             errors.append(f"bone {bone['name']}'s cubes sit {max(far):.1f}px from its pivot")
 
-    rest_matrices = matrix_of(geometry, {})
-    shield_pts = bone_points(geometry, rest_matrices["shield"], "shield")
-    if aabb(shield_pts)[0][0] > -12.0:
-        errors.append("shield is not on the left forearm")
-    if aabb(shield_pts)[1][2] > -3.4:
-        errors.append("buckler does not stand in front of the left forearm")
+    if bones_by_name.get("shield", {}).get("cubes"):
+        errors.append("retired shield geometry is still visible")
 
     # ---- 9. the weapon is drawn, not modelled ----
     # the sword and spear are the shared wind arsenal models, placed on an empty
@@ -314,6 +323,36 @@ def main():
     for retired in ("haft_a", "haft_b", "blade", "spur", "tassel_a"):
         if retired in names:
             errors.append(f"retired dagger-axe bone {retired} still in the rig")
+
+    # ---- 10. the renderer draws the blade the audit just measured ----
+    # Every number below is duplicated between the Java renderer and wind_blade.GEAR:
+    # if they drift, the offline measurements (tip reach, aim, clearance) stop
+    # describing what the game draws, and nothing else would notice.
+    renderer = RENDERER.read_text(encoding="utf-8")
+
+    def constant(name):
+        match = re.search(rf"{name}\s*=\s*(-?[0-9.]+)F", renderer)
+        return float(match.group(1)) if match else None
+
+    for form, prefix in ((1, "SWORD"), (2, "SPEAR")):
+        asset, scale, grip, pitch, roll = wind_blade.GEAR[form]
+        want = {"SCALE": scale, "GRIP": grip, "PITCH": pitch, "ROLL": roll}
+        for key, value in want.items():
+            got = constant(f"{prefix}_{key}")
+            if got is None:
+                errors.append(f"renderer lost {prefix}_{key}")
+            elif abs(got - value) > 1e-6:
+                errors.append(f"{prefix}_{key} is {got} in the renderer but {value} "
+                              f"in wind_blade.GEAR (the audit measures the latter)")
+
+    # The anchor's own transform must be re-applied: GeckoLib pops it before a
+    # renderer hook runs, so drawing there without atBone() loses the anchor's
+    # pivot and its animation (all thirteen clips' wrist keys).
+    if "atBone(" not in renderer:
+        errors.append("renderer draws on the anchor without WindConstructModels.atBone(): "
+                      "the blade would ignore the wrist keys in game")
+    if "drawBlade(pose,gripBone," not in renderer or "gripPose=new org.joml.Matrix4f" not in renderer:
+        errors.append("renderer does not preserve the animated palm for deferred weapon rendering")
 
     print(f"bones={len(bones)} cubes={len(cubes)} clips={len(clips)} "
           f"height={height / 16:.2f} blocks span={span / 16:.2f} blocks "

@@ -141,13 +141,14 @@ public final class CanglanWarlordEntity extends Monster implements GeoEntity {
     public boolean rising() {
         return spawnTicks > 0;
     }
+    boolean canApproach() { return !busy() && shiftTicks == 0 && spawnTicks == 0; }
 
     @Override
     protected void registerGoals() {
         goalSelector.addGoal(0, new FloatGoal(this));
         // Direct steering: a 6.4-block body must never run an A* search across the arena.
         goalSelector.addGoal(2, new GiantApproachGoal(this, 0.95D,
-                () -> getTarget() == null && !busy() && shiftTicks == 0 && spawnTicks == 0));
+                this::canApproach));
         goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 48.0F));
         goalSelector.addGoal(9, new RandomLookAroundGoal(this));
         targetSelector.addGoal(1, new HurtByTargetGoal(this));
@@ -381,7 +382,7 @@ public final class CanglanWarlordEntity extends Monster implements GeoEntity {
                 state -> busy() || shiftTicks > 0 || spawnTicks > 0 || !isAlive()
                         ? PlayState.STOP
                         : state.setAndContinue(RawAnimation.begin()
-                                .thenLoop(state.isMoving() ? "walk" : "idle"))));
+                                .thenLoop((state.isMoving() || walkAnimation.speed() > .02F) ? "walk" : phase()==2 ? "phantom_idle" : "idle"))));
         AnimationController<CanglanWarlordEntity> action = new AnimationController<>(this, "action", 1,
                 state -> PlayState.STOP);
         for (String clip : new String[]{"cleave_left", "cleave_right", "overhead", "thrust",

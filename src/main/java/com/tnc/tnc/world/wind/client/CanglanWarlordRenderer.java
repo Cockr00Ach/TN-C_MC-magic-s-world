@@ -26,6 +26,9 @@ import software.bernie.geckolib.renderer.GeoEntityRenderer;
  * rig audit measured it.
  */
 public final class CanglanWarlordRenderer extends GeoEntityRenderer<CanglanWarlordEntity> {
+    private org.joml.Matrix4f gripPose;
+    private org.joml.Matrix3f gripNormal;
+    private GeoBone gripBone;
     /** Arsenal model index, shared with {@link WindConstructModels#weapon}. */
     private static final int SWORD_FORM = CanglanWarlordAttackRules.FORM_SWORD;
     private static final int SPEAR_FORM = CanglanWarlordAttackRules.FORM_SPEAR;
@@ -39,8 +42,10 @@ public final class CanglanWarlordRenderer extends GeoEntityRenderer<CanglanWarlo
     private static final float SWORD_SCALE = 2.10F;
     private static final float SPEAR_SCALE = 2.40F;
     /** Slides the fist along the haft instead of gripping the butt cap. */
-    private static final float SWORD_GRIP = 0.25F;
-    private static final float SPEAR_GRIP = 0.55F;
+    // Sword grip centre is (8,8,-0.8) in the item mesh; spear grip is (8,8,0).
+    // Compensate the model's -0.5 block centring *after* applying weapon scale.
+    private static final float SWORD_GRIP = 1.155F;
+    private static final float SPEAR_GRIP = 1.20F;
 
     public CanglanWarlordRenderer(EntityRendererProvider.Context context) {
         super(context, new CanglanWarlordModel());
@@ -54,9 +59,10 @@ public final class CanglanWarlordRenderer extends GeoEntityRenderer<CanglanWarlo
         return e.phase()==2 ? software.bernie.geckolib.core.object.Color.ofRGBA(.55F,.95F,1F,.48F) : super.getRenderColor(e,partial,light);
     }
     @Override public void render(CanglanWarlordEntity e,float yaw,float partial,PoseStack pose,MultiBufferSource buffers,int light) {
+        gripPose=null;gripNormal=null;gripBone=null;
         pose.pushPose();float scale=e.battleScale();pose.scale(scale,scale,scale);
         pose.pushPose();
-        pose.mulPose(Axis.YP.rotationDegrees(180-yaw));pose.translate(0,5.5,.9);
+        pose.mulPose(Axis.YP.rotationDegrees(180-e.yBodyRot));pose.translate(0,5.5,.9);
         pose.mulPose(Axis.XP.rotationDegrees(90));pose.mulPose(Axis.YP.rotationDegrees((e.tickCount+partial)*1.2F));
         pose.scale(4.2F,1,4.2F);pose.translate(-.5,0,-.5);
         var mc=net.minecraft.client.Minecraft.getInstance();
@@ -64,7 +70,9 @@ public final class CanglanWarlordRenderer extends GeoEntityRenderer<CanglanWarlo
                 net.minecraft.world.item.ItemStack.EMPTY,LightTexture.FULL_BRIGHT,net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY,
                 pose,buffers.getBuffer(RenderType.entityTranslucent(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS)));
         pose.popPose();
-        super.render(e,yaw,partial,pose,buffers,e.phase()==2?LightTexture.FULL_BRIGHT:light);pose.popPose();
+        super.render(e,yaw,partial,pose,buffers,e.phase()==2?LightTexture.FULL_BRIGHT:light);
+        if(gripPose!=null)drawBlade(pose,gripBone,e,buffers);
+        pose.popPose();
     }
 
     @Override
@@ -78,7 +86,11 @@ public final class CanglanWarlordRenderer extends GeoEntityRenderer<CanglanWarlo
         super.renderRecursively(pose, entity, bone, type, buffers, out, reRender,
                 partial, boneLight, overlay, red, green, blue, alpha);
         if (!reRender && name.equals("weapon_1")) {
-            drawBlade(pose, bone, entity, buffers);
+            // Cache the animated palm without changing texture buffers mid-body.
+            pose.pushPose();WindConstructModels.atBone(pose, bone);
+            gripPose=new org.joml.Matrix4f(pose.last().pose());
+            gripNormal=new org.joml.Matrix3f(pose.last().normal());gripBone=bone;
+            pose.popPose();
         }
     }
 
@@ -101,7 +113,7 @@ public final class CanglanWarlordRenderer extends GeoEntityRenderer<CanglanWarlo
         boolean spear = entity.weaponForm() == SPEAR_FORM;
         int form = spear ? SPEAR_FORM : SWORD_FORM;
         pose.pushPose();
-        WindConstructModels.atBone(pose, bone);
+        pose.last().pose().set(gripPose);pose.last().normal().set(gripNormal);
         // Item-model +Z is the blade: roll it upright, then cant it forward so it
         // reads as held rather than mounted flat on the back of the hand.
         pose.mulPose(Axis.ZP.rotationDegrees(spear ? SPEAR_ROLL : SWORD_ROLL));
