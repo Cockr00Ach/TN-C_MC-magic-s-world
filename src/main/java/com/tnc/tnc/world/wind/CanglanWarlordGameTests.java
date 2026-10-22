@@ -10,6 +10,11 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 @GameTestHolder("tnccanglan")
 @PrefixGameTestTemplate(false)
 public final class CanglanWarlordGameTests {
+    private static void clearArena(GameTestHelper h,BlockPos min,BlockPos max){
+        for(var p:BlockPos.betweenClosed(h.absolutePos(min),h.absolutePos(max))){
+            h.getLevel().getChunkAt(p);h.getLevel().setBlock(p,net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(),3);
+        }
+    }
     @GameTest(template="building_test_empty", timeoutTicks=50, batch="canglan_authored_thrust")
     public static void authoredThrustStopsAtWallAndOnlyHitsOnce(GameTestHelper helper) {
         var boss=helper.spawn(CanglanWarlordRegistration.CANGLAN_WARLORD,new BlockPos(3,1,2));
@@ -76,13 +81,14 @@ public final class CanglanWarlordGameTests {
     }
     @GameTest(template="building_test_empty", timeoutTicks=50, batch="canglan_step_limit")
     public static void threeStepsRequireAttackAndDoNotRestartAttackCooldown(GameTestHelper helper) {
+        clearArena(helper,new BlockPos(-16,60,-16),new BlockPos(40,69,16));
         var boss=helper.spawn(CanglanWarlordRegistration.CANGLAN_WARLORD,new BlockPos(2,60,2));boss.setNoAi(true);boss.setNoGravity(true);
         var victim=helper.spawn(EntityType.IRON_GOLEM,new BlockPos(5,60,2));victim.setNoAi(true);victim.setNoGravity(true);boss.setTarget(victim);
         int wait=boss.battle().cooldown();
         for(int step=0;step<3;step++){
             double gap=step==0?6:step==1?8:20;
             victim.setPos(boss.position().add(step%2==0?gap:-gap,0,0));
-            helper.assertTrue(boss.battle().windStep(victim,false),"Valid wind step was rejected");
+            helper.assertTrue(boss.battle().windStep(victim,false),"Valid wind step was rejected at step "+step+" from "+boss.position());
             if(step==0)helper.assertTrue(boss.battle().cooldown()==wait,"Wind step restarted attack cooldown");
             for(int tick=0;tick<6&&boss.canglanMove()==14;tick++)boss.battle().tick();
         }
@@ -122,8 +128,10 @@ public final class CanglanWarlordGameTests {
     }
     @GameTest(template="building_test_empty", timeoutTicks=40, batch="canglan_execution")
     public static void lowHealthSweepExecutesOnlyIfVictimStaysWithinReach(GameTestHelper helper) {
+        clearArena(helper,new BlockPos(-2,1,-2),new BlockPos(8,10,12));
         var boss=helper.spawn(CanglanWarlordRegistration.CANGLAN_WARLORD,new BlockPos(2,1,2));boss.setNoAi(true);boss.setNoGravity(true);
         var victim=helper.spawn(EntityType.IRON_GOLEM,new BlockPos(2,1,8));victim.setNoAi(true);victim.setNoGravity(true);victim.setHealth(40);boss.setTarget(victim);
+        helper.assertTrue(boss.hasLineOfSight(victim),"Execution fixture must have clear line of sight");
         helper.assertTrue(boss.battle().begin(5,victim),"Execution sweep was not accepted");
         for(int tick=0;tick<67;tick++)boss.battle().tick();
         helper.assertTrue(!victim.isAlive(),"Low-health target survived execution impact");boss.battle().cleanup();
@@ -135,13 +143,16 @@ public final class CanglanWarlordGameTests {
     }
     @GameTest(template="building_test_empty", timeoutTicks=40, batch="canglan_execution_boundary")
     public static void healthyHalfAndAbsorptionTargetsNeverReceiveExecution(GameTestHelper helper) {
+        clearArena(helper,new BlockPos(-2,1,-2),new BlockPos(8,10,12));
         var boss=helper.spawn(CanglanWarlordRegistration.CANGLAN_WARLORD,new BlockPos(2,1,2));boss.setNoAi(true);boss.setNoGravity(true);
         for(float health:new float[]{100,51,50,40}){
             var victim=helper.spawn(EntityType.IRON_GOLEM,new BlockPos(2,1,8));victim.setNoAi(true);victim.setNoGravity(true);victim.setHealth(health);
             if(health==40)victim.setAbsorptionAmount(20);
+            helper.assertTrue(boss.hasLineOfSight(victim),"Boundary fixture must have clear line of sight");
             boss.setTarget(victim);helper.assertTrue(boss.battle().begin(5,victim),"Boundary sweep did not start");
             for(int tick=0;tick<67;tick++)boss.battle().tick();
             helper.assertTrue(victim.isAlive(),"Healthy, half-health or golden-heart target was executed: "+health);
+            if(health==100)helper.assertTrue(victim.getHealth()<health,"Normal sweep must actually hit, not pass because terrain blocked it");
             boss.battle().cleanup();victim.discard();
         }
         var fragile=helper.spawn(EntityType.IRON_GOLEM,new BlockPos(2,1,8));fragile.setNoAi(true);fragile.setNoGravity(true);

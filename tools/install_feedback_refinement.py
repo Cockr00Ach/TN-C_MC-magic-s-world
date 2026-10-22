@@ -33,19 +33,35 @@ def validate(jar):
     contents = log.read_text('utf8', errors='replace')
     counts = re.findall(r'All (\d+) required tests passed', contents)
     assert log.stat().st_mtime >= latest and 'BUILD SUCCESSFUL' in contents
-    assert counts and int(counts[-1]) >= 155, 'Combined regression including the six new feedback tests required'
+    assert counts and int(counts[-1]) >= 161, 'Combined regression including the six new feedback tests required'
     units = 0
     for p in (R/'build/test-results/test').glob('TEST-*.xml'):
         t = ET.parse(p).getroot()
         assert int(t.attrib['failures']) == int(t.attrib['errors']) == 0
         units += int(t.attrib['tests'])
-    assert units >= 402
+    assert units >= 406
     reports = {}
     with zipfile.ZipFile(jar) as z:
         for mode in ['shaders', 'vanilla']:
             path = R/f'work/feedback-native-{mode}/report.json'
             report = json.loads(path.read_text('utf8'))
-            assert path.stat().st_mtime >= latest
+            if path.stat().st_mtime < latest:
+                # A teammate can land unrelated bosses while native checks run. Reuse
+                # the visual evidence only if EVERY class in the tested feature scopes
+                # and their shared renderer dependencies is byte-identical to that JAR.
+                reference = json.loads((R/'work/feedback-native-reference.json').read_text('utf8'))
+                reference_jar = Path(reference['jar'])
+                assert sha(reference_jar) == reference['sha256']
+                prefixes = tuple('com/tnc/tnc/'+scope+'/' for scope in [
+                    'alchemy','arcana','production','life/routes','life/pasture',
+                    'journey','mana/sight','client/ui'])
+                with zipfile.ZipFile(reference_jar) as tested:
+                    names = {n for n in tested.namelist() if n.startswith(prefixes) and n.endswith('.class')}
+                    assert len(names) > 100
+                    assert names == {n for n in z.namelist() if n.startswith(prefixes) and n.endswith('.class')}
+                    for n in names: assert z.read(n) == tested.read(n), 'Repeat native audit: '+n
+                report['unchanged_native_feature_entries'] = len(names)
+                report['native_reference_jar_sha256'] = reference['sha256']
             assert report['screenshots'] == 11 and not report['errors'] and all(report['checks'].values()), report
             assert len(list(path.parent.glob('*.png'))) == 11
             for key in ['ftb_37B7FFAC33E9E92C', 'ftb_30D9D5470D862905', 'ftb_662EE66DA1916AAF',
@@ -73,7 +89,9 @@ def validate(jar):
                     report.setdefault('verified_reformatted_quests', []).append(name)
             reports[mode] = report
         for n in ['com/tnc/tnc/world/eartharena/EarthArenaEncounter.class',
-                  'com/tnc/tnc/boss/wind/WindGeneralEntity.class', 'com/tnc/tnc/dungeon/TNDungeonMob.class']:
+                  'com/tnc/tnc/boss/wind/WindGeneralEntity.class', 'com/tnc/tnc/dungeon/TNDungeonMob.class',
+                  'com/tnc/tnc/boss/fire/client/VolcanicTortoiseAmbientFx.class',
+                  'com/tnc/tnc/world/wind/client/CanglanCinematicCamera.class']:
             assert n in z.namelist(), 'Preserve teammate content: '+n
     return units, int(counts[-1]), reports
 

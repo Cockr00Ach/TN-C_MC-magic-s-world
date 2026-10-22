@@ -1,9 +1,9 @@
 {
-  "installed_at": "2026-10-23T02:34:53.513639",
-  "jar_sha256": "11b88a11fef4c32a725c9138535885278fb180d69abd138bfe5752d4dd9830ce",
-  "source_commit_before_release": "4b62e7a3dd78ae8e723fc444f4bc074316ce657e",
-  "unit_tests": 402,
-  "combined_game_tests": 155,
+  "installed_at": "2026-10-23T03:14:46.315048",
+  "jar_sha256": "e6faacbc7e3521ea087ef58b0b09ea44eb5907175d440199e5e9713cfa0bcc96",
+  "source_commit_before_release": "25bc96f66ae5cf26f450705bfd28410139dbd663",
+  "unit_tests": 406,
+  "combined_game_tests": 161,
   "native_screenshots": 22,
   "native": {
     "shaders": {
@@ -60,7 +60,9 @@
         "tnc_deep_arcana.snbt": "fa51096dc192d43ada088d2573a33939c680f0326c4fbe775b7f9b48254b2916",
         "tnc_field_04_workshop.snbt": "eccd696689d0106b624d9cf87a67cb676b92a2c56e16e7693f435f8c9859a263",
         "tnc_magic_progression.snbt": "fe19f0c7c4bb89c8b28f5cb490550312354e4258962f47a388244ddcb8315dc0"
-      }
+      },
+      "unchanged_native_feature_entries": 333,
+      "native_reference_jar_sha256": "11b88a11fef4c32a725c9138535885278fb180d69abd138bfe5752d4dd9830ce"
     },
     "vanilla": {
       "screenshots": 11,
@@ -117,6 +119,8 @@
         "tnc_field_04_workshop.snbt": "30833daf8e3e662bb6be882b75285a4cec4b28829228f5527152bab51c1adf75",
         "tnc_magic_progression.snbt": "41be28a045cc01be3425fc32a15d2f71c9c67e5047dc6b1f09629c9c458ede15"
       },
+      "unchanged_native_feature_entries": 333,
+      "native_reference_jar_sha256": "11b88a11fef4c32a725c9138535885278fb180d69abd138bfe5752d4dd9830ce",
       "verified_reformatted_quests": [
         "tnc_alchemy.snbt",
         "tnc_deep_arcana.snbt",
@@ -130,13 +134,13 @@
     "mirror": 46
   },
   "files": {
-    "mods/tnc-1.0.0.jar": "11b88a11fef4c32a725c9138535885278fb180d69abd138bfe5752d4dd9830ce",
+    "mods/tnc-1.0.0.jar": "e6faacbc7e3521ea087ef58b0b09ea44eb5907175d440199e5e9713cfa0bcc96",
     "config/ftbquests/quests/chapters/tnc_alchemy.snbt": "34fd7c9facb149e2fe0b41ddb27339469747e10aa62eae3633fdbb4bba8c2564",
     "config/ftbquests/quests/chapters/tnc_deep_arcana.snbt": "fa51096dc192d43ada088d2573a33939c680f0326c4fbe775b7f9b48254b2916",
     "config/ftbquests/quests/chapters/tnc_field_04_workshop.snbt": "eccd696689d0106b624d9cf87a67cb676b92a2c56e16e7693f435f8c9859a263",
     "config/ftbquests/quests/chapters/tnc_magic_progression.snbt": "fe19f0c7c4bb89c8b28f5cb490550312354e4258962f47a388244ddcb8315dc0"
   },
-  "backup": "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\work\\backups\\feedback-refinement-20261023-023452",
+  "backup": "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\work\\backups\\feedback-refinement-20261023-031444",
   "saves_modified": false,
   "island_templates_modified": false,
   "additional_third_party_jars": []
