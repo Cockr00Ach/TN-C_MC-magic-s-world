@@ -739,5 +739,13 @@
   "effect.tnc.meal_clarity": "Meal Clarity",
   "effect.tnc.meal_gale": "Meal Gale",
   "effect.tnc.meal_harmony": "Meal Harmony",
-  "effect.tnc.meal_no_magic": "Meal No Magic"
+  "effect.tnc.meal_no_magic": "Meal No Magic",
+  "item.tnc.sunpepper_roast": "Sunpepper Roast",
+  "item.tnc.tide_herb_soup": "Tide Herb Soup",
+  "item.tnc.cloudleaf_salad": "Cloudleaf Salad",
+  "item.tnc.earthroot_loaf": "Earthroot Loaf",
+  "item.tnc.moon_honey_parfait": "Moon Honey Parfait",
+  "item.tnc.concord_banquet": "Concord Banquet",
+  "item.tnc.ninefold_sun_feast": "Ninefold Sun Feast",
+  "item.tnc.discord_mash": "Discord Mash"
 }

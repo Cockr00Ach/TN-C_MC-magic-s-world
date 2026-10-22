@@ -79,17 +79,9 @@ public final class MagicForgeMenu extends AbstractContainerMenu {
                 .sorted(Comparator.comparing(recipe -> recipe.getId().toString())).toList();
     }
 
-    public boolean selectRecipe(ServerPlayer player, ResourceLocation recipeId) {
-        if (!(forgeInventory instanceof MagicForgeBlockEntity forge) || !stillValid(player)) return false;
-        for (int i = 0; i < recipes().size(); i++) {
-            if (recipes().get(i).getId().equals(recipeId)) {
-                boolean changed = forge.chooseRecipe(i);
-                broadcastChanges();
-                return changed;
-            }
-        }
-        return false;
-    }
+    public boolean known(ResourceLocation id){return forgeInventory instanceof MagicForgeBlockEntity forge&&forge.knows(id);}
+    /** Advisory book clicks never change production or move ingredients. */
+    public boolean selectRecipe(ServerPlayer player, ResourceLocation recipeId){return stillValid(player)&&known(recipeId);}
 
     @Override public boolean stillValid(Player player) { return forgeInventory.stillValid(player); }
 

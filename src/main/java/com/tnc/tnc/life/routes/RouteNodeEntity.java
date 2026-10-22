@@ -69,6 +69,7 @@ public final class RouteNodeEntity extends BlockEntity implements MenuProvider {
     public final ContainerData data=new ContainerData(){public int get(int index){return switch(index){case 0->mana;case 1->kind().capacity;case 2->inRate+getPersistentData().getInt("AmbientRate");case 3->outRate;case 4->progress;case 5->kind().ordinal();case 6->priority;default->0;};}public void set(int i,int v){}public int getCount(){return 7;}};
     @Override public Component getDisplayName(){return Component.literal(kind().name);}
     @Override public AbstractContainerMenu createMenu(int id,Inventory inv,Player p){return new RouteMenu(id,inv,this);}
+    @Override public net.minecraft.world.phys.AABB getRenderBoundingBox(){return new net.minecraft.world.phys.AABB(worldPosition).inflate(kind()==RouteKind.ABYSS_TOWER?4:kind()==RouteKind.SOLAR||kind()==RouteKind.LUNAR?8:2);}
     @Override public CompoundTag getUpdateTag(){return saveWithoutMetadata();}
     @Override public net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket getUpdatePacket(){return net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket.create(this);}
     @Override public void onLoad(){super.onLoad();if(level instanceof ServerLevel l){RouteNetwork.add(l,worldPosition);if(kind().wire())l.scheduleTick(worldPosition,getBlockState().getBlock(),1);}}

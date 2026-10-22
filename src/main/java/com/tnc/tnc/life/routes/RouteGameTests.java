@@ -51,13 +51,15 @@ public final class RouteGameTests {
         var vein=com.tnc.tnc.life.ecology.EcologyContent.VERDANT;
         h.assertTrue(vein.defaultBlockState().canSurvive(h.getLevel(),p),"verdant vein must accept magic soil");h.succeed();
     }
-    @GameTest(template="empty",timeoutTicks=100) public static void manaFlowsWithinOwnedGardenButStopsAtBorder(GameTestHelper h){
+    @GameTest(template="empty",timeoutTicks=100,batch="route_owned_fluid") public static void manaFlowsWithinOwnedGardenButStopsAtBorder(GameTestHelper h){
         var level=h.getLevel();var plot=com.tnc.tnc.home.PlotCatalog.ALL.stream().filter(p->p.kind()==com.tnc.tnc.home.PlotCatalog.Kind.FIELD).findFirst().orElseThrow();
         var housing=com.tnc.tnc.adventure.AdventureSavedData.get(level.getServer()).housing;boolean existed=housing.contains(plot.id());var before=housing.getCompound(plot.id()).copy();var record=before.copy();housing.put(plot.id(),record);
         var at=h.absolutePos(new BlockPos(3,40,3));var owner=java.util.UUID.randomUUID();
         var local=new BlockPos(plot.max().getX()-1,plot.min().getY()+1,plot.min().getZ()+3);
         record.putUUID("Owner",owner);record.putLong("Origin",at.subtract(local).asLong());record.remove("Preparing");
-        for(var p:BlockPos.betweenClosed(at.offset(-3,-1,-3),at.offset(4,-1,3))){level.getChunkAt(p);level.setBlock(p,Blocks.STONE.defaultBlockState(),3);level.setBlock(p.above(),Blocks.AIR.defaultBlockState(),3);}
+        // This elevated fixture lies outside the tiny template. Clear old falling gravel
+        // and cap it; its global housing record must not race other default-batch tests.
+        for(var p:BlockPos.betweenClosed(at.offset(-3,-1,-3),at.offset(4,-1,3))){level.getChunkAt(p);level.setBlock(p,Blocks.STONE.defaultBlockState(),3);for(int y=1;y<=4;y++)level.setBlock(p.above(y),Blocks.AIR.defaultBlockState(),3);level.setBlock(p.above(5),Blocks.GLASS.defaultBlockState(),3);}
         level.setBlock(at,RouteContent.MANA_LIQUID.get().defaultBlockState(),3);
         h.assertTrue(com.tnc.tnc.home.HousingService.ownedAt(level,at.east())!=null,"fixture must attach ownership record");
         h.runAfterDelay(60,()->{try{

@@ -98,6 +98,7 @@ public final class MagicForgeBlockEntity extends BlockEntity implements WorldlyC
         if (!level.isClientSide && formed != wasFormed) {
             wasFormed = formed;
             frameVisuals(formed);
+            com.tnc.tnc.arcana.ArcanaTowerPorts.refresh(level,worldPosition);
             if (formed && level instanceof ServerLevel server) {
                 if(owner!=null)com.tnc.tnc.life.routes.RouteProgress.awardOwner(server,owner,"workshop/forge_formed");
                 BlockPos chamber = worldPosition.relative(front().getOpposite());
@@ -183,9 +184,12 @@ public final class MagicForgeBlockEntity extends BlockEntity implements WorldlyC
     }
 
     @Nullable public ManaForgeRecipe chosenRecipe() {
-        for (ManaForgeRecipe recipe : recipes()) if (recipe.getId().toString().equals(selectedRecipe)) return recipe;
-        return null;
+        return recipes().stream().filter(recipe->recipe.costs(this)!=null).findFirst().orElse(null);
     }
+    public boolean knows(ResourceLocation id){return getPersistentData().getCompound("CraftedRecipes").getBoolean(id.toString());}
+    private void discovered(ManaForgeRecipe recipe){var known=getPersistentData().getCompound("CraftedRecipes");known.putBoolean(recipe.getId().toString(),true);getPersistentData().put("CraftedRecipes",known);if(level!=null)level.sendBlockUpdated(worldPosition,getBlockState(),getBlockState(),3);}
+    @Override public CompoundTag getUpdateTag(){return saveWithoutMetadata();}
+    @Override public net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket getUpdatePacket(){return net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket.create(this);}
 
     public boolean chooseRecipe(int index) {
         List<ManaForgeRecipe> recipes = recipes();
@@ -319,6 +323,8 @@ public final class MagicForgeBlockEntity extends BlockEntity implements WorldlyC
         }
         // Plants feed collectors; the forge receives conserved network mana.
         ManaForgeRecipe recipe = chosenRecipe();
+        String matched=recipe==null?"":recipe.getId().toString();
+        if(!matched.equals(selectedRecipe)){selectedRecipe=matched;progress=0;}
         if (recipe == null || charge < effectiveMana(recipe)) return;
         if(!com.tnc.tnc.arcana.ArcanaCrafting.allowed(server,this,recipe))return;
         int[] costs = recipe.costs(this);
@@ -347,6 +353,7 @@ public final class MagicForgeBlockEntity extends BlockEntity implements WorldlyC
                 else output.grow(produced.getCount());
                 charge -= paidMana;
                 spendUpgrade();
+                discovered(recipe);
                 completeFx(server);
             }
             progress = 0;

@@ -16,6 +16,6 @@ public final class ArcanaRenderers {
         @Override public ResourceLocation getTextureLocation(T e){return ResourceLocation.parse(spirit?"tnc:textures/block/alchemy_bronze.png":"tnc:textures/block/alchemy_ceramic.png");}
         @Override public boolean shouldRender(T e,net.minecraft.client.renderer.culling.Frustum f,double x,double y,double z){return (!spirit||ArcanaClient.spiritVisible())&&super.shouldRender(e,f,x,y,z);}
         @Override protected void scale(T e,com.mojang.blaze3d.vertex.PoseStack pose,float partial){if(!spirit)pose.scale(1.9f,1.9f,1.9f);}
-        @Override public void render(T e,float yaw,float partial,com.mojang.blaze3d.vertex.PoseStack pose,net.minecraft.client.renderer.MultiBufferSource buffers,int light){if(spirit&&!ArcanaClient.spiritVisible())return;super.render(e,yaw,partial,pose,buffers,spirit?0xf000f0:light);if(spirit)DimensionalSpiritGeometry.render(pose,buffers,e.tickCount+partial);}
+        @Override public void render(T e,float yaw,float partial,com.mojang.blaze3d.vertex.PoseStack pose,net.minecraft.client.renderer.MultiBufferSource buffers,int light){if(spirit&&!ArcanaClient.spiritVisible())return;if(spirit)DimensionalSpiritGeometry.render(pose,buffers,e.tickCount+partial);else super.render(e,yaw,partial,pose,buffers,light);}
     }
 }

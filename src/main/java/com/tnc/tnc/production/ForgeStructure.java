@@ -145,7 +145,7 @@ public final class ForgeStructure {
         return true;
     }
 
-    private static Block blockFor(Part part) {
+    public static Block blockFor(Part part) {
         return switch (part) {
             case BRICK -> MagicForgeContent.FIREBRICK;
             case INPUT -> MagicForgeContent.INPUT_PORT;

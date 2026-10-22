@@ -23,19 +23,21 @@ public final class ArcanaMeals {
     public static Meal analyze(RouteNodeEntity n){var grid=new Taste[9];for(int i=0;i<9;i++)grid[i]=taste(n.inventory.getItem(i));return analyze(grid);}
     public static boolean conflict(RouteNodeEntity n){return analyze(n).conflicts()>0;}
     public static boolean active(RouteNodeEntity n){return analyze(n).sun();}
-    public static String state(RouteNodeEntity n){var m=analyze(n);return m.conflicts()>0?"相克 "+m.conflicts()+" · 强食将反胃禁魔":m.sun()?"九曜烈阳 · 空手享用3分钟无限火力":m.ingredients()<2?"放2—9味食材，F8看五行生克":"相生 "+m.edges()+" · 甘味桥 "+m.bridges()+" · 空手享用";}
+    public static String state(RouteNodeEntity n){var m=analyze(n);return m.conflicts()>0?"相克 "+m.conflicts()+" · 成品将带相冲负效":m.sun()?"九曜烈阳 · 空手装盘，食用后烈阳共鸣":m.ingredients()<2?"放2—9味食材，F8看五行生克":"相生 "+m.edges()+" · 甘味桥 "+m.bridges()+" · 空手制成料理";}
     public static void interact(ServerPlayer p,RouteNodeEntity n,InteractionHand hand,BlockHitResult hit){var held=p.getItemInHand(hand);var at=hit.getLocation().subtract(net.minecraft.world.phys.Vec3.atLowerCornerOf(n.getBlockPos()));int x=Math.max(0,Math.min(2,(int)(at.x*3))),z=Math.max(0,Math.min(2,(int)(at.z*3))),slot=z*3+x;
         if(p.isShiftKeyDown()&&held.isEmpty()){var s=n.inventory.removeItemNoUpdate(slot);if(!s.isEmpty()&&!p.getInventory().add(s))p.drop(s,false);}
         else if(allowed(held)&&n.inventory.getItem(slot).isEmpty())n.inventory.setItem(slot,held.split(1));
         else if(held.isEmpty()){var m=analyze(n);if(m.ingredients()>=2){
+            var meal=prepare(n);if(meal.isEmpty())return;
             for(int i=0;i<9;i++){var old=n.inventory.getItem(i);if(old.isEmpty())continue;var rem=old.getCraftingRemainingItem();n.inventory.setItem(i,ItemStack.EMPTY);if(!rem.isEmpty()&&!p.getInventory().add(rem))p.drop(rem,false);}
-            if(m.conflicts()>0){p.hurt(p.damageSources().magic(),4);p.push(0,.65,0);p.hurtMarked=true;p.addEffect(new MobEffectInstance(MobEffects.CONFUSION,300));p.addEffect(new MobEffectInstance(ArcanaMealEffects.NO_MAGIC,300));}
-            else{p.getFoodData().eat(6+m.ingredients(),.6f);for(int i=0;i<5;i++)if(m.levels()[i]>0)p.addEffect(new MobEffectInstance(ArcanaMealEffects.MEALS[i],6000,Math.min(1,m.levels()[i]-1)));
-                if(m.levels()[3]>0)ArcanaPhysiology.detox(p,30);if(m.bridges()>0)p.addEffect(new MobEffectInstance(ArcanaMealEffects.HARMONY,12000));
-                if(m.sun()){ArcanaPhysiology.data(p).putLong("MealSunUntil",ArcanaPhysiology.now(p)+3600);com.tnc.tnc.journey.JourneyData.get(p.server).setDirty();}
-            }
+            if(!p.getInventory().add(meal))p.drop(meal,false);
+            p.serverLevel().playSound(null,n.getBlockPos(),net.minecraft.sounds.SoundEvents.AMETHYST_BLOCK_CHIME,net.minecraft.sounds.SoundSource.BLOCKS,.7f,1.2f);
+
         }}
         n.setChanged();p.serverLevel().sendBlockUpdated(n.getBlockPos(),n.getBlockState(),n.getBlockState(),3);p.displayClientMessage(net.minecraft.network.chat.Component.literal(state(n)),true);
+    }
+    public static ItemStack prepare(RouteNodeEntity n){var m=analyze(n);if(m.ingredients()<2)return ItemStack.EMPTY;int dominant=0;for(int i=1;i<5;i++)if(m.levels()[i]>m.levels()[dominant])dominant=i;int basic=0;if(m.edges()>0)basic=new int[]{0,3,4,1,2}[dominant];else for(int i=0;i<9;i++){var t=taste(n.inventory.getItem(i));if(t!=null){basic=t.ordinal();break;}}int dish=m.conflicts()>0?7:m.sun()?6:m.bridges()>0?5:basic;
+        var result=new ItemStack(ArcanaContent.item(ArcanaMealItem.IDS[dish]));var tag=result.getOrCreateTag();tag.putInt("Ingredients",m.ingredients());tag.putInt("Conflicts",m.conflicts());tag.putInt("Bridges",m.bridges());tag.putIntArray("TasteLevels",m.levels());tag.putBoolean("SunMeal",m.sun());var list=new net.minecraft.nbt.ListTag();for(int i=0;i<9;i++)if(!n.inventory.getItem(i).isEmpty()){var ingredient=n.inventory.getItem(i).copyWithCount(1).save(new net.minecraft.nbt.CompoundTag());ingredient.putInt("PlateSlot",i);list.add(ingredient);}tag.put("MealIngredients",list);return result;
     }
     public static void radiate(ServerPlayer p){for(var pos:RouteNetwork.positions(p.serverLevel())){if(pos.distToCenterSqr(p.position())>=25||!p.serverLevel().hasChunkAt(pos))continue;var be=p.serverLevel().getBlockEntity(pos);if(be instanceof RouteNodeEntity n&&p.getUUID().equals(n.owner)){int got=n.receiveTyped(8,"solar");ArcanaEnergy.credit(n,"solar",got);n.getPersistentData().putLong("MealBoostUntil",p.level().getGameTime()+25);}else if(be instanceof com.tnc.tnc.production.MagicForgeBlockEntity f&&p.getUUID().equals(f.owner())&&f.formedForTransfer()){f.addCharge(8);f.getPersistentData().putLong("MealBoostUntil",p.level().getGameTime()+25);}}}
     private ArcanaMeals(){}

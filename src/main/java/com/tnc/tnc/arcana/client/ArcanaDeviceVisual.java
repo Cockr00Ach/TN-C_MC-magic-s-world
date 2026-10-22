@@ -15,7 +15,7 @@ public final class ArcanaDeviceVisual {
     private static final net.minecraft.client.model.geom.ModelPart SPIRIT=com.tnc.tnc.arcana.client.ArcanaEntityModel.layer(true).bakeRoot();
     private static final java.util.Map<RouteNodeEntity,Long> LAST=new java.util.WeakHashMap<>();
     public static void render(RouteNodeEntity n,float partial,PoseStack pose,MultiBufferSource buffers,int light,int overlay){
-        if(n.getLevel()==null)return;var mc=Minecraft.getInstance();var renderer=mc.getItemRenderer();
+        if(n.getLevel()==null)return;if(n.kind()==RouteKind.ABYSS_TOWER)ArcanaTowerVisual.render(n,partial,pose,buffers,light,overlay);var mc=Minecraft.getInstance();var renderer=mc.getItemRenderer();
         if(n.kind()==RouteKind.MEAL_PLATE)for(int i=0;i<9;i++){
             var stack=n.inventory.getItem(i);if(stack.isEmpty())continue;pose.pushPose();pose.translate(.25+(i%3)*.25,.14,.25+(i/3)*.25);pose.mulPose(Axis.XP.rotationDegrees(90));pose.scale(.23f,.23f,.23f);renderer.renderStatic(stack,ItemDisplayContext.FIXED,light,overlay,pose,buffers,n.getLevel(),i);pose.popPose();
         }
@@ -46,7 +46,7 @@ public final class ArcanaDeviceVisual {
         if(n.kind()==RouteKind.ABYSS_TOWER&&sight){int stage=n.getPersistentData().getInt("OverloadStage"),c=stage>=2?0xff304d:stage==1?0xffad45:0x5ce4cb;
             for(int i=0;i<5+stage*7;i++){double a=i*Math.PI*.4+now*(stage>=2?.18:.03),h=(i%7)*.35;var at=center.add(Math.cos(a)*(1+stage*.25),h,Math.sin(a)*(1+stage*.25));ManaSightParticles.effect(at,at.add(-Math.sin(a)*.3,.5,Math.cos(a)*.3),c,i%6==0?1:2,3,.08f+stage*.02f,30);}
         }
-        if((n.kind()==RouteKind.SOLAR||n.kind()==RouteKind.LUNAR)&&sight&&n.inRate+n.mana>0){int c=n.kind()==RouteKind.SOLAR?0xffdb83:0xc9e9ff;for(int i=0;i<6;i++){double a=now*.03+i;var at=center.add(Math.cos(a)*.4,3+i*2,Math.sin(a)*.4);ManaSightParticles.effect(at,center.add(0,.4,0),c,1,3,.08f,45);}}
+        if(n.kind()==RouteKind.SOLAR||n.kind()==RouteKind.LUNAR)CelestialCollectorVisual.tick(n,sight);
         if(ArcanaHighway.ring(n)&&n.getPersistentData().getLong("SkyActiveUntil")>now&&n.getPersistentData().contains("SkyTarget")){
             var end=ArcanaHighway.center(BlockPos.of(n.getPersistentData().getLong("SkyTarget")));var start=ArcanaHighway.center(n.getBlockPos());var axis=end.subtract(start).normalize();var u=axis.cross(new Vec3(0,1,0));if(u.lengthSqr()<.01)u=new Vec3(1,0,0);u=u.normalize();var v=axis.cross(u).normalize();
             int grains=Math.min(120,(int)Math.ceil(start.distanceTo(end)*(sight?5:2)));for(int i=0;i<grains;i++){double phase=(now*.004+i/(double)grains)%1,angle=now*.018+i*2.4;var at=start.lerp(end,phase).add(u.scale(Math.cos(angle)*.7)).add(v.scale(Math.sin(angle)*.7));int color=java.awt.Color.HSBtoRGB((float)((phase*.4+now*.0003)%1),.34f,1)&0xffffff;ManaSightParticles.effect(at,at.add(axis.scale(.75)),color,i%9==0?1:0,3,sight?.065f:.035f,48);}

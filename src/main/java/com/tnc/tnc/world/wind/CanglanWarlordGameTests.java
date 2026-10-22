@@ -40,6 +40,9 @@ public final class CanglanWarlordGameTests {
     }
     @GameTest(template="building_test_empty", timeoutTicks=40, batch="canglan_seeking_cyclone")
     public static void cycloneSeeksThenStopsOnItsTarget(GameTestHelper helper) {
+        // The target is beyond the eight-block template; prior batches can leave a wall there.
+        for(int x=0;x<7;x++)for(int y=1;y<9;y++)for(int z=0;z<13;z++)
+            helper.setBlock(new BlockPos(x,y,z),net.minecraft.world.level.block.Blocks.AIR);
         var boss=helper.spawn(CanglanWarlordRegistration.CANGLAN_WARLORD,new BlockPos(2,1,2));boss.setNoAi(true);boss.setNoGravity(true);
         var target=helper.spawn(EntityType.IRON_GOLEM,new BlockPos(2,1,9));target.setNoAi(true);target.setNoGravity(true);boss.setTarget(target);
         var cyclone=CanglanTempestEntity.spawn(boss,boss.position(),net.minecraft.world.phys.Vec3.ZERO,true,1,60);
@@ -47,15 +50,19 @@ public final class CanglanWarlordGameTests {
         for(int i=0;i<12;i++){cyclone.tickCount++;cyclone.tick();}
         helper.assertTrue(cyclone.getZ()>start+1,"Cyclone stayed at the cast point");
         helper.assertTrue(cyclone.anchored(),"Cyclone did not stop on target contact");
-        helper.assertTrue(target.getHealth()<health,"Contact stopped outside the damage area");
+        helper.assertTrue(target.getHealth()<health,"Contact stopped outside the damage area: cyclone="+cyclone.position()+", target="+target.position()+", lineOfSight="+boss.hasLineOfSight(target));
         var at=cyclone.position();for(int i=0;i<5;i++){cyclone.tickCount++;cyclone.tick();}
         helper.assertTrue(cyclone.position().distanceToSqr(at)<.00001,"Contact cyclone kept chasing");
         cyclone.discard();boss.battle().cleanup();helper.succeed();
     }
     @GameTest(template="building_test_empty", timeoutTicks=40, batch="canglan_fusing_cyclone")
     public static void nearbyCyclonesMergeOnceWithoutConsumingAnotherBossSpell(GameTestHelper helper) {
+        for(int x=0;x<10;x++)for(int y=1;y<9;y++)for(int z=0;z<10;z++)
+            helper.setBlock(new BlockPos(x,y,z),net.minecraft.world.level.block.Blocks.AIR);
         var boss=helper.spawn(CanglanWarlordRegistration.CANGLAN_WARLORD,new BlockPos(2,1,2));boss.setNoAi(true);boss.setNoGravity(true);
         var other=helper.spawn(CanglanWarlordRegistration.CANGLAN_WARLORD,new BlockPos(5,1,2));other.setNoAi(true);other.setNoGravity(true);
+        // Prevent the seeking cyclone from selecting a FakePlayer left by another test.
+        var target=helper.spawn(EntityType.IRON_GOLEM,new BlockPos(2,1,2));target.setNoAi(true);target.setNoGravity(true);boss.setTarget(target);
         var a=CanglanTempestEntity.spawn(boss,boss.position(),net.minecraft.world.phys.Vec3.ZERO,true,1,25);
         var b=CanglanTempestEntity.spawn(boss,boss.position().add(4.4,0,0),net.minecraft.world.phys.Vec3.ZERO,true,2,25);
         var foreign=CanglanTempestEntity.spawn(other,boss.position(),net.minecraft.world.phys.Vec3.ZERO,true,1,25);

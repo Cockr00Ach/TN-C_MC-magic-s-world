@@ -1,0 +1,143 @@
+{
+  "installed_at": "2026-10-23T02:34:53.513639",
+  "jar_sha256": "11b88a11fef4c32a725c9138535885278fb180d69abd138bfe5752d4dd9830ce",
+  "source_commit_before_release": "4b62e7a3dd78ae8e723fc444f4bc074316ce657e",
+  "unit_tests": 402,
+  "combined_game_tests": 155,
+  "native_screenshots": 22,
+  "native": {
+    "shaders": {
+      "screenshots": 11,
+      "checks": {
+        "ftb_30D9D5470D862905": true,
+        "ftb_37B7FFAC33E9E92C": true,
+        "ftb_662EE66DA1916AAF": true,
+        "water_present": true,
+        "real_magic_flame": true,
+        "physical_lid_synced": true,
+        "solar-corona_actual_yield": true,
+        "lunar-full_actual_yield": true,
+        "lunar-crescent_actual_yield": true,
+        "spirit_visible": true,
+        "tower_formed": true,
+        "forge_screen": true,
+        "meal_models": true,
+        "texture_tnc:block/alchemy_ceramic": true,
+        "texture_tnc:block/alchemy_bronze": true,
+        "texture_tnc:block/alchemy_glow": true,
+        "texture_tnc:block/alchemy_wood": true,
+        "texture_tnc:block/eco_leaf": true,
+        "texture_tnc:block/eco_berry": true,
+        "texture_tnc:block/eco_root": true,
+        "texture_tnc:block/art_pepper": true,
+        "texture_minecraft:block/honey_block_top": true,
+        "texture_minecraft:block/water_still": true,
+        "texture_minecraft:block/purple_terracotta": true
+      },
+      "errors": [],
+      "class_sha256": {
+        "com.tnc.tnc.alchemy.client.AlchemyRenderer": "b730897bd902fe17c1e8e1d621c1becb5e6fe0ab830ad458c1c781bf460d96ea",
+        "com.tnc.tnc.arcana.client.DimensionalSpiritGeometry": "a238a4e7d5ee54a3a31f4521c7c10846ef1e500c923f6ec7d7653b29b568ebd6",
+        "com.tnc.tnc.arcana.client.CelestialCollectorVisual": "906f02c18f147838446fd979d477aa95e8141f55a9b605a03bcadf1d28d683a9",
+        "com.tnc.tnc.arcana.client.ArcanaTowerVisual": "e5dfadc9a81a87490c6dea159370dd32d3150779a5fb730522fbc6a60dd27896",
+        "com.tnc.tnc.production.MagicForgeBlockEntity": "ce6ede594e651c2c6734538403dd41ac479ad8d48935ab8c148f2ba8f34c97d9",
+        "com.tnc.tnc.arcana.ArcanaMeals": "cdea7ccef032258d88bb4e0e35cd7b94157d43f381fcf8e3516dcbff488e6648"
+      },
+      "asset_sha256": {
+        "assets/tnc/models/block/spellflame_cauldron.json": "b6dc0796157efe1b02d881214521816fe3df43b7685a1961028ee26cba1de7e8",
+        "assets/tnc/models/block/spellflame_cauldron_lid.json": "fc81081661a0ef3817ddc1436b784a769e9b7a3299267337fbe079a2b948e549",
+        "assets/tnc/models/item/sunpepper_roast.json": "afc665f3ff11ce0c921f87f7aff47c2cca3eaea955a54ac19c611a2a28c973f1",
+        "assets/tnc/models/item/tide_herb_soup.json": "8a4aaa81cbbfde8d27973a54be82f84b53ada20a1693f2622d903873d80f56ae",
+        "assets/tnc/models/item/cloudleaf_salad.json": "3afd67ad09bad036834d7fe31105672a5fda22e16dae95b0266241f51be1d7bf",
+        "assets/tnc/models/item/earthroot_loaf.json": "7011390ef8e5ed449e2dc25aac989ad04ed0af734cafb746fadbaa65ee45dd7a",
+        "assets/tnc/models/item/moon_honey_parfait.json": "0c1a7a5dbbcade9a945e90423d5aa5cfc33d4a7364c6276c11a951791eedd3c0",
+        "assets/tnc/models/item/concord_banquet.json": "6f96b4fa3ef4b442a61580a8b43e10e3ca144e1b281caad6c5d382397c1224d0",
+        "assets/tnc/models/item/ninefold_sun_feast.json": "6874a1eaaa82ee503e10a412454d83d21cf9466b05312634c456b29db4fc36d8",
+        "assets/tnc/models/item/discord_mash.json": "db403b5ffbafa38d4edc35967ef8d0a49f4addb19ae3f6f3de37be4a214d0f76"
+      },
+      "quest_sha256": {
+        "tnc_alchemy.snbt": "34fd7c9facb149e2fe0b41ddb27339469747e10aa62eae3633fdbb4bba8c2564",
+        "tnc_deep_arcana.snbt": "fa51096dc192d43ada088d2573a33939c680f0326c4fbe775b7f9b48254b2916",
+        "tnc_field_04_workshop.snbt": "eccd696689d0106b624d9cf87a67cb676b92a2c56e16e7693f435f8c9859a263",
+        "tnc_magic_progression.snbt": "fe19f0c7c4bb89c8b28f5cb490550312354e4258962f47a388244ddcb8315dc0"
+      }
+    },
+    "vanilla": {
+      "screenshots": 11,
+      "checks": {
+        "ftb_37B7FFAC33E9E92C": true,
+        "ftb_662EE66DA1916AAF": true,
+        "ftb_30D9D5470D862905": true,
+        "water_present": true,
+        "real_magic_flame": true,
+        "physical_lid_synced": true,
+        "solar-corona_actual_yield": true,
+        "lunar-full_actual_yield": true,
+        "lunar-crescent_actual_yield": true,
+        "spirit_visible": true,
+        "tower_formed": true,
+        "forge_screen": true,
+        "meal_models": true,
+        "texture_tnc:block/alchemy_ceramic": true,
+        "texture_tnc:block/alchemy_bronze": true,
+        "texture_tnc:block/alchemy_glow": true,
+        "texture_tnc:block/alchemy_wood": true,
+        "texture_tnc:block/eco_leaf": true,
+        "texture_tnc:block/eco_berry": true,
+        "texture_tnc:block/eco_root": true,
+        "texture_tnc:block/art_pepper": true,
+        "texture_minecraft:block/honey_block_top": true,
+        "texture_minecraft:block/water_still": true,
+        "texture_minecraft:block/purple_terracotta": true
+      },
+      "errors": [],
+      "class_sha256": {
+        "com.tnc.tnc.alchemy.client.AlchemyRenderer": "b730897bd902fe17c1e8e1d621c1becb5e6fe0ab830ad458c1c781bf460d96ea",
+        "com.tnc.tnc.arcana.client.DimensionalSpiritGeometry": "a238a4e7d5ee54a3a31f4521c7c10846ef1e500c923f6ec7d7653b29b568ebd6",
+        "com.tnc.tnc.arcana.client.CelestialCollectorVisual": "906f02c18f147838446fd979d477aa95e8141f55a9b605a03bcadf1d28d683a9",
+        "com.tnc.tnc.arcana.client.ArcanaTowerVisual": "e5dfadc9a81a87490c6dea159370dd32d3150779a5fb730522fbc6a60dd27896",
+        "com.tnc.tnc.production.MagicForgeBlockEntity": "ce6ede594e651c2c6734538403dd41ac479ad8d48935ab8c148f2ba8f34c97d9",
+        "com.tnc.tnc.arcana.ArcanaMeals": "cdea7ccef032258d88bb4e0e35cd7b94157d43f381fcf8e3516dcbff488e6648"
+      },
+      "asset_sha256": {
+        "assets/tnc/models/block/spellflame_cauldron.json": "b6dc0796157efe1b02d881214521816fe3df43b7685a1961028ee26cba1de7e8",
+        "assets/tnc/models/block/spellflame_cauldron_lid.json": "fc81081661a0ef3817ddc1436b784a769e9b7a3299267337fbe079a2b948e549",
+        "assets/tnc/models/item/sunpepper_roast.json": "afc665f3ff11ce0c921f87f7aff47c2cca3eaea955a54ac19c611a2a28c973f1",
+        "assets/tnc/models/item/tide_herb_soup.json": "8a4aaa81cbbfde8d27973a54be82f84b53ada20a1693f2622d903873d80f56ae",
+        "assets/tnc/models/item/cloudleaf_salad.json": "3afd67ad09bad036834d7fe31105672a5fda22e16dae95b0266241f51be1d7bf",
+        "assets/tnc/models/item/earthroot_loaf.json": "7011390ef8e5ed449e2dc25aac989ad04ed0af734cafb746fadbaa65ee45dd7a",
+        "assets/tnc/models/item/moon_honey_parfait.json": "0c1a7a5dbbcade9a945e90423d5aa5cfc33d4a7364c6276c11a951791eedd3c0",
+        "assets/tnc/models/item/concord_banquet.json": "6f96b4fa3ef4b442a61580a8b43e10e3ca144e1b281caad6c5d382397c1224d0",
+        "assets/tnc/models/item/ninefold_sun_feast.json": "6874a1eaaa82ee503e10a412454d83d21cf9466b05312634c456b29db4fc36d8",
+        "assets/tnc/models/item/discord_mash.json": "db403b5ffbafa38d4edc35967ef8d0a49f4addb19ae3f6f3de37be4a214d0f76"
+      },
+      "quest_sha256": {
+        "tnc_alchemy.snbt": "6eb787da07b6f659ee9491bf26336dc107e4ba6c9d642f851c66fd2e7f2221a6",
+        "tnc_deep_arcana.snbt": "7bd8d92779d72b288c625f38eb2bb052d8c8a1bff1017485e88bf0bb639820c0",
+        "tnc_field_04_workshop.snbt": "30833daf8e3e662bb6be882b75285a4cec4b28829228f5527152bab51c1adf75",
+        "tnc_magic_progression.snbt": "41be28a045cc01be3425fc32a15d2f71c9c67e5047dc6b1f09629c9c458ede15"
+      },
+      "verified_reformatted_quests": [
+        "tnc_alchemy.snbt",
+        "tnc_deep_arcana.snbt",
+        "tnc_field_04_workshop.snbt",
+        "tnc_magic_progression.snbt"
+      ]
+    }
+  },
+  "protected_quests": {
+    "live": 42,
+    "mirror": 46
+  },
+  "files": {
+    "mods/tnc-1.0.0.jar": "11b88a11fef4c32a725c9138535885278fb180d69abd138bfe5752d4dd9830ce",
+    "config/ftbquests/quests/chapters/tnc_alchemy.snbt": "34fd7c9facb149e2fe0b41ddb27339469747e10aa62eae3633fdbb4bba8c2564",
+    "config/ftbquests/quests/chapters/tnc_deep_arcana.snbt": "fa51096dc192d43ada088d2573a33939c680f0326c4fbe775b7f9b48254b2916",
+    "config/ftbquests/quests/chapters/tnc_field_04_workshop.snbt": "eccd696689d0106b624d9cf87a67cb676b92a2c56e16e7693f435f8c9859a263",
+    "config/ftbquests/quests/chapters/tnc_magic_progression.snbt": "fe19f0c7c4bb89c8b28f5cb490550312354e4258962f47a388244ddcb8315dc0"
+  },
+  "backup": "C:\\Users\\宋志坤\\Documents\\Codex\\2026-09-19\\mu-q\\work\\TN-C_MC-magic-s-world\\work\\backups\\feedback-refinement-20261023-023452",
+  "saves_modified": false,
+  "island_templates_modified": false,
+  "additional_third_party_jars": []
+}

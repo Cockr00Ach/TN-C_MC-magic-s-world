@@ -888,5 +888,13 @@
   "effect.tnc.meal_clarity": "清心膳",
   "effect.tnc.meal_gale": "轻身膳",
   "effect.tnc.meal_harmony": "百味调和",
-  "effect.tnc.meal_no_magic": "炸膛禁魔"
+  "effect.tnc.meal_no_magic": "炸膛禁魔",
+  "item.tnc.sunpepper_roast": "日焰椒香烤盘",
+  "item.tnc.tide_herb_soup": "潮露清汤",
+  "item.tnc.cloudleaf_salad": "云叶拌蔬",
+  "item.tnc.earthroot_loaf": "岩根烤饼",
+  "item.tnc.moon_honey_parfait": "月蜜凝露盏",
+  "item.tnc.concord_banquet": "五味调和宴",
+  "item.tnc.ninefold_sun_feast": "九曜烈阳盛宴",
+  "item.tnc.discord_mash": "相冲杂烩"
 }

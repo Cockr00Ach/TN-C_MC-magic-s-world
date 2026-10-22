@@ -23,6 +23,7 @@ public final class JourneyNativeAudit {
     private static Path output(){return Path.of(System.getProperty("tnc.dungeonAuditOutput")).toAbsolutePath();}
     private static void check(String name,boolean okay){checks.put(name,okay);if(!okay)failures.add(name);}
     public static void tick(TickEvent.ClientTickEvent event)throws Exception{
+        if(Boolean.getBoolean("tnc.feedbackAudit")){com.tnc.tnc.arcana.client.FeedbackNativeAudit.tick(event);return;}
         if(event.phase!=TickEvent.Phase.END)return;var mc=Minecraft.getInstance();org.lwjgl.glfw.GLFW.glfwHideWindow(mc.getWindow().getWindow());
         if(mc.options.enableVsync().get()){mc.options.enableVsync().set(false);mc.getWindow().updateVsync(false);}
         if(mc.level==null||mc.player==null||mc.getOverlay()!=null)return;
