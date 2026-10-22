@@ -116,10 +116,14 @@ public final class VolcanicTortoiseAmbientFx {
         static final float SPARK_SCALE_MIN = 0.50F;
         static final float SPARK_SCALE_MAX = 0.95F;
         static final float SPARK_SCALE_P2_BONUS = 0.35F;
-        static final double SPARK_UP_MIN_P1 = 0.090D;
-        static final double SPARK_UP_MAX_P1 = 0.200D;
-        static final double SPARK_UP_MIN_P2 = 0.110D;
-        static final double SPARK_UP_MAX_P2 = 0.240D;
+        // 2026-10-22：常规火星初始上升速度整体下调 20%
+        // （一阶段 0.090/0.200 → 0.072/0.160，二阶段 0.110/0.240 → 0.088/0.192）。
+        // 数量、尺寸、颜色、出生位置、横向速度、寿命与烟的参数保持不变。
+        // 环境小喷发走独立的 ERUPT_SPARK_UP_*，不会被这条减速影响。
+        static final double SPARK_UP_MIN_P1 = 0.072D;
+        static final double SPARK_UP_MAX_P1 = 0.160D;
+        static final double SPARK_UP_MIN_P2 = 0.088D;
+        static final double SPARK_UP_MAX_P2 = 0.192D;
         static final double SPARK_RADIAL_MIN = 0.020D;
         static final double SPARK_RADIAL_MAX = 0.060D;
         static final double SPARK_SPREAD = 0.26D;
