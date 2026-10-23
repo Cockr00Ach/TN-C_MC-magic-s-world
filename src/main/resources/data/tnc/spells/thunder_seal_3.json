@@ -1,0 +1,52 @@
+{
+  "school": "LIGHTNING",
+  "group": "thunder_seal",
+  "range": 72,
+  "learn": {
+    "tier": 3
+  },
+  "cast": {
+    "duration": 0.85,
+    "animation": "spell_engine:one_handed_area_charge",
+    "sound": {
+      "id": "minecraft:block.beacon.power_select"
+    },
+    "particles": [
+      {
+        "particle_id": "minecraft:electric_spark",
+        "shape": "CIRCLE",
+        "origin": "FEET",
+        "count": 12,
+        "min_speed": 0.03,
+        "max_speed": 0.12
+      }
+    ]
+  },
+  "release": {
+    "target": {
+      "type": "SELF"
+    },
+    "animation": "spell_engine:one_handed_area_release",
+    "sound": {
+      "id": "minecraft:item.trident.thunder"
+    }
+  },
+  "impact": [
+    {
+      "action": {
+        "type": "STATUS_EFFECT",
+        "status_effect": {
+          "effect_id": "tnc:thunder_seal_cast_3",
+          "duration": 0.05,
+          "amplifier": 0,
+          "apply_mode": "SET",
+          "show_particles": false
+        }
+      }
+    }
+  ],
+  "cost": {
+    "exhaust": 0,
+    "cooldown_duration": 10
+  }
+}
