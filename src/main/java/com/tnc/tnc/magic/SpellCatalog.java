@@ -129,7 +129,9 @@ public final class SpellCatalog {
          */
         DARK_DRAGON("暗龙", "放出一条暗龙向前冲（暗系第五条链）"),
         WIND_BALL("风球", "吸引、压缩与升空爆炸"),
-        WIND_WEAPON("风兵", "幻化飞剑、长矛与天降兵器");
+        WIND_WEAPON("风兵", "幻化飞剑、长矛与天降兵器"),
+        LIGHT_MIRROR("光镜", "预留给光镜链，保持并行存档序号兼容"),
+        THUNDER_SEAL("霆狱", "雷楔导通、雷锁与集中天刑");
 
         private final String cn;
         private final String desc;
@@ -190,6 +192,12 @@ public final class SpellCatalog {
             entry("lightning_strike", Chain.CORE, 3, "雷击"),
             entry("lightning_storm", Chain.CORE, 4, "雷暴"),
             entry("heavenly_thunder", Chain.CORE, 5, "天打五雷轰"),
+
+            entry("thunder_seal_1", Chain.THUNDER_SEAL, 1, "雷楔烙印"),
+            entry("thunder_seal_2", Chain.THUNDER_SEAL, 2, "双极鸣雷"),
+            entry("thunder_seal_3", Chain.THUNDER_SEAL, 3, "三才雷锁"),
+            entry("thunder_seal_4", Chain.THUNDER_SEAL, 4, "六极霆狱"),
+            entry("thunder_seal_5", Chain.THUNDER_SEAL, 5, "九霄天刑"),
 
             // ---- 雷球线：把雷电做成会飞的球，一级比一级大 ----
             entry("thunder_orb", Chain.ORB, 1, "雷球"),
