@@ -1,0 +1,11 @@
+{
+  "type": "tnc:wind_arena",
+  "generator": {
+    "type": "tnc:element_arena",
+    "underwater": false,
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "tnc:wind_arena"
+    }
+  }
+}

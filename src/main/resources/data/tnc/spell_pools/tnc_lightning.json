@@ -14,6 +14,11 @@
     "tnc:lightning_blink",
     "tnc:lightning_wind",
     "tnc:lightning_recharge",
-    "tnc:lightning_ascension"
+    "tnc:lightning_ascension",
+    "tnc:thunder_seal_1",
+    "tnc:thunder_seal_2",
+    "tnc:thunder_seal_3",
+    "tnc:thunder_seal_4",
+    "tnc:thunder_seal_5"
   ]
 }

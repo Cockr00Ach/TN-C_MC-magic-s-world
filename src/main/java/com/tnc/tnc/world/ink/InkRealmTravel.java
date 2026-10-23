@@ -48,11 +48,28 @@ public final class InkRealmTravel {
         double safeZ = clampToBorder(target, z, false);
         int blockX = (int) Math.floor(safeX);
         int blockZ = (int) Math.floor(safeZ);
-        int y = target.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockX, blockZ) + 1;
-        y = Math.max(target.getMinBuildHeight() + 2, Math.min(y, target.getMaxBuildHeight() - 2));
-        player.teleportTo(target, safeX, y, safeZ, player.getYRot(), player.getXRot());
-        player.fallDistance = 0.0F;
-        return true;
+        // Heightmaps return the first free block, not the solid block's Y.
+        // Load the actual destination chunk before querying it; search nearby if obstructed.
+        for(int radius=0;radius<=8;radius++)for(int dx=-radius;dx<=radius;dx++)for(int dz=-radius;dz<=radius;dz++){
+            if(Math.max(Math.abs(dx),Math.abs(dz))!=radius)continue;
+            int px=blockX+dx,pz=blockZ+dz;
+            double cx=px+.5,cz=pz+.5;
+            if(cx!=clampToBorder(target,cx,true)||cz!=clampToBorder(target,cz,false))continue;
+            target.getChunk(px>>4,pz>>4);
+            int top=target.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,px,pz);
+            BlockPos support=new BlockPos(px,top-1,pz);var state=target.getBlockState(support);
+            var shape=state.getCollisionShape(target,support);
+            if(shape.isEmpty()||!state.getFluidState().isEmpty())continue;
+            double feet=support.getY()+shape.max(net.minecraft.core.Direction.Axis.Y);
+            if(feet<target.getMinBuildHeight()||feet>target.getMaxBuildHeight()-2)continue;
+            var landing=new net.minecraft.world.phys.Vec3(cx,feet,cz);
+            var box=player.getBoundingBox().move(landing.subtract(player.position()));
+            if(!target.noCollision(player,box)||target.containsAnyLiquid(box))continue;
+            player.teleportTo(target,cx,feet,cz,player.getYRot(),player.getXRot());
+            player.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);player.fallDistance=0;
+            return true;
+        }
+        return false;
     }
 
     private static double clampToBorder(ServerLevel target, double coordinate, boolean xAxis) {
