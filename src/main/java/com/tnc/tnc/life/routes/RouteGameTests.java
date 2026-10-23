@@ -60,11 +60,15 @@ public final class RouteGameTests {
         // This elevated fixture lies outside the tiny template. Clear old falling gravel
         // and cap it; its global housing record must not race other default-batch tests.
         for(var p:BlockPos.betweenClosed(at.offset(-3,-1,-3),at.offset(4,-1,3))){level.getChunkAt(p);level.setBlock(p,Blocks.STONE.defaultBlockState(),3);for(int y=1;y<=4;y++)level.setBlock(p.above(y),Blocks.AIR.defaultBlockState(),3);level.setBlock(p.above(5),Blocks.GLASS.defaultBlockState(),3);}
+        // The test platform may be below a natural aquifer. Seal the sides too:
+        // external vanilla water must not be mistaken for escaping mana.
+        for(int x=-3;x<=4;x++)for(int z=-3;z<=3;z++)if(x==-3||x==4||Math.abs(z)==3)
+            for(int y=0;y<4;y++)level.setBlock(at.offset(x,y,z),Blocks.GLASS.defaultBlockState(),3);
         level.setBlock(at,RouteContent.MANA_LIQUID.get().defaultBlockState(),3);
         h.assertTrue(com.tnc.tnc.home.HousingService.ownedAt(level,at.east())!=null,"fixture must attach ownership record");
         h.runAfterDelay(60,()->{try{
             h.assertTrue(level.getFluidState(at.east()).getFluidType()==RouteContent.MANA_TYPE.get(),"purchased farm must permit internal flow; source="+level.getBlockState(at)+", east="+level.getBlockState(at.east())+", ticking="+level.isPositionEntityTicking(at)+", mixinAllows="+ManaFluid.allowedInOwnedGarden(level,at.east(),Direction.EAST,level.getFluidState(at)));
-            h.assertTrue(level.getFluidState(at.east(2)).isEmpty(),"mana must stop at the property boundary");h.succeed();
+            h.assertTrue(level.getFluidState(at.east(2)).isEmpty(),"mana must stop at the property boundary; outside="+level.getBlockState(at.east(2))+", type="+level.getFluidState(at.east(2)).getFluidType());h.succeed();
         }finally{if(existed)housing.put(plot.id(),before);else housing.remove(plot.id());}});
     }
     @GameTest(template="empty",timeoutTicks=40) public static void growthDustMaturesButDoesNotCreateMana(GameTestHelper h){

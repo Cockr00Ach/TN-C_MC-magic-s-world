@@ -25,7 +25,7 @@ public final class ArcanaDevices {
                 t.putInt("CelestialYield",accepted);t.putLong("CelestialFlowUntil",accepted>0?now+25:0);
             }
             case OBSERVATORY->n.status="空手改写天象（塔300000M） · "+ArcanaSky.forecast(l)+(ArcanaSky.aurora(l)?" · 极光正在流淌":"");
-            case GEOTHERMAL->n.status=t.getLong("BathUntil")>now&&n.mana>0?"浴盐已溶 · 周围源水排毒中":"投入舒缓浴盐并接魔力，周围铺源水";
+            case GEOTHERMAL->n.status=(t.getBoolean("AncientSpring")||t.getLong("BathUntil")>now)&&n.mana>0?"浴盐已溶 · 周围源水排毒中":"投入舒缓浴盐并接魔力，周围铺源水";
             case SPRAYER->spray(l,n);
             case NURTURE->nurture(l,n);
             case MEAL_PLATE->n.status=ArcanaMeals.state(n);
@@ -41,6 +41,9 @@ public final class ArcanaDevices {
         if(ArcanaHighway.ring(n)&&held.is(ArcanaContent.item("symbiosis_marker"))){ArcanaHighway.select(p,n,held);return true;}
         if(ArcanaHighway.ring(n)&&p.isShiftKeyDown()&&held.isEmpty()){t.remove("SkyTarget");t.remove("SkyPath");n.setChanged();return true;}
         if(n.kind()==RouteKind.OBSERVATORY&&held.isEmpty()&&!p.isShiftKeyDown()){var heart=ArcanaRealms.tower(p.serverLevel(),n.getBlockPos(),p.getUUID(),16);if(heart!=null&&p.serverLevel().dimension().equals(net.minecraft.world.level.Level.OVERWORLD)&&heart.spend(300000)){ArcanaSky.forceTonight(p.serverLevel());com.tnc.tnc.mana.sight.ManaSightServer.record(p.serverLevel(),net.minecraft.world.phys.Vec3.atCenterOf(heart.getBlockPos()),net.minecraft.world.phys.Vec3.atCenterOf(n.getBlockPos()).add(0,80,0),300000,0xb6ffe8,4);n.status="天象改写 · 已消耗300000M";}else n.status="16格内成型自有深渊塔储量需≥300000M";}
+        else if(n.kind()==RouteKind.GEOTHERMAL&&held.is(Items.WATER_BUCKET)&&held.hasTag()&&held.getTag().getBoolean("AncientLeylineSpring")){
+            if(!t.getBoolean("AncientSpring")&&n.mayUse(p)){t.putBoolean("AncientSpring",true);if(!p.isCreative())p.setItemInHand(hand,new ItemStack(Items.BUCKET));n.status="千年原浆已融入：永久免浴盐，排毒效率翻倍";}
+        }
         else if(n.kind()==RouteKind.GEOTHERMAL&&held.is(ArcanaContent.item("soothing_bath_salt"))){t.putLong("BathUntil",now+24000);ArcanaItem.consume(p,held);}
         else if(n.kind()==RouteKind.RELIEF&&p.isShiftKeyDown()&&held.isEmpty())relieve(p,n);
         else if(n.kind()==RouteKind.MEAL_PLATE){ArcanaMeals.interact(p,n,hand,hit);return true;}
@@ -52,8 +55,8 @@ public final class ArcanaDevices {
     }
     private static void recover(ServerPlayer p,RouteNodeEntity n){for(int i=0;i<n.inventory.getContainerSize();i++){var s=n.inventory.removeItemNoUpdate(i);if(!s.isEmpty()&&!p.getInventory().add(s))p.drop(s,false);}}
     public static void bathe(ServerPlayer p){var l=p.serverLevel();for(var pos:RouteNetwork.positions(l)){
-        if(pos.distToCenterSqr(p.position())>25||!l.hasChunkAt(pos)||!(l.getBlockEntity(pos) instanceof RouteNodeEntity n)||n.kind()!=RouteKind.GEOTHERMAL||!p.getUUID().equals(n.owner)||n.getPersistentData().getLong("BathUntil")<=l.getGameTime())continue;
-        if(l.getFluidState(p.blockPosition()).isSource()&&n.spend(1)){ArcanaPhysiology.data(p).putLong("BathingUntil",ArcanaPhysiology.now(p)+25);ArcanaPhysiology.detox(p,2);p.heal(.1f);com.tnc.tnc.mana.sight.ManaSightServer.record(l,p.position().add(0,.7,0),p.position().add(0,2.5,0),2,0xffd97d,4);}return;
+        if(pos.distToCenterSqr(p.position())>25||!l.hasChunkAt(pos)||!(l.getBlockEntity(pos) instanceof RouteNodeEntity n)||n.kind()!=RouteKind.GEOTHERMAL||!p.getUUID().equals(n.owner)||!n.getPersistentData().getBoolean("AncientSpring")&&n.getPersistentData().getLong("BathUntil")<=l.getGameTime())continue;
+        if(l.getFluidState(p.blockPosition()).isSource()&&n.spend(1)){ArcanaPhysiology.data(p).putLong("BathingUntil",ArcanaPhysiology.now(p)+25);ArcanaPhysiology.detox(p,n.getPersistentData().getBoolean("AncientSpring")?4:2);p.heal(.1f);com.tnc.tnc.mana.sight.ManaSightServer.record(l,p.position().add(0,.7,0),p.position().add(0,2.5,0),2,0xffd97d,4);}return;
     }}
     private static void tower(ServerLevel l,RouteNodeEntity n){var t=n.getPersistentData();long now=l.getGameTime();boolean formed=formed(l,n.getBlockPos());ArcanaTowerBrick.shell(l,n.getBlockPos(),formed);if(formed!=t.getBoolean("ShellFormed")){t.putBoolean("ShellFormed",formed);t.putLong("TowerFormedAt",now);ArcanaTowerBrick.shell(l,n.getBlockPos(),formed);if(formed)l.playSound(null,n.getBlockPos(),net.minecraft.sounds.SoundEvents.BEACON_ACTIVATE,net.minecraft.sounds.SoundSource.BLOCKS,1,.65f);for(var at:BlockPos.betweenClosed(n.getBlockPos().offset(-2,-1,-2),n.getBlockPos().offset(2,3,2)))if(l.hasChunkAt(at)&&ArcanaTowerPorts.socket(n.getBlockPos(),at)&&l.getBlockState(at).getBlock() instanceof RouteWireBlock wire)wire.refresh(l,at);}
         if(t.hasUUID("Devourer")&&ArcanaDisasters.get(l).dead(t.getUUID("Devourer"))){t.remove("Devourer");t.putDouble("overload_level",40);}

@@ -52,6 +52,7 @@ public final class WindWeaponEntity extends Entity {
             victim.hurt(level().damageSources().indirectMagic(this,owner),damage);
             var pull=origin.subtract(victim.position()).normalize().scale(.08);victim.push(pull.x,.025,pull.z);victim.hurtMarked=true;
         }
+        if(victim==null&&wall.getType()!=HitResult.Type.MISS&&owner instanceof net.minecraft.server.level.ServerPlayer p)com.tnc.tnc.dungeon.leyline.LeylineEvents.spell(p,wall.getBlockPos(),"wind");
         if(victim!=null||wall.getType()!=HitResult.Type.MISS){
             ((net.minecraft.server.level.ServerLevel)level()).sendParticles(net.minecraft.core.particles.ParticleTypes.CLOUD,getX(),getY(),getZ(),5,.15,.15,.15,.04);
             discard();

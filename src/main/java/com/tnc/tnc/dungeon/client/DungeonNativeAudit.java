@@ -23,6 +23,7 @@ public final class DungeonNativeAudit {
     private static final List<String> failures=new ArrayList<>();private static final Map<String,Object> results=new LinkedHashMap<>();
     private static Path folder(){return Path.of(System.getProperty("tnc.dungeonAuditOutput")).toAbsolutePath();}
     @SubscribeEvent public static void tick(TickEvent.ClientTickEvent e)throws Exception{
+      if(Boolean.getBoolean("tnc.leylineAudit")){LeylineNativeAudit.tick(e);return;}
       if(Boolean.getBoolean("tnc.journeyAudit")){com.tnc.tnc.journey.client.JourneyNativeAudit.tick(e);return;}
       if(Boolean.getBoolean("tnc.dungeonUiAudit")){DungeonUiNativeAudit.tick(e);return;}
       if(!Boolean.getBoolean("tnc.dungeonAudit")||e.phase!=TickEvent.Phase.END)return;var mc=Minecraft.getInstance();org.lwjgl.glfw.GLFW.glfwHideWindow(mc.getWindow().getWindow());if(mc.options.enableVsync().get()){mc.options.enableVsync().set(false);mc.getWindow().updateVsync(false);}if(mc.level==null||mc.player==null||mc.getOverlay()!=null)return;

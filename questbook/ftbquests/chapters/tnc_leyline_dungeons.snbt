@@ -1,0 +1,709 @@
+{
+  "id": "2F9112CBB07DED36",
+  "filename": "tnc_leyline_dungeons",
+  "title": "&3&l魔脉迷宫 · 双视界探险",
+  "icon": "minecraft:ender_eye",
+  "group": "46D9BF1B84D709E1",
+  "order_index": 19,
+  "default_hide_dependency_lines": false,
+  "default_quest_shape": "hexagon",
+  "images": [],
+  "quests": [
+    {
+      "id": "4ECCE29F8CF445F9",
+      "title": "&b&l魔脉迷宫 · 两个视界的探险",
+      "icon": "tnc:dungeon_handbook",
+      "x": 0,
+      "y": -4,
+      "description": [
+        "战斗房清场开门，奇遇房可先离开再回来，解谜成功才领取奖励。每5层保存，保留原有倒地与救援规则。",
+        "F8用于辨认供魔动脉、机关线索和隐藏实体。谜题进度由服务器保存；不要求一进门就带齐所有工具。",
+        "下面四列是各领域的代表房型。少量桥梁、宝库、乐音和典当奇遇会跨区域出现。",
+        "1—5层学习本领域基本语言，6层起加入工程与药学机关，11层起出现高风险交易和供魔挑战。",
+        "房间任务通过实际解开机关完成。背包满时奖励进入地下城邮件，腾出格子后自动重试，重连也能领取。"
+      ],
+      "dependencies": [],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "4E8B5C39B0EE2267",
+          "type": "checkmark"
+        }
+      ]
+    },
+    {
+      "id": "2C5961BA43FE0847",
+      "title": "&e&l黄沙遗庭",
+      "icon": "tnc:dungeon_handbook",
+      "x": -9.0,
+      "y": -1,
+      "description": [
+        "光、影、干涸与古代机关",
+        "对应不同的机关与怪物组合。主线通路、支线奖励分开，不会因缺少药水或工具卡死整层。"
+      ],
+      "dependencies": [
+        "4ECCE29F8CF445F9"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "07B5F5CB43F59D96",
+          "type": "checkmark"
+        }
+      ]
+    },
+    {
+      "id": "1A38B232BF0C4E1E",
+      "title": "影针日晷",
+      "icon": "minecraft:clock",
+      "x": -9.0,
+      "y": 2,
+      "description": [
+        "水与风魔法拨动人工太阳，观察指针对应的四道门。F8辨认藏有宝物的门，调好方位再打开。错误方向可能放出闪灵。",
+        "需要补给时可退出这间奇遇，继续探索其他门。"
+      ],
+      "dependencies": [
+        "2C5961BA43FE0847"
+      ],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "3D00AD3D7CDEE215",
+          "type": "advancement",
+          "advancement": "tnc:leyline/sundial"
+        }
+      ]
+    },
+    {
+      "id": "31D54E05107E46EE",
+      "title": "饥饿魔藤",
+      "icon": "tnc:flowing_mana_bucket",
+      "x": -9.0,
+      "y": 4,
+      "description": [
+        "往石盆投入真实储有100M的魔力瓶，或一桶流动魔力，喂饱魔藤后通路打开，奖励可带回家的魔植种子。",
+        "需要补给时可退出这间奇遇，继续探索其他门。"
+      ],
+      "dependencies": [
+        "2C5961BA43FE0847"
+      ],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "2C072A9E21AE48BB",
+          "type": "advancement",
+          "advancement": "tnc:leyline/vines"
+        }
+      ]
+    },
+    {
+      "id": "73E779B5977FD4C3",
+      "title": "透镜寻珍",
+      "icon": "tnc:mana_mirror",
+      "x": -9.0,
+      "y": 6,
+      "description": [
+        "在白色底座放置折光镜，靠近镜子开启F8扫视石壁；只有瞄准处的3×3窗口显露核心。误凿超过三次核心毁坏。潜行空手左击可回收自放镜子。",
+        "需要补给时可退出这间奇遇，继续探索其他门。"
+      ],
+      "dependencies": [
+        "2C5961BA43FE0847"
+      ],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "076286F2E3217087",
+          "type": "advancement",
+          "advancement": "tnc:leyline/lens"
+        }
+      ]
+    },
+    {
+      "id": "737A2696F7C158F5",
+      "title": "折光门扉",
+      "icon": "tnc:mana_meter",
+      "x": -9.0,
+      "y": 8,
+      "description": [
+        "将折光镜摆在工程底座，以魔力计配对，绕开遮光石柱把入口光送到门锁。观察F8中的折射路径。",
+        "需要补给时可退出这间奇遇，继续探索其他门。"
+      ],
+      "dependencies": [
+        "2C5961BA43FE0847"
+      ],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "16E287A8FBED6735",
+          "type": "advancement",
+          "advancement": "tnc:leyline/refraction"
+        }
+      ]
+    },
+    {
+      "id": "6AAD9AE7DD807A0A",
+      "title": "双域斗场",
+      "icon": "minecraft:blaze_powder",
+      "x": -9.0,
+      "y": 10,
+      "description": [
+        "火与冰守卫隔墙对峙。击破屏障核心让两方交战，可以趁机捕获虚弱的幸存者，而不必硬碰两军。",
+        "需要补给时可退出这间奇遇，继续探索其他门。"
+      ],
+      "dependencies": [
+        "2C5961BA43FE0847"
+      ],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "101F3BD98A517C16",
+          "type": "advancement",
+          "advancement": "tnc:leyline/factions"
+        }
+      ]
+    },
+    {
+      "id": "5FA2B7519C21135D",
+      "title": "贪婪天平",
+      "icon": "minecraft:gold_ingot",
+      "x": -9.0,
+      "y": 12,
+      "description": [
+        "右键手印后保持潜行，连续供给18秒，每秒消耗50M并增加5点淤积。提前准备法力与排毒方案，中途松手会重置。",
+        "需要补给时可退出这间奇遇，继续探索其他门。"
+      ],
+      "dependencies": [
+        "2C5961BA43FE0847"
+      ],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "34F798BE8354991D",
+          "type": "advancement",
+          "advancement": "tnc:leyline/scale"
+        }
+      ]
+    },
+    {
+      "id": "4AB2C3E33F97CF45",
+      "title": "&e&l锁钟地牢",
+      "icon": "tnc:dungeon_handbook",
+      "x": -3.0,
+      "y": -1,
+      "description": [
+        "回声、提线与被污染的魔脉",
+        "对应不同的机关与怪物组合。主线通路、支线奖励分开，不会因缺少药水或工具卡死整层。"
+      ],
+      "dependencies": [
+        "4ECCE29F8CF445F9"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "5F98534ACE45D7B5",
+          "type": "checkmark"
+        }
+      ]
+    },
+    {
+      "id": "78417714A78C0C89",
+      "title": "提线剧场",
+      "icon": "minecraft:string",
+      "x": -3.0,
+      "y": 2,
+      "description": [
+        "黄金魔偶的护盾来自高台地精。F8追踪暗影提线，切断三条线，或上台击败脆弱的操偶者。",
+        "需要补给时可退出这间奇遇，继续探索其他门。"
+      ],
+      "dependencies": [
+        "4AB2C3E33F97CF45"
+      ],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "7BEFB151FCDA7EF1",
+          "type": "advancement",
+          "advancement": "tnc:leyline/puppets"
+        }
+      ]
+    },
+    {
+      "id": "3DA91A7CB5D40996",
+      "title": "时间回廊",
+      "icon": "tnc:elixir_echo",
+      "x": -3.0,
+      "y": 4,
+      "description": [
+        "饮用回声魔药并开启F8，按残影脚印顺序行走。抵达末端后用水魔法触及残影指向的石墙。",
+        "需要补给时可退出这间奇遇，继续探索其他门。"
+      ],
+      "dependencies": [
+        "4AB2C3E33F97CF45"
+      ],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "3550FB5FD766D4F8",
+          "type": "advancement",
+          "advancement": "tnc:leyline/echo"
+        }
+      ]
+    },
+    {
+      "id": "19EF816887D94A33",
+      "title": "逆污净室",
+      "icon": "tnc:strange_waste",
+      "x": -3.0,
+      "y": 6,
+      "description": [
+        "再生魔藤吸收一切纯净魔力。古怪废液可以污染池水；高淤积冒险者也能亲自进入池水净化自身并破坏藤蔓供给。",
+        "需要补给时可退出这间奇遇，继续探索其他门。"
+      ],
+      "dependencies": [
+        "4AB2C3E33F97CF45"
+      ],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "1933FA1009ED5759",
+          "type": "advancement",
+          "advancement": "tnc:leyline/pollution"
+        }
+      ]
+    },
+    {
+      "id": "48D4A98DB8272C99",
+      "title": "沉睡胃袋",
+      "icon": "tnc:elixir_cleanse",
+      "x": -3.0,
+      "y": 8,
+      "description": [
+        "巨虫对高强度魔法十分敏感。找到通风口，用安宁或净化类魔药令其沉睡，再取出腹地宝物；惊醒会产生毒液。",
+        "需要补给时可退出这间奇遇，继续探索其他门。"
+      ],
+      "dependencies": [
+        "4AB2C3E33F97CF45"
+      ],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "726001D146D06A36",
+          "type": "advancement",
+          "advancement": "tnc:leyline/stomach"
+        }
+      ]
+    },
+    {
+      "id": "6C2B6FAED9A4FF7C",
+      "title": "饥饿坩埚",
+      "icon": "tnc:spellflame_cauldron",
+      "x": -3.0,
+      "y": 10,
+      "description": [
+        "观察F8味泡判断它偏好甘甜生机还是火辣废液。把匹配的魔法食材投入嘴中，可换取五份臻品魔药。",
+        "需要补给时可退出这间奇遇，继续探索其他门。"
+      ],
+      "dependencies": [
+        "4AB2C3E33F97CF45"
+      ],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "3090DF35A763F305",
+          "type": "advancement",
+          "advancement": "tnc:leyline/cauldron"
+        }
+      ]
+    },
+    {
+      "id": "17CC3832C07C1523",
+      "title": "地精典当与深泉",
+      "icon": "minecraft:water_bucket",
+      "x": -3.0,
+      "y": 12,
+      "description": [
+        "F8下与盲眼地精交易，将自身淤积作为筹码，每人独立结算一次。泡泉10秒获得眷顾；空桶收取原浆，带回地热核心永久升级温泉。",
+        "需要补给时可退出这间奇遇，继续探索其他门。"
+      ],
+      "dependencies": [
+        "4AB2C3E33F97CF45"
+      ],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "3FD0863F1EC644D8",
+          "type": "advancement",
+          "advancement": "tnc:leyline/pawn"
+        }
+      ]
+    },
+    {
+      "id": "568417CDDC18438D",
+      "title": "&e&l沉潮回廊",
+      "icon": "tnc:dungeon_handbook",
+      "x": 3.0,
+      "y": -1,
+      "description": [
+        "潮汐、运输与元素温度",
+        "对应不同的机关与怪物组合。主线通路、支线奖励分开，不会因缺少药水或工具卡死整层。"
+      ],
+      "dependencies": [
+        "4ECCE29F8CF445F9"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "27193F315C22ED34",
+          "type": "checkmark"
+        }
+      ]
+    },
+    {
+      "id": "44B1355131BCF2AA",
+      "title": "魔力潮汐",
+      "icon": "minecraft:prismarine_shard",
+      "x": 3.0,
+      "y": 2,
+      "description": [
+        "每五秒涌来一次潮波，观察F8浪前沿，在石柱的背风侧躲避。抵达尽头收取魔植；被击中会损失个人法力。",
+        "需要补给时可退出这间奇遇，继续探索其他门。"
+      ],
+      "dependencies": [
+        "568417CDDC18438D"
+      ],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "7972062765C0B266",
+          "type": "advancement",
+          "advancement": "tnc:leyline/tide"
+        }
+      ]
+    },
+    {
+      "id": "4A7F2732B6878620",
+      "title": "无形之桥",
+      "icon": "minecraft:feather",
+      "x": 3.0,
+      "y": 4,
+      "description": [
+        "普通视界中断桥已塌，F8会显露风凝成的踏板。完整踩过各段再抵达终点；两侧灰色假路会抽空魔力。",
+        "需要补给时可退出这间奇遇，继续探索其他门。"
+      ],
+      "dependencies": [
+        "568417CDDC18438D"
+      ],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "0EBEFA4E576815DB",
+          "type": "advancement",
+          "advancement": "tnc:leyline/bridge"
+        }
+      ]
+    },
+    {
+      "id": "5EEB1157B9BE6A78",
+      "title": "魔流急湍",
+      "icon": "tnc:elixir_feather",
+      "x": 3.0,
+      "y": 6,
+      "description": [
+        "F8显露三层流动道路。让魔流接住你，利用移动和潜行调节路径，并以轻羽类魔药辅助换道，抵达上层平台。",
+        "需要补给时可退出这间奇遇，继续探索其他门。"
+      ],
+      "dependencies": [
+        "568417CDDC18438D"
+      ],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "5F071C2430786228",
+          "type": "advancement",
+          "advancement": "tnc:leyline/rapids"
+        }
+      ]
+    },
+    {
+      "id": "34196121ADC7F593",
+      "title": "失控药室",
+      "icon": "tnc:sealing_lid",
+      "x": 3.0,
+      "y": 8,
+      "description": [
+        "锅内已有药材与高温魔火。以水或冰魔法降到绿色温区，观察漩涡靠拢，黄金时机用自己携带的封魔盖封住；完成续煮后用玻璃瓶装走。",
+        "需要补给时可退出这间奇遇，继续探索其他门。"
+      ],
+      "dependencies": [
+        "568417CDDC18438D"
+      ],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "55FB03BC337EFE99",
+          "type": "advancement",
+          "advancement": "tnc:leyline/alchemy"
+        }
+      ]
+    },
+    {
+      "id": "30082DAEFC2B88E7",
+      "title": "五味封印",
+      "icon": "tnc:moon_honey_cake",
+      "x": 3.0,
+      "y": 10,
+      "description": [
+        "火与水石盘已经固定。用自制魔植产物补齐甘味中和、风和土，观察颜色联通，解除餐阵。食材不匹配不会消耗。",
+        "需要补给时可退出这间奇遇，继续探索其他门。"
+      ],
+      "dependencies": [
+        "568417CDDC18438D"
+      ],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "43E7649A72E7FC93",
+          "type": "advancement",
+          "advancement": "tnc:leyline/meal"
+        }
+      ]
+    },
+    {
+      "id": "3BF4B7AD5332EC45",
+      "title": "&e&l星眠幻庭",
+      "icon": "tnc:dungeon_handbook",
+      "x": 9.0,
+      "y": -1,
+      "description": [
+        "双视界、空间错觉与奇物",
+        "对应不同的机关与怪物组合。主线通路、支线奖励分开，不会因缺少药水或工具卡死整层。"
+      ],
+      "dependencies": [
+        "4ECCE29F8CF445F9"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "26FAA4C6ED9D3611",
+          "type": "checkmark"
+        }
+      ]
+    },
+    {
+      "id": "1D77C72DC7730780",
+      "title": "双界交错",
+      "icon": "minecraft:quartz",
+      "x": 9.0,
+      "y": 2,
+      "description": [
+        "石桥存在于普通视界，光桥存在于魔力视界。判断下一段再切换；每个人的碰撞独立，不会把队友脚下的桥关掉。",
+        "需要补给时可退出这间奇遇，继续探索其他门。"
+      ],
+      "dependencies": [
+        "3BF4B7AD5332EC45"
+      ],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "12E2BDDEC731EFA1",
+          "type": "advancement",
+          "advancement": "tnc:leyline/dual_bridge"
+        }
+      ]
+    },
+    {
+      "id": "5245BA8EE355F7CC",
+      "title": "幻镜宝库",
+      "icon": "minecraft:chest",
+      "x": 9.0,
+      "y": 4,
+      "description": [
+        "九只宝箱中只有一条金色活脉。F8分辨金色宝物流与黑色死气；错误开箱会惊醒拟态蟹。折光镜也能干涉幻象。",
+        "需要补给时可退出这间奇遇，继续探索其他门。"
+      ],
+      "dependencies": [
+        "3BF4B7AD5332EC45"
+      ],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "60A25DA4A8DF9FDC",
+          "type": "advancement",
+          "advancement": "tnc:leyline/false_vault"
+        }
+      ]
+    },
+    {
+      "id": "4150F46D18D29BC0",
+      "title": "镜中棋局",
+      "icon": "minecraft:polished_blackstone",
+      "x": 9.0,
+      "y": 6,
+      "description": [
+        "水银镜像反射伤害并镜像你的脚步。利用立柱改变路线，让它走入F8显露的吸魔地漏。",
+        "需要补给时可退出这间奇遇，继续探索其他门。"
+      ],
+      "dependencies": [
+        "3BF4B7AD5332EC45"
+      ],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "6B47EE9072B0C9D1",
+          "type": "advancement",
+          "advancement": "tnc:leyline/chess"
+        }
+      ]
+    },
+    {
+      "id": "5144357CDEFDE529",
+      "title": "颠倒风暴",
+      "icon": "tnc:mana_valve",
+      "x": 9.0,
+      "y": 8,
+      "description": [
+        "使用分流阀或风魔法激活逆向重力，上升到天花板寻找宝匣。重力只维持20秒，提前准备轻羽魔药。",
+        "需要补给时可退出这间奇遇，继续探索其他门。"
+      ],
+      "dependencies": [
+        "3BF4B7AD5332EC45"
+      ],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "492E9981DA45FA21",
+          "type": "advancement",
+          "advancement": "tnc:leyline/gravity"
+        }
+      ]
+    },
+    {
+      "id": "56E832527DADB185",
+      "title": "琥珀展馆",
+      "icon": "minecraft:honey_block",
+      "x": 9.0,
+      "y": 10,
+      "description": [
+        "六件展品只够解冻两件。F8分辨宝物、受困同伴与陷阱，选择后用火魔法解冻，机会用尽无法重置。",
+        "需要补给时可退出这间奇遇，继续探索其他门。"
+      ],
+      "dependencies": [
+        "3BF4B7AD5332EC45"
+      ],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "6BE009332D778E96",
+          "type": "advancement",
+          "advancement": "tnc:leyline/exhibition"
+        }
+      ]
+    },
+    {
+      "id": "586370A5C26C3D55",
+      "title": "回声晶厅",
+      "icon": "minecraft:amethyst_cluster",
+      "x": 9.0,
+      "y": 12,
+      "description": [
+        "F8观察中央护盾循环显示的三色音序，再按顺序用箭、法术或敲击触碰对应晶簇。每次探索的音序不同。",
+        "需要补给时可退出这间奇遇，继续探索其他门。"
+      ],
+      "dependencies": [
+        "3BF4B7AD5332EC45"
+      ],
+      "hide_dependency_lines": true,
+      "tasks": [
+        {
+          "id": "6A43A17491332A68",
+          "type": "advancement",
+          "advancement": "tnc:leyline/music"
+        }
+      ]
+    },
+    {
+      "id": "1C3FD366465E2B83",
+      "title": "拟态魔晶蟹",
+      "icon": "tnc:mimic_crystal_crab_spawn_egg",
+      "x": -9.0,
+      "y": 17,
+      "description": [
+        "伪装宝匣，F8能看到深红核心。古怪废液可瓦解外壳；没有废液也能在醒来后战斗。",
+        "战斗房的母巢由灵石供能。切断供能可削弱怪物；废液与透支药水会改变母巢产物。"
+      ],
+      "dependencies": [
+        "4ECCE29F8CF445F9"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "4FC6CB0D4A9B9FB8",
+          "type": "checkmark"
+        }
+      ]
+    },
+    {
+      "id": "0E8DE1199E172BF2",
+      "title": "噬魔幽浮",
+      "icon": "tnc:mana_siphon_jelly_spawn_egg",
+      "x": -3.0,
+      "y": 17,
+      "description": [
+        "普通视界难以察觉，会附身汲取个人法力。F8才能可靠命中，火系魔药泼向脚下可驱离。",
+        "战斗房的母巢由灵石供能。切断供能可削弱怪物；废液与透支药水会改变母巢产物。"
+      ],
+      "dependencies": [
+        "4ECCE29F8CF445F9"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "6ADE3D7AAAD70861",
+          "type": "checkmark"
+        }
+      ]
+    },
+    {
+      "id": "279ED632402DB54F",
+      "title": "强光闪灵",
+      "icon": "tnc:glare_gargoyle_spawn_egg",
+      "x": 3.0,
+      "y": 17,
+      "description": [
+        "F8下直视胸核会短暂失明。观察线索后移开目光、利用立柱遮挡；不要全程盯住它。",
+        "战斗房的母巢由灵石供能。切断供能可削弱怪物；废液与透支药水会改变母巢产物。"
+      ],
+      "dependencies": [
+        "4ECCE29F8CF445F9"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "4108880C4E7AA5F3",
+          "type": "checkmark"
+        }
+      ]
+    },
+    {
+      "id": "62FB1B717A777E6F",
+      "title": "源晶吞噬虫",
+      "icon": "tnc:source_crystal_grub_spawn_egg",
+      "x": 9.0,
+      "y": 17,
+      "description": [
+        "它会吞吃魔力装置。压到四分之一血以下，用缩水捕捉药打开十秒窗口，拘束笼可把它带回产魔。",
+        "战斗房的母巢由灵石供能。切断供能可削弱怪物；废液与透支药水会改变母巢产物。"
+      ],
+      "dependencies": [
+        "4ECCE29F8CF445F9"
+      ],
+      "hide_dependency_lines": false,
+      "tasks": [
+        {
+          "id": "68C3FF7ABFF0AA52",
+          "type": "checkmark"
+        }
+      ]
+    }
+  ]
+}

@@ -23,7 +23,7 @@ public final class DungeonRewards {
       if(r.floor==30){String mail="Trophy_"+r.theme.id;profile.putInt(mail,Math.min(1000,profile.getInt(mail)+1));}profile.remove("Blessing");d.setDirty();
       var p=server.getPlayerList().getPlayer(id);if(p!=null){deliverMail(p);p.sendSystemMessage(net.minecraft.network.chat.Component.literal("勘察记录已保存，回酒馆委托栏潜行右键领取"+copper+"铜"));}
     }
-    public static void deliverMail(ServerPlayer p){var d=DungeonData.get(p.server);var profile=d.profile(p.getUUID());
+    public static void deliverMail(ServerPlayer p){com.tnc.tnc.dungeon.leyline.LeylineRewards.deliver(p);var d=DungeonData.get(p.server);var profile=d.profile(p.getUUID());
       if(profile.getBoolean("Entered"))DungeonTavern.award(p,"entered");
       for(var theme:DungeonTheme.values()){for(int floor=5;floor<=30;floor+=5)if(profile.getBoolean("Paid_"+theme.id+"_"+floor))DungeonTavern.award(p,theme.id+"_"+floor);
         String key="Trophy_"+theme.id;int count=profile.getInt(key);while(count>0){var item=new ItemStack(DungeonContent.ITEMS.get("dungeon_memento"));item.setHoverName(net.minecraft.network.chat.Component.literal(theme.name+" · 三十层通关纪念"));var tx=new InventoryTransaction(p.getInventory());if(!tx.add(item))break;tx.commit();profile.putInt(key,--count);d.setDirty();}

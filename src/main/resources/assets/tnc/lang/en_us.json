@@ -747,5 +747,20 @@
   "item.tnc.moon_honey_parfait": "Moon Honey Parfait",
   "item.tnc.concord_banquet": "Concord Banquet",
   "item.tnc.ninefold_sun_feast": "Ninefold Sun Feast",
-  "item.tnc.discord_mash": "Discord Mash"
+  "item.tnc.discord_mash": "Discord Mash",
+  "entity.tnc.mimic_crystal_crab": "拟态魔晶蟹",
+  "item.tnc.mimic_crystal_crab_spawn_egg": "拟态魔晶蟹刷怪蛋",
+  "entity.tnc.mana_siphon_jelly": "噬魔幽浮",
+  "item.tnc.mana_siphon_jelly_spawn_egg": "噬魔幽浮刷怪蛋",
+  "entity.tnc.glare_gargoyle": "强光闪灵",
+  "item.tnc.glare_gargoyle_spawn_egg": "强光闪灵刷怪蛋",
+  "entity.tnc.source_crystal_grub": "源晶吞噬虫",
+  "item.tnc.source_crystal_grub_spawn_egg": "源晶吞噬虫刷怪蛋",
+  "entity.tnc.ecology_flask": "泼洒魔药瓶",
+  "block.tnc.leyline_source": "供魔灵石",
+  "block.tnc.leyline_nest": "魔脉母巢",
+  "block.tnc.leyline_node": "古代机关石座",
+  "block.tnc.leyline_veil": "无形风桥",
+  "block.tnc.leyline_phase_material": "物质界踏板",
+  "block.tnc.leyline_phase_aether": "魔力界踏板"
 }

@@ -34,6 +34,7 @@ public final class WindBallEntity extends Entity {
                 var hit=e.getBoundingBox().inflate(.45).clip(from,to);if(e.getBoundingBox().inflate(.45).contains(from))hit=java.util.Optional.of(from);
                 if(hit.isPresent()&&from.distanceToSqr(hit.get())<=distance){to=hit.get();distance=from.distanceToSqr(to);contact=true;}
             }
+        if(contact&&wall.getType()!=HitResult.Type.MISS&&owner instanceof net.minecraft.server.level.ServerPlayer p)com.tnc.tnc.dungeon.leyline.LeylineEvents.spell(p,wall.getBlockPos(),"wind");
             setPos(to);if(contact||age>=32)anchor();return;
         }
         ++phaseAge;

@@ -51,11 +51,13 @@ public final class DungeonRealm {
       if(room.kind()==DungeonGraph.Kind.EVENT||room.kind()==DungeonGraph.Kind.REST)cell(a,o.above(),DungeonContent.CONSOLE.defaultBlockState());
       if(room.kind()==DungeonGraph.Kind.EXIT||room.kind()==DungeonGraph.Kind.GUARDIAN){cell(a,o.offset(0,1,3),DungeonContent.WAYSTONE.defaultBlockState());for(int x=-2;x<=2;x++)cell(a,o.offset(x,0,3),r.theme.lamp());}
     }
-    var secret=graph.rooms.stream().filter(q->q.kind()==DungeonGraph.Kind.TREASURE).toList();
+    for(var room:graph.rooms)com.tnc.tnc.dungeon.leyline.LeylineService.build(a,r,room);
+    var secret=graph.rooms.stream().filter(q->q.kind()==DungeonGraph.Kind.TREASURE&&!com.tnc.tnc.dungeon.leyline.LeylineService.puzzle(r,q)).toList();
     if(!secret.isEmpty()){var room=secret.get(Math.floorMod((int)(r.seed+r.floor),secret.size()));cell(a,center(r,room).offset(6,1,5),com.tnc.tnc.alchemy.AlchemyContent.HIDDEN_CACHE.defaultBlockState());}
     for(var room:graph.rooms)for(int target:room.links())if(target>room.id()){
       var other=graph.rooms.get(target);var from=center(r,room);var to=center(r,other);int dx=Integer.signum(to.getX()-from.getX()),dz=Integer.signum(to.getZ()-from.getZ());int ha=room.kind()==DungeonGraph.Kind.GUARDIAN?24:11,hb=other.kind()==DungeonGraph.Kind.GUARDIAN?24:11;
       for(int step=ha;step<=40-hb;step++)for(int side=-2;side<=2;side++)for(int y=0;y<=5;y++){var p=from.offset(dx*step+dz*side,y,dz*step+dx*side);boolean shell=Math.abs(side)==2||y==0||y==5;cell(a,p,shell?(y==0?r.theme.floor():r.theme.trim()):Blocks.AIR.defaultBlockState());}
+      com.tnc.tnc.dungeon.leyline.LeylineCorridors.decorate(a,r,room,other);
     }return a;}
     public static List<BlockPos> door(DungeonData.Run r,DungeonGraph.Room room,int target){var from=center(r,room);var to=center(r,r.graph().rooms.get(target));int dx=Integer.signum(to.getX()-from.getX()),dz=Integer.signum(to.getZ()-from.getZ()),half=room.kind()==DungeonGraph.Kind.GUARDIAN?24:11;var out=new ArrayList<BlockPos>();for(int s=-1;s<=1;s++)for(int y=1;y<=4;y++)out.add(from.offset(dx*half+dz*s,y,dz*half+dx*s));return out;}
     public static void doors(ServerLevel l,DungeonData.Run r,DungeonGraph.Room room,boolean shut){write(()->{for(int target:room.links())for(var p:door(r,room,target))l.setBlock(p,shut?Blocks.TINTED_GLASS.defaultBlockState():Blocks.AIR.defaultBlockState(),2);});}

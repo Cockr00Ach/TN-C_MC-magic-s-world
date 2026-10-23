@@ -28,6 +28,8 @@ public final class ArcanaWasteFlask extends ThrowableItemProjectile {
         if(!(level() instanceof ServerLevel l))return;
         if(getOwner() instanceof ServerPlayer p&&p.isAlive()&&p.serverLevel()==l){
             var at=hit.getLocation();
+            com.tnc.tnc.dungeon.ecology.EcologyHooks.splash(p,at,"strange_waste");
+            com.tnc.tnc.dungeon.leyline.LeylineEvents.potion(p,BlockPos.containing(at),"strange_waste");
             for(var mob:l.getEntitiesOfClass(LivingEntity.class,new AABB(at,at).inflate(2.5)))if(mob.distanceToSqr(at)<6.25)corrode(p,mob);
             var center=BlockPos.containing(at);
             for(var pos:BlockPos.betweenClosed(center.offset(-1,-1,-1),center.offset(1,1,1)))if(l.hasChunkAt(pos)&&!com.tnc.tnc.home.TownProtection.denied(p,pos)){

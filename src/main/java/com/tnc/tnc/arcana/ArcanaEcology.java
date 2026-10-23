@@ -54,6 +54,7 @@ public final class ArcanaEcology {
             case STORM->a.speciesId().equals("wirecall_lizard");default->false;};
     }
     public static boolean applyAnimal(ServerPlayer p,LivingEntity target,String id,ItemStack held){var l=p.serverLevel();if(com.tnc.tnc.home.TownProtection.denied(p,target.blockPosition()))return false;var t=target.getPersistentData();long now=l.getGameTime();
+        if(target instanceof com.tnc.tnc.dungeon.ecology.EcologyMob mob){boolean applied=mob.applyPotion(p,id);if(applied)ArcanaItem.consume(p,held);return applied;}
         if(id.equals("capture_shrink_elixir")){
             if(!p.isAlive()||p.isSpectator()||t.hasUUID("CageOwner")||!(target instanceof Monster)||target instanceof VoidDevourer||target instanceof com.tnc.tnc.dungeon.DungeonMob m&&m.guardian()||target.getMaxHealth()>250||target.getHealth()>target.getMaxHealth()*.25)return false;
             t.putLong("CaptureUntil",now+200);t.putUUID("CaptureOwner",p.getUUID());t.putFloat("ArcanaScale",.3f);target.refreshDimensions();ArcanaItem.consume(p,held);return true;
