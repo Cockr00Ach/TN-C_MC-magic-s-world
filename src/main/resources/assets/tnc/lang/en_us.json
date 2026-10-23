@@ -747,5 +747,17 @@
   "item.tnc.moon_honey_parfait": "Moon Honey Parfait",
   "item.tnc.concord_banquet": "Concord Banquet",
   "item.tnc.ninefold_sun_feast": "Ninefold Sun Feast",
-  "item.tnc.discord_mash": "Discord Mash"
+  "item.tnc.discord_mash": "Discord Mash",
+  "block.tnc.wind_arena_runestone_1": "Gale Runestone 1",
+  "block.tnc.wind_arena_runestone_2": "Gale Runestone 2",
+  "dimension.tnc.wind_arena": "Gale Chessboard",
+  "dimension.tnc.water_arena": "Abyssal Chessboard",
+  "biome.tnc.wind_arena": "Gale Chessboard",
+  "biome.tnc.water_arena": "Abyssal Chessboard",
+  "block.tnc.wind_arena_runestone_3": "Gale Runestone 3",
+  "block.tnc.wind_arena_runestone_4": "Gale Runestone 4",
+  "block.tnc.wind_arena_runestone_5": "Gale Runestone 5",
+  "block.tnc.wind_arena_runestone_6": "Gale Runestone 6",
+  "block.tnc.wind_arena_runestone_7": "Gale Runestone 7",
+  "block.tnc.wind_arena_runestone_8": "Gale Runestone 8"
 }
