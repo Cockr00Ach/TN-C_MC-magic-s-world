@@ -18,4 +18,3 @@ for suffix in ("veil","phase_material","phase_aether"):
 p=r/"src/main/java/com/tnc/tnc/dungeon/DungeonEvents.java";s=p.read_text(encoding="utf-8").replace('p&&DungeonRealm.inside(p.level()))e.setCanceled(true);','p&&DungeonRealm.locked(p.level()))e.setCanceled(true);');p.write_text(s,encoding="utf-8")
 # Puzzles replace the old treasure spawns entirely; avoid a free parallel hidden-cache reward.
 p=r/"src/main/java/com/tnc/tnc/dungeon/DungeonRealm.java";s=p.read_text(encoding="utf-8").replace('q->q.kind()==DungeonGraph.Kind.TREASURE','q->q.kind()==DungeonGraph.Kind.TREASURE&&!com.tnc.tnc.dungeon.leyline.LeylineService.puzzle(r,q)');p.write_text(s,encoding="utf-8")
-

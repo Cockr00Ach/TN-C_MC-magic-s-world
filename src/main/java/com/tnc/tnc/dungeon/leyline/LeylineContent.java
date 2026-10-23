@@ -33,4 +33,3 @@ public final class LeylineContent {
  }
  private static final class Client {static boolean enabled(){return com.tnc.tnc.mana.sight.client.ManaSightClient.enabled();}}
 }
-

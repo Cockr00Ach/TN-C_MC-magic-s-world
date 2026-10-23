@@ -5,4 +5,3 @@ public enum LeylineKind {
  public final String title;public final String hint;
  LeylineKind(String title){this.title=title;this.hint="切换 F8，观察环境中的魔力痕迹。";}
 }
-

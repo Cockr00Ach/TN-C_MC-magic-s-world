@@ -50,4 +50,3 @@ public final class LeylineEvents {
   if(!element.isEmpty())spell(p,b.getBlockPos(),element);
  }
 }
-

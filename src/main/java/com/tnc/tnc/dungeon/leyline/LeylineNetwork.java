@@ -12,4 +12,3 @@ public final class LeylineNetwork {
  static final class Client {static void accept(CompoundTag data){com.tnc.tnc.dungeon.client.LeylineClient.accept(data);}}
  public static void sync(ServerPlayer p,CompoundTag data){CHANNEL.send(PacketDistributor.PLAYER.with(()->p),new State(data));}
 }
-
