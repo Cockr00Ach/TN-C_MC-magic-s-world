@@ -18,7 +18,6 @@ import net.minecraftforge.fml.common.Mod;
 public final class ThunderSealRenderer extends EntityRenderer<ThunderSealEntity> {
     private static final ResourceLocation MODEL=ThunderSealContent.id("thunder_seal_pylon");
     private static final ResourceLocation GLOW=ResourceLocation.fromNamespaceAndPath("minecraft","textures/entity/beacon_beam.png");
-    private static final ResourceLocation CIRCLE=ThunderSealContent.id("textures/entity/thunder_seal_circle.png");
     private static final int[][] COLORS={{255,215,85,255,248,184},{55,181,255,184,242,255},{153,78,255,226,188,255}};
 
     public ThunderSealRenderer(EntityRendererProvider.Context context){super(context);}
@@ -30,7 +29,7 @@ public final class ThunderSealRenderer extends EntityRenderer<ThunderSealEntity>
         double age=e.age(partial);int tier=e.tier(),finish=ThunderSealRules.finish(tier);
         float fade=(float)Math.min(1,Math.max(0,(ThunderSealRules.lifetime(tier)-age)/15));
         double radius=ThunderSealRules.radius(tier),growth=Math.min(1,age/18),height=ThunderSealRules.height(tier),impact=Math.max(0,age-finish);
-        ring(p,buffers,radius,.045,age*.12,fade*.82F);
+        ring(p,buffers,radius,.045,age*.12,fade*.9F);
         var mc=Minecraft.getInstance();
         var model=mc.getModelManager().getModel(new net.minecraft.client.resources.model.ModelResourceLocation(MODEL,"inventory"));
         int count=ThunderSealRules.count(tier);
@@ -40,7 +39,7 @@ public final class ThunderSealRenderer extends EntityRenderer<ThunderSealEntity>
             strength*= (float)Math.max(0,1-Math.max(0,age-finish)/10);
             cage(e,p,buffers,radius,height*growth,age,tier,strength,pulse);
         }
-        if(tier>=4)ring(p,buffers,radius*.92,height*1.28, -age*.07,fade*.28F);
+        if(tier>=4)ring(p,buffers,radius*.92,height*1.28, -age*.07,fade*.35F);
         for(int slot=0;slot<count;slot++){
             Vec3 node=e.node(slot,age);
             p.pushPose();p.translate(node.x,node.y-(1-growth)*height,node.z);
@@ -85,9 +84,7 @@ public final class ThunderSealRenderer extends EntityRenderer<ThunderSealEntity>
 
     private static void ring(PoseStack p,MultiBufferSource b,double r,double y,double angle,float alpha){
         p.pushPose();p.translate(0,y,0);p.mulPose(Axis.YP.rotationDegrees((float)angle));
-        var v=b.getBuffer(RenderType.entityTranslucentEmissive(CIRCLE));var m=p.last();
-        vertex(v,m,new Vec3(-r,0,-r),0,0,alpha,255,255,255);vertex(v,m,new Vec3(-r,0,r),0,1,alpha,255,255,255);
-        vertex(v,m,new Vec3(r,0,r),1,1,alpha,255,255,255);vertex(v,m,new Vec3(r,0,-r),1,0,alpha,255,255,255);p.popPose();
+        ThunderSealSigil.render(p,b,(float)r,alpha);p.popPose();
     }
     private static void bolt(ThunderSealEntity e,PoseStack p,MultiBufferSource b,Vec3 from,Vec3 to,double age,int seed,float alpha,double width){
         Vec3 line=to.subtract(from),axis=line.normalize();

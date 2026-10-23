@@ -17,7 +17,7 @@ public final class ThunderSealClientAudit {
    mc.setScreen(null);mc.getSingleplayerServer().execute(()->{
     var p=mc.getSingleplayerServer().getPlayerList().getPlayer(uuid);var l=p.server.overworld();l.setDayTime(13500);
     for(int x=570;x<=630;x++)for(int z=570;z<=630;z++)l.setBlock(new net.minecraft.core.BlockPos(x,80,z),net.minecraft.world.level.block.Blocks.DEEPSLATE_TILES.defaultBlockState(),2);
-    p.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);double distance=12+t*5;p.teleportTo(l,600,84+t*3,600+distance,180,16);
+    p.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);boolean sigil=Boolean.getBoolean("tnc.thunderSealSigilAudit");double distance=sigil?10+t*3:12+t*5;p.teleportTo(l,600,sigil?84+distance*.7:84+t*3,600+distance,180,sigil?34:16);
     var seal=ThunderSealContent.SEAL.create(l);seal.configure(p,t,new net.minecraft.world.phys.Vec3(600,81,600),null);l.addFreshEntity(seal);entityId=seal.getId();
    });return;
   }
