@@ -70,6 +70,15 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
 
     /** 撕咬判定距离（格）。 */
     public static final double BITE_RANGE = 8.5D;
+    /** 咬合扇区半角（度）：预警和伤害共用同一份几何。 */
+    public static final double BITE_HALF_ANGLE_DEG = 35.0D;
+    /** 嘴部锚点（格）：模型正前方距离 / 离地高度，两阶段分开标定。 */
+    private static final double MOUTH_FORWARD_P1 = 5.3D;
+    private static final double MOUTH_UP_P1 = 1.35D;
+    private static final double MOUTH_FORWARD_P2 = 6.6D;
+    private static final double MOUTH_UP_P2 = 0.70D;
+    /** 攻击调试入口（-/tnc_bite、危险范围可视化），默认关闭。 */
+    public static final boolean ATTACK_DEBUG = Boolean.getBoolean("tnc.tortoise.attack.debug");
     /** 重踏半径（格）。 */
     public static final double SLAM_RADIUS = 9.5D;
     /** 二阶段火山弹的落点散布半径（格）。 */
@@ -86,13 +95,14 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     private static final int ACTION_ERUPTION = 4;
 
     /** 动作时长（tick）。 */
-    private static final int BITE_TICKS = 14;
+    private static final int BITE_TICKS = 20;
     private static final int SLAM_TICKS = 26;
     private static final int TRANSITION_TICKS = 68; // 3.4s 四拍（停步低头 / 下沉震动 / 岩甲掀开 / 口部喷发）
     private static final int ERUPTION_TICKS = 46;
 
     /** 命中结算发生在动作的第几 tick —— 对应动画里"砸到地"的那一帧。 */
-    private static final int BITE_HIT_TICK = 5;
+    /** 咬合落在动画 0.50s 的闭嘴帧上（1.0s 动画 = 20 tick）。 */
+    private static final int BITE_HIT_TICK = 10;
     private static final int SLAM_HIT_TICK = 13;
     private static final int ERUPTION_HIT_TICK = 26;
 
@@ -113,6 +123,14 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     /** 二阶段火山弹的落点（服务端算好，倒计时结束时炸）。 */
     private final java.util.List<Vec3> pendingBlasts = new java.util.ArrayList<>();
     private int blastCountdown;
+
+    /** 本次施法编号：同一次施法内只结算一次（重复判定/重入不会二次扣血）。 */
+    private long castId;
+    /** 施法开始时锁定的朝向；预警与伤害都用它，施法过程中不再跟随玩家。 */
+    private float castYaw;
+    private final java.util.Set<java.util.UUID> castHits = new java.util.HashSet<>();
+    /** 调试用危险范围可视化的剩余 tick（仅 ATTACK_DEBUG 下生效）。 */
+    private int debugOutlineTicks;
 
     public VolcanicTortoiseEntity(EntityType<? extends VolcanicTortoiseEntity> type, Level level) {
         super(type, level);
@@ -273,6 +291,10 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     private void startAction(int next) {
         this.action = next;
         this.actionTicks = 0;
+        // 每次施法一个编号 + 锁定朝向；本次施法内同一目标最多结算一次。
+        this.castId++;
+        this.castYaw = this.getYRot();
+        this.castHits.clear();
         this.getNavigation().stop();
     }
 
@@ -360,18 +382,104 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     }
 
     private void tickBite(ServerLevel level) {
-        if (this.actionTicks == BITE_HIT_TICK) {
-            LivingEntity target = this.getTarget();
-            if (target != null && target.isAlive() && this.distanceTo(target) <= BITE_RANGE + 1.0D) {
-                target.hurt(this.damageSources().mobAttack(this),
-                        (float) (this.getAttributeValue(Attributes.ATTACK_DAMAGE) * this.damageScale()));
-                level.playSound(null, this.blockPosition(), SoundEvents.RAVAGER_ATTACK,
-                        SoundSource.HOSTILE, 1.6F, 0.8F);
+        if (ATTACK_DEBUG && this.debugOutlineTicks > 0) {
+            this.debugOutlineTicks--;
+            if (this.actionTicks % 4 == 1) {
+                this.drawDangerOutline(level);
             }
+        }
+        // 命中时刻 = 动画 0.50s 的闭嘴帧（tick 10），不靠动画回调。
+        if (this.actionTicks == BITE_HIT_TICK) {
+            this.biteSweep(level);
+            this.biteFx(level);
         }
         if (this.actionTicks >= BITE_TICKS) {
             this.finishAction(this.isPhaseTwo() ? 14 : 22);
         }
+    }
+
+    /** 咬合结算：几何以施法时锁定的 castYaw 为准，扇区内每个目标本次施法只吃一次。 */
+    private void biteSweep(ServerLevel level) {
+        Vec3 forward = horizontalForward(this.castYaw);
+        double tanHalf = Math.tan(Math.toRadians(BITE_HALF_ANGLE_DEG));
+        float damage = (float) (this.getAttributeValue(Attributes.ATTACK_DAMAGE) * this.damageScale());
+        AABB box = new AABB(this.getX() - BITE_RANGE, this.getY() - 1.5D, this.getZ() - BITE_RANGE,
+                this.getX() + BITE_RANGE, this.getY() + 5.0D, this.getZ() + BITE_RANGE);
+        for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, box, this::canHarm)) {
+            Vec3 delta = victim.position().add(0.0D, victim.getBbHeight() * 0.5D, 0.0D)
+                    .subtract(this.position().add(0.0D, 1.5D, 0.0D));
+            double along = delta.x * forward.x + delta.z * forward.z;
+            double lateral = Math.abs(delta.x * forward.z - delta.z * forward.x);
+            if (along < 0.5D || along > BITE_RANGE + victim.getBbWidth() * 0.5D
+                    || lateral > tanHalf * Math.max(along, 1.0D)) {
+                continue;
+            }
+            if (!this.castHits.add(victim.getUUID())) {
+                continue;
+            }
+            victim.hurt(this.damageSources().mobAttack(this), damage);
+            victim.push(forward.x * 0.30D, 0.10D, forward.z * 0.30D);
+        }
+        level.playSound(null, this.blockPosition(), SoundEvents.RAVAGER_ATTACK, SoundSource.HOSTILE, 1.6F, 0.8F);
+    }
+
+    /** 咬合瞬间的橙色闪光 + 少量碎火星，位置跟随嘴部。 */
+    private void biteFx(ServerLevel level) {
+        Vec3 mouth = this.mouthPoint();
+        level.sendParticles(ParticleTypes.FLAME, mouth.x, mouth.y, mouth.z, 8, 0.16D, 0.10D, 0.16D, 0.01D);
+        level.sendParticles(ParticleTypes.LAVA, mouth.x, mouth.y, mouth.z, 3, 0.08D, 0.06D, 0.08D, 0.0D);
+        level.playSound(null, net.minecraft.core.BlockPos.containing(mouth), SoundEvents.RAVAGER_ATTACK,
+                SoundSource.HOSTILE, 2.0F, 1.30F);
+    }
+
+    private Vec3 mouthPoint() {
+        boolean two = this.isPhaseTwo();
+        Vec3 forward = horizontalForward(this.castYaw);
+        double fwd = two ? MOUTH_FORWARD_P2 : MOUTH_FORWARD_P1;
+        double up = two ? MOUTH_UP_P2 : MOUTH_UP_P1;
+        return this.position().add(forward.scale(fwd)).add(0.0D, up, 0.0D);
+    }
+
+    private static Vec3 horizontalForward(float yaw) {
+        double rad = Math.toRadians(yaw);
+        return new Vec3(-Math.sin(rad), 0.0D, Math.cos(rad));
+    }
+
+    /** 调试：把本次咬合的扇区画出来（仅 ATTACK_DEBUG 下，由 /tnc_bite true 触发）。 */
+    private void drawDangerOutline(ServerLevel level) {
+        Vec3 center = this.position().add(0.0D, 0.25D, 0.0D);
+        for (int i = 0; i <= 24; i++) {
+            double angle = this.castYaw - BITE_HALF_ANGLE_DEG + (2.0D * BITE_HALF_ANGLE_DEG) * i / 24.0D;
+            Vec3 p = center.add(horizontalForward((float) angle).scale(BITE_RANGE));
+            level.sendParticles(ParticleTypes.END_ROD, p.x, p.y, p.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+        }
+        for (int side = -1; side <= 1; side += 2) {
+            double angle = this.castYaw + side * BITE_HALF_ANGLE_DEG;
+            for (double r = 1.5D; r < BITE_RANGE; r += 1.5D) {
+                Vec3 p = center.add(horizontalForward((float) angle).scale(r));
+                level.sendParticles(ParticleTypes.END_ROD, p.x, p.y, p.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+            }
+        }
+    }
+
+    /** 单技能触发入口（调试用）：立即开始一次撕咬，仍遵守死亡/忙碌限制。 */
+    public boolean forceBite(LivingEntity target, boolean showRange) {
+        if (!this.isAlive() || this.isDeadOrDying() || this.isBusy()) {
+            return false;
+        }
+        if (target != null) {
+            double dx = target.getX() - this.getX();
+            double dz = target.getZ() - this.getZ();
+            float yaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
+            this.setYRot(yaw);
+            this.yBodyRot = yaw;
+            this.yHeadRot = yaw;
+            this.setTarget(target);
+        }
+        this.startAction(ACTION_BITE);
+        this.triggerAnim(ACTION_CONTROLLER, "bite");
+        this.debugOutlineTicks = showRange ? BITE_TICKS : 0;
+        return true;
     }
 
     private void tickSlam(ServerLevel level) {
