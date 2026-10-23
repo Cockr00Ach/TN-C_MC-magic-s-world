@@ -31,8 +31,10 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import com.tnc.tnc.magic.TNShockwaveEntity;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.AnimatableManager;
@@ -79,8 +81,18 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     private static final double MOUTH_UP_P2 = 0.70D;
     /** 攻击调试入口（-/tnc_bite、危险范围可视化），默认关闭。 */
     public static final boolean ATTACK_DEBUG = Boolean.getBoolean("tnc.tortoise.attack.debug");
-    /** 重踏半径（格）。 */
+    /** 重踏半径（格）：AI 的起手距离仍按这个值；实际伤害由扩散火环结算。 */
     public static final double SLAM_RADIUS = 9.5D;
+    /** 扩散火环的最终半径（格）。 */
+    public static final double SLAM_RING_RADIUS = 22.0D;
+    /** 火环环带宽度（格）：伤害在 [半径-带宽/2, 半径+带宽/2] 之间结算。 */
+    public static final double SLAM_RING_BAND = 2.0D;
+    /** 脚下直接冲击半径（格）：与火环共用 castHits，同一次重踏只结算一次。 */
+    private static final double SLAM_IMPACT_RADIUS = 3.0D;
+    /** 目标与地表高差容差（格）：超过视为站高墙/坑里，火环够不到。 */
+    private static final double SLAM_HEIGHT_TOLERANCE = 2.0D;
+    /** 重踏震屏强度（度），0 = 关闭；用 -Dtnc.tortoise.slam.shake=3 开启。 */
+    private static final float SLAM_SHAKE = parseFloatProperty("tnc.tortoise.slam.shake", 0.0F);
     /** 二阶段火山弹的落点散布半径（格）。 */
     public static final double ERUPTION_SPREAD = 8.0D;
 
@@ -96,14 +108,17 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
 
     /** 动作时长（tick）。 */
     private static final int BITE_TICKS = 20;
-    private static final int SLAM_TICKS = 26;
+    private static final int SLAM_TICKS = 72; // 3.6s：24 tick 抬脚蓄力 / 30 tick 火环扩散 / 18 tick 收势
     private static final int TRANSITION_TICKS = 68; // 3.4s 四拍（停步低头 / 下沉震动 / 岩甲掀开 / 口部喷发）
     private static final int ERUPTION_TICKS = 46;
 
     /** 命中结算发生在动作的第几 tick —— 对应动画里"砸到地"的那一帧。 */
     /** 咬合落在动画 0.50s 的闭嘴帧上（1.0s 动画 = 20 tick）。 */
     private static final int BITE_HIT_TICK = 10;
-    private static final int SLAM_HIT_TICK = 13;
+    /** 前脚砸地帧（1.2s），火环从这里开始扩散。 */
+    private static final int SLAM_HIT_TICK = 24;
+    /** 火环从中心推到 SLAM_RING_RADIUS 所需的 tick。 */
+    private static final int SLAM_RING_TICKS = 30;
     private static final int ERUPTION_HIT_TICK = 26;
 
     private static final String ACTION_CONTROLLER = "action";
@@ -117,6 +132,10 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
 
     private int action = ACTION_NONE;
     private int actionTicks;
+    /** 砸地瞬间锁定的冲击中心：视觉与伤害共用同一个点与传播速度。 */
+    private Vec3 slamCenter = Vec3.ZERO;
+    /** 调试：把火环的最大半径画出来（仅 ATTACK_DEBUG 的 /tnc_slam true）。 */
+    private int debugRingTicks;
     private int attackCooldown = 40;
     private int slamCooldown = 120;
     private int eruptionCooldown = 160;
@@ -484,7 +503,18 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
 
     private void tickSlam(ServerLevel level) {
         if (this.actionTicks == SLAM_HIT_TICK) {
-            this.groundSlam(level);
+            this.slamCenter = this.position();
+            this.groundSlamImpact(level);
+        }
+        int ringAge = this.actionTicks - SLAM_HIT_TICK;
+        if (ringAge > 0 && ringAge <= SLAM_RING_TICKS) {
+            this.tickSlamRing(level, ringAge);
+        }
+        if (this.debugRingTicks > 0) {
+            if (this.actionTicks % 4 == 0) {
+                this.debugRingOutline(level);
+            }
+            this.debugRingTicks--;
         }
         if (this.actionTicks >= SLAM_TICKS) {
             this.finishAction(this.isPhaseTwo() ? 40 : 60);
@@ -492,37 +522,148 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         }
     }
 
-    /** 重踏：半径内所有非友方目标吃一次伤害并被掀起来一点。 */
-    private void groundSlam(ServerLevel level) {
-        Vec3 center = this.position();
+    /**
+     * 落地瞬间：短促闪光 + 少量尘土/火星 + 脚下直接冲击。
+     *
+     * <p>不生成常驻烟柱；脚下冲击与随后外扩的火环共用 {@link #castHits}，
+     * 所以同一次重踏对同一目标只结算一次主伤害。
+     */
+    private void groundSlamImpact(ServerLevel level) {
+        Vec3 center = this.slamCenter;
+        level.playSound(null, this.blockPosition(), SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 3.4F, 0.55F);
+        level.playSound(null, this.blockPosition(), SoundEvents.RAVAGER_STUNNED, SoundSource.HOSTILE, 3.0F, 0.5F);
+        level.sendParticles(ParticleTypes.EXPLOSION, center.x, center.y + 0.45D, center.z,
+                2, 0.30D, 0.05D, 0.30D, 0.0D);
+        level.sendParticles(ParticleTypes.SMOKE, center.x, center.y + 0.20D, center.z,
+                24, 1.60D, 0.15D, 1.60D, 0.02D);
+        level.sendParticles(ParticleTypes.LAVA, center.x, center.y + 0.25D, center.z,
+                16, 1.10D, 0.15D, 1.10D, 0.0D);
+        level.sendParticles(ParticleTypes.FLAME, center.x, center.y + 0.30D, center.z,
+                20, 1.20D, 0.10D, 1.20D, 0.03D);
+        this.slamDamage(level, center, 0.0D, SLAM_IMPACT_RADIUS);
+        if (SLAM_SHAKE > 0.0F) {
+            TNShockwaveEntity wave = TNShockwaveEntity.blast(
+                    level, center.add(0.0D, 0.2D, 0.0D), 0.8D, SLAM_SHAKE, this);
+            if (wave != null) {
+                wave.configurePush(false);
+                wave.configureFlash(0.0F);
+            }
+        }
+    }
+
+    /** 火环：伤害与视觉共用同一个半径/速度；贴地采样失败的点跳过，不加载区块。 */
+    private void tickSlamRing(ServerLevel level, int age) {
+        double radius = SLAM_RING_RADIUS * age / (double) SLAM_RING_TICKS;
+        if (radius < 0.6D) {
+            return;
+        }
+        this.slamDamage(level, this.slamCenter, radius - SLAM_RING_BAND * 0.5D, radius + SLAM_RING_BAND * 0.5D);
+        if (age % 2 == 0 || age == SLAM_RING_TICKS) {
+            this.slamRingFx(level, radius, age);
+        }
+    }
+
+    /** 火环视觉：主体橙色火焰 + 稀疏近白内缘 + 暗色余烬；到达最大半径后迅速收掉。 */
+    private void slamRingFx(ServerLevel level, double radius, int age) {
+        Vec3 center = this.slamCenter;
+        int points = (int) Math.max(10.0D, Math.min(72.0D, Math.round(2.0D * Math.PI * radius / 2.4D)));
+        boolean fading = age > SLAM_RING_TICKS - 6;
+        for (int i = 0; i < points; i++) {
+            double angle = 2.0D * Math.PI * i / points;
+            double x = center.x + Math.cos(angle) * radius;
+            double z = center.z + Math.sin(angle) * radius;
+            if (!level.hasChunkAt(net.minecraft.core.BlockPos.containing(x, center.y, z))) {
+                continue;
+            }
+            int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                    net.minecraft.core.BlockPos.containing(x, center.y, z).getX(),
+                    net.minecraft.core.BlockPos.containing(x, center.y, z).getZ());
+            double y = top + 0.12D;
+            if (Math.abs(y - center.y) > 6.0D) {
+                continue;
+            }
+            level.sendParticles(ParticleTypes.FLAME, x, y + 0.18D, z, 1, 0.05D, 0.04D, 0.05D, 0.01D);
+            if (i % 4 == 0) {
+                level.sendParticles(ParticleTypes.LAVA, x, y + 0.10D, z, 1, 0.04D, 0.0D, 0.04D, 0.0D);
+            }
+            if (!fading && i % 5 == 0) {
+                level.sendParticles(ParticleTypes.END_ROD, x, y + 0.30D, z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+            }
+            if (fading && i % 3 == 0) {
+                level.sendParticles(ParticleTypes.SMOKE, x, y + 0.20D, z, 1, 0.02D, 0.02D, 0.02D, 0.0D);
+            }
+        }
+    }
+
+    /** 伤害结算：环带内每人只吃一次；高差/遮挡不过的跳过，避免穿高墙打人。 */
+    private void slamDamage(ServerLevel level, Vec3 center, double inner, double outer) {
         float damage = (float) (this.getAttributeValue(Attributes.ATTACK_DAMAGE) * 0.75D * this.damageScale());
-        AABB box = new AABB(center.x - SLAM_RADIUS, center.y - 2.0D, center.z - SLAM_RADIUS,
-                center.x + SLAM_RADIUS, center.y + 3.0D, center.z + SLAM_RADIUS);
+        AABB box = new AABB(center.x - outer - 2.0D, center.y - 3.0D, center.z - outer - 2.0D,
+                center.x + outer + 2.0D, center.y + 6.0D, center.z + outer + 2.0D);
         for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, box, e -> this.canHarm(e))) {
+            if (victim == this || this.castHits.contains(victim.getUUID())) {
+                continue;
+            }
+            double dist = Math.hypot(victim.getX() - center.x, victim.getZ() - center.z);
+            double half = victim.getBbWidth() * 0.5D;
+            if (dist + half < inner || dist - half > outer) {
+                continue;
+            }
+            if (!this.slamReaches(level, victim, center)) {
+                continue;
+            }
+            if (!this.castHits.add(victim.getUUID())) {
+                continue;
+            }
             victim.hurt(this.damageSources().mobAttack(this), damage);
             Vec3 push = victim.position().subtract(center);
             if (push.lengthSqr() > 1.0E-4D) {
-                push = push.normalize().scale(0.55D);
+                push = push.normalize().scale(inner <= 0.01D ? 0.45D : 0.30D);
             }
-            victim.push(push.x, 0.42D, push.z);
+            victim.push(push.x, inner <= 0.01D ? 0.40D : 0.20D, push.z);
         }
-        level.playSound(null, this.blockPosition(), SoundEvents.RAVAGER_STUNNED, SoundSource.HOSTILE, 3.2F, 0.55F);
-        level.sendParticles(ParticleTypes.EXPLOSION_EMITTER,
-                center.x, center.y + 0.2D, center.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
-        for (int i = 0; i < 40; i++) {
-            double angle = level.getRandom().nextDouble() * Math.PI * 2.0D;
-            double radius = SLAM_RADIUS * Math.sqrt(level.getRandom().nextDouble());
-            level.sendParticles(ParticleTypes.LAVA,
-                    center.x + Math.cos(angle) * radius, center.y + 0.25D,
-                    center.z + Math.sin(angle) * radius, 1, 0.0D, 0.05D, 0.0D, 0.0D);
+    }
+
+    /** 贴地判定：与地表高差不超过容差，且首领到目标有视线（高墙挡住就不结算）。 */
+    private boolean slamReaches(ServerLevel level, LivingEntity victim, Vec3 center) {
+        if (!level.hasChunkAt(victim.blockPosition())) {
+            return false;
         }
-        for (int i = 0; i < 26; i++) {
-            double angle = level.getRandom().nextDouble() * Math.PI * 2.0D;
-            double radius = SLAM_RADIUS * 0.9D * Math.sqrt(level.getRandom().nextDouble());
-            level.sendParticles(ParticleTypes.SMOKE,
-                    center.x + Math.cos(angle) * radius, center.y + 0.3D,
-                    center.z + Math.sin(angle) * radius, 1, 0.05D, 0.10D, 0.05D, 0.01D);
+        int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                victim.blockPosition().getX(), victim.blockPosition().getZ());
+        if (Math.abs(victim.getY() - top) > SLAM_HEIGHT_TOLERANCE) {
+            return false;
         }
+        return this.hasLineOfSight(victim);
+    }
+
+    /** 调试：把火环最终半径画一圈（贴地采样，不加载区块）。 */
+    private void debugRingOutline(ServerLevel level) {
+        Vec3 center = this.slamCenter.equals(Vec3.ZERO) ? this.position() : this.slamCenter;
+        int points = 96;
+        for (int i = 0; i < points; i++) {
+            double angle = 2.0D * Math.PI * i / points;
+            double x = center.x + Math.cos(angle) * SLAM_RING_RADIUS;
+            double z = center.z + Math.sin(angle) * SLAM_RING_RADIUS;
+            if (!level.hasChunkAt(net.minecraft.core.BlockPos.containing(x, center.y, z))) {
+                continue;
+            }
+            int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                    net.minecraft.core.BlockPos.containing(x, center.y, z).getX(),
+                    net.minecraft.core.BlockPos.containing(x, center.y, z).getZ());
+            level.sendParticles(ParticleTypes.END_ROD, x, top + 0.25D, z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+        }
+    }
+
+    /** 调试：立刻踏一次；仍遵守死亡/正在攻击/转阶段限制。 */
+    public boolean forceSlam(boolean showRing) {
+        if (this.isDeadOrDying() || this.action != ACTION_NONE) {
+            return false;
+        }
+        this.startAction(ACTION_SLAM);
+        this.triggerAnim(ACTION_CONTROLLER, "slam");
+        this.debugRingTicks = showRing ? SLAM_TICKS : 0;
+        return true;
     }
 
     /** 二阶段：先在目标周围画三圈预警，倒计时结束一起炸。 */
@@ -663,5 +804,14 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
 
     public static ResourceLocation animationResource() {
         return ResourceLocation.fromNamespaceAndPath("tnc", "animations/entity/volcanic_tortoise.animation.json");
+    }
+
+    /** 读一个 float 系统属性，非法值回退到默认（重踏震屏等可调项用）。 */
+    private static float parseFloatProperty(String key, float fallback) {
+        try {
+            return Float.parseFloat(System.getProperty(key, Float.toString(fallback)));
+        } catch (NumberFormatException ignored) {
+            return fallback;
+        }
     }
 }

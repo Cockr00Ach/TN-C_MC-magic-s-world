@@ -38,6 +38,35 @@ public final class VolcanicTortoiseAttackCommand {
                 .then(Commands.argument("range", BoolArgumentType.bool())
                         .executes(context -> trigger(context.getSource(),
                                 BoolArgumentType.getBool(context, "range")))));
+        event.getDispatcher().register(Commands.literal("tnc_slam")
+                .requires(source -> source.hasPermission(2))
+                .executes(context -> triggerSlam(context.getSource(), false))
+                .then(Commands.argument("range", BoolArgumentType.bool())
+                        .executes(context -> triggerSlam(context.getSource(),
+                                BoolArgumentType.getBool(context, "range")))));
+    }
+
+    /** 调试：让 32 格内最近一只巨龟立刻重踏一次；range=true 时把 22 格最终半径画出来。 */
+    private static int triggerSlam(CommandSourceStack source, boolean showRing) {
+        ServerLevel level = source.getLevel();
+        if (source.getPlayer() == null) {
+            source.sendFailure(Component.literal("需要玩家执行这个调试命令"));
+            return 0;
+        }
+        AABB box = source.getPlayer().getBoundingBox().inflate(32.0D);
+        List<VolcanicTortoiseEntity> bosses = level.getEntitiesOfClass(VolcanicTortoiseEntity.class, box);
+        VolcanicTortoiseEntity boss = bosses.stream()
+                .min(Comparator.comparingDouble(candidate -> candidate.distanceToSqr(source.getPlayer())))
+                .orElse(null);
+        if (boss == null) {
+            source.sendFailure(Component.literal("32 格内没有火山巨龟"));
+            return 0;
+        }
+        boolean started = boss.forceSlam(showRing);
+        source.sendSuccess(() -> Component.literal(started
+                ? "已触发重踏" + (showRing ? "（并显示 22 格半径）" : "")
+                : "BOSS 正在攻击/转阶段/已死亡，本次未触发"), false);
+        return started ? 1 : 0;
     }
 
     private static int trigger(CommandSourceStack source, boolean showRange) {
