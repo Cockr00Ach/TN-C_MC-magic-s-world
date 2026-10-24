@@ -47,6 +47,23 @@ public class FireBlobParticle extends TextureSheetParticle {
     private static final float TONGUE_MULTIPLIER = 1.35F;
     private static final float MAX_QUAD = 0.22F;
 
+    /** 弹幕火球用：更短寿命 + 更大尺寸，让火团更凝实、不拖出长尾。 */
+    private static int overrideLifeMin = -1;
+    private static int overrideLifeMax = -1;
+    private static float overrideScale = 1.0F;
+
+    public static void pushOverrides(int lifeMin, int lifeMax, float scale) {
+        overrideLifeMin = lifeMin;
+        overrideLifeMax = lifeMax;
+        overrideScale = scale;
+    }
+
+    public static void clearOverrides() {
+        overrideLifeMin = -1;
+        overrideLifeMax = -1;
+        overrideScale = 1.0F;
+    }
+
     private final SpriteSet sprites;
     private final float phase;
 
@@ -54,8 +71,12 @@ public class FireBlobParticle extends TextureSheetParticle {
                                double vx, double vy, double vz, SpriteSet sprites, Layer layer) {
         super(level, x, y, z, vx, vy, vz);
         this.sprites = sprites;
-        this.lifetime = layer.minLife + this.random.nextInt(layer.maxLife - layer.minLife + 1);
-        float size = Mth.lerp(this.random.nextFloat(), layer.minSize, layer.maxSize);
+        if (overrideLifeMin > 0) {
+            this.lifetime = overrideLifeMin + this.random.nextInt(overrideLifeMax - overrideLifeMin + 1);
+        } else {
+            this.lifetime = layer.minLife + this.random.nextInt(layer.maxLife - layer.minLife + 1);
+        }
+        float size = Mth.lerp(this.random.nextFloat(), layer.minSize, layer.maxSize) * overrideScale;
         if (this.random.nextFloat() < TONGUE_CHANCE) {
             size *= TONGUE_MULTIPLIER;
         }

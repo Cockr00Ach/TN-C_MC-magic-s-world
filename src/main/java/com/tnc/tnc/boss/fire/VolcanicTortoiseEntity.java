@@ -255,7 +255,9 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     /** 三批、每批 7 颗，共 21 颗。 */
     public static final int BARRAGE_WAVES = 3;
     public static final int BARRAGE_PER_WAVE = 7;
-    public static final int BARRAGE_WAVE_GAP = 10;
+    public static final int BARRAGE_WAVE_GAP = 16;
+    /** 同一批里每颗之间的间隔（一颗颗喷出，避免 7 颗同时在空中共存）。 */
+    public static final int BARRAGE_BALL_STAGGER = 2;
     /** 落区：内圈安全区 8 格，外缘 24 格。 */
     public static final double BARRAGE_INNER_RADIUS = 8.0D;
     public static final double BARRAGE_OUTER_RADIUS = 24.0D;
@@ -270,7 +272,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     private final java.util.List<Vec3> barrageSpots = new java.util.ArrayList<>();
     private int mortarHits;
     private int barrageCharge;
-    private int barrageWave;
+    private int barrageBall;
     /** 二阶段火山弹的落点（服务端算好，倒计时结束时炸）。 */
     private final java.util.List<Vec3> pendingBlasts = new java.util.ArrayList<>();
     private int blastCountdown;
@@ -595,7 +597,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.mortarLastHit.clear();
         this.mortarHits = 0;
         this.barrageSpots.clear();
-        this.barrageWave = 0;
+        this.barrageBall = 0;
         this.getNavigation().stop();
     }
 
@@ -1137,7 +1139,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         if (this.actionTicks == 1) {
             this.barrageCharge = BARRAGE_CHARGE_MIN
                     + level.random.nextInt(BARRAGE_CHARGE_MAX - BARRAGE_CHARGE_MIN + 1);
-            this.barrageWave = 0;
+            this.barrageBall = 0;
             this.barrageSpots.clear();
             this.mortarLastHit.clear();
             this.mortarHits = 0;
@@ -1157,29 +1159,32 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         }
 
         int since = this.actionTicks - this.barrageCharge;
-        while (this.barrageWave < BARRAGE_WAVES && since >= this.barrageWave * BARRAGE_WAVE_GAP) {
-            this.fireBarrageWave(level);
-            this.barrageWave++;
+        int total = BARRAGE_WAVES * BARRAGE_PER_WAVE;
+        while (this.barrageBall < total) {
+            int wave = this.barrageBall / BARRAGE_PER_WAVE;
+            int index = this.barrageBall % BARRAGE_PER_WAVE;
+            int at = wave * BARRAGE_WAVE_GAP + index * BARRAGE_BALL_STAGGER;
+            if (since < at) {
+                break;
+            }
+            this.fireBarrageBall(level);
+            this.barrageBall++;
         }
-        if (this.barrageWave >= BARRAGE_WAVES && since > BARRAGE_WAVES * BARRAGE_WAVE_GAP + 40) {
+        if (this.barrageBall >= total && since > BARRAGE_WAVES * BARRAGE_WAVE_GAP + 40) {
             this.finishAction(40);
             this.eruptionCooldown = this.isPhaseTwo() ? 260 : 340;
         }
     }
 
-    /** 一批 7 颗，落点分散、彼此留出可走的空隙。 */
-    private void fireBarrageWave(ServerLevel level) {
+    /** 发射一颗：一颗颗出膛，落点分散、彼此留出可走的空隙。 */
+    private void fireBarrageBall(ServerLevel level) {
         Vec3 from = this.craterPoint();
         float damage = (float) (this.getAttributeValue(Attributes.ATTACK_DAMAGE)
                 * BARRAGE_DAMAGE_SCALE * this.damageScale());
-        for (int i = 0; i < BARRAGE_PER_WAVE; i++) {
-            Vec3 landing = this.pickLanding(level);
-            if (landing == null) {
-                continue;
-            }
+        Vec3 landing = this.pickLanding(level);
+        if (landing != null) {
             int flight = 42 + level.random.nextInt(14);
-            VolcanicMortarEntity ball = VolcanicMortarEntity.launch(level, this, from, landing, flight, damage, this.castId);
-            level.addFreshEntity(ball);
+            level.addFreshEntity(VolcanicMortarEntity.launch(level, this, from, landing, flight, damage, this.castId));
             this.barrageSpots.add(landing);
         }
         level.playSound(null, this.blockPosition(), SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 1.1F, 1.5F);
