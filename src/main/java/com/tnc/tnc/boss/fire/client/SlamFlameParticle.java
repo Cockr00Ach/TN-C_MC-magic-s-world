@@ -39,6 +39,7 @@ public final class SlamFlameParticle extends TextureSheetParticle {
     private final double lean;
     private final float phase;
     private final boolean mirror;
+    private final int layer;
     private double groundY;
 
     SlamFlameParticle(SimpleParticleType type, ClientLevel level,
@@ -57,6 +58,7 @@ public final class SlamFlameParticle extends TextureSheetParticle {
             this.lean = 0.0D;
             this.phase = 0.0F;
             this.mirror = false;
+            this.layer = 0;
             this.lifetime = 1;
             this.setSprite(sprites.get(0, FRAMES));
             this.remove();
@@ -70,13 +72,19 @@ public final class SlamFlameParticle extends TextureSheetParticle {
         this.lean = ring.lean[index];
         this.phase = ring.phase[index];
         this.mirror = ring.mirror[index];
+        this.layer = ring.layer[index];
         this.quadSize = 1.0F;
         this.gravity = 0.0F;
         this.friction = 1.0F;
         this.hasPhysics = false;
         this.lifetime = SlamRingFx.TICKS + 8;
         this.setSprite(sprites.get(frame(), FRAMES));
-        this.setColor(1.0F, 0.97F, 0.90F);
+        // 内侧火尾偏橙红，中层偏亮，外层稍暗，三层叠在一起是一道有层次的波峰。
+        switch (this.layer) {
+            case 0 -> this.setColor(1.0F, 0.80F, 0.64F);
+            case 1 -> this.setColor(1.0F, 0.96F, 0.90F);
+            default -> this.setColor(1.0F, 0.90F, 0.78F);
+        }
         this.setAlpha(0.0F);
         this.moveToRing(1.0F);
         if (!CREATED_LOGGED) {
@@ -161,7 +169,7 @@ public final class SlamFlameParticle extends TextureSheetParticle {
         double tx = -rz;
         double tz = rx;
         double half = this.width * 0.5D;
-        double h = this.height * (1.0D + 0.045D * Math.sin(age * 0.35D + this.phase * 6.2832D));
+        double h = this.height * (1.0D + 0.07D * Math.sin(age * 0.35D + this.phase * 6.2832D));
         double leanDist = this.lean;
 
         Vec3 cam = camera.getPosition();
@@ -192,20 +200,25 @@ public final class SlamFlameParticle extends TextureSheetParticle {
 
         // 两个绕序各写一遍，避免不同渲染状态下的背面剔除把火带裁掉。
         this.quad(buffer, ox, oy, oz, tX, tZ, lX, lZ, topY, u0, u1, v0, v1,
-                light, r, g, b, a, false);
+                light, r, g, b, a * 0.86F, false);
         this.quad(buffer, ox, oy, oz, tX, tZ, lX, lZ, topY, u0, u1, v0, v1,
-                light, r, g, b, a, true);
+                light, r, g, b, a * 0.86F, true);
 
         // 贴地的一条亮带：竖直贴片从高处俯视会变成一条线，这块水平面负责
-        // 让玩家在高处也能看出完整的圆环。
-        float bandTop = v0 + (v1 - v0) * 0.70F;
-        float outX = (float) (rx * 0.34D);
-        float outZ = (float) (rz * 0.34D);
+        // 让玩家在高处也能看出完整的圆环。三层各自贡献一点，叠出约 2 格宽的火带。
+        float bandTop = v0 + (v1 - v0) * 0.66F;
+        float outX = (float) (rx * 0.58D);
+        float outZ = (float) (rz * 0.58D);
         float gy = oy + 0.005F;
+        float groundAlpha = switch (this.layer) {
+            case 0 -> 0.30F;
+            case 1 -> 0.52F;
+            default -> 0.26F;
+        };
         this.groundQuad(buffer, ox, oz, gy, tX, tZ, outX, outZ,
-                u0, u1, bandTop, v1, light, r, g, b, a * 0.88F, false);
+                u0, u1, bandTop, v1, light, r, g, b, a * groundAlpha, false);
         this.groundQuad(buffer, ox, oz, gy, tX, tZ, outX, outZ,
-                u0, u1, bandTop, v1, light, r, g, b, a * 0.88F, true);
+                u0, u1, bandTop, v1, light, r, g, b, a * groundAlpha, true);
     }
 
     private void groundQuad(VertexConsumer buffer,

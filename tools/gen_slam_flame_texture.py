@@ -2,8 +2,8 @@
 
 一帧的结构（从上到下）：
 - 上半部：2 束较宽的弯曲、分叉火舌，边缘橙红，主体橙黄，芯部亮黄；
-- 底部约 31%：一条连续的亮黄带，用来让相邻火环粒子拼成一条不断的地面火带；
-  亮带上缘做出细小的火舌缺口，避免出现一条笔直的水平接缝。
+- 底部约 34%：贴地火焰根部，做成有亮暗斑块的橙黄纹理，而不是一条均匀白条；
+  左右各 3 像素渐隐、上缘和内部带随机缺口，避免相邻贴片拼出整齐的矩形硬边。
 
 只写 assets/tnc/textures/particle/slam_flame_0..3.png，不碰其它资源。
 """
@@ -17,7 +17,7 @@ import random
 from PIL import Image
 
 W, H = 32, 64
-BAND_TOP = 44          # 底部亮带从这一行开始（约 31% 高度）
+BAND_TOP = 42          # 底部火根从这一行开始（约 34% 高度）
 FRAMES = 4
 
 OUT_DIR = os.path.join("src", "main", "resources", "assets", "tnc", "textures", "particle")
@@ -28,12 +28,13 @@ def mix(c0, c1, t):
     return tuple(int(round(c0[i] + (c1[i] - c0[i]) * t)) for i in range(3))
 
 
-CORE = (255, 248, 206)
-GOLD = (255, 210, 84)
-ORANGE = (255, 150, 34)
-DEEP = (222, 76, 24)
-BAND_CORE = (255, 246, 196)
-BAND_EDGE = (255, 186, 52)
+CORE = (255, 246, 198)
+GOLD = (255, 206, 78)
+ORANGE = (255, 148, 34)
+DEEP = (216, 70, 22)
+ROOT_LIT = (255, 232, 150)
+ROOT_MID = (246, 168, 58)
+ROOT_DARK = (206, 104, 30)
 
 
 def stamp(img, x, y, color, alpha=255):
@@ -41,32 +42,58 @@ def stamp(img, x, y, color, alpha=255):
         img[x, y] = (color[0], color[1], color[2], int(alpha))
 
 
+def edge_fade(x):
+    """左右边缘 0..3 像素渐隐，削弱相邻贴片的矩形接缝。"""
+    d = min(x, W - 1 - x)
+    if d >= 3:
+        return 1.0
+    return (d + 1) / 4.0
+
+
 def draw_band(px, frame):
-    """底部连续亮带：中间近黄白，上缘过渡到橙黄，左右无缝。"""
-    for y in range(BAND_TOP, H):
-        t = (y - BAND_TOP) / float(H - 1 - BAND_TOP)        # 0 顶 -> 1 底
-        core = 1.0 - abs(t - 0.45) * 1.5
-        base = mix(BAND_EDGE, BAND_CORE, core)
+    """贴地火根：橙黄斑块 + 少量亮黄，不再是一条均匀白带。"""
+    rnd = random.Random(1000 + frame * 31)
+    # 每个 x 的上缘高度不同，拼起来是连续但不平齐的火根轮廓。
+    tops = []
+    for x in range(W):
+        t = 0.0
+        t += 1.0 if (x * 5 + frame * 3) % 9 < 4 else 0.0
+        t += 1.0 if (x * 3 + frame) % 11 < 3 else 0.0
+        t += rnd.random() * 1.4
+        tops.append(BAND_TOP + int(t))
+
+    for y in range(BAND_TOP - 2, H):
+        rel = (y - BAND_TOP) / float(H - 1 - BAND_TOP)     # 0 上 -> 1 下
         for x in range(W):
-            # 上缘做 0~2 像素的起伏，拼起来不是一条直尺。
-            edge = BAND_TOP + (1 if (x * 7 + frame * 3) % 11 < 3 else 0) + (1 if (x * 3) % 13 < 2 else 0)
-            if y < edge:
+            if y < tops[x]:
                 continue
-            a = 255
-            if t > 0.93:
-                a = int(255 * (1.0 - (t - 0.93) / 0.07) * 0.9)
-            stamp(px, x, y, base, a)
+            # 斑块亮度：低频 + 随机，避免整条一个颜色
+            cell = (int(x / 3) * 7 + int(y / 4) * 11 + frame * 5) % 17
+            lit = 0.5 + 0.5 * math.sin((x / 5.0) + (y / 7.0) + frame)
+            if cell < 3:
+                base = mix(ROOT_MID, ROOT_LIT, 0.55)
+            elif cell < 6:
+                base = mix(ROOT_MID, ROOT_DARK, 0.45)
+            elif cell < 9:
+                base = mix(ROOT_LIT, ROOT_MID, 0.35)
+            else:
+                base = mix(ROOT_MID, ORANGE, 0.35 + 0.35 * lit)
+            if rel > 0.55:
+                base = mix(base, ROOT_DARK, (rel - 0.55) * 0.9)
+            a = 255.0 * edge_fade(x)
+            if rel > 0.90:
+                a *= 1.0 - (rel - 0.90) / 0.10 * 0.75
+            stamp(px, x, y, base, int(a))
 
 
 def draw_tongue(px, cx, height, width, curve, frame, seed):
     rnd = random.Random(seed + frame * 97)
     for i in range(height):
         t = i / max(1.0, height - 1)                 # 0 底 -> 1 顶
-        y = BAND_TOP + 3 - i
-        # 整体向后弯，顶端再轻微摆动；少量抖动制造翻卷，但不做噪点。
+        y = BAND_TOP + 4 - i
         bend = curve * (t ** 1.8) * 8.0 + math.sin(t * 4.2 + frame * 1.1 + seed) * 1.3
         half = width * 0.5 * (1.0 - t ** 1.5) + 0.9
-        jitter = (rnd.random() - 0.5) * 0.9 * (0.2 + t)
+        jitter = (rnd.random() - 0.5) * 0.8 * (0.2 + t)
         center = cx + bend + jitter
         fork = t > 0.78 and ((i + frame) % 6 == 0)
         for dx in range(-int(round(half)) - 1, int(round(half)) + 2):
@@ -76,25 +103,25 @@ def draw_tongue(px, cx, height, width, curve, frame, seed):
                 continue
             if fork and abs(dx) <= 0:
                 continue
-            # 颜色分层：芯亮黄 -> 金黄 -> 橙 -> 少量橙红
             if d < 0.30:
                 col = mix(CORE, GOLD, 0.10 + 0.30 * t)
             elif d < 0.66:
                 col = mix(GOLD, ORANGE, 0.20 + 0.55 * t)
             else:
                 col = mix(ORANGE, DEEP, 0.30 + 0.45 * t)
-            alpha = 255 if d < 0.86 else int(255 * (1.0 - (d - 0.86) / 0.14))
-            stamp(px, x, y, col, alpha)
+            alpha = 255.0 * edge_fade(x)
+            if d >= 0.86:
+                alpha *= 1.0 - (d - 0.86) / 0.14
+            stamp(px, x, y, col, int(alpha))
 
 
 def build_frame(frame):
     img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     px = img.load()
     draw_band(px, frame)
-    # 两束宽火舌：高度/位置/弯曲都不同，相邻粒子再镜像，避免整圈同一轮廓。
     specs = [
-        (9.0, 26 + (4 if frame % 2 else 0), 10.0, -0.9, 11),
-        (23.0, 19 + (6 if frame in (1, 2) else 0), 8.5, 0.7, 29),
+        (9.0, 24 + (4 if frame % 2 else 0), 10.0, -0.9, 11),
+        (23.0, 18 + (6 if frame in (1, 2) else 0), 8.5, 0.7, 29),
     ]
     for idx, (cx, h, w, curve, seed) in enumerate(specs):
         draw_tongue(px, cx, h, w, curve, frame, seed + idx * 7)

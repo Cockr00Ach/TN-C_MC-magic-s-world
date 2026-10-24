@@ -24,8 +24,12 @@ import java.util.Map;
  * {@link VolcanicTortoiseEntity#slamRingStart()}）。客户端第一次看到某个 start 值时创建一次
  * {@link Ring}，一次性生成整圈粒子；之后每颗粒子都按同一个 {@code R(t)} 推进。
  *
- * <p>关键点：所有粒子共享同一个半径函数，只有很小的径向偏移用于形成火带宽度，
- * 所以任何时刻屏幕上只有一条火带；环消失时整批粒子一起移除，不会在旧半径留下火圈。
+ * <p>火带由三层组成，但三层共用同一个半径函数，所以视觉上仍是一道环：
+ * <ul>
+ *   <li>内层：贴地的橙红火尾，低、向外渐隐；</li>
+ *   <li>中层：主波峰，最高最厚，橙黄带少量亮黄；</li>
+ *   <li>外层：传播前沿，火舌大幅向外倾倒、变薄。</li>
+ * </ul>
  */
 @Mod.EventBusSubscriber(modid = "tnc", value = Dist.CLIENT)
 public final class SlamRingFx {
@@ -38,16 +42,20 @@ public final class SlamRingFx {
     public static final int TICKS = VolcanicTortoiseEntity.SLAM_RING_TICKS;
     /** 最大半径（格）。 */
     public static final double MAX_RADIUS = VolcanicTortoiseEntity.SLAM_RING_RADIUS;
-    /** 目标圆周间距（格）：约 0.30 格 → 环上约 460 个位置，相邻火焰互相重叠。 */
-    private static final double SPACING = 0.30D;
-    /** 主环圆周位置数：2πR / 间距。 */
+    /** 圆周间距（格）：0.45 格，配合 0.8~1.0 格宽的贴片，相邻至少重叠一倍。 */
+    private static final double SPACING = 0.45D;
+    /** 每一层的圆周位置数。 */
     public static final int COUNT = (int) Math.ceil(Math.PI * 2.0D * MAX_RADIUS / SPACING);
-    /** 额外的高火舌数量：叠在低矮主环上，制造局部的高峰，不参与铺满整圈。 */
-    public static final int EXTRA = 200;
-    /** 全部粒子数（主环 + 高火舌）。 */
-    public static final int TOTAL = COUNT + EXTRA;
-    /** 火带半宽（格）：粒子在自己的半径上再 ±这个值，形成约 1 格宽的带。 */
-    private static final double BAND_HALF = 0.34D;
+    /** 层数：内 / 中 / 外。 */
+    public static final int LAYERS = 3;
+    /** 额外的高火舌数量（叠在中层上，制造局部高峰）。 */
+    public static final int EXTRA = 120;
+    /** 全部粒子数。 */
+    public static final int TOTAL = COUNT * LAYERS + EXTRA;
+
+    /** 火带内边界 / 外边界（相对 R(t)，单位格）：主火带约 2 格宽。 */
+    public static final double BAND_INNER = -0.95D;
+    public static final double BAND_OUTER = 1.05D;
 
     private static final Map<Integer, Ring> ACTIVE = new HashMap<>();
 
@@ -64,18 +72,17 @@ public final class SlamRingFx {
         final double centerY;
         final double centerZ;
         final int serverStart;
-        /** 客户端第一次看到本环的 tick，粒子从这里开始计龄。 */
+        /** 客户端第一次看到本环的 tick。 */
         final long bornAt;
         final double[] angle = new double[TOTAL];
         final double[] offset = new double[TOTAL];
-        /** 竖直高度（格），0.5~0.9 为主，少量 1.0~1.35。 */
         final double[] height = new double[TOTAL];
-        /** 贴片宽度（格）。 */
         final double[] width = new double[TOTAL];
-        /** 顶部沿半径向外倾倒的距离（格），表现冲击波向外推进。 */
         final double[] lean = new double[TOTAL];
         final float[] phase = new float[TOTAL];
         final boolean[] mirror = new boolean[TOTAL];
+        /** 0=内侧火尾，1=主波峰，2=外侧前沿。 */
+        final int[] layer = new int[TOTAL];
         boolean expired;
 
         Ring(Vec3 center, int serverStart, long bornAt, ClientLevel level) {
@@ -85,27 +92,47 @@ public final class SlamRingFx {
             this.serverStart = serverStart;
             this.bornAt = bornAt;
 
-            // 主环：等距铺满整圈，高度沿圆周连续起伏（几段自然波峰），不是每株独立随机。
-            for (int i = 0; i < COUNT; i++) {
-                double a = Math.PI * 2.0D * i / COUNT;
-                angle[i] = a + (level.random.nextDouble() - 0.5D) * (Math.PI * 2.0D / COUNT) * 0.45D;
-                offset[i] = (level.random.nextDouble() - 0.5D) * 2.0D * BAND_HALF;
-                double wave = 0.64D + 0.15D * Math.sin(3.0D * a + 1.3D) + 0.08D * Math.sin(7.0D * a + 0.4D);
-                height[i] = clamp(wave, 0.50D, 0.90D);
-                width[i] = 0.60D + level.random.nextDouble() * 0.12D;
-                lean[i] = 0.14D + 0.18D * height[i];
-                phase[i] = level.random.nextFloat();
-                mirror[i] = level.random.nextBoolean();
+            for (int l = 0; l < LAYERS; l++) {
+                for (int i = 0; i < COUNT; i++) {
+                    int idx = l * COUNT + i;
+                    double a = Math.PI * 2.0D * i / COUNT;
+                    // 圆周主波峰：缓慢连续起伏，几段较宽的隆起，不是每株独立随机。
+                    double wave = 0.86D + 0.16D * Math.sin(3.0D * a + 1.1D) + 0.07D * Math.sin(6.0D * a + 2.2D);
+                    layer[idx] = l;
+                    angle[idx] = a + (level.random.nextDouble() - 0.5D) * (Math.PI * 2.0D / COUNT) * 0.45D;
+                    phase[idx] = level.random.nextFloat();
+                    mirror[idx] = level.random.nextBoolean();
+                    switch (l) {
+                        case 0 -> {   // 内侧：低矮、橙红的衰减火尾
+                            offset[idx] = BAND_INNER + 0.10D + level.random.nextDouble() * 0.24D;
+                            height[idx] = 0.26D + level.random.nextDouble() * 0.24D;
+                            width[idx] = 0.80D + level.random.nextDouble() * 0.20D;
+                            lean[idx] = 0.02D + level.random.nextDouble() * 0.06D;
+                        }
+                        case 1 -> {   // 中层：主波峰
+                            offset[idx] = -0.24D + level.random.nextDouble() * 0.50D;
+                            height[idx] = (0.78D + level.random.nextDouble() * 0.22D) * wave;
+                            width[idx] = 0.85D + level.random.nextDouble() * 0.20D;
+                            lean[idx] = 0.24D + level.random.nextDouble() * 0.14D;
+                        }
+                        default -> {  // 外侧：向外倾倒的传播前沿
+                            offset[idx] = 0.70D + level.random.nextDouble() * 0.30D;
+                            height[idx] = (0.54D + level.random.nextDouble() * 0.24D) * wave;
+                            width[idx] = 0.78D + level.random.nextDouble() * 0.18D;
+                            lean[idx] = 0.55D + level.random.nextDouble() * 0.30D;
+                        }
+                    }
+                }
             }
-            // 额外火舌：少量局部高峰，少量更窄更斜，用来打破一圈等高的围栏感。
-            for (int i = COUNT; i < TOTAL; i++) {
-                angle[i] = level.random.nextDouble() * Math.PI * 2.0D;
-                offset[i] = (level.random.nextDouble() - 0.5D) * 2.0D * BAND_HALF;
-                height[i] = 0.98D + level.random.nextDouble() * 0.32D;
-                width[i] = 0.44D + level.random.nextDouble() * 0.16D;
-                lean[i] = 0.26D + 0.16D * level.random.nextDouble();
-                phase[i] = level.random.nextFloat();
-                mirror[i] = level.random.nextBoolean();
+            for (int idx = COUNT * LAYERS; idx < TOTAL; idx++) {
+                angle[idx] = level.random.nextDouble() * Math.PI * 2.0D;
+                offset[idx] = -0.10D + level.random.nextDouble() * 0.40D;
+                height[idx] = 1.02D + level.random.nextDouble() * 0.30D;
+                width[idx] = 0.55D + level.random.nextDouble() * 0.14D;
+                lean[idx] = 0.38D + level.random.nextDouble() * 0.16D;
+                phase[idx] = level.random.nextFloat();
+                mirror[idx] = level.random.nextBoolean();
+                layer[idx] = 1;
             }
         }
 
@@ -114,10 +141,6 @@ public final class SlamRingFx {
             double t = Math.max(0.0D, Math.min(1.0D, age / (double) TICKS));
             return MAX_RADIUS * t;
         }
-    }
-
-    private static double clamp(double v, double min, double max) {
-        return v < min ? min : (v > max ? max : v);
     }
 
     @SubscribeEvent
