@@ -118,13 +118,24 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     /** 前脚砸地帧（1.2s），火环从这里开始扩散。 */
     private static final int SLAM_HIT_TICK = 24;
     /** 火环从中心推到 SLAM_RING_RADIUS 所需的 tick。 */
-    private static final int SLAM_RING_TICKS = 30;
+    /** 火环从中心推到最大半径的 tick 数（客户端网格也用它换算半径）。 */
+    public static final int SLAM_RING_TICKS = 30;
     private static final int ERUPTION_HIT_TICK = 26;
 
     private static final String ACTION_CONTROLLER = "action";
 
     private static final EntityDataAccessor<Integer> DATA_PHASE =
             SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.INT);
+    /** 重踏火环：服务端锁定的砸地时刻（gameTime，-1 表示当前没有火环）。 */
+    private static final EntityDataAccessor<Integer> DATA_SLAM_START =
+            SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.INT);
+    /** 重踏火环：服务端锁定的砸地中心，火环展开后不再跟随 Boss 移动。 */
+    private static final EntityDataAccessor<Float> DATA_SLAM_X =
+            SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> DATA_SLAM_Y =
+            SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> DATA_SLAM_Z =
+            SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.FLOAT);
 
     private final ServerBossEvent bossEvent = new ServerBossEvent(this.getDisplayName(),
             BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10);
@@ -187,10 +198,37 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         return this.action != ACTION_NONE;
     }
 
+    /** 客户端渲染用：火环开始的 gameTime，-1 表示没有正在展开的火环。 */
+    public int slamRingStart() {
+        return this.entityData.get(DATA_SLAM_START);
+    }
+
+    /** 客户端渲染用：服务端锁定的砸地中心（与伤害共用同一个点）。 */
+    public Vec3 slamRingCenter() {
+        return new Vec3(this.entityData.get(DATA_SLAM_X), this.entityData.get(DATA_SLAM_Y),
+                this.entityData.get(DATA_SLAM_Z));
+    }
+
+    /** 服务端：把本次火环的中心与开始时刻同步给客户端（只在砸地瞬间调用一次）。 */
+    private void publishSlamRing(ServerLevel level) {
+        this.entityData.set(DATA_SLAM_X, (float) this.slamCenter.x);
+        this.entityData.set(DATA_SLAM_Y, (float) this.slamCenter.y);
+        this.entityData.set(DATA_SLAM_Z, (float) this.slamCenter.z);
+        this.entityData.set(DATA_SLAM_START, (int) level.getGameTime());
+    }
+
+    private void clearSlamRing() {
+        this.entityData.set(DATA_SLAM_START, -1);
+    }
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(DATA_PHASE, PHASE_ONE);
+        this.entityData.define(DATA_SLAM_START, -1);
+        this.entityData.define(DATA_SLAM_X, 0.0F);
+        this.entityData.define(DATA_SLAM_Y, 0.0F);
+        this.entityData.define(DATA_SLAM_Z, 0.0F);
     }
 
     @Override
@@ -314,6 +352,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.castId++;
         this.castYaw = this.getYRot();
         this.castHits.clear();
+        this.clearSlamRing();
         this.getNavigation().stop();
     }
 
@@ -321,6 +360,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.action = ACTION_NONE;
         this.actionTicks = 0;
         this.attackCooldown = cooldown;
+        this.clearSlamRing();
     }
 
     // ------------------------------------------------------------------ tick --
@@ -504,6 +544,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     private void tickSlam(ServerLevel level) {
         if (this.actionTicks == SLAM_HIT_TICK) {
             this.slamCenter = this.position();
+            this.publishSlamRing(level);
             this.groundSlamImpact(level);
         }
         int ringAge = this.actionTicks - SLAM_HIT_TICK;
@@ -559,38 +600,37 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         }
         this.slamDamage(level, this.slamCenter, radius - SLAM_RING_BAND * 0.5D, radius + SLAM_RING_BAND * 0.5D);
         if (age % 2 == 0 || age == SLAM_RING_TICKS) {
-            this.slamRingFx(level, radius, age);
+            this.slamRingSparks(level, radius, age);
         }
     }
 
-    /** 火环视觉：主体橙色火焰 + 稀疏近白内缘 + 暗色余烬；到达最大半径后迅速收掉。 */
-    private void slamRingFx(ServerLevel level, double radius, int age) {
+    /**
+     * 火环边缘的少量火星补充：连续环带由客户端网格绘制（见 VolcanicTortoiseSlamRingRenderer），
+     * 这里只加短命火星，避免在地面铺满散火或留下残影。
+     */
+    private void slamRingSparks(ServerLevel level, double radius, int age) {
         Vec3 center = this.slamCenter;
-        int points = (int) Math.max(10.0D, Math.min(72.0D, Math.round(2.0D * Math.PI * radius / 2.4D)));
-        boolean fading = age > SLAM_RING_TICKS - 6;
+        int points = 10;
+        boolean fading = age > SLAM_RING_TICKS - 4;
+        if (fading) {
+            points = 5;
+        }
         for (int i = 0; i < points; i++) {
-            double angle = 2.0D * Math.PI * i / points;
+            double angle = 2.0D * Math.PI * i / points + age * 0.11D;
             double x = center.x + Math.cos(angle) * radius;
             double z = center.z + Math.sin(angle) * radius;
-            if (!level.hasChunkAt(net.minecraft.core.BlockPos.containing(x, center.y, z))) {
+            net.minecraft.core.BlockPos pos = net.minecraft.core.BlockPos.containing(x, center.y, z);
+            if (!level.hasChunkAt(pos)) {
                 continue;
             }
-            int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-                    net.minecraft.core.BlockPos.containing(x, center.y, z).getX(),
-                    net.minecraft.core.BlockPos.containing(x, center.y, z).getZ());
-            double y = top + 0.12D;
+            int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pos.getX(), pos.getZ());
+            double y = top + 0.15D;
             if (Math.abs(y - center.y) > 6.0D) {
                 continue;
             }
-            level.sendParticles(ParticleTypes.FLAME, x, y + 0.18D, z, 1, 0.05D, 0.04D, 0.05D, 0.01D);
-            if (i % 4 == 0) {
-                level.sendParticles(ParticleTypes.LAVA, x, y + 0.10D, z, 1, 0.04D, 0.0D, 0.04D, 0.0D);
-            }
-            if (!fading && i % 5 == 0) {
-                level.sendParticles(ParticleTypes.END_ROD, x, y + 0.30D, z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
-            }
-            if (fading && i % 3 == 0) {
-                level.sendParticles(ParticleTypes.SMOKE, x, y + 0.20D, z, 1, 0.02D, 0.02D, 0.02D, 0.0D);
+            level.sendParticles(ParticleTypes.FLAME, x, y + 0.25D, z, 1, 0.03D, 0.05D, 0.03D, 0.015D);
+            if (i % 5 == 2) {
+                level.sendParticles(ParticleTypes.LAVA, x, y + 0.12D, z, 1, 0.02D, 0.0D, 0.02D, 0.0D);
             }
         }
     }
