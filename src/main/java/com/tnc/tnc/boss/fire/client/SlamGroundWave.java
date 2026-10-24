@@ -1,11 +1,13 @@
 package com.tnc.tnc.boss.fire.client;
 
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.logging.LogUtils;
 import com.tnc.tnc.boss.fire.VolcanicTortoiseEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -78,6 +80,9 @@ public final class SlamGroundWave {
     private static final int SEARCH_FALLBACK = 12;
 
     private static final List<Wave> ACTIVE = new ArrayList<>();
+    /** 独立 immediate 缓冲：Oculus 下共享 BufferSource 的 endBatch 是 no-op。 */
+    private static final MultiBufferSource.BufferSource BUFFERS =
+            MultiBufferSource.immediate(new BufferBuilder(262144));
     /** 每个实体上一次看到的震波编号，用来判断「有新的一发」。 */
     private static final Map<Integer, Integer> SEEN = new HashMap<>();
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -273,7 +278,9 @@ public final class SlamGroundWave {
 
     @SubscribeEvent
     public static void render(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
+        // 与 PortalRitualRenderer 一样放在 AFTER_WEATHER：此阶段 RenderSystem 的 model-view
+        // 已包含视角旋转，再叠加一层「世界 → 相机相对」平移即可正确落在世界坐标上。
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_WEATHER) {
             return;
         }
         Minecraft mc = Minecraft.getInstance();
@@ -301,10 +308,11 @@ public final class SlamGroundWave {
         double ageNow = level.getGameTime() + partial;
 
         RenderType type = RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS);
-        var buffers = Minecraft.getInstance().renderBuffers().bufferSource();
+        // Oculus 会把 Minecraft 共享的 BufferSource 换成 endBatch 为 no-op 的分段缓冲，
+        // 用独立 immediate 缓冲才能保证真的提交（PortalRitualRenderer 已踩过同样的坑）。
+        var buffers = BUFFERS;
         VertexConsumer buffer = buffers.getBuffer(type);
 
-        // 该阶段的事件 PoseStack 已含一次相机变换；这里自建「世界 → 相机相对」平移矩阵。
         Matrix4f matrix = new Matrix4f().translation(
                 (float) -camera.x, (float) -camera.y, (float) -camera.z);
 
