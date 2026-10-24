@@ -35,9 +35,9 @@ import java.util.List;
 public final class FirePillarFx {
 
     /** 单根最大存活粒子数（含上升中的全部火舌）。 */
-    private static final int PER_PILLAR_ALIVE = 420;
+    private static final int PER_PILLAR_ALIVE = 560;
     /** 同屏所有火柱的粒子上限，任务 7 的 5–7 根按这个预算设计。 */
-    private static final int GLOBAL_ALIVE = 2600;
+    private static final int GLOBAL_ALIVE = 3200;
     /** 柱子总时长（tick）：蓄亮 + 冲起 + 停留 + 消散。 */
     private static final int TOTAL_TICKS = 74;
     /** 根部蓄亮时长。 */
@@ -47,13 +47,19 @@ public final class FirePillarFx {
     /** 喷流开始减弱的时刻。 */
     private static final int HOLD_END = 50;
     /** 单根高度（格）。 */
-    private static final double HEIGHT_MIN = 8.0D;
-    private static final double HEIGHT_MAX = 10.0D;
+    private static final double HEIGHT_MIN = 10.0D;
+    private static final double HEIGHT_MAX = 13.0D;
     /** 主体宽度（格）。 */
     private static final double WIDTH_MIN = 1.2D;
     private static final double WIDTH_MAX = 1.8D;
     /** 稳定流动通道数量：少量通道 + 每颗随机相位，能看出翻卷但不散成乱流。 */
     private static final int CHANNELS = 7;
+    /** 装饰粒子占主体的比例（首轮 12%）。 */
+    private static final double DECOR_RATIO = 0.12D;
+    /** 单根装饰粒子上限。 */
+    private static final int PER_PILLAR_DECOR = 70;
+    /** 全屏装饰粒子上限（多根/远处时优先削减装饰，保留主体柱体）。 */
+    private static final int GLOBAL_DECOR = 420;
 
     private static final List<Pillar> PILLARS = new ArrayList<>();
 
@@ -68,7 +74,9 @@ public final class FirePillarFx {
         final long seed;
         /** 最近 32 tick 每 tick 的生成数，用于估算存活量。 */
         final int[] history = new int[32];
+        final int[] decorHistory = new int[32];
         int cursor;
+        int decorCursor;
         int spawnedTotal;
 
         Pillar(Vec3 base, long start, double height, double width, long seed) {
@@ -87,10 +95,23 @@ public final class FirePillarFx {
             return sum;
         }
 
+        int decorAlive() {
+            int sum = 0;
+            for (int v : decorHistory) {
+                sum += v;
+            }
+            return sum;
+        }
+
         void record(int spawned) {
             history[cursor] = spawned;
             cursor = (cursor + 1) % history.length;
             spawnedTotal += spawned;
+        }
+
+        void recordDecor(int spawned) {
+            decorHistory[decorCursor] = spawned;
+            decorCursor = (decorCursor + 1) % decorHistory.length;
         }
     }
 
@@ -109,8 +130,10 @@ public final class FirePillarFx {
         long now = level.getGameTime();
 
         int alive = 0;
+        int decorAlive = 0;
         for (Pillar p : PILLARS) {
             alive += p.aliveEstimate();
+            decorAlive += p.decorAlive();
         }
 
         Iterator<Pillar> it = PILLARS.iterator();
@@ -139,25 +162,63 @@ public final class FirePillarFx {
             }
             p.record(count);
             alive += count;
+
+            // 装饰粒子：与主体分开限额，只占主体的一小部分
+            int decorWant = (int) Math.round(count * DECOR_RATIO);
+            int decorRoom = Math.min(PER_PILLAR_DECOR - p.decorAlive(), GLOBAL_DECOR - decorAlive);
+            int decorCount = Math.min(decorWant, decorRoom);
+            for (int i = 0; i < decorCount; i++) {
+                spawnDecor(level, p, age);
+            }
+            p.recordDecor(decorCount);
+            decorAlive += decorCount;
+        }
+    }
+
+    /**
+     * 装饰：亮火星（从根部/边缘向上窜）与暗橙红余烬（外侧与顶部慢慢变暗）。
+     * 数量只占主体的约 12%，不会盖过主柱。
+     */
+    private static void spawnDecor(ClientLevel level, Pillar p, long age) {
+        var random = level.random;
+        boolean spark = random.nextDouble() < 0.65D;
+        double radius = p.width * 0.5D * (0.45D + 0.50D * random.nextDouble());
+        double angle = random.nextDouble() * Math.PI * 2.0D;
+        double x = p.base.x + Math.cos(angle) * radius;
+        double z = p.base.z + Math.sin(angle) * radius;
+
+        if (spark) {
+            double y = p.base.y + 0.15D + random.nextDouble() * Math.min(2.0D, p.height * 0.20D);
+            double up = 0.30D + random.nextDouble() * 0.25D;
+            level.addAlwaysVisibleParticle(TortoiseParticles.FIRE_SPARK.get(), true,
+                    x, y, z,
+                    Math.cos(angle) * 0.004D, up, Math.sin(angle) * 0.004D);
+        } else {
+            // 余烬多出现在柱体中上部，上升慢，亮度逐渐衰减
+            double y = p.base.y + p.height * (0.45D + 0.50D * random.nextDouble());
+            double up = 0.14D + random.nextDouble() * 0.12D;
+            level.addAlwaysVisibleParticle(TortoiseParticles.FIRE_EMBER.get(), true,
+                    x, y, z,
+                    Math.cos(angle) * 0.003D, up, Math.sin(angle) * 0.003D);
         }
     }
 
     /** 按阶段给出每 tick 生成数：蓄亮少、冲起多、停留稳、尾段线性减小。 */
     private static int spawnCountFor(long age) {
         if (age < IGNITE_TICKS) {
-            return 6;
+            return 9;
         }
         if (age < SURGE_END) {
-            return 18;
+            return 26;
         }
         if (age < HOLD_END) {
-            return 14;
+            return 20;
         }
         if (age >= TOTAL_TICKS) {
             return 0;
         }
         double k = 1.0D - (age - HOLD_END) / (double) (TOTAL_TICKS - HOLD_END);
-        return Math.max(0, (int) Math.round(9.0D * k));
+        return Math.max(0, (int) Math.round(13.0D * k));
     }
 
     private static void spawnParticle(ClientLevel level, Pillar p, long age) {
@@ -174,7 +235,7 @@ public final class FirePillarFx {
 
         // 中心快、边缘慢：柱顶自然收束，而不是靠缩小生成半径
         double radial = radius / Math.max(0.001D, p.width * 0.5D);
-        double speed = (0.44D - 0.10D * radial) * (0.92D + 0.16D * random.nextDouble());
+        double speed = (0.56D - 0.14D * radial) * (0.94D + 0.12D * random.nextDouble());
         if (age < IGNITE_TICKS) {
             speed *= 0.55D;      // 蓄亮阶段先压住，形成底部堆积的亮核
         } else if (age > HOLD_END) {
@@ -182,8 +243,8 @@ public final class FirePillarFx {
         }
 
         // 径向一点点外扩 + 切向旋转，形成翻卷；幅度很小，不会越升越散
-        double outward = 0.003D + random.nextDouble() * 0.005D;
-        double tangent = (random.nextDouble() - 0.5D) * 0.012D;
+        double outward = 0.002D + random.nextDouble() * 0.003D;
+        double tangent = (random.nextDouble() - 0.5D) * 0.008D;
         double vx = Math.cos(angle) * outward - Math.sin(angle) * tangent;
         double vz = Math.sin(angle) * outward + Math.cos(angle) * tangent;
 

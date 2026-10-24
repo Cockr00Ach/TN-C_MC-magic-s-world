@@ -25,5 +25,9 @@ public final class TortoiseParticleClient {
         event.registerSpriteSet(TortoiseParticles.FIRE_CHARGE.get(),
                 sprites -> FireBlobParticle.provider(sprites, FireBlobParticle.Layer.CHARGE));
         event.registerSpriteSet(TortoiseParticles.FIRE_PILLAR.get(), FirePillarParticle::provider);
+        event.registerSpriteSet(TortoiseParticles.FIRE_SPARK.get(),
+                sprites -> FireDecorParticle.provider(sprites, FireDecorParticle.Kind.SPARK));
+        event.registerSpriteSet(TortoiseParticles.FIRE_EMBER.get(),
+                sprites -> FireDecorParticle.provider(sprites, FireDecorParticle.Kind.EMBER));
     }
 }

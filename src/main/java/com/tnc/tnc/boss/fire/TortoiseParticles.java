@@ -46,6 +46,14 @@ public final class TortoiseParticles {
     public static final RegistryObject<SimpleParticleType> FIRE_PILLAR =
             TYPES.register("fire_pillar", () -> new SimpleParticleType(true));
 
+    /** 火柱装饰：亮火星。 */
+    public static final RegistryObject<SimpleParticleType> FIRE_SPARK =
+            TYPES.register("fire_spark", () -> new SimpleParticleType(true));
+
+    /** 火柱装饰：暗橙红余烬。 */
+    public static final RegistryObject<SimpleParticleType> FIRE_EMBER =
+            TYPES.register("fire_ember", () -> new SimpleParticleType(true));
+
     private TortoiseParticles() {
     }
 
