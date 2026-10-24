@@ -31,12 +31,12 @@ public final class FireBlobFx {
     private static final double MAX_DIST_SQR = 96.0D * 96.0D;
 
     /** 飞行火球的视觉半径（格）：整体大小保持原技能比例。 */
-    private static final double FLIGHT_RADIUS = 0.80D;
+    private static final double FLIGHT_RADIUS = 1.08D;
     /** 蓄力火团最终半径（格）。 */
-    private static final double CHARGE_RADIUS = 0.72D;
+    private static final double CHARGE_RADIUS = 0.95D;
 
     /** 每 tick 补位上限，配合 4–9 tick 寿命把同时存活粒子控制在 ~150 以内。 */
-    private static final int MAX_SPAWN_PER_TICK = 24;
+    private static final int MAX_SPAWN_PER_TICK = 34;
 
     /** bossId -> {serverStart, localTickAtStart} */
     private static final Map<Integer, long[]> CHARGE_SEEN = new ConcurrentHashMap<>();
@@ -112,11 +112,11 @@ public final class FireBlobFx {
     private static void spawnFlight(ClientLevel level, Vec3 center, double radius, long seed, Vec3 motion) {
         int budget = MAX_SPAWN_PER_TICK;
 
-        budget -= spawnGaussian(level, center, radius * 0.62D, 11,
+        budget -= spawnGaussian(level, center, radius * 0.62D, 15,
                 TortoiseParticles.FIRE_CORE.get(), TortoiseParticles.FIRE_MID.get(), budget);
-        budget -= spawnShell(level, center, radius * 0.82D, 7,
+        budget -= spawnShell(level, center, radius * 0.82D, 9,
                 TortoiseParticles.FIRE_MID.get(), seed + 17L, budget);
-        budget -= spawnShell(level, center, radius * 1.02D, 4,
+        budget -= spawnShell(level, center, radius * 1.02D, 5,
                 TortoiseParticles.FIRE_EDGE.get(), seed + 31L, budget);
 
         // 尾焰：沿速度反方向拉开，越靠后越小
