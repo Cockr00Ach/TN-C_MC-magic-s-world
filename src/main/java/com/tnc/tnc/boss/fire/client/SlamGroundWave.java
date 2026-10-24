@@ -376,7 +376,7 @@ public final class SlamGroundWave {
     private static void beaconQuad(VertexConsumer buffer, Matrix4f matrix,
                                    double cx, double cy, double cz, float dx, float dz) {
         float y0 = (float) cy;
-        float y1 = (float) cy + 4.0F;
+        float y1 = (float) cy + 14.0F;
         buffer.vertex(matrix, (float) cx - dx, y0, (float) cz - dz).color(1.0F, 0.95F, 0.8F, 1.0F).endVertex();
         buffer.vertex(matrix, (float) cx + dx, y0, (float) cz + dz).color(1.0F, 0.95F, 0.8F, 1.0F).endVertex();
         buffer.vertex(matrix, (float) cx + dx, y1, (float) cz + dz).color(1.0F, 0.95F, 0.8F, 1.0F).endVertex();
