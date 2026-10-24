@@ -1,10 +1,11 @@
 package com.tnc.tnc.boss.fire.client;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -20,6 +21,7 @@ import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.joml.Matrix4f;
+import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -59,6 +61,9 @@ public final class SlamGroundWave {
     private static final int SEARCH_DOWN = 3;
 
     private static final List<Wave> ACTIVE = new ArrayList<>();
+    private static final Logger LOGGER = LogUtils.getLogger();
+    /** 只报一次渲染失败，避免每帧刷屏。 */
+    private static boolean warnedFailure;
 
     private SlamGroundWave() {
     }
@@ -153,18 +158,31 @@ public final class SlamGroundWave {
             }
             return;
         }
+        // 地面波只是装饰：任何顶点/渲染异常都不能崩掉客户端，失败一次后直接停用。
+        try {
+            draw(event, level);
+        } catch (Throwable t) {
+            ACTIVE.clear();
+            if (!warnedFailure) {
+                warnedFailure = true;
+                LOGGER.error("[TN-C SlamGroundWave] ground wave disabled after render error", t);
+            }
+        }
+    }
+
+    private static void draw(RenderLevelStageEvent event, ClientLevel level) {
         Vec3 camera = event.getCamera().getPosition();
         float partial = event.getPartialTick();
         double ageNow = level.getGameTime() + partial;
 
         RenderType type = RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS);
-        var buffers = mc.renderBuffers().bufferSource();
+        var buffers = Minecraft.getInstance().renderBuffers().bufferSource();
         VertexConsumer buffer = buffers.getBuffer(type);
 
-        PoseStack pose = event.getPoseStack();
-        pose.pushPose();
-        pose.translate(-camera.x, -camera.y, -camera.z);
-        Matrix4f matrix = pose.last().pose();
+        // 这一阶段的事件 PoseStack 已经带了一次相机变换；再乘一遍会把地面波推到很远的地方。
+        // 与 PortalRitualRenderer 一致：自己构造「世界坐标 → 相机相对」的平移矩阵。
+        Matrix4f matrix = new Matrix4f().translation(
+                (float) -camera.x, (float) -camera.y, (float) -camera.z);
 
         Iterator<Wave> iterator = ACTIVE.iterator();
         while (iterator.hasNext()) {
@@ -208,7 +226,6 @@ public final class SlamGroundWave {
                 vertex(buffer, matrix, x0, y01, z1, patch.u0(), patch.v1(), alpha, patch.light());
             }
         }
-        pose.popPose();
         buffers.endBatch(type);
     }
 
@@ -220,9 +237,13 @@ public final class SlamGroundWave {
 
     private static void vertex(VertexConsumer buffer, Matrix4f matrix, double x, double y, double z,
                                float u, float v, float alpha, int light) {
+        // entityTranslucent 的格式是 POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL：
+        // overlay 与 normal 都必须显式写入，否则 Oculus/ImmediatelyFast 等改动过
+        // BufferBuilder 的客户端会抛 "Not filled all elements of the vertex"。
         buffer.vertex(matrix, (float) x, (float) y, (float) z)
                 .color(1.0F, 1.0F, 1.0F, alpha)
                 .uv(u, v)
+                .overlayCoords(OverlayTexture.NO_OVERLAY)
                 .uv2(light)
                 .normal(0.0F, 1.0F, 0.0F)
                 .endVertex();
