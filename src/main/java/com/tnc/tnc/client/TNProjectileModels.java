@@ -169,9 +169,7 @@ public final class TNProjectileModels {
     public static final String[] PROJECTILE_MODELS = {
             // 火系（用户自制）
             "projectile/fireball",
-            // 火法 Boss 的新方块火球（生成器：tools/gen_fireball_model.py，2026-10-24）
             //   前进方向 -Z、尾迹朝 +Z；渲染缩放 2.0 时主体约 1.75 格。
-            "projectile/fireball_core",
             // 水系（用户自制）
             "projectile/waterball",
             // 雷系（用户自制）
