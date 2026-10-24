@@ -146,9 +146,10 @@ public final class VolcanicFireballEntity extends Projectile {
         this.hitOnce.add(this.getUUID());
         if (this.level() instanceof ServerLevel level) {
             // 主体破裂：核心向内收、外缘向外扩，短促一下；不铺大烟。
-            level.sendParticles(TortoiseParticles.FIRE_CORE.get(), at.x, at.y, at.z, 10, 0.22D, 0.22D, 0.22D, 0.05D);
-            level.sendParticles(TortoiseParticles.FIRE_MID.get(), at.x, at.y, at.z, 24, 0.55D, 0.5D, 0.55D, 0.10D);
-            level.sendParticles(TortoiseParticles.FIRE_EDGE.get(), at.x, at.y, at.z, 18, 0.95D, 0.8D, 0.95D, 0.16D);
+            // 粒子改小以后数量略增，仍靠密集小火苗而不是大圆贴图。
+            level.sendParticles(TortoiseParticles.FIRE_CORE.get(), at.x, at.y, at.z, 16, 0.20D, 0.20D, 0.20D, 0.04D);
+            level.sendParticles(TortoiseParticles.FIRE_MID.get(), at.x, at.y, at.z, 30, 0.45D, 0.40D, 0.45D, 0.08D);
+            level.sendParticles(TortoiseParticles.FIRE_EDGE.get(), at.x, at.y, at.z, 24, 0.80D, 0.65D, 0.80D, 0.14D);
             level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y, at.z, 1, 0.2D, 0.2D, 0.2D, 0.0D);
             level.sendParticles(ParticleTypes.LAVA, at.x, at.y, at.z, 8, 0.6D, 0.5D, 0.6D, 0.0D);
             level.sendParticles(ParticleTypes.SMOKE, at.x, at.y + 0.2D, at.z, 4, 0.5D, 0.35D, 0.5D, 0.01D);
