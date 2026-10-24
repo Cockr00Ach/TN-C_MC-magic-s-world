@@ -592,47 +592,18 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         }
     }
 
-    /** 火环：伤害与视觉共用同一个半径/速度；贴地采样失败的点跳过，不加载区块。 */
+    /**
+     * 火环：伤害与视觉共用同一个半径/速度；贴地采样失败的点跳过，不加载区块。
+     *
+     * <p>客户端表现完全由专用粒子环负责（{@code SlamRingFx} / {@code SlamFlameParticle}），
+     * 服务端这里不再额外撒 FLAME/LAVA——否则会在环带旁边留下与圆环无关的散火。
+     */
     private void tickSlamRing(ServerLevel level, int age) {
         double radius = SLAM_RING_RADIUS * age / (double) SLAM_RING_TICKS;
         if (radius < 0.6D) {
             return;
         }
         this.slamDamage(level, this.slamCenter, radius - SLAM_RING_BAND * 0.5D, radius + SLAM_RING_BAND * 0.5D);
-        if (age % 2 == 0 || age == SLAM_RING_TICKS) {
-            this.slamRingSparks(level, radius, age);
-        }
-    }
-
-    /**
-     * 火环边缘的少量火星补充：连续环带由客户端网格绘制（见 VolcanicTortoiseSlamRingRenderer），
-     * 这里只加短命火星，避免在地面铺满散火或留下残影。
-     */
-    private void slamRingSparks(ServerLevel level, double radius, int age) {
-        Vec3 center = this.slamCenter;
-        int points = 10;
-        boolean fading = age > SLAM_RING_TICKS - 4;
-        if (fading) {
-            points = 5;
-        }
-        for (int i = 0; i < points; i++) {
-            double angle = 2.0D * Math.PI * i / points + age * 0.11D;
-            double x = center.x + Math.cos(angle) * radius;
-            double z = center.z + Math.sin(angle) * radius;
-            net.minecraft.core.BlockPos pos = net.minecraft.core.BlockPos.containing(x, center.y, z);
-            if (!level.hasChunkAt(pos)) {
-                continue;
-            }
-            int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pos.getX(), pos.getZ());
-            double y = top + 0.15D;
-            if (Math.abs(y - center.y) > 6.0D) {
-                continue;
-            }
-            level.sendParticles(ParticleTypes.FLAME, x, y + 0.25D, z, 1, 0.03D, 0.05D, 0.03D, 0.015D);
-            if (i % 5 == 2) {
-                level.sendParticles(ParticleTypes.LAVA, x, y + 0.12D, z, 1, 0.02D, 0.0D, 0.02D, 0.0D);
-            }
-        }
     }
 
     /** 伤害结算：环带内每人只吃一次；高差/遮挡不过的跳过，避免穿高墙打人。 */

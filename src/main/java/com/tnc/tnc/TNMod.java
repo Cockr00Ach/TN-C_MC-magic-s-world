@@ -242,6 +242,8 @@ public class TNMod
         //   实体类型 / 属性表 / 刷怪蛋三样都在 DungeonMobRegistration 里。
         //   ⚠️ 这一行漏了 ⇒ DeferredRegister 没挂上总线 ⇒ 12 个实体**静默不存在** ✗
         com.tnc.tnc.dungeon.DungeonMobRegistration.register(modEventBus);
+        // 火山巨龟重踏火环的专用粒子类型（客户端自定义粒子，共享同一个环半径）。
+        com.tnc.tnc.boss.fire.TortoiseParticles.register(modEventBus);
 
         // 赌场机器（老虎机）—— 方块 / 方块实体类型 / 物品三样都在 TNCasinoRegistry 里，
         // 它自己带 @Mod.EventBusSubscriber(MOD)，所以**必须**在这里强制把类加载一次 ✗：
