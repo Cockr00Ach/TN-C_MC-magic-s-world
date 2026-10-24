@@ -25,12 +25,26 @@ public class FirePillarParticle extends TextureSheetParticle {
     private static final float TONGUE_CHANCE = 0.10F;
     private static final float TONGUE_MULTIPLIER = 1.35F;
     private static final float MAX_QUAD = 0.180F;
-    private static final int MIN_LIFE = 28;
-    private static final int MAX_LIFE = 38;
+    private static final int MIN_LIFE = 34;
+    private static final int MAX_LIFE = 44;
+
+    /** 生成时由 FirePillarFx 写入的柱心与允许半径，用于把粒子约束在柱体内。 */
+    private static double pendingCenterX;
+    private static double pendingCenterZ;
+    private static double pendingRadius;
+
+    static void setSpawnContext(double centerX, double centerZ, double radius) {
+        pendingCenterX = centerX;
+        pendingCenterZ = centerZ;
+        pendingRadius = radius;
+    }
 
     private final SpriteSet sprites;
     private final float swirlPhase;
     private final float swirlAmount;
+    private final double centerX;
+    private final double centerZ;
+    private final double maxRadius;
 
     protected FirePillarParticle(ClientLevel level, double x, double y, double z,
                                  double vx, double vy, double vz, SpriteSet sprites) {
@@ -46,6 +60,9 @@ public class FirePillarParticle extends TextureSheetParticle {
         this.friction = 0.975F;
         this.swirlPhase = this.random.nextFloat() * 6.2832F;
         this.swirlAmount = 0.0006F + this.random.nextFloat() * 0.0005F;
+        this.centerX = pendingCenterX;
+        this.centerZ = pendingCenterZ;
+        this.maxRadius = pendingRadius;
         this.setSpriteFromAge(sprites);
     }
 
@@ -59,6 +76,17 @@ public class FirePillarParticle extends TextureSheetParticle {
         double angle = this.swirlPhase + this.age * 0.16F;
         this.xd += Math.cos(angle) * this.swirlAmount * (t < 0.5F ? 0.55D : 0.20D);
         this.zd += Math.sin(angle) * this.swirlAmount * (t < 0.5F ? 0.55D : 0.20D);
+
+        // 柱体约束：越往上允许半径越小，超出时平滑回推，避免顶部四散成火云
+        double limit = this.maxRadius * (1.0D - 0.32D * t);
+        double dx = this.x - this.centerX;
+        double dz = this.z - this.centerZ;
+        double dist = Math.sqrt(dx * dx + dz * dz);
+        if (dist > limit && dist > 1.0E-4D) {
+            double pull = (dist - limit) * 0.06D;
+            this.xd -= dx / dist * pull;
+            this.zd -= dz / dist * pull;
+        }
 
         // 颜色：根部近白黄 → 金黄 → 橙 → 深橙红；顶部更透
         float[] c = colorAt(t);

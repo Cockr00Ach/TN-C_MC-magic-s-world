@@ -35,9 +35,9 @@ import java.util.List;
 public final class FirePillarFx {
 
     /** 单根最大存活粒子数（含上升中的全部火舌）。 */
-    private static final int PER_PILLAR_ALIVE = 560;
+    private static final int PER_PILLAR_ALIVE = 780;
     /** 同屏所有火柱的粒子上限，任务 7 的 5–7 根按这个预算设计。 */
-    private static final int GLOBAL_ALIVE = 3200;
+    private static final int GLOBAL_ALIVE = 4800;
     /** 柱子总时长（tick）：蓄亮 + 冲起 + 停留 + 消散。 */
     private static final int TOTAL_TICKS = 74;
     /** 根部蓄亮时长。 */
@@ -47,8 +47,8 @@ public final class FirePillarFx {
     /** 喷流开始减弱的时刻。 */
     private static final int HOLD_END = 50;
     /** 单根高度（格）。 */
-    private static final double HEIGHT_MIN = 10.0D;
-    private static final double HEIGHT_MAX = 13.0D;
+    private static final double HEIGHT_MIN = 15.0D;
+    private static final double HEIGHT_MAX = 19.5D;
     /** 主体宽度（格）。 */
     private static final double WIDTH_MIN = 1.2D;
     private static final double WIDTH_MAX = 1.8D;
@@ -57,9 +57,9 @@ public final class FirePillarFx {
     /** 装饰粒子占主体的比例（首轮 12%）。 */
     private static final double DECOR_RATIO = 0.12D;
     /** 单根装饰粒子上限。 */
-    private static final int PER_PILLAR_DECOR = 70;
+    private static final int PER_PILLAR_DECOR = 95;
     /** 全屏装饰粒子上限（多根/远处时优先削减装饰，保留主体柱体）。 */
-    private static final int GLOBAL_DECOR = 420;
+    private static final int GLOBAL_DECOR = 560;
 
     private static final List<Pillar> PILLARS = new ArrayList<>();
 
@@ -206,19 +206,19 @@ public final class FirePillarFx {
     /** 按阶段给出每 tick 生成数：蓄亮少、冲起多、停留稳、尾段线性减小。 */
     private static int spawnCountFor(long age) {
         if (age < IGNITE_TICKS) {
-            return 9;
+            return 12;
         }
         if (age < SURGE_END) {
-            return 26;
+            return 36;
         }
         if (age < HOLD_END) {
-            return 20;
+            return 26;
         }
         if (age >= TOTAL_TICKS) {
             return 0;
         }
         double k = 1.0D - (age - HOLD_END) / (double) (TOTAL_TICKS - HOLD_END);
-        return Math.max(0, (int) Math.round(13.0D * k));
+        return Math.max(0, (int) Math.round(16.0D * k));
     }
 
     private static void spawnParticle(ClientLevel level, Pillar p, long age) {
@@ -235,7 +235,7 @@ public final class FirePillarFx {
 
         // 中心快、边缘慢：柱顶自然收束，而不是靠缩小生成半径
         double radial = radius / Math.max(0.001D, p.width * 0.5D);
-        double speed = (0.56D - 0.14D * radial) * (0.94D + 0.12D * random.nextDouble());
+        double speed = (0.66D - 0.16D * radial) * (0.94D + 0.12D * random.nextDouble());
         if (age < IGNITE_TICKS) {
             speed *= 0.55D;      // 蓄亮阶段先压住，形成底部堆积的亮核
         } else if (age > HOLD_END) {
@@ -248,6 +248,8 @@ public final class FirePillarFx {
         double vx = Math.cos(angle) * outward - Math.sin(angle) * tangent;
         double vz = Math.sin(angle) * outward + Math.cos(angle) * tangent;
 
+        // 柱体约束半径：比生成半径略大，给翻卷留余量，但随高度收窄
+        FirePillarParticle.setSpawnContext(p.base.x, p.base.z, p.width * 0.5D * 0.95D);
         // addAlwaysVisibleParticle：粒子设「最少」时也不把柱体削成零星火星
         level.addAlwaysVisibleParticle(TortoiseParticles.FIRE_PILLAR.get(), true,
                 x, y, z, vx, speed, vz);
