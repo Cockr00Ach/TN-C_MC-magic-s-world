@@ -109,6 +109,19 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     private static final int ACTION_ERUPTION = 4;
     /** 技能 B：大地震波（只有地面起伏与击退，没有火环）。 */
     private static final int ACTION_QUAKE = 5;
+    /** 技能 C（任务 5）：嘴前蓄力后喷吐一发火球。 */
+    private static final int ACTION_SPIT = 6;
+
+    /** 喷吐：蓄力 24–32 tick，后段锁定目标朝向，随后发射。 */
+    private static final int SPIT_CHARGE_MIN = 24;
+    private static final int SPIT_CHARGE_MAX = 32;
+    /** 锁定发生在蓄力的这个比例处（留出可辨识的锁定窗口）。 */
+    private static final float SPIT_LOCK_FRACTION = 0.72F;
+    /** 火球伤害系数：基础攻击力 × 该系数 × 阶段倍率。 */
+    private static final float SPIT_DAMAGE_SCALE = 0.9F;
+    /** 起手距离：太近用咬，太远不喷。 */
+    private static final double SPIT_MIN_RANGE = 7.0D;
+    private static final double SPIT_MAX_RANGE = 30.0D;
 
     /** 动作时长（tick）。 */
     private static final int BITE_TICKS = 20;
@@ -167,6 +180,11 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
             SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Float> DATA_QUAKE_Z =
             SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.FLOAT);
+    /** 喷吐蓄力：开始时刻（-1 = 当前没在蓄力）+ 总蓄力 tick。 */
+    private static final EntityDataAccessor<Integer> DATA_SPIT_START =
+            SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> DATA_SPIT_CHARGE =
+            SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.INT);
 
     private final ServerBossEvent bossEvent = new ServerBossEvent(this.getDisplayName(),
             BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10);
@@ -182,6 +200,12 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     private Vec3 quakeCenter = Vec3.ZERO;
     /** 震波命中记录：与火环的 castHits 完全分开。 */
     private final java.util.Set<java.util.UUID> quakeHits = new java.util.HashSet<>();
+    /** 喷吐：本次蓄力的目标（按 id 存，目标丢失即放弃）、锁定点与冷却。 */
+    private int spitCharge;
+    private int spitLockTick;
+    private int spitTargetId = -1;
+    private Vec3 spitAim = Vec3.ZERO;
+    private int spitCooldown;
     private int attackCooldown = 40;
     private int slamCooldown = 120;
     /** 技能 B 的独立冷却，避免与火环紧接连放。 */
@@ -281,6 +305,27 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.entityData.set(DATA_QUAKE_START, -1);
     }
 
+    /** 客户端渲染用：喷吐蓄力的开始时刻（-1 表示没有蓄力）。 */
+    public int spitChargeStart() {
+        return this.entityData.get(DATA_SPIT_START);
+    }
+
+    /** 客户端渲染用：本次蓄力的总 tick 数。 */
+    public int spitChargeTicks() {
+        return this.entityData.get(DATA_SPIT_CHARGE);
+    }
+
+    private void publishSpit(ServerLevel level) {
+        this.entityData.set(DATA_SPIT_CHARGE, this.spitCharge);
+        this.entityData.set(DATA_SPIT_START, (int) level.getGameTime());
+    }
+
+    private void clearSpit() {
+        this.entityData.set(DATA_SPIT_START, -1);
+        this.spitTargetId = -1;
+        this.spitAim = Vec3.ZERO;
+    }
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
@@ -293,6 +338,8 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.entityData.define(DATA_QUAKE_X, 0.0F);
         this.entityData.define(DATA_QUAKE_Y, 0.0F);
         this.entityData.define(DATA_QUAKE_Z, 0.0F);
+        this.entityData.define(DATA_SPIT_START, -1);
+        this.entityData.define(DATA_SPIT_CHARGE, 0);
     }
 
     @Override
@@ -397,6 +444,12 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
                 self.triggerAnim(ACTION_CONTROLLER, "slam");
                 return;
             }
+            // 中远距离：嘴前蓄力后喷吐一发火球（任务 5）。需要视线，避免隔墙喷。
+            if (self.spitCooldown <= 0 && distance > SPIT_MIN_RANGE && distance < SPIT_MAX_RANGE
+                    && self.hasLineOfSight(target)) {
+                self.startAction(ACTION_SPIT);
+                return;
+            }
             if (self.slamCooldown <= 0 && distance < VolcanicTortoiseEntity.SLAM_RADIUS * 0.75D) {
                 self.startAction(ACTION_SLAM);
                 self.triggerAnim(ACTION_CONTROLLER, "slam");
@@ -425,6 +478,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.quakeHits.clear();
         this.clearSlamRing();
         this.clearQuake();
+        this.clearSpit();
         this.getNavigation().stop();
     }
 
@@ -434,6 +488,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.attackCooldown = cooldown;
         this.clearSlamRing();
         this.clearQuake();
+        this.clearSpit();
     }
 
     // ------------------------------------------------------------------ tick --
@@ -469,6 +524,9 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         if (this.eruptionCooldown > 0) {
             this.eruptionCooldown--;
         }
+        if (this.spitCooldown > 0) {
+            this.spitCooldown--;
+        }
 
         this.tickBlasts(level);
         if (this.action == ACTION_NONE) {
@@ -480,6 +538,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
             case ACTION_SLAM -> this.tickSlam(level);
             case ACTION_QUAKE -> this.tickQuake(level);
             case ACTION_ERUPTION -> this.tickEruption(level);
+            case ACTION_SPIT -> this.tickSpit(level);
             case ACTION_TRANSITION -> this.tickTransition(level);
             default -> {
             }
@@ -918,6 +977,82 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
             this.finishAction(50);
             this.eruptionCooldown = this.isPhaseTwo() ? 200 : 300;
         }
+    }
+
+    // ------------------------------------------------------------ 喷吐（任务 5）--
+
+    private void tickSpit(ServerLevel level) {
+        if (this.isDeadOrDying()) {
+            this.clearSpit();
+            this.finishAction(10);
+            return;
+        }
+        if (this.actionTicks == 1) {
+            LivingEntity target = this.getTarget();
+            if (target == null || !target.isAlive()) {
+                this.finishAction(20);
+                return;
+            }
+            this.spitCharge = SPIT_CHARGE_MIN + level.random.nextInt(SPIT_CHARGE_MAX - SPIT_CHARGE_MIN + 1);
+            this.spitLockTick = Math.max(1, Math.round(this.spitCharge * SPIT_LOCK_FRACTION));
+            this.spitTargetId = target.getId();
+            this.spitAim = Vec3.ZERO;
+            this.publishSpit(level);
+            level.playSound(null, this.blockPosition(), SoundEvents.BLAZE_SHOOT,
+                    SoundSource.HOSTILE, 1.6F, 0.5F);
+        }
+
+        LivingEntity locked = this.spitTargetId >= 0 && level.getEntity(this.spitTargetId) instanceof LivingEntity l
+                ? l : null;
+        // 锁定前允许有限追踪；锁定后不再改朝向，留出可辨识的锁定窗口。
+        if (this.actionTicks <= this.spitLockTick && locked != null && locked.isAlive()) {
+            this.getLookControl().setLookAt(locked, 30.0F, 30.0F);
+            if (this.actionTicks == this.spitLockTick) {
+                this.spitAim = new Vec3(locked.getX(), locked.getY() + locked.getBbHeight() * 0.5D, locked.getZ());
+                this.castYaw = yawTo(this.spitAim, this.position());
+                this.setYRot(this.castYaw);
+                this.setYHeadRot(this.castYaw);
+                level.playSound(null, this.blockPosition(), SoundEvents.FIRECHARGE_USE,
+                        SoundSource.HOSTILE, 1.1F, 1.5F);
+            }
+        }
+
+        if (this.actionTicks >= this.spitCharge) {
+            Vec3 from = this.mouthPoint();
+            Vec3 aim = this.spitAim.equals(Vec3.ZERO) ? from.add(this.getLookAngle().scale(16.0D)) : this.spitAim;
+            Vec3 dir = aim.subtract(from);
+            if (dir.lengthSqr() < 1.0E-6D) {
+                dir = this.getLookAngle();
+            }
+            Vec3 unit = dir.normalize();
+            float damage = (float) (this.getAttributeValue(Attributes.ATTACK_DAMAGE)
+                    * SPIT_DAMAGE_SCALE * this.damageScale());
+            // 生成点前移 1.4 格：既不塞进头部，也不会一出生就撞到自己。
+            Vec3 spawn = from.add(unit.scale(1.4D));
+            level.addFreshEntity(VolcanicFireballEntity.launch(level, this, spawn, unit, damage, this.castId));
+            level.sendParticles(ParticleTypes.EXPLOSION, spawn.x, spawn.y, spawn.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+            level.playSound(null, this.blockPosition(), SoundEvents.GHAST_SHOOT,
+                    SoundSource.HOSTILE, 2.2F, 0.65F);
+            this.finishAction(30);
+            this.spitCooldown = this.isPhaseTwo() ? 120 : 170;
+        }
+    }
+
+    private static float yawTo(Vec3 target, Vec3 from) {
+        return (float) Math.toDegrees(Math.atan2(-(target.x - from.x), target.z - from.z));
+    }
+
+    /** 调试入口：立刻开始一次喷吐（仍遵守存活/忙碌限制）。 */
+    public boolean forceSpit(LivingEntity target) {
+        if (!this.isAlive() || this.isDeadOrDying() || this.isBusy()) {
+            return false;
+        }
+        if (target != null) {
+            this.setTarget(target);
+            this.getLookControl().setLookAt(target, 30.0F, 30.0F);
+        }
+        this.startAction(ACTION_SPIT);
+        return true;
     }
 
     private void tickBlasts(ServerLevel level) {

@@ -17,6 +17,8 @@ import net.minecraftforge.registries.RegisterEvent;
 @Mod.EventBusSubscriber(modid = "tnc", bus = Mod.EventBusSubscriber.Bus.MOD)
 public final class VolcanicTortoiseRegistration {
     public static EntityType<VolcanicTortoiseEntity> TYPE;
+    /** 喷吐火球（任务 5）：服务端权威的直线投射物。 */
+    public static EntityType<VolcanicFireballEntity> FIREBALL;
     public static Item EGG;
 
     @SubscribeEvent
@@ -29,6 +31,13 @@ public final class VolcanicTortoiseRegistration {
                     .updateInterval(2)
                     .build("tnc:volcanic_tortoise");
             helper.register(ResourceLocation.fromNamespaceAndPath("tnc", "volcanic_tortoise"), TYPE);
+
+            FIREBALL = EntityType.Builder.<VolcanicFireballEntity>of(VolcanicFireballEntity::new, MobCategory.MISC)
+                    .sized(1.2F, 1.2F)
+                    .clientTrackingRange(10)
+                    .updateInterval(1)
+                    .build("tnc:volcanic_fireball");
+            helper.register(ResourceLocation.fromNamespaceAndPath("tnc", "volcanic_fireball"), FIREBALL);
         });
         event.register(Registries.ITEM, helper -> {
             EGG = new ForgeSpawnEggItem(() -> TYPE, 0x241C18, 0xF06A1E, new Item.Properties());
