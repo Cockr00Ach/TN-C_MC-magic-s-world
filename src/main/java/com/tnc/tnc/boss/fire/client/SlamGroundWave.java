@@ -6,6 +6,7 @@ import com.tnc.tnc.boss.fire.VolcanicTortoiseEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -342,11 +343,44 @@ public final class SlamGroundWave {
         }
         buffers.endBatch(type);
 
+        if (DEBUG && !ACTIVE.isEmpty()) {
+            drawBeacon(buffers, matrix, ACTIVE.get(ACTIVE.size() - 1));
+        }
+
         if (DEBUG && drawn > 0 && level.getGameTime() - lastStatsTick >= 20L) {
             lastStatsTick = level.getGameTime();
             LOGGER.info("[TN-C QuakeWave] cast={} active={} peakLift={}",
                     cast, drawn, String.format(Locale.ROOT, "%.2f", peak));
         }
+    }
+
+    /**
+     * 调试用：在震波中心画一根 4 格高的白色光柱。
+     * 用 {@link RenderType#lightning()}（已知可用的纯色渲染类型），
+     * 用来区分“位置/矩阵不对”与“地块材质/剔除看不见”。
+     */
+    private static void drawBeacon(net.minecraft.client.renderer.MultiBufferSource.BufferSource buffers,
+                                   Matrix4f matrix, Wave wave) {
+        RenderType type = RenderType.lightning();
+        VertexConsumer buffer = buffers.getBuffer(type);
+        float w = 0.6F;
+        for (int i = 0; i < 4; i++) {
+            double a = Math.PI * 0.5D * i;
+            float dx = (float) Math.cos(a) * w;
+            float dz = (float) Math.sin(a) * w;
+            beaconQuad(buffer, matrix, wave.centerX, wave.centerY, wave.centerZ, dx, dz);
+        }
+        buffers.endBatch(type);
+    }
+
+    private static void beaconQuad(VertexConsumer buffer, Matrix4f matrix,
+                                   double cx, double cy, double cz, float dx, float dz) {
+        float y0 = (float) cy;
+        float y1 = (float) cy + 4.0F;
+        buffer.vertex(matrix, (float) cx - dx, y0, (float) cz - dz).color(1.0F, 0.95F, 0.8F, 1.0F).endVertex();
+        buffer.vertex(matrix, (float) cx + dx, y0, (float) cz + dz).color(1.0F, 0.95F, 0.8F, 1.0F).endVertex();
+        buffer.vertex(matrix, (float) cx + dx, y1, (float) cz + dz).color(1.0F, 0.95F, 0.8F, 1.0F).endVertex();
+        buffer.vertex(matrix, (float) cx - dx, y1, (float) cz - dz).color(1.0F, 0.95F, 0.8F, 1.0F).endVertex();
     }
 
     /** 一块地砖：顶面 + 四周侧面，抬升后能看出厚度。 */
@@ -398,10 +432,16 @@ public final class SlamGroundWave {
                              float u0, float v0, float u1, float v1,
                              float u2, float v2, float u3, float v3,
                              float nx, float ny, float nz) {
+        // 正反两种绕序各写一遍：不依赖 RenderType 的剔除设置，也避免不同绕序约定
+        // 导致整片地砖被背面剔除而完全看不见。
         vertex(buffer, matrix, x0, y0, z0, u0, v0, alpha, light, nx, ny, nz);
         vertex(buffer, matrix, x1, y1, z1, u1, v1, alpha, light, nx, ny, nz);
         vertex(buffer, matrix, x2, y2, z2, u2, v2, alpha, light, nx, ny, nz);
         vertex(buffer, matrix, x3, y3, z3, u3, v3, alpha, light, nx, ny, nz);
+        vertex(buffer, matrix, x3, y3, z3, u3, v3, alpha, light, -nx, -ny, -nz);
+        vertex(buffer, matrix, x2, y2, z2, u2, v2, alpha, light, -nx, -ny, -nz);
+        vertex(buffer, matrix, x1, y1, z1, u1, v1, alpha, light, -nx, -ny, -nz);
+        vertex(buffer, matrix, x0, y0, z0, u0, v0, alpha, light, -nx, -ny, -nz);
     }
 
     /** 该角相对中心的外向程度：1 = 最外角，0 = 最内角。 */
@@ -415,11 +455,13 @@ public final class SlamGroundWave {
                                float nx, float ny, float nz) {
         // entityTranslucent 的格式是 POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL：
         // overlay 与 normal 都必须显式写入。
+        // 光照使用满亮度：震波是魔法冲击，夜里/雨里也必须看得见，
+        // 同时避免暗处 quad 亮度接近 0 而“看不见”。
         buffer.vertex(matrix, (float) x, (float) y, (float) z)
                 .color(1.0F, 1.0F, 1.0F, alpha)
                 .uv(u, v)
                 .overlayCoords(OverlayTexture.NO_OVERLAY)
-                .uv2(light)
+                .uv2(LightTexture.FULL_BRIGHT)
                 .normal(nx, ny, nz)
                 .endVertex();
     }
