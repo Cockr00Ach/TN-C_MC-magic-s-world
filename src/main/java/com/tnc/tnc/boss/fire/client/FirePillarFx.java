@@ -35,9 +35,9 @@ import java.util.List;
 public final class FirePillarFx {
 
     /** 单根最大存活粒子数（含上升中的全部火舌）。 */
-    private static final int PER_PILLAR_ALIVE = 320;
+    private static final int PER_PILLAR_ALIVE = 420;
     /** 同屏所有火柱的粒子上限，任务 7 的 5–7 根按这个预算设计。 */
-    private static final int GLOBAL_ALIVE = 1900;
+    private static final int GLOBAL_ALIVE = 2600;
     /** 柱子总时长（tick）：蓄亮 + 冲起 + 停留 + 消散。 */
     private static final int TOTAL_TICKS = 74;
     /** 根部蓄亮时长。 */
@@ -47,11 +47,11 @@ public final class FirePillarFx {
     /** 喷流开始减弱的时刻。 */
     private static final int HOLD_END = 50;
     /** 单根高度（格）。 */
-    private static final double HEIGHT_MIN = 5.0D;
-    private static final double HEIGHT_MAX = 7.0D;
+    private static final double HEIGHT_MIN = 8.0D;
+    private static final double HEIGHT_MAX = 10.0D;
     /** 主体宽度（格）。 */
-    private static final double WIDTH_MIN = 1.5D;
-    private static final double WIDTH_MAX = 2.0D;
+    private static final double WIDTH_MIN = 1.2D;
+    private static final double WIDTH_MAX = 1.8D;
     /** 稳定流动通道数量：少量通道 + 每颗随机相位，能看出翻卷但不散成乱流。 */
     private static final int CHANNELS = 7;
 
@@ -145,19 +145,19 @@ public final class FirePillarFx {
     /** 按阶段给出每 tick 生成数：蓄亮少、冲起多、停留稳、尾段线性减小。 */
     private static int spawnCountFor(long age) {
         if (age < IGNITE_TICKS) {
-            return 5;
+            return 6;
         }
         if (age < SURGE_END) {
-            return 13;
+            return 18;
         }
         if (age < HOLD_END) {
-            return 9;
+            return 14;
         }
         if (age >= TOTAL_TICKS) {
             return 0;
         }
         double k = 1.0D - (age - HOLD_END) / (double) (TOTAL_TICKS - HOLD_END);
-        return Math.max(0, (int) Math.round(7.0D * k));
+        return Math.max(0, (int) Math.round(9.0D * k));
     }
 
     private static void spawnParticle(ClientLevel level, Pillar p, long age) {
@@ -165,25 +165,25 @@ public final class FirePillarFx {
         int channel = random.nextInt(CHANNELS);
         double channelAngle = (Math.PI * 2.0D / CHANNELS) * channel;
 
-        // 生成半径：主体宽度的 0.2–1.0，中心更密
-        double radius = p.width * 0.5D * (0.20D + 0.80D * Math.sqrt(random.nextDouble()));
-        double angle = channelAngle + (random.nextDouble() - 0.5D) * 0.55D;
+        // 生成半径：收在主体半径的 0.18–0.60，中心更密，根部不铺开成火堆
+        double radius = p.width * 0.5D * (0.18D + 0.42D * Math.sqrt(random.nextDouble()));
+        double angle = channelAngle + (random.nextDouble() - 0.5D) * 0.45D;
         double x = p.base.x + Math.cos(angle) * radius;
         double z = p.base.z + Math.sin(angle) * radius;
-        double y = p.base.y + 0.10D + random.nextDouble() * 0.12D;
+        double y = p.base.y + 0.08D + random.nextDouble() * 0.12D;
 
         // 中心快、边缘慢：柱顶自然收束，而不是靠缩小生成半径
         double radial = radius / Math.max(0.001D, p.width * 0.5D);
-        double speed = (0.34D - 0.10D * radial) * (0.85D + 0.30D * random.nextDouble());
+        double speed = (0.44D - 0.10D * radial) * (0.92D + 0.16D * random.nextDouble());
         if (age < IGNITE_TICKS) {
             speed *= 0.55D;      // 蓄亮阶段先压住，形成底部堆积的亮核
         } else if (age > HOLD_END) {
-            speed *= 0.85D;
+            speed *= 0.88D;
         }
 
         // 径向一点点外扩 + 切向旋转，形成翻卷；幅度很小，不会越升越散
-        double outward = 0.006D + random.nextDouble() * 0.010D;
-        double tangent = (random.nextDouble() - 0.5D) * 0.020D;
+        double outward = 0.003D + random.nextDouble() * 0.005D;
+        double tangent = (random.nextDouble() - 0.5D) * 0.012D;
         double vx = Math.cos(angle) * outward - Math.sin(angle) * tangent;
         double vz = Math.sin(angle) * outward + Math.cos(angle) * tangent;
 

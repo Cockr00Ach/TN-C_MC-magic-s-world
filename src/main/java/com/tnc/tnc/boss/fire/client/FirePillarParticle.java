@@ -20,10 +20,13 @@ import net.minecraft.util.Mth;
  */
 public class FirePillarParticle extends TextureSheetParticle {
 
-    private static final float MIN_SIZE = 0.55F;
-    private static final float MAX_SIZE = 1.00F;
-    private static final int MIN_LIFE = 20;
-    private static final int MAX_LIFE = 30;
+    private static final float MIN_SIZE = 0.08F;
+    private static final float MAX_SIZE = 0.18F;
+    private static final float TONGUE_CHANCE = 0.10F;
+    private static final float TONGUE_MULTIPLIER = 1.35F;
+    private static final float MAX_QUAD = 0.25F;
+    private static final int MIN_LIFE = 26;
+    private static final int MAX_LIFE = 36;
 
     private final SpriteSet sprites;
     private final float swirlPhase;
@@ -35,11 +38,14 @@ public class FirePillarParticle extends TextureSheetParticle {
         this.sprites = sprites;
         this.lifetime = MIN_LIFE + this.random.nextInt(MAX_LIFE - MIN_LIFE + 1);
         this.quadSize = MIN_SIZE + this.random.nextFloat() * (MAX_SIZE - MIN_SIZE);
+        if (this.random.nextFloat() < TONGUE_CHANCE) {
+            this.quadSize = Math.min(this.quadSize * TONGUE_MULTIPLIER, MAX_QUAD);
+        }
         this.gravity = 0.0F;
         this.hasPhysics = false;
-        this.friction = 0.985F;
+        this.friction = 0.955F;
         this.swirlPhase = this.random.nextFloat() * 6.2832F;
-        this.swirlAmount = 0.010F + this.random.nextFloat() * 0.016F;
+        this.swirlAmount = 0.0016F + this.random.nextFloat() * 0.0016F;
         this.setSpriteFromAge(sprites);
     }
 
