@@ -73,12 +73,16 @@ public final class SlamGroundWave {
     /** 采样窗口：施法高度向上/向下各留多少格。 */
     private static final int SEARCH_UP = 8;
     private static final int SEARCH_DOWN = 4;
+    /** 施法点离地表太远时，从高度图向下额外搜索的格数。 */
+    private static final int SEARCH_FALLBACK = 12;
 
     private static final List<Wave> ACTIVE = new ArrayList<>();
     /** 每个实体上一次看到的震波编号，用来判断「有新的一发」。 */
     private static final Map<Integer, Integer> SEEN = new HashMap<>();
     private static final Logger LOGGER = LogUtils.getLogger();
     private static boolean warnedFailure;
+    /** 采样数为 0 时只提醒一次，避免刷屏。 */
+    private static boolean warnedZero;
     private static long lastStatsTick = -100L;
 
     private SlamGroundWave() {
@@ -170,8 +174,17 @@ public final class SlamGroundWave {
             }
         }
         ACTIVE.add(wave);
+        int n = wave.patches.size();
+        if (n == 0 && !warnedZero) {
+            warnedZero = true;
+            int sx = Mth.floor(center.x + 2.0D);
+            int sz = Mth.floor(center.z);
+            int h = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, sx, sz);
+            LOGGER.warn("[TN-C QuakeWave] sampled 0 patches: cast={} center={} heightAtR2={} minBuild={} stateAtHeight={}",
+                    castId, center, h, level.getMinBuildHeight(),
+                    level.getBlockState(new BlockPos(sx, h - 1, sz)));
+        }
         if (DEBUG) {
-            int n = wave.patches.size();
             LOGGER.info("[TN-C QuakeWave] cast={} patches={} centerY={} groundY=[{}, {}] lift={}",
                     castId, n, String.format(Locale.ROOT, "%.2f", center.y),
                     n == 0 ? "-" : String.format(Locale.ROOT, "%.2f", minY),
@@ -182,11 +195,13 @@ public final class SlamGroundWave {
 
     private static Patch sample(ClientLevel level, int x, int z, double radius,
                                 double centerY, float dirX, float dirZ) {
-        int heightmapTop = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1;
-        // 以世界高度图为上界，再用施法高度做局部窗口：既不会跳到洞穴屋顶，
-        // 也不会在负高度/悬空平台上因为窗口离地太远而采不到东西。
-        int top = Math.min(heightmapTop, Mth.floor(centerY + SEARCH_UP));
+        int heightTop = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+        int top = Math.min(heightTop, Mth.floor(centerY + SEARCH_UP));
         int bottom = Math.max(level.getMinBuildHeight(), Mth.floor(centerY - SEARCH_DOWN));
+        if (top < bottom) {
+            // 施法点离地表太远（例如站在高台上或高度图异常）时，至少从高度图向下找 12 格。
+            bottom = Math.max(level.getMinBuildHeight(), Math.min(top, heightTop) - SEARCH_FALLBACK);
+        }
         if (top < bottom) {
             return null;
         }
@@ -195,40 +210,64 @@ public final class SlamGroundWave {
         for (int y = top; y >= bottom; y--) {
             BlockPos pos = new BlockPos(x, y, z);
             if (!level.hasChunkAt(pos)) {
-                return null;
+                continue;
             }
             BlockState state = level.getBlockState(pos);
             if (state.isAir()) {
                 continue;
             }
-            if (!state.getFluidState().isEmpty() || !level.getFluidState(pos.above()).isEmpty()) {
-                return null;
-            }
-            if (state.hasBlockEntity()) {
-                return null;
-            }
-            if (!state.isSolidRender(level, pos)) {
+            if (!state.getFluidState().isEmpty() || state.hasBlockEntity()) {
                 continue;
             }
             BakedModel model = dispatcher.getBlockModel(state);
-            List<BakedQuad> topQuads = model.getQuads(state, Direction.UP, random);
-            if (topQuads.isEmpty()) {
-                continue;
+            BakedQuad topQuad = pickQuad(model, state, Direction.UP, random);
+            boolean solid = state.isSolidRender(level, pos) || state.isSolid();
+            if (topQuad == null) {
+                if (!solid) {
+                    continue;
+                }
+                // 有些模组地板模型没有独立的 UP 面（全部塞在无方向列表里），
+                // 这里退回石头顶面贴图，保证地面波至少能显示出来。
+                topQuad = stoneTop(random);
+                if (topQuad == null) {
+                    continue;
+                }
             }
-            var topSprite = topQuads.get(0).getSprite();
             Direction side = Math.abs(dirX) > Math.abs(dirZ)
                     ? (dirX > 0.0F ? Direction.EAST : Direction.WEST)
                     : (dirZ > 0.0F ? Direction.SOUTH : Direction.NORTH);
-            List<BakedQuad> sideQuads = model.getQuads(state, side, random);
-            var sideSprite = sideQuads.isEmpty() ? topSprite : sideQuads.get(0).getSprite();
+            BakedQuad sideQuad = pickQuad(model, state, side, random);
+            if (sideQuad == null) {
+                sideQuad = topQuad;
+            }
             int light = LevelRenderer.getLightColor(level, pos.above());
             float liftScale = 0.72F + 0.28F * level.random.nextFloat();
             return new Patch(x + 0.5D, z + 0.5D, radius, y + 1.0D,
-                    topSprite.getU0(), topSprite.getV0(), topSprite.getU1(), topSprite.getV1(),
-                    sideSprite.getU0(), sideSprite.getV0(), sideSprite.getU1(), sideSprite.getV1(),
+                    topQuad.getSprite().getU0(), topQuad.getSprite().getV0(),
+                    topQuad.getSprite().getU1(), topQuad.getSprite().getV1(),
+                    sideQuad.getSprite().getU0(), sideQuad.getSprite().getV0(),
+                    sideQuad.getSprite().getU1(), sideQuad.getSprite().getV1(),
                     liftScale, light, dirX, dirZ);
         }
         return null;
+    }
+
+    /** 取某个方向的烘焙四边形；该方向为空时退回无方向列表（模组方块常见）。 */
+    private static BakedQuad pickQuad(BakedModel model, BlockState state, Direction direction,
+                                      RandomSource random) {
+        List<BakedQuad> quads = model.getQuads(state, direction, random);
+        if (quads.isEmpty()) {
+            quads = model.getQuads(state, null, random);
+        }
+        return quads.isEmpty() ? null : quads.get(0);
+    }
+
+    /** 兜底：石头顶面，用于没有可用面数据的模组地板。 */
+    private static BakedQuad stoneTop(RandomSource random) {
+        var dispatcher = Minecraft.getInstance().getBlockRenderer();
+        BlockState stone = net.minecraft.world.level.block.Blocks.STONE.defaultBlockState();
+        List<BakedQuad> quads = dispatcher.getBlockModel(stone).getQuads(stone, Direction.UP, random);
+        return quads.isEmpty() ? null : quads.get(0);
     }
 
     @SubscribeEvent
