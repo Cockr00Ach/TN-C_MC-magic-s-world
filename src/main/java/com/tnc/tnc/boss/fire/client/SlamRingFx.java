@@ -36,7 +36,9 @@ public final class SlamRingFx {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("TN-C/SlamRing");
     /** 调试开关：-Dtnc.tortoise.attack.debug=true 时额外提供 /tnc_ring 并打印建环日志。 */
-    private static final boolean DEBUG = Boolean.getBoolean("tnc.tortoise.attack.debug");
+    public static final boolean DEBUG = Boolean.getBoolean("tnc.tortoise.attack.debug");
+    /** 调试：临时隐藏火环本体，只观察地面波（/tnc_ringhide 切换）。 */
+    public static boolean HIDE_RING;
 
     /** 传播时长（tick），与服务端伤害环一致。 */
     public static final int TICKS = VolcanicTortoiseEntity.SLAM_RING_TICKS;
@@ -225,6 +227,16 @@ public final class SlamRingFx {
     /** 调试命令 /tnc_ring：在脚下放一道环，用来单独确认粒子环本身能不能显示。 */
     @SubscribeEvent
     public static void onClientCommands(RegisterClientCommandsEvent event) {
+        event.getDispatcher().register(Commands.literal("tnc_ringhide").executes(ctx -> {
+            HIDE_RING = !HIDE_RING;
+            LOGGER.info("[TN-C SlamRing] hide ring = {}", HIDE_RING);
+            var player = Minecraft.getInstance().player;
+            if (player != null) {
+                player.displayClientMessage(net.minecraft.network.chat.Component.literal(
+                        HIDE_RING ? "火环已隐藏（只看地面波）" : "火环已恢复"), true);
+            }
+            return 1;
+        }));
         if (!DEBUG) {
             return;
         }

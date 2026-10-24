@@ -154,6 +154,9 @@ public final class SlamFlameParticle extends TextureSheetParticle {
 
     @Override
     public void render(VertexConsumer buffer, Camera camera, float partialTick) {
+        if (SlamRingFx.HIDE_RING) {
+            return;
+        }
         if (this.ring == null || this.ring.expired) {
             return;
         }
