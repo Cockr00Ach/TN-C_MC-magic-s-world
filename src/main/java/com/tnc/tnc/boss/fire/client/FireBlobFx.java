@@ -32,7 +32,7 @@ public final class FireBlobFx {
     private static final double MAX_DIST_SQR = 96.0D * 96.0D;
 
     /** 飞行火球的视觉半径（格）：整体大小保持原技能比例。 */
-    private static final double FLIGHT_RADIUS = 1.40D;
+    private static final double FLIGHT_RADIUS = 0.86D;
     /** 蓄力火团最终半径（格）。 */
     private static final double CHARGE_RADIUS = 1.23D;
 
@@ -75,7 +75,7 @@ public final class FireBlobFx {
         }
 
         // 1b) 喷发弹幕：同一套火团，但更小、尾迹更短，整场共享粒子预算
-        int mortarBudget = 260;
+        int mortarBudget = 90;
         FireBlobParticle.pushOverrides(2, 4, 1.75F);
         try {
             for (VolcanicMortarEntity ball : level.getEntitiesOfClass(VolcanicMortarEntity.class,
@@ -126,29 +126,27 @@ public final class FireBlobFx {
     }
 
     /**
-     * 飞行体：内部高斯分布 + 中层 + 外缘，外加几颗沿速度反向的尾焰。
-     * 粒子速度很小，整体跟着投射物走，不会越飞越散。
+    /**
+     * 飞行火球：方块模型本身就是本体，这里只在模型表面贴一层小火苗，
+     * 让轮廓像在燃烧，而不是再堆一整个粒子球。
      */
     private static void spawnFlight(ClientLevel level, Vec3 center, double radius, long seed, Vec3 motion) {
-        int budget = MAX_SPAWN_PER_TICK;
+        int budget = 18;
 
-        budget -= spawnGaussian(level, center, radius * 0.62D, 40,
-                TortoiseParticles.FIRE_CORE.get(), TortoiseParticles.FIRE_MID.get(), budget);
-        budget -= spawnShell(level, center, radius * 0.82D, 22,
+        budget -= spawnShell(level, center, radius * 0.95D, 11,
                 TortoiseParticles.FIRE_MID.get(), seed + 17L, budget);
-        budget -= spawnShell(level, center, radius * 1.02D, 12,
+        budget -= spawnShell(level, center, radius * 1.06D, 5,
                 TortoiseParticles.FIRE_EDGE.get(), seed + 31L, budget);
 
-        // 尾焰：沿速度反方向拉开，越靠后越小
         if (motion.lengthSqr() > 1.0E-6D && budget > 0) {
             Vec3 back = motion.normalize().scale(-1.0D);
-            int tail = Math.min(budget, 4);
+            int tail = Math.min(budget, 2);
             for (int i = 0; i < tail; i++) {
-                double dist = radius * (0.75D + 0.35D * level.random.nextFloat()) + i * 0.16D;
-                double jitter = (level.random.nextDouble() - 0.5D) * 0.18D;
+                double dist = radius * (0.95D + 0.30D * level.random.nextFloat()) + i * 0.14D;
+                double jitter = (level.random.nextDouble() - 0.5D) * 0.14D;
                 spawn(level, TortoiseParticles.FIRE_EDGE.get(),
                         center.x + back.x * dist + jitter,
-                        center.y + back.y * dist + jitter * 0.6D + (level.random.nextDouble() - 0.5D) * 0.10D,
+                        center.y + back.y * dist + jitter * 0.6D,
                         center.z + back.z * dist + jitter,
                         back.x * 0.02D, 0.012D, back.z * 0.02D);
             }
@@ -156,21 +154,17 @@ public final class FireBlobFx {
     }
 
     /** 弹幕火球：0.95 格半径，核心+边缘各一圈，尾部 2 颗，整颗约 29 颗粒子。 */
+    /** 弹幕火球：模型更小，表面只贴 10 颗左右，预算约 12/颗。 */
     private static int spawnMortar(ClientLevel level, Vec3 center, Vec3 motion, long seed, int budget) {
         int spawned = 0;
-        spawned += spawnGaussian(level, center, 0.50D, 20,
-                TortoiseParticles.FIRE_CORE.get(), TortoiseParticles.FIRE_MID.get(), budget - spawned);
-        spawned += spawnShell(level, center, 0.72D, 14, TortoiseParticles.FIRE_MID.get(), seed + 7L, budget - spawned);
-        spawned += spawnShell(level, center, 0.90D, 9, TortoiseParticles.FIRE_EDGE.get(), seed + 13L, budget - spawned);
+        spawned += spawnShell(level, center, 0.52D, 8, TortoiseParticles.FIRE_MID.get(), seed + 7L, budget - spawned);
+        spawned += spawnShell(level, center, 0.60D, 4, TortoiseParticles.FIRE_EDGE.get(), seed + 13L, budget - spawned);
         if (motion.lengthSqr() > 1.0E-6D && spawned < budget) {
             Vec3 back = motion.normalize().scale(-1.0D);
-            for (int i = 0; i < 2 && spawned < budget; i++) {
-                double dist = 0.95D + i * 0.18D;
-                spawn(level, TortoiseParticles.FIRE_EDGE.get(),
-                        center.x + back.x * dist, center.y + back.y * dist, center.z + back.z * dist,
-                        back.x * 0.02D, -0.01D, back.z * 0.02D);
-                spawned++;
-            }
+            spawn(level, TortoiseParticles.FIRE_EDGE.get(),
+                    center.x + back.x * 0.66D, center.y + back.y * 0.66D, center.z + back.z * 0.66D,
+                    back.x * 0.02D, -0.01D, back.z * 0.02D);
+            spawned++;
         }
         return spawned;
     }
