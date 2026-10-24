@@ -169,7 +169,7 @@ public final class VolcanicFireballEntity extends Projectile {
                     this.damageOnce(victim);
                 }
             }
-            // 落地余火：原地保留一块灼烧区域，周期性伤害。
+            // 落地余火：原地保留一块灼烧区域，周期性造成伤害。
             VolcanicFireFieldEntity.spawn(level, at, this.damage * 0.35F, this.castId);
         }
         this.discard();

@@ -86,12 +86,21 @@ public final class VolcanicFireFieldEntity extends Entity {
             this.discard();
             return;
         }
+        ServerLevel level = (ServerLevel) this.level();
+        double r = this.radius();
+        // 服务端直接发粒子：即使客户端没同步到这个实体，余火也能看见。
+        if (this.tickCount % 4 == 0) {
+            level.sendParticles(TortoiseParticles.FIRE_MID.get(), this.getX(), this.getY() + 0.25D, this.getZ(),
+                    4, r * 0.55D, 0.15D, r * 0.55D, 0.01D);
+        }
+        if (this.tickCount % 8 == 0) {
+            level.sendParticles(ParticleTypes.LARGE_SMOKE, this.getX(), this.getY() + 0.5D, this.getZ(),
+                    2, r * 0.45D, 0.25D, r * 0.45D, 0.01D);
+        }
         if (this.tickCount % HIT_INTERVAL != 0) {
             return;
         }
-        ServerLevel level = (ServerLevel) this.level();
         Vec3 center = this.position();
-        double r = this.radius();
         AABB area = new AABB(center, center).inflate(r, 2.0D, r);
         for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, area)) {
             if (victim == this.getVehicle() || victim.isSpectator()) {
