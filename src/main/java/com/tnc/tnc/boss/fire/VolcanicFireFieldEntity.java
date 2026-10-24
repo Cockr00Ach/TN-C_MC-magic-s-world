@@ -27,7 +27,7 @@ import net.minecraft.world.phys.Vec3;
 public final class VolcanicFireFieldEntity extends Entity {
 
     public static final double RADIUS = 3.0D;
-    public static final int DURATION = 140;
+    public static final int DURATION = 260;
     /** 同一目标两次灼烧的最小间隔。 */
     public static final int HIT_INTERVAL = 20;
 
