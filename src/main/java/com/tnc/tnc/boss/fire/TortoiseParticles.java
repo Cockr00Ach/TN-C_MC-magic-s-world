@@ -42,6 +42,10 @@ public final class TortoiseParticles {
     public static final RegistryObject<SimpleParticleType> FIRE_CHARGE =
             TYPES.register("fire_charge", () -> new SimpleParticleType(true));
 
+    /** 火柱专用：竖向火舌，颜色随年龄从根部亮黄过渡到顶部深橙红。 */
+    public static final RegistryObject<SimpleParticleType> FIRE_PILLAR =
+            TYPES.register("fire_pillar", () -> new SimpleParticleType(true));
+
     private TortoiseParticles() {
     }
 
