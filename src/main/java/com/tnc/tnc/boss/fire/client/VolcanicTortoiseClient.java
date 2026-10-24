@@ -13,5 +13,6 @@ public final class VolcanicTortoiseClient {
         event.registerEntityRenderer(VolcanicTortoiseRegistration.TYPE, VolcanicTortoiseRenderer::new);
         event.registerEntityRenderer(VolcanicTortoiseRegistration.FIREBALL, VolcanicFireballRenderer::new);
         event.registerEntityRenderer(VolcanicTortoiseRegistration.MORTAR, VolcanicMortarRenderer::new);
+        event.registerEntityRenderer(VolcanicTortoiseRegistration.FIRE_FIELD, VolcanicFireFieldRenderer::new);
     }
 }

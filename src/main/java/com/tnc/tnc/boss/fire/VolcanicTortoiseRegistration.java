@@ -21,6 +21,8 @@ public final class VolcanicTortoiseRegistration {
     public static EntityType<VolcanicFireballEntity> FIREBALL;
     /** 火山喷发的抛射火球（任务 8）：抛物线 + 服务端落点预警。 */
     public static EntityType<VolcanicMortarEntity> MORTAR;
+    /** 火球落地后的持续火焰区域。 */
+    public static EntityType<VolcanicFireFieldEntity> FIRE_FIELD;
     public static Item EGG;
 
     @SubscribeEvent
@@ -47,6 +49,14 @@ public final class VolcanicTortoiseRegistration {
                     .updateInterval(1)
                     .build("tnc:volcanic_mortar");
             helper.register(ResourceLocation.fromNamespaceAndPath("tnc", "volcanic_mortar"), MORTAR);
+
+            FIRE_FIELD = EntityType.Builder.<VolcanicFireFieldEntity>of(VolcanicFireFieldEntity::new, MobCategory.MISC)
+                    .sized(1.0F, 0.5F)
+                    .fireImmune()
+                    .clientTrackingRange(10)
+                    .updateInterval(5)
+                    .build("tnc:volcanic_fire_field");
+            helper.register(ResourceLocation.fromNamespaceAndPath("tnc", "volcanic_fire_field"), FIRE_FIELD);
         });
         event.register(Registries.ITEM, helper -> {
             EGG = new ForgeSpawnEggItem(() -> TYPE, 0x241C18, 0xF06A1E, new Item.Properties());

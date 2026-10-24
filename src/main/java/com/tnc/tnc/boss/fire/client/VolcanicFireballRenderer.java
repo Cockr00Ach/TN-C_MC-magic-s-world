@@ -7,6 +7,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 public final class VolcanicFireballRenderer extends FireballModelRenderer<VolcanicFireballEntity> {
 
     public VolcanicFireballRenderer(EntityRendererProvider.Context context) {
-        super(context, 2.0F);
+        super(context, 3.0F);
     }
 }
