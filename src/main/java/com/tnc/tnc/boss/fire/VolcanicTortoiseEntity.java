@@ -107,6 +107,8 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     private static final int ACTION_SLAM = 2;
     private static final int ACTION_TRANSITION = 3;
     private static final int ACTION_ERUPTION = 4;
+    /** 技能 B：大地震波（只有地面起伏与击退，没有火环）。 */
+    private static final int ACTION_QUAKE = 5;
 
     /** 动作时长（tick）。 */
     private static final int BITE_TICKS = 20;
@@ -124,6 +126,23 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     public static final int SLAM_RING_TICKS = 30;
     private static final int ERUPTION_HIT_TICK = 26;
 
+    // ---------------------------------------------------------- 技能 B：大地震波 --
+    /** 与火环共用砸地动作，所以时长与砸地帧一致。 */
+    public static final int QUAKE_TICKS = 72;
+    public static final int QUAKE_HIT_TICK = 24;
+    /** 地面波从中心推到最大半径的 tick 数（比火环慢，方便看清地块依次抬起）。 */
+    public static final int QUAKE_RING_TICKS = 40;
+    /** 独立的最大半径，不与火环共用配置。 */
+    public static final double QUAKE_RADIUS = 22.0D;
+    /** 波峰带宽（格）：只有这个宽度内的地块在抬升。 */
+    public static final double QUAKE_BAND = 3.5D;
+    private static final double QUAKE_HEIGHT_TOLERANCE = 2.0D;
+    /** 首轮基础伤害为 0，只保留配置入口，后续按测试结果调整。 */
+    private static final float QUAKE_DAMAGE = parseFloatProperty("tnc.tortoise.quake.damage", 0.0F);
+    private static final double QUAKE_KNOCKBACK = parseFloatProperty("tnc.tortoise.quake.knockback", 0.85F);
+    /** 轻微上抛，避免只在地面平移。 */
+    private static final double QUAKE_LIFT = parseFloatProperty("tnc.tortoise.quake.lift", 0.16F);
+
     private static final String ACTION_CONTROLLER = "action";
 
     private static final EntityDataAccessor<Integer> DATA_PHASE =
@@ -139,6 +158,16 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     private static final EntityDataAccessor<Float> DATA_SLAM_Z =
             SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.FLOAT);
 
+    /** 大地震波：独立的施法编号（-1 = 当前没有震波），客户端据此创建地面波。 */
+    private static final EntityDataAccessor<Integer> DATA_QUAKE_START =
+            SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Float> DATA_QUAKE_X =
+            SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> DATA_QUAKE_Y =
+            SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> DATA_QUAKE_Z =
+            SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.FLOAT);
+
     private final ServerBossEvent bossEvent = new ServerBossEvent(this.getDisplayName(),
             BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10);
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
@@ -149,8 +178,14 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     private Vec3 slamCenter = Vec3.ZERO;
     /** 调试：把火环的最大半径画出来（仅 ATTACK_DEBUG 的 /tnc_slam true）。 */
     private int debugRingTicks;
+    /** 大地震波：砸地瞬间锁定的中心，展开后不再跟随本体。 */
+    private Vec3 quakeCenter = Vec3.ZERO;
+    /** 震波命中记录：与火环的 castHits 完全分开。 */
+    private final java.util.Set<java.util.UUID> quakeHits = new java.util.HashSet<>();
     private int attackCooldown = 40;
     private int slamCooldown = 120;
+    /** 技能 B 的独立冷却，避免与火环紧接连放。 */
+    private int quakeCooldown = 240;
     private int eruptionCooldown = 160;
     /** 二阶段火山弹的落点（服务端算好，倒计时结束时炸）。 */
     private final java.util.List<Vec3> pendingBlasts = new java.util.ArrayList<>();
@@ -223,6 +258,29 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.entityData.set(DATA_SLAM_START, -1);
     }
 
+    /** 客户端渲染用：大地震波的施法编号，-1 表示当前没有震波。 */
+    public int quakeWaveStart() {
+        return this.entityData.get(DATA_QUAKE_START);
+    }
+
+    /** 客户端渲染用：震波锁定的砸地中心。 */
+    public Vec3 quakeWaveCenter() {
+        return new Vec3(this.entityData.get(DATA_QUAKE_X), this.entityData.get(DATA_QUAKE_Y),
+                this.entityData.get(DATA_QUAKE_Z));
+    }
+
+    /** 服务端：把震波中心与编号同步给客户端（只在砸地瞬间调用一次）。 */
+    private void publishQuake(ServerLevel level) {
+        this.entityData.set(DATA_QUAKE_X, (float) this.quakeCenter.x);
+        this.entityData.set(DATA_QUAKE_Y, (float) this.quakeCenter.y);
+        this.entityData.set(DATA_QUAKE_Z, (float) this.quakeCenter.z);
+        this.entityData.set(DATA_QUAKE_START, (int) level.getGameTime());
+    }
+
+    private void clearQuake() {
+        this.entityData.set(DATA_QUAKE_START, -1);
+    }
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
@@ -231,6 +289,10 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.entityData.define(DATA_SLAM_X, 0.0F);
         this.entityData.define(DATA_SLAM_Y, 0.0F);
         this.entityData.define(DATA_SLAM_Z, 0.0F);
+        this.entityData.define(DATA_QUAKE_START, -1);
+        this.entityData.define(DATA_QUAKE_X, 0.0F);
+        this.entityData.define(DATA_QUAKE_Y, 0.0F);
+        this.entityData.define(DATA_QUAKE_Z, 0.0F);
     }
 
     @Override
@@ -340,6 +402,12 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
                 self.triggerAnim(ACTION_CONTROLLER, "slam");
                 return;
             }
+            // 技能 B 用独立冷却；刚放完火环时 slamCooldown 会挡住连放，这里再加一道距离条件。
+            if (self.quakeCooldown <= 0 && distance < VolcanicTortoiseEntity.QUAKE_RADIUS * 0.45D) {
+                self.startAction(ACTION_QUAKE);
+                self.triggerAnim(ACTION_CONTROLLER, "slam");
+                return;
+            }
             if (distance < VolcanicTortoiseEntity.BITE_RANGE) {
                 self.startAction(ACTION_BITE);
                 self.triggerAnim(ACTION_CONTROLLER, "bite");
@@ -354,7 +422,9 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.castId++;
         this.castYaw = this.getYRot();
         this.castHits.clear();
+        this.quakeHits.clear();
         this.clearSlamRing();
+        this.clearQuake();
         this.getNavigation().stop();
     }
 
@@ -363,6 +433,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.actionTicks = 0;
         this.attackCooldown = cooldown;
         this.clearSlamRing();
+        this.clearQuake();
     }
 
     // ------------------------------------------------------------------ tick --
@@ -392,6 +463,9 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         if (this.slamCooldown > 0) {
             this.slamCooldown--;
         }
+        if (this.quakeCooldown > 0) {
+            this.quakeCooldown--;
+        }
         if (this.eruptionCooldown > 0) {
             this.eruptionCooldown--;
         }
@@ -404,6 +478,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         switch (this.action) {
             case ACTION_BITE -> this.tickBite(level);
             case ACTION_SLAM -> this.tickSlam(level);
+            case ACTION_QUAKE -> this.tickQuake(level);
             case ACTION_ERUPTION -> this.tickEruption(level);
             case ACTION_TRANSITION -> this.tickTransition(level);
             default -> {
@@ -688,6 +763,126 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.startAction(ACTION_SLAM);
         this.triggerAnim(ACTION_CONTROLLER, "slam");
         this.debugRingTicks = showRing ? SLAM_TICKS : 0;
+        return true;
+    }
+
+    // -------------------------------------------------- 技能 B：大地震波 --
+
+    /**
+     * 技能 B：双前脚砸地后，地面波向外传播。
+     *
+     * <p>与技能 A 完全分开：自己的施法编号（{@code DATA_QUAKE_START}）、自己的命中集合
+     * {@link #quakeHits}、自己的冷却 {@link #quakeCooldown}；不产生火环粒子。
+     */
+    private void tickQuake(ServerLevel level) {
+        if (this.actionTicks == QUAKE_HIT_TICK) {
+            this.quakeCenter = this.position();
+            this.publishQuake(level);
+            this.groundQuakeImpact(level);
+        }
+        int radiusAge = this.actionTicks - QUAKE_HIT_TICK;
+        if (radiusAge > 0 && radiusAge <= QUAKE_RING_TICKS) {
+            double radius = QUAKE_RADIUS * radiusAge / (double) QUAKE_RING_TICKS;
+            double half = QUAKE_BAND * 0.5D;
+            this.quakeHit(level, this.quakeCenter, radius - half, radius + half);
+        }
+        if (this.actionTicks >= QUAKE_TICKS) {
+            this.finishAction(this.isPhaseTwo() ? 40 : 60);
+            this.quakeCooldown = this.isPhaseTwo() ? 200 : 280;
+            // 与火环错开：震波结束后至少再等一段时间才允许火环。
+            this.slamCooldown = Math.max(this.slamCooldown, 60);
+        }
+    }
+
+    /** 落地瞬间：只有尘土与低闷冲击，不生成火环、不撒火焰粒子。 */
+    private void groundQuakeImpact(ServerLevel level) {
+        Vec3 center = this.quakeCenter;
+        level.playSound(null, this.blockPosition(), SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 3.2F, 0.45F);
+        level.playSound(null, this.blockPosition(), SoundEvents.RAVAGER_STUNNED, SoundSource.HOSTILE, 3.0F, 0.45F);
+        level.sendParticles(ParticleTypes.EXPLOSION, center.x, center.y + 0.35D, center.z,
+                1, 0.25D, 0.05D, 0.25D, 0.0D);
+        level.sendParticles(ParticleTypes.SMOKE, center.x, center.y + 0.15D, center.z,
+                18, 1.40D, 0.10D, 1.40D, 0.01D);
+        level.sendParticles(ParticleTypes.CRIT, center.x, center.y + 0.20D, center.z,
+                30, 1.80D, 0.10D, 1.80D, 0.15D);
+        if (SLAM_SHAKE > 0.0F) {
+            TNShockwaveEntity wave = TNShockwaveEntity.blast(
+                    level, center.add(0.0D, 0.2D, 0.0D), 0.9D, SLAM_SHAKE, this);
+            if (wave != null) {
+                wave.configurePush(false);
+                wave.configureFlash(0.0F);
+            }
+        }
+    }
+
+    /**
+     * 震波命中：基础伤害默认 0，只做一次向外击退 + 轻微上抛。
+     *
+     * <p>不依赖 {@code hurt(0)} 的返回值（0 伤害会被原版判为无效），
+     * 而是单独判断可攻击性、无敌与命中记录。
+     */
+    private void quakeHit(ServerLevel level, Vec3 center, double inner, double outer) {
+        AABB box = new AABB(center.x - outer - 2.0D, center.y - 3.0D, center.z - outer - 2.0D,
+                center.x + outer + 2.0D, center.y + 6.0D, center.z + outer + 2.0D);
+        for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, box, e -> this.canHarm(e))) {
+            if (victim == this || this.quakeHits.contains(victim.getUUID())) {
+                continue;
+            }
+            if (victim.isInvulnerableTo(this.damageSources().mobAttack(this))) {
+                continue;
+            }
+            double dist = Math.hypot(victim.getX() - center.x, victim.getZ() - center.z);
+            double half = victim.getBbWidth() * 0.5D;
+            if (dist + half < inner || dist - half > outer) {
+                continue;
+            }
+            if (!this.quakeReaches(level, victim, center)) {
+                continue;
+            }
+            if (!this.quakeHits.add(victim.getUUID())) {
+                continue;
+            }
+            if (QUAKE_DAMAGE > 0.0F) {
+                victim.hurt(this.damageSources().mobAttack(this), QUAKE_DAMAGE);
+            }
+            Vec3 push = victim.position().subtract(center);
+            double dx;
+            double dz;
+            if (push.horizontalDistanceSqr() > 1.0E-4D) {
+                dx = push.x;
+                dz = push.z;
+            } else {
+                dx = 1.0D;
+                dz = 0.0D;
+            }
+            victim.knockback(QUAKE_KNOCKBACK, dx, dz);
+            if (QUAKE_LIFT > 0.0D) {
+                Vec3 motion = victim.getDeltaMovement();
+                victim.setDeltaMovement(motion.x, Math.max(motion.y, QUAKE_LIFT), motion.z);
+            }
+        }
+    }
+
+    /** 震波贴地判定：与火环一致的高差容差 + 视线，避免隔墙推人。 */
+    private boolean quakeReaches(ServerLevel level, LivingEntity victim, Vec3 center) {
+        if (!level.hasChunkAt(victim.blockPosition())) {
+            return false;
+        }
+        int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                victim.blockPosition().getX(), victim.blockPosition().getZ());
+        if (Math.abs(victim.getY() - top) > QUAKE_HEIGHT_TOLERANCE) {
+            return false;
+        }
+        return this.hasLineOfSight(victim);
+    }
+
+    /** 调试：立刻放一次大地震波（只震地面，不产生火环）。 */
+    public boolean forceQuake() {
+        if (this.isDeadOrDying() || this.action != ACTION_NONE) {
+            return false;
+        }
+        this.startAction(ACTION_QUAKE);
+        this.triggerAnim(ACTION_CONTROLLER, "slam");
         return true;
     }
 

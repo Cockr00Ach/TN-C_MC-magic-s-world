@@ -44,6 +44,36 @@ public final class VolcanicTortoiseAttackCommand {
                 .then(Commands.argument("range", BoolArgumentType.bool())
                         .executes(context -> triggerSlam(context.getSource(),
                                 BoolArgumentType.getBool(context, "range")))));
+        // 技能 B：大地震波（独立施法，不产生火环）。
+        event.getDispatcher().register(Commands.literal("tnc_quake")
+                .requires(source -> source.hasPermission(2))
+                .executes(context -> triggerQuake(context.getSource())));
+    }
+
+    /** 调试：只触发技能 B（大地震波），不会同时放火环。 */
+    private static int triggerQuake(CommandSourceStack source) {
+        VolcanicTortoiseEntity boss = nearest(source);
+        if (boss == null) {
+            source.sendFailure(Component.literal("32 格内没有火山巨龟"));
+            return 0;
+        }
+        boolean started = boss.forceQuake();
+        source.sendSuccess(() -> Component.literal(started
+                ? "已触发大地震波（只有地面起伏，没有火环）"
+                : "BOSS 正在攻击/转阶段/已死亡，本次未触发"), false);
+        return started ? 1 : 0;
+    }
+
+    private static VolcanicTortoiseEntity nearest(CommandSourceStack source) {
+        ServerLevel level = source.getLevel();
+        if (source.getPlayer() == null) {
+            return null;
+        }
+        AABB box = source.getPlayer().getBoundingBox().inflate(32.0D);
+        List<VolcanicTortoiseEntity> bosses = level.getEntitiesOfClass(VolcanicTortoiseEntity.class, box);
+        return bosses.stream()
+                .min(Comparator.comparingDouble(candidate -> candidate.distanceToSqr(source.getPlayer())))
+                .orElse(null);
     }
 
     /** 调试：让 32 格内最近一只巨龟立刻重踏一次；range=true 时把 22 格最终半径画出来。 */

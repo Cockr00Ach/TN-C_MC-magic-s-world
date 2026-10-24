@@ -184,7 +184,6 @@ public final class SlamRingFx {
                 }
                 if (dist <= 96.0D * 96.0D) {
                     spawn(level, fresh);
-                    SlamGroundWave.begin(level, fresh);
                 }
             }
         }
@@ -221,7 +220,6 @@ public final class SlamRingFx {
         Ring ring = new Ring(center, (int) (System.nanoTime() & 0x3FFFFFFF), level.getGameTime(), level);
         ACTIVE.put(-1, ring);
         spawn(level, ring);
-        SlamGroundWave.begin(level, ring);
     }
 
     /** 调试命令 /tnc_ring：在脚下放一道环，用来单独确认粒子环本身能不能显示。 */

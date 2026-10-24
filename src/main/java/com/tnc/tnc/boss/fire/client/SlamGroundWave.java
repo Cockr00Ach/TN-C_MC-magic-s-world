@@ -2,6 +2,7 @@ package com.tnc.tnc.boss.fire.client;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.logging.LogUtils;
+import com.tnc.tnc.boss.fire.VolcanicTortoiseEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -15,36 +16,43 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.joml.Matrix4f;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
- * 重踏的地面视觉起伏（纯客户端、不产生方块实体、不改存档）。
+ * 技能 B「大地震波」的地面视觉（纯客户端、不产生方块实体、不改存档）。
  *
- * <p>重踏开始时沿火环路径做一次有界采样：每个角度、每 2 格半径取一个支撑面。
+ * <p>它是独立技能：只监听 {@link VolcanicTortoiseEntity#quakeWaveStart()} 的变化，
+ * 与火环 {@code SlamRingFx} 没有任何调用关系。技能 A 不会再触发任何地表隆起。
+ *
+ * <p>重踏落地时沿震波路径做一次有界采样：每个角度、每 2 格半径取一个支撑面。
  * 采样以「世界实际高度图 + 施法高度」共同限定窗口，从窗口顶向下找第一个实心方块，
  * 因此既不会跑到洞穴屋顶，也不会因为是负高度或悬空平台而一个点都采不到。
  *
  * <p>每块地砖画成一个薄盒子：顶面用方块顶面贴图，四周用方块侧面贴图，
  * 抬起后能看到真实的厚度和侧面明暗，而不是一层平面颜色。
- *
- * <p>时间轴完全复用火环的 {@code R(t)}：地面波按各自半径的到达时间抬起、外倾、回落，
- * 比火环早 {@link #LEAD} tick 到达，让抬起的坡面在火焰外沿前方露出来。
  */
 @Mod.EventBusSubscriber(modid = "tnc", value = Dist.CLIENT)
 public final class SlamGroundWave {
+
+    /** 调试开关：-Dtnc.tortoise.attack.debug=true 时打印采样/活跃地块统计。 */
+    private static final boolean DEBUG = Boolean.getBoolean("tnc.tortoise.attack.debug");
 
     /** 圆周采样角度数。 */
     private static final int ANGLES = 96;
@@ -53,20 +61,22 @@ public final class SlamGroundWave {
     /** 径向采样层数（2..22 格）。 */
     private static final int STEPS = 11;
     /** 最大抬升（格）。 */
-    private static final double MAX_LIFT = 0.75D;
+    private static final double MAX_LIFT = 0.80D;
     /** 一块地砖从抬起到落回原位的 tick 数。 */
-    private static final int LIFE = 12;
-    /** 地面比火环提前多少 tick 到达（让坡面在火焰前缘外露出）。 */
-    private static final double LEAD = 2.4D;
+    private static final int LIFE = 8;
+    /** 地面比震波中心到达早多少 tick（让坡面先露出来）。 */
+    private static final double LEAD = 2.0D;
     /** 单块地砖的边长（格）。 */
-    private static final double PATCH = 1.75D;
+    private static final double PATCH = 2.05D;
     /** 相机超过这个距离就不再画地面细节。 */
-    private static final double RENDER_DIST = 48.0D;
+    private static final double RENDER_DIST = 64.0D;
     /** 采样窗口：施法高度向上/向下各留多少格。 */
     private static final int SEARCH_UP = 8;
     private static final int SEARCH_DOWN = 4;
 
     private static final List<Wave> ACTIVE = new ArrayList<>();
+    /** 每个实体上一次看到的震波编号，用来判断「有新的一发」。 */
+    private static final Map<Integer, Integer> SEEN = new HashMap<>();
     private static final Logger LOGGER = LogUtils.getLogger();
     private static boolean warnedFailure;
     private static long lastStatsTick = -100L;
@@ -82,20 +92,65 @@ public final class SlamGroundWave {
     }
 
     private static final class Wave {
-        final SlamRingFx.Ring ring;
+        final int castId;
+        final double centerX;
+        final double centerY;
+        final double centerZ;
+        final long bornAt;
         final List<Patch> patches = new ArrayList<>();
 
-        Wave(SlamRingFx.Ring ring) {
-            this.ring = ring;
+        Wave(int castId, Vec3 center, long bornAt) {
+            this.castId = castId;
+            this.centerX = center.x;
+            this.centerY = center.y;
+            this.centerZ = center.z;
+            this.bornAt = bornAt;
         }
     }
 
-    /** 在创建火环时调用：对本次技能路径做一次有界地表采样。 */
-    static void begin(ClientLevel level, SlamRingFx.Ring ring) {
+    /** 客户端 tick：发现新的震波编号就采样一次。 */
+    @SubscribeEvent
+    public static void onClientTick(TickEvent.ClientTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) {
+            return;
+        }
+        ClientLevel level = Minecraft.getInstance().level;
+        if (level == null) {
+            ACTIVE.clear();
+            SEEN.clear();
+            return;
+        }
+        boolean any = false;
+        for (Entity entity : level.entitiesForRendering()) {
+            if (!(entity instanceof VolcanicTortoiseEntity boss)) {
+                continue;
+            }
+            any = true;
+            int start = boss.quakeWaveStart();
+            Integer previous = SEEN.get(boss.getId());
+            if (start < 0) {
+                SEEN.remove(boss.getId());
+                continue;
+            }
+            if (previous == null || previous != start) {
+                SEEN.put(boss.getId(), start);
+                var player = Minecraft.getInstance().player;
+                if (player != null && boss.distanceToSqr(player) < RENDER_DIST * RENDER_DIST) {
+                    begin(level, start, boss.quakeWaveCenter(), level.getGameTime());
+                }
+            }
+        }
+        if (!any) {
+            SEEN.clear();
+        }
+    }
+
+    /** 新一发震波：对本次路径做一次有界地表采样。 */
+    private static void begin(ClientLevel level, int castId, Vec3 center, long bornAt) {
         if (ACTIVE.size() > 4) {
             ACTIVE.clear();
         }
-        Wave wave = new Wave(ring);
+        Wave wave = new Wave(castId, center, bornAt);
         double minY = Double.MAX_VALUE;
         double maxY = -Double.MAX_VALUE;
         for (int i = 0; i < ANGLES; i++) {
@@ -104,9 +159,9 @@ public final class SlamGroundWave {
             float dirZ = (float) Math.sin(angle);
             for (int step = 1; step <= STEPS; step++) {
                 double radius = step * RADIAL_STEP;
-                int x = Mth.floor(ring.centerX + dirX * radius);
-                int z = Mth.floor(ring.centerZ + dirZ * radius);
-                Patch patch = sample(level, x, z, radius, ring.centerY, dirX, dirZ);
+                int x = Mth.floor(center.x + dirX * radius);
+                int z = Mth.floor(center.z + dirZ * radius);
+                Patch patch = sample(level, x, z, radius, center.y, dirX, dirZ);
                 if (patch != null) {
                     wave.patches.add(patch);
                     minY = Math.min(minY, patch.groundY());
@@ -115,10 +170,10 @@ public final class SlamGroundWave {
             }
         }
         ACTIVE.add(wave);
-        if (SlamRingFx.DEBUG) {
+        if (DEBUG) {
             int n = wave.patches.size();
-            LOGGER.info("[TN-C SlamWave] cast={} patches={} centerY={} groundY=[{}, {}] lift={}",
-                    ring.serverStart, n, String.format(Locale.ROOT, "%.2f", ring.centerY),
+            LOGGER.info("[TN-C QuakeWave] cast={} patches={} centerY={} groundY=[{}, {}] lift={}",
+                    castId, n, String.format(Locale.ROOT, "%.2f", center.y),
                     n == 0 ? "-" : String.format(Locale.ROOT, "%.2f", minY),
                     n == 0 ? "-" : String.format(Locale.ROOT, "%.2f", maxY),
                     MAX_LIFT);
@@ -195,7 +250,7 @@ public final class SlamGroundWave {
             ACTIVE.clear();
             if (!warnedFailure) {
                 warnedFailure = true;
-                LOGGER.error("[TN-C SlamWave] ground wave disabled after render error", t);
+                LOGGER.error("[TN-C QuakeWave] ground wave disabled after render error", t);
             }
         }
     }
@@ -219,20 +274,20 @@ public final class SlamGroundWave {
         Iterator<Wave> iterator = ACTIVE.iterator();
         while (iterator.hasNext()) {
             Wave wave = iterator.next();
-            SlamRingFx.Ring ring = wave.ring;
-            double age = ageNow - ring.bornAt;
-            if (ring.expired || age > SlamRingFx.TICKS + LIFE + 20) {
+            double age = ageNow - wave.bornAt;
+            if (age > VolcanicTortoiseEntity.QUAKE_TICKS + LIFE + 20) {
                 iterator.remove();
                 continue;
             }
-            double distance = Math.hypot(ring.centerX - camera.x, ring.centerZ - camera.z);
+            double distance = Math.hypot(wave.centerX - camera.x, wave.centerZ - camera.z);
             if (distance > RENDER_DIST) {
                 continue;
             }
-            cast = ring.serverStart;
+            cast = wave.castId;
             for (Patch patch : wave.patches) {
                 double arrive = Math.max(0.0D,
-                        patch.radius() / SlamRingFx.MAX_RADIUS * SlamRingFx.TICKS - LEAD);
+                        patch.radius() / VolcanicTortoiseEntity.QUAKE_RADIUS
+                                * VolcanicTortoiseEntity.QUAKE_RING_TICKS - LEAD);
                 double local = age - arrive;
                 if (local <= 0.0D || local > LIFE) {
                     continue;
@@ -248,9 +303,9 @@ public final class SlamGroundWave {
         }
         buffers.endBatch(type);
 
-        if (SlamRingFx.DEBUG && drawn > 0 && level.getGameTime() - lastStatsTick >= 20L) {
+        if (DEBUG && drawn > 0 && level.getGameTime() - lastStatsTick >= 20L) {
             lastStatsTick = level.getGameTime();
-            LOGGER.info("[TN-C SlamWave] cast={} active={} peakLift={}",
+            LOGGER.info("[TN-C QuakeWave] cast={} active={} peakLift={}",
                     cast, drawn, String.format(Locale.ROOT, "%.2f", peak));
         }
     }
