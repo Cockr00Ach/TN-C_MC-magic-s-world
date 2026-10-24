@@ -170,8 +170,6 @@ public final class TNProjectileModels {
             // 火系（用户自制）
             "projectile/fireball",
             // 2026-10-25 作者手改的火球内核（tools/import_fireball_bbmodel.py）
-            "projectile/fireball_core",
-            //   前进方向 -Z、尾迹朝 +Z；渲染缩放 2.0 时主体约 1.75 格。
             // 水系（用户自制）
             "projectile/waterball",
             // 雷系（用户自制）
