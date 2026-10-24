@@ -1,76 +1,17 @@
 {
-  "parent": "minecraft:item/handheld",
+  "loader": "forge:separate_transforms",
   "textures": {
-    "layer0": "tnc:item/wands/light_wand_5"
+    "particle": "tnc:item/wands/held/light_wand_5"
   },
-  "display": {
-    "thirdperson_righthand": {
-      "rotation": [
-        0,
-        90,
-        79.848915
-      ],
-      "translation": [
-        0,
-        1.899229,
-        11.896956
-      ],
-      "scale": [
-        2.0,
-        2.0,
-        2.0
-      ]
+  "base": {
+    "parent": "tnc:item/wands/held/light_wand_5"
+  },
+  "perspectives": {
+    "gui": {
+      "parent": "tnc:item/wands/icons/light_wand_5"
     },
-    "firstperson_righthand": {
-      "rotation": [
-        0,
-        -25,
-        -8.151085
-      ],
-      "translation": [
-        1.343941,
-        11.955991,
-        0.62669
-      ],
-      "scale": [
-        2.0,
-        2.0,
-        2.0
-      ]
-    },
-    "thirdperson_lefthand": {
-      "rotation": [
-        0,
-        -90,
-        -79.848915
-      ],
-      "translation": [
-        0,
-        1.899229,
-        11.896956
-      ],
-      "scale": [
-        2.0,
-        2.0,
-        2.0
-      ]
-    },
-    "firstperson_lefthand": {
-      "rotation": [
-        0,
-        -25,
-        8.151085
-      ],
-      "translation": [
-        -1.343941,
-        11.955991,
-        -0.62669
-      ],
-      "scale": [
-        2.0,
-        2.0,
-        2.0
-      ]
+    "fixed": {
+      "parent": "tnc:item/wands/icons/light_wand_5"
     }
   }
 }

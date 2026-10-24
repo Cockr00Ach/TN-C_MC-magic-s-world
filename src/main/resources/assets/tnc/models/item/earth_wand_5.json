@@ -1,76 +1,17 @@
 {
-  "parent": "minecraft:item/handheld",
+  "loader": "forge:separate_transforms",
   "textures": {
-    "layer0": "tnc:item/wands/earth_wand_5"
+    "particle": "tnc:item/wands/held/earth_wand_5"
   },
-  "display": {
-    "thirdperson_righthand": {
-      "rotation": [
-        0,
-        90,
-        79.799429
-      ],
-      "translation": [
-        0,
-        2.427703,
-        11.159499
-      ],
-      "scale": [
-        2.0,
-        2.0,
-        2.0
-      ]
+  "base": {
+    "parent": "tnc:item/wands/held/earth_wand_5"
+  },
+  "perspectives": {
+    "gui": {
+      "parent": "tnc:item/wands/icons/earth_wand_5"
     },
-    "firstperson_righthand": {
-      "rotation": [
-        0,
-        -25,
-        -8.200571
-      ],
-      "translation": [
-        1.845934,
-        11.237427,
-        0.860773
-      ],
-      "scale": [
-        2.0,
-        2.0,
-        2.0
-      ]
-    },
-    "thirdperson_lefthand": {
-      "rotation": [
-        0,
-        -90,
-        -79.799429
-      ],
-      "translation": [
-        0,
-        2.427703,
-        11.159499
-      ],
-      "scale": [
-        2.0,
-        2.0,
-        2.0
-      ]
-    },
-    "firstperson_lefthand": {
-      "rotation": [
-        0,
-        -25,
-        8.200571
-      ],
-      "translation": [
-        -1.845934,
-        11.237427,
-        -0.860773
-      ],
-      "scale": [
-        2.0,
-        2.0,
-        2.0
-      ]
+    "fixed": {
+      "parent": "tnc:item/wands/icons/earth_wand_5"
     }
   }
 }

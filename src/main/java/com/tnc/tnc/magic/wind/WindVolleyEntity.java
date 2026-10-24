@@ -99,6 +99,7 @@ public final class WindVolleyEntity extends Entity {
                 if(e.getBoundingBox().inflate(.25).contains(from))touch=Optional.of(from);
                 if(touch.isPresent()&&from.distanceToSqr(touch.get())<nearest){nearest=from.distanceToSqr(touch.get());victim=e;to=touch.get();hit=true;}
             }
+            if(victim==null&&wall.getType()!=HitResult.Type.MISS&&owner instanceof net.minecraft.server.level.ServerPlayer p)com.tnc.tnc.dungeon.leyline.LeylineEvents.spell(p,wall.getBlockPos(),"wind");
             boolean end=age>=endTime(slot);if(!hit&&!end)continue;
             mask|=1L<<slot;++impacts;int form=WindChainRules.form(tier(),slot);float amount=WindChainRules.weaponDamage(tier(),form);
             if(tier()>=1){

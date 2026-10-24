@@ -29,7 +29,7 @@ class GuidebookTest {
                 for(var value:chapter.getAsJsonArray("images")){var tex=value.getAsJsonObject().get("image").getAsString();assertNotNull(getClass().getResource("/assets/"+tex.replace(":","/")),tex);}
             }
         }
-        assertEquals(26,chapters.size());assertEquals(191,real);assertEquals(41,atlas);
+        assertEquals(27,chapters.size());assertEquals(191,real);assertEquals(41,atlas);
         for(var chapter:chapters)for(var value:chapter.getAsJsonArray("quests"))for(var d:value.getAsJsonObject().getAsJsonArray("dependencies"))assertTrue(quests.contains(d.getAsString()),d.toString());
         for(String e:List.of("water","fire","lightning","wind","earth","light","dark"))for(int tier=1;tier<=5;tier++){
             String name=e+"_wand_"+tier;assertNotNull(getClass().getResource("/assets/tnc/models/item/"+name+".json"));
@@ -38,7 +38,7 @@ class GuidebookTest {
     }
     @Test void lifeRouteIdsLoadWithInstalledFtbSignedHexParser() throws IOException {
         var ids=new HashSet<String>();var questIds=new HashSet<String>();var references=new ArrayList<String>();
-        for(String name:List.of("tnc_field_02_botany","tnc_field_03_pasture","tnc_field_04_workshop","tnc_field_05_seasons","tnc_magic_progression")){
+        for(String name:List.of("tnc_field_02_botany","tnc_field_03_pasture","tnc_field_04_workshop","tnc_field_05_seasons","tnc_magic_progression","tnc_leyline_dungeons")){
             var chapter=JsonParser.parseString(Files.readString(Path.of("questbook/ftbquests/chapters/"+name+".snbt"))).getAsJsonObject();
             String chapterId=chapter.get("id").getAsString();assertTrue(Long.parseLong(chapterId,16)>0);assertTrue(ids.add(chapterId));
             for(var value:chapter.getAsJsonArray("quests")){
@@ -47,13 +47,13 @@ class GuidebookTest {
                 if(q.has("rewards"))for(var t:q.getAsJsonArray("rewards")){String tid=t.getAsJsonObject().get("id").getAsString();assertTrue(Long.parseLong(tid,16)>0,tid);assertTrue(ids.add(tid));}
                 for(var dependency:q.getAsJsonArray("dependencies"))references.add(dependency.getAsString());
             }
-            for(var value:chapter.getAsJsonArray("quest_links")){
+            if(chapter.has("quest_links"))for(var value:chapter.getAsJsonArray("quest_links")){
                 var link=value.getAsJsonObject();String id=link.get("id").getAsString();assertTrue(Long.parseLong(id,16)>0,id);assertTrue(ids.add(id));
                 // FTB Quests 2001.4.22 QuestLink.readData calls this exact signed parser.
                 String target=link.get("linked_quest").getAsString();assertTrue(Long.parseLong(target,16)>0,target);references.add(target);
             }
         }
-        assertEquals(474,questIds.size());assertTrue(questIds.containsAll(references));
+        assertEquals(506,questIds.size());assertTrue(questIds.containsAll(references));
     }
     @Test void alchemyChapterUsesSafeSignedIdsAndHasEveryPotionRoute() throws IOException {
         var chapter=JsonParser.parseString(Files.readString(Path.of("questbook/ftbquests/chapters/tnc_alchemy.snbt"))).getAsJsonObject();

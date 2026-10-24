@@ -1,0 +1,22 @@
+{
+  "jar_sha256": "879af65b7be72202182565c154224b122dbdd12dbefad355f324fef982d1aa25",
+  "unit_tests": 416,
+  "approved_icons": 74,
+  "native_screenshots": {
+    "vanilla": 85,
+    "shaders": 85
+  },
+  "files": [
+    "mods/tnc-1.0.0.jar"
+  ],
+  "verified_at": "2026-10-24T09:39:19+08:00",
+  "editable_project_round_trips": 70,
+  "wands": 36,
+  "wearables": 34,
+  "shader_pack": "ComplementaryUnbound_r5.6.1",
+  "save_schema_changed": false,
+  "native_report_sha256": {
+    "vanilla": "532f4876797ecd9b6407ddb645f02bf4c965fe15413103ddad32eb2b2fdbee05",
+    "shaders": "cd88c5f2da05fd9d5b3bdf30dbcabd658ef9d4be7f1832944a7565c33fad54cd"
+  }
+}

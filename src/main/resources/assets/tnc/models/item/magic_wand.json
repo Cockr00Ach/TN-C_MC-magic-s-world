@@ -1,6 +1,17 @@
 {
-  "parent": "item/handheld",
+  "loader": "forge:separate_transforms",
   "textures": {
-    "layer0": "tnc:item/magic_wand"
+    "particle": "tnc:item/wands/held/magic_wand"
+  },
+  "base": {
+    "parent": "tnc:item/wands/held/magic_wand"
+  },
+  "perspectives": {
+    "gui": {
+      "parent": "tnc:item/wands/icons/magic_wand"
+    },
+    "fixed": {
+      "parent": "tnc:item/wands/icons/magic_wand"
+    }
   }
 }

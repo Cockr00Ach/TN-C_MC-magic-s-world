@@ -1,0 +1,47 @@
+{
+  "species": 28,
+  "families": {
+    "goblin": {
+      "bones": 47,
+      "cubes": 119
+    },
+    "skeleton": {
+      "bones": 32,
+      "cubes": 77
+    },
+    "slime": {
+      "bones": 8,
+      "cubes": 17
+    },
+    "tentacle": {
+      "bones": 132,
+      "cubes": 232
+    },
+    "orc": {
+      "bones": 54,
+      "cubes": 134
+    },
+    "toad": {
+      "bones": 22,
+      "cubes": 36
+    },
+    "lizard": {
+      "bones": 17,
+      "cubes": 30
+    },
+    "lizardfolk": {
+      "bones": 57,
+      "cubes": 129
+    },
+    "demon": {
+      "bones": 51,
+      "cubes": 134
+    },
+    "mimic": {
+      "bones": 20,
+      "cubes": 31
+    }
+  },
+  "texture_size": 256,
+  "source": "tools/redesign_dungeon_bestiary.py"
+}
