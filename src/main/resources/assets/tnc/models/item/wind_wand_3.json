@@ -1,76 +1,17 @@
 {
-  "parent": "minecraft:item/handheld",
+  "loader": "forge:separate_transforms",
   "textures": {
-    "layer0": "tnc:item/wands/wind_wand_3"
+    "particle": "tnc:item/wands/held/wind_wand_3"
   },
-  "display": {
-    "thirdperson_righthand": {
-      "rotation": [
-        0,
-        90,
-        108.503
-      ],
-      "translation": [
-        0,
-        4.62733,
-        12.235613
-      ],
-      "scale": [
-        1.7,
-        1.7,
-        1.7
-      ]
+  "base": {
+    "parent": "tnc:item/wands/held/wind_wand_3"
+  },
+  "perspectives": {
+    "gui": {
+      "parent": "tnc:item/wands/icons/wind_wand_3"
     },
-    "firstperson_righthand": {
-      "rotation": [
-        0,
-        -25,
-        20.503
-      ],
-      "translation": [
-        3.804221,
-        12.389651,
-        1.773938
-      ],
-      "scale": [
-        1.7,
-        1.7,
-        1.7
-      ]
-    },
-    "thirdperson_lefthand": {
-      "rotation": [
-        0,
-        -90,
-        -108.503
-      ],
-      "translation": [
-        0,
-        4.62733,
-        12.235613
-      ],
-      "scale": [
-        1.7,
-        1.7,
-        1.7
-      ]
-    },
-    "firstperson_lefthand": {
-      "rotation": [
-        0,
-        -25,
-        -20.503
-      ],
-      "translation": [
-        -3.804221,
-        12.389651,
-        -1.773938
-      ],
-      "scale": [
-        1.7,
-        1.7,
-        1.7
-      ]
+    "fixed": {
+      "parent": "tnc:item/wands/icons/wind_wand_3"
     }
   }
 }

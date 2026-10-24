@@ -1,76 +1,17 @@
 {
-  "parent": "minecraft:item/handheld",
+  "loader": "forge:separate_transforms",
   "textures": {
-    "layer0": "tnc:item/wands/water_wand_3"
+    "particle": "tnc:item/wands/held/water_wand_3"
   },
-  "display": {
-    "thirdperson_righthand": {
-      "rotation": [
-        0,
-        90,
-        121.855504
-      ],
-      "translation": [
-        0,
-        1.885744,
-        12.141257
-      ],
-      "scale": [
-        1.7,
-        1.7,
-        1.7
-      ]
+  "base": {
+    "parent": "tnc:item/wands/held/water_wand_3"
+  },
+  "perspectives": {
+    "gui": {
+      "parent": "tnc:item/wands/icons/water_wand_3"
     },
-    "firstperson_righthand": {
-      "rotation": [
-        0,
-        -25,
-        33.855504
-      ],
-      "translation": [
-        1.323999,
-        12.199673,
-        0.617391
-      ],
-      "scale": [
-        1.7,
-        1.7,
-        1.7
-      ]
-    },
-    "thirdperson_lefthand": {
-      "rotation": [
-        0,
-        -90,
-        -121.855504
-      ],
-      "translation": [
-        0,
-        1.885744,
-        12.141257
-      ],
-      "scale": [
-        1.7,
-        1.7,
-        1.7
-      ]
-    },
-    "firstperson_lefthand": {
-      "rotation": [
-        0,
-        -25,
-        -33.855504
-      ],
-      "translation": [
-        -1.323999,
-        12.199673,
-        -0.617391
-      ],
-      "scale": [
-        1.7,
-        1.7,
-        1.7
-      ]
+    "fixed": {
+      "parent": "tnc:item/wands/icons/water_wand_3"
     }
   }
 }

@@ -1,69 +1,82 @@
 package com.tnc.tnc.adventure;
 
 import com.google.gson.*;
+import java.io.*;
+import java.util.*;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.junit.jupiter.api.Test;
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Checks the actual hand-render transform chain, including the inverted model Y axis. */
+/** Geometry-space checks use the same centered model and mirrored hand chain as ItemRenderer. */
 final class WandHoldTransformTest {
-    private static final String[] ELEMENTS={"water","fire","lightning","wind","earth","light","dark"};
-    private JsonObject model(String name) throws IOException {
-        try(var in=getClass().getResourceAsStream("/assets/tnc/models/item/"+name+".json")) {
+    private JsonObject read(String path) throws IOException {
+        try (var in = Objects.requireNonNull(getClass().getResourceAsStream("/assets/tnc/" + path), path)) {
             return JsonParser.parseReader(new InputStreamReader(in)).getAsJsonObject();
         }
     }
-    private Vector3f sample(BufferedImage image,boolean grip) {
-        int low=32,high=-1;
-        for(int y=0;y<32;y++)for(int x=0;x<32;x++)if((image.getRGB(x,y)>>>24)>=128){low=Math.min(low,y);high=Math.max(high,y);}
-        double xsum=0,ysum=0,count=0;
-        for(int y=grip?high-5:low;y<=(grip?high:low+7);y++)for(int x=0;x<32;x++) {
-            if(y<0||y>=32||(image.getRGB(x,y)>>>24)<128)continue;
-            xsum+=x+.5;ysum+=y+.5;count++;
+    private List<String> names() {
+        var result = new ArrayList<String>(); result.add("magic_wand");
+        for (String e : List.of("water", "fire", "lightning", "wind", "earth", "light", "dark"))
+            for (int tier = 1; tier <= 5; tier++) result.add(e + "_wand_" + tier);
+        return result;
+    }
+    private Vector3f vector(JsonArray a) { return new Vector3f(a.get(0).getAsFloat(), a.get(1).getAsFloat(), a.get(2).getAsFloat()); }
+    private Vector3f pose(Vector3f point, JsonObject display, boolean left) {
+        var r = vector(display.getAsJsonArray("rotation")); var s = vector(display.getAsJsonArray("scale"));
+        var t = vector(display.getAsJsonArray("translation")); float sign = left ? -1 : 1;
+        return new Vector3f(point).mul(s).rotate(new Quaternionf().rotationXYZ(
+                (float)Math.toRadians(r.x), (float)Math.toRadians(sign*r.y), (float)Math.toRadians(sign*r.z)))
+                .add(sign*t.x, t.y, t.z);
+    }
+    private JsonObject held(String id) throws IOException { return read("models/item/wands/held/" + id + ".json"); }
+
+    @Test void inventoriesKeepTheApprovedArtworkWhileHandsUseSolidGeometry() throws IOException {
+        for (String id : names()) {
+            var wrapper = read("models/item/" + id + ".json");
+            assertEquals("forge:separate_transforms", wrapper.get("loader").getAsString());
+            var icon = read("models/item/wands/icons/" + id + ".json");
+            assertEquals("minecraft:item/generated", icon.get("parent").getAsString());
+            assertEquals("tnc:item/" + (id.equals("magic_wand") ? id : "wands/"+id), icon.getAsJsonObject("textures").get("layer0").getAsString());
+            var model = held(id); var elements = model.getAsJsonArray("elements");
+            assertTrue(elements.size() >= 15, id);
+            boolean deepHead = false;
+            for (var value : elements) {
+                var b = value.getAsJsonObject(); var lo = vector(b.getAsJsonArray("from")); var hi = vector(b.getAsJsonArray("to"));
+                assertTrue(hi.x > lo.x && hi.y > lo.y && hi.z > lo.z, id + " has volume");
+                for (int axis = 0; axis < 3; axis++) assertTrue(lo.get(axis) >= -16 && hi.get(axis) <= 32, id + " Java model bounds");
+                if (lo.y > 15 && hi.z-lo.z >= 1.8f) deepHead = true;
+                for (var f : b.getAsJsonObject("faces").entrySet()) for (var uv : f.getValue().getAsJsonObject().getAsJsonArray("uv"))
+                    assertTrue(uv.getAsFloat() >= 0 && uv.getAsFloat() <= 16, id + " UV bounds");
+            }
+            assertTrue(deepHead, id + " must have a sculpted head, not extruded sprite pixels");
         }
-        return new Vector3f((float)(xsum/count/2-8),(float)(8-ysum/count/2),0);
     }
-    private Vector3f pose(Vector3f point,JsonObject display,boolean left) {
-        var r=display.getAsJsonArray("rotation");var s=display.getAsJsonArray("scale");var t=display.getAsJsonArray("translation");
-        float sign=left?-1:1,rad=(float)Math.PI/180;
-        return new Vector3f(point).mul(s.get(0).getAsFloat(),s.get(1).getAsFloat(),s.get(2).getAsFloat())
-                .rotate(new Quaternionf().rotationXYZ(r.get(0).getAsFloat()*rad,sign*r.get(1).getAsFloat()*rad,sign*r.get(2).getAsFloat()*rad))
-                .add(sign*t.get(0).getAsFloat(),t.get(1).getAsFloat(),t.get(2).getAsFloat());
-    }
-    @Test void thirdPersonKeepsHeadAboveHandAndPalmOnGripForEveryWand() throws IOException {
-        for(String element:ELEMENTS)for(int tier=1;tier<=5;tier++) {
-            String name=element+"_wand_"+tier;
-            var image=ImageIO.read(getClass().getResourceAsStream("/assets/tnc/textures/item/wands/"+name+".png"));
-            var grip=sample(image,true);var tip=sample(image,false);var displays=model(name).getAsJsonObject("display");
-            for(boolean left:new boolean[]{false,true}) {
-                var d=displays.getAsJsonObject("thirdperson_"+(left?"lefthand":"righthand"));
-                var palm=pose(grip,d,left);
-                assertTrue(palm.length()<1,name+" must meet the hand at its handle, not its center");
-                var axis=pose(tip,d,left).sub(palm).rotateY((float)Math.PI).rotateX(-(float)Math.PI/2);
-                assertTrue(-axis.y>axis.length()*.8,name+" head must point up in the player model, hand="+left);
+
+    @Test void thirdPersonAnchorsBothPalmsAndPointsTheStaffUpward() throws IOException {
+        for (String id : names()) {
+            var model = held(id); var grip = vector(model.getAsJsonArray("tnc_grip")).sub(8,8,8);
+            var tip = vector(model.getAsJsonArray("tnc_tip")).sub(8,8,8);
+            for (boolean left : new boolean[]{false, true}) {
+                var d = model.getAsJsonObject("display").getAsJsonObject("thirdperson_"+(left?"lefthand":"righthand"));
+                var palm = pose(grip, d, left); assertTrue(palm.length() < .01, id + " grip is centered on palm");
+                var axis = pose(tip, d, left).sub(palm).rotateY((float)Math.PI).rotateX(-(float)Math.PI/2);
+                assertTrue(-axis.y > axis.length()*.95, id + " held staff points up, hand="+left);
             }
         }
     }
-    @Test void firstPersonShowsUprightWandFaceInsteadOfPointingIntoCameraDepth() throws IOException {
-        for(String element:ELEMENTS)for(int tier=1;tier<=5;tier++) {
-            String name=element+"_wand_"+tier;
-            var image=ImageIO.read(getClass().getResourceAsStream("/assets/tnc/textures/item/wands/"+name+".png"));
-            var grip=sample(image,true);var tip=sample(image,false);var displays=model(name).getAsJsonObject("display");
-            for(boolean left:new boolean[]{false,true}) {
-                var d=displays.getAsJsonObject("firstperson_"+(left?"lefthand":"righthand"));
-                var palm=pose(grip,d,left);
-                assertTrue(palm.length()<1,name+" first person grip must meet the hand");
-                float cameraYaw=(left?-1:1)*(float)Math.PI/4;
-                var axis=pose(tip,d,left).sub(palm).rotateY(cameraYaw);
-                assertTrue(axis.y>axis.length()*.85&&Math.abs(axis.z)<axis.length()*.2,
-                        name+" must look upright rather than project forward, hand="+left+", axis="+axis);
-                var facing=pose(new Vector3f(0,0,1),d,left).sub(pose(new Vector3f(),d,left)).rotateY(cameraYaw);
-                assertTrue(Math.abs(facing.z)>facing.length()*.85,
-                        name+" sprite face must remain visible in first person, hand="+left+", facing="+facing);
+
+    @Test void firstPersonKeepsTheLongAxisInTheScreenPlaneAndLimitsApparentHeight() throws IOException {
+        for (String id : names()) {
+            var model = held(id); var grip = vector(model.getAsJsonArray("tnc_grip")).sub(8,8,8);
+            var tip = vector(model.getAsJsonArray("tnc_tip")).sub(8,8,8);
+            for (boolean left : new boolean[]{false,true}) {
+                var d = model.getAsJsonObject("display").getAsJsonObject("firstperson_"+(left?"lefthand":"righthand"));
+                var palm = pose(grip,d,left); assertEquals(-.8, palm.y, .01);
+                assertEquals(left?1.8:-1.8,palm.x,.01);
+                var axis = pose(tip,d,left).sub(palm).rotateY((left?-1:1)*(float)Math.PI/4);
+                assertTrue(axis.y > axis.length()*.95 && Math.abs(axis.z) < axis.length()*.2, id + " must not spear into camera depth");
+                assertTrue(axis.length() <= 10.81, id + " staff height must fit a normal first-person view");
             }
         }
     }

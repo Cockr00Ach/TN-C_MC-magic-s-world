@@ -1,76 +1,17 @@
 {
-  "parent": "minecraft:item/handheld",
+  "loader": "forge:separate_transforms",
   "textures": {
-    "layer0": "tnc:item/wands/fire_wand_3"
+    "particle": "tnc:item/wands/held/fire_wand_3"
   },
-  "display": {
-    "thirdperson_righthand": {
-      "rotation": [
-        0,
-        90,
-        117.586548
-      ],
-      "translation": [
-        0,
-        1.836207,
-        12.262249
-      ],
-      "scale": [
-        1.7,
-        1.7,
-        1.7
-      ]
+  "base": {
+    "parent": "tnc:item/wands/held/fire_wand_3"
+  },
+  "perspectives": {
+    "gui": {
+      "parent": "tnc:item/wands/icons/fire_wand_3"
     },
-    "firstperson_righthand": {
-      "rotation": [
-        0,
-        -25,
-        29.586548
-      ],
-      "translation": [
-        1.275303,
-        12.318862,
-        0.594684
-      ],
-      "scale": [
-        1.7,
-        1.7,
-        1.7
-      ]
-    },
-    "thirdperson_lefthand": {
-      "rotation": [
-        0,
-        -90,
-        -117.586548
-      ],
-      "translation": [
-        0,
-        1.836207,
-        12.262249
-      ],
-      "scale": [
-        1.7,
-        1.7,
-        1.7
-      ]
-    },
-    "firstperson_lefthand": {
-      "rotation": [
-        0,
-        -25,
-        -29.586548
-      ],
-      "translation": [
-        -1.275303,
-        12.318862,
-        -0.594684
-      ],
-      "scale": [
-        1.7,
-        1.7,
-        1.7
-      ]
+    "fixed": {
+      "parent": "tnc:item/wands/icons/fire_wand_3"
     }
   }
 }

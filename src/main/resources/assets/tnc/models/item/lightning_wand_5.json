@@ -1,76 +1,17 @@
 {
-  "parent": "minecraft:item/handheld",
+  "loader": "forge:separate_transforms",
   "textures": {
-    "layer0": "tnc:item/wands/lightning_wand_5"
+    "particle": "tnc:item/wands/held/lightning_wand_5"
   },
-  "display": {
-    "thirdperson_righthand": {
-      "rotation": [
-        0,
-        90,
-        76.594126
-      ],
-      "translation": [
-        0,
-        2.206753,
-        10.696493
-      ],
-      "scale": [
-        2.0,
-        2.0,
-        2.0
-      ]
+  "base": {
+    "parent": "tnc:item/wands/held/lightning_wand_5"
+  },
+  "perspectives": {
+    "gui": {
+      "parent": "tnc:item/wands/icons/lightning_wand_5"
     },
-    "firstperson_righthand": {
-      "rotation": [
-        0,
-        -25,
-        -11.405874
-      ],
-      "translation": [
-        1.660452,
-        10.766992,
-        0.774281
-      ],
-      "scale": [
-        2.0,
-        2.0,
-        2.0
-      ]
-    },
-    "thirdperson_lefthand": {
-      "rotation": [
-        0,
-        -90,
-        -76.594126
-      ],
-      "translation": [
-        0,
-        2.206753,
-        10.696493
-      ],
-      "scale": [
-        2.0,
-        2.0,
-        2.0
-      ]
-    },
-    "firstperson_lefthand": {
-      "rotation": [
-        0,
-        -25,
-        11.405874
-      ],
-      "translation": [
-        -1.660452,
-        10.766992,
-        -0.774281
-      ],
-      "scale": [
-        2.0,
-        2.0,
-        2.0
-      ]
+    "fixed": {
+      "parent": "tnc:item/wands/icons/lightning_wand_5"
     }
   }
 }

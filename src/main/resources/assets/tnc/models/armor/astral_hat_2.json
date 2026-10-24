@@ -106,7 +106,7 @@
       "boxes": []
     },
     {
-      "name": "brim",
+      "name": "brim_core",
       "parent": "head",
       "pivot": [
         0,
@@ -121,58 +121,25 @@
       "boxes": [
         {
           "uv": [
-            0,
-            0
-          ],
-          "position": [
-            -6.5,
-            -9,
-            -6.5
-          ],
-          "size": [
-            13,
             1,
-            13
-          ],
-          "inflate": 0
-        }
-      ]
-    },
-    {
-      "name": "cone_base",
-      "parent": "head",
-      "pivot": [
-        0,
-        0,
-        0
-      ],
-      "rotation": [
-        0,
-        0,
-        0
-      ],
-      "boxes": [
-        {
-          "uv": [
-            0,
-            18
+            1
           ],
           "position": [
-            -4,
-            -12,
-            -4
+            -5.9,
+            -8.9,
+            -6.25
           ],
           "size": [
-            8,
-            3,
-            8
+            11.8,
+            0.65,
+            12.5
           ],
           "inflate": 0
         }
       ]
     },
     {
-      "name": "cone_middle",
+      "name": "brim_sides",
       "parent": "head",
       "pivot": [
         0,
@@ -187,25 +154,256 @@
       "boxes": [
         {
           "uv": [
-            0,
-            32
+            53,
+            1
           ],
           "position": [
+            -6.9,
+            -8.8,
+            -5.25
+          ],
+          "size": [
+            13.8,
+            0.5,
+            10.5
+          ],
+          "inflate": 0
+        }
+      ]
+    },
+    {
+      "name": "brim_under",
+      "parent": "head",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "uv": [
+            105,
+            1
+          ],
+          "position": [
+            -6.1000000000000005,
+            -8.35,
+            -5.55
+          ],
+          "size": [
+            12.200000000000001,
+            0.3,
+            11.1
+          ],
+          "inflate": 0
+        }
+      ]
+    },
+    {
+      "name": "brim_front_edge",
+      "parent": "head",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "uv": [
+            157,
+            1
+          ],
+          "position": [
+            -5.9,
+            -8.75,
+            -6.35
+          ],
+          "size": [
+            11.8,
+            0.3,
+            0.3
+          ],
+          "inflate": 0
+        }
+      ]
+    },
+    {
+      "name": "crown_0",
+      "parent": "head",
+      "pivot": [
+        0,
+        -8.6,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        -0.08
+      ],
+      "boxes": [
+        {
+          "uv": [
+            185,
+            1
+          ],
+          "position": [
+            -4.15,
             -3,
-            -16,
-            -3
+            -4.15
           ],
           "size": [
-            6,
-            4,
-            6
+            8.3,
+            3,
+            8.3
           ],
           "inflate": 0
         }
       ]
     },
     {
-      "name": "cone_tip",
+      "name": "crown_1",
+      "parent": "crown_0",
+      "pivot": [
+        0.15,
+        -2.85,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        -0.10500000000000001
+      ],
+      "boxes": [
+        {
+          "uv": [
+            223,
+            1
+          ],
+          "position": [
+            -3.3,
+            -3,
+            -3.3
+          ],
+          "size": [
+            6.6,
+            3,
+            6.6
+          ],
+          "inflate": 0
+        }
+      ]
+    },
+    {
+      "name": "crown_2",
+      "parent": "crown_1",
+      "pivot": [
+        0.15,
+        -2.85,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        -0.13
+      ],
+      "boxes": [
+        {
+          "uv": [
+            1,
+            17
+          ],
+          "position": [
+            -2.4,
+            -2.7,
+            -2.4
+          ],
+          "size": [
+            4.8,
+            2.7,
+            4.8
+          ],
+          "inflate": 0
+        }
+      ]
+    },
+    {
+      "name": "crown_3",
+      "parent": "crown_2",
+      "pivot": [
+        0.15,
+        -2.5500000000000003,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        -0.15500000000000003
+      ],
+      "boxes": [
+        {
+          "uv": [
+            23,
+            17
+          ],
+          "position": [
+            -1.55,
+            -2.5,
+            -1.55
+          ],
+          "size": [
+            3.1,
+            2.5,
+            3.1
+          ],
+          "inflate": 0
+        }
+      ]
+    },
+    {
+      "name": "crown_4",
+      "parent": "crown_3",
+      "pivot": [
+        0.15,
+        -2.35,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        -0.18
+      ],
+      "boxes": [
+        {
+          "uv": [
+            41,
+            17
+          ],
+          "position": [
+            -0.8,
+            -2.1,
+            -0.9
+          ],
+          "size": [
+            1.6,
+            2.1,
+            1.8
+          ],
+          "inflate": 0
+        }
+      ]
+    },
+    {
+      "name": "crown_band",
       "parent": "head",
       "pivot": [
         0,
@@ -215,29 +413,95 @@
       "rotation": [
         0,
         0,
-        0.12
+        0
       ],
       "boxes": [
         {
           "uv": [
-            28,
-            32
+            51,
+            17
           ],
           "position": [
-            -1.5,
-            -20,
-            -1.5
+            -4.32,
+            -10.9,
+            -4.32
           ],
           "size": [
-            3,
-            4,
-            3
+            8.64,
+            1.5,
+            8.64
+          ],
+          "inflate": 0
+        }
+      ]
+    },
+    {
+      "name": "brooch_mount",
+      "parent": "head",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "uv": [
+            89,
+            17
+          ],
+          "position": [
+            -1.3,
+            -11.2,
+            -4.65
+          ],
+          "size": [
+            2.6,
+            2,
+            0.7
+          ],
+          "inflate": 0
+        }
+      ]
+    },
+    {
+      "name": "brooch",
+      "parent": "head",
+      "pivot": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "boxes": [
+        {
+          "uv": [
+            99,
+            17
+          ],
+          "position": [
+            -0.72,
+            -10.95,
+            -5
+          ],
+          "size": [
+            1.44,
+            1.5,
+            0.8
           ],
           "inflate": 0
         }
       ]
     }
   ],
-  "texture_width": 64,
-  "texture_height": 64
+  "texture_width": 256,
+  "texture_height": 32
 }

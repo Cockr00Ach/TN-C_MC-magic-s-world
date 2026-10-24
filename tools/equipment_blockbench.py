@@ -68,11 +68,22 @@ def export_armor(id,parts):
                 elements.append(e);g["children"].append(e["uuid"])
             pending.remove(p);progress=True
         assert progress,"cyclic bones"
-    texture=AS/"textures/models/armor"/(id+".png")
-    d=dict(meta={"format_version":"4.10","model_format":"modded_entity","box_uv":True},name=id,resolution={"width":64,"height":64},elements=elements,outliner=[groups[p["name"]] for p in parts if p["parent"]=="root"],textures=[tex(texture,(64,64))])
-    write(OUT/"armor"/(id+".bbmodel"),d);write(AS/"models/armor"/(id+".json"),{"parts":parts,"texture_width":64,"texture_height":64})
+    texture=AS/"textures/models/armor"/(id+".png");size=Image.open(texture).size
+    d=dict(meta={"format_version":"4.10","model_format":"modded_entity","box_uv":True},name=id,resolution={"width":size[0],"height":size[1]},elements=elements,outliner=[groups[p["name"]] for p in parts if p["parent"]=="root"],textures=[tex(texture,size)])
+    write(OUT/"armor"/(id+".bbmodel"),d);write(AS/"models/armor"/(id+".json"),{"parts":parts,"texture_width":size[0],"texture_height":size[1]})
 def export_wand(p):
-    original=json.loads(p.read_text(encoding="utf8"));location=original["textures"]["layer0"].split(":")[-1]
+    original=json.loads(p.read_text(encoding="utf8"))
+    if original.get("loader")=="forge:separate_transforms":
+        held=AS/"models"/(original["base"]["parent"].split(":")[-1]+".json");model=json.loads(held.read_text("utf8"))
+        texture=AS/"textures"/(model["textures"]["body"].split(":")[-1]+".png");size=Image.open(texture).size;elements=[]
+        for i,src in enumerate(model["elements"]):
+            e=dict(name=src.get("name",str(i)),uuid=uid(p.stem+"/held/"+str(i)),type="cube",box_uv=False,**{"from":src["from"],"to":src["to"]},faces={f:{"texture":0,"uv":[n*size[j%2]/16 for j,n in enumerate(face["uv"])]} for f,face in src["faces"].items()})
+            if "rotation" in src:
+                rot=src["rotation"];e["origin"]=rot["origin"];e["rotation"]=[rot["angle"] if axis==rot["axis"] else 0 for axis in "xyz"];e["rescale"]=rot.get("rescale",False)
+            elements.append(e)
+        write(OUT/"wands"/(p.stem+".bbmodel"),dict(meta={"format_version":"4.10","model_format":"java_block","box_uv":False},name=p.stem,resolution={"width":size[0],"height":size[1]},elements=elements,outliner=[e["uuid"] for e in elements],textures=[tex(texture,size)],display=model.get("display",{})))
+        return
+    location=original["textures"]["layer0"].split(":")[-1]
     texture=AS/"textures"/(location+".png");im=Image.open(texture).convert("RGBA");w,h=im.size;elements=[]
     for y in range(h):
         x=0
@@ -86,17 +97,29 @@ def import_bb(p):
     d=json.loads(p.read_text(encoding="utf8"));id=d["name"];elements={e["uuid"]:e for e in d["elements"]}
     if d["meta"]["model_format"]!="modded_entity":
         old=json.loads((AS/"models/item"/(id+".json")).read_text(encoding="utf8"))
+        separated=old.get("loader")=="forge:separate_transforms"
+        target=AS/"models/item"/(id+".json")
+        if separated:
+            target=AS/"models"/(old["base"]["parent"].split(":")[-1]+".json");old=json.loads(target.read_text("utf8"))
         location=old.get("textures",{}).get("layer0",old.get("textures",{}).get("all","tnc:item/wands/"+id))
-        result={"textures":{"all":location,"particle":location},"display":d.get("display",{}),"elements":[]}
+        if separated:location=old["textures"]["body"]
+        texture_key="body" if separated else "all"
+        result={"textures":{texture_key:location,"particle":location},"display":d.get("display",{}),"elements":[]}
+        for k in ("tnc_grip","tnc_tip","ambientocclusion","gui_light"):
+            if k in old:result[k]=old[k]
         for e in elements.values():
-            cube={"from":e["from"],"to":e["to"],"faces":{f:{"uv":[v*16/d["resolution"]["width"] if i%2==0 else v*16/d["resolution"]["height"] for i,v in enumerate(face["uv"])],"texture":"#all"} for f,face in e["faces"].items() if face.get("texture") is not None}}
+            cube={"name":e.get("name","cube"),"from":e["from"],"to":e["to"],"faces":{f:{"uv":[v*16/d["resolution"]["width"] if i%2==0 else v*16/d["resolution"]["height"] for i,v in enumerate(face["uv"])],"texture":"#"+texture_key} for f,face in e["faces"].items() if face.get("texture") is not None}}
             if e.get("rotation") and any(e["rotation"]):
                 axis=[i for i,v in enumerate(e["rotation"]) if v]
                 assert len(axis)==1,"Java物品单个方块只允许一个旋转轴"
                 i=axis[0];assert e["rotation"][i] in (-45,-22.5,0,22.5,45),"Java物品旋转必须为0、±22.5、±45度"
-                cube["rotation"]={"axis":"xyz"[i],"angle":e["rotation"][i],"origin":e.get("origin",[8,8,8])}
+                cube["rotation"]={"axis":"xyz"[i],"angle":e["rotation"][i],"origin":e.get("origin",[8,8,8]),"rescale":e.get("rescale",False)}
             result["elements"].append(cube)
-        write(AS/"models/item"/(id+".json"),result)
+        write(target,result)
+        if separated:
+            texture=AS/"textures"/(location.split(":")[-1]+".png")
+            source=d["textures"][0].get("source","")
+            if source.startswith("data:image/png;base64,"):texture.write_bytes(base64.b64decode(source.split(",",1)[1]))
     else:
         parts=[]
         def walk(group,parent="root",parent_origin=(0,24,0)):
@@ -111,6 +134,8 @@ def import_bb(p):
         for group in d["outliner"]:walk(group)
         assert {"head","hat","body","right_arm","left_arm","right_leg","left_leg"}<=set(p["name"] for p in parts),"请保留原版7个主骨骼名称"
         write(AS/"models/armor"/(id+".json"),{"parts":parts,"texture_width":d["resolution"]["width"],"texture_height":d["resolution"]["height"]})
+        source=d["textures"][0].get("source","")
+        if source.startswith("data:image/png;base64,"):(AS/"textures/models/armor"/(id+".png")).write_bytes(base64.b64decode(source.split(",",1)[1]))
     # Imported model textures are explicit; do not silently overwrite other items.
     print("Imported",id)
 def main():
@@ -118,12 +143,16 @@ def main():
     if args.import_model:return import_bb(args.import_model)
     for style in ("bastion","astral","runic","wanderer"):
         for tier in range(1,5):
-            for hat in (False,True):export_armor(style+("_hat_" if hat else "_outfit_")+str(tier),armor(style,tier,hat))
-    for hat in (False,True):export_armor("divine"+("_hat_" if hat else "_outfit_")+"5",armor("divine",5,hat))
+            for hat in (False,True):
+                id=style+("_hat_" if hat else "_outfit_")+str(tier);p=AS/"models/armor"/(id+".json")
+                export_armor(id,json.loads(p.read_text("utf8"))["parts"] if p.exists() else armor(style,tier,hat))
+    for hat in (False,True):
+        id="divine"+("_hat_" if hat else "_outfit_")+"5";p=AS/"models/armor"/(id+".json")
+        export_armor(id,json.loads(p.read_text("utf8"))["parts"] if p.exists() else armor("divine",5,hat))
     count=0
     for p in (AS/"models/item").glob("*wand*.json"):
         if not re.fullmatch(r"(magic_wand|(fire|water|earth|wind|light|lightning|dark)_wand_[1-5])",p.stem):continue
         d=json.loads(p.read_text(encoding="utf8"))
-        if "layer0" in d.get("textures",{}):export_wand(p);count+=1
+        if "layer0" in d.get("textures",{}) or d.get("loader")=="forge:separate_transforms":export_wand(p);count+=1
     print("Exported 34 exact wearable models and",count,"wand projects with embedded textures.")
 if __name__=="__main__":main()

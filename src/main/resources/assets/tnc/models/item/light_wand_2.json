@@ -1,76 +1,17 @@
 {
-  "parent": "minecraft:item/handheld",
+  "loader": "forge:separate_transforms",
   "textures": {
-    "layer0": "tnc:item/wands/light_wand_2"
+    "particle": "tnc:item/wands/held/light_wand_2"
   },
-  "display": {
-    "thirdperson_righthand": {
-      "rotation": [
-        0,
-        90,
-        79.088829
-      ],
-      "translation": [
-        0,
-        1.624149,
-        8.42524
-      ],
-      "scale": [
-        1.55,
-        1.55,
-        1.55
-      ]
+  "base": {
+    "parent": "tnc:item/wands/held/light_wand_2"
+  },
+  "perspectives": {
+    "gui": {
+      "parent": "tnc:item/wands/icons/light_wand_2"
     },
-    "firstperson_righthand": {
-      "rotation": [
-        0,
-        -25,
-        -8.911171
-      ],
-      "translation": [
-        1.204595,
-        8.47679,
-        0.561712
-      ],
-      "scale": [
-        1.55,
-        1.55,
-        1.55
-      ]
-    },
-    "thirdperson_lefthand": {
-      "rotation": [
-        0,
-        -90,
-        -79.088829
-      ],
-      "translation": [
-        0,
-        1.624149,
-        8.42524
-      ],
-      "scale": [
-        1.55,
-        1.55,
-        1.55
-      ]
-    },
-    "firstperson_lefthand": {
-      "rotation": [
-        0,
-        -25,
-        8.911171
-      ],
-      "translation": [
-        -1.204595,
-        8.47679,
-        -0.561712
-      ],
-      "scale": [
-        1.55,
-        1.55,
-        1.55
-      ]
+    "fixed": {
+      "parent": "tnc:item/wands/icons/light_wand_2"
     }
   }
 }
