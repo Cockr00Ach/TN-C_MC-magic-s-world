@@ -52,6 +52,10 @@ public final class VolcanicTortoiseAttackCommand {
         event.getDispatcher().register(Commands.literal("tnc_spit")
                 .requires(source -> source.hasPermission(2))
                 .executes(context -> triggerSpit(context.getSource())));
+        // 技能 D：二阶段熔岩之柱（前方走廊预警 + 分批火柱）。
+        event.getDispatcher().register(Commands.literal("tnc_lava_pillar")
+                .requires(source -> source.hasPermission(2))
+                .executes(context -> triggerPillar(context.getSource())));
     }
 
     /** 调试：让最近一只巨龟对执行者开始一次喷吐（蓄力后自动发射）。 */
@@ -78,6 +82,20 @@ public final class VolcanicTortoiseAttackCommand {
         boolean started = boss.forceQuake();
         source.sendSuccess(() -> Component.literal(started
                 ? "已触发大地震波（只有地面起伏，没有火环）"
+                : "BOSS 正在攻击/转阶段/已死亡，本次未触发"), false);
+        return started ? 1 : 0;
+    }
+
+    /** 调试：立即放一次熔岩之柱（走廊预警 36 tick 后分批起火柱）。 */
+    private static int triggerPillar(CommandSourceStack source) {
+        VolcanicTortoiseEntity boss = nearest(source);
+        if (boss == null) {
+            source.sendFailure(Component.literal("32 格内没有火山巨龟"));
+            return 0;
+        }
+        boolean started = boss.forcePillar();
+        source.sendSuccess(() -> Component.literal(started
+                ? "已触发熔岩之柱：36 tick 预警，随后 5–7 根火柱分批冲起"
                 : "BOSS 正在攻击/转阶段/已死亡，本次未触发"), false);
         return started ? 1 : 0;
     }

@@ -1,5 +1,7 @@
 package com.tnc.tnc.boss.fire;
 
+import java.util.List;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -111,6 +113,22 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     private static final int ACTION_QUAKE = 5;
     /** 技能 C（任务 5）：嘴前蓄力后喷吐一发火球。 */
     private static final int ACTION_SPIT = 6;
+    /** 技能 D（任务 7）：二阶段熔岩之柱——前方长方形走廊预警 + 分批冲起的火柱。 */
+    private static final int ACTION_PILLAR = 7;
+
+    /** 预警时长（30–40 tick 之间）。 */
+    public static final int PILLAR_WARN_TICKS = 36;
+    /** 相邻两柱的间隔 tick。 */
+    private static final int PILLAR_STAGGER = 4;
+    /** 走廊内每根柱子的危险半径（与可见柱体主干部位对齐）。 */
+    public static final double PILLAR_DANGER_RADIUS = 1.6D;
+    /** 危险高度：视觉柱 15–19.5 格，但伤害只结算到 8 格，避免变成无限高伤墙。 */
+    public static final double PILLAR_DANGER_HEIGHT = 8.0D;
+    private static final float PILLAR_DAMAGE_SCALE = 0.85F;
+    /** 从身体前缘外多远处开始算走廊。 */
+    private static final double PILLAR_FRONT_OFFSET = 2.6D;
+    private static final int PILLAR_COOLDOWN_TWO = 240;
+    private static final int PILLAR_COOLDOWN_ONE = 320;
 
     /** 喷吐：蓄力 24–32 tick，后段锁定目标朝向，随后发射。 */
     private static final int SPIT_CHARGE_MIN = 24;
@@ -185,6 +203,18 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
             SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> DATA_SPIT_CHARGE =
             SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.INT);
+    /** 熔岩之柱：施法开始时刻（-1 = 当前没有该技能），柱位表由它作种子两端推导。 */
+    private static final EntityDataAccessor<Integer> DATA_PILLAR_START =
+            SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Float> DATA_PILLAR_X =
+            SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> DATA_PILLAR_Y =
+            SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> DATA_PILLAR_Z =
+            SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.FLOAT);
+    /** 走廊朝向（锁定时刻的 yaw，之后不再跟随玩家旋转）。 */
+    private static final EntityDataAccessor<Float> DATA_PILLAR_YAW =
+            SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.FLOAT);
 
     private final ServerBossEvent bossEvent = new ServerBossEvent(this.getDisplayName(),
             BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10);
@@ -206,6 +236,11 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     private int spitTargetId = -1;
     private Vec3 spitAim = Vec3.ZERO;
     private int spitCooldown;
+    /** 熔岩之柱：走廊起点、锁定朝向、开始 tick 与冷却。 */
+    private Vec3 pillarOrigin = Vec3.ZERO;
+    private float pillarYaw;
+    private int pillarStartTick = -1;
+    private int pillarCooldown = PILLAR_COOLDOWN_TWO;
     private int attackCooldown = 40;
     private int slamCooldown = 120;
     /** 技能 B 的独立冷却，避免与火环紧接连放。 */
@@ -326,6 +361,46 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.spitAim = Vec3.ZERO;
     }
 
+    /** 客户端：熔岩之柱开始时刻，-1 表示没有。 */
+    public int pillarWaveStart() {
+        return this.entityData.get(DATA_PILLAR_START);
+    }
+
+    /** 客户端：走廊起点（服务端锁定，之后不跟随本体）。 */
+    public Vec3 pillarWaveOrigin() {
+        return new Vec3(this.entityData.get(DATA_PILLAR_X), this.entityData.get(DATA_PILLAR_Y),
+                this.entityData.get(DATA_PILLAR_Z));
+    }
+
+    /** 客户端：走廊朝向（锁定值）。 */
+    public float pillarWaveYaw() {
+        return this.entityData.get(DATA_PILLAR_YAW);
+    }
+
+    private void publishPillar(ServerLevel level) {
+        this.entityData.set(DATA_PILLAR_X, (float) this.pillarOrigin.x);
+        this.entityData.set(DATA_PILLAR_Y, (float) this.pillarOrigin.y);
+        this.entityData.set(DATA_PILLAR_Z, (float) this.pillarOrigin.z);
+        this.entityData.set(DATA_PILLAR_YAW, this.pillarYaw);
+        this.entityData.set(DATA_PILLAR_START, this.pillarStartTick);
+    }
+
+    private void clearPillar() {
+        this.entityData.set(DATA_PILLAR_START, -1);
+    }
+
+    /** 柱位在世界里的位置（服务端与客户端共用同一套推导）。 */
+    public Vec3 pillarSpotCenter(PillarLayout.Spot spot) {
+        return pillarSpot(this.pillarOrigin, this.pillarYaw, spot);
+    }
+
+    /** 走廊内的局部偏移转世界坐标：forward 沿锁定朝向，lateral 沿右侧。 */
+    public static Vec3 pillarSpot(Vec3 origin, float yaw, PillarLayout.Spot spot) {
+        Vec3 forward = Vec3.directionFromRotation(0.0F, yaw);
+        Vec3 right = new Vec3(-forward.z, 0.0D, forward.x);
+        return origin.add(forward.scale(spot.forward())).add(right.scale(spot.lateral()));
+    }
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
@@ -340,6 +415,11 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.entityData.define(DATA_QUAKE_Z, 0.0F);
         this.entityData.define(DATA_SPIT_START, -1);
         this.entityData.define(DATA_SPIT_CHARGE, 0);
+        this.entityData.define(DATA_PILLAR_START, -1);
+        this.entityData.define(DATA_PILLAR_X, 0.0F);
+        this.entityData.define(DATA_PILLAR_Y, 0.0F);
+        this.entityData.define(DATA_PILLAR_Z, 0.0F);
+        this.entityData.define(DATA_PILLAR_YAW, 0.0F);
     }
 
     @Override
@@ -450,6 +530,13 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
                 self.startAction(ACTION_SPIT);
                 return;
             }
+            // 二阶段中距离：前方走廊预警 + 分批火柱（任务 7）
+            if (self.isPhaseTwo() && self.pillarCooldown <= 0
+                    && distance > 6.0D && distance < 22.0D && self.hasLineOfSight(target)) {
+                self.startAction(ACTION_PILLAR);
+                self.triggerAnim(ACTION_CONTROLLER, "slam");
+                return;
+            }
             if (self.slamCooldown <= 0 && distance < VolcanicTortoiseEntity.SLAM_RADIUS * 0.75D) {
                 self.startAction(ACTION_SLAM);
                 self.triggerAnim(ACTION_CONTROLLER, "slam");
@@ -479,6 +566,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.clearSlamRing();
         this.clearQuake();
         this.clearSpit();
+        this.clearPillar();
         this.getNavigation().stop();
     }
 
@@ -489,6 +577,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.clearSlamRing();
         this.clearQuake();
         this.clearSpit();
+        this.clearPillar();
     }
 
     // ------------------------------------------------------------------ tick --
@@ -527,6 +616,9 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         if (this.spitCooldown > 0) {
             this.spitCooldown--;
         }
+        if (this.pillarCooldown > 0) {
+            this.pillarCooldown--;
+        }
 
         this.tickBlasts(level);
         if (this.action == ACTION_NONE) {
@@ -539,6 +631,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
             case ACTION_QUAKE -> this.tickQuake(level);
             case ACTION_ERUPTION -> this.tickEruption(level);
             case ACTION_SPIT -> this.tickSpit(level);
+            case ACTION_PILLAR -> this.tickPillar(level);
             case ACTION_TRANSITION -> this.tickTransition(level);
             default -> {
             }
@@ -625,6 +718,72 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         level.sendParticles(ParticleTypes.LAVA, mouth.x, mouth.y, mouth.z, 3, 0.08D, 0.06D, 0.08D, 0.0D);
         level.playSound(null, net.minecraft.core.BlockPos.containing(mouth), SoundEvents.RAVAGER_ATTACK,
                 SoundSource.HOSTILE, 2.0F, 1.30F);
+    }
+
+    // ------------------------------------------------------ 技能 D：熔岩之柱 --
+
+    /** 任务 7：前方走廊预警 + 分批冲起的火柱；每根柱子冲起瞬间结算一次伤害。 */
+    private void tickPillar(ServerLevel level) {
+        if (this.actionTicks == 1) {
+            this.pillarStartTick = (int) level.getGameTime();
+            Vec3 forward = Vec3.directionFromRotation(0.0F, this.castYaw).scale(PILLAR_FRONT_OFFSET);
+            this.pillarOrigin = new Vec3(this.getX() + forward.x, this.getY(), this.getZ() + forward.z);
+            this.pillarYaw = this.castYaw;
+            this.publishPillar(level);
+            level.playSound(null, this.blockPosition(), SoundEvents.BLAZE_SHOOT,
+                    SoundSource.HOSTILE, 2.2F, 0.55F);
+        }
+
+        List<PillarLayout.Spot> spots = PillarLayout.spots(this.pillarStartTick);
+        int since = this.actionTicks - PILLAR_WARN_TICKS;
+        if (since >= 0 && since % PILLAR_STAGGER == 0) {
+            int index = since / PILLAR_STAGGER;
+            if (index < spots.size()) {
+                this.pillarImpact(level, this.pillarSpotCenter(spots.get(index)));
+            }
+        }
+
+        int last = PILLAR_WARN_TICKS + (spots.size() - 1) * PILLAR_STAGGER;
+        if (this.actionTicks >= last + 80) {
+            int cooldown = this.isPhaseTwo() ? PILLAR_COOLDOWN_TWO : PILLAR_COOLDOWN_ONE;
+            this.pillarCooldown = cooldown;
+            this.finishAction(cooldown);
+        }
+    }
+
+    /** 单根柱子的伤害：水平 1.6 格、垂直 8 格；同一次施法同一目标只吃一次主伤害。 */
+    private void pillarImpact(ServerLevel level, Vec3 base) {
+        float damage = (float) (this.getAttributeValue(Attributes.ATTACK_DAMAGE)
+                * PILLAR_DAMAGE_SCALE * this.damageScale());
+        AABB box = new AABB(base.x - PILLAR_DANGER_RADIUS, base.y - 0.8D, base.z - PILLAR_DANGER_RADIUS,
+                base.x + PILLAR_DANGER_RADIUS, base.y + PILLAR_DANGER_HEIGHT, base.z + PILLAR_DANGER_RADIUS);
+        for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, box, this::canHarm)) {
+            if (!this.castHits.add(victim.getUUID())) {
+                continue;
+            }
+            double dx = victim.getX() - base.x;
+            double dz = victim.getZ() - base.z;
+            if (dx * dx + dz * dz > PILLAR_DANGER_RADIUS * PILLAR_DANGER_RADIUS) {
+                continue;
+            }
+            if (victim.getY() > base.y + PILLAR_DANGER_HEIGHT
+                    || victim.getY() + victim.getBbHeight() < base.y - 0.8D) {
+                continue;
+            }
+            victim.hurt(this.damageSources().mobAttack(this), damage);
+        }
+        level.playSound(null, BlockPos.containing(base), SoundEvents.FIRECHARGE_USE,
+                SoundSource.HOSTILE, 2.0F, 0.70F);
+    }
+
+    /** 调试/预览用：立即放一次熔岩之柱（不做阶段限制，方便验收）。 */
+    public boolean forcePillar() {
+        if (!this.isAlive() || this.isBusy()) {
+            return false;
+        }
+        this.startAction(ACTION_PILLAR);
+        this.triggerAnim(ACTION_CONTROLLER, "slam");
+        return true;
     }
 
     private Vec3 mouthPoint() {
