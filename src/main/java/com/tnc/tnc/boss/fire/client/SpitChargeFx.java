@@ -93,6 +93,6 @@ public final class SpitChargeFx {
         double up = two ? 0.70D : 1.35D;
         double rad = Math.toRadians(boss.getYRot());
         Vec3 forward = new Vec3(-Math.sin(rad), 0.0D, Math.cos(rad));
-        return boss.position().add(forward.scale(fwd + 1.4D)).add(0.0D, up, 0.0D);
+        return boss.position().add(forward.scale(fwd + 1.55D)).add(0.0D, up, 0.0D);
     }
 }

@@ -18,10 +18,10 @@ import net.minecraft.util.Mth;
 public class FireBlobParticle extends TextureSheetParticle {
 
     public enum Layer {
-        CORE(1.00F, 0.96F, 0.80F, 0.10F, 0.16F, 4, 7),
-        MID(1.00F, 0.68F, 0.26F, 0.14F, 0.24F, 5, 9),
-        EDGE(0.94F, 0.38F, 0.12F, 0.18F, 0.30F, 4, 8),
-        CHARGE(1.00F, 0.86F, 0.50F, 0.10F, 0.22F, 3, 6);
+        CORE(1.00F, 0.96F, 0.80F, 0.055F, 0.090F, 4, 7),
+        MID(1.00F, 0.68F, 0.26F, 0.075F, 0.130F, 5, 9),
+        EDGE(0.94F, 0.38F, 0.12F, 0.100F, 0.165F, 4, 8),
+        CHARGE(1.00F, 0.86F, 0.50F, 0.055F, 0.120F, 3, 6);
 
         final float r;
         final float g;
@@ -44,8 +44,8 @@ public class FireBlobParticle extends TextureSheetParticle {
 
     /** 少数粒子放大成火舌，避免整团全是同样的小点。 */
     private static final float TONGUE_CHANCE = 0.12F;
-    private static final float TONGUE_MULTIPLIER = 1.5F;
-    private static final float MAX_QUAD = 0.42F;
+    private static final float TONGUE_MULTIPLIER = 1.35F;
+    private static final float MAX_QUAD = 0.22F;
 
     private final SpriteSet sprites;
     private final float phase;

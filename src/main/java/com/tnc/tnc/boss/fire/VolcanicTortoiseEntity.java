@@ -1028,7 +1028,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
             float damage = (float) (this.getAttributeValue(Attributes.ATTACK_DAMAGE)
                     * SPIT_DAMAGE_SCALE * this.damageScale());
             // 生成点前移 1.4 格：既不塞进头部，也不会一出生就撞到自己。
-            Vec3 spawn = from.add(unit.scale(1.4D));
+            Vec3 spawn = from.add(unit.scale(1.55D));
             level.addFreshEntity(VolcanicFireballEntity.launch(level, this, spawn, unit, damage, this.castId));
             level.sendParticles(ParticleTypes.EXPLOSION, spawn.x, spawn.y, spawn.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
             level.playSound(null, this.blockPosition(), SoundEvents.GHAST_SHOOT,
