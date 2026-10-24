@@ -1,6 +1,8 @@
 package com.tnc.tnc.boss.fire.client;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.logging.LogUtils;
 import com.tnc.tnc.boss.fire.VolcanicTortoiseEntity;
@@ -9,6 +11,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -83,6 +86,28 @@ public final class SlamGroundWave {
     /** 独立 immediate 缓冲：Oculus 下共享 BufferSource 的 endBatch 是 no-op。 */
     private static final MultiBufferSource.BufferSource BUFFERS =
             MultiBufferSource.immediate(new BufferBuilder(262144));
+    /**
+     * 纯色地砖材质：与调试光柱同一套 RENDERTYPE_LIGHTNING_SHADER + POSITION_COLOR 路径。
+     * 带贴图的 entityTranslucent/entityCutout 在本机 Oculus 环境下多次整片不可见，
+     * 换成这条已被光柱验证过的路径，保证地面波一定能画出来。
+     */
+    private static final class SlabType extends RenderStateShard {
+        private SlabType() {
+            super("tnc_quake_slab", () -> {
+            }, () -> {
+            });
+        }
+
+        static final RenderType TYPE = RenderType.create("tnc_quake_slab",
+                DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.QUADS, 256, false, true,
+                RenderType.CompositeState.builder()
+                        .setShaderState(RENDERTYPE_LIGHTNING_SHADER)
+                        .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                        .setCullState(NO_CULL)
+                        .setWriteMaskState(COLOR_WRITE)
+                        .setOutputState(MAIN_TARGET)
+                        .createCompositeState(false));
+    }
     /** 每个实体上一次看到的震波编号，用来判断「有新的一发」。 */
     private static final Map<Integer, Integer> SEEN = new HashMap<>();
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -94,11 +119,12 @@ public final class SlamGroundWave {
     private SlamGroundWave() {
     }
 
-    /** 一块地表贴片：世界坐标、顶面/侧面 UV、抬升系数与光照。 */
+    /** 一块地表贴片：世界坐标、方块地图色、抬升系数与光照。 */
     private record Patch(double x, double z, double radius, double groundY,
                          float u0, float v0, float u1, float v1,
                          float su0, float sv0, float su1, float sv1,
-                         float liftScale, int light, float dirX, float dirZ) {
+                         float liftScale, int light, float dirX, float dirZ,
+                         int topColor, int sideColor) {
     }
 
     private static final class Wave {
@@ -248,12 +274,17 @@ public final class SlamGroundWave {
             }
             int light = LevelRenderer.getLightColor(level, pos.above());
             float liftScale = 0.72F + 0.28F * level.random.nextFloat();
+            // 用方块地图色画纯色地砖：贴图路径在 Oculus 下多次不显示，
+            // 而 RENDERTYPE_LIGHTNING_SHADER + POSITION_COLOR 的纯色几何已被光柱验证可见。
+            int mapColor = state.getMapColor(level, pos).col;
+            int topColor = brighten(mapColor, 1.12F);
+            int sideColor = brighten(mapColor, 0.68F);
             return new Patch(x + 0.5D, z + 0.5D, radius, y + 1.0D,
                     topQuad.getSprite().getU0(), topQuad.getSprite().getV0(),
                     topQuad.getSprite().getU1(), topQuad.getSprite().getV1(),
                     sideQuad.getSprite().getU0(), sideQuad.getSprite().getV0(),
                     sideQuad.getSprite().getU1(), sideQuad.getSprite().getV1(),
-                    liftScale, light, dirX, dirZ);
+                    liftScale, light, dirX, dirZ, topColor, sideColor);
         }
         return null;
     }
@@ -307,7 +338,7 @@ public final class SlamGroundWave {
         float partial = event.getPartialTick();
         double ageNow = level.getGameTime() + partial;
 
-        RenderType type = RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS);
+        RenderType type = SlabType.TYPE;
         // Oculus 会把 Minecraft 共享的 BufferSource 换成 endBatch 为 no-op 的分段缓冲，
         // 用独立 immediate 缓冲才能保证真的提交（PortalRitualRenderer 已踩过同样的坑）。
         var buffers = BUFFERS;
@@ -408,48 +439,46 @@ public final class SlamGroundWave {
         float y01 = (float) (patch.groundY() + lift * (0.68F + 0.32F * radial01(-half, half, patch)));
 
         // 顶面
-        quad(buffer, matrix, alpha, patch.light(),
-                x0, y00, z0, x1, y10, z0, x1, y11, z1, x0, y01, z1,
-                patch.u0(), patch.v0(), patch.u1(), patch.v1(), patch.u0(), patch.v1(), patch.u1(), patch.v0(),
-                0.0F, 1.0F, 0.0F);
+        solidQuad(buffer, matrix, alpha, patch.topColor(),
+                x0, y00, z0, x1, y10, z0, x1, y11, z1, x0, y01, z1);
 
-        // 四个侧面（用方块侧面贴图，保证草皮/泥土层次）
-        quad(buffer, matrix, alpha, patch.light(),
-                x0, base, z0, x1, base, z0, x1, y10, z0, x0, y00, z0,
-                patch.su0(), patch.sv1(), patch.su1(), patch.sv1(), patch.su1(), patch.sv0(), patch.su0(), patch.sv0(),
-                0.0F, 0.0F, -1.0F);
-        quad(buffer, matrix, alpha, patch.light(),
-                x1, base, z1, x0, base, z1, x0, y01, z1, x1, y11, z1,
-                patch.su0(), patch.sv1(), patch.su1(), patch.sv1(), patch.su1(), patch.sv0(), patch.su0(), patch.sv0(),
-                0.0F, 0.0F, 1.0F);
-        quad(buffer, matrix, alpha, patch.light(),
-                x0, base, z1, x0, base, z0, x0, y00, z0, x0, y01, z1,
-                patch.su0(), patch.sv1(), patch.su1(), patch.sv1(), patch.su1(), patch.sv0(), patch.su0(), patch.sv0(),
-                -1.0F, 0.0F, 0.0F);
-        quad(buffer, matrix, alpha, patch.light(),
-                x1, base, z0, x1, base, z1, x1, y11, z1, x1, y10, z0,
-                patch.su0(), patch.sv1(), patch.su1(), patch.sv1(), patch.su1(), patch.sv0(), patch.su0(), patch.sv0(),
-                1.0F, 0.0F, 0.0F);
+        // 四个侧面（用方块地图色压暗，保证草皮/泥土的层次）
+        int side = patch.sideColor();
+        solidQuad(buffer, matrix, alpha, side,
+                x0, base, z0, x1, base, z0, x1, y10, z0, x0, y00, z0);
+        solidQuad(buffer, matrix, alpha, side,
+                x1, base, z1, x0, base, z1, x0, y01, z1, x1, y11, z1);
+        solidQuad(buffer, matrix, alpha, side,
+                x0, base, z1, x0, base, z0, x0, y00, z0, x0, y01, z1);
+        solidQuad(buffer, matrix, alpha, side,
+                x1, base, z0, x1, base, z1, x1, y11, z1, x1, y10, z0);
     }
 
-    private static void quad(VertexConsumer buffer, Matrix4f matrix, float alpha, int light,
-                             double x0, double y0, double z0,
-                             double x1, double y1, double z1,
-                             double x2, double y2, double z2,
-                             double x3, double y3, double z3,
-                             float u0, float v0, float u1, float v1,
-                             float u2, float v2, float u3, float v3,
-                             float nx, float ny, float nz) {
-        // 正反两种绕序各写一遍：不依赖 RenderType 的剔除设置，也避免不同绕序约定
-        // 导致整片地砖被背面剔除而完全看不见。
-        vertex(buffer, matrix, x0, y0, z0, u0, v0, alpha, light, nx, ny, nz);
-        vertex(buffer, matrix, x1, y1, z1, u1, v1, alpha, light, nx, ny, nz);
-        vertex(buffer, matrix, x2, y2, z2, u2, v2, alpha, light, nx, ny, nz);
-        vertex(buffer, matrix, x3, y3, z3, u3, v3, alpha, light, nx, ny, nz);
-        vertex(buffer, matrix, x3, y3, z3, u3, v3, alpha, light, -nx, -ny, -nz);
-        vertex(buffer, matrix, x2, y2, z2, u2, v2, alpha, light, -nx, -ny, -nz);
-        vertex(buffer, matrix, x1, y1, z1, u1, v1, alpha, light, -nx, -ny, -nz);
-        vertex(buffer, matrix, x0, y0, z0, u0, v0, alpha, light, -nx, -ny, -nz);
+    private static void solidQuad(VertexConsumer buffer, Matrix4f matrix, float alpha, int color,
+                                  double x0, double y0, double z0,
+                                  double x1, double y1, double z1,
+                                  double x2, double y2, double z2,
+                                  double x3, double y3, double z3) {
+        float r = ((color >> 16) & 0xFF) / 255.0F;
+        float g = ((color >> 8) & 0xFF) / 255.0F;
+        float b = (color & 0xFF) / 255.0F;
+        // 正反两种绕序各写一遍：NO_CULL 下无副作用，也避免绕序约定不同导致整片不可见。
+        vertex(buffer, matrix, r, g, b, alpha, x0, y0, z0);
+        vertex(buffer, matrix, r, g, b, alpha, x1, y1, z1);
+        vertex(buffer, matrix, r, g, b, alpha, x2, y2, z2);
+        vertex(buffer, matrix, r, g, b, alpha, x3, y3, z3);
+        vertex(buffer, matrix, r, g, b, alpha, x3, y3, z3);
+        vertex(buffer, matrix, r, g, b, alpha, x2, y2, z2);
+        vertex(buffer, matrix, r, g, b, alpha, x1, y1, z1);
+        vertex(buffer, matrix, r, g, b, alpha, x0, y0, z0);
+    }
+
+    /** 按系数提亮/压暗一个 0xRRGGBB 颜色。 */
+    private static int brighten(int rgb, float factor) {
+        int r = Math.min(255, Math.round(((rgb >> 16) & 0xFF) * factor));
+        int g = Math.min(255, Math.round(((rgb >> 8) & 0xFF) * factor));
+        int b = Math.min(255, Math.round((rgb & 0xFF) * factor));
+        return (r << 16) | (g << 8) | b;
     }
 
     /** 该角相对中心的外向程度：1 = 最外角，0 = 最内角。 */
@@ -458,19 +487,10 @@ public final class SlamGroundWave {
         return Mth.clamp(outward / (PATCH * 0.5D) * 0.5D + 0.5D, 0.0D, 1.0D);
     }
 
-    private static void vertex(VertexConsumer buffer, Matrix4f matrix, double x, double y, double z,
-                               float u, float v, float alpha, int light,
-                               float nx, float ny, float nz) {
-        // entityTranslucent 的格式是 POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL：
-        // overlay 与 normal 都必须显式写入。
-        // 光照使用满亮度：震波是魔法冲击，夜里/雨里也必须看得见，
-        // 同时避免暗处 quad 亮度接近 0 而“看不见”。
+    private static void vertex(VertexConsumer buffer, Matrix4f matrix, float r, float g, float b,
+                               float alpha, double x, double y, double z) {
         buffer.vertex(matrix, (float) x, (float) y, (float) z)
-                .color(1.0F, 1.0F, 1.0F, alpha)
-                .uv(u, v)
-                .overlayCoords(OverlayTexture.NO_OVERLAY)
-                .uv2(LightTexture.FULL_BRIGHT)
-                .normal(nx, ny, nz)
+                .color(r, g, b, alpha)
                 .endVertex();
     }
 }
