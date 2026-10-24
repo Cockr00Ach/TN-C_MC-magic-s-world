@@ -1,6 +1,7 @@
 package com.tnc.tnc.boss.fire;
 
 import java.util.List;
+import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -246,6 +247,30 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     /** 技能 B 的独立冷却，避免与火环紧接连放。 */
     private int quakeCooldown = 240;
     private int eruptionCooldown = 160;
+
+    // ---------------------------------------------------------- 火山喷发（任务 8）--
+    /** 蓄势 tick 下限/上限。 */
+    public static final int BARRAGE_CHARGE_MIN = 30;
+    public static final int BARRAGE_CHARGE_MAX = 40;
+    /** 三批、每批 7 颗，共 21 颗。 */
+    public static final int BARRAGE_WAVES = 3;
+    public static final int BARRAGE_PER_WAVE = 7;
+    public static final int BARRAGE_WAVE_GAP = 10;
+    /** 落区：内圈安全区 8 格，外缘 24 格。 */
+    public static final double BARRAGE_INNER_RADIUS = 8.0D;
+    public static final double BARRAGE_OUTER_RADIUS = 24.0D;
+    public static final double BARRAGE_MIN_SPACING = 3.2D;
+    /** 单颗伤害系数（发射时快照）。 */
+    public static final float BARRAGE_DAMAGE_SCALE = 0.55F;
+    /** 同一目标受击间隔与单次喷发上限。 */
+    private static final int BARRAGE_HIT_INTERVAL = 10;
+    private static final int BARRAGE_MAX_HITS = 8;
+
+    private final java.util.Map<UUID, Integer> mortarLastHit = new java.util.HashMap<>();
+    private final java.util.List<Vec3> barrageSpots = new java.util.ArrayList<>();
+    private int mortarHits;
+    private int barrageCharge;
+    private int barrageWave;
     /** 二阶段火山弹的落点（服务端算好，倒计时结束时炸）。 */
     private final java.util.List<Vec3> pendingBlasts = new java.util.ArrayList<>();
     private int blastCountdown;
@@ -519,7 +544,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
             if (self.isBusy() || self.attackCooldown > 0) {
                 return;
             }
-            if (self.eruptionCooldown <= 0 && distance < 18.0D && self.isPhaseTwo()) {
+            if (self.eruptionCooldown <= 0 && distance > 8.0D && distance < 28.0D && self.isPhaseTwo()) {
                 self.startAction(ACTION_ERUPTION);
                 self.triggerAnim(ACTION_CONTROLLER, "slam");
                 return;
@@ -567,6 +592,10 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.clearQuake();
         this.clearSpit();
         this.clearPillar();
+        this.mortarLastHit.clear();
+        this.mortarHits = 0;
+        this.barrageSpots.clear();
+        this.barrageWave = 0;
         this.getNavigation().stop();
     }
 
@@ -1103,38 +1132,119 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         return true;
     }
 
-    /** 二阶段：先在目标周围画三圈预警，倒计时结束一起炸。 */
+    /** 二阶段火山喷发：火山口蓄势，随后 3 批共 21 颗抛射火球落向 Boss 周围。 */
     private void tickEruption(ServerLevel level) {
         if (this.actionTicks == 1) {
-            LivingEntity target = this.getTarget();
-            Vec3 base = target != null ? target.position() : this.position().add(this.getLookAngle().scale(6.0D));
-            this.pendingBlasts.clear();
-            for (int i = 0; i < 3; i++) {
-                double angle = level.getRandom().nextDouble() * Math.PI * 2.0D;
-                double radius = ERUPTION_SPREAD * Math.sqrt(level.getRandom().nextDouble());
-                this.pendingBlasts.add(new Vec3(
-                        base.x + Math.cos(angle) * radius, base.y, base.z + Math.sin(angle) * radius));
-            }
-            this.blastCountdown = ERUPTION_HIT_TICK;
-            level.playSound(null, this.blockPosition(), SoundEvents.BLAZE_SHOOT, SoundSource.HOSTILE, 2.6F, 0.55F);
-        }
-        // 预警环：落点周围冒火星，让人有时间走开
-        if (this.actionTicks % 3 == 0) {
-            for (Vec3 at : this.pendingBlasts) {
-                for (int i = 0; i < 6; i++) {
-                    double angle = Math.PI * 2.0D * i / 6.0D + this.actionTicks * 0.2D;
-                    level.sendParticles(ParticleTypes.FLAME,
-                            at.x + Math.cos(angle) * 1.7D, at.y + 0.15D, at.z + Math.sin(angle) * 1.7D,
-                            1, 0.0D, 0.02D, 0.0D, 0.0D);
-                }
-            }
-        }
-        if (this.actionTicks >= ERUPTION_TICKS) {
+            this.barrageCharge = BARRAGE_CHARGE_MIN
+                    + level.random.nextInt(BARRAGE_CHARGE_MAX - BARRAGE_CHARGE_MIN + 1);
+            this.barrageWave = 0;
+            this.barrageSpots.clear();
+            this.mortarLastHit.clear();
+            this.mortarHits = 0;
             this.pendingBlasts.clear();
             this.blastCountdown = 0;
-            this.finishAction(50);
-            this.eruptionCooldown = this.isPhaseTwo() ? 200 : 300;
+            level.playSound(null, this.blockPosition(), SoundEvents.BLAZE_SHOOT, SoundSource.HOSTILE, 2.2F, 0.6F);
         }
+
+        Vec3 crater = this.craterPoint();
+        if (this.actionTicks <= this.barrageCharge && this.actionTicks % 2 == 0) {
+            // 蓄势：火山口内亮起来，越接近喷发越密
+            float p = this.actionTicks / (float) this.barrageCharge;
+            level.sendParticles(ParticleTypes.LAVA, crater.x, crater.y, crater.z,
+                    1 + (int) (p * 3.0F), 0.35D, 0.10D, 0.35D, 0.0D);
+            level.sendParticles(TortoiseParticles.FIRE_EDGE.get(), crater.x, crater.y + 0.15D, crater.z,
+                    2 + (int) (p * 4.0F), 0.30D, 0.20D, 0.30D, 0.01D);
+        }
+
+        int since = this.actionTicks - this.barrageCharge;
+        while (this.barrageWave < BARRAGE_WAVES && since >= this.barrageWave * BARRAGE_WAVE_GAP) {
+            this.fireBarrageWave(level);
+            this.barrageWave++;
+        }
+        if (this.barrageWave >= BARRAGE_WAVES && since > BARRAGE_WAVES * BARRAGE_WAVE_GAP + 40) {
+            this.finishAction(40);
+            this.eruptionCooldown = this.isPhaseTwo() ? 260 : 340;
+        }
+    }
+
+    /** 一批 7 颗，落点分散、彼此留出可走的空隙。 */
+    private void fireBarrageWave(ServerLevel level) {
+        Vec3 from = this.craterPoint();
+        float damage = (float) (this.getAttributeValue(Attributes.ATTACK_DAMAGE)
+                * BARRAGE_DAMAGE_SCALE * this.damageScale());
+        for (int i = 0; i < BARRAGE_PER_WAVE; i++) {
+            Vec3 landing = this.pickLanding(level);
+            if (landing == null) {
+                continue;
+            }
+            int flight = 42 + level.random.nextInt(14);
+            VolcanicMortarEntity ball = VolcanicMortarEntity.launch(level, this, from, landing, flight, damage, this.castId);
+            level.addFreshEntity(ball);
+            this.barrageSpots.add(landing);
+        }
+        level.playSound(null, this.blockPosition(), SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 1.1F, 1.5F);
+    }
+
+    /** 环形落区里挑一个点：内圈安全、外缘 24 格、与已有点至少隔 3.2 格。 */
+    private Vec3 pickLanding(ServerLevel level) {
+        for (int attempt = 0; attempt < 40; attempt++) {
+            double angle = level.random.nextDouble() * Math.PI * 2.0D;
+            double r = Math.sqrt(level.random.nextDouble()
+                    * (BARRAGE_OUTER_RADIUS * BARRAGE_OUTER_RADIUS
+                    - BARRAGE_INNER_RADIUS * BARRAGE_INNER_RADIUS)
+                    + BARRAGE_INNER_RADIUS * BARRAGE_INNER_RADIUS);
+            double x = this.getX() + Math.cos(angle) * r;
+            double z = this.getZ() + Math.sin(angle) * r;
+            if (!level.hasChunkAt(BlockPos.containing(x, this.getY(), z))) {
+                continue;
+            }
+            boolean crowded = false;
+            for (Vec3 other : this.barrageSpots) {
+                if (other.distanceToSqr(x, other.y, z) < BARRAGE_MIN_SPACING * BARRAGE_MIN_SPACING) {
+                    crowded = true;
+                    break;
+                }
+            }
+            if (crowded) {
+                continue;
+            }
+            int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                    BlockPos.containing(x, 0, z).getX(), BlockPos.containing(x, 0, z).getZ()) - 1;
+            return new Vec3(x, top + 1.0D, z);
+        }
+        return null;
+    }
+
+    /** 调试入口：立刻开始一次火山喷发（不要求阶段，仍遵守存活/忙碌限制）。 */
+    public boolean forceEruption() {
+        if (!this.isAlive() || this.isDeadOrDying() || this.isBusy()) {
+            return false;
+        }
+        this.startAction(ACTION_ERUPTION);
+        return true;
+    }
+
+    /** 火山口世界坐标：与客户端粒子定位使用同一组高度常数。 */
+    public Vec3 craterPoint() {
+        double height = this.isPhaseTwo() ? 7.22D : 4.50D;
+        return new Vec3(this.getX(), this.getY() + height, this.getZ());
+    }
+
+    /** 喷发伤害去重：同一次施法、同一目标 10 tick 内只吃一次，整场最多 8 次。 */
+    public boolean tryMortarHit(UUID target, long cast) {
+        if (cast != this.castId) {
+            return false;
+        }
+        if (this.mortarHits >= BARRAGE_MAX_HITS) {
+            return false;
+        }
+        Integer last = this.mortarLastHit.get(target);
+        if (last != null && this.tickCount - last < BARRAGE_HIT_INTERVAL) {
+            return false;
+        }
+        this.mortarLastHit.put(target, this.tickCount);
+        this.mortarHits++;
+        return true;
     }
 
     // ------------------------------------------------------------ 喷吐（任务 5）--

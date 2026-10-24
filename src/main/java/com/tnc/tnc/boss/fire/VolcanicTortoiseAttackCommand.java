@@ -52,6 +52,11 @@ public final class VolcanicTortoiseAttackCommand {
         event.getDispatcher().register(Commands.literal("tnc_spit")
                 .requires(source -> source.hasPermission(2))
                 .executes(context -> triggerSpit(context.getSource())));
+        // 技能 E：二阶段火山喷发（火山口弹出 21 颗抛射火球）。
+        event.getDispatcher().register(Commands.literal("tnc_erupt")
+                .requires(source -> source.hasPermission(2))
+                .executes(context -> triggerErupt(context.getSource())));
+
         // 技能 D：二阶段熔岩之柱（前方走廊预警 + 分批火柱）。
         event.getDispatcher().register(Commands.literal("tnc_lava_pillar")
                 .requires(source -> source.hasPermission(2))
@@ -82,6 +87,20 @@ public final class VolcanicTortoiseAttackCommand {
         boolean started = boss.forceQuake();
         source.sendSuccess(() -> Component.literal(started
                 ? "已触发大地震波（只有地面起伏，没有火环）"
+                : "BOSS 正在攻击/转阶段/已死亡，本次未触发"), false);
+        return started ? 1 : 0;
+    }
+
+    /** 调试：立即放一次火山喷发（蓄势 30–40 tick，随后 3 批共 21 颗）。 */
+    private static int triggerErupt(CommandSourceStack source) {
+        VolcanicTortoiseEntity boss = nearest(source);
+        if (boss == null) {
+            source.sendFailure(Component.literal("32 格内没有火山巨龟"));
+            return 0;
+        }
+        boolean started = boss.forceEruption();
+        source.sendSuccess(() -> Component.literal(started
+                ? "已触发火山喷发：蓄势后 3 批共 21 颗抛射火球"
                 : "BOSS 正在攻击/转阶段/已死亡，本次未触发"), false);
         return started ? 1 : 0;
     }

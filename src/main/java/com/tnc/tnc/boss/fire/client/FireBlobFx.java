@@ -2,6 +2,7 @@ package com.tnc.tnc.boss.fire.client;
 
 import com.tnc.tnc.boss.fire.TortoiseParticles;
 import com.tnc.tnc.boss.fire.VolcanicFireballEntity;
+import com.tnc.tnc.boss.fire.VolcanicMortarEntity;
 import com.tnc.tnc.boss.fire.VolcanicTortoiseEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -73,6 +74,20 @@ public final class FireBlobFx {
             spawnFlight(level, center, FLIGHT_RADIUS, now + phase, motion);
         }
 
+        // 1b) 喷发弹幕：同一套火团，但更小、尾迹更短，整场共享粒子预算
+        int mortarBudget = 120;
+        for (VolcanicMortarEntity ball : level.getEntitiesOfClass(VolcanicMortarEntity.class,
+                mc.player.getBoundingBox().inflate(96.0D))) {
+            if (mortarBudget <= 0) {
+                break;
+            }
+            if (ball.position().distanceToSqr(eye) > MAX_DIST_SQR) {
+                continue;
+            }
+            int phase = PHASE.computeIfAbsent(ball.getId(), id -> level.random.nextInt(360));
+            mortarBudget -= spawnMortar(level, ball.position(), ball.getDeltaMovement(), now + phase, mortarBudget);
+        }
+
         // 2) 蓄力：从几颗小火苗长成一团，随进度加密
         for (VolcanicTortoiseEntity boss : level.getEntitiesOfClass(VolcanicTortoiseEntity.class,
                 mc.player.getBoundingBox().inflate(96.0D))) {
@@ -133,6 +148,26 @@ public final class FireBlobFx {
                         back.x * 0.02D, 0.012D, back.z * 0.02D);
             }
         }
+    }
+
+    /** 弹幕火球：0.95 格半径，核心+边缘各一圈，尾部 2 颗，整颗约 29 颗粒子。 */
+    private static int spawnMortar(ClientLevel level, Vec3 center, Vec3 motion, long seed, int budget) {
+        int spawned = 0;
+        spawned += spawnGaussian(level, center, 0.58D, 12,
+                TortoiseParticles.FIRE_CORE.get(), TortoiseParticles.FIRE_MID.get(), budget - spawned);
+        spawned += spawnShell(level, center, 0.80D, 9, TortoiseParticles.FIRE_MID.get(), seed + 7L, budget - spawned);
+        spawned += spawnShell(level, center, 0.95D, 6, TortoiseParticles.FIRE_EDGE.get(), seed + 13L, budget - spawned);
+        if (motion.lengthSqr() > 1.0E-6D && spawned < budget) {
+            Vec3 back = motion.normalize().scale(-1.0D);
+            for (int i = 0; i < 2 && spawned < budget; i++) {
+                double dist = 0.95D + i * 0.18D;
+                spawn(level, TortoiseParticles.FIRE_EDGE.get(),
+                        center.x + back.x * dist, center.y + back.y * dist, center.z + back.z * dist,
+                        back.x * 0.02D, -0.01D, back.z * 0.02D);
+                spawned++;
+            }
+        }
+        return spawned;
     }
 
     /** 蓄力火团：起手只有几颗，越接近发射越密，尺寸随进度长。 */
