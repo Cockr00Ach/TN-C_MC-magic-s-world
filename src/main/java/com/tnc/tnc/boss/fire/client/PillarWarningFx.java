@@ -168,10 +168,6 @@ public final class PillarWarningFx {
         borderStrip(level, warn, 0.0D, LENGTH, HALF_WIDTH - EDGE, HALF_WIDTH, matrix, buffer);
         borderStrip(level, warn, 0.0D, EDGE, -HALF_WIDTH, HALF_WIDTH, matrix, buffer);
         borderStrip(level, warn, LENGTH - EDGE, LENGTH, -HALF_WIDTH, HALF_WIDTH, matrix, buffer);
-        // 柱位标记：环 + 淡填充
-        for (PillarLayout.Spot spot : warn.spots) {
-            marker(level, warn, spot, matrix, buffer, pulse);
-        }
     }
 
     private static void borderStrip(Level level, Warn warn, double f0, double f1,
@@ -183,47 +179,7 @@ public final class PillarWarningFx {
             double fb = f0 + (f1 - f0) * (s + 1) * a;
             double la = l0 + (l1 - l0) * s * a;
             double lb = l0 + (l1 - l0) * (s + 1) * a;
-            groundQuad(level, warn, fa, fb, la, lb, 0.80F, 1.0F, 0.30F, 0.10F, matrix, buffer);
-        }
-    }
-
-    private static void marker(Level level, Warn warn, PillarLayout.Spot spot,
-                               Matrix4f matrix, VertexConsumer buffer, double pulse) {
-        Vec3 center = spotCenter(warn, spot);
-        double r = VolcanicTortoiseEntity.PILLAR_DANGER_RADIUS;
-        int seg = 10;
-        for (int s = 0; s < seg; s++) {
-            double a0 = Math.PI * 2 * s / seg;
-            double a1 = Math.PI * 2 * (s + 1) / seg;
-            double x0 = center.x + Math.cos(a0) * r;
-            double z0 = center.z + Math.sin(a0) * r;
-            double x1 = center.x + Math.cos(a1) * r;
-            double z1 = center.z + Math.sin(a1) * r;
-            // 环带用两条半径之间的四边形近似
-            double r0 = r - 0.18D;
-            double x0i = center.x + Math.cos(a0) * r0;
-            double z0i = center.z + Math.sin(a0) * r0;
-            double x1i = center.x + Math.cos(a1) * r0;
-            double z1i = center.z + Math.sin(a1) * r0;
-            float y = (float) groundY(level, center.x, center.z, warn.origin.y) + 0.02F;
-            quad(buffer, matrix,
-                    (float) x0, y, (float) z0, (float) x1, y, (float) z1,
-                    (float) x1i, y, (float) z1i, (float) x0i, y, (float) z0i,
-                    1.0F, 0.62F, 0.24F, 0.95F);
-        }
-        float y = (float) groundY(level, center.x, center.z, warn.origin.y) + 0.015F;
-        for (int s = 0; s < seg; s++) {
-            double a0 = Math.PI * 2 * s / seg;
-            double a1 = Math.PI * 2 * (s + 1) / seg;
-            quad(buffer, matrix,
-                    (float) center.x, y, (float) center.z,
-                    (float) (center.x + Math.cos(a0) * (r - 0.2D)), y,
-                    (float) (center.z + Math.sin(a0) * (r - 0.2D)),
-                    (float) (center.x + Math.cos(a1) * (r - 0.2D)), y,
-                    (float) (center.z + Math.sin(a1) * (r - 0.2D)),
-                    (float) (center.x + Math.cos(a1) * (r - 0.2D)), y,
-                    (float) (center.z + Math.sin(a1) * (r - 0.2D)),
-                    1.0F, 0.45F, 0.15F, (float) (0.14D + 0.06D * pulse));
+            groundQuad(level, warn, fa, fb, la, lb, 0.88F, 0.62F, 0.03F, 0.03F, matrix, buffer);
         }
     }
 

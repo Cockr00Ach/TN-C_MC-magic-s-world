@@ -533,8 +533,8 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
             // 二阶段中距离：前方走廊预警 + 分批火柱（任务 7）
             if (self.isPhaseTwo() && self.pillarCooldown <= 0
                     && distance > 6.0D && distance < 22.0D && self.hasLineOfSight(target)) {
+                // 熔岩之柱不抬前腿：不放 slam 动作，本体保持待机/行走
                 self.startAction(ACTION_PILLAR);
-                self.triggerAnim(ACTION_CONTROLLER, "slam");
                 return;
             }
             if (self.slamCooldown <= 0 && distance < VolcanicTortoiseEntity.SLAM_RADIUS * 0.75D) {
@@ -782,7 +782,6 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
             return false;
         }
         this.startAction(ACTION_PILLAR);
-        this.triggerAnim(ACTION_CONTROLLER, "slam");
         return true;
     }
 
