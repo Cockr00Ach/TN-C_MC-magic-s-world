@@ -28,13 +28,13 @@ def mix(c0, c1, t):
     return tuple(int(round(c0[i] + (c1[i] - c0[i]) * t)) for i in range(3))
 
 
-CORE = (255, 246, 198)
-GOLD = (255, 206, 78)
-ORANGE = (255, 148, 34)
-DEEP = (216, 70, 22)
-ROOT_LIT = (255, 232, 150)
-ROOT_MID = (246, 168, 58)
-ROOT_DARK = (206, 104, 30)
+CORE = (255, 236, 168)
+GOLD = (255, 186, 62)
+ORANGE = (244, 132, 28)
+DEEP = (198, 62, 22)
+ROOT_LIT = (255, 214, 120)
+ROOT_MID = (230, 150, 48)
+ROOT_DARK = (186, 86, 24)
 
 
 def stamp(img, x, y, color, alpha=255):

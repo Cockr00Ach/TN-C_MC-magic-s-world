@@ -93,6 +93,8 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     private static final double SLAM_HEIGHT_TOLERANCE = 2.0D;
     /** 重踏震屏强度（度），0 = 关闭；用 -Dtnc.tortoise.slam.shake=3 开启。 */
     private static final float SLAM_SHAKE = parseFloatProperty("tnc.tortoise.slam.shake", 0.0F);
+    /** 火环命中击退强度（原版 knockback 参数；内部会按目标的击退抗性衰减）。 */
+    private static final double SLAM_KNOCKBACK = 0.6D;
     /** 二阶段火山弹的落点散布半径（格）。 */
     public static final double ERUPTION_SPREAD = 8.0D;
 
@@ -626,12 +628,24 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
             if (!this.castHits.add(victim.getUUID())) {
                 continue;
             }
-            victim.hurt(this.damageSources().mobAttack(this), damage);
-            Vec3 push = victim.position().subtract(center);
-            if (push.lengthSqr() > 1.0E-4D) {
-                push = push.normalize().scale(inner <= 0.01D ? 0.45D : 0.30D);
+            if (!victim.hurt(this.damageSources().mobAttack(this), damage)) {
+                // 伤害被完全拒绝（同队/无敌/已死等）时不额外施加击退。
+                continue;
             }
-            victim.push(push.x, inner <= 0.01D ? 0.40D : 0.20D, push.z);
+            // 击退统一走原版 knockback：方向 = 圆心 → 目标 的水平外推，强度会按击退抗性衰减。
+            // 旧实现在这里额外 push 了一份水平+竖直速度，属于重复击退，已删除。
+            Vec3 push = victim.position().subtract(center);
+            double dx;
+            double dz;
+            if (push.horizontalDistanceSqr() > 1.0E-4D) {
+                dx = push.x;
+                dz = push.z;
+            } else {
+                // 目标正好站在圆心上：用固定方向兜底，避免零向量。
+                dx = 1.0D;
+                dz = 0.0D;
+            }
+            victim.knockback(SLAM_KNOCKBACK, dx, dz);
         }
     }
 

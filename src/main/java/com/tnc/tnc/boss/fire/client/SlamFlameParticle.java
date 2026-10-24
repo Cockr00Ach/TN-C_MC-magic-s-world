@@ -81,9 +81,9 @@ public final class SlamFlameParticle extends TextureSheetParticle {
         this.setSprite(sprites.get(frame(), FRAMES));
         // 内侧火尾偏橙红，中层偏亮，外层稍暗，三层叠在一起是一道有层次的波峰。
         switch (this.layer) {
-            case 0 -> this.setColor(1.0F, 0.80F, 0.64F);
-            case 1 -> this.setColor(1.0F, 0.96F, 0.90F);
-            default -> this.setColor(1.0F, 0.90F, 0.78F);
+            case 0 -> this.setColor(1.0F, 0.76F, 0.56F);
+            case 1 -> this.setColor(1.0F, 0.93F, 0.84F);
+            default -> this.setColor(1.0F, 0.86F, 0.70F);
         }
         this.setAlpha(0.0F);
         this.moveToRing(1.0F);
