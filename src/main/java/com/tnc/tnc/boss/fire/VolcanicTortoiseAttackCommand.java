@@ -44,6 +44,91 @@ public final class VolcanicTortoiseAttackCommand {
                 .then(Commands.argument("range", BoolArgumentType.bool())
                         .executes(context -> triggerSlam(context.getSource(),
                                 BoolArgumentType.getBool(context, "range")))));
+        // 技能 B：大地震波（独立施法，不产生火环）。
+        event.getDispatcher().register(Commands.literal("tnc_quake")
+                .requires(source -> source.hasPermission(2))
+                .executes(context -> triggerQuake(context.getSource())));
+        // 技能 C：嘴前蓄力 24–32 tick 后喷吐一发火球。
+        event.getDispatcher().register(Commands.literal("tnc_spit")
+                .requires(source -> source.hasPermission(2))
+                .executes(context -> triggerSpit(context.getSource())));
+        // 技能 E：二阶段火山喷发（火山口弹出 21 颗抛射火球）。
+        event.getDispatcher().register(Commands.literal("tnc_erupt")
+                .requires(source -> source.hasPermission(2))
+                .executes(context -> triggerErupt(context.getSource())));
+
+        // 技能 D：二阶段熔岩之柱（前方走廊预警 + 分批火柱）。
+        event.getDispatcher().register(Commands.literal("tnc_lava_pillar")
+                .requires(source -> source.hasPermission(2))
+                .executes(context -> triggerPillar(context.getSource())));
+    }
+
+    /** 调试：让最近一只巨龟对执行者开始一次喷吐（蓄力后自动发射）。 */
+    private static int triggerSpit(CommandSourceStack source) {
+        VolcanicTortoiseEntity boss = nearest(source);
+        if (boss == null) {
+            source.sendFailure(Component.literal("32 格内没有火山巨龟"));
+            return 0;
+        }
+        boolean started = boss.forceSpit(source.getPlayer());
+        source.sendSuccess(() -> Component.literal(started
+                ? "已开始喷吐蓄力（约 1.2–1.6 秒后发射）"
+                : "BOSS 正在攻击/转阶段/已死亡，本次未触发"), false);
+        return started ? 1 : 0;
+    }
+
+    /** 调试：只触发技能 B（大地震波），不会同时放火环。 */
+    private static int triggerQuake(CommandSourceStack source) {
+        VolcanicTortoiseEntity boss = nearest(source);
+        if (boss == null) {
+            source.sendFailure(Component.literal("32 格内没有火山巨龟"));
+            return 0;
+        }
+        boolean started = boss.forceQuake();
+        source.sendSuccess(() -> Component.literal(started
+                ? "已触发大地震波（只有地面起伏，没有火环）"
+                : "BOSS 正在攻击/转阶段/已死亡，本次未触发"), false);
+        return started ? 1 : 0;
+    }
+
+    /** 调试：立即放一次火山喷发（蓄势 30–40 tick，随后 3 批共 21 颗）。 */
+    private static int triggerErupt(CommandSourceStack source) {
+        VolcanicTortoiseEntity boss = nearest(source);
+        if (boss == null) {
+            source.sendFailure(Component.literal("32 格内没有火山巨龟"));
+            return 0;
+        }
+        boolean started = boss.forceEruption();
+        source.sendSuccess(() -> Component.literal(started
+                ? "已触发火山喷发：蓄势后 3 批共 21 颗抛射火球"
+                : "BOSS 正在攻击/转阶段/已死亡，本次未触发"), false);
+        return started ? 1 : 0;
+    }
+
+    /** 调试：立即放一次熔岩之柱（走廊预警 36 tick 后分批起火柱）。 */
+    private static int triggerPillar(CommandSourceStack source) {
+        VolcanicTortoiseEntity boss = nearest(source);
+        if (boss == null) {
+            source.sendFailure(Component.literal("32 格内没有火山巨龟"));
+            return 0;
+        }
+        boolean started = boss.forcePillar();
+        source.sendSuccess(() -> Component.literal(started
+                ? "已触发熔岩之柱：36 tick 预警，随后 5–7 根火柱分批冲起"
+                : "BOSS 正在攻击/转阶段/已死亡，本次未触发"), false);
+        return started ? 1 : 0;
+    }
+
+    private static VolcanicTortoiseEntity nearest(CommandSourceStack source) {
+        ServerLevel level = source.getLevel();
+        if (source.getPlayer() == null) {
+            return null;
+        }
+        AABB box = source.getPlayer().getBoundingBox().inflate(32.0D);
+        List<VolcanicTortoiseEntity> bosses = level.getEntitiesOfClass(VolcanicTortoiseEntity.class, box);
+        return bosses.stream()
+                .min(Comparator.comparingDouble(candidate -> candidate.distanceToSqr(source.getPlayer())))
+                .orElse(null);
     }
 
     /** 调试：让 32 格内最近一只巨龟立刻重踏一次；range=true 时把 22 格最终半径画出来。 */

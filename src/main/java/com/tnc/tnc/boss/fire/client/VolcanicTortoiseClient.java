@@ -11,5 +11,8 @@ public final class VolcanicTortoiseClient {
     @SubscribeEvent
     public static void renderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(VolcanicTortoiseRegistration.TYPE, VolcanicTortoiseRenderer::new);
+        event.registerEntityRenderer(VolcanicTortoiseRegistration.FIREBALL, VolcanicFireballRenderer::new);
+        event.registerEntityRenderer(VolcanicTortoiseRegistration.MORTAR, VolcanicMortarRenderer::new);
+        event.registerEntityRenderer(VolcanicTortoiseRegistration.FIRE_FIELD, VolcanicFireFieldRenderer::new);
     }
 }
