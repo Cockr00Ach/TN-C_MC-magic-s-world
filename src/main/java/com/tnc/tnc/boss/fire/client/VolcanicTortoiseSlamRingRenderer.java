@@ -52,6 +52,15 @@ public final class VolcanicTortoiseSlamRingRenderer {
     private static final MultiBufferSource.BufferSource BUFFERS =
             MultiBufferSource.immediate(new BufferBuilder(262144));
 
+    /**
+     * 每只 Boss 的「第一次看到本次火环」的客户端时刻，key = 实体 id，value = {start 值, 看到时的 gameTime}。
+     * <p>服务端用 {@code ServerLevel.getGameTime()} 记录起点，客户端的 gameTime 由 SetTime 包每秒才校一次，
+     * 两者可能差十几 tick：直接相减会让 age 变负（整段被跳过）或一上来就是 20+（环直接跳到外圈甚至已过期）。
+     * 改为在客户端第一次收到 start 时把 age 记 0，环就一定能从头完整播一遍；代价是比伤害晚一个网络往返。
+     */
+    private static final java.util.Map<Integer, long[]> SEEN = new java.util.HashMap<>();
+    private static boolean loggedDraw;
+
     private VolcanicTortoiseSlamRingRenderer() {
     }
 
@@ -69,17 +78,27 @@ public final class VolcanicTortoiseSlamRingRenderer {
         Vec3 camera = event.getCamera().getPosition();
         RenderType type = RenderType.entityTranslucentEmissive(TEXTURE);
         VertexConsumer out = null;
+        if (SEEN.size() > 128) {
+            SEEN.clear();
+        }
         for (var entity : level.entitiesForRendering()) {
             if (!(entity instanceof VolcanicTortoiseEntity boss)) {
                 continue;
             }
             int start = boss.slamRingStart();
             if (start < 0) {
+                SEEN.remove(entity.getId());
                 continue;
             }
-            // 视觉比服务端落后半 tick：环带永远不会先于伤害到达。
-            float age = (level.getGameTime() - start) + partial - 0.5F;
-            if (age <= 0.0F || age > VolcanicTortoiseEntity.SLAM_RING_TICKS + 3.0F) {
+            long now = level.getGameTime();
+            long[] seen = SEEN.get(entity.getId());
+            if (seen == null || seen[0] != start) {
+                seen = new long[]{start, now};
+                SEEN.put(entity.getId(), seen);
+            }
+            // 以客户端第一次看到本环的时刻为 0，避免两端的 gameTime 不同步把整段吞掉。
+            float age = (float) (now - seen[1]) + partial;
+            if (age > VolcanicTortoiseEntity.SLAM_RING_TICKS + 6.0F) {
                 continue;
             }
             double radius = 22.0D * Math.min(age, VolcanicTortoiseEntity.SLAM_RING_TICKS)
@@ -92,7 +111,7 @@ public final class VolcanicTortoiseSlamRingRenderer {
                 continue;
             }
             // 最大半径附近快速淡出，随后彻底清理。
-            float fade = Mth.clamp((VolcanicTortoiseEntity.SLAM_RING_TICKS + 2.0F - age) / 4.0F, 0.0F, 1.0F);
+            float fade = Mth.clamp((VolcanicTortoiseEntity.SLAM_RING_TICKS + 4.0F - age) / 6.0F, 0.0F, 1.0F);
             Matrix4f pose = new Matrix4f().translation(
                     (float) (center.x - camera.x),
                     (float) (center.y - camera.y),
@@ -101,6 +120,12 @@ public final class VolcanicTortoiseSlamRingRenderer {
                 out = BUFFERS.getBuffer(type);
             }
             ring(level, out, pose, center, radius, age, fade * ALPHA);
+            if (!loggedDraw) {
+                loggedDraw = true;
+                com.mojang.logging.LogUtils.getLogger().info(
+                        "[TN-C SlamRing] first ring drawn: center={} radius={} segments={}",
+                        center, String.format(java.util.Locale.ROOT, "%.2f", radius), SEGMENTS);
+            }
         }
         if (out != null) {
             BUFFERS.endBatch(type);
@@ -162,12 +187,14 @@ public final class VolcanicTortoiseSlamRingRenderer {
                              double x0, double y0, double z0, double x1, double y1, double z1,
                              double top0, double top1, double nx, double nz,
                              float u0, float u1, float alpha, float gain) {
+        // 纹理第 0 行是火舌尖端（透明），最后一列行是近白底色：v=0 对应图片顶部，
+        // 所以环带底部要用 v=1、顶部用 v=0，否则火焰会上下颠倒、底部只剩一条暗红边。
         // 两遍相反绕序：半透明渲染类型会剔背面，保证从环内/环外都能看到。
-        quad(out, pose, x0, y0, z0, u0, 0.0F, x1, y1, z1, u1, 0.0F,
-                x1, top1, z1, u1, 1.0F, x0, top0, z0, u0, 1.0F,
+        quad(out, pose, x0, y0, z0, u0, 1.0F, x1, y1, z1, u1, 1.0F,
+                x1, top1, z1, u1, 0.0F, x0, top0, z0, u0, 0.0F,
                 (float) nx, 0.0F, (float) nz, alpha, gain);
-        quad(out, pose, x0, y0, z0, u0, 0.0F, x0, top0, z0, u0, 1.0F,
-                x1, top1, z1, u1, 1.0F, x1, y1, z1, u1, 0.0F,
+        quad(out, pose, x0, y0, z0, u0, 1.0F, x0, top0, z0, u0, 0.0F,
+                x1, top1, z1, u1, 0.0F, x1, y1, z1, u1, 1.0F,
                 (float) -nx, 0.0F, (float) -nz, alpha, gain);
     }
 
@@ -175,8 +202,8 @@ public final class VolcanicTortoiseSlamRingRenderer {
                              double xi0, double yi0, double zi0, double xi1, double yi1, double zi1,
                              double xo1, double yo1, double zo1, double xo0, double yo0, double zo0,
                              float u0, float u1, float alpha) {
-        quad(out, pose, xi0, yi0, zi0, u0, 0.10F, xi1, yi1, zi1, u1, 0.10F,
-                xo1, yo1, zo1, u1, 0.90F, xo0, yo0, zo0, u0, 0.90F,
+        quad(out, pose, xi0, yi0, zi0, u0, 0.90F, xi1, yi1, zi1, u1, 0.90F,
+                xo1, yo1, zo1, u1, 0.10F, xo0, yo0, zo0, u0, 0.10F,
                 0.0F, 1.0F, 0.0F, alpha, 1.0F);
     }
 
