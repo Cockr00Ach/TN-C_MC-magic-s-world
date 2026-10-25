@@ -43,19 +43,21 @@ public final class VolcanicBossBarOverlay {
     private static final int LAVA_TEX_W = 182;
     private static final int LAVA_TEX_H = 25;
 
-    /** 整条相对参考图原始比例再缩到 0.75（宽度 182 -> 137）。 */
-    private static final double UI_SCALE = 0.75;
-    private static final int BAR_W = (int) Math.round(INNER_W / 2.0 * UI_SCALE);   // 137
-    private static final int BAR_H = (int) Math.round(INNER_H / 2.0 * UI_SCALE);   // 19
-    private static final int ART_W = (int) Math.round(ART_TEX_W / 2.0 * UI_SCALE); // 143
-    private static final int ART_H = (int) Math.round(ART_TEX_H / 2.0 * UI_SCALE); // 52
+    /** 整条等比缩到参考图的一半（宽度 182 -> 91）。 */
+    private static final double UI_SCALE = 0.5;
+    private static final int BAR_W = (int) Math.round(INNER_W / 2.0 * UI_SCALE);   // 91
+    private static final int BAR_H = (int) Math.round(INNER_H / 2.0 * UI_SCALE);   // 13
+    private static final int ART_W = (int) Math.round(ART_TEX_W / 2.0 * UI_SCALE); // 95
+    private static final int ART_H = (int) Math.round(ART_TEX_H / 2.0 * UI_SCALE); // 35
     private static final int ART_OFF_X = (int) Math.round(INNER_LEFT / 2.0 * UI_SCALE); // 2
-    private static final int ART_OFF_Y = (int) Math.round(INNER_TOP / 2.0 * UI_SCALE);  // 27
+    private static final int ART_OFF_Y = (int) Math.round(INNER_TOP / 2.0 * UI_SCALE);  // 18
 
-    /** 名字：橙红色、带阴影，与火山顶留 6px 间隔（避开火焰与烟）。 */
+    /** 名字：橙红色、带阴影，画在血条下方。 */
     private static final int NAME_COLOR = 0xFF5A24;
-    private static final int NAME_GAP = 6;
+    private static final int NAME_GAP = 4;
     private static final int NAME_H = 9;
+    /** 整条相对原版 Boss 栏位置再上移的像素数。 */
+    private static final int LIFT = 5;
     /** 非第一条时裁掉火山上半段，避免压住上一条血条。 */
     private static final int CROP_TOP = INNER_TOP - 10;
 
@@ -82,8 +84,9 @@ public final class VolcanicBossBarOverlay {
         int index = Math.max(0, (y - 12) / 19);
         boolean full = index == 0;
 
-        int shift = Math.max(0, (ART_OFF_Y + NAME_GAP + NAME_H + 4) - y);
-        int barY = y + shift;
+        int shift = Math.max(0, (ART_OFF_Y + 4) - y);
+        // 名字挪到血条下方：整条上移，给下方名字腾出空间
+        int barY = Math.max(2, y + shift - LIFT);
         int artX = x - ART_OFF_X;
         int artY = barY - ART_OFF_Y;
 
@@ -109,8 +112,8 @@ public final class VolcanicBossBarOverlay {
                     0, v, ART_TEX_W, h, ART_TEX_W, ART_TEX_H);
         }
 
-        // 4. 名字：橙红 + 阴影，跟着组件走
-        int nameY = full ? artY - NAME_GAP - NAME_H : barY - NAME_GAP - NAME_H;
+        // 4. 名字：血条正下方，橙红 + 阴影
+        int nameY = barY + BAR_H + NAME_GAP;
         graphics.drawString(font, name, x + BAR_W / 2 - font.width(name) / 2, nameY, NAME_COLOR, true);
     }
 
