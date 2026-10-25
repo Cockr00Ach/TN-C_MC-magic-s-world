@@ -169,6 +169,7 @@ public final class TNProjectileModels {
     public static final String[] PROJECTILE_MODELS = {
             // 火系（用户自制）
             "projectile/fireball",
+            // 2026-10-25 作者手改的火球内核（tools/import_fireball_bbmodel.py）
             // 水系（用户自制）
             "projectile/waterball",
             // 雷系（用户自制）
