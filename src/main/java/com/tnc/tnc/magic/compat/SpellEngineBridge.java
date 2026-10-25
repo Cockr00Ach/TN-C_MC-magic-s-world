@@ -144,7 +144,11 @@ public final class SpellEngineBridge {
      * 没装引擎的环境（dev / 别的包）也能正常注册，不需要再做嵌套类隔离。
      */
     public static Item createWandItem() {
-        return new Item(new Item.Properties().stacksTo(1).rarity(net.minecraft.world.item.Rarity.UNCOMMON));
+        return new Item(new Item.Properties().stacksTo(1).rarity(net.minecraft.world.item.Rarity.UNCOMMON)){
+            @Override public void initializeClient(java.util.function.Consumer<net.minecraftforge.client.extensions.common.IClientItemExtensions> consumer){
+                consumer.accept(new com.tnc.tnc.equipment.client.LuminousStaffRenderer.Extension());
+            }
+        };
     }
 
     /**

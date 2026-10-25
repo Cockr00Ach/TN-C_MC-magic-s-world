@@ -25,7 +25,8 @@ public final class GearModels {
     public static final class Extension implements IClientItemExtensions {
         @Override public Model getGenericArmorModel(LivingEntity entity, ItemStack stack, EquipmentSlot slot, HumanoidModel<?> original) {
             var design = ((MageGear.GearItem) stack.getItem()).design;
-            var model = CACHE.computeIfAbsent(design.id(), id -> new TailoredModel(mesh(design).bakeRoot()));
+            var model = CACHE.computeIfAbsent(design.id(), id -> new TailoredModel(mesh(design).bakeRoot(),design));
+            model.time = entity.tickCount + Minecraft.getInstance().getFrameTime();
             net.minecraftforge.client.ForgeHooksClient.copyModelProperties(original, model);
             model.head.copyFrom(original.head); model.body.copyFrom(original.body);
             model.rightArm.copyFrom(original.rightArm); model.leftArm.copyFrom(original.leftArm);
@@ -42,7 +43,19 @@ public final class GearModels {
     }
 
     private static final class TailoredModel extends HumanoidModel<LivingEntity> {
-        TailoredModel(ModelPart root) { super(root); }
+        private final MageGear.Design design;
+        private float time;
+        TailoredModel(ModelPart root,MageGear.Design design) { super(root);this.design=design; }
+
+        @Override public void renderToBuffer(com.mojang.blaze3d.vertex.PoseStack pose,
+                com.mojang.blaze3d.vertex.VertexConsumer vertices,int light,int overlay,float red,float green,float blue,float alpha){
+            super.renderToBuffer(pose,vertices,light,overlay,red,green,blue,alpha);
+            if(design.tier()<2)return;
+            int frame=Math.floorMod((int)(time/4),8);
+            var texture=ResourceLocation.parse("tnc:textures/models/armor/"+design.id()+"_glow_"+frame+".png");
+            var glow=Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(net.minecraft.client.renderer.RenderType.eyes(texture));
+            super.renderToBuffer(pose,glow,15728880,overlay,1,1,1,design.tier()==2?.45f:design.tier()==3?.65f:1);
+        }
 
         void drape(HumanoidModel<?> wearer, LivingEntity entity) {
             float idle = Mth.sin((entity.tickCount + Minecraft.getInstance().getFrameTime()) * .07f) * .012f;

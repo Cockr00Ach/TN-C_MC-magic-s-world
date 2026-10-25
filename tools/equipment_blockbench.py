@@ -76,6 +76,18 @@ def export_wand(p):
     if original.get("loader")=="forge:separate_transforms":
         held=AS/"models"/(original["base"]["parent"].split(":")[-1]+".json");model=json.loads(held.read_text("utf8"))
         texture=AS/"textures"/(model["textures"]["body"].split(":")[-1]+".png");size=Image.open(texture).size;elements=[]
+        if model.get('loader')=='tnc:botanical_mesh':
+            vertices={};faces={}
+            for i,face in enumerate(model['surfaces']):
+                keys=[]
+                for j,v in enumerate(face['vertices']):
+                    key=f'v{i}_{j}';vertices[key]=v;keys.append(key)
+                face_key=model.get('tnc_surface_keys',[])[i] if i<len(model.get('tnc_surface_keys',[])) else str(i)
+                faces[face_key]=dict(vertices=keys,uv={key:[uv[0]*size[0]/16,uv[1]*size[1]/16] for key,uv in zip(keys,face['uv'])},texture=0,tnc={k:v for k,v in face.items() if k not in ('vertices','uv')})
+            mesh=dict(name=p.stem,uuid=uid(p.stem+'/sculpture'),type='mesh',origin=[0,0,0],vertices=vertices,faces=faces)
+            write(OUT/'wands'/(p.stem+'.bbmodel'),dict(meta={'format_version':'4.10','model_format':'free','box_uv':False},name=p.stem,
+                 resolution={'width':size[0],'height':size[1]},elements=[mesh],outliner=[mesh['uuid']],textures=[tex(texture,size)],display=model.get('display',{})))
+            return
         for i,src in enumerate(model["elements"]):
             e=dict(name=src.get("name",str(i)),uuid=uid(p.stem+"/held/"+str(i)),type="cube",box_uv=False,**{"from":src["from"],"to":src["to"]},faces={f:{"texture":0,"uv":[n*size[j%2]/16 for j,n in enumerate(face["uv"])]} for f,face in src["faces"].items()})
             if "rotation" in src:
@@ -103,6 +115,29 @@ def import_bb(p):
             target=AS/"models"/(old["base"]["parent"].split(":")[-1]+".json");old=json.loads(target.read_text("utf8"))
         location=old.get("textures",{}).get("layer0",old.get("textures",{}).get("all","tnc:item/wands/"+id))
         if separated:location=old["textures"]["body"]
+        if old.get('loader')=='tnc:botanical_mesh':
+            surfaces=[]
+            retained={}
+            retained_keys=[]
+            for mesh in elements.values():
+                assert mesh['type']=='mesh','雕刻法杖请保留网格格式'
+                assert not any(mesh.get('rotation',[0,0,0])),'请在编辑模式中修改顶点，不要整体旋转网格'
+                for face_key,face in mesh['faces'].items():
+                    keys=face['vertices'];assert len(keys)==4,'请保留四边面（可包含重叠的三角形端点）'
+                    # Blockbench drops unregistered custom face fields on save,
+                    # but retains mesh face keys. Recover authored semantics by
+                    # that stable key, never by the new face iteration order.
+                    index=int(face_key) if face_key.isdecimal() else -1
+                    prior=old.get('tnc_surface_metadata',{}).get(face_key,old['surfaces'][index] if 0<=index<len(old['surfaces']) else {})
+                    metadata=face.get('tnc',{k:v for k,v in prior.items() if k not in ('vertices','uv')})
+                    if not metadata:metadata={'part':'edited_frame','material':1}
+                    retained[face_key]=metadata
+                    retained_keys.append(face_key)
+                    surfaces.append(dict(**metadata,vertices=[mesh['vertices'][k] for k in keys],uv=[[face['uv'][k][0]*16/d['resolution']['width'],face['uv'][k][1]*16/d['resolution']['height']] for k in keys]))
+            old['surfaces']=surfaces;old['tnc_surface_metadata']=retained;old['tnc_surface_keys']=retained_keys;old['display']=d.get('display',{});write(target,old)
+            source=d['textures'][0].get('source','')
+            if source.startswith('data:image/png;base64,'):(AS/'textures'/(location.split(':')[-1]+'.png')).write_bytes(base64.b64decode(source.split(',',1)[1]))
+            print('Imported sculpted mesh',id);return
         texture_key="body" if separated else "all"
         result={"textures":{texture_key:location,"particle":location},"display":d.get("display",{}),"elements":[]}
         for k in ("tnc_grip","tnc_tip","ambientocclusion","gui_light"):

@@ -24,8 +24,13 @@ def main():
             held=A/'models/item/wands/held'/f'{id}.json';original=load(held)
             png=A/'textures/item/wands/held'/f'{id}.png'
             assert base64.b64decode(data['textures'][0]['source'].split(',',1)[1])==png.read_bytes(),id
-            assert len(data['elements'])==len(original['elements']),id
+            assert len(data['elements'])==(1 if original.get('loader')=='tnc:botanical_mesh' else len(original['elements'])),id
             wrapper=sha(assets/'models/item'/f'{id}.json')
+            if 'surfaces' in original:
+                # Simulate a real Blockbench save, which removes custom fields.
+                for mesh in data['elements']:
+                    for face in mesh['faces'].values():face.pop('tnc',None)
+                source=root/f'{id}.bbmodel';source.write_text(json.dumps(data),'utf8')
             with contextlib.redirect_stdout(io.StringIO()):
                 bb.import_bb(source);bb.import_bb(source);bb.export_wand(assets/'models/item'/f'{id}.json')
                 bb.import_bb(projects/'wands'/f'{id}.bbmodel')
@@ -34,12 +39,33 @@ def main():
             assert result['tnc_grip']==original['tnc_grip'] and result['tnc_tip']==original['tnc_tip'],id
             assert result.get('ambientocclusion')==original.get('ambientocclusion'),id
             assert result['display']==original['display'],id
+            if 'surfaces' in original:
+                assert len(result['surfaces'])==len(original['surfaces']),id
+                for a,b in zip(original['surfaces'],result['surfaces']):
+                    assert a['vertices']==b['vertices'],id
+                    assert {k:v for k,v in a.items() if k not in ('vertices','uv')}=={k:v for k,v in b.items() if k not in ('vertices','uv')},id+' animated material metadata'
+                    assert all(math.isclose(x,y,abs_tol=1e-8) for u,v in zip(a['uv'],b['uv']) for x,y in zip(u,v)),id
             for before, after in zip(original['elements'],result['elements']):
                 assert before['from']==after['from'] and before['to']==after['to'],id
                 for face in before['faces']:
                     assert all(math.isclose(x,y,abs_tol=1e-8) for x,y in zip(before['faces'][face]['uv'],after['faces'][face]['uv'])),id
             assert sha(assets/'models/item'/f'{id}.json')==wrapper,id+' inventory wrapper must remain untouched'
             assert sha(assets/'textures/item/wands/held'/f'{id}.png')==sha(png),id
+        # Re-export after an artist deletes and reorders faces must not silently
+        # attach the next face's crystal material/animation to the wrong polygon.
+        id='water_wand_5';edited=load(projects/'wands'/f'{id}.bbmodel')
+        faces=edited['elements'][0]['faces'];faces.pop(next(iter(faces)))
+        edited['elements'][0]['faces']=dict(reversed(list(faces.items())))
+        for face in faces.values():face.pop('tnc',None)
+        file=root/'edited.bbmodel';file.write_text(json.dumps(edited),'utf8')
+        with contextlib.redirect_stdout(io.StringIO()):
+            bb.import_bb(file)
+            expected=load(assets/'models/item/wands/held'/f'{id}.json')['surfaces']
+            bb.export_wand(assets/'models/item'/f'{id}.json')
+            saved=load(projects/'wands'/f'{id}.bbmodel')
+            for face in saved['elements'][0]['faces'].values():face.pop('tnc',None)
+            file.write_text(json.dumps(saved),'utf8');bb.import_bb(file)
+        assert load(assets/'models/item/wands/held'/f'{id}.json')['surfaces']==expected,'face identities survive delete/reorder/export/save/import'
         for record in manifest['armor']:
             id=record['id'];source=S/'armor'/f'{id}.bbmodel';data=load(source);original=load(A/'models/armor'/f'{id}.json')
             assert base64.b64decode(data['textures'][0]['source'].split(',',1)[1])==(A/'textures/models/armor'/f'{id}.png').read_bytes(),id

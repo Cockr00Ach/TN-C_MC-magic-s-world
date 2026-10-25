@@ -276,11 +276,28 @@ class Garment:
             self.child('hood_cowl_back', 'head', (-4.4, .1, 2.1), (8.8, 2.7, 3.5), 'lining')
             for x in [-3.4, 3.4]:
                 self.child('hood_tie_'+str(x), 'head', (x-.2, -.1, -3.6), (.4, 3.4, .5), 'leather')
+        # Seat the crown over the upper head instead of balancing above it.
+        drop = .35 if s == 'wanderer' else 2.3 if s in ['astral','divine','bastion'] else 1.8
+        for part in self.parts:
+            if part['parent'] == 'head': part['pivot'][1] += drop
         return self
 
     def save(self):
         texture = A/'textures/models/armor'/f'{self.id}.png'
         w, h = self.atlas.save(texture)
+        if self.tier >= 2:
+            for frame in range(8):
+                glow = Image.new('RGBA', (w, h), (0, 0, 0, 0))
+                for (bw,bh,bd,material),(u,v) in self.atlas.cache.items():
+                    if material not in (['gem'] if self.tier == 2 else ['gem','trim']): continue
+                    for yy in range(v,min(h,v+bh+bd+1)):
+                        for xx in range(u,min(w,u+2*(bw+bd)+1)):
+                            wave=max(0,math.cos(xx*.19+yy*.12-frame*math.tau/8))**5
+                            strength=.12+wave*(.3 if self.tier==2 else .5 if self.tier==3 else .85)
+                            c=self.atlas.image.getpixel((xx,yy))
+                            # Eyes blending is additive: encode intensity in RGB, not just alpha.
+                            glow.putpixel((xx,yy),(*[round(v*strength*.24) for v in c[:3]],255))
+                glow.save(texture.with_name(self.id+'_glow_'+str(frame)+'.png'))
         write(A/'models/armor'/f'{self.id}.json', dict(parts=self.parts, texture_width=w, texture_height=h))
         # The common exporter retains animated humanoid bones and exact box UVs.
         import equipment_blockbench as exporter
@@ -471,8 +488,9 @@ def main():
     before = {p.relative_to(A).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest() for p in icons}
     armor = [Garment(style, t, hat).headwear().save() if hat else Garment(style, t, hat).outfit().save()
              for style in PALETTES for t in ([5] if style == 'divine' else range(1, 5)) for hat in [False, True]]
-    wands = [Wand(e, t).build().save() for e in ELEMENTS for t in range(1, 6)]
-    wands.append(Wand('water', 1, True).build().save())
+    from rebuild_sculpted_wands import build as build_reference_wand
+    wands = [build_reference_wand(e, t) for e in ELEMENTS for t in range(1, 6)]
+    wands.append(build_reference_wand('water', 1, True))
     assert all(hashlib.sha256((A/p).read_bytes()).hexdigest() == digest for p, digest in before.items())
     write(S/'volume-redesign-manifest.json', dict(armor=armor, wands=wands, preserved_icon_sha256=before))
     write(A/'equipment/icon-integrity.json', before)

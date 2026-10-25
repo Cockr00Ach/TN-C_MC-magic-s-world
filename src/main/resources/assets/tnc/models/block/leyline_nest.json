@@ -1,6 +1,6 @@
 {
   "textures": {
-    "shell": "minecraft:block/crimson_hyphae",
+    "shell": "minecraft:block/crimson_stem",
     "core": "minecraft:block/crying_obsidian",
     "particle": "minecraft:block/nether_wart_block"
   },

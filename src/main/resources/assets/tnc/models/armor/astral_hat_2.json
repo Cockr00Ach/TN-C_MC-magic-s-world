@@ -110,7 +110,7 @@
       "parent": "head",
       "pivot": [
         0,
-        0,
+        2.3,
         0
       ],
       "rotation": [
@@ -143,7 +143,7 @@
       "parent": "head",
       "pivot": [
         0,
-        0,
+        2.3,
         0
       ],
       "rotation": [
@@ -176,7 +176,7 @@
       "parent": "head",
       "pivot": [
         0,
-        0,
+        2.3,
         0
       ],
       "rotation": [
@@ -209,7 +209,7 @@
       "parent": "head",
       "pivot": [
         0,
-        0,
+        2.3,
         0
       ],
       "rotation": [
@@ -242,7 +242,7 @@
       "parent": "head",
       "pivot": [
         0,
-        -8.6,
+        -6.3,
         0
       ],
       "rotation": [
@@ -407,7 +407,7 @@
       "parent": "head",
       "pivot": [
         0,
-        0,
+        2.3,
         0
       ],
       "rotation": [
@@ -440,7 +440,7 @@
       "parent": "head",
       "pivot": [
         0,
-        0,
+        2.3,
         0
       ],
       "rotation": [
@@ -473,7 +473,7 @@
       "parent": "head",
       "pivot": [
         0,
-        0,
+        2.3,
         0
       ],
       "rotation": [

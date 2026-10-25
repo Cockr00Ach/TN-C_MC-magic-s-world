@@ -15,6 +15,31 @@ import java.util.*;
 public final class LeylineGameTests {
  private static DungeonData.Run run(){var r=new DungeonData.Run(UUID.randomUUID(),UUID.randomUUID(),4734,908,DungeonTheme.ASTRAL);r.floor=12;return r;}
  @GameTest(template="building_test_empty",timeoutTicks=60,batch="leyline")
+ public static void bridgeCannotBeBypassedAlongEitherWallAndItsSpansRemainConnected(GameTestHelper h){
+  var r=run();var room=r.graph().rooms.get(1);var origin=DungeonRealm.center(r,room);
+  for(var kind:List.of(LeylineKind.BRIDGE,LeylineKind.DUAL_BRIDGE)){
+   var state=new CompoundTag();var cells=new ArrayList<DungeonRealm.Cell>();
+   // Include the inherited combat-room floor: the old regression hid in that perimeter.
+   for(int x=-10;x<=10;x++)for(int z=-10;z<=10;z++)cells.add(new DungeonRealm.Cell(origin.offset(x,0,z),net.minecraft.world.level.block.Blocks.STONE.defaultBlockState()));
+   LeylineRooms.build(cells,r,room,kind,state);var map=new HashMap<BlockPos,BlockState>();cells.forEach(c->map.put(c.pos(),c.state()));
+   h.assertTrue(!walksAcross(map,origin,false),kind+" has no ordinary floor bypass");
+   h.assertTrue(walksAcross(map,origin,true),kind+" has a continuous intended span");
+   h.assertTrue(LeylineService.nodes(state,"return").size()==2,"side entrances have recovery nodes");
+  }h.succeed();
+ }
+ private static boolean walksAcross(Map<BlockPos,BlockState> map,BlockPos origin,boolean allowSpan){
+  var visited=new HashSet<BlockPos>();var queue=new ArrayDeque<BlockPos>();queue.add(origin.offset(0,0,-9));
+  while(!queue.isEmpty()){
+   var p=queue.remove();if(!visited.add(p))continue;
+   if(Math.abs(p.getX()-origin.getX())>10||Math.abs(p.getZ()-origin.getZ())>10)continue;
+   var floor=map.get(p);if(floor==null||floor.isAir())continue;
+   if(!allowSpan&&(floor.is(LeylineContent.VEIL)||floor.is(LeylineContent.PHASE_MATERIAL)||floor.is(LeylineContent.PHASE_AETHER)))continue;
+   if(!map.getOrDefault(p.above(),net.minecraft.world.level.block.Blocks.AIR.defaultBlockState()).isAir())continue;
+   if(p.equals(origin.offset(0,0,8)))return true;
+   for(var direction:net.minecraft.core.Direction.Plane.HORIZONTAL)queue.add(p.relative(direction));
+  }return false;
+ }
+ @GameTest(template="building_test_empty",timeoutTicks=60,batch="leyline")
  public static void everyRoomBuildsWithNodesSafeLandingAndRealRewards(GameTestHelper h){
   var r=run();var room=r.graph().rooms.get(1);var origin=DungeonRealm.center(r,room);
   for(var kind:LeylineKind.values()){
