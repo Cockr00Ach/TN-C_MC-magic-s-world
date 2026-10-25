@@ -19,6 +19,9 @@ import java.util.*;
 public final class DungeonScreen extends Screen {
     public static CompoundTag latest=new CompoundTag();
     private static int received;
+    private static long introUntil;
+    private static boolean introPending;
+    private static String introKey="";
     private static final int W=600,H=360,INK=0xffe6daca,DIM=0xffb5aa98,GOLD=0xffb79a6b,CYAN=0xff91d6d5;
     private final CompoundTag state;
     private final List<Option> options=new ArrayList<>();
@@ -28,11 +31,18 @@ public final class DungeonScreen extends Screen {
     }
     public DungeonScreen(CompoundTag data){super(Component.literal("门后的三十层"));state=data.copy();}
     public static void accept(DungeonNetwork.State s){
-        latest=s.data().copy();var mc=Minecraft.getInstance();received=mc.player==null?0:mc.player.tickCount;
+        var mc=Minecraft.getInstance();
+        String key=s.data().getString("Theme")+":"+((s.data().getInt("Floor")-1)/5)+":"+s.data().get("Run");
+        if(s.data().getInt("Floor")>0&&!key.equals(introKey)) {introKey=key;introPending=true;}
+        if(s.data().getInt("Floor")==0){introKey="";introPending=false;introUntil=0;}
+        latest=s.data().copy();received=mc.player==null?0:mc.player.tickCount;
         if(s.open())mc.setScreen(new DungeonScreen(s.data()));
         else if(mc.screen instanceof DungeonScreen screen&&screen.state.getString("Theme").equals(s.data().getString("Theme"))&&screen.state.getInt("Floor")==s.data().getInt("Floor"))screen.state.merge(s.data());
     }
     private String kind(){return state.getString("Kind");}
+    @SubscribeEvent public static void logout(net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggingOut e){
+        latest=new CompoundTag();introKey="";introUntil=0;introPending=false;received=0;
+    }
     private DungeonTheme theme(){return DungeonTheme.find(state.getString("Theme"));}
     private Item material(){var item=DungeonRewards.material(theme());return item==null?Items.AMETHYST_SHARD:item;}
     private void option(int y,String label,String detail,Item icon,String action,int value){options.add(new Option(26,y,278,40,label,detail,icon,action,value,true));}
@@ -162,7 +172,9 @@ public final class DungeonScreen extends Screen {
     }
     @Override public boolean isPauseScreen(){return false;}
     @SubscribeEvent public static void hud(RenderGuiEvent.Post e){
-        var mc=Minecraft.getInstance();if(mc.player==null||mc.level==null||!DungeonRealm.inside(mc.level)||mc.options.hideGui||mc.screen!=null||mc.player.tickCount-received>160||latest.getInt("Floor")==0)return;
+        var mc=Minecraft.getInstance();if(mc.player==null||mc.level==null||!DungeonRealm.inside(mc.level)||mc.options.hideGui||mc.screen!=null||mc.player.tickCount-received>160||latest.getInt("Floor")==0||mc.getOverlay()!=null)return;
+        if(introPending){introPending=false;introUntil=net.minecraft.Util.getMillis()+6000;}
+        if(net.minecraft.Util.getMillis()>introUntil)return;
         progress(e.getGuiGraphics(),latest);
     }
     static void progress(GuiGraphics g,CompoundTag data){

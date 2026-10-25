@@ -21,6 +21,7 @@ public final class LeylineNativeAudit {
  private static boolean started,saving;
  private static volatile boolean ready;
  private static volatile BlockPos camera;
+ private static volatile float viewPitch=19;
  private static volatile CompoundTag projection;
  private static DungeonData.Run run;
  private static final List<String> failures=new ArrayList<>(),shots=new ArrayList<>();
@@ -33,10 +34,10 @@ public final class LeylineNativeAudit {
   if(!started&&++startup<100)return;
   if(!started){started=true;Files.createDirectories(folder());mc.options.pauseOnLostFocus=false;mc.options.guiScale().set(2);mc.options.framerateLimit().set(60);mc.options.enableVsync().set(false);mc.getWindow().updateVsync(false);mc.options.renderDistance().set(5);mc.options.hideGui=true;prepare(mc);return;}
   if(!ready||saving)return;
-  if(scene>=14){if(!DungeonRealm.inside(mc.level)||mc.player.blockPosition().distSqr(camera)>16)return;mc.setScreen(null);mc.player.setYRot(0);mc.player.setXRot(19);if(projection!=null)LeylineClient.accept(projection);}
+  if(scene>=14){if(!DungeonRealm.inside(mc.level)||mc.player.blockPosition().distSqr(camera)>16)return;mc.setScreen(null);mc.player.setYRot(0);mc.player.setXRot(viewPitch);if(projection!=null)LeylineClient.accept(projection);}
   if(++ticks==100){saving=true;String name=label()+".png";Screenshot.grab(mc.gameDirectory,"leyline-"+name,mc.getMainRenderTarget(),message->{try{Files.copy(mc.gameDirectory.toPath().resolve("screenshots/leyline-"+name),folder().resolve(name),StandardCopyOption.REPLACE_EXISTING);shots.add(name);}catch(Exception ex){failures.add(ex.toString());}finally{saving=false;}});return;}
   if(ticks<115)return;
-  if(++scene>=60){Files.writeString(folder().resolve("report.json"),new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(Map.of("jar_sha256",java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(mc.gameDirectory.toPath().resolve("mods/tnc-1.0.0.jar")))),"screenshots",shots,"failures",failures,"scope","Real full-pack model and room renderers. Poses and room projection are visual fixtures, not interaction-test evidence.")));mc.stop();return;}
+  if(++scene>=60){Files.writeString(folder().resolve("report.json"),new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(Map.of("jar_sha256",java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(mc.gameDirectory.toPath().resolve("mods/tnc-1.0.0.jar")))),"screenshots",shots,"failures",failures,"scope","Real full-pack model and room renderers. Poses and room projection are visual fixtures, not interaction-test evidence.")));WorldFeedbackNativeAudit.finished(mc);return;}
   ticks=0;prepare(mc);
  }
  private static String label(){if(scene>=10&&scene<14)return "ecology-"+(scene-10);return scene<10?String.format("model-%02d-%s",scene,MobCatalog.Family.values()[scene].name().toLowerCase(Locale.ROOT)):String.format("room-%02d-%s-%s",(scene-14)/2,LeylineKind.values()[1+(scene-14)/2].name().toLowerCase(Locale.ROOT),scene%2==1?"f8":"normal");}
@@ -56,9 +57,9 @@ public final class LeylineNativeAudit {
    var room=r.graph().rooms.get(1);var o=DungeonRealm.center(r,room);var state=LeylineService.state(r,room);state.putString("Kind",kind.name());
    var cells=new ArrayList<DungeonRealm.Cell>();
    for(int x=-11;x<=11;x++)for(int z=-11;z<=11;z++){cells.add(new DungeonRealm.Cell(o.offset(x,0,z),theme.floor()));cells.add(new DungeonRealm.Cell(o.offset(x,10,z),theme.wall()));if(Math.abs(x)==11||Math.abs(z)==11)for(int y=1;y<10;y++)cells.add(new DungeonRealm.Cell(o.offset(x,y,z),theme.wall()));}
-   LeylineRooms.build(cells,r,room,kind,state);camera=o.offset(0,5,-9);
+   LeylineRooms.build(cells,r,room,kind,state);boolean corridor=kind==LeylineKind.BRIDGE||kind==LeylineKind.DUAL_BRIDGE||kind==LeylineKind.ECHO||kind==LeylineKind.TIDE;camera=o.offset(0,corridor?2:5,-9);viewPitch=corridor?10:19;
    p.setGameMode(GameType.SPECTATOR);p.removeAllEffects();p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.NIGHT_VISION,20000,0,false,false));
-   p.teleportTo(level,camera.getX()+.5,camera.getY(),camera.getZ()+.5,0,19);
+   p.teleportTo(level,camera.getX()+.5,camera.getY(),camera.getZ()+.5,0,viewPitch);
    DungeonRealm.build(level,r,cells,()->{LeylinePuzzles.tick(level,r,room,List.of());projection=new CompoundTag();projection.putString("Kind",kind.name());projection.putLong("Origin",o.asLong());projection.put("State",state.copy());r.closed=true;ready=true;});
   }catch(Throwable error){failures.add(error.toString());ready=true;}});
  }

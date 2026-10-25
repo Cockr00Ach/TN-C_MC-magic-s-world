@@ -60,6 +60,7 @@ public final class LeylineRooms {
                 column(x,z,high-2,Blocks.POLISHED_DEEPSLATE);
                 put(x,3,z,Blocks.SEA_LANTERN);put(x,high-2,z,Blocks.CHISELED_DEEPSLATE);
             }
+            architecture(kind,high);
             switch(kind){
                 case BRIDGE -> bridge(false);
                 case DUAL_BRIDGE -> bridge(true);
@@ -94,23 +95,104 @@ public final class LeylineRooms {
             box(-1,0,-9,1,0,-8,Blocks.DEEPSLATE_TILES);
             state.put("Nodes",nodes);state.putLong("Origin",origin.asLong());state.putInt("Height",high);
         }
+        /** Individual spatial envelopes, while retaining the saved graph's four doorway anchors. */
+        void architecture(LeylineKind kind,int high){
+            if(kind==LeylineKind.BRIDGE||kind==LeylineKind.DUAL_BRIDGE){
+                // A seven-wide, twenty-long fissure nave. Side graph entries feed its
+                // entrance vestibule through separate return passages inside the rock.
+                for(int side:new int[]{-1,1}){
+                    box(side<0?-10:4,1,-6,side<0?-4:10,high-1,9,Blocks.DEEPSLATE_BRICKS);
+                    box(side*9,1,-9,side*9,3,0,Blocks.AIR);
+                    box(side<0?-10:9,1,-1,side<0?-9:10,3,1,Blocks.AIR);
+                }
+                for(int z=-6;z<=6;z+=4){
+                    box(-3,7,z,3,7,z,Blocks.CHISELED_DEEPSLATE);
+                    put(-4,4,z,Blocks.SEA_LANTERN);put(4,4,z,Blocks.SEA_LANTERN);
+                }
+            }else if(kind==LeylineKind.ECHO||kind==LeylineKind.TIDE){
+                // A twenty-block processional corridor; side doors join the entrance vestibule.
+                int edge=kind==LeylineKind.ECHO?4:7;
+                for(int side:new int[]{-1,1}) {
+                    box(side<0?-10:edge,1,-6,side<0?-edge:10,high-1,8,Blocks.DEEPSLATE_BRICKS);
+                    box(side<0?-10:8,1,-1,side<0?-8:10,4,1,Blocks.AIR);
+                    box(side<0?-9:9,1,-9,side<0?-9:9,4,0,Blocks.AIR);
+                }
+                int rib=kind==LeylineKind.ECHO?4:6;
+                for(int z=-6;z<=6;z+=4){
+                    box(-rib,1,z,-rib,high-2,z,Blocks.POLISHED_DEEPSLATE);
+                    box(rib,1,z,rib,high-2,z,Blocks.POLISHED_DEEPSLATE);
+                    box(-rib,high-2,z,rib,high-2,z,Blocks.CHISELED_DEEPSLATE);
+                    put(-rib,3,z,Blocks.SOUL_LANTERN);put(rib,3,z,Blocks.SOUL_LANTERN);
+                }
+            } else if(kind==LeylineKind.MUSIC||kind==LeylineKind.MEAL||kind==LeylineKind.SUNDIAL){
+                // Chamfered rotunda: there is no usable square corner beyond its octagonal shell.
+                for(int x=-10;x<=10;x++)for(int z=-10;z<=10;z++)if(Math.abs(x)+Math.abs(z)>15)
+                    box(x,1,z,x,high-1,z,kind==LeylineKind.SUNDIAL?Blocks.CUT_SANDSTONE:Blocks.CALCITE);
+            } else if(kind==LeylineKind.EXHIBITION){
+                // A gallery with alternating alcoves and a long central aisle.
+                for(int z:new int[]{-9,-3,3,9})for(int side:new int[]{-1,1})
+                    box(side<0?-10:3,1,z,side<0?-3:10,6,z,Blocks.SMOOTH_QUARTZ);
+            } else if(kind==LeylineKind.RAPIDS){
+                // A tall, narrow current gorge with a visibly elevated destination.
+                for(int side:new int[]{-1,1}){
+                    box(side<0?-10:6,1,-6,side<0?-6:10,high-1,9,Blocks.DARK_PRISMARINE);
+                    box(side*9,1,-9,side*9,3,0,Blocks.AIR);
+                    box(side<0?-10:9,1,-1,side<0?-9:10,3,1,Blocks.AIR);
+                }
+                for(int z=-5;z<=7;z+=4){put(-6,5+(z+5)/2,z,Blocks.SEA_LANTERN);put(6,5+(z+5)/2,z,Blocks.SEA_LANTERN);}
+            } else if(kind==LeylineKind.GRAVITY){
+                // A circular vertical observatory, whose height is its puzzle space.
+                for(int x=-10;x<=10;x++)for(int z=-10;z<=10;z++)if(x*x+z*z>121)
+                    box(x,1,z,x,high-1,z,Blocks.PURPUR_BLOCK);
+                for(int y=5;y<high;y+=6)for(int x=-10;x<=10;x++)for(int z=-10;z<=10;z++)
+                    if(x*x+z*z>115&&x*x+z*z<=132)put(x,y,z,Blocks.END_STONE_BRICKS);
+            } else if(kind==LeylineKind.PAWN){
+                // A sunken spring court, with a timber trading mezzanine along one side.
+                for(int x=-10;x<=10;x++)for(int z=-10;z<=10;z++)if(Math.abs(x)+Math.abs(z)>17)
+                    box(x,1,z,x,high-1,z,Blocks.MOSSY_STONE_BRICKS);
+                box(-9,0,3,-3,0,8,Blocks.DARK_OAK_PLANKS);
+                for(int x:new int[]{-9,-3}){column(x,8,6,Blocks.STRIPPED_DARK_OAK_LOG);put(x,5,7,Blocks.LANTERN);}
+                box(-9,6,3,-3,6,8,Blocks.DARK_OAK_SLAB);
+            } else if(kind==LeylineKind.PUPPETS){
+                // Recessed proscenium and a fan of tiered audience benches.
+                for(int x=-9;x<=9;x++)for(int z=-9;z<=-3;z++)if(Math.abs(x)>=3&&Math.abs(x)+Math.abs(z)>10){
+                    int height=z<=-7?2:1;box(x,1,z,x,height,z,Blocks.DARK_OAK_STAIRS);
+                }
+                for(int side:new int[]{-1,1})box(side<0?-10:7,1,9,side<0?-7:10,high-1,10,Blocks.RED_TERRACOTTA);
+            } else if(kind==LeylineKind.FALSE_VAULT){
+                // An oval treasury rather than another empty rectangular arena.
+                for(int x=-10;x<=10;x++)for(int z=-10;z<=10;z++)if(x*x/121.0+z*z/121.0>1.25)
+                    box(x,1,z,x,high-1,z,Blocks.POLISHED_BLACKSTONE_BRICKS);
+            } else if(kind==LeylineKind.VINES||kind==LeylineKind.POLLUTION||kind==LeylineKind.REFRACTION){
+                // The obstacle divides a real rear chamber; it cannot be sidestepped.
+                int z=kind==LeylineKind.REFRACTION?8:5;
+                int aperture=kind==LeylineKind.REFRACTION?3:5;
+                box(-10,1,z,-aperture-1,9,z,Blocks.CHISELED_DEEPSLATE);
+                box(aperture+1,1,z,10,9,z,Blocks.CHISELED_DEEPSLATE);
+                box(-aperture,5,z,aperture,9,z,Blocks.DEEPSLATE_BRICKS);
+            }
+        }
         void bridge(boolean dual){
-            box(-8,-8,-6,8,-1,6,Blocks.AIR);box(-8,-9,-6,8,-9,6,Blocks.OBSIDIAN);
-            box(-8,0,-6,8,0,6,Blocks.AIR);
-            // Two broad landings connect each doorway; a broken axial span prevents a simple walk-through.
-            box(-8,0,-8,8,0,-7,Blocks.CRACKED_DEEPSLATE_BRICKS);
-            box(-8,0,7,8,0,8,Blocks.CRACKED_DEEPSLATE_BRICKS);
+            // The chasm reaches both outer walls. No inherited perimeter floor survives.
+            box(-10,-8,-6,10,0,6,Blocks.AIR);
+            box(-10,-9,-6,10,-9,6,Blocks.OBSIDIAN);
+            box(-10,0,-10,10,0,-7,Blocks.CRACKED_DEEPSLATE_BRICKS);
+            box(-10,0,8,10,0,10,Blocks.CRACKED_DEEPSLATE_BRICKS);
+            // Side entrances return to the north vestibule; they never reach the far bank.
+            for(int side:new int[]{-1,1}) {
+                box(side*9,0,-6,side*9,0,0,Blocks.DEEPSLATE_TILES);
+                box(side<0?-10:9,0,-1,side<0?-9:10,0,1,Blocks.DEEPSLATE_TILES);
+                node("return",side+1,side*8,1,0,LeylineContent.NODE);
+            }
             for(int i=0;i<7;i++){
-                int x=i%2==0?-1:1,z=-6+i*2;
+                int x=i%2==0?-1:0,z=-6+i*2;
                 Block b=dual?(i%2==0?LeylineContent.PHASE_MATERIAL:LeylineContent.PHASE_AETHER):LeylineContent.VEIL;
-                for(int dx=0;dx<2;dx++)for(int dz=0;dz<2;dz++)put(x+dx,0,z+dz,b);
+                for(int dx=0;dx<3;dx++)for(int dz=0;dz<2;dz++)put(x+dx,0,z+dz,b);
                 node(dual?(i%2==0?"phase_a":"phase_b"):"bridge",i,x,0,z,null);
             }
-            for(int s:new int[]{-1,1}){
-                box(s<0?-8:6,0,-5,s<0?-6:8,0,5,Blocks.SMOOTH_STONE);
-                node("drain",s+1,s*7,0,0,null);
-            }
-            node("goal",0,0,1,8,LeylineContent.NODE);
+            // The far bank is deliberately isolated, including the last row beside the span.
+            box(-10,0,7,-2,0,7,Blocks.AIR);box(3,0,7,10,0,7,Blocks.AIR);
+            node("goal",0,0,1,9,LeylineContent.NODE);
         }
         void vault(){
             defaultInt("TrueIndex",8);
@@ -128,7 +210,8 @@ public final class LeylineRooms {
             for(int i=0;i<4;i++){
                 int x=i%2==0?-5:5,z=-6+i*4;
                 column(x,z,5,Blocks.PRISMARINE);put(x,4,z,Blocks.SEA_LANTERN);
-                node("cover",i,x+(x<0?-1:1),1,z,null);
+                // The incoming tide moves toward -Z: shelter is behind, not inside, the column.
+                node("cover",i,x,1,z-1,null);
             }
             box(-2,0,7,2,0,9,Blocks.MOSS_BLOCK);
             put(0,0,8,Blocks.DIRT);
@@ -139,10 +222,10 @@ public final class LeylineRooms {
         void echo(){
             box(-7,0,-7,7,0,7,Blocks.POLISHED_BLACKSTONE);
             for(int i=0;i<4;i++){
-                int x=(i%2==0?-3:3),z=-5+i*3;
+                int x=(i%2==0?-2:2),z=-5+i*3;
                 put(x,0,z,Blocks.CRACKED_STONE_BRICKS);node("footprint",i,x,0,z,null);
             }
-            for(int x=-5;x<=5;x++)for(int y=1;y<=6;y++)put(x,y,8,Blocks.CHISELED_STONE_BRICKS);
+            for(int x=-10;x<=10;x++)for(int y=1;y<=9;y++)put(x,y,8,Blocks.CHISELED_STONE_BRICKS);
             node("echo_wall",0,0,2,8,null);put(-7,1,-5,Blocks.SKELETON_SKULL);
             put(0,1,9,Blocks.CHEST);
         }
@@ -189,7 +272,7 @@ public final class LeylineRooms {
         }
         void vines(boolean polluted){
             ring(7,0,polluted?Blocks.GILDED_BLACKSTONE:Blocks.MOSS_BLOCK);
-            for(int x=-5;x<=5;x++)for(int y=1;y<=4;y++)if((x+y)%3!=0)
+            for(int x=-5;x<=5;x++)for(int y=1;y<=4;y++)
                 node("vine",(x+5)*4+y,x,y,5,Blocks.MANGROVE_ROOTS);
             box(-8,0,-6,-4,0,-2,Blocks.POLISHED_DEEPSLATE);
             for(int x=-8;x<=-4;x++)for(int z=-6;z<=-2;z++)if(x==-8||x==-4||z==-6||z==-2)put(x,1,z,Blocks.STONE_BRICK_SLAB);
@@ -249,11 +332,11 @@ public final class LeylineRooms {
             ring(8,0,Blocks.CALCITE);
             for(int i=0;i<8;i++){
                 double a=i*Math.PI/4;int x=(int)Math.round(Math.cos(a)*7),z=(int)Math.round(Math.sin(a)*7),h=2+i%4;
-                column(x,z,h,Blocks.AMETHYST_BLOCK);node("crystal",i,x,h,z,null);
+                column(x,z,h,Blocks.AMETHYST_BLOCK);node("crystal",i,x,2,z,null);
                 put(x,h+1,z,Blocks.AMETHYST_CLUSTER);
             }
             node("treasure",0,0,1,0,Blocks.CHEST);
-            for(int x:new int[]{-8,8})for(int z:new int[]{-8,8}){
+            for(int x:new int[]{-7,7})for(int z:new int[]{-7,7}){
                 put(x,0,z,Blocks.DIRT);
                 if(x==z)put(x,1,z,com.tnc.tnc.life.botanical.BotanicalContent.BLOCKS.get("echo_bean").defaultBlockState()
                     .setValue(com.tnc.tnc.life.botanical.BotanicalBlock.WILD,true));

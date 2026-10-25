@@ -71,7 +71,7 @@ public final class LeylineClient {
         double time=owner.getGameTime()+event.getPartialTick();
         if(kind==LeylineKind.DUAL_BRIDGE&&!sight){
             Mesh stone=new Mesh(BUFFERS.getBuffer(LeylineRenderTypes.STONE),pose,camera.subtract(base),event.getCamera().rotation(),time);
-            for(Node n:nodes)if(n.role.equals("phase_a"))stone.slab(n.pos.add(-.5,-.5,-.5),2,0xced1cd,1);
+            for(Node n:nodes)if(n.role.equals("phase_a"))stone.slab(n.pos.add(-.5,-.5,-.5),3,2,0xced1cd,1);
             BUFFERS.endBatch(LeylineRenderTypes.STONE);return;
         }
         Mesh mesh=new Mesh(BUFFERS.getBuffer(LeylineRenderTypes.GLOW),pose,camera.subtract(base),event.getCamera().rotation(),time);
@@ -111,7 +111,7 @@ public final class LeylineClient {
                 for(Node n:nodes){
                     if(Set.of("bridge","phase_b","phase_a").contains(n.role)){
                         boolean material=n.role.equals("phase_a");
-                        m.platform(n.pos.add(.5,.52,.5),material?0xb2bbc4:CYAN,material?.12:.66);
+                        m.bridgePlatform(n.pos.add(1,.52,.5),material?0xb2bbc4:CYAN,material?.12:.66);
                     }else if(n.role.equals("drain"))m.whirlpool(n.pos.add(0,.54,0),PURPLE,1.45);
                 }
             }
@@ -330,12 +330,18 @@ public final class LeylineClient {
             for(int i=0;i<4;i++){double a=i*Math.PI/2+Math.PI/4,b=a+Math.PI/2;segment(p.add(Math.cos(a)*1.25,.015,Math.sin(a)*1.25),p.add(Math.cos(b)*1.25,.015,Math.sin(b)*1.25),.06,c,alpha);}
             ring(p.add(0,.02,0),.5,c,alpha*.7,0);
         }
+        void bridgePlatform(Vec3 p,int c,double alpha){
+            Vec3 a=p.add(-1.46,0,-.96),b=p.add(-1.46,0,.96),d=p.add(1.46,0,.96),e=p.add(1.46,0,-.96);
+            quad(a,b,d,e,c,alpha*.45);
+            segment(a,b,.06,c,alpha);segment(b,d,.06,c,alpha);segment(d,e,.06,c,alpha);segment(e,a,.06,c,alpha);
+            ring(p.add(0,.02,0),.5,c,alpha*.7,0);
+        }
         void platformVertical(Vec3 p,double r,int c,double alpha){quad(p.add(-r,-r,0),p.add(-r,r,0),p.add(r,r,0),p.add(r,-r,0),c,alpha);}
         void footprint(Vec3 p,int c,double alpha){quad(p.add(-.11,0,-.25),p.add(-.11,0,.25),p.add(.11,0,.25),p.add(.11,0,-.25),c,alpha);}
         void wave(double z,int c,double alpha){for(int i=-9;i<9;i++){double y=1.7+.3*Math.sin(i*.6+time*.12);segment(new Vec3(i,y,z),new Vec3(i+1,1.7+.3*Math.sin((i+1)*.6+time*.12),z),.18,c,alpha);segment(new Vec3(i,.15,z),new Vec3(i+1,.15,z),.06,c,alpha);}}
         void chevron(Vec3 p,boolean up,int c){double dy=up?-.7:.7;segment(p.add(-.45,dy,0),p,.05,c,.8);segment(p,p.add(.45,dy,0),.05,c,.8);}
-        void slab(Vec3 p,double size,int c,double alpha){
-            Vec3 a=p,b=p.add(size,0,0),d=p.add(0,0,size),e=p.add(size,0,size);
+        void slab(Vec3 p,double width,double depth,int c,double alpha){
+            Vec3 a=p,b=p.add(width,0,0),d=p.add(0,0,depth),e=p.add(width,0,depth);
             quad(a.add(0,1,0),d.add(0,1,0),e.add(0,1,0),b.add(0,1,0),c,alpha);
             quad(a,b,b.add(0,1,0),a.add(0,1,0),c,alpha);quad(d,d.add(0,1,0),e.add(0,1,0),e,c,alpha);
             quad(a,a.add(0,1,0),d.add(0,1,0),d,c,alpha);quad(b,e,e.add(0,1,0),b.add(0,1,0),c,alpha);

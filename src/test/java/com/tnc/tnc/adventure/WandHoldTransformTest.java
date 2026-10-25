@@ -38,18 +38,20 @@ final class WandHoldTransformTest {
             var icon = read("models/item/wands/icons/" + id + ".json");
             assertEquals("minecraft:item/generated", icon.get("parent").getAsString());
             assertEquals("tnc:item/" + (id.equals("magic_wand") ? id : "wands/"+id), icon.getAsJsonObject("textures").get("layer0").getAsString());
-            var model = held(id); var elements = model.getAsJsonArray("elements");
-            assertTrue(elements.size() >= 15, id);
-            boolean deepHead = false;
-            for (var value : elements) {
-                var b = value.getAsJsonObject(); var lo = vector(b.getAsJsonArray("from")); var hi = vector(b.getAsJsonArray("to"));
-                assertTrue(hi.x > lo.x && hi.y > lo.y && hi.z > lo.z, id + " has volume");
-                for (int axis = 0; axis < 3; axis++) assertTrue(lo.get(axis) >= -16 && hi.get(axis) <= 32, id + " Java model bounds");
-                if (lo.y > 15 && hi.z-lo.z >= 1.8f) deepHead = true;
-                for (var f : b.getAsJsonObject("faces").entrySet()) for (var uv : f.getValue().getAsJsonObject().getAsJsonArray("uv"))
-                    assertTrue(uv.getAsFloat() >= 0 && uv.getAsFloat() <= 16, id + " UV bounds");
+            var model = held(id);
+            assertEquals("tnc:botanical_mesh",model.get("loader").getAsString());
+            var surfaces=model.getAsJsonArray("surfaces");assertTrue(surfaces.size()>=90,id);
+            float minHead=Float.POSITIVE_INFINITY,maxHead=Float.NEGATIVE_INFINITY;
+            for(var value:surfaces){var face=value.getAsJsonObject();
+                assertEquals(4,face.getAsJsonArray("vertices").size(),id);
+                for(var vertex:face.getAsJsonArray("vertices")){
+                    var v=vector(vertex.getAsJsonArray());
+                    for(int axis=0;axis<3;axis++)assertTrue(Float.isFinite(v.get(axis))&&v.get(axis)>=-16&&v.get(axis)<=(axis==1?40:32),id+" actual mesh bounds");
+                    if(v.y>15){minHead=Math.min(minHead,v.z);maxHead=Math.max(maxHead,v.z);}
+                }
+                for(var pair:face.getAsJsonArray("uv"))for(var uv:pair.getAsJsonArray())assertTrue(uv.getAsFloat()>=0&&uv.getAsFloat()<=16,id+" UV bounds");
             }
-            assertTrue(deepHead, id + " must have a sculpted head, not extruded sprite pixels");
+            assertTrue(maxHead-minHead>=1.8f,id+" head has real depth");
         }
     }
 
@@ -72,11 +74,11 @@ final class WandHoldTransformTest {
             var tip = vector(model.getAsJsonArray("tnc_tip")).sub(8,8,8);
             for (boolean left : new boolean[]{false,true}) {
                 var d = model.getAsJsonObject("display").getAsJsonObject("firstperson_"+(left?"lefthand":"righthand"));
-                var palm = pose(grip,d,left); assertEquals(-.8, palm.y, .01);
-                assertEquals(left?1.8:-1.8,palm.x,.01);
+                var palm = pose(grip,d,left); assertEquals(-2.5, palm.y, .01);
+                assertEquals(left?2.8:-2.8,palm.x,.01);
                 var axis = pose(tip,d,left).sub(palm).rotateY((left?-1:1)*(float)Math.PI/4);
                 assertTrue(axis.y > axis.length()*.95 && Math.abs(axis.z) < axis.length()*.2, id + " must not spear into camera depth");
-                assertTrue(axis.length() <= 10.81, id + " staff height must fit a normal first-person view");
+                assertTrue(axis.length() >= 13.9 && axis.length() <= 14.1, id + " staff must be readable at the new validated first-person size");
             }
         }
     }

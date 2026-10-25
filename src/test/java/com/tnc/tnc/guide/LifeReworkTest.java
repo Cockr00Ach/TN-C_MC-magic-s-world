@@ -29,13 +29,23 @@ class LifeReworkTest {
             String id=raw.getAsJsonObject().get("id").getAsString();var states=read(RES.resolve("assets/tnc/blockstates/"+id+".json"));
             for(var variant:states.getAsJsonObject("variants").entrySet()){
                 var v=variant.getValue().getAsJsonObject();String model=v.get("model").getAsString().replace("tnc:","");
-                var mesh=read(RES.resolve("assets/tnc/models/"+model+".json"));var elements=mesh.getAsJsonArray("elements");assertNotNull(elements,id);assertTrue(elements.size()>1,id);models++;
-                for(var element:elements){var e=element.getAsJsonObject();var a=e.getAsJsonArray("from");var b=e.getAsJsonArray("to");
-                    assertTrue(a.get(1).getAsDouble()>=0,id+" root intersects soil");
-                    assertFalse(b.get(0).getAsDouble()-a.get(0).getAsDouble()>=12&&b.get(1).getAsDouble()-a.get(1).getAsDouble()>=12&&b.get(2).getAsDouble()-a.get(2).getAsDouble()>=12,id+" full-cube foliage");
-                    for(var tex:mesh.getAsJsonObject("textures").entrySet())assertTrue(Files.isRegularFile(RES.resolve("assets/tnc/textures/"+tex.getValue().getAsString().replace("tnc:","")+".png")));
+                var mesh=read(RES.resolve("assets/tnc/models/"+model+".json"));
+                assertEquals("tnc:botanical_mesh",mesh.get("loader").getAsString());
+                var file=RES.resolve("assets/tnc/"+mesh.get("geometry").getAsString().replace("tnc:",""));
+                var surfaces=JsonParser.parseString(Files.readString(file)).getAsJsonArray();
+                assertTrue(surfaces.size()>12,id);models++;
+                for(var surface:surfaces){var face=surface.getAsJsonObject();
+                    assertEquals(4,face.getAsJsonArray("vertices").size());
+                    for(var vertex:face.getAsJsonArray("vertices")){
+                        var vtx=vertex.getAsJsonArray();
+                        assertTrue(vtx.get(1).getAsDouble()>=0,id+" root intersects soil");
+                        for(var coordinate:vtx)assertTrue(Double.isFinite(coordinate.getAsDouble()),id);
+                    }
+                    for(var pair:face.getAsJsonArray("uv"))for(var uv:pair.getAsJsonArray())
+                        assertTrue(uv.getAsDouble()>=0&&uv.getAsDouble()<=16,id+" UV bounds");
                 }
-                if(variant.getKey().contains("age=3")||variant.getKey().contains("blooming=true"))mature.add(elements.toString());
+                for(var tex:mesh.getAsJsonObject("textures").entrySet())assertTrue(Files.isRegularFile(RES.resolve("assets/tnc/textures/"+tex.getValue().getAsString().replace("tnc:","")+".png")));
+                if(variant.getKey().contains("age=3")||variant.getKey().contains("blooming=true"))mature.add(surfaces.toString());
             }
         }
         assertTrue(models>=400);assertTrue(mature.size()>=28,"species must differ in real geometry, not just item icons");

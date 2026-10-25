@@ -121,6 +121,7 @@ public final class LeylinePuzzles {
         if(acceptPotion(p,r,room,s,at,potionId)) { LeylineService.consumeHeld(p,hand); if(bottled&&!p.isCreative()) give(p,new ItemStack(Items.GLASS_BOTTLE)); dirty(l); return true; }
         boolean handled=true;
         switch(kind) {
+            case BRIDGE,DUAL_BRIDGE -> { if(hit(s,"return",at)==null)return false;var o=DungeonRealm.center(r,room);p.teleportTo(l,o.getX()+.5,o.getY()+1,o.getZ()-9,0,0);say(p,"回到了桥前。切换F8辨认浮空落脚点。"); }
             case FALSE_VAULT -> { var n=hit(s,"vault",at); if(n==null) return false; int index=n.getInt("Index"); if(index==s.getInt("TrueIndex")) solve(l,r,room,p); else if((s.getInt("OpenedVaults")&(1<<index))==0) { s.putInt("OpenedVaults",s.getInt("OpenedVaults")|(1<<index)); LeylineService.spawnEcology(l,r,room,"crab",at.above()); p.hurt(p.damageSources().magic(),4); say(p,"假箱的死气回路断裂，拟态蟹从外壳中爬出！"); } }
             case TIDE -> { if(hit(s,"plant",at)==null&&hit(s,"goal",at)==null) return false; clearRole(l,s,"plant"); solve(l,r,room,p); }
             case ECHO -> { if(hit(s,"echo_wall",at)==null) return false; say(p,"淡蓝残影在墙前举起了水属性法杖。"); }
@@ -189,7 +190,7 @@ public final class LeylinePuzzles {
 
     private static void bridge(ServerLevel l,Run r,Room room,CompoundTag s,ServerPlayer p,boolean dual,long now) {
         var t=personal(s,p); int bits=t.getInt("BridgeSteps"), required=0;
-        for(String role:dual?List.of("phase_a","phase_b"):List.of("bridge")) for(var n:nodes(s,role)) { int bit=1<<n.getInt("Index"); required|=bit; var at=pos(n); boolean solid=!dual||role.equals("phase_b")==ManaSightServer.enabled(p); if(solid&&Math.abs(p.getY()-(at.getY()+1))<.8&&Math.abs(p.getX()-at.getX()-.5)<1.3&&Math.abs(p.getZ()-at.getZ()-.5)<1.3) bits|=bit; }
+        for(String role:dual?List.of("phase_a","phase_b"):List.of("bridge")) for(var n:nodes(s,role)) { int bit=1<<n.getInt("Index"); required|=bit; var at=pos(n); boolean solid=!dual||role.equals("phase_b")==ManaSightServer.enabled(p); if(solid&&Math.abs(p.getY()-(at.getY()+1))<.8&&Math.abs(p.getX()-at.getX()-1.5)<1.7&&Math.abs(p.getZ()-at.getZ()-1)<1.25) bits|=bit; }
         t.putInt("BridgeSteps",bits);
         for(var n:nodes(s,"drain")) if(near(p,pos(n).above(),1.1)&&cooldown(t,"Drained",now,20)) { emptyMana(p); p.hurt(p.damageSources().magic(),2); }
         var o=DungeonRealm.center(r,room);
@@ -231,7 +232,7 @@ public final class LeylinePuzzles {
         var source=first(s,"beam_source",DungeonRealm.center(r,room)); var lock=first(s,"lock",source);
         for(var base:nodes(s,"mirror_base")) { var at=pos(base).above(); if(!(l.getBlockEntity(at) instanceof RouteNodeEntity mirror)||!RouteMirrorLinks.mirror(mirror)) continue;
             var remote=RouteMirrorLinks.remote(l,mirror); if(remote==null||!nodes(s,"mirror_base").stream().anyMatch(n->pos(n).above().equals(remote))) continue;
-            if(RouteMirrorLinks.clear(l,source,at)&&RouteMirrorLinks.clear(l,remote,lock)) { ManaSightServer.record(l,Vec3.atCenterOf(source),Vec3.atCenterOf(at),32,0xffde85,4); ManaSightServer.record(l,Vec3.atCenterOf(at),Vec3.atCenterOf(remote),32,0xffde85,4); ManaSightServer.record(l,Vec3.atCenterOf(remote),Vec3.atCenterOf(lock),32,0xffde85,4); solve(l,r,room,p); return; }
+            if(RouteMirrorLinks.clear(l,source,at)&&RouteMirrorLinks.clear(l,remote,lock)) { ManaSightServer.record(l,Vec3.atCenterOf(source),Vec3.atCenterOf(at),32,0xffde85,4); ManaSightServer.record(l,Vec3.atCenterOf(at),Vec3.atCenterOf(remote),32,0xffde85,4); ManaSightServer.record(l,Vec3.atCenterOf(remote),Vec3.atCenterOf(lock),32,0xffde85,4); DungeonRealm.write(()->{for(int dx=-1;dx<=1;dx++)for(int dy=-1;dy<=2;dy++)l.setBlock(lock.offset(dx,dy,0),Blocks.AIR.defaultBlockState(),3);}); solve(l,r,room,p); return; }
         }
     }
     private static void cut(ServerLevel l,Run r,Room room,CompoundTag s,CompoundTag node,ServerPlayer p) { s.putInt("CutStrings",s.getInt("CutStrings")|(1<<node.getInt("Index"))); if((s.getInt("CutStrings")&7)==7) { LeylineActors.collapse(l,r,room,s); solve(l,r,room,p); } }
@@ -277,6 +278,8 @@ public final class LeylinePuzzles {
 
     private static void rapids(ServerLevel l,Run r,Room room,CompoundTag s,ServerPlayer p,long now) {
         var t=personal(s,p); var currents=nodes(s,"current"); if(currents.size()<2) return;
+        var origin=DungeonRealm.center(r,room);
+        if(p.getY()<origin.getY()-5){p.hurt(p.damageSources().fall(),4);p.teleportTo(l,origin.getX()+.5,origin.getY()+1,origin.getZ()-9,0,0);p.fallDistance=0;t.remove("Riding");return;}
         if(!p.hasEffect(MobEffects.SLOW_FALLING)&&!p.hasEffect(MobEffects.MOVEMENT_SPEED)) { t.remove("Riding"); return; }
         var start=pos(currents.get(0)); var end=first(s,"rapids_goal",pos(currents.get(currents.size()-1)));
         if(!t.getBoolean("Riding")) { if(!near(p,start,2.5)) return; t.putBoolean("Riding",true); t.putInt("Lane",0); t.putLong("RideStart",now); }

@@ -59,10 +59,25 @@ public final class AlchemyRenderer implements BlockEntityRenderer<AlchemyEntity>
         }
     }
     private static void flames(PoseStack p,MultiBufferSource buffers,double time){
-        var sprite=Minecraft.getInstance().getTextureAtlas(net.minecraft.world.inventory.InventoryMenu.BLOCK_ATLAS).apply(ResourceLocation.parse("minecraft:block/fire_0"));
-        var out=buffers.getBuffer(RenderType.entityCutoutNoCull(net.minecraft.world.inventory.InventoryMenu.BLOCK_ATLAS));
-        for(int i=0;i<5;i++){double a=i*Math.PI*2/5+time*.004;float x=1+(float)Math.cos(a)*.32f,z=1+(float)Math.sin(a)*.32f,h=.28f+(float)Math.sin(time*.15+i)*.035f;
-            for(int plane=0;plane<2;plane++){float dx=plane==0?.18f:0,dz=plane==1?.18f:0;textured(out,p,x-dx,.03f,z-dz,sprite.getU0(),sprite.getV1(),0xffffffff,0xf000f0);textured(out,p,x+dx,.03f,z+dz,sprite.getU1(),sprite.getV1(),0xffffffff,0xf000f0);textured(out,p,x+dx,h,z+dz,sprite.getU1(),sprite.getV0(),0xffffffff,0xf000f0);textured(out,p,x-dx,h,z-dz,sprite.getU0(),sprite.getV0(),0xffffffff,0xf000f0);}
+        var out=buffers.getBuffer(RenderType.entityTranslucent(ResourceLocation.parse("tnc:textures/misc/cauldron_hearth_flame.png")));
+        // One low hearth under the bowl: tapered tongues lean and curl upward,
+        // instead of five miniatures of the full-block fire texture.
+        for(int i=0;i<16;i++){
+            double a=i*Math.PI*2/16,r=.18+(i%3)*.14;
+            float x=1+(float)Math.cos(a)*(float)r,z=1+(float)Math.sin(a)*(float)r;
+            float h=.22f+.065f*(float)Math.sin(time*.19+i*2.1),width=.12f+(i%2)*.045f;
+            double facing=a+Math.sin(time*.03+i)*.3;
+            for(int j=0;j<4;j++){
+                float t=j/4f,u=(j+1)/4f;
+                float dx=(float)Math.cos(facing),dz=(float)Math.sin(facing);
+                float bend=(float)Math.sin(time*.13+i+t*3)*.045f*t;
+                float bend2=(float)Math.sin(time*.13+i+u*3)*.045f*u;
+                float w=width*(1-t*.66f),w2=width*(1-u*.66f);
+                vertex(out,p,x-dx*w+bend,.025f+h*t,z-dz*w,0,1-t,0xdfffffff);
+                vertex(out,p,x+dx*w+bend,.025f+h*t,z+dz*w,1,1-t,0xdfffffff);
+                vertex(out,p,x+dx*w2+bend2,.025f+h*u,z+dz*w2,1,1-u,0xdfffffff);
+                vertex(out,p,x-dx*w2+bend2,.025f+h*u,z-dz*w2,0,1-u,0xdfffffff);
+            }
         }
     }
     private static void effect(net.minecraft.world.phys.Vec3 a,net.minecraft.world.phys.Vec3 b,int c,int s,int m,float size,int life){com.tnc.tnc.mana.sight.client.ManaSightParticles.effect(a,b,c,s,m,size,life);}

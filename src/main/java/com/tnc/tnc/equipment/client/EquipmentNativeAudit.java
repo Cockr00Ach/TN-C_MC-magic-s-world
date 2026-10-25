@@ -102,7 +102,7 @@ public final class EquipmentNativeAudit {
             Files.writeString(folder().resolve("report.json"),new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(Map.of(
                     "jar_sha256",sha,"failures",failures,"screenshots",shots,"expected",SCENES.size(),"wands",36,"wearables",34,
                     "scope","Real full-pack first-person hand rendering; actual equipped local-player models in three inventory cameras. Walking/crouching use input-driven fixture poses, not a full combat playthrough.")));
-            mc.stop(); return;
+            com.tnc.tnc.dungeon.client.WorldFeedbackNativeAudit.finished(mc); return;
         }
         ticks=0; prepare(mc);
     }

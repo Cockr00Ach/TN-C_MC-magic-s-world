@@ -12,6 +12,36 @@ import net.minecraftforge.gametest.*;
 import java.util.*;
 @GameTestHolder("tncjourney") @PrefixGameTestTemplate(false)
 public final class JourneyGameTests {
+    @GameTest(template="building_test_empty",timeoutTicks=30)
+    public static void delayedWelcomeDisplayRenewsOnlyItsOwnNamingSession(GameTestHelper h)throws Exception{
+        var p=AdventureGameTests.player(h);
+        var act=JourneyNetwork.class.getDeclaredMethod("act",net.minecraft.server.level.ServerPlayer.class,JourneyNetwork.Action.class);
+        act.setAccessible(true);
+        act.invoke(null,p,new JourneyNetwork.Action(0,"welcome",""));
+        var field=JourneyNetwork.class.getDeclaredField("sessions");field.setAccessible(true);
+        @SuppressWarnings("unchecked") var sessions=(Map<UUID,Object>)field.get(null);
+        var first=sessions.get(p.getUUID());var type=first.getClass();
+        var tokenMethod=type.getDeclaredMethod("token");tokenMethod.setAccessible(true);
+        long token=(Long)tokenMethod.invoke(first);
+        act.invoke(null,p,new JourneyNetwork.Action(0,"welcome",""));
+        h.assertTrue((Long)tokenMethod.invoke(sessions.get(p.getUUID()))==token,"duplicate MCA welcome preserves open form token");
+        var constructor=type.getDeclaredConstructor(String.class,long.class,long.class);constructor.setAccessible(true);
+        sessions.put(p.getUUID(),constructor.newInstance("profile",token,-1L));
+        act.invoke(null,p,new JourneyNetwork.Action(token+1,"welcome_seen",""));
+        var untilMethod=type.getDeclaredMethod("until");untilMethod.setAccessible(true);
+        h.assertTrue((Long)untilMethod.invoke(sessions.get(p.getUUID()))==-1,"wrong token cannot renew profile");
+        act.invoke(null,p,new JourneyNetwork.Action(token,"welcome_seen",""));
+        h.assertTrue((Long)untilMethod.invoke(sessions.get(p.getUUID()))>=p.server.overworld().getGameTime()+2399,"display acknowledgement renews expired loading token");
+        sessions.put(p.getUUID(),constructor.newInstance("profile",token,-1L));
+        act.invoke(null,p,new JourneyNetwork.Action(token+1,"name","错误会话"));
+        h.assertTrue(!JourneyData.get(p.server).player(p.getUUID()).getBoolean("Named"),"wrong form cannot rename player");
+        act.invoke(null,p,new JourneyNetwork.Action(token,"name","  §  "));
+        h.assertTrue(!JourneyData.get(p.server).player(p.getUUID()).getBoolean("Named"),"invalid name preserves unnamed state");
+        act.invoke(null,p,new JourneyNetwork.Action(token,"name","星旅者"));
+        h.assertTrue(JourneyData.get(p.server).player(p.getUUID()).getBoolean("Named"),"name can be submitted after long loading");
+        h.assertTrue((Long)tokenMethod.invoke(sessions.get(p.getUUID()))==token,"success acknowledges original form instead of reopening another profile");
+        h.succeed();
+    }
     @GameTest(template="building_test_empty",timeoutTicks=50) public static void allActualPotionIngredientsAndCommissionTargetsExist(GameTestHelper h){for(var e:Elixir.values())for(String id:e.ingredients)h.assertTrue(net.minecraftforge.registries.ForgeRegistries.ITEMS.getValue(ResourceLocation.parse(id))!=null&&net.minecraftforge.registries.ForgeRegistries.ITEMS.getValue(ResourceLocation.parse(id))!=Items.AIR,"Ingredient exists "+id);h.assertTrue(CommissionCatalog.all().size()==10,"Ten actual reloadable offers");for(var o:CommissionCatalog.all())if(o.kind().equals("kill"))h.assertTrue(net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.containsKey(ResourceLocation.parse(o.target())),"Target exists "+o.target());h.succeed();}
     private static AlchemyEntity cauldron(GameTestHelper h){var pos=h.absolutePos(new BlockPos(2,2,2));h.getLevel().setBlock(pos,Blocks.AIR.defaultBlockState(),3);h.getLevel().setBlock(pos,AlchemyContent.CAULDRON.defaultBlockState(),3);return (AlchemyEntity)h.getLevel().getBlockEntity(pos);}
     private static void finishCook(GameTestHelper h,AlchemyEntity be){for(int i=0;i<AlchemyEntity.COOK_TICKS;i++){be.temperature=450;AlchemyEntity.tick(h.getLevel(),be.getBlockPos(),be.getBlockState(),be);}}
