@@ -35,6 +35,7 @@ import java.util.UUID;
  * </ul>
  */
 public final class VolcanicFireballEntity extends Projectile {
+    private static final org.slf4j.Logger FIELD_LOG = org.slf4j.LoggerFactory.getLogger("TN-C/firefield");
 
     /** 命中爆炸半径（格）。 */
     public static final double EXPLOSION_RADIUS = 3.0D;
@@ -170,7 +171,14 @@ public final class VolcanicFireballEntity extends Projectile {
                 }
             }
             // 落地余火：原地保留一块灼烧区域，周期性造成伤害。
-            VolcanicFireFieldEntity.spawn(level, at, this.damage * 0.35F, this.castId);
+            VolcanicFireFieldEntity field = VolcanicFireFieldEntity.spawn(level, at, this.damage * 0.35F,
+                    this.castId, this.getOwner() == null ? null : this.getOwner().getUUID(),
+                    VolcanicFireFieldEntity.RADIUS, VolcanicFireFieldEntity.DURATION,
+                    VolcanicFireFieldEntity.HIT_INTERVAL);
+            if (Boolean.getBoolean("tnc.tortoise.firefield.debug")) {
+                FIELD_LOG.info("[TN-C FireField] spit impact at=({}, {}, {}) created={} reason={}",
+                        at.x, at.y, at.z, field != null, field == null ? "no-support-surface" : "ok");
+            }
         }
         this.discard();
     }

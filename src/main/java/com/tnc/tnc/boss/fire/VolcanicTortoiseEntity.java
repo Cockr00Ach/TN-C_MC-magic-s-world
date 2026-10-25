@@ -62,6 +62,19 @@ import software.bernie.geckolib.util.GeckoLibUtil;
  * <p>占地：模型宽 60 单位、高 44 单位、长 88 单位（1 单位 = 1/16 格）⇒ 约 3.75 × 2.75 × 5.5 格。
  */
 public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
+    /** 同一 Boss 的燃烧区域共用的受伤记录，避免重叠区域同时结算。 */
+    private final java.util.Map<UUID, Integer> fieldHits = new java.util.HashMap<>();
+
+    public boolean tryFieldHit(UUID target) {
+        int now = this.tickCount;
+        Integer last = this.fieldHits.get(target);
+        if (last != null && now - last < VolcanicFireFieldEntity.SHARED_HIT_INTERVAL) {
+            return false;
+        }
+        this.fieldHits.put(target, now);
+        return true;
+    }
+
     private static final org.slf4j.Logger SPIT_LOG = org.slf4j.LoggerFactory.getLogger("TN-C/spit");
     /** 一阶段满血；半血切二阶段。 */
     public static final float MAX_HP = 900.0F;
