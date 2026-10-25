@@ -30,7 +30,7 @@ import net.minecraftforge.fml.common.Mod;
  * <p>预警不使用粒子，而是独立的地面四边形（自己的 BufferSource + {@code AFTER_WEATHER}），
  * 因此玩家把粒子调成「最少」也不会丢失危险提示。柱体本身复用 {@link FirePillarFx}。</p>
  */
-@Mod.EventBusSubscriber(modid = "tnc", bus = Mod.EventBusSubscriber.Bus.FORGE)
+@Mod.EventBusSubscriber(modid = "tnc", value = net.minecraftforge.api.distmarker.Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class PillarWarningFx {
 
     /** 与服务端一致的柱间间隔（tick）。 */

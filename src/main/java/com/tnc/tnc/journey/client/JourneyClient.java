@@ -9,14 +9,16 @@ public final class JourneyClient {
     private static Object welcomeConnection;
     private static boolean welcomeRequested;
     private static CompoundTag pendingWelcome;
-    public static void queueWelcome(CompoundTag t){pendingWelcome=t.copy();}
+    private static boolean nameConfirmed;
+    public static void confirmedName(){nameConfirmed=true;pendingWelcome=null;welcomeRequested=true;}
+    public static void queueWelcome(CompoundTag t){if(!nameConfirmed)pendingWelcome=t.copy();}
     private static void requestWelcome(Minecraft mc){
-        if(mc.getConnection()!=welcomeConnection){welcomeConnection=mc.getConnection();welcomeRequested=false;pendingWelcome=null;}
-        if(welcomeRequested||pendingWelcome!=null||mc.getConnection()==null)return;
+        if(mc.getConnection()!=welcomeConnection){welcomeConnection=mc.getConnection();welcomeRequested=false;pendingWelcome=null;nameConfirmed=false;}
+        if(nameConfirmed||welcomeRequested||pendingWelcome!=null||mc.getConnection()==null)return;
         welcomeRequested=true;com.tnc.tnc.journey.JourneyNetwork.send(0,"welcome","");
     }
     private static void welcomeTick(Minecraft mc){
-        if(mc.getConnection()!=welcomeConnection){welcomeConnection=mc.getConnection();welcomeRequested=false;pendingWelcome=null;}
+        if(mc.getConnection()!=welcomeConnection){welcomeConnection=mc.getConnection();welcomeRequested=false;pendingWelcome=null;nameConfirmed=false;}
         if(mc.player==null||mc.level==null||mc.getOverlay()!=null)return;
         if(mc.screen instanceof net.minecraft.client.gui.screens.ReceivingLevelScreen)return;
         if(mc.screen!=null&&!(mc.screen instanceof JourneyScreen))return;

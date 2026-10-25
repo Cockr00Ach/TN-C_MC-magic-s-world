@@ -298,6 +298,13 @@ minecraft {
                 property 'tnc.fullSkyIslandTests', 'true'
                 property 'tnc.skyIslandSource', file('modpack/元素觉醒1.4.3-魔改版-20260915/kubejs/data/tnc').absolutePath
             }
+            if (project.hasProperty('skyStartupTests')) {
+                property 'forge.enabledGameTestNamespaces', 'tncstartup'
+                property 'tnc.skyIslandSource', file('modpack/元素觉醒1.4.3-魔改版-20260915/kubejs/data/tnc').absolutePath
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+                workingDirectory project.file('work/sky-startup-tests')
+            }
             jvmArgs '-Xmx6G'
             // Recovery fixtures intentionally change blocks; never reuse a previous run's world.
             args '--world', "building-tests-${System.currentTimeMillis()}".toString()

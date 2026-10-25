@@ -12,7 +12,7 @@ public final class WorldFeedbackNativeAudit {
     private static int suite;
     public static void tick(TickEvent.ClientTickEvent event)throws Exception{
         if(event.phase!=TickEvent.Phase.END)return;
-        if(root==null){root=Path.of(System.getProperty("tnc.dungeonAuditOutput"));select();}
+        if(root==null){root=Path.of(System.getProperty("tnc.dungeonAuditOutput"));if(Boolean.getBoolean("tnc.namingOnlyAudit"))suite=4;select();}
         switch(suite){
             case 0 -> com.tnc.tnc.equipment.client.EquipmentNativeAudit.tick(event);
             case 1 -> com.tnc.tnc.life.botanical.client.BotanicalNativeAudit.tick(event);
@@ -28,7 +28,7 @@ public final class WorldFeedbackNativeAudit {
         com.tnc.tnc.mana.sight.client.ManaSightClient.setEnabled(false);
         if(++suite<SUITES.length){select();return;}
         var sha=HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(mc.gameDirectory.toPath().resolve("mods/tnc-1.0.0.jar"))));
-        Files.writeString(root.resolve("complete.json"),new com.google.gson.Gson().toJson(Map.of("jar_sha256",sha,"suites",SUITES)));
+        Files.writeString(root.resolve("complete.json"),new com.google.gson.Gson().toJson(Map.of("jar_sha256",sha,"suites",Boolean.getBoolean("tnc.namingOnlyAudit")?new String[]{"naming"}:SUITES)));
         mc.stop();
     }
     private WorldFeedbackNativeAudit(){}

@@ -3,6 +3,14 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class LandmarkPlacementPlanTest {
+    @Test void endIslandFitsFull165BlockHeightWithoutClippingOrBurial() {
+        int y=LandmarkPlacementPlan.endIslandOrigin(70,165,256);
+        assertEquals(87,y);
+        assertTrue(LandmarkPlacementPlan.fits(y,165,0,256));
+        assertEquals(251,y+165-1);
+        assertEquals(Integer.MIN_VALUE,LandmarkPlacementPlan.endIslandOrigin(80,165,256));
+        assertTrue(LandmarkPlacementPlan.fits(LandmarkPlacementPlan.endIslandOrigin(-1,165,256),165,0,256));
+    }
     @Test void fullLandscapeAllowsRollingLandButNotSteepMountains() {
         assertFalse(LandmarkPlacementPlan.terrainFits(64,100,false));
         assertTrue(LandmarkPlacementPlan.terrainFits(64,100,true));

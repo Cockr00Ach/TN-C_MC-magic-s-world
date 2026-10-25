@@ -22,6 +22,13 @@ public final class NamingNativeAudit {
             mc.getSingleplayerServer().execute(()->{var p=mc.getSingleplayerServer().getPlayerList().getPlayers().get(0);p.closeContainer();p.setGameMode(net.minecraft.world.level.GameType.CREATIVE);JourneyData.get(p.server).player(p.getUUID()).putBoolean("Named",false);FamilyLife.openProfile(p);});return;}
         ticks++;
         if(ticks==30){checks.put("profile_displayed",mc.screen instanceof JourneyScreen);capture(mc,"00-profile.png");}
+        if(ticks==35&&mc.screen instanceof JourneyScreen screen){
+            screen.keyPressed(256,0,0);checks.put("escape_keeps_initial_form",mc.screen==screen);
+            screen.onClose();checks.put("close_keeps_initial_form",mc.screen==screen);
+            screen.keyPressed(257,0,0);screen.keyPressed(335,0,0);
+        }
+        if(ticks==39){checks.put("enter_does_not_submit",mc.screen instanceof JourneyScreen);
+            mc.getSingleplayerServer().execute(()->{var p=mc.getSingleplayerServer().getPlayerList().getPlayers().get(0);checks.put("escape_enter_do_not_name",!JourneyData.get(p.server).player(p.getUUID()).getBoolean("Named"));});}
         if(ticks==40&&mc.screen instanceof JourneyScreen screen){
             var box=screen.children().stream().filter(EditBox.class::isInstance).map(EditBox.class::cast).findFirst().orElseThrow();
             box.setValue("");clickConfirm(screen);checks.put("empty_keeps_form",mc.screen==screen);

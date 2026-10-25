@@ -1,4 +1,4 @@
-param([Parameter(Mandatory=$true)][string]$LauncherBatch,[Parameter(Mandatory=$true)][string]$LivePack,[Parameter(Mandatory=$true)][string]$AuditRoot,[Parameter(Mandatory=$true)][string]$Output,[string]$OffscreenAgent="",[switch]$UiOnly,[switch]$JourneyOnly,[switch]$FeedbackOnly,[switch]$LeylineOnly,[switch]$EquipmentOnly,[switch]$BotanicalOnly,[switch]$WorldFeedback)
+param([Parameter(Mandatory=$true)][string]$LauncherBatch,[Parameter(Mandatory=$true)][string]$LivePack,[Parameter(Mandatory=$true)][string]$AuditRoot,[Parameter(Mandatory=$true)][string]$Output,[string]$OffscreenAgent="",[switch]$UiOnly,[switch]$JourneyOnly,[switch]$FeedbackOnly,[switch]$LeylineOnly,[switch]$EquipmentOnly,[switch]$BotanicalOnly,[switch]$WorldFeedback,[switch]$NamingOnly)
 $ErrorActionPreference='Stop'
 if([string]::IsNullOrWhiteSpace($OffscreenAgent)){$OffscreenAgent=Join-Path (Split-Path $PSScriptRoot -Parent) 'work/offscreen-agent/offscreen-audit.jar'}
 $live=[IO.Path]::GetFullPath($LivePack).TrimEnd('\')
@@ -27,6 +27,7 @@ if($UiOnly){$javaArguments='-Dtnc.dungeonUiAudit=true '+$javaArguments}
 if($LeylineOnly){$javaArguments='-Dtnc.leylineAudit=true '+$javaArguments}
 if($BotanicalOnly){$javaArguments='-Dtnc.botanicalAudit=true '+$javaArguments}
 if($WorldFeedback){$javaArguments='-Dtnc.worldFeedbackAudit=true '+$javaArguments}
+if($NamingOnly){$javaArguments='-Dtnc.worldFeedbackAudit=true -Dtnc.namingOnlyAudit=true '+$javaArguments}
 if($EquipmentOnly){$javaArguments='-Dtnc.equipmentAudit=true '+$javaArguments}
 $outputFolder=[IO.Path]::GetFullPath($Output)
 [IO.Directory]::CreateDirectory($outputFolder) | Out-Null
