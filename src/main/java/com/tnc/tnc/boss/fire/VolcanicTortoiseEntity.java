@@ -62,6 +62,7 @@ import software.bernie.geckolib.util.GeckoLibUtil;
  * <p>占地：模型宽 60 单位、高 44 单位、长 88 单位（1 单位 = 1/16 格）⇒ 约 3.75 × 2.75 × 5.5 格。
  */
 public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
+    private static final org.slf4j.Logger SPIT_LOG = org.slf4j.LoggerFactory.getLogger("TN-C/spit");
     /** 一阶段满血；半血切二阶段。 */
     public static final float MAX_HP = 900.0F;
     public static final float PHASE_TWO_HEALTH_FRACTION = 0.5F;
@@ -1300,10 +1301,14 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
             Vec3 unit = dir.normalize();
             float damage = (float) (this.getAttributeValue(Attributes.ATTACK_DAMAGE)
                     * SPIT_DAMAGE_SCALE * this.damageScale());
-            // 生成点前移 1.4 格：既不塞进头部，也不会一出生就撞到自己。
-            Vec3 spawn = from.add(unit.scale(1.55D));
+            // 生成点只沿水平朝向前移 1.55 格，与客户端蓄力中心用同一套公式（不再把俯仰角叠进去，否则会与蓄力位置错开）。
+            Vec3 spawn = from.add(horizontalForward(this.castYaw).scale(1.55D));
             level.addFreshEntity(VolcanicFireballEntity.launch(level, this, spawn, unit, damage, this.castId));
             level.sendParticles(ParticleTypes.EXPLOSION, spawn.x, spawn.y, spawn.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+            if (Boolean.getBoolean("tnc.tortoise.spit.debug")) {
+                SPIT_LOG.info("[TN-C SpitAlign] cast={} mouth=({}, {}, {}) spawn=({}, {}, {}) yaw={}",
+                        this.castId, from.x, from.y, from.z, spawn.x, spawn.y, spawn.z, this.castYaw);
+            }
             level.playSound(null, this.blockPosition(), SoundEvents.GHAST_SHOOT,
                     SoundSource.HOSTILE, 2.2F, 0.65F);
             this.finishAction(30);
@@ -1443,3 +1448,4 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         }
     }
 }
+

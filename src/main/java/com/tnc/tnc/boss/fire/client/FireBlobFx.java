@@ -28,6 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Mod.EventBusSubscriber(modid = "tnc", value = Dist.CLIENT)
 public final class FireBlobFx {
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger("TN-C/spit");
 
     private static final double MAX_DIST_SQR = 96.0D * 96.0D;
 
@@ -68,8 +69,13 @@ public final class FireBlobFx {
             if (ball.position().distanceToSqr(eye) > MAX_DIST_SQR) {
                 continue;
             }
+            boolean firstSeen = !PHASE.containsKey(ball.getId());
             int phase = PHASE.computeIfAbsent(ball.getId(), id -> level.random.nextInt(360));
             Vec3 center = ball.position();
+            if (firstSeen && Boolean.getBoolean("tnc.tortoise.spit.debug")) {
+                LOG.info("[TN-C SpitAlign] client flight center=({}, {}, {})",
+                        center.x, center.y, center.z);
+            }
             Vec3 motion = ball.getDeltaMovement();
             spawnFlight(level, center, FLIGHT_RADIUS, now + phase, motion);
         }

@@ -23,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Mod.EventBusSubscriber(modid = "tnc", value = Dist.CLIENT)
 public final class SpitChargeFx {
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger("TN-C/spit");
 
     /** bossId -> {serverStart, localTickAtStart} */
     private static final Map<Integer, long[]> SEEN = new ConcurrentHashMap<>();
@@ -57,6 +58,11 @@ public final class SpitChargeFx {
             long[] seen = SEEN.get(boss.getId());
             if (seen == null || seen[0] != start) {
                 SEEN.put(boss.getId(), new long[]{start, now});
+                if (Boolean.getBoolean("tnc.tortoise.spit.debug")) {
+                    Vec3 c = chargeCenter(boss);
+                    LOG.info("[TN-C SpitAlign] client charge center=({}, {}, {}) yaw={} phase={}",
+                            c.x, c.y, c.z, boss.getYRot(), boss.isPhaseTwo());
+                }
                 continue;
             }
             int total = Math.max(1, boss.spitChargeTicks());
