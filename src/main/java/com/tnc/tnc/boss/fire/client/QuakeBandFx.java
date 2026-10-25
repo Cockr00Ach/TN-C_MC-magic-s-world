@@ -58,6 +58,9 @@ import java.util.Map;
  */
 @Mod.EventBusSubscriber(modid = TNMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public final class QuakeBandFx {
+    /** 默认关闭：现在以方块形态的地表波为主，可用 -Dtnc.tortoise.quake.glow=true 打开这层淡光。 */
+    private static final boolean GLOW_ENABLED = Boolean.getBoolean("tnc.tortoise.quake.glow");
+
     private static final Logger LOGGER = LoggerFactory.getLogger("TN-C/quake-band");
 
     private static final ResourceLocation GLOW_TEXTURE =
@@ -141,7 +144,7 @@ public final class QuakeBandFx {
 
     @SubscribeEvent
     public static void render(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_WEATHER || ACTIVE.isEmpty()) {
+        if (!GLOW_ENABLED || event.getStage() != RenderLevelStageEvent.Stage.AFTER_WEATHER || ACTIVE.isEmpty()) {
             return;
         }
         Minecraft mc = Minecraft.getInstance();
