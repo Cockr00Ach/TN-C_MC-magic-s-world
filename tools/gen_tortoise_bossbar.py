@@ -1,15 +1,16 @@
-"""生成火山巨龟 Boss 血条的 HUD 贴图（纯像素风，透明背景）。
+"""生成火山巨龟 Boss 血条的 HUD 贴图（参考图风格：黑岩熔边 + 亮熔岩 + 中央火山）。
 
 输出到 src/main/resources/assets/tnc/textures/gui/bossbar/：
-  frame.png    186x12  黑灰火山岩边框（含裂纹、不规则外轮廓）
-  lava.png      16x8   可横向平铺的熔岩条（深橙红底 + 橙/橙黄纹 + 少量黄高光）
-  cooled.png    16x8   已损失部分的冷却岩槽（很暗）
-  volcano.png   34x26  血条上方的小火山（山体 + 火山口 + 熔岩裂隙）
+  frame.png    186x14  黑岩边框（不规则外轮廓、内侧熔岩泛光）
+  lava.png      16x10  亮熔岩填充（红橙底 + 黄芯 + 深色岩块）
+  cooled.png    16x10  已损失部分的冷却岩槽（很暗）
+  volcano.png   40x34  血条中央上方的小火山（山体+火山口+熔岩流+灰烟）
 
-坐标约定：MC GUI 逻辑像素；贴图用最近邻采样，alpha 只有 0 或 255。
+坐标约定：MC GUI 逻辑像素；最近邻采样，alpha 只有 0 或 255。
 """
 
 import math
+import random
 from pathlib import Path
 
 from PIL import Image
@@ -17,145 +18,170 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "src/main/resources/assets/tnc/textures/gui/bossbar"
 
-ROCK_DARK = (34, 30, 28, 255)
-ROCK_MID = (58, 52, 48, 255)
-ROCK_LIGHT = (82, 74, 68, 255)
-CRACK = (16, 13, 12, 255)
-LAVA_DEEP = (84, 18, 10, 255)
-LAVA_RED = (176, 42, 16, 255)
-LAVA_ORANGE = (232, 104, 24, 255)
-LAVA_GOLD = (250, 164, 48, 255)
-LAVA_YELLOW = (255, 226, 140, 255)
-COOL_DARK = (26, 22, 20, 255)
-COOL_MID = (44, 38, 34, 255)
+ROCK_DARK = (26, 23, 21, 255)
+ROCK_MID = (48, 42, 38, 255)
+ROCK_LIGHT = (74, 66, 60, 255)
+GLOW_DEEP = (86, 14, 10, 255)
+GLOW_RED = (168, 26, 14, 255)
+LAVA_DEEP = (96, 16, 8, 255)
+LAVA_RED = (196, 34, 14, 255)
+LAVA_ORANGE = (238, 84, 18, 255)
+LAVA_GOLD = (252, 152, 36, 255)
+LAVA_YELLOW = (255, 224, 120, 255)
+COOL_DARK = (24, 20, 18, 255)
+COOL_MID = (42, 36, 32, 255)
+
+BAR_W, BAR_H = 182, 10
+FRAME_W, FRAME_H = 186, 14
 
 
 def bar_frame():
-    w, h = 186, 12
-    img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    img = Image.new("RGBA", (FRAME_W, FRAME_H), (0, 0, 0, 0))
     px = img.load()
-    # 3px 岩石边框：外圈最暗、中圈主色、内圈稍亮，读起来像粗糙岩框
-    for y in range(h):
-        for x in range(w):
-            edge = min(x, y, w - 1 - x, h - 1 - y)
+    # 内侧留给血条（2px 边框 -> 182x10 内容区）
+    for y in range(FRAME_H):
+        for x in range(FRAME_W):
+            edge = min(x, y, FRAME_W - 1 - x, FRAME_H - 1 - y)
             if edge == 0:
                 px[x, y] = ROCK_DARK
             elif edge == 1:
-                px[x, y] = ROCK_MID if (x * 3 + y) % 5 else ROCK_LIGHT
+                px[x, y] = ROCK_MID if (x * 7 + y * 3) % 6 else ROCK_LIGHT
             elif edge == 2:
-                px[x, y] = ROCK_DARK if (x + y * 2) % 4 else ROCK_MID
-    # 顶边高光，像熔岩从上方照下来
-    for x in range(3, w - 3):
-        if px[x, 1][3]:
-            px[x, 1] = ROCK_LIGHT if x % 9 else ROCK_MID
-    # 外轮廓：四角切 1px，边框上偶尔凸起/缺口，避免“金属直边”
-    for x, y in [(0, 0), (1, 0), (0, 1), (w - 1, 0), (w - 2, 0), (w - 1, 1),
-                 (0, h - 1), (1, h - 1), (0, h - 2), (w - 1, h - 1), (w - 2, h - 1), (w - 1, h - 2)]:
-        px[x, y] = (0, 0, 0, 0)
-    for x in (24, 25, 92, 93, 149, 150):
-        px[x, 0] = ROCK_MID
-        px[x, h - 1] = ROCK_MID
-    # 裂纹：只走边框（edge <= 2），绝不进内容区
-    for x, y in [(10, 2), (11, 3), (12, 3), (31, 9), (32, 8), (55, 1), (56, 2),
-                 (88, 10), (89, 9), (119, 2), (120, 3), (150, 9), (151, 8), (167, 1), (168, 2)]:
-        if 0 <= x < w and 0 <= y < h and px[x, y][3] and min(x, y, w - 1 - x, h - 1 - y) <= 2:
-            px[x, y] = CRACK
+                # 内侧熔岩泛光：靠近血条的一圈暗红，模拟被烤热的岩壁
+                px[x, y] = GLOW_RED if (x + y) % 5 else GLOW_DEEP
+    # 外轮廓做成不规则岩块：每 4~7 px 随机向外凸 1px 或向内缺 1px
+    rng = random.Random(20261025)
+    x = 0
+    while x < FRAME_W:
+        run = rng.randint(3, 7)
+        bump = rng.choice([-1, 0, 0, 1])
+        for i in range(run):
+            xx = x + i
+            if xx >= FRAME_W:
+                break
+            if bump > 0:
+                px[xx, 0] = ROCK_MID
+            elif bump < 0:
+                px[xx, 0] = (0, 0, 0, 0)
+            if bump > 0:
+                px[xx, FRAME_H - 1] = ROCK_DARK
+            elif bump < 0:
+                px[xx, FRAME_H - 1] = (0, 0, 0, 0)
+        x += run
+    # 左右两端加厚，像包住血条的岩块
+    for y in range(1, FRAME_H - 1):
+        px[0, y] = ROCK_MID if y % 3 else ROCK_DARK
+        px[FRAME_W - 1, y] = ROCK_MID if y % 3 else ROCK_DARK
+    # 裂纹
+    for cx, cy in [(15, 2), (16, 3), (17, 4), (48, 11), (49, 10), (88, 2), (89, 3),
+                   (120, 11), (121, 10), (152, 2), (153, 3), (170, 11)]:
+        if 0 <= cx < FRAME_W and 0 <= cy < FRAME_H and px[cx, cy][3]:
+            px[cx, cy] = (14, 11, 10, 255)
     img.save(OUT / "frame.png")
     print("frame", img.size)
 
 
 def lava_tile():
-    """横向可平铺：左右边界像素在周期上连续。"""
-    w, h = 16, 8
-    img = Image.new("RGBA", (w, h), LAVA_DEEP)
-    px = img.load()
-    for x in range(w):
-        # 两条缓慢起伏的熔岩脉，横向 16px 一个周期
-        vein_a = 2.2 + 1.6 * math.sin(2 * math.pi * x / w)
-        vein_b = 5.6 + 1.3 * math.sin(2 * math.pi * x / w + 2.1)
-        for y in range(h):
-            d = min(abs(y - vein_a), abs(y - vein_b))
-            if d < 0.6:
+    """横向可平铺：左右边界在周期上连续。"""
+    img = Image.new("RGBA", (BAR_W, BAR_H), LAVA_DEEP)
+    tile = Image.new("RGBA", (16, BAR_H), LAVA_DEEP)
+    px = tile.load()
+    for x in range(16):
+        core = 4.6 + 1.5 * math.sin(2 * math.pi * x / 16)
+        for y in range(BAR_H):
+            d = abs(y - core)
+            if d < 0.7:
+                px[x, y] = LAVA_YELLOW
+            elif d < 1.5:
                 px[x, y] = LAVA_GOLD
-            elif d < 1.2:
+            elif d < 2.6:
                 px[x, y] = LAVA_ORANGE
-            elif d < 2.0:
+            elif d < 3.6:
                 px[x, y] = LAVA_RED
             else:
                 px[x, y] = LAVA_DEEP
-    # 少量黄色高光点（整条 16px 只有 2 个）
-    for x, y in [(4, 2), (12, 6)]:
-        px[x, y] = LAVA_YELLOW
+    # 深色岩块：熔岩里漂浮的冷却岩，带橙边
+    for bx, by, bw, bh in [(2, 1, 3, 2), (9, 7, 3, 2), (12, 1, 2, 2)]:
+        for yy in range(by, by + bh):
+            for xx in range(bx, bx + bw):
+                if 0 <= xx < 16 and 0 <= yy < BAR_H:
+                    px[xx, yy] = ROCK_DARK if (xx + yy) % 3 else ROCK_MID
+        for yy in range(by - 1, by + bh + 1):
+            for xx in range(bx - 1, bx + bw + 1):
+                if 0 <= xx < 16 and 0 <= yy < BAR_H and px[xx, yy][0] < 120:
+                    px[xx, yy] = LAVA_RED
+    # 平铺到 182 宽，保证左右接缝连续
+    for x in range(BAR_W):
+        for y in range(BAR_H):
+            img.putpixel((x, y), px[x % 16, y])
     img.save(OUT / "lava.png")
     print("lava", img.size)
 
 
 def cooled_tile():
-    w, h = 16, 8
-    img = Image.new("RGBA", (w, h), COOL_DARK)
+    img = Image.new("RGBA", (BAR_W, BAR_H), COOL_DARK)
     px = img.load()
-    for x in range(w):
-        for y in range(h):
-            if (x * 3 + y * 5) % 11 == 0:
+    for x in range(BAR_W):
+        for y in range(BAR_H):
+            if (x * 3 + y * 5) % 13 == 0:
                 px[x, y] = COOL_MID
-    # 底部一条更暗的接缝，和熔岩部分对比更清楚
-    for x in range(w):
-        px[x, h - 1] = (18, 15, 13, 255)
+            if y == BAR_H - 1:
+                px[x, y] = (16, 13, 12, 255)
     img.save(OUT / "cooled.png")
     print("cooled", img.size)
 
 
 def volcano():
-    """34x26 的小火山：锥形山体 + 顶部火山口 + 两条熔岩裂隙。"""
-    w, h = 34, 26
+    """40x34：中央火山，山脚向两侧摊开，熔岩从火山口沿坡流下。"""
+    w, h = 40, 34
     img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     px = img.load()
-    cx = 16.5
+    cx = (w - 1) / 2.0
 
-    # 锥形高度：中心最高（y=4），向两侧落到 y=25
     def top_at(x):
-        t = abs(x - cx) / 17.0
-        return int(round(4 + (t ** 1.35) * 21))
+        t = abs(x - cx) / (w / 2.0)
+        return int(round(3 + (t ** 1.25) * 26))
 
     for x in range(w):
         top = top_at(x)
         for y in range(top, h):
-            if x in (int(cx - 17), int(cx + 17)):
-                continue
-            # 山体：主色 + 少量亮面/暗面，形成斜向纹理
             lit = (x - y) % 7 == 0
             dark = (x + y) % 9 == 0
             px[x, y] = ROCK_LIGHT if lit else (ROCK_DARK if dark else ROCK_MID)
-        # 轮廓线
-        if 0 <= top < h:
-            px[x, top] = ROCK_DARK
+        px[x, top] = ROCK_DARK
 
-    # 火山口：中心挖出一个 9px 宽的凹口
-    for x in range(12, 22):
+    # 火山口凹陷
+    for x in range(14, 26):
         cut = 3 if abs(x - cx) < 2 else (2 if abs(x - cx) < 4 else 1)
-        for y in range(4, 4 + cut):
+        for y in range(3, 3 + cut):
             px[x, y] = (0, 0, 0, 0)
-        for y in range(4 + cut, 4 + cut + 3):
+        for y in range(3 + cut, 3 + cut + 3):
             px[x, y] = LAVA_DEEP
-        px[x, 4 + cut + 3] = LAVA_RED if abs(x - cx) > 2 else LAVA_GOLD
-    # 口内亮部
-    for x in range(14, 20):
-        px[x, 6] = LAVA_ORANGE
-    for x in range(15, 18):
-        px[x, 6] = LAVA_GOLD
+        px[x, 3 + cut + 3] = LAVA_GOLD if abs(x - cx) <= 2 else LAVA_RED
+    for x in range(16, 24):
+        px[x, 5] = LAVA_ORANGE
+    for x in range(18, 22):
+        px[x, 5] = LAVA_YELLOW
 
-    # 熔岩裂隙：从火山口向左右下侧分叉
-    for i, (x, y) in enumerate([(11, 9), (10, 10), (10, 11), (9, 12), (9, 13),
-                                (22, 9), (23, 10), (23, 11), (24, 12), (24, 13), (25, 14)]):
-        if 0 <= x < w:
-            px[x, y] = LAVA_ORANGE if i % 3 else LAVA_RED
-    # 山脚压暗，和血条接缝更自然
-    for x in range(2, w - 2):
-        if px[x, h - 1][3]:
-            px[x, h - 1] = ROCK_DARK
-    # 火山口上方一点灰烟（不用纯白）
-    for x, y in [(16, 2), (17, 2), (16, 3), (18, 3)]:
-        px[x, y] = (116, 108, 104, 255)
+    # 熔岩流：从口沿沿两侧山坡往下，越往下越细
+    for side in (-1, 1):
+        for i in range(12):
+            y = 8 + i
+            x = int(round(cx + side * (2 + i * 0.75) + math.sin(i * 0.9) * 0.8))
+            if 0 <= x < w and 0 <= y < h:
+                px[x, y] = LAVA_ORANGE if i % 3 else LAVA_GOLD
+                if i > 6 and 0 <= x + side < w:
+                    px[x + side, y] = LAVA_RED
+
+    # 山脚岩块压暗
+    for x in range(w):
+        for y in (h - 2, h - 1):
+            if px[x, y][3] and px[x, y][0] < 90:
+                px[x, y] = ROCK_DARK
+
+    # 火山口上方灰烟（不用纯白）
+    for x, y in [(19, 1), (20, 1), (20, 2), (21, 2), (19, 2)]:
+        px[x, y] = (120, 112, 108, 255)
 
     img.save(OUT / "volcano.png")
     print("volcano", img.size)
