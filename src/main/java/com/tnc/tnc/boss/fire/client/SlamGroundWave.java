@@ -181,8 +181,14 @@ public final class SlamGroundWave {
         }
     }
 
+    /** 旧的地砖板效果已由 {@link QuakeBandFx} 的加厚发光波带取代；保留代码但默认关闭。 */
+    private static final boolean ENABLE_PATCHES = false;
+
     /** 新一发震波：对本次路径做一次有界地表采样。 */
     private static void begin(ClientLevel level, int castId, Vec3 center, long bornAt) {
+        if (!ENABLE_PATCHES) {
+            return;
+        }
         if (ACTIVE.size() > 4) {
             ACTIVE.clear();
         }
@@ -334,6 +340,9 @@ public final class SlamGroundWave {
     }
 
     private static void draw(RenderLevelStageEvent event, ClientLevel level) {
+        if (!ENABLE_PATCHES) {
+            return;
+        }
         Vec3 camera = event.getCamera().getPosition();
         float partial = event.getPartialTick();
         double ageNow = level.getGameTime() + partial;
