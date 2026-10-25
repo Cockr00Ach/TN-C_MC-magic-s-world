@@ -30,6 +30,20 @@ public final class LuminousStaffRenderer extends BlockEntityWithoutLevelRenderer
     private record Group(List<Face> faces,String motion,Vector3f pivot,float phase){}
     private record Staff(List<Group> groups,Vector3f core,float[] color,int tier,ResourceLocation base,ResourceLocation emission){}
     private static final Map<String,Staff> CACHE=new HashMap<>();
+    private static final class ShaderPack {
+        private static Object api;
+        private static java.lang.reflect.Method active;
+        static {
+            try {
+                var type=Class.forName("net.irisshaders.iris.api.v0.IrisApi");
+                api=type.getMethod("getInstance").invoke(null);active=type.getMethod("isShaderPackInUse");
+            } catch(ReflectiveOperationException|LinkageError ignored) {}
+        }
+        static float exposure(){
+            try{return active!=null&&Boolean.TRUE.equals(active.invoke(api))?.45f:1f;}
+            catch(ReflectiveOperationException ignored){return 1f;}
+        }
+    }
     @SubscribeEvent public static void rebaked(ModelEvent.BakingCompleted e){CACHE.clear();}
     public LuminousStaffRenderer(){super(Minecraft.getInstance().getBlockEntityRenderDispatcher(),Minecraft.getInstance().getEntityModels());}
     private static Vector3f vector(JsonArray a){return new Vector3f(a.get(0).getAsFloat()/16,a.get(1).getAsFloat()/16,a.get(2).getAsFloat()/16);}
@@ -62,16 +76,18 @@ public final class LuminousStaffRenderer extends BlockEntityWithoutLevelRenderer
         var id=ForgeRegistries.ITEMS.getKey(stack.getItem());if(id==null)return;
         var staff=CACHE.computeIfAbsent(id.getPath(),LuminousStaffRenderer::load);
         var mc=Minecraft.getInstance();double time=mc.level==null?0:mc.level.getGameTime()+mc.getFrameTime();
-        for(int layer=0;layer<3;layer++)for(var group:staff.groups){
+        float exposure=ShaderPack.exposure();
+        for(int layer=0;layer<2;layer++)for(var group:staff.groups){
             pose.pushPose();
             if(group.motion.equals("orbit"))pivot(pose,staff.core,(float)(time*.009));
             if(!group.motion.isEmpty())pivot(pose,group.pivot,(float)(time*.016+group.phase));
-            var out=buffers.getBuffer(layer==0?RenderType.entityCutoutNoCull(staff.base):layer==1?RenderType.entityTranslucent(staff.base):RenderType.eyes(staff.emission));
+            var out=buffers.getBuffer(layer==0?RenderType.entityCutoutNoCull(staff.base):StaffGlow.jewel(staff.emission));
             for(var f:group.faces){
                 boolean crystal=f.material==2;
                 if(layer==0&&!crystal)face(out,pose,f,light,overlay,1,1);
-                if(layer==1&&crystal)face(out,pose,f,LightTexture.FULL_BRIGHT,overlay,1,f.glow?1:.86f);
-                if(layer==2&&crystal)face(out,pose,f,LightTexture.FULL_BRIGHT,overlay,(float)(.72+.18*Math.sin(time*.065+group.phase)),1);
+                // One luminous surface, rather than a coplanar eyes overlay that
+                // shader packs can relight or cover with their translucent hand pass.
+                if(layer==1&&crystal)face(out,pose,f,LightTexture.FULL_BRIGHT,overlay,exposure*(float)(.92+.08*Math.sin(time*.065+group.phase)),1);
             }
             pose.popPose();
         }
@@ -99,6 +115,11 @@ public final class LuminousStaffRenderer extends BlockEntityWithoutLevelRenderer
     }
     private static final class StaffGlow extends RenderType {
         private StaffGlow(){super("tnc_staff_energy",DefaultVertexFormat.NEW_ENTITY,VertexFormat.Mode.QUADS,256,false,true,()->{},()->{});}
+        private static final Map<ResourceLocation,RenderType> JEWELS=new HashMap<>();
+        static RenderType jewel(ResourceLocation texture){return JEWELS.computeIfAbsent(texture,t->create("tnc_staff_jewel",DefaultVertexFormat.NEW_ENTITY,VertexFormat.Mode.QUADS,65536,false,false,
+            CompositeState.builder().setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_EMISSIVE_SHADER)
+                .setTextureState(new TextureStateShard(t,false,false)).setCullState(NO_CULL)
+                .setDepthTestState(LEQUAL_DEPTH_TEST).setWriteMaskState(COLOR_DEPTH_WRITE).createCompositeState(false)));}
         static final RenderType TYPE=create("tnc_staff_energy",DefaultVertexFormat.NEW_ENTITY,VertexFormat.Mode.QUADS,16384,false,true,
             CompositeState.builder().setShaderState(RENDERTYPE_EYES_SHADER)
                 .setTextureState(new TextureStateShard(ResourceLocation.parse("tnc:textures/particle/mana_glow.png"),false,false))
