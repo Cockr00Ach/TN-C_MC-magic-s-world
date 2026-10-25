@@ -148,9 +148,9 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     private static final int PILLAR_COOLDOWN_ONE = 320;
 
     // ------------------------------------------------- 任务 9：狂暴 / 虚弱 --
-    /** 触发阈值：血量比例严格低于该值（默认 15%）。 */
+    /** 触发阈值：血量比例严格低于该值（默认 20%）。 */
     private static final float ENRAGE_THRESHOLD =
-            parseFloatProperty("tnc.tortoise.enrage.threshold", 0.15F);
+            parseFloatProperty("tnc.tortoise.enrage.threshold", 0.20F);
     /** 狂暴持续 tick（默认 200 = 10 秒）。 */
     private static final int ENRAGE_TICKS =
             (int) parseFloatProperty("tnc.tortoise.enrage.ticks", 200.0F);
@@ -323,6 +323,28 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     private int mortarHits;
     private int barrageCharge;
     private int barrageBall;
+    /** 本次喷发的形状参数：普通喷发用常量，狂暴登场的“大喷发”临时放大。 */
+    private int barrageWaves = BARRAGE_WAVES;
+    private int barragePerWave = BARRAGE_PER_WAVE;
+    private int barrageWaveGap = BARRAGE_WAVE_GAP;
+    private int barrageBallStagger = BARRAGE_BALL_STAGGER;
+    private double barrageInner = BARRAGE_INNER_RADIUS;
+    private double barrageOuter = BARRAGE_OUTER_RADIUS;
+    private double barrageSpacing = BARRAGE_MIN_SPACING;
+    private float barrageDamage = BARRAGE_DAMAGE_SCALE;
+    /** 狂暴登场的大喷发标记：只在开始那一轮生效，结束后自动复位。 */
+    private boolean megaEruption;
+
+    /** 大喷发：5 批 × 12 颗 = 60 颗，落区外缘 34 格，比常规喷发大得多。 */
+    private static final int MEGA_WAVES = 5;
+    private static final int MEGA_PER_WAVE = 12;
+    private static final int MEGA_WAVE_GAP = 10;
+    private static final int MEGA_BALL_STAGGER = 1;
+    private static final double MEGA_INNER_RADIUS = 5.0D;
+    private static final double MEGA_OUTER_RADIUS = 34.0D;
+    private static final double MEGA_MIN_SPACING = 2.4D;
+    private static final float MEGA_DAMAGE_SCALE = 0.42F;
+    private static final int MEGA_CHARGE_TICKS = 24;
     /** 二阶段火山弹的落点（服务端算好，倒计时结束时炸）。 */
     private final java.util.List<Vec3> pendingBlasts = new java.util.ArrayList<>();
     private int blastCountdown;
@@ -758,6 +780,25 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
                 this.getX(), this.getY() + 2.0D, this.getZ(), 60, 2.4D, 1.2D, 2.4D, 0.05D);
         level.sendParticles(ParticleTypes.LAVA,
                 this.getX(), this.getY() + 2.2D, this.getZ(), 24, 1.8D, 0.9D, 1.8D, 0.0D);
+        // 狂暴登场：背部火山口直接来一轮超大喷发（5 批 × 12 颗、外缘 34 格）。
+        this.startMegaEruption(level);
+    }
+
+    /** 狂暴登场的大喷发：放大喷发形状参数后，复用成熟的火山喷发流程。 */
+    private void startMegaEruption(ServerLevel level) {
+        this.barrageWaves = MEGA_WAVES;
+        this.barragePerWave = MEGA_PER_WAVE;
+        this.barrageWaveGap = MEGA_WAVE_GAP;
+        this.barrageBallStagger = MEGA_BALL_STAGGER;
+        this.barrageInner = MEGA_INNER_RADIUS;
+        this.barrageOuter = MEGA_OUTER_RADIUS;
+        this.barrageSpacing = MEGA_MIN_SPACING;
+        this.barrageDamage = MEGA_DAMAGE_SCALE;
+        this.megaEruption = true;
+        this.startAction(ACTION_ERUPTION);
+        this.triggerAnim(ACTION_CONTROLLER, "slam");
+        level.playSound(null, this.blockPosition(), SoundEvents.BLAZE_SHOOT,
+                SoundSource.HOSTILE, 3.4F, 0.45F);
     }
 
     /** 狂暴结束：进入虚弱易伤窗口（Weakness + 受到伤害倍增）。 */
@@ -1326,45 +1367,78 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         return true;
     }
 
-    /** 二阶段火山喷发：火山口蓄势，随后 3 批共 21 颗抛射火球落向 Boss 周围。 */
+    /** 火山喷发：火山口蓄势，随后分批抛射火球落向 Boss 周围；mega 版本用于狂暴登场。 */
     private void tickEruption(ServerLevel level) {
         if (this.actionTicks == 1) {
-            this.barrageCharge = BARRAGE_CHARGE_MIN
-                    + level.random.nextInt(BARRAGE_CHARGE_MAX - BARRAGE_CHARGE_MIN + 1);
+            if (!this.megaEruption) {
+                this.barrageWaves = BARRAGE_WAVES;
+                this.barragePerWave = BARRAGE_PER_WAVE;
+                this.barrageWaveGap = BARRAGE_WAVE_GAP;
+                this.barrageBallStagger = BARRAGE_BALL_STAGGER;
+                this.barrageInner = BARRAGE_INNER_RADIUS;
+                this.barrageOuter = BARRAGE_OUTER_RADIUS;
+                this.barrageSpacing = BARRAGE_MIN_SPACING;
+                this.barrageDamage = BARRAGE_DAMAGE_SCALE;
+            }
+            this.barrageCharge = this.megaEruption
+                    ? MEGA_CHARGE_TICKS
+                    : BARRAGE_CHARGE_MIN
+                            + level.random.nextInt(BARRAGE_CHARGE_MAX - BARRAGE_CHARGE_MIN + 1);
             this.barrageBall = 0;
             this.barrageSpots.clear();
             this.mortarLastHit.clear();
             this.mortarHits = 0;
             this.pendingBlasts.clear();
             this.blastCountdown = 0;
-            level.playSound(null, this.blockPosition(), SoundEvents.BLAZE_SHOOT, SoundSource.HOSTILE, 2.2F, 0.6F);
+            if (this.megaEruption) {
+                level.playSound(null, this.blockPosition(), SoundEvents.RAVAGER_ROAR,
+                        SoundSource.HOSTILE, 3.6F, 0.50F);
+                level.playSound(null, this.blockPosition(), SoundEvents.GENERIC_EXPLODE,
+                        SoundSource.HOSTILE, 3.0F, 0.45F);
+            } else {
+                level.playSound(null, this.blockPosition(), SoundEvents.BLAZE_SHOOT,
+                        SoundSource.HOSTILE, 2.2F, 0.6F);
+            }
         }
 
         Vec3 crater = this.craterPoint();
-        if (this.actionTicks <= this.barrageCharge && this.actionTicks % 2 == 0) {
-            // 蓄势：火山口内亮起来，越接近喷发越密
+        if (this.actionTicks <= this.barrageCharge) {
             float p = this.actionTicks / (float) this.barrageCharge;
-            level.sendParticles(ParticleTypes.LAVA, crater.x, crater.y, crater.z,
-                    1 + (int) (p * 3.0F), 0.35D, 0.10D, 0.35D, 0.0D);
-            level.sendParticles(TortoiseParticles.FIRE_EDGE.get(), crater.x, crater.y + 0.15D, crater.z,
-                    2 + (int) (p * 4.0F), 0.30D, 0.20D, 0.30D, 0.01D);
+            if (this.megaEruption) {
+                // 大喷发：火山口整根火柱 + 浓烟，强度明显高于常规蓄势。
+                level.sendParticles(ParticleTypes.FLAME, crater.x, crater.y + 0.4D, crater.z,
+                        6 + (int) (p * 10.0F), 0.60D, 0.80D, 0.60D, 0.06D);
+                level.sendParticles(ParticleTypes.LAVA, crater.x, crater.y, crater.z,
+                        3 + (int) (p * 6.0F), 0.50D, 0.40D, 0.50D, 0.0D);
+                level.sendParticles(ParticleTypes.LARGE_SMOKE, crater.x, crater.y + 1.5D, crater.z,
+                        2 + (int) (p * 5.0F), 0.70D, 1.20D, 0.70D, 0.02D);
+                level.sendParticles(TortoiseParticles.FIRE_MID.get(), crater.x, crater.y + 0.8D, crater.z,
+                        6 + (int) (p * 8.0F), 0.55D, 0.90D, 0.55D, 0.03D);
+            } else if (this.actionTicks % 2 == 0) {
+                level.sendParticles(ParticleTypes.LAVA, crater.x, crater.y, crater.z,
+                        1 + (int) (p * 3.0F), 0.35D, 0.10D, 0.35D, 0.0D);
+                level.sendParticles(TortoiseParticles.FIRE_EDGE.get(), crater.x, crater.y + 0.15D, crater.z,
+                        2 + (int) (p * 4.0F), 0.30D, 0.20D, 0.30D, 0.01D);
+            }
         }
 
         int since = this.actionTicks - this.barrageCharge;
-        int total = BARRAGE_WAVES * BARRAGE_PER_WAVE;
+        int total = this.barrageWaves * this.barragePerWave;
         while (this.barrageBall < total) {
-            int wave = this.barrageBall / BARRAGE_PER_WAVE;
-            int index = this.barrageBall % BARRAGE_PER_WAVE;
-            int at = wave * BARRAGE_WAVE_GAP + index * BARRAGE_BALL_STAGGER;
+            int wave = this.barrageBall / this.barragePerWave;
+            int index = this.barrageBall % this.barragePerWave;
+            int at = wave * this.barrageWaveGap + index * this.barrageBallStagger;
             if (since < at) {
                 break;
             }
             this.fireBarrageBall(level);
             this.barrageBall++;
         }
-        if (this.barrageBall >= total && since > BARRAGE_WAVES * BARRAGE_WAVE_GAP + 40) {
-            this.finishAction(40);
-            this.eruptionCooldown = this.isPhaseTwo() ? 260 : 340;
+        if (this.barrageBall >= total && since > this.barrageWaves * this.barrageWaveGap + 40) {
+            boolean mega = this.megaEruption;
+            this.finishAction(mega ? 20 : 40);
+            this.eruptionCooldown = mega ? 200 : (this.isPhaseTwo() ? 260 : 340);
+            this.megaEruption = false;
         }
     }
 
@@ -1372,7 +1446,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     private void fireBarrageBall(ServerLevel level) {
         Vec3 from = this.craterPoint();
         float damage = (float) (this.getAttributeValue(Attributes.ATTACK_DAMAGE)
-                * BARRAGE_DAMAGE_SCALE * this.damageScale());
+                * this.barrageDamage * this.damageScale());
         Vec3 landing = this.pickLanding(level);
         if (landing != null) {
             int flight = 42 + level.random.nextInt(14);
@@ -1382,14 +1456,14 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         level.playSound(null, this.blockPosition(), SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 1.1F, 1.5F);
     }
 
-    /** 环形落区里挑一个点：内圈安全、外缘 24 格、与已有点至少隔 3.2 格。 */
+    /** 环形落区里挑一个点：内圈安全、外缘按本次喷发配置、与已有点至少隔开配置间距。 */
     private Vec3 pickLanding(ServerLevel level) {
         for (int attempt = 0; attempt < 40; attempt++) {
             double angle = level.random.nextDouble() * Math.PI * 2.0D;
             double r = Math.sqrt(level.random.nextDouble()
-                    * (BARRAGE_OUTER_RADIUS * BARRAGE_OUTER_RADIUS
-                    - BARRAGE_INNER_RADIUS * BARRAGE_INNER_RADIUS)
-                    + BARRAGE_INNER_RADIUS * BARRAGE_INNER_RADIUS);
+                    * (this.barrageOuter * this.barrageOuter
+                    - this.barrageInner * this.barrageInner)
+                    + this.barrageInner * this.barrageInner);
             double x = this.getX() + Math.cos(angle) * r;
             double z = this.getZ() + Math.sin(angle) * r;
             if (!level.hasChunkAt(BlockPos.containing(x, this.getY(), z))) {
@@ -1397,7 +1471,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
             }
             boolean crowded = false;
             for (Vec3 other : this.barrageSpots) {
-                if (other.distanceToSqr(x, other.y, z) < BARRAGE_MIN_SPACING * BARRAGE_MIN_SPACING) {
+                if (other.distanceToSqr(x, other.y, z) < this.barrageSpacing * this.barrageSpacing) {
                     crowded = true;
                     break;
                 }
@@ -1577,6 +1651,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.enrageTicks = 0;
         this.weakTicks = 0;
         this.enragePending = false;
+        this.megaEruption = false;
         this.entityData.set(DATA_ENRAGE_STATE, STATE_NORMAL);
         // death 动画 1.8 秒 = 36 tick，但原版尸体 20 tick 就消失 ⇒ 把死亡计时往前推 16 tick，
         // 让倒地动作完整播完再移除（移除时机完全由 deathTime 驱动，不额外挂逻辑）。
