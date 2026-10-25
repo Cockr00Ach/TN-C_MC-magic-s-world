@@ -78,6 +78,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     }
 
     private static final org.slf4j.Logger SPIT_LOG = org.slf4j.LoggerFactory.getLogger("TN-C/spit");
+    private static final org.slf4j.Logger SKILL_LOG = org.slf4j.LoggerFactory.getLogger("TN-C/skill");
     /** 一阶段满血；半血切二阶段。 */
     public static final float MAX_HP = 900.0F;
     public static final float PHASE_TWO_HEALTH_FRACTION = 0.5F;
@@ -265,6 +266,8 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     private int action = ACTION_NONE;
+    /** 上一次真正出手的技能（用于避免连续两次大范围技能）。 */
+    private int lastSkill = ACTION_NONE;
     private int actionTicks;
     /** 砸地瞬间锁定的冲击中心：视觉与伤害共用同一个点与传播速度。 */
     private Vec3 slamCenter = Vec3.ZERO;
@@ -674,45 +677,118 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
             if (self.isBusy() || self.attackCooldown > 0) {
                 return;
             }
-            if (self.eruptionCooldown <= 0 && distance > 8.0D && distance < 28.0D && self.isPhaseTwo()) {
-                self.startAction(ACTION_ERUPTION);
-                self.triggerAnim(ACTION_CONTROLLER, "slam");
+            int pick = self.pickSkill(target, distance);
+            if (pick == ACTION_NONE) {
                 return;
             }
-            // 中远距离：嘴前蓄力后喷吐一发火球（任务 5）。需要视线，避免隔墙喷。
-            if (self.spitCooldown <= 0 && distance > SPIT_MIN_RANGE && distance < SPIT_MAX_RANGE
-                    && self.hasLineOfSight(target)) {
-                self.startAction(ACTION_SPIT);
-                return;
-            }
-            // 二阶段中距离：前方走廊预警 + 分批火柱（任务 7）
-            if (self.isPhaseTwo() && self.pillarCooldown <= 0
-                    && distance > 6.0D && distance < 22.0D && self.hasLineOfSight(target)) {
-                // 熔岩之柱不抬前腿：不放 slam 动作，本体保持待机/行走
-                self.startAction(ACTION_PILLAR);
-                return;
-            }
-            if (self.slamCooldown <= 0 && distance < VolcanicTortoiseEntity.SLAM_RADIUS * 0.75D) {
-                self.startAction(ACTION_SLAM);
-                self.triggerAnim(ACTION_CONTROLLER, "slam");
-                return;
-            }
-            // 技能 B 用独立冷却；刚放完火环时 slamCooldown 会挡住连放，这里再加一道距离条件。
-            if (self.quakeCooldown <= 0 && distance < VolcanicTortoiseEntity.QUAKE_RADIUS * 0.45D) {
-                self.startAction(ACTION_QUAKE);
-                self.triggerAnim(ACTION_CONTROLLER, "slam");
-                return;
-            }
-            if (distance < VolcanicTortoiseEntity.BITE_RANGE) {
-                self.startAction(ACTION_BITE);
+            self.startAction(pick);
+            if (pick == ACTION_BITE) {
                 self.triggerAnim(ACTION_CONTROLLER, "bite");
+            } else if (pick == ACTION_SLAM || pick == ACTION_QUAKE || pick == ACTION_ERUPTION) {
+                self.triggerAnim(ACTION_CONTROLLER, "slam");
+            }
+            // 喷吐与熔岩之柱不播攻击动画：前者靠嘴前凝聚粒子，后者要求本体保持待机/行走。
+        }
+    }
+
+    /**
+     * 按目标距离、冷却、视线与“上一招”做加权抽签。
+     * <p>二阶段把新技能（熔岩之柱、火山喷发）的权重合计压在 65%–75%，
+     * 旧技能（撕咬、火环、震波、喷吐）合计 25%–35%；连续两次大范围技能会被显著降权。
+     * 总出招频率仍由 {@code attackCooldown} 控制，权重只决定“出哪一招”，不改变出手间隔。</p>
+     */
+    private int pickSkill(LivingEntity target, double distance) {
+        boolean los = this.hasLineOfSight(target);
+        boolean phaseTwo = this.isPhaseTwo();
+
+        int[] ids = new int[6];
+        double[] weights = new double[6];
+        int count = 0;
+
+        if (this.eruptionCooldown <= 0 && phaseTwo && distance > 8.0D && distance < 28.0D) {
+            ids[count] = ACTION_ERUPTION;
+            weights[count++] = 3.4D;
+        }
+        if (this.pillarCooldown <= 0 && phaseTwo && distance > 6.0D && distance < 22.0D && los) {
+            ids[count] = ACTION_PILLAR;
+            weights[count++] = 2.6D;
+        }
+        if (this.spitCooldown <= 0 && distance > SPIT_MIN_RANGE && distance < SPIT_MAX_RANGE && los) {
+            ids[count] = ACTION_SPIT;
+            weights[count++] = phaseTwo ? 0.90D : 0.95D;
+        }
+        if (this.slamCooldown <= 0 && distance < SLAM_RADIUS * 0.75D) {
+            ids[count] = ACTION_SLAM;
+            weights[count++] = phaseTwo ? 0.95D : 1.10D;
+        }
+        if (this.quakeCooldown <= 0 && distance < QUAKE_RADIUS * 0.45D) {
+            ids[count] = ACTION_QUAKE;
+            weights[count++] = 0.50D;
+        }
+        if (distance < BITE_RANGE) {
+            ids[count] = ACTION_BITE;
+            weights[count++] = phaseTwo ? 0.50D : 1.50D;
+        }
+        if (count == 0) {
+            return ACTION_NONE;
+        }
+
+        // 不连续放同一种大范围技能：还有别的大招可选时，把重复的那一招压到 30%。
+        boolean lastWasBig = isBigSkill(this.lastSkill);
+        if (lastWasBig) {
+            boolean otherBig = false;
+            for (int i = 0; i < count; i++) {
+                if (isBigSkill(ids[i]) && ids[i] != this.lastSkill) {
+                    otherBig = true;
+                    break;
+                }
+            }
+            if (otherBig) {
+                for (int i = 0; i < count; i++) {
+                    if (ids[i] == this.lastSkill) {
+                        weights[i] *= 0.30D;
+                    }
+                }
             }
         }
+
+        double total = 0.0D;
+        for (int i = 0; i < count; i++) {
+            total += weights[i];
+        }
+        double roll = this.random.nextDouble() * total;
+        int pick = ids[count - 1];
+        for (int i = 0; i < count; i++) {
+            roll -= weights[i];
+            if (roll <= 0.0D) {
+                pick = ids[i];
+                break;
+            }
+        }
+
+        if (Boolean.getBoolean("tnc.tortoise.attack.debug")) {
+            StringBuilder sb = new StringBuilder("[TN-C Skill] phase=").append(this.phase())
+                    .append(" dist=").append(String.format("%.1f", distance))
+                    .append(" last=").append(this.lastSkill)
+                    .append(" candidates=");
+            for (int i = 0; i < count; i++) {
+                sb.append(ids[i]).append(':').append(String.format("%.2f", weights[i])).append(' ');
+            }
+            sb.append("pick=").append(pick);
+            SKILL_LOG.info(sb.toString());
+        }
+        return pick;
+    }
+
+    private static boolean isBigSkill(int action) {
+        return action == ACTION_SLAM || action == ACTION_QUAKE
+                || action == ACTION_ERUPTION || action == ACTION_PILLAR;
     }
 
     private void startAction(int next) {
         this.action = next;
         this.actionTicks = 0;
+        this.lastSkill = next;
         // 每次施法一个编号 + 锁定朝向；本次施法内同一目标最多结算一次。
         this.castId++;
         this.castYaw = this.getYRot();
