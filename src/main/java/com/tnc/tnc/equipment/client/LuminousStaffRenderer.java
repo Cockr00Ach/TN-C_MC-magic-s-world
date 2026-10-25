@@ -84,9 +84,10 @@ public final class LuminousStaffRenderer extends BlockEntityWithoutLevelRenderer
             var out=buffers.getBuffer(layer==0?RenderType.entityCutoutNoCull(staff.base):StaffGlow.jewel(staff.emission));
             for(var f:group.faces){
                 boolean crystal=f.material==2;
-                if(layer==0&&!crystal)face(out,pose,f,light,overlay,1,1);
-                // One luminous surface, rather than a coplanar eyes overlay that
-                // shader packs can relight or cover with their translucent hand pass.
+                // The opaque body is submitted before emission. A translucent
+                // body can be sorted AFTER the glow by Oculus and hide it; no
+                // body lets additive shader-pack eyes blend straight into sky.
+                if(layer==0)face(out,pose,f,crystal?LightTexture.FULL_BRIGHT:light,overlay,1,1);
                 if(layer==1&&crystal)face(out,pose,f,LightTexture.FULL_BRIGHT,overlay,exposure*(float)(.92+.08*Math.sin(time*.065+group.phase)),1);
             }
             pose.popPose();
@@ -119,7 +120,8 @@ public final class LuminousStaffRenderer extends BlockEntityWithoutLevelRenderer
         static RenderType jewel(ResourceLocation texture){return JEWELS.computeIfAbsent(texture,t->create("tnc_staff_jewel",DefaultVertexFormat.NEW_ENTITY,VertexFormat.Mode.QUADS,65536,false,false,
             CompositeState.builder().setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_EMISSIVE_SHADER)
                 .setTextureState(new TextureStateShard(t,false,false)).setCullState(NO_CULL)
-                .setDepthTestState(LEQUAL_DEPTH_TEST).setWriteMaskState(COLOR_DEPTH_WRITE).createCompositeState(false)));}
+                .setTransparencyState(ADDITIVE_TRANSPARENCY).setLayeringState(POLYGON_OFFSET_LAYERING)
+                .setDepthTestState(LEQUAL_DEPTH_TEST).setWriteMaskState(COLOR_WRITE).createCompositeState(false)));}
         static final RenderType TYPE=create("tnc_staff_energy",DefaultVertexFormat.NEW_ENTITY,VertexFormat.Mode.QUADS,16384,false,true,
             CompositeState.builder().setShaderState(RENDERTYPE_EYES_SHADER)
                 .setTextureState(new TextureStateShard(ResourceLocation.parse("tnc:textures/particle/mana_glow.png"),false,false))
