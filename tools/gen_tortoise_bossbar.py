@@ -1,4 +1,4 @@
-"""生成火山巨龟 Boss 血条的 HUD 贴图（参考图风格：黑岩熔边 + 亮熔岩 + 中央火山）。
+"""生成火山巨龟 Boss 血条的熔岩填充贴图（岩框与火山由 build_bossbar_art.py 从参考图生成）。
 
 输出到 src/main/resources/assets/tnc/textures/gui/bossbar/：
   frame.png    186x14  黑岩边框（不规则外轮廓、内侧熔岩泛光）
@@ -31,7 +31,7 @@ LAVA_YELLOW = (255, 224, 120, 255)
 COOL_DARK = (24, 20, 18, 255)
 COOL_MID = (42, 36, 32, 255)
 
-BAR_W, BAR_H = 182, 10
+BAR_W, BAR_H = 182, 14
 FRAME_W, FRAME_H = 186, 14
 
 
@@ -189,7 +189,5 @@ def volcano():
 
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
-    bar_frame()
     lava_tile()
     cooled_tile()
-    volcano()
