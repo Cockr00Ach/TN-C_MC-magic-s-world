@@ -261,6 +261,10 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     private static final EntityDataAccessor<Integer> DATA_ENRAGE_STATE =
             SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.INT);
 
+    /** 与血条 UUID 对应的同步数据（COMPOUND_TAG 里放 Most/Least 两个 long）。 */
+    private static final EntityDataAccessor<CompoundTag> DATA_BAR_ID =
+            SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.COMPOUND_TAG);
+
     private final ServerBossEvent bossEvent = new ServerBossEvent(this.getDisplayName(),
             BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10);
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
@@ -545,6 +549,19 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.entityData.define(DATA_PILLAR_Z, 0.0F);
         this.entityData.define(DATA_PILLAR_YAW, 0.0F);
         this.entityData.define(DATA_ENRAGE_STATE, STATE_NORMAL);
+        this.entityData.define(DATA_BAR_ID, new CompoundTag());
+    }
+
+    /**
+     * 血条 UUID 随实体同步：客户端用它把 Boss 血条与实体一一对应，不依赖名字/语言。
+     * （1.20.1 的 ServerBossEvent 不能指定 UUID，所以把两边连起来只能走实体同步数据。）
+     */
+    public UUID bossBarUuid() {
+        CompoundTag tag = this.entityData.get(DATA_BAR_ID);
+        if (!tag.contains("Most") || !tag.contains("Least")) {
+            return null;
+        }
+        return new UUID(tag.getLong("Most"), tag.getLong("Least"));
     }
 
     @Override
@@ -940,6 +957,14 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.bossEvent.setProgress(Math.max(0.0F, Math.min(1.0F,
                 this.getHealth() / Math.max(1.0F, this.getMaxHealth()))));
         this.bossEvent.setVisible(this.isAlive() && !this.isDeadOrDying());
+        if (this.tickCount == 1) {
+            // 血条 UUID 只在第一次服务端 tick 写一次，随后靠实体同步数据送到客户端。
+            CompoundTag barTag = new CompoundTag();
+            UUID barId = this.bossEvent.getId();
+            barTag.putLong("Most", barId.getMostSignificantBits());
+            barTag.putLong("Least", barId.getLeastSignificantBits());
+            this.entityData.set(DATA_BAR_ID, barTag);
+        }
         if (!this.isAlive() || this.isDeadOrDying() || this.isNoAi()) {
             return;
         }

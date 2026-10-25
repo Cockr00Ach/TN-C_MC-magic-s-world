@@ -16,7 +16,6 @@ OUT = ROOT / "src/main/resources/assets/tnc/textures/gui/bossbar"
 
 # 目标内框（GUI 像素 * 2，贴图按 2 倍超采样）
 INNER_W_TEX = 364
-INNER_H_TEX = 28
 MARGIN = 4  # 画布四周留白，避免边缘采样发虚
 
 
@@ -25,12 +24,13 @@ def is_lava(px):
     if a == 0:
         return False
     # 亮熔岩：红占主导且不够暗；深色岩块/火山体保留
-    return r > 120 and (r - b) > 45 and g < 175
+    # 熔岩（含内框里的暗红底）：红明显压过绿蓝；深灰岩块（r≈g≈b）保留
+    return r > 65 and r > g * 1.8 and (r - b) > 25
 
 
 def main():
     img = Image.open(SRC).convert("RGBA")
-    # 参考图是白底，先把近白背景转透明
+    # 参考图是白底，先把近白背景转透明；右下角水印一并抹掉（不属于界面内容）
     px = img.load()
     w, h = img.size
     for y in range(h):
@@ -38,6 +38,9 @@ def main():
             r, g, b, a = px[x, y]
             if r > 238 and g > 238 and b > 238:
                 px[x, y] = (r, g, b, 0)
+    for y in range(int(h * 0.86), h):
+        for x in range(int(w * 0.72), w):
+            px[x, y] = (0, 0, 0, 0)
 
     bbox = img.getbbox()
     art = img.crop(bbox)
@@ -79,8 +82,9 @@ def main():
                 cut += 1
 
     # 按内框尺寸重采样整张图（横向/纵向各自对齐到 2 倍 GUI 像素）
+    # 等比缩放：只按宽度算比例，避免横向/纵向各自拉伸
     sx = INNER_W_TEX / float(right - left + 1)
-    sy = INNER_H_TEX / float(bottom - top + 1)
+    sy = sx
     new_w = int(round(aw * sx))
     new_h = int(round(ah * sy))
     art = art.resize((new_w, new_h), Image.LANCZOS)
@@ -91,10 +95,11 @@ def main():
     canvas.alpha_composite(art, (MARGIN, MARGIN))
     canvas.save(OUT / "art.png")
 
+    inner_h_tex = int(round((bottom - top + 1) * sy))
     meta = (
         f"art_w={canvas.width}\nart_h={canvas.height}\n"
         f"inner_left={inner_left + MARGIN}\ninner_top={inner_top + MARGIN}\n"
-        f"inner_w={INNER_W_TEX}\ninner_h={INNER_H_TEX}\n"
+        f"inner_w={INNER_W_TEX}\ninner_h={inner_h_tex}\n"
         f"cut_px={cut}\n"
     )
     (ROOT / "build/bossbar_art_meta.txt").write_text(meta, encoding="utf-8")
