@@ -1,9 +1,12 @@
-"""生成大地震波用的“波带”贴图（透明、自发光）。
+"""生成大地震波“环形波带”的贴图（淡灰金 + 少量暖橙亮纹）。
 
 输出：src/main/resources/assets/tnc/textures/entity/quake_band.png（64x64）
-- 底部（贴地）近白黄、最亮；向上过渡到橙、深橙红，顶部完全透明；
-- 竖向条纹让波带有“能量流动”的质感，横向再做一圈圈柔和起伏；
-- 透明区保持干净（alpha=0），避免出现灰色方块边。
+
+贴图坐标约定：
+- u（横向）沿圆周重复；
+- v（纵向）横跨波带的径向宽度，0 = 内缘、1 = 外缘；
+- 亮度与 alpha 沿 v 呈中间高、两侧透明的波峰分布；
+- 渲染时让 v 随时间缓慢滚动，就形成“一圈圈向外推”的观感。
 """
 
 import math
@@ -18,56 +21,43 @@ W = 64
 H = 64
 random.seed(20261025)
 
-# 每一列的亮度系数：少数几条特别亮，像流动的能量丝
-column_gain = []
-for x in range(W):
-    base = 0.82 + 0.18 * math.sin(x * 0.55) + 0.06 * math.sin(x * 1.9 + 1.3)
-    if random.random() < 0.10:
-        base += 0.22
-    column_gain.append(max(0.55, min(1.35, base)))
+BASE = (214, 206, 190)      # 淡灰金
+WARM = (240, 198, 142)      # 暖金
+ACCENT = (255, 176, 92)     # 少量暖橙亮纹
+
+# 沿 v 的几条亮纹，滚动时像一波波向外推的浪峰
+BANDS = ((0.46, 0.09, 1.0), (0.60, 0.06, 0.55), (0.33, 0.05, 0.40))
 
 
 def lerp(a, b, t):
     return tuple(int(round(a[i] + (b[i] - a[i]) * t)) for i in range(3))
 
 
-CORE = (255, 250, 232)
-GOLD = (255, 226, 150)
-ORANGE = (255, 150, 48)
-DEEP = (214, 78, 22)
-
-
 img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
 px = img.load()
 
 for y in range(H):
-    # t=0 顶部（透明），t=1 底部（贴地、最亮）：图片 y=0 是顶部，所以直接按 y 递增
-    t = y / (H - 1)
-    if t < 0.35:
-        color = lerp(DEEP, ORANGE, t / 0.35)
-    elif t < 0.72:
-        color = lerp(ORANGE, GOLD, (t - 0.35) / 0.37)
-    else:
-        color = lerp(GOLD, CORE, (t - 0.72) / 0.28)
+    v = y / (H - 1)
+    env = math.sin(math.pi * v) ** 0.85
+    alpha = 0.38 * env
+    if alpha <= 0.01:
+        continue
 
-    # 贴地最实，往上快速透明
-    if t <= 0.06:
-        alpha = 0.0
-    elif t < 0.30:
-        alpha = 0.10 + 0.45 * ((t - 0.06) / 0.24)
-    elif t < 0.75:
-        alpha = 0.55 + 0.32 * ((t - 0.30) / 0.45)
-    else:
-        alpha = 0.87 + 0.13 * ((t - 0.75) / 0.25)
+    warm = min(1.0, max(0.0, (v - 0.30) / 0.45))
+    color = lerp(BASE, WARM, warm * 0.8)
+
+    for band_v, width, strength in BANDS:
+        d = abs(v - band_v)
+        if d < width:
+            color = lerp(color, ACCENT, strength * (1.0 - d / width) * 0.55)
 
     for x in range(W):
-        gain = column_gain[x]
-        r, g, b = [min(255, int(c * gain)) for c in color]
-        # 横向柔和起伏，避免整张贴图是均匀渐变
-        wobble = 1.0 + 0.06 * math.sin(x * 0.34 + y * 0.12)
-        r, g, b = [min(255, int(c * wobble)) for c in (r, g, b)]
-        a = int(round(255 * max(0.0, min(1.0, alpha))))
-        px[x, y] = (r, g, b, a)
+        ripple = 0.90 + 0.10 * math.sin(x * 0.22 + v * 1.7) + 0.04 * math.sin(x * 0.9)
+        r, g, b = [min(255, max(0, int(c * ripple))) for c in color]
+        n = random.randint(-5, 5)
+        r, g, b = [min(255, max(0, c + n)) for c in (r, g, b)]
+        a = int(round(255 * alpha * (0.85 + 0.15 * ripple)))
+        px[x, y] = (r, g, b, max(0, min(255, a)))
 
 img.save(OUT)
 print(f"wrote {OUT.relative_to(ROOT)} ({W}x{H})")
