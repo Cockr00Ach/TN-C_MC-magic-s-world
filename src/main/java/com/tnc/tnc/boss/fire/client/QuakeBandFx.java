@@ -8,12 +8,19 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
@@ -32,26 +39,31 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 大地震波的环形波带：一道半透明、有径向宽度和低矮竖向隆起、自发光的波峰，
- * 以砸地时锁定的 Boss 位置为中心向外扩散。
+ * 大地震波的环形波带。
  *
- * <p>不是贴地细线、也不是竖直光墙：截面沿径向是“内缘低矮渐隐 → 中间隆起 → 外缘回落渐隐”
- * 的平滑波峰，整圈共用同一个半径 {@code R(t)}，因此只会出现一道环。</p>
+ * <p>两层叠加：</p>
+ * <ol>
+ *   <li><b>方块层</b>：波带表面直接贴“它正经过的那块地的顶面贴图”，并沿截面隆起，
+ *       所以看起来像是地面被抬起来一道波，而不是一圈光；</li>
+ *   <li><b>发光线</b>：在波峰脊上叠一条很薄的淡金自发光带，保留“冲击波”的观感，
+ *       关光影也能看清波峰位置。</li>
+ * </ol>
  *
- * <p>数据与服务端命中完全同源：半径用 {@code QUAKE_RADIUS * age / QUAKE_RING_TICKS}，
- * 中心用 {@code quakeWaveCenter()}，本类只负责画，不参与伤害或击退。</p>
+ * <p>两层共用同一份几何（半径 {@code QUAKE_RADIUS * age / QUAKE_RING_TICKS}、
+ * 中心 {@code quakeWaveCenter()}），与服务端命中环带完全同源；本类只负责画，
+ * 不参与伤害或击退。</p>
  *
- * <p>渲染：{@link RenderType#entityTranslucentEmissive} + 全亮贴图，关光影也可见；
- * 峰值不透明度约 30%，可以透过波带看到地面。Oculus 会把共享 BufferSource 换成
- * no-op 分段缓冲，所以这里用自建 immediate 缓冲，在 {@code AFTER_WEATHER} 阶段提交。</p>
+ * <p>Oculus 会把共享 BufferSource 换成 no-op 分段缓冲，所以这里用自建 immediate 缓冲，
+ * 在 {@code AFTER_WEATHER} 阶段提交。</p>
  */
 @Mod.EventBusSubscriber(modid = TNMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public final class QuakeBandFx {
     private static final Logger LOGGER = LoggerFactory.getLogger("TN-C/quake-band");
 
-    private static final ResourceLocation TEXTURE =
+    private static final ResourceLocation GLOW_TEXTURE =
             ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "textures/entity/quake_band.png");
-    private static final RenderType TYPE = RenderType.entityTranslucentEmissive(TEXTURE);
+    private static final RenderType GLOW_TYPE = RenderType.entityTranslucentEmissive(GLOW_TEXTURE);
+    private static final RenderType BLOCK_TYPE = RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS);
 
     /** 圆周分段数：160 段在 22 格半径上每段约 0.86 格。 */
     private static final int SEGMENTS = 160;
@@ -61,11 +73,13 @@ public final class QuakeBandFx {
     private static final float WIDTH = 2.6F;
     /** 波峰最大高度（格）。 */
     private static final float PEAK_HEIGHT = 0.55F;
-    /** 波峰处的峰值不透明度（20%–35% 区间）。 */
-    private static final float PEAK_ALPHA = 0.20F;
-    /** u 方向（圆周）贴图重复次数。 */
+    /** 方块层不透明度：接近实体，但边缘仍然渐隐。 */
+    private static final float BLOCK_ALPHA = 0.88F;
+    /** 发光脊线的不透明度。 */
+    private static final float GLOW_ALPHA = 0.30F;
+    /** u 方向贴图重复次数（发光层）。 */
     private static final float UV_REPEAT = 12.0F;
-    /** v 方向（径向）滚动速度：每秒推进的贴图比例。 */
+    /** v 方向滚动速度：每秒推进的贴图比例。 */
     private static final float UV_SCROLL = 0.45F;
     private static final double RENDER_DIST = 96.0D;
     private static final int FADE_IN = 4;
@@ -74,6 +88,9 @@ public final class QuakeBandFx {
 
     private static final List<Band> ACTIVE = new ArrayList<>();
     private static final Map<Integer, Integer> SEEN = new HashMap<>();
+    /** 方块 → 顶面贴图在 block atlas 内的 uv 矩形，避免每帧每个格子重新取模型。 */
+    private static final Map<BlockState, float[]> SPRITE_CACHE = new HashMap<>();
+    private static final RandomSource MODEL_RANDOM = RandomSource.create(20261025L);
     private static final MultiBufferSource.BufferSource BUFFERS =
             MultiBufferSource.immediate(new BufferBuilder(262144));
 
@@ -149,10 +166,8 @@ public final class QuakeBandFx {
 
         Matrix4f matrix = new Matrix4f().translation(
                 (float) -camera.x, (float) -camera.y, (float) -camera.z);
-        VertexConsumer buffer = BUFFERS.getBuffer(TYPE);
-        int drawn = 0;
-        int cast = -1;
 
+        List<Render> bands = new ArrayList<>();
         Iterator<Band> iterator = ACTIVE.iterator();
         while (iterator.hasNext()) {
             Band band = iterator.next();
@@ -164,7 +179,6 @@ public final class QuakeBandFx {
             if (band.center.distanceToSqr(camera) > RENDER_DIST * RENDER_DIST) {
                 continue;
             }
-            cast = band.castId;
             double progress = Mth.clamp(age / VolcanicTortoiseEntity.QUAKE_RING_TICKS, 0.0D, 1.0D);
             double radius = VolcanicTortoiseEntity.QUAKE_RADIUS * progress;
             float fade = (float) Math.min(1.0D, age / FADE_IN)
@@ -172,26 +186,41 @@ public final class QuakeBandFx {
             if (fade <= 0.0F || radius < 0.6D) {
                 continue;
             }
-            drawn++;
-            drawBand(buffer, matrix, level, band, radius, age, fade);
+            bands.add(new Render(band, radius, age, fade));
         }
-        BUFFERS.endBatch(TYPE);
+        if (bands.isEmpty()) {
+            return;
+        }
 
-        if (DEBUG && drawn > 0 && level.getGameTime() - lastStatsTick >= 20L) {
+        VertexConsumer blocks = BUFFERS.getBuffer(BLOCK_TYPE);
+        for (Render r : bands) {
+            drawBandBlocks(blocks, matrix, level, r);
+        }
+        BUFFERS.endBatch(BLOCK_TYPE);
+
+        VertexConsumer glow = BUFFERS.getBuffer(GLOW_TYPE);
+        for (Render r : bands) {
+            drawBandGlow(glow, matrix, level, r);
+        }
+        BUFFERS.endBatch(GLOW_TYPE);
+
+        if (DEBUG && level.getGameTime() - lastStatsTick >= 20L) {
             lastStatsTick = level.getGameTime();
-            LOGGER.info("[TN-C QuakeBand] cast={} bands={}", cast, drawn);
+            LOGGER.info("[TN-C QuakeBand] cast={} bands={}", bands.get(0).band.castId, bands.size());
         }
     }
 
+    private record Render(Band band, double radius, double age, float fade) {
+    }
+
     /**
-     * 画一道波带：沿圆周 160 段、沿径向 8 层，拼成一条“隆起—回落”的曲面。
-     * 每个四边形同时写正反两种绕序，避免从内侧或背面看时整段消失。
+     * 方块层：沿圆周逐段取“脚下那块地”的顶面贴图，拼成隆起的波带。
+     * uv 按 1 格一块重复，避免整张贴图被拉伸成长条。
      */
-    private static void drawBand(VertexConsumer buffer, Matrix4f matrix, Level level,
-                                 Band band, double radius, double age, float fade) {
-        double inner = Math.max(0.3D, radius - WIDTH * 0.5D);
-        double outer = radius + WIDTH * 0.5D;
-        float scroll = (float) ((age * UV_SCROLL / 20.0D) % 1.0F);
+    private static void drawBandBlocks(VertexConsumer buffer, Matrix4f matrix, Level level, Render r) {
+        double inner = Math.max(0.3D, r.radius - WIDTH * 0.5D);
+        double outer = r.radius + WIDTH * 0.5D;
+        BlockRenderDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();
 
         for (int i = 0; i < SEGMENTS; i++) {
             double a0 = Math.PI * 2.0D * i / SEGMENTS;
@@ -200,53 +229,143 @@ public final class QuakeBandFx {
             double dirX = Math.cos(mid);
             double dirZ = Math.sin(mid);
 
-            int x = Mth.floor(band.center.x + dirX * radius);
-            int z = Mth.floor(band.center.z + dirZ * radius);
-            if (!level.hasChunkAt(new BlockPos(x, Mth.floor(band.center.y), z))) {
+            int x = Mth.floor(r.band.center.x + dirX * r.radius);
+            int z = Mth.floor(r.band.center.z + dirZ * r.radius);
+            if (!level.hasChunkAt(new BlockPos(x, Mth.floor(r.band.center.y), z))) {
                 continue;
             }
-            // 高度图给的是地表上方的空气层，正好等于地面顶面高度；负高度由维度构建下限保证。
-            double groundY = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 0.02D;
+            int topAir = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+            double groundY = topAir - 0.02D;
             if (groundY < level.getMinBuildHeight() + 1) {
                 continue;
             }
+            BlockPos groundPos = new BlockPos(x, topAir - 1, z);
+            BlockState state = level.getBlockState(groundPos);
+            if (state.isAir() || !state.getFluidState().isEmpty()) {
+                state = Blocks.STONE.defaultBlockState();
+            }
+            float[] uv = spriteUv(dispatcher, state);
+            if (uv == null) {
+                continue;
+            }
 
-            // 沿圆周的轻微起伏：整体仍是一道连续冲击波
-            double wave = 0.88D + 0.12D * Math.sin(mid * 3.0D + age * 0.05D);
-
-            float u0 = (float) (i / (double) SEGMENTS * UV_REPEAT);
-            float u1 = (float) ((i + 1) / (double) SEGMENTS * UV_REPEAT);
+            double wave = 0.88D + 0.12D * Math.sin(mid * 3.0D + r.age * 0.05D);
+            // 每格方块贴图只取一次，沿圆周按弧长重复，贴图不会被拉成长条
+            double arc = mid * r.radius;
+            float tile = (float) (arc - Math.floor(arc));
 
             for (int j = 0; j < RADIAL_STEPS; j++) {
                 double t0 = j / (double) RADIAL_STEPS;
                 double t1 = (j + 1) / (double) RADIAL_STEPS;
                 float y0 = (float) (groundY + PEAK_HEIGHT * wave * profile(t0));
                 float y1 = (float) (groundY + PEAK_HEIGHT * wave * profile(t1));
-                float a0v = PEAK_ALPHA * fade * (float) alphaProfile(t0);
-                float a1v = PEAK_ALPHA * fade * (float) alphaProfile(t1);
+                float a0v = BLOCK_ALPHA * r.fade * (float) alphaProfile(t0);
+                float a1v = BLOCK_ALPHA * r.fade * (float) alphaProfile(t1);
 
                 double r0 = inner + (outer - inner) * t0;
                 double r1 = inner + (outer - inner) * t1;
 
-                float x00 = (float) (band.center.x + Math.cos(a0) * r0);
-                float z00 = (float) (band.center.z + Math.sin(a0) * r0);
-                float x10 = (float) (band.center.x + Math.cos(a1) * r0);
-                float z10 = (float) (band.center.z + Math.sin(a1) * r0);
-                float x01 = (float) (band.center.x + Math.cos(a0) * r1);
-                float z01 = (float) (band.center.z + Math.sin(a0) * r1);
-                float x11 = (float) (band.center.x + Math.cos(a1) * r1);
-                float z11 = (float) (band.center.z + Math.sin(a1) * r1);
+                float x00 = (float) (r.band.center.x + Math.cos(a0) * r0);
+                float z00 = (float) (r.band.center.z + Math.sin(a0) * r0);
+                float x10 = (float) (r.band.center.x + Math.cos(a1) * r0);
+                float z10 = (float) (r.band.center.z + Math.sin(a1) * r0);
+                float x01 = (float) (r.band.center.x + Math.cos(a0) * r1);
+                float z01 = (float) (r.band.center.z + Math.sin(a0) * r1);
+                float x11 = (float) (r.band.center.x + Math.cos(a1) * r1);
+                float z11 = (float) (r.band.center.z + Math.sin(a1) * r1);
 
-                float v0 = (float) (t0 + scroll);
-                float v1 = (float) (t1 + scroll);
+                float u0 = uv[0] + tile * (uv[2] - uv[0]);
+                float u1 = uv[0] + (float) Math.min(1.0D, tile + 0.35D) * (uv[2] - uv[0]);
+                float v0 = uv[1] + (float) t0 * (uv[3] - uv[1]);
+                float v1 = uv[1] + (float) t1 * (uv[3] - uv[1]);
 
                 quad(buffer, matrix, x00, y0, z00, x10, y0, z10, x11, y1, z11, x01, y1, z01,
-                        u0, v0, u1, v0, u1, v1, u0, v1, a0v, a0v, a1v, a1v);
-                // 反向绕序：从下方/内侧也能看见
+                        u0, v0, u1, v0, u1, v1, u0, v1, a0v, a0v, a1v, a1v, 1.0F, 0.97F, 0.92F);
                 quad(buffer, matrix, x01, y1, z01, x11, y1, z11, x10, y0, z10, x00, y0, z00,
-                        u0, v1, u1, v1, u1, v0, u0, v0, a1v, a1v, a0v, a0v);
+                        u0, v1, u1, v1, u1, v0, u0, v0, a1v, a1v, a0v, a0v, 1.0F, 0.97F, 0.92F);
             }
         }
+    }
+
+    /** 发光层：只在波峰脊线上叠一条淡金带，提示“这是一道冲击波”。 */
+    private static void drawBandGlow(VertexConsumer buffer, Matrix4f matrix, Level level, Render r) {
+        double inner = Math.max(0.3D, r.radius - WIDTH * 0.5D);
+        double outer = r.radius + WIDTH * 0.5D;
+        float scroll = (float) ((r.age * UV_SCROLL / 20.0D) % 1.0F);
+        double t0 = 0.28D;
+        double t1 = 0.58D;
+
+        for (int i = 0; i < SEGMENTS; i++) {
+            double a0 = Math.PI * 2.0D * i / SEGMENTS;
+            double a1 = Math.PI * 2.0D * (i + 1) / SEGMENTS;
+            double mid = (a0 + a1) * 0.5D;
+            int x = Mth.floor(r.band.center.x + Math.cos(mid) * r.radius);
+            int z = Mth.floor(r.band.center.z + Math.sin(mid) * r.radius);
+            if (!level.hasChunkAt(new BlockPos(x, Mth.floor(r.band.center.y), z))) {
+                continue;
+            }
+            double groundY = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 0.02D;
+            if (groundY < level.getMinBuildHeight() + 1) {
+                continue;
+            }
+            double wave = 0.88D + 0.12D * Math.sin(mid * 3.0D + r.age * 0.05D);
+            float y0 = (float) (groundY + PEAK_HEIGHT * wave * profile(t0) + 0.03D);
+            float y1 = (float) (groundY + PEAK_HEIGHT * wave * profile(t1) + 0.03D);
+            float alpha = GLOW_ALPHA * r.fade;
+
+            double rr0 = inner + (outer - inner) * t0;
+            double rr1 = inner + (outer - inner) * t1;
+            float x00 = (float) (r.band.center.x + Math.cos(a0) * rr0);
+            float z00 = (float) (r.band.center.z + Math.sin(a0) * rr0);
+            float x10 = (float) (r.band.center.x + Math.cos(a1) * rr0);
+            float z10 = (float) (r.band.center.z + Math.sin(a1) * rr0);
+            float x01 = (float) (r.band.center.x + Math.cos(a0) * rr1);
+            float z01 = (float) (r.band.center.z + Math.sin(a0) * rr1);
+            float x11 = (float) (r.band.center.x + Math.cos(a1) * rr1);
+            float z11 = (float) (r.band.center.z + Math.sin(a1) * rr1);
+
+            float u0 = (float) (i / (double) SEGMENTS * UV_REPEAT);
+            float u1 = (float) ((i + 1) / (double) SEGMENTS * UV_REPEAT);
+            float v0 = (float) (t0 + scroll);
+            float v1 = (float) (t1 + scroll);
+
+            quad(buffer, matrix, x00, y0, z00, x10, y0, z10, x11, y1, z11, x01, y1, z01,
+                    u0, v0, u1, v0, u1, v1, u0, v1, alpha, alpha, alpha, alpha, 1.0F, 1.0F, 1.0F);
+            quad(buffer, matrix, x01, y1, z01, x11, y1, z11, x10, y0, z10, x00, y0, z00,
+                    u0, v1, u1, v1, u1, v0, u0, v0, alpha, alpha, alpha, alpha, 1.0F, 1.0F, 1.0F);
+        }
+    }
+
+    /** 取方块顶面贴图在 atlas 中的 uv 矩形；失败时退回石头。 */
+    private static float[] spriteUv(BlockRenderDispatcher dispatcher, BlockState state) {
+        float[] cached = SPRITE_CACHE.get(state);
+        if (cached != null) {
+            return cached;
+        }
+        float[] uv = spriteUvOf(dispatcher, state);
+        if (uv == null) {
+            uv = spriteUvOf(dispatcher, Blocks.STONE.defaultBlockState());
+        }
+        if (uv != null) {
+            if (SPRITE_CACHE.size() > 512) {
+                SPRITE_CACHE.clear();
+            }
+            SPRITE_CACHE.put(state, uv);
+        }
+        return uv;
+    }
+
+    private static float[] spriteUvOf(BlockRenderDispatcher dispatcher, BlockState state) {
+        BakedModel model = dispatcher.getBlockModel(state);
+        List<BakedQuad> quads = model.getQuads(state, net.minecraft.core.Direction.UP, MODEL_RANDOM);
+        if (quads.isEmpty()) {
+            quads = model.getQuads(state, null, MODEL_RANDOM);
+        }
+        if (quads.isEmpty()) {
+            return null;
+        }
+        var sprite = quads.get(0).getSprite();
+        return new float[]{sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1()};
     }
 
     /** 径向截面：内缘 0 → 中间隆起 1 → 外缘 0，峰值偏内一点。 */
@@ -268,17 +387,19 @@ public final class QuakeBandFx {
                              float x3, float y3, float z3,
                              float u0, float v0, float u1, float v1,
                              float u2, float v2, float u3, float v3,
-                             float a0, float a1, float a2, float a3) {
-        vertex(buffer, matrix, x0, y0, z0, u0, v0, a0);
-        vertex(buffer, matrix, x1, y1, z1, u1, v1, a1);
-        vertex(buffer, matrix, x2, y2, z2, u2, v2, a2);
-        vertex(buffer, matrix, x3, y3, z3, u3, v3, a3);
+                             float a0, float a1, float a2, float a3,
+                             float cr, float cg, float cb) {
+        vertex(buffer, matrix, x0, y0, z0, u0, v0, a0, cr, cg, cb);
+        vertex(buffer, matrix, x1, y1, z1, u1, v1, a1, cr, cg, cb);
+        vertex(buffer, matrix, x2, y2, z2, u2, v2, a2, cr, cg, cb);
+        vertex(buffer, matrix, x3, y3, z3, u3, v3, a3, cr, cg, cb);
     }
 
     private static void vertex(VertexConsumer buffer, Matrix4f matrix,
-                               float x, float y, float z, float u, float v, float alpha) {
+                               float x, float y, float z, float u, float v, float alpha,
+                               float cr, float cg, float cb) {
         buffer.vertex(matrix, x, y, z)
-                .color(1.0F, 1.0F, 1.0F, Mth.clamp(alpha, 0.0F, 1.0F))
+                .color(cr, cg, cb, Mth.clamp(alpha, 0.0F, 1.0F))
                 .uv(u, v)
                 .overlayCoords(OverlayTexture.NO_OVERLAY)
                 .uv2(LightTexture.FULL_BRIGHT)
