@@ -17,6 +17,8 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
@@ -145,6 +147,30 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     private static final int PILLAR_COOLDOWN_TWO = 240;
     private static final int PILLAR_COOLDOWN_ONE = 320;
 
+    // ------------------------------------------------- 任务 9：狂暴 / 虚弱 --
+    /** 触发阈值：血量比例严格低于该值（默认 15%）。 */
+    private static final float ENRAGE_THRESHOLD =
+            parseFloatProperty("tnc.tortoise.enrage.threshold", 0.15F);
+    /** 狂暴持续 tick（默认 200 = 10 秒）。 */
+    private static final int ENRAGE_TICKS =
+            (int) parseFloatProperty("tnc.tortoise.enrage.ticks", 200.0F);
+    /** 狂暴期攻击伤害倍率。 */
+    private static final float ENRAGE_DAMAGE_MULT =
+            parseFloatProperty("tnc.tortoise.enrage.damage", 2.0F);
+    /** 冷却倒计时倍速：0.5 = 冷却以两倍速度走完，技能间隔约减半。 */
+    private static final float ENRAGE_COOLDOWN_SCALE =
+            parseFloatProperty("tnc.tortoise.enrage.cooldown", 0.5F);
+    /** 狂暴结束后的虚弱窗口（默认 160 tick = 8 秒）。 */
+    private static final int WEAK_TICKS =
+            (int) parseFloatProperty("tnc.tortoise.weak.ticks", 160.0F);
+    /** 虚弱期受到伤害的倍率。 */
+    private static final float WEAK_DAMAGE_TAKEN =
+            parseFloatProperty("tnc.tortoise.weak.damage", 2.0F);
+
+    public static final int STATE_NORMAL = 0;
+    public static final int STATE_ENRAGED = 1;
+    public static final int STATE_WEAK = 2;
+
     /** 喷吐：蓄力 24–32 tick，后段锁定目标朝向，随后发射。 */
     private static final int SPIT_CHARGE_MIN = 24;
     private static final int SPIT_CHARGE_MAX = 32;
@@ -230,6 +256,9 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     /** 走廊朝向（锁定时刻的 yaw，之后不再跟随玩家旋转）。 */
     private static final EntityDataAccessor<Float> DATA_PILLAR_YAW =
             SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.FLOAT);
+    /** 狂暴状态：0 正常 / 1 狂暴 / 2 虚弱易伤（只同步状态，剩余时间由服务端自己算）。 */
+    private static final EntityDataAccessor<Integer> DATA_ENRAGE_STATE =
+            SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.INT);
 
     private final ServerBossEvent bossEvent = new ServerBossEvent(this.getDisplayName(),
             BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10);
@@ -261,6 +290,13 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     /** 技能 B 的独立冷却，避免与火环紧接连放。 */
     private int quakeCooldown = 240;
     private int eruptionCooldown = 160;
+
+    /** 狂暴：每场战斗只触发一次，触发后永久置位（存档保存）。 */
+    private boolean enrageTriggered;
+    /** 血量已跌破阈值但正在放技能/转阶段：等动作结束再进狂暴（转阶段优先）。 */
+    private boolean enragePending;
+    private int enrageTicks;
+    private int weakTicks;
 
     // ---------------------------------------------------------- 火山喷发（任务 8）--
     /** 蓄势 tick 下限/上限。 */
@@ -326,9 +362,31 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         return this.phase() == PHASE_TWO;
     }
 
-    /** 二阶段伤害系数：不写进属性，重载不会叠乘。 */
+    /** 二阶段伤害系数：不写进属性，重载不会叠乘；狂暴倍率也只在这里乘一次。 */
     public double damageScale() {
-        return this.isPhaseTwo() ? 1.35D : 1.0D;
+        double scale = this.isPhaseTwo() ? 1.35D : 1.0D;
+        if (this.isEnraged()) {
+            scale *= ENRAGE_DAMAGE_MULT;
+        }
+        return scale;
+    }
+
+    /** 0 正常 / 1 狂暴 / 2 虚弱易伤；客户端用它决定环境粒子与提示。 */
+    public int enrageState() {
+        return this.entityData.get(DATA_ENRAGE_STATE);
+    }
+
+    public boolean isEnraged() {
+        return this.enrageState() == STATE_ENRAGED;
+    }
+
+    public boolean isWeakened() {
+        return this.enrageState() == STATE_WEAK;
+    }
+
+    /** 服务端：剩余狂暴/虚弱 tick（调试与存档校验用）。 */
+    public int enrageTicksLeft() {
+        return Math.max(this.enrageTicks, this.weakTicks);
     }
 
     public boolean isBusy() {
@@ -461,12 +519,16 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.entityData.define(DATA_PILLAR_Y, 0.0F);
         this.entityData.define(DATA_PILLAR_Z, 0.0F);
         this.entityData.define(DATA_PILLAR_YAW, 0.0F);
+        this.entityData.define(DATA_ENRAGE_STATE, STATE_NORMAL);
     }
 
     @Override
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putInt("TortoisePhase", this.phase());
+        tag.putBoolean("TortoiseEnrageTriggered", this.enrageTriggered);
+        tag.putInt("TortoiseEnrageTicks", this.enrageTicks);
+        tag.putInt("TortoiseWeakTicks", this.weakTicks);
     }
 
     @Override
@@ -474,7 +536,37 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         super.readAdditionalSaveData(tag);
         this.entityData.set(DATA_PHASE,
                 tag.getInt("TortoisePhase") >= PHASE_TWO ? PHASE_TWO : PHASE_ONE);
+        this.enrageTriggered = tag.getBoolean("TortoiseEnrageTriggered");
+        this.enrageTicks = Math.max(0, tag.getInt("TortoiseEnrageTicks"));
+        this.weakTicks = Math.max(0, tag.getInt("TortoiseWeakTicks"));
+        this.enragePending = false;
+        if (this.enrageTicks > 0) {
+            this.entityData.set(DATA_ENRAGE_STATE, STATE_ENRAGED);
+        } else if (this.weakTicks > 0) {
+            this.entityData.set(DATA_ENRAGE_STATE, STATE_WEAK);
+            this.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, this.weakTicks, 0, false, true, true));
+        } else {
+            this.entityData.set(DATA_ENRAGE_STATE, STATE_NORMAL);
+        }
         // 属性由 LivingEntity 自己恢复，这里绝不重新乘一遍
+    }
+
+    /** 虚弱窗口内受到的伤害翻倍；只作用于这只 Boss，且在 hurt 里只乘一次。 */
+    @Override
+    public boolean hurt(DamageSource source, float amount) {
+        if (this.isWeakened() && amount > 0.0F) {
+            amount *= WEAK_DAMAGE_TAKEN;
+        }
+        return super.hurt(source, amount);
+    }
+
+    /** 狂暴期间拒绝新增负面效果（有益效果照常），但不是无敌。 */
+    @Override
+    public boolean canBeAffected(MobEffectInstance effect) {
+        if (this.isEnraged() && !effect.getEffect().isBeneficial()) {
+            return false;
+        }
+        return super.canBeAffected(effect);
     }
 
     @Override
@@ -615,6 +707,99 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.getNavigation().stop();
     }
 
+    // ------------------------------------------------------ 狂暴 / 虚弱 --
+    /** 每 tick 维护狂暴与虚弱计时；触发点只在血量严格低于阈值时判定一次。 */
+    private void tickEnrage(ServerLevel level) {
+        if (this.enrageTicks > 0) {
+            this.enrageTicks--;
+            if (this.enrageTicks == 0) {
+                this.beginWeak(level);
+            }
+        } else if (this.weakTicks > 0) {
+            this.weakTicks--;
+            if (this.weakTicks == 0) {
+                this.endWeak();
+            }
+        }
+
+        if (this.enrageTriggered) {
+            return;
+        }
+        float health = this.getHealth();
+        if (health <= 0.0F || health >= this.getMaxHealth() * ENRAGE_THRESHOLD) {
+            return;
+        }
+        // 转阶段优先：动作没结束（含 transition）就先排队，结束后的第一个空闲 tick 再进狂暴。
+        if (this.action != ACTION_NONE) {
+            this.enragePending = true;
+            return;
+        }
+        this.beginEnrage(level);
+    }
+
+    /** 进入狂暴：清负面、置位、吼叫与火星脉冲；频率/伤害倍率由读取状态的地方生效。 */
+    private void beginEnrage(ServerLevel level) {
+        if (this.enrageTriggered) {
+            return;
+        }
+        this.enrageTriggered = true;
+        this.enragePending = false;
+        this.enrageTicks = ENRAGE_TICKS;
+        this.weakTicks = 0;
+        this.entityData.set(DATA_ENRAGE_STATE, STATE_ENRAGED);
+        for (MobEffectInstance instance : java.util.List.copyOf(this.getActiveEffects())) {
+            if (!instance.getEffect().isBeneficial()) {
+                this.removeEffect(instance.getEffect());
+            }
+        }
+        level.playSound(null, this.blockPosition(), SoundEvents.RAVAGER_ROAR,
+                SoundSource.HOSTILE, 3.4F, 0.62F);
+        level.sendParticles(ParticleTypes.FLAME,
+                this.getX(), this.getY() + 2.0D, this.getZ(), 60, 2.4D, 1.2D, 2.4D, 0.05D);
+        level.sendParticles(ParticleTypes.LAVA,
+                this.getX(), this.getY() + 2.2D, this.getZ(), 24, 1.8D, 0.9D, 1.8D, 0.0D);
+    }
+
+    /** 狂暴结束：进入虚弱易伤窗口（Weakness + 受到伤害倍增）。 */
+    private void beginWeak(ServerLevel level) {
+        this.enrageTicks = 0;
+        this.weakTicks = WEAK_TICKS;
+        this.entityData.set(DATA_ENRAGE_STATE, STATE_WEAK);
+        this.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, WEAK_TICKS, 0, false, true, true));
+        level.playSound(null, this.blockPosition(), SoundEvents.RAVAGER_HURT,
+                SoundSource.HOSTILE, 2.6F, 0.55F);
+        level.sendParticles(ParticleTypes.SMOKE,
+                this.getX(), this.getY() + 1.6D, this.getZ(), 28, 2.0D, 0.8D, 2.0D, 0.01D);
+    }
+
+    private void endWeak() {
+        this.weakTicks = 0;
+        this.entityData.set(DATA_ENRAGE_STATE, STATE_NORMAL);
+    }
+
+    /** 调试：直接进入狂暴（不受血量限制），仍遵守每场一次。 */
+    public void forceEnrage() {
+        if (this.level() instanceof ServerLevel level) {
+            this.beginEnrage(level);
+        }
+    }
+
+    /** 调试：直接进入虚弱易伤窗口。 */
+    public void forceWeak() {
+        if (this.level() instanceof ServerLevel level) {
+            this.beginWeak(level);
+        }
+    }
+
+    /** 调试：清掉狂暴/虚弱状态（不还原已触发的标记，避免重复触发）。 */
+    public void clearEnrageState() {
+        this.enrageTicks = 0;
+        this.weakTicks = 0;
+        this.enragePending = false;
+        this.entityData.set(DATA_ENRAGE_STATE, STATE_NORMAL);
+        this.removeEffect(MobEffects.WEAKNESS);
+    }
+
     private void finishAction(int cooldown) {
         this.action = ACTION_NONE;
         this.actionTicks = 0;
@@ -646,26 +831,19 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
             this.beginPhaseTwo(level);
         }
 
-        if (this.attackCooldown > 0) {
-            this.attackCooldown--;
-        }
-        if (this.slamCooldown > 0) {
-            this.slamCooldown--;
-        }
-        if (this.quakeCooldown > 0) {
-            this.quakeCooldown--;
-        }
-        if (this.eruptionCooldown > 0) {
-            this.eruptionCooldown--;
-        }
-        if (this.spitCooldown > 0) {
-            this.spitCooldown--;
-        }
-        if (this.pillarCooldown > 0) {
-            this.pillarCooldown--;
-        }
+        // 狂暴只加快“冷却倒计时”，不缩短动作时长与预警，保证每次技能仍有可躲避时间。
+        int cooldownStep = this.isEnraged()
+                ? Math.max(1, Math.round(1.0F / ENRAGE_COOLDOWN_SCALE))
+                : 1;
+        this.attackCooldown = Math.max(0, this.attackCooldown - cooldownStep);
+        this.slamCooldown = Math.max(0, this.slamCooldown - cooldownStep);
+        this.quakeCooldown = Math.max(0, this.quakeCooldown - cooldownStep);
+        this.eruptionCooldown = Math.max(0, this.eruptionCooldown - cooldownStep);
+        this.spitCooldown = Math.max(0, this.spitCooldown - cooldownStep);
+        this.pillarCooldown = Math.max(0, this.pillarCooldown - cooldownStep);
 
         this.tickBlasts(level);
+        this.tickEnrage(level);
         if (this.action == ACTION_NONE) {
             return;
         }
@@ -1395,6 +1573,11 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.bossEvent.removeAllPlayers();
         this.pendingBlasts.clear();
         this.blastCountdown = 0;
+        // 死亡不保留任何临时增益/易伤，避免尸体或重载后残留倍率。
+        this.enrageTicks = 0;
+        this.weakTicks = 0;
+        this.enragePending = false;
+        this.entityData.set(DATA_ENRAGE_STATE, STATE_NORMAL);
         // death 动画 1.8 秒 = 36 tick，但原版尸体 20 tick 就消失 ⇒ 把死亡计时往前推 16 tick，
         // 让倒地动作完整播完再移除（移除时机完全由 deathTime 驱动，不额外挂逻辑）。
         this.deathTime = -16;

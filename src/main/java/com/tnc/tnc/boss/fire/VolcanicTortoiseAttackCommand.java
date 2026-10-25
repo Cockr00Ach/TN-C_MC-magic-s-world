@@ -61,6 +61,32 @@ public final class VolcanicTortoiseAttackCommand {
         event.getDispatcher().register(Commands.literal("tnc_lava_pillar")
                 .requires(source -> source.hasPermission(2))
                 .executes(context -> triggerPillar(context.getSource())));
+
+        // 调试：狂暴 / 虚弱 / 清除状态。
+        event.getDispatcher().register(Commands.literal("tnc_enrage")
+                .requires(source -> source.hasPermission(2))
+                .executes(context -> triggerEnrage(context.getSource(), "enrage"))
+                .then(Commands.literal("weak")
+                        .executes(context -> triggerEnrage(context.getSource(), "weak")))
+                .then(Commands.literal("off")
+                        .executes(context -> triggerEnrage(context.getSource(), "off"))));
+    }
+
+    /** 调试：enrage = 立刻狂暴，weak = 立刻进入虚弱易伤，off = 清掉状态。 */
+    private static int triggerEnrage(CommandSourceStack source, String mode) {
+        VolcanicTortoiseEntity boss = nearest(source);
+        if (boss == null) {
+            source.sendFailure(Component.literal("32 格内没有火山巨龟"));
+            return 0;
+        }
+        switch (mode) {
+            case "weak" -> boss.forceWeak();
+            case "off" -> boss.clearEnrageState();
+            default -> boss.forceEnrage();
+        }
+        source.sendSuccess(() -> Component.literal("当前状态：" + boss.enrageState()
+                + "（0 正常 / 1 狂暴 / 2 虚弱），剩余 " + boss.enrageTicksLeft() + " tick"), false);
+        return 1;
     }
 
     /** 调试：让最近一只巨龟对执行者开始一次喷吐（蓄力后自动发射）。 */
