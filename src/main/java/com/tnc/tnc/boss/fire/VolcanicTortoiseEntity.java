@@ -17,6 +17,8 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
@@ -62,6 +64,21 @@ import software.bernie.geckolib.util.GeckoLibUtil;
  * <p>占地：模型宽 60 单位、高 44 单位、长 88 单位（1 单位 = 1/16 格）⇒ 约 3.75 × 2.75 × 5.5 格。
  */
 public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
+    /** 同一 Boss 的燃烧区域共用的受伤记录，避免重叠区域同时结算。 */
+    private final java.util.Map<UUID, Integer> fieldHits = new java.util.HashMap<>();
+
+    public boolean tryFieldHit(UUID target) {
+        int now = this.tickCount;
+        Integer last = this.fieldHits.get(target);
+        if (last != null && now - last < VolcanicFireFieldEntity.SHARED_HIT_INTERVAL) {
+            return false;
+        }
+        this.fieldHits.put(target, now);
+        return true;
+    }
+
+    private static final org.slf4j.Logger SPIT_LOG = org.slf4j.LoggerFactory.getLogger("TN-C/spit");
+    private static final org.slf4j.Logger SKILL_LOG = org.slf4j.LoggerFactory.getLogger("TN-C/skill");
     /** 一阶段满血；半血切二阶段。 */
     public static final float MAX_HP = 900.0F;
     public static final float PHASE_TWO_HEALTH_FRACTION = 0.5F;
@@ -130,6 +147,30 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     private static final double PILLAR_FRONT_OFFSET = 2.6D;
     private static final int PILLAR_COOLDOWN_TWO = 240;
     private static final int PILLAR_COOLDOWN_ONE = 320;
+
+    // ------------------------------------------------- 任务 9：狂暴 / 虚弱 --
+    /** 触发阈值：血量比例严格低于该值（默认 20%）。 */
+    private static final float ENRAGE_THRESHOLD =
+            parseFloatProperty("tnc.tortoise.enrage.threshold", 0.20F);
+    /** 狂暴持续 tick（默认 200 = 10 秒）。 */
+    private static final int ENRAGE_TICKS =
+            (int) parseFloatProperty("tnc.tortoise.enrage.ticks", 200.0F);
+    /** 狂暴期攻击伤害倍率。 */
+    private static final float ENRAGE_DAMAGE_MULT =
+            parseFloatProperty("tnc.tortoise.enrage.damage", 2.0F);
+    /** 冷却倒计时倍速：0.5 = 冷却以两倍速度走完，技能间隔约减半。 */
+    private static final float ENRAGE_COOLDOWN_SCALE =
+            parseFloatProperty("tnc.tortoise.enrage.cooldown", 0.5F);
+    /** 狂暴结束后的虚弱窗口（默认 160 tick = 8 秒）。 */
+    private static final int WEAK_TICKS =
+            (int) parseFloatProperty("tnc.tortoise.weak.ticks", 160.0F);
+    /** 虚弱期受到伤害的倍率。 */
+    private static final float WEAK_DAMAGE_TAKEN =
+            parseFloatProperty("tnc.tortoise.weak.damage", 2.0F);
+
+    public static final int STATE_NORMAL = 0;
+    public static final int STATE_ENRAGED = 1;
+    public static final int STATE_WEAK = 2;
 
     /** 喷吐：蓄力 24–32 tick，后段锁定目标朝向，随后发射。 */
     private static final int SPIT_CHARGE_MIN = 24;
@@ -216,12 +257,21 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     /** 走廊朝向（锁定时刻的 yaw，之后不再跟随玩家旋转）。 */
     private static final EntityDataAccessor<Float> DATA_PILLAR_YAW =
             SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.FLOAT);
+    /** 狂暴状态：0 正常 / 1 狂暴 / 2 虚弱易伤（只同步状态，剩余时间由服务端自己算）。 */
+    private static final EntityDataAccessor<Integer> DATA_ENRAGE_STATE =
+            SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.INT);
+
+    /** 与血条 UUID 对应的同步数据（COMPOUND_TAG 里放 Most/Least 两个 long）。 */
+    private static final EntityDataAccessor<CompoundTag> DATA_BAR_ID =
+            SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.COMPOUND_TAG);
 
     private final ServerBossEvent bossEvent = new ServerBossEvent(this.getDisplayName(),
             BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10);
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     private int action = ACTION_NONE;
+    /** 上一次真正出手的技能（用于避免连续两次大范围技能）。 */
+    private int lastSkill = ACTION_NONE;
     private int actionTicks;
     /** 砸地瞬间锁定的冲击中心：视觉与伤害共用同一个点与传播速度。 */
     private Vec3 slamCenter = Vec3.ZERO;
@@ -248,6 +298,13 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     private int quakeCooldown = 240;
     private int eruptionCooldown = 160;
 
+    /** 狂暴：每场战斗只触发一次，触发后永久置位（存档保存）。 */
+    private boolean enrageTriggered;
+    /** 血量已跌破阈值但正在放技能/转阶段：等动作结束再进狂暴（转阶段优先）。 */
+    private boolean enragePending;
+    private int enrageTicks;
+    private int weakTicks;
+
     // ---------------------------------------------------------- 火山喷发（任务 8）--
     /** 蓄势 tick 下限/上限。 */
     public static final int BARRAGE_CHARGE_MIN = 30;
@@ -273,6 +330,28 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     private int mortarHits;
     private int barrageCharge;
     private int barrageBall;
+    /** 本次喷发的形状参数：普通喷发用常量，狂暴登场的“大喷发”临时放大。 */
+    private int barrageWaves = BARRAGE_WAVES;
+    private int barragePerWave = BARRAGE_PER_WAVE;
+    private int barrageWaveGap = BARRAGE_WAVE_GAP;
+    private int barrageBallStagger = BARRAGE_BALL_STAGGER;
+    private double barrageInner = BARRAGE_INNER_RADIUS;
+    private double barrageOuter = BARRAGE_OUTER_RADIUS;
+    private double barrageSpacing = BARRAGE_MIN_SPACING;
+    private float barrageDamage = BARRAGE_DAMAGE_SCALE;
+    /** 狂暴登场的大喷发标记：只在开始那一轮生效，结束后自动复位。 */
+    private boolean megaEruption;
+
+    /** 大喷发：5 批 × 12 颗 = 60 颗，落区外缘 34 格，比常规喷发大得多。 */
+    private static final int MEGA_WAVES = 5;
+    private static final int MEGA_PER_WAVE = 12;
+    private static final int MEGA_WAVE_GAP = 10;
+    private static final int MEGA_BALL_STAGGER = 1;
+    private static final double MEGA_INNER_RADIUS = 5.0D;
+    private static final double MEGA_OUTER_RADIUS = 34.0D;
+    private static final double MEGA_MIN_SPACING = 2.4D;
+    private static final float MEGA_DAMAGE_SCALE = 0.42F;
+    private static final int MEGA_CHARGE_TICKS = 24;
     /** 二阶段火山弹的落点（服务端算好，倒计时结束时炸）。 */
     private final java.util.List<Vec3> pendingBlasts = new java.util.ArrayList<>();
     private int blastCountdown;
@@ -312,9 +391,31 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         return this.phase() == PHASE_TWO;
     }
 
-    /** 二阶段伤害系数：不写进属性，重载不会叠乘。 */
+    /** 二阶段伤害系数：不写进属性，重载不会叠乘；狂暴倍率也只在这里乘一次。 */
     public double damageScale() {
-        return this.isPhaseTwo() ? 1.35D : 1.0D;
+        double scale = this.isPhaseTwo() ? 1.35D : 1.0D;
+        if (this.isEnraged()) {
+            scale *= ENRAGE_DAMAGE_MULT;
+        }
+        return scale;
+    }
+
+    /** 0 正常 / 1 狂暴 / 2 虚弱易伤；客户端用它决定环境粒子与提示。 */
+    public int enrageState() {
+        return this.entityData.get(DATA_ENRAGE_STATE);
+    }
+
+    public boolean isEnraged() {
+        return this.enrageState() == STATE_ENRAGED;
+    }
+
+    public boolean isWeakened() {
+        return this.enrageState() == STATE_WEAK;
+    }
+
+    /** 服务端：剩余狂暴/虚弱 tick（调试与存档校验用）。 */
+    public int enrageTicksLeft() {
+        return Math.max(this.enrageTicks, this.weakTicks);
     }
 
     public boolean isBusy() {
@@ -447,12 +548,29 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.entityData.define(DATA_PILLAR_Y, 0.0F);
         this.entityData.define(DATA_PILLAR_Z, 0.0F);
         this.entityData.define(DATA_PILLAR_YAW, 0.0F);
+        this.entityData.define(DATA_ENRAGE_STATE, STATE_NORMAL);
+        this.entityData.define(DATA_BAR_ID, new CompoundTag());
+    }
+
+    /**
+     * 血条 UUID 随实体同步：客户端用它把 Boss 血条与实体一一对应，不依赖名字/语言。
+     * （1.20.1 的 ServerBossEvent 不能指定 UUID，所以把两边连起来只能走实体同步数据。）
+     */
+    public UUID bossBarUuid() {
+        CompoundTag tag = this.entityData.get(DATA_BAR_ID);
+        if (!tag.contains("Most") || !tag.contains("Least")) {
+            return null;
+        }
+        return new UUID(tag.getLong("Most"), tag.getLong("Least"));
     }
 
     @Override
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putInt("TortoisePhase", this.phase());
+        tag.putBoolean("TortoiseEnrageTriggered", this.enrageTriggered);
+        tag.putInt("TortoiseEnrageTicks", this.enrageTicks);
+        tag.putInt("TortoiseWeakTicks", this.weakTicks);
     }
 
     @Override
@@ -460,7 +578,37 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         super.readAdditionalSaveData(tag);
         this.entityData.set(DATA_PHASE,
                 tag.getInt("TortoisePhase") >= PHASE_TWO ? PHASE_TWO : PHASE_ONE);
+        this.enrageTriggered = tag.getBoolean("TortoiseEnrageTriggered");
+        this.enrageTicks = Math.max(0, tag.getInt("TortoiseEnrageTicks"));
+        this.weakTicks = Math.max(0, tag.getInt("TortoiseWeakTicks"));
+        this.enragePending = false;
+        if (this.enrageTicks > 0) {
+            this.entityData.set(DATA_ENRAGE_STATE, STATE_ENRAGED);
+        } else if (this.weakTicks > 0) {
+            this.entityData.set(DATA_ENRAGE_STATE, STATE_WEAK);
+            this.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, this.weakTicks, 0, false, true, true));
+        } else {
+            this.entityData.set(DATA_ENRAGE_STATE, STATE_NORMAL);
+        }
         // 属性由 LivingEntity 自己恢复，这里绝不重新乘一遍
+    }
+
+    /** 虚弱窗口内受到的伤害翻倍；只作用于这只 Boss，且在 hurt 里只乘一次。 */
+    @Override
+    public boolean hurt(DamageSource source, float amount) {
+        if (this.isWeakened() && amount > 0.0F) {
+            amount *= WEAK_DAMAGE_TAKEN;
+        }
+        return super.hurt(source, amount);
+    }
+
+    /** 狂暴期间拒绝新增负面效果（有益效果照常），但不是无敌。 */
+    @Override
+    public boolean canBeAffected(MobEffectInstance effect) {
+        if (this.isEnraged() && !effect.getEffect().isBeneficial()) {
+            return false;
+        }
+        return super.canBeAffected(effect);
     }
 
     @Override
@@ -546,45 +694,118 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
             if (self.isBusy() || self.attackCooldown > 0) {
                 return;
             }
-            if (self.eruptionCooldown <= 0 && distance > 8.0D && distance < 28.0D && self.isPhaseTwo()) {
-                self.startAction(ACTION_ERUPTION);
-                self.triggerAnim(ACTION_CONTROLLER, "slam");
+            int pick = self.pickSkill(target, distance);
+            if (pick == ACTION_NONE) {
                 return;
             }
-            // 中远距离：嘴前蓄力后喷吐一发火球（任务 5）。需要视线，避免隔墙喷。
-            if (self.spitCooldown <= 0 && distance > SPIT_MIN_RANGE && distance < SPIT_MAX_RANGE
-                    && self.hasLineOfSight(target)) {
-                self.startAction(ACTION_SPIT);
-                return;
-            }
-            // 二阶段中距离：前方走廊预警 + 分批火柱（任务 7）
-            if (self.isPhaseTwo() && self.pillarCooldown <= 0
-                    && distance > 6.0D && distance < 22.0D && self.hasLineOfSight(target)) {
-                // 熔岩之柱不抬前腿：不放 slam 动作，本体保持待机/行走
-                self.startAction(ACTION_PILLAR);
-                return;
-            }
-            if (self.slamCooldown <= 0 && distance < VolcanicTortoiseEntity.SLAM_RADIUS * 0.75D) {
-                self.startAction(ACTION_SLAM);
-                self.triggerAnim(ACTION_CONTROLLER, "slam");
-                return;
-            }
-            // 技能 B 用独立冷却；刚放完火环时 slamCooldown 会挡住连放，这里再加一道距离条件。
-            if (self.quakeCooldown <= 0 && distance < VolcanicTortoiseEntity.QUAKE_RADIUS * 0.45D) {
-                self.startAction(ACTION_QUAKE);
-                self.triggerAnim(ACTION_CONTROLLER, "slam");
-                return;
-            }
-            if (distance < VolcanicTortoiseEntity.BITE_RANGE) {
-                self.startAction(ACTION_BITE);
+            self.startAction(pick);
+            if (pick == ACTION_BITE) {
                 self.triggerAnim(ACTION_CONTROLLER, "bite");
+            } else if (pick == ACTION_SLAM || pick == ACTION_QUAKE || pick == ACTION_ERUPTION) {
+                self.triggerAnim(ACTION_CONTROLLER, "slam");
+            }
+            // 喷吐与熔岩之柱不播攻击动画：前者靠嘴前凝聚粒子，后者要求本体保持待机/行走。
+        }
+    }
+
+    /**
+     * 按目标距离、冷却、视线与“上一招”做加权抽签。
+     * <p>二阶段把新技能（熔岩之柱、火山喷发）的权重合计压在 65%–75%，
+     * 旧技能（撕咬、火环、震波、喷吐）合计 25%–35%；连续两次大范围技能会被显著降权。
+     * 总出招频率仍由 {@code attackCooldown} 控制，权重只决定“出哪一招”，不改变出手间隔。</p>
+     */
+    private int pickSkill(LivingEntity target, double distance) {
+        boolean los = this.hasLineOfSight(target);
+        boolean phaseTwo = this.isPhaseTwo();
+
+        int[] ids = new int[6];
+        double[] weights = new double[6];
+        int count = 0;
+
+        if (this.eruptionCooldown <= 0 && phaseTwo && distance > 8.0D && distance < 28.0D) {
+            ids[count] = ACTION_ERUPTION;
+            weights[count++] = 3.4D;
+        }
+        if (this.pillarCooldown <= 0 && phaseTwo && distance > 6.0D && distance < 22.0D && los) {
+            ids[count] = ACTION_PILLAR;
+            weights[count++] = 2.6D;
+        }
+        if (this.spitCooldown <= 0 && distance > SPIT_MIN_RANGE && distance < SPIT_MAX_RANGE && los) {
+            ids[count] = ACTION_SPIT;
+            weights[count++] = phaseTwo ? 0.90D : 0.95D;
+        }
+        if (this.slamCooldown <= 0 && distance < SLAM_RADIUS * 0.75D) {
+            ids[count] = ACTION_SLAM;
+            weights[count++] = phaseTwo ? 0.95D : 1.10D;
+        }
+        if (this.quakeCooldown <= 0 && distance < QUAKE_RADIUS * 0.45D) {
+            ids[count] = ACTION_QUAKE;
+            weights[count++] = 0.50D;
+        }
+        if (distance < BITE_RANGE) {
+            ids[count] = ACTION_BITE;
+            weights[count++] = phaseTwo ? 0.50D : 1.50D;
+        }
+        if (count == 0) {
+            return ACTION_NONE;
+        }
+
+        // 不连续放同一种大范围技能：还有别的大招可选时，把重复的那一招压到 30%。
+        boolean lastWasBig = isBigSkill(this.lastSkill);
+        if (lastWasBig) {
+            boolean otherBig = false;
+            for (int i = 0; i < count; i++) {
+                if (isBigSkill(ids[i]) && ids[i] != this.lastSkill) {
+                    otherBig = true;
+                    break;
+                }
+            }
+            if (otherBig) {
+                for (int i = 0; i < count; i++) {
+                    if (ids[i] == this.lastSkill) {
+                        weights[i] *= 0.30D;
+                    }
+                }
             }
         }
+
+        double total = 0.0D;
+        for (int i = 0; i < count; i++) {
+            total += weights[i];
+        }
+        double roll = this.random.nextDouble() * total;
+        int pick = ids[count - 1];
+        for (int i = 0; i < count; i++) {
+            roll -= weights[i];
+            if (roll <= 0.0D) {
+                pick = ids[i];
+                break;
+            }
+        }
+
+        if (Boolean.getBoolean("tnc.tortoise.attack.debug")) {
+            StringBuilder sb = new StringBuilder("[TN-C Skill] phase=").append(this.phase())
+                    .append(" dist=").append(String.format("%.1f", distance))
+                    .append(" last=").append(this.lastSkill)
+                    .append(" candidates=");
+            for (int i = 0; i < count; i++) {
+                sb.append(ids[i]).append(':').append(String.format("%.2f", weights[i])).append(' ');
+            }
+            sb.append("pick=").append(pick);
+            SKILL_LOG.info(sb.toString());
+        }
+        return pick;
+    }
+
+    private static boolean isBigSkill(int action) {
+        return action == ACTION_SLAM || action == ACTION_QUAKE
+                || action == ACTION_ERUPTION || action == ACTION_PILLAR;
     }
 
     private void startAction(int next) {
         this.action = next;
         this.actionTicks = 0;
+        this.lastSkill = next;
         // 每次施法一个编号 + 锁定朝向；本次施法内同一目标最多结算一次。
         this.castId++;
         this.castYaw = this.getYRot();
@@ -599,6 +820,118 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.barrageSpots.clear();
         this.barrageBall = 0;
         this.getNavigation().stop();
+    }
+
+    // ------------------------------------------------------ 狂暴 / 虚弱 --
+    /** 每 tick 维护狂暴与虚弱计时；触发点只在血量严格低于阈值时判定一次。 */
+    private void tickEnrage(ServerLevel level) {
+        if (this.enrageTicks > 0) {
+            this.enrageTicks--;
+            if (this.enrageTicks == 0) {
+                this.beginWeak(level);
+            }
+        } else if (this.weakTicks > 0) {
+            this.weakTicks--;
+            if (this.weakTicks == 0) {
+                this.endWeak();
+            }
+        }
+
+        if (this.enrageTriggered) {
+            return;
+        }
+        float health = this.getHealth();
+        if (health <= 0.0F || health >= this.getMaxHealth() * ENRAGE_THRESHOLD) {
+            return;
+        }
+        // 转阶段优先：动作没结束（含 transition）就先排队，结束后的第一个空闲 tick 再进狂暴。
+        if (this.action != ACTION_NONE) {
+            this.enragePending = true;
+            return;
+        }
+        this.beginEnrage(level);
+    }
+
+    /** 进入狂暴：清负面、置位、吼叫与火星脉冲；频率/伤害倍率由读取状态的地方生效。 */
+    private void beginEnrage(ServerLevel level) {
+        if (this.enrageTriggered) {
+            return;
+        }
+        this.enrageTriggered = true;
+        this.enragePending = false;
+        this.enrageTicks = ENRAGE_TICKS;
+        this.weakTicks = 0;
+        this.entityData.set(DATA_ENRAGE_STATE, STATE_ENRAGED);
+        for (MobEffectInstance instance : java.util.List.copyOf(this.getActiveEffects())) {
+            if (!instance.getEffect().isBeneficial()) {
+                this.removeEffect(instance.getEffect());
+            }
+        }
+        level.playSound(null, this.blockPosition(), SoundEvents.RAVAGER_ROAR,
+                SoundSource.HOSTILE, 3.4F, 0.62F);
+        level.sendParticles(ParticleTypes.FLAME,
+                this.getX(), this.getY() + 2.0D, this.getZ(), 60, 2.4D, 1.2D, 2.4D, 0.05D);
+        level.sendParticles(ParticleTypes.LAVA,
+                this.getX(), this.getY() + 2.2D, this.getZ(), 24, 1.8D, 0.9D, 1.8D, 0.0D);
+        // 狂暴登场：背部火山口直接来一轮超大喷发（5 批 × 12 颗、外缘 34 格）。
+        this.startMegaEruption(level);
+    }
+
+    /** 狂暴登场的大喷发：放大喷发形状参数后，复用成熟的火山喷发流程。 */
+    private void startMegaEruption(ServerLevel level) {
+        this.barrageWaves = MEGA_WAVES;
+        this.barragePerWave = MEGA_PER_WAVE;
+        this.barrageWaveGap = MEGA_WAVE_GAP;
+        this.barrageBallStagger = MEGA_BALL_STAGGER;
+        this.barrageInner = MEGA_INNER_RADIUS;
+        this.barrageOuter = MEGA_OUTER_RADIUS;
+        this.barrageSpacing = MEGA_MIN_SPACING;
+        this.barrageDamage = MEGA_DAMAGE_SCALE;
+        this.megaEruption = true;
+        this.startAction(ACTION_ERUPTION);
+        this.triggerAnim(ACTION_CONTROLLER, "slam");
+        level.playSound(null, this.blockPosition(), SoundEvents.BLAZE_SHOOT,
+                SoundSource.HOSTILE, 3.4F, 0.45F);
+    }
+
+    /** 狂暴结束：进入虚弱易伤窗口（Weakness + 受到伤害倍增）。 */
+    private void beginWeak(ServerLevel level) {
+        this.enrageTicks = 0;
+        this.weakTicks = WEAK_TICKS;
+        this.entityData.set(DATA_ENRAGE_STATE, STATE_WEAK);
+        this.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, WEAK_TICKS, 0, false, true, true));
+        level.playSound(null, this.blockPosition(), SoundEvents.RAVAGER_HURT,
+                SoundSource.HOSTILE, 2.6F, 0.55F);
+        level.sendParticles(ParticleTypes.SMOKE,
+                this.getX(), this.getY() + 1.6D, this.getZ(), 28, 2.0D, 0.8D, 2.0D, 0.01D);
+    }
+
+    private void endWeak() {
+        this.weakTicks = 0;
+        this.entityData.set(DATA_ENRAGE_STATE, STATE_NORMAL);
+    }
+
+    /** 调试：直接进入狂暴（不受血量限制），仍遵守每场一次。 */
+    public void forceEnrage() {
+        if (this.level() instanceof ServerLevel level) {
+            this.beginEnrage(level);
+        }
+    }
+
+    /** 调试：直接进入虚弱易伤窗口。 */
+    public void forceWeak() {
+        if (this.level() instanceof ServerLevel level) {
+            this.beginWeak(level);
+        }
+    }
+
+    /** 调试：清掉狂暴/虚弱状态（不还原已触发的标记，避免重复触发）。 */
+    public void clearEnrageState() {
+        this.enrageTicks = 0;
+        this.weakTicks = 0;
+        this.enragePending = false;
+        this.entityData.set(DATA_ENRAGE_STATE, STATE_NORMAL);
+        this.removeEffect(MobEffects.WEAKNESS);
     }
 
     private void finishAction(int cooldown) {
@@ -624,6 +957,14 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.bossEvent.setProgress(Math.max(0.0F, Math.min(1.0F,
                 this.getHealth() / Math.max(1.0F, this.getMaxHealth()))));
         this.bossEvent.setVisible(this.isAlive() && !this.isDeadOrDying());
+        if (this.tickCount == 1) {
+            // 血条 UUID 只在第一次服务端 tick 写一次，随后靠实体同步数据送到客户端。
+            CompoundTag barTag = new CompoundTag();
+            UUID barId = this.bossEvent.getId();
+            barTag.putLong("Most", barId.getMostSignificantBits());
+            barTag.putLong("Least", barId.getLeastSignificantBits());
+            this.entityData.set(DATA_BAR_ID, barTag);
+        }
         if (!this.isAlive() || this.isDeadOrDying() || this.isNoAi()) {
             return;
         }
@@ -632,26 +973,19 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
             this.beginPhaseTwo(level);
         }
 
-        if (this.attackCooldown > 0) {
-            this.attackCooldown--;
-        }
-        if (this.slamCooldown > 0) {
-            this.slamCooldown--;
-        }
-        if (this.quakeCooldown > 0) {
-            this.quakeCooldown--;
-        }
-        if (this.eruptionCooldown > 0) {
-            this.eruptionCooldown--;
-        }
-        if (this.spitCooldown > 0) {
-            this.spitCooldown--;
-        }
-        if (this.pillarCooldown > 0) {
-            this.pillarCooldown--;
-        }
+        // 狂暴只加快“冷却倒计时”，不缩短动作时长与预警，保证每次技能仍有可躲避时间。
+        int cooldownStep = this.isEnraged()
+                ? Math.max(1, Math.round(1.0F / ENRAGE_COOLDOWN_SCALE))
+                : 1;
+        this.attackCooldown = Math.max(0, this.attackCooldown - cooldownStep);
+        this.slamCooldown = Math.max(0, this.slamCooldown - cooldownStep);
+        this.quakeCooldown = Math.max(0, this.quakeCooldown - cooldownStep);
+        this.eruptionCooldown = Math.max(0, this.eruptionCooldown - cooldownStep);
+        this.spitCooldown = Math.max(0, this.spitCooldown - cooldownStep);
+        this.pillarCooldown = Math.max(0, this.pillarCooldown - cooldownStep);
 
         this.tickBlasts(level);
+        this.tickEnrage(level);
         if (this.action == ACTION_NONE) {
             return;
         }
@@ -1134,45 +1468,78 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         return true;
     }
 
-    /** 二阶段火山喷发：火山口蓄势，随后 3 批共 21 颗抛射火球落向 Boss 周围。 */
+    /** 火山喷发：火山口蓄势，随后分批抛射火球落向 Boss 周围；mega 版本用于狂暴登场。 */
     private void tickEruption(ServerLevel level) {
         if (this.actionTicks == 1) {
-            this.barrageCharge = BARRAGE_CHARGE_MIN
-                    + level.random.nextInt(BARRAGE_CHARGE_MAX - BARRAGE_CHARGE_MIN + 1);
+            if (!this.megaEruption) {
+                this.barrageWaves = BARRAGE_WAVES;
+                this.barragePerWave = BARRAGE_PER_WAVE;
+                this.barrageWaveGap = BARRAGE_WAVE_GAP;
+                this.barrageBallStagger = BARRAGE_BALL_STAGGER;
+                this.barrageInner = BARRAGE_INNER_RADIUS;
+                this.barrageOuter = BARRAGE_OUTER_RADIUS;
+                this.barrageSpacing = BARRAGE_MIN_SPACING;
+                this.barrageDamage = BARRAGE_DAMAGE_SCALE;
+            }
+            this.barrageCharge = this.megaEruption
+                    ? MEGA_CHARGE_TICKS
+                    : BARRAGE_CHARGE_MIN
+                            + level.random.nextInt(BARRAGE_CHARGE_MAX - BARRAGE_CHARGE_MIN + 1);
             this.barrageBall = 0;
             this.barrageSpots.clear();
             this.mortarLastHit.clear();
             this.mortarHits = 0;
             this.pendingBlasts.clear();
             this.blastCountdown = 0;
-            level.playSound(null, this.blockPosition(), SoundEvents.BLAZE_SHOOT, SoundSource.HOSTILE, 2.2F, 0.6F);
+            if (this.megaEruption) {
+                level.playSound(null, this.blockPosition(), SoundEvents.RAVAGER_ROAR,
+                        SoundSource.HOSTILE, 3.6F, 0.50F);
+                level.playSound(null, this.blockPosition(), SoundEvents.GENERIC_EXPLODE,
+                        SoundSource.HOSTILE, 3.0F, 0.45F);
+            } else {
+                level.playSound(null, this.blockPosition(), SoundEvents.BLAZE_SHOOT,
+                        SoundSource.HOSTILE, 2.2F, 0.6F);
+            }
         }
 
         Vec3 crater = this.craterPoint();
-        if (this.actionTicks <= this.barrageCharge && this.actionTicks % 2 == 0) {
-            // 蓄势：火山口内亮起来，越接近喷发越密
+        if (this.actionTicks <= this.barrageCharge) {
             float p = this.actionTicks / (float) this.barrageCharge;
-            level.sendParticles(ParticleTypes.LAVA, crater.x, crater.y, crater.z,
-                    1 + (int) (p * 3.0F), 0.35D, 0.10D, 0.35D, 0.0D);
-            level.sendParticles(TortoiseParticles.FIRE_EDGE.get(), crater.x, crater.y + 0.15D, crater.z,
-                    2 + (int) (p * 4.0F), 0.30D, 0.20D, 0.30D, 0.01D);
+            if (this.megaEruption) {
+                // 大喷发：火山口整根火柱 + 浓烟，强度明显高于常规蓄势。
+                level.sendParticles(ParticleTypes.FLAME, crater.x, crater.y + 0.4D, crater.z,
+                        6 + (int) (p * 10.0F), 0.60D, 0.80D, 0.60D, 0.06D);
+                level.sendParticles(ParticleTypes.LAVA, crater.x, crater.y, crater.z,
+                        3 + (int) (p * 6.0F), 0.50D, 0.40D, 0.50D, 0.0D);
+                level.sendParticles(ParticleTypes.LARGE_SMOKE, crater.x, crater.y + 1.5D, crater.z,
+                        2 + (int) (p * 5.0F), 0.70D, 1.20D, 0.70D, 0.02D);
+                level.sendParticles(TortoiseParticles.FIRE_MID.get(), crater.x, crater.y + 0.8D, crater.z,
+                        6 + (int) (p * 8.0F), 0.55D, 0.90D, 0.55D, 0.03D);
+            } else if (this.actionTicks % 2 == 0) {
+                level.sendParticles(ParticleTypes.LAVA, crater.x, crater.y, crater.z,
+                        1 + (int) (p * 3.0F), 0.35D, 0.10D, 0.35D, 0.0D);
+                level.sendParticles(TortoiseParticles.FIRE_EDGE.get(), crater.x, crater.y + 0.15D, crater.z,
+                        2 + (int) (p * 4.0F), 0.30D, 0.20D, 0.30D, 0.01D);
+            }
         }
 
         int since = this.actionTicks - this.barrageCharge;
-        int total = BARRAGE_WAVES * BARRAGE_PER_WAVE;
+        int total = this.barrageWaves * this.barragePerWave;
         while (this.barrageBall < total) {
-            int wave = this.barrageBall / BARRAGE_PER_WAVE;
-            int index = this.barrageBall % BARRAGE_PER_WAVE;
-            int at = wave * BARRAGE_WAVE_GAP + index * BARRAGE_BALL_STAGGER;
+            int wave = this.barrageBall / this.barragePerWave;
+            int index = this.barrageBall % this.barragePerWave;
+            int at = wave * this.barrageWaveGap + index * this.barrageBallStagger;
             if (since < at) {
                 break;
             }
             this.fireBarrageBall(level);
             this.barrageBall++;
         }
-        if (this.barrageBall >= total && since > BARRAGE_WAVES * BARRAGE_WAVE_GAP + 40) {
-            this.finishAction(40);
-            this.eruptionCooldown = this.isPhaseTwo() ? 260 : 340;
+        if (this.barrageBall >= total && since > this.barrageWaves * this.barrageWaveGap + 40) {
+            boolean mega = this.megaEruption;
+            this.finishAction(mega ? 20 : 40);
+            this.eruptionCooldown = mega ? 200 : (this.isPhaseTwo() ? 260 : 340);
+            this.megaEruption = false;
         }
     }
 
@@ -1180,7 +1547,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     private void fireBarrageBall(ServerLevel level) {
         Vec3 from = this.craterPoint();
         float damage = (float) (this.getAttributeValue(Attributes.ATTACK_DAMAGE)
-                * BARRAGE_DAMAGE_SCALE * this.damageScale());
+                * this.barrageDamage * this.damageScale());
         Vec3 landing = this.pickLanding(level);
         if (landing != null) {
             int flight = 42 + level.random.nextInt(14);
@@ -1190,14 +1557,14 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         level.playSound(null, this.blockPosition(), SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 1.1F, 1.5F);
     }
 
-    /** 环形落区里挑一个点：内圈安全、外缘 24 格、与已有点至少隔 3.2 格。 */
+    /** 环形落区里挑一个点：内圈安全、外缘按本次喷发配置、与已有点至少隔开配置间距。 */
     private Vec3 pickLanding(ServerLevel level) {
         for (int attempt = 0; attempt < 40; attempt++) {
             double angle = level.random.nextDouble() * Math.PI * 2.0D;
             double r = Math.sqrt(level.random.nextDouble()
-                    * (BARRAGE_OUTER_RADIUS * BARRAGE_OUTER_RADIUS
-                    - BARRAGE_INNER_RADIUS * BARRAGE_INNER_RADIUS)
-                    + BARRAGE_INNER_RADIUS * BARRAGE_INNER_RADIUS);
+                    * (this.barrageOuter * this.barrageOuter
+                    - this.barrageInner * this.barrageInner)
+                    + this.barrageInner * this.barrageInner);
             double x = this.getX() + Math.cos(angle) * r;
             double z = this.getZ() + Math.sin(angle) * r;
             if (!level.hasChunkAt(BlockPos.containing(x, this.getY(), z))) {
@@ -1205,7 +1572,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
             }
             boolean crowded = false;
             for (Vec3 other : this.barrageSpots) {
-                if (other.distanceToSqr(x, other.y, z) < BARRAGE_MIN_SPACING * BARRAGE_MIN_SPACING) {
+                if (other.distanceToSqr(x, other.y, z) < this.barrageSpacing * this.barrageSpacing) {
                     crowded = true;
                     break;
                 }
@@ -1300,10 +1667,14 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
             Vec3 unit = dir.normalize();
             float damage = (float) (this.getAttributeValue(Attributes.ATTACK_DAMAGE)
                     * SPIT_DAMAGE_SCALE * this.damageScale());
-            // 生成点前移 1.4 格：既不塞进头部，也不会一出生就撞到自己。
-            Vec3 spawn = from.add(unit.scale(1.55D));
+            // 生成点只沿水平朝向前移 1.55 格，与客户端蓄力中心用同一套公式（不再把俯仰角叠进去，否则会与蓄力位置错开）。
+            Vec3 spawn = from.add(horizontalForward(this.castYaw).scale(1.55D));
             level.addFreshEntity(VolcanicFireballEntity.launch(level, this, spawn, unit, damage, this.castId));
             level.sendParticles(ParticleTypes.EXPLOSION, spawn.x, spawn.y, spawn.z, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+            if (Boolean.getBoolean("tnc.tortoise.spit.debug")) {
+                SPIT_LOG.info("[TN-C SpitAlign] cast={} mouth=({}, {}, {}) spawn=({}, {}, {}) yaw={}",
+                        this.castId, from.x, from.y, from.z, spawn.x, spawn.y, spawn.z, this.castYaw);
+            }
             level.playSound(null, this.blockPosition(), SoundEvents.GHAST_SHOOT,
                     SoundSource.HOSTILE, 2.2F, 0.65F);
             this.finishAction(30);
@@ -1377,6 +1748,12 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.bossEvent.removeAllPlayers();
         this.pendingBlasts.clear();
         this.blastCountdown = 0;
+        // 死亡不保留任何临时增益/易伤，避免尸体或重载后残留倍率。
+        this.enrageTicks = 0;
+        this.weakTicks = 0;
+        this.enragePending = false;
+        this.megaEruption = false;
+        this.entityData.set(DATA_ENRAGE_STATE, STATE_NORMAL);
         // death 动画 1.8 秒 = 36 tick，但原版尸体 20 tick 就消失 ⇒ 把死亡计时往前推 16 tick，
         // 让倒地动作完整播完再移除（移除时机完全由 deathTime 驱动，不额外挂逻辑）。
         this.deathTime = -16;
@@ -1443,3 +1820,4 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         }
     }
 }
+

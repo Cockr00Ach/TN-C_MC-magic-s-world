@@ -1,0 +1,111 @@
+"""用参考图直接做血条：抠掉内框里的熔岩、保留岩框与火山，熔岩由代码按血量填充。
+
+输入：build/ref_bossbar.png（用户给的参考图）
+输出：
+  src/main/resources/assets/tnc/textures/gui/bossbar/art.png   完整条（含火山，内框熔岩已透明）
+  build/bossbar_art_meta.txt                                  贴图内框位置/尺寸，供 Java 侧对齐
+"""
+
+from pathlib import Path
+
+from PIL import Image
+
+ROOT = Path(__file__).resolve().parents[1]
+SRC = ROOT / "build/ref_bossbar.png"
+OUT = ROOT / "src/main/resources/assets/tnc/textures/gui/bossbar"
+
+# 目标内框（GUI 像素 * 2，贴图按 2 倍超采样）
+INNER_W_TEX = 364
+MARGIN = 4  # 画布四周留白，避免边缘采样发虚
+
+
+def is_lava(px):
+    r, g, b, a = px
+    if a == 0:
+        return False
+    # 亮熔岩：红占主导且不够暗；深色岩块/火山体保留
+    # 熔岩（含内框里的暗红底）：红明显压过绿蓝；深灰岩块（r≈g≈b）保留
+    return r > 65 and r > g * 1.8 and (r - b) > 25
+
+
+def main():
+    img = Image.open(SRC).convert("RGBA")
+    # 参考图是白底，先把近白背景转透明；右下角水印一并抹掉（不属于界面内容）
+    px = img.load()
+    w, h = img.size
+    for y in range(h):
+        for x in range(w):
+            r, g, b, a = px[x, y]
+            if r > 238 and g > 238 and b > 238:
+                px[x, y] = (r, g, b, 0)
+    for y in range(int(h * 0.86), h):
+        for x in range(int(w * 0.72), w):
+            px[x, y] = (0, 0, 0, 0)
+
+    bbox = img.getbbox()
+    art = img.crop(bbox)
+    aw, ah = art.size
+
+    # 找内框：按“每行熔岩像素数量”确定纵向范围（火山把内框切成左右两段，
+    # 所以用计数而不是连续段长度），再按分位数取左右边界。
+    ap = art.load()
+    counts = []
+    for y in range(ah):
+        c = 0
+        for x in range(aw):
+            if is_lava(ap[x, y]):
+                c += 1
+        counts.append(c)
+    peak = max(counts)
+    band = [y for y, c in enumerate(counts) if c > peak * 0.55]
+    top, bottom = min(band), max(band)
+
+    xs = []
+    for y in range(top, bottom + 1):
+        for x in range(aw):
+            if is_lava(ap[x, y]):
+                xs.append(x)
+                break
+        for x in range(aw - 1, -1, -1):
+            if is_lava(ap[x, y]):
+                xs.append(x)
+                break
+    xs.sort()
+    left, right = xs[int(len(xs) * 0.02)], xs[int(len(xs) * 0.98) - 1]
+
+    # 抠掉内框里的熔岩（保留深色岩块与火山体）
+    cut = 0
+    for y in range(top, bottom + 1):
+        for x in range(left, right + 1):
+            if is_lava(ap[x, y]):
+                ap[x, y] = (0, 0, 0, 0)
+                cut += 1
+
+    # 按内框尺寸重采样整张图（横向/纵向各自对齐到 2 倍 GUI 像素）
+    # 等比缩放：只按宽度算比例，避免横向/纵向各自拉伸
+    sx = INNER_W_TEX / float(right - left + 1)
+    sy = sx
+    new_w = int(round(aw * sx))
+    new_h = int(round(ah * sy))
+    art = art.resize((new_w, new_h), Image.LANCZOS)
+
+    inner_left = int(round(left * sx))
+    inner_top = int(round(top * sy))
+    canvas = Image.new("RGBA", (new_w + MARGIN * 2, new_h + MARGIN * 2), (0, 0, 0, 0))
+    canvas.alpha_composite(art, (MARGIN, MARGIN))
+    canvas.save(OUT / "art.png")
+
+    inner_h_tex = int(round((bottom - top + 1) * sy))
+    meta = (
+        f"art_w={canvas.width}\nart_h={canvas.height}\n"
+        f"inner_left={inner_left + MARGIN}\ninner_top={inner_top + MARGIN}\n"
+        f"inner_w={INNER_W_TEX}\ninner_h={inner_h_tex}\n"
+        f"cut_px={cut}\n"
+    )
+    (ROOT / "build/bossbar_art_meta.txt").write_text(meta, encoding="utf-8")
+    print(meta)
+    print("art", canvas.size)
+
+
+if __name__ == "__main__":
+    main()

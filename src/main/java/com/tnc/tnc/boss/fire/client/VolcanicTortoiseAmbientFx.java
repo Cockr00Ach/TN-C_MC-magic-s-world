@@ -447,7 +447,9 @@ public final class VolcanicTortoiseAmbientFx {
         Vec3 vent = crater(boss, phaseTwo, level.random);
 
         // ---- 轻烟：小数累计，5/s 就是每 tick +0.25 -------------------------
-        float rateScale = proximity * (attacking ? Tuning.ATTACK_RATE_SCALE : 1.0F);
+        // 狂暴时口部更活跃、虚弱窗口明显降温，但只缩放常规粒子，不改喷发参数。
+        float mood = boss.isEnraged() ? 1.55F : boss.isWeakened() ? 0.35F : 1.0F;
+        float rateScale = proximity * (attacking ? Tuning.ATTACK_RATE_SCALE : 1.0F) * mood;
         if (erupting) {
             // 喷发期间压低常规粒子，避免两套效果叠成浓烟。
             rateScale *= Tuning.ERUPT_REGULAR_SCALE;

@@ -39,6 +39,7 @@ import java.util.UUID;
  * </ul>
  */
 public final class VolcanicMortarEntity extends Projectile {
+    private static final org.slf4j.Logger FIELD_LOG = org.slf4j.LoggerFactory.getLogger("TN-C/firefield");
 
     /** 单颗爆炸半径（格）。 */
     public static final double EXPLOSION_RADIUS = 2.5D;
@@ -173,6 +174,17 @@ public final class VolcanicMortarEntity extends Projectile {
             level.sendParticles(ParticleTypes.LAVA, at.x, at.y + 0.3D, at.z, 5, 0.45D, 0.35D, 0.45D, 0.0D);
             level.playSound(null, net.minecraft.core.BlockPos.containing(at),
                     SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 1.2F, 1.35F);
+            // 有效落地就在实际支撑面上留下燃烧区；若下方没有合法支撑面（空中）就不生成。
+            VolcanicFireFieldEntity field = VolcanicFireFieldEntity.spawn(level, at,
+                    this.damage * 0.30F, this.castId,
+                    this.getOwner() == null ? null : this.getOwner().getUUID(),
+                    VolcanicFireFieldEntity.MORTAR_RADIUS,
+                    VolcanicFireFieldEntity.MORTAR_DURATION,
+                    VolcanicFireFieldEntity.MORTAR_HIT_INTERVAL);
+            if (Boolean.getBoolean("tnc.tortoise.firefield.debug")) {
+                FIELD_LOG.info("[TN-C FireField] mortar impact at=({}, {}, {}) created={} reason={}",
+                        at.x, at.y, at.z, field != null, field == null ? "no-support-surface" : "ok");
+            }
 
             AABB area = new AABB(at, at).inflate(EXPLOSION_RADIUS);
             for (LivingEntity victim : level.getEntitiesOfClass(LivingEntity.class, area, this::canHitEntity)) {

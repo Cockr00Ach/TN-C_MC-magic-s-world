@@ -1,31 +1,30 @@
 package com.tnc.tnc.boss.fire.client;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.logging.LogUtils;
 import com.tnc.tnc.boss.fire.VolcanicTortoiseEntity;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Nullable;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.event.TickEvent;
@@ -33,464 +32,338 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.joml.Matrix4f;
 import org.slf4j.Logger;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import org.slf4j.LoggerFactory;
 
 /**
- * 技能 B「大地震波」的地面视觉（纯客户端、不产生方块实体、不改存档）。
+ * 大地震波（技能 B）的地表表现。
  *
- * <p>它是独立技能：只监听 {@link VolcanicTortoiseEntity#quakeWaveStart()} 的变化，
- * 与火环 {@code SlamRingFx} 没有任何调用关系。技能 A 不会再触发任何地表隆起。
+ * <p>波经过的位置生成一块“临时的地表副本”，用当地方块的真实模型贴图绘制：
+ * 顶面用该方块顶面贴图，侧壁用同方块侧面贴图，高度等于当前抬升量。
+ * 每块副本的 x/z 固定在原地，只随波峰抬起、轻微倾斜，波过后回落到 0 并停止绘制。</p>
  *
- * <p>重踏落地时沿震波路径做一次有界采样：每个角度、每 2 格半径取一个支撑面。
- * 采样以「世界实际高度图 + 施法高度」共同限定窗口，从窗口顶向下找第一个实心方块，
- * 因此既不会跑到洞穴屋顶，也不会因为是负高度或悬空平台而一个点都采不到。
- *
- * <p>每块地砖画成一个薄盒子：顶面用方块顶面贴图，四周用方块侧面贴图，
- * 抬起后能看到真实的厚度和侧面明暗，而不是一层平面颜色。
+ * <p>方块本身、碰撞、伤害、击退都不受影响。发光波带（{@link QuakeBandFx}）
+ * 默认关闭，需要时用 {@code -Dtnc.tortoise.quake.glow=true} 打开。</p>
  */
-@Mod.EventBusSubscriber(modid = "tnc", value = Dist.CLIENT)
+@Mod.EventBusSubscriber(modid = "tnc", value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public final class SlamGroundWave {
 
-    /** 调试开关：-Dtnc.tortoise.attack.debug=true 时打印采样/活跃地块统计。 */
-    private static final boolean DEBUG = Boolean.getBoolean("tnc.tortoise.attack.debug");
+    private static final Logger LOGGER = LoggerFactory.getLogger("TN-C/quake");
 
-    /** 圆周采样角度数。 */
-    private static final int ANGLES = 96;
-    /** 径向采样步长（格）。 */
-    private static final double RADIAL_STEP = 2.0D;
-    /** 径向采样层数（2..22 格）。 */
-    private static final int STEPS = 11;
-    /** 最大抬升（格）。 */
-    private static final double MAX_LIFT = 0.80D;
-    /** 一块地砖从抬起到落回原位的 tick 数。 */
-    private static final int LIFE = 8;
-    /** 地面比震波中心到达早多少 tick（让坡面先露出来）。 */
-    private static final double LEAD = 2.0D;
-    /** 单块地砖的边长（格）。 */
-    private static final double PATCH = 2.05D;
-    /** 相机超过这个距离就不再画地面细节。 */
+    /** 圆周采样数。 */
+    private static final int ANGLES = 128;
+    /** 波峰前后各补一层，避免只画一条细线。 */
+    private static final double[] RADIAL_OFFSETS = {-1.05D, 0.0D, 1.05D};
+    /** 首轮波峰抬升（格）。 */
+    private static final float MAX_LIFT = 0.68F;
+    /** 抬升包络宽度（格）。 */
+    private static final double SIGMA = 0.95D;
+    /** 单帧最多绘制多少块。 */
+    private static final int MAX_PATCHES = 460;
+    /** 超过这个距离不画（火环仍可见）。 */
     private static final double RENDER_DIST = 64.0D;
-    /** 采样窗口：施法高度向上/向下各留多少格。 */
-    private static final int SEARCH_UP = 8;
-    private static final int SEARCH_DOWN = 4;
-    /** 施法点离地表太远时，从高度图向下额外搜索的格数。 */
-    private static final int SEARCH_FALLBACK = 12;
+    /** 波结束后的淡出 tick。 */
+    private static final int FADE_OUT = 6;
+    /** 采样窗口：以施法高度为中心，避免跳到洞穴屋顶。 */
+    private static final int SEARCH_UP = 6;
+    private static final int SEARCH_DOWN = 8;
+    private static final boolean DEBUG = Boolean.getBoolean("tnc.tortoise.quake.debug");
 
-    private static final List<Wave> ACTIVE = new ArrayList<>();
-    /** 独立 immediate 缓冲：Oculus 下共享 BufferSource 的 endBatch 是 no-op。 */
     private static final MultiBufferSource.BufferSource BUFFERS =
             MultiBufferSource.immediate(new BufferBuilder(262144));
-    /**
-     * 纯色地砖材质：与调试光柱同一套 RENDERTYPE_LIGHTNING_SHADER + POSITION_COLOR 路径。
-     * 带贴图的 entityTranslucent/entityCutout 在本机 Oculus 环境下多次整片不可见，
-     * 换成这条已被光柱验证过的路径，保证地面波一定能画出来。
-     */
-    private static final class SlabType extends RenderStateShard {
-        private SlabType() {
-            super("tnc_quake_slab", () -> {
-            }, () -> {
-            });
-        }
 
-        static final RenderType TYPE = RenderType.create("tnc_quake_slab",
-                DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.QUADS, 256, false, true,
-                RenderType.CompositeState.builder()
-                        .setShaderState(RENDERTYPE_LIGHTNING_SHADER)
-                        .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
-                        .setCullState(NO_CULL)
-                        .setWriteMaskState(COLOR_WRITE)
-                        .setOutputState(MAIN_TARGET)
-                        .createCompositeState(false));
-    }
-    /** 每个实体上一次看到的震波编号，用来判断「有新的一发」。 */
-    private static final Map<Integer, Integer> SEEN = new HashMap<>();
-    private static final Logger LOGGER = LogUtils.getLogger();
-    private static boolean warnedFailure;
-    /** 采样数为 0 时只提醒一次，避免刷屏。 */
-    private static boolean warnedZero;
-    private static long lastStatsTick = -100L;
+    private static final List<Wave> ACTIVE = new ArrayList<>();
 
     private SlamGroundWave() {
     }
 
-    /** 一块地表贴片：世界坐标、方块地图色、抬升系数与光照。 */
-    private record Patch(double x, double z, double radius, double groundY,
-                         float u0, float v0, float u1, float v1,
-                         float su0, float sv0, float su1, float sv1,
-                         float liftScale, int light, float dirX, float dirZ,
-                         int topColor, int sideColor) {
-    }
-
     private static final class Wave {
-        final int castId;
-        final double centerX;
-        final double centerY;
-        final double centerZ;
-        final long bornAt;
-        final List<Patch> patches = new ArrayList<>();
+        final Vec3 center;
+        final long startTick;
+        double bornAt;
+        final Map<Long, Patch> patches = new HashMap<>();
+        int lastLogTick;
 
-        Wave(int castId, Vec3 center, long bornAt) {
-            this.castId = castId;
-            this.centerX = center.x;
-            this.centerY = center.y;
-            this.centerZ = center.z;
-            this.bornAt = bornAt;
+        Wave(Vec3 center, long startTick) {
+            this.center = center;
+            this.startTick = startTick;
         }
     }
 
-    /** 客户端 tick：发现新的震波编号就采样一次。 */
+    /** 一块地表副本的静态数据。 */
+    private static final class Patch {
+        final TextureAtlasSprite top;
+        final TextureAtlasSprite[] sides = new TextureAtlasSprite[4];
+        final int tint;
+        final int light;
+        final double groundY;
+
+        Patch(TextureAtlasSprite top, int tint, int light, double groundY) {
+            this.top = top;
+            this.tint = tint;
+            this.light = light;
+            this.groundY = groundY;
+        }
+    }
+
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
+    public static void tick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) {
             return;
         }
-        ClientLevel level = Minecraft.getInstance().level;
-        if (level == null) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null || mc.player == null) {
             ACTIVE.clear();
-            SEEN.clear();
             return;
         }
-        boolean any = false;
-        for (Entity entity : level.entitiesForRendering()) {
-            if (!(entity instanceof VolcanicTortoiseEntity boss)) {
-                continue;
-            }
-            any = true;
-            int start = boss.quakeWaveStart();
-            Integer previous = SEEN.get(boss.getId());
+        for (VolcanicTortoiseEntity boss : mc.level.getEntitiesOfClass(VolcanicTortoiseEntity.class,
+                mc.player.getBoundingBox().inflate(96.0D))) {
+            long start = boss.quakeWaveStart();
             if (start < 0) {
-                SEEN.remove(boss.getId());
                 continue;
             }
-            if (previous == null || previous != start) {
-                SEEN.put(boss.getId(), start);
-                var player = Minecraft.getInstance().player;
-                if (player != null && boss.distanceToSqr(player) < RENDER_DIST * RENDER_DIST) {
-                    begin(level, start, boss.quakeWaveCenter(), level.getGameTime());
+            Vec3 center = boss.quakeWaveCenter();
+            boolean known = false;
+            for (Wave wave : ACTIVE) {
+                if (wave.startTick == start) {
+                    known = true;
+                    break;
                 }
             }
-        }
-        if (!any) {
-            SEEN.clear();
-        }
-    }
-
-    /** 新一发震波：对本次路径做一次有界地表采样。 */
-    private static void begin(ClientLevel level, int castId, Vec3 center, long bornAt) {
-        if (ACTIVE.size() > 4) {
-            ACTIVE.clear();
-        }
-        Wave wave = new Wave(castId, center, bornAt);
-        double minY = Double.MAX_VALUE;
-        double maxY = -Double.MAX_VALUE;
-        for (int i = 0; i < ANGLES; i++) {
-            double angle = Math.PI * 2.0D * i / ANGLES;
-            float dirX = (float) Math.cos(angle);
-            float dirZ = (float) Math.sin(angle);
-            for (int step = 1; step <= STEPS; step++) {
-                double radius = step * RADIAL_STEP;
-                int x = Mth.floor(center.x + dirX * radius);
-                int z = Mth.floor(center.z + dirZ * radius);
-                Patch patch = sample(level, x, z, radius, center.y, dirX, dirZ);
-                if (patch != null) {
-                    wave.patches.add(patch);
-                    minY = Math.min(minY, patch.groundY());
-                    maxY = Math.max(maxY, patch.groundY());
-                }
+            if (!known) {
+                Wave wave = new Wave(center, start);
+                wave.bornAt = mc.level.getGameTime();
+                ACTIVE.add(wave);
             }
         }
-        ACTIVE.add(wave);
-        int n = wave.patches.size();
-        if (n == 0 && !warnedZero) {
-            warnedZero = true;
-            int sx = Mth.floor(center.x + 2.0D);
-            int sz = Mth.floor(center.z);
-            int h = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, sx, sz);
-            LOGGER.warn("[TN-C QuakeWave] sampled 0 patches: cast={} center={} heightAtR2={} minBuild={} stateAtHeight={}",
-                    castId, center, h, level.getMinBuildHeight(),
-                    level.getBlockState(new BlockPos(sx, h - 1, sz)));
-        }
-        if (DEBUG) {
-            LOGGER.info("[TN-C QuakeWave] cast={} patches={} centerY={} groundY=[{}, {}] lift={}",
-                    castId, n, String.format(Locale.ROOT, "%.2f", center.y),
-                    n == 0 ? "-" : String.format(Locale.ROOT, "%.2f", minY),
-                    n == 0 ? "-" : String.format(Locale.ROOT, "%.2f", maxY),
-                    MAX_LIFT);
-        }
-    }
-
-    private static Patch sample(ClientLevel level, int x, int z, double radius,
-                                double centerY, float dirX, float dirZ) {
-        int heightTop = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
-        int top = Math.min(heightTop, Mth.floor(centerY + SEARCH_UP));
-        int bottom = Math.max(level.getMinBuildHeight(), Mth.floor(centerY - SEARCH_DOWN));
-        if (top < bottom) {
-            // 施法点离地表太远（例如站在高台上或高度图异常）时，至少从高度图向下找 12 格。
-            bottom = Math.max(level.getMinBuildHeight(), Math.min(top, heightTop) - SEARCH_FALLBACK);
-        }
-        if (top < bottom) {
-            return null;
-        }
-        BlockRenderDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();
-        RandomSource random = RandomSource.create(42L);
-        for (int y = top; y >= bottom; y--) {
-            BlockPos pos = new BlockPos(x, y, z);
-            if (!level.hasChunkAt(pos)) {
-                continue;
-            }
-            BlockState state = level.getBlockState(pos);
-            if (state.isAir()) {
-                continue;
-            }
-            if (!state.getFluidState().isEmpty() || state.hasBlockEntity()) {
-                continue;
-            }
-            BakedModel model = dispatcher.getBlockModel(state);
-            BakedQuad topQuad = pickQuad(model, state, Direction.UP, random);
-            boolean solid = state.isSolidRender(level, pos) || state.isSolid();
-            if (topQuad == null) {
-                if (!solid) {
-                    continue;
-                }
-                // 有些模组地板模型没有独立的 UP 面（全部塞在无方向列表里），
-                // 这里退回石头顶面贴图，保证地面波至少能显示出来。
-                topQuad = stoneTop(random);
-                if (topQuad == null) {
-                    continue;
-                }
-            }
-            Direction side = Math.abs(dirX) > Math.abs(dirZ)
-                    ? (dirX > 0.0F ? Direction.EAST : Direction.WEST)
-                    : (dirZ > 0.0F ? Direction.SOUTH : Direction.NORTH);
-            BakedQuad sideQuad = pickQuad(model, state, side, random);
-            if (sideQuad == null) {
-                sideQuad = topQuad;
-            }
-            int light = LevelRenderer.getLightColor(level, pos.above());
-            float liftScale = 0.72F + 0.28F * level.random.nextFloat();
-            // 用方块地图色画纯色地砖：贴图路径在 Oculus 下多次不显示，
-            // 而 RENDERTYPE_LIGHTNING_SHADER + POSITION_COLOR 的纯色几何已被光柱验证可见。
-            int mapColor = state.getMapColor(level, pos).col;
-            int topColor = brighten(mapColor, 1.12F);
-            int sideColor = brighten(mapColor, 0.68F);
-            return new Patch(x + 0.5D, z + 0.5D, radius, y + 1.0D,
-                    topQuad.getSprite().getU0(), topQuad.getSprite().getV0(),
-                    topQuad.getSprite().getU1(), topQuad.getSprite().getV1(),
-                    sideQuad.getSprite().getU0(), sideQuad.getSprite().getV0(),
-                    sideQuad.getSprite().getU1(), sideQuad.getSprite().getV1(),
-                    liftScale, light, dirX, dirZ, topColor, sideColor);
-        }
-        return null;
-    }
-
-    /** 取某个方向的烘焙四边形；该方向为空时退回无方向列表（模组方块常见）。 */
-    private static BakedQuad pickQuad(BakedModel model, BlockState state, Direction direction,
-                                      RandomSource random) {
-        List<BakedQuad> quads = model.getQuads(state, direction, random);
-        if (quads.isEmpty()) {
-            quads = model.getQuads(state, null, random);
-        }
-        return quads.isEmpty() ? null : quads.get(0);
-    }
-
-    /** 兜底：石头顶面，用于没有可用面数据的模组地板。 */
-    private static BakedQuad stoneTop(RandomSource random) {
-        var dispatcher = Minecraft.getInstance().getBlockRenderer();
-        BlockState stone = net.minecraft.world.level.block.Blocks.STONE.defaultBlockState();
-        List<BakedQuad> quads = dispatcher.getBlockModel(stone).getQuads(stone, Direction.UP, random);
-        return quads.isEmpty() ? null : quads.get(0);
+        ACTIVE.removeIf(wave -> mc.level.getGameTime() - wave.bornAt
+                > VolcanicTortoiseEntity.QUAKE_RING_TICKS + FADE_OUT + 4);
     }
 
     @SubscribeEvent
     public static void render(RenderLevelStageEvent event) {
-        // 与 PortalRitualRenderer 一样放在 AFTER_WEATHER：此阶段 RenderSystem 的 model-view
-        // 已包含视角旋转，再叠加一层「世界 → 相机相对」平移即可正确落在世界坐标上。
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_WEATHER) {
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_WEATHER || ACTIVE.isEmpty()) {
             return;
         }
         Minecraft mc = Minecraft.getInstance();
-        ClientLevel level = mc.level;
-        if (level == null || ACTIVE.isEmpty()) {
-            if (level == null) {
-                ACTIVE.clear();
-            }
+        if (mc.level == null) {
+            ACTIVE.clear();
             return;
         }
         try {
-            draw(event, level);
+            draw(event, mc.level);
         } catch (Throwable t) {
             ACTIVE.clear();
-            if (!warnedFailure) {
-                warnedFailure = true;
-                LOGGER.error("[TN-C QuakeWave] ground wave disabled after render error", t);
-            }
+            LOGGER.error("[TN-C QuakeWave] disabled after render error", t);
         }
     }
 
-    private static void draw(RenderLevelStageEvent event, ClientLevel level) {
+    private static void draw(RenderLevelStageEvent event, Level level) {
         Vec3 camera = event.getCamera().getPosition();
-        float partial = event.getPartialTick();
-        double ageNow = level.getGameTime() + partial;
-
-        RenderType type = SlabType.TYPE;
-        // Oculus 会把 Minecraft 共享的 BufferSource 换成 endBatch 为 no-op 的分段缓冲，
-        // 用独立 immediate 缓冲才能保证真的提交（PortalRitualRenderer 已踩过同样的坑）。
-        var buffers = BUFFERS;
-        VertexConsumer buffer = buffers.getBuffer(type);
-
+        double now = level.getGameTime() + event.getPartialTick();
         Matrix4f matrix = new Matrix4f().translation(
                 (float) -camera.x, (float) -camera.y, (float) -camera.z);
 
+        VertexConsumer buffer = BUFFERS.getBuffer(RenderType.solid());
         int drawn = 0;
-        float peak = 0.0F;
-        int cast = -1;
-        Iterator<Wave> iterator = ACTIVE.iterator();
-        while (iterator.hasNext()) {
-            Wave wave = iterator.next();
-            double age = ageNow - wave.bornAt;
-            if (age > VolcanicTortoiseEntity.QUAKE_TICKS + LIFE + 20) {
-                iterator.remove();
+
+        for (Wave wave : ACTIVE) {
+            double age = now - wave.bornAt;
+            int life = VolcanicTortoiseEntity.QUAKE_RING_TICKS;
+            if (age > life + FADE_OUT) {
                 continue;
             }
-            double distance = Math.hypot(wave.centerX - camera.x, wave.centerZ - camera.z);
-            if (distance > RENDER_DIST) {
+            double radius = VolcanicTortoiseEntity.QUAKE_RADIUS * Mth.clamp(age / life, 0.0D, 1.0D);
+            float fade = age <= life ? 1.0F : (float) (1.0D - (age - life) / FADE_OUT);
+            if (wave.center.distanceToSqr(camera) > RENDER_DIST * RENDER_DIST) {
                 continue;
             }
-            cast = wave.castId;
-            for (Patch patch : wave.patches) {
-                double arrive = Math.max(0.0D,
-                        patch.radius() / VolcanicTortoiseEntity.QUAKE_RADIUS
-                                * VolcanicTortoiseEntity.QUAKE_RING_TICKS - LEAD);
-                double local = age - arrive;
-                if (local <= 0.0D || local > LIFE) {
-                    continue;
+
+            for (int i = 0; i < ANGLES && drawn < MAX_PATCHES; i++) {
+                double angle = (Math.PI * 2.0D) * i / ANGLES;
+                double dirX = Math.cos(angle);
+                double dirZ = Math.sin(angle);
+                for (double offset : RADIAL_OFFSETS) {
+                    double r = radius + offset;
+                    if (r <= 0.0D) {
+                        continue;
+                    }
+                    double x = wave.center.x + dirX * r;
+                    double z = wave.center.z + dirZ * r;
+                    int bx = Mth.floor(x);
+                    int bz = Mth.floor(z);
+                    double dist = Math.sqrt((x - wave.center.x) * (x - wave.center.x)
+                            + (z - wave.center.z) * (z - wave.center.z));
+                    double delta = radius - dist;
+                    double lift = MAX_LIFT * Math.exp(-(delta * delta) / (SIGMA * SIGMA)) * fade;
+                    if (lift < 0.03D) {
+                        continue;
+                    }
+
+                    long key = BlockPos.asLong(bx, 0, bz);
+                    Patch patch = wave.patches.get(key);
+                    if (patch == null) {
+                        patch = sample(level, bx, bz, wave.center.y);
+                        if (patch == null) {
+                            patch = MISS;
+                        }
+                        wave.patches.put(key, patch);
+                    }
+                    if (patch == MISS || Math.abs(patch.groundY - wave.center.y) > 6.0D) {
+                        continue;
+                    }
+                    drawPatch(buffer, matrix, bx, bz, patch, lift);
+                    drawn++;
                 }
-                float p = (float) (local / LIFE);
-                float envelope = Mth.sin(p * (float) Math.PI);
-                float lift = (float) (MAX_LIFT * patch.liftScale() * envelope);
-                float alpha = Math.min(1.0F, envelope * 2.2F) * 0.95F;
-                peak = Math.max(peak, lift);
-                drawn++;
-                drawPatch(buffer, matrix, patch, lift, alpha);
+            }
+
+            if (DEBUG && level.getGameTime() - wave.lastLogTick > 20) {
+                wave.lastLogTick = (int) level.getGameTime();
+                LOGGER.info("[TN-C QuakeWave] radius={} patches={} cache={}",
+                        String.format("%.1f", radius), drawn, wave.patches.size());
             }
         }
-        buffers.endBatch(type);
 
-        if (DEBUG && !ACTIVE.isEmpty()) {
-            drawBeacon(buffers, matrix, ACTIVE.get(ACTIVE.size() - 1));
-        }
+        BUFFERS.endBatch(RenderType.solid());
+    }
 
-        if (DEBUG && drawn > 0 && level.getGameTime() - lastStatsTick >= 20L) {
-            lastStatsTick = level.getGameTime();
-            LOGGER.info("[TN-C QuakeWave] cast={} active={} peakLift={}",
-                    cast, drawn, String.format(Locale.ROOT, "%.2f", peak));
+    /** 缓存里的“采样失败”标记。 */
+    private static final Patch MISS = new Patch(null, 0xFFFFFF, 0, 0.0D);
+
+    /** 采一块地表副本：真实方块状态、顶面与侧面贴图、染色与光照。 */
+    @Nullable
+    private static Patch sample(Level level, int bx, int bz, double centerY) {
+        int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, bx, bz) - 1;
+        int start = Math.min(top, Mth.floor(centerY + SEARCH_UP));
+        int bottom = Math.max(level.getMinBuildHeight(), Mth.floor(centerY - SEARCH_DOWN));
+        Minecraft mc = Minecraft.getInstance();
+        BlockRenderDispatcher dispatcher = mc.getBlockRenderer();
+        RandomSource random = RandomSource.create(42L);
+
+        for (int y = start; y >= bottom; y--) {
+            BlockPos pos = new BlockPos(bx, y, bz);
+            BlockState state = level.getBlockState(pos);
+            if (state.isAir() || !state.getFluidState().isEmpty() || state.hasBlockEntity()) {
+                continue;
+            }
+            if (state.getRenderShape() != RenderShape.MODEL) {
+                continue;
+            }
+            VoxelShape shape = state.getCollisionShape(level, pos);
+            if (shape.isEmpty()) {
+                continue;
+            }
+            double surface = shape.max(Direction.Axis.Y);
+            if (surface <= 0.02D) {
+                continue;
+            }
+            var model = dispatcher.getBlockModel(state);
+            List<BakedQuad> topQuads = model.getQuads(state, Direction.UP, random);
+            if (topQuads.isEmpty()) {
+                continue;
+            }
+            TextureAtlasSprite topSprite = topQuads.get(0).getSprite();
+            Patch patch = new Patch(topSprite,
+                    mc.getBlockColors().getColor(state, level, pos, 0),
+                    LevelRenderer.getLightColor(level, pos.above()),
+                    y + surface);
+            for (Direction dir : new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST}) {
+                List<BakedQuad> quads = model.getQuads(state, dir, random);
+                patch.sides[sideIndex(dir)] = quads.isEmpty() ? topSprite : quads.get(0).getSprite();
+            }
+            return patch;
         }
+        return null;
+    }
+
+    private static int sideIndex(Direction dir) {
+        return switch (dir) {
+            case NORTH -> 0;
+            case SOUTH -> 1;
+            case WEST -> 2;
+            case EAST -> 3;
+            default -> 0;
+        };
     }
 
     /**
-     * 调试用：在震波中心画一根 4 格高的白色光柱。
-     * 用 {@link RenderType#lightning()}（已知可用的纯色渲染类型），
-     * 用来区分“位置/矩阵不对”与“地块材质/剔除看不见”。
+     * 画一块抬起的地表：顶面 + 四面侧壁。
+     * 位置固定在原 x/z，只有高度随 lift 变化；波峰前后由调用方用同一包络计算。
      */
-    private static void drawBeacon(net.minecraft.client.renderer.MultiBufferSource.BufferSource buffers,
-                                   Matrix4f matrix, Wave wave) {
-        RenderType type = RenderType.lightning();
-        VertexConsumer buffer = buffers.getBuffer(type);
-        float w = 0.6F;
-        for (int i = 0; i < 4; i++) {
-            double a = Math.PI * 0.5D * i;
-            float dx = (float) Math.cos(a) * w;
-            float dz = (float) Math.sin(a) * w;
-            beaconQuad(buffer, matrix, wave.centerX, wave.centerY, wave.centerZ, dx, dz);
+    private static void drawPatch(VertexConsumer buffer, Matrix4f matrix, int bx, int bz,
+                                  Patch patch, double lift) {
+        float x0 = bx;
+        float z0 = bz;
+        float x1 = bx + 1.0F;
+        float z1 = bz + 1.0F;
+        float y0 = (float) patch.groundY;
+        float top = y0 + (float) lift;
+
+        // 轻微倾斜：四角有细小高差，避免整块像一块平板。
+        float tiltX = ((bx * 31 + bz * 17) & 7) / 7.0F - 0.5F;
+        float tiltZ = ((bx * 13 + bz * 29) & 7) / 7.0F - 0.5F;
+        float d = (float) lift * 0.12F;
+        float t00 = top + (tiltX + tiltZ) * d;
+        float t01 = top + (tiltX - tiltZ) * d;
+        float t11 = top - (tiltX + tiltZ) * d;
+        float t10 = top - (tiltX - tiltZ) * d;
+
+        float r = ((patch.tint >> 16) & 0xFF) / 255.0F;
+        float g = ((patch.tint >> 8) & 0xFF) / 255.0F;
+        float b = (patch.tint & 0xFF) / 255.0F;
+
+        TextureAtlasSprite sprite = patch.top;
+        float u0 = sprite.getU0();
+        float u1 = sprite.getU1();
+        float v0 = sprite.getV0();
+        float v1 = sprite.getV1();
+
+        // 顶面：u 沿 +x，v 沿 +z
+        vertex(buffer, matrix, x0, t00, z0, u0, v0, r, g, b, patch.light, 0.0F, 1.0F, 0.0F);
+        vertex(buffer, matrix, x0, t01, z1, u0, v1, r, g, b, patch.light, 0.0F, 1.0F, 0.0F);
+        vertex(buffer, matrix, x1, t11, z1, u1, v1, r, g, b, patch.light, 0.0F, 1.0F, 0.0F);
+        vertex(buffer, matrix, x1, t10, z0, u1, v0, r, g, b, patch.light, 0.0F, 1.0F, 0.0F);
+
+        if (lift < 0.04D) {
+            return;
         }
-        buffers.endBatch(type);
+        // 侧壁：底边在原地面，顶边在抬起的顶面；高度 = 当前抬升量。
+        side(buffer, matrix, patch.sides[0], x1, y0, z0, x0, y0, z0, x0, t00, z0, x1, t10, z0,
+                r, g, b, patch.light);
+        side(buffer, matrix, patch.sides[1], x0, y0, z1, x1, y0, z1, x1, t11, z1, x0, t01, z1,
+                r, g, b, patch.light);
+        side(buffer, matrix, patch.sides[2], x0, y0, z0, x0, y0, z1, x0, t01, z1, x0, t00, z0,
+                r, g, b, patch.light);
+        side(buffer, matrix, patch.sides[3], x1, y0, z1, x1, y0, z0, x1, t10, z0, x1, t11, z1,
+                r, g, b, patch.light);
     }
 
-    private static void beaconQuad(VertexConsumer buffer, Matrix4f matrix,
-                                   double cx, double cy, double cz, float dx, float dz) {
-        float y0 = (float) cy;
-        float y1 = (float) cy + 14.0F;
-        buffer.vertex(matrix, (float) cx - dx, y0, (float) cz - dz).color(1.0F, 0.95F, 0.8F, 1.0F).endVertex();
-        buffer.vertex(matrix, (float) cx + dx, y0, (float) cz + dz).color(1.0F, 0.95F, 0.8F, 1.0F).endVertex();
-        buffer.vertex(matrix, (float) cx + dx, y1, (float) cz + dz).color(1.0F, 0.95F, 0.8F, 1.0F).endVertex();
-        buffer.vertex(matrix, (float) cx - dx, y1, (float) cz - dz).color(1.0F, 0.95F, 0.8F, 1.0F).endVertex();
+    /** 一面侧壁；正反两种绕序各写一次，避免观察角度不同导致整面消失。 */
+    private static void side(VertexConsumer buffer, Matrix4f matrix, TextureAtlasSprite sprite,
+                             float ax, float ay, float az, float bx, float by, float bz,
+                             float cx, float cy, float cz, float dx, float dy, float dz,
+                             float r, float g, float b, int light) {
+        float u0 = sprite.getU0();
+        float u1 = sprite.getU1();
+        float v0 = sprite.getV0();
+        float v1 = sprite.getV1();
+        float shade = 0.78F;
+        // 底边在 v1，顶边在 v0
+        vertex(buffer, matrix, ax, ay, az, u0, v1, r * shade, g * shade, b * shade, light, 0.0F, 0.0F, 1.0F);
+        vertex(buffer, matrix, bx, by, bz, u1, v1, r * shade, g * shade, b * shade, light, 0.0F, 0.0F, 1.0F);
+        vertex(buffer, matrix, cx, cy, cz, u1, v0, r * shade, g * shade, b * shade, light, 0.0F, 0.0F, 1.0F);
+        vertex(buffer, matrix, dx, dy, dz, u0, v0, r * shade, g * shade, b * shade, light, 0.0F, 0.0F, 1.0F);
+        // 反向绕序
+        vertex(buffer, matrix, dx, dy, dz, u0, v0, r * shade, g * shade, b * shade, light, 0.0F, 0.0F, -1.0F);
+        vertex(buffer, matrix, cx, cy, cz, u1, v0, r * shade, g * shade, b * shade, light, 0.0F, 0.0F, -1.0F);
+        vertex(buffer, matrix, bx, by, bz, u1, v1, r * shade, g * shade, b * shade, light, 0.0F, 0.0F, -1.0F);
+        vertex(buffer, matrix, ax, ay, az, u0, v1, r * shade, g * shade, b * shade, light, 0.0F, 0.0F, -1.0F);
     }
 
-    /** 一块地砖：顶面 + 四周侧面，抬升后能看出厚度。 */
-    private static void drawPatch(VertexConsumer buffer, Matrix4f matrix, Patch patch,
-                                  float lift, float alpha) {
-        double half = PATCH * 0.5D;
-        double x0 = patch.x() - half;
-        double x1 = patch.x() + half;
-        double z0 = patch.z() - half;
-        double z1 = patch.z() + half;
-        double base = patch.groundY() - 0.03D;
-
-        // 外侧一角抬得更高，形成向外倾的坡面；内侧几乎贴地。
-        float y00 = (float) (patch.groundY() + lift * (0.68F + 0.32F * radial01(-half, -half, patch)));
-        float y10 = (float) (patch.groundY() + lift * (0.68F + 0.32F * radial01(half, -half, patch)));
-        float y11 = (float) (patch.groundY() + lift * (0.68F + 0.32F * radial01(half, half, patch)));
-        float y01 = (float) (patch.groundY() + lift * (0.68F + 0.32F * radial01(-half, half, patch)));
-
-        // 顶面
-        solidQuad(buffer, matrix, alpha, patch.topColor(),
-                x0, y00, z0, x1, y10, z0, x1, y11, z1, x0, y01, z1);
-
-        // 四个侧面（用方块地图色压暗，保证草皮/泥土的层次）
-        int side = patch.sideColor();
-        solidQuad(buffer, matrix, alpha, side,
-                x0, base, z0, x1, base, z0, x1, y10, z0, x0, y00, z0);
-        solidQuad(buffer, matrix, alpha, side,
-                x1, base, z1, x0, base, z1, x0, y01, z1, x1, y11, z1);
-        solidQuad(buffer, matrix, alpha, side,
-                x0, base, z1, x0, base, z0, x0, y00, z0, x0, y01, z1);
-        solidQuad(buffer, matrix, alpha, side,
-                x1, base, z0, x1, base, z1, x1, y11, z1, x1, y10, z0);
-    }
-
-    private static void solidQuad(VertexConsumer buffer, Matrix4f matrix, float alpha, int color,
-                                  double x0, double y0, double z0,
-                                  double x1, double y1, double z1,
-                                  double x2, double y2, double z2,
-                                  double x3, double y3, double z3) {
-        float r = ((color >> 16) & 0xFF) / 255.0F;
-        float g = ((color >> 8) & 0xFF) / 255.0F;
-        float b = (color & 0xFF) / 255.0F;
-        // 正反两种绕序各写一遍：NO_CULL 下无副作用，也避免绕序约定不同导致整片不可见。
-        vertex(buffer, matrix, r, g, b, alpha, x0, y0, z0);
-        vertex(buffer, matrix, r, g, b, alpha, x1, y1, z1);
-        vertex(buffer, matrix, r, g, b, alpha, x2, y2, z2);
-        vertex(buffer, matrix, r, g, b, alpha, x3, y3, z3);
-        vertex(buffer, matrix, r, g, b, alpha, x3, y3, z3);
-        vertex(buffer, matrix, r, g, b, alpha, x2, y2, z2);
-        vertex(buffer, matrix, r, g, b, alpha, x1, y1, z1);
-        vertex(buffer, matrix, r, g, b, alpha, x0, y0, z0);
-    }
-
-    /** 按系数提亮/压暗一个 0xRRGGBB 颜色。 */
-    private static int brighten(int rgb, float factor) {
-        int r = Math.min(255, Math.round(((rgb >> 16) & 0xFF) * factor));
-        int g = Math.min(255, Math.round(((rgb >> 8) & 0xFF) * factor));
-        int b = Math.min(255, Math.round((rgb & 0xFF) * factor));
-        return (r << 16) | (g << 8) | b;
-    }
-
-    /** 该角相对中心的外向程度：1 = 最外角，0 = 最内角。 */
-    private static double radial01(double cornerX, double cornerZ, Patch patch) {
-        double outward = cornerX * patch.dirX() + cornerZ * patch.dirZ();
-        return Mth.clamp(outward / (PATCH * 0.5D) * 0.5D + 0.5D, 0.0D, 1.0D);
-    }
-
-    private static void vertex(VertexConsumer buffer, Matrix4f matrix, float r, float g, float b,
-                               float alpha, double x, double y, double z) {
-        buffer.vertex(matrix, (float) x, (float) y, (float) z)
-                .color(r, g, b, alpha)
-                .endVertex();
+    private static void vertex(VertexConsumer buffer, Matrix4f matrix,
+                               float x, float y, float z, float u, float v,
+                               float r, float g, float b, int light,
+                               float nx, float ny, float nz) {
+        buffer.vertex(matrix, x, y, z).color(r, g, b, 1.0F).uv(u, v).uv2(light)
+                .normal(nx, ny, nz).endVertex();
     }
 }
