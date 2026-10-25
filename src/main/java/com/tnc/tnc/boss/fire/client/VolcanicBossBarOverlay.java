@@ -39,13 +39,18 @@ public final class VolcanicBossBarOverlay {
     private static final int INNER_TOP = 73;
     private static final int INNER_W = 364;
     private static final int INNER_H = 51;
+    /** lava.png / cooled.png 的原始像素尺寸。 */
+    private static final int LAVA_TEX_W = 182;
+    private static final int LAVA_TEX_H = 25;
 
-    private static final int BAR_W = INNER_W / 2;    // 182
-    private static final int BAR_H = INNER_H / 2;    // 26
-    private static final int ART_W = (int) Math.round(ART_TEX_W / 2.0); // 194
-    private static final int ART_H = (int) Math.round(ART_TEX_H / 2.0); // 71
-    private static final int ART_OFF_X = INNER_LEFT / 2;  // 5
-    private static final int ART_OFF_Y = INNER_TOP / 2;   // 37
+    /** 整条相对参考图原始比例再缩到 0.75（宽度 182 -> 137）。 */
+    private static final double UI_SCALE = 0.75;
+    private static final int BAR_W = (int) Math.round(INNER_W / 2.0 * UI_SCALE);   // 137
+    private static final int BAR_H = (int) Math.round(INNER_H / 2.0 * UI_SCALE);   // 19
+    private static final int ART_W = (int) Math.round(ART_TEX_W / 2.0 * UI_SCALE); // 143
+    private static final int ART_H = (int) Math.round(ART_TEX_H / 2.0 * UI_SCALE); // 52
+    private static final int ART_OFF_X = (int) Math.round(INNER_LEFT / 2.0 * UI_SCALE); // 2
+    private static final int ART_OFF_Y = (int) Math.round(INNER_TOP / 2.0 * UI_SCALE);  // 27
 
     /** 名字：橙红色、带阴影，与火山顶留 6px 间隔（避开火焰与烟）。 */
     private static final int NAME_COLOR = 0xFF5A24;
@@ -82,31 +87,26 @@ public final class VolcanicBossBarOverlay {
         int artX = x - ART_OFF_X;
         int artY = barY - ART_OFF_Y;
 
-        // 1. 空血底图（不裁切）
-        for (int dx = 0; dx < BAR_W; dx += 16) {
-            int tw = Math.min(16, BAR_W - dx);
-            graphics.blit(COOLED, x + dx, barY, dx, 0, tw, BAR_H, BAR_W, BAR_H);
-        }
+        // 1. 空血底图（整张缩放，不裁切）
+        graphics.blit(COOLED, x, barY, BAR_W, BAR_H, 0, 0, LAVA_TEX_W, LAVA_TEX_H, LAVA_TEX_W, LAVA_TEX_H);
 
         // 2. 熔岩填充：左侧为剩余血量，按 progress 裁切，不横向压缩
         float progress = Math.max(0.0F, Math.min(1.0F, event.getBossEvent().getProgress()));
         int fillW = Math.round(BAR_W * progress);
         if (fillW > 0) {
             graphics.enableScissor(x, barY, x + fillW, barY + BAR_H);
-            for (int dx = 0; dx < fillW; dx += 16) {
-                int tw = Math.min(16, fillW - dx);
-                graphics.blit(LAVA, x + dx, barY, dx, 0, tw, BAR_H, BAR_W, BAR_H);
-            }
+            graphics.blit(LAVA, x, barY, BAR_W, BAR_H, 0, 0, LAVA_TEX_W, LAVA_TEX_H, LAVA_TEX_W, LAVA_TEX_H);
             graphics.disableScissor();
         }
 
         // 3. 前景：岩框 + 中央火山（不随血量变化）
         if (full) {
-            graphics.blit(ART, artX, artY, 0, 0, ART_W, ART_H, ART_TEX_W, ART_TEX_H);
+            graphics.blit(ART, artX, artY, ART_W, ART_H, 0, 0, ART_TEX_W, ART_TEX_H, ART_TEX_W, ART_TEX_H);
         } else {
             int v = CROP_TOP;
             int h = ART_TEX_H - CROP_TOP;
-            graphics.blit(ART, artX, barY - CROP_TOP / 2, 0, v, ART_W, (int) Math.round(h / 2.0), ART_TEX_W, ART_TEX_H);
+            graphics.blit(ART, artX, barY - CROP_TOP / 2, ART_W, (int) Math.round(h / 2.0),
+                    0, v, ART_TEX_W, h, ART_TEX_W, ART_TEX_H);
         }
 
         // 4. 名字：橙红 + 阴影，跟着组件走
