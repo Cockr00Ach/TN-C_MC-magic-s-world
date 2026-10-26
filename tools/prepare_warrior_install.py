@@ -8,12 +8,21 @@ def prepare(live,built,forge_class,output):
     output.mkdir(parents=True,exist_ok=False);target=output/'tnc-1.0.0.jar'
     prefixes=('com/tnc/tnc/warrior/','com/tnc/tnc/client/MagicStoneHud',
               'com/tnc/tnc/network/MagicStoneNetwork','com/tnc/tnc/production/ManaForgeRecipe')
-    resources={'data/tnc/recipes/wind_weapon_infusion.json','data/tnc/tags/items/infusible_weapons.json'}
+    resources={'data/tnc/recipes/wind_weapon_infusion.json','data/tnc/tags/items/infusible_weapons.json',
+               'data/tnc/dimension/training_ground.json','data/tnc/dimension_type/training_ground.json'}
     forge='com/tnc/tnc/production/MagicForgeBlockEntity.class'
     with zipfile.ZipFile(base) as old,zipfile.ZipFile(built) as new:
         payload={n:new.read(n) for n in new.namelist() if n in resources or
                  n.endswith('.class') and n.startswith(prefixes) and 'GameTests' not in n and 'UiAudit' not in n}
         payload[forge]=forge_class.read_bytes()
+        # Merge only this feature's key label; preserve every installed translation value.
+        for language in ('zh_cn','en_us'):
+            name=f'assets/tnc/lang/{language}.json'
+            installed=json.loads(old.read(name).decode('utf-8-sig'))
+            built_labels=json.loads(new.read(name).decode('utf-8-sig'))
+            merged_labels=dict(installed);merged_labels['key.tnc.warrior_practice']=built_labels['key.tnc.warrior_practice']
+            assert all(merged_labels[k]==v for k,v in installed.items() if k!='key.tnc.warrior_practice')
+            payload[name]=(json.dumps(merged_labels,ensure_ascii=False,indent=2)+'\n').encode('utf-8')
         assert resources<=payload.keys()
         assert 'com/tnc/tnc/warrior/WarriorTalentRules.class' in payload
         assert not any(n.startswith('net/') for n in payload),'Dependency fixtures cannot ship'

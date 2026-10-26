@@ -15,7 +15,8 @@ public final class TemperingClient {
     private static boolean enrolled;
     private static int points;
     private static int talent;
-    private static boolean graduate,training;
+    private static boolean graduate,training,ground;
+    public static boolean ground(){return ground;}
     private static int blocks,counterTicks,windTicks;
     private static long receivedAt;
     private static long displayTicks;
@@ -38,12 +39,12 @@ public final class TemperingClient {
     public static void accept(TemperingPacket packet) {
         talent = packet.talent(); enrolled = packet.enrolled() && talent > 0;
         points = Math.min(cap(), TemperingRules.clamp(packet.points()));
-        graduate=packet.graduate();training=packet.training()&&enrolled;
+        graduate=packet.graduate();training=packet.training()&&enrolled;ground=packet.ground();
         blocks=packet.blocks();counterTicks=packet.counterTicks();windTicks=packet.windTicks();receivedAt=now();
         if(packet.open()&&Minecraft.getInstance().player!=null)Minecraft.getInstance().setScreen(new WarriorPracticeScreen());
     }
     @SubscribeEvent public static void logout(ClientPlayerNetworkEvent.LoggingOut event) {
         enrolled = false; points = 0; talent = 0;
-        graduate=training=false;blocks=counterTicks=windTicks=0;receivedAt=displayTicks=0;
+        graduate=training=ground=false;blocks=counterTicks=windTicks=0;receivedAt=displayTicks=0;
     }
 }

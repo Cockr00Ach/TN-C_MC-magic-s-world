@@ -22,8 +22,8 @@ import java.util.function.Supplier;
  */
 public class MagicStoneNetwork {
 
-    // v11 adds the warrior practice panel and server-owned training/cooldown display state.
-    private static final String PROTOCOL_VERSION = "11";
+    // v12 adds private training-ground travel and practice location display state.
+    private static final String PROTOCOL_VERSION = "12";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "main"),

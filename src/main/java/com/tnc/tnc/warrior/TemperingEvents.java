@@ -39,7 +39,7 @@ public final class TemperingEvents {
         long now=player.server.overworld().getGameTime();
         return new TemperingPacket(data.enrolled(player.getUUID()), data.points(player.getUUID()), data.talent(player.getUUID()),
             data.guardGraduate(player.getUUID()),TemperingTraining.active(player),TemperingTraining.blockCount(player),
-            TemperingTraining.remaining(player,now),data.windRemaining(player.getUUID(),now),open);
+            TemperingTraining.remaining(player,now),data.windRemaining(player.getUUID(),now),open,TrainingGround.inside(player));
     }
     public static void sync(ServerPlayer player,boolean open) {
         MagicStoneNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player),
@@ -75,6 +75,7 @@ public final class TemperingEvents {
     }
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void defeated(LivingDeathEvent event) {
+        if(TrainingGround.trainer(event.getEntity()))return;
         if (!(event.getEntity() instanceof Enemy) || !(event.getSource().getEntity() instanceof ServerPlayer player)
                 || event.getSource().getDirectEntity() != player || !event.getSource().is(DamageTypes.PLAYER_ATTACK)
                 || player.isCreative() || player.isSpectator() || DownedCombat.isDowned(player)
@@ -115,6 +116,8 @@ public final class TemperingEvents {
                 ctx.getSource().sendSuccess(() -> Component.literal("已启用磨砺：持剑或斧近战击败敌对生物可成长；磨砺永久保留。"), false); return 1;
             }))
             .then(Commands.literal("panel").executes(ctx->{sync(ctx.getSource().getPlayerOrException(),true);return 1;}))
+            .then(Commands.literal("ground").executes(ctx->{return TrainingGround.enter(ctx.getSource().getPlayerOrException())?1:0;})
+                .then(Commands.literal("leave").executes(ctx->{return TrainingGround.leave(ctx.getSource().getPlayerOrException())?1:0;})))
             .then(Commands.literal("talent")
                 .executes(ctx -> { var p=ctx.getSource().getPlayerOrException();ctx.getSource().sendSuccess(()->Component.literal(talentSummary(p)),false);return 1; })
                 .then(Commands.literal("set").requires(s->s.hasPermission(2))

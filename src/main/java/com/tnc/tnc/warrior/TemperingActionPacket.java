@@ -7,7 +7,7 @@ import com.tnc.tnc.network.MagicStoneNetwork;
 
 /** The client chooses an action; qualification, progress and rewards remain server-owned. */
 public record TemperingActionPacket(Action action) {
-    public enum Action { VIEW, START, CANCEL }
+    public enum Action { VIEW, START, CANCEL, ENTER_GROUND, LEAVE_GROUND }
     public static void send(Action action) { MagicStoneNetwork.CHANNEL.sendToServer(new TemperingActionPacket(action)); }
     public void encode(FriendlyByteBuf buffer) { buffer.writeEnum(action); }
     public static TemperingActionPacket decode(FriendlyByteBuf buffer) { return new TemperingActionPacket(buffer.readEnum(Action.class)); }
@@ -21,6 +21,8 @@ public record TemperingActionPacket(Action action) {
                     TemperingEvents.sync(player);
                 }
                 case CANCEL -> TemperingTraining.cancel(player);
+                case ENTER_GROUND -> {TrainingGround.enter(player);TemperingEvents.sync(player);}
+                case LEAVE_GROUND -> {TrainingGround.leave(player);TemperingEvents.sync(player);}
             }
         });
         ctx.setPacketHandled(true);
