@@ -10,4 +10,8 @@ public final class WarriorTalentRules {
     public static int gain(int base, int talent) {
         return (int)Math.min(TemperingRules.MAX_POINTS, Math.max(0L, (long)base) * clamp(talent) / 2L);
     }
+    public static long halfUnits(int base, int talent, int remainder) {
+        if (base <= 0 || clamp(talent) == 0) return 0;
+        return (long)base * clamp(talent) + Math.max(0, Math.min(1, remainder));
+    }
 }

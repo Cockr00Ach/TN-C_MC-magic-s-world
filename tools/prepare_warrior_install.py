@@ -12,7 +12,7 @@ def prepare(live,built,forge_class,output):
     forge='com/tnc/tnc/production/MagicForgeBlockEntity.class'
     with zipfile.ZipFile(base) as old,zipfile.ZipFile(built) as new:
         payload={n:new.read(n) for n in new.namelist() if n in resources or
-                 n.endswith('.class') and n.startswith(prefixes) and 'GameTests' not in n}
+                 n.endswith('.class') and n.startswith(prefixes) and 'GameTests' not in n and 'UiAudit' not in n}
         payload[forge]=forge_class.read_bytes()
         assert resources<=payload.keys()
         assert 'com/tnc/tnc/warrior/WarriorTalentRules.class' in payload
@@ -30,7 +30,7 @@ def prepare(live,built,forge_class,output):
     manifest={'baseInstalledHash':before,'files':[{'source':str(target.resolve()),'relative':'mods/tnc-1.0.0.jar',
         'hash':sha(target),'expectedLiveHash':before}], 'patchEntries':sorted(payload),
         'changedExistingEntries':changed,'unrelatedEntriesByteIdentical':unchanged,
-        'forgeAdapter':'Only tickForge preview-to-assembly call changed; original installed dependencies retained',
+        'forgeAdapter':'Installed forge retained with exactly one verified dynamic assembly output call',
         'savesModified':False}
     (output/'manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2),encoding='utf8')
     print(json.dumps({'jar':str(target),'hash':sha(target),'updatedEntries':len(payload),

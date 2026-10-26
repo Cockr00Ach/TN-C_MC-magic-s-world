@@ -16,6 +16,11 @@ public final class TemperingRules {
     public static String rankName(int points) {
         return new String[]{"初习", "扎根", "坚韧", "百炼", "久战"}[rank(points)];
     }
+    public static int nextMilestone(int points,int cap) {
+        int limit=clamp(cap),p=Math.min(clamp(points),limit);
+        for(int milestone:new int[]{200,1000,3000,10000})if(milestone>p)return Math.min(milestone,limit);
+        return limit;
+    }
     public static int killReward(float maxHealth) {
         if (!Float.isFinite(maxHealth) || maxHealth <= 0) return 0;
         return Math.max(2, Math.min(20, (int)(maxHealth / 10)));

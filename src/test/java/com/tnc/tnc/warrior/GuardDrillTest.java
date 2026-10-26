@@ -14,7 +14,10 @@ class GuardDrillTest {
         assertFalse(d.counter(enemy, 11));
         assertTrue(d.block(enemy, 20));
         assertFalse(d.counter(UUID.randomUUID(), 30));
-        assertTrue(d.counter(enemy, 100));
+        assertTrue(d.counter(enemy, 99));
+        assertEquals(1,d.remaining(99));
+        assertFalse(d.counter(enemy, 100));
+        assertEquals(0,d.remaining(100));
         assertFalse(d.counter(enemy, 101));
         assertFalse(d.counter(enemy, 19));
     }

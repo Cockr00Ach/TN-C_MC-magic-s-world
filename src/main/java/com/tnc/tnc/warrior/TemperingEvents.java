@@ -32,9 +32,18 @@ public final class TemperingEvents {
         return item instanceof SwordItem || item instanceof AxeItem;
     }
     public static void sync(ServerPlayer player) {
+        sync(player,false);
+    }
+    public static TemperingPacket snapshot(ServerPlayer player,boolean open) {
         var data = TemperingData.get(player.server);
+        long now=player.server.overworld().getGameTime();
+        return new TemperingPacket(data.enrolled(player.getUUID()), data.points(player.getUUID()), data.talent(player.getUUID()),
+            data.guardGraduate(player.getUUID()),TemperingTraining.active(player),TemperingTraining.blockCount(player),
+            TemperingTraining.remaining(player,now),data.windRemaining(player.getUUID(),now),open);
+    }
+    public static void sync(ServerPlayer player,boolean open) {
         MagicStoneNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player),
-            new TemperingPacket(data.enrolled(player.getUUID()), data.points(player.getUUID()), data.talent(player.getUUID())));
+            snapshot(player,open));
     }
     @SubscribeEvent public static void login(PlayerEvent.PlayerLoggedInEvent e) { if(e.getEntity() instanceof ServerPlayer p) sync(p); }
     @SubscribeEvent public static void respawn(PlayerEvent.PlayerRespawnEvent e) { if(e.getEntity() instanceof ServerPlayer p) sync(p); }
@@ -42,12 +51,14 @@ public final class TemperingEvents {
     public static int award(ServerPlayer player, int gain) {
         var data = TemperingData.get(player.server);
         if (!data.enrolled(player.getUUID())) return 0;
-        int old = data.points(player.getUUID());
-        int next = Math.min(data.cap(player.getUUID()), TemperingRules.add(old, WarriorTalentRules.gain(gain, data.talent(player.getUUID()))));
-        if (next == old) return 0;
-        data.set(player.getUUID(), next); sync(player);
-        player.displayClientMessage(Component.literal("磨砺 +" + (next-old) + " · " + summary(next)), true);
-        return next-old;
+        int old = data.points(player.getUUID()),gained=data.award(player.getUUID(),gain),next=data.points(player.getUUID());
+        if(gained==0)return 0;
+        sync(player);
+        player.displayClientMessage(Component.literal("磨砺 +" + gained + " · " + summary(next,data.cap(player.getUUID()))), true);
+        if(TemperingRules.rank(next)>TemperingRules.rank(old))
+            player.sendSystemMessage(Component.literal("修习精进 · "+TemperingRules.rankName(next)+"：额外减伤 "+String.format(Locale.ROOT,"%.1f%%",TemperingRules.reduction(next)*100)));
+        if(next==data.cap(player.getUUID()))player.sendSystemMessage(Component.literal("已达到当前战士天赋的磨砺上限。"));
+        return gained;
     }
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void damage(LivingDamageEvent event) {
@@ -77,7 +88,10 @@ public final class TemperingEvents {
         award(player, TemperingRules.killReward(event.getEntity().getMaxHealth()));
     }
     public static String summary(int points) {
-        return TemperingRules.rankName(points) + " · " + points + "/10000 · 额外减伤 "
+        return summary(points,TemperingRules.MAX_POINTS);
+    }
+    public static String summary(int points,int cap) {
+        return TemperingRules.rankName(points) + " · " + points + "/"+cap+" · 额外减伤 "
                 + String.format(Locale.ROOT, "%.1f%%", TemperingRules.reduction(points) * 100);
     }
     private static String talentSummary(ServerPlayer p) {
@@ -100,6 +114,7 @@ public final class TemperingEvents {
                 sync(p);
                 ctx.getSource().sendSuccess(() -> Component.literal("已启用磨砺：持剑或斧近战击败敌对生物可成长；磨砺永久保留。"), false); return 1;
             }))
+            .then(Commands.literal("panel").executes(ctx->{sync(ctx.getSource().getPlayerOrException(),true);return 1;}))
             .then(Commands.literal("talent")
                 .executes(ctx -> { var p=ctx.getSource().getPlayerOrException();ctx.getSource().sendSuccess(()->Component.literal(talentSummary(p)),false);return 1; })
                 .then(Commands.literal("set").requires(s->s.hasPermission(2))
@@ -129,7 +144,7 @@ public final class TemperingEvents {
                         ctx.getSource().sendFailure(Component.literal("磨砺不能超过当前战士天赋上限："+data.cap(p.getUUID())));return 0;
                     }
                     data.set(p.getUUID(), value); sync(p);
-                    ctx.getSource().sendSuccess(() -> Component.literal(summary(value)), false); return 1;
+                    ctx.getSource().sendSuccess(() -> Component.literal(summary(value,data.cap(p.getUUID()))), false); return 1;
                 }))));
     }
 }

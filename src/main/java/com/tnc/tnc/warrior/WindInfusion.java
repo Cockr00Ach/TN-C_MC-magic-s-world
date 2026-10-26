@@ -82,6 +82,7 @@ public final class WindInfusion {
         }
         p.serverLevel().playSound(null, p.blockPosition(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, .8f, 1.3f);
         p.getMainHandItem().hurtAndBreak(1, p, player -> player.broadcastBreakEvent(InteractionHand.MAIN_HAND));
+        TemperingEvents.sync(p);
         return true;
     }
 }

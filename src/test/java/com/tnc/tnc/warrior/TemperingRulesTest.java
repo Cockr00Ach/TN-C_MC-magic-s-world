@@ -4,6 +4,13 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TemperingRulesTest {
+    @Test void nextGoalNeverExceedsPersonalTalentCap() {
+        assertEquals(0,TemperingRules.nextMilestone(0,0));
+        assertEquals(200,TemperingRules.nextMilestone(199,200));
+        assertEquals(200,TemperingRules.nextMilestone(200,200));
+        assertEquals(6000,TemperingRules.nextMilestone(3000,6000));
+        assertEquals(10000,TemperingRules.nextMilestone(10000,10000));
+    }
     @Test void reductionHasDiminishingReturnsAndCannotGrantImmunity() {
         assertEquals(0, TemperingRules.reduction(0));
         assertEquals(.10, TemperingRules.reduction(1000), 1e-9);

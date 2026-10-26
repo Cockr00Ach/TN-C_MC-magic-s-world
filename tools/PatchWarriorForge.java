@@ -21,12 +21,13 @@ public final class PatchWarriorForge {
             }
         },ClassReader.SKIP_CODE);
         if(assembleName[0]==null)throw new IllegalStateException("Missing assembly method");
-        int[] changes={0};var writer=new ClassWriter(ClassWriter.COMPUTE_MAXS);
+        int[] changes={0},existing={0};var writer=new ClassWriter(ClassWriter.COMPUTE_MAXS);
         new ClassReader(original).accept(new ClassVisitor(Opcodes.ASM9,writer){
             @Override public MethodVisitor visitMethod(int a,String n,String d,String s,String[] e){
                 var delegate=super.visitMethod(a,n,d,s,e);
                 return new MethodVisitor(Opcodes.ASM9,delegate){
                     @Override public void visitMethodInsn(int op,String owner,String name,String desc,boolean itf){
+                        if(owner.equals(RECIPE)&&desc.equals(ASSEMBLE)&&name.equals(assembleName[0])&&n.equals("tickForge"))existing[0]++;
                         if(owner.equals(RECIPE)&&desc.equals(PREVIEW)&&n.equals("tickForge")){
                             super.visitVarInsn(Opcodes.ALOAD,0);super.visitInsn(Opcodes.SWAP);
                             super.visitMethodInsn(op,owner,assembleName[0],ASSEMBLE,itf);changes[0]++;
@@ -35,8 +36,8 @@ public final class PatchWarriorForge {
                 };
             }
         },0);
-        if(changes[0]!=1)throw new IllegalStateException("Expected exactly one forge preview call; found "+changes[0]);
-        var output=Path.of(args[2]);Files.createDirectories(output.getParent());Files.write(output,writer.toByteArray());
-        System.out.println("Patched exactly one forge output call to "+assembleName[0]+ASSEMBLE);
+        if(changes[0]+existing[0]!=1)throw new IllegalStateException("Expected exactly one forge output call; found "+changes[0]+" preview and "+existing[0]+" assembly calls");
+        var output=Path.of(args[2]);Files.createDirectories(output.getParent());Files.write(output,changes[0]==0?original:writer.toByteArray());
+        System.out.println(changes[0]==0?"Existing dynamic forge adapter verified and preserved byte for byte.":"Patched exactly one forge output call to "+assembleName[0]+ASSEMBLE);
     }
 }

@@ -22,8 +22,8 @@ import java.util.function.Supplier;
  */
 public class MagicStoneNetwork {
 
-    // v10 adds innate warrior aptitude and personal growth caps to the HUD packet.
-    private static final String PROTOCOL_VERSION = "10";
+    // v11 adds the warrior practice panel and server-owned training/cooldown display state.
+    private static final String PROTOCOL_VERSION = "11";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "main"),
@@ -32,6 +32,9 @@ public class MagicStoneNetwork {
             PROTOCOL_VERSION::equals);
 
     public static void register() {
+        CHANNEL.messageBuilder(com.tnc.tnc.warrior.TemperingActionPacket.class,208,NetworkDirection.PLAY_TO_SERVER)
+                .encoder(com.tnc.tnc.warrior.TemperingActionPacket::encode).decoder(com.tnc.tnc.warrior.TemperingActionPacket::decode)
+                .consumerMainThread(com.tnc.tnc.warrior.TemperingActionPacket::handle).add();
         CHANNEL.messageBuilder(com.tnc.tnc.warrior.TemperingPacket.class,207,NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.tnc.tnc.warrior.TemperingPacket::encode).decoder(com.tnc.tnc.warrior.TemperingPacket::decode)
                 .consumerMainThread(com.tnc.tnc.warrior.TemperingPacket::handle).add();

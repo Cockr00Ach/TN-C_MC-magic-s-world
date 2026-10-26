@@ -13,10 +13,26 @@ import net.minecraft.world.level.saveddata.SavedData;
 public final class TemperingData extends SavedData {
     private final Map<UUID, Integer> points = new HashMap<>();
     private final Map<UUID, Integer> talents = new HashMap<>();
+    private final Map<UUID, Integer> halfPoints = new HashMap<>();
     public int talent(UUID id) { return talents.getOrDefault(id, 0); }
     public int cap(UUID id) { return WarriorTalentRules.cap(talent(id)); }
     public void setTalent(UUID id, int talent) {
-        talents.put(id, WarriorTalentRules.clamp(talent)); points.putIfAbsent(id, 0); setDirty();
+        int next=WarriorTalentRules.clamp(talent);
+        if (next!=talent(id)) halfPoints.remove(id);
+        talents.put(id, next); points.putIfAbsent(id, 0); setDirty();
+    }
+    public boolean guardGraduate(UUID id) { return guardGraduates.contains(id); }
+    public int windRemaining(UUID id,long now) {
+        return (int)Math.max(0,Math.min(WindInfusionRules.COOLDOWN_TICKS,windReady.getOrDefault(id,0L)-now));
+    }
+    /** Half-point carry makes splitting a training reward equivalent to receiving it once. */
+    public int award(UUID id,int base) {
+        if (!enrolled(id) || base<=0 || points(id)>=cap(id)) return 0;
+        int old=points(id);
+        long units=WarriorTalentRules.halfUnits(base,talent(id),halfPoints.getOrDefault(id,0));
+        int next=(int)Math.min(cap(id),(long)old+units/2);
+        halfPoints.put(id,next==cap(id)?0:(int)(units%2));
+        points.put(id,next);setDirty();return next-old;
     }
     private final Map<UUID, Long> windReady = new HashMap<>();
     public boolean spendWindCooldown(UUID id, long now) {
@@ -37,7 +53,7 @@ public final class TemperingData extends SavedData {
         if (talent(id) == 0) return false;
         if (!points.containsKey(id)) { points.put(id, 0); setDirty(); } return true;
     }
-    public void set(UUID id, int value) { points.put(id, TemperingRules.clamp(value)); setDirty(); }
+    public void set(UUID id, int value) { points.put(id, TemperingRules.clamp(value)); halfPoints.remove(id); setDirty(); }
     public static TemperingData load(CompoundTag root) {
         var data = new TemperingData();
         for (Tag entry : root.getList("Players", Tag.TAG_COMPOUND)) {
@@ -45,6 +61,7 @@ public final class TemperingData extends SavedData {
             if (tag.hasUUID("Id")) {
                 data.points.put(tag.getUUID("Id"), TemperingRules.clamp(tag.getInt("Points")));
                 data.talents.put(tag.getUUID("Id"), WarriorTalentRules.clamp(tag.getInt("Talent")));
+                data.halfPoints.put(tag.getUUID("Id"),Math.max(0,Math.min(1,tag.getInt("HalfPoint"))));
                 if (tag.getBoolean("GuardGraduate")) data.guardGraduates.add(tag.getUUID("Id"));
                 data.windReady.put(tag.getUUID("Id"), Math.max(0, tag.getLong("WindReady")));
             }
@@ -56,6 +73,7 @@ public final class TemperingData extends SavedData {
         points.forEach((id, value) -> {
             var tag = new CompoundTag(); tag.putUUID("Id", id); tag.putInt("Points", value);
             tag.putInt("Talent", talent(id));
+            tag.putInt("HalfPoint",halfPoints.getOrDefault(id,0));
             tag.putBoolean("GuardGraduate", guardGraduates.contains(id)); list.add(tag);
             tag.putLong("WindReady", windReady.getOrDefault(id, 0L));
         });
