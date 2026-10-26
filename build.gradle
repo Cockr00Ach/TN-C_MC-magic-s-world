@@ -241,6 +241,10 @@ minecraft {
         // The gametest system is also enabled by default for other run configs under the /test command.
         gameTestServer {
             property 'forge.enabledGameTestNamespaces', project.hasProperty('lifeRoutesTests') ? 'tncroute' : mod_id
+            if (project.hasProperty('warriorTests')) {
+                property 'forge.enabledGameTestNamespaces', 'tncwarrior'
+                workingDirectory project.file('work/warrior-server-tests')
+            }
             if (project.hasProperty('dungeonMobTests')) {
                 property 'forge.enabledGameTestNamespaces', 'tncdungeon'
                 property 'mixin.env.remapRefMap', 'true'

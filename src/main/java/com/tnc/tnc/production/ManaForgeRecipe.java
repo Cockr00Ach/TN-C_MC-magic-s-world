@@ -32,9 +32,14 @@ public final class ManaForgeRecipe implements Recipe<Container> {
     private final int mana;
     private final int workTicks;
     private final String category;
+    private final boolean windInfusion;
 
     public ManaForgeRecipe(ResourceLocation id, List<Input> inputs, ItemStack result,
                            int mana, int workTicks, String category) {
+        this(id, inputs, result, mana, workTicks, category, false);
+    }
+    public ManaForgeRecipe(ResourceLocation id, List<Input> inputs, ItemStack result,
+                           int mana, int workTicks, String category, boolean windInfusion) {
         if (inputs.isEmpty() || inputs.size() > 4 || mana < 1 || mana > MagicForgeBlockEntity.MAX_CHARGE
                 || workTicks < 1 || workTicks > 32_767 || result.isEmpty()
                 || result.getCount() > result.getMaxStackSize()
@@ -46,6 +51,10 @@ public final class ManaForgeRecipe implements Recipe<Container> {
         this.result = result.copy();
         this.mana = mana;
         this.workTicks = workTicks;
+        this.windInfusion = windInfusion;
+        if (windInfusion && (!com.tnc.tnc.warrior.WindInfusion.weapon(result) || result.getCount() != 1
+                || com.tnc.tnc.warrior.WindInfusion.hasElement(result)))
+            throw new IllegalArgumentException("Wind infusion needs a single uninfused weapon preview");
         this.category = switch (category) {
             case "utility", "workshop", "materials" -> category;
             default -> "materials";
@@ -59,6 +68,7 @@ public final class ManaForgeRecipe implements Recipe<Container> {
 
     /** Returns per-slot costs, or null if ANY extra or missing stack exists. */
     @Nullable public int[] costs(Container container) {
+        if (windInfusion && infusionWeapon(container) < 0) return null;
         int occupied = 0;
         for (int slot = 0; slot < 4; slot++) if (!container.getItem(slot).isEmpty()) occupied++;
         if (occupied != inputs.size()) return null;
@@ -84,9 +94,28 @@ public final class ManaForgeRecipe implements Recipe<Container> {
     }
 
     @Override public boolean matches(Container container, Level level) { return costs(container) != null; }
-    @Override public ItemStack assemble(Container container, RegistryAccess registries) { return result.copy(); }
+    private int infusionWeapon(Container container) {
+        int found = -1;
+        for (int slot = 0; slot < 4; slot++) {
+            ItemStack stack = container.getItem(slot);
+            if (!com.tnc.tnc.warrior.WindInfusion.weapon(stack)) continue;
+            if (found >= 0 || stack.getCount() != 1 || com.tnc.tnc.warrior.WindInfusion.hasElement(stack)) return -1;
+            found = slot;
+        }
+        return found;
+    }
+    @Override public ItemStack assemble(Container container, RegistryAccess registries) {
+        if (!windInfusion) return result.copy();
+        int slot = infusionWeapon(container);
+        return slot < 0 || costs(container) == null ? ItemStack.EMPTY
+                : com.tnc.tnc.warrior.WindInfusion.infuse(container.getItem(slot));
+    }
     @Override public boolean canCraftInDimensions(int width, int height) { return width * height >= inputs.size(); }
-    @Override public ItemStack getResultItem(RegistryAccess registries) { return result.copy(); }
+    @Override public ItemStack getResultItem(RegistryAccess registries) {
+        if (!windInfusion) return result.copy();
+        ItemStack preview = com.tnc.tnc.warrior.WindInfusion.infuse(result);
+        preview.setHoverName(net.minecraft.network.chat.Component.literal("风元素灌注")); return preview;
+    }
     @Override public ResourceLocation getId() { return id; }
     @Override public RecipeSerializer<?> getSerializer() { return MagicForgeContent.FORGE_SERIALIZER; }
     @Override public RecipeType<?> getType() { return MagicForgeContent.FORGE_RECIPE_TYPE; }
@@ -108,14 +137,15 @@ public final class ManaForgeRecipe implements Recipe<Container> {
             ItemStack result = new ItemStack(item, GsonHelper.getAsInt(output, "count", 1));
             return new ManaForgeRecipe(id, inputs, result,
                     GsonHelper.getAsInt(json, "mana"), GsonHelper.getAsInt(json, "work_ticks", 80),
-                    GsonHelper.getAsString(json, "category", "materials"));
+                    GsonHelper.getAsString(json, "category", "materials"), GsonHelper.getAsBoolean(json, "wind_infusion", false));
         }
 
         @Override public @Nullable ManaForgeRecipe fromNetwork(ResourceLocation id, FriendlyByteBuf buffer) {
             int n = buffer.readVarInt();
+            if (n < 1 || n > 4) throw new IllegalArgumentException("Invalid forge input count");
             List<Input> inputs = new ArrayList<>();
             for (int i = 0; i < n; i++) inputs.add(new Input(Ingredient.fromNetwork(buffer), buffer.readVarInt()));
-            return new ManaForgeRecipe(id, inputs, buffer.readItem(), buffer.readVarInt(), buffer.readVarInt(), buffer.readUtf());
+            return new ManaForgeRecipe(id, inputs, buffer.readItem(), buffer.readVarInt(), buffer.readVarInt(), buffer.readUtf(), buffer.readBoolean());
         }
 
         @Override public void toNetwork(FriendlyByteBuf buffer, ManaForgeRecipe recipe) {
@@ -125,6 +155,7 @@ public final class ManaForgeRecipe implements Recipe<Container> {
             buffer.writeVarInt(recipe.mana);
             buffer.writeVarInt(recipe.workTicks);
             buffer.writeUtf(recipe.category);
+            buffer.writeBoolean(recipe.windInfusion);
         }
     }
 }

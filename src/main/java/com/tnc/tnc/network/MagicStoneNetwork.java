@@ -22,8 +22,8 @@ import java.util.function.Supplier;
  */
 public class MagicStoneNetwork {
 
-    // v3 adds downed/rescue packets. Reject stale clients instead of silently losing combat state.
-    private static final String PROTOCOL_VERSION = "7";
+    // v10 adds innate warrior aptitude and personal growth caps to the HUD packet.
+    private static final String PROTOCOL_VERSION = "10";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "main"),
@@ -32,6 +32,9 @@ public class MagicStoneNetwork {
             PROTOCOL_VERSION::equals);
 
     public static void register() {
+        CHANNEL.messageBuilder(com.tnc.tnc.warrior.TemperingPacket.class,207,NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.tnc.tnc.warrior.TemperingPacket::encode).decoder(com.tnc.tnc.warrior.TemperingPacket::decode)
+                .consumerMainThread(com.tnc.tnc.warrior.TemperingPacket::handle).add();
         CHANNEL.messageBuilder(com.tnc.tnc.tavern.TavernRoomPacket.class,203,NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.tnc.tnc.tavern.TavernRoomPacket::encode).decoder(com.tnc.tnc.tavern.TavernRoomPacket::decode)
                 .consumerMainThread(com.tnc.tnc.tavern.TavernRoomPacket::handle).add();
