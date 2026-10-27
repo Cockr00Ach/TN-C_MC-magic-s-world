@@ -54,20 +54,37 @@ public final class TrainingGroundGameTests {
     }
     @GameTest(template="building_test_empty",timeoutTicks=500)
     public static void realTeacherAttacksCanBeBlockedAndCounteredForFirstReward(GameTestHelper h){
+        realPractice(h,0,false);
+    }
+    @GameTest(template="building_test_empty",timeoutTicks=500)
+    public static void expertTeacherRecordsRealCounterWithoutRepeatingGrowthReward(GameTestHelper h){
+        realPractice(h,2,true);
+    }
+    private static void realPractice(GameTestHelper h,int mode,boolean graduated){
         var p=AdventureGameTests.player(h);var source=h.absolutePos(new BlockPos(3,3,3));
         h.getLevel().setBlock(source.below(),Blocks.STONE.defaultBlockState(),3);p.setPos(Vec3.atBottomCenterOf(source));p.setOnGround(true);
         p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,new ItemStack(Items.IRON_SWORD));
         var shield=new ItemStack(Items.SHIELD);p.setItemInHand(net.minecraft.world.InteractionHand.OFF_HAND,shield);
         var guild=new TownServiceNpc(EntityType.VILLAGER,h.getLevel());guild.role("guild");guild.moveTo(p.position().add(1,0,0));h.getLevel().addFreshEntity(guild);
         var data=TemperingData.get(p.server);data.setTalent(p.getUUID(),2);
+        if(graduated)data.completeGuardDrill(p.getUUID());
         net.minecraftforge.fml.util.ObfuscationReflectionHelper.setPrivateValue(net.minecraft.server.level.ServerPlayer.class,p,0,"f_8921_");
         h.assertTrue(TrainingGround.enter(p),"Real practice session requested");
         boolean[] started={false},done={false};int[] ticks={0};float health=p.getHealth();
         h.onEachTick(()->{
             if(done[0]||!TrainingGround.inside(p))return;
             if(!started[0]){
+                for(int m=0;m<mode;m++)h.assertTrue(TrainingGround.cyclePractice(p),"Idle player can select difficulty on the server");
+                TrainingGround.resetRhythm(p);
                 started[0]=true;p.setYRot(0);p.setXRot(0);p.startUsingItem(net.minecraft.world.InteractionHand.OFF_HAND);
                 h.assertTrue(TemperingTraining.start(p),"Protected field drill starts");
+                h.assertTrue(!TrainingGround.cyclePractice(p)&&TemperingTraining.mode(p)==mode,"Active drill locks difficulty");
+                if(graduated){
+                    p.stopUsingItem();p.invulnerableTime=0;
+                    p.hurt(p.damageSources().mobAttack(TrainingGround.teacher(p)),4);
+                    h.assertTrue(p.getHealth()==health,"A missed strike is safe");
+                    p.startUsingItem(net.minecraft.world.InteractionHand.OFF_HAND);
+                }
             }
             // A headless player has no movement packets: maintain the close-range position
             // a human keeps by stepping forward after shield knockback.
@@ -85,10 +102,26 @@ public final class TrainingGroundGameTests {
                 var teacher=TrainingGround.teacher(p);h.assertTrue(teacher!=null&&teacher.getPersistentData().getInt("Swings")>=3,"Instructor performed real timed strikes");
                 h.assertTrue(p.getHealth()==health&&shield.getDamageValue()==0,"Three actual blocks preserve life and shield durability");
                 p.stopUsingItem();p.attack(teacher);
-                h.assertTrue(data.points(p.getUUID())==120&&data.guardGraduate(p.getUUID()),"Actual melee counter completes first reward");
+                h.assertTrue(data.points(p.getUUID())==(graduated?0:120)&&data.guardGraduate(p.getUUID()),"Only first graduation yields growth, even on expert tier");
+                var record=TrainingGroundData.get(p.server).record(p.getUUID());
+                h.assertTrue(record.mode()==mode&&record.completions()==1&&record.score()==(graduated?85:100)&&record.reaction()==0,"Real misses and counter update selected tier's personal record: "+record);
                 h.assertTrue(TrainingGround.leave(p),"Completed drill can return normally");h.succeed();
             }finally{guild.discard();p.discard();}
         });
+    }
+    @GameTest(template="building_test_empty",timeoutTicks=40)
+    public static void tierRecordsPersistSeparatelyAndDisplayPacketRoundTrips(GameTestHelper h){
+        var ledger=new TrainingGroundData();var id=UUID.randomUUID();ledger.allocate(id);
+        ledger.complete(id,0,90,12);ledger.complete(id,0,80,6);ledger.cycle(id);
+        h.assertTrue(ledger.record(id).completions()==0,"A new tier has its own records");
+        ledger.complete(id,1,75,20);ledger=TrainingGroundData.load(ledger.save(new CompoundTag()));
+        h.assertTrue(ledger.record(id).mode()==1&&ledger.record(id).score()==75,"Selected tier survives save/load");
+        ledger.cycle(id);ledger.cycle(id);var record=ledger.record(id);
+        h.assertTrue(record.completions()==2&&record.score()==90&&record.reaction()==6,"Best score and fastest counter remain separate personal records");
+        var packet=new TemperingPacket(true,200,2,true,false,0,0,0,true,true,2,5,95,10);
+        var buffer=new net.minecraft.network.FriendlyByteBuf(io.netty.buffer.Unpooled.buffer());
+        try{packet.encode(buffer);h.assertTrue(packet.equals(TemperingPacket.decode(buffer)),"Practice record network state round-trips");}finally{buffer.release();}
+        h.succeed();
     }
     @GameTest(template="building_test_empty",timeoutTicks=40)
     public static void plotAndReturnLedgerSurvivesReloadAndRejectsCorruptAnchors(GameTestHelper h){

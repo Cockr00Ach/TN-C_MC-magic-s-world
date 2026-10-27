@@ -24,8 +24,8 @@ try {
     if($warriorExit -ne 0){throw 'UI audit failed; see work/warrior-ui-audit.log'}
     $warriorReport=Get-Item -LiteralPath 'work/warrior-ui-audit-client/screenshots/warrior-ui-audit.json'
     $warriorResult=Get-Content -LiteralPath $warriorReport.FullName -Raw | ConvertFrom-Json
-    if($warriorReport.LastWriteTime -lt $warriorStarted -or $warriorResult.cases -ne 5 -or -not $warriorResult.buttonStatesVerified -or -not $warriorResult.hotkeyRegistered){throw 'Expected five fresh rendered cases with verified buttons and registered hotkey'}
-    Write-Output 'PASS: five warrior practice screens rendered; buttons and hotkey registration verified.'
+    if($warriorReport.LastWriteTime -lt $warriorStarted -or $warriorResult.cases -ne 7 -or -not $warriorResult.buttonStatesVerified -or -not $warriorResult.hotkeyRegistered){throw 'Expected seven fresh rendered cases with verified buttons and registered hotkey'}
+    Write-Output 'PASS: seven warrior practice screens rendered; buttons and hotkey registration verified.'
 } finally {
     $env:JAVA_HOME=$warriorJava;$env:GRADLE_USER_HOME=$warriorGradle;Pop-Location
 }

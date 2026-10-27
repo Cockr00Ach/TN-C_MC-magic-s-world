@@ -18,6 +18,12 @@ public final class TemperingClient {
     private static boolean graduate,training,ground;
     public static boolean ground(){return ground;}
     private static int blocks,counterTicks,windTicks;
+    private static int mode,completions,bestScore,bestReaction;
+    public static int mode(){return ground?mode:0;}
+    public static int selectedMode(){return mode;}
+    public static int completions(){return completions;}
+    public static int bestScore(){return bestScore;}
+    public static int bestReaction(){return bestReaction;}
     private static long receivedAt;
     private static long displayTicks;
     public static int cap() { return com.tnc.tnc.warrior.WarriorTalentRules.cap(talent); }
@@ -40,11 +46,13 @@ public final class TemperingClient {
         talent = packet.talent(); enrolled = packet.enrolled() && talent > 0;
         points = Math.min(cap(), TemperingRules.clamp(packet.points()));
         graduate=packet.graduate();training=packet.training()&&enrolled;ground=packet.ground();
+        mode=packet.mode();completions=packet.completions();bestScore=packet.bestScore();bestReaction=packet.bestReaction();
         blocks=packet.blocks();counterTicks=packet.counterTicks();windTicks=packet.windTicks();receivedAt=now();
         if(packet.open()&&Minecraft.getInstance().player!=null)Minecraft.getInstance().setScreen(new WarriorPracticeScreen());
     }
     @SubscribeEvent public static void logout(ClientPlayerNetworkEvent.LoggingOut event) {
         enrolled = false; points = 0; talent = 0;
         graduate=training=ground=false;blocks=counterTicks=windTicks=0;receivedAt=displayTicks=0;
+        mode=completions=bestScore=bestReaction=0;
     }
 }

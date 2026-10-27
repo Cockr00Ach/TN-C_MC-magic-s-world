@@ -37,9 +37,10 @@ public final class TemperingEvents {
     public static TemperingPacket snapshot(ServerPlayer player,boolean open) {
         var data = TemperingData.get(player.server);
         long now=player.server.overworld().getGameTime();
+        var record=TrainingGroundData.get(player.server).record(player.getUUID());
         return new TemperingPacket(data.enrolled(player.getUUID()), data.points(player.getUUID()), data.talent(player.getUUID()),
             data.guardGraduate(player.getUUID()),TemperingTraining.active(player),TemperingTraining.blockCount(player),
-            TemperingTraining.remaining(player,now),data.windRemaining(player.getUUID(),now),open,TrainingGround.inside(player));
+            TemperingTraining.remaining(player,now),data.windRemaining(player.getUUID(),now),open,TrainingGround.inside(player),record.mode(),record.completions(),record.score(),record.reaction());
     }
     public static void sync(ServerPlayer player,boolean open) {
         MagicStoneNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player),

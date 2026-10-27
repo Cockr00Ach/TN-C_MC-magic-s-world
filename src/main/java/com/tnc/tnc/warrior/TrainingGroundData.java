@@ -21,6 +21,21 @@ public final class TrainingGroundData extends SavedData {
     }
     private final Map<UUID,Integer> plots=new HashMap<>();
     private final Map<UUID,ReturnPoint> returns=new HashMap<>();
+    private final Map<UUID,CompoundTag> records=new HashMap<>();
+    public record Record(int mode,int completions,int score,int reaction){}
+    public Record record(UUID id){
+        var t=records.getOrDefault(id,new CompoundTag());int mode=PracticeDifficulty.clamp(t.getInt("Mode"));
+        var r=t.getCompound("Tier"+mode);int count=Math.max(0,r.getInt("Completions"));
+        return new Record(mode,count,Math.max(0,Math.min(100,r.getInt("Score"))),count==0?0:Math.max(0,Math.min(80,r.getInt("Reaction"))));
+    }
+    public void cycle(UUID id){var t=records.computeIfAbsent(id,k->new CompoundTag());t.putInt("Mode",(record(id).mode()+1)%3);setDirty();}
+    public void complete(UUID id,int mode,int score,int reaction){
+        var t=records.computeIfAbsent(id,k->new CompoundTag());String key="Tier"+PracticeDifficulty.clamp(mode);var r=t.getCompound(key);
+        int count=Math.max(0,r.getInt("Completions"));r.putInt("Completions",count==Integer.MAX_VALUE?count:count+1);
+        r.putInt("Score",Math.max(count==0?0:Math.max(0,Math.min(100,r.getInt("Score"))),Math.max(0,Math.min(100,score))));
+        r.putInt("Reaction",Math.min(count==0?80:Math.max(0,Math.min(80,r.getInt("Reaction"))),Math.max(0,Math.min(80,reaction))));
+        t.put(key,r);setDirty();
+    }
     private int nextPlot;
     public static TrainingGroundData get(MinecraftServer server){return server.overworld().getDataStorage().computeIfAbsent(TrainingGroundData::load,TrainingGroundData::new,"tnc_training_ground_v1");}
     public int plot(UUID id){return plots.getOrDefault(id,-1);}
@@ -38,12 +53,13 @@ public final class TrainingGroundData extends SavedData {
             var t=(CompoundTag)raw;if(!t.hasUUID("Id"))continue;UUID id=t.getUUID("Id");int plot=t.getInt("Plot");
             if(plot<0||plot>=TrainingGroundRules.MAX_PLOTS||!occupied.add(plot))continue;
             d.plots.put(id,plot);d.nextPlot=Math.max(d.nextPlot,plot+1);
+            if(t.contains("Practice",Tag.TAG_COMPOUND))d.records.put(id,t.getCompound("Practice").copy());
             if(t.contains("Return",Tag.TAG_COMPOUND)){var point=ReturnPoint.load(t.getCompound("Return"));if(point!=null)d.returns.put(id,point);}
         }
         return d;
     }
     @Override public CompoundTag save(CompoundTag root){
-        var list=new ListTag();plots.forEach((id,plot)->{var t=new CompoundTag();t.putUUID("Id",id);t.putInt("Plot",plot);if(returns.containsKey(id))t.put("Return",returns.get(id).save());list.add(t);});
+        var list=new ListTag();plots.forEach((id,plot)->{var t=new CompoundTag();t.putUUID("Id",id);t.putInt("Plot",plot);if(returns.containsKey(id))t.put("Return",returns.get(id).save());if(records.containsKey(id))t.put("Practice",records.get(id).copy());list.add(t);});
         root.put("Players",list);return root;
     }
 }

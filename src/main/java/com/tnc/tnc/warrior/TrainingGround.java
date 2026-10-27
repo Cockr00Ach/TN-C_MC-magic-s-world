@@ -151,24 +151,32 @@ public final class TrainingGround {
         teacher.setPos(TrainingGroundRules.centerX(plot)+.5,2,TrainingGroundRules.centerZ(plot)+3.5);
         var delta=p.position().subtract(teacher.position());float yaw=(float)Math.toDegrees(Math.atan2(-delta.x,delta.z));teacher.setYRot(yaw);teacher.yBodyRot=yaw;teacher.setYHeadRot(yaw);
         long now=p.server.overworld().getGameTime();var t=teacher.getPersistentData();
-        if(!TemperingTraining.active(p)){t.putLong("NextStrike",now+50);t.putBoolean("Windup",false);return;}
+        int mode=TemperingTraining.mode(p),period=PracticeDifficulty.period(mode),windup=PracticeDifficulty.windup(mode);
+        boolean active=TemperingTraining.active(p);
+        teacher.setCustomName(Component.literal("协会陪练 · "+PracticeDifficulty.name(mode)+" · "+(!active?"按修习键开始":TemperingTraining.blockCount(p)<3?"举盾 "+TemperingTraining.blockCount(p)+"/3":TemperingTraining.remaining(p,now)>0?"现在反击！":"再次格挡刷新窗口")));
+        if(!active){t.putLong("NextStrike",now+period);t.putBoolean("Windup",false);return;}
         if(teacher.distanceToSqr(p)>12.25){
-            t.putLong("NextStrike",now+50);t.putBoolean("Windup",false);
+            t.putLong("NextStrike",now+period);t.putBoolean("Windup",false);
             if(now%40==0)p.displayClientMessage(Component.literal("请靠近陪练，正面举盾；盾挡后可向前补位。"),true);
             return;
         }
         long next=t.getLong("NextStrike");
-        if(now>=next-15&&!t.getBoolean("Windup")){
+        if(now>=next-windup&&!t.getBoolean("Windup")){
             t.putBoolean("Windup",true);p.serverLevel().sendParticles(ParticleTypes.CRIT,teacher.getX(),teacher.getY()+1.8,teacher.getZ(),5,.18,.15,.18,0);
             p.serverLevel().playSound(null,teacher.blockPosition(),SoundEvents.NOTE_BLOCK_HAT.value(),SoundSource.PLAYERS,.5f,.7f);
         }
         if(now>=next){
             teacher.swing(InteractionHand.MAIN_HAND);p.hurt(p.damageSources().mobAttack(teacher),4);
-            t.putInt("Swings",t.getInt("Swings")+1);t.putLong("NextStrike",now+50);t.putBoolean("Windup",false);
+            t.putInt("Swings",t.getInt("Swings")+1);t.putLong("NextStrike",now+period);t.putBoolean("Windup",false);
         }
     }
     @SubscribeEvent public static void tick(TickEvent.PlayerTickEvent e){if(e.phase==TickEvent.Phase.END&&e.player instanceof ServerPlayer p)practiceTick(p);}
-    @SubscribeEvent(priority=EventPriority.HIGHEST) public static void safePlayer(LivingHurtEvent e){if(e.getEntity() instanceof ServerPlayer p&&inside(p)){e.setCanceled(true);if(owns(e.getSource().getEntity(),p))p.displayClientMessage(Component.literal("未挡住这次挥击。观察前摇，正面举盾后再反击。"),true);}}
+    static void resetRhythm(ServerPlayer p){var t=teacher(p);if(t!=null){t.getPersistentData().putLong("NextStrike",p.server.overworld().getGameTime()+PracticeDifficulty.period(TemperingTraining.mode(p)));t.getPersistentData().putBoolean("Windup",false);}}
+    static boolean cyclePractice(ServerPlayer p){
+        if(!inside(p)||!qualified(p)||TemperingTraining.active(p))return false;
+        TrainingGroundData.get(p.server).cycle(p.getUUID());resetRhythm(p);return true;
+    }
+    @SubscribeEvent(priority=EventPriority.HIGHEST) public static void safePlayer(LivingHurtEvent e){if(e.getEntity() instanceof ServerPlayer p&&inside(p)){e.setCanceled(true);if(e.getAmount()>0&&owns(e.getSource().getEntity(),p)){TemperingTraining.miss(p);p.displayClientMessage(Component.literal("未挡住这次挥击。观察前摇，正面举盾后再反击。"),true);}}}
     @SubscribeEvent(priority=EventPriority.HIGHEST) public static void trainerAttack(LivingAttackEvent e){
         if(trainer(e.getEntity())&&(!(e.getSource().getEntity() instanceof ServerPlayer p)||!owns(e.getEntity(),p)
             ||!inside(p)||!e.getSource().is(net.minecraft.world.damagesource.DamageTypes.PLAYER_ATTACK)))e.setCanceled(true);

@@ -22,8 +22,8 @@ import java.util.function.Supplier;
  */
 public class MagicStoneNetwork {
 
-    // v12 adds private training-ground travel and practice location display state.
-    private static final String PROTOCOL_VERSION = "12";
+    // v13 adds sparring difficulty and per-tier personal records.
+    private static final String PROTOCOL_VERSION = "13";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "main"),
