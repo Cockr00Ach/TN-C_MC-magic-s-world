@@ -364,6 +364,7 @@ public final class SpellCatalog {
             of(Element.WATER, "flood_of_heaven", Chain.WATER_RAIN, 5, "天洪"),
             // Null element is deliberate: independent skills never enter the seven-element NBT arrays.
             new Entry(ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "chaos_magic"), null, Chain.INDEPENDENT, 1, "乱魔"),
+            new Entry(ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "concealment"), null, Chain.INDEPENDENT, 1, "隐匿"),
 
             // 土魔法：土弹 / 土动 / 土泥 / 土环
             of(Element.EARTH, "earth_shot", Chain.EARTH_SHOT, 1, "土弹"),
