@@ -22,8 +22,8 @@ import java.util.function.Supplier;
  */
 public class MagicStoneNetwork {
 
-    // v3 adds downed/rescue packets. Reject stale clients instead of silently losing combat state.
-    private static final String PROTOCOL_VERSION = "7";
+    // v13 adds sparring difficulty and per-tier personal records.
+    private static final String PROTOCOL_VERSION = "13";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "main"),
@@ -32,6 +32,12 @@ public class MagicStoneNetwork {
             PROTOCOL_VERSION::equals);
 
     public static void register() {
+        CHANNEL.messageBuilder(com.tnc.tnc.warrior.TemperingActionPacket.class,208,NetworkDirection.PLAY_TO_SERVER)
+                .encoder(com.tnc.tnc.warrior.TemperingActionPacket::encode).decoder(com.tnc.tnc.warrior.TemperingActionPacket::decode)
+                .consumerMainThread(com.tnc.tnc.warrior.TemperingActionPacket::handle).add();
+        CHANNEL.messageBuilder(com.tnc.tnc.warrior.TemperingPacket.class,207,NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.tnc.tnc.warrior.TemperingPacket::encode).decoder(com.tnc.tnc.warrior.TemperingPacket::decode)
+                .consumerMainThread(com.tnc.tnc.warrior.TemperingPacket::handle).add();
         CHANNEL.messageBuilder(com.tnc.tnc.tavern.TavernRoomPacket.class,203,NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.tnc.tnc.tavern.TavernRoomPacket::encode).decoder(com.tnc.tnc.tavern.TavernRoomPacket::decode)
                 .consumerMainThread(com.tnc.tnc.tavern.TavernRoomPacket::handle).add();

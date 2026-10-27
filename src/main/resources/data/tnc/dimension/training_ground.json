@@ -1,0 +1,13 @@
+{
+  "type": "tnc:training_ground",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "minecraft:the_void",
+      "lakes": false,
+      "features": false,
+      "layers": [{"block": "minecraft:bedrock", "height": 1}],
+      "structure_overrides": []
+    }
+  }
+}

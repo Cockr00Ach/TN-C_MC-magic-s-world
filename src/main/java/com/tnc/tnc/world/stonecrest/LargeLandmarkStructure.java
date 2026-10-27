@@ -34,10 +34,14 @@ public final class LargeLandmarkStructure extends Structure {
     }
     Optional<GenerationStub> rawGenerationPoint(GenerationContext c) {
         String selected=asset(c.structureTemplateManager());
+        if (selected.equals("end_pvp_island") && !LandmarkGenerationMode.endIslands(c.structureTemplateManager())) return Optional.empty();
         var m=StonecrestManifest.get(selected); var d=m.dimensions();
         // Locate at the southern approach, not inside a roof or unbuilt floating island.
         int x=c.chunkPos().getMinBlockX()+8,z=c.chunkPos().getMinBlockZ()+8;
         int ox=x-d.getX()/2,oz=z-d.getZ()-12;
+        // Keep the arena away from the dragon island and its return portal.
+        if (selected.equals("end_pvp_island") && ox<1024 && ox+d.getX()>-1024
+                && oz<1024 && oz+d.getZ()>-1024) return Optional.empty();
         var heights=new ArrayList<Integer>();
         for (int lz=0;lz<d.getZ();lz+=Math.max(16,d.getZ()/8))
             for (int lx=0;lx<d.getX();lx+=Math.max(16,d.getX()/8)) {
@@ -53,6 +57,12 @@ public final class LargeLandmarkStructure extends Structure {
         if (!m.floating() && !LandmarkPlacementPlan.terrainFits(min,max,m.hasGroundProfile())) return Optional.empty();
         int oy=LandmarkPlacementPlan.originY(heights.get(heights.size()/2),max,m.anchorLocal().getY(),d.getY(),
                 c.heightAccessor().getMaxBuildHeight(),m.floating(),m.sunken());
+        if (selected.equals("end_pvp_island")) {
+            // End height is 256, not the Overworld's 320. The full 165-block island
+            // must fit without clipping its top or intersecting existing End terrain.
+            oy=LandmarkPlacementPlan.endIslandOrigin(max,d.getY(),c.heightAccessor().getMaxBuildHeight());
+            if (oy==Integer.MIN_VALUE) return Optional.empty();
+        }
         if (!LandmarkPlacementPlan.fits(oy,d.getY(),c.heightAccessor().getMinBuildHeight(),c.heightAccessor().getMaxBuildHeight())) return Optional.empty();
         int y=c.chunkGenerator().getFirstOccupiedHeight(x,z,Heightmap.Types.WORLD_SURFACE_WG,c.heightAccessor(),c.randomState())+1;
         BlockPos marker=new BlockPos(x,y,z),origin=new BlockPos(ox,oy,oz);

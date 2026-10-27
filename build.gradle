@@ -86,6 +86,13 @@ minecraft {
         }
 
         client {
+            if (project.hasProperty('warriorUiAudit')) {
+                property 'tnc.warriorUiAudit', 'true'
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+                workingDirectory project.file('work/warrior-ui-audit-client')
+                args '--width', '960', '--height', '640'
+            }
             if (project.hasProperty('inkCraneVisualAudit')) {
                 if (project.hasProperty('inkPaintingWorldAudit')) property 'tnc.inkPaintingWorldAudit', 'true'
                 if (project.hasProperty('inkWingedTigerAudit')) property 'tnc.inkTigerAudit', 'true'
@@ -241,6 +248,10 @@ minecraft {
         // The gametest system is also enabled by default for other run configs under the /test command.
         gameTestServer {
             property 'forge.enabledGameTestNamespaces', project.hasProperty('lifeRoutesTests') ? 'tncroute' : mod_id
+            if (project.hasProperty('warriorTests')) {
+                property 'forge.enabledGameTestNamespaces', 'tncwarrior'
+                workingDirectory project.file('work/warrior-server-tests')
+            }
             if (project.hasProperty('dungeonMobTests')) {
                 property 'forge.enabledGameTestNamespaces', 'tncdungeon'
                 property 'mixin.env.remapRefMap', 'true'
@@ -297,6 +308,13 @@ minecraft {
             if (project.hasProperty('fullSkyIslandTests')) {
                 property 'tnc.fullSkyIslandTests', 'true'
                 property 'tnc.skyIslandSource', file('modpack/元素觉醒1.4.3-魔改版-20260915/kubejs/data/tnc').absolutePath
+            }
+            if (project.hasProperty('skyStartupTests')) {
+                property 'forge.enabledGameTestNamespaces', 'tncstartup'
+                property 'tnc.skyIslandSource', file('modpack/元素觉醒1.4.3-魔改版-20260915/kubejs/data/tnc').absolutePath
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+                workingDirectory project.file('work/sky-startup-tests')
             }
             jvmArgs '-Xmx6G'
             // Recovery fixtures intentionally change blocks; never reuse a previous run's world.

@@ -1,7 +1,7 @@
 {
   "type": "tnc:large_landmark",
   "asset": "end_pvp_island",
-  "biomes": "#minecraft:is_overworld",
+  "biomes": "#minecraft:is_end",
   "step": "surface_structures",
   "spawn_overrides": {},
   "terrain_adaptation": "none"

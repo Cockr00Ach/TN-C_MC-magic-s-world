@@ -2,6 +2,10 @@ package com.tnc.tnc.world.stonecrest;
 
 /** Pure height and overlap policy, independent of Minecraft bootstrap. */
 final class LandmarkPlacementPlan {
+    static int endIslandOrigin(int maximum,int height,int maxBuild) {
+        int y=Math.min(Math.max(132,maximum+24),maxBuild-4-height);
+        return y>=maximum+8 ? y : Integer.MIN_VALUE;
+    }
     static boolean terrainFits(int minimum,int maximum,boolean landscape) {
         // A whole district needs gentle rolling land, not a village-sized level plateau.
         // Landscape sites have a measured ground profile and a 96-block transition belt.

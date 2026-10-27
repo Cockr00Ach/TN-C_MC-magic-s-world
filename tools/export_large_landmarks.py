@@ -179,7 +179,7 @@ def export(args):
     write_json(args.output/'buildings'/(args.asset+'.json'),manifest)
     structure_id=args.structure_id or args.asset
     write_json(args.output/'worldgen/structure'/(structure_id+'.json'),dict(type='tnc:large_landmark',asset=args.asset,
-               biomes='#minecraft:is_overworld' if args.floating else '#tnc:has_structure/imported_buildings',step='surface_structures',spawn_overrides={},terrain_adaptation='none'))
+               biomes='#minecraft:is_end' if args.asset=='end_pvp_island' else '#minecraft:is_overworld' if args.floating else '#tnc:has_structure/imported_buildings',step='surface_structures',spawn_overrides={},terrain_adaptation='none'))
     salt = landscape['placement_salt'] if landscape else int(hashlib.sha256(args.asset.encode()).hexdigest()[:7],16)
     write_json(args.output/'worldgen/structure_set'/(structure_id+'.json'),dict(structures=[dict(structure='tnc:'+structure_id,weight=1)],
                placement=dict(type='minecraft:random_spread',locate_offset=[8,0,8],spacing=160,separation=100,salt=salt)))

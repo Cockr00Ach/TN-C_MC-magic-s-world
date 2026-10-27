@@ -62,6 +62,13 @@ public final class SkyIslandManager {
     private static final Set<BlockPos> ACTIVE_RITUALS = new HashSet<>();
     private static final Map<MinecraftServer,Long> PORTAL_UPGRADES = new WeakHashMap<>();
     private static final Map<MinecraftServer,Map<BlockPos,Long>> PREVIEWS = new WeakHashMap<>();
+    private static final net.minecraft.server.level.TicketType<ChunkPos> BUILD_TICKET =
+            net.minecraft.server.level.TicketType.create("tnc_sky_build", java.util.Comparator.comparingLong(ChunkPos::toLong));
+    private static final Map<MinecraftServer, PortalSurvey> PORTAL_SURVEYS = new WeakHashMap<>();
+    private static final class PortalSurvey {
+        int candidate, bestScore = Integer.MAX_VALUE;
+        BlockPos best;
+    }
     static final class PortalChunksPending extends IOException {
         PortalChunksPending() { super("正在加载两座传送阵及已有生物，加载完成后自动继续升级"); }
     }
@@ -154,6 +161,7 @@ public final class SkyIslandManager {
     }
 
     public static void onServerStopping(MinecraftServer server) {
+        PORTAL_SURVEYS.remove(server);
         PORTAL_UPGRADES.remove(server);
         PREVIEWS.remove(server);
         PORTAL_CHARGES.clear();
@@ -224,8 +232,13 @@ public final class SkyIslandManager {
         int worldX = candidateOriginX + sample.getX();
         int worldZ = candidateOriginZ + sample.getZ();
 
-        level.getChunk(worldX >> 4, worldZ >> 4);
-        int terrainY = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, worldX, worldZ) - 1;
+        // Survey terrain noise, not FULL chunks: probing eight distant sites must not
+        // generate their structures, lighting and entities on the server thread.
+        var loaded = level.getChunkSource().getChunkNow(worldX >> 4, worldZ >> 4);
+        int terrainY = loaded != null
+                ? loaded.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, worldX & 15, worldZ & 15)
+                : level.getChunkSource().getGenerator().getFirstOccupiedHeight(worldX, worldZ,
+                        Heightmap.Types.WORLD_SURFACE_WG, level, level.getChunkSource().randomState());
         int islandBottomY = manifest.worldOriginY() + sample.getY();
         int overlap = Math.max(0, terrainY - islandBottomY + 1);
         data.surveyScore += overlap * 10_000 + Math.max(0, terrainY - 80);
@@ -275,6 +288,7 @@ public final class SkyIslandManager {
         data.arrivalZ = data.originZ + manifest.arrivalLocal().getZ();
 
         BlockPos portalOrigin = chooseGroundPortal(level, manifest);
+        if (portalOrigin == null) return; // Resume next tick while this candidate loads.
         data.groundPortalX = portalOrigin.getX();
         data.groundPortalY = portalOrigin.getY();
         data.groundPortalZ = portalOrigin.getZ();
@@ -292,19 +306,21 @@ public final class SkyIslandManager {
     /** Selects a dry site for the expanded ritual gate without changing the legacy landing offset. */
     private static BlockPos chooseGroundPortal(ServerLevel level, SkyIslandManifest manifest) {
         BlockPos spawn = level.getSharedSpawnPos();
-        int bestScore = Integer.MAX_VALUE;
-        BlockPos best = null;
+        PortalSurvey survey = PORTAL_SURVEYS.computeIfAbsent(level.getServer(), ignored -> new PortalSurvey());
+        SkyIslandSavedData data = SkyIslandSavedData.get(level);
 
-        for (int[] offset : PORTAL_OFFSETS) {
+        if (survey.candidate < PORTAL_OFFSETS.length) {
+            int[] offset = PORTAL_OFFSETS[survey.candidate];
             int centerX = spawn.getX() + offset[0];
             int centerZ = spawn.getZ() + offset[1];
+            forceAreaChunks(level, data, new BlockPos(centerX-18, 0, centerZ-18), 37, 1, 37);
+            if (!activeChunksReady(level, data)) return null;
             int minY = Integer.MAX_VALUE;
             int maxY = Integer.MIN_VALUE;
             int water = 0;
             for (int[] sample : PORTAL_SAMPLES) {
                 int x = centerX + sample[0];
                 int z = centerZ + sample[1];
-                level.getChunk(x >> 4, z >> 4);
                 int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1;
                 minY = Math.min(minY, y);
                 maxY = Math.max(maxY, y);
@@ -313,24 +329,30 @@ public final class SkyIslandManager {
                 }
             }
             int score = (maxY - minY) * 200 + water * 20_000;
-            if (score < bestScore) {
+            if (score < survey.bestScore) {
                 BlockPos candidate = new BlockPos(centerX - 7, maxY, centerZ - 7);
                 try {
                     // Reject tree trunks/buildings at the taller altar before building the whole island.
                     PortalArchitecture.prepare(level, manifest.groundPortal(), candidate, false);
                 } catch (IOException obstruction) {
                     LOGGER.debug("[TN-C Sky Island] portal candidate rejected at {}: {}", candidate, obstruction.getMessage());
-                    continue;
+                    releaseActiveChunks(level, data);
+                    survey.candidate++;
+                    return null;
                 }
-                bestScore = score;
-                best = candidate;
+                survey.bestScore = score;
+                survey.best = candidate;
             }
+            releaseActiveChunks(level, data);
+            survey.candidate++;
+            return null;
         }
 
-        if (best == null) {
+        PORTAL_SURVEYS.remove(level.getServer());
+        if (survey.best == null) {
             throw new IllegalStateException("出生点周围没有足够净空的安全传送阵候选地，未覆盖已有建筑");
         }
-        return best;
+        return survey.best;
     }
 
     static void buildStep(ServerLevel level, SkyIslandSavedData data, SkyIslandManifest manifest) throws IOException {
@@ -353,7 +375,7 @@ public final class SkyIslandManager {
         if (level.getGameTime() < data.waitUntilTick) {
             return;
         }
-        ensureActiveChunksLoaded(level, data);
+        if (!activeChunksReady(level, data)) return;
 
         StructureTemplate template = level.getStructureManager().get(piece.resource())
                 .orElseThrow(() -> new IOException("missing structure template " + piece.resource()));
@@ -409,7 +431,7 @@ public final class SkyIslandManager {
         if (level.getGameTime() < data.waitUntilTick) {
             return;
         }
-        ensureActiveChunksLoaded(level, data);
+        if (!activeChunksReady(level, data)) return;
 
         if (!portalEntitiesReady(level,data)) return;
 
@@ -482,10 +504,9 @@ public final class SkyIslandManager {
         try {
             forceAreaChunks(level, data, PortalArchitecture.footprintOrigin(island), PortalArchitecture.WIDTH, PortalArchitecture.HEIGHT, PortalArchitecture.WIDTH);
             forceAreaChunks(level, data, PortalArchitecture.footprintOrigin(ground), PortalArchitecture.WIDTH, PortalArchitecture.HEIGHT, PortalArchitecture.WIDTH);
-            ensureActiveChunksLoaded(level, data);
             // Block chunks load synchronously, saved entities do not. Keep tickets while the
             // entity manager processes its asynchronous inbox on subsequent server ticks.
-            if (!portalEntitiesReady(level,data)) {
+            if (!activeChunksReady(level,data) || !portalEntitiesReady(level,data)) {
                 pending=true;
                 PORTAL_UPGRADES.put(server,level.getGameTime()+2);
                 throw new PortalChunksPending();
@@ -545,10 +566,9 @@ public final class SkyIslandManager {
                 if (data.activeChunks.contains(packed)) {
                     continue;
                 }
-                // A false return means this exact TN-C owner already had the ticket (for example
-                // after a crash). It is still ours and must still be tracked for later release.
-                ForgeChunkManager.forceChunk(level, TNMod.MODID, owner, chunkX, chunkZ, true, false);
-                level.getChunk(chunkX, chunkZ);
+                // Region tickets schedule generation without Forge's synchronous forceChunk load.
+                ChunkPos chunk = new ChunkPos(chunkX, chunkZ);
+                level.getChunkSource().addRegionTicket(BUILD_TICKET, chunk, 2, chunk);
                 data.activeChunks.add(packed);
                 data.setDirty();
             }
@@ -565,18 +585,22 @@ public final class SkyIslandManager {
         while (!data.activeChunks.isEmpty()) {
             long packed = data.activeChunks.get(data.activeChunks.size() - 1);
             ChunkPos chunk = new ChunkPos(packed);
+            level.getChunkSource().removeRegionTicket(BUILD_TICKET, chunk, 2, chunk);
             ForgeChunkManager.forceChunk(level, TNMod.MODID, owner, chunk.x, chunk.z, false, false);
             data.activeChunks.remove(data.activeChunks.size() - 1);
             data.setDirty();
         }
     }
 
-    /** Synchronous guard for crash recovery before touching a template's blocks. */
-    private static void ensureActiveChunksLoaded(ServerLevel level, SkyIslandSavedData data) {
+    /** Reissue transient tickets after restart and poll; never wait inside a server tick. */
+    private static boolean activeChunksReady(ServerLevel level, SkyIslandSavedData data) {
+        boolean ready = true;
         for (long packed : data.activeChunks) {
             ChunkPos chunk = new ChunkPos(packed);
-            level.getChunk(chunk.x, chunk.z);
+            level.getChunkSource().addRegionTicket(BUILD_TICKET, chunk, 2, chunk);
+            if (level.getChunkSource().getChunkNow(chunk.x, chunk.z) == null) ready = false;
         }
+        return ready;
     }
 
     private static BlockPos ticketOwner(SkyIslandSavedData data) {

@@ -267,7 +267,7 @@ public final class MagicStoneHud {
         graphics.pose().pushPose();
         graphics.pose().translate(0.0F, 0.0F, HUD_Z);
 
-        // 左半边：护甲条（用户的 Temperingbar 剑）——盖在包内护甲条原来的位置上
+        // 剑形条：加入战士磨砺后显示真实磨砺；未加入者保留旧护甲显示。
         drawTemperingBar(minecraft, graphics, width / 2 + TEMPERING_BAR_X_OFFSET, height);
 
         // 右半边：和饱食度同一套贴图规格，紧贴它正上方
@@ -281,28 +281,24 @@ public final class MagicStoneHud {
         graphics.pose().popPose();
     }
 
-    /**
-     * 画护甲条（用户的 Temperingbar：一把剑，剑身按护甲值填充）。
-     *
-     * <p>护甲 0 就不画 —— 原版和包内也都是"没穿护甲就不显示"，画一条空剑反而碍眼。
-     * 数值直接取原版护甲值；上限按 20 算，超过 20 的（模组护甲）就按实际值当上限。
-     */
+    /** Enrolled players see server-synced permanent tempering; others retain the legacy armor display. */
     private static void drawTemperingBar(Minecraft minecraft, GuiGraphics graphics, int x, int height) {
         if (minecraft.player == null) {
             return;
         }
-        int armor = minecraft.player.getArmorValue();
-        if (armor <= 0) {
+        boolean tempering = com.tnc.tnc.warrior.client.TemperingClient.enrolled();
+        int value = tempering ? com.tnc.tnc.warrior.client.TemperingClient.points() : minecraft.player.getArmorValue();
+        if (!tempering && value <= 0) {
             return;
         }
-        int max = Math.max(VANILLA_ARMOR_MAX, armor);
+        int max = tempering ? com.tnc.tnc.warrior.client.TemperingClient.cap() : Math.max(VANILLA_ARMOR_MAX, value);
         int y = height - TEMPERING_BAR_TOP_MARGIN;   // 上面那一行
 
         // 整条（含剑柄、护手、边框）：168x26 -> 84x13
         graphics.blit(TEMPERING_BAR_EMPTY, x, y, BAR_W, BAR_H, 0.0F, 0.0F, TEX_W, TEX_H, TEX_W, TEX_H);
 
         // 剑身按比例从左往右填（只裁 u 65..166 那一段，别把剑柄切了）
-        int filled = (int) Math.round((TEMPERING_TRACK_W / 2) * (double) armor / max);
+        int filled = (int) Math.round((TEMPERING_TRACK_W / 2) * (double) value / max);
         if (filled > 0) {
             graphics.blit(TEMPERING_BAR_FILL,
                     x + TEMPERING_TRACK_U / 2, y + TEMPERING_TRACK_V / 2,
@@ -312,7 +308,7 @@ public final class MagicStoneHud {
         }
 
         // 数字压在剑身上（和魔力条同一套做法：先挪到中线再缩放）
-        String text = armor + "/" + max;
+        String text = value + "/" + max;
         var font = minecraft.font;
         int trackCx = x + (TEMPERING_TRACK_U + TEMPERING_TRACK_W / 2) / 2;
         int trackCy = y + (TEMPERING_TRACK_V + TEMPERING_TRACK_H / 2) / 2;

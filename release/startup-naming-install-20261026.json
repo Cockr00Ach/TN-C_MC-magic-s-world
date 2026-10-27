@@ -1,0 +1,20 @@
+{
+  "jar_sha256": "af79a57b7d3ec40c3a5b4ac3610bf0355dfaeb1539afc61c875a2340a4a0bbe2",
+  "unit_tests": 417,
+  "server_tests": 2,
+  "naming_checks": {
+    "profile_displayed": true,
+    "escape_keeps_initial_form": true,
+    "close_keeps_initial_form": true,
+    "enter_does_not_submit": true,
+    "empty_keeps_form": true,
+    "escape_enter_do_not_name": true,
+    "confirm_closes_form": true,
+    "server_name_saved": true,
+    "display_name_updated": true
+  },
+  "saves_changed": false,
+  "design_status": "proposal_only",
+  "teammate_base": "8033041c",
+  "native_report": "work/startup-naming-native-v2/naming/report.json"
+}

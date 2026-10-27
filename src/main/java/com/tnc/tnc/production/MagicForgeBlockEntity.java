@@ -330,7 +330,8 @@ public final class MagicForgeBlockEntity extends BlockEntity implements WorldlyC
         int[] costs = recipe.costs(this);
         if (costs == null) return;
         ItemStack output = items.get(OUTPUT_SLOT);
-        ItemStack produced = recipe.getResultItem(server.registryAccess());
+        ItemStack produced = recipe.assemble(this, server.registryAccess());
+        if (produced.isEmpty()) return;
         if (!output.isEmpty() && (!ItemStack.isSameItemSameTags(output, produced)
                 || output.getCount() + produced.getCount() > output.getMaxStackSize())) return;
         progress+=getPersistentData().getLong("OverloadBoostUntil")>server.getGameTime()&&server.getGameTime()%2==0||getPersistentData().getLong("MealBoostUntil")>server.getGameTime()&&server.getGameTime()%4==0?2:1;

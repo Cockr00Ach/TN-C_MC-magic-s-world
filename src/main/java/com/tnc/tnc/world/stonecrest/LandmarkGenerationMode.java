@@ -17,6 +17,7 @@ public final class LandmarkGenerationMode extends SavedData {
     private static final String ID="tnc_landmark_generation_v2";
     private static final ConcurrentHashMap<ServerLevel,Boolean> MODES=new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager,Boolean> PALACES=new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager,Boolean> END_ISLANDS=new ConcurrentHashMap<>();
     final boolean nativeChunks;
     final boolean fullHeroskand;
     LandmarkGenerationMode(boolean enabled) { this(enabled,enabled); }
@@ -31,8 +32,23 @@ public final class LandmarkGenerationMode extends SavedData {
         return PALACES.getOrDefault(manager,false);
     }
     static boolean enabled(ServerLevel level) { return MODES.getOrDefault(level,false); }
+    static boolean endIslands(net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager manager) {
+        return END_ISLANDS.getOrDefault(manager,false);
+    }
     @SubscribeEvent public static void loaded(LevelEvent.Load event) {
-        if (!(event.getLevel() instanceof ServerLevel level) || level.dimension()!=Level.OVERWORLD) return;
+        if (!(event.getLevel() instanceof ServerLevel level)) return;
+        // Opt new worlds in once. Retrofitting a 585-block footprint across existing
+        // FULL chunks would leave permanent missing slices at the explored boundary.
+        if (level.dimension()==Level.END) {
+            var mode=level.getDataStorage().computeIfAbsent(LandmarkGenerationMode::load,()->{
+                var created=new LandmarkGenerationMode(level.getGameTime()==0,false);
+                created.setDirty(); return created;
+            },ID);
+            MODES.put(level,mode.nativeChunks);
+            END_ISLANDS.put(level.getStructureManager(),mode.nativeChunks);
+            return;
+        }
+        if (level.dimension()!=Level.OVERWORLD) return;
         var mode=level.getDataStorage().computeIfAbsent(LandmarkGenerationMode::load,()->{
             var created=new LandmarkGenerationMode(level.getGameTime()==0
                     && !(level.getServer() instanceof net.minecraft.gametest.framework.GameTestServer));
@@ -48,5 +64,6 @@ public final class LandmarkGenerationMode extends SavedData {
             PALACES.remove(l.getStructureManager()); return true;
         });
         LandmarkSites.clear(event.getServer());
+        END_ISLANDS.remove(event.getServer().getStructureManager());
     }
 }
