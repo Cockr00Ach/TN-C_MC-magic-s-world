@@ -21,7 +21,7 @@ $javaArguments=[regex]::Replace($javaArguments,'--height\s+\d+','--height 900')
 if($LeylineOnly -or $EquipmentOnly -or $WorldFeedback -or $SkyAcademy){$javaArguments=[regex]::Replace($javaArguments,'-Xmx\S+','-Xmx8G');$javaArguments=[regex]::Replace($javaArguments,'-Xms\S+','-Xms1G')}
 if($SkyAcademy){
     # This affects only the isolated process, never the player's launcher settings.
-    $javaArguments=[regex]::Replace($javaArguments,'-Xmx\S+','-Xmx6G')
+    $javaArguments=[regex]::Replace($javaArguments,'-Xmx\S+','-Xmx8G')
     $javaArguments='-XX:ActiveProcessorCount=4 -XX:MaxDirectMemorySize=512M -XX:NativeMemoryTracking=summary '+$javaArguments
 }
 if(-not(Test-Path -LiteralPath $OffscreenAgent)){throw 'Build tools/OffscreenAuditAgent.java first'}
