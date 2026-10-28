@@ -10,21 +10,28 @@ import numpy as np
 import nbtlib
 from scipy.ndimage import gaussian_filter, distance_transform_edt, binary_dilation
 from sky_landscape import ROOT, terrain_heights, preview
-from export_town_structures import state_tag
+from export_town_structures import state_tag, state_text
 
 OUT=ROOT/'work/sky-academy'
 DATA=ROOT/'src/main/resources/data/tnc/sky_academy'
 RNG=random.Random(261026)
-LANDS=[('sky_west_meadow','51','风铃草甸','FIELD',6800,62,240,32,91),
+LANDS=[('sky_west_meadow','51','风铃草甸','FIELD',6800,70,374,32,90),
        ('sky_south_garden','52','花坡庭地','FIELD',7200,142,432,32,87),
-       ('sky_cloud_pasture','53','云湾大牧场','PASTURE',14500,334,432,48,91)]
+       ('sky_cloud_pasture','53','云湾大牧场','PASTURE',14500,310,436,48,91)]
 
 class Garden:
     def __init__(self):
         RNG.seed(261026)
         cache=np.load(ROOT/'work/sky-landscape/revision.npz')
-        self.scene=cache['scene'].copy(); self.before=self.scene.copy()
+        self.scene=cache['scene'].copy()
         self.names=cache['names'].tolist();self.ids={s:i for i,s in enumerate(self.names)}
+        # Compose the later casino into the offline baseline before surveying land.
+        # It must remain visible in previews and immutable in the exported overlay.
+        casino=nbtlib.load(ROOT/'src/main/resources/data/tnc/casino/island_v3.nbt')
+        palette=[self.sid(state_text(s)) for s in casino['Palette']]
+        for change in casino['Changes']:
+            x,y,z=map(int,change['Pos']);self.scene[y,z,x]=palette[int(change['After'])]
+        self.before=self.scene.copy()
         self.height=terrain_heights(self.scene,self.names)
         self.original_height=self.height.copy();self.landmarks={};self.routes=[]
         self.protected=np.zeros((520,520),dtype=bool)
@@ -70,6 +77,7 @@ class Garden:
         band=(signed>-width)&(signed<width+18)&(self.original_height>=65)
         reserved=np.zeros_like(built)
         reserved[254:344,402:503]=True;reserved[400:449,185:234]=True
+        reserved[227:313,59:130]=True # Casino v3 and five-block approach margin.
         for p in json.loads((ROOT/'src/main/resources/data/tnc/housing/catalog.json').read_text('utf-8'))['plots']:
             if p['id'].startswith('sky_'):continue
             a,_,b=p['min'];c,_,d=p['max'];reserved[max(0,b-3):d+4,max(0,a-3):c+4]=True
@@ -276,17 +284,17 @@ class Garden:
             self.box(x,106,z,x,108,z,'chiseled_stone_bricks');self.landmarks['rune'+str(i)]=[x,108,z]
         for x,z,h in ((65,155,21),(81,142,17),(105,151,23),(64,192,19),(103,207,15),(72,220,18)):
             self.tree(x,z,h,7)
-        self.path([(88,106,191),(91,106,216),(105,110,233),(119,int(self.height[245,119]),245)],3)
+        self.path([(88,106,191),(91,106,210),(106,108,219),(119,int(self.height[220,119]),220)],3)
         # Meadow farms: stepped terrace beds and three houses around a working court.
         self.grade(87,323,26,44,91)
-        for x,z in ((68,299),(98,293),(70,347)):self.cottage(x,z,91)
+        for x,z in ((55,327),(115,350),(70,347)):self.cottage(x,z,91)
         self.landmarks['farm']=[93,92,320]
         for z in range(327,339):
             for x in range(88,109):
                 self.put(x,91,z,'water[level=0]' if x==98 else 'farmland[moisture=7]')
                 if x!=98:self.put(x,92,z,'wheat[age=7]')
         self.path([(119,int(self.height[319,119]),319),(108,95,319),(93,91,319),(70,91,319)],5)
-        self.path([(70,91,307),(70,91,340)],3)
+        self.path([(70,91,319),(70,91,340)],3)
         for x,z in ((60,318),(60,333),(108,347),(101,362)):self.tree(x,z,12,5)
         # Mirror lake: a source-fed upper pool and a broad lower lake, with two visible drops.
         self.basin(423,133,13,12,111);self.basin(443,177,22,22,94)
@@ -311,9 +319,9 @@ class Garden:
             for xx,zz in ((x,z),(x+size-1,z),(x,z+size-1),(x+size-1,z+size-1)):
                 ground=int(self.height[zz,xx]);self.box(xx,ground,zz,xx,ground+1,zz,'mossy_stone_bricks')
             self.landmarks[id]=[x+size//2,y+1,z+size-1]
-        self.path([(78,91,271),(78,91,281),(115,95,281),(115,91,319)],3)
+        self.path([(86,90,405),(105,89,405),(119,int(self.height[405,119]),405)],3)
         self.path([(158,87,463),(178,87,470),(220,88,455)],3)
-        self.path([(358,91,479),(329,89,480),(300,87,475),(270,86,468)],3)
+        self.path([(334,91,483),(310,89,484),(300,87,475),(270,86,468)],3)
         self.fringe_groves()
         # Trees added after roads may overhang them. Trim foliage only, preserving
         # authored arches and clearing a walkable three-block-high corridor.

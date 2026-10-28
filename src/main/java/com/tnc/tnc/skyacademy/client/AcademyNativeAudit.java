@@ -32,11 +32,13 @@ public final class AcademyNativeAudit {
             if(ticks>24000){Files.writeString(folder().resolve("failed.txt"),"Construction timeout: "+status);mc.stop();}return;
         }
         if(!prepared){prepared=true;ready=false;ticks=0;mc.options.renderDistance().set(stage==6?12:10);int[] v=VIEWS[stage];
-            mc.getSingleplayerServer().execute(()->{var s=mc.getSingleplayerServer();var p=s.getPlayerList().getPlayers().get(0);var o=SkyAcademyWorld.origin(s);s.overworld().setDayTime(stage==6?18000:6000);p.teleportTo(s.overworld(),o.getX()+v[0]+.5,o.getY()+v[1],o.getZ()+v[2]+.5,v[3],v[4]);ready=true;});return;
+            mc.getSingleplayerServer().execute(()->{var s=mc.getSingleplayerServer();var p=s.getPlayerList().getPlayers().get(0);var o=SkyAcademyWorld.origin(s);s.overworld().setWeatherParameters(12000,0,false,false);s.overworld().setDayTime(stage==6?18000:6000);p.teleportTo(s.overworld(),o.getX()+v[0]+.5,o.getY()+v[1],o.getZ()+v[2]+.5,v[3],v[4]);ready=true;});return;
         }
         if(!ready||saving)return;
         mc.player.setYRot(VIEWS[stage][3]);mc.player.setXRot(VIEWS[stage][4]);
-        com.tnc.tnc.mana.sight.client.ManaSightClient.setEnabled(stage==6);
+        // Toggling clears the particle pool. Do it only once at each transition,
+        // otherwise an audit frame can never show the living mana currents.
+        if(com.tnc.tnc.mana.sight.client.ManaSightClient.enabled()!=(stage==6))com.tnc.tnc.mana.sight.client.ManaSightClient.setEnabled(stage==6);
         if(++ticks==400){saving=true;String name=stage+"-"+LABELS[stage]+".png";Screenshot.grab(mc.gameDirectory,"academy-"+name,mc.getMainRenderTarget(),m->{try{Files.copy(mc.gameDirectory.toPath().resolve("screenshots/academy-"+name),folder().resolve(name),StandardCopyOption.REPLACE_EXISTING);}catch(Exception ex){throw new RuntimeException(ex);}finally{saving=false;}});}
         if(ticks>420){if(++stage==VIEWS.length){Files.writeString(folder().resolve("report.json"),new com.google.gson.Gson().toJson(Map.of("native_screenshots",LABELS,"scope","Isolated copied sky island; native scenery renderer, no tutorial completion claimed")));mc.stop();return;}prepared=false;}
     }

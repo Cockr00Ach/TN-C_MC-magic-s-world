@@ -11,6 +11,22 @@ class LandscapeTests(unittest.TestCase):
         out=np.load(OUT/'scene.npz');cls.after=out['scene'];cls.names=out['names'].tolist();cls.height=out['height']
         cls.report=json.loads((OUT/'build.json').read_text())
 
+    def test_current_casino_and_its_approach_are_reserved(self):
+        # The casino was added after the cached September terrain baseline.
+        self.assertTrue(self.g.protected[227:313,59:130].all())
+        self.assertTrue(np.array_equal(self.g.before[:,227:313,59:130],self.after[:,227:313,59:130]))
+        for plot in json.loads((ROOT/'src/main/resources/data/tnc/housing/catalog.json').read_text('utf-8'))['plots']:
+            if not plot['id'].startswith('sky_'):continue
+            x,_,z=plot['min'];xx,_,zz=plot['max']
+            self.assertFalse(x<=129 and xx>=59 and z<=312 and zz>=227,plot['id'])
+
+    def test_new_land_has_ground_under_every_buildable_column(self):
+        for plot in json.loads((ROOT/'src/main/resources/data/tnc/housing/catalog.json').read_text('utf-8'))['plots']:
+            if not plot['id'].startswith('sky_'):continue
+            x,_,z=plot['min'];xx,_,zz=plot['max']
+            self.assertGreaterEqual(int(self.g.original_height[z:zz+1,x:xx+1].min()),55,plot['id'])
+            self.assertFalse(self.g.protected[z:zz+1,x:xx+1].any(),plot['id'])
+
     def test_architecture_reservations_and_property_are_untouched(self):
         self.assertTrue(np.array_equal(self.g.before[:,self.g.protected],self.after[:,self.g.protected]))
         self.assertTrue(np.array_equal(self.g.before[:,self.g.architecture],self.after[:,self.g.architecture]))
