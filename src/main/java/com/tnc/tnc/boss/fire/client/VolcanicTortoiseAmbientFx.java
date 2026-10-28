@@ -1,6 +1,7 @@
 package com.tnc.tnc.boss.fire.client;
 
 import com.tnc.tnc.boss.fire.VolcanicTortoiseEntity;
+import com.tnc.tnc.boss.fire.TortoiseTransition;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.ParticleStatus;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -332,7 +333,7 @@ public final class VolcanicTortoiseAmbientFx {
 
         List<VolcanicTortoiseEntity> bosses = new ArrayList<>();
         for (Entity entity : level.entitiesForRendering()) {
-            if (entity instanceof VolcanicTortoiseEntity boss && !boss.isRemoved()
+            if (entity instanceof VolcanicTortoiseEntity boss && !boss.isRemoved() && !boss.isDeadOrDying()
                     && mc.player.distanceToSqr(boss) <= Tuning.MAX_DISTANCE * Tuning.MAX_DISTANCE) {
                 bosses.add(boss);
             }
@@ -380,14 +381,14 @@ public final class VolcanicTortoiseAmbientFx {
 
     private static int tickBoss(Minecraft mc, ClientLevel level, VolcanicTortoiseEntity boss,
                                 FxState state, long now, int budget) {
-        boolean phaseTwo = boss.isPhaseTwo();
+        boolean phaseTwo = boss.usesPhaseTwoModel();
         double distance = Math.sqrt(mc.player.distanceToSqr(boss));
         float proximity = proximity(distance);
 
         // 阶段变化：只在这一 tick 设一次暂停，之后不再重置。
         boolean phaseChanged = state.phase != boss.phase();
         if (phaseChanged) {
-            if (state.phase != -1) {
+            if (state.phase != -1 && !boss.isTransitioning()) {
                 state.resumeAt = now + Tuning.TRANSITION_PAUSE_TICKS;
             }
             state.phase = boss.phase();
@@ -403,11 +404,19 @@ public final class VolcanicTortoiseAmbientFx {
             state.skip = "distance";
             return budget;
         }
-        if (now < state.resumeAt) {
+        if (!boss.isTransitioning() && now < state.resumeAt) {
             state.skip = "transition-pause";
             return budget;
         }
-        boolean attacking = actionPlaying(boss);
+        float transitionScale = boss.isTransitioning() ? TortoiseTransition.ambient(boss.transitionAge(0)) : 1.0F;
+        if (transitionScale <= 0.0F) {
+            state.smokeAcc = state.sparkAcc = 0.0F;
+            state.eruptionStart = -1L;
+            state.nextEruptionAt = now + interval(level.random, phaseTwo);
+            state.skip = "transition-silence";
+            return budget;
+        }
+        boolean attacking = !boss.isTransitioning() && actionPlaying(boss);
         state.skip = attacking ? "attack" : "ok";
 
         if (CRATER_DEBUG) {
@@ -430,7 +439,10 @@ public final class VolcanicTortoiseAmbientFx {
         }
 
         // ---- 小喷发调度：同一实体不重叠，攻击就顺延，绝不累计多次 ----------
-        if (state.eruptionStart >= 0L) {
+        if (boss.isTransitioning()) {
+            state.eruptionStart = -1L;
+            state.nextEruptionAt = now + interval(level.random, phaseTwo);
+        } else if (state.eruptionStart >= 0L) {
             if (attacking) {
                 // 喷发中途开始攻击：停止后续生成，已生成的粒子自然消失。
                 state.eruptionStart = -1L;
@@ -449,7 +461,7 @@ public final class VolcanicTortoiseAmbientFx {
         // ---- 轻烟：小数累计，5/s 就是每 tick +0.25 -------------------------
         // 狂暴时口部更活跃、虚弱窗口明显降温，但只缩放常规粒子，不改喷发参数。
         float mood = boss.isEnraged() ? 1.55F : boss.isWeakened() ? 0.35F : 1.0F;
-        float rateScale = proximity * (attacking ? Tuning.ATTACK_RATE_SCALE : 1.0F) * mood;
+        float rateScale = proximity * (attacking ? Tuning.ATTACK_RATE_SCALE : 1.0F) * mood * transitionScale;
         if (erupting) {
             // 喷发期间压低常规粒子，避免两套效果叠成浓烟。
             rateScale *= Tuning.ERUPT_REGULAR_SCALE;
@@ -909,7 +921,7 @@ public final class VolcanicTortoiseAmbientFx {
             VolcanicTortoiseEntity nearest = null;
             double best = 48.0D * 48.0D;
             for (Entity entity : mc.level.entitiesForRendering()) {
-                if (entity instanceof VolcanicTortoiseEntity boss && !boss.isRemoved()) {
+                if (entity instanceof VolcanicTortoiseEntity boss && !boss.isRemoved() && !boss.isDeadOrDying()) {
                     double d = mc.player.distanceToSqr(boss);
                     if (d <= best) {
                         best = d;

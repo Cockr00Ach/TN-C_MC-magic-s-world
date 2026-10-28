@@ -55,6 +55,7 @@ public final class VolcanicFireFieldEntity extends Entity {
     private long castId;
     private int hitInterval = HIT_INTERVAL;
     private UUID ownerId;
+    private int hazardEpoch;
     /** 支撑面高度（服务端用，落地后不再随地形变化）。 */
     private double groundY;
 
@@ -80,6 +81,9 @@ public final class VolcanicFireFieldEntity extends Entity {
         field.damage = damage;
         field.castId = castId;
         field.ownerId = ownerId;
+        if (ownerId != null && level.getEntity(ownerId) instanceof VolcanicTortoiseEntity boss) {
+            field.hazardEpoch = boss.hazardEpoch();
+        }
         field.hitInterval = Math.max(1, hitInterval);
         field.groundY = ground.y;
         field.getEntityData().set(DATA_RADIUS, (float) radius);
@@ -128,6 +132,10 @@ public final class VolcanicFireFieldEntity extends Entity {
         return this.groundY;
     }
 
+    public boolean isOwnedBy(UUID owner) {
+        return owner.equals(this.ownerId);
+    }
+
     @Override
     protected void defineSynchedData() {
         this.getEntityData().define(DATA_RADIUS, (float) RADIUS);
@@ -146,6 +154,13 @@ public final class VolcanicFireFieldEntity extends Entity {
             return;
         }
         ServerLevel level = (ServerLevel) this.level();
+        // 不让先于施法者重新加载的燃烧区继续伤人。
+        Entity owner = this.ownerId == null ? null : level.getEntity(this.ownerId);
+        if (owner == null || (owner instanceof VolcanicTortoiseEntity boss
+                && (boss.isTransitioning() || boss.hazardEpoch() != this.hazardEpoch))) {
+            this.discard();
+            return;
+        }
         double r = this.radius();
         // 服务端直接发粒子：即使客户端没同步到这个实体，贴地火苗也能看见。
         if (this.tickCount % 2 == 0) {
@@ -201,6 +216,7 @@ public final class VolcanicFireFieldEntity extends Entity {
     protected void readAdditionalSaveData(CompoundTag tag) {
         this.damage = tag.getFloat("FieldDamage");
         this.castId = tag.getLong("FieldCastId");
+        this.hazardEpoch = tag.getInt("HazardEpoch");
         this.hitInterval = Math.max(1, tag.getInt("FieldInterval"));
         this.groundY = tag.getDouble("FieldGroundY");
         if (tag.hasUUID("FieldOwner")) {
@@ -215,6 +231,7 @@ public final class VolcanicFireFieldEntity extends Entity {
     protected void addAdditionalSaveData(CompoundTag tag) {
         tag.putFloat("FieldDamage", this.damage);
         tag.putLong("FieldCastId", this.castId);
+        tag.putInt("HazardEpoch", this.hazardEpoch);
         tag.putInt("FieldInterval", this.hitInterval);
         tag.putDouble("FieldGroundY", this.groundY);
         if (this.ownerId != null) {

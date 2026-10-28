@@ -1,6 +1,7 @@
 package com.tnc.tnc.boss.fire.client;
 
 import com.tnc.tnc.boss.fire.TortoiseParticles;
+import com.tnc.tnc.boss.fire.VolcanicTortoiseEntity;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
@@ -40,6 +41,7 @@ public class FirePillarParticle extends TextureSheetParticle {
     }
 
     private final SpriteSet sprites;
+    private final int ownerId = FirePillarFx.spawningOwner();
     private final float swirlPhase;
     private final float swirlAmount;
     private final double centerX;
@@ -68,6 +70,11 @@ public class FirePillarParticle extends TextureSheetParticle {
 
     @Override
     public void tick() {
+        if (this.ownerId >= 0 && this.level.getEntity(this.ownerId) instanceof VolcanicTortoiseEntity boss
+                && (boss.isTransitioning() || boss.isDeadOrDying())) {
+            this.remove();
+            return;
+        }
         super.tick();
         this.setSpriteFromAge(this.sprites);
 

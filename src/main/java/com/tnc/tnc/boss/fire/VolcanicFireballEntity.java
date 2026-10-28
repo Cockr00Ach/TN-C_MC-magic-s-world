@@ -47,6 +47,7 @@ public final class VolcanicFireballEntity extends Projectile {
     private final Set<UUID> hitOnce = new HashSet<>();
     private float damage = 6.0F;
     private long castId;
+    private int hazardEpoch;
 
     public VolcanicFireballEntity(EntityType<? extends VolcanicFireballEntity> type, Level level) {
         super(type, level);
@@ -59,6 +60,7 @@ public final class VolcanicFireballEntity extends Projectile {
         ball.setPos(from.x, from.y, from.z);
         ball.damage = damage;
         ball.castId = castId;
+        ball.hazardEpoch = owner instanceof VolcanicTortoiseEntity boss ? boss.hazardEpoch() : 0;
         Vec3 dir = direction.normalize();
         ball.setDeltaMovement(dir.scale(SPEED));
         ball.setYRot((float) (Math.toDegrees(Math.atan2(dir.x, dir.z))));
@@ -83,6 +85,13 @@ public final class VolcanicFireballEntity extends Projectile {
         super.tick();
         if (this.level().isClientSide()) {
             this.clientTrail();
+            return;
+        }
+        // 施法者尚未加载时也不能结算，防止旧区块先加载而绕过转阶段清场。
+        Entity owner = this.getOwner();
+        if (owner == null || (owner instanceof VolcanicTortoiseEntity boss
+                && (boss.isTransitioning() || boss.hazardEpoch() != this.hazardEpoch))) {
+            this.discard();
             return;
         }
         if (this.tickCount > MAX_LIFE) {
@@ -215,6 +224,7 @@ public final class VolcanicFireballEntity extends Projectile {
         super.addAdditionalSaveData(tag);
         tag.putFloat("FireballDamage", this.damage);
         tag.putLong("FireballCastId", this.castId);
+        tag.putInt("HazardEpoch", this.hazardEpoch);
     }
 
     @Override
@@ -222,5 +232,6 @@ public final class VolcanicFireballEntity extends Projectile {
         super.readAdditionalSaveData(tag);
         this.damage = tag.getFloat("FireballDamage");
         this.castId = tag.getLong("FireballCastId");
+        this.hazardEpoch = tag.getInt("HazardEpoch");
     }
 }

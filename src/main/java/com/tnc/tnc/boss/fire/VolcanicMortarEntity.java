@@ -58,6 +58,7 @@ public final class VolcanicMortarEntity extends Projectile {
     private final Set<UUID> hitOnce = new HashSet<>();
     private float damage = 6.0F;
     private long castId;
+    private int hazardEpoch;
     /** 服务端专用：落地时刻（gameTime），用于提前/延后判定。 */
     private int landY = -1;
 
@@ -79,6 +80,7 @@ public final class VolcanicMortarEntity extends Projectile {
         ball.setPos(from.x, from.y, from.z);
         ball.damage = damage;
         ball.castId = castId;
+        ball.hazardEpoch = owner instanceof VolcanicTortoiseEntity boss ? boss.hazardEpoch() : 0;
         ball.landY = (int) Math.floor(target.y);
 
         double t = Math.max(1, flight);
@@ -125,6 +127,13 @@ public final class VolcanicMortarEntity extends Projectile {
     public void tick() {
         super.tick();
         if (this.level().isClientSide()) {
+            return;
+        }
+        // 施法者尚未加载时也不能结算，防止旧区块先加载而绕过转阶段清场。
+        Entity owner = this.getOwner();
+        if (owner == null || (owner instanceof VolcanicTortoiseEntity boss
+                && (boss.isTransitioning() || boss.hazardEpoch() != this.hazardEpoch))) {
+            this.discard();
             return;
         }
         Vec3 motion = this.getDeltaMovement();
@@ -224,6 +233,7 @@ public final class VolcanicMortarEntity extends Projectile {
     @Override
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
+        tag.putInt("HazardEpoch", this.hazardEpoch);
         tag.putFloat("MortarDamage", this.damage);
         tag.putLong("MortarCastId", this.castId);
         tag.putDouble("MortarLandX", this.landing().x);
@@ -235,6 +245,7 @@ public final class VolcanicMortarEntity extends Projectile {
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
+        this.hazardEpoch = tag.getInt("HazardEpoch");
         this.damage = tag.getFloat("MortarDamage");
         this.castId = tag.getLong("MortarCastId");
         this.entityData.set(DATA_LAND_X, (float) tag.getDouble("MortarLandX"));

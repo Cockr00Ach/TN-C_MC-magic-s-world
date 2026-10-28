@@ -399,6 +399,8 @@ dependencies {
     // ------------------------------------------------------------------
     compileOnly fg.deobf('touhoulittlemaid:touhoulittlemaid:1.5.2')
     compileOnly fg.deobf('geckolib:geckolib:4.8.4')
+    // Custom Molang queries use GeckoLib's embedded parser API; runtime still comes from GeckoLib.
+    compileOnly files(zipTree('libs/geckolib-4.8.4.jar').matching { include 'META-INF/jarjar/mclib-20.jar' })
 
     if (project.hasProperty('dungeonMobTests') || project.hasProperty('dungeonTests')) {
         runtimeOnly fg.deobf('geckolib:geckolib:4.8.4')

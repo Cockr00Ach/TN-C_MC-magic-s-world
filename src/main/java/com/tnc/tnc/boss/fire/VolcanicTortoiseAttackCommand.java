@@ -63,6 +63,17 @@ public final class VolcanicTortoiseAttackCommand {
                 .executes(context -> triggerPillar(context.getSource())));
 
         // 调试：狂暴 / 虚弱 / 清除状态。
+        event.getDispatcher().register(Commands.literal("tnc_transition")
+                .requires(source -> source.hasPermission(2))
+                .executes(context -> {
+                    VolcanicTortoiseEntity boss = nearest(context.getSource());
+                    if (boss == null || !boss.forceTransition()) {
+                        context.getSource().sendFailure(Component.literal("32 格内没有可转阶段的一阶段火山巨龟"));
+                        return 0;
+                    }
+                    context.getSource().sendSuccess(() -> Component.literal("开始 100 tick 转阶段；期间免伤并免疫所有状态效果"), false);
+                    return 1;
+                }));
         event.getDispatcher().register(Commands.literal("tnc_enrage")
                 .requires(source -> source.hasPermission(2))
                 .executes(context -> triggerEnrage(context.getSource(), "enrage"))
