@@ -63,7 +63,7 @@ public final class WindInfusion {
                 ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, p)).getLocation();
         LivingEntity target = null; double nearest = start.distanceToSqr(end);
         for (var candidate : p.serverLevel().getEntitiesOfClass(LivingEntity.class,
-                new AABB(start, end).inflate(.35), e -> e instanceof Enemy && e.isAlive() && !p.isAlliedTo(e))) {
+                new AABB(start, end).inflate(.35), e -> e instanceof Enemy && e.isAlive() && !p.isAlliedTo(e)&&(!TrainingGround.trainer(e)||SpecialistTrainers.isWindTarget(e)))) {
             var hit = candidate.getBoundingBox().inflate(.2).clip(start, end);
             if (hit.isPresent() && start.distanceToSqr(hit.get()) < nearest
                     && p.serverLevel().clip(new ClipContext(start, candidate.getBoundingBox().getCenter(),
@@ -73,7 +73,7 @@ public final class WindInfusion {
         }
         if (target != null) {
             end = start.add(p.getLookAngle().scale(Math.sqrt(nearest)));
-            target.hurt(p.damageSources().indirectMagic(p, p), WindInfusionRules.DAMAGE);
+            if(target.hurt(p.damageSources().indirectMagic(p, p), WindInfusionRules.DAMAGE))SpecialistTrainers.windHit(p,target);
         }
         WarriorCombatEffects.windCut(p,start,end);
         p.serverLevel().playSound(null, p.blockPosition(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, .8f, 1.3f);

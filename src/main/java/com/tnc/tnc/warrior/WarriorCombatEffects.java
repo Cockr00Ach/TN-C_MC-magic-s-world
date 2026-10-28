@@ -23,7 +23,7 @@ import org.joml.Vector3f;
 @Mod.EventBusSubscriber(modid=TNMod.MODID)
 public final class WarriorCombatEffects {
     private static final Map<UUID,State> STATES=new HashMap<>();
-    private static final class State{long slash=Long.MIN_VALUE,block=Long.MIN_VALUE,impact=Long.MIN_VALUE,lastGuard=Long.MIN_VALUE;boolean guarding;int combo;}
+    private static final class State{long slash=Long.MIN_VALUE,block=Long.MIN_VALUE,impact=Long.MIN_VALUE,lastGuard=Long.MIN_VALUE,flash=Long.MIN_VALUE;boolean guarding;int combo;UUID guardTarget;}
     private WarriorCombatEffects(){}
     private static boolean eligible(ServerPlayer p){return p.isAlive()&&!p.isSpectator()&&!p.isCreative()&&!DownedCombat.isDowned(p)&&TemperingData.get(p.server).enrolled(p.getUUID());}
     static WarriorEffectStyle style(ServerPlayer p){
@@ -70,20 +70,23 @@ public final class WarriorCombatEffects {
         var state=STATES.computeIfAbsent(p.getUUID(),k->new State());long now=p.server.overworld().getGameTime();
         boolean guarding=p.isBlocking();if(guarding&&!state.guarding)guard(p,false,true);state.guarding=guarding;
         if(WindInfusion.weapon(p.getMainHandItem())&&p.swinging&&p.swingTime<=1&&(state.slash==Long.MIN_VALUE||now-state.slash>=6)){
+            if(state.slash==Long.MIN_VALUE||now-state.slash>20)state.combo=0;
             state.slash=now;slash(p,(state.combo++&1)==1);
         }
     }
     @SubscribeEvent(priority=EventPriority.LOWEST) public static void block(ShieldBlockEvent event){
         if(!(event.getEntity() instanceof ServerPlayer p)||!eligible(p)||event.getBlockedDamage()<=0)return;
         var state=STATES.computeIfAbsent(p.getUUID(),k->new State());long now=p.server.overworld().getGameTime();state.lastGuard=now;
+        state.guardTarget=event.getDamageSource().getEntity()==null?null:event.getDamageSource().getEntity().getUUID();
         if(state.block!=Long.MIN_VALUE&&now-state.block<6)return;state.block=now;
-        guard(p,p.getTicksUsingItem()<=10,false);
+        boolean perfect=p.getTicksUsingItem()<=10&&(state.flash==Long.MIN_VALUE||now-state.flash>=20);if(perfect)state.flash=now;
+        guard(p,perfect,false);
     }
     @SubscribeEvent(priority=EventPriority.LOWEST) public static void hit(LivingDamageEvent event){
         if(event.getAmount()<=0||!(event.getSource().getEntity() instanceof ServerPlayer p)||!eligible(p)||!WindInfusion.weapon(p.getMainHandItem())
             ||event.getSource().getDirectEntity()!=p||!event.getSource().is(DamageTypes.PLAYER_ATTACK))return;
         var state=STATES.computeIfAbsent(p.getUUID(),k->new State());long now=p.server.overworld().getGameTime();if(state.impact!=Long.MIN_VALUE&&now-state.impact<6)return;state.impact=now;
-        var center=event.getEntity().getBoundingBox().getCenter();var s=style(p);boolean counter=state.lastGuard!=Long.MIN_VALUE&&now-state.lastGuard<=40;
+        var center=event.getEntity().getBoundingBox().getCenter();var s=style(p);boolean counter=state.lastGuard!=Long.MIN_VALUE&&now-state.lastGuard<=40&&event.getEntity().getUUID().equals(state.guardTarget);
         int count=counter?12:6;p.serverLevel().sendParticles(accent(s),center.x,center.y,center.z,count,.2,.3,.2,.025);
         if(counter){p.serverLevel().sendParticles(ParticleTypes.CRIT,center.x,center.y,center.z,8,.2,.25,.2,.1);state.lastGuard=Long.MIN_VALUE;p.serverLevel().playSound(null,p.blockPosition(),SoundEvents.PLAYER_ATTACK_CRIT,SoundSource.PLAYERS,.55f,1.2f);}
     }
@@ -98,5 +101,6 @@ public final class WarriorCombatEffects {
     }
     @SubscribeEvent public static void logout(PlayerEvent.PlayerLoggedOutEvent e){STATES.remove(e.getEntity().getUUID());}
     @SubscribeEvent public static void changed(PlayerEvent.PlayerChangedDimensionEvent e){STATES.remove(e.getEntity().getUUID());}
+    @SubscribeEvent public static void respawn(PlayerEvent.PlayerRespawnEvent e){STATES.remove(e.getEntity().getUUID());}
     @SubscribeEvent public static void stop(ServerStoppedEvent e){STATES.clear();}
 }

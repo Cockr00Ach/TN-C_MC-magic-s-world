@@ -41,7 +41,7 @@ public final class TrainingGround {
     public static boolean inside(ServerPlayer p){return p.level().dimension().equals(DIMENSION);}
     public static boolean trainer(Entity entity){return entity!=null&&entity.getPersistentData().hasUUID(OWNER);}
     private static boolean owns(Entity entity,ServerPlayer p){return trainer(entity)&&entity.getPersistentData().getUUID(OWNER).equals(p.getUUID());}
-    private static boolean qualified(ServerPlayer p){return p.isAlive()&&!p.isRemoved()&&!p.isCreative()&&!p.isSpectator()&&!DownedCombat.isDowned(p)&&TemperingData.get(p.server).enrolled(p.getUUID());}
+    static boolean qualified(ServerPlayer p){return p.isAlive()&&!p.isRemoved()&&!p.isCreative()&&!p.isSpectator()&&!DownedCombat.isDowned(p)&&TemperingData.get(p.server).enrolled(p.getUUID());}
     public static boolean enter(ServerPlayer p){
         if(inside(p))return true;
         if(!qualified(p)){p.sendSystemMessage(Component.literal("进入训练场需要战士天赋，且处于未倒地的生存状态。"));return false;}
@@ -62,7 +62,7 @@ public final class TrainingGround {
                 for(int x:new int[]{cx-12,cx+12})for(int z:new int[]{cz-12,cz+12})if(!target.hasChunkAt(new BlockPos(x,1,z)))return;
                 build(target,plot);TrainingGroundData.get(p.server).begin(p);TemperingTraining.cancel(p);
                 p.teleportTo(target,cx+.5,2,cz+.5,0,0);settle(p);spawnTeacher(p,plot);TemperingEvents.sync(p);
-                p.sendSystemMessage(Component.literal("已进入个人训练场。按修习快捷键开始守势反击；场内保护生命，武器攻击仍消耗耐久。面板可返回，也可在绿色归途台上潜行离场。"));
+                p.sendSystemMessage(Component.literal("已进入个人训练场。按修习快捷键开始守势反击；右键蓝色盾卫、金色剑术、青色风刃教官可专项训练。场内保护生命，武器攻击仍消耗耐久。面板可返回，也可在绿色归途台上潜行离场。"));
             }catch(RuntimeException e){com.mojang.logging.LogUtils.getLogger().error("Training ground entry failed",e);p.sendSystemMessage(Component.literal("训练场准备失败，请稍后重试。"));}
             finally{PENDING.remove(p.getUUID(),p);}
         },p.server);
@@ -82,12 +82,15 @@ public final class TrainingGround {
         }
         for(int dx=-1;dx<=1;dx++)for(int dz=-1;dz<=1;dz++)level.setBlock(new BlockPos(cx+dx,1,cz-8+dz),Blocks.EMERALD_BLOCK.defaultBlockState(),3);
         for(int x:new int[]{-6,6})level.setBlock(new BlockPos(cx+x,2,cz+5),Blocks.TARGET.defaultBlockState(),3);
+        int[] lessonX={-6,6,-6},lessonZ={-2,-4,7};Block[] pads={Blocks.BLUE_TERRACOTTA,Blocks.YELLOW_TERRACOTTA,Blocks.CYAN_TERRACOTTA};
+        for(int i=0;i<3;i++)for(int dx=-1;dx<=1;dx++)for(int dz=-1;dz<=1;dz++)level.setBlock(new BlockPos(cx+lessonX[i]+dx,1,cz+lessonZ[i]+dz),pads[i].defaultBlockState(),3);
     }
     private static void settle(ServerPlayer p){p.setDeltaMovement(Vec3.ZERO);p.fallDistance=0;p.clearFire();}
     static Husk teacher(ServerPlayer p){
         var entity=TEACHERS.get(p.getUUID());return entity!=null&&entity.isAlive()&&!entity.isRemoved()&&entity.level()==p.level()?entity:null;
     }
     private static void disposeTeacher(ServerPlayer p){
+        SpecialistTrainers.remove(p);
         var level=p.server.getLevel(DIMENSION);var existing=TEACHERS.remove(p.getUUID());
         if(existing!=null)existing.discard();if(level==null)return;
         int plot=TrainingGroundData.get(p.server).plot(p.getUUID());if(plot<0)return;
@@ -105,6 +108,7 @@ public final class TrainingGround {
         teacher.moveTo(TrainingGroundRules.centerX(plot)+.5,2,TrainingGroundRules.centerZ(plot)+3.5,180,0);
         if(!p.serverLevel().addFreshEntity(teacher))throw new IllegalStateException("Could not add practice teacher");
         TEACHERS.put(p.getUUID(),teacher);
+        SpecialistTrainers.spawn(p,plot);
     }
     public static boolean leave(ServerPlayer p){
         if(!inside(p))return false;
@@ -179,7 +183,8 @@ public final class TrainingGround {
     @SubscribeEvent(priority=EventPriority.HIGHEST) public static void safePlayer(LivingHurtEvent e){if(e.getEntity() instanceof ServerPlayer p&&inside(p)){e.setCanceled(true);if(e.getAmount()>0&&owns(e.getSource().getEntity(),p)){TemperingTraining.miss(p);p.displayClientMessage(Component.literal("未挡住这次挥击。观察前摇，正面举盾后再反击。"),true);}}}
     @SubscribeEvent(priority=EventPriority.HIGHEST) public static void trainerAttack(LivingAttackEvent e){
         if(trainer(e.getEntity())&&(!(e.getSource().getEntity() instanceof ServerPlayer p)||!owns(e.getEntity(),p)
-            ||!inside(p)||!e.getSource().is(net.minecraft.world.damagesource.DamageTypes.PLAYER_ATTACK)))e.setCanceled(true);
+            ||!inside(p)||!(e.getSource().is(net.minecraft.world.damagesource.DamageTypes.PLAYER_ATTACK)
+                ||SpecialistTrainers.isWindTarget(e.getEntity())&&e.getSource().is(net.minecraft.world.damagesource.DamageTypes.INDIRECT_MAGIC)&&WindInfusion.isWind(p.getMainHandItem()))))e.setCanceled(true);
     }
     @SubscribeEvent(priority=EventPriority.HIGH) public static void trainerHurt(LivingHurtEvent e){if(trainer(e.getEntity()))e.setAmount(Math.min(1,e.getAmount()));}
     @SubscribeEvent(priority=EventPriority.HIGHEST) public static void shield(ShieldBlockEvent e){if(e.getEntity() instanceof ServerPlayer p&&inside(p)&&owns(e.getDamageSource().getEntity(),p))e.setShieldTakesDamage(false);}

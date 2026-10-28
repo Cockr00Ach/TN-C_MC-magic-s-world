@@ -30,6 +30,7 @@ public final class TemperingTraining {
     public static boolean start(ServerPlayer p) {
         if (!eligible(p)) return false;
         if(ACTIVE.containsKey(p.getUUID())) {TemperingEvents.sync(p);return true;}
+        SpecialistTrainers.cancel(p,false);
         int mode=TrainingGround.inside(p)?TrainingGroundData.get(p.server).record(p.getUUID()).mode():0;
         ACTIVE.put(p.getUUID(), new GuardDrill(mode));
         if(TrainingGround.inside(p))TrainingGround.resetRhythm(p);
