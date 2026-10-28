@@ -52,6 +52,7 @@ public final class PillarWarningFx {
     }
 
     private static final class Warn {
+        final int ownerId;
         final long localStart;
         final long seed;
         final Vec3 origin;
@@ -59,7 +60,8 @@ public final class PillarWarningFx {
         final List<PillarLayout.Spot> spots;
         int spawned;
 
-        Warn(long localStart, long seed, Vec3 origin, float yaw) {
+        Warn(int ownerId, long localStart, long seed, Vec3 origin, float yaw) {
+            this.ownerId = ownerId;
             this.localStart = localStart;
             this.seed = seed;
             this.origin = origin;
@@ -89,7 +91,7 @@ public final class PillarWarningFx {
             }
             Warn warn = ACTIVE.get(boss.getId());
             if (warn == null || warn.seed != start) {
-                warn = new Warn(now, start, boss.pillarWaveOrigin(), boss.pillarWaveYaw());
+                warn = new Warn(boss.getId(), now, start, boss.pillarWaveOrigin(), boss.pillarWaveYaw());
                 ACTIVE.put(boss.getId(), warn);
             }
             long age = now - warn.localStart;
@@ -110,7 +112,7 @@ public final class PillarWarningFx {
         double ground = groundY(level, base.x, base.z, warn.origin.y);
         double height = 15.0D + (warn.seed % 7 + index * 3) % 5 * 1.1D;
         double width = 1.2D + ((warn.seed + index) % 4) * 0.18D;
-        FirePillarFx.spawnAt(new Vec3(base.x, ground, base.z), height, width);
+        FirePillarFx.spawnAt(new Vec3(base.x, ground, base.z), height, width, warn.ownerId);
     }
 
     private static Vec3 spotCenter(Warn warn, PillarLayout.Spot spot) {

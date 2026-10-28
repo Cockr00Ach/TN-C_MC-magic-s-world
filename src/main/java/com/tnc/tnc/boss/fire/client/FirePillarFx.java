@@ -3,6 +3,7 @@ package com.tnc.tnc.boss.fire.client;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.tnc.tnc.boss.fire.TortoiseParticles;
+import com.tnc.tnc.boss.fire.VolcanicTortoiseEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.commands.CommandSourceStack;
@@ -62,6 +63,11 @@ public final class FirePillarFx {
     private static final int GLOBAL_DECOR = 560;
 
     private static final List<Pillar> PILLARS = new ArrayList<>();
+    private static int spawningOwner = -1;
+
+    static int spawningOwner() {
+        return spawningOwner;
+    }
 
     private FirePillarFx() {
     }
@@ -72,6 +78,7 @@ public final class FirePillarFx {
         final double height;
         final double width;
         final long seed;
+        final int ownerId;
         /** 最近 32 tick 每 tick 的生成数，用于估算存活量。 */
         final int[] history = new int[32];
         final int[] decorHistory = new int[32];
@@ -80,11 +87,16 @@ public final class FirePillarFx {
         int spawnedTotal;
 
         Pillar(Vec3 base, long start, double height, double width, long seed) {
+            this(base, start, height, width, seed, -1);
+        }
+
+        Pillar(Vec3 base, long start, double height, double width, long seed, int ownerId) {
             this.base = base;
             this.start = start;
             this.height = height;
             this.width = width;
             this.seed = seed;
+            this.ownerId = ownerId;
         }
 
         int aliveEstimate() {
@@ -139,6 +151,11 @@ public final class FirePillarFx {
         Iterator<Pillar> it = PILLARS.iterator();
         while (it.hasNext()) {
             Pillar p = it.next();
+            if (p.ownerId >= 0 && level.getEntity(p.ownerId) instanceof VolcanicTortoiseEntity boss
+                    && (boss.isTransitioning() || boss.isDeadOrDying())) {
+                it.remove();
+                continue;
+            }
             long age = now - p.start;
             if (age > TOTAL_TICKS + 34L) {
                 it.remove();
@@ -157,21 +174,20 @@ public final class FirePillarFx {
             if (count <= 0) {
                 continue;
             }
-            for (int i = 0; i < count; i++) {
-                spawnParticle(level, p, age);
+            spawningOwner = p.ownerId;
+            try {
+                for (int i = 0; i < count; i++) spawnParticle(level, p, age);
+                p.record(count);
+                alive += count;
+                int decorWant = (int) Math.round(count * DECOR_RATIO);
+                int decorRoom = Math.min(PER_PILLAR_DECOR - p.decorAlive(), GLOBAL_DECOR - decorAlive);
+                int decorCount = Math.min(decorWant, decorRoom);
+                for (int i = 0; i < decorCount; i++) spawnDecor(level, p, age);
+                p.recordDecor(decorCount);
+                decorAlive += decorCount;
+            } finally {
+                spawningOwner = -1;
             }
-            p.record(count);
-            alive += count;
-
-            // 装饰粒子：与主体分开限额，只占主体的一小部分
-            int decorWant = (int) Math.round(count * DECOR_RATIO);
-            int decorRoom = Math.min(PER_PILLAR_DECOR - p.decorAlive(), GLOBAL_DECOR - decorAlive);
-            int decorCount = Math.min(decorWant, decorRoom);
-            for (int i = 0; i < decorCount; i++) {
-                spawnDecor(level, p, age);
-            }
-            p.recordDecor(decorCount);
-            decorAlive += decorCount;
         }
     }
 
@@ -316,11 +332,15 @@ public final class FirePillarFx {
 
     /** 供任务 7 调用：在指定位置直接起一根柱子。 */
     public static void spawnAt(Vec3 base, double height, double width) {
+        spawnAt(base, height, width, -1);
+    }
+
+    public static void spawnAt(Vec3 base, double height, double width, int ownerId) {
         ClientLevel level = Minecraft.getInstance().level;
         if (level == null) {
             return;
         }
-        PILLARS.add(new Pillar(base, level.getGameTime(), height, width, level.random.nextLong()));
+        PILLARS.add(new Pillar(base, level.getGameTime(), height, width, level.random.nextLong(), ownerId));
     }
 
     /** 当前同屏估算存活量，调试用。 */

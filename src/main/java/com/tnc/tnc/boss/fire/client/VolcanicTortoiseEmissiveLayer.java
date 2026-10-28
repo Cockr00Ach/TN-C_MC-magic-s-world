@@ -3,6 +3,8 @@ package com.tnc.tnc.boss.fire.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.tnc.tnc.boss.fire.VolcanicTortoiseEntity;
+import com.tnc.tnc.boss.fire.TortoiseTransition;
+import com.tnc.tnc.boss.fire.TortoiseDeath;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -35,11 +37,20 @@ public final class VolcanicTortoiseEmissiveLayer extends GeoRenderLayer<Volcanic
     public void render(PoseStack poseStack, VolcanicTortoiseEntity entity, BakedGeoModel model,
                        RenderType renderType, MultiBufferSource buffers, VertexConsumer buffer,
                        float partialTick, int packedLight, int packedOverlay) {
-        boolean phaseTwo = entity.isPhaseTwo();
+        boolean phaseTwo = entity.usesPhaseTwoModel();
+        float alpha = entity.isDyingAnimation() ? TortoiseDeath.glow(entity.deathAge(partialTick))
+                : entity.isTransitioning() ? TortoiseTransition.glow(entity.transitionAge(partialTick))
+                : phaseTwo ? 1.0F : 0.55F;
+        if (alpha <= 0) return;
         ResourceLocation texture = phaseTwo ? GLOW_TWO : GLOW_ONE;
         RenderType glow = RenderType.entityTranslucentEmissive(texture);
         this.getRenderer().reRender(model, poseStack, buffers, entity, glow, buffers.getBuffer(glow),
                 partialTick, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY,
-                1.0F, 1.0F, 1.0F, phaseTwo ? 1.0F : 0.55F);
+                1.0F, 1.0F, 1.0F, Math.min(1, alpha));
+        if (alpha > 1) {
+            RenderType flash = RenderType.eyes(texture);
+            this.getRenderer().reRender(model, poseStack, buffers, entity, flash, buffers.getBuffer(flash),
+                    partialTick, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 1, 1, 1, alpha - 1);
+        }
     }
 }

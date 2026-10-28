@@ -186,7 +186,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     /** 动作时长（tick）。 */
     private static final int BITE_TICKS = 20;
     private static final int SLAM_TICKS = 72; // 3.6s：24 tick 抬脚蓄力 / 30 tick 火环扩散 / 18 tick 收势
-    private static final int TRANSITION_TICKS = 68; // 3.4s 四拍（停步低头 / 下沉震动 / 岩甲掀开 / 口部喷发）
+    private static final int TRANSITION_TICKS = TortoiseTransition.DURATION;
     private static final int ERUPTION_TICKS = 46;
 
     /** 命中结算发生在动作的第几 tick —— 对应动画里"砸到地"的那一帧。 */
@@ -264,6 +264,14 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     /** 与血条 UUID 对应的同步数据（COMPOUND_TAG 里放 Most/Least 两个 long）。 */
     private static final EntityDataAccessor<CompoundTag> DATA_BAR_ID =
             SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.COMPOUND_TAG);
+    /** -1 = 非转换；统一时间轴让模型、动画、发光和特效在晚加入时仍能对齐。 */
+    private static final EntityDataAccessor<Long> DATA_TRANSITION_START =
+            SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.LONG);
+
+    private static final EntityDataAccessor<Long> DATA_DEATH_START =
+            SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.LONG);
+    private Vec3 deathAnchor = Vec3.ZERO;
+    private float deathYaw;
 
     private final ServerBossEvent bossEvent = new ServerBossEvent(this.getDisplayName(),
             BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10);
@@ -273,6 +281,13 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     /** 上一次真正出手的技能（用于避免连续两次大范围技能）。 */
     private int lastSkill = ACTION_NONE;
     private int actionTicks;
+    private Vec3 transitionAnchor = Vec3.ZERO;
+    private float transitionYaw;
+    private boolean transitionPreviousNoAi;
+    private boolean transitionPreviousNoGravity;
+    private boolean transitionPreviousInvulnerable;
+    /** 转阶段递增，已卸载的旧投射物/燃烧区回来后也不能继续结算。 */
+    private int hazardEpoch;
     /** 砸地瞬间锁定的冲击中心：视觉与伤害共用同一个点与传播速度。 */
     private Vec3 slamCenter = Vec3.ZERO;
     /** 调试：把火环的最大半径画出来（仅 ATTACK_DEBUG 的 /tnc_slam true）。 */
@@ -389,6 +404,31 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
 
     public boolean isPhaseTwo() {
         return this.phase() == PHASE_TWO;
+    }
+
+    public boolean isTransitioning() {
+        return this.entityData.get(DATA_TRANSITION_START) >= 0L;
+    }
+
+    public float transitionAge(float partialTick) {
+        return TortoiseTransition.age(this.entityData.get(DATA_TRANSITION_START),
+                this.level().getGameTime(), partialTick);
+    }
+
+    public boolean isDyingAnimation() {
+        return this.entityData.get(DATA_DEATH_START) >= 0L;
+    }
+
+    public float deathAge(float partialTick) {
+        return TortoiseDeath.age(this.entityData.get(DATA_DEATH_START), this.level().getGameTime(), partialTick);
+    }
+
+    public boolean usesPhaseTwoModel() {
+        return this.isTransitioning() ? TortoiseTransition.phaseTwo(this.transitionAge(0)) : this.isPhaseTwo();
+    }
+
+    public int hazardEpoch() {
+        return this.hazardEpoch;
     }
 
     /** 二阶段伤害系数：不写进属性，重载不会叠乘；狂暴倍率也只在这里乘一次。 */
@@ -550,6 +590,20 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.entityData.define(DATA_PILLAR_YAW, 0.0F);
         this.entityData.define(DATA_ENRAGE_STATE, STATE_NORMAL);
         this.entityData.define(DATA_BAR_ID, new CompoundTag());
+        this.entityData.define(DATA_TRANSITION_START, -1L);
+        this.entityData.define(DATA_DEATH_START, -1L);
+    }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
+        super.onSyncedDataUpdated(key);
+        if (DATA_DEATH_START.equals(key) && this.isDyingAnimation()) {
+            this.deathAnchor = this.position();
+            this.deathYaw = this.getYRot();
+        }
+        if (DATA_PHASE.equals(key)) {
+            this.refreshDimensions();
+        }
     }
 
     /**
@@ -567,10 +621,22 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     @Override
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
+        tag.putInt("TortoiseDeathAge", this.isDyingAnimation() ? Math.min(TortoiseDeath.DURATION - 1, (int) this.deathAge(0)) : -1);
+        tag.putFloat("TortoiseDeathYaw", this.deathYaw);
         tag.putInt("TortoisePhase", this.phase());
         tag.putBoolean("TortoiseEnrageTriggered", this.enrageTriggered);
         tag.putInt("TortoiseEnrageTicks", this.enrageTicks);
         tag.putInt("TortoiseWeakTicks", this.weakTicks);
+        tag.putBoolean("TortoiseEnragePending", this.enragePending);
+        tag.putInt("TortoiseHazardEpoch", this.hazardEpoch);
+        tag.putInt("TortoiseTransitionAge", this.isTransitioning()
+                ? Math.min(TRANSITION_TICKS - 1, (int) this.transitionAge(0)) : -1);
+        if (this.isTransitioning()) {
+            tag.putFloat("TortoiseTransitionYaw", this.transitionYaw);
+            tag.putBoolean("TortoiseTransitionNoAi", this.transitionPreviousNoAi);
+            tag.putBoolean("TortoiseTransitionNoGravity", this.transitionPreviousNoGravity);
+            tag.putBoolean("TortoiseTransitionInvulnerable", this.transitionPreviousInvulnerable);
+        }
     }
 
     @Override
@@ -581,7 +647,8 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.enrageTriggered = tag.getBoolean("TortoiseEnrageTriggered");
         this.enrageTicks = Math.max(0, tag.getInt("TortoiseEnrageTicks"));
         this.weakTicks = Math.max(0, tag.getInt("TortoiseWeakTicks"));
-        this.enragePending = false;
+        this.enragePending = tag.getBoolean("TortoiseEnragePending");
+        this.hazardEpoch = Math.max(0, tag.getInt("TortoiseHazardEpoch"));
         if (this.enrageTicks > 0) {
             this.entityData.set(DATA_ENRAGE_STATE, STATE_ENRAGED);
         } else if (this.weakTicks > 0) {
@@ -590,12 +657,40 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         } else {
             this.entityData.set(DATA_ENRAGE_STATE, STATE_NORMAL);
         }
+        int deathAge = tag.contains("TortoiseDeathAge") ? tag.getInt("TortoiseDeathAge") : -1;
+        if (deathAge >= 0) {
+            this.entityData.set(DATA_DEATH_START, Math.max(0L, this.level().getGameTime() - Math.min(TortoiseDeath.DURATION - 1, deathAge)));
+            this.deathAnchor = this.position();
+            this.deathYaw = tag.getFloat("TortoiseDeathYaw");
+            this.setNoAi(true);
+            this.setNoGravity(true);
+            this.bossEvent.setVisible(false);
+            this.clearTransitionEffects();
+        }
         // 属性由 LivingEntity 自己恢复，这里绝不重新乘一遍
+        int age = tag.contains("TortoiseTransitionAge") ? tag.getInt("TortoiseTransitionAge") : -1;
+        if (age >= 0 && deathAge < 0) {
+            age = Math.min(TRANSITION_TICKS - 1, age);
+            this.transitionAnchor = this.position();
+            this.transitionYaw = tag.getFloat("TortoiseTransitionYaw");
+            this.transitionPreviousNoAi = tag.getBoolean("TortoiseTransitionNoAi");
+            this.transitionPreviousNoGravity = tag.getBoolean("TortoiseTransitionNoGravity");
+            this.transitionPreviousInvulnerable = tag.getBoolean("TortoiseTransitionInvulnerable");
+            this.entityData.set(DATA_TRANSITION_START, Math.max(0L, this.level().getGameTime() - age));
+            this.action = ACTION_TRANSITION;
+            this.actionTicks = age;
+            this.setNoAi(true);
+            this.setNoGravity(true);
+            this.setInvulnerable(true);
+            this.clearTransitionEffects();
+        }
     }
 
     /** 虚弱窗口内受到的伤害翻倍；只作用于这只 Boss，且在 hurt 里只乘一次。 */
     @Override
     public boolean hurt(DamageSource source, float amount) {
+        // 包括虚空、创造玩家和 bypasses_invulnerability 的伤害，均不进入父类结算。
+        if (this.isTransitioning() || this.isDyingAnimation()) return false;
         if (this.isWeakened() && amount > 0.0F) {
             amount *= WEAK_DAMAGE_TAKEN;
         }
@@ -605,10 +700,45 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     /** 狂暴期间拒绝新增负面效果（有益效果照常），但不是无敌。 */
     @Override
     public boolean canBeAffected(MobEffectInstance effect) {
+        if (this.isTransitioning() || this.isDyingAnimation()) return false;
         if (this.isEnraged() && !effect.getEffect().isBeneficial()) {
             return false;
         }
         return super.canBeAffected(effect);
+    }
+
+    @Override
+    public boolean isInvulnerableTo(DamageSource source) {
+        return this.isTransitioning() || this.isDyingAnimation() || super.isInvulnerableTo(source);
+    }
+
+    @Override
+    public void heal(float amount) {
+        if (!this.isTransitioning() && !this.isDyingAnimation()) super.heal(amount);
+    }
+
+    @Override
+    public void setHealth(float health) {
+        if (!this.isTransitioning() && !this.isDyingAnimation()) super.setHealth(health);
+    }
+
+    @Override
+    public void travel(Vec3 input) {
+        if (this.isTransitioning() || this.isDyingAnimation()) {
+            this.setDeltaMovement(Vec3.ZERO);
+            return;
+        }
+        super.travel(input);
+    }
+
+    @Override
+    public boolean isPushable() {
+        return !this.isTransitioning() && !this.isDyingAnimation() && super.isPushable();
+    }
+
+    @Override
+    public void push(double x, double y, double z) {
+        if (!this.isTransitioning() && !this.isDyingAnimation()) super.push(x, y, z);
     }
 
     @Override
@@ -660,6 +790,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
 
         @Override
         public boolean canUse() {
+            if (VolcanicTortoiseEntity.this.isTransitioning()) return false;
             LivingEntity target = VolcanicTortoiseEntity.this.getTarget();
             return target != null && target.isAlive();
         }
@@ -823,7 +954,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     }
 
     // ------------------------------------------------------ 狂暴 / 虚弱 --
-    /** 每 tick 维护狂暴与虚弱计时；触发点只在血量严格低于阈值时判定一次。 */
+    /** 每 tick 维护狂暴与虚弱计时；血量达到阈值时排队，等转阶段/当前技能结束再触发一次。 */
     private void tickEnrage(ServerLevel level) {
         if (this.enrageTicks > 0) {
             this.enrageTicks--;
@@ -841,7 +972,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
             return;
         }
         float health = this.getHealth();
-        if (health <= 0.0F || health >= this.getMaxHealth() * ENRAGE_THRESHOLD) {
+        if (health <= 0.0F || (!this.enragePending && health > this.getMaxHealth() * ENRAGE_THRESHOLD)) {
             return;
         }
         // 转阶段优先：动作没结束（含 transition）就先排队，结束后的第一个空闲 tick 再进狂暴。
@@ -913,6 +1044,10 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
 
     /** 调试：直接进入狂暴（不受血量限制），仍遵守每场一次。 */
     public void forceEnrage() {
+        if (this.isTransitioning()) {
+            this.enragePending = !this.enrageTriggered;
+            return;
+        }
         if (this.level() instanceof ServerLevel level) {
             this.beginEnrage(level);
         }
@@ -920,6 +1055,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
 
     /** 调试：直接进入虚弱易伤窗口。 */
     public void forceWeak() {
+        if (this.isTransitioning()) return;
         if (this.level() instanceof ServerLevel level) {
             this.beginWeak(level);
         }
@@ -948,6 +1084,11 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
 
     @Override
     public void aiStep() {
+        if (this.level() instanceof ServerLevel server && this.isAlive() && !this.isDeadOrDying()
+                && !this.isNoAi() && !this.isTransitioning() && !this.isPhaseTwo()
+                && this.getHealth() <= this.getMaxHealth() * PHASE_TWO_HEALTH_FRACTION) {
+            this.beginPhaseTwo(server);
+        }
         super.aiStep();
 
         if (!(this.level() instanceof ServerLevel level)) {
@@ -965,13 +1106,15 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
             barTag.putLong("Least", barId.getLeastSignificantBits());
             this.entityData.set(DATA_BAR_ID, barTag);
         }
-        if (!this.isAlive() || this.isDeadOrDying() || this.isNoAi()) {
+        if (!this.isAlive() || this.isDeadOrDying()) {
             return;
         }
-
-        if (!this.isPhaseTwo() && this.getHealth() <= this.getMaxHealth() * PHASE_TWO_HEALTH_FRACTION) {
-            this.beginPhaseTwo(level);
+        if (this.isTransitioning()) {
+            this.holdTransitionPosition();
+            this.tickTransition(level);
+            return;
         }
+        if (this.isNoAi()) return;
 
         // 狂暴只加快“冷却倒计时”，不缩短动作时长与预警，保证每次技能仍有可躲避时间。
         int cooldownStep = this.isEnraged()
@@ -1005,33 +1148,119 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
 
     /** 半血转二阶段：只触发一次，转完清无敌与冷却。 */
     private void beginPhaseTwo(ServerLevel level) {
-        if (this.isPhaseTwo()) {
+        if (this.isPhaseTwo() || this.isTransitioning()) {
             return;
         }
-        this.entityData.set(DATA_PHASE, PHASE_TWO);
-        this.refreshDimensions();
+        this.transitionAnchor = this.position();
+        this.transitionYaw = this.getYRot();
+        this.transitionPreviousNoAi = this.isNoAi();
+        this.transitionPreviousNoGravity = this.isNoGravity();
+        this.transitionPreviousInvulnerable = this.isInvulnerable();
+        this.entityData.set(DATA_TRANSITION_START, level.getGameTime());
         this.startAction(ACTION_TRANSITION);
+        this.hazardEpoch++;
+        this.clearTransitionHazards(level);
+        this.clearTransitionEffects();
         this.setInvulnerable(true);
+        this.setNoAi(true);
+        this.setNoGravity(true);
         this.getNavigation().stop();
-        this.triggerAnim(ACTION_CONTROLLER, "transition");
-        level.playSound(null, this.blockPosition(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 3.0F, 0.55F);
-        level.sendParticles(ParticleTypes.LAVA,
-                this.getX(), this.getY() + 1.2D, this.getZ(), 40, 1.6D, 0.8D, 1.6D, 0.0D);
+        this.holdTransitionPosition();
+        if (!this.enrageTriggered && this.getHealth() <= this.getMaxHealth() * ENRAGE_THRESHOLD) {
+            this.enragePending = true;
+        }
+        level.playSound(null, this.blockPosition(), SoundEvents.STONE_HIT, SoundSource.HOSTILE, 0.6F, 0.45F);
     }
 
     private void tickTransition(ServerLevel level) {
-        if (this.actionTicks == 1 || this.actionTicks % 6 == 0) {
-            level.sendParticles(ParticleTypes.FLAME,
-                    this.getX(), this.getY() + 1.0D, this.getZ(),
-                    18, 1.8D, 0.6D, 1.8D, 0.02D);
+        this.actionTicks = (int) this.transitionAge(0);
+        int age = this.actionTicks;
+        this.clearTransitionEffects();
+        if (age > 0 && age < TortoiseTransition.SILENCE_START && age % 12 == 0) {
+            float volume = 0.3F + age / (float) TortoiseTransition.SILENCE_START;
+            level.playSound(null, this.blockPosition(), SoundEvents.BASALT_BREAK, SoundSource.HOSTILE, volume, 0.5F);
+            level.playSound(null, this.blockPosition(), SoundEvents.STONE_HIT, SoundSource.HOSTILE, volume * 0.6F, 0.4F);
         }
-        if (this.actionTicks >= TRANSITION_TICKS) {
-            this.setInvulnerable(false);
+        if (age >= TortoiseTransition.MODEL_SWAP && !this.isPhaseTwo()) {
+            this.entityData.set(DATA_PHASE, PHASE_TWO);
+            this.refreshDimensions();
+        }
+        if (age == TortoiseTransition.MODEL_SWAP) {
+            level.playSound(null, this.blockPosition(), SoundEvents.GLASS_BREAK, SoundSource.HOSTILE, 2.4F, 0.7F);
+            level.playSound(null, this.blockPosition(), SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 3.0F, 0.55F);
+            level.playSound(null, this.blockPosition(), SoundEvents.DEEPSLATE_BREAK, SoundSource.HOSTILE, 2.2F, 0.5F);
+        }
+        if (age == 90 || age == 112) {
+            level.playSound(null, this.blockPosition(), SoundEvents.STONE_PLACE, SoundSource.HOSTILE, 1.5F, 0.5F);
+        }
+        if (age == 118) {
+            level.playSound(null, this.blockPosition(), SoundEvents.LAVA_AMBIENT, SoundSource.HOSTILE, 1.8F, 0.65F);
+        }
+        if (age == TortoiseTransition.REBUILD_END) {
+            level.playSound(null, this.blockPosition(), SoundEvents.RAVAGER_ROAR, SoundSource.HOSTILE, 3.0F, 0.6F);
+        }
+        if (age >= TRANSITION_TICKS) {
+            this.entityData.set(DATA_PHASE, PHASE_TWO);
+            this.endTransitionProtection();
+            super.setHealth(Math.min(this.getHealth(), this.getMaxHealth()));
             this.finishAction(30);
             this.slamCooldown = 20;
             this.eruptionCooldown = 60;
-            level.playSound(null, this.blockPosition(), SoundEvents.RAVAGER_ATTACK, SoundSource.HOSTILE, 3.0F, 0.6F);
         }
+    }
+
+    private void holdTransitionPosition() {
+        this.getNavigation().stop();
+        this.setDeltaMovement(Vec3.ZERO);
+        this.setPos(this.transitionAnchor.x, this.transitionAnchor.y, this.transitionAnchor.z);
+        this.setYRot(this.transitionYaw);
+        this.setYHeadRot(this.transitionYaw);
+        this.yBodyRot = this.transitionYaw;
+        this.setXRot(0.0F);
+        this.setSpeed(0.0F);
+        this.xxa = this.yya = this.zza = 0.0F;
+    }
+
+    private void clearTransitionEffects() {
+        // 不允许可取消的 Remove 事件留下有益效果，也同步移除它们的属性修饰。
+        for (MobEffectInstance effect : List.copyOf(this.getActiveEffects())) {
+            MobEffectInstance removed = this.removeEffectNoUpdate(effect.getEffect());
+            if (removed != null) this.onEffectRemoved(removed);
+        }
+    }
+
+    private void endTransitionProtection() {
+        this.entityData.set(DATA_TRANSITION_START, -1L);
+        this.setInvulnerable(this.transitionPreviousInvulnerable);
+        this.setNoAi(this.transitionPreviousNoAi);
+        this.setNoGravity(this.transitionPreviousNoGravity);
+        this.setDeltaMovement(Vec3.ZERO);
+    }
+
+    private void clearTransitionHazards(ServerLevel level) {
+        this.pendingBlasts.clear();
+        this.blastCountdown = 0;
+        this.barrageSpots.clear();
+        this.megaEruption = false;
+        this.debugRingTicks = this.debugOutlineTicks = 0;
+        this.fieldHits.clear();
+        java.util.List<Entity> remove = new java.util.ArrayList<>();
+        for (Entity entity : level.getAllEntities()) {
+            if ((entity instanceof VolcanicMortarEntity mortar && mortar.getOwner() == this)
+                    || (entity instanceof VolcanicFireballEntity fireball && fireball.getOwner() == this)
+                    || (entity instanceof VolcanicFireFieldEntity field && field.isOwnedBy(this.getUUID()))) {
+                remove.add(entity);
+            }
+        }
+        remove.forEach(Entity::discard);
+    }
+
+    public boolean forceTransition() {
+        if (this.level() instanceof ServerLevel level && this.isAlive() && !this.isPhaseTwo() && !this.isTransitioning()) {
+            this.beginPhaseTwo(level);
+            return true;
+        }
+        return false;
     }
 
     private void tickBite(ServerLevel level) {
@@ -1598,7 +1827,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
 
     /** 火山口世界坐标：与客户端粒子定位使用同一组高度常数。 */
     public Vec3 craterPoint() {
-        double height = this.isPhaseTwo() ? 7.22D : 4.50D;
+        double height = this.usesPhaseTwoModel() ? 7.22D : 4.50D;
         return new Vec3(this.getX(), this.getY() + height, this.getZ());
     }
 
@@ -1744,21 +1973,72 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
 
     @Override
     public void die(DamageSource source) {
+        if (this.isDyingAnimation()) return;
+        if (this.isTransitioning()) this.endTransitionProtection();
+        super.die(source);
+        if (!this.dead) return; // Respect a cancelled Forge death event.
         this.bossEvent.setVisible(false);
         this.bossEvent.removeAllPlayers();
-        this.pendingBlasts.clear();
-        this.blastCountdown = 0;
-        // 死亡不保留任何临时增益/易伤，避免尸体或重载后残留倍率。
-        this.enrageTicks = 0;
-        this.weakTicks = 0;
-        this.enragePending = false;
-        this.megaEruption = false;
+        this.enrageTicks = this.weakTicks = 0;
+        this.enragePending = this.megaEruption = false;
         this.entityData.set(DATA_ENRAGE_STATE, STATE_NORMAL);
-        // death 动画 1.8 秒 = 36 tick，但原版尸体 20 tick 就消失 ⇒ 把死亡计时往前推 16 tick，
-        // 让倒地动作完整播完再移除（移除时机完全由 deathTime 驱动，不额外挂逻辑）。
-        this.deathTime = -16;
-        this.triggerAnim(ACTION_CONTROLLER, "death");
-        super.die(source);
+        if (this.level() instanceof ServerLevel level) {
+            this.beginDeathSequence(level);
+        }
+    }
+
+    @Override
+    public void handleEntityEvent(byte event) {
+        if (event == 60 && this.isDyingAnimation()) return; // Custom fragments replace the default central poof.
+        super.handleEntityEvent(event);
+    }
+
+    private void beginDeathSequence(ServerLevel level) {
+        this.entityData.set(DATA_TRANSITION_START, -1L);
+        this.entityData.set(DATA_DEATH_START, level.getGameTime());
+        this.deathAnchor = this.position();
+        this.deathYaw = this.getYRot();
+        this.startAction(ACTION_NONE);
+        this.hazardEpoch++;
+        this.clearTransitionHazards(level);
+        this.clearTransitionEffects();
+        this.setNoAi(true);
+        this.setNoGravity(true);
+        this.setDeltaMovement(Vec3.ZERO);
+        this.setXRot(0);
+    }
+
+    @Override
+    protected void tickDeath() {
+        if (!this.isDyingAnimation()) {
+            if (this.level() instanceof ServerLevel level) this.beginDeathSequence(level);
+            else return; // Wait for the server's synced clock rather than removing the corpse early.
+        }
+        int age = (int) this.deathAge(0);
+        this.deathTime = age;
+        this.setDeltaMovement(Vec3.ZERO);
+        if (this.level() instanceof ServerLevel level) {
+            this.getNavigation().stop();
+            this.setPos(this.deathAnchor.x, this.deathAnchor.y, this.deathAnchor.z);
+            this.setYRot(this.deathYaw);
+            this.setYHeadRot(this.deathYaw);
+            this.yBodyRot = this.deathYaw;
+            if (age == TortoiseDeath.IMPACT) {
+                level.playSound(null, this.blockPosition(), SoundEvents.STONE_BREAK, SoundSource.HOSTILE, 2.2F, 0.45F);
+                level.playSound(null, this.blockPosition(), SoundEvents.BASALT_BREAK, SoundSource.HOSTILE, 1.5F, 0.5F);
+            }
+            if (age == TortoiseDeath.COOL_START) {
+                level.playSound(null, this.blockPosition(), SoundEvents.FIRE_EXTINGUISH, SoundSource.HOSTILE, 1.7F, 0.65F);
+            }
+            if (age == 60 || age == 76 || age == 98) {
+                level.playSound(null, this.blockPosition(), SoundEvents.DEEPSLATE_BREAK, SoundSource.HOSTILE,
+                        0.65F * (1 - age / (float) TortoiseDeath.DURATION), 0.55F);
+            }
+            if (age >= TortoiseDeath.DURATION) {
+                this.deathTime = 19;
+                super.tickDeath(); // Retain vanilla KILLED removal and its entity event, exactly once.
+            }
+        }
     }
 
     @Override
@@ -1771,6 +2051,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         controllers.add(new AnimationController<>(this, "move", 8, state -> {
+            if (this.isTransitioning() || this.isDeadOrDying()) return PlayState.STOP;
             if (state.isMoving()) {
                 // 一阶段没有外翻岩甲骨骼，用不含 plate 通道的 walk；
                 // 二阶段用 walk_p2：同一条承重步态 + 岩甲滞后 ±2°（滞后 0.15 秒，左右再错开 0.1 秒）。
@@ -1786,9 +2067,9 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
                 this, ACTION_CONTROLLER, 2, state -> PlayState.STOP);
         action.triggerableAnim("bite", RawAnimation.begin().thenPlay("bite"));
         action.triggerableAnim("slam", RawAnimation.begin().thenPlay("slam"));
-        action.triggerableAnim("transition", RawAnimation.begin().thenPlay("transition"));
-        action.triggerableAnim("death", RawAnimation.begin().thenPlay("death"));
         controllers.add(action);
+        controllers.add(new TortoiseTransitionController(this));
+        controllers.add(new TortoiseDeathController(this));
     }
 
     @Override
