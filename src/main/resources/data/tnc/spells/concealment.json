@@ -1,0 +1,61 @@
+{
+  "school": "ARCANE",
+  "group": "concealment",
+  "range": 0,
+  "learn": {
+    "tier": 1
+  },
+  "cast": {
+    "duration": 0.6,
+    "animation": "spell_engine:one_handed_area_charge",
+    "sound": {
+      "id": "minecraft:block.amethyst_block.resonate",
+      "randomness": 0
+    },
+    "particles": [
+      {
+        "particle_id": "minecraft:smoke",
+        "shape": "CIRCLE",
+        "origin": "FEET",
+        "count": 18.0,
+        "min_speed": 0.02,
+        "max_speed": 0.12
+      },
+      {
+        "particle_id": "minecraft:end_rod",
+        "shape": "SPHERE",
+        "origin": "CENTER",
+        "count": 10.0,
+        "min_speed": 0.02,
+        "max_speed": 0.10
+      }
+    ]
+  },
+  "release": {
+    "target": {
+      "type": "SELF"
+    },
+    "animation": "spell_engine:one_handed_area_release",
+    "sound": {
+      "id": "minecraft:entity.illusioner.mirror_move"
+    }
+  },
+  "impact": [
+    {
+      "action": {
+        "type": "STATUS_EFFECT",
+        "status_effect": {
+          "effect_id": "tnc:concealment",
+          "duration": 1200,
+          "amplifier": 0,
+          "apply_mode": "SET",
+          "show_particles": false
+        }
+      }
+    }
+  ],
+  "cost": {
+    "exhaust": 0.0,
+    "cooldown_duration": 90
+  }
+}

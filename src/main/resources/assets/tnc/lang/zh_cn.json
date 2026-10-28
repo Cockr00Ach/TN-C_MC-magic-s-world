@@ -1,4 +1,5 @@
 {
+  "key.tnc.warrior_practice": "打开战士修习",
   "key.tnc.rescue": "自救 / 救援倒地队友（按住）",
   "item.tnc.chaos_seal": "旧版乱魔符印（已停用）",
   "spell.tnc.chaos_magic.name": "乱魔",
@@ -934,5 +935,8 @@
   "spell.tnc.thunder_seal_2.name": "双极鸣雷",
   "block.tnc.wind_arena_runestone_1": "苍岚·玉白石",
   "dimension.tnc.water_arena": "水渊棋境",
-  "spell.tnc.thunder_seal_1.description": "雷楔从地面显现，蓄势后向雷印落点导通并引下落雷。"
+  "spell.tnc.thunder_seal_1.description": "雷楔从地面显现，蓄势后向雷印落点导通并引下落雷。",
+  "spell.tnc.concealment.name": "隐匿",
+  "spell.tnc.concealment.description": "隐去身形 1 分钟：敌对生物不会把你选作目标。期间造成或受到伤害会立刻显形。",
+  "effect.tnc.concealment": "隐匿"
 }

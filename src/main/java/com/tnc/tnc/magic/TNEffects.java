@@ -455,6 +455,15 @@ public final class TNEffects {
                 return effect;
             });
 
+    /**
+     * 隐匿（通用法术）：1 分钟隐身 + 不被敌对生物索敌。
+     *
+     * <p>破隐规则在 {@link TNConcealmentEvents}：造成或受到伤害立即移除。
+     * 这里只登记效果本体，方便法术 JSON 用 {@code tnc:concealment} 引用。
+     */
+    public static final RegistryObject<MobEffect> CONCEALMENT = EFFECTS.register("concealment",
+            ConcealmentEffect::new);
+
     private TNEffects() {
     }
 
