@@ -92,7 +92,7 @@ public final class SkyIslandManager {
             SkyIslandManifest manifest = manifest(server);
             SkyIslandSavedData data = SkyIslandSavedData.get(overworld);
             boolean complete = isComplete(data, manifest);
-            SkyIslandPlayerNotifications.onLogin(player, manifest.version(), complete&&SkyLandscapeUpgrade.complete(server),
+            SkyIslandPlayerNotifications.onLogin(player, manifest.version(), complete&&SkyLandscapeUpgrade.complete(server)&&com.tnc.tnc.skyacademy.SkyAcademyWorld.ready(server),
                     complete ? groundLanding(data) : BlockPos.ZERO);
 
             if (complete) {
@@ -142,7 +142,7 @@ public final class SkyIslandManager {
 
         try {
             boolean complete = isComplete(data, manifest);
-            SkyIslandPlayerNotifications.tick(server, manifest.version(), complete&&SkyLandscapeUpgrade.complete(server),
+            SkyIslandPlayerNotifications.tick(server, manifest.version(), complete&&SkyLandscapeUpgrade.complete(server)&&com.tnc.tnc.skyacademy.SkyAcademyWorld.ready(server),
                     complete ? groundLanding(data) : BlockPos.ZERO);
             switch (data.phase) {
                 case SURVEY -> surveyStep(level, data, manifest);
@@ -608,7 +608,7 @@ public final class SkyIslandManager {
     }
 
     private static void portalTick(ServerLevel level, SkyIslandSavedData data, SkyIslandManifest manifest) {
-        if (!isComplete(data, manifest)||!SkyLandscapeUpgrade.complete(level.getServer())) {
+        if (!isComplete(data, manifest)||!SkyLandscapeUpgrade.complete(level.getServer())||!com.tnc.tnc.skyacademy.SkyAcademyWorld.ready(level.getServer())) {
             PORTAL_CHARGES.clear();
             for (BlockPos active : ACTIVE_RITUALS) sendRitual(level, active, -1);
             ACTIVE_RITUALS.clear();

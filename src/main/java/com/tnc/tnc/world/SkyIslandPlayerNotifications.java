@@ -68,6 +68,10 @@ final class SkyIslandPlayerNotifications {
 
     static void onGenerationComplete(ServerPlayer player, int manifestVersion, BlockPos groundPortal) {
         CompoundTag persisted = persisted(player);
+        if(!com.tnc.tnc.skyacademy.SkyAcademyWorld.ready(player.server)){
+            persisted.putBoolean(COMPLETION_PENDING,true);
+            return;
+        }
         boolean awakeningSeen = persisted.getInt(AWAKENING_TITLE_VERSION) >= manifestVersion;
         boolean completionSeen = persisted.getInt(COMPLETE_TITLE_VERSION) >= manifestVersion;
         boolean completionPending = persisted.getBoolean(COMPLETION_PENDING);

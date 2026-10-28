@@ -21,5 +21,6 @@ public final class PlotCatalog {
         for(var value:root.getAsJsonArray("plots")){var o=value.getAsJsonObject();var p=new Plot(o.get("id").getAsString(),o.get("number").getAsString(),o.get("name").getAsString(),Kind.valueOf(o.get("kind").getAsString()),o.get("price").getAsLong(),pos(o.getAsJsonArray("min")),pos(o.getAsJsonArray("max")),pos(o.getAsJsonArray("entry")),o.get("detail").getAsString());if(!ids.add(p.id())||p.price()<=0||list.stream().anyMatch(a->a.intersects(p.min(),p.max())))throw new IllegalArgumentException("Overlapping or invalid town property");list.add(p);}return List.copyOf(list);
     }catch(IOException e){throw new ExceptionInInitializerError(e);}}
     public static Plot find(String id){return ALL.stream().filter(p->p.id().equals(id)).findFirst().orElse(null);}
+    public static boolean available(net.minecraft.server.MinecraftServer server,Plot plot){return plot!=null&&(!plot.id().startsWith("sky_")||com.tnc.tnc.skyacademy.SkyAcademyWorld.available(server));}
     public static Plot at(BlockPos local){return ALL.stream().filter(p->p.contains(local)).findFirst().orElse(null);}
 }

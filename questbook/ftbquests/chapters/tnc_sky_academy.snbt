@@ -1,0 +1,130 @@
+{
+  "id": "2E3CD3DDCF903F2C",
+  "filename": "tnc_sky_academy",
+  "title": "&b云溪纪行 · 居民实地课堂",
+  "icon": "minecraft:spyglass",
+  "group": "544E434C49464531",
+  "order_index": -10,
+  "default_hide_dependency_lines": true,
+  "quests": [
+    {
+      "id": "4DCB211B93C79E8D",
+      "title": "云上初见",
+      "icon": "minecraft:flowering_azalea",
+      "x": 0.0,
+      "y": 0.0,
+      "size": 1.6,
+      "description": [
+        "抵达天空岛后观看可跳过的短镜头。随后自由逛镇，向Self和艾琳了解服务。电影播放不能替代初次命名。",
+        "使用 /skylesson 查看下一站导师与实时坐标。右键导师可以重听；跳过动画不会自动完成实操。",
+        "每人独立保存进度；镜湖本轮仅建设景观，尚未加入钓鱼系统。"
+      ],
+      "dependencies": [],
+      "tasks": [
+        {
+          "id": "2E6FD87FC1DB5BC3",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/academy_arrival"
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "7D118B81C0A23A8F",
+      "title": "今夜，看看世界的另一面",
+      "icon": "minecraft:spyglass",
+      "x": 0.0,
+      "y": 3.0,
+      "size": 1.6,
+      "description": [
+        "夜晚前往北方石山找观星人瑟兰。对话后先看普通夜景，再亲自按F8，观察魔脉从草木、湖水汇入星空。白天可以先备好远行物资，夜里回来；不强制全服跳时。",
+        "使用 /skylesson 查看下一站导师与实时坐标。右键导师可以重听；跳过动画不会自动完成实操。",
+        "每人独立保存进度；镜湖本轮仅建设景观，尚未加入钓鱼系统。"
+      ],
+      "dependencies": [
+        "4DCB211B93C79E8D"
+      ],
+      "tasks": [
+        {
+          "id": "64B53573EEC02E89",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/academy_stargaze"
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "19A1828797CE35DA",
+      "title": "地下城之前：无形的路",
+      "icon": "minecraft:chiseled_stone_bricks",
+      "x": 0.0,
+      "y": 6.0,
+      "size": 1.6,
+      "description": [
+        "完成首次魔力视体验后，到西北风铃林找到遗迹向导岚。观看示范，再开启F8辨认石头上光点数量，按一、二、三的顺序右键。完成这次练习后，你就能在地下城识别类似线索。",
+        "使用 /skylesson 查看下一站导师与实时坐标。右键导师可以重听；跳过动画不会自动完成实操。",
+        "每人独立保存进度；镜湖本轮仅建设景观，尚未加入钓鱼系统。"
+      ],
+      "dependencies": [
+        "7D118B81C0A23A8F"
+      ],
+      "tasks": [
+        {
+          "id": "73F5F59598C165B8",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/academy_wind"
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "25A7297B2BBDE1D4",
+      "title": "田庄里的两种呼吸",
+      "icon": "tnc:dew_collector",
+      "x": 0.0,
+      "y": 9.0,
+      "size": 1.6,
+      "description": [
+        "准备发展产魔花园时，去西南青穗田庄找莉禾。先看植物与动物演示，再亲手相邻放置集露盏、用牧务杖选兽并绑定集息器。两种来源均真实产生魔力后完成。喂食不是前置。",
+        "使用 /skylesson 查看下一站导师与实时坐标。右键导师可以重听；跳过动画不会自动完成实操。",
+        "每人独立保存进度；镜湖本轮仅建设景观，尚未加入钓鱼系统。"
+      ],
+      "dependencies": [
+        "19A1828797CE35DA"
+      ],
+      "tasks": [
+        {
+          "id": "03400C5F5AFE593F",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/academy_farm"
+        }
+      ],
+      "rewards": []
+    },
+    {
+      "id": "52EDA9CB1A5AB620",
+      "title": "第一盏属于你的魔力灯",
+      "icon": "tnc:mana_lantern",
+      "x": 0.0,
+      "y": 12.0,
+      "size": 1.6,
+      "description": [
+        "进入魔力科技阶段，到东南溪畔工坊找诺恩。观察储池、晶纤、灯的实物回路，再亲手补上缺口，等真实魔力传到灯中。完成后继续《魔导纪行》；折光镜负责更远的输送。",
+        "使用 /skylesson 查看下一站导师与实时坐标。右键导师可以重听；跳过动画不会自动完成实操。",
+        "每人独立保存进度；镜湖本轮仅建设景观，尚未加入钓鱼系统。"
+      ],
+      "dependencies": [
+        "25A7297B2BBDE1D4"
+      ],
+      "tasks": [
+        {
+          "id": "75EFF06745A2FF25",
+          "type": "advancement",
+          "advancement": "tnc:onboarding/academy_workshop"
+        }
+      ],
+      "rewards": []
+    }
+  ],
+  "images": []
+}

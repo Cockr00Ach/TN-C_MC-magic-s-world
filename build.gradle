@@ -305,6 +305,10 @@ minecraft {
                 property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
                 workingDirectory project.file('work/sky-startup-tests')
             }
+            if (project.hasProperty('skyAcademyTests')) {
+                property 'forge.enabledGameTestNamespaces', 'tncacademy'
+                workingDirectory project.file('work/sky-academy-server-tests')
+            }
             jvmArgs '-Xmx6G'
             // Recovery fixtures intentionally change blocks; never reuse a previous run's world.
             args '--world', "building-tests-${System.currentTimeMillis()}".toString()

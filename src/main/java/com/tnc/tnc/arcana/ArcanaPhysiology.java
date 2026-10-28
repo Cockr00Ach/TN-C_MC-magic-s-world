@@ -23,12 +23,13 @@ public final class ArcanaPhysiology {
     public static void detox(ServerPlayer p,int amount){int old=toxicity(p);if(old==0)return;toxic(p,-amount);if(toxicity(p)==0){data(p).putLong("ClearUntil",now(p)+24000);p.displayClientMessage(net.minecraft.network.chat.Component.literal("经脉通畅 · 一日内回魔加快50%，魔力视精神免耗"),true);}}
     @SubscribeEvent public static void tick(TickEvent.PlayerTickEvent e){if(e.phase!=TickEvent.Phase.END||!(e.player instanceof ServerPlayer p)||p.tickCount%20!=0||!p.isAlive()||p.isSpectator())return;
         var t=data(p);long now=now(p);boolean sight=com.tnc.tnc.mana.sight.ManaSightServer.enabled(p);
-        int seconds=sight?t.getInt("VisionSeconds")+1:0;t.putInt("VisionSeconds",seconds);
+        boolean lesson=com.tnc.tnc.skyacademy.AcademyLessons.firstSightLesson(p);
+        int seconds=sight&&!lesson?t.getInt("VisionSeconds")+1:0;t.putInt("VisionSeconds",seconds);
         double sanity=Math.max(0,Math.min(100,t.getDouble("vision_sanity")));
         if(sight&&seconds>180&&!clearChannels(p))sanity=Math.min(100,sanity+.28);else if(!sight)sanity=Math.max(0,sanity-.5);
         t.putDouble("vision_sanity",sanity);
         if(toxicity(p)>50){p.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN,30,0,false,false));if(p.tickCount%100==0)p.serverLevel().sendParticles(net.minecraft.core.particles.ParticleTypes.SMOKE,p.getX(),p.getEyeY()-.15,p.getZ(),5,.12,.1,.12,.02);}
-        if(sight&&!clearChannels(p)){var look=p.getLookAngle();boolean glaring=luminousGaze(p,look);if(glaring){sanity=Math.min(100,sanity+.45);t.putDouble("vision_sanity",sanity);}}
+        if(sight&&!clearChannels(p)&&!lesson){var look=p.getLookAngle();boolean glaring=luminousGaze(p,look);if(glaring){sanity=Math.min(100,sanity+.45);t.putDouble("vision_sanity",sanity);}}
         if(t.getLong("MealSunUntil")>now){var m=MagicStone.getOrNull(p);if(m!=null){m.addMana(m.getMaxMana());ArcanaMeals.radiate(p);com.tnc.tnc.network.MagicStoneNetwork.syncTo(p);}}
         if(p.isInWater())ArcanaDevices.bathe(p);
         ArcanaMealEffects.tick(p);LeylineDiscoveries.guide(p);ArcanaEquipment.tick(p);ArcanaSpirits.tick(p,sight,sanity);

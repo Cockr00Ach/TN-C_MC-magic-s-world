@@ -23,6 +23,7 @@ public final class DungeonNativeAudit {
     private static final List<String> failures=new ArrayList<>();private static final Map<String,Object> results=new LinkedHashMap<>();
     private static Path folder(){return Path.of(System.getProperty("tnc.dungeonAuditOutput")).toAbsolutePath();}
     @SubscribeEvent public static void tick(TickEvent.ClientTickEvent e)throws Exception{
+      if(Boolean.getBoolean("tnc.skyAcademyAudit")){com.tnc.tnc.skyacademy.client.AcademyNativeAudit.tick(e);return;}
       if(Boolean.getBoolean("tnc.worldFeedbackAudit")){WorldFeedbackNativeAudit.tick(e);return;}
       if(Boolean.getBoolean("tnc.botanicalAudit")){com.tnc.tnc.life.botanical.client.BotanicalNativeAudit.tick(e);return;}
       if(Boolean.getBoolean("tnc.equipmentAudit")){com.tnc.tnc.equipment.client.EquipmentNativeAudit.tick(e);return;}

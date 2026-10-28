@@ -17,6 +17,7 @@ final class ManaSightParticle extends TextureSheetParticle {
     private final int motion;
     private final boolean sightOnly;
     private final float opacity,size;
+    float scenicRange;
     ManaSightParticle(ClientLevel level,Vec3 at,Vec3 target,int color,int texture,int motion,float size,float opacity,int life,double phase,SpriteSet sprites){
         this(level,at,target,color,texture,motion,size,opacity,life,phase,sprites,true);
     }
@@ -47,7 +48,7 @@ final class ManaSightParticle extends TextureSheetParticle {
     }
     @Override public void render(VertexConsumer out,Camera camera,float partial){
         if(ManaRadiance.skipOpaque||sightOnly&&!ManaSightClient.enabled()||Minecraft.getInstance().level!=level)return;
-        float previous=alpha;double d=camera.getPosition().distanceTo(new Vec3(x,y,z)),range=sightOnly?ManaSightParticles.range():64;
+        float previous=alpha;double d=camera.getPosition().distanceTo(new Vec3(x,y,z)),range=scenicRange>0?scenicRange:sightOnly?ManaSightParticles.range():64;
         alpha*=(sightOnly?ManaSightParticles.fade():1)*Mth.clamp((float)((range-d)/18),0,1)*Mth.clamp((float)((d-.35)/1.1),0,1);
         if(alpha>.01f)renderRadiant(out,camera,partial,(float)d);alpha=previous;
     }

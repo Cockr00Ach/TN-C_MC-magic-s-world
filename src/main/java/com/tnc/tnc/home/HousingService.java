@@ -52,7 +52,7 @@ public final class HousingService {
     public static boolean owned(ServerPlayer p){var t=home(p);return t.hasUUID("Owner")&&!t.getBoolean("Preparing");}
     public static boolean atSale(ServerPlayer p){var origin=sourceOrigin(p.server.overworld());return p.serverLevel()==p.server.overworld()&&p.isAlive()&&!p.isSpectator()&&!com.tnc.tnc.combat.DownedCombat.isDowned(p)&&origin!=null&&origin.offset(189,92,394).closerToCenterThan(p.position(),16);}
     public static PlotCatalog.Plot ownedAt(ServerLevel level,BlockPos pos){if(level!=level.getServer().overworld())return null;return PlotCatalog.ALL.stream().filter(a->{var t=home(level.getServer(),a.id());return t.hasUUID("Owner")&&a.contains(pos.subtract(BlockPos.of(t.getLong("Origin"))));}).findFirst().orElse(null);}
-    public static PlotCatalog.Plot plotAt(ServerLevel level,BlockPos pos){if(level!=level.getServer().overworld())return null;var origin=sourceOrigin(level);return origin==null?null:PlotCatalog.at(pos.subtract(origin));}
+    public static PlotCatalog.Plot plotAt(ServerLevel level,BlockPos pos){if(level!=level.getServer().overworld())return null;var origin=sourceOrigin(level);var plot=origin==null?null:PlotCatalog.at(pos.subtract(origin));return PlotCatalog.available(level.getServer(),plot)?plot:null;}
     public static boolean isOwnedPosition(ServerLevel level,BlockPos pos){return ownedAt(level,pos)!=null;}
     public static boolean mayDecorate(ServerPlayer p,BlockPos pos) {
         var plot=ownedAt(p.serverLevel(),pos);if(plot==null)return false;var t=home(p.server,plot.id());
@@ -72,7 +72,7 @@ public final class HousingService {
     public static String buy(ServerPlayer p,String id,boolean installment){return buy(p,id,installment,true);}
     private static String buy(ServerPlayer p,String id,boolean installment,boolean requireVisit) {
         com.tnc.tnc.adventure.BankService.settle(p);
-        var plot=PlotCatalog.find(id);if(plot==null)return "没有这处房源或土地。";
+        var plot=PlotCatalog.find(id);if(!PlotCatalog.available(p.server,plot))return "没有这处房源或土地。";
         if(mine(p,plot.kind())!=null)return "你已有同类产权；先把自己的归处建设起来。";
         if(installment&&plot.kind()!=PlotCatalog.Kind.HOME)return "农田与牧场只需一次购买，不提供房贷。";
         if(requireVisit&&plot.kind()==PlotCatalog.Kind.HOME&&!p.isCreative()&&!AdventureService.profile(p).hasMilestone("viewed_"+id))return "先去"+plot.number()+"号实地看房，再回米洛这里决定。点击去看房可获得指引。";
@@ -176,7 +176,7 @@ public final class HousingService {
         var mine=mine(p,PlotCatalog.Kind.HOME);var t=(mine==null?home(p.server):home(p)).copy();t.putLong("SalePrice",mine==null?PRICE:mine.price());t.putLong("DownPayment",mine==null?DOWN_PAYMENT:mine.down());var origin=t.hasUUID("Owner")?BlockPos.of(t.getLong("Origin")):sourceOrigin(p.server.overworld());
         var selected=mine==null?PlotCatalog.find(ID):mine;
         if(origin!=null){t.putString("Entry",origin.offset(selected.entry()).toShortString());t.putString("Boundary",origin.offset(selected.min()).toShortString()+" 至 "+origin.offset(selected.max()).toShortString());}
-        var list=new net.minecraft.nbt.ListTag();for(var plot:PlotCatalog.ALL){var item=home(p.server,plot.id()).copy();item.putString("Id",plot.id());item.putString("Number",plot.number());item.putString("Name",plot.name());item.putString("Kind",plot.kind().name());item.putString("Detail",plot.detail());item.putLong("Price",plot.price());item.putLong("Down",plot.down());item.putLong("Total",plot.price()+plot.mortgageTotal()-(plot.price()-plot.down()));item.putLong("MortgageTotal",plot.mortgageTotal());item.putBoolean("Viewed",AdventureService.profile(p).hasMilestone("viewed_"+plot.id()));item.putBoolean("Mine",item.hasUUID("Owner")&&item.getUUID("Owner").equals(p.getUUID()));if(origin!=null)item.putString("Entry",origin.offset(plot.entry()).toShortString());list.add(item);}
+        var list=new net.minecraft.nbt.ListTag();for(var plot:PlotCatalog.ALL){if(!PlotCatalog.available(p.server,plot))continue;var item=home(p.server,plot.id()).copy();item.putString("Id",plot.id());item.putString("Number",plot.number());item.putString("Name",plot.name());item.putString("Kind",plot.kind().name());item.putString("Detail",plot.detail());item.putLong("Price",plot.price());item.putLong("Down",plot.down());item.putLong("Total",plot.price()+plot.mortgageTotal()-(plot.price()-plot.down()));item.putLong("MortgageTotal",plot.mortgageTotal());item.putBoolean("Viewed",AdventureService.profile(p).hasMilestone("viewed_"+plot.id()));item.putBoolean("Mine",item.hasUUID("Owner")&&item.getUUID("Owner").equals(p.getUUID()));if(origin!=null)item.putString("Entry",origin.offset(plot.entry()).toShortString());list.add(item);}
         t.put("Catalog",list);t.putBoolean("Mine",owned(p));return t;
     }
     public static boolean intersectsOwned(ServerLevel level,BlockPos min,net.minecraft.core.Vec3i size) {

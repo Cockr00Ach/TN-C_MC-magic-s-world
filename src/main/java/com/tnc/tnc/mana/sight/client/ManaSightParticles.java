@@ -24,6 +24,9 @@ public final class ManaSightParticles {
     private static final RandomSource RANDOM=RandomSource.create(0x544e435349474854L);
     private static final List<ManaSightParticle> OWNED=new ArrayList<>();
     private static final List<ManaSightParticle> EFFECTS=new ArrayList<>();
+    private static final List<ManaSightParticle> SCENIC=new ArrayList<>();
+    private static ClientLevel scenicLevel;
+    private static long scenicPrune=Long.MIN_VALUE;
     private static ClientLevel effectLevel;private static long lastPrune=Long.MIN_VALUE;
     private static SpriteSet sprites;
     private static ClientLevel level;
@@ -41,12 +44,15 @@ public final class ManaSightParticles {
     }
     private static void pruneEffects(){var mc=Minecraft.getInstance();if(mc.level!=effectLevel){EFFECTS.forEach(ManaSightParticle::remove);EFFECTS.clear();effectLevel=mc.level;lastPrune=Long.MIN_VALUE;}if(effectLevel==null)return;long time=effectLevel.getGameTime();if(time==lastPrune)return;lastPrune=time;EFFECTS.removeIf(p->{boolean expired=!p.isAlive()||mc.player==null||p.distanceToSqr(mc.player.getEyePosition())>110*110;if(expired)p.remove();return expired;});}
     public static void effect(Vec3 from,Vec3 to,int color,int sprite,int motion,float size,int life){var mc=Minecraft.getInstance();pruneEffects();if(mc.level==null||mc.player==null||sprites==null||Math.min(from.distanceToSqr(mc.player.getEyePosition()),to.distanceToSqr(mc.player.getEyePosition()))>64*64||count()>=limit()||EFFECTS.size()>=limit()/3)return;var p=new ManaSightParticle(mc.level,from,to,color,sprite,motion,size,1,life,unit()*30,sprites,false);EFFECTS.add(p);mc.particleEngine.add(p);}
-    public static int count(){pruneEffects();return OWNED.size()+EFFECTS.size();}
+    public static int count(){pruneEffects();pruneScenic();return OWNED.size()+EFFECTS.size()+SCENIC.size();}
+    private static void pruneScenic(){var mc=Minecraft.getInstance();if(scenicLevel!=mc.level){SCENIC.forEach(ManaSightParticle::remove);SCENIC.clear();scenicLevel=mc.level;scenicPrune=Long.MIN_VALUE;}if(mc.level==null||scenicPrune==mc.level.getGameTime())return;scenicPrune=mc.level.getGameTime();SCENIC.removeIf(p->{boolean gone=!p.isAlive()||!ManaSightClient.enabled()||mc.player==null||p.distanceToSqr(mc.player.getEyePosition())>400*400;if(gone)p.remove();return gone;});}
+    /** Fixed authored vista only; shares the global particle budget and has its own far-distance cutoff. */
+    public static void scenic(Vec3 from,Vec3 to,int color,int sprite,float size,int life){var mc=Minecraft.getInstance();pruneScenic();if(mc.level==null||mc.player==null||sprites==null||!ManaSightClient.enabled()||count()>=limit()||SCENIC.size()>=limit()/4)return;var p=new ManaSightParticle(mc.level,from,to,color,sprite,2,size,1,Math.min(120,life),unit()*30,sprites);p.scenicRange=400;SCENIC.add(p);mc.particleEngine.add(p);}
     public static int sightCount(){return OWNED.size();}
-    public static void reloadClear(){clear();EFFECTS.forEach(ManaSightParticle::remove);EFFECTS.clear();effectLevel=null;}
+    public static void reloadClear(){clear();EFFECTS.forEach(ManaSightParticle::remove);EFFECTS.clear();SCENIC.forEach(ManaSightParticle::remove);SCENIC.clear();effectLevel=null;scenicLevel=null;}
     public static int emittedTransfers(){return emitted;}
     static float fade(){return fade;}
-    public static void clear(){OWNED.forEach(ManaSightParticle::remove);OWNED.clear();level=null;ticks=0;cursor=0;fade=0;}
+    public static void clear(){OWNED.forEach(ManaSightParticle::remove);OWNED.clear();SCENIC.forEach(ManaSightParticle::remove);SCENIC.clear();level=null;ticks=0;cursor=0;fade=0;}
     public static int limit(){var p=Minecraft.getInstance().options.particles().get();return p==ParticleStatus.MINIMAL?6000:p==ParticleStatus.DECREASED?14400:24000;}
     public static int range(){var p=Minecraft.getInstance().options.particles().get();return p==ParticleStatus.MINIMAL?64:p==ParticleStatus.DECREASED?80:96;}
     public static double farthest(){var mc=Minecraft.getInstance();if(mc.player==null)return 0;return Math.sqrt(OWNED.stream().mapToDouble(p->p.distanceToSqr(mc.player.getEyePosition())).max().orElse(0));}
@@ -62,12 +68,12 @@ public final class ManaSightParticles {
         OWNED.add(p);Minecraft.getInstance().particleEngine.add(p);
     }
     public static void update(ClientLevel world,Vec3 eye,Collection<ManaFlow> flows,float entrance){
-        if(level!=world){clear();level=world;}fade=entrance;while(OWNED.size()+EFFECTS.size()>limit()){var list=OWNED.isEmpty()?EFFECTS:OWNED;list.remove(0).remove();}
+        if(level!=world){clear();level=world;}fade=entrance;while(OWNED.size()+EFFECTS.size()+SCENIC.size()>limit()){var list=!OWNED.isEmpty()?OWNED:!EFFECTS.isEmpty()?EFFECTS:SCENIC;list.remove(0).remove();}
         OWNED.removeIf(p->{boolean expired=!p.isAlive()||world.getGameTime()-p.born>200||p.distanceToSqr(eye)>110*110;if(expired)p.remove();return expired;});
         if(sprites==null)return;
         boolean dead=com.tnc.tnc.arcana.client.ArcanaClient.deadMana;int quality=limit(), fill=ticks++==0?1800:0;double reach=range()-6;
         // Reserve a quarter of the budget for real, server-confirmed interaction.
-        int ambientBudget=dead?0:Math.max(0,quality*3/4-EFFECTS.size());if(dead&&!wasDead){OWNED.forEach(ManaSightParticle::remove);OWNED.clear();}wasDead=dead;
+        int ambientBudget=dead?0:Math.max(0,quality*3/4-EFFECTS.size()-SCENIC.size());if(dead&&!wasDead){OWNED.forEach(ManaSightParticle::remove);OWNED.clear();}wasDead=dead;
         for(int i=0;i<fill+85&&OWNED.size()<ambientBudget;i++){
             double a=unit()*Math.PI*2,r=3+Math.sqrt(unit())*reach;
             Vec3 at=eye.add(Math.cos(a)*r,-10+unit()*48,Math.sin(a)*r);

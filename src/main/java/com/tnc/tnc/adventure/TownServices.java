@@ -43,6 +43,7 @@ public final class TownServices {
     public static boolean atBoard(ServerPlayer p){var b=board(p.server.overworld());return p.serverLevel()==p.server.overworld()&&p.isAlive()&&!p.isSpectator()&&!com.tnc.tnc.combat.DownedCombat.isDowned(p)&&b!=null&&b.closerToCenterThan(p.position(),16)&&p.serverLevel().hasChunkAt(b);}
     public static boolean openBoard(ServerPlayer p){if(!atBoard(p))return false;return com.tnc.tnc.journey.CommissionService.openAt(p,board(p.server.overworld()));}
     public static void open(ServerPlayer p,TownServiceNpc npc){
+        if(npc.role().startsWith("academy_")){com.tnc.tnc.skyacademy.AcademyLessons.open(p,npc.role().substring(8));return;}
         if(!near(p,npc.role()))return;AdventureService.milestone(p,"met_"+npc.role());AdventureService.sync(p,true,"",npc.role());
         if(npc.role().equals("guild"))p.sendSystemMessage(Component.literal("登记在这里办理；接单与交付请右键旁边的旧铜纸签委托栏。"));
     }
