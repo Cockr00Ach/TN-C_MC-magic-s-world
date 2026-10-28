@@ -75,11 +75,7 @@ public final class WindInfusion {
             end = start.add(p.getLookAngle().scale(Math.sqrt(nearest)));
             target.hurt(p.damageSources().indirectMagic(p, p), WindInfusionRules.DAMAGE);
         }
-        Vec3 delta = end.subtract(start); int steps = Math.max(1, (int)(delta.length() * 5));
-        for (int i = 0; i <= steps; i++) {
-            Vec3 at = start.add(delta.scale(i / (double)steps));
-            p.serverLevel().sendParticles(ParticleTypes.CLOUD, at.x, at.y, at.z, 1, .04, .04, .04, 0);
-        }
+        WarriorCombatEffects.windCut(p,start,end);
         p.serverLevel().playSound(null, p.blockPosition(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, .8f, 1.3f);
         p.getMainHandItem().hurtAndBreak(1, p, player -> player.broadcastBreakEvent(InteractionHand.MAIN_HAND));
         TemperingEvents.sync(p);

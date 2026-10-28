@@ -17,6 +17,19 @@ import net.minecraftforge.gametest.*;
 
 @GameTestHolder("tncwarrior") @PrefixGameTestTemplate(false)
 public final class TrainingGroundGameTests {
+    @GameTest(template="building_test_empty",timeoutTicks=40)
+    public static void elementalEffectsPreserveCombatStatsAndCosmeticChoiceSurvivesReload(GameTestHelper h){
+        var p=AdventureGameTests.player(h);p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,new ItemStack(Items.IRON_SWORD));
+        TemperingData.get(p.server).setTalent(p.getUUID(),2);var data=WarriorEffectsData.get(p.server);float health=p.getHealth();int damage=p.getMainHandItem().getDamageValue();
+        for(var style:WarriorEffectStyle.values()){
+            data.set(p.getUUID(),style);h.assertTrue(WarriorCombatEffects.style(p)==style,"Selected palette resolves");
+            WarriorCombatEffects.slash(p,false);WarriorCombatEffects.slash(p,true);WarriorCombatEffects.guard(p,false,true);WarriorCombatEffects.guard(p,true,false);
+        }
+        var restored=WarriorEffectsData.load(data.save(new CompoundTag()));h.assertTrue(restored.style(p.getUUID())==WarriorEffectStyle.DARK,"Cosmetic choice persists independently of training plots");
+        p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,WindInfusion.infuse(p.getMainHandItem()));h.assertTrue(WarriorCombatEffects.style(p)==WarriorEffectStyle.WIND,"Weapon element takes priority");
+        p.setXRot(-90);WarriorCombatEffects.slash(p,false);WarriorCombatEffects.windCut(p,p.getEyePosition(),p.getEyePosition().add(0,6,0));
+        h.assertTrue(p.getHealth()==health&&p.getMainHandItem().getDamageValue()==damage&&TemperingData.get(p.server).points(p.getUUID())==0,"Cosmetic emissions cannot alter life, durability or growth");p.discard();h.succeed();
+    }
     @GameTest(template="building_test_empty",timeoutTicks=400)
     public static void guildEntryCreatesOwnedTrainerAndSafeReturn(GameTestHelper h){
         var p=AdventureGameTests.player(h);var source=h.absolutePos(new BlockPos(2,3,2));
