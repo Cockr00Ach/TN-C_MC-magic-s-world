@@ -213,8 +213,8 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     /** 首轮基础伤害为 0，只保留配置入口，后续按测试结果调整。 */
     private static final float QUAKE_DAMAGE = parseFloatProperty("tnc.tortoise.quake.damage", 0.0F);
     private static final double QUAKE_KNOCKBACK = parseFloatProperty("tnc.tortoise.quake.knockback", 0.85F);
-    /** 轻微上抛，避免只在地面平移。 */
-    private static final double QUAKE_LIFT = parseFloatProperty("tnc.tortoise.quake.lift", 0.16F);
+    /** 命中即击飞；眩晕从同一刻计时100tick，落地不会重置。 */
+    private static final double QUAKE_LIFT = parseFloatProperty("tnc.tortoise.quake.lift", 0.90F);
 
     private static final String ACTION_CONTROLLER = "action";
 
@@ -1669,7 +1669,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     }
 
     /**
-     * 震波命中：基础伤害默认 0，只做一次向外击退 + 轻微上抛。
+     * 震波命中：基础伤害默认 0，每次施法命中一次，向外击飞并眩晕5秒。
      *
      * <p>不依赖 {@code hurt(0)} 的返回值（0 伤害会被原版判为无效），
      * 而是单独判断可攻击性、无敌与命中记录。
@@ -1712,10 +1712,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
                 dz = 0.0D;
             }
             victim.knockback(QUAKE_KNOCKBACK, -dx, -dz);
-            if (QUAKE_LIFT > 0.0D) {
-                Vec3 motion = victim.getDeltaMovement();
-                victim.setDeltaMovement(motion.x, Math.max(motion.y, QUAKE_LIFT), motion.z);
-            }
+            TortoiseStun.apply(victim, QUAKE_LIFT);
         }
     }
 

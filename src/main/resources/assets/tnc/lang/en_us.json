@@ -789,5 +789,6 @@
   "spell.tnc.thunder_seal_1.description": "1 physical conductors pulse 1 times, then converge into a final lightning strike. Aimed location stays fixed; allies and walls are respected.",
   "spell.tnc.concealment.name": "Concealment",
   "spell.tnc.concealment.description": "Vanish for 1 minute: hostile mobs will not target you. Dealing or taking damage ends it immediately.",
-  "effect.tnc.concealment": "Concealment"
+  "effect.tnc.concealment": "Concealment",
+  "effect.tnc.tortoise_stun": "Stunned"
 }
