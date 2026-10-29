@@ -38,7 +38,7 @@ public final class VolcanicTortoiseRegistration {
             helper.register(ResourceLocation.fromNamespaceAndPath("tnc", "volcanic_tortoise"), TYPE);
 
             REMAINS = EntityType.Builder.<TortoiseRemainsEntity>of(TortoiseRemainsEntity::new, MobCategory.MISC)
-                    .sized(5.0F, 1.5F).fireImmune().clientTrackingRange(10).updateInterval(20)
+                    .sized(6.8F, 1.9F).fireImmune().clientTrackingRange(10).updateInterval(20)
                     .build("tnc:volcanic_tortoise_remains");
             helper.register(ResourceLocation.fromNamespaceAndPath("tnc", "volcanic_tortoise_remains"), REMAINS);
 

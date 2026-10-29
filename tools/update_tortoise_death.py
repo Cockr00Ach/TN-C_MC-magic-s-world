@@ -55,7 +55,7 @@ def main():
         replacement = "    from tortoise_death_animation import build_death\n" + replacement
     lines[assignment.lineno - 1:assignment.end_lineno] = [replacement]
     p.write_text("".join(lines), encoding="utf-8")
-    print("Updated death only: 9 seconds; existing geometry, textures, transition and other clips preserved.")
+    print("Updated death only: 12.2 seconds; existing geometry, textures, transition and other clips preserved.")
 
 
 if __name__ == "__main__":

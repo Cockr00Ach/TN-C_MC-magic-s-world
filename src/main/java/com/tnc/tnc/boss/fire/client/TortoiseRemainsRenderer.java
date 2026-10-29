@@ -22,12 +22,13 @@ public final class TortoiseRemainsRenderer extends EntityRenderer<TortoiseRemain
     };
     public TortoiseRemainsRenderer(EntityRendererProvider.Context context) {
         super(context);
-        this.shadowRadius = 2.2F;
+        this.shadowRadius = 3.0F;
     }
     @Override public void render(TortoiseRemainsEntity entity, float yaw, float partial, PoseStack poses,
                                  MultiBufferSource buffers, int light) {
         poses.pushPose();
         poses.mulPose(Axis.YP.rotationDegrees(-entity.getYRot()));
+        poses.scale(1.35F, 1.25F, 1.35F);
         for (int i = 0; i < ROCKS.length; i++) {
             float[] rock = ROCKS[i];
             poses.pushPose();

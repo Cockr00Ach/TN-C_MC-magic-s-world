@@ -2032,7 +2032,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
             if (age == 32 || age == 58) {
                 level.playSound(null, this.blockPosition(), SoundEvents.BASALT_BREAK, SoundSource.HOSTILE, 0.3F, 0.65F);
             }
-            if (age >= TortoiseDeath.FADE_START && !this.deathRemainsSpawned) {
+            if (age >= TortoiseDeath.REMAINS_AT && !this.deathRemainsSpawned) {
                 Vec3 ground = VolcanicFireFieldEntity.groundBelow(level, this.deathAnchor);
                 if (ground == null) ground = this.deathAnchor;
                 TortoiseRemainsEntity remains = new TortoiseRemainsEntity(VolcanicTortoiseRegistration.REMAINS, level);

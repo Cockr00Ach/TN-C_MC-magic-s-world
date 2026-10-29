@@ -6,7 +6,7 @@ from tortoise_transition_animation import sample, cube_vertices
 from preview_geo_anim import mmul, translate, apply, rx, ry, rz
 
 ROOT = Path(__file__).resolve().parents[1]
-DURATION = 180
+DURATION = 244
 
 
 def rotation(angles):
@@ -116,5 +116,9 @@ def build_death():
                     a, b = [round(poses[tick][name][channel][axis], 5) for poses in phases]
                     vector.append(a if abs(a - b) < 0.00001 else f"query.tnc_phase_two ? {b} : {a}")
                 keys[f"{tick / 20:g}"] = vector
-            bones[name][channel] = keys
+            # Keep both ends of constant runs; preserve every changing fitted pose.
+            items = list(keys.items())
+            bones[name][channel] = {time: vector for i, (time, vector) in enumerate(items)
+                                    if i == 0 or i == len(items) - 1
+                                    or vector != items[i - 1][1] or vector != items[i + 1][1]}
     return {"loop": False, "animation_length": DURATION / 20, "bones": bones}
