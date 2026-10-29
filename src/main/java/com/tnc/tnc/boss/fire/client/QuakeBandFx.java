@@ -1,412 +1,445 @@
 package com.tnc.tnc.boss.fire.client;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.tnc.tnc.TNMod;
-import com.tnc.tnc.boss.fire.VolcanicTortoiseEntity;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
-import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.client.resources.model.BakedModel;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexBuffer;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexSorting;
+import com.tnc.tnc.boss.fire.TortoiseQuake;
+import com.tnc.tnc.boss.fire.TortoiseQuakeTiles;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.state.BlockState;
+import com.tnc.tnc.boss.fire.VolcanicTortoiseEntity;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RegisterClientCommandsEvent;
+import net.minecraftforge.client.event.RegisterShadersEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.joml.Matrix4f;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL14;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-/**
- * 大地震波的环形波带。
- *
- * <p>两层叠加：</p>
- * <ol>
- *   <li><b>方块层</b>：波带表面直接贴“它正经过的那块地的顶面贴图”，并沿截面隆起，
- *       所以看起来像是地面被抬起来一道波，而不是一圈光；</li>
- *   <li><b>发光线</b>：在波峰脊上叠一条很薄的淡金自发光带，保留“冲击波”的观感，
- *       关光影也能看清波峰位置。</li>
- * </ol>
- *
- * <p>两层共用同一份几何（半径 {@code QUAKE_RADIUS * age / QUAKE_RING_TICKS}、
- * 中心 {@code quakeWaveCenter()}），与服务端命中环带完全同源；本类只负责画，
- * 不参与伤害或击退。</p>
- *
- * <p>Oculus 会把共享 BufferSource 换成 no-op 分段缓冲，所以这里用自建 immediate 缓冲，
- * 在 {@code AFTER_WEATHER} 阶段提交。</p>
- */
-@Mod.EventBusSubscriber(modid = TNMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
+/** A travelling ridge of locally textured ground pieces, using the verified world VBO draw path. */
+@Mod.EventBusSubscriber(modid = "tnc", value = Dist.CLIENT)
 public final class QuakeBandFx {
-    /** 默认关闭：现在以方块形态的地表波为主，可用 -Dtnc.tortoise.quake.glow=true 打开这层淡光。 */
-    private static final boolean GLOW_ENABLED = Boolean.getBoolean("tnc.tortoise.quake.glow");
-
-    private static final Logger LOGGER = LoggerFactory.getLogger("TN-C/quake-band");
-
-    private static final ResourceLocation GLOW_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "textures/entity/quake_band.png");
-    private static final RenderType GLOW_TYPE = RenderType.entityTranslucentEmissive(GLOW_TEXTURE);
-    private static final RenderType BLOCK_TYPE = RenderType.entityTranslucent(TextureAtlas.LOCATION_BLOCKS);
-
-    /** 圆周分段数：160 段在 22 格半径上每段约 0.86 格。 */
-    private static final int SEGMENTS = 160;
-    /** 径向分层数：决定波峰截面的平滑程度。 */
-    private static final int RADIAL_STEPS = 8;
-    /** 波带径向宽度（格）。 */
-    private static final float WIDTH = 2.6F;
-    /** 波峰最大高度（格）。 */
-    private static final float PEAK_HEIGHT = 0.55F;
-    /** 方块层不透明度：接近实体，但边缘仍然渐隐。 */
-    private static final float BLOCK_ALPHA = 0.88F;
-    /** 发光脊线的不透明度。 */
-    private static final float GLOW_ALPHA = 0.30F;
-    /** u 方向贴图重复次数（发光层）。 */
-    private static final float UV_REPEAT = 12.0F;
-    /** v 方向滚动速度：每秒推进的贴图比例。 */
-    private static final float UV_SCROLL = 0.45F;
-    private static final double RENDER_DIST = 96.0D;
-    private static final int FADE_IN = 4;
-    private static final int FADE_OUT = 10;
-    private static final boolean DEBUG = Boolean.getBoolean("tnc.tortoise.quake.debug");
-
-    private static final List<Band> ACTIVE = new ArrayList<>();
-    private static final Map<Integer, Integer> SEEN = new HashMap<>();
-    /** 方块 → 顶面贴图在 block atlas 内的 uv 矩形，避免每帧每个格子重新取模型。 */
-    private static final Map<BlockState, float[]> SPRITE_CACHE = new HashMap<>();
-    private static final RandomSource MODEL_RANDOM = RandomSource.create(20261025L);
-    private static final MultiBufferSource.BufferSource BUFFERS =
-            MultiBufferSource.immediate(new BufferBuilder(262144));
-
-    private static long lastStatsTick;
-
-    private record Band(int castId, Vec3 center, long bornAt) {
-    }
+    private static final ResourceLocation TEXTURE = InventoryMenu.BLOCK_ATLAS;
+    private static final Map<UUID, Wave> BOSS_WAVES = new HashMap<>();
+    private static final double RANGE_SQR = 96.0D * 96.0D;
+    private static final int MAX_BOSS_WAVES = 3;
+    private static final int MAX_TILES = 768;
+    private static final int HOLD_TICKS = 1200;
+    private static ClientLevel currentLevel;
+    private static int localTick;
+    private static Wave preview;
+    private static ShaderInstance shader;
+    private static VertexBuffer vertexBuffer;
+    private static final BufferBuilder BUILDER = new BufferBuilder(1048576);
 
     private QuakeBandFx() {
     }
 
+    @Mod.EventBusSubscriber(modid = "tnc", value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
+    public static final class Shaders {
+        @SubscribeEvent
+        public static void register(RegisterShadersEvent event) throws java.io.IOException {
+            event.registerShader(new ShaderInstance(event.getResourceProvider(),
+                    ResourceLocation.fromNamespaceAndPath("tnc", "quake_band"), DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP),
+                    loaded -> shader = loaded);
+        }
+    }
+
+    private record Face(int[] data, float red, float green, float blue) {
+    }
+
+    private record Surface(BlockState state, double groundY, double pivot, int light,
+                           List<Face> faces, float shadowU, float shadowV) {
+    }
+
+    private static final Surface MISS = new Surface(null,0,0,0,List.of(),0,0);
+
+    private static final class Wave {
+        final int cast;
+        final Vec3 center;
+        final float yaw;
+        final TortoiseQuake.Playback clock = new TortoiseQuake.Playback();
+        final Map<Long, Surface> surfaces = new HashMap<>();
+        final Surface prototype;
+        final boolean flat;
+        final boolean held;
+        final double heldAge;
+        final int born;
+
+        Wave(int cast, Vec3 center, float yaw, boolean flat, boolean held, double heldAge) {
+            this.cast = cast;
+            this.center = center;
+            this.yaw = yaw;
+            this.heldAge = heldAge;
+            this.flat = flat;
+            this.held = held;
+            this.born = localTick;
+            this.prototype = capture(Minecraft.getInstance(), Mth.floor(center.x), Mth.floor(center.z), center.y);
+        }
+
+        double age(float partial) {
+            return held ? heldAge : clock.age(localTick + partial);
+        }
+
+        Surface tile(int x, int z) {
+            if (flat) return prototype == null ? null : new Surface(prototype.state, center.y,
+                    prototype.pivot, prototype.light, prototype.faces, prototype.shadowU, prototype.shadowV);
+            long key = ((long) x << 32) ^ (z & 0xffffffffL);
+            Surface cached = surfaces.get(key);
+            if (cached != null) return cached == MISS ? null : cached;
+            Surface sampled = capture(Minecraft.getInstance(), x, z, center.y);
+            if (surfaces.size() < 4096) surfaces.put(key, sampled == null ? MISS : sampled);
+            return sampled;
+        }
+    }
+
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) {
-            return;
-        }
+    public static void commands(RegisterClientCommandsEvent event) {
+        event.getDispatcher().register(Commands.literal("tnc_quake_preview")
+                .executes(context -> startPreview(false, false, false))
+                .then(Commands.literal("hold").executes(context -> startPreview(false, true, false)))
+                .then(Commands.literal("flat").executes(context -> startPreview(true, true, false)))
+                .then(Commands.literal("warn").executes(context -> startPreview(false, true, true)))
+                .then(Commands.literal("clear").executes(context -> {
+                    preview = null;
+                    return 1;
+                })));
+    }
+
+    private static int startPreview(boolean flat, boolean held, boolean warning) {
         Minecraft mc = Minecraft.getInstance();
-        var level = mc.level;
-        if (level == null) {
-            ACTIVE.clear();
-            SEEN.clear();
-            return;
+        if (mc.level == null || mc.player == null) return 0;
+        HitResult hit = mc.player.pick(40.0D, 0.0F, false);
+        Vec3 target;
+        if (hit instanceof BlockHitResult block && hit.getType() == HitResult.Type.BLOCK) {
+            target = block.getLocation();
+        } else {
+            Vec3 look = mc.player.getLookAngle();
+            target = mc.player.position().add(look.x * 8.0D, 0, look.z * 8.0D);
         }
-        for (Entity entity : level.entitiesForRendering()) {
-            if (!(entity instanceof VolcanicTortoiseEntity boss)) {
-                continue;
-            }
-            int start = boss.quakeWaveStart();
-            Integer previous = SEEN.get(boss.getId());
-            if (start < 0) {
-                SEEN.remove(boss.getId());
-                continue;
-            }
-            if (previous != null && previous == start) {
-                continue;
-            }
-            SEEN.put(boss.getId(), start);
-            var player = mc.player;
-            if (player != null && boss.distanceToSqr(player) > RENDER_DIST * RENDER_DIST) {
-                continue;
-            }
-            if (ACTIVE.size() > 4) {
-                ACTIVE.clear();
-            }
-            ACTIVE.add(new Band(start, boss.quakeWaveCenter(), level.getGameTime()));
+        int x = Mth.floor(target.x), z = Mth.floor(target.z);
+        if (!mc.level.hasChunkAt(BlockPos.containing(target))) return 0;
+        double reference = mc.level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
+        Surface picked = capture(mc, x, z, reference);
+        if (picked == null) {
+            mc.player.displayClientMessage(Component.literal("请将准星对准附近的地面"), false);
+            return 0;
         }
+        resetLevel(mc.level);
+        preview = new Wave(0, new Vec3(target.x, picked.groundY, target.z), mc.player.getYRot(), flat, held, warning ? -12 : 24);
+        preview.clock.receive(0, -TortoiseQuake.WARNING_TICKS, localTick);
+        mc.player.displayClientMessage(Component.literal(held
+                ? "扇形效果已定格；/tnc_quake_preview clear 清除"
+                : "前方120°地震：红色预警1.2秒，随后2秒扩至22格"), false);
+        return 1;
+    }
+
+    private static void resetLevel(ClientLevel level) {
+        if (currentLevel == level) return;
+        currentLevel = level;
+        BOSS_WAVES.clear();
+        preview = null;
+        if (vertexBuffer != null) {
+            vertexBuffer.close();
+            vertexBuffer = null;
+        }
+    }
+
+    @SubscribeEvent
+    public static void tick(TickEvent.ClientTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) return;
+        Minecraft mc = Minecraft.getInstance();
+        resetLevel(mc.level);
+        if (mc.level == null || mc.player == null || mc.isPaused()) return;
+        localTick++;
+        if (preview != null && (localTick - preview.born >= HOLD_TICKS
+                || (!preview.held && preview.age(0) >= TortoiseQuake.LIFETIME))) preview = null;
+        var present = new HashSet<UUID>();
+        int dustBudget = 32;
+        for (var entity : mc.level.entitiesForRendering()) {
+            if (!(entity instanceof VolcanicTortoiseEntity boss) || boss.quakeWaveStart() < 0
+                    || boss.isDeadOrDying() || boss.quakeWaveCenter().distanceToSqr(mc.player.position()) > RANGE_SQR) continue;
+            UUID owner = boss.getUUID();
+            present.add(owner);
+            Wave wave = BOSS_WAVES.get(owner);
+            if (wave == null || wave.cast != boss.quakeWaveStart()) {
+                wave = new Wave(boss.quakeWaveStart(), boss.quakeWaveCenter(), boss.quakeWaveYaw(), false, false, 24);
+                BOSS_WAVES.put(owner, wave);
+            }
+            wave.clock.receive(wave.cast, boss.quakeWaveAge(), localTick);
+            if (wave.age(0) >= TortoiseQuake.LIFETIME) wave.surfaces.clear();
+            else dustBudget -= dust(mc, wave, Math.min(12, dustBudget));
+        }
+        BOSS_WAVES.keySet().removeIf(owner -> !present.contains(owner));
+        if (preview != null && !preview.held) dust(mc, preview, Math.min(12, dustBudget));
+    }
+
+    /** Collision surface supplies a world-space TOP; model local Y is kept separate from block Y. */
+    private static Surface capture(Minecraft mc, int x, int z, double referenceY) {
+        ClientLevel level = mc.level;
+        if (level == null || !level.hasChunkAt(BlockPos.containing(x, referenceY, z))) return null;
+        // A stale/offset heightmap hint must not exclude the actual collision surface.
+        int top = Mth.floor(referenceY + 4.0D);
+        int bottom = Math.max(level.getMinBuildHeight(), Mth.floor(referenceY - 4.0D));
+        for (int y = top; y >= bottom; y--) {
+            BlockPos pos = new BlockPos(x, y, z);
+            BlockState state = level.getBlockState(pos);
+            if (state.isAir() || !state.getFluidState().isEmpty() || state.hasBlockEntity()
+                    || state.getRenderShape() != RenderShape.MODEL) continue;
+            var shape = state.getCollisionShape(level, pos);
+            if (shape.isEmpty()) continue;
+            var above = level.getBlockState(pos.above());
+            if (!above.getCollisionShape(level, pos.above()).isEmpty() || !above.getFluidState().isEmpty()) continue;
+            double pivot = shape.max(Direction.Axis.Y), surface = y + pivot;
+            if (Math.abs(surface - referenceY) > 3.0D) return null;
+            var model = mc.getBlockRenderer().getBlockModel(state);
+            var random = RandomSource.create(42L);
+            List<Face> faces = new ArrayList<>();
+            for (int side = 0; side <= Direction.values().length; side++) {
+                Direction direction = side == Direction.values().length ? null : Direction.values()[side];
+                random.setSeed(state.getSeed(pos));
+                for (BakedQuad quad : model.getQuads(state, direction, random)) {
+                    if (quad.getVertices().length < 24) continue;
+                    int tint = quad.isTinted() ? mc.getBlockColors().getColor(state, level, pos, quad.getTintIndex()) : 0xFFFFFF;
+                    float shade = quad.isShade() ? level.getShade(quad.getDirection(), true) : 1.0F;
+                    faces.add(new Face(quad.getVertices(), ((tint >> 16) & 255) / 255.0F * shade,
+                            ((tint >> 8) & 255) / 255.0F * shade, (tint & 255) / 255.0F * shade));
+                    if (faces.size() >= 48) break;
+                }
+                if (faces.size() >= 48) break;
+            }
+            TextureAtlasSprite sprite = model.getParticleIcon();
+            if (faces.isEmpty()) fallbackCube(faces, sprite, pivot);
+            pivot = modelTop(faces, pivot);
+            return new Surface(state, surface, pivot, LevelRenderer.getLightColor(level, pos.above()),
+                    faces, (sprite.getU0()+sprite.getU1())*0.5F, (sprite.getV0()+sprite.getV1())*0.5F);
+        }
+        return null;
+    }
+
+    /** Models may be translated vertically by resource packs; align their real top to ground. */
+    private static double modelTop(List<Face> faces, double fallback) {
+        double top = -Double.MAX_VALUE;
+        for (Face face : faces) {
+            int stride = face.data.length/4;
+            for (int i=0;i<4;i++) {
+                float y = Float.intBitsToFloat(face.data[i*stride+1]);
+                if (Float.isFinite(y)) top = Math.max(top,y);
+            }
+        }
+        return top == -Double.MAX_VALUE ? fallback : top;
+    }
+
+    /** Keep unsupported mod models visible, without requiring a culled UP quad. */
+    private static void fallbackCube(List<Face> out, TextureAtlasSprite sprite, double top) {
+        float y = (float) top;
+        float[][] quads = {
+                {0,y,0, 0,y,1, 1,y,1, 1,y,0}, {0,0,1, 0,0,0, 1,0,0, 1,0,1},
+                {1,0,0, 0,0,0, 0,y,0, 1,y,0}, {0,0,1, 1,0,1, 1,y,1, 0,y,1},
+                {0,0,0, 0,0,1, 0,y,1, 0,y,0}, {1,0,1, 1,0,0, 1,y,0, 1,y,1}};
+        for (int side=0;side<quads.length;side++) {
+            int[] data = new int[32];
+            for (int i=0;i<4;i++) {
+                for (int axis=0;axis<3;axis++) data[i*8+axis]=Float.floatToIntBits(quads[side][i*3+axis]);
+                data[i*8+3]=-1;
+                data[i*8+4]=Float.floatToIntBits(i==0 || i==1 ? sprite.getU0() : sprite.getU1());
+                data[i*8+5]=Float.floatToIntBits(i==0 || i==3 ? sprite.getV1() : sprite.getV0());
+            }
+            float shade=side==0 ? 1.0F : side==1 ? 0.5F : 0.75F;
+            out.add(new Face(data,shade,shade,shade));
+        }
+    }
+
+    private static int dust(Minecraft mc, Wave wave, int budget) {
+        double age=wave.age(0);
+        if (budget<=0 || age<=0 || age>TortoiseQuake.TRAVEL_TICKS) return 0;
+        double radius=TortoiseQuake.radius(age);
+        for(int i=0;i<budget;i++) {
+            double fraction = ((i+0.5D)/budget + localTick*0.071D)%1.0D;
+            double angle=Math.toRadians(wave.yaw)+(fraction*2-1)*TortoiseQuake.HALF_ANGLE;
+            double dx=-Math.sin(angle),dz=Math.cos(angle);
+            int x=Mth.floor(wave.center.x+dx*radius),z=Mth.floor(wave.center.z+dz*radius);
+            Surface tile=wave.tile(x,z);
+            if(tile==null)continue;
+            double distance=Math.hypot(x+0.5D-wave.center.x,z+0.5D-wave.center.z);
+            double y=tile.groundY+TortoiseQuakeTiles.lift(age,distance)+0.2D;
+            if(i%4==0)mc.level.addParticle(ParticleTypes.POOF,x+0.5D,y,z+0.5D,dx*0.05D,0.04D,dz*0.05D);
+            else mc.level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK,tile.state),x+0.5D,y,z+0.5D,
+                    dx*0.11D,0.12D,dz*0.11D);
+        }
+        return budget;
+    }
+
+    /** Ground-projected fill, outer arc and side borders, using the same depth-tested VBO. */
+    private static int warning(Minecraft mc, Wave wave, Vec3 camera, double age) {
+        float alpha = TortoiseQuake.warningOpacity(age);
+        if (alpha <= 0) return 0;
+        TextureAtlasSprite white = mc.getTextureAtlas(TEXTURE).apply(
+                ResourceLocation.fromNamespaceAndPath("minecraft","block/white_concrete"));
+        float u=(white.getU0()+white.getU1())*0.5F,v=(white.getV0()+white.getV1())*0.5F;
+        double start=Math.toRadians(wave.yaw)-TortoiseQuake.HALF_ANGLE;
+        double step=TortoiseQuake.HALF_ANGLE*2/64.0D;
+        int vertices=0;
+        for (int a=0;a<64;a++) {
+            double angle=start+a*step;
+            for (int r=0;r<22;r++) vertices+=warningQuad(wave,camera,r,r+1,angle,angle+step,alpha,u,v);
+            vertices+=warningQuad(wave,camera,TortoiseQuake.RADIUS-0.18D,TortoiseQuake.RADIUS,
+                    angle,angle+step,0.86F,u,v);
+        }
+        for (int r=0;r<22;r++) {
+            double width=0.12D/Math.max(1,r+0.5D);
+            vertices+=warningQuad(wave,camera,r,r+1,start,start+width,0.86F,u,v);
+            double end=start+2*TortoiseQuake.HALF_ANGLE;
+            vertices+=warningQuad(wave,camera,r,r+1,end-width,end,0.86F,u,v);
+        }
+        return vertices;
+    }
+
+    private static int warningQuad(Wave wave, Vec3 camera, double inner, double outer,
+                                   double from, double to, float alpha, float u, float v) {
+        double[] radii={inner,outer,outer,inner},angles={from,from,to,to};
+        double[] xs=new double[4],ys=new double[4],zs=new double[4];
+        double low=Double.MAX_VALUE,high=-Double.MAX_VALUE;
+        for (int i=0;i<4;i++) {
+            xs[i]=wave.center.x-Math.sin(angles[i])*radii[i];
+            zs[i]=wave.center.z+Math.cos(angles[i])*radii[i];
+            Surface surface=wave.tile(Mth.floor(xs[i]),Mth.floor(zs[i]));
+            if (surface==null) return 0;
+            ys[i]=surface.groundY+0.055D;
+            low=Math.min(low,ys[i]);high=Math.max(high,ys[i]);
+        }
+        if (high-low>1.05D) return 0; // Do not bridge a wall or cliff.
+        for (int i=0;i<4;i++) BUILDER.vertex(xs[i]-camera.x,ys[i]-camera.y,zs[i]-camera.z)
+                .color(1.0F,0.025F,0.01F,alpha).uv(u,v).uv2(0x00F000F0).endVertex();
+        return 4;
     }
 
     @SubscribeEvent
     public static void render(RenderLevelStageEvent event) {
-        if (!GLOW_ENABLED || event.getStage() != RenderLevelStageEvent.Stage.AFTER_WEATHER || ACTIVE.isEmpty()) {
-            return;
-        }
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_WEATHER || shader == null) return;
         Minecraft mc = Minecraft.getInstance();
-        var level = mc.level;
-        if (level == null) {
-            ACTIVE.clear();
-            return;
-        }
-        try {
-            draw(event, level);
-        } catch (Throwable t) {
-            ACTIVE.clear();
-            LOGGER.error("[TN-C QuakeBand] disabled after render error", t);
-        }
-    }
-
-    private static void draw(RenderLevelStageEvent event, Level level) {
+        if (mc.level != currentLevel || mc.level == null || mc.player == null) return;
+        float partial = mc.isPaused() ? 0 : event.getPartialTick();
         Vec3 camera = event.getCamera().getPosition();
-        float partial = event.getPartialTick();
-        double now = level.getGameTime() + partial;
-        int life = VolcanicTortoiseEntity.QUAKE_RING_TICKS + FADE_OUT;
-
-        Matrix4f matrix = new Matrix4f().translation(
-                (float) -camera.x, (float) -camera.y, (float) -camera.z);
-
-        List<Render> bands = new ArrayList<>();
-        Iterator<Band> iterator = ACTIVE.iterator();
-        while (iterator.hasNext()) {
-            Band band = iterator.next();
-            double age = now - band.bornAt;
-            if (age > life + 6) {
-                iterator.remove();
+        List<Wave> waves = new ArrayList<>();
+        if (preview != null) waves.add(preview);
+        BOSS_WAVES.values().stream().filter(w -> w.age(partial) < TortoiseQuake.LIFETIME)
+                .sorted(java.util.Comparator.comparingDouble(w -> w.center.distanceToSqr(camera)))
+                .limit(MAX_BOSS_WAVES).forEach(waves::add);
+        if (waves.isEmpty()) return;
+        BUILDER.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP);
+        int vertices = 0, remaining = MAX_TILES, remainingWaves=waves.size();
+        for (Wave wave : waves) {
+            int allowance=remaining/remainingWaves--;
+            if (wave.center.distanceToSqr(camera) > RANGE_SQR) continue;
+            double age=wave.age(partial);
+            if (age < 0) {
+                vertices += warning(mc,wave,camera,age);
                 continue;
             }
-            if (band.center.distanceToSqr(camera) > RENDER_DIST * RENDER_DIST) {
-                continue;
+            var cells=TortoiseQuakeTiles.cells(wave.center.x,wave.center.z,age,wave.yaw);
+            int count=Math.min(allowance,cells.size());
+            for(int i=0;i<count;i++) {
+                var cell=cells.get(i*cells.size()/count);
+                float opacity=TortoiseQuakeTiles.opacity(age,cell.distance());
+                if(opacity<=0 || TortoiseQuakeTiles.lift(age,cell.distance())<0.005D)continue;
+                Surface tile=wave.tile(cell.x(),cell.z());
+                if(tile==null)continue;
+                var pose=TortoiseQuakeTiles.pose(cell,wave.center.x,wave.center.z,tile.groundY,tile.pivot,age);
+                for(Face face:tile.faces) {
+                    int stride=face.data.length/4;
+                    for(int v=0;v<4;v++) {
+                        int offset=v*stride;
+                        double x=Float.intBitsToFloat(face.data[offset]),y=Float.intBitsToFloat(face.data[offset+1]),z=Float.intBitsToFloat(face.data[offset+2]);
+                        BUILDER.vertex(pose.x(x,y,z)-camera.x,pose.y(x,y,z)-camera.y,pose.z(x,y,z)-camera.z)
+                                .color(face.red,face.green,face.blue,opacity)
+                                .uv(Float.intBitsToFloat(face.data[offset+4]),Float.intBitsToFloat(face.data[offset+5]))
+                                .uv2(tile.light).endVertex();
+                    }
+                    vertices+=4;
+                }
+                float shadow=(float)(Math.min(1,pose.lift()/TortoiseQuakeTiles.PEAK_LIFT)*0.30D)*opacity;
+                double y=tile.groundY+0.012D-camera.y,x=cell.x()-camera.x,z=cell.z()-camera.z;
+                BUILDER.vertex(x,y,z).color(0.02F,0.02F,0.02F,shadow).uv(tile.shadowU,tile.shadowV).uv2(tile.light).endVertex();
+                BUILDER.vertex(x,y,z+1).color(0.02F,0.02F,0.02F,shadow).uv(tile.shadowU,tile.shadowV).uv2(tile.light).endVertex();
+                BUILDER.vertex(x+1,y,z+1).color(0.02F,0.02F,0.02F,shadow).uv(tile.shadowU,tile.shadowV).uv2(tile.light).endVertex();
+                BUILDER.vertex(x+1,y,z).color(0.02F,0.02F,0.02F,shadow).uv(tile.shadowU,tile.shadowV).uv2(tile.light).endVertex();
+                vertices+=4;
+                remaining--;
             }
-            double progress = Mth.clamp(age / VolcanicTortoiseEntity.QUAKE_RING_TICKS, 0.0D, 1.0D);
-            double radius = VolcanicTortoiseEntity.QUAKE_RADIUS * progress;
-            float fade = (float) Math.min(1.0D, age / FADE_IN)
-                    * (float) Math.min(1.0D, Math.max(0.0D, (life - age) / FADE_OUT));
-            if (fade <= 0.0F || radius < 0.6D) {
-                continue;
-            }
-            bands.add(new Render(band, radius, age, fade));
         }
-        if (bands.isEmpty()) {
+        if (vertices == 0) {
+            BUILDER.end().release();
             return;
         }
-
-        VertexConsumer blocks = BUFFERS.getBuffer(BLOCK_TYPE);
-        for (Render r : bands) {
-            drawBandBlocks(blocks, matrix, level, r);
-        }
-        BUFFERS.endBatch(BLOCK_TYPE);
-
-        VertexConsumer glow = BUFFERS.getBuffer(GLOW_TYPE);
-        for (Render r : bands) {
-            drawBandGlow(glow, matrix, level, r);
-        }
-        BUFFERS.endBatch(GLOW_TYPE);
-
-        if (DEBUG && level.getGameTime() - lastStatsTick >= 20L) {
-            lastStatsTick = level.getGameTime();
-            LOGGER.info("[TN-C QuakeBand] cast={} bands={}", bands.get(0).band.castId, bands.size());
-        }
-    }
-
-    private record Render(Band band, double radius, double age, float fade) {
-    }
-
-    /**
-     * 方块层：沿圆周逐段取“脚下那块地”的顶面贴图，拼成隆起的波带。
-     * uv 按 1 格一块重复，避免整张贴图被拉伸成长条。
-     */
-    private static void drawBandBlocks(VertexConsumer buffer, Matrix4f matrix, Level level, Render r) {
-        double inner = Math.max(0.3D, r.radius - WIDTH * 0.5D);
-        double outer = r.radius + WIDTH * 0.5D;
-        BlockRenderDispatcher dispatcher = Minecraft.getInstance().getBlockRenderer();
-
-        for (int i = 0; i < SEGMENTS; i++) {
-            double a0 = Math.PI * 2.0D * i / SEGMENTS;
-            double a1 = Math.PI * 2.0D * (i + 1) / SEGMENTS;
-            double mid = (a0 + a1) * 0.5D;
-            double dirX = Math.cos(mid);
-            double dirZ = Math.sin(mid);
-
-            int x = Mth.floor(r.band.center.x + dirX * r.radius);
-            int z = Mth.floor(r.band.center.z + dirZ * r.radius);
-            if (!level.hasChunkAt(new BlockPos(x, Mth.floor(r.band.center.y), z))) {
-                continue;
-            }
-            int topAir = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
-            double groundY = topAir - 0.02D;
-            if (groundY < level.getMinBuildHeight() + 1) {
-                continue;
-            }
-            BlockPos groundPos = new BlockPos(x, topAir - 1, z);
-            BlockState state = level.getBlockState(groundPos);
-            if (state.isAir() || !state.getFluidState().isEmpty()) {
-                state = Blocks.STONE.defaultBlockState();
-            }
-            float[] uv = spriteUv(dispatcher, state);
-            if (uv == null) {
-                continue;
-            }
-
-            double wave = 0.88D + 0.12D * Math.sin(mid * 3.0D + r.age * 0.05D);
-            // 每格方块贴图只取一次，沿圆周按弧长重复，贴图不会被拉成长条
-            double arc = mid * r.radius;
-            float tile = (float) (arc - Math.floor(arc));
-
-            for (int j = 0; j < RADIAL_STEPS; j++) {
-                double t0 = j / (double) RADIAL_STEPS;
-                double t1 = (j + 1) / (double) RADIAL_STEPS;
-                float y0 = (float) (groundY + PEAK_HEIGHT * wave * profile(t0));
-                float y1 = (float) (groundY + PEAK_HEIGHT * wave * profile(t1));
-                float a0v = BLOCK_ALPHA * r.fade * (float) alphaProfile(t0);
-                float a1v = BLOCK_ALPHA * r.fade * (float) alphaProfile(t1);
-
-                double r0 = inner + (outer - inner) * t0;
-                double r1 = inner + (outer - inner) * t1;
-
-                float x00 = (float) (r.band.center.x + Math.cos(a0) * r0);
-                float z00 = (float) (r.band.center.z + Math.sin(a0) * r0);
-                float x10 = (float) (r.band.center.x + Math.cos(a1) * r0);
-                float z10 = (float) (r.band.center.z + Math.sin(a1) * r0);
-                float x01 = (float) (r.band.center.x + Math.cos(a0) * r1);
-                float z01 = (float) (r.band.center.z + Math.sin(a0) * r1);
-                float x11 = (float) (r.band.center.x + Math.cos(a1) * r1);
-                float z11 = (float) (r.band.center.z + Math.sin(a1) * r1);
-
-                float u0 = uv[0] + tile * (uv[2] - uv[0]);
-                float u1 = uv[0] + (float) Math.min(1.0D, tile + 0.35D) * (uv[2] - uv[0]);
-                float v0 = uv[1] + (float) t0 * (uv[3] - uv[1]);
-                float v1 = uv[1] + (float) t1 * (uv[3] - uv[1]);
-
-                quad(buffer, matrix, x00, y0, z00, x10, y0, z10, x11, y1, z11, x01, y1, z01,
-                        u0, v0, u1, v0, u1, v1, u0, v1, a0v, a0v, a1v, a1v, 1.0F, 0.97F, 0.92F);
-                quad(buffer, matrix, x01, y1, z01, x11, y1, z11, x10, y0, z10, x00, y0, z00,
-                        u0, v1, u1, v1, u1, v0, u0, v0, a1v, a1v, a0v, a0v, 1.0F, 0.97F, 0.92F);
-            }
+        BUILDER.setQuadSorting(VertexSorting.DISTANCE_TO_ORIGIN);
+        boolean blend = GL11.glIsEnabled(GL11.GL_BLEND), cull = GL11.glIsEnabled(GL11.GL_CULL_FACE);
+        boolean depth = GL11.glIsEnabled(GL11.GL_DEPTH_TEST), depthWrite = GL11.glGetBoolean(GL11.GL_DEPTH_WRITEMASK);
+        int srcRgb = GL11.glGetInteger(GL14.GL_BLEND_SRC_RGB), dstRgb = GL11.glGetInteger(GL14.GL_BLEND_DST_RGB);
+        int srcAlpha = GL11.glGetInteger(GL14.GL_BLEND_SRC_ALPHA), dstAlpha = GL11.glGetInteger(GL14.GL_BLEND_DST_ALPHA);
+        var previousShader = RenderSystem.getShader();
+        int previousTexture=RenderSystem.getShaderTexture(0),previousLight=RenderSystem.getShaderTexture(2);
+        float[] previousColor = RenderSystem.getShaderColor().clone();
+        try {
+            RenderSystem.enableDepthTest();
+            RenderSystem.depthMask(false);
+            RenderSystem.disableCull();
+            RenderSystem.enableBlend();
+            RenderSystem.blendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA,
+                    GL11.GL_ONE, GL11.GL_ONE_MINUS_SRC_ALPHA);
+            RenderSystem.setShaderColor(1, 1, 1, 1);
+            RenderSystem.setShaderTexture(0, TEXTURE);
+            mc.gameRenderer.lightTexture().turnOnLightLayer();
+            if (vertexBuffer == null) vertexBuffer = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
+            vertexBuffer.bind();
+            vertexBuffer.upload(BUILDER.end());
+            Matrix4f view = new Matrix4f().rotateX((float) Math.toRadians(event.getCamera().getXRot()))
+                    .rotateY((float) Math.toRadians(event.getCamera().getYRot() + 180.0F));
+            vertexBuffer.drawWithShader(view, event.getProjectionMatrix(), shader);
+        } finally {
+            VertexBuffer.unbind();
+            RenderSystem.depthMask(depthWrite);
+            if (depth) RenderSystem.enableDepthTest(); else RenderSystem.disableDepthTest();
+            if (cull) RenderSystem.enableCull(); else RenderSystem.disableCull();
+            RenderSystem.blendFuncSeparate(srcRgb, dstRgb, srcAlpha, dstAlpha);
+            if (blend) RenderSystem.enableBlend(); else RenderSystem.disableBlend();
+            RenderSystem.setShaderColor(previousColor[0], previousColor[1], previousColor[2], previousColor[3]);
+            RenderSystem.setShaderTexture(0,previousTexture);
+            RenderSystem.setShaderTexture(2,previousLight);
+            RenderSystem.setShader(() -> previousShader);
         }
     }
 
-    /** 发光层：只在波峰脊线上叠一条淡金带，提示“这是一道冲击波”。 */
-    private static void drawBandGlow(VertexConsumer buffer, Matrix4f matrix, Level level, Render r) {
-        double inner = Math.max(0.3D, r.radius - WIDTH * 0.5D);
-        double outer = r.radius + WIDTH * 0.5D;
-        float scroll = (float) ((r.age * UV_SCROLL / 20.0D) % 1.0F);
-        double t0 = 0.28D;
-        double t1 = 0.58D;
-
-        for (int i = 0; i < SEGMENTS; i++) {
-            double a0 = Math.PI * 2.0D * i / SEGMENTS;
-            double a1 = Math.PI * 2.0D * (i + 1) / SEGMENTS;
-            double mid = (a0 + a1) * 0.5D;
-            int x = Mth.floor(r.band.center.x + Math.cos(mid) * r.radius);
-            int z = Mth.floor(r.band.center.z + Math.sin(mid) * r.radius);
-            if (!level.hasChunkAt(new BlockPos(x, Mth.floor(r.band.center.y), z))) {
-                continue;
-            }
-            double groundY = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 0.02D;
-            if (groundY < level.getMinBuildHeight() + 1) {
-                continue;
-            }
-            double wave = 0.88D + 0.12D * Math.sin(mid * 3.0D + r.age * 0.05D);
-            float y0 = (float) (groundY + PEAK_HEIGHT * wave * profile(t0) + 0.03D);
-            float y1 = (float) (groundY + PEAK_HEIGHT * wave * profile(t1) + 0.03D);
-            float alpha = GLOW_ALPHA * r.fade;
-
-            double rr0 = inner + (outer - inner) * t0;
-            double rr1 = inner + (outer - inner) * t1;
-            float x00 = (float) (r.band.center.x + Math.cos(a0) * rr0);
-            float z00 = (float) (r.band.center.z + Math.sin(a0) * rr0);
-            float x10 = (float) (r.band.center.x + Math.cos(a1) * rr0);
-            float z10 = (float) (r.band.center.z + Math.sin(a1) * rr0);
-            float x01 = (float) (r.band.center.x + Math.cos(a0) * rr1);
-            float z01 = (float) (r.band.center.z + Math.sin(a0) * rr1);
-            float x11 = (float) (r.band.center.x + Math.cos(a1) * rr1);
-            float z11 = (float) (r.band.center.z + Math.sin(a1) * rr1);
-
-            float u0 = (float) (i / (double) SEGMENTS * UV_REPEAT);
-            float u1 = (float) ((i + 1) / (double) SEGMENTS * UV_REPEAT);
-            float v0 = (float) (t0 + scroll);
-            float v1 = (float) (t1 + scroll);
-
-            quad(buffer, matrix, x00, y0, z00, x10, y0, z10, x11, y1, z11, x01, y1, z01,
-                    u0, v0, u1, v0, u1, v1, u0, v1, alpha, alpha, alpha, alpha, 1.0F, 1.0F, 1.0F);
-            quad(buffer, matrix, x01, y1, z01, x11, y1, z11, x10, y0, z10, x00, y0, z00,
-                    u0, v1, u1, v1, u1, v0, u0, v0, alpha, alpha, alpha, alpha, 1.0F, 1.0F, 1.0F);
-        }
-    }
-
-    /** 取方块顶面贴图在 atlas 中的 uv 矩形；失败时退回石头。 */
-    private static float[] spriteUv(BlockRenderDispatcher dispatcher, BlockState state) {
-        float[] cached = SPRITE_CACHE.get(state);
-        if (cached != null) {
-            return cached;
-        }
-        float[] uv = spriteUvOf(dispatcher, state);
-        if (uv == null) {
-            uv = spriteUvOf(dispatcher, Blocks.STONE.defaultBlockState());
-        }
-        if (uv != null) {
-            if (SPRITE_CACHE.size() > 512) {
-                SPRITE_CACHE.clear();
-            }
-            SPRITE_CACHE.put(state, uv);
-        }
-        return uv;
-    }
-
-    private static float[] spriteUvOf(BlockRenderDispatcher dispatcher, BlockState state) {
-        BakedModel model = dispatcher.getBlockModel(state);
-        List<BakedQuad> quads = model.getQuads(state, net.minecraft.core.Direction.UP, MODEL_RANDOM);
-        if (quads.isEmpty()) {
-            quads = model.getQuads(state, null, MODEL_RANDOM);
-        }
-        if (quads.isEmpty()) {
-            return null;
-        }
-        var sprite = quads.get(0).getSprite();
-        return new float[]{sprite.getU0(), sprite.getV0(), sprite.getU1(), sprite.getV1()};
-    }
-
-    /** 径向截面：内缘 0 → 中间隆起 1 → 外缘 0，峰值偏内一点。 */
-    private static double profile(double t) {
-        double peakAt = 0.42D;
-        double x = t < peakAt ? t / peakAt : (1.0D - t) / (1.0D - peakAt);
-        return Math.pow(Mth.clamp(x, 0.0D, 1.0D), 1.15D);
-    }
-
-    /** 透明度截面：边缘完全透明，避免硬边和方片感。 */
-    private static double alphaProfile(double t) {
-        return Math.pow(Math.sin(Math.PI * Mth.clamp(t, 0.0D, 1.0D)), 0.75D);
-    }
-
-    private static void quad(VertexConsumer buffer, Matrix4f matrix,
-                             float x0, float y0, float z0,
-                             float x1, float y1, float z1,
-                             float x2, float y2, float z2,
-                             float x3, float y3, float z3,
-                             float u0, float v0, float u1, float v1,
-                             float u2, float v2, float u3, float v3,
-                             float a0, float a1, float a2, float a3,
-                             float cr, float cg, float cb) {
-        vertex(buffer, matrix, x0, y0, z0, u0, v0, a0, cr, cg, cb);
-        vertex(buffer, matrix, x1, y1, z1, u1, v1, a1, cr, cg, cb);
-        vertex(buffer, matrix, x2, y2, z2, u2, v2, a2, cr, cg, cb);
-        vertex(buffer, matrix, x3, y3, z3, u3, v3, a3, cr, cg, cb);
-    }
-
-    private static void vertex(VertexConsumer buffer, Matrix4f matrix,
-                               float x, float y, float z, float u, float v, float alpha,
-                               float cr, float cg, float cb) {
-        buffer.vertex(matrix, x, y, z)
-                .color(cr, cg, cb, Mth.clamp(alpha, 0.0F, 1.0F))
-                .uv(u, v)
-                .overlayCoords(OverlayTexture.NO_OVERLAY)
-                .uv2(LightTexture.FULL_BRIGHT)
-                .normal(0.0F, 1.0F, 0.0F)
-                .endVertex();
-    }
 }

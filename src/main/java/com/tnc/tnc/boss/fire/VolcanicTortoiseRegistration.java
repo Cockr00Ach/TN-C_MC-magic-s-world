@@ -23,6 +23,7 @@ public final class VolcanicTortoiseRegistration {
     public static EntityType<VolcanicMortarEntity> MORTAR;
     /** 火球落地后的持续火焰区域。 */
     public static EntityType<VolcanicFireFieldEntity> FIRE_FIELD;
+    public static EntityType<TortoiseRemainsEntity> REMAINS;
     public static Item EGG;
 
     @SubscribeEvent
@@ -35,6 +36,11 @@ public final class VolcanicTortoiseRegistration {
                     .updateInterval(2)
                     .build("tnc:volcanic_tortoise");
             helper.register(ResourceLocation.fromNamespaceAndPath("tnc", "volcanic_tortoise"), TYPE);
+
+            REMAINS = EntityType.Builder.<TortoiseRemainsEntity>of(TortoiseRemainsEntity::new, MobCategory.MISC)
+                    .sized(6.8F, 1.9F).fireImmune().clientTrackingRange(10).updateInterval(20)
+                    .build("tnc:volcanic_tortoise_remains");
+            helper.register(ResourceLocation.fromNamespaceAndPath("tnc", "volcanic_tortoise_remains"), REMAINS);
 
             FIREBALL = EntityType.Builder.<VolcanicFireballEntity>of(VolcanicFireballEntity::new, MobCategory.MISC)
                     .sized(1.2F, 1.2F)

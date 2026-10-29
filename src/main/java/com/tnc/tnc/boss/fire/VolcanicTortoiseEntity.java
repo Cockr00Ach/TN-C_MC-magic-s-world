@@ -200,21 +200,21 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     private static final int ERUPTION_HIT_TICK = 26;
 
     // ---------------------------------------------------------- 技能 B：大地震波 --
-    /** 与火环共用砸地动作，所以时长与砸地帧一致。 */
-    public static final int QUAKE_TICKS = 72;
-    public static final int QUAKE_HIT_TICK = 24;
+    /** 共用砸地帧，额外留出末圈地块归位时间。 */
+    public static final int QUAKE_TICKS = 78;
+    public static final int QUAKE_HIT_TICK = TortoiseQuake.WARNING_TICKS;
     /** 地面波从中心推到最大半径的 tick 数（比火环慢，方便看清地块依次抬起）。 */
-    public static final int QUAKE_RING_TICKS = 40;
+    public static final int QUAKE_RING_TICKS = TortoiseQuake.TRAVEL_TICKS;
     /** 独立的最大半径，不与火环共用配置。 */
-    public static final double QUAKE_RADIUS = 22.0D;
+    public static final double QUAKE_RADIUS = TortoiseQuake.RADIUS;
     /** 波峰带宽（格）：只有这个宽度内的地块在抬升。 */
     public static final double QUAKE_BAND = 3.5D;
     private static final double QUAKE_HEIGHT_TOLERANCE = 2.0D;
     /** 首轮基础伤害为 0，只保留配置入口，后续按测试结果调整。 */
     private static final float QUAKE_DAMAGE = parseFloatProperty("tnc.tortoise.quake.damage", 0.0F);
     private static final double QUAKE_KNOCKBACK = parseFloatProperty("tnc.tortoise.quake.knockback", 0.85F);
-    /** 轻微上抛，避免只在地面平移。 */
-    private static final double QUAKE_LIFT = parseFloatProperty("tnc.tortoise.quake.lift", 0.16F);
+    /** 命中即击飞；眩晕从同一刻计时100tick，落地不会重置。 */
+    private static final double QUAKE_LIFT = parseFloatProperty("tnc.tortoise.quake.lift", 0.90F);
 
     private static final String ACTION_CONTROLLER = "action";
 
@@ -234,11 +234,16 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     /** 大地震波：独立的施法编号（-1 = 当前没有震波），客户端据此创建地面波。 */
     private static final EntityDataAccessor<Integer> DATA_QUAKE_START =
             SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.INT);
+    /** Elapsed cast age, independent of client/server world clock offsets. */
+    private static final EntityDataAccessor<Integer> DATA_QUAKE_AGE =
+            SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Float> DATA_QUAKE_X =
             SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Float> DATA_QUAKE_Y =
             SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Float> DATA_QUAKE_Z =
+            SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> DATA_QUAKE_YAW =
             SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.FLOAT);
     /** 喷吐蓄力：开始时刻（-1 = 当前没在蓄力）+ 总蓄力 tick。 */
     private static final EntityDataAccessor<Integer> DATA_SPIT_START =
@@ -268,10 +273,13 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     private static final EntityDataAccessor<Long> DATA_TRANSITION_START =
             SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.LONG);
 
-    private static final EntityDataAccessor<Long> DATA_DEATH_START =
-            SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.LONG);
+    private static final EntityDataAccessor<Integer> DATA_DEATH_AGE =
+            SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.INT);
+    private int serverDeathTicks = -1;
+    private final TortoiseDeathClock clientDeathClock = new TortoiseDeathClock();
     private Vec3 deathAnchor = Vec3.ZERO;
     private float deathYaw;
+    private boolean deathRemainsSpawned;
 
     private final ServerBossEvent bossEvent = new ServerBossEvent(this.getDisplayName(),
             BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10);
@@ -416,11 +424,14 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     }
 
     public boolean isDyingAnimation() {
-        return this.entityData.get(DATA_DEATH_START) >= 0L;
+        return this.entityData.get(DATA_DEATH_AGE) >= 0
+                // LivingEntity's constructor calls our setHealth before subclass fields initialize.
+                || (this.level().isClientSide && this.clientDeathClock != null && this.clientDeathClock.started());
     }
 
     public float deathAge(float partialTick) {
-        return TortoiseDeath.age(this.entityData.get(DATA_DEATH_START), this.level().getGameTime(), partialTick);
+        return this.level().isClientSide ? this.clientDeathClock == null ? -1 : this.clientDeathClock.age(this.tickCount, partialTick)
+                : this.serverDeathTicks < 0 ? -1 : Math.min(TortoiseDeath.DURATION, this.serverDeathTicks + partialTick);
     }
 
     public boolean usesPhaseTwoModel() {
@@ -490,22 +501,33 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         return this.entityData.get(DATA_QUAKE_START);
     }
 
+    public int quakeWaveAge() {
+        return this.entityData.get(DATA_QUAKE_AGE);
+    }
+
     /** 客户端渲染用：震波锁定的砸地中心。 */
     public Vec3 quakeWaveCenter() {
         return new Vec3(this.entityData.get(DATA_QUAKE_X), this.entityData.get(DATA_QUAKE_Y),
                 this.entityData.get(DATA_QUAKE_Z));
     }
 
-    /** 服务端：把震波中心与编号同步给客户端（只在砸地瞬间调用一次）。 */
-    private void publishQuake(ServerLevel level) {
+    public float quakeWaveYaw() {
+        return this.entityData.get(DATA_QUAKE_YAW);
+    }
+
+    /** Lock warning and impact to one origin and direction at the start of the windup. */
+    private void publishQuake() {
         this.entityData.set(DATA_QUAKE_X, (float) this.quakeCenter.x);
         this.entityData.set(DATA_QUAKE_Y, (float) this.quakeCenter.y);
         this.entityData.set(DATA_QUAKE_Z, (float) this.quakeCenter.z);
-        this.entityData.set(DATA_QUAKE_START, (int) level.getGameTime());
+        this.entityData.set(DATA_QUAKE_YAW, this.castYaw);
+        this.entityData.set(DATA_QUAKE_AGE, -QUAKE_HIT_TICK);
+        this.entityData.set(DATA_QUAKE_START, (int) (this.castId & Integer.MAX_VALUE));
     }
 
     private void clearQuake() {
         this.entityData.set(DATA_QUAKE_START, -1);
+        this.entityData.set(DATA_QUAKE_AGE, -1);
     }
 
     /** 客户端渲染用：喷吐蓄力的开始时刻（-1 表示没有蓄力）。 */
@@ -578,9 +600,11 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.entityData.define(DATA_SLAM_Y, 0.0F);
         this.entityData.define(DATA_SLAM_Z, 0.0F);
         this.entityData.define(DATA_QUAKE_START, -1);
+        this.entityData.define(DATA_QUAKE_AGE, -1);
         this.entityData.define(DATA_QUAKE_X, 0.0F);
         this.entityData.define(DATA_QUAKE_Y, 0.0F);
         this.entityData.define(DATA_QUAKE_Z, 0.0F);
+        this.entityData.define(DATA_QUAKE_YAW, 0.0F);
         this.entityData.define(DATA_SPIT_START, -1);
         this.entityData.define(DATA_SPIT_CHARGE, 0);
         this.entityData.define(DATA_PILLAR_START, -1);
@@ -591,15 +615,14 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.entityData.define(DATA_ENRAGE_STATE, STATE_NORMAL);
         this.entityData.define(DATA_BAR_ID, new CompoundTag());
         this.entityData.define(DATA_TRANSITION_START, -1L);
-        this.entityData.define(DATA_DEATH_START, -1L);
+        this.entityData.define(DATA_DEATH_AGE, -1);
     }
 
     @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
         super.onSyncedDataUpdated(key);
-        if (DATA_DEATH_START.equals(key) && this.isDyingAnimation()) {
-            this.deathAnchor = this.position();
-            this.deathYaw = this.getYRot();
+        if (DATA_DEATH_AGE.equals(key) && this.level().isClientSide && this.clientDeathClock != null) {
+            this.clientDeathClock.receive(this.entityData.get(DATA_DEATH_AGE), this.tickCount);
         }
         if (DATA_PHASE.equals(key)) {
             this.refreshDimensions();
@@ -623,6 +646,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         super.addAdditionalSaveData(tag);
         tag.putInt("TortoiseDeathAge", this.isDyingAnimation() ? Math.min(TortoiseDeath.DURATION - 1, (int) this.deathAge(0)) : -1);
         tag.putFloat("TortoiseDeathYaw", this.deathYaw);
+        tag.putBoolean("TortoiseRemainsSpawned", this.deathRemainsSpawned);
         tag.putInt("TortoisePhase", this.phase());
         tag.putBoolean("TortoiseEnrageTriggered", this.enrageTriggered);
         tag.putInt("TortoiseEnrageTicks", this.enrageTicks);
@@ -659,9 +683,11 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         }
         int deathAge = tag.contains("TortoiseDeathAge") ? tag.getInt("TortoiseDeathAge") : -1;
         if (deathAge >= 0) {
-            this.entityData.set(DATA_DEATH_START, Math.max(0L, this.level().getGameTime() - Math.min(TortoiseDeath.DURATION - 1, deathAge)));
+            this.serverDeathTicks = Math.min(TortoiseDeath.DURATION - 1, deathAge);
+            this.entityData.set(DATA_DEATH_AGE, this.serverDeathTicks);
             this.deathAnchor = this.position();
             this.deathYaw = tag.getFloat("TortoiseDeathYaw");
+            this.deathRemainsSpawned = tag.getBoolean("TortoiseRemainsSpawned");
             this.setNoAi(true);
             this.setNoGravity(true);
             this.bossEvent.setVisible(false);
@@ -726,6 +752,11 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     public void travel(Vec3 input) {
         if (this.isTransitioning() || this.isDyingAnimation()) {
             this.setDeltaMovement(Vec3.ZERO);
+            return;
+        }
+        if (this.action == ACTION_QUAKE) {
+            this.setDeltaMovement(0.0D, this.getDeltaMovement().y, 0.0D);
+            super.travel(new Vec3(0.0D, input.y, 0.0D));
             return;
         }
         super.travel(input);
@@ -812,6 +843,10 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
                 return;
             }
             VolcanicTortoiseEntity self = VolcanicTortoiseEntity.this;
+            if (self.action == ACTION_QUAKE) {
+                self.getNavigation().stop();
+                return;
+            }
             self.getLookControl().setLookAt(target, 30.0F, 30.0F);
             double distance = self.distanceTo(target);
             if (--this.repath <= 0) {
@@ -951,6 +986,10 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.barrageSpots.clear();
         this.barrageBall = 0;
         this.getNavigation().stop();
+        if (next == ACTION_QUAKE) {
+            this.quakeCenter = this.position();
+            this.publishQuake();
+        }
     }
 
     // ------------------------------------------------------ 狂暴 / 虚弱 --
@@ -1586,14 +1625,17 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
      * {@link #quakeHits}、自己的冷却 {@link #quakeCooldown}；不产生火环粒子。
      */
     private void tickQuake(ServerLevel level) {
-        if (this.actionTicks == QUAKE_HIT_TICK) {
-            this.quakeCenter = this.position();
-            this.publishQuake(level);
-            this.groundQuakeImpact(level);
-        }
+        this.getNavigation().stop();
+        this.setYRot(this.castYaw);
+        this.setYHeadRot(this.castYaw);
+        this.yBodyRot = this.castYaw;
+        if (this.actionTicks == QUAKE_HIT_TICK) this.groundQuakeImpact(level);
         int radiusAge = this.actionTicks - QUAKE_HIT_TICK;
+        if (radiusAge % 2 == 0) {
+            this.entityData.set(DATA_QUAKE_AGE, radiusAge);
+        }
         if (radiusAge > 0 && radiusAge <= QUAKE_RING_TICKS) {
-            double radius = QUAKE_RADIUS * radiusAge / (double) QUAKE_RING_TICKS;
+            double radius = TortoiseQuake.radius(radiusAge);
             double half = QUAKE_BAND * 0.5D;
             this.quakeHit(level, this.quakeCenter, radius - half, radius + half);
         }
@@ -1627,7 +1669,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     }
 
     /**
-     * 震波命中：基础伤害默认 0，只做一次向外击退 + 轻微上抛。
+     * 震波命中：基础伤害默认 0，每次施法命中一次，向外击飞并眩晕5秒。
      *
      * <p>不依赖 {@code hurt(0)} 的返回值（0 伤害会被原版判为无效），
      * 而是单独判断可攻击性、无敌与命中记录。
@@ -1645,6 +1687,9 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
             double dist = Math.hypot(victim.getX() - center.x, victim.getZ() - center.z);
             double half = victim.getBbWidth() * 0.5D;
             if (dist + half < inner || dist - half > outer) {
+                continue;
+            }
+            if (!TortoiseQuake.contains(victim.getX()-center.x, victim.getZ()-center.z, this.castYaw, half)) {
                 continue;
             }
             if (!this.quakeReaches(level, victim, center)) {
@@ -1666,11 +1711,8 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
                 dx = 1.0D;
                 dz = 0.0D;
             }
-            victim.knockback(QUAKE_KNOCKBACK, dx, dz);
-            if (QUAKE_LIFT > 0.0D) {
-                Vec3 motion = victim.getDeltaMovement();
-                victim.setDeltaMovement(motion.x, Math.max(motion.y, QUAKE_LIFT), motion.z);
-            }
+            victim.knockback(QUAKE_KNOCKBACK, -dx, -dz);
+            TortoiseStun.apply(victim, QUAKE_LIFT);
         }
     }
 
@@ -1989,13 +2031,20 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
 
     @Override
     public void handleEntityEvent(byte event) {
-        if (event == 60 && this.isDyingAnimation()) return; // Custom fragments replace the default central poof.
+        if (event == 60 && this.isDyingAnimation()) return; // The whole-body fade replaces the default central poof.
         super.handleEntityEvent(event);
+        if (event == 3 && this.level().isClientSide) {
+            // Process vanilla Health=0 first; otherwise the dying health guard would block it.
+            this.clientDeathClock.startIfAbsent(this.tickCount);
+        }
     }
 
     private void beginDeathSequence(ServerLevel level) {
         this.entityData.set(DATA_TRANSITION_START, -1L);
-        this.entityData.set(DATA_DEATH_START, level.getGameTime());
+        this.serverDeathTicks = 0;
+        this.entityData.set(DATA_DEATH_AGE, 0);
+        this.bossEvent.setVisible(false);
+        this.bossEvent.removeAllPlayers();
         this.deathAnchor = this.position();
         this.deathYaw = this.getYRot();
         this.startAction(ACTION_NONE);
@@ -2014,25 +2063,30 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
             if (this.level() instanceof ServerLevel level) this.beginDeathSequence(level);
             else return; // Wait for the server's synced clock rather than removing the corpse early.
         }
-        int age = (int) this.deathAge(0);
-        this.deathTime = age;
         this.setDeltaMovement(Vec3.ZERO);
         if (this.level() instanceof ServerLevel level) {
+            int age = this.serverDeathTicks = Math.min(TortoiseDeath.DURATION, this.serverDeathTicks + 1);
+            this.deathTime = age;
+            if (age % 2 == 0 || age == TortoiseDeath.DURATION) this.entityData.set(DATA_DEATH_AGE, age);
             this.getNavigation().stop();
             this.setPos(this.deathAnchor.x, this.deathAnchor.y, this.deathAnchor.z);
             this.setYRot(this.deathYaw);
             this.setYHeadRot(this.deathYaw);
             this.yBodyRot = this.deathYaw;
-            if (age == TortoiseDeath.IMPACT) {
-                level.playSound(null, this.blockPosition(), SoundEvents.STONE_BREAK, SoundSource.HOSTILE, 2.2F, 0.45F);
-                level.playSound(null, this.blockPosition(), SoundEvents.BASALT_BREAK, SoundSource.HOSTILE, 1.5F, 0.5F);
+            if (age == 4) {
+                level.playSound(null, this.blockPosition(), SoundEvents.FIRE_EXTINGUISH, SoundSource.HOSTILE, 0.8F, 0.65F);
             }
-            if (age == TortoiseDeath.COOL_START) {
-                level.playSound(null, this.blockPosition(), SoundEvents.FIRE_EXTINGUISH, SoundSource.HOSTILE, 1.7F, 0.65F);
+            if (age == 32 || age == 58) {
+                level.playSound(null, this.blockPosition(), SoundEvents.BASALT_BREAK, SoundSource.HOSTILE, 0.3F, 0.65F);
             }
-            if (age == 60 || age == 76 || age == 98) {
-                level.playSound(null, this.blockPosition(), SoundEvents.DEEPSLATE_BREAK, SoundSource.HOSTILE,
-                        0.65F * (1 - age / (float) TortoiseDeath.DURATION), 0.55F);
+            if (age >= TortoiseDeath.REMAINS_AT && !this.deathRemainsSpawned) {
+                Vec3 ground = VolcanicFireFieldEntity.groundBelow(level, this.deathAnchor);
+                if (ground == null) ground = this.deathAnchor;
+                TortoiseRemainsEntity remains = new TortoiseRemainsEntity(VolcanicTortoiseRegistration.REMAINS, level);
+                // A stable identity prevents a second mound when a partially saved death is resumed.
+                remains.setUUID(UUID.nameUUIDFromBytes((this.getUUID() + ":remains").getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+                remains.moveTo(ground.x, ground.y, ground.z, this.deathYaw, 0);
+                this.deathRemainsSpawned = level.getEntity(remains.getUUID()) != null || level.addFreshEntity(remains);
             }
             if (age >= TortoiseDeath.DURATION) {
                 this.deathTime = 19;

@@ -9,7 +9,7 @@ import software.bernie.geckolib.core.animation.RawAnimation;
 import software.bernie.geckolib.core.object.PlayState;
 import software.bernie.geckolib.core.state.BoneSnapshot;
 
-/** Seeks the existing transition clip from synced game time, including late tracking/model swaps. */
+/** Seeks the death clip from synced elapsed ticks, including late tracking/model swaps. */
 final class TortoiseDeathController extends AnimationController<VolcanicTortoiseEntity> {
     private static final RawAnimation CLIP = RawAnimation.begin().thenPlay("death");
     private float partialTick;

@@ -57,4 +57,16 @@ public final class TNConcealmentEvents {
             living.removeEffect(effect);
         }
     }
+    /** Migrate saved effects from the old seconds/ticks mix-up before their normal tick. */
+    @SubscribeEvent
+    public static void clampLegacyDuration(net.minecraftforge.event.entity.living.LivingEvent.LivingTickEvent event) {
+        LivingEntity target=event.getEntity();
+        if (target.level().isClientSide()) return;
+        var effect=target.getEffect(TNEffects.CONCEALMENT.get());
+        if (effect==null || effect.getDuration()<=1200) return;
+        var replacement=new net.minecraft.world.effect.MobEffectInstance(TNEffects.CONCEALMENT.get(),1200,
+                effect.getAmplifier(),effect.isAmbient(),effect.isVisible(),effect.showIcon());
+        target.removeEffect(TNEffects.CONCEALMENT.get());
+        target.addEffect(replacement);
+    }
 }

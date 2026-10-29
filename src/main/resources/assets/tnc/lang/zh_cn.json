@@ -938,5 +938,6 @@
   "spell.tnc.thunder_seal_1.description": "雷楔从地面显现，蓄势后向雷印落点导通并引下落雷。",
   "spell.tnc.concealment.name": "隐匿",
   "spell.tnc.concealment.description": "隐去身形 1 分钟：敌对生物不会把你选作目标。期间造成或受到伤害会立刻显形。",
-  "effect.tnc.concealment": "隐匿"
+  "effect.tnc.concealment": "隐匿",
+  "effect.tnc.tortoise_stun": "眩晕"
 }
