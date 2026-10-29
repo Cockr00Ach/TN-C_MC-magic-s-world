@@ -420,11 +420,12 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
 
     public boolean isDyingAnimation() {
         return this.entityData.get(DATA_DEATH_AGE) >= 0
-                || (this.level().isClientSide && this.clientDeathClock.started());
+                // LivingEntity's constructor calls our setHealth before subclass fields initialize.
+                || (this.level().isClientSide && this.clientDeathClock != null && this.clientDeathClock.started());
     }
 
     public float deathAge(float partialTick) {
-        return this.level().isClientSide ? this.clientDeathClock.age(this.tickCount, partialTick)
+        return this.level().isClientSide ? this.clientDeathClock == null ? -1 : this.clientDeathClock.age(this.tickCount, partialTick)
                 : this.serverDeathTicks < 0 ? -1 : Math.min(TortoiseDeath.DURATION, this.serverDeathTicks + partialTick);
     }
 
@@ -602,7 +603,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
         super.onSyncedDataUpdated(key);
-        if (DATA_DEATH_AGE.equals(key) && this.level().isClientSide) {
+        if (DATA_DEATH_AGE.equals(key) && this.level().isClientSide && this.clientDeathClock != null) {
             this.clientDeathClock.receive(this.entityData.get(DATA_DEATH_AGE), this.tickCount);
         }
         if (DATA_PHASE.equals(key)) {
