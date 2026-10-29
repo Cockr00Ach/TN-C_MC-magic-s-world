@@ -1,0 +1,26 @@
+{
+  "type": "tnc:skyhaven",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "tnc:skyhaven",
+      "features": false,
+      "lakes": false,
+      "structure_overrides": [],
+      "layers": [
+        {
+          "block": "minecraft:bedrock",
+          "height": 1
+        },
+        {
+          "block": "minecraft:deepslate",
+          "height": 36
+        },
+        {
+          "block": "tnc:abyssal_mana_water",
+          "height": 12
+        }
+      ]
+    }
+  }
+}
