@@ -41,11 +41,16 @@ public final class TortoiseQuakeTiles {
     }
 
     public static List<Cell> cells(double centerX, double centerZ, double age) {
+        return cells(centerX, centerZ, age, 0);
+    }
+
+    public static List<Cell> cells(double centerX, double centerZ, double age, double yaw) {
         List<Cell> cells = new ArrayList<>();
         if (age < 0 || age >= TortoiseQuake.LIFETIME) return cells;
         int cx = (int) Math.floor(centerX), cz = (int) Math.floor(centerZ);
         for (int x = cx - 24; x <= cx + 24; x++) for (int z = cz - 24; z <= cz + 24; z++) {
             double distance = Math.hypot(x + 0.5D - centerX, z + 0.5D - centerZ);
+            if (!TortoiseQuake.contains(x+0.5D-centerX,z+0.5D-centerZ,yaw,0.71D)) continue;
             if (lift(age, distance) > 0.003D || lift(age + 1.0D, distance) > 0.003D) cells.add(new Cell(x,z,distance));
         }
         cells.sort(Comparator.comparingDouble(cell -> Math.atan2(cell.z + 0.5D - centerZ, cell.x + 0.5D - centerX)));

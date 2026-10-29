@@ -83,4 +83,43 @@ class TortoiseQuakeTest {
         assertEquals(11,first.age(4));assertEquals(1,second.age(4));
         first.receive(90,0,4);assertEquals(0,first.age(4));assertEquals(1,second.age(4));
     }
+    @Test void sectorUsesMinecraftYawAndKeepsTheRearSafe() {
+        assertTrue(TortoiseQuake.contains(0,21,0,0));
+        assertTrue(TortoiseQuake.contains(-21,0,90,0));
+        assertTrue(TortoiseQuake.contains(0,-21,180,0));
+        assertFalse(TortoiseQuake.contains(0,-10,0,0.3D));
+        assertFalse(TortoiseQuake.contains(10,0,0,0.3D));
+        assertFalse(TortoiseQuake.contains(0,22.4D,0,0.3D));
+        double x=Math.sin(Math.toRadians(61))*10,z=Math.cos(Math.toRadians(61))*10;
+        assertFalse(TortoiseQuake.contains(x,z,0,0));
+        assertTrue(TortoiseQuake.contains(x,z,0,0.3D));
+        assertFalse(TortoiseQuake.contains(0,-1,0,0.3D));
+    }
+    @Test void renderedCellsAndHitAreaShareTheSameSector() {
+        for(int yaw=0;yaw<360;yaw+=45)for(int age=1;age<50;age+=3) {
+            var cells=TortoiseQuakeTiles.cells(-10.3D,4.7D,age,yaw);
+            for(var cell:cells)assertTrue(TortoiseQuake.contains(cell.x()+0.5D+10.3D,
+                    cell.z()+0.5D-4.7D,yaw,0.71D));
+        }
+        assertFalse(TortoiseQuakeTiles.cells(0.5D,0.5D,24,0).isEmpty());
+    }
+    @Test void warningAgeSurvivesTrackingAndCrossesImpactWithoutRestart() {
+        var clock=new TortoiseQuake.Playback();clock.receive(8,-24,100);
+        assertEquals(-12,clock.age(112));clock.receive(8,-24,112);
+        assertEquals(-12,clock.age(112));clock.receive(8,-2,122);
+        assertEquals(0,clock.age(124));clock.receive(8,0,124);
+        assertEquals(2.5D,clock.age(126.5D));
+        var late=new TortoiseQuake.Playback();late.receive(8,-6,40000);
+        assertEquals(-4,late.age(40002));
+        late.receive(-1,-1,40003);assertEquals(-1,late.age(40010));
+    }
+    @Test void warningIsVisibleOnlyBeforeImpactAndNeverRaisesTerrain() {
+        for(double age=-24;age<0;age+=0.25D) {
+            assertTrue(TortoiseQuake.warningOpacity(age)>=0.13F);
+            assertEquals(0,TortoiseQuakeTiles.lift(age,5));
+            assertTrue(TortoiseQuakeTiles.cells(0,0,age).isEmpty());
+        }
+        assertEquals(0,TortoiseQuake.warningOpacity(0));
+        assertEquals(0,TortoiseQuake.warningOpacity(-25));
+    }
 }
