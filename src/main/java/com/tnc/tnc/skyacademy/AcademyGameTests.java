@@ -13,6 +13,18 @@ import net.minecraftforge.gametest.*;
 /** Exercises the same machines, ownership checks and dialogue actions used by players. */
 @GameTestHolder("tncacademy") @PrefixGameTestTemplate(false)
 public final class AcademyGameTests {
+    @GameTest(template="building_test_empty",timeoutTicks=100)
+    public static void freshIslandEnrollmentDoesNotDependOnWorldTickZero(GameTestHelper h){
+        var s=h.getLevel().getServer();var state=SkyAcademyWorld.State.get(s.overworld());
+        boolean enabled=state.enabled,done=state.done;int tile=state.tile,cursor=state.cursor;String error=state.error;
+        try{
+            state.enabled=false;state.done=false;
+            h.assertTrue(s.overworld().getGameTime()>0,"fixture starts after world warm-up");
+            SkyAcademyWorld.beginFreshIsland(s);
+            h.assertTrue(state.enabled&&!state.done&&!SkyAcademyWorld.ready(s),"new island waits for the authored scenery even after warm-up");
+            h.succeed();
+        }finally{state.enabled=enabled;state.done=done;state.tile=tile;state.cursor=cursor;state.error=error;state.setDirty();}
+    }
     private interface Check { void run(ServerPlayer p,BlockPos base)throws Exception; }
     private static void fixture(GameTestHelper h,String site,Check check)throws Exception{
         var l=h.getLevel();var s=l.getServer();var store=l.getDataStorage();

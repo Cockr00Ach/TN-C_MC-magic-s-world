@@ -101,6 +101,8 @@ public final class SkyIslandManager {
             }
 
             if (data.version != manifest.version()) {
+                if(data.version==0 && data.phase==SkyIslandSavedData.Phase.IDLE)
+                    com.tnc.tnc.skyacademy.SkyAcademyWorld.beginFreshIsland(server);
                 releaseActiveChunks(overworld, data);
                 data.resetFor(manifest);
             } else if (data.phase == SkyIslandSavedData.Phase.IDLE) {

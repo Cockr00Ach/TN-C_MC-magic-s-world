@@ -35,6 +35,8 @@ public final class SkyAcademyWorld {
         }catch(IOException e){throw new ExceptionInInitializerError(e);}
     }
     public static BlockPos origin(MinecraftServer s){return SkyIslandSavedData.get(s.overworld()).anchorPos("ORIGIN");}
+    /** Called by the island lifecycle, never inferred from a fleeting game-time value. */
+    public static void beginFreshIsland(MinecraftServer s){var d=State.get(s.overworld());d.enabled=true;d.done=false;d.tile=d.cursor=0;d.error="";d.setDirty();}
     public static BlockPos at(MinecraftServer s,String site){var o=origin(s);var p=SITES.get(site);return o==null||p==null?null:o.offset(p);}
     public static boolean available(MinecraftServer s){var d=State.get(s.overworld());return d.enabled&&d.done;}
     public static void enableIsolatedAudit(MinecraftServer s){if(!Boolean.getBoolean("tnc.skyAcademyAudit"))throw new IllegalStateException("Audit opt-in required");var d=State.get(s.overworld());if(!d.enabled){d.enabled=true;d.done=false;d.tile=d.cursor=0;d.error="";d.setDirty();}}
