@@ -7,9 +7,6 @@ public final class TortoiseDeath {
     public static final int MAX_PARTICLE_LIFE = 24, REMAINS_AT = SCATTER_END + MAX_PARTICLE_LIFE;
     public static final int DURATION = REMAINS_AT + 4;
     private TortoiseDeath() {}
-    public static float age(long start, long now, float partial) {
-        return start < 0 ? -1 : Math.max(0, Math.min(DURATION, now - start + partial));
-    }
     public static float cooling(float age) { return TortoiseTransition.smooth(age / COOL_END); }
     public static float glow(float age) { return 1 - cooling(age); }
     public static float opacity(float age) {

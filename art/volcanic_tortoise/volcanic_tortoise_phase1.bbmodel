@@ -18861,12 +18861,572 @@
       },
       {
        "channel": "position",
-       "time": 3.0,
+       "time": 1.0,
        "interpolation": "linear",
        "data_points": [
         {
          "x": 0,
          "y": 0.0,
+         "z": 0
+        }
+       ],
+       "uuid": "1afe8688cb1d5c6fb35f0176731d24f7",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.05,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.012,
+         "z": 0
+        }
+       ],
+       "uuid": "c3628586ac8d5035945368ab2936264f",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.1,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.024,
+         "z": 0
+        }
+       ],
+       "uuid": "99b837a03ea45c06a6a55b7d4c0e4ea1",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.15,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.036,
+         "z": 0
+        }
+       ],
+       "uuid": "bd8b6bd8cbf959b39a9622ed2a1ba779",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.2,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.048,
+         "z": 0
+        }
+       ],
+       "uuid": "dc7eeb5c30a956dab95461153d70ec12",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.25,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.06,
+         "z": 0
+        }
+       ],
+       "uuid": "afcc30a746d3528aa4a890e0ca9f3443",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.3,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.072,
+         "z": 0
+        }
+       ],
+       "uuid": "afe8609125b050619287b797afa3c829",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.35,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.084,
+         "z": 0
+        }
+       ],
+       "uuid": "2129dc01d5e852ff899fabbf991afd3d",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.4,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.096,
+         "z": 0
+        }
+       ],
+       "uuid": "166dbfb4c5d650ffade754203a3fd828",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.45,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.108,
+         "z": 0
+        }
+       ],
+       "uuid": "c24d40c2bd535c68ac9922c2ae52adfd",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.5,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.12,
+         "z": 0
+        }
+       ],
+       "uuid": "ec9960d51db051bd888156003ee438b2",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.55,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.132,
+         "z": 0
+        }
+       ],
+       "uuid": "479255c1020b5a6298a15dea520a5e02",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.6,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.144,
+         "z": 0
+        }
+       ],
+       "uuid": "86781e60b06b5cfaa3afc96afbbdf586",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.65,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.156,
+         "z": 0
+        }
+       ],
+       "uuid": "61bba8c31f6d56f0bae18e5c648abc73",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.7,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.168,
+         "z": 0
+        }
+       ],
+       "uuid": "a054ab0ed05f55b3a748473195b0422b",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.75,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.18,
+         "z": 0
+        }
+       ],
+       "uuid": "ada13223d8bf5512989c1aecfc2d8a3b",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.8,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.192,
+         "z": 0
+        }
+       ],
+       "uuid": "3202f19b4bad57aba0cfaa56d5fc9efa",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.85,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.204,
+         "z": 0
+        }
+       ],
+       "uuid": "78dbbeb998525eba8ba779c3b6c2bba0",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.9,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.216,
+         "z": 0
+        }
+       ],
+       "uuid": "b75284da020158c4b4bfce03323e47f7",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.95,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.228,
+         "z": 0
+        }
+       ],
+       "uuid": "f9fd4c1568c05de38233adf17205906a",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.0,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.24,
+         "z": 0
+        }
+       ],
+       "uuid": "f383436b08d45b6fb023b739905818d2",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.05,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.252,
+         "z": 0
+        }
+       ],
+       "uuid": "214d74e33a285ac598c2d29faa218162",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.1,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.264,
+         "z": 0
+        }
+       ],
+       "uuid": "b0e521ed42d75ff18739d3a240c7e017",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.15,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.276,
+         "z": 0
+        }
+       ],
+       "uuid": "688fcb7b710a5ee9aa2ad448b8607544",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.2,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.288,
+         "z": 0
+        }
+       ],
+       "uuid": "0e73879ece4b5f2d8cb90d3b3c1eb8cf",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.25,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.3,
+         "z": 0
+        }
+       ],
+       "uuid": "ac5f86cdfe005f3fa4aa5bb5640071ca",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.3,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.312,
+         "z": 0
+        }
+       ],
+       "uuid": "e1c20ec518735418bb8fd00e7c57872c",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.35,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.324,
+         "z": 0
+        }
+       ],
+       "uuid": "e1e3b7b1387050bab5123b183b9ec41f",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.4,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.336,
+         "z": 0
+        }
+       ],
+       "uuid": "53bb0325e1405105b12fa3b8904a9df2",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.45,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.348,
+         "z": 0
+        }
+       ],
+       "uuid": "b253e2de59b059b6b10d6c4491737ef9",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.5,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.36,
+         "z": 0
+        }
+       ],
+       "uuid": "dff29721035355579da18c955e44a547",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.55,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.372,
+         "z": 0
+        }
+       ],
+       "uuid": "1c639bfa146d5168a6cd3b11f7e60a66",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.6,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.384,
+         "z": 0
+        }
+       ],
+       "uuid": "8b2e30f578ff57bbbc347c16eadc4a76",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.65,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.396,
+         "z": 0
+        }
+       ],
+       "uuid": "019c87abd4b65bf6a286b75920b8d542",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.7,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.408,
+         "z": 0
+        }
+       ],
+       "uuid": "793448933d175a02b3c1f1f548e26447",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.75,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.42,
+         "z": 0
+        }
+       ],
+       "uuid": "4ad44b9acc77575aa3c058cf34abd45c",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.8,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.432,
+         "z": 0
+        }
+       ],
+       "uuid": "b0df0e6753a453dbba7e6999dede69e8",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.85,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.444,
+         "z": 0
+        }
+       ],
+       "uuid": "b915460865725b1c820b5870830e7109",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.9,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.456,
+         "z": 0
+        }
+       ],
+       "uuid": "7e9e56cfa5bc513c96866b00097f2584",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.95,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.468,
+         "z": 0
+        }
+       ],
+       "uuid": "9b0e75a523da573a85a7495e5f5cafde",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 3.0,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": -0.48,
          "z": 0
         }
        ],
@@ -18880,7 +19440,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.02,
+         "y": -0.492,
          "z": 0
         }
        ],
@@ -18894,7 +19454,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.04,
+         "y": -0.504,
          "z": 0
         }
        ],
@@ -18908,7 +19468,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.06,
+         "y": -0.516,
          "z": 0
         }
        ],
@@ -18922,7 +19482,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.08,
+         "y": -0.528,
          "z": 0
         }
        ],
@@ -18936,7 +19496,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.1,
+         "y": -0.54,
          "z": 0
         }
        ],
@@ -18950,7 +19510,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.12,
+         "y": -0.552,
          "z": 0
         }
        ],
@@ -18964,7 +19524,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.14,
+         "y": -0.564,
          "z": 0
         }
        ],
@@ -18978,7 +19538,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.16,
+         "y": -0.576,
          "z": 0
         }
        ],
@@ -18992,7 +19552,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.18,
+         "y": -0.588,
          "z": 0
         }
        ],
@@ -19006,7 +19566,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.2,
+         "y": -0.6,
          "z": 0
         }
        ],
@@ -19020,7 +19580,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.22,
+         "y": -0.612,
          "z": 0
         }
        ],
@@ -19034,7 +19594,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.24,
+         "y": -0.624,
          "z": 0
         }
        ],
@@ -19048,7 +19608,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.26,
+         "y": -0.636,
          "z": 0
         }
        ],
@@ -19062,7 +19622,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.28,
+         "y": -0.648,
          "z": 0
         }
        ],
@@ -19076,7 +19636,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.3,
+         "y": -0.66,
          "z": 0
         }
        ],
@@ -19090,7 +19650,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.32,
+         "y": -0.672,
          "z": 0
         }
        ],
@@ -19104,7 +19664,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.34,
+         "y": -0.684,
          "z": 0
         }
        ],
@@ -19118,7 +19678,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.36,
+         "y": -0.696,
          "z": 0
         }
        ],
@@ -19132,7 +19692,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.38,
+         "y": -0.708,
          "z": 0
         }
        ],
@@ -19146,7 +19706,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.4,
+         "y": -0.72,
          "z": 0
         }
        ],
@@ -19160,7 +19720,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.42,
+         "y": -0.732,
          "z": 0
         }
        ],
@@ -19174,7 +19734,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.44,
+         "y": -0.744,
          "z": 0
         }
        ],
@@ -19188,7 +19748,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.46,
+         "y": -0.756,
          "z": 0
         }
        ],
@@ -19202,7 +19762,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.48,
+         "y": -0.768,
          "z": 0
         }
        ],
@@ -19216,7 +19776,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.5,
+         "y": -0.78,
          "z": 0
         }
        ],
@@ -19230,7 +19790,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.52,
+         "y": -0.792,
          "z": 0
         }
        ],
@@ -19244,7 +19804,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.54,
+         "y": -0.804,
          "z": 0
         }
        ],
@@ -19258,7 +19818,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.56,
+         "y": -0.816,
          "z": 0
         }
        ],
@@ -19272,7 +19832,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.58,
+         "y": -0.828,
          "z": 0
         }
        ],
@@ -19286,7 +19846,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.6,
+         "y": -0.84,
          "z": 0
         }
        ],
@@ -19300,7 +19860,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.62,
+         "y": -0.852,
          "z": 0
         }
        ],
@@ -19314,7 +19874,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.64,
+         "y": -0.864,
          "z": 0
         }
        ],
@@ -19328,7 +19888,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.66,
+         "y": -0.876,
          "z": 0
         }
        ],
@@ -19342,7 +19902,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.68,
+         "y": -0.888,
          "z": 0
         }
        ],
@@ -19356,7 +19916,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.7,
+         "y": -0.9,
          "z": 0
         }
        ],
@@ -19370,7 +19930,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.72,
+         "y": -0.912,
          "z": 0
         }
        ],
@@ -19384,7 +19944,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.74,
+         "y": -0.924,
          "z": 0
         }
        ],
@@ -19398,7 +19958,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.76,
+         "y": -0.936,
          "z": 0
         }
        ],
@@ -19412,7 +19972,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.78,
+         "y": -0.948,
          "z": 0
         }
        ],
@@ -19426,7 +19986,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.8,
+         "y": -0.96,
          "z": 0
         }
        ],
@@ -19440,7 +20000,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.82,
+         "y": -0.972,
          "z": 0
         }
        ],
@@ -19454,7 +20014,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.84,
+         "y": -0.984,
          "z": 0
         }
        ],
@@ -19468,7 +20028,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.86,
+         "y": -0.996,
          "z": 0
         }
        ],
@@ -19482,7 +20042,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.88,
+         "y": -1.008,
          "z": 0
         }
        ],
@@ -19496,7 +20056,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.9,
+         "y": -1.02,
          "z": 0
         }
        ],
@@ -19510,7 +20070,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.92,
+         "y": -1.032,
          "z": 0
         }
        ],
@@ -19524,7 +20084,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.94,
+         "y": -1.044,
          "z": 0
         }
        ],
@@ -19538,7 +20098,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.96,
+         "y": -1.056,
          "z": 0
         }
        ],
@@ -19552,7 +20112,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -0.98,
+         "y": -1.068,
          "z": 0
         }
        ],
@@ -19566,7 +20126,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -1.0,
+         "y": -1.08,
          "z": 0
         }
        ],
@@ -19580,7 +20140,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -1.02,
+         "y": -1.092,
          "z": 0
         }
        ],
@@ -19594,7 +20154,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -1.04,
+         "y": -1.104,
          "z": 0
         }
        ],
@@ -19608,7 +20168,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -1.06,
+         "y": -1.116,
          "z": 0
         }
        ],
@@ -19622,7 +20182,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -1.08,
+         "y": -1.128,
          "z": 0
         }
        ],
@@ -19636,7 +20196,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -1.1,
+         "y": -1.14,
          "z": 0
         }
        ],
@@ -19650,7 +20210,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -1.12,
+         "y": -1.152,
          "z": 0
         }
        ],
@@ -19664,7 +20224,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -1.14,
+         "y": -1.164,
          "z": 0
         }
        ],
@@ -19678,7 +20238,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -1.16,
+         "y": -1.176,
          "z": 0
         }
        ],
@@ -19692,7 +20252,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": -1.18,
+         "y": -1.188,
          "z": 0
         }
        ],
@@ -19845,11 +20405,571 @@
       },
       {
        "channel": "rotation",
-       "time": 3.0,
+       "time": 1.0,
        "interpolation": "linear",
        "data_points": [
         {
          "x": 0.0,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "503c671e4b7d52439f01f28e3362c65c",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.05,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0.08,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "1ad592e1459159999c5d52dda065a2eb",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.1,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0.16,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "81f36324345a5de8978204016b2ae9ae",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.15,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0.24,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "5b9fdb0d656c5c5088645f62967de7f3",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.2,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0.32,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "c814825d79805384892230b7550df8b1",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.25,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0.4,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "33185696102158eeab41de242b5c0991",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.3,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0.48,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "5f041338deba503896f081bdb3537ed1",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.35,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0.56,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "7b7b5493f8185e11a31956ce1485adee",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.4,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0.64,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "23abd84f3d51537baebd0e7b1d785ea8",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.45,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0.72,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "53ced1f6612b5cafb3b90ab25a2c5f4b",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.5,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0.8,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "dfcd1a000d03501898db0fe53d896e2c",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.55,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0.88,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "e9178640190353d98c8293d4a32dd28a",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.6,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0.96,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "bc7f8108c31954cea17e7f7190bdb34b",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.65,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 1.04,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "046aadc79b9a501a95329ae646614697",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.7,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 1.12,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "09eb78279f0550ec81431f7f668683bc",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.75,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 1.2,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "80dec666b2d25d7893f8351773c349cc",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.8,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 1.28,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "4a946f2ca40255db83449746454f6016",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.85,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 1.36,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "21c0c24905b554f9bd0f27dbbb018c7a",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.9,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 1.44,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "8288d36cbf7056aa8a8b72908f2514d3",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.95,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 1.52,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "b9598b97e03d5d78bfb94376b8222e17",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.0,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 1.6,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "3166082048ce558f86769672657362df",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.05,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 1.68,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "ca2bcd3317f755d9b34bac6280a8e956",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.1,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 1.76,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "68d32b2e604959e492f2d096531799a4",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.15,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 1.84,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "4208bda8a6085842876f6a35383578b6",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.2,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 1.92,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "712ee37680ae5b34a5911f25dbda34ce",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.25,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 2.0,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "458e16e7f6af5a25b5dcf8a89c442179",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.3,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 2.08,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "b3848c80c4f251e4a3d3f027e86e24da",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.35,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 2.16,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "ce35333be42f5e0b9e53bafe0cf6896e",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.4,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 2.24,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "b26dcb46df665303a638f86a8f5280de",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.45,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 2.32,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "edfb88b0ab485de4b13a312a1736f422",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.5,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 2.4,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "c0194debf6fb5cf082b933365592640f",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.55,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 2.48,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "47b56a78a4c85a18ac5e5f2a4b148aa4",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.6,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 2.56,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "8d2d66fc16ad5a7ebaa4cb64314e00b6",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.65,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 2.64,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "ed897c5986bf5f02897052851961a282",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.7,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 2.72,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "a7664912d15f5f1db67a241089da8ddf",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.75,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 2.8,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "03f36cd3870952cd88ca9cf1913c2d7a",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.8,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 2.88,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "227ccd84a0075a52936a076fef092316",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.85,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 2.96,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "29d8efb40df95c80b1504a7bee7c7d4e",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.9,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 3.04,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "80e7dcbdbd9a5d54b035f10b3bdd14c2",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.95,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 3.12,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "412a12a0f5b75d45b58bdea5d370d1ca",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 3.0,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 3.2,
          "y": 0,
          "z": 0
         }
@@ -19863,7 +20983,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 0.16667,
+         "x": 3.28,
          "y": 0,
          "z": 0
         }
@@ -19877,7 +20997,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 0.33333,
+         "x": 3.36,
          "y": 0,
          "z": 0
         }
@@ -19891,7 +21011,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 0.5,
+         "x": 3.44,
          "y": 0,
          "z": 0
         }
@@ -19905,7 +21025,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 0.66667,
+         "x": 3.52,
          "y": 0,
          "z": 0
         }
@@ -19919,7 +21039,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 0.83333,
+         "x": 3.6,
          "y": 0,
          "z": 0
         }
@@ -19933,7 +21053,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 1.0,
+         "x": 3.68,
          "y": 0,
          "z": 0
         }
@@ -19947,7 +21067,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 1.16667,
+         "x": 3.76,
          "y": 0,
          "z": 0
         }
@@ -19961,7 +21081,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 1.33333,
+         "x": 3.84,
          "y": 0,
          "z": 0
         }
@@ -19975,7 +21095,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 1.5,
+         "x": 3.92,
          "y": 0,
          "z": 0
         }
@@ -19989,7 +21109,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 1.66667,
+         "x": 4.0,
          "y": 0,
          "z": 0
         }
@@ -20003,7 +21123,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 1.83333,
+         "x": 4.08,
          "y": 0,
          "z": 0
         }
@@ -20017,7 +21137,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 2.0,
+         "x": 4.16,
          "y": 0,
          "z": 0
         }
@@ -20031,7 +21151,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 2.16667,
+         "x": 4.24,
          "y": 0,
          "z": 0
         }
@@ -20045,7 +21165,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 2.33333,
+         "x": 4.32,
          "y": 0,
          "z": 0
         }
@@ -20059,7 +21179,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 2.5,
+         "x": 4.4,
          "y": 0,
          "z": 0
         }
@@ -20073,7 +21193,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 2.66667,
+         "x": 4.48,
          "y": 0,
          "z": 0
         }
@@ -20087,7 +21207,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 2.83333,
+         "x": 4.56,
          "y": 0,
          "z": 0
         }
@@ -20101,7 +21221,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 3.0,
+         "x": 4.64,
          "y": 0,
          "z": 0
         }
@@ -20115,7 +21235,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 3.16667,
+         "x": 4.72,
          "y": 0,
          "z": 0
         }
@@ -20129,7 +21249,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 3.33333,
+         "x": 4.8,
          "y": 0,
          "z": 0
         }
@@ -20143,7 +21263,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 3.5,
+         "x": 4.88,
          "y": 0,
          "z": 0
         }
@@ -20157,7 +21277,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 3.66667,
+         "x": 4.96,
          "y": 0,
          "z": 0
         }
@@ -20171,7 +21291,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 3.83333,
+         "x": 5.04,
          "y": 0,
          "z": 0
         }
@@ -20185,7 +21305,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 4.0,
+         "x": 5.12,
          "y": 0,
          "z": 0
         }
@@ -20199,7 +21319,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 4.16667,
+         "x": 5.2,
          "y": 0,
          "z": 0
         }
@@ -20213,7 +21333,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 4.33333,
+         "x": 5.28,
          "y": 0,
          "z": 0
         }
@@ -20227,7 +21347,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 4.5,
+         "x": 5.36,
          "y": 0,
          "z": 0
         }
@@ -20241,7 +21361,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 4.66667,
+         "x": 5.44,
          "y": 0,
          "z": 0
         }
@@ -20255,7 +21375,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 4.83333,
+         "x": 5.52,
          "y": 0,
          "z": 0
         }
@@ -20269,7 +21389,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 5.0,
+         "x": 5.6,
          "y": 0,
          "z": 0
         }
@@ -20283,7 +21403,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 5.16667,
+         "x": 5.68,
          "y": 0,
          "z": 0
         }
@@ -20297,7 +21417,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 5.33333,
+         "x": 5.76,
          "y": 0,
          "z": 0
         }
@@ -20311,7 +21431,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 5.5,
+         "x": 5.84,
          "y": 0,
          "z": 0
         }
@@ -20325,7 +21445,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 5.66667,
+         "x": 5.92,
          "y": 0,
          "z": 0
         }
@@ -20339,7 +21459,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 5.83333,
+         "x": 6.0,
          "y": 0,
          "z": 0
         }
@@ -20353,7 +21473,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 6.0,
+         "x": 6.08,
          "y": 0,
          "z": 0
         }
@@ -20367,7 +21487,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 6.16667,
+         "x": 6.16,
          "y": 0,
          "z": 0
         }
@@ -20381,7 +21501,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 6.33333,
+         "x": 6.24,
          "y": 0,
          "z": 0
         }
@@ -20395,7 +21515,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 6.5,
+         "x": 6.32,
          "y": 0,
          "z": 0
         }
@@ -20409,7 +21529,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 6.66667,
+         "x": 6.4,
          "y": 0,
          "z": 0
         }
@@ -20423,7 +21543,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 6.83333,
+         "x": 6.48,
          "y": 0,
          "z": 0
         }
@@ -20437,7 +21557,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 7.0,
+         "x": 6.56,
          "y": 0,
          "z": 0
         }
@@ -20451,7 +21571,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 7.16667,
+         "x": 6.64,
          "y": 0,
          "z": 0
         }
@@ -20465,7 +21585,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 7.33333,
+         "x": 6.72,
          "y": 0,
          "z": 0
         }
@@ -20479,7 +21599,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 7.5,
+         "x": 6.8,
          "y": 0,
          "z": 0
         }
@@ -20493,7 +21613,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 7.66667,
+         "x": 6.88,
          "y": 0,
          "z": 0
         }
@@ -20507,7 +21627,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 7.83333,
+         "x": 6.96,
          "y": 0,
          "z": 0
         }
@@ -20521,7 +21641,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 8.0,
+         "x": 7.04,
          "y": 0,
          "z": 0
         }
@@ -20535,7 +21655,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 8.16667,
+         "x": 7.12,
          "y": 0,
          "z": 0
         }
@@ -20549,7 +21669,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 8.33333,
+         "x": 7.2,
          "y": 0,
          "z": 0
         }
@@ -20563,7 +21683,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 8.5,
+         "x": 7.28,
          "y": 0,
          "z": 0
         }
@@ -20577,7 +21697,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 8.66667,
+         "x": 7.36,
          "y": 0,
          "z": 0
         }
@@ -20591,7 +21711,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 8.83333,
+         "x": 7.44,
          "y": 0,
          "z": 0
         }
@@ -20605,7 +21725,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 9.0,
+         "x": 7.52,
          "y": 0,
          "z": 0
         }
@@ -20619,7 +21739,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 9.16667,
+         "x": 7.6,
          "y": 0,
          "z": 0
         }
@@ -20633,7 +21753,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 9.33333,
+         "x": 7.68,
          "y": 0,
          "z": 0
         }
@@ -20647,7 +21767,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 9.5,
+         "x": 7.76,
          "y": 0,
          "z": 0
         }
@@ -20661,7 +21781,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 9.66667,
+         "x": 7.84,
          "y": 0,
          "z": 0
         }
@@ -20675,7 +21795,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 9.83333,
+         "x": 7.92,
          "y": 0,
          "z": 0
         }
@@ -20689,7 +21809,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 10.0,
+         "x": 8.0,
          "y": 0,
          "z": 0
         }
@@ -20703,7 +21823,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 10,
+         "x": 8.0,
          "y": 0,
          "z": 0
         }
@@ -20733,11 +21853,571 @@
       },
       {
        "channel": "rotation",
+       "time": 1.0,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0.0,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "bcf9a17ff0785e869b79f9257f3b8c5e",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.05,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0.12,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "36713b57b91a50d4bc9223d08ce45689",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.1,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0.24,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "5c5b1e2fd3445478a8c15cd566ba255d",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.15,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0.36,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "02784421c75d58fe9dd9424e1b08c16c",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.2,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0.48,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "a3de81ae1e44536ba823ed37d5c05a94",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.25,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0.6,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "8abbfc014b5b58e988aebb0fe3d541d6",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.3,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0.72,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "aaef977b5a9e508aa1f6e729eefeb80e",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.35,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0.84,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "78f1f39f0f025c2596878d7e18392c01",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.4,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0.96,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "272c78db0aac5106ba9fd8ad5b4e7ab3",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.45,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 1.08,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "3287c51bc38e5c2785c8b4afe4e2de1d",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.5,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 1.2,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "190f75f4860a5555b70c6edf1030f929",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.55,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 1.32,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "d80908f3c5ad52a88cd7f1f300cabf32",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.6,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 1.44,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "a6762df593c8535ab221ece05f7b4d4e",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.65,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 1.56,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "e903e1a9d9e35165a4d6d0df1de8e87f",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.7,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 1.68,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "ba8988faf59e54188198fccd34637447",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.75,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 1.8,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "c5526f1917c15587861bdc070a3983fb",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.8,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 1.92,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "57ffdcc060ff5fa882e2a9ab0e6427a9",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.85,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 2.04,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "1ebbe4a915f15014a40515234f26cb33",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.9,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 2.16,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "f1f1a640776c51cb900f511e51058219",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 1.95,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 2.28,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "469d92cbf32c51c8818ceebd5b80203c",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.0,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 2.4,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "380050dc0f925b909d4cd8d6951ff7b1",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.05,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 2.52,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "2a10adae4385524c8e7dc720e1e0aaf1",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.1,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 2.64,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "1d7871c15bc45fdc97c71c44a968f3cd",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.15,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 2.76,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "6eb615b47be95f52b5c5a2868b4868ec",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.2,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 2.88,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "b25d6c6734545f218e9b62e32a159ec1",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.25,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 3.0,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "8a1424a4e80b518881b7d619771c138b",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.3,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 3.12,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "a8f4cef1b808595897f4009441a10f99",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.35,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 3.24,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "31b5ea28073052b2a6a1c91e682993dd",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.4,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 3.36,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "6f2ead998467584892ff9bc4520f258b",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.45,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 3.48,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "713c46acc5ab5f2fa2e2ed6807a89fd1",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.5,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 3.6,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "91349c88c0b5569ea1a7b30530171c26",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.55,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 3.72,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "0f11a77e3d5c5306b82ea6369178ced0",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.6,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 3.84,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "12cd914ae2585795bb671f60e56af56c",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.65,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 3.96,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "0ae5e2bf719552b498ab1c1d3b6e3fcd",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.7,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 4.08,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "5b2ef945b51151cba8b261db8190c185",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.75,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 4.2,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "bb9b20a6530f5000a4b620db3b46eedd",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.8,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 4.32,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "316bc8767b935e8a91415c8b6ceeb93a",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.85,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 4.44,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "0d296760633d5824a9004c7cbbdc6dc8",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.9,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 4.56,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "b0e5fe95fdbb53d9b2ec5fea12b189d6",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
+       "time": 2.95,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 4.68,
+         "y": 0,
+         "z": 0
+        }
+       ],
+       "uuid": "a6a4786d8663510e9852d7afdf70de63",
+       "color": -1
+      },
+      {
+       "channel": "rotation",
        "time": 3.0,
        "interpolation": "linear",
        "data_points": [
         {
-         "x": 0,
+         "x": 4.8,
          "y": 0,
          "z": 0
         }
@@ -20751,7 +22431,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -0.11402,
+         "x": 4.92,
          "y": 0,
          "z": 0
         }
@@ -20765,7 +22445,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -0.228,
+         "x": 5.04,
          "y": 0,
          "z": 0
         }
@@ -20779,7 +22459,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -0.34199,
+         "x": 5.16,
          "y": 0,
          "z": 0
         }
@@ -20793,7 +22473,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -0.45597,
+         "x": 5.28,
          "y": 0,
          "z": 0
         }
@@ -20807,7 +22487,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -0.56995,
+         "x": 5.4,
          "y": 0,
          "z": 0
         }
@@ -20821,7 +22501,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -0.68462,
+         "x": 5.52,
          "y": 0,
          "z": 0
         }
@@ -20835,7 +22515,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -0.79861,
+         "x": 5.64,
          "y": 0,
          "z": 0
         }
@@ -20849,7 +22529,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -0.91259,
+         "x": 5.76,
          "y": 0,
          "z": 0
         }
@@ -20863,7 +22543,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -1.02657,
+         "x": 5.88,
          "y": 0,
          "z": 0
         }
@@ -20877,7 +22557,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -1.14082,
+         "x": 6.0,
          "y": 0,
          "z": 0
         }
@@ -20891,7 +22571,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -1.25526,
+         "x": 6.12,
          "y": 0,
          "z": 0
         }
@@ -20905,7 +22585,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -1.36894,
+         "x": 6.24,
          "y": 0,
          "z": 0
         }
@@ -20919,7 +22599,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -1.48338,
+         "x": 6.36,
          "y": 0,
          "z": 0
         }
@@ -20933,7 +22613,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -1.59782,
+         "x": 6.48,
          "y": 0,
          "z": 0
         }
@@ -20947,7 +22627,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -1.7115,
+         "x": 6.6,
          "y": 0,
          "z": 0
         }
@@ -20961,7 +22641,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -1.82594,
+         "x": 6.72,
          "y": 0,
          "z": 0
         }
@@ -20975,7 +22655,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -1.94038,
+         "x": 6.84,
          "y": 0,
          "z": 0
         }
@@ -20989,7 +22669,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -2.05406,
+         "x": 6.96,
          "y": 0,
          "z": 0
         }
@@ -21003,7 +22683,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -2.1685,
+         "x": 7.08,
          "y": 0,
          "z": 0
         }
@@ -21017,7 +22697,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -2.28294,
+         "x": 7.2,
          "y": 0,
          "z": 0
         }
@@ -21031,7 +22711,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -2.39662,
+         "x": 7.32,
          "y": 0,
          "z": 0
         }
@@ -21045,7 +22725,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -2.51106,
+         "x": 7.44,
          "y": 0,
          "z": 0
         }
@@ -21059,7 +22739,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -2.6255,
+         "x": 7.56,
          "y": 0,
          "z": 0
         }
@@ -21073,7 +22753,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -2.73918,
+         "x": 7.68,
          "y": 0,
          "z": 0
         }
@@ -21087,7 +22767,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -2.85362,
+         "x": 7.8,
          "y": 0,
          "z": 0
         }
@@ -21101,7 +22781,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -2.96806,
+         "x": 7.92,
          "y": 0,
          "z": 0
         }
@@ -21115,7 +22795,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -3.08174,
+         "x": 8.04,
          "y": 0,
          "z": 0
         }
@@ -21129,7 +22809,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -3.19618,
+         "x": 8.16,
          "y": 0,
          "z": 0
         }
@@ -21143,7 +22823,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -3.31062,
+         "x": 8.28,
          "y": 0,
          "z": 0
         }
@@ -21157,7 +22837,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -3.4243,
+         "x": 8.4,
          "y": 0,
          "z": 0
         }
@@ -21171,7 +22851,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -3.53874,
+         "x": 8.52,
          "y": 0,
          "z": 0
         }
@@ -21185,7 +22865,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -3.65318,
+         "x": 8.64,
          "y": 0,
          "z": 0
         }
@@ -21199,7 +22879,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -3.76686,
+         "x": 8.76,
          "y": 0,
          "z": 0
         }
@@ -21213,7 +22893,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -3.8813,
+         "x": 8.88,
          "y": 0,
          "z": 0
         }
@@ -21227,7 +22907,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -3.99498,
+         "x": 9.0,
          "y": 0,
          "z": 0
         }
@@ -21241,7 +22921,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -4.10942,
+         "x": 9.12,
          "y": 0,
          "z": 0
         }
@@ -21255,7 +22935,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -4.2231,
+         "x": 9.24,
          "y": 0,
          "z": 0
         }
@@ -21269,7 +22949,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -4.33754,
+         "x": 9.36,
          "y": 0,
          "z": 0
         }
@@ -21283,7 +22963,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -4.45122,
+         "x": 9.48,
          "y": 0,
          "z": 0
         }
@@ -21297,7 +22977,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -4.56524,
+         "x": 9.6,
          "y": 0,
          "z": 0
         }
@@ -21311,7 +22991,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -4.67937,
+         "x": 9.72,
          "y": 0,
          "z": 0
         }
@@ -21325,7 +23005,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -4.79351,
+         "x": 9.84,
          "y": 0,
          "z": 0
         }
@@ -21339,7 +23019,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -4.90765,
+         "x": 9.96,
          "y": 0,
          "z": 0
         }
@@ -21353,7 +23033,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -5.02094,
+         "x": 10.08,
          "y": 0,
          "z": 0
         }
@@ -21367,7 +23047,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -5.13508,
+         "x": 10.2,
          "y": 0,
          "z": 0
         }
@@ -21381,7 +23061,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -5.24921,
+         "x": 10.32,
          "y": 0,
          "z": 0
         }
@@ -21395,7 +23075,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -5.36251,
+         "x": 10.44,
          "y": 0,
          "z": 0
         }
@@ -21409,7 +23089,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -5.47665,
+         "x": 10.56,
          "y": 0,
          "z": 0
         }
@@ -21423,7 +23103,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -5.59078,
+         "x": 10.68,
          "y": 0,
          "z": 0
         }
@@ -21437,7 +23117,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -5.70408,
+         "x": 10.8,
          "y": 0,
          "z": 0
         }
@@ -21451,7 +23131,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -5.81821,
+         "x": 10.92,
          "y": 0,
          "z": 0
         }
@@ -21465,7 +23145,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -5.93151,
+         "x": 11.04,
          "y": 0,
          "z": 0
         }
@@ -21479,7 +23159,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -6.04565,
+         "x": 11.16,
          "y": 0,
          "z": 0
         }
@@ -21493,7 +23173,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -6.15894,
+         "x": 11.28,
          "y": 0,
          "z": 0
         }
@@ -21507,7 +23187,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -6.27224,
+         "x": 11.4,
          "y": 0,
          "z": 0
         }
@@ -21521,7 +23201,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -6.38638,
+         "x": 11.52,
          "y": 0,
          "z": 0
         }
@@ -21535,7 +23215,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -6.49967,
+         "x": 11.64,
          "y": 0,
          "z": 0
         }
@@ -21549,7 +23229,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -6.61297,
+         "x": 11.76,
          "y": 0,
          "z": 0
         }
@@ -21563,7 +23243,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -6.72626,
+         "x": 11.88,
          "y": 0,
          "z": 0
         }
@@ -21577,7 +23257,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -6.8404,
+         "x": 12.0,
          "y": 0,
          "z": 0
         }
@@ -21591,7 +23271,7 @@
        "interpolation": "linear",
        "data_points": [
         {
-         "x": -6.8404,
+         "x": 12.0,
          "y": 0,
          "z": 0
         }
@@ -22537,12 +24217,572 @@
       },
       {
        "channel": "position",
-       "time": 3.0,
+       "time": 1.0,
        "interpolation": "linear",
        "data_points": [
         {
          "x": 0,
          "y": 0.03,
+         "z": 0
+        }
+       ],
+       "uuid": "6a34005d598e5d889b3c019f1e9bbdbe",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.05,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.042,
+         "z": 0
+        }
+       ],
+       "uuid": "16794cc795bb5b0cbf12b8c1b0f1bf06",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.1,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.054,
+         "z": 0
+        }
+       ],
+       "uuid": "18a54a03f1c35e5f97f89ab78dae39a2",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.15,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.066,
+         "z": 0
+        }
+       ],
+       "uuid": "977cdda59d6c590eafe2aebd1cd2bbb5",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.2,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.078,
+         "z": 0
+        }
+       ],
+       "uuid": "dd9b8de026c255ba88c7a2bd33703453",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.25,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.09,
+         "z": 0
+        }
+       ],
+       "uuid": "50d79c9157ea57fabbf70020f49a6788",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.3,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.102,
+         "z": 0
+        }
+       ],
+       "uuid": "f995214b95515a6883d601de718a5c29",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.35,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.114,
+         "z": 0
+        }
+       ],
+       "uuid": "af107079ea6c55cca28a0cbd722d4515",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.4,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.126,
+         "z": 0
+        }
+       ],
+       "uuid": "9da648e5775f557e8ad66b18c8297df3",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.45,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.138,
+         "z": 0
+        }
+       ],
+       "uuid": "028fbc3ec74f599cab740b98ddcffe54",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.5,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.15,
+         "z": 0
+        }
+       ],
+       "uuid": "dc3f54175aaf5a84ba3a7ff32247731d",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.55,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.162,
+         "z": 0
+        }
+       ],
+       "uuid": "e51810e5e2cb57d296b953d8b06e8319",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.6,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.174,
+         "z": 0
+        }
+       ],
+       "uuid": "5d847bc42d8f5c8093e14c8ce91a0ce4",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.65,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.186,
+         "z": 0
+        }
+       ],
+       "uuid": "74748d9990295bcf95d1a9a596f415fc",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.7,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.198,
+         "z": 0
+        }
+       ],
+       "uuid": "c221fbab970d56eab5445b95f2169589",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.75,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.21,
+         "z": 0
+        }
+       ],
+       "uuid": "a26f168fc4ac54408fedd65a51b56148",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.8,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.222,
+         "z": 0
+        }
+       ],
+       "uuid": "8a2bdde34d7050ec82e6dd9a5ecaebcf",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.85,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.234,
+         "z": 0
+        }
+       ],
+       "uuid": "f419a3e810bb5c97aca6a1392b968ac7",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.9,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.246,
+         "z": 0
+        }
+       ],
+       "uuid": "b3ddd46799a85b589d0a878c98949c81",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.95,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.258,
+         "z": 0
+        }
+       ],
+       "uuid": "4afe02c3850e554e82967cf79e937838",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.0,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.27,
+         "z": 0
+        }
+       ],
+       "uuid": "c6bf0b84b113506982bb54ce47f79a6c",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.05,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.282,
+         "z": 0
+        }
+       ],
+       "uuid": "259e801e72bd58cda3821577946f484f",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.1,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.294,
+         "z": 0
+        }
+       ],
+       "uuid": "fbfac277d444591ca80702081e64bedd",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.15,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.306,
+         "z": 0
+        }
+       ],
+       "uuid": "ab0e3394e4b35899afd8b9c229bc4a01",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.2,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.318,
+         "z": 0
+        }
+       ],
+       "uuid": "ccf1fe3c37f6544ea0671bbcb6150f35",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.25,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.33,
+         "z": 0
+        }
+       ],
+       "uuid": "de9d1c9130985e9a94feb0091a8f8143",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.3,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.342,
+         "z": 0
+        }
+       ],
+       "uuid": "5993750c30aa5e01a6d71c27193798ea",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.35,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.354,
+         "z": 0
+        }
+       ],
+       "uuid": "0800513f97c05cc2876873e0dd7cf14d",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.4,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.366,
+         "z": 0
+        }
+       ],
+       "uuid": "a5ad4107c75e5b96b392e596f1e39c10",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.45,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.378,
+         "z": 0
+        }
+       ],
+       "uuid": "9fe5ddda9b3055e49fd07f8e000682ba",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.5,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.39,
+         "z": 0
+        }
+       ],
+       "uuid": "d6e9b0ad7d3255a4aa0c55276fc4ef0d",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.55,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.402,
+         "z": 0
+        }
+       ],
+       "uuid": "a2301645127d535ba2642a07b25fe74a",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.6,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.414,
+         "z": 0
+        }
+       ],
+       "uuid": "a4680aed36f85b64a563c51511b60b31",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.65,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.426,
+         "z": 0
+        }
+       ],
+       "uuid": "c8de94760d5d50b58dabff9478f374e7",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.7,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.438,
+         "z": 0
+        }
+       ],
+       "uuid": "69564d81968a50d99aa911cb9458440e",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.75,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.45,
+         "z": 0
+        }
+       ],
+       "uuid": "9d33da5218045b1bbfb503c93ba36ca4",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.8,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.462,
+         "z": 0
+        }
+       ],
+       "uuid": "edfdeb7db47c5a5b9b4c89572664dd4e",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.85,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.474,
+         "z": 0
+        }
+       ],
+       "uuid": "1142b7a7ed55580d9c0a7aa8c4a1dc57",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.9,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.486,
+         "z": 0
+        }
+       ],
+       "uuid": "e63973d2a36f5afa9267d6f5714b69cc",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.95,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.498,
+         "z": 0
+        }
+       ],
+       "uuid": "b20d8d5424345e3595434efffe5c66ac",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 3.0,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.51,
          "z": 0
         }
        ],
@@ -22556,7 +24796,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.05,
+         "y": 0.522,
          "z": 0
         }
        ],
@@ -22570,7 +24810,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.07,
+         "y": 0.534,
          "z": 0
         }
        ],
@@ -22584,7 +24824,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.09,
+         "y": 0.546,
          "z": 0
         }
        ],
@@ -22598,7 +24838,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.11,
+         "y": 0.558,
          "z": 0
         }
        ],
@@ -22612,7 +24852,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.13,
+         "y": 0.57,
          "z": 0
         }
        ],
@@ -22626,7 +24866,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.15,
+         "y": 0.582,
          "z": 0
         }
        ],
@@ -22640,7 +24880,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.17,
+         "y": 0.594,
          "z": 0
         }
        ],
@@ -22654,7 +24894,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.19,
+         "y": 0.606,
          "z": 0
         }
        ],
@@ -22668,7 +24908,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.21,
+         "y": 0.618,
          "z": 0
         }
        ],
@@ -22682,7 +24922,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.23,
+         "y": 0.63,
          "z": 0
         }
        ],
@@ -22696,7 +24936,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.25,
+         "y": 0.642,
          "z": 0
         }
        ],
@@ -22710,7 +24950,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.27,
+         "y": 0.654,
          "z": 0
         }
        ],
@@ -22724,7 +24964,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.29,
+         "y": 0.666,
          "z": 0
         }
        ],
@@ -22738,7 +24978,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.31,
+         "y": 0.678,
          "z": 0
         }
        ],
@@ -22752,7 +24992,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.33,
+         "y": 0.69,
          "z": 0
         }
        ],
@@ -22766,7 +25006,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.35,
+         "y": 0.702,
          "z": 0
         }
        ],
@@ -22780,7 +25020,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.37,
+         "y": 0.714,
          "z": 0
         }
        ],
@@ -22794,7 +25034,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.39,
+         "y": 0.726,
          "z": 0
         }
        ],
@@ -22808,7 +25048,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.41,
+         "y": 0.738,
          "z": 0
         }
        ],
@@ -22822,7 +25062,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.43,
+         "y": 0.75,
          "z": 0
         }
        ],
@@ -22836,7 +25076,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.45,
+         "y": 0.762,
          "z": 0
         }
        ],
@@ -22850,7 +25090,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.47,
+         "y": 0.774,
          "z": 0
         }
        ],
@@ -22864,7 +25104,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.49,
+         "y": 0.786,
          "z": 0
         }
        ],
@@ -22878,7 +25118,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.51,
+         "y": 0.798,
          "z": 0
         }
        ],
@@ -22892,7 +25132,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.53,
+         "y": 0.81,
          "z": 0
         }
        ],
@@ -22906,7 +25146,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.55,
+         "y": 0.822,
          "z": 0
         }
        ],
@@ -22920,7 +25160,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.57,
+         "y": 0.834,
          "z": 0
         }
        ],
@@ -22934,7 +25174,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.59,
+         "y": 0.846,
          "z": 0
         }
        ],
@@ -22948,7 +25188,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.61,
+         "y": 0.858,
          "z": 0
         }
        ],
@@ -22962,7 +25202,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.63,
+         "y": 0.87,
          "z": 0
         }
        ],
@@ -22976,7 +25216,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.65,
+         "y": 0.882,
          "z": 0
         }
        ],
@@ -22990,7 +25230,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.67,
+         "y": 0.894,
          "z": 0
         }
        ],
@@ -23004,7 +25244,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.69,
+         "y": 0.906,
          "z": 0
         }
        ],
@@ -23018,7 +25258,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.71,
+         "y": 0.918,
          "z": 0
         }
        ],
@@ -23032,7 +25272,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.73,
+         "y": 0.93,
          "z": 0
         }
        ],
@@ -23046,7 +25286,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.75,
+         "y": 0.942,
          "z": 0
         }
        ],
@@ -23060,7 +25300,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.77,
+         "y": 0.954,
          "z": 0
         }
        ],
@@ -23074,7 +25314,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.79,
+         "y": 0.966,
          "z": 0
         }
        ],
@@ -23088,7 +25328,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.81,
+         "y": 0.978,
          "z": 0
         }
        ],
@@ -23102,7 +25342,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.83,
+         "y": 0.99,
          "z": 0
         }
        ],
@@ -23116,7 +25356,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.85,
+         "y": 1.002,
          "z": 0
         }
        ],
@@ -23130,7 +25370,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.87,
+         "y": 1.014,
          "z": 0
         }
        ],
@@ -23144,7 +25384,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.89,
+         "y": 1.026,
          "z": 0
         }
        ],
@@ -23158,7 +25398,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.91,
+         "y": 1.038,
          "z": 0
         }
        ],
@@ -23172,7 +25412,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.93,
+         "y": 1.05,
          "z": 0
         }
        ],
@@ -23186,7 +25426,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.95,
+         "y": 1.062,
          "z": 0
         }
        ],
@@ -23200,7 +25440,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.97,
+         "y": 1.074,
          "z": 0
         }
        ],
@@ -23214,7 +25454,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.99,
+         "y": 1.086,
          "z": 0
         }
        ],
@@ -23228,7 +25468,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.01,
+         "y": 1.098,
          "z": 0
         }
        ],
@@ -23242,7 +25482,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.03,
+         "y": 1.11,
          "z": 0
         }
        ],
@@ -23256,7 +25496,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.05,
+         "y": 1.122,
          "z": 0
         }
        ],
@@ -23270,7 +25510,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.07,
+         "y": 1.134,
          "z": 0
         }
        ],
@@ -23284,7 +25524,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.09,
+         "y": 1.146,
          "z": 0
         }
        ],
@@ -23298,7 +25538,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.11,
+         "y": 1.158,
          "z": 0
         }
        ],
@@ -23312,7 +25552,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.13,
+         "y": 1.17,
          "z": 0
         }
        ],
@@ -23326,7 +25566,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.15,
+         "y": 1.182,
          "z": 0
         }
        ],
@@ -23340,7 +25580,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.17,
+         "y": 1.194,
          "z": 0
         }
        ],
@@ -23354,7 +25594,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.19,
+         "y": 1.206,
          "z": 0
         }
        ],
@@ -23368,7 +25608,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.21,
+         "y": 1.218,
          "z": 0
         }
        ],
@@ -23453,12 +25693,572 @@
       },
       {
        "channel": "position",
-       "time": 3.0,
+       "time": 1.0,
        "interpolation": "linear",
        "data_points": [
         {
          "x": 0,
          "y": 0.03,
+         "z": 0
+        }
+       ],
+       "uuid": "f649788b6c89584a82b3568fa5451bdd",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.05,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.042,
+         "z": 0
+        }
+       ],
+       "uuid": "2b6b0206973b5e47a5d2e64384fe168a",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.1,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.054,
+         "z": 0
+        }
+       ],
+       "uuid": "c7731201e82c5e52add3d6eac1e3fab0",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.15,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.066,
+         "z": 0
+        }
+       ],
+       "uuid": "89ecc50fc0c95eb08c79d45e0d406a08",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.2,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.078,
+         "z": 0
+        }
+       ],
+       "uuid": "e47eb00351915fabb169fa44f1b1fe27",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.25,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.09,
+         "z": 0
+        }
+       ],
+       "uuid": "7930deac930d5c01941ba61673bcf591",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.3,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.102,
+         "z": 0
+        }
+       ],
+       "uuid": "36ff66c60a3d5d048322bae8d571e9cf",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.35,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.114,
+         "z": 0
+        }
+       ],
+       "uuid": "0038be2625a45250b30ed6ae6b6b74df",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.4,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.126,
+         "z": 0
+        }
+       ],
+       "uuid": "198f90e0bbe454ed90428d586402ef48",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.45,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.138,
+         "z": 0
+        }
+       ],
+       "uuid": "7d1b7e67761f55f690b2e2fe3e637d2c",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.5,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.15,
+         "z": 0
+        }
+       ],
+       "uuid": "d2b8f469e6fa5715bf9edab1e84c72f3",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.55,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.162,
+         "z": 0
+        }
+       ],
+       "uuid": "658070b7a9b7570487c5a3d89465e539",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.6,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.174,
+         "z": 0
+        }
+       ],
+       "uuid": "d66511e78b435a7e97938fbe4e9f3234",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.65,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.186,
+         "z": 0
+        }
+       ],
+       "uuid": "f70eed215e1b555ba154e82d3b9f2d03",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.7,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.198,
+         "z": 0
+        }
+       ],
+       "uuid": "73c67210fff153a0a71686665ae368a4",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.75,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.21,
+         "z": 0
+        }
+       ],
+       "uuid": "f7f6ac07e0d551cd896843524517ae25",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.8,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.222,
+         "z": 0
+        }
+       ],
+       "uuid": "92a543224fcd5824ac4507dcb7a76a2b",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.85,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.234,
+         "z": 0
+        }
+       ],
+       "uuid": "5e21c46c9ca151049e0ca3f93e422d95",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.9,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.246,
+         "z": 0
+        }
+       ],
+       "uuid": "a1b6cc49111b5522b925893b5bc5af3d",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.95,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.258,
+         "z": 0
+        }
+       ],
+       "uuid": "ca974d4ef846562bb16beb7c3cd1b6a1",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.0,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.27,
+         "z": 0
+        }
+       ],
+       "uuid": "b227f6bb24b3576dac8cefed02a0507b",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.05,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.282,
+         "z": 0
+        }
+       ],
+       "uuid": "dbcb0683da1d5c39a9bf3775c0af6c5b",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.1,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.294,
+         "z": 0
+        }
+       ],
+       "uuid": "38d83a2c8ea25c37ac4880a235f751bb",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.15,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.306,
+         "z": 0
+        }
+       ],
+       "uuid": "454dfda05bf158b1adef26fc652e64a2",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.2,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.318,
+         "z": 0
+        }
+       ],
+       "uuid": "5767b531b6325f948bfb00720f78398f",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.25,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.33,
+         "z": 0
+        }
+       ],
+       "uuid": "71267541bafb538ab255aaef1f5175ac",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.3,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.342,
+         "z": 0
+        }
+       ],
+       "uuid": "1550f9a094445a50baaa39a0c0392180",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.35,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.354,
+         "z": 0
+        }
+       ],
+       "uuid": "dde65bfeff6c58ec8c6c1825865f2807",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.4,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.366,
+         "z": 0
+        }
+       ],
+       "uuid": "bdef7d193a0d5bb3857e9dafc3dc56fe",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.45,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.378,
+         "z": 0
+        }
+       ],
+       "uuid": "d65df6619b7158eba8db0bbde391ba27",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.5,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.39,
+         "z": 0
+        }
+       ],
+       "uuid": "6da3e4db26285b8680bf99d669473e8f",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.55,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.402,
+         "z": 0
+        }
+       ],
+       "uuid": "8b9b9ab69a035269bad95638861f99bf",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.6,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.414,
+         "z": 0
+        }
+       ],
+       "uuid": "e9090721011f53faace917e44c34fcf6",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.65,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.426,
+         "z": 0
+        }
+       ],
+       "uuid": "773d312669135f6fbd61beffa50f35ad",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.7,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.438,
+         "z": 0
+        }
+       ],
+       "uuid": "8fd166dac49f5ec8a686f399722d6b46",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.75,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.45,
+         "z": 0
+        }
+       ],
+       "uuid": "2167da3af8dc51129c6309a5d5a5ee0e",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.8,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.462,
+         "z": 0
+        }
+       ],
+       "uuid": "eda840dcf50351fe8bd3b69f365b3d41",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.85,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.474,
+         "z": 0
+        }
+       ],
+       "uuid": "1933eec20ebc5a4b994549dabe77725f",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.9,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.486,
+         "z": 0
+        }
+       ],
+       "uuid": "1c13c7e8106e51bfbbeed7b67d7825dc",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.95,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.498,
+         "z": 0
+        }
+       ],
+       "uuid": "31c443ebe4b85ceba884961248be39ed",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 3.0,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.51,
          "z": 0
         }
        ],
@@ -23472,7 +26272,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.05,
+         "y": 0.522,
          "z": 0
         }
        ],
@@ -23486,7 +26286,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.07,
+         "y": 0.534,
          "z": 0
         }
        ],
@@ -23500,7 +26300,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.09,
+         "y": 0.546,
          "z": 0
         }
        ],
@@ -23514,7 +26314,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.11,
+         "y": 0.558,
          "z": 0
         }
        ],
@@ -23528,7 +26328,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.13,
+         "y": 0.57,
          "z": 0
         }
        ],
@@ -23542,7 +26342,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.15,
+         "y": 0.582,
          "z": 0
         }
        ],
@@ -23556,7 +26356,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.17,
+         "y": 0.594,
          "z": 0
         }
        ],
@@ -23570,7 +26370,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.19,
+         "y": 0.606,
          "z": 0
         }
        ],
@@ -23584,7 +26384,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.21,
+         "y": 0.618,
          "z": 0
         }
        ],
@@ -23598,7 +26398,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.23,
+         "y": 0.63,
          "z": 0
         }
        ],
@@ -23612,7 +26412,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.25,
+         "y": 0.642,
          "z": 0
         }
        ],
@@ -23626,7 +26426,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.27,
+         "y": 0.654,
          "z": 0
         }
        ],
@@ -23640,7 +26440,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.29,
+         "y": 0.666,
          "z": 0
         }
        ],
@@ -23654,7 +26454,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.31,
+         "y": 0.678,
          "z": 0
         }
        ],
@@ -23668,7 +26468,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.33,
+         "y": 0.69,
          "z": 0
         }
        ],
@@ -23682,7 +26482,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.35,
+         "y": 0.702,
          "z": 0
         }
        ],
@@ -23696,7 +26496,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.37,
+         "y": 0.714,
          "z": 0
         }
        ],
@@ -23710,7 +26510,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.39,
+         "y": 0.726,
          "z": 0
         }
        ],
@@ -23724,7 +26524,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.41,
+         "y": 0.738,
          "z": 0
         }
        ],
@@ -23738,7 +26538,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.43,
+         "y": 0.75,
          "z": 0
         }
        ],
@@ -23752,7 +26552,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.45,
+         "y": 0.762,
          "z": 0
         }
        ],
@@ -23766,7 +26566,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.47,
+         "y": 0.774,
          "z": 0
         }
        ],
@@ -23780,7 +26580,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.49,
+         "y": 0.786,
          "z": 0
         }
        ],
@@ -23794,7 +26594,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.51,
+         "y": 0.798,
          "z": 0
         }
        ],
@@ -23808,7 +26608,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.53,
+         "y": 0.81,
          "z": 0
         }
        ],
@@ -23822,7 +26622,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.55,
+         "y": 0.822,
          "z": 0
         }
        ],
@@ -23836,7 +26636,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.57,
+         "y": 0.834,
          "z": 0
         }
        ],
@@ -23850,7 +26650,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.59,
+         "y": 0.846,
          "z": 0
         }
        ],
@@ -23864,7 +26664,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.61,
+         "y": 0.858,
          "z": 0
         }
        ],
@@ -23878,7 +26678,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.63,
+         "y": 0.87,
          "z": 0
         }
        ],
@@ -23892,7 +26692,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.65,
+         "y": 0.882,
          "z": 0
         }
        ],
@@ -23906,7 +26706,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.67,
+         "y": 0.894,
          "z": 0
         }
        ],
@@ -23920,7 +26720,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.69,
+         "y": 0.906,
          "z": 0
         }
        ],
@@ -23934,7 +26734,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.71,
+         "y": 0.918,
          "z": 0
         }
        ],
@@ -23948,7 +26748,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.73,
+         "y": 0.93,
          "z": 0
         }
        ],
@@ -23962,7 +26762,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.75,
+         "y": 0.942,
          "z": 0
         }
        ],
@@ -23976,7 +26776,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.77,
+         "y": 0.954,
          "z": 0
         }
        ],
@@ -23990,7 +26790,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.79,
+         "y": 0.966,
          "z": 0
         }
        ],
@@ -24004,7 +26804,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.81,
+         "y": 0.978,
          "z": 0
         }
        ],
@@ -24018,7 +26818,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.83,
+         "y": 0.99,
          "z": 0
         }
        ],
@@ -24032,7 +26832,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.85,
+         "y": 1.002,
          "z": 0
         }
        ],
@@ -24046,7 +26846,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.87,
+         "y": 1.014,
          "z": 0
         }
        ],
@@ -24060,7 +26860,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.89,
+         "y": 1.026,
          "z": 0
         }
        ],
@@ -24074,7 +26874,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.91,
+         "y": 1.038,
          "z": 0
         }
        ],
@@ -24088,7 +26888,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.93,
+         "y": 1.05,
          "z": 0
         }
        ],
@@ -24102,7 +26902,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.95,
+         "y": 1.062,
          "z": 0
         }
        ],
@@ -24116,7 +26916,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.97,
+         "y": 1.074,
          "z": 0
         }
        ],
@@ -24130,7 +26930,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.99,
+         "y": 1.086,
          "z": 0
         }
        ],
@@ -24144,7 +26944,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.01,
+         "y": 1.098,
          "z": 0
         }
        ],
@@ -24158,7 +26958,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.03,
+         "y": 1.11,
          "z": 0
         }
        ],
@@ -24172,7 +26972,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.05,
+         "y": 1.122,
          "z": 0
         }
        ],
@@ -24186,7 +26986,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.07,
+         "y": 1.134,
          "z": 0
         }
        ],
@@ -24200,7 +27000,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.09,
+         "y": 1.146,
          "z": 0
         }
        ],
@@ -24214,7 +27014,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.11,
+         "y": 1.158,
          "z": 0
         }
        ],
@@ -24228,7 +27028,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.13,
+         "y": 1.17,
          "z": 0
         }
        ],
@@ -24242,7 +27042,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.15,
+         "y": 1.182,
          "z": 0
         }
        ],
@@ -24256,7 +27056,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.17,
+         "y": 1.194,
          "z": 0
         }
        ],
@@ -24270,7 +27070,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.19,
+         "y": 1.206,
          "z": 0
         }
        ],
@@ -24284,7 +27084,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.21,
+         "y": 1.218,
          "z": 0
         }
        ],
@@ -24369,12 +27169,572 @@
       },
       {
        "channel": "position",
-       "time": 3.0,
+       "time": 1.0,
        "interpolation": "linear",
        "data_points": [
         {
          "x": 0,
          "y": 0.03,
+         "z": 0
+        }
+       ],
+       "uuid": "7722492b6ad95388a15e8f5d766dfcd3",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.05,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.042,
+         "z": 0
+        }
+       ],
+       "uuid": "19e9c5723cad501ab9e8c5faa583dec3",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.1,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.054,
+         "z": 0
+        }
+       ],
+       "uuid": "cacb30354fb85c6b90dcfd123ddbc8da",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.15,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.066,
+         "z": 0
+        }
+       ],
+       "uuid": "b38bb96317c456fb87bf90d6631a8896",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.2,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.078,
+         "z": 0
+        }
+       ],
+       "uuid": "304c3145d16b5961a390a7df4b5fd289",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.25,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.09,
+         "z": 0
+        }
+       ],
+       "uuid": "bc3aa1b6d8445974b41cd4f4dafcc766",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.3,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.102,
+         "z": 0
+        }
+       ],
+       "uuid": "1f67aa1af5f65c0eb14412fd4a27121f",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.35,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.114,
+         "z": 0
+        }
+       ],
+       "uuid": "185921a508bb56f6a0bf4b6896267d6e",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.4,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.126,
+         "z": 0
+        }
+       ],
+       "uuid": "7254047d94395961a664018030da80fa",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.45,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.138,
+         "z": 0
+        }
+       ],
+       "uuid": "e02cefaacfbe5b599e1afa5725344c86",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.5,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.15,
+         "z": 0
+        }
+       ],
+       "uuid": "14b762ebca105894b727014692325f83",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.55,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.162,
+         "z": 0
+        }
+       ],
+       "uuid": "eb449986cc6950478efc0cc74a2f8f16",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.6,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.174,
+         "z": 0
+        }
+       ],
+       "uuid": "f9caf383e3f056dfa9bd811832ca98d5",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.65,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.186,
+         "z": 0
+        }
+       ],
+       "uuid": "1d372a7f0d085f409bde585c73224514",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.7,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.198,
+         "z": 0
+        }
+       ],
+       "uuid": "36a6ceb83921553aaec8216760544747",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.75,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.21,
+         "z": 0
+        }
+       ],
+       "uuid": "6b32c43bd65956b594b843a26a56066a",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.8,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.222,
+         "z": 0
+        }
+       ],
+       "uuid": "b925c860ec3c5505af4a5f0470bb5d76",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.85,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.234,
+         "z": 0
+        }
+       ],
+       "uuid": "409e09aaffeb5936b65f8a1c0a4de5a8",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.9,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.246,
+         "z": 0
+        }
+       ],
+       "uuid": "fb5de53626ee553f83604ed5b38f6df2",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.95,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.258,
+         "z": 0
+        }
+       ],
+       "uuid": "c054dcd847db5cab8b94fa782c2dbdb9",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.0,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.27,
+         "z": 0
+        }
+       ],
+       "uuid": "2ba49428430453909115d30e633684f1",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.05,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.282,
+         "z": 0
+        }
+       ],
+       "uuid": "ba767791d69e5b098d1b5bc21a2c7391",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.1,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.294,
+         "z": 0
+        }
+       ],
+       "uuid": "02de01e19eeb5730b3d0c7d376b4e24a",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.15,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.306,
+         "z": 0
+        }
+       ],
+       "uuid": "304abbc862ae53649bf62dae652937f8",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.2,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.318,
+         "z": 0
+        }
+       ],
+       "uuid": "f3ee2aae427959afac3f620a910e5a99",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.25,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.33,
+         "z": 0
+        }
+       ],
+       "uuid": "27f64639b9135ec99eb06f196ec216b6",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.3,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.342,
+         "z": 0
+        }
+       ],
+       "uuid": "ae2dbaada6765106bac693586ab7b760",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.35,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.354,
+         "z": 0
+        }
+       ],
+       "uuid": "fb7e78e6ab8a5543b56bf802c00c2568",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.4,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.366,
+         "z": 0
+        }
+       ],
+       "uuid": "68424a397aae51d3bfd39b34e650d9f1",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.45,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.378,
+         "z": 0
+        }
+       ],
+       "uuid": "da7677f07004532684b6160cb9518357",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.5,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.39,
+         "z": 0
+        }
+       ],
+       "uuid": "7224cbf52a0c56088bbb5ddc9bce562e",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.55,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.402,
+         "z": 0
+        }
+       ],
+       "uuid": "8e769605f87558e8aac1f376b243e551",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.6,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.414,
+         "z": 0
+        }
+       ],
+       "uuid": "d1443db6c7fc575e899f0c5e775189a0",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.65,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.426,
+         "z": 0
+        }
+       ],
+       "uuid": "792dbb663cbd5205b3200661616ce2dc",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.7,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.438,
+         "z": 0
+        }
+       ],
+       "uuid": "fb746c145a905a49a50a8e30ccc1e3f1",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.75,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.45,
+         "z": 0
+        }
+       ],
+       "uuid": "ddc22383294c5ac0acee58bf437f1fe5",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.8,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.462,
+         "z": 0
+        }
+       ],
+       "uuid": "3244bd1f5d855d2da87d8bdd451f0711",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.85,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.474,
+         "z": 0
+        }
+       ],
+       "uuid": "b96e6f5971235a5c8954f66c17773f7c",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.9,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.486,
+         "z": 0
+        }
+       ],
+       "uuid": "569673ae05d654a8987dac6096015c6d",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.95,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.498,
+         "z": 0
+        }
+       ],
+       "uuid": "5abec7ba6427532f8feec7b1c0c6b730",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 3.0,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.51,
          "z": 0
         }
        ],
@@ -24388,7 +27748,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.05,
+         "y": 0.522,
          "z": 0
         }
        ],
@@ -24402,7 +27762,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.07,
+         "y": 0.534,
          "z": 0
         }
        ],
@@ -24416,7 +27776,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.09,
+         "y": 0.546,
          "z": 0
         }
        ],
@@ -24430,7 +27790,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.11,
+         "y": 0.558,
          "z": 0
         }
        ],
@@ -24444,7 +27804,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.13,
+         "y": 0.57,
          "z": 0
         }
        ],
@@ -24458,7 +27818,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.15,
+         "y": 0.582,
          "z": 0
         }
        ],
@@ -24472,7 +27832,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.17,
+         "y": 0.594,
          "z": 0
         }
        ],
@@ -24486,7 +27846,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.19,
+         "y": 0.606,
          "z": 0
         }
        ],
@@ -24500,7 +27860,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.21,
+         "y": 0.618,
          "z": 0
         }
        ],
@@ -24514,7 +27874,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.23,
+         "y": 0.63,
          "z": 0
         }
        ],
@@ -24528,7 +27888,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.25,
+         "y": 0.642,
          "z": 0
         }
        ],
@@ -24542,7 +27902,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.27,
+         "y": 0.654,
          "z": 0
         }
        ],
@@ -24556,7 +27916,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.29,
+         "y": 0.666,
          "z": 0
         }
        ],
@@ -24570,7 +27930,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.31,
+         "y": 0.678,
          "z": 0
         }
        ],
@@ -24584,7 +27944,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.33,
+         "y": 0.69,
          "z": 0
         }
        ],
@@ -24598,7 +27958,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.35,
+         "y": 0.702,
          "z": 0
         }
        ],
@@ -24612,7 +27972,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.37,
+         "y": 0.714,
          "z": 0
         }
        ],
@@ -24626,7 +27986,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.39,
+         "y": 0.726,
          "z": 0
         }
        ],
@@ -24640,7 +28000,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.41,
+         "y": 0.738,
          "z": 0
         }
        ],
@@ -24654,7 +28014,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.43,
+         "y": 0.75,
          "z": 0
         }
        ],
@@ -24668,7 +28028,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.45,
+         "y": 0.762,
          "z": 0
         }
        ],
@@ -24682,7 +28042,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.47,
+         "y": 0.774,
          "z": 0
         }
        ],
@@ -24696,7 +28056,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.49,
+         "y": 0.786,
          "z": 0
         }
        ],
@@ -24710,7 +28070,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.51,
+         "y": 0.798,
          "z": 0
         }
        ],
@@ -24724,7 +28084,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.53,
+         "y": 0.81,
          "z": 0
         }
        ],
@@ -24738,7 +28098,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.55,
+         "y": 0.822,
          "z": 0
         }
        ],
@@ -24752,7 +28112,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.57,
+         "y": 0.834,
          "z": 0
         }
        ],
@@ -24766,7 +28126,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.59,
+         "y": 0.846,
          "z": 0
         }
        ],
@@ -24780,7 +28140,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.61,
+         "y": 0.858,
          "z": 0
         }
        ],
@@ -24794,7 +28154,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.63,
+         "y": 0.87,
          "z": 0
         }
        ],
@@ -24808,7 +28168,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.65,
+         "y": 0.882,
          "z": 0
         }
        ],
@@ -24822,7 +28182,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.67,
+         "y": 0.894,
          "z": 0
         }
        ],
@@ -24836,7 +28196,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.69,
+         "y": 0.906,
          "z": 0
         }
        ],
@@ -24850,7 +28210,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.71,
+         "y": 0.918,
          "z": 0
         }
        ],
@@ -24864,7 +28224,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.73,
+         "y": 0.93,
          "z": 0
         }
        ],
@@ -24878,7 +28238,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.75,
+         "y": 0.942,
          "z": 0
         }
        ],
@@ -24892,7 +28252,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.77,
+         "y": 0.954,
          "z": 0
         }
        ],
@@ -24906,7 +28266,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.79,
+         "y": 0.966,
          "z": 0
         }
        ],
@@ -24920,7 +28280,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.81,
+         "y": 0.978,
          "z": 0
         }
        ],
@@ -24934,7 +28294,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.83,
+         "y": 0.99,
          "z": 0
         }
        ],
@@ -24948,7 +28308,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.85,
+         "y": 1.002,
          "z": 0
         }
        ],
@@ -24962,7 +28322,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.87,
+         "y": 1.014,
          "z": 0
         }
        ],
@@ -24976,7 +28336,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.89,
+         "y": 1.026,
          "z": 0
         }
        ],
@@ -24990,7 +28350,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.91,
+         "y": 1.038,
          "z": 0
         }
        ],
@@ -25004,7 +28364,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.93,
+         "y": 1.05,
          "z": 0
         }
        ],
@@ -25018,7 +28378,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.95,
+         "y": 1.062,
          "z": 0
         }
        ],
@@ -25032,7 +28392,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.97,
+         "y": 1.074,
          "z": 0
         }
        ],
@@ -25046,7 +28406,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.99,
+         "y": 1.086,
          "z": 0
         }
        ],
@@ -25060,7 +28420,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.01,
+         "y": 1.098,
          "z": 0
         }
        ],
@@ -25074,7 +28434,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.03,
+         "y": 1.11,
          "z": 0
         }
        ],
@@ -25088,7 +28448,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.05,
+         "y": 1.122,
          "z": 0
         }
        ],
@@ -25102,7 +28462,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.07,
+         "y": 1.134,
          "z": 0
         }
        ],
@@ -25116,7 +28476,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.09,
+         "y": 1.146,
          "z": 0
         }
        ],
@@ -25130,7 +28490,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.11,
+         "y": 1.158,
          "z": 0
         }
        ],
@@ -25144,7 +28504,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.13,
+         "y": 1.17,
          "z": 0
         }
        ],
@@ -25158,7 +28518,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.15,
+         "y": 1.182,
          "z": 0
         }
        ],
@@ -25172,7 +28532,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.17,
+         "y": 1.194,
          "z": 0
         }
        ],
@@ -25186,7 +28546,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.19,
+         "y": 1.206,
          "z": 0
         }
        ],
@@ -25200,7 +28560,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.21,
+         "y": 1.218,
          "z": 0
         }
        ],
@@ -25285,12 +28645,572 @@
       },
       {
        "channel": "position",
-       "time": 3.0,
+       "time": 1.0,
        "interpolation": "linear",
        "data_points": [
         {
          "x": 0,
          "y": 0.03,
+         "z": 0
+        }
+       ],
+       "uuid": "78c6c9fdec805e45b0a9c27f65ba9780",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.05,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.042,
+         "z": 0
+        }
+       ],
+       "uuid": "0083b2a8155258c390f7d1039303aa5d",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.1,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.054,
+         "z": 0
+        }
+       ],
+       "uuid": "2b732beb9b195c3b8b880b6ae293936d",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.15,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.066,
+         "z": 0
+        }
+       ],
+       "uuid": "8cd6eaba96e9568580e335cd246c8a05",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.2,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.078,
+         "z": 0
+        }
+       ],
+       "uuid": "bbf147ca29285941b2dccb40f7320fca",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.25,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.09,
+         "z": 0
+        }
+       ],
+       "uuid": "279f15d4403250afba73d6c3386452a3",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.3,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.102,
+         "z": 0
+        }
+       ],
+       "uuid": "06bfd64f5155587797e608cc2569ef84",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.35,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.114,
+         "z": 0
+        }
+       ],
+       "uuid": "ef4814bb42cf5e2da91ba8eb38b9f9ff",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.4,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.126,
+         "z": 0
+        }
+       ],
+       "uuid": "d4a4489776ef5e6d809bb8fd786ab827",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.45,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.138,
+         "z": 0
+        }
+       ],
+       "uuid": "d54dc51130df5f0eb85355c0dfcba045",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.5,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.15,
+         "z": 0
+        }
+       ],
+       "uuid": "40f2bd76b1ee5baebab0416963618ea6",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.55,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.162,
+         "z": 0
+        }
+       ],
+       "uuid": "8a216e93de0452c1a98066bd3a8b9a1c",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.6,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.174,
+         "z": 0
+        }
+       ],
+       "uuid": "7ddfe4254a29512e889b47024fba5bec",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.65,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.186,
+         "z": 0
+        }
+       ],
+       "uuid": "9488c9c6135c57b9ad6021fa2982a864",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.7,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.198,
+         "z": 0
+        }
+       ],
+       "uuid": "e930407f172851d186fe4d7b567cfd77",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.75,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.21,
+         "z": 0
+        }
+       ],
+       "uuid": "bbcc889b43b858aa8b08965c0b930dd1",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.8,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.222,
+         "z": 0
+        }
+       ],
+       "uuid": "791589ed1ea159e1960d6ebe73eb3608",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.85,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.234,
+         "z": 0
+        }
+       ],
+       "uuid": "e657a42d89925741a7fe620b1f701820",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.9,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.246,
+         "z": 0
+        }
+       ],
+       "uuid": "e7fd091919e758b390216c8ba6e70cca",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 1.95,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.258,
+         "z": 0
+        }
+       ],
+       "uuid": "6abce2cab1c9596da4c2929d4660de2a",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.0,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.27,
+         "z": 0
+        }
+       ],
+       "uuid": "748e0a9cd9b6514d9ecf1f33541fef5d",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.05,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.282,
+         "z": 0
+        }
+       ],
+       "uuid": "3b1e2ccabe895c049b4db64435d1394e",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.1,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.294,
+         "z": 0
+        }
+       ],
+       "uuid": "650010eaf2e154b2bb1cfa913c44952e",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.15,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.306,
+         "z": 0
+        }
+       ],
+       "uuid": "c73489506e895f619a32d2b37253434d",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.2,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.318,
+         "z": 0
+        }
+       ],
+       "uuid": "fd2e516d39e95de0825098631d9a1690",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.25,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.33,
+         "z": 0
+        }
+       ],
+       "uuid": "f732c4098660517797e45ce8ee1782d1",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.3,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.342,
+         "z": 0
+        }
+       ],
+       "uuid": "afd83f14364f570dbbda2bd78c8b3703",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.35,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.354,
+         "z": 0
+        }
+       ],
+       "uuid": "3690b3b31f9c55e3bf254b4c682f08fa",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.4,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.366,
+         "z": 0
+        }
+       ],
+       "uuid": "f69b16698eea5eaa8b8fa0a3395cefd4",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.45,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.378,
+         "z": 0
+        }
+       ],
+       "uuid": "368c2095b84657a8a1c5bf0ab67214cb",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.5,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.39,
+         "z": 0
+        }
+       ],
+       "uuid": "9fbd8fd6b9bc5748b4ee78cf070f0b9a",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.55,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.402,
+         "z": 0
+        }
+       ],
+       "uuid": "15ead909085e59edba35c1735335a38a",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.6,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.414,
+         "z": 0
+        }
+       ],
+       "uuid": "ebcf256f9bc95a13b57d2478002fb16d",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.65,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.426,
+         "z": 0
+        }
+       ],
+       "uuid": "08d3e8b4256c56b0a5929de58235a95a",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.7,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.438,
+         "z": 0
+        }
+       ],
+       "uuid": "e0a424aa78a65a91b47716cf3f4ca504",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.75,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.45,
+         "z": 0
+        }
+       ],
+       "uuid": "8621d15a4f5d5c6e8781de73cb9c964a",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.8,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.462,
+         "z": 0
+        }
+       ],
+       "uuid": "4a5c2518b0175b90803e050d260b7396",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.85,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.474,
+         "z": 0
+        }
+       ],
+       "uuid": "aa42037aba665b9b83acd199138b287c",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.9,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.486,
+         "z": 0
+        }
+       ],
+       "uuid": "577f973d5e12502085f56905b92219be",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 2.95,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.498,
+         "z": 0
+        }
+       ],
+       "uuid": "b87c97d6e736564e80199ccf6bff1125",
+       "color": -1
+      },
+      {
+       "channel": "position",
+       "time": 3.0,
+       "interpolation": "linear",
+       "data_points": [
+        {
+         "x": 0,
+         "y": 0.51,
          "z": 0
         }
        ],
@@ -25304,7 +29224,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.05,
+         "y": 0.522,
          "z": 0
         }
        ],
@@ -25318,7 +29238,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.07,
+         "y": 0.534,
          "z": 0
         }
        ],
@@ -25332,7 +29252,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.09,
+         "y": 0.546,
          "z": 0
         }
        ],
@@ -25346,7 +29266,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.11,
+         "y": 0.558,
          "z": 0
         }
        ],
@@ -25360,7 +29280,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.13,
+         "y": 0.57,
          "z": 0
         }
        ],
@@ -25374,7 +29294,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.15,
+         "y": 0.582,
          "z": 0
         }
        ],
@@ -25388,7 +29308,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.17,
+         "y": 0.594,
          "z": 0
         }
        ],
@@ -25402,7 +29322,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.19,
+         "y": 0.606,
          "z": 0
         }
        ],
@@ -25416,7 +29336,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.21,
+         "y": 0.618,
          "z": 0
         }
        ],
@@ -25430,7 +29350,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.23,
+         "y": 0.63,
          "z": 0
         }
        ],
@@ -25444,7 +29364,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.25,
+         "y": 0.642,
          "z": 0
         }
        ],
@@ -25458,7 +29378,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.27,
+         "y": 0.654,
          "z": 0
         }
        ],
@@ -25472,7 +29392,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.29,
+         "y": 0.666,
          "z": 0
         }
        ],
@@ -25486,7 +29406,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.31,
+         "y": 0.678,
          "z": 0
         }
        ],
@@ -25500,7 +29420,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.33,
+         "y": 0.69,
          "z": 0
         }
        ],
@@ -25514,7 +29434,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.35,
+         "y": 0.702,
          "z": 0
         }
        ],
@@ -25528,7 +29448,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.37,
+         "y": 0.714,
          "z": 0
         }
        ],
@@ -25542,7 +29462,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.39,
+         "y": 0.726,
          "z": 0
         }
        ],
@@ -25556,7 +29476,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.41,
+         "y": 0.738,
          "z": 0
         }
        ],
@@ -25570,7 +29490,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.43,
+         "y": 0.75,
          "z": 0
         }
        ],
@@ -25584,7 +29504,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.45,
+         "y": 0.762,
          "z": 0
         }
        ],
@@ -25598,7 +29518,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.47,
+         "y": 0.774,
          "z": 0
         }
        ],
@@ -25612,7 +29532,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.49,
+         "y": 0.786,
          "z": 0
         }
        ],
@@ -25626,7 +29546,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.51,
+         "y": 0.798,
          "z": 0
         }
        ],
@@ -25640,7 +29560,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.53,
+         "y": 0.81,
          "z": 0
         }
        ],
@@ -25654,7 +29574,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.55,
+         "y": 0.822,
          "z": 0
         }
        ],
@@ -25668,7 +29588,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.57,
+         "y": 0.834,
          "z": 0
         }
        ],
@@ -25682,7 +29602,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.59,
+         "y": 0.846,
          "z": 0
         }
        ],
@@ -25696,7 +29616,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.61,
+         "y": 0.858,
          "z": 0
         }
        ],
@@ -25710,7 +29630,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.63,
+         "y": 0.87,
          "z": 0
         }
        ],
@@ -25724,7 +29644,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.65,
+         "y": 0.882,
          "z": 0
         }
        ],
@@ -25738,7 +29658,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.67,
+         "y": 0.894,
          "z": 0
         }
        ],
@@ -25752,7 +29672,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.69,
+         "y": 0.906,
          "z": 0
         }
        ],
@@ -25766,7 +29686,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.71,
+         "y": 0.918,
          "z": 0
         }
        ],
@@ -25780,7 +29700,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.73,
+         "y": 0.93,
          "z": 0
         }
        ],
@@ -25794,7 +29714,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.75,
+         "y": 0.942,
          "z": 0
         }
        ],
@@ -25808,7 +29728,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.77,
+         "y": 0.954,
          "z": 0
         }
        ],
@@ -25822,7 +29742,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.79,
+         "y": 0.966,
          "z": 0
         }
        ],
@@ -25836,7 +29756,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.81,
+         "y": 0.978,
          "z": 0
         }
        ],
@@ -25850,7 +29770,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.83,
+         "y": 0.99,
          "z": 0
         }
        ],
@@ -25864,7 +29784,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.85,
+         "y": 1.002,
          "z": 0
         }
        ],
@@ -25878,7 +29798,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.87,
+         "y": 1.014,
          "z": 0
         }
        ],
@@ -25892,7 +29812,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.89,
+         "y": 1.026,
          "z": 0
         }
        ],
@@ -25906,7 +29826,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.91,
+         "y": 1.038,
          "z": 0
         }
        ],
@@ -25920,7 +29840,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.93,
+         "y": 1.05,
          "z": 0
         }
        ],
@@ -25934,7 +29854,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.95,
+         "y": 1.062,
          "z": 0
         }
        ],
@@ -25948,7 +29868,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.97,
+         "y": 1.074,
          "z": 0
         }
        ],
@@ -25962,7 +29882,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 0.99,
+         "y": 1.086,
          "z": 0
         }
        ],
@@ -25976,7 +29896,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.01,
+         "y": 1.098,
          "z": 0
         }
        ],
@@ -25990,7 +29910,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.03,
+         "y": 1.11,
          "z": 0
         }
        ],
@@ -26004,7 +29924,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.05,
+         "y": 1.122,
          "z": 0
         }
        ],
@@ -26018,7 +29938,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.07,
+         "y": 1.134,
          "z": 0
         }
        ],
@@ -26032,7 +29952,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.09,
+         "y": 1.146,
          "z": 0
         }
        ],
@@ -26046,7 +29966,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.11,
+         "y": 1.158,
          "z": 0
         }
        ],
@@ -26060,7 +29980,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.13,
+         "y": 1.17,
          "z": 0
         }
        ],
@@ -26074,7 +29994,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.15,
+         "y": 1.182,
          "z": 0
         }
        ],
@@ -26088,7 +30008,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.17,
+         "y": 1.194,
          "z": 0
         }
        ],
@@ -26102,7 +30022,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.19,
+         "y": 1.206,
          "z": 0
         }
        ],
@@ -26116,7 +30036,7 @@
        "data_points": [
         {
          "x": 0,
-         "y": 1.21,
+         "y": 1.218,
          "z": 0
         }
        ],

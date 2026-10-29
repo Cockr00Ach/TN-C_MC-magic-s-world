@@ -3,10 +3,9 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TortoiseDeathTest {
-    @Test void lateTrackingAndReloadUseTheSameClampedClock() {
-        assertEquals(-1, TortoiseDeath.age(-1, 6000, .5F));
-        assertEquals(50.5F, TortoiseDeath.age(1000, 1050, .5F));
-        assertEquals(244, TortoiseDeath.age(1000, 2000, .5F));
+    @Test void bodyIsAlreadyTransparentBeforeFinalParticlesExpire() {
+        assertEquals(0, TortoiseDeath.opacity(TortoiseDeath.SCATTER_END));
+        assertEquals(0, TortoiseDeath.opacity(TortoiseDeath.REMAINS_AT));
     }
     @Test void coolingNeverFlashesOrReignites() {
         float previous = 1;

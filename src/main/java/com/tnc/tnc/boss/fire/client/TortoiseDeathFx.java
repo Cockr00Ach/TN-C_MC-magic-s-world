@@ -33,7 +33,7 @@ public final class TortoiseDeathFx {
 
     public static boolean beginSurfaceFrame(VolcanicTortoiseEntity boss, float age) {
         if (age < TortoiseDeath.SCATTER_START || age >= TortoiseDeath.SCATTER_END || !visible(boss)) return false;
-        long now = boss.level().getGameTime();
+        long now = boss.tickCount;
         Long last = FRAMES.put(boss, now);
         return last == null || last != now;
     }
@@ -41,7 +41,7 @@ public final class TortoiseDeathFx {
     private static boolean available(VolcanicTortoiseEntity boss) {
         if (!visible(boss)) return false;
         ClientLevel level = Minecraft.getInstance().level;
-        long now = level.getGameTime();
+        long now = Minecraft.getInstance().player.tickCount;
         if (budgetLevel != level || budgetTick != now) {
             budgetLevel = level;
             budgetTick = now;

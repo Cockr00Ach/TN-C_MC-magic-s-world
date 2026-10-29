@@ -40,12 +40,12 @@ def load_geometry(phase):
 def pose_at(tick):
     def value(keys): return sample(keys, tick)
     pose = {
-        "body": {"position": [0, value({0: 0, 60: 0, 120: -1.2, 180: -1.2}), 0],
+        "body": {"position": [0, value({0: 0, 20: 0, 120: -1.2, 244: -1.2}), 0],
                  "rotation": [0, 0, 0]},
         "shell": {"rotation": [0, 0, 0]},
         "whorl": {"position": [0, 0, 0]},
-        "neck": {"rotation": [value({0: 0, 60: 0, 120: 10, 180: 10}), 0, 0]},
-        "head": {"rotation": [0, 0, 0]},
+        "neck": {"rotation": [value({0: 0, 20: 0, 120: 8, 244: 8}), 0, 0]},
+        "head": {"rotation": [value({0: 0, 20: 0, 120: 12, 244: 12}), 0, 0]},
         "jaw": {"rotation": [0, 0, 0]},
         "tail": {"rotation": [value({0: 0, 60: 0, 120: -3, 180: -3}), 0, 0]},
     }
@@ -70,29 +70,13 @@ def fitted_poses(phase):
         # Keep the taller phase-two torso close to its existing stance.
         if phase == 2: pose["body"]["position"][1] *= 0.5
         return pose
-    held_head = head_min(base_pose(60))
     poses = []
     for tick in range(DURATION + 1):
         pose = base_pose(tick)
-        if tick > 60:
-            target = sample({60: held_head, 120: held_head * 0.60, 180: held_head * 0.60}, tick)
-            pose["head"]["rotation"][0] = 35
-            target = max(target, head_min(pose) + 0.03)
-            # The rear of the skull drops if the head tilts too far up. Locate the safe peak
-            # first, then solve on its downward-facing branch instead of assuming monotonicity.
-            samples = []
-            for angle in range(-45, 36, 5):
-                pose["head"]["rotation"][0] = angle
-                samples.append((head_min(pose), angle))
-            maximum, low = max(samples)
-            assert maximum >= target - 0.001, (phase, tick, maximum, target)
-            high = 35
-            for _ in range(16):
-                angle = (low + high) / 2
-                pose["head"]["rotation"][0] = angle
-                if head_min(pose) > target: low = angle
-                else: high = angle
-            pose["head"]["rotation"][0] = (low + high) / 2
+        if phase == 2:
+            pose["neck"]["rotation"][0] = sample({0: 0, 20: 0, 120: -10, 244: -10}, tick)
+            pose["head"]["rotation"][0] = sample({0: 0, 20: 0, 120: 28, 244: 28}, tick)
+        assert head_min(pose) >= 0.03, (phase, tick, "head/jaw below ground")
         for name in ("leg_fl", "leg_fr", "leg_bl", "leg_br"):
             tf = transforms(geo, pose)
             minimum = min(apply(tf[name], p)[1] for p in points[name])

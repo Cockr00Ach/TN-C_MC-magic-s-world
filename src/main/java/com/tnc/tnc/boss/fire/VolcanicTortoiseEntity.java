@@ -268,8 +268,10 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     private static final EntityDataAccessor<Long> DATA_TRANSITION_START =
             SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.LONG);
 
-    private static final EntityDataAccessor<Long> DATA_DEATH_START =
-            SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.LONG);
+    private static final EntityDataAccessor<Integer> DATA_DEATH_AGE =
+            SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.INT);
+    private int serverDeathTicks = -1;
+    private final TortoiseDeathClock clientDeathClock = new TortoiseDeathClock();
     private Vec3 deathAnchor = Vec3.ZERO;
     private float deathYaw;
     private boolean deathRemainsSpawned;
@@ -417,11 +419,13 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     }
 
     public boolean isDyingAnimation() {
-        return this.entityData.get(DATA_DEATH_START) >= 0L;
+        return this.entityData.get(DATA_DEATH_AGE) >= 0
+                || (this.level().isClientSide && this.clientDeathClock.started());
     }
 
     public float deathAge(float partialTick) {
-        return TortoiseDeath.age(this.entityData.get(DATA_DEATH_START), this.level().getGameTime(), partialTick);
+        return this.level().isClientSide ? this.clientDeathClock.age(this.tickCount, partialTick)
+                : this.serverDeathTicks < 0 ? -1 : Math.min(TortoiseDeath.DURATION, this.serverDeathTicks + partialTick);
     }
 
     public boolean usesPhaseTwoModel() {
@@ -592,15 +596,14 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.entityData.define(DATA_ENRAGE_STATE, STATE_NORMAL);
         this.entityData.define(DATA_BAR_ID, new CompoundTag());
         this.entityData.define(DATA_TRANSITION_START, -1L);
-        this.entityData.define(DATA_DEATH_START, -1L);
+        this.entityData.define(DATA_DEATH_AGE, -1);
     }
 
     @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
         super.onSyncedDataUpdated(key);
-        if (DATA_DEATH_START.equals(key) && this.isDyingAnimation()) {
-            this.deathAnchor = this.position();
-            this.deathYaw = this.getYRot();
+        if (DATA_DEATH_AGE.equals(key) && this.level().isClientSide) {
+            this.clientDeathClock.receive(this.entityData.get(DATA_DEATH_AGE), this.tickCount);
         }
         if (DATA_PHASE.equals(key)) {
             this.refreshDimensions();
@@ -661,7 +664,8 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         }
         int deathAge = tag.contains("TortoiseDeathAge") ? tag.getInt("TortoiseDeathAge") : -1;
         if (deathAge >= 0) {
-            this.entityData.set(DATA_DEATH_START, Math.max(0L, this.level().getGameTime() - Math.min(TortoiseDeath.DURATION - 1, deathAge)));
+            this.serverDeathTicks = Math.min(TortoiseDeath.DURATION - 1, deathAge);
+            this.entityData.set(DATA_DEATH_AGE, this.serverDeathTicks);
             this.deathAnchor = this.position();
             this.deathYaw = tag.getFloat("TortoiseDeathYaw");
             this.deathRemainsSpawned = tag.getBoolean("TortoiseRemainsSpawned");
@@ -1994,11 +1998,18 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     public void handleEntityEvent(byte event) {
         if (event == 60 && this.isDyingAnimation()) return; // The whole-body fade replaces the default central poof.
         super.handleEntityEvent(event);
+        if (event == 3 && this.level().isClientSide) {
+            // Process vanilla Health=0 first; otherwise the dying health guard would block it.
+            this.clientDeathClock.startIfAbsent(this.tickCount);
+        }
     }
 
     private void beginDeathSequence(ServerLevel level) {
         this.entityData.set(DATA_TRANSITION_START, -1L);
-        this.entityData.set(DATA_DEATH_START, level.getGameTime());
+        this.serverDeathTicks = 0;
+        this.entityData.set(DATA_DEATH_AGE, 0);
+        this.bossEvent.setVisible(false);
+        this.bossEvent.removeAllPlayers();
         this.deathAnchor = this.position();
         this.deathYaw = this.getYRot();
         this.startAction(ACTION_NONE);
@@ -2017,10 +2028,11 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
             if (this.level() instanceof ServerLevel level) this.beginDeathSequence(level);
             else return; // Wait for the server's synced clock rather than removing the corpse early.
         }
-        int age = (int) this.deathAge(0);
-        this.deathTime = age;
         this.setDeltaMovement(Vec3.ZERO);
         if (this.level() instanceof ServerLevel level) {
+            int age = this.serverDeathTicks = Math.min(TortoiseDeath.DURATION, this.serverDeathTicks + 1);
+            this.deathTime = age;
+            if (age % 2 == 0 || age == TortoiseDeath.DURATION) this.entityData.set(DATA_DEATH_AGE, age);
             this.getNavigation().stop();
             this.setPos(this.deathAnchor.x, this.deathAnchor.y, this.deathAnchor.z);
             this.setYRot(this.deathYaw);
