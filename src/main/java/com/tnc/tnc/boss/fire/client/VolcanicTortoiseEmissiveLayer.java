@@ -38,7 +38,7 @@ public final class VolcanicTortoiseEmissiveLayer extends GeoRenderLayer<Volcanic
                        RenderType renderType, MultiBufferSource buffers, VertexConsumer buffer,
                        float partialTick, int packedLight, int packedOverlay) {
         boolean phaseTwo = entity.usesPhaseTwoModel();
-        float alpha = entity.isDyingAnimation() ? TortoiseDeath.glow(entity.deathAge(partialTick))
+        float alpha = entity.isDyingAnimation() ? (phaseTwo ? 1.0F : 0.55F) * TortoiseDeath.glow(entity.deathAge(partialTick))
                 : entity.isTransitioning() ? TortoiseTransition.glow(entity.transitionAge(partialTick))
                 : phaseTwo ? 1.0F : 0.55F;
         if (alpha <= 0) return;

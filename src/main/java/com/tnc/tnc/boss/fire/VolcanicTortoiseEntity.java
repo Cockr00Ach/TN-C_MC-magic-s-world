@@ -272,6 +272,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
             SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.LONG);
     private Vec3 deathAnchor = Vec3.ZERO;
     private float deathYaw;
+    private boolean deathRemainsSpawned;
 
     private final ServerBossEvent bossEvent = new ServerBossEvent(this.getDisplayName(),
             BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10);
@@ -623,6 +624,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         super.addAdditionalSaveData(tag);
         tag.putInt("TortoiseDeathAge", this.isDyingAnimation() ? Math.min(TortoiseDeath.DURATION - 1, (int) this.deathAge(0)) : -1);
         tag.putFloat("TortoiseDeathYaw", this.deathYaw);
+        tag.putBoolean("TortoiseRemainsSpawned", this.deathRemainsSpawned);
         tag.putInt("TortoisePhase", this.phase());
         tag.putBoolean("TortoiseEnrageTriggered", this.enrageTriggered);
         tag.putInt("TortoiseEnrageTicks", this.enrageTicks);
@@ -662,6 +664,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
             this.entityData.set(DATA_DEATH_START, Math.max(0L, this.level().getGameTime() - Math.min(TortoiseDeath.DURATION - 1, deathAge)));
             this.deathAnchor = this.position();
             this.deathYaw = tag.getFloat("TortoiseDeathYaw");
+            this.deathRemainsSpawned = tag.getBoolean("TortoiseRemainsSpawned");
             this.setNoAi(true);
             this.setNoGravity(true);
             this.bossEvent.setVisible(false);
@@ -1989,7 +1992,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
 
     @Override
     public void handleEntityEvent(byte event) {
-        if (event == 60 && this.isDyingAnimation()) return; // Custom fragments replace the default central poof.
+        if (event == 60 && this.isDyingAnimation()) return; // The whole-body fade replaces the default central poof.
         super.handleEntityEvent(event);
     }
 
@@ -2023,16 +2026,20 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
             this.setYRot(this.deathYaw);
             this.setYHeadRot(this.deathYaw);
             this.yBodyRot = this.deathYaw;
-            if (age == TortoiseDeath.IMPACT) {
-                level.playSound(null, this.blockPosition(), SoundEvents.STONE_BREAK, SoundSource.HOSTILE, 2.2F, 0.45F);
-                level.playSound(null, this.blockPosition(), SoundEvents.BASALT_BREAK, SoundSource.HOSTILE, 1.5F, 0.5F);
+            if (age == 4) {
+                level.playSound(null, this.blockPosition(), SoundEvents.FIRE_EXTINGUISH, SoundSource.HOSTILE, 0.8F, 0.65F);
             }
-            if (age == TortoiseDeath.COOL_START) {
-                level.playSound(null, this.blockPosition(), SoundEvents.FIRE_EXTINGUISH, SoundSource.HOSTILE, 1.7F, 0.65F);
+            if (age == 32 || age == 58) {
+                level.playSound(null, this.blockPosition(), SoundEvents.BASALT_BREAK, SoundSource.HOSTILE, 0.3F, 0.65F);
             }
-            if (age == 60 || age == 76 || age == 98) {
-                level.playSound(null, this.blockPosition(), SoundEvents.DEEPSLATE_BREAK, SoundSource.HOSTILE,
-                        0.65F * (1 - age / (float) TortoiseDeath.DURATION), 0.55F);
+            if (age >= TortoiseDeath.FADE_START && !this.deathRemainsSpawned) {
+                Vec3 ground = VolcanicFireFieldEntity.groundBelow(level, this.deathAnchor);
+                if (ground == null) ground = this.deathAnchor;
+                TortoiseRemainsEntity remains = new TortoiseRemainsEntity(VolcanicTortoiseRegistration.REMAINS, level);
+                // A stable identity prevents a second mound when a partially saved death is resumed.
+                remains.setUUID(UUID.nameUUIDFromBytes((this.getUUID() + ":remains").getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+                remains.moveTo(ground.x, ground.y, ground.z, this.deathYaw, 0);
+                this.deathRemainsSpawned = level.getEntity(remains.getUUID()) != null || level.addFreshEntity(remains);
             }
             if (age >= TortoiseDeath.DURATION) {
                 this.deathTime = 19;
