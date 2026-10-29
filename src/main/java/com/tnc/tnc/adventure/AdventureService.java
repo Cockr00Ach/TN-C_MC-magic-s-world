@@ -45,7 +45,7 @@ public final class AdventureService {
         if(advancement!=null)for(String criterion:player.getAdvancements().getOrStartProgress(advancement).getRemainingCriteria())player.getAdvancements().award(advancement,criterion);
     }
     public static BlockPos tavern(ServerPlayer player) {
-        var origin=SkyIslandAnchors.resolve(player.server.overworld(),SkyIslandAnchors.Anchor.ORIGIN);
+        var origin=SkyIslandAnchors.resolve(com.tnc.tnc.world.SkyIslandWorlds.island(player.server),SkyIslandAnchors.Anchor.ORIGIN);
         return origin==null?null:origin.offset(419,90,291);
     }
     public static boolean atService(ServerPlayer player) {
@@ -160,7 +160,7 @@ public final class AdventureService {
         tag.putBoolean("AtShop",TownServices.near(player,"shop"));tag.put("Shop",ShopService.snapshot(player));
         tag.put("TownStories",TownStories.snapshot(player));
         var panel=ServicePanel.fromRole(role);tag.putString("ServiceRole",panel.role());tag.putInt("InitialTab",panel.tab());
-        tag.putString("Directions",TownServices.directions(player.server.overworld()));
+        tag.putString("Directions",TownServices.directions(com.tnc.tnc.world.SkyIslandWorlds.island(player.server)));
         tag.put("Housing",com.tnc.tnc.home.HousingService.snapshot(player));
         tag.putLong("BankNow",System.currentTimeMillis());tag.putInt("BankInterestPercent",Config.bankDailyInterestPercent);tag.putInt("BankWage",BankService.wage(p));
         tag.putBoolean("AtHomeSale",com.tnc.tnc.home.HousingService.atSale(player));

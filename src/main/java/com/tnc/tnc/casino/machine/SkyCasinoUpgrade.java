@@ -138,7 +138,7 @@ public final class SkyCasinoUpgrade {
         }
     }
     public static void tick(MinecraftServer server) {
-        var l=server.overworld();var island=SkyIslandSavedData.get(l);
+        var l=com.tnc.tnc.world.SkyIslandWorlds.island(server);var island=SkyIslandSavedData.get(l);
         if(!island.isSkyIslandComplete()||!SkyLandscapeUpgrade.complete(server)||l.players().isEmpty())return;
         var s=state(l);if(s.phase<0)return;
         try {
@@ -207,15 +207,15 @@ public final class SkyCasinoUpgrade {
         be.load(data);be.setChanged();l.sendBlockUpdated(p,c.after(),c.after(),3);s.applied.add(key);s.setDirty();
     }
     public static String status(MinecraftServer server) {
-        var s=state(server.overworld());var plan=PLANS.get(server);
+        var s=state(com.tnc.tnc.world.SkyIslandWorlds.island(server));var plan=PLANS.get(server);
         return "天空赌场："+(s.phase==2?"已完成":s.phase<0?"暂停":s.phase==1?"施工":"等待检查")+"，"+s.cursor+(plan==null?"":"/"+plan.changes().size())
                 +(s.error.isEmpty()?"":"；"+s.error)+"；位置 "+s.origin.offset(66,90,234).toShortString();
     }
     public static void retry(MinecraftServer server) {
-        var s=state(server.overworld());if(s.phase==2)return;s.phase=0;s.cursor=0;s.error="";s.setDirty();
+        var s=state(com.tnc.tnc.world.SkyIslandWorlds.island(server));if(s.phase==2)return;s.phase=0;s.cursor=0;s.error="";s.setDirty();
     }
     private static void release(ServerLevel l) {
         for(var c:TICKETS.getOrDefault(l.getServer(),Set.of()))l.getChunkSource().removeRegionTicket(TICKET,c,2,c);TICKETS.remove(l.getServer());
     }
-    public static void stop(MinecraftServer server){release(server.overworld());PLANS.remove(server);}
+    public static void stop(MinecraftServer server){release(com.tnc.tnc.world.SkyIslandWorlds.island(server));PLANS.remove(server);}
 }

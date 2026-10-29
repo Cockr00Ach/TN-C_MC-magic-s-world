@@ -74,7 +74,7 @@ public final class AcademyClient {
                 boolean night=shot.equals("stargaze");stop();if(night){mc.player.setYRot(0);mc.player.setXRot(-8);mc.player.displayClientMessage(net.minecraft.network.chat.Component.literal("瑟兰：现在，亲手按F8。让风告诉你答案。"),true);}
             }else update();
         }
-        if(origin!=null&&mc.level.dimension()==net.minecraft.world.level.Level.OVERWORLD&&ManaSightClient.enabled())scenery();
+        if(origin!=null&&(mc.level.dimension()==net.minecraft.world.level.Level.OVERWORLD||mc.level.dimension().equals(com.tnc.tnc.world.skyhaven.SkyhavenContent.KEY))&&ManaSightClient.enabled())scenery();
     }
     private static void scenery(){
         var mc=Minecraft.getInstance();var eye=mc.player.getEyePosition();long clock=mc.level.getGameTime();

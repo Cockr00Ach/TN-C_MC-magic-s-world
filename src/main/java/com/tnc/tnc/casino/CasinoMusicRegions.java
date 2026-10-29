@@ -8,7 +8,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 @net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid="tnc")
 public final class CasinoMusicRegions {
  private static final Map<ServerPlayer,String> SENT=new WeakHashMap<>();
- @SubscribeEvent public static void tick(TickEvent.ServerTickEvent e){if(e.phase!=TickEvent.Phase.END||e.getServer().getTickCount()%20!=0)return;var l=e.getServer().overworld();var s=SkyCasinoUpgrade.state(l);for(var p:e.getServer().getPlayerList().getPlayers()){
+ @SubscribeEvent public static void tick(TickEvent.ServerTickEvent e){if(e.phase!=TickEvent.Phase.END||e.getServer().getTickCount()%20!=0)return;var l=com.tnc.tnc.world.SkyIslandWorlds.island(e.getServer());var s=SkyCasinoUpgrade.state(l);for(var p:e.getServer().getPlayerList().getPlayers()){
   boolean available=s.phase==2&&p.serverLevel()==l;String key=p.serverLevel().dimension().location()+":"+available+":"+s.origin;
   if(key.equals(SENT.get(p)))continue;var lo=s.origin.offset(SkyCasinoUpgrade.MIN);var hi=s.origin.offset(SkyCasinoUpgrade.MAX);
   var boxes=available?List.of(new AABB(lo.getX()-2,lo.getY()-2,lo.getZ()-2,hi.getX()+3,hi.getY()+3,hi.getZ()+3)):List.<AABB>of();

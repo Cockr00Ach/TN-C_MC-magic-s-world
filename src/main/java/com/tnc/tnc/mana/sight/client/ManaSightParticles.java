@@ -71,7 +71,7 @@ public final class ManaSightParticles {
         if(level!=world){clear();level=world;}fade=entrance;while(OWNED.size()+EFFECTS.size()+SCENIC.size()>limit()){var list=!OWNED.isEmpty()?OWNED:!EFFECTS.isEmpty()?EFFECTS:SCENIC;list.remove(0).remove();}
         OWNED.removeIf(p->{boolean expired=!p.isAlive()||world.getGameTime()-p.born>200||p.distanceToSqr(eye)>110*110;if(expired)p.remove();return expired;});
         if(sprites==null)return;
-        boolean dead=com.tnc.tnc.arcana.client.ArcanaClient.deadMana;int quality=limit(), fill=ticks++==0?1800:0;double reach=range()-6;
+        boolean dead=com.tnc.tnc.arcana.client.ArcanaClient.deadMana||(world.dimension().equals(com.tnc.tnc.world.skyhaven.SkyhavenContent.KEY)&&eye.y<120);int quality=limit(), fill=ticks++==0?1800:0;double reach=range()-6;
         // Reserve a quarter of the budget for real, server-confirmed interaction.
         int ambientBudget=dead?0:Math.max(0,quality*3/4-EFFECTS.size()-SCENIC.size());if(dead&&!wasDead){OWNED.forEach(ManaSightParticle::remove);OWNED.clear();}wasDead=dead;
         for(int i=0;i<fill+85&&OWNED.size()<ambientBudget;i++){

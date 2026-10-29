@@ -32,8 +32,8 @@ public final class AcademyLessons {
     public static CompoundTag data(ServerPlayer p){var root=JourneyData.get(p.server).player(p.getUUID());if(!root.contains("SkyAcademy",10))root.put("SkyAcademy",new CompoundTag());return root.getCompound("SkyAcademy");}
     static void dirty(ServerPlayer p){JourneyData.get(p.server).setDirty();}
     public static int completed(ServerPlayer p){return data(p).getInt("Completed");}
-    private static long now(ServerPlayer p){return p.server.overworld().getGameTime();}
-    private static boolean near(ServerPlayer p,String site,double radius){var pos=SkyAcademyWorld.at(p.server,site);return p.isAlive()&&!p.isSpectator()&&!com.tnc.tnc.combat.DownedCombat.isDowned(p)&&p.serverLevel()==p.server.overworld()&&pos!=null&&pos.closerToCenterThan(p.position(),radius);}
+    private static long now(ServerPlayer p){return com.tnc.tnc.world.SkyIslandWorlds.island(p.server).getGameTime();}
+    private static boolean near(ServerPlayer p,String site,double radius){var pos=SkyAcademyWorld.at(p.server,site);return p.isAlive()&&!p.isSpectator()&&!com.tnc.tnc.combat.DownedCombat.isDowned(p)&&p.serverLevel()==com.tnc.tnc.world.SkyIslandWorlds.island(p.server)&&pos!=null&&pos.closerToCenterThan(p.position(),radius);}
     public static void finish(ServerPlayer p,int flag,String key){
         var t=data(p);if((t.getInt("Completed")&flag)!=0)return;
         t.putInt("Completed",t.getInt("Completed")|flag);dirty(p);AdventureService.milestone(p,"academy_"+key);
@@ -71,14 +71,14 @@ public final class AcademyLessons {
     }
     public static boolean leased(ServerPlayer p,String site){var l=LEASES.getOrDefault(p.server,Map.of()).get(site);return l!=null&&l.owner.equals(p.getUUID())&&l.until>now(p);}
     public static boolean trainingProtected(ServerPlayer p,BlockPos pos){
-        if(!SkyAcademyWorld.available(p.server)||p.serverLevel()!=p.server.overworld())return false;
+        if(!SkyAcademyWorld.available(p.server)||p.serverLevel()!=com.tnc.tnc.world.SkyIslandWorlds.island(p.server))return false;
         for(String site:List.of("farm","workshop")){var at=AcademyStations.base(p.server,site);if(at!=null&&new AABB(at.offset(-2,-2,-2),at.offset(10,6,6)).contains(net.minecraft.world.phys.Vec3.atCenterOf(pos)))return !leased(p,site);}
         return false;
     }
     /** Editing permissions differ from machine-use permissions: a learner may
      * power the whole demonstration, but may only replace its practice piece. */
     public static boolean trainingEditDenied(ServerPlayer p,BlockPos pos){
-        if(p.isCreative()||!SkyAcademyWorld.available(p.server)||p.serverLevel()!=p.server.overworld())return false;
+        if(p.isCreative()||!SkyAcademyWorld.available(p.server)||p.serverLevel()!=com.tnc.tnc.world.SkyIslandWorlds.island(p.server))return false;
         for(String site:List.of("farm","workshop")){
             var at=AcademyStations.base(p.server,site);
             if(at!=null&&new AABB(at.offset(-2,-2,-2),at.offset(10,6,6)).contains(net.minecraft.world.phys.Vec3.atCenterOf(pos))){
@@ -96,7 +96,7 @@ public final class AcademyLessons {
         var server=event.getServer();if(!SkyAcademyWorld.available(server))return;
         if(server.getTickCount()%100==0)ensureMentors(server);
         for(var p:server.getPlayerList().getPlayers()){
-            if(p.serverLevel()!=server.overworld()||!p.isAlive())continue;
+            if(p.serverLevel()!=com.tnc.tnc.world.SkyIslandWorlds.island(server)||!p.isAlive())continue;
             var t=data(p);
             if((completed(p)&AcademyRules.ARRIVAL)==0&&JourneyData.get(server).player(p.getUUID()).getBoolean("Named")){
                 var entry=SkyIslandSavedDataBridge.arrival(server);
@@ -119,7 +119,7 @@ public final class AcademyLessons {
         }
     }
     private static void ensureMentors(MinecraftServer server){
-        var l=server.overworld();for(var e:NAMES.entrySet()){
+        var l=com.tnc.tnc.world.SkyIslandWorlds.island(server);for(var e:NAMES.entrySet()){
             var at=SkyAcademyWorld.at(server,e.getKey());if(at==null||!l.hasChunkAt(at)||l.players().stream().noneMatch(p->at.closerToCenterThan(p.position(),64)))continue;
             String role="academy_"+e.getKey();var found=l.getEntitiesOfClass(TownServiceNpc.class,new AABB(at).inflate(12),n->n.role().equals(role));
             if(!found.isEmpty())continue;
@@ -143,5 +143,5 @@ public final class AcademyLessons {
     }
     @SubscribeEvent public static void logout(net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent e){SESSIONS.remove(e.getEntity().getUUID());}
     @SubscribeEvent public static void stop(net.minecraftforge.event.server.ServerStoppedEvent e){SESSIONS.clear();LEASES.remove(e.getServer());}
-    private static final class SkyIslandSavedDataBridge {static BlockPos arrival(MinecraftServer s){return com.tnc.tnc.world.SkyIslandSavedData.get(s.overworld()).anchorPos("ARRIVAL");}}
+    private static final class SkyIslandSavedDataBridge {static BlockPos arrival(MinecraftServer s){return com.tnc.tnc.world.SkyIslandSavedData.get(com.tnc.tnc.world.SkyIslandWorlds.island(s)).anchorPos("ARRIVAL");}}
 }

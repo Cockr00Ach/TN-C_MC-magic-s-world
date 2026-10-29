@@ -6,9 +6,9 @@ import net.minecraft.world.level.saveddata.SavedData;
 /** Central routing point for the pending island migration. Existing complete islands stay put. */
 public final class SkyIslandWorlds {
  static final class Choice extends SavedData {
-  boolean realm;
-  static Choice get(MinecraftServer s){return s.overworld().getDataStorage().computeIfAbsent(t->{var c=new Choice();c.realm=t.getBoolean("Realm");return c;},Choice::new,"tnc_sky_world_choice");}
-  public CompoundTag save(CompoundTag t){t.putBoolean("Realm",realm);return t;}
+  boolean realm,groundBuilt;
+  static Choice get(MinecraftServer s){return s.overworld().getDataStorage().computeIfAbsent(t->{var c=new Choice();c.realm=t.getBoolean("Realm");c.groundBuilt=t.getBoolean("GroundBuilt");return c;},Choice::new,"tnc_sky_world_choice");}
+  public CompoundTag save(CompoundTag t){t.putBoolean("Realm",realm);t.putBoolean("GroundBuilt",groundBuilt);return t;}
  }
  public static boolean separate(MinecraftServer s){return Choice.get(s).realm;}
  public static ServerLevel island(MinecraftServer s){
@@ -18,6 +18,7 @@ public final class SkyIslandWorlds {
   return target;
  }
  /** Only invoked before a fresh island starts; never opts a completed legacy island in. */
- static void chooseFresh(MinecraftServer s){var legacy=SkyIslandSavedData.get(s.overworld());if(legacy.version!=0||legacy.phase!=SkyIslandSavedData.Phase.IDLE)throw new IllegalStateException("已有岛屿不自动迁移");var c=Choice.get(s);c.realm=true;c.setDirty();}
+ static void chooseFresh(MinecraftServer s){var legacy=SkyIslandSavedData.get(s.overworld());if(legacy.version!=0||legacy.phase!=SkyIslandSavedData.Phase.IDLE)throw new IllegalStateException("已有岛屿不自动迁移");var c=Choice.get(s);c.realm=true;c.setDirty();releaseUnusedSpawn(s);}
+ public static void releaseUnusedSpawn(MinecraftServer s){if(separate(s))s.overworld().getChunkSource().removeRegionTicket(net.minecraft.server.level.TicketType.START,new net.minecraft.world.level.ChunkPos(s.overworld().getSharedSpawnPos()),11,net.minecraft.util.Unit.INSTANCE);}
  private SkyIslandWorlds(){}
 }

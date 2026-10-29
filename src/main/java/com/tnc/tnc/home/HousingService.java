@@ -50,9 +50,9 @@ public final class HousingService {
     public static BlockPos sourceOrigin(ServerLevel level){return SkyIslandAnchors.resolve(level,SkyIslandAnchors.Anchor.ORIGIN);}
     public static boolean inside(BlockPos local){return local.getX()>=182&&local.getX()<=199&&local.getY()>=90&&local.getY()<=117&&local.getZ()>=384&&local.getZ()<=398;}
     public static boolean owned(ServerPlayer p){var t=home(p);return t.hasUUID("Owner")&&!t.getBoolean("Preparing");}
-    public static boolean atSale(ServerPlayer p){var origin=sourceOrigin(p.server.overworld());return p.serverLevel()==p.server.overworld()&&p.isAlive()&&!p.isSpectator()&&!com.tnc.tnc.combat.DownedCombat.isDowned(p)&&origin!=null&&origin.offset(189,92,394).closerToCenterThan(p.position(),16);}
-    public static PlotCatalog.Plot ownedAt(ServerLevel level,BlockPos pos){if(level!=level.getServer().overworld())return null;return PlotCatalog.ALL.stream().filter(a->{var t=home(level.getServer(),a.id());return t.hasUUID("Owner")&&a.contains(pos.subtract(BlockPos.of(t.getLong("Origin"))));}).findFirst().orElse(null);}
-    public static PlotCatalog.Plot plotAt(ServerLevel level,BlockPos pos){if(level!=level.getServer().overworld())return null;var origin=sourceOrigin(level);var plot=origin==null?null:PlotCatalog.at(pos.subtract(origin));return PlotCatalog.available(level.getServer(),plot)?plot:null;}
+    public static boolean atSale(ServerPlayer p){var origin=sourceOrigin(com.tnc.tnc.world.SkyIslandWorlds.island(p.server));return p.serverLevel()==com.tnc.tnc.world.SkyIslandWorlds.island(p.server)&&p.isAlive()&&!p.isSpectator()&&!com.tnc.tnc.combat.DownedCombat.isDowned(p)&&origin!=null&&origin.offset(189,92,394).closerToCenterThan(p.position(),16);}
+    public static PlotCatalog.Plot ownedAt(ServerLevel level,BlockPos pos){if(level!=com.tnc.tnc.world.SkyIslandWorlds.island(level.getServer()))return null;return PlotCatalog.ALL.stream().filter(a->{var t=home(level.getServer(),a.id());return t.hasUUID("Owner")&&a.contains(pos.subtract(BlockPos.of(t.getLong("Origin"))));}).findFirst().orElse(null);}
+    public static PlotCatalog.Plot plotAt(ServerLevel level,BlockPos pos){if(level!=com.tnc.tnc.world.SkyIslandWorlds.island(level.getServer()))return null;var origin=sourceOrigin(level);var plot=origin==null?null:PlotCatalog.at(pos.subtract(origin));return PlotCatalog.available(level.getServer(),plot)?plot:null;}
     public static boolean isOwnedPosition(ServerLevel level,BlockPos pos){return ownedAt(level,pos)!=null;}
     public static boolean mayDecorate(ServerPlayer p,BlockPos pos) {
         var plot=ownedAt(p.serverLevel(),pos);if(plot==null)return false;var t=home(p.server,plot.id());
@@ -76,7 +76,7 @@ public final class HousingService {
         if(mine(p,plot.kind())!=null)return "你已有同类产权；先把自己的归处建设起来。";
         if(installment&&plot.kind()!=PlotCatalog.Kind.HOME)return "农田与牧场只需一次购买，不提供房贷。";
         if(requireVisit&&plot.kind()==PlotCatalog.Kind.HOME&&!p.isCreative()&&!AdventureService.profile(p).hasMilestone("viewed_"+id))return "先去"+plot.number()+"号实地看房，再回米洛这里决定。点击去看房可获得指引。";
-        if(p.level()!=p.server.overworld())return "住宅位于主世界天空岛。";
+        if(p.level()!=com.tnc.tnc.world.SkyIslandWorlds.island(p.server))return "住宅位于主世界天空岛。";
         var origin=sourceOrigin(p.serverLevel());if(origin==null||!SkyIslandAnchors.isComplete(p.serverLevel()))return "天空岛还未完成，尚无可售房源。";
         var chunks=new HashSet<net.minecraft.world.level.ChunkPos>();boolean waiting=false;
         try{
@@ -173,19 +173,19 @@ public final class HousingService {
         if(t.hasUUID("Owner")){var owner=level.getServer().getPlayerList().getPlayer(t.getUUID("Owner"));if(owner!=null)AdventureService.milestone(owner,"home_bought");}
     }
     public static CompoundTag snapshot(ServerPlayer p){
-        var mine=mine(p,PlotCatalog.Kind.HOME);var t=(mine==null?home(p.server):home(p)).copy();t.putLong("SalePrice",mine==null?PRICE:mine.price());t.putLong("DownPayment",mine==null?DOWN_PAYMENT:mine.down());var origin=t.hasUUID("Owner")?BlockPos.of(t.getLong("Origin")):sourceOrigin(p.server.overworld());
+        var mine=mine(p,PlotCatalog.Kind.HOME);var t=(mine==null?home(p.server):home(p)).copy();t.putLong("SalePrice",mine==null?PRICE:mine.price());t.putLong("DownPayment",mine==null?DOWN_PAYMENT:mine.down());var origin=t.hasUUID("Owner")?BlockPos.of(t.getLong("Origin")):sourceOrigin(com.tnc.tnc.world.SkyIslandWorlds.island(p.server));
         var selected=mine==null?PlotCatalog.find(ID):mine;
         if(origin!=null){t.putString("Entry",origin.offset(selected.entry()).toShortString());t.putString("Boundary",origin.offset(selected.min()).toShortString()+" 至 "+origin.offset(selected.max()).toShortString());}
         var list=new net.minecraft.nbt.ListTag();for(var plot:PlotCatalog.ALL){if(!PlotCatalog.available(p.server,plot))continue;var item=home(p.server,plot.id()).copy();item.putString("Id",plot.id());item.putString("Number",plot.number());item.putString("Name",plot.name());item.putString("Kind",plot.kind().name());item.putString("Detail",plot.detail());item.putLong("Price",plot.price());item.putLong("Down",plot.down());item.putLong("Total",plot.price()+plot.mortgageTotal()-(plot.price()-plot.down()));item.putLong("MortgageTotal",plot.mortgageTotal());item.putBoolean("Viewed",AdventureService.profile(p).hasMilestone("viewed_"+plot.id()));item.putBoolean("Mine",item.hasUUID("Owner")&&item.getUUID("Owner").equals(p.getUUID()));if(origin!=null)item.putString("Entry",origin.offset(plot.entry()).toShortString());list.add(item);}
         t.put("Catalog",list);t.putBoolean("Mine",owned(p));return t;
     }
     public static boolean intersectsOwned(ServerLevel level,BlockPos min,net.minecraft.core.Vec3i size) {
-        if(level!=level.getServer().overworld())return false;var max=min.offset(size).offset(-1,-1,-1);return PlotCatalog.ALL.stream().anyMatch(plot->{var t=home(level.getServer(),plot.id());if(!t.hasUUID("Owner"))return false;var o=BlockPos.of(t.getLong("Origin"));return plot.intersects(min.subtract(o),max.subtract(o));});
+        if(level!=com.tnc.tnc.world.SkyIslandWorlds.island(level.getServer()))return false;var max=min.offset(size).offset(-1,-1,-1);return PlotCatalog.ALL.stream().anyMatch(plot->{var t=home(level.getServer(),plot.id());if(!t.hasUUID("Owner"))return false;var o=BlockPos.of(t.getLong("Origin"));return plot.intersects(min.subtract(o),max.subtract(o));});
     }
     public static BlockPos furnishedBed(ServerPlayer p) {
         if(!owned(p))return null;var plot=mine(p,PlotCatalog.Kind.HOME);var t=home(p);var origin=BlockPos.of(t.getLong("Origin"));int beds=0;BlockPos selected=null;
-        for(var pos:BlockPos.betweenClosed(origin.offset(plot.min()),origin.offset(plot.max())))if(p.server.overworld().hasChunkAt(pos)) {
-            var state=p.server.overworld().getBlockState(pos);
+        for(var pos:BlockPos.betweenClosed(origin.offset(plot.min()),origin.offset(plot.max())))if(com.tnc.tnc.world.SkyIslandWorlds.island(p.server).hasChunkAt(pos)) {
+            var state=com.tnc.tnc.world.SkyIslandWorlds.island(p.server).getBlockState(pos);
             if(state.getBlock() instanceof net.minecraft.world.level.block.BedBlock&&state.getValue(net.minecraft.world.level.block.BedBlock.PART)==net.minecraft.world.level.block.state.properties.BedPart.HEAD){beds++;selected=pos.immutable();}
         }return beds>=2?selected:null;
     }

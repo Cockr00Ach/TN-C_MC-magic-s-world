@@ -37,11 +37,11 @@ public final class TownServices {
     }
     public static String directions(ServerLevel l){var o=origin(l);if(o==null)return "天空岛尚未落成。";return "29潮生制杖屋 "+o.offset(POSTS.get(1).local).toShortString()+"；28炉石铁匠铺 "+o.offset(POSTS.get(2).local).toShortString()+"；19归航银行 "+o.offset(POSTS.get(3).local).toShortString()+"。店员在屋内，酒馆入门上楼北侧为委托栏。";}
     public static boolean near(ServerPlayer p,String role){
-        if(p.serverLevel()!=p.server.overworld()||!p.isAlive()||p.isSpectator()||com.tnc.tnc.combat.DownedCombat.isDowned(p))return false;
+        if(p.serverLevel()!=com.tnc.tnc.world.SkyIslandWorlds.island(p.server)||!p.isAlive()||p.isSpectator()||com.tnc.tnc.combat.DownedCombat.isDowned(p))return false;
         return !p.serverLevel().getEntitiesOfClass(TownServiceNpc.class,new AABB(p.blockPosition()).inflate(8),n->n.isAlive()&&n.role().equals(role)&&n.distanceToSqr(p)<=64).isEmpty();
     }
-    public static boolean atBoard(ServerPlayer p){var b=board(p.server.overworld());return p.serverLevel()==p.server.overworld()&&p.isAlive()&&!p.isSpectator()&&!com.tnc.tnc.combat.DownedCombat.isDowned(p)&&b!=null&&b.closerToCenterThan(p.position(),16)&&p.serverLevel().hasChunkAt(b);}
-    public static boolean openBoard(ServerPlayer p){if(!atBoard(p))return false;return com.tnc.tnc.journey.CommissionService.openAt(p,board(p.server.overworld()));}
+    public static boolean atBoard(ServerPlayer p){var b=board(com.tnc.tnc.world.SkyIslandWorlds.island(p.server));return p.serverLevel()==com.tnc.tnc.world.SkyIslandWorlds.island(p.server)&&p.isAlive()&&!p.isSpectator()&&!com.tnc.tnc.combat.DownedCombat.isDowned(p)&&b!=null&&b.closerToCenterThan(p.position(),16)&&p.serverLevel().hasChunkAt(b);}
+    public static boolean openBoard(ServerPlayer p){if(!atBoard(p))return false;return com.tnc.tnc.journey.CommissionService.openAt(p,board(com.tnc.tnc.world.SkyIslandWorlds.island(p.server)));}
     public static void open(ServerPlayer p,TownServiceNpc npc){
         if(npc.role().startsWith("academy_")){com.tnc.tnc.skyacademy.AcademyLessons.open(p,npc.role().substring(8));return;}
         if(!near(p,npc.role()))return;AdventureService.milestone(p,"met_"+npc.role());AdventureService.sync(p,true,"",npc.role());
@@ -107,7 +107,7 @@ public final class TownServices {
         record.putLong("Pos",target.asLong());record.putInt("LayoutVersion",POST_LAYOUT_VERSION);return true;
     }
     @SubscribeEvent public static void tick(TickEvent.ServerTickEvent e){
-        if(e.phase!=TickEvent.Phase.END)return;var s=net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();if(s==null||s.getTickCount()%100!=0)return;var l=s.overworld();var o=origin(l);if(o==null||!SkyIslandAnchors.isComplete(l))return;
+        if(e.phase!=TickEvent.Phase.END)return;var s=net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();if(s==null||s.getTickCount()%100!=0)return;var l=com.tnc.tnc.world.SkyIslandWorlds.island(s);var o=origin(l);if(o==null||!SkyIslandAnchors.isComplete(l))return;
         var store=AdventureSavedData.get(s);if(!store.housing.contains("TownServices",10))store.housing.put("TownServices",new CompoundTag());var records=store.housing.getCompound("TownServices");
         for(var post:POSTS){if(!postReady(post,com.tnc.tnc.world.SkyLandscapeUpgrade.complete(s))||(post.role.equals("guild")&&!com.tnc.tnc.tavern.TavernUpgrade.complete(s)))continue;var record=records.getCompound(post.role);if(ensurePost(l,o,post,record)){records.put(post.role,record);store.setDirty();}}
         if(!com.tnc.tnc.world.SkyLandscapeUpgrade.complete(s)||!com.tnc.tnc.tavern.TavernUpgrade.complete(s))return;

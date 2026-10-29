@@ -939,5 +939,8 @@
   "spell.tnc.concealment.name": "隐匿",
   "spell.tnc.concealment.description": "隐去身形 1 分钟：敌对生物不会把你选作目标。期间造成或受到伤害会立刻显形。",
   "effect.tnc.concealment": "隐匿",
-  "effect.tnc.tortoise_stun": "眩晕"
+  "effect.tnc.tortoise_stun": "眩晕",
+  "block.tnc.abyssal_mana_water": "玄潮魔水",
+  "item.tnc.abyssal_mana_water_bucket": "玄潮魔水桶",
+  "fluid_type.tnc.abyssal_mana_water": "玄潮魔水"
 }

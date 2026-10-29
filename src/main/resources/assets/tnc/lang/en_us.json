@@ -790,5 +790,8 @@
   "spell.tnc.concealment.name": "Concealment",
   "spell.tnc.concealment.description": "Vanish for 1 minute: hostile mobs will not target you. Dealing or taking damage ends it immediately.",
   "effect.tnc.concealment": "Concealment",
-  "effect.tnc.tortoise_stun": "Stunned"
+  "effect.tnc.tortoise_stun": "Stunned",
+  "block.tnc.abyssal_mana_water": "Abyssal Mana Water",
+  "item.tnc.abyssal_mana_water_bucket": "Abyssal Mana Water Bucket",
+  "fluid_type.tnc.abyssal_mana_water": "Abyssal Mana Water"
 }

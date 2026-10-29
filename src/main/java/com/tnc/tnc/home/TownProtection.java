@@ -13,7 +13,7 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(modid=TNMod.MODID)
 public final class TownProtection {
     public static boolean town(ServerLevel l,BlockPos world){
-        if(l!=l.getServer().overworld())return false;
+        if(l!=com.tnc.tnc.world.SkyIslandWorlds.island(l.getServer()))return false;
         var origin=HousingService.sourceOrigin(l);if(origin==null)return false;var p=world.subtract(origin);
         return (p.getX()>=120&&p.getX()<=402&&p.getZ()>=92&&p.getZ()<=432&&p.getY()>=80&&p.getY()<=180)
                 ||(p.getX()>=410&&p.getX()<=490&&p.getZ()>=260&&p.getZ()<=330&&p.getY()>=80&&p.getY()<=145);
@@ -48,7 +48,7 @@ public final class TownProtection {
     @SubscribeEvent public static void tick(TickEvent.ServerTickEvent e){
         if(e.phase!=TickEvent.Phase.END)return;var server=net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();if(server==null||server.getTickCount()%200!=0)return;
         for(var plot:PlotCatalog.ALL){var t=HousingService.home(server,plot.id());if(!t.getBoolean("Preparing"))continue;
-        try{HousingService.finish(server.overworld(),BlockPos.of(t.getLong("Origin")),HousingService.blueprint(server.overworld(),plot.id()),t);}catch(Exception ignored){}}
+        try{HousingService.finish(com.tnc.tnc.world.SkyIslandWorlds.island(server),BlockPos.of(t.getLong("Origin")),HousingService.blueprint(com.tnc.tnc.world.SkyIslandWorlds.island(server),plot.id()),t);}catch(Exception ignored){}}
     }
     @SubscribeEvent public static void animalUse(PlayerInteractEvent.EntityInteract e){if(e.getEntity() instanceof ServerPlayer p&&e.getTarget() instanceof net.minecraft.world.entity.animal.Animal&&HousingService.ownedAt(p.serverLevel(),e.getTarget().blockPosition())!=null&&denied(p,e.getTarget().blockPosition()))e.setCanceled(true);}
     @SubscribeEvent public static void preciseAnimalUse(PlayerInteractEvent.EntityInteractSpecific e){if(e.getEntity() instanceof ServerPlayer p&&e.getTarget() instanceof net.minecraft.world.entity.animal.Animal&&HousingService.ownedAt(p.serverLevel(),e.getTarget().blockPosition())!=null&&denied(p,e.getTarget().blockPosition()))e.setCanceled(true);}

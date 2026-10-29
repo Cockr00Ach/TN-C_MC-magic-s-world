@@ -170,7 +170,7 @@ public final class SkyLandscapeUpgrade {
         s.cursor=0;s.tile++;s.setDirty();
     }
     public static void tick(MinecraftServer server) {
-        var l=server.overworld();var island=SkyIslandSavedData.get(l);
+        var l=com.tnc.tnc.world.SkyIslandWorlds.island(server);var island=SkyIslandSavedData.get(l);
         if(!island.isSkyIslandComplete()||l.players().isEmpty())return;
         var s=State.get(l);if(s.phase<0||s.phase==2)return;
         try {
@@ -184,20 +184,20 @@ public final class SkyLandscapeUpgrade {
             l.players().forEach(p->p.sendSystemMessage(Component.literal("§e天空岛整修暂停："+s.error)));
         }
     }
-    public static boolean complete(MinecraftServer server) { return State.get(server.overworld()).phase==2; }
+    public static boolean complete(MinecraftServer server) { return State.get(com.tnc.tnc.world.SkyIslandWorlds.island(server)).phase==2; }
     public static String status(MinecraftServer server) {
-        var s=State.get(server.overworld());var plan=PLANS.get(server);
+        var s=State.get(com.tnc.tnc.world.SkyIslandWorlds.island(server));var plan=PLANS.get(server);
         return "天空岛整修："+(switch(s.phase){case 0->"检查现场";case 1->"施工";case 2->"已完成";default->"暂停";})
                 +"，分片 "+s.tile+(plan==null?"":"/"+plan.tiles.size())
                 +(s.error.isEmpty()?"":"；"+s.error)+(s.waiting.isEmpty()?"":"；"+s.waiting)
                 +(plan==null?"":"；酒馆入口 "+s.origin.offset(plan.tavern).toShortString());
     }
     public static void retry(MinecraftServer server) {
-        var s=State.get(server.overworld());if(s.phase==2)return;s.phase=0;s.tile=0;s.cursor=0;s.error="";s.setDirty();
+        var s=State.get(com.tnc.tnc.world.SkyIslandWorlds.island(server));if(s.phase==2)return;s.phase=0;s.tile=0;s.cursor=0;s.error="";s.setDirty();
     }
     static void release(ServerLevel l) {
         for(var c:TICKETS.getOrDefault(l.getServer(),Set.of()))l.getChunkSource().removeRegionTicket(TICKET,c,2,c);
         TICKETS.remove(l.getServer());
     }
-    public static void stop(MinecraftServer s){release(s.overworld());PLANS.remove(s);}
+    public static void stop(MinecraftServer s){release(com.tnc.tnc.world.SkyIslandWorlds.island(s));PLANS.remove(s);}
 }

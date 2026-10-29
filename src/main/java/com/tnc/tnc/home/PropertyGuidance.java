@@ -9,10 +9,10 @@ import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber(modid=TNMod.MODID)
 public final class PropertyGuidance {
-    public static String look(ServerPlayer p,String id){var plot=PlotCatalog.find(id);var o=HousingService.sourceOrigin(p.server.overworld());if(!PlotCatalog.available(p.server,plot)||o==null)return "房源尚未就绪。";
+    public static String look(ServerPlayer p,String id){var plot=PlotCatalog.find(id);var o=HousingService.sourceOrigin(com.tnc.tnc.world.SkyIslandWorlds.island(p.server));if(!PlotCatalog.available(p.server,plot)||o==null)return "房源尚未就绪。";
         p.getPersistentData().putString("TncPropertyRoute",id);String line="米洛："+plot.number()+"号"+plot.name()+"，位置 "+o.offset(plot.entry()).toShortString()+"。到门口后实地看看，再回来决定。";p.sendSystemMessage(Component.literal(line));return line;
     }
-    @SubscribeEvent public static void tick(TickEvent.PlayerTickEvent e){if(e.phase!=TickEvent.Phase.END||!(e.player instanceof ServerPlayer p)||p.tickCount%20!=0||p.serverLevel()!=p.server.overworld())return;var o=HousingService.sourceOrigin(p.serverLevel());if(o==null)return;
+    @SubscribeEvent public static void tick(TickEvent.PlayerTickEvent e){if(e.phase!=TickEvent.Phase.END||!(e.player instanceof ServerPlayer p)||p.tickCount%20!=0||p.serverLevel()!=com.tnc.tnc.world.SkyIslandWorlds.island(p.server))return;var o=HousingService.sourceOrigin(p.serverLevel());if(o==null)return;
         for(var plot:PlotCatalog.ALL)if(PlotCatalog.available(p.server,plot)&&o.offset(plot.entry()).closerToCenterThan(p.position(),8)){if(!AdventureService.profile(p).hasMilestone("viewed_"+plot.id())){AdventureService.milestone(p,"viewed_"+plot.id());p.sendSystemMessage(Component.literal("你已到达"+plot.number()+"号"+plot.name()+"。门牌与边界已记录；回银行可以办理购买。"));}}
         String id=p.getPersistentData().getString("TncPropertyRoute");var a=PlotCatalog.find(id);if(a==null)return;var target=o.offset(a.entry());double distance=Math.sqrt(target.distToCenterSqr(p.position()));
         if(distance<8){p.getPersistentData().remove("TncPropertyRoute");return;}

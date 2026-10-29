@@ -34,14 +34,14 @@ public final class SkyAcademyWorld {
             var map=new LinkedHashMap<String,BlockPos>();JsonParser.parseReader(r).getAsJsonObject().entrySet().forEach(e->{var a=e.getValue().getAsJsonArray();map.put(e.getKey(),new BlockPos(a.get(0).getAsInt(),a.get(1).getAsInt(),a.get(2).getAsInt()));});return Map.copyOf(map);
         }catch(IOException e){throw new ExceptionInInitializerError(e);}
     }
-    public static BlockPos origin(MinecraftServer s){return SkyIslandSavedData.get(s.overworld()).anchorPos("ORIGIN");}
+    public static BlockPos origin(MinecraftServer s){return SkyIslandSavedData.get(com.tnc.tnc.world.SkyIslandWorlds.island(s)).anchorPos("ORIGIN");}
     /** Called by the island lifecycle, never inferred from a fleeting game-time value. */
-    public static void beginFreshIsland(MinecraftServer s){var d=State.get(s.overworld());d.enabled=true;d.done=false;d.tile=d.cursor=0;d.error="";d.setDirty();}
+    public static void beginFreshIsland(MinecraftServer s){var d=State.get(com.tnc.tnc.world.SkyIslandWorlds.island(s));d.enabled=true;d.done=false;d.tile=d.cursor=0;d.error="";d.setDirty();}
     public static BlockPos at(MinecraftServer s,String site){var o=origin(s);var p=SITES.get(site);return o==null||p==null?null:o.offset(p);}
-    public static boolean available(MinecraftServer s){var d=State.get(s.overworld());return d.enabled&&d.done;}
-    public static void enableIsolatedAudit(MinecraftServer s){if(!Boolean.getBoolean("tnc.skyAcademyAudit"))throw new IllegalStateException("Audit opt-in required");var d=State.get(s.overworld());if(!d.enabled){d.enabled=true;d.done=false;d.tile=d.cursor=0;d.error="";d.setDirty();}}
-    public static boolean ready(MinecraftServer s){var d=State.get(s.overworld());return !d.enabled||d.done;}
-    public static String status(MinecraftServer s){var d=State.get(s.overworld());return !d.enabled?"旧存档保留原地形":d.done?"云溪景观与教学场地就绪":"云溪景观施工 "+d.tile+" / "+(PLANS.containsKey(s)?PLANS.get(s).tiles.size():"待加载")+(d.error.isEmpty()?"":" · "+d.error);}
+    public static boolean available(MinecraftServer s){var d=State.get(com.tnc.tnc.world.SkyIslandWorlds.island(s));return d.enabled&&d.done;}
+    public static void enableIsolatedAudit(MinecraftServer s){if(!Boolean.getBoolean("tnc.skyAcademyAudit"))throw new IllegalStateException("Audit opt-in required");var d=State.get(com.tnc.tnc.world.SkyIslandWorlds.island(s));if(!d.enabled){d.enabled=true;d.done=false;d.tile=d.cursor=0;d.error="";d.setDirty();}}
+    public static boolean ready(MinecraftServer s){var d=State.get(com.tnc.tnc.world.SkyIslandWorlds.island(s));return !d.enabled||d.done;}
+    public static String status(MinecraftServer s){var d=State.get(com.tnc.tnc.world.SkyIslandWorlds.island(s));return !d.enabled?"旧存档保留原地形":d.done?"云溪景观与教学场地就绪":"云溪景观施工 "+d.tile+" / "+(PLANS.containsKey(s)?PLANS.get(s).tiles.size():"待加载")+(d.error.isEmpty()?"":" · "+d.error);}
     @SubscribeEvent public static void load(net.minecraftforge.event.level.LevelEvent.Load e){if(e.getLevel() instanceof ServerLevel l&&l.dimension()==net.minecraft.world.level.Level.OVERWORLD)State.get(l);}
     private static Plan loadPlan(ServerLevel l)throws IOException{
         CompoundTag tag;try(var in=SkyAcademyWorld.class.getResourceAsStream("/data/tnc/sky_academy/landscape.nbt")){tag=NbtIo.readCompressed(Objects.requireNonNull(in));}
@@ -58,7 +58,7 @@ public final class SkyAcademyWorld {
     }
     @SubscribeEvent public static void tick(net.minecraftforge.event.TickEvent.ServerTickEvent e){
         if(e.phase!=net.minecraftforge.event.TickEvent.Phase.END)return;
-        var server=e.getServer();var l=server.overworld();var d=State.get(l);
+        var server=e.getServer();var l=com.tnc.tnc.world.SkyIslandWorlds.island(server);var d=State.get(l);
         if(!d.enabled||d.done||!d.error.isEmpty()||l.players().isEmpty()||!SkyLandscapeUpgrade.complete(server))return;
         var o=origin(server);if(o==null)return;
         try{
@@ -79,6 +79,6 @@ public final class SkyAcademyWorld {
             if(d.cursor>=a.length){d.tile++;d.cursor=0;}d.setDirty();
         }catch(Exception ex){d.error=ex.getMessage();d.setDirty();release(server);com.mojang.logging.LogUtils.getLogger().error("[Sky Academy] Construction paused",ex);}
     }
-    private static void release(MinecraftServer s){for(var c:TICKETS.getOrDefault(s,Set.of()))s.overworld().getChunkSource().removeRegionTicket(TICKET,c,2,c);TICKETS.remove(s);}
+    private static void release(MinecraftServer s){for(var c:TICKETS.getOrDefault(s,Set.of()))com.tnc.tnc.world.SkyIslandWorlds.island(s).getChunkSource().removeRegionTicket(TICKET,c,2,c);TICKETS.remove(s);}
     @SubscribeEvent public static void stop(net.minecraftforge.event.server.ServerStoppingEvent e){release(e.getServer());PLANS.remove(e.getServer());}
 }

@@ -59,7 +59,7 @@ public final class SkyIslandSavedData extends SavedData {
      * 只扩大可见性，逻辑一字未改。
      */
     public static SkyIslandSavedData get(ServerLevel level) {
-        return level.getDataStorage().computeIfAbsent(
+        return level.getServer().overworld().getDataStorage().computeIfAbsent(
                 SkyIslandSavedData::load,
                 SkyIslandSavedData::new,
                 FILE_ID

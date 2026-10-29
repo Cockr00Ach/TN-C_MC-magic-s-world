@@ -123,9 +123,9 @@ public final class TavernUpgrade {
             var entity=EntityType.loadEntityRecursive(tag,l,e->e);if(entity!=null)l.addFreshEntityWithPassengers(entity);
         }
     }
-    public static boolean complete(MinecraftServer server){return State.get(server.overworld()).phase==2;}
+    public static boolean complete(MinecraftServer server){return State.get(com.tnc.tnc.world.SkyIslandWorlds.island(server)).phase==2;}
     public static void tick(MinecraftServer server) {
-        var l=server.overworld();var island=SkyIslandSavedData.get(l);if(!island.isSkyIslandComplete()||!SkyLandscapeUpgrade.complete(server)||l.players().isEmpty())return;
+        var l=com.tnc.tnc.world.SkyIslandWorlds.island(server);var island=SkyIslandSavedData.get(l);if(!island.isSkyIslandComplete()||!SkyLandscapeUpgrade.complete(server)||l.players().isEmpty())return;
         var s=State.get(l);
         // Missing dependency failed before any construction; recover once it is restored.
         recoverMissingDependency(l,s);
@@ -154,7 +154,7 @@ public final class TavernUpgrade {
         }catch(Exception e){s.phase=-1;s.error=e.getMessage();s.setDirty();release(l);LogUtils.getLogger().error("[TN-C Tavern] update paused: {}",s.error,e);}
     }
     public static void sync(ServerPlayer player,boolean immediate) {
-        var server=player.server;var l=server.overworld();var s=State.get(l);if(s.phase!=2)return;
+        var server=player.server;var l=com.tnc.tnc.world.SkyIslandWorlds.island(server);var s=State.get(l);if(s.phase!=2)return;
         try {
             var plan=PLANS.get(server);if(plan==null){plan=load(l);PLANS.put(server,plan);}
             String key=player.serverLevel().dimension().location()+":"+s.origin;
@@ -185,5 +185,5 @@ public final class TavernUpgrade {
         return spawned;
     }
     private static void release(ServerLevel l){for(var c:TICKETS.getOrDefault(l.getServer(),Set.of()))l.getChunkSource().removeRegionTicket(TICKET,c,2,c);TICKETS.remove(l.getServer());}
-    public static void stop(MinecraftServer server){release(server.overworld());PLANS.remove(server);SENT.clear();}
+    public static void stop(MinecraftServer server){release(com.tnc.tnc.world.SkyIslandWorlds.island(server));PLANS.remove(server);SENT.clear();}
 }

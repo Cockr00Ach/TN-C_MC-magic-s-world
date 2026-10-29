@@ -476,6 +476,6 @@ public class NpcPlacementSavedData extends net.minecraft.world.level.saveddata.S
 
     /** 主世界（NPC 都放主世界；天空岛也在主世界）。 */
     public static ServerLevel overworldOf(net.minecraft.server.MinecraftServer server) {
-        return server.getLevel(Level.OVERWORLD);
+        return com.tnc.tnc.world.SkyIslandWorlds.island(server);
     }
 }

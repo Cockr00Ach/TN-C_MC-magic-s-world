@@ -87,7 +87,7 @@ public final class TownStories {
         return false;
     }
     static int furnishing(ServerPlayer p){
-        var plot=HousingService.mine(p,PlotCatalog.Kind.HOME);if(plot==null||!HousingService.owned(p))return 0;var origin=BlockPos.of(HousingService.home(p).getLong("Origin"));var l=p.server.overworld();int found=0;
+        var plot=HousingService.mine(p,PlotCatalog.Kind.HOME);if(plot==null||!HousingService.owned(p))return 0;var origin=BlockPos.of(HousingService.home(p).getLong("Origin"));var l=com.tnc.tnc.world.SkyIslandWorlds.island(p.server);int found=0;
         for(var pos:BlockPos.betweenClosed(origin.offset(plot.min()),origin.offset(plot.max()))){if(!l.hasChunkAt(pos))continue;var state=l.getBlockState(pos);
             if(state.getBlock() instanceof BedBlock&&state.getValue(BedBlock.PART)==BedPart.HEAD)found|=1;
             if(state.getLightEmission(l,pos)>=5)found|=2;var key=ForgeRegistries.BLOCKS.getKey(state.getBlock());if(key!=null&&key.getNamespace().equals("immersive_furniture"))found|=4;if(found==7)break;
@@ -100,8 +100,8 @@ public final class TownStories {
     static void addUnique(ServerPlayer p,CompoundTag r,String key,String value){var list=r.getList(key,8);if(list.stream().noneMatch(t->t.getAsString().equals(value))){list.add(StringTag.valueOf(value));r.put(key,list);AdventureSavedData.get(p.server).setDirty();}}
     @SubscribeEvent public static void explore(TickEvent.PlayerTickEvent e){
         if(e.phase!=TickEvent.Phase.END||!(e.player instanceof ServerPlayer p)||p.tickCount%100!=0||!living(p)||record(p,"journey").getInt("Stage")!=1)return;
-        var origin=HousingService.sourceOrigin(p.server.overworld());if(origin==null)return;var local=p.blockPosition().subtract(origin);
-        if(p.serverLevel()==p.server.overworld()&&local.getX()>=0&&local.getX()<520&&local.getZ()>=0&&local.getZ()<520&&local.getY()>=30&&local.getY()<240)return;
+        var origin=HousingService.sourceOrigin(com.tnc.tnc.world.SkyIslandWorlds.island(p.server));if(origin==null)return;var local=p.blockPosition().subtract(origin);
+        if(p.serverLevel()==com.tnc.tnc.world.SkyIslandWorlds.island(p.server)&&local.getX()>=0&&local.getX()<520&&local.getZ()>=0&&local.getZ()<520&&local.getY()>=30&&local.getY()<240)return;
         p.serverLevel().getBiome(p.blockPosition()).unwrapKey().ifPresent(key->recordBiome(p,key.location().toString()));
     }
     static String residentId(ServerPlayer p,Entity npc){
@@ -112,13 +112,13 @@ public final class TownStories {
         for(var story:List.of("supper","journey")){var r=record(p,story);if(r.getInt("Stage")==3)addUnique(p,r,"Guests",id);}
     }
     @SubscribeEvent public static void visit(PlayerInteractEvent.EntityInteract e){
-        if(!(e.getEntity() instanceof ServerPlayer p)||e.getHand()!=InteractionHand.MAIN_HAND||!living(p)||p.serverLevel()!=p.server.overworld()||p.distanceToSqr(e.getTarget())>36)return;var id=residentId(p,e.getTarget());if(id==null)return;
+        if(!(e.getEntity() instanceof ServerPlayer p)||e.getHand()!=InteractionHand.MAIN_HAND||!living(p)||p.serverLevel()!=com.tnc.tnc.world.SkyIslandWorlds.island(p.server)||p.distanceToSqr(e.getTarget())>36)return;var id=residentId(p,e.getTarget());if(id==null)return;
         rememberVisit(p,id);var greetings=journal(p).getCompound("Greetings");long day=Math.max(0,System.currentTimeMillis()/86_400_000L);if(greetings.contains(id)&&greetings.getLong(id)>=day)return;
         greetings.putLong(id,day);journal(p).put("Greetings",greetings);AdventureSavedData.get(p.server).setDirty();var d=ResidentService.definition(id);
         String line=complete(p,"supper")?"还记得酒馆那一桌热饭吗？下次也给你留位置。":complete(p,"journey")?"你上次说的远方，我还记着。有新故事记得带回来。":complete(p,"home")?"新家住得还习惯吗？晚些时候记得给自己留一盏灯。":switch(id){case "lin"->"新鲜的收成可以卖给织夏。今天店里的推荐品，可能正好是你的菜。";case "qiao"->"不必每天赶路。有空坐下来吃顿饭，也算一天的收获。";case "lan"->"岛外的水会流向哪里？回来时告诉我你看到了什么。";case "yan"->"不是每一页札记都要写战斗。记下一个陌生地方，也很好。";case "he"->"给旅人留一碗热汤，是我喜欢这里的原因。";default->"有人记得你回来的声音，这里才像一个家。";};p.sendSystemMessage(Component.literal(d.name()+"："+line));
     }
     static void rememberRest(ServerPlayer p,BlockPos bed,int sleptTicks){
-        if(sleptTicks<100||!living(p)||p.serverLevel()!=p.server.overworld()||!HousingService.owned(p)||record(p,"home").getInt("Stage")!=3)return;
+        if(sleptTicks<100||!living(p)||p.serverLevel()!=com.tnc.tnc.world.SkyIslandWorlds.island(p.server)||!HousingService.owned(p)||record(p,"home").getInt("Stage")!=3)return;
         var plot=HousingService.mine(p,PlotCatalog.Kind.HOME);var origin=BlockPos.of(HousingService.home(p).getLong("Origin"));if(bed!=null&&plot.contains(bed.subtract(origin))){record(p,"home").putBoolean("Rested",true);AdventureSavedData.get(p.server).setDirty();}
     }
     @SubscribeEvent public static void wake(PlayerWakeUpEvent e){if(e.getEntity() instanceof ServerPlayer p&&!e.wakeImmediately()&&!e.updateLevel())rememberRest(p,p.getSleepingPos().orElse(null),p.getSleepTimer());}

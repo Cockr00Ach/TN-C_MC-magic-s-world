@@ -87,7 +87,10 @@ public final class SkyIslandManager {
 
     public static void onPlayerLogin(ServerPlayer player) {
         MinecraftServer server = player.server;
-        ServerLevel overworld = server.overworld();
+        var initial=SkyIslandSavedData.get(server.overworld());
+        if(!SkyIslandWorlds.separate(server)&&initial.version==0&&initial.phase==SkyIslandSavedData.Phase.IDLE)SkyIslandWorlds.chooseFresh(server);
+        ServerLevel overworld = SkyIslandWorlds.island(server);
+        SkyhavenTravel.login(player);
         try {
             SkyIslandManifest manifest = manifest(server);
             SkyIslandSavedData data = SkyIslandSavedData.get(overworld);
@@ -126,7 +129,7 @@ public final class SkyIslandManager {
     }
 
     public static void tick(MinecraftServer server) {
-        ServerLevel level = server.overworld();
+        ServerLevel level = SkyIslandWorlds.island(server);
         previewTick(level);
         SkyIslandSavedData data = SkyIslandSavedData.get(level);
 
@@ -168,7 +171,7 @@ public final class SkyIslandManager {
         PREVIEWS.remove(server);
         PORTAL_CHARGES.clear();
         ACTIVE_RITUALS.clear();
-        ServerLevel level = server.overworld();
+        ServerLevel level = SkyIslandWorlds.island(server);
         SkyIslandSavedData data = SkyIslandSavedData.get(level);
         try {
             releaseActiveChunks(level, data);
@@ -178,7 +181,7 @@ public final class SkyIslandManager {
     }
 
     public static void previewRitual(ServerPlayer player) {
-        var level=player.server.overworld(); var data=SkyIslandSavedData.get(level);
+        var level=SkyIslandWorlds.island(player.server); var data=SkyIslandSavedData.get(level);
         BlockPos center=player.blockPosition();
         if (data.isSkyIslandComplete()) {
             var a=groundLanding(data); var b=islandLanding(data);
@@ -220,6 +223,7 @@ public final class SkyIslandManager {
     }
 
     private static void surveyStep(ServerLevel level, SkyIslandSavedData data, SkyIslandManifest manifest) {
+        if(SkyIslandWorlds.separate(level.getServer())){data.bestOriginX=-260;data.bestOriginZ=-260;data.bestSurveyScore=0;finishSurvey(level,data,manifest);return;}
         List<BlockPos> samples = surveySamples(manifest);
         if (data.surveyCandidate >= ISLAND_OFFSETS.length) {
             finishSurvey(level, data, manifest);
@@ -289,7 +293,7 @@ public final class SkyIslandManager {
         data.arrivalY = data.originY + manifest.arrivalLocal().getY();
         data.arrivalZ = data.originZ + manifest.arrivalLocal().getZ();
 
-        BlockPos portalOrigin = chooseGroundPortal(level, manifest);
+        BlockPos portalOrigin = chooseGroundPortal(SkyIslandWorlds.separate(level.getServer())?level.getServer().overworld():level, manifest);
         if (portalOrigin == null) return; // Resume next tick while this candidate loads.
         data.groundPortalX = portalOrigin.getX();
         data.groundPortalY = portalOrigin.getY();
@@ -412,6 +416,8 @@ public final class SkyIslandManager {
     }
 
     static void finalizeBuild(ServerLevel level, SkyIslandSavedData data, SkyIslandManifest manifest) throws IOException {
+        boolean separate=SkyIslandWorlds.separate(level.getServer());
+        if(separate&&!SkyhavenTravel.groundGate(level.getServer().overworld(),data,manifest))return;
         BlockPos islandPortalOrigin = new BlockPos(
                 data.arrivalX - 7,
                 data.arrivalY - 1,
@@ -425,7 +431,7 @@ public final class SkyIslandManager {
 
         if (data.activeChunks.isEmpty()) {
             forceAreaChunks(level, data, PortalArchitecture.footprintOrigin(islandPortalOrigin), PortalArchitecture.WIDTH, PortalArchitecture.HEIGHT, PortalArchitecture.WIDTH);
-            forceAreaChunks(level, data, PortalArchitecture.footprintOrigin(groundPortalOrigin), PortalArchitecture.WIDTH, PortalArchitecture.HEIGHT, PortalArchitecture.WIDTH);
+            if(!separate)forceAreaChunks(level, data, PortalArchitecture.footprintOrigin(groundPortalOrigin), PortalArchitecture.WIDTH, PortalArchitecture.HEIGHT, PortalArchitecture.WIDTH);
             data.waitUntilTick = level.getGameTime() + 2L;
             data.setDirty();
             return;
@@ -440,8 +446,8 @@ public final class SkyIslandManager {
         PortalArchitecture.Plan islandPlan, groundPlan, supports;
         try {
             islandPlan = PortalArchitecture.prepare(level, manifest.islandPortal(), islandPortalOrigin, false);
-            groundPlan = PortalArchitecture.prepare(level, manifest.groundPortal(), groundPortalOrigin, false);
-            supports = PortalArchitecture.prepareSupports(level,groundPortalOrigin);
+            groundPlan = separate?null:PortalArchitecture.prepare(level, manifest.groundPortal(), groundPortalOrigin, false);
+            supports = separate?null:PortalArchitecture.prepareSupports(level,groundPortalOrigin);
         } catch (PortalArchitecture.SiteOccupied occupied) {
             String waiting=occupied.getMessage();
             if (!waiting.equals(data.lastError)) {
@@ -454,11 +460,11 @@ public final class SkyIslandManager {
             return;
         }
         islandPlan.apply(level);
-        groundPlan.apply(level);
-        supports.apply(level);
+        if(groundPlan!=null)groundPlan.apply(level);
+        if(supports!=null)supports.apply(level);
 
         ensureLanding(level, islandLanding(data));
-        ensureLanding(level, groundLanding(data));
+        if(!separate)ensureLanding(level, groundLanding(data));
         releaseActiveChunks(level, data);
 
         data.phase = SkyIslandSavedData.Phase.COMPLETE;
@@ -496,7 +502,8 @@ public final class SkyIslandManager {
 
     /** Explicit local rebuild, never a v5 island reset or an automatic old-save overwrite. */
     public static void refreshPortalArchitecture(MinecraftServer server) throws IOException {
-        ServerLevel level = server.overworld();
+        if(SkyIslandWorlds.separate(server))throw new IOException("跨界传送阵已按两个维度分别管理，无需旧版同维度翻修");
+        ServerLevel level = SkyIslandWorlds.island(server);
         SkyIslandSavedData data = SkyIslandSavedData.get(level);
         SkyIslandManifest manifest = manifest(server);
         if (!isComplete(data, manifest)) throw new IOException("天空岛尚未生成完成");
@@ -621,21 +628,21 @@ public final class SkyIslandManager {
         BlockPos island = islandLanding(data);
         boolean effectsTick = level.getGameTime() % 5L == 0L;
         if (effectsTick) {
-            portalParticles(level, ground);
+            portalParticles(SkyIslandWorlds.separate(level.getServer())?level.getServer().overworld():level, ground);
             portalParticles(level, island);
         }
 
         Set<UUID> presentPlayers = new HashSet<>();
-        for (ServerPlayer player : level.players()) {
+        for (ServerPlayer player : level.getServer().getPlayerList().getPlayers()) {
             presentPlayers.add(player.getUUID());
             long cooldown = player.getPersistentData().getLong(PLAYER_COOLDOWN);
             if (level.getGameTime() < cooldown) {
                 PORTAL_CHARGES.remove(player.getUUID());
                 continue;
             }
-            boolean atGround = insidePortal(player, ground);
-            boolean atIsland = insidePortal(player, island);
-            updatePortalCharge(player, level, manifest, ground, island, atGround, atIsland, effectsTick);
+            boolean atGround = player.serverLevel()==level.getServer().overworld()&&insidePortal(player, ground);
+            boolean atIsland = player.serverLevel()==level&&insidePortal(player, island);
+            updatePortalCharge(player, player.serverLevel(), manifest, ground, island, atGround, atIsland, effectsTick);
         }
         PORTAL_CHARGES.keySet().removeIf(uuid -> !presentPlayers.contains(uuid));
         for (boolean fromGround : new boolean[]{true, false}) {
@@ -644,10 +651,10 @@ public final class SkyIslandManager {
                     .filter(c -> c.fromGround() == fromGround)
                     .mapToLong(PortalChargeState::startedAt).min().orElse(-1);
             if (started >= 0) {
-                sendRitual(level, center, (int)(level.getGameTime() - started));
+                sendRitual(fromGround&&SkyIslandWorlds.separate(level.getServer())?level.getServer().overworld():level, center, (int)(level.getGameTime() - started));
                 ACTIVE_RITUALS.add(center);
             } else if (ACTIVE_RITUALS.remove(center)) {
-                sendRitual(level, center, -1);
+                sendRitual(fromGround&&SkyIslandWorlds.separate(level.getServer())?level.getServer().overworld():level, center, -1);
             }
         }
     }
@@ -730,8 +737,9 @@ public final class SkyIslandManager {
         departureBurst(level, source);
         level.playSound(null, source, SoundEvents.ENDERMAN_TELEPORT,
                 SoundSource.PLAYERS, 0.9F, 0.8F);
-        teleport(player, level, destination);
-        arrivalBurst(level, destination);
+        var destinationWorld=SkyIslandWorlds.separate(level.getServer())?(fromGround?SkyIslandWorlds.island(level.getServer()):level.getServer().overworld()):level;
+        teleport(player, destinationWorld, destination);
+        arrivalBurst(destinationWorld, destination);
         level.playSound(null, destination, SoundEvents.ENDERMAN_TELEPORT,
                 SoundSource.PLAYERS, 0.8F, 1.25F);
     }

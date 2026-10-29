@@ -44,7 +44,7 @@ public final class ResidentService {
     static boolean likes(Definition d,String item){return switch(d.preference){case "bread"->item.contains("bread")||item.contains("pie");case "vegetable"->item.contains("carrot")||item.contains("potato")||item.contains("salad");case "fish"->item.contains("fish")||item.contains("salmon")||item.contains("cod");case "sweet"->item.contains("cookie")||item.contains("berry")||item.contains("pie");case "meat"->item.contains("cooked_")&&!item.contains("fish")&&!item.contains("cod")&&!item.contains("salmon");default->item.contains("soup")||item.contains("stew")||item.contains("feast");};}
     public static String act(ServerPlayer p,String action){
         if(McaResidents.available())return action.equals("home")?McaResidents.moveFamily(p):"请右键居民使用凡家物语的聊天、送礼、婚姻与家庭面板。结婚后带伴侣回自己的房子，输入 /neighbor home 设置住处。";
-        if(p.serverLevel()!=p.server.overworld())return "生活互动仅在主世界住宅区办理。";
+        if(p.serverLevel()!=com.tnc.tnc.world.SkyIslandWorlds.island(p.server))return "生活互动仅在主世界住宅区办理。";
         var session=SESSIONS.get(p.getUUID());var entity=session==null?null:p.serverLevel().getEntity(session);
         if(!(entity instanceof ResidentEntity npc)||npc.distanceToSqr(p)>64||!p.isAlive()||p.isSpectator()||com.tnc.tnc.combat.DownedCombat.isDowned(p))return "请先到邻居身边右键交流。";
         var def=definition(npc.identity());if(def==null||npc.isBaby())return "这位居民不能参与该互动。";
@@ -80,21 +80,21 @@ public final class ResidentService {
         AdventureSavedData.get(p.server).setDirty();return d.name+"："+(likes(d,item)?"这正合我的口味。":"谢谢你带来的料理。")+" 好感 "+r.getInt("Affection")+"/100。";
     }
     static String invite(ServerPlayer p,ResidentEntity npc){
-        if(p.serverLevel()!=p.server.overworld()||npc.level()!=p.server.overworld())return "生活互动仅在主世界住宅区办理。";
+        if(p.serverLevel()!=com.tnc.tnc.world.SkyIslandWorlds.island(p.server)||npc.level()!=com.tnc.tnc.world.SkyIslandWorlds.island(p.server))return "生活互动仅在主世界住宅区办理。";
         var r=relation(p,npc.identity());if(r.getInt("Affection")<70||r.getList("Dishes",8).size()<3||r.getInt("Meals")<3)return "邻居还没准备好：需要亲密70、三种料理和三次共餐。可以选择一直做朋友。";
         if(!HousingService.owned(p))return "需要你自己购买并装修的住宅。";
-        var bed=HousingService.furnishedBed(p);var stand=bed==null?null:safeBeside(p.server.overworld(),bed);if(stand==null)return "家中需要两张床和床旁两格高的安全活动空间。";
+        var bed=HousingService.furnishedBed(p);var stand=bed==null?null:safeBeside(com.tnc.tnc.world.SkyIslandWorlds.island(p.server),bed);if(stand==null)return "家中需要两张床和床旁两格高的安全活动空间。";
         var record=records(p.server).getCompound(npc.identity());if(record.hasUUID("Partner"))return "这位邻居已有共同生活的约定。";
         for(var d:ALL){var other=records(p.server).getCompound(d.id);if(other.hasUUID("Partner")&&other.getUUID("Partner").equals(p.getUUID()))return "已有一位同住邻居。请先明确结束原来的约定。";}
-        if(!p.server.overworld().hasChunkAt(stand))return "住宅区块未加载，请先回家看看。";
+        if(!com.tnc.tnc.world.SkyIslandWorlds.island(p.server).hasChunkAt(stand))return "住宅区块未加载，请先回家看看。";
         // Clicking the explicit invitation is the player's choice; the adult resident agrees only after readiness checks.
         record.putUUID("Partner",p.getUUID());record.putLong("Pos",stand.asLong());npc.teleportTo(stand.getX()+.5,stand.getY(),stand.getZ()+.5);
         AdventureSavedData.get(p.server).setDirty();AdventureService.milestone(p,"living_together");return npc.getName().getString()+"：我愿意搬来共同生活。远征多久都不会扣钱或掉好感。";
     }
     static String leave(ServerPlayer p,ResidentEntity npc){
-        if(p.serverLevel()!=p.server.overworld()||npc.level()!=p.server.overworld())return "生活互动仅在主世界住宅区办理。";
+        if(p.serverLevel()!=com.tnc.tnc.world.SkyIslandWorlds.island(p.server)||npc.level()!=com.tnc.tnc.world.SkyIslandWorlds.island(p.server))return "生活互动仅在主世界住宅区办理。";
         var record=records(p.server).getCompound(npc.identity());if(!record.hasUUID("Partner")||!record.getUUID("Partner").equals(p.getUUID()))return "你们目前没有共同生活的约定。";
-        var origin=HousingService.sourceOrigin(p.server.overworld());var d=definition(npc.identity());var stand=origin==null?null:safeBeside(p.server.overworld(),origin.offset(d.bed));if(stand==null)return "原住处区块未加载，先走近原住宅再办理。";
+        var origin=HousingService.sourceOrigin(com.tnc.tnc.world.SkyIslandWorlds.island(p.server));var d=definition(npc.identity());var stand=origin==null?null:safeBeside(com.tnc.tnc.world.SkyIslandWorlds.island(p.server),origin.offset(d.bed));if(stand==null)return "原住处区块未加载，先走近原住宅再办理。";
         record.remove("Partner");record.putLong("Pos",stand.asLong());npc.teleportTo(stand.getX()+.5,stand.getY(),stand.getZ()+.5);AdventureSavedData.get(p.server).setDirty();return "已结束共同生活。友情保留，邻居回到原住宅。";
     }
     public static BlockPos safeBeside(ServerLevel level,BlockPos bed){

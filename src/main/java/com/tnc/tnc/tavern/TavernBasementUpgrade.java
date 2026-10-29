@@ -56,7 +56,7 @@ public final class TavernBasementUpgrade {
         chunks.forEach(c->l.getChunkSource().addRegionTicket(TICKET,c,2,c));TICKETS.put(l.getServer(),chunks);return chunks.stream().allMatch(c->l.hasChunk(c.x,c.z)&&l.areEntitiesLoaded(c.toLong()));
     }
     public static void tick(MinecraftServer server) {
-        var l=server.overworld();if(!TavernUpgrade.complete(server)||l.players().isEmpty())return;var s=state(l);if(s.phase==2||s.phase<0)return;
+        var l=com.tnc.tnc.world.SkyIslandWorlds.island(server);if(!TavernUpgrade.complete(server)||l.players().isEmpty())return;var s=state(l);if(s.phase==2||s.phase<0)return;
         try {
             var plan=PLANS.get(server);if(plan==null){plan=load(l);PLANS.put(server,plan);}var origin=SkyIslandSavedData.get(l).anchorPos("ORIGIN");
             if(s.hash.isEmpty()){s.hash=plan.hash();s.origin=origin;s.setDirty();}if(!s.hash.equals(plan.hash())||!s.origin.equals(origin))throw new IOException("地下室施工资源或岛原点变化");
@@ -67,5 +67,5 @@ public final class TavernBasementUpgrade {
         }catch(Exception error){s.phase=-1;s.error=error.getMessage();s.setDirty();release(l);LogUtils.getLogger().error("[TN-C Tavern] cellar correction paused",error);}
     }
     private static void release(ServerLevel l){for(var c:TICKETS.getOrDefault(l.getServer(),Set.of()))l.getChunkSource().removeRegionTicket(TICKET,c,2,c);TICKETS.remove(l.getServer());}
-    public static void stop(MinecraftServer server){release(server.overworld());PLANS.remove(server);}
+    public static void stop(MinecraftServer server){release(com.tnc.tnc.world.SkyIslandWorlds.island(server));PLANS.remove(server);}
 }

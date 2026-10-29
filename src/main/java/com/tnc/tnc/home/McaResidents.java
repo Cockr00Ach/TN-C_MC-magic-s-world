@@ -60,7 +60,7 @@ public final class McaResidents {
     }
     public static String moveFamily(ServerPlayer p){
         if(!available())return "当前未加载凡家物语。";
-        if(p.serverLevel()!=p.server.overworld()||!p.isAlive()||p.isSpectator()||com.tnc.tnc.combat.DownedCombat.isDowned(p)||!HousingService.owned(p))return "先回到你自己的住宅。";
+        if(p.serverLevel()!=com.tnc.tnc.world.SkyIslandWorlds.island(p.server)||!p.isAlive()||p.isSpectator()||com.tnc.tnc.combat.DownedCombat.isDowned(p)||!HousingService.owned(p))return "先回到你自己的住宅。";
         var plot=HousingService.mine(p,PlotCatalog.Kind.HOME);var record=HousingService.home(p);var origin=BlockPos.of(record.getLong("Origin"));if(!plot.contains(p.blockPosition().subtract(origin)))return "请站在你购买的房子里，让伴侣跟随你到家。";
         var bed=HousingService.furnishedBed(p);if(bed==null)return "家中需要两张普通床，并留出床旁活动空间。";
         var nearby=p.serverLevel().getEntitiesOfClass(Villager.class,p.getBoundingBox().inflate(8),McaResidents::nativeResident);

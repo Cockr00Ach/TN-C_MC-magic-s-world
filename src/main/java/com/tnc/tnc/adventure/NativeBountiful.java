@@ -26,10 +26,10 @@ public final class NativeBountiful {
         p.sendSystemMessage(net.minecraft.network.chat.Component.literal("酒馆结算：+"+credited+"铜、+"+xp+"经验、+"+(units*10)+"声望。"+(credited<copper?"余额已达上限，超出部分未入账。":"")));return true;
     }
     public static void refreshCount(ServerPlayer p){
-        var pos=TownServices.board(p.server.overworld());if(pos==null||!p.server.overworld().hasChunkAt(pos))return;
+        var pos=TownServices.board(com.tnc.tnc.world.SkyIslandWorlds.island(p.server));if(pos==null||!com.tnc.tnc.world.SkyIslandWorlds.island(p.server).hasChunkAt(pos))return;
         var record=AdventureSavedData.get(p.server).housing.getCompound("TownServices");
         if(record.contains("LegacyPaperPos",4))pos=net.minecraft.core.BlockPos.of(record.getLong("LegacyPaperPos"));
-        var be=p.server.overworld().getBlockEntity(pos);if(be==null||!be.getClass().getName().equals("io.ejekta.bountiful.content.board.BoardBlockEntity"))return;
+        var be=com.tnc.tnc.world.SkyIslandWorlds.island(p.server).getBlockEntity(pos);if(be==null||!be.getClass().getName().equals("io.ejekta.bountiful.content.board.BoardBlockEntity"))return;
         try{
             var completed=com.google.gson.JsonParser.parseString(be.saveWithoutMetadata().getString("completed")).getAsJsonObject();
             var value=completed.get(p.getUUID().toString());if(value==null)return;int count=Math.max(0,Math.min(1_000_000,value.getAsInt()));var a=AdventureService.profile(p);

@@ -75,9 +75,9 @@ public final class AdventureEvents {
             if(p.level().dimension()==net.minecraft.world.level.Level.NETHER)AdventureService.milestone(p,"entered_nether");
             if(p.level().dimension()==net.minecraft.world.level.Level.END)AdventureService.milestone(p,"entered_end");
             for(int n:new int[]{5,10,20,30,50,70,85,100})if(AdventureService.profile(p).level()>=n)AdventureService.milestone(p,"level_"+n);
-            var arrival=com.tnc.tnc.npc.SkyIslandAnchors.resolve(server.overworld(),com.tnc.tnc.npc.SkyIslandAnchors.Anchor.ARRIVAL);
-            if(p.level()==server.overworld()&&arrival!=null&&arrival.closerToCenterThan(p.position(),16))AdventureService.milestone(p,"arrived");
-            var origin=com.tnc.tnc.npc.SkyIslandAnchors.resolve(server.overworld(),com.tnc.tnc.npc.SkyIslandAnchors.Anchor.ORIGIN);
+            var arrival=com.tnc.tnc.npc.SkyIslandAnchors.resolve(com.tnc.tnc.world.SkyIslandWorlds.island(server),com.tnc.tnc.npc.SkyIslandAnchors.Anchor.ARRIVAL);
+            if(p.level()==com.tnc.tnc.world.SkyIslandWorlds.island(server)&&arrival!=null&&arrival.closerToCenterThan(p.position(),16))AdventureService.milestone(p,"arrived");
+            var origin=com.tnc.tnc.npc.SkyIslandAnchors.resolve(com.tnc.tnc.world.SkyIslandWorlds.island(server),com.tnc.tnc.npc.SkyIslandAnchors.Anchor.ORIGIN);
             if(p.level()==server.overworld()&&origin!=null&&origin.offset(210,95,312).closerToCenterThan(p.position(),12))AdventureService.milestone(p,"visited_entertainment");
             var magic=MagicStone.getOrNull(p);
             if(magic!=null&&!magic.getLearned().isEmpty())AdventureService.milestone(p,"learned");
