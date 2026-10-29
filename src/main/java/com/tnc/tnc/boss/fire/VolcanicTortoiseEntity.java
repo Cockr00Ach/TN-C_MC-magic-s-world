@@ -200,13 +200,13 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
     private static final int ERUPTION_HIT_TICK = 26;
 
     // ---------------------------------------------------------- 技能 B：大地震波 --
-    /** 与火环共用砸地动作，所以时长与砸地帧一致。 */
-    public static final int QUAKE_TICKS = 72;
+    /** 共用砸地帧，额外留出末圈地块归位时间。 */
+    public static final int QUAKE_TICKS = 78;
     public static final int QUAKE_HIT_TICK = 24;
     /** 地面波从中心推到最大半径的 tick 数（比火环慢，方便看清地块依次抬起）。 */
-    public static final int QUAKE_RING_TICKS = 40;
+    public static final int QUAKE_RING_TICKS = TortoiseQuake.TRAVEL_TICKS;
     /** 独立的最大半径，不与火环共用配置。 */
-    public static final double QUAKE_RADIUS = 22.0D;
+    public static final double QUAKE_RADIUS = TortoiseQuake.RADIUS;
     /** 波峰带宽（格）：只有这个宽度内的地块在抬升。 */
     public static final double QUAKE_BAND = 3.5D;
     private static final double QUAKE_HEIGHT_TOLERANCE = 2.0D;
@@ -233,6 +233,9 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
 
     /** 大地震波：独立的施法编号（-1 = 当前没有震波），客户端据此创建地面波。 */
     private static final EntityDataAccessor<Integer> DATA_QUAKE_START =
+            SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.INT);
+    /** Elapsed cast age, independent of client/server world clock offsets. */
+    private static final EntityDataAccessor<Integer> DATA_QUAKE_AGE =
             SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Float> DATA_QUAKE_X =
             SynchedEntityData.defineId(VolcanicTortoiseEntity.class, EntityDataSerializers.FLOAT);
@@ -496,6 +499,10 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         return this.entityData.get(DATA_QUAKE_START);
     }
 
+    public int quakeWaveAge() {
+        return this.entityData.get(DATA_QUAKE_AGE);
+    }
+
     /** 客户端渲染用：震波锁定的砸地中心。 */
     public Vec3 quakeWaveCenter() {
         return new Vec3(this.entityData.get(DATA_QUAKE_X), this.entityData.get(DATA_QUAKE_Y),
@@ -507,11 +514,13 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.entityData.set(DATA_QUAKE_X, (float) this.quakeCenter.x);
         this.entityData.set(DATA_QUAKE_Y, (float) this.quakeCenter.y);
         this.entityData.set(DATA_QUAKE_Z, (float) this.quakeCenter.z);
-        this.entityData.set(DATA_QUAKE_START, (int) level.getGameTime());
+        this.entityData.set(DATA_QUAKE_AGE, 0);
+        this.entityData.set(DATA_QUAKE_START, (int) (this.castId & Integer.MAX_VALUE));
     }
 
     private void clearQuake() {
         this.entityData.set(DATA_QUAKE_START, -1);
+        this.entityData.set(DATA_QUAKE_AGE, -1);
     }
 
     /** 客户端渲染用：喷吐蓄力的开始时刻（-1 表示没有蓄力）。 */
@@ -584,6 +593,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
         this.entityData.define(DATA_SLAM_Y, 0.0F);
         this.entityData.define(DATA_SLAM_Z, 0.0F);
         this.entityData.define(DATA_QUAKE_START, -1);
+        this.entityData.define(DATA_QUAKE_AGE, -1);
         this.entityData.define(DATA_QUAKE_X, 0.0F);
         this.entityData.define(DATA_QUAKE_Y, 0.0F);
         this.entityData.define(DATA_QUAKE_Z, 0.0F);
@@ -1600,8 +1610,11 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
             this.groundQuakeImpact(level);
         }
         int radiusAge = this.actionTicks - QUAKE_HIT_TICK;
+        if (radiusAge >= 0 && radiusAge % 2 == 0) {
+            this.entityData.set(DATA_QUAKE_AGE, radiusAge);
+        }
         if (radiusAge > 0 && radiusAge <= QUAKE_RING_TICKS) {
-            double radius = QUAKE_RADIUS * radiusAge / (double) QUAKE_RING_TICKS;
+            double radius = TortoiseQuake.radius(radiusAge);
             double half = QUAKE_BAND * 0.5D;
             this.quakeHit(level, this.quakeCenter, radius - half, radius + half);
         }
