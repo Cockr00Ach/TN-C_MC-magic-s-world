@@ -13,18 +13,32 @@ public final class SkyhavenTravel {
  private static final BlockPos WAIT=new BlockPos(640,180,640);
  private static net.minecraft.nbt.CompoundTag flags(ServerPlayer p){var root=p.getPersistentData();if(!root.contains(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG,10))root.put(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG,new net.minecraft.nbt.CompoundTag());return root.getCompound(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG);}
  private static final Set<UUID> PENDING=new HashSet<>();
+ private static final Map<UUID,Integer> LOGIN=new HashMap<>();
  private static final Map<MinecraftServer,Set<ChunkPos>> GATES=new WeakHashMap<>();
  private static final TicketType<ChunkPos> TICKET=TicketType.create("tnc_skyhaven_gate",Comparator.comparingLong(ChunkPos::toLong),40);
- public static void login(ServerPlayer p){
+ private static BlockPos firstArrival(MinecraftServer s){var authored=com.tnc.tnc.skyacademy.SkyAcademyWorld.at(s,"arrival");return com.tnc.tnc.skyacademy.SkyAcademyWorld.available(s)&&authored!=null?authored:SkyIslandSavedData.get(SkyIslandWorlds.island(s)).anchorPos("ARRIVAL");}
+ public static void login(ServerPlayer p){if(SkyIslandWorlds.separate(p.server))LOGIN.put(p.getUUID(),p.server.getTickCount()+2);}
+ private static void enter(ServerPlayer p){
   if(!SkyIslandWorlds.separate(p.server))return;
   var t=flags(p);if(t.getBoolean("SkyhavenArrived"))return;
   if(!PENDING.add(p.getUUID()))return;
   var target=SkyIslandWorlds.island(p.server);
+  var data=SkyIslandSavedData.get(target);
+  if(data.isSkyIslandComplete()&&com.tnc.tnc.skyacademy.SkyAcademyWorld.ready(p.server)){
+   var at=firstArrival(p.server);
+   target.getChunkSource().getChunkFuture(at.getX()>>4,at.getZ()>>4,net.minecraft.world.level.chunk.ChunkStatus.FULL,true).whenCompleteAsync((c,e)->{
+    try{if(e!=null||c==null||c.left().isEmpty()||p.hasDisconnected())return;
+     p.teleportTo(target,at.getX()+.5,at.getY(),at.getZ()+.5,180,0);p.setRespawnPosition(target.dimension(),at,180,true,false);
+     flags(p).putBoolean("SkyhavenWaiting",false);flags(p).putBoolean("SkyhavenArrived",true);
+    }finally{PENDING.remove(p.getUUID());}
+   },p.server);
+   return;
+  }
   target.getChunkSource().getChunkFuture(WAIT.getX()>>4,WAIT.getZ()>>4,net.minecraft.world.level.chunk.ChunkStatus.FULL,true).whenCompleteAsync((c,e)->{
    try{if(e!=null||c==null||c.left().isEmpty()||p.hasDisconnected())return;
     for(int x=-3;x<=3;x++)for(int z=-3;z<=3;z++)target.setBlock(WAIT.offset(x,-1,z),Blocks.SMOOTH_QUARTZ.defaultBlockState(),18);
     p.teleportTo(target,WAIT.getX()+.5,WAIT.getY(),WAIT.getZ()+.5,180,0);
-    t.putBoolean("SkyhavenWaiting",true);
+    flags(p).putBoolean("SkyhavenWaiting",true);
     for(int x=-3;x<=3;x++)for(int z=-3;z<=3;z++)if(Math.abs(x)==3||Math.abs(z)==3)for(int y=0;y<2;y++)target.setBlock(WAIT.offset(x,y,z),Blocks.GLASS.defaultBlockState(),18);
    }finally{PENDING.remove(p.getUUID());}
   },p.server);
@@ -35,14 +49,15 @@ public final class SkyhavenTravel {
   GATES.put(s,wanted);for(var c:wanted)main.getChunkSource().addRegionTicket(TICKET,c,2,c);
   if(wanted.stream().anyMatch(c->main.getChunkSource().getChunkNow(c.x,c.z)==null||!main.areEntitiesLoaded(c.toLong())))return false;
   try {var gate=PortalArchitecture.prepare(main,manifest.groundPortal(),origin,false);var supports=PortalArchitecture.prepareSupports(main,origin);gate.apply(main);supports.apply(main);main.getChunkSource().save(true);var choice=SkyIslandWorlds.Choice.get(s);choice.groundBuilt=true;choice.setDirty();return true;}
-  catch(PortalArchitecture.SiteOccupied occupied){return false;}
+  catch(PortalArchitecture.SiteOccupied occupied){if(data.isSkyIslandComplete())throw occupied;return false;}
   finally{for(var c:wanted)main.getChunkSource().removeRegionTicket(TICKET,c,2,c);GATES.remove(s);}
  }
  @SubscribeEvent public static void tick(net.minecraftforge.event.TickEvent.ServerTickEvent e){
   if(e.phase!=net.minecraftforge.event.TickEvent.Phase.END||!SkyIslandWorlds.separate(e.getServer()))return;
   var s=e.getServer();var world=SkyIslandWorlds.island(s);var data=SkyIslandSavedData.get(world);
+  for(var it=LOGIN.entrySet().iterator();it.hasNext();){var entry=it.next();if(s.getTickCount()<entry.getValue())continue;it.remove();var p=s.getPlayerList().getPlayer(entry.getKey());if(p!=null)enter(p);}
   if(!data.isSkyIslandComplete()||!com.tnc.tnc.skyacademy.SkyAcademyWorld.ready(s))return;
-  var at=data.anchorPos("ARRIVAL");
+  var at=firstArrival(s);
   for(var p:s.getPlayerList().getPlayers())if(flags(p).getBoolean("SkyhavenWaiting")&&p.isAlive()&&PENDING.add(p.getUUID())){
    world.getChunkSource().getChunkFuture(at.getX()>>4,at.getZ()>>4,net.minecraft.world.level.chunk.ChunkStatus.FULL,true).whenCompleteAsync((c,error)->{
     try{if(error!=null||p.hasDisconnected()||c==null||c.left().isEmpty())return;
@@ -52,7 +67,7 @@ public final class SkyhavenTravel {
    },s);
   }
  }
- @SubscribeEvent public static void stop(net.minecraftforge.event.server.ServerStoppingEvent e){var pending=GATES.remove(e.getServer());if(pending!=null)for(var c:pending)e.getServer().overworld().getChunkSource().removeRegionTicket(TICKET,c,2,c);PENDING.clear();}
+ @SubscribeEvent public static void stop(net.minecraftforge.event.server.ServerStoppingEvent e){var pending=GATES.remove(e.getServer());if(pending!=null)for(var c:pending)e.getServer().overworld().getChunkSource().removeRegionTicket(TICKET,c,2,c);PENDING.clear();LOGIN.clear();}
  @SubscribeEvent public static void respawn(net.minecraftforge.event.entity.player.PlayerEvent.PlayerRespawnEvent e){if(e.getEntity() instanceof ServerPlayer p&&!flags(p).getBoolean("SkyhavenArrived"))login(p);}
  @SubscribeEvent public static void started(net.minecraftforge.event.server.ServerStartedEvent e){SkyIslandWorlds.releaseUnusedSpawn(e.getServer());}
  private SkyhavenTravel(){}

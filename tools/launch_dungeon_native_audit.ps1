@@ -1,4 +1,4 @@
-param([Parameter(Mandatory=$true)][string]$LauncherBatch,[Parameter(Mandatory=$true)][string]$LivePack,[Parameter(Mandatory=$true)][string]$AuditRoot,[Parameter(Mandatory=$true)][string]$Output,[string]$OffscreenAgent="",[switch]$UiOnly,[switch]$JourneyOnly,[switch]$FeedbackOnly,[switch]$LeylineOnly,[switch]$EquipmentOnly,[switch]$BotanicalOnly,[switch]$WorldFeedback,[switch]$NamingOnly,[switch]$SkyAcademy)
+param([Parameter(Mandatory=$true)][string]$LauncherBatch,[Parameter(Mandatory=$true)][string]$LivePack,[Parameter(Mandatory=$true)][string]$AuditRoot,[Parameter(Mandatory=$true)][string]$Output,[string]$OffscreenAgent="",[switch]$UiOnly,[switch]$JourneyOnly,[switch]$FeedbackOnly,[switch]$LeylineOnly,[switch]$EquipmentOnly,[switch]$BotanicalOnly,[switch]$WorldFeedback,[switch]$NamingOnly,[switch]$SkyAcademy,[switch]$SkyhavenStartup)
 $ErrorActionPreference='Stop'
 if([string]::IsNullOrWhiteSpace($OffscreenAgent)){$OffscreenAgent=Join-Path (Split-Path $PSScriptRoot -Parent) 'work/offscreen-agent/offscreen-audit.jar'}
 $live=[IO.Path]::GetFullPath($LivePack).TrimEnd('\')
@@ -35,6 +35,10 @@ if($WorldFeedback){$javaArguments='-Dtnc.worldFeedbackAudit=true '+$javaArgument
 if($NamingOnly){$javaArguments='-Dtnc.worldFeedbackAudit=true -Dtnc.namingOnlyAudit=true '+$javaArguments}
 if($EquipmentOnly){$javaArguments='-Dtnc.equipmentAudit=true '+$javaArguments}
 if($SkyAcademy){$javaArguments='-Dtnc.skyAcademyAudit=true '+$javaArguments}
+if($SkyhavenStartup){
+    $javaArguments=[regex]::Replace($javaArguments,'-Xmx\S+','-Xmx8G')
+    $javaArguments='-Dtnc.skyhavenStartupAudit=true -XX:ActiveProcessorCount=4 -XX:MaxDirectMemorySize=512M '+$javaArguments
+}
 $outputFolder=[IO.Path]::GetFullPath($Output)
 [IO.Directory]::CreateDirectory($outputFolder) | Out-Null
 $shaderFile=Join-Path $audit 'config/oculus.properties'

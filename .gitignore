@@ -86,6 +86,7 @@ modpack/*/config/openloader/resources/*
 # 它是"素材来源"，不是工程内容 —— 一旦被 git add -A 收进去，
 # .git 会直接涨到 1.5 GB，推都推不上去。
 *.zip
+!src/main/resources/data/tnc/skyhaven/starter.zip
 *.7z
 *.rar
 

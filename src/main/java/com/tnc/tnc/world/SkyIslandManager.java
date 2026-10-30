@@ -56,6 +56,7 @@ public final class SkyIslandManager {
     };
     private static final long PORTAL_COOLDOWN_TICKS = 60L;
     private static final String PLAYER_COOLDOWN = "tnc_sky_portal_cooldown";
+    private static final String PLAYER_EXIT_REQUIRED = "tnc_sky_portal_exit_required";
     private static final Map<MinecraftServer, SkyIslandManifest> MANIFESTS =
             Collections.synchronizedMap(new WeakHashMap<>());
     private static final Map<UUID, PortalChargeState> PORTAL_CHARGES = new HashMap<>();
@@ -154,6 +155,28 @@ public final class SkyIslandManager {
                 case BUILDING -> buildStep(level, data, manifest);
                 case FINALIZING -> finalizeBuild(level, data, manifest);
                 case COMPLETE -> {
+                    if (SkyIslandWorlds.separate(server) && !SkyIslandWorlds.Choice.get(server).groundBuilt) {
+                        if (level.getGameTime() < data.waitUntilTick) return;
+                        try {
+                            if (data.groundPortalY == 0) {
+                                BlockPos gate = chooseGroundPortal(server.overworld(), manifest);
+                                if (gate == null) return;
+                                data.groundPortalX=gate.getX();data.groundPortalY=gate.getY();data.groundPortalZ=gate.getZ();data.setDirty();
+                            }
+                            if (!SkyhavenTravel.groundGate(server.overworld(),data,manifest)) return;
+                            data.lastError="";
+                        } catch (IOException | IllegalStateException gateFailure) {
+                            // A blocked overworld exit must never invalidate the ready island
+                            // or restart its construction on the next player's login.
+                            releaseActiveChunks(server.overworld(),data);
+                            PORTAL_SURVEYS.remove(server);
+                            data.groundPortalY=0;
+                            data.waitUntilTick=level.getGameTime()+1200;
+                            String message="主世界出口暂未就绪："+shortMessage(gateFailure);
+                            if (!message.equals(data.lastError)) LOGGER.warn("[Skyhaven] {}",message);
+                            data.lastError=message;data.setDirty();return;
+                        }
+                    }
                     upgradePortalIfReady(level,data);
                     portalTick(level, data, manifest);
                 }
@@ -642,6 +665,10 @@ public final class SkyIslandManager {
             }
             boolean atGround = player.serverLevel()==level.getServer().overworld()&&insidePortal(player, ground);
             boolean atIsland = player.serverLevel()==level&&insidePortal(player, island);
+            if (portalExitBlocked(player.getPersistentData(),atGround||atIsland)) {
+                PORTAL_CHARGES.remove(player.getUUID());
+                continue;
+            }
             updatePortalCharge(player, player.serverLevel(), manifest, ground, island, atGround, atIsland, effectsTick);
         }
         PORTAL_CHARGES.keySet().removeIf(uuid -> !presentPlayers.contains(uuid));
@@ -657,6 +684,12 @@ public final class SkyIslandManager {
                 sendRitual(fromGround&&SkyIslandWorlds.separate(level.getServer())?level.getServer().overworld():level, center, -1);
             }
         }
+    }
+
+    static boolean portalExitBlocked(net.minecraft.nbt.CompoundTag data,boolean inside) {
+        if (!data.getBoolean(PLAYER_EXIT_REQUIRED)) return false;
+        if (!inside) data.putBoolean(PLAYER_EXIT_REQUIRED,false);
+        return true;
     }
 
     private static void sendRitual(ServerLevel level, BlockPos center, int elapsed) {
@@ -756,6 +789,7 @@ public final class SkyIslandManager {
         level.getChunk(destination.getX() >> 4, destination.getZ() >> 4);
         ensureLanding(level, destination);
         player.getPersistentData().putLong(PLAYER_COOLDOWN, level.getGameTime() + PORTAL_COOLDOWN_TICKS);
+        player.getPersistentData().putBoolean(PLAYER_EXIT_REQUIRED,true);
         player.teleportTo(
                 level,
                 destination.getX() + 0.5D,

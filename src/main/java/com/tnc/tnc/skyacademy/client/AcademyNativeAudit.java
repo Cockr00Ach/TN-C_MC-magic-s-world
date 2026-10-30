@@ -10,7 +10,7 @@ import java.util.*;
 
 /** Explicit opt-in, isolated copied save only; captures the real native renderer. */
 public final class AcademyNativeAudit {
-    private static int startup,stage,ticks;private static volatile boolean sawMain,roundTrip;private static boolean started,prepared,saving;
+    private static int startup,stage,ticks,mainTicks;private static volatile boolean sawMain,roundTrip;private static boolean started,prepared,saving;
     private static volatile boolean ready,complete;private static volatile String status="";
     private static final String[] LABELS={"west-fringe","north-ridge","east-lake","south-fringe","farm","workshop","night-ridge","black-sea","black-sea-f8"};
     private static final int[][] VIEWS={{104,150,355,180,30},{278,168,128,180,24},{468,124,222,155,24},{254,134,484,180,25},{87,100,340,180,22},{419,102,391,180,23},{258,141,61,0,-8},{680,-15,260,90,35},{680,-15,260,90,35}};
@@ -32,7 +32,13 @@ public final class AcademyNativeAudit {
             if(ticks>24000){Files.writeString(folder().resolve("failed.txt"),"Construction timeout: "+status);mc.stop();}return;
         }
         if(stage>=VIEWS.length){
-            if(++ticks%20==0)mc.getSingleplayerServer().execute(()->{var s=mc.getSingleplayerServer();var p=s.getPlayerList().getPlayers().get(0);if(p.serverLevel()==s.overworld())sawMain=true;else if(sawMain&&p.serverLevel()==com.tnc.tnc.world.SkyIslandWorlds.island(s))roundTrip=true;});
+            if(++ticks%20==0)mc.getSingleplayerServer().execute(()->{var s=mc.getSingleplayerServer();var p=s.getPlayerList().getPlayers().get(0);if(p.serverLevel()==s.overworld()){
+                sawMain=true;var gate=com.tnc.tnc.world.SkyIslandSavedData.get(s.overworld()).anchorPos("GROUND_PORTAL");
+                // Leave and re-enter the destination trigger: standing still is now
+                // intentionally safe and cannot cause repeated dimension changes.
+                if(++mainTicks==4)p.teleportTo(s.overworld(),gate.getX()+12.5,gate.getY()+1,gate.getZ()+7.5,0,0);
+                if(mainTicks==6)p.teleportTo(s.overworld(),gate.getX()+7.5,gate.getY()+1,gate.getZ()+7.5,0,0);
+            }else if(sawMain&&p.serverLevel()==com.tnc.tnc.world.SkyIslandWorlds.island(s))roundTrip=true;});
             if(roundTrip||ticks>1800){Files.writeString(folder().resolve("report.json"),new com.google.gson.Gson().toJson(Map.of("native_screenshots",LABELS,"normal_lifecycle",true,"portal_round_trip",roundTrip,"scope","Isolated lifecycle and actual proximity-triggered paired-portal travel")));mc.stop();}return;
         }
         if(!prepared){prepared=true;ready=false;ticks=0;mc.options.renderDistance().set(stage==6?12:10);int[] v=VIEWS[stage];
