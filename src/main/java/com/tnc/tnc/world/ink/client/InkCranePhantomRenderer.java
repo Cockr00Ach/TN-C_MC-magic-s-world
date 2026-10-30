@@ -19,7 +19,7 @@ public final class InkCranePhantomRenderer extends GeoEntityRenderer<InkCranePha
 
     @Override public RenderType getRenderType(InkCranePhantomEntity entity, ResourceLocation texture,
                                                MultiBufferSource buffers, float partial) {
-        return RenderType.entityTranslucentEmissive(texture);
+        return RenderType.entityTranslucent(texture);
     }
     @Override public Color getRenderColor(InkCranePhantomEntity entity, float partial, int light) {
         float formed = entity.mode() == InkCranePhantomEntity.LONG_WINGS

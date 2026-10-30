@@ -572,6 +572,8 @@ public final class TnSpellMechanics {
         if((com.tnc.tnc.combat.DownedCombat.isDowned(player)||com.tnc.tnc.dungeon.DungeonService.recovering(player)))return;
         String path = spellId.getPath();
 
+        com.tnc.tnc.light.LightMirrorSpells.cast(player, path);
+
         // 真的放出去了 ⇒ 消掉"放行了却没放出来"的哑火待定项 ✓（见 ManaGate.PENDING）
         ManaGate.noteCastHappened(player);
 

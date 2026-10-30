@@ -13,55 +13,62 @@ public final class InkCelestialDragonGameTests {
         var e=h.spawn(net.minecraft.world.entity.EntityType.PIG,new BlockPos(-50,70,5));e.setNoAi(true);e.setNoGravity(true);
         e.getAttribute(Attributes.MAX_HEALTH).setBaseValue(200);e.setHealth(200);return e;
     }
-    @GameTest(template="ink_crane_empty",timeoutTicks=90)
+    @GameTest(batch="ink_breathStopsAtWallAndDoesNotDamageThroughIt",template="ink_crane_empty",timeoutTicks=90)
     public static void breathStopsAtWallAndDoesNotDamageThroughIt(GameTestHelper h){
+        InkCombatTestIsolation.prepare(h);
         var e=dragon(h);var p=victim(h);
-        for(int y=66;y<=134;y++)for(int z=1;z<=9;z++)h.setBlock(new BlockPos(-25,y,z),net.minecraft.world.level.block.Blocks.STONE);
+        for(int y=60;y<=180;y++)for(int z=-10;z<=20;z++)h.setBlock(new BlockPos(-45,y,z),net.minecraft.world.level.block.Blocks.STONE);
         e.startInkAttack(1,p);
         h.runAtTickTime(65,()->{
             h.assertTrue(e.breathHit(),"Ray hits solid wall");h.assertTrue(p.getHealth()==200,"Wall shields target from beam and splash");
-            h.assertBlockPresent(net.minecraft.world.level.block.Blocks.STONE,new BlockPos(-25,76,5));
-            for(int y=66;y<=134;y++)for(int z=1;z<=9;z++)h.setBlock(new BlockPos(-25,y,z),net.minecraft.world.level.block.Blocks.AIR);
+            h.assertBlockPresent(net.minecraft.world.level.block.Blocks.STONE,new BlockPos(-45,76,5));
+            for(int y=60;y<=180;y++)for(int z=-10;z<=20;z++)h.setBlock(new BlockPos(-45,y,z),net.minecraft.world.level.block.Blocks.AIR);
             e.discard();p.discard();h.succeed();
         });
     }
-    @GameTest(template="ink_crane_empty",timeoutTicks=70)
+    @GameTest(batch="ink_dragonReallyFliesInOpenAir",template="ink_crane_empty",timeoutTicks=70)
     public static void dragonReallyFliesInOpenAir(GameTestHelper h){
+        InkCombatTestIsolation.prepare(h);
         var e=dragon(h);e.setPos(e.getX(),h.getLevel().getMaxBuildHeight()-85,e.getZ());e.setNoAi(false);Vec3 at=e.position();
         for(int x=-15;x<=15;x++)for(int z=-15;z<=15;z++)h.getLevel().getChunkAt(e.blockPosition().offset(x*16,0,z*16));
         h.runAtTickTime(50,()->{boolean moved=e.position().distanceTo(at)>2&&e.isNoGravity();String detail=" ticks="+e.tickCount+" from="+at+" to="+e.position()+" noAI="+e.isNoAi();e.discard();h.assertTrue(moved,"Airborne cruise must actually move without gravity"+detail);h.succeed();});
     }
-    @GameTest(template="ink_crane_empty",timeoutTicks=90)
+    @GameTest(batch="ink_breathOpensJawTracksTargetAndDealsDamage",template="ink_crane_empty",timeoutTicks=90)
     public static void breathOpensJawTracksTargetAndDealsDamage(GameTestHelper h){
+        InkCombatTestIsolation.prepare(h);
         var e=dragon(h);var p=victim(h);h.assertTrue(e.startInkAttack(1,p),"Breath starts");
         h.assertTrue(!e.startInkAttack(2,p),"Cannot overlap moves");
         h.runAtTickTime(65,()->{h.assertTrue(e.jawOpen(0)>.95&&e.inkMove()==1,"Jaw remains open while breathing");
             h.assertTrue(p.getHealth()<200,"Actual server breath damages target");
-            h.assertTrue(e.effectVector("point").distanceTo(e.mouthPosition())<=144.1,"Ray is range limited");e.discard();p.discard();h.succeed();});
+            h.assertTrue(e.effectVector("point").distanceTo(e.mouthPosition())<=48*InkDragonCombatRules.BODY_SCALE+.1,"Ray is range limited");e.discard();p.discard();h.succeed();});
     }
-    @GameTest(template="ink_crane_empty",timeoutTicks=165)
+    @GameTest(batch="ink_diveActuallyHitsAndResets",template="ink_crane_empty",timeoutTicks=165)
     public static void diveActuallyHitsAndResets(GameTestHelper h){
+        InkCombatTestIsolation.prepare(h);
         var e=dragon(h);e.setPos(e.position().add(0,90,0));var p=victim(h);h.assertTrue(e.startInkAttack(2,p),"Dive starts");
         h.runAtTickTime(60,()->h.assertTrue(e.effectVector("high").y>p.getY()+15,"Dragon ascends before gathering"));
         h.runAtTickTime(125,()->h.assertTrue(p.getHealth()<=168,"Impact applies server damage exactly at landing"));
         h.runAtTickTime(155,()->{h.assertTrue(e.inkMove()==0,"Move resets after burst");e.discard();p.discard();h.succeed();});
     }
-    @GameTest(template="ink_crane_empty",timeoutTicks=35)
+    @GameTest(batch="ink_targetRemovalCancelsAndDoesNotLeaveOpenJaw",template="ink_crane_empty",timeoutTicks=35)
     public static void targetRemovalCancelsAndDoesNotLeaveOpenJaw(GameTestHelper h){
+        InkCombatTestIsolation.prepare(h);
         var e=dragon(h);var p=victim(h);e.startInkAttack(1,p);
         h.runAtTickTime(20,p::discard);h.runAtTickTime(25,()->{h.assertTrue(e.inkMove()==0&&e.jawOpen(0)==0,"Removing victim cancels spell and jaw");e.discard();h.succeed();});
     }
-    @GameTest(template="ink_crane_empty",timeoutTicks=70)
+    @GameTest(batch="ink_approvedDragonIsIndependentAndRemainsHoveringWithoutGriefing",template="ink_crane_empty",timeoutTicks=70)
     public static void approvedDragonIsIndependentAndRemainsHoveringWithoutGriefing(GameTestHelper h){
+        InkCombatTestIsolation.prepare(h);
         var dragon=h.spawn(InkBossRegistration.INK_CELESTIAL_DRAGON,new BlockPos(5,8,5));dragon.setGroundedForObservation(false);dragon.setNoAi(true);Vec3 at=dragon.position();
-        h.assertTrue(dragon.getMaxHealth()==1000&&dragon.getBbHeight()==30,"Dedicated server attributes and horizontal flight core registered");
+        h.assertTrue(dragon.getMaxHealth()==1000&&dragon.getBbHeight()==10*InkDragonCombatRules.BODY_SCALE,"Dedicated server attributes and horizontal flight core registered");
         h.assertTrue(InkBossRegistration.INK_ABYSS_DRAKE!=null&&InkBossRegistration.INK_CRANE_BOSS!=null&&InkBossRegistration.INK_WINGED_TIGER!=null,"Older bosses remain registered");
         h.runAtTickTime(45,()->{h.assertTrue(dragon.position().distanceTo(at)<.01&&dragon.isNoGravity(),"Hovering anchor never falls or wanders");
             h.assertTrue(dragon.getTarget()==null&&!dragon.isPushable(),"Display incarnation does not invent aggression or push players");
             h.assertTrue(!dragon.removeWhenFarAway(100000),"Persistent dragon does not despawn");dragon.discard();h.succeed();});
     }
-    @GameTest(template="ink_crane_empty",timeoutTicks=90)
+    @GameTest(batch="ink_groundObservationLandsStaysAndPersists",template="ink_crane_empty",timeoutTicks=90)
     public static void groundObservationLandsStaysAndPersists(GameTestHelper h){
+        InkCombatTestIsolation.prepare(h);
         h.setBlock(new BlockPos(5,4,5),net.minecraft.world.level.block.Blocks.STONE);
         var e=h.spawn(InkBossRegistration.INK_CELESTIAL_DRAGON,new BlockPos(5,80,5));e.setGroundedForObservation(true);
         var p=victim(h);
@@ -83,8 +90,9 @@ public final class InkCelestialDragonGameTests {
             });
         });
     }
-    @GameTest(template="ink_crane_empty",timeoutTicks=25)
+    @GameTest(batch="ink_modelEntitySurvivesSaveLoadAndDragonCommandIsOperatorOnly",template="ink_crane_empty",timeoutTicks=25)
     public static void modelEntitySurvivesSaveLoadAndDragonCommandIsOperatorOnly(GameTestHelper h){
+        InkCombatTestIsolation.prepare(h);
         var dragon=h.spawn(InkBossRegistration.INK_CELESTIAL_DRAGON,new BlockPos(5,8,5));dragon.setYRot(123);dragon.setHealth(777);
         var tag=new net.minecraft.nbt.CompoundTag();dragon.saveWithoutId(tag);
         var restored=InkBossRegistration.INK_CELESTIAL_DRAGON.create(h.getLevel());restored.load(tag);
@@ -94,4 +102,28 @@ public final class InkCelestialDragonGameTests {
         h.assertTrue(dispatcher.parse("tnc ink dragon",source.withPermission(0)).getReader().canRead(),"Non-operator cannot use ink commands");
         dragon.discard();h.succeed();
     }
+
+    @net.minecraft.gametest.framework.BeforeBatch(batch="ink_breathStopsAtWallAndDoesNotDamageThroughIt")
+    public static void isolate_breathStopsAtWallAndDoesNotDamageThroughIt(net.minecraft.server.level.ServerLevel level){InkCombatTestIsolation.clear(level);}
+
+    @net.minecraft.gametest.framework.BeforeBatch(batch="ink_dragonReallyFliesInOpenAir")
+    public static void isolate_dragonReallyFliesInOpenAir(net.minecraft.server.level.ServerLevel level){InkCombatTestIsolation.clear(level);}
+
+    @net.minecraft.gametest.framework.BeforeBatch(batch="ink_breathOpensJawTracksTargetAndDealsDamage")
+    public static void isolate_breathOpensJawTracksTargetAndDealsDamage(net.minecraft.server.level.ServerLevel level){InkCombatTestIsolation.clear(level);}
+
+    @net.minecraft.gametest.framework.BeforeBatch(batch="ink_diveActuallyHitsAndResets")
+    public static void isolate_diveActuallyHitsAndResets(net.minecraft.server.level.ServerLevel level){InkCombatTestIsolation.clear(level);}
+
+    @net.minecraft.gametest.framework.BeforeBatch(batch="ink_targetRemovalCancelsAndDoesNotLeaveOpenJaw")
+    public static void isolate_targetRemovalCancelsAndDoesNotLeaveOpenJaw(net.minecraft.server.level.ServerLevel level){InkCombatTestIsolation.clear(level);}
+
+    @net.minecraft.gametest.framework.BeforeBatch(batch="ink_approvedDragonIsIndependentAndRemainsHoveringWithoutGriefing")
+    public static void isolate_approvedDragonIsIndependentAndRemainsHoveringWithoutGriefing(net.minecraft.server.level.ServerLevel level){InkCombatTestIsolation.clear(level);}
+
+    @net.minecraft.gametest.framework.BeforeBatch(batch="ink_groundObservationLandsStaysAndPersists")
+    public static void isolate_groundObservationLandsStaysAndPersists(net.minecraft.server.level.ServerLevel level){InkCombatTestIsolation.clear(level);}
+
+    @net.minecraft.gametest.framework.BeforeBatch(batch="ink_modelEntitySurvivesSaveLoadAndDragonCommandIsOperatorOnly")
+    public static void isolate_modelEntitySurvivesSaveLoadAndDragonCommandIsOperatorOnly(net.minecraft.server.level.ServerLevel level){InkCombatTestIsolation.clear(level);}
 }

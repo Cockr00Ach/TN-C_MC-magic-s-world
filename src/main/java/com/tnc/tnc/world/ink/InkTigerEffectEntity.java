@@ -24,10 +24,13 @@ public final class InkTigerEffectEntity extends Entity implements GeoEntity {
     private static final EntityDataAccessor<Integer> MODE=SynchedEntityData.defineId(InkTigerEffectEntity.class,EntityDataSerializers.INT);
     private static final EntityDataAccessor<Long> START=SynchedEntityData.defineId(InkTigerEffectEntity.class,EntityDataSerializers.LONG);
     private static final EntityDataAccessor<Boolean> DONE=SynchedEntityData.defineId(InkTigerEffectEntity.class,EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> RELEASE=SynchedEntityData.defineId(InkTigerEffectEntity.class,EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> FOLLOW=SynchedEntityData.defineId(InkTigerEffectEntity.class,EntityDataSerializers.BOOLEAN);
     private UUID ownerId,targetId;
     private final AnimatableInstanceCache cache=GeckoLibUtil.createInstanceCache(this);
     private final Deque<Vec3> trail=new ArrayDeque<>();
     private Vec3 lerpTarget=Vec3.ZERO;private int lerpSteps;
+    private int finishedAt;
     public InkTigerEffectEntity(EntityType<? extends InkTigerEffectEntity> type,Level level){super(type,level);noPhysics=true;setNoGravity(true);}
     public static InkTigerEffectEntity spawn(InkWingedTigerEntity owner,LivingEntity target,int mode,Vec3 at){
         var e=InkBossRegistration.INK_TIGER_EFFECT.create(owner.level());if(e==null)return null;
@@ -38,11 +41,15 @@ public final class InkTigerEffectEntity extends Entity implements GeoEntity {
         owner.level().addFreshEntity(e);return e;
     }
     public int mode(){return entityData.get(MODE);}
+    public int releaseAt(){return entityData.get(RELEASE);}
+    public static InkTigerEffectEntity phantom(InkWingedTigerEntity owner,LivingEntity target,Vec3 at,int release,boolean follow){
+        var e=spawn(owner,target,GHOST,at);if(e!=null){e.entityData.set(RELEASE,release);e.entityData.set(FOLLOW,follow);}return e;
+    }
     public int age(){return (int)Math.max(0,level().getGameTime()-entityData.get(START));}
     public boolean finished(){return entityData.get(DONE);}
     public Deque<Vec3> trail(){return trail;}
     public boolean ownedBy(Entity owner){return owner.getUUID().equals(ownerId);}
-    @Override protected void defineSynchedData(){entityData.define(MODE,SHOT);entityData.define(START,0L);entityData.define(DONE,false);}
+    @Override protected void defineSynchedData(){entityData.define(MODE,SHOT);entityData.define(START,0L);entityData.define(DONE,false);entityData.define(RELEASE,22);entityData.define(FOLLOW,true);}
     private InkWingedTigerEntity owner(){var e=ownerId==null?null:((ServerLevel)level()).getEntity(ownerId);return e instanceof InkWingedTigerEntity t?t:null;}
     public static boolean hostile(LivingEntity owner,Entity e){return e instanceof LivingEntity l&&l.isAlive()&&e!=owner&&!owner.isAlliedTo(e)&&!e.isSpectator()&&!(e instanceof Player p&&p.isCreative());}
     private boolean visible(Vec3 from,Vec3 to){return level().clip(new ClipContext(from,to,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,this)).getType()==HitResult.Type.MISS;}
@@ -64,14 +71,15 @@ public final class InkTigerEffectEntity extends Entity implements GeoEntity {
             if(t>=220)discard();return;
         }
         var target=targetId==null?null:((ServerLevel)level()).getEntity(targetId);
-        if(target==null||!target.isAlive()||t>=(mode()==SHOT?100:95)){discard();return;}
-        if(mode()==GHOST&&t<InkTigerAttackRules.GHOST_RELEASE){
-            setPos(owner.position().subtract(Vec3.directionFromRotation(0,owner.getYRot()).scale(6*InkTigerAttackRules.BODY_MULTIPLIER)).add(0,InkTigerAttackRules.BODY_MULTIPLIER,0));setYRot(owner.getYRot());return;
+        if(target==null||!target.isAlive()||t>=(mode()==SHOT?100:releaseAt()+85)){discard();return;}
+        if(mode()==GHOST&&t<releaseAt()){
+            if(entityData.get(FOLLOW))setPos(owner.position().subtract(Vec3.directionFromRotation(0,owner.getYRot()).scale(6*InkTigerAttackRules.BODY_MULTIPLIER)).add(0,InkTigerAttackRules.BODY_MULTIPLIER,0));
+            Vec3 d=target.position().subtract(position());setYRot((float)Math.toDegrees(Math.atan2(-d.x,d.z)));return;
         }
-        if(mode()==GHOST&&finished()){if(t>=65)discard();return;}
+        if(mode()==GHOST&&finished()){if(t-finishedAt>=12)discard();return;}
         Vec3 start=position(),velocity=getDeltaMovement();
         if(mode()==GHOST){
-            Vec3 aim=target.getBoundingBox().getCenter().subtract(start).normalize().scale(1.15);
+            Vec3 aim=target.getBoundingBox().getCenter().subtract(start).normalize().scale(InkTigerAttackRules.GHOST_SPEED);
             velocity=velocity.lengthSqr()<.01?aim:velocity.scale(.92).add(aim.scale(.08));setDeltaMovement(velocity);
         }
         Vec3 end=start.add(velocity);
@@ -83,9 +91,9 @@ public final class InkTigerEffectEntity extends Entity implements GeoEntity {
         if(hit!=null){
             setPos(hit.getLocation());
             if(mode()==SHOT){hit.getEntity().hurt(damageSources().mobAttack(owner),8);anchorBall();}
-            else{hurtArea(owner,position(),6,30);entityData.set(DONE,true);setDeltaMovement(Vec3.ZERO);}
+            else{hurtArea(owner,position(),6,30);entityData.set(DONE,true);finishedAt=t;setDeltaMovement(Vec3.ZERO);}
         }else if(block.getType()!=HitResult.Type.MISS){
-            setPos(end);if(mode()==SHOT)anchorBall();else{entityData.set(DONE,true);setDeltaMovement(Vec3.ZERO);}
+            setPos(end);if(mode()==SHOT)anchorBall();else{entityData.set(DONE,true);finishedAt=t;setDeltaMovement(Vec3.ZERO);}
         }else setPos(end);
     }
     private void anchorBall(){

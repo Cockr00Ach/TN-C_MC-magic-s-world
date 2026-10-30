@@ -18,8 +18,9 @@ import java.util.UUID;
 @GameTestHolder("tncink")
 @PrefixGameTestTemplate(false)
 public final class InkCraneCombatGameTests {
-    @GameTest(template="ink_crane_empty",timeoutTicks=30)
+    @GameTest(batch="ink_oldGroundStrokesBecomePaperWithoutChangingThePaintingOrBuildings",template="ink_crane_empty",timeoutTicks=30)
     public static void oldGroundStrokesBecomePaperWithoutChangingThePaintingOrBuildings(GameTestHelper h) {
+        InkCombatTestIsolation.prepare(h);
         var realm=h.getLevel().getServer().getLevel(InkRealmTravel.INK_REALM);
         var chunk=realm.getChunk(0,0);int y=realm.getMinBuildHeight()+4;
         var black=new BlockPos(3,y,3);var gray=new BlockPos(4,y,3);var building=new BlockPos(5,y,3);
@@ -33,8 +34,9 @@ public final class InkCraneCombatGameTests {
         h.assertTrue(realm.getBlockState(black.above()).isAir(),"Flat ground must stay flat");
         h.succeed();
     }
-    @GameTest(template="ink_crane_empty",timeoutTicks=145)
+    @GameTest(batch="ink_ballPullIsStrongHorizontalExcludesCasterAndStopsAtExplosion",template="ink_crane_empty",timeoutTicks=145)
     public static void ballPullIsStrongHorizontalExcludesCasterAndStopsAtExplosion(GameTestHelper h) {
+        InkCombatTestIsolation.prepare(h);
         var boss=boss(h);var victim=target(h,32);Vec3 home=boss.position(),start=victim.position();
         // NoAI mobs skip travel physics; keep physics enabled but disable voluntary walking.
         ((net.minecraft.world.entity.Mob)victim).setNoAi(false);
@@ -54,8 +56,9 @@ public final class InkCraneCombatGameTests {
             ritual.discard();victim.discard();boss.discard();h.succeed();
         });
     }
-    @GameTest(template="ink_crane_empty",timeoutTicks=60)
+    @GameTest(batch="ink_landscapeIsBudgetedAndPreservesExistingBuildings",template="ink_crane_empty",timeoutTicks=60)
     public static void landscapeIsBudgetedAndPreservesExistingBuildings(GameTestHelper h) {
+        InkCombatTestIsolation.prepare(h);
         var level=h.getLevel().getServer().getLevel(InkRealmTravel.INK_REALM);
         h.assertTrue(level!=null,"Ink dimension must be registered");
         var chunk=level.getChunk(6,6);
@@ -113,8 +116,9 @@ public final class InkCraneCombatGameTests {
         return boss.level().getEntitiesOfClass(InkCranePhantomEntity.class,boss.getBoundingBox().inflate(160),e->e.ownedBy(boss));
     }
 
-    @GameTest(template="ink_crane_empty",timeoutTicks=140)
+    @GameTest(batch="ink_tenRealPursuitPhantomsHitWithoutHurtingCaster",template="ink_crane_empty",timeoutTicks=140)
     public static void tenRealPursuitPhantomsHitWithoutHurtingCaster(GameTestHelper h) {
+        InkCombatTestIsolation.prepare(h);
         var boss=boss(h);var target=target(h,46);Set<UUID> seen=new HashSet<>();
         h.assertTrue(boss.startInkAttack(1,target),"Barrage starts");
         for(int t=2;t<=114;t+=2) h.runAtTickTime(t,()->effects(boss).stream()
@@ -127,8 +131,9 @@ public final class InkCraneCombatGameTests {
         });
     }
 
-    @GameTest(template="ink_crane_empty",timeoutTicks=180)
+    @GameTest(batch="ink_longWingIsForwardOnlyAndCannotHitRepeatedly",template="ink_crane_empty",timeoutTicks=180)
     public static void longWingIsForwardOnlyAndCannotHitRepeatedly(GameTestHelper h) {
+        InkCombatTestIsolation.prepare(h);
         var boss=boss(h);var front=target(h,30);var rear=target(h,10);
         h.assertTrue(boss.startInkAttack(2,front),"Long wing starts");
         h.runAtTickTime(35,()->h.assertTrue(effects(boss).isEmpty(),"Avatar must wait until the upward cry completes"));
@@ -143,8 +148,9 @@ public final class InkCraneCombatGameTests {
         });
     }
 
-    @GameTest(template="ink_crane_empty",timeoutTicks=330)
+    @GameTest(batch="ink_skyCastReallyRisesHitsExplodesAndRestoresGravity",template="ink_crane_empty",timeoutTicks=330)
     public static void skyCastReallyRisesHitsExplodesAndRestoresGravity(GameTestHelper h) {
+        InkCombatTestIsolation.prepare(h);
         var boss=boss(h);var target=target(h,36);Vec3 home=boss.position();
         h.assertTrue(boss.startInkAttack(3,target),"Sky cast starts");
         h.runAtTickTime(8,()->h.assertTrue(boss.skyShroudVisible(),"Attached shadow is already visible during ascent"));
@@ -175,8 +181,9 @@ public final class InkCraneCombatGameTests {
         });
     }
 
-    @GameTest(template="ink_crane_empty",timeoutTicks=45)
+    @GameTest(batch="ink_interruptedAscentRemovesTheAttachedShadowAndRestoresGravity",template="ink_crane_empty",timeoutTicks=45)
     public static void interruptedAscentRemovesTheAttachedShadowAndRestoresGravity(GameTestHelper h) {
+        InkCombatTestIsolation.prepare(h);
         var boss=boss(h);var target=target(h,36);Vec3 home=boss.position();
         h.assertTrue(boss.startInkAttack(3,target),"Sky move starts");
         h.runAtTickTime(18,()->{h.assertTrue(boss.skyShroudVisible(),"Airborne shadow active");target.discard();});
@@ -187,8 +194,9 @@ public final class InkCraneCombatGameTests {
         });
     }
 
-    @GameTest(template="ink_crane_empty",timeoutTicks=180)
+    @GameTest(batch="ink_summonedDrakeHitsCreatesSealAndDetonates",template="ink_crane_empty",timeoutTicks=180)
     public static void summonedDrakeHitsCreatesSealAndDetonates(GameTestHelper h) {
+        InkCombatTestIsolation.prepare(h);
         var boss=boss(h);var target=target(h,32);
         h.assertTrue(boss.startInkAttack(4,target),"Drake charge starts");
         h.runAtTickTime(55,()->{
@@ -201,8 +209,9 @@ public final class InkCraneCombatGameTests {
         });
     }
 
-    @GameTest(template="ink_crane_empty",timeoutTicks=110)
+    @GameTest(batch="ink_pursuitFindsANewEnemyWhenItsOriginalTargetDisappears",template="ink_crane_empty",timeoutTicks=110)
     public static void pursuitFindsANewEnemyWhenItsOriginalTargetDisappears(GameTestHelper h) {
+        InkCombatTestIsolation.prepare(h);
         var boss=boss(h);var old=target(h,46);var replacement=target(h,42);
         replacement.setPos(replacement.position().add(7,0,0));
         Vec3 origin=boss.position().add(0,3.23,0);
@@ -215,4 +224,31 @@ public final class InkCraneCombatGameTests {
             boss.discard();replacement.discard();h.succeed();
         });
     }
+
+    @net.minecraft.gametest.framework.BeforeBatch(batch="ink_oldGroundStrokesBecomePaperWithoutChangingThePaintingOrBuildings")
+    public static void isolate_oldGroundStrokesBecomePaperWithoutChangingThePaintingOrBuildings(net.minecraft.server.level.ServerLevel level){InkCombatTestIsolation.clear(level);}
+
+    @net.minecraft.gametest.framework.BeforeBatch(batch="ink_ballPullIsStrongHorizontalExcludesCasterAndStopsAtExplosion")
+    public static void isolate_ballPullIsStrongHorizontalExcludesCasterAndStopsAtExplosion(net.minecraft.server.level.ServerLevel level){InkCombatTestIsolation.clear(level);}
+
+    @net.minecraft.gametest.framework.BeforeBatch(batch="ink_landscapeIsBudgetedAndPreservesExistingBuildings")
+    public static void isolate_landscapeIsBudgetedAndPreservesExistingBuildings(net.minecraft.server.level.ServerLevel level){InkCombatTestIsolation.clear(level);}
+
+    @net.minecraft.gametest.framework.BeforeBatch(batch="ink_tenRealPursuitPhantomsHitWithoutHurtingCaster")
+    public static void isolate_tenRealPursuitPhantomsHitWithoutHurtingCaster(net.minecraft.server.level.ServerLevel level){InkCombatTestIsolation.clear(level);}
+
+    @net.minecraft.gametest.framework.BeforeBatch(batch="ink_longWingIsForwardOnlyAndCannotHitRepeatedly")
+    public static void isolate_longWingIsForwardOnlyAndCannotHitRepeatedly(net.minecraft.server.level.ServerLevel level){InkCombatTestIsolation.clear(level);}
+
+    @net.minecraft.gametest.framework.BeforeBatch(batch="ink_skyCastReallyRisesHitsExplodesAndRestoresGravity")
+    public static void isolate_skyCastReallyRisesHitsExplodesAndRestoresGravity(net.minecraft.server.level.ServerLevel level){InkCombatTestIsolation.clear(level);}
+
+    @net.minecraft.gametest.framework.BeforeBatch(batch="ink_interruptedAscentRemovesTheAttachedShadowAndRestoresGravity")
+    public static void isolate_interruptedAscentRemovesTheAttachedShadowAndRestoresGravity(net.minecraft.server.level.ServerLevel level){InkCombatTestIsolation.clear(level);}
+
+    @net.minecraft.gametest.framework.BeforeBatch(batch="ink_summonedDrakeHitsCreatesSealAndDetonates")
+    public static void isolate_summonedDrakeHitsCreatesSealAndDetonates(net.minecraft.server.level.ServerLevel level){InkCombatTestIsolation.clear(level);}
+
+    @net.minecraft.gametest.framework.BeforeBatch(batch="ink_pursuitFindsANewEnemyWhenItsOriginalTargetDisappears")
+    public static void isolate_pursuitFindsANewEnemyWhenItsOriginalTargetDisappears(net.minecraft.server.level.ServerLevel level){InkCombatTestIsolation.clear(level);}
 }

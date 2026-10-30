@@ -1,8 +1,8 @@
 {
   "passed": true,
-  "mesh_parts": 497,
-  "vertices": 93614,
-  "triangles": 140414,
+  "mesh_parts": 597,
+  "vertices": 100468,
+  "triangles": 152306,
   "cube_elements": 0,
   "five_toed_paws": 4,
   "matching_bbmodel_glb_geometry": true,

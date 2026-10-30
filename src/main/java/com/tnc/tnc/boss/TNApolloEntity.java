@@ -82,6 +82,24 @@ public class TNApolloEntity extends Monster implements GeoEntity {
     private int castCooldown = 80;
     private int pendingSpell = -1;
     private int pendingTicks = 0;
+    private static final int SUMMON_ACOLYTES = 6;
+    private int acolyteCooldown;
+
+    /** A real, interruptible cast. No followers appear until its three-second animation ends. */
+    public boolean beginAcolyteSummon() {
+        if (!(level() instanceof ServerLevel) || !isAlive() || pendingSpell >= 0 || acolyteCooldown > 0
+                || getTarget() == null || !getTarget().isAlive()
+                || com.tnc.tnc.light.ApolloAcolyteEntity.count(this) >= 3) return false;
+        getNavigation().stop();
+        startCast(SUMMON_ACOLYTES);
+        var circle = TNOrbEntities.MAGIC_CIRCLE.get().create(level());
+        if (circle != null) {
+            circle.configure(3.8, 70, com.tnc.tnc.magic.TNMagicCircleEntity.STYLE_LIGHT);
+            circle.moveTo(getX(), getY()+.05, getZ(), 0, 0);
+            level().addFreshEntity(circle);
+        }
+        return true;
+    }
 
     public TNApolloEntity(EntityType<? extends TNApolloEntity> type, Level level) {
         super(type, level);
@@ -167,6 +185,14 @@ public class TNApolloEntity extends Monster implements GeoEntity {
         if (this.level().isClientSide()) {
             return;
         }
+        if (!isAlive()) { pendingSpell=-1; return; }
+        if (acolyteCooldown > 0) acolyteCooldown--;
+        if (pendingSpell == SUMMON_ACOLYTES) {
+            getNavigation().stop();
+            if (getTarget() == null || !getTarget().isAlive()) {
+                pendingSpell=-1; acolyteCooldown=40; return;
+            }
+        }
         // —— 正在唱法：等动画播完再生效 ✓
         if (this.pendingSpell >= 0) {
             if (--this.pendingTicks <= 0) {
@@ -179,6 +205,7 @@ public class TNApolloEntity extends Monster implements GeoEntity {
         if (this.getTarget() == null || --this.castCooldown > 0) {
             return;
         }
+        if (beginAcolyteSummon()) return;
         this.startCast(this.pickSpell());
     }
 
@@ -201,8 +228,8 @@ public class TNApolloEntity extends Monster implements GeoEntity {
     /** 开始施法：触发动画并开始倒计时（时长＝动画时长 ✓）。 */
     private void startCast(int spell) {
         this.pendingSpell = spell;
-        this.pendingTicks = CAST_TICKS[spell];
-        this.triggerAnim("action", ANIM[spell]);
+        this.pendingTicks = spell == SUMMON_ACOLYTES ? 60 : CAST_TICKS[spell];
+        this.triggerAnim("action", spell == SUMMON_ACOLYTES ? "palymagic_t4_t5" : ANIM[spell]);
         if (this.level() instanceof ServerLevel level) {
             // ★ 作者 2026-10-01："阿波罗施法技能就晴天" ✓ —— 太阳神一出手天就放晴 ✓
             //   （和光耀 t3「神光」的"回归晴天"同一套写法 ✓；6000 tick = 5 分钟 ✓）
@@ -228,6 +255,15 @@ public class TNApolloEntity extends Monster implements GeoEntity {
         if (!(this.level() instanceof ServerLevel level)) {
             return;
         }
+        if (spell == SUMMON_ACOLYTES) {
+            if (isAlive() && getTarget() != null && getTarget().isAlive()) {
+                int summoned = com.tnc.tnc.light.ApolloAcolyteEntity.summonMissing(this);
+                acolyteCooldown = summoned > 0 ? 600 : 100;
+                level.playSound(null, getX(), getY(), getZ(), SoundEvents.EVOKER_PREPARE_SUMMON,
+                        SoundSource.HOSTILE, 1.4F, 1.1F);
+            }
+            return;
+        }
         String path = PATHS[spell];
         if (IS_BEAM[spell]) {
             com.tnc.tnc.light.TNLightBeamMechanics.onSpellCast(this, path, LENGTH_SCALE[spell]);
@@ -239,6 +275,13 @@ public class TNApolloEntity extends Monster implements GeoEntity {
     }
 
     // ---- 资源 ----
+    @Override public void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        super.addAdditionalSaveData(tag); tag.putInt("AcolyteSummonCooldown", acolyteCooldown);
+    }
+    @Override public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        acolyteCooldown = net.minecraft.util.Mth.clamp(tag.getInt("AcolyteSummonCooldown"),0,600);
+    }
     public static ResourceLocation modelResource() {
         return ResourceLocation.fromNamespaceAndPath("tnc", "geo/entity/gothic_priest.geo.json");
     }

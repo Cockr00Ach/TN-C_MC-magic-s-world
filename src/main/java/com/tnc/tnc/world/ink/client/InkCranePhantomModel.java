@@ -42,7 +42,7 @@ public final class InkCranePhantomModel extends GeoModel<InkCranePhantomEntity> 
         for (String side : new String[]{"l", "r"}) {
             GeoBone b = (GeoBone) getAnimationProcessor().getBone("wing_" + side);
             if (b == null) continue;
-            b.setScaleX(1); b.setScaleY(1); b.setScaleZ(1);
+            b.setScaleX(1.5F); b.setScaleY(1); b.setScaleZ(1);
         }
     }
 }

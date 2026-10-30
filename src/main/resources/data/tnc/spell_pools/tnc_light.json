@@ -1,5 +1,10 @@
 {
   "spell_ids": [
+    "tnc:light_mirror_t1",
+    "tnc:light_mirror_t2",
+    "tnc:light_mirror_t3",
+    "tnc:light_mirror_t4",
+    "tnc:light_mirror_t5",
     "tnc:light_radiance",
     "tnc:holy_light",
     "tnc:divine_light",

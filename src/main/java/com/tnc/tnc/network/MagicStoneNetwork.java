@@ -22,8 +22,8 @@ import java.util.function.Supplier;
  */
 public class MagicStoneNetwork {
 
-    // v13 adds sparring difficulty and per-tier personal records.
-    private static final String PROTOCOL_VERSION = "13";
+    // v14 adds the arena instructor role (summon/dismiss from the sky-island terminal).
+    private static final String PROTOCOL_VERSION = "14";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "main"),

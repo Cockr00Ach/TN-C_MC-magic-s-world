@@ -139,8 +139,14 @@ final class PortalArchitecture {
     }
 
     private static boolean naturalGround(BlockState state) {
+        // CLAY belongs here: the 2026-10-31 world had an authored clay bank right under the
+        // arrival platform's corner (582,180,45). Clay is not in Tags.Blocks.DIRT, so the
+        // guard read it as "player building" and threw on every FINALIZING retry -- the
+        // island could never reach COMPLETE, which in turn kept the warrior arena from
+        // ever being built. Clay is ordinary terrain, not masonry.
         return state.is(BlockTags.DIRT) || state.is(BlockTags.BASE_STONE_OVERWORLD)
                 || state.is(BlockTags.SAND) || state.is(Blocks.GRAVEL) || state.is(Blocks.DIRT_PATH)
+                || state.is(Blocks.CLAY)
                 || state.is(net.minecraftforge.common.Tags.Blocks.ORES);
     }
 

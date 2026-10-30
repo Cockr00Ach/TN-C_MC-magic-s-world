@@ -15,11 +15,12 @@ final class InkCraneAttacks {
     private InkCranePhantomEntity landingSeal;
     private boolean landed;
     private boolean previousGravity;
+    private InkRitualEntity lockSeal;
 
     InkCraneAttacks(InkCraneBossEntity boss) { this.boss = boss; }
 
     boolean begin(int requested, LivingEntity victim) {
-        if (move != 0 || !boss.isAlive() || victim == null || !victim.isAlive()
+        if (InkEncounter.introducing(boss) || move != 0 || !boss.isAlive() || victim == null || !victim.isAlive()
                 || victim.level() != boss.level() || requested < 1 || requested > 4) return false;
         move = requested; age = 0; target = victim; home = boss.position();
         landing = null; landingSeal = null; landed = false;
@@ -28,8 +29,11 @@ final class InkCraneAttacks {
         boss.getNavigation().stop();
         if (move == InkCraneAttackRules.SKY) {
             boss.setNoGravity(true);boss.setSkyShroudVisible(true);
+            InkRestraints.hold(boss,victim,victim.position(),InkCraneAttackRules.SKY_RELEASE+InkCraneAttackRules.DIVE_TICKS+3);
+            lockSeal=InkRitualEntity.spawn(boss,victim,InkRitualEntity.CRANE,victim.position().add(0,.04,0),InkCraneAttackRules.SKY_RELEASE+InkCraneAttackRules.DIVE_TICKS+5);
         }
         boss.triggerAnim("action", move == 2 ? "ink_roar" : move == 3 ? "sky_ascent" : "ink_flap");
+        InkBossAudio.cast(boss,1);
         boss.playSound(SoundEvents.ENDER_DRAGON_FLAP, 1.8F, 0.55F);
         return true;
     }
@@ -91,6 +95,7 @@ final class InkCraneAttacks {
             position = hover.lerp(landing, t * t);
             if (t >= 1 && !landed) {
                 landed = true;
+                InkRestraints.release(boss);if(lockSeal!=null)lockSeal.discard();
                 // Same-frame order: arrive, remove the attached shadow, impact, then gather ink.
                 boss.setSkyShroudVisible(false);
                 skyImpact(landing);
@@ -133,6 +138,7 @@ final class InkCraneAttacks {
     }
 
     void cancel() {
+        InkRestraints.release(boss);if(lockSeal!=null)lockSeal.discard();lockSeal=null;
         boss.setSkyShroudVisible(false);
         if (move == InkCraneAttackRules.SKY) {
             if (landed && landing != null) boss.setPos(landing);

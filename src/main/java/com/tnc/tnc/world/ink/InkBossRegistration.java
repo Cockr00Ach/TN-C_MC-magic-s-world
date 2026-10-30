@@ -13,6 +13,8 @@ import net.minecraftforge.registries.RegisterEvent;
 /** Forge registry bridge for the ink-realm boss. */
 @Mod.EventBusSubscriber(modid = TNMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public final class InkBossRegistration {
+    public static EntityType<InkRitualEntity> INK_RITUAL;
+    public static EntityType<InkPortalEntity> INK_PORTAL;
     public static EntityType<InkAbyssDrakeEntity> INK_ABYSS_DRAKE;
     public static EntityType<InkCraneBossEntity> INK_CRANE_BOSS;
     public static EntityType<InkCranePhantomEntity> INK_CRANE_PHANTOM;
@@ -24,7 +26,12 @@ public final class InkBossRegistration {
 
     @SubscribeEvent
     public static void register(RegisterEvent event) {
+        event.register(Registries.ITEM,helper->helper.register(ResourceLocation.fromNamespaceAndPath("tnc","ink_portal"),new InkPortalItem()));
         event.register(Registries.ENTITY_TYPE, helper -> {
+            INK_RITUAL=EntityType.Builder.<InkRitualEntity>of(InkRitualEntity::new,MobCategory.MISC).sized(1,1).clientTrackingRange(32).updateInterval(1).build("tnc:ink_ritual");
+            helper.register(ResourceLocation.fromNamespaceAndPath("tnc","ink_ritual"),INK_RITUAL);
+            INK_PORTAL=EntityType.Builder.<InkPortalEntity>of(InkPortalEntity::new,MobCategory.MISC).sized(4.8F,5.2F).clientTrackingRange(12).updateInterval(20).build("tnc:ink_portal");
+            helper.register(ResourceLocation.fromNamespaceAndPath("tnc","ink_portal"),INK_PORTAL);
             INK_CELESTIAL_DRAGON=EntityType.Builder.<InkCelestialDragonEntity>of(InkCelestialDragonEntity::new,MobCategory.MISC)
                     .sized(8*InkDragonCombatRules.BODY_SCALE,10*InkDragonCombatRules.BODY_SCALE).clientTrackingRange(32).updateInterval(2).build("tnc:ink_celestial_dragon");
             helper.register(ResourceLocation.fromNamespaceAndPath(TNMod.MODID,"ink_celestial_dragon"),INK_CELESTIAL_DRAGON);
@@ -44,7 +51,7 @@ public final class InkBossRegistration {
                     INK_ABYSS_DRAKE);
             INK_CRANE_BOSS = EntityType.Builder
                     .<InkCraneBossEntity>of(InkCraneBossEntity::new, MobCategory.MONSTER)
-                    .sized(3.2F, 12.8F)
+                    .sized(4.8F, 19.2F)
                     .clientTrackingRange(16)
                     .updateInterval(2)
                     .build("tnc:ink_crane_boss");

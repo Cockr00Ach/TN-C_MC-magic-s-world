@@ -45,7 +45,7 @@ final class InkCraneRitualVisuals {
                 float fade = 1 - i / (path.size() + 1.0F);
                 if (i % 3 == 0) {
                     Vec3 drop = local.add(Math.sin(i * 2.3) * width, Math.cos(i * 1.8) * width, 0);
-                    stroke(out, pose.last(), drop, drop.add(.06, -.22 * fade, .03), .09 * fade, .01F, fade);
+                    InkWashVisuals.fleck(pose,buffers,drop,.14*fade,i,age,i%6==0?.8F:.01F,fade*.75F);
                 }
             }
             previous = local; i++;
@@ -64,8 +64,10 @@ final class InkCraneRitualVisuals {
         double age = entity.chargeAge() < 0 ? -1 : entity.chargeAge() + partial;
         double turn = (entity.age() + partial) * .027;
         float fade = (float) Math.min(1, (118 - age) / 12.0);
-        if (age >= 0 && age < InkCraneAttackRules.BALL_EXPLODE) gathering(
-                buffers.getBuffer(RenderType.entityTranslucent(BRUSH)), pose.last(), age, fade);
+        if (age >= 0 && age < InkCraneAttackRules.BALL_EXPLODE) {
+            double core=InkCraneAttackRules.ballRadius(age)/InkCraneAttackRules.BALL_SCALE;
+            InkWashVisuals.gather(pose,buffers,age,new Vec3(0,age<32?.35+age/32:core+.35,0),core,14);
+        }
         VertexConsumer out = buffers.getBuffer(RenderType.entityTranslucent(WHITE));
         for (int layer = 0; layer < 3; layer++) {
             double radius = 5.8 - layer * 1.35;
@@ -88,31 +90,9 @@ final class InkCraneRitualVisuals {
             double t = (age - InkCraneAttackRules.BALL_EXPLODE) / 18;
             ring(out, pose.last(), 1 + t * 13, .8 * (1 - t) + .05, .2, 0, .01F, (float) (1 - t), false);
             ring(out, pose.last(), 1.3 + t * 13, .1, .22, 0, .94F, (float) ((1 - t) * .8), false);
-            bloom(out, pose.last(), t * 18, 10, (float) (1 - t));
+            InkWashVisuals.burst(pose,buffers,t*36,10);
         }
         } finally { pose.popPose(); }
-    }
-
-    private static void gathering(VertexConsumer out, PoseStack.Pose pose, double age, float fade) {
-        double core = InkCraneAttackRules.ballRadius(age) / InkCraneAttackRules.BALL_SCALE;
-        Vec3 center = new Vec3(0, age < 32 ? .35 + age / 32 : core + .35, 0);
-        for (int stream = 0; stream < 20; stream++) {
-            double phase = (age * .024 + stream * .173) % 1;
-            List<Vec3> path=new ArrayList<>();
-            for (int step = 0; step <= 32; step++) {
-                double u = Math.max(0, Math.min(1, phase + (step - 32) * .017));
-                double radius = (1 - u) * (11 + (stream % 4) * 2) + core * .25;
-                double angle = stream * 2.39996 + age * .018 + u * Math.PI * 1.7;
-                Vec3 at = point(angle, radius, .18 + Math.sin(u * Math.PI) * (1.5 + stream % 3))
-                        .lerp(center, u * u);
-                path.add(at);
-            }
-            java.util.Collections.reverse(path);
-            double width=.16+core*.035;
-            ribbon(out,pose,path,width*3.3,.09F,fade*.18F,true);
-            ribbon(out,pose,path,width,.004F,fade*.96F,true);
-            if(stream%4==0)ribbon(out,pose,path,width*.07,.78F,fade*.5F,true);
-        }
     }
 
     static void aura(InkCranePhantomEntity entity, float partial, PoseStack pose, MultiBufferSource buffers) {
@@ -202,7 +182,7 @@ final class InkCraneRitualVisuals {
     }
     private static Vec3 point(double a, double r, double y) { return new Vec3(Math.cos(a) * r, y, Math.sin(a) * r); }
 
-    private static void ring(VertexConsumer out, PoseStack.Pose pose, double radius, double width, double y,
+    static void ring(VertexConsumer out, PoseStack.Pose pose, double radius, double width, double y,
                              double turn, float gray, float alpha, boolean broken) {
         for (int i = 0; i < 96; i++) {
             if (broken && i % 24 >= 20) continue;

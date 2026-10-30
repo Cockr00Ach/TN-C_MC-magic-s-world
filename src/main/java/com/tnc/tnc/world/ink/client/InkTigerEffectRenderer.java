@@ -16,7 +16,7 @@ public final class InkTigerEffectRenderer extends GeoEntityRenderer<InkTigerEffe
         @Override public ResourceLocation getAnimationResource(InkTigerEffectEntity e){return asset("animations/entity/ink_winged_tiger.animation.json");}
         @Override public void setCustomAnimations(InkTigerEffectEntity e,long id,software.bernie.geckolib.core.animation.AnimationState<InkTigerEffectEntity> state){super.setCustomAnimations(e,id,state);InkTigerWingPose.apply(this,false);}
     });withScale((float)InkTigerAttackRules.GHOST_SCALE*InkTigerAttackRules.BODY_SCALE);shadowRadius=0;}
-    @Override public RenderType getRenderType(InkTigerEffectEntity e,ResourceLocation t,MultiBufferSource b,float p){return RenderType.entityTranslucentEmissive(t);}
+    @Override public RenderType getRenderType(InkTigerEffectEntity e,ResourceLocation t,MultiBufferSource b,float p){return RenderType.entityTranslucent(t);}
     @Override public Color getRenderColor(InkTigerEffectEntity e,float p,int l){return Color.ofRGBA(1F,1F,1F,(e.finished()?.08F:.34F)*(float)Math.min(1,(e.age()+p)/18));}
     @Override public void renderCubesOfBone(PoseStack p,GeoBone b,VertexConsumer o,int l,int v,float r,float g,float blue,float a){super.renderCubesOfBone(p,b,o,LightTexture.FULL_BRIGHT,v,r,g,blue,a*InkWingOpacity.alpha(b.getName()));}
     @Override public void render(InkTigerEffectEntity e,float yaw,float partial,PoseStack pose,MultiBufferSource b,int light){

@@ -1,0 +1,24 @@
+{
+  "music": "Three full tracks supplied locally by the author. No redistribution license inferred; local music files are Git-ignored.",
+  "crane_cast": {
+    "title": "Peacock scream",
+    "author": "popthebubbles4; submitted by qubodup",
+    "source": "https://opengameart.org/content/peacock-scream",
+    "license": "CC0-1.0",
+    "changes": "Trimmed, pitch lowered, filtered, faded and loudness normalized as a stylized bird cry. Not an actual crane field recording."
+  },
+  "tiger_cast": {
+    "title": "Tiger Roar",
+    "author": "lauramellis",
+    "source": "https://freesound.org/people/lauramellis/sounds/263115/",
+    "license": "CC0-1.0",
+    "changes": "HQ preview trimmed, filtered, faded, converted to mono and normalized."
+  },
+  "dragon_cast": {
+    "title": "CC0 Deep Monster Roar",
+    "author": "trazzz123",
+    "source": "https://opengameart.org/content/cc0-deep-monster-roar",
+    "license": "CC0-1.0",
+    "changes": "Trimmed, filtered, faded, converted to mono and normalized as a fantasy dragon roar."
+  }
+}

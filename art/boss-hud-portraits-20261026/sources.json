@@ -1,0 +1,101 @@
+{
+  "installedSourceSha256": "239411A9FE2413BBF91AF66BD3B5E5DC9D34D9524C1C556D63E970C9E477C096",
+  "portraits": [
+    {
+      "entity": "tnc:apollo",
+      "triangles": 19392,
+      "atlasSlot": 0,
+      "model": "gothic_priest",
+      "texture": "gothic_priest_bedrock",
+      "dedicatedSolarRelief": true
+    },
+    {
+      "entity": "tnc:dark_giant",
+      "triangles": 264,
+      "atlasSlot": 1,
+      "model": "dark_giant",
+      "texture": "dark_giant_bedrock",
+      "dedicatedSolarRelief": false
+    },
+    {
+      "entity": "tnc:stone_lancer",
+      "triangles": 264,
+      "atlasSlot": 2,
+      "model": "stone_lancer",
+      "texture": "stone_lancer",
+      "dedicatedSolarRelief": false
+    },
+    {
+      "entity": "tnc:water_leviathan",
+      "triangles": 780,
+      "atlasSlot": 3,
+      "model": "water_leviathan",
+      "texture": "water_leviathan_bedrock",
+      "dedicatedSolarRelief": false
+    },
+    {
+      "entity": "tnc:yan_dark",
+      "triangles": 228,
+      "atlasSlot": 4,
+      "model": "yan_dark",
+      "texture": "yan_dark_bedrock",
+      "dedicatedSolarRelief": false
+    },
+    {
+      "entity": "tnc:wind_general",
+      "triangles": 936,
+      "atlasSlot": 5,
+      "model": "wind_general",
+      "texture": "wind_general",
+      "dedicatedSolarRelief": false
+    },
+    {
+      "entity": "tnc:wind_warden",
+      "triangles": 3816,
+      "atlasSlot": 6,
+      "model": "wind_warden",
+      "texture": "wind_warden",
+      "dedicatedSolarRelief": false
+    },
+    {
+      "entity": "tnc:canglan_warlord",
+      "triangles": 1416,
+      "atlasSlot": 7,
+      "model": "canglan_warlord",
+      "texture": "canglan_warlord",
+      "dedicatedSolarRelief": false
+    },
+    {
+      "entity": "tnc:ink_abyss_drake",
+      "triangles": 312,
+      "atlasSlot": 8,
+      "model": "ink_abyss_drake",
+      "texture": "ink_abyss_drake",
+      "dedicatedSolarRelief": false
+    },
+    {
+      "entity": "tnc:ink_crane_boss",
+      "triangles": 1524,
+      "atlasSlot": 9,
+      "model": "ink_crane_boss",
+      "texture": "ink_crane_boss",
+      "dedicatedSolarRelief": false
+    },
+    {
+      "entity": "tnc:ink_winged_tiger",
+      "triangles": 1044,
+      "atlasSlot": 10,
+      "model": "ink_winged_tiger",
+      "texture": "ink_winged_tiger",
+      "dedicatedSolarRelief": false
+    },
+    {
+      "entity": "tnc:ink_celestial_dragon",
+      "triangles": 67408,
+      "atlasSlot": 11,
+      "model": null,
+      "texture": null,
+      "dedicatedSolarRelief": false
+    }
+  ]
+}

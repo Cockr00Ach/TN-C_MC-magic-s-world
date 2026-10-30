@@ -130,7 +130,8 @@ public final class SpellCatalog {
         DARK_DRAGON("暗龙", "放出一条暗龙向前冲（暗系第五条链）"),
         WIND_BALL("风球", "吸引、压缩与升空爆炸"),
         WIND_WEAPON("风兵", "幻化飞剑、长矛与天降兵器"),
-        LIGHT_MIRROR("光镜", "预留给光镜链，保持并行存档序号兼容"),
+        // Append only: existing saved chain ordinals must never change.
+        LIGHT_MIRROR("光镜", "布置光镜，将白光折射为多色光线"),
         THUNDER_SEAL("霆狱", "雷楔导通、雷锁与集中天刑");
 
         private final String cn;
@@ -304,6 +305,11 @@ public final class SpellCatalog {
             //   5 五光十射：天上开 5 个阵，每个阵各放一次圣光天降（错开落下）
             //   （数值都在 light/TNLightBeamMechanics 的一张表里 ✓，改那里就行 ✓）
             of(Element.LIGHT, "light_beam", Chain.LIGHT_BEAM, 1, "光线"),
+            of(Element.LIGHT, "light_mirror_t1", Chain.LIGHT_MIRROR, 1, "三辉光镜"),
+            of(Element.LIGHT, "light_mirror_t2", Chain.LIGHT_MIRROR, 2, "四象光镜"),
+            of(Element.LIGHT, "light_mirror_t3", Chain.LIGHT_MIRROR, 3, "五色光镜"),
+            of(Element.LIGHT, "light_mirror_t4", Chain.LIGHT_MIRROR, 4, "六芒光镜"),
+            of(Element.LIGHT, "light_mirror_t5", Chain.LIGHT_MIRROR, 5, "七曜光镜"),
             of(Element.LIGHT, "great_light_beam", Chain.LIGHT_BEAM, 2, "大光线"),
             of(Element.LIGHT, "giant_light_beam", Chain.LIGHT_BEAM, 3, "巨大光线"),
             of(Element.LIGHT, "holy_light_descent", Chain.LIGHT_BEAM, 4, "圣光天降"),

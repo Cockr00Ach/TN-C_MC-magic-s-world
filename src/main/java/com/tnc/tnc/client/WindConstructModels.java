@@ -16,6 +16,22 @@ import org.joml.Quaternionf;
 public final class WindConstructModels {
     public static final String[] NAMES={"core","cage","crescent","sword","spear","chakram"};
     public static ResourceLocation id(String name){return ResourceLocation.fromNamespaceAndPath("tnc","wind/arsenal/"+name);}
+
+    /**
+     * Moves the pose onto a bone's own <b>pivot</b> — the frame a bone-attached model
+     * has to be drawn in.
+     *
+     * <p>Why it is needed: GeckoLib's {@code renderRecursively} pushes the pose, applies the
+     * bone transform, draws that bone's cubes and children, then pops it again. A renderer
+     * hook that runs <i>after</i> {@code super.renderRecursively(bone, ...)} therefore holds
+     * the <b>parent's</b> frame, not the bone's ✗: the anchor's pivot offset and — far worse —
+     * its animation (every wrist key of every clip) would be ignored, so a held weapon would
+     * stay bolted to the hand bone and never swing.
+     *
+     * <p>This re-applies exactly what GeckoLib applied, in its order
+     * ({@code T(pos) · T(pivot) · Rz · Ry · Rx · scale}), and stops at the pivot so the
+     * caller's own offsets start from the bone.
+     */
     public static void atBone(PoseStack pose, software.bernie.geckolib.cache.object.GeoBone bone){
         pose.translate(bone.getPosX()/16.0F,bone.getPosY()/16.0F,bone.getPosZ()/16.0F);
         pose.translate(bone.getPivotX()/16.0F,bone.getPivotY()/16.0F,bone.getPivotZ()/16.0F);

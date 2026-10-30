@@ -29,10 +29,29 @@ public final class InkRealmTravel {
         if (target == null) {
             return false;
         }
+        if(player.level().dimension().equals(INK_REALM))return true;
+        var origin=new net.minecraft.nbt.CompoundTag();origin.putString("dimension",player.level().dimension().location().toString());
+        origin.putDouble("x",player.getX());origin.putDouble("y",player.getY());origin.putDouble("z",player.getZ());
+        origin.putFloat("yaw",player.getYRot());origin.putFloat("pitch",player.getXRot());
+        player.getPersistentData().put("TncInkReturn",origin);
         return teleport(player, target, player.getX(), player.getZ());
     }
 
     public static boolean leave(ServerPlayer player) {
+        var origin=player.getPersistentData().getCompound("TncInkReturn");
+        ResourceLocation id=ResourceLocation.tryParse(origin.getString("dimension"));
+        if(id!=null){
+            ServerLevel previous=player.server.getLevel(ResourceKey.create(Registries.DIMENSION,id));
+            if(previous!=null&&!previous.dimension().equals(INK_REALM)){
+                double x=clampToBorder(previous,origin.getDouble("x"),true),z=clampToBorder(previous,origin.getDouble("z"),false),y=origin.getDouble("y");
+                previous.getChunk(net.minecraft.core.BlockPos.containing(x,y,z));
+                var box=player.getBoundingBox().move(new net.minecraft.world.phys.Vec3(x,y,z).subtract(player.position()));
+                if(y>previous.getMinBuildHeight()&&y<previous.getMaxBuildHeight()-2&&previous.noCollision(player,box)){
+                    player.teleportTo(previous,x,y,z,origin.getFloat("yaw"),origin.getFloat("pitch"));player.fallDistance=0;return true;
+                }
+                return teleport(player,previous,x,z);
+            }
+        }
         ServerLevel target = player.server.overworld();
         BlockPos spawn = target.getSharedSpawnPos();
         return teleport(player, target, spawn.getX() + 0.5D, spawn.getZ() + 0.5D);

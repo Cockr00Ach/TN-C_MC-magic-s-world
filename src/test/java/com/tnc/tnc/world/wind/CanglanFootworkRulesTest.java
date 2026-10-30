@@ -2,6 +2,13 @@ package com.tnc.tnc.world.wind;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 class CanglanFootworkRulesTest {
+ @Test void onlyRealExecutionMessagesCanOpenTheCamera(){
+  assertFalse(CanglanWarGodRules.executionCamera(80,false));
+  assertTrue(CanglanWarGodRules.executionCamera(80,true));
+  assertFalse(CanglanWarGodRules.executionCamera(0,false));
+  assertFalse(CanglanWarGodRules.executionCamera(0,true));
+  assertFalse(CanglanWarGodRules.executionCamera(-1,true));
+ }
  @Test void spacingMovesWidenThenCloseTheGap(){
   double[] first=CanglanWarGodRules.stepOffset(6,0,1,0,false,1);
   assertEquals(14,Math.hypot(6+first[0],first[1]),1E-6);

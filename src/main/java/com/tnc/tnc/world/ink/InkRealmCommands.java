@@ -21,6 +21,13 @@ public final class InkRealmCommands {
         event.getDispatcher().register(Commands.literal("tnc")
                 .then(Commands.literal("ink")
                         .requires(source -> source.hasPermission(2))
+                        .then(Commands.literal("trial").executes(context->{
+                            boolean started=InkEncounter.start(context.getSource().getPlayerOrException());
+                            if(!started)context.getSource().sendFailure(Component.literal("请在水墨维度启动试炼；同一时间只能进行一场三相战斗。"));
+                            return started?1:0;
+                        }))
+                        .then(Commands.literal("trial_reset").executes(context->{var p=context.getSource().getPlayerOrException();InkEncounter.get(p.serverLevel()).reset(p.serverLevel());return 1;}))
+                        .then(Commands.literal("portal").executes(context->InkPortalEntity.place(context.getSource().getPlayerOrException())?1:0))
                         .then(Commands.literal("dragon").executes(context->{
                             var player=context.getSource().getPlayerOrException();var level=player.serverLevel();
                             Vec3 forward=player.getLookAngle().multiply(1,0,1).normalize();if(forward.lengthSqr()<.01)forward=new Vec3(0,0,1);
@@ -41,7 +48,7 @@ public final class InkRealmCommands {
                             if(dragon==null){context.getSource().sendFailure(Component.literal("附近已加载区域内没有墨龙。"));return 0;}
                             context.getSource().sendSuccess(()->Component.literal(String.format("最近墨龙：%.0f / %.0f / %.0f，距离 %.0f 格。",dragon.getX(),dragon.getY(),dragon.getZ(),player.distanceTo(dragon))),false);return 1;
                         }))
-                        .then(Commands.literal("dragon_attack").then(Commands.argument("move",IntegerArgumentType.integer(1,2)).executes(context->{
+                        .then(Commands.literal("dragon_attack").then(Commands.argument("move",IntegerArgumentType.integer(1,5)).executes(context->{
                             var player=context.getSource().getPlayerOrException();
                             var dragon=player.serverLevel().getEntitiesOfClass(InkCelestialDragonEntity.class,player.getBoundingBox().inflate(128)).stream().min(java.util.Comparator.comparingDouble(player::distanceToSqr)).orElse(null);
                             if(dragon==null||!dragon.startInkAttack(IntegerArgumentType.getInteger(context,"move"),player)){
@@ -56,7 +63,7 @@ public final class InkRealmCommands {
                             tiger.moveTo(player.getX()+forward.x,player.getY()+1,player.getZ()+forward.z,player.getYRot()+180,0);
                             level.addFreshEntity(tiger);context.getSource().sendSuccess(()->Component.literal("玄墨翼虎已踏墨现身。"),true);return 1;
                         }))
-                        .then(Commands.literal("tiger_attack").then(Commands.argument("move",IntegerArgumentType.integer(1,3)).executes(context->{
+                        .then(Commands.literal("tiger_attack").then(Commands.argument("move",IntegerArgumentType.integer(1,4)).executes(context->{
                             var player=context.getSource().getPlayerOrException();var tiger=player.serverLevel().getEntitiesOfClass(
                                     InkWingedTigerEntity.class,player.getBoundingBox().inflate(96),LivingEntity->LivingEntity.isAlive())
                                     .stream().min(java.util.Comparator.comparingDouble(player::distanceToSqr)).orElse(null);

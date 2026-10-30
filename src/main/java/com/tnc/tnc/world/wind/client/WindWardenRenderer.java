@@ -45,11 +45,12 @@ public final class WindWardenRenderer extends GeoEntityRenderer<WindWardenEntity
         super.renderRecursively(pose, entity, bone, type, buffers, out, reRender,
                 partial, light, overlay, red, green, blue, alpha);
         if (!reRender && name.equals("weapon_1")) {
-            drawWeapon(pose, entity, buffers);
+            drawWeapon(pose, bone, entity, buffers);
         }
     }
 
-    private void drawWeapon(PoseStack pose, WindWardenEntity entity, MultiBufferSource buffers) {
+    private void drawWeapon(PoseStack pose, GeoBone bone, WindWardenEntity entity,
+                            MultiBufferSource buffers) {
         if (!entity.isAlive() || entity.shifting()) {
             return;
         }
@@ -57,6 +58,9 @@ public final class WindWardenRenderer extends GeoEntityRenderer<WindWardenEntity
         // canted forward to read as "held", not "mounted on the fist".
         int form = entity.isSpearPhase() ? SPEAR_FORM : SWORD_FORM;
         pose.pushPose();
+        // The anchor's own transform is already popped by the time this hook runs, so the
+        // pose is re-seated on its pivot first (same fix as the Canglan warlord's renderer).
+        WindConstructModels.atBone(pose, bone);
         pose.mulPose(Axis.XP.rotationDegrees(-74.0F));
         pose.mulPose(Axis.ZP.rotationDegrees(entity.isSpearPhase() ? 4.0F : -8.0F));
         float scale = entity.isSpearPhase() ? 1.45F : 1.30F;

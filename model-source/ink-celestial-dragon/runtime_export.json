@@ -1,6 +1,6 @@
 {
-  "sourceSHA256": "a53b4bb80fbabccd4834d47c050290de59db26b1a96eedb46c9f815f94e4a0f1",
-  "runtimeSHA256": "a57206ed72a8df388cb9de849057dc40218e70531bd112779aa3b0c6ee3bc16f",
+  "sourceSHA256": "55bbd247b1d0a829638a87e99248e3b68d739368548bc926feb915b5099ee22c",
+  "runtimeSHA256": "98969ad9c9bac777d19cfc784701327e2e681ab824ae22987e9e699fe8d97c82",
   "groups": [
     "body",
     "head",
@@ -15,16 +15,16 @@
     "hind_leg_1"
   ],
   "triangles_by_lod": [
-    140414,
-    67794,
-    32506
+    152306,
+    75190,
+    36630
   ],
   "vertices_by_lod": [
-    421242,
-    203382,
-    97518
+    456918,
+    225570,
+    109890
   ],
-  "bytes": 11554648,
+  "bytes": 12678424,
   "near_mesh_matches_approved_triangles": true,
   "pose": "extended horizontal flight, not the old sculpture coil",
   "centrelineLength": 66.11085658933472,

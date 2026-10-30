@@ -42,6 +42,16 @@ public class TNLightBeamEntity extends Entity {
 
     /** 形态：0 = 前射（彩虹渐变 ✓），1 = 天降（更亮、白芯更大 ✓）。 */
     public static final int STYLE_RAY = 0;
+    /** Fixed-origin, fixed-direction flash. Does not follow the caster during its afterimage. */
+    public static final int STYLE_PULSE = 3;
+    public static final int STYLE_REFRACTED = 4;
+    private static final EntityDataAccessor<Integer> DATA_COLOR =
+            SynchedEntityData.defineId(TNLightBeamEntity.class, EntityDataSerializers.INT);
+    private int mirrorDepth;
+    private final Set<UUID> visitedMirrors = new HashSet<>();
+    private BranchBudget branchBudget = new BranchBudget();
+    private static final class BranchBudget { int remaining = LightMirrorRules.MAX_BRANCHES; }
+    public int beamColor() { return entityData.get(DATA_COLOR); }
 
     /**
      * 形态 2 = <b>火系射线</b>（作者 2026-10-05 的「打火链」t1 起）✓。
@@ -247,6 +257,7 @@ public class TNLightBeamEntity extends Entity {
         this.entityData.define(DATA_TARGET, -1);
         this.entityData.define(DATA_SHAKE, 0);
         this.entityData.define(DATA_FAN_OFFSET,0F);
+        this.entityData.define(DATA_COLOR, 0xffffff);
     }
 
     @Override
@@ -277,7 +288,8 @@ public class TNLightBeamEntity extends Entity {
         if (this.style() == STYLE_FIRE && this.fireClip()) {
             return;                              // 已经散掉了 ✓
         }
-        this.damageAlong();
+        if (style() != STYLE_FIRE && (style() == STYLE_DESCENT || tickCount == 1)) interactMirrors();
+        if ((style() != STYLE_PULSE && style() != STYLE_REFRACTED) || tickCount == 1) this.damageAlong();
         // ★ 2026-10-01 作者："把烟雾特效去掉" ✗ —— 原来这里每 tick 撒 END_ROD（末端火花）
         //   和 FLASH（起手一团白，看着就像冒烟 ✗）；光柱其实已经是**实体几何**了 ✓，
         //   这些粒子只会互相干扰 ✗ ⇒ 整块删掉，光柱就是干干净净一根柱子 ✓（要加回来说一声 ✓）。
@@ -408,6 +420,49 @@ public class TNLightBeamEntity extends Entity {
         return e.position().add(0.0D, e.getBbHeight() * 0.5D, 0.0D);
     }
 
+    /** All children share one hard budget and ancestor path: no recursive mirror storms. */
+    private void interactMirrors() {
+        if (!(level() instanceof ServerLevel server) || mirrorDepth >= LightMirrorRules.MAX_DEPTH
+                || branchBudget.remaining <= 0 || !(server.getEntity(casterId()) instanceof LivingEntity owner)) return;
+        Vec3 from=position(), end=endPoint();
+        var mirrors=server.getEntitiesOfClass(TNLightMirrorEntity.class, new AABB(from,end).inflate(radius()+2),
+                m -> m.isAlive() && m.belongsTo(owner) && !visitedMirrors.contains(m.getUUID())
+                        && LightMirrorRules.intersects(from,end,m.opticalBounds(),radius()));
+        mirrors.sort(java.util.Comparator.comparingDouble(m -> m.center().distanceToSqr(from)));
+        int processed=0;
+        for (var mirror : mirrors) {
+            if (++processed > 6 || branchBudget.remaining <= 0) break;
+            visitedMirrors.add(mirror.getUUID());
+            boolean shatter=style()==STYLE_DESCENT;
+            Vec3 origin=mirror.center();
+            var directions=shatter ? LightMirrorRules.sixDirections(mirror.getYRot())
+                    : LightMirrorRules.split(mirror.axis(),mirror.tier());
+            if (branchBudget.remaining < directions.size()) break;
+            mirror.flash();
+            if(shatter) mirror.discard();
+            else {
+                // The incident ray terminates on the prism; coloured rays begin there.
+                entityData.set(DATA_LENGTH, (int)Math.round(from.distanceTo(origin)*100));
+            }
+            for(int i=0;i<directions.size() && branchBudget.remaining>0;i++) {
+                var child=com.tnc.tnc.magic.TNOrbEntities.LIGHT_BEAM.get().create(server);
+                if(child==null) continue;
+                Vec3 direction=directions.get(i);
+                child.moveTo(origin.x,origin.y,origin.z,TNLightBeamMechanics.yawFor(direction),TNLightBeamMechanics.pitchFor(direction));
+                child.configure(owner, Math.min(.6,Math.max(.12,radius()*.42)), shatter ? 36 : 26+mirror.tier()*5,
+                        damage*(shatter ? .35F : .45F), LightMirrorRules.afterimageTicks(mirror.tier()),
+                        STYLE_REFRACTED,null);
+                child.entityData.set(DATA_COLOR, LightMirrorRules.color(i));
+                child.mirrorDepth=mirrorDepth+1; child.branchBudget=branchBudget;
+                child.visitedMirrors.addAll(visitedMirrors);
+                branchBudget.remaining--; server.addFreshEntity(child);
+            }
+            server.playSound(null,origin.x,origin.y,origin.z,net.minecraft.sounds.SoundEvents.AMETHYST_BLOCK_CHIME,
+                    net.minecraft.sounds.SoundSource.PLAYERS,.8F,shatter ? .75F : 1.5F);
+            if(!shatter) break;
+        }
+    }
+
     /** 沿柱子打伤害 ✓ —— 敌人**每条光线只挨一次** ✓（否则贴脸会被打几十下 ✗）。 */
     private void damageAlong() {
         Vec3 from = this.position();
@@ -427,6 +482,7 @@ public class TNLightBeamEntity extends Entity {
             if (target == owner || !target.isAlive()) {
                 continue;
             }
+            if (!LightMirrorRules.intersects(from, to, target.getBoundingBox(), this.radius())) continue;
             // ★ 统一用 isHostile ✓：玩家施法按老规矩（村民/动物/剧情NPC 不打 ✓）；
             //   怪物（阿波罗那种 Boss）施法时**只打玩家** ✓ —— 不然它自己会把自己的小怪一起轰 ✗
             // 火系形态走火系的判据（打所有生物 ✓）；光系原有行为不变 ✓

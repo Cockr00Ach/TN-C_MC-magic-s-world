@@ -176,6 +176,11 @@ public final class PortalArchitectureGameTests {
             level.setBlock(origin.offset(x,0,z),Blocks.GRASS_BLOCK.defaultBlockState(),18);
         level.setBlock(origin.offset(7,1,8),Blocks.DANDELION.defaultBlockState(),18);
         level.setBlock(origin.offset(8,1,7),Blocks.AZURE_BLUET.defaultBlockState(),18);
+        // A clay bank under the disk's corner and rim must count as natural ground: the
+        // 2026-10-31 world sat in ERROR forever because of one clay block at 582,180,45.
+        level.setBlock(origin,Blocks.CLAY.defaultBlockState(),18);
+        level.setBlock(origin.offset(-1,0,7),Blocks.CLAY.defaultBlockState(),18);
+        level.setBlock(origin.offset(14,1,14),Blocks.CLAY.defaultBlockState(),18);
         var plan = PortalArchitecture.prepare(level,GATE,origin,false);
         plan.apply(level);
         if (level.getBlockState(origin.offset(7,1,8)).is(Blocks.DANDELION)

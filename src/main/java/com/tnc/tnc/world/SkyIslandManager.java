@@ -65,6 +65,15 @@ public final class SkyIslandManager {
     private static final net.minecraft.server.level.TicketType<ChunkPos> BUILD_TICKET =
             net.minecraft.server.level.TicketType.create("tnc_sky_build", java.util.Comparator.comparingLong(ChunkPos::toLong));
     private static final Map<MinecraftServer, PortalSurvey> PORTAL_SURVEYS = new WeakHashMap<>();
+    static List<BlockPos> portalSearchOffsets() {
+        List<BlockPos> out=new ArrayList<>();
+        for(int[] offset:PORTAL_OFFSETS)out.add(new BlockPos(offset[0],0,offset[1]));
+        for(int radius:new int[]{256,384,640,1024,1536})for(int i=0;i<8;i++) {
+            double a=i*Math.PI/4;
+            out.add(new BlockPos((int)Math.round(Math.cos(a)*radius),0,(int)Math.round(Math.sin(a)*radius)));
+        }
+        return out;
+    }
     private static final class PortalSurvey {
         int candidate, bestScore = Integer.MAX_VALUE;
         BlockPos best;
@@ -306,15 +315,19 @@ public final class SkyIslandManager {
     }
 
     /** Selects a dry site for the expanded ritual gate without changing the legacy landing offset. */
-    private static BlockPos chooseGroundPortal(ServerLevel level, SkyIslandManifest manifest) {
+    static BlockPos chooseGroundPortal(ServerLevel level, SkyIslandManifest manifest) {
         BlockPos spawn = level.getSharedSpawnPos();
         PortalSurvey survey = PORTAL_SURVEYS.computeIfAbsent(level.getServer(), ignored -> new PortalSurvey());
         SkyIslandSavedData data = SkyIslandSavedData.get(level);
 
-        if (survey.candidate < PORTAL_OFFSETS.length) {
-            int[] offset = PORTAL_OFFSETS[survey.candidate];
-            int centerX = spawn.getX() + offset[0];
-            int centerZ = spawn.getZ() + offset[1];
+        var offsets=portalSearchOffsets();
+        if (survey.candidate >= PORTAL_OFFSETS.length && survey.best != null) {
+            PORTAL_SURVEYS.remove(level.getServer()); return survey.best;
+        }
+        if (survey.candidate < offsets.size()) {
+            BlockPos offset = offsets.get(survey.candidate);
+            int centerX = spawn.getX() + offset.getX();
+            int centerZ = spawn.getZ() + offset.getZ();
             forceAreaChunks(level, data, new BlockPos(centerX-18, 0, centerZ-18), 37, 1, 37);
             if (!activeChunksReady(level, data)) return null;
             int minY = Integer.MAX_VALUE;

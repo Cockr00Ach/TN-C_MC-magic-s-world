@@ -401,6 +401,12 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
             }
         }
         level.sendParticles(ParticleTypes.FLASH, this.getX(), cy, this.getZ(), 3, 0.2D, 0.3D, 0.2D, 0.0D);
+        // ★ "万雷归体"那一下要有声 ✓（作者 2026-10-21 要雷声）：一圈干雷 ＋ 一声滚雷，
+        //   和变身时那声生成咆哮叠在一起 ⇒ "他被雷灌满了" ✓
+        level.playSound(null, this.getX(), cy, this.getZ(),
+                SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.HOSTILE, 1.8F, 0.9F);
+        level.playSound(null, this.getX(), cy, this.getZ(),
+                SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.HOSTILE, 2.4F, 0.65F);
     }
 
     @Override
@@ -483,11 +489,36 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
         //   听起来像"蓄能"而不是"吐口水" ✓；技能本身的落雷声照旧在各自方法里播 ✓
         level.playSound(null, this.getX(), this.getY() + 1.0D, this.getZ(),
                 SoundEvents.WITHER_SHOOT, SoundSource.HOSTILE, 1.6F, 0.6F);
+        // ★ 2026-10-21 作者："为衍的法术增加音效，增加雷声" ——
+        //   四个技能原来**共用**这一声蓄能 ✗ ⇒ 现在每个技能再补一声"报点"：
+        //   不用看画面，光听就知道他要放哪一招 ✓（各自的落雷声/滚雷见各方法 ✓）。
         switch (this.random.nextInt(4)) {
-            case 0 -> this.castStorm(level, target);
-            case 1 -> this.castHeavenlyThunder(level, target);
-            case 2 -> this.castGodDescent(level, target);
-            default -> this.castBlink(level, target);
+            case 0 -> {
+                // 雷暴：云里先"啪"一声 ⇒ 五道雷随后落下（落地各自带滚雷 ✓）
+                level.playSound(null, this.getX(), this.getY() + 1.0D, this.getZ(),
+                        SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.HOSTILE, 1.2F, 1.4F);
+                this.castStorm(level, target);
+            }
+            case 1 -> {
+                // 天打五雷轰：魔法阵亮起 ＋ 一道干雷 ⇒ 12 道齐落
+                level.playSound(null, this.getX(), this.getY() + 1.0D, this.getZ(),
+                        SoundEvents.BEACON_ACTIVATE, SoundSource.HOSTILE, 1.4F, 0.7F);
+                level.playSound(null, target.getX(), target.getY(), target.getZ(),
+                        SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.HOSTILE, 1.3F, 1.15F);
+                this.castHeavenlyThunder(level, target);
+            }
+            case 2 -> {
+                // 神在投篮：三尊神就位那一下（低频 conduit ✓），大雷球自己带着下落轰鸣 ✓
+                level.playSound(null, this.getX(), this.getY() + 1.0D, this.getZ(),
+                        SoundEvents.CONDUIT_ACTIVATE, SoundSource.HOSTILE, 1.6F, 0.6F);
+                this.castGodDescent(level, target);
+            }
+            default -> {
+                // 闪电移位：**走**和**到**各一声（原来只有到的那一声 ✗ ⇒ 像凭空冒出来）
+                level.playSound(null, this.getX(), this.getY() + 1.0D, this.getZ(),
+                        SoundEvents.ENDERMAN_TELEPORT, SoundSource.HOSTILE, 1.0F, 1.5F);
+                this.castBlink(level, target);
+            }
         }
     }
 
@@ -519,8 +550,10 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
             this.bolt(level, target.position().add(dx, 0.0D, dz), 4.5D, 3.0D,
                     STORM_DAMAGE, STORM_RADIUS);
         }
+        // 施法者脚下这一声 = "云压过来了" ✓；五道雷各自的落地滚雷在
+        // TNLightningStrikeEntity.playRollingThunder 里放 ✓（同一维度 10 tick 内只响一声 ✓）
         level.playSound(null, this.getX(), this.getY(), this.getZ(),
-                SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.HOSTILE, 1.5F, 1.0F);
+                SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.HOSTILE, 1.7F, 0.95F);
     }
 
     /**

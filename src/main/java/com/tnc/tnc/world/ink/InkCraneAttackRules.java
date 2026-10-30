@@ -7,10 +7,10 @@ public final class InkCraneAttackRules {
     public static final int ROAR_TICKS = 42, AVATAR_FORM_TICKS = 12;
     public static final int SWEEP_HIT_START = 82, SWEEP_HIT_END = 96;
     public static final int SWEEP_INTERVAL = 26, SWEEP_COUNT = 3;
-    public static final float BODY_SCALE = .84F, PHANTOM_MULTIPLIER = 2F, BALL_SCALE = 3F;
+    public static final float BODY_SCALE = 1.26F, PHANTOM_MULTIPLIER = 2F, BALL_SCALE = 3F;
     public static final int RISE_TICKS = 30, SKY_RELEASE = 50, DIVE_TICKS = 32;
     public static final int BALL_EXPLODE = 100, RITUAL_LIFE = 220;
-    public static final double SWEEP_REACH = 14.0, BLAST_RADIUS = 9.0;
+    public static final double SWEEP_REACH = 28.0, BLAST_RADIUS = 9.0;
     public static final int PAINTING_FACES = 12;
     public static final double PAINTING_RADIUS = 84, PAINTING_WIDTH = 34, PAINTING_HEIGHT = 24;
     public static final double EXPLOSION_VISUAL_SCALE = 1.6, PULL_RADIUS = 24, PULL_SPEED_CAP = .45;

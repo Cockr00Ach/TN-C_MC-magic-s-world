@@ -33,6 +33,14 @@ build
 .gradle-home
 .gradle-user/
 __pycache__/
+
+# Locally supplied Yan battle track, imported with tools/prepare_yan_boss_music.py.
+/src/main/resources/assets/tnc/sounds/music/boss/yan_crywolf.ogg
+/src/main/resources/assets/tnc/sounds/music/boss/earth_dawn.ogg
+/src/main/resources/assets/tnc/sounds/music/boss/wind_phoenix.ogg
+
+# Author-provided boss songs: local playback assets, not automatically published.
+src/main/resources/assets/tnc/sounds/music/ink/
 *.pyc
 
 # ---------- 运行环境（dev 服务器、世界存档、日志）----------

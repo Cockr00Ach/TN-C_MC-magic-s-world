@@ -29,7 +29,7 @@ public final class InkWingedTigerEntity extends Monster implements GeoEntity {
     private final ServerBossEvent bar=new ServerBossEvent(Component.translatable("entity.tnc.ink_winged_tiger"),BossEvent.BossBarColor.WHITE,BossEvent.BossBarOverlay.NOTCHED_10);
     private LivingEntity victim;
     private Vec3 home,landing;
-    private int age,cooldown=80,nextMove=1,blinkCooldown=150;
+    private int age,cooldown=80,nextMove=1,blinkCooldown=150,executionCooldown;
     private boolean oldGravity,landed;
     public InkWingedTigerEntity(EntityType<? extends InkWingedTigerEntity> type,Level level){super(type,level);xpReward=950;setPersistenceRequired();}
     public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes()
@@ -41,16 +41,15 @@ public final class InkWingedTigerEntity extends Monster implements GeoEntity {
     public int moveAge(){return (int)Math.max(0,level().getGameTime()-entityData.get(START));}
     @Override protected void registerGoals(){
         goalSelector.addGoal(0,new FloatGoal(this));
-        goalSelector.addGoal(2,new MeleeAttackGoal(this,1.1,true){
-            @Override public boolean canUse(){return inkMove()==0&&super.canUse();}
-            @Override public boolean canContinueToUse(){return inkMove()==0&&super.canContinueToUse();}});
+        goalSelector.addGoal(2,new InkOrbitGoal(this,()->inkMove()==0));
         goalSelector.addGoal(7,new RandomStrollGoal(this,.75){@Override public boolean canUse(){return inkMove()==0&&super.canUse();}});
         goalSelector.addGoal(8,new LookAtPlayerGoal(this,Player.class,32));
         goalSelector.addGoal(9,new RandomLookAroundGoal(this));
         targetSelector.addGoal(1,new HurtByTargetGoal(this));targetSelector.addGoal(2,new NearestAttackableTargetGoal<>(this,Player.class,true));
     }
     public boolean startInkAttack(int move,LivingEntity target){
-        if(level().isClientSide || inkMove()!=0 || !isAlive() || move<1||move>3||target==null||!target.isAlive()||target.level()!=level())return false;
+        if(level().isClientSide || InkEncounter.introducing(this) || inkMove()!=0 || !isAlive() || move<1||move>4||target==null||!target.isAlive()||target.level()!=level())return false;
+        if(move==4&&(!canExecute(target)||!InkRestraints.hold(this,target,mouthPosition(false),3)))return false;
         victim=target;home=position();landing=home;oldGravity=isNoGravity();landed=false;age=0;
         entityData.set(MOVE,move);entityData.set(START,level().getGameTime());getNavigation().stop();
         if(move==1){
@@ -59,16 +58,26 @@ public final class InkWingedTigerEntity extends Monster implements GeoEntity {
             while(rise>0&&!level().noCollision(this,getBoundingBox().expandTowards(0,rise,0)))rise--;
             landing=home.add(0,rise,0);setNoGravity(true);
         }
-        if(move==2)InkTigerEffectEntity.spawn(this,target,InkTigerEffectEntity.GHOST,home);
-        triggerAnim("action",move==1?"sky_spit":move==2?"phantom_cast":"ink_roar");
-        playSound(move==3?SoundEvents.RAVAGER_ROAR:SoundEvents.ENDER_DRAGON_FLAP,2,.65F);
+        if(move==2){
+            InkTigerEffectEntity.phantom(this,target,home,22,true);
+            double base=Math.atan2(getZ()-target.getZ(),getX()-target.getX());
+            for(int i=0;i<3;i++){double a=base+(i+1)*Math.PI/2;
+                InkTigerEffectEntity.phantom(this,target,target.position().add(Math.cos(a)*58,2,Math.sin(a)*58),38+i*16,false);
+            }
+        }
+        if(move==4){executionCooldown=280;if(target instanceof ServerPlayer player)InkEncounterNetwork.send(player,this,4);}
+        triggerAnim("action",move==1?"sky_spit":move==2?"phantom_cast":move==4?"execution":"ink_roar");
+        InkBossAudio.cast(this,2);
+        if(move!=3)playSound(SoundEvents.ENDER_DRAGON_FLAP,2,.65F);
         return true;
     }
-    @Override public void aiStep(){super.aiStep();
+    @Override public void aiStep(){if(!level().isClientSide&&InkEncounter.introducing(this)){setDeltaMovement(Vec3.ZERO);return;}super.aiStep();
         if(level().isClientSide){if(tickCount%3==0)level().addParticle(net.minecraft.core.particles.ParticleTypes.ASH,getRandomX(.8),getY()+2,getRandomZ(.8),0,.025,0);return;}
         bar.setProgress(getHealth()/getMaxHealth());
+        if(executionCooldown>0)executionCooldown--;
         if(blinkCooldown>0)blinkCooldown--;
         if(inkMove()==0){
+            if(getTarget()!=null&&executionCooldown==0&&canExecute(getTarget())&&startInkAttack(4,getTarget()))return;
             if(blinkCooldown==0&&getTarget()!=null&&distanceToSqr(getTarget())<48*48)tryCombatBlink(getTarget());
             if(cooldown>0)cooldown--;else if(getTarget()!=null&&distanceToSqr(getTarget())<48*48&&hasLineOfSight(getTarget())
                 &&startInkAttack(nextMove,getTarget()))nextMove=nextMove%3+1;return;}
@@ -96,12 +105,19 @@ public final class InkWingedTigerEntity extends Monster implements GeoEntity {
                 if(InkTigerAttackRules.slashAt(age))strike(position(),14,16,false,true);
             }
         }
+        if(inkMove()==4){
+            Vec3 mouth=mouthPosition(false).add(0,1.3,0);
+            if(!InkRestraints.hold(this,victim,mouth,3)){cancelMove();return;}
+            if(age==22||age==36||age==50){victim.hurt(damageSources().mobAttack(this),7);playSound(SoundEvents.GENERIC_EAT,1.6F,.6F);}
+        }
         if(++age>=InkTigerAttackRules.duration(inkMove()))cancelMove();
     }
     public Vec3 mouthPosition(boolean raised){
         return position().add(Vec3.directionFromRotation(0,getYRot()).scale((raised?2.3:4.15)*InkTigerAttackRules.BODY_MULTIPLIER))
-                .add(0,(raised?5.3:2.6)*InkTigerAttackRules.BODY_MULTIPLIER,0);
+                .add(0,(raised?3.4:2.6)*InkTigerAttackRules.BODY_MULTIPLIER+(raised?InkTigerAttackRules.roarBallRadius(moveAge())+2:0),0);
     }
+    public boolean canExecute(LivingEntity target){return target instanceof Player p&&!p.isCreative()&&!p.isSpectator()&&p.isAlive()
+            &&p.getHealth()<=p.getMaxHealth()*.5&&distanceToSqr(p)<28*28&&hasLineOfSight(p);}
     private void tryCombatBlink(LivingEntity target){
         for(int i=0;i<12;i++){
             double a=random.nextDouble()*Math.PI*2;Vec3 p=target.position().add(Math.cos(a)*8,3,Math.sin(a)*8);
@@ -135,6 +151,8 @@ public final class InkWingedTigerEntity extends Monster implements GeoEntity {
         }
     }
     private void cancelMove(){
+        InkRestraints.release(this);
+        if(inkMove()==4&&victim instanceof ServerPlayer player)InkEncounterNetwork.send(player,this,0);
         if(inkMove()==1){if(home!=null)setPos(home);setNoGravity(oldGravity);fallDistance=0;}
         entityData.set(MOVE,0);victim=null;home=null;landing=null;cooldown=85;setDeltaMovement(Vec3.ZERO);
     }
@@ -148,14 +166,14 @@ public final class InkWingedTigerEntity extends Monster implements GeoEntity {
     @Override public boolean removeWhenFarAway(double d){return false;}
     @Override public void startSeenByPlayer(ServerPlayer p){super.startSeenByPlayer(p);bar.addPlayer(p);}
     @Override public void stopSeenByPlayer(ServerPlayer p){super.stopSeenByPlayer(p);bar.removePlayer(p);}
-    @Override public void remove(RemovalReason r){bar.removeAllPlayers();super.remove(r);}
+    @Override public void remove(RemovalReason r){InkRestraints.release(this);bar.removeAllPlayers();super.remove(r);}
     @Override public void die(DamageSource source){cancelMove();bar.removeAllPlayers();super.die(source);}
     @Override public AABB getBoundingBoxForCulling(){return super.getBoundingBoxForCulling().inflate(24);}
     @Override public void registerControllers(AnimatableManager.ControllerRegistrar registrar){
         registrar.add(new AnimationController<>(this,"locomotion",6,state->inkMove()!=0?PlayState.STOP:
                 state.setAndContinue(RawAnimation.begin().thenLoop(state.isMoving()?"walk":"idle"))));
         var action=new AnimationController<InkWingedTigerEntity>(this,"action",3,state->PlayState.STOP);
-        for(String name:new String[]{"claw","pounce","roar","sky_spit","phantom_cast","ink_roar"})action.triggerableAnim(name,RawAnimation.begin().thenPlay(name));registrar.add(action);
+        for(String name:new String[]{"claw","pounce","roar","sky_spit","phantom_cast","ink_roar","execution"})action.triggerableAnim(name,RawAnimation.begin().thenPlay(name));registrar.add(action);
     }
     @Override public AnimatableInstanceCache getAnimatableInstanceCache(){return cache;}
 }

@@ -1,4 +1,4 @@
-﻿# TN-C mod jar verifier
+# TN-C mod jar verifier
 #
 #   Checks the built mod jar BEFORE the game is started, so that a
 #   "compiles fine but silently does nothing" mistake cannot slip through.
@@ -158,7 +158,27 @@ try {
         'com/tnc/tnc/casino/client/TNSlotMachineRenderer.class',
         'com/tnc/tnc/casino/client/TNRouletteRenderer.class',
         'com/tnc/tnc/casino/client/TNGambleTableRenderer.class',
-        'com/tnc/tnc/casino/client/TNCasinoGeometry.class'
+        'com/tnc/tnc/casino/client/TNCasinoGeometry.class',
+        # player casting animations (2026-10-30): /tnc anim + the wand-Self demo actor.
+        # Missing classes here are silent: a missing command class means the command
+        # simply does not exist, a missing support class means NoClassDefFoundError
+        # the first time it is used.
+        'com/tnc/tnc/magic/PlayerCastAnimations.class',
+        'com/tnc/tnc/npc/CastPreviewCommand.class',
+        'com/tnc/tnc/npc/compat/SelfCastActorSupport.class',
+        'com/tnc/tnc/npc/compat/SelfCastActorSupport$Geo.class',
+        # warrior sky-island arena (2026-10-30): the terminal block, the arena builder
+        # and the GeckoLib instructor. A missing entity class or renderer is silent in
+        # game (no instructor ever appears / appears as nothing), so all of them are
+        # pinned here.
+        'com/tnc/tnc/warrior/PracticeArena.class',
+        'com/tnc/tnc/warrior/PracticeTerminalBlock.class',
+        'com/tnc/tnc/warrior/InstructorEntity.class',
+        'com/tnc/tnc/warrior/WarriorEntities.class',
+        'com/tnc/tnc/warrior/client/InstructorGeoModel.class',
+        'com/tnc/tnc/warrior/client/InstructorHeldItemLayer.class',
+        'com/tnc/tnc/warrior/client/InstructorRenderer.class',
+        'com/tnc/tnc/warrior/client/WarriorClientEvents.class'
     )
     function Get-ClassText([string]$entryName) {
         $entry = $zip.Entries | Where-Object { $_.FullName -eq $entryName }
@@ -1302,7 +1322,10 @@ try {
                          # renderers are never registered (machine exists but is
                          # completely invisible, still with no error in the log).
                          'com/tnc/tnc/casino/machine/TNCasinoRegistry.class',
-                         'com/tnc/tnc/casino/client/TNCasinoClient.class')) {
+                         'com/tnc/tnc/casino/client/TNCasinoClient.class',
+                         # /tnc anim (2026-10-30): without the annotation the command
+                         # registers nothing and the demo actor can never be spawned.
+                         'com/tnc/tnc/npc/CastPreviewCommand.class')) {
         $text = Get-ClassText $class
         if ($null -eq $text) { continue }
         if ($text.Contains($annotation)) { Ok "has @Mod.EventBusSubscriber: $class" }

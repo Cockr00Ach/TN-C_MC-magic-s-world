@@ -1,0 +1,9 @@
+{
+  "required": true,
+  "minVersion": "0.8.5",
+  "package": "com.tnc.tnc.world.ink.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": ["InkLivingTimeMixin", "InkSpellTimeMixin"],
+  "client": ["InkFrameMixin", "InkHandTimeMixin", "InkSkyHeightMixin"],
+  "injectors": {"defaultRequire": 1}
+}

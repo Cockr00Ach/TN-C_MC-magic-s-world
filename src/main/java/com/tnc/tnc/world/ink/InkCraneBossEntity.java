@@ -95,6 +95,7 @@ public final class InkCraneBossEntity extends Monster implements GeoEntity {
 
     @Override
     public void aiStep() {
+        if(!level().isClientSide&&InkEncounter.introducing(this)){setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);return;}
         super.aiStep();
         if (level().isClientSide) {
             emitInkLight();
@@ -143,7 +144,7 @@ public final class InkCraneBossEntity extends Monster implements GeoEntity {
     @Override public boolean removeWhenFarAway(double distance) { return false; }
     @Override public void startSeenByPlayer(ServerPlayer player) { super.startSeenByPlayer(player); bossBar.addPlayer(player); }
     @Override public void stopSeenByPlayer(ServerPlayer player) { super.stopSeenByPlayer(player); bossBar.removePlayer(player); }
-    @Override public void remove(RemovalReason reason) { bossBar.removeAllPlayers(); super.remove(reason); }
+    @Override public void remove(RemovalReason reason) { InkRestraints.release(this); bossBar.removeAllPlayers(); super.remove(reason); }
     @Override public void die(DamageSource source) { attacks.cancel(); bossBar.removeAllPlayers(); super.die(source); }
 
     @Override public void addAdditionalSaveData(CompoundTag tag) {

@@ -1,0 +1,27 @@
+{
+  "width": 1024,
+  "height": 2048,
+  "frameHeight": 128,
+  "openingY": [
+    45,
+    83
+  ],
+  "frameCaps": 128,
+  "fieldsY": 1536,
+  "fieldHeight": 32,
+  "glintY": 1920,
+  "themes": [
+    "apollo",
+    "dark_giant",
+    "stone_lancer",
+    "water_leviathan",
+    "yan_dark",
+    "wind_general",
+    "wind_warden",
+    "canglan_warlord",
+    "ink_abyss_drake",
+    "ink_crane_boss",
+    "ink_winged_tiger",
+    "ink_celestial_dragon"
+  ]
+}

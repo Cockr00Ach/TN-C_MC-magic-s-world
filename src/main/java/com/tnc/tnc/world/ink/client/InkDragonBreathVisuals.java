@@ -80,19 +80,11 @@ final class InkDragonBreathVisuals {
     }
     /** Radial watercolor wash + rising, overturning ink sheets; all motion is age driven. */
     static void impact(double age,PoseStack pose,MultiBufferSource buffers){
-        var wash=buffers.getBuffer(RenderType.entityTranslucentEmissive(WHITE));
-        // Uneven translucent wash spreads across the hit surface, not a geometric magic circle.
-        for(int ring=0;ring<12;ring++)for(int j=0;j<96;j++){
-            double a=j*Math.PI/48,b=(j+1)*Math.PI/48;
-            double r=ring*.72,s=(ring+1)*.72;
-            float gray=ring<4?.008F:.06F;
-            float alpha=(float)(.64*Math.pow(1-ring/12.0,1.6));
-            InkCraneRitualVisuals.quad(wash,pose.last(),wash(a,r,age),wash(b,r,age),wash(b,s,age),wash(a,s,age),gray,alpha);
-        }
+        InkWashVisuals.wash(pose,buffers,age,.8F,8.5);
         var brush=buffers.getBuffer(RenderType.entityTranslucent(BRUSH));
         // Pressure-driven fans rise at the impact point, curl, then flatten outward.
-        for(int plume=0;plume<52;plume++)for(int i=0;i<26;i++){
-            double t=i/26.0,u=(i+1)/26.0,a=plume*2.399963;
+        for(int plume=0;plume<24;plume++)for(int i=0;i<16;i++){
+            double t=i/16.0,u=(i+1)/16.0,a=plume*2.399963;
             double w=(.10+.32*Math.sin(t*Math.PI))*(1+(plume%4)*.23);
             Vec3 p=plume(a,t,age,plume),q=plume(a,u,age,plume);
             Vec3 side=new Vec3(-Math.sin(a),0,Math.cos(a)).scale(w);
@@ -101,7 +93,7 @@ final class InkDragonBreathVisuals {
             InkCraneRitualVisuals.quad(brush,pose.last(),p.add(side),q.add(side),q.subtract(side),p.subtract(side),gray,alpha);
         }
         // Rolling low ink mist separates into long ragged tongues instead of a solid black disc.
-        for(int k=0;k<30;k++)for(int i=0;i<20;i++){
+        for(int k=0;k<16;k++)for(int i=0;i<20;i++){
             double t=i/20.0,u=(i+1)/20.0,a=k*2.399963;
             double wave=(age*.035+k*.173)%1;
             double r=1.2+t*(6+wave*3),s=1.2+u*(6+wave*3);
@@ -110,10 +102,10 @@ final class InkDragonBreathVisuals {
             InkCraneRitualVisuals.quad(brush,pose.last(),radial(a-w,r,h),radial(a-w,s,h),radial(a+w,s,h+.12),radial(a+w,r,h+.12),
                     k%4==0?.22F:.018F,(float)(.55*(1-t)));
         }
-        for(int i=0;i<110;i++){
+        for(int i=0;i<24;i++){
             double t=(age*.023+i*.61803398875)%1,a=i*2.399963,r=1+t*(5+i%6);
             Vec3 p=radial(a,r,.18+Math.sin(t*Math.PI)*(1+i%4));
-            InkCraneRitualVisuals.stroke(brush,pose.last(),p,p.add(Math.cos(a)*.55,-.15,Math.sin(a)*.55),.025+(i%3)*.025,.012F,(float)(.8*(1-t)));
+            InkWashVisuals.fleck(pose,buffers,p,.08+(i%3)*.035,i,age,i%6==0?.8F:.012F,(float)(.8*Math.sin(t*Math.PI)));
         }
     }
     private static Vec3 radial(double a,double r,double y){return new Vec3(Math.cos(a)*r,y,Math.sin(a)*r);}

@@ -49,6 +49,7 @@ public final class InkCraneVisualAudit {
             }
         }
         if(mc.level==null||mc.player==null||mc.getOverlay()!=null)return;
+        if(Boolean.getBoolean("tnc.inkEncounterAudit")){InkEncounterAudit.tick(mc);return;}
         if(Boolean.getBoolean("tnc.inkDragonVisibilityAudit")){InkDragonVisibilityAudit.tick(mc);return;}
         if(Boolean.getBoolean("tnc.inkDragonFlightAudit")){InkDragonFlightAudit.tick(mc);return;}
         if(Boolean.getBoolean("tnc.inkDragonCombatAudit")){InkDragonCombatAudit.tick(mc);return;}

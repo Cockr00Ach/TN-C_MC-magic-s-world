@@ -37,6 +37,11 @@ MODID = "tnc"
 # ZhuangquerangMaidNpcEntity). Renaming any of these breaks the animations.
 REQUIRED_BONES = {
     "self": ["head", "body", "armRight", "armLeft", "legRight", "legLeft"],
+    # self_wand = the same player rig holding the shipped staff (tools/gen_player_wand.py):
+    # the seven humanoid bones must survive so self's animations keep working, plus the
+    # two prop bones the staff is animated through.
+    "self_wand": ["head", "body", "armRight", "armLeft", "legRight", "legLeft",
+                  "wand", "wandJewel"],
     "zhuangquerang": [],
 }
 
@@ -45,12 +50,20 @@ REQUIRED_BONES = {
 # is called zhuangquerang.png, so "<npc>_bedrock.png" would be a false alarm.
 BEDROCK_SKIN = {
     "self": "self_bedrock.png",
+    "self_wand": "self_wand_bedrock.png",
     "cava": "cava_bedrock.png",
     "huai": "huai_bedrock.png",
     "zhuangquerang": "zhuangquerang.png",
 }
 
 DEFAULT_NPCS = ["self", "zhuangquerang"]
+
+# Most models keep their clips in "<npc>.animation.json". self_wand's casting clips were
+# authored as "player_magic-animation.json" (the author's own file name, 2026-10-30), so map
+# that one explicitly here instead of renaming the author's file.
+ANIMATION_FILE = {
+    "self_wand": "player_magic-animation.json",
+}
 
 POW2 = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096]
 
@@ -119,7 +132,8 @@ def check_texture(repo, npc, geo_names, problems, notes):
 
 def check_animations(repo, npc, geo_names, problems, notes):
     path = os.path.join(repo, "src", "main", "resources", "assets", MODID,
-                        "animations", "entity", npc + ".animation.json")
+                        "animations", "entity",
+                        ANIMATION_FILE.get(npc, npc + ".animation.json"))
     if not os.path.isfile(path):
         notes.append("%s: (no animation file yet)" % npc)
         return

@@ -95,14 +95,14 @@ public class TNLightBeamRenderer extends EntityRenderer<TNLightBeamEntity> {
 
         // ① 外层彩色壳（沿轴线彩虹 ✓）
         float shell = (float) (radius * grow);
-        tube(vc, m, shell, (float) length, false, age, descent, fire);
+        tube(vc, m, shell, (float) length, false, age, descent, fire, beam.beamColor());
         // ② 内层芯（粗光才画 ✓；天降那档芯更粗 ✓）
         //    火系：芯更粗（0.42）+ 更高热 —— 作者要"射线要凝实，能看出是一条射线" ✓
         float coreFraction = fire ? 0.42F : (descent ? 0.45F : 0.30F);
-        tube(vc, m, shell * coreFraction, (float) length, true, age, descent, fire);
+        tube(vc, m, shell * coreFraction, (float) length, true, age, descent, fire, beam.beamColor());
         // ③ 两端的亮圈
-        cap(vc, m, shell, 0.0F, age, fire);
-        cap(vc, m, shell * 1.15F, (float) length, age, fire);
+        cap(vc, m, shell, 0.0F, age, fire, beam.beamColor());
+        cap(vc, m, shell * 1.15F, (float) length, age, fire, beam.beamColor());
         pose.popPose();
     }
 
@@ -129,7 +129,7 @@ public class TNLightBeamRenderer extends EntityRenderer<TNLightBeamEntity> {
      * @param white true = 画白芯（不彩虹 ✓）
      */
     private static void tube(VertexConsumer vc, Matrix4f m, float radius, float length,
-                             boolean white, float age, boolean descent, boolean fire) {
+                             boolean white, float age, boolean descent, boolean fire, int beamColor) {
         for (int i = 0; i < SIDES; i++) {
             double a0 = Math.PI * 2.0D * i / SIDES;
             double a1 = Math.PI * 2.0D * (i + 1) / SIDES;
@@ -140,9 +140,9 @@ public class TNLightBeamRenderer extends EntityRenderer<TNLightBeamEntity> {
             // 颜色：沿轴线走一整圈彩虹 ✓（白芯就纯白 ✓）
             // 火系的芯是**高热黄白**（不是纯白 ✗）；壳是橙红火焰渐变 ✓
             int[] c0 = white ? (fire ? new int[]{255, 241, 186} : new int[]{255, 255, 255})
-                    : rainbow(0.0F + age * 0.02F, descent, fire);
+                    : fire ? rainbow(age * 0.02F, descent, true) : rgb(beamColor);
             int[] c1 = white ? (fire ? new int[]{255, 250, 225} : new int[]{255, 255, 255})
-                    : rainbow(1.0F + age * 0.02F, descent, fire);
+                    : fire ? rainbow(1.0F + age * 0.02F, descent, true) : rgb(beamColor);
             // 火系不透明度更高 ⇒ 看着"凝实"（作者明确要求 ✓）
             int alpha = white ? (fire ? 245 : 235) : (fire ? 230 : 205);
             quad(vc, m, x0, y0, 0.0F, x1, y1, 0.0F, x1, y1, length, x0, y0, length, c0, c1, alpha, true);
@@ -151,8 +151,9 @@ public class TNLightBeamRenderer extends EntityRenderer<TNLightBeamEntity> {
     }
 
     /** 两端的一个"亮圈"（把管口堵上，看着像发光的口 ✓）。 */
-    private static void cap(VertexConsumer vc, Matrix4f m, float radius, float z, float age, boolean fire) {
-        int[] c = rainbow(0.5F + age * 0.02F, false, fire);
+    private static int[] rgb(int color) { return new int[]{(color >> 16) & 255, (color >> 8) & 255, color & 255}; }
+    private static void cap(VertexConsumer vc, Matrix4f m, float radius, float z, float age, boolean fire, int beamColor) {
+        int[] c = fire ? rainbow(0.5F + age * 0.02F, false, true) : rgb(beamColor);
         double step = Math.PI * 2.0D / SIDES;
         for (int i = 0; i < SIDES; i++) {
             float x0 = (float) Math.cos(step * i) * radius;

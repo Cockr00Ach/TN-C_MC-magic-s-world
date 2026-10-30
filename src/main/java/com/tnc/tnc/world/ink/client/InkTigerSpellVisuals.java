@@ -65,7 +65,7 @@ final class InkTigerSpellVisuals {
         if(e.mode()==InkTigerEffectEntity.BURST){burst(pose,buffers,age,18);return;}
         if(e.mode()==InkTigerEffectEntity.GHOST){
             InkCraneRitualVisuals.brushTrail(e.trail(),e.position(),age,4.5*InkTigerAttackRules.BODY_MULTIPLIER,pose,buffers);
-            if(age<22)window(pose,buffers,8*InkTigerAttackRules.BODY_MULTIPLIER,age,(float)Math.min(1,age/8));return;
+            if(age<e.releaseAt())window(pose,buffers,8*InkTigerAttackRules.BODY_MULTIPLIER,age,(float)Math.min(1,age/8));return;
         }
         if(e.mode()==InkTigerEffectEntity.SHOT){
             gather(pose,buffers,age,Vec3.ZERO,1.4,3);
@@ -82,44 +82,15 @@ final class InkTigerSpellVisuals {
         }
     }
     static void gather(PoseStack pose,MultiBufferSource buffers,double age,Vec3 center,double radius,double reach){
-        var ink=buffers.getBuffer(RenderType.entityTranslucent(BRUSH));
-        for(int i=0;i<28;i++){
-            List<Vec3> path=new ArrayList<>();double phase=(age*.024+i*.173)%1;
-            for(int j=0;j<13;j++){
-                double t=Math.min(1,phase+j*.022),r=(1-t)*reach,a=i*2.39996+t*1.7;
-                path.add(center.add(Math.cos(a)*r,Math.sin(i*1.4)*r*.4,Math.sin(a)*r));
-            }
-            for(int j=1;j<path.size();j++)InkCraneRitualVisuals.stroke(ink,pose.last(),path.get(j-1),path.get(j),.06+(i%4)*.045,.01F,.55F);
-        }
-        if(radius>.06){pose.pushPose();pose.translate(center.x,center.y,center.z);
-            InkCraneRitualVisuals.sphere(buffers.getBuffer(RenderType.entityTranslucent(WHITE)),pose.last(),radius,0,age,1);pose.popPose();}
+        InkWashVisuals.gather(pose,buffers,age,center,radius,reach);
+        if(radius>.06){pose.pushPose();try{pose.translate(center.x,center.y,center.z);
+            InkCraneRitualVisuals.sphere(buffers.getBuffer(RenderType.entityTranslucent(WHITE)),pose.last(),radius,0,age,1);
+        }finally{pose.popPose();}}
     }
     static void burst(PoseStack pose,MultiBufferSource buffers,double age,double radius){
-        float fade=(float)Math.max(0,1-age/36);
-        InkCraneRitualVisuals.bloom(buffers.getBuffer(RenderType.entityTranslucent(BRUSH)),pose.last(),age,radius,fade);
-        wash(pose,buffers,age,fade,radius*Math.min(1,age/12));
+        InkWashVisuals.burst(pose,buffers,age,radius);
     }
     static void wash(PoseStack pose,MultiBufferSource buffers,double age,float alpha,double radius){
-        var out=buffers.getBuffer(RenderType.entityTranslucent(WHITE));
-        double spread=Math.min(1,Math.max(.04,age/16));
-        for(int layer=0;layer<12;layer++){
-            Vec3 center=new Vec3(Math.sin(layer*.32)*radius*.16,.035+layer*.003,Math.cos(layer*.23)*radius*.12);
-            for(int i=0;i<64;i++){
-                double a=i*Math.PI/32,b=(i+1)*Math.PI/32;
-                double r=radius*spread*(1-layer*.052)*(1+.15*Math.sin(a*3+.5)+.08*Math.sin(a*7+1.7)+.025*Math.cos(a*13));
-                double s=radius*spread*(1-layer*.052)*(1+.15*Math.sin(b*3+.5)+.08*Math.sin(b*7+1.7)+.025*Math.cos(b*13));
-                InkCraneRitualVisuals.quad(out,pose.last(),center,center.add(Math.cos(a)*r,0,Math.sin(a)*r),
-                        center.add(Math.cos(b)*s,0,Math.sin(b)*s),center,.015F,alpha*(.035F+layer*.008F));
-            }
-        }
-        // Small rounded satellites and dilute halos make a bleeding wash rather than radial spokes.
-        for(int drop=0;drop<38;drop++){
-            double angle=drop*2.39996,d=radius*spread*(.5+(drop%7)*.105),r=radius*(.012+(drop%5)*.012);
-            Vec3 center=new Vec3(Math.cos(angle)*d,.076+drop*.0001,Math.sin(angle)*d);
-            for(int i=0;i<10;i++){
-                double a=i*Math.PI/5,b=(i+1)*Math.PI/5;
-                InkCraneRitualVisuals.quad(out,pose.last(),center,center.add(Math.cos(a)*r,0,Math.sin(a)*r),center.add(Math.cos(b)*r,0,Math.sin(b)*r),center,.012F,alpha*.25F);
-            }
-        }
+        InkWashVisuals.wash(pose,buffers,age,alpha,radius*Math.min(1,Math.max(0,age/16)));
     }
 }

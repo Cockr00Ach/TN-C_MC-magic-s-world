@@ -1,0 +1,13 @@
+{
+  "bones": 50,
+  "beforeCubes": 416,
+  "afterCubes": 494,
+  "addedReliefCubes": 78,
+  "atlasPixels": 1024,
+  "logicalUVSize": 256,
+  "animationSHA256Unchanged": "90dafa1c79b8796bc985d379e31790fbfe4b2461e5d43d5de0b999abe67944b8",
+  "atlasSHA256": "42969bcbf54ba1593c22cfe239b5997121d27104badba7234be9776faf2379bf",
+  "geoSHA256": "0ce7bd3db7f7257a88cf5b5403112ca442c2cb41fd75693ebf0e1d457fc25bb3",
+  "originalBoneAndCubeTransformsPreserved": true,
+  "imageWorkflow": "User-approved deterministic procedural atlas; image_gen attempt did not return"
+}

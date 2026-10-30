@@ -10,6 +10,23 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 @GameTestHolder("tnccanglan")
 @PrefixGameTestTemplate(false)
 public final class CanglanWarlordGameTests {
+    @GameTest(template="building_test_empty",templateNamespace="tnccanglancamera",timeoutTicks=40,batch="canglan_execution_camera")
+    public static void onlyLowHealthPlayerSweepClaimsCinematicSession(GameTestHelper helper) {
+        var boss=helper.spawn(CanglanWarlordRegistration.CANGLAN_WARLORD,new BlockPos(2,1,2));boss.setNoAi(true);boss.setNoGravity(true);
+        var player=net.minecraftforge.common.util.FakePlayerFactory.get(helper.getLevel(),new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(),"SweepCameraTest"));
+        player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);player.setInvulnerable(false);player.setPos(boss.position().add(6,0,0));
+        for(float health:new float[]{20,10,9}) {
+            player.setHealth(health);player.setAbsorptionAmount(0);boss.setTarget(player);
+            helper.assertTrue(boss.battle().begin(5,player),"Player sweep failed to start");
+            helper.assertTrue(boss.battle().hasCinematic()==(health<10),"Ordinary/half-health sweep opened camera, or true execution lost it: "+health);
+            boss.battle().cleanup();helper.assertTrue(!boss.battle().hasCinematic(),"Cancelled execution retained camera session");
+        }
+        player.setHealth(9);player.setAbsorptionAmount(2);boss.setTarget(player);boss.battle().begin(5,player);
+        helper.assertTrue(!boss.battle().hasCinematic(),"Golden hearts incorrectly allowed execution camera");boss.battle().cleanup();
+        player.setAbsorptionAmount(0);player.setGameMode(net.minecraft.world.level.GameType.CREATIVE);boss.setTarget(player);boss.battle().begin(5,player);
+        helper.assertTrue(!boss.battle().hasCinematic(),"Creative player received execution camera");boss.battle().cleanup();
+        helper.succeed();
+    }
     private static void clearArena(GameTestHelper h,BlockPos min,BlockPos max){
         for(var p:BlockPos.betweenClosed(h.absolutePos(min),h.absolutePos(max))){
             h.getLevel().getChunkAt(p);h.getLevel().setBlock(p,net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(),3);
@@ -133,12 +150,12 @@ public final class CanglanWarlordGameTests {
         var victim=helper.spawn(EntityType.IRON_GOLEM,new BlockPos(2,1,8));victim.setNoAi(true);victim.setNoGravity(true);victim.setHealth(40);boss.setTarget(victim);
         helper.assertTrue(boss.hasLineOfSight(victim),"Execution fixture must have clear line of sight");
         helper.assertTrue(boss.battle().begin(5,victim),"Execution sweep was not accepted");
-        for(int tick=0;tick<67;tick++)boss.battle().tick();
+        for(int tick=0;tick<CanglanExecutionPose.DURATION;tick++)boss.battle().tick();
         helper.assertTrue(!victim.isAlive(),"Low-health target survived execution impact");boss.battle().cleanup();
         var escaped=helper.spawn(EntityType.IRON_GOLEM,new BlockPos(2,1,8));escaped.setNoAi(true);escaped.setNoGravity(true);escaped.setHealth(40);boss.setTarget(escaped);
         helper.assertTrue(boss.battle().begin(5,escaped),"Second execution did not start");
-        for(int tick=0;tick<40;tick++)boss.battle().tick();escaped.setPos(boss.position().add(25,0,0));
-        for(int tick=40;tick<67;tick++)boss.battle().tick();
+        for(int tick=0;tick<18;tick++)boss.battle().tick();escaped.setPos(boss.position().add(25,0,0));
+        for(int tick=18;tick<CanglanExecutionPose.DURATION;tick++)boss.battle().tick();
         helper.assertTrue(escaped.isAlive(),"Execution hit a target that escaped melee reach");boss.battle().cleanup();helper.succeed();
     }
     @GameTest(template="building_test_empty", timeoutTicks=40, batch="canglan_execution_boundary")
@@ -150,23 +167,23 @@ public final class CanglanWarlordGameTests {
             if(health==40)victim.setAbsorptionAmount(20);
             helper.assertTrue(boss.hasLineOfSight(victim),"Boundary fixture must have clear line of sight");
             boss.setTarget(victim);helper.assertTrue(boss.battle().begin(5,victim),"Boundary sweep did not start");
-            for(int tick=0;tick<67;tick++)boss.battle().tick();
+            for(int tick=0;tick<CanglanExecutionPose.DURATION;tick++)boss.battle().tick();
             helper.assertTrue(victim.isAlive(),"Healthy, half-health or golden-heart target was executed: "+health);
             if(health==100)helper.assertTrue(victim.getHealth()<health,"Normal sweep must actually hit, not pass because terrain blocked it");
             boss.battle().cleanup();victim.discard();
         }
         var fragile=helper.spawn(EntityType.IRON_GOLEM,new BlockPos(2,1,8));fragile.setNoAi(true);fragile.setNoGravity(true);
         fragile.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(20);fragile.setHealth(20);boss.setTarget(fragile);
-        boss.battle().begin(5,fragile);for(int tick=0;tick<67;tick++)boss.battle().tick();
+        boss.battle().begin(5,fragile);for(int tick=0;tick<CanglanExecutionPose.DURATION;tick++)boss.battle().tick();
         helper.assertTrue(fragile.getHealth()>=11,"Normal sweep one-shot an unarmoured full-health 20 HP target");boss.battle().cleanup();fragile.discard();
         // A normal sweep cannot promote itself to execution when health falls during windup.
         var victim=helper.spawn(EntityType.IRON_GOLEM,new BlockPos(2,1,8));victim.setNoAi(true);victim.setNoGravity(true);boss.setTarget(victim);
         boss.battle().begin(5,victim);victim.setHealth(40);
-        for(int tick=0;tick<67;tick++)boss.battle().tick();
+        for(int tick=0;tick<CanglanExecutionPose.DURATION;tick++)boss.battle().tick();
         helper.assertTrue(victim.isAlive(),"Normal sweep promoted to execution during windup");boss.battle().cleanup();victim.discard();
         var healed=helper.spawn(EntityType.IRON_GOLEM,new BlockPos(2,1,8));healed.setNoAi(true);healed.setNoGravity(true);healed.setHealth(40);boss.setTarget(healed);
         boss.battle().begin(5,healed);healed.setHealth(80);
-        for(int tick=0;tick<67;tick++)boss.battle().tick();
+        for(int tick=0;tick<CanglanExecutionPose.DURATION;tick++)boss.battle().tick();
         helper.assertTrue(healed.isAlive(),"Healed target was still executed");boss.battle().cleanup();helper.succeed();
     }
     @GameTest(template="building_test_empty", timeoutTicks=40, batch="canglan_awareness")

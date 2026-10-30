@@ -43,7 +43,8 @@ class InkCraneAttackRulesTest {
         assertTrue(InkCraneAttackRules.inSweep(7, 3, 0, 1));
         assertFalse(InkCraneAttackRules.inSweep(0, -3, 0, 1));
         assertFalse(InkCraneAttackRules.inSweep(14, 0, 0, 1));
-        assertFalse(InkCraneAttackRules.inSweep(0, 14.1, 0, 1));
+        assertTrue(InkCraneAttackRules.inSweep(0, 27.9, 0, 1));
+        assertFalse(InkCraneAttackRules.inSweep(0, 28.1, 0, 1));
         assertTrue(InkCraneAttackRules.inSweep(0, 0, 0, 1));
     }
 
@@ -79,7 +80,7 @@ class InkCraneAttackRulesTest {
         }
         assertEquals(-1,InkCraneAttackRules.sweepPass(81));
         assertEquals(-1,InkCraneAttackRules.sweepPass(160));
-        assertEquals(.84F,InkCraneAttackRules.BODY_SCALE);
+        assertEquals(1.26F,InkCraneAttackRules.BODY_SCALE);
     }
 
     @Test void avatarCannotSweepBeforeTheCryAndFormationFinish() {
