@@ -100,7 +100,8 @@ public final class AcademyLessons {
             if(p.serverLevel()!=com.tnc.tnc.world.SkyIslandWorlds.island(server)||!p.isAlive())continue;
             var t=data(p);
             if((completed(p)&AcademyRules.ARRIVAL)==0&&JourneyData.get(server).player(p.getUUID()).getBoolean("Named")){
-                var entry=SkyIslandSavedDataBridge.arrival(server);
+                var entry=SkyAcademyWorld.at(server,"arrival");
+                if(entry==null)entry=SkyIslandSavedDataBridge.arrival(server);
                 if(entry!=null&&entry.closerToCenterThan(p.position(),24)){finish(p,AcademyRules.ARRIVAL,"arrival");shot(p,"arrival",300);}
             }
             String site=t.getString("Active");long demo=t.getLong("DemoUntil");

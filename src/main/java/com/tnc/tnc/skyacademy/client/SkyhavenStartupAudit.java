@@ -12,7 +12,7 @@ import java.util.*;
 @Mod.EventBusSubscriber(modid="tnc",value=Dist.CLIENT)
 public final class SkyhavenStartupAudit {
     private static long joined,lastFrame,sampleStart;
-    private static int stage,loadingTicks,photoTicks;
+    private static int stage,loadingTicks,photoTicks,cinematicTicks;
     private static boolean configured,photoPrepared,saving,loadingCaptured;private static volatile boolean photoReady;
     private static final List<Double> frames=new ArrayList<>();
     private static final List<Map<String,Object>> measurements=new ArrayList<>();
@@ -41,6 +41,7 @@ public final class SkyhavenStartupAudit {
         });
         mc.setScreen(null);
         if(!arrived||!complete){if(System.nanoTime()-joined>120_000_000_000L){Files.writeString(output().resolve("failed.txt"),"No normal arrival within 120s");mc.stop();}return;}
+        if(AcademyClient.cinematic()&&++cinematicTicks==100)capture(mc,"arrival-cinematic.png");
         if(stage>=2){photos(mc);return;}
         if(sampleStart==0){sampleStart=System.nanoTime();Files.writeString(output().resolve("arrival.txt"),"normal arrival seconds="+(sampleStart-joined)/1e9+", dimension="+mc.level.dimension().location()+", position="+mc.player.position());}
         long elapsed=System.nanoTime()-sampleStart;

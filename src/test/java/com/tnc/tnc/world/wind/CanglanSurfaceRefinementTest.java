@@ -15,8 +15,10 @@ class CanglanSurfaceRefinementTest {
                 .getAsJsonArray("minecraft:geometry").get(0).getAsJsonObject();
     }
     @Test void authoredMotionAndOriginalRestTransformsStayIntact()throws Exception {
-        assertArrayEquals(Files.readAllBytes(SOURCE.resolve("unchanged.animation.json")),
-                Files.readAllBytes(ROOT.resolve("animations/entity/canglan_warlord.animation.json")));
+        var originalAnimations=JsonParser.parseString(Files.readString(SOURCE.resolve("unchanged.animation.json"))).getAsJsonObject().getAsJsonObject("animations");
+        var currentAnimations=JsonParser.parseString(Files.readString(ROOT.resolve("animations/entity/canglan_warlord.animation.json"))).getAsJsonObject().getAsJsonObject("animations");
+        // Later combat work adds execution_impale; all original authored motions must remain intact.
+        for(var entry:originalAnimations.entrySet())assertEquals(entry.getValue(),currentAnimations.get(entry.getKey()),"Original animation changed: "+entry.getKey());
         var old=geometry(SOURCE.resolve("before.geo.json")).getAsJsonArray("bones");
         var now=geometry(ROOT.resolve("geo/entity/canglan_warlord.geo.json")).getAsJsonArray("bones");
         assertEquals(old.size(),now.size());int before=0,after=0;
