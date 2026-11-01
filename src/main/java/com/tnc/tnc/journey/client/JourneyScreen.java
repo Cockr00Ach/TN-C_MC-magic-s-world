@@ -14,13 +14,30 @@ public final class JourneyScreen extends Screen {
     private record Choice(int x,int y,int w,int h,String label,String action,String id){boolean hit(double a,double b){return a>=x&&a<x+w&&b>=y&&b<y+h;}}
     public JourneyScreen(CompoundTag t){super(Component.literal("RouchNao · 旅途与归处"));state=t.copy();name=t.getString("Name");}
     public static void open(CompoundTag t){if(t.getString("Page").equals("name_result")){var mc=Minecraft.getInstance();if(mc.screen instanceof JourneyScreen screen&&screen.state.getString("Page").equals("profile")&&screen.state.getLong("Token")==t.getLong("Token")){screen.nameSentAt=0;if(t.getBoolean("Success")){JourneyClient.confirmedName();mc.setScreen(null);}else screen.nameStatus=t.getString("Message");}return;}if(t.getBoolean("InitialWelcome")){JourneyClient.queueWelcome(t);return;}if(t.getString("Page").equals("greeting")){JourneyClient.greeting(t);return;}Minecraft.getInstance().setScreen(new JourneyScreen(t));}
-    @Override protected void init(){canvasHeight=state.getString("Page").equals("board")?400:360;scale=Math.min(1.3,Math.min((width-16)/600.,(height-16)/(double)canvasHeight));left=(width-600*scale)/2;top=(height-canvasHeight*scale)/2;if(state.getString("Page").equals("profile")){nameBox=new net.minecraft.client.gui.components.EditBox(font,240,300,206,14,Component.literal("角色姓名"));nameBox.setMaxLength(20);nameBox.setValue(name);nameBox.setBordered(false);nameBox.setResponder(s->name=s);addWidget(nameBox);setInitialFocus(nameBox);}}
+    @Override protected void init(){canvasHeight=state.getString("Page").equals("board")?400:360;scale=Math.min(1.3,Math.min((width-16)/600.,(height-16)/(double)canvasHeight));left=(width-600*scale)/2;top=(height-canvasHeight*scale)/2;if(state.getString("Page").equals("profile")){nameBox=new net.minecraft.client.gui.components.EditBox(font,260,300,184,14,Component.literal("角色姓名"));nameBox.setMaxLength(20);nameBox.setValue(name);nameBox.setBordered(false);nameBox.setResponder(s->name=s);addWidget(nameBox);setInitialFocus(nameBox);}}
     private void text(GuiGraphics g,String s,int x,int y,int c){g.drawString(font,s,x,y,c,false);}
     private void lines(GuiGraphics g,String s,int x,int y,int w,int c,int max){var a=font.split(Component.literal(s),w);for(int i=0;i<Math.min(max,a.size());i++)g.drawString(font,a.get(i),x,y+12*i,c,false);}
     private void button(GuiGraphics g,int x,int y,int w,int h,String title,String action,String id,double mx,double my){var o=new Choice(x,y,w,h,title,action,id);choices.add(o);boolean hover=o.hit(mx,my);g.fill(x,y,x+w,y+h,hover?0xff315256:0xff1b2229);g.renderOutline(x,y,w,h,hover?0xffcde8d5:0xff9e855b);text(g,title,x+(w-font.width(title))/2,y+(h-8)/2,0xffe6daca);}
-    @Override public void render(GuiGraphics g,int mouseX,int mouseY,float partial){renderBackground(g);g.pose().pushPose();g.pose().translate(left,top,0);g.pose().scale((float)scale,(float)scale,1);ArcaneGui.proportionalFrame(g,0,0,600,canvasHeight);choices.clear();double mx=(mouseX-left)/scale,my=(mouseY-top)/scale;String kind=state.getString("Page");text(g,kind.equals("board")?"灯下委托栏":kind.equals("profile")?"初来此世 · 人物档案":"留一盏灯 · 家庭时光",24,29,ArcaneGui.TEXT);text(g,kind.equals("board")?"直接接单 · 最多三份 · 回栏交付，无需携带纸张":kind.equals("profile")?"力量属于旅途，名字属于你。":"婚姻与孩子沿用凡家物语，旅途与家在这里相连。",24,49,ArcaneGui.CYAN);
-        if(kind.equals("board"))board(g,mx,my);else if(kind.equals("profile"))profile(g,mx,my,partial);else family(g,mx,my);
-        text(g,requiresName()?"请点击确认姓名，完成初次登记":"ESC 返回",24,canvasHeight-23,ArcaneGui.DIM);g.pose().popPose();super.render(g,mouseX,mouseY,partial);
+    @Override public void render(GuiGraphics g,int mouseX,int mouseY,float partial){
+        renderBackground(g);g.pose().pushPose();g.pose().translate(left,top,0);g.pose().scale((float)scale,(float)scale,1);
+        choices.clear();double mx=(mouseX-left)/scale,my=(mouseY-top)/scale;String kind=state.getString("Page");
+        if(kind.equals("profile")){
+            g.fillGradient(0,0,600,360,0xff101c2d,0xff090e19);
+            g.renderOutline(0,0,600,360,0xff7f735e);g.renderOutline(3,3,594,354,0xff293644);
+            var art=net.minecraft.resources.ResourceLocation.parse("tnc:textures/gui/profile_sanctum.png");
+            g.pose().pushPose();g.pose().translate(9,9,0);g.pose().scale(228/1024f,342/1536f,1);g.blit(art,0,0,0,0,1024,1536,1024,1536);g.pose().popPose();
+            text(g,"初来此世",253,26,0xffe1c597);
+            g.pose().pushPose();g.pose().translate(252,43,0);g.pose().scale(1.5f,1.5f,1);text(g,"刻下你的名字",0,0,0xfff1e9d8);g.pose().popPose();
+            text(g,"从此，星海将记住你的旅途。",253,65,0xffa5b2c6);g.fill(253,83,573,84,0xff465060);
+            profile(g,mx,my,partial);
+        }else{
+            ArcaneGui.proportionalFrame(g,0,0,600,canvasHeight);
+            text(g,kind.equals("board")?"灯下委托栏":"留一盏灯 · 家庭时光",24,29,ArcaneGui.TEXT);
+            text(g,kind.equals("board")?"直接接单 · 最多三份 · 回栏交付，无需携带纸张":"婚姻与孩子沿用凡家物语，旅途与家在这里相连。",24,49,ArcaneGui.CYAN);
+            if(kind.equals("board"))board(g,mx,my);else family(g,mx,my);
+            text(g,"ESC 返回",24,canvasHeight-23,ArcaneGui.DIM);
+        }
+        g.pose().popPose();super.render(g,mouseX,mouseY,partial);
     }
     private void board(GuiGraphics g,double mx,double my){var all=state.getList("Cards",10);int pages=Math.max(1,(all.size()+5)/6);page=Math.min(page,pages-1);
         for(int i=0;i<6;i++){int index=page*6+i;if(index>=all.size())break;var c=all.getCompound(index);int x=23+(i%3)*188,y=77+(i/3)*140;boolean active=c.getBoolean("Active"),done=c.getInt("Progress")>=c.getInt("Count");
@@ -39,12 +56,21 @@ public final class JourneyScreen extends Screen {
         button(g,230,369,35,18,"‹","prev","",mx,my);text(g,(page+1)+" / "+pages,277,374,ArcaneGui.DIM);button(g,337,369,35,18,"›","next","",mx,my);button(g,424,369,151,18,"酒馆特别档案","archive","",mx,my);
     }
     private void profile(GuiGraphics g,double mx,double my,float partial){
-        g.fill(23,78,205,311,0x7010161e);ArcaneGui.sigil(g,114,178,70,(minecraft.level==null?0:minecraft.level.getGameTime())+partial,.3f,true);
-        if(minecraft.player!=null){g.pose().pushPose();g.pose().translate(0,0,150);net.minecraft.client.gui.screens.inventory.InventoryScreen.renderEntityInInventoryFollowsMouse(g,114,282,70,(float)Math.max(-20,Math.min(20,114-mx)),(float)Math.max(-12,Math.min(12,175-my)),minecraft.player);g.pose().popPose();}
-        String[] stats={"基础攻击  "+format(state.getDouble("Attack")),"最大生命  "+format(state.getDouble("Health")),"护甲  "+format(state.getDouble("Armor")),"移动速度  "+format(state.getDouble("Speed")),"魔力  "+state.getInt("Mana")+" / "+state.getInt("MaxMana")};for(int i=0;i<stats.length;i++)text(g,stats[i],233,85+22*i,ArcaneGui.TEXT);
-        text(g,"元素亲和",233,206,ArcaneGui.GOLD);int i=0;for(var e:com.tnc.tnc.magic.Element.values()){int x=233+i%4*80,y=227+i/4*20;String label=e==com.tnc.tnc.magic.Element.DARK?"暗":e.cn();text(g,label+"  "+state.getCompound("Affinity").getInt(e.id()),x,y,ArcaneGui.CYAN);i++;}
-        text(g,"你的名字（点击后直接输入，最多20字）",233,277,ArcaneGui.DIM);g.fill(232,292,454,317,0xff101921);g.renderOutline(232,292,222,25,0xffaa936c);if(nameBox!=null)nameBox.render(g,(int)mx,(int)my,partial);button(g,467,292,104,25,nameSentAt==0?"确认姓名":"保存中…","name","",mx,my);
-        text(g,nameStatus,233,323,ArcaneGui.CYAN);
+        if(minecraft.player!=null){g.pose().pushPose();g.pose().translate(0,0,150);net.minecraft.client.gui.screens.inventory.InventoryScreen.renderEntityInInventoryFollowsMouse(g,123,275,100,(float)Math.max(-16,Math.min(16,123-mx)),(float)Math.max(-10,Math.min(10,170-my)),minecraft.player);g.pose().popPose();}
+        String[] labels={"基础攻击","最大生命","护甲","移动速度"};
+        String[] values={format(state.getDouble("Attack")),format(state.getDouble("Health")),format(state.getDouble("Armor")),format(state.getDouble("Speed"))};
+        for(int i=0;i<4;i++){int x=253+(i%2)*166,y=98+(i/2)*34;text(g,labels[i],x,y,0xff9baec2);text(g,values[i],x+91,y,0xfff2e6cd);g.fill(x,y+21,x+148,y+22,0x402f435a);}
+        text(g,"魔力",253,174,0xffa8ccdf);String mana=state.getInt("Mana")+" / "+state.getInt("MaxMana");text(g,mana,573-font.width(mana),174,0xffe7ecf4);
+        g.fill(253,191,573,195,0xff1c2f46);g.fill(253,191,253+(int)(320*Math.min(1,state.getInt("Mana")/(double)Math.max(1,state.getInt("MaxMana")))),195,0xff80b8d3);
+        text(g,"元素亲和",253,212,0xffcfb58c);int i=0;
+        int[] colors={0xff8fcbea,0xffe9a28c,0xffc7b0ed,0xffa8d7cb,0xffcfbc97,0xffeee0a2,0xffb9acce};
+        for(var e:com.tnc.tnc.magic.Element.values()){int x=253+i%4*82,y=233+i/4*20;String label=e==com.tnc.tnc.magic.Element.DARK?"暗":e.cn();text(g,label,x,y,colors[i%colors.length]);text(g,""+state.getCompound("Affinity").getInt(e.id()),x+26,y,0xffdce1ec);i++;}
+        text(g,"你的名字",253,277,0xffb9c6d7);text(g,"最多20字",510,277,0xff7f90a9);
+        g.fill(252,292,454,317,0xff111e31);g.fill(252,316,454,317,0xff92b6cd);
+        if(nameBox!=null)nameBox.render(g,(int)mx,(int)my,partial);
+        var confirm=new Choice(467,292,106,25,nameSentAt==0?"确认姓名":"保存中…","name","");choices.add(confirm);
+        boolean hover=confirm.hit(mx,my);g.fillGradient(467,292,573,317,hover?0xff47617d:0xff30445c,hover?0xff293e56:0xff1b2b40);g.renderOutline(467,292,106,25,hover?0xffead2a8:0xff9e8c70);text(g,confirm.label,520-font.width(confirm.label)/2,301,0xfff0e2c9);
+        text(g,nameStatus.isEmpty()?"确认后，开始你的旅途。":nameStatus,253,330,0xff9fb3ca);
     }
     private String format(double n){return String.format(Locale.ROOT,n<1?"%.2f":"%.1f",n);}
     private void family(GuiGraphics g,double mx,double my){ArcaneGui.sigil(g,127,181,72,minecraft.level==null?0:minecraft.level.getGameTime(),.5f,true);text(g,state.getString("Spouse"),245,91,ArcaneGui.TEXT);lines(g,state.getString("Line"),245,115,300,ArcaneGui.DIM,3);text(g,"孩子："+state.getInt("Children")+"（在家 "+state.getInt("PresentChildren")+"）  ·  "+(state.getBoolean("Home")?"在家中":"与家人同行"),245,171,ArcaneGui.CYAN);button(g,245,204,304,31,"一起吃饭 · 需要两份同种食物","dinner","",mx,my);button(g,245,251,304,31,"把这里当作家","home","",mx,my);lines(g,"普通右键继续聊天、送礼与育儿；潜行右键伴侣打开此页。",245,301,300,ArcaneGui.DIM,2);}

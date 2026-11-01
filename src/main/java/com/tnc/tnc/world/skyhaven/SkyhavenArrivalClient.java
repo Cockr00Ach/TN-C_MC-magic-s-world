@@ -1,6 +1,6 @@
 package com.tnc.tnc.world.skyhaven;
 
-import com.tnc.tnc.client.ui.ArcaneGui;
+import com.tnc.tnc.journey.client.JourneyScreen;
 import com.tnc.tnc.skyacademy.AcademyNetwork;
 import com.tnc.tnc.world.SkyhavenReadiness;
 import net.minecraft.client.*;
@@ -23,8 +23,12 @@ public final class SkyhavenArrivalClient {
     public static boolean active(){return !phase.isEmpty();}
     public static void receive(CompoundTag t){
         var mc=Minecraft.getInstance();String next=t.getString("Phase");
-        if(next.equals("done")){clear();mc.setScreen(deferred);deferred=null;return;}
-        if(!active()){deferred=mc.screen instanceof net.minecraft.client.gui.screens.ReceivingLevelScreen?null:mc.screen;quiet=ticks=0;acknowledged=false;sceneAt=lastFrame=0;}
+        if(next.equals("done")){
+            if(!active()||t.getLong("Token")!=token)return;
+            var resume=deferred;deferred=null;clear();mc.setScreen(resume);
+            com.mojang.logging.LogUtils.getLogger().info("[Skyhaven Arrival] Loading UI released; resumed={}",resume==null?"game":resume.getClass().getSimpleName());return;
+        }
+        if(!active()){deferred=mc.screen instanceof JourneyScreen?mc.screen:null;quiet=ticks=0;acknowledged=false;sceneAt=lastFrame=0;}
         token=t.getLong("Token");at=BlockPos.of(t.getLong("At"));ready=t.getInt("Ready");total=t.getInt("Total");
         radius=Math.max(1,Math.min(Math.min(3,t.getInt("ClientRadius")),mc.options.renderDistance().get()-1));required=(radius*2+1)*(radius*2+1);
         if(next.equals("scene")&&!phase.equals("scene"))sceneAt=System.nanoTime();phase=next;if(mc.screen!=SCREEN)mc.setScreen(SCREEN);
@@ -32,7 +36,9 @@ public final class SkyhavenArrivalClient {
     private static void clear(){phase="";token=sceneAt=lastFrame=0;quiet=chunks=compiled=0;acknowledged=false;}
     @SubscribeEvent public static void opening(ScreenEvent.Opening e){if(!active()||e.getNewScreen()==SCREEN)return;
         if(e.getNewScreen() instanceof net.minecraft.client.gui.screens.DisconnectedScreen||e.getNewScreen() instanceof net.minecraft.client.gui.screens.TitleScreen){clear();deferred=null;return;}
-        if(e.getNewScreen()!=null&&!(e.getNewScreen() instanceof net.minecraft.client.gui.screens.ReceivingLevelScreen))deferred=e.getNewScreen();e.setNewScreen(SCREEN);
+        // Joining/progress/terrain screens are transient. Restoring one after its
+        // owning connection transition has finished leaves it on screen forever.
+        if(e.getNewScreen() instanceof JourneyScreen)deferred=e.getNewScreen();e.setNewScreen(SCREEN);
     }
     @SubscribeEvent public static void tick(TickEvent.ClientTickEvent e){
         if(e.phase!=TickEvent.Phase.END||!active())return;var mc=Minecraft.getInstance();
@@ -58,14 +64,20 @@ public final class SkyhavenArrivalClient {
         @Override public boolean shouldCloseOnEsc(){return false;}
         @Override public void onClose(){}
         @Override public void render(GuiGraphics g,int mx,int my,float partial){
-            g.fill(0,0,width,height,0xff080f17);int w=Math.min(380,width-30),h=190,x=(width-w)/2,y=(height-h)/2;
-            ArcaneGui.proportionalFrame(g,x,y,w,h);ArcaneGui.sigil(g,width/2,y+48,23,System.currentTimeMillis()/50.,.5f,true);
-            g.drawCenteredString(font,"云溪 · 群岛之门",width/2,y+85,ArcaneGui.GOLD);
-            boolean scene=phase.equals("scene");String text=scene?"整理光影与眼前的风景":"准备岛屿与周边地形";
-            g.drawCenteredString(font,text,width/2,y+110,ArcaneGui.TEXT);
+            // User supplied artwork, kept at its original aspect ratio.
+            var background=net.minecraft.resources.ResourceLocation.parse("tnc:textures/gui/skyhaven_arrival.png");
+            float scale=Math.max(width/1672f,height/941f);
+            g.pose().pushPose();g.pose().scale(scale,scale,1);
+            g.blit(background,Math.round((width/scale-1672)/2),Math.round((height/scale-941)/2),0,0,1672,941,1672,941);g.pose().popPose();
+            int barWidth=Math.min(480,width-56),x=(width-barWidth)/2,y=height-35;
+            for(int row=0;row<84;row++){int alpha=(int)(160*(row/83.));g.fill(0,height-84+row,width,height-83+row,alpha<<24);}
+            boolean scene=phase.equals("scene");
             double progress=scene?.7+.15*Math.min(1,chunks/(double)required)+.1*Math.min(1,compiled/9.)+.05*Math.min(1,quiet/40.):.7*ready/Math.max(1.,total);
-            g.fill(x+28,y+134,x+w-28,y+139,0xff202932);g.fill(x+28,y+134,x+28+(int)((w-56)*Math.min(.99,progress)),y+139,0xff91c9c5);
-            g.drawCenteredString(font,scene?"让风先走遍街巷，再与你一同启程。":ready+" / "+total,width/2,y+151,ArcaneGui.DIM);
+            int filled=(int)((barWidth-2)*Math.min(.99,progress));
+            g.fill(x-1,y-1,x+barWidth+1,y+6,0x998fbcce);g.fill(x,y,x+barWidth,y+5,0xd5162030);
+            g.fill(x+1,y+1,x+1+filled,y+4,0xffb8e9ee);
+            g.drawCenteredString(font,scene?"正在准备眼前的风景…":"正在准备天空岛…",width/2,y-16,0xfff5f0e9);
+            g.drawCenteredString(font,(int)(Math.min(.99,progress)*100)+"%",width/2,y+11,0xffdedfe9);
         }
     }
     private SkyhavenArrivalClient(){}

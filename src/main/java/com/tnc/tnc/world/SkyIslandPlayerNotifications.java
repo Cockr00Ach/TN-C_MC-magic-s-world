@@ -44,6 +44,7 @@ final class SkyIslandPlayerNotifications {
 
     static void onLogin(ServerPlayer player, int manifestVersion, boolean islandComplete,
                         BlockPos groundPortal) {
+        if(SkyIslandWorlds.separate(player.server))return;
         CompoundTag persisted = persisted(player);
         boolean awakeningSeen = persisted.getInt(AWAKENING_TITLE_VERSION) >= manifestVersion;
         boolean completionSeen = persisted.getInt(COMPLETE_TITLE_VERSION) >= manifestVersion;
@@ -67,6 +68,7 @@ final class SkyIslandPlayerNotifications {
     }
 
     static void onGenerationComplete(ServerPlayer player, int manifestVersion, BlockPos groundPortal) {
+        if(SkyIslandWorlds.separate(player.server))return;
         CompoundTag persisted = persisted(player);
         if(!com.tnc.tnc.skyacademy.SkyAcademyWorld.ready(player.server)){
             persisted.putBoolean(COMPLETION_PENDING,true);
@@ -90,6 +92,7 @@ final class SkyIslandPlayerNotifications {
 
     static void tick(MinecraftServer server, int manifestVersion, boolean islandComplete,
                      BlockPos groundPortal) {
+        if(SkyIslandWorlds.separate(server))return;
         boolean activeSequence = false;
         boolean transitioned = false;
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
