@@ -3,8 +3,8 @@ import net.minecraft.world.phys.*;
 /** Rest-rig coordinates shared by server mouth, renderer and flight/culling bounds. */
 public final class InkDragonFlightRules {
     public static final Vec3 HEAD=new Vec3(-4,5,0),MOUTH=new Vec3(-7.65,4.14,0),JAW=new Vec3(-5.7,4.15,0);
-    public static final double SUMMON_DISTANCE=72,SUMMON_RISE=4,HOVER_CLEARANCE=8;
-    public static final double GROUND_MODEL_DROP=9;
+    public static final double SUMMON_DISTANCE=144,SUMMON_RISE=4,HOVER_CLEARANCE=8;
+    public static final double GROUND_MODEL_DROP=18;
     private InkDragonFlightRules(){}
     public static AABB restingBounds(Vec3 at,float yaw){
         AABB b=bounds(at,yaw).move(0,-GROUND_MODEL_DROP,0);

@@ -13,6 +13,8 @@ public final class InkBossClientRegistration {
 
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(InkBossRegistration.INK_RITUAL,InkRitualRenderer::new);
+        event.registerEntityRenderer(InkBossRegistration.INK_PORTAL,InkPortalRenderer::new);
         event.registerEntityRenderer(InkBossRegistration.INK_CELESTIAL_DRAGON,InkCelestialDragonRenderer::new);
         event.registerEntityRenderer(InkBossRegistration.INK_WINGED_TIGER,InkWingedTigerRenderer::new);
         event.registerEntityRenderer(InkBossRegistration.INK_TIGER_EFFECT,InkTigerEffectRenderer::new);

@@ -198,14 +198,14 @@ class CanglanWarlordModelTest {
     }
 
     @Test
-    void theAtlasIsAQuarteredSheet() throws Exception {
+    void detailedAtlasPreservesTheLogicalUvContract() throws Exception {
         Path texture = ROOT.resolve("textures/entity/canglan_warlord.png");
         assertTrue(Files.exists(texture), "缺少实体贴图");
         try (InputStream in = Files.newInputStream(texture)) {
             BufferedImage image = ImageIO.read(in);
             assertNotNull(image, "贴图读不出来");
-            assertEquals(256, image.getWidth(), "贴图必须是 256 宽的图集");
-            assertEquals(256, image.getHeight(), "贴图必须是 256 高的图集");
+            assertEquals(1024, image.getWidth(), "细化图集使用 1024 实际像素，保留 256 单位逻辑 UV");
+            assertEquals(1024, image.getHeight(), "细化图集使用 1024 实际像素，保留 256 单位逻辑 UV");
         }
     }
 

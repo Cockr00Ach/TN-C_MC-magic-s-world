@@ -1,0 +1,74 @@
+{
+  "targetLUFS": -18,
+  "truePeakTargetDBTP": -2,
+  "songs": [
+    {
+      "source": "原创古风音乐 P1 【原创音乐】大漠行（古风 游戏配乐）.aac",
+      "sourceSHA256": "7e43dd6949832fccb5de06cb42725593c042d78f031f12a6b8a5e83979ca88db",
+      "duration": 98.41,
+      "inputLUFS": -11.45,
+      "outputLUFS": -18.02,
+      "truePeakDBTP": -6.28,
+      "bytes": 1677003,
+      "phase": 1,
+      "title": "大漠行",
+      "event": "tnc:music.ink.crane"
+    },
+    {
+      "source": "火焰帝皇以骸BOSS战斗 BGM _《绝区零》3.1版本OST P1 火焰帝皇以骸BOSS战斗 BGM _《绝区零》3.1版本OST.aac",
+      "sourceSHA256": "66197369691b9c8738afea53906f7babeeb1ae77f56bf2fa807e31fb75d4aa0a",
+      "duration": 299.03,
+      "inputLUFS": -11.4,
+      "outputLUFS": -18.09,
+      "truePeakDBTP": -7.71,
+      "bytes": 5407187,
+      "phase": 2,
+      "title": "火焰帝皇以骸 BOSS战",
+      "event": "tnc:music.ink.tiger"
+    },
+    {
+      "source": "《绝区零》3.0版本音乐OST合集 P1 这鼓点！【𝟒𝐊_𝐇𝐢-𝐑𝐞𝐬】骤雨狂风 _ 基塔布鲁BOSS战音乐《绝区零》3.0版本音乐OST『某个梦游者的自白』.aac",
+      "sourceSHA256": "7f2de0ea289d4400d089e2bbbb3a73a5a49e79a00895baa90789f03788004dae",
+      "duration": 217.88,
+      "inputLUFS": -7.27,
+      "outputLUFS": -18.12,
+      "truePeakDBTP": -9.34,
+      "bytes": 4096666,
+      "phase": 3,
+      "title": "骤雨狂风 · 基塔布鲁 BOSS战",
+      "event": "tnc:music.ink.dragon"
+    }
+  ],
+  "roars": [
+    {
+      "source": "bird.flac",
+      "sourceSHA256": "2a4b19ac14a22f63425f98e9d305610c8ce766b02bfac295fdf827a6d5b70ddd",
+      "duration": 1.05,
+      "inputLUFS": -13.82,
+      "outputLUFS": -20.01,
+      "truePeakDBTP": -10.2,
+      "bytes": 15849,
+      "event": "tnc:ink.crane.cast"
+    },
+    {
+      "source": "tiger.mp3",
+      "sourceSHA256": "38a0c9603e5dd819f8140dd637d0521d52609c2304654a28dedd481fd36f974a",
+      "duration": 4.5,
+      "inputLUFS": -45.23,
+      "outputLUFS": -20.86,
+      "truePeakDBTP": -1.97,
+      "bytes": 48655,
+      "event": "tnc:ink.tiger.cast"
+    },
+    {
+      "source": "dragon.wav",
+      "sourceSHA256": "040d2841619c732098c30a638731317d13d7647e5ce1a75a3246219ce4b162ff",
+      "duration": 5.0,
+      "inputLUFS": -20.16,
+      "outputLUFS": -20.2,
+      "truePeakDBTP": -3.72,
+      "bytes": 36462,
+      "event": "tnc:ink.dragon.cast"
+    }
+  ]
+}

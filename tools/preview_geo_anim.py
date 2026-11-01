@@ -11,9 +11,12 @@ this script reproduces what GeckoLib will do and draws it:
   * the animation's rotation/position keyframes, linearly interpolated
   * orthographic camera, painter's algorithm, flat shading by face normal
 
-Front of the model = -Z (both of the author's angel models put the face cubes at -Z, and
-those models render correctly in game). The script paints a RED arrow on the ground on
-the -Z side, so "which way is the front" is never a guess in the output image.
+Front of the model = -Z by default (the usual GeckoLib/vanilla convention: the box-UV net
+puts the skin's face slot on the -Z face, and vanilla's "180 - bodyYaw" turn maps the model's
+-Z onto the entity's look direction). A few of the author's hand-built models are painted on
++Z instead; pass --front=+Z and this preview mirrors them exactly like their renderer does.
+There is no orientation arrow in the output: each panel is labelled with the view name and
+the side the camera is on, e.g. "front(-Z)" / "back(+Z)".
 
 Usage:
   python tools/preview_geo_anim.py <geo> <animation> <clip> [--views side,front,three] [--times 0,0.2,..]
@@ -328,7 +331,7 @@ _CACHE = {}
 #   "-Z" = the usual convention (GeckoLib/vanilla map the model's -Z onto the entity's facing)
 #   "+Z" = the author's two angel models (the eyes are painted on the +Z face; see
 #          tools/face_uv_check.py). Their renderers therefore add a 180 deg yaw, and this
-#          preview does the same, so the red arrow always means "the way the entity looks".
+#          preview does the same, so "front" stays "the way the entity looks".
 FRONT = "+Z"
 
 

@@ -64,7 +64,7 @@ minecraft {
         // applies to all the run configs below
         configureEach {
             workingDirectory project.file('run')
-            args '--mixin', 'tnc.water-bore.mixins.json', '--mixin', 'tnc.equipment.mixins.json', '--mixin', 'tnc.town.mixins.json'
+            args '--mixin', 'tnc.water-bore.mixins.json', '--mixin', 'tnc.equipment.mixins.json', '--mixin', 'tnc.town.mixins.json', '--mixin', 'tnc.ink.mixins.json'
 
             // Recommended logging data for a userdev environment
             // The markers can be added/remove as needed separated by commas.
@@ -101,6 +101,7 @@ minecraft {
                 if (project.hasProperty('inkDragonBreathAudit')) property 'tnc.inkDragonBreathAudit', 'true'
                 if (project.hasProperty('inkDragonDiveAudit')) property 'tnc.inkDragonDiveAudit', 'true'
                 if (project.hasProperty('inkDragonCombatAudit')) property 'tnc.inkDragonCombatAudit', 'true'
+                if (project.hasProperty('inkEncounterAudit')) property 'tnc.inkEncounterAudit', 'true'
                 if (project.hasProperty('inkDragonFlightAudit')) property 'tnc.inkDragonFlightAudit', 'true'
                 if (project.hasProperty('inkDragonVisibilityAudit')) property 'tnc.inkDragonVisibilityAudit', 'true'
                 if (project.hasProperty('inkDragonWorldAudit')) property 'tnc.inkDragonWorldAudit', 'true'
@@ -506,7 +507,7 @@ tasks.named('jar', Jar).configure {
                 'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
                 // Forge 从 jar 清单里读 mixin 配置；我们的 Mixin 只注入 SpellEngine
                 // （由 TncMixinPlugin 判断引擎在不在）
-                'MixinConfigs'            : "${mod_id}.mixins.json,${mod_id}.water-bore.mixins.json,${mod_id}.equipment.mixins.json,${mod_id}.town.mixins.json"
+                'MixinConfigs'            : "${mod_id}.mixins.json,${mod_id}.water-bore.mixins.json,${mod_id}.equipment.mixins.json,${mod_id}.town.mixins.json,${mod_id}.ink.mixins.json"
         ])
     }
 

@@ -30,6 +30,10 @@ MODELS = {
     "angel": ("geo/entity/angel.geo.json", "textures/entity/angel_bedrock.png"),
     "yan": ("geo/entity/yan.geo.json", "textures/entity/yan_bedrock.png"),
     "zuowang": ("geo/entity/zuowang.geo.json", "textures/entity/zuowang_bedrock.png"),
+    # the player rig and its staff-holding variant keep the vanilla skin layout, so their
+    # face slot should land on -Z like yan/zuowang
+    "self": ("geo/entity/self.geo.json", "textures/entity/self_bedrock.png"),
+    "self_wand": ("geo/entity/self_wand.geo.json", "textures/entity/self_wand_bedrock.png"),
 }
 ROOT = os.path.join("src", "main", "resources", "assets", "tnc")
 ZOOM = 8

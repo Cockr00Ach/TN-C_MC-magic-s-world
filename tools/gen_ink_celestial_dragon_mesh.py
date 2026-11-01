@@ -169,6 +169,30 @@ for s in [-1,1]:
         p=np.array([-5.9+(i%4)*.22,15.5+(i//4)*.13,s*(.18+i*.043)])
         leaf(f'head_scale_{s}_{i}',[p,p+[.35,.10,s*.04],p+[.55,.02,s*.05]],.08,3,'head')
 
+# Third-form crown: layered brow plates, etched horn roots, swept gills and an articulated mouth.
+# Fine facial etching is deliberately named facial_armour so the far LOD drops it.
+for s in [-1,1]:
+    for row in range(3):
+        p=np.array([-6.35+row*.12,15.22+row*.12,s*(.76-row*.05)])
+        leaf(f'crown_brow_plate_{s}_{row}',[p,p+[.48,.25,s*.07],p+[1.18,.33,s*.02]],.08+row*.015,2+row,'head')
+    for i in range(6):
+        p=np.array([-5.32+i*.105,14.53+(i%2)*.14,s*(.88+i*.025)])
+        leaf(f'cheek_gill_blade_{s}_{i}',[p,p+[.42,.18,s*.16],p+[.97,.52+i*.04,s*.13]],.075,1+i%3,'head')
+    for i in range(8):
+        p=np.array([-4.85+i*.026,15.6+i*.085,s*(.51+i*.017)])
+        tube(f'facial_armour_horn_etch_{s}_{i}',[p+[-.14,0,-s*.08],p+[-.17,.04,0],p+[0,.08,s*.17]], [.012,.022,.008],3+i%3,'antlers',6,8)
+    for i in range(10):
+        p=np.array([-7.55+i*.14,14.86+math.sin(i*.4)*.08,s*(.28+i*.016)])
+        leaf(f'facial_armour_muzzle_{s}_{i}',[p,p+[.12,.04,s*.03],p+[.23,0,s*.03]],.04,3+i%3,'head',False)
+    tube(f'tear_duct_silver_{s}',[[-6.17,15.11,s*.8],[-6.05,15.04,s*.85],[-5.84,15.04,s*.85]],[.018,.026,.004],7,'head',8,16)
+    tube(f'jaw_hinge_{s}',[[-5.73,14.23,s*.63],[-5.88,14.03,s*.66],[-6.2,13.95,s*.49]],[.12,.10,.02],2,'jaw',12,18)
+    for i in range(5):
+        p=np.array([-4.5+i*.11,15.4+i*.12,s*(.43+i*.06)])
+        leaf(f'crown_ink_plume_{s}_{i}',[p,p+[.7,.65,s*.2],p+[1.6,.9+i*.1,s*.45]],.105,0,'mane')
+ellipsoid('inner_mouth_shadow',[-6.85,14.19,0],[.95,.12,.36],0,'jaw',24,10)
+tube('tongue_ink_ridge',[[-6.1,14.09,0],[-6.8,14.12,0],[-7.4,14.1,0]],[.16,.18,.07],3,'jaw',12,16)
+leaf('forehead_central_keel',[[-6.1,15.55,0],[-5.55,16.02,0],[-4.6,16.25,0]],.20,5,'head')
+
 # Four articulated-looking legs, five separate digits with curled claws on each paw.
 for limb,u in [('fore',.27),('hind',.62)]:
     j=int(u*224)

@@ -40,7 +40,7 @@ public final class TemperingEvents {
         var record=TrainingGroundData.get(player.server).record(player.getUUID());
         return new TemperingPacket(data.enrolled(player.getUUID()), data.points(player.getUUID()), data.talent(player.getUUID()),
             data.guardGraduate(player.getUUID()),TemperingTraining.active(player),TemperingTraining.blockCount(player),
-            TemperingTraining.remaining(player,now),data.windRemaining(player.getUUID(),now),open,TrainingGround.inside(player),record.mode(),record.completions(),record.score(),record.reaction());
+            TemperingTraining.remaining(player,now),data.windRemaining(player.getUUID(),now),open,TrainingGround.inside(player),record.mode(),record.completions(),record.score(),record.reaction(),TrainingGround.activeRole(player));
     }
     public static void sync(ServerPlayer player,boolean open) {
         MagicStoneNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player),
@@ -117,8 +117,8 @@ public final class TemperingEvents {
                 ctx.getSource().sendSuccess(() -> Component.literal("已启用磨砺：持剑或斧近战击败敌对生物可成长；磨砺永久保留。"), false); return 1;
             }))
             .then(Commands.literal("panel").executes(ctx->{sync(ctx.getSource().getPlayerOrException(),true);return 1;}))
-            .then(Commands.literal("ground").executes(ctx->{return TrainingGround.enter(ctx.getSource().getPlayerOrException())?1:0;})
-                .then(Commands.literal("leave").executes(ctx->{return TrainingGround.leave(ctx.getSource().getPlayerOrException())?1:0;})))
+            .then(Commands.literal("ground").executes(ctx->{return PracticeArena.teleportIn(ctx.getSource().getPlayerOrException())?1:0;})
+                .then(Commands.literal("leave").executes(ctx->{return PracticeArena.dismiss(ctx.getSource().getPlayerOrException())?1:0;})))
             .then(Commands.literal("talent")
                 .executes(ctx -> { var p=ctx.getSource().getPlayerOrException();ctx.getSource().sendSuccess(()->Component.literal(talentSummary(p)),false);return 1; })
                 .then(Commands.literal("set").requires(s->s.hasPermission(2))
@@ -132,13 +132,14 @@ public final class TemperingEvents {
             .then(Commands.literal("train").executes(ctx -> {
                 var p = ctx.getSource().getPlayerOrException();
                 if (!TemperingTraining.start(p)) {
-                    ctx.getSource().sendFailure(Component.literal("请先加入磨砺，并在生存模式、未倒地时开始训练。")); return 0;
+                    ctx.getSource().sendFailure(Component.literal("请先加入磨砺，站在演武场内、生存模式且未倒地时开始训练。")); return 0;
                 }
                 return 1;
             }))
             .then(Commands.literal("cancel").executes(ctx -> {
-                TemperingTraining.cancel(ctx.getSource().getPlayerOrException());
-                ctx.getSource().sendSuccess(() -> Component.literal("本次训练已结束。"), false); return 1;
+                var p = ctx.getSource().getPlayerOrException();
+                PracticeArena.dismiss(p);
+                ctx.getSource().sendSuccess(() -> Component.literal("本次练习已结束。"), false); return 1;
             }))
             .then(Commands.literal("set").requires(source -> source.hasPermission(2))
                 .then(Commands.argument("points", IntegerArgumentType.integer(0, TemperingRules.MAX_POINTS)).executes(ctx -> {

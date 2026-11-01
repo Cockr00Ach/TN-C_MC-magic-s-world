@@ -391,7 +391,7 @@ public final class CanglanWarlordEntity extends Monster implements GeoEntity {
                 state -> PlayState.STOP);
         for (String clip : new String[]{"cleave_left", "cleave_right", "overhead", "thrust",
                 "sweep", "spear_throw", "shield_bash", "war_cry", "phase_shift", "spawn",
-                "death", "cyclone", "sky_arsenal", "gale_cut", "wind_step"}) {
+                "death", "cyclone", "sky_arsenal", "gale_cut", "wind_step", "execution_impale"}) {
             action.triggerableAnim(clip, RawAnimation.begin().thenPlay(clip));
         }
         controllers.add(action);

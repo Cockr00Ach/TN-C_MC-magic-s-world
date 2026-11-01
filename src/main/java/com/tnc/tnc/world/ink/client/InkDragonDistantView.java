@@ -39,7 +39,7 @@ public final class InkDragonDistantView {
             MOTION.put(s.id(),new Motion(fresh?s.position():e.position(),s.position(),fresh?s.yaw():e.getYRot(),s.yaw(),level.getGameTime()));
             if(fresh)e.moveTo(s.position().x,s.position().y,s.position().z,s.yaw(),0);
             e.applyVisualSnapshot(s.state());
-            e.yRotO=s.yaw();e.yBodyRot=s.yaw();e.yHeadRot=s.yaw();e.yHeadRotO=s.yaw();
+            e.yRotO=s.yaw();e.yBodyRot=s.yaw();e.yHeadRotO=e.yHeadRot;
         }
         VIEWS.keySet().retainAll(keep);MOTION.keySet().retainAll(keep);received=System.nanoTime();
     }
@@ -52,15 +52,8 @@ public final class InkDragonDistantView {
         var actual=new HashMap<UUID,InkCelestialDragonEntity>();
         for(var e:mc.level.entitiesForRendering())if(e instanceof InkCelestialDragonEntity dragon)actual.put(e.getUUID(),dragon);
         var camera=event.getCamera().getPosition();var buffers=BUFFERS;
-        var original=new org.joml.Matrix4f(com.mojang.blaze3d.systems.RenderSystem.getProjectionMatrix());
-        var sorting=com.mojang.blaze3d.systems.RenderSystem.getVertexSorting();
-        com.mojang.blaze3d.systems.RenderSystem.setProjectionMatrix(InkDragonVisibilityProjection.extend(original),sorting);
-        try{
-        for(var e:actual.values()){
-            if(InkDragonVisibility.distanceSquared(new InkDragonVisibility.Snapshot(e.getUUID(),e.position(),e.getYRot(),e.visualSnapshot()),camera)>InkDragonVisibility.RANGE*InkDragonVisibility.RANGE)continue;
-            var at=new net.minecraft.world.phys.Vec3(net.minecraft.util.Mth.lerp(event.getPartialTick(),e.xOld,e.getX()),net.minecraft.util.Mth.lerp(event.getPartialTick(),e.yOld,e.getY()),net.minecraft.util.Mth.lerp(event.getPartialTick(),e.zOld,e.getZ()));
-            draw(e,at,net.minecraft.util.Mth.rotLerp(event.getPartialTick(),e.yRotO,e.getYRot()),event);liveDrawn++;
-        }
+        // The normal entity pass owns tracked dragons. Never replace global projection under Oculus.
+        liveDrawn=actual.size();
         for(var entry:VIEWS.entrySet()){
             if(actual.containsKey(entry.getKey()))continue;
             var e=entry.getValue();
@@ -70,12 +63,9 @@ public final class InkDragonDistantView {
             e.tickCount=(int)mc.level.getGameTime();draw(e,at,yaw,event);drawn++;
         }
         buffers.endBatch();
-        }finally{com.mojang.blaze3d.systems.RenderSystem.setProjectionMatrix(original,sorting);}
     }
     private static void draw(InkCelestialDragonEntity e,net.minecraft.world.phys.Vec3 at,float yaw,RenderLevelStageEvent event){
-        var mc=Minecraft.getInstance();var camera=event.getCamera().getPosition();var pose=event.getPoseStack();pose.pushPose();
-        try{pose.translate(at.x-camera.x,at.y-camera.y,at.z-camera.z);
-            ((InkCelestialDragonRenderer)mc.getEntityRenderDispatcher().getRenderer(e)).renderWorld(e,yaw,event.getPartialTick(),pose,BUFFERS);
-        }finally{pose.popPose();}
+        var mc=Minecraft.getInstance();var camera=event.getCamera().getPosition();
+        mc.getEntityRenderDispatcher().render(e,at.x-camera.x,at.y-camera.y,at.z-camera.z,yaw,event.getPartialTick(),event.getPoseStack(),BUFFERS,LightTexture.FULL_BRIGHT);
     }
 }

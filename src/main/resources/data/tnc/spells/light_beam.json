@@ -4,7 +4,7 @@
   "range": 0.0,
   "learn": { "tier": 1 },
   "cast": {
-    "duration": 0.6,
+    "duration": 0.0,
     "animation": "spell_engine:one_handed_projectile_charge",
     "sound": { "id": "block.amethyst_block.chime", "randomness": 0 },
     "particles": [ { "particle_id": "end_rod", "shape": "CIRCLE", "origin": "FEET", "count": 16.0, "min_speed": 0.05, "max_speed": 0.2 } ]

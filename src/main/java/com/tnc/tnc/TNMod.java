@@ -55,6 +55,12 @@ public class TNMod
             BLOCKS.register("gamble_table", com.tnc.tnc.casino.machine.TNGambleTableBlock::new);
     public static final RegistryObject<Block> MANA_ROOT =
             BLOCKS.register("mana_root", com.tnc.tnc.life.ManaRoot.RootBlock::new);
+    /** 演武终端：天空岛演武场正中的那台机器（场景方块，不给拆）。 */
+    public static final RegistryObject<Block> PRACTICE_TERMINAL =
+            BLOCKS.register("practice_terminal", com.tnc.tnc.warrior.PracticeTerminalBlock::new);
+    public static final RegistryObject<Item> PRACTICE_TERMINAL_ITEM =
+            ITEMS.register("practice_terminal", () -> new net.minecraft.world.item.BlockItem(
+                    PRACTICE_TERMINAL.get(), new Item.Properties()));
     public static final RegistryObject<Item> GAMBLE_TABLE_ITEM =
             ITEMS.register("gamble_table", () -> new net.minecraft.world.item.BlockItem(
                     GAMBLE_TABLE.get(), new Item.Properties()));
@@ -238,6 +244,8 @@ public class TNMod
         com.tnc.tnc.npc.TNNpcAttributes.register(modEventBus);
         // 法术召唤物/环绕物实体（环绕雷球）
         com.tnc.tnc.magic.TNOrbEntities.register(modEventBus);
+        // 战士系统实体：演武场教官（GeckoLib 模型，按需召出）
+        com.tnc.tnc.warrior.WarriorEntities.register(modEventBus);
         // ★ 地下城小怪 12 只 + 远程弹体（2026-10-20）——
         //   实体类型 / 属性表 / 刷怪蛋三样都在 DungeonMobRegistration 里。
         //   ⚠️ 这一行漏了 ⇒ DeferredRegister 没挂上总线 ⇒ 12 个实体**静默不存在** ✗

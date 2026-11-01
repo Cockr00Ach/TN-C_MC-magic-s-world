@@ -5,7 +5,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
@@ -77,6 +80,33 @@ public class TNLightningStrikeEntity extends Entity {
     private double fallTo;
     /** 落地那一 tick（-1 = 还没落地 ✓）。 */
     private int landedTick = -1;
+
+    // ------------------------------------------------------------------
+    //  ★ 雷声（作者 2026-10-21："为衍的法术增加音效，增加雷声"）
+    //
+    //  原来落雷只有落地那一下"啪"（{@code LIGHTNING_BOLT_IMPACT} ✓，见 tick 里），
+    //  没有**雷声** ✗ —— 而"先看到一道白闪、过一拍才听见轰"才是打雷的听感 ✓。
+    //  所以这里补三处：
+    //  <ol>
+    //    <li><b>落地后的滚雷</b>（{@link #THUNDER_DELAY} tick 之后放）✓；</li>
+    //    <li>只有**大雷**（{@link #THUNDER_MIN_SCALE} 倍以上）和**暗色雷**（黑暗衍 ✓）才配 ——
+    //        主链的雷场一次落十几道 4.5 倍的小雷，每道都配一声滚雷会糊成噪音 ✗；</li>
+    //    <li>同一维度 {@link #THUNDER_GAP} tick 内**只放一次**（兜底：天打五雷轰的 12 道
+    //        是同一 tick 一起落地的 ⇒ 不加这道闸就是 12 声叠在一起 ✗✗）。</li>
+    //  </ol>
+    // ------------------------------------------------------------------
+
+    /** 落地之后隔几 tick 再响滚雷（先"啪"后"轰" ✓）。 */
+    private static final int THUNDER_DELAY = 4;
+    /** 多大的雷才配滚雷（4.5 倍的主链小雷不配 ✓；12 倍的天打五雷轰、20 倍的雷球配 ✓）。 */
+    private static final double THUNDER_MIN_SCALE = 9.0D;
+    /** 同一维度两次滚雷的最小间隔（tick）—— 防止一轮齐落叠成一团噪音 ✓。 */
+    private static final int THUNDER_GAP = 10;
+    /** 每个维度上一次滚雷是哪一 tick ✓（纯表现，不存档、不跨维度 ✓）。 */
+    private static final java.util.Map<ResourceKey<Level>, Long> LAST_THUNDER =
+            new java.util.HashMap<>();
+    /** 这一道雷的滚雷安排在哪一 tick（-1 = 没有安排 ✓）。 */
+    private int thunderTick = -1;
 
     /**
      * 落地那一 tick（**同步给客户端** ✓）：客户端据此只在"砸到地上那一下"晃屏 ✓
@@ -283,6 +313,12 @@ public class TNLightningStrikeEntity extends Entity {
                     6, 1.6D, 1.6D, 1.6D, 0.15D);
             lvl.sendParticles(ParticleTypes.SQUID_INK, this.getX(), this.getY() + 2.0D, this.getZ(),
                     4, 1.6D, 1.6D, 1.6D, 0.10D);
+            // ★ 悬停时的"神鸣"✓ —— 低频（0.55 音高）小声，每 30 tick 一声，
+            //   只是让三尊神"有存在感"，不抢落雷那一声轰 ✓。
+            if (this.tickCount % 30 == 1) {
+                lvl.playSound(null, this.getX(), this.getY() + 1.0D, this.getZ(),
+                        SoundEvents.CONDUIT_AMBIENT, SoundSource.HOSTILE, 1.4F, 0.55F);
+            }
             return;
         }
         if (this.tickCount == 1) {
@@ -304,6 +340,12 @@ public class TNLightningStrikeEntity extends Entity {
             }
             level.sendParticles(ParticleTypes.WITCH, this.getX(), next + 0.5D, this.getZ(),
                     4, 0.3D, 0.8D, 0.3D, 0.3D);
+            // ★ 大雷球（神在投篮）下落时的低频轰鸣 ✓ —— 每 15 tick 一声，
+            //   玩家先听见"有东西正压下来"，落地那一下才接滚雷 ✓。
+            if (this.isBall() && this.tickCount % 15 == 1) {
+                level.playSound(null, this.getX(), this.getY(), this.getZ(),
+                        SoundEvents.BEACON_AMBIENT, SoundSource.HOSTILE, 1.8F, 0.5F);
+            }
             this.setPos(this.getX(), next, this.getZ());
             return;
         }
@@ -321,12 +363,55 @@ public class TNLightningStrikeEntity extends Entity {
             level.sendParticles(ParticleTypes.FLASH, this.getX(), this.getY() + 0.8D, this.getZ(),
                     2, 0.1D, 0.1D, 0.1D, 0.0D);
             level.playSound(null, this.getX(), this.getY(), this.getZ(),
-                    net.minecraft.sounds.SoundEvents.LIGHTNING_BOLT_IMPACT,
-                    net.minecraft.sounds.SoundSource.PLAYERS, 1.0F, 1.2F);
+                    SoundEvents.LIGHTNING_BOLT_IMPACT,
+                    this.isDark() ? SoundSource.HOSTILE : SoundSource.PLAYERS, 1.0F, 1.2F);
+            // ★ 这一下是"啪"（IMPACT ✓）；滚雷排到几 tick 之后 ✓（见 playRollingThunder）
+            this.thunderTick = this.tickCount + THUNDER_DELAY;
             landBlast(level);
-        } else if (this.tickCount > this.landedTick + this.life()) {
+        } else if (this.thunderTick < 0 && this.tickCount > this.landedTick + this.life()) {
             this.discard();
         }
+        // ★ 滚雷：落地之后那一声"轰" ✓（排在 DISCARD 之前，所以不会因为亮完就没了 ✗）
+        if (this.thunderTick > 0 && this.tickCount >= this.thunderTick) {
+            this.thunderTick = -1;
+            this.playRollingThunder((ServerLevel) this.level());
+        }
+    }
+
+    /**
+     * 落地之后那一声<b>滚雷</b> ✓ —— 作者 2026-10-21："为衍的法术增加音效，<b>增加雷声</b>"。
+     *
+     * <p>为什么要"隔一拍"：真实的雷是**先见白闪、后闻轰隆** ✓；而且
+     * {@code LIGHTNING_BOLT_IMPACT} 是短促的"啪"，两种音叠在同一 tick 会互相盖掉 ✗。
+     *
+     * <p>三重节流（缺一道都会糊 ✗）：
+     * <ol>
+     *   <li>只有大雷（≥ {@link #THUNDER_MIN_SCALE} 倍）或暗色雷（黑暗衍那套 ✓）才配；</li>
+     *   <li>同维度 {@link #THUNDER_GAP} tick 内只放一次；</li>
+     *   <li>音量按体型给（4.5 → 1.3；12 → 2.0；20 → 2.6 封顶 ✓）。</li>
+     * </ol>
+     * 于是"天打五雷轰"的 12 道齐落听起来是**一声**又厚又长的轰 ✓，
+     * 而不是 12 个喇叭一起炸 ✗。
+     */
+    private void playRollingThunder(ServerLevel level) {
+        double size = this.scale();
+        if (!this.isDark() && size < THUNDER_MIN_SCALE) {
+            return;
+        }
+        long now = level.getGameTime();
+        Long last = LAST_THUNDER.get(level.dimension());
+        if (last != null && now - last < THUNDER_GAP) {
+            return;
+        }
+        LAST_THUNDER.put(level.dimension(), now);
+        float volume = (float) Math.min(2.6D, 0.9D + size * 0.09D);
+        // 暗色雷压得更低更闷 ✓（和"黑暗衍"那套紫黑观感一致；亮色雷亮一点 ✓）
+        float pitch = this.isDark() ? 0.72F : 0.9F;
+        // 音源跟着"谁的雷"走 ✓：黑暗衍放的算敌对音（受敌对音量控制），
+        // 玩家自己放的主链雷算玩家音（受玩家音量控制）—— 和 IMPACT 那一句同一条规矩 ✓
+        level.playSound(null, this.getX(), this.getY(), this.getZ(),
+                SoundEvents.LIGHTNING_BOLT_THUNDER,
+                this.isDark() ? SoundSource.HOSTILE : SoundSource.PLAYERS, volume, pitch);
     }
 
     /**

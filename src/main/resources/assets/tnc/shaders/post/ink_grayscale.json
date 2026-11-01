@@ -1,0 +1,1 @@
+{"targets":["swap"],"passes":[{"name":"tnc:ink_grayscale","intarget":"minecraft:main","outtarget":"swap"},{"name":"blit","intarget":"swap","outtarget":"minecraft:main"}]}

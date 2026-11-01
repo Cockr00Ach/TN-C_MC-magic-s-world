@@ -21,6 +21,8 @@ public final class CanglanWarGodRules {
     public static boolean executionHealth(float health,float absorption,float maximum){
         return maximum>0&&health>0&&health+Math.max(0,absorption)<maximum*.5F;
     }
+    /** Zero-duration messages still cancel a shot; only a true execution may open one. */
+    public static boolean executionCamera(int ticks,boolean execution){return ticks>0&&execution;}
     public static double sweepRange(float scale){return 7D*scale;}
     /** Tactical landing offset from the caster: two spacing moves, then a melee entry. */
     public static double[] stepOffset(double awayX,double awayZ,float scale,int stage,boolean dodge,int side){
@@ -39,8 +41,8 @@ public final class CanglanWarGodRules {
         if(length>limit){x*=limit/length;z*=limit/length;}
         return new double[]{x,z};
     }
-    public static int duration(int move) { return move == TORNADO ? 48 : move >= ARSENAL_4 ? 46 : move == WAVE ? 30 : move == 5 ? 80 : move == 1 ? 34 : 20; }
-    public static String animation(int move) { return move == TORNADO ? "cyclone" : move == 5 ? "sweep" : move >= ARSENAL_4 ? "sky_arsenal" : move == WAVE ? "gale_cut" : "thrust"; }
+    public static int duration(int move) { return move == CanglanExecutionPose.MOVE ? CanglanExecutionPose.DURATION : move == TORNADO ? 48 : move >= ARSENAL_4 ? 46 : move == WAVE ? 30 : move == 5 ? 80 : move == 1 ? 34 : 20; }
+    public static String animation(int move) { return move == CanglanExecutionPose.MOVE ? "execution_impale" : move == TORNADO ? "cyclone" : move == 5 ? "sweep" : move >= ARSENAL_4 ? "sky_arsenal" : move == WAVE ? "gale_cut" : "thrust"; }
     /** Authored root-Z curve in blocks, extracted from the user's thrust clip. */
     public static double thrustDistance(int age) {
         double seconds = Math.max(0, Math.min(20, age)) / 20D;

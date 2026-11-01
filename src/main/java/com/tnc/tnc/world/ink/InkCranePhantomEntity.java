@@ -176,7 +176,7 @@ public final class InkCranePhantomEntity extends Entity implements GeoEntity {
         if (pass >= 0) {
             if (lastSweepPass != pass) { struck.clear(); lastSweepPass = pass; }
             for (LivingEntity victim : level().getEntitiesOfClass(LivingEntity.class,
-                    owner.getBoundingBox().inflate(14, 1.5, 14), e -> canHit(owner, e))) {
+                    owner.getBoundingBox().inflate(InkCraneAttackRules.SWEEP_REACH, 1.5, InkCraneAttackRules.SWEEP_REACH), e -> canHit(owner, e))) {
                 Vec3 delta = victim.position().subtract(owner.position());
                 if (InkCraneAttackRules.inSweep(delta.x, delta.z, forward.x, forward.z)
                         && owner.hasLineOfSight(victim) && struck.add(victim.getUUID())) {

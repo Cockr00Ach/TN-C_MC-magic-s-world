@@ -22,7 +22,7 @@ public final class InkWingedTigerRenderer extends GeoEntityRenderer<InkWingedTig
         super.renderCubesOfBone(pose,bone,out,light,overlay,r,g,b,a*InkWingOpacity.alpha(bone.getName()));
     }
     @Override public void render(InkWingedTigerEntity e,float yaw,float partial,PoseStack pose,MultiBufferSource buffers,int light){
-        boolean folded=e.inkMove()==0;Boolean previous=foldedStates.put(e,folded);
+        boolean folded=e.inkMove()==0||e.inkMove()==4;Boolean previous=foldedStates.put(e,folded);
         // Old open-wing trails must not hang in the air after the wings fold against the body.
         if(previous!=null&&previous!=folded){trails.remove(e);sampled.remove(e);}
         super.render(e,yaw,partial,pose,buffers,light);

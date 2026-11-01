@@ -34,8 +34,7 @@ public final class TravelMusicController {
      * ★ 2026-09-30：boss 战音乐（作者："音乐效果没出来"）
      *
      * <h2>为什么"凋零那套"没有音乐可放</h2>
-     * 原版凋零**根本没有专属 BGM** ✗ —— 全游戏只有末影龙有 boss 音乐
-     * （{@code minecraft:music.dragon}）。所以这里直接借**末影龙那首**当 boss 曲 ✓。
+     * 使用本地导入的 Crywolf，作为公孙衍专属战斗音乐。
      *
      * <h2>为什么不能交给原版 MusicManager</h2>
      * 本整合包的背景音乐由**我们自己**接管：{@code MusicManagerMixin} 把原版音乐关掉了

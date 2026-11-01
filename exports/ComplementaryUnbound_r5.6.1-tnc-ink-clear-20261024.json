@@ -1,0 +1,17 @@
+{
+  "source": "E:\\download\\正式版 2.12.6.1\\.minecraft\\versions\\元素觉醒1.4.3-魔改版-20260915\\shaderpacks\\ComplementaryUnbound_r5.6.1",
+  "output": "D:\\ModTest\\exports\\ComplementaryUnbound_r5.6.1-tnc-ink-clear-20261024.zip",
+  "customDimension": "tnc:ink_realm",
+  "changedSharedFiles": [
+    "shaders/dimension.properties",
+    "shaders/lib/atmospherics/fog/mainFog.glsl",
+    "shaders/lib/common.glsl",
+    "shaders/shaders.properties"
+  ],
+  "newEntryPoints": 59,
+  "originalWorldProgramsUnchanged": true,
+  "sourceUnchanged": true,
+  "sha256": "2533bcf2a8ce1eac0064bf287abb9fa2c0766e5dbaacfac948012ddba48c58f8",
+  "runtimeShaderCompilationVerified": true,
+  "runtimeReport": "D:/ModTest/work/ink-clear-atmosphere-native-report.json"
+}

@@ -18,8 +18,9 @@ public final class InkWingedTigerGameTests {
     private static LivingEntity target(GameTestHelper h,int z){var e=h.spawn(EntityType.VILLAGER,new BlockPos(20,4,z));e.setNoAi(true);e.setNoGravity(true);e.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1000);e.setHealth(1000);return e;}
     private static java.util.List<InkTigerEffectEntity> effects(GameTestHelper h,InkWingedTigerEntity t){return h.getLevel().getEntitiesOfClass(InkTigerEffectEntity.class,t.getBoundingBox().inflate(100),e->e.ownedBy(t));}
     private static void clean(GameTestHelper h,InkWingedTigerEntity t,LivingEntity... enemies){for(var e:effects(h,t))e.discard();t.discard();for(var e:enemies)e.discard();}
-    @GameTest(template="ink_crane_empty",timeoutTicks=220)
+    @GameTest(batch="ink_skyShotChargesThenHitsGrowsAndExplodesOnlyOnce",template="ink_crane_empty",timeoutTicks=220)
     public static void skyShotChargesThenHitsGrowsAndExplodesOnlyOnce(GameTestHelper h){
+        InkCombatTestIsolation.prepare(h);
         var t=tiger(h);var e=target(h,36);Vec3 home=t.position();t.startInkAttack(1,e);
         h.runAtTickTime(40,()->{h.assertTrue(t.getY()>home.y+10&&t.isNoGravity(),"Real body rises before spit");h.assertTrue(effects(h,t).isEmpty(),"No premature projectile");});
         h.runAtTickTime(100,()->h.assertTrue(effects(h,t).stream().anyMatch(v->v.mode()==InkTigerEffectEntity.BALL),"Shot collision becomes anchored growing ball"));
@@ -29,28 +30,32 @@ public final class InkWingedTigerGameTests {
             h.assertTrue(effects(h,t).stream().anyMatch(v->v.mode()==InkTigerEffectEntity.BALL&&v.age()>=100),"Landscape aftermath persists");
             h.assertTrue(h.getBlockState(new BlockPos(20,3,36)).is(Blocks.STONE),"No terrain destruction");clean(h,t,e);h.succeed();});
     }
-    @GameTest(template="ink_crane_empty",timeoutTicks=100)
+    @GameTest(batch="ink_giantGhostFormsBehindTigerThenChargesTarget",template="ink_crane_empty",timeoutTicks=100)
     public static void giantGhostFormsBehindTigerThenChargesTarget(GameTestHelper h){
+        InkCombatTestIsolation.prepare(h);
         var t=tiger(h);var e=target(h,36);Vec3 home=t.position();t.startInkAttack(2,e);
-        h.runAtTickTime(12,()->{var ghost=effects(h,t).stream().filter(v->v.mode()==InkTigerEffectEntity.GHOST).findFirst().orElseThrow();h.assertTrue(ghost.getZ()<t.getZ()-4,"Ghost forms behind caster");h.assertTrue(e.getHealth()==1000,"No windup damage");});
-        h.runAtTickTime(75,()->{h.assertTrue(e.getHealth()==970,"One ghost impact: "+e.getHealth());h.assertTrue(t.position().distanceTo(home)<1,"Ghost, not caster, rushes");clean(h,t,e);h.succeed();});
+        h.runAtTickTime(12,()->{var ghost=effects(h,t).stream().filter(v->v.mode()==InkTigerEffectEntity.GHOST&&v.releaseAt()==22).findFirst().orElseThrow();h.assertTrue(ghost.getZ()<t.getZ()-4,"Primary ghost forms behind caster");h.assertTrue(e.getHealth()==1000,"No windup damage");});
+        h.runAtTickTime(75,()->{h.assertTrue(e.getHealth()<=970,"Staggered ghosts impact: "+e.getHealth());h.assertTrue(t.position().distanceTo(home)<1,"Ghosts, not caster, rush");clean(h,t,e);h.succeed();});
     }
-    @GameTest(template="ink_crane_empty",timeoutTicks=170)
+    @GameTest(batch="ink_roarPullsThenDetonatesThenWingSlashes",template="ink_crane_empty",timeoutTicks=170)
     public static void roarPullsThenDetonatesThenWingSlashes(GameTestHelper h){
+        InkCombatTestIsolation.prepare(h);
         var t=tiger(h);var e=target(h,30);var far=target(h,47);t.startInkAttack(3,e);double z=e.getZ();
         h.runAtTickTime(65,()->{h.assertTrue(e.getDeltaMovement().z<-.001||e.getZ()<z-.2,"Server applies inward impulse even to no-AI fixture: "+e.getDeltaMovement());h.assertTrue(e.getHealth()==1000,"Charge does not detonate early");});
         h.runAtTickTime(95,()->h.assertTrue(e.getHealth()<=972,"Ball detonates before wing spin"));
         h.runAtTickTime(145,()->{h.assertTrue(e.getHealth()<972,"Subsequent wing slash damage");h.assertTrue(far.getHealth()==1000,"Outside suction/blast/slash range");h.assertTrue(t.getHealth()==t.getMaxHealth(),"Caster safe");clean(h,t,e,far);h.succeed();});
     }
-    @GameTest(template="ink_crane_empty",timeoutTicks=65)
+    @GameTest(batch="ink_interruptedOrReloadedFlightNeverLeavesTigerFloating",template="ink_crane_empty",timeoutTicks=65)
     public static void interruptedOrReloadedFlightNeverLeavesTigerFloating(GameTestHelper h){
+        InkCombatTestIsolation.prepare(h);
         var t=tiger(h);var e=target(h,36);Vec3 home=t.position();t.startInkAttack(1,e);
         h.runAtTickTime(35,()->{var tag=new net.minecraft.nbt.CompoundTag();t.saveWithoutId(tag);var restored=InkBossRegistration.INK_WINGED_TIGER.create(h.getLevel());restored.load(tag);
             h.assertTrue(!restored.isNoGravity()&&restored.inkMove()==0&&restored.position().distanceTo(home)<1,"Reload returns to safe ground");e.discard();});
         h.runAtTickTime(45,()->{h.assertTrue(!t.isNoGravity()&&t.inkMove()==0&&t.position().distanceTo(home)<1,"Target loss cancels flight");clean(h,t);h.succeed();});
     }
-    @GameTest(template="ink_crane_empty",timeoutTicks=20)
+    @GameTest(batch="ink_blinkChecksBodyVolumeAndLeavesTwoWatercolorStains",template="ink_crane_empty",timeoutTicks=20)
     public static void blinkChecksBodyVolumeAndLeavesTwoWatercolorStains(GameTestHelper h){
+        InkCombatTestIsolation.prepare(h);
         var t=tiger(h);Vec3 before=t.position(),at=before.add(10,0,0);
         h.assertTrue(t.blinkTo(at),"Safe supported destination accepted");h.assertTrue(t.position().distanceTo(at)<.01,"Actual teleport");
         h.assertTrue(effects(h,t).stream().filter(v->v.mode()==InkTigerEffectEntity.STAIN).count()==2,"Departure and arrival stains");
@@ -58,20 +63,22 @@ public final class InkWingedTigerGameTests {
         h.assertTrue(!t.blinkTo(before.add(0,12,0)),"Unsupported air destination rejected");
         h.setBlock(20,5,20,Blocks.AIR);clean(h,t);h.succeed();
     }
-    @GameTest(template="ink_crane_empty",timeoutTicks=65)
+    @GameTest(batch="ink_ceilingLimitsFlightAndDeadCasterCancelsPendingDamage",template="ink_crane_empty",timeoutTicks=65)
     public static void ceilingLimitsFlightAndDeadCasterCancelsPendingDamage(GameTestHelper h){
+        InkCombatTestIsolation.prepare(h);
         var t=tiger(h);var e=target(h,36);double y=t.getY();
         for(var p:BlockPos.betweenClosed(h.absolutePos(new BlockPos(16,14,16)),h.absolutePos(new BlockPos(24,14,24))))h.getLevel().setBlock(p,Blocks.STONE.defaultBlockState(),2);
         t.startInkAttack(1,e);
         h.runAtTickTime(40,()->{h.assertTrue(t.getY()<y+3,"Body does not rise through ceiling");t.kill();});
         h.runAtTickTime(50,()->{h.assertTrue(e.getHealth()==1000,"No postmortem projectile damage");clean(h,t,e);h.succeed();});
     }
-    @GameTest(template="ink_crane_empty",timeoutTicks=75)
+    @GameTest(batch="ink_wallAndAlliesBlockSuctionAndShotDamage",template="ink_crane_empty",timeoutTicks=75)
     public static void wallAndAlliesBlockSuctionAndShotDamage(GameTestHelper h){
-        var t=tiger(h);var e=target(h,36);var ally=target(h,24);
+        InkCombatTestIsolation.prepare(h);
+        var t=tiger(h);var e=target(h,60);var ally=target(h,24);
         var board=h.getLevel().getScoreboard();var team=board.addPlayerTeam("tiger"+t.getId());
         board.addPlayerToTeam(t.getStringUUID(),team);board.addPlayerToTeam(ally.getStringUUID(),team);
-        for(var p:BlockPos.betweenClosed(h.absolutePos(new BlockPos(16,4,28)),h.absolutePos(new BlockPos(24,20,28))))h.getLevel().setBlock(p,Blocks.STONE.defaultBlockState(),2);
+        for(var p:BlockPos.betweenClosed(h.absolutePos(new BlockPos(10,4,48)),h.absolutePos(new BlockPos(30,35,48))))h.getLevel().setBlock(p,Blocks.STONE.defaultBlockState(),2);
         InkTigerEffectEntity.pull(t,t.position(),22,.045,.22);
         h.assertTrue(e.getDeltaMovement().lengthSqr()==0&&ally.getDeltaMovement().lengthSqr()==0,"Neither wall-hidden enemy nor ally pulled");
         InkTigerEffectEntity.spawn(t,e,InkTigerEffectEntity.SHOT,t.mouthPosition(false));
@@ -79,8 +86,9 @@ public final class InkWingedTigerGameTests {
             h.assertTrue(effects(h,t).stream().anyMatch(v->v.mode()==InkTigerEffectEntity.BALL),"Wall impact anchors ball without tunnelling");
             board.removePlayerTeam(team);clean(h,t,e,ally);h.succeed();});
     }
-    @GameTest(template="ink_crane_empty",timeoutTicks=145)
+    @GameTest(batch="ink_tigerBallPullsRealPhysicsTargetSeveralBlocksAndStopsAfterBlast",template="ink_crane_empty",timeoutTicks=145)
     public static void tigerBallPullsRealPhysicsTargetSeveralBlocksAndStopsAfterBlast(GameTestHelper h){
+        InkCombatTestIsolation.prepare(h);
         var t=tiger(h);var e=target(h,32);((Mob)e).setNoAi(false);e.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0);
         Vec3 start=e.position();var ball=InkTigerEffectEntity.spawn(t,e,InkTigerEffectEntity.BALL,t.position().add(0,0,20));
         h.runAtTickTime(25,()->h.assertTrue(e.position().distanceTo(start)<.01,"No early pull"));
@@ -91,4 +99,28 @@ public final class InkWingedTigerGameTests {
         h.runAtTickTime(130,()->{h.assertTrue(e.position().distanceTo(start)<.01,"Attraction ends after detonation");
             h.assertTrue(t.getBbWidth()>7&&t.getBbHeight()>7,"Body-sized hitbox follows visual scale");clean(h,t,e);h.succeed();});
     }
+
+    @net.minecraft.gametest.framework.BeforeBatch(batch="ink_skyShotChargesThenHitsGrowsAndExplodesOnlyOnce")
+    public static void isolate_skyShotChargesThenHitsGrowsAndExplodesOnlyOnce(net.minecraft.server.level.ServerLevel level){InkCombatTestIsolation.clear(level);}
+
+    @net.minecraft.gametest.framework.BeforeBatch(batch="ink_giantGhostFormsBehindTigerThenChargesTarget")
+    public static void isolate_giantGhostFormsBehindTigerThenChargesTarget(net.minecraft.server.level.ServerLevel level){InkCombatTestIsolation.clear(level);}
+
+    @net.minecraft.gametest.framework.BeforeBatch(batch="ink_roarPullsThenDetonatesThenWingSlashes")
+    public static void isolate_roarPullsThenDetonatesThenWingSlashes(net.minecraft.server.level.ServerLevel level){InkCombatTestIsolation.clear(level);}
+
+    @net.minecraft.gametest.framework.BeforeBatch(batch="ink_interruptedOrReloadedFlightNeverLeavesTigerFloating")
+    public static void isolate_interruptedOrReloadedFlightNeverLeavesTigerFloating(net.minecraft.server.level.ServerLevel level){InkCombatTestIsolation.clear(level);}
+
+    @net.minecraft.gametest.framework.BeforeBatch(batch="ink_blinkChecksBodyVolumeAndLeavesTwoWatercolorStains")
+    public static void isolate_blinkChecksBodyVolumeAndLeavesTwoWatercolorStains(net.minecraft.server.level.ServerLevel level){InkCombatTestIsolation.clear(level);}
+
+    @net.minecraft.gametest.framework.BeforeBatch(batch="ink_ceilingLimitsFlightAndDeadCasterCancelsPendingDamage")
+    public static void isolate_ceilingLimitsFlightAndDeadCasterCancelsPendingDamage(net.minecraft.server.level.ServerLevel level){InkCombatTestIsolation.clear(level);}
+
+    @net.minecraft.gametest.framework.BeforeBatch(batch="ink_wallAndAlliesBlockSuctionAndShotDamage")
+    public static void isolate_wallAndAlliesBlockSuctionAndShotDamage(net.minecraft.server.level.ServerLevel level){InkCombatTestIsolation.clear(level);}
+
+    @net.minecraft.gametest.framework.BeforeBatch(batch="ink_tigerBallPullsRealPhysicsTargetSeveralBlocksAndStopsAfterBlast")
+    public static void isolate_tigerBallPullsRealPhysicsTargetSeveralBlocksAndStopsAfterBlast(net.minecraft.server.level.ServerLevel level){InkCombatTestIsolation.clear(level);}
 }

@@ -15,11 +15,11 @@ try {
     $warriorLog = Join-Path $warriorRoot 'work/warrior-gametest.log'
     & .\gradlew.bat runGameTestServer -PwarriorTests -PbuildingGameTests -x downloadAssets --offline --console=plain *> $warriorLog
     if ($LASTEXITCODE -ne 0) { throw "Warrior server tests failed. See $warriorLog" }
-    if (-not (Select-String -LiteralPath $warriorLog -Pattern '18 GAME TESTS COMPLETE' -Quiet) -or
-        -not (Select-String -LiteralPath $warriorLog -Pattern 'All 18 required tests passed' -Quiet)) {
-        throw "Expected eighteen passing server tests; zero discovered tests is not success. See $warriorLog"
+    if (-not (Select-String -LiteralPath $warriorLog -Pattern '19 GAME TESTS COMPLETE' -Quiet) -or
+        -not (Select-String -LiteralPath $warriorLog -Pattern 'All 19 required tests passed' -Quiet)) {
+        throw "Expected nineteen passing server tests; zero discovered tests is not success. See $warriorLog"
     }
-    Write-Output "PASS: all eighteen warrior server tests executed. Log: $warriorLog"
+    Write-Output "PASS: all nineteen warrior server tests executed. Log: $warriorLog"
 } finally {
     $env:JAVA_HOME = $warriorOriginalJava
     $env:GRADLE_USER_HOME = $warriorOriginalGradle

@@ -19,17 +19,18 @@ public class SelfBedrockGeoModel extends GeoModel<SelfBedrockNpcEntity> {
 
     @Override
     public ResourceLocation getModelResource(SelfBedrockNpcEntity animatable) {
-        return SelfBedrockNpcEntity.modelResource();
+        // 按这一只是不是"持杖"外观分流：普通 / 持杖各有自己的模型 + 贴图 + 动画文件。
+        return animatable.renderModelResource();
     }
 
     @Override
     public ResourceLocation getTextureResource(SelfBedrockNpcEntity animatable) {
-        return SelfBedrockNpcEntity.textureResource();
+        return animatable.renderTextureResource();
     }
 
     @Override
     public ResourceLocation getAnimationResource(SelfBedrockNpcEntity animatable) {
-        return SelfBedrockNpcEntity.animationResource();
+        return animatable.renderAnimationResource();
     }
 
     /**

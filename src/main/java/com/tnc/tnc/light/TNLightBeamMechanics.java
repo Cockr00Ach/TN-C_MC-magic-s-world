@@ -469,7 +469,7 @@ public final class TNLightBeamMechanics {
         Vec3 from = caster.getEyePosition();
         List<Vec3> dirs = fanDirections(caster.getLookAngle(), spell.rays(), spell.spreadDeg());
         for (int i=0;i<dirs.size();i++) {
-            spawn(level,caster,from,dirs.get(i),spell,TNLightBeamEntity.STYLE_RAY,null,lengthScale,sizeScale,
+            spawn(level,caster,from,dirs.get(i),spell,TNLightBeamEntity.STYLE_PULSE,null,lengthScale,sizeScale,
                     (float)LightBeamAim.offset(i,dirs.size(),spell.spreadDeg()));
         }
         play(level, from, spell.tier() >= 3 ? SoundEvents.BEACON_ACTIVATE : SoundEvents.AMETHYST_BLOCK_CHIME);
@@ -477,7 +477,7 @@ public final class TNLightBeamMechanics {
             player.displayClientMessage(Component.literal("§e[TN-C] §r" + name(spell)
                     + " §7（" + spell.rays() + " 道实体光线，每道粗 "
                     + String.format(java.util.Locale.ROOT, "%.1f", spell.radius() * 2.0D) + " 格"
-                    + "，随面朝方向）"), true);
+                    + "，瞬发白光，可经光镜分光）"), true);
         }
         LOGGER.info("TN-C/light: 光线 {} rays={} radius={} dmg={} caster={} target={}",
                 spell.path(), spell.rays(), spell.radius(), spell.damage(), caster.getName().getString(),
@@ -576,7 +576,8 @@ public final class TNLightBeamMechanics {
             length = Math.max(length * 0.5D, target.position().distanceTo(from));
         }
         // ★ 半径乘 sizeScale ✓（天使那发 t4 传 0.2 = 缩小五倍 ✓）
-        beam.configure(caster, spell.radius() * sizeScale, length, spell.damage(), BEAM_LIFE, style, target);
+        beam.configure(caster, spell.radius() * sizeScale, length, spell.damage(),
+                spell.sky() ? BEAM_LIFE : LightMirrorRules.PULSE_TICKS, style, target);
         beam.setFanOffset(fanOffset);
         beam.setShake(spell.shake());            // ★ 画面震动（作者 2026-10-01："并且加上画面震动"✓）
         level.addFreshEntity(beam);

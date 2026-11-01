@@ -15,6 +15,9 @@ final class CanglanWarlordCombat {
     private int move, age, cycle, cooldown=30, stepCooldown=8, dodgeCooldown, recallAge=-1;
     private LivingEntity target,testTarget,executionTarget;
     private net.minecraft.server.level.ServerPlayer cinematicPlayer;
+    private long executionStarted;
+    private float executionYaw;
+    private boolean impaled,flung,executionFinished;
     private boolean testing,testLoop;
     private int testMove;
     private int consecutiveSteps,footworkStage;
@@ -34,6 +37,14 @@ final class CanglanWarlordCombat {
     int anchorCount(){return anchors.size();}
     int consecutiveSteps(){return consecutiveSteps;}
     boolean testing(){return testing;}
+    boolean hasCinematic(){return cinematicPlayer!=null;}
+    void syncExecution(net.minecraft.server.level.ServerPlayer player){
+        if(move==CanglanExecutionPose.MOVE&&executionTarget!=null)CanglanCinematicNetwork.executionTo(player,boss,executionTarget,executionStarted,executionPhase());
+    }
+    private int executionPhase(){return flung?CanglanExecutionPose.FLUNG:impaled?CanglanExecutionPose.PINNED:CanglanExecutionPose.WINDUP;}
+    private boolean executable(LivingEntity victim){return victim!=null&&victim.isAlive()&&!victim.isRemoved()&&victim.level()==boss.level()
+            &&CanglanWarGodRules.executionHealth(victim.getHealth(),victim.getAbsorptionAmount(),victim.getMaxHealth())&&!victim.isInvulnerable()
+            &&!victim.isPassenger()&&(!(victim instanceof net.minecraft.world.entity.player.Player p)||!p.isCreative()&&!p.isSpectator()&&!com.tnc.tnc.combat.DownedCombat.isDowned(p));}
     void testAttack(int requested,LivingEntity victim,boolean loop){
         cleanup();testing=true;testLoop=loop;testMove=requested;testTarget=victim;
         boss.setTarget(victim);begin(requested,victim);
@@ -47,13 +58,17 @@ final class CanglanWarlordCombat {
     }
     boolean begin(int requested,LivingEntity victim){
         if(busy()||requested==0||victim==null||!victim.isAlive())return false;
-        if(requested==5&&!canSweep(victim))return false;
+        if((requested==5||requested==CanglanExecutionPose.MOVE)&&!canSweep(victim))return false;
+        if(requested==CanglanExecutionPose.MOVE&&!executable(victim))return false;
+        if(requested==5&&executable(victim))requested=CanglanExecutionPose.MOVE;
         meleeEntry=false;move=requested;target=victim;age=0;boss.setCanglanMove(move);
         thrustVictims.clear();
-        if(move==5){
-            executionTarget=CanglanWarGodRules.executionHealth(victim.getHealth(),victim.getAbsorptionAmount(),victim.getMaxHealth())&&!victim.isInvulnerable()
-                    &&(!(victim instanceof net.minecraft.world.entity.player.Player p)||!p.isCreative())?victim:null;
-            if(victim instanceof net.minecraft.server.level.ServerPlayer p){cinematicPlayer=p;CanglanCinematicNetwork.send(p,boss,80,executionTarget!=null);}
+        if(move==CanglanExecutionPose.MOVE){
+            executionTarget=victim;executionStarted=Math.max(boss.level().getGameTime()+1,executionStarted+1);impaled=flung=executionFinished=false;
+            Vec3 delta=victim.position().subtract(boss.position());float yaw=(float)Math.toDegrees(Math.atan2(-delta.x,delta.z));
+            executionYaw=yaw;boss.setYRot(yaw);boss.yBodyRot=yaw;boss.setYHeadRot(yaw);
+            CanglanCinematicNetwork.execution(boss,victim,executionStarted,CanglanExecutionPose.WINDUP);
+            if(victim instanceof net.minecraft.server.level.ServerPlayer p){cinematicPlayer=p;CanglanCinematicNetwork.send(p,boss,CanglanExecutionPose.DURATION,true);}
         }
         if(move==1){
             thrustDirection=victim.position().subtract(boss.position()).multiply(1,0,1).normalize();
@@ -84,6 +99,7 @@ final class CanglanWarlordCombat {
             boss.setDeltaMovement(Vec3.ZERO);--travelTicks;if(travelTicks==0)boss.setCanglanMove(0);return;
         }
         if(recallAge>=0){tickRecall();return;}
+        if(move==CanglanExecutionPose.MOVE){tickExecution();return;}
         if(anchors.size()>=10){recallAge=0;tickRecall();return;}
         LivingEntity victim=boss.getTarget();
         if(victim==null||!victim.isAlive()) {if(!anchors.isEmpty())clearAnchors();cancel();return;}
@@ -108,7 +124,6 @@ final class CanglanWarlordCombat {
         float scale=boss.battleScale();
         if(move==1 && age<20) advanceThrust(scale);
         if(move==1 && age==24) strikeThrust(boss.position(),boss.position(),scale);
-        if(move==5 && age==66)executeSweep();
         if(move==5 && age==66)strike(boss.position(),8*scale,true);
         if(move==CanglanWarGodRules.TORNADO&&age==26){strike(boss.position(),9*scale,true);gale(boss.position(),false);}
         if(move==CanglanWarGodRules.WAVE&&age==15){
@@ -121,16 +136,34 @@ final class CanglanWarlordCombat {
         }
         if(++age>=CanglanWarGodRules.duration(move)){consecutiveSteps=0;boolean arsenal=move>=11;cancel();cooldown=arsenal?35:18;}
     }
-    private void executeSweep(){
+    private void tickExecution(){
         LivingEntity victim=executionTarget;
-        if(victim==null||!victim.isAlive()||!CanglanWarGodRules.executionHealth(victim.getHealth(),victim.getAbsorptionAmount(),victim.getMaxHealth())||victim.isInvulnerable()
-                ||!canSweep(victim)||!boss.hasLineOfSight(victim))return;
-        if(victim instanceof net.minecraft.world.entity.player.Player p&&(p.isCreative()||p.isSpectator()))return;
-        if(victim.hurt(boss.level().damageSources().mobAttack(boss),Float.MAX_VALUE)){
-            thrustVictims.add(victim.getId());
-            boss.level().playSound(null,victim.blockPosition(),SoundEvents.TRIDENT_THUNDER,SoundSource.HOSTILE,1.8F,.8F);
-            ((ServerLevel)boss.level()).sendParticles(net.minecraft.core.particles.ParticleTypes.SWEEP_ATTACK,victim.getX(),victim.getY()+1,victim.getZ(),12,1,1,1,.05);
+        if(victim==null||victim.level()!=boss.level()||victim.isRemoved()||!boss.isAlive()||boss.isRemoved()){cancel();return;}
+        if(!executionFinished&&!executable(victim)){cancel();return;}
+        if(age>0&&age%10==0)CanglanCinematicNetwork.execution(boss,victim,executionStarted,executionPhase());
+        boss.getNavigation().stop();boss.setDeltaMovement(Vec3.ZERO);boss.setYRot(executionYaw);boss.yBodyRot=executionYaw;boss.setYHeadRot(executionYaw);
+        if(age==CanglanExecutionPose.CONTACT){
+            if(!canSweep(victim)||!boss.hasLineOfSight(victim)){cancel();return;}
+            Vec3 feet=CanglanExecutionPose.tip(boss,age).subtract(0,victim.getBbHeight()*.55,0);
+            if(!CanglanExecutionPins.bind(boss,victim,feet)){cancel();return;}
+            impaled=true;CanglanCinematicNetwork.execution(boss,victim,executionStarted,CanglanExecutionPose.PINNED);
+            boss.level().playSound(null,victim.blockPosition(),SoundEvents.TRIDENT_HIT,SoundSource.HOSTILE,1.8F,.65F);
         }
+        if(impaled&&age<CanglanExecutionPose.RELEASE){
+            if(!CanglanExecutionPins.move(boss,victim,CanglanExecutionPose.tip(boss,age).subtract(0,victim.getBbHeight()*.55,0))){cancel();return;}
+            if(age%5==0)((ServerLevel)boss.level()).sendParticles(net.minecraft.core.particles.ParticleTypes.SWEEP_ATTACK,victim.getX(),victim.getY()+.8,victim.getZ(),2,.15,.3,.15,.01);
+        }
+        if(impaled&&age==CanglanExecutionPose.RELEASE){
+            CanglanExecutionPins.release(boss,victim);impaled=false;flung=true;
+            victim.setDeltaMovement(CanglanExecutionPose.launch(boss.yBodyRot,boss.battleScale()));victim.fallDistance=0;victim.hurtMarked=true;
+            if(victim instanceof net.minecraft.server.level.ServerPlayer p&&!(p instanceof net.minecraftforge.common.util.FakePlayer))p.connection.send(new net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket(p));
+            CanglanCinematicNetwork.execution(boss,victim,executionStarted,CanglanExecutionPose.FLUNG);
+            boss.level().playSound(null,boss.blockPosition(),SoundEvents.TRIDENT_RIPTIDE_3,SoundSource.HOSTILE,2,.7F);
+        }
+        if(flung&&!executionFinished&&(age>=CanglanExecutionPose.FINISH||age>=CanglanExecutionPose.RELEASE+8&&victim.onGround())){
+            executionFinished=true;CanglanExecutionHealth.finish(boss,victim);
+        }
+        if(++age>=CanglanExecutionPose.DURATION){consecutiveSteps=0;cancel();cooldown=35;}
     }
     private void advanceThrust(float scale){
         Vec3 from=boss.position();
@@ -231,7 +264,7 @@ final class CanglanWarlordCombat {
         }
         ((ServerLevel)boss.level()).sendParticles(net.minecraft.core.particles.ParticleTypes.SWEEP_ATTACK,at.x,at.y+1,at.z,8,reach*.35,.5,reach*.35,.02);
     }
-    void cancel(){if(cinematicPlayer!=null)CanglanCinematicNetwork.send(cinematicPlayer,boss,0,false);cinematicPlayer=null;executionTarget=null;thrustVictims.clear();move=0;age=0;target=null;boss.setCanglanMove(0);cooldown=18;}
+    void cancel(){CanglanExecutionPins.releaseAll(boss);if(executionTarget!=null)CanglanCinematicNetwork.execution(boss,executionTarget,executionStarted,CanglanExecutionPose.END);if(cinematicPlayer!=null)CanglanCinematicNetwork.send(cinematicPlayer,boss,0,false);cinematicPlayer=null;executionTarget=null;impaled=flung=executionFinished=false;thrustVictims.clear();move=0;age=0;target=null;boss.setCanglanMove(0);cooldown=18;}
     void clearAnchors(){for(var e:anchors)e.discard();anchors.clear();recallAge=-1;}
     void cleanup(){meleeEntry=false;travelTicks=0;travelTo=null;cancel();clearAnchors();for(var e:spells)e.discard();spells.clear();}
 }

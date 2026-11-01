@@ -101,6 +101,7 @@ public final class CanglanWarlordRenderer extends GeoEntityRenderer<CanglanWarlo
                                   boolean reRender, float partial, int light, int overlay,
                                   float red, float green, float blue, float alpha) {
         String name = bone.getName();
+        if(!reRender&&name.equals("root"))CanglanExecutionClient.pose(entity,bone,partial);
         // The mask's eye slit is emissive: it has to survive a dark arena.
         int boneLight = name.equals("eyes") ? LightTexture.FULL_BRIGHT : light;
         super.renderRecursively(pose, entity, bone, type, buffers, out, reRender,

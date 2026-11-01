@@ -23,9 +23,9 @@ class InkTigerAttackRulesTest {
         assertTrue(InkTigerAttackRules.GHOST_RELEASE<InkTigerAttackRules.duration(2));
     }
     @Test void bodyAndGhostScaleTogetherWhileDamagePhasesStayUnchanged(){
-        assertEquals(2,InkTigerAttackRules.BODY_MULTIPLIER);
-        assertEquals(2.3,InkTigerAttackRules.BODY_SCALE,.001);
-        assertEquals(11.5,InkTigerAttackRules.GHOST_SCALE*InkTigerAttackRules.BODY_SCALE,.001);
+        assertEquals(4,InkTigerAttackRules.BODY_MULTIPLIER);
+        assertEquals(4.6,InkTigerAttackRules.BODY_SCALE,.001);
+        assertEquals(23,InkTigerAttackRules.GHOST_SCALE*InkTigerAttackRules.BODY_SCALE,.001);
         assertTrue(InkTigerAttackRules.SUCTION_ACCELERATION>=.15);
     }
 }
