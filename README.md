@@ -1,5 +1,7 @@
 # TN-C（元素觉醒 · 魔法系统改造）
 
+> **2026-11-02 · Agent拉取更新必读：** [先读协作更新与运行实例同步](docs/协作更新与运行实例同步.md)。pull后必须核对**实际游戏实例**的 `config/modernfix-mixins.properties` 已启用 `mixin.perf.dynamic_resources=true`，保留其他配置；Java/资源更新另需构建安装JAR。只更新源码或只换JAR，都不能代表本轮内存优化已安装。根目录 `AGENTS.md` 为Agent接手入口。下方旧日期记录不是当前删除／清空操作指令。
+
 Minecraft 1.20.1 / Forge 47.4.22 的魔改工程。给整合包 **元素觉醒 1.4.3** 加一套自研的
 **魔法石 + 法杖** 体系，取代原来"卷轴 + 法术注册台"那一套。
 
