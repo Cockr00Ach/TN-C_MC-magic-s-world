@@ -1,5 +1,6 @@
-param([Parameter(Mandatory=$true)][string]$LauncherBatch,[Parameter(Mandatory=$true)][string]$LivePack,[Parameter(Mandatory=$true)][string]$AuditRoot,[Parameter(Mandatory=$true)][string]$Output,[string]$OffscreenAgent="",[switch]$UiOnly,[switch]$JourneyOnly,[switch]$FeedbackOnly,[switch]$LeylineOnly,[switch]$EquipmentOnly,[switch]$BotanicalOnly,[switch]$WorldFeedback,[switch]$NamingOnly,[switch]$SkyAcademy,[switch]$SkyhavenStartup)
+param([Parameter(Mandatory=$true)][string]$LauncherBatch,[Parameter(Mandatory=$true)][string]$LivePack,[Parameter(Mandatory=$true)][string]$AuditRoot,[Parameter(Mandatory=$true)][string]$Output,[string]$OffscreenAgent="",[switch]$UiOnly,[switch]$JourneyOnly,[switch]$FeedbackOnly,[switch]$LeylineOnly,[switch]$EquipmentOnly,[switch]$BotanicalOnly,[switch]$WorldFeedback,[switch]$NamingOnly,[switch]$SkyAcademy,[switch]$SkyhavenStartup,[switch]$SkyhavenProfile)
 $ErrorActionPreference='Stop'
+if($SkyhavenProfile){$SkyhavenStartup=$true}
 if([string]::IsNullOrWhiteSpace($OffscreenAgent)){$OffscreenAgent=Join-Path (Split-Path $PSScriptRoot -Parent) 'work/offscreen-agent/offscreen-audit.jar'}
 $live=[IO.Path]::GetFullPath($LivePack).TrimEnd('\')
 $audit=[IO.Path]::GetFullPath($AuditRoot).TrimEnd('\')
@@ -39,11 +40,19 @@ if($SkyhavenStartup){
     $javaArguments=[regex]::Replace($javaArguments,'-Xmx\S+','-Xmx8G')
     $javaArguments='-Dtnc.skyhavenStartupAudit=true -XX:ActiveProcessorCount=4 -XX:MaxDirectMemorySize=512M '+$javaArguments
 }
+if($SkyhavenProfile){
+ $javaArguments=[regex]::Replace($javaArguments,'-Xmx\S+','-Xmx7680m').Replace('-XX:ActiveProcessorCount=4 ','')
+ $javaArguments='-Dtnc.skyhavenWalkProfile=true '+$javaArguments
+}
 $outputFolder=[IO.Path]::GetFullPath($Output)
 [IO.Directory]::CreateDirectory($outputFolder) | Out-Null
 $shaderFile=Join-Path $audit 'config/oculus.properties'
 $shaders=(Test-Path -LiteralPath $shaderFile) -and ((Get-Content -LiteralPath $shaderFile) -contains 'enableShaders=true')
-@{jar_sha256=(Get-FileHash -LiteralPath (Join-Path $audit 'mods/tnc-1.0.0.jar') -Algorithm SHA256).Hash.ToLowerInvariant();shaders=$shaders;started_utc=[DateTime]::UtcNow.ToString('o');audit_root=$audit} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $outputFolder 'launch.json') -Encoding utf8
+$heapSetting=[regex]::Match($javaArguments,'-Xmx(?<size>\d+)(?<unit>[gGmM])')
+$heapMb=[int]$heapSetting.Groups['size'].Value;if($heapSetting.Groups['unit'].Value -match '[gG]'){$heapMb*=1024}
+$dynamicFile=Join-Path $audit 'config/modernfix-mixins.properties'
+$dynamicResources=(Test-Path -LiteralPath $dynamicFile) -and [bool]((Get-Content -LiteralPath $dynamicFile) -match '^\s*mixin\.perf\.dynamic_resources\s*=\s*true\s*$')
+@{max_heap_mb=$heapMb;dynamic_resources=$dynamicResources;jar_sha256=(Get-FileHash -LiteralPath (Join-Path $audit 'mods/tnc-1.0.0.jar') -Algorithm SHA256).Hash.ToLowerInvariant();shaders=$shaders;started_utc=[DateTime]::UtcNow.ToString('o');audit_root=$audit} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $outputFolder 'launch.json') -Encoding utf8
 $p=Start-Process -FilePath $javaExe -ArgumentList $javaArguments -WorkingDirectory $audit -WindowStyle Hidden -RedirectStandardOutput (Join-Path $audit "dungeon-audit-jvm-stdout.log") -RedirectStandardError (Join-Path $audit "dungeon-audit-jvm-stderr.log") -PassThru
 Write-Output ('Isolated Dungeon audit started; process ID: '+$p.Id)
 if($p.WaitForExit(1000)){Write-Output ('Audit exited early with code '+$p.ExitCode)}

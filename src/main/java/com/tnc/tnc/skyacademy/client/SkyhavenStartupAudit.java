@@ -25,6 +25,11 @@ public final class SkyhavenStartupAudit {
         var mc=Minecraft.getInstance();
         if(!mc.gameDirectory.toPath().toAbsolutePath().normalize().equals(Path.of("D:/TNC-Audits/dungeons-20261019").toAbsolutePath().normalize()))throw new IllegalStateException("Isolated audit only");
         org.lwjgl.glfw.GLFW.glfwHideWindow(mc.getWindow().getWindow());
+        // A hidden Windows GLFW surface can report a 1x1 framebuffer. Never
+        // benchmark that tiny target as if it were the user's actual picture.
+        if(mc.getWindow().getWidth()!=1600||mc.getWindow().getHeight()!=900){
+            mc.getWindow().setWidth(1600);mc.getWindow().setHeight(900);mc.resizeDisplay();
+        }
         if(mc.player!=null&&joined==0)joined=System.nanoTime();
         if(com.tnc.tnc.world.skyhaven.SkyhavenArrivalClient.active()){
             Files.createDirectories(output());
@@ -63,7 +68,7 @@ public final class SkyhavenStartupAudit {
         }
         if(mc.screen instanceof net.minecraft.client.gui.screens.ProgressScreen||mc.screen instanceof net.minecraft.client.gui.screens.ReceivingLevelScreen){Files.writeString(output().resolve("failed.txt"),"Transient joining screen restored");mc.stop();return;}
         if(AcademyClient.cinematic()&&++cinematicTicks==100)capture(mc,"arrival-cinematic.png");
-        if(stage>=2){photos(mc);return;}
+        if(stage>=2){if(Boolean.getBoolean("tnc.skyhavenWalkProfile"))SkyhavenWalkProfile.tick();else photos(mc);return;}
         if(sampleStart==0){sampleStart=System.nanoTime();Files.writeString(output().resolve("arrival.txt"),"normal arrival seconds="+(sampleStart-joined)/1e9+", dimension="+mc.level.dimension().location()+", position="+mc.player.position());}
         long elapsed=System.nanoTime()-sampleStart;
         // Walk out of the arrival gate normally; standing in its trigger would
