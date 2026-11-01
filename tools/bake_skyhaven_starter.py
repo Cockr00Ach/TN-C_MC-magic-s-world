@@ -91,6 +91,8 @@ def main():
             'excludes': ['players', 'progress', 'accounts', 'NPCs', 'overworld', 'waiting platform']}))
     assert total >= 1024, total
     print(f'Baked {total} chunks, {DEST.stat().st_size} bytes')
+    from finish_skyhaven_gateway import finish
+    finish(DEST)
 
 
 if __name__ == '__main__':

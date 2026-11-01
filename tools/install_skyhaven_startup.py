@@ -23,7 +23,7 @@ def tune(pack, backup):
     options = pack / 'options.txt'
     if options.exists():
         shutil.copy2(options, backup / 'options.txt')
-        values = {'renderDistance': '8', 'simulationDistance': '4'}
+        values = {'renderDistance': '8', 'simulationDistance': '5'}
         lines = options.read_text('utf-8').splitlines()
         if 'guiScale:0' in lines:
             values['guiScale'] = '2'

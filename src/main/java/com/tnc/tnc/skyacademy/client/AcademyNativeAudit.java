@@ -23,7 +23,7 @@ public final class AcademyNativeAudit {
         if(!started&&++startup<100)return;
         if(!started){
             if(!mc.gameDirectory.toPath().toAbsolutePath().normalize().equals(Path.of("D:/TNC-Audits/dungeons-20261019").toAbsolutePath().normalize()))throw new IllegalStateException("Refusing non-isolated sky audit");
-            started=true;Files.createDirectories(folder());mc.options.pauseOnLostFocus=false;mc.options.renderDistance().set(6);mc.options.simulationDistance().set(4);mc.options.framerateLimit().set(60);mc.options.guiScale().set(2);mc.options.hideGui=true;mc.options.setCameraType(CameraType.FIRST_PERSON);
+            started=true;Files.createDirectories(folder());mc.options.pauseOnLostFocus=false;mc.options.renderDistance().set(6);mc.options.simulationDistance().set(5);mc.options.framerateLimit().set(60);mc.options.guiScale().set(2);mc.options.hideGui=true;mc.options.setCameraType(CameraType.FIRST_PERSON);
             mc.getSingleplayerServer().execute(()->{var s=mc.getSingleplayerServer();var p=s.getPlayerList().getPlayers().get(0);p.setGameMode(GameType.SPECTATOR);var root=com.tnc.tnc.journey.JourneyData.get(s).player(p.getUUID());root.putBoolean("Named",true);com.tnc.tnc.journey.JourneyData.get(s).setDirty();if(com.tnc.tnc.world.SkyIslandWorlds.separate(s))return;SkyAcademyWorld.enableIsolatedAudit(s);var o=SkyAcademyWorld.origin(s);p.teleportTo(com.tnc.tnc.world.SkyIslandWorlds.island(s),o.getX()+260.5,o.getY()+190,o.getZ()+260.5,0,0);});return;
         }
         mc.setScreen(null);

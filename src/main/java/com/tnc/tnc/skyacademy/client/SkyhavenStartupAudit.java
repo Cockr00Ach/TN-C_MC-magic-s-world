@@ -12,8 +12,8 @@ import java.util.*;
 @Mod.EventBusSubscriber(modid="tnc",value=Dist.CLIENT)
 public final class SkyhavenStartupAudit {
     private static long joined,lastFrame,sampleStart;
-    private static int stage;
-    private static boolean configured;
+    private static int stage,loadingTicks,photoTicks;
+    private static boolean configured,photoPrepared,saving,loadingCaptured;private static volatile boolean photoReady;
     private static final List<Double> frames=new ArrayList<>();
     private static final List<Map<String,Object>> measurements=new ArrayList<>();
     private static volatile boolean arrived,complete;
@@ -24,9 +24,13 @@ public final class SkyhavenStartupAudit {
         var mc=Minecraft.getInstance();
         if(!mc.gameDirectory.toPath().toAbsolutePath().normalize().equals(Path.of("D:/TNC-Audits/dungeons-20261019").toAbsolutePath().normalize()))throw new IllegalStateException("Isolated audit only");
         org.lwjgl.glfw.GLFW.glfwHideWindow(mc.getWindow().getWindow());
+        if(mc.player!=null&&joined==0)joined=System.nanoTime();
+        if(com.tnc.tnc.world.skyhaven.SkyhavenArrivalClient.active()){
+            Files.createDirectories(output());if(++loadingTicks>=70&&mc.getOverlay()==null&&!loadingCaptured){loadingCaptured=true;capture(mc,"arrival-loading.png");}return;
+        }
         if(mc.player==null||mc.level==null||mc.getOverlay()!=null)return;
         if(joined==0)joined=System.nanoTime();
-        if(!configured){configured=true;Files.createDirectories(output());mc.options.pauseOnLostFocus=false;mc.options.guiScale().set(2);mc.options.renderDistance().set(8);mc.options.simulationDistance().set(4);mc.options.framerateLimit().set(120);mc.options.enableVsync().set(false);mc.getWindow().updateVsync(false);mc.resizeDisplay();}
+        if(!configured){configured=true;Files.createDirectories(output());mc.options.pauseOnLostFocus=false;mc.options.guiScale().set(2);mc.options.renderDistance().set(8);mc.options.simulationDistance().set(5);mc.options.framerateLimit().set(120);mc.options.enableVsync().set(false);mc.getWindow().updateVsync(false);mc.resizeDisplay();}
         mc.getSingleplayerServer().execute(()->{
             var s=mc.getSingleplayerServer();var p=s.getPlayerList().getPlayers().get(0);
             complete=com.tnc.tnc.world.SkyIslandSavedData.get(s.overworld()).isSkyIslandComplete();
@@ -37,6 +41,7 @@ public final class SkyhavenStartupAudit {
         });
         mc.setScreen(null);
         if(!arrived||!complete){if(System.nanoTime()-joined>120_000_000_000L){Files.writeString(output().resolve("failed.txt"),"No normal arrival within 120s");mc.stop();}return;}
+        if(stage>=2){photos(mc);return;}
         if(sampleStart==0){sampleStart=System.nanoTime();Files.writeString(output().resolve("arrival.txt"),"normal arrival seconds="+(sampleStart-joined)/1e9+", dimension="+mc.level.dimension().location()+", position="+mc.player.position());}
         long elapsed=System.nanoTime()-sampleStart;
         // Walk out of the arrival gate normally; standing in its trigger would
@@ -48,11 +53,21 @@ public final class SkyhavenStartupAudit {
         if(sorted.isEmpty())return;
         var result=new LinkedHashMap<String,Object>();result.put("f8",stage==1);result.put("frames",sorted.size());result.put("median_ms",sorted.get(sorted.size()/2));result.put("p95_ms",sorted.get((int)(sorted.size()*.95)));result.put("p99_ms",sorted.get((int)(sorted.size()*.99)));result.put("average_fps",1000/frames.stream().mapToDouble(x->x).average().orElse(1000));result.put("server_tick_ms",tickMs);result.put("heap_used_mb",(Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory())/1048576);
         measurements.add(result);
-        int shot=stage;
-        Screenshot.grab(mc.gameDirectory,"startup-"+shot+".png",mc.getMainRenderTarget(),m->{try{Files.copy(mc.gameDirectory.toPath().resolve("screenshots/startup-"+shot+".png"),output().resolve("startup-"+shot+".png"),StandardCopyOption.REPLACE_EXISTING);}catch(Exception ex){throw new RuntimeException(ex);}});
+        capture(mc,"startup-"+stage+".png");
         if(stage++==0){com.tnc.tnc.mana.sight.client.ManaSightClient.setEnabled(true);frames.clear();sampleStart=System.nanoTime();lastFrame=0;return;}
-        Files.writeString(output().resolve("report.json"),new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(Map.of("normal_arrival",arrived,"complete_on_entry",complete,"measurements",measurements)));
-        mc.stop();
+    }
+    private static void capture(Minecraft mc,String name){saving=true;Screenshot.grab(mc.gameDirectory,name,mc.getMainRenderTarget(),m->{try{Files.copy(mc.gameDirectory.toPath().resolve("screenshots/"+name),output().resolve(name),StandardCopyOption.REPLACE_EXISTING);}catch(Exception ex){throw new RuntimeException(ex);}finally{saving=false;}});}
+    private static void photos(Minecraft mc)throws Exception {
+        if(saving)return;
+        if(stage>=4){Files.writeString(output().resolve("report.json"),new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(Map.of("normal_arrival",arrived,"complete_on_entry",complete,"measurements",measurements,"screenshots",List.of("arrival-loading.png","startup-0.png","startup-1.png","gateway-foundation.png","sea-gyres.png"))));mc.stop();return;}
+        if(!photoPrepared){photoPrepared=true;photoReady=false;photoTicks=0;com.tnc.tnc.mana.sight.client.ManaSightClient.setEnabled(stage==3);
+            mc.getSingleplayerServer().execute(()->{var s=mc.getSingleplayerServer();var p=s.getPlayerList().getPlayers().get(0);p.setGameMode(net.minecraft.world.level.GameType.SPECTATOR);s.overworld().setWeatherParameters(12000,0,false,false);s.overworld().setDayTime(6000);
+                if(stage==2)p.teleportTo(com.tnc.tnc.world.SkyIslandWorlds.island(s),-91,180,157,-80,4);
+                else {var g=com.tnc.tnc.world.skyhaven.SeaGyreLayout.near(410,0).get(0);p.teleportTo(com.tnc.tnc.world.SkyIslandWorlds.island(s),g.x(),112,g.z()-20,0,74);}
+                photoReady=true;
+            });return;
+        }
+        if(photoReady&&++photoTicks>=220){capture(mc,stage==2?"gateway-foundation.png":"sea-gyres.png");stage++;photoPrepared=false;}
     }
     @SubscribeEvent public static void frame(TickEvent.RenderTickEvent event){
         if(!Boolean.getBoolean("tnc.skyhavenStartupAudit")||event.phase!=TickEvent.Phase.END||sampleStart==0)return;

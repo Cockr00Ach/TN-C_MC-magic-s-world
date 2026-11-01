@@ -96,6 +96,7 @@ public final class AcademyLessons {
         var server=event.getServer();if(!SkyAcademyWorld.available(server))return;
         if(server.getTickCount()%100==0)ensureMentors(server);
         for(var p:server.getPlayerList().getPlayers()){
+              if(com.tnc.tnc.world.SkyhavenArrival.active(p))continue;
             if(p.serverLevel()!=com.tnc.tnc.world.SkyIslandWorlds.island(server)||!p.isAlive())continue;
             var t=data(p);
             if((completed(p)&AcademyRules.ARRIVAL)==0&&JourneyData.get(server).player(p.getUUID()).getBoolean("Named")){

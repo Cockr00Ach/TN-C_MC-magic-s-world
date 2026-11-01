@@ -658,6 +658,7 @@ public final class SkyIslandManager {
         Set<UUID> presentPlayers = new HashSet<>();
         for (ServerPlayer player : level.getServer().getPlayerList().getPlayers()) {
             presentPlayers.add(player.getUUID());
+            if(SkyhavenArrival.active(player)){PORTAL_CHARGES.remove(player.getUUID());continue;}
             long cooldown = player.getPersistentData().getLong(PLAYER_COOLDOWN);
             if (level.getGameTime() < cooldown) {
                 PORTAL_CHARGES.remove(player.getUUID());

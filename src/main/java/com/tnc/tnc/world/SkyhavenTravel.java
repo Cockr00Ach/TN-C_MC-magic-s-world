@@ -26,12 +26,7 @@ public final class SkyhavenTravel {
   var data=SkyIslandSavedData.get(target);
   if(data.isSkyIslandComplete()&&com.tnc.tnc.skyacademy.SkyAcademyWorld.ready(p.server)){
    var at=firstArrival(p.server);
-   target.getChunkSource().getChunkFuture(at.getX()>>4,at.getZ()>>4,net.minecraft.world.level.chunk.ChunkStatus.FULL,true).whenCompleteAsync((c,e)->{
-    try{if(e!=null||c==null||c.left().isEmpty()||p.hasDisconnected())return;
-     p.teleportTo(target,at.getX()+.5,at.getY(),at.getZ()+.5,180,0);p.setRespawnPosition(target.dimension(),at,180,true,false);
-     flags(p).putBoolean("SkyhavenWaiting",false);flags(p).putBoolean("SkyhavenArrived",true);
-    }finally{PENDING.remove(p.getUUID());}
-   },p.server);
+   SkyhavenArrival.begin(p,at);PENDING.remove(p.getUUID());
    return;
   }
   target.getChunkSource().getChunkFuture(WAIT.getX()>>4,WAIT.getZ()>>4,net.minecraft.world.level.chunk.ChunkStatus.FULL,true).whenCompleteAsync((c,e)->{
@@ -58,14 +53,7 @@ public final class SkyhavenTravel {
   for(var it=LOGIN.entrySet().iterator();it.hasNext();){var entry=it.next();if(s.getTickCount()<entry.getValue())continue;it.remove();var p=s.getPlayerList().getPlayer(entry.getKey());if(p!=null)enter(p);}
   if(!data.isSkyIslandComplete()||!com.tnc.tnc.skyacademy.SkyAcademyWorld.ready(s))return;
   var at=firstArrival(s);
-  for(var p:s.getPlayerList().getPlayers())if(flags(p).getBoolean("SkyhavenWaiting")&&p.isAlive()&&PENDING.add(p.getUUID())){
-   world.getChunkSource().getChunkFuture(at.getX()>>4,at.getZ()>>4,net.minecraft.world.level.chunk.ChunkStatus.FULL,true).whenCompleteAsync((c,error)->{
-    try{if(error!=null||p.hasDisconnected()||c==null||c.left().isEmpty())return;
-     p.teleportTo(world,at.getX()+.5,at.getY(),at.getZ()+.5,180,0);p.setRespawnPosition(world.dimension(),at,180,true,false);
-     flags(p).putBoolean("SkyhavenWaiting",false);flags(p).putBoolean("SkyhavenArrived",true);
-    }finally{PENDING.remove(p.getUUID());}
-   },s);
-  }
+  for(var p:s.getPlayerList().getPlayers())if(flags(p).getBoolean("SkyhavenWaiting")&&!SkyhavenArrival.active(p)&&p.isAlive())SkyhavenArrival.begin(p,at);
  }
  @SubscribeEvent public static void stop(net.minecraftforge.event.server.ServerStoppingEvent e){var pending=GATES.remove(e.getServer());if(pending!=null)for(var c:pending)e.getServer().overworld().getChunkSource().removeRegionTicket(TICKET,c,2,c);PENDING.clear();LOGIN.clear();}
  @SubscribeEvent public static void respawn(net.minecraftforge.event.entity.player.PlayerEvent.PlayerRespawnEvent e){if(e.getEntity() instanceof ServerPlayer p&&!flags(p).getBoolean("SkyhavenArrived"))login(p);}

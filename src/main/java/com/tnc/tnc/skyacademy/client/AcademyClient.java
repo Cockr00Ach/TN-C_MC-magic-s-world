@@ -21,6 +21,7 @@ public final class AcademyClient {
     private static ArmorStand camera;private static CameraType previous;private static net.minecraft.client.multiplayer.ClientLevel owner;
     private static boolean practice,restoreSight,changedSight;private static final Random random=new Random(261026);
     public static void receive(CompoundTag t){
+        if(t.getString("Type").equals("arrival_loading")){com.tnc.tnc.world.skyhaven.SkyhavenArrivalClient.receive(t);return;}
         var mc=Minecraft.getInstance();if(mc.level==null||mc.player==null)return;
         switch(t.getString("Type")){
             case "dialogue"->mc.setScreen(new AcademyScreen(t));
