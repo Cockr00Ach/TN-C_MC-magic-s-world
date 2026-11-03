@@ -205,6 +205,11 @@ try {
         'com/tnc/tnc/warrior/WarriorPerformance.class',
         'com/tnc/tnc/warrior/WarriorBowCharge.class',
         'com/tnc/tnc/warrior/BowChargeRules.class',
+        'com/tnc/tnc/warrior/WeaponChargeRules.class',
+        'com/tnc/tnc/warrior/WarriorHitSound.class',
+        'com/tnc/tnc/warrior/TestDummyEntity.class',
+        'com/tnc/tnc/warrior/TestDummyService.class',
+        'com/tnc/tnc/warrior/client/TestDummyRenderer.class',
         'com/tnc/tnc/warrior/client/WarriorPhantomRenderer.class'
     )
     function Get-ClassText([string]$entryName) {
