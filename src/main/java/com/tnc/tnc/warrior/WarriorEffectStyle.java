@@ -10,5 +10,12 @@ public enum WarriorEffectStyle {
     public final String id,label;public final int color;
     WarriorEffectStyle(String id,String label,int color){this.id=id;this.label=label;this.color=color;}
     public static WarriorEffectStyle find(String id){if(id==null)return null;for(var s:values())if(s.id.equals(id.toLowerCase(Locale.ROOT)))return s;return null;}
-    public static int budget(String kind){return switch(kind){case "slash"->27;case "block"->24;default->12;};}
+    /**
+     * 一簇粒子最多几颗。
+     *
+     * <p>2026-11-03 之后服务端只发"打实了"的小反馈，所以这里只剩格挡光圈一个用途；
+     * 以前给挥砍弧光（27）、剑身辉光（3）、剑尖拖尾（3）留的档位跟着那几段代码一起删了 ——
+     * 刀刃光效现在是客户端渲染的 {@code WarriorTrail}，不经过这里。
+     */
+    public static int budget(String kind){return switch(kind){case "block"->24;default->12;};}
 }

@@ -22,6 +22,10 @@ public final class WarriorEntities {
             .updateInterval(2)
             .build("tnc:instructor"));
 
+    public static final RegistryObject<EntityType<TestDummyEntity>> TEST_DUMMY =
+        ENTITY_TYPES.register("test_dummy", () -> EntityType.Builder.of(TestDummyEntity::new,MobCategory.MISC)
+            .sized(.8f,2f).clientTrackingRange(10).updateInterval(2).build("tnc:test_dummy"));
+
     private WarriorEntities() {
     }
 
@@ -31,6 +35,7 @@ public final class WarriorEntities {
     }
 
     private static void attributes(EntityAttributeCreationEvent event) {
+        event.put(TEST_DUMMY.get(),TestDummyEntity.attributes().build());
         event.put(INSTRUCTOR.get(), InstructorEntity.createAttributes().build());
     }
 }

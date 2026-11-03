@@ -44,6 +44,9 @@ public class InstructorEntity extends Monster implements GeoEntity {
 
     private static final EntityDataAccessor<Integer> DATA_VARIANT =
         SynchedEntityData.defineId(InstructorEntity.class, EntityDataSerializers.INT);
+    /** 举盾架势：洛克上盾挡课时一直架着，靠它把 idle 换成 block_hold 循环。 */
+    private static final EntityDataAccessor<Boolean> DATA_HOLD =
+        SynchedEntityData.defineId(InstructorEntity.class, EntityDataSerializers.BOOLEAN);
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
@@ -72,6 +75,16 @@ public class InstructorEntity extends Monster implements GeoEntity {
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(DATA_VARIANT, VARIANT_COUNTER);
+        this.entityData.define(DATA_HOLD, false);
+    }
+
+    /** 是否正架着（盾挡课）。 */
+    public boolean holding() {
+        return this.entityData.get(DATA_HOLD);
+    }
+
+    public void setHolding(boolean hold) {
+        if (holding() != hold) this.entityData.set(DATA_HOLD, hold);
     }
 
     @Override
@@ -150,6 +163,10 @@ public class InstructorEntity extends Monster implements GeoEntity {
             return false;
         }
         boolean hurt = super.hurt(source, amount);
+        // 受击要看得见：木人桩以前挨打只有血条动，学员判断不出"这一下算不算数"。
+        if (hurt && this.isAlive()) {
+            playAnimation("hit");
+        }
         if (hurt && this.isAlive() && this.getHealth() < this.getMaxHealth() * 0.35F) {
             this.setHealth(this.getMaxHealth());
         }
@@ -162,6 +179,7 @@ public class InstructorEntity extends Monster implements GeoEntity {
         super.die(source);
     }
 
+
     /** 动作播报：由演武场在挥击/举盾/起风时调用。 */
     public void playAnimation(String name) {
         if (name != null && !name.isEmpty()) triggerAnim("action", name);
@@ -169,8 +187,12 @@ public class InstructorEntity extends Monster implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "move", 4,
-            state -> state.setAndContinue(RawAnimation.begin().thenLoop("idle"))));
+        // 待机只有一条控制器，但待机姿势有两种：站着（idle）和架着盾（block_hold）。
+        // 分成两条控制器会互相抢骨骼（后加的那条覆盖先加的），所以这里按状态切换动画名。
+        controllers.add(new AnimationController<>(this, "move", 4, state -> {
+            state.getController().transitionLength(6);
+            return state.setAndContinue(RawAnimation.begin().thenLoop(holding() ? "block_hold" : "idle"));
+        }));
         AnimationController<InstructorEntity> action = new AnimationController<>(this, "action", 2,
             state -> PlayState.STOP);
         action.triggerableAnim("attack", RawAnimation.begin().thenPlay("attack"));
@@ -178,6 +200,7 @@ public class InstructorEntity extends Monster implements GeoEntity {
         action.triggerableAnim("cast", RawAnimation.begin().thenPlay("cast"));
         action.triggerableAnim("greet", RawAnimation.begin().thenPlay("greet"));
         action.triggerableAnim("death", RawAnimation.begin().thenPlay("death"));
+        action.triggerableAnim("hit", RawAnimation.begin().thenPlay("hit"));
         controllers.add(action);
     }
 

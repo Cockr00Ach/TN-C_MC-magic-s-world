@@ -2,6 +2,7 @@ package com.tnc.tnc.warrior;
 
 import com.tnc.tnc.TNMod;
 import com.tnc.tnc.world.SkyIslandSavedData;
+import com.tnc.tnc.world.SkyIslandWorlds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -37,28 +38,44 @@ public final class PracticeArena {
     /**
      * 演武场台心（世界坐标）。天空岛还没生成完时返回 {@code null}。
      *
-     * <p>返回的 Y 是岛的原点高度，真正的台面高度在建台时按地形算。
+     * <p>返回的 Y 是抵达点脚下的台面高度；不能用下方自然地形的 heightmap。
      */
     public static BlockPos site(MinecraftServer server) {
         var island = SkyIslandSavedData.get(server.overworld());
         if (!island.isSkyIslandComplete()) return null;
         var origin = island.anchorPos("ORIGIN");
         if (origin == null) return null;
-        return new BlockPos(origin.getX() + LOCAL_X, origin.getY(), origin.getZ() + LOCAL_Z);
+        var arrival = island.anchorPos("ARRIVAL");
+        if (arrival == null) return null;
+        return new BlockPos(origin.getX() + LOCAL_X, arrival.getY() - 1, origin.getZ() + LOCAL_Z);
     }
 
     /** 台子建好没有；没建就试着建（岛没生成完就什么都不做）。 */
     public static boolean ensure(MinecraftServer server) {
-        var data = TrainingGroundData.get(server);
-        if (data.arenaBuilt()) return true;
         var site = site(server);
         if (site == null) return false;
-        build(server.overworld(), site.getX(), site.getZ());
-        return data.arenaBuilt();
+        var arena = islandArena(server);
+        if (arena != null) return true;
+        // Old saves may record a deck on the natural ground underneath the island.
+        // Keep that structure intact; register a new deck at the island arrival elevation.
+        build(SkyIslandWorlds.island(server), site.getX(), site.getZ(), site.getY());
+        return islandArena(server) != null;
+    }
+
+    static TrainingGroundData.Arena islandArena(MinecraftServer server) {
+        var site = site(server);
+        if (site == null) return null;
+        return TrainingGroundData.get(server).arenas().stream()
+            .filter(a -> a.dimension().equals(SkyIslandWorlds.island(server).dimension().location().toString()) && a.center().equals(site))
+            .findFirst().orElse(null);
     }
 
     /** 一次性砌台：找平地形、铺台面、四角演武位、中央终端、南侧台阶。 */
     public static void build(ServerLevel level, int cx, int cz) {
+        build(level, cx, cz, null);
+    }
+
+    static void build(ServerLevel level, int cx, int cz, Integer fixedDeck) {
         int half = TrainingGroundRules.HALF;
         int size = half * 2 + 1;
         // 先把台子占的区块加载出来：没加载的区块 heightmap 全是空值，
@@ -78,7 +95,7 @@ public final class PracticeArena {
             }
         }
         if (maxTop < level.getMinBuildHeight() + 2) return;
-        int deck = maxTop + 1;
+        int deck = fixedDeck == null ? maxTop + 1 : fixedDeck;
         for (int dx = -half; dx <= half; dx++) {
             for (int dz = -half; dz <= half; dz++) {
                 int x = cx + dx, z = cz + dz;
@@ -258,16 +275,18 @@ public final class PracticeArena {
             p.sendSystemMessage(Component.literal("天空岛还没生成完，演武场暂时无法使用。"));
             return false;
         }
-        var c = TrainingGroundData.get(p.server).arenaCenter();
+        var arena = islandArena(p.server);
+        var c = arena == null ? null : arena.center();
         if (c == null) {
             p.sendSystemMessage(Component.literal("天空岛还没生成完，演武场暂时无法使用。"));
             return false;
         }
         double x = c.getX() + 0.5;
         double z = c.getZ() + TrainingGroundRules.HALF - 2.5;
-        p.teleportTo(p.serverLevel(), x, c.getY() + 1, z, 180f, 0f);
+        p.teleportTo(SkyIslandWorlds.island(p.server), x, c.getY() + 1, z, 180f, 0f);
         settle(p);
-        TemperingEvents.sync(p);
+        TemperingEvents.sync(p, true);
+        p.sendSystemMessage(Component.literal("已到天空岛演武场：在面板选择教官，再点开始练习即可召出。"));
         return true;
     }
 
@@ -298,7 +317,6 @@ public final class PracticeArena {
         if (event.phase != TickEvent.Phase.END) return;
         var server = event.getServer();
         if (server == null || server.getTickCount() % 40 != 0) return;
-        if (TrainingGroundData.get(server).arenaBuilt()) return;
         ensure(server);
     }
 }

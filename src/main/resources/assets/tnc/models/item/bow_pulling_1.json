@@ -1,0 +1,7 @@
+{
+  "parent": "tnc:item/bow",
+  "textures": {
+    "layer0": "tnc:item/bow_pulling_1"
+  },
+  "overrides": []
+}

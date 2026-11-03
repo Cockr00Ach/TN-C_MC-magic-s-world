@@ -12,7 +12,7 @@ import com.tnc.tnc.network.MagicStoneNetwork;
  */
 public record TemperingActionPacket(Action action, String role) {
     public enum Action {
-        VIEW, START, CANCEL, SUMMON, DISMISS, CYCLE_PRACTICE
+        VIEW, START, CANCEL, SUMMON, DISMISS, CYCLE_PRACTICE, TEST_DUMMY
     }
 
     public TemperingActionPacket(Action action) {
@@ -42,6 +42,7 @@ public record TemperingActionPacket(Action action, String role) {
         if (player != null) {
             ctx.enqueueWork(() -> {
                 switch (action) {
+                    case TEST_DUMMY -> TestDummyService.spawn(player);
                     case VIEW -> TemperingEvents.sync(player, true);
                     case START -> {
                         if (!TemperingTraining.start(player)) {

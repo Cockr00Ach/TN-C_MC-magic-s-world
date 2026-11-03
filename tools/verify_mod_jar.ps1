@@ -178,7 +178,34 @@ try {
         'com/tnc/tnc/warrior/client/InstructorGeoModel.class',
         'com/tnc/tnc/warrior/client/InstructorHeldItemLayer.class',
         'com/tnc/tnc/warrior/client/InstructorRenderer.class',
-        'com/tnc/tnc/warrior/client/WarriorClientEvents.class'
+        'com/tnc/tnc/warrior/client/WarriorClientEvents.class',
+        # instructor courses (2026-11-03): the course table drives every specialist
+        # lesson. Missing it means "no lesson ever starts" and the specialisation
+        # silently degrades to the old single-shot behaviour, so it is pinned.
+        'com/tnc/tnc/warrior/InstructorCourses.class',
+        'com/tnc/tnc/warrior/InstructorCourses$Course.class',
+        # weapon codex (2026-11-01): K opens it. A missing screen or catalog class is a
+        # silent failure (the key just does nothing), so both are pinned.
+        'com/tnc/tnc/warrior/WarriorCodex.class',
+        'com/tnc/tnc/warrior/client/WarriorCodexScreen.class',
+        # sword combo keyframes + duel rules (2026-11-01). Silent failures, all of them:
+        # a missing loader -> the four combos silently fall back to the old procedural
+        # poses (looks wrong but never errors); a missing WarriorDuel -> parry / stance
+        # break / clash simply do nothing; a missing role class -> NoClassDefFoundError
+        # the first time a finisher lands.
+        'com/tnc/tnc/warrior/WarriorComboRole.class',
+        'com/tnc/tnc/warrior/WarriorDuel.class',
+        'com/tnc/tnc/warrior/WarriorDuel$Outcome.class',
+        'com/tnc/tnc/warrior/client/WarriorComboAnimations.class',
+        'com/tnc/tnc/warrior/client/WarriorComboAnimations$Clip.class',
+        'com/tnc/tnc/warrior/client/WarriorComboAnimations$Track.class',
+        'com/tnc/tnc/warrior/client/WarriorPose.class',
+        'com/tnc/tnc/warrior/client/WarriorPoseMath.class',
+        'com/tnc/tnc/mixin/WarriorHeldWeaponMixin.class',
+        'com/tnc/tnc/warrior/WarriorPerformance.class',
+        'com/tnc/tnc/warrior/WarriorBowCharge.class',
+        'com/tnc/tnc/warrior/BowChargeRules.class',
+        'com/tnc/tnc/warrior/client/WarriorPhantomRenderer.class'
     )
     function Get-ClassText([string]$entryName) {
         $entry = $zip.Entries | Where-Object { $_.FullName -eq $entryName }
@@ -192,6 +219,62 @@ try {
     foreach ($class in $expectedClasses) {
         if ($zip.Entries | Where-Object { $_.FullName -eq $class }) { Ok "class present: $class" }
         else { Fail "class missing from jar: $class" }
+    }
+
+    # ---------------- C1b. every mixin class must be declared + every config loaded ----------------
+    # A mixin that compiles but is not declared in ANY *.mixins.json is DEAD CODE: it is
+    # loaded by nobody and silently never runs. And a config that is not in the jar
+    # manifest's MixinConfigs is equally dead. Both directions are checked because the
+    # warrior pose mixin once shipped applied-at-the-wrong-layer (overwritten by vanilla's
+    # attack animation) with every unit test and GameTest still green.
+    $mixinResourceDir = Join-Path $TncRepoRoot 'src\main\resources'
+    $mixinSourceRoot = Join-Path $TncRepoRoot 'src\main\java'
+    $mixinConfigs = @(Get-ChildItem -LiteralPath $mixinResourceDir -Filter '*.mixins.json')
+    if ($mixinConfigs.Count -eq 0) { Fail 'no *.mixins.json found in src/main/resources' }
+    # Fully-qualified, because each config declares its own "package" and the ink mixins
+    # live under com.tnc.tnc.world.ink.mixin while the rest are under com.tnc.tnc.mixin.
+    $declaredMixins = @()
+    foreach ($config in $mixinConfigs) {
+        $parsed = Get-Content -LiteralPath $config.FullName -Raw | ConvertFrom-Json
+        foreach ($slot in @('mixins', 'client', 'server')) {
+            foreach ($name in @($parsed.$slot)) {
+                if ($name) { $declaredMixins += ($parsed.package + '.' + $name) }
+            }
+        }
+    }
+    $manifestText = Get-ClassText 'META-INF/MANIFEST.MF'
+    $manifestLine = ''
+    if ($manifestText) {
+        foreach ($line in ($manifestText -split "`r?`n")) {
+            if ($line -match '^MixinConfigs:') { $manifestLine += $line.Substring(13).TrimStart() }
+            elseif ($manifestLine -ne '' -and $line -match '^ ') {
+                # manifest wraps at 72 bytes; the single leading space is the continuation
+                # marker, NOT data -- it has to be dropped or a name split mid-token
+                # ("tnc.equipment.m" + " ixins.json") never matches.
+                $manifestLine += $line.Substring(1)
+            }
+            elseif ($manifestLine -ne '') { break }
+        }
+    }
+    foreach ($config in $mixinConfigs) {
+        if ($manifestLine -like ('*' + $config.Name + '*')) { Ok "mixin config loaded: $($config.Name)" }
+        else { Fail "mixin config NOT in jar manifest MixinConfigs: $($config.Name) (never loaded)" }
+    }
+    $mixinSources = @(Get-ChildItem -LiteralPath (Join-Path $mixinSourceRoot 'com\tnc\tnc') -Recurse -Filter '*Mixin.java')
+    $sourceClasses = @()
+    foreach ($file in $mixinSources) {
+        $rel = $file.FullName.Substring($mixinSourceRoot.Length + 1)
+        $sourceClasses += (($rel -replace '\\', '.') -replace '\.java$', '')
+    }
+    foreach ($class in $sourceClasses) {
+        $simple = ($class -split '\.')[-1]
+        if ($declaredMixins -contains $class) { Ok "mixin declared: $simple" }
+        else { Fail "mixin NOT declared in any *.mixins.json: $class (compiles, never runs)" }
+    }
+    foreach ($class in $declaredMixins) {
+        if ($sourceClasses -notcontains $class) {
+            Fail "a *.mixins.json declares a mixin with no source: $class"
+        }
     }
 
     # ---------------- C2. the magic wand's data + assets ----------------
@@ -209,6 +292,19 @@ try {
                        'assets/tnc/textures/gui/mana_bar/thundermagicbar_fill.png')) {
         if ($zip.Entries | Where-Object { $_.FullName -eq $res }) { Ok "resource present: $res" }
         else { Fail "resource missing from jar: $res" }
+    }
+
+    # ---------------- C2b. the combo keyframes (sword / greatsword / hammer / bow) ----------------
+    # The Blockbench clips live under a Chinese path (animations/entity/<cn>/<cn>.json).
+    # Packaging is where that breaks: if the entry name gets mangled, the loader finds
+    # nothing and the combos silently play the old procedural poses instead.
+    # Matched with an ASCII-only wildcard on purpose -- the literal path cannot be
+    # written here safely (this script is read with the ANSI codepage).
+    $clipFiles = @($zip.Entries | Where-Object { $_.FullName -like 'assets/tnc/animations/entity/*/*.json' })
+    if ($clipFiles.Count -ge 4) {
+        Ok ("combo keyframes packaged: {0} files under assets/tnc/animations/entity/*/*.json" -f $clipFiles.Count)
+    } else {
+        Fail ("combo keyframes missing from jar: found {0} file(s), expected 4 (sword/greatsword/hammer/bow)" -f $clipFiles.Count)
     }
 
     # ---------------- D1b2. the two new lightning chains (orb / speed) ----------------
@@ -965,7 +1061,12 @@ try {
     # This actually happened: zhuangquerang_spawn_egg was registered with no model.
     # The texture is resolved from the model's own layer0 (the record papers share one
     # texture, so "assets/tnc/textures/item/<id>.png" is NOT a valid assumption).
-    $ourItems = @('sword', 'magic_wand', 'fireball',
+    # 2026-11-03: 'sword' 试作之剑已彻底删除（用户要求），从清单里拿掉；同一批新增的
+    # 七把战士武器补进来——它们就是最容易"注册了但模型/贴图没进 jar"的那类物品。
+    $ourItems = @('magic_wand', 'fireball',
+                  'greatsword', 'hammer', 'spear', 'bow', 'dragon_sword',
+                  'frost_katana', 'star_rapier', 'crimson_warblade',
+                  'doom_scythe', 'earthshaker_hammer', 'sky_halberd',
                   # The three bank coins. Added 2026-10-09 after the author reported
                   # "我的金银铜币怎么还是紫黑方块啊": they HAD models, but the models were
                   # unloadable (-90 degree rotations), and they were missing from this list
@@ -982,7 +1083,9 @@ try {
         if (-not $modelEntry) { $noModel += $item; continue }
         $mr = New-Object System.IO.StreamReader($modelEntry.Open(), [System.Text.Encoding]::UTF8)
         $modelText = $mr.ReadToEnd(); $mr.Close()
-        $ref = [regex]::Match($modelText, '"layer0"\s*:\s*"([^"]+)"')
+        # 手绘 3D 物品模型（武器）用的是 "0" 这个贴图键，不是 "layer0"，两个都要认，
+        # 否则七把武器等于没查贴图。
+        $ref = [regex]::Match($modelText, '"(?:layer0|0)"\s*:\s*"([^"]+)"')
         if (-not $ref.Success) { continue }      # 走 parent（如 template_spawn_egg）的不用查贴图 ✓
         # NOTE: do NOT write this as -replace '^([^:]+):', '$1:textures/'.
         # PowerShell parses '$1:' as a SCOPE-QUALIFIED variable name, so the

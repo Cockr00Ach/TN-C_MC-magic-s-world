@@ -901,6 +901,75 @@ def build_animations():
         },
     }
 
+    # ---- block_hold: 40 ticks, the guard stance held, breathing under it --- #
+    # 举盾课里教官要一直举着盾等学员撞上来；block 是 20 tick 的一次性动作，
+    # 反复重播会在接缝处一顿。这里单独导出一条"架着不动"的循环，只有呼吸起伏。
+    hold = {
+        "body": [0.0, -18.0, 0.0],
+        "head": [2.0, -14.0, 0.0],
+        "cape": [3.0, -4.0, 0.0],
+        "shoulder_l": [-4.0, 0.0, 10.0],
+        "upper_arm_l": [-6.0, 0.0, 74.0],
+        "forearm_l": [-10.0, 86.0, 0.0],
+        "shoulder_r": [-4.0, 0.0, -5.0],
+        "upper_arm_r": [-14.0, 0.0, -8.0],
+        "forearm_r": [-44.0, 0.0, 0.0],
+        "thigh_r": [4.0, 0.0, 0.0],
+        "shin_r": [-6.0, 0.0, 0.0],
+        "thigh_l": [-3.0, 0.0, 0.0],
+        "shin_l": [5.0, 0.0, 0.0],
+        "skirt_f": [3.0, 0.0, 0.0],
+        "skirt_b": [-3.0, 0.0, 0.0],
+    }
+    sway = {
+        "body": [0.9, -18.6, 0.3],
+        "head": [3.2, -13.2, 0.0],
+        "cape": [4.6, -4.0, 1.1],
+        "shoulder_l": [-4.0, 0.0, 11.2],
+        "upper_arm_l": [-5.2, 0.0, 75.6],
+        "forearm_l": [-11.2, 87.4, 0.0],
+        "shoulder_r": [-4.0, 0.0, -4.0],
+        "upper_arm_r": [-13.2, 0.0, -9.2],
+        "forearm_r": [-46.4, 0.0, 0.0],
+        "thigh_r": [4.6, 0.0, 0.0],
+        "shin_r": [-7.0, 0.0, 0.0],
+        "thigh_l": [-3.6, 0.0, 0.0],
+        "shin_l": [5.8, 0.0, 0.0],
+        "skirt_f": [4.2, 0.0, 0.0],
+        "skirt_b": [-4.2, 0.0, 0.0],
+    }
+    anims["block_hold"] = {
+        "loop": True,
+        "animation_length": 2.0,
+        "bones": {
+            bone: {"rotation": kf((0.00, rest), (1.00, sway[bone]), (2.00, rest))}
+            for bone, rest in hold.items()
+        },
+    }
+
+    # ---- hit: 10 ticks, flinch back, forearms come up ---------------------- #
+    anims["hit"] = {
+        "loop": False,
+        "animation_length": 0.5,
+        "bones": {
+            "body": {"rotation": kf((0.00, Z), (0.10, [-6.0, 3.0, 0.0]), (0.25, [-3.0, 1.5, 0.0]), (0.50, Z))},
+            "head": {"rotation": kf((0.00, Z), (0.10, [-11.0, 4.0, 0.0]), (0.30, [-4.0, 1.0, 0.0]), (0.50, Z))},
+            "cape": {"rotation": kf((0.00, Z), (0.12, [-9.0, 0.0, 1.5]), (0.50, Z))},
+            "shoulder_r": {"rotation": kf((0.00, Z), (0.10, [-6.0, 0.0, -5.0]), (0.50, Z))},
+            "shoulder_l": {"rotation": kf((0.00, Z), (0.10, [-6.0, 0.0, 5.0]), (0.50, Z))},
+            "upper_arm_r": {"rotation": kf((0.00, Z), (0.10, [-24.0, 0.0, -14.0]), (0.30, [-10.0, 0.0, -6.0]), (0.50, Z))},
+            "upper_arm_l": {"rotation": kf((0.00, Z), (0.10, [-24.0, 0.0, 14.0]), (0.30, [-10.0, 0.0, 6.0]), (0.50, Z))},
+            "forearm_r": {"rotation": kf((0.00, Z), (0.10, [-32.0, 0.0, 0.0]), (0.30, [-14.0, 0.0, 0.0]), (0.50, Z))},
+            "forearm_l": {"rotation": kf((0.00, Z), (0.10, [-32.0, 0.0, 0.0]), (0.30, [-14.0, 0.0, 0.0]), (0.50, Z))},
+            "thigh_r": {"rotation": kf((0.00, Z), (0.12, [7.0, 0.0, 0.0]), (0.50, Z))},
+            "shin_r": {"rotation": kf((0.00, Z), (0.12, [-11.0, 0.0, 0.0]), (0.50, Z))},
+            "thigh_l": {"rotation": kf((0.00, Z), (0.12, [7.0, 0.0, 0.0]), (0.50, Z))},
+            "shin_l": {"rotation": kf((0.00, Z), (0.12, [-11.0, 0.0, 0.0]), (0.50, Z))},
+            "skirt_f": {"rotation": kf((0.00, Z), (0.12, [-4.5, 0.0, 0.0]), (0.50, Z))},
+            "skirt_b": {"rotation": kf((0.00, Z), (0.12, [5.5, 0.0, 0.0]), (0.50, Z))},
+        },
+    }
+
     # ---- cast: 18 ticks, both arms push out, chin lifts ------------------- #
     anims["cast"] = {
         "loop": False,
@@ -1209,8 +1278,9 @@ def verify(geo, anims, textures):
 
     # ---- animations ------------------------------------------------------ #
     anims_data = anims["animations"]
-    check(sorted(anims_data) == sorted(["idle", "attack", "block", "cast", "greet", "death"]),
-          "six animations present: idle/attack/block/cast/greet/death")
+    check(sorted(anims_data) == sorted(
+              ["idle", "attack", "block", "block_hold", "cast", "greet", "death", "hit"]),
+          "eight animations present: idle/attack/block/block_hold/cast/greet/death/hit")
 
     animated = set()
     frames_ok = True
@@ -1253,10 +1323,11 @@ def verify(geo, anims, textures):
           "elbow: forearm reaches 1 px into the sleeve (elbow at y=%g)" % byname["forearm_r"]["pivot"][1])
 
     # tick counts at 20 fps
-    expected_ticks = {"idle": 60, "attack": 14, "block": 20, "cast": 18, "greet": 20, "death": 20}
+    expected_ticks = {"idle": 60, "attack": 14, "block": 20, "block_hold": 40,
+                      "cast": 18, "greet": 20, "death": 20, "hit": 10}
     tick_ok = all(round(anims_data[k]["animation_length"] * FPS) == v
                   for k, v in expected_ticks.items())
-    check(tick_ok, "animation lengths equal 60/14/20/18/20/20 ticks at %d fps" % FPS)
+    check(tick_ok, "animation lengths equal 60/14/20/40/18/20/20/10 ticks at %d fps" % FPS)
 
     # ---- textures -------------------------------------------------------- #
     for v in VARIANTS:

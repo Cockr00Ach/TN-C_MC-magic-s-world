@@ -1,0 +1,62 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "tnc:item/bow"
+  },
+  "display": {
+    "thirdperson_righthand": {
+      "rotation": [
+        0,
+        -90,
+        0
+      ],
+      "scale": [
+        1.25,
+        1.25,
+        1.25
+      ]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [
+        0,
+        90,
+        0
+      ],
+      "scale": [
+        1.25,
+        1.25,
+        1.25
+      ]
+    },
+    "firstperson_righthand": {
+      "scale": [
+        1.2,
+        1.2,
+        1.2
+      ]
+    }
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "pulling": 1,
+        "pull": 0
+      },
+      "model": "tnc:item/bow_pulling_0"
+    },
+    {
+      "predicate": {
+        "pulling": 1,
+        "pull": 0.65
+      },
+      "model": "tnc:item/bow_pulling_1"
+    },
+    {
+      "predicate": {
+        "pulling": 1,
+        "pull": 0.9
+      },
+      "model": "tnc:item/bow_pulling_2"
+    }
+  ]
+}

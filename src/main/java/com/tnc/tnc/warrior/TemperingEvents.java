@@ -40,11 +40,19 @@ public final class TemperingEvents {
         var record=TrainingGroundData.get(player.server).record(player.getUUID());
         return new TemperingPacket(data.enrolled(player.getUUID()), data.points(player.getUUID()), data.talent(player.getUUID()),
             data.guardGraduate(player.getUUID()),TemperingTraining.active(player),TemperingTraining.blockCount(player),
-            TemperingTraining.remaining(player,now),data.windRemaining(player.getUUID(),now),open,TrainingGround.inside(player),record.mode(),record.completions(),record.score(),record.reaction(),TrainingGround.activeRole(player));
+            TemperingTraining.remaining(player,now),data.windRemaining(player.getUUID(),now),open,TrainingGround.inside(player),record.mode(),record.completions(),record.score(),record.reaction(),TrainingGround.activeRole(player),
+            SpecialistTrainers.coursesLine(player), SpecialistTrainers.activeCourse(player));
     }
     public static void sync(ServerPlayer player,boolean open) {
         MagicStoneNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player),
             snapshot(player,open));
+        MagicStoneNetwork.CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> player),
+            new WarriorPhantomPacket(player.getUUID(), (float)WarriorPhantom.scale(player)));
+    }
+    @SubscribeEvent public static void tracking(PlayerEvent.StartTracking e) {
+        if (e.getEntity() instanceof ServerPlayer observer && e.getTarget() instanceof ServerPlayer target)
+            MagicStoneNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(() -> observer),
+                new WarriorPhantomPacket(target.getUUID(), (float)WarriorPhantom.scale(target)));
     }
     @SubscribeEvent public static void login(PlayerEvent.PlayerLoggedInEvent e) { if(e.getEntity() instanceof ServerPlayer p) sync(p); }
     @SubscribeEvent public static void respawn(PlayerEvent.PlayerRespawnEvent e) { if(e.getEntity() instanceof ServerPlayer p) sync(p); }
@@ -117,6 +125,20 @@ public final class TemperingEvents {
                 ctx.getSource().sendSuccess(() -> Component.literal("已启用磨砺：持剑或斧近战击败敌对生物可成长；磨砺永久保留。"), false); return 1;
             }))
             .then(Commands.literal("panel").executes(ctx->{sync(ctx.getSource().getPlayerOrException(),true);return 1;}))
+            // 课程表：不带参数打全部，带角色只打那一位。玩家想知道"后面还有什么"时不用跑回岛上。
+            .then(Commands.literal("courses")
+                .executes(ctx -> {
+                    SpecialistTrainers.listCourses(ctx.getSource().getPlayerOrException(), null);
+                    return 1;
+                })
+                .then(Commands.argument("role", com.mojang.brigadier.arguments.StringArgumentType.word())
+                    .suggests((ctx, builder) -> net.minecraft.commands.SharedSuggestionProvider
+                        .suggest(InstructorCourses.roles(), builder))
+                    .executes(ctx -> {
+                        SpecialistTrainers.listCourses(ctx.getSource().getPlayerOrException(),
+                            com.mojang.brigadier.arguments.StringArgumentType.getString(ctx, "role"));
+                        return 1;
+                    })))
             .then(Commands.literal("ground").executes(ctx->{return PracticeArena.teleportIn(ctx.getSource().getPlayerOrException())?1:0;})
                 .then(Commands.literal("leave").executes(ctx->{return PracticeArena.dismiss(ctx.getSource().getPlayerOrException())?1:0;})))
             .then(Commands.literal("talent")
@@ -141,6 +163,12 @@ public final class TemperingEvents {
                 PracticeArena.dismiss(p);
                 ctx.getSource().sendSuccess(() -> Component.literal("本次练习已结束。"), false); return 1;
             }))
+            .then(Commands.literal("complete").requires(source -> source.hasPermission(2))
+                .executes(ctx -> completeTraining(ctx.getSource(),
+                    java.util.List.of(ctx.getSource().getPlayerOrException())))
+                .then(Commands.argument("targets", net.minecraft.commands.arguments.EntityArgument.players())
+                    .executes(ctx -> completeTraining(ctx.getSource(),
+                        net.minecraft.commands.arguments.EntityArgument.getPlayers(ctx, "targets")))))
             .then(Commands.literal("set").requires(source -> source.hasPermission(2))
                 .then(Commands.argument("points", IntegerArgumentType.integer(0, TemperingRules.MAX_POINTS)).executes(ctx -> {
                     var p = ctx.getSource().getPlayerOrException(); int value = IntegerArgumentType.getInteger(ctx, "points");
@@ -151,5 +179,44 @@ public final class TemperingEvents {
                     data.set(p.getUUID(), value); sync(p);
                     ctx.getSource().sendSuccess(() -> Component.literal(summary(value,data.cap(p.getUUID()))), false); return 1;
                 }))));
+    }
+
+    /**
+     * 调试/验收用：把指定玩家的专项训练记录直接写成"已通过"。
+     *
+     * <p>补的是图鉴里除磨砺之外的门槛 —— 完成次数、最佳评分、盾牌试炼毕业。
+     * 三档难度都写满（完成 99 次、评分 100、反应 80），所以无论玩家当前选中哪档
+     * 难度，`TrainingGroundData.record` 读到的都是通过状态。不改天赋、也不改磨砺点数：
+     * 那两项仍由 {@code /tempering talent set} 与 {@code /tempering set} 负责。
+     */
+    private static int completeTraining(net.minecraft.commands.CommandSourceStack source,
+                                        java.util.Collection<ServerPlayer> targets) {
+        var ground = TrainingGroundData.get(source.getServer());
+        var tempering = TemperingData.get(source.getServer());
+        int done = 0;
+        for (ServerPlayer player : targets) {
+            var id = player.getUUID();
+            if (tempering.talent(id) == 0) {
+                player.sendSystemMessage(Component.literal(
+                        "战士天赋为 0，无法补训练记录；先执行 /tempering talent set @s 6"));
+                continue;
+            }
+            tempering.enroll(id);
+            for (int mode = 0; mode < 3; mode++) {
+                ground.pass(id, mode, 99, 100, 80);
+            }
+            tempering.completeGuardDrill(id);
+            sync(player);
+            player.sendSystemMessage(Component.literal(
+                    "训练记录已补满：完成次数 99 · 最佳评分 100 · 最快反应 80 · 盾牌试炼已毕业"));
+            done++;
+        }
+        if (done == 0) {
+            source.sendFailure(Component.literal("没有可补训练记录的目标。"));
+            return 0;
+        }
+        int count = done;
+        source.sendSuccess(() -> Component.literal("已为 " + count + " 名角色补满专项训练记录。"), true);
+        return done;
     }
 }

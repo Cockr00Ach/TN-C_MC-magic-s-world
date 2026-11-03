@@ -5,6 +5,8 @@
     "minecraft:golden_sword", "minecraft:diamond_sword", "minecraft:netherite_sword",
     "minecraft:wooden_axe", "minecraft:stone_axe", "minecraft:iron_axe",
     "minecraft:golden_axe", "minecraft:diamond_axe", "minecraft:netherite_axe",
-    "tnc:sword"
+    "tnc:greatsword", "tnc:hammer", "tnc:spear", "tnc:dragon_sword",
+    "tnc:frost_katana", "tnc:star_rapier", "tnc:crimson_warblade",
+    "tnc:doom_scythe", "tnc:earthshaker_hammer", "tnc:sky_halberd"
   ]
 }

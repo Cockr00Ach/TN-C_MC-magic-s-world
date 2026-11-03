@@ -22,10 +22,20 @@ public final class WarriorPracticeKeys {
         if(event.phase!=TickEvent.Phase.END)return;
         boolean requested=false;while(OPEN.consumeClick())requested=true;
         var mc=Minecraft.getInstance();
-        if(requested&&mc.player!=null&&mc.level!=null&&mc.screen==null)TemperingActionPacket.send(TemperingActionPacket.Action.VIEW);
+        if(requested&&mc.player!=null&&mc.level!=null&&mc.screen==null){
+            // 快捷键开的是武器图鉴；训练面板只从演武场中央的终端进（见 PracticeTerminalBlock）。
+            // 先本地开屏再加一个既有的 VIEW 请求刷数据，回包会重建同一个界面而不是换掉它。
+            TemperingClient.hintCodex();
+            TemperingActionPacket.send(TemperingActionPacket.Action.VIEW);
+            mc.setScreen(new WarriorCodexScreen());
+        }
     }
-    @Mod.EventBusSubscriber(modid=TNMod.MODID,value=Dist.CLIENT,bus=Mod.EventBusSubscriber.Bus.MOD)
+    /**
+     * 按键注册入口。由 {@code TNMod.ClientModEvents#onRegisterKeyMappings} 显式调用，
+     * <b>故意不加</b> {@code @Mod.EventBusSubscriber}：同一个 MOD 事件总线里，嵌套类的
+     * 自动订阅在本整合包里出现过"注册了却没被调用"的情况，显式调用最稳。
+     */
     public static final class Registration{
-        @SubscribeEvent public static void register(RegisterKeyMappingsEvent event){event.register(OPEN);}
+        public static void register(RegisterKeyMappingsEvent event){event.register(OPEN);}
     }
 }

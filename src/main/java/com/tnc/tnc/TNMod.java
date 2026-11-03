@@ -70,16 +70,39 @@ public class TNMod
     //  物品
     // ------------------------------------------------------------------
 
-    // 试作之剑 —— 第一件使用 Blockbench 自定义模型的物品。
-    //   模型: assets/tnc/models/item/sword.json
-    //   贴图: assets/tnc/textures/item/sword.png
-    //   名字: assets/tnc/lang/{zh_cn,en_us}.json -> item.tnc.sword
-    //
-    // Tiers.IRON 表示沿用原版铁质工具的属性（挖掘等级、耐久）；3 和 -2.4F 分别是
-    // 攻击力附加值（实际伤害 = 玩家基础 1 + 3 = 4）和攻击速度修正。
-    // 之后做真正的 TN-C 武器时应该自定义一个 Tier，而不是借用原版的。
-    public static final RegistryObject<Item> SWORD = ITEMS.register("sword",
-            () -> new SwordItem(Tiers.IRON, 3, -2.4F, new Item.Properties()));
+    // 战士的正式武器：重剑、锤、长枪、弓。
+    public static final RegistryObject<Item> GREATSWORD = ITEMS.register("greatsword",
+            () -> new SwordItem(Tiers.IRON, 5, -3.0F, new Item.Properties().durability(900)));
+    public static final RegistryObject<Item> HAMMER = ITEMS.register("hammer",
+            () -> new SwordItem(Tiers.IRON, 4, -3.2F, new Item.Properties().durability(1100)));
+    // 长枪：复用风系 boss 那把「风遗物长枪」的模型贴图（models/item/spear.json 只是父模型转发）
+    public static final RegistryObject<Item> SPEAR = ITEMS.register("spear",
+            () -> new SwordItem(Tiers.IRON, 4, -2.6F, new Item.Properties().durability(1000)));
+    // 龙之剑：长剑家族的旗舰刀，连招收尾会唤出龙虚影；伤害和耐久比普通剑高一档
+    public static final RegistryObject<Item> DRAGON_SWORD = ITEMS.register("dragon_sword",
+            () -> new SwordItem(Tiers.IRON, 6, -2.5F, new Item.Properties().durability(1400)));
+    public static final RegistryObject<Item> BOW = ITEMS.register("bow",
+            () -> new net.minecraft.world.item.BowItem(new Item.Properties().durability(500)));
+
+    // ------------------------------------------------------------------
+    //  扩展武器池（20261103）
+    //  每一把都归属已有的四大家族（长剑/重剑/锤/长枪），
+    //  所以直接能用现有连招，不需要新的动画和连招数据。
+    //  属性上做出差异：太刀快、细剑更快但伤害低、
+    //  斩马刀伤害高、巨镰慢但重、战锤最重、戟长且伤害高。
+    // ------------------------------------------------------------------
+    public static final RegistryObject<Item> FROST_KATANA = ITEMS.register("frost_katana",
+            () -> new SwordItem(Tiers.IRON, 4, -2.0F, new Item.Properties().durability(800)));
+    public static final RegistryObject<Item> STAR_RAPIER = ITEMS.register("star_rapier",
+            () -> new SwordItem(Tiers.IRON, 2, -1.6F, new Item.Properties().durability(520)));
+    public static final RegistryObject<Item> CRIMSON_WARBLADE = ITEMS.register("crimson_warblade",
+            () -> new SwordItem(Tiers.IRON, 6, -3.0F, new Item.Properties().durability(1000)));
+    public static final RegistryObject<Item> DOOM_SCYTHE = ITEMS.register("doom_scythe",
+            () -> new SwordItem(Tiers.IRON, 5, -2.9F, new Item.Properties().durability(950)));
+    public static final RegistryObject<Item> EARTHSHAKER_HAMMER = ITEMS.register("earthshaker_hammer",
+            () -> new SwordItem(Tiers.IRON, 5, -3.2F, new Item.Properties().durability(1200)));
+    public static final RegistryObject<Item> SKY_HALBERD = ITEMS.register("sky_halberd",
+            () -> new SwordItem(Tiers.IRON, 5, -2.7F, new Item.Properties().durability(1100)));
     public static final RegistryObject<Item> CHAOS_SEAL = ITEMS.register("chaos_seal",
             com.tnc.tnc.magic.water.ChaosSilence.SealItem::new);
 
@@ -159,9 +182,21 @@ public class TNMod
     // 以后新增物品时，在这里 output.accept(...) 加一行即可出现在本标签页中。
     public static final RegistryObject<CreativeModeTab> TNC_TAB = CREATIVE_MODE_TABS.register("main", () -> CreativeModeTab.builder()
             .withTabsBefore(CreativeModeTabs.COMBAT)
-            .icon(() -> SWORD.get().getDefaultInstance())
+            .icon(() -> GREATSWORD.get().getDefaultInstance())
             .displayItems((parameters, output) -> {
-                output.accept(SWORD.get());
+                // 按武器线分组摆放（同族挨着），找起来不用一件件看名字：
+                // 长剑 → 重武器 → 长柄 → 弓。
+                output.accept(DRAGON_SWORD.get());
+                output.accept(FROST_KATANA.get());
+                output.accept(STAR_RAPIER.get());
+                output.accept(GREATSWORD.get());
+                output.accept(CRIMSON_WARBLADE.get());
+                output.accept(DOOM_SCYTHE.get());
+                output.accept(HAMMER.get());
+                output.accept(EARTHSHAKER_HAMMER.get());
+                output.accept(SPEAR.get());
+                output.accept(SKY_HALBERD.get());
+                output.accept(BOW.get());
                 output.accept(TNC_IRON_ARMOR.get());
                 // Legacy chaos_seal stays registered for save compatibility; learned magic replaces it.
                 output.accept(WAND.get());
@@ -358,6 +393,10 @@ public class TNMod
         public static void onRegisterKeyMappings(net.minecraftforge.client.event.RegisterKeyMappingsEvent event)
         {
             com.tnc.tnc.client.MagicStoneKeys.register(event);
+            // 战士两条键显式注册：嵌套 @Mod.EventBusSubscriber 自动订阅在本整合包里
+            // 出现过"logging 说注册了、事件却没回调"的情况（K 键与连招 Q/E 都受影响）。
+            com.tnc.tnc.warrior.client.WarriorPracticeKeys.Registration.register(event);
+            com.tnc.tnc.warrior.client.WarriorComboKeys.Registration.register(event);
         }
     }
 }
