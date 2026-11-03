@@ -83,6 +83,8 @@ modpack/*/_archive/
 modpack/*/config/*
 # TN-C startup mitigation: keep Forge setup threading configuration in sync.
 !modpack/*/config/fml.toml
+# TN-C measured model-memory fix for the large Conquest asset set.
+!modpack/*/config/modernfix-mixins.properties
 !modpack/*/config/openloader/
 modpack/*/config/openloader/*
 !modpack/*/config/openloader/resources/
