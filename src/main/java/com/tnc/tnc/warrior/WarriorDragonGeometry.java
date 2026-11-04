@@ -4,27 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.world.phys.Vec3;
 
-/**
- * 龙之剑那条龙的<b>纯几何</b>：没有渲染器、没有世界，只有三角形。
- *
- * <p>这样做有三个好处：
- * <ol>
- *   <li>渲染器只剩"把三角形塞进 buffer"，出了怪形状一眼能看出是数据还是画错；</li>
- *   <li>可以在单测里检查形状（头有没有推进、宽度有没有越界、截面有没有塌、有没有 NaN）；</li>
- *   <li>{@code tools/dragon_preview.py} 能读同一份三角形数据离线出图，不用起客户端。</li>
- * </ol>
- *
- * <p><b>龙身是四棱管，不是一条带子。</b>第一版做的是"沿龙身永远竖直的飘带"，结果在
- * 弧线最高点处切向的 Y 分量穿过 0，{@code up} 会突然翻面，相邻两段直接拧成蝴蝶结
- * （离线预览里看得很清楚：一排梳齿）。现在按<b>平行传输</b>逐段旋转截面（每段只把
- * 上一段的 {@code u} 投影到新切向的垂面上），截面不会翻面，任何视角看都有体积。
- *
- * <p><b>没有翅膀。</b>中途试过给两侧加"膜状翼"，离线预览里是一块块浮在旁边的暗红色块 ——
- * 中式龙本来就是蛇身，靠龙身、龙头、双角认，加翼反而像贴上去的装饰。所以这条龙是
- * 无翼蛇身 + 菱形龙头 + 一对后掠角 + 金色脊线。
- *
- * <p>坐标系就是世界坐标；{@code origin} 是龙尾起点，{@code dir} 是水平朝向（已归一化），
- * {@code side} 是 {@code dir} 左转 90° 的水平向量。
+/** A carved, articulated block dragon: segmented armour, paws, claws, jaws and forked antlers.
+ * Pure production geometry, also exported by the unit test for offline visual inspection.
  */
 public final class WarriorDragonGeometry {
 
@@ -33,17 +14,13 @@ public final class WarriorDragonGeometry {
     /** 龙头推进占用的 tick 数。 */
     public static final int TRAVEL = 10;
     /** 沿龙身的采样段数。 */
-    public static final int SAMPLES = 28;
+    public static final int SAMPLES = 40;
     /** 龙长（格）。 */
     public static final double LENGTH = 7.5;
-    /** 每段龙身画几个三角形：4 个侧面 × 2。 */
-    public static final int TRIS_PER_SEGMENT = 8;
-    /** 龙头几个三角形（菱形 2 + 脊线 1 + 双角 2）。 */
-    public static final int HEAD_TRIS = 5;
 
-    public static final int SHELL = 0x5E0912;
-    public static final int BODY = 0xC92A22;
-    public static final int CORE = 0xFFD680;
+    public static final int SHELL = 0x48272E;
+    public static final int BODY = 0x9F5261;
+    public static final int CORE = 0xDDC9A2;
 
     /** 一个上色三角形：渲染器三个顶点，预览脚本三个点。 */
     public record Tri(Vec3 a, Vec3 b, Vec3 c, int color, float alpha) {
@@ -71,7 +48,7 @@ public final class WarriorDragonGeometry {
     /** 半径：尾细、中段最粗、龙头收一点。 */
     public static double radius(double s) {
         double taper = Math.sin(Math.PI * Math.pow(Math.max(0, s), 0.75));
-        return 0.035 + 0.30 * Math.max(0, taper);
+        return 0.035 + 0.30 * Math.max(0, taper) + .19 * Math.max(0, Math.min(1, (s-.72)/.28));
     }
 
     /** 龙头进度 0..1。 */
@@ -88,96 +65,74 @@ public final class WarriorDragonGeometry {
      * 把一条龙变成三角形列表。{@code head} 是龙头进度（0..1），{@code fade} 是整体透明度。
      */
     public static List<Tri> build(Vec3 origin, Vec3 dir, Vec3 side, double head, float fade) {
-        List<Tri> out = new ArrayList<>(SAMPLES * TRIS_PER_SEGMENT * 3 + 8);
-        if (head <= 0.01) {
-            return out;
-        }
-        Vec3[] points = new Vec3[SAMPLES + 1];
-        Vec3[] tangents = new Vec3[SAMPLES + 1];
-        Vec3[] us = new Vec3[SAMPLES + 1];
-        Vec3[] vs = new Vec3[SAMPLES + 1];
-        double[] radius = new double[SAMPLES + 1];
-        for (int i = 0; i <= SAMPLES; i++) {
-            double s = head * i / (double) SAMPLES;
-            points[i] = path(origin, dir, side, s);
-            tangents[i] = tangent(origin, dir, side, s, head);
-            radius[i] = radius(s);
-        }
-        // 平行传输：只把上一段的 u 投影到新切向的垂面，截面就不会在弧线顶点翻面
-        Vec3 carried = new Vec3(0, 1, 0);
-        for (int i = 0; i <= SAMPLES; i++) {
-            Vec3 t = tangents[i];
-            Vec3 u = carried.subtract(t.scale(carried.dot(t)));
-            if (u.lengthSqr() < 1.0E-6) {
-                u = side.subtract(t.scale(side.dot(t)));
+        List<Tri> out = new ArrayList<>(5000);
+        if (head <= .01) return out;
+        for (int i=0;i<SAMPLES;i++) {
+            double s=head*(i+.5)/SAMPLES;
+            Vec3 point=path(origin,dir,side,s), forward=tangent(origin,dir,side,s,head);
+            Vec3 right=new Vec3(-forward.z,0,forward.x).normalize();
+            Vec3 up=right.cross(forward).normalize();
+            double half=head/(SAMPLES*2.0);
+            double length=path(origin,dir,side,s-half).distanceTo(path(origin,dir,side,s+half))*1.35;
+            double r=radius(s);
+            float alpha=fade*(float)(.65+.3*i/SAMPLES);
+            block(out,point,right,up,forward,0,0,0,r*1.8,r*1.65,length,BODY,alpha);
+            block(out,point,right,up,forward,0,-r*.8,0,r*1.15,r*.28,length*.8,CORE,alpha);
+            // Individually fitted scale courses, a segmented mane and dorsal crest.
+            for(int sign:new int[]{-1,1})for(int row=0;row<2;row++)
+                block(out,point,right,up,forward,sign*r*(.78+row*.06),r*(.25-row*.6),length*.10,
+                      r*.32,r*.42,length*.72,row==0?0xA85562:SHELL,alpha);
+            block(out,point,right,up,forward,0,r*.94,-length*.1,r*.38,r*.45,length*.5,0xD5B27B,alpha);
+            if(i%4==0)for(int sign:new int[]{-1,1})
+                block(out,point,right,up,forward,sign*r*.4,r*.72,0,r*.2,r*.3,length*.45,CORE,alpha);
+            // Two pairs of folded legs, jointed paws and three separate claws.
+            if(i==SAMPLES-7 || i==SAMPLES-18)for(int sign:new int[]{-1,1}) {
+                block(out,point,right,up,forward,sign*r*1.3,-r*.5,0,.25,.25,.38,SHELL,alpha);
+                block(out,point,right,up,forward,sign*r*1.7,-r*.95,.15,.2,.35,.23,BODY,alpha);
+                for(int claw=0;claw<3;claw++)block(out,point,right,up,forward,
+                        sign*r*1.7+(claw-1)*.09,-r*1.13,.33,.055,.08,.25,CORE,alpha);
             }
-            if (u.lengthSqr() < 1.0E-6) {
-                u = dir.cross(t);
-            }
-            u = u.normalize();
-            carried = u;
-            us[i] = u;
-            vs[i] = t.cross(u).normalize();
         }
-        tube(out, points, us, vs, radius, 1.0, SHELL, fade * 0.42f);
-        tube(out, points, us, vs, radius, 0.62, BODY, fade * 0.72f);
-        tube(out, points, us, vs, radius, 0.20, CORE, fade * 0.95f);
-        head(out, origin, dir, side, head, fade);
+        carvedHead(out,origin,dir,side,head,fade);
         return out;
     }
 
-    /** 四棱管：每段 4 个侧面，尾淡头亮。 */
-    private static void tube(List<Tri> out, Vec3[] points, Vec3[] us, Vec3[] vs, double[] radius,
-                             double scale, int color, float alpha) {
-        int last = points.length - 1;
-        for (int i = 0; i < last; i++) {
-            double t0 = i / (double) last, t1 = (i + 1) / (double) last;
-            float a0 = alpha * (float) (0.24 + 0.76 * t0);
-            float a1 = alpha * (float) (0.24 + 0.76 * t1);
-            float sideAlpha = (a0 + a1) * 0.5f;
-            double r0 = radius[i] * scale, r1 = radius[i + 1] * scale;
-            Vec3 a = points[i], b = points[i + 1];
-            Vec3 au = us[i], bu = us[i + 1], av = vs[i], bv = vs[i + 1];
-            Vec3[] aCorners = {
-                a.add(au.scale(r0)).add(av.scale(r0)), a.add(au.scale(r0)).subtract(av.scale(r0)),
-                a.subtract(au.scale(r0)).subtract(av.scale(r0)), a.subtract(au.scale(r0)).add(av.scale(r0))
-            };
-            Vec3[] bCorners = {
-                b.add(bu.scale(r1)).add(bv.scale(r1)), b.add(bu.scale(r1)).subtract(bv.scale(r1)),
-                b.subtract(bu.scale(r1)).subtract(bv.scale(r1)), b.subtract(bu.scale(r1)).add(bv.scale(r1))
-            };
-            for (int corner = 0; corner < 4; corner++) {
-                Vec3 a0p = aCorners[corner], a1p = aCorners[(corner + 1) % 4];
-                Vec3 b0p = bCorners[corner], b1p = bCorners[(corner + 1) % 4];
-                out.add(new Tri(a0p, b0p, b1p, color, sideAlpha));
-                out.add(new Tri(a0p, b1p, a1p, color, sideAlpha));
-            }
+    private static void carvedHead(List<Tri> out,Vec3 origin,Vec3 dir,Vec3 side,double head,float fade) {
+        Vec3 at=path(origin,dir,side,head),f=tangent(origin,dir,side,head,head);
+        Vec3 r=new Vec3(-f.z,0,f.x).normalize(),u=r.cross(f).normalize();
+        block(out,at,r,u,f,0,.05,0,.66,.50,.74,0x713B49,fade);
+        block(out,at,r,u,f,0,.22,-.1,.48,.20,.56,0xA85562,fade);
+        block(out,at,r,u,f,0,-.07,.48,.48,.24,.50,0xA85562,fade);
+        block(out,at,r,u,f,0,-.23,.37,.46,.13,.58,0xD5B27B,fade);
+        block(out,at,r,u,f,0,-.12,.64,.50,.12,.12,SHELL,fade);
+        for(int sign:new int[]{-1,1}) {
+            block(out,at,r,u,f,sign*.32,.13,.24,.12,.19,.25,SHELL,fade);
+            block(out,at,r,u,f,sign*.385,.15,.29,.035,.085,.12,CORE,fade);
+            block(out,at,r,u,f,sign*.37,.27,.16,.22,.12,.39,0xD5B27B,fade);
+            // Antlers fork into a tall rear tine and a shorter forward branch.
+            for(int j=0;j<5;j++)block(out,at,r,u,f,sign*(.22+j*.055),.38+j*.105,-.22-j*.095,
+                    .13-j*.012,.15,.17,0xD5B27B,fade);
+            for(int j=0;j<3;j++)block(out,at,r,u,f,sign*(.32+j*.055),.53+j*.085,-.23+j*.09,.09,.13,.13,CORE,fade);
+            for(int j=0;j<5;j++)block(out,at,r,u,f,sign*(.25+j*.085),-.08+j*.035,.49-j*.065,.11,.07,.11,0xD5B27B,fade);
+            for(int j=0;j<3;j++)block(out,at,r,u,f,sign*.18,-.15,.35+j*.12,.05,.10,.06,0xE8D8B8,fade);
+            for(int j=0;j<4;j++)block(out,at,r,u,f,sign*(.38+j*.055),.05-j*.06,-.25-j*.12,.16,.15,.20,SHELL,fade);
         }
     }
 
-    /** 龙头：菱形 + 金色脊线 + 一对向后掠的角。 */
-    private static void head(List<Tri> out, Vec3 origin, Vec3 dir, Vec3 side, double head, float fade) {
-        Vec3 tip = path(origin, dir, side, head);
-        Vec3 forward = tangent(origin, dir, side, head, head);
-        Vec3 up = new Vec3(0, 1, 0).subtract(forward.scale(forward.y));
-        up = up.lengthSqr() < 1.0E-4 ? side : up.normalize();
-        double size = 0.40;
-        Vec3 snout = tip.add(forward.scale(1.75 * size));
-        Vec3 left = tip.add(up.scale(size)).subtract(forward.scale(0.30));
-        Vec3 right = tip.subtract(up.scale(size)).subtract(forward.scale(0.30));
-        Vec3 back = tip.subtract(forward.scale(1.70 * size));
-        out.add(new Tri(left, snout, right, BODY, fade * 0.88f));
-        out.add(new Tri(left, right, back, SHELL, fade * 0.62f));
-        Vec3 core = tip.subtract(forward.scale(0.06));
-        out.add(new Tri(core.add(up.scale(0.15)), core.add(forward.scale(0.45)),
-                core.subtract(up.scale(0.15)), CORE, fade));
-        // 角：短、向后掠，让远端轮廓一眼能认出是"头"而不是"箭头"
-        for (int sign = -1; sign <= 1; sign += 2) {
-            Vec3 base = tip.subtract(forward.scale(0.30)).add(up.scale(size * 0.60));
-            Vec3 horn = tip.subtract(forward.scale(0.85)).add(up.scale(size * 1.55))
-                    .add(side.scale(sign * 0.16));
-            out.add(new Tri(base, horn, tip.subtract(forward.scale(0.95)).add(up.scale(0.10)),
-                    SHELL, fade * 0.8f));
+    /** Actual box faces, with directional pixel-art shading; no overlapping glow tubes. */
+    private static void block(List<Tri> out,Vec3 at,Vec3 r,Vec3 u,Vec3 f,double x,double y,double z,
+                              double w,double h,double d,int color,float alpha) {
+        Vec3[] p=new Vec3[8];
+        for(int i=0;i<8;i++)p[i]=at.add(r.scale(x+((i&1)==0?-.5:.5)*w))
+                .add(u.scale(y+((i&2)==0?-.5:.5)*h)).add(f.scale(z+((i&4)==0?-.5:.5)*d));
+        int[][] faces={{0,2,3,1},{4,5,7,6},{0,4,6,2},{1,3,7,5},{0,1,5,4},{2,6,7,3}};
+        double[] shades={.78,.90,.70,.84,.60,1};
+        for(int i=0;i<faces.length;i++) {
+            int[] q=faces[i];double shade=shades[i];
+            int c=((int)((color>>16&255)*shade)<<16)|((int)((color>>8&255)*shade)<<8)|(int)((color&255)*shade);
+            out.add(new Tri(p[q[0]],p[q[1]],p[q[2]],c,alpha));
+            out.add(new Tri(p[q[0]],p[q[2]],p[q[3]],c,alpha));
         }
     }
+
 }

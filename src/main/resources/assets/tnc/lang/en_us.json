@@ -839,5 +839,12 @@
   "item.tnc.abyssal_mana_water_bucket": "Abyssal Mana Water Bucket",
   "fluid_type.tnc.abyssal_mana_water": "Abyssal Mana Water",
   "key.tnc.bow_charge_z": "Horizontal Strike / Combo Z",
-  "entity.tnc.test_dummy": "Combat Test Dummy"
+  "entity.tnc.test_dummy": "Combat Test Dummy",
+  "item.tnc.moon_bow": "Crescent Longbow",
+  "item.tnc.storm_bow": "Stormchaser Bow",
+  "item.tnc.ember_bow": "Emberwing Warbow",
+  "item.tnc.moon_arrow": "Crescent Arrow",
+  "item.tnc.storm_arrow": "Stormchaser Arrow",
+  "item.tnc.ember_arrow": "Emberwing Arrow",
+  "entity.tnc.ornate_arrow": "Forged Arrow"
 }

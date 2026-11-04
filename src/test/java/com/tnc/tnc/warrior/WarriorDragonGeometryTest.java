@@ -8,21 +8,15 @@ import net.minecraft.world.phys.Vec3;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * 龙之剑那条龙的几何检查。
- *
- * <p>客户端在这台机器上起不来（第三方模组 `net.spell_engine` 缺类），所以形状不能只靠"进游戏看一眼"。
- * 这里检查的是**进游戏真会用到的那份数据**：{@link WarriorDragonGeometry#build} 产出的三角形。
- *
- * <p>顺带把两帧的三角形写进 `build/tnc-dragon-quads.csv`，`tools/dragon_preview.py`
- * 会读它离线出图 —— 图和游戏里画的是同一批顶点。
+/** Tests the production dragon mesh for finite, non-degenerate, bounded geometry.
+ * Also exports the exact runtime triangles for the offline visual preview;
+ * this export is not a substitute for a real-client rendering check.
  */
 class WarriorDragonGeometryTest {
 
     private static final Vec3 ORIGIN = new Vec3(0, 0, 0);
     private static final Vec3 DIR = new Vec3(0, 0, 1);
     private static final Vec3 SIDE = new Vec3(-1, 0, 0);
-    private static final int SEGMENTS = WarriorDragonGeometry.SAMPLES * WarriorDragonGeometry.TRIS_PER_SEGMENT * 3;
 
     @Test void headAdvancesOverTicksAndStops() {
         assertEquals(0.0, WarriorDragonGeometry.head(0), 1.0E-9);
@@ -59,7 +53,7 @@ class WarriorDragonGeometryTest {
     @Test void trianglesAreSolidAndBounded() throws IOException {
         List<WarriorDragonGeometry.Tri> early = WarriorDragonGeometry.build(ORIGIN, DIR, SIDE, 0.4, 1.0f);
         List<WarriorDragonGeometry.Tri> late = WarriorDragonGeometry.build(ORIGIN, DIR, SIDE, 1.0, 1.0f);
-        assertEquals(SEGMENTS + WarriorDragonGeometry.HEAD_TRIS, early.size());
+        assertTrue(early.size()>4000 && early.size()<10000, "detailed block dragon within its render budget");
         assertEquals(early.size(), late.size());
         for (var tri : late) {
             assertTrue(tri.alpha() >= 0 && tri.alpha() <= 1, "alpha out of range: " + tri.alpha());

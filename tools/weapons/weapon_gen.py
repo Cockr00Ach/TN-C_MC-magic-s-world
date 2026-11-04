@@ -13,6 +13,7 @@
 import json
 import math
 import os
+import pixel_forge
 
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
@@ -357,7 +358,7 @@ def paint_span(px, v, cols, style, pal, tint, vfrac):
             px[u, v] = gems[idx]
 
 
-def build_texture(weapon):
+def build_texture_legacy(weapon):
     pal = PALETTES[weapon["palette"]]
     img = Image.new("RGBA", (TEX_SIZE, TEX_SIZE), (0, 0, 0, 0))
     ox, oz = sprite_offsets(weapon)
@@ -441,6 +442,10 @@ def build_texture(weapon):
     return img, rects
 
 
+def build_texture(weapon):
+    return pixel_forge.texture(weapon, expand_profile(weapon), PALETTES, mix, dark, light)
+
+
 # ----------------------------------------------------------------------
 #  模型 JSON
 # ----------------------------------------------------------------------
@@ -468,6 +473,7 @@ def face_uvs(rect, box, mode):
 
 def build_model(weapon, rects):
     elements = []
+    hidden = pixel_forge.hidden_faces(expand_profile(weapon))
     for part in expand_profile(weapon):
         box = part[1]
         mode = part[3]
@@ -481,6 +487,8 @@ def build_model(weapon, rects):
         for face in element['faces'].values():
             face['uv'] = [round(value * 16 / TEX_SIZE, 5) for value in face['uv']]
             face['texture'] = '#0'
+        element['faces'] = {key: value for key, value in element['faces'].items()
+                            if key not in hidden.get(part[0], set())}
         if rot:
             axis, angle, origin = rot
             element["rotation"] = {"angle": angle, "axis": axis,
@@ -543,12 +551,12 @@ AXIS_ROT = {
 }
 
 FACES = [
-    ("up", [0b001, 0b011, 0b111, 0b101]),
-    ("down", [0b000, 0b100, 0b110, 0b010]),
-    ("north", [0b000, 0b001, 0b101, 0b100]),
-    ("south", [0b110, 0b111, 0b011, 0b010]),
-    ("west", [0b000, 0b010, 0b011, 0b001]),
-    ("east", [0b100, 0b101, 0b111, 0b110]),
+    ("up", [2, 3, 7, 6]),
+    ("down", [0, 4, 5, 1]),
+    ("north", [0, 2, 6, 4]),
+    ("south", [1, 5, 7, 3]),
+    ("west", [0, 1, 3, 2]),
+    ("east", [4, 6, 7, 5]),
 ]
 
 
@@ -579,7 +587,7 @@ def project(p, yaw, pitch):
     return np.array([x, y, z])
 
 
-def expand_profile(weapon):
+def expand_profile_legacy(weapon):
     """刀身用控制点描述：(z, 左边, 右边)，每 0.5 单位生成一行方块。"""
     prof = weapon.get("profile")
     if not prof:
@@ -604,6 +612,12 @@ def expand_profile(weapon):
     return weapon["parts"] + rows
 
 
+def expand_profile(weapon):
+    if '_pixel_parts' not in weapon:
+        weapon['_pixel_parts'] = pixel_forge.parts(weapon, _lerp_profile)
+    return weapon['_pixel_parts']
+
+
 def _lerp_profile(prof, z, idx):
     for i in range(len(prof) - 1):
         a, b = prof[i], prof[i + 1]
@@ -619,9 +633,11 @@ def render_preview(weapon, tex_img, size=520, yaw_deg=34, pitch_deg=-52):
 
     center = np.array([7.9, 0.7, 8.0])
     faces = []
+    hidden = pixel_forge.hidden_faces(expand_profile(weapon))
     for part in expand_profile(weapon):
         proj = [project(np.array(c) - center, yaw, pitch) for c in element_corners(part)]
         for fname, idx in FACES:
+            if fname in hidden.get(part[0], set()): continue
             sel = [proj[i] for i in idx]
             a = sel[1] - sel[0]
             b = sel[2] - sel[0]
@@ -668,15 +684,11 @@ def render_preview(weapon, tex_img, size=520, yaw_deg=34, pitch_deg=-52):
         if not inside.any():
             continue
         u, v, w, h = weapon["_rects"][part[0]]
-        if fname in ("up", "down"):
-            su = u + np.clip(a, 0, 0.999) * w
-            sv = v + np.clip(b if fname == "up" else 1 - b, 0, 0.999) * h
-        elif fname in ("north", "south"):
-            su = u + np.clip(a, 0, 0.999) * w
-            sv = np.full_like(a, v + max(0, (h - max(1, 2)) // 2) + 0.5)
-        else:
-            su = np.full_like(b, u + max(0, (w - 1) // 2) + 0.5)
-            sv = v + np.clip(b, 0, 0.999) * h
+        # Use exactly the authored face UV rectangle, including tiny material
+        # swatches. Do not sample neighbouring swatches for side-face thickness.
+        uv=face_uvs((u,v,w,h),part[1],part[3])[fname]['uv']
+        su=uv[0]+np.clip(a,0,.999)*(uv[2]-uv[0])
+        sv=uv[1]+np.clip(b,0,.999)*(uv[3]-uv[1])
         tu = np.clip(su.astype(int), 0, TEX_SIZE - 1)
         tv = np.clip(sv.astype(int), 0, TEX_SIZE - 1)
         col = tex[tv, tu].astype(np.float64)
@@ -748,12 +760,21 @@ def contact_sheet(rows, path, cols=2, cell=470, title="TN-C 战士武器"):
             c = int(30 + k * 1.2)
             pd.rectangle([0, (cell - 30) * k // 24, cell - 30, (cell - 30) * (k + 1) // 24],
                          fill=(c, c, c + 4))
-        icon = img.resize((cell - 90, cell - 90), Image.LANCZOS)
+        icon = img.resize((cell - 90, cell - 90), Image.Resampling.NEAREST)
         panel.paste(icon, ((cell - 30 - icon.width) // 2, (cell - 30 - icon.height) // 2), icon)
         sheet.paste(panel, (cx + 15, cy))
         draw.text((cx + 18, cy + cell - 28), name, font=font_n, fill=(236, 231, 221))
         draw.text((cx + 18, cy + cell - 2), sub, font=font_s, fill=(146, 144, 142))
     sheet.save(path)
+
+
+def write_model(name,model):
+    """Keep generated geometry reviewable: metadata plus one JSON line per cuboid."""
+    metadata={k:v for k,v in model.items() if k!='elements'}
+    header=json.dumps(metadata,ensure_ascii=False,indent=2).rstrip()
+    lines=[json.dumps(element,ensure_ascii=False,separators=(',',':')) for element in model['elements']]
+    with open(os.path.join(MODELS,name+'.json'),'w',encoding='utf8') as output:
+        output.write(header[:-1]+',\n  "elements": [\n    '+',\n    '.join(lines)+'\n  ]\n}\n')
 
 
 def main():
@@ -763,17 +784,62 @@ def main():
         img, rects = build_texture(weapon)
         weapon["_rects"] = rects
         model = build_model(weapon, rects)
-        with open(os.path.join(MODELS, weapon["id"] + ".json"), "w", encoding="utf-8") as f:
-            json.dump(model, f, indent=2, ensure_ascii=False)
-            f.write("\n")
+        write_model(weapon['id'],model)
         img.save(os.path.join(TEX, weapon["id"] + ".png"))
-        atlas_sheet(weapon, img, rects)
         prev = render_preview(weapon, img)
         prev.save(os.path.join(PREVIEW, "weapon-" + weapon["id"] + ".png"))
         rows.append((prev, weapon["zh"] + "  ·  " + weapon["en"],
                      weapon["id"] + "  (" + weapon["family"] + ")"))
-        print("built", weapon["id"])
-    contact_sheet(rows, os.path.join(PREVIEW, "weapons-20261103.png"))
+        print("built", weapon["id"], len(model['elements']), 'blocks',
+              sum(len(e['faces']) for e in model['elements']), 'visible quads')
+    contact_sheet(rows, os.path.join(PREVIEW, "weapons-pixel-forge-20261105.png"),
+                  title="TN-C 战士武器 · 方块锻造")
+    build_bows()
+    build_arrows()
+
+
+def build_bows():
+    rows=[]
+    from copy import deepcopy
+    bow_display={
+        'gui':{'rotation':[0,0,-12],'scale':[.55]*3,'translation':[0,0,0]},
+        'thirdperson_righthand':{'rotation':[0,-90,0],'scale':[1.25]*3},
+        'thirdperson_lefthand':{'rotation':[0,90,0],'scale':[1.25]*3},
+        'firstperson_righthand':{'rotation':[0,-90,12],'translation':[1,1,0],'scale':[1.1]*3},
+        'firstperson_lefthand':{'rotation':[0,90,-12],'translation':[-1,1,0],'scale':[1.1]*3},
+        'ground':{'scale':[.5]*3,'translation':[0,3,0]},
+        'fixed':{'scale':[.55]*3}}
+    for id,palette,zh in [('bow','earth','战士长弓'),('moon_bow','doom','弦月长弓'),
+                          ('storm_bow','sky','逐风战弓'),('ember_bow','crimson','烬羽重弓')]:
+        for stage,pull in enumerate((0,.25,.65,1)):
+            name=id if stage==0 else id+'_pulling_'+str(stage-1)
+            weapon={'id':name,'palette':palette,'parts':[], '_pixel_parts':pixel_forge.bow_parts(palette,pull)}
+            image,rects=build_texture(weapon);weapon['_rects']=rects
+            model=build_model(weapon,rects);model['display']=deepcopy(bow_display);model['tnc_grip']=[8,8,8]
+            if stage==0:model['overrides']=[{'predicate':{'pulling':1,'pull':p},'model':'tnc:item/'+id+'_pulling_'+str(i)} for i,p in enumerate((0,.65,.9))]
+            write_model(name,model)
+            image.save(os.path.join(TEX,name+'.png'))
+            if stage in (0,3):
+                prev=render_preview(weapon,image,size=520,yaw_deg=18,pitch_deg=-8)
+                prev.save(os.path.join(PREVIEW,name+'-pixel-20261105.png'))
+                rows.append((prev,zh+(' · 满弦' if stage else ' · 未拉弦'),f'{len(model["elements"])} blocks'))
+            print('built',name,len(model['elements']),'blocks')
+    contact_sheet(rows,os.path.join(PREVIEW,'bows-pixel-forge-20261105.png'),title='TN-C 弓 · 方块锻造')
+
+
+def build_arrows():
+    rows=[]
+    for id,palette,zh in [('storm_arrow','sky','逐风箭'),('moon_arrow','doom','弦月箭'),('ember_arrow','crimson','烬羽箭')]:
+        weapon={'id':id,'palette':palette,'parts':[],'_pixel_parts':pixel_forge.arrow_parts(palette)}
+        image,rects=build_texture(weapon);weapon['_rects']=rects
+        model=build_model(weapon,rects)
+        model['display']={'gui':{'rotation':[-90,0,-40],'scale':[.8]*3},'fixed':{},
+                          'thirdperson_righthand':{'rotation':[-90,0,0]},'ground':{'scale':[.5]*3}}
+        write_model(id,model)
+        image.save(os.path.join(TEX,id+'.png'))
+        prev=render_preview(weapon,image);rows.append((prev,zh,str(len(model['elements']))+' blocks'))
+        print('built',id,len(model['elements']),'blocks')
+    contact_sheet(rows,os.path.join(PREVIEW,'arrows-pixel-forge-20261105.png'),title='TN-C 箭 · 方块锻造')
 
 
 if __name__ == "__main__":

@@ -82,7 +82,16 @@ public class TNMod
     public static final RegistryObject<Item> DRAGON_SWORD = ITEMS.register("dragon_sword",
             () -> new SwordItem(Tiers.IRON, 6, -2.5F, new Item.Properties().durability(1400)));
     public static final RegistryObject<Item> BOW = ITEMS.register("bow",
-            () -> new net.minecraft.world.item.BowItem(new Item.Properties().durability(500)));
+            () -> new com.tnc.tnc.warrior.WarriorOrnateBowItem(0,500));
+    public static final RegistryObject<Item> MOON_BOW = ITEMS.register("moon_bow",
+            () -> new com.tnc.tnc.warrior.WarriorOrnateBowItem(1,650));
+    public static final RegistryObject<Item> STORM_BOW = ITEMS.register("storm_bow",
+            () -> new com.tnc.tnc.warrior.WarriorOrnateBowItem(0,600));
+    public static final RegistryObject<Item> EMBER_BOW = ITEMS.register("ember_bow",
+            () -> new com.tnc.tnc.warrior.WarriorOrnateBowItem(2,800));
+    public static final RegistryObject<Item> MOON_ARROW = ITEMS.register("moon_arrow",()->new com.tnc.tnc.warrior.WarriorArrowItem(1));
+    public static final RegistryObject<Item> STORM_ARROW = ITEMS.register("storm_arrow",()->new com.tnc.tnc.warrior.WarriorArrowItem(0));
+    public static final RegistryObject<Item> EMBER_ARROW = ITEMS.register("ember_arrow",()->new com.tnc.tnc.warrior.WarriorArrowItem(2));
 
     // ------------------------------------------------------------------
     //  扩展武器池（20261103）
@@ -197,6 +206,8 @@ public class TNMod
                 output.accept(SPEAR.get());
                 output.accept(SKY_HALBERD.get());
                 output.accept(BOW.get());
+                output.accept(MOON_BOW.get());output.accept(STORM_BOW.get());output.accept(EMBER_BOW.get());
+                output.accept(MOON_ARROW.get());output.accept(STORM_ARROW.get());output.accept(EMBER_ARROW.get());
                 output.accept(TNC_IRON_ARMOR.get());
                 // Legacy chaos_seal stays registered for save compatibility; learned magic replaces it.
                 output.accept(WAND.get());

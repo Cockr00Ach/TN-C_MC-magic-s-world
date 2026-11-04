@@ -206,6 +206,13 @@ try {
         'com/tnc/tnc/warrior/WarriorBowCharge.class',
         'com/tnc/tnc/warrior/BowChargeRules.class',
         'com/tnc/tnc/warrior/WeaponChargeRules.class',
+        'com/tnc/tnc/warrior/WarriorArrowEntity.class',
+        'com/tnc/tnc/warrior/WarriorArrowItem.class',
+        'com/tnc/tnc/warrior/WarriorOrnateBowItem.class',
+        'com/tnc/tnc/warrior/WarriorWeaponOrnaments.class',
+        'com/tnc/tnc/warrior/client/WarriorArrowRenderer.class',
+        'com/tnc/tnc/warrior/client/WarriorWeaponOrnamentRenderer.class',
+        'com/tnc/tnc/warrior/client/WarriorGeometryRenderType.class',
         'com/tnc/tnc/warrior/WarriorHitSound.class',
         'com/tnc/tnc/warrior/TestDummyEntity.class',
         'com/tnc/tnc/warrior/TestDummyService.class',
@@ -1072,6 +1079,7 @@ try {
                   'greatsword', 'hammer', 'spear', 'bow', 'dragon_sword',
                   'frost_katana', 'star_rapier', 'crimson_warblade',
                   'doom_scythe', 'earthshaker_hammer', 'sky_halberd',
+                  'moon_bow', 'storm_bow', 'ember_bow', 'moon_arrow', 'storm_arrow', 'ember_arrow',
                   # The three bank coins. Added 2026-10-09 after the author reported
                   # "我的金银铜币怎么还是紫黑方块啊": they HAD models, but the models were
                   # unloadable (-90 degree rotations), and they were missing from this list

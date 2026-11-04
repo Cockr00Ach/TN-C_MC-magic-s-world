@@ -2,20 +2,21 @@
 
 读 `build/tnc-dragon-quads.csv` —— 那份数据是单测 `WarriorDragonGeometryTest` 从
 `WarriorDragonGeometry.build(...)` 直接写出来的三角形，和客户端渲染器画的是同一批顶点。
-所以这张图不是"另外画一遍"，只是把同一堆三角形成像（加算混合，和 `RenderType.lightning` 同一种猜法）。
+所以这张图不是"另外画一遍"，只是把同一堆三角形成像（普通透明混合与深度测试，对应本轮实体几何渲染）。
 
 用法：python tools/dragon_preview.py [输出路径]
-默认输出 docs/previews/dragon-render-20261103.png
+默认输出 docs/previews/dragon-pixel-forge-20261105.png
 """
 import csv
 import sys
 from pathlib import Path
 
 from PIL import Image, ImageDraw
+import numpy as np
 
 ROOT = Path(__file__).resolve().parent.parent
 SOURCE = ROOT / "build" / "tnc-dragon-quads.csv"
-TARGET = ROOT / "docs" / "previews" / "dragon-render-20261103.png"
+TARGET = ROOT / "docs" / "previews" / "dragon-pixel-forge-20261105.png"
 
 CELL_W, CELL_H = 860, 400
 PAD = 22
@@ -70,34 +71,22 @@ def fit(frames):
 
 
 def render_frame(frame, scale, ox, oy):
-    width, height = CELL_W, CELL_H
-    buffer = [[[float(c) for c in BACKGROUND] for _ in range(width)] for _ in range(height)]
-    for color, alpha, points in frame["tris"]:
-        rgb = ((color >> 16) & 255, (color >> 8) & 255, color & 255)
-        projected = [project(p, scale, ox, oy) for p in points]
-        min_x = max(0, int(min(p[0] for p in projected)))
-        max_x = min(width - 1, int(max(p[0] for p in projected)) + 1)
-        min_y = max(0, int(min(p[1] for p in projected)))
-        max_y = min(height - 1, int(max(p[1] for p in projected)) + 1)
-        if min_x > max_x or min_y > max_y:
-            continue
-        mask = Image.new("L", (max_x - min_x + 1, max_y - min_y + 1), 0)
-        ImageDraw.Draw(mask).polygon([(p[0] - min_x, p[1] - min_y) for p in projected], fill=255)
-        pixels = mask.load()
-        for y in range(min_y, max_y + 1):
-            row = buffer[y]
-            for x in range(min_x, max_x + 1):
-                if pixels[x - min_x, y - min_y]:
-                    cell = row[x]
-                    cell[0] += rgb[0] * alpha
-                    cell[1] += rgb[1] * alpha
-                    cell[2] += rgb[2] * alpha
-    image = Image.new("RGB", (width, height), BACKGROUND)
-    image.putdata([
-        (min(255, int(buffer[y][x][0])), min(255, int(buffer[y][x][1])), min(255, int(buffer[y][x][2])))
-        for y in range(height) for x in range(width)
-    ])
-    return image
+    buffer=np.full((CELL_H,CELL_W,3),BACKGROUND,dtype=float)
+    zbuffer=np.full((CELL_H,CELL_W),-1e20)
+    for color,alpha,points in frame['tris']:
+        p=np.array([project(v,scale,ox,oy) for v in points]);depth=np.array([v[0]*.7+v[1]*.315+v[2]*1.05 for v in points])
+        lo=np.maximum(0,np.floor(p.min(axis=0)).astype(int));hi=np.minimum([CELL_W-1,CELL_H-1],np.ceil(p.max(axis=0)).astype(int))
+        if np.any(hi<lo):continue
+        a,b=p[1]-p[0],p[2]-p[0];det=a[0]*b[1]-a[1]*b[0]
+        if abs(det)<1e-9:continue
+        gy,gx=np.mgrid[lo[1]:hi[1]+1,lo[0]:hi[0]+1];dx,dy=gx-p[0,0],gy-p[0,1]
+        u=(dx*b[1]-dy*b[0])/det;v=(a[0]*dy-a[1]*dx)/det
+        z=depth[0]+u*(depth[1]-depth[0])+v*(depth[2]-depth[0])
+        target=buffer[lo[1]:hi[1]+1,lo[0]:hi[0]+1];zt=zbuffer[lo[1]:hi[1]+1,lo[0]:hi[0]+1]
+        mask=(u>=0)&(v>=0)&(u+v<=1)&(z>zt)
+        rgb=np.array([(color>>16)&255,(color>>8)&255,color&255])
+        target[mask]=target[mask]*(1-alpha)+rgb*alpha;zt[mask]=z[mask]
+    return Image.fromarray(np.clip(buffer,0,255).astype('uint8'),'RGB')
 
 
 def main():
@@ -112,7 +101,7 @@ def main():
         sheet.paste(image, (0, top))
         draw.text((16, top + 10), f"龙头进度 {frame['head']:.2f}  ({len(frame['tris'])} tris)",
                   fill=(208, 216, 228))
-        draw.text((16, top + 26), "WarriorDragonGeometry.build(): 4 棱管 x3 层 + 双翼 + 菱形龙头",
+        draw.text((16, top + 26), "Production mesh: segmented armour / claws / jaws / forked antlers",
                   fill=(120, 134, 152))
     out.parent.mkdir(parents=True, exist_ok=True)
     sheet.save(out)

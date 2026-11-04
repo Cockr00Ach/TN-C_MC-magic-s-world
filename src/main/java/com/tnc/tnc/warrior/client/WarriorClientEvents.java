@@ -15,18 +15,20 @@ public final class WarriorClientEvents {
     }
     @SubscribeEvent public static void bowProperties(net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent event){
         event.enqueueWork(()->{
-            var bow=TNMod.BOW.get();
+            for(var bow:java.util.List.of(TNMod.BOW.get(),TNMod.MOON_BOW.get(),TNMod.STORM_BOW.get(),TNMod.EMBER_BOW.get())) {
             net.minecraft.client.renderer.item.ItemProperties.register(bow,
                     net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("minecraft","pulling"),
                     (stack,level,entity,seed)->entity!=null&&entity.isUsingItem()&&entity.getUseItem()==stack?1:0);
             net.minecraft.client.renderer.item.ItemProperties.register(bow,
                     net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("minecraft","pull"),
                     (stack,level,entity,seed)->entity!=null&&entity.getUseItem()==stack?(stack.getUseDuration()-entity.getUseItemRemainingTicks())/20f:0);
+            }
         });
     }
 
     @SubscribeEvent
     public static void renderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(WarriorEntities.ORNATE_ARROW.get(),WarriorArrowRenderer::new);
         event.registerEntityRenderer(WarriorEntities.TEST_DUMMY.get(),TestDummyRenderer::new);
         event.registerEntityRenderer(WarriorEntities.INSTRUCTOR.get(), InstructorRenderer::new);
     }

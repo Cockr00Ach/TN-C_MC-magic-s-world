@@ -590,6 +590,7 @@ public final class WarriorComboService {
     /** 远程终结技（弓）：消耗一支箭再射；创造/无限附魔不消耗，射出的箭也不能捡。 */
     private static void shoot(ServerPlayer player, WarriorSkill skill) {
         ItemStack bow = player.getMainHandItem();
+        ItemStack ammunition = ammo(player).copy();
         boolean infinite = player.getAbilities().instabuild
                 || EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY_ARROWS, bow) > 0;
         if (!infinite) {
@@ -599,7 +600,7 @@ public final class WarriorComboService {
             }
         }
         net.minecraft.world.entity.projectile.Arrow arrow =
-                new net.minecraft.world.entity.projectile.Arrow(player.level(), player);
+                WarriorArrowEntity.create(player.level(),player,ammunition,bow);
         arrow.setPos(player.getX(), player.getEyeY() - 0.1, player.getZ());
         arrow.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F,
                 2.4F, Math.max(0.4F, 1.2F - (float) Math.min(1, skill.length() / 8.0)));

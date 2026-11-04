@@ -993,5 +993,12 @@
   "item.tnc.abyssal_mana_water_bucket": "玄潮魔水桶",
   "fluid_type.tnc.abyssal_mana_water": "玄潮魔水",
   "key.tnc.bow_charge_z": "横斩 / 连招 Z",
-  "entity.tnc.test_dummy": "测试木桩"
+  "entity.tnc.test_dummy": "测试木桩",
+  "item.tnc.moon_bow": "弦月长弓",
+  "item.tnc.storm_bow": "逐风战弓",
+  "item.tnc.ember_bow": "烬羽重弓",
+  "item.tnc.moon_arrow": "弦月箭",
+  "item.tnc.storm_arrow": "逐风箭",
+  "item.tnc.ember_arrow": "烬羽箭",
+  "entity.tnc.ornate_arrow": "精工箭"
 }

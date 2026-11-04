@@ -3,6 +3,9 @@
   "values": [
     "tnc:bow",
     "minecraft:bow",
-    "minecraft:crossbow"
+    "minecraft:crossbow",
+    "tnc:moon_bow",
+    "tnc:storm_bow",
+    "tnc:ember_bow"
   ]
 }

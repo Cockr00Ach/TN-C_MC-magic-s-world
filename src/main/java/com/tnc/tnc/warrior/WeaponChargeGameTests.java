@@ -8,13 +8,13 @@ import net.minecraftforge.gametest.*;
 import net.minecraftforge.common.MinecraftForge;
 @GameTestHolder("tncwarrior") @PrefixGameTestTemplate(false)
 public final class WeaponChargeGameTests {
-    @GameTest(template="building_test_empty",timeoutTicks=300)
+    @GameTest(template="building_test_empty",timeoutTicks=500)
     public static void everyWeaponWaitsForZReleaseIncludingScytheAndBow(GameTestHelper h){
         var p=AdventureGameTests.player(h);var data=TemperingData.get(p.server);data.setTalent(p.getUUID(),6);data.enroll(p.getUUID());
         var pos=h.absolutePos(new BlockPos(5,3,3));p.setPos(pos.getX(),pos.getY(),pos.getZ());p.setYRot(0);p.setXRot(0);
         p.setItemInHand(InteractionHand.OFF_HAND,new ItemStack(Items.ARROW,64));
         var target=h.spawn(WarriorEntities.TEST_DUMMY.get(),new BlockPos(5,3,6));target.setPos(p.getX(),p.getY(),p.getZ()+2.5);
-        Item[] items={Items.IRON_SWORD,com.tnc.tnc.TNMod.GREATSWORD.get(),com.tnc.tnc.TNMod.HAMMER.get(),com.tnc.tnc.TNMod.SPEAR.get(),com.tnc.tnc.TNMod.DOOM_SCYTHE.get(),com.tnc.tnc.TNMod.BOW.get()};
+        Item[] items={Items.IRON_SWORD,com.tnc.tnc.TNMod.GREATSWORD.get(),com.tnc.tnc.TNMod.HAMMER.get(),com.tnc.tnc.TNMod.SPEAR.get(),com.tnc.tnc.TNMod.DOOM_SCYTHE.get(),com.tnc.tnc.TNMod.BOW.get(),com.tnc.tnc.TNMod.MOON_BOW.get(),com.tnc.tnc.TNMod.STORM_BOW.get(),com.tnc.tnc.TNMod.EMBER_BOW.get()};
         for(int n=0;n<items.length;n++){
             final int i=n;int start=1+n*40;
             h.runAfterDelay(start,()->{target.resetStats();p.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(items[i]));WarriorComboService.input(p,WarriorMove.HORIZONTAL,WarriorComboInputPacket.CHARGE_START);});
@@ -26,7 +26,7 @@ public final class WeaponChargeGameTests {
                 else h.assertTrue(!p.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.projectile.Arrow.class,p.getBoundingBox().inflate(30),a->a.getOwner()==p).isEmpty(),"Bow release fires arrow");
             });
         }
-        h.runAfterDelay(240,()->{target.discard();p.discard();h.succeed();});
+        h.runAfterDelay(items.length*40,()->{target.discard();p.discard();h.succeed();});
     }
     @GameTest(template="building_test_empty",timeoutTicks=100)
     public static void zHoldNeverAttacksUntilReleaseAndReleaseOnlyHitsOnce(GameTestHelper h){

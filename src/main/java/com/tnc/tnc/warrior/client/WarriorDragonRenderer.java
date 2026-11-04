@@ -20,25 +20,9 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.joml.Matrix4f;
 
-/**
- * 龙之剑的龙：**真实几何体**，不是粒子。
- *
- * <p>2026-11-03 之前这条龙是服务端每 tick 撒几十颗尘埃粒子拼出来的（龙骨 END_ROD、
- * 龙身暗红尘埃、两侧斜线当龙翼、龙头炸一发 FLASH）。问题是：粒子没有体积、没有朝向，
- * 远看是一团糊、近看是一串点，而且粒子上限一吃就只剩一半。现在改成客户端画一条
- * 带厚度的刃形长龙：沿玩家朝向冲出 7.5 格，蛇形摆动、两侧张翼、头部收成菱形，
- * 三层嵌套（暗红外壳 / 赤红龙身 / 金色脊线）叠加发光。
- *
- * <p>形状本身在 {@link WarriorDragonGeometry}（纯数学，可单测、可离线出预览图）；
- * 这里只负责"把三角形塞进 buffer"，所以画错了只有两种可能：数据错（单测能抓到）
- * 或者顶点顺序/混合错。
- *
- * <p>触发方式<b>不新增网络包</b>：服务端只广播动作（{@code WarriorAnimationPacket}），
- * 客户端在 {@link WarriorAnimationClient#accept} 里看到"龙之剑 + 终结技动作"就自己起一条龙。
- * 这样别人的屏幕上也能看到，而且协议号不用动（协议号 20 由美术侧负责，别去碰）。
- *
- * <p>渲染方式与 {@code WarriorWaveRenderer} 一致：{@code RenderType.lightning()} 加算、
- * 不写深度，所以龙不会把地形或别的实体遮黑，多条叠在一起也只是更亮。
+/** Short-lived carved block dragon, with bounded instances and a private geometry buffer.
+ * Production meshes are shared with the offline preview. Quad submission and ordinary
+ * alpha blending keep the scales, antlers and jaws legible instead of washing them white.
  */
 @Mod.EventBusSubscriber(modid = TNMod.MODID, value = Dist.CLIENT)
 public final class WarriorDragonRenderer {
@@ -137,7 +121,7 @@ public final class WarriorDragonRenderer {
         }
         Vec3 camera = event.getCamera().getPosition();
         var buffers = BUFFERS;
-        var vertices = buffers.getBuffer(RenderType.lightning());
+        var vertices = buffers.getBuffer(WarriorGeometryRenderType.TYPE);
         Matrix4f matrix = new Matrix4f().translation((float) -camera.x, (float) -camera.y, (float) -camera.z);
         float partial = event.getPartialTick();
         boolean drew = false;
@@ -150,7 +134,7 @@ public final class WarriorDragonRenderer {
             draw(vertices, matrix, dragon, WarriorDragonGeometry.head(age), WarriorDragonGeometry.fade(age));
         }
         if (drew) {
-            buffers.endBatch(RenderType.lightning());
+            buffers.endBatch(WarriorGeometryRenderType.TYPE);
         }
     }
 
@@ -158,6 +142,9 @@ public final class WarriorDragonRenderer {
         for (var tri : WarriorDragonGeometry.build(dragon.origin(), dragon.dir(), dragon.side(), head, fade)) {
             vertex(out, matrix, tri.a(), tri.color(), tri.alpha());
             vertex(out, matrix, tri.b(), tri.color(), tri.alpha());
+            vertex(out, matrix, tri.c(), tri.color(), tri.alpha());
+            // The renderer consumes QUADS: duplicate the third corner to submit
+            // a degenerate fourth corner rather than joining unrelated triangles.
             vertex(out, matrix, tri.c(), tri.color(), tri.alpha());
         }
     }

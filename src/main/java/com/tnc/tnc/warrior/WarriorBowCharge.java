@@ -74,11 +74,12 @@ public final class WarriorBowCharge {
         if(c.family!=WarriorWeaponFamily.BOW){fireMelee(p,c);return;}
         if(!WarriorComboService.hasAmmo(p))return;
         float power=BowChargeRules.power(p.serverLevel().getGameTime()-c.start);
+        ItemStack ammunition=WarriorComboService.ammo(p).copy();
         boolean infinite=p.getAbilities().instabuild||EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY_ARROWS,c.bow)>0;
         if(!infinite)WarriorComboService.ammo(p).shrink(1);
         int count=BowChargeRules.arrows(c.move);
         for(int i=0;i<count;i++){
-            Arrow a=new Arrow(p.level(),p);a.setPos(p.getX(),p.getEyeY()-.1,p.getZ());
+            Arrow a=WarriorArrowEntity.create(p.level(),p,ammunition,c.bow);a.setPos(p.getX(),p.getEyeY()-.1,p.getZ());
             a.shootFromRotation(p,p.getXRot(),p.getYRot()+(i-(count-1)/2f)*(6-2*power),0,2+1.6f*power,.25f);
             a.setBaseDamage(c.move==WarriorMove.HORIZONTAL?8:count==3?2+2*power:3+5*power);
             if(c.move==WarriorMove.HORIZONTAL)a.getPersistentData().putDouble("TncZChargeDamage",3+5*WeaponChargeRules.multiplier(p.level().getGameTime()-c.start));a.setCritArrow(power>=1);a.setGlowingTag(true);
