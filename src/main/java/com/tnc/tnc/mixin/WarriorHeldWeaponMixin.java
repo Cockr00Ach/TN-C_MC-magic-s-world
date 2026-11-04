@@ -19,6 +19,7 @@ public abstract class WarriorHeldWeaponMixin {
             at=@At("TAIL"))
     private void tnc$boundWeapon(LivingEntity entity, ItemStack stack, ItemDisplayContext context, boolean left,
             PoseStack pose, MultiBufferSource buffers, int light, CallbackInfo callback) {
+        com.tnc.tnc.warrior.client.WarriorTrail.capture(entity,stack,context,left,pose);
         WarriorPhantomRenderer.renderBound(entity, stack, context, left, pose, buffers, light);
         com.tnc.tnc.warrior.client.WarriorWeaponOrnamentRenderer.render(entity,stack,context,left,pose,buffers,light);
     }

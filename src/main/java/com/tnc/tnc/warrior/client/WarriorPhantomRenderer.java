@@ -60,6 +60,7 @@ public final class WarriorPhantomRenderer {
     public static void renderBound(net.minecraft.world.entity.LivingEntity entity, ItemStack stack,
             ItemDisplayContext context, boolean left, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
         if (disabled() || !(entity instanceof AbstractClientPlayer player) || !WarriorWeapons.bladed(stack)
+                || left!=(player.getMainArm()==net.minecraft.world.entity.HumanoidArm.LEFT)
                 || (context != ItemDisplayContext.THIRD_PERSON_LEFT_HAND
                     && context != ItemDisplayContext.THIRD_PERSON_RIGHT_HAND)) return;
         try {
@@ -71,11 +72,13 @@ public final class WarriorPhantomRenderer {
 
     private static void renderWeapon(AbstractClientPlayer player, ItemStack stack, ItemDisplayContext context,
             boolean left, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
+        float visibility=WarriorTrail.ghostVisibility(player);
+        if(visibility<=.001f)return;
         double scale = player == Minecraft.getInstance().player ? scale() : WarriorPhantomScales.get(player.getUUID());
         // 始终比真剑大 2%：完全重合会和真模型 z-fighting，寒毛一点就看不出来了
         double draw = Math.max(scale, 1.02);
         boolean combo = WarriorTrail.finisher(player.getId());
-        float alpha = alpha(scale, combo);
+        float alpha = alpha(scale, combo)*visibility;
 
         // ItemInHandRenderer uses entity id + display context as the model override seed.
         int seed = player.getId() + context.ordinal();
@@ -96,8 +99,8 @@ public final class WarriorPhantomRenderer {
             Vector3f compensation = com.tnc.tnc.warrior.WarriorGripGeometry.compensation(anchor, draw);
             poseStack.translate(compensation.x(), compensation.y(), compensation.z());
             poseStack.scale((float) draw, (float) draw, (float) draw);
-            Minecraft.getInstance().getItemRenderer().renderStatic(player, stack, context, left, poseStack,
-                    ghost(buffer, alpha), player.level(), packedLight, OverlayTexture.NO_OVERLAY, seed);
+            Minecraft.getInstance().getItemRenderer().render(stack,context,left,poseStack,
+                    ghost(buffer,alpha),packedLight,OverlayTexture.NO_OVERLAY,WarriorGhostModels.find(stack,baked));
         } finally {
             // 必须在 finally 里弹栈：中间抛异常而不弹，整帧的 PoseStack 就不平衡了
             poseStack.popPose();
@@ -120,17 +123,14 @@ public final class WarriorPhantomRenderer {
         };
     }
 
-    /**
-     * 透明度：磨砺 0 时虚影和真剑等大、只是薄薄一层（"一直都有虚影跟着"）；
-     * 连招放出来的那几帧亮一档并轻微脉动（"只有释放连招时才明显"）。
-     */
+    /** Attack opacity only; the envelope gate above removes all idle ghost submissions. */
     private static float alpha(double scale, boolean combo) {
         double grown = (scale - 1.0) / WarriorPhantom.MAX_GROWTH;
         float base = (float) (0.14 + 0.26 * grown);
         if (!combo) {
             return base;
         }
-        float pulse = 0.88f + 0.12f * (float) Math.sin(System.currentTimeMillis() / 70.0);
+        float pulse = 0.975f + 0.025f * (float) Math.sin(net.minecraft.Util.getNanos() / 240_000_000.0);
         return Math.min(0.85f, (float) (0.40 + 0.34 * grown) * pulse);
     }
 

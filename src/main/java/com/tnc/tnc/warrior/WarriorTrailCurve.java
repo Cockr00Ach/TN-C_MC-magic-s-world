@@ -81,17 +81,18 @@ public final class WarriorTrailCurve {
         if (budget >= sum || budget <= 0) {
             return steps;
         }
-        // 每段至少 1，所以先把"至少 1"的那部分扣掉，剩下的按比例分
-        int spare = Math.max(0, budget - steps.length);
-        int[] out = new int[steps.length];
-        for (int i = 0; i < steps.length; i++) {
-            int n = Math.max(1, steps[i]);
-            if (n == 1 || spare == 0) {
-                out[i] = 1;
-                continue;
-            }
-            int scaled = 1 + Math.round((n - 1) * (float) spare / (float) Math.max(1, sum - steps.length));
-            out[i] = Math.max(1, scaled);
+        int target=Math.max(steps.length,budget),extra=target-steps.length;
+        int[] out=new int[steps.length];double[] fractions=new double[steps.length];
+        int used=0,weight=Math.max(1,sum-steps.length);
+        for(int i=0;i<steps.length;i++){
+            double exact=Math.max(0,steps[i]-1)*(double)extra/weight;
+            int whole=(int)Math.floor(exact);out[i]=1+whole;used+=whole;fractions[i]=exact-whole;
+        }
+        // Largest remainder allocation: rounding every segment independently
+        // could exceed the promised total vertex budget.
+        for(int left=extra-used;left>0;left--){
+            int best=0;for(int i=1;i<fractions.length;i++)if(fractions[i]>fractions[best])best=i;
+            out[best]++;fractions[best]=-1;
         }
         return out;
     }

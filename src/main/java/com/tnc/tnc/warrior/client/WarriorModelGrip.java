@@ -37,6 +37,6 @@ public final class WarriorModelGrip {
         });
     }
     @SubscribeEvent public static void reload(RegisterClientReloadListenersEvent event) {
-        event.registerReloadListener((ResourceManagerReloadListener) resources -> CACHE.clear());
+        event.registerReloadListener((ResourceManagerReloadListener) resources -> {CACHE.clear();WarriorModelBlade.clear();WarriorTrail.clear();});
     }
 }
