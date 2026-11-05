@@ -626,7 +626,7 @@ public final class WarriorComboService {
      * <p>"打断其他玩家的连招"靠的是清空他服务端的输入缓冲 —— 不清的话，对方元素栏里
      * 已经接了一半的连招会在僵直结束后继续成立。
      */
-    private static void interrupt(ServerPlayer player, LivingEntity target, int staggerTicks) {
+    static void interrupt(ServerPlayer player, LivingEntity target, int staggerTicks) {
         target.stopUsingItem();
         if (target instanceof ServerPlayer other) {
             clearCombo(other);
@@ -714,7 +714,7 @@ public final class WarriorComboService {
     }
 
     /** 目标是否在玩家面前 {@code degrees} 度的扇形里。360 度恒真。 */
-    static boolean inArc(ServerPlayer player, LivingEntity target, int degrees) {
+    static boolean inArc(LivingEntity player, LivingEntity target, int degrees) {
         if (degrees >= 360) {
             return true;
         }
@@ -746,6 +746,7 @@ public final class WarriorComboService {
 
     static boolean eligible(ServerPlayer player) {
         return player.isAlive() && !player.isSpectator() && !DownedCombat.isDowned(player)
+                && !com.tnc.tnc.bronze.BronzeTwinWeapon.blocked(player)
                 && !(player.isUsingItem() && player.getUseItem().getItem() instanceof com.tnc.tnc.bronze.BronzeWeaponItem)
                 && TemperingData.get(player.server).enrolled(player.getUUID());
     }
@@ -837,6 +838,14 @@ public final class WarriorComboService {
         if (state.counterAt != Long.MIN_VALUE && now >= state.counterAt) {
             state.counterAt = Long.MIN_VALUE;
             mobCounterSweep(player);
+        }
+        if(com.tnc.tnc.bronze.BronzeTwinWeapon.blocked(player)){
+            if(!state.tracker.isEmpty()||state.heldSkill!=null||state.finisherUntil>now||state.counterAt!=Long.MIN_VALUE||state.stanceUntil>now){
+                if(state.heldSkill!=null)player.removeEffect(net.minecraft.world.effect.MobEffects.DAMAGE_RESISTANCE);
+                state.tracker.clear();state.heldSkill=null;state.stanceUntil=Long.MIN_VALUE;state.counterAt=Long.MIN_VALUE;state.finisherUntil=0;
+                WarriorAnimationPacket.cancel(player);sync(player,state,-1);
+            }
+            return;
         }
         int before = state.tracker.size();
         state.tracker.prune(now);

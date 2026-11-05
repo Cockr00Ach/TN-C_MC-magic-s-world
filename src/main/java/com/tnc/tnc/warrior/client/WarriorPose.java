@@ -32,6 +32,7 @@ public final class WarriorPose {
     public static void apply(Player player, HumanoidModel<?> model) {
         WarriorAnimationClient.Active active = WarriorAnimationClient.active(player.getId());
         if (active == null) {
+            pairedArms(player,model);
             return;
         }
         float raw = active.progress(Minecraft.getInstance().getFrameTime());
@@ -43,6 +44,7 @@ public final class WarriorPose {
         if (clip != null) {
             applyClip(model, clip, t, leftHanded,weight);
             brace(model,active,family,raw,weight);
+            pairedArms(player,model);
             return;
         }
         WarriorPoseMath.Pose pose = family==com.tnc.tnc.warrior.WarriorWeaponFamily.HAMMER
@@ -66,6 +68,14 @@ public final class WarriorPose {
 
         if(weight>=.999f)twoHandedSupport(player, model, pose, leftHanded);
         brace(model,active,family,raw,weight);
+        pairedArms(player,model);
+    }
+    /** The partner blade follows the native arm timeline; damage is still resolved once by the warrior service. */
+    private static void pairedArms(Player player,HumanoidModel<?> model){
+        if(!com.tnc.tnc.bronze.BronzeTwinWeapon.active(player))return;
+        ModelPart main=player.getMainArm()==HumanoidArm.LEFT?model.leftArm:model.rightArm;
+        ModelPart partner=player.getMainArm()==HumanoidArm.LEFT?model.rightArm:model.leftArm;
+        partner.xRot=main.xRot;partner.yRot=-main.yRot;partner.zRot=-main.zRot;
     }
 
     private static void brace(HumanoidModel<?> model,WarriorAnimationClient.Active active,

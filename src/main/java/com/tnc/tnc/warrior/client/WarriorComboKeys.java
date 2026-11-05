@@ -93,6 +93,7 @@ public final class WarriorComboKeys {
         return minecraft != null && minecraft.player != null && minecraft.level != null
                 && minecraft.screen == null && minecraft.getOverlay() == null
                 && TemperingClient.enrolled()
+                && !com.tnc.tnc.bronze.BronzeTwinWeapon.blocked(minecraft.player)
                 && WarriorWeapons.family(minecraft.player.getMainHandItem()) != null;
     }
 
@@ -121,7 +122,8 @@ public final class WarriorComboKeys {
             return;
         }
         boolean ready = combatReady(minecraft);
-        if (ready) {
+        if (ready || minecraft.screen==null && minecraft.getOverlay()==null && TemperingClient.enrolled()
+                && com.tnc.tnc.bronze.BronzeTwinWeapon.blocked(minecraft.player)) {
             // 先于原版 handleKeybinds 吃掉同一按键上的原版动作，否则 Q 会丢剑、E 会弹背包。
             // 步法键（左 Ctrl）**不吃**：它和原版疾跑撞在一个键上，但意图一致（都是往前冲），
             // 吃掉疾跑反而亏；玩家改到别的键也不受影响。

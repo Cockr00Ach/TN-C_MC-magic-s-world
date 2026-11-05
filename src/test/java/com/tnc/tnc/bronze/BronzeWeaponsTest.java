@@ -51,6 +51,7 @@ class BronzeWeaponsTest {
                 for(var face:element.getAsJsonObject("faces").entrySet())for(var uv:face.getValue().getAsJsonObject().getAsJsonArray("uv"))assertTrue(uv.getAsDouble()>=0&&uv.getAsDouble()<=16);
             }
             var recipe=JsonParser.parseString(Files.readString(root.resolve("data/tnc/recipes/"+type.id()+".json"))).getAsJsonObject();
+            if(type==BronzeProfile.HALBERD){assertEquals("tnc:bronze_fusion",recipe.get("type").getAsString());continue;}
             assertEquals("tnc:"+type.id(),recipe.getAsJsonObject("result").get("item").getAsString());
             assertEquals(3,recipe.getAsJsonArray("pattern").size());
             assertEquals("minecraft:copper_ingot",recipe.getAsJsonObject("key").getAsJsonObject("C").get("item").getAsString());

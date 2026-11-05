@@ -19,6 +19,7 @@ public final class BronzeDaggerEntity extends ThrowableItemProjectile {
     private float damage;private boolean returning;private long flightToken;private Vec3 origin;
     public BronzeDaggerEntity(EntityType<? extends BronzeDaggerEntity> type,Level level){super(type,level);}
     public static void launch(ServerPlayer p,ItemStack stack,int charge){
+        if(!BronzeTwinWeapon.canUse(p,stack))return;
         var entity=new BronzeDaggerEntity(BronzeWeapons.DAGGER.get(),p.level());entity.setOwner(p);
         entity.setPos(p.getX(),p.getEyeY()-.15,p.getZ());entity.origin=entity.position();
         entity.flightToken=p.level().getGameTime()+60;
@@ -35,6 +36,7 @@ public final class BronzeDaggerEntity extends ThrowableItemProjectile {
     @Override protected float getGravity(){return returning?0:.025f;}
     @Override protected void onHitEntity(EntityHitResult hit){
         if(level().isClientSide||returning)return;
+        if(getOwner() instanceof ServerPlayer player&&!pairedGripValid(player)){returning=true;return;}
         if(getOwner() instanceof ServerPlayer p&&hit.getEntity() instanceof LivingEntity target&&com.tnc.tnc.warrior.WarriorBronzeBridge.validTarget(p,target)){
             float bonus=EnchantmentHelper.getDamageBonus(getItem(),target.getMobType());
             if(target.hurt(damageSources().thrown(this,p),damage+bonus)){
@@ -50,12 +52,18 @@ public final class BronzeDaggerEntity extends ThrowableItemProjectile {
     @Override public void tick(){
         if(!level().isClientSide){
             if(!(getOwner() instanceof ServerPlayer p)||!p.isAlive()||p.isRemoved()||p.level()!=level()||tickCount>=58){finish();return;}
+            if(!pairedGripValid(p))returning=true;
             if(origin==null)origin=position();if(position().distanceToSqr(origin)>18*18||tickCount>=22)returning=true;
             if(returning){noPhysics=true;setNoGravity(true);Vec3 delta=p.getEyePosition().add(0,-.3,0).subtract(position());
                 if(delta.lengthSqr()<1){finish();return;}setDeltaMovement(delta.normalize().scale(1.65));}
         }
         super.tick();
         if(level().isClientSide)level().addParticle(net.minecraft.core.particles.ParticleTypes.WAX_OFF,getX(),getY(),getZ(),0,0,0);
+    }
+    private boolean pairedGripValid(ServerPlayer player){
+        if(!BronzeTwinWeapon.isPair(getItem()))return true;
+        var held=player.getMainHandItem();
+        return BronzeTwinWeapon.isPair(held)&&player.getOffhandItem().isEmpty()&&held.hasTag()&&held.getTag().hasUUID(BronzeWeaponItem.FLIGHT_ID)&&held.getTag().getUUID(BronzeWeaponItem.FLIGHT_ID).equals(getUUID());
     }
     private void finish(){
         if(getOwner() instanceof ServerPlayer p)for(int i=0;i<p.getInventory().getContainerSize();i++){
