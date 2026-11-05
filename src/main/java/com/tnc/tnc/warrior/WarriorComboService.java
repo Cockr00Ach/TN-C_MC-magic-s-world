@@ -746,6 +746,7 @@ public final class WarriorComboService {
 
     static boolean eligible(ServerPlayer player) {
         return player.isAlive() && !player.isSpectator() && !DownedCombat.isDowned(player)
+                && !(player.isUsingItem() && player.getUseItem().getItem() instanceof com.tnc.tnc.bronze.BronzeWeaponItem)
                 && TemperingData.get(player.server).enrolled(player.getUUID());
     }
 

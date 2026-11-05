@@ -78,7 +78,9 @@ public class TNMagicCircleRenderer extends EntityRenderer<TNMagicCircleEntity> {
     private static ResourceLocation textureFor(TNMagicCircleEntity entity) {
         int style = entity.style();
         if (style == TNMagicCircleEntity.STYLE_LIGHT
-                || style == TNMagicCircleEntity.STYLE_LIGHT_SKY) {
+                || style == TNMagicCircleEntity.STYLE_LIGHT_SKY
+                || style == TNMagicCircleEntity.STYLE_LIGHT_MINOR
+                || style == TNMagicCircleEntity.STYLE_LIGHT_GRAND) {
             return LIGHT_TEXTURE;
         }
         if (style == TNMagicCircleEntity.STYLE_DARK || style == TNMagicCircleEntity.STYLE_DARK_RITUAL) {
@@ -96,7 +98,9 @@ public class TNMagicCircleRenderer extends EntityRenderer<TNMagicCircleEntity> {
         if(entity.style()==TNMagicCircleEntity.STYLE_DARK_HAND)return;
         if(entity.style()==TNMagicCircleEntity.STYLE_WIND
                 ||entity.style()==TNMagicCircleEntity.STYLE_LIGHT
-                ||entity.style()==TNMagicCircleEntity.STYLE_LIGHT_SKY){ElementSealRenderer.render(entity,partialTick,poseStack,buffer);return;}
+                ||entity.style()==TNMagicCircleEntity.STYLE_LIGHT_SKY
+                ||entity.style()==TNMagicCircleEntity.STYLE_LIGHT_MINOR
+                ||entity.style()==TNMagicCircleEntity.STYLE_LIGHT_GRAND){ElementSealRenderer.render(entity,partialTick,poseStack,buffer);return;}
         if(entity.style()==TNMagicCircleEntity.STYLE_EARTH){EarthSealRenderer.render(entity,partialTick,poseStack,buffer);return;}
         float age = entity.tickCount + partialTick;
         float life = Math.max(1.0F, entity.life());

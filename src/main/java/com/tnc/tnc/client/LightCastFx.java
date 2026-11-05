@@ -39,16 +39,18 @@ import java.util.UUID;
  *
  * <h2>这一版做了什么</h2>
  * 以前光耀 / 召唤天使是「读条 1 秒 → 脚下突然一张阵」✓——只有<b>一个</b>法阵，而且都在释放之后 ✗。
- * 现在释放之前就有一整套仪式场，并且读条越长、阵越完整：
+ * 现在释放之前就有一整套仪式场，并且<b>低阶/中阶/高阶是三种不同的施法方式</b>
+ * （{@link LightRitualSequence.Rite}），不是同一张阵只改数量：
  * <ol>
- *   <li><b>主阵被一笔一笔“写”出来</b>：外环从 0 扫到 360°，24 道符文按读条依次点亮；</li>
- *   <li><b>一圈小法阵</b>（3~7 颗，{@link LightRitualSequence#satelliteSeals}）分两圈绕着施法者转，
- *       每一颗有自己的点亮时刻与呼吸节奏；每颗小阵还带一枚<b>竖起来的伴生环</b>；</li>
- *   <li><b>竖环</b>（2~5 枚）绕身翻转 —— 就是“铁魔法”高阶法术那种立起来穿过去的法阵；</li>
- *   <li><b>头顶太阳种子</b>：核心、光柱、8 向光芒、3 条从地面盘旋上去的光带，越到后面越亮；</li>
- *   <li><b>屏幕：先压暗、再爆亮</b>：读条前段四周压暗（暴风雨前夕），最后 40% 暖白光晕爬满屏幕，
- *       释放瞬间白闪 ＋ 震屏；</li>
- *   <li><b>释放后还有一圈扩散光环</b>（几何爆发），配合服务端新铺的小阵与粒子 ✓。</li>
+ *   <li><b>主阵被一笔一笔“写”出来</b>：外环从 0 扫到 360°，符文按读条依次点亮；</li>
+ *   <li><b>低阶「铭刻」</b>：一张干净的地面符 + 2/3 颗贴地小阵，只有 6/8 道光芒与 6/8 道符文，
+ *       没有竖环、没有光柱、没有屏幕压暗/心跳/光雨 —— 读条短、收得也快；</li>
+ *   <li><b>中阶「圣所」</b>：小阵扩到 4 颗并各带一枚竖立伴生环，身周 2 道门环，
+ *       开始有轻微暗角、一次心跳和一根细光柱；</li>
+ *   <li><b>高阶「天穹降临」</b>：6/8 颗小阵、4/6 道门环、满档压暗/心跳/光柱/盘旋光带/脉冲环/光雨，
+ *       头顶太阳种子全开 —— 也就是作者要的“暴风雨的前夕”＋“光污染”；</li>
+ *   <li><b>释放后的阵也有三档</b>：低阶主阵用 {@code STYLE_LIGHT_MINOR}（一圈符），
+ *       高阶用 {@code STYLE_LIGHT_GRAND}（多一圈外环与刻痕），不再所有档位都长一样。</li>
  * </ol>
  *
  * <h2>为什么客户端自己算，不走服务端实体</h2>
@@ -243,9 +245,11 @@ public final class LightCastFx {
                     -Math.cos(angle) * 0.035D, 0.055D + RANDOM.nextDouble() * 0.035D,
                     -Math.sin(angle) * 0.035D);
         }
-        // 头顶核心附近：蓝白电火花，读条越后越密
+        // 头顶核心附近：蓝白电火花，读条越后越密（低阶核心更低，粒子也跟着压低）
         int sparks = (1 + (int) (info.ratio() * 3.0F)) * (minimal ? 1 : 2);
-        double coreY = cy + 2.55D + 0.12D * info.tier() + 0.3D * info.ratio();
+        double coreY = cy + (LightRitualSequence.hasCorePillar(info.tier())
+                ? 2.55D + 0.12D * info.tier() + 0.30D * info.ratio()
+                : 1.45D + 0.08D * info.tier() + 0.16D * info.ratio());
         for (int i = 0; i < sparks; i++) {
             level.addParticle(ParticleTypes.ELECTRIC_SPARK,
                     cx + (RANDOM.nextDouble() - 0.5D) * 0.8D,
@@ -679,13 +683,16 @@ public final class LightCastFx {
             WaterGeometry.ringColor(out, pose, new Vec3(0.0D, 0.10D, 0.0D), UP,
                     radius, Math.max(0.04D, R * 0.014D), C_R, C_G, C_B, alpha, 72);
         }
-        // 竖直光柱：先冲高、再淡出
-        double height = (5.5D + tier * 1.4D) * Math.min(1.0D, u * 4.0D + 0.25D);
+        // 竖直光柱：低阶只是脚边一小簇，中高阶才冲高
+        double height = (LightRitualSequence.hasCorePillar(tier)
+                ? 5.5D + tier * 1.4D
+                : 2.0D + tier * 0.45D) * Math.min(1.0D, u * 4.0D + 0.25D);
         WaterGeometry.tube(out, pose, new Vec3(0.0D, 0.10D, 0.0D), new Vec3(0.0D, height, 0.0D),
                 (0.45D - 0.35D * u) * strength + 0.05D, 1.0F, 0.98F, 0.92F, fade * 0.55F, 8);
-        // 12 道星芒
-        for (int i = 0; i < 12; i++) {
-            double angle = i * Math.PI / 6.0D;
+        // 星芒：低阶 6 道，高阶 12 道
+        int starRays = LightRitualSequence.hasCorePillar(tier) ? 12 : 6;
+        for (int i = 0; i < starRays; i++) {
+            double angle = i * Math.PI * 2.0D / starRays;
             Vec3 dir = new Vec3(Math.cos(angle), 0.0D, Math.sin(angle));
             Vec3 center = new Vec3(0.0D, 1.0D, 0.0D);
             WaterGeometry.tube(out, pose, center.add(dir.scale(R * 0.2D)),

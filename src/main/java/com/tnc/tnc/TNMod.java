@@ -304,6 +304,7 @@ public class TNMod
         modEventBus.addListener(com.tnc.tnc.life.UncommonMagicPlants::creative);
 
         // 把三个注册器挂到 mod 事件总线上，否则上面注册的内容不会生效
+        com.tnc.tnc.bronze.BronzeWeapons.register(modEventBus);
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
         MENUS.register(modEventBus);

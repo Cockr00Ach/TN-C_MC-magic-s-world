@@ -413,13 +413,14 @@ public final class TNLightChainMechanics {
      */
     private static void lightReleaseParticles(ServerLevel level, Vec3 at, double radius, int tier) {
         level.sendParticles(ParticleTypes.END_ROD, at.x, at.y + 1.0D, at.z,
-                36 + tier * 12, radius * 0.32D, 0.75D, radius * 0.32D, 0.055D);
+                24 + tier * 8, radius * 0.32D, 0.75D, radius * 0.32D, 0.055D);
         level.sendParticles(ParticleTypes.FIREWORK, at.x, at.y + 1.35D, at.z,
-                18 + tier * 6, 0.85D, 0.75D, 0.85D, 0.14D);
+                10 + tier * 4, 0.85D, 0.75D, 0.85D, 0.14D);
         level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y + 2.0D, at.z,
-                14 + tier * 4, 0.55D, 0.55D, 0.55D, 0.10D);
-        // 竖直光柱：从脚底往上每 0.7 格撒两点，读起来像一根“落下来的光”
-        for (int i = 0; i < 8 + tier * 2; i++) {
+                8 + tier * 3, 0.55D, 0.55D, 0.55D, 0.10D);
+        // 竖直光柱：低阶只在脚边冒一小簇，中高阶才是“落下来的光”
+        int column = LightRitualSequence.hasCorePillar(tier) ? 8 + tier * 2 : 2;
+        for (int i = 0; i < column; i++) {
             level.sendParticles(ParticleTypes.END_ROD, at.x, at.y + 0.6D + i * 0.7D, at.z,
                     2, 0.12D, 0.03D, 0.12D, 0.01D);
         }

@@ -27,7 +27,7 @@
     "target": {
       "type": "SELF"
     },
-    "animation": "spell_engine:one_handed_area_release",
+    "animation": "spell_engine:dual_handed_ground_release",
     "sound": {
       "id": "block.amethyst_block.chime"
     }

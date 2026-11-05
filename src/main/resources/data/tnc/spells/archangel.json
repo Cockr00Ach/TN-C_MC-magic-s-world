@@ -7,7 +7,7 @@
   },
   "cast": {
     "duration": 3.2,
-    "animation": "spell_engine:two_handed_channeling",
+    "animation": "spell_engine:two_handed_spinning",
     "sound": {
       "id": "block.beacon.activate",
       "randomness": 0
@@ -27,7 +27,7 @@
     "target": {
       "type": "SELF"
     },
-    "animation": "spell_engine:one_handed_area_release",
+    "animation": "spell_engine:dual_handed_ground_release",
     "sound": {
       "id": "block.amethyst_block.chime"
     }

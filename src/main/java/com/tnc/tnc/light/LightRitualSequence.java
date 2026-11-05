@@ -13,18 +13,19 @@ package com.tnc.tnc.light;
  * 拆出来之后：
  * <ul>
  *   <li>{@code LightCastFx}（客户端只负责画）和 {@code TNLightChainMechanics}（服务端铺阵）共用同一套数量；</li>
- *   <li>测试可以钉死「低档也有至少 3 颗小阵」「点亮顺序单调」「progress 0/1 两端闭合」这些不变量 ✓。</li>
+ *   <li>测试可以钉死「三档仪式的结构差异」「点亮顺序单调」「progress 0/1 两端闭合」这些不变量 ✓。</li>
  * </ul>
  *
- * <h2>观感设计（“暴风雨的前夕”）</h2>
+ * <h2>观感设计（低阶是符，高阶才是“暴风雨的前夕”）</h2>
  * <ol>
- *   <li><b>先暗后亮</b>：读条前段屏幕四周压暗（{@link #darkVignette}），像云层压下来；</li>
- *   <li><b>一点点“写”出来</b>：主阵不是整张蹦出来，而是按读条比例一段段描出来
- *       （{@link #formation}），同时小阵按顺序点亮（{@link #satelliteIgnition}）；</li>
+ *   <li><b>低阶先不压屏</b>：只有 t3 起才有暗角（{@link #darkVignette}）与心跳；
+ *       t1/t2 就是一张快速写完的地面符；</li>
+ *   <li><b>一点点“写”出来</b>：主阵按读条比例一段段描出来（{@link #formation}），
+ *       小阵按顺序点亮（{@link #satelliteIgnition}）；</li>
  *   <li><b>越接近释放越亮</b>：核心/光柱/射线随 {@link #chargeGlow} 加速增亮，
- *       最后一小段还会心跳式地颤一下；</li>
- *   <li><b>释放即炸开</b>：{@link #releaseFlash} / {@link #releaseShake} 给白闪与震屏，
- *       配合服务端多铺的小阵，形成“光污染” ✓。</li>
+ *       t3 起才有心跳；</li>
+ *   <li><b>释放即炸开</b>：{@link #releaseFlash} / {@link #releaseShake} 按档位给白闪与震屏，
+ *       低阶只是轻轻一亮，t4/t5 才形成“光污染” ✓。</li>
  * </ol>
  */
 public final class LightRitualSequence {

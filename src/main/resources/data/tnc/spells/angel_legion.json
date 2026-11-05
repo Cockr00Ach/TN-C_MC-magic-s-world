@@ -7,7 +7,7 @@
   },
   "cast": {
     "duration": 2.4,
-    "animation": "spell_engine:one_handed_area_charge",
+    "animation": "spell_engine:one_handed_sky_charge",
     "sound": {
       "id": "block.beacon.activate",
       "randomness": 0
@@ -27,7 +27,7 @@
     "target": {
       "type": "SELF"
     },
-    "animation": "spell_engine:one_handed_area_release",
+    "animation": "spell_engine:one_handed_area_release_ground_left_to_right",
     "sound": {
       "id": "block.amethyst_block.chime"
     }

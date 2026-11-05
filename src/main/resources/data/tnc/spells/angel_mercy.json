@@ -5,13 +5,13 @@
   "learn": { "tier": 5 },
   "cast": {
     "duration": 3.8,
-    "animation": "spell_engine:one_handed_area_charge",
+    "animation": "spell_engine:two_handed_spinning",
     "sound": { "id": "block.beacon.activate", "randomness": 0 },
     "particles": [ { "particle_id": "end_rod", "shape": "CIRCLE", "origin": "FEET", "count": 60.0, "min_speed": 0.05, "max_speed": 0.25 } ]
   },
   "release": {
     "target": { "type": "SELF" },
-    "animation": "spell_engine:one_handed_area_release",
+    "animation": "spell_engine:dual_handed_ground_release",
     "sound": { "id": "block.amethyst_block.chime" }
   },
   "impact": [

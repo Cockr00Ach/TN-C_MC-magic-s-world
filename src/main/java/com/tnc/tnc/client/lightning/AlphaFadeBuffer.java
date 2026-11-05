@@ -95,5 +95,15 @@ public final class AlphaFadeBuffer implements MultiBufferSource {
         public void endVertex() {
             this.inner.endVertex();
         }
+
+        @Override
+        public void defaultColor(int red, int green, int blue, int a) {
+            this.inner.defaultColor(red, green, blue, (int) (a * this.alpha));
+        }
+
+        @Override
+        public void unsetDefaultColor() {
+            this.inner.unsetDefaultColor();
+        }
     }
 }
