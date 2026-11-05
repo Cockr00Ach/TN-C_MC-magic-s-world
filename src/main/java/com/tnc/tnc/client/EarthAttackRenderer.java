@@ -160,8 +160,8 @@ public final class EarthAttackRenderer extends EntityRenderer<EarthAttackEntity>
             double t=Math.min(1,local/5.0);
             double rise=EarthRuptureLayout.rise(t);
             boolean weapon=!e.model().startsWith("stone_lancer_")&&i%3==1;
-            double height=(weapon?(giant?2.6:1.9):(giant?1.7:.95))+shard.lift()*(giant?1.5:.7);
-            double width=shard.size()*(weapon?(giant?1.9:1.5):(giant?1.35:1))*(.75+.25*settle);
+            double height=(weapon?(giant?3.4:2.6):(giant?1.7:.95))+shard.lift()*(giant?1.5:.7);
+            double width=shard.size()*(weapon?(giant?2.1:1.7):(giant?1.35:1))*(.75+.25*settle);
             double lean=7+9*EarthRuptureLayout.impact(t);
             pose.pushPose();
             pose.translate(Math.cos(shard.angle())*shard.radius(),0,Math.sin(shard.angle())*shard.radius());

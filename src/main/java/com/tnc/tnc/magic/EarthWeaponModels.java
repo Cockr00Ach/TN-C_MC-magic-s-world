@@ -24,7 +24,7 @@ public final class EarthWeaponModels {
     /** Length in blocks of the flying weapon; longer than the old 3.4 block spear. */
     public static final float FLIGHT_LENGTH = 5.2F;
     /** Width multiplier of the flying weapon; thicker than the old 0.42 block spear. */
-    public static final float FLIGHT_WIDTH = 2.4F;
+    public static final float FLIGHT_WIDTH = 2.8F;
 
     private EarthWeaponModels() {}
 
