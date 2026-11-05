@@ -43,7 +43,22 @@ public final class EarthWeaponModels {
         return model != null && model.startsWith("earth_wpn_");
     }
 
+    /** Boss variants: same geometry, black-and-gold material, spawned as {@code stone_lancer_earth_wpn_dark_*}. */
+    public static boolean isBossWeapon(String model) {
+        return model != null && model.startsWith("stone_lancer_earth_wpn_");
+    }
+
     public static String pick(RandomSource random) {
         return MODELS.get(random.nextInt(MODELS.size()));
+    }
+
+    /** Returns {@code earth_wpn_dark_<name>}; the boss entity prefixes {@code stone_lancer_}. */
+    public static String pickBoss(RandomSource random) {
+        return "earth_wpn_dark_" + MODELS.get(random.nextInt(MODELS.size())).substring("earth_wpn_".length());
+    }
+
+    /** Full model ids of the black-and-gold copies packed for the Stone Lancer attacks. */
+    public static java.util.List<String> bossModels() {
+        return MODELS.stream().map(name -> "stone_lancer_earth_wpn_dark_" + name.substring("earth_wpn_".length())).toList();
     }
 }

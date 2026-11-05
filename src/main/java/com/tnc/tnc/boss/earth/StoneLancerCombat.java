@@ -24,14 +24,32 @@ final class StoneLancerCombat {
             int count=b.enraged()?8:6;
             for(int i=0;i<count;i++){
                 Vec3 at=b.position().add(0,b.getBbHeight()+26+(i/2)*8,0).add(side.scale(i%2==0?12:-12));
-                spawn(b,0,"earth_spear_sharp",at,target.add(0,5,0),1.5F,3.7F,i*3,90,16,2.2);
+                // Half the volley is now black-and-gold stone greatswords instead of plain spears.
+                boolean weapon=i%2==1;
+                spawn(b,0,weapon?EarthWeaponModels.pickBoss(b.getRandom()):"earth_spear_sharp",at,target.add(0,5,0),1.5F,3.7F,i*3,90,16,2.2);
             }
         }else if(move==1){
             for(int lane=-1;lane<=1;lane++)for(int step=0;step<5;step++){
                 Vec3 p=ground(b,b.position().add(forward.scale(25+step*18)).add(side.scale(lane*17.5)));
-                spawn(b,1,"earth_spike_sharp",p,p,1.7F,4+step*.5F,step*4,65,18,2.6);
+                boolean weapon=((lane+step)&1)==0;
+                spawn(b,1,weapon?EarthWeaponModels.pickBoss(b.getRandom()):"earth_spike_sharp",p,p,1.7F,4+step*.5F,step*4,65,18,2.6);
             }
+            // One low boom for the whole fan-out instead of one sound per pillar.
+            b.level().playSound(null,b.getX(),b.getY(),b.getZ(),
+                    net.minecraft.sounds.SoundEvents.GENERIC_EXPLODE,net.minecraft.sounds.SoundSource.HOSTILE,1.8F,.45F);
         }else if(move==2)spawn(b,3,"earth_spear_sharp",target.add(0,190,0),target,8,25,20,60,38,6);
+        else if(move==3||move==5)spawn(b,2,"earth_orb",target.add(0,-20,0),target.add(0,45,0),10,10,0,104,32,9);
+        else if(move==6)spawn(b,2,"gravity_core",b.position().add(0,28,0),b.position().add(0,85,0),30,30,0,104,44,27);
+        else if(move==4){
+            b.startQuake();seal(b,b.position(),StoneLancerEntity.QUAKE_RADIUS,80);
+            // Six directions, four expanding fronts: fixed 24-entity ceiling even at 200 blocks.
+            for(int step=0;step<4;step++)for(int ray=0;ray<6;ray++){
+                double angle=ray*Math.PI/3;double distance=45+step*45;
+                Vec3 p=ground(b,b.position().add(Math.cos(angle)*distance,0,Math.sin(angle)*distance));
+                boolean weapon=(step+ray)%3==0;
+                spawn(b,1,weapon?EarthWeaponModels.pickBoss(b.getRandom()):"earth_spike_sharp",p,p,2.4F+step*.5F,5+step*1.2F,step*15,100,26,9);
+            }
+        }
         else if(move==3||move==5)spawn(b,2,"earth_orb",target.add(0,-20,0),target.add(0,45,0),10,10,0,104,32,9);
         else if(move==6)spawn(b,2,"gravity_core",b.position().add(0,28,0),b.position().add(0,85,0),30,30,0,104,44,27);
         else if(move==4){

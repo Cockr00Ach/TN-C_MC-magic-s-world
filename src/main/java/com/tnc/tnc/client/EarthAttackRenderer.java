@@ -21,7 +21,7 @@ public final class EarthAttackRenderer extends EntityRenderer<EarthAttackEntity>
         double age=e.age(partial)-e.waitTicks();if(e.done()){renderBurst(e,partial,pose,buffers,light);if(e.mode()!=7&&e.mode()!=3)return;}if(age<0&&e.mode()!=0&&e.mode()!=3)return;
         if(e.mode()==8){renderLaunch(e,partial,pose,buffers,light);return;}
         if(e.mode()==3){renderSkySpear(e,partial,age,pose,buffers);return;}
-        if(e.mode()==1&&EarthWeaponModels.isWeapon(e.model())){renderWeaponSpike(e,partial,pose,buffers,light);return;}
+        if(e.mode()==1&&(EarthWeaponModels.isWeapon(e.model())||EarthWeaponModels.isBossWeapon(e.model()))){renderWeaponSpike(e,partial,pose,buffers,light);return;}
         float growth=e.mode()==2?(float)Math.max(.04,Math.min(1,age/45)):e.mode()==1?(float)EarthRuptureLayout.rise(Math.max(0,Math.min(1,age/8))):1;
         pose.pushPose();if(e.mode()==0||e.mode()==3||e.mode()==5){pose.mulPose(Axis.YP.rotationDegrees(e.getYRot()));pose.mulPose(Axis.XP.rotationDegrees(e.getXRot()));}
         // earth_pillar is authored upright; stand it onto the +Z flight axis the entity renderer expects.

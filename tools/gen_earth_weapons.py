@@ -12,6 +12,7 @@ The projectile renderer treats +Z as the flight axis, which is how these held-it
 models are authored, so flying weapons need no extra rotation; standing them up as
 a column only needs a -90 degree X rotation.
 """
+import copy
 import json
 import pathlib
 
@@ -23,6 +24,8 @@ ITEMS = ROOT / "src/main/resources/assets/tnc/models/item"
 TEXTURES = ROOT / "src/main/resources/assets/tnc/textures"
 OUT_MODELS = ROOT / "src/main/resources/assets/tnc/models/projectile"
 OUT_TEXTURES = TEXTURES / "block/earth_weapon"
+OUT_DARK_TEXTURES = TEXTURES / "block/earth_weapon_dark"
+BOSS_PREFIX = "stone_lancer_earth_wpn_dark_"
 
 # weapon model -> stone palette used to repaint it
 WEAPONS = {
@@ -78,6 +81,19 @@ def palette_shading(src: Image.Image, size: int = 16) -> np.ndarray:
     return np.clip(small @ np.array([0.299, 0.587, 0.114], dtype=np.float32), 0.0, 1.0)
 
 
+def dark_tile(palette: str, src_tex: Image.Image, size: int = 16) -> np.ndarray:
+    """Boss material: near-black stone body with gold on the blade edges and ornaments."""
+    grain = stone_tile(palette, size)
+    lum = palette_shading(src_tex, size)
+    edge = np.clip((lum - 0.34) / 0.50, 0.0, 1.0)[..., None] ** 1.2
+    # A few deterministic gold veins so a flat face still reads as black-and-gold.
+    veins = (np.random.default_rng(20261106).random((size, size)) < 0.14)[..., None].astype(np.float32)
+    gold = np.clip(edge * 0.85 + veins * 0.55, 0.0, 1.0)
+    base = np.array([0.075, 0.070, 0.064], dtype=np.float32) + grain * 0.13
+    metal = np.array([0.95, 0.72, 0.28], dtype=np.float32) * (0.65 + 0.55 * grain)
+    return np.clip(base * (1.0 - gold) + metal * gold, 0.0, 1.0)
+
+
 def recentre(model: dict) -> None:
     els = model["elements"]
     xs = [v for e in els for v in (e["from"][0], e["to"][0])]
@@ -127,12 +143,16 @@ def check(model: dict, name: str) -> None:
 def main() -> None:
     OUT_MODELS.mkdir(parents=True, exist_ok=True)
     OUT_TEXTURES.mkdir(parents=True, exist_ok=True)
+    OUT_DARK_TEXTURES.mkdir(parents=True, exist_ok=True)
     for name, palette in WEAPONS.items():
         src_tex = Image.open(TEXTURES / f"item/{name}.png")
         tile = stone_tile(palette) * (0.55 + 0.9 * palette_shading(src_tex)[..., None])
         tile = np.clip(tile, 0.0, 1.0)
         Image.fromarray((tile * 255).round()[..., :3].astype(np.uint8), "RGB").save(
             OUT_TEXTURES / f"{name}.png")
+        dark = dark_tile(palette, src_tex)
+        Image.fromarray((dark * 255).round()[..., :3].astype(np.uint8), "RGB").save(
+            OUT_DARK_TEXTURES / f"{name}.png")
 
         model = json.loads((ITEMS / f"{name}.json").read_text(encoding="utf-8"))
         # vanilla refuses an element with zero faces; such cubes are invisible anyway
@@ -151,7 +171,15 @@ def main() -> None:
 
         out = OUT_MODELS / f"earth_wpn_{name}.json"
         out.write_text(json.dumps(model, separators=(",", ":")), encoding="utf-8")
-        print(f"{name:24s} els={len(model['elements']):5d} dropped={dropped:3d} -> {out.stat().st_size / 1024:7.1f} KB")
+
+        # Same geometry, boss material: used by the Stone Lancer's quake/volley attacks.
+        boss = copy.deepcopy(model)
+        boss_tex = f"tnc:block/earth_weapon_dark/{name}"
+        boss["textures"] = {"0": boss_tex, "particle": boss_tex}
+        check(boss, name)
+        boss_out = OUT_MODELS / f"{BOSS_PREFIX}{name}.json"
+        boss_out.write_text(json.dumps(boss, separators=(",", ":")), encoding="utf-8")
+        print(f"{name:24s} els={len(model['elements']):5d} dropped={dropped:3d} -> {out.stat().st_size / 1024:7.1f} KB + boss {boss_out.stat().st_size / 1024:7.1f} KB")
 
 
 if __name__ == "__main__":
