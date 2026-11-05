@@ -60,6 +60,23 @@ public final class TrainingGroundData extends SavedData {
         setDirty();
     }
 
+    /**
+     * 直接把某一档练习的纪录写成"已通过"。
+     *
+     * <p>给调试指令用：正常流程是每次 {@link #complete} 累加一次，这里一次写满
+     * 完成次数/最佳评分/最快反应，让图鉴里"完成 N 次 / 最佳评分"这类条件立刻满足。
+     * 只改台账，不改磨砺点数和天赋。
+     */
+    public void pass(UUID id, int mode, int completions, int score, int reaction) {
+        var t = records.computeIfAbsent(id, k -> new CompoundTag());
+        var r = new CompoundTag();
+        r.putInt("Completions", Math.max(0, completions));
+        r.putInt("Score", Math.max(0, Math.min(100, score)));
+        r.putInt("Reaction", Math.max(0, Math.min(80, reaction)));
+        t.put("Tier" + PracticeDifficulty.clamp(mode), r);
+        setDirty();
+    }
+
     public static TrainingGroundData get(MinecraftServer server) {
         return server.overworld().getDataStorage()
             .computeIfAbsent(TrainingGroundData::load, TrainingGroundData::new, "tnc_training_ground_v1");

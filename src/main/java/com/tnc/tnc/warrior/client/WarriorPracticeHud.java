@@ -11,8 +11,12 @@ public final class WarriorPracticeHud {
     private WarriorPracticeHud(){}
     @SubscribeEvent public static void render(RenderGuiEvent.Post event){
         var mc=Minecraft.getInstance();
-        if(mc.player==null||mc.options.hideGui||!TemperingClient.training())return;
-        String text="守势反击 · "+WarriorPracticeScreen.trainingStatus();
+        if(mc.player==null||mc.options.hideGui)return;
+        boolean training=TemperingClient.training();
+        // 教官上课时也常驻一条：只靠头顶名字的话，学员一低头看手就打不到了。
+        String lesson=TemperingClient.courseNow();
+        if(!training&&lesson.isEmpty())return;
+        String text=training?"守势反击 · "+WarriorPracticeScreen.trainingStatus():"教官课 · "+lesson;
         var g=event.getGuiGraphics();int width=mc.getWindow().getGuiScaledWidth(),height=mc.getWindow().getGuiScaledHeight();
         int textWidth=mc.font.width(text),x=(width-textWidth)/2,y=height-88;
         g.pose().pushPose();g.pose().translate(0,0,75);

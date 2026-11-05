@@ -22,8 +22,11 @@ import java.util.function.Supplier;
  */
 public class MagicStoneNetwork {
 
-    // v14 adds the arena instructor role (summon/dismiss from the sky-island terminal).
-    private static final String PROTOCOL_VERSION = "14";
+    // v18 adds the combat step (Shift) packet. v21 adds the instructor-course text to the
+    // tempering snapshot (same packet, two extra strings -> the shape changed, so the
+    // version has to change or a stale client would read the buffer past the end).
+    // v28 adds attack ownership, target size and the surface frame to warrior impacts.
+    private static final String PROTOCOL_VERSION = "28";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "main"),
@@ -32,12 +35,36 @@ public class MagicStoneNetwork {
             PROTOCOL_VERSION::equals);
 
     public static void register() {
+        CHANNEL.messageBuilder(com.tnc.tnc.warrior.WarriorImpactPacket.class,215,NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.tnc.tnc.warrior.WarriorImpactPacket::encode).decoder(com.tnc.tnc.warrior.WarriorImpactPacket::decode)
+                .consumerMainThread(com.tnc.tnc.warrior.WarriorImpactPacket::handle).add();
+        CHANNEL.messageBuilder(com.tnc.tnc.warrior.WarriorPhantomPacket.class,214,NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.tnc.tnc.warrior.WarriorPhantomPacket::encode).decoder(com.tnc.tnc.warrior.WarriorPhantomPacket::decode)
+                .consumerMainThread(com.tnc.tnc.warrior.WarriorPhantomPacket::handle).add();
+        CHANNEL.messageBuilder(com.tnc.tnc.warrior.WarriorWavePacket.class,213,NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.tnc.tnc.warrior.WarriorWavePacket::encode).decoder(com.tnc.tnc.warrior.WarriorWavePacket::decode)
+                .consumerMainThread(com.tnc.tnc.warrior.WarriorWavePacket::handle).add();
         CHANNEL.messageBuilder(com.tnc.tnc.warrior.TemperingActionPacket.class,208,NetworkDirection.PLAY_TO_SERVER)
                 .encoder(com.tnc.tnc.warrior.TemperingActionPacket::encode).decoder(com.tnc.tnc.warrior.TemperingActionPacket::decode)
                 .consumerMainThread(com.tnc.tnc.warrior.TemperingActionPacket::handle).add();
         CHANNEL.messageBuilder(com.tnc.tnc.warrior.TemperingPacket.class,207,NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.tnc.tnc.warrior.TemperingPacket::encode).decoder(com.tnc.tnc.warrior.TemperingPacket::decode)
                 .consumerMainThread(com.tnc.tnc.warrior.TemperingPacket::handle).add();
+        // 长剑连招：客户端只发"按了哪一下"，终结技与伤害全部在服务端算
+        CHANNEL.messageBuilder(com.tnc.tnc.warrior.WarriorComboInputPacket.class,209,NetworkDirection.PLAY_TO_SERVER)
+                .encoder(com.tnc.tnc.warrior.WarriorComboInputPacket::encode).decoder(com.tnc.tnc.warrior.WarriorComboInputPacket::decode)
+                .consumerMainThread(com.tnc.tnc.warrior.WarriorComboInputPacket::handle).add();
+        CHANNEL.messageBuilder(com.tnc.tnc.warrior.WarriorComboSyncPacket.class,210,NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.tnc.tnc.warrior.WarriorComboSyncPacket::encode).decoder(com.tnc.tnc.warrior.WarriorComboSyncPacket::decode)
+                .consumerMainThread(com.tnc.tnc.warrior.WarriorComboSyncPacket::handle).add();
+        // 动作广播：发给追这个玩家的人 + 自己（第三人称看得到、第一人称也有手臂动作）
+        CHANNEL.messageBuilder(com.tnc.tnc.warrior.WarriorAnimationPacket.class,211,NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.tnc.tnc.warrior.WarriorAnimationPacket::encode).decoder(com.tnc.tnc.warrior.WarriorAnimationPacket::decode)
+                .consumerMainThread(com.tnc.tnc.warrior.WarriorAnimationPacket::handle).add();
+        // 战斗步法：短按冲刺 / 长按冲刺+加速跑，同时清空自己的连招
+        CHANNEL.messageBuilder(com.tnc.tnc.warrior.WarriorStepPacket.class,212,NetworkDirection.PLAY_TO_SERVER)
+                .encoder(com.tnc.tnc.warrior.WarriorStepPacket::encode).decoder(com.tnc.tnc.warrior.WarriorStepPacket::decode)
+                .consumerMainThread(com.tnc.tnc.warrior.WarriorStepPacket::handle).add();
         CHANNEL.messageBuilder(com.tnc.tnc.tavern.TavernRoomPacket.class,203,NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.tnc.tnc.tavern.TavernRoomPacket::encode).decoder(com.tnc.tnc.tavern.TavernRoomPacket::decode)
                 .consumerMainThread(com.tnc.tnc.tavern.TavernRoomPacket::handle).add();

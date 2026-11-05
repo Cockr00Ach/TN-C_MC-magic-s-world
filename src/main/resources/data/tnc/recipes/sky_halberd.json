@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "tnc_weapons",
+  "pattern": [
+    " II",
+    " I ",
+    "S  "
+  ],
+  "key": {
+    "I": {
+      "tag": "forge:ingots/iron"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    }
+  },
+  "result": {
+    "item": "tnc:sky_halberd",
+    "count": 1
+  }
+}

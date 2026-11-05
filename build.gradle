@@ -64,7 +64,7 @@ minecraft {
         // applies to all the run configs below
         configureEach {
             workingDirectory project.file('run')
-            args '--mixin', 'tnc.water-bore.mixins.json', '--mixin', 'tnc.equipment.mixins.json', '--mixin', 'tnc.town.mixins.json', '--mixin', 'tnc.ink.mixins.json'
+            args '--mixin', 'tnc.water-bore.mixins.json', '--mixin', 'tnc.equipment.mixins.json', '--mixin', 'tnc.town.mixins.json', '--mixin', 'tnc.ink.mixins.json', '--mixin', 'tnc.warrior.mixins.json'
 
             // Recommended logging data for a userdev environment
             // The markers can be added/remove as needed separated by commas.
@@ -86,6 +86,14 @@ minecraft {
         }
 
         client {
+            if (project.hasProperty('warriorAnimAudit')) {
+                property 'tnc.warriorAnimAudit', 'true'
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+                workingDirectory project.file(project.hasProperty('warriorMeshAudit') ? 'work/warrior-mesh-audit-client' : 'run')
+                if (project.hasProperty('warriorMeshAudit')) property 'tnc.warriorMeshAudit', 'true'
+                args '--quickPlaySingleplayer', 'New World', '--width', '1280', '--height', '720'
+            }
             if (project.hasProperty('warriorUiAudit')) {
                 property 'tnc.warriorUiAudit', 'true'
                 property 'mixin.env.remapRefMap', 'true'
@@ -507,7 +515,7 @@ tasks.named('jar', Jar).configure {
                 'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
                 // Forge 从 jar 清单里读 mixin 配置；我们的 Mixin 只注入 SpellEngine
                 // （由 TncMixinPlugin 判断引擎在不在）
-                'MixinConfigs'            : "${mod_id}.mixins.json,${mod_id}.water-bore.mixins.json,${mod_id}.equipment.mixins.json,${mod_id}.town.mixins.json,${mod_id}.ink.mixins.json"
+                'MixinConfigs'            : "${mod_id}.mixins.json,${mod_id}.water-bore.mixins.json,${mod_id}.equipment.mixins.json,${mod_id}.town.mixins.json,${mod_id}.ink.mixins.json,${mod_id}.warrior.mixins.json"
         ])
     }
 

@@ -4,6 +4,7 @@
   "package": "com.tnc.tnc.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "BronzeRepairMixin",
     "ConquestBushMixin",
     "SpellHelperManaGateMixin",
     "WhisperQuestDumpMixin",
@@ -12,6 +13,7 @@
     "StatusBarBarsMixin"
   ],
   "client": [
+    "BronzeHeldItemMixin",
     "MusicManagerMixin"
   ],
   "injectors": {

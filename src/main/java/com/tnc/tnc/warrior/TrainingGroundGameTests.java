@@ -31,17 +31,18 @@ public final class TrainingGroundGameTests {
         for (var style : WarriorEffectStyle.values()) {
             data.set(p.getUUID(), style);
             h.assertTrue(WarriorCombatEffects.style(p) == style, "Selected palette resolves");
-            WarriorCombatEffects.slash(p, false);
-            WarriorCombatEffects.slash(p, true);
+            // 2026-11-03：施放类粒子（挥砍弧光、龙身）已删除，这里改成检查仍是服务端
+            // 反馈的那几处（格挡光圈、龙吼）—— 它们同样不该影响生命/耐久/成长。
             WarriorCombatEffects.guard(p, false, true);
             WarriorCombatEffects.guard(p, true, false);
+            WarriorCombatEffects.dragonRoar(p);
         }
         var restored = WarriorEffectsData.load(data.save(new CompoundTag()));
         h.assertTrue(restored.style(p.getUUID()) == WarriorEffectStyle.DARK, "Cosmetic choice persists independently of training plots");
         p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, WindInfusion.infuse(p.getMainHandItem()));
         h.assertTrue(WarriorCombatEffects.style(p) == WarriorEffectStyle.WIND, "Weapon element takes priority");
         p.setXRot(-90);
-        WarriorCombatEffects.slash(p, false);
+        WarriorCombatEffects.dragonRoar(p);
         WarriorCombatEffects.windCut(p, p.getEyePosition(), p.getEyePosition().add(0, 6, 0));
         h.assertTrue(p.getHealth() == health && p.getMainHandItem().getDamageValue() == damage
             && TemperingData.get(p.server).points(p.getUUID()) == 0, "Cosmetic emissions cannot alter life, durability or growth");
@@ -57,8 +58,10 @@ public final class TrainingGroundGameTests {
      */
     static TrainingGroundData.Arena arena(GameTestHelper h, int offset) {
         var level = h.getLevel();
-        var origin = h.absolutePos(new BlockPos(0, 0, 0));
-        int cx = origin.getX() + offset, cz = origin.getZ() + offset;
+        // Template origins shift when more tests are added. Origin + offset can put two
+        // supposedly private arenas on the same coordinates (one builder erases the other's tutor).
+        // Each caller supplies a unique offset; allocate fixed, widely separated cells from it.
+        int cx = 2000 + offset * 2, cz = 2000;
         PracticeArena.build(level, cx, cz);
         String dimension = level.dimension().location().toString();
         for (var built : TrainingGroundData.get(level.getServer()).arenas()) {
@@ -173,6 +176,20 @@ public final class TrainingGroundGameTests {
         h.onEachTick(() -> {
             if (done[0]) return;
             var teacher = TrainingGround.teacher(p);
+            // 先把 tick 数记上：教官没召出来时也要在第 300 tick 大声失败，
+            // 否则测试只会"卡到 800 tick 超时"，看不出是哪一步没成。
+            if (++ticks[0] == 300 && TemperingTraining.blockCount(p) < 3) {
+                h.fail("Real blocking stalled: teacher=" + (teacher == null ? "none" : "ok")
+                    + ", using=" + p.isUsingItem() + ", blocking=" + p.isBlocking()
+                    + ", blocks=" + TemperingTraining.blockCount(p) + ", swings="
+                    + (teacher == null ? -1 : teacher.getPersistentData().getInt("Swings")) + ", position=" + p.position()
+                    + ", inside=" + TrainingGround.inside(p) + ", active=" + TemperingTraining.active(p)
+                    + ", enrolled=" + TemperingData.get(p.server).enrolled(p.getUUID()) + ", arena=" + arena
+                    + ", next=" + (teacher == null ? -1 : teacher.getPersistentData().getLong("NextStrike"))
+                    + ", windup=" + (teacher == null ? false : teacher.getPersistentData().getBoolean("Windup"))
+                    + ", now=" + p.server.overworld().getGameTime() + ", mode=" + TemperingTraining.mode(p));
+                return;
+            }
             if (teacher == null) return;
             var tag = teacher.getPersistentData();
             p.setPos(teacher.getX(), teacher.getY(), teacher.getZ() - 2.0);
@@ -196,21 +213,7 @@ public final class TrainingGroundGameTests {
             p.tick();
             p.doTick();
             TrainingGround.practiceTick(p);
-            if (++ticks[0] == 300 && TemperingTraining.blockCount(p) < 3) {
-                var ledger = TrainingGroundData.get(p.server);
-                h.fail("Real blocking stalled: using=" + p.isUsingItem() + ", blocking=" + p.isBlocking()
-                    + ", blocks=" + TemperingTraining.blockCount(p) + ", swings="
-                    + teacher.getPersistentData().getInt("Swings") + ", position=" + p.position()
-                    + ", inside=" + TrainingGround.inside(p) + ", active=" + TemperingTraining.active(p)
-                    + ", enrolled=" + TemperingData.get(p.server).enrolled(p.getUUID()) + ", arena=" + arena
-                    + ", home=" + teacher.getPersistentData().getDouble("HomeX") + ","
-                    + teacher.getPersistentData().getDouble("HomeY") + ","
-                    + teacher.getPersistentData().getDouble("HomeZ")
-                    + ", next=" + teacher.getPersistentData().getLong("NextStrike")
-                    + ", windup=" + teacher.getPersistentData().getBoolean("Windup")
-                    + ", now=" + p.server.overworld().getGameTime() + ", mode=" + TemperingTraining.mode(p));
-                return;
-            }
+
             if (TemperingTraining.blockCount(p) < 3) return;
             done[0] = true;
             try {
@@ -249,7 +252,9 @@ public final class TrainingGroundGameTests {
         var record = ledger.record(id);
         h.assertTrue(record.completions() == 2 && record.score() == 90 && record.reaction() == 6,
             "Best score and fastest counter remain separate personal records");
-        var packet = new TemperingPacket(true, 200, 2, true, false, 0, 0, 0, true, true, 2, 5, 95, 10, "blade");
+        // 课程进度也一起过一遍网络：这两条是 2026-11-03 新加的字段，最容易"编码写了、解码漏读"。
+        var packet = new TemperingPacket(true, 200, 2, true, false, 0, 0, 0, true, true, 2, 5, 95, 10, "blade",
+            "guard:1/3|blade:2/4|wind:0/3|counter:0/1", "第三课 · 旋转斩击 1/2");
         var buffer = new net.minecraft.network.FriendlyByteBuf(io.netty.buffer.Unpooled.buffer());
         try {
             packet.encode(buffer);

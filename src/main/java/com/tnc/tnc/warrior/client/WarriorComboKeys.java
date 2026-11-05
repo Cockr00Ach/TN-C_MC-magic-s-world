@@ -1,0 +1,319 @@
+package com.tnc.tnc.warrior.client;
+
+import com.mojang.blaze3d.platform.InputConstants;
+import com.tnc.tnc.TNMod;
+import com.tnc.tnc.warrior.ComboTracker;
+import com.tnc.tnc.warrior.WarriorComboInputPacket;
+import com.tnc.tnc.warrior.WarriorMove;
+import com.tnc.tnc.warrior.WarriorStepPacket;
+import com.tnc.tnc.warrior.WarriorWeapons;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.client.settings.KeyConflictContext;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import org.lwjgl.glfw.GLFW;
+
+/**
+ * 长剑连招的客户端输入。
+ *
+ * <p>默认键：<b>Q = 左斩击、E = 右斩击、左键 = 横斩击</b>（可在「选项 → 控制 → TN-C」改）。
+ * 三个键都可改，所以界面上的连招串（QEZ…）只是"默认键"的说明，判定永远按实际绑定走。
+ *
+ * <p><b>为什么要"接管"Q/E</b>：Q 是原版丢弃、E 是打开背包。拿着长剑又加入磨砺时，
+ * 这两个键在战斗里必须是斩击；否则连招第一下就把剑丢出去了。做法是在
+ * {@link TickEvent.ClientTickEvent} 的 START（原版 {@code handleKeybinds} 之前）
+ * 把原版那两个键的点击<b>吃掉</b>——只在"我们的连招键恰好绑在同一个键上"时才吃，
+ * 玩家把连招改到别的键，Q/E 立刻恢复原版功能。
+ *
+ * <p><b>只认 {@code isDown()} 的上升沿，不认 {@code consumeClick()}</b>：GLFW 的
+ * 自动重复（{@code GLFW_REPEAT}）会往点击计数里塞事件，按住 E 不放就会被当成
+ * "一直短按 E"——连招缓冲里堆满 E，长按永远判不出来。点击计数仍然要清，
+ * 否则会漏给别人（见 {@link #drainClicks}）。
+ *
+ * <p>关掉界面（{@code screen != null}）或未加入磨砺时不接管，背包和丢弃照常。
+ */
+@Mod.EventBusSubscriber(modid = TNMod.MODID, value = Dist.CLIENT)
+public final class WarriorComboKeys {
+
+    public static final KeyMapping LEFT = new KeyMapping("key.tnc.combo_left",
+            KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_Q, "key.categories.tnc");
+    public static final KeyMapping RIGHT = new KeyMapping("key.tnc.combo_right",
+            KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_E, "key.categories.tnc");
+    /**
+     * 战斗步法：<b>按下即中断自己的动作</b>、短按冲一大段、长按小步+加速跑。
+     *
+     * <p><b>默认左 Ctrl，不是 Shift</b>：Shift 是原版潜行键，同一个键既潜行又冲刺必然冲突
+     * ——按住 Shift 想蹲，结果人冲出去了。所以步法单独占一个键，潜行保持原版，两边都不打架。
+     *
+     * <p>左 Ctrl 是原版疾跑键，但不冲突：两个动作的意图是一致的（都是"往前冲"），
+     * 而且本 mod 不再吞任何原版按键，疾跑照常。真要分开，在「选项 → 控制」里改任意一边即可。
+     */
+    public static final KeyMapping STEP = new KeyMapping("key.tnc.combo_step",
+            KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_CONTROL, "key.categories.tnc");
+
+    /** 长按期间每隔这么多 tick 续一次（服务端只用来续架势窗口，不产生输入）。 */
+    public static final KeyMapping BOW_HORIZONTAL = new KeyMapping("key.tnc.bow_charge_z",
+            KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_Z, "key.categories.tnc");
+    private static boolean bowZWasDown, zFromKeyboard;
+    private static final int KEEPALIVE_TICKS = 10;
+
+    private WarriorComboKeys() {
+    }
+
+    /** 客户端 tick 计数，只用来量"按住多久"。 */
+    private static long tick;
+
+    private static boolean leftWasDown;
+    private static boolean rightWasDown;
+    private static boolean stepWasDown;
+
+    private static long leftDownAt = -1;
+    private static boolean leftHeldSent;
+    private static long leftKeepAlive;
+
+    private static long rightDownAt = -1;
+    private static boolean rightHeldSent;
+    private static long rightKeepAlive;
+
+    private static long zDownAt = -1;
+    private static boolean zCharged;
+    private static long zKeepAlive;
+
+    private static long stepDownAt = -1;
+    private static boolean stepPending;
+    private static boolean stepCharged;
+
+    /** 现在该不该把 Q/E 当出招：在游戏里、没开界面、有战士天赋、手持武器。 */
+    static boolean combatReady(Minecraft minecraft) {
+        return minecraft != null && minecraft.player != null && minecraft.level != null
+                && minecraft.screen == null && minecraft.getOverlay() == null
+                && TemperingClient.enrolled()
+                && WarriorWeapons.family(minecraft.player.getMainHandItem()) != null;
+    }
+
+    /** 现在这个方向键还按着吗（给"长按保持架势"用，见 {@link WarriorAnimationClient}）。 */
+    public static boolean holding(WarriorMove move) {
+        if (move == WarriorMove.LEFT) {
+            return LEFT.isDown();
+        }
+        if (move == WarriorMove.RIGHT) {
+            return RIGHT.isDown();
+        }
+        if (move == WarriorMove.HORIZONTAL) {
+            return zDownAt >= 0;
+        }
+        return false;
+    }
+
+    @SubscribeEvent
+    public static void tick(TickEvent.ClientTickEvent event) {
+        if (event.phase != TickEvent.Phase.START) {
+            return;
+        }
+        tick++;
+        var minecraft = Minecraft.getInstance();
+        if (minecraft.player == null) {
+            return;
+        }
+        boolean ready = combatReady(minecraft);
+        if (ready) {
+            // 先于原版 handleKeybinds 吃掉同一按键上的原版动作，否则 Q 会丢剑、E 会弹背包。
+            // 步法键（左 Ctrl）**不吃**：它和原版疾跑撞在一个键上，但意图一致（都是往前冲），
+            // 吃掉疾跑反而亏；玩家改到别的键也不受影响。
+            swallowConflicts(minecraft.options, LEFT);
+            swallowConflicts(minecraft.options, RIGHT);
+        }
+
+        boolean bowZNow = BOW_HORIZONTAL.isDown();
+        drainClicks(BOW_HORIZONTAL);
+        if (ready) {
+            if (bowZNow && !bowZWasDown && zDownAt < 0) {
+                zFromKeyboard=true; zDownAt=tick; zCharged=false;
+                WarriorComboInputPacket.send(WarriorMove.HORIZONTAL,WarriorComboInputPacket.CHARGE_START);
+            }
+        }
+        if (zFromKeyboard && ((!bowZNow && bowZWasDown) || !ready)) {
+            if(ready)WarriorComboInputPacket.send(WarriorMove.HORIZONTAL,zCharged?WarriorComboInputPacket.RELEASE:WarriorComboInputPacket.TAP);
+            zDownAt=-1;zCharged=false;zFromKeyboard=false;
+        }
+        bowZWasDown=bowZNow;
+        boolean sameKey = LEFT.getKey().equals(RIGHT.getKey());
+        boolean leftNow = LEFT.isDown();
+        boolean rightNow = !sameKey && RIGHT.isDown();
+        boolean stepNow = STEP.isDown();
+        // 自动重复的点击一律丢掉：只认 isDown 的上升/下降沿
+        drainClicks(LEFT);
+        drainClicks(RIGHT);
+        drainClicks(STEP);
+
+        if (leftNow && !leftWasDown) {
+            leftDownAt = tick;
+            leftHeldSent = false;
+            if (ready) {
+                WarriorComboInputPacket.send(WarriorMove.LEFT);
+            }
+        }
+        if (rightNow && !rightWasDown) {
+            rightDownAt = tick;
+            rightHeldSent = false;
+            if (ready) {
+                WarriorComboInputPacket.send(WarriorMove.RIGHT);
+            }
+        }
+        if (stepNow && !stepWasDown) {
+            // 按下那一瞬间先发"只中断"：立刻停下自己的动作，不等松手
+            stepPending = true;
+            stepDownAt = tick;
+            stepCharged = false;
+            if (ready) {
+                WarriorStepPacket.send(WarriorStepPacket.CANCEL);
+            }
+        }
+        leftWasDown = leftNow;
+        rightWasDown = rightNow;
+        stepWasDown = stepNow;
+
+        // Q：按住超过半秒补发长按，之后每 10 tick 续一次，松手补一个收势
+        if (leftDownAt >= 0) {
+            if (!leftNow) {
+                if (leftHeldSent && ready) {
+                    WarriorComboInputPacket.send(WarriorMove.LEFT, WarriorComboInputPacket.RELEASE);
+                }
+                leftDownAt = -1;
+                leftHeldSent = false;
+            } else if (!leftHeldSent) {
+                if (tick - leftDownAt >= ComboTracker.HOLD_TICKS) {
+                    if (ready) {
+                        WarriorComboInputPacket.send(WarriorMove.LEFT, WarriorComboInputPacket.HOLD);
+                    }
+                    leftHeldSent = true;
+                    leftKeepAlive = tick;
+                }
+            } else if (tick - leftKeepAlive >= KEEPALIVE_TICKS) {
+                if (ready) {
+                    WarriorComboInputPacket.send(WarriorMove.LEFT, WarriorComboInputPacket.KEEPALIVE);
+                }
+                leftKeepAlive = tick;
+            }
+        }
+        // E：同上
+        if (rightDownAt >= 0) {
+            if (!rightNow) {
+                if (rightHeldSent && ready) {
+                    WarriorComboInputPacket.send(WarriorMove.RIGHT, WarriorComboInputPacket.RELEASE);
+                }
+                rightDownAt = -1;
+                rightHeldSent = false;
+            } else if (!rightHeldSent) {
+                if (tick - rightDownAt >= ComboTracker.HOLD_TICKS) {
+                    if (ready) {
+                        WarriorComboInputPacket.send(WarriorMove.RIGHT, WarriorComboInputPacket.HOLD);
+                    }
+                    rightHeldSent = true;
+                    rightKeepAlive = tick;
+                }
+            } else if (tick - rightKeepAlive >= KEEPALIVE_TICKS) {
+                if (ready) {
+                    WarriorComboInputPacket.send(WarriorMove.RIGHT, WarriorComboInputPacket.KEEPALIVE);
+                }
+                rightKeepAlive = tick;
+            }
+        }
+
+        // 左键按住超过半秒：同理补发长按 Z（按下那一下已经发过轻点）
+        if (zDownAt >= 0) {
+            if (!zCharged && tick - zDownAt >= ComboTracker.HOLD_TICKS) {
+                if (ready) {
+                    WarriorComboInputPacket.send(WarriorMove.HORIZONTAL, WarriorComboInputPacket.HOLD);
+                }
+                zCharged = true;
+                zKeepAlive = tick;
+            } else if (zCharged && tick - zKeepAlive >= KEEPALIVE_TICKS) {
+                if (ready) {
+                    WarriorComboInputPacket.send(WarriorMove.HORIZONTAL, WarriorComboInputPacket.KEEPALIVE);
+                }
+                zKeepAlive = tick;
+            }
+        }
+
+        // 战斗步法：松手（短按）→ 冲一大段；按住够久（长按）→ 一小段 + 加速跑。
+        if (stepPending) {
+            if (!STEP.isDown()) {
+                if (ready) {
+                    WarriorStepPacket.send(WarriorStepPacket.TAP);
+                }
+                stepPending = false;
+            } else if (!stepCharged && tick - stepDownAt >= ComboTracker.HOLD_TICKS) {
+                if (ready) {
+                    WarriorStepPacket.send(WarriorStepPacket.HOLD);
+                }
+                stepCharged = true;
+                stepPending = false;
+            }
+        }
+    }
+
+    /** 清掉一个键上堆积的点击计数（自动重复会塞很多），谁都不许拿它当"按下"。 */
+    private static void drainClicks(KeyMapping mapping) {
+        while (mapping.consumeClick()) {
+            // 故意空转：只清点击计数
+        }
+    }
+
+    /** 左键 = 横斩击。用鼠标按下事件而不是攻击事件，按住不会每 tick 灌一个 Z。 */
+    @SubscribeEvent
+    public static void attackKey(InputEvent.InteractionKeyMappingTriggered event) {
+        if(event.isAttack() && combatReady(Minecraft.getInstance()) && BOW_HORIZONTAL.isDown()) {
+            event.setCanceled(true);event.setSwingHand(false);
+        }
+    }
+    @SubscribeEvent
+    public static void mouse(InputEvent.MouseButton.Pre event) {
+        if(event.getButton()!=GLFW.GLFW_MOUSE_BUTTON_LEFT)return;
+        if(combatReady(Minecraft.getInstance()) && BOW_HORIZONTAL.isDown()){event.setCanceled(true);return;}
+        // Mouse stays an ordinary attack. Only the dedicated Z key owns charge/release.
+        if(event.getAction()==GLFW.GLFW_PRESS && combatReady(Minecraft.getInstance()))WarriorComboInputPacket.send(WarriorMove.HORIZONTAL);
+    }
+
+    /**
+     * 把与连招键同键的原版按键点击全部吃掉，而不只是 Q/E 这两个默认对。
+     *
+     * <p>玩家把连招改到别的键（比如 F、1、聊天键）时，原版动作同样会在
+     * {@code handleKeybinds} 里触发；这里统一清掉。攻击/使用两个鼠标键位不动：
+     * 左键本身就是横斩，吃掉反而会让原版攻击失效。
+     */
+    private static void swallowConflicts(net.minecraft.client.Options options, KeyMapping combo) {
+        if (combo.isUnbound()) {
+            return;
+        }
+        for (KeyMapping mapping : options.keyMappings) {
+            if (mapping == LEFT || mapping == RIGHT || mapping == STEP || mapping == combo) {
+                continue;
+            }
+            if (mapping == options.keyAttack || mapping == options.keyUse) {
+                continue;
+            }
+            if (!combo.getKey().equals(mapping.getKey())) {
+                continue;
+            }
+            while (mapping.consumeClick()) {
+                // 故意空转：只清点击计数
+            }
+        }
+    }
+
+    /** 按键注册入口，由 {@code TNMod.ClientModEvents} 显式调用（不用嵌套类自动订阅，见 WarriorPracticeKeys）。 */
+    public static final class Registration {
+        public static void register(RegisterKeyMappingsEvent event) {
+            event.register(LEFT);
+            event.register(RIGHT);
+            event.register(STEP);
+            event.register(BOW_HORIZONTAL);
+        }
+    }
+}

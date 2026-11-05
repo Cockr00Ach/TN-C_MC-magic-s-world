@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "tnc_weapons",
+  "pattern": [
+    " SI",
+    "S I",
+    " SI"
+  ],
+  "key": {
+    "S": {
+      "item": "minecraft:stick"
+    },
+    "I": {
+      "item": "minecraft:string"
+    }
+  },
+  "result": {
+    "item": "tnc:bow",
+    "count": 1
+  }
+}

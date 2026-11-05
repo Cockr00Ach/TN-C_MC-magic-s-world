@@ -97,8 +97,8 @@ D:\ModTest\
 │   ├── META-INF/mods.toml
 │   ├── pack.mcmeta                     (pack_format 15 = 1.20.1)
 │   └── assets/tnc/
-│       ├── models/item/sword.json      ← 试作之剑模型
-│       ├── textures/item/sword.png
+│       ├── models/item/*.json          ← 战士武器模型（重剑/锤/枪/弓/龙之剑/新武器…）
+│       ├── textures/item/*.png
 │       └── lang/{zh_cn,en_us}.json
 └── model-source/                        ← 模型源文件与参考
 ```
@@ -113,12 +113,16 @@ D:\ModTest\
 - `Config.java` 修掉过时 API（`new ResourceLocation(s)` → `ResourceLocation.tryParse(s)`）
 - **未完成**：`mod_authors` 还是占位符
 
-## 4.2 试作之剑（已完成，游戏内可见）
+## 4.2 试作之剑（2026-11-03 已删除）
 
-- 3D 模型 + 贴图 + `display` 显示设置
-- 关键教训：**模型平躺在 XZ 平面（Y 薄）时，必须自己写 `display`，不能用 `parent: item/handheld`**（那是给立在 XY 平面的模型用的）
-- `gui` 旋转用 `[-90, 0, 0]` 把平躺模型立起来
-- 游戏内名字：试作之剑 / Prototype Sword
+早期用来验证"自定义 3D 物品模型"的样机，官方定位一直是废案：**已彻底删除**——
+注册、模型、贴图、语言条目、`infusible_weapons` 引用全部清掉，存档里若还有它只会变成空气。
+
+- ~~3D 模型 + 贴图 + `display` 显示设置~~（文件已删）
+- 唯一保留下来的是**教训**：模型平躺在 XZ 平面（Y 薄）时，必须自己写 `display`，
+  不能用 `parent: item/handheld`（那是给立在 XY 平面的模型用的）；
+  `gui` 旋转用 `[-90, 0, 0]` 把平躺模型立起来。
+- 现在的武器一律自带完整 `display`，见 `tools/weapons/weapon_gen.py` 顶部的 `DISPLAY`。
 
 ## 4.3 songzhikun 角色模型（TLM 车万女仆）
 

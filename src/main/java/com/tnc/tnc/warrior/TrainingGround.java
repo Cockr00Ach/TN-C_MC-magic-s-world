@@ -67,6 +67,7 @@ public final class TrainingGround {
         return tutors.isEmpty() ? "" : tutors.get(0).getPersistentData().getString(InstructorEntity.ROLE);
     }
 
+
     static InstructorEntity teacher(ServerPlayer p) {
         var entity = TEACHERS.get(p.getUUID());
         return entity != null && entity.isAlive() && !entity.isRemoved() && entity.level() == p.level()
@@ -99,6 +100,7 @@ public final class TrainingGround {
         tutor.playAnimation("greet");
         if ("counter".equals(role)) {
             TEACHERS.put(p.getUUID(), tutor);
+
         } else {
             SpecialistTrainers.adopt(p, tutor);
         }
@@ -116,6 +118,7 @@ public final class TrainingGround {
 
     /** 收起这位玩家名下的全部教官与训练状态（不动演武位）。 */
     static void dismissAll(ServerPlayer p) {
+        TestDummyService.dismiss(p);
         TemperingTraining.cancel(p);
         SpecialistTrainers.remove(p);
         var teacher = TEACHERS.remove(p.getUUID());

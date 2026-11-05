@@ -45,6 +45,10 @@ public final class WindEarthVisualMechanics {
             if(circle!=null){circle.configure(spec.tier()==5?5:3.5,50,TNMagicCircleEntity.STYLE_EARTH);circle.setPos(player.position().add(0,.06,0));player.serverLevel().addFreshEntity(circle);}
         }
         EarthAttackMechanics.cast(player,args.spell(),spec);
+        // A short, deep stone crack lands with the first columns breaking surface.
+        if(spec.kind()==WindEarthVisualRules.EARTH_MOVE)
+            player.serverLevel().playSound(null,player.getX(),player.getY(),player.getZ(),
+                    net.minecraft.sounds.SoundEvents.STONE_BREAK,net.minecraft.sounds.SoundSource.PLAYERS,1.4F,.58F);
         if((spec.kind()==3&&spec.tier()>=3)||(spec.kind()==4&&spec.tier()>=2))return;
         // Buffs replace an existing aura; static damage fields keep their separate positions.
         if(spec.followsOwner())player.serverLevel().getEntitiesOfClass(WindEarthVisualEntity.class,
