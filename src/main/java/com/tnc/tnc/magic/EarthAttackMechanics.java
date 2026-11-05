@@ -22,9 +22,11 @@ public final class EarthAttackMechanics {
         if(kind==3&&tier>=3) {
             for(int i=0;i<EarthActionRules.shots(tier);i++) {
                 if(tier==5) {
-                    // 土神的枪：细土柱先射出去，命中后由巨型土柱把目标顶上天。
+                    // 土神的枪：随机一把石化武器先射出去，命中后由巨型土柱把目标顶上天。
                     Vec3 from=player.getEyePosition().add(player.getLookAngle().scale(1.2));
-                    var bolt=spawn(player,0,"earth_pillar",from,target.add(0,.9,0),.42F,3.4F,0,120,damage,3.0,source);
+                    String weapon=EarthWeaponModels.pick(player.getRandom());
+                    var bolt=spawn(player,0,weapon,from,target.add(0,.9,0),EarthWeaponModels.FLIGHT_WIDTH,
+                            EarthWeaponModels.FLIGHT_LENGTH,0,120,damage,3.0,source);
                     if(bolt!=null)bolt.setLaunch(true);
                 }
                 else {

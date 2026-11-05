@@ -2,6 +2,7 @@ package com.tnc.tnc.client;
 import com.tnc.tnc.magic.EarthAttackEntity;
 import com.tnc.tnc.magic.EarthLaunchLayout;
 import com.tnc.tnc.magic.EarthRuptureLayout;
+import com.tnc.tnc.magic.EarthWeaponModels;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
@@ -158,18 +159,20 @@ public final class EarthAttackRenderer extends EntityRenderer<EarthAttackEntity>
             if(local<0)continue;
             double t=Math.min(1,local/5.0);
             double rise=EarthRuptureLayout.rise(t);
-            double height=(giant?1.7:.95)+shard.lift()*(giant?1.5:.7);
-            double width=shard.size()*(giant?1.35:1)*(.75+.25*settle);
+            boolean weapon=!e.model().startsWith("stone_lancer_")&&i%3==1;
+            double height=(weapon?(giant?2.6:1.9):(giant?1.7:.95))+shard.lift()*(giant?1.5:.7);
+            double width=shard.size()*(weapon?(giant?1.9:1.5):(giant?1.35:1))*(.75+.25*settle);
             double lean=7+9*EarthRuptureLayout.impact(t);
             pose.pushPose();
             pose.translate(Math.cos(shard.angle())*shard.radius(),0,Math.sin(shard.angle())*shard.radius());
             pose.mulPose(Axis.YP.rotationDegrees((float)-Math.toDegrees(shard.angle())));
             pose.mulPose(Axis.ZP.rotationDegrees((float)-lean));
             pose.mulPose(Axis.YP.rotationDegrees((float)shard.spin()));
+            String model=e.model().startsWith("stone_lancer_")?"stone_lancer_earth_spike_sharp"
+                    :(weapon?EarthWeaponModels.MODELS.get(i%EarthWeaponModels.MODELS.size()):i%3==0?"earth_pillar":"earth_spike_sharp");
+            if(weapon)pose.mulPose(Axis.XP.rotationDegrees(-90)); // weapons are authored on +Z; stand them up
             pose.scale((float)(width*1.0),(float)(height*rise*settle),(float)(width*1.0));
             pose.translate(0,.5,0);
-            String model=e.model().startsWith("stone_lancer_")?"stone_lancer_earth_spike_sharp"
-                    :(i%3==0?"earth_pillar":"earth_spike_sharp");
             draw(model,pose,buffers,light,net.spell_engine.api.render.LightEmission.NONE);
             pose.popPose();
         }

@@ -60,7 +60,7 @@ public final class EarthAttackEntity extends Entity {
             var wall=level().clip(new ClipContext(origin,next,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,this));
             if(wall.getType()!=HitResult.Type.MISS)next=wall.getLocation();
             LivingEntity target=null;double best=Double.MAX_VALUE;
-            double hitWidth=model().startsWith("stone_lancer_")?4:.8;
+            double hitWidth=model().startsWith("stone_lancer_")?4:EarthWeaponModels.isWeapon(model())?1.8:.8;
             var pathBounds=mode()==3?new AABB(origin,next).inflate(hitWidth):getBoundingBox().expandTowards(velocity).inflate(hitWidth);
             for(var e:level().getEntitiesOfClass(LivingEntity.class,pathBounds,
                     e->e.isAlive()&&e!=living&&!e.isAlliedTo(living)&&!e.isSpectator())) {

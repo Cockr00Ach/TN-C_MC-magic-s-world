@@ -12,12 +12,13 @@ class TNDirectSpellModelsTest {
     @Test void registerAdditionalUsesExactPlainKeysRequiredByModernFixAndSpellEngine() {
         var keys=new HashSet<ResourceLocation>();
         TNDirectSpellModels.register(new ModelEvent.RegisterAdditional(keys));
-        assertEquals(13,keys.size());
+        assertEquals(18,keys.size());
         for(var key:keys) {
             assertFalse(key instanceof ModelResourceLocation,"Variant keys incorrectly load blockstates");
             assertTrue(Files.exists(Path.of("src/main/resources/assets/tnc/models/"+key.getPath()+".json")),key.toString());
         }
         assertTrue(keys.contains(ResourceLocation.fromNamespaceAndPath("tnc","projectile/wind_tornado")));
         assertTrue(keys.contains(ResourceLocation.fromNamespaceAndPath("tnc","projectile/earth_pillar")));
+        assertTrue(keys.contains(ResourceLocation.fromNamespaceAndPath("tnc","projectile/earth_wpn_doom_scythe")));
     }
 }
