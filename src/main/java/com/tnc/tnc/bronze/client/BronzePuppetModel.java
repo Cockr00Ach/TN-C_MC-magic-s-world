@@ -17,7 +17,8 @@ public final class BronzePuppetModel extends HumanoidModel<BronzePuppetEntity> {
     public static LayerDefinition layer(){
         MeshDefinition mesh=HumanoidModel.createMesh(CubeDeformation.NONE,0);var root=mesh.getRoot();
         int textureWidth=128,textureHeight=128;
-        try(var in=BronzePuppetModel.class.getResourceAsStream("/assets/tnc/geo/entity/bronze_puppet_parts.json")){
+        // This is vanilla humanoid metadata, not Bedrock geometry. AzureLib scans every geo/*.json.
+        try(var in=BronzePuppetModel.class.getResourceAsStream("/assets/tnc/puppet/bronze_puppet_parts.json")){
             if(in==null)throw new IllegalStateException("Missing bronze puppet geometry");
             var document=JsonParser.parseReader(new InputStreamReader(in,java.nio.charset.StandardCharsets.UTF_8));
             var parts=document.isJsonArray()?document.getAsJsonArray():document.getAsJsonObject().getAsJsonArray("parts");

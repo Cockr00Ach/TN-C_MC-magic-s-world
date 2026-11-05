@@ -27,7 +27,7 @@ class BronzeArtResourcesTest {
         }
     }
     @Test void puppetBakesWithUnstretchedHighDensityUVsAndRotatedFaceDetails() throws Exception {
-        var metadata=JsonParser.parseString(Files.readString(ASSETS.resolve("geo/entity/bronze_puppet_parts.json"))).getAsJsonObject();
+        var metadata=JsonParser.parseString(Files.readString(ASSETS.resolve("puppet/bronze_puppet_parts.json"))).getAsJsonObject();
         var texture=ImageIO.read(ASSETS.resolve("textures/entity/bronze_puppet.png").toFile());
         assertEquals(metadata.get("texture_width").getAsInt(),texture.getWidth());
         assertEquals(metadata.get("texture_height").getAsInt(),texture.getHeight());

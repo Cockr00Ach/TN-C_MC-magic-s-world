@@ -422,7 +422,10 @@ def pack_puppet(p):
         texture.paste(Image.fromarray(patch,'RGB'),(u*density,v*density))
     target=ASSET/'textures/entity/bronze_puppet.png';target.parent.mkdir(parents=True,exist_ok=True);texture.save(target)
     result={'format':2,'texture_width':size,'texture_height':size,'texel_density':density,'parts':p.parts}
-    write(ASSET/'geo/entity/bronze_puppet_parts.json',result)
+    # AzureLib discovers every geo/*.json, including custom data with no Bedrock geometry.
+    write(ASSET/'puppet/bronze_puppet_parts.json',result)
+    legacy=ASSET/'geo/entity/bronze_puppet_parts.json'
+    if legacy.exists():legacy.unlink()
     return result
 
 def rotation(degrees):
@@ -452,7 +455,7 @@ def weapon_scene(kind,shift=(0,0,0),scale=1,flip_y=True):
     return items
 
 def puppet_scene(head_only=False,armed=True):
-    data=json.loads((ASSET/'geo/entity/bronze_puppet_parts.json').read_text(encoding='utf-8'))
+    data=json.loads((ASSET/'puppet/bronze_puppet_parts.json').read_text(encoding='utf-8'))
     tex=np.array(Image.open(ASSET/'textures/entity/bronze_puppet.png').convert('RGB'));items=[]
     poses={'right_arm':[-7,0,12],'left_arm':[-7,0,-12]}
     for part in data['parts']:
@@ -518,7 +521,7 @@ def weapon_preview():
     return canvas
 
 def puppet_preview():
-    data=json.loads((ASSET/'geo/entity/bronze_puppet_parts.json').read_text(encoding='utf-8'))
+    data=json.loads((ASSET/'puppet/bronze_puppet_parts.json').read_text(encoding='utf-8'))
     count=sum(len(p['boxes']) for p in data['parts'])
     canvas=Image.new('RGB',(1900,1720),(24,29,27));d=ImageDraw.Draw(canvas)
     d.text((65,35),'青铜人偶 · 古铸战卫',font=font(49),fill=(208,192,149))
