@@ -46,6 +46,17 @@ public final class EarthTremorClient {
             if(blast.mode()==2&&elapsed>=0&&elapsed<6&&distance<64)
                 launchKick=Math.max(launchKick,(float)((1-elapsed/6)*(1-distance/64)*.7));
         }
+        // Giant stone weapons erupting in place of rock spikes hit much harder than a spike.
+        for(var spike:mc.level.getEntitiesOfClass(com.tnc.tnc.magic.EarthAttackEntity.class,
+                mc.player.getBoundingBox().inflate(44),e->e.mode()==1&&!e.done())) {
+            double a=spike.age((float)event.getPartialTick())-spike.waitTicks();
+            if(a<0||a>16)continue;
+            double distance=mc.player.position().distanceTo(spike.position());
+            if(distance>40)continue;
+            float big=spike.height()>=7?1F:.4F;
+            strength=Math.max(strength,(float)(3.4F*big*(1-a/16)*(1-distance/40)));
+            if(a<5)launchKick=Math.max(launchKick,(float)(.55F*big*(1-a/5)*(1-distance/40)));
+        }
         // 土神的枪：巨柱升起时持续低频震动，起步瞬间再补一记 FOV 冲击。
         for(var launch:mc.level.getEntitiesOfClass(com.tnc.tnc.magic.EarthAttackEntity.class,mc.player.getBoundingBox().inflate(90),
                 e->e.mode()==8&&!e.done())) {

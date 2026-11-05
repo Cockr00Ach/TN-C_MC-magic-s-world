@@ -21,6 +21,7 @@ public final class EarthAttackRenderer extends EntityRenderer<EarthAttackEntity>
         double age=e.age(partial)-e.waitTicks();if(e.done()){renderBurst(e,partial,pose,buffers,light);if(e.mode()!=7&&e.mode()!=3)return;}if(age<0&&e.mode()!=0&&e.mode()!=3)return;
         if(e.mode()==8){renderLaunch(e,partial,pose,buffers,light);return;}
         if(e.mode()==3){renderSkySpear(e,partial,age,pose,buffers);return;}
+        if(e.mode()==1&&EarthWeaponModels.isWeapon(e.model())){renderWeaponSpike(e,partial,pose,buffers,light);return;}
         float growth=e.mode()==2?(float)Math.max(.04,Math.min(1,age/45)):e.mode()==1?(float)EarthRuptureLayout.rise(Math.max(0,Math.min(1,age/8))):1;
         pose.pushPose();if(e.mode()==0||e.mode()==3||e.mode()==5){pose.mulPose(Axis.YP.rotationDegrees(e.getYRot()));pose.mulPose(Axis.XP.rotationDegrees(e.getXRot()));}
         // earth_pillar is authored upright; stand it onto the +Z flight axis the entity renderer expects.
@@ -98,6 +99,44 @@ public final class EarthAttackRenderer extends EntityRenderer<EarthAttackEntity>
             draw(EarthWeaponModels.MODELS.get(i%EarthWeaponModels.MODELS.size()),pose,buffers,light,net.spell_engine.api.render.LightEmission.NONE);
             pose.popPose();
         }
+    }
+    /** A giant stone weapon punching out of the ground where a rock spike would have been. */
+    private void renderWeaponSpike(EarthAttackEntity e,float partial,PoseStack pose,MultiBufferSource buffers,int light) {
+        double age=e.age(partial)-e.waitTicks();
+        if(age<0)return;
+        float grow=(float)EarthRuptureLayout.rise(Math.max(0,Math.min(1,age/8)));
+        float w=e.scale(),h=(float)(e.height()*grow);
+        pose.pushPose();
+        pose.mulPose(Axis.YP.rotationDegrees(e.getYRot()));
+        pose.mulPose(Axis.ZP.rotationDegrees(-12));
+        // Weapon models are authored on +Z; -90 about X stands them up, then lift by half the
+        // scaled length so the base sits on the ground instead of the middle being buried.
+        pose.mulPose(Axis.XP.rotationDegrees(-90));
+        pose.translate(0,0,h*.5F);
+        pose.scale(w,w,h);
+        draw(e.model(),pose,buffers,light,net.spell_engine.api.render.LightEmission.NONE);
+        pose.popPose();
+        if(age<16) {
+            var out=buffers.getBuffer(WaterRenderTypes.geometry());
+            double radius=Math.max(.3,age*.5);
+            WaterGeometry.ringColor(out,pose.last().pose(),new net.minecraft.world.phys.Vec3(0,.06,0),
+                    new net.minecraft.world.phys.Vec3(0,1,0),radius,.45,.58F,.42F,.24F,(float)((1-age/16)*.75),36);
+        }
+        for(int i=0;i<10;i++) {
+            double a=i*Math.PI*2/10+.5;
+            double t=Math.max(0,Math.min(1,age/14));
+            double r=w*.9+t*2.6;
+            double y=.15+t*(1.6+(i%3)*.5)-t*t*1.2;
+            if(y<-.2)continue;
+            pose.pushPose();
+            pose.translate(Math.cos(a)*r,y,Math.sin(a)*r);
+            pose.mulPose(Axis.YP.rotationDegrees((float)(a*180/Math.PI)));
+            pose.mulPose(Axis.XP.rotationDegrees((float)(t*40)));
+            pose.scale(.3F,.3F,.3F);
+            draw("earth_clod",pose,buffers,light,net.spell_engine.api.render.LightEmission.NONE);
+            pose.popPose();
+        }
+        drawChips(e,Math.max(0,age),pose,buffers,light);
     }
     /** Splinters thrown from the base of a spike as it punches out of the ground. */
     private void drawChips(EarthAttackEntity e,double age,PoseStack pose,MultiBufferSource buffers,int light) {
