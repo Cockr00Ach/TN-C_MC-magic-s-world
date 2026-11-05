@@ -31,6 +31,8 @@ WEAPONS = {
     "sky_halberd": "grey",
     "doom_scythe": "basalt",
     "earthshaker_hammer": "brown",
+    "crimson_warblade": "crimson",
+    "star_rapier": "silver",
 }
 
 TINTS = {
@@ -39,8 +41,10 @@ TINTS = {
     "grey": (0.94, 0.96, 0.99),
     "basalt": (0.55, 0.54, 0.58),
     "brown": (1.0, 0.84, 0.62),
+    "crimson": (0.96, 0.64, 0.55),
+    "silver": (1.04, 1.05, 1.06),
 }
-GAIN = {"amber": 1.0, "pale": 1.22, "grey": 0.95, "basalt": 0.62, "brown": 0.9}
+GAIN = {"amber": 1.0, "pale": 1.22, "grey": 0.95, "basalt": 0.62, "brown": 0.9, "crimson": 0.82, "silver": 1.0}
 
 
 def stone_tile(mode: str, size: int = 16) -> np.ndarray:

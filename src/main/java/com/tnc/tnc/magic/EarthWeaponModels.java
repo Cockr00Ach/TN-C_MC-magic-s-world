@@ -17,7 +17,9 @@ public final class EarthWeaponModels {
             "earth_wpn_frost_katana",
             "earth_wpn_sky_halberd",
             "earth_wpn_doom_scythe",
-            "earth_wpn_earthshaker_hammer");
+            "earth_wpn_earthshaker_hammer",
+            "earth_wpn_crimson_warblade",
+            "earth_wpn_star_rapier");
 
     /** Length in blocks of the flying weapon; longer than the old 3.4 block spear. */
     public static final float FLIGHT_LENGTH = 5.2F;
