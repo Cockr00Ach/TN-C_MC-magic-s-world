@@ -5,9 +5,10 @@ import java.util.List;
 
 /** Closed 3D storm walls and swept helices. No entities, particles or per-vertex allocations. */
 public final class SeaTornadoGeometry {
-    public static final int MAX_VISIBLE = 2;
+    public static final int MAX_VISIBLE = 10;
+    public static final double VIEW_DISTANCE = 360;
     public enum Detail {
-        NEAR(48,56,96), FAR(28,36,64);
+        NEAR(22,32,48), MID(14,24,32), FAR(10,16,24);
         final int rows, sides, helix;
         Detail(int rows,int sides,int helix){this.rows=rows;this.sides=sides;this.helix=helix;}
         public int quads(){return 2*rows*sides+15*sides+4*helix;}
@@ -19,30 +20,30 @@ public final class SeaTornadoGeometry {
     private SeaTornadoGeometry(){}
 
     /** Sea surface is Y49; even the animated shoulder stays below the island's Y174 floor. */
-    public static double height(SeaGyreLayout.Gyre g){return 80+26*(.5+.5*Math.sin(g.phase()*1.73));}
+    public static double height(SeaGyreLayout.Gyre g){return 66+42*(.5+.5*Math.sin(g.phase()*1.73));}
     public static double radius(SeaGyreLayout.Gyre g,double t){
         t=Math.max(0,Math.min(1,t));
         double body=.5+.5*Math.sin(g.phase()*2.31+1.4);
-        return g.radius()*(.16+.18*body+(1.04+.43*body)*Math.pow(t,.80+.65*(1-body)));
+        return g.radius()*(.08+.18*body+(.92+.20*body)*Math.pow(t,.90+.60*(1-body)));
+    }
+    /** Only the closest two use the full mesh, even when ten storms share the view. */
+    public static Detail detail(int nearestRank,double distance){
+        return nearestRank<2&&distance<155?Detail.NEAR:nearestRank<5&&distance<250?Detail.MID:Detail.FAR;
     }
     public static List<SeaGyreLayout.Gyre> select(List<SeaGyreLayout.Gyre> eligible){
-        return select(eligible,List.of());
-    }
-    public static List<SeaGyreLayout.Gyre> select(List<SeaGyreLayout.Gyre> eligible,List<SeaGyreLayout.Gyre> previous){
         var out=new ArrayList<SeaGyreLayout.Gyre>(MAX_VISIBLE);
-        for(var g:previous)if(eligible.contains(g)&&out.size()<MAX_VISIBLE)out.add(g);
         for(var g:eligible){
             if(out.size()>=MAX_VISIBLE)break;
             if(out.contains(g))continue;
             boolean separated=true;
-            for(var chosen:out)if(Math.hypot(g.x()-chosen.x(),g.z()-chosen.z())<175){separated=false;break;}
+            for(var chosen:out)if(Math.hypot(g.x()-chosen.x(),g.z()-chosen.z())<96){separated=false;break;}
             if(separated)out.add(g);
             if(out.size()==MAX_VISIBLE)break;
         }
         return List.copyOf(out);
     }
     public static double distanceFade(double horizontalDistance){
-        double t=Math.max(0,Math.min(1,(210-horizontalDistance)/40));return t*t*(3-2*t);
+        double t=Math.max(0,Math.min(1,(VIEW_DISTANCE-horizontalDistance)/100));return t*t*(3-2*t);
     }
 
     public static void build(SeaGyreLayout.Gyre g,double seconds,Detail detail,double opacity,Sink sink){
@@ -87,7 +88,7 @@ public final class SeaTornadoGeometry {
     }
     private static void cloud(SeaGyreLayout.Gyre g,double time,double q,double a,int cap,double opacity,Sink sink){
         double spin=time*g.direction()*.38+g.phase();
-        double r=g.radius()*(cap==0?.22+q*1.4:1+q*.75);
+        double r=g.radius()*(cap==0?.22+q*1.4:.70+q*.65);
         r*=1+.13*Math.sin(a*3+spin+q*5)+.08*Math.sin(a*5-spin*.7-q*7);
         double y=cap==0?height(g)*.09*Math.pow(1-q,1.5)+Math.sin(a*3+spin+q*4)*7*q*Math.sin(Math.PI*q)
                 :height(g)*(.92+Math.sin(q*Math.PI/2)*.13)+Math.sin(a*4-spin+q*8)*4*q;

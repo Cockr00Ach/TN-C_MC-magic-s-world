@@ -63,7 +63,7 @@ public final class SeaTornadoNativeAudit {
         if(!ready||!mc.level.dimension().equals(SkyhavenContent.KEY)||++ticks<240)return;
         String image="sea-tornado-"+new String[]{"day-side","night-diagonal","sea-level"}[phase]+".png";
         var camera=mc.gameRenderer.getMainCamera();
-        cameras.add(Map.of("phase",phase,"position",List.of(camera.getPosition().x,camera.getPosition().y,camera.getPosition().z),"yaw",camera.getYRot(),"pitch",camera.getXRot()));
+        cameras.add(Map.of("phase",phase,"position",List.of(camera.getPosition().x,camera.getPosition().y,camera.getPosition().z),"yaw",camera.getYRot(),"pitch",camera.getXRot(),"effects",SkyhavenSeaVision.auditSnapshot()));
         saving=true;images.add(image);
         Screenshot.grab(mc.gameDirectory,image,mc.getMainRenderTarget(),message->{
             try{Files.copy(mc.gameDirectory.toPath().resolve("screenshots/"+image),output().resolve(image),StandardCopyOption.REPLACE_EXISTING);}

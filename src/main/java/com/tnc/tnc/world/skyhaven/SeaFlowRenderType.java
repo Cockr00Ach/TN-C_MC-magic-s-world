@@ -9,4 +9,9 @@ final class SeaFlowRenderType extends RenderType {
    .setTextureState(new TextureStateShard(net.minecraft.resources.ResourceLocation.parse("tnc:textures/particle/abyssal_storm.png"),true,false))
    .setTransparencyState(TRANSLUCENT_TRANSPARENCY).setLightmapState(LIGHTMAP).setOverlayState(OVERLAY)
    .setCullState(NO_CULL).setDepthTestState(LEQUAL_DEPTH_TEST).setWriteMaskState(COLOR_WRITE).setOutputState(MAIN_TARGET).createCompositeState(false));
+ static final RenderType ENERGY=create("tnc_sea_mana_riot",DefaultVertexFormat.NEW_ENTITY,VertexFormat.Mode.QUADS,262144,false,false,
+  CompositeState.builder().setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_SHADER)
+   .setTextureState(new TextureStateShard(net.minecraft.resources.ResourceLocation.parse("tnc:textures/particle/mana_riot.png"),true,false))
+   .setTransparencyState(TRANSLUCENT_TRANSPARENCY).setLightmapState(LIGHTMAP).setOverlayState(OVERLAY)
+   .setCullState(NO_CULL).setDepthTestState(LEQUAL_DEPTH_TEST).setWriteMaskState(COLOR_WRITE).setOutputState(MAIN_TARGET).createCompositeState(false));
 }
