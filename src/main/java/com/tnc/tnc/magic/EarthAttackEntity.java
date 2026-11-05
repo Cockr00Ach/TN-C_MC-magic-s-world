@@ -151,6 +151,19 @@ public final class EarthAttackEntity extends Entity {
         server.sendParticles(EarthParticles.DUST.get(),centre.x,centre.y+.35,centre.z,cloud,radius*.5,Math.min(3,radius*.3),radius*.5,.34);
         server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK,Blocks.COARSE_DIRT.defaultBlockState()),centre.x,centre.y+.25,centre.z,
                 mode()==2?88:22,radius*.35,1.2,radius*.35,mode()==2?.65:.26);
+        // Ground ring: chips are kicked outward from several points so the blast
+        // reads as the floor breaking apart, not just a puff at the centre.
+        int ring=mode()==2?14:9;
+        var ringChip=new BlockParticleOption(ParticleTypes.BLOCK,
+                (mode()==2?Blocks.STONE:Blocks.COARSE_DIRT).defaultBlockState());
+        for(int i=0;i<ring;i++) {
+            double a=i*Math.PI*2/ring,d=Math.max(1,radius*(.35+.45*(i%3)/2));
+            double x=centre.x+Math.cos(a)*d,z=centre.z+Math.sin(a)*d;
+            server.sendParticles(ringChip,x,centre.y+.12,z,5,.18,.16,.18,.2);
+            server.sendParticles(EarthParticles.DUST.get(),x,centre.y+.1,z,2,.18,.05,.18,.04);
+            server.sendParticles(ringChip,x,centre.y+.12,z,0,Math.cos(a)*.24,.3,Math.sin(a)*.24,.6);
+            if(mode()==2&&i%5==0)server.sendParticles(ParticleTypes.EXPLOSION,x,centre.y+.25,z,1,0,0,0,0);
+        }
         int rays=mode()==2?48:24;
         for(int i=0;i<rays;i++) {
             double a=i*Math.PI*2/rays,s=(mode()==2?.85:.35)+(i%5)*.08;
