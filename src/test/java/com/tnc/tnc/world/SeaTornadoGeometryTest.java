@@ -1,0 +1,72 @@
+package com.tnc.tnc.world;
+
+import com.tnc.tnc.world.skyhaven.*;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class SeaTornadoGeometryTest {
+    private final SeaGyreLayout.Gyre storm=new SeaGyreLayout.Gyre(0,0,40,.7,1);
+    @Test void volumeIsBroadAndStaysBelowIslandFloor(){
+        assertTrue(SeaTornadoGeometry.height(storm)>=80);
+        assertTrue(SeaTornadoGeometry.radius(storm,1)>SeaTornadoGeometry.radius(storm,0)*4);
+        double[] bounds={Double.POSITIVE_INFINITY,Double.NEGATIVE_INFINITY,0};
+        SeaTornadoGeometry.build(storm,10,SeaTornadoGeometry.Detail.NEAR,1,(x,y,z,u,v,rgb,a,nx,ny,nz)->{
+            bounds[0]=Math.min(bounds[0],y);bounds[1]=Math.max(bounds[1],y);bounds[2]=Math.max(bounds[2],Math.hypot(x,z));
+        });
+        assertTrue(bounds[1]-bounds[0]>80,"Cannot collapse to a water-plane spiral");
+        assertTrue(49.05+bounds[1]<170,"Leave clearance below the Y174 island floor");
+        assertTrue(bounds[2]>75,"Wide billowing storm canopy");
+    }
+    @Test void allVerticesAreFiniteDarkAndWithinStrictQuadBudget(){
+        for(var detail:SeaTornadoGeometry.Detail.values()){
+            int[] count={0};
+            SeaTornadoGeometry.build(storm,100,detail,1,(x,y,z,u,v,rgb,a,nx,ny,nz)->{
+                assertTrue(Double.isFinite(x+y+z+u+v+nx+ny+nz));assertTrue(a>=0&&a<=255);
+                assertTrue((rgb>>16&255)<40&&(rgb>>8&255)<40&&(rgb&255)<50);
+                assertTrue(y>=0&&49.05+y<170);assertTrue(Math.hypot(x,z)<95);count[0]++;
+            });
+            assertEquals(detail.quads()*4,count[0]);assertTrue(count[0]<27000);
+        }
+    }
+    @Test void sameWorldTimeIsDeterministicButMotionActuallyChangesGeometry(){
+        double[] a=checksum(4),b=checksum(4),c=checksum(6);
+        assertArrayEquals(a,b);assertNotEquals(a[0],c[0]);assertNotEquals(a[1],c[1]);
+    }
+    @Test void densityAndDistanceAreBoundedWithoutRewritingWorldLayout(){
+        var chosen=SeaTornadoGeometry.select(SeaGyreLayout.near(0,0));assertTrue(chosen.size()<=2&&!chosen.isEmpty());
+        if(chosen.size()==2)assertTrue(Math.hypot(chosen.get(0).x()-chosen.get(1).x(),chosen.get(0).z()-chosen.get(1).z())>=175);
+        assertEquals(1,SeaTornadoGeometry.distanceFade(100));assertEquals(0,SeaTornadoGeometry.distanceFade(210));
+        assertTrue(SeaTornadoGeometry.distanceFade(175)>0&&SeaTornadoGeometry.distanceFade(175)<1);
+    }
+    @Test void zeroOpacityAndInvalidTimeEmitNothing(){
+        int[] n={0};SeaTornadoGeometry.Sink sink=(x,y,z,u,v,rgb,a,nx,ny,nz)->n[0]++;
+        SeaTornadoGeometry.build(storm,Double.NaN,SeaTornadoGeometry.Detail.NEAR,1,sink);
+        SeaTornadoGeometry.build(storm,0,SeaTornadoGeometry.Detail.NEAR,0,sink);assertEquals(0,n[0]);
+    }
+    @Test void sparseLayoutDoesNotJumpWhenPlayerCrossesACellBoundary(){
+        var a=SeaTornadoLayout.near(191,60);var b=SeaTornadoLayout.near(193,60);
+        assertTrue(a.stream().filter(b::contains).count()>=2);assertEquals(a,SeaTornadoLayout.near(191,60));
+        for(var g:a)for(var h:a)if(g!=h)assertTrue(Math.hypot(g.x()-h.x(),g.z()-h.z())>=175);
+    }
+    @Test void passingNearestRankBoundaryRetainsAlreadyVisibleStorms(){
+        var first=SeaTornadoGeometry.select(SeaTornadoLayout.near(191,191));
+        var next=SeaTornadoGeometry.select(SeaTornadoLayout.near(193,193),first);
+        assertEquals(first,next,"Full-opacity storms must not swap when nearest rankings change");
+    }
+    @Test void fatAndSlenderStormsBothFitBelowTheIslandAcrossAnimation(){
+        double minRatio=Double.POSITIVE_INFINITY,maxRatio=0;
+        for(int i=0;i<12;i++){
+            var g=new SeaGyreLayout.Gyre(0,0,24+i*28./11,i*Math.PI/6,i%2==0?1:-1);
+            double ratio=2*SeaTornadoGeometry.radius(g,.75)/SeaTornadoGeometry.height(g);
+            minRatio=Math.min(minRatio,ratio);maxRatio=Math.max(maxRatio,ratio);
+            for(double time:new double[]{0,13,90})SeaTornadoGeometry.build(g,time,SeaTornadoGeometry.Detail.FAR,1,(x,y,z,u,v,rgb,a,nx,ny,nz)->{
+                assertTrue(49.05+y<170,"Animated shoulder must remain below the island");
+            });
+        }
+        assertTrue(maxRatio>minRatio*1.7,"Storms need visibly distinct body proportions");
+        assertTrue(maxRatio>1,"Some storms must be broader than tall");
+    }
+    private double[] checksum(double time){
+        double[] s={0,0};SeaTornadoGeometry.build(storm,time,SeaTornadoGeometry.Detail.FAR,1,(x,y,z,u,v,rgb,a,nx,ny,nz)->{s[0]+=x*x+z*z;s[1]+=y*y+u+v;});return s;
+    }
+}

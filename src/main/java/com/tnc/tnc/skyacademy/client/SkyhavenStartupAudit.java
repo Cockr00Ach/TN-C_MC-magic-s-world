@@ -45,6 +45,7 @@ public final class SkyhavenStartupAudit {
         if(mc.player==null||mc.level==null||mc.getOverlay()!=null)return;
         if(joined==0)joined=System.nanoTime();
         if(!configured){configured=true;Files.createDirectories(output());mc.options.pauseOnLostFocus=false;mc.options.guiScale().set(2);mc.options.renderDistance().set(8);mc.options.simulationDistance().set(5);mc.options.framerateLimit().set(120);mc.options.enableVsync().set(false);mc.getWindow().updateVsync(false);mc.resizeDisplay();}
+        if(Boolean.getBoolean("tnc.skyhavenTornadoAudit")){SeaTornadoNativeAudit.tick(mc);return;}
         mc.getSingleplayerServer().execute(()->{
             var s=mc.getSingleplayerServer();var p=s.getPlayerList().getPlayers().get(0);
             complete=com.tnc.tnc.world.SkyIslandSavedData.get(s.overworld()).isSkyIslandComplete();

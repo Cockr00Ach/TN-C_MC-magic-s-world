@@ -1,5 +1,6 @@
-param([Parameter(Mandatory=$true)][string]$LauncherBatch,[Parameter(Mandatory=$true)][string]$LivePack,[Parameter(Mandatory=$true)][string]$AuditRoot,[Parameter(Mandatory=$true)][string]$Output,[string]$OffscreenAgent="",[switch]$UiOnly,[switch]$JourneyOnly,[switch]$FeedbackOnly,[switch]$LeylineOnly,[switch]$EquipmentOnly,[switch]$BotanicalOnly,[switch]$WorldFeedback,[switch]$NamingOnly,[switch]$SkyAcademy,[switch]$SkyhavenStartup,[switch]$SkyhavenProfile)
+param([Parameter(Mandatory=$true)][string]$LauncherBatch,[Parameter(Mandatory=$true)][string]$LivePack,[Parameter(Mandatory=$true)][string]$AuditRoot,[Parameter(Mandatory=$true)][string]$Output,[string]$OffscreenAgent="",[switch]$UiOnly,[switch]$JourneyOnly,[switch]$FeedbackOnly,[switch]$LeylineOnly,[switch]$EquipmentOnly,[switch]$BotanicalOnly,[switch]$WorldFeedback,[switch]$NamingOnly,[switch]$SkyAcademy,[switch]$SkyhavenStartup,[switch]$SkyhavenProfile,[switch]$SkyhavenTornado)
 $ErrorActionPreference='Stop'
+if($SkyhavenTornado){$SkyhavenStartup=$true}
 if($SkyhavenProfile){$SkyhavenStartup=$true}
 if([string]::IsNullOrWhiteSpace($OffscreenAgent)){$OffscreenAgent=Join-Path (Split-Path $PSScriptRoot -Parent) 'work/offscreen-agent/offscreen-audit.jar'}
 $live=[IO.Path]::GetFullPath($LivePack).TrimEnd('\')
@@ -44,6 +45,7 @@ if($SkyhavenProfile){
  $javaArguments=[regex]::Replace($javaArguments,'-Xmx\S+','-Xmx7680m').Replace('-XX:ActiveProcessorCount=4 ','')
  $javaArguments='-Dtnc.skyhavenWalkProfile=true '+$javaArguments
 }
+if($SkyhavenTornado){$javaArguments='-Dtnc.skyhavenTornadoAudit=true '+$javaArguments}
 $outputFolder=[IO.Path]::GetFullPath($Output)
 [IO.Directory]::CreateDirectory($outputFolder) | Out-Null
 $shaderFile=Join-Path $audit 'config/oculus.properties'
