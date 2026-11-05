@@ -21,7 +21,12 @@ public final class EarthAttackMechanics {
         float damage=(float)(power.randomValue()*EarthActionRules.coefficient(kind,tier));
         if(kind==3&&tier>=3) {
             for(int i=0;i<EarthActionRules.shots(tier);i++) {
-                if(tier==5)spawn(player,3,"earth_spear_sharp",target.add(0,55,0),target,25,70,40,80,damage,6,source);
+                if(tier==5) {
+                    // 土神的枪：细土柱先射出去，命中后由巨型土柱把目标顶上天。
+                    Vec3 from=player.getEyePosition().add(player.getLookAngle().scale(1.2));
+                    var bolt=spawn(player,0,"earth_pillar",from,target.add(0,.9,0),.42F,3.4F,0,120,damage,3.0,source);
+                    if(bolt!=null)bolt.setLaunch(true);
+                }
                 else {
                     Vec3 start=tier==4?player.position().add(0,3.5+(i/5)*1.8,0).add(side.scale((i%5-2)*1.8))
                             :player.getEyePosition().add(player.getLookAngle().scale(1.2));
@@ -56,9 +61,10 @@ public final class EarthAttackMechanics {
         var hit=caster.level().clip(new ClipContext(from,to,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,caster));
         return hit.getType()==HitResult.Type.MISS?target:hit.getLocation();
     }
-    private static void spawn(ServerPlayer caster,int mode,String model,Vec3 start,Vec3 end,float scale,float height,int wait,int ttl,float damage,double radius,DamageSource source) {
-        var entity=WindEarthVisualMechanics.ATTACK.get().create(caster.serverLevel());if(entity==null)return;
+    private static EarthAttackEntity spawn(ServerPlayer caster,int mode,String model,Vec3 start,Vec3 end,float scale,float height,int wait,int ttl,float damage,double radius,DamageSource source) {
+        var entity=WindEarthVisualMechanics.ATTACK.get().create(caster.serverLevel());if(entity==null)return null;
         entity.configure(caster,mode,model,start,end,scale,height,wait,ttl,damage,radius*com.tnc.tnc.arcana.ArcanaBeacon.scale(caster),source);entity.getPersistentData().putFloat("BeaconScale",com.tnc.tnc.arcana.ArcanaBeacon.scale(caster));caster.serverLevel().addFreshEntity(entity);
         if(mode==2)entity.damageCentre=new Vec3(end.x,end.y-(wait>0?18:6),end.z);
+        return entity;
     }
 }

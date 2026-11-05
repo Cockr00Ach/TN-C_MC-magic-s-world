@@ -1,5 +1,6 @@
 package com.tnc.tnc.client;
 import com.tnc.tnc.magic.EarthAttackEntity;
+import com.tnc.tnc.magic.EarthLaunchLayout;
 import com.tnc.tnc.magic.EarthRuptureLayout;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
@@ -17,10 +18,14 @@ public final class EarthAttackRenderer extends EntityRenderer<EarthAttackEntity>
     public ResourceLocation getTextureLocation(EarthAttackEntity e){return ResourceLocation.fromNamespaceAndPath("minecraft","textures/block/stone.png");}
     public void render(EarthAttackEntity e,float yaw,float partial,PoseStack pose,MultiBufferSource buffers,int light) {
         double age=e.age(partial)-e.waitTicks();if(e.done()){renderBurst(e,partial,pose,buffers,light);if(e.mode()!=7&&e.mode()!=3)return;}if(age<0&&e.mode()!=0&&e.mode()!=3)return;
+        if(e.mode()==8){renderLaunch(e,partial,pose,buffers,light);return;}
         if(e.mode()==3){renderSkySpear(e,partial,age,pose,buffers);return;}
         float growth=e.mode()==2?(float)Math.max(.04,Math.min(1,age/45)):e.mode()==1?(float)EarthRuptureLayout.rise(Math.max(0,Math.min(1,age/8))):1;
         pose.pushPose();if(e.mode()==0||e.mode()==3||e.mode()==5){pose.mulPose(Axis.YP.rotationDegrees(e.getYRot()));pose.mulPose(Axis.XP.rotationDegrees(e.getXRot()));}
-        if(e.mode()==0||e.mode()==3||e.mode()==5)pose.scale(e.scale(),e.scale(),e.height());else pose.scale(e.scale()*growth,e.height()*growth,e.scale()*growth);
+        // earth_pillar is authored upright; stand it onto the +Z flight axis the entity renderer expects.
+        if(e.mode()==0&&e.model().equals("earth_pillar"))pose.mulPose(Axis.XP.rotationDegrees(90));
+        if(e.mode()==0&&e.model().equals("earth_pillar"))pose.scale(e.scale(),e.height(),e.scale());
+        else if(e.mode()==0||e.mode()==3||e.mode()==5)pose.scale(e.scale(),e.scale(),e.height());else pose.scale(e.scale()*growth,e.height()*growth,e.scale()*growth);
         if(e.model().startsWith("stone_lancer_")&&(e.mode()==0||e.mode()==5))
             pose.translate(0,0,-1.5); // Centered model tip Z=1.5 stays on the swept impact point.
         else pose.translate(0,e.mode()==2?0:.5,0);
@@ -39,6 +44,44 @@ public final class EarthAttackRenderer extends EntityRenderer<EarthAttackEntity>
             pose.mulPose(Axis.YP.rotationDegrees((float)(a*180/Math.PI)));pose.scale(.55F,.55F,.55F);
             net.spell_engine.api.render.CustomModels.render(net.spell_engine.client.render.SpellModelHelper.LAYERS.get(net.spell_engine.api.render.LightEmission.NONE),
                     Minecraft.getInstance().getItemRenderer(),ResourceLocation.fromNamespaceAndPath("tnc","projectile/earth_clod"),pose,buffers,light,OverlayTexture.NO_OVERLAY);
+            pose.popPose();
+        }
+    }
+    /** Giant column that erupts under a target and carries it skyward. */
+    private void renderLaunch(EarthAttackEntity e,float partial,PoseStack pose,MultiBufferSource buffers,int light) {
+        double age=e.age(partial);
+        double grow=EarthLaunchLayout.grow(age/EarthAttackEntity.LAUNCH_RISE);
+        double top=grow*e.height();
+        float w=e.scale();
+        int seg=0;
+        for(double y=0;y<top;y+=3.2,seg++) {
+            pose.pushPose();
+            pose.translate(Math.sin(seg*1.7)*.08,y,Math.cos(seg*2.3)*.08);
+            pose.mulPose(Axis.YP.rotationDegrees((float)(seg*29+age*1.1)));
+            pose.scale(w,3.25F,w);
+            pose.translate(0,.5,0);
+            draw("earth_pillar",pose,buffers,light,net.spell_engine.api.render.LightEmission.NONE);
+            pose.popPose();
+        }
+        // Broken crown around the top so the carried target looks lifted on a rock, not on a tube.
+        for(int i=0;i<5;i++) {
+            double a=i*Math.PI*2/5;
+            pose.pushPose();
+            pose.translate(Math.cos(a)*w*.9,top,Math.sin(a)*w*.9);
+            pose.mulPose(Axis.YP.rotationDegrees((float)(a*180/Math.PI)));
+            pose.mulPose(Axis.XP.rotationDegrees(-38));
+            pose.scale(w*.55F,2.6F,w*.55F);
+            pose.translate(0,.5,0);
+            draw("earth_spike_sharp",pose,buffers,light,net.spell_engine.api.render.LightEmission.NONE);
+            pose.popPose();
+        }
+        for(int i=0;i<6;i++) {
+            double a=i*Math.PI/3;
+            pose.pushPose();
+            pose.translate(Math.cos(a)*w*.95,.15,Math.sin(a)*w*.95);
+            pose.mulPose(Axis.YP.rotationDegrees((float)(a*180/Math.PI)));
+            pose.scale(.7F,.7F,.7F);
+            draw("earth_clod",pose,buffers,light,net.spell_engine.api.render.LightEmission.NONE);
             pose.popPose();
         }
     }
@@ -86,6 +129,11 @@ public final class EarthAttackRenderer extends EntityRenderer<EarthAttackEntity>
                 double radius=Math.max(.2,(elapsed-ring*2)*.95);
                 WaterGeometry.ringColor(out,pose.last().pose(),new net.minecraft.world.phys.Vec3(0,.25+ring*.2,0),new net.minecraft.world.phys.Vec3(0,1,0),radius,1.2-ring*.35,.72F,.42F,.12F,fade*.8F,48);
             }
+        } else if(elapsed<10) {
+            // Every earth blast gets a ground shockwave ring, not only the giant one.
+            var out=buffers.getBuffer(WaterRenderTypes.geometry());
+            double radius=Math.max(.2,elapsed*.85);
+            WaterGeometry.ringColor(out,pose.last().pose(),new net.minecraft.world.phys.Vec3(0,.15,0),new net.minecraft.world.phys.Vec3(0,1,0),radius,.3,.62F,.45F,.26F,fade*.65F,32);
         }
         drawBurstColumns(e,elapsed,giant,pose,buffers,light);
         int pieces=giant?42:18;
