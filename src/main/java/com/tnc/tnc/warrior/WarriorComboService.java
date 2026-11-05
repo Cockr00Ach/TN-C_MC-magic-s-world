@@ -746,6 +746,7 @@ public final class WarriorComboService {
 
     static boolean eligible(ServerPlayer player) {
         return player.isAlive() && !player.isSpectator() && !DownedCombat.isDowned(player)
+                && !com.tnc.tnc.bronze.BronzeTwinWeapon.blocked(player)
                 && !(player.isUsingItem() && player.getUseItem().getItem() instanceof com.tnc.tnc.bronze.BronzeWeaponItem)
                 && TemperingData.get(player.server).enrolled(player.getUUID());
     }
@@ -837,6 +838,14 @@ public final class WarriorComboService {
         if (state.counterAt != Long.MIN_VALUE && now >= state.counterAt) {
             state.counterAt = Long.MIN_VALUE;
             mobCounterSweep(player);
+        }
+        if(com.tnc.tnc.bronze.BronzeTwinWeapon.blocked(player)){
+            if(!state.tracker.isEmpty()||state.heldSkill!=null||state.finisherUntil>now||state.counterAt!=Long.MIN_VALUE||state.stanceUntil>now){
+                if(state.heldSkill!=null)player.removeEffect(net.minecraft.world.effect.MobEffects.DAMAGE_RESISTANCE);
+                state.tracker.clear();state.heldSkill=null;state.stanceUntil=Long.MIN_VALUE;state.counterAt=Long.MIN_VALUE;state.finisherUntil=0;
+                WarriorAnimationPacket.cancel(player);sync(player,state,-1);
+            }
+            return;
         }
         int before = state.tracker.size();
         state.tracker.prune(now);

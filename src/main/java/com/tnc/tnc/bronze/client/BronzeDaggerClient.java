@@ -18,7 +18,7 @@ public final class BronzeDaggerClient {
     @SubscribeEvent public static void attack(InputEvent.InteractionKeyMappingTriggered e){
         var mc=Minecraft.getInstance();if(!e.isAttack()||mc.player==null)return;
         var stack=mc.player.getMainHandItem();
-        if(stack.getItem() instanceof BronzeWeaponItem&&BronzeWeaponItem.inFlight(stack,mc.level)){e.setCanceled(true);e.setSwingHand(false);}
+        if(stack.getItem() instanceof BronzeWeaponItem&&(BronzeWeaponItem.inFlight(stack,mc.level)||BronzeTwinWeapon.blocked(mc.player))){e.setCanceled(true);e.setSwingHand(false);}
     }
     @SubscribeEvent public static void charge(TickEvent.ClientTickEvent e){
         var mc=Minecraft.getInstance();if(e.phase!=TickEvent.Phase.END||mc.player==null||mc.isPaused())return;

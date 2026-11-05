@@ -14,7 +14,7 @@ public final class WarriorFirstPersonPose {
     private WarriorFirstPersonPose() {}
     public static void apply(LivingEntity entity,ItemStack stack,ItemDisplayContext context,boolean left,PoseStack pose){
         if(!context.firstPerson() || entity!=Minecraft.getInstance().player || !WarriorWeapons.bladed(stack)
-                || left!=(entity.getMainArm()==HumanoidArm.LEFT))return;
+                || left!=(entity.getMainArm()==HumanoidArm.LEFT)&&!com.tnc.tnc.bronze.BronzeTwinWeapon.active(entity))return;
         var active=WarriorAnimationClient.active(entity.getId());
         if(active==null || active.hold())return;
         float partial=Minecraft.getInstance().getFrameTime();

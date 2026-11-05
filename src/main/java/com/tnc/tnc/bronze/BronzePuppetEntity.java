@@ -52,6 +52,7 @@ public final class BronzePuppetEntity extends PathfinderMob implements OwnableEn
         if(now>=expiresAt-PuppetBondData.FADE)dissolve();
         if(fadeEnd()!=0){navigation.stop();if(now>=fadeEnd())discard();return;}
         if(!isAlive())return;
+        if(!BronzeTwinWeapon.active(this)){active=null;entityData.set(ANIMATION,-1);navigation.stop();return;}
         if(!(getOwner() instanceof ServerPlayer owner)||!owner.isAlive()){setTarget(null);active=null;entityData.set(ANIMATION,-1);navigation.stop();return;}
         if(owner.level()!=level()){dissolve();return;}
         if(com.tnc.tnc.boss.fire.TortoiseStun.isStunned(this)){active=null;entityData.set(ANIMATION,-1);navigation.stop();return;}
@@ -69,7 +70,7 @@ public final class BronzePuppetEntity extends PathfinderMob implements OwnableEn
             navigation.stop();long age=level().getGameTime()-entityData.get(START);
             if(!struck&&age>=Math.max(3,active.animation().durationTicks()/2)){struck=true;WarriorBronzeBridge.puppetMelee(this,owner,active);}
             if(age>=active.animation().durationTicks())active=null;
-        }else if(distanceTo(target)>3.6)navigation.moveTo(target,1.1);
+        }else if(distanceTo(target)>2.65)navigation.moveTo(target,1.1);
         else if(now>=nextAttack&&hasLineOfSight(target)){
             var choices=WarriorBronzeBridge.puppetSkills();active=choices.get(attackIndex++%choices.size());struck=false;
             entityData.set(ANIMATION,active.animation().ordinal());entityData.set(START,level().getGameTime());nextAttack=now+active.animation().durationTicks()+16;navigation.stop();

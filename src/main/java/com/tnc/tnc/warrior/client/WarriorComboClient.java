@@ -135,7 +135,7 @@ public final class WarriorComboClient {
     /** 手上武器的家族；空手/非武器返回 {@code null}。 */
     public static WarriorWeaponFamily heldFamily() {
         var player = Minecraft.getInstance().player;
-        return player == null ? null : WarriorWeapons.family(player.getMainHandItem());
+        return player == null || com.tnc.tnc.bronze.BronzeTwinWeapon.blocked(player) ? null : WarriorWeapons.family(player.getMainHandItem());
     }
 
     /** 手上是不是长剑（和"拿法杖才能施法"同一条规矩，保留给旧调用）。 */

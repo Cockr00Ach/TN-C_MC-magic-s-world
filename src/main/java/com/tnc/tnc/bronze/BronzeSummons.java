@@ -11,6 +11,7 @@ import net.minecraftforge.fml.common.Mod;
 public final class BronzeSummons {
     public static long time(net.minecraft.server.MinecraftServer server){return server.overworld().getGameTime();}
     public static InteractionResult summon(ServerPlayer owner){
+        if(!BronzeTwinWeapon.active(owner))return InteractionResult.FAIL;
         var data=PuppetBondData.get(owner.server);long now=time(owner.server);var bond=data.bond(owner.getUUID());
         if(!data.available(owner.getUUID(),now)){
             owner.displayClientMessage(bond.puppet()!=null?Component.translatable("message.tnc.puppet_exists"):Component.translatable("message.tnc.puppet_cooldown",(bond.readyAt()-now+19)/20),true);return InteractionResult.FAIL;

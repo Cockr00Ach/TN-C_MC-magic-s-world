@@ -19,12 +19,16 @@ public final class BronzeWeaponItem extends SwordItem {
     public static int upgrade(ItemStack stack){return stack.hasTag()?Math.max(0,Math.min(10,stack.getTag().getInt(UPGRADE))):0;}
     public static boolean inFlight(ItemStack stack,Level level){return stack.hasTag()&&stack.getTag().getLong(FLIGHT)>level.getGameTime();}
     @Override public Multimap<Attribute,AttributeModifier> getAttributeModifiers(EquipmentSlot slot,ItemStack stack){
-        if(slot!=EquipmentSlot.MAINHAND)return ImmutableMultimap.of();
+        if(slot!=EquipmentSlot.MAINHAND||profile==BronzeProfile.HALBERD&&stack.hasTag()&&stack.getTag().getBoolean(BronzeTwinWeapon.BLOCKED))return ImmutableMultimap.of();
         return ImmutableMultimap.of(Attributes.ATTACK_DAMAGE,new AttributeModifier(BASE_ATTACK_DAMAGE_UUID,"Bronze damage",profile.upgraded(upgrade(stack)),AttributeModifier.Operation.ADDITION),
             Attributes.ATTACK_SPEED,new AttributeModifier(BASE_ATTACK_SPEED_UUID,"Bronze speed",profile.speed-4,AttributeModifier.Operation.ADDITION));
     }
     @Override public InteractionResultHolder<ItemStack> use(Level level,Player player,InteractionHand hand){
         ItemStack stack=player.getItemInHand(hand);
+        if(!BronzeTwinWeapon.permits(profile,hand==InteractionHand.MAIN_HAND,player.getOffhandItem().isEmpty())){
+            if(profile==BronzeProfile.HALBERD&&!level.isClientSide)player.displayClientMessage(Component.translatable("message.tnc.bronze_twin_offhand"),true);
+            return InteractionResultHolder.fail(stack);
+        }
         if(hand!=InteractionHand.MAIN_HAND||inFlight(stack,level)||!com.tnc.tnc.warrior.WarriorBronzeBridge.canThrow(player))return InteractionResultHolder.fail(stack);
         if(profile==BronzeProfile.HALBERD&&player.isShiftKeyDown())return new InteractionResultHolder<>(level.isClientSide?InteractionResult.SUCCESS:BronzeSummons.summon((net.minecraft.server.level.ServerPlayer)player),stack);
         if(profile!=BronzeProfile.DAGGER&&profile!=BronzeProfile.HALBERD)return InteractionResultHolder.fail(stack);
@@ -38,6 +42,10 @@ public final class BronzeWeaponItem extends SwordItem {
     }
     @Override public void inventoryTick(ItemStack stack,Level level,Entity owner,int slot,boolean selected){
         super.inventoryTick(stack,level,owner,slot,selected);
+        if(!level.isClientSide&&profile==BronzeProfile.HALBERD&&owner instanceof LivingEntity living){
+            if(living.getMainHandItem()==stack)BronzeTwinWeapon.updateAttributes(living);
+            else if(stack.hasTag())stack.getTag().remove(BronzeTwinWeapon.BLOCKED);
+        }
         if(!level.isClientSide&&stack.hasTag()&&stack.getTag().contains(FLIGHT)&&(!inFlight(stack,level)||stack.getTag().getLong(FLIGHT)>level.getGameTime()+60)){stack.getTag().remove(FLIGHT);stack.getTag().remove(FLIGHT_ID);}
     }
     @Override public boolean isValidRepairItem(ItemStack a,ItemStack b){return b.is(Items.COPPER_INGOT)||super.isValidRepairItem(a,b);}
@@ -46,6 +54,12 @@ public final class BronzeWeaponItem extends SwordItem {
         lines.add(Component.translatable("tooltip.tnc.bronze_combo").withStyle(ChatFormatting.GRAY));
         if(profile==BronzeProfile.DAGGER||profile==BronzeProfile.HALBERD)lines.add(Component.translatable("tooltip.tnc.bronze_throw").withStyle(ChatFormatting.GRAY));
         if(profile==BronzeProfile.HALBERD)lines.add(Component.translatable("tooltip.tnc.bronze_summon").withStyle(ChatFormatting.DARK_AQUA));
+        if(profile==BronzeProfile.HALBERD)lines.add(Component.translatable("tooltip.tnc.bronze_twin").withStyle(ChatFormatting.GOLD));
         if(level!=null&&inFlight(stack,level))lines.add(stack.getHoverName().copy().append(" ↩").withStyle(ChatFormatting.DARK_AQUA));
+    }
+    @Override public void initializeClient(java.util.function.Consumer<net.minecraftforge.client.extensions.common.IClientItemExtensions> consumer){
+        // Forge may invoke this from Item's constructor, before profile is assigned.
+        // Ordinary bronze models do not use a builtin/entity renderer.
+        consumer.accept(new com.tnc.tnc.bronze.client.BronzeTwinRenderer.Extension());
     }
 }

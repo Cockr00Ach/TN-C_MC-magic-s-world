@@ -41,8 +41,8 @@ class PuppetBondTest {
         var loaded=PuppetBondData.load(data.save(new CompoundTag()));assertTrue(loaded.owns(owner,puppet));assertFalse(loaded.available(owner,200));
         loaded.vanished(owner,puppet,350);var reloaded=PuppetBondData.load(loaded.save(new CompoundTag()));assertFalse(reloaded.available(owner,2749));assertTrue(reloaded.available(owner,2750));
     }
-    @Test void aiMovesAreActualExistingSpearWarriorSkills(){
+    @Test void aiMovesAreActualExistingSwordWarriorSkills(){
         var skills=com.tnc.tnc.warrior.WarriorBronzeBridge.puppetSkills();assertFalse(skills.isEmpty());
-        for(var skill:skills){assertEquals(com.tnc.tnc.warrior.WarriorWeaponFamily.SPEAR,skill.family());assertTrue(com.tnc.tnc.warrior.WarriorCombos.all().contains(skill));assertFalse(skill.ranged());}
+        for(var skill:skills){assertEquals(com.tnc.tnc.warrior.WarriorWeaponFamily.LONGSWORD,skill.family());assertTrue(com.tnc.tnc.warrior.WarriorCombos.all().contains(skill));assertFalse(skill.ranged());}
     }
 }

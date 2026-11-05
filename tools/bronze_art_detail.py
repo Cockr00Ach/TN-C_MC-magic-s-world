@@ -4,13 +4,13 @@ All previews rasterize the shipped cuboids, rotations, UV nets and texture PNGs.
 No game, concept image, additional combat controller or runtime texture generation.
 """
 from pathlib import Path
-import hashlib,json,math
+import copy,hashlib,json,math
 import numpy as np
 from PIL import Image,ImageDraw,ImageFont
 
 ROOT=Path(__file__).resolve().parents[1]
 RES=ROOT/'src/main/resources';ASSET=RES/'assets/tnc';PREVIEW=ROOT/'docs/previews'
-NAMES={'greatsword':'古铜大剑','spear':'古铜长枪','dao':'古铜大刀','dagger':'古铜匕首','halberd':'青铜战戟'}
+NAMES={'greatsword':'古铜大剑','spear':'古铜长枪','dao':'古铜大刀','dagger':'古铜匕首','halberd':'青铜双刃'}
 COLORS=[(106,91,56),(43,91,74),(174,153,100),(55,40,29),(133,113,68),(25,38,32),(151,130,80),(40,32,22)]
 SIDES=('down','up','west','north','east','south')
 INDICES=((5,4,0,1),(2,3,7,6),(0,4,7,3),(1,0,3,2),(5,1,2,6),(4,5,6,7))
@@ -153,6 +153,7 @@ class Weapon:
         for y in (19.4,22,24.6):self.relief(-5.1,y,.65)
 
 def weapon(kind):
+    if kind=='halberd':return twin_pair()
     w=Weapon()
     if kind in ('spear','halberd'):
         w.grip(-14.5,15.2,.46);w.mask_guard(14,1.65);w.blade(kind,17,31,2.6)
@@ -179,6 +180,84 @@ def weapon(kind):
     scale={'greatsword':.85,'spear':.9,'dao':.8,'dagger':.65,'halberd':.9}[kind]
     return {'credit':'TN-C quarter-unit cast bronze; tools/bronze_art_detail.py','textures':{'bronze':'tnc:item/bronze_atlas','particle':'tnc:item/bronze_atlas'},'gui_light':'front',
         'display':{'thirdperson_righthand':{'rotation':[0,-90,0],'translation':[0,2.5,1],'scale':[scale]*3},'thirdperson_lefthand':{'rotation':[0,90,0],'translation':[0,2.5,1],'scale':[scale]*3},'firstperson_righthand':{'rotation':[0,-90,15],'translation':[1,2,-2],'scale':[scale*.75]*3},'firstperson_lefthand':{'rotation':[0,90,-15],'translation':[1,2,-2],'scale':[scale*.75]*3},'gui':{'rotation':[0,0,-30],'translation':[0,-1,0],'scale':[.33 if kind in ('spear','halberd') else .4]*3},'ground':{'rotation':[0,0,0],'translation':[0,3,0],'scale':[.25]*3},'fixed':{'rotation':[0,0,0],'translation':[0,0,0],'scale':[.4]*3}},'elements':w.elements}
+
+def twin_component(which):
+    """Reference silhouette: a wide fullered sword and a recurved blade with a reverse tail."""
+    w=Weapon();w.grip(-8.8,2,.57)
+    if which=='main':
+        profile=[(4,-3.1,3.1),(5,-4.5,4.5),(6.2,-3.4,3.4),(8,-3,3),(11,-3.3,3.3),(19,-3.0,3.0),(24,-2.1,2.1),(29,-.65,.65),(31,-.035,.035)]
+    else:
+        profile=[(4,-1.5,1.9),(5.3,-2.9,3.1),(6.3,-1.6,3.35),(9,-1.5,4.0),(10.4,-2.6,4.45),(11.5,-1.25,4.65),(14,-1,5.1),(15.2,-1.9,5.2),(16.1,-.2,5.15),(20,.3,4.7),(23,-.1,3.7),(26,-1.1,1.8),(28,-2,.2),(30,-2.75,-2.69)]
+    def bounds(y):
+        for a,b in zip(profile,profile[1:]):
+            if a[0]<=y<=b[0]:
+                t=(y-a[0])/(b[0]-a[0]);return a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t
+        return profile[-1][1:]
+    for y in np.arange(4,profile[-1][0],.25):
+        left,right=bounds(float(y+.125));xs=[left]+[float(v) for v in np.arange(math.ceil(left/.5)*.5,right,.5)]+[right]
+        hole=which=='main' and 13<y<23
+        if hole:xs=sorted(set(xs+[-.2,.2]))
+        for xa,xb in zip(xs,xs[1:]):
+            if hole and xa>=-.201 and xb<=.201:continue
+            dist=min((xa+xb)/2-left,right-(xa+xb)/2);d=min(.64,.12+dist*.33)
+            w.box(xa,float(y),-d,xb,float(y+.25),d,2 if dist<.28 else 0,'forged_twin_bevel')
+        if which=='main' and y<27:
+            for x in ((-.33,.22) if hole else (-.1,)):w.box(x,float(y),-.69,x+.11,float(y+.25),.69,6,'fuller_shoulder')
+    # Angular horned guard and nested bronze fastening plates.
+    for i,width in enumerate((1.7,2.3,3.0,3.8,4.1,3.55)):
+        size=width if which=='main' else width*.72
+        w.box(-size,2+i*.25,-.77,size,2+(i+1)*.25,.77,0,'horned_guard')
+    for y,width in ((3.5,1.6),(3.75,1.4),(4,1.2),(4.25,1.0)):
+        w.box(-width,y,-.74,width,y+.25,.74,4,'socket_plate')
+    def pin(x,y,r=.29):
+        for i in range(8):
+            angle=i*math.pi/4
+            for z in (-.80,.68):w.box(x+math.cos(angle)*r-.08,y+math.sin(angle)*r-.08,z,x+math.cos(angle)*r+.08,y+math.sin(angle)*r+.08,z+.12,6,'bronze_pin_ring')
+        w.box(x-.15,y-.15,-.86,x+.15,y+.15,.86,2,'pin_head')
+    if which=='main':
+        for x,y in ((-2.6,4.7),(2.6,4.7),(0,3.15)):pin(x,y)
+        for y in (7,10,24):
+            for x in (-2.2,.6):w.relief(x,y,.68)
+        for i in range(8):
+            width=.88-abs(i-3.5)*.10
+            w.box(-width,-10.6+i*.22,-.53,width,-10.6+(i+1)*.22,.53,0,'pointed_cast_pommel')
+        pin(0,-9.6,.21)
+    else:
+        for x,y in ((-1.0,5.4),(-.6,10.7),(.7,16.0)):pin(x,y,.23)
+        for x,y in ((-.85,7),(0,12),(1.5,18)):w.relief(x,y,.65)
+        # The second blade has a short, sharp reverse spike at the pommel.
+        w.box(-.4,-9.6,-.45,.4,-8.7,.45,4,'tail_socket')
+        for y in np.arange(-15.5,-9.4,.25):
+            t=(y+15.5)/6.1;width=max(.055,1.2*t)
+            for xa in np.arange(-width,width,.35):w.box(float(xa),float(y),-.27,float(min(xa+.35,width)),float(y+.25),.27,2 if abs(xa)>width-.4 else 0,'reverse_tail_blade')
+        pin(0,-9.7,.22)
+    result=weapon('dagger');result['credit']='TN-C inseparable bronze twinblades; tools/bronze_art_detail.py'
+    # Both grips share the item pivot (8,8,8), so either hand clamps the actual handle.
+    for element in w.elements:
+        for key in ('from','to'):
+            x,y,z=element[key];element[key]=[round(8+(x-8)*.75,4),round(8+(y+3.3)*.68,4),round(8+(z-8)*.75,4)]
+    result['elements']=w.elements
+    result['display']={
+        'thirdperson_righthand':{'rotation':[0,-90,0],'translation':[0,0,0],'scale':[1,1,1]},
+        'thirdperson_lefthand':{'rotation':[0,90,0],'translation':[0,0,0],'scale':[1,1,1]},
+        'firstperson_righthand':{'rotation':[0,-90,15],'translation':[0,0,0],'scale':[.88]*3},
+        'firstperson_lefthand':{'rotation':[0,90,-15],'translation':[0,0,0],'scale':[.88]*3},
+        'gui':{'rotation':[0,0,-18],'translation':[0,-1,0],'scale':[.40]*3},
+        'ground':{'rotation':[0,0,0],'translation':[0,3,0],'scale':[.4]*3},
+        'fixed':{'rotation':[0,0,0],'translation':[0,0,0],'scale':[.4]*3}}
+    return result
+
+def twin_pair():
+    main=twin_component('main');off=twin_component('off')
+    for name,model in (('bronze_twin_main',main),('bronze_twin_off',off)):write(ASSET/f'models/item/{name}.json',model)
+    combined=copy.deepcopy(main);combined['parent']='builtin/entity';combined['elements']=[]
+    for offset,model in ((-4.8,main),(4.8,off)):
+        for original in model['elements']:
+            element=copy.deepcopy(original)
+            for key in ('from','to'):element[key][0]=round(element[key][0]+offset,4)
+            combined['elements'].append(element)
+    combined['display']['gui']['scale']=[.31]*3
+    return combined
 
 class Puppet:
     def __init__(self):self.parts=[];self.boxes=[]
@@ -375,7 +454,7 @@ def weapon_scene(kind,shift=(0,0,0),scale=1,flip_y=True):
 def puppet_scene(head_only=False,armed=True):
     data=json.loads((ASSET/'geo/entity/bronze_puppet_parts.json').read_text(encoding='utf-8'))
     tex=np.array(Image.open(ASSET/'textures/entity/bronze_puppet.png').convert('RGB'));items=[]
-    poses={'right_arm':[-7,0,12],'left_arm':[-10,5,-8]}
+    poses={'right_arm':[-7,0,12],'left_arm':[-7,0,-12]}
     for part in data['parts']:
         if head_only and part['name']!='head':continue
         matrix=rotation(poses.get(part['name'],[0,0,0]))
@@ -385,8 +464,9 @@ def puppet_scene(head_only=False,armed=True):
                 center=np.array(box[:3])+np.array(box[3:])/2;pts=(pts-center)@rotation(b['rotation']).T+center
             pts=pts@matrix.T+part['pivot'];items.append((pts,cube_uv(box,b['uv'],data['texel_density']),tex))
     if armed and not head_only:
-        hand=np.array([0,10.95,-.8])@rotation(poses['right_arm']).T+np.array([-6,2,0])
-        items+=weapon_scene('halberd',hand,.77)
+        for part,side,mesh in (('right_arm',-1,'twin_main'),('left_arm',1,'twin_off')):
+            hand=np.array([0,10.95,-.8])@rotation(poses[part]).T+np.array([side*6,2,0])
+            items+=weapon_scene(mesh,hand+np.array([0,8*.9,0]),.9)
     return items
 
 def raster(scene,width,height,azimuth=.34,pitch=.14,padding=.08):
@@ -442,7 +522,7 @@ def puppet_preview():
     count=sum(len(p['boxes']) for p in data['parts'])
     canvas=Image.new('RGB',(1900,1720),(24,29,27));d=ImageDraw.Draw(canvas)
     d.text((65,35),'青铜人偶 · 古铸战卫',font=font(49),fill=(208,192,149))
-    d.text((68,112),'怒目兽面  /  铸纹甲片  /  分节关节  /  握持青铜战戟',font=font(26),fill=(137,154,139))
+    d.text((68,112),'怒目兽面  /  铸纹甲片  /  分节关节  /  成套双刃',font=font(26),fill=(137,154,139))
     full=raster(puppet_scene(),1190,1420,.26,.10,.06);canvas.paste(full,(10,210))
     head=raster(puppet_scene(True,False),650,650,.40,.05,.11);canvas.paste(head,(1220,255))
     d.text((1270,960),'深眼窝 · 斜压怒眉',font=font(30),fill=(208,192,149))
@@ -453,11 +533,22 @@ def puppet_preview():
     d.text((1270,1400),f"{data['texture_width']} × {data['texture_height']} 独立 UV 材质",font=font(23),fill=(137,154,139))
     d.text((68,1650),'成品资源离线渲染 · 未启动游戏',font=font(23),fill=(137,154,139))
     for name in ('bronze_detail_puppet.png','bronze_puppet_finished.png'):canvas.save(PREVIEW/name)
+    canvas.save(PREVIEW/'bronze_twin_equipped.png')
     close=Image.new('RGB',(1800,1240),(24,29,27));dr=ImageDraw.Draw(close)
     dr.text((65,30),'青铜人偶 · 头部铸造细节',font=font(47),fill=(208,192,149))
     for i,az in enumerate((0,.50)):close.paste(raster(puppet_scene(True,False),850,1010,az,.04,.1),(30+i*890,170))
     close.save(PREVIEW/'bronze_detail_head.png')
     return canvas
+
+def twin_preview():
+    canvas=Image.new('RGB',(2000,1550),(24,29,27));d=ImageDraw.Draw(canvas)
+    d.text((65,35),'青铜双刃 · 四器合铸',font=font(49),fill=(208,192,149))
+    d.text((68,112),'宽刃长剑 × 弯刃尾锋  /  成套双持  /  副手必须为空',font=font(27),fill=(137,154,139))
+    for i,(kind,label) in enumerate((('twin_main','主手 · 宽刃长剑'),('twin_off','配对刃 · 弯刃尾锋'))):
+        scene=weapon_scene(kind);canvas.paste(raster(scene,900,1160,.32,.07,.08),(60+i*970,210))
+        d.text((505+i*970,1420),label,font=font(34),anchor='mm',fill=(208,192,149))
+    d.text((68,1500),'一个物品 · 统一强化与耐久 · 成品模型资源离线渲染',font=font(24),fill=(137,154,139))
+    PREVIEW.mkdir(parents=True,exist_ok=True);canvas.save(PREVIEW/'bronze_twin_finished.png')
 
 def main():
     weapon_atlas()

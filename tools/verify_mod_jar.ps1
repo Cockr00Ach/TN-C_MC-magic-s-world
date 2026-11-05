@@ -277,7 +277,9 @@ try {
         if ($manifestLine -like ('*' + $config.Name + '*')) { Ok "mixin config loaded: $($config.Name)" }
         else { Fail "mixin config NOT in jar manifest MixinConfigs: $($config.Name) (never loaded)" }
     }
-    $mixinSources = @(Get-ChildItem -LiteralPath (Join-Path $mixinSourceRoot 'com\tnc\tnc') -Recurse -Filter '*Mixin.java')
+    # Accessor/Invoker mixins are interfaces and commonly omit the Mixin suffix.
+    # Keep the same two-way declaration checks for all three source conventions.
+    $mixinSources = @(Get-ChildItem -LiteralPath (Join-Path $mixinSourceRoot 'com\tnc\tnc') -Recurse -Filter '*.java' | Where-Object { $_.BaseName -match '(Mixin|Invoker|Accessor)$' })
     $sourceClasses = @()
     foreach ($file in $mixinSources) {
         $rel = $file.FullName.Substring($mixinSourceRoot.Length + 1)

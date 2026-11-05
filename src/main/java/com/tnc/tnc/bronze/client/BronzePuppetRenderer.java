@@ -15,7 +15,7 @@ import net.minecraftforge.fml.common.Mod;
 public final class BronzePuppetRenderer extends HumanoidMobRenderer<BronzePuppetEntity,BronzePuppetModel> {
     private static final ResourceLocation TEXTURE=ResourceLocation.fromNamespaceAndPath("tnc","textures/entity/bronze_puppet.png");
     private static final ModelLayerLocation LAYER=new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath("tnc","bronze_puppet"),"main");
-    public BronzePuppetRenderer(EntityRendererProvider.Context context){super(context,new BronzePuppetModel(context.bakeLayer(LAYER)),.55f);}
+    public BronzePuppetRenderer(EntityRendererProvider.Context context){super(context,new BronzePuppetModel(context.bakeLayer(LAYER)),.55f);addLayer(new BronzeTwinLayer<>(this));}
     @Override public ResourceLocation getTextureLocation(BronzePuppetEntity entity){return TEXTURE;}
     @Override protected RenderType getRenderType(BronzePuppetEntity entity,boolean visible,boolean translucent,boolean glow){return RenderType.entityTranslucent(TEXTURE);}
     @Override protected float getFlipDegrees(BronzePuppetEntity entity){return 0;}
