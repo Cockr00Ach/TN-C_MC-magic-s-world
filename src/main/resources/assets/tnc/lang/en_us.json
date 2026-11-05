@@ -864,5 +864,13 @@
   "tooltip.tnc.bronze_upgrade": "Copper tempering: %s/10 (+%s%% base damage)",
   "tooltip.tnc.bronze_combo": "Warrior combos: existing Q / E / Z inputs, unlocks and cooldowns",
   "tooltip.tnc.bronze_throw": "Hold use to charge; release to throw. Full charge: 1.5s. Returns automatically.",
-  "tooltip.tnc.bronze_returning": "Dagger returning…"
+  "tooltip.tnc.bronze_returning": "Dagger returning…",
+  "block.tnc.warrior_hearth": "Warrior Hearth",
+  "block.tnc.warrior_anvil": "Warrior Anvil",
+  "block.tnc.warrior_quench_bath": "Quenching Bath",
+  "item.tnc.warrior_forge_hammer": "Forging Hammer",
+  "item.tnc.warrior_forge_billet": "Forging Workpiece",
+  "item.tnc.warrior_sword_grip": "Sword Grip",
+  "item.tnc.warrior_long_grip": "Long Grip",
+  "item.tnc.warrior_mace_grip": "Mace Grip"
 }

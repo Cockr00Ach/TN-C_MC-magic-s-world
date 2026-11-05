@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "S S",
+    "S S",
+    "SSS"
+  ],
+  "key": {
+    "S": {
+      "item": "minecraft:polished_deepslate"
+    }
+  },
+  "result": {
+    "item": "tnc:warrior_quench_bath",
+    "count": 1
+  }
+}

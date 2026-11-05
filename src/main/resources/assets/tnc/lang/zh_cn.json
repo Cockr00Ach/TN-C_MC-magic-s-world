@@ -1018,5 +1018,13 @@
   "tooltip.tnc.bronze_upgrade": "铜铸强化：%s/10（基础攻击 +%s%%）",
   "tooltip.tnc.bronze_combo": "战士连招：沿用 Q / E / Z、解锁与冷却规则",
   "tooltip.tnc.bronze_throw": "按住右键蓄力，松开投掷；1.5 秒满蓄，自动回手",
-  "tooltip.tnc.bronze_returning": "匕首回收中…"
+  "tooltip.tnc.bronze_returning": "匕首回收中…",
+  "block.tnc.warrior_hearth": "赤膛炉 · 手工锻造",
+  "block.tnc.warrior_anvil": "百锻砧",
+  "block.tnc.warrior_quench_bath": "淬锋槽",
+  "item.tnc.warrior_forge_hammer": "锻造锤",
+  "item.tnc.warrior_forge_billet": "锻造工件",
+  "item.tnc.warrior_sword_grip": "剑柄",
+  "item.tnc.warrior_long_grip": "长柄",
+  "item.tnc.warrior_mace_grip": "锤柄"
 }

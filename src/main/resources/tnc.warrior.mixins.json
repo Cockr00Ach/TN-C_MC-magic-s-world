@@ -10,5 +10,8 @@
   "injectors": {
     "defaultRequire": 1
   },
-  "refmap": "tnc.warrior.refmap.json"
+  "refmap": "tnc.warrior.refmap.json",
+  "mixins": [
+    "ForgeDurabilityMixin"
+  ]
 }
