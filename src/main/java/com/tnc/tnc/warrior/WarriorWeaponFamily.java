@@ -74,7 +74,7 @@ public enum WarriorWeaponFamily {
 
     /** 拿着这件物品算哪个家族；空手/非武器返回 {@code null}。 */
     public static WarriorWeaponFamily of(ItemStack stack) {
-        if (stack == null || stack.isEmpty()) {
+        if (stack == null || stack.isEmpty() || stack.getItem() instanceof com.tnc.tnc.bronze.BronzeWeaponItem && stack.hasTag() && stack.getTag().contains(com.tnc.tnc.bronze.BronzeWeaponItem.FLIGHT)) {
             return null;
         }
         // 标签先判：重剑/锤也可能是 SwordItem

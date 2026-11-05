@@ -1000,5 +1000,13 @@
   "item.tnc.moon_arrow": "弦月箭",
   "item.tnc.storm_arrow": "逐风箭",
   "item.tnc.ember_arrow": "烬羽箭",
-  "entity.tnc.ornate_arrow": "精工箭"
+  "entity.tnc.ornate_arrow": "精工箭",
+  "item.tnc.bronze_greatsword": "古铜大剑",
+  "item.tnc.bronze_spear": "古铜长枪",
+  "item.tnc.bronze_dao": "古铜大刀",
+  "item.tnc.bronze_dagger": "古铜匕首",
+  "tooltip.tnc.bronze_upgrade": "铜铸强化：%s/10（基础攻击 +%s%%）",
+  "tooltip.tnc.bronze_combo": "战士连招：沿用 Q / E / Z、解锁与冷却规则",
+  "tooltip.tnc.bronze_throw": "按住右键蓄力，松开投掷；1.5 秒满蓄，自动回手",
+  "tooltip.tnc.bronze_returning": "匕首回收中…"
 }
