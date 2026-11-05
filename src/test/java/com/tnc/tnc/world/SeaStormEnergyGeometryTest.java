@@ -6,20 +6,20 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SeaStormEnergyGeometryTest {
-    private final SeaGyreLayout.Gyre storm=new SeaGyreLayout.Gyre(0,0,86,.7,1);
+    private final SeaGyreLayout.Gyre storm=new SeaGyreLayout.Gyre(0,0,38,.7,1);
 
     @Test void allRibbonsStayBelowIslandIncludingTheirActualThickness(){
         for(var d:SeaTornadoGeometry.Detail.values())for(double time:new double[]{0,13,125}){
             int[] count={0};double[] bounds={0,0};
             SeaStormEnergyGeometry.build(storm,time,d,1,(x,y,z,u,v,rgb,alpha,nx,ny,nz)->{
                 assertTrue(Double.isFinite(x+y+z+u+v+nx+ny+nz));
-                assertTrue(alpha>=0&&alpha<=255);assertTrue(y>=0&&49.05+y<170);
-                assertTrue(Math.hypot(x,z)<220);assertTrue(nx*nx+ny*ny+nz*nz>.99);
+                assertTrue(alpha>=0&&alpha<=255);assertTrue(y>=0&&49.05+y<124);
+                assertTrue(Math.hypot(x,z)<105);assertTrue(nx*nx+ny*ny+nz*nz>.99);
                 bounds[0]=Math.max(bounds[0],Math.hypot(x,z));bounds[1]=Math.max(bounds[1],y);count[0]++;
             });
             assertEquals(SeaStormEnergyGeometry.quads(d)*4,count[0]);
-            assertTrue(bounds[0]>150,"Mana turbulence occupies the whole sea around the black core");
-            assertTrue(bounds[1]>90,"Ribbons must actually climb through the 3D volume");
+            assertTrue(bounds[0]>65,"Mana turbulence still surrounds the smaller black core");
+            assertTrue(bounds[1]>45,"Ribbons must actually climb through the 3D volume");
         }
     }
     @Test void travelingFlowIsDeterministicAndMovesWithoutChangingItsWorldAnchor(){

@@ -14,7 +14,7 @@ public final class SeaTornadoLayout {
             var random=new Random(((long)gx*341873128712L)^((long)gz*132897987541L)^0x53544f524dL);
             double sx=gx*SPACING+SPACING*.5+(random.nextDouble()-.5)*12,sz=gz*SPACING+SPACING*.5+(random.nextDouble()-.5)*12;
             if(Math.hypot(sx-x,sz-z)>SeaTornadoGeometry.VIEW_DISTANCE)continue;
-            double radius=random.nextDouble()<.22?60+random.nextDouble()*16:36+random.nextDouble()*22;
+            double radius=random.nextDouble()<.22?30+random.nextDouble()*8:20+random.nextDouble()*10;
             out.add(new SeaGyreLayout.Gyre(sx,sz,radius,random.nextDouble()*Math.PI*2,random.nextBoolean()?1:-1));
         }
         out.sort(Comparator.comparingDouble(g->Math.hypot(g.x()-x,g.z()-z)));

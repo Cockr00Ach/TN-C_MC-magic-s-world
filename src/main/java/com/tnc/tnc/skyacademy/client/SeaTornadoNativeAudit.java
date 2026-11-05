@@ -15,6 +15,8 @@ public final class SeaTornadoNativeAudit {
     private static long started;
     private static volatile boolean ready;
     private static volatile SeaGyreLayout.Gyre storm;
+    private static volatile BlockPos shore;
+    private static volatile BlockPos standing;
     private static final List<String> images=new ArrayList<>();
     private static final List<Map<String,Object>> cameras=new ArrayList<>();
     private static Path output(){return Path.of(System.getProperty("tnc.dungeonAuditOutput"));}
@@ -24,7 +26,7 @@ public final class SeaTornadoNativeAudit {
         if(!mc.gameDirectory.toPath().toAbsolutePath().normalize().equals(Path.of("D:/TNC-Audits/dungeons-20261019").toAbsolutePath().normalize()))
             throw new IllegalStateException("Separate prepared audit save required");
         if(!configured){
-            configured=true;started=System.nanoTime();Files.createDirectories(output());mc.options.fov().set(90);mc.options.renderDistance().set(10);mc.options.hideGui=true;
+            configured=true;started=System.nanoTime();Files.createDirectories(output());mc.options.fov().set(70);mc.options.renderDistance().set(8);mc.options.hideGui=true;
             mc.options.setCameraType(CameraType.FIRST_PERSON);
         }
         if(System.nanoTime()-started>180_000_000_000L){Files.writeString(output().resolve("sea-tornado-failed.txt"),"Three-angle audit did not complete within 180 seconds");mc.stop();return;}
@@ -35,6 +37,9 @@ public final class SeaTornadoNativeAudit {
             report.put("framebuffer_width",mc.getWindow().getWidth());report.put("framebuffer_height",mc.getWindow().getHeight());
             report.put("f8",true);report.put("storm",storm);report.put("column_height",SeaTornadoGeometry.height(storm));
             report.put("max_visible_storms",SeaTornadoGeometry.MAX_VISIBLE);
+            report.put("shore",List.of(shore.getX(),shore.getY(),shore.getZ()));
+            report.put("standing",List.of(standing.getX(),standing.getY(),standing.getZ()));
+            report.put("clear_water_blocks",SeaStormCoast.CLEAR_WATER);report.put("fov",70);report.put("render_distance",8);
             report.put("cameras",cameras);
             Files.writeString(output().resolve("sea-tornado-report.json"),new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(report));
             mc.stop();return;
@@ -46,17 +51,21 @@ public final class SeaTornadoNativeAudit {
                 var server=mc.getSingleplayerServer();var player=server.getPlayerList().getPlayers().get(0);
                 var sea=com.tnc.tnc.world.SkyIslandWorlds.island(server);
                 com.tnc.tnc.journey.JourneyData.get(server).player(player.getUUID()).putBoolean("Named",true);
+                if(shore==null){
+                    shore=findShore(sea);int x=shore.getX()-3,z=shore.getZ();
+                    standing=new BlockPos(x,sea.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,x,z),z);
+                }
                 if(storm==null){
-                    for(var g:SeaTornadoLayout.near(650,0)){
+                    for(var g:SeaTornadoLayout.near(shore.getX(),shore.getZ())){
+                        if(!SeaStormCoast.offshore(g)||g.x()<shore.getX()+100)continue;
                         var at=BlockPos.containing(g.x(),48,g.z());
                         if(sea.getFluidState(at).is(SkyhavenContent.SOURCE)&&sea.getHeight(Heightmap.Types.WORLD_SURFACE,at.getX(),at.getZ())<=51){storm=g;break;}
                     }
                     if(storm==null)throw new IllegalStateException("No genuine exposed abyssal sea center for audit");
                 }
                 player.setGameMode(GameType.SPECTATOR);sea.setWeatherParameters(12000,0,false,false);server.overworld().setDayTime(phase==1?18000:6000);
-                if(phase==0)player.teleportTo(sea,storm.x()-116,177,storm.z()-116,-45,24);
-                else if(phase==1)player.teleportTo(sea,storm.x()+116,177,storm.z()-116,45,24);
-                else player.teleportTo(sea,storm.x(),74,storm.z()-105,0,-15);
+                if(phase<2)player.teleportTo(sea,standing.getX()+.5,standing.getY(),standing.getZ()+.5,-90,26);
+                else player.teleportTo(sea,storm.x(),67,storm.z()-95,0,-7);
                 ready=true;
             });return;
         }
@@ -70,5 +79,24 @@ public final class SeaTornadoNativeAudit {
             catch(Exception ex){throw new RuntimeException(ex);}finally{saving=false;}
         });
         phase++;prepared=false;
+    }
+    private static BlockPos findShore(net.minecraft.server.level.ServerLevel sea){
+        BlockPos best=null;
+        for(int z=-96;z<=96;z+=8)for(int x=270;x>=120;x-=2){
+            // Level.getHeight returns the minimum height for absent chunks. This
+            // explicit preparation is only inside the guarded isolated audit;
+            // the player's sea renderer never requests a chunk.
+            sea.getChunkAt(new BlockPos(x,0,z));
+            int y=sea.getHeight(Heightmap.Types.WORLD_SURFACE,x,z);
+            if(y<170||y>190)continue;
+            sea.getChunkAt(new BlockPos(x+12,0,z));
+            if(sea.getHeight(Heightmap.Types.WORLD_SURFACE,x+12,z)>=160)continue;
+            var floor=new BlockPos(x,y-1,z);var state=sea.getBlockState(floor);
+            if(!state.getFluidState().isEmpty()||state.getCollisionShape(sea,floor).isEmpty())continue;
+            if(best==null||x>best.getX()||(x==best.getX()&&Math.abs(z)<Math.abs(best.getZ())))best=new BlockPos(x,y,z);
+            break;
+        }
+        if(best==null)throw new IllegalStateException("No genuine walkable east island shore in the isolated authored save");
+        return best;
     }
 }

@@ -19,12 +19,12 @@ public final class SeaTornadoGeometry {
     private static final double TAU=Math.PI*2;
     private SeaTornadoGeometry(){}
 
-    /** Sea surface is Y49; even the animated shoulder stays below the island's Y174 floor. */
-    public static double height(SeaGyreLayout.Gyre g){return 66+42*(.5+.5*Math.sin(g.phase()*1.73));}
+    /** Low offshore funnels leave roughly sixty blocks of clear air below the island. */
+    public static double height(SeaGyreLayout.Gyre g){return 42+20*(.5+.5*Math.sin(g.phase()*1.73));}
     public static double radius(SeaGyreLayout.Gyre g,double t){
         t=Math.max(0,Math.min(1,t));
         double body=.5+.5*Math.sin(g.phase()*2.31+1.4);
-        return g.radius()*(.08+.18*body+(.92+.20*body)*Math.pow(t,.90+.60*(1-body)));
+        return g.radius()*(.065+.09*body+(.88+.12*body)*Math.pow(t,.85+.50*(1-body)));
     }
     /** Only the closest two use the full mesh, even when ten storms share the view. */
     public static Detail detail(int nearestRank,double distance){
@@ -88,13 +88,13 @@ public final class SeaTornadoGeometry {
     }
     private static void cloud(SeaGyreLayout.Gyre g,double time,double q,double a,int cap,double opacity,Sink sink){
         double spin=time*g.direction()*.38+g.phase();
-        double r=g.radius()*(cap==0?.22+q*1.4:.70+q*.65);
+        double r=g.radius()*(cap==0?.22+q*1.4:.50+q*.55);
         r*=1+.13*Math.sin(a*3+spin+q*5)+.08*Math.sin(a*5-spin*.7-q*7);
         double y=cap==0?height(g)*.09*Math.pow(1-q,1.5)+Math.sin(a*3+spin+q*4)*7*q*Math.sin(Math.PI*q)
-                :height(g)*(.92+Math.sin(q*Math.PI/2)*.13)+Math.sin(a*4-spin+q*8)*4*q;
+                :height(g)*(.91+Math.sin(q*Math.PI/2)*.08)+Math.sin(a*4-spin+q*8)*1.6*q;
         double fade=Math.pow(1-q,.70)*Math.min(1,q*9+.35);
         if(cap==0)fade*=.30+.70*Math.pow(.5+.5*Math.sin(a*3+spin*2-q*5),2);
-        sink.vertex(Math.cos(a)*r,Math.max(.02,y),Math.sin(a)*r,(float)(a/TAU*2+spin*.08),(float)(q*2-time*.06),cap==0?0x03050b:0x050710,(int)(225*fade*opacity),Math.cos(a)*.3,1,Math.sin(a)*.3);
+        sink.vertex(Math.cos(a)*r,Math.max(.02,y),Math.sin(a)*r,(float)(a/TAU*2+spin*.08),(float)(q*2-time*.06),cap==0?0x03050b:0x050710,(int)((cap==0?225:160)*fade*opacity),Math.cos(a)*.3,1,Math.sin(a)*.3);
     }
     private static void helix(SeaGyreLayout.Gyre g,double time,int arm,double t,int edge,double opacity,Sink sink){
         double a=g.phase()+time*g.direction()*.72+arm*TAU/4+t*TAU*2.4+edge*.30;

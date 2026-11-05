@@ -151,7 +151,7 @@ public final class SeaStormEnergyGeometry {
     }
     private static void vertex(double x,double y,double z,float u,float v,int rgb,int alpha,SeaTornadoGeometry.Sink sink){
         // Include the ribbon's actual thickness in the bound, not just its centerline.
-        sink.vertex(x,Math.max(.15,Math.min(119.5,y)),z,u,v,rgb,alpha,0,1,0);
+        sink.vertex(x,Math.max(.15,Math.min(74.5,y)),z,u,v,rgb,alpha,0,1,0);
     }
     private static double fract(double value){return value-Math.floor(value);}
 }

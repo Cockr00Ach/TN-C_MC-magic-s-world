@@ -5,17 +5,17 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SeaTornadoGeometryTest {
-    private final SeaGyreLayout.Gyre storm=new SeaGyreLayout.Gyre(0,0,56,.7,1);
-    @Test void volumeIsBroadAndStaysBelowIslandFloor(){
-        assertTrue(SeaTornadoGeometry.height(storm)>=80);
-        assertTrue(SeaTornadoGeometry.radius(storm,1)>SeaTornadoGeometry.radius(storm,0)*3);
+    private final SeaGyreLayout.Gyre storm=new SeaGyreLayout.Gyre(0,0,30,.7,1);
+    @Test void lowerNarrowerFunnelLeavesItsSilhouetteVisibleFromTheIsland(){
+        assertTrue(SeaTornadoGeometry.height(storm)>=42&&SeaTornadoGeometry.height(storm)<=62);
+        assertTrue(SeaTornadoGeometry.radius(storm,1)>SeaTornadoGeometry.radius(storm,0)*5);
         double[] bounds={Double.POSITIVE_INFINITY,Double.NEGATIVE_INFINITY,0};
         SeaTornadoGeometry.build(storm,10,SeaTornadoGeometry.Detail.NEAR,1,(x,y,z,u,v,rgb,a,nx,ny,nz)->{
             bounds[0]=Math.min(bounds[0],y);bounds[1]=Math.max(bounds[1],y);bounds[2]=Math.max(bounds[2],Math.hypot(x,z));
         });
-        assertTrue(bounds[1]-bounds[0]>80,"Cannot collapse to a water-plane spiral");
-        assertTrue(49.05+bounds[1]<170,"Leave clearance below the Y174 island floor");
-        assertTrue(bounds[2]>75,"Wide billowing storm canopy");
+        assertTrue(bounds[1]-bounds[0]>40,"Cannot collapse to a water-plane spiral");
+        assertTrue(49.05+bounds[1]<115,"Leave roughly sixty blocks of clear air below the island");
+        assertTrue(bounds[2]>25&&bounds[2]<65,"A narrow funnel, not a broad black lid");
     }
     @Test void allVerticesAreFiniteDarkAndWithinStrictQuadBudget(){
         for(var detail:SeaTornadoGeometry.Detail.values()){
@@ -23,7 +23,7 @@ class SeaTornadoGeometryTest {
             SeaTornadoGeometry.build(storm,100,detail,1,(x,y,z,u,v,rgb,a,nx,ny,nz)->{
                 assertTrue(Double.isFinite(x+y+z+u+v+nx+ny+nz));assertTrue(a>=0&&a<=255);
                 assertTrue((rgb>>16&255)<40&&(rgb>>8&255)<40&&(rgb&255)<50);
-                assertTrue(y>=0&&49.05+y<170);assertTrue(Math.hypot(x,z)<145);count[0]++;
+                assertTrue(y>=0&&49.05+y<115);assertTrue(Math.hypot(x,z)<65);count[0]++;
             });
             assertEquals(detail.quads()*4,count[0]);assertTrue(count[0]<27000);
         }
@@ -47,7 +47,8 @@ class SeaTornadoGeometryTest {
         var a=SeaTornadoLayout.near(127,60);var b=SeaTornadoLayout.near(129,60);
         assertTrue(a.stream().filter(b::contains).count()>=20);assertEquals(a,SeaTornadoLayout.near(127,60));
         for(var g:a)for(var h:a)if(g!=h)assertTrue(Math.hypot(g.x()-h.x(),g.z()-h.z())>=96);
-        assertTrue(a.stream().anyMatch(g->g.radius()>60),"The storm bank includes dominant wide vortices");
+        assertTrue(a.stream().anyMatch(g->g.radius()>30),"The storm bank still includes wider vortices");
+        for(var g:a)assertTrue(g.radius()>=20&&g.radius()<=38);
     }
     @Test void passingNearestRankBoundaryRetainsAlreadyVisibleStorms(){
         var slots=new SeaStormVisibility();
@@ -58,11 +59,11 @@ class SeaTornadoGeometryTest {
     @Test void fatAndSlenderStormsBothFitBelowTheIslandAcrossAnimation(){
         double minRatio=Double.POSITIVE_INFINITY,maxRatio=0;
         for(int i=0;i<12;i++){
-            var g=new SeaGyreLayout.Gyre(0,0,36+i*40./11,i*Math.PI/6,i%2==0?1:-1);
+            var g=new SeaGyreLayout.Gyre(0,0,20+i*18./11,i*Math.PI/6,i%2==0?1:-1);
             double ratio=2*SeaTornadoGeometry.radius(g,.75)/SeaTornadoGeometry.height(g);
             minRatio=Math.min(minRatio,ratio);maxRatio=Math.max(maxRatio,ratio);
             for(double time:new double[]{0,13,90})SeaTornadoGeometry.build(g,time,SeaTornadoGeometry.Detail.FAR,1,(x,y,z,u,v,rgb,a,nx,ny,nz)->{
-                assertTrue(49.05+y<170,"Animated shoulder must remain below the island");
+                assertTrue(49.05+y<115,"Animated shoulder must remain well below the island");
             });
         }
         assertTrue(maxRatio>minRatio*1.7,"Storms need visibly distinct body proportions");

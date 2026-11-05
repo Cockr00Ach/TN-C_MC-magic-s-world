@@ -9,7 +9,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.joml.Matrix4f;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Comparator;
 
@@ -18,14 +17,13 @@ import java.util.Comparator;
 public final class SkyhavenSeaVision {
     private static final MultiBufferSource.BufferSource BUFFER=MultiBufferSource.immediate(new BufferBuilder(2097152));
     private static java.lang.ref.WeakReference<net.minecraft.client.multiplayer.ClientLevel> world=new java.lang.ref.WeakReference<>(null);
-    private static List<SeaGyreLayout.Gyre> visible=List.of();
     private static final SeaStormVisibility VISIBILITY=new SeaStormVisibility();
     private static final boolean AUDIT=Boolean.getBoolean("tnc.skyhavenTornadoAudit");
-    private static int lastStorms,lastDrawn,lastQuads,lastLinks;
+    private static int lastStorms,lastDrawn,lastQuads,lastLinks,lastBackground;
     private static long samples;
     private static double totalMillis,maxMillis;
     public static Map<String,Object> auditSnapshot(){
-        return Map.of("visible_storms",lastStorms,"drawn_storms",lastDrawn,"quads",lastQuads,"links",lastLinks,
+        return Map.of("visible_storms",lastStorms,"drawn_storms",lastDrawn,"quads",lastQuads,"links",lastLinks,"unloaded_sea_candidates",lastBackground,
                 "sample_frames",samples,"mean_effect_cpu_ms",samples==0?0:totalMillis/samples,"max_effect_cpu_ms",maxMillis);
     }
     @SubscribeEvent public static void render(RenderLevelStageEvent event){
@@ -33,24 +31,29 @@ public final class SkyhavenSeaVision {
         var mc=Minecraft.getInstance();
         if(mc.level==null||!mc.level.dimension().equals(SkyhavenContent.KEY)
                 ||!com.tnc.tnc.mana.sight.client.ManaSightClient.enabled()){
-            visible=List.of();VISIBILITY.clear();world.clear();return;
+            VISIBILITY.clear();world.clear();return;
         }
-        if(world.get()!=mc.level){visible=List.of();VISIBILITY.clear();world=new java.lang.ref.WeakReference<>(mc.level);}
+        if(world.get()!=mc.level){VISIBILITY.clear();world=new java.lang.ref.WeakReference<>(mc.level);}
         long began=AUDIT?System.nanoTime():0;
         var camera=event.getCamera().getPosition();
         var eligible=new ArrayList<SeaGyreLayout.Gyre>();
+        int background=0;
         for(var g:SeaTornadoLayout.near(camera.x,camera.z)){
+            if(!SeaStormCoast.offshore(g))continue;
             var at=BlockPos.containing(g.x(),48,g.z());
-            if(!mc.level.hasChunkAt(at)||!mc.level.getFluidState(at).is(SkyhavenContent.SOURCE))continue;
-            if(mc.level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE,at.getX(),at.getZ())>51)continue;
+            // Outside the fixed authored rectangle this realm generates flat abyssal
+            // sea. Its distant background may render at 8 chunks without requesting
+            // any extra chunks. Loaded columns still respect actual player buildings.
+            // ClientLevel.hasChunk is always true. Query the actual cache with
+            // create=false so a missing packet is not mistaken for a dry column.
+            var loaded=mc.level.getChunkSource().getChunk(at.getX()>>4,at.getZ()>>4,net.minecraft.world.level.chunk.ChunkStatus.FULL,false);
+            if(loaded!=null){
+                if(!mc.level.getFluidState(at).is(SkyhavenContent.SOURCE))continue;
+                if(mc.level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE,at.getX(),at.getZ())>51)continue;
+            }else background++;
             eligible.add(g);
         }
-        // A previously confirmed sea column may finish fading after its source chunk
-        // unloads. This uses cached knowledge only, never requests a far chunk.
-        for(var g:visible)if(!eligible.contains(g)&&Math.hypot(g.x()-camera.x,g.z()-camera.z)<SeaTornadoGeometry.VIEW_DISTANCE
-                &&!mc.level.hasChunkAt(BlockPos.containing(g.x(),48,g.z())))eligible.add(g);
         var storms=VISIBILITY.update(eligible,camera.x,camera.z,mc.level.getGameTime()+event.getPartialTick());
-        visible=storms;
         var ordered=new ArrayList<>(storms);
         ordered.sort(Comparator.comparingDouble(g->Math.hypot(g.x()-camera.x,g.z()-camera.z)));
         double seconds=(mc.level.getGameTime()+event.getPartialTick())/20.;
@@ -66,8 +69,8 @@ public final class SkyhavenSeaVision {
         // the distant glow; drawing all glows last would turn the sea into a wire cage.
         for(int i=ordered.size()-1;i>=0;i--){
             var g=ordered.get(i);double distance=Math.hypot(g.x()-camera.x,g.z()-camera.z);
-            double extent=g.radius()*2.55+6;
-            if(!event.getFrustum().isVisible(new net.minecraft.world.phys.AABB(g.x()-extent,49,g.z()-extent,g.x()+extent,169,g.z()+extent)))continue;
+            double extent=SeaStormCoast.footprint(g);
+            if(!event.getFrustum().isVisible(new net.minecraft.world.phys.AABB(g.x()-extent,49,g.z()-extent,g.x()+extent,124,g.z()+extent)))continue;
             drawn++;
             var matrix=new Matrix4f().translation((float)(g.x()-camera.x),(float)(49.05-camera.y),(float)(g.z()-camera.z));
             var detail=SeaTornadoGeometry.detail(i,distance);
@@ -83,6 +86,7 @@ public final class SkyhavenSeaVision {
         for(int i=0;i<ordered.size();i++)for(int j=i+1;j<ordered.size();j++){
             if(!SeaStormEnergyGeometry.linked(ordered,i,j))continue;
             var a=ordered.get(i);var b=ordered.get(j);
+            if(!SeaStormCoast.linkOffshore(a,b))continue;
             if(!event.getFrustum().isVisible(new net.minecraft.world.phys.AABB(Math.min(a.x(),b.x())-30,49,Math.min(a.z(),b.z())-30,
                     Math.max(a.x(),b.x())+30,110,Math.max(a.z(),b.z())+30)))continue;
             double alpha=Math.min(opacity(a,Math.hypot(a.x()-camera.x,a.z()-camera.z),mc.level.getGameTime()+event.getPartialTick()),
@@ -96,7 +100,7 @@ public final class SkyhavenSeaVision {
             com.mojang.blaze3d.systems.RenderSystem.setShaderFogEnd(previousFogEnd);
         }
         if(AUDIT){
-            lastStorms=ordered.size();lastDrawn=drawn;lastQuads=quads;lastLinks=links;
+            lastStorms=ordered.size();lastDrawn=drawn;lastQuads=quads;lastLinks=links;lastBackground=background;
             double millis=(System.nanoTime()-began)/1_000_000.;samples++;totalMillis+=millis;maxMillis=Math.max(maxMillis,millis);
         }
     }
