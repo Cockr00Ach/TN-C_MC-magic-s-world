@@ -441,6 +441,279 @@ public final class EarthCastFx {
                 at.add(x).add(z), at.subtract(x).add(z), r * 1.05F, g, b * .95F, alpha);
     }
 
+    /** 暗色薄盒（顶面 + 四面），给翻起来的土板、隆起用。 */
+    private static void darkBox(VertexConsumer out, Matrix4f pose, Vec3 center, double hx, double hy,
+                                double hz, double yaw, float r, float g, float b, float alpha) {
+        double c = Math.cos(yaw), s = Math.sin(yaw);
+        Vec3 ex = new Vec3(c * hx, 0, s * hx);
+        Vec3 ez = new Vec3(-s * hz, 0, c * hz);
+        Vec3 up = new Vec3(0, hy, 0);
+        Vec3 a0 = center.subtract(ex).subtract(ez), a1 = center.add(ex).subtract(ez),
+                a2 = center.add(ex).add(ez), a3 = center.subtract(ex).add(ez);
+        darkQuad(out, pose, a0.add(up), a1.add(up), a2.add(up), a3.add(up), r, g, b, alpha);
+        darkQuad(out, pose, a0.subtract(up), a1.subtract(up), a1.add(up), a0.add(up),
+                r * .66F, g * .66F, b * .66F, alpha);
+        darkQuad(out, pose, a1.subtract(up), a2.subtract(up), a2.add(up), a1.add(up),
+                r * .76F, g * .76F, b * .76F, alpha);
+        darkQuad(out, pose, a2.subtract(up), a3.subtract(up), a3.add(up), a2.add(up),
+                r * .66F, g * .66F, b * .66F, alpha);
+        darkQuad(out, pose, a3.subtract(up), a0.subtract(up), a0.add(up), a3.add(up),
+                r * .76F, g * .76F, b * .76F, alpha);
+    }
+
+    // ---------------------------------------------------------------- 裂缝几何
+
+    /** 裂缝折线的点数：7 个点 / 6 段，够了；再多只是喂 GPU。 */
+    static final int CRACK_POINTS = 7;
+
+    /**
+     * 一条裂缝的折线：不是"绕圈抖动"，而是带惯性的随机游走 —— 每一段方向只偏一点，
+     * 偶尔来一个大折角，这样看起来才像地面被撕开，而不是一条飘着的丝带。
+     * 半径用加速曲线（先慢后快）往脚下收，缝尖看起来是"爬"过来的。
+     */
+    static Vec3[] crackPath(int i, int cracks, double start, double tip, int tier) {
+        Vec3[] pts = new Vec3[CRACK_POINTS];
+        double base = crackAngle(i, cracks);
+        double drift = (hash(i, 131) - .5) * .34;
+        for (int s = 0; s < CRACK_POINTS; s++) {
+            double t = s / (CRACK_POINTS - 1.0);
+            double ease = t * t * (.45 + .55 * t);
+            double r = start + (tip - start) * ease;
+            double jag = (hash(i * 137 + s, 11) - .5) * (.30 + .09 * tier);
+            drift = drift * .58 + jag * .52;
+            double a = base + drift * (.5 + 1.15 * t) + (hash(i * 17 + s, 5) - .5) * .07;
+            double y = .012 + hash(i * 13 + s, 7) * .009;
+            pts[s] = new Vec3(Math.cos(a) * r, y, Math.sin(a) * r);
+        }
+        return pts;
+    }
+
+    /** 缝宽：越靠缝尖越细，再乘一个逐点抖动，避免"等宽带子"。 */
+    static double crackWidth(int i, int s, int tier) {
+        double t = s / (CRACK_POINTS - 1.0);
+        double taper = 1 - .70 * t;
+        double wobble = .68 + .64 * hash(i * 53 + s, 29);
+        return (.048 + .011 * tier) * taper * wobble;
+    }
+
+    private static Vec3 acrossOf(Vec3 a, Vec3 b) {
+        Vec3 d = b.subtract(a);
+        if (d.lengthSqr() < 1e-9) {
+            return new Vec3(0, 0, 1);
+        }
+        Vec3 c = d.normalize().cross(UP);
+        return c.lengthSqr() < 1e-9 ? new Vec3(0, 0, 1) : c.normalize();
+    }
+
+    /**
+     * 画一条折线裂缝。暗部：缝底柔黑（地下是空的）+ 缝芯 + 两侧翻起的土唇 + 卡在缝里的碎石；
+     * 亮部只画缝内一条偏侧的余烬边 —— 不描外轮廓，因为描边最像"贴纸"。
+     */
+    private static void crackSegments(VertexConsumer out, Matrix4f pose, boolean dark, Vec3[] pts,
+                                      double[] w, int tier, float glow, float mul) {
+        for (int s = 0; s + 1 < pts.length; s++) {
+            Vec3 a = pts[s], b = pts[s + 1];
+            double width = (w[s] + w[s + 1]) * .5;
+            if (dark) {
+                darkStroke(out, pose, UP, a.add(0, -.008, 0), b.add(0, -.008, 0), width * 1.75,
+                        .030F, .022F, .016F, .55F * mul);
+                darkStroke(out, pose, UP, a, b, width, DEEP_R, DEEP_G, DEEP_B, .95F * mul);
+            } else {
+                double t = s / (pts.length - 1.0);
+                Vec3 across = acrossOf(a, b).scale(width * .42);
+                Vec3 a2 = a.add(across).add(0, .003, 0);
+                Vec3 b2 = b.add(across).add(0, .003, 0);
+                WaterGeometry.stroke(out, pose, UP, a2, b2, width * .30, GOLD_R, GOLD_G, GOLD_B,
+                        (.20F + .62F * glow) * (1 - .58F * (float) t) * mul);
+            }
+        }
+        if (dark) {
+            crackLips(out, pose, pts, w, tier, mul);
+        }
+    }
+
+    /** 缝两侧被顶起来的土唇：内缘贴地、外缘抬高，颜色比地面亮一点。 */
+    private static void crackLips(VertexConsumer out, Matrix4f pose, Vec3[] pts, double[] w,
+                                  int tier, float mul) {
+        for (int s = 0; s + 1 < pts.length; s++) {
+            Vec3 across = acrossOf(pts[s], pts[s + 1]);
+            double inner = w[s] * .50, outer = w[s] * 2.1;
+            double lift0 = .026 + .010 * tier, lift1 = .022 + .009 * tier;
+            for (int side = -1; side <= 1; side += 2) {
+                Vec3 i0 = pts[s].add(across.scale(inner * side));
+                Vec3 i1 = pts[s + 1].add(across.scale(inner * side));
+                Vec3 o0 = pts[s].add(across.scale(outer * side)).add(0, lift0, 0);
+                Vec3 o1 = pts[s + 1].add(across.scale(outer * side)).add(0, lift1, 0);
+                darkQuad(out, pose, i0, o0, o1, i1, STONE_R * 1.02F, STONE_G * .96F, STONE_B * .88F,
+                        .52F * mul);
+            }
+        }
+    }
+
+    /** 分叉：从主缝中段的某点斜着再撕一条，长度按档位加长。 */
+    private static void crackBranch(VertexConsumer out, Matrix4f pose, boolean dark, int i, int cracks,
+                                    Vec3[] pts, double[] w, int tier, float glow, float mul) {
+        Vec3 base = pts[2];
+        Vec3 dir = pts[3].subtract(base);
+        if (dir.lengthSqr() < 1e-9) {
+            return;
+        }
+        dir = dir.normalize();
+        double turn = (hash(i, 41) < .5 ? 1 : -1) * (.72 + .40 * hash(i, 43));
+        Vec3 d = new Vec3(dir.x * Math.cos(turn) - dir.z * Math.sin(turn), 0,
+                dir.x * Math.sin(turn) + dir.z * Math.cos(turn));
+        double len = (1.05 + .22 * tier) * (.65 + .55 * hash(i, 47));
+        Vec3[] bp = new Vec3[3];
+        double[] bw = new double[3];
+        for (int k = 0; k < 3; k++) {
+            double t = k / 2.0;
+            Vec3 p = base.add(d.scale(len * t))
+                    .add(acrossOf(base, base.add(d)).scale((hash(i * 3 + k, 23) - .5) * .16 * t));
+            bp[k] = new Vec3(p.x, .012 + .007 * hash(i + k, 3), p.z);
+            bw[k] = w[2] * (.82 - .30 * t);
+        }
+        crackSegments(out, pose, dark, bp, bw, tier, glow, mul * .85F);
+    }
+
+    // ---------------------------------------------------------------- 读条增料
+
+    /** 贴着地面慢慢转的尘雾带：两条很宽的暗环，做出"地上有层土在浮"的体积。 */
+    private static void dustBand(VertexConsumer out, Matrix4f pose, double R, float p, double time) {
+        for (int k = 0; k < 2; k++) {
+            double r = R * (.46 + .20 * k) * (1.03 - .10 * p);
+            double y = .09 + .075 * k;
+            darkRing(out, pose, new Vec3(0, y, 0), UP, r, .30 + .10 * k,
+                    .105F, .085F, .062F, .10F + .09F * p, 26);
+        }
+    }
+
+    /** 地面被压出来的同心尘环：每 12 tick 从脚下推出去一圈。 */
+    private static void groundPulses(VertexConsumer out, Matrix4f pose, boolean dark, double R,
+                                     float p, float glow, double time) {
+        double period = 12;
+        for (int k = 0; k < 3; k++) {
+            double age = ((time + k * period / 3.0) % period) / period;
+            double r = .75 + age * (R * .95);
+            float a = (float) ((1 - age) * (dark ? .26 : .26 + .26 * glow));
+            if (dark) {
+                darkRing(out, pose, new Vec3(0, .024, 0), UP, r, .05 + .03 * age,
+                        DEEP_R, DEEP_G, DEEP_B, a, 40);
+            } else {
+                WaterGeometry.ringColor(out, pose, new Vec3(0, .028, 0), UP, r, .018,
+                        EMBER_R, EMBER_G, EMBER_B, a, 40);
+            }
+        }
+    }
+
+    /** 从几条主缝里被顶起来、又慢慢沉回去的土板 —— 比悬空小方块更像"地裂开了"。 */
+    private static void risingSlabs(VertexConsumer out, Matrix4f pose, int tier, double R, float p) {
+        int n = 3 + Math.min(2, tier - 1);
+        for (int k = 0; k < n; k++) {
+            int cracks = crackCount(tier);
+            int i = (k * 5 + 2) % cracks;
+            double a = crackAngle(i, cracks) + (k % 2 == 0 ? .16 : -.16);
+            double dist = R * (.48 + .14 * (k % 3));
+            double grow = Mth.clamp((p - .16F) / .26F, 0, 1);
+            double sink = Mth.clamp((p - .64F) / .30F, 0, 1);
+            double h = (.30 + .14 * k) * grow * (1 - .90 * sink);
+            if (h < .03) {
+                continue;
+            }
+            Vec3 base = new Vec3(Math.cos(a) * dist, h * .5, Math.sin(a) * dist);
+            double w = .15 + .04 * (k % 2) + .07 * grow;
+            darkBox(out, pose, base, w, h * .5, w * .62, a + .55,
+                    STONE_R * .96F, STONE_G * .90F, STONE_B * .82F, .78F);
+        }
+    }
+
+    /** 从缝里被吸向胸口的地气：几段短线，头部沿着缝→胸口的连线往前走。 */
+    private static void inhaleStreaks(VertexConsumer out, Matrix4f pose, boolean dark, int cracks,
+                                      double R, float p, double chest, float glow, double time) {
+        int n = 6;
+        for (int k = 0; k < n; k++) {
+            int i = k * cracks / n;
+            double a = crackAngle(i, cracks);
+            Vec3 from = new Vec3(Math.cos(a) * crackTip(R, reach(p), i), .04,
+                    Math.sin(a) * crackTip(R, reach(p), i));
+            Vec3 to = new Vec3(0, chest - .12, 0);
+            double head = (time * .022 + k * .167) % 1.0;
+            double t0 = Mth.clamp((float) (head * .55), 0, 1);
+            Vec3 a0 = from.lerp(to, .25 + .55 * t0);
+            Vec3 a1 = from.lerp(to, Math.min(1, .25 + .55 * t0 + .16));
+            float alpha = (float) ((.10 + .24 * glow) * (1 - head * .6));
+            if (dark) {
+                darkStroke(out, pose, UP, a0, a1, .022, STONE_R, STONE_G, STONE_B, alpha);
+            } else {
+                WaterGeometry.stroke(out, pose, UP, a0, a1, .012, GOLD_R, GOLD_G, GOLD_B,
+                        alpha * .9F);
+            }
+        }
+    }
+
+    /** 胸口攒的那团土光：两颗交叉圆盘 + 一圈余烬 + 三颗绕着的火星。 */
+    private static void chestOrb(VertexConsumer out, Matrix4f pose, double chest, float glow, double time) {
+        double r = .12 + .17 * glow + .02 * Math.sin(time * .25);
+        Vec3 c = new Vec3(0, chest, 0);
+        WaterGeometry.disk(out, pose, c, UP, r, GOLD_R, GOLD_G, GOLD_B, .30F + .40F * glow, 20);
+        WaterGeometry.disk(out, pose, c, new Vec3(1, 0, 0), r * .92, GOLD_R, GOLD_G, GOLD_B,
+                .26F + .34F * glow, 18);
+        WaterGeometry.ringColor(out, pose, c, UP, r * 1.7, .014, EMBER_R, EMBER_G, EMBER_B,
+                .20F + .28F * glow, 24);
+        for (int k = 0; k < 3; k++) {
+            double a = time * .16 + k * 2.09;
+            Vec3 spark = c.add(Math.cos(a) * r * 2.3, Math.sin(time * .3 + k) * .10,
+                    Math.sin(a) * r * 2.3);
+            WaterGeometry.disk(out, pose, spark, UP, .032, EMBER_R, EMBER_G, EMBER_B,
+                    .38F + .30F * glow, 10);
+        }
+    }
+
+    /** 临放前的最后一下：脚边 8 根尖石顶出来（只在最后的 0.12 里）。 */
+    private static void footSpikes(VertexConsumer out, Matrix4f pose, boolean dark, float p,
+                                   float glow) {
+        double grow = Mth.clamp((p - .86F) / .12F, 0, 1);
+        if (grow <= 0) {
+            return;
+        }
+        for (int k = 0; k < 8; k++) {
+            double a = k * Math.PI / 4 + .2;
+            double h = (.32 + .22 * (k % 3)) * grow;
+            Vec3 base = new Vec3(Math.cos(a) * .62, .01, Math.sin(a) * .62);
+            Vec3 tip = base.add(-Math.cos(a) * .10, h, -Math.sin(a) * .10);
+            Vec3 across = new Vec3(-Math.sin(a), 0, Math.cos(a)).scale(.065);
+            if (dark) {
+                darkQuad(out, pose, base.subtract(across), base.add(across), tip, tip,
+                        DEEP_R, DEEP_G, DEEP_B, .85F * (float) grow);
+                darkQuad(out, pose, base.subtract(across).add(0, .002, 0), base.add(across),
+                        tip.add(0, -h * .35, 0), tip.add(0, -h * .35, 0),
+                        STONE_R * .7F, STONE_G * .7F, STONE_B * .7F, .55F * (float) grow);
+            } else {
+                WaterGeometry.quad(out, pose, base.subtract(across), base.add(across), tip, tip,
+                        EMBER_R, EMBER_G, EMBER_B, .45F * (float) grow * (.4F + glow));
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------- 土神之枪比例
+
+    /** 原枪的宽/长（模型实测：16 长、2.14 宽）。 */
+    static final double SPEAR_HALF_WIDTH_RATIO = .0669;
+    /** 枪头占全长、枪杆半径占全长。 */
+    static final double SPEAR_HEAD_LENGTH_RATIO = .30;
+    static final double SPEAR_SHAFT_RADIUS_RATIO = .018;
+
+    /**
+     * 只做整体放大：所有尺寸都从 {@code length} 按同一比例推出来，所以无论 form 多少，
+     * 长宽比都和原来那把枪一致（之前是长度单独涨、头不涨，所以越到后面越"拉长"）。
+     */
+    static double[] spearDims(float form) {
+        double f = Mth.clamp(form, 0, 1);
+        double length = 4.4 + 2.8 * f;
+        return new double[]{length, length * SPEAR_HALF_WIDTH_RATIO,
+                length * SPEAR_HEAD_LENGTH_RATIO, length * SPEAR_SHAFT_RADIUS_RATIO};
+    }
+
+
     private static void ritualDark(VertexConsumer out, Matrix4f pose, Player player, CastInfo info, double time) {
         int tier = info.tier();
         float p = info.ratio();
@@ -448,9 +721,13 @@ public final class EarthCastFx {
         int cracks = crackCount(tier);
         double R = info.radius();
 
-        // 每条裂缝的暗色缝芯。
+        // 贴地尘雾 + 一圈圈往外压的土环（先铺气氛）。
+        dustBand(out, pose, R, p, time);
+        groundPulses(out, pose, true, R, p, 0, time);
+
+        // 每条裂缝的暗色缝芯、土唇、碎石、分叉。
         for (int i = 0; i < cracks; i++) {
-            crackCore(out, pose, i, cracks, R, reach, tier, time);
+            crackCore(out, pose, i, cracks, R, reach, tier);
         }
 
         // 脚边被翻起的土层：一圈暗色环 + 中心薄盘。
@@ -461,9 +738,15 @@ public final class EarthCastFx {
                 near * (.85 + .2 * reach), .10 + .02 * tier,
                 DEEP_R, DEEP_G, DEEP_B, .30F + .20F * reach, 40);
 
+        // 从裂缝里顶出来、又沉回去的土板。
+        risingSlabs(out, pose, tier, R, p);
+
+        // 被吸向胸口的地气（暗的那层，亮层在 glow 遍）。
+        double chest = player.getBbHeight() * .56D;
+        inhaleStreaks(out, pose, true, cracks, R, p, chest, 0, time);
+
         // 从裂缝里顶出来、正被吸走的碎块（几何小块，比粒子更“实”）。
         float pull = Mth.clamp((p - .40F) / .45F, 0, 1);
-        double chest = player.getBbHeight() * .56D;
         for (int i = 0; i < cracks; i++) {
             for (int k = 0; k < 3; k++) {
                 double phase = (time * .035 + i * .137 + k * .31) % 1.0;
@@ -481,42 +764,44 @@ public final class EarthCastFx {
                 darkCube(out, pose, at, size, STONE_R, STONE_G, STONE_B, .55F);
             }
         }
+
+        // 最后一下：脚边尖石顶出来。
+        footSpikes(out, pose, true, p, 0);
     }
 
-    /** 一条放射状裂缝：4 段折线、每段带抖动，缝芯暗、两边稍亮（亮边在 glow 遍）。 */
+    /** 一条放射状裂缝：折线 + 土唇 + 碎石 + 卫星碎纹，偶数条再撕一根分叉。 */
     private static void crackCore(VertexConsumer out, Matrix4f pose, int i, int cracks,
-                                  double R, double reach, int tier, double time) {
+                                  double R, double reach, int tier) {
         double start = crackStart(R, i);
         double tip = crackTip(R, reach, i);
-        if (tip >= start - .05) {
+        if (tip >= start - .1) {
             return;
         }
-        Vec3 prev = null;
-        for (int s = 0; s <= 4; s++) {
-            Vec3 point = crackPoint(i, s, cracks, start, tip, tier);
-            if (prev != null) {
-                darkStroke(out, pose, UP, prev, point, .030 + .010 * tier,
-                        DEEP_R, DEEP_G, DEEP_B, .78F);
-            }
-            prev = point;
+        Vec3[] pts = crackPath(i, cracks, start, tip, tier);
+        double[] w = new double[CRACK_POINTS];
+        for (int s = 0; s < CRACK_POINTS; s++) {
+            w[s] = crackWidth(i, s, tier);
         }
-        // 分叉：偶数裂缝在中段再裂一条短的。
-        if ((i & 1) == 0) {
-            Vec3 mid = crackPoint(i, 2, cracks, start, tip, tier);
-            Vec3 other = mid.add(Math.cos(crackAngle(i, cracks) + 1.1) * (1.1 + .2 * tier), 0,
-                    Math.sin(crackAngle(i, cracks) + 1.1) * (1.1 + .2 * tier));
-            darkStroke(out, pose, UP, mid, other, .022 + .006 * tier,
-                    DEEP_R, DEEP_G, DEEP_B, .62F);
-        }
-    }
+        crackSegments(out, pose, true, pts, w, tier, 0, 1F);
 
-    private static Vec3 crackPoint(int i, int s, int cracks, double start, double tip, int tier) {
-        double t = s / 4.0;
-        double radius = start + (tip - start) * t;
-        double wobble = (hash(i * 7 + s, 3) - .5) * (.30 + .05 * tier);
-        double angle = crackAngle(i, cracks) + wobble;
-        return new Vec3(Math.cos(angle) * radius, .020 + hash(i * 13 + s, 7) * .012,
-                Math.sin(angle) * radius);
+        // 缝里卡着的碎石：半埋，不跟着旋涡走（这样才像从地下翻出来的）。
+        for (int s = 1; s + 1 < CRACK_POINTS; s += 2) {
+            double size = .030 + .030 * hash(i * 71 + s, 19);
+            darkCube(out, pose, pts[s].add(0, size * .35, 0), size,
+                    STONE_R * .88F, STONE_G * .84F, STONE_B * .78F, .85F);
+        }
+        // 卫星碎纹：主缝边上崩出来的两道小裂。
+        for (int k = 0; k < 2; k++) {
+            int s = 2 + k * 2;
+            Vec3 from = pts[s];
+            double a = Math.atan2(from.z, from.x) + (k == 0 ? .78 : -.88);
+            Vec3 to = from.add(Math.cos(a) * (.22 + .10 * tier), 0,
+                    Math.sin(a) * (.22 + .10 * tier));
+            darkStroke(out, pose, UP, from, to, w[s] * .32, DEEP_R, DEEP_G, DEEP_B, .55F);
+        }
+        if ((i & 1) == 0 || tier >= 4) {
+            crackBranch(out, pose, true, i, cracks, pts, w, tier, 0, 1F);
+        }
     }
 
     // ---------------------------------------------------------------- glow pass
@@ -529,27 +814,28 @@ public final class EarthCastFx {
         int cracks = crackCount(tier);
         double R = info.radius();
 
-        // 裂缝的金色边缘：贴着缝芯画，越到后面越亮。
+        // 裂缝里的余烬边 + 缝尖热点 + 分叉的细光。
         for (int i = 0; i < cracks; i++) {
             double start = crackStart(R, i);
             double tip = crackTip(R, reach, i);
-            if (tip >= start - .05) {
+            if (tip >= start - .1) {
                 continue;
             }
-            Vec3 prev = null;
-            for (int s = 0; s <= 4; s++) {
-                Vec3 point = crackPoint(i, s, cracks, start, tip, tier).add(0, .012, 0);
-                if (prev != null) {
-                    WaterGeometry.stroke(out, pose, UP, prev, point, .012 + .004 * tier,
-                            GOLD_R, GOLD_G, GOLD_B, (.22F + .55F * glow) * (.55F + .45F * (1 - s / 5F)));
-                }
-                prev = point;
+            Vec3[] pts = crackPath(i, cracks, start, tip, tier);
+            double[] w = new double[CRACK_POINTS];
+            for (int s = 0; s < CRACK_POINTS; s++) {
+                w[s] = crackWidth(i, s, tier);
             }
-            // 缝尖的余烬点。
-            Vec3 tipPoint = crackPoint(i, 4, cracks, start, tip, tier).add(0, .02, 0);
-            WaterGeometry.disk(out, pose, tipPoint, UP, .10 + .03 * tier,
-                    EMBER_R, EMBER_G, EMBER_B, .35F + .40F * glow, 20);
+            crackSegments(out, pose, false, pts, w, tier, glow, 1F);
+            WaterGeometry.disk(out, pose, pts[CRACK_POINTS - 1].add(0, .02, 0), UP,
+                    .09 + .03 * tier, EMBER_R, EMBER_G, EMBER_B, .32F + .40F * glow, 18);
+            if ((i & 1) == 0 || tier >= 4) {
+                crackBranch(out, pose, false, i, cracks, pts, w, tier, glow, .9F);
+            }
         }
+
+        // 往外压的土环（亮的那层：余烬色）+ 贴地尘雾。
+        groundPulses(out, pose, false, R, p, glow, time);
 
         // 地面法阵：1 圈（t1-2）/ 2 圈 / 3 圈 + 刻度。
         double ring = 2.0 + .55 * tier;
@@ -614,6 +900,11 @@ public final class EarthCastFx {
             }
         }
 
+        // 从缝里抽上来的亮地气 + 胸口攒的土光 + 临放前的脚边尖石。
+        inhaleStreaks(out, pose, false, cracks, R, p, player.getBbHeight() * .56D, glow, time);
+        chestOrb(out, pose, player.getBbHeight() * .56D, glow, time);
+        footSpikes(out, pose, false, p, glow);
+
         // 土神的枪：最后一小段在头顶凝出巨枪轮廓，指向准星。
         if (tier >= 5 && p > .45F) {
             float form = Mth.clamp((p - .45F) / .45F, 0, 1);
@@ -621,9 +912,11 @@ public final class EarthCastFx {
         }
     }
 
-    /** 一把朝准星方向的半透明巨枪：枪杆 + 锥形枪头 + 两道刃光。 */
+    /** 一把朝准星方向的半透明巨枪：只整体放大，长宽比与原枪一致。 */
     private static void spearSilhouette(VertexConsumer out, Matrix4f pose, Player player,
                                         float form, double time, float glow) {
+        double[] dims = spearDims(form);
+        double length = dims[0], halfWidth = dims[1], headLength = dims[2], shaft = dims[3];
         Vec3 look = player.getLookAngle();
         if (look.lengthSqr() < 1e-5) {
             look = new Vec3(0, 0, 1);
@@ -635,31 +928,33 @@ public final class EarthCastFx {
         }
         right = right.normalize();
         Vec3 up = right.cross(look).normalize();
-        double length = 4.2 * form;
-        Vec3 base = new Vec3(0, 2.55 + .35 * form, 0).add(look.scale(-.9 * form));
-        Vec3 tip = base.add(look.scale(length));
-        double shaft = .075 + .03 * form;
-        double head = .34 + .18 * form;
-        float alpha = (.18F + .30F * glow) * form;
 
-        // 枪杆（两根交叉面，任意角度看都有厚度）。
-        WaterGeometry.stroke(out, pose, up, base, tip.subtract(look.scale(length * .28)), shaft,
-                GOLD_R, GOLD_G, GOLD_B, alpha);
-        WaterGeometry.stroke(out, pose, right, base, tip.subtract(look.scale(length * .28)), shaft,
-                GOLD_R, GOLD_G, GOLD_B, alpha * .8F);
-        // 枪头：四个三角面拼出锥体。
-        Vec3 neck = tip.subtract(look.scale(length * .30));
-        Vec3 edge = tip.subtract(look.scale(length * .02));
+        // 枪尾在肩后一点，整把枪沿准星方向往前伸。
+        Vec3 grip = new Vec3(0, 2.25 + .45 * form, 0).add(look.scale(-.45 * form));
+        Vec3 neck = grip.add(look.scale(length - headLength));
+        Vec3 tip = grip.add(look.scale(length));
+        float alpha = (.14F + .32F * glow) * (.30F + .70F * form);
+
+        // 枪杆：两个交叉面，任意角度看都有厚度；尾端一颗小球收口。
+        WaterGeometry.stroke(out, pose, up, grip, neck, shaft, GOLD_R, GOLD_G, GOLD_B, alpha);
+        WaterGeometry.stroke(out, pose, right, grip, neck, shaft, GOLD_R, GOLD_G, GOLD_B, alpha * .82F);
+        WaterGeometry.ringColor(out, pose, grip.add(look.scale(shaft * 2.0)), look, shaft * 2.6,
+                shaft * .55, EMBER_R, EMBER_G, EMBER_B, alpha * .85F, 14);
+        // 枪头：薄而长的四棱锥（肩宽 halfWidth、长度 headLength）。
         for (int i = 0; i < 4; i++) {
-            double a = i * Math.PI / 2 + time * .04;
-            Vec3 side = right.scale(Math.cos(a) * head).add(up.scale(Math.sin(a) * head));
-            WaterGeometry.quad(out, pose, neck.add(side), neck.subtract(side), edge, edge,
-                    GOLD_R, GOLD_G, GOLD_B, alpha * .9F);
+            double a = i * Math.PI / 2 + time * .03;
+            Vec3 side = right.scale(Math.cos(a) * halfWidth).add(up.scale(Math.sin(a) * halfWidth));
+            WaterGeometry.quad(out, pose, neck.add(side), neck.subtract(side), tip, tip,
+                    GOLD_R, GOLD_G, GOLD_B, alpha);
         }
-        WaterGeometry.disk(out, pose, tip, look, head * .35, GOLD_R, GOLD_G, GOLD_B, alpha, 16);
-        // 刃光：从枪头往后扫的两道细光。
-        WaterGeometry.stroke(out, pose, up, neck, tip, .020, 1.0F, .92F, .70F, alpha * .8F);
+        // 枪肩金环 + 中央刃光 + 枪尖光点。
+        WaterGeometry.ringColor(out, pose, neck, look, halfWidth * 1.10, halfWidth * .16,
+                EMBER_R, EMBER_G, EMBER_B, alpha * .9F, 18);
+        WaterGeometry.stroke(out, pose, up, neck, tip, halfWidth * .18, 1.0F, .93F, .72F,
+                alpha * .85F);
+        WaterGeometry.disk(out, pose, tip, look, halfWidth * .30, GOLD_R, GOLD_G, GOLD_B, alpha, 14);
     }
+
 
     // ---------------------------------------------------------------- burst
 

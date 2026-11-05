@@ -71,6 +71,61 @@ class EarthCastFxTest {
     }
 
     /**
+     * The crack must read as torn ground, not a smooth arc: radii shrink monotonically, the path
+     * bends (direction changes between segments), and it narrows towards the tip.
+     */
+    @Test void cracksAreJaggedPolylinesThatTaper() {
+        double radius = 8.0;
+        int tier = 4;
+        int count = EarthCastFx.crackCountFor(tier);
+        for (int i = 0; i < count; i++) {
+            double start = EarthCastFx.crackStartFor(radius, i);
+            double tip = EarthCastFx.crackTipFor(radius, 1F, i);
+            Vec3[] path = EarthCastFx.crackPath(i, count, start, tip, tier);
+            assertEquals(EarthCastFx.CRACK_POINTS, path.length);
+
+            double previousRadius = Double.MAX_VALUE;
+            for (Vec3 point : path) {
+                double r = Math.hypot(point.x, point.z);
+                assertTrue(r <= previousRadius + 1e-6, "crack " + i + " should only crawl inward");
+                previousRadius = r;
+            }
+
+            double[] deltas = new double[path.length - 2];
+            for (int s = 0; s + 2 < path.length; s++) {
+                Vec3 d0 = path[s + 1].subtract(path[s]);
+                Vec3 d1 = path[s + 2].subtract(path[s + 1]);
+                deltas[s] = Math.abs(Math.atan2(d0.z, d0.x) - Math.atan2(d1.z, d1.x));
+            }
+            double mean = Arrays.stream(deltas).average().orElse(0);
+            assertTrue(mean > .01, "crack " + i + " bends like a smooth arc, mean turn " + mean);
+
+            double firstWidth = EarthCastFx.crackWidth(i, 0, tier);
+            assertTrue(firstWidth > 0, "crack must have width");
+            assertTrue(EarthCastFx.crackWidth(i, EarthCastFx.CRACK_POINTS - 1, tier) < firstWidth,
+                    "crack " + i + " must taper towards its tip");
+        }
+    }
+
+    /**
+     * The god-spear silhouette has to keep the original weapon's proportions: every size is
+     * derived from one length, so growing it only scales it up (the old version stretched the
+     * shaft faster than the head).
+     */
+    @Test void spearSilhouetteKeepsItsProportionsWhenScaledUp() {
+        double previousLength = 0;
+        for (float form : new float[]{0F, .25F, .5F, .75F, 1F}) {
+            double[] dims = EarthCastFx.spearDims(form);
+            double length = dims[0];
+            assertTrue(length > previousLength, "spear should grow with the cast, form " + form);
+            previousLength = length;
+            assertEquals(EarthCastFx.SPEAR_HALF_WIDTH_RATIO, dims[1] / length, 1e-9);
+            assertEquals(EarthCastFx.SPEAR_HEAD_LENGTH_RATIO, dims[2] / length, 1e-9);
+            assertEquals(EarthCastFx.SPEAR_SHAFT_RADIUS_RATIO, dims[3] / length, 1e-9);
+        }
+    }
+
+    /**
      * Regression for the 2026-11-06 03:41 client crash: the dark pass used the water helpers,
      * which only write position+color, but {@code LightningRenderTypes.DARK} is NEW_ENTITY
      * (position/color/uv/overlay/light/normal) and throws "Not filled all elements of the vertex".
