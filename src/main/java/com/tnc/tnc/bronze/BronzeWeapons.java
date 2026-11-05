@@ -19,7 +19,10 @@ public final class BronzeWeapons {
     static {for(var profile:BronzeProfile.values())WEAPONS.put(profile,ITEMS.register(profile.id(),()->new BronzeWeaponItem(profile)));}
     public static final RegistryObject<EntityType<BronzeDaggerEntity>> DAGGER=ENTITIES.register("bronze_dagger_flight",()->EntityType.Builder.<BronzeDaggerEntity>of(BronzeDaggerEntity::new,MobCategory.MISC).sized(.25f,.25f).clientTrackingRange(10).updateInterval(1).build("tnc:bronze_dagger_flight"));
     public static final RegistryObject<RecipeSerializer<BronzeUpgradeRecipe>> UPGRADE=RECIPES.register("bronze_upgrade",()->new SimpleCraftingRecipeSerializer<>(BronzeUpgradeRecipe::new));
-    public static void register(IEventBus bus){ITEMS.register(bus);ENTITIES.register(bus);RECIPES.register(bus);}
+    public static final RegistryObject<RecipeSerializer<BronzeFusionRecipe>> FUSION=RECIPES.register("bronze_fusion",()->new SimpleCraftingRecipeSerializer<>(BronzeFusionRecipe::new));
+    public static final RegistryObject<EntityType<BronzePuppetEntity>> PUPPET=ENTITIES.register("bronze_puppet",()->EntityType.Builder.<BronzePuppetEntity>of(BronzePuppetEntity::new,MobCategory.CREATURE).sized(.85f,2.2f).clientTrackingRange(10).updateInterval(2).build("tnc:bronze_puppet"));
+    public static void register(IEventBus bus){ITEMS.register(bus);ENTITIES.register(bus);RECIPES.register(bus);bus.addListener(BronzeWeapons::attributes);}
+    private static void attributes(net.minecraftforge.event.entity.EntityAttributeCreationEvent event){event.put(PUPPET.get(),BronzePuppetEntity.attributes().build());}
     @SubscribeEvent public static void creative(BuildCreativeModeTabContentsEvent event){
         if(event.getTabKey()==CreativeModeTabs.COMBAT)for(var item:WEAPONS.values())event.accept(item.get());
     }

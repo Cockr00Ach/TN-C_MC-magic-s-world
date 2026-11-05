@@ -626,7 +626,7 @@ public final class WarriorComboService {
      * <p>"打断其他玩家的连招"靠的是清空他服务端的输入缓冲 —— 不清的话，对方元素栏里
      * 已经接了一半的连招会在僵直结束后继续成立。
      */
-    private static void interrupt(ServerPlayer player, LivingEntity target, int staggerTicks) {
+    static void interrupt(ServerPlayer player, LivingEntity target, int staggerTicks) {
         target.stopUsingItem();
         if (target instanceof ServerPlayer other) {
             clearCombo(other);
@@ -714,7 +714,7 @@ public final class WarriorComboService {
     }
 
     /** 目标是否在玩家面前 {@code degrees} 度的扇形里。360 度恒真。 */
-    static boolean inArc(ServerPlayer player, LivingEntity target, int degrees) {
+    static boolean inArc(LivingEntity player, LivingEntity target, int degrees) {
         if (degrees >= 360) {
             return true;
         }

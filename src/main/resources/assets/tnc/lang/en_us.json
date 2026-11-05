@@ -864,5 +864,12 @@
   "tooltip.tnc.bronze_upgrade": "Copper tempering: %s/10 (+%s%% base damage)",
   "tooltip.tnc.bronze_combo": "Warrior combos: existing Q / E / Z inputs, unlocks and cooldowns",
   "tooltip.tnc.bronze_throw": "Hold use to charge; release to throw. Full charge: 1.5s. Returns automatically.",
-  "tooltip.tnc.bronze_returning": "Dagger returning…"
+  "tooltip.tnc.bronze_returning": "Dagger returning…",
+  "item.tnc.bronze_halberd": "Bronze Halberd",
+  "entity.tnc.bronze_puppet": "Bronze Puppet",
+  "tooltip.tnc.bronze_summon": "Sneak + use: summon bronze puppet (up to 10 minutes)",
+  "message.tnc.puppet_exists": "Your bronze puppet is still present",
+  "message.tnc.puppet_cooldown": "Puppet summon cooldown: %s seconds",
+  "message.tnc.puppet_no_space": "Not enough space to summon the puppet",
+  "message.tnc.puppet_summoned": "Bronze puppet summoned for up to 10 minutes"
 }

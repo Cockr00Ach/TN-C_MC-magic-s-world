@@ -25,13 +25,15 @@ public final class BronzeWeaponItem extends SwordItem {
     }
     @Override public InteractionResultHolder<ItemStack> use(Level level,Player player,InteractionHand hand){
         ItemStack stack=player.getItemInHand(hand);
-        if(profile!=BronzeProfile.DAGGER||hand!=InteractionHand.MAIN_HAND||inFlight(stack,level)||!com.tnc.tnc.warrior.WarriorBronzeBridge.canThrow(player))return InteractionResultHolder.fail(stack);
+        if(hand!=InteractionHand.MAIN_HAND||inFlight(stack,level)||!com.tnc.tnc.warrior.WarriorBronzeBridge.canThrow(player))return InteractionResultHolder.fail(stack);
+        if(profile==BronzeProfile.HALBERD&&player.isShiftKeyDown())return new InteractionResultHolder<>(level.isClientSide?InteractionResult.SUCCESS:BronzeSummons.summon((net.minecraft.server.level.ServerPlayer)player),stack);
+        if(profile!=BronzeProfile.DAGGER&&profile!=BronzeProfile.HALBERD)return InteractionResultHolder.fail(stack);
         player.startUsingItem(hand);return InteractionResultHolder.consume(stack);
     }
     @Override public int getUseDuration(ItemStack stack){return 72000;}
     @Override public UseAnim getUseAnimation(ItemStack stack){return UseAnim.SPEAR;}
     @Override public void releaseUsing(ItemStack stack,Level level,LivingEntity entity,int remaining){
-        if(!level.isClientSide&&entity instanceof net.minecraft.server.level.ServerPlayer player&&profile==BronzeProfile.DAGGER&&!inFlight(stack,level)&&com.tnc.tnc.warrior.WarriorBronzeBridge.canThrow(player))
+        if(!level.isClientSide&&entity instanceof net.minecraft.server.level.ServerPlayer player&&(profile==BronzeProfile.DAGGER||profile==BronzeProfile.HALBERD)&&!inFlight(stack,level)&&com.tnc.tnc.warrior.WarriorBronzeBridge.canThrow(player))
             BronzeDaggerEntity.launch(player,stack,getUseDuration(stack)-remaining);
     }
     @Override public void inventoryTick(ItemStack stack,Level level,Entity owner,int slot,boolean selected){
@@ -42,7 +44,8 @@ public final class BronzeWeaponItem extends SwordItem {
     @Override public void appendHoverText(ItemStack stack,Level level,List<Component> lines,TooltipFlag flag){
         lines.add(Component.translatable("tooltip.tnc.bronze_upgrade",upgrade(stack),upgrade(stack)*10).withStyle(ChatFormatting.GOLD));
         lines.add(Component.translatable("tooltip.tnc.bronze_combo").withStyle(ChatFormatting.GRAY));
-        if(profile==BronzeProfile.DAGGER)lines.add(Component.translatable("tooltip.tnc.bronze_throw").withStyle(ChatFormatting.GRAY));
-        if(level!=null&&inFlight(stack,level))lines.add(Component.translatable("tooltip.tnc.bronze_returning").withStyle(ChatFormatting.DARK_AQUA));
+        if(profile==BronzeProfile.DAGGER||profile==BronzeProfile.HALBERD)lines.add(Component.translatable("tooltip.tnc.bronze_throw").withStyle(ChatFormatting.GRAY));
+        if(profile==BronzeProfile.HALBERD)lines.add(Component.translatable("tooltip.tnc.bronze_summon").withStyle(ChatFormatting.DARK_AQUA));
+        if(level!=null&&inFlight(stack,level))lines.add(stack.getHoverName().copy().append(" ↩").withStyle(ChatFormatting.DARK_AQUA));
     }
 }

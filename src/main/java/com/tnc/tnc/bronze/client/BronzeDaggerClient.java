@@ -23,7 +23,7 @@ public final class BronzeDaggerClient {
     @SubscribeEvent public static void charge(TickEvent.ClientTickEvent e){
         var mc=Minecraft.getInstance();if(e.phase!=TickEvent.Phase.END||mc.player==null||mc.isPaused())return;
         if(mc.player.isUsingItem()&&mc.player.getUsedItemHand()==InteractionHand.MAIN_HAND
-            &&mc.player.getUseItem().getItem() instanceof BronzeWeaponItem item&&item.profile==BronzeProfile.DAGGER&&mc.player.getTicksUsingItem()==30)
+            &&mc.player.getUseItem().getItem() instanceof BronzeWeaponItem item&&(item.profile==BronzeProfile.DAGGER||item.profile==BronzeProfile.HALBERD)&&mc.player.getTicksUsingItem()==30)
             mc.player.playSound(net.minecraft.sounds.SoundEvents.AMETHYST_BLOCK_CHIME,.6f,.7f);
     }
 }

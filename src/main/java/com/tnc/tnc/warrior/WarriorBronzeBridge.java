@@ -22,6 +22,18 @@ public final class WarriorBronzeBridge {
         return WarriorComboService.validTarget(player,target);
     }
     public static void impact(ServerPlayer player,LivingEntity target,boolean heavy){WarriorCombatEffects.hitSpark(player,target,heavy);}
+    public static java.util.List<WarriorSkill> puppetSkills(){return WarriorCombos.forFamily(WarriorWeaponFamily.SPEAR).stream().filter(s->!s.ranged()&&!s.anyHold()&&s.guardTicks()==0).limit(3).toList();}
+    /** Mob adaptation of the same warrior skill data, target rules, arc and interruption effects. */
+    public static void puppetMelee(com.tnc.tnc.bronze.BronzePuppetEntity actor,ServerPlayer owner,WarriorSkill skill){
+        for(var target:actor.level().getEntitiesOfClass(LivingEntity.class,actor.getBoundingBox().inflate(skill.radius()),t->t!=actor&&validTarget(owner,t)&&!actor.isAlliedTo(t))){
+            if(!actor.hasLineOfSight(target)||!WarriorComboService.inArc(actor,target,skill.arcDegrees())||actor.distanceTo(target)>skill.radius()+target.getBbWidth()/2)continue;
+            if(target.hurt(actor.damageSources().mobAttack(actor),(float)actor.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE)*skill.damageMultiplier())){
+                target.knockback(skill.knockback(),actor.getX()-target.getX(),actor.getZ()-target.getZ());target.hurtMarked=true;
+                WarriorCombatEffects.hitSpark(owner,target,true);
+                if(skill.interrupt()||skill.staggerTicks()>0)WarriorComboService.interrupt(owner,target,skill.staggerTicks());
+            }
+        }
+    }
     @SubscribeEvent public static void attack(AttackEntityEvent e){
         var stack=e.getEntity().getMainHandItem();
         if(stack.getItem() instanceof BronzeWeaponItem&&BronzeWeaponItem.inFlight(stack,e.getEntity().level()))e.setCanceled(true);
