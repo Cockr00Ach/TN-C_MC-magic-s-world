@@ -66,6 +66,37 @@ public final class EarthSpellParticles {
                             Math.cos(angle)*.19,.02,Math.sin(angle)*.19);
                 }
             }
+            // Each staggered batch gets a wind-up puff and a landing cough, so a
+            // column reads as weight hitting the floor twice instead of sliding up.
+            for(int i=0;i<columns;i++) {
+                int delay=(i%5)*2;
+                if(delay<1)continue;
+                double angle=i*Math.PI*2/Math.max(1,columns);
+                double base=aura?radius*.78:radius*(.42+.22*(i%3)/2);
+                double x=c.x+Math.cos(angle)*base,z=c.z+Math.sin(angle)*base;
+                if(age==delay-2) {
+                    level.addParticle(dirt,x,c.y+.14,z,0,.07,0);
+                    for(int k=0;k<2;k++) {
+                        double a=angle+(k==0?-.42:.42);
+                        level.addParticle(EarthParticles.DUST.get(),x,c.y+.05,z,Math.cos(a)*.04,.02,Math.sin(a)*.04);
+                    }
+                }
+                if(age==delay+(int)EarthRuptureLayout.PUNCH_TICKS) {
+                    level.addParticle(stone,x,c.y+.12,z,0,.05,0);
+                    for(int k=0;k<3;k++) {
+                        double a=angle+(k-1)*.55;
+                        level.addParticle(EarthParticles.DUST.get(),x,c.y+.06,z,Math.cos(a)*.11,.015,Math.sin(a)*.11);
+                    }
+                }
+            }
+            // The first break gets one fast, tight ring: the whole field snaps at once.
+            if(age==2) {
+                for(int i=0;i<16;i++) {
+                    double a=i*Math.PI*2/16,r=radius*.42;
+                    level.addParticle(EarthParticles.DUST.get(),c.x+Math.cos(a)*r,c.y+.05,c.z+Math.sin(a)*r,
+                            Math.cos(a)*.30,.01,Math.sin(a)*.30);
+                }
+            }
         } else {
             int n=count(tier,false);
             for(int i=0;i<n;i++) {

@@ -169,6 +169,23 @@ public final class EarthAttackEntity extends Entity {
             double a=i*Math.PI*2/rays,s=(mode()==2?.85:.35)+(i%5)*.08;
             server.sendParticles(EarthParticles.DUST.get(),centre.x,centre.y+.45,centre.z,0,Math.cos(a)*s,.10+(i%3)*.08,Math.sin(a)*s,1);
         }
+        // Two low rings plus a short vertical jet: even a single-target blast
+        // leaves the floor with a visible shockwave instead of only a puff.
+        for(int i=0;i<20;i++) {
+            double a=i*Math.PI*2/20,r=radius*.95;
+            server.sendParticles(EarthParticles.DUST.get(),centre.x+Math.cos(a)*r,centre.y+.08,centre.z+Math.sin(a)*r,
+                    1,Math.cos(a)*.42,.02,Math.sin(a)*.42,.55);
+        }
+        for(int i=0;i<12;i++) {
+            double a=i*Math.PI*2/12+.13,r=radius*.35;
+            server.sendParticles(EarthParticles.DUST.get(),centre.x+Math.cos(a)*r,centre.y+.08,centre.z+Math.sin(a)*r,
+                    1,Math.cos(a)*.55,.03,Math.sin(a)*.55,.42);
+        }
+        for(int i=0;i<6;i++) {
+            double a=i*Math.PI*2/6;
+            server.sendParticles(EarthParticles.DUST.get(),centre.x+Math.cos(a)*.3,centre.y+.15,centre.z+Math.sin(a)*.3,
+                    0,Math.cos(a)*.05,.45+(i%3)*.07,Math.sin(a)*.05,.9);
+        }
         server.playSound(null,centre.x,centre.y,centre.z,SoundEvents.GENERIC_EXPLODE,SoundSource.PLAYERS,1.55F,.58F);
         server.playSound(null,centre.x,centre.y,centre.z,SoundEvents.STONE_BREAK,SoundSource.PLAYERS,1.8F,.72F);
     }
