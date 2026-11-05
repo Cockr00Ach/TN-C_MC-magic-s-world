@@ -16,15 +16,36 @@ public final class BronzePuppetModel extends HumanoidModel<BronzePuppetEntity> {
     public BronzePuppetModel(ModelPart root){super(root);hat.visible=false;}
     public static LayerDefinition layer(){
         MeshDefinition mesh=HumanoidModel.createMesh(CubeDeformation.NONE,0);var root=mesh.getRoot();
+        int textureWidth=128,textureHeight=128;
         try(var in=BronzePuppetModel.class.getResourceAsStream("/assets/tnc/geo/entity/bronze_puppet_parts.json")){
             if(in==null)throw new IllegalStateException("Missing bronze puppet geometry");
-            var parts=JsonParser.parseReader(new InputStreamReader(in,java.nio.charset.StandardCharsets.UTF_8)).getAsJsonArray();
+            var document=JsonParser.parseReader(new InputStreamReader(in,java.nio.charset.StandardCharsets.UTF_8));
+            var parts=document.isJsonArray()?document.getAsJsonArray():document.getAsJsonObject().getAsJsonArray("parts");
+            float uvScale=1;
+            if(document.isJsonObject()){
+                var metadata=document.getAsJsonObject();textureWidth=metadata.get("texture_width").getAsInt();textureHeight=metadata.get("texture_height").getAsInt();
+                // CubeDefinition scales UV denominators only; physical bone proportions stay unchanged.
+                uvScale=1f/metadata.get("texel_density").getAsFloat();
+            }
             for(var raw:parts){var part=raw.getAsJsonObject();var cubes=CubeListBuilder.create();
-                for(var box:part.getAsJsonArray("boxes")){var b=box.getAsJsonObject();var a=b.getAsJsonArray("box");var uv=b.getAsJsonArray("uv");cubes.texOffs(uv.get(0).getAsInt(),uv.get(1).getAsInt()).addBox(a.get(0).getAsFloat(),a.get(1).getAsFloat(),a.get(2).getAsFloat(),a.get(3).getAsFloat(),a.get(4).getAsFloat(),a.get(5).getAsFloat());}
-                var p=part.getAsJsonArray("pivot");root.addOrReplaceChild(part.get("name").getAsString(),cubes,PartPose.offset(p.get(0).getAsFloat(),p.get(1).getAsFloat(),p.get(2).getAsFloat()));
+                for(var box:part.getAsJsonArray("boxes"))if(!box.getAsJsonObject().has("rotation"))addCube(cubes,box.getAsJsonObject(),uvScale,false);
+                var p=part.getAsJsonArray("pivot");var bone=root.addOrReplaceChild(part.get("name").getAsString(),cubes,PartPose.offset(p.get(0).getAsFloat(),p.get(1).getAsFloat(),p.get(2).getAsFloat()));
+                int index=0;
+                for(var box:part.getAsJsonArray("boxes")){
+                    var b=box.getAsJsonObject();if(!b.has("rotation"))continue;
+                    var a=b.getAsJsonArray("box");var rotation=b.getAsJsonArray("rotation");var child=CubeListBuilder.create();addCube(child,b,uvScale,true);
+                    bone.addOrReplaceChild("detail_"+index++,child,PartPose.offsetAndRotation(
+                        a.get(0).getAsFloat()+a.get(3).getAsFloat()/2,a.get(1).getAsFloat()+a.get(4).getAsFloat()/2,a.get(2).getAsFloat()+a.get(5).getAsFloat()/2,
+                        rotation.get(0).getAsFloat()*Mth.DEG_TO_RAD,rotation.get(1).getAsFloat()*Mth.DEG_TO_RAD,rotation.get(2).getAsFloat()*Mth.DEG_TO_RAD));
+                }
             }
         }catch(java.io.IOException e){throw new IllegalStateException(e);}
-        return LayerDefinition.create(mesh,128,128);
+        return LayerDefinition.create(mesh,textureWidth,textureHeight);
+    }
+    private static void addCube(CubeListBuilder cubes,JsonObject box,float uvScale,boolean centered){
+        var a=box.getAsJsonArray("box");var uv=box.getAsJsonArray("uv");float w=a.get(3).getAsFloat(),h=a.get(4).getAsFloat(),d=a.get(5).getAsFloat();
+        cubes.texOffs(uv.get(0).getAsInt(),uv.get(1).getAsInt()).addBox(
+            centered?-w/2:a.get(0).getAsFloat(),centered?-h/2:a.get(1).getAsFloat(),centered?-d/2:a.get(2).getAsFloat(),w,h,d,CubeDeformation.NONE,uvScale,uvScale);
     }
     @Override public void setupAnim(BronzePuppetEntity entity,float limb,float amount,float age,float yaw,float pitch){
         // Native warrior curves are offsets from the authored pose, never last frame's offsets.
