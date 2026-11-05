@@ -26,6 +26,6 @@ class WarriorImpactShapeTest {
                 svg.append("' fill='#").append(String.format("%06x",q.color())).append("' opacity='").append(q.alpha()).append("'/>");
             }
         }
-        svg.append("</svg>");var p=Path.of("docs/previews/warrior-impact-mesh-20261104.svg");Files.createDirectories(p.getParent());Files.writeString(p,svg);
+        svg.append("</svg>");var p=Path.of("work/warrior-impact-mesh-20261105.svg");Files.createDirectories(p.getParent());Files.writeString(p,svg);
     }
 }

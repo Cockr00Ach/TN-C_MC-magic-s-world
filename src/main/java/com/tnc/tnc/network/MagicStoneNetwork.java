@@ -25,7 +25,8 @@ public class MagicStoneNetwork {
     // v18 adds the combat step (Shift) packet. v21 adds the instructor-course text to the
     // tempering snapshot (same packet, two extra strings -> the shape changed, so the
     // version has to change or a stale client would read the buffer past the end).
-    private static final String PROTOCOL_VERSION = "27";
+    // v28 adds attack ownership, target size and the surface frame to warrior impacts.
+    private static final String PROTOCOL_VERSION = "28";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "main"),

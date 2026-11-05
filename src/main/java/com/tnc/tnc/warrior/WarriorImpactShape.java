@@ -6,9 +6,13 @@ import net.minecraft.world.phys.Vec3;
 public final class WarriorImpactShape {
     public record Quad(Vec3 a,Vec3 b,Vec3 c,Vec3 d,int color,float alpha){}
     private WarriorImpactShape(){}
-    public static int duration(int kind){return kind==2?10:kind==3?9:kind==4?11:7;}
+    public static int duration(int kind){return kind==2?10:kind==3?5:kind==0?4:kind==4?11:7;}
     public static List<Quad> build(int kind,float t,int color){
-        if(t<0||t>=1)return List.of();
+        return build(kind,t,color,0,true);
+    }
+    public static List<Quad> build(int kind,float t,int color,int seed,boolean metal){
+        if(!Float.isFinite(t)||t<0||t>=1)return List.of();
+        if(kind==0||kind==3)return contact(kind==3,t,color,seed,metal);
         var out=new ArrayList<Quad>();float fade=(1-t)*(1-t);
         if(kind==2){
             ring(out,.5+3.5*t,.18,color,fade,32);
@@ -31,6 +35,37 @@ public final class WarriorImpactShape {
             var axis=radial(angle,1);var side=radial(angle+Math.PI/2,kind==3?.095:.055);
             var base=axis.scale(.08);var tip=axis.scale(length);
             out.add(new Quad(base.add(side),tip,base.subtract(side),Vec3.ZERO,0xFFF8DF,fade));
+        }
+        return out;
+    }
+    // Seeded, asymmetric slivers in a surface-local frame. No camera-facing star or ring.
+    private static List<Quad> contact(boolean heavy,float t,int color,int seed,boolean metal){
+        var out=new ArrayList<Quad>();var random=new Random(seed);
+        double angle=random.nextDouble()*Math.PI;
+        var axis=radial(angle,1);var side=radial(angle+Math.PI/2,1);
+        float fade=(1-t)*(1-t);
+        double length=(heavy?.38:.24)*(1+.4*t),width=.032*(1-t);
+        if(t<.45){
+            float flash=(float)(1-t/.45);
+            var a=axis.scale(-length);var b=axis.scale(length);
+            out.add(new Quad(a,b.add(side.scale(width)),b,a.subtract(side.scale(width)),color,flash*.85f));
+            out.add(new Quad(a.scale(.65),b.scale(.65).add(side.scale(width*.4)),b.scale(.65),a.scale(.65).subtract(side.scale(width*.4)),0xFFF1CE,flash));
+        }
+        int count=metal?(heavy?12:8):(heavy?6:4);
+        for(int i=0;i<count;i++){
+            double a=angle+(random.nextDouble()-.5)*1.7+(i%3==0?Math.PI:0);
+            double speed=(.18+random.nextDouble()*.44)*(heavy?1.25:1)*(metal?1:.65);
+            var direction=radial(a,1);
+            double travel=speed*(1-Math.exp(-3*t));
+            var head=direction.scale(.025+travel).add(0,-.12*t*t,(.02+random.nextDouble()*.18)*t);
+            double streak=(.035+random.nextDouble()*.11)*(1-t);
+            var tail=head.subtract(direction.scale(streak));
+            var across=radial(a+Math.PI/2,(.006+random.nextDouble()*.008)*(1-t));
+            int tint=metal?(t<.22?0xFFF1C1:t<.55?0xE9AE57:0x90603C):color;
+            out.add(new Quad(head,tail.add(across),tail.subtract(across),head,tint,fade));
+            // A second, angled face makes the fragment visible from grazing angles.
+            var depth=new Vec3(0,0,across.length());
+            out.add(new Quad(head,tail.add(depth),tail.subtract(depth),head,tint,fade*.7f));
         }
         return out;
     }

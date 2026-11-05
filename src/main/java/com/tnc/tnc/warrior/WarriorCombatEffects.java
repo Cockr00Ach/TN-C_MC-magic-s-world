@@ -28,7 +28,7 @@ import org.joml.Vector3f;
  * （{@code WarriorTrail} / {@code WarriorWaveRenderer} / {@code WarriorPhantomRenderer} /
  * {@code WarriorDragonRenderer}），服务端只管判定和声音。
  *
- * <p>这里保留的两处粒子是<b>命中反馈</b>，不是施放特效：
+ * <p>这里保留的两处几何反馈是<b>命中反馈</b>，不是施放特效：
  * 打到人溅出的火花（{@link #hitSpark}）、格挡时身前的一圈防反光（{@link #guard}）。
  * 这两处都很小、持续时间不到 0.5 秒，而且只在"真的挡住了 / 真的打中了"时才出现。
  */
@@ -38,6 +38,8 @@ public final class WarriorCombatEffects {
     private static final class State{
         long block=Long.MIN_VALUE,impact=Long.MIN_VALUE,lastGuard=Long.MIN_VALUE,flash=Long.MIN_VALUE;
         long lastHitSound=Long.MIN_VALUE;
+        long sparkTick=Long.MIN_VALUE;
+        final Set<Integer> sparkTargets=new HashSet<>();
         boolean guarding;
         UUID guardTarget;
     }
@@ -77,17 +79,15 @@ public final class WarriorCombatEffects {
     }
 
     /**
-     * 命中的火花：从被打中的那一点沿<b>这一刀的挥向</b>甩出一小簇电火花，重武器更多更散。
+     * 命中反馈：在碰撞箱表面绘制短切痕和立体碎片，护甲命中增加金属火星。
      *
      * <p>只在真的造成伤害时调用（`hurt(...)` 返回 true 之后），所以它不是"施放特效"，
      * 而是"打实了"的反馈。
      */
     static void hitSpark(ServerPlayer p, net.minecraft.world.entity.LivingEntity target, boolean heavy) {
-        var center = target.getBoundingBox().getCenter();
-        var toward = p.getEyePosition().subtract(center);
-        if (toward.lengthSqr() < .001) toward = new Vec3(0,0,1);
-        // Put the flash outside the struck surface, rather than occluded inside the torso.
-        WarriorImpactPacket.send(p,center.add(toward.normalize().scale(target.getBbWidth()*.75+.12)),heavy?3:0);
+        var state=STATES.computeIfAbsent(p.getUUID(),k->new State());long now=p.level().getGameTime();
+        if(state.sparkTick!=now){state.sparkTick=now;state.sparkTargets.clear();}
+        if(state.sparkTargets.add(target.getId()))WarriorImpactPacket.hit(p,target,heavy,p.getEyePosition());
 
     }
 
