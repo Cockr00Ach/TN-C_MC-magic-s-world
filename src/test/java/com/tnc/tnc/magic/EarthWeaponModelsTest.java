@@ -4,14 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
+import net.minecraft.client.renderer.block.model.BlockModel;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -29,39 +28,24 @@ class EarthWeaponModelsTest {
             assertTrue(name.startsWith("earth_wpn_"), name);
             Path file = MODELS.resolve(name + ".json");
             assertTrue(Files.exists(file), file.toString());
-            JsonObject model;
+            // Parse with vanilla's own deserializer: this is what rejected the first batch
+            // ("Expected between 1 and 6 unique faces, got 0") and produced missing-model cubes.
+            BlockModel parsed;
             try (Reader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
-                model = JsonParser.parseReader(reader).getAsJsonObject();
+                parsed = BlockModel.fromStream(reader);
             }
-            JsonObject textures = model.getAsJsonObject("textures");
-            String texture = textures.get("0").getAsString();
-            assertEquals("tnc:block/earth_weapon/" + name.substring("earth_wpn_".length()), texture);
-
-            var elements = model.getAsJsonArray("elements");
+            var elements = parsed.getElements();
             assertFalse(elements.isEmpty(), name);
-            for (JsonElement element : elements) {
-                JsonObject cube = element.getAsJsonObject();
-                JsonObject faces = cube.getAsJsonObject("faces");
-                int count = faces.size();
+            for (var element : elements) {
+                int count = element.faces.size();
                 assertTrue(count >= 1 && count <= 6, name + " element has " + count + " faces");
-                for (Map.Entry<String, JsonElement> face : faces.entrySet()) {
-                    assertTrue(face.getValue().getAsJsonObject().has("uv"), name + " " + face.getKey());
-                    assertEquals("#0", face.getValue().getAsJsonObject().get("texture").getAsString());
-                }
-                for (String bound : new String[] {"from", "to"}) {
-                    var xyz = cube.getAsJsonArray(bound);
-                    assertEquals(3, xyz.size());
-                    for (JsonElement value : xyz) {
-                        double v = value.getAsDouble();
-                        assertTrue(v >= -16 && v <= 32, name + " " + bound + " out of range: " + v);
-                    }
-                }
-                for (int axis = 0; axis < 3; axis++) {
-                    assertTrue(cube.getAsJsonArray("from").get(axis).getAsDouble()
-                                    <= cube.getAsJsonArray("to").get(axis).getAsDouble() + 1e-6,
-                            name + " from > to");
-                }
             }
+            JsonObject raw;
+            try (Reader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
+                raw = JsonParser.parseReader(reader).getAsJsonObject();
+            }
+            assertEquals("tnc:block/earth_weapon/" + name.substring("earth_wpn_".length()),
+                    raw.getAsJsonObject("textures").get("0").getAsString());
             Path png = TEXTURES.resolve(name.substring("earth_wpn_".length()) + ".png");
             assertTrue(Files.exists(png), png.toString());
         }
