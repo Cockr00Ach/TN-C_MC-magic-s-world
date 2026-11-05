@@ -16,7 +16,7 @@
         "particle_id": "minecraft:electric_spark",
         "shape": "CIRCLE",
         "origin": "FEET",
-        "count": 8,
+        "count": 4,
         "min_speed": 0.03,
         "max_speed": 0.12
       }

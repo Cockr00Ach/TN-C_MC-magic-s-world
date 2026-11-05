@@ -33,7 +33,7 @@ public final class InkCelestialDragonRenderer extends EntityRenderer<InkCelestia
     @Override public boolean shouldRender(InkCelestialDragonEntity e,net.minecraft.client.renderer.culling.Frustum f,double x,double y,double z){
         // Cull using the full animated dragon, never its small vanilla entity box.
         // In particular, do not submit an off-screen dragon to every shadow pass.
-        return f.isVisible(e.getBoundingBoxForCulling());
+        return !InkDragonDistantView.ownsTrackedPass()&&f.isVisible(e.getBoundingBoxForCulling());
     }
     @SubscribeEvent public static void reload(RegisterClientReloadListenersEvent event){
         event.registerReloadListener((ResourceManagerReloadListener)resources->Minecraft.getInstance().execute(()->{MESHES.clear();data=null;}));

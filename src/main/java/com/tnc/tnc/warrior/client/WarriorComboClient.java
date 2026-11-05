@@ -104,7 +104,11 @@ public final class WarriorComboClient {
         }
         WarriorWeaponFamily family = heldFamily();
         return ComboTracker.progressOfInputs(inputs(),
-                family == null ? WarriorCombos.all() : WarriorCombos.forFamily(family));
+                family == null ? WarriorCombos.all() : WarriorCombos.forFamily(family).stream().map(WarriorComboClient::heldVariant).toList());
+    }
+    public static WarriorSkill heldVariant(WarriorSkill skill) {
+        var player=Minecraft.getInstance().player;
+        return player==null || skill==null?skill:com.tnc.tnc.warrior.WarriorPerformance.forWeapon(skill,player.getMainHandItem());
     }
 
     /** 服务端快照还"新鲜"吗（超过输入窗口就当作连招已断）。 */
@@ -114,7 +118,7 @@ public final class WarriorComboClient {
 
     /** 该连招剩余冷却（tick）。 */
     public static int cooldown(WarriorSkill skill) {
-        int index = WarriorCombos.all().indexOf(skill);
+        int index = WarriorCombos.indexOf(skill);
         if (index < 0 || index >= cooldowns.length) {
             return 0;
         }
@@ -124,7 +128,7 @@ public final class WarriorComboClient {
 
     /** 刚放出来的一招，HUD 用它闪一下。 */
     public static boolean flashing(WarriorSkill skill) {
-        int index = WarriorCombos.all().indexOf(skill);
+        int index = WarriorCombos.indexOf(skill);
         return index >= 0 && index == flashed && ticks - flashAt <= 10;
     }
 

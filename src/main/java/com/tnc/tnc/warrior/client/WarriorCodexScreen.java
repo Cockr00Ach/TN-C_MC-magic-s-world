@@ -167,7 +167,13 @@ public final class WarriorCodexScreen extends Screen {
         // 连招条目把顺序直接摆在行上：玩家一眼就能看到"这招要按哪几下"
         WarriorSkill combo = WarriorCombos.byCodexId(entry.id());
         String sequence = combo == null ? "" : " · " + combo.sequenceLabel();
-        return prefix + entry.name() + sequence + (entry.implemented() ? "" : " · 规划");
+        return prefix + entryName(entry) + sequence + (entry.implemented() ? "" : " · 规划");
+    }
+
+    private String entryName(Entry entry) {
+        var base=WarriorCombos.byCodexId(entry.id());
+        var move=WarriorComboClient.heldVariant(base);
+        return move==null || move==base?entry.name():move.name();
     }
 
     private static Progress progress() {
@@ -264,7 +270,7 @@ public final class WarriorCodexScreen extends Screen {
             return;
         }
         State state = entry.state(p);
-        g.drawString(this.font, fitLabel(entry.name(), width), x, top + 84, stateColor(state), false);
+        g.drawString(this.font, fitLabel(entryName(entry), width), x, top + 84, stateColor(state), false);
         g.drawString(this.font, fitLabel(entry.title(), width), x, top + 96, COLOR_DIM, false);
 
         String stateText = switch (state) {
@@ -340,7 +346,7 @@ public final class WarriorCodexScreen extends Screen {
     private List<Component> tooltip(Entry entry, Progress p) {
         List<Component> lines = new ArrayList<>();
         State state = entry.state(p);
-        lines.add(Component.literal(entry.name() + "（" + entry.title() + "）"));
+        lines.add(Component.literal(entryName(entry) + "（" + entry.title() + "）"));
         lines.add(Component.literal(switch (state) {
             case MET -> "§a已开放";
             case ONGOING -> "§e进行中 " + entry.percent(p) + "%";
@@ -349,6 +355,8 @@ public final class WarriorCodexScreen extends Screen {
         lines.add(Component.literal("§7" + entry.effect()));
         WarriorSkill combo = WarriorCombos.byCodexId(entry.id());
         if (combo != null) {
+            combo=WarriorComboClient.heldVariant(combo);
+            lines.add(Component.literal("§7"+combo.finisherText()));
             lines.add(Component.literal("§b槽位 " + (combo.slot() + 1) + " / " + WarriorSkill.LOADOUT_SLOTS
                     + " · " + combo.chain().cn() + " · 连招 " + combo.sequenceLabel()
                     + " · 冷却 " + combo.cooldownSeconds() + " 秒"));

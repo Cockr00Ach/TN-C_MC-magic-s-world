@@ -77,7 +77,8 @@ public class TNMagicCircleRenderer extends EntityRenderer<TNMagicCircleEntity> {
      */
     private static ResourceLocation textureFor(TNMagicCircleEntity entity) {
         int style = entity.style();
-        if (style == TNMagicCircleEntity.STYLE_LIGHT) {
+        if (style == TNMagicCircleEntity.STYLE_LIGHT
+                || style == TNMagicCircleEntity.STYLE_LIGHT_SKY) {
             return LIGHT_TEXTURE;
         }
         if (style == TNMagicCircleEntity.STYLE_DARK || style == TNMagicCircleEntity.STYLE_DARK_RITUAL) {
@@ -93,7 +94,9 @@ public class TNMagicCircleRenderer extends EntityRenderer<TNMagicCircleEntity> {
     public void render(TNMagicCircleEntity entity, float entityYaw, float partialTick, PoseStack poseStack,
                        MultiBufferSource buffer, int packedLight) {
         if(entity.style()==TNMagicCircleEntity.STYLE_DARK_HAND)return;
-        if(entity.style()==TNMagicCircleEntity.STYLE_WIND||entity.style()==TNMagicCircleEntity.STYLE_LIGHT){ElementSealRenderer.render(entity,partialTick,poseStack,buffer);return;}
+        if(entity.style()==TNMagicCircleEntity.STYLE_WIND
+                ||entity.style()==TNMagicCircleEntity.STYLE_LIGHT
+                ||entity.style()==TNMagicCircleEntity.STYLE_LIGHT_SKY){ElementSealRenderer.render(entity,partialTick,poseStack,buffer);return;}
         if(entity.style()==TNMagicCircleEntity.STYLE_EARTH){EarthSealRenderer.render(entity,partialTick,poseStack,buffer);return;}
         float age = entity.tickCount + partialTick;
         float life = Math.max(1.0F, entity.life());
@@ -161,6 +164,27 @@ public class TNMagicCircleRenderer extends EntityRenderer<TNMagicCircleEntity> {
         drawQuad(consumer, matrix, r, alpha, true);
 
         poseStack.popPose();
+
+        // ★★ 2026-11-05 雷网（作者："类似蛛网一样的雷网特效可以丰富我们的法阵"）✓
+        //   画在**贴图之后**、用**没有旋转的坐标**（上面那张面片已经被摊平/转过了 ✗）——
+        //   雷网是立体的（有高度抖动），所以必须回到实体原点、用世界坐标画 ✓。
+        if (!wave && entity.style() == TNMagicCircleEntity.STYLE_LIGHTNING) {
+            net.minecraft.world.phys.Vec3 at = entity.getPosition(partialTick);
+            net.minecraft.world.phys.Vec3 cam =
+                    net.minecraft.client.Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
+            poseStack.pushPose();
+            com.tnc.tnc.client.lightning.LightningBoltGeometry.groundWeb(
+                    buffer.getBuffer(com.tnc.tnc.client.lightning.LightningRenderTypes.BOLT),
+                    poseStack.last().pose(),
+                    0.0D, 0.06D, 0.0D, (float) (radius * 0.98D),
+                    // 种子每 2 tick 换一次 ⇒ 雷网在"滋滋"地爬，而不是一张静止的贴图 ✓
+                    entity.getId() * 31L + entity.tickCount / 2,
+                    entity.theme(), alpha * 0.85F,
+                    age * 0.012F,
+                    cam.x - at.x, cam.y - at.y, cam.z - at.z, true);
+            poseStack.popPose();
+        }
+
         super.render(entity, entityYaw, partialTick, poseStack, buffer, packedLight);
     }
 

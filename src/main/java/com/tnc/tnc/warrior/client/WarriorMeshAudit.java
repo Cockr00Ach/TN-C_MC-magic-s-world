@@ -19,7 +19,7 @@ import net.minecraftforge.fml.common.Mod;
 public final class WarriorMeshAudit {
     private static int boot, scene, frame;
     private static volatile boolean saving;
-    private static final String[] NAMES = {"sword-base", "sword-phantom", "dragon-phantom", "air-blade", "ground-wave", "dragon-left", "dragon-render"};
+    private static final String[] NAMES = {"sword-base", "sword-phantom", "dragon-phantom", "air-blade", "ground-wave", "dragon-left", "dragon-render", "first-person-right", "first-person-left"};
     @SubscribeEvent public static void tick(TickEvent.ClientTickEvent event) {
         if (!Boolean.getBoolean("tnc.warriorMeshAudit") || event.phase != TickEvent.Phase.END) return;
         var mc = Minecraft.getInstance();
@@ -31,13 +31,16 @@ public final class WarriorMeshAudit {
         mc.options.pauseOnLostFocus = false;
         mc.options.hideGui = true;
         // 第 7 幕看的是"龙在身后飞出去"，所以从背后拍；其余几幕从正面拍手上的刃
-        mc.options.setCameraType(scene == 6 ? CameraType.THIRD_PERSON_BACK : CameraType.THIRD_PERSON_FRONT);
+        mc.options.setCameraType(scene >= 7 ? CameraType.FIRST_PERSON : scene == 6 ? CameraType.THIRD_PERSON_BACK : CameraType.THIRD_PERSON_FRONT);
         mc.player.setYRot(0); mc.player.setXRot(12); mc.player.yBodyRot = 0; mc.player.yHeadRot = 0;
-        mc.player.setMainArm(scene == 5 ? net.minecraft.world.entity.HumanoidArm.LEFT : net.minecraft.world.entity.HumanoidArm.RIGHT);
+        mc.player.setMainArm((scene == 5 || scene == 8) ? net.minecraft.world.entity.HumanoidArm.LEFT : net.minecraft.world.entity.HumanoidArm.RIGHT);
         mc.player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,
-                new ItemStack(scene == 2 || scene == 5 || scene == 6 ? TNMod.DRAGON_SWORD.get() : Items.IRON_SWORD));
+                new ItemStack(scene == 2 || scene == 5 || scene >= 6 ? TNMod.DRAGON_SWORD.get() : Items.IRON_SWORD));
         TemperingClient.accept(new TemperingPacket(true, scene == 0 ? 0 : 10000, 6));
         frame++;
+        if(frame==30 && scene!=3 && scene!=4 && scene!=6)
+            WarriorAnimationClient.accept(mc.player.getId(),com.tnc.tnc.warrior.WarriorAnimation.SLASH_HORIZONTAL,20);
+
         if (frame == 35 && (scene == 3 || scene == 4)) {
             boolean ground = scene == 4;
             Vec3 origin = mc.player.position().add(-2.8, ground ? .12 : .9, 1.1);

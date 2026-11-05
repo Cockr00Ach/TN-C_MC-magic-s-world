@@ -34,15 +34,20 @@ public final class WarriorPose {
         if (active == null) {
             return;
         }
-        float t = active.progress(Minecraft.getInstance().getFrameTime());
+        float raw = active.progress(Minecraft.getInstance().getFrameTime());
+        var family=WarriorWeapons.family(player.getMainHandItem());
+        float t = WarriorHeavyMotion.progress(active.animation(),family,active.hold(),raw);
         boolean leftHanded = player.getMainArm() == HumanoidArm.LEFT;
-        WarriorComboAnimations.Clip clip = WarriorComboAnimations.clip(active.animation());
+        WarriorComboAnimations.Clip clip = WarriorMartialClips.clip(active.animation(),player.getMainHandItem());
         float weight=active.weight(Minecraft.getInstance().getFrameTime());
         if (clip != null) {
             applyClip(model, clip, t, leftHanded,weight);
+            brace(model,active,family,raw,weight);
             return;
         }
-        WarriorPoseMath.Pose pose = WarriorPoseMath.of(active.animation(), t, leftHanded);
+        WarriorPoseMath.Pose pose = family==com.tnc.tnc.warrior.WarriorWeaponFamily.HAMMER
+                ?WarriorHammerGrowth.fallbackPose(active.animation(),t,leftHanded)
+                :WarriorPoseMath.of(active.animation(), t, leftHanded);
 
         model.rightArm.xRot = WarriorMotionBlend.angle(model.rightArm.xRot,pose.rightArmX(),weight);
         model.rightArm.yRot = WarriorMotionBlend.angle(model.rightArm.yRot,pose.rightArmY(),weight);
@@ -60,6 +65,17 @@ public final class WarriorPose {
         model.leftLeg.xRot += pose.leftLegX()*weight;
 
         if(weight>=.999f)twoHandedSupport(player, model, pose, leftHanded);
+        brace(model,active,family,raw,weight);
+    }
+
+    private static void brace(HumanoidModel<?> model,WarriorAnimationClient.Active active,
+            com.tnc.tnc.warrior.WarriorWeaponFamily family,float raw,float weight){
+        if(!WarriorHeavyMotion.applies(active.animation(),family,active.hold()))return;
+        float load=WarriorHeavyMotion.brace(raw)*weight;
+        model.body.xRot+=load;
+        model.head.xRot-=load*.35f;
+        model.rightLeg.xRot+=load*.65f;
+        model.leftLeg.xRot-=load*.45f;
     }
 
     /**

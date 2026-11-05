@@ -35,6 +35,7 @@ public final class WarriorPerformance {
         return forId(skill,net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(stack.getItem()).toString());
     }
     public static WarriorSkill forId(WarriorSkill s,String id) {
+        if(WarriorMartialArts.supports(id))return WarriorMartialArts.adapt(s,id);
         if(!id.equals("tnc:doom_scythe"))return s;
         WarriorAnimation a=switch(s.slot()) {
             case 0->WarriorAnimation.SCYTHE_EXECUTE;case 1->WarriorAnimation.SCYTHE_GUARD;

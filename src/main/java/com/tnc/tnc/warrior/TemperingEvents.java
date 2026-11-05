@@ -47,12 +47,12 @@ public final class TemperingEvents {
         MagicStoneNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player),
             snapshot(player,open));
         MagicStoneNetwork.CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> player),
-            new WarriorPhantomPacket(player.getUUID(), (float)WarriorPhantom.scale(player)));
+            new WarriorPhantomPacket(player.getUUID(), (float)WarriorPhantom.scale(player),TemperingData.get(player.server).points(player.getUUID())));
     }
     @SubscribeEvent public static void tracking(PlayerEvent.StartTracking e) {
         if (e.getEntity() instanceof ServerPlayer observer && e.getTarget() instanceof ServerPlayer target)
             MagicStoneNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(() -> observer),
-                new WarriorPhantomPacket(target.getUUID(), (float)WarriorPhantom.scale(target)));
+                new WarriorPhantomPacket(target.getUUID(), (float)WarriorPhantom.scale(target),TemperingData.get(target.server).points(target.getUUID())));
     }
     @SubscribeEvent public static void login(PlayerEvent.PlayerLoggedInEvent e) { if(e.getEntity() instanceof ServerPlayer p) sync(p); }
     @SubscribeEvent public static void respawn(PlayerEvent.PlayerRespawnEvent e) { if(e.getEntity() instanceof ServerPlayer p) sync(p); }

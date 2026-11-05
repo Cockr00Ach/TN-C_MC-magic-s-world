@@ -33,7 +33,19 @@ WEAPONS = {
     "earthshaker_hammer": "brown",
     "crimson_warblade": "crimson",
     "star_rapier": "silver",
+    "crescent_guandao": "amber",
+    "fangtian_ji": "grey",
+    "han_iron_jian": "silver",
+    "iron_jian_mace": "brown",
+    "monk_spade": "basalt",
+    "qimei_staff": "brown",
+    "red_tassel_spear": "crimson",
+    "ring_pommel_dao": "grey",
+    "willow_leaf_dao": "pale",
+    "yue_bronze_jian": "amber",
 }
+
+FACES = {"north", "south", "east", "west", "up", "down"}
 
 TINTS = {
     "amber": (1.18, 0.95, 0.62),
@@ -86,6 +98,32 @@ def recentre(model: dict) -> None:
         e["from"], e["to"] = lo, hi
 
 
+def check(model: dict, name: str) -> None:
+    """Mirror the checks vanilla's BlockElement deserializer performs."""
+    els = model["elements"]
+    if not els:
+        raise SystemExit(f"{name}: no elements")
+    for i, e in enumerate(els):
+        faces = e.get("faces") or {}
+        if not 1 <= len(faces) <= 6:
+            raise SystemExit(f"{name}[{i}]: {len(faces)} faces")
+        bad = set(faces) - FACES
+        if bad:
+            raise SystemExit(f"{name}[{i}]: bad faces {bad}")
+        for side, face in faces.items():
+            if "uv" not in face:
+                raise SystemExit(f"{name}[{i}].{side}: no uv")
+            if not str(face.get("texture", "")).startswith("#"):
+                raise SystemExit(f"{name}[{i}].{side}: bad texture {face.get('texture')}")
+        for axis in range(3):
+            for bound in ("from", "to"):
+                v = e[bound][axis]
+                if not -16 - 1e-6 <= v <= 32 + 1e-6:
+                    raise SystemExit(f"{name}[{i}].{bound}[{axis}]={v} out of range")
+            if e["from"][axis] > e["to"][axis] + 1e-6:
+                raise SystemExit(f"{name}[{i}]: from > to on axis {axis}")
+
+
 def main() -> None:
     OUT_MODELS.mkdir(parents=True, exist_ok=True)
     OUT_TEXTURES.mkdir(parents=True, exist_ok=True)
@@ -97,19 +135,23 @@ def main() -> None:
             OUT_TEXTURES / f"{name}.png")
 
         model = json.loads((ITEMS / f"{name}.json").read_text(encoding="utf-8"))
+        # vanilla refuses an element with zero faces; such cubes are invisible anyway
+        dropped = sum(1 for e in model["elements"] if not e.get("faces"))
+        model["elements"] = [e for e in model["elements"] if e.get("faces")]
         recentre(model)
         tex = f"tnc:block/earth_weapon/{name}"
         model["textures"] = {"0": tex, "particle": tex}
-        for key in ("display", "credit", "tnc_grip", "texture_size"):
+        for key in ("display", "credit", "tnc_grip", "texture_size", "parent", "gui_light", "overrides"):
             model.pop(key, None)
         model["ambientocclusion"] = True
         for e in model["elements"]:
             for face in e["faces"].values():
                 face["texture"] = "#0"
+        check(model, name)
 
         out = OUT_MODELS / f"earth_wpn_{name}.json"
         out.write_text(json.dumps(model, separators=(",", ":")), encoding="utf-8")
-        print(f"{name:24s} els={len(model['elements']):5d} -> {out.stat().st_size / 1024:7.1f} KB")
+        print(f"{name:24s} els={len(model['elements']):5d} dropped={dropped:3d} -> {out.stat().st_size / 1024:7.1f} KB")
 
 
 if __name__ == "__main__":

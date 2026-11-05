@@ -19,6 +19,8 @@ import net.minecraft.world.level.Level;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.AnimatableManager;
+import software.bernie.geckolib.core.animation.AnimationController;
+import software.bernie.geckolib.core.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 /**
@@ -111,7 +113,10 @@ public class TNAngelEntity extends Monster implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        // 静态模型：没有动画文件，也不播动作 ✓
+        // 2026-11-05：从"完全静止的雕像"改成缓慢的降临呼吸 —— 身体浮沉、衣摆/头微摆、
+        // 光环自转、翅膀轻扇；幅度刻意很小，远看仍是一尊庄严的天使，不会像生物一样乱动。
+        controllers.add(new AnimationController<>(this, "idle", 0,
+                state -> state.setAndContinue(RawAnimation.begin().thenLoop("idle"))));
     }
 
     @Override

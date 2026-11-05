@@ -79,6 +79,7 @@ public final class WarriorComboHud {
     }
 
     private static void drawSlot(GuiGraphics graphics, Minecraft minecraft, WarriorSkill skill, int x, int y) {
+        skill=WarriorComboClient.heldVariant(skill);
         boolean unlocked = skill != null && WarriorCombos.unlocked(skill, TemperingClient.progress());
         // 整格不透明：法术栏在"副手带使用动作"时仍可能露一格在正中，这里要盖住它
         graphics.fill(x, y, x + SLOT_W, y + SLOT_H, COLOR_BG);
@@ -170,7 +171,7 @@ public final class WarriorComboHud {
             return null;
         }
         var list = WarriorCombos.forFamily(family);
-        return list.isEmpty() ? null : list.get(0);
+        return list.isEmpty() ? null : WarriorComboClient.heldVariant(list.get(0));
     }
 
     /** 三条链的边框色：一眼能看出这格是突击/攻击/防御。 */

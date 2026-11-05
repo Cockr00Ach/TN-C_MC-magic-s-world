@@ -512,13 +512,16 @@ public final class TNLightBeamMechanics {
         for (int i = 0; i < spots.size(); i++) {
             Vec3 at = spots.get(i);
             double ground = groundY(level, at);
-            // ① 天上的阵（雷法那种线条型 ✓）—— 阵先亮，**1 秒后**光柱才落下 ✓
+            // ① 天上的阵 —— 和地上同一套白金光阵（STYLE_LIGHT_SKY：不往上长柱，改往下垂光幕）
             //    ★ 半径乘 sizeScale ✓（天使那发 t4：22.5 × 1.6 × 0.2 ≈ 7.2 格 ✓ = 缩小五倍 ✓）
+            int impactStyle = spell.tier() >= 4
+                    ? TNMagicCircleEntity.STYLE_LIGHT_GRAND
+                    : TNMagicCircleEntity.STYLE_LIGHT_MINOR;
             circle(level, at.x, ground + SKY_HEIGHT, at.z,
-                    spell.radius() * sizeScale * SKY_CIRCLE_SCALE, 0.0F);
+                    spell.radius() * sizeScale * SKY_CIRCLE_SCALE, 0.0F, true, impactStyle);
             // ② 地面也补一张阵，让"落点"看得见 ✓
             circle(level, at.x, ground + 0.04D, at.z,
-                    spell.radius() * sizeScale * SKY_CIRCLE_SCALE * 0.8D, 0.0F);
+                    spell.radius() * sizeScale * SKY_CIRCLE_SCALE * 0.8D, 0.0F, false, impactStyle);
             // ③ 光柱：等 SKY_DELAY + i*SKY_STAGGER 才落 ✓（t5 一根接一根 ✓）
             //    The marked location is immutable throughout the delay and beam lifetime.
             PENDING.add(new Pending(level, caster, new Vec3(at.x, ground + SKY_HEIGHT, at.z),
@@ -538,12 +541,14 @@ public final class TNLightBeamMechanics {
                 targets.size(), caster.getName().getString());
     }
 
-    private static void circle(ServerLevel level, double x, double y, double z, double radius, float yaw) {
+    private static void circle(ServerLevel level, double x, double y, double z,
+                               double radius, float yaw, boolean sky, int groundStyle) {
         TNMagicCircleEntity circle = TNOrbEntities.MAGIC_CIRCLE.get().create(level);
         if (circle == null) {
             return;
         }
-        circle.configure(radius, SKY_CIRCLE_LIFE, TNMagicCircleEntity.STYLE_STORM);
+        circle.configure(radius, SKY_CIRCLE_LIFE,
+                sky ? TNMagicCircleEntity.STYLE_LIGHT_SKY : groundStyle);
         circle.moveTo(x, y, z, yaw, 0.0F);
         level.addFreshEntity(circle);
     }
@@ -581,6 +586,13 @@ public final class TNLightBeamMechanics {
         beam.setFanOffset(fanOffset);
         beam.setShake(spell.shake());            // ★ 画面震动（作者 2026-10-01："并且加上画面震动"✓）
         level.addFreshEntity(beam);
+        // 枪口光：玩家自己放的光线在眼前炸一小簇 —— 不然光束是从“虚空”里突然开始的 ✗
+        if (!spell.sky() && caster instanceof ServerPlayer) {
+            level.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD,
+                    from.x, from.y - 0.15D, from.z, 18, 0.16D, 0.16D, 0.16D, 0.05D);
+            level.sendParticles(net.minecraft.core.particles.ParticleTypes.FIREWORK,
+                    from.x, from.y - 0.15D, from.z, 10, 0.12D, 0.12D, 0.12D, 0.03D);
+        }
         return beam;
     }
 

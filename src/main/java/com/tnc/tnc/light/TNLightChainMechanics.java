@@ -4,6 +4,7 @@ import com.tnc.tnc.combat.CombatTeams;
 import com.tnc.tnc.magic.TNEffects;
 import com.tnc.tnc.magic.TNMagicCircleEntity;
 import com.tnc.tnc.magic.TNOrbEntities;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -214,12 +215,9 @@ public final class TNLightChainMechanics {
         boolean playerCaster = caster instanceof ServerPlayer;
 
         // ① 法阵：半径 = 法术范围 ✓（作者："范围多大法阵多大"✓），用**光系**那张纯白贴图 ✓
-        TNMagicCircleEntity circle = TNOrbEntities.MAGIC_CIRCLE.get().create(level);
-        if (circle != null) {
-            circle.configure(spell.radius(), CIRCLE_LIFE, TNMagicCircleEntity.STYLE_LIGHT);
-            circle.moveTo(at.x, at.y + 0.04D, at.z, 0.0F, 0.0F);
-            level.addFreshEntity(circle);
-        }
+        //    ★ 2026-11-05：不再只铺一张 ✗ —— 主阵周围再铺 3~7 张小阵（读条时客户端也会画一套仪式场 ✓）。
+        //      小阵的数量/位置和客户端 {@code LightRitualSequence} 共用同一套规则 ✓。
+        spawnGraceArray(level, caster, at, spell.radius(), spell.tier());
 
         // ② 队友：立刻回血 + 挂减伤 buff（施法者自己一定算 ✓）
         //    ★ 作者 2026-10-01："新做了一个阿波罗 boss…就跟公孙衍迷失一样，能放玩家的法术" ✓
@@ -326,11 +324,117 @@ public final class TNLightChainMechanics {
      *   <li>不同档的天使可以共存 ✓（放完 t5 再放 t1，两只一起飞 ✓ —— 这正是"链"该有的样子 ✓）。</li>
      * </ul>
      */
+    /**
+     * 光耀的<b>整座仪式阵</b>：主阵 ＋ 3~7 颗小阵 ＋（t3 起）身后一枚竖立光环 ✓。
+     *
+     * <p>2026-11-05 作者：「不是每次就一个法阵吗，我希望有更多的小法阵」✓ ——
+     * 以前这里只有一张半径 = 范围的阵 ✗，释放完就没了；现在释放瞬间能同时看到
+     * <b>主阵 ＋ 两圈小阵</b>，每颗小阵半径 1~2.8 格、寿命比主阵短，会先淡出 ✓。
+     *
+     * <p>数量/轨道/大小全部来自 {@link LightRitualSequence} —— 和客户端读条时画的那套
+     * 是同一份规则 ⇒ 读条时小阵的位置，和释放后真正铺下的小阵位置对得上 ✓（“仪式完成”）。
+     */
+    private static void spawnGraceArray(ServerLevel level, LivingEntity caster, Vec3 at,
+                                        double radius, int tier) {
+        // 主阵：低阶用“简阵”，t3 用标准阵，t4/t5 用高阶阵 —— 和客户端读条是同一套档位规则
+        int mainStyle = switch (LightRitualSequence.rite(tier)) {
+            case INSCRIPTION -> TNMagicCircleEntity.STYLE_LIGHT_MINOR;
+            case SANCTUARY -> TNMagicCircleEntity.STYLE_LIGHT;
+            case DESCENT -> TNMagicCircleEntity.STYLE_LIGHT_GRAND;
+        };
+        spawnLightCircle(level, at.x, at.y + 0.04D, at.z, radius, CIRCLE_LIFE, false, 0.0F, mainStyle);
+
+        int count = LightRitualSequence.satelliteSeals(tier);
+        double yaw = Math.toRadians(caster.getYRot());
+        for (int i = 0; i < count; i++) {
+            double orbit = radius * LightRitualSequence.satelliteOrbitFraction(i);
+            double angle = yaw + LightRitualSequence.satelliteAngle(tier, i);
+            double size = Math.max(1.0D, Math.min(2.8D,
+                    radius * LightRitualSequence.satelliteSizeFraction(tier) * 1.55D));
+            int life = 80 + tier * 12;                 // 比主阵短：小阵先退场，主阵最后收 ✓
+            spawnLightCircle(level,
+                    at.x + Math.cos(angle) * orbit,
+                    at.y + 0.04D,
+                    at.z + Math.sin(angle) * orbit,
+                    size, life, false, 0.0F, TNMagicCircleEntity.STYLE_LIGHT_MINOR);
+        }
+
+        // t3 起：身后立起竖环；t4/t5 是 2/3 道，左右排开 —— 低阶一张都没有。
+        int halos = LightRitualSequence.uprightHalos(tier);
+        if (halos > 0) {
+            Vec3 look = caster.getLookAngle();
+            Vec3 flat = new Vec3(look.x, 0.0D, look.z);
+            flat = flat.lengthSqr() < 1.0E-4D ? new Vec3(0.0D, 0.0D, 1.0D) : flat.normalize();
+            Vec3 right = new Vec3(-flat.z, 0.0D, flat.x);
+            for (int i = 0; i < halos; i++) {
+                double side = (i - (halos - 1) * 0.5D) * 1.18D;
+                Vec3 halo = at.add(0.0D, 2.15D + tier * 0.18D + Math.abs(side) * 0.12D, 0.0D)
+                        .subtract(flat.scale(0.75D + Math.abs(side) * 0.10D))
+                        .add(right.scale(side));
+                float facing = (float) Math.toDegrees(Math.atan2(at.x - halo.x, at.z - halo.z));
+                spawnLightCircle(level, halo.x, halo.y, halo.z,
+                        1.9D + tier * 0.18D - Math.abs(side) * 0.08D, 160, true, facing,
+                        TNMagicCircleEntity.STYLE_LIGHT);
+            }
+        }
+
+        lightReleaseParticles(level, at, radius, tier);
+        LOGGER.info("TN-C/light: 光耀仪式阵 radius={} tier={} satellites={} halos={} at={}",
+                radius, tier, count, halos, at);
+    }
+
+    /** 光系档位 → 地面主阵的样式（低阶简阵 / 中阶标准 / 高阶重阵）。 */
+    private static int circleStyle(int tier) {
+        return switch (LightRitualSequence.rite(tier)) {
+            case INSCRIPTION -> TNMagicCircleEntity.STYLE_LIGHT_MINOR;
+            case SANCTUARY -> TNMagicCircleEntity.STYLE_LIGHT;
+            case DESCENT -> TNMagicCircleEntity.STYLE_LIGHT_GRAND;
+        };
+    }
+
+    /** 铺一张光系法阵（地面或竖立）。不逐张打日志 —— 一次光耀最多 9 张，刷屏 ✗。 */
+    private static void spawnLightCircle(ServerLevel level, double x, double y, double z,
+                                         double radius, int life, boolean upright, float facing,
+                                         int style) {
+        TNMagicCircleEntity circle = TNOrbEntities.MAGIC_CIRCLE.get().create(level);
+        if (circle == null) {
+            return;
+        }
+        circle.configure(radius, life, style, upright, facing);
+        circle.moveTo(x, y, z, 0.0F, 0.0F);
+        level.addFreshEntity(circle);
+    }
+
+    /**
+     * 释放瞬间的<b>光污染</b>粒子：一大圈向外飞的白光点 ＋ 中心金色烟花 ＋ 一根竖直光柱 ✓。
+     *
+     * <p>这些是服务端广播的，所以<b>附近的玩家都能看见</b> ✓；客户端读条那套是自己算的，
+     * 两套叠起来才是“暴风雨终于落下来”的感觉 ✓。
+     */
+    private static void lightReleaseParticles(ServerLevel level, Vec3 at, double radius, int tier) {
+        level.sendParticles(ParticleTypes.END_ROD, at.x, at.y + 1.0D, at.z,
+                36 + tier * 12, radius * 0.32D, 0.75D, radius * 0.32D, 0.055D);
+        level.sendParticles(ParticleTypes.FIREWORK, at.x, at.y + 1.35D, at.z,
+                18 + tier * 6, 0.85D, 0.75D, 0.85D, 0.14D);
+        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y + 2.0D, at.z,
+                14 + tier * 4, 0.55D, 0.55D, 0.55D, 0.10D);
+        // 竖直光柱：从脚底往上每 0.7 格撒两点，读起来像一根“落下来的光”
+        for (int i = 0; i < 8 + tier * 2; i++) {
+            level.sendParticles(ParticleTypes.END_ROD, at.x, at.y + 0.6D + i * 0.7D, at.z,
+                    2, 0.12D, 0.03D, 0.12D, 0.01D);
+        }
+    }
+
     private static void castSummon(LivingEntity caster, Summon summon) {
         if (!(caster.level() instanceof ServerLevel level)) {
             return;
         }
         Vec3 at = caster.position();
+        // ★ 2026-11-05：召唤链也铺阵 ✓ —— 主阵 3~4.6 格 ＋ 每只天使脚下一枚 1.2~1.6 格小阵。
+        //   以前召唤链一张阵都没有 ✗，作者要“更多的小法阵” ⇒ 这里正好一只天使 = 一个圆 ✓。
+        spawnLightCircle(level, at.x, at.y + 0.04D, at.z,
+                3.2D + summon.tier() * 0.28D, 110, false, 0.0F, circleStyle(summon.tier()));
+        lightReleaseParticles(level, at, 5.0D, summon.tier());
         List<TNFightingAngelEntity> mine = level.getEntitiesOfClass(TNFightingAngelEntity.class,
                 new AABB(at, at).inflate(64.0D),
                 a -> caster.getUUID().equals(a.owner()));
@@ -370,6 +474,13 @@ public final class TNLightChainMechanics {
                     caster.getX() + Math.cos(angle) * radius,
                     caster.getY() + 1.0D,
                     caster.getZ() + Math.sin(angle) * radius);
+            // 天使落点的小法阵（半径随档位 1.2~1.6 格），寿命和天使的落地闪光差不多 ✓
+            spawnLightCircle(level,
+                    caster.getX() + Math.cos(angle) * radius,
+                    caster.getY() + 0.04D,
+                    caster.getZ() + Math.sin(angle) * radius,
+                    1.2D + summon.tier() * 0.08D, 90, false, 0.0F,
+                    TNMagicCircleEntity.STYLE_LIGHT_MINOR);
         }
 
         if (caster instanceof ServerPlayer player) {
@@ -410,6 +521,14 @@ public final class TNLightChainMechanics {
                 x, y + 1.0D, z, SUMMON_FLASH_PARTICLES, 0.4D, 0.7D, 0.4D, 0.05D);
         level.sendParticles(net.minecraft.core.particles.ParticleTypes.FIREWORK,
                 x, y + 1.0D, z, 24, 0.3D, 0.5D, 0.3D, 0.08D);
+        // ★ 天降光柱：一根从 ~11 格高落到脚边的粒子柱 —— 天使不是"刷"出来的，是"落"下来的 ✓
+        level.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD,
+                x, y + 5.5D, z, 36, 0.28D, 5.2D, 0.28D, 0.0D);
+        // 落地一圈压低的白光 + 金火花 ✓
+        level.sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD,
+                x, y + 0.25D, z, 28, 0.60D, 0.15D, 0.60D, 0.02D);
+        level.sendParticles(net.minecraft.core.particles.ParticleTypes.FIREWORK,
+                x, y + 0.35D, z, 18, 0.40D, 0.15D, 0.40D, 0.03D);
     }
 
     /** 队友 = 同一个 {@link CombatTeams#group} ✓（自己也算 ✓）；怪物施法没有队伍 ⇒ 只算自己 ✓。 */

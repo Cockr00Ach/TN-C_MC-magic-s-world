@@ -170,11 +170,13 @@ public final class WarriorAnimationClient {
             turn=WarriorMotionBlend.root(turn,active.weight(net.minecraft.client.Minecraft.getInstance().getFrameTime()));
             return player.getMainArm() == net.minecraft.world.entity.HumanoidArm.LEFT ? -turn : turn;
         }
-        WarriorComboAnimations.Clip clip = WarriorComboAnimations.clip(active.animation());
+        WarriorComboAnimations.Clip clip = WarriorMartialClips.clip(active.animation(),player.getMainHandItem());
         if (clip == null || !clip.moves("bone")) {
             return 0f;
         }
-        float t = active.progress(net.minecraft.client.Minecraft.getInstance().getFrameTime());
+        float t = WarriorHeavyMotion.progress(active.animation(),
+                com.tnc.tnc.warrior.WarriorWeapons.family(player.getMainHandItem()),active.hold(),
+                active.progress(net.minecraft.client.Minecraft.getInstance().getFrameTime()));
         float seconds = Math.max(0f, Math.min(1f, t)) * clip.lengthSeconds();
         return WarriorMotionBlend.root(WarriorPose.rootYaw(clip, seconds,
                 player.getMainArm() == net.minecraft.world.entity.HumanoidArm.LEFT),active.weight(net.minecraft.client.Minecraft.getInstance().getFrameTime()));

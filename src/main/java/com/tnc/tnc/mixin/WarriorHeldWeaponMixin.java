@@ -15,12 +15,22 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /** Shares the weapon's actual mount for either hand, including poses provided by other render layers. */
 @Mixin(ItemInHandRenderer.class)
 public abstract class WarriorHeldWeaponMixin {
+    @Inject(method="renderItem(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemDisplayContext;ZLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", at=@At("HEAD"))
+    private void tnc$firstPersonPose(LivingEntity entity, ItemStack stack, ItemDisplayContext context, boolean left,
+            PoseStack pose, MultiBufferSource buffers, int light, CallbackInfo callback) {
+        pose.pushPose();
+        com.tnc.tnc.warrior.client.WarriorFirstPersonPose.apply(entity,stack,context,left,pose);
+        com.tnc.tnc.warrior.client.WarriorHammerGrowthRenderer.apply(entity,stack,context,left,pose);
+    }
+
     @Inject(method="renderItem(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemDisplayContext;ZLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V",
             at=@At("TAIL"))
     private void tnc$boundWeapon(LivingEntity entity, ItemStack stack, ItemDisplayContext context, boolean left,
             PoseStack pose, MultiBufferSource buffers, int light, CallbackInfo callback) {
         com.tnc.tnc.warrior.client.WarriorTrail.capture(entity,stack,context,left,pose);
+        com.tnc.tnc.warrior.client.WarriorTrail.renderFirstPerson(entity,context,left,buffers);
         WarriorPhantomRenderer.renderBound(entity, stack, context, left, pose, buffers, light);
         com.tnc.tnc.warrior.client.WarriorWeaponOrnamentRenderer.render(entity,stack,context,left,pose,buffers,light);
+        pose.popPose();
     }
 }

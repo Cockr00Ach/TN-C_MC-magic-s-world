@@ -57,7 +57,9 @@ class WarriorComboAnimationsTest {
                 WarriorAnimation.BOW_BACK_SHOT}) {
             assertNotNull(WarriorComboAnimations.clip(animation), "动作没有对应关键帧：" + animation);
         }
-        assertEquals(40, WarriorComboAnimations.all().size(),
+        long catalogClips=WarriorComboAnimations.all().keySet().stream()
+                .filter(name->WarriorMartialArts.ids().stream().noneMatch(id->name.startsWith(id+"_"))).count();
+        assertEquals(40, catalogClips,
                 "29 条连招、6 条镰刀变体和持续蓄弓：" + WarriorComboAnimations.all().keySet());
         // 单段挥砍仍然走程序化曲线
         assertEquals(null, WarriorComboAnimations.clip(WarriorAnimation.SLASH_LEFT));

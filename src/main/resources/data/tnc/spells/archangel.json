@@ -6,7 +6,7 @@
     "tier": 5
   },
   "cast": {
-    "duration": 1.6,
+    "duration": 3.2,
     "animation": "spell_engine:two_handed_channeling",
     "sound": {
       "id": "block.beacon.activate",

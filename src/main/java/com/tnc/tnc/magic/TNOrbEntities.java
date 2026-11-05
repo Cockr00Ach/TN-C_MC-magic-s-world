@@ -158,6 +158,54 @@ public final class TNOrbEntities {
                     .build("tnc:lightning_strike"));
 
     /**
+     * ★ 绕在施法者身上的一圈<b>雷笼</b>（作者 2026-11-05："类似蛛网一样的雷网特效，
+     * 可以丰富我们的法阵还有自身周围的特效" ✓）。
+     *
+     * <p>纯表现（{@link TNLightningAuraEntity}）：跟着主人走、不碰任何实体、不结算伤害 ✓。
+     * 碰撞箱 0.1 只是一颗"锚点"—— 5 格宽/高的雷笼全在渲染器里现画；
+     * 剔除盒在实体里覆盖过了，所以贴着它往上看也不会被视锥裁掉 ✓。
+     * <b>{@code updateInterval(1)}</b>：它每 tick 都要跟着人跑，10 tick 同步一次会"拖尾"✗。
+     */
+    public static final RegistryObject<EntityType<TNLightningAuraEntity>> LIGHTNING_AURA =
+            ENTITY_TYPES.register("lightning_aura", () -> EntityType.Builder
+                    .of(TNLightningAuraEntity::new, MobCategory.MISC)
+                    .sized(0.1F, 0.1F)
+                    .clientTrackingRange(10)
+                    .updateInterval(1)
+                    .build("tnc:lightning_aura"));
+
+    /**
+     * ★ <b>雷龙</b>（作者 2026-11-05："t5 砸下雷电之后，砸中的地面有龙直冲云霄"）。
+     *
+     * <p>纯表现（{@link TNLightningDragonEntity}）：钉在落点、按 {@code age} 沿螺旋冲上 50 多格，
+     * 模型由渲染器现画（几百个方块 ＋ 雷电勾线 ✓）。
+     * <b>{@code clientTrackingRange(16)}</b>：它比普通落雷大得多，站在 200 格外也应该看得见
+     * 天上那条发光的龙 ✓（渲染器里另有 131072 格² 的距离上限）。
+     */
+    public static final RegistryObject<EntityType<TNLightningDragonEntity>> LIGHTNING_DRAGON =
+            ENTITY_TYPES.register("lightning_dragon", () -> EntityType.Builder
+                    .of(TNLightningDragonEntity::new, MobCategory.MISC)
+                    .sized(0.1F, 0.1F)
+                    .clientTrackingRange(16)
+                    .updateInterval(2)
+                    .build("tnc:lightning_dragon"));
+
+    /**
+     * ★ <b>横向电弧</b>（作者 2026-11-05："闪电链的 t1 和 t3 怎么没特效一样"）。
+     *
+     * <p>纯表现（{@link TNLightningArcEntity}）：从实体位置拉一条雷电到 {@code +offset}，
+     * 活几 tick 就散。t1 电花／t3 雷击／雷锲链的节点间电弧都靠它 ✓。
+     * {@code updateInterval(20)}：它自己不动，端点只在生成时同步一次 ✓。
+     */
+    public static final RegistryObject<EntityType<TNLightningArcEntity>> LIGHTNING_ARC =
+            ENTITY_TYPES.register("lightning_arc", () -> EntityType.Builder
+                    .of(TNLightningArcEntity::new, MobCategory.MISC)
+                    .sized(0.1F, 0.1F)
+                    .clientTrackingRange(12)
+                    .updateInterval(20)
+                    .build("tnc:lightning_arc"));
+
+    /**
      * ★ 光系第二条链 t3/t4/t5 召唤的**光天使** ✓（作者 2026-10-01 做的 Bedrock 模型 ✓）。
      *
      * <p>它是 {@link com.tnc.tnc.light.TNAngelEntity}（GeckoLib 生物 ✓，纯雕像：无敌/无 AI/不推动别人 ✓）。

@@ -112,6 +112,27 @@ public class TNMod
             () -> new SwordItem(Tiers.IRON, 5, -3.2F, new Item.Properties().durability(1200)));
     public static final RegistryObject<Item> SKY_HALBERD = ITEMS.register("sky_halberd",
             () -> new SwordItem(Tiers.IRON, 5, -2.7F, new Item.Properties().durability(1100)));
+    // Traditional silhouettes share the established combat families and input flow.
+    public static final RegistryObject<Item> YUE_BRONZE_JIAN = ITEMS.register("yue_bronze_jian",
+            () -> new SwordItem(Tiers.IRON, 4, -2.2F, new Item.Properties().durability(720)));
+    public static final RegistryObject<Item> WILLOW_LEAF_DAO = ITEMS.register("willow_leaf_dao",
+            () -> new SwordItem(Tiers.IRON, 4, -2.0F, new Item.Properties().durability(800)));
+    public static final RegistryObject<Item> CRESCENT_GUANDAO = ITEMS.register("crescent_guandao",
+            () -> new SwordItem(Tiers.IRON, 6, -3.0F, new Item.Properties().durability(1100)));
+    public static final RegistryObject<Item> FANGTIAN_JI = ITEMS.register("fangtian_ji",
+            () -> new SwordItem(Tiers.IRON, 5, -2.8F, new Item.Properties().durability(1100)));
+    public static final RegistryObject<Item> RED_TASSEL_SPEAR = ITEMS.register("red_tassel_spear",
+            () -> new SwordItem(Tiers.IRON, 4, -2.5F, new Item.Properties().durability(900)));
+    public static final RegistryObject<Item> RING_POMMEL_DAO = ITEMS.register("ring_pommel_dao",
+            () -> new SwordItem(Tiers.IRON, 4, -2.3F, new Item.Properties().durability(900)));
+    public static final RegistryObject<Item> HAN_IRON_JIAN = ITEMS.register("han_iron_jian",
+            () -> new SwordItem(Tiers.IRON, 4, -2.2F, new Item.Properties().durability(850)));
+    public static final RegistryObject<Item> IRON_JIAN_MACE = ITEMS.register("iron_jian_mace",
+            () -> new SwordItem(Tiers.IRON, 5, -2.8F, new Item.Properties().durability(1250)));
+    public static final RegistryObject<Item> MONK_SPADE = ITEMS.register("monk_spade",
+            () -> new SwordItem(Tiers.IRON, 5, -2.9F, new Item.Properties().durability(1000)));
+    public static final RegistryObject<Item> QIMEI_STAFF = ITEMS.register("qimei_staff",
+            () -> new SwordItem(Tiers.IRON, 2, -2.1F, new Item.Properties().durability(700)));
     public static final RegistryObject<Item> CHAOS_SEAL = ITEMS.register("chaos_seal",
             com.tnc.tnc.magic.water.ChaosSilence.SealItem::new);
 
@@ -198,13 +219,22 @@ public class TNMod
                 output.accept(DRAGON_SWORD.get());
                 output.accept(FROST_KATANA.get());
                 output.accept(STAR_RAPIER.get());
+                output.accept(YUE_BRONZE_JIAN.get());
+                output.accept(WILLOW_LEAF_DAO.get());
+                output.accept(RING_POMMEL_DAO.get());output.accept(HAN_IRON_JIAN.get());
                 output.accept(GREATSWORD.get());
                 output.accept(CRIMSON_WARBLADE.get());
+                output.accept(CRESCENT_GUANDAO.get());
+                output.accept(MONK_SPADE.get());
                 output.accept(DOOM_SCYTHE.get());
                 output.accept(HAMMER.get());
                 output.accept(EARTHSHAKER_HAMMER.get());
+                output.accept(IRON_JIAN_MACE.get());
                 output.accept(SPEAR.get());
                 output.accept(SKY_HALBERD.get());
+                output.accept(FANGTIAN_JI.get());
+                output.accept(RED_TASSEL_SPEAR.get());
+                output.accept(QIMEI_STAFF.get());
                 output.accept(BOW.get());
                 output.accept(MOON_BOW.get());output.accept(STORM_BOW.get());output.accept(EMBER_BOW.get());
                 output.accept(MOON_ARROW.get());output.accept(STORM_ARROW.get());output.accept(EMBER_ARROW.get());

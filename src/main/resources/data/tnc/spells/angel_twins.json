@@ -6,7 +6,7 @@
     "tier": 2
   },
   "cast": {
-    "duration": 1.0,
+    "duration": 2.0,
     "animation": "spell_engine:one_handed_area_charge",
     "sound": {
       "id": "block.beacon.activate",

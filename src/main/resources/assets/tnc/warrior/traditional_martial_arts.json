@@ -1,0 +1,508 @@
+{
+  "yue_bronze_jian": {
+    "family": "LONGSWORD",
+    "moves": [
+      {
+        "name": "进步直刺",
+        "kind": "thrust",
+        "radius": 2.8,
+        "arc": 35,
+        "dash": 0,
+        "text": "进步直刺：收势送尖，步身与前刺同步"
+      },
+      {
+        "name": "提剑截腕",
+        "kind": "guard",
+        "radius": 3,
+        "arc": 110,
+        "dash": 0,
+        "text": "提剑截腕：提起兵器封住中线，按住末段保持架势"
+      },
+      {
+        "name": "压剑破架",
+        "kind": "press",
+        "radius": 3,
+        "arc": 110,
+        "dash": 0.25,
+        "text": "压剑破架：贴近中线压下兵器后短促前顶，专破振刀"
+      },
+      {
+        "name": "挂撩穿刺",
+        "kind": "liao",
+        "radius": 2.8,
+        "arc": 110,
+        "dash": 0.55,
+        "text": "挂撩穿刺：先挂开兵器，再由下向上撩起接刺"
+      },
+      {
+        "name": "退步点剑",
+        "kind": "retreat",
+        "radius": 2.8,
+        "arc": 110,
+        "dash": 0.55,
+        "text": "退步点剑：撤步避锋，回身截击"
+      },
+      {
+        "name": "剪腕回刺",
+        "kind": "wrist",
+        "radius": 2.8,
+        "arc": 110,
+        "dash": 0.55,
+        "text": "剪腕回刺：腕花换刃，点刺收锋"
+      }
+    ]
+  },
+  "willow_leaf_dao": {
+    "family": "LONGSWORD",
+    "moves": [
+      {
+        "name": "弓步劈刀",
+        "kind": "chop",
+        "radius": 2.9,
+        "arc": 110,
+        "dash": 0,
+        "text": "弓步劈刀：提起兵器蓄势，转腰斜劈收落"
+      },
+      {
+        "name": "抱刀护身",
+        "kind": "guard",
+        "radius": 3,
+        "arc": 110,
+        "dash": 0,
+        "text": "抱刀护身：提起兵器封住中线，按住末段保持架势"
+      },
+      {
+        "name": "压刀进斩",
+        "kind": "press",
+        "radius": 3,
+        "arc": 110,
+        "dash": 0.25,
+        "text": "压刀进斩：贴近中线压下兵器后短促前顶，专破振刀"
+      },
+      {
+        "name": "缠头裹脑",
+        "kind": "wrap",
+        "radius": 2.9,
+        "arc": 110,
+        "dash": 0.55,
+        "text": "缠头裹脑：贴肩绕背过刀，转腰接劈斩"
+      },
+      {
+        "name": "退步反撩",
+        "kind": "retreat",
+        "radius": 2.9,
+        "arc": 110,
+        "dash": 0.55,
+        "text": "退步反撩：撤步避锋，回身截击"
+      },
+      {
+        "name": "云刀横斩",
+        "kind": "cloud",
+        "radius": 2.9,
+        "arc": 230,
+        "dash": 0.55,
+        "text": "云刀横斩：举刀平云后转腰横斩"
+      }
+    ]
+  },
+  "crescent_guandao": {
+    "family": "GREATSWORD",
+    "moves": [
+      {
+        "name": "拖刀上劈",
+        "kind": "heavy",
+        "radius": 3.8,
+        "arc": 110,
+        "dash": 0,
+        "text": "拖刀上劈：沉腰提器，踏实下劈，留出重击回收"
+      },
+      {
+        "name": "横刀拦门",
+        "kind": "guard",
+        "radius": 3,
+        "arc": 110,
+        "dash": 0,
+        "text": "横刀拦门：提起兵器封住中线，按住末段保持架势"
+      },
+      {
+        "name": "沉刀压架",
+        "kind": "press",
+        "radius": 3,
+        "arc": 110,
+        "dash": 0.25,
+        "text": "沉刀压架：贴近中线压下兵器后短促前顶，专破振刀"
+      },
+      {
+        "name": "拦腰大斩",
+        "kind": "sweep",
+        "radius": 3.8,
+        "arc": 230,
+        "dash": 0.55,
+        "text": "拦腰大斩：转腰带动横向大扫，覆盖宽扇面"
+      },
+      {
+        "name": "回身拖劈",
+        "kind": "wrap",
+        "radius": 3.8,
+        "arc": 110,
+        "dash": 0.55,
+        "text": "回身拖劈：贴肩绕背过刀，转腰接劈斩"
+      },
+      {
+        "name": "提刀斩落",
+        "kind": "chop",
+        "radius": 3.8,
+        "arc": 110,
+        "dash": 0.55,
+        "text": "提刀斩落：提起兵器蓄势，转腰斜劈收落"
+      }
+    ]
+  },
+  "fangtian_ji": {
+    "family": "SPEAR",
+    "moves": [
+      {
+        "name": "中平戟刺",
+        "kind": "thrust",
+        "radius": 3.8,
+        "arc": 35,
+        "dash": 0,
+        "text": "中平戟刺：收势送尖，步身与前刺同步"
+      },
+      {
+        "name": "横戟架挡",
+        "kind": "guard",
+        "radius": 3,
+        "arc": 110,
+        "dash": 0,
+        "text": "横戟架挡：提起兵器封住中线，按住末段保持架势"
+      },
+      {
+        "name": "月牙压架",
+        "kind": "press",
+        "radius": 3,
+        "arc": 110,
+        "dash": 0.25,
+        "text": "月牙压架：贴近中线压下兵器后短促前顶，专破振刀"
+      },
+      {
+        "name": "勾挂回斩",
+        "kind": "hook",
+        "radius": 3.8,
+        "arc": 110,
+        "dash": 0.55,
+        "text": "勾挂回斩：月牙勾挂回收，再翻刃横带"
+      },
+      {
+        "name": "回身扫戟",
+        "kind": "sweep",
+        "radius": 3.8,
+        "arc": 230,
+        "dash": 0.55,
+        "text": "回身扫戟：转腰带动横向大扫，覆盖宽扇面"
+      }
+    ]
+  },
+  "red_tassel_spear": {
+    "family": "SPEAR",
+    "moves": [
+      {
+        "name": "拦拿扎枪",
+        "kind": "spear",
+        "radius": 4.0,
+        "arc": 35,
+        "dash": 0,
+        "text": "拦拿扎枪：枪尖外拦、内拿，收枪后中平送扎"
+      },
+      {
+        "name": "中平拦枪",
+        "kind": "guard",
+        "radius": 3,
+        "arc": 110,
+        "dash": 0,
+        "text": "中平拦枪：提起兵器封住中线，按住末段保持架势"
+      },
+      {
+        "name": "崩枪破架",
+        "kind": "press",
+        "radius": 3,
+        "arc": 110,
+        "dash": 0.25,
+        "text": "崩枪破架：贴近中线压下兵器后短促前顶，专破振刀"
+      },
+      {
+        "name": "进步穿枪",
+        "kind": "thrust",
+        "radius": 4.0,
+        "arc": 35,
+        "dash": 1.8,
+        "text": "进步穿枪：收势送尖，步身与前刺同步"
+      },
+      {
+        "name": "回马扎枪",
+        "kind": "return",
+        "radius": 4.0,
+        "arc": 35,
+        "dash": 0.55,
+        "text": "回马扎枪：转身收枪再回扎"
+      }
+    ]
+  },
+  "ring_pommel_dao": {
+    "family": "LONGSWORD",
+    "moves": [
+      {
+        "name": "进身斜劈",
+        "kind": "chop",
+        "radius": 2.9,
+        "arc": 110,
+        "dash": 0,
+        "text": "进身斜劈：提起兵器蓄势，转腰斜劈收落"
+      },
+      {
+        "name": "立刀格挡",
+        "kind": "guard",
+        "radius": 3,
+        "arc": 110,
+        "dash": 0,
+        "text": "立刀格挡：提起兵器封住中线，按住末段保持架势"
+      },
+      {
+        "name": "刀背压架",
+        "kind": "press",
+        "radius": 3,
+        "arc": 110,
+        "dash": 0.25,
+        "text": "刀背压架：贴近中线压下兵器后短促前顶，专破振刀"
+      },
+      {
+        "name": "连环劈斩",
+        "kind": "double",
+        "radius": 2.9,
+        "arc": 110,
+        "dash": 0.55,
+        "text": "连环劈斩：左右换势连打后收势"
+      },
+      {
+        "name": "撤步截刀",
+        "kind": "retreat",
+        "radius": 2.9,
+        "arc": 110,
+        "dash": 0.55,
+        "text": "撤步截刀：撤步避锋，回身截击"
+      },
+      {
+        "name": "翻腕上撩",
+        "kind": "liao",
+        "radius": 2.9,
+        "arc": 110,
+        "dash": 0.55,
+        "text": "翻腕上撩：先挂开兵器，再由下向上撩起接刺"
+      }
+    ]
+  },
+  "han_iron_jian": {
+    "family": "LONGSWORD",
+    "moves": [
+      {
+        "name": "弓步穿刺",
+        "kind": "thrust",
+        "radius": 3.1,
+        "arc": 35,
+        "dash": 0,
+        "text": "弓步穿刺：收势送尖，步身与前刺同步"
+      },
+      {
+        "name": "立剑截击",
+        "kind": "guard",
+        "radius": 3,
+        "arc": 110,
+        "dash": 0,
+        "text": "立剑截击：提起兵器封住中线，按住末段保持架势"
+      },
+      {
+        "name": "沉腕压剑",
+        "kind": "press",
+        "radius": 3,
+        "arc": 110,
+        "dash": 0.25,
+        "text": "沉腕压剑：贴近中线压下兵器后短促前顶，专破振刀"
+      },
+      {
+        "name": "左右挂撩",
+        "kind": "liao",
+        "radius": 3.1,
+        "arc": 110,
+        "dash": 0.55,
+        "text": "左右挂撩：先挂开兵器，再由下向上撩起接刺"
+      },
+      {
+        "name": "撤步回刺",
+        "kind": "retreat",
+        "radius": 3.1,
+        "arc": 110,
+        "dash": 0.55,
+        "text": "撤步回刺：撤步避锋，回身截击"
+      },
+      {
+        "name": "云剑点刺",
+        "kind": "wrist",
+        "radius": 3.1,
+        "arc": 110,
+        "dash": 0.55,
+        "text": "云剑点刺：腕花换刃，点刺收锋"
+      }
+    ]
+  },
+  "iron_jian_mace": {
+    "family": "HAMMER",
+    "moves": [
+      {
+        "name": "沉身劈锏",
+        "kind": "heavy",
+        "radius": 2.65,
+        "arc": 110,
+        "dash": 0,
+        "text": "沉身劈锏：沉腰提器，踏实下劈，留出重击回收"
+      },
+      {
+        "name": "横锏护门",
+        "kind": "guard",
+        "radius": 3,
+        "arc": 110,
+        "dash": 0,
+        "text": "横锏护门：提起兵器封住中线，按住末段保持架势"
+      },
+      {
+        "name": "短打破架",
+        "kind": "press",
+        "radius": 3,
+        "arc": 110,
+        "dash": 0.25,
+        "text": "短打破架：贴近中线压下兵器后短促前顶，专破振刀"
+      },
+      {
+        "name": "左右连打",
+        "kind": "double",
+        "radius": 2.65,
+        "arc": 110,
+        "dash": 0.55,
+        "text": "左右连打：左右换势连打后收势"
+      },
+      {
+        "name": "回身砸锏",
+        "kind": "chop",
+        "radius": 2.65,
+        "arc": 110,
+        "dash": 0.55,
+        "text": "回身砸锏：提起兵器蓄势，转腰斜劈收落"
+      },
+      {
+        "name": "提锏下压",
+        "kind": "heavy",
+        "radius": 2.65,
+        "arc": 110,
+        "dash": 0.55,
+        "text": "提锏下压：沉腰提器，踏实下劈，留出重击回收"
+      }
+    ]
+  },
+  "monk_spade": {
+    "family": "GREATSWORD",
+    "moves": [
+      {
+        "name": "推铲进击",
+        "kind": "thrust",
+        "radius": 3.7,
+        "arc": 35,
+        "dash": 0,
+        "text": "推铲进击：收势送尖，步身与前刺同步"
+      },
+      {
+        "name": "横铲封门",
+        "kind": "guard",
+        "radius": 3,
+        "arc": 110,
+        "dash": 0,
+        "text": "横铲封门：提起兵器封住中线，按住末段保持架势"
+      },
+      {
+        "name": "铲面压架",
+        "kind": "press",
+        "radius": 3,
+        "arc": 110,
+        "dash": 0.25,
+        "text": "铲面压架：贴近中线压下兵器后短促前顶，专破振刀"
+      },
+      {
+        "name": "月牙勾挂",
+        "kind": "hook",
+        "radius": 3.7,
+        "arc": 110,
+        "dash": 0.55,
+        "text": "月牙勾挂：月牙勾挂回收，再翻刃横带"
+      },
+      {
+        "name": "转身平扫",
+        "kind": "sweep",
+        "radius": 3.7,
+        "arc": 230,
+        "dash": 0.55,
+        "text": "转身平扫：转腰带动横向大扫，覆盖宽扇面"
+      },
+      {
+        "name": "抡铲下劈",
+        "kind": "heavy",
+        "radius": 3.7,
+        "arc": 110,
+        "dash": 0.55,
+        "text": "抡铲下劈：沉腰提器，踏实下劈，留出重击回收"
+      }
+    ]
+  },
+  "qimei_staff": {
+    "family": "SPEAR",
+    "moves": [
+      {
+        "name": "劈棍接戳",
+        "kind": "staff",
+        "radius": 3.5,
+        "arc": 110,
+        "dash": 0,
+        "text": "劈棍接戳：先抡劈，再收把平戳"
+      },
+      {
+        "name": "横棍架挡",
+        "kind": "guard",
+        "radius": 3,
+        "arc": 110,
+        "dash": 0,
+        "text": "横棍架挡：提起兵器封住中线，按住末段保持架势"
+      },
+      {
+        "name": "压棍破架",
+        "kind": "press",
+        "radius": 3,
+        "arc": 110,
+        "dash": 0.25,
+        "text": "压棍破架：贴近中线压下兵器后短促前顶，专破振刀"
+      },
+      {
+        "name": "立舞花棍",
+        "kind": "flower",
+        "radius": 3.5,
+        "arc": 230,
+        "dash": 0.55,
+        "text": "立舞花棍：立圆左右舞花，接棍端横击"
+      },
+      {
+        "name": "转身低扫",
+        "kind": "sweep",
+        "radius": 3.5,
+        "arc": 230,
+        "dash": 0.55,
+        "text": "转身低扫：转腰带动横向大扫，覆盖宽扇面"
+      }
+    ]
+  }
+}

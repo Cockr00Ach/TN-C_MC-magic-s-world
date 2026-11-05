@@ -7,7 +7,12 @@ import net.minecraft.world.phys.Vec3;
 public final class WarriorTrailVolume {
     public static final int NEAR_POINTS=96,FAR_POINTS=40,HISTORY=64;
     public record Point(Vec3 hilt,Vec3 tip,double at) {}
-    @FunctionalInterface public interface Sink {void quad(Vec3 a,Vec3 b,Vec3 c,Vec3 d,int color,float alphaA,float alphaB,float alphaC,float alphaD);}
+    @FunctionalInterface public interface Sink {
+        void quad(Vec3 a,Vec3 b,Vec3 c,Vec3 d,int color,float alphaA,float alphaB,float alphaC,float alphaD);
+        default void gradient(Vec3 a,Vec3 b,Vec3 c,Vec3 d,int ca,int cb,int cc,int cd,float aa,float ab,float ac,float ad){
+            quad(a,b,c,d,cb,aa,ab,ac,ad);
+        }
+    }
     private record Ring(Vec3 a,Vec3 b,Vec3 c,Vec3 d,Vec3 featherA,Vec3 featherB,Vec3 coreA,Vec3 coreB,float alpha) {}
     private WarriorTrailVolume() {}
     public static int maxQuads(int points){return Math.max(0,points-1)*7+2;}
@@ -63,23 +68,24 @@ public final class WarriorTrailVolume {
             Vec3 feather=p.hilt.add(blade.scale(ghostScale+.10));
             float alpha=(float)(intensity*fade*fade*(.25+.75*Math.min(1,(p.at-points.get(0).at)/55)));
             Ring ring=new Ring(inner.add(offset),outer.add(offset),outer.subtract(offset),inner.subtract(offset),
-                    feather.add(offset.scale(.2)),feather.subtract(offset.scale(.2)),p.hilt.lerp(p.tip,.90),p.hilt.lerp(p.tip,1.025),alpha);
+                    feather.add(offset.scale(.2)),feather.subtract(offset.scale(.2)),p.hilt.add(blade.scale(ghostScale-.065)),p.hilt.add(blade.scale(ghostScale+.015)),alpha);
             if(first==null)first=ring;
             if(previous!=null) {
-                Ring a=previous,b=ring;int color=style.shell();
-                sink.quad(a.a,a.b,b.b,b.a,color,a.alpha*.08f,a.alpha,b.alpha,b.alpha*.08f);
-                sink.quad(a.d,b.d,b.c,a.c,color,a.alpha*.08f,b.alpha*.08f,b.alpha,a.alpha);
+                Ring a=previous,b=ring;int color=style.shell(),base=style.base();
+                sink.gradient(a.a,a.b,b.b,b.a,base,color,color,base,a.alpha*.24f,a.alpha,b.alpha,b.alpha*.24f);
+                sink.gradient(a.d,b.d,b.c,a.c,base,base,color,color,a.alpha*.24f,b.alpha*.24f,b.alpha,a.alpha);
                 sink.quad(a.b,a.c,b.c,b.b,color,a.alpha*.72f,a.alpha*.72f,b.alpha*.72f,b.alpha*.72f);
-                sink.quad(a.a,b.a,b.d,a.d,color,a.alpha*.07f,b.alpha*.07f,b.alpha*.07f,a.alpha*.07f);
+                sink.quad(a.a,b.a,b.d,a.d,base,a.alpha*.07f,b.alpha*.07f,b.alpha*.07f,a.alpha*.07f);
                 sink.quad(a.b,a.featherA,b.featherA,b.b,color,a.alpha,0,0,b.alpha);
                 sink.quad(a.c,b.c,b.featherB,a.featherB,color,a.alpha,b.alpha,0,0);
-                sink.quad(a.coreA,a.coreB,b.coreB,b.coreA,style.core(),a.alpha*.18f,a.alpha*.7f,b.alpha*.7f,b.alpha*.18f);
+                // Keep a readable narrow light core while the broad shell stays transparent.
+                sink.quad(a.coreA,a.coreB,b.coreB,b.coreA,WarriorTrailAppearance.mix(style.shell(),0xFFFFFF,.30),a.alpha*.35f,Math.min(.92f,a.alpha*1.4f),Math.min(.92f,b.alpha*1.4f),b.alpha*.35f);
                 quads+=7;
             }
             previous=ring;
         }
         if(first!=null && previous!=first){
-            for(Ring r:new Ring[]{first,previous})sink.quad(r.a,r.d,r.c,r.b,style.shell(),r.alpha*.08f,r.alpha*.08f,r.alpha,r.alpha);
+            for(Ring r:new Ring[]{first,previous})sink.gradient(r.a,r.d,r.c,r.b,style.base(),style.base(),style.shell(),style.shell(),r.alpha*.24f,r.alpha*.24f,r.alpha,r.alpha);
             quads+=2;
         }
         return quads;

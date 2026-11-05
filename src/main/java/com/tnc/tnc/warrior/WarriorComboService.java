@@ -227,7 +227,8 @@ public final class WarriorComboService {
     /** 命中一条连招后：查解锁、查冷却、放终结技。返回在目录里的下标（HUD 闪实用）。 */
     private static int resolve(ServerPlayer player, State state, WarriorSkill skill, long now, boolean held) {
         var progress = progress(player);
-        int index = WarriorCombos.all().indexOf(skill);
+        int index = WarriorCombos.indexOf(skill);
+        skill = WarriorPerformance.forWeapon(skill, player.getMainHandItem());
         if (!WarriorCombos.unlocked(skill, progress)) {
             int need = WarriorCombos.temperRequirement(skill);
             hint(player, "§e连招已成 · " + skill.name() + " 尚未解锁"
@@ -330,7 +331,6 @@ public final class WarriorComboService {
 
     /** 终结技：扇形/环形范围伤害 + 击退 + 位移 + 打断/僵直 + 闪避 + 武器耐久。 */
     private static boolean finisher(ServerPlayer player, WarriorSkill skill, State state, long now, boolean held) {
-        skill = WarriorPerformance.forWeapon(skill, player.getMainHandItem());
         // 刚被振刀架住 / 被破架：僵直期间连招发不出来（冷却也不占，恢复后能立刻再试）
         if (now < state.interruptedUntil) {
             hint(player, "§c僵直中 · 连招接不上");
@@ -729,7 +729,7 @@ public final class WarriorComboService {
         if (to.lengthSqr() < 1e-6) {
             return true;
         }
-        double cos = Math.cos(Math.toRadians(Math.max(1, Math.min(180, degrees)) / 2.0));
+        double cos = Math.cos(Math.toRadians(Math.max(1, Math.min(359, degrees)) / 2.0));
         return flat.normalize().dot(to.normalize()) >= cos;
     }
 
@@ -1025,6 +1025,7 @@ public final class WarriorComboService {
             out.append(" · 下一步 ").append(next.next().label()).append("（").append(next.skill().name()).append("）");
         }
         for (WarriorSkill skill : catalog) {
+            skill=WarriorPerformance.forWeapon(skill,player.getMainHandItem());
             out.append("\n").append(skill.chain().cn()).append(" · ").append(skill.name())
                     .append(" ").append(skill.sequenceLabel())
                     .append(" · 槽 ").append(skill.slot() + 1)

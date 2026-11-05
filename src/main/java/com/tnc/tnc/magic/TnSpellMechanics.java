@@ -87,11 +87,14 @@ public final class TnSpellMechanics {
     /** t5 闪电登神：全身电弧密度 / 环绕电光 / 雷印。 */
     private static final int ASCENSION_ARC_INTERVAL = 2;
     private static final int ASCENSION_ARC_COUNT = 2;
-    private static final int ASCENSION_ORBIT_COUNT = 3;
+    // ★ 2026-11-05 作者："粒子可以删去很多……包括闪电登神那条链" ——
+    //   现在身上另有**雷龙缠绕**（比撒粒子有存在感得多 ✓），粒子就不用堆了：
+    //   环绕电光 3 → 2、雷印 1.0 格一枚 → 1.6 格、同时最多 10 → 6 枚 ✓
+    private static final int ASCENSION_ORBIT_COUNT = 2;
     private static final double ASCENSION_ORBIT_RADIUS = 1.05D;
     private static final int ASCENSION_MARK_LIFE = 40;          // 雷印存活 tick
-    private static final double ASCENSION_MARK_STEP = 1.0D;     // 走多远落一枚
-    private static final int ASCENSION_MARK_MAX = 10;           // 最多同时留几枚
+    private static final double ASCENSION_MARK_STEP = 1.6D;     // 走多远落一枚
+    private static final int ASCENSION_MARK_MAX = 6;            // 最多同时留几枚
 
     /** 回蓝的表演窗口：uuid -> 结束时刻（只在内存里，不需要存档） */
     private static final Map<UUID, Long> RECHARGE_UNTIL = new ConcurrentHashMap<>();
@@ -257,7 +260,9 @@ public final class TnSpellMechanics {
         // `spread` doubles as the size knob: 1.5 -> 2.25x, 2.4 (the big strike) -> 3.6x.
         TNLightningStrikeEntity bolt = TNOrbEntities.LIGHTNING_STRIKE.get().create(level);
         if (bolt != null) {
-            bolt.configure(spread * 3.0D, 6, at.y, spread >= 2.0D ? 9.0D : 3.0D);   // x2 size (author) + fall from 24 blocks up
+            // ★ 2026-11-05：寿命 6 → 16 tick。6 tick（0.3 秒）连"落地 → 展开雷网 → 淡出"都走不完 ✗，
+            //   整个新加的落点特效（雷网/地光/回击电弧）根本来不及看 ✓；16 tick 刚好够它演完 ✓
+            bolt.configure(spread * 3.0D, 16, at.y, spread >= 2.0D ? 9.0D : 3.0D);   // x2 size (author) + fall from 24 blocks up
             bolt.moveTo(at.x, at.y, at.z, 0.0F, 0.0F);
             level.addFreshEntity(bolt);
         }
@@ -278,15 +283,102 @@ public final class TnSpellMechanics {
                 net.minecraft.sounds.SoundSource.PLAYERS, 0.7F, 1.2F);
     }
 
+    /**
+     * 延迟劈下的雷（"天打五雷轰"那五道要错开落 ✓）。
+     *
+     * <p>2026-11-05：t5 的落雷原来全靠引擎那 30 颗 {@code flash} 模型的流星 ——
+     * 那是**旧雷电**的样子，和新做的落雷/雷龙完全不搭 ✗。现在流星只留伤害
+     * （模型缩到 0.05，看不见），真正的"五雷"由这里错开时间劈下去 ✓。
+     */
+    private record QueuedBolt(ServerLevel level, Vec3 at, double scale, long due) {
+    }
+
+    private static final java.util.List<QueuedBolt> QUEUED_BOLTS =
+            new java.util.concurrent.CopyOnWriteArrayList<>();
+
+    /** 排队：{@code delay} tick 后在 {@code at} 劈一道 {@code scale} 大小的雷（纯视觉）✓。 */
+    private static void queueBolt(ServerLevel level, Vec3 at, double scale, int delay) {
+        QUEUED_BOLTS.add(new QueuedBolt(level, at, scale, level.getGameTime() + Math.max(0, delay)));
+    }
+
+    /** 服务端每 tick 清一次队列（{@link #onServerTick} 里调）✓。 */
+    private static void tickQueuedBolts() {
+        if (QUEUED_BOLTS.isEmpty()) {
+            return;
+        }
+        QUEUED_BOLTS.removeIf(q -> {
+            if (q.level().getGameTime() < q.due()) {
+                return false;
+            }
+            spawnSkyBolt(q.level(), q.at(), q.scale());
+            return true;
+        });
+    }
+
+    /** 一道"从天上劈到地面"的雷（纯视觉，不结算伤害 —— 伤害在法术 JSON / 机制里）✓。 */
+    private static void spawnSkyBolt(ServerLevel level, Vec3 at, double scale) {
+        TNLightningStrikeEntity bolt = TNOrbEntities.LIGHTNING_STRIKE.get().create(level);
+        if (bolt == null) {
+            return;
+        }
+        bolt.configure(scale, 18, at.y, scale >= 9.0D ? 9.0D : 5.0D);
+        bolt.moveTo(at.x, at.y, at.z, 0.0F, 0.0F);
+        level.addFreshEntity(bolt);
+        level.playSound(null, at.x, at.y, at.z,
+                net.minecraft.sounds.SoundEvents.LIGHTNING_BOLT_THUNDER,
+                net.minecraft.sounds.SoundSource.PLAYERS, 1.1F, 0.9F + level.random.nextFloat() * 0.2F);
+    }
+
     /** 雷击（t3）：在**准星落点**劈一道"超级大雷"（更大更粗 ✗ 视觉；伤害由法术 JSON 给 ✓）。 */
     private static void bigStrike(ServerPlayer player) {
         ServerLevel level = player.serverLevel();
         net.minecraft.world.phys.HitResult hit = player.pick(STRIKE_RANGE, 0.0F, false);
         Vec3 at = hit.getLocation();
+        // ★ 2026-11-05：对准天空/远处放的时候，落点会**悬在半空** ⇒ 大雷挂在云里、地上什么也没有 ✗。
+        //   按到地面上（最多往下 26 格）再劈 ✓
+        at = new Vec3(at.x, groundBelow(level, at, 26).y, at.z);
         strikeVisual(level, at, 30, 4.8D);   // x2 again (author 2026-09-27) -> 14.4x bolt
+        // ★ 2026-11-05 作者："t1 和 t3 怎么没特效一样" —— 补上"雷从手上出去"的那一截 ✓
+        castArc(player, at.add(0.0D, 0.6D, 0.0D), 0.30F, 12, false, 4);
         level.playSound(null, at.x, at.y, at.z,
                 net.minecraft.sounds.SoundEvents.LIGHTNING_BOLT_THUNDER,
                 net.minecraft.sounds.SoundSource.PLAYERS, 1.2F, 1.0F);
+    }
+
+    /**
+     * 从施法者手上拉一道电弧到 {@code to}（{@link TNLightningArcEntity}）。
+     *
+     * <p>2026-11-05 作者："闪电链的 t1 和 t3 怎么没特效一样" —— t1 原本只有
+     * 引擎给的几颗电花粒子（{@code CURSOR} 瞬间结算、没有投射物），
+     * t3 虽然劈了落雷但"起手 → 落点"是空的 ⇒ 两档看着都像没放出来 ✗。
+     *
+     * @param width  主干半宽（格）：t1 0.10、t3 0.30 就够 ✓
+     * @param life   存活 tick
+     * @param impact 落点要不要炸一圈地网/地光（t3 自己已经有落雷特效了 ⇒ false ✓）
+     * @param extra  额外再拉几条（错开一点角度，雷电更像"一束"而不是一根）
+     */
+    private static void castArc(ServerPlayer player, Vec3 to, float width, int life, boolean impact, int extra) {
+        ServerLevel level = player.serverLevel();
+        Vec3 look = player.getLookAngle();
+        Vec3 from = player.getEyePosition().add(look.scale(0.55D)).add(0.0D, -0.28D, 0.0D);
+        int theme = randomLightningTheme(level);
+        for (int i = 0; i <= extra; i++) {
+            TNLightningArcEntity arc = TNOrbEntities.LIGHTNING_ARC.get().create(level);
+            if (arc == null) {
+                return;
+            }
+            Vec3 end = to;
+            if (i > 0) {
+                // 侧向散开 ⇒ 一束电 ✓（散得太开就不像"一道雷"了 ✗）
+                double spread = 0.22D * i;
+                end = to.add(level.random.nextGaussian() * spread,
+                        level.random.nextGaussian() * spread * 0.6D,
+                        level.random.nextGaussian() * spread);
+            }
+            arc.configure(from, end, theme, life + (i > 0 ? 1 : 0),
+                    width * (i == 0 ? 1.0F : 0.55F), impact && i == 0);
+            level.addFreshEntity(arc);
+        }
     }
 
     /** 雷场（t2）：第 20 / 60 tick 各劈一轮范围内的敌人 ⇒ 每个敌人挨两下 ✓。 */
@@ -555,6 +647,35 @@ public final class TnSpellMechanics {
         }
     }
 
+    /**
+     * <b>径向电弧爆炸</b>：从中心朝四面八方甩出一圈锯齿雷线 ✓
+     * （作者 2026-11-05："爆炸特效也优化一下"）。
+     *
+     * <p>和 {@link #arcBall} 的区别：那个是"一团乱点"，看起来像烟花 ✗；
+     * 这个是**有方向的雷线**（每条 8 段），落地那一下才像"雷炸开了" ✓。
+     * 每条线只发 9 颗粒子，{@code count=1, speed=0} 精确落在线上（不会散成雾 ✓）。
+     *
+     * @param count  几条（一般 8~20）
+     * @param radius 甩多远（格）
+     * @param up     允许往上偏多少（0 = 纯贴地）
+     */
+    public static void arcBurst(ServerLevel level, Vec3 center, int count, double radius, double up) {
+        if (count <= 0 || radius <= 0.0D) {
+            return;
+        }
+        for (int i = 0; i < count; i++) {
+            double angle = i * (Math.PI * 2.0D / count) + (level.random.nextDouble() - 0.5D) * 0.35D;
+            double reach = radius * (0.65D + level.random.nextDouble() * 0.55D);
+            double rise = up * (0.15D + level.random.nextDouble() * 0.75D);
+            Vec3 end = center.add(Math.cos(angle) * reach, rise, Math.sin(angle) * reach);
+            // 中段抬高一点 ⇒ 弧线是"抛"出去的，不是贴地直线 ✓
+            Vec3 mid = center.add(Math.cos(angle) * reach * 0.45D, rise * 0.85D + 0.25D,
+                    Math.sin(angle) * reach * 0.45D);
+            arcLine(level, center, mid, 4, 0.22D);
+            arcLine(level, mid, end, 5, 0.30D);
+        }
+    }
+
     private TnSpellMechanics() {
     }
 
@@ -610,6 +731,17 @@ public final class TnSpellMechanics {
         if (path.equals("lightning_blink")) {
             blinkBurst(player);
         }
+        // ★ 2026-11-05 作者："登神链我希望施法之后持续时内会有我们的雷龙缠绕着身上一直游走"
+        //   第二批追加："我希望从 t3 开始就有龙，随 t 级变大" ⇒
+        //   t3「雷风」0.30 ／ t4「雷充」0.42 ／ t5「闪电登神」0.55（体形，见 COIL_SCALE_*）
+        //   施法那一刻立刻盘上，之后由 tickCoilDragon 每秒补一条 ✓
+        if (path.equals("lightning_wind")) {
+            startCoilDragon(player, COIL_SCALE_T3, COIL_TICKS_T3);
+        } else if (path.equals("lightning_recharge")) {
+            startCoilDragon(player, COIL_SCALE_T4, COIL_TICKS_T4);
+        } else if (path.equals("lightning_ascension")) {
+            startCoilDragon(player, COIL_SCALE_T5, COIL_TICKS_T5);
+        }
 
         // ★ 查一次目录条目：下面的"魔法阵保证"按 **链 + 档位** 判 ✓（不写死法术 id）
         SpellCatalog.Entry castEntry = SpellCatalog.byId(spellId);
@@ -654,10 +786,16 @@ public final class TnSpellMechanics {
         //   阵的出场是**瞬时满亮度**、随后**平滑淡出**（渲染器负责，见 TNMagicCircleRenderer）✓
         else if (path.equals("spark")) {
             // (无魔法阵：t1 不做 -- 作者 2026-09-27：低档也铺 = "随便哪个魔法都有了" ✗)          // t1 电花
+            // ★ 2026-11-05 作者："t1 怎么没特效一样" —— t1 的 JSON 是 CURSOR 瞬间结算，
+            //   除了几颗粒子什么都没有 ✗。补一道手 → 落点的电弧 ＋ 落点小雷网 ✓
+            castArc(player, aimPoint(player).add(0.0D, 0.35D, 0.0D), 0.10F, 8, true, 2);
         } else if (path.equals("lightning_field")) {
             // (无魔法阵：t2 不做 ✗)         // t2 电场
             // 雷场：开一个 100 tick 的窗口，第 20 / 60 tick 各劈一轮 ⇒ 场内敌人各挨两下 ✓
             FIELD_UNTIL.put(player.getUUID(), player.level().getGameTime() + FIELD_WINDOW);
+            // ★ 2026-11-05：电场也要"围着自己"的雷笼（作者："丰富…自身周围的特效"✓）
+            spawnAura(player, 4.2D, 4.6D, 120, randomLightningTheme(player.serverLevel()),
+                    TNLightningAuraEntity.STYLE_FIELD);
         } else if (path.equals("lightning_strike")) {
             // (无魔法阵：t3 不做 ✗)         // t3 雷击
             bigStrike(player);                            // 准星落点劈一道"超级大雷" ✓
@@ -667,9 +805,31 @@ public final class TnSpellMechanics {
             // 雷暴：窗口 200 tick，期间每 15 tick 劈一轮，一直劈到结束 ✓
             STORM_UNTIL.put(player.getUUID(), player.level().getGameTime() + STORM_WINDOW);
             STORM_BOOST.put(player.getUUID(),com.tnc.tnc.arcana.ArcanaBeacon.scale(player));
+            // ★ 2026-11-05：雷暴 = 一圈持续"炸"的雷笼（比电场大、会脉冲 ✓）
+            spawnAura(player, 5.2D, 6.0D, 205, randomLightningTheme(player.serverLevel()),
+                    TNLightningAuraEntity.STYLE_STORM);
         } else if (path.equals("heavenly_thunder")) {
             spawnMagicCircle(player, 14.0D, 210);        // t5 天雷
             circleOwn = true;
+            int theme = randomLightningTheme(player.serverLevel());
+            spawnAura(player, 5.0D, 6.5D, 140, theme, TNLightningAuraEntity.STYLE_STORM);
+            // ★★ 2026-11-05 作者："t5 砸下雷电之后，砸中的地面有龙直冲云霄" ✓
+            //   先在准星落点蓄 14 tick 雷（这段时间渲染器只画地面的雷网/地光），
+            //   然后龙破土、沿螺旋冲上 50 多格 —— 体积比"神在投篮"那 29 格高的神还大 ✓
+            Vec3 impact = groundBelow(player.serverLevel(), aimPoint(player), 24);
+            spawnDragon(player.serverLevel(), impact, 1.15D, 14, theme, 175);
+            // ★ 2026-11-05 作者："天打五雷轰的雷电怎么不优化一下" —— 五道错开的落雷 ✓
+            //   中间那道最粗（和龙同一下落地），周围五道依次落，从 4 tick 到 36 tick ⇒
+            //   整整两秒都在劈，"天打五雷轰"才像那么回事 ✓（伤害仍由流星/JSON 结算 ✗ 不重复）
+            ServerLevel boltLevel = player.serverLevel();
+            queueBolt(boltLevel, impact, 12.5D, 12);
+            for (int i = 0; i < 5; i++) {
+                double ang = Math.PI * 2.0D * i / 5.0D + boltLevel.random.nextDouble() * 0.4D;
+                double r = 2.6D + boltLevel.random.nextDouble() * 2.6D;
+                Vec3 p = impact.add(Math.cos(ang) * r, 0.0D, Math.sin(ang) * r);
+                queueBolt(boltLevel, groundBelow(boltLevel, p, 24), 7.0D + boltLevel.random.nextDouble() * 2.0D,
+                        4 + i * 7);
+            }
         }
 
         // ★★ 保证：**雷系三条链（主链 CORE / 雷球 ORB / 雷速 SPEED）的 t4、t5 一定有魔法阵** ✓
@@ -756,11 +916,18 @@ public final class TnSpellMechanics {
      * （作者："他的法术怎么感觉一般啊，他没有天打五雷轰吗" ⇒ 给他配上阵，和玩家 t5 同款 ✓）。
      */
     public static void spawnMagicCircleAt(ServerLevel level, Vec3 at, double radius, int life) {
+        spawnMagicCircleAt(level, at, radius, life, TNMagicCircleEntity.STYLE_LIGHTNING,
+                randomLightningTheme(level));
+    }
+
+    /** 带样式/主题的版本 ✓（黑暗衍要暗紫阵、玩家要随机金/蓝/紫 ⇒ 由调用方给 ✓）。 */
+    public static void spawnMagicCircleAt(ServerLevel level, Vec3 at, double radius, int life,
+                                          int style, int theme) {
         TNMagicCircleEntity circle = TNOrbEntities.MAGIC_CIRCLE.get().create(level);
         if (circle == null) {
             return;
         }
-        circle.configure(radius, life);
+        circle.configure(radius, life, style, theme);
         net.minecraft.core.BlockPos pos = net.minecraft.core.BlockPos.containing(at.x, at.y, at.z);
         int guard = 0;
         while (guard++ < 8 && pos.getY() > level.getMinBuildHeight() && level.getBlockState(pos.below()).isAir()) {
@@ -770,7 +937,8 @@ public final class TnSpellMechanics {
         level.addFreshEntity(circle);
         // ★ 铺阵一定留一行日志（作者 2026-09-29："保证 t4/t5 有魔法阵"）——
         //   验收时 grep `TN-C: spawn circle` 就知道这一张到底铺没铺、铺在哪、多大 ✓
-        LOGGER.info("TN-C: spawn circle at {} r={} life={} (aim point)", pos, radius, life);
+        LOGGER.info("TN-C: spawn circle at {} r={} life={} style={} theme={} (aim point)",
+                pos, radius, life, style, theme);
     }
 
     /**
@@ -798,7 +966,7 @@ public final class TnSpellMechanics {
         if (circle == null) {
             return;
         }
-        circle.configure(radius, life);
+        circle.configure(radius, life, TNMagicCircleEntity.STYLE_LIGHTNING);
         // 贴在他站的那一层：往下找一个不是空气的方块，铺在它上面 ✓
         net.minecraft.core.BlockPos pos = player.blockPosition();
         int guard = 0;
@@ -810,6 +978,95 @@ public final class TnSpellMechanics {
         level.addFreshEntity(circle);
         // ★ 铺阵一定留一行日志（见 spawnMagicCircleAt 的说明）✓
         LOGGER.info("TN-C: spawn circle at {} r={} life={} (caster feet)", pos, radius, life);
+    }
+
+    // ------------------------------------------------------------------
+    //  ★ 2026-11-05 雷系新表现：颜色主题 / 雷笼 / 雷龙
+    // ------------------------------------------------------------------
+
+    /**
+     * 随机挑一个雷的主题色 —— 作者要"黄的、蓝的、紫的都有" ✓。
+     *
+     * <p>权重给成 <b>紫 45% / 蓝 35% / 金 20%</b>：紫最像"天雷"，金色留给少数几道做点缀
+     * （金色一多就变成"圣光" ✗）。
+     */
+    public static int randomLightningTheme(ServerLevel level) {
+        int r = level.random.nextInt(100);
+        return r < 45 ? 2 : (r < 80 ? 1 : 0);
+    }
+
+    /**
+     * 在施法者身上挂一圈<b>雷笼</b>（{@link TNLightningAuraEntity}）✓。
+     *
+     * <p>同一个人身上只留一圈 ✗ —— 雷场/雷暴连着放两次时，两圈叠在一起会糊成一团
+     * （而且几何量翻倍）。所以先把自己周围 3 格内已有的雷笼清掉，再挂新的 ✓。
+     */
+    public static void spawnAura(ServerPlayer player, double radius, double height, int life,
+                                 int theme, int style) {
+        ServerLevel level = player.serverLevel();
+        for (TNLightningAuraEntity old : level.getEntitiesOfClass(TNLightningAuraEntity.class,
+                player.getBoundingBox().inflate(3.0D))) {
+            old.discard();
+        }
+        TNLightningAuraEntity aura = TNOrbEntities.LIGHTNING_AURA.get().create(level);
+        if (aura == null) {
+            return;
+        }
+        aura.configure(radius, height, life, theme, style);
+        aura.bind(player);
+        level.addFreshEntity(aura);
+        LOGGER.info("TN-C: spawn lightning aura r={} h={} life={} theme={} style={}",
+                radius, height, life, theme, style);
+    }
+
+    /**
+     * 在落点召出一条<b>雷龙</b>（{@link TNLightningDragonEntity}）✓ ——
+     * 作者 2026-11-05："t5 砸下雷电之后，砸中的地面有龙直冲云霄"。
+     *
+     * @param scale 体型（1.0 = 45 格长；t5 给 1.1~1.25 ⇒ 50 多格，比神还大 ✓）
+     * @param delay 破土前蓄力多少 tick（天雷先在落点蓄 14 tick，龙再出来 ✓）
+     */
+    public static void spawnDragon(ServerLevel level, Vec3 at, double scale, int delay, int theme, int life) {
+        // ★ 同一个地方别叠第二条：黑暗衍和玩家连着放 t5 时，两条龙会穿模成一团乱麻 ✗。
+        //   16 格内的旧龙先收掉（一条龙本来就 50 格长，叠着必然穿模 ✓）
+        //   ★ 2026-11-05：**盘在身上的那条不算**（它是登神 buff 的常驻装饰，
+        //     不该因为放了另一发 t5 就被顺手清掉 ✗）
+        for (TNLightningDragonEntity old : level.getEntitiesOfClass(TNLightningDragonEntity.class,
+                new net.minecraft.world.phys.AABB(at, at).inflate(16.0D))) {
+            if (!old.coil()) {
+                old.discard();
+            }
+        }
+        TNLightningDragonEntity dragon = TNOrbEntities.LIGHTNING_DRAGON.get().create(level);
+        if (dragon == null) {
+            return;
+        }
+        dragon.configure(scale, life, theme, delay);
+        dragon.moveTo(at.x, at.y, at.z, 0.0F, 0.0F);
+        level.addFreshEntity(dragon);
+        LOGGER.info("TN-C: spawn lightning dragon at {} scale={} delay={} theme={} life={}",
+                at, scale, delay, theme, life);
+    }
+
+    /**
+     * 把"准星落点"按到<b>地面</b>上（雷龙要从地里出来，不能悬在半空 ✗）。
+     *
+     * <p>{@link #aimPoint} 给的是视线命中的那个方块面；玩家朝天/朝远处放 t5 时，
+     * 那个点在空气里 ⇒ 往下最多找 {@code maxDown} 格，站在第一块非空气方块上 ✓；
+     * 真找不到（悬空/虚空）就退回原点，让龙在落点原处破土 ✓。
+     */
+    private static Vec3 groundBelow(ServerLevel level, Vec3 at, int maxDown) {
+        net.minecraft.core.BlockPos pos = net.minecraft.core.BlockPos.containing(at.x, at.y + 0.1D, at.z);
+        for (int i = 0; i < maxDown; i++) {
+            if (pos.getY() < level.getMinBuildHeight()) {
+                break;
+            }
+            if (!level.getBlockState(pos).isAir()) {
+                return new Vec3(at.x, pos.getY() + 1.0D, at.z);
+            }
+            pos = pos.below();
+        }
+        return at;
     }
 
     // ------------------------------------------------------------------
@@ -841,6 +1098,8 @@ public final class TnSpellMechanics {
         if (event.phase != TickEvent.Phase.END) {
             return;
         }
+        // 排队中的落雷（"五雷轰顶"的错峰）先处理 ✓
+        tickQueuedBolts();
         for (ServerPlayer player : event.getServer().getPlayerList().getPlayers()) {
             tickPlayer(player);
         }
@@ -883,6 +1142,10 @@ public final class TnSpellMechanics {
             LAST_MARK.remove(player.getUUID());
             removeGodFollower(player);
         }
+        // ★ 2026-11-05 作者："登神链我希望施法之后持续时间内会有我们的雷**龙**缠绕着身上一直游走"
+        //   第二批："从 t3 开始就有龙，随 t 级变大" ⇒ 这条**不在登神分支里**：
+        //   t3/t4 没有登神 buff，但它们身上也该有龙 ✓（到期由 COILS 自己清 ✓）
+        tickCoilDragon(player, time);
         // 回蓝的 3 秒表演 + 地上的雷印（两者都可能没有，函数内部自己判断）
         rechargeFlourish(player, time);
         sparkMarks(player, time);
@@ -1167,16 +1430,19 @@ public final class TnSpellMechanics {
         }
         java.util.UUID id = entity.getUUID();
         double phase = (time % 40) / 40.0D * Math.PI * 2.0D;
-        for (int i = 0; i < ASCENSION_ORBIT_COUNT; i++) {
-            double a1 = phase * 2.0D + i * (Math.PI * 2.0D / ASCENSION_ORBIT_COUNT);
-            double a2 = a1 + 0.5D;
-            Vec3 p1 = new Vec3(entity.getX() + Math.cos(a1) * ASCENSION_ORBIT_RADIUS,
-                    entity.getY() + 0.9D + Math.sin(a1 * 2.0D) * 0.35D,
-                    entity.getZ() + Math.sin(a1) * ASCENSION_ORBIT_RADIUS);
-            Vec3 p2 = new Vec3(entity.getX() + Math.cos(a2) * ASCENSION_ORBIT_RADIUS,
-                    entity.getY() + 0.9D + Math.sin(a2 * 2.0D) * 0.35D,
-                    entity.getZ() + Math.sin(a2) * ASCENSION_ORBIT_RADIUS);
-            arcLine(level, p1, p2, 3, 0.05D);
+        // 环绕电光隔 tick 画一次（原来是每 tick 3 条 ⇒ 纯浪费 ✗）
+        if (time % 2 == 0) {
+            for (int i = 0; i < ASCENSION_ORBIT_COUNT; i++) {
+                double a1 = phase * 2.0D + i * (Math.PI * 2.0D / ASCENSION_ORBIT_COUNT);
+                double a2 = a1 + 0.5D;
+                Vec3 p1 = new Vec3(entity.getX() + Math.cos(a1) * ASCENSION_ORBIT_RADIUS,
+                        entity.getY() + 0.9D + Math.sin(a1 * 2.0D) * 0.35D,
+                        entity.getZ() + Math.sin(a1) * ASCENSION_ORBIT_RADIUS);
+                Vec3 p2 = new Vec3(entity.getX() + Math.cos(a2) * ASCENSION_ORBIT_RADIUS,
+                        entity.getY() + 0.9D + Math.sin(a2 * 2.0D) * 0.35D,
+                        entity.getZ() + Math.sin(a2) * ASCENSION_ORBIT_RADIUS);
+                arcLine(level, p1, p2, 3, 0.05D);
+            }
         }
         if (time % ASCENSION_ARC_INTERVAL == 0) {
             // 身上：两点之间蹦一条电弧（比撒点更像"电在身上跳" ✓）
@@ -1276,6 +1542,95 @@ public final class TnSpellMechanics {
     }
 
     // ------------------------------------------------------------------
+    //  ★ 盘在身上的雷龙（雷速链 t3/t4/t5，2026-11-05）
+    // ------------------------------------------------------------------
+
+    /**
+     * 雷速链从 t3 起身上就有一条雷龙，<b>档位越高越大</b> ✓
+     * （作者 2026-11-05 第二批："我希望从 t3 开始就有龙，随 t 级变大"）。
+     *
+     * <p>体型（1.0 = 破土那条 45 格长的龙）：
+     * t3「雷风」0.30 ／ t4「雷充」0.42 ／ t5「闪电登神」0.55 ✓
+     *
+     * <p>★ 为什么不用 buff 判断：t1「电光」和 t4「雷充」挂的是<b>同一个</b>
+     * {@code tnc:lightning_haste} buff ✗，按 buff 分不出档位；所以施法时把
+     * "我这一档要多大、到什么时候"记进 {@link #COILS} ✓（纯服务端，不占同步数据）。
+     */
+    private static final double COIL_SCALE_T3 = 0.30D;
+    private static final double COIL_SCALE_T4 = 0.42D;
+    private static final double COIL_SCALE_T5 = 0.55D;
+
+    /** buff 时长（tick）：t3 15 秒、t4/t5 12 秒 —— 和法术 JSON 里的一致 ✓ */
+    private static final int COIL_TICKS_T3 = 300;
+    private static final int COIL_TICKS_T4 = 240;
+    private static final int COIL_TICKS_T5 = 240;
+
+    /** 谁身上有龙、多大、到什么时候（到期自动散 ✓）。 */
+    private record Coil(double scale, long until) {
+    }
+
+    private static final java.util.Map<java.util.UUID, Coil> COILS = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /** 施法那一刻：把这一档的雷龙盘上（t3/t4/t5 各调一次 ✓）。 */
+    public static void startCoilDragon(ServerPlayer player, double scale, int ticks) {
+        long until = player.serverLevel().getGameTime() + Math.max(40, ticks);
+        COILS.put(player.getUUID(), new Coil(scale, until));
+        spawnCoilDragon(player, player.serverLevel(), scale, Math.max(40, ticks));
+    }
+
+    /** 每 tick：到期就散，掉了（换维度/重登）就按剩余时间补一条 ✓。 */
+    private static void tickCoilDragon(ServerPlayer player, long time) {
+        Coil coil = COILS.get(player.getUUID());
+        if (coil == null) {
+            return;
+        }
+        ServerLevel level = player.serverLevel();
+        long now = level.getGameTime();
+        if (now >= coil.until() || !player.isAlive()) {
+            COILS.remove(player.getUUID());
+            removeCoilDragon(player);
+            return;
+        }
+        if (time % 20 != 0) {
+            return;                                   // 1 秒查一次就够
+        }
+        for (TNLightningDragonEntity dragon : level.getEntitiesOfClass(TNLightningDragonEntity.class,
+                player.getBoundingBox().inflate(16.0D))) {
+            if (dragon.coil() && player.getUUID().equals(dragon.ownerId())) {
+                if (Math.abs(dragon.scale() - coil.scale()) < 0.02D) {
+                    return;                           // 已经有同尺寸的一条 ✓
+                }
+                dragon.discard();                     // 尺寸变了（比如又放了一发更高档的）⇒ 换掉
+                break;
+            }
+        }
+        spawnCoilDragon(player, level, coil.scale(), (int) (coil.until() - now));
+    }
+
+    private static void spawnCoilDragon(net.minecraft.world.entity.LivingEntity owner, ServerLevel level,
+                                        double scale, int life) {
+        TNLightningDragonEntity dragon = TNOrbEntities.LIGHTNING_DRAGON.get().create(level);
+        if (dragon == null) {
+            return;
+        }
+        dragon.configureCoil(owner, scale, life, randomLightningTheme(level));
+        level.addFreshEntity(dragon);
+    }
+
+    /** 到期 / 人没了：把缠绕的雷龙清掉 ✓。 */
+    public static void removeCoilDragon(net.minecraft.world.entity.LivingEntity owner) {
+        if (!(owner.level() instanceof ServerLevel level)) {
+            return;
+        }
+        for (TNLightningDragonEntity dragon : level.getEntitiesOfClass(TNLightningDragonEntity.class,
+                owner.getBoundingBox().inflate(24.0D))) {
+            if (dragon.coil() && owner.getUUID().equals(dragon.ownerId())) {
+                dragon.discard();
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------
     //  ★ 万雷归体（登神链 t1..t5）
     // ------------------------------------------------------------------
 
@@ -1301,6 +1656,12 @@ public final class TnSpellMechanics {
         int idx = Math.max(0, Math.min(GATHER_TICKS.length - 1, tier - 1));
         long now = wallTicks();
         GATHER.put(player.getUUID(), new Gather(now, now + GATHER_TICKS[idx], tier));
+        // ★ 2026-11-05：t5「闪电登神」除了万雷归体，还要有一圈贴在身上的雷笼 ✓
+        //   （作者："丰富…自身周围的特效" —— 归体是"从外往里"，雷笼是"罩在身上"，两层不打架 ✓）
+        if (tier >= 5) {
+            spawnAura(player, 3.6D, 4.2D, 240, randomLightningTheme(player.serverLevel()),
+                    TNLightningAuraEntity.STYLE_STORM);
+        }
         LOGGER.info("TN-C: gather start tier={} ticks={} perTick={} radius={}",
                 tier, GATHER_TICKS[idx], GATHER_PER_TICK[idx], GATHER_RADIUS[idx]);
     }

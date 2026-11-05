@@ -85,6 +85,19 @@ public final class EarthAttackRenderer extends EntityRenderer<EarthAttackEntity>
             draw("earth_clod",pose,buffers,light,net.spell_engine.api.render.LightEmission.NONE);
             pose.popPose();
         }
+        // Stone weapons jutting out of the rising column: the whole arsenal takes part in the lift.
+        int weapons=Math.min(6,EarthWeaponModels.MODELS.size());
+        for(int i=0;i<weapons;i++) {
+            double a=i*Math.PI*2/weapons+.42;
+            double y=Math.max(.7,top*(.22+.11*(i%3)));
+            pose.pushPose();
+            pose.translate(Math.cos(a)*w*1.05,y,Math.sin(a)*w*1.05);
+            pose.mulPose(Axis.YP.rotationDegrees((float)(a*180/Math.PI)));
+            pose.mulPose(Axis.XP.rotationDegrees(-58));
+            pose.scale(w*1.5F,w*1.5F,w*1.5F);
+            draw(EarthWeaponModels.MODELS.get(i%EarthWeaponModels.MODELS.size()),pose,buffers,light,net.spell_engine.api.render.LightEmission.NONE);
+            pose.popPose();
+        }
     }
     /** Splinters thrown from the base of a spike as it punches out of the ground. */
     private void drawChips(EarthAttackEntity e,double age,PoseStack pose,MultiBufferSource buffers,int light) {
@@ -146,7 +159,6 @@ public final class EarthAttackRenderer extends EntityRenderer<EarthAttackEntity>
             draw((e.model().startsWith("stone_lancer_")?"stone_lancer_":"")+(i%3==0?"earth_shell":"earth_clod"),pose,buffers,light,net.spell_engine.api.render.LightEmission.NONE);pose.popPose();
         }
         pose.popPose();
-        drawBurstColumns(e,elapsed,giant,pose,buffers,light);
     }
     /** A ring of small columns erupting around the detonation, then crumbling as it ends. */
     private void drawBurstColumns(EarthAttackEntity e,double elapsed,boolean giant,PoseStack pose,MultiBufferSource buffers,int light) {

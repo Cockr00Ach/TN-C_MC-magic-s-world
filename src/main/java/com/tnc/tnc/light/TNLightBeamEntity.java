@@ -403,14 +403,19 @@ public class TNLightBeamEntity extends Entity {
         if (++this.fireBlockedTicks < FIRE_DISSOLVE_TICKS) {
             return false;                       // 还没到消散的时候 ✓
         }
-        // 散成火焰粒子（**散开**，不是原地一坨 ✗）——作者要求就是这个 ✓
+        // 散成粒子（**散开**，不是原地一坨 ✗）——火系是火焰，光系必须是“光” ✗：
+        //   以前所有光线撞墙都冒火，光系看着像火法 ✗；现在按 style 分支 ✓
         Vec3 at = wall.getLocation();
-        server.sendParticles(net.minecraft.core.particles.ParticleTypes.FLAME,
-                at.x, at.y, at.z, 60, 0.9D, 0.9D, 0.9D, 0.06D);
-        server.sendParticles(net.minecraft.core.particles.ParticleTypes.LAVA,
-                at.x, at.y, at.z, 20, 0.7D, 0.7D, 0.7D, 0.05D);
-        server.sendParticles(net.minecraft.core.particles.ParticleTypes.SMALL_FLAME,
-                at.x, at.y, at.z, 40, 1.1D, 1.1D, 1.1D, 0.08D);
+        boolean fire = style() == STYLE_FIRE;
+        server.sendParticles(fire ? net.minecraft.core.particles.ParticleTypes.FLAME
+                        : net.minecraft.core.particles.ParticleTypes.END_ROD,
+                at.x, at.y, at.z, fire ? 60 : 46, 0.9D, 0.9D, 0.9D, 0.06D);
+        server.sendParticles(fire ? net.minecraft.core.particles.ParticleTypes.LAVA
+                        : net.minecraft.core.particles.ParticleTypes.FIREWORK,
+                at.x, at.y, at.z, fire ? 20 : 24, 0.7D, 0.7D, 0.7D, 0.05D);
+        server.sendParticles(fire ? net.minecraft.core.particles.ParticleTypes.SMALL_FLAME
+                        : net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK,
+                at.x, at.y, at.z, fire ? 40 : 18, 1.1D, 1.1D, 1.1D, 0.08D);
         this.discard();
         return true;
     }

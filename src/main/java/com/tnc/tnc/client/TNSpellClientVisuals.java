@@ -112,6 +112,30 @@ public final class TNSpellClientVisuals {
     private static final double SHAKE_RANGE = 40.0D;
     private static final net.minecraft.util.RandomSource SHAKE_RANDOM = net.minecraft.util.RandomSource.create();
 
+    /**
+     * 光系读条／释放专用：从 {@code LightCastFx} 点一下白闪 ✓。
+     *
+     * <p>取 max 而不是覆盖 —— 同一帧里如果还有更强的爆炸白闪，不能被光系压弱 ✓。
+     *
+     * @param strength 0~1（会乘进 {@code flash * 200} 的 alpha）
+     */
+    public static void pulseFlash(float strength) {
+        if (strength > flash) {
+            flash = Math.min(1.0F, strength);
+        }
+    }
+
+    /**
+     * 光系读条／释放专用：从 {@code LightCastFx} 点一下震屏（度）✓。
+     *
+     * <p>同样取 max；上限沿用爆炸震屏的 {@link #SHAKE_MAX}，光系不会盖过核弹 ✓。
+     */
+    public static void pulseShake(float degrees) {
+        if (degrees > shake) {
+            shake = (float) Math.min(SHAKE_MAX, degrees);
+        }
+    }
+
     @SubscribeEvent
     public static void onClientTick(net.minecraftforge.event.TickEvent.ClientTickEvent event) {
         if (event.phase != net.minecraftforge.event.TickEvent.Phase.END) {
@@ -156,6 +180,36 @@ public final class TNSpellClientVisuals {
                 float s = (float) (bolt.shake() * Math.max(0.0D, 1.0D - d / SHAKE_RANGE));
                 if (s > shake) {
                     shake = s;
+                }
+                // ★ 2026-11-05：落地那一下**还要白闪**（作者："爆炸特效也优化一下"）✓
+                //   以前只有震屏、没有光 —— 现在按体型给 0.30~0.60 的白闪，大雷落地整屏会"过曝"一瞬 ✓
+                double near = Math.max(0.0D, 1.0D - d / SHAKE_RANGE);
+                float f = (float) (near * Math.min(0.60D, 0.22D + bolt.scale() * 0.022D));
+                if (f > flash) {
+                    flash = f;
+                }
+            }
+            // ★ 2026-11-05 雷龙破土：那一瞬才是"天雷砸下来的正主"，必须有光 + 镜头震 ✓
+            //   龙是 50 格高的东西从地里窜出来 —— 只给几何、不给屏幕反馈，冲击力差一大截 ✗。
+            //   只在**破土后 6 tick** 内给（全程 8 秒都晃会晃吐人 ✗，这是 2026-09-29 落雷那次的教训）。
+            for (com.tnc.tnc.magic.TNLightningDragonEntity dragon : minecraft.level.getEntitiesOfClass(
+                    com.tnc.tnc.magic.TNLightningDragonEntity.class,
+                    minecraft.player.getBoundingBox().inflate(SHAKE_RANGE))) {
+                int since = dragon.tickCount - dragon.delay() - 1;
+                if (since < 0 || since > 6) {
+                    continue;                   // 还在蓄力 / 已经窜上去了 ⇒ 不晃 ✓
+                }
+                double d = dragon.position().distanceTo(minecraft.player.position());
+                // 越晚越弱：像一次"闷响"而不是持续地震 ✓
+                float decay = 1.0F - since / 7.0F;
+                double near = Math.max(0.0D, 1.0D - d / SHAKE_RANGE);
+                float s = (float) (near * near * (4.6D + 1.8D * dragon.scale()) * decay);
+                if (s > shake) {
+                    shake = s;
+                }
+                float f = (float) (near * 0.42D * decay);
+                if (f > flash) {
+                    flash = f;
                 }
             }
         }

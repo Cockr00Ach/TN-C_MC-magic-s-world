@@ -45,6 +45,14 @@ public final class TNSpellOrbClientEvents {
         event.registerEntityRenderer(TNOrbEntities.MAGIC_CIRCLE.get(), TNMagicCircleRenderer::new);
         event.registerEntityRenderer(TNOrbEntities.SHOCKWAVE.get(), TNMagicCircleRenderer::new);
         event.registerEntityRenderer(TNOrbEntities.LIGHTNING_STRIKE.get(), TNLightningStrikeRenderer::new);
+        // ★ 雷笼（作者 2026-11-05："自身周围的特效"）—— 跟着施法者走的蛛网雷笼 ✓
+        event.registerEntityRenderer(TNOrbEntities.LIGHTNING_AURA.get(), TNLightningAuraRenderer::new);
+        // ★★ 雷龙（作者 2026-11-05："t5 砸下雷电之后，砸中的地面有龙直冲云霄"）✓
+        //   模型是现画的（几百个方块 ＋ 雷电勾线），见 TNLightningDragonRenderer ✓
+        event.registerEntityRenderer(TNOrbEntities.LIGHTNING_DRAGON.get(), TNLightningDragonRenderer::new);
+        // ★ 横向电弧（作者 2026-11-05："闪电链的 t1 和 t3 怎么没特效一样"）——
+        //   t1 电花 / t3 雷击 的"手 → 落点"那一截，雷锲链的节点间电弧也复用它 ✓
+        event.registerEntityRenderer(TNOrbEntities.LIGHTNING_ARC.get(), TNLightningArcRenderer::new);
         event.registerEntityRenderer(TNOrbEntities.WATER_SPELL.get(), TNWaterSpellRenderer::new);
         event.registerEntityRenderer(TNOrbEntities.WATER_BOLT.get(), TNWaterBoltRenderer::new);
         event.registerEntityRenderer(TNOrbEntities.WATER_FIELD.get(), TNWaterFieldRenderer::new);

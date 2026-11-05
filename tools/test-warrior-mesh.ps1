@@ -26,7 +26,7 @@ try {
     $folder='work/warrior-mesh-audit-client/screenshots'
     $shots=@(Get-ChildItem -LiteralPath $folder -Filter 'warrior-mesh-*.png' -ErrorAction SilentlyContinue |
         Where-Object {$_.LastWriteTime -ge $started})
-    if($shots.Count -lt 7){throw "expected 7 fresh screenshots, got $($shots.Count); see work/mesh-audit.log"}
+    if($shots.Count -lt 9){throw "expected 9 fresh screenshots (including both first-person hands), got $($shots.Count); see work/mesh-audit.log"}
     foreach($shot in $shots){Write-Output ("{0} {1} bytes" -f $shot.Name,$shot.Length)}
     Write-Output "PASS: $($shots.Count) warrior mesh screenshots rendered (incl. dragon)."
 } finally {

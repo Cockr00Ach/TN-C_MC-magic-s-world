@@ -78,6 +78,32 @@ public class TNLightningStrikeEntity extends Entity {
 
     /** 落点高度（只有服务端要用 ✓ 不用同步）。 */
     private double fallTo;
+
+    // ------------------------------------------------------------------
+    //  ★ 2026-11-05 作者："你现在的雷电就是只掉下来一个模型……我希望是从天空中
+    //    一直落到地上，很震撼的从天劈到地的光效，而且可以多劈"
+    //
+    //  于是 kind = 0（闪电）不再"掉模型"了 ✗：实体**直接钉在落点**，
+    //  整根闪电由客户端渲染器从天上现画（{@code TNLightningStrikeRenderer}）✓。
+    //  下面三个同步字段就是渲染器画那根闪电需要的参数 —— 都必须**同步**，
+    //  否则客户端每帧重新随机会得到一条不停抖动的蛇 ✗✗。
+    // ------------------------------------------------------------------
+
+    /** 颜色主题（{@code LightningTheme}：0 金 / 1 蓝 / 2 紫 / 3 暗）。 */
+    private static final EntityDataAccessor<Integer> DATA_THEME =
+            SynchedEntityData.defineId(TNLightningStrikeEntity.class, EntityDataSerializers.INT);
+    /** 落点高度 ×100（渲染器要知道"从哪儿劈到哪儿"✓）。 */
+    private static final EntityDataAccessor<Integer> DATA_ANCHOR_Y =
+            SynchedEntityData.defineId(TNLightningStrikeEntity.class, EntityDataSerializers.INT);
+    /** 这根闪电的随机种子（**同步** ⇒ 每帧画出来的是同一根 ✓）。 */
+    private static final EntityDataAccessor<Integer> DATA_SEED =
+            SynchedEntityData.defineId(TNLightningStrikeEntity.class, EntityDataSerializers.INT);
+
+    /** 落地后还亮多少 tick 的"余电"（-1 = 没有 ✓）。 */
+    private int crackleUntil = -1;
+    /** 第二圈冲击波安排在哪一 tick（-1 = 没有 ✓）。 */
+    private int reRingTick = -1;
+
     /** 落地那一 tick（-1 = 还没落地 ✓）。 */
     private int landedTick = -1;
 
@@ -151,6 +177,35 @@ public class TNLightningStrikeEntity extends Entity {
         this.entityData.set(DATA_LIFE, Math.max(1, lifeTicks));
         this.fallTo = fallToY;
         this.entityData.set(DATA_SHAKE, (int) Math.round(shakeStrength * 100.0D));
+        // ★ 整根闪电的绘制参数（见 DATA_THEME 上面的说明）✓
+        this.entityData.set(DATA_ANCHOR_Y, (int) Math.round(fallToY * 100.0D));
+        this.entityData.set(DATA_THEME, this.random.nextInt(3));      // 金黄 / 天蓝 / 紫，随机
+        this.entityData.set(DATA_SEED, this.random.nextInt());
+    }
+
+    /** 指定颜色主题（不指定就按 configure 里随机的那一档 ✓）。 */
+    public void theme(int theme) {
+        this.entityData.set(DATA_THEME, Math.max(0, theme));
+    }
+
+    /** 颜色主题（{@code LightningTheme}）。 */
+    public int theme() {
+        return this.entityData.get(DATA_THEME);
+    }
+
+    /** 落点高度（渲染器用它当"整根闪电的下端"✓）。 */
+    public double anchorY() {
+        return this.entityData.get(DATA_ANCHOR_Y) / 100.0D;
+    }
+
+    /** 闪电形状的随机种子（同步过 ⇒ 客户端每帧一致 ✓）。 */
+    public int seed() {
+        return this.entityData.get(DATA_SEED);
+    }
+
+    /** 是不是"整根闪电"形态（kind = 0）。 */
+    public boolean isBolt() {
+        return this.entityData.get(DATA_KIND) == 0;
     }
 
     /** How hard the screen should shake on the hit (degrees) ✓ */
@@ -287,6 +342,9 @@ public class TNLightningStrikeEntity extends Entity {
         this.entityData.define(DATA_KIND, 0);
         this.entityData.define(DATA_IMPACT_AT, -1);
         this.entityData.define(DATA_DARK, false);
+        this.entityData.define(DATA_THEME, 2);
+        this.entityData.define(DATA_ANCHOR_Y, 0);
+        this.entityData.define(DATA_SEED, 0);
     }
 
     @Override
@@ -322,9 +380,18 @@ public class TNLightningStrikeEntity extends Entity {
             return;
         }
         if (this.tickCount == 1) {
-            // 生成在目标正上方（生成时给的是落点坐标 ✓）
-            this.setPos(this.getX(), this.fallTo + FALL_HEIGHT, this.getZ());
-            return;
+            if (this.isBolt()) {
+                // ★ 整根闪电（2026-11-05）：实体**不往下掉**了 ✗ —— 直接钉在落点，
+                //   从云层到地面那 40 多格由渲染器一次画完 ✓。
+                //   不然"掉模型"的 4 tick 里，天上那段是空的（正是作者说的"只掉下来一个模型"✗）。
+                //   这里**刻意不 return**：让下面的 landing 逻辑在同一个 tick 就跑，
+                //   于是"劈下来"和"炸开"是同一瞬间 ✓。
+                this.setPos(this.getX(), this.fallTo, this.getZ());
+            } else {
+                // 生成在目标正上方（生成时给的是落点坐标 ✓）
+                this.setPos(this.getX(), this.fallTo + FALL_HEIGHT, this.getZ());
+                return;
+            }
         }
         if (this.getY() > this.fallTo) {
             double next = Math.max(this.fallTo, this.getY() - this.fallSpeed);
@@ -352,24 +419,66 @@ public class TNLightningStrikeEntity extends Entity {
         if (this.landedTick < 0) {
             this.landedTick = this.tickCount;
             this.entityData.set(DATA_IMPACT_AT, this.tickCount);     // 同步给客户端：该晃屏了 ✓
-            // 落地那一下：炸开一圈 ✓
             ServerLevel level = (ServerLevel) this.level();
-            level.sendParticles(arc(), this.getX(), this.getY() + 0.4D, this.getZ(),
-                    120, 0.7D, 0.6D, 0.7D, 3.0D);
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, this.getX(), this.getY() + 0.4D, this.getZ(),
-                    120, 0.7D, 0.6D, 0.7D, 3.0D);
-            level.sendParticles(ParticleTypes.WITCH, this.getX(), this.getY() + 0.4D, this.getZ(),
-                    50, 0.5D, 0.4D, 0.5D, 2.0D);
-            level.sendParticles(ParticleTypes.FLASH, this.getX(), this.getY() + 0.8D, this.getZ(),
-                    2, 0.1D, 0.1D, 0.1D, 0.0D);
-            level.playSound(null, this.getX(), this.getY(), this.getZ(),
+            double cx = this.getX();
+            double cy = this.getY();
+            double cz = this.getZ();
+            // ★★ 2026-11-05 落地爆炸重做（作者："爆炸特效也优化一下"）
+            //   体型归一化：主链那道 4.5 倍的小雷 = 1.0，天打五雷轰的 14 倍 ≈ 3.1
+            //   —— 数量/半径/音量都按它给，小雷才不会炸出核弹 ✗
+            double size = Math.max(0.6D, this.scale() / 4.5D);
+            double radius = 0.45D + size * 0.40D;
+            // ① 径向电弧：从落点向外"炸"出一圈锯齿雷线（比单纯撒点像爆炸 ✓）
+            TnSpellMechanics.arcBurst(level, new net.minecraft.world.phys.Vec3(cx, cy + 0.25D, cz),
+                    8 + (int) Math.min(14.0D, size * 3.0D), radius * 1.4D, 0.5D);
+            // ② 电花 + 电弧粒子
+            level.sendParticles(arc(), cx, cy + 0.4D, cz,
+                    (int) (50 + 60 * size), 0.45D * size, 0.45D * size, 0.45D * size, 2.2D + size);
+            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, cx, cy + 0.35D, cz,
+                    (int) (60 + 70 * size), 0.55D * size, 0.5D * size, 0.55D * size, 3.0D + size * 2.0D);
+            level.sendParticles(ParticleTypes.WITCH, cx, cy + 0.4D, cz,
+                    (int) (18 + 24 * size), 0.4D * size, 0.35D * size, 0.4D * size, 1.6D);
+            // ③ 扬尘：贴地往外抛（有它才像"砸进地里"✓）
+            level.sendParticles(ParticleTypes.CLOUD, cx, cy + 0.2D, cz,
+                    (int) (10 + 14 * size), 0.5D * size, 0.2D, 0.5D * size, 0.35D);
+            level.sendParticles(ParticleTypes.POOF, cx, cy + 0.15D, cz,
+                    (int) (8 + 10 * size), 0.45D * size, 0.15D, 0.45D * size, 0.15D);
+            // ④ 白闪（原版 FLASH 粒子是大范围曝光 ✓）
+            level.sendParticles(ParticleTypes.FLASH, cx, cy + 0.8D, cz,
+                    size >= 2.0D ? 4 : 2, 0.1D, 0.1D, 0.1D, 0.0D);
+            level.playSound(null, cx, cy, cz,
                     SoundEvents.LIGHTNING_BOLT_IMPACT,
-                    this.isDark() ? SoundSource.HOSTILE : SoundSource.PLAYERS, 1.0F, 1.2F);
+                    this.isDark() ? SoundSource.HOSTILE : SoundSource.PLAYERS,
+                    (float) Math.min(1.6D, 0.8D + size * 0.25D), 1.15F);
             // ★ 这一下是"啪"（IMPACT ✓）；滚雷排到几 tick 之后 ✓（见 playRollingThunder）
             this.thunderTick = this.tickCount + THUNDER_DELAY;
             landBlast(level);
+            // ★ 第二圈冲击波（只给大雷）：第一圈"炸开"，3 tick 后这一圈更慢更大 ⇒
+            //   像"气浪追着第一圈出去" ✓。纯表现：不推人、不震屏、不白闪。
+            if (size >= 1.8D) {
+                this.reRingTick = this.tickCount + 3;
+            }
+            // 落地后还留在雷网里劈啪作响的余电（网由客户端渲染器画，这里补粒子 ✓）
+            this.crackleUntil = this.tickCount + this.life();
         } else if (this.thunderTick < 0 && this.tickCount > this.landedTick + this.life()) {
             this.discard();
+            return;
+        }
+        // ★ 第二圈冲击波到点（见落地那段）
+        if (this.reRingTick > 0 && this.tickCount >= this.reRingTick) {
+            this.reRingTick = -1;
+            double size = Math.max(0.6D, this.scale() / 4.5D);
+            TNShockwaveEntity.blast((ServerLevel) this.level(),
+                    new net.minecraft.world.phys.Vec3(this.getX(), this.getY() + 0.05D, this.getZ()),
+                    1.2D + size * 0.9D, 0.0F, null, 0.0F, false);
+        }
+        // ★ 余电：落地后每 2 tick 在雷网上补一两点电弧 ✓
+        if (this.crackleUntil > this.tickCount && this.tickCount % 2 == 0 && !this.isBall()) {
+            ServerLevel level = (ServerLevel) this.level();
+            double ang = level.random.nextDouble() * Math.PI * 2.0D;
+            double rr = 0.3D + level.random.nextDouble() * Math.max(0.6D, this.scale() * 0.12D);
+            level.sendParticles(arc(), this.getX() + Math.cos(ang) * rr, this.getY() + 0.15D,
+                    this.getZ() + Math.sin(ang) * rr, 1, 0.0D, 0.0D, 0.0D, 0.0D);
         }
         // ★ 滚雷：落地之后那一声"轰" ✓（排在 DISCARD 之前，所以不会因为亮完就没了 ✗）
         if (this.thunderTick > 0 && this.tickCount >= this.thunderTick) {
@@ -532,6 +641,12 @@ public class TNLightningStrikeEntity extends Entity {
         level.sendParticles(ParticleTypes.SQUID_INK, cx, cy + 1.0D, cz,
                 60, 1.0D, 0.6D, 1.0D, 3.0D);
         level.sendParticles(ParticleTypes.FLASH, cx, cy + 1.5D, cz, 4, 0.3D, 0.3D, 0.3D, 0.0D);
+
+        // ★★ 2026-11-05 作者："t5 砸下雷电之后，砸中的地面有龙直冲云霄" ✓
+        //   神在投篮 t5 的**大雷球落地**就是这一下 —— 龙从爆心直接冲出来（不需要蓄力，
+        //   因为它自己就是"砸下来"的那一方 ✓）。体积 1.2 倍 ≈ 54 格长，和 29 格高的神同场也不虚 ✓
+        TnSpellMechanics.spawnDragon(level, new net.minecraft.world.phys.Vec3(cx, cy, cz),
+                1.2D, 0, TnSpellMechanics.randomLightningTheme(level), 180);
     }
 
     @Override

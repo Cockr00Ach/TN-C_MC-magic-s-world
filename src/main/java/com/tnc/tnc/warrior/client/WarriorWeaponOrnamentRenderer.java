@@ -28,7 +28,7 @@ public final class WarriorWeaponOrnamentRenderer {
         try {
             model.getTransforms().getTransform(context).apply(left,pose);
             pose.translate(-.5,-.5,-.5);
-            var out=buffers.getBuffer(WarriorGeometryRenderType.TYPE);
+            var out=WarriorTrailRenderType.buffer(buffers);
             for(var box:boxes)cube(out,pose,box);
         } finally {pose.popPose();}
     }

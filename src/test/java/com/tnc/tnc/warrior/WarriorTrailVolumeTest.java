@@ -8,6 +8,44 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class WarriorTrailVolumeTest {
+    @Test void bladeLengthGradientKeepsTipColourAndSupportsWhiteAndDarkRoots(){
+        for(String weapon:List.of("dragon_sword","doom_scythe")){
+            var style=WarriorTrailAppearance.of(weapon,WarriorWeaponFamily.GREATSWORD,"");
+            assertEquals(weapon.equals("doom_scythe")?0x10101B:0xF5F7FF,style.base());
+            boolean[] gradient={false};float[] brightest={0};
+            WarriorTrailVolume.emit(List.of(point(0,0),point(60,70)),70,320,.1,1.8,style,.62f,new WarriorTrailVolume.Sink(){
+                public void quad(Vec3 a,Vec3 b,Vec3 c,Vec3 d,int color,float aa,float ab,float ac,float ad){
+                    brightest[0]=Math.max(brightest[0],Math.max(ab,ac));
+                }
+                public void gradient(Vec3 a,Vec3 b,Vec3 c,Vec3 d,int ca,int cb,int cc,int cd,float aa,float ab,float ac,float ad){
+                    if(ca==style.base() && cb==style.shell()){
+                        assertEquals(style.shell(),cc);assertEquals(style.base(),cd);
+                        gradient[0]=true;
+                    }
+                }
+            });
+            assertTrue(gradient[0],"lengthwise gradient must reach the vertex consumer");
+            assertTrue(brightest[0]>.62f && brightest[0]<1,"narrow tip is brighter while remaining translucent");
+        }
+    }
+    @Test void translucentTrailKeepsFeatherTransparentAndFadesWithAge(){
+        var curve=WarriorTrailVolume.resample(List.of(point(0,0),point(65,55),point(140,110)),96);
+        var style=WarriorTrailAppearance.of("dragon_sword",WarriorWeaponFamily.LONGSWORD,"");
+        float[] peaks=new float[2];
+        boolean[] feather={false};
+        for(int sample=0;sample<2;sample++){
+            final int index=sample;
+            WarriorTrailVolume.emit(curve,110+sample*100,320,.18,1.35,style,.62f,(a,b,c,d,color,aa,ab,ac,ad)->{
+                for(float alpha:new float[]{aa,ab,ac,ad}){
+                    assertTrue(alpha>=0 && alpha<=.92f,"no opaque sheets");
+                    peaks[index]=Math.max(peaks[index],alpha);
+                    if(alpha==0)feather[0]=true;
+                }
+            });
+        }
+        assertTrue(feather[0]);
+        assertTrue(peaks[0]>peaks[1] && peaks[1]>0,"tail must fade rather than pop off");
+    }
     private static WarriorTrailVolume.Point point(double degrees,double at){
         double a=Math.toRadians(degrees);return new WarriorTrailVolume.Point(Vec3.ZERO,new Vec3(Math.cos(a)*2,0,Math.sin(a)*2),at);
     }

@@ -88,6 +88,16 @@ public class TNThunderOrbRenderer extends EntityRenderer<TNThunderOrbEntity> {
         // 自转：让碎块球的面转起来，静态看着像卡住了 ✓
         float spin = (entity.tickCount + partialTick) * 12.0F;
 
+        // ★ 2026-11-05：球心先垫一圈主题色辉光（引擎那层关掉了混合，模型本身不再透明 ✗，
+        //   这里补一层加色光斑 ⇒ 远看是"一团发光的雷球"✓）
+        net.minecraft.world.phys.Vec3 cam = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
+        net.minecraft.world.phys.Vec3 at = entity.getPosition(partialTick);
+        com.tnc.tnc.client.lightning.LightningBoltGeometry.billboardFlash(
+                buffer.getBuffer(com.tnc.tnc.client.lightning.LightningRenderTypes.BOLT),
+                poseStack.last().pose(), 0.0D, 0.0D, 0.0D, 2.1F,
+                com.tnc.tnc.client.lightning.LightningTheme.GOLD, 0.22F,
+                cam.x - at.x, cam.y - at.y, cam.z - at.z);
+
         poseStack.pushPose();
         poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(spin));
         poseStack.scale(SCALE, SCALE, SCALE);
@@ -119,8 +129,8 @@ public class TNThunderOrbRenderer extends EntityRenderer<TNThunderOrbEntity> {
      */
     private static boolean renderWithEngine(PoseStack poseStack, MultiBufferSource buffer) {
         try {
-            RenderType layer = net.spell_engine.client.render.SpellModelHelper.LAYERS
-                    .get(net.spell_engine.api.render.LightEmission.RADIATE);
+            // ★ 2026-11-05：引擎的 LAYERS 是 NO_TRANSPARENCY（模型会变实心 ✗）⇒ 用我们自己的半透明层 ✓
+            RenderType layer = com.tnc.tnc.client.lightning.LightningRenderTypes.SPELL_MODEL;
             net.spell_engine.api.render.CustomModels.render(layer, Minecraft.getInstance().getItemRenderer(),
                     MODEL_ID, poseStack, buffer, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
             if (!logged) {

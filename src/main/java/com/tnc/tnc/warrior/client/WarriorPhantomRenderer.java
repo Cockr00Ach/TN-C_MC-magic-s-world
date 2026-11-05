@@ -54,14 +54,16 @@ public final class WarriorPhantomRenderer {
      * 所以别人屏幕上也能看到他放大了多少。
      */
     static double scaleFor(AbstractClientPlayer player) {
+        if(WarriorHeavyGrowth.usesEntityGrowth(WarriorWeapons.family(player.getMainHandItem())))return 1;
         return player == Minecraft.getInstance().player ? scale() : WarriorPhantomScales.get(player.getUUID());
     }
 
     public static void renderBound(net.minecraft.world.entity.LivingEntity entity, ItemStack stack,
             ItemDisplayContext context, boolean left, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
         if (disabled() || !(entity instanceof AbstractClientPlayer player) || !WarriorWeapons.bladed(stack)
+                || WarriorHeavyGrowth.usesEntityGrowth(WarriorWeapons.family(stack))
                 || left!=(player.getMainArm()==net.minecraft.world.entity.HumanoidArm.LEFT)
-                || (context != ItemDisplayContext.THIRD_PERSON_LEFT_HAND
+                || (!context.firstPerson() && context != ItemDisplayContext.THIRD_PERSON_LEFT_HAND
                     && context != ItemDisplayContext.THIRD_PERSON_RIGHT_HAND)) return;
         try {
             renderWeapon(player, stack, context, left, poseStack, buffer, packedLight);
@@ -78,7 +80,7 @@ public final class WarriorPhantomRenderer {
         // 始终比真剑大 2%：完全重合会和真模型 z-fighting，寒毛一点就看不出来了
         double draw = Math.max(scale, 1.02);
         boolean combo = WarriorTrail.finisher(player.getId());
-        float alpha = alpha(scale, combo)*visibility;
+        float alpha = alpha(scale, combo)*visibility*(context.firstPerson() ? .65f : 1f);
 
         // ItemInHandRenderer uses entity id + display context as the model override seed.
         int seed = player.getId() + context.ordinal();

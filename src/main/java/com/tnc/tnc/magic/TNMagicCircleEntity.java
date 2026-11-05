@@ -59,6 +59,56 @@ public class TNMagicCircleEntity extends Entity {
      */
     public static final int STYLE_DARK_HAND = 3;
 
+    /**
+     * ★ <b>雷系专用阵</b>（作者 2026-11-05："类似蛛网一样的雷网特效可以丰富我们的法阵" ✓）。
+     *
+     * <p>贴图仍然用 {@code magic_circle.png}（和 {@link #STYLE_STORM} 一样），
+     * 区别在渲染器：这个样式会在符文之上<b>再铺一张蛛网雷网</b>（颜色跟着 {@link #DATA_THEME} 走 ✓）。
+     *
+     * <p>为什么不直接改 {@link #STYLE_STORM} ✗：0 号样式还被暗系召唤 / 暗龙那些阵用着，
+     * 给它们也加上雷网会让暗阵变"雷阵" ✗ —— 新开一个样式最干净 ✓。
+     */
+    public static final int STYLE_LIGHTNING = 7;
+
+    /**
+     * ★ <b>光系“天上的阵”</b>（作者 2026-11-05：“统一一下光法里的法阵”）✓。
+     *
+     * <p>和 {@link #STYLE_LIGHT} 用同一套几何、同一套配色，唯一区别：
+     * <b>不画地面光柱</b>，改成向下垂的 12 片光幕 —— 它悬在光柱落点的正上方，
+     * 柱子从阵心往下落，阵自己再往上长一根柱子就会穿模 ✗。
+     *
+     * <p>以前光线的天降阵借用 {@link #STYLE_STORM}（雷法线条型），
+     * 和地上的白金光阵完全不是一套语言 ✗；现在光系所有阵统一走
+     * {@link #STYLE_LIGHT} / {@code STYLE_LIGHT_SKY} ✓。
+     */
+    public static final int STYLE_LIGHT_SKY = 8;
+
+    /**
+     * ★ <b>光系低阶阵</b>（作者 2026-11-05：「低级和高级应该是有区别的」）。
+     *
+     * <p>和 {@link #STYLE_LIGHT} 同一张白金光贴图，但渲染器只画<b>一圈主环 + 6/8 道光芒</b>：
+     * 没有双层辅助环、没有内层八角星、没有绕身光柱。t1/t2 的光耀与瞬发光线的落点用它，
+     * 读起来像“在地上快速刻一个符”，而不是把高阶仪式缩小。
+     */
+    public static final int STYLE_LIGHT_MINOR = 9;
+
+    /**
+     * ★ <b>光系高阶阵</b>（t4/t5 的“天穹降临”）。
+     *
+     * <p>在 {@link #STYLE_LIGHT} 的满配几何上再叠一圈外环与更多刻度，配合更大的半径、
+     * 更多小阵/门环/光雨 —— 让高阶阵一眼就比中阶“重”。
+     */
+    public static final int STYLE_LIGHT_GRAND = 10;
+
+    /**
+     * ★ 法阵的<b>主题色</b>（作者 2026-11-05："黄的、蓝的、紫的"）。
+     *
+     * <p>{@code LightningTheme} 的编号：0 金 / 1 蓝 / 2 紫 / 3 暗。
+     * 只有 {@link #STYLE_LIGHTNING} 会读它（其余样式沿用贴图本来的颜色 ✓）。
+     */
+    protected static final EntityDataAccessor<Integer> DATA_THEME =
+            SynchedEntityData.defineId(TNMagicCircleEntity.class, EntityDataSerializers.INT);
+
     protected static final EntityDataAccessor<Integer> DATA_STYLE =
             SynchedEntityData.defineId(TNMagicCircleEntity.class, EntityDataSerializers.INT);
 
@@ -96,6 +146,20 @@ public class TNMagicCircleEntity extends Entity {
     /** 生成后调用一次：半径（格）、存在时长（tick）、样式 ✓。 */
     public void configure(double radius, int lifeTicks, int style) {
         this.configure(radius, lifeTicks, style, false, 0.0F);
+    }
+
+    /**
+     * 带<b>主题色</b>的版本 ✓ —— 只有 {@link #STYLE_LIGHTNING} 会用到
+     * （金 / 蓝 / 紫，见 {@link #DATA_THEME}）。
+     */
+    public void configure(double radius, int lifeTicks, int style, int theme) {
+        this.entityData.set(DATA_THEME, Math.max(0, theme));
+        this.configure(radius, lifeTicks, style, false, 0.0F);
+    }
+
+    /** 主题色（{@code LightningTheme} 编号）。 */
+    public int theme() {
+        return this.entityData.get(DATA_THEME);
     }
 
     /**
@@ -139,6 +203,7 @@ public class TNMagicCircleEntity extends Entity {
         this.entityData.define(DATA_RADIUS, 30);
         this.entityData.define(DATA_LIFE, DEFAULT_LIFE);
         this.entityData.define(DATA_STYLE, STYLE_STORM);
+        this.entityData.define(DATA_THEME, 2);
         this.entityData.define(DATA_UPRIGHT, 0);
         this.entityData.define(DATA_FACING, 0);
     }

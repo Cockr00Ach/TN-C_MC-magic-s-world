@@ -12,7 +12,12 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(modid = TNMod.MODID, value = Dist.CLIENT)
 public final class WarriorPhantomScales {
     private static final Map<UUID, Float> SCALES = new HashMap<>();
-    public static void accept(UUID player, float scale) { SCALES.put(player, scale); }
+    private static final Map<UUID, Integer> POINTS = new HashMap<>();
+    public static void accept(UUID player, float scale) { accept(player,scale,0); }
+    public static void accept(UUID player, float scale,int points) {
+        SCALES.put(player, scale);POINTS.put(player,com.tnc.tnc.warrior.TemperingRules.clamp(points));
+    }
     public static double get(UUID player) { return SCALES.getOrDefault(player, 1f); }
-    @SubscribeEvent public static void logout(ClientPlayerNetworkEvent.LoggingOut event) { SCALES.clear(); }
+    public static int points(UUID player) { return POINTS.getOrDefault(player,0); }
+    @SubscribeEvent public static void logout(ClientPlayerNetworkEvent.LoggingOut event) { SCALES.clear();POINTS.clear(); }
 }

@@ -2,20 +2,46 @@
   "school": "LIGHTNING",
   "group": "orb",
   "range": 0.0,
-  "learn": { "tier": 5, "level_cost_per_tier": 15, "level_requirement_per_tier": 20 },
+  "learn": {
+    "tier": 5,
+    "level_cost_per_tier": 15,
+    "level_requirement_per_tier": 20
+  },
   "cast": {
     "duration": 2.0,
     "animation": "spell_engine:two_handed_channeling",
-    "sound": { "id": "spell_engine:generic_lightning_casting", "randomness": 0 },
+    "sound": {
+      "id": "spell_engine:generic_lightning_casting",
+      "randomness": 0
+    },
     "particles": [
-      { "particle_id": "spell_engine:electric_arc_b", "shape": "CIRCLE", "origin": "FEET", "count": 24.0, "min_speed": 0.05, "max_speed": 0.25 },
-      { "particle_id": "minecraft:electric_spark", "shape": "PILLAR", "origin": "FEET", "count": 14.0, "min_speed": 0.15, "max_speed": 0.6 }
+      {
+        "particle_id": "spell_engine:electric_arc_b",
+        "shape": "CIRCLE",
+        "origin": "FEET",
+        "count": 12,
+        "min_speed": 0.05,
+        "max_speed": 0.25
+      },
+      {
+        "particle_id": "minecraft:electric_spark",
+        "shape": "PILLAR",
+        "origin": "FEET",
+        "count": 7,
+        "min_speed": 0.15,
+        "max_speed": 0.6
+      }
     ]
   },
   "release": {
-    "target": { "type": "SELF" },
+    "target": {
+      "type": "SELF"
+    },
     "animation": "spell_engine:one_handed_area_release",
-    "sound": { "id": "entity.lightning_bolt.thunder", "volume": 1.5 }
+    "sound": {
+      "id": "entity.lightning_bolt.thunder",
+      "volume": 1.5
+    }
   },
   "impact": [
     {
@@ -25,15 +51,37 @@
           "entity_type_id": "tnc:magic_circle",
           "time_to_live_seconds": 8,
           "delay_ticks": 0,
-          "placement": { "force_onto_ground": true }
+          "placement": {
+            "force_onto_ground": true
+          }
         }
       },
       "particles": [
-        { "particle_id": "spell_engine:electric_arc_b", "shape": "SPHERE", "origin": "CENTER", "count": 70.0, "min_speed": 0.4, "max_speed": 2.5 },
-        { "particle_id": "minecraft:electric_spark", "shape": "PILLAR", "origin": "CENTER", "count": 40.0, "min_speed": 0.2, "max_speed": 1.5 }
+        {
+          "particle_id": "spell_engine:electric_arc_b",
+          "shape": "SPHERE",
+          "origin": "CENTER",
+          "count": 10,
+          "min_speed": 0.4,
+          "max_speed": 2.5
+        },
+        {
+          "particle_id": "minecraft:electric_spark",
+          "shape": "PILLAR",
+          "origin": "CENTER",
+          "count": 6,
+          "min_speed": 0.2,
+          "max_speed": 1.5
+        }
       ],
-      "sound": { "id": "entity.lightning_bolt.thunder", "volume": 1.2 }
+      "sound": {
+        "id": "entity.lightning_bolt.thunder",
+        "volume": 1.2
+      }
     }
   ],
-  "cost": { "exhaust": 1.0, "cooldown_duration": 20.0 }
+  "cost": {
+    "exhaust": 1.0,
+    "cooldown_duration": 20.0
+  }
 }

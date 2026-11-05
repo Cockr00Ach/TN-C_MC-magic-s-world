@@ -14,7 +14,9 @@ import net.minecraftforge.registries.ForgeRegistries;
 /** Cheap matching silhouettes for the enlarged translucent attack ghost. */
 @Mod.EventBusSubscriber(modid="tnc",value=Dist.CLIENT,bus=Mod.EventBusSubscriber.Bus.MOD)
 public final class WarriorGhostModels {
-    private static final Set<String> IDS=Set.of("dragon_sword","frost_katana","star_rapier","crimson_warblade","doom_scythe","earthshaker_hammer","sky_halberd");
+    private static final Set<String> IDS=Set.of("dragon_sword","frost_katana","star_rapier","crimson_warblade","doom_scythe","earthshaker_hammer","sky_halberd",
+            "yue_bronze_jian","willow_leaf_dao","crescent_guandao","fangtian_ji","red_tassel_spear",
+            "ring_pommel_dao","han_iron_jian","iron_jian_mace","monk_spade","qimei_staff");
     private static ResourceLocation model(String id){return ResourceLocation.fromNamespaceAndPath("tnc","item/warrior_ghost/"+id);}
     @SubscribeEvent public static void register(ModelEvent.RegisterAdditional event){for(String id:IDS)event.register(model(id));}
     @SubscribeEvent public static void baked(ModelEvent.BakingCompleted event){

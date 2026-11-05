@@ -846,5 +846,15 @@
   "item.tnc.moon_arrow": "Crescent Arrow",
   "item.tnc.storm_arrow": "Stormchaser Arrow",
   "item.tnc.ember_arrow": "Emberwing Arrow",
-  "entity.tnc.ornate_arrow": "Forged Arrow"
+  "entity.tnc.ornate_arrow": "Forged Arrow",
+  "item.tnc.yue_bronze_jian": "Yue Bronze Jian",
+  "item.tnc.willow_leaf_dao": "Willow-leaf Dao",
+  "item.tnc.crescent_guandao": "Crescent Guandao",
+  "item.tnc.fangtian_ji": "Fangtian Ji",
+  "item.tnc.red_tassel_spear": "Red-tassel Spear",
+  "item.tnc.ring_pommel_dao": "Ring-pommel Dao",
+  "item.tnc.han_iron_jian": "Han Iron Jian",
+  "item.tnc.iron_jian_mace": "Four-ridge Iron Jian",
+  "item.tnc.monk_spade": "Monk Crescent Spade",
+  "item.tnc.qimei_staff": "Qimei Staff"
 }

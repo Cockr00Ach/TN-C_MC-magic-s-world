@@ -238,6 +238,12 @@ public final class WarriorCombos {
     public static List<WarriorSkill> all() {
         return SKILLS;
     }
+    /** A weapon variant retains the catalog ID even when its visible name or sector differs. */
+    public static int indexOf(WarriorSkill skill) {
+        if(skill==null)return -1;
+        for(int i=0;i<SKILLS.size();i++)if(SKILLS.get(i).id().equals(skill.id()))return i;
+        return -1;
+    }
 
     /** 某个武器家族的全部连招。 */
     public static List<WarriorSkill> forFamily(WarriorWeaponFamily family) {

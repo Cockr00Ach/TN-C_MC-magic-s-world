@@ -4,7 +4,7 @@
   "range": 12.0,
   "learn": { "tier": 3 },
   "cast": {
-    "duration": 1.4,
+    "duration": 2.7,
     "animation": "spell_engine:one_handed_area_charge",
     "sound": { "id": "block.beacon.activate", "randomness": 0 },
     "particles": [ { "particle_id": "end_rod", "shape": "CIRCLE", "origin": "FEET", "count": 40.0, "min_speed": 0.05, "max_speed": 0.25 } ]

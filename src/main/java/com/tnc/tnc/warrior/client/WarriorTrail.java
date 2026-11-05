@@ -49,6 +49,8 @@ public final class WarriorTrail {
 
     private static final class State {
         String weapon;
+        boolean firstPerson;
+        boolean leftHand;
         final Deque<WarriorTrailVolume.Point> history=new ArrayDeque<>();
         List<WarriorTrailVolume.Point> curve=List.of();
         long version,cachedVersion=-1;
@@ -71,9 +73,12 @@ public final class WarriorTrail {
     }
     /** Called before the ghost from the same actual held-item draw. */
     public static void capture(LivingEntity entity,ItemStack stack,ItemDisplayContext context,boolean left,PoseStack mount){
-        if(!(entity instanceof AbstractClientPlayer player) || (context!=ItemDisplayContext.THIRD_PERSON_LEFT_HAND && context!=ItemDisplayContext.THIRD_PERSON_RIGHT_HAND)
+        if(!(entity instanceof AbstractClientPlayer player) || (!context.firstPerson() && context!=ItemDisplayContext.THIRD_PERSON_LEFT_HAND && context!=ItemDisplayContext.THIRD_PERSON_RIGHT_HAND)
                 || left!=(player.getMainArm()==HumanoidArm.LEFT))return;
-        var mc=Minecraft.getInstance();var key=ForgeRegistries.ITEMS.getKey(stack.getItem());
+        var mc=Minecraft.getInstance();
+        // A local player may also be drawn by a body/shadow mod. Never mix view-space and world-space history.
+        if(player==mc.player && context.firstPerson()!=mc.options.getCameraType().isFirstPerson())return;
+        var key=ForgeRegistries.ITEMS.getKey(stack.getItem());
         var family=WarriorWeapons.family(stack);
         if(world!=player.level()){clear();world=player.level();}
         if(key==null || family==null || family==WarriorWeaponFamily.BOW || !player.isAlive() || player.isSpectator()){
@@ -84,7 +89,9 @@ public final class WarriorTrail {
         double time=now();
         if(time>nextCleanup){STATES.values().removeIf(s->time-s.lastSeen>2000);nextCleanup=time+1000;}
         String identity=key.toString();State state=STATES.get(player.getId());
-        if(state==null || !state.weapon.equals(identity)){state=new State(identity);STATES.put(player.getId(),state);}
+        if(state==null || !state.weapon.equals(identity) || state.firstPerson!=context.firstPerson() || state.leftHand!=left){state=new State(identity);STATES.put(player.getId(),state);}
+        state.firstPerson=context.firstPerson();
+        state.leftHand=left;
         state.lastSeen=time;
         boolean attack=attacking(player);
         double life=finisher(player.getId())?profile(family).finisherLife():profile(family).life();
@@ -100,7 +107,8 @@ public final class WarriorTrail {
         var authored=WarriorModelBlade.find(key);
         Vec3 grip=authored.isPresent()?authored.get().grip():WarriorModelGrip.find(key).orElse(new Vec3(3/16.0,3/16.0,.5));
         Vec3 tip=authored.isPresent()?authored.get().tip():WarriorModelBlade.fromBaked(key,model,grip).tip();
-        Vec3 hiltWorld=world(pose,grip,camera),tipWorld=world(pose,tip,camera);
+        Vec3 origin=context.firstPerson()?Vec3.ZERO:camera;
+        Vec3 hiltWorld=world(pose,grip,origin),tipWorld=world(pose,tip,origin);
         if(previous!=null){
             double elapsed=time-previous.at();
             if(elapsed>160 || previous.hilt().distanceToSqr(hiltWorld)>4){state.history.clear();state.version++;}
@@ -123,8 +131,13 @@ public final class WarriorTrail {
         double t=now();
         return WarriorTrailAppearance.visibility(t-s.start,t-s.lastAttack,s.attacking && attacking(player));
     }
-    static void render(AbstractClientPlayer player,MultiBufferSource buffer){
-        State state=STATES.get(player.getId());if(state==null || state.history.size()<2)return;
+    public static void renderFirstPerson(LivingEntity entity,ItemDisplayContext context,boolean left,MultiBufferSource buffer){
+        if(context.firstPerson() && entity instanceof AbstractClientPlayer player
+                && left==(player.getMainArm()==HumanoidArm.LEFT))render(player,buffer,true);
+    }
+    static void render(AbstractClientPlayer player,MultiBufferSource buffer){render(player,buffer,false);}
+    private static void render(AbstractClientPlayer player,MultiBufferSource buffer,boolean firstPerson){
+        State state=STATES.get(player.getId());if(state==null || state.firstPerson!=firstPerson || state.history.size()<2)return;
         var mc=Minecraft.getInstance();Vec3 camera=mc.gameRenderer.getMainCamera().getPosition();
         double distance=camera.distanceToSqr(player.position());if(distance>1024)return;
         var family=WarriorWeapons.family(player.getMainHandItem());if(family==null || family==WarriorWeaponFamily.BOW)return;
@@ -138,12 +151,18 @@ public final class WarriorTrail {
         String element=stack.hasTag()?stack.getTag().getString(WindInfusion.ELEMENT_KEY):"";
         var style=WarriorTrailAppearance.of(key==null?"":key.getPath(),family,element);
         double scale=WarriorPhantomRenderer.disabled()?1:Math.max(1,WarriorPhantomRenderer.scaleFor(player));
-        var out=buffer.getBuffer(WarriorTrailRenderType.TYPE);
+        var out=WarriorTrailRenderType.buffer(buffer);
+        Vec3 origin=firstPerson?Vec3.ZERO:camera;
         float ramp=(float)Math.max(0,Math.min(1,(time-state.start)/40));
-        float intensity=ramp*(.48f+.26f*Math.min(1,state.speed/12));
+        float intensity=ramp*(.40f+.22f*Math.min(1,state.speed/12))*(firstPerson?.78f:1f);
         WarriorTrailVolume.emit(state.curve,time,life,profile(family).outerStart(),scale,style,intensity,
-                (a,b,c,d,color,aa,ab,ac,ad)->{
-                    vertex(out,a,camera,color,aa);vertex(out,b,camera,color,ab);vertex(out,c,camera,color,ac);vertex(out,d,camera,color,ad);
+                new WarriorTrailVolume.Sink(){
+                    @Override public void quad(Vec3 a,Vec3 b,Vec3 c,Vec3 d,int color,float aa,float ab,float ac,float ad){
+                        gradient(a,b,c,d,color,color,color,color,aa,ab,ac,ad);
+                    }
+                    @Override public void gradient(Vec3 a,Vec3 b,Vec3 c,Vec3 d,int ca,int cb,int cc,int cd,float aa,float ab,float ac,float ad){
+                        vertex(out,a,origin,ca,aa);vertex(out,b,origin,cb,ab);vertex(out,c,origin,cc,ac);vertex(out,d,origin,cd,ad);
+                    }
                 });
     }
     private static void vertex(VertexConsumer out,Vec3 p,Vec3 camera,int color,float alpha){

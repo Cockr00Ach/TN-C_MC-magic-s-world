@@ -26,7 +26,8 @@ public class MagicStoneNetwork {
     // tempering snapshot (same packet, two extra strings -> the shape changed, so the
     // version has to change or a stale client would read the buffer past the end).
     // v28 adds attack ownership, target size and the surface frame to warrior impacts.
-    private static final String PROTOCOL_VERSION = "28";
+    // v29 includes absolute tempering points in the tracked-player weapon-growth packet.
+    private static final String PROTOCOL_VERSION = "29";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "main"),

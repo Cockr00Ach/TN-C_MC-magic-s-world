@@ -565,12 +565,17 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
      */
     private void castHeavenlyThunder(ServerLevel level, LivingEntity target) {
         Vec3 at = target.position();
-        com.tnc.tnc.magic.TnSpellMechanics.spawnMagicCircleAt(level, at, 14.0D, 210);
+        // ★ 2026-11-05：黑暗衍的阵也用**雷系新样式**（雷网 + 暗紫主题 ✓）
+        com.tnc.tnc.magic.TnSpellMechanics.spawnMagicCircleAt(level, at, 14.0D, 210,
+                com.tnc.tnc.magic.TNMagicCircleEntity.STYLE_LIGHTNING, 3);
         for (int i = 0; i < 12; i++) {
             double dx = (this.random.nextDouble() - 0.5D) * 8.0D;
             double dz = (this.random.nextDouble() - 0.5D) * 8.0D;
             this.bolt(level, at.add(dx, 0.0D, dz), 12.0D, 8.0D, THUNDER_DAMAGE, THUNDER_RADIUS);
         }
+        // ★★ 2026-11-05 作者："t5 砸下雷电之后，砸中的地面有龙直冲云霄" ✓
+        //   黑暗衍的天打五雷轰也是 t5 级的"雷砸地" —— 12 道雷落完，从目标脚下冲出一条**暗紫雷龙** ✓
+        com.tnc.tnc.magic.TnSpellMechanics.spawnDragon(level, at, 1.3D, 12, 3, 190);
         level.playSound(null, this.getX(), this.getY(), this.getZ(),
                 SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.HOSTILE, 2.0F, 0.9F);
     }

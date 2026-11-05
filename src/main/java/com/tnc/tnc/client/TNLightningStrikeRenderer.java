@@ -169,6 +169,21 @@ public class TNLightningStrikeRenderer extends EntityRenderer<TNLightningStrikeE
     public void render(TNLightningStrikeEntity entity, float entityYaw, float partialTick, PoseStack poseStack,
                        MultiBufferSource buffer, int packedLight) {
         float age = entity.tickCount + partialTick;
+        // ★★ 2026-11-05 作者："你现在的雷电就是只掉下来一个模型……我希望是从天空中一直落到地上，
+        //    很震撼的从天劈到地的光效，而且可以多劈"
+        //  ⇒ kind = 0（闪电）**不再画那个 flash 模型** ✗：整根闪电（含分叉/雷网/冲击闪）
+        //    由 {@link #renderFullBolt} 现画，从云层一路画到脚底 ✓。
+        //    神/球/跟随神仍然走原来的模型路径（它们本来就不是"劈下来的一道雷"✓）。
+        if (!entity.usesGodModel() && !entity.isBall()) {
+            renderFullBolt(entity, age, partialTick, poseStack, buffer);
+            if (LOGGED.add(entity.isDark() ? "bolt-geometry-dark" : "bolt-geometry")) {
+                LOGGER.info("TN-C: strike render kind=bolt-geometry scale={} theme={} life={} anchorY={}",
+                        entity.scale(), entity.theme(), entity.life(), entity.anchorY());
+            }
+            super.render(entity, entityYaw, partialTick, poseStack, buffer, packedLight);
+            return;
+        }
+
         // pop in over 2 ticks, shrink away over the last 2 - a strike has no time to fade
         // 2026-09-27: 原来这里是 grow * min(1, (life-age)/2) ✗ —— life 只有 4 tick 而其中
         // 大部分被"下落"吃掉，于是雷还在天上时 k 已经归零、整道雷不画 ✗（作者："有的时候
@@ -185,6 +200,24 @@ public class TNLightningStrikeRenderer extends EntityRenderer<TNLightningStrikeE
                 : ball ? (dark ? BALL_DARK_MODEL_ID : BALL_MODEL_ID)
                 : (dark ? FLASH_DARK_MODEL_ID : MODEL_ID);
 
+        // ★ 2026-11-05 作者："神在投篮的神还有球都变得不透明了" —— 根因在引擎那层：
+        //   spell_engine 0.15.12 的 spellObject(LightEmission) 传的是 translucent=false
+        //   ⇒ TransparencyState = NO_TRANSPARENCY ⇒ 贴图 alpha 被忽略、模型变实心 ✗。
+        //   现在改走我们自己的 SPELL_MODEL（TRANSLUCENT ＋ 自发光 ＋ 不写深度）✓
+        if (god || ball) {
+            // 先垫一圈主题色的辉光（相机朝向的光斑），模型再盖上去 ⇒ 有"发光"的体感 ✓
+            net.minecraft.world.phys.Vec3 camPos = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
+            net.minecraft.world.phys.Vec3 here = entity.getPosition(partialTick);
+            double hx = camPos.x - here.x;
+            double hy = camPos.y - here.y;
+            double hz = camPos.z - here.z;
+            double haloY = god ? 0.50D * s : 0.50D;
+            float haloR = (float) (god ? 0.34D * s : 0.62D * s);
+            com.tnc.tnc.client.lightning.LightningBoltGeometry.billboardFlash(
+                    buffer.getBuffer(com.tnc.tnc.client.lightning.LightningRenderTypes.BOLT),
+                    poseStack.last().pose(), 0.0D, haloY, 0.0D, haloR,
+                    com.tnc.tnc.client.lightning.LightningTheme.GOLD, 0.14F, hx, hy, hz);
+        }
         poseStack.pushPose();
         poseStack.scale(s, s, s);
         if (god) {
@@ -207,11 +240,20 @@ public class TNLightningStrikeRenderer extends EntityRenderer<TNLightningStrikeE
                     ENGINE_HALF_BLOCK - CENTER_Z);
         }
         try {
+            // ★ 2026-11-05 第二批（作者："闪电登神人物背后的雷神怎么也没有变透明"）：
+            //   换半透明 RenderType 还不够 —— 引擎那条 baked-item 路径的**顶点 alpha 写死 1.0**，
+            //   只有贴图镂空处透，实心部分（占 40% 像素）永远实心 ✗。
+            //   所以再套一层 {@link com.tnc.tnc.client.lightning.AlphaFadeBuffer}，把整尊神的
+            //   顶点 alpha 乘下去 ⇒ 真正半透明的雷神 ✓（神 0.60 / 跟随神 0.52 / 雷球 0.85）
+            float modelAlpha = ball ? 0.85F : (t5god ? 0.60F : 0.52F);
             net.spell_engine.api.render.CustomModels.render(
-                    net.spell_engine.client.render.SpellModelHelper.LAYERS
-                            .get(net.spell_engine.api.render.LightEmission.RADIATE),
+                    // ★ 2026-11-05：不再用引擎那层（它是 NO_TRANSPARENCY ⇒ 模型不透明 ✗），
+                    //   换成我们自己的半透明自发光层 ✓
+                    com.tnc.tnc.client.lightning.LightningRenderTypes.SPELL_MODEL,
                     Minecraft.getInstance().getItemRenderer(), modelId,
-                    poseStack, buffer, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
+                    poseStack,
+                    com.tnc.tnc.client.lightning.AlphaFadeBuffer.of(buffer, modelAlpha),
+                    LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
         } catch (Throwable ignored) {
             // engine missing / API changed: the hit still has its particles, just no model
         }
@@ -234,6 +276,136 @@ public class TNLightningStrikeRenderer extends EntityRenderer<TNLightningStrikeE
         }
 
         super.render(entity, entityYaw, partialTick, poseStack, buffer, packedLight);
+    }
+
+    // ------------------------------------------------------------------
+    //  ★ 整根闪电（2026-11-05）
+    // ------------------------------------------------------------------
+
+    /** 云层在落点上方多少格（格）—— 40 格已经高过任何平视的视线 ✓。 */
+    private static final double SKY_HEIGHT = 46.0D;
+
+    /**
+     * 画一根<b>从天到地</b>的闪电，以及落地后的雷网/冲击闪。
+     *
+     * <h2>为什么不用模型</h2>
+     * {@code flash} 模型只有 2.25 格高（作者模型 y −5..31，单位 1/16），放大到 14 倍也才 31 格，
+     * 而且是"一根直棍" ✗ —— 这才是"只掉下来一个模型"的根源。现画的版本：
+     * <ul>
+     *   <li>长度 = 落点上方 {@link #SKY_HEIGHT} 格（约 46）＋ 随体型再加 ✓；</li>
+     *   <li>形状每根不同（种子同步 ✓），带 2~5 根分叉（大雷还有二级分叉）✓；</li>
+     *   <li>落地后铺开<b>蛛网雷网</b> ＋ 贴地白光 ＋ 白闪 ＋ 扩散光圈 ✓；</li>
+     *   <li>"多劈"：主雷之外还有 2~5 道错开 1~2 tick 的副雷（同一次施法里的连劈 ✓）。</li>
+     * </ul>
+     *
+     * <p>坐标：实体原点就在落点（{@code tick()} 里第一 tick 就把自己钉在 {@code fallTo} ✓），
+     * 所以几何直接从 {@code y=0} 画到 {@code y=SKY_HEIGHT}；相机位置换成"实体原点坐标系"再传进去 ✓。
+     */
+    private void renderFullBolt(TNLightningStrikeEntity entity, float age, float partialTick,
+                                PoseStack poseStack, MultiBufferSource buffer) {
+        net.minecraft.world.phys.Vec3 cam = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
+        net.minecraft.world.phys.Vec3 at = entity.getPosition(partialTick);
+        double camX = cam.x - at.x;
+        double camY = cam.y - at.y;
+        double camZ = cam.z - at.z;
+
+        double scale = Math.max(1.0D, entity.scale());
+        float width = (float) Math.min(1.25D, Math.max(0.16D, scale * 0.072D));
+        int theme = entity.isDark() ? com.tnc.tnc.client.lightning.LightningTheme.DARK : entity.theme();
+        int life = Math.max(1, entity.life());
+        int impact = entity.impactAt();
+        int sinceHit = impact < 0 ? -1 : (int) Math.floor(age) - impact;
+
+        // 落地后的淡出（实体在 landedTick + life 时会被服务端 discard ✓）
+        float fade = 1.0F;
+        if (sinceHit >= 0 && sinceHit > life - 4) {
+            fade = Math.max(0.0F, (life - sinceHit) / 4.0F);
+        }
+        // 出现的那一瞬：从 0.35 亮到 1（2 tick）—— 生硬的"啪"比渐变更像雷 ✓
+        fade *= Math.min(1.0F, 0.35F + age * 0.5F);
+
+        org.joml.Matrix4f m = poseStack.last().pose();
+        VertexConsumer vc = buffer.getBuffer(com.tnc.tnc.client.lightning.LightningRenderTypes.BOLT);
+
+        double groundY = entity.anchorY() - at.y;                 // 落点在实体坐标系里的高度（≈0）
+        double topY = groundY + SKY_HEIGHT + Math.min(26.0D, scale * 1.6D);
+        int seed = entity.seed();
+        float flicker = 0.88F + 0.12F * net.minecraft.util.Mth.sin(age * 2.3F + seed * 0.01F);
+
+        // ---- 主雷 ----
+        com.tnc.tnc.client.lightning.LightningBoltGeometry.bolt(vc, m,
+                0.0D, topY, 0.0D, 0.0D, groundY, 0.0D,
+                seed, width, 1.0F * fade * flicker, theme,
+                (int) Math.min(6.0D, 2.0D + scale * 0.32D), camX, camY, camZ);
+
+        // ---- 副雷（"可以多劈"）----
+        //   出生时间错开 2 tick，位置在落点周围 1~2 格（不是同一个点 ✗，否则像重影）
+        int extras = scale >= 10.0D ? 5 : (scale >= 6.0D ? 3 : 2);
+        for (int i = 0; i < extras; i++) {
+            int born = 2 + i * 2;
+            if (sinceHit >= 0 && sinceHit < born) {
+                continue;
+            }
+            double ang = seed * 0.0007D + i * 2.39996D;
+            double off = 0.9D + scale * 0.10D + i * 0.35D;
+            double ox = Math.cos(ang) * off;
+            double oz = Math.sin(ang) * off;
+            double sway = 0.8D + i * 0.45D;
+            float a = fade * flicker * (0.78F - i * 0.07F);
+            com.tnc.tnc.client.lightning.LightningBoltGeometry.bolt(vc, m,
+                    ox, topY + i * 0.8D, oz,
+                    ox * 0.25D + Math.cos(ang + 1.2D) * sway, groundY, oz * 0.25D + Math.sin(ang + 1.2D) * sway,
+                    seed + 977L * (i + 1), width * (0.62F - i * 0.05F), a, theme,
+                    i == 0 ? 3 : 1, camX, camY, camZ);
+        }
+
+        // ---- 大雷的"补刀"：第 6 tick 再劈一根粗的（只有大雷有 ✓）----
+        if (scale >= 9.0D && sinceHit >= 6 && sinceHit <= 10) {
+            float a = fade * 0.9F * Math.max(0.0F, 1.0F - (sinceHit - 6) / 5.0F);
+            com.tnc.tnc.client.lightning.LightningBoltGeometry.bolt(vc, m,
+                    0.7D, topY + 2.0D, -0.5D, -0.4D, groundY, 0.4D,
+                    seed + 5501L, width * 0.9F, a, theme, 4, camX, camY, camZ);
+        }
+
+        // ---- 落地后的地网 / 闪光 ----
+        if (sinceHit >= 0) {
+            float t = sinceHit;
+            // ① 蛛网：落地那一下最亮，之后留 8 tick 慢慢暗
+            float webAlpha = fade * (t < 2.0F ? 0.95F : Math.max(0.0F, 0.95F - (t - 2.0F) * 0.10F));
+            double maxRadius = 1.6D + scale * 0.42D;               // 4.5 倍 ⇒ 3.5；14 倍 ⇒ 7.5
+            com.tnc.tnc.client.lightning.LightningBoltGeometry.groundWeb(vc, m,
+                    0.0D, groundY, 0.0D, (float) maxRadius, seed, theme, webAlpha,
+                    (float) (seed * 0.001D + t * 0.02D), camX, camY, camZ, true);
+            // ② 贴地白光（中心白 → 主题色 → 透明）
+            float flashA = fade * (t < 1.0F ? 0.95F : Math.max(0.0F, 0.95F - (t - 1.0F) * 0.12F));
+            com.tnc.tnc.client.lightning.LightningBoltGeometry.groundFlash(vc, m,
+                    0.0D, groundY, 0.0D, (float) (1.4D + scale * 0.30D), theme, flashA);
+            // ③ 空中的白闪（那一下"啪"的来源）
+            if (t < 3.0F) {
+                com.tnc.tnc.client.lightning.LightningBoltGeometry.billboardFlash(vc, m,
+                        0.0D, groundY + 0.9D + scale * 0.05D, 0.0D, (float) (1.0D + scale * 0.10D),
+                        theme, fade * 0.6F * (1.0F - t / 3.0F), camX, camY, camZ);
+            }
+            // ④ 向外扩散的气浪光圈（第 3 tick 起，越大越淡）
+            if (t >= 3.0F && t < 16.0F) {
+                double grow = 1.0D + (t - 3.0D) * 0.55D;
+                float a = fade * 0.35F * Math.max(0.0F, 1.0F - (t - 3.0F) / 13.0F);
+                com.tnc.tnc.client.lightning.LightningBoltGeometry.groundFlash(vc, m,
+                        0.0D, groundY, 0.0D, (float) (maxRadius * grow), theme, a);
+            }
+            // ⑤ 云底的亮斑：让"天被劈开了"这件事在头顶也看得见 ✓
+            if (t < 8.0F) {
+                com.tnc.tnc.client.lightning.LightningBoltGeometry.billboardFlash(vc, m,
+                        0.0D, topY - 2.0D, 0.0D, (float) (3.0D + scale * 0.5D), theme,
+                        fade * 0.18F * (1.0F - t / 8.0F), camX, camY, camZ);
+            }
+        } else {
+            // 还没落地（正常情况下 kind=0 第一 tick 就落地 ✓，这里只兜底）：画一截从天上垂下来的前导
+            double lead = Math.max(groundY, topY - age * 6.0D);
+            com.tnc.tnc.client.lightning.LightningBoltGeometry.bolt(vc, m,
+                    0.0D, topY, 0.0D, 0.0D, lead, 0.0D, seed + 31L, width, 0.9F * fade,
+                    theme, 1, camX, camY, camZ);
+        }
     }
 
     /**

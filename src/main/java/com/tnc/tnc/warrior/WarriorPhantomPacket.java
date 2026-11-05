@@ -6,13 +6,17 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 
 /** Other players must see this player's reach, never the observer's own progression. */
-public record WarriorPhantomPacket(UUID player, float scale) {
-    public void encode(FriendlyByteBuf out) { out.writeUUID(player); out.writeFloat(scale); }
+public record WarriorPhantomPacket(UUID player, float scale,int points) {
+    public WarriorPhantomPacket(UUID player,float scale){this(player,scale,0);}
+    public void encode(FriendlyByteBuf out) { out.writeUUID(player); out.writeFloat(scale); out.writeVarInt(points); }
     public static WarriorPhantomPacket decode(FriendlyByteBuf in) {
         UUID player = in.readUUID(); float scale = in.readFloat();
         if (!Float.isFinite(scale) || scale < 1 || scale > 1 + WarriorPhantom.MAX_GROWTH + .001)
             throw new io.netty.handler.codec.DecoderException("invalid warrior phantom scale");
-        return new WarriorPhantomPacket(player, scale);
+        int points=in.readVarInt();
+        if(points<0 || points>TemperingRules.MAX_POINTS)
+            throw new io.netty.handler.codec.DecoderException("invalid warrior tempering points");
+        return new WarriorPhantomPacket(player, scale,points);
     }
     public void handle(Supplier<NetworkEvent.Context> supplier) {
         var context = supplier.get();
@@ -20,7 +24,7 @@ public record WarriorPhantomPacket(UUID player, float scale) {
     }
     private static final class ClientOnly {
         static void accept(WarriorPhantomPacket packet) {
-            com.tnc.tnc.warrior.client.WarriorPhantomScales.accept(packet.player(), packet.scale());
+            com.tnc.tnc.warrior.client.WarriorPhantomScales.accept(packet.player(), packet.scale(),packet.points());
         }
     }
 }

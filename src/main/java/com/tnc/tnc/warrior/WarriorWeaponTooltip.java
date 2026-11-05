@@ -52,6 +52,12 @@ public final class WarriorWeaponTooltip {
         if (event.getFlags().isAdvanced()) {
             event.getToolTip().add(Component.translatable("tooltip.tnc.weapon.keys")
                     .withStyle(ChatFormatting.DARK_GRAY));
+            if(WarriorMartialArts.supports(id.toString())) {
+                for(var skill:WarriorCombos.forFamily(family)) {
+                    var move=WarriorMartialArts.adapt(skill,id.toString());
+                    event.getToolTip().add(Component.literal(move.holdLabel()+" · "+move.name()).withStyle(ChatFormatting.GOLD));
+                }
+            }
         }
     }
 

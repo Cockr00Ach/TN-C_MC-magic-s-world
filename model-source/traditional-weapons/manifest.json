@@ -1,0 +1,62 @@
+[
+  {
+    "id": "yue_bronze_jian",
+    "blocks": 945,
+    "quads": 4026,
+    "ghost_blocks": 32
+  },
+  {
+    "id": "willow_leaf_dao",
+    "blocks": 711,
+    "quads": 2922,
+    "ghost_blocks": 31
+  },
+  {
+    "id": "crescent_guandao",
+    "blocks": 1459,
+    "quads": 6446,
+    "ghost_blocks": 37
+  },
+  {
+    "id": "fangtian_ji",
+    "blocks": 1168,
+    "quads": 5928,
+    "ghost_blocks": 50
+  },
+  {
+    "id": "red_tassel_spear",
+    "blocks": 948,
+    "quads": 4902,
+    "ghost_blocks": 46
+  },
+  {
+    "id": "ring_pommel_dao",
+    "blocks": 551,
+    "quads": 2082,
+    "ghost_blocks": 43
+  },
+  {
+    "id": "han_iron_jian",
+    "blocks": 773,
+    "quads": 3232,
+    "ghost_blocks": 36
+  },
+  {
+    "id": "iron_jian_mace",
+    "blocks": 581,
+    "quads": 2220,
+    "ghost_blocks": 30
+  },
+  {
+    "id": "monk_spade",
+    "blocks": 1330,
+    "quads": 5900,
+    "ghost_blocks": 35
+  },
+  {
+    "id": "qimei_staff",
+    "blocks": 943,
+    "quads": 5210,
+    "ghost_blocks": 8
+  }
+]

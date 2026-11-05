@@ -19,6 +19,17 @@ public final class InkDragonDistantView {
     private static long received;
     private static int drawn,liveDrawn;
     private static final net.minecraft.client.renderer.MultiBufferSource.BufferSource BUFFERS=net.minecraft.client.renderer.MultiBufferSource.immediate(new com.mojang.blaze3d.vertex.BufferBuilder(65536));
+    private static boolean drawing;
+    static boolean independentPass(){
+        var mc=Minecraft.getInstance();
+        if(mc.level==null||!mc.level.dimension().location().toString().equals("tnc:ink_realm"))return false;
+        try{
+            var api=Class.forName("net.irisshaders.iris.api.v0.IrisApi");
+            return !(boolean)api.getMethod("isShaderPackInUse").invoke(api.getMethod("getInstance").invoke(null));
+        }catch(ClassNotFoundException absent){return true;}
+        catch(ReflectiveOperationException unavailable){return false;}
+    }
+    static boolean ownsTrackedPass(){return !drawing&&independentPass();}
     public static int cachedViews(){return VIEWS.size();}
     public static int drawnViews(){return drawn;}
     public static int drawnLive(){return liveDrawn;}
@@ -54,6 +65,26 @@ public final class InkDragonDistantView {
         var camera=event.getCamera().getPosition();var buffers=BUFFERS;
         // The normal entity pass owns tracked dragons. Never replace global projection under Oculus.
         liveDrawn=actual.size();
+        boolean independent=independentPass();
+        var projection=new org.joml.Matrix4f(com.mojang.blaze3d.systems.RenderSystem.getProjectionMatrix());
+        float fogStart=com.mojang.blaze3d.systems.RenderSystem.getShaderFogStart(),fogEnd=com.mojang.blaze3d.systems.RenderSystem.getShaderFogEnd();
+        var sorting=com.mojang.blaze3d.systems.RenderSystem.getVertexSorting();
+        try {
+        drawing=true;
+        if(independent){
+            // Preserve the camera FOV, aspect and near plane; extend only this model pass.
+            com.mojang.blaze3d.systems.RenderSystem.setShaderFogStart(1536F);
+            com.mojang.blaze3d.systems.RenderSystem.setShaderFogEnd(2048F);
+            var distant=new org.joml.Matrix4f(projection);
+            float near=projection.m32()/(projection.m22()-1F),far=2048F;
+            distant.m22(-(far+near)/(far-near)).m32(-2F*far*near/(far-near));
+            com.mojang.blaze3d.systems.RenderSystem.setProjectionMatrix(distant,sorting);
+            for(var e:actual.values())draw(e,new net.minecraft.world.phys.Vec3(
+                net.minecraft.util.Mth.lerp(event.getPartialTick(),e.xOld,e.getX()),
+                net.minecraft.util.Mth.lerp(event.getPartialTick(),e.yOld,e.getY()),
+                net.minecraft.util.Mth.lerp(event.getPartialTick(),e.zOld,e.getZ())),
+                net.minecraft.util.Mth.rotLerp(event.getPartialTick(),e.yRotO,e.getYRot()),event);
+        }
         for(var entry:VIEWS.entrySet()){
             if(actual.containsKey(entry.getKey()))continue;
             var e=entry.getValue();
@@ -63,6 +94,14 @@ public final class InkDragonDistantView {
             e.tickCount=(int)mc.level.getGameTime();draw(e,at,yaw,event);drawn++;
         }
         buffers.endBatch();
+        }finally{
+            drawing=false;
+            if(independent){
+                com.mojang.blaze3d.systems.RenderSystem.setProjectionMatrix(projection,sorting);
+                com.mojang.blaze3d.systems.RenderSystem.setShaderFogStart(fogStart);
+                com.mojang.blaze3d.systems.RenderSystem.setShaderFogEnd(fogEnd);
+            }
+        }
     }
     private static void draw(InkCelestialDragonEntity e,net.minecraft.world.phys.Vec3 at,float yaw,RenderLevelStageEvent event){
         var mc=Minecraft.getInstance();var camera=event.getCamera().getPosition();

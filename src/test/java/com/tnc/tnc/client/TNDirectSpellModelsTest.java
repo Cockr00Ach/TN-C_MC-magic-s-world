@@ -12,7 +12,7 @@ class TNDirectSpellModelsTest {
     @Test void registerAdditionalUsesExactPlainKeysRequiredByModernFixAndSpellEngine() {
         var keys=new HashSet<ResourceLocation>();
         TNDirectSpellModels.register(new ModelEvent.RegisterAdditional(keys));
-        assertEquals(20,keys.size());
+        assertEquals(30,keys.size());
         for(var key:keys) {
             assertFalse(key instanceof ModelResourceLocation,"Variant keys incorrectly load blockstates");
             assertTrue(Files.exists(Path.of("src/main/resources/assets/tnc/models/"+key.getPath()+".json")),key.toString());

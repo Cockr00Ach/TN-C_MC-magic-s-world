@@ -90,7 +90,8 @@ public final class WarriorComboAnimations {
              "/assets/tnc/animations/entity/hammer_combo.json"},
             {"/assets/tnc/animations/entity/战士连招/长弓连招.json",
              "/assets/tnc/animations/entity/bow_combo.json"},
-            {"/assets/tnc/animations/entity/warrior_performance.json"}};
+            {"/assets/tnc/animations/entity/warrior_performance.json"},
+            {"/assets/tnc/animations/entity/traditional_martial_arts.json"}};
 
     private static final float[] ZERO = {0f, 0f, 0f};
 
@@ -212,6 +213,12 @@ public final class WarriorComboAnimations {
             }
         }
         return null;
+    }
+
+    public static Clip clip(WarriorAnimation animation,String weaponId) {
+        String key=com.tnc.tnc.warrior.WarriorMartialArts.clipKey(animation,weaponId);
+        Clip variant=key==null?null:all().get(key);
+        return variant==null?clip(animation):variant;
     }
 
     /** 已加载的全部动作（首次调用时读文件，失败就记住空表，不每帧重试）。 */

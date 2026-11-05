@@ -260,6 +260,8 @@ minecraft {
             if (project.hasProperty('warriorTests')) {
                 property 'forge.enabledGameTestNamespaces', 'tncwarrior'
                 workingDirectory project.file('work/warrior-server-tests')
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
             }
             if (project.hasProperty('dungeonMobTests')) {
                 property 'forge.enabledGameTestNamespaces', 'tncdungeon'
@@ -411,7 +413,7 @@ dependencies {
     // Custom Molang queries use GeckoLib's embedded parser API; runtime still comes from GeckoLib.
     compileOnly files(zipTree('libs/geckolib-4.8.4.jar').matching { include 'META-INF/jarjar/mclib-20.jar' })
 
-    if (project.hasProperty('dungeonMobTests') || project.hasProperty('dungeonTests')) {
+    if (project.hasProperty('dungeonMobTests') || project.hasProperty('dungeonTests') || project.hasProperty('warriorTests')) {
         runtimeOnly fg.deobf('geckolib:geckolib:4.8.4')
     }
     testImplementation platform('org.junit:junit-bom:5.10.2')
