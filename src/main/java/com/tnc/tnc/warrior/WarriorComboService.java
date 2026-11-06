@@ -285,6 +285,12 @@ public final class WarriorComboService {
         if (move == WarriorMove.HORIZONTAL) {
             // Z（左键）的伤害由原版结算，这里只补动作，避免一次点击打两下
             state.lastSlash = now;
+            // Vanilla misses are silent. Match Q/E's swish for the bronze dao without re-running damage.
+            if (player.getMainHandItem().getItem() instanceof com.tnc.tnc.bronze.BronzeWeaponItem bronze
+                    && bronze.profile == com.tnc.tnc.bronze.BronzeProfile.DAO) {
+                player.serverLevel().playSound(null, player.blockPosition(), SoundEvents.PLAYER_ATTACK_SWEEP,
+                        SoundSource.PLAYERS, .7f, .85f);
+            }
             return;
         }
         long last = state.lastSlashByMove.getOrDefault(move, Long.MIN_VALUE);
