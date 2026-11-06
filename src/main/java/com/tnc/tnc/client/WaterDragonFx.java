@@ -175,7 +175,9 @@ public final class WaterDragonFx {
         }
         dir = dir.normalize();
         Vec3 right = rightOf(dir);
-        Vec3 up = dir.cross(right).normalize();
+        // ⚠️ 必须是 right × dir（= +Y）。写成 dir × right 得到的是 (0,-1,0) —— 整条龙的背鳍、
+        // 龙角、龙须全会朝下翻（2026-11-07 出预览图时才发现）。
+        Vec3 up = right.cross(dir).normalize();
         double s = dragon.scale;
         for (int i = 0; i < 2; i++) {
             Vec3 offset = right.scale((RANDOM.nextDouble() - .5) * .5 * s)
@@ -342,7 +344,8 @@ public final class WaterDragonFx {
                                        float alpha, float age, long seed) {
         Vec3 dir = dirIn.lengthSqr() < 1e-8 ? new Vec3(0, 0, 1) : dirIn.normalize();
         Vec3 right = rightOf(dir);
-        Vec3 up = dir.cross(right).normalize();
+        // right × dir = +Y（见 tickTrail 的注释：反过来会把背鳍/龙角/龙须全翻到肚子底下）。
+        Vec3 up = right.cross(dir).normalize();
         double s = scale;
         double len = lengthFor(s);   // 以格为单位的全长
 
@@ -355,19 +358,26 @@ public final class WaterDragonFx {
             double sway = Math.sin(age * .55D - t * 4.6D) * .055 * len * (.25 + .75 * t);
             double rise = Math.sin(age * .42D - t * 5.4D) * .028 * len * t;
             spine[i] = at.add(dir.scale(z)).add(right.scale(sway)).add(up.scale(rise));
-            radii[i] = s * (.150 - .062 * t);
+            // 头要比脖子粗一点，否则整条龙读成「一根会发光的管子、前面鼓了个包」。
+            radii[i] = s * (.108 - .052 * t);
         }
 
         // ---- 2. 四层管：外层越宽越暗，芯越窄越白 ----
-        for (int i = 0; i < SPINE - 1; i++) {
-            Vec3 a = spine[i];
-            Vec3 b = spine[i + 1];
-            double r = (radii[i] + radii[i + 1]) * .5;
-            WaterGeometry.tube(out, IDENTITY, a, b, r * 2.25, DEEP_R, DEEP_G, DEEP_B, .07F * alpha, 8);
-            WaterGeometry.tube(out, IDENTITY, a, b, r * 1.55, C_R * .75F, C_G * .85F, C_B, .16F * alpha, 6);
-            WaterGeometry.tube(out, IDENTITY, a, b, r, LIGHT_R, LIGHT_G, LIGHT_B, .28F * alpha, 5);
-            WaterGeometry.tube(out, IDENTITY, a, b, r * .42, FOAM_R, FOAM_G, FOAM_B, .60F * alpha, 4);
+        // 一条连续的扫掠管（不是 11 段圆柱）。分段圆柱在接缝处半径一跳、截面还各转一个角度，
+        // 远看就是"一叠藕片"；平行移动坐标架扫过去才是水。
+        final int bodyPts = 26;
+        Vec3[] bodyPath = new Vec3[bodyPts];
+        double[] bodyRad = new double[bodyPts];
+        for (int i = 0; i < bodyPts; i++) {
+            double t = i / (double) (bodyPts - 1);
+            bodyPath[i] = spineAt(spine, t);
+            bodyRad[i] = s * (.108 - .052 * t);
         }
+        // 四层叠加（加色）：中心累计 0.05+0.13+0.20+0.40 ≈ 0.78，过 1 就烧成纯白塑料管了。
+        sweep(out, bodyPath, scaled(bodyRad, 2.00), DEEP_R, DEEP_G, DEEP_B, .05F * alpha, 8);
+        sweep(out, bodyPath, scaled(bodyRad, 1.55), C_R * .75F, C_G * .85F, C_B, .13F * alpha, 6);
+        sweep(out, bodyPath, scaled(bodyRad, 1.00), LIGHT_R, LIGHT_G, LIGHT_B, .20F * alpha, 5);
+        sweep(out, bodyPath, scaled(bodyRad, .42), FOAM_R, FOAM_G, FOAM_B, .40F * alpha, 4);
         // 尾尖一点更亮的珠子。
         WaterGeometry.droplet(out, IDENTITY, spine[SPINE - 1], .10 * s, age * 1.3,
                 FOAM_R, FOAM_G, FOAM_B, .55F * alpha);
@@ -382,11 +392,11 @@ public final class WaterDragonFx {
             Vec3 tip = base.add(up.scale(height));
             Vec3 tipNext = next.add(up.scale(height * .88));
             WaterGeometry.quad(out, IDENTITY, base, next, tipNext, tip,
-                    C_R, C_G, C_B, .14F * alpha);
+                    C_R, C_G, C_B, .30F * alpha);
             WaterGeometry.tube(out, IDENTITY, base, tip, .012 * s, LIGHT_R, LIGHT_G, LIGHT_B,
                     .28F * alpha, 4);
             if (previousTip != null) {
-                WaterGeometry.tube(out, IDENTITY, previousTip, tip, .010 * s,
+                WaterGeometry.tube(out, IDENTITY, previousTip, tip, .008 * s,
                         FOAM_R, FOAM_G, FOAM_B, .34F * alpha, 4);
             }
             previousTip = tip;
@@ -403,37 +413,38 @@ public final class WaterDragonFx {
                 double t = pair == 0 ? .26 : .58;
                 Vec3 root = spineAt(spine, t).add(right.scale(side * radii[Math.min(SPINE - 1,
                         (int) Math.round(t * (SPINE - 1)))] * .55));
+                // 腿往后收：膝在外侧下方，脚再往下、略往前，爪子朝前——像在"游泳蹬水"。
                 Vec3 knee = root.add(right.scale(side * .13 * s)).add(0, -.19 * s, 0)
-                        .add(dir.scale(-.05 * s));
-                Vec3 foot = knee.add(right.scale(side * .05 * s)).add(dir.scale(-.14 * s))
-                        .add(0, .04 * s, 0);
+                        .add(dir.scale(-.06 * s));
+                Vec3 foot = knee.add(right.scale(side * .04 * s)).add(dir.scale(.07 * s))
+                        .add(0, -.09 * s, 0);
                 WaterGeometry.tube(out, IDENTITY, root, knee, .045 * s, C_R, C_G, C_B, .30F * alpha, 5);
                 WaterGeometry.tube(out, IDENTITY, knee, foot, .034 * s, C_R, C_G, C_B, .26F * alpha, 5);
                 for (int claw = -1; claw <= 1; claw++) {
-                    Vec3 tip = foot.add(dir.scale(-.09 * s))
-                            .add(right.scale(claw * .045 * s));
+                    Vec3 tip = foot.add(dir.scale(.10 * s))
+                            .add(right.scale(claw * .045 * s)).add(0, -.02 * s, 0);
                     WaterGeometry.tube(out, IDENTITY, foot, tip, .010 * s,
                             FOAM_R, FOAM_G, FOAM_B, .40F * alpha, 4);
                 }
             }
         }
 
-        // ---- 6. 尾鳍：五根扇骨 ----
+        // ---- 6. 尾鳍：五根扇骨（短一点，太长会像一圈太阳芒）+ 骨间水膜 ----
         Vec3 tail = spine[SPINE - 1];
+        Vec3[] tips = new Vec3[5];
         for (int i = 0; i < 5; i++) {
             double a = (i - 2) * .34;
-            Vec3 tip = tail.add(right.scale(Math.sin(a) * .42 * s))
-                    .add(up.scale(Math.cos(a) * .30 * s))
-                    .add(dir.scale(-.16 * s));
-            WaterGeometry.tube(out, IDENTITY, tail, tip, .012 * s, LIGHT_R, LIGHT_G, LIGHT_B,
+            tips[i] = tail.add(right.scale(Math.sin(a) * .24 * s))
+                    .add(up.scale(Math.cos(a) * .17 * s))
+                    .add(dir.scale(-.12 * s));
+            WaterGeometry.tube(out, IDENTITY, tail, tips[i], .012 * s, LIGHT_R, LIGHT_G, LIGHT_B,
                     .30F * alpha, 4);
         }
-        WaterGeometry.quad(out, IDENTITY,
-                tail.add(right.scale(-.30 * s)).add(up.scale(-.14 * s)),
-                tail.add(right.scale(.30 * s)).add(up.scale(-.14 * s)),
-                tail.add(right.scale(.20 * s)).add(up.scale(.16 * s)).add(dir.scale(-.14 * s)),
-                tail.add(right.scale(-.20 * s)).add(up.scale(.16 * s)).add(dir.scale(-.14 * s)),
-                C_R, C_G, C_B, .12F * alpha);
+        // 骨与骨之间拉一片扇形水膜（比一整块三角板更像鳍）
+        for (int i = 0; i < 4; i++) {
+            WaterGeometry.quad(out, IDENTITY, tail, tips[i], tips[i + 1], tail,
+                    C_R, C_G, C_B, .10F * alpha);
+        }
 
         // ---- 7. 三圈绕身水环 + 沿身水珠 ----
         for (int k = 1; k <= 3; k++) {
@@ -443,7 +454,7 @@ public final class WaterDragonFx {
                 axis = dir;
             }
             WaterGeometry.ringColor(out, IDENTITY, center, axis.normalize(),
-                    radii[(int) Math.min(SPINE - 1, Math.round(k * .24 * (SPINE - 1)))] * 2.1,
+                    radii[(int) Math.min(SPINE - 1, Math.round(k * .24 * (SPINE - 1)))] * 1.8,
                     .012 * s, LIGHT_R, LIGHT_G, LIGHT_B, .16F * alpha, 18);
         }
         for (int k = 0; k < 4; k++) {
@@ -455,40 +466,49 @@ public final class WaterDragonFx {
         }
     }
 
-    /** 头：颅、吻、下颚、眉骨、眼、四角、两口长龙须、牙、鳃鳍。 */
+    /**
+     * 头：脖、颅、吻、下颚、眉骨、眼、四角、两口长龙须、牙、鳃鳍。
+     *
+     * <p>全部用<b>锥形圆管</b>拼（不是方块）。方块头在本项目的加色渲染里就是一个亮盒子，
+     * 一眼看出是"贴了个箱子"；管子才有水的那种圆润过渡。
+     */
     private static void head(VertexConsumer out, Vec3 head, Vec3 dir, Vec3 right, Vec3 up,
                              double s, float age, double jawOpen, float alpha) {
-        Vec3 skull = head.add(dir.scale(-.02 * s)).add(up.scale(.015 * s));
-        box(out, skull, right, up, dir, .125 * s, .105 * s, .155 * s,
-                C_R, C_G, C_B, .30F * alpha);
-        Vec3 snout = head.add(dir.scale(.19 * s)).add(up.scale(-.005 * s));
-        box(out, snout, right, up, dir, .080 * s, .070 * s, .120 * s,
-                LIGHT_R, LIGHT_G, LIGHT_B, .34F * alpha);
-        // 下颚：以颅后为铰链往下张（角度由 age 推）。
-        Vec3 jaw = head.add(dir.scale(.13 * s)).add(up.scale(-.10 * s - jawOpen * .10 * s));
-        box(out, jaw, right, up, dir, .070 * s, .035 * s, .135 * s,
-                C_R * .85F, C_G, C_B, .26F * alpha);
-        // 眉骨
+        // 脖子 + 颅 + 吻：一条连续的扫掠管，半径从脖子到吻尖一路收细
+        sweep(out, new Vec3[]{head.add(dir.scale(-.34 * s)), head.add(dir.scale(-.16 * s)),
+                        head.add(dir.scale(-.03 * s)), head.add(dir.scale(.09 * s)),
+                        head.add(dir.scale(.19 * s)), head.add(dir.scale(.30 * s)),
+                        head.add(dir.scale(.345 * s))},
+                new double[]{.092 * s, .118 * s, .130 * s, .126 * s, .104 * s, .075 * s, .048 * s},
+                C_R, C_G, C_B, .24F * alpha, 12);
+        // 下颚：以颅后为铰链往下张（角度由 age 推）
+        Vec3 hinge = head.add(dir.scale(.02 * s)).add(up.scale(-.055 * s - jawOpen * .05 * s));
+        Vec3 jawMid = head.add(dir.scale(.17 * s)).add(up.scale(-.075 * s - jawOpen * .10 * s));
+        Vec3 jawTip = head.add(dir.scale(.30 * s)).add(up.scale(-.070 * s - jawOpen * .13 * s));
+        sweep(out, new Vec3[]{hinge, jawMid, jawTip},
+                new double[]{.070 * s, .058 * s, .040 * s}, C_R * .85F, C_G, C_B, .22F * alpha, 8);
+        // 眉骨：两道短短的凸脊，压在眼上方
         for (int side = -1; side <= 1; side += 2) {
-            Vec3 brow = head.add(right.scale(side * .085 * s)).add(up.scale(.095 * s))
-                    .add(dir.scale(.06 * s));
-            box(out, brow, right, up, dir, .040 * s, .022 * s, .060 * s,
-                    C_R, C_G, C_B, .26F * alpha);
+            Vec3 a = head.add(dir.scale(.05 * s)).add(right.scale(side * .055 * s))
+                    .add(up.scale(.095 * s));
+            Vec3 b = head.add(dir.scale(.21 * s)).add(right.scale(side * .070 * s))
+                    .add(up.scale(.072 * s));
+            WaterGeometry.tube(out, IDENTITY, a, b, .024 * s, C_R, C_G, C_B, .26F * alpha, 5);
         }
         // 眼：一颗亮芯 + 一圈光晕，朝外
         for (int side = -1; side <= 1; side += 2) {
-            Vec3 eye = head.add(right.scale(side * .118 * s)).add(up.scale(.045 * s))
+            Vec3 eye = head.add(right.scale(side * .105 * s)).add(up.scale(.055 * s))
                     .add(dir.scale(.135 * s));
             Vec3 normal = right.scale(side);
-            WaterGeometry.disk(out, IDENTITY, eye, normal, .055 * s, C_R, C_G, C_B, .30F * alpha, 12);
+            WaterGeometry.disk(out, IDENTITY, eye, normal, .058 * s, C_R, C_G, C_B, .30F * alpha, 12);
             WaterGeometry.disk(out, IDENTITY, eye.add(normal.scale(.002)), normal,
-                    .026 * s, FOAM_R, FOAM_G, FOAM_B, .85F * alpha, 10);
+                    .027 * s, FOAM_R, FOAM_G, FOAM_B, .85F * alpha, 10);
         }
         // 四角：两对，向后上扫，逐节摆
         for (int side = -1; side <= 1; side += 2) {
             for (int pair = 0; pair < 2; pair++) {
-                Vec3 start = head.add(right.scale(side * (.085 + pair * .035) * s))
-                        .add(up.scale((.09 - pair * .03) * s))
+                Vec3 start = head.add(right.scale(side * (.080 + pair * .035) * s))
+                        .add(up.scale((.100 - pair * .030) * s))
                         .add(dir.scale((-.02 - pair * .05) * s));
                 Vec3 tip = start.add(right.scale(side * (.14 + pair * .05) * s))
                         .add(up.scale((.20 - pair * .06) * s))
@@ -496,33 +516,35 @@ public final class WaterDragonFx {
                 horn(out, start, tip, s * (pair == 0 ? 1 : .8), age + side * .7, alpha);
             }
         }
-        // 两口龙须：14 节，两条不同相位，飘得很慢
+        // 两口龙须：14 节，贴着脖子往后飘（张开太多会像两根天线）
         for (int side = -1; side <= 1; side += 2) {
-            Vec3 root = snout.add(right.scale(side * .075 * s)).add(up.scale(.010 * s))
-                    .add(dir.scale(.06 * s));
+            Vec3 root = head.add(dir.scale(.27 * s)).add(right.scale(side * .050 * s))
+                    .add(up.scale(-.010 * s));
             whisker(out, root, dir, right, up, side, s * 1.05, age + side * 1.3, alpha);
         }
         // 牙：上下各 4 颗小白锥
         for (int side = -1; side <= 1; side += 2) {
             for (int i = 0; i < 4; i++) {
-                Vec3 at = snout.add(right.scale(side * (.020 + i * .022) * s))
-                        .add(dir.scale((.08 - i * .045) * s)).add(up.scale(-.065 * s));
-                WaterGeometry.tube(out, IDENTITY, at, at.add(0, -.030 * s, 0), .009 * s,
+                double z = (.265 - i * .052) * s;
+                Vec3 at = head.add(dir.scale(z)).add(right.scale(side * (.016 + i * .014) * s))
+                        .add(up.scale(-.050 * s));
+                WaterGeometry.tube(out, IDENTITY, at, at.add(0, -.028 * s, 0), .009 * s,
                         FOAM_R, FOAM_G, FOAM_B, .45F * alpha, 4);
-                Vec3 low = jaw.add(right.scale(side * (.018 + i * .020) * s))
-                        .add(dir.scale((.07 - i * .042) * s)).add(up.scale(.032 * s));
-                WaterGeometry.tube(out, IDENTITY, low, low.add(0, .026 * s, 0), .008 * s,
+                Vec3 low = head.add(dir.scale(z - .01 * s))
+                        .add(right.scale(side * (.014 + i * .013) * s))
+                        .add(up.scale(-.060 * s - jawOpen * .10 * s));
+                WaterGeometry.tube(out, IDENTITY, low, low.add(0, .024 * s, 0), .008 * s,
                         FOAM_R, FOAM_G, FOAM_B, .40F * alpha, 4);
             }
         }
         // 鳃鳍：三片向后扫的水膜
         for (int side = -1; side <= 1; side += 2) {
             for (int i = 0; i < 3; i++) {
-                Vec3 root = head.add(right.scale(side * (.11 + i * .012) * s))
-                        .add(up.scale((.02 - i * .035) * s)).add(dir.scale(-.06 * s));
-                Vec3 tip = root.add(right.scale(side * .22 * s)).add(up.scale(.04 * s))
-                        .add(dir.scale(-.16 * s));
-                WaterGeometry.quad(out, IDENTITY, root, root.add(dir.scale(-.10 * s)), tip, tip,
+                Vec3 root = head.add(right.scale(side * (.115 + i * .012) * s))
+                        .add(up.scale((.020 - i * .035) * s)).add(dir.scale(-.07 * s));
+                Vec3 tip = root.add(right.scale(side * .20 * s)).add(up.scale(.04 * s))
+                        .add(dir.scale(-.20 * s));
+                WaterGeometry.quad(out, IDENTITY, root, root.add(dir.scale(-.09 * s)), tip, tip,
                         C_R, C_G, C_B, .12F * alpha);
                 WaterGeometry.tube(out, IDENTITY, root, tip, .010 * s, LIGHT_R, LIGHT_G, LIGHT_B,
                         .24F * alpha, 4);
@@ -530,6 +552,51 @@ public final class WaterDragonFx {
         }
     }
 
+    /**
+     * 连续扫掠管：沿一条折线把截面扫过去，半径逐点插值，截面用<b>平行移动坐标架</b>。
+     *
+     * <p>这是这条龙身上最重要的一处：用 {@code WaterGeometry.tube} 一段段接出来的管子，
+     * 每个接缝半径一跳、截面还各转一个角度，加色叠起来就是"一叠藕片"或者"竹节"。
+     * 扫掠出来的是一整条光滑的水柱，只有首尾是开口的。
+     */
+    private static void sweep(VertexConsumer out, Vec3[] pts, double[] rad,
+                              float r, float g, float b, float alpha, int sides) {
+        int n = pts.length;
+        Vec3 t0 = pts[1].subtract(pts[0]).normalize();
+        Vec3 ref = Math.abs(t0.y) > .9 ? new Vec3(1, 0, 0) : UP;
+        Vec3 nrm = t0.cross(ref).normalize();
+        Vec3[][] ring = new Vec3[n][sides];
+        for (int i = 0; i < n; i++) {
+            Vec3 t = i == 0 ? t0
+                    : i == n - 1 ? pts[n - 1].subtract(pts[n - 2]).normalize()
+                    : pts[i + 1].subtract(pts[i - 1]).normalize();
+            // 上一环的法向投影到当前截面 = 平行移动，整条管子不会自己拧麻花
+            Vec3 flat = nrm.subtract(t.scale(nrm.dot(t)));
+            nrm = flat.lengthSqr() < 1e-9 ? t0.cross(ref).normalize() : flat.normalize();
+            Vec3 bin = t.cross(nrm).normalize();
+            for (int k = 0; k < sides; k++) {
+                double a = k * Math.PI * 2 / sides;
+                ring[i][k] = pts[i].add(nrm.scale(Math.cos(a) * rad[i]))
+                        .add(bin.scale(Math.sin(a) * rad[i]));
+            }
+        }
+        for (int i = 0; i < n - 1; i++) {
+            for (int k = 0; k < sides; k++) {
+                int k2 = (k + 1) % sides;
+                WaterGeometry.quad(out, IDENTITY, ring[i][k], ring[i + 1][k], ring[i + 1][k2],
+                        ring[i][k2], r, g, b, alpha);
+            }
+        }
+    }
+
+    /** 半径数组整体乘一个系数（四层管共用同一条脊线，只是粗细不同）。 */
+    private static double[] scaled(double[] in, double k) {
+        double[] out = new double[in.length];
+        for (int i = 0; i < in.length; i++) {
+            out[i] = in[i] * k;
+        }
+        return out;
+    }
     /** 一根角：5 节锥形管，逐节往回收，带轻微摆动。 */
     private static void horn(VertexConsumer out, Vec3 start, Vec3 tip, double s, double phase,
                              float alpha) {
@@ -554,9 +621,9 @@ public final class WaterDragonFx {
         for (int i = 1; i <= segments; i++) {
             double t = i / (double) segments;
             double wave = Math.sin(phase + t * 4.4D) * .10 * s * t;
-            Vec3 p = root.add(right.scale(side * (.30 + .55 * t) * s + wave))
-                    .add(dir.scale(-1.0 * t * s))
-                    .add(up.scale((.06 - .10 * t) * s + Math.cos(phase + t * 3.6) * .05 * s * t));
+            Vec3 p = root.add(right.scale(side * (.10 + .34 * t) * s + wave))
+                    .add(dir.scale(-1.15 * t * s))
+                    .add(up.scale(-.16 * t * s + Math.cos(phase + t * 3.6) * .05 * s * t));
             WaterGeometry.tube(out, IDENTITY, previous, p, s * (.012 - .007 * t),
                     FOAM_R, FOAM_G, FOAM_B, .40F * alpha, 4);
             previous = p;
