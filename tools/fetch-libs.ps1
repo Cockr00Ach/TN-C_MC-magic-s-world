@@ -126,7 +126,12 @@ Get-ChildItem $libsDir -Filter '*.jar' | ForEach-Object { Write-Host ("  {0}  ({
 # The guard lives in the repo (tools/git-hooks/) but git only uses it when
 # core.hooksPath points there, and that setting is per-clone. Without it a stray
 # `git add -A` can swallow a 1.5 GB file - which actually happened once.
-$hooksPath = & git -C $repoRoot config core.hooksPath 2>$null
+# Advisory only. git may not be on PATH (a machine may only have the launcher's
+# bundled Git), and CommandNotFound is terminating under $ErrorActionPreference
+# = 'Stop' - which used to abort the script AFTER the jars were copied, so a
+# completely successful fetch reported exit code 1. Never let the hint do that.
+$hooksPath = ''
+try { $hooksPath = (& git -C $repoRoot config core.hooksPath 2>$null) } catch { $hooksPath = '' }
 Write-Host ''
 if ($hooksPath -ne 'tools/git-hooks') {
     Write-Host '--------------------------------------------------------------'

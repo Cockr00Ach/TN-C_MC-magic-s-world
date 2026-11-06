@@ -8,9 +8,9 @@
 #   <workpack>\config\openloader\resources\TN-C\assets\tnc\textures\spell\<name>.png
 #   <preview>  an 8x magnified contact sheet, for eyeballing the result
 #
-# The modpack folder is auto-detected (same rule as modpack\sync.ps1: the only
-# folder under D:\ModTest\modpack), so this file stays pure ASCII and does not
-# need a UTF-8 BOM.
+# The modpack folder is auto-detected (same rule as every other tool: the only
+# folder under <repo>\modpack), so this file stays pure ASCII and does not need a
+# UTF-8 BOM.
 #
 # Mask characters:
 #   .  transparent      #  outline (dark)     +  mid tone
@@ -18,15 +18,25 @@
 
 param(
     [string]$WorkPack = '',
-    [string]$Preview  = 'D:\ModTest\design\refs\icon-preview.png'
+    [string]$Preview  = ''
 )
 
 Add-Type -AssemblyName System.Drawing
 
+# Shared paths (<repo>\modpack\<pack>, <repo>\design\refs, ...) - no hardcoded
+# D:\ModTest / E:\download, which only ever worked on one machine.
+. (Join-Path $PSScriptRoot '_common.ps1')
+
 if ([string]::IsNullOrWhiteSpace($WorkPack)) {
-    $packDirs = @(Get-ChildItem 'D:\ModTest\modpack' -Directory | Where-Object { $_.Name -ne 'archive' })
-    if ($packDirs.Count -ne 1) { Write-Host "ERROR: expected exactly 1 modpack folder under D:\ModTest\modpack, found $($packDirs.Count)"; exit 1 }
-    $WorkPack = $packDirs[0].FullName
+    $WorkPack = Find-TncWorkPack
+    if (-not $WorkPack) {
+        Write-Host 'ERROR: could not locate the modpack workspace (see the message above).'
+        Write-Host '       Pass it explicitly:  -WorkPack "<repo>\modpack\<pack>"'
+        exit 1
+    }
+}
+if ([string]::IsNullOrWhiteSpace($Preview)) {
+    $Preview = Join-Path $TncRepoRoot 'design\refs\icon-preview.png'
 }
 
 $icons = @(
