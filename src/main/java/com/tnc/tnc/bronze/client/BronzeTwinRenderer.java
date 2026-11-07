@@ -63,11 +63,15 @@ public final class BronzeTwinRenderer extends BlockEntityWithoutLevelRenderer {
             view=HELD.get();
             if(view==null){var player=Minecraft.getInstance().player;view=context.firstPerson()&&player!=null&&!BronzeTwinWeapon.active(player)?View.COMBINED:View.PRIMARY;}
         }
-        var vertices=ItemRenderer.getFoilBufferDirect(buffers,RenderType.entityCutoutNoCull(TEXTURE),true,stack.hasFoil());
-        var p=pose.last();
-        for(var face:MODELS.computeIfAbsent(view,BronzeTwinRenderer::load))for(int i=0;i<4;i++){
-            var v=face.vertices[i];var uv=face.uv[i];var normal=face.normal;
-            vertices.vertex(p.pose(),v[0],v[1],v[2]).color(255,255,255,255).uv(uv[0],uv[1]).overlayCoords(overlay).uv2(light).normal(p.normal(),normal[0],normal[1],normal[2]).endVertex();
-        }
+        pose.pushPose();
+        try{
+            if(hand)BronzeTwinGrip.apply(view==View.SECONDARY,pose);
+            var vertices=ItemRenderer.getFoilBufferDirect(buffers,RenderType.entityCutoutNoCull(TEXTURE),true,stack.hasFoil());
+            var p=pose.last();
+            for(var face:MODELS.computeIfAbsent(view,BronzeTwinRenderer::load))for(int i=0;i<4;i++){
+                var v=face.vertices[i];var uv=face.uv[i];var normal=face.normal;
+                vertices.vertex(p.pose(),v[0],v[1],v[2]).color(255,255,255,255).uv(uv[0],uv[1]).overlayCoords(overlay).uv2(light).normal(p.normal(),normal[0],normal[1],normal[2]).endVertex();
+            }
+        }finally{pose.popPose();}
     }
 }
