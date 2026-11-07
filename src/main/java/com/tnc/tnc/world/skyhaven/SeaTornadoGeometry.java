@@ -6,7 +6,7 @@ import java.util.List;
 /** Closed 3D storm walls and swept helices. No entities, particles or per-vertex allocations. */
 public final class SeaTornadoGeometry {
     public static final int MAX_VISIBLE = 10;
-    public static final double VIEW_DISTANCE = 360;
+    public static final double VIEW_DISTANCE = 480;
     public enum Detail {
         NEAR(22,32,48), MID(14,24,32), FAR(10,16,24);
         final int rows, sides, helix;
@@ -19,8 +19,12 @@ public final class SeaTornadoGeometry {
     private static final double TAU=Math.PI*2;
     private SeaTornadoGeometry(){}
 
-    /** Low offshore funnels leave roughly sixty blocks of clear air below the island. */
-    public static double height(SeaGyreLayout.Gyre g){return 42+20*(.5+.5*Math.sin(g.phase()*1.73));}
+    /** The horizon bank rises higher than the sparse foreground funnels. */
+    public static double height(SeaGyreLayout.Gyre storm){
+        double variation = .5 + .5 * Math.sin(storm.phase() * 1.73);
+        return SeaStormCoast.foreground(storm) || storm.radius() < 40
+                ? 42 + 20 * variation : 68 + 26 * variation;
+    }
     public static double radius(SeaGyreLayout.Gyre g,double t){
         t=Math.max(0,Math.min(1,t));
         double body=.5+.5*Math.sin(g.phase()*2.31+1.4);

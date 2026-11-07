@@ -4,7 +4,7 @@ package com.tnc.tnc.world.skyhaven;
 public final class SeaStormCoast {
     // SkyIslandManager places the 520-wide realm island at (-260,-260).
     // tools/bake_skyhaven_starter.py includes its enclosing -17..16 chunk rectangle.
-    public static final double LAND_MIN=-272,LAND_MAX=272,CLEAR_WATER=80;
+    public static final double LAND_MIN=-272,LAND_MAX=272,CLEAR_WATER=54;
     private SeaStormCoast(){}
     public static double distanceToIsland(double x,double z){
         double dx=Math.max(0,Math.max(LAND_MIN-x,x-LAND_MAX));
@@ -12,8 +12,13 @@ public final class SeaStormCoast {
         return Math.hypot(dx,dz);
     }
     public static double footprint(SeaGyreLayout.Gyre storm){return storm.radius()*2.55+6;}
+    public static boolean foreground(SeaGyreLayout.Gyre storm){
+        double distance = distanceToIsland(storm.x(), storm.z());
+        return storm.radius() < 40 && distance >= 90 && distance < 120;
+    }
     public static boolean offshore(SeaGyreLayout.Gyre storm){
-        return distanceToIsland(storm.x(),storm.z())>=CLEAR_WATER+footprint(storm);
+        double clearance = foreground(storm) ? 15 : CLEAR_WATER;
+        return distanceToIsland(storm.x(),storm.z()) >= clearance + footprint(storm);
     }
     /** A 30-block ribbon envelope, plus the half-sample spacing, makes this conservative. */
     public static boolean linkOffshore(SeaGyreLayout.Gyre a,SeaGyreLayout.Gyre b){

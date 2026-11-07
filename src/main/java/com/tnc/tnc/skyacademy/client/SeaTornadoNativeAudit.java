@@ -52,7 +52,7 @@ public final class SeaTornadoNativeAudit {
                 var sea=com.tnc.tnc.world.SkyIslandWorlds.island(server);
                 com.tnc.tnc.journey.JourneyData.get(server).player(player.getUUID()).putBoolean("Named",true);
                 if(shore==null){
-                    shore=findShore(sea);int x=shore.getX()-3,z=shore.getZ();
+                    shore=findShore(sea);int x=shore.getX(),z=shore.getZ();
                     standing=new BlockPos(x,sea.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,x,z),z);
                 }
                 if(storm==null){
@@ -63,16 +63,19 @@ public final class SeaTornadoNativeAudit {
                     }
                     if(storm==null)throw new IllegalStateException("No genuine exposed abyssal sea center for audit");
                 }
-                player.setGameMode(GameType.SPECTATOR);sea.setWeatherParameters(12000,0,false,false);server.overworld().setDayTime(phase==1?18000:6000);
+                player.setGameMode(GameType.CREATIVE);player.getAbilities().flying=false;player.onUpdateAbilities();sea.setWeatherParameters(12000,0,false,false);server.overworld().setDayTime(phase==1?18000:6000);
                 if(phase<2)player.teleportTo(sea,standing.getX()+.5,standing.getY(),standing.getZ()+.5,-90,26);
-                else player.teleportTo(sea,storm.x(),67,storm.z()-95,0,-7);
+                else {
+                    int x=standing.getX()-24,z=standing.getZ();
+                    player.teleportTo(sea,x+.5,sea.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,x,z),z+.5,-90,26);
+                }
                 ready=true;
             });return;
         }
         if(!ready||!mc.level.dimension().equals(SkyhavenContent.KEY)||++ticks<240)return;
-        String image="sea-tornado-"+new String[]{"day-side","night-diagonal","sea-level"}[phase]+".png";
+        String image="sea-tornado-"+new String[]{"edge-day","edge-night","island-interior"}[phase]+".png";
         var camera=mc.gameRenderer.getMainCamera();
-        cameras.add(Map.of("phase",phase,"position",List.of(camera.getPosition().x,camera.getPosition().y,camera.getPosition().z),"yaw",camera.getYRot(),"pitch",camera.getXRot(),"effects",SkyhavenSeaVision.auditSnapshot()));
+        cameras.add(Map.of("phase",phase,"position",List.of(camera.getPosition().x,camera.getPosition().y,camera.getPosition().z),"yaw",camera.getYRot(),"pitch",camera.getXRot(),"grounded",mc.player.onGround(),"flying",mc.player.getAbilities().flying,"effects",SkyhavenSeaVision.auditSnapshot()));
         saving=true;images.add(image);
         Screenshot.grab(mc.gameDirectory,image,mc.getMainRenderTarget(),message->{
             try{Files.copy(mc.gameDirectory.toPath().resolve("screenshots/"+image),output().resolve(image),StandardCopyOption.REPLACE_EXISTING);}
@@ -88,9 +91,9 @@ public final class SeaTornadoNativeAudit {
             // the player's sea renderer never requests a chunk.
             sea.getChunkAt(new BlockPos(x,0,z));
             int y=sea.getHeight(Heightmap.Types.WORLD_SURFACE,x,z);
-            if(y<170||y>190)continue;
-            sea.getChunkAt(new BlockPos(x+12,0,z));
-            if(sea.getHeight(Heightmap.Types.WORLD_SURFACE,x+12,z)>=160)continue;
+            if(y<160||y>195)continue;
+            sea.getChunkAt(new BlockPos(x+4,0,z));
+            if(sea.getHeight(Heightmap.Types.WORLD_SURFACE,x+4,z)>61)continue;
             var floor=new BlockPos(x,y-1,z);var state=sea.getBlockState(floor);
             if(!state.getFluidState().isEmpty()||state.getCollisionShape(sea,floor).isEmpty())continue;
             if(best==null||x>best.getX()||(x==best.getX()&&Math.abs(z)<Math.abs(best.getZ())))best=new BlockPos(x,y,z);

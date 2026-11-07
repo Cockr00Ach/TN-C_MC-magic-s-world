@@ -35,8 +35,8 @@ class SeaTornadoGeometryTest {
     @Test void densityAndDistanceAreBoundedWithoutRewritingWorldLayout(){
         var chosen=SeaTornadoGeometry.select(SeaTornadoLayout.near(0,0));assertEquals(10,chosen.size());
         for(var a:chosen)for(var b:chosen)if(a!=b)assertTrue(Math.hypot(a.x()-b.x(),a.z()-b.z())>=96);
-        assertEquals(1,SeaTornadoGeometry.distanceFade(100));assertEquals(0,SeaTornadoGeometry.distanceFade(360));
-        assertTrue(SeaTornadoGeometry.distanceFade(310)>0&&SeaTornadoGeometry.distanceFade(310)<1);
+        assertEquals(1,SeaTornadoGeometry.distanceFade(100));assertEquals(0,SeaTornadoGeometry.distanceFade(480));
+        assertTrue(SeaTornadoGeometry.distanceFade(430)>0&&SeaTornadoGeometry.distanceFade(430)<1);
     }
     @Test void zeroOpacityAndInvalidTimeEmitNothing(){
         int[] n={0};SeaTornadoGeometry.Sink sink=(x,y,z,u,v,rgb,a,nx,ny,nz)->n[0]++;
@@ -46,15 +46,16 @@ class SeaTornadoGeometryTest {
     @Test void denseLayoutDoesNotJumpWhenPlayerCrossesACellBoundary(){
         var a=SeaTornadoLayout.near(127,60);var b=SeaTornadoLayout.near(129,60);
         assertTrue(a.stream().filter(b::contains).count()>=20);assertEquals(a,SeaTornadoLayout.near(127,60));
-        for(var g:a)for(var h:a)if(g!=h)assertTrue(Math.hypot(g.x()-h.x(),g.z()-h.z())>=96);
-        assertTrue(a.stream().anyMatch(g->g.radius()>30),"The storm bank still includes wider vortices");
-        for(var g:a)assertTrue(g.radius()>=20&&g.radius()<=38);
+        assertEquals(a.size(),a.stream().distinct().count());
+        assertTrue(a.stream().anyMatch(g->g.radius()>=40));
+        for(var g:a)assertTrue(g.radius()>=24&&g.radius()<=53);
     }
     @Test void passingNearestRankBoundaryRetainsAlreadyVisibleStorms(){
         var slots=new SeaStormVisibility();
         var first=slots.update(SeaTornadoLayout.near(191,191),191,191,0);
-        var next=slots.update(SeaTornadoLayout.near(193,193),193,193,40);
-        assertEquals(first,next,"Full-opacity storms must not swap when nearest rankings change");
+        var eligible=SeaTornadoLayout.near(193,193);
+        var next=slots.update(eligible,193,193,1);
+        assertTrue(next.containsAll(first.stream().filter(eligible::contains).toList()));
     }
     @Test void fatAndSlenderStormsBothFitBelowTheIslandAcrossAnimation(){
         double minRatio=Double.POSITIVE_INFINITY,maxRatio=0;

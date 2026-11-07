@@ -33,6 +33,11 @@ public final class SkyhavenSeaVision {
                 ||!com.tnc.tnc.mana.sight.client.ManaSightClient.enabled()){
             VISIBILITY.clear();world.clear();return;
         }
+        if(!standingAtSeaEdge(mc)){
+            VISIBILITY.clear();
+            lastStorms=lastDrawn=lastQuads=lastLinks=lastBackground=0;
+            return;
+        }
         if(world.get()!=mc.level){VISIBILITY.clear();world=new java.lang.ref.WeakReference<>(mc.level);}
         long began=AUDIT?System.nanoTime():0;
         var camera=event.getCamera().getPosition();
@@ -63,14 +68,14 @@ public final class SkyhavenSeaVision {
         try{
         // This magical volume has its own bounded distance fade; ordinary ocean fog
         // must not turn its black lower wall into a pale transparent blue tube.
-        com.mojang.blaze3d.systems.RenderSystem.setShaderFogStart(390);
-        com.mojang.blaze3d.systems.RenderSystem.setShaderFogEnd(520);
+        com.mojang.blaze3d.systems.RenderSystem.setShaderFogStart(510);
+        com.mojang.blaze3d.systems.RenderSystem.setShaderFogEnd(650);
         // Flush each storm's body then its flow. A nearer black body can occlude
         // the distant glow; drawing all glows last would turn the sea into a wire cage.
         for(int i=ordered.size()-1;i>=0;i--){
             var g=ordered.get(i);double distance=Math.hypot(g.x()-camera.x,g.z()-camera.z);
             double extent=SeaStormCoast.footprint(g);
-            if(!event.getFrustum().isVisible(new net.minecraft.world.phys.AABB(g.x()-extent,49,g.z()-extent,g.x()+extent,124,g.z()+extent)))continue;
+            if(!event.getFrustum().isVisible(new net.minecraft.world.phys.AABB(g.x()-extent,49,g.z()-extent,g.x()+extent,150,g.z()+extent)))continue;
             drawn++;
             var matrix=new Matrix4f().translation((float)(g.x()-camera.x),(float)(49.05-camera.y),(float)(g.z()-camera.z));
             var detail=SeaTornadoGeometry.detail(i,distance);
@@ -104,6 +109,24 @@ public final class SkyhavenSeaVision {
             double millis=(System.nanoTime()-began)/1_000_000.;samples++;totalMillis+=millis;maxMillis=Math.max(maxMillis,millis);
         }
     }
+    private static final int[][] EDGE_SAMPLES = {{6,0},{-6,0},{0,6},{0,-6},{4,4},{4,-4},{-4,4},{-4,-4}};
+
+    private static boolean standingAtSeaEdge(Minecraft mc){
+        var player=mc.player;
+        if(player==null || player.getAbilities().flying || player.getY()<140 || player.getY()>215
+                || SeaStormCoast.distanceToIsland(player.getX(),player.getZ())>0)return false;
+        if(!player.onGround() && mc.level.noCollision(player,player.getBoundingBox().move(0,-.15,0)))return false;
+        for(int[] direction : EDGE_SAMPLES){
+            var sea=BlockPos.containing(player.getX()+direction[0],48,player.getZ()+direction[1]);
+            var chunk=mc.level.getChunkSource().getChunk(sea.getX()>>4,sea.getZ()>>4,
+                    net.minecraft.world.level.chunk.ChunkStatus.FULL,false);
+            if(chunk!=null && chunk.getFluidState(sea).is(SkyhavenContent.SOURCE)
+                    && mc.level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE,sea.getX(),sea.getZ())<=61)
+                return true;
+        }
+        return false;
+    }
+
     private static double opacity(SeaGyreLayout.Gyre g,double distance,double time){
         return SeaTornadoGeometry.distanceFade(distance)*VISIBILITY.opacity(g,time);
     }
