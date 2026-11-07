@@ -59,6 +59,7 @@ public final class WarriorAnimationClient {
     private static final org.slf4j.Logger LOGGER = com.mojang.logging.LogUtils.getLogger();
     private static boolean loggedClips;
     private static long ticks;
+    public static long clock(){return ticks;}
 
     static {
         // 正式客户端里，动画文件是从 Forge 挂上去的 mod 文件里读的：classpath 读不到时
@@ -122,6 +123,7 @@ public final class WarriorAnimationClient {
                 && current.animation().priority() > animation.priority()) {
             return;
         }
+        WarriorChargeVisual.accept(entityId,current,animation,hold,ticks);
         if(hold && current!=null && current.hold() && current.animation()==animation){
             ACTIVE.put(entityId,new Active(animation,current.startTick(),current.durationTicks(),true,ticks));
         }else ACTIVE.put(entityId, new Active(animation, ticks, durationTicks, hold));
@@ -148,6 +150,7 @@ public final class WarriorAnimationClient {
     /** 立刻停掉某个实体正在演的动作（Shift 中断 / 被僵直打断）。 */
     public static void cancel(int entityId) {
         ACTIVE.remove(entityId);
+        WarriorChargeVisual.accept(entityId,null,null,false,ticks);
     }
 
     /**
@@ -196,7 +199,7 @@ public final class WarriorAnimationClient {
 
     @SubscribeEvent
     public static void logout(ClientPlayerNetworkEvent.LoggingOut event) {
-        ACTIVE.clear();
+        ACTIVE.clear();WarriorChargeVisual.clear();
         WarriorTrail.clear();
         WarriorDash.clear();
     }
@@ -204,7 +207,7 @@ public final class WarriorAnimationClient {
     @SubscribeEvent
     public static void clone(ClientPlayerNetworkEvent.Clone event) {
         // 重生/换维度换的是新的客户端实体 id，旧动画不该跟过去
-        ACTIVE.clear();
+        ACTIVE.clear();WarriorChargeVisual.clear();
         WarriorTrail.clear();
         WarriorDash.clear();
     }

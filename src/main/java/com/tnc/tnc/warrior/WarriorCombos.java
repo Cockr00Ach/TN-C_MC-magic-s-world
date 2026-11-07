@@ -234,6 +234,15 @@ public final class WarriorCombos {
                     WarriorAnimation.EVADE,
                     List.of(false, false, false), 0, 10, 2.2)).stream().map(WarriorPerformance::catalog).map(WarriorUnifiedSlots::apply).toList();
 
+    /** QZE remains an alternate input for players who learned the previous attack chain. */
+    public static List<WarriorSkill> inputsForFamily(WarriorWeaponFamily family){
+        var out=new ArrayList<>(forFamily(family));var s=bySlot(family,0);
+        if(s!=null)out.add(0,new WarriorSkill(s.id(),s.codexId(),s.name(),WarriorMove.parse("qze"),s.slot(),s.cooldownTicks(),
+            s.damageMultiplier(),s.radius(),s.arcDegrees(),s.knockback(),s.durabilityCost(),s.finisherText(),s.family(),s.chain(),s.dash(),s.ranged(),
+            s.interrupt(),s.staggerTicks(),s.animation(),List.of(false,false,false),s.guardTicks(),s.evadeTicks(),s.backstep()));
+        return out;
+    }
+
     /** 全部连招（按槽位顺序）。 */
     public static List<WarriorSkill> all() {
         return SKILLS;

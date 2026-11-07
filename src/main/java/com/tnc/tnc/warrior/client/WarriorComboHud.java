@@ -72,18 +72,25 @@ public final class WarriorComboHud {
         graphics.pose().pushPose();
         graphics.pose().translate(0.0F, 0.0F, HUD_Z);
         for (int i = 0; i < SLOTS; i++) {
-            drawSlot(graphics, minecraft, page.get(i), x0 + i * SLOT_W, y);
+            drawSlot(graphics, minecraft, page.get(i), i, x0 + i * SLOT_W, y);
         }
         drawHint(graphics, minecraft, centerX, y - 11);
         graphics.pose().popPose();
     }
 
-    private static void drawSlot(GuiGraphics graphics, Minecraft minecraft, WarriorSkill skill, int x, int y) {
+    private static void drawSlot(GuiGraphics graphics, Minecraft minecraft, WarriorSkill skill, int slot, int x, int y) {
         skill=WarriorComboClient.heldVariant(skill);
         boolean unlocked = skill != null && WarriorCombos.unlocked(skill, TemperingClient.progress());
         // 整格不透明：法术栏在"副手带使用动作"时仍可能露一格在正中，这里要盖住它
         graphics.fill(x, y, x + SLOT_W, y + SLOT_H, COLOR_BG);
         outline(graphics, x, y, unlocked && skill != null ? chainColor(skill.chain()) : COLOR_BORDER_DIM);
+        String role=com.tnc.tnc.warrior.WarriorUnifiedSlots.purpose(slot);
+        graphics.pose().pushPose();
+        graphics.pose().translate(x+SLOT_W/2f,y+2,0);
+        float roleScale=Math.min(.5f,(SLOT_W-2f)/Math.max(1,minecraft.font.width(role)));
+        graphics.pose().scale(roleScale,roleScale,1);
+        graphics.drawString(minecraft.font,role,-minecraft.font.width(role)/2,0,unlocked?COLOR_TEXT:COLOR_DIM,false);
+        graphics.pose().popPose();
         if (skill == null) {
             return;
         }
@@ -97,7 +104,7 @@ public final class WarriorComboHud {
             String sequence = skill.compactLabel();
             int color = unlocked ? COLOR_TEXT : COLOR_DIM;
             graphics.pose().pushPose();
-            graphics.pose().translate(x + SLOT_W / 2.0F, y + 7.0F, 0.0F);
+            graphics.pose().translate(x + SLOT_W / 2.0F, y + 10.0F, 0.0F);
             graphics.pose().scale(.5F, .5F, 1.0F);
             graphics.drawString(minecraft.font, sequence, -minecraft.font.width(sequence) / 2, 0, color, false);
             graphics.pose().popPose();
@@ -107,7 +114,7 @@ public final class WarriorComboHud {
             int need = WarriorCombos.temperRequirement(skill);
             String text = need > 0 ? String.valueOf(need) : "锁";
             graphics.pose().pushPose();
-            graphics.pose().translate(x + SLOT_W / 2.0F, y + 13.0F, 0.0F);
+            graphics.pose().translate(x + SLOT_W / 2.0F, y + 16.0F, 0.0F);
             graphics.pose().scale(.5F, .5F, 1.0F);
             graphics.drawString(minecraft.font, text, -minecraft.font.width(text) / 2, 0, COLOR_DIM, false);
             graphics.pose().popPose();
@@ -115,12 +122,12 @@ public final class WarriorComboHud {
         }
 
         if (cooldown > 0) {
-            int filled = (int) Math.ceil((SLOT_H - 2) * (double) Math.min(cooldown, skill.cooldownTicks())
+            int filled = (int) Math.ceil((SLOT_H - 9) * (double) Math.min(cooldown, skill.cooldownTicks())
                     / skill.cooldownTicks());
             graphics.fill(x + 1, y + SLOT_H - 1 - filled, x + SLOT_W - 2, y + SLOT_H - 1, 0xAA000000);
             String seconds = String.format(java.util.Locale.ROOT, "%.0f", cooldown / 20.0);
             graphics.pose().pushPose();
-            graphics.pose().translate(x + SLOT_W / 2.0F, y + 7.0F, 0.0F);
+            graphics.pose().translate(x + SLOT_W / 2.0F, y + 10.0F, 0.0F);
             graphics.pose().scale(.5F, .5F, 1.0F);
             graphics.drawString(minecraft.font, seconds, -minecraft.font.width(seconds) / 2, 0, COLOR_TEXT, true);
             graphics.pose().popPose();
@@ -140,7 +147,7 @@ public final class WarriorComboHud {
             graphics.drawString(minecraft.font, hint, centerX - minecraft.font.width(hint) / 2, y, COLOR_DIM, true);
             return;
         }
-        String name = progress.skill().chain().cn() + " · " + progress.skill().name();
+        String name = com.tnc.tnc.warrior.WarriorUnifiedSlots.purpose(progress.skill().slot()) + " · " + progress.skill().name();
         int length = progress.skill().length();
         int seqWidth = 0;
         for (int i = 0; i < length; i++) {

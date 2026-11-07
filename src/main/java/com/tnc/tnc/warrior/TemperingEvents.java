@@ -44,6 +44,7 @@ public final class TemperingEvents {
             SpecialistTrainers.coursesLine(player), SpecialistTrainers.activeCourse(player));
     }
     public static void sync(ServerPlayer player,boolean open) {
+        WarriorReach.update(player);
         MagicStoneNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player),
             snapshot(player,open));
         MagicStoneNetwork.CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> player),

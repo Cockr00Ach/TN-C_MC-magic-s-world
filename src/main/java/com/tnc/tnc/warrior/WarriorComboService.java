@@ -216,7 +216,7 @@ public final class WarriorComboService {
         }
 
         WarriorInput input = held ? WarriorInput.hold(move) : WarriorInput.tap(move);
-        WarriorSkill matched = state.tracker.push(input, now, WarriorCombos.forFamily(family));
+        WarriorSkill matched = state.tracker.push(input, now, WarriorCombos.inputsForFamily(family));
         int flashed = -1;
         if (matched != null) {
             flashed = resolve(player, state, matched, now, held);
@@ -312,7 +312,7 @@ public final class WarriorComboService {
         // 左斩偏左、右斩偏右、横斩最宽：三种基础攻击的"手感形状"不一样
         int arc = move == WarriorMove.HORIZONTAL ? SLASH_ARC : 80;
         float scale = move == WarriorMove.HORIZONTAL ? SLASH_DAMAGE : 0.50f;
-        for (LivingEntity target : targets(player, SLASH_RANGE)) {
+        for (LivingEntity target : targets(player, SLASH_RANGE * WarriorReach.basicScale(player))) {
             if (!inArc(player, target, arc)) {
                 continue;
             }
@@ -458,8 +458,8 @@ public final class WarriorComboService {
     static void melee(ServerPlayer player, WarriorSkill skill, State state, long now) {
         float base = (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE);
         WarriorComboRole role = skill.role();
-        // 虚影倍率：磨砺越高手越长（和客户端的虚影大小是同一个数）
-        double reach = WarriorPhantom.scale(player);
+        // Heavy weapons use the solid model's 3..10 peak; light weapons retain their phantom reach.
+        double reach = WarriorReach.scale(player);
         boolean landed = false;
         for (LivingEntity target : targets(player, skill.radius() * reach)) {
             if (!skill.fullCircle() && !inArc(player, target, skill.arcDegrees())) {
@@ -919,8 +919,8 @@ public final class WarriorComboService {
         WarriorAnimationPacket.broadcast(p,WarriorAnimation.SPIN_SLASH,10);
         WarriorImpactPacket.send(p,p.position().add(0,.85,0),2);
         p.serverLevel().playSound(null,p.blockPosition(),SoundEvents.PLAYER_ATTACK_SWEEP,SoundSource.PLAYERS,1.1f,.75f);
-        for(var target:targets(p,4)){
-            if(!smallCounterTarget(p,target))continue;
+        for(var target:targets(p,4*WarriorReach.basicScale(p))){
+            if(!(target instanceof net.minecraft.world.entity.Mob)||target.getBbHeight()>=4)continue;
             target.hurt(p.damageSources().playerAttack(p),(float)p.getAttributeValue(Attributes.ATTACK_DAMAGE)*.8f);
             var away=target.position().subtract(p.position()).multiply(1,0,1);
             if(away.lengthSqr()<.001)away=new Vec3(1,0,0);

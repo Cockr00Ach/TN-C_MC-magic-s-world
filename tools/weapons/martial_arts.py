@@ -6,6 +6,7 @@ Shared keys/unlocks remain the existing unified combat layout.
 import json
 from pathlib import Path
 from traditional_weapons import ROOT
+from martial_signatures import signature
 
 # slot order: attack, held parry, parry breaker, specialties.
 PROFILES = [
@@ -66,11 +67,11 @@ def main():
             dash=0 if slot in (0,1) else .25 if slot==2 else 1.8 if kind in ('thrust','spear') else .55
             text=name+'：'+{'thrust':'收势送尖，步身与前刺同步','spear':'枪尖外拦、内拿，收枪后中平送扎','guard':'提起兵器封住中线，按住末段保持架势','press':'贴近中线压下兵器后短促前顶，专破振刀','sweep':'转腰带动横向大扫，覆盖宽扇面','flower':'立圆左右舞花，接棍端横击','wrap':'贴肩绕背过刀，转腰接劈斩','cloud':'举刀平云后转腰横斩','liao':'先挂开兵器，再由下向上撩起接刺','wrist':'腕花换刃，点刺收锋','retreat':'撤步避锋，回身截击','return':'转身收枪再回扎','staff':'先抡劈，再收把平戳','hook':'月牙勾挂回收，再翻刃横带','double':'左右换势连打后收势','chop':'提起兵器蓄势，转腰斜劈收落','heavy':'沉腰提器，踏实下劈，留出重击回收'}[kind]
             entries.append(dict(name=name,kind=kind,radius=radius,arc=arc,dash=dash,text=text))
-            animations[id+'_'+str(slot)]=clip(kind,twohand,flavor)
+            animations[id+'_'+str(slot)]=clip(kind,twohand,flavor) if id=='red_tassel_spear' else signature(id,slot,twohand)
             rows.append(f'| {id} | {slot+1} | {name} | {kind} | {arc}° | {radius} |')
         profiles[id]=dict(family=family,moves=entries)
         for suffix,kind in [('q','liao' if family=='LONGSWORD' else 'chop'),('e','press'),('z','thrust' if id=='red_tassel_spear' else 'sweep')]:
-            animations[id+'_basic_'+suffix]=clip(kind,twohand,flavor)
+            animations[id+'_basic_'+suffix]=clip(kind,twohand,flavor) if id=='red_tassel_spear' else signature(id,{'q':0,'e':2,'z':3}[suffix],twohand)
     path=assets/'warrior';path.mkdir(exist_ok=True)
     (path/'traditional_martial_arts.json').write_bytes((json.dumps(profiles,ensure_ascii=False,indent=2)+'\n').encode('utf8'))
     (assets/'animations/entity/traditional_martial_arts.json').write_bytes((json.dumps(dict(format_version='1.8.0',animations=animations),ensure_ascii=False,indent=2)+'\n').encode('utf8'))

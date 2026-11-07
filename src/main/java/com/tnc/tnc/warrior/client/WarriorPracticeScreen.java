@@ -178,7 +178,7 @@ public final class WarriorPracticeScreen extends Screen {
         g.pose().scale(fit, fit, 1);
         ArcaneGui.frame(g, left, top, W, H);
         text(g, "教官终端", 18, 15, 0xffe8c68a);
-        text(g, "武器图鉴 " + WarriorPracticeKeys.OPEN.getTranslatedKeyMessage().getString(), 232, 15, MUTED);
+        text(g, "战士系统 " + WarriorPracticeKeys.OPEN.getTranslatedKeyMessage().getString(), 232, 15, MUTED);
         text(g, "选择教官", 18, 36, 0xffe8c68a);
         text(g, TemperingClient.enrolled()
             ? "磨砺 " + TemperingClient.points() + " / " + TemperingClient.cap()

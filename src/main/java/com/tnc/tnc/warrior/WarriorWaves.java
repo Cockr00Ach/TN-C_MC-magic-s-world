@@ -31,6 +31,7 @@ import net.minecraft.world.phys.Vec3;
  *       战锤的震地/崩山。用户画的例图就是这一种：外圈暗、内芯亮。</li>
  * </ul>
  */
+@net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid="tnc")
 public final class WarriorWaves {
 
     private WarriorWaves() {
@@ -118,7 +119,7 @@ public final class WarriorWaves {
 
     /** 这一招要不要带剑气/剑波；没有就不发。 */
     static void onFinisher(ServerPlayer player, WarriorSkill skill, double reach) {
-        Spec spec = SPECS.get(skill.id());
+        Spec spec = specFor(skill);
         if (spec == null || player == null) {
             return;
         }
@@ -129,20 +130,47 @@ public final class WarriorWaves {
         float base = (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE);
         ACTIVE.add(new Wave(spec.kind(), player.level().dimension(), origin, dir, spec, base * spec.damage(),
                 player.getUUID(), player.level().getGameTime(), Math.max(1.0, reach)));
+        var stack=player.getMainHandItem();
+        var key=net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(stack.getItem());
+        String element=stack.hasTag()?stack.getTag().getString(WindInfusion.ELEMENT_KEY):"";
+        var appearance=WarriorTrailAppearance.of(key==null?"":key.getPath(),skill.family(),element);
         com.tnc.tnc.network.MagicStoneNetwork.CHANNEL.send(
                 net.minecraftforge.network.PacketDistributor.NEAR.with(() ->
                         new net.minecraftforge.network.PacketDistributor.TargetPoint(origin.x, origin.y, origin.z,
                                 96, player.level().dimension())),
                 new WarriorWavePacket(player.level().dimension().location(), origin, dir,
                         spec.kind() == Kind.GROUND, spec.speed(), spec.range() * Math.max(1.0, reach),
-                        spec.halfWidth(), color(spec.core()), color(spec.edge()), player.level().getGameTime()));
+                        spec.halfWidth(), appearance.core(), appearance.shell(), player.level().getGameTime()));
         player.serverLevel().playSound(null, player.blockPosition(),
                 spec.kind() == Kind.GROUND ? SoundEvents.GENERIC_EXPLODE : SoundEvents.PLAYER_ATTACK_SWEEP,
                 SoundSource.PLAYERS, spec.kind() == Kind.GROUND ? 0.45f : 0.8f,
                 spec.kind() == Kind.GROUND ? 0.85f : 1.35f);
     }
 
-    /** 每 tick 推进所有剑气；由 {@link WarriorCombatEffects#arrowTick} 调用，不用另注册事件。 */
+    /** Own level hook: removing arrow particle code must never remove moving damage simulation. */
+    @net.minecraftforge.eventbus.api.SubscribeEvent
+    public static void levelTick(net.minecraftforge.event.TickEvent.LevelTickEvent event) {
+        if(event.phase==net.minecraftforge.event.TickEvent.Phase.END && event.level instanceof ServerLevel level)
+            tick(level,level.getGameTime());
+    }
+    @net.minecraftforge.eventbus.api.SubscribeEvent
+    public static void stopped(net.minecraftforge.event.server.ServerStoppedEvent event){ACTIVE.clear();warned=false;}
+    @net.minecraftforge.eventbus.api.SubscribeEvent
+    public static void unloaded(net.minecraftforge.event.level.LevelEvent.Unload event){
+        if(event.getLevel() instanceof ServerLevel level)ACTIVE.removeIf(w->w.dimension.equals(level.dimension()));
+    }
+    public static Spec specFor(WarriorSkill skill) {
+        if(skill==null || skill.ranged() || !skill.family().melee() || skill.slot()==1 || skill.slot()==2 || skill.backsteps())return null;
+        Spec original=SPECS.get(skill.id());if(original!=null)return original;
+        return switch(skill.family()) {
+            case LONGSWORD->SPECS.get("sword_combo_1");
+            case GREATSWORD->SPECS.get("greatsword_combo_1");
+            case HAMMER->SPECS.get("hammer_combo_2");
+            case SPEAR->SPECS.get("spear_combo_1");
+            default->null;
+        };
+    }
+    /** Advance exactly once per server level tick. */
     static void tick(ServerLevel level, long now) {
         if (ACTIVE.isEmpty()) {
             return;
@@ -160,6 +188,12 @@ public final class WarriorWaves {
                 continue;
             }
             Vec3 center = wave.origin.add(wave.dir.scale(travelled));
+            Vec3 previous=wave.origin.add(wave.dir.scale(Math.max(0,travelled-wave.spec.speed())));
+            if(level.clip(new net.minecraft.world.level.ClipContext(previous,center,
+                    net.minecraft.world.level.ClipContext.Block.COLLIDER,
+                    net.minecraft.world.level.ClipContext.Fluid.NONE,null)).getType()!=net.minecraft.world.phys.HitResult.Type.MISS) {
+                it.remove();continue;
+            }
             Vec3 side = new Vec3(-wave.dir.z, 0, wave.dir.x);
             try {
                 damage(level, wave, center, side);
@@ -185,7 +219,8 @@ public final class WarriorWaves {
         double reach = Math.max(1.2, wave.spec.halfWidth() + 0.6);
         AABB box = new AABB(center.x - reach, center.y - 1.0, center.z - reach,
                 center.x + reach, center.y + (wave.kind == Kind.GROUND ? 1.0 : 1.9), center.z + reach);
-        for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, box, e -> e != player && e.isAlive())) {
+        for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, box,
+                e -> WarriorComboService.validTarget(player,e) && player.hasLineOfSight(e))) {
             if (!wave.hit.add(target.getId())) {
                 continue;
             }
@@ -208,5 +243,6 @@ public final class WarriorWaves {
     public static int activeCount() {
         return ACTIVE.size();
     }
+    static long activeCount(UUID owner){return ACTIVE.stream().filter(w->w.owner.equals(owner)).count();}
 
 }

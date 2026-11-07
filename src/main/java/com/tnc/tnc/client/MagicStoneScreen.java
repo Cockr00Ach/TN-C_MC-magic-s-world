@@ -23,9 +23,9 @@ import java.util.List;
  */
 public class MagicStoneScreen extends Screen {
 
-    private static final int PANEL_W = 600;   // Four water routes when the window is wide enough.
-    private static final int PANEL_H = 288;
-    private static final int ROW_H = 24;
+    private static final int PANEL_W = 680;   // Four water routes when the window is wide enough.
+    private static final int PANEL_H = 360;
+    private static final int ROW_H = 30;
 
     private static final int COLOR_PANEL = 0xE62A1F16;   // dark brown
     private static final int COLOR_BORDER = 0xFF8A6A42;  // brown-gold border
@@ -35,8 +35,8 @@ public class MagicStoneScreen extends Screen {
     private static final int COLOR_OK = 0xFF96CDBA;
     private static final int COLOR_BAD = 0xFFD79282;
 
-    private static final int LIST_X = 186;
-    private static final int LIST_Y = 104;
+    private static final int LIST_X = 200;
+    private static final int LIST_Y = 112;
 
     /**
      * 只在第一次 init 时拉数据。
@@ -73,10 +73,14 @@ public class MagicStoneScreen extends Screen {
     /**
      * 配键列表滚到第几屏（0 基）。
      *
-     * <p>为什么用"屏"而不是"行"：列表按"每屏 N 行 × 2 列"翻，一次滚一屏
+     * <p>为什么用"屏"而不是"行"：列表按"每屏 N 行 × 3 列"翻，一次滚一屏
      * 才不会出现"滚了半行、两列错位"的观感 ✗。
      */
     private int bindScroll;
+    private final SpellDragGesture<net.minecraft.resources.ResourceLocation> drag=new SpellDragGesture<>();
+    private final java.util.Map<Integer,MagicStoneLoadoutLayout.Rect> slotRects=new java.util.LinkedHashMap<>();
+    private String bindFeedback="按住法术拖入下方槽位 · 右键槽位清空";
+
 
     private int listX() { return Math.min(LIST_X, (int)(panelWidth()*.35)); }
     private int chainsPerPage() { return Math.max(1,(panelWidth()-listX()-12)/80); }
@@ -117,10 +121,11 @@ public class MagicStoneScreen extends Screen {
 
     @Override
     protected void init() {
+        drag.cancel();bindRects.clear();slotRects.clear();
         // Always use the physical GUI viewport: server refreshes also call init().
         int actualW = minecraft.getWindow().getGuiScaledWidth();
         int actualH = minecraft.getWindow().getGuiScaledHeight();
-        uiScale = Math.max(.2f, Math.min(1, Math.min((actualW - 16f) / 300, (actualH - 16f) / PANEL_H)));
+        uiScale = Math.max(.2f, Math.min(1, Math.min((actualW - 16f) / 580, (actualH - 16f) / PANEL_H)));
         width = (int) Math.ceil(actualW / uiScale);
         height = (int) Math.ceil(actualH / uiScale);
         if (!syncRequested) {
@@ -143,13 +148,13 @@ public class MagicStoneScreen extends Screen {
     private void initTabs() {
         // Information, navigation and spell lists have separate vertical bands.
         int y = top() + 76;
-        int tabW = Math.min(50, (listX() - 28) / 2);
-        addRenderableWidget(Button.builder(Component.literal(bindTab ? "学习" : "§l学习"),
+        int tabW = Math.min(72, (listX() - 28) / 2);
+        addRenderableWidget(Button.builder(Component.literal(bindTab ? "学习法术" : "§l学习法术"),
                         b -> { bindTab = false; rebuildWidgets(); })
-                .bounds(left() + 12, y, tabW, 16).build());
-        addRenderableWidget(Button.builder(Component.literal(bindTab ? "§l配键" : "配键"),
+                .bounds(left() + 12, y, tabW, 20).build());
+        addRenderableWidget(Button.builder(Component.literal(bindTab ? "§l拖动配键" : "拖动配键"),
                         b -> { bindTab = true; bindSlot = -1; rebuildWidgets(); })
-                .bounds(left() + 16 + tabW, y, tabW, 16).build());
+                .bounds(left() + 16 + tabW, y, tabW, 20).build());
     }
 
     /**
@@ -160,29 +165,7 @@ public class MagicStoneScreen extends Screen {
      * 而且那一列还压住了第三条链的名字。现在按钮就是整行（列宽），三个链并排。
      */
     private void initLearnTab(MagicStoneData data) {
-        // 元素切换：每个"有法术的元素"一个按钮。
-        // 加新元素时这里不用动 —— 遍历 Element.values() 自动多一个。
-        int tabX = left() + listX();
-        int tabWidth=Math.min(40,(panelWidth()-listX()-12)/Element.values().length-4);
-        for (Element element : Element.values()) {
-            if (SpellCatalog.chainsOf(element).isEmpty()) {
-                continue;
-            }
-            final Element target = element;
-            Button tab = Button.builder(Component.literal(element==Element.DARK?"暗":element.cn()), clicked -> {
-                        shownElement = target;
-                        chainPage=0;
-                        rebuildWidgets();
-                    })
-                    .bounds(tabX, top() + PANEL_H - 24, tabWidth, 16)
-                    .build();
-            tab.active = element != shownElement;   // 当前元素灰掉
-            addRenderableWidget(tab);
-            tabX += tabWidth+4;
-        }
-        Button independent=Button.builder(Component.literal("独立魔法"),clicked->{shownElement=null;chainPage=0;rebuildWidgets();})
-                .bounds(left()+12,top()+PANEL_H-24,listX()-24,16).build();
-        independent.active=shownElement!=null;addRenderableWidget(independent);
+        initElementTabs();
         int pages=Math.max(1,(SpellCatalog.chainsOf(shownElement).size()+chainsPerPage()-1)/chainsPerPage());
         if(pages>1) {
             Button previous=Button.builder(Component.literal("◀"),b->{chainPage--;rebuildWidgets();}).bounds(left()+panelWidth()-48,top()+LIST_Y-16,18,12).build();
@@ -202,7 +185,7 @@ public class MagicStoneScreen extends Screen {
                 String label = entry.displayName();
                 Button button = Button.builder(Component.literal("    "+fitLabel(label, colW - 34)),
                                 clicked -> MagicStoneNetwork.requestUnlock(target.id()))
-                        .bounds(colX, rowY, colW - 8, 20)
+                        .bounds(colX, rowY, colW - 8, 24)
                         .build();
                 button.active = state == MagicStoneLearning.Result.OK;
                 addRenderableWidget(button);
@@ -213,136 +196,66 @@ public class MagicStoneScreen extends Screen {
     }
 
     /**
-     * 配键页：左列 = 当前这一页的 9 个键（点一下选中），右列 = 已学法术（点一下放进选中的键）。
+     * 配键页：上方法术库，下方九个配键槽；拖动松手后才提交服务端。
      *
      * <p>为什么要有这个页：引擎只给 9 个施法热键（右键 + 2~9），改不动 ✗ ——
      * 所以内容按页切（2 页 × 9），而"哪个键放哪个法术"由玩家自己排 ✓。
      * 一页装不下 18 个，装得下也要允许玩家为了手感重排。
      */
+    private void initElementTabs(){
+        int x=left()+listX();
+        int w=(panelWidth()-listX()-12)/(Element.values().length+1)-4;
+        for(var e:Element.values()){
+            if(SpellCatalog.chainsOf(e).isEmpty())continue;
+            var button=Button.builder(Component.literal(e==Element.DARK?"暗":e.cn()),b->{
+                shownElement=e;chainPage=0;bindScroll=0;rebuildWidgets();
+            }).bounds(x,top()+76,w,20).build();
+            button.active=e!=shownElement;addRenderableWidget(button);x+=w+4;
+        }
+        var independent=Button.builder(Component.literal("独立"),b->{shownElement=null;chainPage=0;bindScroll=0;rebuildWidgets();})
+                .bounds(x,top()+76,w,20).build();
+        independent.active=shownElement!=null;addRenderableWidget(independent);
+    }
+
     private void initBindTab(MagicStoneData data) {
-        int page = data.getLoadoutPage();
-        int footerW = (listX() - 28) / 2;
-
-        // 左列：9 个槽（第一页第 1 个是右键位）
-        for (int i = 0; i < MagicStoneData.SLOTS_PER_PAGE; i++) {
-            final int global = page * MagicStoneData.SLOTS_PER_PAGE + i;
-            boolean selected = global == bindSlot;
-            String key = i == 0 ? "右键" : String.valueOf(i + 1);
-            var bound = data.getSlot(global);
-            String label = (selected ? "§e▶ " : "§7") + key + " §r" + boundName(bound, data);
-            Button slot = Button.builder(Component.literal(fitLabel(label, listX() - 32)), b -> {
-                        bindSlot = (bindSlot == global) ? -1 : global;
-                        rebuildWidgets();
-                    })
-                    .bounds(left() + 12, top() + LIST_Y + i * BIND_SLOT_ROW_H, listX() - 24, 14)
-                    .build();
-            addRenderableWidget(slot);
+        initElementTabs();
+        int page=data.getLoadoutPage();
+        for(int i=0;i<MagicStoneData.SLOTS_PER_PAGE;i++)
+            slotRects.put(page*MagicStoneData.SLOTS_PER_PAGE+i,MagicStoneLoadoutLayout.slot(left(),top(),panelWidth(),PANEL_H,i));
+        addRenderableWidget(Button.builder(Component.literal("切换配键页"),b->{
+            drag.cancel();bindSlot=-1;MagicStoneNetwork.requestNextPage();
+        }).bounds(left()+panelWidth()-94,top()+PANEL_H-102,82,18).build());
+        var options=SpellCatalog.chainTopAssignable(data,shownElement);
+        bindScroll=Math.max(0,Math.min(bindScrollRows()-1,bindScroll));
+        int rows=bindVisibleRows(),cols=bindColsPerView(),colW=(panelWidth()-24)/cols;
+        for(int i=0;i<options.size();i++){
+            int visual=i-bindScroll*rows*cols;
+            if(visual<0)continue;
+            if(visual>=rows*cols)break;
+            var entry=options.get(i);int x=left()+12+(visual%cols)*colW,y=top()+LIST_Y+16+(visual/cols)*BIND_ROW_H;
+            addRenderableWidget(Button.builder(Component.literal("    "+fitLabel(entry.displayName(),colW-40)),b->{})
+                    .bounds(x,y,colW-8,24).build());
+            bindRects.put(entry,new int[]{x,y,colW-8,24});
         }
-
-        // 切页（只改服务端的"当前页"，它会把新一页写进法杖）
-        addRenderableWidget(Button.builder(Component.literal("切页"), b -> {
-                    MagicStoneNetwork.requestNextPage();
-                    bindSlot = -1;
-                })
-                .bounds(left() + 12, top() + PANEL_H - 24, footerW, 16).build());
-
-        // 右列：元素筛选（只列有链的元素）—— 最后补一个「独立」，否则乱魔没地方配 ✓
-        int tabX = left() + listX();
-        int tabWidth = Math.min(40, (panelWidth() - listX() - 12) / (Element.values().length + 1) - 4);
-        for (Element element : Element.values()) {
-            if (SpellCatalog.chainsOf(element).isEmpty()) {
-                continue;
-            }
-            final Element target = element;
-            Button tab = Button.builder(Component.literal(element == Element.DARK ? "暗" : element.cn()),
-                            b -> { shownElement = target; bindScroll = 0; rebuildWidgets(); })
-                    .bounds(tabX, top() + PANEL_H - 24, tabWidth, 16).build();
-            tab.active = element != shownElement;
-            addRenderableWidget(tab);
-            tabX += tabWidth + 4;
+        if(bindScrollRows()>1){
+            addRenderableWidget(Button.builder(Component.literal("◀"),b->{bindScroll=Math.max(0,bindScroll-1);rebuildWidgets();})
+                    .bounds(left()+panelWidth()-52,top()+LIST_Y-14,18,14).build());
+            addRenderableWidget(Button.builder(Component.literal("▶"),b->{bindScroll=Math.min(bindScrollRows()-1,bindScroll+1);rebuildWidgets();})
+                    .bounds(left()+panelWidth()-30,top()+LIST_Y-14,18,14).build());
         }
-        Button independentTab = Button.builder(Component.literal("独立"),
-                        b -> { shownElement = null; bindScroll = 0; rebuildWidgets(); })
-                .bounds(tabX, top() + PANEL_H - 24, tabWidth, 16).build();
-        independentTab.active = shownElement != null;
-        addRenderableWidget(independentTab);
-
-        // 右列：这个元素下**每条链当前拥有的最高档**（作者 2026-09-29 规则）。
-        // 没学过的链不出现；链里学了更高档，列表里换的就是那一档 ✓。
-        List<SpellCatalog.Entry> options = SpellCatalog.chainTopAssignable(data, shownElement);
-        int colW = Math.max(80, (panelWidth() - listX() - 12) / bindColsPerView());
-        int maxRows = bindVisibleRows();
-        int perView = maxRows * bindColsPerView();
-        bindRects.clear();
-        for (int i = 0; i < options.size(); i++) {
-            int visual = i - bindScroll * perView;
-            if (visual < 0) {
-                continue;                                    // 滚出上边
-            }
-            int col = visual / maxRows;
-            int row = visual % maxRows;
-            if (col >= bindColsPerView()) {
-                break;                                       // 滚出下边（后面的等滚动再看）
-            }
-            SpellCatalog.Entry entry = options.get(i);
-            final SpellCatalog.Entry target = entry;
-            int colX = left() + listX() + col * colW;
-            int rowY = top() + LIST_Y + 16 + row * BIND_ROW_H;
-            boolean bound = data.isBound(entry.id());
-            Button button = Button.builder(
-                            Component.literal("    " + (bound ? "§7" : "§f") + fitLabel(entry.displayName(), colW - 34)),
-                            b -> {
-                                if (bindSlot < 0) {
-                                    return;                   // 没选槽就什么都不做（提示画在表头）
-                                }
-                                MagicStoneNetwork.requestSetSlot(bindSlot, target.id());
-                            })
-                    .bounds(colX, rowY, colW - 8, 18)
-                    .build();
-            button.active = bindSlot >= 0 && !bound;
-            addRenderableWidget(button);
-            bindRects.put(entry, new int[]{colX, rowY, colW - 8, 18});
-        }
-
-        // 滚动提示（只在真的放不下时出现）
-        if (bindScrollRows() > 1) {
-            addRenderableWidget(Button.builder(Component.literal("▲"), b -> {
-                        bindScroll = Math.max(0, bindScroll - 1);
-                        rebuildWidgets();
-                    })
-                    .bounds(left() + panelWidth() - 40, top() + LIST_Y - 16, 16, 12).build());
-            addRenderableWidget(Button.builder(Component.literal("▼"), b -> {
-                        bindScroll = Math.min(bindScrollRows() - 1, bindScroll + 1);
-                        rebuildWidgets();
-                    })
-                    .bounds(left() + panelWidth() - 20, top() + LIST_Y - 16, 16, 12).build());
-        }
-
-        // 清空选中槽
-        Button clear = Button.builder(Component.literal("清空"), b -> {
-                    if (bindSlot >= 0) {
-                        MagicStoneNetwork.requestClearSlot(bindSlot);
-                    }
-                })
-                .bounds(left() + 16 + footerW, top() + PANEL_H - 24, footerW, 16).build();
-        clear.active = bindSlot >= 0;
-        addRenderableWidget(clear);
     }
 
     /** 配键列表一行多高（比学习页的 ROW_H 矮一点，为了多塞几行）。 */
-    private static final int BIND_ROW_H = 18;
-
-    /** 配键页左列"一个键位"那一行多高（按钮 14 高 + 2 间隙）。 */
-    private static final int BIND_SLOT_ROW_H = 16;
+    private static final int BIND_ROW_H = 28;
 
     /** 配键列表一屏能显示几行。 */
     private int bindVisibleRows() {
-        return Math.max(1, (PANEL_H - 28 - LIST_Y - 16) / BIND_ROW_H);
+        return Math.max(1, (PANEL_H - 106 - LIST_Y - 16) / BIND_ROW_H);
     }
 
     /** 配键列表一屏能显示几列。 */
     private int bindColsPerView() {
-        return 2;
+        return 3;
     }
 
     /** 配键列表一共要滚几屏。 */
@@ -403,6 +316,17 @@ public class MagicStoneScreen extends Screen {
         graphics.pose().scale(uiScale, uiScale, 1);
         try {
             renderPanel(graphics, (int) (mouseX / uiScale), (int) (mouseY / uiScale), partialTick);
+            if(drag.active()){
+                pendingTooltip=null;
+                if(drag.dragging()){
+                    int x=(int)(mouseX/uiScale)+10,y=(int)(mouseY/uiScale)-8;
+                    var entry=SpellCatalog.byId(drag.payload());
+                    graphics.pose().pushPose();graphics.pose().translate(0,0,400);
+                    graphics.fill(x-3,y-3,x+140,y+21,0xF0302920);
+                    if(entry!=null){drawSpellIcon(graphics,entry,x,y);graphics.drawString(font,fitLabel(entry.displayName(),116),x+20,y+4,COLOR_TITLE,false);}
+                    graphics.pose().popPose();
+                }
+            }
         } finally {
             graphics.pose().popPose();
         }
@@ -435,7 +359,7 @@ public class MagicStoneScreen extends Screen {
                         + " · 已投 " + data.getPointsSpent() + "）", panelW - 24),
                 left + 12, top + 59, COLOR_TEXT, false);
         graphics.fill(left + 8, top + 72, left + panelWidth() - 8, top + 73, 0x50C9A063);
-        graphics.fill(left + listX() - 8, top + 94, left + listX() - 7, top + PANEL_H - 8, 0x50C9A063);
+        if(!bindTab)graphics.fill(left + listX() - 8, top + 102, left + listX() - 7, top + PANEL_H - 8, 0x50C9A063);
 
         if (bindTab) {
             drawBindTab(graphics, data, mouseX, mouseY, left, top, panelW);
@@ -445,13 +369,13 @@ public class MagicStoneScreen extends Screen {
         // 左列：元素亲和度 —— 用户画的水晶贴图 + 42 个亲和力点（点位由用户标注，见 AffinityWidget）
         // 用户要求：等比例放大到占满左下框约 80%，且**不要任何文字** ✗
         int affinityScale=Math.max(1,Math.min(3,(listX()-20)/33));
-        AffinityWidget.render(graphics,left+(listX()-33*affinityScale)/2,top()+113,affinityScale,data::getAffinity);
+        AffinityWidget.render(graphics,left+(listX()-33*affinityScale)/2,top()+128,affinityScale,data::getAffinity);
 
         // 法术目录：**每条链一列**（雷系现在有主链/雷球/雷速三条，15 个法术挤一列会跑出面板）
         // 每行的按钮在 init() 里创建（名字就是按钮的标签），这里只画表头和悬停提示。
         List<SpellCatalog.Chain> chains = visibleChains();
         int colW = columnWidth(chains.size());
-        String heading=shownElement==null?"独立魔法 · 无元素亲和限制":shownElement.cn()+"系法术 · 每链最高档";
+        String heading=shownElement==null?"独立魔法 · 无元素亲和限制":shownElement.cn()+"系法术 · 按链进阶学习";
         graphics.drawString(this.font,fitLabel(heading,panelW-listX()-64),left+listX(),top+LIST_Y-10,COLOR_TITLE,false);
         int chainIndex = 0;
         for (SpellCatalog.Chain chain : chains) {
@@ -471,8 +395,8 @@ public class MagicStoneScreen extends Screen {
             for (SpellCatalog.Entry entry : SpellCatalog.of(shownElement, chain)) {
                 // 法术图标画在按钮左边（super.render 之后画，否则被按钮盖住）
                 // 一律画 —— 未学会的 t3+ 以前不画，看上去像"图标坏了"，作者要求统一显示 ✓
-                drawSpellIcon(graphics, entry, colX + 2, spellY + 2);
-                if (isHovering(colX, spellY, colW - 8, 20, mouseX, mouseY)) {
+                drawSpellIcon(graphics, entry, colX + 4, spellY + 4);
+                if (isHovering(colX, spellY, colW - 8, 24, mouseX, mouseY)) {
                     MagicStoneLearning.Result state = MagicStoneLearning.check(data, entry);
                     // 消耗要按玩家自己的上限算（随上限等比放大），不然提示和实际扣费对不上
                     String tooltip=entry.fullName()
@@ -501,66 +425,32 @@ public class MagicStoneScreen extends Screen {
      */
     private void drawBindTab(GuiGraphics graphics, MagicStoneData data,
                              int mouseX, int mouseY, int left, int top, int panelW) {
-        int page = data.getLoadoutPage();
-        int bound = (int) data.pageSpellIds(page).stream().filter(java.util.Objects::nonNull).count();
-
-        graphics.drawString(this.font, fitLabel("配键 · 第 " + (page + 1) + "/"
-                        + MagicStoneData.PAGE_COUNT + " 页 · 本页 " + bound + "/"
-                        + MagicStoneData.SLOTS_PER_PAGE + " 个", listX() - 26),
-                left + 12, top + LIST_Y - 10, COLOR_TITLE, false);
-        graphics.drawString(this.font,
-                fitLabel(bindSlot < 0 ? "先选左侧键位" : "再选右侧法术", listX() - 26),
-                left + 12, top + PANEL_H - 38, bindSlot < 0 ? COLOR_DIM : 0xFFFFD479, false);
-
-        String heading = shownElement == null ? "独立魔法"
-                : "每条链的最高档 · " + shownElement.cn() + "系";
-        if (bindScrollRows() > 1) {
-            heading = heading + " §7(" + (bindScroll + 1) + "/" + bindScrollRows() + " 滚轮/▲▼)";
+        int page=data.getLoadoutPage();
+        String element=shownElement==null?"独立魔法":(shownElement==Element.DARK?"暗":shownElement.cn())+"系法术";
+        graphics.drawString(font,"已学法术 · "+element+" · 每链最高档",left+12,top+LIST_Y-12,COLOR_TITLE,false);
+        super.render(graphics,mouseX,mouseY,0);
+        if(bindRects.isEmpty())graphics.drawCenteredString(font,"暂无可配置法术，请先到学习页解锁",left+panelW/2,top+LIST_Y+58,COLOR_DIM);
+        for(var e:bindRects.entrySet()){
+            int[] r=e.getValue();drawSpellIcon(graphics,e.getKey(),r[0]+4,r[1]+4);
+            if(data.isBound(e.getKey().id()))graphics.fill(r[0]+r[2]-7,r[1]+3,r[0]+r[2]-3,r[1]+7,COLOR_OK);
+            if(!drag.active()&&isHovering(r[0],r[1],r[2],r[3],mouseX,mouseY))
+                renderLines(graphics,e.getKey().fullName()+"\n§7"+effectSummary(e.getKey())+"\n§7按住拖入下方槽位；已配置法术可拖动改位置",mouseX,mouseY);
         }
-        graphics.drawString(this.font, fitLabel(heading, panelW - listX() - (bindScrollRows() > 1 ? 64 : 20)),
-                left + listX(), top + LIST_Y - 10, COLOR_TITLE, false);
-
-        super.render(graphics, mouseX, mouseY, 0.0F);
-
-        for (var icon : bindRects.entrySet()) {
-            int[] r = icon.getValue();
-            drawSpellIcon(graphics, icon.getKey(), r[0] + 2, r[1] + 1);
+        graphics.drawString(font,"配键槽 · 第 "+(page+1)+" / "+MagicStoneData.PAGE_COUNT+" 页",left+12,top+PANEL_H-98,COLOR_TITLE,false);
+        for(var cell:slotRects.entrySet()){
+            int global=cell.getKey();var r=cell.getValue();var id=data.getSlot(global);var entry=id==null?null:SpellCatalog.byId(id);
+            boolean over=r.contains(mouseX,mouseY);
+            graphics.fill(r.x(),r.y(),r.x()+r.width(),r.y()+r.height(),over&&drag.dragging()?0xFF385548:COLOR_PANEL);
+            int border=over&&drag.dragging()?COLOR_OK:global==bindSlot?COLOR_TITLE:COLOR_BORDER;
+            graphics.renderOutline(r.x(),r.y(),r.width(),r.height(),border);
+            String key=global%MagicStoneData.SLOTS_PER_PAGE==0?"右键":String.valueOf(global%MagicStoneData.SLOTS_PER_PAGE+1);
+            graphics.drawString(font,key,r.x()+4,r.y()+3,COLOR_DIM,false);
+            if(entry!=null)drawSpellIcon(graphics,entry,r.x()+(r.width()-16)/2,r.y()+12);
+            String name=entry==null?"拖入法术":entry.displayName();
+            graphics.drawCenteredString(font,fitLabel(name,r.width()-6),r.x()+r.width()/2,r.y()+30,entry==null?COLOR_DIM:COLOR_TEXT);
+            if(over&&!drag.active())renderLines(graphics,(entry==null?"空槽":entry.fullName())+"\n§7拖入法术配置或替换；右键清空\n§7已配置的法术也可直接拖动",mouseX,mouseY);
         }
-
-        int footerW = (listX() - 28) / 2;
-        if (isHovering(left + 12, top + PANEL_H - 24, footerW, 16, mouseX, mouseY))
-            renderLines(graphics, "切换法术页（默认数字键 1）", mouseX, mouseY);
-        if (isHovering(left + 16 + footerW, top + PANEL_H - 24, footerW, 16, mouseX, mouseY))
-            renderLines(graphics, "清空左侧选中的键位", mouseX, mouseY);
-
-        // 槽位行高必须和 drawBindTab 里的悬停判定用同一个常量（对不上的话提示会串行）
-        for (int i = 0; i < MagicStoneData.SLOTS_PER_PAGE; i++) {
-            int global = page * MagicStoneData.SLOTS_PER_PAGE + i;
-            int slotY = top + LIST_Y + i * BIND_SLOT_ROW_H;
-            if (!isHovering(left + 12, slotY, listX() - 24, 14, mouseX, mouseY)) {
-                continue;
-            }
-            var boundSpell = data.getSlot(global);
-            SpellCatalog.Entry entry = boundSpell == null ? null : SpellCatalog.byId(boundSpell);
-            String tip = (i == 0 ? "右键位" : "数字键 " + (i + 1))
-                    + "\n§7全局第 " + (global + 1) + " 个槽"
-                    + (entry == null ? "\n§7当前：空" : "\n§r" + entry.fullName()
-                    + "\n§7施放消耗 " + entry.manaCostFor(data.getMaxMana()) + " 魔力");
-            renderLines(graphics, tip, mouseX, mouseY);
-            return;
-        }
-        for (var hovered : bindRects.entrySet()) {
-            int[] r = hovered.getValue();
-            if (!isHovering(r[0], r[1], r[2], r[3], mouseX, mouseY)) {
-                continue;
-            }
-            SpellCatalog.Entry entry = hovered.getKey();
-            renderLines(graphics, entry.fullName()
-                    + "\n§7施放消耗 " + entry.manaCostFor(data.getMaxMana()) + " 魔力"
-                    + "\n§7" + (data.isBound(entry.id()) ? "已经配在某个键上（换个键要重新点）" : "点一下放进选中的键"),
-                    mouseX, mouseY);
-            return;
-        }
+        graphics.drawString(font,fitLabel(drag.dragging()?"松手放入高亮槽位 · 放在槽外取消":bindFeedback,panelW-24),left+12,top+PANEL_H-24,COLOR_DIM,false);
     }
 
     /** 折行画一段带 § 颜色的多行提示。 */
@@ -642,15 +532,50 @@ public class MagicStoneScreen extends Screen {
         return false;
     }
 
-    @Override public boolean mouseClicked(double x, double y, int button) {
-        return super.mouseClicked(x / uiScale, y / uiScale, button);
+    private int dropSlot(double x,double y){
+        for(var r:slotRects.entrySet())if(r.getValue().contains(x,y))return r.getKey();
+        return -1;
     }
-    @Override public boolean mouseReleased(double x, double y, int button) {
-        return super.mouseReleased(x / uiScale, y / uiScale, button);
+    @Override public boolean mouseClicked(double x,double y,int button){
+        double px=x/uiScale,py=y/uiScale;
+        if(bindTab){
+            var data=clientData();int slot=dropSlot(px,py);
+            if(data!=null&&slot>=0){
+                bindSlot=slot;
+                if(button==1){drag.cancel();MagicStoneNetwork.requestClearSlot(slot);bindFeedback="已请求清空槽位";return true;}
+                if(button==0){var id=data.getSlot(slot);if(id!=null)drag.begin(id,px,py);return true;}
+            }
+            if(button==0)for(var card:bindRects.entrySet()){
+                int[] r=card.getValue();if(isHovering(r[0],r[1],r[2],r[3],(int)px,(int)py)){
+                    drag.begin(card.getKey().id(),px,py);return true;
+                }
+            }
+        }
+        return super.mouseClicked(px,py,button);
     }
-    @Override public boolean mouseDragged(double x, double y, int button, double dx, double dy) {
-        return super.mouseDragged(x / uiScale, y / uiScale, button, dx / uiScale, dy / uiScale);
+    @Override public boolean mouseReleased(double x,double y,int button){
+        if(button==0&&drag.active()){
+            double px=x/uiScale,py=y/uiScale;drag.move(px,py);int slot=dropSlot(px,py);
+            var spell=drag.finish(slot>=0);var data=clientData();
+            if(spell!=null&&data!=null&&data.hasLearned(spell)){
+                boolean occupied=data.getSlot(slot)!=null;bindSlot=slot;
+                MagicStoneNetwork.requestSetSlot(slot,spell);
+                bindFeedback=occupied?"已请求替换槽位法术":"已请求配置法术";
+            }else bindFeedback="已取消拖动，原配键保留";
+            return true;
+        }
+        return super.mouseReleased(x/uiScale,y/uiScale,button);
     }
+    @Override public boolean mouseDragged(double x,double y,int button,double dx,double dy){
+        if(button==0&&drag.active()){drag.move(x/uiScale,y/uiScale);return true;}
+        return super.mouseDragged(x/uiScale,y/uiScale,button,dx/uiScale,dy/uiScale);
+    }
+    @Override public boolean keyPressed(int key,int scan,int modifiers){
+        if(key==256&&drag.active()){drag.cancel();bindFeedback="已取消拖动，原配键保留";return true;}
+        return super.keyPressed(key,scan,modifiers);
+    }
+    @Override public void tick(){super.tick();if(!minecraft.isWindowActive())drag.cancel();}
+    @Override public void removed(){drag.cancel();super.removed();}
     @Override public void mouseMoved(double x, double y) {
         super.mouseMoved(x / uiScale, y / uiScale);
     }
@@ -663,7 +588,7 @@ public class MagicStoneScreen extends Screen {
      */
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-        if (bindTab && bindScrollRows() > 1 && delta != 0.0) {
+        if (bindTab && !drag.active() && bindScrollRows() > 1 && delta != 0.0) {
             int next = Math.max(0, Math.min(bindScrollRows() - 1, bindScroll + (delta < 0 ? 1 : -1)));
             if (next != bindScroll) {
                 bindScroll = next;

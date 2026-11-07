@@ -11,7 +11,8 @@ public record WarriorPhantomPacket(UUID player, float scale,int points) {
     public void encode(FriendlyByteBuf out) { out.writeUUID(player); out.writeFloat(scale); out.writeVarInt(points); }
     public static WarriorPhantomPacket decode(FriendlyByteBuf in) {
         UUID player = in.readUUID(); float scale = in.readFloat();
-        if (!Float.isFinite(scale) || scale < 1 || scale > 1 + WarriorPhantom.MAX_GROWTH + .001)
+        // Accept the previous wire range; client rendering clamps legacy peaks to the new cap.
+        if (!Float.isFinite(scale) || scale < 1 || scale > 10.001f)
             throw new io.netty.handler.codec.DecoderException("invalid warrior phantom scale");
         int points=in.readVarInt();
         if(points<0 || points>TemperingRules.MAX_POINTS)

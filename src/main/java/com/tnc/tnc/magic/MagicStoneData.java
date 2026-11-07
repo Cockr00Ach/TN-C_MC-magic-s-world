@@ -89,6 +89,7 @@ public class MagicStoneData {
 
     /** 当前翻到第几页（0 基）。服务端权威，客户端只是镜像。 */
     private int loadoutPage;
+    private boolean manualLoadout;
 
     // ---- 配装（loadout）对外方法 ----
 
@@ -145,6 +146,7 @@ public class MagicStoneData {
             }
         }
         loadout.set(index, id);
+        manualLoadout=true;
         return true;
     }
 
@@ -196,7 +198,7 @@ public class MagicStoneData {
             }
             loadout.set(i,seen.add(bound)?bound:null);
         }
-        for (SpellCatalog.Entry top : SpellCatalog.effective(this)) {
+        if(!manualLoadout)for (SpellCatalog.Entry top : SpellCatalog.effective(this)) {
             if (!isBound(top.id())) {
                 int free = firstFreeSlot();
                 if (free < 0) break;
@@ -212,6 +214,7 @@ public class MagicStoneData {
             return false;
         }
         loadout.set(index, null);
+        manualLoadout=true;
         return true;
     }
 
@@ -771,6 +774,7 @@ public class MagicStoneData {
         this.loadout.clear();
         this.loadout.addAll(other.loadout);
         this.loadoutPage = other.loadoutPage;
+        this.manualLoadout = other.manualLoadout;
         this.mana = other.mana;
         this.maxMana = other.maxMana;
         this.pointsSpent = other.pointsSpent;
@@ -831,6 +835,7 @@ public class MagicStoneData {
             loadoutList.add(StringTag.valueOf(id == null ? "" : id));
         }
         tag.put("Loadout", loadoutList);
+        tag.putBoolean("ManualLoadout",manualLoadout);
         tag.putInt("LoadoutPage", getLoadoutPage());
 
         tag.putInt("Mana", mana);
@@ -884,6 +889,7 @@ public class MagicStoneData {
 
         mana = tag.getInt("Mana");
         loadoutPage = clamp(tag.getInt("LoadoutPage"), 0, PAGE_COUNT - 1);
+        manualLoadout=tag.getBoolean("ManualLoadout");
         // 配装：老存档没有 Loadout 键 → 空表 → 走下面的"按链进度自动补默认配装"✓
         loadout.clear();
         if (tag.contains("Loadout", Tag.TAG_LIST)) {

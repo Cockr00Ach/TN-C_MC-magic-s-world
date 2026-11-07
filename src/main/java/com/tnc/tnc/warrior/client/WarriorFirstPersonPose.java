@@ -16,7 +16,23 @@ public final class WarriorFirstPersonPose {
         if(!context.firstPerson() || entity!=Minecraft.getInstance().player || !WarriorWeapons.bladed(stack)
                 || left!=(entity.getMainArm()==HumanoidArm.LEFT)&&!com.tnc.tnc.bronze.BronzeTwinWeapon.active(entity))return;
         var active=WarriorAnimationClient.active(entity.getId());
-        if(active==null || active.hold())return;
+        if(active==null)return;
+        float charge=WarriorChargeVisual.scale(entity.getId(),Minecraft.getInstance().getFrameTime());
+        if(charge>0){
+            float t=active.progress(Minecraft.getInstance().getFrameTime());
+            var family=WarriorWeapons.family(stack);
+            var key=net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(stack.getItem());
+            var profile=com.tnc.tnc.warrior.WeaponChargeRules.profile(key==null?"":key.getPath(),family);
+            boolean sweep=profile.arc()>=180;
+            float strike=active.hold()?0:(float)Math.sin(Math.PI*Math.min(1,t*1.7f));
+            float hand=left?-1:1;
+            pose.translate(-.10*hand,.20-strike*.48,-.28);
+            pose.mulPose(Axis.XP.rotationDegrees((sweep?-22:-68)+strike*(sweep?22:125)));
+            pose.mulPose(Axis.YP.rotationDegrees((sweep?(-48+110*strike):0)*hand));
+            pose.mulPose(Axis.ZP.rotationDegrees((sweep?-28+65*strike:8)*hand));
+            return;
+        }
+        if(active.hold())return;
         float partial=Minecraft.getInstance().getFrameTime();
         float t=active.progress(partial),weight=active.weight(partial);
         if(t>=1 || weight<=0)return;
@@ -29,6 +45,14 @@ public final class WarriorFirstPersonPose {
             pose.translate(0,-load*.55,-Math.max(0,load)*.30);
         }
         var clip=WarriorMartialClips.clip(active.animation(),stack);
+        if(clip!=null && WarriorMartialViewMotion.supports(clip.name())) {
+            var motion=WarriorMartialViewMotion.sample(clip,t,left);
+            pose.translate(motion.x()*weight,motion.y()*weight,motion.z()*weight);
+            pose.mulPose(Axis.XP.rotationDegrees(motion.pitch()*weight));
+            pose.mulPose(Axis.YP.rotationDegrees(motion.yaw()*weight));
+            pose.mulPose(Axis.ZP.rotationDegrees(motion.roll()*weight));
+            return;
+        }
         float x,y,z;
         if(clip!=null){
             var angles=clip.rotation("armRight",t*clip.lengthSeconds());

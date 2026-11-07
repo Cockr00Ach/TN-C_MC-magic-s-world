@@ -91,7 +91,7 @@ public final class WarriorComboKeys {
     /** 现在该不该把 Q/E 当出招：在游戏里、没开界面、有战士天赋、手持武器。 */
     static boolean combatReady(Minecraft minecraft) {
         return minecraft != null && minecraft.player != null && minecraft.level != null
-                && minecraft.screen == null && minecraft.getOverlay() == null
+                && minecraft.screen == null && minecraft.getOverlay() == null && minecraft.isWindowActive()
                 && TemperingClient.enrolled()
                 && !com.tnc.tnc.bronze.BronzeTwinWeapon.blocked(minecraft.player)
                 && WarriorWeapons.family(minecraft.player.getMainHandItem()) != null;
@@ -131,6 +131,10 @@ public final class WarriorComboKeys {
             swallowConflicts(minecraft.options, RIGHT);
         }
 
+        if(!ready) {
+            if(leftDownAt>=0 || zDownAt>=0) com.tnc.tnc.warrior.WarriorStepPacket.send(com.tnc.tnc.warrior.WarriorStepPacket.CANCEL);
+            leftDownAt=-1;leftHeldSent=false;zDownAt=-1;zCharged=false;zFromKeyboard=false;
+        }
         boolean bowZNow = BOW_HORIZONTAL.isDown();
         drainClicks(BOW_HORIZONTAL);
         if (ready) {
@@ -157,7 +161,7 @@ public final class WarriorComboKeys {
             leftDownAt = tick;
             leftHeldSent = false;
             if (ready) {
-                WarriorComboInputPacket.send(WarriorMove.LEFT);
+                WarriorComboInputPacket.send(WarriorMove.LEFT,WarriorComboInputPacket.CHARGE_START);
             }
         }
         if (rightNow && !rightWasDown) {
@@ -183,8 +187,8 @@ public final class WarriorComboKeys {
         // Q：按住超过半秒补发长按，之后每 10 tick 续一次，松手补一个收势
         if (leftDownAt >= 0) {
             if (!leftNow) {
-                if (leftHeldSent && ready) {
-                    WarriorComboInputPacket.send(WarriorMove.LEFT, WarriorComboInputPacket.RELEASE);
+                if (ready) {
+                    WarriorComboInputPacket.send(WarriorMove.LEFT, leftHeldSent?WarriorComboInputPacket.RELEASE:WarriorComboInputPacket.TAP);
                 }
                 leftDownAt = -1;
                 leftHeldSent = false;
@@ -270,14 +274,14 @@ public final class WarriorComboKeys {
     /** 左键 = 横斩击。用鼠标按下事件而不是攻击事件，按住不会每 tick 灌一个 Z。 */
     @SubscribeEvent
     public static void attackKey(InputEvent.InteractionKeyMappingTriggered event) {
-        if(event.isAttack() && combatReady(Minecraft.getInstance()) && BOW_HORIZONTAL.isDown()) {
+        if(event.isAttack() && combatReady(Minecraft.getInstance()) && (BOW_HORIZONTAL.isDown() || leftHeldSent)) {
             event.setCanceled(true);event.setSwingHand(false);
         }
     }
     @SubscribeEvent
     public static void mouse(InputEvent.MouseButton.Pre event) {
         if(event.getButton()!=GLFW.GLFW_MOUSE_BUTTON_LEFT)return;
-        if(combatReady(Minecraft.getInstance()) && BOW_HORIZONTAL.isDown()){event.setCanceled(true);return;}
+        if(combatReady(Minecraft.getInstance()) && (BOW_HORIZONTAL.isDown() || leftHeldSent)){event.setCanceled(true);return;}
         // Mouse stays an ordinary attack. Only the dedicated Z key owns charge/release.
         if(event.getAction()==GLFW.GLFW_PRESS && combatReady(Minecraft.getInstance()))WarriorComboInputPacket.send(WarriorMove.HORIZONTAL);
     }

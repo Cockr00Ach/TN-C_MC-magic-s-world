@@ -8,6 +8,7 @@ import math
 from pathlib import Path
 import weapon_gen as g
 import pixel_forge
+import craft_details
 
 ROOT = Path(g.ROOT)
 IDS = ['yue_bronze_jian', 'willow_leaf_dao', 'crescent_guandao', 'fangtian_ji', 'red_tassel_spear']
@@ -87,7 +88,10 @@ def definitions():
 
 def decorate(w, detail=True):
     # Fine geometry is physical on both faces; ghost keeps only the silhouette.
-    out = pixel_forge.parts(w, g._lerp_profile) if detail else g.expand_profile_legacy(w)
+    core=w
+    if detail and w['id']=='qimei_staff':
+        core=dict(w,parts=[(n,b,'blade' if n=='wood_staff' else role,mode,*extra) for n,b,role,mode,*extra in w['parts']])
+    out = pixel_forge.parts(core, g._lerp_profile) if detail else g.expand_profile_legacy(w)
     out = list(out)
     def add(name, b, style='guard'):
         b=tuple(round(x,4) for x in b)
@@ -205,7 +209,7 @@ def decorate(w, detail=True):
                 z=-9+i*.5
                 add('grain_ridge',(6.48,-.08,z,6.66,0,z+.32),'blade')
                 add('grain_ridge',(7.34,1.24,z,7.52,1.32,z+.32),'blade')
-    return out
+    return craft_details.refine(w,out) if detail else out
 
 
 def make_model(w, detailed=True):

@@ -34,7 +34,7 @@ public final class WarriorBowCharge {
     private static final Map<UUID,Long> NEXT_SHOT=new HashMap<>();
     public static boolean input(ServerPlayer p,WarriorMove move,int mode){
         var id=p.getUUID();
-        boolean immediate=mode==WarriorComboInputPacket.CHARGE_START && move==WarriorMove.HORIZONTAL;
+        boolean immediate=mode==WarriorComboInputPacket.CHARGE_START && (move==WarriorMove.HORIZONTAL || move==WarriorMove.LEFT);
         if(immediate){cancel(p);INTERRUPTED.remove(id);}
         if(INTERRUPTED.contains(id)){
             if(mode==WarriorComboInputPacket.RELEASE||mode==WarriorComboInputPacket.TAP)INTERRUPTED.remove(id);
@@ -42,7 +42,7 @@ public final class WarriorBowCharge {
         }
         var charge=ACTIVE.get(id);
         if(charge!=null){
-            if(move==WarriorMove.HORIZONTAL && mode==WarriorComboInputPacket.TAP){ACTIVE.remove(id);p.stopUsingItem();WarriorAnimationPacket.cancel(p);return false;}
+            if(move==charge.move && mode==WarriorComboInputPacket.TAP){ACTIVE.remove(id);p.stopUsingItem();WarriorAnimationPacket.cancel(p);return false;}
             if(!valid(p,charge)){cancel(p);return true;}
             if(mode==WarriorComboInputPacket.HOLD && !charge.activated){activate(p,charge);return true;}
             if(move!=charge.move){if(mode==WarriorComboInputPacket.TAP)cancel(p);return true;}
@@ -51,7 +51,7 @@ public final class WarriorBowCharge {
             return true;
         }
         var family=WarriorWeapons.family(p.getMainHandItem());
-        if((mode!=WarriorComboInputPacket.HOLD && !immediate) || family==null || (move!=WarriorMove.HORIZONTAL && family!=WarriorWeaponFamily.BOW))return false;
+        if((mode!=WarriorComboInputPacket.HOLD && !immediate) || family==null || (move!=WarriorMove.HORIZONTAL && move!=WarriorMove.LEFT && family!=WarriorWeaponFamily.BOW))return false;
         if(move==WarriorMove.RIGHT && WarriorComboService.state(p.getUUID()).tracker.moves().equals(WarriorMove.parse("eqe")))return false;
         long now=p.serverLevel().getGameTime();
         if(!WarriorComboService.eligible(p)||now<NEXT_SHOT.getOrDefault(id,0L)||(family==WarriorWeaponFamily.BOW&&!WarriorComboService.hasAmmo(p))||WarriorComboService.state(id).interruptedUntil>WarriorComboService.gameTime(p))return true;
@@ -68,7 +68,7 @@ public final class WarriorBowCharge {
     }
     private static boolean valid(ServerPlayer p,Charge c){return WarriorComboService.eligible(p)&&p.level().dimension().equals(c.dimension)
             &&p.getMainHandItem()==c.bow&&WarriorWeapons.family(c.bow)==c.family;}
-    public static void cancel(ServerPlayer p){if(p==null)return;var removed=ACTIVE.remove(p.getUUID());if(removed!=null){if(removed.move==WarriorMove.HORIZONTAL)INTERRUPTED.add(p.getUUID());p.stopUsingItem();WarriorAnimationPacket.cancel(p);}}
+    public static void cancel(ServerPlayer p){if(p==null)return;var removed=ACTIVE.remove(p.getUUID());if(removed!=null){INTERRUPTED.add(p.getUUID());p.stopUsingItem();WarriorAnimationPacket.cancel(p);}}
     private static void fire(ServerPlayer p,Charge c){
         if(!valid(p,c)||p.serverLevel().getGameTime()-c.pulse>40)return;
         if(c.family!=WarriorWeaponFamily.BOW){fireMelee(p,c);return;}
@@ -97,20 +97,20 @@ public final class WarriorBowCharge {
     @SubscribeEvent public static void preventAutoAttack(net.minecraftforge.event.entity.player.AttackEntityEvent e){if(e.getEntity() instanceof ServerPlayer p && charging(p))e.setCanceled(true);}
     private static void fireMelee(ServerPlayer p,Charge c){
         double mult=WeaponChargeRules.multiplier(p.level().getGameTime()-c.start);
-        boolean scythe=p.getMainHandItem().is(com.tnc.tnc.TNMod.DOOM_SCYTHE.get());
-        var attack=scythe?WarriorAnimation.SCYTHE_REAP:switch(c.family){case GREATSWORD->WarriorAnimation.GS_SMASH;case HAMMER->WarriorAnimation.HM_QUAKE;case SPEAR->WarriorAnimation.SPEAR_BREAK;default->WarriorAnimation.SWORD_BREAKER;};
+        var profile=WeaponChargeRules.profile(net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(c.bow.getItem()).getPath(),c.family);
+        var attack=profile.release();
         WarriorAnimationPacket.broadcast(p,attack,attack.durationTicks());
-        double radius=(c.family==WarriorWeaponFamily.SPEAR?4.2:3.2)*WarriorPhantom.scale(p);
-        int arc=scythe?360:c.family==WarriorWeaponFamily.SPEAR?55:c.family==WarriorWeaponFamily.HAMMER?180:120;
+        double radius=profile.radius();
+        int arc=profile.arc();
         var base=WarriorCombos.bySlot(c.family,0);
-        var charged=new WarriorSkill(base.id(),base.codexId(),base.name()+"·蓄力",base.sequence(),0,base.cooldownTicks(),(float)mult,
-            radius/WarriorPhantom.scale(p),arc,.6,1,"松手蓄力攻击",c.family,WarriorChain.ATTACK,0,false,false,0,attack,
+        var charged=new WarriorSkill(base.id(),base.codexId(),profile.name(),base.sequence(),0,base.cooldownTicks(),(float)mult,
+            radius,arc,.6,1,"松手蓄力攻击",c.family,WarriorChain.ATTACK,0,false,false,0,attack,
             java.util.Collections.nCopies(base.length(),false),0,0,0);
         WarriorComboService.melee(p,charged,WarriorComboService.state(p.getUUID()),WarriorComboService.gameTime(p));
         c.bow.hurtAndBreak(1,p,owner->owner.broadcastBreakEvent(net.minecraft.world.InteractionHand.MAIN_HAND));
         NEXT_SHOT.put(p.getUUID(),p.level().getGameTime()+10);
         p.serverLevel().playSound(null,p.blockPosition(),SoundEvents.PLAYER_ATTACK_SWEEP,SoundSource.PLAYERS,1,.8f);
-        p.displayClientMessage(Component.literal(String.format(java.util.Locale.ROOT,"蓄力斩 · %.1f×",mult)),true);
+        p.displayClientMessage(Component.literal(String.format(java.util.Locale.ROOT,profile.name()+" · %.1f×",mult)),true);
     }
     @SubscribeEvent(priority=net.minecraftforge.eventbus.api.EventPriority.HIGH)
     public static void unboundedArrowDamage(net.minecraftforge.event.entity.living.LivingHurtEvent e){

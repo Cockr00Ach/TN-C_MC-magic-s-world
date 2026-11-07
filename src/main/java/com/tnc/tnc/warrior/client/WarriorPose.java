@@ -35,6 +35,18 @@ public final class WarriorPose {
             pairedArms(player,model);
             return;
         }
+        if(active.hold() && com.tnc.tnc.warrior.WeaponChargeRules.chargingAnimation(active.animation())
+                && active.animation()!=com.tnc.tnc.warrior.WarriorAnimation.BOW_CHARGE){
+            boolean spear=WarriorWeapons.family(player.getMainHandItem())==com.tnc.tnc.warrior.WarriorWeaponFamily.SPEAR;
+            ModelPart main=player.getMainArm()==HumanoidArm.LEFT?model.leftArm:model.rightArm;
+            ModelPart support=player.getMainArm()==HumanoidArm.LEFT?model.rightArm:model.leftArm;
+            float w=active.weight(Minecraft.getInstance().getFrameTime());
+            main.xRot=WarriorMotionBlend.angle(main.xRot,spear?-1.35f:-2.65f,w);
+            main.yRot=WarriorMotionBlend.angle(main.yRot,spear?-.55f:0,w);
+            support.xRot=WarriorMotionBlend.angle(support.xRot,spear?-1.1f:-2.3f,w);
+            model.body.xRot+=.12f*w;
+            pairedArms(player,model);return;
+        }
         float raw = active.progress(Minecraft.getInstance().getFrameTime());
         var family=WarriorWeapons.family(player.getMainHandItem());
         float t = WarriorHeavyMotion.progress(active.animation(),family,active.hold(),raw);

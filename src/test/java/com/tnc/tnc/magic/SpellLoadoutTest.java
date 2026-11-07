@@ -415,13 +415,24 @@ class SpellLoadoutTest {
         MagicStoneData data = rich();
         unlock(data, "spark");
         unlock(data, "fireball");
-        data.clearSlot(0);
-        data.clearSlot(1);
+        data.forceSlotForTest(0,null);
+        data.forceSlotForTest(1,null);
         assertEquals(0, data.loadoutCount());
 
         data.normalizeLoadout();
         assertTrue(wandIds(data).contains(id("spark")));
         assertTrue(wandIds(data).contains(id("fireball")));
+    }
+
+    @Test
+    void explicitClearAndReplacementStayAfterNormalizationAndReload(){
+        var data=rich();unlock(data,"spark");unlock(data,"fireball");
+        data.setSlot(1,id("spark"));data.normalizeLoadout();
+        assertNull(data.getSlot(0));assertEquals(id("spark"),data.getSlot(1));
+        assertFalse(data.isBound(id("fireball")),"Replaced spell stays in library rather than refilling an empty slot");
+        data.clearSlot(1);var restored=new MagicStoneData();restored.deserializeNBT(data.serializeNBT());restored.normalizeLoadout();
+        assertEquals(0,restored.loadoutCount(),"Manual empty slots survive reconnect");
+        var copied=new MagicStoneData();copied.copyFrom(data);copied.normalizeLoadout();assertEquals(0,copied.loadoutCount());
     }
 
     /** 记录某个槽里有多少个法术（用于断言"只留一个"）。 */

@@ -11,7 +11,7 @@ from PIL import Image,ImageDraw,ImageFont
 ROOT=Path(__file__).resolve().parents[1]
 RES=ROOT/'src/main/resources';ASSET=RES/'assets/tnc';PREVIEW=ROOT/'docs/previews'
 NAMES={'greatsword':'古铜大剑','spear':'古铜长枪','dao':'古铜大刀','dagger':'古铜匕首','halberd':'青铜双刃'}
-COLORS=[(106,91,56),(43,91,74),(174,153,100),(55,40,29),(133,113,68),(25,38,32),(151,130,80),(40,32,22)]
+COLORS=[(126,103,61),(43,96,77),(207,181,116),(47,34,25),(151,124,71),(23,37,31),(177,147,89),(38,29,21)]
 SIDES=('down','up','west','north','east','south')
 INDICES=((5,4,0,1),(2,3,7,6),(0,4,7,3),(1,0,3,2),(5,1,2,6),(4,5,6,7))
 
@@ -93,6 +93,7 @@ class Weapon:
             for y in np.arange(bottom+.7,top-1,.75):
                 for x in (-r+.12,r-.2):self.box(x,float(y),-r-.035,x+.08,float(y+.42),-r+.015,7,'shaft_incision')
     def mask_guard(self,y,width=3):
+        start=len(self.elements)
         # A chamfered cast taotie, narrow recessed eyes, bridge and curled horns.
         for i in range(7):
             yy=y+i*.25;inset=abs(i-3)*.13
@@ -110,6 +111,11 @@ class Weapon:
             for i in range(7):
                 x=sign*(.28+i*.27)
                 self.box(x-.085,y-.1-i*.035,-.91,x+.085,y+.04-i*.035,.91,4,'guard_lip')
+        for e in list(self.elements[start:]):
+            if e['name'] in ('eye_recess','eye_inlay'):
+                mirror=copy.deepcopy(e);mirror['name']='reverse_'+e['name']
+                mirror['from'][2],mirror['to'][2]=16-e['to'][2],16-e['from'][2]
+                self.elements.append(mirror)
     def blade(self,kind,start,end,wide):
         for y in np.arange(start,end,.25):
             p=(y-start)/(end-start)
@@ -152,6 +158,26 @@ class Weapon:
             for x in np.arange(-4.8,.3,.35):self.box(float(x),y,-.55,float(x+.35),y+.55,.55,0,'crescent_bridge')
         for y in (19.4,22,24.6):self.relief(-5.1,y,.65)
 
+def refine_cast(w,kind):
+    rows={}
+    for e in list(w.elements):
+        if e['name'] not in ('bevelled_blade','forged_twin_bevel'):continue
+        rows.setdefault(round(e['from'][1],4),[]).append(e)
+    for i,(y,boxes) in enumerate(sorted(rows.items())):
+        left=min(e['from'][0] for e in boxes)-8;right=max(e['to'][0] for e in boxes)-8
+        if right-left<1.8 or i%2:continue
+        for x in (left+.38,right-.50):
+            seats=[e for e in boxes if e['from'][0] <= x+8 <= e['to'][0]]
+            if not seats:continue
+            depth=max(e['to'][2]-8 for e in seats)
+            for sign in (-1,1):
+                a,b=sorted((sign*(depth-.02),sign*(depth+.065)))
+                w.box(x,y,a,x+.12,y+.18,b,6,'cast_border_wire')
+    for x in (-.42,.42):
+        for z in (-.79,.66):
+            w.box(x-.15,1.35,z,x+.15,1.66,z+.13,0,'collar_rivet_seat')
+            w.box(x-.07,1.40,z-.025,x+.07,1.60,z+.16,2,'collar_rivet')
+
 def weapon(kind):
     if kind=='halberd':return twin_pair()
     w=Weapon()
@@ -177,6 +203,7 @@ def weapon(kind):
         else:
             y=-9.8 if kind=='greatsword' else -4.3
             w.mask_guard(y,1.2)
+    refine_cast(w,kind)
     scale={'greatsword':.85,'spear':.9,'dao':.8,'dagger':.65,'halberd':.9}[kind]
     return {'credit':'TN-C quarter-unit cast bronze; tools/bronze_art_detail.py','textures':{'bronze':'tnc:item/bronze_atlas','particle':'tnc:item/bronze_atlas'},'gui_light':'front',
         'display':{'thirdperson_righthand':{'rotation':[0,-90,0],'translation':[0,2.5,1],'scale':[scale]*3},'thirdperson_lefthand':{'rotation':[0,90,0],'translation':[0,2.5,1],'scale':[scale]*3},'firstperson_righthand':{'rotation':[0,-90,15],'translation':[1,2,-2],'scale':[scale*.75]*3},'firstperson_lefthand':{'rotation':[0,90,-15],'translation':[1,2,-2],'scale':[scale*.75]*3},'gui':{'rotation':[0,0,-30],'translation':[0,-1,0],'scale':[.33 if kind in ('spear','halberd') else .4]*3},'ground':{'rotation':[0,0,0],'translation':[0,3,0],'scale':[.25]*3},'fixed':{'rotation':[0,0,0],'translation':[0,0,0],'scale':[.4]*3}},'elements':w.elements}
@@ -196,13 +223,13 @@ def twin_component(which):
     for y in np.arange(4,profile[-1][0],.25):
         left,right=bounds(float(y+.125));xs=[left]+[float(v) for v in np.arange(math.ceil(left/.5)*.5,right,.5)]+[right]
         hole=which=='main' and 13<y<23
-        if hole:xs=sorted(set(xs+[-.2,.2]))
+        if hole:xs=sorted(set(xs+[-.43,.43]))
         for xa,xb in zip(xs,xs[1:]):
-            if hole and xa>=-.201 and xb<=.201:continue
+            if hole and xa>=-.431 and xb<=.431:continue
             dist=min((xa+xb)/2-left,right-(xa+xb)/2);d=min(.64,.12+dist*.33)
             w.box(xa,float(y),-d,xb,float(y+.25),d,2 if dist<.28 else 0,'forged_twin_bevel')
         if which=='main' and y<27:
-            for x in ((-.33,.22) if hole else (-.1,)):w.box(x,float(y),-.69,x+.11,float(y+.25),.69,6,'fuller_shoulder')
+            for x in ((-.58,.47) if hole else (-.1,)):w.box(x,float(y),-.69,x+.11,float(y+.25),.69,6,'fuller_shoulder')
     # Angular horned guard and nested bronze fastening plates.
     for i,width in enumerate((1.7,2.3,3.0,3.8,4.1,3.55)):
         size=width if which=='main' else width*.72
@@ -231,6 +258,7 @@ def twin_component(which):
             t=(y+15.5)/6.1;width=max(.055,1.2*t)
             for xa in np.arange(-width,width,.35):w.box(float(xa),float(y),-.27,float(min(xa+.35,width)),float(y+.25),.27,2 if abs(xa)>width-.4 else 0,'reverse_tail_blade')
         pin(0,-9.7,.22)
+    refine_cast(w,'twin_'+which)
     result=weapon('dagger');result['credit']='TN-C inseparable bronze twinblades; tools/bronze_art_detail.py'
     # Both grips share the item pivot (8,8,8), so either hand clamps the actual handle.
     for element in w.elements:

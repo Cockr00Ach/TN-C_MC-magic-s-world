@@ -12,8 +12,11 @@ import preview_geo_anim as render
 def main():
     assets=ROOT/'src/main/resources/assets/tnc'
     source=json.loads((assets/'animations/entity/traditional_martial_arts.json').read_text('utf8'))['animations']
-    cases=[('willow_leaf_dao',3,'柳叶刀 · 缠头裹脑'),('red_tassel_spear',0,'红缨枪 · 拦拿扎'),
-           ('qimei_staff',3,'齐眉棍 · 立舞花'),('monk_spade',3,'月牙铲 · 勾挂回带')]
+    cases=[('willow_leaf_dao',3,'柳叶刀 · 缠头裹脑'),('red_tassel_spear',0,'红缨枪 · 拦拿扎（保留）'),
+           ('qimei_staff',3,'齐眉棍 · 立舞花'),('monk_spade',3,'月牙铲 · 勾挂回带'),
+           ('fangtian_ji',3,'方天戟 · 勾挂回斩'),('crescent_guandao',3,'偃月刀 · 拦腰大斩'),
+           ('ring_pommel_dao',3,'环首刀 · 连环劈斩'),('han_iron_jian',3,'汉剑 · 左右挂撩'),
+           ('yue_bronze_jian',3,'青铜剑 · 挂撩穿刺'),('iron_jian_mace',3,'铁锏 · 左右连打')]
     sheet=Image.new('RGB',(1440,len(cases)*330),(24,25,31));d=ImageDraw.Draw(sheet)
     font=ImageFont.truetype('C:/Windows/Fonts/msyh.ttc',25)
     for row,(id,slot,title) in enumerate(cases):
@@ -37,9 +40,9 @@ def main():
         for i in range(30):
             frames.append(render.render(bones,order,anim,min(i/25,1),300,30,12,4,'',center=(0,17,0)))
         for col,n in enumerate([0,6,11,16,20,25]):sheet.paste(frames[n].resize((240,280)),(col*240,row*330+45))
-        out=ROOT/'docs/previews'/f'martial-{id}.gif'
+        out=ROOT/'docs/previews'/f'martial-{id}-20261106.gif'
         frames[0].save(out,save_all=True,append_images=frames[1:],duration=60,loop=0,optimize=False)
-    sheet.save(ROOT/'docs/previews/traditional-martial-arts-20261105.png')
+    sheet.save(ROOT/'docs/previews/traditional-martial-arts-20261106.png')
     print('Wrote four rig GIFs and keyframe contact sheet')
 
 

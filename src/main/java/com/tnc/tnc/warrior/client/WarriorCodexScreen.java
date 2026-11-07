@@ -9,6 +9,7 @@ import com.tnc.tnc.warrior.WarriorCodex.State;
 import com.tnc.tnc.warrior.WarriorCodex.Weapon;
 import com.tnc.tnc.warrior.WarriorCombos;
 import com.tnc.tnc.warrior.WarriorSkill;
+import com.tnc.tnc.warrior.WarriorUnifiedSlots;
 import com.tnc.tnc.warrior.WarriorTalentRules;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,6 +54,7 @@ public final class WarriorCodexScreen extends Screen {
     private Weapon shown = Weapon.SWORD;
     /** 左栏正在详细展示的条目 id。 */
     private String selectedId;
+    private boolean showGuide = true;
     /**
      * 每个条目按钮的屏幕矩形。
      *
@@ -63,7 +65,7 @@ public final class WarriorCodexScreen extends Screen {
     private List<Component> pendingTooltip;
 
     public WarriorCodexScreen() {
-        super(Component.literal("武器图鉴"));
+        super(Component.literal("战士系统"));
     }
 
     // ------------------------------------------------------------------
@@ -109,6 +111,10 @@ public final class WarriorCodexScreen extends Screen {
         height = (int) Math.ceil(actualH / uiScale);
 
         rowRects.clear();
+        addRenderableWidget(Button.builder(Component.literal(showGuide?"查看招式":"操作说明"), b -> {
+            showGuide=!showGuide;rebuildWidgets();
+        }).bounds(left()+panelWidth()-88,top()+8,76,16).build());
+        if(showGuide)return;
 
         int tabW = Math.max(28, Math.min(76, (panelWidth() - 24) / Weapon.values().length - 4));
         int x = left() + 12;
@@ -139,7 +145,7 @@ public final class WarriorCodexScreen extends Screen {
             int rowY = top() + LIST_Y + 16;
             for (Entry entry : WarriorCodex.of(shown, chain)) {
                 final String id = entry.id();
-                Button row = Button.builder(Component.literal(rowLabel(entry)), b -> {
+                Button row = Button.builder(Component.literal(fitLabel(rowLabel(entry), Math.max(34,colW-34))), b -> {
                     selectedId = id;
                     rebuildWidgets();
                 }).bounds(colX + 18, rowY, Math.max(40, colW - 26), 20).build();
@@ -166,8 +172,8 @@ public final class WarriorCodexScreen extends Screen {
         String prefix = entry.id().equals(selectedId) ? "▶ " : "";
         // 连招条目把顺序直接摆在行上：玩家一眼就能看到"这招要按哪几下"
         WarriorSkill combo = WarriorCombos.byCodexId(entry.id());
-        String sequence = combo == null ? "" : " · " + combo.sequenceLabel();
-        return prefix + entryName(entry) + sequence + (entry.implemented() ? "" : " · 规划");
+        String label = combo == null ? entryName(entry) : WarriorUnifiedSlots.purpose(combo.slot())+" · "+combo.compactLabel();
+        return prefix + label + (entry.implemented() ? "" : " · 规划");
     }
 
     private String entryName(Entry entry) {
@@ -226,8 +232,13 @@ public final class WarriorCodexScreen extends Screen {
             + " · 按 " + WarriorPracticeKeys.OPEN.getTranslatedKeyMessage().getString() + " 关闭";
         g.drawString(this.font, fitLabel(sub, panelW - 24), left + 12, top + 59, COLOR_DIM, false);
         g.fill(left + 8, top + 72, left + panelW - 8, top + 73, 0x50C9A063);
-        g.fill(left + LIST_X - 8, top + 96, left + LIST_X - 7, top + PANEL_H - 8, 0x50C9A063);
+        if(!showGuide)g.fill(left + LIST_X - 8, top + 96, left + LIST_X - 7, top + PANEL_H - 8, 0x50C9A063);
 
+        if(showGuide){
+            drawGuide(g,left,top,panelW);
+            super.render(g,mouseX,mouseY,partialTick);
+            return;
+        }
         drawDetail(g, p, left, top);
 
         List<String> chains = WarriorCodex.chainsOf(shown);
@@ -261,6 +272,28 @@ public final class WarriorCodexScreen extends Screen {
         }
     }
 
+    /** Short lines keep the introduction readable even at the minimum panel width. */
+    private void drawGuide(GuiGraphics g,int left,int top,int panelW){
+        String[] lines={
+            "统一槽位：主攻 → 振刀 → 破振刀",
+            "随后依次：连招1 → 连招2 → … → 连招n",
+            "主攻：ZZZ，也可连续三次左键；QZE 仍可用",
+            "振刀：E Q 后长按 E，架住攻击；松手收架",
+            "破振刀：E Q Z，命中破开架势并打断",
+            "连招1起：查看各武器条目中的输入与效果",
+            "短按 Q 左斩、短按 E 右斩、Z／左键横斩",
+            "长按 Q 半秒进入蓄力，松手攻击；受击中断",
+            "近战蓄力逐渐放大，最大八倍，收招后缩回",
+            "剑竖起重劈；刀横断；枪突刺；锤震地",
+            "左 Ctrl：中断动作／战斗步法",
+            "磨砺与训练满足条件后开放，不消耗点数",
+            "演武场中央终端：选教官、练习、测试木桩",
+            "点击右上角查看招式，切换武器页签看详情"
+        };
+        for(int i=0;i<lines.length;i++)
+            g.drawString(font,fitLabel(lines[i],panelW-24),left+12,top+84+i*12,i<2?COLOR_TITLE:COLOR_TEXT,false);
+    }
+
     private void drawDetail(GuiGraphics g, Progress p, int left, int top) {
         int x = left + 12;
         int width = LIST_X - 24;
@@ -270,7 +303,7 @@ public final class WarriorCodexScreen extends Screen {
             return;
         }
         State state = entry.state(p);
-        g.drawString(this.font, fitLabel(entryName(entry), width), x, top + 84, stateColor(state), false);
+        g.drawString(this.font, fitLabel((WarriorCombos.byCodexId(entry.id())==null?"":WarriorUnifiedSlots.purpose(WarriorCombos.byCodexId(entry.id()).slot())+" · ")+entryName(entry), width), x, top + 84, stateColor(state), false);
         g.drawString(this.font, fitLabel(entry.title(), width), x, top + 96, COLOR_DIM, false);
 
         String stateText = switch (state) {
@@ -358,7 +391,7 @@ public final class WarriorCodexScreen extends Screen {
             combo=WarriorComboClient.heldVariant(combo);
             lines.add(Component.literal("§7"+combo.finisherText()));
             lines.add(Component.literal("§b槽位 " + (combo.slot() + 1) + " / " + WarriorSkill.LOADOUT_SLOTS
-                    + " · " + combo.chain().cn() + " · 连招 " + combo.sequenceLabel()
+                    + " · " + WarriorUnifiedSlots.purpose(combo.slot()) + " · 输入 " + combo.sequenceLabel()
                     + " · 冷却 " + combo.cooldownSeconds() + " 秒"));
             if (combo.displaces()) {
                 lines.add(Component.literal("§7带位移 " + String.format(java.util.Locale.ROOT, "%.1f", combo.dash())
@@ -372,7 +405,7 @@ public final class WarriorCodexScreen extends Screen {
             } else {
                 lines.add(Component.literal("§7动作：" + combo.animation().cn()));
             }
-            lines.add(Component.literal("§7持武器按顺序出招，命中后自动衔接；不消耗磨砺"));
+            lines.add(Component.literal("§7持武器按顺序输入，连招成立后自动衔接；不消耗磨砺"));
         }
         if (!entry.source().isEmpty()) {
             lines.add(Component.literal("§7怎么练 " + entry.source()));

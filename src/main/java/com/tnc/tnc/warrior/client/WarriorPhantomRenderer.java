@@ -54,13 +54,20 @@ public final class WarriorPhantomRenderer {
      * 所以别人屏幕上也能看到他放大了多少。
      */
     static double scaleFor(AbstractClientPlayer player) {
-        if(WarriorHeavyGrowth.usesEntityGrowth(WarriorWeapons.family(player.getMainHandItem())))return 1;
-        return player == Minecraft.getInstance().player ? scale() : WarriorPhantomScales.get(player.getUUID());
+        if(WarriorChargeVisual.scale(player.getId(),Minecraft.getInstance().getFrameTime())>0 || WarriorHeavyGrowth.usesEntityGrowth(WarriorWeapons.family(player.getMainHandItem())))return 1;
+        float peak=(float)(player==Minecraft.getInstance().player?scale():WarriorPhantomScales.get(player.getUUID()));
+        var a=WarriorAnimationClient.active(player.getId());
+        var mc=Minecraft.getInstance();
+        if(a!=null && (a.hold() || a.progress(mc.getFrameTime())<1))
+            return WarriorHeavyGrowth.phantomScale(a.animation(),a.hold(),a.progress(mc.getFrameTime()),peak);
+        return WarriorHeavyGrowth.phantomScale(com.tnc.tnc.warrior.WarriorAnimation.SLASH_HORIZONTAL,false,
+                player.getAttackAnim(mc.getFrameTime()),peak);
     }
 
     public static void renderBound(net.minecraft.world.entity.LivingEntity entity, ItemStack stack,
             ItemDisplayContext context, boolean left, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
         if (disabled() || !(entity instanceof AbstractClientPlayer player) || !WarriorWeapons.bladed(stack)
+                || WarriorChargeVisual.scale(player.getId(),Minecraft.getInstance().getFrameTime())>0
                 || WarriorHeavyGrowth.usesEntityGrowth(WarriorWeapons.family(stack))
                 || left!=(player.getMainArm()==net.minecraft.world.entity.HumanoidArm.LEFT)
                 || (!context.firstPerson() && context != ItemDisplayContext.THIRD_PERSON_LEFT_HAND
@@ -78,7 +85,7 @@ public final class WarriorPhantomRenderer {
         if(visibility<=.001f)return;
         double scale = player == Minecraft.getInstance().player ? scale() : WarriorPhantomScales.get(player.getUUID());
         // 始终比真剑大 2%：完全重合会和真模型 z-fighting，寒毛一点就看不出来了
-        double draw = Math.max(scale, 1.02);
+        double draw = Math.max(scaleFor(player), 1.02);
         boolean combo = WarriorTrail.finisher(player.getId());
         float alpha = alpha(scale, combo)*visibility*(context.firstPerson() ? .65f : 1f);
 
@@ -127,7 +134,7 @@ public final class WarriorPhantomRenderer {
 
     /** Attack opacity only; the envelope gate above removes all idle ghost submissions. */
     private static float alpha(double scale, boolean combo) {
-        double grown = (scale - 1.0) / WarriorPhantom.MAX_GROWTH;
+        double grown = Math.max(0,Math.min(1,(scale-3)/7));
         float base = (float) (0.14 + 0.26 * grown);
         if (!combo) {
             return base;
