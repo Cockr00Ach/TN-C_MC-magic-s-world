@@ -1,9 +1,9 @@
 {
-  "item.tnc.living_fish_sword": "活鱼剑",
-  "item.tnc.metal_fish_sword": "金属鱼剑",
-  "tooltip.tnc.fish_living": "灵活快攻 · 铁砧＋铁锭5%／铁块30%金属化",
-  "tooltip.tnc.fish_metal": "金属鳞甲 · 威力更强，攻速较慢",
+  "item.tnc.living_fish_sword": "尚方宝鱼",
+  "item.tnc.metal_fish_sword": "尚方宝剑",
+  "tooltip.tnc.fish_living": "一条励志打败一切的鱼，努力保持笔直，也许能有点用",
+  "tooltip.tnc.fish_metal": "为了获得更强的力量，用铁包裹自身",
   "tooltip.tnc.fish_pending": "取出后进行金属化判定：成功率 %s%%（失败保留原剑）",
-  "message.tnc.fish_success": "金属化成功！获得金属鱼剑。",
+  "message.tnc.fish_success": "金属化成功！获得尚方宝剑。",
   "message.tnc.fish_failure": "金属化未成功，材料已消耗，鱼剑保留。"
 }
