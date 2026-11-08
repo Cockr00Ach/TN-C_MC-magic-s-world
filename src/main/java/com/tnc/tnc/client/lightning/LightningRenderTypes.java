@@ -39,6 +39,9 @@ public final class LightningRenderTypes {
     /** 雷系几何唯一用到的渲染层 ✓。 */
     public static final RenderType BOLT = LightningType.BOLT;
 
+    /** Ground cracks need alpha blending: additive lightning cannot draw dark geometry. */
+    public static final RenderType DARK = LightningType.DARK;
+
     /**
      * ★ <b>法术模型层（半透明 ＋ 自发光）</b> —— 给「雷球 / 三尊神 / 环绕雷球」这些
      * <b>作者做的方块模型</b>用 ✓。
@@ -93,6 +96,19 @@ public final class LightningRenderTypes {
                         .setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_EMISSIVE_SHADER)
                         .setTextureState(new TextureStateShard(WHITE_TEXTURE, false, false))
                         .setTransparencyState(LIGHTNING_TRANSPARENCY)
+                        .setCullState(NO_CULL)
+                        .setDepthTestState(LEQUAL_DEPTH_TEST)
+                        .setWriteMaskState(COLOR_WRITE)
+                        .setOutputState(MAIN_TARGET)
+                        .createCompositeState(false));
+
+        static final RenderType DARK = create(
+                "tnc_spell_dark", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS,
+                262144, false, true,
+                CompositeState.builder()
+                        .setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_EMISSIVE_SHADER)
+                        .setTextureState(new TextureStateShard(WHITE_TEXTURE, false, false))
+                        .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
                         .setCullState(NO_CULL)
                         .setDepthTestState(LEQUAL_DEPTH_TEST)
                         .setWriteMaskState(COLOR_WRITE)
