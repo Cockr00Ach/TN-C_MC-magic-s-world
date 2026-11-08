@@ -5,5 +5,9 @@
   "tooltip.tnc.fish_metal": "为了获得更强的力量，用铁包裹自身",
   "tooltip.tnc.fish_pending": "取出后进行金属化判定：成功率 %s%%（失败保留原剑）",
   "message.tnc.fish_success": "金属化成功！获得尚方宝剑。",
-  "message.tnc.fish_failure": "金属化未成功，材料已消耗，鱼剑保留。"
+  "message.tnc.fish_failure": "金属化未成功，材料已消耗，鱼剑保留。",
+  "skill.tnc.fish_school_living": "鱼贯而出",
+  "skill.tnc.fish_school_metal": "铁鳞奔流",
+  "tooltip.tnc.fish_school": "右键：%s · 伤害%s · 魔力%s · 冷却%s游戏秒（两剑共用）",
+  "message.tnc.fish_mana": "当前无法消耗魔力（需要%s点）"
 }
