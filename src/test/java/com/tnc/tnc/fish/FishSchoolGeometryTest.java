@@ -81,8 +81,8 @@ class FishSchoolGeometryTest {
     @Test void bothSchoolTexturesAreSmallOpaqueStaticAssets() throws Exception {
         for (String variant:new String[]{"living","metal"}) {
             var image=ImageIO.read(Path.of("src/main/resources/assets/tnc/textures/entity/fish_school_"+variant+".png").toFile());
-            assertEquals(64,image.getWidth());assertEquals(64,image.getHeight());
-            for (int x=0;x<64;x++) for (int y=0;y<64;y++) assertEquals(255,(image.getRGB(x,y)>>>24)&255);
+            assertEquals(512,image.getWidth());assertEquals(512,image.getHeight());
+            for (int x=0;x<512;x++) for (int y=0;y<512;y++) assertEquals(255,(image.getRGB(x,y)>>>24)&255);
         }
     }
 }

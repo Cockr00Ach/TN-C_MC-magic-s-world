@@ -14,13 +14,15 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 public final class FishSchoolRenderer extends EntityRenderer<FishSchoolEntity> {
-    public static final ModelLayerLocation LAYER=new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath("tnc","fish_school"),"main");
+    public static final ModelLayerLocation LIVING_LAYER=new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath("tnc","fish_school"),"living");
+    public static final ModelLayerLocation METAL_LAYER=new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath("tnc","fish_school"),"metal");
     private static final ResourceLocation LIVING=ResourceLocation.fromNamespaceAndPath("tnc","textures/entity/fish_school_living.png");
     private static final ResourceLocation METAL=ResourceLocation.fromNamespaceAndPath("tnc","textures/entity/fish_school_metal.png");
-    private final FishSchoolModel model;
-    public FishSchoolRenderer(EntityRendererProvider.Context context) { super(context);model=new FishSchoolModel(context.bakeLayer(LAYER));shadowRadius=0; }
+    private final FishSchoolModel livingModel,metalModel;
+    public FishSchoolRenderer(EntityRendererProvider.Context context) { super(context);livingModel=new FishSchoolModel(context.bakeLayer(LIVING_LAYER));metalModel=new FishSchoolModel(context.bakeLayer(METAL_LAYER));shadowRadius=0; }
     @Override public void render(FishSchoolEntity entity,float yaw,float partial,PoseStack pose,MultiBufferSource buffers,int light) {
         double age=Math.min(FishSchoolGeometry.LIFETIME,entity.age()+partial);
+        FishSchoolModel model=entity.metal()?metalModel:livingModel;
         var vertices=buffers.getBuffer(RenderType.entityCutoutNoCull(getTextureLocation(entity)));
         for (int lane=0;lane<FishSchoolGeometry.COUNT;lane++) {
             if (!entity.active(lane) || !entity.visuallyClear(lane,age)) continue;
@@ -37,7 +39,7 @@ public final class FishSchoolRenderer extends EntityRenderer<FishSchoolEntity> {
     @Override public ResourceLocation getTextureLocation(FishSchoolEntity entity) { return entity.metal()?METAL:LIVING; }
     @Mod.EventBusSubscriber(modid="tnc",bus=Mod.EventBusSubscriber.Bus.MOD,value=Dist.CLIENT)
     public static final class Registration {
-        @SubscribeEvent public static void layers(EntityRenderersEvent.RegisterLayerDefinitions event) { event.registerLayerDefinition(LAYER,FishSchoolModel::layer); }
+        @SubscribeEvent public static void layers(EntityRenderersEvent.RegisterLayerDefinitions event) { event.registerLayerDefinition(LIVING_LAYER,()->FishSchoolModel.layer(false));event.registerLayerDefinition(METAL_LAYER,()->FishSchoolModel.layer(true)); }
         @SubscribeEvent public static void renderer(EntityRenderersEvent.RegisterRenderers event) { event.registerEntityRenderer(FishSwords.school(),FishSchoolRenderer::new); }
     }
 }

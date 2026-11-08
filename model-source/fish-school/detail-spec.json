@@ -1,0 +1,2094 @@
+{
+  "texture_size": 512,
+  "density": 8,
+  "parts": [
+    {
+      "name": "streamlined_core",
+      "center": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        2.9,
+        3.9,
+        6.2
+      ],
+      "material": "scales",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "both",
+      "uv": [
+        2,
+        2
+      ],
+      "uv_size": [
+        148,
+        83
+      ]
+    },
+    {
+      "name": "shoulders",
+      "center": [
+        0,
+        -0.1,
+        2.8
+      ],
+      "size": [
+        3.3,
+        3.8,
+        3.6
+      ],
+      "material": "scales",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "both",
+      "uv": [
+        152,
+        2
+      ],
+      "uv_size": [
+        113,
+        62
+      ]
+    },
+    {
+      "name": "tapered_rear",
+      "center": [
+        0,
+        0,
+        -3.0
+      ],
+      "size": [
+        2.1,
+        2.8,
+        2.5
+      ],
+      "material": "scales",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "both",
+      "uv": [
+        267,
+        2
+      ],
+      "uv_size": [
+        76,
+        45
+      ]
+    },
+    {
+      "name": "belly",
+      "center": [
+        0,
+        1.65,
+        0.2
+      ],
+      "size": [
+        2.5,
+        0.7,
+        5.4
+      ],
+      "material": "belly",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "both",
+      "uv": [
+        345,
+        2
+      ],
+      "uv_size": [
+        129,
+        51
+      ]
+    },
+    {
+      "name": "flank_bevel_-1_-1",
+      "center": [
+        -1.35,
+        -1.4,
+        0.1
+      ],
+      "size": [
+        0.65,
+        1.2,
+        5.8
+      ],
+      "material": "scales",
+      "rotation": [
+        0,
+        0,
+        -22.5
+      ],
+      "tail": false,
+      "variants": "both",
+      "uv": [
+        2,
+        87
+      ],
+      "uv_size": [
+        106,
+        58
+      ]
+    },
+    {
+      "name": "flank_bevel_-1_1",
+      "center": [
+        -1.35,
+        1.4,
+        0.1
+      ],
+      "size": [
+        0.65,
+        1.2,
+        5.8
+      ],
+      "material": "scales",
+      "rotation": [
+        0,
+        0,
+        22.5
+      ],
+      "tail": false,
+      "variants": "both",
+      "uv": [
+        110,
+        87
+      ],
+      "uv_size": [
+        106,
+        58
+      ]
+    },
+    {
+      "name": "flank_bevel_1_-1",
+      "center": [
+        1.35,
+        -1.4,
+        0.1
+      ],
+      "size": [
+        0.65,
+        1.2,
+        5.8
+      ],
+      "material": "scales",
+      "rotation": [
+        0,
+        0,
+        22.5
+      ],
+      "tail": false,
+      "variants": "both",
+      "uv": [
+        218,
+        87
+      ],
+      "uv_size": [
+        106,
+        58
+      ]
+    },
+    {
+      "name": "flank_bevel_1_1",
+      "center": [
+        1.35,
+        1.4,
+        0.1
+      ],
+      "size": [
+        0.65,
+        1.2,
+        5.8
+      ],
+      "material": "scales",
+      "rotation": [
+        0,
+        0,
+        -22.5
+      ],
+      "tail": false,
+      "variants": "both",
+      "uv": [
+        326,
+        87
+      ],
+      "uv_size": [
+        106,
+        58
+      ]
+    },
+    {
+      "name": "cheeks",
+      "center": [
+        0,
+        -0.15,
+        4.65
+      ],
+      "size": [
+        2.9,
+        3.15,
+        2.5
+      ],
+      "material": "head",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "both",
+      "uv": [
+        2,
+        147
+      ],
+      "uv_size": [
+        89,
+        48
+      ]
+    },
+    {
+      "name": "upper_snout",
+      "center": [
+        0,
+        -0.25,
+        6.1
+      ],
+      "size": [
+        2.3,
+        2.35,
+        1.5
+      ],
+      "material": "head",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "both",
+      "uv": [
+        93,
+        147
+      ],
+      "uv_size": [
+        63,
+        33
+      ]
+    },
+    {
+      "name": "snout_bevel",
+      "center": [
+        0,
+        -0.25,
+        6.85
+      ],
+      "size": [
+        1.65,
+        1.85,
+        1.65
+      ],
+      "material": "head",
+      "rotation": [
+        0,
+        45,
+        0
+      ],
+      "tail": false,
+      "variants": "both",
+      "uv": [
+        158,
+        147
+      ],
+      "uv_size": [
+        55,
+        30
+      ]
+    },
+    {
+      "name": "lower_jaw",
+      "center": [
+        0,
+        1.0,
+        5.85
+      ],
+      "size": [
+        2.1,
+        0.45,
+        2.2
+      ],
+      "material": "belly",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "both",
+      "uv": [
+        215,
+        147
+      ],
+      "uv_size": [
+        71,
+        24
+      ]
+    },
+    {
+      "name": "mouth_-1",
+      "center": [
+        -1.17,
+        0.55,
+        6.1
+      ],
+      "size": [
+        0.08,
+        0.12,
+        1.7
+      ],
+      "material": "mouth",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "both",
+      "uv": [
+        288,
+        147
+      ],
+      "uv_size": [
+        31,
+        17
+      ]
+    },
+    {
+      "name": "gill_cover_-1",
+      "center": [
+        -1.55,
+        0.05,
+        3.7
+      ],
+      "size": [
+        0.35,
+        2.8,
+        1.4
+      ],
+      "material": "head",
+      "rotation": [
+        -8,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "both",
+      "uv": [
+        321,
+        147
+      ],
+      "uv_size": [
+        30,
+        36
+      ]
+    },
+    {
+      "name": "gill_slit_-1_0",
+      "center": [
+        -1.765,
+        0.15,
+        3.3
+      ],
+      "size": [
+        0.08,
+        1.85,
+        0.1
+      ],
+      "material": "gill",
+      "rotation": [
+        -12,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "both",
+      "uv": [
+        353,
+        147
+      ],
+      "uv_size": [
+        5,
+        18
+      ]
+    },
+    {
+      "name": "gill_slit_-1_1",
+      "center": [
+        -1.765,
+        0.15,
+        3.63
+      ],
+      "size": [
+        0.08,
+        1.85,
+        0.1
+      ],
+      "material": "gill",
+      "rotation": [
+        -12,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "both",
+      "uv": [
+        360,
+        147
+      ],
+      "uv_size": [
+        5,
+        18
+      ]
+    },
+    {
+      "name": "gill_slit_-1_2",
+      "center": [
+        -1.765,
+        0.15,
+        3.96
+      ],
+      "size": [
+        0.08,
+        1.85,
+        0.1
+      ],
+      "material": "gill",
+      "rotation": [
+        -12,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "both",
+      "uv": [
+        367,
+        147
+      ],
+      "uv_size": [
+        5,
+        18
+      ]
+    },
+    {
+      "name": "pectoral_-1",
+      "center": [
+        -1.9,
+        1.0,
+        1.8
+      ],
+      "size": [
+        0.4,
+        2.6,
+        2.2
+      ],
+      "material": "fin",
+      "rotation": [
+        0,
+        -12,
+        20
+      ],
+      "tail": false,
+      "variants": "both",
+      "uv": [
+        374,
+        147
+      ],
+      "uv_size": [
+        44,
+        41
+      ]
+    },
+    {
+      "name": "pelvic_-1",
+      "center": [
+        -0.8,
+        2.1,
+        -1.3
+      ],
+      "size": [
+        0.25,
+        1.7,
+        1.9
+      ],
+      "material": "fin",
+      "rotation": [
+        -15,
+        0,
+        -15
+      ],
+      "tail": false,
+      "variants": "both",
+      "uv": [
+        420,
+        147
+      ],
+      "uv_size": [
+        37,
+        31
+      ]
+    },
+    {
+      "name": "eye_socket_-1",
+      "center": [
+        -1.55,
+        -0.6,
+        5.05
+      ],
+      "size": [
+        0.32,
+        1.7,
+        1.7
+      ],
+      "material": "socket",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "living",
+      "uv": [
+        459,
+        147
+      ],
+      "uv_size": [
+        35,
+        30
+      ]
+    },
+    {
+      "name": "eye_white_-1",
+      "center": [
+        -1.77,
+        -0.6,
+        5.05
+      ],
+      "size": [
+        0.22,
+        1.4,
+        1.4
+      ],
+      "material": "white",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "living",
+      "uv": [
+        2,
+        197
+      ],
+      "uv_size": [
+        28,
+        25
+      ]
+    },
+    {
+      "name": "eye_pupil_-1",
+      "center": [
+        -1.91,
+        -0.55,
+        5.28
+      ],
+      "size": [
+        0.12,
+        0.9,
+        0.82
+      ],
+      "material": "pupil",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "living",
+      "uv": [
+        32,
+        197
+      ],
+      "uv_size": [
+        18,
+        16
+      ]
+    },
+    {
+      "name": "eye_glint_-1",
+      "center": [
+        -2.0,
+        -0.85,
+        5.5
+      ],
+      "size": [
+        0.08,
+        0.27,
+        0.27
+      ],
+      "material": "white",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "living",
+      "uv": [
+        52,
+        197
+      ],
+      "uv_size": [
+        8,
+        7
+      ]
+    },
+    {
+      "name": "eye_bezel_-1",
+      "center": [
+        -1.63,
+        -0.6,
+        5.05
+      ],
+      "size": [
+        0.38,
+        1.4,
+        1.4
+      ],
+      "material": "gold",
+      "rotation": [
+        45,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "metal",
+      "uv": [
+        62,
+        197
+      ],
+      "uv_size": [
+        31,
+        25
+      ]
+    },
+    {
+      "name": "eye_recess_-1",
+      "center": [
+        -1.86,
+        -0.6,
+        5.05
+      ],
+      "size": [
+        0.13,
+        1.12,
+        1.12
+      ],
+      "material": "socket",
+      "rotation": [
+        45,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "metal",
+      "uv": [
+        95,
+        197
+      ],
+      "uv_size": [
+        22,
+        20
+      ]
+    },
+    {
+      "name": "eye_crystal_-1",
+      "center": [
+        -1.97,
+        -0.6,
+        5.05
+      ],
+      "size": [
+        0.17,
+        0.83,
+        0.83
+      ],
+      "material": "gem",
+      "rotation": [
+        45,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "metal",
+      "uv": [
+        119,
+        197
+      ],
+      "uv_size": [
+        18,
+        16
+      ]
+    },
+    {
+      "name": "crystal_glint_-1",
+      "center": [
+        -2.08,
+        -0.85,
+        5.12
+      ],
+      "size": [
+        0.09,
+        0.25,
+        0.35
+      ],
+      "material": "white",
+      "rotation": [
+        45,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "metal",
+      "uv": [
+        139,
+        197
+      ],
+      "uv_size": [
+        10,
+        7
+      ]
+    },
+    {
+      "name": "armor_-1_0",
+      "center": [
+        -1.62,
+        -0.05,
+        1.7
+      ],
+      "size": [
+        0.23,
+        2.8,
+        1.15
+      ],
+      "material": "armor",
+      "rotation": [
+        -4,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "metal",
+      "uv": [
+        151,
+        197
+      ],
+      "uv_size": [
+        25,
+        34
+      ]
+    },
+    {
+      "name": "armor_rivet_-1_0",
+      "center": [
+        -1.78,
+        -0.9,
+        1.9
+      ],
+      "size": [
+        0.13,
+        0.22,
+        0.22
+      ],
+      "material": "gold",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "metal",
+      "uv": [
+        178,
+        197
+      ],
+      "uv_size": [
+        8,
+        6
+      ]
+    },
+    {
+      "name": "armor_-1_1",
+      "center": [
+        -1.62,
+        -0.05,
+        0.5
+      ],
+      "size": [
+        0.23,
+        2.8,
+        1.15
+      ],
+      "material": "armor",
+      "rotation": [
+        -4,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "metal",
+      "uv": [
+        188,
+        197
+      ],
+      "uv_size": [
+        25,
+        34
+      ]
+    },
+    {
+      "name": "armor_rivet_-1_1",
+      "center": [
+        -1.78,
+        -0.9,
+        0.7
+      ],
+      "size": [
+        0.13,
+        0.22,
+        0.22
+      ],
+      "material": "gold",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "metal",
+      "uv": [
+        215,
+        197
+      ],
+      "uv_size": [
+        8,
+        6
+      ]
+    },
+    {
+      "name": "armor_-1_2",
+      "center": [
+        -1.62,
+        -0.05,
+        -0.7
+      ],
+      "size": [
+        0.23,
+        2.8,
+        1.15
+      ],
+      "material": "armor",
+      "rotation": [
+        -4,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "metal",
+      "uv": [
+        225,
+        197
+      ],
+      "uv_size": [
+        25,
+        34
+      ]
+    },
+    {
+      "name": "armor_rivet_-1_2",
+      "center": [
+        -1.78,
+        -0.9,
+        -0.5
+      ],
+      "size": [
+        0.13,
+        0.22,
+        0.22
+      ],
+      "material": "gold",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "metal",
+      "uv": [
+        252,
+        197
+      ],
+      "uv_size": [
+        8,
+        6
+      ]
+    },
+    {
+      "name": "armor_-1_3",
+      "center": [
+        -1.62,
+        -0.05,
+        -1.8999999999999997
+      ],
+      "size": [
+        0.23,
+        2.8,
+        1.15
+      ],
+      "material": "armor",
+      "rotation": [
+        -4,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "metal",
+      "uv": [
+        262,
+        197
+      ],
+      "uv_size": [
+        25,
+        34
+      ]
+    },
+    {
+      "name": "armor_rivet_-1_3",
+      "center": [
+        -1.78,
+        -0.9,
+        -1.6999999999999997
+      ],
+      "size": [
+        0.13,
+        0.22,
+        0.22
+      ],
+      "material": "gold",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "metal",
+      "uv": [
+        289,
+        197
+      ],
+      "uv_size": [
+        8,
+        6
+      ]
+    },
+    {
+      "name": "operculum_rim_-1",
+      "center": [
+        -1.76,
+        -1.15,
+        3.85
+      ],
+      "size": [
+        0.12,
+        0.18,
+        1.4
+      ],
+      "material": "gold",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "metal",
+      "uv": [
+        299,
+        197
+      ],
+      "uv_size": [
+        27,
+        15
+      ]
+    },
+    {
+      "name": "mouth_1",
+      "center": [
+        1.17,
+        0.55,
+        6.1
+      ],
+      "size": [
+        0.08,
+        0.12,
+        1.7
+      ],
+      "material": "mouth",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "both",
+      "uv": [
+        328,
+        197
+      ],
+      "uv_size": [
+        31,
+        17
+      ]
+    },
+    {
+      "name": "gill_cover_1",
+      "center": [
+        1.55,
+        0.05,
+        3.7
+      ],
+      "size": [
+        0.35,
+        2.8,
+        1.4
+      ],
+      "material": "head",
+      "rotation": [
+        8,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "both",
+      "uv": [
+        361,
+        197
+      ],
+      "uv_size": [
+        30,
+        36
+      ]
+    },
+    {
+      "name": "gill_slit_1_0",
+      "center": [
+        1.765,
+        0.15,
+        3.3
+      ],
+      "size": [
+        0.08,
+        1.85,
+        0.1
+      ],
+      "material": "gill",
+      "rotation": [
+        12,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "both",
+      "uv": [
+        393,
+        197
+      ],
+      "uv_size": [
+        5,
+        18
+      ]
+    },
+    {
+      "name": "gill_slit_1_1",
+      "center": [
+        1.765,
+        0.15,
+        3.63
+      ],
+      "size": [
+        0.08,
+        1.85,
+        0.1
+      ],
+      "material": "gill",
+      "rotation": [
+        12,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "both",
+      "uv": [
+        400,
+        197
+      ],
+      "uv_size": [
+        5,
+        18
+      ]
+    },
+    {
+      "name": "gill_slit_1_2",
+      "center": [
+        1.765,
+        0.15,
+        3.96
+      ],
+      "size": [
+        0.08,
+        1.85,
+        0.1
+      ],
+      "material": "gill",
+      "rotation": [
+        12,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "both",
+      "uv": [
+        407,
+        197
+      ],
+      "uv_size": [
+        5,
+        18
+      ]
+    },
+    {
+      "name": "pectoral_1",
+      "center": [
+        1.9,
+        1.0,
+        1.8
+      ],
+      "size": [
+        0.4,
+        2.6,
+        2.2
+      ],
+      "material": "fin",
+      "rotation": [
+        0,
+        12,
+        -20
+      ],
+      "tail": false,
+      "variants": "both",
+      "uv": [
+        414,
+        197
+      ],
+      "uv_size": [
+        44,
+        41
+      ]
+    },
+    {
+      "name": "pelvic_1",
+      "center": [
+        0.8,
+        2.1,
+        -1.3
+      ],
+      "size": [
+        0.25,
+        1.7,
+        1.9
+      ],
+      "material": "fin",
+      "rotation": [
+        -15,
+        0,
+        15
+      ],
+      "tail": false,
+      "variants": "both",
+      "uv": [
+        460,
+        197
+      ],
+      "uv_size": [
+        37,
+        31
+      ]
+    },
+    {
+      "name": "eye_socket_1",
+      "center": [
+        1.55,
+        -0.6,
+        5.05
+      ],
+      "size": [
+        0.32,
+        1.7,
+        1.7
+      ],
+      "material": "socket",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "living",
+      "uv": [
+        2,
+        240
+      ],
+      "uv_size": [
+        35,
+        30
+      ]
+    },
+    {
+      "name": "eye_white_1",
+      "center": [
+        1.77,
+        -0.6,
+        5.05
+      ],
+      "size": [
+        0.22,
+        1.4,
+        1.4
+      ],
+      "material": "white",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "living",
+      "uv": [
+        39,
+        240
+      ],
+      "uv_size": [
+        28,
+        25
+      ]
+    },
+    {
+      "name": "eye_pupil_1",
+      "center": [
+        1.91,
+        -0.55,
+        5.28
+      ],
+      "size": [
+        0.12,
+        0.9,
+        0.82
+      ],
+      "material": "pupil",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "living",
+      "uv": [
+        69,
+        240
+      ],
+      "uv_size": [
+        18,
+        16
+      ]
+    },
+    {
+      "name": "eye_glint_1",
+      "center": [
+        2.0,
+        -0.85,
+        5.5
+      ],
+      "size": [
+        0.08,
+        0.27,
+        0.27
+      ],
+      "material": "white",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "living",
+      "uv": [
+        89,
+        240
+      ],
+      "uv_size": [
+        8,
+        7
+      ]
+    },
+    {
+      "name": "eye_bezel_1",
+      "center": [
+        1.63,
+        -0.6,
+        5.05
+      ],
+      "size": [
+        0.38,
+        1.4,
+        1.4
+      ],
+      "material": "gold",
+      "rotation": [
+        45,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "metal",
+      "uv": [
+        99,
+        240
+      ],
+      "uv_size": [
+        31,
+        25
+      ]
+    },
+    {
+      "name": "eye_recess_1",
+      "center": [
+        1.86,
+        -0.6,
+        5.05
+      ],
+      "size": [
+        0.13,
+        1.12,
+        1.12
+      ],
+      "material": "socket",
+      "rotation": [
+        45,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "metal",
+      "uv": [
+        132,
+        240
+      ],
+      "uv_size": [
+        22,
+        20
+      ]
+    },
+    {
+      "name": "eye_crystal_1",
+      "center": [
+        1.97,
+        -0.6,
+        5.05
+      ],
+      "size": [
+        0.17,
+        0.83,
+        0.83
+      ],
+      "material": "gem",
+      "rotation": [
+        45,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "metal",
+      "uv": [
+        156,
+        240
+      ],
+      "uv_size": [
+        18,
+        16
+      ]
+    },
+    {
+      "name": "crystal_glint_1",
+      "center": [
+        2.08,
+        -0.85,
+        5.12
+      ],
+      "size": [
+        0.09,
+        0.25,
+        0.35
+      ],
+      "material": "white",
+      "rotation": [
+        45,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "metal",
+      "uv": [
+        176,
+        240
+      ],
+      "uv_size": [
+        10,
+        7
+      ]
+    },
+    {
+      "name": "armor_1_0",
+      "center": [
+        1.62,
+        -0.05,
+        1.7
+      ],
+      "size": [
+        0.23,
+        2.8,
+        1.15
+      ],
+      "material": "armor",
+      "rotation": [
+        4,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "metal",
+      "uv": [
+        188,
+        240
+      ],
+      "uv_size": [
+        25,
+        34
+      ]
+    },
+    {
+      "name": "armor_rivet_1_0",
+      "center": [
+        1.78,
+        -0.9,
+        1.9
+      ],
+      "size": [
+        0.13,
+        0.22,
+        0.22
+      ],
+      "material": "gold",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "metal",
+      "uv": [
+        215,
+        240
+      ],
+      "uv_size": [
+        8,
+        6
+      ]
+    },
+    {
+      "name": "armor_1_1",
+      "center": [
+        1.62,
+        -0.05,
+        0.5
+      ],
+      "size": [
+        0.23,
+        2.8,
+        1.15
+      ],
+      "material": "armor",
+      "rotation": [
+        4,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "metal",
+      "uv": [
+        225,
+        240
+      ],
+      "uv_size": [
+        25,
+        34
+      ]
+    },
+    {
+      "name": "armor_rivet_1_1",
+      "center": [
+        1.78,
+        -0.9,
+        0.7
+      ],
+      "size": [
+        0.13,
+        0.22,
+        0.22
+      ],
+      "material": "gold",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "metal",
+      "uv": [
+        252,
+        240
+      ],
+      "uv_size": [
+        8,
+        6
+      ]
+    },
+    {
+      "name": "armor_1_2",
+      "center": [
+        1.62,
+        -0.05,
+        -0.7
+      ],
+      "size": [
+        0.23,
+        2.8,
+        1.15
+      ],
+      "material": "armor",
+      "rotation": [
+        4,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "metal",
+      "uv": [
+        262,
+        240
+      ],
+      "uv_size": [
+        25,
+        34
+      ]
+    },
+    {
+      "name": "armor_rivet_1_2",
+      "center": [
+        1.78,
+        -0.9,
+        -0.5
+      ],
+      "size": [
+        0.13,
+        0.22,
+        0.22
+      ],
+      "material": "gold",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "metal",
+      "uv": [
+        289,
+        240
+      ],
+      "uv_size": [
+        8,
+        6
+      ]
+    },
+    {
+      "name": "armor_1_3",
+      "center": [
+        1.62,
+        -0.05,
+        -1.8999999999999997
+      ],
+      "size": [
+        0.23,
+        2.8,
+        1.15
+      ],
+      "material": "armor",
+      "rotation": [
+        4,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "metal",
+      "uv": [
+        299,
+        240
+      ],
+      "uv_size": [
+        25,
+        34
+      ]
+    },
+    {
+      "name": "armor_rivet_1_3",
+      "center": [
+        1.78,
+        -0.9,
+        -1.6999999999999997
+      ],
+      "size": [
+        0.13,
+        0.22,
+        0.22
+      ],
+      "material": "gold",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "metal",
+      "uv": [
+        326,
+        240
+      ],
+      "uv_size": [
+        8,
+        6
+      ]
+    },
+    {
+      "name": "operculum_rim_1",
+      "center": [
+        1.76,
+        -1.15,
+        3.85
+      ],
+      "size": [
+        0.12,
+        0.18,
+        1.4
+      ],
+      "material": "gold",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "metal",
+      "uv": [
+        336,
+        240
+      ],
+      "uv_size": [
+        27,
+        15
+      ]
+    },
+    {
+      "name": "dorsal_rear",
+      "center": [
+        0,
+        -2.8,
+        -1.45
+      ],
+      "size": [
+        0.35,
+        2.2,
+        3.6
+      ],
+      "material": "fin",
+      "rotation": [
+        -18,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "both",
+      "uv": [
+        365,
+        240
+      ],
+      "uv_size": [
+        66,
+        49
+      ]
+    },
+    {
+      "name": "dorsal_leading",
+      "center": [
+        0,
+        -2.7,
+        1.2
+      ],
+      "size": [
+        0.38,
+        1.8,
+        1.8
+      ],
+      "material": "fin",
+      "rotation": [
+        22.5,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "both",
+      "uv": [
+        433,
+        240
+      ],
+      "uv_size": [
+        37,
+        31
+      ]
+    },
+    {
+      "name": "dorsal_metal_edge",
+      "center": [
+        0,
+        -3.9,
+        -1.5
+      ],
+      "size": [
+        0.42,
+        0.2,
+        3.2
+      ],
+      "material": "edge",
+      "rotation": [
+        -18,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "metal",
+      "uv": [
+        2,
+        291
+      ],
+      "uv_size": [
+        60,
+        30
+      ]
+    },
+    {
+      "name": "dorsal_copper_tip",
+      "center": [
+        0,
+        -4.1,
+        -2.5
+      ],
+      "size": [
+        0.5,
+        0.35,
+        0.55
+      ],
+      "material": "gold",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tail": false,
+      "variants": "metal",
+      "uv": [
+        64,
+        291
+      ],
+      "uv_size": [
+        19,
+        10
+      ]
+    },
+    {
+      "name": "tail_peduncle",
+      "center": [
+        0,
+        0,
+        -4.5
+      ],
+      "size": [
+        1.3,
+        1.8,
+        2.8
+      ],
+      "material": "scales",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tail": true,
+      "variants": "both",
+      "uv": [
+        85,
+        291
+      ],
+      "uv_size": [
+        68,
+        39
+      ]
+    },
+    {
+      "name": "tail_upper",
+      "center": [
+        0,
+        -1.7,
+        -6.45
+      ],
+      "size": [
+        0.45,
+        2.6,
+        2.6
+      ],
+      "material": "tail",
+      "rotation": [
+        -18,
+        0,
+        0
+      ],
+      "tail": true,
+      "variants": "both",
+      "uv": [
+        155,
+        291
+      ],
+      "uv_size": [
+        51,
+        44
+      ]
+    },
+    {
+      "name": "tail_lower",
+      "center": [
+        0,
+        1.7,
+        -6.45
+      ],
+      "size": [
+        0.45,
+        2.6,
+        2.6
+      ],
+      "material": "tail",
+      "rotation": [
+        18,
+        0,
+        0
+      ],
+      "tail": true,
+      "variants": "both",
+      "uv": [
+        208,
+        291
+      ],
+      "uv_size": [
+        51,
+        44
+      ]
+    },
+    {
+      "name": "tail_upper_tip",
+      "center": [
+        0,
+        -2.7,
+        -7.1
+      ],
+      "size": [
+        0.4,
+        1.5,
+        1.5
+      ],
+      "material": "tail",
+      "rotation": [
+        -28,
+        0,
+        0
+      ],
+      "tail": true,
+      "variants": "both",
+      "uv": [
+        261,
+        291
+      ],
+      "uv_size": [
+        33,
+        26
+      ]
+    },
+    {
+      "name": "tail_lower_tip",
+      "center": [
+        0,
+        2.7,
+        -7.1
+      ],
+      "size": [
+        0.4,
+        1.5,
+        1.5
+      ],
+      "material": "tail",
+      "rotation": [
+        28,
+        0,
+        0
+      ],
+      "tail": true,
+      "variants": "both",
+      "uv": [
+        296,
+        291
+      ],
+      "uv_size": [
+        33,
+        26
+      ]
+    },
+    {
+      "name": "tail_upper_edge",
+      "center": [
+        0,
+        -3.2,
+        -7.2
+      ],
+      "size": [
+        0.5,
+        0.2,
+        1.5
+      ],
+      "material": "edge",
+      "rotation": [
+        -28,
+        0,
+        0
+      ],
+      "tail": true,
+      "variants": "metal",
+      "uv": [
+        331,
+        291
+      ],
+      "uv_size": [
+        34,
+        16
+      ]
+    },
+    {
+      "name": "tail_lower_edge",
+      "center": [
+        0,
+        3.2,
+        -7.2
+      ],
+      "size": [
+        0.5,
+        0.2,
+        1.5
+      ],
+      "material": "edge",
+      "rotation": [
+        28,
+        0,
+        0
+      ],
+      "tail": true,
+      "variants": "metal",
+      "uv": [
+        367,
+        291
+      ],
+      "uv_size": [
+        34,
+        16
+      ]
+    },
+    {
+      "name": "tail_socket",
+      "center": [
+        0,
+        0,
+        -5.2
+      ],
+      "size": [
+        1.4,
+        1.95,
+        0.45
+      ],
+      "material": "gold",
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "tail": true,
+      "variants": "metal",
+      "uv": [
+        403,
+        291
+      ],
+      "uv_size": [
+        32,
+        22
+      ]
+    }
+  ]
+}
