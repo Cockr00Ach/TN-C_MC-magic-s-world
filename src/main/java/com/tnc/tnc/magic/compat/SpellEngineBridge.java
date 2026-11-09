@@ -170,6 +170,32 @@ public final class SpellEngineBridge {
     }
 
     /**
+     * 兜底对齐：把玩家<b>背包里现有的</b>法杖立刻对齐到魔法石里的已解锁集合。
+     *
+     * <h2>为什么需要这条</h2>
+     * {@link #ensureWand} 只在"登录 / 学 / 忘 / 铸杖 / 命令"这些时刻被调用，
+     * 它当时能看到的只有<b>那一刻在背包里</b>的法杖。所以：
+     * <ul>
+     *   <li>从箱子里拿出来的、别人给的、跨维度带回来的法杖 —— 从来没被写过 container，
+     *       拿在手上就是"空的"（玩家会以为法术绑在那根杖上 ✗）；</li>
+     *   <li>遗忘之后如果没走那几条路，杖里还留着已经忘掉的法术 ✗。</li>
+     * </ul>
+     * 这条每秒扫一次（见 {@code WandSync}），把这两种情况都抹平：
+     * 拿起任何一根杖，一秒内就是魔法石的内容；忘掉的法术也会在一秒内从杖上掉下去 ✓
+     *
+     * <p>不发杖（{@link #ensureWand} 才会补发，否则创造模式玩家每秒多一根 ✗），
+     * 已经一致就什么都不写（{@code writeIfDifferent}）✓
+     *
+     * @return 这次真改了几根杖
+     */
+    public static int refreshWands(Player player) {
+        if (!enginePresent()) {
+            return 0;
+        }
+        return Impl.refreshWands(player);
+    }
+
+    /**
      * 引擎认识这个法术吗？（防呆闸门用）
      *
      * <p>目录里可以存在"还没写 JSON 的骨架"法术，但那种法术**学得到却放不出** ✗，
@@ -210,24 +236,9 @@ public final class SpellEngineBridge {
                 }
                 // 按目录（= 等级）排序，让槽位顺序稳定可预期
                 List<String> wanted = orderedSpellIds(learned);
-                var fullKnowledge=new java.util.LinkedHashSet<ResourceLocation>(learned);
-                var stone=com.tnc.tnc.magic.MagicStone.getOrNull(player);
-                if(stone!=null)fullKnowledge.addAll(stone.getLearned());
-
-                int found = 0;
-                int rewritten = 0;
-                for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
-                    ItemStack stack = player.getInventory().getItem(slot);
-                    if (stack.isEmpty() || (!stack.is(wandItem)&&!(stack.getItem() instanceof com.tnc.tnc.adventure.ElementWands.Wand))) {
-                        continue;
-                    }
-                    found++;
-                    var supported=stack.getItem() instanceof com.tnc.tnc.adventure.ElementWands.Wand typed
-                            ?orderedSpellIds(com.tnc.tnc.adventure.ElementWands.supported(fullKnowledge,typed.design)):wanted;
-                    if (writeIfDifferent(stack, supported)) {
-                        rewritten++;
-                    }
-                }
+                int[] counts = syncExistingWands(player, learned, wandItem);
+                int found = counts[0];
+                int rewritten = counts[1];
 
                 if (found == 0) {
                     if (!player.isCreative() && !adminGive) {
@@ -248,16 +259,88 @@ public final class SpellEngineBridge {
                 if (rewritten == 0) {
                     return WandResult.ALREADY_COMPLETE;
                 }
-                // 就地改 ItemStack 的 NBT 不一定让客户端收到。
-                // 快捷栏跑在客户端，读的是客户端那份物品 —— 所以这里强制同步一次背包栏位，
-                // 否则"服务端明明写好了、客户端还是看不到法术"。
-                player.inventoryMenu.broadcastChanges();
                 LOGGER.info("TN-C: synced {} magic wand(s) of {} to {} spell(s)",
                         rewritten, player.getName().getString(), wanted.size());
                 return WandResult.UPDATED;
             } catch (Throwable error) {
                 LOGGER.warn("TN-C: failed to sync the magic wand of {}", player.getName().getString(), error);
                 return WandResult.FAILED;
+            }
+        }
+
+        /**
+         * 只对齐<b>背包里已经有的</b>法杖（不补发）。返回 {@code {找到的杖数, 重写的杖数}}。
+         *
+         * <p>补发逻辑留在 {@link #ensureWand} 里：这条路是每秒都会走的，
+         * 要是也能发杖，创造模式玩家会每秒多一根 ✗
+         */
+        static int[] syncExistingWands(Player player, Collection<ResourceLocation> learned, Item wandItem) {
+            List<String> wanted = orderedSpellIds(learned);
+            var fullKnowledge = new java.util.LinkedHashSet<ResourceLocation>(learned);
+            var stone = com.tnc.tnc.magic.MagicStone.getOrNull(player);
+            if (stone != null) {
+                fullKnowledge.addAll(stone.getLearned());
+            }
+            int found = 0;
+            int rewritten = 0;
+            for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
+                ItemStack stack = player.getInventory().getItem(slot);
+                if (stack.isEmpty() || (!stack.is(wandItem) && !(stack.getItem() instanceof com.tnc.tnc.adventure.ElementWands.Wand))) {
+                    continue;
+                }
+                found++;
+                var supported = stack.getItem() instanceof com.tnc.tnc.adventure.ElementWands.Wand typed
+                        ? orderedSpellIds(com.tnc.tnc.adventure.ElementWands.supported(fullKnowledge, typed.design))
+                        : wanted;
+                if (writeIfDifferent(stack, supported)) {
+                    rewritten++;
+                }
+            }
+            if (rewritten > 0) {
+                // 就地改 ItemStack 的 NBT 不一定让客户端收到。
+                // 快捷栏跑在客户端，读的是客户端那份物品 —— 所以这里强制同步一次背包栏位，
+                // 否则"服务端明明写好了、客户端还是看不到法术"。
+                player.inventoryMenu.broadcastChanges();
+            }
+            return new int[]{found, rewritten};
+        }
+
+        /** 拿魔法石里的已解锁集合对齐背包里现有的法杖（不补发）。返回重写了几根。 */
+        static int refreshWands(Player player) {
+            try {
+                Item wandItem = ForgeRegistries.ITEMS.getValue(WAND);
+                if (wandItem == null) {
+                    return 0;
+                }
+                // 读条中不动杖：把法术从杖里抽走会让引擎那条 SpellCast$Process 指向不存在的东西 ✗
+                if (casting(player)) {
+                    return 0;
+                }
+                var stone = com.tnc.tnc.magic.MagicStone.getOrNull(player);
+                // ⚠️ 用 learnedView()（当前这一页的配装），不是 getLearned()（全部已学）：
+                //    其他所有调用点都是 learnedView，这里换成 getLearned 会把"分页配装"覆盖掉 ✗
+                Collection<ResourceLocation> learned = stone != null ? stone.learnedView() : List.of();
+                int rewritten = syncExistingWands(player, learned, wandItem)[1];
+                if (rewritten > 0) {
+                    LOGGER.info("TN-C: refreshed {} wand(s) of {} from the magic stone",
+                            rewritten, player.getName().getString());
+                }
+                return rewritten;
+            } catch (Throwable error) {
+                LOGGER.warn("TN-C: failed to refresh the wands of {}", player.getName().getString(), error);
+                return 0;
+            }
+        }
+
+        /** 玩家现在是不是在读条/引导（只有装了引擎才可能为 true）。 */
+        static boolean casting(Player player) {
+            if (!(player instanceof net.spell_engine.internals.casting.SpellCasterEntity caster)) {
+                return false;
+            }
+            try {
+                return caster.getSpellCastProcess() != null;
+            } catch (Throwable ignored) {
+                return false;                    // 判定失败就别拦，宁可同步
             }
         }
 
