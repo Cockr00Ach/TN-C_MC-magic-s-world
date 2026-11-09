@@ -1,0 +1,82 @@
+[
+  {
+    "project": "01_青铜大剑_成品精度.bbmodel",
+    "texture": "bronze_atlas.png",
+    "bitmap": [
+      512,
+      256
+    ],
+    "embedded_pixels_match": true,
+    "frames": 1
+  },
+  {
+    "project": "02_青铜长枪_成品精度.bbmodel",
+    "texture": "bronze_atlas.png",
+    "bitmap": [
+      512,
+      256
+    ],
+    "embedded_pixels_match": true,
+    "frames": 1
+  },
+  {
+    "project": "03_青铜大刀_成品精度.bbmodel",
+    "texture": "bronze_atlas.png",
+    "bitmap": [
+      512,
+      256
+    ],
+    "embedded_pixels_match": true,
+    "frames": 1
+  },
+  {
+    "project": "04_青铜匕首_成品精度.bbmodel",
+    "texture": "bronze_atlas.png",
+    "bitmap": [
+      512,
+      256
+    ],
+    "embedded_pixels_match": true,
+    "frames": 1
+  },
+  {
+    "project": "05_青铜双刃_成品精度.bbmodel",
+    "texture": "bronze_atlas.png",
+    "bitmap": [
+      512,
+      256
+    ],
+    "embedded_pixels_match": true,
+    "frames": 1
+  },
+  {
+    "project": "06_青铜人偶_铸造精修.bbmodel",
+    "texture": "bronze_puppet.png",
+    "bitmap": [
+      2048,
+      2048
+    ],
+    "embedded_pixels_match": true,
+    "frames": 1
+  },
+  {
+    "project": "07_人偶持械精修预览.bbmodel",
+    "texture": "bronze_puppet.png",
+    "bitmap": [
+      2048,
+      2048
+    ],
+    "embedded_pixels_match": true,
+    "frames": 1
+  },
+  {
+    "project": "07_人偶持械精修预览.bbmodel",
+    "texture": "bronze_atlas.png",
+    "bitmap": [
+      512,
+      256
+    ],
+    "embedded_pixels_match": true,
+    "frames": 1
+  }
+]

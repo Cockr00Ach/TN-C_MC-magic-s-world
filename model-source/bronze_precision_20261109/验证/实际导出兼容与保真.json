@@ -1,0 +1,44 @@
+[
+  {
+    "model": "bronze_greatsword",
+    "export_geometry_uv_material_display_matches": true,
+    "numeric_comparison": "Exact IEEE-754 Float32 bit equality, matching the target Minecraft numeric representation; no geometry tolerance",
+    "elements": 1890,
+    "faces": 10951
+  },
+  {
+    "model": "bronze_spear",
+    "export_geometry_uv_material_display_matches": true,
+    "numeric_comparison": "Exact IEEE-754 Float32 bit equality, matching the target Minecraft numeric representation; no geometry tolerance",
+    "elements": 1200,
+    "faces": 6833
+  },
+  {
+    "model": "bronze_dao",
+    "export_geometry_uv_material_display_matches": true,
+    "numeric_comparison": "Exact IEEE-754 Float32 bit equality, matching the target Minecraft numeric representation; no geometry tolerance",
+    "elements": 1408,
+    "faces": 8230
+  },
+  {
+    "model": "bronze_dagger",
+    "export_geometry_uv_material_display_matches": true,
+    "numeric_comparison": "Exact IEEE-754 Float32 bit equality, matching the target Minecraft numeric representation; no geometry tolerance",
+    "elements": 889,
+    "faces": 5037
+  },
+  {
+    "model": "bronze_twin_main",
+    "export_geometry_uv_material_display_matches": true,
+    "numeric_comparison": "Exact IEEE-754 Float32 bit equality, matching the target Minecraft numeric representation; no geometry tolerance",
+    "elements": 1894,
+    "faces": 11364
+  },
+  {
+    "model": "bronze_twin_off",
+    "export_geometry_uv_material_display_matches": true,
+    "numeric_comparison": "Exact IEEE-754 Float32 bit equality, matching the target Minecraft numeric representation; no geometry tolerance",
+    "elements": 1645,
+    "faces": 9870
+  }
+]

@@ -1,0 +1,100 @@
+{
+  "目标": "武器保留现有成品的轮廓、实厚倒角、铸纹和缠柄；人偶基于现有精细版本继续精修",
+  "武器方法": "定稿保留原成品轮廓、倒角与原始贴图。仅清理已证明完全位于同一刚体不透明实体内部的面；不移动可见顶点和UV。",
+  "预算": {
+    "weapons": "不超过对应现有模型的组件/面数，须做固定视角对照",
+    "puppet_components_max": 1000,
+    "puppet_texture_max": [
+      2048,
+      2048
+    ],
+    "geometry_frames": 1,
+    "materials_per_model": 1
+  },
+  "武器": [
+    {
+      "model": "bronze_greatsword",
+      "baseline_components": 1895,
+      "final_components": 1890,
+      "final_faces": 10951,
+      "removed_internal_faces": 419,
+      "removed_fully_hidden_components": [
+        3,
+        4,
+        170,
+        172,
+        173
+      ],
+      "same_visible_geometry_and_UV": true,
+      "twin_six_faces_required": false
+    },
+    {
+      "model": "bronze_spear",
+      "baseline_components": 1207,
+      "final_components": 1200,
+      "final_faces": 6833,
+      "removed_internal_faces": 409,
+      "removed_fully_hidden_components": [
+        461,
+        462,
+        467,
+        468,
+        479,
+        481,
+        482
+      ],
+      "same_visible_geometry_and_UV": true,
+      "twin_six_faces_required": false
+    },
+    {
+      "model": "bronze_dao",
+      "baseline_components": 1408,
+      "final_components": 1408,
+      "final_faces": 8230,
+      "removed_internal_faces": 218,
+      "removed_fully_hidden_components": [],
+      "same_visible_geometry_and_UV": true,
+      "twin_six_faces_required": false
+    },
+    {
+      "model": "bronze_dagger",
+      "baseline_components": 894,
+      "final_components": 889,
+      "final_faces": 5037,
+      "removed_internal_faces": 327,
+      "removed_fully_hidden_components": [
+        7,
+        8,
+        81,
+        83,
+        84
+      ],
+      "same_visible_geometry_and_UV": true,
+      "twin_six_faces_required": false
+    },
+    {
+      "model": "bronze_twin_main",
+      "baseline_components": 1894,
+      "final_components": 1894,
+      "final_faces": 11364,
+      "removed_internal_faces": 0,
+      "removed_fully_hidden_components": [],
+      "same_visible_geometry_and_UV": true,
+      "twin_six_faces_required": true
+    },
+    {
+      "model": "bronze_twin_off",
+      "baseline_components": 1645,
+      "final_components": 1645,
+      "final_faces": 9870,
+      "removed_internal_faces": 0,
+      "removed_fully_hidden_components": [],
+      "same_visible_geometry_and_UV": true,
+      "twin_six_faces_required": true
+    }
+  ],
+  "客户端": "不启动；未测FPS",
+  "合并候选处理": "精确合并试样在前视与斜视出现局部光栅/纹理差异，未作为定稿。为保留细节，保留原始细分几何。",
+  "高组件成本复审": "原1.20.1 cuboid格式与现有自定义双刃渲染器只接受六面立方体；曲线轮廓、渐薄倒角、实厚铸纹和编织柄为可见立体结构。低组件旋转体块版本已损失细节，UV兼容合并试样也未通过逐像素对照，因此不扩大复杂度，在当前成品的组件上限内保留原结构。运行FPS未测量。",
+  "双刃限制": "现有 BronzeTwinRenderer 对每个 cuboid 直接读取六个面；为兼容其输入，不删减双刃面字段、不引入旋转。"
+}

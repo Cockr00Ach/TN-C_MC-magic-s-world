@@ -1,0 +1,115 @@
+{
+  "weapon_pixel_comparison": {
+    "views": 25,
+    "all_pixel_identical": true
+  },
+  "audits": [
+    {
+      "model": "01_青铜大剑_成品精度.bbmodel",
+      "exit_code": 0,
+      "errors": [],
+      "warnings": 1,
+      "report": "01_青铜大剑_成品精度_bbmodel_审计.json"
+    },
+    {
+      "model": "02_青铜长枪_成品精度.bbmodel",
+      "exit_code": 0,
+      "errors": [],
+      "warnings": 1,
+      "report": "02_青铜长枪_成品精度_bbmodel_审计.json"
+    },
+    {
+      "model": "03_青铜大刀_成品精度.bbmodel",
+      "exit_code": 0,
+      "errors": [],
+      "warnings": 1,
+      "report": "03_青铜大刀_成品精度_bbmodel_审计.json"
+    },
+    {
+      "model": "04_青铜匕首_成品精度.bbmodel",
+      "exit_code": 0,
+      "errors": [],
+      "warnings": 1,
+      "report": "04_青铜匕首_成品精度_bbmodel_审计.json"
+    },
+    {
+      "model": "05_青铜双刃_成品精度.bbmodel",
+      "exit_code": 0,
+      "errors": [],
+      "warnings": 1,
+      "report": "05_青铜双刃_成品精度_bbmodel_审计.json"
+    },
+    {
+      "model": "06_青铜人偶_铸造精修.bbmodel",
+      "exit_code": 0,
+      "errors": [],
+      "warnings": 0,
+      "report": "06_青铜人偶_铸造精修_bbmodel_审计.json"
+    },
+    {
+      "model": "07_人偶持械精修预览.bbmodel",
+      "exit_code": 0,
+      "errors": [],
+      "warnings": 2,
+      "report": "07_人偶持械精修预览_bbmodel_审计.json"
+    },
+    {
+      "model": "bronze_dagger.json",
+      "exit_code": 0,
+      "errors": [],
+      "warnings": 0,
+      "report": "bronze_dagger_json_审计.json"
+    },
+    {
+      "model": "bronze_dao.json",
+      "exit_code": 0,
+      "errors": [],
+      "warnings": 0,
+      "report": "bronze_dao_json_审计.json"
+    },
+    {
+      "model": "bronze_greatsword.json",
+      "exit_code": 0,
+      "errors": [],
+      "warnings": 0,
+      "report": "bronze_greatsword_json_审计.json"
+    },
+    {
+      "model": "bronze_halberd.json",
+      "exit_code": 0,
+      "errors": [],
+      "warnings": 0,
+      "report": "bronze_halberd_json_审计.json"
+    },
+    {
+      "model": "bronze_spear.json",
+      "exit_code": 0,
+      "errors": [],
+      "warnings": 0,
+      "report": "bronze_spear_json_审计.json"
+    },
+    {
+      "model": "bronze_twin_main.json",
+      "exit_code": 0,
+      "errors": [],
+      "warnings": 0,
+      "report": "bronze_twin_main_json_审计.json"
+    },
+    {
+      "model": "bronze_twin_off.json",
+      "exit_code": 0,
+      "errors": [],
+      "warnings": 0,
+      "report": "bronze_twin_off_json_审计.json"
+    }
+  ],
+  "game_started": false,
+  "game_installed": false,
+  "client_fps": "未测量",
+  "runtime_note": "双刃保持原有轴对齐六面数据；人偶使用现有原生 Humanoid 数据格式。持械场景为通用展示模型，武器合并预览网格不进入游戏运行数据。",
+  "limitations": [
+    "java-legacy 审计仅作共享结构预检，不是完整 1.20.1 schema 验证器",
+    "持械预览的网格由额外结构检查及 Blockbench 重开检查验证；通用审计脚本不证明任意网格运行兼容",
+    "未测试客户端视觉、光影、动作或FPS"
+  ]
+}

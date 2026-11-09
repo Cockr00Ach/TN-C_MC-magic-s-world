@@ -1,0 +1,79 @@
+[
+  {
+    "project": "01_青铜大剑_成品精度.bbmodel",
+    "cubes": 1890,
+    "meshes": 0,
+    "cube_faces": 10951,
+    "mesh_vertices": 0,
+    "mesh_faces": 0,
+    "textures": 1,
+    "draw_calls": "未测量",
+    "minecraft_fps": "未测量"
+  },
+  {
+    "project": "02_青铜长枪_成品精度.bbmodel",
+    "cubes": 1200,
+    "meshes": 0,
+    "cube_faces": 6833,
+    "mesh_vertices": 0,
+    "mesh_faces": 0,
+    "textures": 1,
+    "draw_calls": "未测量",
+    "minecraft_fps": "未测量"
+  },
+  {
+    "project": "03_青铜大刀_成品精度.bbmodel",
+    "cubes": 1408,
+    "meshes": 0,
+    "cube_faces": 8230,
+    "mesh_vertices": 0,
+    "mesh_faces": 0,
+    "textures": 1,
+    "draw_calls": "未测量",
+    "minecraft_fps": "未测量"
+  },
+  {
+    "project": "04_青铜匕首_成品精度.bbmodel",
+    "cubes": 889,
+    "meshes": 0,
+    "cube_faces": 5037,
+    "mesh_vertices": 0,
+    "mesh_faces": 0,
+    "textures": 1,
+    "draw_calls": "未测量",
+    "minecraft_fps": "未测量"
+  },
+  {
+    "project": "05_青铜双刃_成品精度.bbmodel",
+    "cubes": 3539,
+    "meshes": 0,
+    "cube_faces": 21234,
+    "mesh_vertices": 0,
+    "mesh_faces": 0,
+    "textures": 1,
+    "draw_calls": "未测量",
+    "minecraft_fps": "未测量"
+  },
+  {
+    "project": "06_青铜人偶_铸造精修.bbmodel",
+    "cubes": 881,
+    "meshes": 0,
+    "cube_faces": 5286,
+    "mesh_vertices": 0,
+    "mesh_faces": 0,
+    "textures": 1,
+    "draw_calls": "未测量",
+    "minecraft_fps": "未测量"
+  },
+  {
+    "project": "07_人偶持械精修预览.bbmodel",
+    "cubes": 881,
+    "meshes": 2,
+    "cube_faces": 5286,
+    "mesh_vertices": 28312,
+    "mesh_faces": 21234,
+    "textures": 2,
+    "draw_calls": "未测量",
+    "minecraft_fps": "未测量"
+  }
+]

@@ -1,0 +1,52 @@
+[
+  {
+    "uuid": "23c98831-a4a8-069c-90ef-ccb357b10e14",
+    "context": "gui",
+    "cubes": 1890
+  },
+  {
+    "uuid": "23c98831-a4a8-069c-90ef-ccb357b10e14",
+    "context": "thirdperson_righthand",
+    "cubes": 1890
+  },
+  {
+    "uuid": "e7d0b917-b438-61cf-ec06-5cfe34413b2c",
+    "context": "gui",
+    "cubes": 1200
+  },
+  {
+    "uuid": "e7d0b917-b438-61cf-ec06-5cfe34413b2c",
+    "context": "thirdperson_righthand",
+    "cubes": 1200
+  },
+  {
+    "uuid": "313323b9-b819-fe6d-ec42-90100e060e3b",
+    "context": "gui",
+    "cubes": 1408
+  },
+  {
+    "uuid": "313323b9-b819-fe6d-ec42-90100e060e3b",
+    "context": "thirdperson_righthand",
+    "cubes": 1408
+  },
+  {
+    "uuid": "41699638-ed91-1ceb-484c-0646a5c112cd",
+    "context": "gui",
+    "cubes": 889
+  },
+  {
+    "uuid": "41699638-ed91-1ceb-484c-0646a5c112cd",
+    "context": "thirdperson_righthand",
+    "cubes": 889
+  },
+  {
+    "uuid": "7180fbec-d8e5-638d-2e9a-cf090d73a4f1",
+    "context": "gui",
+    "cubes": 3539
+  },
+  {
+    "uuid": "7180fbec-d8e5-638d-2e9a-cf090d73a4f1",
+    "context": "thirdperson_righthand",
+    "cubes": 3539
+  }
+]
