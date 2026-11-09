@@ -1,20 +1,21 @@
 [
   {
     "project": "01_青铜大剑_成品精度.bbmodel",
-    "elements": 1890,
-    "cubes": 1890,
+    "elements": 1891,
+    "cubes": 1891,
     "meshes": 0,
     "geometry_uv_rig_matches": true,
-    "numeric_comparison": "exact Float32 values used by preview and target geometry buffers",
-    "errors": [],
+    "mesh_rotations": [],
+    "numeric_comparison": "exact Float32 values",
     "error_count": 0,
+    "errors": [],
     "textures": [
       {
         "name": "bronze_atlas.png",
         "width": 512,
         "height": 256,
-        "embedded": true,
-        "error": 0
+        "error": 0,
+        "embedded": true
       }
     ]
   },

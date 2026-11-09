@@ -1,9 +1,10 @@
 {
-  "current_scope": "本轮有意增加大刀及匕首的连接套口，当前版本不再声明25视图全部与原成品逐像素一致。其余模型文件未修改。",
+  "current_scope": "当前大剑、大刀及匕首按用户要求增加实体刀根套口；不再声明这些武器当前整图与原成品完全相同。原有部件及UV保留。",
   "all_pixel_identical": false,
   "intentional_changes": [
     "dao socket",
-    "dagger socket"
+    "dagger socket",
+    "greatsword socket"
   ],
   "current_proof": "连接与刃向修复检查.json",
   "historical_before_socket_fix": {
@@ -398,5 +399,6 @@
       "Camera, lights, viewport, frame time and renderer settings must match",
       "Transparent hidden RGB differences are included in strict RGBA comparison"
     ]
-  }
+  },
+  "greatsword_current_proof": "大剑刀根连接检查.json"
 }

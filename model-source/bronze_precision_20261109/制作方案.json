@@ -2,7 +2,7 @@
   "目标": "武器保留现有成品的轮廓、实厚倒角、铸纹和缠柄；人偶基于现有精细版本继续精修",
   "武器方法": "定稿保留原成品轮廓、倒角与原始贴图。仅清理已证明完全位于同一刚体不透明实体内部的面；不移动可见顶点和UV。 本轮按用户要求为大刀和匕首各补一个实体刀根套口，其他原有部件保持不变。",
   "预算": {
-    "weapons": "原成品成本保真；本轮接缝修复仅允许大刀及匕首各增加1个结构套口、6个面，不新增贴图或模型帧",
+    "weapons": "原成品成本保真；本轮接缝修复仅允许大剑、大刀及匕首各增加1个结构套口、6个面，不新增贴图或模型帧",
     "puppet_components_max": 1000,
     "puppet_texture_max": [
       2048,
@@ -15,8 +15,8 @@
     {
       "model": "bronze_greatsword",
       "baseline_components": 1895,
-      "final_components": 1890,
-      "final_faces": 10951,
+      "final_components": 1891,
+      "final_faces": 10957,
       "removed_internal_faces": 419,
       "removed_fully_hidden_components": [
         3,
@@ -25,8 +25,10 @@
         172,
         173
       ],
-      "same_visible_geometry_and_UV": true,
-      "twin_six_faces_required": false
+      "same_visible_geometry_and_UV": false,
+      "twin_six_faces_required": false,
+      "original_elements_UV_unchanged": true,
+      "intentional_addition": "铸造刀根套口"
     },
     {
       "model": "bronze_spear",
@@ -119,5 +121,6 @@
     "方法": "重排原有76个手部部件；不新增几何，复用原UV分配和贴图",
     "结构": "四指沿刀柄轴线排列并弯合，拇指对扣",
     "同步": "第06主工程、第07持械工程、原生Humanoid导出及Java参考"
-  }
+  },
+  "大剑刀根修复": "新增1个实体套口，向下嵌入护手0.20、向上嵌入刀身0.18，原有1890个部件不动；复用原图集。"
 }

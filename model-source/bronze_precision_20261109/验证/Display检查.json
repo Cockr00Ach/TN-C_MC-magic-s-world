@@ -2,12 +2,14 @@
   {
     "uuid": "23c98831-a4a8-069c-90ef-ccb357b10e14",
     "context": "gui",
-    "cubes": 1890
+    "cubes": 1891,
+    "rechecked_after_socket_fix": true
   },
   {
     "uuid": "23c98831-a4a8-069c-90ef-ccb357b10e14",
     "context": "thirdperson_righthand",
-    "cubes": 1890
+    "cubes": 1891,
+    "rechecked_after_socket_fix": true
   },
   {
     "uuid": "e7d0b917-b438-61cf-ec06-5cfe34413b2c",

@@ -130,5 +130,10 @@
     "proof": "手部握持检查.json",
     "native_projects_reopened": 2,
     "structural_audits": 2
+  },
+  "greatsword_socket": {
+    "proof": "大剑刀根连接检查.json",
+    "reopened_projects": 1,
+    "structural_audits": 2
   }
 }

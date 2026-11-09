@@ -1,10 +1,12 @@
 [
   {
     "model": "bronze_greatsword",
-    "export_geometry_uv_material_display_matches": true,
+    "export_geometry_uv_material_display_matches": false,
     "numeric_comparison": "Exact IEEE-754 Float32 bit equality, matching the target Minecraft numeric representation; no geometry tolerance",
-    "elements": 1890,
-    "faces": 10951
+    "elements": 1891,
+    "faces": 10957,
+    "original_geometry_uv_material_display_matches": true,
+    "intentional_addition": "1 structural blade socket"
   },
   {
     "model": "bronze_spear",
