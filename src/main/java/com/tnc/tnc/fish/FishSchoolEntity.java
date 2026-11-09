@@ -42,7 +42,7 @@ public final class FishSchoolEntity extends Entity {
         double yaw=Math.toRadians(facingYaw());return new Vec3(Math.cos(yaw),0,Math.sin(yaw));
     }
     public Vec3 up() { return forward().cross(right()).normalize(); }
-    public Vec3 fish(int lane,double age) { return FishSchoolGeometry.world(position(),forward(),right(),up(),lane,age,metal()); }
+    public Vec3 fish(int lane,double age) { return FishSchoolGeometry.world(position(),forward(),right(),up(),lane,age,metal(),getUUID().hashCode()); }
     public boolean visuallyClear(int lane,double age) {
         Vec3 from=age<1 ? position() : fish(lane,Math.floor(age));
         return wall(from,fish(lane,age))==null;

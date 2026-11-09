@@ -18,17 +18,32 @@ public final class FishSchoolGeometry {
     public static double knockback(boolean metal) { return metal ? 1.25 : .65; }
     public static double progress(double age) { return Math.max(0, Math.min(1, (age-GATHER_TICKS)/TRAVEL_TICKS)); }
     public static Offset offset(int lane, double age, boolean metal) {
+        return offset(lane,age,metal,0);
+    }
+    // Irregular 3D samples, not rows. Lane 1 is central and lane 0 tests the outer corridor.
+    private static final double[] SIDE={-1.12,-.08,.72,-.54,1.13,.31,-.89,.9,-.28,.49,-.7,.1};
+    private static final double[] UP={.08,-.04,.42,-.46,-.13,.11,.51,-.4,.34,-.25,-.21,.57};
+    private static final double[] LAG={.52,.08,1.48,.91,1.1,.65,1.72,.29,1.04,1.89,.21,1.33};
+    public static Offset offset(int lane,double age,boolean metal,int seed) {
         if (lane<0 || lane>=COUNT) throw new IllegalArgumentException("fish lane");
+        double phase=(seed&65535)*.001+lane*2.399;
         double gather=Math.max(.12,Math.min(1,age/GATHER_TICKS));
-        double side=(lane%3-1)*1.22;
-        double up=(lane/3-1.5)*.28;
-        double lag=metal ? Math.abs(side)*.7+(lane/3)*.15 : ((lane*5)%4)*.19;
-        double forward=.4+Math.max(0,progress(age)*(RANGE-RADIUS-.4)-lag);
-        if (!metal) { side+=.05*Math.sin(age*.65+lane); up+=.05*Math.sin(age*.8+lane*1.7); }
-        return new Offset(side*gather,up*gather,forward);
+        double amplitude=metal?.035:.065;
+        double side=SIDE[lane]+amplitude*Math.sin(age*.31+phase);
+        double up=UP[lane]+amplitude*Math.sin(age*.37+phase*1.31);
+        double depth=LAG[lane]+.08*Math.sin(phase);
+        double delay=.5+.65*(1+Math.sin(phase));
+        double travel=Math.max(0,Math.min(1,(age-GATHER_TICKS-delay)/(TRAVEL_TICKS-delay)));
+        // Individual release times and modest speed variation, with monotone forward travel.
+        travel+=.025*Math.sin(Math.PI*travel)*Math.sin(2*Math.PI*travel+phase);
+        double start=.4+.2*depth,end=RANGE-RADIUS-depth;
+        return new Offset(side*gather,up*gather,start+(end-start)*travel);
     }
     public static Vec3 world(Vec3 origin, Vec3 forward, Vec3 right, Vec3 up, int lane, double age, boolean metal) {
-        Offset o=offset(lane,age,metal);
+        return world(origin,forward,right,up,lane,age,metal,0);
+    }
+    public static Vec3 world(Vec3 origin,Vec3 forward,Vec3 right,Vec3 up,int lane,double age,boolean metal,int seed) {
+        Offset o=offset(lane,age,metal,seed);
         return origin.add(right.scale(o.side())).add(up.scale(o.up())).add(forward.scale(o.forward()));
     }
     public static Vec3 halfExtents(Vec3 forward,Vec3 right,Vec3 up) {
