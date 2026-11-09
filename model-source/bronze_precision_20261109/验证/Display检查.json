@@ -22,22 +22,26 @@
   {
     "uuid": "313323b9-b819-fe6d-ec42-90100e060e3b",
     "context": "gui",
-    "cubes": 1408
+    "cubes": 1409,
+    "rechecked_after_socket_fix": true
   },
   {
     "uuid": "313323b9-b819-fe6d-ec42-90100e060e3b",
     "context": "thirdperson_righthand",
-    "cubes": 1408
+    "cubes": 1409,
+    "rechecked_after_socket_fix": true
   },
   {
     "uuid": "41699638-ed91-1ceb-484c-0646a5c112cd",
     "context": "gui",
-    "cubes": 889
+    "cubes": 890,
+    "rechecked_after_socket_fix": true
   },
   {
     "uuid": "41699638-ed91-1ceb-484c-0646a5c112cd",
     "context": "thirdperson_righthand",
-    "cubes": 889
+    "cubes": 890,
+    "rechecked_after_socket_fix": true
   },
   {
     "uuid": "7180fbec-d8e5-638d-2e9a-cf090d73a4f1",

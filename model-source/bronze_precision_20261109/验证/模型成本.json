@@ -23,9 +23,9 @@
   },
   {
     "project": "03_青铜大刀_成品精度.bbmodel",
-    "cubes": 1408,
+    "cubes": 1409,
     "meshes": 0,
-    "cube_faces": 8230,
+    "cube_faces": 8236,
     "mesh_vertices": 0,
     "mesh_faces": 0,
     "textures": 1,
@@ -34,9 +34,9 @@
   },
   {
     "project": "04_青铜匕首_成品精度.bbmodel",
-    "cubes": 889,
+    "cubes": 890,
     "meshes": 0,
-    "cube_faces": 5037,
+    "cube_faces": 5043,
     "mesh_vertices": 0,
     "mesh_faces": 0,
     "textures": 1,

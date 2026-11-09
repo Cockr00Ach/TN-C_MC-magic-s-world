@@ -1,7 +1,9 @@
 {
   "weapon_pixel_comparison": {
-    "views": 25,
-    "all_pixel_identical": true
+    "historical_baseline_views": 25,
+    "historical_all_pixel_identical": true,
+    "current_all_pixel_identical": false,
+    "reason": "User-requested visible blade socket additions on dao and dagger; original elements and UV remain exact."
   },
   "audits": [
     {
@@ -111,5 +113,11 @@
     "java-legacy 审计仅作共享结构预检，不是完整 1.20.1 schema 验证器",
     "持械预览的网格由额外结构检查及 Blockbench 重开检查验证；通用审计脚本不证明任意网格运行兼容",
     "未测试客户端视觉、光影、动作或FPS"
-  ]
+  ],
+  "current_fix": {
+    "proof": "连接与刃向修复检查.json",
+    "changed_projects_reopened": 3,
+    "changed_files_audited": 5,
+    "game_started": false
+  }
 }

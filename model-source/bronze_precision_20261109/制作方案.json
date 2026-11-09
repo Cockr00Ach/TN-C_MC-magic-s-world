@@ -1,8 +1,8 @@
 {
   "目标": "武器保留现有成品的轮廓、实厚倒角、铸纹和缠柄；人偶基于现有精细版本继续精修",
-  "武器方法": "定稿保留原成品轮廓、倒角与原始贴图。仅清理已证明完全位于同一刚体不透明实体内部的面；不移动可见顶点和UV。",
+  "武器方法": "定稿保留原成品轮廓、倒角与原始贴图。仅清理已证明完全位于同一刚体不透明实体内部的面；不移动可见顶点和UV。 本轮按用户要求为大刀和匕首各补一个实体刀根套口，其他原有部件保持不变。",
   "预算": {
-    "weapons": "不超过对应现有模型的组件/面数，须做固定视角对照",
+    "weapons": "原成品成本保真；本轮接缝修复仅允许大刀及匕首各增加1个结构套口、6个面，不新增贴图或模型帧",
     "puppet_components_max": 1000,
     "puppet_texture_max": [
       2048,
@@ -49,18 +49,20 @@
     {
       "model": "bronze_dao",
       "baseline_components": 1408,
-      "final_components": 1408,
-      "final_faces": 8230,
+      "final_components": 1409,
+      "final_faces": 8236,
       "removed_internal_faces": 218,
       "removed_fully_hidden_components": [],
-      "same_visible_geometry_and_UV": true,
-      "twin_six_faces_required": false
+      "same_visible_geometry_and_UV": false,
+      "twin_six_faces_required": false,
+      "original_elements_UV_unchanged": true,
+      "intentional_addition": "铸造刀根套口"
     },
     {
       "model": "bronze_dagger",
       "baseline_components": 894,
-      "final_components": 889,
-      "final_faces": 5037,
+      "final_components": 890,
+      "final_faces": 5043,
       "removed_internal_faces": 327,
       "removed_fully_hidden_components": [
         7,
@@ -69,8 +71,10 @@
         83,
         84
       ],
-      "same_visible_geometry_and_UV": true,
-      "twin_six_faces_required": false
+      "same_visible_geometry_and_UV": false,
+      "twin_six_faces_required": false,
+      "original_elements_UV_unchanged": true,
+      "intentional_addition": "铸造刀根套口"
     },
     {
       "model": "bronze_twin_main",
@@ -95,6 +99,7 @@
   ],
   "客户端": "不启动；未测FPS",
   "合并候选处理": "精确合并试样在前视与斜视出现局部光栅/纹理差异，未作为定稿。为保留细节，保留原始细分几何。",
-  "高组件成本复审": "原1.20.1 cuboid格式与现有自定义双刃渲染器只接受六面立方体；曲线轮廓、渐薄倒角、实厚铸纹和编织柄为可见立体结构。低组件旋转体块版本已损失细节，UV兼容合并试样也未通过逐像素对照，因此不扩大复杂度，在当前成品的组件上限内保留原结构。运行FPS未测量。",
-  "双刃限制": "现有 BronzeTwinRenderer 对每个 cuboid 直接读取六个面；为兼容其输入，不删减双刃面字段、不引入旋转。"
+  "高组件成本复审": "原1.20.1 cuboid格式与现有自定义双刃渲染器只接受六面立方体；曲线轮廓、渐薄倒角、实厚铸纹和编织柄为可见立体结构。低组件旋转体块版本已损失细节，UV兼容合并试样也未通过逐像素对照，因此不扩大复杂度，在当前成品的组件上限内保留原结构。运行FPS未测量。 本轮在保持已有细节的前提下仅增加两个必要连接件。",
+  "双刃限制": "现有 BronzeTwinRenderer 对每个 cuboid 直接读取六个面；为兼容其输入，不删减双刃面字段、不引入旋转。",
+  "本轮修复": "大刀及匕首套口上下实际嵌入护手与刀身；第07人偶的两个持械节点各绕自身刀柄长轴旋转180度，刀刃向下、刀尖向前。"
 }
