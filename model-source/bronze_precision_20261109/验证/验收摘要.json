@@ -119,5 +119,11 @@
     "changed_projects_reopened": 3,
     "changed_files_audited": 5,
     "game_started": false
+  },
+  "pottery_texture": {
+    "proof": "陶纹贴图检查.json",
+    "native_projects_reopened": 2,
+    "structural_audits": 2,
+    "no_added_geometry_or_texture_dimensions": true
   }
 }

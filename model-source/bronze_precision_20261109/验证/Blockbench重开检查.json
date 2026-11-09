@@ -102,16 +102,17 @@
     "cubes": 881,
     "meshes": 0,
     "geometry_uv_rig_matches": true,
-    "numeric_comparison": "exact Float32 values used by preview and target geometry buffers",
-    "errors": [],
+    "mesh_rotations": [],
+    "numeric_comparison": "exact Float32 values",
     "error_count": 0,
+    "errors": [],
     "textures": [
       {
         "name": "bronze_puppet.png",
         "width": 2048,
         "height": 2048,
-        "embedded": true,
-        "error": 0
+        "error": 0,
+        "embedded": true
       }
     ]
   },

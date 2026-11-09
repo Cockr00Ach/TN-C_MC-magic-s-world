@@ -57,7 +57,8 @@
       2048
     ],
     "embedded_pixels_match": true,
-    "frames": 1
+    "frames": 1,
+    "rechecked_after_pottery_paint": true
   },
   {
     "project": "07_人偶持械精修预览.bbmodel",
@@ -67,7 +68,8 @@
       2048
     ],
     "embedded_pixels_match": true,
-    "frames": 1
+    "frames": 1,
+    "rechecked_after_pottery_paint": true
   },
   {
     "project": "07_人偶持械精修预览.bbmodel",

@@ -7,7 +7,6 @@
     2048
   ],
   "texels_per_model_unit": 8,
-  "original_texture_pixels_preserved_outside_new_UV_and_eye_inlays": true,
   "added_names": [
     "refined_brow_end_L",
     "refined_temple_upper_L",
@@ -110,5 +109,7 @@
     "refined_toe_corner_R1"
   ],
   "changed_eye_inlays": 2,
-  "runtime": "原生 Humanoid；保留六肢与 head/hat 枢轴，新增结构固定归属原骨骼"
+  "runtime": "原生 Humanoid；保留六肢与 head/hat 枢轴，新增结构固定归属原骨骼",
+  "before_pottery_original_texture_preservation": true,
+  "later_pottery_paint": "本轮有意重绘部分原甲片像素，范围见陶纹贴图检查.json；几何及UV未变。"
 }

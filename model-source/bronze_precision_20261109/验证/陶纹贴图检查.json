@@ -1,0 +1,66 @@
+{
+  "scope": "在青铜人偶既有甲片上绘制参考陶纹的旋涡与带状弧纹",
+  "method": "Blockbench native Painter texture edit; world-aligned motifs mapped into existing face UV islands",
+  "style": {
+    "locations": [
+      "成对胸甲旋涡",
+      "肩甲回旋弧带",
+      "背甲大卷纹",
+      "护腕",
+      "裙甲",
+      "大腿及护胫"
+    ],
+    "palette": {
+      "red": [
+        151,
+        68,
+        38
+      ],
+      "ochre": [
+        198,
+        157,
+        83
+      ]
+    },
+    "wear": "保留底层铜锈明暗与磨损；脸部不重绘"
+  },
+  "projects": [
+    {
+      "project": "06_青铜人偶_铸造精修.bbmodel",
+      "geometry_UV_rig_and_pose_exactly_unchanged": true,
+      "embedded_PNG_matches_delivered_texture": true,
+      "cubes": 881,
+      "meshes": 0
+    },
+    {
+      "project": "07_人偶持械精修预览.bbmodel",
+      "geometry_UV_rig_and_pose_exactly_unchanged": true,
+      "embedded_PNG_matches_delivered_texture": true,
+      "cubes": 881,
+      "meshes": 2
+    }
+  ],
+  "texture": [
+    2048,
+    2048
+  ],
+  "texels_per_model_unit": 8,
+  "changed_pixels": 9682,
+  "outside_mask_pixels_exactly_unchanged": true,
+  "alpha_exactly_unchanged": true,
+  "opaque_pixels": 4194304,
+  "affected_faces": 239,
+  "runtime_geometry_file_unchanged": true,
+  "cost_delta": {
+    "components": 0,
+    "faces": 0,
+    "textures": 0,
+    "texture_dimensions": 0,
+    "geometry_frames": 0
+  },
+  "reopen_passed": true,
+  "game_started": false,
+  "game_installed": false,
+  "draw_calls": "未测量",
+  "client_FPS": "未测量"
+}
