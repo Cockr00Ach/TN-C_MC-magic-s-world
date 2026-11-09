@@ -1,0 +1,266 @@
+[
+  {
+    "model": "bronze_greatsword",
+    "view": "front",
+    "uuid": "aec2083c-e7c0-c6a0-749b-e192d3a5cb30",
+    "count": 22,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  },
+  {
+    "model": "bronze_greatsword",
+    "view": "back",
+    "uuid": "aec2083c-e7c0-c6a0-749b-e192d3a5cb30",
+    "count": 22,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  },
+  {
+    "model": "bronze_greatsword",
+    "view": "side",
+    "uuid": "aec2083c-e7c0-c6a0-749b-e192d3a5cb30",
+    "count": 22,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  },
+  {
+    "model": "bronze_greatsword",
+    "view": "top",
+    "uuid": "aec2083c-e7c0-c6a0-749b-e192d3a5cb30",
+    "count": 22,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  },
+  {
+    "model": "bronze_greatsword",
+    "view": "hero",
+    "uuid": "aec2083c-e7c0-c6a0-749b-e192d3a5cb30",
+    "count": 22,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  },
+  {
+    "model": "bronze_spear",
+    "view": "front",
+    "uuid": "c2934482-473d-0799-819f-55babddbc600",
+    "count": 14,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  },
+  {
+    "model": "bronze_spear",
+    "view": "back",
+    "uuid": "c2934482-473d-0799-819f-55babddbc600",
+    "count": 14,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  },
+  {
+    "model": "bronze_spear",
+    "view": "side",
+    "uuid": "c2934482-473d-0799-819f-55babddbc600",
+    "count": 14,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  },
+  {
+    "model": "bronze_spear",
+    "view": "top",
+    "uuid": "c2934482-473d-0799-819f-55babddbc600",
+    "count": 14,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  },
+  {
+    "model": "bronze_spear",
+    "view": "hero",
+    "uuid": "c2934482-473d-0799-819f-55babddbc600",
+    "count": 14,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  },
+  {
+    "model": "bronze_dao",
+    "view": "front",
+    "uuid": "660991aa-bcc5-e127-5537-a021d53d8fc0",
+    "count": 20,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  },
+  {
+    "model": "bronze_dao",
+    "view": "back",
+    "uuid": "660991aa-bcc5-e127-5537-a021d53d8fc0",
+    "count": 20,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  },
+  {
+    "model": "bronze_dao",
+    "view": "side",
+    "uuid": "660991aa-bcc5-e127-5537-a021d53d8fc0",
+    "count": 20,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  },
+  {
+    "model": "bronze_dao",
+    "view": "top",
+    "uuid": "660991aa-bcc5-e127-5537-a021d53d8fc0",
+    "count": 20,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  },
+  {
+    "model": "bronze_dao",
+    "view": "hero",
+    "uuid": "660991aa-bcc5-e127-5537-a021d53d8fc0",
+    "count": 20,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  },
+  {
+    "model": "bronze_dagger",
+    "view": "front",
+    "uuid": "cccaa1fa-824a-9776-07cc-857511d1b013",
+    "count": 16,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  },
+  {
+    "model": "bronze_dagger",
+    "view": "back",
+    "uuid": "cccaa1fa-824a-9776-07cc-857511d1b013",
+    "count": 16,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  },
+  {
+    "model": "bronze_dagger",
+    "view": "side",
+    "uuid": "cccaa1fa-824a-9776-07cc-857511d1b013",
+    "count": 16,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  },
+  {
+    "model": "bronze_dagger",
+    "view": "top",
+    "uuid": "cccaa1fa-824a-9776-07cc-857511d1b013",
+    "count": 16,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  },
+  {
+    "model": "bronze_dagger",
+    "view": "hero",
+    "uuid": "cccaa1fa-824a-9776-07cc-857511d1b013",
+    "count": 16,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  },
+  {
+    "model": "bronze_twins",
+    "view": "front",
+    "uuid": "db883bb0-4251-a13c-ad30-6f51bc64c8f8",
+    "count": 43,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  },
+  {
+    "model": "bronze_twins",
+    "view": "back",
+    "uuid": "db883bb0-4251-a13c-ad30-6f51bc64c8f8",
+    "count": 43,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  },
+  {
+    "model": "bronze_twins",
+    "view": "side",
+    "uuid": "db883bb0-4251-a13c-ad30-6f51bc64c8f8",
+    "count": 43,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  },
+  {
+    "model": "bronze_twins",
+    "view": "top",
+    "uuid": "db883bb0-4251-a13c-ad30-6f51bc64c8f8",
+    "count": 43,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  },
+  {
+    "model": "bronze_twins",
+    "view": "hero",
+    "uuid": "db883bb0-4251-a13c-ad30-6f51bc64c8f8",
+    "count": 43,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  },
+  {
+    "model": "bronze_puppet",
+    "view": "front",
+    "uuid": "58902593-b1bf-04ae-3543-31ad593ce6b2",
+    "count": 83,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  },
+  {
+    "model": "bronze_puppet",
+    "view": "back",
+    "uuid": "58902593-b1bf-04ae-3543-31ad593ce6b2",
+    "count": 83,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  },
+  {
+    "model": "bronze_puppet",
+    "view": "side",
+    "uuid": "58902593-b1bf-04ae-3543-31ad593ce6b2",
+    "count": 83,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  },
+  {
+    "model": "bronze_puppet",
+    "view": "top",
+    "uuid": "58902593-b1bf-04ae-3543-31ad593ce6b2",
+    "count": 83,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  },
+  {
+    "model": "bronze_puppet",
+    "view": "hero",
+    "uuid": "58902593-b1bf-04ae-3543-31ad593ce6b2",
+    "count": 83,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  },
+  {
+    "model": "bronze_puppet",
+    "view": "head",
+    "uuid": "58902593-b1bf-04ae-3543-31ad593ce6b2",
+    "count": 83,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  },
+  {
+    "model": "bronze_puppet_equipped",
+    "view": "hero",
+    "uuid": "02eec314-9a36-be55-b4bf-49d0af4dca5d",
+    "count": 126,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  },
+  {
+    "model": "bronze_puppet_equipped",
+    "view": "side",
+    "uuid": "02eec314-9a36-be55-b4bf-49d0af4dca5d",
+    "count": 126,
+    "atomic_project_binding": true,
+    "gizmos_hidden": true
+  }
+]

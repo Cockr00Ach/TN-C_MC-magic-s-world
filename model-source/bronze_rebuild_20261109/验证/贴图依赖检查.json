@@ -1,0 +1,65 @@
+[
+  {
+    "model": "01_青铜大剑",
+    "embedded_matches_png": true,
+    "dimensions": [
+      512,
+      512
+    ],
+    "frames": 1
+  },
+  {
+    "model": "02_青铜长枪",
+    "embedded_matches_png": true,
+    "dimensions": [
+      512,
+      512
+    ],
+    "frames": 1
+  },
+  {
+    "model": "03_青铜大刀",
+    "embedded_matches_png": true,
+    "dimensions": [
+      512,
+      512
+    ],
+    "frames": 1
+  },
+  {
+    "model": "04_青铜匕首",
+    "embedded_matches_png": true,
+    "dimensions": [
+      512,
+      512
+    ],
+    "frames": 1
+  },
+  {
+    "model": "05_青铜双刃",
+    "embedded_matches_png": true,
+    "dimensions": [
+      512,
+      512
+    ],
+    "frames": 1
+  },
+  {
+    "model": "06_青铜人偶",
+    "embedded_matches_png": true,
+    "dimensions": [
+      512,
+      512
+    ],
+    "frames": 1
+  },
+  {
+    "model": "07_人偶持械预览",
+    "embedded_matches_png": true,
+    "dimensions": [
+      512,
+      512
+    ],
+    "frames": 1
+  }
+]
