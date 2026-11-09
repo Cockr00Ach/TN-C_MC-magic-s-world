@@ -111,5 +111,6 @@
   "changed_eye_inlays": 2,
   "runtime": "原生 Humanoid；保留六肢与 head/hat 枢轴，新增结构固定归属原骨骼",
   "before_pottery_original_texture_preservation": true,
-  "later_pottery_paint": "本轮有意重绘部分原甲片像素，范围见陶纹贴图检查.json；几何及UV未变。"
+  "later_pottery_paint": "本轮有意重绘部分原甲片像素，范围见陶纹贴图检查.json；几何及UV未变。",
+  "subsequent_hand_geometry_edit": "本轮另行修正双手握持几何与对应手部UV，陶纹像素及其余结构不变；当前范围见手部握持检查.json。"
 }

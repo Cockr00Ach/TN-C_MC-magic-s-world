@@ -62,5 +62,6 @@
   "game_started": false,
   "game_installed": false,
   "draw_calls": "未测量",
-  "client_FPS": "未测量"
+  "client_FPS": "未测量",
+  "subsequent_hand_geometry_edit": "本轮另行修正双手握持几何与对应手部UV，陶纹像素及其余结构不变；当前范围见手部握持检查.json。"
 }

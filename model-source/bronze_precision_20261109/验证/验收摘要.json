@@ -125,5 +125,10 @@
     "native_projects_reopened": 2,
     "structural_audits": 2,
     "no_added_geometry_or_texture_dimensions": true
+  },
+  "hand_grip": {
+    "proof": "手部握持检查.json",
+    "native_projects_reopened": 2,
+    "structural_audits": 2
   }
 }

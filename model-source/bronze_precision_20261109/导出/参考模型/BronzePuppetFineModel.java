@@ -636,49 +636,28 @@ public class BronzePuppetFineModel<T extends Entity> extends EntityModel<T> {
 		.texOffs(191, 143).addBox(-1.685F, 9.65F, -1.85F, 3.37F, 0.25F, 3.7F, new CubeDeformation(0.0F))
 		.texOffs(208, 143).addBox(-1.75F, 9.9F, -1.85F, 3.5F, 0.25F, 3.7F, new CubeDeformation(0.0F))
 		.texOffs(225, 143).addBox(-1.685F, 10.15F, -1.85F, 3.37F, 0.25F, 3.7F, new CubeDeformation(0.0F))
-		.texOffs(242, 135).addBox(-1.6086F, 10.05F, -1.72F, 3.2172F, 0.3625F, 3.25F, new CubeDeformation(0.0F))
-		.texOffs(154, 150).addBox(-1.7028F, 10.4125F, -1.72F, 3.4057F, 0.3625F, 3.25F, new CubeDeformation(0.0F))
-		.texOffs(170, 150).addBox(-1.7028F, 10.775F, -1.72F, 3.4057F, 0.3625F, 3.25F, new CubeDeformation(0.0F))
-		.texOffs(242, 143).addBox(-1.6086F, 11.1375F, -1.72F, 3.2172F, 0.3625F, 3.25F, new CubeDeformation(0.0F))
-		.texOffs(116, 170).addBox(0.9872F, 10.9F, -1.78F, 0.5456F, 0.2467F, 0.78F, new CubeDeformation(0.0F))
-		.texOffs(121, 170).addBox(0.93F, 11.1467F, -1.78F, 0.66F, 0.2467F, 0.78F, new CubeDeformation(0.0F))
-		.texOffs(126, 170).addBox(0.9872F, 11.3933F, -1.78F, 0.5456F, 0.2467F, 0.78F, new CubeDeformation(0.0F))
-		.texOffs(106, 183).addBox(1.15F, 11.02F, -1.91F, 0.22F, 0.22F, 0.1F, new CubeDeformation(0.0F))
-		.texOffs(62, 186).addBox(1.1962F, 11.0662F, -1.97F, 0.1276F, 0.1276F, 0.09F, new CubeDeformation(0.0F))
-		.texOffs(131, 170).addBox(0.1672F, 10.9F, -1.78F, 0.5456F, 0.2467F, 0.78F, new CubeDeformation(0.0F))
-		.texOffs(136, 170).addBox(0.11F, 11.1467F, -1.78F, 0.66F, 0.2467F, 0.78F, new CubeDeformation(0.0F))
-		.texOffs(141, 170).addBox(0.1672F, 11.3933F, -1.78F, 0.5456F, 0.2467F, 0.78F, new CubeDeformation(0.0F))
-		.texOffs(109, 183).addBox(0.33F, 11.02F, -1.91F, 0.22F, 0.22F, 0.1F, new CubeDeformation(0.0F))
-		.texOffs(65, 186).addBox(0.3762F, 11.0662F, -1.97F, 0.1276F, 0.1276F, 0.09F, new CubeDeformation(0.0F))
-		.texOffs(146, 170).addBox(-0.6528F, 10.9F, -1.78F, 0.5456F, 0.2467F, 0.78F, new CubeDeformation(0.0F))
-		.texOffs(151, 170).addBox(-0.71F, 11.1467F, -1.78F, 0.66F, 0.2467F, 0.78F, new CubeDeformation(0.0F))
-		.texOffs(156, 170).addBox(-0.6528F, 11.3933F, -1.78F, 0.5456F, 0.2467F, 0.78F, new CubeDeformation(0.0F))
-		.texOffs(112, 183).addBox(-0.49F, 11.02F, -1.91F, 0.22F, 0.22F, 0.1F, new CubeDeformation(0.0F))
-		.texOffs(68, 186).addBox(-0.4438F, 11.0662F, -1.97F, 0.1276F, 0.1276F, 0.09F, new CubeDeformation(0.0F))
-		.texOffs(161, 170).addBox(-1.4728F, 10.9F, -1.78F, 0.5456F, 0.2467F, 0.78F, new CubeDeformation(0.0F))
-		.texOffs(166, 170).addBox(-1.53F, 11.1467F, -1.78F, 0.66F, 0.2467F, 0.78F, new CubeDeformation(0.0F))
-		.texOffs(171, 170).addBox(-1.4728F, 11.3933F, -1.78F, 0.5456F, 0.2467F, 0.78F, new CubeDeformation(0.0F))
-		.texOffs(115, 183).addBox(-1.31F, 11.02F, -1.91F, 0.22F, 0.22F, 0.1F, new CubeDeformation(0.0F))
-		.texOffs(71, 186).addBox(-1.2638F, 11.0662F, -1.97F, 0.1276F, 0.1276F, 0.09F, new CubeDeformation(0.0F))
 		.texOffs(41, 200).addBox(-1.9F, -1.1F, 2.75F, 3.8F, 1.5F, 0.6F, new CubeDeformation(0.0F))
 		.texOffs(240, 203).addBox(-1.9F, -1.1F, -3.26F, 3.8F, 0.5F, 0.5F, new CubeDeformation(0.0F))
 		.texOffs(29, 201).addBox(1.35F, 9.68F, -1.85F, 0.6F, 0.75F, 0.8F, new CubeDeformation(0.0F))
 		.texOffs(141, 201).addBox(-1.95F, 9.68F, -1.85F, 0.6F, 0.75F, 0.8F, new CubeDeformation(0.0F)), PartPose.offset(6.0F, 2.0F, 0.0F));
 
-		PartDefinition refined_thumb_cap_L_116_r1 = right_arm.addOrReplaceChild("refined_thumb_cap_L_116_r1", CubeListBuilder.create().texOffs(251, 58).addBox(-0.29F, -0.3F, -0.14F, 0.58F, 0.6F, 0.28F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(1.48F, 10.85F, -2.06F, 0.0F, 0.2618F, 0.384F));
+		PartDefinition refined_thumb_cap_L_116_r1 = right_arm.addOrReplaceChild("refined_thumb_cap_L_116_r1", CubeListBuilder.create().texOffs(251, 58).addBox(-0.29F, -0.3F, -0.05F, 0.58F, 0.6F, 0.1F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0591F, 9.8751F, -1.35F, 0.0F, 1.5708F, 1.1345F));
 
-		PartDefinition refined_finger_nail_L3_115_r1 = right_arm.addOrReplaceChild("refined_finger_nail_L3_115_r1", CubeListBuilder.create().texOffs(202, 204).addBox(-0.2F, -0.17F, -0.125F, 0.4F, 0.34F, 0.25F, new CubeDeformation(0.0F))
-		.texOffs(198, 204).addBox(0.62F, -0.17F, -0.125F, 0.4F, 0.34F, 0.25F, new CubeDeformation(0.0F))
-		.texOffs(194, 204).addBox(1.44F, -0.17F, -0.125F, 0.4F, 0.34F, 0.25F, new CubeDeformation(0.0F))
-		.texOffs(190, 204).addBox(2.26F, -0.17F, -0.125F, 0.4F, 0.34F, 0.25F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-1.19F, 11.89F, -1.375F, 0.384F, 0.0F, 0.0F));
+		PartDefinition refined_finger_nail_L3_115_r1 = right_arm.addOrReplaceChild("refined_finger_nail_L3_115_r1", CubeListBuilder.create().texOffs(202, 204).addBox(-0.2F, -0.06F, -0.125F, 0.4F, 0.12F, 0.25F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.68F, 10.5F, 1.2F, 0.0F, 1.5708F, -1.5708F));
 
-		PartDefinition refined_knuckle_cap_L3_114_r1 = right_arm.addOrReplaceChild("refined_knuckle_cap_L3_114_r1", CubeListBuilder.create().texOffs(5, 205).addBox(-0.23F, -0.17F, -0.125F, 0.46F, 0.34F, 0.25F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-1.2F, 11.11F, -1.945F, 0.0F, 0.0F, -0.0873F));
+		PartDefinition refined_knuckle_cap_L3_114_r1 = right_arm.addOrReplaceChild("refined_knuckle_cap_L3_114_r1", CubeListBuilder.create().texOffs(5, 205).addBox(-0.23F, -0.17F, -0.125F, 0.46F, 0.34F, 0.25F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.99F, 10.7F, 1.2F, 0.0F, 1.5708F, 0.0F));
 
-		PartDefinition refined_knuckle_cap_L2_112_r1 = right_arm.addOrReplaceChild("refined_knuckle_cap_L2_112_r1", CubeListBuilder.create().texOffs(1, 205).addBox(-0.23F, -0.17F, -0.125F, 0.46F, 0.34F, 0.25F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.38F, 11.11F, -1.945F, 0.0F, 0.0F, -0.0873F));
+		PartDefinition refined_finger_nail_L2_113_r1 = right_arm.addOrReplaceChild("refined_finger_nail_L2_113_r1", CubeListBuilder.create().texOffs(198, 204).addBox(-0.2F, -0.06F, -0.125F, 0.4F, 0.12F, 0.25F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.68F, 10.5F, 0.38F, 0.0F, 1.5708F, -1.5708F));
 
-		PartDefinition refined_knuckle_cap_L1_110_r1 = right_arm.addOrReplaceChild("refined_knuckle_cap_L1_110_r1", CubeListBuilder.create().texOffs(226, 204).addBox(-0.23F, -0.17F, -0.125F, 0.46F, 0.34F, 0.25F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.44F, 11.11F, -1.945F, 0.0F, 0.0F, -0.0873F));
+		PartDefinition refined_knuckle_cap_L2_112_r1 = right_arm.addOrReplaceChild("refined_knuckle_cap_L2_112_r1", CubeListBuilder.create().texOffs(1, 205).addBox(-0.23F, -0.17F, -0.125F, 0.46F, 0.34F, 0.25F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.99F, 10.7F, 0.38F, 0.0F, 1.5708F, 0.0F));
 
-		PartDefinition refined_knuckle_cap_L0_108_r1 = right_arm.addOrReplaceChild("refined_knuckle_cap_L0_108_r1", CubeListBuilder.create().texOffs(222, 204).addBox(-0.23F, -0.17F, -0.125F, 0.46F, 0.34F, 0.25F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(1.26F, 11.11F, -1.945F, 0.0F, 0.0F, -0.0873F));
+		PartDefinition refined_finger_nail_L1_111_r1 = right_arm.addOrReplaceChild("refined_finger_nail_L1_111_r1", CubeListBuilder.create().texOffs(194, 204).addBox(-0.2F, -0.06F, -0.125F, 0.4F, 0.12F, 0.25F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.68F, 10.5F, -0.44F, 0.0F, 1.5708F, -1.5708F));
+
+		PartDefinition refined_knuckle_cap_L1_110_r1 = right_arm.addOrReplaceChild("refined_knuckle_cap_L1_110_r1", CubeListBuilder.create().texOffs(226, 204).addBox(-0.23F, -0.17F, -0.125F, 0.46F, 0.34F, 0.25F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.99F, 10.7F, -0.44F, 0.0F, 1.5708F, 0.0F));
+
+		PartDefinition refined_finger_nail_L0_109_r1 = right_arm.addOrReplaceChild("refined_finger_nail_L0_109_r1", CubeListBuilder.create().texOffs(190, 204).addBox(-0.2F, -0.06F, -0.125F, 0.4F, 0.12F, 0.25F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.68F, 10.5F, -1.26F, 0.0F, 1.5708F, -1.5708F));
+
+		PartDefinition refined_knuckle_cap_L0_108_r1 = right_arm.addOrReplaceChild("refined_knuckle_cap_L0_108_r1", CubeListBuilder.create().texOffs(222, 204).addBox(-0.23F, -0.17F, -0.125F, 0.46F, 0.34F, 0.25F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.99F, 10.7F, -1.26F, 0.0F, 1.5708F, 0.0F));
 
 		PartDefinition refined_bracer_rear_lower_L_105_r1 = right_arm.addOrReplaceChild("refined_bracer_rear_lower_L_105_r1", CubeListBuilder.create().texOffs(121, 201).addBox(-1.75F, -0.6F, -0.225F, 3.5F, 1.2F, 0.45F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 8.55F, 2.595F, 0.0F, 0.0F, 0.0698F));
 
@@ -690,12 +669,60 @@ public class BronzePuppetFineModel<T extends Entity> extends EntityModel<T> {
 
 		PartDefinition refined_shoulder_crown_L_99_r1 = right_arm.addOrReplaceChild("refined_shoulder_crown_L_99_r1", CubeListBuilder.create().texOffs(93, 192).addBox(-0.38F, -1.25F, -2.6F, 0.76F, 2.5F, 5.2F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(2.45F, -0.65F, 0.0F, 0.0F, 0.0F, -0.2094F));
 
-		PartDefinition opposed_thumb_98_r1 = right_arm.addOrReplaceChild("opposed_thumb_98_r1", CubeListBuilder.create().texOffs(109, 156).addBox(-0.35F, -0.8F, -0.45F, 0.7F, 1.6F, 0.9F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(1.48F, 11.14F, -1.63F, 0.0F, 0.2618F, 0.384F));
+		PartDefinition opposed_thumb_98_r1 = right_arm.addOrReplaceChild("opposed_thumb_98_r1", CubeListBuilder.create().texOffs(109, 156).addBox(-0.35F, -0.8F, -0.18F, 0.7F, 1.6F, 0.36F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.15F, 10.07F, -1.35F, 0.0F, 1.5708F, 1.1345F));
 
-		PartDefinition finger_curled_tip_95_r1 = right_arm.addOrReplaceChild("finger_curled_tip_95_r1", CubeListBuilder.create().texOffs(197, 156).addBox(-0.29F, -0.34F, -0.525F, 0.58F, 0.68F, 1.05F, new CubeDeformation(0.0F))
-		.texOffs(191, 156).addBox(0.53F, -0.34F, -0.525F, 0.58F, 0.68F, 1.05F, new CubeDeformation(0.0F))
-		.texOffs(185, 156).addBox(1.35F, -0.34F, -0.525F, 0.58F, 0.68F, 1.05F, new CubeDeformation(0.0F))
-		.texOffs(179, 156).addBox(2.17F, -0.34F, -0.525F, 0.58F, 0.68F, 1.05F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-1.2F, 11.87F, -0.775F, 0.384F, 0.0F, 0.0F));
+		PartDefinition worn_rivet_97_r1 = right_arm.addOrReplaceChild("worn_rivet_97_r1", CubeListBuilder.create().texOffs(71, 186).addBox(-0.0638F, -0.0638F, -0.045F, 0.1276F, 0.1276F, 0.09F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.5554F, 11.166F, 1.2F, 0.0F, -1.5708F, 0.6981F));
+
+		PartDefinition rivet_base_96_r1 = right_arm.addOrReplaceChild("rivet_base_96_r1", CubeListBuilder.create().texOffs(115, 183).addBox(-0.11F, -0.11F, -0.05F, 0.22F, 0.22F, 0.1F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.5056F, 11.1242F, 1.2F, 0.0F, -1.5708F, 0.6981F));
+
+		PartDefinition finger_curled_tip_95_r1 = right_arm.addOrReplaceChild("finger_curled_tip_95_r1", CubeListBuilder.create().texOffs(197, 156).addBox(-0.29F, -0.15F, -0.525F, 0.58F, 0.3F, 1.05F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.49F, 10.65F, 1.2F, 0.0F, 1.5708F, -1.5708F));
+
+		PartDefinition finger_proximal_94_r1 = right_arm.addOrReplaceChild("finger_proximal_94_r1", CubeListBuilder.create().texOffs(171, 170).addBox(-0.2728F, -0.1234F, -0.39F, 0.5456F, 0.2467F, 0.78F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.3754F, 11.015F, 1.2F, 0.0F, 1.5708F, 0.8727F));
+
+		PartDefinition finger_proximal_93_r1 = right_arm.addOrReplaceChild("finger_proximal_93_r1", CubeListBuilder.create().texOffs(166, 170).addBox(-0.33F, -0.1234F, -0.39F, 0.66F, 0.2467F, 0.78F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 11.19F, 1.2F, 0.0F, 1.5708F, 0.0F));
+
+		PartDefinition finger_proximal_92_r1 = right_arm.addOrReplaceChild("finger_proximal_92_r1", CubeListBuilder.create().texOffs(161, 170).addBox(-0.2728F, -0.1234F, -0.39F, 0.5456F, 0.2467F, 0.78F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.3754F, 11.015F, 1.2F, 0.0F, 1.5708F, -0.8727F));
+
+		PartDefinition worn_rivet_91_r1 = right_arm.addOrReplaceChild("worn_rivet_91_r1", CubeListBuilder.create().texOffs(68, 186).addBox(-0.0638F, -0.0638F, -0.045F, 0.1276F, 0.1276F, 0.09F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.5554F, 11.166F, 0.38F, 0.0F, -1.5708F, 0.6981F));
+
+		PartDefinition rivet_base_90_r1 = right_arm.addOrReplaceChild("rivet_base_90_r1", CubeListBuilder.create().texOffs(112, 183).addBox(-0.11F, -0.11F, -0.05F, 0.22F, 0.22F, 0.1F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.5056F, 11.1242F, 0.38F, 0.0F, -1.5708F, 0.6981F));
+
+		PartDefinition finger_curled_tip_89_r1 = right_arm.addOrReplaceChild("finger_curled_tip_89_r1", CubeListBuilder.create().texOffs(191, 156).addBox(-0.29F, -0.15F, -0.525F, 0.58F, 0.3F, 1.05F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.49F, 10.65F, 0.38F, 0.0F, 1.5708F, -1.5708F));
+
+		PartDefinition finger_proximal_88_r1 = right_arm.addOrReplaceChild("finger_proximal_88_r1", CubeListBuilder.create().texOffs(156, 170).addBox(-0.2728F, -0.1234F, -0.39F, 0.5456F, 0.2467F, 0.78F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.3754F, 11.015F, 0.38F, 0.0F, 1.5708F, 0.8727F));
+
+		PartDefinition finger_proximal_87_r1 = right_arm.addOrReplaceChild("finger_proximal_87_r1", CubeListBuilder.create().texOffs(151, 170).addBox(-0.33F, -0.1234F, -0.39F, 0.66F, 0.2467F, 0.78F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 11.19F, 0.38F, 0.0F, 1.5708F, 0.0F));
+
+		PartDefinition finger_proximal_86_r1 = right_arm.addOrReplaceChild("finger_proximal_86_r1", CubeListBuilder.create().texOffs(146, 170).addBox(-0.2728F, -0.1234F, -0.39F, 0.5456F, 0.2467F, 0.78F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.3754F, 11.015F, 0.38F, 0.0F, 1.5708F, -0.8727F));
+
+		PartDefinition worn_rivet_85_r1 = right_arm.addOrReplaceChild("worn_rivet_85_r1", CubeListBuilder.create().texOffs(65, 186).addBox(-0.0638F, -0.0638F, -0.045F, 0.1276F, 0.1276F, 0.09F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.5554F, 11.166F, -0.44F, 0.0F, -1.5708F, 0.6981F));
+
+		PartDefinition rivet_base_84_r1 = right_arm.addOrReplaceChild("rivet_base_84_r1", CubeListBuilder.create().texOffs(109, 183).addBox(-0.11F, -0.11F, -0.05F, 0.22F, 0.22F, 0.1F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.5056F, 11.1242F, -0.44F, 0.0F, -1.5708F, 0.6981F));
+
+		PartDefinition finger_curled_tip_83_r1 = right_arm.addOrReplaceChild("finger_curled_tip_83_r1", CubeListBuilder.create().texOffs(185, 156).addBox(-0.29F, -0.15F, -0.525F, 0.58F, 0.3F, 1.05F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.49F, 10.65F, -0.44F, 0.0F, 1.5708F, -1.5708F));
+
+		PartDefinition finger_proximal_82_r1 = right_arm.addOrReplaceChild("finger_proximal_82_r1", CubeListBuilder.create().texOffs(141, 170).addBox(-0.2728F, -0.1234F, -0.39F, 0.5456F, 0.2467F, 0.78F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.3754F, 11.015F, -0.44F, 0.0F, 1.5708F, 0.8727F));
+
+		PartDefinition finger_proximal_81_r1 = right_arm.addOrReplaceChild("finger_proximal_81_r1", CubeListBuilder.create().texOffs(136, 170).addBox(-0.33F, -0.1234F, -0.39F, 0.66F, 0.2467F, 0.78F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 11.19F, -0.44F, 0.0F, 1.5708F, 0.0F));
+
+		PartDefinition finger_proximal_80_r1 = right_arm.addOrReplaceChild("finger_proximal_80_r1", CubeListBuilder.create().texOffs(131, 170).addBox(-0.2728F, -0.1234F, -0.39F, 0.5456F, 0.2467F, 0.78F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.3754F, 11.015F, -0.44F, 0.0F, 1.5708F, -0.8727F));
+
+		PartDefinition worn_rivet_79_r1 = right_arm.addOrReplaceChild("worn_rivet_79_r1", CubeListBuilder.create().texOffs(62, 186).addBox(-0.0638F, -0.0638F, -0.045F, 0.1276F, 0.1276F, 0.09F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.5554F, 11.166F, -1.26F, 0.0F, -1.5708F, 0.6981F));
+
+		PartDefinition rivet_base_78_r1 = right_arm.addOrReplaceChild("rivet_base_78_r1", CubeListBuilder.create().texOffs(106, 183).addBox(-0.11F, -0.11F, -0.05F, 0.22F, 0.22F, 0.1F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.5056F, 11.1242F, -1.26F, 0.0F, -1.5708F, 0.6981F));
+
+		PartDefinition finger_curled_tip_77_r1 = right_arm.addOrReplaceChild("finger_curled_tip_77_r1", CubeListBuilder.create().texOffs(179, 156).addBox(-0.29F, -0.15F, -0.525F, 0.58F, 0.3F, 1.05F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.49F, 10.65F, -1.26F, 0.0F, 1.5708F, -1.5708F));
+
+		PartDefinition finger_proximal_76_r1 = right_arm.addOrReplaceChild("finger_proximal_76_r1", CubeListBuilder.create().texOffs(126, 170).addBox(-0.2728F, -0.1234F, -0.39F, 0.5456F, 0.2467F, 0.78F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.3754F, 11.015F, -1.26F, 0.0F, 1.5708F, 0.8727F));
+
+		PartDefinition finger_proximal_75_r1 = right_arm.addOrReplaceChild("finger_proximal_75_r1", CubeListBuilder.create().texOffs(121, 170).addBox(-0.33F, -0.1234F, -0.39F, 0.66F, 0.2467F, 0.78F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 11.19F, -1.26F, 0.0F, 1.5708F, 0.0F));
+
+		PartDefinition finger_proximal_74_r1 = right_arm.addOrReplaceChild("finger_proximal_74_r1", CubeListBuilder.create().texOffs(116, 170).addBox(-0.2728F, -0.1234F, -0.39F, 0.5456F, 0.2467F, 0.78F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.3754F, 11.015F, -1.26F, 0.0F, 1.5708F, -0.8727F));
+
+		PartDefinition palm_73_r1 = right_arm.addOrReplaceChild("palm_73_r1", CubeListBuilder.create().texOffs(242, 143).addBox(-1.6086F, -0.1813F, -0.29F, 3.2172F, 0.3625F, 0.58F, new CubeDeformation(0.0F))
+		.texOffs(170, 150).addBox(-1.7028F, -0.5437F, -0.29F, 3.4057F, 0.3625F, 0.58F, new CubeDeformation(0.0F))
+		.texOffs(154, 150).addBox(-1.7028F, -0.9063F, -0.29F, 3.4057F, 0.3625F, 0.58F, new CubeDeformation(0.0F))
+		.texOffs(242, 135).addBox(-1.6086F, -1.2688F, -0.29F, 3.2172F, 0.3625F, 0.58F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.62F, 11.2188F, 0.0F, 0.0F, 1.5708F, 0.0F));
 
 		PartDefinition faceted_joint_ring_49_r1 = right_arm.addOrReplaceChild("faceted_joint_ring_49_r1", CubeListBuilder.create().texOffs(247, 166).addBox(-0.3F, -0.3F, -0.225F, 0.6F, 0.6F, 0.45F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(1.0253F, 6.3753F, -2.005F, 0.0F, 0.0F, 5.4978F));
 
@@ -774,49 +801,28 @@ public class BronzePuppetFineModel<T extends Entity> extends EntityModel<T> {
 		.texOffs(1, 150).addBox(-1.685F, 9.65F, -1.85F, 3.37F, 0.25F, 3.7F, new CubeDeformation(0.0F))
 		.texOffs(18, 150).addBox(-1.75F, 9.9F, -1.85F, 3.5F, 0.25F, 3.7F, new CubeDeformation(0.0F))
 		.texOffs(35, 150).addBox(-1.685F, 10.15F, -1.85F, 3.37F, 0.25F, 3.7F, new CubeDeformation(0.0F))
-		.texOffs(186, 150).addBox(-1.6086F, 10.05F, -1.72F, 3.2172F, 0.3625F, 3.25F, new CubeDeformation(0.0F))
-		.texOffs(201, 150).addBox(-1.7028F, 10.4125F, -1.72F, 3.4057F, 0.3625F, 3.25F, new CubeDeformation(0.0F))
-		.texOffs(217, 150).addBox(-1.7028F, 10.775F, -1.72F, 3.4057F, 0.3625F, 3.25F, new CubeDeformation(0.0F))
-		.texOffs(233, 150).addBox(-1.6086F, 11.1375F, -1.72F, 3.2172F, 0.3625F, 3.25F, new CubeDeformation(0.0F))
-		.texOffs(176, 170).addBox(0.9872F, 10.9F, -1.78F, 0.5456F, 0.2467F, 0.78F, new CubeDeformation(0.0F))
-		.texOffs(181, 170).addBox(0.93F, 11.1467F, -1.78F, 0.66F, 0.2467F, 0.78F, new CubeDeformation(0.0F))
-		.texOffs(186, 170).addBox(0.9872F, 11.3933F, -1.78F, 0.5456F, 0.2467F, 0.78F, new CubeDeformation(0.0F))
-		.texOffs(118, 183).addBox(1.15F, 11.02F, -1.91F, 0.22F, 0.22F, 0.1F, new CubeDeformation(0.0F))
-		.texOffs(74, 186).addBox(1.1962F, 11.0662F, -1.97F, 0.1276F, 0.1276F, 0.09F, new CubeDeformation(0.0F))
-		.texOffs(191, 170).addBox(0.1672F, 10.9F, -1.78F, 0.5456F, 0.2467F, 0.78F, new CubeDeformation(0.0F))
-		.texOffs(196, 170).addBox(0.11F, 11.1467F, -1.78F, 0.66F, 0.2467F, 0.78F, new CubeDeformation(0.0F))
-		.texOffs(201, 170).addBox(0.1672F, 11.3933F, -1.78F, 0.5456F, 0.2467F, 0.78F, new CubeDeformation(0.0F))
-		.texOffs(121, 183).addBox(0.33F, 11.02F, -1.91F, 0.22F, 0.22F, 0.1F, new CubeDeformation(0.0F))
-		.texOffs(77, 186).addBox(0.3762F, 11.0662F, -1.97F, 0.1276F, 0.1276F, 0.09F, new CubeDeformation(0.0F))
-		.texOffs(206, 170).addBox(-0.6528F, 10.9F, -1.78F, 0.5456F, 0.2467F, 0.78F, new CubeDeformation(0.0F))
-		.texOffs(211, 170).addBox(-0.71F, 11.1467F, -1.78F, 0.66F, 0.2467F, 0.78F, new CubeDeformation(0.0F))
-		.texOffs(216, 170).addBox(-0.6528F, 11.3933F, -1.78F, 0.5456F, 0.2467F, 0.78F, new CubeDeformation(0.0F))
-		.texOffs(124, 183).addBox(-0.49F, 11.02F, -1.91F, 0.22F, 0.22F, 0.1F, new CubeDeformation(0.0F))
-		.texOffs(80, 186).addBox(-0.4438F, 11.0662F, -1.97F, 0.1276F, 0.1276F, 0.09F, new CubeDeformation(0.0F))
-		.texOffs(221, 170).addBox(-1.4728F, 10.9F, -1.78F, 0.5456F, 0.2467F, 0.78F, new CubeDeformation(0.0F))
-		.texOffs(226, 170).addBox(-1.53F, 11.1467F, -1.78F, 0.66F, 0.2467F, 0.78F, new CubeDeformation(0.0F))
-		.texOffs(231, 170).addBox(-1.4728F, 11.3933F, -1.78F, 0.5456F, 0.2467F, 0.78F, new CubeDeformation(0.0F))
-		.texOffs(127, 183).addBox(-1.31F, 11.02F, -1.91F, 0.22F, 0.22F, 0.1F, new CubeDeformation(0.0F))
-		.texOffs(83, 186).addBox(-1.2638F, 11.0662F, -1.97F, 0.1276F, 0.1276F, 0.09F, new CubeDeformation(0.0F))
 		.texOffs(52, 200).addBox(-1.9F, -1.1F, 2.75F, 3.8F, 1.5F, 0.6F, new CubeDeformation(0.0F))
 		.texOffs(75, 204).addBox(-1.9F, -1.1F, -3.26F, 3.8F, 0.5F, 0.5F, new CubeDeformation(0.0F))
 		.texOffs(146, 201).addBox(1.35F, 9.68F, -1.85F, 0.6F, 0.75F, 0.8F, new CubeDeformation(0.0F))
 		.texOffs(151, 201).addBox(-1.95F, 9.68F, -1.85F, 0.6F, 0.75F, 0.8F, new CubeDeformation(0.0F)), PartPose.offset(-6.0F, 2.0F, 0.0F));
 
-		PartDefinition refined_thumb_cap_R_116_r1 = left_arm.addOrReplaceChild("refined_thumb_cap_R_116_r1", CubeListBuilder.create().texOffs(251, 203).addBox(-0.29F, -0.3F, -0.14F, 0.58F, 0.6F, 0.28F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-1.48F, 10.85F, -2.06F, 0.0F, -0.2618F, -0.384F));
+		PartDefinition refined_thumb_cap_R_116_r1 = left_arm.addOrReplaceChild("refined_thumb_cap_R_116_r1", CubeListBuilder.create().texOffs(251, 203).addBox(-0.29F, -0.3F, -0.05F, 0.58F, 0.6F, 0.1F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.0591F, 9.8751F, -1.35F, 0.0F, -1.5708F, -1.1345F));
 
-		PartDefinition refined_finger_nail_R3_115_r1 = left_arm.addOrReplaceChild("refined_finger_nail_R3_115_r1", CubeListBuilder.create().texOffs(218, 204).addBox(-0.2F, -0.17F, -0.125F, 0.4F, 0.34F, 0.25F, new CubeDeformation(0.0F))
-		.texOffs(214, 204).addBox(0.62F, -0.17F, -0.125F, 0.4F, 0.34F, 0.25F, new CubeDeformation(0.0F))
-		.texOffs(210, 204).addBox(1.44F, -0.17F, -0.125F, 0.4F, 0.34F, 0.25F, new CubeDeformation(0.0F))
-		.texOffs(206, 204).addBox(2.26F, -0.17F, -0.125F, 0.4F, 0.34F, 0.25F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-1.19F, 11.89F, -1.375F, 0.384F, 0.0F, 0.0F));
+		PartDefinition refined_finger_nail_R3_115_r1 = left_arm.addOrReplaceChild("refined_finger_nail_R3_115_r1", CubeListBuilder.create().texOffs(218, 204).addBox(-0.2F, -0.06F, -0.125F, 0.4F, 0.12F, 0.25F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.68F, 10.5F, -1.2F, 0.0F, -1.5708F, 1.5708F));
 
-		PartDefinition refined_knuckle_cap_R3_114_r1 = left_arm.addOrReplaceChild("refined_knuckle_cap_R3_114_r1", CubeListBuilder.create().texOffs(21, 205).addBox(-0.23F, -0.17F, -0.125F, 0.46F, 0.34F, 0.25F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-1.2F, 11.11F, -1.945F, 0.0F, 0.0F, -0.0873F));
+		PartDefinition refined_knuckle_cap_R3_114_r1 = left_arm.addOrReplaceChild("refined_knuckle_cap_R3_114_r1", CubeListBuilder.create().texOffs(21, 205).addBox(-0.23F, -0.17F, -0.125F, 0.46F, 0.34F, 0.25F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.99F, 10.7F, -1.2F, 0.0F, -1.5708F, 0.0F));
 
-		PartDefinition refined_knuckle_cap_R2_112_r1 = left_arm.addOrReplaceChild("refined_knuckle_cap_R2_112_r1", CubeListBuilder.create().texOffs(17, 205).addBox(-0.23F, -0.17F, -0.125F, 0.46F, 0.34F, 0.25F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.38F, 11.11F, -1.945F, 0.0F, 0.0F, -0.0873F));
+		PartDefinition refined_finger_nail_R2_113_r1 = left_arm.addOrReplaceChild("refined_finger_nail_R2_113_r1", CubeListBuilder.create().texOffs(214, 204).addBox(-0.2F, -0.06F, -0.125F, 0.4F, 0.12F, 0.25F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.68F, 10.5F, -0.38F, 0.0F, -1.5708F, 1.5708F));
 
-		PartDefinition refined_knuckle_cap_R1_110_r1 = left_arm.addOrReplaceChild("refined_knuckle_cap_R1_110_r1", CubeListBuilder.create().texOffs(13, 205).addBox(-0.23F, -0.17F, -0.125F, 0.46F, 0.34F, 0.25F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.44F, 11.11F, -1.945F, 0.0F, 0.0F, -0.0873F));
+		PartDefinition refined_knuckle_cap_R2_112_r1 = left_arm.addOrReplaceChild("refined_knuckle_cap_R2_112_r1", CubeListBuilder.create().texOffs(17, 205).addBox(-0.23F, -0.17F, -0.125F, 0.46F, 0.34F, 0.25F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.99F, 10.7F, -0.38F, 0.0F, -1.5708F, 0.0F));
 
-		PartDefinition refined_knuckle_cap_R0_108_r1 = left_arm.addOrReplaceChild("refined_knuckle_cap_R0_108_r1", CubeListBuilder.create().texOffs(9, 205).addBox(-0.23F, -0.17F, -0.125F, 0.46F, 0.34F, 0.25F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(1.26F, 11.11F, -1.945F, 0.0F, 0.0F, -0.0873F));
+		PartDefinition refined_finger_nail_R1_111_r1 = left_arm.addOrReplaceChild("refined_finger_nail_R1_111_r1", CubeListBuilder.create().texOffs(210, 204).addBox(-0.2F, -0.06F, -0.125F, 0.4F, 0.12F, 0.25F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.68F, 10.5F, 0.44F, 0.0F, -1.5708F, 1.5708F));
+
+		PartDefinition refined_knuckle_cap_R1_110_r1 = left_arm.addOrReplaceChild("refined_knuckle_cap_R1_110_r1", CubeListBuilder.create().texOffs(13, 205).addBox(-0.23F, -0.17F, -0.125F, 0.46F, 0.34F, 0.25F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.99F, 10.7F, 0.44F, 0.0F, -1.5708F, 0.0F));
+
+		PartDefinition refined_finger_nail_R0_109_r1 = left_arm.addOrReplaceChild("refined_finger_nail_R0_109_r1", CubeListBuilder.create().texOffs(206, 204).addBox(-0.2F, -0.06F, -0.125F, 0.4F, 0.12F, 0.25F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.68F, 10.5F, 1.26F, 0.0F, -1.5708F, 1.5708F));
+
+		PartDefinition refined_knuckle_cap_R0_108_r1 = left_arm.addOrReplaceChild("refined_knuckle_cap_R0_108_r1", CubeListBuilder.create().texOffs(9, 205).addBox(-0.23F, -0.17F, -0.125F, 0.46F, 0.34F, 0.25F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.99F, 10.7F, 1.26F, 0.0F, -1.5708F, 0.0F));
 
 		PartDefinition refined_bracer_rear_lower_R_105_r1 = left_arm.addOrReplaceChild("refined_bracer_rear_lower_R_105_r1", CubeListBuilder.create().texOffs(131, 201).addBox(-1.75F, -0.6F, -0.225F, 3.5F, 1.2F, 0.45F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 8.55F, 2.595F, 0.0F, 0.0F, 0.0698F));
 
@@ -828,12 +834,60 @@ public class BronzePuppetFineModel<T extends Entity> extends EntityModel<T> {
 
 		PartDefinition refined_shoulder_crown_R_99_r1 = left_arm.addOrReplaceChild("refined_shoulder_crown_R_99_r1", CubeListBuilder.create().texOffs(107, 192).addBox(-0.38F, -1.25F, -2.6F, 0.76F, 2.5F, 5.2F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-2.45F, -0.65F, 0.0F, 0.0F, 0.0F, 0.2094F));
 
-		PartDefinition opposed_thumb_98_r2 = left_arm.addOrReplaceChild("opposed_thumb_98_r2", CubeListBuilder.create().texOffs(115, 156).addBox(-0.35F, -0.8F, -0.45F, 0.7F, 1.6F, 0.9F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-1.48F, 11.14F, -1.63F, 0.0F, -0.2618F, -0.384F));
+		PartDefinition opposed_thumb_98_r2 = left_arm.addOrReplaceChild("opposed_thumb_98_r2", CubeListBuilder.create().texOffs(115, 156).addBox(-0.35F, -0.8F, -0.18F, 0.7F, 1.6F, 0.36F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.15F, 10.07F, -1.35F, 0.0F, -1.5708F, -1.1345F));
 
-		PartDefinition finger_curled_tip_95_r2 = left_arm.addOrReplaceChild("finger_curled_tip_95_r2", CubeListBuilder.create().texOffs(221, 156).addBox(-0.29F, -0.34F, -0.525F, 0.58F, 0.68F, 1.05F, new CubeDeformation(0.0F))
-		.texOffs(215, 156).addBox(0.53F, -0.34F, -0.525F, 0.58F, 0.68F, 1.05F, new CubeDeformation(0.0F))
-		.texOffs(209, 156).addBox(1.35F, -0.34F, -0.525F, 0.58F, 0.68F, 1.05F, new CubeDeformation(0.0F))
-		.texOffs(203, 156).addBox(2.17F, -0.34F, -0.525F, 0.58F, 0.68F, 1.05F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-1.2F, 11.87F, -0.775F, 0.384F, 0.0F, 0.0F));
+		PartDefinition worn_rivet_97_r2 = left_arm.addOrReplaceChild("worn_rivet_97_r2", CubeListBuilder.create().texOffs(83, 186).addBox(-0.0638F, -0.0638F, -0.045F, 0.1276F, 0.1276F, 0.09F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.5554F, 11.166F, -1.2F, 0.0F, 1.5708F, -0.6981F));
+
+		PartDefinition rivet_base_96_r2 = left_arm.addOrReplaceChild("rivet_base_96_r2", CubeListBuilder.create().texOffs(127, 183).addBox(-0.11F, -0.11F, -0.05F, 0.22F, 0.22F, 0.1F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.5056F, 11.1242F, -1.2F, 0.0F, 1.5708F, -0.6981F));
+
+		PartDefinition finger_curled_tip_95_r2 = left_arm.addOrReplaceChild("finger_curled_tip_95_r2", CubeListBuilder.create().texOffs(221, 156).addBox(-0.29F, -0.15F, -0.525F, 0.58F, 0.3F, 1.05F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.49F, 10.65F, -1.2F, 0.0F, -1.5708F, 1.5708F));
+
+		PartDefinition finger_proximal_94_r2 = left_arm.addOrReplaceChild("finger_proximal_94_r2", CubeListBuilder.create().texOffs(231, 170).addBox(-0.2728F, -0.1234F, -0.39F, 0.5456F, 0.2467F, 0.78F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.3754F, 11.015F, -1.2F, 0.0F, -1.5708F, -0.8727F));
+
+		PartDefinition finger_proximal_93_r2 = left_arm.addOrReplaceChild("finger_proximal_93_r2", CubeListBuilder.create().texOffs(226, 170).addBox(-0.33F, -0.1234F, -0.39F, 0.66F, 0.2467F, 0.78F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 11.19F, -1.2F, 0.0F, -1.5708F, 0.0F));
+
+		PartDefinition finger_proximal_92_r2 = left_arm.addOrReplaceChild("finger_proximal_92_r2", CubeListBuilder.create().texOffs(221, 170).addBox(-0.2728F, -0.1234F, -0.39F, 0.5456F, 0.2467F, 0.78F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.3754F, 11.015F, -1.2F, 0.0F, -1.5708F, 0.8727F));
+
+		PartDefinition worn_rivet_91_r2 = left_arm.addOrReplaceChild("worn_rivet_91_r2", CubeListBuilder.create().texOffs(80, 186).addBox(-0.0638F, -0.0638F, -0.045F, 0.1276F, 0.1276F, 0.09F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.5554F, 11.166F, -0.38F, 0.0F, 1.5708F, -0.6981F));
+
+		PartDefinition rivet_base_90_r2 = left_arm.addOrReplaceChild("rivet_base_90_r2", CubeListBuilder.create().texOffs(124, 183).addBox(-0.11F, -0.11F, -0.05F, 0.22F, 0.22F, 0.1F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.5056F, 11.1242F, -0.38F, 0.0F, 1.5708F, -0.6981F));
+
+		PartDefinition finger_curled_tip_89_r2 = left_arm.addOrReplaceChild("finger_curled_tip_89_r2", CubeListBuilder.create().texOffs(215, 156).addBox(-0.29F, -0.15F, -0.525F, 0.58F, 0.3F, 1.05F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.49F, 10.65F, -0.38F, 0.0F, -1.5708F, 1.5708F));
+
+		PartDefinition finger_proximal_88_r2 = left_arm.addOrReplaceChild("finger_proximal_88_r2", CubeListBuilder.create().texOffs(216, 170).addBox(-0.2728F, -0.1234F, -0.39F, 0.5456F, 0.2467F, 0.78F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.3754F, 11.015F, -0.38F, 0.0F, -1.5708F, -0.8727F));
+
+		PartDefinition finger_proximal_87_r2 = left_arm.addOrReplaceChild("finger_proximal_87_r2", CubeListBuilder.create().texOffs(211, 170).addBox(-0.33F, -0.1234F, -0.39F, 0.66F, 0.2467F, 0.78F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 11.19F, -0.38F, 0.0F, -1.5708F, 0.0F));
+
+		PartDefinition finger_proximal_86_r2 = left_arm.addOrReplaceChild("finger_proximal_86_r2", CubeListBuilder.create().texOffs(206, 170).addBox(-0.2728F, -0.1234F, -0.39F, 0.5456F, 0.2467F, 0.78F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.3754F, 11.015F, -0.38F, 0.0F, -1.5708F, 0.8727F));
+
+		PartDefinition worn_rivet_85_r2 = left_arm.addOrReplaceChild("worn_rivet_85_r2", CubeListBuilder.create().texOffs(77, 186).addBox(-0.0638F, -0.0638F, -0.045F, 0.1276F, 0.1276F, 0.09F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.5554F, 11.166F, 0.44F, 0.0F, 1.5708F, -0.6981F));
+
+		PartDefinition rivet_base_84_r2 = left_arm.addOrReplaceChild("rivet_base_84_r2", CubeListBuilder.create().texOffs(121, 183).addBox(-0.11F, -0.11F, -0.05F, 0.22F, 0.22F, 0.1F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.5056F, 11.1242F, 0.44F, 0.0F, 1.5708F, -0.6981F));
+
+		PartDefinition finger_curled_tip_83_r2 = left_arm.addOrReplaceChild("finger_curled_tip_83_r2", CubeListBuilder.create().texOffs(209, 156).addBox(-0.29F, -0.15F, -0.525F, 0.58F, 0.3F, 1.05F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.49F, 10.65F, 0.44F, 0.0F, -1.5708F, 1.5708F));
+
+		PartDefinition finger_proximal_82_r2 = left_arm.addOrReplaceChild("finger_proximal_82_r2", CubeListBuilder.create().texOffs(201, 170).addBox(-0.2728F, -0.1234F, -0.39F, 0.5456F, 0.2467F, 0.78F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.3754F, 11.015F, 0.44F, 0.0F, -1.5708F, -0.8727F));
+
+		PartDefinition finger_proximal_81_r2 = left_arm.addOrReplaceChild("finger_proximal_81_r2", CubeListBuilder.create().texOffs(196, 170).addBox(-0.33F, -0.1234F, -0.39F, 0.66F, 0.2467F, 0.78F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 11.19F, 0.44F, 0.0F, -1.5708F, 0.0F));
+
+		PartDefinition finger_proximal_80_r2 = left_arm.addOrReplaceChild("finger_proximal_80_r2", CubeListBuilder.create().texOffs(191, 170).addBox(-0.2728F, -0.1234F, -0.39F, 0.5456F, 0.2467F, 0.78F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.3754F, 11.015F, 0.44F, 0.0F, -1.5708F, 0.8727F));
+
+		PartDefinition worn_rivet_79_r2 = left_arm.addOrReplaceChild("worn_rivet_79_r2", CubeListBuilder.create().texOffs(74, 186).addBox(-0.0638F, -0.0638F, -0.045F, 0.1276F, 0.1276F, 0.09F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.5554F, 11.166F, 1.26F, 0.0F, 1.5708F, -0.6981F));
+
+		PartDefinition rivet_base_78_r2 = left_arm.addOrReplaceChild("rivet_base_78_r2", CubeListBuilder.create().texOffs(118, 183).addBox(-0.11F, -0.11F, -0.05F, 0.22F, 0.22F, 0.1F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.5056F, 11.1242F, 1.26F, 0.0F, 1.5708F, -0.6981F));
+
+		PartDefinition finger_curled_tip_77_r2 = left_arm.addOrReplaceChild("finger_curled_tip_77_r2", CubeListBuilder.create().texOffs(203, 156).addBox(-0.29F, -0.15F, -0.525F, 0.58F, 0.3F, 1.05F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.49F, 10.65F, 1.26F, 0.0F, -1.5708F, 1.5708F));
+
+		PartDefinition finger_proximal_76_r2 = left_arm.addOrReplaceChild("finger_proximal_76_r2", CubeListBuilder.create().texOffs(186, 170).addBox(-0.2728F, -0.1234F, -0.39F, 0.5456F, 0.2467F, 0.78F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.3754F, 11.015F, 1.26F, 0.0F, -1.5708F, -0.8727F));
+
+		PartDefinition finger_proximal_75_r2 = left_arm.addOrReplaceChild("finger_proximal_75_r2", CubeListBuilder.create().texOffs(181, 170).addBox(-0.33F, -0.1234F, -0.39F, 0.66F, 0.2467F, 0.78F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 11.19F, 1.26F, 0.0F, -1.5708F, 0.0F));
+
+		PartDefinition finger_proximal_74_r2 = left_arm.addOrReplaceChild("finger_proximal_74_r2", CubeListBuilder.create().texOffs(176, 170).addBox(-0.2728F, -0.1234F, -0.39F, 0.5456F, 0.2467F, 0.78F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.3754F, 11.015F, 1.26F, 0.0F, -1.5708F, 0.8727F));
+
+		PartDefinition palm_73_r2 = left_arm.addOrReplaceChild("palm_73_r2", CubeListBuilder.create().texOffs(233, 150).addBox(-1.6086F, -0.1813F, -0.29F, 3.2172F, 0.3625F, 0.58F, new CubeDeformation(0.0F))
+		.texOffs(217, 150).addBox(-1.7029F, -0.5437F, -0.29F, 3.4057F, 0.3625F, 0.58F, new CubeDeformation(0.0F))
+		.texOffs(201, 150).addBox(-1.7029F, -0.9063F, -0.29F, 3.4057F, 0.3625F, 0.58F, new CubeDeformation(0.0F))
+		.texOffs(186, 150).addBox(-1.6086F, -1.2688F, -0.29F, 3.2172F, 0.3625F, 0.58F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.62F, 11.2188F, 0.0F, 0.0F, -1.5708F, 0.0F));
 
 		PartDefinition faceted_joint_ring_49_r2 = left_arm.addOrReplaceChild("faceted_joint_ring_49_r2", CubeListBuilder.create().texOffs(31, 170).addBox(-0.3F, -0.3F, -0.225F, 0.6F, 0.6F, 0.45F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(1.0253F, 6.3753F, -2.005F, 0.0F, 0.0F, 5.4978F));
 
