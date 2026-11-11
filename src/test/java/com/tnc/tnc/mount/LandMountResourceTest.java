@@ -14,6 +14,7 @@ class LandMountResourceTest {
    Path root=Path.of("src/main/resources/assets/tnc");
    var geo=JsonParser.parseString(Files.readString(root.resolve("geo/mount/"+id+".geo.json"))).getAsJsonObject().getAsJsonArray("minecraft:geometry").get(0).getAsJsonObject();
    Set<String> bones=new HashSet<>();for(var bone:geo.getAsJsonArray("bones"))assertTrue(bones.add(bone.getAsJsonObject().get("name").getAsString()));
+   assertFalse(bones.contains("saddle"),"Bareback mounts must not ship saddle geometry");
    var clips=JsonParser.parseString(Files.readString(root.resolve("animations/mount/"+id+".animation.json"))).getAsJsonObject().getAsJsonObject("animations");
    for(String mode:List.of("idle","walk","trot","gallop")){
     var clip=clips.getAsJsonObject("animation."+id+"."+mode);assertNotNull(clip);assertTrue(clip.get("loop").getAsBoolean());double length=clip.get("animation_length").getAsDouble();assertTrue(length>0);
@@ -27,6 +28,20 @@ class LandMountResourceTest {
     }
    }
    assertTrue(Files.size(root.resolve("textures/entity/mount/"+id+".png"))>100);
+  }
+ }
+ @Test void upperLegsHaveNoAbruptRotationChanges()throws Exception{
+  for(String id:List.of("rainbow_unicorn","mountain_goat","snow_wolf")){
+   var clips=JsonParser.parseString(Files.readString(Path.of("src/main/resources/assets/tnc/animations/mount/"+id+".animation.json"))).getAsJsonObject().getAsJsonObject("animations");
+   for(var clip:clips.entrySet())for(var bone:clip.getValue().getAsJsonObject().getAsJsonObject("bones").entrySet()){
+    String name=bone.getKey();if(!name.startsWith("front")&&!name.startsWith("hind"))continue;
+    if(name.endsWith("_shin")||name.endsWith("_foot")||name.endsWith("_hock")||name.endsWith("_carpus"))continue;
+    Double previous=null;
+    for(var k:bone.getValue().getAsJsonObject().getAsJsonObject("rotation").entrySet()){
+     double x=k.getValue().getAsJsonArray().get(0).getAsDouble();assertTrue(Math.abs(x)<=56.01,id+"/"+clip.getKey()+"/"+name);
+     if(previous!=null)assertTrue(Math.abs(x-previous)<35,"Abrupt upper-leg flip: "+id+"/"+name);previous=x;
+    }
+   }
   }
  }
 }

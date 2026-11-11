@@ -34,14 +34,19 @@ public final class LandMount extends Horse implements GeoEntity {
     }
     @Override public boolean canMate(Animal other){return false;}
     @Override public boolean canWearArmor(){return false;}
+    // Constant on both logical sides: vanilla riding/jump control works without an item or saddle flag.
+    @Override public boolean isSaddled(){return true;}
+    @Override public boolean isSaddleable(){return false;}
+    @Override public void equipSaddle(SoundSource source){}
+    @Override public void openCustomInventoryScreen(Player player){}
+
     @Override public boolean canFreeze(){return !snow()&&super.canFreeze();}
     @Override public boolean canBeRiddenUnderFluidType(net.minecraftforge.fluids.FluidType type,net.minecraft.world.entity.Entity rider){return (snow()&&type==net.minecraftforge.common.ForgeMod.WATER_TYPE.get())||super.canBeRiddenUnderFluidType(type,rider);}
     @Override public InteractionResult mobInteract(Player player,InteractionHand hand){
         ItemStack held=player.getItemInHand(hand);
-        if(!isBaby()&&!isVehicle()&&!player.isSecondaryUseActive()&&(held.isEmpty()||held.is(Items.SADDLE))){
+        if(!isBaby()&&!isVehicle()&&!player.isSecondaryUseActive()&&held.isEmpty()){
             if(!level().isClientSide){
                 if(!isTamed())tameWithName(player);
-                if(!isSaddled())equipSaddle(SoundSource.PLAYERS);
                 doPlayerRide(player);
             }
             return InteractionResult.sidedSuccess(level().isClientSide);
@@ -72,7 +77,7 @@ public final class LandMount extends Horse implements GeoEntity {
             if(isInWater()&&isVehicle())setDeltaMovement(getDeltaMovement().add(0,.025,0));
         }
     }
-    @Override public double getPassengersRidingOffset(){return (goat()?32:snow()?30:35)*.65/16;}
+    @Override public double getPassengersRidingOffset(){return (goat()?29:snow()?28:33)*.65/16;}
     @Override protected SoundEvent getAmbientSound(){return goat()?SoundEvents.GOAT_AMBIENT:snow()?SoundEvents.WOLF_AMBIENT:super.getAmbientSound();}
     @Override protected SoundEvent getHurtSound(DamageSource source){return goat()?SoundEvents.GOAT_HURT:snow()?SoundEvents.WOLF_HURT:super.getHurtSound(source);}
     @Override protected SoundEvent getDeathSound(){return goat()?SoundEvents.GOAT_DEATH:snow()?SoundEvents.WOLF_DEATH:super.getDeathSound();}
