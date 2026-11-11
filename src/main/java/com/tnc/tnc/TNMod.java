@@ -305,6 +305,7 @@ public class TNMod
 
         // 把三个注册器挂到 mod 事件总线上，否则上面注册的内容不会生效
         com.tnc.tnc.bronze.BronzeWeapons.register(modEventBus);
+        com.tnc.tnc.mount.LandMounts.register(modEventBus);
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
         MENUS.register(modEventBus);
