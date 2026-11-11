@@ -83,7 +83,9 @@ public final class LandMount extends Horse implements GeoEntity {
     @Override protected SoundEvent getDeathSound(){return goat()?SoundEvents.GOAT_DEATH:snow()?SoundEvents.WOLF_DEATH:super.getDeathSound();}
     @Override public void registerControllers(AnimatableManager.ControllerRegistrar controllers){
         controllers.add(new AnimationController<LandMount>(this,"movement",3,state->{
-            double speed=Math.sqrt(getDeltaMovement().horizontalDistanceSqr());String clip=MountMotion.clip(speed);
+            // Delta movement already contains ground damping; rendered tick displacement reflects actual travel.
+            double moved=Math.hypot(getX()-xo,getZ()-zo);
+            double speed=Math.max(moved>1.5?0:moved,Math.sqrt(getDeltaMovement().horizontalDistanceSqr()));String clip=MountMotion.clip(speed);
             state.getController().setAnimationSpeed(MountMotion.rate(clip,speed));
             return state.setAndContinue(RawAnimation.begin().thenLoop("animation."+species()+"."+clip));
         }));

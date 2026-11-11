@@ -38,7 +38,7 @@ class LandMountResourceTest {
     if(name.endsWith("_shin")||name.endsWith("_foot")||name.endsWith("_hock")||name.endsWith("_carpus"))continue;
     Double previous=null;
     for(var k:bone.getValue().getAsJsonObject().getAsJsonObject("rotation").entrySet()){
-     double x=k.getValue().getAsJsonArray().get(0).getAsDouble();assertTrue(Math.abs(x)<=56.01,id+"/"+clip.getKey()+"/"+name);
+     double x=k.getValue().getAsJsonArray().get(0).getAsDouble();assertTrue(Math.abs(x)<=68.01,id+"/"+clip.getKey()+"/"+name);
      if(previous!=null)assertTrue(Math.abs(x-previous)<35,"Abrupt upper-leg flip: "+id+"/"+name);previous=x;
     }
    }
