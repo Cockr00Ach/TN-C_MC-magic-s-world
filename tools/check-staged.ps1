@@ -79,6 +79,8 @@ $sizeExempt = '^(src/main/resources/assets/tnc/sounds/(music/travel/.*|tavern/(w
 # Authored dragon source models and the runtime mesh are intentional project
 # resources, not third-party packs. Exact paths only, still capped at 20 MiB.
 $authoredDragonAssets = @(
+    # Generated wind boss texture atlas, retained at original pixel resolution.
+    'art/generated/element_boss_blocks/wind_atlas.png',
     # CC0 calligraphy brush source; provenance is stored beside the model.
     'model-source/ink-calligraphy-brush/source.glb',
     'model-source/ink-celestial-dragon/ink_celestial_dragon.bbmodel',
