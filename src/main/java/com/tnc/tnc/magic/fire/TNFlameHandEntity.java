@@ -150,6 +150,20 @@ public class TNFlameHandEntity extends Entity {
             }
         }
 
+        // ★ 持续燃烧：每 2 tick 甩一把火星，档位越高越密（"疯狂"感靠这个堆出来）
+        if (tickCount % 2 == 0 && level() instanceof ServerLevel sl) {
+            int n = 3 + tier();
+            double h = gripHeight() * (0.35 + 0.5 * (tickCount % 8) / 8.0);
+            sl.sendParticles(net.minecraft.core.particles.ParticleTypes.FLAME,
+                    getX(), getY() + h, getZ(), n, 0.45, 0.5, 0.45, 0.06);
+            sl.sendParticles(net.minecraft.core.particles.ParticleTypes.SMALL_FLAME,
+                    getX(), getY() + h * 0.5, getZ(), n, 0.5, 0.2, 0.5, 0.02);
+            if (tier() >= 4 && tickCount % 6 == 0) {
+                sl.sendParticles(net.minecraft.core.particles.ParticleTypes.LAVA,
+                        getX(), getY() + h, getZ(), 4, 0.4, 0.4, 0.4, 0.1);
+            }
+        }
+
         if (tickCount == 62) {
             burst(target);
         }
@@ -180,8 +194,18 @@ public class TNFlameHandEntity extends Entity {
         }
         server.sendParticles(net.minecraft.core.particles.ParticleTypes.LAVA,
                 at.x, at.y, at.z, 18, 0.35, 0.5, 0.35, 0.25);
+        // ★ 力量感：每一下捏都抖屏（档位越高抖得越狠），并在掌心炸出一圈冲击
+        com.tnc.tnc.magic.TNShockwaveEntity.blast(server, at, 1.3D + 0.35D * tier(),
+                2.5F + 1.4F * tier(), null, 0.9F);
+        // 第三下（最后一下）额外在地上泼一片岩浆：捏碎之后脚下就是火海
+        if (crushes >= 3 && tier() >= 2) {
+            TNLavaFieldEntity.spawn(server, new Vec3(getX(), getY() + 0.2, getZ()), caster(),
+                    crushDamage * 0.35F, 1.6D + 0.25D * tier(), 60);
+        }
         server.playSound(null, at.x, at.y, at.z, SoundEvents.BLAZE_HURT, SoundSource.PLAYERS,
-                0.9F, 0.7F + 0.1F * crushes);
+                1.4F, 0.62F + 0.06F * crushes);
+        server.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS,
+                0.55F, 1.45F);
     }
 
     private void burst(@Nullable LivingEntity target) {
@@ -201,12 +225,18 @@ public class TNFlameHandEntity extends Entity {
             victim.setSecondsOnFire(6);
             FireHeat.add(victim, caster(), 10.0F);
         }
+        com.tnc.tnc.magic.TNShockwaveEntity.blast(server, at, radius * 1.15D,
+                5.0F + 2.2F * tier(), null, 1.2F + heat * 0.01F);
+        TNLavaFieldEntity.spawn(server, new Vec3(getX(), getY() + 0.2, getZ()), caster(),
+                damage * 0.30F, 2.0D + 0.3D * tier(), 100);
         server.sendParticles(net.minecraft.core.particles.ParticleTypes.EXPLOSION_EMITTER,
                 at.x, at.y, at.z, 2, 0.4, 0.4, 0.4, 0.0);
         server.sendParticles(net.minecraft.core.particles.ParticleTypes.FLAME,
                 at.x, at.y, at.z, 60, radius * 0.4, radius * 0.3, radius * 0.4, 0.35);
         server.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE,
-                SoundSource.PLAYERS, 1.3F, 0.85F);
+                SoundSource.PLAYERS, 2.0F, 0.72F);
+        server.playSound(null, at.x, at.y, at.z, SoundEvents.LIGHTNING_BOLT_THUNDER,
+                SoundSource.PLAYERS, 0.9F, 1.6F);
     }
 
     @Override

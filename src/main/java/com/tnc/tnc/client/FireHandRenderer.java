@@ -78,7 +78,8 @@ public final class FireHandRenderer extends EntityRenderer<TNFlameHandEntity> {
         }
         thumb(vc, m, rise, curl);
         // ---- 火：手上的火舌 + 空中的火柱
-        flames(vc, m, p, rise, tier);
+        float rage = 1.0F + 0.55F * crushPulse(p) + 0.10F * tier;   // 捏的那一下整体炸亮
+        flames(vc, m, p, rise, tier, rage);
         if (entity.aerial()) {
             pillar(vc, m, p, rise, tier);
         }
@@ -105,6 +106,15 @@ public final class FireHandRenderer extends EntityRenderer<TNFlameHandEntity> {
             return 0.86F + 0.14F * pulse;
         }
         return Mth.lerp(Math.min(1F, (p - 0.80F) / 0.20F), 1.0F, 0.10F);      // 炸开
+    }
+
+    /** 三下捏的发力包络：每一拍的峰值 = 1，用来让火光和抖动跟上节奏。 */
+    private static float crushPulse(float p) {
+        if (p < 0.44F || p > 0.84F) {
+            return 0.0F;
+        }
+        float t = (p - 0.44F) / 0.40F;
+        return (float) Math.pow(Math.max(0.0, Math.sin(t * Math.PI * 3.0)), 3.0);
     }
 
     /** 手指张开程度（0 并拢 → 1 大张）。 */
@@ -216,23 +226,26 @@ public final class FireHandRenderer extends EntityRenderer<TNFlameHandEntity> {
     // ------------------------------------------------------------ 火
 
     /** 手上的火舌：沿手掌外缘窜出去的细锥。 */
-    private static void flames(VertexConsumer vc, PoseStack.Pose m, float p, double rise, int tier) {
-        int count = 10 + 3 * tier;
+    private static void flames(VertexConsumer vc, PoseStack.Pose m, float p, double rise, int tier,
+                               float rage) {
+        int count = (int) ((12 + 4 * tier) * Math.min(2.0F, rage));
         for (int i = 0; i < count; i++) {
             double a = (i / (double) count) * Math.PI * 2.0 + p * 3.0;
             double y0 = 0.1 + 1.5 * rise + 0.5 * Math.sin(a * 3.0 + p * 9.0);
             double r0 = 0.42 + 0.06 * Math.sin(a * 5.0 + p * 7.0);
             double x0 = Math.cos(a) * r0;
             double z0 = Math.sin(a) * r0 * 0.55;
-            double h = (0.30 + 0.35 * (i % 3)) * (0.7 + 0.5 * Math.sin(p * 11.0 + i));
+            double h = (0.30 + 0.35 * (i % 3)) * (0.7 + 0.5 * Math.sin(p * 11.0 + i))
+                    * (0.85 + 0.55 * rage);
             double sway = 0.12 * Math.sin(p * 13.0 + i * 2.1);
             double[][] pts = {
                     {x0, y0, z0},
                     {x0 * 1.15 + sway, y0 + h * 0.55, z0 * 1.15},
                     {x0 * 1.25 + sway * 2, y0 + h, z0 * 1.25},
             };
-            double[] radii = {0.075, 0.045, 0.004};
-            tube(vc, m, pts, radii, 0.95F, 0.42F, 0.06F, 0.75F, 1.6F);
+            double[] radii = {0.075 * rage, 0.045 * rage, 0.004};
+            tube(vc, m, pts, radii, Math.min(1F, 0.95F * rage), 0.42F, 0.06F,
+                    Math.min(0.95F, 0.75F * rage), 1.6F);
         }
     }
 
