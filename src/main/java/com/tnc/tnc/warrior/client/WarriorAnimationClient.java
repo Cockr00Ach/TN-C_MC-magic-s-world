@@ -123,6 +123,7 @@ public final class WarriorAnimationClient {
                 && current.animation().priority() > animation.priority()) {
             return;
         }
+        if(animation==WarriorAnimation.ULTIMATE)WarriorUltimateCamera.start(entityId);
         WarriorChargeVisual.accept(entityId,current,animation,hold,ticks);
         if(hold && current!=null && current.hold() && current.animation()==animation){
             ACTIVE.put(entityId,new Active(animation,current.startTick(),current.durationTicks(),true,ticks));

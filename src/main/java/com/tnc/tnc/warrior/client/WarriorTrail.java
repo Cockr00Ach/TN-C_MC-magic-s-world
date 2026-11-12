@@ -149,21 +149,27 @@ public final class WarriorTrail {
         }
         var stack=player.getMainHandItem();var key=ForgeRegistries.ITEMS.getKey(stack.getItem());
         String element=stack.hasTag()?stack.getTag().getString(WindInfusion.ELEMENT_KEY):"";
+        // ★ 2026-11-08 领域法术（作者："战士的刀光剑影变成黑色"）——
+        //   领域开着的时候，刀光按领域元素重上色：雷＝紫电、暗＝近黑 ✓
+        //   走效果读状态（客户端本来就有），不需要额外发包 ✓
+        String domain=com.tnc.tnc.warrior.WarriorDomainLink.activeElementId(player);
+        if(domain!=null)element=domain;
         var style=WarriorTrailAppearance.of(key==null?"":key.getPath(),family,element);
         double scale=WarriorPhantomRenderer.disabled()?1:Math.max(1,WarriorPhantomRenderer.scaleFor(player));
         var out=WarriorTrailRenderType.buffer(buffer);
         Vec3 origin=firstPerson?Vec3.ZERO:camera;
         float ramp=(float)Math.max(0,Math.min(1,(time-state.start)/40));
         float intensity=ramp*(.40f+.22f*Math.min(1,state.speed/12))*(firstPerson?.78f:1f);
-        WarriorTrailVolume.emit(state.curve,time,life,profile(family).outerStart(),scale,style,intensity,
-                new WarriorTrailVolume.Sink(){
+        WarriorTrailVolume.Sink sink=new WarriorTrailVolume.Sink(){
                     @Override public void quad(Vec3 a,Vec3 b,Vec3 c,Vec3 d,int color,float aa,float ab,float ac,float ad){
                         gradient(a,b,c,d,color,color,color,color,aa,ab,ac,ad);
                     }
                     @Override public void gradient(Vec3 a,Vec3 b,Vec3 c,Vec3 d,int ca,int cb,int cc,int cd,float aa,float ab,float ac,float ad){
                         vertex(out,a,origin,ca,aa);vertex(out,b,origin,cb,ab);vertex(out,c,origin,cc,ac);vertex(out,d,origin,cd,ad);
                     }
-                });
+                };
+        WarriorTrailVolume.emit(state.curve,time,life,profile(family).outerStart(),scale,style,intensity,sink);
+        if(family!=WarriorWeaponFamily.HAMMER)WarriorBladeEcho.emit(state.curve,time,life,scale,style.core(),sink);
     }
     private static void vertex(VertexConsumer out,Vec3 p,Vec3 camera,int color,float alpha){
         out.vertex(p.x-camera.x,p.y-camera.y,p.z-camera.z).color((color>>16&255)/255f,(color>>8&255)/255f,(color&255)/255f,alpha).endVertex();

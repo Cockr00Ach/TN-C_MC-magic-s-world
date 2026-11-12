@@ -89,7 +89,8 @@ public enum WarriorAnimation {
     SWORD_CHARGE(20),
     GS_CHARGE(26),
     HM_CHARGE(26),
-    SPEAR_CHARGE(20);
+    SPEAR_CHARGE(20),
+    ULTIMATE(96);
 
     private final int durationTicks;
 
@@ -111,6 +112,7 @@ public enum WarriorAnimation {
      */
     public int priority() {
         return switch (this) {
+            case ULTIMATE -> 2;
             case SLASH_LEFT, SLASH_RIGHT, SLASH_HORIZONTAL -> 0;
             default -> 1;
         };
@@ -130,7 +132,7 @@ public enum WarriorAnimation {
      */
     public boolean finisher() {
         return switch (this) {
-            case THRUST_DASH, SPIN_SLASH, OVERHEAD_SMASH, GROUND_QUAKE,
+            case ULTIMATE, THRUST_DASH, SPIN_SLASH, OVERHEAD_SMASH, GROUND_QUAKE,
                  SWORD_BREAKER, SWORD_SPIN, SWORD_COUNTER,
                  GS_SWEEP, GS_SMASH, HM_CRUSH, HM_QUAKE,
                  SWORD_RETREAT,SWORD_SWALLOW,GS_RIFT,GS_ADVANCE,HM_RUIN,HM_DRIVE,
@@ -143,6 +145,7 @@ public enum WarriorAnimation {
     /** 图鉴/提示里的中文动作名。 */
     public String cn() {
         return switch (this) {
+            case ULTIMATE -> "武器奥义";
             case SLASH_LEFT -> "左斩";
             case SLASH_RIGHT -> "右斩";
             case SLASH_HORIZONTAL -> "横斩";

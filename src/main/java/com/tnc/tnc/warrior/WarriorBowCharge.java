@@ -34,30 +34,38 @@ public final class WarriorBowCharge {
     private static final Map<UUID,Long> NEXT_SHOT=new HashMap<>();
     public static boolean input(ServerPlayer p,WarriorMove move,int mode){
         var id=p.getUUID();
-        boolean immediate=mode==WarriorComboInputPacket.CHARGE_START && (move==WarriorMove.HORIZONTAL || move==WarriorMove.LEFT);
+        boolean immediate=mode==WarriorComboInputPacket.CHARGE_START && move==WarriorMove.HORIZONTAL;
         if(immediate){cancel(p);INTERRUPTED.remove(id);}
         if(INTERRUPTED.contains(id)){
-            if(mode==WarriorComboInputPacket.RELEASE||mode==WarriorComboInputPacket.TAP)INTERRUPTED.remove(id);
+            if(mode==WarriorComboInputPacket.TAP){INTERRUPTED.remove(id);return false;}
+            if(mode==WarriorComboInputPacket.RELEASE)INTERRUPTED.remove(id);
             return true;
         }
         var charge=ACTIVE.get(id);
         if(charge!=null){
             if(move==charge.move && mode==WarriorComboInputPacket.TAP){ACTIVE.remove(id);p.stopUsingItem();WarriorAnimationPacket.cancel(p);return false;}
-            if(!valid(p,charge)){cancel(p);return true;}
+            if(!valid(p,charge)){cancel(p);if(mode==WarriorComboInputPacket.TAP){INTERRUPTED.remove(id);return false;}return true;}
+            if(move!=charge.move){if(mode==WarriorComboInputPacket.TAP){cancel(p);INTERRUPTED.remove(id);return false;}return true;}
             if(mode==WarriorComboInputPacket.HOLD && !charge.activated){activate(p,charge);return true;}
-            if(move!=charge.move){if(mode==WarriorComboInputPacket.TAP)cancel(p);return true;}
             if(mode==WarriorComboInputPacket.KEEPALIVE){charge.pulse=p.serverLevel().getGameTime();return true;}
             if(mode==WarriorComboInputPacket.RELEASE){ACTIVE.remove(id);p.stopUsingItem();if(charge.activated)fire(p,charge);if(charge.family==WarriorWeaponFamily.BOW)WarriorAnimationPacket.release(p,charge.animation,20);return true;}
             return true;
         }
         var family=WarriorWeapons.family(p.getMainHandItem());
-        if((mode!=WarriorComboInputPacket.HOLD && !immediate) || family==null || (move!=WarriorMove.HORIZONTAL && move!=WarriorMove.LEFT && family!=WarriorWeaponFamily.BOW))return false;
+        if((mode!=WarriorComboInputPacket.HOLD && !immediate) || family==null || move!=WarriorMove.HORIZONTAL)return false;
         if(move==WarriorMove.RIGHT && WarriorComboService.state(p.getUUID()).tracker.moves().equals(WarriorMove.parse("eqe")))return false;
         long now=p.serverLevel().getGameTime();
         if(!WarriorComboService.eligible(p)||now<NEXT_SHOT.getOrDefault(id,0L)||(family==WarriorWeaponFamily.BOW&&!WarriorComboService.hasAmmo(p))||WarriorComboService.state(id).interruptedUntil>WarriorComboService.gameTime(p))return true;
         var created=new Charge(p,move,immediate);ACTIVE.put(id,created);
         if(!immediate)activate(p,created);
         return true;
+    }
+    /** Suppress native bow/item use on the server too, so release cannot fire twice. */
+    @SubscribeEvent public static void rightUse(net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickItem e){
+        if(e.getEntity() instanceof ServerPlayer p && e.getHand()==net.minecraft.world.InteractionHand.MAIN_HAND
+                && !p.isShiftKeyDown() && WarriorComboService.eligible(p) && WarriorWeapons.family(p.getMainHandItem())!=null){
+            e.setCancellationResult(net.minecraft.world.InteractionResult.CONSUME);e.setCanceled(true);
+        }
     }
     private static void activate(ServerPlayer p,Charge c){
         c.activated=true;c.pulse=p.level().getGameTime();

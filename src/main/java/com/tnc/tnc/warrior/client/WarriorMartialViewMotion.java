@@ -5,6 +5,7 @@ public final class WarriorMartialViewMotion {
     public record Frame(double x,double y,double z,float pitch,float yaw,float roll) {}
     private WarriorMartialViewMotion() {}
     public static boolean supports(String clip) {
+        if(clip!=null&&(clip.endsWith("_ultimate")||clip.contains("_signature_")))return true;
         return clip!=null && !clip.startsWith("red_tassel_spear_") &&
                 (clip.startsWith("yue_bronze_jian_") || clip.startsWith("han_iron_jian_") ||
                  clip.startsWith("willow_leaf_dao_") || clip.startsWith("ring_pommel_dao_") ||

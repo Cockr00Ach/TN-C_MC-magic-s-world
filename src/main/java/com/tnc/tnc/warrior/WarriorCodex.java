@@ -495,7 +495,7 @@ public final class WarriorCodex {
             String originalEffect=effect;
             effect="槽位 "+(slot+1)+" · "+WarriorUnifiedSlots.purpose(slot)+" · "+WarriorUnifiedSlots.keys(slot).toUpperCase(java.util.Locale.ROOT)
                 +(slot==1?"（末段长按）":"")+"。";
-            if(slot==0)effect+="三次短按 Z／左键，原地收势主攻；QZE 仍可使用。长按 Q 蓄力，松手攻击，受击会中断。";
+            if(slot==0)effect+="三次短按 Z／左键，原地收势主攻；QZE 仍可使用。长按鼠标右键蓄力，松手攻击，受击会中断。";
             if(slot==1)effect+="架住攻击；有效怪物近战触发横扫击飞。";
             if(slot==2)effect+="向前破开振刀，打断并僵直。";
             if(slot>=3)effect+=originalEffect.replaceAll("[QZE]{2,6}",WarriorUnifiedSlots.keys(slot).toUpperCase(java.util.Locale.ROOT));

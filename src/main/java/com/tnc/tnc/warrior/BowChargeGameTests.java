@@ -14,13 +14,13 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 @GameTestHolder("tncwarrior") @PrefixGameTestTemplate(false)
 public final class BowChargeGameTests {
     @GameTest(template="building_test_empty",timeoutTicks=120)
-    public static void chargedModesConsumeOneArrowAndProduceDistinctProjectiles(GameTestHelper h){
+    public static void rightChargeConsumesOneArrowPerRelease(GameTestHelper h){
         var p=AdventureGameTests.player(h);var data=TemperingData.get(p.server);
         data.setTalent(p.getUUID(),6);data.enroll(p.getUUID());
         p.setPos(net.minecraft.world.phys.Vec3.atCenterOf(h.absolutePos(new net.minecraft.core.BlockPos(5,4,5))));
         p.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(TNMod.BOW.get()));
         p.getInventory().add(new ItemStack(Items.ARROW,8));
-        WarriorMove[] moves={WarriorMove.LEFT,WarriorMove.RIGHT,WarriorMove.HORIZONTAL};
+        WarriorMove[] moves={WarriorMove.HORIZONTAL,WarriorMove.HORIZONTAL,WarriorMove.HORIZONTAL};
         for(int i=0;i<3;i++){
             final int n=i;int start=1+i*30;
             h.runAfterDelay(start,()->WarriorComboService.input(p,moves[n],WarriorComboInputPacket.HOLD));
@@ -32,8 +32,7 @@ public final class BowChargeGameTests {
                 var arrows=p.serverLevel().getEntitiesOfClass(Arrow.class,p.getBoundingBox().inflate(100),a->a.getOwner()==p);
                 h.assertTrue(arrows.size()-before==BowChargeRules.arrows(moves[n]),"charged arrow mode did not fire its projectile count");
                 h.assertTrue(WarriorComboService.ammo(p).getCount()==ammo-1,"each release consumes exactly one inventory arrow");
-                if(n==0)h.assertTrue(arrows.stream().anyMatch(a->a.getPierceLevel()>0),"Q must pierce");
-                if(n==2)h.assertTrue(arrows.stream().anyMatch(a->a.getPersistentData().getBoolean("TncImpactArrow")),"Z must carry the impact behavior");
+                h.assertTrue(arrows.stream().anyMatch(a->a.getPersistentData().getBoolean("TncImpactArrow")),"Right charge carries the impact behavior");
             });
         }
         h.runAfterDelay(90,h::succeed);
@@ -42,9 +41,9 @@ public final class BowChargeGameTests {
     public static void swappingBowCancelsChargeWithoutConsumingAmmo(GameTestHelper h){
         var p=AdventureGameTests.player(h);var d=TemperingData.get(p.server);d.setTalent(p.getUUID(),6);d.enroll(p.getUUID());
         p.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(TNMod.BOW.get()));p.getInventory().add(new ItemStack(Items.ARROW,4));
-        WarriorComboService.input(p,WarriorMove.LEFT,WarriorComboInputPacket.HOLD);
+        WarriorComboService.input(p,WarriorMove.HORIZONTAL,WarriorComboInputPacket.HOLD);
         p.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(Items.IRON_SWORD));
-        WarriorBowCharge.input(p,WarriorMove.LEFT,WarriorComboInputPacket.RELEASE);
+        WarriorBowCharge.input(p,WarriorMove.HORIZONTAL,WarriorComboInputPacket.RELEASE);
         h.assertTrue(WarriorComboService.ammo(p).getCount()==4,"switching weapons must not spend ammo");h.succeed();
     }
 }
