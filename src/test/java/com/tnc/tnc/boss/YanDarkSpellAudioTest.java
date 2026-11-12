@@ -121,13 +121,19 @@ class YanDarkSpellAudioTest {
 
     @Test
     void castingAnnouncesWhichSpellIsComing() throws Exception {
-        String cast = body(read(BOSS), "private void castRandomSpell(");
+        // ★ 2026-11-07：`castRandomSpell` 被拆成「掷骰 ＋ 起阵」和「按招数执行」两半，
+        //   四个"报点"声（IMPACT/BEACON/CONDUIT/TP）跟着搬到了 `executeDarkRitual` 里 ✓
+        //   —— 这条闸门改看执行那半边，标准一点没放宽（四条声一条都不能少）✓
+        String cast = body(read(BOSS), "private void executeDarkRitual(");
         for (String tell : new String[]{"LIGHTNING_BOLT_IMPACT", "BEACON_ACTIVATE",
                 "CONDUIT_ACTIVATE", "ENDERMAN_TELEPORT"}) {
             assertTrue(cast.contains("SoundEvents." + tell),
                     "施法那一下少了 " + tell + " 这个「报点」声 ✗ ⇒ 四个技能听起来一模一样 ✓");
         }
-        assertTrue(cast.contains("WITHER_SHOOT"),
+        // 蓄能那嗓招牌音在「掷骰 ＋ 起阵」那半边（拆开以后它在 beginDarkRitual 里）✓
+        String roll = body(read(BOSS), "private void castRandomSpell(");
+        String charge = body(read(BOSS), "private void beginDarkRitual(");
+        assertTrue(roll.contains("WITHER_SHOOT") || charge.contains("WITHER_SHOOT") || cast.contains("WITHER_SHOOT"),
                 "蓄能那一声（凋零发射骷髅头 ✓）被删了 ✗ —— 那是黑暗衍的招牌音 ✓");
     }
 

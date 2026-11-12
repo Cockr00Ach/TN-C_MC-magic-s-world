@@ -13,7 +13,7 @@ public final class WarriorSwordUltimate {
    Vec3 from=p.position(),direction=targets.isEmpty()?p.getLookAngle().multiply(1,0,1).normalize():targets.get(0).position().subtract(from).multiply(1,0,1).normalize();
    double length=targets.isEmpty()?4:Math.min(10,p.distanceTo(targets.get(0))+2);Vec3 to=from;
    for(double d=.25;d<=length;d+=.25){Vec3 next=from.add(direction.scale(d));
-    if(!p.level().noCollision(p,p.getBoundingBox().move(next.subtract(from)))||!p.level().getWorldBorder().isWithinBounds(net.minecraft.core.BlockPos.containing(next)))break;
+    if(p.level().getBlockCollisions(p,p.getBoundingBox().move(next.subtract(from))).iterator().hasNext()||!p.level().getWorldBorder().isWithinBounds(net.minecraft.core.BlockPos.containing(next)))break;
     var floor=p.level().clip(new net.minecraft.world.level.ClipContext(next.add(0,.1,0),next.add(0,-1.5,0),net.minecraft.world.level.ClipContext.Block.COLLIDER,net.minecraft.world.level.ClipContext.Fluid.NONE,p));
     if(floor.getType()==net.minecraft.world.phys.HitResult.Type.MISS)break;to=next;
    }

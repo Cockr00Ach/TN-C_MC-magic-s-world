@@ -82,11 +82,13 @@ public class TNTornadoEntity extends Entity {
     public static final double[] SIZE_MULTIPLIER = { 2.0D, 5.0D, 8.0D };
 
     /**
-     * 每档甩出去的风刃**尺寸倍率** ✓ —— 作者逐档表：t3 <b>5</b> / t4 <b>10</b> / t5 <b>20</b> 倍 ✓。
+     * 每档甩出去的风刃**尺寸倍率** —— ★ 2026-11-09 作者：「这个风刃也改一改……体积统一一下」
+     * ⇒ 不再用旧表（t3 <b>5</b> / t4 <b>10</b> / t5 <b>20</b> 倍 ✗ 那会让 t5 的刃有 23 格宽），
+     * 三档**统一**成 {@link TNWindBladeEntity#SPELL_BLADE_SIZE} ✓。
      *
-     * <p>⚠️ 和 {@link #SIZE_MULTIPLIER} 是**两张表** ✗：龙卷风 2/5/8、它吐的刃 5/10/20 ✓
-     * —— 别合并成一个数（作者是分开给的 ✓）。
+     * <p>保留这个数组只是为了让"旧数值"有据可查（文档/日志里好对照），代码不再读它 ✗。
      */
+    @Deprecated
     public static final double[] BLADE_SIZE_MULTIPLIER = { 5.0D, 10.0D, 20.0D };
 
     /** 每档召唤几个龙卷风 ✓ —— 只有 t5 是 2 个（作者："t5……并且生成两个龙卷风" ✓）。 */
@@ -113,19 +115,26 @@ public class TNTornadoEntity extends Entity {
     /** 风刃飞出去的速度（格/tick）✓。 */
     private static final double BLADE_SPEED = 1.15D;
 
-    // ---- 模型本体的几何（单位 = 1/16 格）✓ ----
-    // 与 tools/gen_wind_tornado_model.py 顶部的 BASE_RADIUS / TOP_RADIUS /
-    // LAYERS × TWIST_DEG 同源 ✓ —— 粒子和甩刃的出生点都按它算，
-    // 这样"粒子 / 板子 / 风刃"三者的位置永远对得上 ✗ 不会各算各的 ✗。
+    // ---- 漏斗的几何（单位 = 1/16 格）✓ ----
+    // ★ 2026-11-09 作者：「我们的闪电不是一个一个线吗，我想这个线螺旋缠绕起来变成龙卷风……
+    //   可以有明确的锐角，极具那种线条特色」—— 所以**视觉主体不再是烘焙模型** ✗，
+    //   而是 {@link TornadoLineShape} 算出来的一束螺旋折线（客户端画光带）✓。
+    //   这三个数仍然有效：光带的高度/收口、粒子的落点、风刃的出生点全都按它算 ✓
+    //   ⇒ "线 / 粒子 / 风刃"三者永远在同一条螺旋上 ✓ 不会各算各的 ✗。
 
-    /** 漏斗底部的半宽（单位）✓。 */
-    private static final double MODEL_BASE_RADIUS = 4.0D;
+    /**
+     * 漏斗底部的半宽（单位）✓。
+     *
+     * <p>★ 2026-11-09 作者：「根部可以半径再小一点」⇒ 4.0 → <b>2.4</b>
+     * （t3 接地半径 0.5 格 → <b>0.3 格</b>，t5 2.0 格 → <b>1.2 格</b>）。
+     * 顶上收口不变（{@link #MODEL_TOP_RADIUS}）⇒ 漏斗锥度更陡，落地那一小截更像"抽起来"的 ✓。
+     * 粒子和光带都读这个数 ⇒ 一起变窄 ✓（只改线不改粒子会穿帮 ✗）。
+     */
+    public static final double MODEL_BASE_RADIUS = 2.4D;
     /** 漏斗顶部的半宽（单位）✓（收口 = 漏斗形 ✓）。 */
-    private static final double MODEL_TOP_RADIUS = 13.5D;
+    public static final double MODEL_TOP_RADIUS = 13.5D;
     /** 漏斗总高（单位）✓。 */
-    private static final double MODEL_HEIGHT = 31.0D;
-    /** 模型自己的总扭转（度）✓ ＝ (7 层 − 1) × 每层 22.5°。 */
-    private static final double MODEL_TWIST_DEG = 6.0D * 22.5D;
+    public static final double MODEL_HEIGHT = 31.0D;
 
     /** 每 tick 撒几颗漩涡粒子 ✓（作者：「最好是混着粒子旋转」✓）。 */
     private static final int[] SWIRL_PER_TICK = { 4, 8, 12 };
@@ -259,17 +268,19 @@ public class TNTornadoEntity extends Entity {
         double topR = MODEL_TOP_RADIUS / 16.0D * scale;
         double height = MODEL_HEIGHT / 16.0D * scale;
         double spinRad = Math.toRadians(spin());
-        double twist = Math.toRadians(MODEL_TWIST_DEG);
 
         int count = SWIRL_PER_TICK[tier - 3];
         for (int i = 0; i < count; i++) {
             double u = random.nextDouble();                  // 0 = 底、1 = 顶 ✓
-            double radius = baseR + (topR - baseR) * u;
-            // ⚠️ 方向必须和**板子**一致 ✗：渲染器那句是 `Axis.YP.rotationDegrees(spin)`，
-            //    绕 +Y 的右手旋转会把 (cos φ, sin φ) 映到 **φ − spin** ⇒ 模型是**逆着** atan2 转的 ✓。
-            //    模型每层还多扭 22.5°（同样是 − 方向）⇒ 粒子也写成 `−(spin + twist × u)` ✓，
-            //    否则粒子风幕会**逆着**板子的螺旋转，一眼就穿帮 ✗。
-            double angle = -(spinRad + twist * u) + (random.nextDouble() - 0.5D) * 0.35D;
+            // 半径必须走**光带同一条剖面**（不是直线插值 ✗）：
+            // 光带是 `bottom + (top − bottom) · u^0.72`，根部更收 ⇒ 粒子用直线会在根部凸出去 ✗
+            double radius = TornadoLineShape.profile(u, baseR, topR);
+            // ⚠️ 扭转速率必须和**光带**同源（{@link TornadoLineShape#totalTwist()}）✗：
+            //    以前这里是模型那份 135°（7 层 × 22.5°），现在线绕 1.55 圈（≈558°），
+            //    粒子要是还按 135° 转就会**逆着**线走，一眼就穿帮 ✗。
+            //    方向仍是 `−(spin + twist × u)`（绕 +Y 的右手旋转会把 (cos φ, sin φ) 映到 φ − spin ✓）。
+            double angle = -(spinRad + TornadoLineShape.totalTwist() * u)
+                    + (random.nextDouble() - 0.5D) * 0.35D;
             double tangential = 0.05D + 0.05D * u;
             // 切向速度 = 位置对角度的导数 × d(angle)/d(spin)（＝ −1）✓
             level().addParticle(net.minecraft.core.particles.ParticleTypes.CLOUD,
@@ -326,8 +337,10 @@ public class TNTornadoEntity extends Entity {
             TNWindBladeEntity blade = TNWindBladeEntity.shoot(
                     (ServerLevel) level(), at, dir, BLADE_SPEED, damage, owner(), size);
             if (blade != null) {
-                // 让风刃自己转（视觉：斩击在飞的时候是转的 ✓）
-                blade.setSpinRate((float) (18.0D + random.nextDouble() * 10.0D));
+                // ★ 2026-11-10 作者：「发射出的风刃不要一直旋转，就顺着龙卷风的风向直射出去就行」
+                //   ⇒ 自转速率给 0（以前是 18~28°/tick，飞出去在"打转" ✗）。
+                //   朝向仍是发射时的 yaw/pitch ⇒ 刃口始终顺着风向 ✓。
+                blade.setSpinRate(0.0F);
             }
         }
 
@@ -410,12 +423,14 @@ public class TNTornadoEntity extends Entity {
     }
 
     /**
-     * 它甩出去的风刃该多大 ✓。★ 作者逐档表：5/10/20 倍 ✓。
+     * 它甩出去的风刃该多大 ✓ —— ★ 2026-11-09 起三档**统一**成
+     * {@link TNWindBladeEntity#SPELL_BLADE_SIZE} ✓（作者：「体积统一一下」）。
      *
-     * <p>和 {@link #sizeScale()} **不是一个数** ✗ —— 龙卷风 2/5/8、刃 5/10/20 ✓。
+     * <p>旧表是 5/10/20 倍 ⇒ t5 的刃跨度 <b>23.6 格</b>，比龙卷风本身还宽 ✗。
+     * 现在三档同一个尺寸，档位只影响<b>伤害</b>（{@link #BLADE_DAMAGE}）和<b>数量</b> ✓。
      */
     public double bladeSizeMultiplier() {
-        return BLADE_SIZE_MULTIPLIER[tier() - 3];
+        return TNWindBladeEntity.SPELL_BLADE_SIZE;
     }
 
     /**

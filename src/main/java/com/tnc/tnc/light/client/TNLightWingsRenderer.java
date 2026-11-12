@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import com.tnc.tnc.TNMod;
+import com.tnc.tnc.light.LightWingOwners;
 import com.tnc.tnc.magic.TNEffects;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -63,10 +64,15 @@ public final class TNLightWingsRenderer {
         if (!(event.getEntity() instanceof AbstractClientPlayer player)) {
             return;
         }
-        if (!TNEffects.LIGHT_WINGS.isPresent() || !player.hasEffect(TNEffects.LIGHT_WINGS.get())) {
+        // ★ 2026-11-07 作者："升到光法 t5 的玩家可以永久有这个翅膀" ✓
+        //   ⇒ 两条来源：① 光耀 buff（t4+ 放的，限时 ✓）；② 光耀链点满 t5（永久 ✓）。
+        //   永久那条只改"看不看得见" ✗ 飞行——mayfly 还挂在 buff 上 ✓。
+        boolean buffed = TNEffects.LIGHT_WINGS.isPresent() && player.hasEffect(TNEffects.LIGHT_WINGS.get());
+        if (!buffed && !LightWingOwners.hasPermanentWings(player)) {
             FLIGHT_START.remove(player.getUUID());
             return;
         }
+        if(com.tnc.tnc.client.FirstPersonSpellView.own(player))return;
         float partial = event.getPartialTick();
         boolean flying = player.getAbilities().flying;
         double vy = player.getDeltaMovement().y;

@@ -133,6 +133,9 @@ public final class WarriorWaves {
         var stack=player.getMainHandItem();
         var key=net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(stack.getItem());
         String element=stack.hasTag()?stack.getTag().getString(WindInfusion.ELEMENT_KEY):"";
+        // ★ 2026-11-08 领域法术：剑波也跟着领域换色（雷＝紫电、暗＝近黑）✓
+        String domain=com.tnc.tnc.magic.domain.DomainSpells.activeElementId(player);
+        if(domain!=null)element=domain;
         var appearance=WarriorTrailAppearance.of(key==null?"":key.getPath(),skill.family(),element);
         com.tnc.tnc.network.MagicStoneNetwork.CHANNEL.send(
                 net.minecraftforge.network.PacketDistributor.NEAR.with(() ->

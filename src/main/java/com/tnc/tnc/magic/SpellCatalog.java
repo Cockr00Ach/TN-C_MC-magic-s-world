@@ -17,7 +17,7 @@ import java.util.List;
  * <ul>
  *   <li>每条链各自算进度：想学某条链的 2 级，必须先学<b>同一条链</b>的 1 级
  *       （三条链互不影响，不是"整个元素一条进度"）。</li>
- *   <li><b>高阶替换低阶</b>：法杖上每条链只挂"已经解锁的最高那一级"。
+ *   <li><b>高阶替换低阶</b>：法杖上每个已学等级均可独立配键。
  *       学了「大雷球」以后，法杖上就只有大雷球，不再有「雷球」——
  *       见 {@link #effective(MagicStoneData)}。</li>
  * </ul>
@@ -160,8 +160,14 @@ public final class SpellCatalog {
 
         /** 界面/提示里显示的完整名字，例如「雷击（雷 · 主链 · 专家级）」。 */
         public String fullName() {
-            return independent() ? displayName + "（独立魔法 · 无元素）"
-                    : displayName + "（" + element.cn() + " · " + chain.cn() + " · " + Element.tierName(tier) + "）";
+            if (independent()) {
+                // ★ 2026-11-08：领域法术也是独立法术（element == null），但它有「属于哪一系」；
+                //   显示成「独立魔法 · 无元素」会让玩家以为它没元素 ✗ ⇒ 单独一支 ✓
+                Element domain = com.tnc.tnc.magic.domain.DomainSpells.elementOf(id);
+                return domain == null ? displayName + "（独立魔法 · 无元素）"
+                        : displayName + "（领域魔法 · " + domain.cn() + "）";
+            }
+            return displayName + "（" + element.cn() + " · " + chain.cn() + " · " + Element.tierName(tier) + "）";
         }
 
         /** 施放一次消耗多少魔力（消耗表里的原始值，= 基准上限下的消耗）。 */
@@ -371,6 +377,18 @@ public final class SpellCatalog {
             // Null element is deliberate: independent skills never enter the seven-element NBT arrays.
             new Entry(ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "chaos_magic"), null, Chain.INDEPENDENT, 1, "乱魔"),
             new Entry(ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "concealment"), null, Chain.INDEPENDENT, 1, "隐匿"),
+            // ★ 2026-11-08 领域法术（作者："这个领域法术放在独立法术那里，并且告知玩家只能选择一个"）
+            //   id 和 {@link #specials()} 一条条对应（七个元素各一条），
+            //   元素写 null 是为了让它们只出现在「独立」页、不进七元素 NBT 数组；
+            //   真实元素由 {@code DomainSpells.elementOf(id)} 反查 ✓。
+            new Entry(ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "lightning_domain"), null, Chain.INDEPENDENT, 1, "雷霆领域"),
+            new Entry(ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "dark_domain"), null, Chain.INDEPENDENT, 1, "暗黑领域"),
+            // 2026-11-08 第二轮：作者「可以尝试做做别的法术领域」⇒ 补齐另外五系 ✓
+            new Entry(ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "fire_domain"), null, Chain.INDEPENDENT, 1, "焚天领域"),
+            new Entry(ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "wind_domain"), null, Chain.INDEPENDENT, 1, "风神领域"),
+            new Entry(ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "water_domain"), null, Chain.INDEPENDENT, 1, "深海领域"),
+            new Entry(ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "earth_domain"), null, Chain.INDEPENDENT, 1, "大地领域"),
+            new Entry(ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "light_domain"), null, Chain.INDEPENDENT, 1, "圣光领域"),
 
             // 土魔法：土弹 / 土动 / 土泥 / 土环
             of(Element.EARTH, "earth_shot", Chain.EARTH_SHOT, 1, "土弹"),
@@ -569,25 +587,16 @@ public final class SpellCatalog {
         return top;
     }
 
-    /**
-     * <b>配键列表用</b>：某元素下"每条链当前拥有的最高档"，按链的顺序返回。
-     *
-     * <p>为什么列表只给链顶而不是"全部已学"（作者 2026-09-29 要求）：
-     * 玩家心里的一条链就是<b>一个法术</b> —— "我的雷系主链是雷击"。
-     * 把 t1~t4 全列出来会让人以为四张牌都能带，实际上带哪张都得占一个键，
-     * 而链内低档在数值上就是纯退化 ✗。
-     *
-     * <p>没学过的链直接<b>不出现</b>（不是灰条目）—— 列表里只有你真拥有的东西 ✓。
-     * 找不到能绑的（引擎没实装）也跳过，免得出现按不动的条目。
-     */
-    public static List<Entry> chainTopAssignable(MagicStoneData data, Element element) {
-        List<Entry> result = new ArrayList<>();
-        for (Chain chain : chainsOf(element)) {
-            Entry top = topLearned(data, element, chain);
-            if (top != null && canBind(data, top.id())) {
-                result.add(top);
-            }
-        }
+    /** All learned spells in an element, ordered by chain then tier. */
+    public static List<Entry> learnedAssignable(MagicStoneData data,Element element){
+        List<Entry> result=new ArrayList<>();
+        for(Entry entry:of(element))if(data.hasLearned(entry.id()))result.add(entry);
+        return result;
+    }
+    /** Legacy API retained for binary compatibility; the UI uses learnedAssignable. */
+    public static List<Entry> chainTopAssignable(MagicStoneData data,Element element){
+        List<Entry> result=new ArrayList<>();
+        for(Chain chain:chainsOf(element)){Entry top=topLearned(data,element,chain);if(top!=null&&canBind(data,top.id()))result.add(top);}
         return result;
     }
 
@@ -673,49 +682,18 @@ public final class SpellCatalog {
         return ids;
     }
 
-    /**
-     * 这个法术<b>能不能被玩家配到键位上</b>。
-     *
-     * <p>三条判据（缺一不可）：
-     * <ol>
-     *   <li><b>学过</b> —— 魔法石是权威数据</li>
-     *   <li><b>是它那条链的最高档</b> —— 作者 2026-09-29 定的规则：
-     *       一条链就是一个法术，学了高阶就用高阶（低档在数值上纯退化 ✗）。
-     *       独立魔法与目录外的第三方法术不受这条限制 ✓</li>
-     *   <li><b>引擎认识它</b> —— 目录里有、JSON 还没写的法术绑上去也放不出来</li>
-     * </ol>
-     */
+    /** Learned spells may be bound at every tier; the engine must recognize the spell. */
     public static boolean canBind(MagicStoneData data, ResourceLocation spell) {
         if (data == null || spell == null || !data.hasLearned(spell)) {
-            return false;
-        }
-        if (!isChainTop(data, spell)) {
             return false;
         }
         Entry entry = byId(spell);
         return entry == null || com.tnc.tnc.magic.compat.SpellEngineBridge.hasSpell(entry.id());
     }
 
-    /**
-     * <b>法杖当前这一页该写什么</b> —— 定长 {@link MagicStoneData#SLOTS_PER_PAGE} 项，
-     * 空槽是 {@code null}（空槽必须占位，不能挤位）。
-     *
-     * <p>这是"法杖内容"的<b>唯一口径</b>：登录补杖、学法后同步、切页、{@code /tnc wand}
-     * 全都要走它 —— 几处各算一套的话，页号和配装会互相冲掉 ✗。
-     *
-     * <p><b>写杖之前先规范化配装</b>（{@link MagicStoneData#normalizeLoadout}）——
-     * 这一步是"同一条链的低档不许留在法杖上"的强制执行点 ✗。
-     * 作者 2026-09-29 实测的顺序是"先学完几个档、再去配键页手动摆"，
-     * 那种顺序下低档会各占一个空槽，只有在这里统一收口才治得住 ✓。
-     *
-     * <p>顺带做两层过滤（只影响这次写进杖里的内容，<b>不改</b>玩家的配装）：
-     * <ol>
-     *   <li>没学过 / 目录里查不到 → 空槽（老存档迁移过来的配装对不上目录时兜底）</li>
-     *   <li>引擎不认识的 → 空槽（防呆闸门，免得法杖上出现按不动的空格）</li>
-     * </ol>
-     */
+    /** Fixed-size page of independently bound learned spells; unknown engine IDs remain empty. */
     public static List<ResourceLocation> wandSpellIds(MagicStoneData data) {
-        // ★ 唯一出口上的不变量：一条链一个法术、且只能是当前链顶
+        // Normalize duplicate IDs without changing the selected spell tier.
         data.normalizeLoadout();
         List<ResourceLocation> page = data.pageSpellIds(data.getLoadoutPage());
         List<ResourceLocation> result = new ArrayList<>(page.size());

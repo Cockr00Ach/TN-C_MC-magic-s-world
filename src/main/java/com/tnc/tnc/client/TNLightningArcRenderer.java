@@ -73,13 +73,32 @@ public class TNLightningArcRenderer extends EntityRenderer<TNLightningArcEntity>
         }
 
         int theme = LightningTheme.clamp(entity.theme());
-        VertexConsumer vc = buffer.getBuffer(LightningRenderTypes.BOLT);
         var m = poseStack.last().pose();
 
         // 每 2 tick 换种子：电在抖 ✓
         long seed = entity.getId() * 1315423911L + (age / 2) * 7919L;
         float w = entity.width();
         float a = alpha * 0.95F;
+
+        // ★ 2026-11-05 作者："闪电要是横着来是不是就是黑线和血线了" ⇒ 暗系电弧不画白芯，
+        //   改成**黑芯 ＋ 血红边**（普通 alpha 混合，见 LightningRenderTypes.DARK）✓
+        if (theme == LightningTheme.DARK) {
+            VertexConsumer dvc = buffer.getBuffer(LightningRenderTypes.DARK);
+            LightningBoltGeometry.darkBolt(dvc, m, 0.0D, 0.0D, 0.0D, ex, ey, ez, seed, w, a,
+                    cx, cy, cz);
+            if (entity.impact()) {
+                float radius = (float) Math.min(3.2D, Math.max(0.55D, w * 26.0D));
+                // 落点不是"雷网"，是两圈往回收的暗红细线（黑线环）✓
+                LightningBoltGeometry.darkRing(dvc, m, ex, ey, ez, radius, 16, seed ^ 0x51EDL,
+                        0.045F, a * 0.65F, age * 0.04D, cx, cy, cz);
+                LightningBoltGeometry.darkRing(dvc, m, ex, ey, ez, radius * 0.52D, 12, seed ^ 0x9E37L,
+                        0.035F, a * 0.50F, -age * 0.06D, cx, cy, cz);
+            }
+            super.render(entity, entityYaw, partialTick, poseStack, buffer, packedLight);
+            return;
+        }
+
+        VertexConsumer vc = buffer.getBuffer(LightningRenderTypes.BOLT);
 
         // 主干（四层：晕/中/白芯/高光）—— 分叉按长度给，短电弧不要太多叉 ✓
         int branches = len > 6.0D ? 3 : (len > 2.5D ? 2 : 1);

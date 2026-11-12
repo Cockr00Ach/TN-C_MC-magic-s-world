@@ -82,8 +82,17 @@ public class TNNightGripEntity extends Entity {
     //  甩出（弧线）
     // ------------------------------------------------------------------
 
-    /** 甩出用多久（tick）：12 tick = 0.6 秒，与法术 JSON 的 {@code cast.duration} 对齐 ✓。 */
-    private static final int FLY_TICKS = 12;
+    /**
+     * 甩出用多久（tick）。
+     *
+     * <p>★ 2026-11-06 作者：「黑暗之手链手出去的速度可以慢些」—— 12 tick（0.6 秒）时，
+     * 手是"啪"一下就贴到人身上的 ✗；现在 18 tick（0.9 秒），配合渲染那边 20 tick 的
+     * 五指张开 ⇒ 能看清"手从背后甩出去 → 追上 → 抓住"三个阶段 ✓。
+     *
+     * <p>（原来那行注释说 12 tick 是为了对齐法术 JSON 的 {@code cast.duration}；
+     * 手是投射物，晚 6 tick 到达不影响读条，反而更像"甩出去"✓）
+     */
+    private static final int FLY_TICKS = 18;
 
     /** 弧线控制点抬多高（格）⇒ 手"甩"出去而不是直线推出去 ✓。 */
     private static final double ARC_LIFT = 1.35D;
@@ -418,6 +427,21 @@ public class TNNightGripEntity extends Entity {
         Vec3 start = landing.add(alongX ? offset : -offset, SKYFALL_HEIGHT, alongX ? -offset : offset);
         this.arcStart = start;
         this.arcEnd = landing;
+        setPos(start);
+    }
+
+    /**
+     * 从<b>指定点</b>起手（暗领域专用，2026-11-08）：手从目标脚下那团黑雾里伸出来，再抓上去 ✓。
+     *
+     * <p>和 {@link #launch} 唯一的区别是起点由调用方给（不是施法者后背）：
+     * 领域要的是"地里伸出一只手"，所以起点写成 {@code at + (0, -0.9, 0)} ——
+     * 在地面以下，配上脚下那团黑雾，读起来就是"从地里冒出来"✓。
+     * 弧线控制点照旧用 {@link #controlPoint} 算，所以它仍然是"甩"出去而不是直线平移 ✓。
+     */
+    public void launchFrom(Vec3 start, LivingEntity caster, int targetId, int tier) {
+        launch(caster, targetId, tier, 0, 1);
+        this.arcStart = start;
+        this.arcControl = controlPoint(start, this.arcEnd, 0, 1);
         setPos(start);
     }
 

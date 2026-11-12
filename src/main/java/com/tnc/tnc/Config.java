@@ -114,6 +114,37 @@ public class Config {
                     "设 0 = 施法后立刻开始回魔。")
             .defineInRange("manaRegenDelayAfterCastTicks", 60, 0, 12000);
 
+    // ---------------- 法杖元素附身（docs/design/2026-11-07-法杖元素附身赶路设计.md） ----------------
+
+    private static final ForgeConfigSpec.BooleanValue TRAVEL_ENABLED;
+    private static final ForgeConfigSpec.BooleanValue TRAVEL_REQUIRE_STUDIED;
+    private static final ForgeConfigSpec.IntValue TRAVEL_COMBAT_LOCK_TICKS;
+    private static final ForgeConfigSpec.IntValue TRAVEL_SLOW_FALLING_TICKS;
+    private static final ForgeConfigSpec.DoubleValue TRAVEL_FOV_BOOST;
+    static {
+        BUILDER.push("travel");
+        TRAVEL_ENABLED = BUILDER
+                .comment("元素附身总开关。关掉后长按 Q 不再进入附身（短按 Q 本来就没有动作）。")
+                .define("enabled", true);
+        TRAVEL_REQUIRE_STUDIED = BUILDER
+                .comment("附身要求该元素至少学过 1 个法术。",
+                        "为什么不用七系亲和力总和：当前 defaultAffinity=3，所有人总和都是 21，挡不住纯战士；",
+                        "冒险点数起点也是 4，同样挡不住。只有 learned 集合能表达“学过这个元素”。")
+                .define("requireStudiedSpell", true);
+        TRAVEL_COMBAT_LOCK_TICKS = BUILDER
+                .comment("受到/造成战斗伤害后多少 tick 内不能进入附身（20 tick = 1 秒，默认 100 = 5 秒）。")
+                .defineInRange("combatLockTicks", 100, 0, 1200);
+        TRAVEL_SLOW_FALLING_TICKS = BUILDER
+                .comment("空中退出附身后给多少 tick 缓降（20 tick = 1 秒，默认 200 = 10 秒）。")
+                .defineInRange("slowFallingTicks", 200, 0, 1200);
+        TRAVEL_FOV_BOOST = BUILDER
+                .comment("附身全速时的视野扩张度数（0 = 关闭，默认 5）。",
+                        "只在客户端生效；晕 3D 的玩家设 0。",
+                        "按当前速度比例给，站着不动不会扩视野。")
+                .defineInRange("fovBoost", 5.0D, 0.0D, 20.0D);
+        BUILDER.pop();
+    }
+
     private static final ForgeConfigSpec.IntValue BANK_INTEREST = BUILDER.comment("银行每现实24小时存款利率（百分比）；在线离线均计算，不自动复利。").defineInRange("bankDailyInterestPercent",10,0,100);
     private static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> BANK_WAGES = BUILDER.comment("冒险等级1/10/25/45/70五阶段的每日津贴（铜）。").defineList("bankDailyWages",List.of(20,50,100,180,300),v->v instanceof Integer n&&n>=0&&n<=100000);
     public static int bankDailyInterestPercent=10;
@@ -138,6 +169,11 @@ public class Config {
     public static boolean restoreWandOnLogin;
     public static int manaRegenIntervalTicks;
     public static int manaRegenDelayAfterCastTicks;
+    public static boolean travelEnabled;
+    public static boolean travelRequireStudiedSpell;
+    public static int travelCombatLockTicks;
+    public static int travelSlowFallingTicks;
+    public static double travelFovBoost;
 
     @SubscribeEvent
     static void onLoad(final ModConfigEvent event) {
@@ -159,6 +195,11 @@ public class Config {
         restoreWandOnLogin = RESTORE_WAND_ON_LOGIN.get();
         manaRegenIntervalTicks = MANA_REGEN_INTERVAL_TICKS.get();
         manaRegenDelayAfterCastTicks = MANA_REGEN_DELAY_AFTER_CAST.get();
+        travelEnabled = TRAVEL_ENABLED.get();
+        travelRequireStudiedSpell = TRAVEL_REQUIRE_STUDIED.get();
+        travelCombatLockTicks = TRAVEL_COMBAT_LOCK_TICKS.get();
+        travelSlowFallingTicks = TRAVEL_SLOW_FALLING_TICKS.get();
+        travelFovBoost = TRAVEL_FOV_BOOST.get();
     }
 
     /** 第 tier 级（1..5）法术需要投多少魔法点数。 */

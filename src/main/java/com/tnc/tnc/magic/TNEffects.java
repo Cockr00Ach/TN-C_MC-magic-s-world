@@ -464,7 +464,75 @@ public final class TNEffects {
     public static final RegistryObject<MobEffect> CONCEALMENT = EFFECTS.register("concealment",
             ConcealmentEffect::new);
 
+    /**
+     * 雷霆领域（2026-11-08 领域法术）：这个效果就是"领域开着"的唯一状态。
+     *
+     * <p>为什么用效果当状态，而不是玩家 NBT 里存时间戳：
+     * <ol>
+     *   <li><b>自动同步</b>：客户端直接 {@code hasEffect} 就能读 ⇒ 刀光剑影变色、
+     *       HUD 图标都不用额外发包 ✓；</li>
+     *   <li><b>自带倒计时</b>：到期自动消失，服务端不用每 tick 维护"还剩多久"✓；</li>
+     *   <li><b>玩家看得见</b>：HUD 上有图标 ⇒ "我的领域还开着"一目了然 ✓。</li>
+     * </ol>
+     * 本身不给任何属性 —— 加伤在 {@link com.tnc.tnc.magic.TNSpecialMagic}（亲和力 ×5%）
+     * 和 {@link com.tnc.tnc.magic.domain.DomainService}（周期落雷 / 战士附伤）里 ✓。
+     *
+     * <p>颜色：紫电 {@code 0x9E79FF}，和雷系其他效果的蓝紫区分开 ✓。
+     */
+    public static final RegistryObject<MobEffect> DOMAIN_LIGHTNING = EFFECTS.register("domain_lightning",
+            () -> new DomainEffect(0x9E79FF));
+
+    /** 暗黑领域：近黑紫 {@code 0x1A1024}（和暗雾侵蚀的暗紫区分开 ✓）。 */
+    public static final RegistryObject<MobEffect> DOMAIN_DARK = EFFECTS.register("domain_dark",
+            () -> new DomainEffect(0x1A1024));
+
+    /** 焚天领域：火橙 {@code 0xFF6A2E}。 */
+    public static final RegistryObject<MobEffect> DOMAIN_FIRE = EFFECTS.register("domain_fire",
+            () -> new DomainEffect(0xFF6A2E));
+
+    /** 风神领域：青绿 {@code 0x6BE7B0}。 */
+    public static final RegistryObject<MobEffect> DOMAIN_WIND = EFFECTS.register("domain_wind",
+            () -> new DomainEffect(0x6BE7B0));
+
+    /** 深海领域：水蓝 {@code 0x4FB6FF}。 */
+    public static final RegistryObject<MobEffect> DOMAIN_WATER = EFFECTS.register("domain_water",
+            () -> new DomainEffect(0x4FB6FF));
+
+    /** 大地领域：土黄 {@code 0xC79A5A}。 */
+    public static final RegistryObject<MobEffect> DOMAIN_EARTH = EFFECTS.register("domain_earth",
+            () -> new DomainEffect(0xC79A5A));
+
+    /** 圣光领域：白金 {@code 0xFFE9A8}。 */
+    public static final RegistryObject<MobEffect> DOMAIN_LIGHT = EFFECTS.register("domain_light",
+            () -> new DomainEffect(0xFFE9A8));
+
+    /** 元素 → 领域效果（{@link com.tnc.tnc.magic.domain.DomainSpells} 用它读状态 ✓）。 */
+    private static final java.util.Map<Element, RegistryObject<MobEffect>> DOMAIN_EFFECTS = java.util.Map.of(
+            Element.LIGHTNING, DOMAIN_LIGHTNING,
+            Element.DARK, DOMAIN_DARK,
+            Element.FIRE, DOMAIN_FIRE,
+            Element.WIND, DOMAIN_WIND,
+            Element.WATER, DOMAIN_WATER,
+            Element.EARTH, DOMAIN_EARTH,
+            Element.LIGHT, DOMAIN_LIGHT);
+
+    /** 某系的领域效果（没注册返回 {@code null}）。 */
+    public static MobEffect domainEffect(Element element) {
+        if (element == null) {
+            return null;
+        }
+        RegistryObject<MobEffect> ref = DOMAIN_EFFECTS.get(element);
+        return ref == null ? null : ref.get();
+    }
+
     private TNEffects() {
+    }
+
+    /** 领域效果本体：只有"开着"这一件事，不加属性、不跳伤害、不显示粒子 ✓。 */
+    private static class DomainEffect extends MobEffect {
+        DomainEffect(int color) {
+            super(MobEffectCategory.BENEFICIAL, color);
+        }
     }
 
     /** 带一个属性修饰符的效果（默认增益；减益走下面那个带 category 的构造器 ✓）。 */

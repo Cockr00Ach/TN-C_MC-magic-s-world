@@ -56,6 +56,13 @@ public final class TNSpellOrbClientEvents {
         event.registerEntityRenderer(TNOrbEntities.WATER_SPELL.get(), TNWaterSpellRenderer::new);
         event.registerEntityRenderer(TNOrbEntities.WATER_BOLT.get(), TNWaterBoltRenderer::new);
         event.registerEntityRenderer(TNOrbEntities.WATER_FIELD.get(), TNWaterFieldRenderer::new);
+        // ★★ 2026-11-09 水球链 t4/t5 重做（作者："金闪闪那种"✓）：
+        //   ① 法阵群（平时两个小阵绕着玩家转，攻击时一圈阵亮起来再齐射 ✓）
+        //   ② 齐射出去的一道道水波（"不用原来那样持久，就跟光线一样"✓）
+        //   ⚠️ 这两个**都必须注册** ✗ —— 漏一个就是"一施法就 entityrenderer is null 卡退"✗
+        //   （OrbEntityRendererCoverageTest 会在构建期拦住 ✓）
+        event.registerEntityRenderer(TNOrbEntities.WATER_GATE.get(), TNWaterGateRenderer::new);
+        event.registerEntityRenderer(TNOrbEntities.WATER_LANCE.get(), TNWaterLanceRenderer::new);
         // ★ 火球链的自有投射物（火系第 1 条链 ✓）：命中要精确知道法术与伤害才能挂焚身，
         //   所以不走引擎的 PROJECTILE。视觉暂由粒子承担，见 TNFireBoltRenderer ✓
         event.registerEntityRenderer(TNOrbEntities.FIRE_BOLT.get(), TNFireBoltRenderer::new);

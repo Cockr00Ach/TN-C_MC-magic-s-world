@@ -89,7 +89,7 @@ public class TNWindBladeEntity extends Entity {
      * 20 倍时是 5 格 ⇒ 一出生就可能够到旁边的怪。给足 {@code MAX_LIFE} 才不至于
      * "刚出门就没了" ✓（真正的保护是 {@link #MAX_HIT_RADIUS} 的封顶 ✓）。
      */
-    private static final int MAX_LIFE = 40;
+    public static final int MAX_LIFE = 40;
 
     /**
      * 渲染缩放的**基准** ✓ —— 月牙模型本身最大跨度 1.179 格 ⇒ 1 倍 ≈ 1.2 格宽 ✓。
@@ -98,6 +98,33 @@ public class TNWindBladeEntity extends Entity {
      * 实际渲染缩放 = {@code BASE_SCALE × 倍率} ✓（见 {@code TNNightGripEntity}）。
      */
     private static final double BASE_SCALE = 1.0D;
+
+    /**
+     * 1 倍时月牙的**跨度**（格）✓ —— 旧的烘焙模型量出来是 1.179 格。
+     *
+     * <p>现在渲染不再画模型（改成战士那种剑气光带，见 {@code client/WindBladeQi}），
+     * 但"1 倍 = 多大"必须沿用同一个口径 ✓，否则判定（{@link #hitRadiusFor(double)}）
+     * 和画面又会各说各话 ✗。
+     */
+    public static final double BASE_SPAN = 1.179D;
+
+    /**
+     * ★ <b>风法（龙卷风）甩出来的刃统一尺寸</b> —— 2026-11-09 作者：「这个风刃也改一改……
+     * 体积统一一下」；2026-11-10 又加了一句「体积加大」⇒ 2.4 → <b>3.8</b>。
+     *
+     * <p>旧表 t3/t4/t5 = <b>5 / 10 / 20</b> 倍 ⇒ t5 的刃跨度 23.6 格（比龙卷风还宽 ✗）。
+     * 现在三档都按这个数走 ⇒ 跨度 {@code 1.179 × 3.8 ≈ 4.5 格}、判定半径
+     * {@code 1.1 × √3.8 ≈ 2.1 格} ✓ —— 战士剑气是 2.4 格，刃比它大一号，像"斩开"的一片 ✓。
+     *
+     * <p>⚠️ 只统一**风法**这一路 ✗：风守卫 Boss 那两发（2.6 / 4.2）是它自己的招式参数，
+     * 照旧按调用方给的倍率走 ✓。
+     */
+    public static final double SPELL_BLADE_SIZE = 3.8D;
+
+    /** 这一发月牙的**半宽**（格）✓ —— 渲染几何用它算真实尺寸（不再用模型 + 缩放）。 */
+    public double halfSpanBlocks() {
+        return BASE_SPAN * sizeMultiplier() * 0.5D;
+    }
 
     private UUID ownerId;
 

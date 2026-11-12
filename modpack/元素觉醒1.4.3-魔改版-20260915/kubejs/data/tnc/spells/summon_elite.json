@@ -6,7 +6,7 @@
     "tier": 2
   },
   "cast": {
-    "duration": 0.7,
+    "duration": 1.3,
     "animation": "spell_engine:one_handed_area_charge",
     "sound": {
       "id": "spell_engine:generic_soul_casting",

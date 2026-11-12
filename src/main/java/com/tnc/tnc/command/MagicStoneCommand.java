@@ -376,6 +376,8 @@ public class MagicStoneCommand {
             case OUT_OF_ORDER -> "需先学上一级";
             case NOT_ENOUGH_POINTS -> "点数不足";
             case NOT_IMPLEMENTED -> "尚未实装";
+            case DOMAIN_CONFLICT -> "已选别的领域";
+            case DOMAIN_NEEDS_AFFINITY -> "领域需要亲和力";
         };
     }
 

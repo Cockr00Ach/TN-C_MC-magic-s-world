@@ -293,6 +293,14 @@ public final class TnSpellMechanics {
     private record QueuedBolt(ServerLevel level, Vec3 at, double scale, long due) {
     }
 
+    /**
+     * 天打五雷轰一共劈几道 ✓（作者 2026-11-07：「天打五雷轰轰的次数太少了」）。
+     *
+     * <p>原来是"中心 1 道 ＋ 环绕 5 道"＝ 6 道、两秒劈完 ⇒ 作者嫌少。
+     * 现在 **1 ＋ 9 ＋ 6 ＋ 3 ＝ 19 道**，分三波劈满 4 秒（近 → 外圈 → 收尾大雷）✓。
+     */
+    public static final int HEAVENLY_THUNDER_BOLTS = 19;
+
     private static final java.util.List<QueuedBolt> QUEUED_BOLTS =
             new java.util.concurrent.CopyOnWriteArrayList<>();
 
@@ -705,6 +713,8 @@ public final class TnSpellMechanics {
         com.tnc.tnc.magic.water.TNWaterSpellEntity.cast(player, spellId);
         com.tnc.tnc.magic.water.TNWaterFieldEntity.cast(player, spellId);
         com.tnc.tnc.magic.water.ChaosSilence.cast(player, spellId);
+        // 领域法术（2026-11-08）：独立法术页的雷霆领域 / 暗黑领域 —— 把领域"展开"成状态效果
+        com.tnc.tnc.magic.domain.DomainService.cast(player, spellId);
         // 火球链（火系第 1 条链）：自有投射物。命中时要精确知道「是哪个法术、打了多少」
         // 才能挂焚身，所以不走引擎的 PROJECTILE —— 引擎不会把法术 id 告诉伤害事件。
         // 不是本链的法术它返回 false，所以这里无脑调一遍是安全的（和水系同一个约定）。
@@ -758,7 +768,12 @@ public final class TnSpellMechanics {
             circleOwn = true;                             // 阵在**准星落点**（作者要的"敌人脚下"✓）
             // 大雷球的粒子不跟随 ✗ -> 自己开一个窗口，每 tick 在球的位置画环 ✓
             BIG_BALL_UNTIL.put(player.getUUID(), player.level().getGameTime() + BIG_BALL_WINDOW);
+            // ★ 2026-11-05 第四批（作者："雷球的 t4 和 t5 也可以优化一下，一条龙从天上飞进地下，
+            //   身后跟着的是我们的巨大雷球"）⇒ 雷球链 **t4 = cataclysm_thunder_orb** 起俯冲 ✓
+            spawnOrbDiveDragon(player, 4);
         } else if (path.equals("god_descent")) {
+            // ★ 上面那条同理：雷球链 **t5 = god_descent（神在投篮）** 也要一条俯冲雷龙 ✓
+            spawnOrbDiveDragon(player, 5);
             // 神在投篮（t5）：**开窗口** —— 真正的三尊神 / 大雷球 / 锚点魔法阵由 tickDivineShot 摆 ✓
             // 2026-09-29 修（作者："t5 施法总是有问题"）：这里原来只有一张脚下的阵 ✗，
             //   DIVINE_UNTIL 从头到尾**没有任何地方写过** ⇒ tickDivineShot 形同死代码：
@@ -818,17 +833,32 @@ public final class TnSpellMechanics {
             //   然后龙破土、沿螺旋冲上 50 多格 —— 体积比"神在投篮"那 29 格高的神还大 ✓
             Vec3 impact = groundBelow(player.serverLevel(), aimPoint(player), 24);
             spawnDragon(player.serverLevel(), impact, 1.15D, 14, theme, 175);
-            // ★ 2026-11-05 作者："天打五雷轰的雷电怎么不优化一下" —— 五道错开的落雷 ✓
-            //   中间那道最粗（和龙同一下落地），周围五道依次落，从 4 tick 到 36 tick ⇒
-            //   整整两秒都在劈，"天打五雷轰"才像那么回事 ✓（伤害仍由流星/JSON 结算 ✗ 不重复）
+            // ★ 2026-11-05 作者："天打五雷轰的雷电怎么不优化一下" —— 错开的落雷 ✓
+            // ★ 2026-11-07 作者："天打五雷轰轰的次数太少了" —— 6 道 → **19 道**，三波：
+            //   第一波 9 道：贴着落点一圈，3 tick 一道（12~36 tick）
+            //   第二波 6 道：外圈 4.5~8.5 格补劈，5 tick 一道（34~64 tick）
+            //   第三波 3 道：更大更粗的收尾（58~70 tick）
+            //   ⇒ 整整 4 秒天都在劈，"五雷轰"才够凶 ✓（伤害仍由流星/JSON 结算 ✗ 不重复）
             ServerLevel boltLevel = player.serverLevel();
             queueBolt(boltLevel, impact, 12.5D, 12);
-            for (int i = 0; i < 5; i++) {
-                double ang = Math.PI * 2.0D * i / 5.0D + boltLevel.random.nextDouble() * 0.4D;
-                double r = 2.6D + boltLevel.random.nextDouble() * 2.6D;
+            for (int i = 0; i < 9; i++) {
+                double ang = Math.PI * 2.0D * i / 9.0D + boltLevel.random.nextDouble() * 0.35D;
+                double r = 2.2D + boltLevel.random.nextDouble() * 2.4D;
                 Vec3 p = impact.add(Math.cos(ang) * r, 0.0D, Math.sin(ang) * r);
-                queueBolt(boltLevel, groundBelow(boltLevel, p, 24), 7.0D + boltLevel.random.nextDouble() * 2.0D,
-                        4 + i * 7);
+                queueBolt(boltLevel, groundBelow(boltLevel, p, 24),
+                        7.0D + boltLevel.random.nextDouble() * 2.0D, 12 + i * 3);
+            }
+            for (int i = 0; i < 6; i++) {
+                double ang = Math.PI * 2.0D * i / 6.0D + 0.55D + boltLevel.random.nextDouble() * 0.30D;
+                double r = 4.5D + boltLevel.random.nextDouble() * 4.0D;
+                Vec3 p = impact.add(Math.cos(ang) * r, 0.0D, Math.sin(ang) * r);
+                queueBolt(boltLevel, groundBelow(boltLevel, p, 28),
+                        6.0D + boltLevel.random.nextDouble() * 2.0D, 34 + i * 5);
+            }
+            for (int i = 0; i < 3; i++) {
+                double ang = Math.PI * 2.0D * i / 3.0D + 0.9D;
+                Vec3 p = impact.add(Math.cos(ang) * 1.6D, 0.0D, Math.sin(ang) * 1.6D);
+                queueBolt(boltLevel, groundBelow(boltLevel, p, 24), 10.0D + i, 58 + i * 6);
             }
         }
 
@@ -1049,6 +1079,43 @@ public final class TnSpellMechanics {
     }
 
     /**
+     * ★ <b>雷球链 t4/t5 的俯冲雷龙</b>（2026-11-05 第四批）。
+     *
+     * <p>作者：「雷球的 t4 和 t5 也可以优化一下，一条龙从天上飞进地下，
+     * 身后跟着的是我们的巨大雷球」。
+     *
+     * <p>落点在准星所指的地面；龙本身是 {@link TNLightningDragonEntity#MODE_DIVE}
+     * （实体停在落点，渲染器把龙身抬到 {@code height} 高处、倒过来头朝下、按 age 一路降下来 ✓），
+     * 身后那串巨大雷球由渲染器沿着同一条下落线画（纯几何，不额外生成实体 ✓ 也就不会有二次伤害 ✗）。
+     *
+     * @param tier 4 = 超级无敌大雷球 {@code cataclysm_thunder_orb}（小一号、快一点）
+     *             ／5 = 神在投篮 {@code god_descent}（更大、砸得更重）
+     */
+    private static void spawnOrbDiveDragon(ServerPlayer player, int tier) {
+        ServerLevel level = player.serverLevel();
+        Vec3 at = groundBelow(level, aimPoint(player), 24);
+        int theme = randomLightningTheme(level);
+        double scale = tier >= 5 ? 1.10D : 0.90D;
+        double height = 46.0D * scale + 12.0D;
+        int life = tier >= 5 ? 56 : 48;
+        // 同一个落点只留一条俯冲龙（连续两发 t5 会叠成两条交叉的龙 ✗）
+        for (TNLightningDragonEntity old : level.getEntitiesOfClass(TNLightningDragonEntity.class,
+                new net.minecraft.world.phys.AABB(at, at).inflate(24.0D))) {
+            if (old.dive()) {
+                old.discard();
+            }
+        }
+        TNLightningDragonEntity dragon = TNOrbEntities.LIGHTNING_DRAGON.get().create(level);
+        if (dragon == null) {
+            return;
+        }
+        dragon.configureDive(at, height, scale, life, theme);
+        level.addFreshEntity(dragon);
+        LOGGER.info("TN-C: spawn dive dragon at {} scale={} height={} theme={} life={}",
+                at, scale, height, theme, life);
+    }
+
+    /**
      * 把"准星落点"按到<b>地面</b>上（雷龙要从地里出来，不能悬在半空 ✗）。
      *
      * <p>{@link #aimPoint} 给的是视线命中的那个方块面；玩家朝天/朝远处放 t5 时，
@@ -1136,7 +1203,9 @@ public final class TnSpellMechanics {
         // 闪电登神：全身电弧 + 环绕电光 + 走过留雷印 + **背后跟着的神** ✓
         if (has(player, TNEffects.LIGHTNING_ASCENSION)) {
             ascensionAura(player, time);
-            maintainGodFollower(player, time, false);
+            // ★ 2026-11-05 第三批（作者："雷电登神背后的 god 可以删去，就留下雷龙，但是也不要有雷网"）：
+            //   跟随神 **不再生成** ✗ —— 登神期间只留盘在身上的那条雷龙 ✓
+            //   （removeGodFollower 仍然在 else 分支里做一次兜底清理，防止旧实体残留）
         } else {
             // buff 没了就把"上一个雷印位置"清掉，免得下次上 buff 时先补一枚
             LAST_MARK.remove(player.getUUID());
@@ -1656,12 +1725,10 @@ public final class TnSpellMechanics {
         int idx = Math.max(0, Math.min(GATHER_TICKS.length - 1, tier - 1));
         long now = wallTicks();
         GATHER.put(player.getUUID(), new Gather(now, now + GATHER_TICKS[idx], tier));
-        // ★ 2026-11-05：t5「闪电登神」除了万雷归体，还要有一圈贴在身上的雷笼 ✓
-        //   （作者："丰富…自身周围的特效" —— 归体是"从外往里"，雷笼是"罩在身上"，两层不打架 ✓）
-        if (tier >= 5) {
-            spawnAura(player, 3.6D, 4.2D, 240, randomLightningTheme(player.serverLevel()),
-                    TNLightningAuraEntity.STYLE_STORM);
-        }
+        // ★ 2026-11-05 第三批（作者："就留下雷龙，但是也不要有雷网"）：
+        //   登神不再挂那圈 STYLE_STORM 雷笼 ✗ —— 雷笼的地面雷网就是作者说的"雷网"，
+        //   登神期间只留盘在身上的雷龙 ＋ 身上的电弧/雷印 ✓
+        // （保留 bell 注释，方便以后想加"纯竖笼不带网"的版本时知道原来挂在哪）
         LOGGER.info("TN-C: gather start tier={} ticks={} perTick={} radius={}",
                 tier, GATHER_TICKS[idx], GATHER_PER_TICK[idx], GATHER_RADIUS[idx]);
     }

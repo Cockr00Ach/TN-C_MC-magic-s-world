@@ -11,6 +11,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * <b>雷龙</b> —— 一条"用雷电勾线出来"的龙（纯表现实体）。
@@ -75,6 +76,15 @@ public class TNLightningDragonEntity extends Entity {
 
     public static final int MODE_ERUPT = 0;
     public static final int MODE_COIL = 1;
+    /** ★ 2026-11-05 第四批：从天而降扎进地里（雷球链 t4/t5 —— 作者："一条龙从天上飞进地下"） */
+    public static final int MODE_DIVE = 2;
+
+    /**
+     * 俯冲形态的<b>起始高度</b>（格，×100 存）。渲染器按 age 把它一路降到 0，
+     * 龙身倒转、头朝下，身后拖着一串巨大雷球 ✓。
+     */
+    private static final EntityDataAccessor<Integer> DATA_HEIGHT =
+            SynchedEntityData.defineId(TNLightningDragonEntity.class, EntityDataSerializers.INT);
 
     /** 已经吼过没有（服务端字段就够 ✓）。 */
     private boolean roared = false;
@@ -129,6 +139,32 @@ public class TNLightningDragonEntity extends Entity {
         return this.mode() == MODE_COIL;
     }
 
+    /** ★ 俯冲形态（天 → 地，头朝下，身后跟着巨大雷球）✓ */
+    public boolean dive() {
+        return this.mode() == MODE_DIVE;
+    }
+
+    public double diveHeight() {
+        return this.entityData.get(DATA_HEIGHT) / 100.0D;
+    }
+
+    /**
+     * 变成"从天上扎进地里"的那条龙（雷球链 t4/t5）。
+     *
+     * <p>{@code at} 是<b>落点</b>（实体就停在这儿，渲染器按 {@code height} 把龙身抬到天上再一路降下来）；
+     * 这样位置同步、剔除盒、落地粒子都只需要管一个点 ✓。
+     */
+    public void configureDive(Vec3 at, double height, double scale, int life, int theme) {
+        this.entityData.set(DATA_MODE, MODE_DIVE);
+        this.entityData.set(DATA_HEIGHT, (int) Math.round(Math.max(4.0D, height) * 100.0D));
+        this.entityData.set(DATA_SCALE, (int) Math.round(scale * 100.0D));
+        this.entityData.set(DATA_LIFE, Math.max(20, life));
+        this.entityData.set(DATA_THEME, Math.max(0, theme));
+        this.entityData.set(DATA_DELAY, 0);
+        this.entityData.set(DATA_SEED, this.random.nextInt());
+        this.setPos(at.x, at.y, at.z);
+    }
+
     public java.util.UUID ownerId() {
         return this.entityData.get(DATA_OWNER).orElse(null);
     }
@@ -159,6 +195,7 @@ public class TNLightningDragonEntity extends Entity {
         this.entityData.define(DATA_DELAY, 0);
         this.entityData.define(DATA_MODE, MODE_ERUPT);
         this.entityData.define(DATA_OWNER, java.util.Optional.empty());
+        this.entityData.define(DATA_HEIGHT, 3000);
     }
 
     @Override
@@ -188,6 +225,35 @@ public class TNLightningDragonEntity extends Entity {
                         this.getY() + 0.5D + this.random.nextDouble() * 3.6D,
                         this.getZ() + Math.sin(ang) * r,
                         1, 0.05D, 0.05D, 0.05D, 0.0D);
+            }
+            return;
+        }
+        // ★ 2026-11-05 第四批：俯冲形态（天 → 地，头朝下，身后拖着一串巨大雷球）
+        //   实体位置 = 落点；龙身高度由渲染器按 age 从 diveHeight 一路降到 0 ✓
+        if (this.dive()) {
+            if (!this.roared && this.tickCount == 1) {
+                this.roared = true;
+                level.playSound(null, this.getX(), this.getY() + 0.5D, this.getZ(),
+                        SoundEvents.ENDER_DRAGON_GROWL, SoundSource.HOSTILE, 2.0F, 0.62F);
+                level.playSound(null, this.getX(), this.getY() + 0.5D, this.getZ(),
+                        SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.HOSTILE, 1.4F, 0.5F);
+            }
+            double p = Math.min(1.0D, this.tickCount / (double) Math.max(1, this.life()));
+            double y = this.diveHeight() * (1.0D - p);
+            if (this.tickCount % 3 == 0) {
+                level.sendParticles(TnSpellMechanics.arc(), this.getX(), this.getY() + y, this.getZ(),
+                        2, 0.45D, 0.45D, 0.45D, 0.0D);
+                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, this.getX(), this.getY() + y, this.getZ(),
+                        2, 0.45D, 0.45D, 0.45D, 0.05D);
+            }
+            if (this.tickCount >= this.life()) {
+                level.sendParticles(ParticleTypes.FLASH, this.getX(), this.getY() + 0.5D, this.getZ(),
+                        4, 0.3D, 0.3D, 0.3D, 0.0D);
+                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, this.getX(), this.getY() + 0.3D, this.getZ(),
+                        140, 1.1D, 0.7D, 1.1D, 1.8D);
+                level.playSound(null, this.getX(), this.getY(), this.getZ(),
+                        SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.HOSTILE, 1.8F, 0.7F);
+                this.discard();
             }
             return;
         }
@@ -234,6 +300,10 @@ public class TNLightningDragonEntity extends Entity {
             return super.getBoundingBoxForCulling().inflate(6.0D, 8.0D, 6.0D);
         }
         double s = Math.max(0.5D, this.scale());
+        if (this.dive()) {
+            // 俯冲形态：龙身被渲染器抬到 diveHeight 高处 ⇒ 剔除盒必须跟着抬 ✗（否则平视时整条龙被裁掉）
+            return super.getBoundingBoxForCulling().inflate(12.0D * s, this.diveHeight() + 8.0D, 12.0D * s);
+        }
         return super.getBoundingBoxForCulling().inflate(12.0D * s, LightningDragonPath.sky(s) + 8.0D, 12.0D * s);
     }
 

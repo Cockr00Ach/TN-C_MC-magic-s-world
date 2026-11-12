@@ -1,7 +1,10 @@
 package com.tnc.tnc.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.tnc.tnc.TNMod;
+import com.tnc.tnc.client.lightning.LightningBoltGeometry;
+import com.tnc.tnc.client.lightning.LightningRenderTypes;
 import com.tnc.tnc.magic.TNNightGripEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
@@ -16,6 +19,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 /**
  * <b>抓住不放的那只黑手</b>怎么画 —— 暗系第一条链「黑夜之手」重做的抓取端 ✓
@@ -104,6 +109,14 @@ public class TNNightGripRenderer extends EntityRenderer<TNNightGripEntity> {
      * 会把该填的值打印出来 ✓）。
      */
 
+    /**
+     * ★ 手"伸出去"要多久（tick）—— 作者 2026-11-06：「黑暗之手链手出去的速度可以慢些」。
+     *
+     * <p>原来是 9 tick（≈0.45 秒），几乎是"啪"一下就到位 ✗；现在 20 tick（1 秒）——
+     * 五根手指一节一节张开的过程能看清了 ✓。
+     */
+    private static final float HANG_GROW_TICKS = 20.0F;
+
     public TNNightGripRenderer(EntityRendererProvider.Context context) {
         super(context);
         this.shadowRadius = 0.0F;      // 悬空的黑手不投影子 ✓
@@ -132,43 +145,83 @@ public class TNNightGripRenderer extends EntityRenderer<TNNightGripEntity> {
         poseStack.mulPose(com.mojang.math.Axis.YP.rotation((float) Math.atan2(direction.x, direction.z)));
         poseStack.mulPose(com.mojang.math.Axis.XP.rotation(
                 (float) -Math.asin(Mth.clamp(direction.y, -1.0D, 1.0D))));
-        // ② 按档位放大，再补回引擎内部那 −0.5 格 ✓
+        // ② 按档位放大
         poseStack.scale(scale, scale, scale);
-        // ③ ★ 锚点（作者 2026-10-10："落地点从中心改到底部"）：
-        //    抓取 ⇒ 抬 13/16 格（模型 y 跨度 ±13 单位），**模型底边**落在实体位置上
-        //            ⇒ 配合实体的"目标脚下"锚点 ⇒ 一只手掌**贴地立着**按向目标 ✓；
-        //    天降 ⇒ **不抬**：此时模型的 +Y（原本的"上"）已经被转成水平了，
-        //            再抬就会把整只手平推出去 ✗；掌心（+Z 面）本来就贴着落点 ✓。
-        //    两处都在**缩放后的坐标系**里平移 ⇒ 世界偏移 = (13/16)×scale ✓。
-        poseStack.translate(0.5F, 0.5F + (sky ? 0.0F : (float) entity.modelHalfHeightUnits()), 0.5F);
-
-        if (!renderWithEngine(poseStack, buffer, entity)) {
-            // 引擎不在/渲染失败：**什么都不画**，但绝不崩 ✓
-            // （手的主体表现还有服务端撒的黑索与黑雾粒子 ⇒ 即使这条路径失败也不会"啥都看不见" ✓）
-            if (!logged) {
-                logged = true;
-                LOGGER.warn("TN-C: night hand 引擎渲染路径不可用，本帧只靠粒子表现 ✓");
-            }
+        // ③ ★ 2026-11-05 作者：「那个手模型可以去掉我觉得，我比较想是就是我们的这个黑线简单勾勒一个手」
+        //    ⇒ 不再走引擎模型，改画**几条黑线/血线**。手腕落在实体锚点上、手指往 +Y 长，
+        //      所以原来"补引擎 −0.5"和"抬半高"都不需要了 ✓（天降仍补一下居中）。
+        if (sky) {
+            poseStack.translate(0.5F, 0.5F, 0.5F);
         }
+
+        renderLineHand(entity, partialTick, poseStack, buffer);
         poseStack.popPose();
 
-        if (!sky) {
+        super.render(entity, entityYaw, partialTick, poseStack, buffer, packedLight);
+    }
+
+    /**
+     * ★ <b>用黑线勾勒出来的那只手</b>（作者 2026-11-05：「我们的这个黑线简单勾勒一个手」，
+     * 参考《超凡蜘蛛侠 2》钟楼：蛛丝飞到头，<b>顶端展开五根线</b>，像手一样 ✓）。
+     *
+     * <h2>为什么是"线"而不是模型</h2>
+     * 模型是一块实心的、有正反面的东西，暗系要的恰恰是"只有轮廓、边缘还在渗血"的观感 ✗；
+     * 而 {@link LightningBoltGeometry#darkArc} 画的是黑芯＋血边的线，天生就长这样 ✓。
+     *
+     * <h2>结构（局部坐标：手腕在原点、手指朝 +Y、掌心朝 +Z）</h2>
+     * <pre>
+     *   腕 ← 掌缘两侧 ← 指根弧（五条）
+     *                    └→ 五指：指根 → 中节 → 指尖（两段，**一节一节**长出来 ✓）
+     *                    └→ 拇指：斜着从掌侧伸出去
+     * </pre>
+     * 每根手指错开 {@link #FINGER_STAGGER} tick 起长 ⇒ 指尖像蛛丝那样"唰"地展开五根 ✓。
+     *
+     * <p>相机量用<b>位姿矩阵求逆</b>拿（{@code inv · (0,0,0)}）——这样不管外面转了多少度、
+     * 缩了多少倍，线永远正对相机 ✓。
+     */
+    private static void renderLineHand(TNNightGripEntity entity, float partialTick,
+                                       PoseStack poseStack, MultiBufferSource buffer) {
+        int age = entity.tickCount;
+        float t = age + partialTick;
+        float alpha = 0.92F * Mth.clamp(t / 6.0F, 0.0F, 1.0F);
+        if (alpha <= 0.01F) {
+            return;
+        }
+        float grow = Mth.clamp(t / HANG_GROW_TICKS, 0.0F, 1.0F);
+
+        Matrix4f m = poseStack.last().pose();
+        Matrix4f inv = new Matrix4f(m).invert();
+        Vector3f camLocal = inv.transformPosition(new Vector3f());
+        double cx = camLocal.x;
+        double cy = camLocal.y;
+        double cz = camLocal.z;
+
+        VertexConsumer vc = buffer.getBuffer(LightningRenderTypes.DARK);
+        long seed = entity.getId() * 1315423911L;
+
+        // ① 手本体：统一走 {@link DarkHandLines}（黑雾中心冒出来的手用的是同一份骨架 ✓）
+        DarkHandLines.hand(vc, m, cx, cy, cz, grow, alpha, 0.0F, seed);
+
+        // ⑥ 背上那条"线"（原来接模型手腕的黑索）：也从施法者背后**一节一节**爬过来 ✓
+        if (!entity.skyfall()) {
             LivingEntity owner = living(entity.ownerEntityId());
             if (owner != null) {
                 Vec3 origin = entity.getPosition(partialTick);
-                Vec3 back = owner.getPosition(partialTick).add(0, owner.getBbHeight() * 0.65D, 0)
-                        .subtract(owner.getLookAngle().multiply(0.55D, 0.0D, 0.55D));
-                // Actual imported wrist centre, in the same rotated coordinates as the model.
-                double yaw = Math.atan2(direction.x, direction.z);
-                double pitch = -Math.asin(Mth.clamp(direction.y, -1.0D, 1.0D));
-                Vec3 wrist = new Vec3(-0.8D / 16, entity.modelHalfHeightUnits() - 6.5D / 16, -6.0D / 16)
-                        .xRot((float) -pitch).yRot((float) yaw).scale(scale);
-                NightHandGeometry.tube(buffer.getBuffer(NightHandRenderTypes.geometry()),poseStack.last().pose(),
-                        back.subtract(origin),wrist,Math.min(.8,.12*scale),entity.handSlot(),false,entity.tickCount+partialTick);
+                Vec3 back = owner.getPosition(partialTick)
+                        .add(0.0D, owner.getBbHeight() * 0.62D, 0.0D)
+                        .subtract(owner.getLookAngle().multiply(0.50D, 0.0D, 0.50D));
+                Vector3f local = inv.transformPosition(new Vector3f(
+                        (float) (back.x - origin.x), (float) (back.y - origin.y), (float) (back.z - origin.z)));
+                float cg = Mth.clamp(t / HANG_GROW_TICKS, 0.0F, 1.0F);
+                LightningBoltGeometry.darkBoltDeep(vc, m, local.x, local.y, local.z, 0.0D, 0.08D, -0.02D,
+                        seed + 401L, 0.075F, alpha * 0.90F, cg, cx, cy, cz);
             }
         }
-        super.render(entity, entityYaw, partialTick, poseStack, buffer, packedLight);
     }
+
+    // ------------------------------------------------------------------
+    //  （线手骨架已抽到 {@link DarkHandLines}：黑手和黑雾中心的手共用那一份 ✓）
+    // ------------------------------------------------------------------
 
     /**
      * 手该朝哪个方向 —— 也就是"掌心对着谁" ✓。
