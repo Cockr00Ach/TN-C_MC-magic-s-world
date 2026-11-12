@@ -718,6 +718,8 @@ public final class TnSpellMechanics {
         // 火球链（火系第 1 条链）：自有投射物。命中时要精确知道「是哪个法术、打了多少」
         // 才能挂焚身，所以不走引擎的 PROJECTILE —— 引擎不会把法术 id 告诉伤害事件。
         // 不是本链的法术它返回 false，所以这里无脑调一遍是安全的（和水系同一个约定）。
+        // 火法重做（2026-11-13）：点火链 / 引爆链统一走热量经济
+        com.tnc.tnc.magic.fire.TNFireRework.cast(player, spellId);
         com.tnc.tnc.magic.fire.TNFireBoltEntity.cast(player, spellId);
         // 火球链里"不是朝准星扔火球"的那两档（t4 熔岳天倾的头顶法阵 / t5 炎葬的脚下法阵）
         com.tnc.tnc.magic.fire.TNFireFields.cast(player, spellId);

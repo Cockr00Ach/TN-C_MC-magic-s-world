@@ -269,6 +269,11 @@ public final class TNFireBoltEntity extends Projectile {
         if (player == null || spellId == null || !spellId.getNamespace().equals(TNMod.MODID)) {
             return false;
         }
+        // 2026-11-13 火法重做：点火链/引爆链已交给 TNFireRework（热量经济），
+        // 这里必须让路，否则同一个法术会被新旧两套各放一次 ✗
+        if (TNFireRework.handles(spellId)) {
+            return false;
+        }
         FireSpellRules.Bolt bolt = FireSpellRules.bolt(spellId.getPath());
         if (bolt == null) {
             return false;
