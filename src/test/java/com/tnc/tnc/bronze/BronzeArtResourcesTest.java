@@ -22,7 +22,7 @@ class BronzeArtResourcesTest {
             try(var reader=Files.newBufferedReader(ASSETS.resolve("models/item/"+kind.id()+".json"),StandardCharsets.UTF_8)){
                 var model=BlockModel.fromStream(reader);
                 assertFalse(model.getElements().isEmpty());
-                for(var element:model.getElements())assertEquals(6,element.faces.size());
+                for(var element:model.getElements())assertTrue(element.faces.size()>=1&&element.faces.size()<=6,"Only visible faces are required for vanilla items");
             }
         }
     }

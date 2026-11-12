@@ -21,7 +21,7 @@ public final class BronzeTwinLayer<T extends LivingEntity,M extends EntityModel<
         getParentModel().translateToHand(arm,pose);
         pose.mulPose(Axis.XP.rotationDegrees(-90));pose.mulPose(Axis.YP.rotationDegrees(180));pose.translate((left?-1:1)/16d,.125,-.625);
         var context=left?ItemDisplayContext.THIRD_PERSON_LEFT_HAND:ItemDisplayContext.THIRD_PERSON_RIGHT_HAND;
-        BronzeTwinRenderer.withView(BronzeTwinRenderer.View.SECONDARY,()->Minecraft.getInstance().gameRenderer.itemInHandRenderer.renderItem(owner,owner.getMainHandItem(),context,left,pose,buffers,light));
+        BronzeTwinRenderer.withView(BronzeTwinRenderer.View.SECONDARY,owner,()->Minecraft.getInstance().gameRenderer.itemInHandRenderer.renderItem(owner,owner.getMainHandItem(),context,left,pose,buffers,light));
         pose.popPose();
     }
 }

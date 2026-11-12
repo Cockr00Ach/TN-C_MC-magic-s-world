@@ -1,0 +1,13 @@
+{
+  "item.tnc.living_fish_sword": "Living Fish Sword",
+  "item.tnc.metal_fish_sword": "Metal Fish Sword",
+  "tooltip.tnc.fish_living": "Fast attacks · Anvil: iron ingot 5% / iron block 30% metalization",
+  "tooltip.tnc.fish_metal": "Metal scales · Stronger damage, slower attacks",
+  "tooltip.tnc.fish_pending": "Take to attempt metalization: %s%% chance (failure keeps the sword)",
+  "message.tnc.fish_success": "Metalization succeeded! Metal Fish Sword acquired.",
+  "message.tnc.fish_failure": "Metalization failed. Material consumed; sword retained.",
+  "skill.tnc.fish_school_living": "Fish Rush",
+  "skill.tnc.fish_school_metal": "Iron Shoal",
+  "tooltip.tnc.fish_school": "Right-click: %s | Damage %s | Mana %s | Cooldown %ss (shared)",
+  "message.tnc.fish_mana": "Cannot spend mana right now (requires %s)."
+}

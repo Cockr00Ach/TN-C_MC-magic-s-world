@@ -1,0 +1,76 @@
+{
+  "path": "C:\\Users\\邵子豪\\Desktop\\mc建模\\武器\\青铜武器与人偶_精修_20261109\\可编辑模型\\07_人偶持械精修预览.bbmodel",
+  "profile": "generic",
+  "kind": "bbmodel",
+  "structural_errors_absent": true,
+  "dependencies_complete": true,
+  "counts": {
+    "elements": 883,
+    "plane_elements": 0,
+    "inverted_elements": 0,
+    "rotated_elements": 176,
+    "declared_export_faces": 5286
+  },
+  "textures": {
+    "0": {
+      "size": [
+        2048,
+        2048
+      ],
+      "pixels": 4194304,
+      "rgba_base_bytes": 16777216,
+      "transparent_pixels": 0,
+      "partial_alpha_pixels": 0,
+      "frame_size": [
+        2048,
+        2048
+      ],
+      "frame_count": 1,
+      "animation_metadata_checked": false,
+      "uv_size": [
+        256,
+        256
+      ]
+    },
+    "1": {
+      "size": [
+        512,
+        256
+      ],
+      "pixels": 131072,
+      "rgba_base_bytes": 524288,
+      "transparent_pixels": 0,
+      "partial_alpha_pixels": 0,
+      "frame_size": [
+        512,
+        256
+      ],
+      "frame_count": 1,
+      "animation_metadata_checked": false,
+      "uv_size": [
+        16,
+        16
+      ]
+    }
+  },
+  "texture_pixels": 4325376,
+  "errors": [],
+  "warnings": [
+    {
+      "code": "non_cube_geometry",
+      "where": "881:主手直刃_完整成品网格",
+      "detail": "Java cuboid export cannot directly represent arbitrary mesh geometry"
+    },
+    {
+      "code": "non_cube_geometry",
+      "where": "882:伴随弯刃_完整成品网格",
+      "detail": "Java cuboid export cannot directly represent arbitrary mesh geometry"
+    }
+  ],
+  "limitations": [
+    "No Minecraft client render or FPS measurement",
+    "No full schema validation or arbitrary overlap/hidden-face proof",
+    "No custom animation expansion, bone transform baking or outline pairing verification",
+    "Pack version, item definitions and display contexts require separate checks"
+  ]
+}

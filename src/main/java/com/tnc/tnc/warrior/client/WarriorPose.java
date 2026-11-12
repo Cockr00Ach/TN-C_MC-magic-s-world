@@ -2,6 +2,7 @@ package com.tnc.tnc.warrior.client;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
@@ -30,6 +31,23 @@ public final class WarriorPose {
     }
 
     public static void apply(Player player, HumanoidModel<?> model) {
+        try {
+            applyPose(player, model);
+        } finally {
+            // PlayerModel copied these layers before our setupAnim TAIL hook. Recopy
+            // the final pose so a moved arm cannot leave a detached sleeve behind.
+            if (model instanceof PlayerModel<?> skin) {
+                skin.rightSleeve.copyFrom(model.rightArm);
+                skin.leftSleeve.copyFrom(model.leftArm);
+                skin.rightPants.copyFrom(model.rightLeg);
+                skin.leftPants.copyFrom(model.leftLeg);
+                skin.jacket.copyFrom(model.body);
+                skin.hat.copyFrom(model.head);
+            }
+        }
+    }
+
+    private static void applyPose(Player player, HumanoidModel<?> model) {
         WarriorAnimationClient.Active active = WarriorAnimationClient.active(player.getId());
         if (active == null) {
             pairedArms(player,model);

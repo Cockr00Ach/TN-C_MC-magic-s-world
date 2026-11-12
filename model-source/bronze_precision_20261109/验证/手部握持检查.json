@@ -1,0 +1,63 @@
+{
+  "scope": "双手四指围绕刀柄弯合、拇指从对侧回扣；保留刀刃朝下和长刀尖朝前",
+  "projects": [
+    {
+      "project": "06_青铜人偶_铸造精修.bbmodel",
+      "hand_elements_adjusted": 76,
+      "all_other_elements_unchanged_at_target_Float32": true,
+      "rig_and_mesh_weapon_poses_unchanged": true,
+      "original_UV_offsets_reused": true,
+      "resized_UV_islands_fit_original_allocations": true,
+      "new_components": 0,
+      "new_textures": 0
+    },
+    {
+      "project": "07_人偶持械精修预览.bbmodel",
+      "hand_elements_adjusted": 76,
+      "all_other_elements_unchanged_at_target_Float32": true,
+      "rig_and_mesh_weapon_poses_unchanged": true,
+      "original_UV_offsets_reused": true,
+      "resized_UV_islands_fit_original_allocations": true,
+      "new_components": 0,
+      "new_textures": 0
+    }
+  ],
+  "native_reopen_passed": true,
+  "runtime_boxes_updated": 76,
+  "runtime_box_count": 881,
+  "texture_pixels_unchanged": true,
+  "texture": [
+    2048,
+    2048
+  ],
+  "texels_per_model_unit": 8,
+  "grip_axes": [
+    {
+      "center": [
+        -6,
+        11.3,
+        -0.65
+      ],
+      "shaft_axis": "local Z"
+    },
+    {
+      "center": [
+        6,
+        11.3,
+        -0.65
+      ],
+      "shaft_axis": "local Z"
+    }
+  ],
+  "geometry_note": "四指沿握柄纵向排列，各自三段指节绕握柄弯合，指尖回扣；掌背位于握柄外侧，拇指跨向食指端。",
+  "cost_delta": {
+    "components": 0,
+    "faces": 0,
+    "textures": 0,
+    "texture_pixels": 0,
+    "geometry_frames": 0
+  },
+  "game_started": false,
+  "game_installed": false,
+  "client_FPS": "未测量"
+}

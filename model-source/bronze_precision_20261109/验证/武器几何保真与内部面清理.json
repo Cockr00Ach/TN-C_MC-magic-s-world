@@ -1,0 +1,82 @@
+[
+  {
+    "model": "bronze_greatsword",
+    "baseline_components": 1895,
+    "final_components": 1890,
+    "final_faces": 10951,
+    "removed_internal_faces": 419,
+    "removed_fully_hidden_components": [
+      3,
+      4,
+      170,
+      172,
+      173
+    ],
+    "same_visible_geometry_and_UV": true,
+    "twin_six_faces_required": false
+  },
+  {
+    "model": "bronze_spear",
+    "baseline_components": 1207,
+    "final_components": 1200,
+    "final_faces": 6833,
+    "removed_internal_faces": 409,
+    "removed_fully_hidden_components": [
+      461,
+      462,
+      467,
+      468,
+      479,
+      481,
+      482
+    ],
+    "same_visible_geometry_and_UV": true,
+    "twin_six_faces_required": false
+  },
+  {
+    "model": "bronze_dao",
+    "baseline_components": 1408,
+    "final_components": 1408,
+    "final_faces": 8230,
+    "removed_internal_faces": 218,
+    "removed_fully_hidden_components": [],
+    "same_visible_geometry_and_UV": true,
+    "twin_six_faces_required": false
+  },
+  {
+    "model": "bronze_dagger",
+    "baseline_components": 894,
+    "final_components": 889,
+    "final_faces": 5037,
+    "removed_internal_faces": 327,
+    "removed_fully_hidden_components": [
+      7,
+      8,
+      81,
+      83,
+      84
+    ],
+    "same_visible_geometry_and_UV": true,
+    "twin_six_faces_required": false
+  },
+  {
+    "model": "bronze_twin_main",
+    "baseline_components": 1894,
+    "final_components": 1894,
+    "final_faces": 11364,
+    "removed_internal_faces": 0,
+    "removed_fully_hidden_components": [],
+    "same_visible_geometry_and_UV": true,
+    "twin_six_faces_required": true
+  },
+  {
+    "model": "bronze_twin_off",
+    "baseline_components": 1645,
+    "final_components": 1645,
+    "final_faces": 9870,
+    "removed_internal_faces": 0,
+    "removed_fully_hidden_components": [],
+    "same_visible_geometry_and_UV": true,
+    "twin_six_faces_required": true
+  }
+]
