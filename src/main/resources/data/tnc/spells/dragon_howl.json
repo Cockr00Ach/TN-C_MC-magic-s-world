@@ -6,7 +6,7 @@
     "tier": 4
   },
   "cast": {
-    "duration": 1.2,
+    "duration": 0.95,
     "animation": "spell_engine:one_handed_projectile_charge",
     "sound": {
       "id": "spell_engine:generic_arcane_casting",

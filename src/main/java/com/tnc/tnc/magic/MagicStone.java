@@ -223,6 +223,10 @@ public class MagicStone {
         if (serverPlayer.level().isClientSide()) {
             return;
         }
+        // 附身中暂停回魔：否则 8% 进入 + 1.2~2.4%/s 的消耗会被回魔抵掉，HUD 上几乎不掉。
+        if (com.tnc.tnc.travel.TravelFormService.active(serverPlayer)) {
+            return;
+        }
         int interval = Math.max(1, Config.manaRegenIntervalTicks);
         // ★ 单调时钟（见 nowTicks 的说明）：**绝不能**再用 level.getGameTime() ✗ ——
         //   换到新世界时 gameTime 会倒退，delta 变负数会让这里的闸门永久成立 ⇒ 回魔彻底停摆 ✗✗

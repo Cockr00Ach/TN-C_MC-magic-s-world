@@ -75,7 +75,7 @@ class LightWingsPreviewTest {
         System.out.println("[旋转手性对比已写出] build/light_wings_rot_none|plus|minus.png（纯色 ✓）");
     }
 
-    private static void render(List<TNLightWingsModel.PreviewFace> faces, BufferedImage tex,
+    static void render(List<TNLightWingsModel.PreviewFace> faces, BufferedImage tex,
                                double yawDeg, String out, boolean solidOnly) throws Exception {
         BufferedImage img = new BufferedImage(W, H, BufferedImage.TYPE_INT_ARGB);
         for (int y = 0; y < H; y++) {
@@ -257,7 +257,7 @@ class LightWingsPreviewTest {
         return x * x;
     }
 
-    private static void loadModel() throws Exception {
+    static void loadModel() throws Exception {
         try (var stream = LightWingsPreviewTest.class.getResourceAsStream(
                 "/assets/tnc/geo/entity/light_wings.geo.json")) {
             assertNotNull(stream, "找不到 light_wings.geo.json");
@@ -265,7 +265,7 @@ class LightWingsPreviewTest {
         }
     }
 
-    private static BufferedImage loadTexture() throws Exception {
+    static BufferedImage loadTexture() throws Exception {
         try (var stream = LightWingsPreviewTest.class.getResourceAsStream(
                 "/assets/tnc/textures/entity/light_wings_bedrock.png")) {
             assertNotNull(stream, "找不到贴图");

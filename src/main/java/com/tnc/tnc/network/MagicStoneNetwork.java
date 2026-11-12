@@ -27,7 +27,9 @@ public class MagicStoneNetwork {
     // version has to change or a stale client would read the buffer past the end).
     // v28 adds attack ownership, target size and the surface frame to warrior impacts.
     // v29 includes absolute tempering points in the tracked-player weapon-growth packet.
-    private static final String PROTOCOL_VERSION = "29";
+    // v30 accepts tracked phantom peaks through 10x.
+    // v31 adds authoritative sword-ultimate path effects.
+    private static final String PROTOCOL_VERSION = "31";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "main"),
@@ -36,6 +38,7 @@ public class MagicStoneNetwork {
             PROTOCOL_VERSION::equals);
 
     public static void register() {
+        CHANNEL.messageBuilder(com.tnc.tnc.warrior.WarriorSwordFx.class,216,NetworkDirection.PLAY_TO_CLIENT).encoder(com.tnc.tnc.warrior.WarriorSwordFx::encode).decoder(com.tnc.tnc.warrior.WarriorSwordFx::decode).consumerMainThread(com.tnc.tnc.warrior.WarriorSwordFx::handle).add();
         CHANNEL.messageBuilder(com.tnc.tnc.warrior.WarriorImpactPacket.class,215,NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.tnc.tnc.warrior.WarriorImpactPacket::encode).decoder(com.tnc.tnc.warrior.WarriorImpactPacket::decode)
                 .consumerMainThread(com.tnc.tnc.warrior.WarriorImpactPacket::handle).add();

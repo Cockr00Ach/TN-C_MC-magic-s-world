@@ -20,7 +20,8 @@ public final class ChantRules {
             case "divine_shot" -> new String[]{"借我神明的一瞬","天穹为场，雷星为球","神在投篮——此击必达"};
             case "lightning_recharge" -> new String[]{"雷脉轮转，时序逆行","解开束缚我的刻度","闪电——再度听令"};
             case "lightning_ascension" -> new String[]{"肉身为引，雷霆为魂","跨过凡人的边界","闪电登神——吾即天威"};
-            default -> new String[]{entry.element().cn()+"之元素，回应召唤","以魔力为契，以意志为引",entry.displayName()+"——降临"};
+            // ★ element 可能是 null（独立/领域法术不进七元素数组）—— 直接 .cn() 会 NPE ✗
+            default -> new String[]{entry.element()==null?"领域":entry.element().cn(),"以魔力为契，以意志为引",entry.displayName()+"——降临"};
         };
     }
     public static String line(SpellCatalog.Entry entry,float progress) {

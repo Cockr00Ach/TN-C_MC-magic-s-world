@@ -74,6 +74,8 @@ public class TNThunderOrbEntity extends Entity {
     /** 每 tick 画几个点（每点 4 颗，紫黄各半 ✓） */
     private static final int ORB_RING_POINTS = 36;
 
+    private static final net.minecraft.network.syncher.EntityDataAccessor<java.util.Optional<UUID>> VIEW_OWNER=net.minecraft.network.syncher.SynchedEntityData.defineId(TNThunderOrbEntity.class,net.minecraft.network.syncher.EntityDataSerializers.OPTIONAL_UUID);
+    public UUID visualOwner(){return entityData.get(VIEW_OWNER).orElse(null);}
     private UUID ownerId;
     private int slot;
 
@@ -100,6 +102,7 @@ public class TNThunderOrbEntity extends Entity {
 
     @Override
     protected void defineSynchedData() {
+        entityData.define(VIEW_OWNER,java.util.Optional.empty());
         // 没有需要同步的字段：位置由原版实体同步机制处理 ✓
     }
 
@@ -121,6 +124,7 @@ public class TNThunderOrbEntity extends Entity {
 
     @Override
     public void tick() {
+        if(!level().isClientSide)entityData.set(VIEW_OWNER,java.util.Optional.ofNullable(ownerId));
         super.tick();       // 客户端靠它做插值，位置看起来才顺 ✓
         if (this.level().isClientSide()) {
             return;

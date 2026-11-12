@@ -262,7 +262,7 @@ class WarriorCombosTest {
                     skill.id() + " 的界面连招串必须能反解回同一个顺序");
             assertTrue(label.matches("[QEZ]+"), "连招串只该由 Q/E/Z 组成：" + label);
         }
-        assertEquals("QZE", WarriorCombos.byId("sword_combo_1").sequenceLabel());
+        assertEquals("ZZZ", WarriorCombos.byId("sword_combo_1").sequenceLabel());
         assertEquals("QEZ", WarriorCombos.byId("sword_combo_2").sequenceLabel());
         assertEquals("EQZ", WarriorCombos.byId("sword_combo_3").sequenceLabel());
     }

@@ -69,31 +69,64 @@ public class TNLightningDragonRenderer extends EntityRenderer<TNLightningDragonE
         long seed = entity.seed();
 
         // ---- ★ 缠绕形态（登神链 t5）：绕着人一条螺旋，一直在游 ✓ ----
+        //   ★ 2026-11-06：几何搬去 {@link CoilDragonOverlay}（{@code AFTER_ENTITIES} 里画）——
+        //     作者：「缠绕着玩家的龙模型加载怎么在玩家模型之后，这样从侧面看龙始终在玩家模型背后
+        //     没有绕着的感觉」。加色层不写深度，在实体层里先画就会被玩家盖掉 ✗；
+        //     改成"所有实体画完之后再补画"，深度测试才会自己把后半圈挡掉 ✓
         if (entity.coil()) {
-            float fade = Math.min(1.0F, age / 8.0F);
+            super.render(entity, entityYaw, partialTick, poseStack, buffer, packedLight);
+            return;
+        }
+
+        // ---- ★ 2026-11-05 第四批：俯冲形态（雷球链 t4/t5）----
+        //   作者："一条龙从天上飞进地下，身后跟着的是我们的巨大雷球" ✓
+        //   实体位置 = 落点；龙身被 poseStack 抬到 diveHeight 高处、整条倒过来（头朝下），
+        //   再按 age 一路降到 0 ⇒ 最后正好"扎进地里" ✓
+        if (entity.dive()) {
+            double height = entity.diveHeight();
+            float total = Math.max(1.0F, entity.life());
+            float p = Math.min(1.0F, age / total);
+            double y = height * (1.0D - p);
+            float fade = Math.min(1.0F, age / 4.0F);
             float remain = entity.life() - age;
-            if (remain < 20.0F) {
-                fade *= Math.max(0.0F, remain / 20.0F);
+            if (remain < 10.0F) {
+                fade *= Math.max(0.0F, remain / 10.0F);
             }
-            if (fade > 0.004F) {
-                // ★ 第二批反馈（"太大只了，没有绕在身上的感觉"）：半径收到 ≈1.1 格、
-                //   跨度 ≈3 格（头顶略高于人），圈数由几何自己按脊线长度反算（0.55 体型 ≈ 3.5 圈）⇒
-                //   贴着身体一圈圈缠上去 ✓（原来是 1.57 格 + 2 圈的大蛇兜圈 ✗）
-                double radius = 0.80D + 0.55D * scale;   // 0.30→0.97 / 0.55→1.10
-                double height = 1.15D + 3.45D * scale;   // 0.30→2.19 / 0.55→3.05
-                LightningDragonGeometry.coil(vc, m, seed, age, scale, theme,
-                        0.85F * fade, camX, camY, camZ,
-                        radius, height, age * 0.11D);
-                // 脚下一圈小雷网（"雷龙给你让路"✓），随龙一起转
-                LightningBoltGeometry.groundWeb(vc, m, 0.0D, 0.03D, 0.0D,
-                        (float) (1.15D + 1.5D * scale), seed + 3L, theme, 0.32F * fade,
-                        (float) (age * 0.07D), camX, camY, camZ, true);
-                LightningBoltGeometry.groundFlash(vc, m, 0.0D, 0.03D, 0.0D,
-                        (float) (0.9D + 1.2D * scale), theme, 0.20F * fade);
-                // 头顶那点白：一眼看出龙首在哪 ✓
-                LightningBoltGeometry.billboardFlash(vc, m, 0.0D, height + 0.35D, 0.0D,
-                        (float) (0.65D + 0.8D * scale), theme, 0.28F * fade, camX, camY, camZ);
+            if (fade <= 0.004F) {
+                super.render(entity, entityYaw, partialTick, poseStack, buffer, packedLight);
+                return;
             }
+            double dcamY = camY - y;   // 龙身被抬起来了 ⇒ 相机相对向量也要跟着抬 ✓
+
+            poseStack.pushPose();
+            poseStack.translate(0.0D, y, 0.0D);
+            poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(180.0F));   // 头朝下
+            Matrix4f diveMatrix = poseStack.last().pose();
+            LightningDragonGeometry.dragon(vc, diveMatrix, seed, Math.max(0.0F, age),
+                    scale, theme, 0.92F * fade, camX, dcamY, camZ);
+            poseStack.popPose();
+
+            // 身后那一串巨大雷球：沿同一条下落线，一颗比一颗高、比龙慢半拍 ✓
+            int balls = scale >= 1.0D ? 5 : 4;
+            for (int i = 0; i < balls; i++) {
+                double lag = 0.09D * (i + 1);
+                double bp = Math.max(0.0D, p - lag);
+                double by = height * (1.0D - bp) + 1.2D * (i + 1);
+                double wobble = 0.55D * scale * (i + 1) * 0.35D;
+                double bx = Math.sin(age * 0.06D + i * 1.7D) * wobble;
+                double bz = Math.cos(age * 0.05D + i * 1.3D) * wobble;
+                lightningBall(vc, m, bx, by, bz, (float) (1.5D * scale + 0.3D), theme,
+                        fade * (1.0F - 0.10F * i), seed + 900L + i, camX, camY, camZ);
+            }
+
+            // 落点：被"吸"起来的一圈电 ＋ 地光（越接近落地越亮 ✓）
+            float suck = Math.min(1.0F, p * 2.5F);
+            LightningBoltGeometry.groundWeb(vc, m, 0.0D, 0.03D, 0.0D,
+                    (float) (2.4D + 2.4D * scale) * (0.5F + 0.5F * suck), seed + 7L, theme,
+                    0.55F * fade * suck, (float) (age * 0.06D), camX, camY, camZ, true);
+            LightningBoltGeometry.groundFlash(vc, m, 0.0D, 0.03D, 0.0D,
+                    (float) (1.8D + 2.2D * scale) * suck, theme, 0.40F * fade * suck);
+
             super.render(entity, entityYaw, partialTick, poseStack, buffer, packedLight);
             return;
         }
@@ -166,5 +199,35 @@ public class TNLightningDragonRenderer extends EntityRenderer<TNLightningDragonE
                 (float) (0.8D * scale), theme, 0.35F * fade, camX, camY, camZ);
 
         super.render(entity, entityYaw, partialTick, poseStack, buffer, packedLight);
+    }
+
+    /**
+     * ★ 一颗<b>巨大雷球</b>（俯冲形态身后拖着的那串）。
+     *
+     * <p>用纯几何画，不加载 {@code lightingball_2} 模型：两层朝向镜头的加色光斑
+     * （外层主题色壳 ＋ 内层白核）＋ 8 道沿球面爬的电须 ⇒ 远看就是一颗"滋滋响的电球" ✓。
+     * 这样也绕开了引擎 {@code CustomModels} 那套 {@code translate(-0.5,-0.5,-0.5)} 的坑 ✗。
+     */
+    private static void lightningBall(VertexConsumer vc, Matrix4f m, double x, double y, double z, float r,
+                                      int theme, float alpha, long seed,
+                                      double camX, double camY, double camZ) {
+        if (r <= 0.05F || alpha <= 0.004F) {
+            return;
+        }
+        // 外壳（大、淡）＋ 中层（主题色、实）＋ 白核（小、最亮）
+        LightningBoltGeometry.billboardFlash(vc, m, x, y, z, r * 1.45F, theme, 0.42F * alpha, camX, camY, camZ);
+        LightningBoltGeometry.billboardFlash(vc, m, x, y, z, r * 1.02F, theme, 0.80F * alpha, camX, camY, camZ);
+        LightningBoltGeometry.billboardFlash(vc, m, x, y, z, r * 0.48F, theme, alpha, camX, camY, camZ);
+        // 球面上爬的电须：从球心附近打到球面，随机偏转 ⇒ "电在球里滚"
+        for (int i = 0; i < 8; i++) {
+            double a0 = seed * 0.017D + i * 0.7854D;
+            double a1 = a0 + 0.7D + (i % 3) * 0.25D;
+            double rr0 = r * 0.30D;
+            double rr1 = r * (0.72D + (i % 2) * 0.22D);
+            LightningBoltGeometry.arc(vc, m,
+                    x + Math.cos(a0) * rr0, y + Math.sin(a0 * 1.7D) * rr0, z + Math.sin(a0) * rr0,
+                    x + Math.cos(a1) * rr1, y + Math.sin(a1 * 1.7D) * rr1, z + Math.sin(a1) * rr1,
+                    seed + i * 97L, 0.10F * r * 0.35F, 0.70F * alpha, theme, camX, camY, camZ);
+        }
     }
 }

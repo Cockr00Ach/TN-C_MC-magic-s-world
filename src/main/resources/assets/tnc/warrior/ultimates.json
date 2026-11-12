@@ -1,0 +1,1335 @@
+[
+  {
+    "id": "longsword",
+    "name": "七星交锋",
+    "keys": "qqeezqqqqq",
+    "description": "交剑换线、回锋反切",
+    "strokes": [
+      {
+        "tick": 26,
+        "shape": "S",
+        "yaw": -24,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 38,
+        "shape": "T",
+        "yaw": 28,
+        "radius": 7,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 52,
+        "shape": "R",
+        "yaw": -12,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 66,
+        "shape": "T",
+        "yaw": 18,
+        "radius": 7,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 82,
+        "shape": "S",
+        "yaw": 0,
+        "radius": 6,
+        "multiplier": 2.6
+      }
+    ]
+  },
+  {
+    "id": "greatsword",
+    "name": "王庭断章",
+    "keys": "qqeezqqqqe",
+    "description": "高位架剑、横断接重劈",
+    "strokes": [
+      {
+        "tick": 26,
+        "shape": "S",
+        "yaw": -24,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 39,
+        "shape": "V",
+        "yaw": 28,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 53,
+        "shape": "H",
+        "yaw": -12,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 67,
+        "shape": "S",
+        "yaw": 18,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 82,
+        "shape": "H",
+        "yaw": 0,
+        "radius": 6,
+        "multiplier": 2.6
+      }
+    ]
+  },
+  {
+    "id": "hammer",
+    "name": "千钧天落",
+    "keys": "qqeezqqqqz",
+    "description": "沉腰抡锤、三叠震地",
+    "strokes": [
+      {
+        "tick": 26,
+        "shape": "H",
+        "yaw": -24,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 40,
+        "shape": "H",
+        "yaw": 28,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 52,
+        "shape": "O",
+        "yaw": 0,
+        "radius": 5.5,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 68,
+        "shape": "V",
+        "yaw": 18,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 82,
+        "shape": "H",
+        "yaw": 0,
+        "radius": 6,
+        "multiplier": 2.6
+      }
+    ]
+  },
+  {
+    "id": "spear",
+    "name": "游龙贯日",
+    "keys": "qqeezqqqeq",
+    "description": "拨杆进身、长线贯刺",
+    "strokes": [
+      {
+        "tick": 26,
+        "shape": "S",
+        "yaw": -24,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 38,
+        "shape": "T",
+        "yaw": 28,
+        "radius": 7,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 53,
+        "shape": "T",
+        "yaw": -12,
+        "radius": 7,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 69,
+        "shape": "R",
+        "yaw": 18,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 82,
+        "shape": "T",
+        "yaw": 0,
+        "radius": 7,
+        "multiplier": 2.6
+      }
+    ]
+  },
+  {
+    "id": "dragon_sword",
+    "name": "龙游九霄",
+    "keys": "qqeezqqqee",
+    "description": "挑剑引龙、盘旋斩落",
+    "strokes": [
+      {
+        "tick": 26,
+        "shape": "V",
+        "yaw": -24,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 39,
+        "shape": "O",
+        "yaw": 0,
+        "radius": 5.5,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 52,
+        "shape": "S",
+        "yaw": -12,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 66,
+        "shape": "T",
+        "yaw": 18,
+        "radius": 7,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 82,
+        "shape": "H",
+        "yaw": 0,
+        "radius": 6,
+        "multiplier": 2.6
+      }
+    ]
+  },
+  {
+    "id": "bow",
+    "name": "天穹连珠",
+    "keys": "qqeezqqqez",
+    "description": "错步开弓、连珠贯空",
+    "strokes": [
+      {
+        "tick": 26,
+        "shape": "B",
+        "yaw": -24,
+        "radius": 18,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 40,
+        "shape": "B",
+        "yaw": 28,
+        "radius": 18,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 53,
+        "shape": "T",
+        "yaw": -12,
+        "radius": 7,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 67,
+        "shape": "B",
+        "yaw": 18,
+        "radius": 18,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 82,
+        "shape": "B",
+        "yaw": 0,
+        "radius": 18,
+        "multiplier": 2.6
+      }
+    ]
+  },
+  {
+    "id": "moon_bow",
+    "name": "月轮坠星",
+    "keys": "qqeezqqqzq",
+    "description": "侧身挽月、扇面齐射",
+    "strokes": [
+      {
+        "tick": 26,
+        "shape": "B",
+        "yaw": -24,
+        "radius": 18,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 38,
+        "shape": "O",
+        "yaw": 0,
+        "radius": 5.5,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 52,
+        "shape": "V",
+        "yaw": -12,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 68,
+        "shape": "B",
+        "yaw": 18,
+        "radius": 18,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 82,
+        "shape": "B",
+        "yaw": 0,
+        "radius": 18,
+        "multiplier": 2.6
+      }
+    ]
+  },
+  {
+    "id": "storm_bow",
+    "name": "雷隼逐影",
+    "keys": "qqeezqqqze",
+    "description": "换步连射、雷隼穿心",
+    "strokes": [
+      {
+        "tick": 26,
+        "shape": "B",
+        "yaw": -24,
+        "radius": 18,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 39,
+        "shape": "T",
+        "yaw": 28,
+        "radius": 7,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 53,
+        "shape": "B",
+        "yaw": -12,
+        "radius": 18,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 69,
+        "shape": "R",
+        "yaw": 18,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 82,
+        "shape": "B",
+        "yaw": 0,
+        "radius": 18,
+        "multiplier": 2.6
+      }
+    ]
+  },
+  {
+    "id": "ember_bow",
+    "name": "烬羽焚天",
+    "keys": "qqeezqqqzz",
+    "description": "低弓引火、上挑焚羽",
+    "strokes": [
+      {
+        "tick": 26,
+        "shape": "B",
+        "yaw": -24,
+        "radius": 18,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 40,
+        "shape": "H",
+        "yaw": 28,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 52,
+        "shape": "B",
+        "yaw": -12,
+        "radius": 18,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 66,
+        "shape": "V",
+        "yaw": 18,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 82,
+        "shape": "B",
+        "yaw": 0,
+        "radius": 18,
+        "multiplier": 2.6
+      }
+    ]
+  },
+  {
+    "id": "frost_katana",
+    "name": "雪尽无声",
+    "keys": "qqeezqqeqq",
+    "description": "藏锋拔斩、反手纳刃",
+    "strokes": [
+      {
+        "tick": 26,
+        "shape": "D",
+        "yaw": -24,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 38,
+        "shape": "R",
+        "yaw": 28,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 53,
+        "shape": "D",
+        "yaw": -12,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 67,
+        "shape": "S",
+        "yaw": 18,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 82,
+        "shape": "D",
+        "yaw": 0,
+        "radius": 6,
+        "multiplier": 2.6
+      }
+    ]
+  },
+  {
+    "id": "star_rapier",
+    "name": "星芒礼赞",
+    "keys": "qqeezqqeqe",
+    "description": "拨剑换线、弓步复刺",
+    "strokes": [
+      {
+        "tick": 26,
+        "shape": "T",
+        "yaw": -24,
+        "radius": 7,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 39,
+        "shape": "R",
+        "yaw": 28,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 52,
+        "shape": "T",
+        "yaw": -12,
+        "radius": 7,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 68,
+        "shape": "T",
+        "yaw": 18,
+        "radius": 7,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 82,
+        "shape": "V",
+        "yaw": 0,
+        "radius": 6,
+        "multiplier": 2.6
+      }
+    ]
+  },
+  {
+    "id": "crimson_warblade",
+    "name": "赤潮断岳",
+    "keys": "qqeezqqeqz",
+    "description": "缠头重扫、拖刀断岳",
+    "strokes": [
+      {
+        "tick": 26,
+        "shape": "S",
+        "yaw": -24,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 40,
+        "shape": "O",
+        "yaw": 0,
+        "radius": 5.5,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 53,
+        "shape": "S",
+        "yaw": -12,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 69,
+        "shape": "H",
+        "yaw": 18,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 82,
+        "shape": "H",
+        "yaw": 0,
+        "radius": 6,
+        "multiplier": 2.6
+      }
+    ]
+  },
+  {
+    "id": "doom_scythe",
+    "name": "冥月归墟",
+    "keys": "qqeezqqeeq",
+    "description": "钩收旋镰、回环收割",
+    "strokes": [
+      {
+        "tick": 26,
+        "shape": "R",
+        "yaw": -24,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 38,
+        "shape": "O",
+        "yaw": 0,
+        "radius": 5.5,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 52,
+        "shape": "V",
+        "yaw": -12,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 66,
+        "shape": "O",
+        "yaw": 0,
+        "radius": 5.5,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 82,
+        "shape": "R",
+        "yaw": 0,
+        "radius": 6,
+        "multiplier": 2.6
+      }
+    ]
+  },
+  {
+    "id": "earthshaker_hammer",
+    "name": "地脉天崩",
+    "keys": "qqeezqqeee",
+    "description": "挑锤沉身、地脉三震",
+    "strokes": [
+      {
+        "tick": 26,
+        "shape": "H",
+        "yaw": -24,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 39,
+        "shape": "V",
+        "yaw": 28,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 53,
+        "shape": "H",
+        "yaw": -12,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 67,
+        "shape": "O",
+        "yaw": 0,
+        "radius": 5.5,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 82,
+        "shape": "H",
+        "yaw": 0,
+        "radius": 6,
+        "multiplier": 2.6
+      }
+    ]
+  },
+  {
+    "id": "sky_halberd",
+    "name": "苍穹天衡",
+    "keys": "qqeezqqeez",
+    "description": "刺挑横挂、斩落天衡",
+    "strokes": [
+      {
+        "tick": 26,
+        "shape": "V",
+        "yaw": -24,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 40,
+        "shape": "T",
+        "yaw": 28,
+        "radius": 7,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 52,
+        "shape": "S",
+        "yaw": -12,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 68,
+        "shape": "O",
+        "yaw": 0,
+        "radius": 5.5,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 82,
+        "shape": "H",
+        "yaw": 0,
+        "radius": 6,
+        "multiplier": 2.6
+      }
+    ]
+  },
+  {
+    "id": "yue_bronze_jian",
+    "name": "越女照水",
+    "keys": "qqeezqqezq",
+    "description": "点刺洗剑、撩腕归中",
+    "strokes": [
+      {
+        "tick": 26,
+        "shape": "T",
+        "yaw": -24,
+        "radius": 7,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 38,
+        "shape": "R",
+        "yaw": 28,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 53,
+        "shape": "S",
+        "yaw": -12,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 69,
+        "shape": "V",
+        "yaw": 18,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 82,
+        "shape": "T",
+        "yaw": 0,
+        "radius": 7,
+        "multiplier": 2.6
+      }
+    ]
+  },
+  {
+    "id": "willow_leaf_dao",
+    "name": "柳浪千叠",
+    "keys": "qqeezqqeze",
+    "description": "缠头裹脑、云刀横断",
+    "strokes": [
+      {
+        "tick": 26,
+        "shape": "D",
+        "yaw": -24,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 39,
+        "shape": "S",
+        "yaw": 28,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 52,
+        "shape": "O",
+        "yaw": 0,
+        "radius": 5.5,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 66,
+        "shape": "R",
+        "yaw": 18,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 82,
+        "shape": "S",
+        "yaw": 0,
+        "radius": 6,
+        "multiplier": 2.6
+      }
+    ]
+  },
+  {
+    "id": "crescent_guandao",
+    "name": "青龙偃月",
+    "keys": "qqeezqqezz",
+    "description": "拖刀提撩、回身劈山",
+    "strokes": [
+      {
+        "tick": 26,
+        "shape": "O",
+        "yaw": 0,
+        "radius": 5.5,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 40,
+        "shape": "S",
+        "yaw": 28,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 53,
+        "shape": "H",
+        "yaw": -12,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 67,
+        "shape": "V",
+        "yaw": 18,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 82,
+        "shape": "H",
+        "yaw": 0,
+        "radius": 6,
+        "multiplier": 2.6
+      }
+    ]
+  },
+  {
+    "id": "fangtian_ji",
+    "name": "辕门落日",
+    "keys": "qqeezqqzqq",
+    "description": "月牙钩挂、刺劈回旋",
+    "strokes": [
+      {
+        "tick": 26,
+        "shape": "T",
+        "yaw": -24,
+        "radius": 7,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 38,
+        "shape": "S",
+        "yaw": 28,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 52,
+        "shape": "R",
+        "yaw": -12,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 68,
+        "shape": "H",
+        "yaw": 18,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 82,
+        "shape": "O",
+        "yaw": 0,
+        "radius": 5.5,
+        "multiplier": 2.6
+      }
+    ]
+  },
+  {
+    "id": "red_tassel_spear",
+    "name": "百鸟朝凤",
+    "keys": "qqeezqqzqe",
+    "description": "拦拿连扎、回马贯日",
+    "strokes": [
+      {
+        "tick": 26,
+        "shape": "R",
+        "yaw": -24,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 39,
+        "shape": "T",
+        "yaw": 28,
+        "radius": 7,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 53,
+        "shape": "T",
+        "yaw": -12,
+        "radius": 7,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 69,
+        "shape": "S",
+        "yaw": 18,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 82,
+        "shape": "T",
+        "yaw": 0,
+        "radius": 7,
+        "multiplier": 2.6
+      }
+    ]
+  },
+  {
+    "id": "ring_pommel_dao",
+    "name": "朔风破军",
+    "keys": "qqeezqqzqz",
+    "description": "朴直劈砍、进步截腰",
+    "strokes": [
+      {
+        "tick": 26,
+        "shape": "H",
+        "yaw": -24,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 40,
+        "shape": "S",
+        "yaw": 28,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 52,
+        "shape": "D",
+        "yaw": -12,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 66,
+        "shape": "R",
+        "yaw": 18,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 82,
+        "shape": "S",
+        "yaw": 0,
+        "radius": 6,
+        "multiplier": 2.6
+      }
+    ]
+  },
+  {
+    "id": "han_iron_jian",
+    "name": "汉阙长歌",
+    "keys": "qqeezqqzeq",
+    "description": "挂剑撩锋、横截归鞘",
+    "strokes": [
+      {
+        "tick": 26,
+        "shape": "S",
+        "yaw": -24,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 38,
+        "shape": "V",
+        "yaw": 28,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 53,
+        "shape": "T",
+        "yaw": -12,
+        "radius": 7,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 67,
+        "shape": "R",
+        "yaw": 18,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 82,
+        "shape": "S",
+        "yaw": 0,
+        "radius": 6,
+        "multiplier": 2.6
+      }
+    ]
+  },
+  {
+    "id": "iron_jian_mace",
+    "name": "金声裂石",
+    "keys": "qqeezqqzee",
+    "description": "架砸挑压、双落破甲",
+    "strokes": [
+      {
+        "tick": 26,
+        "shape": "R",
+        "yaw": -24,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 39,
+        "shape": "H",
+        "yaw": 28,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 52,
+        "shape": "V",
+        "yaw": -12,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 68,
+        "shape": "H",
+        "yaw": 18,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 82,
+        "shape": "H",
+        "yaw": 0,
+        "radius": 6,
+        "multiplier": 2.6
+      }
+    ]
+  },
+  {
+    "id": "monk_spade",
+    "name": "禅月渡厄",
+    "keys": "qqeezqqzez",
+    "description": "铲推月挑、横封开道",
+    "strokes": [
+      {
+        "tick": 26,
+        "shape": "O",
+        "yaw": 0,
+        "radius": 5.5,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 40,
+        "shape": "R",
+        "yaw": 28,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 53,
+        "shape": "H",
+        "yaw": -12,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 69,
+        "shape": "V",
+        "yaw": 18,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 82,
+        "shape": "S",
+        "yaw": 0,
+        "radius": 6,
+        "multiplier": 2.6
+      }
+    ]
+  },
+  {
+    "id": "qimei_staff",
+    "name": "六合盘龙",
+    "keys": "qqeezqqzzq",
+    "description": "舞花换把、扫挑点扎",
+    "strokes": [
+      {
+        "tick": 26,
+        "shape": "S",
+        "yaw": -24,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 38,
+        "shape": "O",
+        "yaw": 0,
+        "radius": 5.5,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 52,
+        "shape": "T",
+        "yaw": -12,
+        "radius": 7,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 66,
+        "shape": "R",
+        "yaw": 18,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 82,
+        "shape": "O",
+        "yaw": 0,
+        "radius": 5.5,
+        "multiplier": 2.6
+      }
+    ]
+  },
+  {
+    "id": "bronze_greatsword",
+    "name": "古鼎镇山",
+    "keys": "qqeezqqzze",
+    "description": "横剑压阵、鼎势镇地",
+    "strokes": [
+      {
+        "tick": 26,
+        "shape": "H",
+        "yaw": -24,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 39,
+        "shape": "O",
+        "yaw": 0,
+        "radius": 5.5,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 53,
+        "shape": "S",
+        "yaw": -12,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 67,
+        "shape": "V",
+        "yaw": 18,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 82,
+        "shape": "H",
+        "yaw": 0,
+        "radius": 6,
+        "multiplier": 2.6
+      }
+    ]
+  },
+  {
+    "id": "bronze_spear",
+    "name": "玄鸟穿云",
+    "keys": "qqeezqqzzz",
+    "description": "长杆截拿、玄鸟贯云",
+    "strokes": [
+      {
+        "tick": 26,
+        "shape": "T",
+        "yaw": -24,
+        "radius": 7,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 40,
+        "shape": "V",
+        "yaw": 28,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 52,
+        "shape": "T",
+        "yaw": -12,
+        "radius": 7,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 68,
+        "shape": "R",
+        "yaw": 18,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 82,
+        "shape": "T",
+        "yaw": 0,
+        "radius": 7,
+        "multiplier": 2.6
+      }
+    ]
+  },
+  {
+    "id": "bronze_dao",
+    "name": "铜雀回风",
+    "keys": "qqeezqeqqq",
+    "description": "卷刃绕肩、回风截步",
+    "strokes": [
+      {
+        "tick": 26,
+        "shape": "S",
+        "yaw": -24,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 38,
+        "shape": "D",
+        "yaw": 28,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 53,
+        "shape": "O",
+        "yaw": 0,
+        "radius": 5.5,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 69,
+        "shape": "S",
+        "yaw": 18,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 82,
+        "shape": "R",
+        "yaw": 0,
+        "radius": 6,
+        "multiplier": 2.6
+      }
+    ]
+  },
+  {
+    "id": "bronze_dagger",
+    "name": "寸芒惊鸿",
+    "keys": "qqeezqeqqe",
+    "description": "贴身换腕、反握挑刺",
+    "strokes": [
+      {
+        "tick": 26,
+        "shape": "D",
+        "yaw": -24,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 39,
+        "shape": "T",
+        "yaw": 28,
+        "radius": 7,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 52,
+        "shape": "R",
+        "yaw": -12,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 66,
+        "shape": "T",
+        "yaw": 18,
+        "radius": 7,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 82,
+        "shape": "D",
+        "yaw": 0,
+        "radius": 6,
+        "multiplier": 2.6
+      }
+    ]
+  },
+  {
+    "id": "bronze_halberd",
+    "name": "双阙合璧",
+    "keys": "qqeezqeqqz",
+    "description": "双刃交错、合戟开天",
+    "strokes": [
+      {
+        "tick": 26,
+        "shape": "R",
+        "yaw": -24,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 40,
+        "shape": "T",
+        "yaw": 28,
+        "radius": 7,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 53,
+        "shape": "O",
+        "yaw": 0,
+        "radius": 5.5,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 67,
+        "shape": "S",
+        "yaw": 18,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 82,
+        "shape": "H",
+        "yaw": 0,
+        "radius": 6,
+        "multiplier": 2.6
+      }
+    ]
+  },
+  {
+    "id": "wind_relic_spear",
+    "name": "岚脉归一",
+    "keys": "qqeezqeqeq",
+    "description": "拦风挑势、定点穿岚",
+    "strokes": [
+      {
+        "tick": 26,
+        "shape": "T",
+        "yaw": -24,
+        "radius": 7,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 38,
+        "shape": "S",
+        "yaw": 28,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 52,
+        "shape": "V",
+        "yaw": -12,
+        "radius": 6,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 68,
+        "shape": "T",
+        "yaw": 18,
+        "radius": 7,
+        "multiplier": 0.85
+      },
+      {
+        "tick": 82,
+        "shape": "T",
+        "yaw": 0,
+        "radius": 7,
+        "multiplier": 2.6
+      }
+    ]
+  }
+]

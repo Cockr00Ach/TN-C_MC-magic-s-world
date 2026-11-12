@@ -23,7 +23,7 @@ public final class InkShaderSession {
             if(inInk){
                 if(original==null){State before=backend.read();journal.save(before);original=before;}
                 apply(mode==Mode.INK?new State(true,INK_PACK):new State(false,original.pack()));
-            }else if(original!=null){apply(original);journal.clear();original=null;}
+            }else if(original!=null){apply(new State(original.pack()!=null&&!original.pack().isBlank(),original.pack()));journal.clear();original=null;}
         }catch(Exception failure){
             failed=true;
             // A half-written or failed shader load must not become the player's new permanent preference.

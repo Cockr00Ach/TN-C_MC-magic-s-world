@@ -195,11 +195,17 @@ public final class ManaGate {
                         com.tnc.tnc.magic.compat.SpellEngineBridge.WAND);
         return java.util.stream.Stream.of(player.getMainHandItem(),player.getOffhandItem()).anyMatch(s->!s.isEmpty()&&((wand!=null&&s.is(wand))||s.getItem() instanceof com.tnc.tnc.adventure.ElementWands.Wand));
     }
+    /**
+     * 手上有没有能放这个法术的法杖。
+     *
+     * <p>2026-11-09 起<b>不看元素</b>：知识在魔法石，任何杖都能放已学的法术，
+     * 只看<b>阶位</b>够不够（元素只影响 {@code WandResonance} 的 +25% 共鸣伤害）。
+     */
     public static boolean hasWandFor(Player player,SpellCatalog.Entry entry){
         var legacy=net.minecraftforge.registries.ForgeRegistries.ITEMS.getValue(com.tnc.tnc.magic.compat.SpellEngineBridge.WAND);
         return java.util.stream.Stream.of(player.getMainHandItem(),player.getOffhandItem()).anyMatch(s->{
             if(s.isEmpty())return false;if(legacy!=null&&s.is(legacy))return true;
-            return s.getItem() instanceof com.tnc.tnc.adventure.ElementWands.Wand w&&entry.tier()<=w.design.tier()&&(entry.independent()||entry.element()==w.design.element());
+            return s.getItem() instanceof com.tnc.tnc.adventure.ElementWands.Wand w&&entry.tier()<=w.design.tier();
         });
     }
 
@@ -254,6 +260,8 @@ public final class ManaGate {
         if(com.tnc.tnc.boss.fire.TortoiseStun.isStunned(serverPlayer))return true;
         if(serverPlayer.hasEffect(com.tnc.tnc.arcana.ArcanaMealEffects.NO_MAGIC))return true;
         if((com.tnc.tnc.combat.DownedCombat.isDowned(serverPlayer)||com.tnc.tnc.dungeon.DungeonService.recovering(serverPlayer)))return true;
+        // 附身中禁止施法（客户端屏蔽之外的第二道闸门）
+        if(com.tnc.tnc.travel.TravelFormService.active(serverPlayer))return true;
         // 只管 TN-C 自己的法术
         SpellCatalog.Entry entry = SpellCatalog.byId(spellId);
         if (entry == null) {
@@ -286,6 +294,8 @@ public final class ManaGate {
                     entry.manaCostFor(data.getMaxMana()));
             // 记一笔"我放行了"：1.5 秒内没有 SPELL_CAST 就提示"没放出来"（见 PENDING 的说明 ✓）
             noteAllowed(serverPlayer, spellId);
+            // 同元素法杖共鸣：开一个 3 秒窗口，窗口内的 spell_power 伤害 +25%（见 WandResonance）
+            com.tnc.tnc.adventure.WandResonance.mark(serverPlayer, entry);
             return false;
         }
 
@@ -299,7 +309,7 @@ public final class ManaGate {
             noWandCount.incrementAndGet();
             lastBlockedSpell = spellId + "（没拿法杖）";
             serverPlayer.displayClientMessage(Component.literal(
-                    "§c[TN-C] 需要手持能承载该元素与阶位的法器"), true);
+                    "§c[TN-C] 需要手持能承载" + entry.tier() + " 阶法术的法杖"), true);
         } else {
             int cost = com.tnc.tnc.equipment.MageGear.spellCost(serverPlayer,entry.manaCostFor(data.getMaxMana()));
             lastBlockedSpell = spellId + "（" + data.getMana() + " / " + cost + "）";

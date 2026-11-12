@@ -13,10 +13,12 @@
     "StatusBarBarsMixin"
   ],
   "client": [
+    "BronzeHandInvoker",
     "BronzeHeldItemMixin",
     "MusicManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 0
-  }
+  },
+  "refmap": "tnc.bronze.refmap.json"
 }

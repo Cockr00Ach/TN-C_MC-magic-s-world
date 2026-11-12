@@ -79,7 +79,7 @@ public final class WarriorTrailVolume {
                 sink.quad(a.b,a.featherA,b.featherA,b.b,color,a.alpha,0,0,b.alpha);
                 sink.quad(a.c,b.c,b.featherB,a.featherB,color,a.alpha,b.alpha,0,0);
                 // Keep a readable narrow light core while the broad shell stays transparent.
-                sink.quad(a.coreA,a.coreB,b.coreB,b.coreA,WarriorTrailAppearance.mix(style.shell(),0xFFFFFF,.30),a.alpha*.35f,Math.min(.92f,a.alpha*1.4f),Math.min(.92f,b.alpha*1.4f),b.alpha*.35f);
+                sink.quad(a.coreA,a.coreB,b.coreB,b.coreA,WarriorTrailAppearance.mix(style.core(),0xFFFFFF,.18),a.alpha*.35f,Math.min(.92f,a.alpha*1.4f),Math.min(.92f,b.alpha*1.4f),b.alpha*.35f);
                 quads+=7;
             }
             previous=ring;

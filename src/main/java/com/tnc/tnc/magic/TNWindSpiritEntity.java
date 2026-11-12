@@ -133,6 +133,17 @@ public class TNWindSpiritEntity extends Entity implements GeoEntity {
         return Math.max(1, this.entityData.get(DATA_TIER));
     }
 
+    /**
+     * <b>只给客户端残影/预览用的档位覆盖</b> ✓（{@code client/WindSpiritGhost} 用它把
+     * 读条前戏里那只小风灵固定成高阶形态）。
+     *
+     * <p>⚠ 真实风灵的档位只由 {@link #bind} 在服务端设定 ✗ ——
+     * 在服务端实体上调这个方法会让同步数据被客户端改写，不要这么用。
+     */
+    public void previewTier(int tier) {
+        this.entityData.set(DATA_TIER, Math.max(1, Math.min(5, tier)));
+    }
+
     /** 这一只是不是 {@code owner} 的（维护方用它数数量 ✓）。 */
     public boolean isOwnedBy(ServerPlayer owner) {
         return this.ownerId != null && this.ownerId.equals(owner.getUUID());

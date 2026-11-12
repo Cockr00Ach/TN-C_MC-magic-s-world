@@ -29,10 +29,18 @@ public final class WindSolidModels {
             p.scale(side*(1.15F+tier*.12F)*scale,scale,scale);draw("feather_wing",p,b);p.popPose();
         }
     }
+    /**
+     * 风系地面法阵。2026-11-07 起不再画那个 120 cubes 的 {@code wind/seal} 方块模型
+     * （远看只剩一圈白线，和其它系分不出来），改成 {@link WindEarthGeometry#windSeal}
+     * 的程序化三旋臂阵 ⇒ 和读条前戏、实体风阵是同一张阵 ✓，顶点也从 ~6k 降到 ~1.3k ✓。
+     */
     static void seal(double radius,double age,float alpha,PoseStack p,MultiBufferSource b){
-        if(alpha<=0)return;
-        p.pushPose();p.translate(0,.08,0);p.mulPose(Axis.YP.rotationDegrees((float)(age*.55)));
-        float size=(float)(radius*2*Math.min(1,alpha*4));p.scale(size,1.2F,size);
-        draw("seal",p,b);p.popPose();
+        if(alpha<=0||radius<=0)return;
+        p.pushPose();
+        var m=p.last().pose();
+        float grow=(float)Math.min(1D,alpha*3D);
+        WindEarthVisualBuffers.draw(b,(body,glow)->WindEarthGeometry.windSeal(
+                body,glow,m,radius*grow,age,alpha,3,WindEarthGeometry.FLAT));
+        p.popPose();
     }
 }

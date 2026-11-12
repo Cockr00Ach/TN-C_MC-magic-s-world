@@ -2,7 +2,7 @@ package com.tnc.tnc.bronze;
 
 /** Item statistics only; the existing warrior system owns all melee timing and animations. */
 public enum BronzeProfile {
-    GREATSWORD(10,1.0f),SPEAR(7,1.5f),DAO(8,1.3f),DAGGER(4,2.5f);
+    GREATSWORD(10,1.0f),SPEAR(7,1.5f),DAO(8,1.3f),DAGGER(4,2.5f),HALBERD(14,1.2f);
 
     public final double damage;
     public final float speed;

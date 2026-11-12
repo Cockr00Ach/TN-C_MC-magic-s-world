@@ -51,6 +51,7 @@ public final class WindWeaponEntity extends Entity {
         if(victim!=null){
             victim.hurt(level().damageSources().indirectMagic(this,owner),damage);
             var pull=origin.subtract(victim.position()).normalize().scale(.08);victim.push(pull.x,.025,pull.z);victim.hurtMarked=true;
+            burst(victim);
         }
         if(victim==null&&wall.getType()!=HitResult.Type.MISS&&owner instanceof net.minecraft.server.level.ServerPlayer p)com.tnc.tnc.dungeon.leyline.LeylineEvents.spell(p,wall.getBlockPos(),"wind");
         if(victim!=null||wall.getType()!=HitResult.Type.MISS){
@@ -58,6 +59,33 @@ public final class WindWeaponEntity extends Entity {
             discard();
         }
     }
+    /**
+     * ★ <b>命中炸开</b>（2026-11-11 作者「风灵再改改」）✓
+     *
+     * <p>以前命中只是"那只怪掉一格血 + 一点云"✗ —— 风灵每 10 tick 打一发，
+     * 打起来像在"戳"。现在命中点炸开一小圈风：范围内的敌人吃
+     * {@link WindArsenalRules#burstDamageShare()} 的伤害并被轻轻推开，
+     * 再补一圈 {@code SWEEP_ATTACK} ⇒ 每一发都看得出"斩到了" ✓。
+     */
+    private void burst(LivingEntity hit){
+        if(!(level() instanceof net.minecraft.server.level.ServerLevel server))return;
+        double radius=WindArsenalRules.burstRadius(tier());
+        float share=damage*WindArsenalRules.burstDamageShare();
+        for(var other:level().getEntitiesOfClass(LivingEntity.class,
+                new AABB(hit.position(),hit.position()).inflate(radius),
+                e->e!=hit&&e!=owner&&!(e instanceof Player)&&e.isAlive()&&!e.isSpectator()&&!e.isAlliedTo(owner))){
+            if(other.distanceTo(hit)>radius)continue;
+            other.hurt(level().damageSources().indirectMagic(this,owner),share);
+            var out=other.position().subtract(hit.position());
+            if(out.lengthSqr()>1.0E-4D){out=out.normalize().scale(.18D);other.push(out.x,.06D,out.z);other.hurtMarked=true;}
+        }
+        double y=hit.getY()+hit.getBbHeight()*0.5D;
+        server.sendParticles(net.minecraft.core.particles.ParticleTypes.SWEEP_ATTACK,hit.getX(),y,hit.getZ(),
+                3,.2D,.2D,.2D,0.0D);
+        server.sendParticles(net.minecraft.core.particles.ParticleTypes.CLOUD,hit.getX(),y,hit.getZ(),
+                8,.25D,.2D,.25D,0.03D);
+    }
+
     @Override public AABB getBoundingBoxForCulling(){return super.getBoundingBoxForCulling().inflate(44);}
     @Override public boolean shouldRenderAtSqrDistance(double d){return d<128*128;}
     @Override public boolean isPickable(){return false;}

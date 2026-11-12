@@ -37,8 +37,16 @@ public final class CheckBronzeMixinTargets {
                     }
                 }
             }
-            if(checked!=3)throw new AssertionError("Expected three injection sites, got "+checked);
-            System.out.println("PASS: all "+checked+" bronze Mixin injection sites resolve in the actual SRG Minecraft jar");
+            if(checked!=4)throw new AssertionError("Expected four injection sites, got "+checked);
+            var invoker=read(mod,"com/tnc/tnc/mixin/BronzeHandInvoker");var renderer=read(mc,"net/minecraft/client/renderer/ItemInHandRenderer");
+            String descriptor="(Lnet/minecraft/client/player/AbstractClientPlayer;FFLnet/minecraft/world/InteractionHand;FLnet/minecraft/world/item/ItemStack;FLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V";
+            if(invoker.methods.stream().noneMatch(m->m.name.equals("bronze$renderArmWithItem")&&m.desc.equals(descriptor)))throw new AssertionError("Wrong invoker descriptor");
+            if(renderer.methods.stream().noneMatch(m->m.name.equals("m_109371_")&&m.desc.equals(descriptor)))throw new AssertionError("Missing private native arm renderer target");
+            String refmap=new String(mod.getInputStream(mod.getJarEntry("tnc.bronze.refmap.json")).readAllBytes(),java.nio.charset.StandardCharsets.UTF_8);
+            if(!refmap.contains("\"renderArmWithItem\"")||!refmap.contains("m_109371_"+descriptor))throw new AssertionError("Invoker refmap does not resolve the runtime method");
+            String config=new String(mod.getInputStream(mod.getJarEntry("tnc.mixins.json")).readAllBytes(),java.nio.charset.StandardCharsets.UTF_8);
+            if(!config.contains("BronzeHandInvoker")||!config.contains("tnc.bronze.refmap.json"))throw new AssertionError("Invoker/refmap not registered");
+            System.out.println("PASS: all "+checked+" bronze Mixin injection sites and the private arm-render invoker resolve in the actual SRG Minecraft jar");
         }
     }
 }

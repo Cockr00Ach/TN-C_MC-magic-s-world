@@ -21,12 +21,13 @@ final class SeaGodSwordVisuals {
         float sealFade=0;
         for(int strike=0;strike<count;strike++) {
             double phase=age-strike*SeaGodSwordRules.INTERVAL;
-            if(SeaGodSwordRules.visible(phase))sealFade=Math.max(sealFade,fieldFade*SeaGodSwordRules.opacity(phase));
+            // 天阵有自己的提前量：先阵、再兽升空、最后才是剑（见 SeaGodSwordRules.SEAL_TICK）。
+            sealFade=Math.max(sealFade,fieldFade*SeaGodSwordRules.sealOpacity(phase));
         }
         // Consecutive swords share the same two stationary sky seals.
         if(sealFade>0) {
-            WaterGeometry.richCircle(buffers,stack,new Vec3(0,sealHeight,0),UP,36,animation,sealFade,3);
-            WaterGeometry.richCircle(buffers,stack,new Vec3(0,sealHeight-4,0),UP,24,-animation,sealFade*.85F,3);
+            WaterGeometry.richCircle(buffers,stack,new Vec3(0,sealHeight,0),UP,36,animation,sealFade,2,3);
+            WaterGeometry.richCircle(buffers,stack,new Vec3(0,sealHeight-4,0),UP,24,-animation,sealFade*.85F,2,3);
         }
         // Stationary gateways along the blade's actual 64-block descent, not on the moving sword.
         // Only boss crypts receive these extra gateways; player swords retain their original presentation.
@@ -34,8 +35,8 @@ final class SeaGodSwordVisuals {
             float pathFade=0;
             for(int strike=0;strike<count;strike++)
                 pathFade=Math.max(pathFade,fieldFade*SeaGodSwordRules.pathSealOpacity(age-strike*SeaGodSwordRules.INTERVAL,i));
-            if(pathFade>0)WaterSolidModels.seal(stack,buffers,new Vec3(0,SeaGodSwordRules.pathSealHeight(i),0),
-                    UP,12+i*1.5,animation*(i%2==0?1:-1)+i*21,pathFade);
+            if(pathFade>0)WaterGeometry.staticSeal(buffers,stack,new Vec3(0,SeaGodSwordRules.pathSealHeight(i),0),
+                    UP,12+i*1.5,animation*(i%2==0?1:-1)+i*21,pathFade,3);
         }
         // Finite barrage: at most two visible swords, sharing the same server schedule.
         for(int strike=0;strike<count;strike++) {

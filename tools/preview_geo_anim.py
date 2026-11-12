@@ -195,6 +195,18 @@ def cube_faces(cube):
             "east": (u + d + w, v + d, d, h),
             "south": (u + d + w + d, v + d, w, h),
         }
+    elif isinstance(uv, dict):
+        # per-face UV ({"north": {"uv": [u, v], "uv_size": [w, h]}, ...}) -- what
+        # tools/rework_wind_spirit.py and tools/refine_wind_models.py write.
+        rects = {}
+        for key in ("north", "south", "east", "west", "up", "down"):
+            face = uv.get(key)
+            if isinstance(face, dict) and "uv" in face:
+                size = face.get("uv_size") or [w, h]
+                rects[key] = (float(face["uv"][0]), float(face["uv"][1]),
+                              float(size[0]), float(size[1]))
+            elif isinstance(face, list):
+                rects[key] = (float(face[0]), float(face[1]), w, h)
     out = []
     for idx, n, key in quads:
         out.append(([corners[i] for i in idx], n, rects.get(key) if rects else None))

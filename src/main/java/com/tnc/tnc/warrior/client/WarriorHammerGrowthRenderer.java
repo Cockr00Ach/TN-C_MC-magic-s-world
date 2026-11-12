@@ -20,16 +20,19 @@ public final class WarriorHammerGrowthRenderer {
         return a!=null && WarriorHeavyGrowth.applies(a.animation(),WarriorWeapons.family(player.getMainHandItem()),a.hold());
     }
     public static void apply(LivingEntity entity,ItemStack stack,ItemDisplayContext context,boolean left,PoseStack pose){
-        if(!(entity instanceof AbstractClientPlayer player) || left!=(player.getMainArm()==HumanoidArm.LEFT)
+        if(!(entity instanceof AbstractClientPlayer player) || left!=(player.getMainArm()==HumanoidArm.LEFT) && !com.tnc.tnc.bronze.BronzeTwinWeapon.active(player)
                 || !(context.firstPerson() || context==ItemDisplayContext.THIRD_PERSON_LEFT_HAND
                     || context==ItemDisplayContext.THIRD_PERSON_RIGHT_HAND))return;
         var a=WarriorAnimationClient.active(player.getId());
         var mc=Minecraft.getInstance();
         var family=WarriorWeapons.family(stack);
-        if(!WarriorHeavyGrowth.usesEntityGrowth(family))return;
+        float charged=WarriorChargeVisual.scale(player.getId(),mc.getFrameTime());
+        if(charged<=0 && !WarriorHeavyGrowth.usesEntityGrowth(family))return;
         int points=player==mc.player?TemperingClient.points():WarriorPhantomScales.points(player.getUUID());
         float peak=WarriorHeavyGrowth.peak(points);
         float scale;
+        if(charged>0)scale=charged;
+        else
         if(a!=null && (a.hold() || a.progress(mc.getFrameTime())<1)){
             float t=WarriorHeavyMotion.progress(a.animation(),family,a.hold(),a.progress(mc.getFrameTime()));
             scale=WarriorHeavyGrowth.scale(a.animation(),family,a.hold(),t,peak);

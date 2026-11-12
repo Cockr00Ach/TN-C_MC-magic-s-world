@@ -501,17 +501,27 @@ public final class TNLightBeamMechanics {
 
         // ★ 落点：先按"锁到的敌人脚下"排 ✓，然后交给 spreadSpots 拉开（最低分散距离 minGap ✓）——
         //   怪扎堆时宁可少放几根，也不让五根 27 格宽的柱子糊成一坨 ✗（作者 2026-10-01 ✓）。
-        List<Vec3> wanted = new ArrayList<>();
-        for (LivingEntity target : targets) {
-            wanted.add(target.position());
+        // ★★ 2026-11-07 作者："那个镜子要把它弄成可以瞄准的东西嘞，不然光线 t4t5 砸不到它身上" ✓
+        //   ⇒ 准星瞄着自己的光镜时，天阵开在**它正上方**、而且**只落一根**柱子 ✓
+        //   （t5 撒五根、每根再被镜子分成六道 ⇒ 场面直接糊掉 ✗）。
+        TNLightMirrorEntity prism = LightMirrorAim.pick(level, caster);
+        List<Vec3> spots;
+        if (prism != null) {
+            spots = List.of(prism.center());
+        } else {
+            List<Vec3> wanted = new ArrayList<>();
+            for (LivingEntity target : targets) {
+                wanted.add(target.position());
+            }
+            Vec3 fallback = aimPoint(caster, spell.reach());
+            spots = spreadSpots(wanted, fallback, spell.circles(),
+                    Math.max(BARRAGE_RING, spell.minGap()), spell.minGap());
         }
-        Vec3 fallback = aimPoint(caster, spell.reach());
-        List<Vec3> spots = spreadSpots(wanted, fallback, spell.circles(),
-                Math.max(BARRAGE_RING, spell.minGap()), spell.minGap());
 
         for (int i = 0; i < spots.size(); i++) {
             Vec3 at = spots.get(i);
-            double ground = groundY(level, at);
+            // 瞄着光镜时用镜子自己的高度当"地面" ✓ —— 镜子浮在空中也保证柱子从它头顶上方落下 ✓
+            double ground = prism != null ? prism.getY() : groundY(level, at);
             // ① 天上的阵 —— 和地上同一套白金光阵（STYLE_LIGHT_SKY：不往上长柱，改往下垂光幕）
             //    ★ 半径乘 sizeScale ✓（天使那发 t4：22.5 × 1.6 × 0.2 ≈ 7.2 格 ✓ = 缩小五倍 ✓）
             int impactStyle = spell.tier() >= 4
@@ -534,6 +544,7 @@ public final class TNLightBeamMechanics {
                     + " §7（天上 " + spots.size() + " 个阵，1 秒后落下，每道粗 "
                     + String.format(java.util.Locale.ROOT, "%.1f", spell.radius() * sizeScale * 2.0D) + " 格"
                     + "，落点固定"
+                    + (prism != null ? "，瞄中光镜 ⇒ 只落一列" : "")
                     + "）"), true);
         }
         LOGGER.info("TN-C/light: 光柱 {} circles={} radius={} delay={}t dmg={} targets={} caster={}",

@@ -194,25 +194,66 @@ public final class ThunderSealRenderer extends EntityRenderer<ThunderSealEntity>
                     (float) (radius * 0.42D), theme, 0.40F * a, camX, camY, camZ);
         }
 
-        // ---------------- 5. 雷楔节点：一根竖雷 ＋ 脚下小网 ＋ 模型 ----------------
+        // ---------------- 5. 雷楔节点：天雷砸下，楔子**直接闪出** ----------------
+        // ★ 2026-11-08 作者："雷锲的出现直接闪出就行，你不要雷劈了之后还从地里长出来"
+        //   ⇒ 把"长"的痕迹全删掉：
+        //     ✗ 模型不再从 0.02 缩放到 1（整根一起变大 = 从土里顶出来 ✗）
+        //     ✗ 不再有从地面往楔轴上收的 6 道短雷（那就是"从地里长出来"的读法 ✗）
+        //   ✓ 天雷落地那一 tick，楔子**满尺寸**已经在那儿，雷环是**向外**炸的：
+        //     30 格天雷砸下 → 落点白闪 → 雷环向外炸开 → 楔子直接闪出（1 楔 1 道雷 ✓）
         var model = mc.getModelManager().getModel(
                 new net.minecraft.client.resources.model.ModelResourceLocation(MODEL, "inventory"));
+        double birthTicks = ThunderSealRules.birthTicks();
         for (int slot = 0; slot < count; slot++) {
+            double since = age - ThunderSealRules.strikeTick(slot);   // 距离"这道天雷落地"多久
+            if (since < 0.0D) {
+                continue;                        // 还没轮到这一楔：一根雷都不画（劈到才有 ✓）
+            }
             Vec3 node = entity.node(slot, age);
-            // 节点自己那根雷：从脚下打到节点高度（t5 的节点会升空 ⇒ 雷跟着拉长 ✓）
-            double nodeTop = Math.max(node.y, 0.0D) + height * 0.88D * growth;
+            float k = (float) Mth.clamp(1.0D - since / 10.0D, 0.0D, 1.0D);
+
+            if (since < 10.0D) {
+                // ① 天雷：从 30 格高砸到落点（落地 1 tick 最亮，之后 10 tick 收细）
+                LightningBoltGeometry.bolt(vc, m, node.x, 30.0D, node.z, node.x, node.y + 0.08D, node.z,
+                        baseSeed + 600L + slot * 37L + (long) since,
+                        tier >= 4 ? 0.34F : 0.24F, 0.95F * k, theme, tier >= 4 ? 3 : 2,
+                        camX, camY, camZ);
+                // ② 落地白闪
+                LightningBoltGeometry.groundFlash(vc, m, node.x, node.y + 0.04D, node.z,
+                        (float) (2.1D + since * 0.35D), theme, 0.90F * k);
+            }
+            // ③ 雷环：**向外**炸开（越炸越大、离楔轴越远 ⇒ 不会读成"往中间长"✓）
+            if (since < birthTicks) {
+                float g = (float) (1.0D - since / birthTicks);
+                LightningBoltGeometry.groundWeb(vc, m, node.x, node.y + 0.05D, node.z,
+                        (float) (0.9D + since * 0.55D), baseSeed + 900L + slot, theme,
+                        0.55F * g, (float) (since * 0.22D), camX, camY, camZ, false);
+                for (int s = 0; s < 5; s++) {
+                    double ang = s * (Math.PI * 2.0D / 5.0D) + slot * 0.9D;
+                    double yy = node.y + 0.30D + 0.10D * (s % 2);
+                    LightningBoltGeometry.bolt(vc, m,
+                            node.x + Math.cos(ang) * 0.22D, yy, node.z + Math.sin(ang) * 0.22D,
+                            node.x + Math.cos(ang) * (1.35D + since * 0.30D), yy,
+                            node.z + Math.sin(ang) * (1.35D + since * 0.30D),
+                            baseSeed + 950L + slot * 13L + s, 0.06F, 0.70F * g, theme, 1,
+                            camX, camY, camZ);
+                }
+            }
+
+            // ④ 楔子立起来的那根竖雷（骨架）：落地即满亮度
+            double nodeTop = Math.max(node.y, 0.0D) + height * 0.88D;
             LightningBoltGeometry.bolt(vc, m, node.x, 0.05D, node.z, node.x, nodeTop, node.z,
                     baseSeed + 300L + slot * 71L + flick, 0.10F, 0.66F * a, theme, 2,
                     camX, camY, camZ);
             LightningBoltGeometry.groundWeb(vc, m, node.x, node.y + 0.07D, node.z,
-                    (float) (1.7D * growth), baseSeed + 400L + slot, theme, 0.34F * a * pulse,
+                    1.7F, baseSeed + 400L + slot, theme, 0.34F * a * pulse,
                     (float) (age * 0.09D), camX, camY, camZ, false);
 
-            // 模型（雷楔本体）
-            poseStack.pushPose();
-            poseStack.translate(node.x, node.y - (1.0D - growth) * height, node.z);
-            poseStack.mulPose(Axis.YP.rotationDegrees((float) (slot * 360.0D / count)));
+            // ⑤ 楔子本体：**落地即满尺寸**（不缩放、不过冲 ⇒ 直接闪出来 ✓）
             float scale = (float) (height / 1.9D);
+            poseStack.pushPose();
+            poseStack.translate(node.x, node.y, node.z);
+            poseStack.mulPose(Axis.YP.rotationDegrees((float) (slot * 360.0D / count)));
             poseStack.scale(scale, scale, scale);
             poseStack.translate(-0.25D, 0.0D, -0.25D);
             mc.getItemRenderer().renderModelLists(model, net.minecraft.world.item.ItemStack.EMPTY,

@@ -85,6 +85,7 @@ public class TNThunderOrbRenderer extends EntityRenderer<TNThunderOrbEntity> {
     @Override
     public void render(TNThunderOrbEntity entity, float entityYaw, float partialTick, PoseStack poseStack,
                        MultiBufferSource buffer, int packedLight) {
+        if(FirstPersonSpellView.own(entity.visualOwner()))return;
         // 自转：让碎块球的面转起来，静态看着像卡住了 ✓
         float spin = (entity.tickCount + partialTick) * 12.0F;
 

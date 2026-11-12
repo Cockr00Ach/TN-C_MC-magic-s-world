@@ -11,6 +11,11 @@ import net.minecraft.client.renderer.*;
 final class WaterGeometry {
     private WaterGeometry() {}
     private static final Vec3 UP=new Vec3(0,1,0);
+    /** Pearl, cyan and restrained gold: the same palette as the tide seal in the spell docs. */
+    private static final float WR=.78F,WG=.96F,WB=1.0F;
+    private static final float CR=.26F,CG=.78F,CB=1.0F;
+    private static final float GR=.95F,GG=.74F,GB=.30F;
+    private static final float D_R=.02F,D_G=.10F,D_B=.28F;
     static void vertex(VertexConsumer out,Matrix4f pose,Vec3 p,float r,float g,float b,float a) {
         // Highlights frequently add to their base tint. Clamp before float colors become bytes,
         // otherwise values above one wrap and a bright water seam becomes a dark wrong color.
@@ -143,17 +148,324 @@ final class WaterGeometry {
         across=across.normalize().scale(halfWidth);
         quad(out,pose,a.subtract(across),a.add(across),q.add(across),q.subtract(across),r,g,blue,alpha);
     }
-    /** Layered indigo/violet water sigil. Geometry colors are independent of the cyan water body. */
+    /**
+     * Layered tide seal. Body is alpha-blended deep blue/cyan; the bright edges go through the
+     * deferred emission layer, so the seal reads as water rather than glowing plastic.
+     *
+     * <p>Tier 1–2 is deliberately compact (rings, short wave glyphs, four crests, a central
+     * drain). Tier 3 adds the crescent and two more crests; tier 4–5 add the outer whirlpool
+     * arms and the wider crest ring. The old textured seal model is still available for the
+     * model audit, but gameplay circles no longer use it.
+     */
+    static void seal(VertexConsumer out,VertexConsumer glow,Matrix4f pose,Vec3 center,Vec3 dir,
+                     double radius,double time,float alpha,int tier) {
+        if(radius<=1e-4||alpha<=1e-4)return;
+        int t=Math.max(1,Math.min(5,tier));
+        Vec3 axis=dir.lengthSqr()<1e-9?UP:dir.normalize();
+        Vec3 right=WaterSpellRules.right(axis),up=right.cross(axis).normalize();
+        boolean rich=t>=3;
+        double spin=time*.012;
+        int glyphs=t<=2?8:12;
+        int crests=t<=2?4:t==3?6:8;
+        int arms=t>=5?4:t==4?3:0;
+
+        // Soft body wash: keep it weak, otherwise the world underneath turns into blue concrete.
+        WaterGeometry.disk(out,pose,center.add(axis.scale(.002)),axis,radius*.99,
+                .02F,.10F,.28F,alpha*.075F,48);
+        WaterGeometry.disk(glow,pose,center.add(axis.scale(.003)),axis,radius*.94,
+                .04F,.26F,.58F,alpha*.13F,40);
+        WaterGeometry.disk(glow,pose,center.add(axis.scale(.005)),axis,radius*.42,
+                .12F,.48F,.78F,alpha*.16F,24);
+
+        // Concentric tide rings.
+        ringColor(out,pose,center,axis,radius*.995,radius*.011,WR,WG,WB,alpha*.88F,64);
+        ringColor(glow,pose,center,axis,radius*.995,radius*.007,WR,WG,WB,alpha*.55F,48);
+        ringColor(out,pose,center,axis,radius*1.045,radius*.0028,GR,GG,GB,alpha*.30F,40);
+        ringColor(out,pose,center,axis,radius*.855,radius*.0050,CR,CG,CB,alpha*.55F,44);
+        ringColor(glow,pose,center,axis,radius*.855,radius*.0035,CR,CG,CB,alpha*.35F,40);
+        ringColor(out,pose,center,axis,radius*.58,radius*.0042,WR,WG,WB,alpha*.30F,36);
+
+        // Short wave crests around the outer band: three strokes each, not a cross/rune.
+        for(int i=0;i<glyphs;i++) {
+            double a=spin+i*Math.PI*2/glyphs;
+            sealGlyph(out,glow,pose,center,right,up,axis,a,radius*.895,radius*.058,
+                    alpha*(i%3==0?.78F:.55F));
+        }
+
+        // Crescent: the tide moon. Low tiers keep only the concentric rings.
+        if(rich) sealCrescent(out,glow,pose,center,right,up,axis,radius,spin*.55,alpha);
+
+        // Partial ripple arcs inside the crescent.
+        for(int k=0;k<(rich?3:2);k++) {
+            double rr=radius*(.72-k*.075),a0=spin*(.35+k*.4)+k*1.7,span=Math.PI*.72;
+            sealArc(out,glow,pose,center,right,up,axis,rr,a0,a0+span,12,
+                    k==0?GR:WR,k==0?GG:WG,k==0?GB:WB,alpha*(.18F+k*.03F));
+        }
+
+        // Whirlpool arms: tier 4–5 only. Low tier stays a clean seal, not a vortex.
+        for(int i=0;i<arms;i++) {
+            double base=spin*.8+i*Math.PI*2/arms+Math.PI/8;
+            sealArm(out,glow,pose,center,right,up,axis,base,radius,alpha);
+        }
+
+        // Crest blades around the rim: short alternating fins, thicker than a line.
+        for(int i=0;i<crests;i++) {
+            double a=spin*1.1+i*Math.PI*2/crests+Math.PI/8;
+            sealCrest(out,glow,pose,center,right,up,axis,a,radius,i%2==0,
+                    alpha*(.26F+.10F*(i%2)));
+        }
+
+        // Central whirlpool: a draining spiral, not the old teardrop/eye.
+        sealVortex(out,glow,pose,center,right,up,axis,radius,time,alpha,rich);
+    }
+
+    private static Vec3 sealPoint(Vec3 center,Vec3 right,Vec3 up,Vec3 axis,
+                                  double angle,double radius,double lift) {
+        return center.add(right.scale(Math.cos(angle)*radius))
+                .add(up.scale(Math.sin(angle)*radius)).add(axis.scale(lift));
+    }
+
+    private static void sealGlyph(VertexConsumer out,VertexConsumer glow,Matrix4f pose,
+                                  Vec3 center,Vec3 right,Vec3 up,Vec3 axis,double angle,
+                                  double radius,double size,float alpha) {
+        for(int k=0;k<2;k++) {
+            double off=(k==0?-.012D:.012D);
+            Vec3 a=sealPoint(center,right,up,axis,angle-.070D,radius-off,.004D);
+            Vec3 b=sealPoint(center,right,up,axis,angle-.024D,radius+size*.55D-off,.004D);
+            Vec3 c=sealPoint(center,right,up,axis,angle+.024D,radius+size*.55D-off,.004D);
+            Vec3 d=sealPoint(center,right,up,axis,angle+.070D,radius-off,.004D);
+            float ar=(k==0?GR:CR),ag=(k==0?GG:CG),ab=(k==0?GB:CB);
+            stroke(out,pose,axis,a,b,size*.10D,ar,ag,ab,alpha);
+            stroke(out,pose,axis,b,c,size*.10D,ar,ag,ab,alpha*.92F);
+            stroke(out,pose,axis,c,d,size*.10D,ar,ag,ab,alpha*.84F);
+            stroke(glow,pose,axis,a,d,size*.025D,WR,WG,WB,alpha*.42F);
+        }
+    }
+
+    private static void sealCrescent(VertexConsumer out,VertexConsumer glow,Matrix4f pose,
+                                     Vec3 center,Vec3 right,Vec3 up,Vec3 axis,
+                                     double radius,double angle,float alpha) {
+        int seg=18;
+        double mid=radius*.465D;
+        Vec3 prevO=null,prevI=null;
+        for(int i=0;i<=seg;i++) {
+            double u=i/(double)seg;
+            double taper=Math.sin(Math.PI*u);
+            double outer=mid+radius*.045D*taper,inner=mid-radius*.045D*taper;
+            double a=angle-Math.PI*.69D+i*Math.PI*1.38D/seg;
+            Vec3 po=sealPoint(center,right,up,axis,a,outer,.008D);
+            Vec3 pi=sealPoint(center,right,up,axis,a,inner,.008D);
+            if(prevO!=null) quad(out,pose,prevI,prevO,po,pi,CR,CG,CB,alpha*.26F);
+            prevO=po;prevI=pi;
+        }
+        for(int edge=0;edge<2;edge++) {
+            for(int i=0;i<seg;i++) {
+                double u0=i/(double)seg,u1=(i+1)/(double)seg;
+                double t0=Math.sin(Math.PI*u0),t1=Math.sin(Math.PI*u1);
+                double rr0=mid+(edge==0?radius*.045D*t0:-radius*.045D*t0);
+                double rr1=mid+(edge==0?radius*.045D*t1:-radius*.045D*t1);
+                double a0=angle-Math.PI*.69D+i*Math.PI*1.38D/seg;
+                double a1=angle-Math.PI*.69D+(i+1)*Math.PI*1.38D/seg;
+                Vec3 p=sealPoint(center,right,up,axis,a0,rr0,.010D);
+                Vec3 q=sealPoint(center,right,up,axis,a1,rr1,.010D);
+                float w=(float)(radius*(edge==0?.0045D:.0035D)*(.55D+.45D*t0));
+                stroke(out,pose,axis,p,q,Math.max(radius*.0018D,w),edge==0?WR:CR,
+                        edge==0?WG:CG,edge==0?WB:CB,alpha*(edge==0?.82F:.55F));
+                if(edge==0)stroke(glow,pose,axis,p,q,radius*.0025D,WR,WG,WB,alpha*.40F);
+            }
+        }
+    }
+
+    private static void sealArc(VertexConsumer out,VertexConsumer glow,Matrix4f pose,
+                                Vec3 center,Vec3 right,Vec3 up,Vec3 axis,
+                                double radius,double a0,double a1,int seg,
+                                float r,float g,float b,float alpha) {
+        for(int i=0;i<seg;i++) {
+            double t0=a0+(a1-a0)*i/seg,t1=a0+(a1-a0)*(i+1)/seg;
+            Vec3 p=sealPoint(center,right,up,axis,t0,radius,.006D);
+            Vec3 q=sealPoint(center,right,up,axis,t1,radius,.006D);
+            stroke(out,pose,axis,p,q,radius*.0050D,r,g,b,alpha);
+            if(i%3==0)stroke(glow,pose,axis,p,q,radius*.0022D,WR,WG,WB,alpha*.40F);
+        }
+    }
+
+    private static void sealArm(VertexConsumer out,VertexConsumer glow,Matrix4f pose,
+                                Vec3 center,Vec3 right,Vec3 up,Vec3 axis,
+                                double base,double radius,float alpha) {
+        int steps=7;
+        Vec3 prev=null,prevSide=null,prevP=null;
+        for(int j=0;j<=steps;j++) {
+            double t=j/(double)steps;
+            double a=base+t*1.18D;
+            double rr=radius*(.27D+.65D*t);
+            Vec3 p=sealPoint(center,right,up,axis,a,rr,.010D);
+            Vec3 tangent=right.scale(-Math.sin(a)).add(up.scale(Math.cos(a)));
+            Vec3 side=tangent.scale(radius*.020D*(1.0D-.45D*t));
+            if(prev!=null) {
+                quad(out,pose,prev.add(prevSide),prev.subtract(prevSide),
+                        p.subtract(side),p.add(side),CR,CG,CB,alpha*.20F);
+                stroke(glow,pose,axis,prevP,p,radius*.0024D,CR,CG,CB,alpha*.32F);
+            }
+            prev=p;prevSide=side;prevP=p;
+        }
+    }
+
+    private static void sealCrest(VertexConsumer out,VertexConsumer glow,Matrix4f pose,
+                                  Vec3 center,Vec3 right,Vec3 up,Vec3 axis,
+                                  double angle,double radius,boolean longCrest,float alpha) {
+        double r0=radius*.855D,r1=radius*.975D,r2=radius*(longCrest?1.055D:1.005D);
+        Vec3 base=sealPoint(center,right,up,axis,angle,r0,.006D);
+        Vec3 mid=sealPoint(center,right,up,axis,angle+.020D,r1,.006D);
+        Vec3 tip=sealPoint(center,right,up,axis,angle+.042D,r2,.006D);
+        Vec3 tan0=right.scale(-Math.sin(angle)).add(up.scale(Math.cos(angle)));
+        Vec3 tan1=right.scale(-Math.sin(angle+.020D)).add(up.scale(Math.cos(angle+.020D)));
+        Vec3 tan2=right.scale(-Math.sin(angle+.042D)).add(up.scale(Math.cos(angle+.042D)));
+        Vec3 b0=tan0.scale(radius*.044D),b1=tan1.scale(radius*.026D),b2=tan2.scale(radius*.010D);
+        quad(out,pose,base.add(b0),base.subtract(b0),mid.subtract(b1),mid.add(b1),
+                CR,CG,CB,alpha*.56F);
+        quad(out,pose,mid.add(b1),mid.subtract(b1),tip.subtract(b2),tip.add(b2),
+                CR,CG,CB,alpha*.48F);
+        stroke(out,pose,axis,base.add(b0),tip.add(b2),radius*.0038D,WR,WG,WB,alpha*.74F);
+        stroke(glow,pose,axis,base.add(b0),tip.add(b2),radius*.0024D,WR,WG,WB,alpha*.48F);
+    }
+
+    /**
+     * Central drain: three broad spiral bands, four tight filaments, broken rim arcs and an
+     * open comma core. There is deliberately no closed ring around a solid centre — the old
+     * teardrop + inner ring + bright dot read as an eye from above.
+     */
+    private static void sealVortex(VertexConsumer out,VertexConsumer glow,Matrix4f pose,
+                                   Vec3 center,Vec3 right,Vec3 up,Vec3 axis,
+                                   double radius,double time,float alpha,boolean rich) {
+        Vec3 origin=center.add(axis.scale(.010D));
+        double spin=time*.032D;
+        int arms=3;
+        int armSteps=rich?14:11;
+        int threads=rich?4:3;
+        int threadSteps=rich?13:10;
+
+        // A shallow dark basin, then a faint blue upwelling. No outline, so it cannot read as a pupil.
+        disk(out,pose,origin,axis,radius*.225D,.012F,.050F,.20F,alpha*.22F,24);
+        disk(glow,pose,origin.add(axis.scale(.002D)),axis,radius*.175D,
+                .03F,.16F,.42F,alpha*.14F,20);
+
+        // Broad translucent bands: the body of the whirlpool.
+        for(int arm=0;arm<arms;arm++) {
+            double base=spin+arm*Math.PI*2.0D/arms;
+            Vec3 prev=null,prevSide=null;
+            for(int j=0;j<=armSteps;j++) {
+                double t=j/(double)armSteps;
+                double rr=radius*(.30D-.255D*t);
+                double a=base+t*(2.25D+.15D*(rich?1:0));
+                Vec3 p=sealPoint(center,right,up,axis,a,rr,.004D+.016D*(1.0D-t));
+                Vec3 tangent=right.scale(-Math.sin(a)).add(up.scale(Math.cos(a)));
+                Vec3 side=tangent.scale(radius*(.028D*(1.0D-t)+.003D));
+                if(prev!=null) {
+                    quad(out,pose,prev.subtract(prevSide),prev.add(prevSide),
+                            p.add(side),p.subtract(side),CR,CG,CB,
+                            alpha*(.12F+.025F*(rich?1F:0F))*(1F-.25F*(float)t));
+                    stroke(glow,pose,axis,prev.add(prevSide),p.add(side),radius*.0016D,
+                            CR,CG,CB,alpha*.18F);
+                }
+                prev=p;prevSide=side;
+            }
+        }
+
+        // Tight bright filaments: they make the rotation legible at a distance.
+        for(int k=0;k<threads;k++) {
+            double base=spin*1.65D+k*Math.PI*2.0D/threads;
+            Vec3 prev=null;
+            for(int j=0;j<=threadSteps;j++) {
+                double t=j/(double)threadSteps;
+                double rr=radius*(.285D-.260D*t);
+                double a=base+t*(3.35D+.25D*(rich?1:0));
+                Vec3 p=sealPoint(center,right,up,axis,a,rr,.012D);
+                if(prev!=null) stroke(glow,pose,axis,prev,p,
+                        (float)(radius*(.0036D*(1.0D-t)+.0011D)),
+                        k%2==0?WR:CR,k%2==0?WG:CG,k%2==0?WB:CB,
+                        alpha*(.38F-.18F*(float)t));
+                prev=p;
+            }
+        }
+
+        // Broken rim currents, not a full iris ring.
+        for(int k=0;k<3;k++) {
+            double rr=radius*(.245D-.040D*k);
+            double a0=spin*1.6D+k*2.0D;
+            sealArc(out,glow,pose,center,right,up,axis,rr,a0,a0+1.45D,7,
+                    k==1?GR:CR,k==1?GG:CG,k==1?GB:CB,alpha*.16F);
+        }
+
+        // Open comma core: two short arcs ending off-centre, so the centre is a drain, not a pupil.
+        for(int k=0;k<2;k++) {
+            double base=spin*2.1D+k*Math.PI;
+            Vec3 prev=null;
+            for(int j=0;j<=8;j++) {
+                double t=j/8.0D;
+                double rr=radius*(.085D-.070D*t);
+                double a=base+t*2.5D;
+                Vec3 p=sealPoint(center,right,up,axis,a,rr,.014D);
+                if(prev!=null) stroke(glow,pose,axis,prev,p,
+                        (float)(radius*(.005D*(1.0D-t)+.001D)),
+                        k==0?WR:CR,k==0?WG:CG,k==0?WB:CB,
+                        alpha*(.55F-.25F*(float)t));
+                prev=p;
+            }
+        }
+
+        // The actual drain + a few foam specks caught in the current.
+        disk(out,pose,origin.add(axis.scale(.002D)),axis,radius*.040D,
+                .006F,.025F,.10F,alpha*.50F,12);
+        disk(glow,pose,origin.add(axis.scale(.004D)),axis,radius*.011D,
+                .82F,.98F,1,alpha*.85F,8);
+        for(int k=0;k<(rich?3:2);k++) {
+            double a=spin*1.2D+k*Math.PI*.55D;
+            double rr=radius*(.17D-.035D*k);
+            disk(out,pose,sealPoint(center,right,up,axis,a,rr,.016D),axis,radius*.006D,
+                    WR,WG,WB,alpha*.30F,6);
+        }
+    }
+
+    static void sealSatellite(VertexConsumer out,VertexConsumer glow,Matrix4f pose,
+                              Vec3 center,Vec3 dir,double radius,double time,float alpha) {
+        Vec3 axis=dir.lengthSqr()<1e-9?UP:dir.normalize();
+        ringColor(out,pose,center,axis,radius,radius*.055,WR,WG,WB,alpha*.72F,12);
+        ringColor(glow,pose,center,axis,radius,radius*.070,CR,CG,CB,alpha*.42F,10);
+        ringColor(out,pose,center,axis,radius*.55,radius*.045,GR,GG,GB,alpha*.55F,8);
+        disk(glow,pose,center.add(axis.scale(.004)),axis,radius*.18,
+                .75F,.96F,1,alpha*.72F,6);
+    }
+
     static void richCircle(MultiBufferSource buffers,PoseStack stack,Vec3 center,Vec3 dir,double radius,double time,float alpha) {
-        richCircle(buffers,stack,center,dir,radius,time,alpha,radius>=6?6:3);
+        richCircle(buffers,stack,center,dir,radius,time,alpha,radius>=6?6:3,3);
     }
     /**
      * @param satellites 卫星子阵数量 ✓ —— 半径 15 的龙滅大阵给 6 个子阵太费（作者 2026-10-10：
      *                   "把 t5 水柱释放过程里的线条量都可以减半" ✗）⇒ 调用方可以只要 3 个 ✓。
      */
     static void richCircle(MultiBufferSource buffers,PoseStack stack,Vec3 center,Vec3 dir,double radius,double time,float alpha,int satellites) {
-        WaterSolidModels.seal(stack,buffers,center,dir,radius,time,alpha);
-        buffers.getBuffer(WaterRenderTypes.geometry());
+        richCircle(buffers,stack,center,dir,radius,time,alpha,satellites,3);
+    }
+    static void richCircle(MultiBufferSource buffers,PoseStack stack,Vec3 center,Vec3 dir,
+                           double radius,double time,float alpha,int satellites,int tier) {
+        Matrix4f pose=stack.last().pose();
+        int n=Math.max(0,Math.min(6,satellites));
+        WaterVisualBuffers.draw(buffers,(out,glow) -> {
+            seal(out,glow,pose,center,dir,radius,time,alpha,tier);
+            for(int i=0;i<n;i++) {
+                double a=time*.010D+i*Math.PI*2.0D/Math.max(1,n)+Math.PI/4.0D;
+                Vec3 axis=dir.lengthSqr()<1e-9?UP:dir.normalize();
+                Vec3 right=WaterSpellRules.right(axis),up=right.cross(axis).normalize();
+                Vec3 at=center.add(right.scale(Math.cos(a)*radius*1.13D))
+                        .add(up.scale(Math.sin(a)*radius*1.13D));
+                sealSatellite(out,glow,pose,at,axis,radius*.055D,time,alpha*.88F);
+            }
+        });
+    }
+    static void staticSeal(MultiBufferSource buffers,PoseStack stack,Vec3 center,Vec3 dir,
+                           double radius,double time,float alpha,int tier) {
+        Matrix4f pose=stack.last().pose();
+        WaterVisualBuffers.draw(buffers,(out,glow) -> seal(out,glow,pose,center,dir,radius,time,alpha,tier));
     }
     static void drawCircle(VertexConsumer out,VertexConsumer glow,Matrix4f pose,Vec3 center,Vec3 dir,
                            double radius,double time,float alpha,int satellites) {
@@ -260,6 +572,29 @@ final class WaterGeometry {
         板宽按 ~1.5 格取整，上限 48 ✗ —— 半径 18 的深渊若按 1.5 格算要 75 块，
         每块 96 顶点 ⇒ 单实体上万个顶点纯属白烧 GPU ✗。 */
     static int panelCount(double radius) { return Math.max(8,Math.min(48,(int)Math.round(Math.PI*2*radius/1.5))); }
+    /**
+     * 水牢柱廊一圈几根 ✓（作者 2026-11-10："水牢的隔板……做成一个个罗马圣柱"✗）。
+     *
+     * <p>比 {@link #panelCount} **少得多** ✗：隔板要严丝合缝（1.5 格一块 ✓），
+     * 柱子是"廊"——柱距 3.4 格才看得出是一根根柱子，30 根挤在半径 12 的圈上会连成一堵墙 ✗。
+     * 上限 28 根：t5 冥穴半径 26 格（周长 163）也只要 28 根，再多就是烧顶点 ✗。
+     */
+    static int columnCount(double radius) { return Math.max(8,Math.min(22,(int)Math.round(Math.PI*2*radius/4.2))); }
+
+    /**
+     * 单根柱子的直径（格 ✓）—— 三个上限取最小：
+     * <ol>
+     *   <li>{@code chord*0.62}：别把柱廊挤成一堵墙（柱距六成 ✓）；</li>
+     *   <li>{@code height/6.5}：**别做成细针** ✗ —— 24 格高的柱子如果只有 1.4 格粗，
+     *       看起来像根旗杆而不是罗马柱（试玩前就能算出来 ✓）；</li>
+     *   <li>2.6 格硬上限：再粗就不像柱子、像水塔 ✗。</li>
+     * </ol>
+     */
+    static double columnDiameter(double radius,double height,int columns) {
+        if(columns<=0||radius<=0)return .8D;
+        double chord=2*radius*Math.sin(Math.PI/columns);
+        return Math.max(.55D,Math.min(2.6D,Math.min(chord*.62D,height/6.5D)));
+    }
     /**
      * 水板圆筒（2026-10-10 第七批）：作者 ——"水牢…把他改成一个个竖起来的水板连在一起变成一个圆困住敌人"✓。
      *

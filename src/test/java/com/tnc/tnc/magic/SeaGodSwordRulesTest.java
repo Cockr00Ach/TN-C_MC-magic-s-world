@@ -27,6 +27,17 @@ class SeaGodSwordRulesTest {
         }
         assertEquals(60,SeaGodSwordRules.DAMAGE);
     }
+    @Test void skySealOpensBeforeTheGiantSwordAppears() {
+        // 作者 2026-11-07：先出现法阵，再出现巨剑；中间那段留给水渊兽升空化作虚影消失。
+        assertTrue(SeaGodSwordRules.SEAL_TICK<SeaGodSwordRules.APPEAR_TICK);
+        assertTrue(SeaGodSwordRules.APPEAR_TICK-SeaGodSwordRules.SEAL_TICK>=40,"Seal must lead the sword by two seconds or more");
+        assertEquals(0,SeaGodSwordRules.sealOpacity(SeaGodSwordRules.SEAL_TICK));
+        assertEquals(0,SeaGodSwordRules.sealOpacity(SeaGodSwordRules.SEAL_TICK-1));
+        assertTrue(SeaGodSwordRules.sealVisible(SeaGodSwordRules.APPEAR_TICK-1),"Seal already visible before the sword");
+        assertEquals(1,SeaGodSwordRules.sealOpacity(SeaGodSwordRules.APPEAR_TICK));
+        assertEquals(0,SeaGodSwordRules.sealOpacity(SeaGodSwordRules.END_TICK+8));
+    }
+
     @Test void continuousBarrageHasEightDistinctStrikesAndNoMoreThanTwoVisibleSwords() {
         assertEquals(8,SeaGodSwordRules.COUNT);
         int impacts=0;

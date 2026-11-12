@@ -21,18 +21,18 @@ final class InkShaderSessionTest {
         assertEquals(new InkShaderSession.State(true,PACK),s.original());
         s.tick(false);s.tick(false);assertTrue(b.state.enabled());assertEquals(PACK,b.state.pack());assertEquals(2,b.applies);assertFalse(files.journalExists());
     }
-    @Test void originalOffNeverGetsEnabledOnExit()throws Exception {
+    @Test void originalOffEnablesSelectedPackOnExit()throws Exception {
         var b=new Backend(false);var s=new InkShaderSession(b,new InkShaderFiles(folder));s.tick(true);s.tick(false);
-        assertFalse(b.state.enabled());assertEquals(0,b.applies);
+        assertTrue(b.state.enabled());assertEquals(1,b.applies);
     }
     @Test void changingModesKeepsTheOriginalPackAndState()throws Exception {
         var b=new Backend(true);var s=new InkShaderSession(b,new InkShaderFiles(folder));s.tick(true);
         s.mode(InkShaderSession.Mode.INK);s.tick(true);assertEquals(new InkShaderSession.State(true,InkShaderSession.INK_PACK),b.state);
         s.mode(InkShaderSession.Mode.OFF);s.tick(true);s.tick(false);assertEquals(new InkShaderSession.State(true,PACK),b.state);
     }
-    @Test void explicitlyTestingInkWhileOriginallyOffStillRestoresOff()throws Exception {
+    @Test void explicitlyTestingInkReturnsToSelectedPackEnabled()throws Exception {
         var b=new Backend(false);var s=new InkShaderSession(b,new InkShaderFiles(folder));s.mode(InkShaderSession.Mode.INK);
-        s.tick(true);assertTrue(b.state.enabled());s.tick(false);assertEquals(new InkShaderSession.State(false,PACK),b.state);
+        s.tick(true);assertTrue(b.state.enabled());s.tick(false);assertEquals(new InkShaderSession.State(true,PACK),b.state);
     }
     @Test void startupRecoversAnInterruptedSessionBeforeCapturingAgain()throws Exception {
         var files=new InkShaderFiles(folder);files.save(new InkShaderSession.State(true,PACK));

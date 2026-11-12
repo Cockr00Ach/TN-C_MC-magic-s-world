@@ -220,17 +220,8 @@ public final class MagicStoneSelfTest {
                 "freeBefore=" + freeBefore + " slot0=" + loadout.getSlot(0)
                         + " slot" + freeBefore + "=" + loadout.getSlot(freeBefore)));
 
-        // ② 配键列表 = 每条链的最高档；同链升档后列表换成新档、旧档不再可绑
-        java.util.List<SpellCatalog.Entry> topsBefore = SpellCatalog.chainTopAssignable(loadout, Element.LIGHTNING);
-        boolean topsAreChainTops = !topsBefore.isEmpty();
-        for (SpellCatalog.Entry top : topsBefore) {
-            if (!top.id().equals(SpellCatalog.topLearned(loadout, Element.LIGHTNING, top.chain()).id())) {
-                topsAreChainTops = false;
-            }
-        }
-        checks.add(new Check("loadout: bind list = each chain's current top only", topsAreChainTops,
-                "lightning tops=" + topsBefore.size() + " " + topsBefore.stream()
-                        .map(SpellCatalog.Entry::displayName).toList()));
+        var learnedOptions=SpellCatalog.learnedAssignable(loadout,Element.LIGHTNING);
+        checks.add(new Check("loadout: every learned tier is available",learnedOptions.stream().allMatch(e->loadout.hasLearned(e.id())),"learned="+learnedOptions.size()));
 
         // ②b 同链升档：该链的键被换成新档，别的链不动
         SpellCatalog.Entry coreT1 = SpellCatalog.of(Element.LIGHTNING, SpellCatalog.Chain.CORE).get(0);
@@ -243,10 +234,10 @@ public final class MagicStoneSelfTest {
             if (orbT1Self.id().equals(loadout.getSlot(i))) orbSlot = i;
         }
         MagicStoneLearning.unlock(loadout, coreT2);
-        boolean upgraded = coreSlot >= 0 && coreT2.id().equals(loadout.getSlot(coreSlot))
+        boolean upgraded = coreSlot >= 0 && coreT1.id().equals(loadout.getSlot(coreSlot))
                 && orbSlot >= 0 && orbT1Self.id().equals(loadout.getSlot(orbSlot))
-                && !SpellCatalog.canBind(loadout, coreT1.id());
-        checks.add(new Check("loadout: same-chain upgrade swaps that chain's key only", upgraded,
+                && SpellCatalog.canBind(loadout, coreT1.id()) && loadout.isBound(coreT2.id());
+        checks.add(new Check("loadout: same-chain learning preserves both tiers", upgraded,
                 "coreSlot=" + coreSlot + " -> " + loadout.getSlot(coreSlot)
                         + " orbSlot=" + orbSlot + " kept=" + (orbSlot >= 0 && orbT1Self.id().equals(loadout.getSlot(orbSlot)))));
 

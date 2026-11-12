@@ -5,6 +5,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.spell_engine.entity.SpellCloud;
 
 /**
@@ -96,6 +97,9 @@ public class DarkFogCloudEntity extends SpellCloud {
             "minecraft:squid_ink"
     };
 
+    /** 黑雾"抓紧"的判定间隔（tick）：越密越像一直有人拽，但也不用每 tick 都推 ✓。 */
+    private static final int GRIP_INTERVAL = 6;
+
     /** 边界法阵（纯表现，不进存档 ✓）。 */
     private TNMagicCircleEntity circle;
 
@@ -148,6 +152,16 @@ public class DarkFogCloudEntity extends SpellCloud {
     private static final net.minecraft.network.syncher.EntityDataAccessor<Integer> DATA_FOG_RADIUS =
             net.minecraft.network.syncher.SynchedEntityData.defineId(
                     DarkFogCloudEntity.class, net.minecraft.network.syncher.EntityDataSerializers.INT);
+    /**
+     * ★ 2026-11-11 作者：「黑雾的大小也要随着 t 级增长变大，你别只加宽度，高度也要加」✓
+     *
+     * <p>雾的半高（格 ×100 存）。以前只说半径（宽度），高度是渲染器里写死的
+     * {@code 1.1 + 档位×0.1}（t1 1.2 → t5 1.6，几乎不变 ✗）。
+     * 现在半高 = 半径 × {@link #HEIGHT_RATIO}（t1 4.5 格 → 半高 2.25；t5 9 格 → 半高 4.5）✓。
+     */
+    private static final net.minecraft.network.syncher.EntityDataAccessor<Integer> DATA_FOG_HEIGHT =
+            net.minecraft.network.syncher.SynchedEntityData.defineId(
+                    DarkFogCloudEntity.class, net.minecraft.network.syncher.EntityDataSerializers.INT);
 
     /** 同步施法者实体 id；客户端据此给自己的黑雾保留清晰视野。 */
     private static final net.minecraft.network.syncher.EntityDataAccessor<Integer> DATA_OWNER_ID =
@@ -166,6 +180,7 @@ public class DarkFogCloudEntity extends SpellCloud {
         super.m_8097_();
         this.entityData.define(DATA_FOG_TIER, 0);
         this.entityData.define(DATA_FOG_RADIUS, 0);
+        this.entityData.define(DATA_FOG_HEIGHT, 0);
         this.entityData.define(DATA_OWNER_ID, -1);
         this.entityData.define(DATA_FOG_OWNER, java.util.Optional.empty());
     }
@@ -178,6 +193,34 @@ public class DarkFogCloudEntity extends SpellCloud {
     /** 客户端用：这片雾的半径（格；0 = 还不知道）✓。 */
     public double syncedRadius() {
         return this.entityData.get(DATA_FOG_RADIUS) / 100.0D;
+    }
+
+    /** 客户端用：这片雾的<b>半高</b>（格）✓ —— 没同步到就退回"按半径算"。 */
+    public double syncedHeight() {
+        int stored = this.entityData.get(DATA_FOG_HEIGHT);
+        if (stored > 0) {
+            return stored / 100.0D;
+        }
+        return fogHalfHeightFor(syncedRadius());
+    }
+
+    /** 半高与半径的比例 ✓（2026-11-11 作者：高度也要跟着档位长）—— 规则在 {@link DarkFogRules} 里 ✓。 */
+    public static final double HEIGHT_RATIO = DarkFogRules.HEIGHT_RATIO;
+
+    /**
+     * 一片雾的<b>半高</b>（格）✓ —— t1 半径 4.5 ⇒ 半高 2.25；t5 半径 9 ⇒ 半高 4.5。
+     *
+     * <p>⚠️ Boss 领域雾（半径 &gt; {@link #DOMAIN_RADIUS}）保持 3.2 格：
+     * 那是"整个战场都是雾"的场面，长高没有意义（而且 150×0.5 = 75 格会把整张图糊掉 ✗）✓。
+     */
+    public static double fogHalfHeightFor(double radius) {
+        return DarkFogRules.halfHeight(radius);
+    }
+
+    /** 这片雾的半高（格）✓（服务端判定用）。 */
+    public double fogHalfHeight() {
+        double radius = circleRadius > 0.0D ? circleRadius : syncedRadius();
+        return fogHalfHeightFor(radius);
     }
 
     /** 客户端用：这片雾是谁释放的（-1 = 尚未同步）。 */
@@ -208,6 +251,11 @@ public class DarkFogCloudEntity extends SpellCloud {
         int stored = (int) Math.round(radius * 100.0D);
         if (this.entityData.get(DATA_FOG_RADIUS) != stored) {
             this.entityData.set(DATA_FOG_RADIUS, stored);
+        }
+        // ★ 2026-11-11：半高也跟着半径同步给客户端（渲染器用它决定雾片的高度）✓
+        int storedHeight = (int) Math.round(fogHalfHeightFor(radius) * 100.0D);
+        if (this.entityData.get(DATA_FOG_HEIGHT) != storedHeight) {
+            this.entityData.set(DATA_FOG_HEIGHT, storedHeight);
         }
         LivingEntity owner = resolveOwner();
         int ownerId = owner == null ? -1 : owner.getId();
@@ -276,6 +324,7 @@ public class DarkFogCloudEntity extends SpellCloud {
         placeCircle();
         purgeExtraCircles();
         syncAppearance();
+        gripIntruders();
 
         if (!isDarkFog() || tickCount < FOLLOW_GRACE_TICKS) {
             return;
@@ -301,6 +350,114 @@ public class DarkFogCloudEntity extends SpellCloud {
             setPos(owner.getX(), targetY, owner.getZ());
         }
         placeCircle();
+    }
+
+    /**
+     * ★ <b>把雾里的敌人"抓紧"</b> —— 作者 2026-11-05：
+     * 「黑雾加一点那个就是，中心是不是会冒出手，把敌人抓紧黑雾之中」✓
+     *
+     * <p>视觉那边（{@code DarkMistRenderer}）已经让雾心冒出手、在敌人身上各抓一只；
+     * 这里补上<b>手感</b>，让"被抓住"不只是画面：
+     * <ul>
+     *   <li><b>往雾心拽</b>：每 {@link #GRIP_INTERVAL} tick 给一个朝中心的小推力
+     *       （{@code hurtMarked} 让服务端把速度同步给客户端 ⇒ 玩家也会被拽 ✓）；</li>
+     *   <li><b>重减速</b>：按档位给 {@code MOVEMENT_SLOWDOWN}（最高 IV），持续刷新 ⇒ 走不出去 ✓；</li>
+     *   <li><b>压跳</b>：向上的速度砍到三成 ⇒ 跳不出雾 ✓（不锁 AI、不 noAi，敌人还能打你）。</li>
+     * </ul>
+     *
+     * <p>不拽施法者自己和队友（{@code isAlliedTo}）✓；不处理非暗雾（别的 cloud 法术不受影响）✓。
+     *
+     * <p>★ <b>Boss 领域雾要单独调</b>（作者 2026-11-05：「连着黑暗boss的也一起改了」）：
+     * 巨人的领域把半径放大了 30 倍（{@code TNDarkGiantFog}）⇒ 同一套数值会变成
+     * "整个屏幕都被拽" ✗。所以 domain 雾（{@code radius > 64}）改用更轻的一套：
+     * 间隔 10 tick、推力 0.06、减速封顶 III —— 范围大、手感必须软 ✓。
+     */
+    private static final double DOMAIN_RADIUS = 64.0D;
+
+    private void gripIntruders() {
+        if (!isDarkFog()) {
+            return;
+        }
+        double radius = circleRadius > 0.0D ? circleRadius : syncedRadius();
+        if (radius <= 0.0D) {
+            return;
+        }
+        boolean domain = radius > DOMAIN_RADIUS;
+        if (tickCount % (domain ? GRIP_INTERVAL * 2 : GRIP_INTERVAL) != 0) {
+            return;
+        }
+        LivingEntity owner = resolveOwner();
+        int tier = Math.max(1, tier());
+        int slowAmp = domain ? Math.min(3, tier) : Math.min(4, tier);
+        // ★ 2026-11-11：雾现在是一个"圆柱"——半高也跟着档位长（见 fogHalfHeightFor）✓
+        double halfHeight = fogHalfHeight();
+        // 瞬移进雾里之后停在离雾心多远（雾半径的 45%，至少 0.6 格）
+        double inside = DarkFogRules.insideDistance(radius);
+        // ★ 2026-11-06 作者：「黑雾抓周围的敌人的距离要很远啊，起码比黑雾范围大」
+        //   ⇒ 抓取半径 = 雾半径 × 1.45（原来就是雾半径本身 ⇒ 只有雾最里面的人被抓住 ✗）。
+        //   Boss 领域雾（150 格）再乘 1.45 就成了两百格，太重 ⇒ 单独封顶 96 格 ✓
+        double grip = DarkFogRules.gripRadius(radius);
+        double r2 = grip * grip;
+        for (LivingEntity victim : level().getEntitiesOfClass(LivingEntity.class,
+                getBoundingBox().inflate(grip + 1.0D), LivingEntity::isAlive)) {
+            if (owner != null && (victim == owner || victim.isAlliedTo(owner))) {
+                continue;
+            }
+            // ★ Boss 领域雾：施法者是巨人 ⇒ 只抓玩家，别把 BOSS 自己召唤的小怪按在雾里 ✗
+            //   （作者 2026-11-05："连着黑暗boss的也一起改了"）
+            if (!(owner instanceof net.minecraft.world.entity.player.Player)
+                    && victim instanceof net.minecraft.world.entity.monster.Monster) {
+                continue;
+            }
+            // 高度也要算：雾是圆柱，头顶/脚下太远的敌人不该被拽进雾底 ✗
+            double victimCentreY = victim.getY() + victim.getBbHeight() * 0.5D;
+            if (Math.abs(victimCentreY - getY()) > halfHeight + victim.getBbHeight() * 0.5D) {
+                continue;
+            }
+            double dx = getX() - victim.getX();
+            double dz = getZ() - victim.getZ();
+            double d2 = dx * dx + dz * dz;
+            if (d2 > r2) {
+                continue;
+            }
+            double d = Math.sqrt(d2);
+            // ★ 2026-11-11 作者：「我要你瞬间给他拉进来」——
+            //   以前是每 6 tick 给一个很小的速度（0.10×距离），要拽好几秒才进得去 ✗；
+            //   现在够到就直接**瞬移进雾里**（离雾心 ≈ 半径 45% 的地方）✓，
+            //   再补一串黑雾粒子，读作"被一把抓进去了" ✓
+            //
+            // ⚠️ **Boss 领域雾不瞬移** ✗：那是 150 格半径的战场雾，
+            //    瞬移会把玩家直接甩到 BOSS 脸上（67 格），属于"游戏替我死" ✗ ——
+            //    领域雾仍然只给一点轻推（和以前一样）✓
+            if (domain) {
+                if (d > 0.5D) {
+                    double pull = 0.06D * Math.min(1.0D, d / radius);
+                    Vec3 v = victim.getDeltaMovement();
+                    victim.setDeltaMovement(v.x + dx / d * pull, v.y, v.z + dz / d * pull);
+                    victim.hurtMarked = true;
+                }
+            } else if (d > inside) {
+                double tx = getX() - dx / d * inside;
+                double tz = getZ() - dz / d * inside;
+                double ty = Math.max(getY() - halfHeight + 0.1D,
+                        Math.min(getY() + halfHeight - 0.1D, victim.getY()));
+                victim.teleportTo(tx, ty, tz);
+                victim.setDeltaMovement(0.0D, -0.12D, 0.0D);
+                victim.fallDistance = 0.0F;
+                victim.hurtMarked = true;
+                if (level() instanceof ServerLevel server) {
+                    server.sendParticles(net.minecraft.core.particles.ParticleTypes.SQUID_INK,
+                            tx, victimCentreY, tz, 6, 0.2D, 0.2D, 0.2D, 0.02D);
+                }
+            }
+            victim.addEffect(new net.minecraft.world.effect.MobEffectInstance(
+                    net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN,
+                    40, slowAmp, false, false, true));
+            Vec3 v2 = victim.getDeltaMovement();
+            if (v2.y > 0.08D) {
+                victim.setDeltaMovement(v2.x, v2.y * 0.35D, v2.z);
+            }
+        }
     }
 
     /**

@@ -47,7 +47,7 @@ public final class WarriorMartialArts {
         return new WarriorSkill(s.id(),s.codexId(),move.get("name").getAsString(),s.sequence(),s.slot(),s.cooldownTicks(),
                 s.damageMultiplier(),move.get("radius").getAsDouble(),s.slot()==1?120:s.slot()==2?100:move.get("arc").getAsInt(),
                 s.knockback(),s.durabilityCost(),move.get("text").getAsString(),s.family(),s.chain(),
-                s.backsteps()?0:move.get("dash").getAsDouble(),s.ranged(),s.interrupt(),s.staggerTicks(),s.animation(),
+                s.slot()==0 || s.backsteps()?0:move.get("dash").getAsDouble(),s.ranged(),s.interrupt(),s.staggerTicks(),s.animation(),
                 s.holds(),s.guardTicks(),s.evadeTicks(),s.backstep());
     }
     public static String clipKey(WarriorAnimation animation,String id) {

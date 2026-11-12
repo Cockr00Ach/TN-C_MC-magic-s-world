@@ -154,6 +154,25 @@ public final class TNNpcs {
                     .clientTrackingRange(16)
                     .build("tnc:dark_giant"));
 
+    /**
+     * ★ 黑魔法师 —— 暗系第二条 boss ✓（作者 2026-11-07："你做一个黑魔法师，通身黑暗 …… 然后把现在的暗系 boss 的法术绑到它身上" ✓）。
+     *
+     * <p>{@link #DARK_GIANT 巨兽人领主} 一个字节没动 ✓ —— 作者说那个"到时候拿去做战士那边的 boss" ✓，
+     * 这个黑魔法师是**法师系** ✓，法术完全一样（同读 {@code TNDarkGiantSpells} ✓）。
+     *
+     * <p>模型：{@code geo/entity/dark_mage.geo.json}（{@code tools/gen_dark_mage.py} 生成 ✓），
+     * 预览 {@code docs/previews/mobs/dark_mage.png} ✓。碰撞箱按 3.9 格高 / 1.1 格宽给 ✓。
+     * ★ 属性必须在 {@code TNNpcAttributes} 里也注册 ✗ 漏了生成即崩 ✗；渲染器必须在
+     * {@code TNNpcClientEvents} 里注册 ✗ 漏了客户端崩 ✗。
+     */
+    public static final RegistryObject<EntityType<com.tnc.tnc.boss.TNDarkMageEntity>> DARK_MAGE =
+            ENTITY_TYPES.register("dark_mage", () -> EntityType.Builder
+                    .of(com.tnc.tnc.boss.TNDarkMageEntity::new, MobCategory.MONSTER)
+                    .sized(com.tnc.tnc.boss.TNDarkMageEntity.HITBOX_WIDTH,
+                            com.tnc.tnc.boss.TNDarkMageEntity.HITBOX_HEIGHT)
+                    .clientTrackingRange(12)
+                    .build("tnc:dark_mage"));
+
     /** 蓝金水渊兽：四倍体型，水下游泳、离水飞行。 */
     public static final RegistryObject<EntityType<com.tnc.tnc.boss.TNWaterLeviathanEntity>> WATER_LEVIATHAN =
             ENTITY_TYPES.register("water_leviathan", () -> EntityType.Builder

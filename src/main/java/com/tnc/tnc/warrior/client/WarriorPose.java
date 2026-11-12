@@ -2,6 +2,7 @@ package com.tnc.tnc.warrior.client;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
@@ -30,9 +31,39 @@ public final class WarriorPose {
     }
 
     public static void apply(Player player, HumanoidModel<?> model) {
+        try {
+            applyPose(player, model);
+        } finally {
+            // PlayerModel copied these layers before our setupAnim TAIL hook. Recopy
+            // the final pose so a moved arm cannot leave a detached sleeve behind.
+            if (model instanceof PlayerModel<?> skin) {
+                skin.rightSleeve.copyFrom(model.rightArm);
+                skin.leftSleeve.copyFrom(model.leftArm);
+                skin.rightPants.copyFrom(model.rightLeg);
+                skin.leftPants.copyFrom(model.leftLeg);
+                skin.jacket.copyFrom(model.body);
+                skin.hat.copyFrom(model.head);
+            }
+        }
+    }
+
+    private static void applyPose(Player player, HumanoidModel<?> model) {
         WarriorAnimationClient.Active active = WarriorAnimationClient.active(player.getId());
         if (active == null) {
+            pairedArms(player,model);
             return;
+        }
+        if(active.hold() && com.tnc.tnc.warrior.WeaponChargeRules.chargingAnimation(active.animation())
+                && active.animation()!=com.tnc.tnc.warrior.WarriorAnimation.BOW_CHARGE){
+            boolean spear=WarriorWeapons.family(player.getMainHandItem())==com.tnc.tnc.warrior.WarriorWeaponFamily.SPEAR;
+            ModelPart main=player.getMainArm()==HumanoidArm.LEFT?model.leftArm:model.rightArm;
+            ModelPart support=player.getMainArm()==HumanoidArm.LEFT?model.rightArm:model.leftArm;
+            float w=active.weight(Minecraft.getInstance().getFrameTime());
+            main.xRot=WarriorMotionBlend.angle(main.xRot,spear?-1.35f:-2.65f,w);
+            main.yRot=WarriorMotionBlend.angle(main.yRot,spear?-.55f:0,w);
+            support.xRot=WarriorMotionBlend.angle(support.xRot,spear?-1.1f:-2.3f,w);
+            model.body.xRot+=.12f*w;
+            pairedArms(player,model);return;
         }
         float raw = active.progress(Minecraft.getInstance().getFrameTime());
         var family=WarriorWeapons.family(player.getMainHandItem());
@@ -43,6 +74,7 @@ public final class WarriorPose {
         if (clip != null) {
             applyClip(model, clip, t, leftHanded,weight);
             brace(model,active,family,raw,weight);
+            pairedArms(player,model);
             return;
         }
         WarriorPoseMath.Pose pose = family==com.tnc.tnc.warrior.WarriorWeaponFamily.HAMMER
@@ -66,6 +98,14 @@ public final class WarriorPose {
 
         if(weight>=.999f)twoHandedSupport(player, model, pose, leftHanded);
         brace(model,active,family,raw,weight);
+        pairedArms(player,model);
+    }
+    /** The partner blade follows the native arm timeline; damage is still resolved once by the warrior service. */
+    private static void pairedArms(Player player,HumanoidModel<?> model){
+        if(!com.tnc.tnc.bronze.BronzeTwinWeapon.active(player))return;
+        ModelPart main=player.getMainArm()==HumanoidArm.LEFT?model.leftArm:model.rightArm;
+        ModelPart partner=player.getMainArm()==HumanoidArm.LEFT?model.rightArm:model.leftArm;
+        partner.xRot=main.xRot;partner.yRot=-main.yRot;partner.zRot=-main.zRot;
     }
 
     private static void brace(HumanoidModel<?> model,WarriorAnimationClient.Active active,

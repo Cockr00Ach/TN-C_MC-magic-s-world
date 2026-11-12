@@ -88,9 +88,15 @@ public final class LightMirrorGameTests {
         // Make an open corridor independent of the small template's side walls.
         for(int x=-4;x<10;x++)for(int y=2;y<9;y++)for(int z=-4;z<12;z++)h.setBlock(new BlockPos(x,y,z),net.minecraft.world.level.block.Blocks.AIR);
         h.assertTrue(boss.beginAcolyteSummon(),"Summon begins as a cast");
+        h.assertTrue(boss.castSpell()==7 && boss.castDuration()==60 && boss.castRemainingTicks()==60,
+                "Apollo publishes the three-second summon windup to the client");
         for(int i=0;i<59;i++)boss.aiStep();
+        h.assertTrue(boss.castSpell()==7 && boss.castRemainingTicks()==1,
+                "Windup countdown stays synced while the animation plays");
         h.assertTrue(ApolloAcolyteEntity.count(boss)==0,"No instant background reinforcements during windup");
         boss.aiStep();
+        h.assertTrue(boss.castSpell()==0 && boss.castRemainingTicks()==0,
+                "The synced windup clears exactly when the spell resolves");
         var followers=h.getLevel().getEntitiesOfClass(ApolloAcolyteEntity.class,boss.getBoundingBox().inflate(30),a->a.belongsTo(boss));
         h.assertTrue(followers.size()==3,"Apollo has three dedicated mirror supporters");
         h.assertTrue(!boss.beginAcolyteSummon(),"Cooldown blocks duplicate summons");
@@ -105,6 +111,8 @@ public final class LightMirrorGameTests {
         var target=h.spawn(EntityType.IRON_GOLEM,new BlockPos(2,3,6));target.setNoAi(true);boss.setTarget(target);
         h.assertTrue(boss.beginAcolyteSummon(),"Summon starts");
         boss.setTarget(null);boss.aiStep();
+        h.assertTrue(boss.castSpell()==0 && boss.castRemainingTicks()==0,
+                "Lost target clears the synced windup too");
         h.assertTrue(ApolloAcolyteEntity.count(boss)==0,"Cancelled cast never summons");
         boss.setTarget(target);h.assertTrue(!boss.beginAcolyteSummon(),"Interrupted cast has retry delay");
         var tag=new net.minecraft.nbt.CompoundTag();boss.addAdditionalSaveData(tag);

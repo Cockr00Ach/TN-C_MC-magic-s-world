@@ -9,7 +9,7 @@ public final class WarriorHeavyMotion {
     private static final float[] TIME={0,.34f,.58f,.78f,1},POSE={0,.22f,.58f,.65f,1};
     private WarriorHeavyMotion() {}
     public static boolean applies(WarriorAnimation animation,WarriorWeaponFamily family,boolean hold){
-        return !hold && (family==WarriorWeaponFamily.GREATSWORD || family==WarriorWeaponFamily.HAMMER)
+        return animation!=WarriorAnimation.ULTIMATE && !hold && (family==WarriorWeaponFamily.GREATSWORD || family==WarriorWeaponFamily.HAMMER)
                 && WarriorTrailAppearance.attacking(animation,false,false);
     }
     public static float progress(WarriorAnimation animation,WarriorWeaponFamily family,boolean hold,float t){

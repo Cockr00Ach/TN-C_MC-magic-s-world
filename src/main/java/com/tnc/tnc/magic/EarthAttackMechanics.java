@@ -49,9 +49,22 @@ public final class EarthAttackMechanics {
             } else for(int i=0;i<EarthActionRules.spikes(tier);i++) {
                 int step=tier==4?i%6:i;double angle=tier==4?(i/6)*Math.PI/3:Math.atan2(forward.z,forward.x);
                 Vec3 point=player.position().add(Math.cos(angle)*(tier==4?4+step*3.6:2+step*1.7),0,Math.sin(angle)*(tier==4?4+step*3.6:2+step*1.7));
-                float width=tier==2?.8F+step*.25F:tier==3?1.6F:3.2F;
-                float height=(tier==2?1.8F+step*.8F:3.6F+step*.6F)*(tier==4?2:1);
-                spawn(player,1,"earth_spike_sharp",point,point,width,height,step*3,120,damage,width+1,source);
+                // Every other spike erupts as a giant stone weapon instead of a rock pillar:
+                // the triple spike of tier 2 becomes two swords plus one rock, tier 3 half blades.
+                boolean weapon=(tier==4?i%6==0:i%2==0)&&(tier==2||tier==3||tier==4||tier==5);
+                String model=weapon?EarthWeaponModels.pick(player.getRandom()):"earth_spike_sharp";
+                float width=weapon?2.8F+step*.4F:(tier==2?1.1F+step*.35F:tier==3?2.2F:3.2F);
+                float height=weapon?tier==2?11F:tier==3?13F:18F:(tier==2?2.6F+step*1.1F:5F+step*.9F)*(tier==4?2:1);
+                Vec3 facing=weapon?new Vec3(player.getRandom().nextDouble()-.5,0,player.getRandom().nextDouble()-.5):Vec3.ZERO;
+                Vec3 end=point;
+                if(facing.lengthSqr()>1e-6)end=point.add(facing.normalize().scale(.05));
+                var spike=spawn(player,1,model,point,end,width,height,step*3,120,damage,width+1,source);
+                player.serverLevel().playSound(null,point.x,point.y,point.z,
+                        net.minecraft.sounds.SoundEvents.STONE_BREAK,net.minecraft.sounds.SoundSource.PLAYERS,1.6F,.5F);
+                if(spike!=null&&weapon) {
+                    player.serverLevel().playSound(null,point.x,point.y,point.z,
+                            net.minecraft.sounds.SoundEvents.GENERIC_EXPLODE,net.minecraft.sounds.SoundSource.PLAYERS,.9F,.55F);
+                }
             }
         } else if(kind==5&&tier==5) {
             Vec3 centre=player.position();

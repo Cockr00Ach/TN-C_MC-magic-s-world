@@ -1,0 +1,404 @@
+{
+  "current_scope": "当前大剑、大刀及匕首按用户要求增加实体刀根套口；不再声明这些武器当前整图与原成品完全相同。原有部件及UV保留。",
+  "all_pixel_identical": false,
+  "intentional_changes": [
+    "dao socket",
+    "dagger socket",
+    "greatsword socket"
+  ],
+  "current_proof": "连接与刃向修复检查.json",
+  "historical_before_socket_fix": {
+    "comparison_inputs_valid": true,
+    "all_pixel_identical": true,
+    "background": [
+      0,
+      0,
+      0
+    ],
+    "samples": [
+      {
+        "name": "dagger_back.png",
+        "size": [
+          1000,
+          1250
+        ],
+        "changed_pixels": 0,
+        "changed_bbox": null,
+        "mean_absolute_rgba_error_0_255": 0.0,
+        "max_channel_error": 0,
+        "foreground_pixels": 1250000,
+        "foreground_mean_absolute_rgba_error_0_255": 0.0,
+        "changed_fraction_foreground": 0.0,
+        "pixel_identical": true
+      },
+      {
+        "name": "dagger_front.png",
+        "size": [
+          1000,
+          1250
+        ],
+        "changed_pixels": 0,
+        "changed_bbox": null,
+        "mean_absolute_rgba_error_0_255": 0.0,
+        "max_channel_error": 0,
+        "foreground_pixels": 1250000,
+        "foreground_mean_absolute_rgba_error_0_255": 0.0,
+        "changed_fraction_foreground": 0.0,
+        "pixel_identical": true
+      },
+      {
+        "name": "dagger_hero.png",
+        "size": [
+          1000,
+          1250
+        ],
+        "changed_pixels": 0,
+        "changed_bbox": null,
+        "mean_absolute_rgba_error_0_255": 0.0,
+        "max_channel_error": 0,
+        "foreground_pixels": 1250000,
+        "foreground_mean_absolute_rgba_error_0_255": 0.0,
+        "changed_fraction_foreground": 0.0,
+        "pixel_identical": true
+      },
+      {
+        "name": "dagger_side.png",
+        "size": [
+          1000,
+          1250
+        ],
+        "changed_pixels": 0,
+        "changed_bbox": null,
+        "mean_absolute_rgba_error_0_255": 0.0,
+        "max_channel_error": 0,
+        "foreground_pixels": 1250000,
+        "foreground_mean_absolute_rgba_error_0_255": 0.0,
+        "changed_fraction_foreground": 0.0,
+        "pixel_identical": true
+      },
+      {
+        "name": "dagger_top.png",
+        "size": [
+          1000,
+          1250
+        ],
+        "changed_pixels": 0,
+        "changed_bbox": null,
+        "mean_absolute_rgba_error_0_255": 0.0,
+        "max_channel_error": 0,
+        "foreground_pixels": 1250000,
+        "foreground_mean_absolute_rgba_error_0_255": 0.0,
+        "changed_fraction_foreground": 0.0,
+        "pixel_identical": true
+      },
+      {
+        "name": "dao_back.png",
+        "size": [
+          1000,
+          1250
+        ],
+        "changed_pixels": 0,
+        "changed_bbox": null,
+        "mean_absolute_rgba_error_0_255": 0.0,
+        "max_channel_error": 0,
+        "foreground_pixels": 1250000,
+        "foreground_mean_absolute_rgba_error_0_255": 0.0,
+        "changed_fraction_foreground": 0.0,
+        "pixel_identical": true
+      },
+      {
+        "name": "dao_front.png",
+        "size": [
+          1000,
+          1250
+        ],
+        "changed_pixels": 0,
+        "changed_bbox": null,
+        "mean_absolute_rgba_error_0_255": 0.0,
+        "max_channel_error": 0,
+        "foreground_pixels": 1250000,
+        "foreground_mean_absolute_rgba_error_0_255": 0.0,
+        "changed_fraction_foreground": 0.0,
+        "pixel_identical": true
+      },
+      {
+        "name": "dao_hero.png",
+        "size": [
+          1000,
+          1250
+        ],
+        "changed_pixels": 0,
+        "changed_bbox": null,
+        "mean_absolute_rgba_error_0_255": 0.0,
+        "max_channel_error": 0,
+        "foreground_pixels": 1250000,
+        "foreground_mean_absolute_rgba_error_0_255": 0.0,
+        "changed_fraction_foreground": 0.0,
+        "pixel_identical": true
+      },
+      {
+        "name": "dao_side.png",
+        "size": [
+          1000,
+          1250
+        ],
+        "changed_pixels": 0,
+        "changed_bbox": null,
+        "mean_absolute_rgba_error_0_255": 0.0,
+        "max_channel_error": 0,
+        "foreground_pixels": 1250000,
+        "foreground_mean_absolute_rgba_error_0_255": 0.0,
+        "changed_fraction_foreground": 0.0,
+        "pixel_identical": true
+      },
+      {
+        "name": "dao_top.png",
+        "size": [
+          1000,
+          1250
+        ],
+        "changed_pixels": 0,
+        "changed_bbox": null,
+        "mean_absolute_rgba_error_0_255": 0.0,
+        "max_channel_error": 0,
+        "foreground_pixels": 1250000,
+        "foreground_mean_absolute_rgba_error_0_255": 0.0,
+        "changed_fraction_foreground": 0.0,
+        "pixel_identical": true
+      },
+      {
+        "name": "greatsword_back.png",
+        "size": [
+          1000,
+          1250
+        ],
+        "changed_pixels": 0,
+        "changed_bbox": null,
+        "mean_absolute_rgba_error_0_255": 0.0,
+        "max_channel_error": 0,
+        "foreground_pixels": 1250000,
+        "foreground_mean_absolute_rgba_error_0_255": 0.0,
+        "changed_fraction_foreground": 0.0,
+        "pixel_identical": true
+      },
+      {
+        "name": "greatsword_front.png",
+        "size": [
+          1000,
+          1250
+        ],
+        "changed_pixels": 0,
+        "changed_bbox": null,
+        "mean_absolute_rgba_error_0_255": 0.0,
+        "max_channel_error": 0,
+        "foreground_pixels": 1250000,
+        "foreground_mean_absolute_rgba_error_0_255": 0.0,
+        "changed_fraction_foreground": 0.0,
+        "pixel_identical": true
+      },
+      {
+        "name": "greatsword_hero.png",
+        "size": [
+          1000,
+          1250
+        ],
+        "changed_pixels": 0,
+        "changed_bbox": null,
+        "mean_absolute_rgba_error_0_255": 0.0,
+        "max_channel_error": 0,
+        "foreground_pixels": 1250000,
+        "foreground_mean_absolute_rgba_error_0_255": 0.0,
+        "changed_fraction_foreground": 0.0,
+        "pixel_identical": true
+      },
+      {
+        "name": "greatsword_side.png",
+        "size": [
+          1000,
+          1250
+        ],
+        "changed_pixels": 0,
+        "changed_bbox": null,
+        "mean_absolute_rgba_error_0_255": 0.0,
+        "max_channel_error": 0,
+        "foreground_pixels": 1250000,
+        "foreground_mean_absolute_rgba_error_0_255": 0.0,
+        "changed_fraction_foreground": 0.0,
+        "pixel_identical": true
+      },
+      {
+        "name": "greatsword_top.png",
+        "size": [
+          1000,
+          1250
+        ],
+        "changed_pixels": 0,
+        "changed_bbox": null,
+        "mean_absolute_rgba_error_0_255": 0.0,
+        "max_channel_error": 0,
+        "foreground_pixels": 1250000,
+        "foreground_mean_absolute_rgba_error_0_255": 0.0,
+        "changed_fraction_foreground": 0.0,
+        "pixel_identical": true
+      },
+      {
+        "name": "spear_back.png",
+        "size": [
+          1000,
+          1250
+        ],
+        "changed_pixels": 0,
+        "changed_bbox": null,
+        "mean_absolute_rgba_error_0_255": 0.0,
+        "max_channel_error": 0,
+        "foreground_pixels": 1250000,
+        "foreground_mean_absolute_rgba_error_0_255": 0.0,
+        "changed_fraction_foreground": 0.0,
+        "pixel_identical": true
+      },
+      {
+        "name": "spear_front.png",
+        "size": [
+          1000,
+          1250
+        ],
+        "changed_pixels": 0,
+        "changed_bbox": null,
+        "mean_absolute_rgba_error_0_255": 0.0,
+        "max_channel_error": 0,
+        "foreground_pixels": 1250000,
+        "foreground_mean_absolute_rgba_error_0_255": 0.0,
+        "changed_fraction_foreground": 0.0,
+        "pixel_identical": true
+      },
+      {
+        "name": "spear_hero.png",
+        "size": [
+          1000,
+          1250
+        ],
+        "changed_pixels": 0,
+        "changed_bbox": null,
+        "mean_absolute_rgba_error_0_255": 0.0,
+        "max_channel_error": 0,
+        "foreground_pixels": 1250000,
+        "foreground_mean_absolute_rgba_error_0_255": 0.0,
+        "changed_fraction_foreground": 0.0,
+        "pixel_identical": true
+      },
+      {
+        "name": "spear_side.png",
+        "size": [
+          1000,
+          1250
+        ],
+        "changed_pixels": 0,
+        "changed_bbox": null,
+        "mean_absolute_rgba_error_0_255": 0.0,
+        "max_channel_error": 0,
+        "foreground_pixels": 1250000,
+        "foreground_mean_absolute_rgba_error_0_255": 0.0,
+        "changed_fraction_foreground": 0.0,
+        "pixel_identical": true
+      },
+      {
+        "name": "spear_top.png",
+        "size": [
+          1000,
+          1250
+        ],
+        "changed_pixels": 0,
+        "changed_bbox": null,
+        "mean_absolute_rgba_error_0_255": 0.0,
+        "max_channel_error": 0,
+        "foreground_pixels": 1250000,
+        "foreground_mean_absolute_rgba_error_0_255": 0.0,
+        "changed_fraction_foreground": 0.0,
+        "pixel_identical": true
+      },
+      {
+        "name": "twins_back.png",
+        "size": [
+          1000,
+          1250
+        ],
+        "changed_pixels": 0,
+        "changed_bbox": null,
+        "mean_absolute_rgba_error_0_255": 0.0,
+        "max_channel_error": 0,
+        "foreground_pixels": 1250000,
+        "foreground_mean_absolute_rgba_error_0_255": 0.0,
+        "changed_fraction_foreground": 0.0,
+        "pixel_identical": true
+      },
+      {
+        "name": "twins_front.png",
+        "size": [
+          1000,
+          1250
+        ],
+        "changed_pixels": 0,
+        "changed_bbox": null,
+        "mean_absolute_rgba_error_0_255": 0.0,
+        "max_channel_error": 0,
+        "foreground_pixels": 1250000,
+        "foreground_mean_absolute_rgba_error_0_255": 0.0,
+        "changed_fraction_foreground": 0.0,
+        "pixel_identical": true
+      },
+      {
+        "name": "twins_hero.png",
+        "size": [
+          1000,
+          1250
+        ],
+        "changed_pixels": 0,
+        "changed_bbox": null,
+        "mean_absolute_rgba_error_0_255": 0.0,
+        "max_channel_error": 0,
+        "foreground_pixels": 1250000,
+        "foreground_mean_absolute_rgba_error_0_255": 0.0,
+        "changed_fraction_foreground": 0.0,
+        "pixel_identical": true
+      },
+      {
+        "name": "twins_side.png",
+        "size": [
+          1000,
+          1250
+        ],
+        "changed_pixels": 0,
+        "changed_bbox": null,
+        "mean_absolute_rgba_error_0_255": 0.0,
+        "max_channel_error": 0,
+        "foreground_pixels": 1250000,
+        "foreground_mean_absolute_rgba_error_0_255": 0.0,
+        "changed_fraction_foreground": 0.0,
+        "pixel_identical": true
+      },
+      {
+        "name": "twins_top.png",
+        "size": [
+          1000,
+          1250
+        ],
+        "changed_pixels": 0,
+        "changed_bbox": null,
+        "mean_absolute_rgba_error_0_255": 0.0,
+        "max_channel_error": 0,
+        "foreground_pixels": 1250000,
+        "foreground_mean_absolute_rgba_error_0_255": 0.0,
+        "changed_fraction_foreground": 0.0,
+        "pixel_identical": true
+      }
+    ],
+    "errors": [],
+    "limitations": [
+      "No perceptual acceptance inferred from small average errors",
+      "Only provided PNGs checked; full frame/view coverage must be documented",
+      "Camera, lights, viewport, frame time and renderer settings must match",
+      "Transparent hidden RGB differences are included in strict RGBA comparison"
+    ]
+  },
+  "greatsword_current_proof": "大剑刀根连接检查.json"
+}

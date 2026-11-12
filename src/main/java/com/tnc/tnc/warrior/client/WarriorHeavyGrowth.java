@@ -5,14 +5,14 @@ import com.tnc.tnc.warrior.WarriorWeaponFamily;
 
 /** All heavy melee weapons grow their solid model; they never submit a phantom overlay. */
 public final class WarriorHeavyGrowth {
-    public static final float MIN_PEAK=3,MAX_PEAK=10;
+    public static final float MIN_PEAK=(float)com.tnc.tnc.warrior.WarriorReach.MIN_PEAK,
+            MAX_PEAK=(float)com.tnc.tnc.warrior.WarriorReach.MAX_PEAK;
     private WarriorHeavyGrowth() {}
     public static float peak(int points){
-        return MIN_PEAK+(MAX_PEAK-MIN_PEAK)*com.tnc.tnc.warrior.TemperingRules.clamp(points)
-                /com.tnc.tnc.warrior.TemperingRules.MAX_POINTS;
+        return (float)com.tnc.tnc.warrior.WarriorReach.peak(points);
     }
     public static boolean usesEntityGrowth(WarriorWeaponFamily family){
-        return family==WarriorWeaponFamily.GREATSWORD || family==WarriorWeaponFamily.HAMMER;
+        return com.tnc.tnc.warrior.WarriorReach.heavy(family);
     }
     public static boolean applies(WarriorAnimation animation,WarriorWeaponFamily family,boolean hold){
         if(!usesEntityGrowth(family) || hold || animation==null)return false;
@@ -37,6 +37,13 @@ public final class WarriorHeavyGrowth {
     }
     public static float scale(WarriorAnimation animation,WarriorWeaponFamily family,boolean hold,float progress,float peak){
         if(!applies(animation,family,hold) || !Float.isFinite(progress))return 1;
+        return envelope(animation,progress,peak);
+    }
+    public static float phantomScale(WarriorAnimation animation,boolean hold,float progress,float peak){
+        if(!com.tnc.tnc.warrior.WarriorTrailAppearance.attacking(animation,hold,false) || !Float.isFinite(progress))return 1;
+        return envelope(animation,progress,peak);
+    }
+    private static float envelope(WarriorAnimation animation,float progress,float peak){
         peak=Float.isFinite(peak)?Math.max(MIN_PEAK,Math.min(MAX_PEAK,peak)):MIN_PEAK;
         float t=Math.max(0,Math.min(1,progress));
         float recovery=animation==WarriorAnimation.SPIN_SLASH || animation==WarriorAnimation.SCYTHE_WHIRL?.80f:.70f;

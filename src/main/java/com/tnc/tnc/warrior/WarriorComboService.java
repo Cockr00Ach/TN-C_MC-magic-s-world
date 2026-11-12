@@ -145,6 +145,7 @@ public final class WarriorComboService {
             return;
         }
         try {
+            if (WarriorUltimateService.active(player)) return;
             if (WarriorBowCharge.input(player,move,mode)) return;
             if(mode==WarriorComboInputPacket.CHARGE_START)return;
             if (mode == WarriorComboInputPacket.RELEASE) {
@@ -202,6 +203,7 @@ public final class WarriorComboService {
             return;
         }
         state.lastInput = now;
+        if (!held && WarriorUltimateService.input(player,move,now)) { state.tracker.clear(); sync(player,state,-1); return; }
 
         if (!held) {
             // Z（左键）的原版伤害已经由游戏结算，这里只记输入，避免一次点击打两下。
@@ -216,7 +218,7 @@ public final class WarriorComboService {
         }
 
         WarriorInput input = held ? WarriorInput.hold(move) : WarriorInput.tap(move);
-        WarriorSkill matched = state.tracker.push(input, now, WarriorCombos.forFamily(family));
+        WarriorSkill matched = state.tracker.push(input, now, WarriorCombos.inputsForFamily(family));
         int flashed = -1;
         if (matched != null) {
             flashed = resolve(player, state, matched, now, held);
@@ -285,6 +287,12 @@ public final class WarriorComboService {
         if (move == WarriorMove.HORIZONTAL) {
             // Z（左键）的伤害由原版结算，这里只补动作，避免一次点击打两下
             state.lastSlash = now;
+            // Vanilla misses are silent. Match Q/E's swish for the bronze dao without re-running damage.
+            if (player.getMainHandItem().getItem() instanceof com.tnc.tnc.bronze.BronzeWeaponItem bronze
+                    && bronze.profile == com.tnc.tnc.bronze.BronzeProfile.DAO) {
+                player.serverLevel().playSound(null, player.blockPosition(), SoundEvents.PLAYER_ATTACK_SWEEP,
+                        SoundSource.PLAYERS, .7f, .85f);
+            }
             return;
         }
         long last = state.lastSlashByMove.getOrDefault(move, Long.MIN_VALUE);
@@ -312,7 +320,7 @@ public final class WarriorComboService {
         // 左斩偏左、右斩偏右、横斩最宽：三种基础攻击的"手感形状"不一样
         int arc = move == WarriorMove.HORIZONTAL ? SLASH_ARC : 80;
         float scale = move == WarriorMove.HORIZONTAL ? SLASH_DAMAGE : 0.50f;
-        for (LivingEntity target : targets(player, SLASH_RANGE)) {
+        for (LivingEntity target : targets(player, SLASH_RANGE * WarriorReach.basicScale(player))) {
             if (!inArc(player, target, arc)) {
                 continue;
             }
@@ -401,6 +409,7 @@ public final class WarriorComboService {
      * 于是"按 Shift 就能立刻停下自己的动作"是无延迟的，后面的冲刺只是附加的位移。
      */
     public static void interrupt(ServerPlayer player) {
+        WarriorUltimateService.cancel(player);
         WarriorBowCharge.cancel(player);
         if (player == null || !eligible(player)) {
             return;
@@ -458,8 +467,8 @@ public final class WarriorComboService {
     static void melee(ServerPlayer player, WarriorSkill skill, State state, long now) {
         float base = (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE);
         WarriorComboRole role = skill.role();
-        // 虚影倍率：磨砺越高手越长（和客户端的虚影大小是同一个数）
-        double reach = WarriorPhantom.scale(player);
+        // Heavy weapons use the solid model's 3..10 peak; light weapons retain their phantom reach.
+        double reach = WarriorReach.scale(player);
         boolean landed = false;
         for (LivingEntity target : targets(player, skill.radius() * reach)) {
             if (!skill.fullCircle() && !inArc(player, target, skill.arcDegrees())) {
@@ -626,7 +635,7 @@ public final class WarriorComboService {
      * <p>"打断其他玩家的连招"靠的是清空他服务端的输入缓冲 —— 不清的话，对方元素栏里
      * 已经接了一半的连招会在僵直结束后继续成立。
      */
-    private static void interrupt(ServerPlayer player, LivingEntity target, int staggerTicks) {
+    static void interrupt(ServerPlayer player, LivingEntity target, int staggerTicks) {
         target.stopUsingItem();
         if (target instanceof ServerPlayer other) {
             clearCombo(other);
@@ -681,7 +690,7 @@ public final class WarriorComboService {
         player.hurtMarked = true;
     }
 
-    private static List<LivingEntity> targets(ServerPlayer player, double radius) {
+    static List<LivingEntity> targets(ServerPlayer player, double radius) {
         double reach = radius * radius;
         return player.serverLevel().getEntitiesOfClass(LivingEntity.class,
                 player.getBoundingBox().inflate(radius),
@@ -714,7 +723,7 @@ public final class WarriorComboService {
     }
 
     /** 目标是否在玩家面前 {@code degrees} 度的扇形里。360 度恒真。 */
-    static boolean inArc(ServerPlayer player, LivingEntity target, int degrees) {
+    static boolean inArc(LivingEntity player, LivingEntity target, int degrees) {
         if (degrees >= 360) {
             return true;
         }
@@ -746,6 +755,7 @@ public final class WarriorComboService {
 
     static boolean eligible(ServerPlayer player) {
         return player.isAlive() && !player.isSpectator() && !DownedCombat.isDowned(player)
+                && !com.tnc.tnc.bronze.BronzeTwinWeapon.blocked(player)
                 && !(player.isUsingItem() && player.getUseItem().getItem() instanceof com.tnc.tnc.bronze.BronzeWeaponItem)
                 && TemperingData.get(player.server).enrolled(player.getUUID());
     }
@@ -838,6 +848,14 @@ public final class WarriorComboService {
             state.counterAt = Long.MIN_VALUE;
             mobCounterSweep(player);
         }
+        if(com.tnc.tnc.bronze.BronzeTwinWeapon.blocked(player)){
+            if(!state.tracker.isEmpty()||state.heldSkill!=null||state.finisherUntil>now||state.counterAt!=Long.MIN_VALUE||state.stanceUntil>now){
+                if(state.heldSkill!=null)player.removeEffect(net.minecraft.world.effect.MobEffects.DAMAGE_RESISTANCE);
+                state.tracker.clear();state.heldSkill=null;state.stanceUntil=Long.MIN_VALUE;state.counterAt=Long.MIN_VALUE;state.finisherUntil=0;
+                WarriorAnimationPacket.cancel(player);sync(player,state,-1);
+            }
+            return;
+        }
         int before = state.tracker.size();
         state.tracker.prune(now);
         if (state.tracker.size() != before) {
@@ -910,8 +928,8 @@ public final class WarriorComboService {
         WarriorAnimationPacket.broadcast(p,WarriorAnimation.SPIN_SLASH,10);
         WarriorImpactPacket.send(p,p.position().add(0,.85,0),2);
         p.serverLevel().playSound(null,p.blockPosition(),SoundEvents.PLAYER_ATTACK_SWEEP,SoundSource.PLAYERS,1.1f,.75f);
-        for(var target:targets(p,4)){
-            if(!smallCounterTarget(p,target))continue;
+        for(var target:targets(p,4*WarriorReach.basicScale(p))){
+            if(!(target instanceof net.minecraft.world.entity.Mob)||target.getBbHeight()>=4)continue;
             target.hurt(p.damageSources().playerAttack(p),(float)p.getAttributeValue(Attributes.ATTACK_DAMAGE)*.8f);
             var away=target.position().subtract(p.position()).multiply(1,0,1);
             if(away.lengthSqr()<.001)away=new Vec3(1,0,0);

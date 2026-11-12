@@ -85,6 +85,45 @@ public class TNApolloEntity extends Monster implements GeoEntity {
     private static final int SUMMON_ACOLYTES = 6;
     private int acolyteCooldown;
 
+    /** Client-visible cast state: 0 = idle, otherwise spell index + 1. */
+    private static final net.minecraft.network.syncher.EntityDataAccessor<Integer> DATA_CAST_SPELL =
+            net.minecraft.network.syncher.SynchedEntityData.defineId(
+                    TNApolloEntity.class, net.minecraft.network.syncher.EntityDataSerializers.INT);
+    /** Remaining windup ticks; the client uses it for the pre-cast ritual. */
+    private static final net.minecraft.network.syncher.EntityDataAccessor<Integer> DATA_CAST_TICKS =
+            net.minecraft.network.syncher.SynchedEntityData.defineId(
+                    TNApolloEntity.class, net.minecraft.network.syncher.EntityDataSerializers.INT);
+
+    @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(DATA_CAST_SPELL, 0);
+        this.entityData.define(DATA_CAST_TICKS, 0);
+    }
+
+    /** 0 = idle, otherwise the spell index + 1. */
+    public int castSpell() {
+        return this.entityData.get(DATA_CAST_SPELL);
+    }
+
+    public int castRemainingTicks() {
+        return this.entityData.get(DATA_CAST_TICKS);
+    }
+
+    /** Full windup length of the current cast, in ticks. */
+    public int castDuration() {
+        int spell = castSpell();
+        if (spell == 0) return 0;
+        if (spell == SUMMON_ACOLYTES + 1) return 60;
+        int index = spell - 1;
+        return index >= 0 && index < CAST_TICKS.length ? CAST_TICKS[index] : 0;
+    }
+
+    private void clearCastSync() {
+        this.entityData.set(DATA_CAST_SPELL, 0);
+        this.entityData.set(DATA_CAST_TICKS, 0);
+    }
+
     /** A real, interruptible cast. No followers appear until its three-second animation ends. */
     public boolean beginAcolyteSummon() {
         if (!(level() instanceof ServerLevel) || !isAlive() || pendingSpell >= 0 || acolyteCooldown > 0
@@ -94,7 +133,7 @@ public class TNApolloEntity extends Monster implements GeoEntity {
         startCast(SUMMON_ACOLYTES);
         var circle = TNOrbEntities.MAGIC_CIRCLE.get().create(level());
         if (circle != null) {
-            circle.configure(3.8, 70, com.tnc.tnc.magic.TNMagicCircleEntity.STYLE_LIGHT);
+            circle.configure(4.4, 70, com.tnc.tnc.magic.TNMagicCircleEntity.STYLE_LIGHT_GRAND);
             circle.moveTo(getX(), getY()+.05, getZ(), 0, 0);
             level().addFreshEntity(circle);
         }
@@ -185,12 +224,12 @@ public class TNApolloEntity extends Monster implements GeoEntity {
         if (this.level().isClientSide()) {
             return;
         }
-        if (!isAlive()) { pendingSpell=-1; return; }
+        if (!isAlive()) { pendingSpell=-1; clearCastSync(); return; }
         if (acolyteCooldown > 0) acolyteCooldown--;
         if (pendingSpell == SUMMON_ACOLYTES) {
             getNavigation().stop();
             if (getTarget() == null || !getTarget().isAlive()) {
-                pendingSpell=-1; acolyteCooldown=40; return;
+                pendingSpell=-1; acolyteCooldown=40; clearCastSync(); return;
             }
         }
         // —— 正在唱法：等动画播完再生效 ✓
@@ -199,6 +238,9 @@ public class TNApolloEntity extends Monster implements GeoEntity {
                 this.applySpell(this.pendingSpell);
                 this.pendingSpell = -1;
                 this.castCooldown = 60;
+                clearCastSync();
+            } else {
+                this.entityData.set(DATA_CAST_TICKS, this.pendingTicks);
             }
             return;
         }
@@ -229,6 +271,8 @@ public class TNApolloEntity extends Monster implements GeoEntity {
     private void startCast(int spell) {
         this.pendingSpell = spell;
         this.pendingTicks = spell == SUMMON_ACOLYTES ? 60 : CAST_TICKS[spell];
+        this.entityData.set(DATA_CAST_SPELL, spell + 1);
+        this.entityData.set(DATA_CAST_TICKS, this.pendingTicks);
         this.triggerAnim("action", spell == SUMMON_ACOLYTES ? "palymagic_t4_t5" : ANIM[spell]);
         if (this.level() instanceof ServerLevel level) {
             // ★ 作者 2026-10-01："阿波罗施法技能就晴天" ✓ —— 太阳神一出手天就放晴 ✓

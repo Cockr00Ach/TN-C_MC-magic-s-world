@@ -42,9 +42,6 @@ public final class QuestMarkerHud {
     /** 目标在屏幕外时，箭头离屏幕边留多少像素。 */
     private static final int EDGE_MARGIN = 28;
 
-    /** 目标在视野内时，超过这个距离就不画屏幕内标记（免得挤成一团）。 */
-    private static final double ONSCREEN_MAX_DISTANCE = 64.0D;
-
     /** 标记本身的颜色（金）。 */
     private static final int COLOR = 0xFFD8A657;
     private static final int COLOR_DIM = 0x80704A1E;
@@ -73,7 +70,7 @@ public final class QuestMarkerHud {
         pose.translate(0.0F, 0.0F, HUD_Z);
 
         int[] screen = projectToScreen(mc, marker.position(), width, height);
-        if (screen != null && marker.distance() <= ONSCREEN_MAX_DISTANCE) {
+        if (screen != null) {
             drawOnScreenMarker(graphics, mc, marker, screen[0], screen[1]);
         } else {
             drawEdgeArrow(graphics, mc, marker, width, height);
@@ -85,36 +82,27 @@ public final class QuestMarkerHud {
     /**
      * 把世界坐标投到屏幕像素。
      *
-     * @return {@code {x, y}}；目标在摄像机背后时返回 {@code null}
+     * <p>旋转交给 {@link QuestMarkerGeometry}（它按原版摄像机基向量点乘，写错了会被
+     * {@code QuestMarkerGeometryTest} 当场抓住）；这里只管"在不在画面里"。
+     *
+     * @return {@code {x, y}}；目标在摄像机背后、或投影落在画面外时返回 {@code null}
      */
     private static int[] projectToScreen(Minecraft mc, Vec3 world, int width, int height) {
         Vec3 camera = mc.gameRenderer.getMainCamera().getPosition();
         Vec3 delta = world.subtract(camera);
-        float yaw = mc.gameRenderer.getMainCamera().getYRot();
-        float pitch = mc.gameRenderer.getMainCamera().getXRot();
-
-        // 世界 -> 摄像机局部坐标（先按 pitch 绕 X，再按 yaw 绕 Y）
-        double cosPitch = Math.cos(-pitch * Mth.DEG_TO_RAD);
-        double sinPitch = Math.sin(-pitch * Mth.DEG_TO_RAD);
-        double y1 = delta.y * cosPitch - delta.z * sinPitch;
-        double z1 = delta.y * sinPitch + delta.z * cosPitch;
-
-        double cosYaw = Math.cos(-yaw * Mth.DEG_TO_RAD);
-        double sinYaw = Math.sin(-yaw * Mth.DEG_TO_RAD);
-        double x2 = delta.x * cosYaw - z1 * sinYaw;
-        double z2 = delta.x * sinYaw + z1 * cosYaw;
-
-        if (z2 <= 0.05D) {
+        QuestMarkerGeometry.CameraSpace space = QuestMarkerGeometry.cameraSpace(
+                delta.x, delta.y, delta.z,
+                mc.gameRenderer.getMainCamera().getYRot(),
+                mc.gameRenderer.getMainCamera().getXRot());
+        if (space.depth() <= 0.05D) {
             return null;                       // 在背后：交给边缘箭头
         }
-        double fov = mc.options.fov().get();
-        double scale = (height / 2.0D) / Math.tan(fov * Mth.DEG_TO_RAD / 2.0D);
-        int x = (int) (width / 2.0D + x2 * scale / z2);
-        int y = (int) (height / 2.0D - y1 * scale / z2);
-        if (x < 0 || x > width || y < 0 || y > height) {
+        QuestMarkerGeometry.ScreenPoint point =
+                QuestMarkerGeometry.project(space, mc.options.fov().get(), width, height);
+        if (point.x() < 0 || point.x() > width || point.y() < 0 || point.y() > height) {
             return null;                       // 出了画面：交给边缘箭头
         }
-        return new int[]{x, y};
+        return new int[]{(int) Math.round(point.x()), (int) Math.round(point.y())};
     }
 
     /** 目标在视野里：画一个菱形 + 名字 + 距离。 */
@@ -134,30 +122,26 @@ public final class QuestMarkerHud {
     /**
      * 目标在画面外/背后：贴屏幕边缘画一个指向箭头 + 距离。
      *
-     * <p>方向取"目标相对玩家朝向的偏角"，不依赖投影结果 ——
-     * 所以目标在正后方时也能给出正确的左右指向 ✓。
+     * <p>方向同样走 {@link QuestMarkerGeometry#edgeDirection} —— 用摄像机基向量算方位角，
+     * 所以朝西、朝北、低头抬头时都指向它真正所在的那一侧（旧写法把 yaw 加反了，
+     * 只有朝南时碰巧正确）。
      */
     private static void drawEdgeArrow(GuiGraphics graphics, Minecraft mc,
                                       QuestMarkerTarget.Marker marker, int width, int height) {
-        Vec3 player = mc.player.position();
-        double dx = marker.position().x - player.x;
-        double dz = marker.position().z - player.z;
-
-        // 玩家朝向：把世界方向转到"以屏幕为参照"的角度
-        float yaw = mc.player.getYRot();
-        double rel = Math.atan2(-dx, dz) + Math.toRadians(yaw);
-        double sin = Math.sin(rel);
-        double cos = Math.cos(rel);
+        Vec3 camera = mc.gameRenderer.getMainCamera().getPosition();
+        Vec3 delta = marker.position().subtract(camera);
+        double[] dir = QuestMarkerGeometry.edgeDirection(QuestMarkerGeometry.cameraSpace(
+                delta.x, delta.y, delta.z,
+                mc.gameRenderer.getMainCamera().getYRot(),
+                mc.gameRenderer.getMainCamera().getXRot()));
 
         int cx = width / 2;
         int cy = height / 2;
-        int radiusX = cx - EDGE_MARGIN;
-        int radiusY = cy - EDGE_MARGIN;
+        int radiusX = Math.max(1, cx - EDGE_MARGIN);
+        int radiusY = Math.max(1, cy - EDGE_MARGIN);
 
-        // 把方向向量缩放到屏幕边缘（椭圆裁剪，角落不会跑出屏幕）
-        double scale = 1.0D / Math.max(Math.abs(sin) / radiusX, Math.abs(cos) / radiusY);
-        int ax = cx + (int) (sin * scale);
-        int ay = cy - (int) (cos * scale);
+        int ax = cx + (int) Math.round(dir[0] * radiusX);
+        int ay = cy + (int) Math.round(dir[1] * radiusY);
 
         // 箭头：一个朝外的三角 + 一段"柄"
         int size = 7;

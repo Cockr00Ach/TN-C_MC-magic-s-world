@@ -78,26 +78,59 @@ public final class WindConstructModels {
         public void defaultColor(int r,int g,int b,int a){out.defaultColor(Math.min(255,(int)(r*.58F+28)),Math.min(255,(int)(g*.80F+48)),Math.min(255,(int)(b*.75F+65)),(int)(a*alpha));}
         public void unsetDefaultColor(){out.unsetDefaultColor();}
     }
+    /**
+     * 风球（t1/t2 的风灵形态、风球链的飞行体）。
+     *
+     * <p>2026-11-07 重排：以前的球是「内核 + 3 层随机倾角的 cage + 2 道收缩环 + 一圈平躺的月牙刃」✗
+     * —— 三个 cage 的倾角是 35/85/135 度，谁也不跟谁垂直，叠起来读成"一团乱铁丝" ✗；
+     * 月牙刃全在同一个水平面（{@code cos/sin} 只走 XZ），远看是一条扁扁的旋转木马 ✗。
+     *
+     * <p>现在：
+     * <ol>
+     *   <li><b>内核</b>两层反向自转（一层 .90、一层 .34 透明度、缩到 .82）⇒ 球心自己在搅动 ✓；</li>
+     *   <li><b>三条大圆经线</b>互成 60 度、都立起来（X 90 度）⇒ 才是"球"而不是乱线 ✓，交替正反转；</li>
+     *   <li><b>赤道环</b>反向转，和经线十字交叉 ⇒ 有经纬球的读感 ✓；</li>
+     *   <li><b>两道收缩碎环</b>一上一下对称收进来（以前是同一个 75 度）✓；</li>
+     *   <li><b>月牙刃</b>分到 3 个倾角（0/38/76 度）的轨道面上 ⇒ 包住整颗球 ✓；</li>
+     *   <li>整体加一点点 <b>呼吸缩放</b>（±2%）⇒ 静止时也不会像一块死模型 ✓。</li>
+     * </ol>
+     * 绘制次数：2 内核 + 4 cage + 2 碎环 + N 月牙（tier 决定）＝和旧版基本一致 ✓，不会多烧 GPU。
+     */
     public static void orb(int tier,double age,PoseStack p,MultiBufferSource b){
-        p.pushPose();p.translate(0,.2,0);float s=.72F+tier*.08F;p.scale(s,s,s);
-        p.pushPose();p.mulPose(Axis.YP.rotationDegrees((float)(age*2%360)));draw("core",p,b,.88F);p.popPose();
+        p.pushPose();p.translate(0,.2,0);
+        float pulse=1F+.02F*(float)Math.sin(age*.11);
+        float s=(.72F+tier*.08F)*pulse;p.scale(s,s,s);
+        p.pushPose();p.mulPose(Axis.YP.rotationDegrees((float)(age*2%360)));draw("core",p,b,.90F);p.popPose();
+        p.pushPose();p.mulPose(Axis.XP.rotationDegrees(90));p.mulPose(Axis.ZP.rotationDegrees((float)(-age*3.1%360)));
+        p.scale(.82F,.82F,.82F);draw("core",p,b,.34F);p.popPose();
+        // Great-circle meridians: mutually 60 deg apart and all upright -> reads as a sphere.
         for(int i=0;i<3;i++){
-            p.pushPose();p.mulPose(Axis.YP.rotationDegrees(i*60));p.mulPose(Axis.XP.rotationDegrees(35+i*50));
-            p.mulPose(Axis.ZP.rotationDegrees((float)((age*(3.2+i*.6)+i*120)%360)));
-            draw("cage",p,b,.38F);p.popPose();
+            p.pushPose();
+            p.mulPose(Axis.YP.rotationDegrees(i*60));
+            p.mulPose(Axis.XP.rotationDegrees(90));
+            p.mulPose(Axis.ZP.rotationDegrees((float)((age*(2.6+i*.5)+(i%2==0?1:-1)*40)%360)));
+            draw("cage",p,b,.34F);
+            p.popPose();
         }
+        p.pushPose();p.mulPose(Axis.ZP.rotationDegrees((float)((-age*2.2)%360)));draw("cage",p,b,.26F);p.popPose();
         // Converging broken rings give the core a visible inward flow, at a fixed draw budget.
         for(int i=0;i<2;i++){
-            double phase=(age/28+i*.5)%1;float size=(float)(1.8-phase*1.5);
-            p.pushPose();p.mulPose(Axis.XP.rotationDegrees(75));p.mulPose(Axis.ZP.rotationDegrees((float)((age*5+i*180)%360)));
-            p.scale(size,size,size);draw("cage",p,b,(float)(Math.sin(phase*Math.PI)*.28));p.popPose();
+            double phase=(age/30+i*.5)%1;float size=(float)(1.9-phase*1.55);
+            p.pushPose();p.mulPose(Axis.XP.rotationDegrees(i==0?82:-82));
+            p.mulPose(Axis.ZP.rotationDegrees((float)((age*5*(i==0?1:-1)+i*180)%360)));
+            p.scale(size,size,size);draw("cage",p,b,(float)(Math.sin(phase*Math.PI)*.26));p.popPose();
         }
         int blades=WindArsenalRules.blades(tier);
         for(int i=0;i<blades;i++){
             double a=age*.055+i*Math.PI*2/blades;
-            p.pushPose();p.translate(Math.cos(a)*.88,Math.sin(a*2)*.12,Math.sin(a)*.88);
-            p.mulPose(Axis.YP.rotation((float)-a));p.mulPose(Axis.XP.rotationDegrees(75));p.scale(.36F,.36F,.36F);
-            draw("crescent",p,b,.72F);p.popPose();
+            double tilt=(i%3)*38.0;
+            p.pushPose();
+            p.mulPose(Axis.YP.rotation((float)a));
+            p.mulPose(Axis.ZP.rotationDegrees((float)tilt));
+            p.translate(.92,0,0);
+            p.mulPose(Axis.YP.rotation((float)-a));
+            p.mulPose(Axis.XP.rotationDegrees(75));p.scale(.34F,.34F,.34F);
+            draw("crescent",p,b,.74F);p.popPose();
         }
         p.popPose();
     }

@@ -26,8 +26,11 @@ public final class TNWaterLeviathanEmissiveLayer extends GeoRenderLayer<TNWaterL
                        RenderType renderType, MultiBufferSource buffers, VertexConsumer buffer,
                        float partialTick, int packedLight, int packedOverlay) {
         RenderType glow = RenderType.entityTranslucentEmissive(GLOW);
+        // 化虚影时符文层跟着一起淡；虚影本身“一直在发光”，所以这里不再按环境光压暗。
+        float base = entity.isPhaseTwo() ? 1.0F : 0.78F;
+        float alpha = entity.ghosting() ? base*entity.ghostAlpha() : base;
         this.getRenderer().reRender(model, poseStack, buffers, entity, glow, buffers.getBuffer(glow),
                 partialTick, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY,
-                1.0F, 1.0F, 1.0F, entity.isPhaseTwo() ? 1.0F : 0.78F);
+                1.0F, 1.0F, 1.0F, alpha);
     }
 }

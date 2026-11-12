@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
  */
 class ComboTrackerTest {
 
-    private static final List<WarriorSkill> CATALOG = WarriorCombos.forFamily(WarriorWeaponFamily.LONGSWORD);
+    private static final List<WarriorSkill> CATALOG = WarriorCombos.inputsForFamily(WarriorWeaponFamily.LONGSWORD);
 
     private static ComboTracker.Progress progress(List<WarriorMove> buffer) {
         return ComboTracker.progressOf(buffer, CATALOG);
@@ -61,7 +61,7 @@ class ComboTrackerTest {
         ComboTracker.Progress progress = tracker.progress(CATALOG);
         assertNotNull(progress);
         assertEquals(2, progress.matchedCount());
-        assertEquals(WarriorMove.LEFT, progress.next(), "从 ZZ 起手，下一步应提示 Q");
+        assertEquals(WarriorMove.HORIZONTAL, progress.next(), "ZZ 后再按 Z 完成实用主攻");
     }
 
     @Test

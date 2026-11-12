@@ -276,6 +276,8 @@ public class TNMod
                 output.accept(com.tnc.tnc.npc.TNNpcAttributes.ZUOWANG_SPAWN_EGG.get());
                 // BOSS 刷怪蛋（暗系巨人）—— 同样是验收用，正式上线走召唤/剧情
                 output.accept(com.tnc.tnc.npc.TNNpcAttributes.DARK_GIANT_SPAWN_EGG.get());
+                // 黑魔法师（2026-11-07 ✓）—— 验收"通身黑暗"+ "法术和巨人同一套"都靠它
+                output.accept(com.tnc.tnc.npc.TNNpcAttributes.DARK_MAGE_SPAWN_EGG.get());
                 output.accept(com.tnc.tnc.npc.TNNpcAttributes.WATER_LEVIATHAN_SPAWN_EGG.get());
             }).build());
 
@@ -305,6 +307,7 @@ public class TNMod
 
         // 把三个注册器挂到 mod 事件总线上，否则上面注册的内容不会生效
         com.tnc.tnc.bronze.BronzeWeapons.register(modEventBus);
+        com.tnc.tnc.mount.LandMounts.register(modEventBus);
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
         MENUS.register(modEventBus);
@@ -365,6 +368,8 @@ public class TNMod
         // 对话系统的包也挂在同一条通道上（在 MagicStoneNetwork.register() 里一并注册）——
         // 一个 mod 只能有一条 SimpleChannel，另建同名通道会在构造期抛异常、整包启动失败。
         MagicStoneNetwork.register();
+        // 元素附身独立通道（tnc:travel v1）：只走意图与 HUD 状态，不碰 tnc:main 的协议号。
+        com.tnc.tnc.travel.TravelNetwork.register();
     }
 
     private void commonSetup(final FMLCommonSetupEvent event)

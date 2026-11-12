@@ -86,7 +86,7 @@ final class ElementSealRenderer {
         }
         boolean minor = e.style() == TNMagicCircleEntity.STYLE_LIGHT_MINOR;
         boolean veryGrand = e.style() == TNMagicCircleEntity.STYLE_LIGHT_GRAND;
-        boolean grand = r >= 4.0D && !upright && !minor;
+        boolean grand = (r >= 4.0D || veryGrand) && !upright && !minor;
         Matrix4f m = p.last().pose();
         Vec3 c = new Vec3(0.0D, 0.06D, 0.0D);
         VertexConsumer out = b.getBuffer(WaterRenderTypes.geometry());
@@ -100,7 +100,11 @@ final class ElementSealRenderer {
         glowWash(glow, m, r, alpha, grand);
 
         if (!grand) {
-            simpleSeal(out, glow, m, c, r, alpha, spinOut, pulse);
+            if (minor) {
+                minorSeal(out, glow, m, c, r, alpha, spinOut, pulse, r >= 3.0D);
+            } else {
+                simpleSeal(out, glow, m, c, r, alpha, spinOut, pulse);
+            }
             if (sky) {
                 skyCurtain(out, m, r, alpha, age);
             }
@@ -252,7 +256,7 @@ final class ElementSealRenderer {
         }
     }
 
-    /** 小阵（半径 < 4 的卫星阵 / 召唤落点阵）：两环 ＋ 六刻痕 ＋ 亮核，便宜但够清楚 ✓。 */
+    /** 通用小阵（非 MINOR 的 {@code STYLE_LIGHT} 小半径）：两环 ＋ 六刻痕 ＋ 亮核，便宜但够清楚 ✓。 */
     private static void simpleSeal(VertexConsumer out, VertexConsumer glow, Matrix4f m, Vec3 c,
                                    double r, float alpha, double spin, float pulse) {
         WaterGeometry.ringColor(out, m, c, UP, r, r * 0.040D, W_R, W_G, W_B, alpha * 0.90F, 40);
@@ -269,6 +273,123 @@ final class ElementSealRenderer {
         }
         WaterGeometry.disk(glow, m, c.add(0.0D, 0.004D, 0.0D), UP, r * 0.20D * pulse,
                 1.0F, 1.0F, 1.0F, alpha * 0.45F, 16);
+    }
+
+    /**
+     * 低阶「铭刻」的小日轮：不是把高阶阵砍两刀，而是单独一枚<b>六瓣小太阳</b>——
+     * 多圈细环 ＋ 六片花瓣 ＋ 六道带菱形尖的短光 ＋ 十二道刻度 ＋ 中心星核。
+     *
+     * <p>半径 &lt; 3 的卫星/落点阵用紧凑版（去花瓣与刻度），大阵才铺满，
+     * 这样 t1/t2 的主阵有细节，几十颗小阵也不会把顶点数吃爆 ✓。
+     */
+    private static void minorSeal(VertexConsumer out, VertexConsumer glow, Matrix4f m, Vec3 c,
+                                  double r, float alpha, double spin, float pulse, boolean rich) {
+        // ① 柔光底：外圈冷白、中心暖白，低阶也要“发光”而不是几根线
+        WaterGeometry.disk(glow, m, c.add(0.0D, 0.002D, 0.0D), UP, r * 0.90D,
+                1.0F, 0.96F, 0.82F, alpha * 0.045F, 44);
+        WaterGeometry.disk(glow, m, c.add(0.0D, 0.004D, 0.0D), UP, r * 0.40D * pulse,
+                1.0F, 0.98F, 0.90F, alpha * 0.12F, 28);
+        WaterGeometry.ringColor(glow, m, c, UP, r * 1.035D, r * 0.055D,
+                1.0F, 0.95F, 0.80F, alpha * 0.075F, 48);
+
+        // ② 多圈主环：外白、中金、内白；再加一道极细的外晕，轮廓才不“毛”
+        WaterGeometry.ringColor(out, m, c, UP, r * 0.995D, r * 0.011D,
+                W_R, W_G, W_B, alpha * 0.88F, 64);
+        WaterGeometry.ringColor(out, m, c, UP, r * 1.055D, Math.max(0.002D, r * 0.0025D),
+                G_R, G_G, G_B, alpha * 0.22F, 56);
+        WaterGeometry.ringColor(out, m, c, UP, r * 0.80D, Math.max(0.003D, r * 0.0050D),
+                G_R, G_G, G_B, alpha * 0.48F, 48);
+        WaterGeometry.ringColor(out, m, c, UP, r * 0.50D, Math.max(0.003D, r * 0.0038D),
+                W_R, W_G, W_B, alpha * 0.40F, 40);
+        WaterGeometry.ringColor(out, m, c, UP, r * 0.30D, Math.max(0.002D, r * 0.0030D),
+                G_R, G_G, G_B, alpha * 0.32F, 32);
+
+        if (rich) {
+            // ③ 六片花瓣（长瓣白、内瓣金）＋ 六根细茎，花心往外长，不再用穿过中心的十字光
+            for (int i = 0; i < 6; i++) {
+                double a = spin + i * Math.PI / 3.0D + Math.PI / 6.0D;
+                Vec3 stemFrom = c.add(Math.cos(a) * r * 0.22D, 0.0D, Math.sin(a) * r * 0.22D);
+                Vec3 stemTo = c.add(Math.cos(a) * r * 0.52D, 0.0D, Math.sin(a) * r * 0.52D);
+                WaterGeometry.tube(out, m, stemFrom, stemTo, Math.max(0.0025D, r * 0.0030D),
+                        G_R, G_G, G_B, alpha * 0.32F, 3);
+                petal(out, m, c, a, r * 0.50D, r * 0.80D, 0.075D,
+                        W_R, W_G, W_B, alpha * 0.28F);
+                petal(out, m, c, a, r * 0.57D, r * 0.71D, 0.038D,
+                        G_R, G_G, G_B, alpha * 0.24F);
+                diamond(out, m, c, a, r * 0.835D, r * 0.010D, r * 0.016D,
+                        G_R, G_G, G_B, alpha * 0.30F);
+            }
+        }
+
+        // ④ 六道外光：从花瓣之间向外抽出的细尖光，尖端点一颗小菱形（不再贯穿中心）
+        for (int i = 0; i < 6; i++) {
+            double a = spin + i * Math.PI / 3.0D;
+            taperedRay(out, m, c, a, r * 0.855D, r * 1.015D,
+                    Math.max(0.006D, r * 0.018D), W_R, W_G, W_B, alpha * 0.38F);
+            diamond(out, m, c, a, r * 0.995D, r * 0.010D, r * 0.017D,
+                    G_R, G_G, G_B, alpha * 0.42F);
+        }
+
+        if (rich) {
+            // ⑤ 十二道短刻度：错开 15°，像钟面，把外环“压住”
+            for (int i = 0; i < 12; i++) {
+                double a = spin * 1.4D + i * Math.PI / 6.0D + Math.PI / 12.0D;
+                Vec3 from = c.add(Math.cos(a) * r * 0.925D, 0.0D, Math.sin(a) * r * 0.925D);
+                Vec3 to = c.add(Math.cos(a) * r * 0.965D, 0.0D, Math.sin(a) * r * 0.965D);
+                WaterGeometry.tube(out, m, from, to, Math.max(0.0018D, r * 0.0022D),
+                        G_R, G_G, G_B, alpha * 0.30F, 3);
+            }
+        }
+
+        // ⑥ 中心：六片小花瓣围着一颗亮核，比六根直线更像“光”本身
+        for (int i = 0; i < 6; i++) {
+            double a = spin * 0.7D + i * Math.PI / 3.0D + Math.PI / 6.0D;
+            petal(out, m, c, a, r * 0.145D, r * 0.225D, 0.042D,
+                    G_R, G_G, G_B, alpha * 0.34F);
+        }
+        WaterGeometry.ringColor(out, m, c, UP, r * 0.120D, Math.max(0.004D, r * 0.0075D),
+                W_R, W_G, W_B, alpha * 0.72F, 24);
+        WaterGeometry.disk(glow, m, c.add(0.0D, 0.006D, 0.0D), UP, r * 0.055D * pulse,
+                1.0F, 1.0F, 0.96F, alpha * 0.62F, 18);
+    }
+
+    /** 从内向外抽出的锥形光：根部有宽度、尖端收成一点 ✓。 */
+    private static void taperedRay(VertexConsumer out, Matrix4f m, Vec3 c, double angle,
+                                   double inner, double outer, double halfWidth,
+                                   float cr, float cg, float cb, float alpha) {
+        Vec3 dir = new Vec3(Math.cos(angle), 0.0D, Math.sin(angle));
+        Vec3 side = new Vec3(-dir.z, 0.0D, dir.x);
+        Vec3 i0 = c.add(dir.scale(inner)).add(side.scale(halfWidth));
+        Vec3 i1 = c.add(dir.scale(inner)).subtract(side.scale(halfWidth));
+        Vec3 tip = c.add(dir.scale(outer));
+        WaterGeometry.quad(out, m, i0, i1, tip, tip, cr, cg, cb, alpha);
+    }
+
+    /** 一片朝外的叶子形花瓣（内尖—左腰—外尖—右腰）。 */
+    private static void petal(VertexConsumer out, Matrix4f m, Vec3 c, double angle,
+                              double inner, double outer, double halfAngle,
+                              float cr, float cg, float cb, float alpha) {
+        double mid = inner + (outer - inner) * 0.55D;
+        Vec3 p0 = c.add(Math.cos(angle) * inner, 0.0D, Math.sin(angle) * inner);
+        Vec3 p1 = c.add(Math.cos(angle + halfAngle) * mid, 0.0D,
+                Math.sin(angle + halfAngle) * mid);
+        Vec3 p2 = c.add(Math.cos(angle) * outer, 0.0D, Math.sin(angle) * outer);
+        Vec3 p3 = c.add(Math.cos(angle - halfAngle) * mid, 0.0D,
+                Math.sin(angle - halfAngle) * mid);
+        WaterGeometry.quad(out, m, p0, p1, p2, p3, cr, cg, cb, alpha);
+    }
+
+    /** 菱形光点：沿 angle 方向、中心 radius，length/width 控制长短胖瘦。 */
+    private static void diamond(VertexConsumer out, Matrix4f m, Vec3 c, double angle,
+                                double radius, double halfWidth, double halfLength,
+                                float cr, float cg, float cb, float alpha) {
+        Vec3 dir = new Vec3(Math.cos(angle), 0.0D, Math.sin(angle));
+        Vec3 side = new Vec3(-dir.z, 0.0D, dir.x);
+        Vec3 inner = c.add(dir.scale(radius - halfLength));
+        Vec3 outer = c.add(dir.scale(radius + halfLength));
+        Vec3 left = c.add(dir.scale(radius)).add(side.scale(halfWidth));
+        Vec3 right = c.add(dir.scale(radius)).subtract(side.scale(halfWidth));
+        WaterGeometry.quad(out, m, inner, left, outer, right, cr, cg, cb, alpha);
     }
 
     /** 四向饰纹：一段伸出去的短臂 ＋ 末端菱形 ✓。 */

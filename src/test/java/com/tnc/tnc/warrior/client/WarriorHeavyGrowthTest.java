@@ -6,26 +6,36 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class WarriorHeavyGrowthTest {
-    @Test void temperingRaisesPeakLinearlyFromThreeToTenWithoutUsingTalentCap(){
+    @Test void lightWeaponPhantomsGrowThroughTheAttackAndUseTheSameEightfoldPeak(){
+        for(var a:new WarriorAnimation[]{WarriorAnimation.SLASH_LEFT,WarriorAnimation.SWORD_BREAKER,
+                WarriorAnimation.SWORD_SPIN,WarriorAnimation.SPEAR_BREAK,WarriorAnimation.SPEAR_FLOW}){
+            assertEquals(1,WarriorHeavyGrowth.phantomScale(a,false,0,10));
+            assertEquals(8,WarriorHeavyGrowth.phantomScale(a,false,.6f,10),1e-6);
+            assertEquals(1,WarriorHeavyGrowth.phantomScale(a,false,1,10),1e-6);
+            assertEquals(1,WarriorHeavyGrowth.phantomScale(a,true,.6f,10));
+        }
+        assertEquals(1,WarriorHeavyGrowth.phantomScale(WarriorAnimation.SWORD_STANCE,false,.5f,10));
+    }
+    @Test void temperingRaisesPeakLinearlyFromThreeToEightWithoutUsingTalentCap(){
         assertEquals(3,WarriorHeavyGrowth.peak(0));
-        assertEquals(6.5f,WarriorHeavyGrowth.peak(5000));
-        assertEquals(10,WarriorHeavyGrowth.peak(10000));
+        assertEquals(5.5f,WarriorHeavyGrowth.peak(5000));
+        assertEquals(8,WarriorHeavyGrowth.peak(10000));
         assertEquals(3,WarriorHeavyGrowth.peak(Integer.MIN_VALUE));
-        assertEquals(10,WarriorHeavyGrowth.peak(Integer.MAX_VALUE));
+        assertEquals(8,WarriorHeavyGrowth.peak(Integer.MAX_VALUE));
         float previous=3;
         for(int points=0;points<=10000;points++){
-            float peak=WarriorHeavyGrowth.peak(points);assertTrue(peak>=previous && peak<=10);previous=peak;
+            float peak=WarriorHeavyGrowth.peak(points);assertTrue(peak>=previous && peak<=8);previous=peak;
         }
     }
-    @Test void tenfoldGrowthStillPreservesIdleAndRecoveryAcrossEveryHeavyAttack(){
+    @Test void eightfoldGrowthStillPreservesIdleAndRecoveryAcrossEveryHeavyAttack(){
         for(var family:new WarriorWeaponFamily[]{WarriorWeaponFamily.GREATSWORD,WarriorWeaponFamily.HAMMER})
             for(var animation:WarriorAnimation.values())if(WarriorHeavyGrowth.applies(animation,family,false)){
                 assertEquals(1,WarriorHeavyGrowth.scale(animation,family,false,0,10));
-                assertEquals(10,WarriorHeavyGrowth.scale(animation,family,false,WarriorHeavyGrowth.liftEnd(animation),10),.00001);
+                assertEquals(8,WarriorHeavyGrowth.scale(animation,family,false,WarriorHeavyGrowth.liftEnd(animation),10),.00001);
                 assertEquals(1,WarriorHeavyGrowth.scale(animation,family,false,1,10),.00001);
                 for(int i=0;i<=100;i++){
                     float size=WarriorHeavyGrowth.scale(animation,family,false,i/100f,1000);
-                    assertTrue(Float.isFinite(size) && size>=1 && size<=10);
+                    assertTrue(Float.isFinite(size) && size>=1 && size<=8);
                 }
             }
     }

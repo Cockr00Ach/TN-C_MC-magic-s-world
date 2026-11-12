@@ -3,6 +3,7 @@ package com.tnc.tnc.boss;
 import com.tnc.tnc.magic.TNEffects;
 import com.tnc.tnc.magic.TNOrbEntities;
 import com.tnc.tnc.magic.TNLightningStrikeEntity;
+import com.tnc.tnc.magic.dark.DarkRitualSequence;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -129,6 +130,28 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
     private int phase = 1;
     private int castCooldown = CAST_INTERVAL_P1;
 
+    // ------------------------------------------------------------------
+    //  ★ 2026-11-05 第四批：施法前戏（作者「优化一下衍 boss 的施法 … 衍是有黑暗元素的」）
+    //
+    //  以前的流程：冷却一到 → 一声 WITHER_SHOOT → 技能**同一 tick 就落地** ✗
+    //  玩家没有任何反应窗口，观感就是"凭空挨打"。现在拆成两段：
+    //    1) beginDarkRitual()：在落点铺一圈**暗系仪式阵**（黑心＋勾爪，见 DarkSealRenderer），
+    //       卫星小阵与门环按 DarkRitualSequence 的节拍一颗颗点亮；boss 站定、只做施法动作；
+    //    2) telegraph 走完 → executeDarkRitual() 才真正放招 ✓
+    //  注意：**完全不用雷锲**（作者："但是不要雷锲"）—— 这里只有阵和雾，没有 ThunderSeal ✓。
+    // ------------------------------------------------------------------
+
+    /** 已排程、还没到点的仪式动作（小阵点亮、门环立起、雾爆）。 */
+    private record RitualStep(int atTick, Runnable action) {
+    }
+
+    private final java.util.List<RitualStep> ritualSteps = new java.util.ArrayList<>();
+    /** 仪式时钟；-1 = 当前没有仪式在跑。 */
+    private int ritualTick = -1;
+    /** 正在蓄力的技能编号（-1 = 没有）；{@code pendingTicks} 走到 0 就出手 ✓。 */
+    private int pendingKind = -1;
+    private int pendingTicks = 0;
+
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     /** 两个施法动作（作者做的 playmagic_1/2 ✓）可按需触发 ✓ */
@@ -240,11 +263,52 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
         this.bossEvent.removePlayer(player);
     }
 
+    /**
+     * 排着的落雷 —— 天打五雷轰要**分波**砸，不能 12 道全挤在同一 tick。
+     *
+     * <p>★ 2026-11-07 作者：「天打五雷轰轰的次数太少了」。12 道同 tick 落 = 一团白闪 ＋ 一声巨响，
+     * 听起来是"轰"**一下**；分成三波（每波 4 道、隔 4 tick）就是"轰轰轰"三下，
+     * 伤害总量和落点范围都没变 ✓（只是把同一 tick 的 12 次拆到 8 tick 里）。
+     */
+    private record PendingStrike(Vec3 at, double scale, double shake, float damage, double radius, long due) {
+    }
+
+    private final java.util.List<PendingStrike> pendingStrikes = new java.util.ArrayList<>();
+
+    /** 排入一波天雷：{@code bolts} 道按每 4 道一波错开 ✓。 */
+    private void queueHeavenlyVolley(ServerLevel level, Vec3 at, int bolts) {
+        long now = level.getGameTime();
+        for (int i = 0; i < bolts; i++) {
+            double dx = (this.random.nextDouble() - 0.5D) * 8.0D;
+            double dz = (this.random.nextDouble() - 0.5D) * 8.0D;
+            this.pendingStrikes.add(new PendingStrike(at.add(dx, 0.0D, dz), 12.0D, 8.0D,
+                    THUNDER_DAMAGE, THUNDER_RADIUS, now + (i / 4) * 4L));
+        }
+    }
+
+    /** 到点就落（在 {@link #customServerAiStep()} 里每 tick 清一次 ✓）。 */
+    private void tickPendingStrikes(ServerLevel level) {
+        if (this.pendingStrikes.isEmpty()) {
+            return;
+        }
+        long now = level.getGameTime();
+        this.pendingStrikes.removeIf(p -> {
+            if (now < p.due()) {
+                return false;
+            }
+            this.bolt(level, p.at(), p.scale(), p.shake(), p.damage(), p.radius());
+            return true;
+        });
+    }
+
     /** 每 tick（服务端）刷新条子的长度 ✓ —— 原版凋零也是在这里 setProgress 的 ✓。 */
     @Override
     protected void customServerAiStep() {
         super.customServerAiStep();
         this.bossEvent.setProgress(this.getHealth() / this.getMaxHealth());
+        if (this.level() instanceof ServerLevel server) {
+            this.tickPendingStrikes(server);
+        }
     }
 
     /** 条子的名字：二阶段挂上「· 神降」✓（名字本身来自 lang：公孙衍（迷失）✓）。 */
@@ -257,6 +321,7 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
     /** 死了/被清掉时把条子收干净 ✓（不然玩家那边会留一条空条 ✗）。 */
     @Override
     public void remove(Entity.RemovalReason reason) {
+        this.pendingStrikes.clear();          // 还没落的雷不再补（免得 boss 没了还在劈人 ✗）
         this.bossEvent.removeAllPlayers();
         this.bossEvent.setVisible(false);
         super.remove(reason);
@@ -458,6 +523,30 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
         if (this.getTarget() == null) {
             return;
         }
+        // ★ 仪式时钟：到点的动作挨个执行（小阵点亮 / 门环立起 / 雾爆）✓
+        if (this.ritualTick >= 0) {
+            this.ritualTick++;
+            if (!this.ritualSteps.isEmpty()) {
+                var it = this.ritualSteps.iterator();
+                while (it.hasNext()) {
+                    RitualStep step = it.next();
+                    if (step.atTick() <= this.ritualTick) {
+                        step.action().run();
+                        it.remove();
+                    }
+                }
+            }
+        }
+        // ★ 蓄力中：站定、不放别的，时间到就出手 ✓（这就是"前戏"）
+        if (this.pendingKind >= 0) {
+            this.getNavigation().stop();
+            if (--this.pendingTicks <= 0) {
+                int kind = this.pendingKind;
+                this.pendingKind = -1;
+                this.executeDarkRitual(kind);
+            }
+            return;
+        }
         // ★ 二阶段：打架期间把雷雨续上（作者要看"神降"的天 ✓，见 GOD_WEATHER_TICKS 的注释）
         if (this.phase == 2 && PHASE2_WEATHER_REFRESH > 0
                 && this.tickCount % PHASE2_WEATHER_REFRESH == 0
@@ -478,21 +567,104 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
         }
     }
 
-    /** 随机放四个技能之一（作者的四个"随机放" ✓）。 */
+    /**
+     * 随机挑一个技能 ⇒ <b>先起暗系仪式前戏</b>，前戏走完才真放 ✓（见 {@link #beginDarkRitual}）。
+     *
+     * <p>老版本这里是一嗓子 {@code WITHER_SHOOT} 之后**同一 tick** 就把技能砸出去 ✗；
+     * 现在"蓄能声"挪到前戏开场，"报点声"挪到出手那一下（{@link #executeDarkRitual}）✓。
+     */
     private void castRandomSpell() {
         LivingEntity target = this.getTarget();
         if (target == null || !(this.level() instanceof ServerLevel level)) {
             return;
         }
         this.triggerAnim("action", this.random.nextBoolean() ? "playmagic_1" : "playmagic_2");
-        // ★ 施法那一下：凋零发射骷髅头的声音（{@code WITHER_SHOOT}）✓ —— 音高压低一点，
-        //   听起来像"蓄能"而不是"吐口水" ✓；技能本身的落雷声照旧在各自方法里播 ✓
+        this.beginDarkRitual(this.random.nextInt(4), level, target);
+    }
+
+    /** 暗系的主题色（{@code LightningTheme.DARK}）；这里写常量是为了不让实体类 import 客户端类 ✓。 */
+    private static final int DARK_THEME = 3;
+
+    /**
+     * ★ <b>起仪式</b>：铺主阵、排小阵、排门环、报一声"要来了"。
+     *
+     * <p>点选在<b>落点</b>（目标脚下）而不是 boss 脚下 —— 玩家一眼看出"这招要砸这里" ✓；
+     * 闪电移位例外（阵在自己脚下，代表"他要走"✓）。
+     */
+    private void beginDarkRitual(int kind, ServerLevel level, LivingEntity target) {
+        DarkRitualSequence.Rite rite = DarkRitualSequence.riteFor(kind);
+        int ticks = DarkRitualSequence.telegraphTicks(rite);
+        int life = DarkRitualSequence.circleLife(rite);
+        double radius = DarkRitualSequence.mainRadius(rite);
+        Vec3 at = (kind == 3) ? groundAt(level, this.position()) : groundAt(level, target.position());
+
+        this.ritualSteps.clear();
+        this.ritualTick = 0;
+
+        // 主阵：立刻出现（这就是"报点"——脚下先亮一个圈 ✓）
+        com.tnc.tnc.magic.TnSpellMechanics.spawnMagicCircleAt(level, at, radius, life,
+                DarkRitualSequence.mainStyle(rite), DARK_THEME);
+
+        // 卫星小阵：按节拍一颗颗点亮（一波一波往里推 ✓）
+        int sats = DarkRitualSequence.satelliteSeals(rite);
+        double size = DarkRitualSequence.satelliteSize(rite);
+        for (int i = 0; i < sats; i++) {
+            double ang = DarkRitualSequence.satelliteAngle(i);
+            double orbit = radius * DarkRitualSequence.satelliteOrbitFraction(i);
+            Vec3 p = at.add(Math.cos(ang) * orbit, 0.0D, Math.sin(ang) * orbit);
+            int delay = DarkRitualSequence.ignitionTick(rite, i, sats);
+            int smallLife = Math.max(20, life - delay);
+            this.ritualSteps.add(new RitualStep(delay, () ->
+                    com.tnc.tnc.magic.TnSpellMechanics.spawnMagicCircleAt(level, p, size, smallLife,
+                            com.tnc.tnc.magic.TNMagicCircleEntity.STYLE_DARK_MINOR, DARK_THEME)));
+        }
+
+        // 门环：中段一道道立起来、面朝阵心 ✓（和雷锲那套形似，但**没有雷锲实体/禁锢** ✓）
+        int gates = DarkRitualSequence.gateRings(rite);
+        for (int i = 0; i < gates; i++) {
+            double ang = i * (Math.PI * 2.0D / gates) + Math.PI / gates;
+            double dist = DarkRitualSequence.gateRadius(rite);
+            Vec3 gp = at.add(Math.cos(ang) * dist, 1.25D, Math.sin(ang) * dist);
+            float facing = (float) Math.toDegrees(Math.atan2(at.x - gp.x, at.z - gp.z));
+            int delay = DarkRitualSequence.gateTick(rite, i, gates);
+            int gateLife = Math.max(20, life - delay);
+            this.ritualSteps.add(new RitualStep(delay, () -> {
+                var circle = com.tnc.tnc.magic.TNOrbEntities.MAGIC_CIRCLE.get().create(level);
+                if (circle == null) {
+                    return;
+                }
+                circle.configure(2.2D, gateLife, com.tnc.tnc.magic.TNMagicCircleEntity.STYLE_DARK_GRAND, DARK_THEME);
+                circle.configure(2.2D, gateLife, com.tnc.tnc.magic.TNMagicCircleEntity.STYLE_DARK_GRAND, true, facing);
+                circle.moveTo(gp.x, gp.y, gp.z, 0.0F, 0.0F);
+                level.addFreshEntity(circle);
+            }));
+        }
+
+        // 出手前 6 tick：一团黑雾炸开 ="要砸下来了" ✓
+        int mist = DarkRitualSequence.mistBurst(rite);
+        this.ritualSteps.add(new RitualStep(Math.max(1, ticks - 6), () -> this.darkSparks(level, at, mist)));
+
+        this.pendingKind = kind;
+        this.pendingTicks = ticks;
+        // 蓄能声（低沉）＋ 落点那声"闷响"
         level.playSound(null, this.getX(), this.getY() + 1.0D, this.getZ(),
-                SoundEvents.WITHER_SHOOT, SoundSource.HOSTILE, 1.6F, 0.6F);
-        // ★ 2026-10-21 作者："为衍的法术增加音效，增加雷声" ——
-        //   四个技能原来**共用**这一声蓄能 ✗ ⇒ 现在每个技能再补一声"报点"：
-        //   不用看画面，光听就知道他要放哪一招 ✓（各自的落雷声/滚雷见各方法 ✓）。
-        switch (this.random.nextInt(4)) {
+                SoundEvents.WITHER_SHOOT, SoundSource.HOSTILE, 1.6F, 0.55F);
+        level.playSound(null, at.x, at.y + 1.2D, at.z,
+                SoundEvents.SOUL_ESCAPE, SoundSource.HOSTILE, 1.2F, 0.8F);
+    }
+
+    /** 前戏走完：真正放招（音效报点 + 各技能本体）✓。 */
+    private void executeDarkRitual(int kind) {
+        this.ritualTick = -1;
+        this.ritualSteps.clear();
+        if (!(this.level() instanceof ServerLevel level)) {
+            return;
+        }
+        LivingEntity target = this.getTarget();
+        if (target == null) {
+            return;
+        }
+        switch (kind) {
             case 0 -> {
                 // 雷暴：云里先"啪"一声 ⇒ 五道雷随后落下（落地各自带滚雷 ✓）
                 level.playSound(null, this.getX(), this.getY() + 1.0D, this.getZ(),
@@ -520,6 +692,14 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
                 this.castBlink(level, target);
             }
         }
+    }
+
+    /** 把点按到地面上（阵要贴地 ✓；找不到就原样返回）。 */
+    private static Vec3 groundAt(ServerLevel level, Vec3 at) {
+        int y = level.getHeight(
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                (int) Math.floor(at.x), (int) Math.floor(at.z));
+        return new Vec3(at.x, y, at.z);
     }
 
     /**
@@ -565,14 +745,12 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
      */
     private void castHeavenlyThunder(ServerLevel level, LivingEntity target) {
         Vec3 at = target.position();
-        // ★ 2026-11-05：黑暗衍的阵也用**雷系新样式**（雷网 + 暗紫主题 ✓）
-        com.tnc.tnc.magic.TnSpellMechanics.spawnMagicCircleAt(level, at, 14.0D, 210,
-                com.tnc.tnc.magic.TNMagicCircleEntity.STYLE_LIGHTNING, 3);
-        for (int i = 0; i < 12; i++) {
-            double dx = (this.random.nextDouble() - 0.5D) * 8.0D;
-            double dz = (this.random.nextDouble() - 0.5D) * 8.0D;
-            this.bolt(level, at.add(dx, 0.0D, dz), 12.0D, 8.0D, THUNDER_DAMAGE, THUNDER_RADIUS);
-        }
+        // ★ 2026-11-05 第四批：阵已经由前戏（beginDarkRitual）在这块地面铺好了（暗系大阵 ✓），
+        //   这里不再叠一张旧雷阵 ✗ —— 只补一层"阵心炸开"的黑雾 ✓
+        this.darkSparks(level, at, 48);
+        // ★ 2026-11-07 作者："天打五雷轰轰的次数太少了" ⇒ 12 道不再同 tick 齐落，
+        //   改成三波（每波 4 道、隔 4 tick）⇒ 听见三声"轰"，不是一声 ✓
+        this.queueHeavenlyVolley(level, at, 12);
         // ★★ 2026-11-05 作者："t5 砸下雷电之后，砸中的地面有龙直冲云霄" ✓
         //   黑暗衍的天打五雷轰也是 t5 级的"雷砸地" —— 12 道雷落完，从目标脚下冲出一条**暗紫雷龙** ✓
         com.tnc.tnc.magic.TnSpellMechanics.spawnDragon(level, at, 1.3D, 12, 3, 190);

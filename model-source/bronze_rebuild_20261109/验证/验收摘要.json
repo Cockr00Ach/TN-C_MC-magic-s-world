@@ -1,0 +1,213 @@
+{
+  "structural_checks_1_20_1": [
+    {
+      "file": "导出\\assets\\tnc\\models\\item\\bronze_dagger.json",
+      "elements": 16,
+      "faces": 90,
+      "errors": [],
+      "duplicates": 0
+    },
+    {
+      "file": "导出\\assets\\tnc\\models\\item\\bronze_dao.json",
+      "elements": 20,
+      "faces": 114,
+      "errors": [],
+      "duplicates": 0
+    },
+    {
+      "file": "导出\\assets\\tnc\\models\\item\\bronze_greatsword.json",
+      "elements": 22,
+      "faces": 124,
+      "errors": [],
+      "duplicates": 0
+    },
+    {
+      "file": "导出\\assets\\tnc\\models\\item\\bronze_spear.json",
+      "elements": 14,
+      "faces": 82,
+      "errors": [],
+      "duplicates": 0
+    },
+    {
+      "file": "导出\\assets\\tnc\\models\\item\\bronze_twin_main.json",
+      "elements": 20,
+      "faces": 115,
+      "errors": [],
+      "duplicates": 0
+    },
+    {
+      "file": "导出\\assets\\tnc\\models\\item\\bronze_twin_off.json",
+      "elements": 23,
+      "faces": 130,
+      "errors": [],
+      "duplicates": 0
+    },
+    {
+      "file": "导出\\assets\\tnc\\models\\item\\bronze_twin_pair.json",
+      "elements": 43,
+      "faces": 245,
+      "errors": [],
+      "duplicates": 0
+    }
+  ],
+  "editor_counts": [
+    {
+      "name": "01_青铜大剑",
+      "editor_cubes": 22,
+      "texture_bitmap": [
+        512,
+        512
+      ],
+      "texture_frames": 1
+    },
+    {
+      "name": "02_青铜长枪",
+      "editor_cubes": 14,
+      "texture_bitmap": [
+        512,
+        512
+      ],
+      "texture_frames": 1
+    },
+    {
+      "name": "03_青铜大刀",
+      "editor_cubes": 20,
+      "texture_bitmap": [
+        512,
+        512
+      ],
+      "texture_frames": 1
+    },
+    {
+      "name": "04_青铜匕首",
+      "editor_cubes": 16,
+      "texture_bitmap": [
+        512,
+        512
+      ],
+      "texture_frames": 1
+    },
+    {
+      "name": "05_青铜双刃",
+      "editor_cubes": 43,
+      "texture_bitmap": [
+        512,
+        512
+      ],
+      "texture_frames": 1
+    },
+    {
+      "name": "06_青铜人偶",
+      "editor_cubes": 83,
+      "texture_bitmap": [
+        512,
+        512
+      ],
+      "texture_frames": 1
+    },
+    {
+      "name": "07_人偶持械预览",
+      "editor_cubes": 126,
+      "texture_bitmap": [
+        512,
+        512
+      ],
+      "texture_frames": 1
+    }
+  ],
+  "skill_audits": [
+    {
+      "model": "01_青铜大剑.bbmodel",
+      "exit_code": 0,
+      "report": "01_青铜大剑_bbmodel_审计.json",
+      "error_count": 0
+    },
+    {
+      "model": "02_青铜长枪.bbmodel",
+      "exit_code": 0,
+      "report": "02_青铜长枪_bbmodel_审计.json",
+      "error_count": 0
+    },
+    {
+      "model": "03_青铜大刀.bbmodel",
+      "exit_code": 0,
+      "report": "03_青铜大刀_bbmodel_审计.json",
+      "error_count": 0
+    },
+    {
+      "model": "04_青铜匕首.bbmodel",
+      "exit_code": 0,
+      "report": "04_青铜匕首_bbmodel_审计.json",
+      "error_count": 0
+    },
+    {
+      "model": "05_青铜双刃.bbmodel",
+      "exit_code": 0,
+      "report": "05_青铜双刃_bbmodel_审计.json",
+      "error_count": 0
+    },
+    {
+      "model": "06_青铜人偶.bbmodel",
+      "exit_code": 0,
+      "report": "06_青铜人偶_bbmodel_审计.json",
+      "error_count": 0
+    },
+    {
+      "model": "07_人偶持械预览.bbmodel",
+      "exit_code": 0,
+      "report": "07_人偶持械预览_bbmodel_审计.json",
+      "error_count": 0
+    },
+    {
+      "model": "bronze_dagger.json",
+      "exit_code": 0,
+      "report": "bronze_dagger_json_审计.json",
+      "error_count": 0
+    },
+    {
+      "model": "bronze_dao.json",
+      "exit_code": 0,
+      "report": "bronze_dao_json_审计.json",
+      "error_count": 0
+    },
+    {
+      "model": "bronze_greatsword.json",
+      "exit_code": 0,
+      "report": "bronze_greatsword_json_审计.json",
+      "error_count": 0
+    },
+    {
+      "model": "bronze_spear.json",
+      "exit_code": 0,
+      "report": "bronze_spear_json_审计.json",
+      "error_count": 0
+    },
+    {
+      "model": "bronze_twin_main.json",
+      "exit_code": 0,
+      "report": "bronze_twin_main_json_审计.json",
+      "error_count": 0
+    },
+    {
+      "model": "bronze_twin_off.json",
+      "exit_code": 0,
+      "report": "bronze_twin_off_json_审计.json",
+      "error_count": 0
+    },
+    {
+      "model": "bronze_twin_pair.json",
+      "exit_code": 0,
+      "report": "bronze_twin_pair_json_审计.json",
+      "error_count": 0
+    }
+  ],
+  "client_started": false,
+  "client_visuals": "未测试",
+  "client_fps": "未测量",
+  "limitations": [
+    "java-legacy 脚本是共享结构预检，并非完整 Minecraft 1.20.1 schema 验证器",
+    "未启动客户端；显示效果只证明 Blockbench 编辑/Display 视图",
+    "人偶运行数据使用原 Humanoid 加载器；Java 文件是原生导出参考，不是完整替换类",
+    "双刃的当前自定义渲染器忽略 element.rotation，接入前需适配"
+  ]
+}

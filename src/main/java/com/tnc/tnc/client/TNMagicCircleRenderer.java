@@ -83,7 +83,9 @@ public class TNMagicCircleRenderer extends EntityRenderer<TNMagicCircleEntity> {
                 || style == TNMagicCircleEntity.STYLE_LIGHT_GRAND) {
             return LIGHT_TEXTURE;
         }
-        if (style == TNMagicCircleEntity.STYLE_DARK || style == TNMagicCircleEntity.STYLE_DARK_RITUAL) {
+        if (style == TNMagicCircleEntity.STYLE_DARK || style == TNMagicCircleEntity.STYLE_DARK_RITUAL
+                || style == TNMagicCircleEntity.STYLE_DARK_MINOR
+                || style == TNMagicCircleEntity.STYLE_DARK_GRAND) {
             return DARK_TEXTURE;
         }
         if (style == TNMagicCircleEntity.STYLE_DARK_HAND) {
@@ -101,6 +103,12 @@ public class TNMagicCircleRenderer extends EntityRenderer<TNMagicCircleEntity> {
                 ||entity.style()==TNMagicCircleEntity.STYLE_LIGHT_SKY
                 ||entity.style()==TNMagicCircleEntity.STYLE_LIGHT_MINOR
                 ||entity.style()==TNMagicCircleEntity.STYLE_LIGHT_GRAND){ElementSealRenderer.render(entity,partialTick,poseStack,buffer);return;}
+        // ★ 2026-11-05 第三批：雷系也分低阶/高阶（照光法的形，材料换成真雷）✓
+        if(entity.style()==TNMagicCircleEntity.STYLE_LIGHTNING_MINOR
+                ||entity.style()==TNMagicCircleEntity.STYLE_LIGHTNING_GRAND){LightningSealRenderer.render(entity,partialTick,poseStack,buffer);return;}
+        // ★ 2026-11-05 第四批：暗系仪式阵（衍 boss 的施法前戏；黑心 ＋ 勾爪，不是雷网 ≠ 雷锲 ✓）
+        if(entity.style()==TNMagicCircleEntity.STYLE_DARK_MINOR
+                ||entity.style()==TNMagicCircleEntity.STYLE_DARK_GRAND){DarkSealRenderer.render(entity,partialTick,poseStack,buffer);return;}
         if(entity.style()==TNMagicCircleEntity.STYLE_EARTH){EarthSealRenderer.render(entity,partialTick,poseStack,buffer);return;}
         float age = entity.tickCount + partialTick;
         float life = Math.max(1.0F, entity.life());

@@ -1,0 +1,107 @@
+[
+  {
+    "id": "bronze_greatsword",
+    "uuid": "d2340384-2c55-ad78-53b7-61b4995ba78c",
+    "cubes": 22,
+    "geometry_matches": true,
+    "textures": [
+      {
+        "width": 512,
+        "height": 512,
+        "missing": 0,
+        "embedded": true
+      }
+    ],
+    "format": "java_block"
+  },
+  {
+    "id": "bronze_spear",
+    "uuid": "9a8c1ef6-531c-63a2-a712-4233907a8c32",
+    "cubes": 14,
+    "geometry_matches": true,
+    "textures": [
+      {
+        "width": 512,
+        "height": 512,
+        "missing": 0,
+        "embedded": true
+      }
+    ],
+    "format": "java_block"
+  },
+  {
+    "id": "bronze_dao",
+    "uuid": "5249d39a-3836-6e2c-b7cd-464aee37b159",
+    "cubes": 20,
+    "geometry_matches": true,
+    "textures": [
+      {
+        "width": 512,
+        "height": 512,
+        "missing": 0,
+        "embedded": true
+      }
+    ],
+    "format": "java_block"
+  },
+  {
+    "id": "bronze_dagger",
+    "uuid": "671b9429-1366-492b-4709-ca685ab60353",
+    "cubes": 16,
+    "geometry_matches": true,
+    "textures": [
+      {
+        "width": 512,
+        "height": 512,
+        "missing": 0,
+        "embedded": true
+      }
+    ],
+    "format": "java_block"
+  },
+  {
+    "id": "bronze_twins",
+    "uuid": "7c648eb2-65ff-2245-0867-52201652545d",
+    "cubes": 43,
+    "geometry_matches": true,
+    "textures": [
+      {
+        "width": 512,
+        "height": 512,
+        "missing": 0,
+        "embedded": true
+      }
+    ],
+    "format": "java_block"
+  },
+  {
+    "id": "bronze_puppet",
+    "uuid": "f9eb2ec8-53b5-ab34-8bb8-76efc328d660",
+    "cubes": 83,
+    "geometry_matches": true,
+    "textures": [
+      {
+        "width": 512,
+        "height": 512,
+        "missing": 0,
+        "embedded": true
+      }
+    ],
+    "format": "modded_entity"
+  },
+  {
+    "id": "bronze_puppet_equipped",
+    "uuid": "d2d134e3-afec-8daf-d17a-86af8fcff2de",
+    "cubes": 126,
+    "geometry_matches": true,
+    "textures": [
+      {
+        "width": 512,
+        "height": 512,
+        "missing": 0,
+        "embedded": true
+      }
+    ],
+    "format": "free"
+  }
+]

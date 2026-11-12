@@ -86,5 +86,9 @@ public final class TNNpcClientEvents {
                 ctx -> new com.tnc.tnc.boss.client.TNDarkGiantRenderer(ctx));
         event.registerEntityRenderer(com.tnc.tnc.npc.TNNpcs.WATER_LEVIATHAN.get(),
                 com.tnc.tnc.boss.client.TNWaterLeviathanRenderer::new);
+        // ★ 黑魔法师（作者 2026-11-07 ✓）—— 和上面一样，**必须在所有 if/else 外面** ✗
+        //   （理由见上面那段 yan_dark 的注释：漏了渲染器 ⇒ Oculus 影子 pass NPE ⇒ 客户端直接崩 ✗）
+        event.registerEntityRenderer(com.tnc.tnc.npc.TNNpcs.DARK_MAGE.get(),
+                ctx -> new com.tnc.tnc.boss.client.TNDarkMageRenderer(ctx));
     }
 }

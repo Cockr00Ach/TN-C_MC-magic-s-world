@@ -30,6 +30,7 @@ public final class WarriorPoseMath {
     public static Pose of(WarriorAnimation animation, float t, boolean leftHanded) {
         float x = Math.max(0, Math.min(1, t));
         Pose right = switch (animation) {
+            case ULTIMATE -> spin(ease(x));
             case SWORD_CHARGE, GS_CHARGE, HM_CHARGE -> overhead(x);
             case SPEAR_CHARGE -> thrust(x);
             case SLASH_LEFT -> slash(ease(x), false, false);

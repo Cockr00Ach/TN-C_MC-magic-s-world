@@ -52,6 +52,13 @@ public final class TNLightMirrorEntity extends Entity {
     }
     @Override public Packet<ClientGamePacketListener> getAddEntityPacket() { return NetworkHooks.getEntitySpawningPacket(this); }
     @Override public boolean isPickable() { return true; }
+    /**
+     * 准星"贴脸上就能选中"的半径 ✓（作者 2026-11-07："那个镜子要把它弄成可以瞄准的东西"）。
+     * 光镜本身只有一张薄片（碰撞盒 = 1 格方块），原版拾取要正好戳到那 1 格才中 ✗；
+     * 放到 1.1 格之后，"看着它按右键/左键"就够了 ✓ —— 真正的施法瞄准在
+     * {@link LightMirrorAim} 里另有一套（视线锥 + 光路盒子 ✓）。
+     */
+    @Override public float getPickRadius() { return 1.1F; }
     @Override public boolean hurt(net.minecraft.world.damagesource.DamageSource source, float amount) {
         if (!level().isClientSide && !isInvulnerableTo(source) && amount > 0) { discard(); return true; }
         return false;

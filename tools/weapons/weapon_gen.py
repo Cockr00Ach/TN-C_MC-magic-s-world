@@ -14,6 +14,7 @@ import json
 import math
 import os
 import pixel_forge
+import craft_details
 
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
@@ -614,7 +615,7 @@ def expand_profile_legacy(weapon):
 
 def expand_profile(weapon):
     if '_pixel_parts' not in weapon:
-        weapon['_pixel_parts'] = pixel_forge.parts(weapon, _lerp_profile)
+        weapon['_pixel_parts'] = craft_details.refine(weapon,pixel_forge.parts(weapon, _lerp_profile))
     return weapon['_pixel_parts']
 
 

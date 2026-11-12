@@ -23,7 +23,16 @@ public final class MagicStoneLearning {
         OUT_OF_ORDER,
         NOT_ENOUGH_POINTS,
         /** 目录里有这个法术，但引擎还没实装（缺 JSON）——不能解锁，否则白花点数 ✗ */
-        NOT_IMPLEMENTED
+        NOT_IMPLEMENTED,
+        /**
+         * 领域法术冲突（2026-11-08 作者："告知玩家只能选择一个领域法术"）。
+         *
+         * <p>七个元素各有一条领域（{@code SpellCatalog.specials()}），
+         * 一人只能选一条：已经有别的领域就学不了第二条 ✓。
+         */
+        DOMAIN_CONFLICT,
+        /** 领域法术要求该元素亲和力 ≥ 1（作者："条件是有亲和力就行"）。 */
+        DOMAIN_NEEDS_AFFINITY
     }
 
     private MagicStoneLearning() {
@@ -55,6 +64,20 @@ public final class MagicStoneLearning {
         if (!entry.independent() && entry.tier() > data.maxTierFor(entry.element())) {
             return Result.AFFINITY_TOO_LOW;
         }
+        // ★ 2026-11-08 领域法术（作者："放在独立法术那里，告知玩家只能选择一个，条件是有亲和力就行"）
+        //   ① 一人一条：已经选了别的领域 ⇒ 直接拒（想换得先遗忘）✓
+        //   ② 亲和力 ≥ 1 才给学（不看等级、不看链进度 ✓）
+        com.tnc.tnc.magic.Element domain = com.tnc.tnc.magic.domain.DomainSpells.elementOf(entry.id());
+        if (domain != null) {
+            for (com.tnc.tnc.magic.Element owned : data.specialElements()) {
+                if (owned != domain) {
+                    return Result.DOMAIN_CONFLICT;
+                }
+            }
+            if (data.getAffinity(domain) <= 0) {
+                return Result.DOMAIN_NEEDS_AFFINITY;
+            }
+        }
         // 不能跳级：看的是**同一条链**的进度（三条链各自算）
         if (!entry.independent() && entry.tier() > data.getProgress(entry.element(), entry.chain()) + 1) {
             return Result.OUT_OF_ORDER;
@@ -75,7 +98,26 @@ public final class MagicStoneLearning {
         data.learn(entry.id());
         if (!entry.independent()) data.setProgress(entry.element(), entry.chain(),
                 Math.max(data.getProgress(entry.element(), entry.chain()), entry.tier()));
+        // 领域法术：学会即"拥有这个领域"（亲和力加成的开关就是 specials ✓）
+        com.tnc.tnc.magic.Element domain = com.tnc.tnc.magic.domain.DomainSpells.elementOf(entry.id());
+        if (domain != null) {
+            data.grantSpecial(domain);
+        }
         return Result.OK;
+    }
+
+    /**
+     * 这条法术属于哪一系的显示名。
+     *
+     * <p>⚠️ 独立/领域法术的 {@code element()} 是 null（它们不进七元素数组），
+     * 这里绝不能直接 {@code entry.element().cn()} —— 2026-11-08 作者点领域时崩的就是这类 NPE ✗。
+     */
+    private static String elementName(SpellCatalog.Entry entry) {
+        if (entry.element() != null) {
+            return entry.element().cn();
+        }
+        Element domain = com.tnc.tnc.magic.domain.DomainSpells.elementOf(entry.id());
+        return domain != null ? domain.cn() : "该";
     }
 
     /** 给玩家看的一句话说明（成功和失败都有）。 */
@@ -85,16 +127,26 @@ public final class MagicStoneLearning {
             case OK -> Component.literal("§a[TN-C] §r已解锁 §e" + entry.fullName() + "§r（还剩 "
                     + data.getPointsAvailable(Config.pointThresholds) + " 点）");
             case ALREADY_LEARNED -> Component.literal("§7[TN-C] " + entry.displayName() + " 已经学过了");
-            case AFFINITY_TOO_LOW -> Component.literal("§c[TN-C] " + entry.element().cn() + "系亲和力不足："
+            case AFFINITY_TOO_LOW -> Component.literal("§c[TN-C] " + elementName(entry) + "系亲和力不足："
                     + entry.displayName() + " 需要" + Element.tierName(entry.tier())
-                    + "，你现在只能学到" + Element.tierName(Math.max(1, data.maxTierFor(entry.element()))));
+                    + (entry.element() == null ? " §7（领域只看亲和力 ≥1）"
+                    : "，你现在只能学到" + Element.tierName(Math.max(1, data.maxTierFor(entry.element())))));
             case OUT_OF_ORDER -> Component.literal("§c[TN-C] 不能跳级：先把"
-                    + entry.element().cn() + "系「" + entry.chain().cn() + "」链的上一级学了"
-                    + "（这条链当前进度 " + Element.tierName(data.getProgress(entry.element(), entry.chain())) + "）");
+                    + elementName(entry) + "系「" + entry.chain().cn() + "」链的上一级学了"
+                    + (entry.element() == null ? ""
+                    : "（这条链当前进度 " + Element.tierName(data.getProgress(entry.element(), entry.chain())) + "）"));
             case NOT_ENOUGH_POINTS -> Component.literal("§c[TN-C] 魔法点数不够：需要 " + cost
                     + " 点，当前可用 " + data.getPointsAvailable(Config.pointThresholds) + " 点");
             case NOT_IMPLEMENTED -> Component.literal("§e[TN-C] " + entry.displayName()
                     + " 尚未实装 §7（目录里有、法术本体还没做，学不了）");
+            case DOMAIN_CONFLICT -> Component.literal("§c[TN-C] 只能选一个领域法术：你已经选了「"
+                    + com.tnc.tnc.magic.domain.DomainSpells.nameOf(data.specialElements().isEmpty()
+                    ? null : data.specialElements().get(0))
+                    + "」§7（想换请先在魔法石里遗忘它）");
+            case DOMAIN_NEEDS_AFFINITY -> Component.literal("§c[TN-C] 领域法术要有亲和力："
+                    + com.tnc.tnc.magic.domain.DomainSpells.nameOf(
+                    com.tnc.tnc.magic.domain.DomainSpells.elementOf(entry.id()))
+                    + " 需要该系亲和力至少 1 级 §7（这条不看等级，只看亲和力 ✓）");
         };
     }
 }

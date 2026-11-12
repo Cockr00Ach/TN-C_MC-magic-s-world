@@ -34,7 +34,12 @@ public final class InkRealmTravel {
         origin.putDouble("x",player.getX());origin.putDouble("y",player.getY());origin.putDouble("z",player.getZ());
         origin.putFloat("yaw",player.getYRot());origin.putFloat("pitch",player.getXRot());
         player.getPersistentData().put("TncInkReturn",origin);
-        return teleport(player, target, player.getX(), player.getZ());
+        if(!teleport(player, target, player.getX(), player.getZ()))return false;
+        if(target.getEntitiesOfClass(InkPortalEntity.class,player.getBoundingBox().inflate(16)).isEmpty()
+                &&!InkPortalEntity.place(player)){
+            leave(player);return false;
+        }
+        return true;
     }
 
     public static boolean leave(ServerPlayer player) {

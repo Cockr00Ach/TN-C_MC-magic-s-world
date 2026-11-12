@@ -1,0 +1,176 @@
+[
+  {
+    "project": "01_青铜大剑_成品精度.bbmodel",
+    "elements": 1891,
+    "cubes": 1891,
+    "meshes": 0,
+    "geometry_uv_rig_matches": true,
+    "mesh_rotations": [],
+    "numeric_comparison": "exact Float32 values",
+    "error_count": 0,
+    "errors": [],
+    "textures": [
+      {
+        "name": "bronze_atlas.png",
+        "width": 512,
+        "height": 256,
+        "error": 0,
+        "embedded": true
+      }
+    ]
+  },
+  {
+    "project": "02_青铜长枪_成品精度.bbmodel",
+    "elements": 1200,
+    "cubes": 1200,
+    "meshes": 0,
+    "geometry_uv_rig_matches": true,
+    "numeric_comparison": "exact Float32 values used by preview and target geometry buffers",
+    "errors": [],
+    "error_count": 0,
+    "textures": [
+      {
+        "name": "bronze_atlas.png",
+        "width": 512,
+        "height": 256,
+        "embedded": true,
+        "error": 0
+      }
+    ]
+  },
+  {
+    "project": "03_青铜大刀_成品精度.bbmodel",
+    "elements": 1409,
+    "cubes": 1409,
+    "meshes": 0,
+    "geometry_uv_rig_matches": true,
+    "mesh_rotations": [],
+    "numeric_comparison": "exact Float32 values",
+    "error_count": 0,
+    "errors": [],
+    "textures": [
+      {
+        "name": "bronze_atlas.png",
+        "width": 512,
+        "height": 256,
+        "error": 0,
+        "embedded": true
+      }
+    ]
+  },
+  {
+    "project": "04_青铜匕首_成品精度.bbmodel",
+    "elements": 890,
+    "cubes": 890,
+    "meshes": 0,
+    "geometry_uv_rig_matches": true,
+    "mesh_rotations": [],
+    "numeric_comparison": "exact Float32 values",
+    "error_count": 0,
+    "errors": [],
+    "textures": [
+      {
+        "name": "bronze_atlas.png",
+        "width": 512,
+        "height": 256,
+        "error": 0,
+        "embedded": true
+      }
+    ]
+  },
+  {
+    "project": "05_青铜双刃_成品精度.bbmodel",
+    "elements": 3539,
+    "cubes": 3539,
+    "meshes": 0,
+    "geometry_uv_rig_matches": true,
+    "numeric_comparison": "exact Float32 values used by preview and target geometry buffers",
+    "errors": [],
+    "error_count": 0,
+    "textures": [
+      {
+        "name": "bronze_atlas.png",
+        "width": 512,
+        "height": 256,
+        "embedded": true,
+        "error": 0
+      }
+    ]
+  },
+  {
+    "project": "06_青铜人偶_铸造精修.bbmodel",
+    "elements": 881,
+    "cubes": 881,
+    "meshes": 0,
+    "geometry_uv_rig_matches": true,
+    "mesh_rotations": [],
+    "numeric_comparison": "exact Float32 values",
+    "error_count": 0,
+    "errors": [],
+    "textures": [
+      {
+        "name": "bronze_puppet.png",
+        "width": 2048,
+        "height": 2048,
+        "error": 0,
+        "embedded": true
+      }
+    ]
+  },
+  {
+    "project": "07_人偶持械精修预览.bbmodel",
+    "elements": 883,
+    "cubes": 881,
+    "meshes": 2,
+    "geometry_uv_rig_matches": true,
+    "mesh_rotations": [
+      {
+        "name": "主手直刃_完整成品网格",
+        "origin": [
+          -6,
+          11.3,
+          -0.65
+        ],
+        "rotation": [
+          0,
+          0,
+          180
+        ],
+        "parent": "right_arm"
+      },
+      {
+        "name": "伴随弯刃_完整成品网格",
+        "origin": [
+          6,
+          11.3,
+          -0.65
+        ],
+        "rotation": [
+          0,
+          0,
+          180
+        ],
+        "parent": "left_arm"
+      }
+    ],
+    "numeric_comparison": "exact Float32 values",
+    "error_count": 0,
+    "errors": [],
+    "textures": [
+      {
+        "name": "bronze_puppet.png",
+        "width": 2048,
+        "height": 2048,
+        "error": 0,
+        "embedded": true
+      },
+      {
+        "name": "bronze_atlas.png",
+        "width": 512,
+        "height": 256,
+        "error": 0,
+        "embedded": true
+      }
+    ]
+  }
+]

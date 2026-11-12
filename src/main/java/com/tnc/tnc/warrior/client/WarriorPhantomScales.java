@@ -15,7 +15,7 @@ public final class WarriorPhantomScales {
     private static final Map<UUID, Integer> POINTS = new HashMap<>();
     public static void accept(UUID player, float scale) { accept(player,scale,0); }
     public static void accept(UUID player, float scale,int points) {
-        SCALES.put(player, scale);POINTS.put(player,com.tnc.tnc.warrior.TemperingRules.clamp(points));
+        SCALES.put(player,Math.min(scale,(float)com.tnc.tnc.warrior.WarriorReach.MAX_PEAK));POINTS.put(player,com.tnc.tnc.warrior.TemperingRules.clamp(points));
     }
     public static double get(UUID player) { return SCALES.getOrDefault(player, 1f); }
     public static int points(UUID player) { return POINTS.getOrDefault(player,0); }

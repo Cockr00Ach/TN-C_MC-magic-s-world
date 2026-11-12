@@ -27,6 +27,12 @@ public final class WaterRestraints {
         locks.put(target.getUUID(),new Lock(source.getUUID(),at,level.getGameTime()+2));
         freeze(target,at);
     }
+    static void holdAt(net.minecraft.world.entity.Entity source,LivingEntity target,Vec3 at){
+        if(!WaterSpellRules.canRestrain(target.getBbHeight()))return;
+        var level=(ServerLevel)source.level();
+        LOCKS.computeIfAbsent(level,k->new HashMap<>()).put(target.getUUID(),new Lock(source.getUUID(),at,level.getGameTime()+2));
+        freeze(target,at);
+    }
     private static void freeze(LivingEntity target,Vec3 at) {
         boolean displaced=target.position().distanceToSqr(at)>1e-8;
         boolean impulse=target.getDeltaMovement().horizontalDistanceSqr()>1e-6||target.getDeltaMovement().y>.02;

@@ -1,0 +1,289 @@
+[
+  {
+    "id": "bronze_greatsword",
+    "project": "aec2083c-e7c0-c6a0-749b-e192d3a5cb30",
+    "cubes": 22,
+    "removed": [
+      {
+        "cube": "10cdce2f-de58-6d56-3c02-e373b9fd94ba",
+        "name": "缠柄",
+        "face": "up",
+        "inside": "d6ff37b4-91dc-38d9-6a85-4e8da11b6845"
+      },
+      {
+        "cube": "10cdce2f-de58-6d56-3c02-e373b9fd94ba",
+        "name": "缠柄",
+        "face": "down",
+        "inside": "987c8632-8b19-0e95-e683-432129919935"
+      },
+      {
+        "cube": "1c3be07d-44e9-5fdd-aa4c-72b86996e95b",
+        "name": "护手兽鼻",
+        "face": "south",
+        "inside": "78774db1-ea48-093e-4e95-3c0a52c38ece"
+      },
+      {
+        "cube": "6d4f343b-d43b-f18d-76fc-ea134f5ab092",
+        "name": "刃根",
+        "face": "down",
+        "inside": "a9d32e5f-5c6a-4993-5e64-b0a67784d257"
+      },
+      {
+        "cube": "f44a46ca-6bcc-c316-e1b5-0b95eed5c11f",
+        "name": "中空左脊",
+        "face": "down",
+        "inside": "6d4f343b-d43b-f18d-76fc-ea134f5ab092"
+      },
+      {
+        "cube": "49e69d82-b45d-6b97-7d8c-b0b3b022a839",
+        "name": "中空右脊",
+        "face": "down",
+        "inside": "6d4f343b-d43b-f18d-76fc-ea134f5ab092"
+      },
+      {
+        "cube": "dba146c2-7a72-0535-dc6f-62588cb6ce0e",
+        "name": "刃根饕餮面",
+        "face": "south",
+        "inside": "6d4f343b-d43b-f18d-76fc-ea134f5ab092"
+      },
+      {
+        "cube": "86d01682-b315-bf57-a2b5-dff12ad090da",
+        "name": "刃根饕餮面",
+        "face": "north",
+        "inside": "6d4f343b-d43b-f18d-76fc-ea134f5ab092"
+      }
+    ]
+  },
+  {
+    "id": "bronze_spear",
+    "project": "c2934482-473d-0799-819f-55babddbc600",
+    "cubes": 15,
+    "removed": [
+      {
+        "cube": "a2c3098d-9338-16f9-7735-733ff1cbdb9e",
+        "name": "长枪杆",
+        "face": "up",
+        "inside": "4b222e41-5e48-06f2-c680-2511db8abbf2"
+      },
+      {
+        "cube": "a2c3098d-9338-16f9-7735-733ff1cbdb9e",
+        "name": "长枪杆",
+        "face": "down",
+        "inside": "73f1c1ad-7d15-9ac6-6e4a-fe69be950b93"
+      },
+      {
+        "cube": "0b347b5d-ab00-a8c6-d055-fef62eafa118",
+        "name": "铜箍_14",
+        "face": "east",
+        "inside": "4b222e41-5e48-06f2-c680-2511db8abbf2"
+      },
+      {
+        "cube": "0b347b5d-ab00-a8c6-d055-fef62eafa118",
+        "name": "铜箍_14",
+        "face": "west",
+        "inside": "4b222e41-5e48-06f2-c680-2511db8abbf2"
+      },
+      {
+        "cube": "0b347b5d-ab00-a8c6-d055-fef62eafa118",
+        "name": "铜箍_14",
+        "face": "up",
+        "inside": "4b222e41-5e48-06f2-c680-2511db8abbf2"
+      },
+      {
+        "cube": "0b347b5d-ab00-a8c6-d055-fef62eafa118",
+        "name": "铜箍_14",
+        "face": "down",
+        "inside": "4b222e41-5e48-06f2-c680-2511db8abbf2"
+      },
+      {
+        "cube": "0b347b5d-ab00-a8c6-d055-fef62eafa118",
+        "name": "铜箍_14",
+        "face": "south",
+        "inside": "4b222e41-5e48-06f2-c680-2511db8abbf2"
+      },
+      {
+        "cube": "0b347b5d-ab00-a8c6-d055-fef62eafa118",
+        "name": "铜箍_14",
+        "face": "north",
+        "inside": "4b222e41-5e48-06f2-c680-2511db8abbf2"
+      }
+    ]
+  },
+  {
+    "id": "bronze_dao",
+    "project": "660991aa-bcc5-e127-5537-a021d53d8fc0",
+    "cubes": 20,
+    "removed": [
+      {
+        "cube": "b259e4c4-122e-e419-d841-71e3412ef5da",
+        "name": "缠柄",
+        "face": "up",
+        "inside": "2bb54183-2727-b85e-0c50-0fd2e5a7e140"
+      },
+      {
+        "cube": "b259e4c4-122e-e419-d841-71e3412ef5da",
+        "name": "缠柄",
+        "face": "down",
+        "inside": "95365040-a75e-7afb-2c46-70bb94b5c3d0"
+      },
+      {
+        "cube": "6e82d42a-e4d0-073e-3fdc-aa8a27a6adbc",
+        "name": "护手兽鼻",
+        "face": "south",
+        "inside": "20d785d3-e38e-f138-3ed2-4695fa37d344"
+      },
+      {
+        "cube": "7ebe4cbe-092f-032e-e41e-056d7c589cd6",
+        "name": "厚刀身",
+        "face": "east",
+        "inside": "7c29b136-df26-0339-06a2-1f62e8b4436e"
+      },
+      {
+        "cube": "33f9d47f-ee17-9ad1-8187-a8cfa3642e87",
+        "name": "刀根穿孔圈",
+        "face": "south",
+        "inside": "3dca5e62-8ca0-6700-9cc7-e973f1427434"
+      },
+      {
+        "cube": "183e6036-f384-b6b0-94b1-3b9ce65c1937",
+        "name": "刀根穿孔圈",
+        "face": "north",
+        "inside": "3dca5e62-8ca0-6700-9cc7-e973f1427434"
+      }
+    ]
+  },
+  {
+    "id": "bronze_dagger",
+    "project": "cccaa1fa-824a-9776-07cc-857511d1b013",
+    "cubes": 16,
+    "removed": [
+      {
+        "cube": "1e28e07f-b0ad-8215-fd23-527a2fa9a02b",
+        "name": "缠柄",
+        "face": "up",
+        "inside": "c4b275fb-f8f8-98a3-148b-69e405e4a872"
+      },
+      {
+        "cube": "1e28e07f-b0ad-8215-fd23-527a2fa9a02b",
+        "name": "缠柄",
+        "face": "down",
+        "inside": "82079b61-9b4f-9cc3-e01e-db7c884d7df8"
+      },
+      {
+        "cube": "b01470fa-2721-3236-1cd1-c9121c199334",
+        "name": "护手兽鼻",
+        "face": "south",
+        "inside": "ffc91b8d-e6a1-bb70-312a-0481693dc10c"
+      },
+      {
+        "cube": "055d1fcb-7f29-a674-15c6-6230c82aeea4",
+        "name": "匕首刃根",
+        "face": "down",
+        "inside": "fc066821-ce3e-09f6-c30e-ee097e8e5e91"
+      },
+      {
+        "cube": "cd99f04e-2c9b-3611-fb46-9c19daf7eb95",
+        "name": "左刃瓣",
+        "face": "down",
+        "inside": "055d1fcb-7f29-a674-15c6-6230c82aeea4"
+      },
+      {
+        "cube": "cc68ad04-5351-b027-eeef-ed02c7855c16",
+        "name": "右刃瓣",
+        "face": "down",
+        "inside": "055d1fcb-7f29-a674-15c6-6230c82aeea4"
+      }
+    ]
+  },
+  {
+    "id": "bronze_twins",
+    "project": "db883bb0-4251-a13c-ad30-6f51bc64c8f8",
+    "cubes": 43,
+    "removed": [
+      {
+        "cube": "845f078d-208d-f400-7ee9-4c996a4429d8",
+        "name": "主刃_缠柄",
+        "face": "up",
+        "inside": "27b9e8bb-bf9e-dccc-e97a-8023dac6cbf1"
+      },
+      {
+        "cube": "845f078d-208d-f400-7ee9-4c996a4429d8",
+        "name": "主刃_缠柄",
+        "face": "down",
+        "inside": "6ddcf80c-bfad-76a7-6ae3-5d752782bf1c"
+      },
+      {
+        "cube": "4449d2ea-e93c-3f4f-3b6a-4705cda7c754",
+        "name": "护手兽鼻",
+        "face": "south",
+        "inside": "038b755b-f6e9-a5da-8409-81c270bdcb02"
+      },
+      {
+        "cube": "fdd37052-ab1c-0768-c524-c16d4ab85bcc",
+        "name": "主刃_铆钉",
+        "face": "south",
+        "inside": "eab7042e-3f5b-3611-45cf-b8e5c62a680e"
+      },
+      {
+        "cube": "1f14dd0a-0d05-e80f-1fd7-5aa2147f0842",
+        "name": "主刃_铆钉",
+        "face": "north",
+        "inside": "d89aa90e-4866-8994-d633-5602ce4f6688"
+      },
+      {
+        "cube": "09187d45-f2e9-145f-40f0-b68a4d35b2d5",
+        "name": "副刃_缠柄",
+        "face": "up",
+        "inside": "b8f872b5-8b00-770e-1cc8-2c2ee901786c"
+      },
+      {
+        "cube": "09187d45-f2e9-145f-40f0-b68a4d35b2d5",
+        "name": "副刃_缠柄",
+        "face": "down",
+        "inside": "b1717650-4a91-8554-7559-c44574f23b59"
+      },
+      {
+        "cube": "e83400bd-9cc6-1e78-2db3-3040c7390e67",
+        "name": "护手兽鼻",
+        "face": "south",
+        "inside": "919e7821-6c88-ca05-a9e4-0e7c5ec4e615"
+      },
+      {
+        "cube": "c9d836b5-87ac-a214-06f0-448dce10b2af",
+        "name": "副刃_刀根",
+        "face": "down",
+        "inside": "fadfadfb-a2a2-2a4d-a6bf-c1c09c4b7c5c"
+      },
+      {
+        "cube": "1d874835-e6ad-ab04-55b3-5f9b0629ce3f",
+        "name": "副刃_下开锋",
+        "face": "down",
+        "inside": "fadfadfb-a2a2-2a4d-a6bf-c1c09c4b7c5c"
+      },
+      {
+        "cube": "13de644d-3ae8-5e1a-2ec5-ba44c397d691",
+        "name": "副刃_上开锋",
+        "face": "east",
+        "inside": "523cc694-bf30-5dd3-895b-d9df1e3dbb41"
+      },
+      {
+        "cube": "c3ab8a91-cbb3-7279-afd8-8c48214cbab0",
+        "name": "副刃_铆钉",
+        "face": "south",
+        "inside": "a97cb9dd-ffcf-f8ea-6de6-2d74b7e5b350"
+      },
+      {
+        "cube": "e8e4f172-5c8f-ec16-7756-8227a2314f7b",
+        "name": "副刃_铆钉",
+        "face": "north",
+        "inside": "ad5591d7-c904-4560-8fab-ebd70e3b0935"
+      }
+    ]
+  },
+  {
+    "id": "bronze_puppet",
+    "project": "58902593-b1bf-04ae-3543-31ad593ce6b2",
+    "cubes": 83,
+    "removed": []
+  }
+]

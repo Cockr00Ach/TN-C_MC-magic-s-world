@@ -26,6 +26,8 @@ public final class TNWaterSpellEntity extends Entity {
     private static final EntityDataAccessor<Boolean> BLOCKED=SynchedEntityData.defineId(TNWaterSpellEntity.class,EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> FIRED_AT=SynchedEntityData.defineId(TNWaterSpellEntity.class,EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> BOSS_CAST=SynchedEntityData.defineId(TNWaterSpellEntity.class,EntityDataSerializers.BOOLEAN);
+    private static final net.minecraft.network.syncher.EntityDataAccessor<java.util.Optional<UUID>> VIEW_OWNER=net.minecraft.network.syncher.SynchedEntityData.defineId(TNWaterSpellEntity.class,net.minecraft.network.syncher.EntityDataSerializers.OPTIONAL_UUID);
+    public UUID visualOwner(){return entityData.get(VIEW_OWNER).orElse(null);}
     private UUID owner;
     private TNWaterFieldEntity prison;
     private Vec3 barrageAim;
@@ -39,6 +41,17 @@ public final class TNWaterSpellEntity extends Entity {
         int tier=WaterSpellRules.tier(spell.getPath()); if(tier==0)return;
         if(tier<=2) { bolt(player, tier,player.getEyePosition().add(player.getLookAngle().scale(.5)),player.getLookAngle().scale(tier==1?1.5:2));
             WaterFx.muzzle(player.serverLevel(),player.getEyePosition().add(player.getLookAngle().scale(.5)),player.getLookAngle(),tier);return; }
+        // ★★ 2026-11-09 作者重做 t4/t5：「直接射一个太单调了」——
+        //   t4 龙啸 / t5 龙滅 不再当场放一根持续光柱 ✗，改成先挂一组**环绕法阵** ✓
+        //   （两个小阵绕着玩家转 20 秒 ✓），玩家打中敌人时那一圈法阵亮起来、
+        //   全部亮完再**一起**射出水波 ✓；t5 最后还要汇聚成一道巨大水波 ✓。
+        //   时间线在 WaterGateRules、状态机在 TNWaterGateEntity、画面在 TNWaterGateRenderer ✓。
+        if(tier>=4) {
+            TNWaterGateEntity.cast(player, tier);
+            WaterFx.aperture(player.serverLevel(), player.position().add(0, 1.15, 0),
+                    player.getLookAngle(), com.tnc.tnc.magic.water.WaterGateRules.sealRadius(tier));
+            return;
+        }
         // One active large cast per player; repeated release cannot multiply drilling work.
         for(var old:player.serverLevel().getEntitiesOfClass(TNWaterSpellEntity.class,player.getBoundingBox().inflate(128)))
             if(player.getUUID().equals(old.owner))old.discard();
@@ -114,6 +127,11 @@ public final class TNWaterSpellEntity extends Entity {
         var bolt=TNOrbEntities.WATER_BOLT.get().create(player.level());
         if(bolt!=null) { bolt.configure(player,tier,at,velocity);bolt.setSpellScale(scale);player.level().addFreshEntity(bolt); }
     }
+    @Override public void remove(RemovalReason reason){
+        if(level() instanceof ServerLevel server)WaterRestraints.release(server,getUUID());
+        if(!level().isClientSide && prison!=null) {prison.discard();prison=null;}
+        super.remove(reason);
+    }
     public float spellScale(){return entityData.get(BOSS_CAST) && tier()==3 ? 3F : 1F;}
     public double circleRadius(){return WaterSpellRules.circleRadius(tier())*spellScale();}
     public int duration(){return entityData.get(BOSS_CAST) && tier()==5 ? 200 : WaterSpellRules.duration(tier());}
@@ -123,8 +141,9 @@ public final class TNWaterSpellEntity extends Entity {
     public float length(){return entityData.get(LENGTH);}
     public boolean blocked(){return entityData.get(BLOCKED);}
     public Vec3 direction(){return Vec3.directionFromRotation(entityData.get(PITCH),entityData.get(YAW));}
-    @Override protected void defineSynchedData(){entityData.define(BOSS_CAST,false);entityData.define(FIRED_AT,-1);entityData.define(TIER,3);entityData.define(AGE,0);entityData.define(LENGTH,0F);entityData.define(YAW,0F);entityData.define(PITCH,0F);entityData.define(BLOCKED,false);}
+    @Override protected void defineSynchedData(){entityData.define(VIEW_OWNER,java.util.Optional.empty());entityData.define(BOSS_CAST,false);entityData.define(FIRED_AT,-1);entityData.define(TIER,3);entityData.define(AGE,0);entityData.define(LENGTH,0F);entityData.define(YAW,0F);entityData.define(PITCH,0F);entityData.define(BLOCKED,false);}
     @Override public void tick() {
+        if(!level().isClientSide)entityData.set(VIEW_OWNER,java.util.Optional.ofNullable(owner));
         super.tick(); if(level().isClientSide)return;
         ServerLevel level=(ServerLevel)level();
         LivingEntity player=WaterSpellOwners.resolve(level,owner);
@@ -156,6 +175,10 @@ public final class TNWaterSpellEntity extends Entity {
         }
         int active=tickCount-fireTick;
         if(active>=duration()) { discard();return; }
+        // ★ 2026-11-10 作者："把 t3 改回不是蓝金水渊兽的版本"⇒
+        //   t3「龙王吼」回到**阵口连续喷水炮弹**那一版 ✓（每 4 tick 三发、共 10 秒 ✓）：
+        //   没有水渊兽虚影、没有咬住升空、没有巨剑砸地 ✗（那套东西已经整块删掉了 ✓）。
+        //   玩家和 Boss（BOSS_CAST）现在走的是同一段 ✓ —— Boss 那版本来就是这一套 ✓。
         if(tier()==3) {
             if(active%4==0) {
                 Vec3 right=WaterSpellRules.right(dir),up=right.cross(dir).normalize();
@@ -171,6 +194,7 @@ public final class TNWaterSpellEntity extends Entity {
             }
             return;
         }
+
         double len;
         if(tier()==5 && terrainCaster!=null) {
             if(bore==null)bore=new WaterTerrainBore(position(),dir,WaterSpellRules.radius(tier()),WaterSpellRules.range(tier()));
@@ -238,10 +262,6 @@ public final class TNWaterSpellEntity extends Entity {
             }
         }
         return length;
-    }
-    @Override public void remove(RemovalReason reason) {
-        if(!level().isClientSide && prison!=null) {prison.discard();prison=null;}
-        super.remove(reason);
     }
     @Override public boolean shouldBeSaved(){return false;}
     @Override protected void readAdditionalSaveData(CompoundTag tag){discard();}

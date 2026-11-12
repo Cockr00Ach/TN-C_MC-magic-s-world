@@ -102,8 +102,8 @@ public final class InkCelestialDragonRenderer extends EntityRenderer<InkCelestia
                 var group=batch.group();pose.pushPose();
                 if(HEAD_GROUPS.contains(group.name())){
                     pose.translate(-4,5,0);
-                    if(entity.inkMove()==0)pose.mulPose(Axis.YP.rotationDegrees(-Mth.clamp(Mth.wrapDegrees(entity.yHeadRot-entity.getYRot()),-85,85)));
-                    if(entity.inkMove()!=5)pose.mulPose(Axis.ZP.rotationDegrees(entity.breathPitch()));pose.translate(4,-5,0);
+                    if(entity.inkMove()==0)pose.mulPose(Axis.YP.rotationDegrees(-Mth.clamp(Mth.wrapDegrees(Mth.rotLerp(partial,entity.yHeadRotO,entity.yHeadRot)-yaw),-85,85)));
+                    if(entity.inkMove()!=5)pose.mulPose(Axis.ZP.rotationDegrees(entity.inkMove()==0?Mth.lerp(partial,entity.xRotO,entity.getXRot()):entity.breathPitch()));pose.translate(4,-5,0);
                 }
                 if(group.name().equals("jaw")||group.name().equals("beard")){
                     pose.translate(-5.7,4.15,0);pose.mulPose(Axis.ZP.rotationDegrees(-7+55*entity.jawOpen(partial)));pose.translate(5.7,-4.15,0);

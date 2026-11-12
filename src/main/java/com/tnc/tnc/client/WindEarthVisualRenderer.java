@@ -23,6 +23,7 @@ public final class WindEarthVisualRenderer extends EntityRenderer<WindEarthVisua
         float envelope=WindEarthVisualRules.envelope(age,entity.life());
         if(envelope<=.005)return;
         Entity owner=entity.level().getEntity(entity.ownerId());
+        if(entity.followsOwner()&&entity.kind()==0&&FirstPersonSpellView.own(owner))return;
         Vec3 centre=entity.followsOwner()&&owner!=null?owner.getPosition(partial):entity.position();
         poses.pushPose();
         Vec3 offset=centre.subtract(entity.getPosition(partial));poses.translate(offset.x,offset.y,offset.z);

@@ -36,6 +36,7 @@ public final class WarriorComboAnimations {
 
     /** 动作名 → 动画枚举。名字就是 Blockbench 里的动画名，改名字要同步改这里。 */
     private static final Map<String, WarriorAnimation> BY_CLIP = Map.ofEntries(
+            Map.entry("ULTIMATE", WarriorAnimation.ULTIMATE),
             Map.entry("长剑QZE", WarriorAnimation.SWORD_BREAKER),
             Map.entry("长剑QEQZZZ", WarriorAnimation.SWORD_SPIN),
             Map.entry("长剑QE长Z", WarriorAnimation.SWORD_STANCE),
@@ -90,6 +91,8 @@ public final class WarriorComboAnimations {
              "/assets/tnc/animations/entity/hammer_combo.json"},
             {"/assets/tnc/animations/entity/战士连招/长弓连招.json",
              "/assets/tnc/animations/entity/bow_combo.json"},
+            {"/assets/tnc/animations/entity/warrior_ultimates.json"},
+            {"/assets/tnc/animations/entity/warrior_signatures.json"},
             {"/assets/tnc/animations/entity/warrior_performance.json"},
             {"/assets/tnc/animations/entity/traditional_martial_arts.json"}};
 
@@ -216,7 +219,9 @@ public final class WarriorComboAnimations {
     }
 
     public static Clip clip(WarriorAnimation animation,String weaponId) {
-        String key=com.tnc.tnc.warrior.WarriorMartialArts.clipKey(animation,weaponId);
+        Clip signature=all().get(weaponId.replace("tnc:","")+"_signature_"+animation);
+        if(signature!=null)return signature;
+        String key=animation==WarriorAnimation.ULTIMATE ? com.tnc.tnc.warrior.WarriorUltimates.forId(weaponId).id()+"_ultimate" : com.tnc.tnc.warrior.WarriorMartialArts.clipKey(animation,weaponId);
         Clip variant=key==null?null:all().get(key);
         return variant==null?clip(animation):variant;
     }

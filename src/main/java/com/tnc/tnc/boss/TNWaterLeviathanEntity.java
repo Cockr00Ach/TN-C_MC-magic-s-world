@@ -68,6 +68,29 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
             SynchedEntityData.defineId(TNWaterLeviathanEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Float> CAST_PITCH =
             SynchedEntityData.defineId(TNWaterLeviathanEntity.class, EntityDataSerializers.FLOAT);
+    /**
+     * 升空到天阵之后“化作发光虚影再消失”的进度（0 = 实体本体，{@link #GHOST_TICKS} = 完全不可见）。
+     *
+     * <p>作者 2026-11-07：「他要飞到很高的天空再消失……这个 boss 的虚影也可以发着光」——
+     * 本体是真的飞上去的（碰撞、站位、测试都不变），只是到站后由客户端把同一副模型改画成
+     * 自发光半透明残影并淡出；回程落地前再反向淡入，所以服务端只同步这一个 0..30 的计数。
+     */
+    private static final EntityDataAccessor<Integer> CAST_GHOST =
+            SynchedEntityData.defineId(TNWaterLeviathanEntity.class, EntityDataSerializers.INT);
+    /** 到站后 40 tick（2 s）淡成虚影并消失，正好在 APPEAR_TICK=100 的巨剑出现前收干净。 */
+    public static final int GHOST_TICKS = 40;
+    /** 起飞前先让脚下法阵亮 10 tick（0.5 s），再真的离地。 */
+    private static final int ASCENT_DELAY = 10;
+
+    // Client-visible anticipation state. The server owns the windup; the client only renders it.
+    private static final EntityDataAccessor<Integer> CAST_REMAIN =
+            SynchedEntityData.defineId(TNWaterLeviathanEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> CAST_TOTAL =
+            SynchedEntityData.defineId(TNWaterLeviathanEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> CAST_VISUAL_TIER =
+            SynchedEntityData.defineId(TNWaterLeviathanEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> CAST_VISUAL_FAMILY =
+            SynchedEntityData.defineId(TNWaterLeviathanEntity.class, EntityDataSerializers.INT);
     public static final double MOUTH_FORWARD = 109.0D/16.0D*SIZE_SCALE;
     public static final double MOUTH_HEIGHT = 1.35D*SIZE_SCALE;
     public static final double APERTURE_GAP = 0.85D*SIZE_SCALE;
@@ -81,8 +104,14 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
     private int returnTicks;
     private int basicMouthTicks;
     private Vec3 ritualVelocity=Vec3.ZERO;
+    /** 升空曲线：起点（起飞位置）→ 控制点（前出并微微抬高）→ 天阵站点。 */
+    private Vec3 ascentStart, ascentControl, ascentEnd;
+    private float ascentT, ascentStep;
+    private int ascentDelay;
     private boolean returningFromSky;
     private Vec3 returnPosition;
+    /** 回程起始距离，用来把“虚影→实体”的淡入铺满整段下落。 */
+    private double returnStartDistance;
     private float castTilt, previousCastTilt;
     private float flightPitch, previousFlightPitch, flightBank, previousFlightBank;
 
@@ -133,11 +162,13 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
         super.tick();
         this.fallDistance = 0.0F;
         if (this.level() instanceof ServerLevel server) {
+            if (!this.isAlive() && this.castRemainingTicks()!=0) this.clearVisualWindup();
             if (basicMouthTicks>0 && --basicMouthTicks==0 && castPose()==4) entityData.set(CAST_POSE,0);
             tickChannel(server);
         }
         previousCastTilt = castTilt;
-        castTilt += net.minecraft.util.Mth.clamp((castPose()==2 || castPose()==3 ? 1F : 0F)-castTilt,-0.20F,0.20F);
+        // 升空段（pose 2）的俯仰由曲线切线给，不再固定“低头 90°”；只有到站低头吐剑才用 castTilt。
+        castTilt += net.minecraft.util.Mth.clamp((castPose()==3 ? 1F : 0F)-castTilt,-0.20F,0.20F);
         previousFlightPitch=flightPitch;previousFlightBank=flightBank;
         Vec3 drift=position().subtract(xo,yo,zo);
         float lean=drift.lengthSqr()<0.0001 ? 0 : net.minecraft.util.Mth.clamp(
@@ -177,10 +208,21 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
         this.entityData.define(DATA_PHASE, PHASE_ONE);
         this.entityData.define(CAST_POSE, 0);
         this.entityData.define(CAST_PITCH, 0F);
+        this.entityData.define(CAST_GHOST, 0);
+        this.entityData.define(CAST_REMAIN, 0);
+        this.entityData.define(CAST_TOTAL, 0);
+        this.entityData.define(CAST_VISUAL_TIER, 0);
+        this.entityData.define(CAST_VISUAL_FAMILY, 0);
     }
 
     public java.util.UUID channelId() { return channel; }
     public int castPose() { return entityData.get(CAST_POSE); }
+    /** Windup ticks left; 0 means no anticipation is playing. */
+    public int castRemainingTicks() { return entityData.get(CAST_REMAIN); }
+    public int castTotalTicks() { return entityData.get(CAST_TOTAL); }
+    /** 1 = water orb, 2 = water bind; 0 = no anticipation. */
+    public int castVisualFamily() { return entityData.get(CAST_VISUAL_FAMILY); }
+    public int castVisualTier() { return entityData.get(CAST_VISUAL_TIER); }
     public boolean mouthOpen() { return castPose()==1 || castPose()==3 || castPose()==4; }
     public float castTilt(float partial) {
         float t=net.minecraft.util.Mth.lerp(partial,previousCastTilt,castTilt);
@@ -188,10 +230,16 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
     }
 
     public boolean isReturningFromSky() { return returningFromSky; }
+    /** 0 = 实体本体；>0 = 已经化虚影（30 = 完全消失）。 */
+    public int ghostAge() { return entityData.get(CAST_GHOST); }
+    public boolean ghosting() { return ghostAge()>0; }
+    /** 1 = 清楚可见，0 = 完全消失。 */
+    public float ghostAlpha() { return 1F-net.minecraft.util.Mth.clamp(ghostAge()/(float)GHOST_TICKS,0F,1F); }
     public float flightPitch(float partial){return net.minecraft.util.Mth.lerp(partial,previousFlightPitch,flightPitch);}
     public float flightBank(float partial){return net.minecraft.util.Mth.lerp(partial,previousFlightBank,flightBank);}
     public float castingPitch(float partial) {
-        return castPose()==1 || castPose()==4 ? entityData.get(CAST_PITCH) : 90F*castTilt(partial);
+        // pose 2 = 沿曲线升空：俯仰跟着路径切线（向上爬升就是抬头），pose 3 = 到站低头吐剑。
+        return castPose()==1 || castPose()==4 || castPose()==2 ? entityData.get(CAST_PITCH) : 90F*castTilt(partial);
     }
     public Vec3 mouthPosition(float yaw,float pitch) {
         return position().add(Vec3.directionFromRotation(pitch,yaw).scale(MOUTH_FORWARD))
@@ -216,13 +264,82 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
     public void beginChannel(net.minecraft.world.entity.Entity spell, net.minecraft.world.entity.LivingEntity target,
                              Vec3 station, float yaw) {
         channel=spell.getUUID(); channelEntity=spell; channelTarget=target.getUUID(); channelPosition=station;
-        channelYaw=yaw;basicMouthTicks=0;ritualVelocity=Vec3.ZERO;
+        channelYaw=yaw;basicMouthTicks=0;ritualVelocity=Vec3.ZERO;entityData.set(CAST_GHOST,0);returnStartDistance=0D;
         if (spell instanceof com.tnc.tnc.magic.water.TNWaterFieldEntity) returnPosition=position();
         returningFromSky=false;
         entityData.set(CAST_PITCH,spell instanceof com.tnc.tnc.magic.water.TNWaterSpellEntity beam
                 ? (float)-Math.toDegrees(Math.asin(beam.direction().y)) : 0F);
         entityData.set(CAST_POSE,spell instanceof com.tnc.tnc.magic.water.TNWaterFieldEntity ? 2 : 1);
+        if (spell instanceof com.tnc.tnc.magic.water.TNWaterFieldEntity) beginAscent(station,yaw);
         navigation.stop(); setDeltaMovement(Vec3.ZERO);
+    }
+
+    /**
+     * 起飞航线（作者手绘 2026-11-07）：先贴着水面往前冲出去，再拐一个弯几乎垂直地窜上天空，
+     * 而不是从原地直线平移上去。用二次贝塞尔，控制点放在正前方偏上，于是
+     * 起点切线≈水平前冲、终点切线≈竖直向上，正好是画里那条“先平飞后拔高”的曲线。
+     */
+    private void beginAscent(Vec3 station,float yaw) {
+        ascentStart=position(); ascentEnd=station;
+        Vec3 toStation=station.subtract(ascentStart);
+        Vec3 flat=new Vec3(toStation.x,0,toStation.z);
+        double flatLength=flat.length();
+        Vec3 dir=flatLength>1.0E-3D ? flat.normalize() : Vec3.directionFromRotation(0,yaw);
+        double out=net.minecraft.util.Mth.clamp(flatLength*.45D,9D,26D);
+        // 控制点只抬高一点点：起点切线接近水平（先贴着水面冲出去），终点切线才接近竖直（再拔高）。
+        double rise=net.minecraft.util.Mth.clamp(Math.abs(toStation.y)*.025D,1.5D,6D);
+        ascentControl=ascentStart.add(dir.scale(out)).add(0,rise,0);
+        double length=ascentStart.distanceTo(ascentControl)+ascentControl.distanceTo(ascentEnd);
+        // 34→40 tick 爬完 100+ 格：比旧版直线插值更快，且到站时间早于 APPEAR_TICK=100。
+        ascentStep=(float)(1D/net.minecraft.util.Mth.clamp(length/3.4D,26D,40D));
+        ascentT=0F; ascentDelay=ASCENT_DELAY;
+        Vec3 tangent=ascentTangent(0F);
+        if (tangent.lengthSqr()>1.0E-6D) {
+            float pitch=pitchFor(tangent), yawToPath=yawFor(tangent);
+            entityData.set(CAST_PITCH,pitch);
+            // 起飞前一拍就把头抬到航向上：法阵亮着的那 10 tick 里它已经在“瞄准天空”，不是平移。
+            setXRot(pitch); setYRot(yawToPath); setYHeadRot(yawToPath); setYBodyRot(yawToPath);
+        }
+    }
+
+    private Vec3 ascentPoint(float t) {
+        float u=1F-t;
+        return ascentStart.scale(u*u).add(ascentControl.scale(2F*u*t)).add(ascentEnd.scale(t*t));
+    }
+
+    private Vec3 ascentTangent(float t) {
+        return ascentControl.subtract(ascentStart).scale(2F*(1F-t))
+                .add(ascentEnd.subtract(ascentControl).scale(2F*t));
+    }
+
+    /** 正数 = 低头（MC 的 xRot 约定），爬升时切线的 y 为正 ⇒ 得到负俯仰 = 抬头。 */
+    private static float pitchFor(Vec3 tangent) {
+        Vec3 n=tangent.normalize();
+        return (float)-Math.toDegrees(Math.asin(net.minecraft.util.Mth.clamp(n.y,-1D,1D)));
+    }
+
+    private static float yawFor(Vec3 tangent) {
+        return (float)Math.toDegrees(Math.atan2(-tangent.x,tangent.z));
+    }
+
+    /** 沿曲线推进并让头/身体对齐切线方向；返回 true 表示已到站。 */
+    private boolean climbAscent() {
+        if (ascentEnd==null) return false;
+        if (ascentDelay>0) { ascentDelay--; return false; }
+        ascentT=Math.min(1F,ascentT+ascentStep);
+        Vec3 tangent=ascentTangent(ascentT);
+        if (tangent.lengthSqr()>1.0E-6D) {
+            float yaw=yawFor(tangent);
+            setYRot(yaw);setYHeadRot(yaw);setYBodyRot(yaw);
+            float pitch=pitchFor(tangent);
+            setXRot(pitch);
+            entityData.set(CAST_PITCH,pitch);
+        }
+        Vec3 want=ascentPoint(ascentT);
+        Vec3 delta=want.subtract(position());
+        // 仍然走 move(...)：巨兽的碰撞体照旧参与，只换目的地。
+        if (delta.lengthSqr()>1.0E-6D) move(MoverType.SELF,delta);
+        return ascentT>=1F || position().distanceToSqr(ascentEnd)<0.36D;
     }
 
     private void tickChannel(ServerLevel server) {
@@ -238,23 +355,31 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
             returningFromSky=isAlive() && (castPose()==2 || castPose()==3);
             channel=null; channelEntity=null; channelPosition=null; entityData.set(CAST_POSE,0);
             setXRot(0F);
-            returnTarget=channelTarget; returnTicks=600;
+            returnTarget=channelTarget; returnTicks=600; returnStartDistance=0D;
             attackCooldown=LeviathanSpellRules.recovery(isPhaseTwo());
             return;
         }
         navigation.stop(); setDeltaMovement(Vec3.ZERO);
-        setYRot(channelYaw); setYHeadRot(channelYaw); setYBodyRot(channelYaw);
         if (castPose()==2) {
-            Vec3 delta=channelPosition.subtract(position());
-            double distance=delta.length();
-            if (distance<0.25D) {
-                setPos(channelPosition);ritualVelocity=Vec3.ZERO;entityData.set(CAST_POSE,3);
-            } else {
-                // Arrive before the sword appears, even from sea level. Collision remains physical.
-                moveRitualToward(channelPosition);
+            if (climbAscent()) {
+                // 到站那一刻的俯仰直接接到 castTilt 上：模型从“仰头爬升”平滑翻成“低头吐剑”，不会瞬移。
+                float endPitch=ascentEnd==null ? 0F : pitchFor(ascentTangent(1F));
+                castTilt=net.minecraft.util.Mth.clamp(endPitch/90F,-1F,1F);
+                previousCastTilt=castTilt;
+                setPos(channelPosition);ritualVelocity=Vec3.ZERO;
+                setYRot(channelYaw); setYHeadRot(channelYaw); setYBodyRot(channelYaw);
+                setXRot(90F); entityData.set(CAST_PITCH,90F);
+                entityData.set(CAST_POSE,3);
+                entityData.set(CAST_GHOST,1);
+                ascentEnd=null;
             }
-        } else setPos(channelPosition);
-        setXRot(castPose()==2 || castPose()==3 ? 90F : spell instanceof com.tnc.tnc.magic.water.TNWaterSpellEntity beam
+            return;
+        }
+        setYRot(channelYaw); setYHeadRot(channelYaw); setYBodyRot(channelYaw);
+        setPos(channelPosition);
+        if (castPose()==3 && ghostAge()>0 && ghostAge()<GHOST_TICKS)
+            entityData.set(CAST_GHOST,Math.min(GHOST_TICKS,ghostAge()+1));
+        setXRot(castPose()==3 ? 90F : spell instanceof com.tnc.tnc.magic.water.TNWaterSpellEntity beam
                 ? (float)-Math.toDegrees(Math.asin(beam.direction().y)) : 0F);
     }
 
@@ -276,8 +401,17 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
         }
         navigation.stop(); setDeltaMovement(Vec3.ZERO); setXRot(0F);
         Vec3 delta=destination.subtract(position());
+        // 回程按“剩余路程比例”反向淡入：从 116 格高空下来只用 20 多 tick，
+        // 若只在最后 30 格才淡，落地那一刻还是全透明 ⇒ 会“啪”地凭空出现。
+        if (returnStartDistance<=0D) returnStartDistance=Math.max(1D,delta.length());
+        if (ghostAge()>0) {
+            double left=Math.min(1D,delta.length()/returnStartDistance);
+            entityData.set(CAST_GHOST,(int)Math.round(GHOST_TICKS*left));
+        }
         if (delta.lengthSqr()<6.25D) {
+            entityData.set(CAST_GHOST,0);
             returningFromSky=false; returnPosition=null;ritualVelocity=Vec3.ZERO;attackCooldown=10;
+            returnStartDistance=0D;
             return;
         }
         // Follow the victim's current location rather than the old stationary crypt field.
@@ -328,6 +462,9 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
             this.setCustomName(Component.translatable("entity.tnc.water_leviathan"));
         channel=null; channelEntity=null; channelPosition=null; entityData.set(CAST_POSE,0);
         returningFromSky=tag.getBoolean("LeviathanSkyReturn");
+        // 存档恢复时若正从天上回来，别让巨兽突然出现在 116 格高空，继续保持虚影直到落地淡入。
+        entityData.set(CAST_GHOST,returningFromSky ? GHOST_TICKS : 0);
+        returnStartDistance=0D;
         returnPosition=returningFromSky ? new Vec3(tag.getDouble("LeviathanReturnX"),
                 tag.getDouble("LeviathanReturnY"),tag.getDouble("LeviathanReturnZ")) : null;
         returnTarget=tag.hasUUID("LeviathanReturnTarget") ? tag.getUUID("LeviathanReturnTarget") : null;
@@ -468,6 +605,9 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
                 this.pendingAction = ACTION_NONE;
                 this.pendingSpell=null;
                 this.attackCooldown=LeviathanSpellRules.recovery(this.isPhaseTwo());
+                this.clearVisualWindup();
+            } else {
+                this.entityData.set(CAST_REMAIN,this.actionTicks);
             }
             return;
         }
@@ -478,6 +618,7 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
         this.pendingSpell=LeviathanSpellRules.next(this.basicCasts,this.specialCooldown,this.nextSpecial);
         this.pendingAction=ACTION_SPELL;
         this.actionTicks=LeviathanSpellRules.windup(this.pendingSpell,this.isPhaseTwo());
+        this.beginVisualWindup(this.pendingSpell,this.actionTicks);
         this.getLookControl().setLookAt(target, 30, 30);
         if (!LeviathanSpellRules.BASIC.equals(this.pendingSpell))
             this.triggerAnim(ACTION_CONTROLLER, "breath");
@@ -492,6 +633,28 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
         Vec3 muzzle=mouthPosition(getYRot(),0F);
         level.sendParticles(ParticleTypes.END_ROD,muzzle.x,muzzle.y,muzzle.z,
                 basic?8:28,1.1D*SIZE_SCALE,0.65D*SIZE_SCALE,1.1D*SIZE_SCALE,0.04D);
+    }
+
+    /**
+     * Publish the anticipation to the client. No new entity or packet: only four synched ints
+     * that the existing boss renderer already receives.
+     */
+    private void beginVisualWindup(String spell,int ticks) {
+        this.entityData.set(CAST_REMAIN,ticks);
+        this.entityData.set(CAST_TOTAL,ticks);
+        this.entityData.set(CAST_VISUAL_TIER,switch(spell) {
+            case "dragon_ruin","sea_god_crypt" -> 5;
+            case "dragon_roar" -> 3;
+            default -> 3;
+        });
+        this.entityData.set(CAST_VISUAL_FAMILY,"sea_god_crypt".equals(spell) ? 2 : 1);
+    }
+
+    private void clearVisualWindup() {
+        this.entityData.set(CAST_REMAIN,0);
+        this.entityData.set(CAST_TOTAL,0);
+        this.entityData.set(CAST_VISUAL_TIER,0);
+        this.entityData.set(CAST_VISUAL_FAMILY,0);
     }
 
     private boolean canStrike(net.minecraft.world.entity.LivingEntity victim) {

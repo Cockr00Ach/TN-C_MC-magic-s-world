@@ -1,0 +1,51 @@
+{
+  "path": "C:\\Users\\邵子豪\\Desktop\\mc建模\\武器\\青铜武器与人偶_精修_20261109\\可编辑模型\\04_青铜匕首_成品精度.bbmodel",
+  "profile": "java-legacy",
+  "kind": "bbmodel",
+  "structural_errors_absent": true,
+  "dependencies_complete": true,
+  "counts": {
+    "elements": 890,
+    "plane_elements": 0,
+    "inverted_elements": 0,
+    "rotated_elements": 0,
+    "declared_export_faces": 5043
+  },
+  "textures": {
+    "0": {
+      "size": [
+        512,
+        256
+      ],
+      "pixels": 131072,
+      "rgba_base_bytes": 524288,
+      "transparent_pixels": 0,
+      "partial_alpha_pixels": 0,
+      "frame_size": [
+        512,
+        256
+      ],
+      "frame_count": 1,
+      "animation_metadata_checked": false,
+      "uv_size": [
+        16,
+        16
+      ]
+    }
+  },
+  "texture_pixels": 131072,
+  "errors": [],
+  "warnings": [
+    {
+      "code": "editor_is_not_export",
+      "where": "model",
+      "detail": "Groups, animation, pivots, inflate and editor materials must be checked after Java export."
+    }
+  ],
+  "limitations": [
+    "No Minecraft client render or FPS measurement",
+    "No full schema validation or arbitrary overlap/hidden-face proof",
+    "No custom animation expansion, bone transform baking or outline pairing verification",
+    "Pack version, item definitions and display contexts require separate checks"
+  ]
+}

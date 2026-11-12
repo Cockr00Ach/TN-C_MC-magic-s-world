@@ -1,0 +1,58 @@
+[
+  {
+    "id": "bronze_greatsword",
+    "cubes": 22,
+    "preview_cube_meshes": 22,
+    "unique_preview_materials": 1,
+    "preview_draw_calls": "unmeasured",
+    "minecraft_fps": "unmeasured"
+  },
+  {
+    "id": "bronze_spear",
+    "cubes": 14,
+    "preview_cube_meshes": 14,
+    "unique_preview_materials": 1,
+    "preview_draw_calls": "unmeasured",
+    "minecraft_fps": "unmeasured"
+  },
+  {
+    "id": "bronze_dao",
+    "cubes": 20,
+    "preview_cube_meshes": 20,
+    "unique_preview_materials": 1,
+    "preview_draw_calls": "unmeasured",
+    "minecraft_fps": "unmeasured"
+  },
+  {
+    "id": "bronze_dagger",
+    "cubes": 16,
+    "preview_cube_meshes": 16,
+    "unique_preview_materials": 1,
+    "preview_draw_calls": "unmeasured",
+    "minecraft_fps": "unmeasured"
+  },
+  {
+    "id": "bronze_twins",
+    "cubes": 43,
+    "preview_cube_meshes": 43,
+    "unique_preview_materials": 1,
+    "preview_draw_calls": "unmeasured",
+    "minecraft_fps": "unmeasured"
+  },
+  {
+    "id": "bronze_puppet",
+    "cubes": 83,
+    "preview_cube_meshes": 83,
+    "unique_preview_materials": 1,
+    "preview_draw_calls": "unmeasured",
+    "minecraft_fps": "unmeasured"
+  },
+  {
+    "id": "bronze_puppet_equipped",
+    "cubes": 126,
+    "preview_cube_meshes": 126,
+    "unique_preview_materials": 1,
+    "preview_draw_calls": "unmeasured",
+    "minecraft_fps": "unmeasured"
+  }
+]

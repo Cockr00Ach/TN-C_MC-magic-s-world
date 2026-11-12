@@ -15,6 +15,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class BronzeHeldItemMixin {
     @Inject(method={"renderArmWithItem","m_117184_"},at=@At("HEAD"),remap=false,cancellable=true,require=1)
     private void bronzeHideThrown(LivingEntity entity,ItemStack stack,ItemDisplayContext context,HumanoidArm arm,PoseStack pose,MultiBufferSource buffers,int light,CallbackInfo ci){
-        if(stack.getItem() instanceof BronzeWeaponItem&&BronzeWeaponItem.inFlight(stack,entity.level()))ci.cancel();
+        if(stack.getItem() instanceof BronzeWeaponItem&&BronzeWeaponItem.inFlight(stack,entity.level())){ci.cancel();return;}
+        if(BronzeTwinWeapon.isPair(stack))com.tnc.tnc.bronze.client.BronzeTwinRenderer.beginHeld(entity,stack,arm);
+    }
+    @Inject(method={"renderArmWithItem","m_117184_"},at=@At("RETURN"),remap=false,require=1)
+    private void bronzeFinishHeld(LivingEntity entity,ItemStack stack,ItemDisplayContext context,HumanoidArm arm,PoseStack pose,MultiBufferSource buffers,int light,CallbackInfo ci){
+        if(BronzeTwinWeapon.isPair(stack))com.tnc.tnc.bronze.client.BronzeTwinRenderer.endHeld();
     }
 }

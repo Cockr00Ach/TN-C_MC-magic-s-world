@@ -59,7 +59,7 @@
     }
   ],
   "cost": {
-    "exhaust": 0.3,
+    "exhaust": 0,
     "cooldown_duration": 9
   }
 }

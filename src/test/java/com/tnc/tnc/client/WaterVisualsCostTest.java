@@ -135,14 +135,16 @@ class WaterVisualsCostTest {
     }
 
     @Test void completeBeamBodyHasBoundedNearAndFarCost() {
+        // 相机放在光源侧面 64 格处（光带要正对镜头才对，见 WaterBeamVisuals ✓）
+        Vec3 camera = new Vec3(0, 0, -64);
         for(int tier:new int[]{4,5}) {
             int t=tier;
-            int near=cost(out -> WaterBeamVisuals.render(out,out,POSE,t,new Vec3(0,0,1),WaterSpellRules.range(t),120,.9F,true));
-            int far=cost(out -> WaterBeamVisuals.render(out,out,POSE,t,new Vec3(0,0,1),WaterSpellRules.range(t),120,.9F,false));
+            int near=cost(out -> WaterBeamVisuals.render(out,out,POSE,t,new Vec3(0,0,1),WaterSpellRules.range(t),120,.9F,true,camera));
+            int far=cost(out -> WaterBeamVisuals.render(out,out,POSE,t,new Vec3(0,0,1),WaterSpellRules.range(t),120,.9F,false,camera));
             System.out.println("TN-C complete beam tier="+t+" near="+near+" far="+far);
             assertTrue(near<=1800,"Beam shell, core, ribbons and caps share one budget");
             assertTrue(far<near,"Beam distance LOD reduces geometry");
-            assertEquals(0,cost(out -> WaterBeamVisuals.render(out,out,POSE,t,UP,0,120,.9F,true)));
+            assertEquals(0,cost(out -> WaterBeamVisuals.render(out,out,POSE,t,UP,0,120,.9F,true,camera)));
         }
     }
 

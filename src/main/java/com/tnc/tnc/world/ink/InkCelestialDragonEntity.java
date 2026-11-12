@@ -22,6 +22,8 @@ public final class InkCelestialDragonEntity extends PathfinderMob {
     private static final EntityDataAccessor<CompoundTag> EFFECT=SynchedEntityData.defineId(InkCelestialDragonEntity.class,EntityDataSerializers.COMPOUND_TAG);
     private static final EntityDataAccessor<Boolean> GROUNDED=SynchedEntityData.defineId(InkCelestialDragonEntity.class,EntityDataSerializers.BOOLEAN);
     private final ServerBossEvent bar=new ServerBossEvent(Component.translatable("entity.tnc.ink_celestial_dragon"),BossEvent.BossBarColor.WHITE,BossEvent.BossBarOverlay.NOTCHED_10);
+    private Vec3 cruiseVelocity=Vec3.ZERO;
+    private float cruiseTurn;
     private Vec3 home,flightGoal,attackHome,highOrb,landing;
     private LivingEntity victim;
     private int cooldown=100,nextMove=1;
@@ -109,8 +111,8 @@ public final class InkCelestialDragonEntity extends PathfinderMob {
             if(flightGoal!=null)flyToward(flightGoal,.25*SCALE);
             Vec3 head=position().add(InkDragonFlightRules.HEAD.scale(SCALE).yRot((float)Math.toRadians(90-getYRot()))).add(0,SCALE,0);
             Vec3 d=watched.getEyePosition().subtract(head);float desired=(float)Math.toDegrees(Math.atan2(-d.x,d.z));
-            yHeadRot=getYRot()+net.minecraft.util.Mth.clamp(net.minecraft.util.Mth.wrapDegrees(desired-getYRot()),-85,85);
-            setXRot((float)net.minecraft.util.Mth.clamp(Math.toDegrees(Math.atan2(-d.y,d.horizontalDistance())),-25,40));return;
+            yHeadRot=net.minecraft.util.Mth.rotLerp(.12F,yHeadRot,getYRot()+net.minecraft.util.Mth.clamp(net.minecraft.util.Mth.wrapDegrees(desired-getYRot()),-65,65));
+            setXRot(net.minecraft.util.Mth.lerp(.08F,getXRot(),(float)net.minecraft.util.Mth.clamp(Math.toDegrees(Math.atan2(-d.y,d.horizontalDistance())),-25,40)));return;
         }
         if(flightGoal==null||tickCount%100==0||position().distanceToSqr(flightGoal)<4){double a=tickCount*.004+getId(),x=home.x+Math.cos(a)*20,z=home.z+Math.sin(a)*20;int ground=ground(x,z);
             if(ground!=Integer.MIN_VALUE)flightGoal=new Vec3(x,Math.min(level().getMaxBuildHeight()-40,ground+InkDragonFlightRules.HOVER_CLEARANCE),z);}
@@ -119,11 +121,13 @@ public final class InkCelestialDragonEntity extends PathfinderMob {
     private int ground(double x,double z){int height=level().getMinBuildHeight();
         for(int dx:new int[]{-36,0,36})for(int dz:new int[]{-36,0,36}){BlockPos at=BlockPos.containing(x+dx,0,z+dz);if(!level().hasChunkAt(at))return Integer.MIN_VALUE;height=Math.max(height,level().getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,at.getX(),at.getZ()));}return height;}
     private void flyToward(Vec3 goal,double speed){
-        Vec3 d=goal.subtract(position());if(d.lengthSqr()<.001)return;Vec3 step=d.scale(Math.min(speed/d.length(),1)),next=position().add(step);
+        Vec3 d=goal.subtract(position());if(d.lengthSqr()<.001)return;Vec3 step=d.scale(Math.min(speed/d.length(),1));
+        if(inkMove()==0){cruiseVelocity=cruiseVelocity.lerp(step,.075);step=cruiseVelocity;}
+        Vec3 next=position().add(step);
         if(!level().hasChunkAt(BlockPos.containing(next)))return;
         float desired=(float)Math.toDegrees(Math.atan2(-d.x,d.z));float nextYaw=inkMove()==0?getYRot()+net.minecraft.util.Mth.clamp(net.minecraft.util.Mth.wrapDegrees(desired-getYRot()),-3,3):getYRot();
         AABB box=InkDragonFlightRules.bounds(next,getYRot()).minmax(InkDragonFlightRules.bounds(next,nextYaw));
-        if(!hasFlightRoom(box)){flightGoal=null;return;}setPos(next);if(inkMove()==0)face(next.add(step.scale(10)));
+        if(!hasFlightRoom(box)){flightGoal=null;cruiseVelocity=Vec3.ZERO;return;}setPos(next);if(inkMove()==0)face(next.add(step.scale(10)));
     }
     /** Fast air-chunk rejection: do not scan a giant empty volume every tick. Never requests missing chunks. */
     public boolean hasFlightRoom(AABB box){
@@ -140,7 +144,7 @@ public final class InkCelestialDragonEntity extends PathfinderMob {
             }
         return true;
     }
-    private void face(Vec3 point){Vec3 d=point.subtract(position());float desired=(float)Math.toDegrees(Math.atan2(-d.x,d.z));float turn=inkMove()==0?3:8;setYRot(getYRot()+net.minecraft.util.Mth.clamp(net.minecraft.util.Mth.wrapDegrees(desired-getYRot()),-turn,turn));yBodyRot=getYRot();yHeadRot=getYRot();}
+    private void face(Vec3 point){Vec3 d=point.subtract(position());float desired=(float)Math.toDegrees(Math.atan2(-d.x,d.z));float turn=inkMove()==0?3:8;float delta=net.minecraft.util.Mth.clamp(net.minecraft.util.Mth.wrapDegrees(desired-getYRot()),-turn,turn);if(inkMove()==0){cruiseTurn=net.minecraft.util.Mth.lerp(.16F,cruiseTurn,delta);delta=cruiseTurn;}setYRot(getYRot()+delta);yBodyRot=getYRot();if(inkMove()!=0)yHeadRot=getYRot();}
     public float breathPitch(){if(inkMove()==5)return InkDragonDrainRules.pitch(moveAge());if(inkMove()!=1)return inkMove()==0?getXRot():0;Vec3 origin=position().add(InkDragonFlightRules.HEAD.add(0,1,0).scale(SCALE).yRot((float)Math.toRadians(90-getYRot())));Vec3 d=effectVector("point").subtract(origin);return (float)net.minecraft.util.Mth.clamp(Math.toDegrees(Math.atan2(-d.y,Math.sqrt(d.x*d.x+d.z*d.z))),-25,65);}
     public Vec3 mouthPosition(){Vec3 d=InkDragonFlightRules.MOUTH.subtract(InkDragonFlightRules.HEAD);double a=Math.toRadians(breathPitch());Vec3 p=new Vec3(d.x*Math.cos(a)-d.y*Math.sin(a),d.x*Math.sin(a)+d.y*Math.cos(a),d.z).add(InkDragonFlightRules.HEAD);return position().add(p.scale(SCALE).yRot((float)Math.toRadians(90-getYRot()))).add(0,SCALE,0);}
     private void attackTick(){

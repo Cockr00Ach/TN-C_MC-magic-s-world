@@ -482,24 +482,50 @@ public final class WaterMagicGameTests {
         h.assertTrue(Math.abs(WaterSpellRules.RAIN_VOLUME_HALF*Math.sqrt(2)-1)<.02,"Rain volume corners land on the water surface rim");
         h.assertTrue(WaterSpellRules.RAIN_CURTAIN_RING>0&&WaterSpellRules.RAIN_CURTAIN_RING<1,"Curtain ring stays inside the field radius");h.succeed();
     }
-    @GameTest(template="water_test_large_empty",timeoutTicks=30)
-    public static void dragonLaunchClearsFlatGrassWithoutRemovingProtection(GameTestHelper h) {
+    @GameTest(template="water_test_large_empty",timeoutTicks=40)
+    public static void dragonRuinLeavesAnOrbitingGateInsteadOfAPersistentBeam(GameTestHelper h) {
+        // ★ 2026-11-09 作者重做水球链 t4/t5："直接射一个太单调了"✗
+        //   ⇒ 施法不再当场放一根持续钻掘的光柱 ✗，而是挂一组**环绕法阵**（20 秒 ✓），
+        //   玩家打中敌人时那一圈法阵亮起来、全部亮完再一起射出水波 ✓（见 WaterGateRules）。
+        //   这条闸门钉住三件事：① 施法只留一组阵 ② 没有残留的持续光柱 ③ t5 的阵是 5 档。
         var p=caster(h);p.setPos(Vec3.atCenterOf(h.absolutePos(new BlockPos(24,2,24))).subtract(0,.5,0));p.setYRot(0);p.setXRot(0);
-        for(int x=0;x<48;x++)for(int z=0;z<48;z++) {
-            h.getLevel().setBlockAndUpdate(h.absolutePos(new BlockPos(x,1,z)),Blocks.GRASS_BLOCK.defaultBlockState());
-            h.getLevel().setBlockAndUpdate(h.absolutePos(new BlockPos(x,2,z)),Blocks.GRASS.defaultBlockState());
-        }
         TNWaterSpellEntity.cast(p,net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tnc","dragon_ruin"));
-        // ⚠️ 搜索半径必须 ≥ 法阵半径 ✗：炮口按**法阵**(30 格)抬高到地面上方 ⇒ 它离玩家约 30 格 ✗，
-        // 用 20 格找会 IndexOutOfBounds ✗（2026-10-10 法阵加倍后踩到过一次 ✓）。
-        var cast=h.getLevel().getEntitiesOfClass(TNWaterSpellEntity.class,p.getBoundingBox().inflate(WaterSpellRules.circleRadius(5)+8)).get(0);
-        var bore=new WaterTerrainBore(cast.position(),cast.direction(),WaterSpellRules.radius(5),1);bore.tick(h.getLevel(),p);
-        Vec3 desired=p.getEyePosition().add(p.getLookAngle().scale(2)).add(0,WaterSpellRules.circleRadius(5)-p.getEyeHeight()+.8,0);
-        var obstruction=h.getLevel().clip(new net.minecraft.world.level.ClipContext(p.getEyePosition(),desired,net.minecraft.world.level.ClipContext.Block.COLLIDER,net.minecraft.world.level.ClipContext.Fluid.NONE,p));
-        // 2026-10-10：前端改成"保证速度射出"✗ ⇒ 光看 length()>0 已经证明不了炮口没埋在地里 ✗
-        //（埋着也会立刻射出去 ✗）—— 改成看"炮口那一层还有没有东西要挖" ✓，这才是这条测试的本意 ✓。
-        h.assertTrue(bore.length()>0&&bore.tick(h.getLevel(),p)==0&&!bore.stopped(),"Dragon muzzle must launch above its own ground footprint: "+cast.position()+" eye="+p.getEyePosition()+" dir="+cast.direction()+" look="+p.getLookAngle()+" obstruction="+obstruction+" block="+h.getLevel().getBlockState(obstruction.getBlockPos())+" stop="+bore.stopReason());
-        cast.discard();h.succeed();
+        var gates=h.getLevel().getEntitiesOfClass(TNWaterGateEntity.class,p.getBoundingBox().inflate(8));
+        h.assertTrue(gates.size()==1,"t5 cast must leave exactly one orbiting gate, got "+gates.size());
+        var gate=gates.get(0);
+        h.assertTrue(gate.tier()==5,"t5 gate carries tier 5");
+        h.assertTrue(gate.phase()==TNWaterGateEntity.IDLE,"gate starts idle (two small circles orbiting)");
+        h.assertTrue(h.getLevel().getEntitiesOfClass(TNWaterSpellEntity.class,
+                p.getBoundingBox().inflate(WaterSpellRules.circleRadius(5)+8)).isEmpty(),
+                "the old persistent beam must not be spawned anymore");
+        gate.discard();h.succeed();
+    }
+    @GameTest(template="water_test_large_empty",timeoutTicks=40)
+    public static void gateVolleySpawnsOneLancePerPortalOnlyAfterCharging(GameTestHelper h) {
+        // 作者："记得要先出现法阵，法阵全部出现完之后再一起发射水波"✗
+        // ⇒ 触发后第一 tick 只有阵在长、**一道水波都没有** ✓；等 openTicks 到齐才一次性全部射出 ✓。
+        var p=caster(h);p.setPos(Vec3.atCenterOf(h.absolutePos(new BlockPos(24,2,24))).subtract(0,.5,0));
+        Zombie victim=zombie(h,p.position().add(0,0,8));
+        var gate=TNWaterGateEntity.cast(p,4);
+        h.assertTrue(gate!=null,"gate spawns");
+        gate.tick();                       // 追一次位置（服务端每 tick 调 ✓）
+        TNWaterGateEntity.onOwnerDamaged(p,victim);
+        h.assertTrue(gate.phase()==TNWaterGateEntity.OPEN,"the hit opens the circles");
+        h.assertTrue(lances(h,p).isEmpty(),"no wave may fire before every circle is up");
+        // 一 tick 一 tick 推到"齐射那一刻"就停（水波只活 10 tick ✗，推过头就数不到了 ✗）
+        java.util.List<TNWaterLanceEntity> fired=java.util.List.of();
+        for(int i=0;i<WaterGateRules.openTicks(4)+8;i++) {
+            gate.tick();
+            fired=lances(h,p);
+            if(!fired.isEmpty())break;
+        }
+        h.assertTrue(fired.size()==WaterGateRules.portals(4),
+                "all circles fire together, expected "+WaterGateRules.portals(4)+", got "+fired.size());
+        for(var lance:fired)h.assertTrue(!lance.giant(),"normal volley waves are not the giant one");
+        gate.discard();victim.discard();h.succeed();
+    }
+    private static java.util.List<TNWaterLanceEntity> lances(GameTestHelper h,net.minecraft.world.entity.Entity at) {
+        return h.getLevel().getEntitiesOfClass(TNWaterLanceEntity.class,at.getBoundingBox().inflate(12));
     }
     @GameTest(template="building_test_empty",timeoutTicks=30)
     public static void slashThinSweepIncludesVerticalEdgesButNotFutureTargets(GameTestHelper h) {

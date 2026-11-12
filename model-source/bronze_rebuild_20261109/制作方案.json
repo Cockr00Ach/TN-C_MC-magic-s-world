@@ -1,0 +1,79 @@
+{
+  "target": "Forge 1.20.1 / native Java item + custom Humanoid cube data",
+  "work": "独立几何与材质重建；不是旧模型无损压缩",
+  "texture": {
+    "bitmap": [
+      512,
+      512
+    ],
+    "logical_uv": [
+      128,
+      128
+    ],
+    "density": 4,
+    "frames": 1
+  },
+  "budgets": {
+    "bronze_greatsword": 70,
+    "bronze_spear": 60,
+    "bronze_dao": 70,
+    "bronze_dagger": 45,
+    "bronze_twins": 130,
+    "bronze_puppet": 160
+  },
+  "models": [
+    {
+      "id": "bronze_greatsword",
+      "title": "01_青铜大剑",
+      "description": "阔身中空，夔龙护手",
+      "budget": 70,
+      "count": 22,
+      "format": "java_block"
+    },
+    {
+      "id": "bronze_spear",
+      "title": "02_青铜长枪",
+      "description": "长杆柳叶枪，铜箍收束",
+      "budget": 60,
+      "count": 14,
+      "format": "java_block"
+    },
+    {
+      "id": "bronze_dao",
+      "title": "03_青铜大刀",
+      "description": "厚背上挑，宽刃兽格",
+      "budget": 70,
+      "count": 20,
+      "format": "java_block"
+    },
+    {
+      "id": "bronze_dagger",
+      "title": "04_青铜匕首",
+      "description": "配重短刃，保留蓄力投掷用途",
+      "budget": 45,
+      "count": 16,
+      "format": "java_block"
+    },
+    {
+      "id": "bronze_twins",
+      "title": "05_青铜双刃",
+      "description": "一体双持：主手直刃与伴随弯月刃",
+      "budget": 130,
+      "count": 43,
+      "format": "java_block"
+    },
+    {
+      "id": "bronze_puppet",
+      "title": "06_青铜人偶",
+      "description": "怒目兽面，分层铠甲，沿用 Humanoid 六肢骨架",
+      "budget": 160,
+      "count": 83,
+      "format": "modded_entity"
+    }
+  ],
+  "runtime_limitations": [
+    "双刃原自定义渲染器忽略 element.rotation，新模型含合法旋转；不得直接覆盖安装，需同步渲染器适配",
+    "人偶使用原生 Humanoid 骨架；不是 GeckoLib 模型",
+    "本任务不启动 Minecraft，游戏视觉、动作和性能未测量"
+  ]
+}

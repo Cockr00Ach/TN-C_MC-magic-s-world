@@ -139,13 +139,15 @@ public final class TownRevisionGameTests {
         var chaos=ResourceLocation.parse("tnc:chaos_magic");var learned=new ArrayList<ResourceLocation>();water.forEach(e->learned.add(e.id()));learned.add(chaos);
         var selected=ElementWands.supported(learned,ElementWands.find("water_wand_1"));
         h.assertTrue(selected.contains(chaos)&&selected.contains(water.stream().filter(e->e.tier()==1).findFirst().orElseThrow().id())&&selected.size()==2,"Chaos and low-tier fallback coexist without null element");
-        h.assertTrue(ElementWands.supported(learned,ElementWands.find("fire_wand_1")).equals(List.of(chaos)),"Other element does not leak");h.succeed();
+        // 2026-11-09 起法杖不再按元素过滤（知识在魔法石），只按阶位：别的元素杖也放得出一阶
+        h.assertTrue(ElementWands.supported(learned,ElementWands.find("fire_wand_1")).equals(selected),
+                "Element no longer filters; tier capacity still applies");h.succeed();
     }
     @GameTest(template="building_test_empty",timeoutTicks=30)
     public static void castingGateRecognizesTypedWandsAndRejectsWrongTier(GameTestHelper h){
         var p=AdventureGameTests.player(h);p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,ElementWands.stack(ElementWands.find("water_wand_1")));
-        var one=SpellCatalog.all().stream().filter(e->e.element()==Element.WATER&&e.tier()==1).findFirst().orElseThrow();var high=SpellCatalog.all().stream().filter(e->e.element()==Element.WATER&&e.tier()==4).findFirst().orElseThrow();var fire=SpellCatalog.all().stream().filter(e->e.element()==Element.FIRE).findFirst().orElseThrow();
-        h.assertTrue(ManaGate.hasWand(p)&&ManaGate.hasWandFor(p,one)&&!ManaGate.hasWandFor(p,high)&&!ManaGate.hasWandFor(p,fire),"Typed wand reaches real mana gate with element and tier enforced");
+        var one=SpellCatalog.all().stream().filter(e->e.element()==Element.WATER&&e.tier()==1).findFirst().orElseThrow();var high=SpellCatalog.all().stream().filter(e->e.element()==Element.WATER&&e.tier()==4).findFirst().orElseThrow();var fire=SpellCatalog.all().stream().filter(e->e.element()==Element.FIRE&&e.tier()==1).findFirst().orElseThrow();
+        h.assertTrue(ManaGate.hasWand(p)&&ManaGate.hasWandFor(p,one)&&!ManaGate.hasWandFor(p,high)&&ManaGate.hasWandFor(p,fire),"Tier is enforced, element is not");
         p.setItemInHand(net.minecraft.world.InteractionHand.OFF_HAND,ElementWands.stack(ElementWands.find("water_wand_4")));h.assertTrue(ManaGate.hasWandFor(p,high),"Supported offhand wand is allowed");h.succeed();
     }
     @GameTest(template="building_test_empty",timeoutTicks=30)
