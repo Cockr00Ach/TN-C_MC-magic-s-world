@@ -1,0 +1,158 @@
+{
+  "scope": "匕首及大刀刀根连接、人偶持械场景刃口方向",
+  "weapons": [
+    {
+      "model": "dao",
+      "original_elements_unchanged": true,
+      "original_UV_material_display_unchanged": true,
+      "new_components": 1,
+      "added_component": "6d06518c-6d81-5042-33f3-de46916a2b2f",
+      "blade_root_overlap_y": 0.17999999999999972,
+      "guard_overlap_y": 0.20000000000000018,
+      "all_10_root_segments_have_positive_3D_overlap": true,
+      "actual_export_preserves_original_elements_exact_Float32": true,
+      "actual_export_components": 1409,
+      "actual_export_faces": 8236,
+      "renders": [
+        {
+          "view": "front",
+          "changed_pixel_bounds": [
+            442,
+            748,
+            558,
+            764
+          ],
+          "intentional_change": "blade socket"
+        },
+        {
+          "view": "back",
+          "changed_pixel_bounds": [
+            442,
+            748,
+            558,
+            764
+          ],
+          "intentional_change": "blade socket"
+        },
+        {
+          "view": "side",
+          "changed_pixel_bounds": [
+            481,
+            745,
+            519,
+            767
+          ],
+          "intentional_change": "blade socket"
+        },
+        {
+          "view": "hero",
+          "changed_pixel_bounds": [
+            444,
+            736,
+            555,
+            760
+          ],
+          "intentional_change": "blade socket"
+        }
+      ]
+    },
+    {
+      "model": "dagger",
+      "original_elements_unchanged": true,
+      "original_UV_material_display_unchanged": true,
+      "new_components": 1,
+      "added_component": "5271fd70-e11f-aa0a-44ab-617aeee17be8",
+      "blade_root_overlap_y": 0.17999999999999972,
+      "guard_overlap_y": 0.20000000000000018,
+      "all_10_root_segments_have_positive_3D_overlap": true,
+      "actual_export_preserves_original_elements_exact_Float32": true,
+      "actual_export_components": 890,
+      "actual_export_faces": 5043,
+      "renders": [
+        {
+          "view": "front",
+          "changed_pixel_bounds": [
+            442,
+            748,
+            558,
+            764
+          ],
+          "intentional_change": "blade socket"
+        },
+        {
+          "view": "back",
+          "changed_pixel_bounds": [
+            442,
+            748,
+            558,
+            764
+          ],
+          "intentional_change": "blade socket"
+        },
+        {
+          "view": "side",
+          "changed_pixel_bounds": [
+            481,
+            749,
+            519,
+            767
+          ],
+          "intentional_change": "blade socket"
+        },
+        {
+          "view": "hero",
+          "changed_pixel_bounds": [
+            444,
+            735,
+            555,
+            760
+          ],
+          "intentional_change": "blade socket"
+        }
+      ]
+    }
+  ],
+  "equipped_pose": [
+    {
+      "name": "主手直刃_完整成品网格",
+      "rotation": [
+        0,
+        0,
+        180
+      ],
+      "grip_anchor_unchanged": true,
+      "vertices_faces_UV_unchanged": true,
+      "forward_axis": "local -Z, unchanged by 180-degree Z rotation",
+      "local_tip_z": -16.79328,
+      "edge_orientation": "local Y reversed; curved cutting belly faces down"
+    },
+    {
+      "name": "伴随弯刃_完整成品网格",
+      "rotation": [
+        0,
+        0,
+        180
+      ],
+      "grip_anchor_unchanged": true,
+      "vertices_faces_UV_unchanged": true,
+      "forward_axis": "local -Z, unchanged by 180-degree Z rotation",
+      "local_tip_z": -16.30368,
+      "edge_orientation": "local Y reversed; curved cutting belly faces down"
+    }
+  ],
+  "reopen_passed": true,
+  "game_started": false,
+  "game_installed": false,
+  "cost_delta": {
+    "cuboids": 2,
+    "faces": 12,
+    "textures": 0,
+    "geometry_frames": 0
+  },
+  "preserved": "原有几何、UV、贴图、握持位置、Display 和人体结构不变；只新增两件套口和翻转两个持械节点",
+  "limitations": [
+    "编辑器和离线导出检查；未测游戏画面、draw call 或 FPS",
+    "第07持械场景只作源模型展示，不替换运行中的人偶动作"
+  ],
+  "subsequent_texture_edit": "人偶贴图后续添加陶纹；原几何、UV及持械朝向继续保留，纹样检查见陶纹贴图检查.json。"
+}

@@ -1,0 +1,50 @@
+[
+  {
+    "model": "bronze_greatsword",
+    "export_geometry_uv_material_display_matches": false,
+    "numeric_comparison": "Exact IEEE-754 Float32 bit equality, matching the target Minecraft numeric representation; no geometry tolerance",
+    "elements": 1891,
+    "faces": 10957,
+    "original_geometry_uv_material_display_matches": true,
+    "intentional_addition": "1 structural blade socket"
+  },
+  {
+    "model": "bronze_spear",
+    "export_geometry_uv_material_display_matches": true,
+    "numeric_comparison": "Exact IEEE-754 Float32 bit equality, matching the target Minecraft numeric representation; no geometry tolerance",
+    "elements": 1200,
+    "faces": 6833
+  },
+  {
+    "model": "bronze_dao",
+    "export_geometry_uv_material_display_matches": false,
+    "numeric_comparison": "Exact IEEE-754 Float32 bit equality, matching the target Minecraft numeric representation; no geometry tolerance",
+    "elements": 1409,
+    "faces": 8236,
+    "original_geometry_uv_material_display_matches": true,
+    "intentional_addition": "1 structural blade socket"
+  },
+  {
+    "model": "bronze_dagger",
+    "export_geometry_uv_material_display_matches": false,
+    "numeric_comparison": "Exact IEEE-754 Float32 bit equality, matching the target Minecraft numeric representation; no geometry tolerance",
+    "elements": 890,
+    "faces": 5043,
+    "original_geometry_uv_material_display_matches": true,
+    "intentional_addition": "1 structural blade socket"
+  },
+  {
+    "model": "bronze_twin_main",
+    "export_geometry_uv_material_display_matches": true,
+    "numeric_comparison": "Exact IEEE-754 Float32 bit equality, matching the target Minecraft numeric representation; no geometry tolerance",
+    "elements": 1894,
+    "faces": 11364
+  },
+  {
+    "model": "bronze_twin_off",
+    "export_geometry_uv_material_display_matches": true,
+    "numeric_comparison": "Exact IEEE-754 Float32 bit equality, matching the target Minecraft numeric representation; no geometry tolerance",
+    "elements": 1645,
+    "faces": 9870
+  }
+]

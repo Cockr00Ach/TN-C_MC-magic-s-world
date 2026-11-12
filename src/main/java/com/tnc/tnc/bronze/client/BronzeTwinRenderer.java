@@ -23,17 +23,23 @@ public final class BronzeTwinRenderer extends BlockEntityWithoutLevelRenderer {
     private static final ResourceLocation TEXTURE=ResourceLocation.fromNamespaceAndPath("tnc","textures/item/bronze_atlas.png");
     private static final Map<View,List<Face>> MODELS=new EnumMap<>(View.class);
     private static final ThreadLocal<View> HELD=new ThreadLocal<>();
+    private static final ThreadLocal<Boolean> PUPPET_HELD=new ThreadLocal<>();
     private static final String[] SIDES={"down","up","west","north","east","south"};
     private static final int[][] INDICES={{5,4,0,1},{2,3,7,6},{0,4,7,3},{1,0,3,2},{5,1,2,6},{4,5,6,7}};
     public BronzeTwinRenderer(){super(Minecraft.getInstance().getBlockEntityRenderDispatcher(),Minecraft.getInstance().getEntityModels());}
     public static void clear(){MODELS.clear();}
     public static void beginHeld(LivingEntity owner,ItemStack stack,HumanoidArm arm){
+        PUPPET_HELD.set(owner instanceof BronzePuppetEntity);
         HELD.set(BronzeTwinWeapon.active(owner)&&stack==owner.getMainHandItem()&&arm==owner.getMainArm()?View.PRIMARY:View.COMBINED);
     }
-    public static void endHeld(){HELD.remove();}
+    public static void endHeld(){HELD.remove();PUPPET_HELD.remove();}
     public static void withView(View view,Runnable action){
         View previous=HELD.get();HELD.set(view);
         try{action.run();}finally{if(previous==null)HELD.remove();else HELD.set(previous);}
+    }
+    public static void withView(View view,LivingEntity owner,Runnable action){
+        Boolean previous=PUPPET_HELD.get();PUPPET_HELD.set(owner instanceof BronzePuppetEntity);
+        try{withView(view,action);}finally{if(previous==null)PUPPET_HELD.remove();else PUPPET_HELD.set(previous);}
     }
     private static List<Face> load(View view){
         String id=switch(view){case PRIMARY->"bronze_twin_main";case SECONDARY->"bronze_twin_off";case COMBINED->"bronze_halberd";};
@@ -65,7 +71,7 @@ public final class BronzeTwinRenderer extends BlockEntityWithoutLevelRenderer {
         }
         pose.pushPose();
         try{
-            if(hand)BronzeTwinGrip.apply(view==View.SECONDARY,pose);
+            if(hand)BronzeTwinGrip.apply(view==View.SECONDARY||Boolean.TRUE.equals(PUPPET_HELD.get()),pose);
             var vertices=ItemRenderer.getFoilBufferDirect(buffers,RenderType.entityCutoutNoCull(TEXTURE),true,stack.hasFoil());
             var p=pose.last();
             for(var face:MODELS.computeIfAbsent(view,BronzeTwinRenderer::load))for(int i=0;i<4;i++){

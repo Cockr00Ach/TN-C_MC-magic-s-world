@@ -1,0 +1,56 @@
+{
+  "model": "01_青铜大剑_成品精度.bbmodel",
+  "original_elements_unchanged": true,
+  "original_UV_material_and_Display_unchanged": true,
+  "actual_export_original_elements_exact_Float32": true,
+  "all_12_root_segments_overlap_socket": true,
+  "blade_overlap_y": 0.17999999999999972,
+  "guard_overlap_y": 0.20000000000000018,
+  "native_reopen_passed": true,
+  "views": [
+    {
+      "view": "front",
+      "changed_bounds": [
+        433,
+        748,
+        567,
+        760
+      ]
+    },
+    {
+      "view": "back",
+      "changed_bounds": [
+        433,
+        748,
+        567,
+        760
+      ]
+    },
+    {
+      "view": "side",
+      "changed_bounds": [
+        481,
+        749,
+        519,
+        768
+      ]
+    },
+    {
+      "view": "hero",
+      "changed_bounds": [
+        437,
+        734,
+        562,
+        758
+      ]
+    }
+  ],
+  "new_components": 1,
+  "new_faces": 6,
+  "new_textures": 0,
+  "export_components": 1891,
+  "export_faces": 10957,
+  "game_started": false,
+  "game_installed": false,
+  "client_FPS": "未测量"
+}
