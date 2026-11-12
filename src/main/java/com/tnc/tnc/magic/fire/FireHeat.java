@@ -102,6 +102,8 @@ public final class FireHeat {
         if (victim == null || victim.level().isClientSide() || !victim.isAlive() || amount <= 0.0F) {
             return of(victim);
         }
+        // 焚元（燃烧形态 3 档）：所有火系叠热 +50%
+        amount *= TNFireForms.heatMultiplier(caster);
         boolean wasIgnited = ignited(victim);
         float now = Math.min(MAX, of(victim) + amount);
         HEAT.put(victim.getUUID(), now);

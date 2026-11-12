@@ -51,4 +51,17 @@ class FireReworkContractTest {
         assertEquals(0.0F, FireHeat.ratio(null), "没有实体就是 0 热");
         assertEquals(0.0F, FireHeat.of(null), "没有实体就没有热量");
     }
+
+    @Test
+    void burnChainFormsOwnOnlyTheBurnSpells() {
+        for (String p : new String[]{"fire_aspect", "ember_burn", "blaze_burn", "inferno_burn", "total_burn"}) {
+            assertTrue(TNFireForms.handles(p), p + " 应该归燃烧形态管");
+        }
+        for (String p : new String[]{"flame_grip", "sun_ray", "fireball", "water_ball"}) {
+            assertFalse(TNFireForms.handles(p), p + " 不该归燃烧形态管");
+        }
+        // 没有形态的玩家：叠热倍率必须是 1（不能平白给加成）
+        assertEquals(1.0F, TNFireForms.heatMultiplier(null), "没有玩家时倍率必须是 1");
+        assertEquals(0, TNFireForms.tier(null), "没有玩家时没有形态");
+    }
 }

@@ -720,6 +720,8 @@ public final class TnSpellMechanics {
         // 不是本链的法术它返回 false，所以这里无脑调一遍是安全的（和水系同一个约定）。
         // 火法重做（2026-11-13）：点火链 / 引爆链统一走热量经济
         com.tnc.tnc.magic.fire.TNFireRework.cast(player, spellId);
+        // 燃烧形态链（原燃烧链）：接上热量经济（燎原火痕 / 近战叠热 / 叠热 x1.5 / 烬魂 / 殉命）
+        com.tnc.tnc.magic.fire.TNFireForms.cast(player, path);
         com.tnc.tnc.magic.fire.TNFireBoltEntity.cast(player, spellId);
         // 火球链里"不是朝准星扔火球"的那两档（t4 熔岳天倾的头顶法阵 / t5 炎葬的脚下法阵）
         com.tnc.tnc.magic.fire.TNFireFields.cast(player, spellId);
