@@ -883,5 +883,15 @@
   "message.tnc.puppet_summoned": "Bronze puppet summoned for up to 10 minutes",
   "tooltip.tnc.bronze_twin": "Paired weapon: requires an empty offhand",
   "message.tnc.bronze_twin_offhand": "Bronze Twinblades require an empty offhand and the main-hand slot",
-  "spell.tnc.dragon_roar.description": "Opens a vertical water sigil and fires 150 single-target water shells over 10 seconds."
+  "spell.tnc.dragon_roar.description": "Opens a vertical water sigil and fires 150 single-target water shells over 10 seconds.",
+  "spell.tnc.flame_grip.name": "Flame Grip",
+  "spell.tnc.flame_grip.description": "A burning giant hand erupts under the target, grabbing and crushing it; the release blast scales with the target's Heat.",
+  "spell.tnc.blaze_clutch.name": "Blaze Clutch",
+  "spell.tnc.blaze_clutch.description": "A larger hand squeezes three times, stacking Heat with every crush.",
+  "spell.tnc.molten_crush.name": "Molten Crush",
+  "spell.tnc.molten_crush.description": "The hand burns red-hot and pins the target while squeezing; blast radius grows with the target's Heat.",
+  "spell.tnc.inferno_clench.name": "Inferno Clench",
+  "spell.tnc.inferno_clench.description": "The giant hand crushes the target into a fireball, then detonates a wide sea of flame. Against airborne targets the arm burns all the way into the sky.",
+  "spell.tnc.pyre_god_hand.name": "Hand of the Pyre God",
+  "spell.tnc.pyre_god_hand.description": "The hand of a fire god bursts from the ground, white-hot; the detonation is driven entirely by the target's Heat."
 }

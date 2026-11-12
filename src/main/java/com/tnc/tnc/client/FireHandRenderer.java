@@ -32,7 +32,7 @@ import net.minecraft.util.Mth;
 public final class FireHandRenderer extends EntityRenderer<TNFlameHandEntity> {
 
     /** 整体透明度：虚影。 */
-    private static final float GHOST = 0.62F;
+    private static final float GHOST = 0.92F;
 
     /** 离地多高开始完全不透明（格）。 */
     private static final double GROUND_FADE = 0.75D;
@@ -244,8 +244,8 @@ public final class FireHandRenderer extends EntityRenderer<TNFlameHandEntity> {
                     {x0 * 1.25 + sway * 2, y0 + h, z0 * 1.25},
             };
             double[] radii = {0.075 * rage, 0.045 * rage, 0.004};
-            tube(vc, m, pts, radii, Math.min(1F, 0.95F * rage), 0.42F, 0.06F,
-                    Math.min(0.95F, 0.75F * rage), 1.6F);
+            tube(vc, m, pts, radii, 1.0F, 0.72F, 0.22F,
+                    Math.min(0.98F, 0.80F * rage), 1.6F);
         }
     }
 
@@ -296,8 +296,10 @@ public final class FireHandRenderer extends EntityRenderer<TNFlameHandEntity> {
                 float t = i / (float) Math.max(1, pts.length - 2);
                 // 越往上越亮：底部焦黑，指节/指尖发白
                 float hot = Mth.clamp(t * 0.9f + emissive * 0.15f, 0f, 1f);
+                // 底色也要亮：光影/加色下暗色会被吃掉，所以从"暗红炭"直接提到"烧红的铁"
                 quad(vc, m, q0, q1, q2, q3,
-                        Mth.lerp(hot, r, 1.0F), Mth.lerp(hot, g, 0.72F), Mth.lerp(hot, b, 0.34F),
+                        Mth.lerp(hot, 0.72F, 1.0F), Mth.lerp(hot, 0.26F, 0.86F),
+                        Mth.lerp(hot, 0.08F, 0.42F),
                         alpha * ghostFade(q0[1]));
             }
             prevRight = right;
@@ -317,7 +319,7 @@ public final class FireHandRenderer extends EntityRenderer<TNFlameHandEntity> {
             double[] p1 = superEllipse(a1, y0, w0, d0);
             double[] p2 = superEllipse(a1, y1, w1, d1);
             double[] p3 = superEllipse(a0, y1, w1, d1);
-            quad(vc, m, p0, p1, p2, p3, r, g, b, alpha * ghostFade(y0));
+            quad(vc, m, p0, p1, p2, p3, 0.82F, 0.32F, 0.10F, alpha * ghostFade(y0));
         }
     }
 
@@ -334,7 +336,7 @@ public final class FireHandRenderer extends EntityRenderer<TNFlameHandEntity> {
         if (y >= GROUND_FADE) {
             return GHOST;
         }
-        return GHOST * (float) Mth.clamp((y + 0.35) / (GROUND_FADE + 0.35), 0.02, 1.0);
+        return GHOST * (float) Mth.clamp((y + 0.35) / (GROUND_FADE + 0.35), 0.18, 1.0);
     }
 
     private static double[] ringPoint(double[] p, double[] right, double[] up, double a, double radius) {
