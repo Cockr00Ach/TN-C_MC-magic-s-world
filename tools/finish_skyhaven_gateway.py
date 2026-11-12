@@ -129,7 +129,7 @@ def finish(path):
         if any(f'realm/region/r.{x // 32}.{z // 32}.mca' == name for x, z in modified):
             files[name] = anvil.pack_region(raw, records)
     manifest = json.loads(files['manifest.json'])
-    manifest.update(revision=2, gateway_foundation={'centre': [gx, underside - 1, gz], 'radius': 34,
+    manifest.update(revision=max(2, manifest['revision']), gateway_foundation={'centre': [gx, underside - 1, gz], 'radius': 34,
                     'changed_chunks': len(modified), 'raised_columns': len(columns)})
     files['manifest.json'] = json.dumps(manifest).encode()
     temp = path.with_suffix('.new')

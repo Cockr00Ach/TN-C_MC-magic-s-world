@@ -42,7 +42,7 @@ def main():
     with zipfile.ZipFile(jar) as z:
         with zipfile.ZipFile(io.BytesIO(z.read('data/tnc/skyhaven/starter.zip'))) as terrain:
             manifest = json.loads(terrain.read('manifest.json'))
-            assert manifest['revision'] == 2 and manifest['gateway_foundation']['raised_columns'] >= 1000
+            assert manifest['revision'] >= 2 and manifest['gateway_foundation']['raised_columns'] >= 1000
     assert not running(live), 'Exit only the actual live game before replacement'
     receipt = {'jar_sha256': digest, 'unit_tests': count, 'server_tests': 7,
                'native': native, 'production_saves_changed': False}

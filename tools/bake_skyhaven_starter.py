@@ -93,6 +93,8 @@ def main():
     print(f'Baked {total} chunks, {DEST.stat().st_size} bytes')
     from finish_skyhaven_gateway import finish
     finish(DEST)
+    from bake_quartz_summit import bake
+    bake(DEST)
 
 
 if __name__ == '__main__':
