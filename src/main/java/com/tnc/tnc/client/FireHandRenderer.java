@@ -39,6 +39,21 @@ public final class FireHandRenderer extends EntityRenderer<TNFlameHandEntity> {
 
     private static final int SIDES = 12;
 
+    /** 当前帧的湍流相位（0~1 循环），让表面的明暗像真火一样流动。 */
+    private static float turbulencePhase = 0.0F;
+
+    /**
+     * 程序化湍流：用位置做哈希，叠上时间相位 —— 表面会出现流动的明暗带，
+     * 比纯渐变像"真火"，而且不需要贴图（自定义 RenderType 在某些光影包里会被吞）。
+     */
+    private static float turbulence(double x, double y, double z) {
+        double v = Math.sin(x * 7.1 + turbulencePhase * 6.283)
+                + Math.sin(y * 5.3 - turbulencePhase * 4.712 + 1.7)
+                + Math.sin(z * 6.7 + turbulencePhase * 3.141 + 3.1)
+                + Math.sin((x + y + z) * 11.0 - turbulencePhase * 9.0);
+        return (float) (0.5 + v * 0.125);
+    }
+
     public FireHandRenderer(EntityRendererProvider.Context context) {
         super(context);
     }
@@ -55,6 +70,7 @@ public final class FireHandRenderer extends EntityRenderer<TNFlameHandEntity> {
         int tier = Mth.clamp(entity.tier(), 1, 5);
         float scale = 0.70F + 0.30F * tier;      // t1 小、t5 巨大
 
+        turbulencePhase = (float) ((entity.tickCount + partialTick) * 0.06 % 1.0);
         VertexConsumer vc = buffers.getBuffer(RenderType.lightning());
 
         pose.pushPose();
@@ -297,9 +313,12 @@ public final class FireHandRenderer extends EntityRenderer<TNFlameHandEntity> {
                 // 越往上越亮：底部焦黑，指节/指尖发白
                 float hot = Mth.clamp(t * 0.9f + emissive * 0.15f, 0f, 1f);
                 // 底色也要亮：光影/加色下暗色会被吃掉，所以从"暗红炭"直接提到"烧红的铁"
+                // 再乘一层程序化湍流：表面有流动的亮带/暗纹，像真火而不是塑料壳
+                float turb = 0.55F + 0.75F * turbulence(q0[0], q0[1], q0[2]);
                 quad(vc, m, q0, q1, q2, q3,
-                        Mth.lerp(hot, 0.72F, 1.0F), Mth.lerp(hot, 0.26F, 0.86F),
-                        Mth.lerp(hot, 0.08F, 0.42F),
+                        Math.min(1.0F, Mth.lerp(hot, 0.72F, 1.0F) * turb),
+                        Math.min(1.0F, Mth.lerp(hot, 0.26F, 0.86F) * turb),
+                        Math.min(1.0F, Mth.lerp(hot, 0.08F, 0.42F) * turb),
                         alpha * ghostFade(q0[1]));
             }
             prevRight = right;
@@ -319,7 +338,10 @@ public final class FireHandRenderer extends EntityRenderer<TNFlameHandEntity> {
             double[] p1 = superEllipse(a1, y0, w0, d0);
             double[] p2 = superEllipse(a1, y1, w1, d1);
             double[] p3 = superEllipse(a0, y1, w1, d1);
-            quad(vc, m, p0, p1, p2, p3, 0.82F, 0.32F, 0.10F, alpha * ghostFade(y0));
+            float turb = 0.55F + 0.75F * turbulence(p0[0], p0[1], p0[2]);
+            quad(vc, m, p0, p1, p2, p3,
+                    Math.min(1.0F, 0.82F * turb), Math.min(1.0F, 0.32F * turb),
+                    Math.min(1.0F, 0.10F * turb), alpha * ghostFade(y0));
         }
     }
 
