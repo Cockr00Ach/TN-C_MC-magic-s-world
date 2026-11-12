@@ -724,6 +724,9 @@ public final class TnSpellMechanics {
         // 射线链（火系第 2 条链）：同样要吃"是哪个法术、挂了没"这些参数 ✗
         // ⇒ 也走 Java 派发（引擎的 SPAWN 带不了参数 ✗）。不是本链的返回 false ✓
         com.tnc.tnc.magic.fire.TNFireRays.cast(player, spellId);
+        // 火手链（火系第 4 条链，2026-11-13 新增）：从目标脚下伸出燃烧的巨人手掌，抓住并捏爆。
+        // 爆炸规模按目标身上的热量放大；目标在天上时手臂会一路烧上天（渲染层画火柱）。
+        com.tnc.tnc.magic.fire.TNFireHands.cast(player, spellId);
 
         // 闪电降低冷却：恢复一半蓝量（上限的一半）
         if (path.equals("lightning_recharge")) {

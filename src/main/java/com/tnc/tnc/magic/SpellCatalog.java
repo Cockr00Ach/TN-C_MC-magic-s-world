@@ -46,6 +46,12 @@ public final class SpellCatalog {
         /** 燃烧线：拿血量换伤害，越烧越强，烧到尽头能原地复活。 */
         BURN("燃烧", "以血换伤"),
 
+        /**
+         * 火手链（2026-11-13 新增）：从敌人脚下伸出一只燃烧的巨人手掌，抓住并捏爆，
+         * 爆炸规模按目标身上的<b>热量</b>放大。
+         */
+        FIRE_HAND("火手", "从地下伸出的燃烧巨手"),
+
         /** 风速线：从短时起飞，到 4 级起解锁即永久飞行。 */
         FLIGHT("风速", "起飞与加速"),
 
@@ -253,6 +259,14 @@ public final class SpellCatalog {
             fireEntry("blaze_burn", Chain.BURN, 3, "焚元"),
             fireEntry("inferno_burn", Chain.BURN, 4, "烬魂"),
             fireEntry("total_burn", Chain.BURN, 5, "殉命"),
+
+            // ---- 火手链（2026-11-13 新增）：燃烧的巨人手掌从地下伸出，抓住并捏爆 ----
+            //   爆炸规模 = 档位 + 目标身上的热量；目标在天上时手臂会一路烧上天（火柱）✓
+            fireEntry("flame_grip", Chain.FIRE_HAND, 1, "焚握"),
+            fireEntry("blaze_clutch", Chain.FIRE_HAND, 2, "焰攥"),
+            fireEntry("molten_crush", Chain.FIRE_HAND, 3, "熔绞"),
+            fireEntry("inferno_clench", Chain.FIRE_HAND, 4, "炼狱之握"),
+            fireEntry("pyre_god_hand", Chain.FIRE_HAND, 5, "炎神之手"),
 
             // ---- 风速线：1 起飞5s → 2 起飞5s+速100% → 3 起飞15s+速150%+风伤50%
             //              → 4 永久起飞+速300%30s+风伤100% → 5 再加无冷却+蓝耗减半 ----
