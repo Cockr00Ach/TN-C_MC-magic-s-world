@@ -32,6 +32,11 @@ public final class TNFireFields {
         if (player == null || spellId == null || !spellId.getNamespace().equals(TNMod.MODID)) {
             return false;
         }
+        // 2026-11-13 火法重做：点火链/引爆链已交给 TNFireRework（热量经济），
+        // 这里必须让路，否则同一个法术会被新旧两套各放一次 ✗
+        if (TNFireRework.handles(spellId)) {
+            return false;
+        }
         if (!(player.level() instanceof ServerLevel level)) {
             return false;
         }

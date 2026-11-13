@@ -80,6 +80,17 @@ public final class TNOrbEntities {
                     .sized(.1F,.1F).clientTrackingRange(12).updateInterval(10).build("tnc:lava_field"));
 
     /**
+     * 火手链：燃烧的巨人手掌。
+     *
+     * <p>它不是投射物，是"抓取过程"的载体：服务端每 tick 把目标按在掌心里，
+     * 客户端只负责把这只手画出来（几何在 {@code client/FireHandRenderer}）。
+     * {@code updateInterval(1)} 让相位每 tick 都同步过去，抓着目标时才不会抖。
+     */
+    public static final RegistryObject<EntityType<com.tnc.tnc.magic.fire.TNFlameHandEntity>> FLAME_HAND =
+            ENTITY_TYPES.register("flame_hand", () -> EntityType.Builder.of(com.tnc.tnc.magic.fire.TNFlameHandEntity::new, MobCategory.MISC)
+                    .sized(2.0F, 3.4F).clientTrackingRange(12).updateInterval(1).build("tnc:flame_hand"));
+
+    /**
      * 熔岳天倾（火球链 t4）的头顶法阵。
      *
      * <p>{@code updateInterval(2)}：它跟着施法者移动，位置同步慢会看起来"飘在后面"。

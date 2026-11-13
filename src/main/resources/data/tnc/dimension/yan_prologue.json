@@ -1,0 +1,11 @@
+{
+  "type": "tnc:yan_sanctuary",
+  "generator": {
+    "type": "tnc:yan_sanctuary",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "tnc:yan_sanctuary"
+    },
+    "repeat_altar": true
+  }
+}

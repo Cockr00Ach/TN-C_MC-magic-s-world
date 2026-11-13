@@ -1,0 +1,14 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "tnc:block/storm_flame",
+        "y": 0
+      },
+      {
+        "model": "tnc:block/storm_flame",
+        "y": 90
+      }
+    ]
+  }
+}

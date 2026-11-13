@@ -146,6 +146,12 @@ public final class SpellEngineManaHook {
                 return;
             }
 
+            if (com.tnc.tnc.world.yan.YanPrologue.active(player)) {
+                if (args.action() == net.spell_engine.internals.casting.SpellCast.Action.RELEASE) {
+                    com.tnc.tnc.world.yan.YanPrologueSpells.release(player, data, entry);
+                }
+                return;
+            }
             int cost = com.tnc.tnc.equipment.MageGear.spellCost(player,entry.manaCostFor(data.getMaxMana()));
 
             // 燃烧链：把火绕到施法者身上（作者 2026-10-11：动画从火焰粒子改为真实建模的火焰围绕）。

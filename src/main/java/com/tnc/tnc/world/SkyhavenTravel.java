@@ -21,7 +21,7 @@ public final class SkyhavenTravel {
  private static void enter(ServerPlayer p){
   if(!SkyIslandWorlds.separate(p.server))return;
   var t=flags(p);if(t.getBoolean("SkyhavenArrived"))return;
-  if(!PENDING.add(p.getUUID()))return;
+  if(com.tnc.tnc.world.yan.YanPrologue.begin(p)||!PENDING.add(p.getUUID()))return;
   var target=SkyIslandWorlds.island(p.server);
   var data=SkyIslandSavedData.get(target);
   if(data.isSkyIslandComplete()&&com.tnc.tnc.skyacademy.SkyAcademyWorld.ready(p.server)){

@@ -718,12 +718,19 @@ public final class TnSpellMechanics {
         // 火球链（火系第 1 条链）：自有投射物。命中时要精确知道「是哪个法术、打了多少」
         // 才能挂焚身，所以不走引擎的 PROJECTILE —— 引擎不会把法术 id 告诉伤害事件。
         // 不是本链的法术它返回 false，所以这里无脑调一遍是安全的（和水系同一个约定）。
+        // 火法重做（2026-11-13）：点火链 / 引爆链统一走热量经济
+        com.tnc.tnc.magic.fire.TNFireRework.cast(player, spellId);
+        // 燃烧形态链（原燃烧链）：接上热量经济（燎原火痕 / 近战叠热 / 叠热 x1.5 / 烬魂 / 殉命）
+        com.tnc.tnc.magic.fire.TNFireForms.cast(player, path);
         com.tnc.tnc.magic.fire.TNFireBoltEntity.cast(player, spellId);
         // 火球链里"不是朝准星扔火球"的那两档（t4 熔岳天倾的头顶法阵 / t5 炎葬的脚下法阵）
         com.tnc.tnc.magic.fire.TNFireFields.cast(player, spellId);
         // 射线链（火系第 2 条链）：同样要吃"是哪个法术、挂了没"这些参数 ✗
         // ⇒ 也走 Java 派发（引擎的 SPAWN 带不了参数 ✗）。不是本链的返回 false ✓
         com.tnc.tnc.magic.fire.TNFireRays.cast(player, spellId);
+        // 火手链（火系第 4 条链，2026-11-13 新增）：从目标脚下伸出燃烧的巨人手掌，抓住并捏爆。
+        // 爆炸规模按目标身上的热量放大；目标在天上时手臂会一路烧上天（渲染层画火柱）。
+        com.tnc.tnc.magic.fire.TNFireHands.cast(player, spellId);
 
         // 闪电降低冷却：恢复一半蓝量（上限的一半）
         if (path.equals("lightning_recharge")) {

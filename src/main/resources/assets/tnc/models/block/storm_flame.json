@@ -1,0 +1,219 @@
+{
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:cutout",
+  "ambientocclusion": false,
+  "textures": {
+    "particle": "#flame",
+    "flame": "tnc:block/storm_flame"
+  },
+  "elements": [
+    {
+      "from": [
+        0.5,
+        0,
+        8
+      ],
+      "to": [
+        15.5,
+        18,
+        8
+      ],
+      "shade": false,
+      "rotation": {
+        "origin": [
+          8,
+          8,
+          8
+        ],
+        "axis": "y",
+        "angle": 45
+      },
+      "faces": {
+        "north": {
+          "texture": "#flame",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "forge_data": {
+            "block_light": 15,
+            "sky_light": 0,
+            "ambient_occlusion": false
+          }
+        },
+        "south": {
+          "texture": "#flame",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "forge_data": {
+            "block_light": 15,
+            "sky_light": 0,
+            "ambient_occlusion": false
+          }
+        }
+      }
+    },
+    {
+      "from": [
+        0.5,
+        0,
+        8
+      ],
+      "to": [
+        15.5,
+        18,
+        8
+      ],
+      "shade": false,
+      "rotation": {
+        "origin": [
+          8,
+          8,
+          8
+        ],
+        "axis": "y",
+        "angle": -45
+      },
+      "faces": {
+        "north": {
+          "texture": "#flame",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "forge_data": {
+            "block_light": 15,
+            "sky_light": 0,
+            "ambient_occlusion": false
+          }
+        },
+        "south": {
+          "texture": "#flame",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "forge_data": {
+            "block_light": 15,
+            "sky_light": 0,
+            "ambient_occlusion": false
+          }
+        }
+      }
+    },
+    {
+      "from": [
+        1.25,
+        0,
+        8
+      ],
+      "to": [
+        14.75,
+        15,
+        8
+      ],
+      "shade": false,
+      "rotation": {
+        "origin": [
+          8,
+          8,
+          8
+        ],
+        "axis": "y",
+        "angle": 22.5
+      },
+      "faces": {
+        "north": {
+          "texture": "#flame",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "forge_data": {
+            "block_light": 15,
+            "sky_light": 0,
+            "ambient_occlusion": false
+          }
+        },
+        "south": {
+          "texture": "#flame",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "forge_data": {
+            "block_light": 15,
+            "sky_light": 0,
+            "ambient_occlusion": false
+          }
+        }
+      }
+    },
+    {
+      "from": [
+        1.25,
+        0,
+        8
+      ],
+      "to": [
+        14.75,
+        15,
+        8
+      ],
+      "shade": false,
+      "rotation": {
+        "origin": [
+          8,
+          8,
+          8
+        ],
+        "axis": "y",
+        "angle": -22.5
+      },
+      "faces": {
+        "north": {
+          "texture": "#flame",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "forge_data": {
+            "block_light": 15,
+            "sky_light": 0,
+            "ambient_occlusion": false
+          }
+        },
+        "south": {
+          "texture": "#flame",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "forge_data": {
+            "block_light": 15,
+            "sky_light": 0,
+            "ambient_occlusion": false
+          }
+        }
+      }
+    }
+  ]
+}

@@ -21,6 +21,7 @@ public final class JourneyNetwork {
     public static void send(long token,String action,String value){CHANNEL.sendToServer(new Action(token,action,value));}
     private static void namingResult(ServerPlayer p,long token,boolean success,String message){var t=new CompoundTag();t.putString("Page","name_result");t.putLong("Token",token);t.putBoolean("Success",success);t.putString("Message",message);CHANNEL.send(PacketDistributor.PLAYER.with(()->p),new View(t));}
     private static void act(ServerPlayer p,Action m){
+        if(com.tnc.tnc.world.yan.YanPrologue.awaiting(p))return;
         if(m.action.equals("name")){
             var session=sessions.get(p.getUUID());
             if(session==null||!session.page.equals("profile")||session.token!=m.token){namingResult(p,m.token,false,"页面已失效，请关闭后重新打开人物档案。");return;}

@@ -1,0 +1,22 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "tnc:block/stormvein_obsidian",
+        "y": 0
+      },
+      {
+        "model": "tnc:block/stormvein_obsidian",
+        "y": 90
+      },
+      {
+        "model": "tnc:block/stormvein_obsidian",
+        "y": 180
+      },
+      {
+        "model": "tnc:block/stormvein_obsidian",
+        "y": 270
+      }
+    ]
+  }
+}
