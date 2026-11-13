@@ -193,7 +193,7 @@ public final class ManaGate {
         net.minecraft.world.item.Item wand =
                 net.minecraftforge.registries.ForgeRegistries.ITEMS.getValue(
                         com.tnc.tnc.magic.compat.SpellEngineBridge.WAND);
-        return java.util.stream.Stream.of(player.getMainHandItem(),player.getOffhandItem()).anyMatch(s->!s.isEmpty()&&((wand!=null&&s.is(wand))||s.getItem() instanceof com.tnc.tnc.adventure.ElementWands.Wand));
+        return java.util.stream.Stream.of(player.getMainHandItem(),player.getOffhandItem()).anyMatch(s->!s.isEmpty()&&!com.tnc.tnc.world.yan.YanPrologueSpells.isWand(s)&&((wand!=null&&s.is(wand))||s.getItem() instanceof com.tnc.tnc.adventure.ElementWands.Wand));
     }
     /**
      * 手上有没有能放这个法术的法杖。
@@ -204,7 +204,8 @@ public final class ManaGate {
     public static boolean hasWandFor(Player player,SpellCatalog.Entry entry){
         var legacy=net.minecraftforge.registries.ForgeRegistries.ITEMS.getValue(com.tnc.tnc.magic.compat.SpellEngineBridge.WAND);
         return java.util.stream.Stream.of(player.getMainHandItem(),player.getOffhandItem()).anyMatch(s->{
-            if(s.isEmpty())return false;if(legacy!=null&&s.is(legacy))return true;
+            if (s.isEmpty() || com.tnc.tnc.world.yan.YanPrologueSpells.isWand(s)) return false;
+            if (legacy != null && s.is(legacy)) return true;
             return s.getItem() instanceof com.tnc.tnc.adventure.ElementWands.Wand w&&entry.tier()<=w.design.tier();
         });
     }
@@ -262,6 +263,9 @@ public final class ManaGate {
         if((com.tnc.tnc.combat.DownedCombat.isDowned(serverPlayer)||com.tnc.tnc.dungeon.DungeonService.recovering(serverPlayer)))return true;
         // 附身中禁止施法（客户端屏蔽之外的第二道闸门）
         if(com.tnc.tnc.travel.TravelFormService.active(serverPlayer))return true;
+        if (com.tnc.tnc.world.yan.YanPrologue.active(serverPlayer)) {
+            return com.tnc.tnc.world.yan.YanPrologueSpells.blocksCast(serverPlayer, spellId);
+        }
         // 只管 TN-C 自己的法术
         SpellCatalog.Entry entry = SpellCatalog.byId(spellId);
         if (entry == null) {

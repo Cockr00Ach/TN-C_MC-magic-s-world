@@ -1,0 +1,118 @@
+{
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "particle": "#rock",
+    "rock": "tnc:block/stormvein_obsidian",
+    "veins": "tnc:block/stormvein_obsidian_veins"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#rock",
+          "cullface": "down"
+        },
+        "up": {
+          "texture": "#rock",
+          "cullface": "up"
+        },
+        "north": {
+          "texture": "#rock",
+          "cullface": "north"
+        },
+        "south": {
+          "texture": "#rock",
+          "cullface": "south"
+        },
+        "west": {
+          "texture": "#rock",
+          "cullface": "west"
+        },
+        "east": {
+          "texture": "#rock",
+          "cullface": "east"
+        }
+      }
+    },
+    {
+      "from": [
+        -0.005,
+        -0.005,
+        -0.005
+      ],
+      "to": [
+        16.005,
+        16.005,
+        16.005
+      ],
+      "shade": false,
+      "faces": {
+        "down": {
+          "texture": "#veins",
+          "cullface": "down",
+          "forge_data": {
+            "block_light": 15,
+            "sky_light": 0,
+            "ambient_occlusion": false
+          }
+        },
+        "up": {
+          "texture": "#veins",
+          "cullface": "up",
+          "forge_data": {
+            "block_light": 15,
+            "sky_light": 0,
+            "ambient_occlusion": false
+          }
+        },
+        "north": {
+          "texture": "#veins",
+          "cullface": "north",
+          "forge_data": {
+            "block_light": 15,
+            "sky_light": 0,
+            "ambient_occlusion": false
+          }
+        },
+        "south": {
+          "texture": "#veins",
+          "cullface": "south",
+          "forge_data": {
+            "block_light": 15,
+            "sky_light": 0,
+            "ambient_occlusion": false
+          }
+        },
+        "west": {
+          "texture": "#veins",
+          "cullface": "west",
+          "forge_data": {
+            "block_light": 15,
+            "sky_light": 0,
+            "ambient_occlusion": false
+          }
+        },
+        "east": {
+          "texture": "#veins",
+          "cullface": "east",
+          "forge_data": {
+            "block_light": 15,
+            "sky_light": 0,
+            "ambient_occlusion": false
+          }
+        }
+      }
+    }
+  ]
+}

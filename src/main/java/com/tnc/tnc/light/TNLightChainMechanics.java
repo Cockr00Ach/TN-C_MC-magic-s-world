@@ -641,6 +641,10 @@ public final class TNLightChainMechanics {
         }
     }
 
+    public static void endGraceFlight(ServerPlayer player) {
+        if (FLIGHT_UNTIL.remove(player.getUUID()) != null) giveFlight(player, false);
+    }
+
     /** 给/收飞行 ✓（只在状态真的变了才发同步包 ✗ —— 每 tick 刷包会把客户端刷爆 ✗）。 */
     private static void giveFlight(ServerPlayer player, boolean fly) {
         if (fly == player.getAbilities().mayfly) {

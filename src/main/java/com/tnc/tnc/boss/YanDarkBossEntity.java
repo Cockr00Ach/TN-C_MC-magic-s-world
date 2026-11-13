@@ -152,6 +152,25 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
     private int pendingKind = -1;
     private int pendingTicks = 0;
 
+    // ------------------------------------------------------------------
+    //  ★ 2026-11-14 作者：处决演出（二阶段 75% 血，只放一次）
+    //   分镜/时长全在 {@link YanExecutionRules} 里；这里只管"什么时候开始、冻结谁、打多少" ✓
+    // ------------------------------------------------------------------
+
+    /** 处决时钟：-1 = 没在演 ✓（同步给客户端，客户端据此运镜/画雷）✓。 */
+    private static final net.minecraft.network.syncher.EntityDataAccessor<Integer> DATA_EXEC_TICK =
+            net.minecraft.network.syncher.SynchedEntityData.defineId(
+                    YanDarkBossEntity.class, net.minecraft.network.syncher.EntityDataSerializers.INT);
+    /** 被处决的玩家实体 id（-1 = 无）✓。 */
+    private static final net.minecraft.network.syncher.EntityDataAccessor<Integer> DATA_EXEC_TARGET =
+            net.minecraft.network.syncher.SynchedEntityData.defineId(
+                    YanDarkBossEntity.class, net.minecraft.network.syncher.EntityDataSerializers.INT);
+
+    private int execTick = -1;
+    private int execTargetId = -1;
+    /** 这个处决一辈子只放一次 ✓（存盘：读档回来也不会再放）。 */
+    private boolean execUsed = false;
+
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
     /** 两个施法动作（作者做的 playmagic_1/2 ✓）可按需触发 ✓ */
@@ -174,6 +193,39 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
         this.xpReward = 500;
     }
 
+    @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(DATA_EXEC_TICK, -1);
+        this.entityData.define(DATA_EXEC_TARGET, -1);
+    }
+
+    /** 客户端用：处决时钟（-1 = 没在演）✓。 */
+    public int execTick() {
+        return this.entityData.get(DATA_EXEC_TICK);
+    }
+
+    /** 客户端用：被处决的玩家实体 id（-1 = 无）✓。 */
+    public int execTargetId() {
+        return this.entityData.get(DATA_EXEC_TARGET);
+    }
+
+    /** 这个处决放过没有 ✓（调试/自检用）。 */
+    public boolean execUsed() {
+        return this.execUsed;
+    }
+
+    @Override
+    public void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        tag.putBoolean("YanExecutionUsed", this.execUsed);
+    }
+
+    @Override
+    public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        this.execUsed = tag.getBoolean("YanExecutionUsed");
+    }
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MAX_HEALTH, PHASE_HEALTH)
@@ -224,6 +276,113 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
      * 想面向 (dx, dz) 就得 {@code yaw = atan2(−dx, dz)} ✓（x 分量最容易写反 ✗）。
      * 三个都写：`setYRot`（实体朝向）、`yBodyRot`（渲染器用的身体角 ✓）、`yHeadRot`（头部）✓。
      */
+    // ------------------------------------------------------------------
+    //  ★ 处决：二阶段 75% 血，只放一次（2026-11-14 作者）
+    // ------------------------------------------------------------------
+
+    /** 条件满足就开始处决 ✓（条件本身在 {@link YanExecutionRules#shouldTrigger}）。 */
+    protected final boolean maybeStartExecution() {
+        if (!(this.getTarget() instanceof ServerPlayer player) || !player.isAlive() || player.level() != this.level()
+                || !YanExecutionRules.shouldTrigger(this.phase, this.getHealth(), this.getMaxHealth(), this.execUsed, true)) {
+            return false;
+        }
+        this.startExecution(player);
+        return true;
+    }
+
+    private void startExecution(ServerPlayer player) {
+        this.execUsed = true;                       // ★ 一辈子一次（存盘也记住）✓
+        this.execTick = 0;
+        this.execTargetId = player.getId();
+        this.entityData.set(DATA_EXEC_TICK, 0);
+        this.entityData.set(DATA_EXEC_TARGET, this.execTargetId);
+        this.getNavigation().stop();
+        this.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+        this.faceTarget();
+        this.triggerAnim("action", "playmagic_2");
+        if (this.level() instanceof ServerLevel level) {
+            // ① 衍脚下展开暗系大法阵（作者："衍脚下展开魔法阵"）✓
+            spawnExecutionCircle(level, this.position(), 5.4D);
+            level.playSound(null, this.blockPosition(), SoundEvents.WITHER_DEATH,
+                    SoundSource.HOSTILE, 1.8F, 0.55F);
+            level.playSound(null, this.blockPosition(), SoundEvents.LIGHTNING_BOLT_THUNDER,
+                    SoundSource.HOSTILE, 1.2F, 0.45F);
+        }
+    }
+
+    /** 每 tick 推进处决 ✓（判定/伤害都在服务端，客户端只负责运镜和画雷）。 */
+    protected final void tickExecution() {
+        if (!(this.level() instanceof ServerLevel level)) {
+            this.clearExecution();
+            return;
+        }
+        int tick = this.execTick;
+        this.execTick++;
+        this.entityData.set(DATA_EXEC_TICK, this.execTick);
+        this.getNavigation().stop();
+        this.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+
+        ServerPlayer victim = level.getEntity(this.execTargetId) instanceof ServerPlayer p ? p : null;
+        if (victim == null || !victim.isAlive()) {
+            this.clearExecution();
+            return;
+        }
+
+        // ② 玩家脚下：法阵 ＋ 被禁锢（作者："玩家脚下出现法阵和雷网并且被禁锢不能动了"）✓
+        if (tick == YanExecutionRules.AT_PLAYER) {
+            spawnExecutionCircle(level, victim.position(), 2.6D);
+            level.playSound(null, victim.blockPosition(), SoundEvents.LIGHTNING_BOLT_THUNDER,
+                    SoundSource.PLAYERS, 0.8F, 1.4F);
+        }
+        if (tick >= YanExecutionRules.AT_PLAYER && tick < YanExecutionRules.AT_IMPACT) {
+            victim.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+            victim.hurtMarked = true;
+            victim.addEffect(new MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN,
+                    10, 6, false, false, false));
+            victim.addEffect(new MobEffectInstance(net.minecraft.world.effect.MobEffects.JUMP,
+                    10, 128, false, false, false));
+        }
+
+        // ③ 雷劈中：秒杀 ＋ 身上爆出无数雷电（作者："玩家身上爆出无数雷电，秒杀技能"）✓
+        if (tick == YanExecutionRules.AT_IMPACT) {
+            victim.invulnerableTime = 0;
+            victim.hurt(this.damageSources().indirectMagic(this, this),
+                    YanExecutionRules.EXECUTION_DAMAGE);
+            var at = victim.position().add(0.0D, victim.getBbHeight() * 0.5D, 0.0D);
+            com.tnc.tnc.magic.TnSpellMechanics.arcBall(level, at, 80, 2.4D);
+            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 120, 1.6D, 1.6D, 1.6D, 0.35D);
+            level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y, at.z, 3, 1.2D, 1.2D, 1.2D, 0.0D);
+            level.playSound(null, victim.blockPosition(), SoundEvents.LIGHTNING_BOLT_THUNDER,
+                    SoundSource.PLAYERS, 3.0F, 0.75F);
+        }
+
+        // ④ 收尾：镜头交还、解除禁锢 ✓
+        if (YanExecutionRules.finished(tick) || this.execTick >= YanExecutionRules.END) {
+            victim.removeEffect(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN);
+            victim.removeEffect(net.minecraft.world.effect.MobEffects.JUMP);
+            this.clearExecution();
+        }
+    }
+
+    protected boolean ticksExecutionInAi() { return true; }
+
+    private void clearExecution() {
+        this.execTick = -1;
+        this.execTargetId = -1;
+        this.entityData.set(DATA_EXEC_TICK, -1);
+        this.entityData.set(DATA_EXEC_TARGET, -1);
+    }
+
+    /** 暗系法阵（衍脚下 5.4 格、玩家脚下 2.6 格）✓。 */
+    private static void spawnExecutionCircle(ServerLevel level, net.minecraft.world.phys.Vec3 at, double radius) {
+        var circle = TNOrbEntities.MAGIC_CIRCLE.get().create(level);
+        if (circle == null) {
+            return;
+        }
+        circle.configure(radius, 120, com.tnc.tnc.magic.TNMagicCircleEntity.STYLE_DARK);
+        circle.moveTo(at.x, at.y + 0.06D, at.z, 0, 0);
+        level.addFreshEntity(circle);
+    }
     private void faceTarget() {
         LivingEntity target = this.getTarget();
         if (target == null) {
@@ -517,6 +676,15 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
         if (this.phase == 2) {
             this.ensurePhaseTwoAura();
             this.phaseTwoAscensionVisuals();     // ★ 电弧/环绕电光/雷印（不然"看不出在登神" ✗）
+        }
+        // ★ 2026-11-14 处决演出：进行中就只推进时钟（boss 站定，别再放别的招）✓
+        if (this.execTick >= 0) {
+            if (this.ticksExecutionInAi()) this.tickExecution();
+            return;
+        }
+        // ★ 二阶段 75% 血：放一次处决（一辈子一次）✓
+        if (this.ticksExecutionInAi() && this.maybeStartExecution()) {
+            return;
         }
         // ★ 一直看着玩家（作者："boss 虽然不动，他的朝向应该一直看着玩家啊"）✓ 在施法/目标判定之前 ✓
         this.faceTarget();

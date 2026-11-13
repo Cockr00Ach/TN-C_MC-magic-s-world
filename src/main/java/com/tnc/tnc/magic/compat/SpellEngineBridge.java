@@ -210,6 +210,11 @@ public final class SpellEngineBridge {
         return Impl.hasSpell(spellId);
     }
 
+    /** Populate the temporary staff with the normal eight Spell Engine slots. */
+    public static void writePrologueContainer(ItemStack stack, List<ResourceLocation> spells) {
+        if (enginePresent()) Impl.writeContainer(stack, spells.stream().map(ResourceLocation::toString).toList());
+    }
+
     /** 给玩家看的一句话说明。 */
     public static String describeWand(WandResult result, int learnedCount) {        return switch (result) {
             case NOTHING_LEARNED -> "还没解锁任何法术，先不用拿法杖";
@@ -289,6 +294,7 @@ public final class SpellEngineBridge {
                     continue;
                 }
                 found++;
+                if (com.tnc.tnc.world.yan.YanPrologueSpells.isWand(stack)) continue;
                 var supported = stack.getItem() instanceof com.tnc.tnc.adventure.ElementWands.Wand typed
                         ? orderedSpellIds(com.tnc.tnc.adventure.ElementWands.supported(fullKnowledge, typed.design))
                         : wanted;

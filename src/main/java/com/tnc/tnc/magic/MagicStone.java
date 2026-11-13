@@ -301,6 +301,7 @@ public class MagicStone {
     public static void refreshMaxMana(Player player, MagicStoneData data) {
         int growth = 0;
         if (player instanceof ServerPlayer serverPlayer) {
+            if (com.tnc.tnc.world.yan.YanPrologue.usingKit(serverPlayer)) return;
             var profile = com.tnc.tnc.adventure.AdventureService.profile(serverPlayer);
             growth = profile.level() - 1;
             data.setAdventurePoints(profile.learningPoints());
