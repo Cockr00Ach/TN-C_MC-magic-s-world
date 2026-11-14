@@ -95,6 +95,8 @@ public final class YanNailPuzzle {
         level.sendParticles(ParticleTypes.FLASH, center.x, center.y + 1.5, center.z, 4, 0.5, 0.5, 0.5, 0.0);
         level.playSound(null, boss.blockPosition(), SoundEvents.LIGHTNING_BOLT_THUNDER,
                 SoundSource.HOSTILE, 2.0F, 0.9F);
+        com.tnc.tnc.boss.BossTrialCue.begin(level, boss.position(), 24.0D, "§d击碎六枚雷锲",
+                0.72F, 0.45F, 1.0F, WINDOW_TICKS);
         announce(level, boss, "§6[衍] §r六枚雷锲已经插下 §7—— 15 秒内全部击碎，否则他会把雷还给你们。");
     }
 
@@ -114,6 +116,8 @@ public final class YanNailPuzzle {
             succeed(level, boss, round);
             return;
         }
+        com.tnc.tnc.boss.BossTrialCue.warn(level, boss.position(), 24.0D,
+                (int) (round.deadline - level.getGameTime()));
         if (level.getGameTime() >= round.deadline) {
             fail(level, boss, round);
         }

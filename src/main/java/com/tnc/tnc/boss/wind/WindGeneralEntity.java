@@ -21,5 +21,16 @@ public final class WindGeneralEntity extends PathfinderMob implements GeoEntity 
         controllers.add(new AnimationController<>(this,"movement",8,state->state.setAndContinue(RawAnimation.begin().thenLoop(state.isMoving()?"walk":"idle"))));
     }
     @Override public AnimatableInstanceCache getAnimatableInstanceCache(){return cache;}
+
+    @Override public void aiStep(){
+        super.aiStep();
+        if(!(level() instanceof net.minecraft.server.level.ServerLevel level)||!isAlive())return;
+        WindShadowTrial.tick(this);
+        if(!getPersistentData().getBoolean("TncWindShadowUsed")
+                &&getHealth()<=getMaxHealth()*0.60F){
+            getPersistentData().putBoolean("TncWindShadowUsed",true);
+            WindShadowTrial.start(this,level);
+        }
+    }
     @Override public boolean removeWhenFarAway(double distance){return false;}
 }

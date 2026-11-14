@@ -38,6 +38,8 @@ public final class TNSpellOrbClientEvents {
         event.registerEntityRenderer(TNOrbEntities.THUNDER_NAIL.get(), ThunderNailRenderer::new);
         // 土系 Boss 交互：场地中心的有血量土柱
         event.registerEntityRenderer(TNOrbEntities.EARTH_PILLAR.get(), EarthPillarRenderer::new);
+        // 风将交互：五个虚影（真身手里有长矛）
+        event.registerEntityRenderer(TNOrbEntities.WIND_SHADOW.get(), com.tnc.tnc.boss.wind.WindShadowTrial.ShadowRenderer::new);
         // ★ 风灵（风系第 2 条链「风球 / 风灵」，2026-10-10）—— 作者："风灵呢" ✗
         //   那一整条链以前是**纯粒子**（玩家看不见风灵）；现在每一只都是实体 ✓，
         //   模型/动画/贴图由 tools/gen_wind_sprite_model.py 程序化生成（GeckoLib，

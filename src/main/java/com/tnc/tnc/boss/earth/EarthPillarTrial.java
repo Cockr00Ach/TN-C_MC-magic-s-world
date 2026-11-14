@@ -111,6 +111,8 @@ public final class EarthPillarTrial {
         level.sendParticles(ParticleTypes.FLASH, cx, cy + 2, cz, 6, 0.6, 0.8, 0.6, 0.0);
         level.playSound(null, boss.blockPosition(), SoundEvents.LIGHTNING_BOLT_THUNDER,
                 SoundSource.HOSTILE, 2.0F, 0.6F);
+        com.tnc.tnc.boss.BossTrialCue.begin(level, centre, 60.0D, "§6击碎场地中心的土柱",
+                0.86F, 0.68F, 0.36F, WINDOW_TICKS);
         announce(level, centre, "§6[山君] §r他退回场地中心，把你们震开—— §e15 秒内打碎那根土柱！");
     }
 
@@ -128,6 +130,8 @@ public final class EarthPillarTrial {
                 succeed(level, boss, round);
                 return;
             }
+            com.tnc.tnc.boss.BossTrialCue.warn(level, boss.position(), 60.0D,
+                    (int) (round.deadline - now));
             if (now >= round.deadline) {
                 fail(level, boss, round);
             }

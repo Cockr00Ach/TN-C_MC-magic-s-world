@@ -531,6 +531,15 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
         if (!(this.level() instanceof ServerLevel level)) {
             return;
         }
+        // ★ 2026-11-15 水球交互：掉血超过 40% 触发一次；之后每 tick 推进这一轮
+        if (this.isAlive()) {
+            com.tnc.tnc.boss.WaterOrbTrial.tick(this);
+            if (!this.getPersistentData().getBoolean("TncWaterOrbTrialUsed")
+                    && this.getHealth() <= this.getMaxHealth() * 0.60F) {
+                this.getPersistentData().putBoolean("TncWaterOrbTrialUsed", true);
+                com.tnc.tnc.boss.WaterOrbTrial.start(this, level);
+            }
+        }
         this.bossEvent.setName(this.getDisplayName());
         this.bossEvent.setProgress(Math.max(0.0F, Math.min(1.0F,
                 this.getHealth() / Math.max(1.0F, this.getMaxHealth()))));
