@@ -22,6 +22,27 @@ public final class JourneyNetwork {
     private static void namingResult(ServerPlayer p,long token,boolean success,String message){var t=new CompoundTag();t.putString("Page","name_result");t.putLong("Token",token);t.putBoolean("Success",success);t.putString("Message",message);CHANNEL.send(PacketDistributor.PLAYER.with(()->p),new View(t));}
     private static void act(ServerPlayer p,Action m){
         if(com.tnc.tnc.world.yan.YanPrologue.awaiting(p))return;
+
+        if(m.action.equals("create")){
+            var session=sessions.get(p.getUUID());
+            if(session==null||!session.page.equals("profile")||session.token!=m.token){namingResult(p,m.token,false,"页面已失效，请关闭后重新打开人物档案。");return;}
+            var parts=m.value.split(";",3);
+            if(parts.length<3){namingResult(p,m.token,false,"配点数据不完整。");return;}
+            int count=com.tnc.tnc.magic.Element.values().length;
+            int[] affinities=new int[count];
+            try{
+                var cells=parts[0].split(",");
+                if(cells.length!=count)throw new IllegalArgumentException("cells");
+                for(int i=0;i<count;i++)affinities[i]=Integer.parseInt(cells[i].strip());
+            }catch(Exception bad){namingResult(p,m.token,false,"配点数据格式不对。");return;}
+            int talent;
+            try{talent=Integer.parseInt(parts[1].strip());}catch(Exception bad){namingResult(p,m.token,false,"天赋数值不对。");return;}
+            String error=com.tnc.tnc.journey.JourneyProfileRules.validate(affinities,talent);
+            if(error!=null){namingResult(p,m.token,false,error);return;}
+            if(!FamilyLife.name(p,parts[2])){namingResult(p,m.token,false,"名字请使用1—20个字符。");return;}
+            FamilyLife.applyProfile(p,affinities,talent);   // name() 之后：否则会被默认亲和盖掉
+            namingResult(p,m.token,true,"姓名与配点已保存");return;
+        }
         if(m.action.equals("name")){
             var session=sessions.get(p.getUUID());
             if(session==null||!session.page.equals("profile")||session.token!=m.token){namingResult(p,m.token,false,"页面已失效，请关闭后重新打开人物档案。");return;}

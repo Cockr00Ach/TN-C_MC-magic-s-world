@@ -10,11 +10,12 @@ import net.minecraft.world.item.*;
 import java.util.*;
 public final class JourneyScreen extends Screen {
     private final CompoundTag state;private final List<Choice> choices=new ArrayList<>();private int page;private String name;private net.minecraft.client.gui.components.EditBox nameBox;private double scale,left,top;private int canvasHeight=360;
-    private String nameStatus="";private long nameSentAt;
+    private String nameStatus="";private long nameSentAt;private final int[] affinities=com.tnc.tnc.journey.JourneyProfileRules.defaults();private int talent=com.tnc.tnc.journey.JourneyProfileRules.defaultTalent();
     private record Choice(int x,int y,int w,int h,String label,String action,String id){boolean hit(double a,double b){return a>=x&&a<x+w&&b>=y&&b<y+h;}}
     public JourneyScreen(CompoundTag t){super(Component.literal("RouchNao · 旅途与归处"));state=t.copy();name=t.getString("Name");}
     public static void open(CompoundTag t){if(t.getString("Page").equals("name_result")){var mc=Minecraft.getInstance();if(mc.screen instanceof JourneyScreen screen&&screen.state.getString("Page").equals("profile")&&screen.state.getLong("Token")==t.getLong("Token")){screen.nameSentAt=0;if(t.getBoolean("Success")){JourneyClient.confirmedName();mc.setScreen(null);}else screen.nameStatus=t.getString("Message");}return;}if(t.getBoolean("InitialWelcome")){JourneyClient.queueWelcome(t);return;}if(t.getString("Page").equals("greeting")){JourneyClient.greeting(t);return;}Minecraft.getInstance().setScreen(new JourneyScreen(t));}
-    @Override protected void init(){canvasHeight=state.getString("Page").equals("board")?400:360;scale=Math.min(1.3,Math.min((width-16)/600.,(height-16)/(double)canvasHeight));left=(width-600*scale)/2;top=(height-canvasHeight*scale)/2;if(state.getString("Page").equals("profile")){nameBox=new net.minecraft.client.gui.components.EditBox(font,260,300,184,14,Component.literal("角色姓名"));nameBox.setMaxLength(20);nameBox.setValue(name);nameBox.setBordered(false);nameBox.setResponder(s->name=s);addWidget(nameBox);setInitialFocus(nameBox);}}
+    @Override protected void init(){canvasHeight=400;scale=Math.min(1.3,Math.min((width-16)/600.,(height-16)/(double)canvasHeight));left=(width-600*scale)/2;top=(height-canvasHeight*scale)/2;if(state.getString("Page").equals("profile")){var src=state.getCompound("Affinity");var els=com.tnc.tnc.magic.Element.values();boolean fresh=true;for(int k=0;k<els.length&&k<affinities.length;k++){int v=src.getInt(els[k].id());if(v>0){affinities[k]=v;fresh=false;}}if(fresh)System.arraycopy(com.tnc.tnc.journey.JourneyProfileRules.defaults(),0,affinities,0,affinities.length);talent=state.getInt("Talent");if(talent==0)talent=com.tnc.tnc.journey.JourneyProfileRules.defaultTalent();nameBox=new net.minecraft.client.gui.components.EditBox(font,260,348,184,14,Component.literal("角色姓名"));nameBox.setMaxLength(20);nameBox.setValue(name);nameBox.setBordered(false);nameBox.setResponder(s->name=s);addWidget(nameBox);setInitialFocus(nameBox);}}
+    private void small(GuiGraphics g,int x,int y,String label,String action,double mx,double my){var o=new Choice(x,y,14,14,label,action,"");choices.add(o);boolean hover=o.hit(mx,my);g.fill(x,y,x+14,y+14,hover?0xff39506a:0xff1d2a3a);g.renderOutline(x,y,14,14,hover?0xffe0c9a2:0xff6b7b90);text(g,label,x+7-font.width(label)/2,y+3,0xffdbe2ee);}
     private void text(GuiGraphics g,String s,int x,int y,int c){g.drawString(font,s,x,y,c,false);}
     private void lines(GuiGraphics g,String s,int x,int y,int w,int c,int max){var a=font.split(Component.literal(s),w);for(int i=0;i<Math.min(max,a.size());i++)g.drawString(font,a.get(i),x,y+12*i,c,false);}
     private void button(GuiGraphics g,int x,int y,int w,int h,String title,String action,String id,double mx,double my){var o=new Choice(x,y,w,h,title,action,id);choices.add(o);boolean hover=o.hit(mx,my);g.fill(x,y,x+w,y+h,hover?0xff315256:0xff1b2229);g.renderOutline(x,y,w,h,hover?0xffcde8d5:0xff9e855b);text(g,title,x+(w-font.width(title))/2,y+(h-8)/2,0xffe6daca);}
@@ -62,20 +63,33 @@ public final class JourneyScreen extends Screen {
         for(int i=0;i<4;i++){int x=253+(i%2)*166,y=98+(i/2)*34;text(g,labels[i],x,y,0xff9baec2);text(g,values[i],x+91,y,0xfff2e6cd);g.fill(x,y+21,x+148,y+22,0x402f435a);}
         text(g,"魔力",253,174,0xffa8ccdf);String mana=state.getInt("Mana")+" / "+state.getInt("MaxMana");text(g,mana,573-font.width(mana),174,0xffe7ecf4);
         g.fill(253,191,573,195,0xff1c2f46);g.fill(253,191,253+(int)(320*Math.min(1,state.getInt("Mana")/(double)Math.max(1,state.getInt("MaxMana")))),195,0xff80b8d3);
-        text(g,"元素亲和",253,212,0xffcfb58c);int i=0;
+        text(g,"元素亲和",253,208,0xffcfb58c);text(g,"共 12 点 · 只有一项能到 6",253+72,208,0xff7f90a9);
         int[] colors={0xff8fcbea,0xffe9a28c,0xffc7b0ed,0xffa8d7cb,0xffcfbc97,0xffeee0a2,0xffb9acce};
-        for(var e:com.tnc.tnc.magic.Element.values()){int x=253+i%4*82,y=233+i/4*20;String label=e==com.tnc.tnc.magic.Element.DARK?"暗":e.cn();text(g,label,x,y,colors[i%colors.length]);text(g,""+state.getCompound("Affinity").getInt(e.id()),x+26,y,0xffdce1ec);i++;}
-        text(g,"你的名字",253,277,0xffb9c6d7);text(g,"最多20字",510,277,0xff7f90a9);
-        g.fill(252,292,454,317,0xff111e31);g.fill(252,316,454,317,0xff92b6cd);
+        var els=com.tnc.tnc.magic.Element.values();
+        for(int i=0;i<els.length&&i<affinities.length;i++){
+            var e=els[i];int x=253+(i%2)*160,y=226+(i/2)*20;
+            String label=e==com.tnc.tnc.magic.Element.DARK?"暗":e.cn();
+            text(g,label,x,y,colors[i%colors.length]);
+            text(g,""+affinities[i],x+26,y,0xffdce1ec);
+            small(g,x+44,y-3,"-","aff_"+i+"_-1",mx,my);
+            small(g,x+60,y-3,"+","aff_"+i+"_1",mx,my);
+        }
+        text(g,"战士天赋",413,226,0xffcfb58c);text(g,""+talent,479,226,0xffdce1ec);
+        small(g,497,223,"-","tal_-1",mx,my);small(g,513,223,"+","tal_1",mx,my);
+        var summary=com.tnc.tnc.journey.JourneyProfileRules.summary(affinities,talent);
+        var error=com.tnc.tnc.journey.JourneyProfileRules.validate(affinities,talent);
+        text(g,error==null?summary:"§c"+error,253,306,error==null?0xff9fb3ca:0xffe08a7a);
+        text(g,"你的名字",253,326,0xffb9c6d7);text(g,"最多20字",510,326,0xff7f90a9);
+        g.fill(252,344,454,369,0xff111e31);g.fill(252,368,454,369,0xff92b6cd);
         if(nameBox!=null)nameBox.render(g,(int)mx,(int)my,partial);
-        var confirm=new Choice(467,292,106,25,nameSentAt==0?"确认姓名":"保存中…","name","");choices.add(confirm);
-        boolean hover=confirm.hit(mx,my);g.fillGradient(467,292,573,317,hover?0xff47617d:0xff30445c,hover?0xff293e56:0xff1b2b40);g.renderOutline(467,292,106,25,hover?0xffead2a8:0xff9e8c70);text(g,confirm.label,520-font.width(confirm.label)/2,301,0xfff0e2c9);
-        text(g,nameStatus.isEmpty()?"确认后，开始你的旅途。":nameStatus,253,330,0xff9fb3ca);
+        var confirm=new Choice(467,344,106,25,nameSentAt==0?"确认并启程":"保存中…","name","");choices.add(confirm);
+        boolean hover=confirm.hit(mx,my);g.fillGradient(467,344,573,369,hover?0xff47617d:0xff30445c,hover?0xff293e56:0xff1b2b40);g.renderOutline(467,344,106,25,hover?0xffead2a8:0xff9e8c70);text(g,confirm.label,520-font.width(confirm.label)/2,353,0xfff0e2c9);
+        text(g,nameStatus.isEmpty()?"配点与姓名确认后，开始你的旅途。":nameStatus,253,380,0xff9fb3ca);
     }
     private String format(double n){return String.format(Locale.ROOT,n<1?"%.2f":"%.1f",n);}
     private void family(GuiGraphics g,double mx,double my){ArcaneGui.sigil(g,127,181,72,minecraft.level==null?0:minecraft.level.getGameTime(),.5f,true);text(g,state.getString("Spouse"),245,91,ArcaneGui.TEXT);lines(g,state.getString("Line"),245,115,300,ArcaneGui.DIM,3);text(g,"孩子："+state.getInt("Children")+"（在家 "+state.getInt("PresentChildren")+"）  ·  "+(state.getBoolean("Home")?"在家中":"与家人同行"),245,171,ArcaneGui.CYAN);button(g,245,204,304,31,"一起吃饭 · 需要两份同种食物","dinner","",mx,my);button(g,245,251,304,31,"把这里当作家","home","",mx,my);lines(g,"普通右键继续聊天、送礼与育儿；潜行右键伴侣打开此页。",245,301,300,ArcaneGui.DIM,2);}
-    private void submitName(){if(nameSentAt!=0)return;String value=nameBox==null?name:nameBox.getValue();if(value.strip().isBlank()){nameStatus="请输入名字后再确认。";return;}nameSentAt=System.currentTimeMillis();nameStatus="正在保存姓名…";JourneyNetwork.send(state.getLong("Token"),"name",value);}
-    @Override public boolean mouseClicked(double mx,double my,int b){if(b==0){double x=(mx-left)/scale,y=(my-top)/scale;if(nameBox!=null&&nameBox.mouseClicked(x,y,b)){setFocused(nameBox);return true;}for(var o:choices)if(o.hit(x,y)){if(o.action.equals("prev"))page=Math.max(0,page-1);else if(o.action.equals("next"))page++;else if(o.action.equals("name"))submitName();else JourneyNetwork.send(state.getLong("Token"),o.action,o.id);return true;}}return super.mouseClicked(mx,my,b);}
+    private void submitName(){if(nameSentAt!=0)return;String value=nameBox==null?name:nameBox.getValue();if(value.strip().isBlank()){nameStatus="请输入名字后再确认。";return;}var error=com.tnc.tnc.journey.JourneyProfileRules.validate(affinities,talent);if(error!=null){nameStatus=error;return;}var csv=new StringBuilder();for(int i=0;i<affinities.length;i++){if(i>0)csv.append(",");csv.append(affinities[i]);}nameSentAt=System.currentTimeMillis();nameStatus="正在保存…";JourneyNetwork.send(state.getLong("Token"),"create",csv+";"+talent+";"+value);}
+    @Override public boolean mouseClicked(double mx,double my,int b){if(b==0){double x=(mx-left)/scale,y=(my-top)/scale;if(nameBox!=null&&nameBox.mouseClicked(x,y,b)){setFocused(nameBox);return true;}for(var o:choices)if(o.hit(x,y)){if(o.action.startsWith("aff_")){var p=o.action.split("_");int idx=Integer.parseInt(p[1]),delta=Integer.parseInt(p[2]);affinities[idx]=Math.max(com.tnc.tnc.journey.JourneyProfileRules.MIN,Math.min(com.tnc.tnc.journey.JourneyProfileRules.MAX,affinities[idx]+delta));return true;}if(o.action.startsWith("tal_")){talent=Math.max(0,Math.min(com.tnc.tnc.journey.JourneyProfileRules.TALENT_MAX,talent+Integer.parseInt(o.action.substring(4))));return true;}if(o.action.equals("prev"))page=Math.max(0,page-1);else if(o.action.equals("next"))page++;else if(o.action.equals("name"))submitName();else JourneyNetwork.send(state.getLong("Token"),o.action,o.id);return true;}}return super.mouseClicked(mx,my,b);}
     private boolean requiresName(){return state.getString("Page").equals("profile")&&!state.getBoolean("Named");}
     @Override public boolean shouldCloseOnEsc(){return !requiresName();}
     @Override public void onClose(){if(!requiresName())super.onClose();}

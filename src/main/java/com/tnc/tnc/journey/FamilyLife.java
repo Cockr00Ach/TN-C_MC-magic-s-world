@@ -41,7 +41,26 @@ public final class FamilyLife {
         d.getClass().getMethod("setEntityDataSet",boolean.class).invoke(d,true);
     }catch(Exception ex){error(ex);}}
     public static CompoundTag profile(ServerPlayer p){var t=new CompoundTag();var saved=JourneyData.get(p.server).player(p.getUUID());var magic=MagicStone.getOrNull(p);
-        t.putString("Name",saved.getString("Name").isBlank()?p.getGameProfile().getName():saved.getString("Name"));t.putBoolean("Named",saved.getBoolean("Named"));t.putDouble("Attack",p.getAttributeValue(Attributes.ATTACK_DAMAGE));t.putDouble("Health",p.getMaxHealth());t.putDouble("Armor",p.getArmorValue());t.putDouble("Speed",p.getAttributeValue(Attributes.MOVEMENT_SPEED));t.putInt("Mana",magic==null?0:magic.getMana());t.putInt("MaxMana",magic==null?0:magic.getMaxMana());var a=new CompoundTag();for(var e:Element.values())a.putInt(e.id(),magic==null?0:magic.getAffinity(e));t.put("Affinity",a);return t;
+        t.putString("Name",saved.getString("Name").isBlank()?p.getGameProfile().getName():saved.getString("Name"));t.putBoolean("Named",saved.getBoolean("Named"));t.putDouble("Attack",p.getAttributeValue(Attributes.ATTACK_DAMAGE));t.putDouble("Health",p.getMaxHealth());t.putDouble("Armor",p.getArmorValue());t.putDouble("Speed",p.getAttributeValue(Attributes.MOVEMENT_SPEED));t.putInt("Mana",magic==null?0:magic.getMana());t.putInt("MaxMana",magic==null?0:magic.getMaxMana());var a=new CompoundTag();for(var e:Element.values())a.putInt(e.id(),magic==null?0:magic.getAffinity(e));t.put("Affinity",a);t.putInt("Talent",com.tnc.tnc.warrior.TemperingData.get(p.server).talent(p.getUUID()));return t;
+    }
+
+    /**
+     * 开局配点落地：写元素亲和 + 战士天赋，并按新的亲和重算魔力上限。
+     *
+     * <p>必须<b>在 {@link #name} 之后</b>调：{@code name()} 会走 {@code initialize()} 铺默认亲和，
+     * 顺序反了就会被默认值盖掉 ✗
+     */
+    public static void applyProfile(ServerPlayer p, int[] affinities, int talent) {
+        var magic = MagicStone.getOrNull(p);
+        if (magic != null) {
+            for (var e : Element.values()) {
+                magic.setAffinity(e, affinities[e.ordinal()]);
+            }
+            MagicStone.refreshMaxMana(p, magic);
+            com.tnc.tnc.network.MagicStoneNetwork.syncTo(p);
+        }
+        com.tnc.tnc.warrior.TemperingData.get(p.server).setTalent(p.getUUID(), talent);
+        JourneyData.get(p.server).setDirty();
     }
     public static void openProfile(ServerPlayer p){JourneyNetwork.open(p,"profile",profile(p));}
     public static boolean name(ServerPlayer p,String value){String n=value.strip().replaceAll("[\\p{Cntrl}§]","").strip();if(n.isBlank()||n.codePointCount(0,n.length())>20)return false;var t=JourneyData.get(p.server).player(p.getUUID());t.putString("Name",n);t.putBoolean("Named",true);p.setCustomName(Component.literal(n));p.refreshDisplayName();p.refreshTabListName();initialize(p);
