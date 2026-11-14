@@ -121,9 +121,7 @@ public final class WaterOrbTrial {
         }
         // 剩余三颗开始抖屏（越接近结算越急）
         int left = (ORBS - round.spawned) * SPAWN_INTERVAL;
-        if (left <= 60) {
-            com.tnc.tnc.boss.BossTrialCue.warn(level, boss.position(), 40.0D, Math.max(1, left));
-        }
+        com.tnc.tnc.boss.BossTrialCue.warn(level, boss.position(), 40.0D, Math.max(1, left));
         // 2) 每 tick 把水球往最近的玩家身上掰（这就是"跟踪"）
         steer(level, round);
         // 3) 十颗都放完 + 场上的球都没了 → 结算

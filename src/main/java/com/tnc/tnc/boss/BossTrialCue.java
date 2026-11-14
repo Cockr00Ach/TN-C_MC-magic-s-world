@@ -55,7 +55,10 @@ public final class BossTrialCue {
         level.sendParticles(new DustParticleOptions(new Vector3f(colourR, colourG, colourB), 3.0F),
                 centre.x, centre.y + 2.0, centre.z, 60, radius * 0.25, 1.2, radius * 0.25, 0.1);
 
-        // 2) 屏幕上方写目标（title 常驻整轮，subtitle 留给倒计时）
+        // 2) 屏幕特效：元素色边框 + 倒计时 + 临近心跳红闪
+        BossTrialSync.push(level, centre, ticks, Math.max(1, ticks), colourR, colourG, colourB);
+
+        // 3) 屏幕上方写目标（title 常驻整轮，subtitle 留给倒计时）
         for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class,
                 new AABB(centre, centre).inflate(radius + 48.0D), p -> p.isAlive() && !p.isSpectator())) {
             player.connection.send(new ClientboundSetTitlesAnimationPacket(10, Math.max(20, ticks), 10));
@@ -71,7 +74,14 @@ public final class BossTrialCue {
      * <p>复用 {@link TNShockwaveEntity#blast} 的镜头抖动（火系那套已经在用，稳）。
      */
     public static void warn(ServerLevel level, Vec3 centre, double radius, int ticksLeft) {
-        if (ticksLeft <= 0 || ticksLeft > 60 || ticksLeft % 20 > 5) {
+        if (ticksLeft <= 0) {
+            return;
+        }
+        // 屏幕特效每 10 tick 更新一次（让边框一直收着走）
+        if (ticksLeft % 10 == 0) {
+            BossTrialSync.push(level, centre, ticksLeft, 60 * 20, 0.9F, 0.35F, 0.30F);
+        }
+        if (ticksLeft > 60 || ticksLeft % 20 > 5) {
             return;
         }
         float shake = 1.4F + (60 - ticksLeft) * 0.06F;

@@ -181,8 +181,8 @@ public final class SummonTrial {
             round.resolved = true;
             ROUNDS.remove(boss.getUUID());
             castFog(level, boss, round);
-        } else if (round.fogAt - now <= 60) {
-            BossTrialCue.warn(level, boss.position(), 40.0D, (int) (round.fogAt - now));
+        } else {
+            BossTrialCue.warn(level, boss.position(), 40.0D, (int) Math.max(1, round.fogAt - now));
         }
     }
 
