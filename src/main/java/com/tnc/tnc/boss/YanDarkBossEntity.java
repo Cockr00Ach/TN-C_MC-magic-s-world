@@ -3,7 +3,10 @@ package com.tnc.tnc.boss;
 import com.tnc.tnc.magic.TNEffects;
 import com.tnc.tnc.magic.TNOrbEntities;
 import com.tnc.tnc.magic.TNLightningStrikeEntity;
+import com.tnc.tnc.magic.TnSpellMechanics;
 import com.tnc.tnc.magic.dark.DarkRitualSequence;
+import com.tnc.tnc.world.yan.YanPrologue;
+import com.tnc.tnc.world.yan.YanSanctuary;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -128,6 +131,13 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
 
     /** 1 = 一阶段，2 = 二阶段 ✓。 */
     private int phase = 1;
+
+    /** 掉到这个血量比例（≤60%）才触发雷锲谜题。 */
+    private static final float NAIL_TRIGGER_HEALTH = 0.60F;
+
+    /** 雷锲谜题只出现一次：掉血超过 40%（血量 ≤ 60%）时触发（2026-11-15 作者）。 */
+    private boolean nailUsed;
+
     private int castCooldown = CAST_INTERVAL_P1;
 
     // ------------------------------------------------------------------
@@ -349,9 +359,15 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
             victim.hurt(this.damageSources().indirectMagic(this, this),
                     YanExecutionRules.EXECUTION_DAMAGE);
             var at = victim.position().add(0.0D, victim.getBbHeight() * 0.5D, 0.0D);
-            com.tnc.tnc.magic.TnSpellMechanics.arcBall(level, at, 80, 2.4D);
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 120, 1.6D, 1.6D, 1.6D, 0.35D);
-            level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y, at.z, 3, 1.2D, 1.2D, 1.2D, 0.0D);
+            if (isYanArena(level)) {
+                // The execution camera already draws the radial lightning at impact.
+                level.sendParticles(ParticleTypes.WITCH, at.x, at.y, at.z, 16, 0.8D, 0.8D, 0.8D, 0.12D);
+                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 24, 1.2D, 1.2D, 1.2D, 0.35D);
+            } else {
+                TnSpellMechanics.arcBall(level, at, 80, 2.4D);
+                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 120, 1.6D, 1.6D, 1.6D, 0.35D);
+                level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y, at.z, 3, 1.2D, 1.2D, 1.2D, 0.0D);
+            }
             level.playSound(null, victim.blockPosition(), SoundEvents.LIGHTNING_BOLT_THUNDER,
                     SoundSource.PLAYERS, 3.0F, 0.75F);
         }
@@ -495,6 +511,11 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
         return this.phase;
     }
 
+    public static boolean isYanArena(Level level) {
+        var dimension = level.dimension();
+        return dimension.equals(YanSanctuary.KEY) || dimension.equals(YanPrologue.WORLD);
+    }
+
     // ------------------------------------------------------------------
     //  ★ 凋零那一套音效（作者 2026-09-30："音乐也用凋零的好了"）
     //
@@ -567,12 +588,14 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
      */
     private void phaseTwoAscensionVisuals() {
         long time = this.level().getGameTime();
-        com.tnc.tnc.magic.TnSpellMechanics.ascensionAura(this, time);
-        com.tnc.tnc.magic.TnSpellMechanics.sparkMarks(this, time);
+        if (!isYanArena(this.level())) {
+            TnSpellMechanics.ascensionAura(this, time);
+            TnSpellMechanics.sparkMarks(this, time);
+        }
         // ★★ 作者要的"登神外观"＝背后跟随的那尊 god ✓（"我想要的登神外观是那个 god 的模型
         //    在他背后跟随的那个效果"）—— 黑暗衍用它那套暗色模型（god_dark ✓），
         //    尺寸按 boss 的体型放大到 GOD_FOLLOWER_SCALE ✓。
-        com.tnc.tnc.magic.TnSpellMechanics.maintainGodFollower(this, time, true, GOD_FOLLOWER_SCALE);
+        TnSpellMechanics.maintainGodFollower(this, time, true, GOD_FOLLOWER_SCALE);
         // ★★ 作者 2026-09-30："boss 二阶段我希望他身上一直散发着黑色和紫色粒子" ✓
         this.phaseTwoAuraParticles();
     }
@@ -588,11 +611,13 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
         if (!(this.level() instanceof ServerLevel level)) {
             return;
         }
+        boolean arena = isYanArena(level);
+        if (arena && this.tickCount % 4 != 0) return;
         double cy = this.getY() + this.getBbHeight() * 0.6D;
         level.sendParticles(ParticleTypes.WITCH, this.getX(), cy, this.getZ(),
-                6, 0.7D, 1.1D, 0.7D, 0.02D);
+                arena ? 4 : 6, 0.7D, 1.1D, 0.7D, 0.02D);
         level.sendParticles(ParticleTypes.SQUID_INK, this.getX(), cy, this.getZ(),
-                4, 0.7D, 1.1D, 0.7D, 0.01D);
+                arena ? 2 : 4, 0.7D, 1.1D, 0.7D, 0.01D);
     }
 
     /**
@@ -611,17 +636,18 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
      */
     private void phaseTwoGatherBurst(ServerLevel level) {
         double cy = this.getY() + this.getBbHeight() * 0.55D;
+        Vec3 center = new Vec3(this.getX(), cy, this.getZ());
+        boolean arena = isYanArena(level);
         for (int ring = 0; ring < 3; ring++) {
             double radius = 6.0D + ring * 3.0D;
-            int points = 12 + ring * 4;
+            int points = arena ? 6 + ring * 2 : 12 + ring * 4;
             for (int i = 0; i < points; i++) {
                 double a = i * (Math.PI * 2.0D / points) + ring * 0.3D;
                 Vec3 from = new Vec3(
                         this.getX() + Math.cos(a) * radius,
                         cy + (ring - 1) * 1.5D,
                         this.getZ() + Math.sin(a) * radius);
-                com.tnc.tnc.magic.TnSpellMechanics.arcLine(level, from,
-                        new Vec3(this.getX(), cy, this.getZ()), 5, 0.15D);
+                TnSpellMechanics.arcLine(level, from, center, arena ? 2 : 5, 0.15D);
             }
         }
         level.sendParticles(ParticleTypes.FLASH, this.getX(), cy, this.getZ(), 3, 0.2D, 0.3D, 0.2D, 0.0D);
@@ -635,6 +661,16 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
 
     @Override
     public boolean hurt(net.minecraft.world.damagesource.DamageSource source, float amount) {
+        // 2026-11-15 雷锲阶段：雷锲还在 = 衍无敌（只弹火花，不掉血）
+        if (YanNailPuzzle.isActive(this)) {
+            if (this.level() instanceof ServerLevel level) {
+                level.sendParticles(net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK,
+                        this.getX(), this.getY() + 1.6D, this.getZ(), 10, 0.5D, 0.8D, 0.5D, 0.15D);
+                level.playSound(null, this.blockPosition(), net.minecraft.sounds.SoundEvents.SHIELD_BLOCK,
+                        net.minecraft.sounds.SoundSource.HOSTILE, 1.0F, 0.6F);
+            }
+            return false;
+        }
         boolean hit = super.hurt(source, amount);
         if (!hit || this.level().isClientSide()) {
             return hit;
@@ -650,7 +686,7 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
                 level.sendParticles(ParticleTypes.FLASH, this.getX(), this.getY() + 1.5D, this.getZ(),
                         6, 0.4D, 0.6D, 0.4D, 0.0D);
                 level.sendParticles(ParticleTypes.SQUID_INK, this.getX(), this.getY() + 1.0D, this.getZ(),
-                        120, 1.2D, 1.2D, 1.2D, 0.4D);
+                        isYanArena(level) ? 32 : 120, 1.2D, 1.2D, 1.2D, 0.4D);
                 level.playSound(null, this.getX(), this.getY(), this.getZ(),
                         SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.HOSTILE, 2.0F, 0.8F);
                 // ★ 二阶段变身＝再来一次"生成咆哮" ✓（凋零那套；听过一次就忘不掉 ✓）
@@ -672,6 +708,14 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
         // ★ 生成咆哮（凋零那套）：第一次 tick 播一次 ✓（见 playSpawnRoar 的说明）
         if (this.tickCount == 1) {
             this.playSpawnRoar();
+        }
+        // ★ 2026-11-15 雷锲交互：整场只出现一次，触发条件是"血量被打掉超过 40%"
+        YanNailPuzzle.tick(this);
+        if (!this.nailUsed && this.isAlive() && this.getTarget() != null
+                && this.getHealth() <= this.getMaxHealth() * NAIL_TRIGGER_HEALTH
+                && this.level() instanceof ServerLevel nailLevel) {
+            this.nailUsed = true;
+            YanNailPuzzle.start(this, nailLevel);
         }
         if (this.phase == 2) {
             this.ensurePhaseTwoAura();
@@ -730,7 +774,7 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
 
     /** 把天变黑下雷雨 ✓（**只在现在没打雷时才改** —— 和玩家法术同一条规矩，见常量注释）。 */
     private void startThunderstorm(ServerLevel level, int ticks) {
-        if (!level.isThundering()) {
+        if (!isYanArena(level) && !level.isThundering()) {
             level.setWeatherParameters(0, Math.max(20, ticks), true, true);
         }
     }
@@ -764,6 +808,7 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
         int ticks = DarkRitualSequence.telegraphTicks(rite);
         int life = DarkRitualSequence.circleLife(rite);
         double radius = DarkRitualSequence.mainRadius(rite);
+        boolean arena = isYanArena(level);
         Vec3 at = (kind == 3) ? groundAt(level, this.position()) : groundAt(level, target.position());
 
         this.ritualSteps.clear();
@@ -775,6 +820,7 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
 
         // 卫星小阵：按节拍一颗颗点亮（一波一波往里推 ✓）
         int sats = DarkRitualSequence.satelliteSeals(rite);
+        if (arena) sats = Math.min(sats, 4);
         double size = DarkRitualSequence.satelliteSize(rite);
         for (int i = 0; i < sats; i++) {
             double ang = DarkRitualSequence.satelliteAngle(i);
@@ -789,6 +835,7 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
 
         // 门环：中段一道道立起来、面朝阵心 ✓（和雷锲那套形似，但**没有雷锲实体/禁锢** ✓）
         int gates = DarkRitualSequence.gateRings(rite);
+        if (arena) gates = Math.min(gates, 3);
         for (int i = 0; i < gates; i++) {
             double ang = i * (Math.PI * 2.0D / gates) + Math.PI / gates;
             double dist = DarkRitualSequence.gateRadius(rite);
@@ -944,6 +991,7 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
             ball.asDark();                           // lightingball_dark ✓
             ball.setFallSpeed(BALL_FALL_SPEED);
             ball.configure(20.0D, 6, at.y, 12.0D);
+            if (isYanArena(level)) ball.theme(DARK_THEME);
             ball.setLandImpact(this, BALL_DAMAGE, BALL_BLAST);   // ★ 落地才有伤害/爆炸 ✓
             ball.moveTo(at.x, at.y, at.z, 0.0F, 0.0F);
             level.addFreshEntity(ball);
@@ -1022,6 +1070,7 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
 
     /** 黑暗衍的"电花"＝ 黑雾为主 + 一点蓝电 ✓（亮蓝色 60 颗看着像普通雷法，不像他 ✗）。 */
     private void darkSparks(ServerLevel level, Vec3 at, int count) {
+        if (isYanArena(level)) count = Math.min(18, count);
         level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y + 1.0D, at.z,
                 count, 0.6D, 0.8D, 0.6D, 0.5D);
         level.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y + 1.0D, at.z,

@@ -86,6 +86,11 @@ public final class TNOrbEntities {
      * 客户端只负责把这只手画出来（几何在 {@code client/FireHandRenderer}）。
      * {@code updateInterval(1)} 让相位每 tick 都同步过去，抓着目标时才不会抖。
      */
+    /** 衍的雷锲（2026-11-15 交互玩法）：六枚插在地上，15 秒内打光就能反噬他。 */
+    public static final RegistryObject<EntityType<com.tnc.tnc.boss.TNThunderNailEntity>> THUNDER_NAIL =
+            ENTITY_TYPES.register("thunder_nail", () -> EntityType.Builder.of(com.tnc.tnc.boss.TNThunderNailEntity::new, MobCategory.MISC)
+                    .sized(0.6F, 1.9F).clientTrackingRange(10).updateInterval(2).build("tnc:thunder_nail"));
+
     public static final RegistryObject<EntityType<com.tnc.tnc.magic.fire.TNFlameHandEntity>> FLAME_HAND =
             ENTITY_TYPES.register("flame_hand", () -> EntityType.Builder.of(com.tnc.tnc.magic.fire.TNFlameHandEntity::new, MobCategory.MISC)
                     .sized(2.0F, 3.4F).clientTrackingRange(12).updateInterval(1).build("tnc:flame_hand"));

@@ -34,6 +34,8 @@ public final class TNSpellOrbClientEvents {
         //   几何全在 renderer 里按骨骼生成（不用模型文件），虚影 + 自发光 + 贴地淡出 + 空中的火柱。
         //   ⚠️ 实体有类型、客户端没渲染器 = 一生成就卡退，这一行不能漏 ✗
         event.registerEntityRenderer(TNOrbEntities.FLAME_HAND.get(), FireHandRenderer::new);
+        // 衍的雷锲：几何在 ThunderNailRenderer 里现场生成（不需要模型文件）
+        event.registerEntityRenderer(TNOrbEntities.THUNDER_NAIL.get(), ThunderNailRenderer::new);
         // ★ 风灵（风系第 2 条链「风球 / 风灵」，2026-10-10）—— 作者："风灵呢" ✗
         //   那一整条链以前是**纯粒子**（玩家看不见风灵）；现在每一只都是实体 ✓，
         //   模型/动画/贴图由 tools/gen_wind_sprite_model.py 程序化生成（GeckoLib，
