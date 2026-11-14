@@ -44,4 +44,16 @@ class LandMountResourceTest {
    }
   }
  }
+ @Test void allThreeForelegsHaveTwoDistinctRestTurns()throws Exception{
+  for(String id:List.of("rainbow_unicorn","mountain_goat","snow_wolf")){
+   var geo=JsonParser.parseString(Files.readString(Path.of("src/main/resources/assets/tnc/geo/mount/"+id+".geo.json"))).getAsJsonObject().getAsJsonArray("minecraft:geometry").get(0).getAsJsonObject();
+   Map<String,JsonObject> bones=new HashMap<>();for(var x:geo.getAsJsonArray("bones"))bones.put(x.getAsJsonObject().get("name").getAsString(),x.getAsJsonObject());
+   int legs=0;
+   for(String n:bones.keySet())if(n.startsWith("front")&&!n.endsWith("_shin")&&!n.endsWith("_carpus")&&!n.endsWith("_foot")){
+    legs++;double a=bones.get(n).getAsJsonArray("pivot").get(2).getAsDouble(),b=bones.get(n+"_shin").getAsJsonArray("pivot").get(2).getAsDouble(),c=bones.get(n+"_carpus").getAsJsonArray("pivot").get(2).getAsDouble(),d=bones.get(n+"_foot").getAsJsonArray("pivot").get(2).getAsDouble();
+    assertTrue(b-a>1.2,id+" upper turn");assertTrue(b-c>1.6,id+" forearm direction");assertTrue(d-c>.3,id+" lower turn");
+   }
+   assertEquals(2,legs,id);
+  }
+ }
 }
