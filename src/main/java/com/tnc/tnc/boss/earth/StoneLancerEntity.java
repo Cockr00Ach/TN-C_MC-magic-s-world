@@ -69,6 +69,8 @@ public final class StoneLancerEntity extends Monster implements GeoEntity {
     void setCasting(boolean value){entityData.set(CASTING,value);}
     boolean beginBurrow(LivingEntity target){return burrow.begin(target);}
     void finishBurrowWithoutTarget(){cooldown=50;}
+    /** 交互玩法：破柱成功后停手若干 tick（2026-11-15 作者设计）。 */
+    void suppressAttacks(int ticks){cooldown=Math.max(cooldown,ticks);pending=-1;coreChannel=0;setCasting(false);}
     public double burrowOffset(float partial){
         int phase=burrowPhase();if(phase==0)return 0;
         double age=level().isClientSide?Math.max(0,level().getGameTime()-entityData.get(BURROW_START)+partial):burrow.age()+partial;
@@ -117,6 +119,15 @@ public final class StoneLancerEntity extends Monster implements GeoEntity {
         bar.setName(getDisplayName());bar.setProgress(getHealth()/getMaxHealth());
         if(tickCount%20==0)attacks.removeIf(e->!e.isAlive());
         if(distantCooldown>0)distantCooldown--;
+        // ★ 2026-11-15 土柱交互：血量掉到 60% 以下触发一次；之后每 tick 推进这一轮
+        if (isArenaBound() && arenaAwake() && isAlive()) {
+            EarthPillarTrial.tick(this);
+            if (!getPersistentData().getBoolean("TncEarthTrialUsed")
+                    && getHealth() <= getMaxHealth() * 0.60F) {
+                getPersistentData().putBoolean("TncEarthTrialUsed", true);
+                EarthPillarTrial.start(this, server);
+            }
+        }
         if(burrow.tick())return;
         if(coreChannel>0){
             getNavigation().stop();setDeltaMovement(0,getDeltaMovement().y,0);

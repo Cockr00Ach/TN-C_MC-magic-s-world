@@ -87,6 +87,11 @@ public final class TNOrbEntities {
      * {@code updateInterval(1)} 让相位每 tick 都同步过去，抓着目标时才不会抖。
      */
     /** 衍的雷锲（2026-11-15 交互玩法）：六枚插在地上，15 秒内打光就能反噬他。 */
+    /** 土系 Boss 交互玩法：场地中心那根有血量的土柱（2026-11-15）。 */
+    public static final RegistryObject<EntityType<com.tnc.tnc.boss.earth.TNEarthPillarEntity>> EARTH_PILLAR =
+            ENTITY_TYPES.register("earth_pillar", () -> EntityType.Builder.of(com.tnc.tnc.boss.earth.TNEarthPillarEntity::new, MobCategory.MISC)
+                    .sized(2.4F, 4.0F).clientTrackingRange(10).updateInterval(2).build("tnc:earth_pillar"));
+
     public static final RegistryObject<EntityType<com.tnc.tnc.boss.TNThunderNailEntity>> THUNDER_NAIL =
             ENTITY_TYPES.register("thunder_nail", () -> EntityType.Builder.of(com.tnc.tnc.boss.TNThunderNailEntity::new, MobCategory.MISC)
                     .sized(0.6F, 1.9F).clientTrackingRange(10).updateInterval(2).build("tnc:thunder_nail"));
