@@ -28,9 +28,9 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(modid = TNMod.MODID)
 public final class PracticeArena {
     /** 演武场在天空岛本地坐标系里的中心 X。 */
-    public static final int LOCAL_X = 84;
+    public static final int LOCAL_X = 285;
     /** 演武场在天空岛本地坐标系里的中心 Z。 */
-    public static final int LOCAL_Z = 256;
+    public static final int LOCAL_Z = 423;
 
     private PracticeArena() {
     }
@@ -54,11 +54,15 @@ public final class PracticeArena {
     public static boolean ensure(MinecraftServer server) {
         var site = site(server);
         if (site == null) return false;
+        var level = SkyIslandWorlds.island(server);
+        var origin = SkyIslandSavedData.get(level).anchorPos("ORIGIN");
+        TrainingGroundData.get(server).retireArena(level.dimension().location().toString(),
+                origin.getX() + 84, origin.getZ() + 256);
         var arena = islandArena(server);
         if (arena != null) return true;
         // Old saves may record a deck on the natural ground underneath the island.
         // Keep that structure intact; register a new deck at the island arrival elevation.
-        build(SkyIslandWorlds.island(server), site.getX(), site.getZ(), site.getY());
+        build(level, site.getX(), site.getZ(), site.getY());
         return islandArena(server) != null;
     }
 
@@ -77,6 +81,15 @@ public final class PracticeArena {
 
     static void build(ServerLevel level, int cx, int cz, Integer fixedDeck) {
         int half = TrainingGroundRules.HALF;
+        if (level == SkyIslandWorlds.island(level.getServer())) {
+            var origin = SkyIslandSavedData.get(level).anchorPos("ORIGIN");
+            if (origin != null) {
+                var min = origin.offset(com.tnc.tnc.casino.machine.SkyCasinoUpgrade.MIN);
+                var max = origin.offset(com.tnc.tnc.casino.machine.SkyCasinoUpgrade.MAX);
+                if (cx + half >= min.getX() && cx - half <= max.getX()
+                        && cz + half + 5 >= min.getZ() && cz - half <= max.getZ()) return;
+            }
+        }
         int size = half * 2 + 1;
         // 先把台子占的区块加载出来：没加载的区块 heightmap 全是空值，
         // 直接读会把台面砌到世界底部去。
@@ -153,7 +166,7 @@ public final class PracticeArena {
         }
         TrainingGroundData.get(level.getServer()).markArena(level.dimension().location().toString(), cx, deck, cz);
         level.getServer().getPlayerList().broadcastSystemMessage(
-            Component.literal("天空岛演武场已落成：岛西侧的青石台，中央终端可以召出教官。"), false);
+            Component.literal("天空岛演武场已落成：岛南侧的青石台，中央终端可以召出教官。"), false);
     }
 
     /** 台面花纹：外圈黑石、四角演武位、中央台基、两条石环。 */
@@ -227,14 +240,14 @@ public final class PracticeArena {
             return false;
         }
         if (!inside(p)) {
-            p.sendSystemMessage(Component.literal("先走到天空岛西侧的演武场，再用中央终端召唤教官。"));
+            p.sendSystemMessage(Component.literal("先走到天空岛南侧的演武场，再用中央终端召唤教官。"));
             return false;
         }
         String normalized = normalizeRole(role);
         TrainingGround.dismissAll(p);
         var arena = arenaOf(p);
         if (arena == null) {
-            p.sendSystemMessage(Component.literal("先走到天空岛西侧的演武场，再用中央终端召唤教官。"));
+            p.sendSystemMessage(Component.literal("先走到天空岛南侧的演武场，再用中央终端召唤教官。"));
             return false;
         }
         int pad = data.claim(p.getUUID(), arena.key());

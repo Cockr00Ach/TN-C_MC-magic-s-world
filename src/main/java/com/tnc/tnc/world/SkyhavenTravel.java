@@ -16,7 +16,7 @@ public final class SkyhavenTravel {
  private static final Map<UUID,Integer> LOGIN=new HashMap<>();
  private static final Map<MinecraftServer,Set<ChunkPos>> GATES=new WeakHashMap<>();
  private static final TicketType<ChunkPos> TICKET=TicketType.create("tnc_skyhaven_gate",Comparator.comparingLong(ChunkPos::toLong),40);
- private static BlockPos firstArrival(MinecraftServer s){var authored=com.tnc.tnc.skyacademy.SkyAcademyWorld.at(s,"arrival");return com.tnc.tnc.skyacademy.SkyAcademyWorld.available(s)&&authored!=null?authored:SkyIslandSavedData.get(SkyIslandWorlds.island(s)).anchorPos("ARRIVAL");}
+ private static BlockPos firstArrival(MinecraftServer s){var origin=SkyIslandSavedData.get(SkyIslandWorlds.island(s)).anchorPos("ORIGIN");return origin==null?SkyIslandSavedData.get(SkyIslandWorlds.island(s)).anchorPos("ARRIVAL"):origin.offset(com.tnc.tnc.tavern.TavernOpening.SEAT);}
  public static void login(ServerPlayer p){if(SkyIslandWorlds.separate(p.server))LOGIN.put(p.getUUID(),p.server.getTickCount()+2);}
  private static void enter(ServerPlayer p){
   if(!SkyIslandWorlds.separate(p.server))return;

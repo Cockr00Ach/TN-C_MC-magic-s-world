@@ -171,9 +171,10 @@ public final class TavernUpgrade {
     }
     public static int ensureGuests(ServerLevel l,BlockPos origin,TavernAtmosphere atmosphere) {
         int spawned=0;
-        var retained=atmosphere.seats().stream().map(TavernAtmosphere.Seat::id).collect(java.util.stream.Collectors.toSet());
+        var retained=atmosphere.seats().stream().filter(s->!s.local().equals(TavernOpening.SEAT)).map(TavernAtmosphere.Seat::id).collect(java.util.stream.Collectors.toSet());
         for(var guest:l.getEntitiesOfClass(TavernGuestEntity.class,new AABB(origin.offset(MIN),origin.offset(MAX).offset(1,1,1))))if(!retained.contains(guest.seatId()))guest.discard();
         for(var seat:atmosphere.seats()) {
+            if(seat.local().equals(TavernOpening.SEAT))continue;
             var p=origin.offset(seat.local());var chunk=new ChunkPos(p);
             if(!l.hasChunkAt(p)||!l.areEntitiesLoaded(chunk.toLong())||!l.isPositionEntityTicking(p))continue;
             var existing=l.getEntitiesOfClass(TavernGuestEntity.class,new AABB(p).inflate(2),e->e.seatId().equals(seat.id()));

@@ -30,5 +30,13 @@
         "stream": true
       }
     ]
+  },
+  "music.first_sight.full": {
+    "sounds": [
+      {
+        "name": "tnc:music/first_sight/full",
+        "stream": true
+      }
+    ]
   }
 }

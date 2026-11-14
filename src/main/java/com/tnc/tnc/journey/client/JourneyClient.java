@@ -20,7 +20,7 @@ public final class JourneyClient {
     }
     private static void welcomeTick(Minecraft mc){
         if(mc.getConnection()!=welcomeConnection){welcomeConnection=mc.getConnection();welcomeRequested=false;pendingWelcome=null;nameConfirmed=false;}
-        if(mc.player==null||mc.level==null||mc.getOverlay()!=null)return;
+        if(mc.player==null||mc.level==null||mc.getOverlay()!=null||com.tnc.tnc.skyacademy.client.AcademyClient.cinematic())return;
         if(mc.screen instanceof net.minecraft.client.gui.screens.ReceivingLevelScreen)return;
         if(mc.screen!=null&&!(mc.screen instanceof JourneyScreen))return;
         requestWelcome(mc);

@@ -33,7 +33,7 @@ public final class SkyhavenSeaVision {
                 ||!com.tnc.tnc.mana.sight.client.ManaSightClient.enabled()){
             VISIBILITY.clear();world.clear();return;
         }
-        if(!standingAtSeaEdge(mc)){
+        if(!canSeeSeaStorms(mc)){
             VISIBILITY.clear();
             lastStorms=lastDrawn=lastQuads=lastLinks=lastBackground=0;
             return;
@@ -111,20 +111,26 @@ public final class SkyhavenSeaVision {
     }
     private static final int[][] EDGE_SAMPLES = {{6,0},{-6,0},{0,6},{0,-6},{4,4},{4,-4},{-4,4},{-4,-4}};
 
-    private static boolean standingAtSeaEdge(Minecraft mc){
+    private static boolean canSeeSeaStorms(Minecraft mc){
         var player=mc.player;
-        if(player==null || player.getAbilities().flying || player.getY()<140 || player.getY()>215
-                || SeaStormCoast.distanceToIsland(player.getX(),player.getZ())>0)return false;
-        if(!player.onGround() && mc.level.noCollision(player,player.getBoundingBox().move(0,-.15,0)))return false;
+        if(player==null)return false;
+        if(player.isInFluidType(SkyhavenContent.TYPE)
+                || SeaStormCoast.distanceToIsland(player.getX(),player.getZ())>0)return true;
+        // The authored rectangle also contains sea beyond the actual shoreline.
+        // Test the player's own column before checking the rim around it.
+        if(openSeaColumn(mc,player.getX(),player.getZ()))return true;
         for(int[] direction : EDGE_SAMPLES){
-            var sea=BlockPos.containing(player.getX()+direction[0],48,player.getZ()+direction[1]);
-            var chunk=mc.level.getChunkSource().getChunk(sea.getX()>>4,sea.getZ()>>4,
-                    net.minecraft.world.level.chunk.ChunkStatus.FULL,false);
-            if(chunk!=null && chunk.getFluidState(sea).is(SkyhavenContent.SOURCE)
-                    && mc.level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE,sea.getX(),sea.getZ())<=61)
-                return true;
+            if(openSeaColumn(mc,player.getX()+direction[0],player.getZ()+direction[1]))return true;
         }
         return false;
+    }
+
+    private static boolean openSeaColumn(Minecraft mc,double x,double z){
+        var sea=BlockPos.containing(x,48,z);
+        var chunk=mc.level.getChunkSource().getChunk(sea.getX()>>4,sea.getZ()>>4,
+                net.minecraft.world.level.chunk.ChunkStatus.FULL,false);
+        return chunk!=null && chunk.getFluidState(sea).is(SkyhavenContent.SOURCE)
+                && mc.level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE,sea.getX(),sea.getZ())<=61;
     }
 
     private static double opacity(SeaGyreLayout.Gyre g,double distance,double time){

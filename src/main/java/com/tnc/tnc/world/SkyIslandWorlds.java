@@ -19,7 +19,7 @@ public final class SkyIslandWorlds {
   return target;
  }
  /** Only invoked before a fresh island starts; never opts a completed legacy island in. */
- static void chooseFresh(MinecraftServer s){var legacy=SkyIslandSavedData.get(s.overworld());if(legacy.version!=0||legacy.phase!=SkyIslandSavedData.Phase.IDLE)throw new IllegalStateException("已有岛屿不自动迁移");var c=Choice.get(s);c.realm=true;c.setDirty();releaseUnusedSpawn(s);}
+ static void chooseFresh(MinecraftServer s){var legacy=SkyIslandSavedData.get(s.overworld());if(legacy.version!=0||legacy.phase!=SkyIslandSavedData.Phase.IDLE)throw new IllegalStateException("已有岛屿不自动迁移");var c=Choice.get(s);c.realm=true;c.prologue=true;c.setDirty();releaseUnusedSpawn(s);}
  public static void releaseUnusedSpawn(MinecraftServer s){if(separate(s))s.overworld().getChunkSource().removeRegionTicket(net.minecraft.server.level.TicketType.START,new net.minecraft.world.level.ChunkPos(s.overworld().getSharedSpawnPos()),11,net.minecraft.util.Unit.INSTANCE);}
  private SkyIslandWorlds(){}
 }

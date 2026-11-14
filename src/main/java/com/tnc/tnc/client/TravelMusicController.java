@@ -96,6 +96,9 @@ public final class TravelMusicController {
 
         SoundManager sounds = minecraft.getSoundManager();
 
+        // The first-sight score continues even when the player leaves the platform.
+        if (com.tnc.tnc.skyacademy.client.FirstSightScene.active()) return;
+
         // Indoors the inn owns the channel, including its initial ten seconds of silence.
         boolean casinoMusic=com.tnc.tnc.casino.client.CasinoMusicController.tick(minecraft);
         if(com.tnc.tnc.tavern.client.TavernMusicController.tick(minecraft)||casinoMusic){

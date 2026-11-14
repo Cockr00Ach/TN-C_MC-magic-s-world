@@ -28,11 +28,15 @@ public final class PracticeArenaLocationGameTests {
         root.getDataStorage().set(SkyIslandSavedData.FILE_ID,island);
         var oldFloor=new BlockPos(10084,105,10256);
         try {
+            var casino = new BlockPos(10084, 180, 10256);
+            level.setBlock(casino, Blocks.DIAMOND_BLOCK.defaultBlockState(), 3);
+            PracticeArena.build(level, casino.getX(), casino.getZ());
+            h.assertTrue(level.getBlockState(casino).is(Blocks.DIAMOND_BLOCK), "Casino footprint is protected");
             var data=TrainingGroundData.get(level.getServer());
             data.markArena("minecraft:overworld",10084,105,10256);
             level.setBlock(oldFloor,Blocks.GOLD_BLOCK.defaultBlockState(),3);
             h.assertTrue(PracticeArena.ensure(level.getServer()),"Old record must not bypass island construction");
-            var site=new BlockPos(10084,179,10256);
+            var site=new BlockPos(10285,179,10423);
             h.assertTrue(PracticeArena.site(level.getServer()).equals(site),"Deck elevation follows arrival, not ground heightmap");
             h.assertTrue(level.getBlockState(site.above()).is(TNMod.PRACTICE_TERMINAL.get()),"Island deck has a terminal");
             h.assertTrue(level.getBlockState(oldFloor).is(Blocks.GOLD_BLOCK),"Migration preserves old structure");
@@ -43,7 +47,7 @@ public final class PracticeArenaLocationGameTests {
             var p=AdventureGameTests.player(h);
             try {
                 h.assertTrue(PracticeArena.teleportIn(p),"Command reaches island arena");
-                h.assertTrue(p.serverLevel()==level&&p.getY()==180&&p.getX()==10084.5,"Destination is island height in the independent realm");
+                h.assertTrue(p.serverLevel()==level&&p.getY()==180&&p.getX()==10285.5,"Destination is island height in the independent realm");
             } finally {p.discard();}
             h.succeed();
         } finally {root.getDataStorage().set(SkyIslandSavedData.FILE_ID,previous);choice.realm=wasRealm;choice.setDirty();}

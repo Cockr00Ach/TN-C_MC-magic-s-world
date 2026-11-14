@@ -160,6 +160,14 @@ public final class TrainingGroundData extends SavedData {
         return arenas.isEmpty() ? null : arenas.get(arenas.size() - 1).center();
     }
 
+    void retireArena(String dimension, int x, int z) {
+        if (arenas.removeIf(arena -> {
+            if (!arena.dimension().equals(dimension) || arena.x() != x || arena.z() != z) return false;
+            pads.remove(arena.key());
+            return true;
+        })) setDirty();
+    }
+
     public void markArena(String dimension, int x, int y, int z) {
         String dim = dimension == null || dimension.isEmpty() ? "minecraft:overworld" : dimension;
         var arena = new Arena(dim, x, y, z);

@@ -53,6 +53,7 @@ public final class SkyhavenArrival {
         var root=p.getPersistentData();if(!root.contains(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG,10))root.put(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG,new CompoundTag());
         var flags=root.getCompound(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG);flags.putBoolean("SkyhavenWaiting",false);flags.putBoolean("SkyhavenArrived",true);
         release(j);JOBS.remove(p.getUUID());send(j,"done");
+        com.tnc.tnc.tavern.TavernOpening.queue(p);
         com.mojang.logging.LogUtils.getLogger().info("[Skyhaven Arrival] Client scene ready; first arrival released after {} seconds",(System.nanoTime()-j.started)/1_000_000_000.);
     }
     private static void release(Job j){for(var c:j.chunks.subList(0,j.issued))j.world.getChunkSource().removeRegionTicket(TICKET,c,0,j.player.getUUID());}

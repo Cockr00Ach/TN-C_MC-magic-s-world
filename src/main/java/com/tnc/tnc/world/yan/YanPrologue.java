@@ -123,7 +123,7 @@ public final class YanPrologue {
     public static boolean awaiting(ServerPlayer player) {
         if (active(player)) return true;
         if (!SkyIslandWorlds.prologueEnabled(player.server) || player.server.getLevel(WORLD) == null
-                || player.isCreative() || player.isSpectator()
+                || player.isSpectator()
                 || player instanceof net.minecraftforge.common.util.FakePlayer) return false;
         var record = JourneyData.get(player.server).player(player.getUUID());
         return !record.getBoolean(COMPLETE) && !record.getBoolean("Named");

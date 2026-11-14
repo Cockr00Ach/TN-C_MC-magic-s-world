@@ -23,13 +23,15 @@ public final class AcademyClient {
     public static void receive(CompoundTag t){
         if(t.getString("Type").equals("arrival_loading")){com.tnc.tnc.world.skyhaven.SkyhavenArrivalClient.receive(t);return;}
         var mc=Minecraft.getInstance();if(mc.level==null||mc.player==null)return;
+        if(t.getString("Type").equals("tavern_opening")){com.tnc.tnc.tavern.client.TavernOpeningScene.start(t);return;}
+        if(t.getString("Type").equals("tavern_end")){com.tnc.tnc.tavern.client.TavernOpeningScene.close();return;}
         switch(t.getString("Type")){
             case "dialogue"->mc.setScreen(new AcademyScreen(t));
-            case "shot"->{origin=BlockPos.of(t.getLong("Origin"));start(t.getString("Site"),t.getInt("Ticks"));}
+            case "shot"->{origin=BlockPos.of(t.getLong("Origin"));if(t.getString("Site").equals("stargaze")){FirstSightScene.start(t);}else start(t.getString("Site"),t.getInt("Ticks"));}
             case "state"->{origin=BlockPos.of(t.getLong("Origin"));int next=t.getInt("Completed");if(next!=complete)hintAge=300;complete=next;active=t.getString("Active");exposure=t.getInt("Exposure");rune=t.getInt("Rune");practice=t.getBoolean("Practice");}
         }
     }
-    public static boolean cinematic(){return camera!=null;}
+    public static boolean cinematic(){return camera!=null||FirstSightScene.locked()||com.tnc.tnc.tavern.client.TavernOpeningScene.active();}
     public static String shot(){return shot;}
     public static BlockPos origin(){return origin;}
     private static void start(String name,int ticks){
@@ -82,10 +84,11 @@ public final class AcademyClient {
         var ridge=point("stargaze");
         if(eye.distanceToSqr(ridge)<48*48&&AcademyRules.night(mc.level.getDayTime())){
             // An environment-sized river of individual luminous grains, never a solid ribbon wall.
-            double reveal=active.equals("stargaze")?Math.min(1,exposure/160.):1;
+            double reveal=1;
+            SummitMagicVista.tick(ridge, clock);
             int quality=mc.options.particles().get()==ParticleStatus.MINIMAL?18:mc.options.particles().get()==ParticleStatus.DECREASED?34:56;
             String[] roots={"farm","lake","wind","workshop"};int[] colors={0x6CE7A7,0x8CDAFF,0xF3DC99,0x84F5E6};
-            for(int i=0;i<quality;i++){
+            for(int i=0;i<quality/2;i++){
                 int branch=i%4;double u=random.nextDouble()*reveal;var source=point(roots[branch]);var center=Vec3.atCenterOf(origin.offset(260,170,210));
                 Vec3 base=source.lerp(center,u);double curve=Math.sin(u*Math.PI);
                 Vec3 at=base.add(Math.sin(u*6+branch)*curve*22+(random.nextDouble()-.5)*8,curve*20+(random.nextDouble()-.5)*8,Math.cos(u*6+branch)*curve*15+(random.nextDouble()-.5)*8);
@@ -116,7 +119,7 @@ public final class AcademyClient {
             g.drawCenteredString(mc.font,line,w/2,h-33,0xD6EEE8);g.drawCenteredString(mc.font,"潜行键跳过镜头 · 实操仍需亲手完成",w/2,h-18,0xA5AAA7);return;
         }
         if(!active.isEmpty()){
-            String text=switch(active){case "stargaze"->"夜景研习 · "+(ManaSightClient.enabled()?"看见魔脉如何汇入星空":"亲手按F8打开魔力视野");case "wind"->"F8寻找光点 · 依次右键一、二、三枚光点的石头（"+rune+"/3）";case "farm"->"练习：相邻放集露盏；牧务杖选兽，再右键集息器";default->"练习：补上晶纤缺口，观察魔力输送直到灯亮";};
+            String text=switch(active){case "stargaze"->"";case "wind"->"F8寻找光点 · 依次右键一、二、三枚光点的石头（"+rune+"/3）";case "farm"->"练习：相邻放集露盏；牧务杖选兽，再右键集息器";default->"练习：补上晶纤缺口，观察魔力输送直到灯亮";};
             var at=point(active);if(mc.player.position().distanceToSqr(at)<32*32)g.drawCenteredString(mc.font,text,w/2,h-63,0xC8E8DD);
         }else if(hintAge>0){String next=AcademyRules.next(complete);var site=SkyAcademyWorld.SITES.get(next);if(site!=null)g.drawCenteredString(mc.font,"新的邀约 · "+AcademyLessons.title(next)+" · /skylesson 查看地点",w/2,h-63,0xC8E8DD);}
     }

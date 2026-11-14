@@ -15,7 +15,9 @@
   "client": [
     "BronzeHandInvoker",
     "BronzeHeldItemMixin",
-    "MusicManagerMixin"
+    "MusicManagerMixin",
+    "OpeningHeldItemMixin",
+    "OpeningPlayerPoseMixin"
   ],
   "injectors": {
     "defaultRequire": 0
