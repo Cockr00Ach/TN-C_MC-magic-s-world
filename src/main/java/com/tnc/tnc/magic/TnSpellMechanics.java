@@ -713,6 +713,8 @@ public final class TnSpellMechanics {
         com.tnc.tnc.magic.water.TNWaterSpellEntity.cast(player, spellId);
         com.tnc.tnc.magic.water.TNWaterFieldEntity.cast(player, spellId);
         com.tnc.tnc.magic.water.ChaosSilence.cast(player, spellId);
+        // 独立法术：法力护盾（挡一次任意伤害，最多 3 层，无冷却）
+        com.tnc.tnc.magic.ManaShield.cast(player, spellId);
         // 领域法术（2026-11-08）：独立法术页的雷霆领域 / 暗黑领域 —— 把领域"展开"成状态效果
         com.tnc.tnc.magic.domain.DomainService.cast(player, spellId);
         // 火球链（火系第 1 条链）：自有投射物。命中时要精确知道「是哪个法术、打了多少」

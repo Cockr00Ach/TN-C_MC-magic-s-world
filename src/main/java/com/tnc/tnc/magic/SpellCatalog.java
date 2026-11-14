@@ -38,13 +38,13 @@ public final class SpellCatalog {
         SPEED("雷速", "加速与位移"),
 
         /** 火射线线：从一条穿透射线，到三条齐发，再到命中就炸。 */
-        RAY("射线", "穿透的火焰射线"),
+        RAY("点火", "布火并积攒热量"),
 
         /** 火球线（2026-10-05 重做）：火球术 → 大火球术 → 熔岩火球 → 熔岳天倾 → 炎葬。 */
-        BALL("火球", "会飞的火球"),
+        BALL("引爆", "消耗热量并引爆"),
 
         /** 燃烧线：拿血量换伤害，越烧越强，烧到尽头能原地复活。 */
-        BURN("燃烧", "以血换伤"),
+        BURN("燃烧形态", "改变叠热与战斗方式"),
 
         /**
          * 火手链（2026-11-13 新增）：从敌人脚下伸出一只燃烧的巨人手掌，抓住并捏爆，
@@ -228,11 +228,11 @@ public final class SpellCatalog {
             entry("lightning_ascension", Chain.SPEED, 5, "闪电登神"),
 
             // ---- 火射线线：1 穿透 → 2 更粗 → 3 火龙吐息（穿透 + 终点爆炸）→ 4 炎魔龙之怒（法阵）→ 5 太阳审判（烈日坠）----
-            fireEntry("sun_ray", Chain.RAY, 1, "烈阳射线"),
-            fireEntry("blast_ray", Chain.RAY, 2, "爆炸射线"),
-            fireEntry("fire_dragon", Chain.RAY, 3, "火龙吐息"),
-            fireEntry("flame_demon_wrath", Chain.RAY, 4, "炎魔龙之怒"),
-            fireEntry("solar_judgment", Chain.RAY, 5, "太阳の审判"),
+            fireEntry("sun_ray", Chain.RAY, 1, "火星"),
+            fireEntry("blast_ray", Chain.RAY, 2, "燃痕"),
+            fireEntry("fire_dragon", Chain.RAY, 3, "焚风"),
+            fireEntry("flame_demon_wrath", Chain.RAY, 4, "炎狱"),
+            fireEntry("solar_judgment", Chain.RAY, 5, "天火"),
 
             // ---- 火球线（作者 2026-10-05 定稿）----
             //   ★ 1/2 两档已改成**自有实体**（magic/fire/TNFireBoltEntity）：
@@ -244,11 +244,11 @@ public final class SpellCatalog {
             //     所以按作者决定**只保留大火球术** ✓
             //   3/4/5 也已是自有实体：熔岩火球（落点熔岩地）/ 熔岳天倾（法阵砸落）/ 陨星坠 ✓
             //   ⚠️ 同档仍只放一个 —— 上面「每条链每档恰好一个」的理由同样适用 ✗
-            fireEntry("fireball", Chain.BALL, 1, "火球术"),
-            fireEntry("great_fireball", Chain.BALL, 2, "大火球术"),
-            fireEntry("lava_fireball", Chain.BALL, 3, "熔岩火球"),
-            fireEntry("molten_skyfall", Chain.BALL, 4, "熔岳天倾"),
-            fireEntry("meteor_fall", Chain.BALL, 5, "陨星坠"),
+            fireEntry("fireball", Chain.BALL, 1, "爆燃"),
+            fireEntry("great_fireball", Chain.BALL, 2, "连爆"),
+            fireEntry("lava_fireball", Chain.BALL, 3, "火种"),
+            fireEntry("molten_skyfall", Chain.BALL, 4, "熔核"),
+            fireEntry("meteor_fall", Chain.BALL, 5, "殉爆"),
 
             // ---- 燃烧线（2026-10-11 重做）：以伤换伤 —— 火伤越高，自己挨打越疼
             //   1 燎肤(+10%火伤/+10%受伤/结束反噬20%最大生命) → 2 灼脉(+25%/+20%/40%)
@@ -391,6 +391,8 @@ public final class SpellCatalog {
             // Null element is deliberate: independent skills never enter the seven-element NBT arrays.
             new Entry(ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "chaos_magic"), null, Chain.INDEPENDENT, 1, "乱魔"),
             new Entry(ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "concealment"), null, Chain.INDEPENDENT, 1, "隐匿"),
+            // 2026-11-15：凝聚魔力的护盾，挡一次任意伤害就碎，最多叠 3 层，无冷却
+            new Entry(ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "mana_shield"), null, Chain.INDEPENDENT, 1, "法力护盾"),
             // ★ 2026-11-08 领域法术（作者："这个领域法术放在独立法术那里，并且告知玩家只能选择一个"）
             //   id 和 {@link #specials()} 一条条对应（七个元素各一条），
             //   元素写 null 是为了让它们只出现在「独立」页、不进七元素 NBT 数组；
