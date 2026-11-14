@@ -218,6 +218,16 @@ public class TNApolloEntity extends Monster implements GeoEntity {
     @Override
     public void aiStep() {
         super.aiStep();
+        // ★ 2026-11-15 召唤交互：掉血超过 40% 触发一次
+        if (this.isAlive() && this.level() instanceof net.minecraft.server.level.ServerLevel trialLevel) {
+            com.tnc.tnc.boss.SummonTrial.tick(this);
+            if (!this.getPersistentData().getBoolean("TncSummonTrialUsed")
+                    && this.getHealth() <= this.getMaxHealth() * 0.60F) {
+                this.getPersistentData().putBoolean("TncSummonTrialUsed", true);
+                com.tnc.tnc.boss.SummonTrial.start(this, trialLevel,
+                        com.tnc.tnc.boss.SummonTrial.Kind.LIGHT);
+            }
+        }
         if (!this.level().isClientSide()) {
             this.tickBossBar();
         }
