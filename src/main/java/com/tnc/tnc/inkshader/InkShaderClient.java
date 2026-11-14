@@ -60,7 +60,7 @@ public final class InkShaderClient {
             if(mode==InkShaderSession.Mode.INK&&!java.nio.file.Files.isRegularFile(backend.shaderDirectory().resolve(InkShaderSession.INK_PACK))){message("未找到水墨光影包："+InkShaderSession.INK_PACK);return false;}
             files.mode(mode);session.mode(mode);
             var level=Minecraft.getInstance().level;advance(level!=null&&level.dimension().location().toString().equals("tnc:ink_realm"));
-            message(mode==InkShaderSession.Mode.OFF?"水墨维度：自动关闭光影，离开后恢复原状态。":"水墨维度：使用水墨光影，离开后恢复原状态。");return !session.failed();
+            message(mode==InkShaderSession.Mode.OFF?"水墨维度：自动关闭光影，离开后打开原光影包。":"水墨维度：使用水墨光影，离开后打开原光影包。");return !session.failed();
         }catch(Exception e){failure(e);return false;}
     }
     @SubscribeEvent public static void commands(RegisterClientCommandsEvent event){
@@ -68,7 +68,7 @@ public final class InkShaderClient {
         root.then(net.minecraft.commands.Commands.literal("off").executes(c->mode(InkShaderSession.Mode.OFF)?1:0));
         root.then(net.minecraft.commands.Commands.literal("ink").executes(c->mode(InkShaderSession.Mode.INK)?1:0));
         root.then(net.minecraft.commands.Commands.literal("status").executes(c->{
-            message(session==null?"水墨维度光影切换：等待 Oculus。":"水墨维度光影："+(session.mode()==InkShaderSession.Mode.OFF?"自动关闭":"水墨光影")+(session.active()?"；离开后恢复原状态。":"。"));return 1;}));
+            message(session==null?"水墨维度光影切换：等待 Oculus。":"水墨维度光影："+(session.mode()==InkShaderSession.Mode.OFF?"自动关闭":"水墨光影")+(session.active()?"；离开后打开原光影包。":"。"));return 1;}));
         event.getDispatcher().register(root);
     }
     static InkShaderSession auditSession(){return session;}

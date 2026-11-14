@@ -63,12 +63,72 @@ public final class LightningBoltGeometry {
                             double bx, double by, double bz,
                             long seed, float width, float alpha, int theme, int branches,
                             double camX, double camY, double camZ) {
+        bolt0(vc, m, ax, ay, az, bx, by, bz, seed, width, alpha,
+                LightningTheme.glow(theme), LightningTheme.mid(theme), LightningTheme.edge(theme),
+                branches, camX, camY, camZ);
+    }
+
+    /**
+     * 自定义配色的 {@link #bolt} —— 火/水/风/土/光这些没有 {@link LightningTheme} 主题的元素用。
+     *
+     * <p>几何、分叉、白芯、辉光层次和雷完全一样，只有颜色不同；这样七系形态看起来是
+     * “同一种语言的不同元素”，而不是七套各画各的 ✗。
+     */
+    public static void boltTinted(VertexConsumer vc, Matrix4f m,
+                                  double ax, double ay, double az,
+                                  double bx, double by, double bz,
+                                  long seed, float width, float alpha,
+                                  float[] mid, float[] glow, int branches,
+                                  double camX, double camY, double camZ) {
+        boltTinted(vc, m, ax, ay, az, bx, by, bz, seed, width, alpha, mid, glow, branches, 1.0D,
+                camX, camY, camZ);
+    }
+
+    /**
+     * 同上，但可以<b>调抖动幅度</b> ✓（{@code jitterScale = 1} 就是雷系原样 ✗）。
+     *
+     * <p>★ 2026-11-09 水球链 t4/t5：「一根直直的闪电像不像水波嘞」——
+     * 雷系那条 4 级中点位移是按<b>段长</b>抖的 ✗（48 格的光束会歪出好几格 ✗），
+     * 拿去做"水柱"就成了一根乱窜的蛇 ✗。水要的是"大致笔直、略有起伏" ⇒ 传 0.3 左右 ✓。
+     *
+     * @param jitterScale 抖动倍率（1 = 雷系原样；0 = 完全笔直）
+     */
+    public static void boltTinted(VertexConsumer vc, Matrix4f m,
+                                  double ax, double ay, double az,
+                                  double bx, double by, double bz,
+                                  long seed, float width, float alpha,
+                                  float[] mid, float[] glow, int branches, double jitterScale,
+                                  double camX, double camY, double camZ) {
+        bolt0(vc, m, ax, ay, az, bx, by, bz, seed, width, alpha,
+                glow, mid, mul(mid, 0.55F), branches, jitterScale, camX, camY, camZ);
+    }
+
+    private static void bolt0(VertexConsumer vc, Matrix4f m,
+                              double ax, double ay, double az,
+                              double bx, double by, double bz,
+                              long seed, float width, float alpha,
+                              float[] glow, float[] mid, float[] edge,
+                              int branches,
+                              double camX, double camY, double camZ) {
+        bolt0(vc, m, ax, ay, az, bx, by, bz, seed, width, alpha, glow, mid, edge, branches, 1.0D,
+                camX, camY, camZ);
+    }
+
+    private static void bolt0(VertexConsumer vc, Matrix4f m,
+                              double ax, double ay, double az,
+                              double bx, double by, double bz,
+                              long seed, float width, float alpha,
+                              float[] glow, float[] mid, float[] edge,
+                              int branches, double jitterScale,
+                              double camX, double camY, double camZ) {
         if (width <= 0.0F || alpha <= 0.004F) {
             return;
         }
+        double pathJitter = PATH_JITTER * jitterScale;
+        double branchJitter = BRANCH_JITTER * jitterScale;
         RandomSource rnd = RandomSource.create(seed);
-        double[][] path = path(ax, ay, az, bx, by, bz, PATH_LEVELS, PATH_JITTER, rnd);
-        strands(vc, m, path, width, alpha, theme, camX, camY, camZ);
+        double[][] path = path(ax, ay, az, bx, by, bz, PATH_LEVELS, pathJitter, rnd);
+        strands(vc, m, path, width, alpha, glow, mid, edge, camX, camY, camZ);
 
         if (branches <= 0) {
             return;
@@ -92,8 +152,8 @@ public final class LightningBoltGeometry {
             double ex = p[0] + Math.cos(angle) * reach + ux * reach * 0.55D;
             double ey = p[1] + uy * reach * 0.75D - reach * 0.10D;
             double ez = p[2] + Math.sin(angle) * reach + uz * reach * 0.55D;
-            double[][] sub = path(p[0], p[1], p[2], ex, ey, ez, BRANCH_LEVELS, BRANCH_JITTER, rnd);
-            strands(vc, m, sub, width * 0.52F, alpha * 0.72F, theme, camX, camY, camZ);
+            double[][] sub = path(p[0], p[1], p[2], ex, ey, ez, BRANCH_LEVELS, branchJitter, rnd);
+            strands(vc, m, sub, width * 0.52F, alpha * 0.72F, glow, mid, edge, camX, camY, camZ);
             // 二级分叉：只给最粗的大雷（width 够大时）—— 小雷画了也看不见，纯浪费 ✗
             if (width > 0.34F && rnd.nextBoolean()) {
                 int at2 = 1 + rnd.nextInt(Math.max(1, sub.length - 2));
@@ -102,19 +162,21 @@ public final class LightningBoltGeometry {
                 double r2 = len * (0.07D + rnd.nextDouble() * 0.09D);
                 double[][] sub2 = path(q[0], q[1], q[2],
                         q[0] + Math.cos(a2) * r2, q[1] - r2 * 0.55D, q[2] + Math.sin(a2) * r2,
-                        2, 0.11D, rnd);
-                strands(vc, m, sub2, width * 0.28F, alpha * 0.55F, theme, camX, camY, camZ);
+                        2, 0.11D * jitterScale, rnd);
+                strands(vc, m, sub2, width * 0.28F, alpha * 0.55F, glow, mid, edge, camX, camY, camZ);
             }
         }
     }
 
+    /** 颜色乘一个系数（做"更暗的边"用）。 */
+    private static float[] mul(float[] color, float factor) {
+        return new float[]{color[0] * factor, color[1] * factor, color[2] * factor};
+    }
+
     /** 四层叠出来的"白芯 + 彩色光晕"。 */
     private static void strands(VertexConsumer vc, Matrix4f m, double[][] pts, float width,
-                                float alpha, int theme,
+                                float alpha, float[] glow, float[] mid, float[] edge,
                                 double camX, double camY, double camZ) {
-        float[] glow = LightningTheme.glow(theme);
-        float[] mid = LightningTheme.mid(theme);
-        float[] edge = LightningTheme.edge(theme);
         float[] white = LightningTheme.WHITE;
         // 1) 外辉光：宽、暗、几乎不挡住背后
         ribbon(vc, m, pts, width * 3.4F, glow, 0.15F * alpha, glow, 0.0F, camX, camY, camZ);
@@ -124,6 +186,72 @@ public final class LightningBoltGeometry {
         ribbon(vc, m, pts, width * 0.55F, white, 0.92F * alpha, mid, 0.55F * alpha, camX, camY, camZ);
         // 4) 高光丝：让芯里还有一条更亮的东西
         ribbon(vc, m, pts, width * 0.17F, white, 0.88F * alpha, white, 0.0F, camX, camY, camZ);
+    }
+
+    // ------------------------------------------------------------------
+    //  任意折线（风系龙卷风：螺旋缠绕的一束线）
+    // ------------------------------------------------------------------
+
+    /**
+     * 把一条<b>任意折线</b>画成三层加色光带（外辉光 / 主色 / 白芯）✓。
+     *
+     * <p>为什么不直接用 {@link #arcTinted}：那个只吃"两点 + 随机抖动" ✗，
+     * 而龙卷风要的是<b>自己指定的折点</b>（作者 2026-11-09：「线螺旋缠绕起来变成龙卷风……
+     * 可以有明确的锐角，极具那种线条特色」）—— 折点在哪里、折多锐，必须由
+     * {@link com.tnc.tnc.magic.TornadoLineShape} 说了算 ✓。
+     *
+     * <p>三层宽度比沿用雷电那一套（3.4 / 1.5 / 0.5），所以风线和闪电是同一种"亮线"读法 ✓，
+     * 只是颜色换成风系的青白 ✓。
+     *
+     * @param pts   折线（至少两点，单位 = 当前 pose 空间）
+     * @param width 白芯半宽
+     * @param alpha 总不透明度（0..1）
+     * @param core  白芯色（通常纯白）
+     * @param mid   主色（外缘过渡色）
+     * @param glow  外辉光色
+     */
+    public static void polyline(VertexConsumer vc, Matrix4f m, double[][] pts,
+                                float width, float alpha,
+                                float[] core, float[] mid, float[] glow,
+                                double camX, double camY, double camZ) {
+        if (pts == null || pts.length < 2 || width <= 0.0F || alpha <= 0.004F) {
+            return;
+        }
+        // 1) 外辉光：宽、很淡，边缘直接透明（光带而不是实心管）✓
+        ribbon(vc, m, pts, width * 3.4F, glow, 0.15F * alpha, glow, 0.0F, camX, camY, camZ);
+        // 2) 主色：看得出是青绿的风 ✓
+        ribbon(vc, m, pts, width * 1.5F, mid, 0.42F * alpha, mid, 0.08F * alpha,
+                camX, camY, camZ);
+        // 3) 白芯：中心亮到发白，边缘退回主色 ⇒ 远看是一条细亮线 ✓
+        ribbon(vc, m, pts, width * 0.5F, core, 0.95F * alpha, mid, 0.55F * alpha,
+                camX, camY, camZ);
+    }
+
+    /**
+     * 同上，但<b>每一段可以不一样粗</b>（根细 → 慢慢变粗 → 后面一样粗 ✓）。
+     *
+     * <p>★ 2026-11-10 作者：「t4t5 发射水波时，水波的根部应该从细到粗然后保持一样，
+     * 也就是法阵那个根部要细细的，不然就很突兀」✗ ——
+     * 原来整根光带是**等宽**的 ✗：法阵口才 0.9 格，水波一冒出来就有 1.4 格宽 ⇒ 像从针眼里挤出一根柱子 ✗。
+     *
+     * <p>为什么不做成"整根锥形"✗：作者要的是"**从细到粗然后保持一样**"✓ ——
+     * 只在根部 {@code ramp} 那一小段收细，往后的宽度恒定 ✓（全程锥形会像漏斗 ✗）。
+     *
+     * @param half 每个<b>点</b>的宽度倍率（{@code pts.length} 个，白芯半宽 = {@code width*half[i]}）
+     */
+    public static void polylineTapered(VertexConsumer vc, Matrix4f m, double[][] pts, float[] half,
+                                       float width, float alpha,
+                                       float[] core, float[] mid, float[] glow,
+                                       double camX, double camY, double camZ) {
+        if (pts == null || pts.length < 2 || half == null || half.length != pts.length
+                || width <= 0.0F || alpha <= 0.004F) {
+            return;
+        }
+        ribbon(vc, m, pts, half, width * 3.4F, glow, 0.15F * alpha, glow, 0.0F, camX, camY, camZ);
+        ribbon(vc, m, pts, half, width * 1.5F, mid, 0.42F * alpha, mid, 0.08F * alpha,
+                camX, camY, camZ);
+        ribbon(vc, m, pts, half, width * 0.5F, core, 0.95F * alpha, mid, 0.55F * alpha,
+                camX, camY, camZ);
     }
 
     // ------------------------------------------------------------------
@@ -146,6 +274,368 @@ public final class LightningBoltGeometry {
         RandomSource rnd = RandomSource.create(seed);
         double[][] pts = path(ax, ay, az, bx, by, bz, 2, 0.11D, rnd);
         webLine(vc, m, pts, width, alpha, theme, camX, camY, camZ);
+    }
+
+    // ------------------------------------------------------------------
+    //  自定义配色的短电弧（火/水/风/土/光的拖尾都用它）
+    // ------------------------------------------------------------------
+
+    /**
+     * 两点之间的一条<b>自定义配色短电弧</b>：三层（外辉光 / 主色 / 白芯）。
+     *
+     * <p>和 {@link #arc} 的区别只是颜色不再取自 {@link LightningTheme}——
+     * 元素附身的拖尾要按元素上色，但几何必须和雷共用同一套"锯齿 + 辉光"的读法 ✓。
+     *
+     * @param core 中心色（通常白，土/暗可以给深色）
+     * @param mid  主色
+     * @param glow 外辉光色
+     */
+    public static void arcTinted(VertexConsumer vc, Matrix4f m,
+                                 double ax, double ay, double az,
+                                 double bx, double by, double bz,
+                                 long seed, float width, float alpha,
+                                 float[] core, float[] mid, float[] glow,
+                                 double camX, double camY, double camZ) {
+        if (width <= 0.0F || alpha <= 0.004F) {
+            return;
+        }
+        RandomSource rnd = RandomSource.create(seed);
+        double[][] pts = path(ax, ay, az, bx, by, bz, 2, 0.11D, rnd);
+        ribbon(vc, m, pts, width * 3.0F, glow, 0.16F * alpha, glow, 0.0F, camX, camY, camZ);
+        ribbon(vc, m, pts, width, core, 0.62F * alpha, mid, 0.35F * alpha,
+                camX, camY, camZ);
+    }
+
+    // ------------------------------------------------------------------
+    //  暗系：黑线 ＋ 血线（横向的"暗闪电"）
+    // ------------------------------------------------------------------
+
+    /** 黑芯：几乎纯黑，靠 alpha 压住背后的亮处（加色层里它是看不见的 ✗，要走 {@code DARK} 层）。 */
+    private static final float[] DARK_CORE = {0.015F, 0.010F, 0.030F};
+    /** 血线主色（暗红，不是亮红 —— 亮红在夜里像火法 ✗）。 */
+    private static final float[] BLOOD = {0.62F, 0.030F, 0.070F};
+    /** 血线的雾边：更暗的红。 */
+    private static final float[] BLOOD_DIM = {0.28F, 0.000F, 0.035F};
+
+    /**
+     * ★ <b>一条"黑线 ＋ 血线"</b>（横着走的暗闪电）。
+     *
+     * <p>作者 2026-11-05：「闪电要是横着来是不是就是黑线和血线了」—— 是。
+     * 竖着劈下来的叫"雷"，横着游过去的读起来就是"某种黑红色的东西在爬" ✓。
+     * 这里把雷的<b>白芯换成黑芯</b>、把彩色辉光换成<b>血红</b>，四层叠出：
+     * 血雾（宽/极暗）→ 血线（中/暗红）→ 黑芯（细/最黑）→ 一线血高光。
+     *
+     * <p>⚠️ 调用方必须用 {@code LightningRenderTypes.DARK}（普通 alpha 混合）建 consumer；
+     * 用 {@code BOLT}（加色）的话黑芯会直接消失 ✗。
+     */
+    public static void darkBolt(VertexConsumer vc, Matrix4f m,
+                                double ax, double ay, double az,
+                                double bx, double by, double bz,
+                                long seed, float width, float alpha,
+                                double camX, double camY, double camZ) {
+        darkBolt(vc, m, ax, ay, az, bx, by, bz, seed, width, alpha, 1.0D, camX, camY, camZ);
+    }
+
+    /**
+     * ★ 同上，但<b>只画到 {@code growth}（0..1）这么长</b>——"一节一节过去"✓。
+     *
+     * <p>作者 2026-11-05：「我不希望像雷电一样瞬间就过去，你可以一节一节过去」。
+     * 所以暗系的线不走"整条啪一下出现"，而是沿着路径**一截一截长**：
+     * 每条线自己带一个"长到哪了"的比例，服务端/渲染器按 tick 推进即可。
+     *
+     * <p>线头会亮一颗小血珠（{@link #darkBead}），所以能看到"它在爬" ✓。
+     */
+    public static void darkBolt(VertexConsumer vc, Matrix4f m,
+                                double ax, double ay, double az,
+                                double bx, double by, double bz,
+                                long seed, float width, float alpha, double growth,
+                                double camX, double camY, double camZ) {
+        if (width <= 0.0F || alpha <= 0.004F || growth <= 0.01D) {
+            return;
+        }
+        RandomSource rnd = RandomSource.create(seed);
+        double[][] full = path(ax, ay, az, bx, by, bz, PATH_LEVELS, PATH_JITTER, rnd);
+        double[][] pts = clipPath(full, growth);
+        if (pts.length < 2) {
+            return;
+        }
+        darkStrands(vc, m, pts, width, alpha, camX, camY, camZ);
+        if (growth < 0.985D) {
+            // 生长中的线头：一颗小血珠 ⇒ 看得出"还在长" ✓
+            double[] head = pts[pts.length - 1];
+            darkBead(vc, m, head[0], head[1], head[2], width * 2.4F, alpha, camX, camY, camZ);
+        }
+    }
+
+    /**
+     * 两点之间的<b>短黑线</b>（黑阵的门环/勾爪、暗系命中溅出的"线"）。
+     *
+     * <p>比 {@link #darkBolt} 少两层、少两段细分：短距离不需要那么"活"，而且数量多 ✓。
+     */
+    public static void darkArc(VertexConsumer vc, Matrix4f m,
+                               double ax, double ay, double az,
+                               double bx, double by, double bz,
+                               long seed, float width, float alpha,
+                               double camX, double camY, double camZ) {
+        darkArc(vc, m, ax, ay, az, bx, by, bz, seed, width, alpha, 1.0D, camX, camY, camZ);
+    }
+
+    /** 同上，但只画到 {@code growth}（0..1）—— 手指/爪尖要"一节一节"伸出来时用它 ✓。 */
+    public static void darkArc(VertexConsumer vc, Matrix4f m,
+                               double ax, double ay, double az,
+                               double bx, double by, double bz,
+                               long seed, float width, float alpha, double growth,
+                               double camX, double camY, double camZ) {
+        if (width <= 0.0F || alpha <= 0.004F || growth <= 0.01D) {
+            return;
+        }
+        RandomSource rnd = RandomSource.create(seed);
+        double[][] full = path(ax, ay, az, bx, by, bz, 2, 0.10D, rnd);
+        double[][] pts = clipPath(full, growth);
+        if (pts.length < 2) {
+            return;
+        }
+        darkStrands(vc, m, pts, width, alpha, camX, camY, camZ);
+    }
+
+    /**
+     * 一颗<b>面向相机的小血珠</b>（线性生长的线头 / 指尖 / 吸血的节点）✓。
+     *
+     * <p>三层同心：暗红雾 → 血色 → 黑芯。用同一层 {@code DARK} 画，
+     * 所以它是"暗红色的点"，不是加色的亮点 ✓。
+     */
+    public static void darkBead(VertexConsumer vc, Matrix4f m,
+                                double x, double y, double z, float radius, float alpha,
+                                double camX, double camY, double camZ) {
+        if (radius <= 0.0F || alpha <= 0.004F) {
+            return;
+        }
+        double[] fwd = {camX - x, camY - y, camZ - z};
+        double fl = Math.sqrt(fwd[0] * fwd[0] + fwd[1] * fwd[1] + fwd[2] * fwd[2]);
+        if (fl < 1.0E-4D) {
+            return;
+        }
+        fwd[0] /= fl;
+        fwd[1] /= fl;
+        fwd[2] /= fl;
+        double[] right = {fwd[2], 0.0D, -fwd[0]};
+        double rl = Math.sqrt(right[0] * right[0] + right[2] * right[2]);
+        if (rl < 1.0E-4D) {
+            right = new double[]{1.0D, 0.0D, 0.0D};
+            rl = 1.0D;
+        }
+        right[0] /= rl;
+        right[2] /= rl;
+        right[1] = 0.0D;
+        // up = fwd × right
+        double[] up = {
+                fwd[1] * right[2] - fwd[2] * right[1],
+                fwd[2] * right[0] - fwd[0] * right[2],
+                fwd[0] * right[1] - fwd[1] * right[0]};
+        beadQuad(vc, m, x, y, z, right, up, radius * 2.3D, BLOOD_DIM, 0.28F * alpha);
+        beadQuad(vc, m, x, y, z, right, up, radius * 1.25D, BLOOD, 0.55F * alpha);
+        beadQuad(vc, m, x, y, z, right, up, radius * 0.55D, DARK_CORE, 0.95F * alpha);
+    }
+
+    private static void beadQuad(VertexConsumer vc, Matrix4f m, double x, double y, double z,
+                                 double[] right, double[] up, double half,
+                                 float[] color, float alpha) {
+        double rx = right[0] * half;
+        double rz = right[2] * half;
+        double ux = up[0] * half;
+        double uy = up[1] * half;
+        double uz = up[2] * half;
+        vertex(vc, m, (float) (x - rx - ux), (float) (y - uy), (float) (z - rz - uz), color, alpha);
+        vertex(vc, m, (float) (x + rx - ux), (float) (y - uy), (float) (z + rz - uz), color, alpha);
+        vertex(vc, m, (float) (x + rx + ux), (float) (y + uy), (float) (z + rz + uz), color, alpha);
+        vertex(vc, m, (float) (x - rx + ux), (float) (y + uy), (float) (z - rz + uz), color, alpha);
+    }
+
+    /**
+     * 把折线按<b>弧长比例</b>剪到 {@code growth}（0..1）。
+     *
+     * <p>剪完的最后一点是"插值出来的"⇒ 线头像真的在爬，而非跳到下一个折点 ✓。
+     */
+    private static double[][] clipPath(double[][] pts, double growth) {
+        if (growth >= 0.999D) {
+            return pts;
+        }
+        if (growth <= 0.0D) {
+            return new double[0][];
+        }
+        int n = pts.length;
+        double[] seg = new double[n - 1];
+        double total = 0.0D;
+        for (int i = 0; i < n - 1; i++) {
+            double dx = pts[i + 1][0] - pts[i][0];
+            double dy = pts[i + 1][1] - pts[i][1];
+            double dz = pts[i + 1][2] - pts[i][2];
+            seg[i] = Math.sqrt(dx * dx + dy * dy + dz * dz);
+            total += seg[i];
+        }
+        if (total < 1.0E-6D) {
+            return new double[][]{pts[0], pts[n - 1]};
+        }
+        double target = total * Math.max(0.0D, Math.min(1.0D, growth));
+        double run = 0.0D;
+        int keep = 1;
+        for (int i = 0; i < n - 1; i++) {
+            if (run + seg[i] >= target) {
+                double t = seg[i] < 1.0E-9D ? 0.0D : (target - run) / seg[i];
+                double[][] out = new double[keep + 1][];
+                System.arraycopy(pts, 0, out, 0, keep);
+                out[keep] = new double[]{
+                        pts[i][0] + (pts[i + 1][0] - pts[i][0]) * t,
+                        pts[i][1] + (pts[i + 1][1] - pts[i][1]) * t,
+                        pts[i][2] + (pts[i + 1][2] - pts[i][2]) * t};
+                return out;
+            }
+            run += seg[i];
+            keep++;
+        }
+        return pts;
+    }
+
+    /**
+     * 一圈横着的<b>黑线环</b>（贴地/悬空都行）—— 暗系落点、黑阵外圈用它。
+     *
+     * @param y 环的高度（离 {@code cy} 多少格；贴地给 0.05 左右）
+     */
+    public static void darkRing(VertexConsumer vc, Matrix4f m,
+                                double cx, double cy, double cz,
+                                double radius, int segments, long seed,
+                                float width, float alpha, double spin,
+                                double camX, double camY, double camZ) {
+        if (radius <= 0.02D || alpha <= 0.004F) {
+            return;
+        }
+        for (int i = 0; i < segments; i++) {
+            double a0 = spin + i * (Math.PI * 2.0D / segments);
+            double a1 = a0 + Math.PI * 2.0D / segments;
+            darkArc(vc, m,
+                    cx + Math.cos(a0) * radius, cy, cz + Math.sin(a0) * radius,
+                    cx + Math.cos(a1) * radius, cy, cz + Math.sin(a1) * radius,
+                    seed + i * 31L, width, alpha, camX, camY, camZ);
+        }
+    }
+
+    /** 黑线四层：血雾 → 血线 → 黑芯 → 血色高光 ✓ */
+    private static void darkStrands(VertexConsumer vc, Matrix4f m, double[][] pts, float width,
+                                    float alpha, double camX, double camY, double camZ) {
+        darkStrands(vc, m, pts, width, alpha, BLOOD, BLOOD_DIM, camX, camY, camZ);
+    }
+
+    /**
+     * 同上，但<b>血色可换</b>（作者 2026-11-06：「我希望是深暗红色 …… 黑暗之手链太亮」）。
+     *
+     * <p>四层的比例保持不变，只换中间那两层的颜色 ⇒ 换的是"血色有多深"，不是"线有多亮" ✓。
+     * 献祭/落点用的仍是默认 {@link #BLOOD}（作者说那个刚好 ✓），只有线手换成更深的一档。
+     */
+    private static void darkStrands(VertexConsumer vc, Matrix4f m, double[][] pts, float width,
+                                    float alpha, float[] blood, float[] bloodDim,
+                                    double camX, double camY, double camZ) {
+        // 1) 血雾：最宽、最暗，只负责"这附近有东西"
+        ribbon(vc, m, pts, width * 4.0F, bloodDim, 0.10F * alpha, bloodDim, 0.0F, camX, camY, camZ);
+        // 2) 血线：看得出是暗红
+        ribbon(vc, m, pts, width * 1.8F, blood, 0.42F * alpha, bloodDim, 0.0F, camX, camY, camZ);
+        // 3) 黑芯：细、几乎纯黑、alpha 高 ⇒ 把背后的光"吃"掉，这才叫黑线 ✓
+        ribbon(vc, m, pts, width * 0.80F, DARK_CORE, 0.92F * alpha, DARK_CORE, 0.45F * alpha,
+                camX, camY, camZ);
+        // 4) 一线血高光：黑芯中间留一点红，不然整条会糊成剪影
+        ribbon(vc, m, pts, width * 0.22F, blood, 0.80F * alpha, blood, 0.0F, camX, camY, camZ);
+    }
+
+    /**
+     * ★ <b>深暗红版</b>的黑线（2026-11-06 作者：「我希望是深暗红色 …… 黑暗之手链太亮」）。
+     *
+     * <p>和 {@link #darkBolt} 完全同一条路径，只把血色压深一档：血雾 `{0.10,0,0.012}`、
+     * 血线 `{0.30,0.012,0.030}` —— 比默认 {@code BLOOD {0.62,0.03,0.07}} 暗一半，
+     * 在夜里读起来是"深红发黑"而不是"亮红发光"✓。献祭/落点继续用默认档（作者说刚好 ✓）。
+     */
+    public static final float[] BLOOD_DEEP = {0.30F, 0.012F, 0.030F};
+    /** 深暗红版的血雾（更暗一档）。 */
+    public static final float[] BLOOD_DEEP_DIM = {0.105F, 0.002F, 0.013F};
+
+    /** 同上，只画到 {@code growth}（0..1），颜色换成<b>深暗红</b> ✓。 */
+    public static void darkArcDeep(VertexConsumer vc, Matrix4f m,
+                                   double ax, double ay, double az,
+                                   double bx, double by, double bz,
+                                   long seed, float width, float alpha, double growth,
+                                   double camX, double camY, double camZ) {
+        if (width <= 0.0F || alpha <= 0.004F || growth <= 0.01D) {
+            return;
+        }
+        RandomSource rnd = RandomSource.create(seed);
+        double[][] full = path(ax, ay, az, bx, by, bz, 2, 0.10D, rnd);
+        double[][] pts = clipPath(full, growth);
+        if (pts.length < 2) {
+            return;
+        }
+        darkStrands(vc, m, pts, width, alpha, BLOOD_DEEP, BLOOD_DEEP_DIM, camX, camY, camZ);
+    }
+
+    /** 同上，整条（不剪）✓。 */
+    public static void darkArcDeep(VertexConsumer vc, Matrix4f m,
+                                   double ax, double ay, double az,
+                                   double bx, double by, double bz,
+                                   long seed, float width, float alpha,
+                                   double camX, double camY, double camZ) {
+        darkArcDeep(vc, m, ax, ay, az, bx, by, bz, seed, width, alpha, 1.0D, camX, camY, camZ);
+    }
+
+    /** 深暗红版的黑线（带生长 + 线头血珠）✓。 */
+    public static void darkBoltDeep(VertexConsumer vc, Matrix4f m,
+                                    double ax, double ay, double az,
+                                    double bx, double by, double bz,
+                                    long seed, float width, float alpha, double growth,
+                                    double camX, double camY, double camZ) {
+        if (width <= 0.0F || alpha <= 0.004F || growth <= 0.01D) {
+            return;
+        }
+        RandomSource rnd = RandomSource.create(seed);
+        double[][] full = path(ax, ay, az, bx, by, bz, PATH_LEVELS, PATH_JITTER, rnd);
+        double[][] pts = clipPath(full, growth);
+        if (pts.length < 2) {
+            return;
+        }
+        darkStrands(vc, m, pts, width, alpha, BLOOD_DEEP, BLOOD_DEEP_DIM, camX, camY, camZ);
+        if (growth < 0.985D) {
+            double[] head = pts[pts.length - 1];
+            darkBeadDeep(vc, m, head[0], head[1], head[2], width * 2.4F, alpha, camX, camY, camZ);
+        }
+    }
+
+    /** 深暗红版的"血珠"（比默认那档暗一半，夜里不会发光 ✓）。 */
+    public static void darkBeadDeep(VertexConsumer vc, Matrix4f m,
+                                    double x, double y, double z, float radius, float alpha,
+                                    double camX, double camY, double camZ) {
+        if (radius <= 0.0F || alpha <= 0.004F) {
+            return;
+        }
+        double[] fwd = {camX - x, camY - y, camZ - z};
+        double fl = Math.sqrt(fwd[0] * fwd[0] + fwd[1] * fwd[1] + fwd[2] * fwd[2]);
+        if (fl < 1.0E-4D) {
+            return;
+        }
+        fwd[0] /= fl;
+        fwd[1] /= fl;
+        fwd[2] /= fl;
+        double[] right = {fwd[2], 0.0D, -fwd[0]};
+        double rl = Math.sqrt(right[0] * right[0] + right[2] * right[2]);
+        if (rl < 1.0E-4D) {
+            right = new double[]{1.0D, 0.0D, 0.0D};
+            rl = 1.0D;
+        }
+        right[0] /= rl;
+        right[2] /= rl;
+        right[1] = 0.0D;
+        double[] up = {
+                fwd[1] * right[2] - fwd[2] * right[1],
+                fwd[2] * right[0] - fwd[0] * right[2],
+                fwd[0] * right[1] - fwd[1] * right[0]};
+        beadQuad(vc, m, x, y, z, right, up, radius * 2.3D, BLOOD_DEEP_DIM, 0.28F * alpha);
+        beadQuad(vc, m, x, y, z, right, up, radius * 1.25D, BLOOD_DEEP, 0.55F * alpha);
+        beadQuad(vc, m, x, y, z, right, up, radius * 0.55D, DARK_CORE, 0.95F * alpha);
     }
 
     // ------------------------------------------------------------------
@@ -371,6 +861,21 @@ public final class LightningBoltGeometry {
                                       double cx, double cy, double cz, float radius,
                                       int theme, float alpha,
                                       double camX, double camY, double camZ) {
+        flash0(vc, m, cx, cy, cz, radius, LightningTheme.mid(theme), alpha, camX, camY, camZ);
+    }
+
+    /** 自定义配色的白闪（火/水/风/土/光用；中心仍是白，外圈是给的颜色）。 */
+    public static void flashTinted(VertexConsumer vc, Matrix4f m,
+                                   double cx, double cy, double cz, float radius,
+                                   float[] mid, float alpha,
+                                   double camX, double camY, double camZ) {
+        flash0(vc, m, cx, cy, cz, radius, mid, alpha, camX, camY, camZ);
+    }
+
+    private static void flash0(VertexConsumer vc, Matrix4f m,
+                               double cx, double cy, double cz, float radius,
+                               float[] mid, float alpha,
+                               double camX, double camY, double camZ) {
         if (radius <= 0.002F || alpha <= 0.004F) {
             return;
         }
@@ -411,7 +916,6 @@ public final class LightningBoltGeometry {
         uy /= ul;
         uz /= ul;
         float[] white = LightningTheme.WHITE;
-        float[] mid = LightningTheme.mid(theme);
         int segments = 16;
         float inner = radius * 0.40F;
         for (int i = 0; i < segments; i++) {
@@ -527,6 +1031,22 @@ public final class LightningBoltGeometry {
         if (half <= 0.0F) {
             return;
         }
+        float[] unit = new float[pts.length];
+        java.util.Arrays.fill(unit, 1.0F);
+        ribbon(vc, m, pts, unit, half, core, coreAlpha, edge, edgeAlpha, camX, camY, camZ);
+    }
+
+    /**
+     * 带<b>逐点宽度倍率</b>的光带 ✓ —— 段 i 的两端各用自己的倍率，所以过渡是连续的 ✓
+     * （根部细、往后再一样粗；见 {@link #polylineTapered} ✓）。
+     */
+    private static void ribbon(VertexConsumer vc, Matrix4f m, double[][] pts, float[] taper, float half,
+                               float[] core, float coreAlpha,
+                               float[] edge, float edgeAlpha,
+                               double camX, double camY, double camZ) {
+        if (half <= 0.0F) {
+            return;
+        }
         int n = pts.length;
         for (int i = 0; i < n - 1; i++) {
             double[] p = pts[i];
@@ -536,6 +1056,12 @@ public final class LightningBoltGeometry {
             if (sp == null || sq == null) {
                 continue;
             }
+            // 两端各自的半宽（根部细 ⇒ 这一段的 p 端窄、q 端宽 ✓ 自然的锥形过渡）
+            double hp = half * taper[i];
+            double hq = half * taper[Math.min(i + 1, n - 1)];
+            if (hp <= 1.0E-5D && hq <= 1.0E-5D) {
+                continue;
+            }
             float px = (float) p[0];
             float py = (float) p[1];
             float pz = (float) p[2];
@@ -543,14 +1069,14 @@ public final class LightningBoltGeometry {
             float qy = (float) q[1];
             float qz = (float) q[2];
             // 左半条（边缘 → 中心）
-            vertex(vc, m, px - sp[0] * half, py - sp[1] * half, pz - sp[2] * half, edge, edgeAlpha);
+            vertex(vc, m, px - sp[0] * hp, py - sp[1] * hp, pz - sp[2] * hp, edge, edgeAlpha);
             vertex(vc, m, px, py, pz, core, coreAlpha);
             vertex(vc, m, qx, qy, qz, core, coreAlpha);
-            vertex(vc, m, qx - sq[0] * half, qy - sq[1] * half, qz - sq[2] * half, edge, edgeAlpha);
+            vertex(vc, m, qx - sq[0] * hq, qy - sq[1] * hq, qz - sq[2] * hq, edge, edgeAlpha);
             // 右半条（中心 → 边缘）
             vertex(vc, m, px, py, pz, core, coreAlpha);
-            vertex(vc, m, px + sp[0] * half, py + sp[1] * half, pz + sp[2] * half, edge, edgeAlpha);
-            vertex(vc, m, qx + sq[0] * half, qy + sq[1] * half, qz + sq[2] * half, edge, edgeAlpha);
+            vertex(vc, m, px + sp[0] * hp, py + sp[1] * hp, pz + sp[2] * hp, edge, edgeAlpha);
+            vertex(vc, m, qx + sq[0] * hq, qy + sq[1] * hq, qz + sq[2] * hq, edge, edgeAlpha);
             vertex(vc, m, qx, qy, qz, core, coreAlpha);
         }
     }

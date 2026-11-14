@@ -33,6 +33,33 @@ public final class TNOrbEntities {
                     .sized(.1F,.1F).clientTrackingRange(12).updateInterval(1).build("tnc:water_field"));
 
     /**
+     * ★ <b>水球链 t4/t5 的"法阵群"</b>（作者 2026-11-09：金闪闪那种 —— 平时两个小法阵绕着玩家转，
+     * 攻击敌人时一圈法阵亮起来、亮完再一起射出水波 ✓）。
+     *
+     * <p>它自己是<b>锚点</b>（0.1 格、不碰撞、不可选中 ✗）：所有法阵几何都在
+     * {@code client/TNWaterGateRenderer} 里现画，判定（
+     * 哪一 tick 射、射谁）在 {@code TNWaterGateEntity} 里 ✓。
+     *
+     * <p>{@code updateInterval(1)}：它每 tick 贴着玩家走 —— 同步慢了法阵会拖在身后 ✗
+     * （黑雾 / 黑夜之手 / 环绕雷球都是同一个理由 ✓）；
+     * {@code clientTrackingRange(16)}：法阵要 16 格内都看得见 ✓。
+     */
+    public static final RegistryObject<EntityType<com.tnc.tnc.magic.water.TNWaterGateEntity>> WATER_GATE =
+            ENTITY_TYPES.register("water_gate", () -> EntityType.Builder.of(com.tnc.tnc.magic.water.TNWaterGateEntity::new, MobCategory.MISC)
+                    .sized(.1F,.1F).clientTrackingRange(16).updateInterval(1).build("tnc:water_gate"));
+
+    /**
+     * ★ <b>一道水波</b>（齐射里那一发 ✓ 作者："不用原来那样持久，就跟光线一样就行了"）。
+     *
+     * <p>活 {@code WaterGateRules.lanceTicks()} tick、只结算一次伤害、不碰地形 ✗
+     * —— 和老的持续钻掘光柱 {@code TNWaterSpellEntity} 完全是两个东西 ✗。
+     * 几何由 {@code client/TNWaterLanceRenderer} 用 {@code WaterBeamVisuals} 画（就是那根"加粗的闪电"✓）。
+     */
+    public static final RegistryObject<EntityType<com.tnc.tnc.magic.water.TNWaterLanceEntity>> WATER_LANCE =
+            ENTITY_TYPES.register("water_lance", () -> EntityType.Builder.of(com.tnc.tnc.magic.water.TNWaterLanceEntity::new, MobCategory.MISC)
+                    .sized(.1F,.1F).clientTrackingRange(16).updateInterval(1).build("tnc:water_lance"));
+
+    /**
      * 火球链的自有投射物。
      *
      * <p>{@code updateInterval(1)}：火球飞得快，位置要每 tick 同步，不然客户端会看到它一跳一跳。
@@ -51,6 +78,17 @@ public final class TNOrbEntities {
     public static final RegistryObject<EntityType<com.tnc.tnc.magic.fire.TNLavaFieldEntity>> LAVA_FIELD =
             ENTITY_TYPES.register("lava_field", () -> EntityType.Builder.of(com.tnc.tnc.magic.fire.TNLavaFieldEntity::new, MobCategory.MISC)
                     .sized(.1F,.1F).clientTrackingRange(12).updateInterval(10).build("tnc:lava_field"));
+
+    /**
+     * 火手链：燃烧的巨人手掌。
+     *
+     * <p>它不是投射物，是"抓取过程"的载体：服务端每 tick 把目标按在掌心里，
+     * 客户端只负责把这只手画出来（几何在 {@code client/FireHandRenderer}）。
+     * {@code updateInterval(1)} 让相位每 tick 都同步过去，抓着目标时才不会抖。
+     */
+    public static final RegistryObject<EntityType<com.tnc.tnc.magic.fire.TNFlameHandEntity>> FLAME_HAND =
+            ENTITY_TYPES.register("flame_hand", () -> EntityType.Builder.of(com.tnc.tnc.magic.fire.TNFlameHandEntity::new, MobCategory.MISC)
+                    .sized(2.0F, 3.4F).clientTrackingRange(12).updateInterval(1).build("tnc:flame_hand"));
 
     /**
      * 熔岳天倾（火球链 t4）的头顶法阵。
@@ -493,8 +531,12 @@ public final class TNOrbEntities {
      *
      * <p>作者原话：「t3 开始释放风刃会<b>召唤出一个一直在旋转的龙卷风</b>，
      * 然后<b>持续向外发射风刃</b>」✓ —— 它**留在原地**（不是投射物 ✗），
-     * 自己转、自己吐 {@link TNWindBladeEntity} ✓。模型 {@code tnc:projectile/wind_tornado}
-     * 由 {@code tools/gen_wind_tornado_model.py} 程序化生成 ✓。
+     * 自己转、自己吐 {@link TNWindBladeEntity} ✓。
+     *
+     * <p>★ 2026-11-09 起<b>视觉主体不再是模型</b>✗：作者要"闪电那种线螺旋缠绕成龙卷风，
+     * 有明确的锐角"⇒ 现在由 {@code client.WindTornadoLines} 直接画一束螺旋折线
+     * （几何在 {@link TornadoLineShape}）✓。模型 {@code tnc:projectile/wind_tornado}
+     * 仍保留给苍岚军神的 {@code CanglanTempestRenderer} 用 ✓。
      *
      * <p>尺寸给大一点（2×3 格）✓：模型本体约 1.9 格宽、1.9 格高，
      * 但视锥剔除盒要**包得住放大后的样子** ✗（t5 会放大到 1.6 倍 ⇒ 3 格宽）。

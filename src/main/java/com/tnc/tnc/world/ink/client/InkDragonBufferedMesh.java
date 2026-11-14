@@ -16,7 +16,7 @@ final class InkDragonBufferedMesh {
         float[][] result=new float[2][2049];if(grounded)return result;
         for(int i=0;i<=2048;i++){double x=i/16.0-32,t=Math.max(0,Math.min(1,(x+4)/12)),w=t*t*(3-2*t);
             double tail=Math.max(0,Math.min(1,(x-8)/54));tail=tail*tail*(3-2*tail);
-            double sin=Math.sin((x+4)*.17-age*.085)*w;result[0][i]=(float)(sin*(1.2+1.6*tail));result[1][i]=(float)(sin*1.4);
+            double sin=Math.sin((x+4)*.17-age*.085)*w;result[0][i]=(float)(sin*(1.2+1.6*tail));result[1][i]=(float)((Math.sin((x+4)*.13-age*.06)*1.15+Math.sin((x+4)*.27-age*.11)*.25)*w);
         }return result;
     }
     static void draw(Batch batch,float[][] wave,PoseStack.Pose pose,VertexConsumer out,int light,float opacity){

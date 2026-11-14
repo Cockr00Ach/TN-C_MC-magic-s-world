@@ -58,6 +58,7 @@ class WarriorComboAnimationsTest {
             assertNotNull(WarriorComboAnimations.clip(animation), "动作没有对应关键帧：" + animation);
         }
         long catalogClips=WarriorComboAnimations.all().keySet().stream()
+                .filter(name->!name.equals("ULTIMATE")&&!name.endsWith("_ultimate")&&!name.contains("_signature_"))
                 .filter(name->WarriorMartialArts.ids().stream().noneMatch(id->name.startsWith(id+"_"))).count();
         assertEquals(40, catalogClips,
                 "29 条连招、6 条镰刀变体和持续蓄弓：" + WarriorComboAnimations.all().keySet());

@@ -273,6 +273,12 @@ public final class WarriorCodexScreen extends Screen {
     }
 
     /** Short lines keep the introduction readable even at the minimum panel width. */
+    private String ultimateGuide(){
+        if(minecraft==null||minecraft.player==null)return "手持武器查看专属奥义";
+        var id=net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(minecraft.player.getMainHandItem().getItem());
+        var u=com.tnc.tnc.warrior.WarriorUltimates.forId(id==null?"":id.toString());
+        return "奥义 · "+u.name()+"："+u.keys().toUpperCase(java.util.Locale.ROOT);
+    }
     private void drawGuide(GuiGraphics g,int left,int top,int panelW){
         String[] lines={
             "统一槽位：主攻 → 振刀 → 破振刀",
@@ -282,13 +288,13 @@ public final class WarriorCodexScreen extends Screen {
             "破振刀：E Q Z，命中破开架势并打断",
             "连招1起：查看各武器条目中的输入与效果",
             "短按 Q 左斩、短按 E 右斩、Z／左键横斩",
-            "长按 Q 半秒进入蓄力，松手攻击；受击中断",
+            "长按鼠标右键半秒蓄力，松手攻击；受击中断",
             "近战蓄力逐渐放大，最大八倍，收招后缩回",
             "剑竖起重劈；刀横断；枪突刺；锤震地",
             "左 Ctrl：中断动作／战斗步法",
-            "磨砺与训练满足条件后开放，不消耗点数",
-            "演武场中央终端：选教官、练习、测试木桩",
-            "点击右上角查看招式，切换武器页签看详情"
+            ultimateGuide(),
+            "奥义十连：间隔≤0.9秒；测试无冷却；施招无敌",
+            "领域共鸣改变收招效果；潜行跳过特写"
         };
         for(int i=0;i<lines.length;i++)
             g.drawString(font,fitLabel(lines[i],panelW-24),left+12,top+84+i*12,i<2?COLOR_TITLE:COLOR_TEXT,false);

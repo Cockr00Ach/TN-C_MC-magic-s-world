@@ -6,10 +6,11 @@ import net.minecraft.world.level.saveddata.SavedData;
 /** Central routing point for the pending island migration. Existing complete islands stay put. */
 public final class SkyIslandWorlds {
  static final class Choice extends SavedData {
-  boolean realm,groundBuilt;
-  static Choice get(MinecraftServer s){return s.overworld().getDataStorage().computeIfAbsent(t->{var c=new Choice();c.realm=t.getBoolean("Realm");c.groundBuilt=t.getBoolean("GroundBuilt");return c;},Choice::new,"tnc_sky_world_choice");}
-  public CompoundTag save(CompoundTag t){t.putBoolean("Realm",realm);t.putBoolean("GroundBuilt",groundBuilt);return t;}
+  boolean realm,groundBuilt,prologue;
+  static Choice get(MinecraftServer s){return s.overworld().getDataStorage().computeIfAbsent(t->{var c=new Choice();c.realm=t.getBoolean("Realm");c.groundBuilt=t.getBoolean("GroundBuilt");c.prologue=t.getBoolean("YanPrologue");return c;},Choice::new,"tnc_sky_world_choice");}
+  public CompoundTag save(CompoundTag t){t.putBoolean("Realm",realm);t.putBoolean("GroundBuilt",groundBuilt);t.putBoolean("YanPrologue",prologue);return t;}
  }
+ public static boolean prologueEnabled(MinecraftServer s){return Choice.get(s).prologue;}
  public static boolean separate(MinecraftServer s){return Choice.get(s).realm;}
  public static ServerLevel island(MinecraftServer s){
   if(!separate(s))return s.overworld();

@@ -155,6 +155,9 @@ public final class TNScorch {
         if (dps <= 0.0F) {
             return false;
         }
+        // ★ 2026-11-13 火法重做：焚身是**每一次火系命中**都会走的路，所以热量也在这里叠
+        //   （不放在各法术里，否则四条链要各抄一遍 ✗）。焚身"不刷新"不代表热量也不涨 ✓
+        FireHeat.add(victim, caster, hitDamage * 1.2F + (heavy ? 18.0F : 8.0F));
         long now = victim.level().getGameTime();
         State old = STATES.get(victim.getUUID());
         boolean active = old != null && old.endsAt() > now && victim.hasEffect(BURNING_BODY.get());

@@ -1,0 +1,7 @@
+{
+  "school":"ARCANE", "group":"dark_domain", "range":0, "learn":{"tier":1},
+  "cast":{"duration":0.9,"animation":"spell_engine:one_handed_area_charge","sound":{"id":"minecraft:entity.warden.heartbeat"}},
+  "release":{"target":{"type":"SELF"},"animation":"spell_engine:one_handed_area_release"},
+  "impact":[{"action":{"type":"STATUS_EFFECT","status_effect":{"effect_id":"tnc:domain_dark","duration":30,"amplifier":0}}}],
+  "cost":{"exhaust":0,"cooldown_duration":90}
+}

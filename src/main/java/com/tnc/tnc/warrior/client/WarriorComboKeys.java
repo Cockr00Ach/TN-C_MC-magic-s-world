@@ -59,30 +59,15 @@ public final class WarriorComboKeys {
     /** 长按期间每隔这么多 tick 续一次（服务端只用来续架势窗口，不产生输入）。 */
     public static final KeyMapping BOW_HORIZONTAL = new KeyMapping("key.tnc.bow_charge_z",
             KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_Z, "key.categories.tnc");
-    private static boolean bowZWasDown, zFromKeyboard;
-    private static final int KEEPALIVE_TICKS = 10;
-
-    private WarriorComboKeys() {
-    }
-
-    /** 客户端 tick 计数，只用来量"按住多久"。 */
+    private static final WarriorRightChargeInput CHARGE=new WarriorRightChargeInput();
+    private static final int KEEPALIVE_TICKS=10;
     private static long tick;
-
-    private static boolean leftWasDown;
-    private static boolean rightWasDown;
-    private static boolean stepWasDown;
-
-    private static long leftDownAt = -1;
-    private static boolean leftHeldSent;
-    private static long leftKeepAlive;
+    private static boolean rightWasDown,stepWasDown;
+    private WarriorComboKeys(){}
 
     private static long rightDownAt = -1;
     private static boolean rightHeldSent;
     private static long rightKeepAlive;
-
-    private static long zDownAt = -1;
-    private static boolean zCharged;
-    private static long zKeepAlive;
 
     private static long stepDownAt = -1;
     private static boolean stepPending;
@@ -106,7 +91,7 @@ public final class WarriorComboKeys {
             return RIGHT.isDown();
         }
         if (move == WarriorMove.HORIZONTAL) {
-            return zDownAt >= 0;
+            return CHARGE.active();
         }
         return false;
     }
@@ -119,6 +104,7 @@ public final class WarriorComboKeys {
         tick++;
         var minecraft = Minecraft.getInstance();
         if (minecraft.player == null) {
+            CHARGE.cancel(false);rightDownAt=-1;rightHeldSent=false;stepPending=false;rightWasDown=false;
             return;
         }
         boolean ready = combatReady(minecraft);
@@ -131,25 +117,16 @@ public final class WarriorComboKeys {
             swallowConflicts(minecraft.options, RIGHT);
         }
 
-        if(!ready) {
-            if(leftDownAt>=0 || zDownAt>=0) com.tnc.tnc.warrior.WarriorStepPacket.send(com.tnc.tnc.warrior.WarriorStepPacket.CANCEL);
-            leftDownAt=-1;leftHeldSent=false;zDownAt=-1;zCharged=false;zFromKeyboard=false;
+        var action=CHARGE.update(minecraft.options.keyUse.isDown(),ready&&!minecraft.player.isShiftKeyDown(),tick);
+        switch(action){
+            case HOLD->WarriorComboInputPacket.send(WarriorMove.HORIZONTAL,WarriorComboInputPacket.HOLD);
+            case KEEPALIVE->WarriorComboInputPacket.send(WarriorMove.HORIZONTAL,WarriorComboInputPacket.KEEPALIVE);
+            case RELEASE->WarriorComboInputPacket.send(WarriorMove.HORIZONTAL,WarriorComboInputPacket.RELEASE);
+            case CANCEL->WarriorStepPacket.send(WarriorStepPacket.CANCEL);
+            default->{}
         }
-        boolean bowZNow = BOW_HORIZONTAL.isDown();
-        drainClicks(BOW_HORIZONTAL);
-        if (ready) {
-            if (bowZNow && !bowZWasDown && zDownAt < 0) {
-                zFromKeyboard=true; zDownAt=tick; zCharged=false;
-                WarriorComboInputPacket.send(WarriorMove.HORIZONTAL,WarriorComboInputPacket.CHARGE_START);
-            }
-        }
-        if (zFromKeyboard && ((!bowZNow && bowZWasDown) || !ready)) {
-            if(ready)WarriorComboInputPacket.send(WarriorMove.HORIZONTAL,zCharged?WarriorComboInputPacket.RELEASE:WarriorComboInputPacket.TAP);
-            zDownAt=-1;zCharged=false;zFromKeyboard=false;
-        }
-        bowZWasDown=bowZNow;
+        if(!ready){rightDownAt=-1;rightHeldSent=false;stepPending=false;}
         boolean sameKey = LEFT.getKey().equals(RIGHT.getKey());
-        boolean leftNow = LEFT.isDown();
         boolean rightNow = !sameKey && RIGHT.isDown();
         boolean stepNow = STEP.isDown();
         // 自动重复的点击一律丢掉：只认 isDown 的上升/下降沿
@@ -157,56 +134,27 @@ public final class WarriorComboKeys {
         drainClicks(RIGHT);
         drainClicks(STEP);
 
-        if (leftNow && !leftWasDown) {
-            leftDownAt = tick;
-            leftHeldSent = false;
-            if (ready) {
-                WarriorComboInputPacket.send(WarriorMove.LEFT,WarriorComboInputPacket.CHARGE_START);
-            }
-        }
         if (rightNow && !rightWasDown) {
-            rightDownAt = tick;
+            rightDownAt = ready?tick:-1;
             rightHeldSent = false;
             if (ready) {
+                cancelCharge();
                 WarriorComboInputPacket.send(WarriorMove.RIGHT);
             }
         }
         if (stepNow && !stepWasDown) {
             // 按下那一瞬间先发"只中断"：立刻停下自己的动作，不等松手
-            stepPending = true;
+            stepPending = ready;
             stepDownAt = tick;
             stepCharged = false;
             if (ready) {
+                CHARGE.cancel(minecraft.options.keyUse.isDown());
                 WarriorStepPacket.send(WarriorStepPacket.CANCEL);
             }
         }
-        leftWasDown = leftNow;
         rightWasDown = rightNow;
         stepWasDown = stepNow;
 
-        // Q：按住超过半秒补发长按，之后每 10 tick 续一次，松手补一个收势
-        if (leftDownAt >= 0) {
-            if (!leftNow) {
-                if (ready) {
-                    WarriorComboInputPacket.send(WarriorMove.LEFT, leftHeldSent?WarriorComboInputPacket.RELEASE:WarriorComboInputPacket.TAP);
-                }
-                leftDownAt = -1;
-                leftHeldSent = false;
-            } else if (!leftHeldSent) {
-                if (tick - leftDownAt >= ComboTracker.HOLD_TICKS) {
-                    if (ready) {
-                        WarriorComboInputPacket.send(WarriorMove.LEFT, WarriorComboInputPacket.HOLD);
-                    }
-                    leftHeldSent = true;
-                    leftKeepAlive = tick;
-                }
-            } else if (tick - leftKeepAlive >= KEEPALIVE_TICKS) {
-                if (ready) {
-                    WarriorComboInputPacket.send(WarriorMove.LEFT, WarriorComboInputPacket.KEEPALIVE);
-                }
-                leftKeepAlive = tick;
-            }
-        }
         // E：同上
         if (rightDownAt >= 0) {
             if (!rightNow) {
@@ -228,22 +176,6 @@ public final class WarriorComboKeys {
                     WarriorComboInputPacket.send(WarriorMove.RIGHT, WarriorComboInputPacket.KEEPALIVE);
                 }
                 rightKeepAlive = tick;
-            }
-        }
-
-        // 左键按住超过半秒：同理补发长按 Z（按下那一下已经发过轻点）
-        if (zDownAt >= 0) {
-            if (!zCharged && tick - zDownAt >= ComboTracker.HOLD_TICKS) {
-                if (ready) {
-                    WarriorComboInputPacket.send(WarriorMove.HORIZONTAL, WarriorComboInputPacket.HOLD);
-                }
-                zCharged = true;
-                zKeepAlive = tick;
-            } else if (zCharged && tick - zKeepAlive >= KEEPALIVE_TICKS) {
-                if (ready) {
-                    WarriorComboInputPacket.send(WarriorMove.HORIZONTAL, WarriorComboInputPacket.KEEPALIVE);
-                }
-                zKeepAlive = tick;
             }
         }
 
@@ -271,19 +203,43 @@ public final class WarriorComboKeys {
         }
     }
 
-    /** 左键 = 横斩击。用鼠标按下事件而不是攻击事件，按住不会每 tick 灌一个 Z。 */
-    @SubscribeEvent
-    public static void attackKey(InputEvent.InteractionKeyMappingTriggered event) {
-        if(event.isAttack() && combatReady(Minecraft.getInstance()) && (BOW_HORIZONTAL.isDown() || leftHeldSent)) {
+    private static void cancelCharge(){
+        if(CHARGE.active()){
+            CHARGE.cancel(Minecraft.getInstance().options.keyUse.isDown());
+            WarriorStepPacket.send(WarriorStepPacket.CANCEL);
+        }
+    }
+    /** Physical press events retain very short Q/Z taps that polling isDown can miss. */
+    @SubscribeEvent public static void key(InputEvent.Key event){
+        if(event.getAction()!=GLFW.GLFW_PRESS || !combatReady(Minecraft.getInstance()))return;
+        WarriorMove move=LEFT.matches(event.getKey(),event.getScanCode())?WarriorMove.LEFT
+                :BOW_HORIZONTAL.matches(event.getKey(),event.getScanCode())?WarriorMove.HORIZONTAL:null;
+        if(move!=null){cancelCharge();WarriorComboInputPacket.send(move);}
+    }
+    /** Run after block/entity interactions: chests and trading retain their ordinary right click. */
+    @SubscribeEvent public static void use(net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickItem event){
+        var mc=Minecraft.getInstance();
+        if(!event.getLevel().isClientSide || event.getEntity()!=mc.player
+                || event.getHand()!=net.minecraft.world.InteractionHand.MAIN_HAND || !combatReady(mc)
+                || mc.player.isShiftKeyDown())return;
+        event.setCancellationResult(net.minecraft.world.InteractionResult.CONSUME);event.setCanceled(true);
+        if(mc.options.keyUse.isDown()&&CHARGE.begin(tick))
+            WarriorComboInputPacket.send(WarriorMove.HORIZONTAL,WarriorComboInputPacket.CHARGE_START);
+    }
+    @SubscribeEvent public static void attackKey(InputEvent.InteractionKeyMappingTriggered event){
+        if(event.isUseItem()&&combatReady(Minecraft.getInstance())&&(CHARGE.active()||CHARGE.blocked())){
             event.setCanceled(true);event.setSwingHand(false);
         }
     }
-    @SubscribeEvent
-    public static void mouse(InputEvent.MouseButton.Pre event) {
-        if(event.getButton()!=GLFW.GLFW_MOUSE_BUTTON_LEFT)return;
-        if(combatReady(Minecraft.getInstance()) && (BOW_HORIZONTAL.isDown() || leftHeldSent)){event.setCanceled(true);return;}
-        // Mouse stays an ordinary attack. Only the dedicated Z key owns charge/release.
-        if(event.getAction()==GLFW.GLFW_PRESS && combatReady(Minecraft.getInstance()))WarriorComboInputPacket.send(WarriorMove.HORIZONTAL);
+    @SubscribeEvent public static void mouse(InputEvent.MouseButton.Pre event){
+        if(event.getAction()!=GLFW.GLFW_PRESS || !combatReady(Minecraft.getInstance()))return;
+        int button=event.getButton();
+        boolean q=LEFT.getKey().getType()==InputConstants.Type.MOUSE&&LEFT.getKey().getValue()==button;
+        boolean z=BOW_HORIZONTAL.getKey().getType()==InputConstants.Type.MOUSE&&BOW_HORIZONTAL.getKey().getValue()==button;
+        if(q||z||button==GLFW.GLFW_MOUSE_BUTTON_LEFT){
+            cancelCharge();WarriorComboInputPacket.send(q?WarriorMove.LEFT:WarriorMove.HORIZONTAL);
+            if(q||z&&button!=GLFW.GLFW_MOUSE_BUTTON_LEFT)event.setCanceled(true);
+        }
     }
 
     /**

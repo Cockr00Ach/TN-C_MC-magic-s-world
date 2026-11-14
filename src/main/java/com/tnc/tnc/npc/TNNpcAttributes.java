@@ -61,6 +61,14 @@ public final class TNNpcAttributes {
             () -> new net.minecraftforge.common.ForgeSpawnEggItem(
                     TNNpcs.DARK_GIANT, 0x261A2E, 0x8E2B24, new Item.Properties()));
 
+    /**
+     * 黑魔法师的刷怪蛋（配色：袍子的近黑紫 {@code 0x0C0B15} + 眼缝/符文的暗红 {@code 0xB0202C}）。
+     * 和别的 boss 一样留一个蛋 ✓ —— 验收"通身黑暗"的模型和"法术是不是同一套"都靠它一句话扔到场上 ✓。
+     */
+    public static final RegistryObject<Item> DARK_MAGE_SPAWN_EGG = SPAWN_EGGS.register("dark_mage_spawn_egg",
+            () -> new net.minecraftforge.common.ForgeSpawnEggItem(
+                    TNNpcs.DARK_MAGE, 0x0C0B15, 0xB0202C, new Item.Properties()));
+
     /** 深渊海蓝 + 圣甲金。正式生成入口后仍保留刷怪蛋用于验收模型与招式。 */
     public static final RegistryObject<Item> WATER_LEVIATHAN_SPAWN_EGG = SPAWN_EGGS.register(
             "water_leviathan_spawn_egg", () -> new net.minecraftforge.common.ForgeSpawnEggItem(
@@ -86,6 +94,8 @@ public final class TNNpcAttributes {
         event.put(TNNpcs.APOLLO.get(), com.tnc.tnc.boss.TNApolloEntity.createAttributes().build());
         // ★ 暗系巨人领主（作者 2026-10-03 ✓）—— 生物必须在这里有属性，漏了生成即崩 ✗
         event.put(TNNpcs.DARK_GIANT.get(), com.tnc.tnc.boss.TNDarkGiantEntity.createAttributes().build());
+        // ★ 黑魔法师（作者 2026-11-07 ✓）—— 同上，漏了生成即崩 ✗
+        event.put(TNNpcs.DARK_MAGE.get(), com.tnc.tnc.boss.TNDarkMageEntity.createAttributes().build());
         event.put(TNNpcs.WATER_LEVIATHAN.get(),
                 com.tnc.tnc.boss.TNWaterLeviathanEntity.createAttributes().build());
         event.put(TNNpcs.ZUOWANG.get(), TnDialogueNpc.attributes().build());

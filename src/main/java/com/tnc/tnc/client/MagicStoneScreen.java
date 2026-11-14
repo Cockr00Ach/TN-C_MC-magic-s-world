@@ -225,7 +225,7 @@ public class MagicStoneScreen extends Screen {
         addRenderableWidget(Button.builder(Component.literal("切换配键页"),b->{
             drag.cancel();bindSlot=-1;MagicStoneNetwork.requestNextPage();
         }).bounds(left()+panelWidth()-94,top()+PANEL_H-102,82,18).build());
-        var options=SpellCatalog.chainTopAssignable(data,shownElement);
+        var options=SpellCatalog.learnedAssignable(data,shownElement);
         bindScroll=Math.max(0,Math.min(bindScrollRows()-1,bindScroll));
         int rows=bindVisibleRows(),cols=bindColsPerView(),colW=(panelWidth()-24)/cols;
         for(int i=0;i<options.size();i++){
@@ -264,7 +264,7 @@ public class MagicStoneScreen extends Screen {
         if (data == null) {
             return 1;
         }
-        int count = SpellCatalog.chainTopAssignable(data, shownElement).size();
+        int count = SpellCatalog.learnedAssignable(data, shownElement).size();
         int perView = bindVisibleRows() * bindColsPerView();
         return Math.max(1, (count + perView - 1) / perView);
     }
@@ -403,7 +403,16 @@ public class MagicStoneScreen extends Screen {
                                     + "\n§b效果 §r" + effectSummary(entry)
                                     + "\n§7解锁消耗 " + MagicStoneLearning.learningCost(data,entry) + " 点"
                                     + "\n§7施放消耗 " + entry.manaCostFor(data.getMaxMana()) + " 魔力"
-                                    + (entry.independent()?"\n§d独立魔法 · 无亲和力要求": "\n§7亲和力要求 " + Element.tierName(entry.tier())
+                                    + (com.tnc.tnc.magic.domain.DomainSpells.isDomain(entry.id())
+                                            // ★ 2026-11-08 领域法术：作者要求"告知玩家只能选择一个"
+                                            ? "\n§d领域魔法 · 全部元素只能选一个"
+                                              + "\n§7要求 " + com.tnc.tnc.magic.domain.DomainSpells
+                                                    .nameOf(com.tnc.tnc.magic.domain.DomainSpells.elementOf(entry.id()))
+                                                    + "亲和力 ≥ 1（不看等级）"
+                                              + "\n§7当前 " + (data.specialElements().isEmpty() ? "还没有领域"
+                                                    : "已选「" + com.tnc.tnc.magic.domain.DomainSpells
+                                                      .nameOf(data.specialElements().get(0)) + "」")
+                                            : entry.independent()?"\n§d独立魔法 · 无亲和力要求": "\n§7亲和力要求 " + Element.tierName(entry.tier())
                                     + "（当前上限 " + Element.tierName(Math.max(1, data.maxTierFor(entry.element()))) + "）")
                                     + "\n§7前置 " + (entry.tier() <= 1 ? "无（链的第 1 级）"
                                             : "先学本链第 " + (entry.tier() - 1) + " 级")
@@ -427,7 +436,7 @@ public class MagicStoneScreen extends Screen {
                              int mouseX, int mouseY, int left, int top, int panelW) {
         int page=data.getLoadoutPage();
         String element=shownElement==null?"独立魔法":(shownElement==Element.DARK?"暗":shownElement.cn())+"系法术";
-        graphics.drawString(font,"已学法术 · "+element+" · 每链最高档",left+12,top+LIST_Y-12,COLOR_TITLE,false);
+        graphics.drawString(font,"已学法术 · "+element+" · 全部已学 · 各等级均可配键",left+12,top+LIST_Y-12,COLOR_TITLE,false);
         super.render(graphics,mouseX,mouseY,0);
         if(bindRects.isEmpty())graphics.drawCenteredString(font,"暂无可配置法术，请先到学习页解锁",left+panelW/2,top+LIST_Y+58,COLOR_DIM);
         for(var e:bindRects.entrySet()){
@@ -483,7 +492,19 @@ public class MagicStoneScreen extends Screen {
         String key = "spell.tnc." + entry.id().getPath() + ".description";
         String written = Component.translatable(key).getString();
         if (!written.equals(key)) return written;
-        return entry.element().cn() + "系 · " + entry.chain().cn() + "链 · 第 " + entry.tier() + " 级 · "
+        // ★ 2026-11-08 作者报「学领域就报错了」：独立/领域法术的 element 是 null
+        //   （它们只出现在「独立」页、不进七元素 NBT 数组），以前这里直接 entry.element().cn()
+        //   ⇒ 鼠标一划过领域法术就 NPE 崩客户端 ✗。现在按"有没有元素"分三支 ✓
+        String own;
+        if (entry.element() != null) {
+            own = entry.element().cn() + "系";
+        } else if (com.tnc.tnc.magic.domain.DomainSpells.isDomain(entry.id())) {
+            own = com.tnc.tnc.magic.domain.DomainSpells.nameOf(
+                    com.tnc.tnc.magic.domain.DomainSpells.elementOf(entry.id()));
+        } else {
+            own = "独立魔法";
+        }
+        return own + " · " + entry.chain().cn() + "链 · 第 " + entry.tier() + " 级 · "
                 + entry.chain().desc();
     }
 

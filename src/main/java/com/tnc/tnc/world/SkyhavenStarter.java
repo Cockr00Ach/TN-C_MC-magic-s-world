@@ -68,6 +68,7 @@ public final class SkyhavenStarter {
     private static void writeChoice(Path data)throws IOException {
         CompoundTag choice=new CompoundTag(),payload=new CompoundTag();
         payload.putBoolean("Realm",true);payload.putBoolean("GroundBuilt",false);
+        payload.putBoolean("YanPrologue",true);
         choice.put("data",payload);choice.putInt("DataVersion",3465);
         NbtIo.writeCompressed(choice,data.resolve("tnc_sky_world_choice.dat").toFile());
     }

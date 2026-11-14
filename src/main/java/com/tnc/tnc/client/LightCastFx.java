@@ -3,6 +3,7 @@ package com.tnc.tnc.client;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.tnc.tnc.TNMod;
+import com.tnc.tnc.boss.TNApolloEntity;
 import com.tnc.tnc.light.LightRitualSequence;
 import com.tnc.tnc.magic.water.WaterSpellRules;
 import net.minecraft.client.Minecraft;
@@ -49,7 +50,7 @@ import java.util.UUID;
  *       开始有轻微暗角、一次心跳和一根细光柱；</li>
  *   <li><b>高阶「天穹降临」</b>：6/8 颗小阵、4/6 道门环、满档压暗/心跳/光柱/盘旋光带/脉冲环/光雨，
  *       头顶太阳种子全开 —— 也就是作者要的“暴风雨的前夕”＋“光污染”；</li>
- *   <li><b>释放后的阵也有三档</b>：低阶主阵用 {@code STYLE_LIGHT_MINOR}（一圈符），
+ *   <li><b>释放后的阵也有三档</b>：低阶主阵用 {@code STYLE_LIGHT_MINOR}（六瓣小日轮，独立的 minorSeal），
  *       高阶用 {@code STYLE_LIGHT_GRAND}（多一圈外环与刻痕），不再所有档位都长一样。</li>
  * </ol>
  *
@@ -165,7 +166,7 @@ public final class LightCastFx {
             double distance = player == mc.player ? 0.0D : player.distanceTo(mc.player);
             double falloff = Math.max(0.0D, 1.0D - distance / 28.0D);
             if (distance < 64.0D) {
-                tickParticles(level, player, info, state, minimal);
+                tickParticles(level, player.position(), info, state, minimal);
             }
             if (player == mc.player) {
                 wash = Math.max(wash, LightRitualSequence.chargeGlow(info.ratio())
@@ -177,6 +178,43 @@ public final class LightCastFx {
                         * LightRitualSequence.screenFx(info.tier()) * (float) falloff * 0.55F);
                 vignette = Math.max(vignette, LightRitualSequence.darkVignette(info.tier(), info.ratio())
                         * (float) falloff * 0.35F);
+            }
+        }
+
+        // Apollo's custom cast timer is synced through two entity-data ints; draw the same
+        // pre-cast language at boss scale instead of leaving his three-second animation bare.
+        for (var entity : level.entitiesForRendering()) {
+            if (!(entity instanceof TNApolloEntity boss) || !boss.isAlive()) {
+                continue;
+            }
+            CastInfo info = scanApollo(boss);
+            if (info == null) {
+                continue;
+            }
+            seen.add(boss.getUUID());
+            Vec3 pos = boss.position();
+            CastState state = CASTS.computeIfAbsent(boss.getUUID(), id -> new CastState(info.tier()));
+            state.tier = info.tier();
+            state.ratio = info.ratio();
+            state.maxRatio = Math.max(state.maxRatio, info.ratio());
+            state.x = pos.x;
+            state.y = pos.y;
+            state.z = pos.z;
+            state.lastSeen = now;
+
+            double distance = boss.distanceTo(mc.player);
+            double falloff = Math.max(0.0D, 1.0D - distance / 40.0D);
+            if (distance < 80.0D) {
+                tickParticles(level, pos, info, state, minimal);
+            }
+            if (falloff > 0.0D) {
+                wash = Math.max(wash, LightRitualSequence.chargeGlow(info.ratio())
+                        * LightRitualSequence.screenFx(info.tier()) * (float) falloff);
+                vignette = Math.max(vignette, LightRitualSequence.darkVignette(info.tier(), info.ratio())
+                        * (float) falloff);
+                if (distance < 40.0D) {
+                    tickHeartbeat(level, info, state, now);
+                }
             }
         }
 
@@ -228,12 +266,12 @@ public final class LightCastFx {
      * <p>全部是客户端本地粒子（不占服务端带宽）✓；粒子设置调成 MINIMAL 时数量砍半，
      * 保证低配机器也能读出“阵在动” ✓。
      */
-    private static void tickParticles(ClientLevel level, Player player, CastInfo info,
+    private static void tickParticles(ClientLevel level, Vec3 pos, CastInfo info,
                                       CastState state, boolean minimal) {
         double range = info.range();
-        double cx = player.getX();
-        double cy = player.getY();
-        double cz = player.getZ();
+        double cx = pos.x;
+        double cy = pos.y;
+        double cz = pos.z;
 
         int motes = (2 + info.tier()) * (minimal ? 1 : 2);
         for (int i = 0; i < motes; i++) {
@@ -353,6 +391,25 @@ public final class LightCastFx {
             ritual(out, pose, info, now + partial);
             any = true;
         }
+        for (var entity : level.entitiesForRendering()) {
+            if (!(entity instanceof TNApolloEntity boss) || !boss.isAlive()) {
+                continue;
+            }
+            CastInfo info = scanApollo(boss);
+            if (info == null) {
+                continue;
+            }
+            Vec3 base = boss.getPosition(partial);
+            if (base.distanceToSqr(camera) > 128.0D * 128.0D) {
+                continue;
+            }
+            Matrix4f pose = new Matrix4f().translation(
+                    (float) (base.x - camera.x),
+                    (float) (base.y - camera.y),
+                    (float) (base.z - camera.z));
+            apolloRitual(out, pose, info, now + partial);
+            any = true;
+        }
         for (Burst burst : BURSTS) {
             double age = now - burst.start + partial;
             if (age < 0.0D || age > 20.0D) {
@@ -398,13 +455,30 @@ public final class LightCastFx {
         core(out, pose, range, tier, p, form, glow, time, grand);
     }
 
-    /** 地面主阵：低阶只画一圈符 + 6/8 道光芒；中高阶才有双层环、内层八角星与满圈符文。 */
+    /** Apollo gets the same ritual plus a crown above his head; the ground pattern is boss-scaled. */
+    private static void apolloRitual(VertexConsumer out, Matrix4f pose, CastInfo info, double time) {
+        ritual(out, pose, info, time);
+        int tier = info.tier();
+        float p = info.ratio();
+        float a = 0.16F + 0.28F * LightRitualSequence.chargeGlow(p);
+        double y = 3.25D + 0.10D * tier + 0.22D * LightRitualSequence.formation(p);
+        WaterGeometry.ringColor(out, pose, new Vec3(0, y, 0), UP,
+                1.95D + 0.14D * tier, 0.032D, G_R, G_G, G_B, a, 56);
+        WaterGeometry.ringColor(out, pose, new Vec3(0, y + 0.02D, 0), UP,
+                2.34D + 0.16D * tier, 0.014D, C_R, C_G, C_B, a * 0.7F, 48);
+    }
+
+    /**
+     * 地面主阵。低阶（铭刻）是一枚<b>六瓣小日轮</b>：三圈细环 ＋ 六片花瓣/花茎 ＋
+     * 六道带菱形尖的外光 ＋ 十二道刻度，没有八角星、双层大环和满圈符文；
+     * 中高阶才铺开双层环、内层八角星、18/24 道符文与日冕。
+     */
     private static void groundSeal(VertexConsumer out, Matrix4f pose, double range, int tier,
                                    float p, float form, float glow, double time, boolean grand) {
         double R = range;
 
         // 贴地的一层很淡的光晕（读条越久越亮；别太实，否则像铺了一张白纸 ✗）
-        int layers = grand ? 3 : 1;
+        int layers = grand ? 3 : 2;
         for (int i = 0; i < layers; i++) {
             WaterGeometry.disk(out, pose, new Vec3(0.0D, 0.045D + i * 0.003D, 0.0D), UP,
                     R * (0.58D + i * 0.20D), W_R, W_G, W_B, 0.012F + form * 0.008F, 48);
@@ -416,6 +490,14 @@ public final class LightCastFx {
         if (grand) {
             WaterGeometry.ringColor(out, pose, new Vec3(0.0D, 0.012D, 0.0D), UP, R * 0.86D,
                     R * 0.003D, G_R, G_G, G_B, 0.05F + 0.05F * form, 80);
+        } else {
+            // 低阶：三圈细环撑住轮廓（金 0.80R、白 0.50R），一张符也要有层次
+            WaterGeometry.ringColor(out, pose, new Vec3(0.0D, 0.010D, 0.0D), UP, R * 0.80D,
+                    R * 0.0030D, G_R, G_G, G_B, (0.10F + 0.16F * form) * 0.85F, 80);
+            WaterGeometry.ringColor(out, pose, new Vec3(0.0D, 0.012D, 0.0D), UP, R * 0.50D,
+                    R * 0.0025D, W_R, W_G, W_B, 0.08F + 0.14F * form, 64);
+            WaterGeometry.ringColor(out, pose, new Vec3(0.0D, 0.014D, 0.0D), UP, R * 1.045D,
+                    R * 0.0020D, G_R, G_G, G_B, 0.06F + 0.10F * form, 96);
         }
 
         // 两段反向扫出来的主环：读条 = 笔尖在阵上走一圈 ✓
@@ -424,6 +506,11 @@ public final class LightCastFx {
                 Math.PI * 2.0D * form, W_R, W_G, W_B, 0.55F, 96);
         arc(out, pose, new Vec3(0.0D, 0.008D, 0.0D), UP, R * 0.955D, R * 0.010D,
                 -phase * 1.3D, Math.PI * 2.0D * form * 0.78D, G_R, G_G, G_B, 0.35F, 80);
+        if (!grand) {
+            // 低阶的第三道环：只描 70%，像笔锋收尾时轻轻带过
+            arc(out, pose, new Vec3(0.0D, 0.016D, 0.0D), UP, R * 0.80D, R * 0.006D,
+                    phase * 0.6D, Math.PI * 2.0D * form * 0.70D, W_R, W_G, W_B, 0.22F, 64);
+        }
 
         // 外圈符文：按读条顺序依次亮起；低阶只刻 6/8 道，高阶 18/24 道
         int runes = LightRitualSequence.outerRunes(tier);
@@ -438,14 +525,52 @@ public final class LightCastFx {
                     G_R, G_G, G_B, 0.55F * lit);
         }
 
-        // 向外的光芒（日冕）：越接近释放越长
+        // 低阶专属：六片花瓣 ＋ 六道外光（带菱形尖）＋ 十二道刻度 —— 小日轮的主体
+        if (!grand) {
+            for (int i = 0; i < 6; i++) {
+                double a = phase * 0.5D + i * Math.PI / 3.0D + Math.PI / 6.0D;
+                float petalLit = LightRitualSequence.smooth(
+                        LightRitualSequence.clamp((p - 0.08F - i * 0.035F) / 0.20F));
+                if (petalLit <= 0.02F) {
+                    continue;
+                }
+                // 花茎：从内环长到花瓣根部，避免花瓣“浮”在空中
+                WaterGeometry.tube(out, pose, polar(a, R * 0.22D, 0.07D),
+                        polar(a, R * 0.52D, 0.07D), Math.max(0.0022D, R * 0.0026D),
+                        G_R, G_G, G_B, 0.22F * petalLit, 3);
+                sealPetal(out, pose, a, R * 0.50D, R * 0.80D, 0.075D,
+                        W_R, W_G, W_B, 0.24F * petalLit * form);
+                sealPetal(out, pose, a, R * 0.57D, R * 0.71D, 0.038D,
+                        G_R, G_G, G_B, 0.19F * petalLit * form);
+                sealDiamond(out, pose, a, R * 0.835D, R * 0.009D, R * 0.014D,
+                        G_R, G_G, G_B, 0.26F * petalLit);
+            }
+            for (int i = 0; i < 12; i++) {
+                double a = phase * 0.9D + i * Math.PI / 6.0D + Math.PI / 12.0D;
+                Vec3 from = polar(a, R * 0.925D, 0.06D);
+                Vec3 to = polar(a, R * 0.965D, 0.06D);
+                WaterGeometry.tube(out, pose, from, to, Math.max(0.0016D, R * 0.0020D),
+                        G_R, G_G, G_B, 0.22F * form, 3);
+            }
+        }
+
+        // 向外的光芒（日冕）：越接近释放越长；低阶用锥形光＋尖端菱形，高阶保持细管
         int rays = LightRitualSequence.groundRays(tier);
         for (int i = 0; i < rays; i++) {
             double angle = i * Math.PI * 2.0D / rays + time * 0.006D;
-            Vec3 inner = polar(angle, R * 0.92D, 0.06D);
-            Vec3 outer = polar(angle, R * (1.02D + 0.22D * glow), 0.06D);
-            float alpha = 0.10F + 0.22F * glow;
-            WaterGeometry.tube(out, pose, inner, outer, R * 0.0055D, G_R, G_G, G_B, alpha, 4);
+            double tip = R * (1.02D + 0.22D * glow);
+            if (grand) {
+                Vec3 inner = polar(angle, R * 0.92D, 0.06D);
+                Vec3 outer = polar(angle, tip, 0.06D);
+                float alpha = 0.10F + 0.22F * glow;
+                WaterGeometry.tube(out, pose, inner, outer, R * 0.0055D,
+                        G_R, G_G, G_B, alpha, 4);
+            } else {
+                sealRay(out, pose, angle, R * 0.925D, tip, Math.max(0.006D, R * 0.018D),
+                        W_R, W_G, W_B, 0.22F + 0.30F * glow);
+                sealDiamond(out, pose, angle, tip - R * 0.005D, R * 0.010D, R * 0.018D,
+                        1.0F, 0.96F, 0.82F, 0.18F + 0.22F * glow);
+            }
         }
 
         // 内层八角星：只有中高阶才叠这两枚反向方框（低阶保持“一个干净的符”）
@@ -456,11 +581,23 @@ public final class LightCastFx {
                     G_R, G_G, G_B, 0.26F * form);
         }
 
-        // 中心：小环 + 亮核
-        WaterGeometry.ringColor(out, pose, Vec3.ZERO, UP, R * 0.20D, R * 0.006D,
-                W_R, W_G, W_B, 0.35F * form, 48);
-        WaterGeometry.disk(out, pose, new Vec3(0.0D, 0.055D, 0.0D), UP, R * 0.045D,
-                1.0F, 0.98F, 0.90F, 0.16F + 0.22F * glow, 24);
+        // 中心：低阶是六芒小星核，中高阶是较大的环 + 亮核
+        if (grand) {
+            WaterGeometry.ringColor(out, pose, Vec3.ZERO, UP, R * 0.20D, R * 0.006D,
+                    W_R, W_G, W_B, 0.35F * form, 48);
+            WaterGeometry.disk(out, pose, new Vec3(0.0D, 0.055D, 0.0D), UP, R * 0.045D,
+                    1.0F, 0.98F, 0.90F, 0.16F + 0.22F * glow, 24);
+        } else {
+            for (int i = 0; i < 6; i++) {
+                double a = -phase * 0.7D + i * Math.PI / 3.0D + Math.PI / 6.0D;
+                sealPetal(out, pose, a, R * 0.145D, R * 0.225D, 0.042D,
+                        G_R, G_G, G_B, 0.28F * form);
+            }
+            WaterGeometry.ringColor(out, pose, new Vec3(0.0D, 0.02D, 0.0D), UP,
+                    R * 0.120D, R * 0.006D, W_R, W_G, W_B, 0.62F * form, 32);
+            WaterGeometry.disk(out, pose, new Vec3(0.0D, 0.055D, 0.0D), UP, R * 0.050D,
+                    1.0F, 1.0F, 0.94F, 0.20F + 0.30F * glow, 24);
+        }
     }
 
     /** 2~8 颗绕行小阵；中高阶每颗再顶一枚竖立伴生环（低阶只有贴地小阵）。 */
@@ -731,6 +868,43 @@ public final class LightCastFx {
         }
     }
 
+    /** 一片朝外的叶子形花瓣（内尖—左腰—外尖—右腰），低阶小日轮用 ✓。 */
+    private static void sealPetal(VertexConsumer out, Matrix4f pose, double angle,
+                                  double inner, double outer, double halfAngle,
+                                  float r, float g, float b, float alpha) {
+        double mid = inner + (outer - inner) * 0.55D;
+        Vec3 p0 = polar(angle, inner, 0.055D);
+        Vec3 p1 = polar(angle + halfAngle, mid, 0.055D);
+        Vec3 p2 = polar(angle, outer, 0.055D);
+        Vec3 p3 = polar(angle - halfAngle, mid, 0.055D);
+        WaterGeometry.quad(out, pose, p0, p1, p2, p3, r, g, b, alpha);
+    }
+
+    /** 菱形光点：沿 angle 方向、中心 radius，控制长短胖瘦 ✓。 */
+    private static void sealDiamond(VertexConsumer out, Matrix4f pose, double angle,
+                                    double radius, double halfWidth, double halfLength,
+                                    float r, float g, float b, float alpha) {
+        Vec3 dir = new Vec3(Math.cos(angle), 0.0D, Math.sin(angle));
+        Vec3 side = new Vec3(-dir.z, 0.0D, dir.x);
+        Vec3 inner = polar(angle, radius - halfLength, 0.06D);
+        Vec3 outer = polar(angle, radius + halfLength, 0.06D);
+        Vec3 left = polar(angle, radius, 0.06D).add(side.scale(halfWidth));
+        Vec3 right = polar(angle, radius, 0.06D).subtract(side.scale(halfWidth));
+        WaterGeometry.quad(out, pose, inner, left, outer, right, r, g, b, alpha);
+    }
+
+    /** 从内向外抽出的锥形光：根部有宽度、尖端收成一点 ✓。 */
+    private static void sealRay(VertexConsumer out, Matrix4f pose, double angle,
+                                double inner, double outer, double halfWidth,
+                                float r, float g, float b, float alpha) {
+        Vec3 dir = new Vec3(Math.cos(angle), 0.0D, Math.sin(angle));
+        Vec3 side = new Vec3(-dir.z, 0.0D, dir.x);
+        Vec3 i0 = polar(angle, inner, 0.06D).add(side.scale(halfWidth));
+        Vec3 i1 = polar(angle, inner, 0.06D).subtract(side.scale(halfWidth));
+        Vec3 tip = polar(angle, outer, 0.06D);
+        WaterGeometry.quad(out, pose, i0, i1, tip, tip, r, g, b, alpha);
+    }
+
     /** 一道符文：径向短划 ＋ 外端小菱形（几何体画不出真字，但远看是“文字带”✓）。 */
     private static void rune(VertexConsumer out, Matrix4f pose, double angle, double radius,
                              double halfHeight, double width,
@@ -775,6 +949,27 @@ public final class LightCastFx {
             Vec3 p1 = polar(a1, radius, 0.06D);
             WaterGeometry.tube(out, pose, p0, p1, width, r, g, b, alpha, 4);
         }
+    }
+
+    private static CastInfo scanApollo(TNApolloEntity boss) {
+        int code = boss.castSpell();
+        if (code <= 0) {
+            return null;
+        }
+        int total = boss.castDuration();
+        if (total <= 0) {
+            return null;
+        }
+        int remaining = Mth.clamp(boss.castRemainingTicks(), 0, total);
+        float ratio = Mth.clamp(1.0F - remaining / (float) total, 0.01F, 1.0F);
+        int spell = code - 1;
+        int tier = switch (spell) {
+            case 0 -> 2;
+            case 1 -> 3;
+            case 4 -> 5;
+            default -> 4;
+        };
+        return new CastInfo(tier, ratio, 6.4D + tier * 0.18D);
     }
 
     private static Vec3 interpolated(Player player, float partial) {

@@ -273,6 +273,11 @@ minecraft {
                 property 'mixin.env.remapRefMap', 'true'
                 property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
             }
+            if (project.hasProperty('lightMirrorTests')) {
+                property 'forge.enabledGameTestNamespaces', 'tnclightmirror'
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+            }
             if (project.hasProperty('inkCraneTests')) {
                 property 'forge.enabledGameTestNamespaces', 'tncink'
                 property 'mixin.env.remapRefMap', 'true'
@@ -434,7 +439,7 @@ dependencies {
     }
     // Optional headless building smoke tests need the same NPC animation API as the pack.
     // Compile-only keeps normal distribution unchanged; enable with -PbuildingGameTests.
-    if (project.hasProperty('buildingGameTests') || project.hasProperty('magicStoneUiAudit') || project.hasProperty('journeyTests') || project.hasProperty('dungeonMobTests') || project.hasProperty('arcanaTests')) {
+    if (project.hasProperty('buildingGameTests') || project.hasProperty('magicStoneUiAudit') || project.hasProperty('journeyTests') || project.hasProperty('dungeonMobTests') || project.hasProperty('arcanaTests') || project.hasProperty('lightMirrorTests')) {
         runtimeOnly fg.deobf('geckolib:geckolib:4.8.4')
     }
     // 地下城小怪 17 只：无头 GameTest 要真跑 GeckoLib 实体（模型/控制器在服务端也要解析），
@@ -467,6 +472,14 @@ dependencies {
 
 tasks.named('test', Test).configure {
     useJUnitPlatform()
+    // 只改法术 JSON（读条/冷却）不动 java 时，Gradle 会把 test 判成 UP-TO-DATE ⇒
+    // SpellBalanceTest 这些"读数据文件"的闸门就被静默跳过了 ✗ 所以把数据目录登记成输入。
+    ['src/main/resources/data/tnc/spells',
+     'modpack/元素觉醒1.4.3-魔改版-20260915/kubejs/data/tnc/spells'].each { d ->
+        if (file(d).isDirectory()) {
+            inputs.dir(d)
+        }
+    }
 }
 
 // Local travel music definitions are optional; tavern events must survive a clean checkout.

@@ -39,9 +39,6 @@ public final class LightningRenderTypes {
     /** 雷系几何唯一用到的渲染层 ✓。 */
     public static final RenderType BOLT = LightningType.BOLT;
 
-    /** Ground cracks need alpha blending: additive lightning cannot draw dark geometry. */
-    public static final RenderType DARK = LightningType.DARK;
-
     /**
      * ★ <b>法术模型层（半透明 ＋ 自发光）</b> —— 给「雷球 / 三尊神 / 环绕雷球」这些
      * <b>作者做的方块模型</b>用 ✓。
@@ -65,6 +62,27 @@ public final class LightningRenderTypes {
 
     /** 模型"发光外轮廓"：同一份几何用加色再画一遍（贴图纯白 ⇒ 就是一层白色辉光）✓。 */
     public static final RenderType SPELL_MODEL_GLOW = BOLT;
+
+    /**
+     * ★ <b>暗系"黑线"层</b>（2026-11-05 第四批之后：作者「闪电要是横着来是不是就是黑线和血线了」）。
+     *
+     * <p>为什么必须另开一层：{@link #BOLT} 是<b>加色</b>混合（{@code SRC_ALPHA, ONE}）——
+     * 黑色加进去等于没画 ✗。黑线要"吃光"，只能走<b>普通 alpha</b>
+     * （{@code SRC_ALPHA, ONE_MINUS_SRC_ALPHA}）⇒ 深色压住背后的亮处，才是真正的"黑"✓。
+     *
+     * <p>其余和 BOLT 一致：白贴图（颜色全走顶点色）、不写深度、不剔除、输出到主目标。
+     */
+    public static final RenderType DARK = LightningType.DARK;
+
+    /**
+     * ★ <b>暗系"黑线"层（不测深度）</b> —— 只给<b>黑雾里的手</b>用。
+     *
+     * <p>为什么必须不测深度：黑雾的雾片是 {@code entityTranslucent}，会<b>写深度</b>；
+     * 雾心正好被好几张雾片盖着 ⇒ 用 {@link #DARK} 画的手会被整片雾挡没 ✗
+     * （作者要的恰恰是"从雾里冒出手"，看不见就等于没做）。
+     * 手的 alpha 会随相机距离衰减，所以也不会在远处"穿墙"太明显 ✓。
+     */
+    public static final RenderType DARK_OVERLAY = LightningType.DARK_OVERLAY;
 
     private LightningRenderTypes() {
     }
@@ -102,19 +120,6 @@ public final class LightningRenderTypes {
                         .setOutputState(MAIN_TARGET)
                         .createCompositeState(false));
 
-        static final RenderType DARK = create(
-                "tnc_spell_dark", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS,
-                262144, false, true,
-                CompositeState.builder()
-                        .setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_EMISSIVE_SHADER)
-                        .setTextureState(new TextureStateShard(WHITE_TEXTURE, false, false))
-                        .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
-                        .setCullState(NO_CULL)
-                        .setDepthTestState(LEQUAL_DEPTH_TEST)
-                        .setWriteMaskState(COLOR_WRITE)
-                        .setOutputState(MAIN_TARGET)
-                        .createCompositeState(false));
-
         static final RenderType SPELL_MODEL = create(
                 "tnc_spell_model",
                 DefaultVertexFormat.NEW_ENTITY,
@@ -130,6 +135,42 @@ public final class LightningRenderTypes {
                         .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
                         .setCullState(NO_CULL)
                         .setDepthTestState(LEQUAL_DEPTH_TEST)
+                        .setWriteMaskState(COLOR_WRITE)
+                        .setOutputState(MAIN_TARGET)
+                        .createCompositeState(false));
+
+        /** 暗系黑线：普通 alpha 混合（黑色必须靠"遮住"而非"加亮" ✓）。 */
+        static final RenderType DARK = create(
+                "tnc_dark_strand",
+                DefaultVertexFormat.NEW_ENTITY,
+                VertexFormat.Mode.QUADS,
+                262144,
+                false,
+                true,
+                CompositeState.builder()
+                        .setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_EMISSIVE_SHADER)
+                        .setTextureState(new TextureStateShard(WHITE_TEXTURE, false, false))
+                        .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                        .setCullState(NO_CULL)
+                        .setDepthTestState(LEQUAL_DEPTH_TEST)
+                        .setWriteMaskState(COLOR_WRITE)
+                        .setOutputState(MAIN_TARGET)
+                        .createCompositeState(false));
+
+        /** 黑雾里的手：不测深度（雾片写深度会把手挡没），其余同 DARK ✓。 */
+        static final RenderType DARK_OVERLAY = create(
+                "tnc_dark_strand_overlay",
+                DefaultVertexFormat.NEW_ENTITY,
+                VertexFormat.Mode.QUADS,
+                262144,
+                false,
+                true,
+                CompositeState.builder()
+                        .setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_EMISSIVE_SHADER)
+                        .setTextureState(new TextureStateShard(WHITE_TEXTURE, false, false))
+                        .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                        .setCullState(NO_CULL)
+                        .setDepthTestState(NO_DEPTH_TEST)
                         .setWriteMaskState(COLOR_WRITE)
                         .setOutputState(MAIN_TARGET)
                         .createCompositeState(false));

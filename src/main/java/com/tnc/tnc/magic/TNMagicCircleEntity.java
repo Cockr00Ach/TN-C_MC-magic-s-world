@@ -101,6 +101,40 @@ public class TNMagicCircleEntity extends Entity {
     public static final int STYLE_LIGHT_GRAND = 10;
 
     /**
+     * ★ <b>雷系低阶阵</b>（2026-11-05 第三批：作者「参考一下光法的施法前戏和法阵，照猫画虎一下」）。
+     *
+     * <p>和光系的 {@link #STYLE_LIGHT_MINOR} 同一个思路：<b>一圈电环 ＋ 6 道辐条 ＋ 中心亮核</b>，
+     * 没有外环、没有刻痕、没有雷网 —— t1/t2 的雷锲阵与所有卫星小阵用它，
+     * 读起来像"在地上烙一个雷印"，而不是把高阶牢笼缩小 ✗。
+     */
+    public static final int STYLE_LIGHTNING_MINOR = 11;
+
+    /**
+     * ★ <b>雷系高阶阵</b>（t4/t5 的「霆狱」）。
+     *
+     * <p>在 {@link #STYLE_LIGHTNING} 的满配几何上再叠一圈外环 ＋ 24 道外侧刻痕 ＋ 12 道抬起的电须，
+     * 配合更大的半径、更多小阵/门环 —— 让高阶阵一眼就比中阶"重" ✓。
+     */
+    public static final int STYLE_LIGHTNING_GRAND = 12;
+
+    /**
+     * ★ <b>暗系低阶阵</b>（2026-11-05 第四批：作者「优化一下衍 boss 的施法 … 衍是有黑暗元素的」）。
+     *
+     * <p>和 {@link #STYLE_LIGHTNING_MINOR} 同一个骨架，但气质换成"影子"：
+     * 环是**紫黑**的、辐条末端往里**勾**（不是直辐条）、外圈只留一圈被拉进来黑雾，
+     * 中心的核是**黑**的（暗核吸光）✓ —— 一眼看得出是衍的东西，不是雷法 ✗。
+     */
+    public static final int STYLE_DARK_MINOR = 13;
+
+    /**
+     * ★ <b>暗系高阶阵</b>（衍的大招「天打五雷轰 / 神在投篮」的前戏）。
+     *
+     * <p>在低阶的基础上叠外环 ＋ 刻痕 ＋ 更多勾爪 ＋ 一圈**立的门环**，
+     * 配合更长的蓄力 —— 作者要的"有前戏、看得出在憋大招" ✓。
+     */
+    public static final int STYLE_DARK_GRAND = 14;
+
+    /**
      * ★ 法阵的<b>主题色</b>（作者 2026-11-05："黄的、蓝的、紫的"）。
      *
      * <p>{@code LightningTheme} 的编号：0 金 / 1 蓝 / 2 紫 / 3 暗。

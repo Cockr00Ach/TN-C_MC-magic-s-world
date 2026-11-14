@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "side": "tnc:block/yan_altar_side",
+    "end": "tnc:block/yan_altar_top"
+  }
+}

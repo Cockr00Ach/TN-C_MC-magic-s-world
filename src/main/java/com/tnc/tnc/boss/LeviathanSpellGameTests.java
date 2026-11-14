@@ -155,6 +155,7 @@ public final class LeviathanSpellGameTests {
     @GameTest(template="leviathan_empty",timeoutTicks=455)
     public static void cryptAscendsToSealFacesDownAndEndsAfterOneSword(GameTestHelper h) {
         var boss=boss(h); var enemy=target(h);
+        final net.minecraft.world.phys.Vec3 launch=boss.position();
         h.assertTrue(LeviathanSpells.cast(boss,enemy,"sea_god_crypt"),"Crypt created");
         final TNWaterFieldEntity[] fieldRef={null};
         h.runAtTickTime(2,()->{
@@ -163,18 +164,31 @@ public final class LeviathanSpellGameTests {
             h.assertTrue(field.swordImpactIndex(140)==0 && field.swordImpactIndex(200)==-1,"Only the first impact is scheduled");
         });
         h.runAtTickTime(8,()->{
-            h.assertTrue(boss.castPose()==2 && boss.getXRot()==90F && boss.castTilt(1)>.99F,
-                    "Boss turns head-down during ascent within a quarter second");
+            // 作者 2026-11-07：「头是要对着方向的，不是单纯平移」——起飞段朝航向抬头，不再固定低头 90°。
+            h.assertTrue(boss.castPose()==2 && boss.getXRot()<-5F && boss.castTilt(1)<.2F,
+                    "Boss lifts its head along the launch heading instead of sliding head-down; xRot="+boss.getXRot()+" tilt="+boss.castTilt(1));
+        });
+        h.runAtTickTime(30,()->{
+            h.assertTrue(boss.castPose()==2,"Still climbing half-way through the flight");
+            h.assertTrue(boss.getY()>launch.y+25D,"Already well above the launch point; y="+boss.getY());
+            h.assertTrue(boss.getXRot()<-40F,"Muzzle keeps pointing up the climb; xRot="+boss.getXRot());
+            h.assertTrue(boss.position().subtract(launch).horizontalDistanceSqr()>16D,
+                    "The flight leaves the launch point sideways before it rises (curved take-off)");
+            h.assertTrue(boss.getLookAngle().y>.2D,"Head looks along the upward path, not sideways or down");
         });
         h.runAtTickTime(55,()->{
             h.assertTrue(boss.castPose()==3 && boss.mouthOpen(),"Arrives before the sword appears and opens its mouth; pose="+boss.castPose()+" boss="+boss.position()+" station="+fieldRef[0].skySealCenter()+" removed="+fieldRef[0].isRemoved()+" age="+fieldRef[0].age());
+            h.assertTrue(boss.ghosting() && boss.ghostAlpha()<1F,"Arrival starts the glowing ghost fade instead of a hard cut");
             h.assertTrue(boss.position().distanceTo(fieldRef[0].skySealCenter())<boss.MOUTH_FORWARD+boss.APERTURE_GAP+1,"Boss is stationed at the actual sky seal");
             h.assertTrue(boss.aperturePosition(boss.getYRot(),90F).distanceTo(fieldRef[0].skySealCenter())<0.01,
                     "The sky seal is just in front of the downward-facing mouth");
             h.assertTrue(boss.getLookAngle().dot(new net.minecraft.world.phys.Vec3(0,-1,0))>0.99,
                     "Boss faces the same downward direction as the falling sword");
         });
-        h.runAtTickTime(195,()->h.assertTrue(boss.mouthOpen() && !fieldRef[0].isRemoved(),"Holds the pose until the crypt ends"));
+        h.runAtTickTime(195,()->{
+            h.assertTrue(boss.mouthOpen() && !fieldRef[0].isRemoved(),"Holds the pose until the crypt ends");
+            h.assertTrue(boss.ghostAlpha()<.05F,"The sky ghost is gone long before the sword lands (alpha="+boss.ghostAlpha()+")");
+        });
         h.runAtTickTime(210,()->{
             h.assertTrue(fieldRef[0].isRemoved() && !boss.mouthOpen(),"Crypt and mouth end together");
             h.assertTrue(boss.isReturningFromSky(),"Crypt ends with an active return flight");

@@ -145,6 +145,7 @@ public final class WarriorComboService {
             return;
         }
         try {
+            if (WarriorUltimateService.active(player)) return;
             if (WarriorBowCharge.input(player,move,mode)) return;
             if(mode==WarriorComboInputPacket.CHARGE_START)return;
             if (mode == WarriorComboInputPacket.RELEASE) {
@@ -202,6 +203,7 @@ public final class WarriorComboService {
             return;
         }
         state.lastInput = now;
+        if (!held && WarriorUltimateService.input(player,move,now)) { state.tracker.clear(); sync(player,state,-1); return; }
 
         if (!held) {
             // Z（左键）的原版伤害已经由游戏结算，这里只记输入，避免一次点击打两下。
@@ -407,6 +409,7 @@ public final class WarriorComboService {
      * 于是"按 Shift 就能立刻停下自己的动作"是无延迟的，后面的冲刺只是附加的位移。
      */
     public static void interrupt(ServerPlayer player) {
+        WarriorUltimateService.cancel(player);
         WarriorBowCharge.cancel(player);
         if (player == null || !eligible(player)) {
             return;
@@ -687,7 +690,7 @@ public final class WarriorComboService {
         player.hurtMarked = true;
     }
 
-    private static List<LivingEntity> targets(ServerPlayer player, double radius) {
+    static List<LivingEntity> targets(ServerPlayer player, double radius) {
         double reach = radius * radius;
         return player.serverLevel().getEntitiesOfClass(LivingEntity.class,
                 player.getBoundingBox().inflate(radius),

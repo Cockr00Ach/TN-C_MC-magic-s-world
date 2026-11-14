@@ -121,7 +121,7 @@ public final class WaterModelClientAudit {
                 } else {
                     poses.pushPose();poses.translate(-.72,0,.4);poses.scale(.015F,.015F,.015F);
                     WaterVisualBuffers.draw(WaterTransparencyPass.route(buffers),(body,glow)->WaterBeamVisuals.render(
-                            body,glow,poses.last().pose(),5,new Vec3(1,0,0),96,40,1,true));
+                            body,glow,poses.last().pose(),5,new Vec3(1,0,0),96,40,1,true,new Vec3(0,0,-48)));
                     poses.popPose();
                 }
                 buffers.endBatch();

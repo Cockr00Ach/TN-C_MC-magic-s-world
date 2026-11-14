@@ -4,7 +4,7 @@
   "range": 26.0,
   "learn": { "tier": 1 },
   "cast": {
-    "duration": 0.5,
+    "duration": 0.45,
     "animation": "spell_engine:one_handed_projectile_charge",
     "sound": { "id": "spell_engine:generic_wind_charging", "randomness": 0 },
     "particles": [ { "particle_id": "cloud", "shape": "PIPE", "origin": "FEET", "count": 6.0, "min_speed": 0.1, "max_speed": 0.5 } ]
@@ -70,5 +70,5 @@
     "particles": [ { "particle_id": "cloud", "shape": "SPHERE", "origin": "CENTER", "count": 40.0, "min_speed": 0.3, "max_speed": 1.2 } ],
     "sound": { "id": "spell_engine:generic_wind_charging", "volume": 0.9 }
   },
-  "cost": { "exhaust": 0.0, "cooldown_duration": 2.5 }
+  "cost": { "exhaust": 0.0, "cooldown_duration": 3 }
 }

@@ -215,7 +215,7 @@ public final class TNLightChainMechanics {
         boolean playerCaster = caster instanceof ServerPlayer;
 
         // ① 法阵：半径 = 法术范围 ✓（作者："范围多大法阵多大"✓），用**光系**那张纯白贴图 ✓
-        //    ★ 2026-11-05：不再只铺一张 ✗ —— 主阵周围再铺 3~7 张小阵（读条时客户端也会画一套仪式场 ✓）。
+        //    ★ 2026-11-05：不再只铺一张 ✗ —— 主阵周围再铺 2~8 张小阵（低阶 2/3，高阶 6/8；读条时客户端也会画一套仪式场 ✓）。
         //      小阵的数量/位置和客户端 {@code LightRitualSequence} 共用同一套规则 ✓。
         spawnGraceArray(level, caster, at, spell.radius(), spell.tier());
 
@@ -325,7 +325,7 @@ public final class TNLightChainMechanics {
      * </ul>
      */
     /**
-     * 光耀的<b>整座仪式阵</b>：主阵 ＋ 3~7 颗小阵 ＋（t3 起）身后一枚竖立光环 ✓。
+     * 光耀的<b>整座仪式阵</b>：主阵 ＋ 2~8 颗小阵 ＋（t3 起 1~3 道）身后竖立光环 ✓。
      *
      * <p>2026-11-05 作者：「不是每次就一个法阵吗，我希望有更多的小法阵」✓ ——
      * 以前这里只有一张半径 = 范围的阵 ✗，释放完就没了；现在释放瞬间能同时看到
@@ -639,6 +639,10 @@ public final class TNLightChainMechanics {
             }
             giveFlight(player, false);
         }
+    }
+
+    public static void endGraceFlight(ServerPlayer player) {
+        if (FLIGHT_UNTIL.remove(player.getUUID()) != null) giveFlight(player, false);
     }
 
     /** 给/收飞行 ✓（只在状态真的变了才发同步包 ✗ —— 每 tick 刷包会把客户端刷爆 ✗）。 */

@@ -39,6 +39,8 @@ public final class TNWaterFieldEntity extends Entity {
     public int swordImpactIndex(int age){int index=SeaGodSwordRules.impactIndex(age);return index>=swordCount()?-1:index;}
     private boolean swordCue(int age,int first){return bossCrypt()?age==first:SeaGodSwordRules.cue(age,first);}
     private static final EntityDataAccessor<Float> SCALE=SynchedEntityData.defineId(TNWaterFieldEntity.class,EntityDataSerializers.FLOAT);
+    private static final net.minecraft.network.syncher.EntityDataAccessor<java.util.Optional<UUID>> VIEW_OWNER=net.minecraft.network.syncher.SynchedEntityData.defineId(TNWaterFieldEntity.class,net.minecraft.network.syncher.EntityDataSerializers.OPTIONAL_UUID);
+    public UUID visualOwner(){return entityData.get(VIEW_OWNER).orElse(null);}
     private UUID owner,anchor;
     private TNWaterSpellEntity bindingBeam;
     private int lastSwordImpact=-1;
@@ -162,7 +164,7 @@ public final class TNWaterFieldEntity extends Entity {
         return field;
     }
 
-    public static LivingEntity aimEnemy(ServerPlayer player,double range) {
+    public static LivingEntity aimEnemy(LivingEntity player,double range) {
         Vec3 from=player.getEyePosition(),end=from.add(player.getLookAngle().scale(range));
         var wall=player.level().clip(new ClipContext(from,end,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,player));
         if(wall.getType()!=HitResult.Type.MISS)end=wall.getLocation();
@@ -173,8 +175,9 @@ public final class TNWaterFieldEntity extends Entity {
         }
         return closest;
     }
-    @Override protected void defineSynchedData(){entityData.define(SCALE,1F);entityData.define(BOSS_CAST,false);entityData.define(SKY_HEIGHT,116F);entityData.define(KIND,1);entityData.define(TIER,1);entityData.define(AGE,0);entityData.define(YAW,0F);entityData.define(PITCH,0F);entityData.define(EMITTER,false);entityData.define(ROLL,0F);}
+    @Override protected void defineSynchedData(){entityData.define(VIEW_OWNER,java.util.Optional.empty());entityData.define(SCALE,1F);entityData.define(BOSS_CAST,false);entityData.define(SKY_HEIGHT,116F);entityData.define(KIND,1);entityData.define(TIER,1);entityData.define(AGE,0);entityData.define(YAW,0F);entityData.define(PITCH,0F);entityData.define(EMITTER,false);entityData.define(ROLL,0F);}
     @Override public void tick() {
+        if(!level().isClientSide)entityData.set(VIEW_OWNER,java.util.Optional.ofNullable(owner));
         super.tick();
         if(level().isClientSide) { clientRain(); return; }
         ServerLevel level=(ServerLevel)level();

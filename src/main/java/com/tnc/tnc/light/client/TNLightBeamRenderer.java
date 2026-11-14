@@ -90,6 +90,9 @@ public class TNLightBeamRenderer extends EntityRenderer<TNLightBeamEntity> {
             pose.mulPose(Axis.XP.rotationDegrees(Mth.lerp(partialTick, beam.xRotO, beam.getXRot())));
         }
 
+        boolean avoid=com.tnc.tnc.client.FirstPersonSpellView.own(beam.level().getEntity(beam.casterId()))
+                &&origin.distanceTo(net.minecraft.client.Minecraft.getInstance().gameRenderer.getMainCamera().getPosition())<1;
+        if(avoid){double skip=Math.min(length,com.tnc.tnc.client.FirstPersonSpellView.clearance(radius));pose.translate(0,0,skip);length-=skip;if(length<=.01){pose.popPose();return;}}
         VertexConsumer vc = buffers.getBuffer(RenderType.entityTranslucentEmissive(WHITE));
         Matrix4f m = pose.last().pose();
 
@@ -101,7 +104,7 @@ public class TNLightBeamRenderer extends EntityRenderer<TNLightBeamEntity> {
         float coreFraction = fire ? 0.42F : (descent ? 0.45F : 0.30F);
         tube(vc, m, shell * coreFraction, (float) length, true, age, descent, fire, beam.beamColor());
         // ③ 两端的亮圈
-        cap(vc, m, shell, 0.0F, age, fire, beam.beamColor());
+        if(!avoid)cap(vc, m, shell, 0.0F, age, fire, beam.beamColor());
         cap(vc, m, shell * 1.15F, (float) length, age, fire, beam.beamColor());
         pose.popPose();
     }

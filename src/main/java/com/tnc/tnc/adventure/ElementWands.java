@@ -2,6 +2,9 @@ package com.tnc.tnc.adventure;
 
 import com.tnc.tnc.TNMod;
 import com.tnc.tnc.magic.*;
+import com.tnc.tnc.travel.TravelForms;
+import com.tnc.tnc.travel.TravelKeyHint;
+import com.tnc.tnc.travel.TravelStaff;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.*;
 import net.minecraft.network.chat.Component;
@@ -33,26 +36,59 @@ public final class ElementWands {
     public static void register(){} // Called while TNMod's DeferredRegister is being populated.
     public static Design find(String id){return ALL.stream().filter(d->d.id.equals(id)).findFirst().orElse(null);}
     public static ItemStack stack(Design d){return new ItemStack(ITEMS.get(d.id).get());}
+    /**
+     * 这根法杖能承载哪些已学法术。
+     *
+     * <h2>规则（2026-11-09 作者拍板）</h2>
+     * <b>不再按元素过滤</b>：知识在魔法石，任何法杖都能放玩家已学的法术，
+     * 法杖只限制<b>阶位</b>（冒险者杖只放 1 阶，神杖放 1~5 阶）。
+     * 同元素不再决定"能不能放"，只决定"放得疼不疼"——见 {@link WandResonance} 的 +25% 共鸣。
+     *
+     * <p>为什么要改：作者实测拿暗杖时魔法石里 10 个风系法术一个都不显示，
+     * 看起来像"法术绑在某一根杖上"✗。元素杖的意义现在体现在<b>共鸣加成</b>上。
+     */
     public static List<ResourceLocation> supported(Collection<ResourceLocation> learned,Design design){
         // Recompute highest learned spell within the weapon's capacity, not the player's
         // globally highest spell. A lower-tier wand never erases a learned higher tier.
         var chosen=new LinkedHashMap<String,SpellCatalog.Entry>();
-        for(var e:SpellCatalog.all())if(learned.contains(e.id())&&(e.element()==design.element||e.chain()==SpellCatalog.Chain.INDEPENDENT)&&e.tier()<=design.tier){
+        for(var e:SpellCatalog.all())if(learned.contains(e.id())&&e.tier()<=design.tier){
             String key=e.independent()?e.id().toString():e.element().id()+":"+e.chain().name();var old=chosen.get(key);if(old==null||old.tier()<e.tier())chosen.put(key,e);
         }
-        var ids=new ArrayList<ResourceLocation>();chosen.values().forEach(e->ids.add(e.id()));
+        // 不分元素之后一阶能凑出 7 系 ×4 链 = 28 条，远超引擎那 8 个槽位
+        // （见 SpellEngineBridge.WAND_CAPACITY）。所以排序后截断：
+        //   本元素优先 → 阶位高的优先 → 目录顺序（稳定，槽位不会每次刷新乱跳）
+        var order=new ArrayList<SpellCatalog.Entry>(chosen.values());
+        order.sort(java.util.Comparator
+                .<SpellCatalog.Entry>comparingInt(e->e.element()==design.element?0:1)
+                .thenComparingInt(e->-e.tier()));
+        var ids=new ArrayList<ResourceLocation>();
+        for(var e:order){
+            if(ids.size()>=8)break;   // = SpellEngineBridge.WAND_CAPACITY
+            ids.add(e.id());
+        }
         // Placeholder domains are not weapon slots until they have real catalogue entries.
         return ids;
     }
-    public static final class Wand extends Item {
+    public static final class Wand extends Item implements TravelStaff {
         public final Design design;
         Wand(Design d){super(new Properties().stacksTo(1).rarity(d.tier>=4?Rarity.EPIC:d.tier>=2?Rarity.RARE:Rarity.UNCOMMON));design=d;}
+        @Override public Element travelElement(){return design.element;}
+        @Override public int travelTier(){return design.tier;}
         @Override public void initializeClient(java.util.function.Consumer<net.minecraftforge.client.extensions.common.IClientItemExtensions> consumer){
             consumer.accept(new com.tnc.tnc.equipment.client.LuminousStaffRenderer.Extension());
         }
         @Override public void appendHoverText(ItemStack stack,Level level,List<Component> lines,TooltipFlag flag){
-            lines.add(Component.literal("承载同元素1～"+design.tier+"阶已学法术；知识保存在魔法石"));
-            lines.add(Component.literal("前往铸器师打造；神杖不会自动授予神法"));if(stack.hasTag()&&stack.getTag().contains("SpiritMana"))lines.add(Component.literal("同源温养 "+stack.getTag().getInt("SpiritMana")+" /10000M"));if(stack.hasTag()&&stack.getTag().contains("SpiritAffix"))lines.add(Component.literal("器灵觉醒 · "+design.element.cn()+"元素神技"));
+            lines.add(Component.literal("承载 1～"+design.tier+" 阶已学法术（不分元素）；知识保存在魔法石"));
+            lines.add(Component.literal("共鸣：用它放"+design.element.cn()+"系法术，伤害 +25%"));
+            lines.add(Component.literal("前往铸器师打造；神杖不会自动授予神法"));
+            if(TravelForms.supported(design.element)){
+                String key=TravelKeyHint.key();
+                lines.add(Component.literal("元素附身 · "+TravelForms.formName(design.element)+"（长按 "+key+"；松手退出）"));
+                lines.add(Component.literal("附身中右键 = "+TravelForms.skillName(design.element)+"；短按 "+key+" 不触发任何动作"));
+            }else{
+                lines.add(Component.literal("元素附身 · 尚未开放（长按 "+TravelKeyHint.key()+" 查看提示）"));
+            }
+            if(stack.hasTag()&&stack.getTag().contains("SpiritMana"))lines.add(Component.literal("同源温养 "+stack.getTag().getInt("SpiritMana")+" /10000M"));if(stack.hasTag()&&stack.getTag().contains("SpiritAffix"))lines.add(Component.literal("器灵觉醒 · "+design.element.cn()+"元素神技"));
         }
     }
 }

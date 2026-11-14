@@ -29,8 +29,11 @@ import java.util.Optional;
  * <ol>
  *   <li>取当前**正在追踪**的任务（{@code ClientQuestData.trackedEntry()}）；
  *       没追踪就什么都不画 —— 这正是"我开始追踪那个任务"才出现标记 ✓；</li>
- *   <li>任务里写了 {@code npc.entity_type} ⇒ 在客户端已加载的实体里找**最近的一个**；</li>
- *   <li>任务目标是 {@code location} 且带固定坐标 ⇒ 退回用那个坐标（引擎自带路点也管这条）✓。</li>
+ *   <li>**第一步目标是 {@code dialogue}** 且任务写了 {@code npc.entity_type}
+ *       ⇒ 在客户端已加载的实体里找**最近的一个**（位置每帧现查）✓；</li>
+ *   <li>任务目标是 {@code location} 且带固定坐标 ⇒ 退回用那个坐标（引擎自带路点也管这条）✓；</li>
+ *   <li>其余情况（{@code kill}、{@code collect} 这类）**不画人物标记** ✗ ——
+ *       那些目标没有"要找的人"，硬指任务发布者只会把人带错地方。</li>
  * </ol>
  *
  * <p>⚠️ 客户端只找**已加载**的实体：目标远在天边时找不到，这是对的 ——
@@ -63,16 +66,20 @@ public final class QuestMarkerTarget {
         }
         Entry entry = tracked.get();
 
-        // 1) 优先按"要找哪一类 NPC"现查最近的一个
+        // 1) 找人：只有**对话**目标才存在"要找的人"。kill / collect 这类目标没有 NPC 可找，
+        //    如果还去指任务发布者，等于把人往反方向带 ✗（这一步就是"目标点不对"的来源之一）。
+        //    读不到目标类型时（老版本 mod 没有 type()）按旧行为处理，宁可多画也别整条消失。
         ResourceLocation npcType = entry.npcEntityTypeId();
-        if (npcType != null) {
+        boolean personObjective = entry.firstObjectiveType() == null || entry.firstObjectiveIsDialogue();
+        if (npcType != null && personObjective) {
             Entity nearest = nearestOfType(mc, npcType, player);
             if (nearest != null) {
                 String label = entry.npcDisplayName() != null && !entry.npcDisplayName().isBlank()
                         ? entry.npcDisplayName()
                         : entry.title();
-                return Optional.of(new Marker(nearest.position(), label,
-                        player.position().distanceTo(nearest.position()), true));
+                Vec3 aim = nearest.getEyePosition();
+                return Optional.of(new Marker(aim, label,
+                        player.getEyePosition().distanceTo(aim), true));
             }
         }
 
@@ -80,7 +87,7 @@ public final class QuestMarkerTarget {
         Vec3 fixed = entry.objectivePosition();
         if (fixed != null) {
             return Optional.of(new Marker(fixed, entry.title(),
-                    player.position().distanceTo(fixed), true));
+                    player.getEyePosition().distanceTo(fixed), true));
         }
 
         return Optional.empty();
@@ -120,9 +127,15 @@ public final class QuestMarkerTarget {
     //  拿不到就当"没有追踪任务"处理 —— 少画一个标记，不是故障 ✓。
     // ------------------------------------------------------------------
 
-    /** 追踪中的任务：id / 标题 / 要找的 NPC 类型 / 固定坐标。 */
+    /** 追踪中的任务：id / 标题 / 要找的 NPC 类型 / 第一步目标的类型 / 固定坐标。 */
     public record Entry(String id, String title, String npcDisplayName,
-                        ResourceLocation npcEntityTypeId, Vec3 objectivePosition) {
+                        ResourceLocation npcEntityTypeId, String firstObjectiveType,
+                        Vec3 objectivePosition) {
+
+        /** 第一步目标是不是"和某个人对话" —— 只有这种目标才谈得上找人。 */
+        public boolean firstObjectiveIsDialogue() {
+            return "dialogue".equals(firstObjectiveType);
+        }
     }
 
     private static final String CLIENT_DATA = "com.lirxowo.whisperingquests.client.ClientQuestData";
@@ -133,6 +146,7 @@ public final class QuestMarkerTarget {
     private static java.lang.reflect.Method entryNpcType;
     private static java.lang.reflect.Method entryNpcName;
     private static java.lang.reflect.Method entryObjectives;
+    private static java.lang.reflect.Method objectiveType;
     private static java.lang.reflect.Method objectivePosition;
 
     private static Optional<Entry> trackedEntry() {
@@ -152,29 +166,47 @@ public final class QuestMarkerTarget {
             String title = asString(invoke(e, entryTitle));
             String npcName = asString(invoke(e, entryNpcName));
             ResourceLocation npcType = (ResourceLocation) invoke(e, entryNpcType);
-            Vec3 pos = firstObjectivePosition(e);
-            return Optional.of(new Entry(id, title, npcName, npcType, pos));
+            Objectives objectives = readObjectives(e);
+            return Optional.of(new Entry(id, title, npcName, npcType,
+                    objectives.firstType(), objectives.position()));
         } catch (ReflectiveOperationException | RuntimeException error) {
             return Optional.empty();     // 对方改了签名 ⇒ 少画标记，不报错刷屏
         }
     }
 
-    /** 取第一个带坐标的目标（location 目标走这条）。 */
-    private static Vec3 firstObjectivePosition(Object entry) throws ReflectiveOperationException {
-        if (entryObjectives == null || objectivePosition == null) {
-            return null;
+    /** {@link #readObjectives} 的结果：第一步目标的类型 + 第一个带坐标的目标。 */
+    private record Objectives(String firstType, Vec3 position) {
+    }
+
+    /**
+     * 读任务的目标列表。
+     *
+     * <p>{@code firstType} 决定"这条任务到底该不该显示人物标记"；
+     * {@code position} 只对 {@code location} 目标有值（对话目标没有坐标）。
+     */
+    private static Objectives readObjectives(Object entry) throws ReflectiveOperationException {
+        if (entryObjectives == null) {
+            return new Objectives(null, null);
         }
         Object objectives = entryObjectives.invoke(entry);
         if (!(objectives instanceof java.util.List<?> list)) {
-            return null;
+            return new Objectives(null, null);
         }
-        for (Object objective : list) {
-            Object pos = objectivePosition.invoke(objective);
-            if (pos instanceof net.minecraft.core.BlockPos bp) {
-                return new Vec3(bp.getX() + 0.5D, bp.getY(), bp.getZ() + 0.5D);
+        String firstType = null;
+        if (!list.isEmpty() && objectiveType != null) {
+            firstType = asString(objectiveType.invoke(list.get(0)));
+        }
+        Vec3 position = null;
+        if (objectivePosition != null) {
+            for (Object objective : list) {
+                Object pos = objectivePosition.invoke(objective);
+                if (pos instanceof net.minecraft.core.BlockPos bp) {
+                    position = new Vec3(bp.getX() + 0.5D, bp.getY(), bp.getZ() + 0.5D);
+                    break;
+                }
             }
         }
-        return null;
+        return new Objectives(firstType, position);
     }
 
     private static Object invoke(Object target, java.lang.reflect.Method m)
@@ -202,6 +234,13 @@ public final class QuestMarkerTarget {
 
             Class<?> objectiveClass = Class.forName(CLIENT_DATA + "$ObjectiveEntry");
             objectivePosition = objectiveClass.getMethod("position");
+            // type() 是 3.x 才有的：老版本拿不到就按旧行为处理（不按目标类型过滤），
+            // 不要因为少这一个方法就让整块标记全灭。
+            try {
+                objectiveType = objectiveClass.getMethod("type");
+            } catch (NoSuchMethodException absent) {
+                objectiveType = null;
+            }
 
             com.mojang.logging.LogUtils.getLogger()
                     .info("TN-C quest marker: whisperingquests client API resolved");

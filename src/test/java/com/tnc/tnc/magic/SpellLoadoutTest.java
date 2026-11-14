@@ -85,58 +85,13 @@ class SpellLoadoutTest {
         assertEquals(3, data.loadoutCount());
     }
 
-    /**
-     * 链式替换：同一条链学了更高档，绑着这条链低档的键<b>自动换成新的最高档</b>。
-     *
-     * <p>这不是"覆盖玩家手配的键位" ✗ —— 玩家配的是"我的这条链"，
-     * 至于这条链当前是哪一档，由他学到哪儿决定（作者 2026-09-29 的规则）。
-     * <b>别的链、别的元素的键一律不动</b> ✓。
-     */
     @Test
-    void learningAHigherTierOfAChainUpgradesThatChainsSlotOnly() {
-        MagicStoneData data = fresh();
-        data.learn(id("spark"));                     // 雷 · 主链 t1 → 自动进 0 号
-        data.learn(id("fireball"));                  // 火 · 火球链 t1 → 自动进 1 号
-        data.learn(id("thunder_orb"));               // 雷 · 雷球链 t1 → 自动进 2 号
-        data.setSlot(0, id("spark"));                // 主链 → 右键位
-        data.setSlot(5, id("fireball"));             // 火球 → 5 号键
-        data.setSlot(1, id("thunder_orb"));          // 雷球 → 2 号键
+    void higherTierPreservesLowerTierAndOtherChains(){var data=fresh();data.learn(id("spark"));data.learn(id("fireball"));data.setSlot(5,id("spark"));data.learn(id("lightning_field"));assertEquals(id("spark"),data.getSlot(5));assertTrue(data.isBound(id("lightning_field")));assertTrue(data.isBound(id("fireball")));assertTrue(SpellCatalog.canBind(data,id("spark")));assertTrue(SpellCatalog.canBind(data,id("lightning_field")));assertFalse(SpellCatalog.canBind(data,id("god_descent")));}
 
-        // 学雷 · 主链 t2（雷场）——同一条链
-        data.learn(id("lightning_field"));
-        assertEquals(id("lightning_field"), data.getSlot(0), "同链低档必须被换成新的链顶");
-        assertEquals(id("fireball"), data.getSlot(5), "别的元素的键不许动");
-        assertEquals(id("thunder_orb"), data.getSlot(1), "别的链的键不许动");
 
-        // 非链顶不许进新槽（列表里也不会出现它）
-        assertFalse(data.fillFirstFree(id("spark")));
-        assertFalse(SpellCatalog.canBind(data, id("spark")), "低档不再是链顶 → 不能再绑");
-        assertTrue(SpellCatalog.canBind(data, id("lightning_field")));
-    }
-
-    /** 配键列表只给"每条链当前拥有的最高档"，没学过的链不出现。 */
     @Test
-    void assignableListExposesOnlyChainTops() {
-        MagicStoneData data = fresh();
-        assertTrue(SpellCatalog.chainTopAssignable(data, Element.LIGHTNING).isEmpty(),
-                "什么都没学时列表应该是空的");
+    void assignableListContainsAllLearnedTiers(){var data=fresh();assertTrue(SpellCatalog.learnedAssignable(data,Element.LIGHTNING).isEmpty());data.learn(id("spark"));data.learn(id("lightning_field"));data.learn(id("thunder_orb"));var list=SpellCatalog.learnedAssignable(data,Element.LIGHTNING);assertEquals(3,list.size());assertTrue(list.stream().anyMatch(e->e.id().equals(id("spark"))));assertTrue(SpellCatalog.learnedAssignable(data,Element.FIRE).isEmpty());}
 
-        data.learn(id("spark"));                     // 雷 · 主链 t1
-        var light = SpellCatalog.chainTopAssignable(data, Element.LIGHTNING);
-        assertEquals(1, light.size(), "只学了主链 → 列表里只有主链那一个");
-        assertEquals(id("spark"), light.get(0).id());
-        assertTrue(SpellCatalog.chainTopAssignable(data, Element.FIRE).isEmpty(),
-                "别的元素没学过 → 空");
-
-        data.learn(id("lightning_field"));           // 主链升到 t2
-        light = SpellCatalog.chainTopAssignable(data, Element.LIGHTNING);
-        assertEquals(1, light.size(), "同一条链升档不该让列表变长");
-        assertEquals(id("lightning_field"), light.get(0).id(), "列表里换成了新的最高档");
-
-        data.learn(id("thunder_orb"));               // 雷球链 t1
-        assertEquals(2, SpellCatalog.chainTopAssignable(data, Element.LIGHTNING).size(),
-                "新学一条链才多一条");
-    }
 
     @Test
     void oneSpellOccupiesExactlyOneSlot() {
@@ -291,61 +246,17 @@ class SpellLoadoutTest {
                 "解锁失败：" + path);
     }
 
-    /**
-     * 真实路径 A：学法自动配到空槽 → 再把这条链升一档 → 低级必须从法杖上消失。
-     */
     @Test
-    void uiPathUpgradeRemovesTheLowerTierFromTheWand() {
-        MagicStoneData data = rich();
-        unlock(data, "spark");                       // 雷 · 主链 t1 → 自动进 0 号
-        assertEquals(id("spark"), data.getSlot(0), "学法应该自动配到第一个空槽");
-        assertTrue(wandIds(data).contains(id("spark")));
+    void uiLearningKeepsBothTiersOnWand(){var data=rich();unlock(data,"spark");unlock(data,"lightning_field");assertTrue(wandIds(data).contains(id("spark")));assertTrue(wandIds(data).contains(id("lightning_field")));assertEquals(id("spark"),data.getSlot(0));}
 
-        unlock(data, "lightning_field");             // 同链升到 t2
-        assertFalse(wandIds(data).contains(id("spark")),
-                "低级必须从法杖上消失（作者报的就是这条没生效）");
-        assertTrue(wandIds(data).contains(id("lightning_field")));
-        assertEquals(id("lightning_field"), data.getSlot(0), "链顶应该顶掉这个键上的低档");
-    }
 
-    /**
-     * 真实路径 B：低级**手动**绑在某个键上 → 升档 → 一样要被顶掉。
-     */
     @Test
-    void manualBindingOfLowerTierIsAlsoReplacedOnUpgrade() {
-        MagicStoneData data = rich();
-        unlock(data, "spark");
-        unlock(data, "thunder_orb");                 // 另一条链，占 1 号
-        data.setSlot(6, id("spark"));                // 玩家手动把低级放到 7 号键
-        assertNull(data.getSlot(0), "同一个法术只占一个槽 → 旧位置清空");
+    void manualLowerTierStaysAfterLearningAndReload(){var data=rich();unlock(data,"spark");data.setSlot(6,id("spark"));unlock(data,"lightning_field");data.normalizeLoadout();var restored=new MagicStoneData();restored.deserializeNBT(data.serializeNBT());restored.normalizeLoadout();assertEquals(id("spark"),restored.getSlot(6));assertTrue(restored.isBound(id("lightning_field")));}
 
-        unlock(data, "lightning_field");
-        assertFalse(wandIds(data).contains(id("spark")), "手动绑的低档也要被顶掉");
-        assertEquals(id("lightning_field"), data.getSlot(6));
-        assertEquals(id("thunder_orb"), data.getSlot(1), "别的链不动");
-    }
 
-    /**
-     * 真实路径 C：低级被绑在**两个页**上（一个法术一个槽，所以这里是同链低档占两个槽的情况）
-     * —— 或者更常见的：同一条链的低档分别占了第 1 页和第 2 页的槽。
-     * 升档后**两个槽都要换**，不能只换第一个。
-     */
     @Test
-    void upgradeReplacesEverySlotHoldingTheLowerTier() {
-        MagicStoneData data = rich();
-        unlock(data, "spark");
-        unlock(data, "thunder_orb");
-        // 手工构造"同链低档占两个槽"：先把 spark 挪到第 2 页，再把 spark 放回第 1 页
-        // （setSlot 会清旧位置，所以这里直接写两个槽模拟老存档/异常状态）
-        data.setSlot(0, id("spark"));
-        data.setSlot(9, id("spark"));                // setSlot 会清掉 0 号，所以先记一下
-        // 上面这一步只会剩 9 号有 spark —— 用它验证"非 0 号槽也能被换掉"
-        assertEquals(id("spark"), data.getSlot(9));
+    void differentTiersCanBeBoundAcrossPages(){var data=rich();unlock(data,"spark");unlock(data,"lightning_field");data.setSlot(9,id("spark"));data.setSlot(2,id("lightning_field"));data.normalizeLoadout();assertEquals(id("spark"),data.getSlot(9));assertEquals(id("lightning_field"),data.getSlot(2));assertTrue(SpellCatalog.wandSpellIds(data).contains(id("lightning_field")));data.setLoadoutPage(1);assertTrue(SpellCatalog.wandSpellIds(data).contains(id("spark")));}
 
-        unlock(data, "lightning_field");
-        assertFalse(wandIds(data).contains(id("spark")), "第 2 页上的低档也必须被换掉");
-        assertEquals(id("lightning_field"), data.getSlot(9));
-    }
 
     /** 法杖当前页里"真的有东西"的那些 id（= 玩家按得出来的法术）。 */
     private static java.util.List<ResourceLocation> wandIds(MagicStoneData data) {
@@ -386,28 +297,9 @@ class SpellLoadoutTest {
         assertNull(data.getSlot(7));
     }
 
-    /** "先学完再手动摆"：同链两个档都被绑上 → 规范化把低档顶掉。 */
     @Test
-    void normalizeRemovesLowerTierEvenWhenItWasBoundManually() {
-        MagicStoneData data = rich();
-        // 复刻作者的操作顺序：同一条链一路学到高档（不能跳档）
-        unlock(data, "thunder_orb");                 // 雷球链 t1
-        unlock(data, "great_thunder_orb");           // t2
-        unlock(data, "explosive_thunder_orb");       // t3
-        unlock(data, "cataclysm_thunder_orb");       // t4
-        unlock(data, "god_descent");                 // t5
-        assertTrue(data.getLearned().contains(id("god_descent")),
-                "前置：高档确实学会了（日志里那 5 次 synced 就是这个过程）");
+    void normalizePreservesAllFiveTiers(){var data=rich();for(String n:new String[]{"thunder_orb","great_thunder_orb","explosive_thunder_orb","cataclysm_thunder_orb","god_descent"})unlock(data,n);data.setSlot(0,id("thunder_orb"));data.setSlot(9,id("god_descent"));data.normalizeLoadout();assertEquals(id("thunder_orb"),data.getSlot(0));assertEquals(id("god_descent"),data.getSlot(9));assertEquals(5,wandIds(data).size());}
 
-        // 玩家手动把两个档摆到两个键上（低档本来被自动顶掉了，这里手工造出坏状态）
-        data.setSlot(0, id("thunder_orb"));
-        data.setSlot(3, id("god_descent"));
-
-        data.normalizeLoadout();
-        assertNull(data.getSlot(0), "清除低档的重复槽");
-        assertEquals(id("god_descent"), data.getSlot(3), "保留玩家已经设置的链顶位置");
-        assertFalse(wandIds(data).contains(id("thunder_orb")), "低档绝不能再出现在法杖上");
-    }
 
     /** 规范化必须让"没绑过的链顶"补进空槽（玩家不手动配也能用上）。 */
     @Test

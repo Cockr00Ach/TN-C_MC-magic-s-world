@@ -14,9 +14,7 @@ final class WindEarthGeometry {
     static void spell(VertexConsumer body,VertexConsumer glow,Matrix4f m,int kind,int tier,double r,double time,float alpha,Ground ground) {
         if(alpha<=0||r<=0)return;
         if(kind<3) {
-            ring(glow,m,r*.86,.024,time*.035,alpha*.72F,147,226,222,ground);
-            ring(body,m,r,.055,-time*.022,alpha*.42F,199,235,229,ground);
-            feathers(glow,m,r,time,alpha,tier,ground);
+            windSeal(body,glow,m,r,time,alpha,tier,ground);
             if(kind==0) {
                 for(int i=0;i<2+tier/2;i++)helix(body,glow,m,.5+tier*.07,.35,1.9,time*.11+i*2.1,alpha*.6F,32);
                 if(tier>=4) wings(body,glow,m,tier,time,alpha);
@@ -178,6 +176,91 @@ final class WindEarthGeometry {
                     Math.cos(b)*(r+width),.1,Math.sin(b)*(r+width),Math.cos(a)*(r+width),.1,Math.sin(a)*(r+width),red,green,blue,alpha*(1-i/17F));
         }
     }
+    // ------------------------------------------------------------------
+    //  风系法阵（2026-11-07 重绘）
+    // ------------------------------------------------------------------
+    /**
+     * <b>新法阵</b>：以前风系地上只有「两个同心白环 + 6~11 片羽毛」（{@code ring+ring+feathers}），
+     * 远看就是一圈白线，和光系/水系完全分不出来 ✗。现在一张阵里有：
+     * <ol>
+     *   <li><b>三段断开的外弧</b>（整圆像水阵；被风切开才像风）；</li>
+     *   <li><b>三条主旋臂</b>顺时针 + <b>三条细臂</b>逆时针，对转读成气旋；</li>
+     *   <li><b>12/16 道羽形刻度</b>：长短交替、末端往里卷（风系唯一的“羽毛”记号）；</li>
+     *   <li><b>风眼</b>：三层反向短弧 + 中心亮点，越靠中心转得越快；</li>
+     *   <li>一圈 <b>虚线内环</b>，让阵有“刻度盘”而不是一坨雾。</li>
+     * </ol>
+     * 顶点约 1.3k（旧版 0.4k），单阵远低于 {@code WindEarthGeometryTest} 的 6500 上限 ✓。
+     *
+     * <p>读条前戏（{@code WindCastFx}）和释放后的实体阵（{@link #spell}）共用这一份画法，
+     * 所以玩家看到的是“同一张阵在长大”，而不是两套风格 ✗。
+     */
+    static void windSeal(VertexConsumer body,VertexConsumer glow,Matrix4f m,double r,double time,float alpha,int tier,Ground ground) {
+        if(alpha<=0||r<=0)return;
+        double spin=time*.016;
+        for(int k=0;k<3;k++) {
+            double a0=spin+k*Math.PI*2/3;
+            windBand(glow,m,r,10,a0,Math.PI*.60,.985,1.012,.030,.004,0,alpha*.62F,MINT_R,MINT_G,MINT_B,ground);
+            windBand(body,m,r,10,a0+.16,Math.PI*.46,.955,.975,.012,.002,0,alpha*.32F,PEARL_R,PEARL_G,PEARL_B,ground);
+        }
+        for(int k=0;k<3;k++) {
+            double a0=spin+k*Math.PI*2/3;
+            windBand(glow,m,r,18,a0,Math.PI*.78,.14,.99,.085,.008,0,alpha*.52F,MINT_R,MINT_G,MINT_B,ground);
+            windBand(body,m,r,18,a0+.05,Math.PI*.74,.16,.97,.048,.004,0,alpha*.26F,PEARL_R,PEARL_G,PEARL_B,ground);
+            double b0=-spin*.85+Math.PI/3+k*Math.PI*2/3;
+            windBand(glow,m,r,14,b0,-Math.PI*.62,.20,.95,.040,.003,0,alpha*.28F,PALE_R,PALE_G,PALE_B,ground);
+        }
+        int ticks=tier>=4?16:12;
+        for(int i=0;i<ticks;i++) {
+            double a=spin*.55+i*Math.PI*2/ticks;
+            boolean longTick=(i&1)==0;
+            windBand(glow,m,r,4,a,0,longTick?.50:.58,longTick?.95:.84,.030,.002,-.16,alpha*.66F,PEARL_R,PEARL_G,PEARL_B,ground);
+        }
+        for(int i=0;i<3;i++) {
+            double radius=(.30-.075*i);
+            double dir=(i%2==0)?1:-1;
+            windBand(glow,m,r,8,spin*dir*2.4+i*1.7,Math.PI*1.25,radius,radius,.014,.004,0,
+                    alpha*(.80F-.18F*i),PALE_R,PALE_G,PALE_B,ground);
+        }
+        double eye=r*.08;
+        double ey=ground.y(0,0)+.052;
+        for(int i=0;i<8;i++) {
+            double a=spin*3+i*Math.PI/4,b=spin*3+(i+1)*Math.PI/4;
+            quad(glow,m,0,ey,0,Math.cos(a)*eye,ey,Math.sin(a)*eye,Math.cos(b)*eye,ey,Math.sin(b)*eye,0,ey,0,
+                    PEARL_R,PEARL_G,PEARL_B,alpha*.9F);
+        }
+        for(int i=0;i<8;i++) {
+            double a=-spin*.45+i*Math.PI/4;
+            windBand(body,m,r,3,a,Math.PI*.10,.46,.46,.012,.002,0,alpha*.30F,PALE_R,PALE_G,PALE_B,ground);
+        }
+        if(tier>=3)windBand(glow,m,r,16,-spin*1.3,Math.PI*1.85,1.075,1.075,.010,.003,0,alpha*.20F,MINT_R,MINT_G,MINT_B,ground);
+    }
+
+    private static final int PEARL_R=232,PEARL_G=250,PEARL_B=246;
+    private static final int MINT_R=147,MINT_G=232,MINT_B=226;
+    private static final int PALE_R=198,PALE_G=240,PALE_B=238;
+
+    /**
+     * 地面上一条沿角度扫过去的带子：半径从 {@code r*from} 到 {@code r*to}，角度从 {@code a0}
+     * 扫过 {@code sweep}，宽度（格）从 {@code w0} 收到 {@code w1}，{@code curl} 是额外的卷角。
+     * 宽度在角度上换算成半角差，所以旋臂越靠外越细，自然收尖。
+     */
+    private static void windBand(VertexConsumer out,Matrix4f m,double r,int seg,double a0,double sweep,
+                                 double from,double to,double w0,double w1,double curl,
+                                 float alpha,int red,int green,int blue,Ground ground) {
+        for(int i=0;i<seg;i++) {
+            double t0=i/(double)seg,t1=(i+1.0)/seg;
+            double aa=a0+sweep*t0+curl*t0*t0,ab=a0+sweep*t1+curl*t1*t1;
+            double ra=r*(from+(to-from)*t0),rb=r*(from+(to-from)*t1);
+            double wa=(w0+(w1-w0)*t0)/Math.max(.22D,ra),wb=(w0+(w1-w0)*t1)/Math.max(.22D,rb);
+            double x0=Math.cos(aa-wa)*ra,z0=Math.sin(aa-wa)*ra;
+            double x1=Math.cos(ab-wb)*rb,z1=Math.sin(ab-wb)*rb;
+            double x2=Math.cos(ab+wb)*rb,z2=Math.sin(ab+wb)*rb;
+            double x3=Math.cos(aa+wa)*ra,z3=Math.sin(aa+wa)*ra;
+            quad(out,m,x0,ground.y(x0,z0)+.048,z0,x1,ground.y(x1,z1)+.048,z1,
+                    x2,ground.y(x2,z2)+.048,z2,x3,ground.y(x3,z3)+.048,z3,red,green,blue,alpha);
+        }
+    }
+
     private static void seal(VertexConsumer body,VertexConsumer glow,Matrix4f m,double r,int tier,double time,float alpha) {
         for(int i=0;i<8;i++) {
             double a=i*Math.PI/4,b=(i+1)*Math.PI/4;

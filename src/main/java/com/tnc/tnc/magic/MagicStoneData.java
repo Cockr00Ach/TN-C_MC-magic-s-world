@@ -150,61 +150,15 @@ public class MagicStoneData {
         return true;
     }
 
-    /**
-     * <b>把配装拉回合法状态</b> —— 这是"一条链一个法术"的强制执行点。
-     *
-     * <h2>为什么不变量写在 setSlot/learn 里就够</h2>
-     * 作者 2026-09-29 实测的真实顺序是"**先学完几个档，再去配键页手动摆**"：
-     * 学法那一刻低档各占一个空槽，之后手动摆键时谁也没去清掉那些已经过时的低档 ✗
-     * —— 结果是<a>同一条链的 t1 / t4 / t5 三个档同时挂在法杖上</a>，
-     * 玩家当然"学了高级的，低级还能放"。
-     *
-     * <p>所以不做"在某个时刻替换"，而是定一条<b>不变量</b>，在每次写杖前强制执行：
-     * <blockquote>每条链在配装里最多出现一次，且只能是它当前的最高档。</blockquote>
-     *
-     * <p>具体三步：
-     * <ol>
-     *   <li>槽位上的法术如果是自己那条链的<b>低档</b> → 换成该链当前链顶</li>
-     *   <li>同一条链出现多次 → 优先保留玩家已绑定的<b>链顶</b>槽，否则保留第一个槽，其余清空</li>
-     *   <li>某条链有链顶但没被绑过 → 补进第一个空槽（不挤掉任何已绑的）</li>
-     * </ol>
-     *
-     * <p>放在 {@link SpellCatalog#wandSpellIds} 的入口上，所有路径（学法 / 手动配键 /
-     * 切页 / 登录补杖 / 老存档）都会自愈 ✓。
-     *
-     * @return 真的改动过配装才返回 true
-     */
-    public boolean normalizeLoadout() {
-        java.util.List<String> before = new java.util.ArrayList<>(loadout);
-        java.util.Map<String,Integer> existingTops=new java.util.HashMap<>();
+    /** Keep learned tiers exactly where the player placed them; prune only invalid or duplicate IDs. */
+    public boolean normalizeLoadout(){
+        var before=new java.util.ArrayList<>(loadout);var seen=new java.util.HashSet<String>();
         for(int i=0;i<LOADOUT_SLOTS;i++){
-            ResourceLocation id=loadout.get(i)==null?null:ResourceLocation.tryParse(loadout.get(i));
-            SpellCatalog.Entry entry=id==null?null:SpellCatalog.byId(id);
-            if(entry==null||entry.independent()||entry.element()==null||!hasLearned(id))continue;
-            SpellCatalog.Entry top=SpellCatalog.topLearned(this,entry.element(),entry.chain());
-            if(top!=null&&top.id().equals(id))existingTops.putIfAbsent(top.id().toString(),i);
+            String value=loadout.get(i);if(value==null)continue;
+            ResourceLocation id=ResourceLocation.tryParse(value);
+            if(id==null||!hasLearned(id)||!seen.add(id.toString()))loadout.set(i,null);
         }
-        java.util.Set<String> seen=new java.util.HashSet<>();
-        for(int i=0;i<LOADOUT_SLOTS;i++){
-            String bound=loadout.get(i);if(bound==null)continue;
-            ResourceLocation id=ResourceLocation.tryParse(bound);
-            if(id==null||!hasLearned(id)){loadout.set(i,null);continue;}
-            SpellCatalog.Entry entry=SpellCatalog.byId(id);
-            if(entry!=null&&!entry.independent()&&entry.element()!=null){
-                SpellCatalog.Entry top=SpellCatalog.topLearned(this,entry.element(),entry.chain());
-                if(top==null){loadout.set(i,null);continue;}
-                bound=top.id().toString();
-                if(existingTops.containsKey(bound)&&existingTops.get(bound)!=i){loadout.set(i,null);continue;}
-            }
-            loadout.set(i,seen.add(bound)?bound:null);
-        }
-        if(!manualLoadout)for (SpellCatalog.Entry top : SpellCatalog.effective(this)) {
-            if (!isBound(top.id())) {
-                int free = firstFreeSlot();
-                if (free < 0) break;
-                loadout.set(free, top.id().toString());
-            }
-        }
+        if(!manualLoadout)for(var entry:SpellCatalog.assignable(this))fillFirstFree(entry.id());
         return !before.equals(loadout);
     }
 
@@ -244,30 +198,12 @@ public class MagicStoneData {
         return count;
     }
 
-    /**
-     * 默认配装：把新学会的法术放进<b>第一个空槽</b>。
-     *
-     * <p>★ 铁律：<b>绝不覆盖玩家已经配好的槽</b> —— 玩家手动排过键位之后，
-     * 再学一个法术不该把他排好的东西顶掉（作者 2026-09-29 要的就是"自己调整"）✓。
-     * 18 个槽全满就什么都不做：法术仍然在魔法石里，玩家自己去配键页腾位置。
-     *
-     * <p>⚠️ 但"同一条链学了更高档"是<b>例外</b>：那时要换掉这个键上的低档
-     * （见 {@link #rebindChainToTop}）—— 那不是覆盖玩家的选择，
-     * 玩家配的是"我的这条链"，链顶是哪一档由他学到哪儿决定 ✓。
-     *
-     * <p>还有一条收敛规则：<b>非链顶的法术自动不去占新槽</b>。
-     * 因为配键列表只列链顶（{@link SpellCatalog#chainTopAssignable}），
-     * 自动把过时的低档塞进槽里只会产生"列表里没有、却占着一个键"的怪状态 ✗。
-     *
-     * @return 真的放进去了才返回 true
-     */
+    /** Newly learned spells fill an empty slot without replacing existing choices. */
     public boolean fillFirstFree(ResourceLocation spell) {
         if (spell == null || isBound(spell)) {
             return false;
         }
-        if (!SpellCatalog.isChainTop(this, spell)) {
-            return false;                       // 不是链顶：不进新槽（学了更高档时会被换掉）
-        }
+        if(!hasLearned(spell))return false;
         int free = firstFreeSlot();
         if (free < 0) {
             return false;
@@ -390,7 +326,19 @@ public class MagicStoneData {
     /** -1 denotes an account not yet migrated to permanent adventure growth. */
     private int adventurePoints = -1;
 
+    /**
+     * 元素附身冷却结束的主世界 gameTime；0 = 就绪。
+     *
+     * <p>放在魔法石数据里而不是内存 map：死亡克隆、换维度、重登都跟着走，
+     * 也自动进 {@code SyncMagicStone}，客户端 HUD 能显示剩余冷却。
+     */
+    private long travelCooldownUntil;
+
     public void setAdventurePoints(int points) { adventurePoints = Math.max(0, points); }
+
+    public long getTravelCooldownUntil() { return travelCooldownUntil; }
+
+    public void setTravelCooldownUntil(long gameTime) { travelCooldownUntil = Math.max(0L, gameTime); }
 
     /**
      * 亲和力是否已经分配过。亲和力天生固定，只在第一次进游戏时掷一次，
@@ -657,64 +605,14 @@ public class MagicStoneData {
         return learned.contains(spell);
     }
 
-    public boolean learn(ResourceLocation spell) {
-        learningHistory.add(spell);
-        explicitlyForgotten.remove(spell);
-        boolean added = learned.add(spell);
-        if (!added) {
-            // 已经学过：那次学习可能是"补记录"，但链顶仍可能变（例如老存档迁移），照样同步一次
-            rebindChainToTop(spell);
-            return false;
-        }
-        // ★ 链式替换（作者 2026-09-29 定的规则）：
-        //   学会某条链的更高档时，**原来绑着这条链低档的那些键自动换成新的最高档**。
-        //   这不是"覆盖玩家手配的键位" ✗ —— 它换的是**同一条链**的东西：
-        //   玩家配的是"我的雷系主链"，至于主链当前是哪一档，由他学到哪儿决定 ✓。
-        //   不同链、别的元素的键一律不动 ✓。
-        if (!rebindChainToTop(spell)) {
-            // 独立魔法 / 不在链上的法术：没有"链顶"概念，按普通新法术填空槽
-            fillFirstFree(spell);
-        }
-        return true;
+    public boolean learn(ResourceLocation spell){
+        learningHistory.add(spell);explicitlyForgotten.remove(spell);
+        boolean added=learned.add(spell);
+        if(added)fillFirstFree(spell);
+        return added;
     }
 
-    /**
-     * 把配装里所有"绑着 {@code spell} 所属链的低档"的槽改成 {@code spell}。
-     *
-     * @return 这个法术属于某条链（做了链式替换）返回 true；独立魔法/目录外返回 false
-     */
-    private boolean rebindChainToTop(ResourceLocation spell) {
-        SpellCatalog.Entry entry = SpellCatalog.byId(spell);
-        if (entry == null || entry.independent() || entry.element() == null) {
-            return false;
-        }
-        SpellCatalog.Entry top = SpellCatalog.topLearned(this, entry.element(), entry.chain());
-        if (top == null || !top.id().equals(spell)) {
-            return false;                       // 学会的不是链顶（理论上不该发生）→ 不替换
-        }
-        String newId = spell.toString();
-        boolean changed = false;
-        for (int i = 0; i < LOADOUT_SLOTS; i++) {
-            String bound = loadout.get(i);
-            if (bound == null) {
-                continue;
-            }
-            ResourceLocation parsed = ResourceLocation.tryParse(bound);
-            SpellCatalog.Entry boundEntry = parsed == null ? null : SpellCatalog.byId(parsed);
-            if (boundEntry == null || boundEntry.independent() || boundEntry.element() == null) {
-                continue;
-            }
-            if (boundEntry.element() == entry.element() && boundEntry.chain() == entry.chain()) {
-                loadout.set(i, newId);
-                changed = true;
-            }
-        }
-        if (!changed) {
-            // 这条链还没在任何键上 → 当成新法术填空槽（玩家不手动配也能用上）
-            fillFirstFree(spell);
-        }
-        return true;
-    }
+
 
     /**
      * 遗忘时顺手把配装里的槽清掉。
@@ -780,6 +678,7 @@ public class MagicStoneData {
         this.pointsSpent = other.pointsSpent;
         this.bonusPoints = other.bonusPoints;
         this.adventurePoints = other.adventurePoints;
+        this.travelCooldownUntil = other.travelCooldownUntil;
         this.initialized = other.initialized;
     }
 
@@ -843,6 +742,7 @@ public class MagicStoneData {
         tag.putInt("PointsSpent", pointsSpent);
         tag.putInt("BonusPoints", bonusPoints);
         tag.putInt("AdventurePoints", adventurePoints);
+        tag.putLong("TravelCooldownUntil", travelCooldownUntil);
         tag.putBoolean("Initialized", initialized);
         return tag;
     }
@@ -915,6 +815,7 @@ public class MagicStoneData {
         pointsSpent = tag.getInt("PointsSpent");
         bonusPoints = Math.max(0, tag.getInt("BonusPoints"));
         adventurePoints = tag.contains("AdventurePoints") ? Math.max(-1, tag.getInt("AdventurePoints")) : -1;
+        travelCooldownUntil = Math.max(0L, tag.getLong("TravelCooldownUntil"));
         initialized = tag.getBoolean("Initialized");
     }
 

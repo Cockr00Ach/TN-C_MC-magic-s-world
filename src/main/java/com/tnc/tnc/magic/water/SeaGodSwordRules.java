@@ -7,6 +7,18 @@ public final class SeaGodSwordRules {
     public static final double LENGTH=64, DROP_HEIGHT=64;
     public static final float DAMAGE=60;
     public static final int PATH_SEAL_COUNT=5, PATH_SEAL_SPACING=12;
+    /**
+     * 天阵比巨剑早 48 tick（2.4 s）亮起。
+     *
+     * <p>作者 2026-11-07：「要先出现一个法阵，再出现巨剑」——原来两座天印和剑同 tick 出现，
+     * 读起来像“剑把阵砸出来”；现在阵先铺开，兽升空化作虚影消失，最后才是剑。
+     */
+    public static final int SEAL_TICK=APPEAR_TICK-48;
+    public static boolean sealVisible(double age) { return age>=SEAL_TICK && age<END_TICK+8; }
+    public static float sealOpacity(double age) {
+        if(!sealVisible(age))return 0;
+        return (float)Math.min(1,Math.min((age-SEAL_TICK)/14,(END_TICK+8-age)/22));
+    }
     public static double pathSealHeight(int index) { return (index+1)*PATH_SEAL_SPACING; }
     /** Reveal from the sky downwards; every seal is ready before the sword drops. */
     public static float pathSealOpacity(double age,int index) {

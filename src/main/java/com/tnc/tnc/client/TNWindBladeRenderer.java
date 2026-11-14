@@ -1,48 +1,41 @@
 package com.tnc.tnc.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.tnc.tnc.TNMod;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.tnc.tnc.client.lightning.LightningRenderTypes;
 import com.tnc.tnc.magic.TNWindBladeEntity;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 
 /**
- * ★ <b>飞出去的风刃的渲染器</b>（龙卷风吐出来的那一片，2026-10-10）✓
+ * ★ <b>风刃的渲染器</b> —— 2026-11-09 起走「战士剑气」那一套光带，不再画烘焙月牙 ✓
  *
- * <p>用的就是 {@code tnc:projectile/windblade} 那片**月牙** ✓ —— 和 t1/t2 直接飞出去的
- * 风刃**同一个模型** ✓（作者要的"风刃"就是它；龙卷风只是换了个发射方式 ✓）。
+ * <p>作者：「这个风刃也改一改，其实可以改成战士那里的剑气你觉得如何，体积统一一下」。
  *
- * <h2>朝向</h2>
- * 模型的新月躺在 <b>XY 平面</b>上、薄的那一维是 Z ⇒ 只要按飞行方向做
- * {@code yaw → pitch} 两步旋转（和引擎 {@code SpellProjectileRenderer} 同一套算法 ✓），
- * 水平飞的时候刀口朝前 ✓。发射时服务端已经把 yaw/pitch 算好同步过来了 ✓，
- * 这里不自己反推方向 ✗（那样两边会不一致）。
+ * <h2>改了什么</h2>
+ * <ul>
+ *   <li><b>不再画模型</b> ✗（旧版走 SpellEngine {@code CustomModels} 画
+ *       {@code tnc:projectile/windblade}）⇒ 现在由 {@link WindBladeQi} 直接生成弯月顶点 ✓
+ *       —— 和战士 {@code WarriorWaveRenderer} 同一种"四层渐隐月牙 + 残影 + 刃口"读法 ✓</li>
+ *   <li><b>尺寸统一</b>：旧版按 5/10/20 倍缩放（t5 跨度 23.6 格 ✗）；现在几何按
+ *       {@link TNWindBladeEntity#halfSpanBlocks()} 直接算世界尺寸 ⇒ 风法三档一样大 ✓
+ *       （风守卫 Boss 自己的 2.6 / 4.2 倍照旧 ✓）</li>
+ *   <li><b>淡入淡出</b>：出生 2 tick 淡入、最后 6 tick 淡出 ✓（旧版到点直接消失 ✗）</li>
+ * </ul>
  *
- * <h2>自转</h2>
- * 额外绕模型自身的 <b>Z 轴</b>转（{@link TNWindBladeEntity#spin()}）⇒ 飞出去像"斩"出来的 ✓
- * （作者的水法海浪斩击也是转着飞的 ✓）。转速由发射方给（龙卷风每发随机 18~28°/tick ✓）。
+ * <h2>朝向/自转没变</h2>
+ * 还是 {@link WindBladeVisualPose#rotation(float, float, float)}：局部 +Z 始终对着飞行方向，
+ * 自转只在这个平面里转 ✓（服务端同步的 yaw/pitch/spin，客户端不自己反推 ✗）。
  *
- * <h2>★ 引擎内部那 −0.5 格：这里**不要**再补 ✗（2026-10-10 修）</h2>
- * 引擎 {@code CustomModels.render} 里那句 {@code translate(-0.5,-0.5,-0.5)}
- * （反编译实例里那份 spell_engine 核对过 ✓）已经把"方块模型空间"挪成**以原点为中心** ✓。
- * 而月牙模型的包围盒**正好以 (8,8,8) 单位为中心**（＝ 0.5 格）✓
- * ⇒ 引擎那一句就把它对到实体原点了 ✓。
- *
- * <p>所以这里**一个字都不能补** ✗ —— 以前跟着 {@link TNTornadoRenderer} 补了
- * {@code (+0.5,+0.5,+0.5)} ⇒ 月牙整体偏出 0.87 格（斜角）✗ ——
- * 判定在实体中心、画面却偏在半格外，"打中了但看着没打到"就是这么来的 ✗。
+ * <p>⚠️ 这里**不用** poseStack 的缩放 ✗：几何已经是世界尺寸（格），再乘一次就会和判定
+ * （{@code hitRadiusFor}）对不上 —— 那正是以前"打中了但看着没打到"的老毛病 ✗。
  */
 public class TNWindBladeRenderer extends EntityRenderer<TNWindBladeEntity> {
 
-    private static final ResourceLocation MODEL_ID = ResourceLocation.fromNamespaceAndPath(
-            TNMod.MODID, TNProjectileModels.WINDBLADE);
-
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(
-            TNMod.MODID, "textures/spell_projectile/windblade.png");
+    /** 加色光带要的白贴图（和龙卷风/闪电同一张 ✓）。 */
+    private static final ResourceLocation TEXTURE = LightningRenderTypes.WHITE_TEXTURE;
 
     public TNWindBladeRenderer(EntityRendererProvider.Context context) {
         super(context);
@@ -57,30 +50,21 @@ public class TNWindBladeRenderer extends EntityRenderer<TNWindBladeEntity> {
     @Override
     public void render(TNWindBladeEntity entity, float entityYaw, float partialTick, PoseStack poseStack,
                        MultiBufferSource buffer, int packedLight) {
-        float scale = (float) entity.sizeScale();
+        float age = entity.tickCount + partialTick;
+        float fadeIn = Math.min(1.0F, age / 2.0F);
+        float fadeOut = Math.min(1.0F, (TNWindBladeEntity.MAX_LIFE - age) / 6.0F);
+        float alpha = Math.max(0.0F, Math.min(fadeIn, fadeOut));
+        if (alpha <= 0.004F) {
+            return;
+        }
 
         poseStack.pushPose();
-        // ① 朝向：yaw（绕 Y）→ pitch（绕已经转过去的 X）✓
-        // Lock the launch normal; spin only in the blade's own plane, with frame interpolation.
-        poseStack.mulPose(WindBladeVisualPose.rotation(entity.bladeYaw(),entity.bladePitch(),entity.visualSpin(partialTick)));
-        // ③ 缩放 —— **不要再 translate** ✗：月牙以 (8,8,8) 单位为中心，
-        //    引擎那句 −0.5 已经把它对到实体原点了（见类注释 ✓）
-        poseStack.scale(scale, scale, scale);
-
-        renderWithEngine(poseStack, buffer);
+        poseStack.mulPose(WindBladeVisualPose.rotation(
+                entity.bladeYaw(), entity.bladePitch(), entity.visualSpin(partialTick)));
+        VertexConsumer vc = buffer.getBuffer(LightningRenderTypes.BOLT);
+        WindBladeQi.draw(vc, poseStack.last().pose(), entity.halfSpanBlocks(), alpha);
         poseStack.popPose();
 
         super.render(entity, entityYaw, partialTick, poseStack, buffer, packedLight);
-    }
-
-    private static void renderWithEngine(PoseStack poseStack, MultiBufferSource buffer) {
-        try {
-            net.minecraft.client.renderer.RenderType layer =
-                    net.minecraft.client.renderer.RenderType.entityTranslucent(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS);
-            net.spell_engine.api.render.CustomModels.render(layer,
-                    net.minecraft.client.Minecraft.getInstance().getItemRenderer(), MODEL_ID,
-                    poseStack, buffer, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
-        } catch (Throwable ignored) {
-        }
     }
 }

@@ -10,6 +10,7 @@ public final class JourneyClient {
     private static boolean welcomeRequested;
     private static CompoundTag pendingWelcome;
     private static boolean nameConfirmed;
+    public static void restartWelcome(){welcomeRequested=false;pendingWelcome=null;}
     public static void confirmedName(){nameConfirmed=true;pendingWelcome=null;welcomeRequested=true;}
     public static void queueWelcome(CompoundTag t){if(!nameConfirmed)pendingWelcome=t.copy();}
     private static void requestWelcome(Minecraft mc){
