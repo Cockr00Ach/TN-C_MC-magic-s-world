@@ -81,6 +81,17 @@ public final class BossTrialCue {
         if (ticksLeft % 10 == 0) {
             BossTrialSync.push(level, centre, ticksLeft, 60 * 20, 0.9F, 0.35F, 0.30F);
         }
+        // 最后 5 秒：心跳声（音调越来越高 → 越接近越慌）
+        if (ticksLeft <= 100 && ticksLeft % 20 == 0) {
+            float pitch = 0.9F + (100 - ticksLeft) * 0.006F;
+            float volume = 0.9F + (100 - ticksLeft) * 0.006F;
+            for (ServerPlayer player : level.getEntitiesOfClass(ServerPlayer.class,
+                    new AABB(centre, centre).inflate(radius + 48.0D), p -> p.isAlive() && !p.isSpectator())) {
+                level.playSound(null, player.blockPosition(),
+                        net.minecraft.sounds.SoundEvents.WARDEN_HEARTBEAT,
+                        net.minecraft.sounds.SoundSource.AMBIENT, Math.min(1.6F, volume), pitch);
+            }
+        }
         if (ticksLeft > 60 || ticksLeft % 20 > 5) {
             return;
         }
