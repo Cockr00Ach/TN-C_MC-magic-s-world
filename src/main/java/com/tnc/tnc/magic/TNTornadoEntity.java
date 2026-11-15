@@ -228,6 +228,10 @@ public class TNTornadoEntity extends Entity {
         }
 
         // ④ 卷人 ✓
+        // ★ 2026-11-13 作者：「龙卷风加上强力吸力，四格以下的敌人会在其中卷到飞起」✓
+        //   每 tick 改写一次四格内敌人的速度（切向转 + 向内收 + 往上升）——
+        //   老的 suckIn 每 10 tick 才拽一下、只给 0.06 上升，永远不会"飞起来" ✗
+        swirlInside(tier);
         if (age % SUCK_INTERVAL == 0) {
             suckIn(tier);
         }
@@ -366,6 +370,42 @@ public class TNTornadoEntity extends Entity {
     public static double spawnRadiusFor(int tier) {
         int index = Mth_clamp(tier, 3, 5) - 3;
         return 0.9375D * SIZE_MULTIPLIER[index];
+    }
+
+    /**
+     * ★ <b>强力吸力</b>（2026-11-13 作者：「龙卷风加上强力吸力，四格以下的敌人会在其中卷到飞起」）✓
+     *
+     * <p>对<b>四格以内</b>的敌人每 tick <b>直接改写速度</b>（不是"拽一下"）：
+     * 切向绕着风眼转、径向往轴心收、垂直一路往上升 ⇒ 真的被卷到空中转圈 ✓。
+     *
+     * <p>速度全部由 {@link TornadoSwirlRules} 算（纯数学、有封顶）⇒
+     * t5 也不会把怪甩到一百格外 ✗；同时清 {@code fallDistance} ⇒ 掉下来不摔死 ✓。
+     *
+     * <p>⚠️ 仍然只卷<b>敌人</b>：玩家、主人、友军都不碰 ✓（和 {@link #suckIn} 同一套判据）。
+     */
+    private void swirlInside(int tier) {
+        LivingEntity owner = owner();
+        double tornadoHeight = MODEL_HEIGHT / 16.0D * sizeScale();
+        double radius = TornadoSwirlRules.LIFT_RADIUS;
+        List<LivingEntity> targets = level().getEntitiesOfClass(LivingEntity.class,
+                new AABB(getX() - radius, getY() - 1.0D, getZ() - radius,
+                        getX() + radius, getY() + tornadoHeight + 2.0D, getZ() + radius),
+                e -> e.isAlive() && e != owner && !(e instanceof Player) && !e.isAlliedTo(e));
+        for (LivingEntity target : targets) {
+            if (owner != null && (target == owner || target.isAlliedTo(owner))) {
+                continue;
+            }
+            double dx = target.getX() - getX();
+            double dz = target.getZ() - getZ();
+            double heightAbove = target.getY() - getY();
+            if (!TornadoSwirlRules.inside(dx, dz, heightAbove, tornadoHeight)) {
+                continue;
+            }
+            double[] v = TornadoSwirlRules.velocity(dx, dz, heightAbove, tornadoHeight, tier);
+            target.setDeltaMovement(v[0], v[1], v[2]);
+            target.hurtMarked = true;
+            target.fallDistance = 0.0F;          // 被卷起来的人掉下来不摔死 ✓
+        }
     }
 
     /**

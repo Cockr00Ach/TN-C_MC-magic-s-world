@@ -398,7 +398,7 @@ public final class VolcanicTortoiseEntity extends Monster implements GeoEntity {
                 .add(Attributes.MAX_HEALTH, MAX_HP)
                 .add(Attributes.ATTACK_DAMAGE, 22.0D)
                 .add(Attributes.MOVEMENT_SPEED, 0.16D)
-                .add(Attributes.FOLLOW_RANGE, 64.0D)
+                .add(Attributes.FOLLOW_RANGE, com.tnc.tnc.boss.BossLeash.ARENA_FOLLOW_RANGE)
                 .add(Attributes.ARMOR, 20.0D)
                 .add(Attributes.ARMOR_TOUGHNESS, 8.0D)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0D);

@@ -31,6 +31,12 @@ final class WandHoldTransformTest {
     }
     private JsonObject held(String id) throws IOException { return read("models/item/wands/held/" + id + ".json"); }
 
+    /** The actual ItemInHandLayer path, in model pixels before the arm bone is applied. */
+    private Vector3f handAttachment(Vector3f point, JsonObject display, boolean left) {
+        return pose(point, display, left).add(left ? -1 : 1, 2, -10)
+                .rotateY((float) Math.PI).rotateX(-(float) Math.PI / 2);
+    }
+
     @Test void inventoriesKeepTheApprovedArtworkWhileHandsUseSolidGeometry() throws IOException {
         for (String id : names()) {
             var wrapper = read("models/item/" + id + ".json");
@@ -55,30 +61,43 @@ final class WandHoldTransformTest {
         }
     }
 
-    @Test void thirdPersonAnchorsBothPalmsAndPointsTheStaffUpward() throws IOException {
+    @Test void thirdPersonMatchesTheQimeiStaffWeaponGripFromBothSides() throws IOException {
+        var reference = read("models/item/qimei_staff.json");
+        var referenceGrip = vector(reference.getAsJsonArray("tnc_grip")).sub(8, 8, 8);
         for (String id : names()) {
             var model = held(id); var grip = vector(model.getAsJsonArray("tnc_grip")).sub(8,8,8);
             var tip = vector(model.getAsJsonArray("tnc_tip")).sub(8,8,8);
             for (boolean left : new boolean[]{false, true}) {
-                var d = model.getAsJsonObject("display").getAsJsonObject("thirdperson_"+(left?"lefthand":"righthand"));
-                var palm = pose(grip, d, left); assertTrue(palm.length() < .01, id + " grip is centered on palm");
-                var axis = pose(tip, d, left).sub(palm).rotateY((float)Math.PI).rotateX(-(float)Math.PI/2);
-                assertTrue(-axis.y > axis.length()*.95, id + " held staff points up, hand="+left);
+                String context = "thirdperson_" + (left ? "lefthand" : "righthand");
+                var d = model.getAsJsonObject("display").getAsJsonObject(context);
+                var ref = reference.getAsJsonObject("display").getAsJsonObject(context);
+                var palm = handAttachment(grip, d, left);
+                var weaponPalm = handAttachment(referenceGrip, ref, left);
+                var weaponAxis = handAttachment(new Vector3f(referenceGrip).add(0, 0, 1), ref, left)
+                        .sub(weaponPalm).normalize();
+                var shaft = handAttachment(tip, d, left).sub(palm).normalize();
+                assertTrue(palm.distance(weaponPalm) < .01, id + " must share the proven weapon's palm anchor");
+                assertTrue(shaft.dot(weaponAxis) > .999f, id + " must follow the weapon's direction across the fist");
+                var front = new Vector3f(palm).fma(3, shaft);
+                var back = new Vector3f(palm).fma(-3, shaft);
+                assertTrue(front.z < -2.8f && back.z > 2.8f,
+                        id + " shaft must clear either side of the forearm immediately beyond the grip");
             }
         }
     }
 
-    @Test void firstPersonKeepsTheLongAxisInTheScreenPlaneAndLimitsApparentHeight() throws IOException {
+    @Test void firstPersonKeepsTheRestoredVanillaGripAndFraming() throws IOException {
         for (String id : names()) {
             var model = held(id); var grip = vector(model.getAsJsonArray("tnc_grip")).sub(8,8,8);
             var tip = vector(model.getAsJsonArray("tnc_tip")).sub(8,8,8);
             for (boolean left : new boolean[]{false,true}) {
                 var d = model.getAsJsonObject("display").getAsJsonObject("firstperson_"+(left?"lefthand":"righthand"));
-                var palm = pose(grip,d,left); assertEquals(-2.5, palm.y, .01);
-                assertEquals(left?2.8:-2.8,palm.x,.01);
-                var axis = pose(tip,d,left).sub(palm).rotateY((left?-1:1)*(float)Math.PI/4);
-                assertTrue(axis.y > axis.length()*.95 && Math.abs(axis.z) < axis.length()*.2, id + " must not spear into camera depth");
-                assertTrue(axis.length() >= 13.9 && axis.length() <= 14.1, id + " staff must be readable at the new validated first-person size");
+                var palm = pose(grip,d,left);
+                assertTrue(palm.length() < .01, id + " vanilla item grip remains at its anchor");
+                var axis = pose(tip,d,left).sub(palm).rotateY((left ? -1 : 1) * (float) Math.PI / 4);
+                assertTrue(axis.y > axis.length() * .95 && Math.abs(axis.z) < axis.length() * .2,
+                        id + " staff crown stays within the restored first-person framing");
+                assertEquals(14, axis.length(), .1, id + " restored visible length above the palm");
             }
         }
     }

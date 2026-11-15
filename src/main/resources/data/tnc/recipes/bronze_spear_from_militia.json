@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "group": "tnc_weapons",
+  "ingredients": [
+    {
+      "item": "tnc:militia_spear"
+    },
+    {
+      "item": "minecraft:copper_ingot"
+    },
+    {
+      "item": "minecraft:leather"
+    }
+  ],
+  "result": {
+    "item": "tnc:bronze_spear",
+    "count": 1
+  }
+}

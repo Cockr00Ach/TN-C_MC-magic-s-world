@@ -26,6 +26,16 @@ public final class WarriorUltimates {
     public static Art forId(String id){
         String local=id.startsWith("tnc:")?id.substring(4):id;
         if(ARTS.containsKey(local))return ARTS.get(local);
+        var entry=id.startsWith("tnc:")?WarriorWeaponRanks.entry(local):null;
+        if(entry!=null)return ARTS.get(switch(entry.branch()) {
+            case LONGSWORD -> "longsword";
+            case GREATSWORD -> "greatsword";
+            case HAMMER -> "hammer";
+            case SPEAR -> "spear";
+            case HALBERD -> "sky_halberd";
+            case SCYTHE -> "doom_scythe";
+            case BOW -> "bow";
+        });
         return ARTS.get(id.contains("bow")?"bow":"longsword");
     }
     public static Vec3 direction(float yaw,Stroke stroke){return Vec3.directionFromRotation(0,(float)(yaw+stroke.yaw()));}

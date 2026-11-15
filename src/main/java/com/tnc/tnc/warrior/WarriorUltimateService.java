@@ -30,19 +30,26 @@ public final class WarriorUltimateService {
             &&!com.tnc.tnc.combat.DownedCombat.isDowned(p)&&p.level().dimension().equals(c.dimension())
             &&p.getInventory().selected==c.slot()&&p.getMainHandItem()==c.weapon();}
     public static boolean input(ServerPlayer p,WarriorMove move,long now){
-        var id=ForgeRegistries.ITEMS.getKey(p.getMainHandItem().getItem());if(id==null)return false;
+        ItemStack weapon=p.getMainHandItem();
+        if(WarriorWeapons.family(weapon)==null
+                ||!WarriorWeaponRanks.allowsUltimate(WarriorWeaponRanks.rank(weapon),TemperingData.get(p.server).points(p.getUUID()))) {
+            INPUT.remove(p.getUUID());
+            return false;
+        }
+        var id=ForgeRegistries.ITEMS.getKey(weapon.getItem());if(id==null)return false;
         var art=WarriorUltimates.forId(id.toString());
         if(!INPUT.computeIfAbsent(p.getUUID(),x->new WarriorUltimateInput()).push(id.toString(),art.keys(),move.key(),now))return false;
         WarriorBowCharge.cancel(p);
         var state=WarriorComboService.state(p.getUUID());state.heldSkill=null;state.stanceUntil=0;
         state.finisherUntil=now+WarriorUltimates.DURATION;
         p.getPersistentData().remove(READY);
-        ACTIVE.put(p.getUUID(),new Cast(art,now,p.getMainHandItem(),p.getInventory().selected,p.getYRot(),p.level().dimension()));
+        WarriorSwordUltimate.clear(p);WarriorPolearmUltimates.clear(p);
+        ACTIVE.put(p.getUUID(),new Cast(art,now,weapon,p.getInventory().selected,p.getYRot(),p.level().dimension()));
         WarriorAnimationPacket.broadcast(p,WarriorAnimation.ULTIMATE,WarriorUltimates.DURATION);
         p.displayClientMessage(net.minecraft.network.chat.Component.literal("✦ "+art.name()+" · "+art.description()),true);
         return true;
     }
-    public static void cancel(ServerPlayer p){if(p!=null){INPUT.remove(p.getUUID());WarriorSwordUltimate.clear(p);if(ACTIVE.remove(p.getUUID())!=null){WarriorComboService.state(p.getUUID()).finisherUntil=0;WarriorAnimationPacket.cancel(p);}}}
+    public static void cancel(ServerPlayer p){if(p!=null){INPUT.remove(p.getUUID());WarriorSwordUltimate.clear(p);WarriorPolearmUltimates.clear(p);if(ACTIVE.remove(p.getUUID())!=null){WarriorComboService.state(p.getUUID()).finisherUntil=0;WarriorAnimationPacket.cancel(p);}}}
     @SubscribeEvent(priority=EventPriority.HIGHEST)
     public static void immune(LivingAttackEvent e){if(e.getEntity() instanceof ServerPlayer p&&active(p))e.setCanceled(true);}
     @SubscribeEvent(priority=EventPriority.HIGHEST)
@@ -54,10 +61,14 @@ public final class WarriorUltimateService {
         var c=ACTIVE.get(p.getUUID());if(c==null)return;
         long age=p.serverLevel().getGameTime()-c.start();
         if(!valid(p,c)||age>=WarriorUltimates.DURATION){cancel(p);return;}
+        if(age==6||age==14||age==22)WarriorUltimateSound.anticipate(p,(float)age/22);
         // Grounded choreography: no teleporting through boss walls, keep gravity intact.
         p.setDeltaMovement(0,p.getDeltaMovement().y,0);
         p.setYRot(c.yaw());p.yBodyRot=c.yaw();
+        if(WarriorPolearmUltimates.tick(p,(int)age))return;
         if(WarriorWeapons.family(p.getMainHandItem())==WarriorWeaponFamily.LONGSWORD){WarriorSwordUltimate.tick(p,(int)age);return;}
+        if(WarriorWeapons.family(p.getMainHandItem())==WarriorWeaponFamily.GREATSWORD){p.setDeltaMovement(0,0,0);p.fallDistance=0;WarriorSpecialUltimates.heavy(p,(int)age);return;}
+        if(WarriorWeapons.family(p.getMainHandItem())==WarriorWeaponFamily.BOW && WarriorSpecialUltimates.elemental(p)){WarriorSpecialUltimates.bow(p,(int)age);return;}
         for(int i=0;i<c.art().strokes().size();i++){
             var s=c.art().strokes().get(i);if(age==s.tick())strike(p,c,s,i==c.art().strokes().size()-1);
         }
@@ -82,7 +93,9 @@ public final class WarriorUltimateService {
             }
         }
         if(finale&&"light".equals(element))p.heal(4);
-        p.serverLevel().playSound(null,p.blockPosition(),finale?SoundEvents.TRIDENT_THUNDER:SoundEvents.PLAYER_ATTACK_SWEEP,SoundSource.PLAYERS,finale?.7f:.6f,finale?1.35f:1.1f);
+        WarriorSwordFx.send(p,p.position(),p.position(),finale?2:3);
+        if(finale)WarriorUltimateSound.impact(p,p.position());else WarriorUltimateSound.heavySwing(p);
+
     }
     @SubscribeEvent public static void logout(PlayerEvent.PlayerLoggedOutEvent e){if(e.getEntity() instanceof ServerPlayer p)cancel(p);}
     @SubscribeEvent public static void dimension(PlayerEvent.PlayerChangedDimensionEvent e){if(e.getEntity() instanceof ServerPlayer p)cancel(p);}

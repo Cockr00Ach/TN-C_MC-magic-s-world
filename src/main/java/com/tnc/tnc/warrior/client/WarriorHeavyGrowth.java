@@ -17,6 +17,7 @@ public final class WarriorHeavyGrowth {
     public static boolean applies(WarriorAnimation animation,WarriorWeaponFamily family,boolean hold){
         if(!usesEntityGrowth(family) || hold || animation==null)return false;
         return switch(animation){
+            case ULTIMATE -> family==WarriorWeaponFamily.GREATSWORD;
             case SLASH_LEFT,SLASH_RIGHT,SLASH_HORIZONTAL,OVERHEAD_SMASH,GROUND_QUAKE,SPIN_SLASH,GUARD_BASH,
                  GS_SWEEP,GS_SMASH,GS_WALL,GS_RIFT,GS_ADVANCE,HM_CRUSH,HM_QUAKE,HM_CUT,HM_RUIN,HM_DRIVE,
                  SCYTHE_POUNCE,SCYTHE_REAP,SCYTHE_HOOK,SCYTHE_EXECUTE,SCYTHE_WHIRL -> true;
@@ -37,6 +38,7 @@ public final class WarriorHeavyGrowth {
     }
     public static float scale(WarriorAnimation animation,WarriorWeaponFamily family,boolean hold,float progress,float peak){
         if(!applies(animation,family,hold) || !Float.isFinite(progress))return 1;
+        if(animation==WarriorAnimation.ULTIMATE && family==WarriorWeaponFamily.GREATSWORD)return 1+19*smooth(progress/.30f)*(1-smooth((progress-.9f)/.1f));
         return envelope(animation,progress,peak);
     }
     public static float phantomScale(WarriorAnimation animation,boolean hold,float progress,float peak){

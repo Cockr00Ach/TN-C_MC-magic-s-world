@@ -12,6 +12,11 @@ class WarriorMartialArtsTest {
             String id="tnc:"+path;
             for(var base:WarriorCombos.forFamily(WarriorMartialArts.family(id))) {
                 var move=WarriorPerformance.forId(base,id);
+                if(base.slot()==6||base.id().equals("spear_combo_6")) {
+                    assertSame(base,move,"New slots use the available family choreography");
+                    assertNotNull(WarriorComboAnimations.clip(base.animation(),id));
+                    continue;
+                }
                 assertNotEquals(base.name(),move.name(),id);
                 assertEquals(base.id(),move.id());assertEquals(base.codexId(),move.codexId());
                 assertEquals(base.sequence(),move.sequence());assertEquals(base.holds(),move.holds());

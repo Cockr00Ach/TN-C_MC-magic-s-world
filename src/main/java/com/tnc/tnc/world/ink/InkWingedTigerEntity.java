@@ -35,7 +35,7 @@ public final class InkWingedTigerEntity extends Monster implements GeoEntity {
     public static AttributeSupplier.Builder createAttributes(){return Monster.createMonsterAttributes()
             .add(Attributes.MAX_HEALTH,1000).add(Attributes.ATTACK_DAMAGE,26).add(Attributes.ARMOR,14)
             .add(Attributes.ARMOR_TOUGHNESS,8).add(Attributes.MOVEMENT_SPEED,.29)
-            .add(Attributes.FOLLOW_RANGE,64).add(Attributes.KNOCKBACK_RESISTANCE,1);}
+            .add(Attributes.FOLLOW_RANGE,com.tnc.tnc.boss.BossLeash.ARENA_FOLLOW_RANGE).add(Attributes.KNOCKBACK_RESISTANCE,1);}
     @Override protected void defineSynchedData(){super.defineSynchedData();entityData.define(MOVE,0);entityData.define(START,0L);}
     public int inkMove(){return entityData.get(MOVE);}
     public int moveAge(){return (int)Math.max(0,level().getGameTime()-entityData.get(START));}

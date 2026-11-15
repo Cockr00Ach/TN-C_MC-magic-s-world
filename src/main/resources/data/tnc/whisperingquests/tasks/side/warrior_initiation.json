@@ -1,0 +1,79 @@
+{
+  "id": "tnc:side/warrior_initiation",
+  "enabled": true,
+  "weight": 1,
+  "category": "side",
+  "chapter": "tnc:chapters/warrior_training",
+  "repeatable": false,
+  "sync_with_team": false,
+  "title": "莉娅的第一堂课",
+  "short_description": "到演武场找莉娅，完成基础实操。",
+  "description": "到演武场找到莉娅，先看动作示范，再使用中央终端，依次练习主攻、振刀和破振刀。\n\n每一步由实际练习推进，最后听完莉娅的总结。任务书会保存已经完成的步骤，重新进入世界后可以继续。",
+  "icon": "tnc:ashwood_jian",
+  "refresh_pool": "triggered",
+  "min_player_level": 0,
+  "objectives": [
+    {
+      "type": "tnc:warrior_tutorial",
+      "id": "meet_mentor",
+      "text": "与莉娅见面并开始示范",
+      "amount": 1,
+      "consume": false,
+      "waypoint_requires_tracking": true
+    },
+    {
+      "type": "tnc:warrior_tutorial",
+      "id": "watch_demo",
+      "text": "看完动作示范",
+      "amount": 1,
+      "consume": false,
+      "waypoint_requires_tracking": true
+    },
+    {
+      "type": "tnc:warrior_tutorial",
+      "id": "use_terminal",
+      "text": "使用演武场中央终端",
+      "amount": 1,
+      "consume": false,
+      "waypoint_requires_tracking": true
+    },
+    {
+      "type": "tnc:warrior_tutorial",
+      "id": "basic_attack",
+      "text": "完成主攻练习",
+      "amount": 1,
+      "consume": false,
+      "waypoint_requires_tracking": true
+    },
+    {
+      "type": "tnc:warrior_tutorial",
+      "id": "deflect",
+      "text": "成功完成振刀练习",
+      "amount": 1,
+      "consume": false,
+      "waypoint_requires_tracking": true
+    },
+    {
+      "type": "tnc:warrior_tutorial",
+      "id": "break_deflect",
+      "text": "成功完成破振刀练习",
+      "amount": 1,
+      "consume": false,
+      "waypoint_requires_tracking": true
+    },
+    {
+      "type": "tnc:warrior_tutorial",
+      "id": "finish_summary",
+      "text": "听完莉娅的总结",
+      "amount": 1,
+      "consume": false,
+      "waypoint_requires_tracking": true
+    }
+  ],
+  "rewards": [],
+  "next": [],
+  "npc": {
+    "entity_type": "tnc:instructor",
+    "display_name": "莉娅 · 战士入门"
+  }
+}

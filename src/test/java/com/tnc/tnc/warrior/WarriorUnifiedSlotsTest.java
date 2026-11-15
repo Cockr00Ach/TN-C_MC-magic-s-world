@@ -14,8 +14,8 @@ class WarriorUnifiedSlotsTest {
         }
     }
     @Test void laterSlotsRetainWeaponSpecificFunctionsAndCounts(){
-        assertEquals(5,WarriorCombos.forFamily(WarriorWeaponFamily.SPEAR).size());
-        assertEquals(6,WarriorCombos.forFamily(WarriorWeaponFamily.BOW).size());
+        assertEquals(7,WarriorCombos.forFamily(WarriorWeaponFamily.SPEAR).size());
+        assertEquals(7,WarriorCombos.forFamily(WarriorWeaponFamily.BOW).size());
         assertEquals(WarriorChain.EVADE,WarriorCombos.bySlot(WarriorWeaponFamily.SPEAR,4).chain());
         assertEquals(WarriorChain.ATTACK,WarriorCombos.bySlot(WarriorWeaponFamily.HAMMER,4).chain());
     }

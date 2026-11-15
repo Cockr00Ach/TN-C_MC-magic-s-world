@@ -133,6 +133,28 @@ public class TNMod
             () -> new SwordItem(Tiers.IRON, 5, -2.9F, new Item.Properties().durability(1000)));
     public static final RegistryObject<Item> QIMEI_STAFF = ITEMS.register("qimei_staff",
             () -> new SwordItem(Tiers.IRON, 2, -2.1F, new Item.Properties().durability(700)));
+    public static final RegistryObject<Item> ASHWOOD_JIAN = warriorBlade("ashwood_jian", Tiers.WOOD, 2, -2.3F, 160);
+    public static final RegistryObject<Item> CLOUDRIDGE_JIAN = warriorBlade("cloudridge_jian", Tiers.DIAMOND, 4, -2.2F, 1320);
+    public static final RegistryObject<Item> IRONWOOD_MALLET = warriorBlade("ironwood_mallet", Tiers.IRON, 2, -3.2F, 360);
+    public static final RegistryObject<Item> RING_FLANGE_HAMMER = warriorBlade("ring_flange_hammer", Tiers.DIAMOND, 5, -3.1F, 1520);
+    public static final RegistryObject<Item> THUNDER_BRONZE_HAMMER = warriorBlade("thunder_bronze_hammer", Tiers.NETHERITE, 6, -3.2F, 1900);
+    public static final RegistryObject<Item> MILITIA_SPEAR = warriorBlade("militia_spear", Tiers.IRON, 2, -2.7F, 420);
+    public static final RegistryObject<Item> SILVER_HOOK_SPEAR = warriorBlade("silver_hook_spear", Tiers.DIAMOND, 4, -2.5F, 1350);
+    public static final RegistryObject<Item> COILED_DRAGON_SPEAR = warriorBlade("coiled_dragon_spear", Tiers.NETHERITE, 5, -2.5F, 1750);
+    public static final RegistryObject<Item> BRONZE_GE_HALBERD = warriorBlade("bronze_ge_halberd", Tiers.STONE, 3, -2.9F, 440);
+    public static final RegistryObject<Item> SINGLE_CRESCENT_HALBERD = warriorBlade("single_crescent_halberd", Tiers.IRON, 4, -2.8F, 720);
+    public static final RegistryObject<Item> BLACK_IRON_HALBERD = warriorBlade("black_iron_halberd", Tiers.DIAMOND, 4, -2.8F, 1450);
+    public static final RegistryObject<Item> FIELD_SCYTHE = warriorBlade("field_scythe", Tiers.WOOD, 3, -3.0F, 300);
+    public static final RegistryObject<Item> IRON_CRESCENT_SCYTHE = warriorBlade("iron_crescent_scythe", Tiers.IRON, 3, -2.9F, 640);
+    public static final RegistryObject<Item> WHITE_BONE_SCYTHE = warriorBlade("white_bone_scythe", Tiers.DIAMOND, 4, -2.9F, 1350);
+    public static final RegistryObject<Item> ECLIPSE_SCYTHE = warriorBlade("eclipse_scythe", Tiers.NETHERITE, 6, -2.9F, 1800);
+    public static final RegistryObject<Item> LAMINATED_HORN_BOW = ITEMS.register("laminated_horn_bow",
+            () -> new com.tnc.tnc.warrior.WarriorOrnateBowItem(0, 730));
+
+    private static RegistryObject<Item> warriorBlade(String id, net.minecraft.world.item.Tier material,
+            int damage, float speed, int durability) {
+        return ITEMS.register(id, () -> new SwordItem(material, damage, speed, new Item.Properties().durability(durability)));
+    }
     public static final RegistryObject<Item> CHAOS_SEAL = ITEMS.register("chaos_seal",
             com.tnc.tnc.magic.water.ChaosSilence.SealItem::new);
 
@@ -214,29 +236,11 @@ public class TNMod
             .withTabsBefore(CreativeModeTabs.COMBAT)
             .icon(() -> GREATSWORD.get().getDefaultInstance())
             .displayItems((parameters, output) -> {
-                // 按武器线分组摆放（同族挨着），找起来不用一件件看名字：
-                // 长剑 → 重武器 → 长柄 → 弓。
-                output.accept(DRAGON_SWORD.get());
-                output.accept(FROST_KATANA.get());
-                output.accept(STAR_RAPIER.get());
-                output.accept(YUE_BRONZE_JIAN.get());
-                output.accept(WILLOW_LEAF_DAO.get());
-                output.accept(RING_POMMEL_DAO.get());output.accept(HAN_IRON_JIAN.get());
-                output.accept(GREATSWORD.get());
-                output.accept(CRIMSON_WARBLADE.get());
-                output.accept(CRESCENT_GUANDAO.get());
-                output.accept(MONK_SPADE.get());
-                output.accept(DOOM_SCYTHE.get());
-                output.accept(HAMMER.get());
-                output.accept(EARTHSHAKER_HAMMER.get());
-                output.accept(IRON_JIAN_MACE.get());
-                output.accept(SPEAR.get());
-                output.accept(SKY_HALBERD.get());
-                output.accept(FANGTIAN_JI.get());
-                output.accept(RED_TASSEL_SPEAR.get());
-                output.accept(QIMEI_STAFF.get());
-                output.accept(BOW.get());
-                output.accept(MOON_BOW.get());output.accept(STORM_BOW.get());output.accept(EMBER_BOW.get());
+                for (var weapon : com.tnc.tnc.warrior.WarriorWeaponRanks.catalogue()) {
+                    var id = net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(MODID, weapon.id());
+                    var item = net.minecraftforge.registries.ForgeRegistries.ITEMS.getValue(id);
+                    if (item != null) output.accept(item);
+                }
                 output.accept(MOON_ARROW.get());output.accept(STORM_ARROW.get());output.accept(EMBER_ARROW.get());
                 output.accept(TNC_IRON_ARMOR.get());
                 // Legacy chaos_seal stays registered for save compatibility; learned magic replaces it.

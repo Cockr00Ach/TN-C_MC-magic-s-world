@@ -1,7 +1,8 @@
-param([Parameter(Mandatory=$true)][string]$LauncherBatch,[Parameter(Mandatory=$true)][string]$LivePack,[Parameter(Mandatory=$true)][string]$AuditRoot,[Parameter(Mandatory=$true)][string]$Output,[string]$OffscreenAgent="",[switch]$UiOnly,[switch]$JourneyOnly,[switch]$FeedbackOnly,[switch]$LeylineOnly,[switch]$EquipmentOnly,[switch]$BotanicalOnly,[switch]$WorldFeedback,[switch]$NamingOnly,[switch]$SkyAcademy,[switch]$SkyhavenStartup,[switch]$SkyhavenProfile,[switch]$SkyhavenTornado)
+param([Parameter(Mandatory=$true)][string]$LauncherBatch,[Parameter(Mandatory=$true)][string]$LivePack,[Parameter(Mandatory=$true)][string]$AuditRoot,[Parameter(Mandatory=$true)][string]$Output,[string]$OffscreenAgent="",[switch]$UiOnly,[switch]$JourneyOnly,[switch]$FeedbackOnly,[switch]$LeylineOnly,[switch]$EquipmentOnly,[switch]$BotanicalOnly,[switch]$WorldFeedback,[switch]$NamingOnly,[switch]$SkyAcademy,[switch]$SkyhavenStartup,[switch]$SkyhavenProfile,[switch]$SkyhavenTornado,[switch]$WeaponGripAudit)
 $ErrorActionPreference='Stop'
 if($SkyhavenTornado){$SkyhavenStartup=$true}
 if($SkyhavenProfile){$SkyhavenStartup=$true}
+if($WeaponGripAudit){$EquipmentOnly=$true}
 if([string]::IsNullOrWhiteSpace($OffscreenAgent)){$OffscreenAgent=Join-Path (Split-Path $PSScriptRoot -Parent) 'work/offscreen-agent/offscreen-audit.jar'}
 $live=[IO.Path]::GetFullPath($LivePack).TrimEnd('\')
 $audit=[IO.Path]::GetFullPath($AuditRoot).TrimEnd('\')
@@ -36,6 +37,7 @@ if($BotanicalOnly){$javaArguments='-Dtnc.botanicalAudit=true '+$javaArguments}
 if($WorldFeedback){$javaArguments='-Dtnc.worldFeedbackAudit=true '+$javaArguments}
 if($NamingOnly){$javaArguments='-Dtnc.worldFeedbackAudit=true -Dtnc.namingOnlyAudit=true '+$javaArguments}
 if($EquipmentOnly){$javaArguments='-Dtnc.equipmentAudit=true '+$javaArguments}
+if($WeaponGripAudit){$javaArguments='-Dtnc.weaponGripAudit=true '+$javaArguments}
 if($SkyAcademy){$javaArguments='-Dtnc.skyAcademyAudit=true '+$javaArguments}
 if($SkyhavenStartup){
     $javaArguments=[regex]::Replace($javaArguments,'-Xmx\S+','-Xmx8G')

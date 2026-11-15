@@ -1,5 +1,6 @@
 package com.tnc.tnc.world.yan;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -213,25 +214,45 @@ public final class YanPrologueDefeatClient {
         float time = age + event.getPartialTick();
         float timepiece = time - YanPrologueScript.CLOCK_START;
         if (timepiece >= 0) {
-            float fade = smooth(timepiece / 10);
-            gui.fill(0, 0, width, height, color(0x110c20, fade * .49F));
+            float fade = smooth(timepiece / YanPrologueClockRules.FADE_IN);
+            // 只把画面压暗（不再垫白盘 ✗ —— 作者第二版："不用这个白色圆盘"）
+            gui.fill(0, 0, width, height, color(0x07050b, fade * .58F));
             var pose = gui.pose();
             pose.pushPose();
             pose.translate(width / 2F, height / 2F, 0);
             float scale = Math.min(width, height) / 190F * (.93F + .07F * fade);
             pose.scale(scale, scale, 1);
-            for (int mark = 0; mark < 60; mark++) {
-                pose.pushPose();
-                pose.mulPose(Axis.ZP.rotationDegrees(mark * 6));
-                gui.fill(-3, -57, 3, -55, color(0xbca577, fade * .55F));
-                gui.fill(-3, -53, 3, -52, color(0xffedc2, fade * .95F));
-                if (mark % 5 == 0) gui.fill(-1, -48, 2, mark % 15 == 0 ? -38 : -42, color(0xffedc2, fade));
-                pose.popPose();
-            }
-            float reverse = timepiece * timepiece;
-            drawHand(gui, 60 - reverse * .19F, 25, 3, color(0xffe2a2, fade));
-            drawHand(gui, 158 - reverse * .9F, 38, 2, color(0xfff6dc, fade));
-            gui.fill(-3, -3, 4, 4, color(0xfff4cc, fade));
+            // ★ 2026-11-15 第二版：**亮墨**漩涡阵（墨自己发光 ✓）＋ 毛笔指针 ✓
+            //   （第一版垫了张宣纸、指针是 gui.fill 的矩形 ⇒ 作者："时针分针一点水墨感都没有"✗）
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+            float r = YanPrologueClockRules.DIAL_RADIUS;
+            // ① 外层水墨阵：慢慢转 ✓
+            pose.pushPose();
+            pose.mulPose(Axis.ZP.rotationDegrees(YanPrologueClockRules.outerTurn(timepiece)));
+            pose.scale(YanPrologueClockRules.OUTER_SCALE, YanPrologueClockRules.OUTER_SCALE, 1.0F);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, fade * YanPrologueClockRules.OUTER_ALPHA);
+            blitSeal(gui, -r, -r, r * 2);
+            pose.popPose();
+            // ② 内层：反向、更小、更淡 ⇒ 墨在水里化开 ✓
+            pose.pushPose();
+            pose.mulPose(Axis.ZP.rotationDegrees(YanPrologueClockRules.innerTurn(timepiece)));
+            pose.scale(YanPrologueClockRules.INNER_SCALE, YanPrologueClockRules.INNER_SCALE, 1.0F);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, fade * YanPrologueClockRules.INNER_ALPHA);
+            blitSeal(gui, -r, -r, r * 2);
+            pose.popPose();
+            // ③ 两支毛笔指针（倒着转 ⇒ "时间倒流"✓）
+            drawBrush(gui, YanPrologueClockRules.HAND_HOUR, YanPrologueClockRules.HAND_HOUR_W,
+                    YanPrologueClockRules.HAND_HOUR_H, YanPrologueClockRules.hourAngle(timepiece),
+                    YanPrologueClockRules.HOUR_LENGTH, fade);
+            drawBrush(gui, YanPrologueClockRules.HAND_MINUTE, YanPrologueClockRules.HAND_MINUTE_W,
+                    YanPrologueClockRules.HAND_MINUTE_H, YanPrologueClockRules.minuteAngle(timepiece),
+                    YanPrologueClockRules.MINUTE_LENGTH, fade);
+            // ④ 轴心：一点朱红（像盖在画上的印 ✓）
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            gui.fill(-3, -3, 4, 4, color(0x8a2f2b, fade));
+            gui.fill(-1, -1, 2, 2, color(0xf0dca8, fade * .9F));
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             pose.popPose();
         }
         float flash = time - (YanPrologueScript.DEFEAT_TICKS - 8);
@@ -241,12 +262,40 @@ public final class YanPrologueDefeatClient {
         }
     }
 
-    private static void drawHand(GuiGraphics gui, float rotation, int length, int thickness, int color) {
+    /** 贴一张亮墨阵（固定 512×512 的贴图 ✓）。 */
+    private static void blitSeal(GuiGraphics gui, float x, float y, float size) {
+        gui.blit(YanPrologueClockRules.SEAL, Math.round(x), Math.round(y),
+                Math.round(size), Math.round(size), 0, 0, 512, 512, 512, 512);
+    }
+
+    /**
+     * 一支<b>毛笔指针</b> ✓ —— 图的下端是转轴、上端是笔锋，绕着转轴转 ✓。
+     *
+     * <p>为什么要贴图而不是 {@code gui.fill}：矩形直边、方头、粗细不变 ✗ ——
+     * 作者 2026-11-15 第二版："时针分针一点水墨感都没有"✗。
+     * 笔锋图自带"起笔粗 → 收笔尖、边缘不齐、几道飞白"✓，贴上去就有毛笔味 ✓。
+     *
+     * @param length 画多长（GUI 单位 ✓ 从轴心到笔尖）
+     */
+    private static void drawBrush(GuiGraphics gui, net.minecraft.resources.ResourceLocation texture,
+                                  int textureWidth, int textureHeight, float angle, float length,
+                                  float alpha) {
+        float aspect = textureWidth / (float)textureHeight;
+        int w = Math.max(3, Math.round(length * aspect));
         var pose = gui.pose();
         pose.pushPose();
-        pose.mulPose(Axis.ZP.rotationDegrees(rotation));
-        gui.fill(-thickness / 2, -length, (thickness + 1) / 2, 6, color);
-        gui.fill(0, -length - 3, 1, -length, color);
+        pose.mulPose(Axis.ZP.rotationDegrees(angle));
+        // ① 湿笔的**淡边**：同一支笔放宽一点、原色压淡 ⇒ 墨在纸上洇开的那圈 ✓
+        //    （这一层同时也是"暗底上的轮廓"✓ —— 否则浅墨笔锋出了阵面就看不见了 ✗）
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, alpha * 0.45F);
+        gui.blit(texture, -(w * 5) / 4, Math.round(-length * 1.04F), (w * 5) / 2,
+                Math.round(length * 1.04F), 0, 0, textureWidth, textureHeight,
+                textureWidth, textureHeight);
+        // ② 笔锋本体：**浓墨**（贴图是月白的，这里用乘色压暗 ✓）——
+        //    不然白笔锋压在亮墨阵上就糊成一片了 ✗
+        RenderSystem.setShaderColor(0.24F, 0.20F, 0.18F, alpha);
+        gui.blit(texture, -w / 2, Math.round(-length), w, Math.round(length), 0, 0,
+                textureWidth, textureHeight, textureWidth, textureHeight);
         pose.popPose();
     }
 

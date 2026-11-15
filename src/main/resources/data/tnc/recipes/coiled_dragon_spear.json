@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "group": "tnc_weapons",
+  "ingredients": [
+    {
+      "item": "tnc:silver_hook_spear"
+    },
+    {
+      "item": "minecraft:netherite_ingot"
+    },
+    {
+      "item": "minecraft:gold_ingot"
+    },
+    {
+      "item": "minecraft:emerald"
+    }
+  ],
+  "result": {
+    "item": "tnc:coiled_dragon_spear",
+    "count": 1
+  }
+}

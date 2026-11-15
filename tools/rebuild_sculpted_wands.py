@@ -9,6 +9,7 @@ import math, hashlib
 from PIL import Image
 from rebuild_equipment_models import A, S, ELEMENTS, WAND_COLORS, write
 from equipment_blockbench import export_wand
+from staff_hold_pose import item_display
 
 TAU = math.tau
 def add(a,b): return tuple(x+y for x,y in zip(a,b))
@@ -275,16 +276,8 @@ class Sculpt:
                     atlas.putpixel((ox+x,oy+y),tuple(min(255,max(0,v)) for v in pixel)+(255,))
         target=A/'textures/item/wands/held'/f'{self.name}.png';target.parent.mkdir(parents=True,exist_ok=True);atlas.save(target)
         emission.save(target.with_name(self.name+'_emission.png'))
-        display={};tip=36.5
-        for first in [False,True]:
-            rotation=[0,-25,-10] if first else [90,0,0];scale=14/(tip-5) if first else .94
-            rz,ry,rx=[math.radians(rotation[i]) for i in [2,1,0]];x,y,z=0,-3*scale,0
-            x,y=x*math.cos(rz)-y*math.sin(rz),x*math.sin(rz)+y*math.cos(rz)
-            x,z=x*math.cos(ry)+z*math.sin(ry),-x*math.sin(ry)+z*math.cos(ry)
-            y,z=y*math.cos(rx)-z*math.sin(rx),y*math.sin(rx)+z*math.cos(rx)
-            for hand in ['righthand','lefthand']:
-                display[('firstperson_' if first else 'thirdperson_')+hand]=dict(rotation=rotation,translation=[-x-(2.8 if first else 0),-y-(2.5 if first else 0),-z],scale=[scale]*3)
-        display['ground']=dict(rotation=[0,0,15],translation=[0,3,0],scale=[.35]*3)
+        tip=36.5
+        display=item_display([8,5,8],[8,tip,8])
         icon=A/'textures/item'/('magic_wand.png' if base else f'wands/{self.name}.png')
         model=dict(loader='tnc:botanical_mesh',staff_render=True,surfaces=self.surfaces,elements=[],ambientocclusion=False,
             textures=dict(plant=f'tnc:item/wands/held/{self.name}',body=f'tnc:item/wands/held/{self.name}',particle=f'tnc:item/wands/held/{self.name}'),display=display,

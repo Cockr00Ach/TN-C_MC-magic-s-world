@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "group": "tnc_weapons",
+  "ingredients": [
+    {
+      "item": "tnc:earthshaker_hammer"
+    },
+    {
+      "item": "minecraft:diamond"
+    },
+    {
+      "item": "minecraft:iron_ingot"
+    },
+    {
+      "item": "minecraft:chain"
+    }
+  ],
+  "result": {
+    "item": "tnc:ring_flange_hammer",
+    "count": 1
+  }
+}

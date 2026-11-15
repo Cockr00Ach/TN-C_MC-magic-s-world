@@ -60,7 +60,7 @@ public final class InkCraneBossEntity extends Monster implements GeoEntity {
                 .add(Attributes.ARMOR, 12.0)
                 .add(Attributes.ARMOR_TOUGHNESS, 7.0)
                 .add(Attributes.MOVEMENT_SPEED, 0.27)
-                .add(Attributes.FOLLOW_RANGE, 64.0)
+                .add(Attributes.FOLLOW_RANGE, com.tnc.tnc.boss.BossLeash.ARENA_FOLLOW_RANGE)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0);
     }
 

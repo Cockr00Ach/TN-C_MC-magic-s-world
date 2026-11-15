@@ -47,6 +47,8 @@ public class InstructorEntity extends Monster implements GeoEntity {
     /** 举盾架势：洛克上盾挡课时一直架着，靠它把 idle 换成 block_hold 循环。 */
     private static final EntityDataAccessor<Boolean> DATA_HOLD =
         SynchedEntityData.defineId(InstructorEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> DATA_TUTORIAL =
+        SynchedEntityData.defineId(InstructorEntity.class, EntityDataSerializers.BOOLEAN);
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
 
@@ -76,6 +78,7 @@ public class InstructorEntity extends Monster implements GeoEntity {
         super.defineSynchedData();
         this.entityData.define(DATA_VARIANT, VARIANT_COUNTER);
         this.entityData.define(DATA_HOLD, false);
+        this.entityData.define(DATA_TUTORIAL, false);
     }
 
     /** 是否正架着（盾挡课）。 */
@@ -87,16 +90,26 @@ public class InstructorEntity extends Monster implements GeoEntity {
         if (holding() != hold) this.entityData.set(DATA_HOLD, hold);
     }
 
+    public boolean tutorialActor() {
+        return this.entityData.get(DATA_TUTORIAL);
+    }
+
+    public void setTutorialActor(boolean tutorial) {
+        this.entityData.set(DATA_TUTORIAL, tutorial);
+    }
+
     @Override
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putInt("InstructorVariant", variant());
+        tag.putBoolean("InstructorTutorial", tutorialActor());
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         setVariant(tag.getInt("InstructorVariant"));
+        setTutorialActor(tag.getBoolean("InstructorTutorial"));
     }
 
     public int variant() {
@@ -201,6 +214,9 @@ public class InstructorEntity extends Monster implements GeoEntity {
         action.triggerableAnim("greet", RawAnimation.begin().thenPlay("greet"));
         action.triggerableAnim("death", RawAnimation.begin().thenPlay("death"));
         action.triggerableAnim("hit", RawAnimation.begin().thenPlay("hit"));
+        action.triggerableAnim("tutorial_draw", RawAnimation.begin().thenPlay("tutorial_draw"));
+        action.triggerableAnim("tutorial_thrust", RawAnimation.begin().thenPlay("tutorial_thrust"));
+        action.triggerableAnim("tutorial_sheath", RawAnimation.begin().thenPlay("tutorial_sheath"));
         controllers.add(action);
     }
 

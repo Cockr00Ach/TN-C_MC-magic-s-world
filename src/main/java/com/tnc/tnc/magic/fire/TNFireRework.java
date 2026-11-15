@@ -1,338 +1,395 @@
 package com.tnc.tnc.magic.fire;
 
 import com.tnc.tnc.TNMod;
-import com.tnc.tnc.magic.TNShockwaveEntity;
-import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-/**
- * 火法重做：<b>点火链</b>（攒热）与 <b>引爆链</b>（花热）。
- *
- * <h2>两条链的关系</h2>
- * 点火链单发伤害很低，作用是把热量堆上去；引爆链自己的伤害几乎全部来自
- * <b>目标身上已有的热量</b>（{@link FireHeat}）。所以低阶玩家用「火星 → 爆燃」
- * 就能打出完整循环，高阶只是把攒和放到更大范围 ✓
- *
- * <h2>为什么同一个类管 10 个法术</h2>
- * 它们共用同一套"命中/范围/结算"工具，拆开写会重复十遍 ✗。
- * 约定和别的火系链一样：<b>不是本链返回 false</b>，派发处可以无脑全调一遍 ✓
- */
+/** Server-side ignition and detonation chains. All telegraphs resolve at their displayed position. */
 @Mod.EventBusSubscriber(modid = TNMod.MODID)
 public final class TNFireRework {
-
-    /** 点火链（原射线链的 5 个 id）。 */
-    private static final Set<String> IGNITE = Set.of(
-            "sun_ray", "blast_ray", "fire_dragon", "flame_demon_wrath", "solar_judgment");
-
-    /** 引爆链（原火球链的 5 个 id）。 */
-    private static final Set<String> DETONATE = Set.of(
+    private static final Set<String> SPELLS = Set.of(
+            "sun_ray", "blast_ray", "fire_dragon", "flame_demon_wrath", "solar_judgment",
             "fireball", "great_fireball", "lava_fireball", "molten_skyfall", "meteor_fall");
 
-    /** 延时爆炸（火种、熔核）：不新建实体，靠一条服务端队列结算，最省。 */
-    private record Pending(ServerLevel level, Vec3 at, long tick, float damage, UUID caster,
-                           float heat, double radius, boolean consumeTargets) {
-    }
+    private enum Step { SEED, MOLTEN, MARTYR, FOOTPRINT }
 
+    private record Pending(ServerLevel level, UUID owner, long when, Step step,
+                           Vec3 at, Vec3 axis, float radius, UUID target, Set<UUID> hit) {}
     private static final List<Pending> PENDING = new ArrayList<>();
+    private record Ignition(float range, float impact, float initialHeat,
+                            float burnDamage, float burnHeat, int burnSeconds) {}
+    private record Burn(ServerLevel level, UUID owner, int tier, long nextPulse, int pulses, long appliedAt) {}
+    private static final List<Ignition> IGNITIONS = List.of(
+            new Ignition(26, 6, 16, 2.5F, 7, 5),
+            new Ignition(30, 8, 18, 3, 8, 5),
+            new Ignition(34, 10, 22, 4, 9, 6),
+            new Ignition(38, 13, 24, 5, 10, 6),
+            new Ignition(46, 17, 28, 6, 12, 7));
+    private static final Map<UUID, Burn> BURNING = new HashMap<>();
+    private static final float[] SPEND = {.45F, .50F, .45F, .40F, .60F};
 
-    private TNFireRework() {
+
+    private TNFireRework() {}
+
+    public static boolean handles(ResourceLocation id) {
+        return TNMod.MODID.equals(id.getNamespace()) && SPELLS.contains(id.getPath());
     }
 
-    public static boolean handles(ResourceLocation spellId) {
-        String path = spellId.getPath();
-        return IGNITE.contains(path) || DETONATE.contains(path);
-    }
-
-    /** 派发入口。不是本链返回 false。 */
-    public static boolean cast(ServerPlayer player, ResourceLocation spellId) {
-        String path = spellId.getPath();
-        if (!(player.level() instanceof ServerLevel level)) {
-            return false;
-        }
-        switch (path) {
-            case "sun_ray" -> spark(player, level);
-            case "blast_ray" -> emberTrail(player, level);
-            case "fire_dragon" -> fireWall(player, level);
-            case "flame_demon_wrath" -> infernoRing(player, level);
-            case "solar_judgment" -> skyfire(player, level);
-            case "fireball" -> detonate(player, level, 2.2F, false);
-            case "great_fireball" -> detonate(player, level, 2.5F, true);
-            case "lava_fireball" -> seed(player, level);
-            case "molten_skyfall" -> moltenCore(player, level);
-            case "meteor_fall" -> martyrBurst(player, level);
-            default -> {
-                return false;
-            }
+    public static boolean cast(ServerPlayer player, ResourceLocation id) {
+        if (!handles(id)) return false;
+        switch (id.getPath()) {
+            case "sun_ray" -> launch(player, 1);
+            case "blast_ray" -> launch(player, 2);
+            case "fire_dragon" -> launch(player, 3);
+            case "flame_demon_wrath" -> launch(player, 4);
+            case "solar_judgment" -> launch(player, 5);
+            case "fireball" -> detonate(player, false);
+            case "great_fireball" -> detonate(player, true);
+            case "lava_fireball" -> seed(player);
+            case "molten_skyfall" -> moltenCore(player);
+            case "meteor_fall" -> martyrBurst(player);
+            default -> { return false; }
         }
         return true;
     }
 
-    // ================================================================ 点火链
-
-    /** t1 火星：短锥，伤害很低，热量 +12。 */
-    private static void spark(ServerPlayer player, ServerLevel level) {
+    private static void launch(ServerPlayer player, int tier) {
+        Ignition spell = IGNITIONS.get(tier - 1);
         Vec3 eye = player.getEyePosition();
-        Vec3 look = player.getLookAngle();
-        int hits = 0;
-        for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class,
-                new AABB(eye, eye.add(look.scale(7.0D))).inflate(2.0D),
-                t -> t != player && FireSpellRules.hittable(player, t))) {
-            Vec3 to = e.position().subtract(eye).normalize();
-            if (to.dot(look) < 0.55) {
+        TNFireBoltEntity.launchIgnitionCast(player, tier, spell.range);
+        sound(player, eye, SoundEvents.BLAZE_SHOOT, .82F, 1.3F - tier * .12F);
+    }
+
+    static void burnOnHit(ServerPlayer player, LivingEntity target, int tier) {
+        Ignition spell = IGNITIONS.get(tier - 1);
+        UUID id = target.getUUID();
+        Burn old = BURNING.get(id);
+        long now = player.serverLevel().getGameTime();
+        boolean sameLevel = old != null && old.level == player.level();
+        if (sameLevel && old.owner.equals(player.getUUID()) && old.tier == tier && now - old.appliedAt < 5) return;
+        damage(player, target, spell.impact);
+        if (!target.isAlive()) return;
+        FireHeat.add(target, player, spell.initialHeat);
+        if (target.isInWaterOrBubble() || (old == null && BURNING.size() >= 512)) return;
+        if (sameLevel && old.tier > tier) return;
+        long next = sameLevel ? old.nextPulse : now + 20;
+        BURNING.put(id, new Burn(player.serverLevel(), player.getUUID(), tier, next, spell.burnSeconds, now));
+        showBurn(player, target, tier);
+        emit(player, FireReworkEffects.Kind.FIRE_WAVE, target.position().add(0, .15, 0), Vec3.ZERO,
+                Math.min(3.4F, Math.max(1.35F + tier * .22F, target.getBbWidth() * .7F)), tier / 5F, 15);
+        sound(player, target.position(), SoundEvents.FIRECHARGE_USE, .55F, 1.22F - tier * .1F);
+    }
+
+    private static void showBurn(ServerPlayer player, LivingEntity target, int tier) {
+        FireReworkEffects.emitAttached(player, target, FireReworkEffects.Kind.SCORCHED,
+                Math.max(.4F, Math.min(2F, target.getBbWidth() * .64F)), tier / 5F, 25);
+    }
+
+    private static void tickBurns(TickEvent.ServerTickEvent event) {
+        for (var it = BURNING.entrySet().iterator(); it.hasNext();) {
+            var entry = it.next();
+            Burn burn = entry.getValue();
+            if (event.getServer().getLevel(burn.level.dimension()) != burn.level
+                    || !(burn.level.getEntity(entry.getKey()) instanceof LivingEntity target)
+                    || !(burn.level.getEntity(burn.owner) instanceof ServerPlayer caster)
+                    || !caster.isAlive() || caster.isSpectator() || target.isInWaterOrBubble()
+                    || !canDamage(caster, target)) {
+                it.remove();
                 continue;
             }
-            e.hurt(level.damageSources().onFire(), 4.0F);
-            e.setSecondsOnFire(3);
-            FireHeat.add(e, player, 12.0F);
-            hits++;
-        }
-        Vec3 tip = eye.add(look.scale(4.0D));
-        level.sendParticles(ParticleTypes.FLAME, tip.x, tip.y, tip.z, 16, 0.6, 0.6, 0.6, 0.08);
-        level.playSound(null, player.blockPosition(), SoundEvents.BLAZE_SHOOT,
-                SoundSource.PLAYERS, 0.7F, hits > 0 ? 1.35F : 1.1F);
-    }
-
-    /** t2 燃痕：沿视线铺一条火带（几块短命的熔岩地）。 */
-    private static void emberTrail(ServerPlayer player, ServerLevel level) {
-        Vec3 eye = player.getEyePosition();
-        Vec3 dir = player.getLookAngle();
-        for (int i = 1; i <= 4; i++) {
-            Vec3 at = eye.add(dir.scale(i * 3.0D));
-            Vec3 ground = TNFireHands.groundUnder(level, at);
-            TNLavaFieldEntity.spawn(level, ground, player, 3.0F, 1.6D, 50);
-            level.sendParticles(ParticleTypes.FLAME, ground.x, ground.y + 0.3, ground.z,
-                    10, 0.5, 0.2, 0.5, 0.05);
-        }
-        for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class,
-                new AABB(eye, eye.add(dir.scale(13.0D))).inflate(2.5D),
-                t -> t != player && FireSpellRules.hittable(player, t))) {
-            e.hurt(level.damageSources().onFire(), 6.0F);
-            FireHeat.add(e, player, 10.0F);
-        }
-        level.playSound(null, player.blockPosition(), SoundEvents.FIRECHARGE_USE,
-                SoundSource.PLAYERS, 0.8F, 1.2F);
-    }
-
-    /** t3 焚风：前方炸开一堵火墙，把敌人推着烧。 */
-    private static void fireWall(ServerPlayer player, ServerLevel level) {
-        Vec3 at = player.getEyePosition().add(player.getLookAngle().scale(8.0D));
-        for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class,
-                new AABB(at, at).inflate(6.0D),
-                t -> t != player && FireSpellRules.hittable(player, t))) {
-            Vec3 push = e.position().subtract(at).normalize().scale(0.85D).add(0, 0.35, 0);
-            e.setDeltaMovement(e.getDeltaMovement().add(push));
-            e.hurtMarked = true;
-            e.hurt(level.damageSources().onFire(), 8.0F);
-            e.setSecondsOnFire(4);
-            FireHeat.add(e, player, 14.0F);
-        }
-        TNShockwaveEntity.blast(level, at, 6.0D, FireSpellRules.SHAKE_T3, player, 1.0F);
-        level.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z, 80, 3.0, 1.5, 3.0, 0.15);
-    }
-
-    /** t4 炎狱：以目标点为心，2 秒内四圈火环往外扩，每圈都叠热。 */
-    private static void infernoRing(ServerPlayer player, ServerLevel level) {
-        Vec3 center = aimPoint(player, level, 26.0D);
-        for (int i = 0; i < 4; i++) {
-            schedule(level, center, i * 10L + 5, 5.0F, player, 10.0F, 3.0D + i * 1.6D, false);
-        }
-        level.playSound(null, player.blockPosition(), SoundEvents.FIRECHARGE_USE,
-                SoundSource.PLAYERS, 1.2F, 0.8F);
-    }
-
-    /** t5 天火：24 格内所有敌人一次注入大量热量并点燃。 */
-    private static void skyfire(ServerPlayer player, ServerLevel level) {
-        Vec3 center = player.position();
-        int n = 0;
-        for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class,
-                new AABB(center, center).inflate(24.0D),
-                t -> t != player && FireSpellRules.hittable(player, t))) {
-            FireHeat.add(e, player, 45.0F);
-            e.setSecondsOnFire(8);
-            e.hurt(level.damageSources().onFire(), 10.0F);
-            n++;
-        }
-        level.sendParticles(ParticleTypes.FLAME, center.x, center.y + 6, center.z, 200, 12, 8, 12, 0.1);
-        level.sendParticles(ParticleTypes.LAVA, center.x, center.y + 1, center.z, 60, 8, 1, 8, 0.2);
-        level.playSound(null, player.blockPosition(), SoundEvents.LIGHTNING_BOLT_THUNDER,
-                SoundSource.PLAYERS, 1.0F, 1.4F);
-        if (n == 0) {
-            player.displayClientMessage(net.minecraft.network.chat.Component.literal(
-                    "§c[TN-C] §7天火落空了（24 格内没有敌人）"), true);
-        }
-    }
-
-    // ================================================================ 引爆链
-
-    /** t1/t2 爆燃：把目标身上的热量一次花掉。t2 会向周围传一半。 */
-    private static void detonate(ServerPlayer player, ServerLevel level, float rate, boolean chain) {
-        LivingEntity target = aim(player, level, 26.0D);
-        if (target == null) {
-            player.displayClientMessage(net.minecraft.network.chat.Component.literal(
-                    "§c[TN-C] §7没瞄到目标"), true);
-            return;
-        }
-        float heat = FireHeat.consume(target);
-        float damage = Math.max(8.0F, heat * rate);
-        Vec3 at = target.position().add(0, target.getBbHeight() * 0.5, 0);
-        target.hurt(level.damageSources().onFire(), damage);
-        target.setSecondsOnFire(5);
-        explodeFx(level, at, 2.5D + (chain ? 1.0D : 0.0D), damage * 0.25F, player);
-        if (chain) {
-            float share = heat * 0.5F;
-            for (LivingEntity other : level.getEntitiesOfClass(LivingEntity.class,
-                    new AABB(at, at).inflate(6.0D),
-                    t -> t != target && t != player && FireSpellRules.hittable(player, t))) {
-                FireHeat.add(other, player, share);
-                other.hurt(level.damageSources().onFire(), damage * 0.35F);
+            if (burn.level.getGameTime() < burn.nextPulse) continue;
+            Ignition spell = IGNITIONS.get(burn.tier - 1);
+            damage(caster, target, spell.burnDamage);
+            FireHeat.add(target, caster, spell.burnHeat);
+            if (burn.pulses <= 1 || !target.isAlive()) it.remove();
+            else {
+                entry.setValue(new Burn(burn.level, burn.owner, burn.tier, burn.level.getGameTime() + 20, burn.pulses - 1, burn.appliedAt));
+                showBurn(caster, target, burn.tier);
             }
         }
-        player.displayClientMessage(net.minecraft.network.chat.Component.literal(
-                String.format("§6[TN-C] §r爆燃 §c%.0f §7伤害 §8(热量 %.0f)", damage, heat)), true);
     }
 
-    /** t3 火种：先埋一颗（+15 热），3 秒后自己炸；伤害按埋下时的热量算。 */
-    private static void seed(ServerPlayer player, ServerLevel level) {
-        LivingEntity target = aim(player, level, 26.0D);
-        Vec3 at = target != null ? target.position() : aimPoint(player, level, 20.0D);
-        float heat = target != null ? FireHeat.of(target) : 0.0F;
-        if (target != null) {
-            FireHeat.add(target, player, 15.0F);
+    private static void detonate(ServerPlayer player, boolean chain) {
+        LivingEntity target = aim(player, 26);
+        if (target == null) return;
+        Vec3 at = center(target);
+        int tier = chain ? 2 : 1;
+        float heat = heatFuel(target, tier);
+        float damage = Math.max(8, heat * (chain ? 4.1F : 4.0F));
+        if (!detonationDamage(player, target, damage)) return;
+        spend(player, target, tier);
+        if (target.isAlive()) target.setSecondsOnFire(4);
+        burst(player, at, chain ? 3.6F : 2.5F, heat, FireReworkEffects.Kind.DETONATE);
+        if (!chain || heat <= 0) return;
+        for (LivingEntity other : nearby(player, at, 6, 5).stream()
+                .filter(e -> e != target && visible(player, at, center(e))).limit(4).toList()) {
+            emit(player, FireReworkEffects.Kind.CHAIN, at, center(other).subtract(at), .6F, heat / 100F, 18);
+            if (detonationDamage(player, other, damage * .35F)) FireHeat.add(other, player, heat * .75F);
         }
-        schedule(level, at, 60L, (heat + 25.0F) * 2.4F, player, 0.0F, 3.0D, false);
-        level.playSound(null, player.blockPosition(), SoundEvents.FIRECHARGE_USE,
-                SoundSource.PLAYERS, 0.9F, 0.6F);
-        player.displayClientMessage(net.minecraft.network.chat.Component.literal(
-                "§6[TN-C] §r火种已埋下 §7（3 秒后引爆）"), true);
     }
 
-    /** t4 熔核：把热量压成三颗熔岩核，0.4 秒一颗地砸下去。 */
-    private static void moltenCore(ServerPlayer player, ServerLevel level) {
-        LivingEntity target = aim(player, level, 32.0D);
-        Vec3 at = target != null ? target.position() : aimPoint(player, level, 24.0D);
-        float heat = target != null ? FireHeat.consume(target) : 0.0F;
+    private static void seed(ServerPlayer player) {
+        LivingEntity target = aim(player, 26);
+        Vec3 at = target == null ? groundAim(player, 24) : target.position();
+        if (!queue(player, Step.SEED, at, Vec3.ZERO, 3.2F, 60, null, null)) return;
+        if (target != null) FireHeat.add(target, player, 15);
+        emit(player, FireReworkEffects.Kind.SEED, at, Vec3.ZERO, 3.2F, .8F, 60);
+        sound(player, at, SoundEvents.FIRECHARGE_USE, .9F, .62F);
+    }
+
+    private static void moltenCore(ServerPlayer player) {
+        Vec3 at = groundAim(player, 32);
+        Vec3 forward = forward(player);
+        Vec3 right = FireSpellRules.right(forward);
         for (int i = 0; i < 3; i++) {
-            Vec3 offset = at.add((i - 1) * 2.2D, 0, (i % 2 == 0 ? 1.6D : -1.6D));
-            schedule(level, offset, i * 8L + 4, Math.max(10.0F, heat * 0.9F), player, 0.0F, 3.2D, false);
-        }
-        level.playSound(null, player.blockPosition(), SoundEvents.BLAZE_SHOOT,
-                SoundSource.PLAYERS, 1.2F, 0.5F);
-    }
-
-    /** t5 殉爆：24 格内所有带热的敌人一起引爆，自己的血也算燃料（越少越疼）。 */
-    private static void martyrBurst(ServerPlayer player, ServerLevel level) {
-        Vec3 center = player.position();
-        float selfFuel = 1.0F + (1.0F - Math.max(0.0F, player.getHealth() / player.getMaxHealth())) * 1.5F;
-        int n = 0;
-        for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class,
-                new AABB(center, center).inflate(24.0D),
-                t -> t != player && FireSpellRules.hittable(player, t))) {
-            float heat = FireHeat.consume(e);
-            if (heat <= 0.0F) {
-                continue;
+            Vec3 offset = at.add(right.scale((i - 1) * 3.8)).add(forward.scale(i == 1 ? 2.1 : -1.1));
+            Vec3 surface = ground(player, offset.add(0, .65, 0));
+            if (surface == null || !visible(player, at.add(0, .7, 0), surface.add(0, .7, 0))) continue;
+            int delay = 19 + i * 9;
+            if (queue(player, Step.MOLTEN, surface, Vec3.ZERO, 3.4F, delay, null, null)) {
+                emit(player, FireReworkEffects.Kind.MOLTEN, surface, upward(player, surface, 11), 3.4F, .92F, delay);
             }
-            e.hurt(level.damageSources().onFire(), heat * 2.6F * selfFuel);
-            explodeFx(level, e.position(), 2.6D, heat * 0.3F, player);
-            n++;
         }
-        level.playSound(null, player.blockPosition(), SoundEvents.GENERIC_EXPLODE,
-                SoundSource.PLAYERS, 2.0F, 0.65F);
-        player.displayClientMessage(net.minecraft.network.chat.Component.literal(
-                String.format("§6[TN-C] §r殉爆 §c%d §7个目标 §8(自身燃料 ×%.2f)", n, selfFuel)), true);
+        sound(player, at, SoundEvents.BLAZE_SHOOT, 1F, .52F);
     }
 
-    // ================================================================ 工具
-
-    private static void explodeFx(ServerLevel level, Vec3 at, double radius, float shake, ServerPlayer caster) {
-        TNShockwaveEntity.blast(level, at, radius, shake, caster, 1.0F);
-        TNLavaFieldEntity.spawn(level, TNFireHands.groundUnder(level, at), caster,
-                Math.max(2.0F, shake * 2.0F), Math.max(1.2D, radius * 0.6D), 60);
-        level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, at.x, at.y, at.z, 1, 0.2, 0.2, 0.2, 0.0);
-        level.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z, 40, radius * 0.4, radius * 0.3, radius * 0.4, 0.2);
+    private static void martyrBurst(ServerPlayer player) {
+        Vec3 eye = player.getEyePosition();
+        nearby(player, eye, 24, 16).stream()
+                .filter(target -> FireHeat.of(target) > 0 && visible(player, eye, center(target)))
+                .limit(12).forEach(target -> {
+                    if (queue(player, Step.MARTYR, target.position(), Vec3.ZERO, 3.8F, 12, target.getUUID(), null)) {
+                        emit(player, FireReworkEffects.Kind.MARTYR_DRAW, center(target), Vec3.ZERO, 3.8F,
+                                FireHeat.ratio(target), 12);
+                    }
+                });
     }
 
-    private static void schedule(ServerLevel level, Vec3 at, long delay, float damage, ServerPlayer caster,
-                                 float heat, double radius, boolean consume) {
-        long when = level.getGameTime() + delay;
-        PENDING.add(new Pending(level, at, when, damage, caster.getUUID(), heat, radius, consume));
+    static void footprint(ServerPlayer player, Vec3 at, Vec3 axis) {
+        if (queue(player, Step.FOOTPRINT, at, axis, 1.05F, 4, null, new HashSet<>())) {
+            emit(player, FireReworkEffects.Kind.FOOTPRINT, at, axis, 1.05F, .45F, 26);
+        }
     }
 
-    /** 延时队列：到点就炸，顺便给范围内的敌人叠热。 */
+    private static boolean queue(ServerPlayer player, Step step, Vec3 at, Vec3 axis, float radius,
+                                 int delay, UUID target, Set<UUID> hit) {
+        ServerLevel level = player.serverLevel();
+        if (!level.hasChunkAt(BlockPos.containing(at)) || PENDING.size() >= 512) return false;
+        PENDING.add(new Pending(level, player.getUUID(), level.getGameTime() + delay, step, at, axis, radius, target, hit));
+        return true;
+    }
+
     @SubscribeEvent
     public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || PENDING.isEmpty()) {
-            return;
-        }
-        MinecraftServer server = event.getServer();
-        if (server == null) {
-            return;
-        }
-        var it = PENDING.iterator();
-        while (it.hasNext()) {
-            Pending p = it.next();
-            if (p.level().getGameTime() < p.tick()) {
-                continue;
-            }
-            it.remove();
-            ServerPlayer caster = server.getPlayerList().getPlayer(p.caster());
-            for (LivingEntity e : p.level().getEntitiesOfClass(LivingEntity.class,
-                    new AABB(p.at(), p.at()).inflate(p.radius() + 1.0D),
-                    t -> FireSpellRules.hittable(caster, t))) {
-                float falloff = (float) Math.max(0.3, 1.0 - e.position().distanceTo(p.at()) / (p.radius() + 1.0D));
-                e.hurt(p.level().damageSources().onFire(), p.damage() * falloff);
-                e.setSecondsOnFire(4);
-                FireHeat.add(e, caster, p.heat());
-            }
-            explodeFx(p.level(), p.at(), p.radius(), (float) (2.0 + p.radius()), caster);
+        if (event.phase != TickEvent.Phase.END) return;
+        tickBurns(event);
+        if (PENDING.isEmpty()) return;
+        List<Pending> due = new ArrayList<>();
+        PENDING.removeIf(p -> {
+            if (event.getServer().getLevel(p.level.dimension()) != p.level) return true;
+            if (p.level.getGameTime() < p.when) return false;
+            due.add(p);
+            return true;
+        });
+        for (Pending p : due) {
+            if (p.level.getEntity(p.owner) instanceof ServerPlayer caster
+                    && caster.isAlive() && !caster.isSpectator()
+                    && p.level.hasChunkAt(BlockPos.containing(p.at))) resolve(caster, p);
         }
     }
 
-    /** 视线命中点（打不到方块就取最远 24 格）。 */
-    private static Vec3 aimPoint(ServerPlayer player, ServerLevel level, double range) {
-        Vec3 eye = player.getEyePosition();
-        Vec3 end = eye.add(player.getLookAngle().scale(range));
-        var hit = level.clip(new net.minecraft.world.level.ClipContext(eye, end,
-                net.minecraft.world.level.ClipContext.Block.COLLIDER,
-                net.minecraft.world.level.ClipContext.Fluid.NONE, player));
-        return hit.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK
-                ? hit.getLocation() : end;
+    @SubscribeEvent
+    public static void stop(ServerStoppedEvent event) {
+        PENDING.clear();
+        BURNING.clear();
     }
 
-    /** 沿视线找最近的生物。 */
-    private static LivingEntity aim(ServerPlayer player, ServerLevel level, double range) {
-        Vec3 eye = player.getEyePosition();
-        Vec3 end = eye.add(player.getLookAngle().scale(range));
+    private static void resolve(ServerPlayer player, Pending p) {
+        Vec3 at = p.at;
+        switch (p.step) {
+            case FOOTPRINT -> {
+                for (LivingEntity target : area(player, at, p.radius, 1.7)) {
+                    if (p.hit.add(target.getUUID())) ignite(player, target, 1, 8);
+                }
+                if (p.axis.lengthSqr() > 0) queue(player, Step.FOOTPRINT, at, Vec3.ZERO, p.radius, 12, null, p.hit);
+            }
+            case SEED, MOLTEN -> {
+                boolean seed = p.step == Step.SEED;
+                float peak = 0;
+                for (LivingEntity target : area(player, at, p.radius, 3)) {
+                    int tier = seed ? 3 : 4;
+                    float heat = heatFuel(target, tier);
+                    if (!detonationDamage(player, target, seed ? 20 + heat * 4.5F : 10 + heat * 3.0F)) continue;
+                    spend(player, target, tier);
+                    peak = Math.max(peak, heat);
+                    if (target.isAlive()) target.setSecondsOnFire(4);
+                }
+                burst(player, at, p.radius, peak, seed ? FireReworkEffects.Kind.DETONATE : FireReworkEffects.Kind.MOLTEN_IMPACT);
+            }
+            case MARTYR -> {
+                if (!(p.level.getEntity(p.target) instanceof LivingEntity target)
+                        || !canDamage(player, target) || !visible(player, player.getEyePosition(), center(target))
+                        || player.distanceToSqr(target) > 28 * 28) return;
+                float heat = heatFuel(target, 5);
+                if (heat <= 0) return;
+                float fuel = 1 + (1 - player.getHealth() / player.getMaxHealth()) * 1.5F;
+                if (!detonationDamage(player, target, heat * 4.0F * fuel)) return;
+                spend(player, target, 5);
+                burst(player, center(target), p.radius, heat, FireReworkEffects.Kind.MARTYR);
+            }
+        }
+    }
+
+    static boolean canDamage(ServerPlayer player, LivingEntity target) {
+        return TNFlameHandEntity.canDamage(player, target)
+                && (!(target instanceof ServerPlayer other) || player.canHarmPlayer(other));
+    }
+
+    static List<LivingEntity> area(ServerPlayer player, Vec3 at, double radius, double height) {
+        return nearby(player, at, radius, height).stream()
+                .filter(target -> visible(player, at.add(0, .2, 0), center(target))).toList();
+    }
+
+    private static List<LivingEntity> nearby(ServerPlayer player, Vec3 at, double radius, double height) {
+        var box = FireSpellRules.uprightArea(at, radius, height);
+        return player.serverLevel().getEntitiesOfClass(LivingEntity.class, box,
+                target -> canDamage(player, target) && center(target).subtract(at).horizontalDistanceSqr() <= radius * radius)
+                .stream().sorted(Comparator.comparingDouble(target -> center(target).distanceToSqr(at))).toList();
+    }
+
+    static boolean isFire(DamageSource source) {
+        return source.is(DamageTypeTags.IS_FIRE) || source.typeHolder().unwrapKey().map(key ->
+                "spell_power".equals(key.location().getNamespace()) && "fire".equals(key.location().getPath())).orElse(false);
+    }
+
+    static void damage(ServerPlayer player, LivingEntity target, float amount) {
+        applyFireDamage(player, target, amount);
+    }
+
+    private static boolean applyFireDamage(ServerPlayer player, LivingEntity target, float amount) {
+        var fire = player.serverLevel().damageSources().onFire().typeHolder();
+        return target.hurt(new DamageSource(fire, player, player), amount * FireSpellRules.power(player));
+    }
+
+    static boolean detonationDamage(ServerPlayer player, LivingEntity target, float amount) {
+        // Ignition ticks and preceding hits must not consume a separate detonation's damage window.
+        int previousInvulnerability = target.invulnerableTime;
+        target.invulnerableTime = 0;
+        boolean hit = applyFireDamage(player, target, amount);
+        if (!hit) target.invulnerableTime = previousInvulnerability;
+        return hit;
+    }
+
+    private static void ignite(ServerPlayer player, LivingEntity target, float damage, float heat) {
+        damage(player, target, damage);
+        FireHeat.add(target, player, heat);
+    }
+
+    private static float heatFuel(LivingEntity target, int tier) {
+        return FireHeat.of(target) * SPEND[tier - 1];
+    }
+
+    private static void spend(ServerPlayer player, LivingEntity target, int tier) {
+        FireHeatFeedback.watch(player, target);
+        float fraction = SPEND[tier - 1];
+        FireHeat.spend(target, fraction * FireHeat.costMultiplier(FireHeat.control(player)));
+    }
+
+    private static LivingEntity aim(ServerPlayer player, double range) {
+        Vec3 from = player.getEyePosition();
+        Vec3 end = clip(player, from, from.add(player.getLookAngle().scale(range)));
         LivingEntity best = null;
-        double bestDist = Double.MAX_VALUE;
-        for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class,
-                new AABB(eye, end).inflate(1.2D),
-                t -> t != player && FireSpellRules.hittable(player, t))) {
-            var hit = e.getBoundingBox().inflate(0.35D).clip(eye, end);
-            if (hit.isEmpty()) {
-                continue;
-            }
-            double d = hit.get().distanceTo(eye);
-            if (d < bestDist) {
-                bestDist = d;
-                best = e;
+        double distance = from.distanceToSqr(end);
+        for (LivingEntity target : player.serverLevel().getEntitiesOfClass(LivingEntity.class,
+                new AABB(from, end).inflate(1), entity -> canDamage(player, entity))) {
+            var hit = target.getBoundingBox().inflate(.24).clip(from, end);
+            if (hit.isEmpty()) continue;
+            double candidate = from.distanceToSqr(hit.get());
+            if (candidate < distance && visible(player, from, center(target))) {
+                distance = candidate;
+                best = target;
             }
         }
         return best;
+    }
+
+    private static Vec3 groundAim(ServerPlayer player, double range) {
+        LivingEntity target = aim(player, range);
+        if (target != null) {
+            Vec3 surface = ground(player, target.position().add(0, .45, 0));
+            return surface == null ? target.position() : surface;
+        }
+        Vec3 eye = player.getEyePosition();
+        Vec3 at = clip(player, eye, eye.add(player.getLookAngle().scale(range)));
+        Vec3 ground = ground(player, at.subtract(player.getLookAngle().scale(.18)));
+        return ground == null ? player.position() : ground;
+    }
+
+    private static Vec3 ground(ServerPlayer player, Vec3 point) {
+        if (!player.serverLevel().hasChunkAt(BlockPos.containing(point))) return null;
+        var hit = player.serverLevel().clip(new ClipContext(point.add(0, .8, 0), point.add(0, -18, 0),
+                ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
+        return hit.getType() == HitResult.Type.BLOCK ? hit.getLocation().add(0, .035, 0) : null;
+    }
+
+    private static Vec3 upward(ServerPlayer player, Vec3 at, double height) {
+        Vec3 start = at.add(0, .2, 0);
+        return clip(player, start, start.add(0, height, 0)).subtract(at);
+    }
+
+    private static Vec3 clip(ServerPlayer player, Vec3 from, Vec3 end) {
+        return player.serverLevel().clip(new ClipContext(from, end,
+                ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player)).getLocation();
+    }
+
+    static boolean visible(ServerPlayer player, Vec3 from, Vec3 end) {
+        return clip(player, from, end).distanceToSqr(end) < .01;
+    }
+
+    private static Vec3 forward(ServerPlayer player) {
+        return Vec3.directionFromRotation(0, player.getYRot());
+    }
+
+    private static Vec3 center(LivingEntity target) {
+        return target.getBoundingBox().getCenter();
+    }
+
+    static void burst(ServerPlayer player, Vec3 at, float radius, float heat, FireReworkEffects.Kind kind) {
+        emit(player, kind, at, Vec3.ZERO, radius, .34F + .66F * Math.min(1, heat / 100), 28);
+        sound(player, at, SoundEvents.GENERIC_EXPLODE, 1F, .8F + radius * .06F);
+    }
+
+    static void emit(ServerPlayer player, FireReworkEffects.Kind kind, Vec3 at, Vec3 direction,
+                     float radius, float intensity, int lifetime) {
+        FireReworkEffects.emit(player.serverLevel(), kind, at, direction, radius, intensity, lifetime, player);
+    }
+
+    private static void sound(ServerPlayer player, Vec3 at, SoundEvent event, float volume, float pitch) {
+        player.serverLevel().playSound(null, at.x, at.y, at.z, event, SoundSource.PLAYERS, volume, pitch);
     }
 }

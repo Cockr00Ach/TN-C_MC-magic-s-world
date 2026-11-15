@@ -7,12 +7,14 @@ import net.minecraft.nbt.NbtIo;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.Set;
 
 @GameTestHolder("tncyan")
@@ -45,7 +47,7 @@ public final class YanSanctuaryGameTests {
     }
 
     @GameTest(template = "empty", timeoutTicks = 200, batch = "yan_sanctuary")
-    public static void blueprintKeepsItsShapeWithOneMaterial(GameTestHelper helper) throws Exception {
+    public static void blueprintKeepsItsShapeWithAShadedPalette(GameTestHelper helper) throws Exception {
         var level = realm(helper);
         int[] entries;
         try (var input = YanSanctuaryGameTests.class.getResourceAsStream("/data/tnc/blueprints/aurelian.nbt")) {
@@ -61,6 +63,7 @@ public final class YanSanctuaryGameTests {
             if (entries[i + 3] != 0 && tested.contains(new ChunkPos(pos))) points.add(pos);
         }
         helper.assertTrue(points.size() > 500, "The sampled chunks cover multiple large parts of the dragon");
+        var materials = new HashSet<Block>();
         for (var chunk : tested) {
             var actual = level.getChunk(chunk.x, chunk.z);
             for (int x = chunk.getMinBlockX(); x <= chunk.getMaxBlockX(); x++) {
@@ -70,14 +73,55 @@ public final class YanSanctuaryGameTests {
                         var pos = new BlockPos(x, y, z);
                         var state = actual.getBlockState(pos);
                         boolean expected = points.contains(pos);
-                        helper.assertTrue(expected ? state.is(YanSanctuary.OBSIDIAN) : state.isAir(),
+                        helper.assertTrue(expected != state.isAir(),
                                 "Wrong shape or material at " + pos);
-                        if (expected) top = y + 1;
+                        if (expected) {
+                            top = y + 1;
+                            materials.add(state.getBlock());
+                        }
                     }
                     helper.assertTrue(actual.getHeight(Heightmap.Types.WORLD_SURFACE, x & 15, z & 15) + 1 == top,
                             "Dragon heightmap must match the statue");
                 }
             }
+        }
+        helper.assertTrue(materials.size() >= 6 && materials.contains(Blocks.CALCITE)
+                        && materials.contains(YanSanctuary.OBSIDIAN),
+                "The statue has distinct dark stone, pale details and sparse storm veins");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 200, batch = "yan_sanctuary")
+    public static void theOldDragonRecolorsWithoutFillingHolesOrOverwritingOtherBlocks(GameTestHelper helper) {
+        var level = realm(helper);
+        var generator = (YanSanctuaryGenerator) level.getChunkSource().getGenerator();
+        var pos = new ChunkPos(YanSanctuaryLayout.DRAGON.offset(46, 220, 242));
+        var chunk = level.getChunk(pos.x, pos.z);
+        var sample = new ArrayList<BlockPos>();
+        for (int x = pos.getMinBlockX(); x <= pos.getMaxBlockX() && sample.size() < 3; x++) {
+            for (int z = pos.getMinBlockZ(); z <= pos.getMaxBlockZ() && sample.size() < 3; z++) {
+                short[] column = generator.dragonColumn(x, z);
+                if (column == null) continue;
+                for (short block : column) {
+                    if (YanSanctuaryGenerator.dragonMaterial(block).is(YanSanctuary.OBSIDIAN)) continue;
+                    sample.add(new BlockPos(x, YanSanctuaryGenerator.dragonY(block), z));
+                    if (sample.size() == 3) break;
+                }
+            }
+        }
+        helper.assertTrue(sample.size() == 3, "The sampled chunk has recolorable sculpture blocks");
+        var original = sample.stream().map(chunk::getBlockState).toList();
+        try {
+            chunk.setBlockState(sample.get(0), YanSanctuary.OBSIDIAN.defaultBlockState(), false);
+            chunk.setBlockState(sample.get(1), Blocks.AIR.defaultBlockState(), false);
+            chunk.setBlockState(sample.get(2), Blocks.BRICKS.defaultBlockState(), false);
+            var upgrade = new YanDragonPaletteUpgrade.Recolor(generator, chunk);
+            while (!upgrade.step()) {}
+            helper.assertTrue(chunk.getBlockState(sample.get(0)) == original.get(0), "Original storm stone is recolored");
+            helper.assertTrue(chunk.getBlockState(sample.get(1)).isAir(), "Mined blocks are not re-created");
+            helper.assertTrue(chunk.getBlockState(sample.get(2)).is(Blocks.BRICKS), "Player replacement blocks stay intact");
+        } finally {
+            for (int i = 0; i < sample.size(); i++) chunk.setBlockState(sample.get(i), original.get(i), false);
         }
         helper.succeed();
     }

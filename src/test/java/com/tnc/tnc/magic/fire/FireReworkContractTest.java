@@ -39,11 +39,21 @@ class FireReworkContractTest {
     void heatThresholdsStayOrderedAndReachable() {
         assertTrue(FireHeat.IGNITE_AT > 0 && FireHeat.IGNITE_AT < FireHeat.MAX,
                 "燃点必须在 (0, 上限) 之间，否则永远不会自燃或一碰就炸");
-        assertEquals(FireHeat.MAX, FireHeat.OVERHEAT_AT, "过燃就是满热量");
-        assertTrue(FireHeat.DECAY_PER_SECOND > 0, "热量必须会衰减，否则攒一次就永久生效");
-        assertTrue(FireHeat.IGNITED_TAKEN_MULTIPLIER >= 1.0F, "燃点加成不该是减法");
-        assertTrue(FireHeat.OVERHEAT_DAMAGE_PER_HEAT > 0 && FireHeat.OVERHEAT_RADIUS > 0,
-                "过燃自爆要真的能打到人");
+        assertTrue(FireHeat.coolingRate(FireHeat.control(6, 5)) > 0);
+        assertTrue(FireHeat.IGNITED_TAKEN_MULTIPLIER >= 1.0F);
+    }
+
+    @Test
+    void affinityAndLearnedTierIndependentlyImproveHeatControl() {
+        int novice = FireHeat.control(1, 1);
+        int affinity = FireHeat.control(4, 1);
+        int training = FireHeat.control(4, 4);
+        assertTrue(FireHeat.graceTicks(novice) < FireHeat.graceTicks(affinity));
+        assertTrue(FireHeat.graceTicks(affinity) < FireHeat.graceTicks(training));
+        assertTrue(FireHeat.coolingRate(training) < FireHeat.coolingRate(affinity));
+        assertTrue(FireHeat.coolingRate(affinity) < FireHeat.coolingRate(novice));
+        assertTrue(FireHeat.costMultiplier(training) < FireHeat.costMultiplier(affinity));
+        assertTrue(FireHeat.costMultiplier(affinity) < FireHeat.costMultiplier(novice));
     }
 
     @Test

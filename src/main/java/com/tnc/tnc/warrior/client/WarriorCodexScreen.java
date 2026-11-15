@@ -11,6 +11,8 @@ import com.tnc.tnc.warrior.WarriorCombos;
 import com.tnc.tnc.warrior.WarriorSkill;
 import com.tnc.tnc.warrior.WarriorUnifiedSlots;
 import com.tnc.tnc.warrior.WarriorTalentRules;
+import com.tnc.tnc.warrior.WarriorUltimates;
+import com.tnc.tnc.warrior.WarriorWeaponRanks;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +39,7 @@ public final class WarriorCodexScreen extends Screen {
 
     private static final int PANEL_W = 600;
     private static final int PANEL_H = 288;
-    private static final int ROW_H = 24;
+    private static final int ROW_H = 20;
 
     private static final int COLOR_TITLE = 0xFFF2DFC4;
     private static final int COLOR_TEXT = 0xFFDCC9B0;
@@ -55,6 +57,8 @@ public final class WarriorCodexScreen extends Screen {
     /** 左栏正在详细展示的条目 id。 */
     private String selectedId;
     private boolean showGuide = true;
+    private boolean showCatalogue;
+    private WarriorWeaponRanks.Branch catalogueBranch;
     /**
      * 每个条目按钮的屏幕矩形。
      *
@@ -112,8 +116,19 @@ public final class WarriorCodexScreen extends Screen {
 
         rowRects.clear();
         addRenderableWidget(Button.builder(Component.literal(showGuide?"查看招式":"操作说明"), b -> {
-            showGuide=!showGuide;rebuildWidgets();
+            showGuide=showCatalogue||!showGuide;
+            showCatalogue=false;
+            rebuildWidgets();
         }).bounds(left()+panelWidth()-88,top()+8,76,16).build());
+        addRenderableWidget(Button.builder(Component.literal("武器名录"), b -> {
+            showCatalogue=true;
+            showGuide=false;
+            rebuildWidgets();
+        }).bounds(left()+panelWidth()-168,top()+8,76,16).build()).active=!showCatalogue;
+        if(showCatalogue){
+            initCatalogue();
+            return;
+        }
         if(showGuide)return;
 
         int tabW = Math.max(28, Math.min(76, (panelWidth() - 24) / Weapon.values().length - 4));
@@ -148,7 +163,7 @@ public final class WarriorCodexScreen extends Screen {
                 Button row = Button.builder(Component.literal(fitLabel(rowLabel(entry), Math.max(34,colW-34))), b -> {
                     selectedId = id;
                     rebuildWidgets();
-                }).bounds(colX + 18, rowY, Math.max(40, colW - 26), 20).build();
+                }).bounds(colX + 18, rowY, Math.max(40, colW - 26), 18).build();
                 addRenderableWidget(row);
                 rowRects.put(entry.id(), new int[]{colX, rowY, colW - 8});
                 rowY += ROW_H;
@@ -157,15 +172,69 @@ public final class WarriorCodexScreen extends Screen {
         }
     }
 
+    private void initCatalogue() {
+        if (catalogueBranch == null) {
+            catalogueBranch = heldBranch();
+            if (catalogueBranch == null) catalogueBranch = WarriorWeaponRanks.Branch.LONGSWORD;
+        }
+        var branches = WarriorWeaponRanks.Branch.values();
+        int tabWidth = (panelWidth() - 24) / branches.length;
+        for (int i = 0; i < branches.length; i++) {
+            var branch = branches[i];
+            var label = Component.translatable(branch.translationKey());
+            Button tab = Button.builder(Component.literal(fitLabel(label.getString(), tabWidth - 5)), button -> {
+                catalogueBranch = branch;
+                rebuildWidgets();
+            }).bounds(left() + 12 + i * tabWidth, top() + PANEL_H - 24, tabWidth - 3, 16).build();
+            tab.active = branch != catalogueBranch;
+            addRenderableWidget(tab);
+        }
+    }
+
+    private WarriorWeaponRanks.Branch heldBranch() {
+        if (minecraft == null || minecraft.player == null) return null;
+        return WarriorWeaponRanks.branch(minecraft.player.getMainHandItem());
+    }
+
+    private int rankFor(WarriorSkill skill) {
+        return WarriorComboClient.heldFamily() == skill.family() ? WarriorComboClient.heldRank() : 0;
+    }
+
+    private State state(Entry entry, Progress progress) {
+        var skill = WarriorCombos.byCodexId(entry.id());
+        if (skill != null && entry.implemented()) {
+            int rank = rankFor(skill);
+            return rank > 0 && WarriorCombos.unlocked(skill, progress, rank) ? State.MET : State.ONGOING;
+        }
+        return entry.state(progress);
+    }
+
+    private String comboStateText(Entry entry, Progress progress) {
+        var skill = WarriorCombos.byCodexId(entry.id());
+        if (skill == null) return "进行中 " + entry.percent(progress) + "%";
+        if (!progress.enrolled()) return "需先开启战士天赋";
+        return Component.translatable("tooltip.tnc.weapon.requires_rank", WarriorCombos.requiredRank(skill)).getString();
+    }
+
     private boolean belongsToShown(String id) {
         Entry entry = WarriorCodex.byId(id);
         return entry != null && entry.weapon() == shown;
     }
 
     private String tabLabel(Weapon weapon) {
-        int[] counts = WarriorCodex.metOfImplemented(weapon, progress());
+        var progress = progress();
+        var entries = WarriorCodex.of(weapon);
+        long total = entries.stream().filter(Entry::implemented).count();
+        long available = entries.stream().filter(entry -> state(entry, progress) == State.MET).count();
         String base = (weapon == shown ? "§l" : "") + weapon.cn();
-        return counts[1] == 0 ? base : base + " " + counts[0] + "/" + counts[1];
+        return total == 0 ? base : base + " " + available + "/" + total;
+    }
+
+    private String entrySubtitle(Entry entry) {
+        var skill = WarriorCombos.byCodexId(entry.id());
+        if (skill == null) return entry.title();
+        String rank = Component.translatable("tooltip.tnc.weapon.requires_rank", WarriorCombos.requiredRank(skill)).getString();
+        return entry.chain() + " · " + rank;
     }
 
     private String rowLabel(Entry entry) {
@@ -227,11 +296,17 @@ public final class WarriorCodexScreen extends Screen {
             : "此角色尚无战士天赋：磨砺不会积累，图鉴里的条件无法推进";
         g.drawString(this.font, fitLabel(head, panelW - 24), left + 12, top + 46,
             p.enrolled() ? COLOR_TEXT : COLOR_ONGOING, false);
-        String sub = "已点亮 " + WarriorCodex.metCount(p) + " / " + WarriorCodex.implementedCount()
+        long available = WarriorCodex.all().stream().filter(entry -> state(entry, p) == State.MET).count();
+        String sub = "当前可用 " + available + " / " + WarriorCodex.implementedCount()
             + " 项（不含规划）· 减伤 " + String.format(java.util.Locale.ROOT, "%.1f%%", p.reduction() * 100)
             + " · 按 " + WarriorPracticeKeys.OPEN.getTranslatedKeyMessage().getString() + " 关闭";
         g.drawString(this.font, fitLabel(sub, panelW - 24), left + 12, top + 59, COLOR_DIM, false);
         g.fill(left + 8, top + 72, left + panelW - 8, top + 73, 0x50C9A063);
+        if(showCatalogue){
+            drawCatalogue(g,left,top,panelW);
+            super.render(g,mouseX,mouseY,partialTick);
+            return;
+        }
         if(!showGuide)g.fill(left + LIST_X - 8, top + 96, left + LIST_X - 7, top + PANEL_H - 8, 0x50C9A063);
 
         if(showGuide){
@@ -262,7 +337,7 @@ public final class WarriorCodexScreen extends Screen {
             int iconX = rect[0] + 2;
             int iconY = rect[1] + 2;
             g.renderItem(icon(entry), iconX, iconY);
-            State state = entry.state(p);
+            State state = state(entry,p);
             if (state != State.MET) {
                 g.fill(iconX, iconY, iconX + 16, iconY + 16, state == State.PLANNED ? 0xC0101518 : 0x70101518);
             }
@@ -274,15 +349,27 @@ public final class WarriorCodexScreen extends Screen {
 
     /** Short lines keep the introduction readable even at the minimum panel width. */
     private String ultimateGuide(){
-        if(minecraft==null||minecraft.player==null)return "手持武器查看专属奥义";
+        if(heldBranch()==null)return "手持武器查看专属奥义";
+        int rank = WarriorComboClient.heldRank();
         var id=net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(minecraft.player.getMainHandItem().getItem());
-        var u=com.tnc.tnc.warrior.WarriorUltimates.forId(id==null?"":id.toString());
-        return "奥义 · "+u.name()+"："+u.keys().toUpperCase(java.util.Locale.ROOT);
+        if (id == null) return "手持武器查看专属奥义";
+        var u=WarriorUltimates.forId(id.toString());
+        if (!progress().enrolled() || !WarriorWeaponRanks.allowsUltimate(rank, progress().points())) {
+            return "奥义锁定 · " + u.name();
+        }
+        return "已开放奥义 · "+u.name()+" · "+u.keys().toUpperCase(java.util.Locale.ROOT);
     }
     private void drawGuide(GuiGraphics g,int left,int top,int panelW){
+        var branch = heldBranch();
+        int rank = WarriorComboClient.heldRank();
+        String held = branch == null ? "手持武器查看当前档位与连招" :
+                Component.translatable(branch.translationKey()).getString() + " · "
+                + Component.translatable("tooltip.tnc.weapon.rank",rank).getString() + " · "
+                + Component.translatable("tooltip.tnc.weapon.combo_count",WarriorWeaponRanks.comboCount(rank)).getString();
         String[] lines={
+            held,
             "统一槽位：主攻 → 振刀 → 破振刀",
-            "随后依次：连招1 → 连招2 → … → 连招n",
+            "1 级可用前三招，武器每升一级多开一个槽位",
             "主攻：ZZZ，也可连续三次左键；QZE 仍可用",
             "振刀：E Q 后长按 E，架住攻击；松手收架",
             "破振刀：E Q Z，命中破开架势并打断",
@@ -293,11 +380,32 @@ public final class WarriorCodexScreen extends Screen {
             "剑竖起重劈；刀横断；枪突刺；锤震地",
             "左 Ctrl：中断动作／战斗步法",
             ultimateGuide(),
+            Component.translatable("tooltip.tnc.weapon.ultimate_requirement").getString(),
             "奥义十连：间隔≤0.9秒；测试无冷却；施招无敌",
             "领域共鸣改变收招效果；潜行跳过特写"
         };
         for(int i=0;i<lines.length;i++)
-            g.drawString(font,fitLabel(lines[i],panelW-24),left+12,top+84+i*12,i<2?COLOR_TITLE:COLOR_TEXT,false);
+            g.drawString(font,fitLabel(lines[i],panelW-24),left+12,top+84+i*11,i<2?COLOR_TITLE:COLOR_TEXT,false);
+    }
+
+    private void drawCatalogue(GuiGraphics g, int left, int top, int width) {
+        g.drawString(font, Component.translatable(catalogueBranch.translationKey()), left + 12, top + 84, COLOR_TITLE, false);
+        for (int rank = 1; rank <= 5; rank++) {
+            int y = top + 102 + (rank - 1) * 29;
+            String label = Component.translatable("tooltip.tnc.weapon.rank",rank).getString() + " · "
+                    + Component.translatable("tooltip.tnc.weapon.combo_count",WarriorWeaponRanks.comboCount(rank)).getString();
+            g.drawString(font, fitLabel(label,width-24), left + 12, y, COLOR_DIM, false);
+            StringBuilder items = new StringBuilder();
+            for (var entry : WarriorWeaponRanks.catalogue()) {
+                if (entry.branch() != catalogueBranch || entry.rank() != rank) continue;
+                var id = net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tnc", entry.id());
+                var item = net.minecraftforge.registries.ForgeRegistries.ITEMS.getValue(id);
+                if (item == null || item == Items.AIR) continue;
+                if (!items.isEmpty()) items.append(" · ");
+                items.append(item.getDescription().getString());
+            }
+            g.drawString(font, fitLabel(items.toString(),width-24), left + 12, y + 11, COLOR_TEXT, false);
+        }
     }
 
     private void drawDetail(GuiGraphics g, Progress p, int left, int top) {
@@ -308,19 +416,19 @@ public final class WarriorCodexScreen extends Screen {
             g.drawString(this.font, "选一个条目看条件", x, top + 90, COLOR_DIM, false);
             return;
         }
-        State state = entry.state(p);
+        State state = state(entry,p);
         g.drawString(this.font, fitLabel((WarriorCombos.byCodexId(entry.id())==null?"":WarriorUnifiedSlots.purpose(WarriorCombos.byCodexId(entry.id()).slot())+" · ")+entryName(entry), width), x, top + 84, stateColor(state), false);
-        g.drawString(this.font, fitLabel(entry.title(), width), x, top + 96, COLOR_DIM, false);
+        g.drawString(this.font, fitLabel(entrySubtitle(entry), width), x, top + 96, COLOR_DIM, false);
 
         String stateText = switch (state) {
             case MET -> "已开放";
-            case ONGOING -> "进行中 " + entry.percent(p) + "%";
+            case ONGOING -> comboStateText(entry,p);
             case PLANNED -> "规划中 · 尚未实装";
         };
         g.drawString(this.font, fitLabel(stateText, width), x, top + 110, stateColor(state), false);
 
         g.fill(x, top + 122, x + width, top + 127, 0xFF2B3033);
-        int filled = (int) (width * (entry.percent(p) / 100.0));
+        int filled = (int) (width * (state == State.ONGOING && WarriorCombos.byCodexId(entry.id()) != null ? 0 : entry.percent(p) / 100.0));
         if (filled > 0) g.fill(x, top + 122, x + filled, top + 127, state == State.PLANNED ? 0xFF6B6459 : 0xFF87BFAC);
 
         int y = top + 136;
@@ -384,11 +492,11 @@ public final class WarriorCodexScreen extends Screen {
 
     private List<Component> tooltip(Entry entry, Progress p) {
         List<Component> lines = new ArrayList<>();
-        State state = entry.state(p);
-        lines.add(Component.literal(entryName(entry) + "（" + entry.title() + "）"));
+        State state = state(entry,p);
+        lines.add(Component.literal(entryName(entry) + "（" + entrySubtitle(entry) + "）"));
         lines.add(Component.literal(switch (state) {
             case MET -> "§a已开放";
-            case ONGOING -> "§e进行中 " + entry.percent(p) + "%";
+            case ONGOING -> "§e" + comboStateText(entry,p);
             case PLANNED -> "§7规划中 · 尚未实装";
         }));
         lines.add(Component.literal("§7" + entry.effect()));
@@ -411,7 +519,7 @@ public final class WarriorCodexScreen extends Screen {
             } else {
                 lines.add(Component.literal("§7动作：" + combo.animation().cn()));
             }
-            lines.add(Component.literal("§7持武器按顺序输入，连招成立后自动衔接；不消耗磨砺"));
+            lines.add(Component.literal("§7持符合等级的武器按顺序输入，连招成立后自动衔接"));
         }
         if (!entry.source().isEmpty()) {
             lines.add(Component.literal("§7怎么练 " + entry.source()));
@@ -455,7 +563,7 @@ public final class WarriorCodexScreen extends Screen {
     }
 
     private boolean hovering(int[] rect, int mouseX, int mouseY) {
-        return mouseX >= rect[0] && mouseX < rect[0] + rect[2] && mouseY >= rect[1] && mouseY < rect[1] + 20;
+        return mouseX >= rect[0] && mouseX < rect[0] + rect[2] && mouseY >= rect[1] && mouseY < rect[1] + ROW_H;
     }
 
     // ------------------------------------------------------------------

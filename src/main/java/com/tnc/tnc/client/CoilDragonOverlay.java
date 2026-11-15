@@ -109,20 +109,34 @@ public final class CoilDragonOverlay {
             //   现在直接**挂到穿戴者身上**（读客户端那份带插值的玩家位置）⇒ 永远贴着人 ✓。
             Vec3 at = wearerPosition(mc, entity, partial).orElseGet(() -> entity.getPosition(partial));
 
-            Matrix4f m = new Matrix4f().translation(
-                    (float) (at.x - cam.x), (float) (at.y - cam.y), (float) (at.z - cam.z));
+            // ★ 2026-11-14 修「换视角之后龙不在人物脚下」：
+            //   以前这里自己拼一个 `translation(at − cam)` —— 只补了平移、**没带相机的旋转** ✗。
+            //   第一人称时相机就在玩家脑袋里，转视角时误差正好被"看不见自己脚下"盖住 ✓；
+            //   换成第三人称（相机被拉到身后、朝向也完全不同）⇒ 少掉的那次旋转就暴露了，
+            //   龙被摆到人旁边去 ✗。
+            //   现在改用引擎给的 {@code event.getPoseStack()}（它已经含"相机旋转 + 平移到相机"），
+            //   只在上面平移世界坐标 ⇒ 不管第几人称都对 ✓。
+            var pose = event.getPoseStack();
             double camX = cam.x - at.x;
             double camY = cam.y - at.y;
             double camZ = cam.z - at.z;
 
-            // 和渲染器里同一套参数：半径收到贴着身体、跨度略高于人、一直在游 ✓
-            double radius = 0.80D + 0.55D * scale;
-            double height = 1.15D + 3.45D * scale;
-            LightningDragonGeometry.coil(vc, m, entity.seed(), age, scale, theme,
-                    0.85F * fade, camX, camY, camZ, radius, height, age * 0.11D);
-            // 头顶那点白：一眼看出龙首在哪 ✓
-            LightningBoltGeometry.billboardFlash(vc, m, 0.0D, height + 0.35D, 0.0D,
-                    (float) (0.65D + 0.8D * scale), theme, 0.28F * fade, camX, camY, camZ);
+            // ★ 2026-11-13 作者：「登神链，龙不要围绕在玩家身上吧，改成围绕在玩家脚上，
+            //   这样起飞就有踩着龙的感觉」✓
+            //   改法：半径放宽（像个盘起来的圈）＋ 高度压到脚踝（不再爬到胸口）＋ 整体再往下压 0.40 格
+            //   ⇒ 玩家等于**踩在龙背上**；起飞时读作"御龙" ✓
+            double radius = 1.10D + 0.55D * scale;
+            double height = 0.18D + 0.22D * scale;
+            pose.pushPose();
+            pose.translate(at.x, at.y - 0.40D, at.z);       // 世界坐标；相机变换由引擎那一层负责 ✓
+            Matrix4f coilMatrix = pose.last().pose();
+            double coilCamY = camY + 0.40D;                 // 原点下移了 ⇒ 相机相对向量跟着抬 ✓
+            LightningDragonGeometry.coil(vc, coilMatrix, entity.seed(), age, scale, theme,
+                    0.85F * fade, camX, coilCamY, camZ, radius, height, age * 0.11D);
+            // 龙首那点白：一眼看出头在哪 ✓（贴着脚边的圈）
+            LightningBoltGeometry.billboardFlash(vc, coilMatrix, 0.0D, height + 0.18D, 0.0D,
+                    (float) (0.55D + 0.7D * scale), theme, 0.28F * fade, camX, coilCamY, camZ);
+            pose.popPose();
             any = true;
         }
         if (any) {

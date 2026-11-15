@@ -61,6 +61,55 @@ public final class WarriorTrail {
         State(String weapon){this.weapon=weapon;}
     }
     private static final Map<Integer,State> STATES=new HashMap<>();
+    /** 软边贴图的亮度补偿：贴图平均 alpha 0.63 → 补 1.30（不补满，留下渐隐的层次）。 */
+    private static final float PLUME_GAIN=1.30f;
+
+    /** 重心档位：贴图有三张（均衡 / 边缘重 / 中心重），见 {@code tools/gen_trail_texture.py}。 */
+    static final int PLUME_BALANCED=0,PLUME_EDGE=1,PLUME_CORE=2;
+
+    /**
+     * 哪把武器用哪一档重心。
+     *
+     * <p>用户的要求：**镰刀的刀光重边缘**（刃在两头，光跟着刃走）、**锤子重中心**
+     * （钝器是一团闷光、重量在中间），其余武器保持均衡。
+     *
+     * <p>镰刀按<b>武器 id</b> 认，不按家族认：`doom_scythe` 在数据上挂在重剑 tag 下
+     * （`WarriorUltimateEffects` 里也是"poller identity takes priority"），按家族挑会把它
+     * 和普通重剑混在一起。
+     */
+    static int plumeVariant(String weapon,WarriorWeaponFamily family){
+        String id=weapon==null?"":weapon;
+        if(id.contains("scythe") || id.contains("sickle"))return PLUME_EDGE;
+        if(family==WarriorWeaponFamily.HAMMER)return PLUME_CORE;
+        return PLUME_BALANCED;
+    }
+
+    /**
+     * 三张贴图的平均 alpha 不同（均衡 0.459 / 边缘 0.363 / 中心 0.514），
+     * 这里按"和均衡一样亮"折算，免得换个重心就整体暗一档。
+     */
+    static float plumeGain(int variant){
+        return switch(variant){
+            case PLUME_EDGE->1.26f;
+            case PLUME_CORE->0.89f;
+            default->1f;
+        };
+    }
+
+    /**
+     * 沿轨迹每格多少个贴图周期 —— 丝线的疏密。除了颜色，这是第二条"一眼认出是哪把武器"的线索：
+     * 锤/重剑的丝又长又疏（一大片风压），长剑中等，长枪又细又密（一道快光）。
+     * 改这个数只影响花纹密度，不影响亮度或判定。
+     */
+    static double plumeFrequency(WarriorWeaponFamily family){
+        if(family==null)return .30;
+        return switch(family){
+            case HAMMER->.18;
+            case GREATSWORD->.22;
+            case SPEAR->.46;
+            default->.30;
+        };
+    }
     private static Object world;
     private static double nextCleanup;
     private WarriorTrail() {}
@@ -156,10 +205,13 @@ public final class WarriorTrail {
         if(domain!=null)element=domain;
         var style=WarriorTrailAppearance.of(key==null?"":key.getPath(),family,element);
         double scale=WarriorPhantomRenderer.disabled()?1:Math.max(1,WarriorPhantomRenderer.scaleFor(player));
-        var out=WarriorTrailRenderType.buffer(buffer);
+        int variant=plumeVariant(key==null?"":key.getPath(),family);
+        var out=WarriorTrailRenderType.plume(buffer,plumeFrequency(family),variant);
         Vec3 origin=firstPerson?Vec3.ZERO:camera;
         float ramp=(float)Math.max(0,Math.min(1,(time-state.start)/40));
-        float intensity=ramp*(.40f+.22f*Math.min(1,state.speed/12))*(firstPerson?.78f:1f);
+        // 贴图软边的平均 alpha 只有 ~0.46（中间最实、两侧渐隐），所以整体补一点亮度，
+        // 不然换成软边之后整条会显得"淡了一圈"；三档重心本身的平均亮度也不一样，再按档折算一次。
+        float intensity=ramp*(.40f+.22f*Math.min(1,state.speed/12))*(firstPerson?.78f:1f)*PLUME_GAIN*plumeGain(variant);
         WarriorTrailVolume.Sink sink=new WarriorTrailVolume.Sink(){
                     @Override public void quad(Vec3 a,Vec3 b,Vec3 c,Vec3 d,int color,float aa,float ab,float ac,float ad){
                         gradient(a,b,c,d,color,color,color,color,aa,ab,ac,ad);
@@ -170,9 +222,15 @@ public final class WarriorTrail {
                 };
         WarriorTrailVolume.emit(state.curve,time,life,profile(family).outerStart(),scale,style,intensity,sink);
         if(family!=WarriorWeaponFamily.HAMMER)WarriorBladeEcho.emit(state.curve,time,life,scale,style.core(),sink);
+        // 战锤下砸的"扩散影"：只看几何（最后 120 ms 锤尖掉了多少），所以任何下砸动作都会出。
+        // 第一人称不画 —— 那是给别人看的、也怕和手持视图的矩阵打架。
+        if(!firstPerson){
+            WarriorSlamRipple.sample(player.getId(),key==null?"":key.getPath(),family,state.curve,(long)time,style.shell());
+            WarriorSlamRipple.render(player.getId(),buffer,camera,(long)time);
+        }
     }
     private static void vertex(VertexConsumer out,Vec3 p,Vec3 camera,int color,float alpha){
         out.vertex(p.x-camera.x,p.y-camera.y,p.z-camera.z).color((color>>16&255)/255f,(color>>8&255)/255f,(color&255)/255f,alpha).endVertex();
     }
-    static void clear(){STATES.clear();world=null;}
+    static void clear(){STATES.clear();WarriorSlamRipple.clear();world=null;}
 }

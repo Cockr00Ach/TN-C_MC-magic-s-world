@@ -973,5 +973,6 @@
   "tooltip.tnc.weapon.branch.spear": "Spear",
   "tooltip.tnc.weapon.branch.halberd": "Halberd",
   "tooltip.tnc.weapon.branch.scythe": "Scythe",
-  "tooltip.tnc.weapon.branch.bow": "Bow"
+  "tooltip.tnc.weapon.branch.bow": "Bow",
+  "key.tnc.warrior_tutorial_repeat": "Replay warrior lesson"
 }

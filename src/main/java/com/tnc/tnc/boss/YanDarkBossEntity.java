@@ -243,7 +243,7 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
                 .add(Attributes.MOVEMENT_SPEED, 0.30D)
                 // ★ 2026-09-30 作者："他应该站在原地，有很长的施法距离" ⇒ 索敌/施法距离拉到 64 格 ✓
                 //   （原来 40 格 ✗；四个技能全是从远处打的：落雷/雷球/神在投篮都生成在目标身上 ✓）
-                .add(Attributes.FOLLOW_RANGE, 64.0D)
+                .add(Attributes.FOLLOW_RANGE, com.tnc.tnc.boss.BossLeash.ARENA_FOLLOW_RANGE)
                 .add(Attributes.ARMOR, 8.0D)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0D);
     }

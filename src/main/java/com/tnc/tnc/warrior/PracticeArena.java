@@ -11,7 +11,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -27,10 +29,8 @@ import net.minecraftforge.fml.common.Mod;
  */
 @Mod.EventBusSubscriber(modid = TNMod.MODID)
 public final class PracticeArena {
-    /** 演武场在天空岛本地坐标系里的中心 X。 */
-    public static final int LOCAL_X = 285;
-    /** 演武场在天空岛本地坐标系里的中心 Z。 */
-    public static final int LOCAL_Z = 423;
+    /** 台面在岛原点上方 86 格，中央终端在它上方一格。 */
+    private static final BlockPos DECK_OFFSET = new BlockPos(466, 86, 236);
 
     private PracticeArena() {
     }
@@ -38,16 +38,11 @@ public final class PracticeArena {
     /**
      * 演武场台心（世界坐标）。天空岛还没生成完时返回 {@code null}。
      *
-     * <p>返回的 Y 是抵达点脚下的台面高度；不能用下方自然地形的 heightmap。
+     * <p>台心和终端随存档的天空岛原点平移。
      */
     public static BlockPos site(MinecraftServer server) {
-        var island = SkyIslandSavedData.get(server.overworld());
-        if (!island.isSkyIslandComplete()) return null;
-        var origin = island.anchorPos("ORIGIN");
-        if (origin == null) return null;
-        var arrival = island.anchorPos("ARRIVAL");
-        if (arrival == null) return null;
-        return new BlockPos(origin.getX() + LOCAL_X, arrival.getY() - 1, origin.getZ() + LOCAL_Z);
+        var origin = SkyIslandSavedData.get(server.overworld()).anchorPos("ORIGIN");
+        return origin == null ? null : origin.offset(DECK_OFFSET);
     }
 
     /** 台子建好没有；没建就试着建（岛没生成完就什么都不做）。 */
@@ -55,15 +50,53 @@ public final class PracticeArena {
         var site = site(server);
         if (site == null) return false;
         var level = SkyIslandWorlds.island(server);
+        if (islandArena(server) == null) {
+            build(level, site.getX(), site.getZ(), site.getY());
+            if (islandArena(server) == null) return false;
+        }
+        retirePreviousArenas(server, level, site.subtract(DECK_OFFSET));
+        return true;
+    }
+
+    private static boolean previousCenter(BlockPos origin, int x, int z) {
+        int dx = x - origin.getX(), dz = z - origin.getZ();
+        return dx == 285 && dz == 423 || dx == 84 && dz == 256;
+    }
+
+    /** Retire only the two former island sites, once the new arena can receive players. */
+    private static void retirePreviousArenas(MinecraftServer server, ServerLevel island, BlockPos origin) {
+        var data = TrainingGroundData.get(server);
+        for (var arena : data.arenas()) {
+            if (!previousCenter(origin, arena.x(), arena.z())) continue;
+            ServerLevel oldLevel;
+            if (arena.dimension().equals(island.dimension().location().toString())) oldLevel = island;
+            else if (arena.dimension().equals(server.overworld().dimension().location().toString())) oldLevel = server.overworld();
+            else continue;
+            var terminal = arena.center().above();
+            if (oldLevel.getBlockState(terminal).is(TNMod.PRACTICE_TERMINAL.get())) {
+                oldLevel.setBlockAndUpdate(terminal, Blocks.AIR.defaultBlockState());
+            }
+            var bounds = new AABB(arena.center()).inflate(31, 8, 31);
+            oldLevel.getEntitiesOfClass(InstructorEntity.class, bounds,
+                    tutor -> tutor.getPersistentData().getBoolean(WarriorTutorial.MENTOR)
+                            || tutor.getPersistentData().hasUUID(InstructorEntity.OWNER)).forEach(InstructorEntity::discard);
+            oldLevel.getEntitiesOfClass(TestDummyEntity.class, bounds,
+                    dummy -> dummy.getPersistentData().hasUUID("DummyOwner")).forEach(TestDummyEntity::discard);
+            data.retireArena(arena.dimension(), arena.x(), arena.z());
+        }
+    }
+
+    /** The former permanent mentor may be read from disk after the arena has moved. */
+    @SubscribeEvent
+    public static void removeFormerMentor(EntityJoinLevelEvent event) {
+        if (!(event.getLevel() instanceof ServerLevel level)
+                || !(event.getEntity() instanceof InstructorEntity tutor)
+                || !tutor.getPersistentData().getBoolean(WarriorTutorial.MENTOR)) return;
+        var server = level.getServer();
         var origin = SkyIslandSavedData.get(level).anchorPos("ORIGIN");
-        TrainingGroundData.get(server).retireArena(level.dimension().location().toString(),
-                origin.getX() + 84, origin.getZ() + 256);
-        var arena = islandArena(server);
-        if (arena != null) return true;
-        // Old saves may record a deck on the natural ground underneath the island.
-        // Keep that structure intact; register a new deck at the island arrival elevation.
-        build(level, site.getX(), site.getZ(), site.getY());
-        return islandArena(server) != null;
+        if (origin == null || !previousCenter(origin, tutor.getBlockX(), tutor.getBlockZ() - 26)) return;
+        if (level != server.overworld() && level != SkyIslandWorlds.island(server)) return;
+        if (islandArena(server) != null) event.setCanceled(true);
     }
 
     static TrainingGroundData.Arena islandArena(MinecraftServer server) {
@@ -93,9 +126,9 @@ public final class PracticeArena {
         int size = half * 2 + 1;
         // 先把台子占的区块加载出来：没加载的区块 heightmap 全是空值，
         // 直接读会把台面砌到世界底部去。
-        for (int dx = -half; dx <= half; dx += 16) {
-            for (int dz = -half; dz <= half; dz += 16) {
-                level.getChunk((cx + dx) >> 4, (cz + dz) >> 4);
+        for (int chunkX = (cx - half) >> 4; chunkX <= (cx + half) >> 4; chunkX++) {
+            for (int chunkZ = (cz - half) >> 4; chunkZ <= (cz + half + 6) >> 4; chunkZ++) {
+                level.getChunk(chunkX, chunkZ);
             }
         }
         int[][] tops = new int[size][size];
@@ -109,6 +142,15 @@ public final class PracticeArena {
         }
         if (maxTop < level.getMinBuildHeight() + 2) return;
         int deck = fixedDeck == null ? maxTop + 1 : fixedDeck;
+        int stairsStart = cz + half + 1;
+        int approachHeight = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, cx, stairsStart + 5) - 1;
+        int rise = net.minecraft.util.Mth.clamp(approachHeight - deck, -5, 5);
+        int[] stairHeights = new int[5];
+        for (int i = 0; i < stairHeights.length; i++) {
+            stairHeights[i] = fixedDeck == null ? deck - i
+                    : deck + Integer.signum(rise) * Math.min(i + 1, Math.abs(rise));
+        }
+        if (fixedDeck != null && hasBlockEntitiesInBuildArea(level, cx, deck, cz, half, stairHeights)) return;
         for (int dx = -half; dx <= half; dx++) {
             for (int dz = -half; dz <= half; dz++) {
                 int x = cx + dx, z = cz + dz;
@@ -154,10 +196,10 @@ public final class PracticeArena {
         }
         level.setBlock(new BlockPos(cx, deck + 1, cz),
             TNMod.PRACTICE_TERMINAL.get().defaultBlockState(), 3);
-        // 南侧台阶：从台面下到岛面。
-        for (int i = 0; i < 5; i++) {
-            int z = cz + half + 1 + i;
-            int y = deck - i;
+        // 南侧台阶按岛面高度衔接，林地高于台面时向外逐级抬升。
+        for (int i = 0; i < stairHeights.length; i++) {
+            int z = stairsStart + i;
+            int y = stairHeights[i];
             for (int dx = -2; dx <= 2; dx++) {
                 level.setBlock(new BlockPos(cx + dx, y, z), Blocks.STONE_BRICKS.defaultBlockState(), 3);
                 level.setBlock(new BlockPos(cx + dx, y + 1, z), Blocks.AIR.defaultBlockState(), 2);
@@ -166,7 +208,21 @@ public final class PracticeArena {
         }
         TrainingGroundData.get(level.getServer()).markArena(level.dimension().location().toString(), cx, deck, cz);
         level.getServer().getPlayerList().broadcastSystemMessage(
-            Component.literal("天空岛演武场已落成：岛南侧的青石台，中央终端可以召出教官。"), false);
+            Component.literal("天空岛演武场已落成，中央终端可以召出教官。"), false);
+    }
+
+    private static boolean hasBlockEntitiesInBuildArea(ServerLevel level, int x, int deck, int z, int half, int[] stairHeights) {
+        for (var pos : BlockPos.betweenClosed(x - half, deck, z - half, x + half, deck + 12, z + half)) {
+            if (level.getBlockState(pos).hasBlockEntity()) return true;
+        }
+        for (int i = 0; i < stairHeights.length; i++) {
+            int stairZ = z + half + 1 + i;
+            int y = stairHeights[i];
+            for (var pos : BlockPos.betweenClosed(x - 2, y, stairZ, x + 2, y + 2, stairZ)) {
+                if (level.getBlockState(pos).hasBlockEntity()) return true;
+            }
+        }
+        return false;
     }
 
     /** 台面花纹：外圈黑石、四角演武位、中央台基、两条石环。 */
@@ -217,7 +273,7 @@ public final class PracticeArena {
 
     /** 终端右键：只负责把面板推给客户端，选谁由面板发回来。 */
     public static void openTerminal(ServerPlayer p) {
-        if (!ensure(p.server)) {
+        if (!ensure(p.server) && !inside(p)) {
             p.sendSystemMessage(Component.literal("天空岛还没生成完，演武场暂时无法使用。"));
             return;
         }
@@ -240,14 +296,14 @@ public final class PracticeArena {
             return false;
         }
         if (!inside(p)) {
-            p.sendSystemMessage(Component.literal("先走到天空岛南侧的演武场，再用中央终端召唤教官。"));
+            p.sendSystemMessage(Component.literal("先到天空岛演武场，再用中央终端召唤教官。"));
             return false;
         }
         String normalized = normalizeRole(role);
         TrainingGround.dismissAll(p);
         var arena = arenaOf(p);
         if (arena == null) {
-            p.sendSystemMessage(Component.literal("先走到天空岛南侧的演武场，再用中央终端召唤教官。"));
+            p.sendSystemMessage(Component.literal("先到天空岛演武场，再用中央终端召唤教官。"));
             return false;
         }
         int pad = data.claim(p.getUUID(), arena.key());

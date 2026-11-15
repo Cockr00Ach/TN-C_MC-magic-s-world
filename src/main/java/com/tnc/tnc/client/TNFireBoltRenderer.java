@@ -71,7 +71,11 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
     @Override
     public boolean shouldRender(TNFireBoltEntity entity, net.minecraft.client.renderer.culling.Frustum frustum,
                                 double x, double y, double z) {
-        return entity.distanceToSqr(x, y, z) < 192.0D * 192.0D;
+        if (entity.distanceToSqr(x, y, z) >= 192.0D * 192.0D) return false;
+        if (entity.ignitionTier() == 0) return true;
+        double radius = entity.radius() * 1.4D;
+        Vec3 tail = entity.position().subtract(entity.safeDirection().scale(entity.radius() * 4.2D));
+        return frustum.isVisible(new net.minecraft.world.phys.AABB(entity.position(), tail).inflate(radius));
     }
 
     @Override
@@ -82,6 +86,11 @@ public final class TNFireBoltRenderer extends EntityRenderer<TNFireBoltEntity> {
     @Override
     public void render(TNFireBoltEntity entity, float yaw, float partial, PoseStack stack,
                        MultiBufferSource buffers, int light) {
+        int ignition = entity.ignitionTier();
+        if (ignition > 0) {
+            FireReworkVisuals.renderIgnition(entity, ignition, partial, stack.last().pose(), buffers);
+            return;
+        }
         var out = buffers.getBuffer(WaterRenderTypes.geometry());
         Matrix4f pose = stack.last().pose();
 

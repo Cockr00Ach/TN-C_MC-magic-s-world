@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "group": "tnc_weapons",
+  "ingredients": [
+    {
+      "item": "minecraft:oak_log"
+    },
+    {
+      "item": "minecraft:iron_ingot"
+    },
+    {
+      "item": "minecraft:stick"
+    }
+  ],
+  "result": {
+    "item": "tnc:ironwood_mallet",
+    "count": 1
+  }
+}

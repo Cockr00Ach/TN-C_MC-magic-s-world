@@ -28,17 +28,21 @@ public final class WarriorWeaponOrnamentRenderer {
         try {
             model.getTransforms().getTransform(context).apply(left,pose);
             pose.translate(-.5,-.5,-.5);
-            var out=WarriorTrailRenderType.buffer(buffers);
-            for(var box:boxes)cube(out,pose,box);
+            // A colour-only translucent trail cannot occlude an item batch flushed later.
+            var out=WarriorWeaponOrnamentRenderType.buffer(buffers);
+            for(var box:boxes)cube(out,pose,box,1f);
         } finally {pose.popPose();}
     }
     static void cube(VertexConsumer out,PoseStack pose,WarriorWeaponOrnaments.Box b) {
+        cube(out,pose,b,.96f);
+    }
+    private static void cube(VertexConsumer out,PoseStack pose,WarriorWeaponOrnaments.Box b,float alpha) {
         float x=(float)b.x()/16,y=(float)b.y()/16,z=(float)b.z()/16;
         float X=x+(float)b.w()/16,Y=y+(float)b.h()/16,Z=z+(float)b.d()/16;
         float[][] p={{x,y,z},{X,y,z},{X,Y,z},{x,Y,z},{x,y,Z},{X,y,Z},{X,Y,Z},{x,Y,Z}};
         int[][] faces={{0,3,2,1},{4,5,6,7},{0,4,7,3},{1,2,6,5},{0,1,5,4},{3,7,6,2}};
         float[] shade={.73f,.86f,.7f,.86f,.6f,1};
         for(int f=0;f<6;f++)for(int i:faces[f])out.vertex(pose.last().pose(),p[i][0],p[i][1],p[i][2])
-                .color((b.color()>>16&255)/255f*shade[f],(b.color()>>8&255)/255f*shade[f],(b.color()&255)/255f*shade[f],.96f).endVertex();
+                .color((b.color()>>16&255)/255f*shade[f],(b.color()>>8&255)/255f*shade[f],(b.color()&255)/255f*shade[f],alpha).endVertex();
     }
 }

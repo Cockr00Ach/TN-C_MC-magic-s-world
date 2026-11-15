@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.AABB;
 
 /**
  * Draws the author's {@code tnc:projectile/flash} model as a standing lightning bolt.
@@ -159,7 +160,13 @@ public class TNLightningStrikeRenderer extends EntityRenderer<TNLightningStrikeE
     @Override
     public boolean shouldRender(TNLightningStrikeEntity entity, net.minecraft.client.renderer.culling.Frustum frustum,
                                double camX, double camY, double camZ) {
-        return entity.distanceToSqr(camX, camY, camZ) < RENDER_DISTANCE_SQR;
+        if (entity.distanceToSqr(camX, camY, camZ) >= RENDER_DISTANCE_SQR) return false;
+        if (!entity.usesYanArenaEffects()) return true;
+        double scale = entity.scale();
+        double radius = entity.isBolt() ? 8.0D + scale * 1.7D : 2.0D + scale;
+        double top = entity.isBolt() ? SKY_HEIGHT + 28.0D : scale * 1.6D + 1.0D;
+        return frustum.isVisible(new AABB(entity.getX() - radius, entity.getY() - radius, entity.getZ() - radius,
+                entity.getX() + radius, entity.getY() + top, entity.getZ() + radius));
     }
 
     /** 多远之内无条件画（格²）——181²＝原版 {@code shouldRenderAtSqrDistance} 的上限 ✓ */
@@ -314,6 +321,7 @@ public class TNLightningStrikeRenderer extends EntityRenderer<TNLightningStrikeE
         int theme = entity.isDark() ? com.tnc.tnc.client.lightning.LightningTheme.DARK : entity.theme();
         int life = Math.max(1, entity.life());
         int impact = entity.impactAt();
+        boolean arena = entity.usesYanArenaEffects();
         int sinceHit = impact < 0 ? -1 : (int) Math.floor(age) - impact;
 
         // 落地后的淡出（实体在 landedTick + life 时会被服务端 discard ✓）
@@ -336,11 +344,11 @@ public class TNLightningStrikeRenderer extends EntityRenderer<TNLightningStrikeE
         com.tnc.tnc.client.lightning.LightningBoltGeometry.bolt(vc, m,
                 0.0D, topY, 0.0D, 0.0D, groundY, 0.0D,
                 seed, width, 1.0F * fade * flicker, theme,
-                (int) Math.min(6.0D, 2.0D + scale * 0.32D), camX, camY, camZ);
+                arena ? 2 : (int) Math.min(6.0D, 2.0D + scale * 0.32D), camX, camY, camZ);
 
         // ---- 副雷（"可以多劈"）----
         //   出生时间错开 2 tick，位置在落点周围 1~2 格（不是同一个点 ✗，否则像重影）
-        int extras = scale >= 10.0D ? 5 : (scale >= 6.0D ? 3 : 2);
+        int extras = arena ? 1 : scale >= 10.0D ? 5 : (scale >= 6.0D ? 3 : 2);
         for (int i = 0; i < extras; i++) {
             int born = 2 + i * 2;
             if (sinceHit >= 0 && sinceHit < born) {
@@ -356,11 +364,11 @@ public class TNLightningStrikeRenderer extends EntityRenderer<TNLightningStrikeE
                     ox, topY + i * 0.8D, oz,
                     ox * 0.25D + Math.cos(ang + 1.2D) * sway, groundY, oz * 0.25D + Math.sin(ang + 1.2D) * sway,
                     seed + 977L * (i + 1), width * (0.62F - i * 0.05F), a, theme,
-                    i == 0 ? 3 : 1, camX, camY, camZ);
+                    !arena && i == 0 ? 3 : 1, camX, camY, camZ);
         }
 
         // ---- 大雷的"补刀"：第 6 tick 再劈一根粗的（只有大雷有 ✓）----
-        if (scale >= 9.0D && sinceHit >= 6 && sinceHit <= 10) {
+        if (!arena && scale >= 9.0D && sinceHit >= 6 && sinceHit <= 10) {
             float a = fade * 0.9F * Math.max(0.0F, 1.0F - (sinceHit - 6) / 5.0F);
             com.tnc.tnc.client.lightning.LightningBoltGeometry.bolt(vc, m,
                     0.7D, topY + 2.0D, -0.5D, -0.4D, groundY, 0.4D,
@@ -375,7 +383,7 @@ public class TNLightningStrikeRenderer extends EntityRenderer<TNLightningStrikeE
             double maxRadius = 1.6D + scale * 0.42D;               // 4.5 倍 ⇒ 3.5；14 倍 ⇒ 7.5
             com.tnc.tnc.client.lightning.LightningBoltGeometry.groundWeb(vc, m,
                     0.0D, groundY, 0.0D, (float) maxRadius, seed, theme, webAlpha,
-                    (float) (seed * 0.001D + t * 0.02D), camX, camY, camZ, true);
+                    (float) (seed * 0.001D + t * 0.02D), camX, camY, camZ, !arena);
             // ② 贴地白光（中心白 → 主题色 → 透明）
             float flashA = fade * (t < 1.0F ? 0.95F : Math.max(0.0F, 0.95F - (t - 1.0F) * 0.12F));
             com.tnc.tnc.client.lightning.LightningBoltGeometry.groundFlash(vc, m,

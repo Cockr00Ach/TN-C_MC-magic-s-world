@@ -3,6 +3,7 @@ package com.tnc.tnc.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import com.tnc.tnc.boss.YanDarkBossEntity;
 import com.tnc.tnc.client.lightning.LightningBoltGeometry;
 import com.tnc.tnc.client.lightning.LightningRenderTypes;
 import com.tnc.tnc.client.lightning.LightningTheme;
@@ -62,6 +63,7 @@ final class DarkSealRenderer {
             return;
         }
         double radius = Math.max(0.2D, entity.radius());
+        boolean arena = YanDarkBossEntity.isYanArena(entity.level());
 
         // ---- 底图：暗紫符文盘 ----
         poseStack.pushPose();
@@ -106,22 +108,22 @@ final class DarkSealRenderer {
 
         // 内环（反向转）＋ 主环
         ring(vc, m, radius * 0.58D, 18, seed + 11L, 0.045F, 0.55F * a, LightningTheme.DARK,
-                -spin * 1.6D, cx, cy, cz);
+                -spin * 1.6D, arena, cx, cy, cz);
         ring(vc, m, radius * 0.99D, minor ? 24 : 30, seed + 12L, minor ? 0.052F : 0.060F,
-                0.88F * a, LightningTheme.DARK, spin, cx, cy, cz);
+                0.88F * a, LightningTheme.DARK, spin, arena, cx, cy, cz);
 
         // 高阶：外环 ＋ 刻痕
         if (grand) {
             ring(vc, m, radius * 1.14D, 34, seed + 13L, 0.048F, 0.62F * a, LightningTheme.DARK,
-                    spin * 0.5D, cx, cy, cz);
+                    spin * 0.5D, arena, cx, cy, cz);
             for (int i = 0; i < 20; i++) {
                 double ang = i * (Math.PI * 2.0D / 20.0D) + spin * 0.5D;
                 double r0 = radius * 1.14D;
                 double r1 = radius * (i % 4 == 0 ? 1.27D : 1.20D);
-                LightningBoltGeometry.bolt(vc, m,
+                sealArc(vc, m,
                         Math.cos(ang) * r0, 0.05D, Math.sin(ang) * r0,
                         Math.cos(ang) * r1, 0.05D, Math.sin(ang) * r1,
-                        seed + 300L + i, 0.042F, 0.55F * a, LightningTheme.DARK, 0, cx, cy, cz);
+                        seed + 300L + i, 0.042F, 0.55F * a, LightningTheme.DARK, 0, arena, cx, cy, cz);
             }
         }
 
@@ -136,15 +138,15 @@ final class DarkSealRenderer {
             double midAng = ang + curl;
             double tipAng = ang + curl * 2.1D;
             // 外段：暗紫，粗
-            LightningBoltGeometry.bolt(vc, m,
+            sealArc(vc, m,
                     Math.cos(ang) * clawOuter, 0.06D, Math.sin(ang) * clawOuter,
                     Math.cos(midAng) * clawMid, 0.05D, Math.sin(midAng) * clawMid,
-                    seed + 500L + i, 0.048F, 0.62F * a, LightningTheme.DARK, 1, cx, cy, cz);
+                    seed + 500L + i, 0.048F, 0.62F * a, LightningTheme.DARK, 1, arena, cx, cy, cz);
             // 内段：亮紫，细（尖端）
-            LightningBoltGeometry.bolt(vc, m,
+            sealArc(vc, m,
                     Math.cos(midAng) * clawMid, 0.05D, Math.sin(midAng) * clawMid,
                     Math.cos(tipAng) * clawTip, 0.04D, Math.sin(tipAng) * clawTip,
-                    seed + 800L + i, 0.036F, 0.70F * a, LightningTheme.VIOLET, 0, cx, cy, cz);
+                    seed + 800L + i, 0.036F, 0.70F * a, LightningTheme.VIOLET, 0, arena, cx, cy, cz);
         }
 
         // 高阶：8 道从主环往中心"拉"的弧（和 pull 同拍）
@@ -191,15 +193,27 @@ final class DarkSealRenderer {
 
     /** 一圈短雷首尾相接的环（暗阵也借这套几何，只是配色换成暗紫 ✓）。 */
     private static void ring(VertexConsumer vc, Matrix4f m, double radius, int segments,
-                             long seed, float width, float alpha, int theme, double spin,
+                             long seed, float width, float alpha, int theme, double spin, boolean arena,
                              double camX, double camY, double camZ) {
         for (int i = 0; i < segments; i++) {
             double a0 = spin + i * (Math.PI * 2.0D / segments);
             double a1 = a0 + Math.PI * 2.0D / segments;
-            LightningBoltGeometry.bolt(vc, m,
+            sealArc(vc, m,
                     Math.cos(a0) * radius, 0.05D, Math.sin(a0) * radius,
                     Math.cos(a1) * radius, 0.05D, Math.sin(a1) * radius,
-                    seed + i, width, alpha, theme, 0, camX, camY, camZ);
+                    seed + i, width, alpha, theme, 0, arena, camX, camY, camZ);
+        }
+    }
+
+    private static void sealArc(VertexConsumer vc, Matrix4f m,
+                                double ax, double ay, double az, double bx, double by, double bz,
+                                long seed, float width, float alpha, int theme, int branches, boolean arena,
+                                double camX, double camY, double camZ) {
+        // The arena can show several seals at once. Short arcs retain their pattern with fewer vertices.
+        if (arena) {
+            LightningBoltGeometry.arc(vc, m, ax, ay, az, bx, by, bz, seed, width, alpha, theme, camX, camY, camZ);
+        } else {
+            LightningBoltGeometry.bolt(vc, m, ax, ay, az, bx, by, bz, seed, width, alpha, theme, branches, camX, camY, camZ);
         }
     }
 

@@ -74,7 +74,7 @@ class WarriorCombosTest {
         assertTrue(stance.anyHold());
         assertTrue(stance.guardTicks() > 0, "振刀要给自己一个短时架势");
         assertTrue(stance.interrupt() && stance.staggerTicks() > 0, "振刀要打断并僵直");
-        assertEquals(1500, WarriorCombos.temperRequirement(stance));
+        assertEquals(1, WarriorCombos.requiredRank(stance));
     }
 
     private static void required(WarriorSkill skill) {
@@ -140,7 +140,7 @@ class WarriorCombosTest {
             assertTrue(entry.implemented(), skill.id() + " 的图鉴条目还标着规划中");
             assertEquals(expectedCodexWeapon(skill.family()), entry.weapon(),
                     skill.id() + " 挂错了武器页签");
-            assertNotNull(WarriorCombos.temperRequirement(skill), skill.id() + " 没有磨砺门槛");
+            assertEquals(-1, WarriorCombos.temperRequirement(skill), skill.id() + " 按武器等级开放");
         }
     }
 
@@ -159,10 +159,10 @@ class WarriorCombosTest {
         List<WarriorSkill> greatswords = WarriorCombos.forFamily(WarriorWeaponFamily.GREATSWORD);
         List<WarriorSkill> hammers = WarriorCombos.forFamily(WarriorWeaponFamily.HAMMER);
         List<WarriorSkill> bows = WarriorCombos.forFamily(WarriorWeaponFamily.BOW);
-        assertEquals(6, greatswords.size(), "重剑要三条链 + 架势 + 两招扩写");
-        assertEquals(6, hammers.size(), "战锤要三条链 + 架势 + 两招扩写");
-        assertEquals(6, bows.size(), "长弓要三条链 + 三招扩写");
-        assertEquals(5, WarriorCombos.forFamily(WarriorWeaponFamily.SPEAR).size(), "长枪要四条链 + 一条架势");
+        assertEquals(7, greatswords.size());
+        assertEquals(7, hammers.size());
+        assertEquals(7, bows.size());
+        assertEquals(7, WarriorCombos.forFamily(WarriorWeaponFamily.SPEAR).size());
 
         // 重剑/锤的突击链不做位移，用范围换突进
         assertTrue(greatswords.stream().filter(skill -> skill.chain() == WarriorChain.ASSAULT)
@@ -188,21 +188,29 @@ class WarriorCombosTest {
     }
 
     @Test
-    void unlockFollowsCodexGatesOnly() {
-        WarriorSkill opener = WarriorCombos.byId("sword_combo_1");
-        assertNotNull(opener);
-        assertEquals(200, WarriorCombos.temperRequirement(opener));
-        assertFalse(WarriorCombos.unlocked(opener, progress(3, 199)), "差 1 点磨砺也不能解锁");
-        assertTrue(WarriorCombos.unlocked(opener, progress(3, 200)));
-
-        WarriorSkill spin = WarriorCombos.byId("sword_combo_2");
-        assertEquals(1000, WarriorCombos.temperRequirement(spin));
-        assertFalse(WarriorCombos.unlocked(spin, progress(3, 999)));
-        assertTrue(WarriorCombos.unlocked(spin, progress(3, 1000)));
-
-        // 没有天赋的空白角色（0 磨砺）任何连招都不该开放
-        assertFalse(WarriorCombos.unlocked(opener, Progress.EMPTY));
-        assertTrue(WarriorCombos.unlocked(WarriorCombos.byId("sword_combo_1"), progress(1, 200)));
+    void weaponRanksOpenExactSlotsAndOnlyAvailableInputsAreMatched() {
+        for (var family : WarriorWeaponFamily.values()) {
+            for (int rank = 1; rank <= 5; rank++) {
+                var skills = WarriorCombos.forRank(family, rank);
+                assertEquals(rank + 2, skills.size(), family + " rank " + rank);
+                var inputs = WarriorCombos.inputsForFamily(family, rank);
+                assertTrue(inputs.stream().anyMatch(skill -> skill.slot() == 0 && skill.sequenceLabel().equals("QZE")));
+                for (var skill : WarriorCombos.forFamily(family)) {
+                    boolean allowed = skill.slot() < rank + 2;
+                    assertEquals(allowed, WarriorCombos.unlocked(skill, progress(1, 0), rank), skill.id());
+                    assertFalse(WarriorCombos.unlocked(skill, Progress.EMPTY, rank));
+                    assertEquals(allowed, WarriorCombos.unlocked(skill, progress(6, 10000), rank), skill.id());
+                    var tracker = new ComboTracker();
+                    WarriorSkill matched = null;
+                    for (int i = 0; i < skill.length(); i++) {
+                        var input = new WarriorInput(skill.sequence().get(i), skill.holdAt(i));
+                        matched = tracker.push(input, i * 4L, inputs);
+                    }
+                    if (allowed) assertEquals(skill.id(), matched == null ? "" : matched.id());
+                    else assertNull(matched, skill.id() + " matched above the weapon rank");
+                }
+            }
+        }
     }
 
     @Test
@@ -236,7 +244,8 @@ class WarriorCombosTest {
         assertEquals("sword_combo_2", page0.get(3).id());
         assertEquals("sword_combo_5", page0.get(4).id());
         assertEquals("sword_combo_6", page0.get(5).id());
-        assertNull(page0.get(6));
+        assertEquals("sword_combo_7", page0.get(6).id());
+        assertNull(page0.get(7));
         for (WarriorSkill slot : WarriorCombos.page(1)) {
             assertNull(slot, "第二页暂时没有长剑连招");
         }

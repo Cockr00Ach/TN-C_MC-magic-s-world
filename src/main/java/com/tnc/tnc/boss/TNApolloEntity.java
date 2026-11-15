@@ -175,7 +175,7 @@ public class TNApolloEntity extends Monster implements GeoEntity {
                 .add(Attributes.MAX_HEALTH, MAX_HP)
                 .add(Attributes.ATTACK_DAMAGE, 10.0D)
                 .add(Attributes.MOVEMENT_SPEED, 0.28D)
-                .add(Attributes.FOLLOW_RANGE, 40.0D)
+                .add(Attributes.FOLLOW_RANGE, com.tnc.tnc.boss.BossLeash.ARENA_FOLLOW_RANGE)
                 .add(Attributes.ARMOR, 6.0D)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.8D);
     }

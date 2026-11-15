@@ -97,6 +97,7 @@ public class TNMagicCircleRenderer extends EntityRenderer<TNMagicCircleEntity> {
     @Override
     public void render(TNMagicCircleEntity entity, float entityYaw, float partialTick, PoseStack poseStack,
                        MultiBufferSource buffer, int packedLight) {
+        if (entity.isInvisible()) return;
         if(entity.style()==TNMagicCircleEntity.STYLE_DARK_HAND)return;
         if(entity.style()==TNMagicCircleEntity.STYLE_WIND
                 ||entity.style()==TNMagicCircleEntity.STYLE_LIGHT

@@ -4,7 +4,7 @@ import net.minecraft.world.entity.LivingEntity;
 
 /** Boss casts use the same hand, drain, fog and summon entities as the player chains. */
 public final class TNDarkGiantSpells {
-    public static final double CAST_RANGE=96, FOLLOW_RANGE=128;
+    public static final double CAST_RANGE=96, FOLLOW_RANGE=com.tnc.tnc.boss.BossLeash.ARENA_FOLLOW_RANGE;
     private static final int SUMMON=0,HAND=1,FOG=2,SIPHON=3;
     public record Move(String path,int tier,int chain,int castTicks,int weight,String name) {}
     private static final Move[] MOVES={

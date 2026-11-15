@@ -4,9 +4,13 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.tnc.tnc.warrior.client.InstructorHeldItemLayer;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.junit.jupiter.api.Test;
+import software.bernie.geckolib.cache.object.GeoBone;
+import software.bernie.geckolib.util.RenderUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -25,6 +29,112 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class InstructorGripModelTest {
     private static final float DEG = (float) (Math.PI / 180.0);
+
+    @Test
+    void animatedElbowKeepsTheGripAtTheActualFistWithOneRotation() {
+        var bone = new GeoBone(null, "forearm_r", false, null, false, false);
+        bone.setPivotX(6);
+        bone.setPivotY(18);
+        bone.setRotX(60 * DEG);
+        bone.setScaleY(2);
+        var pose = new PoseStack();
+        // Enter the same frame GeoRenderer supplies to every render layer.
+        RenderUtils.prepMatrixForBone(pose, bone);
+        InstructorHeldItemLayer.moveToHand(pose, bone);
+        var spriteGrip = new Vec3(3.0 / 16.0, 3.0 / 16.0, .5);
+        InstructorHeldItemLayer.orientSword(pose, spriteGrip, false);
+        pose.translate(-.5, -.5, -.5); // ItemRenderer's actual NONE-context model centering
+        var at = pose.last().pose().transformPosition(new Vector3f((float)spriteGrip.x,
+                (float)spriteGrip.y, (float)spriteGrip.z));
+        // Elbow (6,18,0) + Rx(60deg) * scaled forearm (0,-12,0), in model pixels.
+        assertEquals(6 / 16.0, at.x, 1e-5, "The grip must not gain a second elbow offset");
+        assertEquals(12 / 16.0, at.y, 1e-5, "The animated elbow rotates only once");
+        assertEquals(-Math.sqrt(3) * 6 / 16.0, at.z, 1e-5,
+                "A doubled bone rotation would carry the grip behind the actor");
+    }
+
+    @Test
+    void vanillaSpriteAndAuthoredDragonBladeShareOneGripAndPointForward() throws Exception {
+        assertFistAndDirection(new Vec3(3.0 / 16.0, 3.0 / 16.0, .5),
+                new Vec3(15.0 / 16.0, 15.0 / 16.0, .5), false);
+        var root = JsonParser.parseString(Files.readString(Path.of("src/main/resources/assets/tnc/models/item/dragon_sword.json"),
+                StandardCharsets.UTF_8)).getAsJsonObject();
+        var raw = root.getAsJsonArray("tnc_grip");
+        var grip = new Vec3(raw.get(0).getAsDouble() / 16, raw.get(1).getAsDouble() / 16,
+                raw.get(2).getAsDouble() / 16);
+        double tip = grip.z;
+        for (var element : root.getAsJsonArray("elements"))
+            tip = Math.max(tip, element.getAsJsonObject().getAsJsonArray("to").get(2).getAsDouble() / 16);
+        assertTrue(tip - grip.z > .5, "Use the real longitudinal dragon blade, not a sprite surrogate");
+        assertFistAndDirection(grip, new Vec3(grip.x, grip.y, tip), true);
+    }
+
+    private static void assertFistAndDirection(Vec3 grip, Vec3 tip, boolean longitudinal) {
+        var pose = new PoseStack();
+        InstructorHeldItemLayer.orientSword(pose, grip, longitudinal);
+        pose.translate(-.5, -.5, -.5);
+        var transform = pose.last().pose();
+        var at = transform.transformPosition(new Vector3f((float)grip.x, (float)grip.y, (float)grip.z));
+        assertEquals(0, at.x, 1e-5);
+        assertEquals(0, at.y, 1e-5);
+        assertEquals(0, at.z, 1e-5, "Model-centering must leave the authored grip at the fist");
+        var blade = transform.transformPosition(new Vector3f((float)tip.x, (float)tip.y, (float)tip.z)).sub(at).normalize();
+        assertEquals(0, blade.x, 1e-5);
+        assertTrue(blade.y > .5 && blade.z < -.7, "The real blade must point above and in front of the actor: " + blade);
+    }
+
+    @Test
+    void actualGeckoAttackAndThrustFramesExtendTheBladeFromTheFistInsteadOfBackAtTheBody() throws Exception {
+        var resources=Path.of("src/main/resources/assets/tnc");
+        var raw=software.bernie.geckolib.util.JsonUtil.GEO_GSON.fromJson(
+                Files.readString(resources.resolve("geo/entity/instructor.geo.json")),software.bernie.geckolib.loading.json.raw.Model.class);
+        for(String file:new String[]{"instructor.animation.json","instructor_tutorial.animation.json"}) {
+            var json=JsonParser.parseString(Files.readString(resources.resolve("animations/entity/"+file))).getAsJsonObject();
+            var animations=software.bernie.geckolib.util.JsonUtil.GEO_GSON.fromJson(json.get("animations"),software.bernie.geckolib.loading.object.BakedAnimations.class);
+            String[] clips=file.startsWith("instructor_tutorial")?new String[]{"idle","attack","tutorial_thrust"}:new String[]{"idle","attack"};
+            for(String clip:clips) for(double seconds:clip.equals("attack")?new double[]{.35,.38,.40}:clip.equals("tutorial_thrust")?new double[]{.04,.08,.11}:new double[]{0}) {
+                var model=new software.bernie.geckolib.loading.object.BakedModelFactory.Builtin().constructGeoModel(
+                        software.bernie.geckolib.loading.object.GeometryTree.fromModel(raw));
+                var animation=animations.getAnimation(clip);
+                assertTrue(animation!=null,"The real GeckoLib decoder must load "+file+" / "+clip);
+                for(var track:animation.boneAnimations()) {
+                    var bone=model.getBone(track.boneName()).orElseThrow();var keys=track.rotationKeyFrames();
+                    // Sample the actual decoded radians, including GeckoLib's X/Y sign conversion.
+                    bone.setRotX(sample(keys.xKeyframes(),seconds*20));
+                    bone.setRotY(sample(keys.yKeyframes(),seconds*20));
+                    bone.setRotZ(sample(keys.zKeyframes(),seconds*20));
+                }
+                var forearm=model.getBone("forearm_r").orElseThrow();
+                float wrist=InstructorHeldItemLayer.wristPitch(forearm);
+                if(clip.equals("idle")) {assertEquals(InstructorHeldItemLayer.GRIP_ROT_X,wrist,1e-3,"Idle retains its relaxed grip");continue;}
+                var chain=new java.util.ArrayDeque<GeoBone>();
+                for(var bone=forearm;bone!=null;bone=bone.getParent())chain.addFirst(bone);
+                var pose=new PoseStack();for(var bone:chain)RenderUtils.prepMatrixForBone(pose,bone);
+                var reach=pose.last().pose().transformDirection(new Vector3f(0,-1,0)).normalize();
+                InstructorHeldItemLayer.moveToHand(pose,forearm);
+                var fist=pose.last().pose().transformPosition(new Vector3f());
+                var grip=new Vec3(7.0/16,.5/16,2.05/16);
+                InstructorHeldItemLayer.orientSword(pose,grip,true,wrist);pose.translate(-.5,-.5,-.5);
+                var at=pose.last().pose().transformPosition(new Vector3f((float)grip.x,(float)grip.y,(float)grip.z));
+                var tip=pose.last().pose().transformPosition(new Vector3f((float)grip.x,(float)grip.y,(float)grip.z+1));
+                var blade=tip.sub(at).normalize();
+                assertTrue(at.distance(fist)<1e-5,"Wrist correction must retain the same fist anchor");
+                assertTrue(blade.dot(reach)>.995,"Blade must continue along the animated forearm at "+file+" / "+clip+" / "+seconds+"s; dot="+blade.dot(reach));
+            }
+        }
+    }
+
+    private static float sample(java.util.List<software.bernie.geckolib.core.keyframe.Keyframe<com.eliotlash.mclib.math.IValue>> keys,double tick) {
+        if(keys.isEmpty())return 0;
+        for(var key:keys) {
+            if(tick<=key.length()) {
+                double t=key.length()==0?1:tick/key.length();
+                return (float)(key.startValue().get()+(key.endValue().get()-key.startValue().get())*t);
+            }
+            tick-=key.length();
+        }
+        return (float)keys.get(keys.size()-1).endValue().get();
+    }
 
     @Test
     void gripRotationIsSingleAxisSoBothEulerConventionsAgree() {

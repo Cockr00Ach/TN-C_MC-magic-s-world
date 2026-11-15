@@ -1,5 +1,6 @@
 package com.tnc.tnc.magic;
 
+import com.tnc.tnc.boss.YanDarkBossEntity;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -255,6 +256,10 @@ public class TNLightningStrikeEntity extends Entity {
         this.entityData.set(DATA_DARK, true);
     }
 
+    public boolean usesYanArenaEffects() {
+        return this.isDark() && YanDarkBossEntity.isYanArena(this.level());
+    }
+
     public boolean isDark() {
         return this.entityData.get(DATA_DARK);
     }
@@ -353,6 +358,7 @@ public class TNLightningStrikeEntity extends Entity {
         if (this.level().isClientSide()) {
             return;
         }
+        boolean arena = this.usesYanArenaEffects();
         if (this.isFollowerGod()) {
             tickFollowerGod();
             return;
@@ -367,10 +373,12 @@ public class TNLightningStrikeEntity extends Entity {
                 return;
             }
             ServerLevel lvl = (ServerLevel) this.level();
-            lvl.sendParticles(ParticleTypes.WITCH, this.getX(), this.getY() + 2.0D, this.getZ(),
-                    6, 1.6D, 1.6D, 1.6D, 0.15D);
-            lvl.sendParticles(ParticleTypes.SQUID_INK, this.getX(), this.getY() + 2.0D, this.getZ(),
-                    4, 1.6D, 1.6D, 1.6D, 0.10D);
+            if (!arena || (this.tickCount + this.seed()) % 5 == 0) {
+                lvl.sendParticles(ParticleTypes.WITCH, this.getX(), this.getY() + 2.0D, this.getZ(),
+                        arena ? 4 : 6, 1.6D, 1.6D, 1.6D, 0.15D);
+                lvl.sendParticles(ParticleTypes.SQUID_INK, this.getX(), this.getY() + 2.0D, this.getZ(),
+                        arena ? 2 : 4, 1.6D, 1.6D, 1.6D, 0.10D);
+            }
             // ★ 悬停时的"神鸣"✓ —— 低频（0.55 音高）小声，每 30 tick 一声，
             //   只是让三尊神"有存在感"，不抢落雷那一声轰 ✓。
             if (this.tickCount % 30 == 1) {
@@ -397,16 +405,23 @@ public class TNLightningStrikeEntity extends Entity {
             double next = Math.max(this.fallTo, this.getY() - this.fallSpeed);
             // 下落拖尾：一路撒电花 —— "从天劈下来"的观感主要靠它 ✓
             ServerLevel level = (ServerLevel) this.level();
-            double rr = 0.7D;
-            for (int i = 0; i < 6; i++) {
-                double aa = i * (Math.PI / 3.0D) + (this.tickCount * 0.4D);
-                double px = this.getX() + Math.cos(aa) * rr;
-                double pz = this.getZ() + Math.sin(aa) * rr;
-                level.sendParticles(arc(), px, next + 0.5D, pz, 1, 0.05D, 0.6D, 0.05D, 0.15D);
-                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, px, next + 0.5D, pz, 1, 0.05D, 0.6D, 0.05D, 0.15D);
+            if (arena) {
+                if (this.tickCount % 3 == 0) {
+                    level.sendParticles(ParticleTypes.WITCH, this.getX(), next + 0.5D, this.getZ(),
+                            5, 0.7D, 0.45D, 0.7D, 0.12D);
+                }
+            } else {
+                double rr = 0.7D;
+                for (int i = 0; i < 6; i++) {
+                    double aa = i * (Math.PI / 3.0D) + (this.tickCount * 0.4D);
+                    double px = this.getX() + Math.cos(aa) * rr;
+                    double pz = this.getZ() + Math.sin(aa) * rr;
+                    level.sendParticles(arc(), px, next + 0.5D, pz, 1, 0.05D, 0.6D, 0.05D, 0.15D);
+                    level.sendParticles(ParticleTypes.ELECTRIC_SPARK, px, next + 0.5D, pz, 1, 0.05D, 0.6D, 0.05D, 0.15D);
+                }
+                level.sendParticles(ParticleTypes.WITCH, this.getX(), next + 0.5D, this.getZ(),
+                        4, 0.3D, 0.8D, 0.3D, 0.3D);
             }
-            level.sendParticles(ParticleTypes.WITCH, this.getX(), next + 0.5D, this.getZ(),
-                    4, 0.3D, 0.8D, 0.3D, 0.3D);
             // ★ 大雷球（神在投篮）下落时的低频轰鸣 ✓ —— 每 15 tick 一声，
             //   玩家先听见"有东西正压下来"，落地那一下才接滚雷 ✓。
             if (this.isBall() && this.tickCount % 15 == 1) {
@@ -427,25 +442,19 @@ public class TNLightningStrikeEntity extends Entity {
             //   体型归一化：主链那道 4.5 倍的小雷 = 1.0，天打五雷轰的 14 倍 ≈ 3.1
             //   —— 数量/半径/音量都按它给，小雷才不会炸出核弹 ✗
             double size = Math.max(0.6D, this.scale() / 4.5D);
-            double radius = 0.45D + size * 0.40D;
-            // ① 径向电弧：从落点向外"炸"出一圈锯齿雷线（比单纯撒点像爆炸 ✓）
-            TnSpellMechanics.arcBurst(level, new net.minecraft.world.phys.Vec3(cx, cy + 0.25D, cz),
-                    8 + (int) Math.min(14.0D, size * 3.0D), radius * 1.4D, 0.5D);
-            // ② 电花 + 电弧粒子
-            level.sendParticles(arc(), cx, cy + 0.4D, cz,
-                    (int) (50 + 60 * size), 0.45D * size, 0.45D * size, 0.45D * size, 2.2D + size);
-            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, cx, cy + 0.35D, cz,
-                    (int) (60 + 70 * size), 0.55D * size, 0.5D * size, 0.55D * size, 3.0D + size * 2.0D);
-            level.sendParticles(ParticleTypes.WITCH, cx, cy + 0.4D, cz,
-                    (int) (18 + 24 * size), 0.4D * size, 0.35D * size, 0.4D * size, 1.6D);
-            // ③ 扬尘：贴地往外抛（有它才像"砸进地里"✓）
-            level.sendParticles(ParticleTypes.CLOUD, cx, cy + 0.2D, cz,
-                    (int) (10 + 14 * size), 0.5D * size, 0.2D, 0.5D * size, 0.35D);
-            level.sendParticles(ParticleTypes.POOF, cx, cy + 0.15D, cz,
-                    (int) (8 + 10 * size), 0.45D * size, 0.15D, 0.45D * size, 0.15D);
-            // ④ 白闪（原版 FLASH 粒子是大范围曝光 ✓）
-            level.sendParticles(ParticleTypes.FLASH, cx, cy + 0.8D, cz,
-                    size >= 2.0D ? 4 : 2, 0.1D, 0.1D, 0.1D, 0.0D);
+            if (arena) {
+                // Bolt geometry already supplies the electrical web, glow and expanding ring.
+                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, cx, cy + 0.3D, cz,
+                        this.isBall() ? 50 : 12, 0.45D * size, 0.35D, 0.45D * size, 0.65D);
+                level.sendParticles(ParticleTypes.WITCH, cx, cy + 0.3D, cz,
+                        this.isBall() ? 32 : 8, 0.35D * size, 0.3D, 0.35D * size, 0.35D);
+                if (this.isBall()) {
+                    level.sendParticles(ParticleTypes.SQUID_INK, cx, cy + 0.45D, cz, 16, 1.2D, 0.4D, 1.2D, 0.32D);
+                    level.sendParticles(ParticleTypes.FLASH, cx, cy + 0.8D, cz, 1, 0.0D, 0.0D, 0.0D, 0.0D);
+                }
+            } else {
+                spawnImpactParticles(level, cx, cy, cz, size);
+            }
             level.playSound(null, cx, cy, cz,
                     SoundEvents.LIGHTNING_BOLT_IMPACT,
                     this.isDark() ? SoundSource.HOSTILE : SoundSource.PLAYERS,
@@ -455,7 +464,7 @@ public class TNLightningStrikeEntity extends Entity {
             landBlast(level);
             // ★ 第二圈冲击波（只给大雷）：第一圈"炸开"，3 tick 后这一圈更慢更大 ⇒
             //   像"气浪追着第一圈出去" ✓。纯表现：不推人、不震屏、不白闪。
-            if (size >= 1.8D) {
+            if (!arena && size >= 1.8D) {
                 this.reRingTick = this.tickCount + 3;
             }
             // 落地后还留在雷网里劈啪作响的余电（网由客户端渲染器画，这里补粒子 ✓）
@@ -473,7 +482,7 @@ public class TNLightningStrikeEntity extends Entity {
                     1.2D + size * 0.9D, 0.0F, null, 0.0F, false);
         }
         // ★ 余电：落地后每 2 tick 在雷网上补一两点电弧 ✓
-        if (this.crackleUntil > this.tickCount && this.tickCount % 2 == 0 && !this.isBall()) {
+        if (!arena && this.crackleUntil > this.tickCount && this.tickCount % 2 == 0 && !this.isBall()) {
             ServerLevel level = (ServerLevel) this.level();
             double ang = level.random.nextDouble() * Math.PI * 2.0D;
             double rr = 0.3D + level.random.nextDouble() * Math.max(0.6D, this.scale() * 0.12D);
@@ -485,6 +494,24 @@ public class TNLightningStrikeEntity extends Entity {
             this.thunderTick = -1;
             this.playRollingThunder((ServerLevel) this.level());
         }
+    }
+
+    private static void spawnImpactParticles(ServerLevel level, double x, double y, double z, double size) {
+        double radius = 0.45D + size * 0.40D;
+        TnSpellMechanics.arcBurst(level, new net.minecraft.world.phys.Vec3(x, y + 0.25D, z),
+                8 + (int) Math.min(14.0D, size * 3.0D), radius * 1.4D, 0.5D);
+        level.sendParticles(arc(), x, y + 0.4D, z,
+                (int) (50 + 60 * size), 0.45D * size, 0.45D * size, 0.45D * size, 2.2D + size);
+        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, x, y + 0.35D, z,
+                (int) (60 + 70 * size), 0.55D * size, 0.5D * size, 0.55D * size, 3.0D + size * 2.0D);
+        level.sendParticles(ParticleTypes.WITCH, x, y + 0.4D, z,
+                (int) (18 + 24 * size), 0.4D * size, 0.35D * size, 0.4D * size, 1.6D);
+        level.sendParticles(ParticleTypes.CLOUD, x, y + 0.2D, z,
+                (int) (10 + 14 * size), 0.5D * size, 0.2D, 0.5D * size, 0.35D);
+        level.sendParticles(ParticleTypes.POOF, x, y + 0.15D, z,
+                (int) (8 + 10 * size), 0.45D * size, 0.15D, 0.45D * size, 0.15D);
+        level.sendParticles(ParticleTypes.FLASH, x, y + 0.8D, z,
+                size >= 2.0D ? 4 : 2, 0.1D, 0.1D, 0.1D, 0.0D);
     }
 
     /**
@@ -572,10 +599,12 @@ public class TNLightningStrikeEntity extends Entity {
         this.setYRot(yaw);
         this.setXRot(0.0F);
         // 粒子：和 t5 天上那三尊同一套配色（紫 + 一点点黑）✓
-        level.sendParticles(ParticleTypes.WITCH, this.getX(), this.getY() + 2.5D, this.getZ(),
-                3, 1.0D, 1.2D, 1.0D, 0.10D);
-        level.sendParticles(ParticleTypes.SQUID_INK, this.getX(), this.getY() + 2.5D, this.getZ(),
-                2, 1.0D, 1.2D, 1.0D, 0.06D);
+        if (!this.usesYanArenaEffects() || this.tickCount % 5 == 0) {
+            level.sendParticles(ParticleTypes.WITCH, this.getX(), this.getY() + 2.5D, this.getZ(),
+                    3, 1.0D, 1.2D, 1.0D, 0.10D);
+            level.sendParticles(ParticleTypes.SQUID_INK, this.getX(), this.getY() + 2.5D, this.getZ(),
+                    2, 1.0D, 1.2D, 1.0D, 0.06D);
+        }
     }
 
     /** 跟随神的兜底寿命（tick）：10 分钟 ✓ */
@@ -632,6 +661,12 @@ public class TNLightningStrikeEntity extends Entity {
             wave.exemptFromPush(owner);                     // 作者 2026-09-29："爆炸不要把我击飞" ✓
             wave.moveTo(cx, cy + 0.05D, cz, 0.0F, 0.0F);
             level.addFreshEntity(wave);
+        }
+        if (this.usesYanArenaEffects()) {
+            if (this.isBall()) {
+                TnSpellMechanics.spawnDragon(level, new net.minecraft.world.phys.Vec3(cx, cy, cz), 1.2D, 0, this.theme(), 180);
+            }
+            return;
         }
         level.sendParticles(arc(), cx, cy + 1.0D, cz, 200, 1.4D, 0.9D, 1.4D, 4.0D);
         level.sendParticles(ParticleTypes.ELECTRIC_SPARK, cx, cy + 1.0D, cz,

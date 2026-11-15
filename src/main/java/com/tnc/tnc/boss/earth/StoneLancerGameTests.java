@@ -15,7 +15,7 @@ public final class StoneLancerGameTests {
         h.assertTrue(boss!=null&&boss.getMaxHealth()==1000,"Boss has its registered attribute set");
         h.assertTrue(StoneLancerRegistration.EGG instanceof net.minecraftforge.common.ForgeSpawnEggItem,"Spawn egg is registered");
         h.assertTrue(Math.abs(boss.getBbWidth()-29.7)<.01&&Math.abs(boss.getBbHeight()-26.66)<.01&&boss.fireImmune(),"Combat scale is bounded and the rock body resists fire");
-        h.assertTrue(boss.getAttributeValue(Attributes.FOLLOW_RANGE)==400,"Boss can detect ranged players");
+        h.assertTrue(boss.getAttributeValue(Attributes.FOLLOW_RANGE)>=400,"Boss can detect ranged players");
         h.assertTrue(StoneLancerEntity.moveFor(0,350*350)>=2&&StoneLancerEntity.moveFor(1,150*150)==0,"Distant players get reachable skills instead of short-range spikes or expired lances");
         boss.setHealth(450);h.assertTrue(boss.enraged(),"Half health enables the second combat phase");boss.discard();h.succeed();
     }

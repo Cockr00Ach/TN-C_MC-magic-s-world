@@ -165,4 +165,44 @@ class WarriorTrailCurveTest {
     private static int samples(WarriorWeaponFamily family) {
         return WarriorTrail.profile(family).samples();
     }
+
+    @Test
+    void strandDensitySeparatesTheFamilies() {
+        // 丝线疏密是颜色之外的第二身份线索：锤/重剑最疏（一大片风压），枪最密（一道快光）。
+        double hammer = WarriorTrail.plumeFrequency(WarriorWeaponFamily.HAMMER);
+        double great = WarriorTrail.plumeFrequency(WarriorWeaponFamily.GREATSWORD);
+        double sword = WarriorTrail.plumeFrequency(WarriorWeaponFamily.LONGSWORD);
+        double spear = WarriorTrail.plumeFrequency(WarriorWeaponFamily.SPEAR);
+
+        assertTrue(hammer < great, "锤的丝要比重剑更疏");
+        assertTrue(great < sword, "重剑的丝要比长剑更疏");
+        assertTrue(sword < spear, "枪的丝要比长剑更密");
+        for (double f : new double[]{hammer, great, sword, spear, WarriorTrail.plumeFrequency(null)}) {
+            assertTrue(f > 0.05 && f < 2.0, "频率要落在一个合理的量级：" + f);
+        }
+        // 空家族退回长剑那一档，避免"没拿到武器"时花纹突变
+        assertEquals(sword, WarriorTrail.plumeFrequency(null), 1e-9);
+    }
+
+    @Test
+    void weightVariantFollowsTheWeapon() {
+        // 镰刀重边缘、锤重中心、其余均衡 —— 用户点名的两条，加上"别把别的武器顺手改了"
+        assertEquals(WarriorTrail.PLUME_EDGE,
+                WarriorTrail.plumeVariant("doom_scythe", WarriorWeaponFamily.GREATSWORD),
+                "镰刀的刀光要重边缘（它挂在重剑 tag 下，所以必须按 id 认）");
+        assertEquals(WarriorTrail.PLUME_CORE,
+                WarriorTrail.plumeVariant("hammer", WarriorWeaponFamily.HAMMER), "锤要重中心");
+        assertEquals(WarriorTrail.PLUME_CORE,
+                WarriorTrail.plumeVariant("earthshaker_hammer", WarriorWeaponFamily.HAMMER), "裂地战锤同理");
+        assertEquals(WarriorTrail.PLUME_BALANCED,
+                WarriorTrail.plumeVariant("greatsword", WarriorWeaponFamily.GREATSWORD), "普通重剑保持均衡");
+        assertEquals(WarriorTrail.PLUME_BALANCED,
+                WarriorTrail.plumeVariant("dragon_sword", WarriorWeaponFamily.LONGSWORD), "长剑保持均衡");
+        assertEquals(WarriorTrail.PLUME_BALANCED,
+                WarriorTrail.plumeVariant(null, null), "没武器时不许抛异常");
+        // 三档的亮度补偿：边缘那张平均更暗、中心那张更亮，折算要往反方向走
+        assertTrue(WarriorTrail.plumeGain(WarriorTrail.PLUME_EDGE) > 1f, "边缘档要提亮");
+        assertTrue(WarriorTrail.plumeGain(WarriorTrail.PLUME_CORE) < 1f, "中心档要压一点");
+        assertEquals(1f, WarriorTrail.plumeGain(WarriorTrail.PLUME_BALANCED), 1e-6f, "均衡档不额外补偿");
+    }
 }

@@ -29,7 +29,8 @@ public class MagicStoneNetwork {
     // v29 includes absolute tempering points in the tracked-player weapon-growth packet.
     // v30 accepts tracked phantom peaks through 10x.
     // v31 adds authoritative sword-ultimate path effects.
-    private static final String PROTOCOL_VERSION = "31";
+    // v33 expands the combo cooldown catalogue with the rank-five slot.
+    private static final String PROTOCOL_VERSION = "33";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "main"),
@@ -38,6 +39,7 @@ public class MagicStoneNetwork {
             PROTOCOL_VERSION::equals);
 
     public static void register() {
+        CHANNEL.messageBuilder(com.tnc.tnc.warrior.WarriorExecutionFx.class,217,NetworkDirection.PLAY_TO_CLIENT).encoder(com.tnc.tnc.warrior.WarriorExecutionFx::encode).decoder(com.tnc.tnc.warrior.WarriorExecutionFx::decode).consumerMainThread(com.tnc.tnc.warrior.WarriorExecutionFx::handle).add();
         CHANNEL.messageBuilder(com.tnc.tnc.warrior.WarriorSwordFx.class,216,NetworkDirection.PLAY_TO_CLIENT).encoder(com.tnc.tnc.warrior.WarriorSwordFx::encode).decoder(com.tnc.tnc.warrior.WarriorSwordFx::decode).consumerMainThread(com.tnc.tnc.warrior.WarriorSwordFx::handle).add();
         CHANNEL.messageBuilder(com.tnc.tnc.warrior.WarriorImpactPacket.class,215,NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(com.tnc.tnc.warrior.WarriorImpactPacket::encode).decoder(com.tnc.tnc.warrior.WarriorImpactPacket::decode)

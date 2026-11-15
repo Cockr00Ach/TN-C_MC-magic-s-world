@@ -15,7 +15,7 @@ public final class WarriorClientEvents {
     }
     @SubscribeEvent public static void bowProperties(net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent event){
         event.enqueueWork(()->{
-            for(var bow:java.util.List.of(TNMod.BOW.get(),TNMod.MOON_BOW.get(),TNMod.STORM_BOW.get(),TNMod.EMBER_BOW.get())) {
+            for(var bow:java.util.List.of(TNMod.BOW.get(),TNMod.MOON_BOW.get(),TNMod.STORM_BOW.get(),TNMod.EMBER_BOW.get(),TNMod.LAMINATED_HORN_BOW.get())) {
             net.minecraft.client.renderer.item.ItemProperties.register(bow,
                     net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("minecraft","pulling"),
                     (stack,level,entity,seed)->entity!=null&&entity.isUsingItem()&&entity.getUseItem()==stack?1:0);

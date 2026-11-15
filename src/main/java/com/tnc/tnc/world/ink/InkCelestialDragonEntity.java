@@ -34,7 +34,7 @@ public final class InkCelestialDragonEntity extends PathfinderMob {
     private Vec3 drainRecover;
     private final java.util.Set<java.util.UUID> stormHit=new java.util.HashSet<>();
     public InkCelestialDragonEntity(EntityType<? extends InkCelestialDragonEntity> type,Level level){super(type,level);setNoGravity(true);noPhysics=true;setPersistenceRequired();xpReward=1200;}
-    public static AttributeSupplier.Builder createAttributes(){return Mob.createMobAttributes().add(Attributes.MAX_HEALTH,1000).add(Attributes.ARMOR,18).add(Attributes.MOVEMENT_SPEED,.3).add(Attributes.FOLLOW_RANGE,192).add(Attributes.KNOCKBACK_RESISTANCE,1);}
+    public static AttributeSupplier.Builder createAttributes(){return Mob.createMobAttributes().add(Attributes.MAX_HEALTH,1000).add(Attributes.ARMOR,18).add(Attributes.MOVEMENT_SPEED,.3).add(Attributes.FOLLOW_RANGE,com.tnc.tnc.boss.BossLeash.ARENA_FOLLOW_RANGE).add(Attributes.KNOCKBACK_RESISTANCE,1);}
     @Override protected void registerGoals(){}
     @Override protected void defineSynchedData(){super.defineSynchedData();entityData.define(MOVE,0);entityData.define(START,0L);entityData.define(EFFECT,new CompoundTag());entityData.define(GROUNDED,false);}
     public CompoundTag visualSnapshot(){

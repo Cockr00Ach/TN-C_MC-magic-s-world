@@ -3,7 +3,7 @@
     "id": "longsword",
     "name": "七星交锋",
     "keys": "qqeezqqqqq",
-    "description": "交剑换线、回锋反切",
+    "description": "九段穿影·刀痕留地·归剑落雷",
     "strokes": [
       {
         "tick": 26,
@@ -46,7 +46,7 @@
     "id": "greatsword",
     "name": "王庭断章",
     "keys": "qqeezqqqqe",
-    "description": "高位架剑、横断接重劈",
+    "description": "二十倍巨刃·重压崩地·三转风暴",
     "strokes": [
       {
         "tick": 26,
@@ -132,7 +132,7 @@
     "id": "spear",
     "name": "游龙贯日",
     "keys": "qqeezqqqeq",
-    "description": "拨杆进身、长线贯刺",
+    "description": "横枪逐敌·对空穿影·回马破阵",
     "strokes": [
       {
         "tick": 26,
@@ -175,7 +175,7 @@
     "id": "dragon_sword",
     "name": "龙游九霄",
     "keys": "qqeezqqqee",
-    "description": "挑剑引龙、盘旋斩落",
+    "description": "游龙护身·九折穿影·归剑龙吟",
     "strokes": [
       {
         "tick": 26,
@@ -261,7 +261,7 @@
     "id": "moon_bow",
     "name": "月轮坠星",
     "keys": "qqeezqqqzq",
-    "description": "侧身挽月、扇面齐射",
+    "description": "月华聚能·二十追矢·十秒散射",
     "strokes": [
       {
         "tick": 26,
@@ -304,7 +304,7 @@
     "id": "storm_bow",
     "name": "雷隼逐影",
     "keys": "qqeezqqqze",
-    "description": "换步连射、雷隼穿心",
+    "description": "风雷聚能·二十追矢·十秒散射",
     "strokes": [
       {
         "tick": 26,
@@ -347,7 +347,7 @@
     "id": "ember_bow",
     "name": "烬羽焚天",
     "keys": "qqeezqqqzz",
-    "description": "低弓引火、上挑焚羽",
+    "description": "烬火聚能·二十追矢·十秒散射",
     "strokes": [
       {
         "tick": 26,
@@ -390,7 +390,7 @@
     "id": "frost_katana",
     "name": "雪尽无声",
     "keys": "qqeezqqeqq",
-    "description": "藏锋拔斩、反手纳刃",
+    "description": "霜月悬空·冰痕穿刺·归刃凝霜",
     "strokes": [
       {
         "tick": 26,
@@ -433,7 +433,7 @@
     "id": "star_rapier",
     "name": "星芒礼赞",
     "keys": "qqeezqqeqe",
-    "description": "拨剑换线、弓步复刺",
+    "description": "七星列阵·流星贯穿·晨星裁决",
     "strokes": [
       {
         "tick": 26,
@@ -476,7 +476,7 @@
     "id": "crimson_warblade",
     "name": "赤潮断岳",
     "keys": "qqeezqqeqz",
-    "description": "缠头重扫、拖刀断岳",
+    "description": "二十倍斩马刃·崩地三旋",
     "strokes": [
       {
         "tick": 26,
@@ -519,7 +519,7 @@
     "id": "doom_scythe",
     "name": "冥月归墟",
     "keys": "qqeezqqeeq",
-    "description": "钩收旋镰、回环收割",
+    "description": "三转冥镰·挑魂／巨镰斜斩·黑痕追命",
     "strokes": [
       {
         "tick": 26,
@@ -605,7 +605,7 @@
     "id": "sky_halberd",
     "name": "苍穹天衡",
     "keys": "qqeezqqeez",
-    "description": "刺挑横挂、斩落天衡",
+    "description": "腾空十倍·戟林破土·双旋劈山",
     "strokes": [
       {
         "tick": 26,
@@ -777,7 +777,7 @@
     "id": "fangtian_ji",
     "name": "辕门落日",
     "keys": "qqeezqqzqq",
-    "description": "月牙钩挂、刺劈回旋",
+    "description": "十倍画戟·黑刃破土·双旋劈山",
     "strokes": [
       {
         "tick": 26,
@@ -820,7 +820,7 @@
     "id": "red_tassel_spear",
     "name": "百鸟朝凤",
     "keys": "qqeezqqzqe",
-    "description": "拦拿连扎、回马贯日",
+    "description": "红绸游龙·逐敌穿影·回马破阵",
     "strokes": [
       {
         "tick": 26,
@@ -1078,7 +1078,7 @@
     "id": "bronze_greatsword",
     "name": "古鼎镇山",
     "keys": "qqeezqqzze",
-    "description": "横剑压阵、鼎势镇地",
+    "description": "二十倍巨刃·崩地三旋",
     "strokes": [
       {
         "tick": 26,
@@ -1121,7 +1121,7 @@
     "id": "bronze_spear",
     "name": "玄鸟穿云",
     "keys": "qqeezqqzzz",
-    "description": "长杆截拿、玄鸟贯云",
+    "description": "逐敌穿刺·回身横扫",
     "strokes": [
       {
         "tick": 26,
@@ -1250,7 +1250,7 @@
     "id": "bronze_halberd",
     "name": "双阙合璧",
     "keys": "qqeezqeqqz",
-    "description": "双刃交错、合戟开天",
+    "description": "腾空巨戟·十刃破土·力劈华山",
     "strokes": [
       {
         "tick": 26,
@@ -1293,7 +1293,7 @@
     "id": "wind_relic_spear",
     "name": "岚脉归一",
     "keys": "qqeezqeqeq",
-    "description": "拦风挑势、定点穿岚",
+    "description": "驭风穿阵·回马震退",
     "strokes": [
       {
         "tick": 26,

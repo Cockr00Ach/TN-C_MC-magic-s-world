@@ -69,21 +69,25 @@ public final class WarriorComboHud {
         int y = height - SLOT_H;
 
         List<WarriorSkill> page = WarriorCombos.page(family, 0);
+        int rank = WarriorComboClient.heldRank();
         graphics.pose().pushPose();
         graphics.pose().translate(0.0F, 0.0F, HUD_Z);
         for (int i = 0; i < SLOTS; i++) {
-            drawSlot(graphics, minecraft, page.get(i), i, x0 + i * SLOT_W, y);
+            drawSlot(graphics, minecraft, page.get(i), i, x0 + i * SLOT_W, y, rank);
         }
         drawHint(graphics, minecraft, centerX, y - 11);
         graphics.pose().popPose();
     }
 
-    private static void drawSlot(GuiGraphics graphics, Minecraft minecraft, WarriorSkill skill, int slot, int x, int y) {
+    private static void drawSlot(GuiGraphics graphics, Minecraft minecraft, WarriorSkill skill, int slot, int x, int y, int rank) {
         skill=WarriorComboClient.heldVariant(skill);
-        boolean unlocked = skill != null && WarriorCombos.unlocked(skill, TemperingClient.progress());
+        boolean unlocked = WarriorCombos.unlocked(skill, TemperingClient.progress(), rank);
         // 整格不透明：法术栏在"副手带使用动作"时仍可能露一格在正中，这里要盖住它
         graphics.fill(x, y, x + SLOT_W, y + SLOT_H, COLOR_BG);
         outline(graphics, x, y, unlocked && skill != null ? chainColor(skill.chain()) : COLOR_BORDER_DIM);
+        if (skill == null) {
+            return;
+        }
         String role=com.tnc.tnc.warrior.WarriorUnifiedSlots.purpose(slot);
         graphics.pose().pushPose();
         graphics.pose().translate(x+SLOT_W/2f,y+2,0);
@@ -91,14 +95,11 @@ public final class WarriorComboHud {
         graphics.pose().scale(roleScale,roleScale,1);
         graphics.drawString(minecraft.font,role,-minecraft.font.width(role)/2,0,unlocked?COLOR_TEXT:COLOR_DIM,false);
         graphics.pose().popPose();
-        if (skill == null) {
-            return;
-        }
-        if (WarriorComboClient.flashing(skill)) {
+        if (unlocked && WarriorComboClient.flashing(skill)) {
             graphics.fill(x + 1, y + 1, x + SLOT_W - 2, y + SLOT_H - 2, 0x55FFE9A8);
             outline(graphics, x, y, COLOR_FLASH);
         }
-        int cooldown = WarriorComboClient.cooldown(skill);
+        int cooldown = unlocked ? WarriorComboClient.cooldown(skill) : 0;
         // 冷却时格子下半截被黑色遮罩盖住，序号与秒数不能叠在同一行
         if (cooldown <= 0) {
             String sequence = skill.compactLabel();
@@ -111,8 +112,7 @@ public final class WarriorComboHud {
         }
 
         if (!unlocked) {
-            int need = WarriorCombos.temperRequirement(skill);
-            String text = need > 0 ? String.valueOf(need) : "锁";
+            String text = WarriorCombos.requiredRank(skill) + "级";
             graphics.pose().pushPose();
             graphics.pose().translate(x + SLOT_W / 2.0F, y + 16.0F, 0.0F);
             graphics.pose().scale(.5F, .5F, 1.0F);
@@ -138,12 +138,10 @@ public final class WarriorComboHud {
     private static void drawHint(GuiGraphics graphics, Minecraft minecraft, int centerX, int y) {
         ComboTracker.Progress progress = WarriorComboClient.progress();
         if (progress == null) {
-            WarriorSkill first = firstSkill();
-            if (first == null || WarriorCombos.unlocked(first, TemperingClient.progress())) {
-                return;
-            }
-            int need = WarriorCombos.temperRequirement(first);
-            String hint = "连招 · 磨砺 " + need + " 解锁 " + first.name();
+            int rank = WarriorComboClient.heldRank();
+            String hint = net.minecraft.network.chat.Component.translatable("tooltip.tnc.weapon.rank",rank).getString()
+                    + " · " + net.minecraft.network.chat.Component.translatable("tooltip.tnc.weapon.combo_count",
+                    com.tnc.tnc.warrior.WarriorWeaponRanks.comboCount(rank)).getString();
             graphics.drawString(minecraft.font, hint, centerX - minecraft.font.width(hint) / 2, y, COLOR_DIM, true);
             return;
         }
@@ -169,16 +167,6 @@ public final class WarriorComboHud {
             String hold = "按住";
             graphics.drawString(minecraft.font, hold, sx + 2, y, COLOR_NEXT, true);
         }
-    }
-
-    /** 当前武器第一条可提示的连招（HUD 还没解锁时的引导文案用）。 */
-    private static WarriorSkill firstSkill() {
-        var family = WarriorComboClient.heldFamily();
-        if (family == null) {
-            return null;
-        }
-        var list = WarriorCombos.forFamily(family);
-        return list.isEmpty() ? null : WarriorComboClient.heldVariant(list.get(0));
     }
 
     /** 三条链的边框色：一眼能看出这格是突击/攻击/防御。 */

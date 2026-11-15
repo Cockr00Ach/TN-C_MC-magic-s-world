@@ -3,6 +3,9 @@
   "values": [
     "tnc:hammer",
     "tnc:earthshaker_hammer",
-    "tnc:iron_jian_mace"
+    "tnc:iron_jian_mace",
+    "tnc:ironwood_mallet",
+    "tnc:ring_flange_hammer",
+    "tnc:thunder_bronze_hammer"
   ]
 }

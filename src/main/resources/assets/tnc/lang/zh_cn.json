@@ -1111,5 +1111,6 @@
   "tooltip.tnc.weapon.branch.spear": "长枪",
   "tooltip.tnc.weapon.branch.halberd": "戟",
   "tooltip.tnc.weapon.branch.scythe": "镰刀",
-  "tooltip.tnc.weapon.branch.bow": "弓"
+  "tooltip.tnc.weapon.branch.bow": "弓",
+  "key.tnc.warrior_tutorial_repeat": "重看战士教学"
 }

@@ -71,7 +71,7 @@ public final class CanglanWarlordEntity extends Monster implements GeoEntity {
                 .add(Attributes.ARMOR, 16.0D)
                 .add(Attributes.ARMOR_TOUGHNESS, 10.0D)
                 .add(Attributes.MOVEMENT_SPEED, 0.26D)
-                .add(Attributes.FOLLOW_RANGE, 256.0D)
+                .add(Attributes.FOLLOW_RANGE, com.tnc.tnc.boss.BossLeash.ARENA_FOLLOW_RANGE)
                 // Wind is light on its feet but still a six-block wall of plate:
                 // knockback barely moves it, and only the player's own weight does.
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.9D);

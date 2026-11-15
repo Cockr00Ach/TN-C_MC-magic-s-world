@@ -1,5 +1,6 @@
 package com.tnc.tnc.magic.fire;
 
+import com.tnc.tnc.TNMod;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -10,92 +11,168 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
-/**
- * 火手链的入口：从敌人脚下伸出一只燃烧的手，抓住、捏爆。
- *
- * <p>约定和其它火系链一样：<b>不是本链的法术返回 false</b>，派发处可以无脑全调一遍 ✓
- *
- * <h2>为什么手从"地面"出来而不是从目标脚下 3 格</h2>
- * 手是从地里长出来的东西，**必须接在地面上**才不会像浮空贴图；
- * 目标在天上时也一样 —— 手在地面，只是手臂会一路烧上天（见 {@code FireHandRenderer#pillar}）。
- */
+/** The fire-hand chain selects enemies in the aimed area and sustains its higher tiers. */
+@Mod.EventBusSubscriber(modid = TNMod.MODID)
 public final class TNFireHands {
-
-    /** 五个档：id → 档位（伤害/大小/火柱都由这个数推）。 */
     private static final Map<String, Integer> TIERS = Map.of(
             "flame_grip", 1,
             "blaze_clutch", 2,
             "molten_crush", 3,
             "inferno_clench", 4,
             "pyre_god_hand", 5);
+    private static final double RANGE = 42;
+    private static final int WAVE_INTERVAL = 40;
+    private static final Map<UUID, Field> FIELDS = new HashMap<>();
 
-    /** 索敌距离（格）。 */
-    private static final double RANGE = 42.0D;
+    private record Field(ServerLevel level, UUID caster, Vec3 center, int tier, long end, long next) {}
 
-    private TNFireHands() {
-    }
+    private TNFireHands() {}
 
     public static int tierOf(ResourceLocation spellId) {
-        return TIERS.getOrDefault(spellId.getPath(), 0);
+        return spellId.getNamespace().equals(TNMod.MODID) ? TIERS.getOrDefault(spellId.getPath(), 0) : 0;
     }
 
-    /** 派发入口。不是本链返回 false。 */
+    static double seekRadius(int tier) { return tier == 2 ? 6 : tier >= 3 ? 12 : 0; }
+    static int handsPerWave(int tier) { return tier >= 2 && tier < 5 ? 2 : 1; }
+    static int maxActiveHands(int tier) { return tier >= 5 ? 2 : 4; }
+    static int sustainedTicks(int tier) { return tier >= 5 ? 160 : tier == 4 ? 120 : 0; }
+
     public static boolean cast(ServerPlayer player, ResourceLocation spellId) {
         int tier = tierOf(spellId);
-        if (tier <= 0 || !(player.level() instanceof ServerLevel level)) {
-            return false;
-        }
-        LivingEntity target = aim(player, RANGE);
-        boolean aerial = target != null && !target.onGround() && target.getY() > player.getY() + 2.0D;
-
-        Vec3 under;
-        if (target != null) {
-            under = groundUnder(level, target.position());
-        } else {
-            under = groundUnder(level, player.position().add(player.getLookAngle().scale(6.0D)));
-        }
-
-        float heat = target != null ? FireHeat.of(target) : 0.0F;
-        TNFlameHandEntity.spawn(level, player, target, under, tier, heat, aerial);
-        // 起手先给一小把热量：让"抓—捏—爆"这条链自己也参与热量循环
-        if (target != null) {
-            FireHeat.add(target, player, 6.0F * tier);
+        if (tier == 0) return false;
+        ServerLevel level = player.serverLevel();
+        LivingEntity aimed = aim(player, RANGE);
+        Vec3 center = aimed == null ? aimPoint(player) : aimed.position();
+        FIELDS.remove(player.getUUID());
+        spawnWave(level, player, center, tier, aimed);
+        int duration = sustainedTicks(tier);
+        if (duration > 0) {
+            long now = level.getGameTime();
+            FIELDS.put(player.getUUID(), new Field(level, player.getUUID(), center, tier,
+                    now + duration, now + WAVE_INTERVAL));
         }
         return true;
     }
 
-    /** 沿视线找最近的生物；没有就打方块落点（手照样出来，只是抓空气）。 */
-    private static LivingEntity aim(ServerPlayer player, double range) {
-        Vec3 eye = player.getEyePosition();
-        Vec3 end = eye.add(player.getLookAngle().scale(range));
-        LivingEntity best = null;
-        double bestDist = Double.MAX_VALUE;
-        for (LivingEntity e : player.level().getEntitiesOfClass(LivingEntity.class,
-                new AABB(eye, end).inflate(1.4D), t -> t != player && FireSpellRules.hittable(player, t))) {
-            var hit = e.getBoundingBox().inflate(0.4D).clip(eye, end);
-            if (hit.isEmpty()) {
+    @SubscribeEvent
+    public static void tick(TickEvent.ServerTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) return;
+        for (var iterator = FIELDS.entrySet().iterator(); iterator.hasNext();) {
+            var entry = iterator.next();
+            var field = entry.getValue();
+            if (field.level().getServer() != event.getServer()) continue;
+            var player = field.level().getPlayerByUUID(field.caster());
+            long now = field.level().getGameTime();
+            if (!(player instanceof ServerPlayer caster) || !caster.isAlive() || caster.isSpectator()
+                    || now >= field.end() || !field.level().hasChunkAt(BlockPos.containing(field.center()))) {
+                iterator.remove();
                 continue;
             }
-            double d = hit.get().distanceTo(eye);
-            if (d < bestDist) {
-                bestDist = d;
-                best = e;
+            if (now < field.next()) continue;
+            spawnWave(field.level(), caster, field.center(), field.tier(), null);
+            entry.setValue(new Field(field.level(), field.caster(), field.center(), field.tier(),
+                    field.end(), now + WAVE_INTERVAL));
+        }
+    }
+
+    @SubscribeEvent
+    public static void stopped(ServerStoppedEvent event) {
+        FIELDS.values().removeIf(field -> field.level().getServer() == event.getServer());
+    }
+
+    private static void spawnWave(ServerLevel level, ServerPlayer caster, Vec3 center, int tier, LivingEntity aimed) {
+        // Include the previous cast in the active budget and avoid holding one victim with two hands.
+        List<TNFlameHandEntity> active = new ArrayList<>();
+        for (var entity : level.getAllEntities()) {
+            if (entity instanceof TNFlameHandEntity hand && !hand.isRemoved()
+                    && caster.getUUID().equals(hand.visualCaster())) active.add(hand);
+        }
+        int capacity = Math.max(0, maxActiveHands(tier) - active.size());
+        int count = Math.min(handsPerWave(tier), capacity);
+        if (count == 0) return;
+        Set<UUID> held = new HashSet<>();
+        for (var hand : active) {
+            LivingEntity target = hand.target();
+            if (target != null) held.add(target.getUUID());
+        }
+        List<LivingEntity> targets = new ArrayList<>();
+        if (aimed != null && !held.contains(aimed.getUUID()) && TNFlameHandEntity.canDamage(caster, aimed)) targets.add(aimed);
+        if (tier >= 2) {
+            double radius = seekRadius(tier);
+            var nearby = level.getEntitiesOfClass(LivingEntity.class, new AABB(center, center).inflate(radius),
+                    enemy -> !held.contains(enemy.getUUID()) && enemy != aimed
+                            && enemy.distanceToSqr(center) <= radius * radius
+                            && TNFlameHandEntity.canDamage(caster, enemy) && caster.hasLineOfSight(enemy));
+            nearby.sort(Comparator.comparingDouble(enemy -> enemy.distanceToSqr(center)));
+            targets.addAll(nearby);
+        }
+        Vec3 across = caster.getLookAngle().cross(new Vec3(0, 1, 0)).normalize();
+        if (across.lengthSqr() < .01) across = new Vec3(1, 0, 0);
+        for (int i = 0; i < count; i++) {
+            LivingEntity target = i < targets.size() ? targets.get(i) : null;
+            Vec3 at = target == null ? center.add(across.scale((i - (count - 1) * .5) * 3.2)) : target.position();
+            if (!level.hasChunkAt(BlockPos.containing(at))) continue;
+            spawnHand(level, caster, target, at, tier);
+        }
+    }
+
+    private static void spawnHand(ServerLevel level, ServerPlayer caster, LivingEntity target, Vec3 at, int tier) {
+        boolean aerial = target != null && !target.onGround() && target.getY() > caster.getY() + 2;
+        Vec3 under = aerial ? at.add(0, target.getBbHeight() * .5 - TNFlameHandEntity.gripHeight(tier), 0)
+                : groundUnder(level, at);
+        float heat = FireHeat.of(target);
+        TNFlameHandEntity.spawn(level, caster, target, under, tier, heat, aerial);
+        if (target != null) FireHeat.add(target, caster, 6 * tier);
+    }
+
+    private static LivingEntity aim(ServerPlayer player, double range) {
+        Vec3 eye = player.getEyePosition();
+        Vec3 end = player.level().clip(new ClipContext(eye, eye.add(player.getLookAngle().scale(range)),
+                ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player)).getLocation();
+        LivingEntity best = null;
+        double closest = Double.MAX_VALUE;
+        for (var enemy : player.level().getEntitiesOfClass(LivingEntity.class, new AABB(eye, end).inflate(1.4),
+                target -> TNFlameHandEntity.canDamage(player, target))) {
+            var hit = enemy.getBoundingBox().inflate(.4).clip(eye, end);
+            if (hit.isEmpty()) continue;
+            double distance = hit.get().distanceToSqr(eye);
+            if (distance < closest) {
+                closest = distance;
+                best = enemy;
             }
         }
         return best;
     }
 
-    /** 从某个点往下找地面；找不到就退到那个点下方 1.5 格。 */
+    private static Vec3 aimPoint(ServerPlayer caster) {
+        Vec3 eye = caster.getEyePosition();
+        var hit = caster.level().clip(new ClipContext(eye, eye.add(caster.getLookAngle().scale(RANGE)),
+                ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, caster));
+        return hit.getType() == HitResult.Type.BLOCK ? hit.getLocation()
+                : caster.position().add(caster.getLookAngle().scale(12));
+    }
+
     public static Vec3 groundUnder(ServerLevel level, Vec3 at) {
         BlockHitResult hit = level.clip(new ClipContext(at.add(0, 4, 0), at.add(0, -12, 0),
                 ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, null));
         if (hit.getType() == HitResult.Type.BLOCK) {
             BlockPos pos = hit.getBlockPos();
-            return new Vec3(pos.getX() + 0.5D, pos.getY() + 1.0D, pos.getZ() + 0.5D);
+            return new Vec3(pos.getX() + .5, pos.getY() + 1, pos.getZ() + .5);
         }
-        return new Vec3(at.x, at.y - 1.5D, at.z);
+        return at.add(0, -1.5, 0);
     }
 }

@@ -53,6 +53,14 @@ public class TNFlameHandEntity extends Entity {
     private static final EntityDataAccessor<Boolean> AERIAL =
             SynchedEntityData.defineId(TNFlameHandEntity.class, EntityDataSerializers.BOOLEAN);
 
+    private static final EntityDataAccessor<java.util.Optional<UUID>> VISUAL_CASTER=SynchedEntityData.defineId(TNFlameHandEntity.class,EntityDataSerializers.OPTIONAL_UUID);
+    public UUID visualCaster(){return entityData.get(VISUAL_CASTER).orElse(null);}
+    /** Only the hostile cast target can be held; never the caster, allies or a tame companion. */
+    public static boolean canDamage(ServerPlayer caster,LivingEntity target){
+        if(caster==null||!FireSpellRules.hittable(caster,target)||target.isAlliedTo(caster)||caster.isAlliedTo(target))return false;
+        if(target instanceof net.minecraft.world.entity.player.Player p&&(p.isCreative()||p.isSpectator()))return false;
+        return !(target instanceof net.minecraft.world.entity.TamableAnimal pet&&pet.isTame());
+    }
     /** 被抓的目标（只在服务端有意义；客户端靠位置同步）。 */
     @Nullable
     private UUID targetId;
@@ -61,6 +69,8 @@ public class TNFlameHandEntity extends Entity {
     /** 已经结算过第几下捏。 */
     private int crushes;
     private float crushDamage;
+    private int burstAt = -1;
+    private static final int GIANT_BURST_HEAT = 40;
 
     public TNFlameHandEntity(EntityType<? extends TNFlameHandEntity> type, Level level) {
         super(type, level);
@@ -70,6 +80,7 @@ public class TNFlameHandEntity extends Entity {
 
     @Override
     protected void defineSynchedData() {
+        entityData.define(VISUAL_CASTER,java.util.Optional.empty());
         entityData.define(PHASE, 0.0F);
         entityData.define(TIER, 1);
         entityData.define(HEAT, 0.0F);
@@ -111,10 +122,11 @@ public class TNFlameHandEntity extends Entity {
         hand.entityData.set(TIER, Math.max(1, Math.min(5, tier)));
         hand.entityData.set(HEAT, Math.max(0.0F, heat));
         hand.entityData.set(AERIAL, aerial);
-        hand.targetId = target.getUUID();
+        hand.targetId = target==null?null:target.getUUID();
         hand.casterId = caster.getUUID();
+        hand.entityData.set(VISUAL_CASTER,java.util.Optional.of(caster.getUUID()));
         // 每一下捏的伤害：档位线性 + 目标热量的一部分（热越高压得越狠）
-        hand.crushDamage = (5.0F + 3.2F * tier) + heat * 0.06F;
+        hand.crushDamage = (5.0F + 3.2F * hand.tier()) + heat * 0.06F;
         level.addFreshEntity(hand);
         level.playSound(null, under.x, under.y, under.z, SoundEvents.BLAZE_SHOOT,
                 SoundSource.PLAYERS, 1.1F, 0.55F);
@@ -127,28 +139,38 @@ public class TNFlameHandEntity extends Entity {
         if (level().isClientSide()) {
             return;
         }
-        float p = Math.min(1.0F, tickCount / (float) LIFE);
+        var caster=caster();if(caster==null||!caster.isAlive()||caster.isSpectator()){discard();return;}
+        entityData.set(VISUAL_CASTER,java.util.Optional.of(caster.getUUID()));
+        float age = burstAt >= 0 ? tickCount + 62 - burstAt : tickCount;
+        float p = Math.min(1.0F, age / LIFE);
         entityData.set(PHASE, p);
 
         LivingEntity target = target();
+        if (target != null&&!canDamage(caster,target))target=null;
+        if(target!=null)entityData.set(HEAT,Math.max(heat(),Math.min(FireHeat.MAX,FireHeat.of(target))));
+        if (tier() == 5 && burstAt < 0 && tickCount >= 14 && tickCount <= 61) attract(caster);
         if (target != null) {
             // 抓住：掌心位置固定在手的上方，目标被按在原地
             Vec3 grip = new Vec3(getX(), getY() + gripHeight(), getZ());
-            if (p > 0.32F && p < 0.82F) {
+            var feet=grip.add(0,-target.getBbHeight()*.5,0);
+            if (burstAt < 0 && p > 0.32F && p < 0.82F && target.getBbHeight() < (tier() == 5 ? 9 : 4.5F)
+                    && target.getBbWidth() < (tier() == 5 ? 7 : 3.5F)
+                    &&level().noCollision(target,target.getBoundingBox().move(feet.subtract(target.position())))) {
                 target.setDeltaMovement(Vec3.ZERO);
                 target.teleportTo(grip.x, grip.y - target.getBbHeight() * 0.5, grip.z);
-                target.hurtMarked = true;
+                target.fallDistance=0;target.hurtMarked = true;
             }
         }
 
         // 三下收紧：分别在第 36 / 46 / 56 tick 结算
         int[] beats = {36, 46, 56};
         for (int i = 0; i < beats.length; i++) {
-            if (tickCount >= beats[i] && crushes <= i) {
+            if (burstAt < 0 && tickCount >= beats[i] && crushes <= i) {
                 crushes = i + 1;
                 crush(target);
             }
         }
+        if (target != null) entityData.set(HEAT, Math.max(heat(), FireHeat.of(target)));
 
         // ★ 持续燃烧：每 2 tick 甩一把火星，档位越高越密（"疯狂"感靠这个堆出来）
         if (tickCount % 2 == 0 && level() instanceof ServerLevel sl) {
@@ -164,17 +186,38 @@ public class TNFlameHandEntity extends Entity {
             }
         }
 
-        if (tickCount == 62) {
+        if (burstAt < 0 && (tickCount >= 62 || tier() == 5 && tickCount >= 36 && heat() >= GIANT_BURST_HEAT)) {
             burst(target);
+            burstAt = tickCount;
+            entityData.set(PHASE, 62F / LIFE);
         }
-        if (tickCount >= LIFE) {
+        if (age >= LIFE) {
             discard();
         }
     }
 
     /** 掌心离地面的高度（档位越高手越大）。 */
     public double gripHeight() {
-        return 0.9 + 0.42 * tier();
+        return gripHeight(tier());
+    }
+
+    public static double gripHeight(int tier) { return tier >= 5 ? 5.4 : .9 + .42 * tier; }
+
+    private void attract(ServerPlayer caster) {
+        Vec3 center = position().add(0, Math.min(2.2, gripHeight() * .5), 0);
+        LivingEntity held = target();
+        for (var enemy : level().getEntitiesOfClass(LivingEntity.class, new AABB(center, center).inflate(12),
+                living -> living != held && canDamage(caster, living))) {
+            Vec3 inward = center.subtract(enemy.getBoundingBox().getCenter());
+            double distance = inward.length();
+            if (distance <= 1.6 || distance > 12 || !caster.hasLineOfSight(enemy)) continue;
+            Vec3 force = inward.scale(.085 / distance);
+            Vec3 velocity = enemy.getDeltaMovement().scale(.82).add(force);
+            if (velocity.lengthSqr() > .45 * .45) velocity = velocity.normalize().scale(.45);
+            enemy.setDeltaMovement(velocity);
+            enemy.hurtMarked = true;
+            enemy.fallDistance = 0;
+        }
     }
 
     private void crush(@Nullable LivingEntity target) {
@@ -183,20 +226,21 @@ public class TNFlameHandEntity extends Entity {
         }
         Vec3 at = new Vec3(getX(), getY() + gripHeight() * 0.6, getZ());
         if (target != null && target.isAlive()) {
-            target.hurt(server.damageSources().onFire(), crushDamage);
+            TNFireRework.detonationDamage(caster(), target, crushDamage);
             target.setSecondsOnFire(4);
             FireHeat.add(target, caster(), 14.0F + 3.0F * tier());
         }
+        FireReworkEffects.emit(server,FireReworkEffects.Kind.HAND_CRUSH,at,Vec3.ZERO,1.3F+.35F*tier(),Math.min(1,.25F+heat()/100F),18,caster());
         // 只伤"被捏的那一个"以外的？不：捏的时候会挤压周围，小范围擦伤
         for (LivingEntity other : server.getEntitiesOfClass(LivingEntity.class,
-                new AABB(at, at).inflate(1.4 + 0.3 * tier()), e -> e != target && e.isAlive())) {
-            other.hurt(server.damageSources().onFire(), crushDamage * 0.25F);
+                new AABB(at, at).inflate(tier() == 5 ? 5.8 : 1.4 + 0.3 * tier()), e -> e != target && canDamage(caster(),e))) {
+            TNFireRework.detonationDamage(caster(), other, crushDamage * 0.25F);
         }
         server.sendParticles(net.minecraft.core.particles.ParticleTypes.LAVA,
                 at.x, at.y, at.z, 18, 0.35, 0.5, 0.35, 0.25);
         // ★ 力量感：每一下捏都抖屏（档位越高抖得越狠），并在掌心炸出一圈冲击
         com.tnc.tnc.magic.TNShockwaveEntity.blast(server, at, 1.3D + 0.35D * tier(),
-                2.5F + 1.4F * tier(), null, 0.9F);
+                0F, caster(), 0F).setInvisible(true);
         // 第三下（最后一下）额外在地上泼一片岩浆：捏碎之后脚下就是火海
         if (crushes >= 3 && tier() >= 2) {
             TNLavaFieldEntity.spawn(server, new Vec3(getX(), getY() + 0.2, getZ()), caster(),
@@ -214,21 +258,22 @@ public class TNFlameHandEntity extends Entity {
         }
         Vec3 at = new Vec3(getX(), getY() + gripHeight() * 0.6, getZ());
         float heat = this.heat();
-        double radius = 2.4 + 0.55 * tier() + heat * 0.006;
+        double radius = (tier() == 5 ? 8.5 : 2.4 + 0.55 * tier()) + heat * .006;
         float damage = (8.0F + 5.0F * tier()) * (1.0F + heat / 110.0F);
         ServerPlayer caster = caster();
         for (LivingEntity victim : server.getEntitiesOfClass(LivingEntity.class,
-                new AABB(at, at).inflate(radius + 1.0), e -> FireSpellRules.hittable(caster, e))) {
+                new AABB(at, at).inflate(radius + 1.0), e -> canDamage(caster,e))) {
             double dist = victim.position().distanceTo(at);
             float falloff = (float) Math.max(0.25, 1.0 - dist / (radius + 1.0));
-            victim.hurt(server.damageSources().onFire(), damage * falloff);
+            TNFireRework.detonationDamage(caster, victim, damage * falloff);
             victim.setSecondsOnFire(6);
             FireHeat.add(victim, caster(), 10.0F);
         }
         com.tnc.tnc.magic.TNShockwaveEntity.blast(server, at, radius * 1.15D,
-                5.0F + 2.2F * tier(), null, 1.2F + heat * 0.01F);
+                0F, caster(), 0F).setInvisible(true);
         TNLavaFieldEntity.spawn(server, new Vec3(getX(), getY() + 0.2, getZ()), caster(),
                 damage * 0.30F, 2.0D + 0.3D * tier(), 100);
+        FireReworkEffects.emit(server,FireReworkEffects.Kind.HEAT_BURST,at,Vec3.ZERO,(float)radius,Math.min(1,.35F+heat/100F),32,caster);
         server.sendParticles(net.minecraft.core.particles.ParticleTypes.EXPLOSION_EMITTER,
                 at.x, at.y, at.z, 2, 0.4, 0.4, 0.4, 0.0);
         server.sendParticles(net.minecraft.core.particles.ParticleTypes.FLAME,
@@ -238,6 +283,8 @@ public class TNFlameHandEntity extends Entity {
         server.playSound(null, at.x, at.y, at.z, SoundEvents.LIGHTNING_BOLT_THUNDER,
                 SoundSource.PLAYERS, 0.9F, 1.6F);
     }
+
+    @Override public boolean shouldBeSaved(){return false;}
 
     @Override
     protected void readAdditionalSaveData(CompoundTag tag) {

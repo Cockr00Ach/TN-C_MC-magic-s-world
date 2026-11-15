@@ -486,11 +486,23 @@ public final class WarriorCodex {
                     "持长枪按顺序出招，最后一下按住；磨砺 1600 自动点亮，不耗磨砺", true, "", temper(1600)),
             entry("spear_combo_5", Weapon.POLEARM, "长枪连招", 5, "游龙步",
                     "顺序 EZQ：点枪、借力、收枪向后滑步，短时无敌并拉开距离。",
-                    "持长枪按顺序出招；磨砺 1000 自动点亮，不耗磨砺", true, "", temper(1000)));
+                    "持长枪按顺序出招；磨砺 1000 自动点亮，不耗磨砺", true, "", temper(1000)),
+            entry("spear_combo_6", Weapon.POLEARM, "长枪连招", 6, "拨云横枪",
+                    "横枪拨开面前的敌人，再踏步扫过侧翼。", "", true, ""),
+            entry("sword_combo_7", Weapon.SWORD, "长剑连招", 7, "掠风回锋",
+                    "踏前带过剑锋，再转身切向敌人的侧面。", "", true, ""),
+            entry("greatsword_combo_7", Weapon.AXE, "重剑连招", 7, "贯岳",
+                    "压低剑锋踏前，接一记高处劈落的重斩。", "", true, ""),
+            entry("hammer_combo_7", Weapon.AXE, "锤连招", 7, "崩岩回震",
+                    "沉锤砸地，回拉锤头震开身边的敌人。", "", true, ""),
+            entry("bow_combo_7", Weapon.BOW, "弓连招", 7, "回身贯风箭",
+                    "向后挪开一步，回身射出一支强力箭。", "", true, ""),
+            entry("spear_combo_7", Weapon.POLEARM, "长枪连招", 7, "穿阵落锋",
+                    "收杆蓄势，踏步向前送出一记窄角度的长刺。", "", true, ""));
 
     private static Entry entry(String id, Weapon weapon, String chain, int tier, String name, String effect,
                                String source, boolean implemented, String role, Clause... gates) {
-        if (id.matches("(sword|greatsword|hammer|bow|spear)_combo_[1-6]")) {
+        if (id.matches("(sword|greatsword|hammer|bow|spear)_combo_[1-7]")) {
             int slot=WarriorUnifiedSlots.slot(id);
             String originalEffect=effect;
             effect="槽位 "+(slot+1)+" · "+WarriorUnifiedSlots.purpose(slot)+" · "+WarriorUnifiedSlots.keys(slot).toUpperCase(java.util.Locale.ROOT)
@@ -501,6 +513,8 @@ public final class WarriorCodex {
             if(slot>=3)effect+=originalEffect.replaceAll("[QZE]{2,6}",WarriorUnifiedSlots.keys(slot).toUpperCase(java.util.Locale.ROOT));
             name=WarriorUnifiedSlots.name(id,name);
             tier=slot+1;
+            source = "战士天赋已开启，手持 " + Math.max(1, slot - 1) + " 级及以上武器按顺序出招。";
+            gates = new Clause[]{talent(1)};
         }
         return new Entry(id, weapon, chain, tier, name, effect, source, implemented, List.of(gates), role);
     }

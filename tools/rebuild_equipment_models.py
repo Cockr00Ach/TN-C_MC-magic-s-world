@@ -2,6 +2,7 @@
 from pathlib import Path
 from PIL import Image, ImageDraw
 import base64, hashlib, json, math, uuid
+from staff_hold_pose import item_display
 
 R = Path(__file__).resolve().parents[1]
 A = R / 'src/main/resources/assets/tnc'
@@ -454,22 +455,8 @@ class Wand:
             for face in e['faces'].values():
                 face['uv'] = [round(n*16/(w if i%2 == 0 else h), 5) for i, n in enumerate(face['uv'])]
         tip = max(e['to'][1] for e in self.elements)
-        grip = [0, -3, 0]  # [8,5,8] in model coordinates, relative to item center.
-        fp_scale = min(.58, 10.8/(tip-5))
-        display = {}
-        for first in [False, True]:
-            rotation = [0, -25, -5] if first else [90, 0, 0]
-            scale = fp_scale if first else (.85 if self.tier < 3 else .94)
-            # Model item transform is T * Rxyz * S around the model's [8,8,8] center.
-            rz, ry, rx = [math.radians(rotation[i]) for i in [2, 1, 0]]
-            x, y, z = grip[0]*scale, grip[1]*scale, 0
-            x, y = x*math.cos(rz)-y*math.sin(rz), x*math.sin(rz)+y*math.cos(rz)
-            x, z = x*math.cos(ry)+z*math.sin(ry), -x*math.sin(ry)+z*math.cos(ry)
-            y, z = y*math.cos(rx)-z*math.sin(rx), y*math.sin(rx)+z*math.cos(rx)
-            translation = [-x-(1.8 if first else 0), -y-(.8 if first else 0), -z]
-            for hand in ['righthand', 'lefthand']:
-                display[('firstperson_' if first else 'thirdperson_')+hand] = dict(rotation=rotation, translation=translation, scale=[scale]*3)
-        display['ground'] = dict(rotation=[0, 0, 15], translation=[0, 3, 0], scale=[.35]*3)
+        display = item_display([8, 5, 8], [8, tip, 8], first_person_height=10.8,
+                               third_person_scale=.85 if self.tier < 3 else .94)
         held = dict(ambientocclusion=False, textures=dict(body=f'tnc:item/wands/held/{self.id}', particle=f'tnc:item/wands/held/{self.id}'),
                     display=display, elements=self.elements, tnc_grip=[8, 5, 8], tnc_tip=[8, tip, 8])
         write(A/'models/item/wands/held'/f'{self.id}.json', held)

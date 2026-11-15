@@ -56,6 +56,10 @@ public final class CanglanTempestEntity extends Entity {
    if(contact!=null){to=contact.add(to.subtract(from).normalize().scale(.05));entityData.set(ANCHORED,true);}
   }
   setPos(to);
+  // ★ 2026-11-15：和玩家龙卷风同一套"强力吸力"（作者上一轮：四格内的敌人被卷到飞起）✓
+  //   Boss 的旋风更大 ⇒ 吸附半径跟着 visualScale 走，但**力度只给玩家的 0.9 倍**，
+  //   免得把玩家直接甩出战场 ✗。
+  if(tornado())swirlNearby();
   if(tornado()&&tickCount%4==0)fuseNearby();
   if(tickCount%6!=0)return;
   double r=(tornado()?2.7:8.5)*visualScale();int budget=0;
@@ -66,6 +70,30 @@ public final class CanglanTempestEntity extends Entity {
    if(tornado()){Vec3 d=position().subtract(v.position()).multiply(1,0,1).normalize().scale(.18);v.push(d.x,.12,d.z);v.hurtMarked=true;}
   }
  }
+ /** 吸力半径（格）✓ —— 比伤害半径略大一点，读作"风先拽进来、再挨打" ✓。 */
+ private double suctionRadius(){return Math.max(3.0D,2.7D*visualScale()*1.15D);}
+
+ /** 吸力作用的高度（格）✓（和渲染的线旋风一致）。 */
+ private double suctionHeight(){return Math.max(3.0D,2.7D*visualScale()*2.6D);}
+
+ /**
+  * ★ <b>强力吸力</b>：把范围内的敌人拽向旋风轴并往上卷（2026-11-15 跟着玩家龙卷风一起做）✓
+  *
+  * <p>速度完全由 {@link com.tnc.tnc.magic.TornadoSwirlRules} 给（切向转＋向内收＋上升，有封顶），
+  * 这里只乘 0.9 稍微收着点 —— Boss 的吸力不该让玩家完全失去操作 ✗。
+  */
+ private void swirlNearby(){
+  double radius=suctionRadius(),height=suctionHeight();
+  for(var v:level().getEntitiesOfClass(LivingEntity.class,getBoundingBox().inflate(radius,height+2,radius),this::enemy)){
+   if(v instanceof CanglanWarlordEntity)continue;
+   double dx=v.getX()-getX(),dz=v.getZ()-getZ(),dy=v.getY()-getY();
+   if(dx*dx+dz*dz>radius*radius||dy<-1||dy>height+1)continue;
+   double[] vel=com.tnc.tnc.magic.TornadoSwirlRules.velocity(dx,dz,Math.max(0,dy),height,5);
+   v.setDeltaMovement(vel[0]*0.9D,vel[1]*0.9D,vel[2]*0.9D);
+   v.fallDistance=0;v.hurtMarked=true;
+  }
+ }
+
  private void fuseNearby(){
   boolean combined=false;int budget=0;
   for(var other:level().getEntitiesOfClass(CanglanTempestEntity.class,getBoundingBox().inflate(12*owner.battleScale()+1.5*visualScale()),e->e!=this&&!e.isRemoved()&&e.tornado()&&e.owner==owner&&e.getId()>getId())){

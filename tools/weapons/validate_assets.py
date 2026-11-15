@@ -20,6 +20,7 @@ def main():
         assert model['textures']['0']=='tnc:item/'+id,id
         assert model['elements'],id
         for e in model['elements']:
+            assert 1<=len(e.get('faces',{}))<=6,id+' has an element rejected by vanilla (empty faces)'
             assert all(-16<=v<=32 for v in e['from']+e['to']),id
             assert all(e['to'][i]>e['from'][i] for i in range(3)),id
             for face in e['faces'].values():

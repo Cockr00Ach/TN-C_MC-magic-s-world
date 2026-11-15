@@ -2,28 +2,42 @@ package com.tnc.tnc.warrior.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.tnc.tnc.warrior.WarriorPhantom;
 import com.tnc.tnc.warrior.WarriorWeapons;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.ItemTransform;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.model.pipeline.VertexConsumerWrapper;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 /** Weapon-bound overlay: uses the actual held-item render invocation and its final mounting matrix. */
+@Mod.EventBusSubscriber(modid="tnc",value=Dist.CLIENT)
 public final class WarriorPhantomRenderer {
 
     /** 出过一次错就彻底停用：宁可没虚影，也不能把玩家卡掉线。 */
     private static final org.slf4j.Logger LOGGER = com.mojang.logging.LogUtils.getLogger();
     private static volatile boolean disabled;
     private static boolean logged;
+    private record Ghost(ItemStack stack,ItemDisplayContext context,boolean left,PoseStack pose,
+                         int light,BakedModel model,float alpha) {}
+    private static final WarriorPhantomFrame<Ghost> WORLD=new WarriorPhantomFrame<>(64);
+    private static MultiBufferSource.BufferSource worldBuffer;
+    private static Matrix4f worldModelView;
+    private static float worldFogStart,worldFogEnd;
 
     private WarriorPhantomRenderer() {
     }
@@ -72,6 +86,7 @@ public final class WarriorPhantomRenderer {
                 || left!=(player.getMainArm()==net.minecraft.world.entity.HumanoidArm.LEFT)
                 || (!context.firstPerson() && context != ItemDisplayContext.THIRD_PERSON_LEFT_HAND
                     && context != ItemDisplayContext.THIRD_PERSON_RIGHT_HAND)) return;
+        var ultimate=WarriorAnimationClient.active(player.getId());if(ultimate!=null&&ultimate.animation()==com.tnc.tnc.warrior.WarriorAnimation.ULTIMATE&&com.tnc.tnc.warrior.WarriorPolearmUltimates.kind(stack).equals("halberd"))return;
         try {
             renderWeapon(player, stack, context, left, poseStack, buffer, packedLight);
         } catch (RuntimeException | LinkageError error) {
@@ -108,8 +123,20 @@ public final class WarriorPhantomRenderer {
             Vector3f compensation = com.tnc.tnc.warrior.WarriorGripGeometry.compensation(anchor, draw);
             poseStack.translate(compensation.x(), compensation.y(), compensation.z());
             poseStack.scale((float) draw, (float) draw, (float) draw);
-            Minecraft.getInstance().getItemRenderer().render(stack,context,left,poseStack,
-                    ghost(buffer,alpha),packedLight,OverlayTexture.NO_OVERLAY,WarriorGhostModels.find(stack,baked));
+            var model=WarriorGhostModels.find(stack,baked);
+            if(context.firstPerson()) {
+                renderGhost(stack,context,left,poseStack,buffer,packedLight,model,alpha);
+            } else {
+                // Preserve the actual mounted pose, not an approximation reconstructed from the player arm.
+                var captured=new PoseStack();
+                captured.last().pose().set(poseStack.last().pose());
+                captured.last().normal().set(poseStack.last().normal());
+                if(WORLD.add(player.level(),new Ghost(stack.copy(),context,left,captured,packedLight,model,alpha))
+                        && worldModelView==null) {
+                    worldModelView=new Matrix4f(RenderSystem.getModelViewMatrix());
+                    worldFogStart=RenderSystem.getShaderFogStart();worldFogEnd=RenderSystem.getShaderFogEnd();
+                }
+            }
         } finally {
             // 必须在 finally 里弹栈：中间抛异常而不弹，整帧的 PoseStack 就不平衡了
             poseStack.popPose();
@@ -132,30 +159,68 @@ public final class WarriorPhantomRenderer {
         };
     }
 
-    /** Attack opacity only; the envelope gate above removes all idle ghost submissions. */
-    private static float alpha(double scale, boolean combo) {
+    /** Per-face opacity stays low even when the authored silhouette contains several overlapping boxes. */
+    static float opacity(double scale, boolean combo) {
         double grown = Math.max(0,Math.min(1,(scale-3)/7));
-        float base = (float) (0.14 + 0.26 * grown);
-        if (!combo) {
-            return base;
-        }
-        float pulse = 0.975f + 0.025f * (float) Math.sin(net.minecraft.Util.getNanos() / 240_000_000.0);
-        return Math.min(0.85f, (float) (0.40 + 0.34 * grown) * pulse);
+        return (float)(combo ? .10+.04*grown : .07+.03*grown);
     }
 
-    private static MultiBufferSource ghost(MultiBufferSource base, float alpha) {
-        return new MultiBufferSource() {
-            @Override
-            public VertexConsumer getBuffer(RenderType type) {
-                // 物品模型走的是 entityCutout（不透明裁剪），这里统一换成半透明版本
-                RenderType ghostType = RenderType.entityTranslucentCull(TextureAtlas.LOCATION_BLOCKS);
-                return new Alpha(base.getBuffer(ghostType), alpha);
-            }
-        };
+    /** Attack opacity only; the envelope gate above removes all idle ghost submissions. */
+    private static float alpha(double scale, boolean combo) {
+        if(!combo)return opacity(scale,false);
+        float pulse = 0.975f + 0.025f * (float) Math.sin(net.minecraft.Util.getNanos() / 240_000_000.0);
+        return opacity(scale,true)*pulse;
+    }
+
+    private static void renderGhost(ItemStack stack,ItemDisplayContext context,boolean left,PoseStack pose,
+                                    MultiBufferSource buffer,int light,BakedModel baked,float alpha) {
+        pose.pushPose();
+        try {
+            var model=ForgeHooksClient.handleCameraTransforms(pose,baked,context,left);
+            if(model.isCustomRenderer())return;
+            pose.translate(-.5,-.5,-.5);
+            var out=new Alpha(buffer.getBuffer(WarriorPhantomRenderType.TYPE),alpha);
+            // Render each baked pass once. Routing both glint and item passes to the same ghost buffer
+            // duplicated enchanted sword geometry and made overlapping silhouettes nearly opaque.
+            for(var pass:model.getRenderPasses(stack,true))
+                if(!pass.isCustomRenderer())Minecraft.getInstance().getItemRenderer()
+                        .renderModelLists(pass,stack,light,OverlayTexture.NO_OVERLAY,pose,out);
+        } finally {pose.popPose();}
+    }
+
+    @SubscribeEvent public static void frame(TickEvent.RenderTickEvent event) {
+        if(event.phase==TickEvent.Phase.START){WORLD.clear();worldModelView=null;}
+    }
+
+    @SubscribeEvent public static void world(RenderLevelStageEvent event) {
+        var level=Minecraft.getInstance().level;
+        if(event.getStage()==RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS) {
+            WORLD.begin(disabled()?null:level);worldModelView=null;return;
+        }
+        if(event.getStage()!=RenderLevelStageEvent.Stage.AFTER_LEVEL)return;
+        var ghosts=WORLD.end(level);
+        if(ghosts.isEmpty() || disabled() || worldModelView==null)return;
+        // AFTER_LEVEL is after Fabulous composition and before the first-person depth clear.
+        // The event pose here is a projection helper, not the captured entity mounting matrix.
+        var view=RenderSystem.getModelViewStack();
+        float fogStart=RenderSystem.getShaderFogStart(),fogEnd=RenderSystem.getShaderFogEnd();
+        view.pushPose();view.last().pose().set(worldModelView);RenderSystem.applyModelViewMatrix();
+        RenderSystem.setShaderFogStart(worldFogStart);RenderSystem.setShaderFogEnd(worldFogEnd);
+        try {
+            if(worldBuffer==null)worldBuffer=MultiBufferSource.immediate(new BufferBuilder(65536));
+            for(var ghost:ghosts)renderGhost(ghost.stack(),ghost.context(),ghost.left(),ghost.pose(),
+                    worldBuffer,ghost.light(),ghost.model(),ghost.alpha());
+            worldBuffer.endBatch();
+        } catch(RuntimeException | LinkageError error) {
+            worldBuffer=null;disable(error);
+        } finally {
+            view.popPose();RenderSystem.applyModelViewMatrix();
+            RenderSystem.setShaderFogStart(fogStart);RenderSystem.setShaderFogEnd(fogEnd);
+        }
     }
 
     /** 只改 alpha 的顶点消费者：颜色、UV、光照都原样透传。 */
-    private static final class Alpha extends VertexConsumerWrapper {
+    static final class Alpha extends VertexConsumerWrapper {
         private final float alpha;
 
         Alpha(VertexConsumer parent, float alpha) {
@@ -170,7 +235,14 @@ public final class WarriorPhantomRenderer {
 
         @Override
         public VertexConsumer color(float red, float green, float blue, float a) {
-            return super.color(red, green, blue, a * alpha);
+            // Calling super.color(float) would dispatch back to color(int) and multiply alpha twice.
+            parent.color(red,green,blue,a*alpha);
+            return this;
+        }
+
+        @Override
+        public void defaultColor(int red,int green,int blue,int a) {
+            parent.defaultColor(red,green,blue,Math.round(a*alpha));
         }
     }
 }

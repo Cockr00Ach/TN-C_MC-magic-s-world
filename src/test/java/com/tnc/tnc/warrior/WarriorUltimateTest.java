@@ -19,7 +19,7 @@ class WarriorUltimateTest {
             assertEquals(4.8,clip.lengthSeconds(),.001);
             for(String bone:List.of("bone","head","armRight","armLeft","legRight","legLeft")){
                 assertTrue(clip.moves(bone),art.id()+" missing "+bone);
-                for(float x:clip.rotation(bone,4.8f))assertEquals(0,x,.001);
+                for(float x:clip.rotation(bone,4.8f))assertEquals(0,net.minecraft.util.Mth.wrapDegrees(x),.001);
             }
             int last=22;for(var stroke:art.strokes()){assertTrue(stroke.tick()>last);assertTrue(stroke.tick()<96);last=stroke.tick();}
         }

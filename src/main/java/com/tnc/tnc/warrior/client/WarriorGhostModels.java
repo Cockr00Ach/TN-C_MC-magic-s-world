@@ -16,7 +16,10 @@ import net.minecraftforge.registries.ForgeRegistries;
 public final class WarriorGhostModels {
     private static final Set<String> IDS=Set.of("dragon_sword","frost_katana","star_rapier","crimson_warblade","doom_scythe","earthshaker_hammer","sky_halberd",
             "yue_bronze_jian","willow_leaf_dao","crescent_guandao","fangtian_ji","red_tassel_spear",
-            "ring_pommel_dao","han_iron_jian","iron_jian_mace","monk_spade","qimei_staff");
+            "ring_pommel_dao","han_iron_jian","iron_jian_mace","monk_spade","qimei_staff",
+            "ashwood_jian","cloudridge_jian","ironwood_mallet","ring_flange_hammer","thunder_bronze_hammer",
+            "militia_spear","silver_hook_spear","coiled_dragon_spear","bronze_ge_halberd","single_crescent_halberd",
+            "black_iron_halberd","field_scythe","iron_crescent_scythe","white_bone_scythe","eclipse_scythe");
     private static ResourceLocation model(String id){return ResourceLocation.fromNamespaceAndPath("tnc","item/warrior_ghost/"+id);}
     @SubscribeEvent public static void register(ModelEvent.RegisterAdditional event){for(String id:IDS)event.register(model(id));}
     @SubscribeEvent public static void baked(ModelEvent.BakingCompleted event){

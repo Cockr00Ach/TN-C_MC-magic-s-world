@@ -8,6 +8,7 @@ import com.tnc.tnc.warrior.WarriorInput;
 import com.tnc.tnc.warrior.WarriorMove;
 import com.tnc.tnc.warrior.WarriorSkill;
 import com.tnc.tnc.warrior.WarriorWeaponFamily;
+import com.tnc.tnc.warrior.WarriorWeaponRanks;
 import com.tnc.tnc.warrior.WarriorWeapons;
 import java.util.ArrayList;
 import java.util.List;
@@ -99,12 +100,12 @@ public final class WarriorComboClient {
 
     /** 正在接的那一招；没有输入或已经超窗口返回 {@code null}。 */
     public static ComboTracker.Progress progress() {
-        if (!active()) {
+        if (!active() || !TemperingClient.enrolled()) {
             return null;
         }
         WarriorWeaponFamily family = heldFamily();
-        return ComboTracker.progressOfInputs(inputs(),
-                family == null ? WarriorCombos.all() : WarriorCombos.forFamily(family).stream().map(WarriorComboClient::heldVariant).toList());
+        return family == null ? null : ComboTracker.progressOfInputs(inputs(),
+                WarriorCombos.inputsForFamily(family, heldRank()).stream().map(WarriorComboClient::heldVariant).toList());
     }
     public static WarriorSkill heldVariant(WarriorSkill skill) {
         var player=Minecraft.getInstance().player;
@@ -136,6 +137,11 @@ public final class WarriorComboClient {
     public static WarriorWeaponFamily heldFamily() {
         var player = Minecraft.getInstance().player;
         return player == null || com.tnc.tnc.bronze.BronzeTwinWeapon.blocked(player) ? null : WarriorWeapons.family(player.getMainHandItem());
+    }
+
+    public static int heldRank() {
+        var player = Minecraft.getInstance().player;
+        return player == null ? 0 : WarriorWeaponRanks.rank(player.getMainHandItem());
     }
 
     /** 手上是不是长剑（和"拿法杖才能施法"同一条规矩，保留给旧调用）。 */

@@ -6,12 +6,13 @@ public final class WarriorUnifiedSlots {
     private WarriorUnifiedSlots(){}
     public static int slot(String id){
         int n=Integer.parseInt(id.substring(id.lastIndexOf('_')+1));
+        if(n==7)return 6;
         if(id.startsWith("bow_"))return switch(n){case 1->0;case 4->1;case 5->2;case 2->3;case 3->4;default->5;};
         if(n==4)return 1;if(n==3)return 2;
         if(id.startsWith("greatsword_")||id.startsWith("hammer_"))return n==2?0:n==1?3:n-1;
         return n==1?0:n==2?3:n-1;
     }
-    public static String keys(int slot){return switch(slot){case 0->"zzz";case 1->"eqe";case 2->"eqz";case 3->"qez";case 4->"zqe";default->"zzq";};}
+    public static String keys(int slot){return switch(slot){case 0->"zzz";case 1->"eqe";case 2->"eqz";case 3->"qez";case 4->"zqe";case 5->"zzq";case 6->"qee";default->throw new IllegalArgumentException("Unknown warrior combo slot: "+slot);};}
     public static String name(String id,String original){return id.equals("bow_combo_4")?"架势·挽弓":id.equals("bow_combo_5")?"弓身破架":original;}
     public static String purpose(int slot){return switch(slot){case 0->"主攻";case 1->"振刀";case 2->"破振刀";default->"连招"+(slot-2);};}
     public static WarriorSkill apply(WarriorSkill s){

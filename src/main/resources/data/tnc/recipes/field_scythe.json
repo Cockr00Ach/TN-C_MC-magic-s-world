@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "group": "tnc_weapons",
+  "ingredients": [
+    {
+      "item": "minecraft:iron_ingot"
+    },
+    {
+      "item": "minecraft:stick"
+    },
+    {
+      "item": "minecraft:oak_planks"
+    }
+  ],
+  "result": {
+    "item": "tnc:field_scythe",
+    "count": 1
+  }
+}

@@ -193,7 +193,7 @@ final class WindWardenCombat {
                 boss.position().add(0, boss.getBbHeight() * 0.62, 0).add(aim.scale(1.6)),
                 aim, 1.05D, damage, boss, 2.6D);
         if (blade != null) {
-            blade.setSpinRate(26.0F);
+            blade.setSpinRate(0.0F);   // 2026-11-15：和玩家风刃统一成"顺着风向直射"
         }
         boss.level().playSound(null, boss.blockPosition(), SoundEvents.PLAYER_ATTACK_SWEEP,
                 SoundSource.HOSTILE, 1.1F, 1.5F);

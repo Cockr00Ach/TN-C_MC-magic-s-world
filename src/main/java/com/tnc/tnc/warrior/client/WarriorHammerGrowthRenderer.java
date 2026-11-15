@@ -27,7 +27,8 @@ public final class WarriorHammerGrowthRenderer {
         var mc=Minecraft.getInstance();
         var family=WarriorWeapons.family(stack);
         float charged=WarriorChargeVisual.scale(player.getId(),mc.getFrameTime());
-        if(charged<=0 && !WarriorHeavyGrowth.usesEntityGrowth(family))return;
+        boolean polearm=a!=null&&a.animation()==com.tnc.tnc.warrior.WarriorAnimation.ULTIMATE&&!com.tnc.tnc.warrior.WarriorPolearmUltimates.kind(stack).isEmpty();
+        if(charged<=0 && !WarriorHeavyGrowth.usesEntityGrowth(family)&&!polearm)return;
         int points=player==mc.player?TemperingClient.points():WarriorPhantomScales.points(player.getUUID());
         float peak=WarriorHeavyGrowth.peak(points);
         float scale;
@@ -41,6 +42,7 @@ public final class WarriorHammerGrowthRenderer {
             float swing=player.getAttackAnim(mc.getFrameTime());
             scale=WarriorHeavyGrowth.scale(com.tnc.tnc.warrior.WarriorAnimation.SLASH_HORIZONTAL,family,false,swing,peak);
         }
+        if(polearm){float age=a.progress(mc.getFrameTime())*96;String type=com.tnc.tnc.warrior.WarriorPolearmUltimates.kind(stack);if(type.equals("halberd"))scale=1+9*Math.max(0,Math.min(1,(age-24)/20))*(1-Math.max(0,Math.min(1,(age-88)/8)));else if(type.equals("scythe"))scale=WarriorExecutionVisual.giant(player.getId())?1+9*Math.max(0,Math.min(1,(age-48)/20)):1;}
         if(scale<=1.00001f)return;
         var key=ForgeRegistries.ITEMS.getKey(stack.getItem());
         if(key==null)return;

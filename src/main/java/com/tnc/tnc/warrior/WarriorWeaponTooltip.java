@@ -44,20 +44,26 @@ public final class WarriorWeaponTooltip {
         if (family == null) {
             return;
         }
-        var line = Component.translatable(key(family)).withStyle(ChatFormatting.GRAY);
+        int rank = WarriorWeaponRanks.rank(stack);
+        var branch = WarriorWeaponRanks.branch(stack);
+        var line = Component.translatable(branch == null ? key(family) : branch.translationKey()).withStyle(ChatFormatting.GRAY);
         line.append(Component.literal(" · ").withStyle(ChatFormatting.DARK_GRAY));
         line.append(Component.translatable(handKey(family)).withStyle(ChatFormatting.GRAY));
+        line.append(Component.literal(" · ").withStyle(ChatFormatting.DARK_GRAY));
+        line.append(Component.translatable("tooltip.tnc.weapon.rank", rank).withStyle(ChatFormatting.GOLD));
         event.getToolTip().add(line);
+        event.getToolTip().add(Component.translatable("tooltip.tnc.weapon.combo_count", WarriorWeaponRanks.comboCount(rank))
+                .withStyle(ChatFormatting.GRAY));
 
         if (event.getFlags().isAdvanced()) {
             event.getToolTip().add(Component.translatable("tooltip.tnc.weapon.keys")
                     .withStyle(ChatFormatting.DARK_GRAY));
-            if(WarriorMartialArts.supports(id.toString())) {
-                for(var skill:WarriorCombos.forFamily(family)) {
-                    var move=WarriorMartialArts.adapt(skill,id.toString());
-                    event.getToolTip().add(Component.literal(move.holdLabel()+" · "+move.name()).withStyle(ChatFormatting.GOLD));
-                }
+            for(var skill:WarriorCombos.forRank(family, rank)) {
+                var move=WarriorPerformance.forId(skill,id.toString());
+                event.getToolTip().add(Component.literal(move.holdLabel()+" · "+move.name()).withStyle(ChatFormatting.GOLD));
             }
+            event.getToolTip().add(Component.translatable("tooltip.tnc.weapon.ultimate_requirement")
+                    .withStyle(ChatFormatting.DARK_GRAY));
         }
     }
 

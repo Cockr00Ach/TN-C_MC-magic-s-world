@@ -18,18 +18,20 @@ public final class WarriorUltimateCamera {
     private static CameraType previous;
     private static net.minecraft.client.multiplayer.ClientLevel world;
     private static int age;
+    private static int executionTarget=-1,limit=22;
+    public static void execution(int owner,int target,int ticks){start(owner);if(camera!=null){executionTarget=target;limit=ticks;update();}}
     private static float yaw;
     public static void start(int entity){
         var mc=Minecraft.getInstance();
         if(mc.player==null||mc.level==null||mc.player.getId()!=entity||mc.screen!=null||mc.getCameraEntity()!=mc.player)return;
-        previous=mc.options.getCameraType();world=mc.level;age=0;yaw=mc.player.getYRot();
+        executionTarget=-1;limit=22;previous=mc.options.getCameraType();world=mc.level;age=0;yaw=mc.player.getYRot();
         camera=new ArmorStand(mc.level,mc.player.getX(),mc.player.getY(),mc.player.getZ());camera.setInvisible(true);
         update();if(camera==null)return;mc.options.setCameraType(CameraType.FIRST_PERSON);mc.setCameraEntity(camera);
     }
     public static void stop(){
         var mc=Minecraft.getInstance();
         if(camera!=null&&mc.getCameraEntity()==camera){mc.setCameraEntity(mc.player);if(previous!=null)mc.options.setCameraType(previous);}
-        camera=null;previous=null;world=null;
+        camera=null;previous=null;world=null;executionTarget=-1;
     }
     @SubscribeEvent public static void tick(TickEvent.ClientTickEvent e){
         if(e.phase!=TickEvent.Phase.END||camera==null)return;var mc=Minecraft.getInstance();
@@ -37,14 +39,14 @@ public final class WarriorUltimateCamera {
         if(mc.level!=world||mc.player==null||!mc.player.isAlive()||mc.player.isSpectator()||mc.screen!=null||!mc.isWindowActive()
             ||mc.options.keyShift.isDown()||mc.getCameraEntity()!=camera||mc.options.getCameraType()!=CameraType.FIRST_PERSON
             ||anim==null||anim.animation()!=WarriorAnimation.ULTIMATE){stop();return;}
-        if(mc.isPaused())return;if(++age>=WarriorUltimates.INTRO){stop();return;}update();
+        if(mc.isPaused())return;if(++age>=limit){stop();return;}update();
     }
     private static void update(){
         var mc=Minecraft.getInstance();var p=mc.player;
         double t=Math.max(0,Math.min(1,(age-7)/14.0));t=t*t*(3-2*t);
         Vec3 f=faceDirection(1),side=new Vec3(f.z,0,-f.x).normalize();
         Vec3 focus=focus(1);
-        Vec3 eye=focus.add(f.scale(.95+1.5*t)).add(side.scale(.06+.55*t)).add(0,.02+.12*t,0);
+        Vec3 eye=executionTarget>=0?focus.add(side.scale(3.0)).add(f.scale(1.1)).add(0,.4,0):focus.add(f.scale(.95+1.5*t)).add(side.scale(.06+.55*t)).add(0,.02+.12*t,0);
         var hit=world.clip(new ClipContext(focus,eye,ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,p));
         if(hit.getType()==HitResult.Type.BLOCK){eye=hit.getLocation().lerp(focus,.2);if(eye.distanceTo(focus)<.45){stop();return;}}
         Vec3 d=focus.subtract(eye);
@@ -68,6 +70,7 @@ public final class WarriorUltimateCamera {
     }
     private static Vec3 focus(float partial){
         var p=Minecraft.getInstance().player;
+        if(executionTarget>=0&&world!=null&&world.getEntity(executionTarget) instanceof net.minecraft.world.entity.LivingEntity victim)return victim.getPosition(partial).add(0,victim.getBbHeight()*.6,0).lerp(p.getPosition(partial).add(0,1.3,0),.3);
         double scale=p.getEyeHeight()/1.62;
         // Player model head pivots at 1.5 blocks; face is on the front surface,
         // not at the gameplay eye position inside the head cube.

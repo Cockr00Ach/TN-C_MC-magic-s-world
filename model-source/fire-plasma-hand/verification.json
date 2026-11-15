@@ -1,0 +1,15 @@
+{
+  "finiteQuads": true,
+  "posesChecked": 10,
+  "tierPoseSamples": 385,
+  "crushBeats": [
+    36,
+    46,
+    56
+  ],
+  "maximumGroundQuads": 2627,
+  "aerialQuads": 3083,
+  "previewUsesRuntimeMesh": true,
+  "nativeGameTest": false,
+  "preview": "Direct offline alpha compositing of runtime quads; not a Minecraft screenshot."
+}

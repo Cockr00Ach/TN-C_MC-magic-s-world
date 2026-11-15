@@ -490,6 +490,10 @@ def build_model(weapon, rects):
             face['texture'] = '#0'
         element['faces'] = {key: value for key, value in element['faces'].items()
                             if key not in hidden.get(part[0], set())}
+        # Fully occluded cubes have no drawable geometry. Vanilla rejects a model
+        # containing even one element with faces:{}, rather than skipping it.
+        if not element['faces']:
+            continue
         if rot:
             axis, angle, origin = rot
             element["rotation"] = {"angle": angle, "axis": axis,

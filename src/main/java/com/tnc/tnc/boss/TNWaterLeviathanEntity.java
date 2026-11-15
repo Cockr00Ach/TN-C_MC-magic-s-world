@@ -196,7 +196,7 @@ public final class TNWaterLeviathanEntity extends Monster implements GeoEntity {
                 .add(Attributes.ATTACK_DAMAGE, 26.0D)
                 .add(Attributes.MOVEMENT_SPEED, 0.19D)
                 .add(Attributes.FLYING_SPEED, 0.30D)
-                .add(Attributes.FOLLOW_RANGE, 128.0D)
+                .add(Attributes.FOLLOW_RANGE, com.tnc.tnc.boss.BossLeash.ARENA_FOLLOW_RANGE)
                 .add(Attributes.ARMOR, 18.0D)
                 .add(Attributes.ARMOR_TOUGHNESS, 10.0D)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0D);

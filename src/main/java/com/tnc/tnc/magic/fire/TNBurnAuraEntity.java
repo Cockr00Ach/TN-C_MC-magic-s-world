@@ -76,7 +76,7 @@ public final class TNBurnAuraEntity extends Entity {
         if (player == null || entry == null) {
             return false;
         }
-        if (entry.chain() != SpellCatalog.Chain.BURN) {
+        if (entry.chain() != SpellCatalog.Chain.BURN || TNFireForms.handles(entry.id().getPath())) {
             return false;
         }
         ServerLevel level = player.serverLevel();

@@ -31,11 +31,11 @@ class WarriorHeavyGrowthTest {
         for(var family:new WarriorWeaponFamily[]{WarriorWeaponFamily.GREATSWORD,WarriorWeaponFamily.HAMMER})
             for(var animation:WarriorAnimation.values())if(WarriorHeavyGrowth.applies(animation,family,false)){
                 assertEquals(1,WarriorHeavyGrowth.scale(animation,family,false,0,10));
-                assertEquals(8,WarriorHeavyGrowth.scale(animation,family,false,WarriorHeavyGrowth.liftEnd(animation),10),.00001);
+                assertEquals(animation==WarriorAnimation.ULTIMATE?20:8,WarriorHeavyGrowth.scale(animation,family,false,animation==WarriorAnimation.ULTIMATE?.5f:WarriorHeavyGrowth.liftEnd(animation),10),.00001);
                 assertEquals(1,WarriorHeavyGrowth.scale(animation,family,false,1,10),.00001);
                 for(int i=0;i<=100;i++){
                     float size=WarriorHeavyGrowth.scale(animation,family,false,i/100f,1000);
-                    assertTrue(Float.isFinite(size) && size>=1 && size<=8);
+                    assertTrue(Float.isFinite(size) && size>=1 && size<=(animation==WarriorAnimation.ULTIMATE?20:8));
                 }
             }
     }

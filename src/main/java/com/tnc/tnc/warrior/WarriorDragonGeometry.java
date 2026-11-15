@@ -97,6 +97,13 @@ public final class WarriorDragonGeometry {
         return out;
     }
 
+    /** The unchanged carved head as a separate rigid mesh for curved flight renderers. */
+    public static List<Tri> headGeometry(Vec3 origin,Vec3 dir,Vec3 side,double head,float fade) {
+        List<Tri> out=new ArrayList<>(800);
+        if(head>.01)carvedHead(out,origin,dir,side,head,fade);
+        return out;
+    }
+
     private static void carvedHead(List<Tri> out,Vec3 origin,Vec3 dir,Vec3 side,double head,float fade) {
         Vec3 at=path(origin,dir,side,head),f=tangent(origin,dir,side,head,head);
         Vec3 r=new Vec3(-f.z,0,f.x).normalize(),u=r.cross(f).normalize();

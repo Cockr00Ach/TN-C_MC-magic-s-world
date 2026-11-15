@@ -29,7 +29,9 @@ public final class WarriorAnimationClient {
 
         /** 0..1 的播放进度（含帧间插值）。长按架势永远停在 1。 */
         public float progress(float partial) {
-            double raw = (WarriorAnimationClient.ticks - startTick + partial) / (double) durationTicks;
+            double elapsed=WarriorAnimationClient.ticks-startTick+partial;
+            var beat=IMPACTS.get(this);if(animation==WarriorAnimation.ULTIMATE&&beat!=null)elapsed-=WarriorImpactTiming.lag(ticks+partial-beat);
+            double raw=elapsed/(double)durationTicks;
             // 长按架势不需要额外的式子：时间一直往前走，进度自然裁在 1
             // （也就是“停在最后一帧”）；差别只在于 hold 不会过期。
             return (float) Math.max(0, Math.min(1, raw));
@@ -54,6 +56,8 @@ public final class WarriorAnimationClient {
         }
     }
 
+    private static final Map<Active,Long> IMPACTS=new HashMap<>();
+    public static void impact(int entityId){var a=ACTIVE.get(entityId);if(a!=null&&a.animation()==WarriorAnimation.ULTIMATE)IMPACTS.put(a,ticks);}
     private static final Map<Integer, Active> ACTIVE = new HashMap<>();
     private static final java.util.Set<WarriorAnimation> reported = java.util.EnumSet.noneOf(WarriorAnimation.class);
     private static final org.slf4j.Logger LOGGER = com.mojang.logging.LogUtils.getLogger();
@@ -99,6 +103,7 @@ public final class WarriorAnimationClient {
         if (ticks % 20 == 0) {
             long now = ticks;
             ACTIVE.entrySet().removeIf(entry -> entry.getValue().expired(now));
+            IMPACTS.entrySet().removeIf(entry->now-entry.getValue()>6);
         }
     }
 

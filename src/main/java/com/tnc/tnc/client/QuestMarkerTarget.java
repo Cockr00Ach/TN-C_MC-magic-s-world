@@ -39,7 +39,28 @@ import java.util.Optional;
  * <p>⚠️ 客户端只找**已加载**的实体：目标远在天边时找不到，这是对的 ——
  * 那时应该显示"方向 + 距离"而不是假装知道它在哪 ✗。
  */
+@net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = "tnc", value = net.minecraftforge.api.distmarker.Dist.CLIENT)
 public final class QuestMarkerTarget {
+
+    private record TutorialWaypoint(ResourceLocation dimension, Vec3 position, String label) {}
+    private static TutorialWaypoint tutorialWaypoint;
+
+    /** The server supplies the mentor's world-dependent arena position after login. */
+    public static void tutorialWaypoint(ResourceLocation dimension, Vec3 position, String label) {
+        if (dimension == null || position == null || !Double.isFinite(position.x)
+                || !Double.isFinite(position.y) || !Double.isFinite(position.z)) return;
+        tutorialWaypoint = new TutorialWaypoint(dimension, position,
+                label == null || label.isBlank() ? "莉娅 · 战士入门" : label);
+    }
+
+    public static void clearTutorialWaypoint() {
+        tutorialWaypoint = null;
+    }
+
+    @net.minecraftforge.eventbus.api.SubscribeEvent
+    public static void logout(net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggingOut event) {
+        clearTutorialWaypoint();
+    }
 
     private QuestMarkerTarget() {
     }
@@ -70,9 +91,10 @@ public final class QuestMarkerTarget {
         //    如果还去指任务发布者，等于把人往反方向带 ✗（这一步就是"目标点不对"的来源之一）。
         //    读不到目标类型时（老版本 mod 没有 type()）按旧行为处理，宁可多画也别整条消失。
         ResourceLocation npcType = entry.npcEntityTypeId();
-        boolean personObjective = entry.firstObjectiveType() == null || entry.firstObjectiveIsDialogue();
+        boolean warriorTutorial = "tnc:side/warrior_initiation".equals(entry.id());
+        boolean personObjective = warriorTutorial || entry.firstObjectiveType() == null || entry.firstObjectiveIsDialogue();
         if (npcType != null && personObjective) {
-            Entity nearest = nearestOfType(mc, npcType, player);
+            Entity nearest = nearestOfType(mc, npcType, player, warriorTutorial ? "莉娅 · 战士入门" : null);
             if (nearest != null) {
                 String label = entry.npcDisplayName() != null && !entry.npcDisplayName().isBlank()
                         ? entry.npcDisplayName()
@@ -81,6 +103,13 @@ public final class QuestMarkerTarget {
                 return Optional.of(new Marker(aim, label,
                         player.getEyePosition().distanceTo(aim), true));
             }
+        }
+
+        if (warriorTutorial && tutorialWaypoint != null) {
+            var waypoint = tutorialWaypoint;
+            return Optional.of(new Marker(waypoint.position(), waypoint.label(),
+                    player.getEyePosition().distanceTo(waypoint.position()),
+                    mc.level.dimension().location().equals(waypoint.dimension())));
         }
 
         // 2) 退回固定坐标（location 目标）
@@ -99,11 +128,16 @@ public final class QuestMarkerTarget {
      * <p>用遍历而不是 {@code level.getEntities} 的 AABB 版本：超视距时本来也找不到，
      * 而这样写不需要猜一个搜索半径 ✓。
      */
-    private static Entity nearestOfType(Minecraft mc, ResourceLocation typeId, LocalPlayer player) {
+    private static Entity nearestOfType(Minecraft mc, ResourceLocation typeId, LocalPlayer player, String requiredName) {
         Entity best = null;
         double bestDistance = Double.MAX_VALUE;
         for (Entity entity : mc.level.entitiesForRendering()) {
             if (entity == player || !entity.isAlive()) {
+                continue;
+            }
+            // The tutorial mentor's permanent custom name is synchronized to clients.
+            if (requiredName != null && (entity.getCustomName() == null
+                    || !requiredName.equals(entity.getCustomName().getString()))) {
                 continue;
             }
             ResourceLocation id = net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES

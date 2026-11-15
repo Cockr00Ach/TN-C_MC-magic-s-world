@@ -83,6 +83,7 @@ public final class WarriorComboService {
     static final class State {
         final ComboTracker tracker = new ComboTracker();
         final Map<String, Long> cooldowns = new HashMap<>();
+        ItemStack comboWeapon = ItemStack.EMPTY;
         long lastInput = Long.MIN_VALUE;
         long lastSlash = Long.MIN_VALUE;
         /** 上一条广播出去的基础动作，用来去重（见 basicAttack）。 */
@@ -144,6 +145,7 @@ public final class WarriorComboService {
         if (player == null || move == null || !eligible(player)) {
             return;
         }
+        if (WarriorTutorial.cinematic(player)) return;
         try {
             if (WarriorUltimateService.active(player)) return;
             if (WarriorBowCharge.input(player,move,mode)) return;
@@ -197,6 +199,11 @@ public final class WarriorComboService {
         }
         long now = gameTime(player);
         State state = state(player.getUUID());
+        ItemStack weapon = player.getMainHandItem();
+        if (state.comboWeapon != weapon) {
+            state.tracker.clear();
+            state.comboWeapon = weapon;
+        }
         // 排查用：一按 Q/E 就掉线时，这一行是 debug.log 里的最后足迹
         LOGGER.debug("[tnc] input move={} held={} family={} gap={}", move, held, family, elapsed(now, state.lastInput));
         if (elapsed(now, state.lastInput) < MIN_INPUT_GAP) {
@@ -218,7 +225,8 @@ public final class WarriorComboService {
         }
 
         WarriorInput input = held ? WarriorInput.hold(move) : WarriorInput.tap(move);
-        WarriorSkill matched = state.tracker.push(input, now, WarriorCombos.inputsForFamily(family));
+        int rank = WarriorWeaponRanks.rank(weapon);
+        WarriorSkill matched = state.tracker.push(input, now, WarriorCombos.inputsForFamily(family, rank));
         int flashed = -1;
         if (matched != null) {
             flashed = resolve(player, state, matched, now, held);
@@ -229,14 +237,13 @@ public final class WarriorComboService {
     /** 命中一条连招后：查解锁、查冷却、放终结技。返回在目录里的下标（HUD 闪实用）。 */
     private static int resolve(ServerPlayer player, State state, WarriorSkill skill, long now, boolean held) {
         var progress = progress(player);
-        int index = WarriorCombos.indexOf(skill);
-        skill = WarriorPerformance.forWeapon(skill, player.getMainHandItem());
-        if (!WarriorCombos.unlocked(skill, progress)) {
-            int need = WarriorCombos.temperRequirement(skill);
-            hint(player, "§e连招已成 · " + skill.name() + " 尚未解锁"
-                    + (need > 0 ? "（需磨砺 " + need + "，当前 " + progress.points() + "）" : ""));
+        ItemStack weapon = player.getMainHandItem();
+        int rank = WarriorWeaponRanks.rank(weapon);
+        if (skill.family() != WarriorWeapons.family(weapon) || !WarriorCombos.unlocked(skill, progress, rank)) {
             return -1;
         }
+        int index = WarriorCombos.indexOf(skill);
+        skill = WarriorPerformance.forWeapon(skill, weapon);
         long ready = state.cooldowns.getOrDefault(skill.id(), 0L);
         if (now < ready) {
             hint(player, "§7" + skill.name() + " 冷却 " + seconds(ready - now));
@@ -844,6 +851,13 @@ public final class WarriorComboService {
             return;
         }
         long now = gameTime(player);
+        if (state.comboWeapon != player.getMainHandItem()) {
+            state.comboWeapon = player.getMainHandItem();
+            if (!state.tracker.isEmpty()) {
+                state.tracker.clear();
+                sync(player, state, -1);
+            }
+        }
         if (state.counterAt != Long.MIN_VALUE && now >= state.counterAt) {
             state.counterAt = Long.MIN_VALUE;
             mobCounterSweep(player);
@@ -921,7 +935,8 @@ public final class WarriorComboService {
     }
     static boolean smallCounterTarget(ServerPlayer p,LivingEntity target){
         return target instanceof net.minecraft.world.entity.Mob && target.getBbHeight()<4
-                && p.distanceToSqr(target)<=16 && p.hasLineOfSight(target) && validTarget(p,target);
+                && p.distanceToSqr(target)<=16 && p.hasLineOfSight(target)
+                && (validTarget(p,target)||WarriorTutorial.parryTarget(p,target));
     }
     static void mobCounterSweep(ServerPlayer p){
         if(!eligible(p)||WarriorWeapons.family(p.getMainHandItem())==null)return;
@@ -1025,8 +1040,10 @@ public final class WarriorComboService {
         var progress = progress(player);
         State state = state(player.getUUID());
         WarriorWeaponFamily family = WarriorWeapons.family(player.getMainHandItem());
-        List<WarriorSkill> catalog = family == null ? WarriorCombos.all() : WarriorCombos.forFamily(family);
+        int rank = WarriorWeaponRanks.rank(player.getMainHandItem());
+        List<WarriorSkill> catalog = family == null ? List.of() : WarriorCombos.forFamily(family);
         StringBuilder out = new StringBuilder(family == null ? "未持武器" : family.cn() + "连招");
+        if (family != null) out.append(" · ").append(rank).append("级");
         out.append(" · 缓冲 ");
         var inputs = state.tracker.inputs();
         if (inputs.isEmpty()) {
@@ -1039,7 +1056,7 @@ public final class WarriorComboService {
                 out.append(inputs.get(i).label());
             }
         }
-        ComboTracker.Progress next = state.tracker.progress(catalog);
+        ComboTracker.Progress next = state.tracker.progress(WarriorCombos.inputsForFamily(family, rank));
         if (next != null && next.next() != null) {
             out.append(" · 下一步 ").append(next.next().label()).append("（").append(next.skill().name()).append("）");
         }
@@ -1048,7 +1065,8 @@ public final class WarriorComboService {
             out.append("\n").append(skill.chain().cn()).append(" · ").append(skill.name())
                     .append(" ").append(skill.sequenceLabel())
                     .append(" · 槽 ").append(skill.slot() + 1)
-                    .append(" · ").append(WarriorCombos.unlocked(skill, progress) ? "已解锁" : "未解锁");
+                    .append(" · ").append(WarriorCombos.unlocked(skill, progress, rank)
+                            ? "已解锁" : "需 " + WarriorCombos.requiredRank(skill) + " 级武器");
             if (skill.displaces()) {
                 out.append(" · 位移 ").append(String.format(Locale.ROOT, "%.1f", skill.dash())).append(" 格");
             }

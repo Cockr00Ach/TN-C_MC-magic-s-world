@@ -32,7 +32,7 @@ public class PracticeTerminalBlock extends Block {
                                  InteractionHand hand, BlockHitResult hit) {
         if (hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
         if (level.isClientSide) return InteractionResult.SUCCESS;
-        if (player instanceof ServerPlayer sp) PracticeArena.openTerminal(sp);
+        if (player instanceof ServerPlayer sp && !WarriorTutorial.terminal(sp,pos)) PracticeArena.openTerminal(sp);
         return InteractionResult.CONSUME;
     }
 }

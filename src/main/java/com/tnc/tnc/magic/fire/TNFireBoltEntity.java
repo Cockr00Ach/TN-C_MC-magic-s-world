@@ -213,6 +213,40 @@ public final class TNFireBoltEntity extends Projectile {
         remaining = bolt.range()*com.tnc.tnc.arcana.ArcanaBeacon.scale(owner);
     }
 
+    static void launchIgnition(ServerPlayer caster, int tier, Vec3 origin, Vec3 axis, float range, float radius) {
+        launchIgnition(caster, tier, origin, axis, range, radius, null);
+    }
+
+    public static void launchIgnitionCast(ServerPlayer caster, int tier, float range) {
+        TNFireballChain.cast(caster, tier, range);
+    }
+
+    static void launchIgnition(ServerPlayer caster, int tier, Vec3 origin, Vec3 axis, float range, float radius,
+                               LivingEntity target) {
+        var level = caster.serverLevel();
+        var bolt = new TNFireBoltEntity(com.tnc.tnc.magic.TNOrbEntities.FIRE_BOLT.get(), level);
+        bolt.setOwner(caster);
+        bolt.entityData.set(SPELL, "ignition_" + tier);
+        bolt.entityData.set(RADIUS, radius);
+        bolt.entityData.set(RANGE, range);
+        bolt.remaining = range;
+        bolt.setPos(origin);
+        bolt.setDeltaMovement(axis.scale(1.25));
+        bolt.lockTarget(target);
+        level.addFreshEntity(bolt);
+    }
+
+    public int ignitionTier() {
+        return switch (spellPath()) {
+            case "ignition_1" -> 1;
+            case "ignition_2" -> 2;
+            case "ignition_3" -> 3;
+            case "ignition_4" -> 4;
+            case "ignition_5" -> 5;
+            default -> 0;
+        };
+    }
+
     /** 锁定一个目标 ⇒ 这一发之后会**拐弯追它** ✓。 */
     public void lockTarget(LivingEntity target) {
         entityData.set(TARGET, target == null ? -1 : target.getId());
@@ -372,6 +406,7 @@ public final class TNFireBoltEntity extends Projectile {
     @Override
     public void tick() {
         super.tick();
+        int ignitionTier = ignitionTier();
 
         // ⚠️ 作者 2026-10-18：**全链都不要悬停** ——
         //    火球/射线 t1~t3 嫌顿，火龙吐息原来要在手前钉 18 tick 凝形，也一起去掉 ✓
@@ -379,6 +414,7 @@ public final class TNFireBoltEntity extends Projectile {
 
         // ---------------- 客户端：只负责好看 ----------------
         if (level().isClientSide) {
+            if (ignitionTier > 0) return;
             // ⚠️ 粒子只做"余烬点缀" —— 火球的形状由 TNFireBoltRenderer 的几何体负责。
             //    作者 2026-10-05 明确指出"不要一个球外面一些火焰粒子"，
             //    所以这里从"每 2 tick 撒 4 颗 + 一颗 LAVA"减到"每 3 tick 在尾后留一颗小火星"，
@@ -428,7 +464,7 @@ public final class TNFireBoltEntity extends Projectile {
             // ★ 作者 2026-10-05：「出射程前都存在，出射程后散开为火焰粒子」+「都按这样改」✓
             //   ⇒ **所有**火系投射物飞到射程尽头都散成一团火焰粒子 ✓
             //     （火龙除外 ✓ —— 它有自己的"剧烈爆炸"收尾 ✓）
-            if (!isDragon() && level() instanceof net.minecraft.server.level.ServerLevel slRay) {
+            if (ignitionTier == 0 && !isDragon() && level() instanceof net.minecraft.server.level.ServerLevel slRay) {
                 Vec3 at = position();
                 slRay.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z,
                         44, 0.35D, 0.35D, 0.35D, 0.10D);
@@ -444,12 +480,30 @@ public final class TNFireBoltEntity extends Projectile {
         ServerLevel server = (ServerLevel) level();
         // 长满的那一帧喷一次火星：给"射出去了"一个明确的瞬间 ✓
         // （原来挂在"悬停成形"那段里；悬停删掉后挪到这儿，观感保留）
-        if (formTicks() > 0 && tickCount == formTicks()) {
+        if (ignitionTier == 0 && formTicks() > 0 && tickCount == formTicks()) {
             server.sendParticles(ParticleTypes.FLAME, getX(), getY(), getZ(),
                     18, 0.14D, 0.14D, 0.14D, 0.10D);
         }
         Vec3 from = position();
         Vec3 motion = getDeltaMovement();
+        if (ignitionTier >= 4 && owner instanceof ServerPlayer caster) {
+            LivingEntity target = targetEntity();
+            if (target != null && (!TNFireRework.canDamage(caster, target)
+                    || target.position().distanceToSqr(from) > remaining * remaining
+                    || !TNFireballChain.visible(server, from, TNFireballChain.center(target), this))) {
+                target = null;
+                lockTarget(null);
+            }
+            if (target == null && tickCount % 5 == 1) {
+                target = TNFireballChain.acquire(caster, from, safeDirection(), Math.min(18, remaining));
+                lockTarget(target);
+            }
+            if (target != null) {
+                Vec3 toward = TNFireballChain.center(target).subtract(from).normalize();
+                motion = turnToward(motion, toward, HOMING_DEGREES_PER_TICK).scale(motion.length());
+                setDeltaMovement(motion);
+            }
+        }
         // ⚠️ 作者 2026-10-05：「把锥形追踪删了」✓
         //    原因（实测）：射线锁住第一个目标后会**一直往它拐**✗，
         //    于是永远对不上第二个目标 ⇒ 表现就是"只有第一个僵尸受伤"✗
@@ -461,7 +515,8 @@ public final class TNFireBoltEntity extends Projectile {
         //   现在**等速直线**：一出生就是 LAUNCH_SPEED 格/tick，轨迹是一条干净的直线 ✓
         // ⚠️ 只改**实际走了多远**，不改 getDeltaMovement() ——
         //    改速度会每 tick 触发一次速度同步包，反而更卡 ✗
-        Vec3 to = from.add(motion);
+        Vec3 to = from.add(ignitionTier > 0 && motion.length() > remaining
+                ? motion.normalize().scale(remaining) : motion);
 
         // 陨星坠的陨石：身周冒火 + **身后铺一条拖尾**
         // （作者 2026-10-05：「我没有看到陨石」→ 先加粒子；又要求「下落过程可以带点拖尾」→ 再铺长）
@@ -509,15 +564,34 @@ public final class TNFireBoltEntity extends Projectile {
         LivingEntity hit = null;
         Vec3 impact = limit;
         double closest = from.distanceToSqr(limit) + 1e-7D;
+        double padding = ignitionTier > 0 ? Math.max(.2, radius() * .7) : .15;
         for (LivingEntity target : server.getEntitiesOfClass(LivingEntity.class,
-                new AABB(from, to).inflate(0.4D), t -> FireSpellRules.hittable(owner, t))) {
-            AABB box = target.getBoundingBox().inflate(0.15D);
+                new AABB(from, ignitionTier > 0 ? limit : to).inflate(ignitionTier > 0 ? padding : .4), t -> ignitionTier > 0
+                        ? owner instanceof ServerPlayer player && TNFireRework.canDamage(player, t)
+                            && TNFireballChain.visible(server, from, TNFireballChain.center(t), this)
+                        : FireSpellRules.hittable(owner, t))) {
+            AABB box = target.getBoundingBox().inflate(padding);
             Optional<Vec3> point = box.contains(from) ? Optional.of(from) : box.clip(from, limit);
             if (point.isPresent() && point.get().distanceToSqr(from) < closest) {
                 closest = point.get().distanceToSqr(from);
                 hit = target;
                 impact = point.get();
             }
+        }
+
+        if (ignitionTier > 0) {
+            if (hit != null && owner instanceof ServerPlayer caster) {
+                TNFireRework.burnOnHit(caster, hit, ignitionTier);
+                discard();
+                return;
+            }
+            if (wall.getType() != HitResult.Type.MISS) {
+                discard();
+                return;
+            }
+            setPos(to);
+            remaining -= to.distanceTo(from);
+            return;
         }
 
         // 火龙吐息：这次扫到的目标如果**已经打过**，就当没打中 ✓

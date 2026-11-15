@@ -12,6 +12,7 @@ import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -43,12 +44,55 @@ public final class YanSanctuaryGenerator extends ChunkGenerator {
                     .apply(instance, YanSanctuaryGenerator::new));
     private static final int GROUND_DEPTH = 4;
     private static final int DRAGON_HEIGHT = 225;
+    private static final int DRAGON_WIDTH = 300;
+    private static final int DRAGON_LENGTH = 289;
+    private static final int MATERIAL_BITS = 4;
+    private static final int MATERIAL_MASK = (1 << MATERIAL_BITS) - 1;
 
-    private record DragonChunk(long[][] columns) {
-        long[] column(int x, int z) { return columns[(x & 15) | ((z & 15) << 4)]; }
+    private enum Stone {
+        SHADOW(Blocks.POLISHED_BLACKSTONE),
+        RIDGE(Blocks.BASALT),
+        SCALES(Blocks.POLISHED_DEEPSLATE),
+        ASH(Blocks.ANDESITE),
+        MEMBRANE(Blocks.SMOOTH_STONE),
+        IVORY(Blocks.CALCITE),
+        VIOLET(Blocks.PURPLE_TERRACOTTA),
+        CRYSTAL(Blocks.AMETHYST_BLOCK),
+        VEIN(YanSanctuary.OBSIDIAN);
+
+        final BlockState state;
+
+        Stone(Block block) { state = block.defaultBlockState(); }
+
+        // Translate the blueprint's original material regions into a single stone and violet palette.
+        static Stone fromSource(String name) {
+            return switch (name) {
+                case "blackstone", "polished_blackstone", "polished_blackstone_bricks", "cracked_polished_blackstone_bricks",
+                        "coal_ore", "deepslate_coal_ore", "netherite_block", "black_terracotta", "black_wool",
+                        "black_concrete_powder", "sculk", "sculk_catalyst" -> SHADOW;
+                case "soul_sand", "gray_glazed_terracotta", "gray_concrete", "gray_wool", "gray_concrete_powder",
+                        "gray_terracotta", "smooth_basalt", "polished_basalt", "basalt" -> RIDGE;
+                case "smooth_stone", "andesite", "polished_andesite", "light_gray_wool", "light_gray_glazed_terracotta",
+                        "light_gray_concrete", "light_gray_concrete_powder", "lodestone", "stone" -> ASH;
+                case "diorite", "polished_diorite", "white_concrete", "white_concrete_powder", "white_wool",
+                        "white_glazed_terracotta", "iron_block", "birch_wood" -> MEMBRANE;
+                case "smooth_quartz", "quartz_block", "quartz_bricks", "quartz_pillar", "chiseled_quartz_block",
+                        "bone_block", "snow_block", "calcite" -> IVORY;
+                case "diamond_ore", "deepslate_diamond_ore", "deepslate_lapis_ore", "iron_ore",
+                        "waxed_exposed_cut_copper", "light_blue_terracotta" -> VIOLET;
+                case "pearlescent_froglight", "orange_glazed_terracotta", "gold_ore" -> CRYSTAL;
+                case "lapis_ore", "deepslate_gold_ore", "gilded_blackstone", "deepslate_redstone_ore" -> VEIN;
+                default -> SCALES;
+            };
+        }
+    }
+
+    private record DragonChunk(short[][] columns) {
+        short[] column(int x, int z) { return columns[(x & 15) | ((z & 15) << 4)]; }
     }
 
     private static final class Dragon {
+        static final Stone[] STONES = Stone.values();
         static final Map<Long, DragonChunk> CHUNKS = read();
 
         private static Map<Long, DragonChunk> read() {
@@ -57,35 +101,50 @@ public final class YanSanctuaryGenerator extends ChunkGenerator {
                 var nbt = NbtIo.readCompressed(input);
                 int[] size = nbt.getIntArray("Size"), blocks = nbt.getIntArray("Blocks");
                 var palette = nbt.getList("Palette", 10);
-                if (!Arrays.equals(size, new int[]{300, DRAGON_HEIGHT, 289}) || blocks.length == 0 || blocks.length % 4 != 0) {
+                if (!Arrays.equals(size, new int[]{DRAGON_WIDTH, DRAGON_HEIGHT, DRAGON_LENGTH})
+                        || blocks.length == 0 || blocks.length % 4 != 0) {
                     throw new IOException("Invalid Aurelian blueprint dimensions");
                 }
 
-                int air = -1;
+                var materials = new byte[palette.size()];
                 for (int i = 0; i < palette.size(); i++) {
-                    if (palette.getCompound(i).getString("Name").equals("minecraft:air")) air = i;
+                    String name = palette.getCompound(i).getString("Name");
+                    if (!name.equals("minecraft:air")) {
+                        materials[i] = (byte) (Stone.fromSource(name.substring(name.indexOf(':') + 1)).ordinal() + 1);
+                    }
                 }
-                var chunks = new HashMap<Long, DragonChunk>();
+                var chunks = new HashMap<Long, byte[][]>();
                 for (int i = 0; i < blocks.length; i += 4) {
                     int x = blocks[i], y = blocks[i + 1], z = blocks[i + 2], material = blocks[i + 3];
                     if (x < 0 || x >= size[0] || y < 0 || y >= size[1] || z < 0 || z >= size[2]
                             || material < 0 || material >= palette.size()) {
                         throw new IOException("Invalid Aurelian blueprint entry");
                     }
-                    if (material == air) continue;
+                    if (materials[material] == 0) continue;
                     x += DRAGON.getX();
                     z += DRAGON.getZ();
                     long key = ChunkPos.asLong(x >> 4, z >> 4);
-                    var chunk = chunks.computeIfAbsent(key, ignored -> new DragonChunk(new long[256][]));
+                    var chunk = chunks.computeIfAbsent(key, ignored -> new byte[256][]);
                     int columnIndex = (x & 15) | ((z & 15) << 4);
-                    long[] column = chunk.columns[columnIndex];
-                    if (column == null) {
-                        column = new long[4];
-                        chunk.columns[columnIndex] = column;
-                    }
-                    column[y >> 6] |= 1L << (y & 63);
+                    if (chunk[columnIndex] == null) chunk[columnIndex] = new byte[DRAGON_HEIGHT];
+                    chunk[columnIndex][y] = materials[material];
                 }
-                return Map.copyOf(chunks);
+                var packed = new HashMap<Long, DragonChunk>();
+                chunks.forEach((key, columns) -> {
+                    var chunk = new short[256][];
+                    var columnBuffer = new short[DRAGON_HEIGHT];
+                    for (int i = 0; i < columns.length; i++) {
+                        byte[] column = columns[i];
+                        if (column == null) continue;
+                        int count = 0;
+                        for (int y = 0; y < column.length; y++) {
+                            if (column[y] != 0) columnBuffer[count++] = (short) ((y << MATERIAL_BITS) | (column[y] - 1));
+                        }
+                        chunk[i] = Arrays.copyOf(columnBuffer, count);
+                    }
+                    packed.put(key, new DragonChunk(chunk));
+                });
+                return Map.copyOf(packed);
             } catch (IOException e) {
                 throw new IllegalStateException("Cannot generate the dragon in Yan's sanctuary", e);
             }
@@ -127,17 +186,26 @@ public final class YanSanctuaryGenerator extends ChunkGenerator {
         return YanSanctuaryLayout.platform(x, y, z);
     }
 
-    private static long[] dragonColumn(int x, int z) {
-        DragonChunk chunk = Dragon.CHUNKS.get(ChunkPos.asLong(x >> 4, z >> 4));
+    private DragonChunk dragonChunk(int x, int z) {
+        x = arenaX(x);
+        if ((x >> 4) < (DRAGON.getX() >> 4) || x >= DRAGON.getX() + DRAGON_WIDTH
+                || (z >> 4) < (DRAGON.getZ() >> 4) || z >= DRAGON.getZ() + DRAGON_LENGTH) return null;
+        return Dragon.CHUNKS.get(ChunkPos.asLong(x >> 4, z >> 4));
+    }
+
+    short[] dragonColumn(int x, int z) {
+        var chunk = dragonChunk(x, z);
         return chunk == null ? null : chunk.column(x, z);
     }
 
-    private static int top(int x, int z, Heightmap.Types type, long[] dragon) {
-        if (dragon != null) {
-            for (int i = dragon.length - 1; i >= 0; i--) {
-                if (dragon[i] != 0) return DRAGON.getY() + (i << 6) + 64 - Long.numberOfLeadingZeros(dragon[i]);
-            }
-        }
+    boolean hasDragon(ChunkPos chunk) { return dragonChunk(chunk.getMinBlockX(), chunk.getMinBlockZ()) != null; }
+
+    static int dragonY(short packed) { return DRAGON.getY() + (packed >> MATERIAL_BITS); }
+
+    static BlockState dragonMaterial(short packed) { return Dragon.STONES[packed & MATERIAL_MASK].state; }
+
+    private static int top(int x, int z, Heightmap.Types type, short[] dragon) {
+        if (dragon != null) return dragonY(dragon[dragon.length - 1]) + 1;
         if (Math.abs(x) > 37 || z < -45 || z > 56) return FLOOR + 1;
         for (int y = STRUCTURE_TOP; y >= FLOOR; y--) {
             if (type.isOpaque().test(ground(x, y, z))) return y + 1;
@@ -153,11 +221,11 @@ public final class YanSanctuaryGenerator extends ChunkGenerator {
             var surface = chunk.getOrCreateHeightmapUnprimed(Heightmap.Types.WORLD_SURFACE_WG);
             var pos = new BlockPos.MutableBlockPos();
             int minX = chunk.getPos().getMinBlockX(), minZ = chunk.getPos().getMinBlockZ();
-            DragonChunk dragon = Dragon.CHUNKS.get(ChunkPos.asLong(arenaX(minX) >> 4, minZ >> 4));
+            DragonChunk dragon = dragonChunk(minX, minZ);
             for (int x = 0; x < 16; x++) {
                 for (int z = 0; z < 16; z++) {
                     int wx = arenaX(minX + x), wz = minZ + z;
-                    long[] column = dragon == null ? null : dragon.column(wx, wz);
+                    short[] column = dragon == null ? null : dragon.column(wx, wz);
                     int surfaceY = top(wx, wz, Heightmap.Types.WORLD_SURFACE_WG, column) - 1;
                     int oceanY = top(wx, wz, Heightmap.Types.OCEAN_FLOOR_WG, column) - 1;
                     for (int y = 0; y <= Math.min(surfaceY, STRUCTURE_TOP); y++) {
@@ -165,15 +233,11 @@ public final class YanSanctuaryGenerator extends ChunkGenerator {
                         if (!state.isAir()) chunk.setBlockState(pos.set(x, y, z), state, false);
                     }
                     if (column != null) {
-                        for (int word = 0; word < column.length; word++) {
-                            for (long mask = column[word]; mask != 0; mask &= mask - 1) {
-                                int y = DRAGON.getY() + (word << 6) + Long.numberOfTrailingZeros(mask);
-                                chunk.setBlockState(pos.set(x, y, z), YanSanctuary.OBSIDIAN.defaultBlockState(), false);
-                            }
-                        }
+                        for (short block : column) chunk.setBlockState(pos.set(x, dragonY(block), z), dragonMaterial(block), false);
                     }
-                    surface.update(x, surfaceY, z, column == null ? ground(wx, surfaceY, wz) : YanSanctuary.OBSIDIAN.defaultBlockState());
-                    ocean.update(x, oceanY, z, column == null ? ground(wx, oceanY, wz) : YanSanctuary.OBSIDIAN.defaultBlockState());
+                    var highestStone = column == null ? null : dragonMaterial(column[column.length - 1]);
+                    surface.update(x, surfaceY, z, highestStone == null ? ground(wx, surfaceY, wz) : highestStone);
+                    ocean.update(x, oceanY, z, highestStone == null ? ground(wx, oceanY, wz) : highestStone);
                 }
             }
             return chunk;
@@ -183,20 +247,21 @@ public final class YanSanctuaryGenerator extends ChunkGenerator {
     @Override
     public int getBaseHeight(int x, int z, Heightmap.Types type, LevelHeightAccessor level, RandomState state) {
         int localX = arenaX(x);
-        return top(localX, z, type, dragonColumn(localX, z));
+        return top(localX, z, type, dragonColumn(x, z));
     }
 
     @Override
     public NoiseColumn getBaseColumn(int x, int z, LevelHeightAccessor level, RandomState state) {
         int min = level.getMinBuildHeight();
         var states = new BlockState[level.getHeight()];
-        x = arenaX(x);
         var dragon = dragonColumn(x, z);
-        for (int i = 0; i < states.length; i++) {
-            int y = min + i;
-            int local = y - DRAGON.getY();
-            boolean statue = dragon != null && local >= 0 && local < DRAGON_HEIGHT && (dragon[local >> 6] & (1L << (local & 63))) != 0;
-            states[i] = statue ? YanSanctuary.OBSIDIAN.defaultBlockState() : ground(x, y, z);
+        int localX = arenaX(x);
+        for (int i = 0; i < states.length; i++) states[i] = ground(localX, min + i, z);
+        if (dragon != null) {
+            for (short block : dragon) {
+                int index = dragonY(block) - min;
+                if (index >= 0 && index < states.length) states[index] = dragonMaterial(block);
+            }
         }
         return new NoiseColumn(min, states);
     }

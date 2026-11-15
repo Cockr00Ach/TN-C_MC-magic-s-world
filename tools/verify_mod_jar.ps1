@@ -313,6 +313,18 @@ try {
         else { Fail "resource missing from jar: $res" }
     }
 
+    # ---------------- C2c. the blade trail's soft-edge texture ----------------
+    # WarriorTrailRenderType.PLUME binds this exact path. If it is not packaged, every
+    # trail quad samples the missing-texture atlas: the sword trail turns into the
+    # purple/black checkerboard instead of a soft plume -- and only at runtime.
+    foreach ($res in @('assets/tnc/textures/particle/trail_plume.png',
+                       'assets/tnc/textures/particle/trail_plume_edge.png',
+                       'assets/tnc/textures/particle/trail_plume_core.png',
+                       'com/tnc/tnc/warrior/client/WarriorTrailUVConsumer.class')) {
+        if ($zip.Entries | Where-Object { $_.FullName -eq $res }) { Ok "resource present: $res" }
+        else { Fail "resource missing from jar: $res" }
+    }
+
     # ---------------- C2b. the combo keyframes (sword / greatsword / hammer / bow) ----------------
     # The Blockbench clips live under a Chinese path (animations/entity/<cn>/<cn>.json).
     # Packaging is where that breaks: if the entry name gets mangled, the loader finds
@@ -1662,7 +1674,8 @@ if (-not $chkPython) {
 } else {
     $savedEap2 = $ErrorActionPreference
     $ErrorActionPreference = 'Continue'
-    foreach ($coinCheck in @(@('gen_coin_models.py', '--check'), @('coin_marks.py', '--check'))) {
+    foreach ($coinCheck in @(@('gen_coin_models.py', '--check'), @('coin_marks.py', '--check'),
+                             @('gen_trail_texture.py', '--check'))) {
         $coinName = $coinCheck[0]
         $coinPath = Join-Path $PSScriptRoot $coinName
         if (-not (Test-Path $coinPath)) { Fail "missing checker: tools\$coinName"; continue }

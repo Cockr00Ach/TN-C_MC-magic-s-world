@@ -232,11 +232,53 @@ public final class WarriorCombos {
                     "右斩点枪、横斩借力、左斩收枪向后滑步：短时无敌并拉开距离",
                     WarriorWeaponFamily.SPEAR, WarriorChain.EVADE, 0, false, false, 0,
                     WarriorAnimation.EVADE,
-                    List.of(false, false, false), 0, 10, 2.2)).stream().map(WarriorPerformance::catalog).map(WarriorUnifiedSlots::apply).toList();
+                    List.of(false, false, false), 0, 10, 2.2),
+            // Append new slots so existing network cooldown indices stay stable.
+            new WarriorSkill("spear_combo_6", "spear_combo_6", "拨云横枪",
+                    WarriorMove.parse("zzq"), 5, 170, 1.20f, 4.5, 200, .85, 3,
+                    "横枪拨开面前的敌人，再踏步扫过侧翼",
+                    WarriorWeaponFamily.SPEAR, WarriorChain.ASSAULT, 1.2, false, false, 0,
+                    WarriorAnimation.SPEAR_RETURN,
+                    List.of(false, false, false), 0, 0, 0),
+            new WarriorSkill("sword_combo_7", "sword_combo_7", "掠风回锋",
+                    WarriorMove.parse("qee"), 6, 190, 1.8f, 3.5, 145, .65, 3,
+                    "踏前带过剑锋，再转身切回敌人的侧面",
+                    WarriorWeaponFamily.LONGSWORD, WarriorChain.ATTACK, 1.0, false, false, 0,
+                    WarriorAnimation.SWORD_SWALLOW,
+                    List.of(false, false, false), 0, 0, 0),
+            new WarriorSkill("greatsword_combo_7", "greatsword_combo_7", "贯岳",
+                    WarriorMove.parse("qee"), 6, 260, 2.4f, 4.2, 135, 1.25, 4,
+                    "压低剑锋踏前，接一记高处劈落的重斩",
+                    WarriorWeaponFamily.GREATSWORD, WarriorChain.ATTACK, .4, false, false, 0,
+                    WarriorAnimation.GS_RIFT,
+                    List.of(false, false, false), 0, 0, 0),
+            new WarriorSkill("hammer_combo_7", "hammer_combo_7", "崩岩回震",
+                    WarriorMove.parse("qee"), 6, 280, 2.35f, 4.5, 260, 1.35, 4,
+                    "沉锤砸地，回拉锤头震开身边的敌人",
+                    WarriorWeaponFamily.HAMMER, WarriorChain.ATTACK, .35, false, false, 0,
+                    WarriorAnimation.HM_RUIN,
+                    List.of(false, false, false), 0, 0, 0),
+            new WarriorSkill("bow_combo_7", "bow_combo_7", "回身贯风箭",
+                    WarriorMove.parse("qee"), 6, 190, 2.15f, 1.0, 20, 0, 2,
+                    "向后挪开一步，回身射出一支强力箭",
+                    WarriorWeaponFamily.BOW, WarriorChain.EVADE, 0, true, false, 0,
+                    WarriorAnimation.BOW_BACK_SHOT,
+                    List.of(false, false, false), 0, 8, 2.5),
+            new WarriorSkill("spear_combo_7", "spear_combo_7", "穿阵落锋",
+                    WarriorMove.parse("qee"), 6, 210, 1.95f, 5.0, 70, .85, 3,
+                    "收杆蓄势，踏步向前送出一记窄角度的长刺",
+                    WarriorWeaponFamily.SPEAR, WarriorChain.ATTACK, 1.3, false, false, 0,
+                    WarriorAnimation.SPEAR_DRAGON,
+                    List.of(false, false, false), 0, 0, 0)).stream().map(WarriorPerformance::catalog).map(WarriorUnifiedSlots::apply).toList();
 
     /** QZE remains an alternate input for players who learned the previous attack chain. */
     public static List<WarriorSkill> inputsForFamily(WarriorWeaponFamily family){
-        var out=new ArrayList<>(forFamily(family));var s=bySlot(family,0);
+        return inputsForFamily(family, 5);
+    }
+
+    public static List<WarriorSkill> inputsForFamily(WarriorWeaponFamily family, int rank) {
+        var out = new ArrayList<>(forRank(family, rank));
+        var s = bySlot(family, 0);
         if(s!=null)out.add(0,new WarriorSkill(s.id(),s.codexId(),s.name(),WarriorMove.parse("qze"),s.slot(),s.cooldownTicks(),
             s.damageMultiplier(),s.radius(),s.arcDegrees(),s.knockback(),s.durabilityCost(),s.finisherText(),s.family(),s.chain(),s.dash(),s.ranged(),
             s.interrupt(),s.staggerTicks(),s.animation(),List.of(false,false,false),s.guardTicks(),s.evadeTicks(),s.backstep()));
@@ -264,6 +306,16 @@ public final class WarriorCombos {
         }
         out.sort(java.util.Comparator.comparingInt(WarriorSkill::slot));
         return out;
+    }
+
+    /** The first three slots are the core skills; each higher rank opens one more slot. */
+    public static int requiredRank(WarriorSkill skill) {
+        return Math.max(1, skill.slot() - 1);
+    }
+
+    public static List<WarriorSkill> forRank(WarriorWeaponFamily family, int rank) {
+        int allowed = WarriorWeaponRanks.comboCount(rank);
+        return forFamily(family).stream().filter(skill -> skill.slot() < allowed).toList();
     }
 
     public static WarriorSkill byId(String id) {
@@ -319,13 +371,18 @@ public final class WarriorCombos {
         return out;
     }
 
-    /** 解锁判定：唯一口径是图鉴条目，和服务端面板读的是同一段代码。 */
+    /** Full catalogue view for callers that do not have a weapon in hand. */
     public static boolean unlocked(WarriorSkill skill, WarriorCodex.Progress progress) {
+        return unlocked(skill, progress, 5);
+    }
+
+    public static boolean unlocked(WarriorSkill skill, WarriorCodex.Progress progress, int rank) {
         if (skill == null || progress == null) {
             return false;
         }
         WarriorCodex.Entry entry = WarriorCodex.byId(skill.codexId());
-        return entry != null && entry.implemented() && entry.met(progress);
+        return progress.enrolled() && skill.slot() < WarriorWeaponRanks.comboCount(rank)
+                && entry != null && entry.implemented() && entry.met(progress);
     }
 
     /** 还没解锁时，面板/提示里要写"还差多少磨砺"；没有磨砺条件返回 -1。 */

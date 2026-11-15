@@ -62,7 +62,7 @@ public final class StoneLancerEntity extends Monster implements GeoEntity {
     public StoneLancerEntity(EntityType<? extends StoneLancerEntity> type,Level level){super(type,level);xpReward=650;setPersistenceRequired();}
     public static AttributeSupplier.Builder attributes(){return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH,1000)
             .add(Attributes.ATTACK_DAMAGE,22).add(Attributes.ARMOR,16).add(Attributes.ARMOR_TOUGHNESS,8)
-            .add(Attributes.MOVEMENT_SPEED,.17).add(Attributes.FOLLOW_RANGE,400).add(Attributes.KNOCKBACK_RESISTANCE,1);}
+            .add(Attributes.MOVEMENT_SPEED,.17).add(Attributes.FOLLOW_RANGE,com.tnc.tnc.boss.BossLeash.ARENA_FOLLOW_RANGE).add(Attributes.KNOCKBACK_RESISTANCE,1);}
     @Override protected void defineSynchedData(){super.defineSynchedData();entityData.define(CASTING,false);entityData.define(BURROW,0);entityData.define(BURROW_START,0L);entityData.define(ARENA_BOUND,false);entityData.define(ARENA_AWAKE,false);}
     public int burrowPhase(){return entityData.get(BURROW);}
     void setBurrowPhase(int phase){entityData.set(BURROW_START,level().getGameTime());entityData.set(BURROW,phase);}

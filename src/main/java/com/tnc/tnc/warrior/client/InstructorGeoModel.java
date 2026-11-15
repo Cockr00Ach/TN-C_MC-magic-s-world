@@ -11,6 +11,8 @@ public final class InstructorGeoModel extends GeoModel<InstructorEntity> {
         ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "geo/entity/instructor.geo.json");
     private static final ResourceLocation ANIM =
         ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "animations/entity/instructor.animation.json");
+    private static final ResourceLocation TUTORIAL_ANIM =
+        ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "animations/entity/instructor_tutorial.animation.json");
     private static final ResourceLocation[] SKINS = new ResourceLocation[InstructorEntity.VARIANTS.length];
 
     static {
@@ -33,7 +35,7 @@ public final class InstructorGeoModel extends GeoModel<InstructorEntity> {
 
     @Override
     public ResourceLocation getAnimationResource(InstructorEntity animatable) {
-        return ANIM;
+        return animatable.tutorialActor() ? TUTORIAL_ANIM : ANIM;
     }
 
     @Override
