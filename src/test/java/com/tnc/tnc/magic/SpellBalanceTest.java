@@ -96,7 +96,8 @@ class SpellBalanceTest {
         for (Spell s : all) {
             assertTrue(s.tier() >= 1 && s.tier() <= 5, s.id() + " 的档位越界: " + s.tier());
             assertTrue(s.cast() >= 0D, s.id() + " 读条是负数");
-            assertTrue(s.cooldown() >= CD_MIN && s.cooldown() <= CD_MAX,
+            if (s.id().equals("mana_shield")) assertEquals(0D, s.cooldown(), "Mana shield intentionally has no cooldown");
+            else assertTrue(s.cooldown() >= CD_MIN && s.cooldown() <= CD_MAX,
                     s.id() + " 冷却越界: " + s.cooldown());
         }
     }
