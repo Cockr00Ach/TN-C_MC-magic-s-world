@@ -77,7 +77,24 @@ public final class LandMount extends Horse implements GeoEntity {
             if(isInWater()&&isVehicle())setDeltaMovement(getDeltaMovement().add(0,.025,0));
         }
     }
-    @Override public double getPassengersRidingOffset(){return (goat()?29:snow()?28:33)*.65/16;}
+    @Override public double getPassengersRidingOffset() {
+        // Include the seated player model's hip offset when aligning with the mount's back.
+        return switch (species()) {
+            case "mountain_goat" -> 0.90;
+            case "snow_wolf" -> 0.86;
+            default -> 0.98;
+        };
+    }
+
+    @Override
+    protected void positionRider(Entity passenger, Entity.MoveFunction move) {
+        if (passenger instanceof Player player && hasPassenger(player)) {
+            // The land-mount rigs keep their backs centered during the horse's jump charge.
+            move.accept(player, getX(), getY() + getPassengersRidingOffset() + player.getMyRidingOffset(), getZ());
+        } else {
+            super.positionRider(passenger, move);
+        }
+    }
     @Override protected SoundEvent getAmbientSound(){return goat()?SoundEvents.GOAT_AMBIENT:snow()?SoundEvents.WOLF_AMBIENT:super.getAmbientSound();}
     @Override protected SoundEvent getHurtSound(DamageSource source){return goat()?SoundEvents.GOAT_HURT:snow()?SoundEvents.WOLF_HURT:super.getHurtSound(source);}
     @Override protected SoundEvent getDeathSound(){return goat()?SoundEvents.GOAT_DEATH:snow()?SoundEvents.WOLF_DEATH:super.getDeathSound();}
