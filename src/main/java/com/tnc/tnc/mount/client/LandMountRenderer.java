@@ -11,7 +11,12 @@ import software.bernie.geckolib.model.GeoModel;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 
 public final class LandMountRenderer extends GeoEntityRenderer<LandMount>{
-    public LandMountRenderer(EntityRendererProvider.Context context){super(context,new Model());withScale(.65f);shadowRadius=.65f;}
+    public LandMountRenderer(EntityRendererProvider.Context context) {
+        super(context, new Model());
+        float scale = 0.65f * LandMounts.SIZE_MULTIPLIER;
+        withScale(scale);
+        shadowRadius = scale;
+    }
     private static final class Model extends GeoModel<LandMount>{
         private ResourceLocation resource(LandMount mount,String folder,String suffix){return ResourceLocation.fromNamespaceAndPath("tnc",folder+mount.species()+suffix);}
         @Override public ResourceLocation getModelResource(LandMount m){return resource(m,"geo/mount/",".geo.json");}

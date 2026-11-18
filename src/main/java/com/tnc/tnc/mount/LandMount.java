@@ -78,12 +78,14 @@ public final class LandMount extends Horse implements GeoEntity {
         }
     }
     @Override public double getPassengersRidingOffset() {
-        // Include the seated player model's hip offset when aligning with the mount's back.
-        return switch (species()) {
+        double baseOffset = switch (species()) {
             case "mountain_goat" -> 0.90;
             case "snow_wolf" -> 0.86;
             default -> 0.98;
         };
+        // Scale the calibrated hip height above the mount's feet, then remove the player's fixed offset.
+        double playerHipCorrection = 0.35;
+        return (baseOffset + playerHipCorrection) * LandMounts.SIZE_MULTIPLIER - playerHipCorrection;
     }
 
     @Override
