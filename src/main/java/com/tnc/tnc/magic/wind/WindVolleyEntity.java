@@ -11,6 +11,8 @@ import java.util.*;
 
 /** One networked cast, up to thirty independent swept weapons, one damage aggregate per victim/tick. */
 public final class WindVolleyEntity extends Entity {
+    private static final EntityDataAccessor<Boolean> COMPACT_FORMATION =
+            SynchedEntityData.defineId(WindVolleyEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> TIER=SynchedEntityData.defineId(WindVolleyEntity.class,EntityDataSerializers.INT);
     private static final EntityDataAccessor<Long> START=SynchedEntityData.defineId(WindVolleyEntity.class,EntityDataSerializers.LONG),DONE=SynchedEntityData.defineId(WindVolleyEntity.class,EntityDataSerializers.LONG);
     private static final EntityDataAccessor<Float> TX=SynchedEntityData.defineId(WindVolleyEntity.class,EntityDataSerializers.FLOAT),TY=SynchedEntityData.defineId(WindVolleyEntity.class,EntityDataSerializers.FLOAT),TZ=SynchedEntityData.defineId(WindVolleyEntity.class,EntityDataSerializers.FLOAT),SPAN=SynchedEntityData.defineId(WindVolleyEntity.class,EntityDataSerializers.FLOAT);
@@ -19,13 +21,20 @@ public final class WindVolleyEntity extends Entity {
     public float bossScale(){return entityData.get(BOSS_SCALE);}
     private LivingEntity owner,target;private int age,finishedAt=-1;
     public WindVolleyEntity(EntityType<? extends WindVolleyEntity> type,Level level){super(type,level);noPhysics=true;setNoGravity(true);}
-    @Override protected void defineSynchedData(){entityData.define(BOSS_SCALE,1F);entityData.define(TIER,1);entityData.define(START,0L);entityData.define(DONE,0L);entityData.define(TX,0F);entityData.define(TY,0F);entityData.define(TZ,0F);entityData.define(SPAN,5F);}
-    public int tier(){return entityData.get(TIER);}public int count(){return WindChainRules.count(tier());}
+    @Override protected void defineSynchedData(){entityData.define(COMPACT_FORMATION,false);entityData.define(BOSS_SCALE,1F);entityData.define(TIER,1);entityData.define(START,0L);entityData.define(DONE,0L);entityData.define(TX,0F);entityData.define(TY,0F);entityData.define(TZ,0F);entityData.define(SPAN,5F);}
+    public int tier(){return entityData.get(TIER);}
+    public int count() {
+        return entityData.get(COMPACT_FORMATION) ? 6 : WindChainRules.count(tier());
+    }
+    public int weaponForm(int slot) {
+        return entityData.get(COMPACT_FORMATION) ? (slot % 3 == 2 ? 2 : 1) : WindChainRules.form(tier(), slot);
+    }
     public double visualAge(float partial){return Math.max(0,level().getGameTime()+partial-entityData.get(START));}
     public boolean done(int slot){return (entityData.get(DONE)&(1L<<slot))!=0;}
     public Vec3 aimPoint(){return position().add(entityData.get(TX),entityData.get(TY),entityData.get(TZ));}
     private void aimAt(Vec3 at){var delta=at.subtract(position());entityData.set(TX,(float)delta.x);entityData.set(TY,(float)delta.y);entityData.set(TZ,(float)delta.z);}
     public void configure(LivingEntity caster,int tier,LivingEntity target){
+        entityData.set(COMPACT_FORMATION, tier == 4 && caster instanceof com.tnc.tnc.world.wind.CanglanWarlordEntity);
         owner=caster;this.target=target;entityData.set(TIER,WindChainRules.tier(tier));setPos(caster.position());entityData.set(START,level().getGameTime());
         aimAt(target==null?caster.getEyePosition().add(caster.getLookAngle().scale(40)):target.position());
         if(target!=null)entityData.set(SPAN,Math.min(48,Math.max(5,target.getBbWidth()*.7F)));
@@ -101,7 +110,7 @@ public final class WindVolleyEntity extends Entity {
             }
             if(victim==null&&wall.getType()!=HitResult.Type.MISS&&owner instanceof net.minecraft.server.level.ServerPlayer p)com.tnc.tnc.dungeon.leyline.LeylineEvents.spell(p,wall.getBlockPos(),"wind");
             boolean end=age>=endTime(slot);if(!hit&&!end)continue;
-            mask|=1L<<slot;++impacts;int form=WindChainRules.form(tier(),slot);float amount=WindChainRules.weaponDamage(tier(),form);
+            mask|=1L<<slot;++impacts;int form=weaponForm(slot);float amount=WindChainRules.weaponDamage(tier(),form);
             if(tier()>=1){
                 double r=tier()==5?36:Math.max(3,WindChainRules.modelScale(tier()));int n=0;
                 for(var e:splash){if(++n>48)break;if(e.getBoundingBox().distanceToSqr(to)>r*r)continue;

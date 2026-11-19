@@ -113,6 +113,7 @@ public final class TemperingEvents {
     }
     @SubscribeEvent public static void commands(RegisterCommandsEvent event) {
         event.getDispatcher().register(Commands.literal("tempering")
+            .then(WeaponChampionDuel.commands())
             .executes(ctx -> {
                 var p = ctx.getSource().getPlayerOrException(); var data = TemperingData.get(p.server);
                 ctx.getSource().sendSuccess(() -> Component.literal(talentSummary(p)), false); return 1;

@@ -133,10 +133,11 @@ public final class FireChainGameTests {
         });
     }
 
-    @GameTest(template = TEMPLATE, timeoutTicks = 220, batch = "fire_chain_combat")
+    @GameTest(template = "fireball_test_empty", timeoutTicks = 220, batch = "fire_heat_progression")
     public static void learnedFireTierAndAffinitySaveHeat(GameTestHelper h) {
-        Vec3 at = origin(h);
+        Vec3 at = Vec3.atBottomCenterOf(h.absolutePos(new BlockPos(18, 3, 8)));
         ServerPlayer caster = player(h, at);
+        caster.setNoGravity(true);
         Zombie novice = enemy(h, at.add(0, 0, 5));
         Zombie expert = enemy(h, at.add(2.4, 0, 5));
         var stone = MagicStone.getOrNull(caster);

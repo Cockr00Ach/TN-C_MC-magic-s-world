@@ -1,0 +1,590 @@
+{
+  "parts": [
+    {
+      "name": "high_collar",
+      "bone": "body",
+      "pivot": [
+        -3.3,
+        -0.72,
+        -2.25
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            49,
+            35
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            7,
+            2,
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "name": "instructor_riding_coat",
+      "bone": "body",
+      "pivot": [
+        -4.3,
+        0.9,
+        1.98
+      ],
+      "rotation": [
+        10,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            74,
+            35
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            8,
+            14,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "side_guard",
+      "bone": "left_arm",
+      "pivot": [
+        -1.43,
+        -2.23,
+        -2.42
+      ],
+      "rotation": [
+        0,
+        0,
+        -10
+      ],
+      "cubes": [
+        {
+          "uv": [
+            93,
+            35
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            5,
+            5,
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "name": "rolled_sleeve",
+      "bone": "right_arm",
+      "pivot": [
+        -3.24,
+        2.1,
+        -2.37
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            0,
+            51
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            5,
+            3,
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "name": "bound_wrist_r",
+      "bone": "right_arm",
+      "pivot": [
+        -3.23,
+        6.02,
+        -2.58
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            21,
+            51
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            5,
+            4,
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "name": "bound_wrist_l",
+      "bone": "left_arm",
+      "pivot": [
+        -1.22,
+        6.04,
+        -2.58
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            42,
+            51
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            5,
+            4,
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "name": "short_split_skirt_0",
+      "bone": "body",
+      "pivot": [
+        -3.7,
+        9.7,
+        -1.89
+      ],
+      "rotation": [
+        -15,
+        0,
+        13
+      ],
+      "cubes": [
+        {
+          "uv": [
+            63,
+            51
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            2,
+            6,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "short_split_skirt_1",
+      "bone": "body",
+      "pivot": [
+        2.75,
+        9.7,
+        -1.97
+      ],
+      "rotation": [
+        -15,
+        0,
+        -13
+      ],
+      "cubes": [
+        {
+          "uv": [
+            70,
+            51
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            2,
+            6,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "training_sash_tail",
+      "bone": "body",
+      "pivot": [
+        2.94,
+        8.95,
+        -2.6
+      ],
+      "rotation": [
+        -12,
+        12,
+        -16
+      ],
+      "cubes": [
+        {
+          "uv": [
+            77,
+            51
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            2,
+            7,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "woven_belt",
+      "bone": "body",
+      "pivot": [
+        -4.3,
+        8.4,
+        -2.7
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            84,
+            51
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            9,
+            2,
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "name": "belt_clasp",
+      "bone": "body",
+      "pivot": [
+        -1.0,
+        8.5,
+        -3.12
+      ],
+      "rotation": [
+        0,
+        0,
+        15
+      ],
+      "cubes": [
+        {
+          "uv": [
+            113,
+            51
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "coiled_bun",
+      "bone": "head",
+      "pivot": [
+        1.22,
+        -9.12,
+        0.88
+      ],
+      "rotation": [
+        0,
+        0,
+        -8
+      ],
+      "cubes": [
+        {
+          "uv": [
+            0,
+            120
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            4,
+            4,
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "name": "pearl_pin",
+      "bone": "head",
+      "pivot": [
+        -1.88,
+        -8.71,
+        0.87
+      ],
+      "rotation": [
+        0,
+        18,
+        -8
+      ],
+      "cubes": [
+        {
+          "uv": [
+            16,
+            126
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            8,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "hanging_lock",
+      "bone": "head",
+      "pivot": [
+        2,
+        -5,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [],
+      "motion": {
+        "idle": [
+          1,
+          0,
+          1
+        ],
+        "walk": [
+          3,
+          0,
+          3
+        ],
+        "wind": [
+          -4,
+          4,
+          3
+        ],
+        "hit": [
+          12,
+          -9,
+          -7
+        ],
+        "open": [
+          7,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "name": "river_braid",
+      "bone": "hanging_lock",
+      "pivot": [
+        1.12,
+        -0.6,
+        1.51
+      ],
+      "rotation": [
+        12,
+        0,
+        -6
+      ],
+      "cubes": [
+        {
+          "uv": [
+            34,
+            118
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            2,
+            8,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "name": "river_braid_clasp",
+      "bone": "hanging_lock",
+      "pivot": [
+        1.9,
+        5.16,
+        2.7
+      ],
+      "rotation": [
+        12,
+        0,
+        -6
+      ],
+      "cubes": [
+        {
+          "uv": [
+            42,
+            125
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            2,
+            1,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "name": "river_sash",
+      "bone": "body",
+      "pivot": [
+        -3.72,
+        8.2,
+        -2.7
+      ],
+      "rotation": [
+        -8,
+        0,
+        15
+      ],
+      "cubes": [
+        {
+          "uv": [
+            50,
+            117
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            2,
+            10,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "martial_seal",
+      "bone": "body",
+      "pivot": [
+        0.18,
+        2.31,
+        -3.62
+      ],
+      "rotation": [
+        0,
+        0,
+        -4
+      ],
+      "cubes": [
+        {
+          "uv": [
+            56,
+            123
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            3,
+            4,
+            1
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -119,10 +119,11 @@ public final class FireDetonationGameTests {
         });
     }
 
-    @GameTest(template = TEMPLATE, timeoutTicks = 40, batch = "fire_detonation")
+    @GameTest(template = "fireball_test_empty", timeoutTicks = 40, batch = "fire_detonation_overlap")
     public static void consecutiveMoltenCoresEachResolveTheirOwnHeatDamage(GameTestHelper helper) {
-        var at = Vec3.atBottomCenterOf(helper.absolutePos(new BlockPos(2, 3, 2)));
+        var at = Vec3.atBottomCenterOf(helper.absolutePos(new BlockPos(18, 3, 8)));
         var caster = player(helper, at);
+        caster.setNoGravity(true);
         var anchor = enemy(helper, at.add(0, 0, 4));
         // right(+Z) points toward -X, so the first left offset lands on +X.
         var victim = enemy(helper, at.add(1.9, 0, 4.5));
@@ -135,13 +136,15 @@ public final class FireDetonationGameTests {
         cast(caster, "molten_skyfall");
         float[] afterFirst = new float[1];
         helper.runAfterDelay(23, () -> {
-            helper.assertTrue(victim.getHealth() < 950, "The first molten core damages its displayed area");
+            helper.assertTrue(victim.getHealth() < 950, "The first molten core damages its displayed area: "
+                    + victim.getHealth() + " at " + victim.position());
             afterFirst[0] = victim.getHealth();
         });
         helper.runAfterDelay(32, () -> {
             try {
                 helper.assertTrue(victim.getHealth() < afterFirst[0] - 10,
-                        "The lower-heat second core still damages the overlapping victim nine ticks later");
+                        "The lower-heat second core still damages the overlapping victim nine ticks later: "
+                                + afterFirst[0] + " to " + victim.getHealth());
                 helper.succeed();
             } finally {
                 cleanup(caster, victim);

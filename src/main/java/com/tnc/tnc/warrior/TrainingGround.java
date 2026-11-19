@@ -249,12 +249,12 @@ public final class TrainingGround {
 
     @SubscribeEvent
     public static void experience(LivingExperienceDropEvent event) {
-        if (trainer(event.getEntity())) event.setDroppedExperience(0);
+        if (trainer(event.getEntity()) || event.getEntity() instanceof WeaponChampionEntity) event.setDroppedExperience(0);
     }
 
     @SubscribeEvent
     public static void drops(LivingDropsEvent event) {
-        if (trainer(event.getEntity())) event.setCanceled(true);
+        if (trainer(event.getEntity()) || event.getEntity() instanceof WeaponChampionEntity) event.setCanceled(true);
     }
 
     @SubscribeEvent
@@ -268,7 +268,8 @@ public final class TrainingGround {
     }
 
     private static boolean practiceItem(ItemStack stack) {
-        return stack.isEmpty() || WindInfusion.weapon(stack) || stack.getItem() instanceof ShieldItem || stack.isEdible();
+        return stack.isEmpty() || WarriorWeapons.family(stack) != null || WindInfusion.weapon(stack)
+            || stack.getItem() instanceof ShieldItem || stack.isEdible();
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)

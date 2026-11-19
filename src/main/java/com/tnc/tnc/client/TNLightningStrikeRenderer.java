@@ -377,7 +377,7 @@ public class TNLightningStrikeRenderer extends EntityRenderer<TNLightningStrikeE
 
         // ---- 落地后的地网 / 闪光 ----
         if (sinceHit >= 0) {
-            float t = sinceHit;
+            float t = age - impact;
             // ① 蛛网：落地那一下最亮，之后留 8 tick 慢慢暗
             float webAlpha = fade * (t < 2.0F ? 0.95F : Math.max(0.0F, 0.95F - (t - 2.0F) * 0.10F));
             double maxRadius = 1.6D + scale * 0.42D;               // 4.5 倍 ⇒ 3.5；14 倍 ⇒ 7.5
@@ -396,10 +396,14 @@ public class TNLightningStrikeRenderer extends EntityRenderer<TNLightningStrikeE
             }
             // ④ 向外扩散的气浪光圈（第 3 tick 起，越大越淡）
             if (t >= 3.0F && t < 16.0F) {
-                double grow = 1.0D + (t - 3.0D) * 0.55D;
-                float a = fade * 0.35F * Math.max(0.0F, 1.0F - (t - 3.0F) / 13.0F);
-                com.tnc.tnc.client.lightning.LightningBoltGeometry.groundFlash(vc, m,
-                        0.0D, groundY, 0.0D, (float) (maxRadius * grow), theme, a);
+                float progress = (t - 3) / 13;
+                if (arena || entity.isDark()) {
+                    double radius = maxRadius * (1 + (t - 3) * .55);
+                    com.tnc.tnc.client.lightning.LightningBoltGeometry.groundFlash(vc, m,
+                            0, groundY, 0, (float) radius, theme, fade * .35F * (1 - progress));
+                } else {
+                    strikeTrace(vc, m, groundY, maxRadius, progress, fade, seed, theme, camX, camY, camZ);
+                }
             }
             // ⑤ 云底的亮斑：让"天被劈开了"这件事在头顶也看得见 ✓
             if (t < 8.0F) {
@@ -413,6 +417,32 @@ public class TNLightningStrikeRenderer extends EntityRenderer<TNLightningStrikeE
             com.tnc.tnc.client.lightning.LightningBoltGeometry.bolt(vc, m,
                     0.0D, topY, 0.0D, 0.0D, lead, 0.0D, seed + 31L, width, 0.9F * fade,
                     theme, 1, camX, camY, camZ);
+        }
+    }
+
+    private static void strikeTrace(VertexConsumer out, org.joml.Matrix4f pose, double y, double range,
+                                    float progress, float fade, int seed, int theme,
+                                    double cameraX, double cameraY, double cameraZ) {
+        double travel = 1 - (1 - progress) * (1 - progress);
+        double radius = range * (.66 + 1.62 * travel);
+        float alpha = fade * (1 - progress) * (1 - progress);
+        var core = com.tnc.tnc.client.lightning.LightningTheme.edge(theme);
+        var mid = com.tnc.tnc.client.lightning.LightningTheme.mid(theme);
+        var glow = com.tnc.tnc.client.lightning.LightningTheme.glow(theme);
+        int slices = range >= 5 ? 6 : 4;
+        double separation = Math.PI * 2 / slices;
+        for (int i = 0; i < slices; i++) {
+            double[][] path = new double[10][3];
+            for (int j = 0; j < path.length; j++) {
+                double along = j / (double) (path.length - 1);
+                double angle = seed % 100 * .054 + separation * i + along * separation * .72 + .20 * travel;
+                double reach = radius * (.91 + .09 * along) + .08 * Math.sin(16 * angle);
+                path[j][0] = reach * Math.cos(angle);
+                path[j][1] = y + .07 + .34 * progress * Math.sin(Math.PI * along);
+                path[j][2] = reach * Math.sin(angle);
+            }
+            com.tnc.tnc.client.lightning.LightningBoltGeometry.polyline(out, pose, path,
+                    .045F, alpha, core, mid, glow, cameraX, cameraY, cameraZ);
         }
     }
 

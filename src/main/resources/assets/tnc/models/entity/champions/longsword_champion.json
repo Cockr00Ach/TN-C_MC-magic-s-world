@@ -1,0 +1,654 @@
+{
+  "parts": [
+    {
+      "name": "parted_hair",
+      "bone": "head",
+      "pivot": [
+        -4.05,
+        -8.6,
+        -3.9
+      ],
+      "rotation": [
+        0,
+        0,
+        -4
+      ],
+      "cubes": [
+        {
+          "uv": [
+            0,
+            35
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            8,
+            2,
+            8
+          ]
+        }
+      ]
+    },
+    {
+      "name": "temple_lock",
+      "bone": "head",
+      "pivot": [
+        -4.4,
+        -7,
+        -3.75
+      ],
+      "rotation": [
+        0,
+        0,
+        8
+      ],
+      "cubes": [
+        {
+          "uv": [
+            33,
+            35
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tied_hair",
+      "bone": "head",
+      "pivot": [
+        -1.6,
+        -10.05,
+        0.05
+      ],
+      "rotation": [
+        0,
+        -12,
+        4
+      ],
+      "cubes": [
+        {
+          "uv": [
+            40,
+            35
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            4,
+            3,
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "name": "cloth_knot",
+      "bone": "head",
+      "pivot": [
+        -2.15,
+        -8.8,
+        2.9
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            57,
+            35
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            4,
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "name": "wooden_hairpin",
+      "bone": "head",
+      "pivot": [
+        -3.9,
+        -9.6,
+        0.95
+      ],
+      "rotation": [
+        6,
+        21,
+        -9
+      ],
+      "cubes": [
+        {
+          "uv": [
+            70,
+            35
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            8,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "headcloth_tail_r",
+      "bone": "head",
+      "pivot": [
+        -1.95,
+        -7.1,
+        3.8
+      ],
+      "rotation": [
+        21,
+        4,
+        11
+      ],
+      "cubes": [
+        {
+          "uv": [
+            89,
+            35
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            2,
+            6,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "headcloth_tail_l",
+      "bone": "head",
+      "pivot": [
+        0,
+        -7.1,
+        3.85
+      ],
+      "rotation": [
+        26,
+        -10,
+        -14
+      ],
+      "cubes": [
+        {
+          "uv": [
+            96,
+            35
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            2,
+            7,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "inner_collar",
+      "bone": "body",
+      "pivot": [
+        -3.9,
+        -0.35,
+        1.7
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            103,
+            35
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            8,
+            2,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "sword_sleeve_r",
+      "bone": "right_arm",
+      "pivot": [
+        -3.1,
+        -2.05,
+        -2.16
+      ],
+      "rotation": [
+        0,
+        0,
+        3
+      ],
+      "cubes": [
+        {
+          "uv": [
+            0,
+            46
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            4,
+            6,
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "name": "sword_sleeve_l",
+      "bone": "left_arm",
+      "pivot": [
+        -1,
+        -2.05,
+        -2.16
+      ],
+      "rotation": [
+        0,
+        0,
+        -3
+      ],
+      "cubes": [
+        {
+          "uv": [
+            17,
+            46
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            4,
+            6,
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "name": "linen_cuff_r",
+      "bone": "right_arm",
+      "pivot": [
+        -3.1,
+        6.15,
+        -2.14
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            34,
+            46
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            4,
+            3,
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "name": "linen_cuff_l",
+      "bone": "left_arm",
+      "pivot": [
+        -1.03,
+        6.15,
+        -2.14
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            51,
+            46
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            4,
+            3,
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "name": "cloth_sash",
+      "bone": "body",
+      "pivot": [
+        -4.25,
+        8.5,
+        -2.3
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            68,
+            46
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            9,
+            2,
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "name": "sash_knot",
+      "bone": "body",
+      "pivot": [
+        -4.15,
+        9.35,
+        -2.9
+      ],
+      "rotation": [
+        0,
+        -8,
+        12
+      ],
+      "cubes": [
+        {
+          "uv": [
+            97,
+            46
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            3,
+            2,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "sash_end",
+      "bone": "body",
+      "pivot": [
+        -3.8,
+        10.4,
+        -2.6
+      ],
+      "rotation": [
+        -7,
+        0,
+        17
+      ],
+      "cubes": [
+        {
+          "uv": [
+            106,
+            46
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "crossed_robe_right",
+      "bone": "body",
+      "pivot": [
+        -4.0,
+        10.05,
+        -2.12
+      ],
+      "rotation": [
+        -8,
+        0,
+        2
+      ],
+      "cubes": [
+        {
+          "uv": [
+            113,
+            46
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            5,
+            7,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "crossed_robe_left",
+      "bone": "body",
+      "pivot": [
+        0.65,
+        10.1,
+        -1.85
+      ],
+      "rotation": [
+        -5,
+        0,
+        -4
+      ],
+      "cubes": [
+        {
+          "uv": [
+            0,
+            57
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            3,
+            5,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "robe_back",
+      "bone": "body",
+      "pivot": [
+        -4.1,
+        9.7,
+        1.6
+      ],
+      "rotation": [
+        8,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            9,
+            57
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            8,
+            8,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "hanging_lock",
+      "bone": "head",
+      "pivot": [
+        2,
+        -5,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [],
+      "motion": {
+        "idle": [
+          1,
+          0,
+          1
+        ],
+        "walk": [
+          3,
+          0,
+          3
+        ],
+        "wind": [
+          -4,
+          4,
+          3
+        ],
+        "hit": [
+          12,
+          -9,
+          -7
+        ],
+        "open": [
+          7,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "name": "swept_forelock",
+      "bone": "hanging_lock",
+      "pivot": [
+        -0.1,
+        -3.05,
+        -4.32
+      ],
+      "rotation": [
+        0,
+        0,
+        -19
+      ],
+      "cubes": [
+        {
+          "uv": [
+            0,
+            123
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            1,
+            4,
+            1
+          ]
+        }
+      ]
+    }
+  ]
+}

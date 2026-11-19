@@ -3,6 +3,7 @@ package com.tnc.tnc.equipment.client;
 import com.google.gson.*;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
+import com.tnc.tnc.client.LightningCastFx;
 import java.util.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.*;
@@ -15,6 +16,7 @@ import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 /** Actual three-dimensional jewels and local energy, in every held-item context. */
@@ -69,6 +71,33 @@ public final class LuminousStaffRenderer extends BlockEntityWithoutLevelRenderer
         }catch(Exception e){throw new IllegalStateException("Cannot load authored staff "+id,e);}
     }
     private static void pivot(PoseStack pose,Vector3f p,float rotation){pose.translate(p.x,p.y,p.z);pose.mulPose(Axis.YP.rotation(rotation));pose.translate(-p.x,-p.y,-p.z);}
+
+    private static void animate(PoseStack pose, Group group, Staff staff, double time, float charge) {
+        switch (group.motion) {
+            case "orbit" -> {
+                pivot(pose, staff.core, (float) (time * .009));
+                pivot(pose, group.pivot, (float) (time * .016 + group.phase));
+            }
+            case "storm_orbit" -> {
+                pivot(pose, staff.core, (float) (time * .019));
+                pivot(pose, group.pivot, (float) (time * .028 + group.phase));
+            }
+            case "armillary" -> {
+                float speed = group.phase == 0 ? .014F : group.phase;
+                pivot(pose, group.pivot, (float) (time * speed + charge * .34));
+            }
+            case "crown" -> {
+                Vector3f center = group.pivot;
+                float open = .08F + .035F * (float) Math.sin(time * .07) + .33F * charge;
+                pose.translate(center.x, center.y, center.z);
+                pose.mulPose(new Quaternionf().rotationAxis(open,
+                        (float) Math.sin(group.phase), 0, -(float) Math.cos(group.phase)));
+                pose.translate(-center.x, -center.y, -center.z);
+            }
+            case "", "electrode" -> { }
+            default -> pivot(pose, group.pivot, (float) (time * .016 + group.phase));
+        }
+    }
     private static void face(VertexConsumer out,PoseStack pose,Face f,int light,int overlay,float intensity,float alpha){
         var p=pose.last();for(int i=0;i<4;i++){var v=f.points[i];out.vertex(p.pose(),v.x,v.y,v.z).color(intensity,intensity,intensity,alpha).uv(f.uv[i][0],f.uv[i][1]).overlayCoords(overlay).uv2(light).normal(p.normal(),f.normal.x,f.normal.y,f.normal.z).endVertex();}
     }
@@ -77,10 +106,15 @@ public final class LuminousStaffRenderer extends BlockEntityWithoutLevelRenderer
         var staff=CACHE.computeIfAbsent(id.getPath(),LuminousStaffRenderer::load);
         var mc=Minecraft.getInstance();double time=mc.level==null?0:mc.level.getGameTime()+mc.getFrameTime();
         float exposure=ShaderPack.exposure();
+        boolean lightning = id.getPath().startsWith("lightning_wand_");
+        boolean firstPerson = context == ItemDisplayContext.FIRST_PERSON_LEFT_HAND
+                || context == ItemDisplayContext.FIRST_PERSON_RIGHT_HAND;
+        float charge = lightning && mc.player != null
+                && (mc.player.getMainHandItem() == stack || mc.player.getOffhandItem() == stack)
+                ? LightningCastFx.localCharge() : 0;
         for(int layer=0;layer<2;layer++)for(var group:staff.groups){
             pose.pushPose();
-            if(group.motion.equals("orbit"))pivot(pose,staff.core,(float)(time*.009));
-            if(!group.motion.isEmpty())pivot(pose,group.pivot,(float)(time*.016+group.phase));
+            animate(pose, group, staff, time, firstPerson ? charge * .56F : charge);
             var out=buffers.getBuffer(layer==0?RenderType.entityCutoutNoCull(staff.base):StaffGlow.jewel(staff.emission));
             for(var f:group.faces){
                 boolean crystal=f.material==2;
@@ -91,10 +125,19 @@ public final class LuminousStaffRenderer extends BlockEntityWithoutLevelRenderer
                 if(layer==1&&crystal)face(out,pose,f,LightTexture.FULL_BRIGHT,overlay,exposure*(float)(.92+.08*Math.sin(time*.065+group.phase)),1);
             }
             pose.popPose();
+            if (layer == 1 && group.motion.equals("electrode") && (firstPerson
+                    || context == ItemDisplayContext.THIRD_PERSON_LEFT_HAND
+                    || context == ItemDisplayContext.THIRD_PERSON_RIGHT_HAND)) {
+                discharge(buffers, pose, group, staff, time, charge, exposure, firstPerson);
+            }
         }
         // Local-volume glow works without a shader pack. It is not a screen-wide
         // particle emitter and never creates world particles in menus.
         var glow=buffers.getBuffer(StaffGlow.TYPE);var c=staff.color;
+        if (lightning) {
+            lightningEnergy(glow, pose, staff, time, exposure, charge, firstPerson);
+            return;
+        }
         float pulse=(float)(.82+.12*Math.sin(time*.065));
         spark(glow,pose,staff.core,.115f,c,pulse);
         spark(glow,pose,staff.core,.28f,c,.12f);
@@ -104,6 +147,45 @@ public final class LuminousStaffRenderer extends BlockEntityWithoutLevelRenderer
             float r=(float)(.10+.14*Math.sin(t*Math.PI));
             var at=new Vector3f(staff.core).add((float)Math.cos(a)*r,(float)(t-.5)*.72f,(float)Math.sin(a)*r);
             spark(glow,pose,at,i%7==0?.026f:.012f,c,(float)(.3+.5*Math.sin(t*Math.PI)));
+        }
+    }
+
+    private static void discharge(MultiBufferSource buffers, PoseStack pose, Group group, Staff staff,
+                                  double time, float charge, float exposure, boolean firstPerson) {
+        double period = 42 - 3 * staff.tier;
+        double clock = time + group.phase * 11;
+        double age = clock % period;
+        double duration = 4 + charge * 4;
+        if (age >= duration) return;
+        float alpha = (float) Math.sin(Math.PI * age / duration) * exposure * (firstPerson ? .68F : .95F);
+        var from = group.pivot;
+        var to = staff.core;
+        long seed = (long) (clock / period) * 101 + (long) group.phase * 31 + (long) (age / 2);
+        var out = buffers.getBuffer(com.tnc.tnc.client.lightning.LightningRenderTypes.BOLT);
+        int theme = staff.tier == 5 ? 0 : staff.tier == 3 ? 2 : 1;
+        com.tnc.tnc.client.lightning.LightningBoltGeometry.arc(out, pose.last().pose(),
+                from.x, from.y, from.z, to.x, to.y, to.z, seed, .005F, alpha, theme, .5, 1, 3);
+    }
+
+    private static void lightningEnergy(VertexConsumer out, PoseStack pose, Staff staff, double time,
+                                        float exposure, float charge, boolean firstPerson) {
+        int tier = staff.tier;
+        float pulse = exposure * (.67F + .12F * (float) Math.sin(time * .08) + .21F * charge);
+        float view = firstPerson ? .46F : 1F;
+        float radius = .057F + .017F * tier;
+        spark(out, pose, staff.core, radius, staff.color, pulse * view);
+        if (!firstPerson && tier >= 3) {
+            spark(out, pose, staff.core, radius * 2.2F, staff.color, pulse * .12F);
+        }
+        int count = firstPerson ? tier : 3 + 2 * tier;
+        for (int i = 0; i < count; i++) {
+            double position = i / (double) count;
+            double angle = position * Math.PI * 2 + time * (.031 + tier * .012);
+            float r = radius * (1 + .82F * charge) * (tier >= 4 ? 1.66F : 1F);
+            var at = new Vector3f(staff.core).add(r * (float) Math.cos(angle),
+                    r * (float) Math.sin(angle * 2 + time * .031) * 1.24F, r * (float) Math.sin(angle));
+            float size = (i % 3 == 0 ? .022F : .013F) * (.74F + tier * .095F);
+            spark(out, pose, at, size, staff.color, pulse * view * (.42F + (float) (.21 * Math.sin(angle))));
         }
     }
     private static void spark(VertexConsumer out,PoseStack pose,Vector3f c,float size,float[] color,float alpha){

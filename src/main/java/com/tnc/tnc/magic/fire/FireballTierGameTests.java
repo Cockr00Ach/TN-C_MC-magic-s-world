@@ -10,8 +10,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
@@ -23,10 +23,13 @@ import java.util.UUID;
 @GameTestHolder("tncfirerefine")
 @PrefixGameTestTemplate(false)
 public final class FireballTierGameTests {
-    private static final String TEMPLATE = "building_test_empty";
+    private static final String TEMPLATE = "fireball_test_empty";
 
     private static ServerPlayer caster(GameTestHelper h) {
-        var at = Vec3.atBottomCenterOf(h.absolutePos(new BlockPos(3, 3, 3)));
+        var floor = h.absolutePos(new BlockPos(16, 3, 16));
+        var chunk = new ChunkPos(floor);
+        // Keep the player, projectiles and initial targets in one indexed entity chunk.
+        var at = new Vec3(chunk.getMinBlockX() + 8.5, floor.getY(), chunk.getMinBlockZ() + 3.5);
         var player = new ServerPlayer(h.getLevel().getServer(), h.getLevel(),
                 new com.mojang.authlib.GameProfile(UUID.randomUUID(), "FireballTest"));
         player.connection = new net.minecraft.server.network.ServerGamePacketListenerImpl(player.server,
@@ -36,6 +39,7 @@ public final class FireballTierGameTests {
         };
         player.setGameMode(GameType.SURVIVAL);
         player.setInvulnerable(false);
+        player.setNoGravity(true);
         player.moveTo(at.x, at.y, at.z, 0, 0);
         h.getLevel().addNewPlayer(player);
         return player;
@@ -44,6 +48,7 @@ public final class FireballTierGameTests {
     private static Zombie enemy(GameTestHelper h, Vec3 at) {
         var target = EntityType.ZOMBIE.create(h.getLevel());
         target.setNoAi(true);
+        target.setBaby(false);
         target.setNoGravity(true);
         target.getAttribute(Attributes.MAX_HEALTH).setBaseValue(300);
         target.setHealth(300);
@@ -86,13 +91,13 @@ public final class FireballTierGameTests {
     @GameTest(template = TEMPLATE, timeoutTicks = 40, batch = "fireball_tiers")
     public static void fourthTierLocksThreeGiantOrbsAndTurnsTowardMovingTargets(GameTestHelper h) {
         var player = caster(h);
-        var targets = List.of(enemy(h, player.position().add(-4, 0, 12)),
-                enemy(h, player.position().add(0, 0, 14)), enemy(h, player.position().add(4, 0, 12)));
+        var targets = List.of(enemy(h, player.position().add(-3, 0, 8)),
+                enemy(h, player.position().add(0, 0, 10)), enemy(h, player.position().add(3, 0, 8)));
         try {
             cast(player, "flame_demon_wrath");
             var launched = bolts(player);
             h.assertTrue(launched.size() == 3 && launched.stream().allMatch(bolt -> bolt.ignitionTier() == 4 && bolt.radius() >= 1.65F),
-                    "T4 launches three giant blue-tier orbs");
+                    "T4 launches three giant blue-tier orbs, got " + launched.size());
             h.assertTrue(launched.stream().map(TNFireBoltEntity::targetEntity).distinct().count() == 3,
                     "The volley distributes locks across three visible enemies");
             var bolt = launched.get(0);
@@ -113,7 +118,7 @@ public final class FireballTierGameTests {
     @GameTest(template = TEMPLATE, timeoutTicks = 90, batch = "fireball_tiers")
     public static void rainContinuesAfterTheCastAndRecastingReplacesItsSchedule(GameTestHelper h) {
         var player = caster(h);
-        var target = enemy(h, player.position().add(0, 0, 12));
+        var target = enemy(h, player.position().add(0, 0, 7));
         cast(player, "solar_judgment");
         h.assertTrue(bolts(player).size() == 1, "The rain starts immediately with one sky orb");
         bolts(player).forEach(Entity::discard);

@@ -10,6 +10,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -23,11 +24,18 @@ import java.util.UUID;
 @PrefixGameTestTemplate(false)
 public final class FireHandSafetyGameTests {
     private static final String TEMPLATE = "building_test_empty";
+    private static final String ARENA = "fireball_test_empty";
     private FireHandSafetyGameTests() {}
 
     private static Vec3 center(GameTestHelper h) {
         var p = h.absolutePos(new BlockPos(2, 2, 2));
         return new Vec3(p.getX() + .5, p.getY(), p.getZ() + .5);
+    }
+
+    private static Vec3 arena(GameTestHelper h) {
+        var floor = h.absolutePos(new BlockPos(16, 3, 16));
+        var chunk = new ChunkPos(floor);
+        return new Vec3(chunk.getMinBlockX() + 6.5, floor.getY(), chunk.getMinBlockZ() + 8.5);
     }
 
     private static ServerPlayer caster(GameTestHelper h, Vec3 at) {
@@ -82,16 +90,16 @@ public final class FireHandSafetyGameTests {
         h.getLevel().getEntitiesOfClass(TNLavaFieldEntity.class, local).forEach(Entity::discard);
     }
 
-    @GameTest(template=TEMPLATE, timeoutTicks=40, batch="fire_hand_safety")
+    @GameTest(template=ARENA, timeoutTicks=40, batch="fire_hand_tiers")
     public static void secondTierSeeksTwoEnemiesAndThirdTierReachesFurther(GameTestHelper h) {
-        Vec3 at = center(h).add(0, 40, 0);
+        Vec3 at = arena(h);
         ServerPlayer player = caster(h, at.add(0, 0, -6));
         player.setNoGravity(true);
         player.setYRot(0); player.setXRot(0);
         Zombie aimed = enemy(h, at), nearby = enemy(h, at.add(4, 0, 0)), distant = enemy(h, at.add(9, 0, 0));
         try {
             h.assertTrue(player.hasLineOfSight(aimed) && player.hasLineOfSight(nearby),
-                    "The elevated fixture leaves both T2 targets unobstructed");
+                    "The arena leaves both T2 targets unobstructed");
             TNFireHands.cast(player, net.minecraft.resources.ResourceLocation.parse("tnc:blaze_clutch"));
             var hands = h.getLevel().getEntitiesOfClass(TNFlameHandEntity.class, new AABB(at, at).inflate(20),
                     hand -> player.getUUID().equals(hand.visualCaster()));
@@ -110,9 +118,9 @@ public final class FireHandSafetyGameTests {
         } finally { cleanup(h, at, aimed, nearby, distant, player); }
     }
 
-    @GameTest(template=TEMPLATE, timeoutTicks=100, batch="fire_hand_safety")
+    @GameTest(template=ARENA, timeoutTicks=100, batch="fire_hand_tiers")
     public static void fourthTierContinuesRaisingHandsAndRepeatedCastsStayBounded(GameTestHelper h) {
-        Vec3 at = center(h).add(0, 40, 0);
+        Vec3 at = arena(h);
         ServerPlayer player = caster(h, at.add(0, 0, -6));
         player.setNoGravity(true);
         player.setYRot(0); player.setXRot(0);
@@ -135,20 +143,21 @@ public final class FireHandSafetyGameTests {
         });
     }
 
-    @GameTest(template=TEMPLATE, timeoutTicks=40, batch="fire_hand_safety")
+    @GameTest(template=ARENA, timeoutTicks=40, batch="fire_hand_tiers")
     public static void giantHandPullsHostilesAndBurstsAtFortyHeatAfterFirstCrush(GameTestHelper h) {
-        Vec3 at = center(h).add(0, 40, 0);
+        Vec3 at = arena(h);
         ServerPlayer player = caster(h, at.add(0, 0, -6));
         player.setNoGravity(true);
-        Zombie held = enemy(h, at), pulled = enemy(h, at.add(7, 0, 0));
+        Zombie held = enemy(h, at), pulled = enemy(h, at.add(4, 0, 0));
         held.getAttribute(Attributes.MAX_HEALTH).setBaseValue(1000); held.setHealth(1000);
         var hand = TNFlameHandEntity.spawn(h.getLevel(), player, held, at, 5, 0, false);
         try {
-            h.assertTrue(player.hasLineOfSight(pulled), "The pulled enemy is visible in the elevated fixture");
+            h.assertTrue(player.hasLineOfSight(pulled), "The pulled enemy is visible in the arena");
             h.assertTrue(hand.gripHeight() > 5 && com.tnc.tnc.client.FireHandPose.scale(5) >= 4,
                     "The giant hand's model and grip height both increase");
             tickAt(hand, 20);
-            h.assertTrue(pulled.getDeltaMovement().x < 0, "T5 pulls nearby hostile enemies toward its palm");
+            h.assertTrue(pulled.getDeltaMovement().x < 0, "T5 pulls nearby hostile enemies toward its palm: "
+                    + pulled.getDeltaMovement() + ", hand at " + hand.position() + ", victim at " + pulled.position());
             FireHeat.add(held, player, 12);
             held.invulnerableTime = 20;
             tickAt(hand, 36);

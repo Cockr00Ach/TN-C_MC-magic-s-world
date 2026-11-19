@@ -115,6 +115,8 @@ public final class WarriorCodexScreen extends Screen {
         height = (int) Math.ceil(actualH / uiScale);
 
         rowRects.clear();
+        addRenderableWidget(Button.builder(Component.literal("首领约战"), b ->
+            minecraft.setScreen(new WeaponChampionScreen())).bounds(left()+12,top()+8,70,16).build());
         addRenderableWidget(Button.builder(Component.literal(showGuide?"查看招式":"操作说明"), b -> {
             showGuide=showCatalogue||!showGuide;
             showCatalogue=false;

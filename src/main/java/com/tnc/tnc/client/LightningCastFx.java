@@ -5,7 +5,6 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.tnc.tnc.TNMod;
 import com.tnc.tnc.client.lightning.LightningBoltGeometry;
 import com.tnc.tnc.client.lightning.LightningRenderTypes;
-import com.tnc.tnc.client.lightning.LightningTheme;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.ParticleStatus;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -36,42 +35,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-/**
- * <b>雷系读条前戏（2026-11-06）</b> —— 作者：「雷法的前戏你也可以优化做做，我希望是周围
- * 随机出现三个不同角度的小法阵，然后跑出我们的小雷龙飞进玩家的身体，脚边出现小闪电这样」✓
- *
- * <h2>三件事，一一对上</h2>
- * <ol>
- *   <li><b>三个小法阵</b>：固定 <b>3</b> 张（不是按档位加数量），位置绕身随机、<b>朝向随机</b>
- *       —— 平贴 / 立着朝外 / 斜插，正好三种角度 ✓；</li>
- *   <li><b>小雷龙</b>：每张阵亮一会儿就"开"，一条<b>线勾的小雷龙</b>（`scale` ≈ 0.16 格长）
- *       从阵心窜出来、沿弧线飞进施法者胸口；入体那一下胸口爆一圈电，t4+ 一张阵能放两条 ✓；</li>
- *   <li><b>脚边小闪电</b>：读条全程脚下一圈小雷网 ＋ 不断跳的短电弧（每 2~3 tick 换一次位置，
- *       像静电在脚边爬），越接近释放越密 ✓。</li>
- * </ol>
- *
- * <h2>额外加的</h2>
- * <ul>
- *   <li>头顶一颗<b>聚雷球</b>：3 条电弧往球心收，随进度变大（t2+ 才明显）；</li>
- *   <li>身侧<b>爆电</b>：从躯干往斜上方炸出去的短弧，每几 tick 换一批；</li>
- *   <li>释放：脚下雷环外扩 ＋ 白闪 ＋ 震屏；</li>
- *   <li>屏幕：极短的白闪（入体/释放）＋ 很淡的蓝黑暗角，<b>不压暗画面</b>（雷不是暗系）✓。</li>
- * </ul>
- *
- * <h2>为什么用学派判定</h2>
- * 雷系五条链（雷击／雷速／雷场／雷球／登神）在数据文件里不一定有 {@code spell.group}
- * （暗系有、雷系是"零散法术＋机制"），所以这里按 <b>{@code spell.school}</b> 判：
- * {@code spell_power:lightning} 命中即算雷系 —— 以后加新雷法术也自动吃到 ✓。
- *
- * <h2>为什么走 {@code BOLT} 层</h2>
- * 雷是<b>加色</b>的（白芯＋主题色外沿），必须 {@link LightningRenderTypes#BOLT}；
- * 黑线那种走 {@code DARK} 层的做法在这里会把雷画没 ✗（§9/§10 的反面）。
- */
+/** Tiered charge geometry for the lightning school and the corresponding release trace. */
 @Mod.EventBusSubscriber(modid = TNMod.MODID, value = Dist.CLIENT)
 public final class LightningCastFx {
-
-    /** 三个小法阵：固定三张（作者原话"三个"）✓。 */
-    private static final int CIRCLES = 3;
 
     /** 和别的雷系几何共用加色层（白芯会被 alpha 压住，不要走 DARK ✗）。 */
     private static final MultiBufferSource.BufferSource BUFFERS =
@@ -93,6 +59,13 @@ public final class LightningCastFx {
     private static float blueVignette;
 
     private LightningCastFx() {
+    }
+
+    public static float localCharge() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || mc.level != owner) return 0;
+        CastState state = CASTS.get(mc.player.getUUID());
+        return state == null ? 0 : state.ratio;
     }
 
     // ==================================================================
@@ -120,26 +93,23 @@ public final class LightningCastFx {
         }
         long now = level.getGameTime();
         boolean minimal = mc.options.particles().get() == ParticleStatus.MINIMAL;
+        boolean firstPerson = mc.options.getCameraType().isFirstPerson();
 
         Set<UUID> seen = new HashSet<>();
         float vignette = 0;
 
         for (Player player : level.players()) {
+            double distance = player.distanceTo(mc.player);
+            if (distance > 64) continue;
             CastInfo info = scan(player);
             if (info == null) {
                 continue;
             }
             seen.add(player.getUUID());
             CastState state = CASTS.computeIfAbsent(player.getUUID(), id -> new CastState(now));
-            state.update(level, player, info, now, minimal);
-
-            double distance = player == mc.player ? 0 : player.distanceTo(mc.player);
-            double falloff = Math.max(0, 1 - distance / 32);
-            if (player == mc.player) {
+            state.update(level, player, info, now, minimal || distance > 24);
+            if (player == mc.player && !firstPerson) {
                 vignette = Math.max(vignette, blueVignette(info.tier(), info.ratio()));
-            } else if (falloff > 0) {
-                vignette = Math.max(vignette, blueVignette(info.tier(), info.ratio())
-                        * (float) falloff * .3F);
             }
         }
 
@@ -152,7 +122,8 @@ public final class LightningCastFx {
             }
             CastState state = entry.getValue();
             if (now - state.lastSeen <= 3 && state.maxRatio > .3F) {
-                spawnBurst(level, state, Math.min(1, state.maxRatio), minimal);
+                boolean local = entry.getKey().equals(mc.player.getUUID());
+                spawnBurst(level, state, Math.min(1, state.maxRatio), minimal, local && !firstPerson);
             }
             it.remove();
         }
@@ -169,11 +140,13 @@ public final class LightningCastFx {
         BURSTS.removeIf(b -> now - b.start > 14L);
     }
 
-    private static void spawnBurst(ClientLevel level, CastState state, float strength, boolean minimal) {
+    private static void spawnBurst(ClientLevel level, CastState state, float strength, boolean minimal, boolean screenCue) {
         BURSTS.add(new Burst(state.x, state.y, state.z, state.tier, strength, level.getGameTime()));
-        whiteFlash = Math.max(whiteFlash, .55F * strength);
-        TNSpellClientVisuals.pulseShake((.10F + .04F * state.tier) * strength);
-        int puffs = (int) ((12 + state.tier * 8) * strength);
+        if (screenCue && state.tier >= 4) {
+            whiteFlash = Math.max(whiteFlash, .17F * strength);
+            TNSpellClientVisuals.pulseShake(.1F * strength);
+        }
+        int puffs = (int) ((4 + state.tier * 3) * strength);
         if (minimal) {
             puffs /= 2;
         }
@@ -208,12 +181,15 @@ public final class LightningCastFx {
         VertexConsumer vc = BUFFERS.getBuffer(LightningRenderTypes.BOLT);
         boolean any = false;
 
-        for (CastState state : CASTS.values()) {
+        for (var entry : CASTS.entrySet()) {
+            CastState state = entry.getValue();
             Vec3 base = new Vec3(state.x, state.y, state.z);
             if (base.distanceToSqr(camera) > 96 * 96) {
                 continue;
             }
-            ritual(vc, state, base, camera, time, partial);
+            boolean near = mc.options.getCameraType().isFirstPerson()
+                    && mc.player != null && entry.getKey().equals(mc.player.getUUID());
+            ritual(vc, state, base, camera, time, near);
             any = true;
         }
         for (Burst burst : BURSTS) {
@@ -225,7 +201,8 @@ public final class LightningCastFx {
             if (at.distanceToSqr(camera) > 96 * 96) {
                 continue;
             }
-            burstFx(vc, at, burst, age, camera);
+            var stage = LightningCastGlyphs.Stage.of(burst.tier);
+            LightningCastGlyphs.release(vc, at, camera, stage, age / 14D, burst.strength, burst.start);
             any = true;
         }
         if (any) {
@@ -233,250 +210,65 @@ public final class LightningCastFx {
         }
     }
 
-    private static void ritual(VertexConsumer vc, CastState state, Vec3 base, Vec3 cam,
-                               double time, float partial) {
-        int tier = state.tier;
-        float p = state.ratio;
-        float glow = .25F + .75F * Mth.clamp(p, 0, 1);
+    private static void ritual(VertexConsumer out, CastState state, Vec3 base, Vec3 camera,
+                               double time, boolean firstPerson) {
+        var stage = LightningCastGlyphs.Stage.of(state.tier);
+        float charge = .18F + .82F * smooth(state.ratio);
+        LightningCastGlyphs.ground(out, base, camera, stage, charge, time, firstPerson);
+        if (state.tier >= 4 && !firstPerson) {
+            LightningCastGlyphs.halo(out, base.add(0, 3.34 + .37 * (state.tier - 4), 0),
+                    camera, stage, time, charge);
+        }
 
-        // ① 脚边小闪电：一圈小雷网 ＋ 不断跳的短电弧（作者点名的第三件事）✓
-        footLightning(vc, base, cam, time, tier, glow);
-        // ② 三个不同角度的小法阵 ✓
-        java.util.ArrayList<Vec3> alive = new java.util.ArrayList<>(3);
         for (Circle circle : state.circles) {
             double age = time - circle.born;
-            if (age < 0 || age > circle.life) {
-                continue;
+            if (age < 0 || age > circle.life
+                    || firstPerson && circle.center.distanceToSqr(camera) < 9) continue;
+            float alpha = Math.min(1F, (float) age / 5F)
+                    * (1 - smooth(Mth.clamp((float) ((age / circle.life - .78) / .22), 0, 1)));
+            if (alpha < .01F) continue;
+            double radius = circle.radius * (.68 + .32 * Mth.clamp(age / 7, 0, 1));
+            LightningCastGlyphs.seal(out, circle.center, circle.normal, camera, stage, radius,
+                    time * .065 + circle.seed % 200 * .025, alpha * charge);
+            if (state.tier >= 3 && !firstPerson && age > 4) {
+                arc(out, circle.center, base.add(0, 1.32, 0),
+                        circle.seed + (long) (time / 4) * 61, .028F, alpha * charge * .68F, stage.accent, camera);
             }
-            float f = (float) Mth.clamp(age / (double) circle.life, 0, 1);
-            float a = Math.min(1F, (float) age / 3F) * (1F - smooth(Mth.clamp((f - .84F) / .16F, 0, 1)));
-            if (a <= .01F) {
-                continue;
-            }
-            double r = circle.radius * (.70D + .30D * Math.min(1D, age / 5D))
-                    * (1D + .06D * Math.sin(time * .3D + circle.seed));
-            ringInPlane(vc, circle.center, circle.normal, r, circle.seed,
-                    a * .80F, time * .18D + circle.seed * .002D, cam);
-            // ★ 2026-11-06 作者：「太小家碧玉了，那个什么唤龙小阵可以离玩家远点」
-            //   ⇒ 阵挪远了（4.3~5.9 格）就得让"它和玩家之间有关系"，否则像三个不相干的圈 ✗。
-            //   开阵前先拉一道忽明忽暗的引导电弧：阵心 → 胸口，读作"阵在把人叫过去 / 把龙叫出来"✓
-            float door = Mth.clamp((f - .45F) / .5F, 0, 1);
-            if (door > .04F) {
-                Vec3 chest = base.add(0, 1.05D, 0);
-                arc(vc, circle.center, chest, circle.seed + 900L + (long) (time / 2) * 7L,
-                        .010F + .003F * tier, a * door * .42F, cam);
-            }
-            // 阵心"充电"：越接近开门，中心那点越亮 ✓
-            if (door > .01F) {
-                flash(vc, circle.center, .05F + .14F * door, a * door, cam);
-            }
-            // 阵要散了：边缘甩出一圈短电（"烧完"的样子，不是无声消失）✓
-            if (f > .80F) {
-                float die = (f - .80F) / .20F;
-                for (int d = 0; d < 6; d++) {
-                    double ang = d * Math.PI * 2 / 6 + time * .5D + circle.seed;
-                    arc(vc, planePoint(circle.center, circle.normal, ang, r),
-                            planePoint(circle.center, circle.normal, ang, r * (1.35D + .5D * die)),
-                            circle.seed + 700L + d, .012F, a * (1F - die) * .8F, cam);
-                }
-            }
-            alive.add(circle.center);
+            flash(out, circle.center, .1F + .12F * charge, alpha * charge * .57F, stage.main, camera);
         }
 
-        // ★ 2026-11-06：三张阵之间拉一圈电 —— 让"三个"读成"一个阵组"，而不是三个孤立的圈 ✓
-        if (alive.size() >= 2) {
-            int links = alive.size() == 2 ? 1 : alive.size();
-            for (int i = 0; i < links; i++) {
-                Vec3 a0 = alive.get(i);
-                Vec3 b0 = alive.get((i + 1) % alive.size());
-                arc(vc, a0, b0, state.seed + 800L + i * 13L + (long) (time / 4) * 7L,
-                        .012F, .16F + .26F * glow, cam);
-            }
-        }
-
-        // ③ 小雷龙：从阵心飞进胸口 ✓
         for (Dragon dragon : state.dragons) {
             double age = time - dragon.born;
-            if (age < 0 || age > dragon.life) {
-                continue;
-            }
-            float f = (float) Mth.clamp(age / (double) dragon.life, 0, 1);
-            Vec3 at = bezier(dragon.from, dragon.ctrl, dragon.to, f);
-            Vec3 ahead = bezier(dragon.from, dragon.ctrl, dragon.to, Math.min(1F, f + .06F));
-            Vec3 dir = ahead.subtract(at);
-            if (dir.lengthSqr() < 1e-6) {
-                dir = dragon.to.subtract(dragon.from);
-            }
-            float a = Math.min(1F, f * 6F) * (1F - smooth(Mth.clamp((f - .82F) / .18F, 0, 1)));
-            if (a <= .01F) {
-                continue;
-            }
-            smallDragon(vc, at, dir, dragon.scale, a, (float) age, dragon.seed, cam);
-        }
-
-        // ④ 入体：胸口爆一圈电 ✓
-        for (Impact impact : state.impacts) {
-            double age = time - impact.born;
-            if (age < 0 || age > 8) {
-                continue;
-            }
-            float f = (float) Mth.clamp(age / 8D, 0, 1);
-            float a = (1F - f) * .9F;
-            flash(vc, impact.at, .30F * (1F - f * .5F), a * .8F, cam);
-            for (int i = 0; i < 6; i++) {
-                double ang = i * Math.PI * 2 / 6 + impact.seed * .01D;
-                Vec3 to = impact.at.add(Math.cos(ang) * (.35D + .5D * f),
-                        Math.sin(ang) * (.35D + .5D * f), Math.cos(ang * 2.3D) * .18D * (1 - f));
-                arc(vc, impact.at, to, impact.seed + i, .018F, a * .85F, cam);
+            if (age < 0 || age > dragon.life) continue;
+            float progress = (float) (age / dragon.life);
+            Vec3 at = bezier(dragon.from, dragon.ctrl, dragon.to, progress);
+            if (firstPerson && at.distanceToSqr(camera) < 10) continue;
+            Vec3 ahead = bezier(dragon.from, dragon.ctrl, dragon.to, Math.min(1, progress + .06F));
+            Vec3 direction = ahead.subtract(at);
+            if (direction.lengthSqr() < 1e-6) direction = dragon.to.subtract(dragon.from);
+            float alpha = Math.min(1, progress * 6) * (1 - smooth(Mth.clamp((progress - .82F) / .18F, 0, 1)));
+            if (alpha > .01F) {
+                smallDragon(out, at, direction, dragon.scale, alpha, (float) age, dragon.seed, stage.main, camera);
             }
         }
 
-        // ⑤ 头顶聚雷球（t2+）：3 条弧往球心收 ✓
-        if (tier >= 2) {
-            Vec3 orb = base.add(0, 2.70D + .12D * Math.sin(time * .09D), 0);
-            float size = (.26F + .06F * tier) * (.55F + .45F * glow);
-            flash(vc, orb, size, .30F + .35F * glow, cam);
-            for (int i = 0; i < 3 + tier; i++) {
-                double ang = time * .12D + i * Math.PI * 2 / (3 + tier);
-                Vec3 from = orb.add(Math.cos(ang) * (1.25D + .35D * Math.sin(time * .2D + i)),
-                        .45D * Math.sin(ang * 1.7D + time * .13D),
-                        Math.sin(ang) * (1.25D + .35D * Math.cos(time * .17D + i)));
-                arc(vc, from, orb, state.seed + 300L + (long) (time / 3) * 17L + i,
-                        .022F, (.30F + .40F * glow), cam);
+        if (!firstPerson) {
+            for (Impact impact : state.impacts) {
+                float alpha = (float) (1 - (time - impact.born) / 8);
+                if (alpha > 0 && alpha <= 1) {
+                    flash(out, impact.at, .10F + .24F * alpha, alpha * .62F, stage.main, camera);
+                }
             }
         }
 
-        // ⑥ 身侧爆电：从躯干斜着炸出去的短弧，每 3 tick 换一批 ✓
-        int sideArcs = 4 + tier;
+        int sparks = firstPerson ? 2 : state.tier + 1;
         long snap = (long) (time / 3);
-        for (int i = 0; i < sideArcs; i++) {
-            double ang = i * Math.PI * 2 / sideArcs + snap * .7D;
-            Vec3 from = base.add(Math.cos(ang) * .35D, 1.0D + Math.sin(ang * 2 + snap) * .35D,
-                    Math.sin(ang) * .35D);
-            Vec3 to = base.add(Math.cos(ang) * (1.55D + .55D * glow),
-                    1.0D + Math.sin(ang * 2 + snap) * .35D + (.30D + .45D * glow) * Math.cos(ang),
-                    Math.sin(ang) * (1.55D + .55D * glow));
-            arc(vc, from, to, state.seed + 500L + snap * 31L + i, .019F,
-                    .18F + .30F * glow, cam);
-        }
-    }
-
-    /** 平面里的一点：{@code center + (u·cosθ + v·sinθ)·r}，{@code u,v} 张成垂直于 {@code normal} 的平面 ✓。 */
-    private static Vec3 planePoint(Vec3 center, Vec3 normal, double angle, double radius) {
-        Vector3f n = new Vector3f((float) normal.x, (float) normal.y, (float) normal.z);
-        if (n.lengthSquared() < 1e-8F) {
-            n.set(0, 1, 0);
-        }
-        n.normalize();
-        Vector3f u = new Vector3f(1, 0, 0);
-        if (Math.abs(n.dot(u)) > .95F) {
-            u.set(0, 0, 1);
-        }
-        u.cross(n).normalize();
-        Vector3f v = new Vector3f(n).cross(u).normalize();
-        double c = Math.cos(angle) * radius;
-        double s = Math.sin(angle) * radius;
-        return center.add(u.x * c + v.x * s, u.y * c + v.y * s, u.z * c + v.z * s);
-    }
-
-    /** 脚边：小雷网 ＋ 短电弧（每 2~3 tick 换位置：像静电在脚边爬）✓。 */
-    private static void footLightning(VertexConsumer vc, Vec3 base, Vec3 cam,
-                                      double time, int tier, float glow) {
-        Vec3 feet = base.add(0, .045D, 0);
-        long snap = (long) (time / 2);
-        // ★ 2026-11-06：脚边雷网从 0.85 放大到 1.30~2.30 格 —— 原来那圈太秀气，
-        //   远看只是"脚下一亮"，现在是一整片噼啪作响的地面 ✓
-        double radius = 1.30D + .11D * tier + .20D * glow;
-        // 大雷网（三圈电）—— 不用 nodes（那会更亮，读条期不需要）✓
-        web(vc, feet, (float) radius, 9000L + (long) (time / 6) * 13L, .28F + .34F * glow,
-                (float) (time * .10D), cam, false);
-        // 外圈 14 根朝外的尖刺：把"雷网"读成"雷阵" ✓
-        for (int i = 0; i < 14; i++) {
-            double a = i * Math.PI * 2 / 14 + time * .05D;
-            arc(vc, feet.add(Math.cos(a) * radius * .96D, 0, Math.sin(a) * radius * .96D),
-                    feet.add(Math.cos(a) * radius * (1.10D + .06D * Math.sin(time * .3D + i)), 0,
-                            Math.sin(a) * radius * (1.10D + .06D * Math.sin(time * .3D + i))),
-                    9000L + i, .013F + .003F * tier, .30F + .34F * glow, cam);
-        }
-        // 贴地的一点底光（很轻，别抢戏）
-        LightningBoltGeometry.groundFlash(vc, IDENTITY,
-                feet.x - cam.x, feet.y - cam.y, feet.z - cam.z,
-                (float) (radius * .75D), LightningTheme.GOLD, .16F + .22F * glow);
-        // 跳动的短电弧：4 + 档 条，从地面小点往上跳
-        int sparks = 4 + tier;
         for (int i = 0; i < sparks; i++) {
-            long seed = 7000L + snap * 53L + i * 11L;
-            RandomSource rnd = RandomSource.create(seed);
-            double a = rnd.nextDouble() * Math.PI * 2;
-            double rr = radius * (.25D + rnd.nextDouble() * .75D);
-            Vec3 from = feet.add(Math.cos(a) * rr, 0, Math.sin(a) * rr);
-            double h = .20D + rnd.nextDouble() * (.45D + .12D * tier);
-            Vec3 to = from.add((rnd.nextDouble() - .5D) * .22D, h,
-                    (rnd.nextDouble() - .5D) * .22D);
-            arc(vc, from, to, seed, .014F + .004F * tier, (.35F + .45F * glow), cam);
-            if (i % 2 == 0) {
-                arc(vc, to, to.add((rnd.nextDouble() - .5D) * .3D, -.1D,
-                        (rnd.nextDouble() - .5D) * .3D), seed + 77L, .011F,
-                        (.25F + .30F * glow), cam);
-            }
-        }
-    }
-
-    private static void burstFx(VertexConsumer vc, Vec3 at, Burst burst, double age, Vec3 cam) {
-        double f = Mth.clamp(age / 12D, 0, 1);
-        float a = (float) ((1 - f) * (.55 + .10 * burst.tier) * burst.strength);
-        double R = 3.40D + burst.tier * .90D;
-        web(vc, at.add(0, .05D, 0), (float) (R * (.55D + f * 1.5D)), burst.start + 5L,
-                a * .8F, (float) (age * .3D), cam, true);
-        LightningBoltGeometry.groundFlash(vc, IDENTITY, at.x - cam.x, at.y - cam.y, at.z - cam.z,
-                (float) (R * (.4D + f)), LightningTheme.GOLD, a * .7F);
-        for (int i = 0; i < 8; i++) {
-            double ang = i * Math.PI * 2 / 8 + burst.start * .01D;
-            Vec3 to = at.add(Math.cos(ang) * R * (.35D + f), .10D + f * .5D,
-                    Math.sin(ang) * R * (.35D + f));
-            arc(vc, at.add(0, .12D, 0), to, burst.start + 40L + i, .022F, a * .8F, cam);
-        }
-    }
-
-    // ==================================================================
-    //  几何
-    // ==================================================================
-
-    /** 任意朝向的小法阵：三圈电环 ＋ 刻度（{@code normal} 决定"平 / 立 / 斜"）✓。 */
-    private static void ringInPlane(VertexConsumer vc, Vec3 center, Vec3 normal, double radius,
-                                    long seed, float alpha, double spin, Vec3 cam) {
-        if (radius <= .02D || alpha <= .01F) {
-            return;
-        }
-        Vector3f n = new Vector3f((float) normal.x, (float) normal.y, (float) normal.z).normalize();
-        Vector3f u = new Vector3f(1, 0, 0);
-        if (Math.abs(n.dot(u)) > .95F) {
-            u.set(0, 0, 1);
-        }
-        u.cross(n).normalize();
-        Vector3f v = new Vector3f(n).cross(u).normalize();
-
-        float tx = (float) (center.x - cam.x);
-        float ty = (float) (center.y - cam.y);
-        float tz = (float) (center.z - cam.z);
-        Matrix4f m = new Matrix4f(
-                u.x, u.y, u.z, 0,
-                v.x, v.y, v.z, 0,
-                n.x, n.y, n.z, 0,
-                tx, ty, tz, 1);
-        double camX = -(u.x * tx + u.y * ty + u.z * tz);
-        double camY = -(v.x * tx + v.y * ty + v.z * tz);
-        double camZ = -(n.x * tx + n.y * ty + n.z * tz);
-
-        LightningBoltGeometry.groundWeb(vc, m, 0, 0, 0, (float) radius, seed, LightningTheme.GOLD,
-                alpha, (float) spin, camX, camY, camZ, false);
-        // 刻度：10 根从 0.88R 到 1.04R 的短弧（"这圈是会咬人的"✓）
-        for (int i = 0; i < 10; i++) {
-            double a = i * Math.PI * 2 / 10 - spin * 1.4D;
-            LightningBoltGeometry.arc(vc, m,
-                    Math.cos(a) * radius * .88D, Math.sin(a) * radius * .88D, 0,
-                    Math.cos(a) * radius * 1.04D, Math.sin(a) * radius * 1.04D, 0,
-                    seed + i, .016F, alpha * .9F, LightningTheme.GOLD, camX, camY, camZ);
+            double angle = i * Math.PI * 2 / sparks + snap * 1.23;
+            double radius = stage.radius * (.78 + .12 * Math.sin(snap * 2.41 + i));
+            Vec3 from = base.add(Math.cos(angle) * radius, .09, Math.sin(angle) * radius);
+            Vec3 to = from.add(Math.cos(angle + .4) * .30, .16 + charge * .35, Math.sin(angle + .4) * .30);
+            arc(out, from, to, state.seed + snap * 31 + i, .023F, .69F * charge, stage.main, camera);
         }
     }
 
@@ -488,7 +280,7 @@ public final class LightningCastFx {
      * 和 `TNLightningDragonRenderer` 里那条 45 格长的大龙是同一套语言、不同尺寸。
      */
     private static void smallDragon(VertexConsumer vc, Vec3 at, Vec3 dir, float scale,
-                                    float alpha, float age, long seed, Vec3 cam) {
+                                    float alpha, float age, long seed, int theme, Vec3 cam) {
         Vector3f z = new Vector3f((float) dir.x, (float) dir.y, (float) dir.z);
         if (z.lengthSquared() < 1e-8F) {
             z.set(0, 0, 1);
@@ -511,7 +303,6 @@ public final class LightningCastFx {
         double camZ = -(z.x * tx + z.y * ty + z.z * tz);
 
         float s = scale;
-        int theme = LightningTheme.GOLD;
         float w = .016F * s / .3F;
 
         // ---- 脊线：从吻部到尾巴，6 节，越往后越细、带一点游动 ✓ ----
@@ -597,25 +388,17 @@ public final class LightningCastFx {
     }
 
     /** 世界坐标 → 相机相对的一小段电弧 ✓。 */
-    private static void arc(VertexConsumer vc, Vec3 a, Vec3 b, long seed,
-                            float width, float alpha, Vec3 cam) {
-        LightningBoltGeometry.arc(vc, IDENTITY,
-                a.x - cam.x, a.y - cam.y, a.z - cam.z,
-                b.x - cam.x, b.y - cam.y, b.z - cam.z,
-                seed, width, alpha, LightningTheme.GOLD, 0, 0, 0);
+    private static void arc(VertexConsumer out, Vec3 from, Vec3 to, long seed, float width, float alpha,
+                            int theme, Vec3 camera) {
+        LightningBoltGeometry.arc(out, IDENTITY,
+                from.x - camera.x, from.y - camera.y, from.z - camera.z,
+                to.x - camera.x, to.y - camera.y, to.z - camera.z,
+                seed, width, alpha, theme, 0, 0, 0);
     }
 
-    private static void flash(VertexConsumer vc, Vec3 at, float radius, float alpha, Vec3 cam) {
-        LightningBoltGeometry.billboardFlash(vc, IDENTITY,
-                at.x - cam.x, at.y - cam.y, at.z - cam.z,
-                radius, LightningTheme.GOLD, alpha, 0, 0, 0);
-    }
-
-    private static void web(VertexConsumer vc, Vec3 at, float radius, long seed,
-                            float alpha, float spin, Vec3 cam, boolean nodes) {
-        LightningBoltGeometry.groundWeb(vc, IDENTITY,
-                at.x - cam.x, at.y - cam.y, at.z - cam.z,
-                radius, seed, LightningTheme.GOLD, alpha, spin, 0, 0, 0, nodes);
+    private static void flash(VertexConsumer out, Vec3 at, float radius, float alpha, int theme, Vec3 camera) {
+        LightningBoltGeometry.billboardFlash(out, IDENTITY,
+                at.x - camera.x, at.y - camera.y, at.z - camera.z, radius, theme, alpha, 0, 0, 0);
     }
 
     private static Vec3 bezier(Vec3 from, Vec3 ctrl, Vec3 to, float f) {
@@ -696,7 +479,7 @@ public final class LightningCastFx {
         final long born;
         final long life;
         final long seed;
-        int emitted;
+        boolean emitted;
 
         Circle(Vec3 center, Vec3 normal, double radius, long born, long life, long seed) {
             this.center = center;
@@ -728,17 +511,7 @@ public final class LightningCastFx {
         }
     }
 
-    private static final class Impact {
-        final Vec3 at;
-        final long born;
-        final long seed;
-
-        Impact(Vec3 at, long born, long seed) {
-            this.at = at;
-            this.born = born;
-            this.seed = seed;
-        }
-    }
+    private record Impact(Vec3 at, long born) {}
 
     private static final class CastState {
         int tier = 1;
@@ -760,10 +533,7 @@ public final class LightningCastFx {
         }
 
         void update(ClientLevel level, Entity caster, CastInfo info, long now, boolean minimal) {
-            this.tier = info.tier();
-            this.ratio = info.ratio();
-            // 连着放第二发：把上一发的三张阵清掉（不然第二发没阵）✗
-            if (now - this.lastSeen > 2L || this.ratio - info.ratio() > .35F) {
+            if (now - this.lastSeen > 2L || this.ratio - info.ratio() > .35F || this.tier != info.tier()) {
                 this.spawned = 0;
                 this.dragonSeq = 0;
                 this.circles.clear();
@@ -772,15 +542,17 @@ public final class LightningCastFx {
                 this.maxRatio = 0;
                 this.startTick = now;
             }
+            this.tier = info.tier();
+            this.ratio = info.ratio();
             this.maxRatio = Math.max(this.maxRatio, info.ratio());
             this.x = caster.getX();
             this.y = caster.getY();
             this.z = caster.getZ();
             this.lastSeen = now;
 
-            // ① 三张阵：0.10 / 0.22 / 0.34 各出一张（三张都在读条前半段就位 ✓）
-            for (int i = this.spawned; i < CIRCLES; i++) {
-                float at = .10F + i * .12F;
+            var stage = LightningCastGlyphs.Stage.of(this.tier);
+            for (int i = this.spawned; i < stage.seals; i++) {
+                float at = .13F + i * .13F;
                 if (this.ratio < at) {
                     break;
                 }
@@ -788,27 +560,19 @@ public final class LightningCastFx {
                 this.spawned = i + 1;
             }
 
-            // ② 阵亮够了就开：一条小雷龙窜出来 ✓
+            int dragonLimit = this.tier == 5 ? 2 : this.tier >= 3 ? 1 : 0;
             for (Circle circle : this.circles) {
-                int max = this.tier >= 4 ? 2 : 1;
-                if (circle.emitted >= max) {
-                    continue;
-                }
-                long nextAt = circle.born + circle.life * (circle.emitted == 0 ? 55L : 82L) / 100L;
-                if (now >= nextAt || this.ratio > .9F) {
-                    circle.emitted++;
+                if (this.dragonSeq >= dragonLimit) break;
+                if (!circle.emitted && (now >= circle.born + circle.life * 32L / 100L || this.ratio > .64F)) {
+                    circle.emitted = true;
                     spawnDragon(level, caster, circle, minimal);
                 }
             }
-            // ③ 龙飞到了：胸口那一下 ✓
-            for (Dragon dragon : this.dragons) {
-                if (now >= dragon.born + dragon.life && dragon.born > 0) {
-                    this.impacts.add(new Impact(dragon.to, now, dragon.seed + 13L));
-                    // 用 born 取反标记"已入体"，避免重复触发 ✓
-                    this.dragons.remove(dragon);
-                    break;
-                }
-            }
+            this.dragons.removeIf(dragon -> {
+                if (now < dragon.born + dragon.life) return false;
+                this.impacts.add(new Impact(dragon.to, now));
+                return true;
+            });
             if (!minimal) {
                 for (Dragon dragon : this.dragons) {
                     if (now - dragon.born < 3L) {
@@ -817,7 +581,6 @@ public final class LightningCastFx {
                     }
                 }
             }
-            this.dragons.removeIf(d -> now > d.born + d.life + 1L);
             this.impacts.removeIf(i -> now > i.born + 10L);
         }
 
@@ -829,29 +592,17 @@ public final class LightningCastFx {
         }
 
         private void spawnCircle(ClientLevel level, Entity caster, int index, boolean minimal) {
-            // ★ 2026-11-06 作者：「太小家碧玉了，那个什么唤龙小阵可以离玩家远点啊」
-            //   原来 2.05~2.55 格（贴着人，读起来像"三个小圈"✗）⇒ 现在 4.30~5.90 格，
-            //   龙要真的"飞一段"才进身体 ✓
-            double radius = 4.30D + index * .55D + (this.tier >= 4 ? .65D : 0);
-            double a = RANDOM.nextDouble() * Math.PI * 2;
-            double y = caster.getY() + .75D + RANDOM.nextDouble() * (1.10D + .10D * this.tier);
-            Vec3 center = new Vec3(caster.getX() + Math.cos(a) * radius, y,
-                    caster.getZ() + Math.sin(a) * radius);
-            // ★ 三种角度：平贴 / 立着朝外 / 斜插 —— 作者要的"不同角度"✓
-            double kind = RANDOM.nextDouble();
-            Vec3 normal;
-            if (kind < .34D) {
-                normal = new Vec3(0, 1, 0);
-                center = new Vec3(center.x, caster.getY() + .05D + RANDOM.nextDouble() * .08D, center.z);
-            } else if (kind < .70D) {
-                double outward = a + (RANDOM.nextDouble() - .5D) * 1.0D;
-                normal = new Vec3(Math.cos(outward), (RANDOM.nextDouble() - .5D) * .5D, Math.sin(outward))
-                        .normalize();
-            } else {
-                double tilt = .5D + RANDOM.nextDouble() * .7D;
-                double yaw = RANDOM.nextDouble() * Math.PI * 2;
-                normal = new Vec3(Math.cos(yaw) * tilt, 1.0D, Math.sin(yaw) * tilt).normalize();
-            }
+            var stage = LightningCastGlyphs.Stage.of(this.tier);
+            double radius = 2.8 + stage.radius * .72 + index * .24;
+            double angle = Math.toRadians(caster.getYRot()) + this.seed % 90 * .02
+                    + index * Math.PI * 2 / stage.seals;
+            Vec3 center = caster.position().add(Math.cos(angle) * radius, .12 + index * 1.27,
+                    Math.sin(angle) * radius);
+            Vec3 normal = switch (index) {
+                case 0 -> new Vec3(.24 * Math.cos(angle), 1, .24 * Math.sin(angle)).normalize();
+                case 1 -> new Vec3(Math.cos(angle), .25, Math.sin(angle)).normalize();
+                default -> new Vec3(Math.cos(angle) * .65, .74, Math.sin(angle) * .65).normalize();
+            };
             long now = level.getGameTime();
             // 阵本身也放大：0.46→0.85（t5 能到 1.3 格半径）—— 远看才有"法阵"的量感 ✓
             // 再乘一个随机大小（0.85~1.18）：三张阵不一般大，读起来才不是"模具刻的"✓
@@ -882,8 +633,8 @@ public final class LightningCastFx {
                     Math.sin(side) * (.95D + RANDOM.nextDouble() * .85D));
             // ★ 龙也放大：0.28 → 0.52（t5 约 0.77，体长约 1.9 格），飞 4~6 格远也看得清 ✓
             this.dragons.add(new Dragon(from, ctrl, chest, level.getGameTime(),
-                    18L + this.tier, this.seed + 900L + (this.dragonSeq++) * 61L,
-                    .52F + .05F * this.tier));
+                    12L + this.tier, this.seed + 900L + (this.dragonSeq++) * 61L,
+                    .52F + .09F * this.tier));
 
             if (!minimal) {
                 for (int i = 0; i < 5; i++) {

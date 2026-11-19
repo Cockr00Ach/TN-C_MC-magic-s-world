@@ -151,7 +151,7 @@ public final class WarriorPose {
      * <p>根骨骼 {@code bone} 只取抬头（x）和侧倾（z）落在 {@code body} 上；<b>绕竖轴
      * （y）的整圈转身不在这里</b>，见方法体里的注释和 {@link WarriorPoseRender}。
      */
-    private static void applyClip(HumanoidModel<?> model, WarriorComboAnimations.Clip clip,
+    static void applyClip(HumanoidModel<?> model, WarriorComboAnimations.Clip clip,
                                   float progress, boolean leftHanded,float weight) {
         float seconds = Math.max(0f, Math.min(1f, progress)) * clip.lengthSeconds();
         float sign = leftHanded ? -1f : 1f;

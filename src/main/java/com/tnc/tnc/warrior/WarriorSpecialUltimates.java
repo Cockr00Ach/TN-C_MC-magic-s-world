@@ -21,7 +21,7 @@ public final class WarriorSpecialUltimates {
    t.hurt(p.damageSources().playerAttack(p),(float)p.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE)*(slam?5:2));
    if(slam&&t.getBbHeight()<4){t.push(0,1.8,0);t.hurtMarked=true;}
   }
-  if(slam)for(int x=-3;x<=3;x++)for(int z=-3;z<=3;z++){
+  if(slam&&!PracticeArena.inside(p))for(int x=-3;x<=3;x++)for(int z=-3;z<=3;z++){
    if(x*x+z*z>9)continue;var pos=p.blockPosition().offset(x,-1,z);var state=p.level().getBlockState(pos);
    if(!state.isAir()&&state.getDestroySpeed(p.level(),pos)>=0&&state.getFluidState().isEmpty()&&p.level().getBlockEntity(pos)==null&&p.mayInteract(p.level(),pos)&&net.minecraftforge.event.ForgeEventFactory.onEntityDestroyBlock(p,pos,state))p.level().destroyBlock(pos,false,p);
   }

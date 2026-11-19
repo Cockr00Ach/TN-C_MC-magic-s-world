@@ -1,0 +1,846 @@
+{
+  "parts": [
+    {
+      "name": "inner_robe",
+      "bone": "body",
+      "pivot": [
+        -4.2,
+        0,
+        -2.25
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            0,
+            35
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            8,
+            9,
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "name": "diagonal_mantle",
+      "bone": "body",
+      "pivot": [
+        -3.98,
+        0.39,
+        -2.8
+      ],
+      "rotation": [
+        0,
+        0,
+        -33
+      ],
+      "cubes": [
+        {
+          "uv": [
+            27,
+            35
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            2,
+            10,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "mantle_tail",
+      "bone": "body",
+      "pivot": [
+        3.1,
+        2.35,
+        1.7
+      ],
+      "rotation": [
+        11,
+        1,
+        13
+      ],
+      "cubes": [
+        {
+          "uv": [
+            34,
+            35
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            4,
+            12,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "amber_sleeve",
+      "bone": "left_arm",
+      "pivot": [
+        -1.5,
+        -2.3,
+        -2.4
+      ],
+      "rotation": [
+        0,
+        0,
+        -9
+      ],
+      "cubes": [
+        {
+          "uv": [
+            45,
+            35
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            5,
+            7,
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "name": "forearm_wrapping",
+      "bone": "right_arm",
+      "pivot": [
+        -3.16,
+        3.4,
+        -2.2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            66,
+            35
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            4,
+            6,
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ankle_wrap_r",
+      "bone": "right_leg",
+      "pivot": [
+        -2.09,
+        7,
+        -2.08
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            83,
+            35
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            4,
+            4,
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ankle_wrap_l",
+      "bone": "left_leg",
+      "pivot": [
+        -2.09,
+        7,
+        -2.08
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            100,
+            35
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            4,
+            4,
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "name": "prayer_bead_0",
+      "bone": "body",
+      "pivot": [
+        -3.4,
+        0.75,
+        -3.03
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            117,
+            35
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "prayer_bead_1",
+      "bone": "body",
+      "pivot": [
+        -2.7,
+        1.97,
+        -3.03
+      ],
+      "rotation": [
+        0,
+        0,
+        13
+      ],
+      "cubes": [
+        {
+          "uv": [
+            122,
+            35
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "prayer_bead_2",
+      "bone": "body",
+      "pivot": [
+        -1.5,
+        2.73,
+        -3.03
+      ],
+      "rotation": [
+        0,
+        0,
+        26
+      ],
+      "cubes": [
+        {
+          "uv": [
+            0,
+            50
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "prayer_bead_3",
+      "bone": "body",
+      "pivot": [
+        -0.28,
+        2.9,
+        -3.03
+      ],
+      "rotation": [
+        0,
+        0,
+        39
+      ],
+      "cubes": [
+        {
+          "uv": [
+            5,
+            50
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "prayer_bead_4",
+      "bone": "body",
+      "pivot": [
+        0.88,
+        2.56,
+        -3.03
+      ],
+      "rotation": [
+        0,
+        0,
+        52
+      ],
+      "cubes": [
+        {
+          "uv": [
+            10,
+            50
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "prayer_bead_5",
+      "bone": "body",
+      "pivot": [
+        2.0,
+        1.65,
+        -3.03
+      ],
+      "rotation": [
+        0,
+        0,
+        65
+      ],
+      "cubes": [
+        {
+          "uv": [
+            15,
+            50
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "prayer_bead_6",
+      "bone": "body",
+      "pivot": [
+        2.8,
+        0.52,
+        -3.03
+      ],
+      "rotation": [
+        0,
+        0,
+        78
+      ],
+      "cubes": [
+        {
+          "uv": [
+            20,
+            50
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "woven_belt",
+      "bone": "body",
+      "pivot": [
+        -4.3,
+        8.4,
+        -2.7
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            25,
+            50
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            9,
+            2,
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "name": "belt_clasp",
+      "bone": "body",
+      "pivot": [
+        -1.0,
+        8.5,
+        -3.12
+      ],
+      "rotation": [
+        0,
+        0,
+        15
+      ],
+      "cubes": [
+        {
+          "uv": [
+            54,
+            50
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "waist_panel_right",
+      "bone": "body",
+      "pivot": [
+        -4.1,
+        9.2,
+        -2.42
+      ],
+      "rotation": [
+        -10,
+        0,
+        6
+      ],
+      "cubes": [
+        {
+          "uv": [
+            61,
+            50
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            4,
+            8,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "waist_panel_left",
+      "bone": "body",
+      "pivot": [
+        0.1,
+        9.2,
+        -2.42
+      ],
+      "rotation": [
+        -10,
+        0,
+        -6
+      ],
+      "cubes": [
+        {
+          "uv": [
+            72,
+            50
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            4,
+            8,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "rear_panel",
+      "bone": "body",
+      "pivot": [
+        -4.1,
+        8.8,
+        1.85
+      ],
+      "rotation": [
+        12,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            83,
+            50
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            8,
+            9,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "hanging_beard",
+      "bone": "head",
+      "pivot": [
+        0,
+        -1,
+        -4
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [],
+      "motion": {
+        "idle": [
+          1,
+          0,
+          1
+        ],
+        "walk": [
+          3,
+          0,
+          3
+        ],
+        "wind": [
+          8,
+          0,
+          1
+        ],
+        "hit": [
+          -15,
+          2,
+          -3
+        ],
+        "open": [
+          7,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "name": "beard_fan",
+      "bone": "hanging_beard",
+      "pivot": [
+        -2.55,
+        -1.0,
+        -0.42
+      ],
+      "rotation": [
+        12,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            0,
+            123
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            5,
+            4,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "beard_outer",
+      "bone": "hanging_beard",
+      "pivot": [
+        -1.62,
+        1.85,
+        0.18
+      ],
+      "rotation": [
+        18,
+        0,
+        -7
+      ],
+      "cubes": [
+        {
+          "uv": [
+            12,
+            124
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            3,
+            3,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "furnace_topknot",
+      "bone": "head",
+      "pivot": [
+        -1.9,
+        -10.17,
+        0.24
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            20,
+            121
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            4,
+            3,
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "name": "furnace_topknot_clasp",
+      "bone": "head",
+      "pivot": [
+        -2.07,
+        -8.86,
+        0.14
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            36,
+            123
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            4,
+            1,
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "name": "hearth_scarf",
+      "bone": "body",
+      "pivot": [
+        -4.63,
+        0.16,
+        1.85
+      ],
+      "rotation": [
+        16,
+        0,
+        -8
+      ],
+      "cubes": [
+        {
+          "uv": [
+            52,
+            114
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            9,
+            13,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "martial_seal",
+      "bone": "body",
+      "pivot": [
+        0.18,
+        2.31,
+        -3.62
+      ],
+      "rotation": [
+        0,
+        0,
+        -4
+      ],
+      "cubes": [
+        {
+          "uv": [
+            72,
+            123
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            3,
+            4,
+            1
+          ]
+        }
+      ]
+    }
+  ]
+}

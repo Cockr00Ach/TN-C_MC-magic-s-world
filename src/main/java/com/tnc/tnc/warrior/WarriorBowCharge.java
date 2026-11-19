@@ -114,7 +114,7 @@ public final class WarriorBowCharge {
         var charged=new WarriorSkill(base.id(),base.codexId(),profile.name(),base.sequence(),0,base.cooldownTicks(),(float)mult,
             radius,arc,.6,1,"松手蓄力攻击",c.family,WarriorChain.ATTACK,0,false,false,0,attack,
             java.util.Collections.nCopies(base.length(),false),0,0,0);
-        WarriorComboService.melee(p,charged,WarriorComboService.state(p.getUUID()),WarriorComboService.gameTime(p));
+        WarriorComboService.melee(p,charged,WarriorComboService.state(p.getUUID()),WarriorComboService.gameTime(p),true);
         c.bow.hurtAndBreak(1,p,owner->owner.broadcastBreakEvent(net.minecraft.world.InteractionHand.MAIN_HAND));
         NEXT_SHOT.put(p.getUUID(),p.level().getGameTime()+10);
         p.serverLevel().playSound(null,p.blockPosition(),SoundEvents.PLAYER_ATTACK_SWEEP,SoundSource.PLAYERS,1,.8f);

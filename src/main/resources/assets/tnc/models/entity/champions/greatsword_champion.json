@@ -1,0 +1,676 @@
+{
+  "parts": [
+    {
+      "name": "ming_helmet_rim",
+      "bone": "head",
+      "pivot": [
+        -4.65,
+        -8.2,
+        -4.55
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            0,
+            35
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            9,
+            2,
+            9
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ming_helmet_bowl",
+      "bone": "head",
+      "pivot": [
+        -4.05,
+        -10,
+        -3.9
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            37,
+            35
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            8,
+            3,
+            8
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ming_helmet_shoulder",
+      "bone": "head",
+      "pivot": [
+        -3.15,
+        -11.3,
+        -3
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            70,
+            35
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            6,
+            2,
+            6
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ming_helmet_tip",
+      "bone": "head",
+      "pivot": [
+        -1.9,
+        -12.6,
+        -1.9
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            95,
+            35
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            4,
+            2,
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "name": "apex_finial",
+      "bone": "head",
+      "pivot": [
+        -0.62,
+        -13.55,
+        -0.65
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            112,
+            35
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            1,
+            2,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "scarlet_top_tassel",
+      "bone": "head",
+      "pivot": [
+        -0.55,
+        -12.8,
+        0.18
+      ],
+      "rotation": [
+        31,
+        3,
+        -18
+      ],
+      "cubes": [
+        {
+          "uv": [
+            117,
+            35
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            2,
+            4,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "brow_bolt",
+      "bone": "head",
+      "pivot": [
+        -0.7,
+        -7.7,
+        -4.99
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            0,
+            47
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "neck_guard",
+      "bone": "head",
+      "pivot": [
+        -4.25,
+        -6.45,
+        2.1
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            7,
+            47
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            8,
+            7,
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "name": "neck_guard_right",
+      "bone": "head",
+      "pivot": [
+        -4.65,
+        -5.5,
+        -0.8
+      ],
+      "rotation": [
+        0,
+        0,
+        4
+      ],
+      "cubes": [
+        {
+          "uv": [
+            30,
+            47
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            1,
+            6,
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "name": "neck_guard_left",
+      "bone": "head",
+      "pivot": [
+        3.85,
+        -5.5,
+        -0.8
+      ],
+      "rotation": [
+        0,
+        0,
+        -4
+      ],
+      "cubes": [
+        {
+          "uv": [
+            43,
+            47
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            1,
+            6,
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "name": "crimson_standing_collar",
+      "bone": "body",
+      "pivot": [
+        -3.75,
+        -0.65,
+        -2.35
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            56,
+            47
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            7,
+            2,
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "name": "riveted_front_right",
+      "bone": "body",
+      "pivot": [
+        -4.2,
+        0.45,
+        -2.9
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            81,
+            47
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            4,
+            10,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "riveted_front_left",
+      "bone": "body",
+      "pivot": [
+        0.0,
+        0.45,
+        -2.92
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            92,
+            47
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            4,
+            10,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "segmented_brassard_r",
+      "bone": "right_arm",
+      "pivot": [
+        -3.4,
+        -1.5,
+        -2.4
+      ],
+      "rotation": [
+        0,
+        0,
+        5
+      ],
+      "cubes": [
+        {
+          "uv": [
+            103,
+            47
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            5,
+            6,
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "name": "forearm_guard_r",
+      "bone": "right_arm",
+      "pivot": [
+        -3.16,
+        5.2,
+        -2.26
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            0,
+            59
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            4,
+            4,
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "name": "segmented_brassard_l",
+      "bone": "left_arm",
+      "pivot": [
+        -0.8,
+        -1.5,
+        -2.4
+      ],
+      "rotation": [
+        0,
+        0,
+        -5
+      ],
+      "cubes": [
+        {
+          "uv": [
+            17,
+            59
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            5,
+            6,
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "name": "forearm_guard_l",
+      "bone": "left_arm",
+      "pivot": [
+        -0.56,
+        5.2,
+        -2.26
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            38,
+            59
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            4,
+            4,
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "name": "red_waistband",
+      "bone": "body",
+      "pivot": [
+        -4.35,
+        9.3,
+        -2.8
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            55,
+            59
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            9,
+            2,
+            6
+          ]
+        }
+      ]
+    },
+    {
+      "name": "right_tasset",
+      "bone": "body",
+      "pivot": [
+        -4.15,
+        10.65,
+        -2.45
+      ],
+      "rotation": [
+        -9,
+        0,
+        3
+      ],
+      "cubes": [
+        {
+          "uv": [
+            86,
+            59
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            4,
+            6,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "left_tasset",
+      "bone": "body",
+      "pivot": [
+        0.15,
+        10.65,
+        -2.45
+      ],
+      "rotation": [
+        -9,
+        0,
+        -3
+      ],
+      "cubes": [
+        {
+          "uv": [
+            97,
+            59
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            4,
+            6,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "crooked_nose",
+      "bone": "head",
+      "pivot": [
+        -0.72,
+        -3.87,
+        -4.5
+      ],
+      "rotation": [
+        5,
+        0,
+        9
+      ],
+      "cubes": [
+        {
+          "uv": [
+            0,
+            125
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ]
+        }
+      ]
+    }
+  ]
+}

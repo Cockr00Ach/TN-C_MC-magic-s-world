@@ -1,0 +1,676 @@
+{
+  "parts": [
+    {
+      "name": "red_inner_collar",
+      "bone": "body",
+      "pivot": [
+        -3.85,
+        -0.38,
+        -2.55
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            80,
+            47
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            8,
+            2,
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "name": "front_cuirass",
+      "bone": "body",
+      "pivot": [
+        -4.1,
+        1.12,
+        -3.05
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            107,
+            47
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            8,
+            8,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "name": "roundel_width_r",
+      "bone": "body",
+      "pivot": [
+        -3.9,
+        3.45,
+        -3.25
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            0,
+            61
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            4,
+            2,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "roundel_height_r",
+      "bone": "body",
+      "pivot": [
+        -2.9,
+        2.45,
+        -3.32
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            11,
+            61
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            2,
+            4,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "mirror_center_r",
+      "bone": "body",
+      "pivot": [
+        -2.9,
+        3.45,
+        -3.53
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            18,
+            61
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "roundel_width_l",
+      "bone": "body",
+      "pivot": [
+        0.1,
+        3.45,
+        -3.25
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            25,
+            61
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            4,
+            2,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "roundel_height_l",
+      "bone": "body",
+      "pivot": [
+        1.1,
+        2.45,
+        -3.32
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            36,
+            61
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            2,
+            4,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "mirror_center_l",
+      "bone": "body",
+      "pivot": [
+        1.1,
+        3.45,
+        -3.53
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            43,
+            61
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "right_spaulder",
+      "bone": "right_arm",
+      "pivot": [
+        -3.52,
+        -1.91,
+        -2.5
+      ],
+      "rotation": [
+        0,
+        0,
+        7
+      ],
+      "cubes": [
+        {
+          "uv": [
+            50,
+            61
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            5,
+            5,
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "name": "left_spaulder",
+      "bone": "left_arm",
+      "pivot": [
+        -0.91,
+        -1.91,
+        -2.5
+      ],
+      "rotation": [
+        0,
+        0,
+        -6
+      ],
+      "cubes": [
+        {
+          "uv": [
+            71,
+            61
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            5,
+            5,
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "name": "scarlet_belt",
+      "bone": "body",
+      "pivot": [
+        -4.4,
+        8.8,
+        -2.69
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            92,
+            61
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            9,
+            2,
+            6
+          ]
+        }
+      ]
+    },
+    {
+      "name": "center_belt_catch",
+      "bone": "body",
+      "pivot": [
+        -1.05,
+        9.05,
+        -3.0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            0,
+            72
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "armored_skirt_right",
+      "bone": "body",
+      "pivot": [
+        -4.18,
+        10,
+        -2.04
+      ],
+      "rotation": [
+        -9,
+        0,
+        5
+      ],
+      "cubes": [
+        {
+          "uv": [
+            7,
+            72
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            4,
+            7,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "armored_skirt_left",
+      "bone": "body",
+      "pivot": [
+        0.14,
+        10,
+        -2.04
+      ],
+      "rotation": [
+        -9,
+        0,
+        -5
+      ],
+      "cubes": [
+        {
+          "uv": [
+            18,
+            72
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            4,
+            7,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "side_cloak",
+      "bone": "body",
+      "pivot": [
+        -4.8,
+        2.3,
+        2.5
+      ],
+      "rotation": [
+        15,
+        -10,
+        4
+      ],
+      "cubes": [
+        {
+          "uv": [
+            29,
+            72
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            8,
+            13,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "astrologer_crown",
+      "bone": "head",
+      "pivot": [
+        -3.35,
+        -10.35,
+        -2.24
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            0,
+            120
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            7,
+            3,
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "name": "star_tablet",
+      "bone": "head",
+      "pivot": [
+        -1.6,
+        -12.43,
+        -2.41
+      ],
+      "rotation": [
+        -6,
+        0,
+        0
+      ],
+      "cubes": [
+        {
+          "uv": [
+            24,
+            123
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            3,
+            4,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "silver_sideburn",
+      "bone": "head",
+      "pivot": [
+        -4.14,
+        -5.35,
+        -2.94
+      ],
+      "rotation": [
+        6,
+        0,
+        6
+      ],
+      "cubes": [
+        {
+          "uv": [
+            32,
+            122
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            1,
+            5,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "observatory_mantle",
+      "bone": "body",
+      "pivot": [
+        -4.55,
+        -0.1,
+        2.04
+      ],
+      "rotation": [
+        12,
+        0,
+        -4
+      ],
+      "cubes": [
+        {
+          "uv": [
+            36,
+            111
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            9,
+            16,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "astrolabe",
+      "bone": "body",
+      "pivot": [
+        -2,
+        1.32,
+        -3.0
+      ],
+      "rotation": [
+        0,
+        0,
+        43
+      ],
+      "cubes": [
+        {
+          "uv": [
+            56,
+            123
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            4,
+            4,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "name": "martial_seal",
+      "bone": "body",
+      "pivot": [
+        0.18,
+        2.31,
+        -3.62
+      ],
+      "rotation": [
+        0,
+        0,
+        -4
+      ],
+      "cubes": [
+        {
+          "uv": [
+            66,
+            123
+          ],
+          "from": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            3,
+            4,
+            1
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -245,7 +245,7 @@ public final class CanglanWarlordGameTests {
         helper.assertTrue(!com.tnc.tnc.magic.wind.WindChainSpells.enemy(player,player),"Player self-protection changed");
         var volley=com.tnc.tnc.magic.wind.WindChainRegistration.VOLLEY.create(helper.getLevel());
         volley.configure(boss,4,player);volley.setBossScale(5);
-        helper.assertTrue(volley.bossScale()==5 && volley.count()==30,"Boss T4 formation or scale incorrect");
+        helper.assertTrue(volley.bossScale()==5 && volley.count()==6 && volley.weaponForm(2)==2 && volley.weaponForm(5)==2,"Boss T4 formation or scale incorrect");
         volley.configure(boss,5,player);
         helper.assertTrue(volley.count()==5,"Boss T5 giant arsenal budget incorrect");helper.succeed();
     }

@@ -28,7 +28,7 @@ public abstract class WarriorHeldWeaponMixin {
     private void tnc$boundWeapon(LivingEntity entity, ItemStack stack, ItemDisplayContext context, boolean left,
             PoseStack pose, MultiBufferSource buffers, int light, CallbackInfo callback) {
         com.tnc.tnc.warrior.client.WarriorTrail.capture(entity,stack,context,left,pose);
-        com.tnc.tnc.warrior.client.WarriorTrail.renderFirstPerson(entity,context,left,buffers);
+        com.tnc.tnc.warrior.client.WarriorTrail.renderHeldTrail(entity,context,left,buffers);
         WarriorPhantomRenderer.renderBound(entity, stack, context, left, pose, buffers, light);
         com.tnc.tnc.warrior.client.WarriorWeaponOrnamentRenderer.render(entity,stack,context,left,pose,buffers,light);
         pose.popPose();

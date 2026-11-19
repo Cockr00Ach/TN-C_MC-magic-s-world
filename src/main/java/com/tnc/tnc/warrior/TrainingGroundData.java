@@ -42,6 +42,18 @@ public final class TrainingGroundData extends SavedData {
             count == 0 ? 0 : Math.max(0, Math.min(80, r.getInt("Reaction"))));
     }
 
+    long recordBossVictory(UUID id, WeaponChampion champion, long ticks) {
+        var player = records.computeIfAbsent(id, key -> new CompoundTag());
+        var victories = player.getCompound("BossVictories");
+        long elapsed = Math.max(1, ticks);
+        long previous = victories.getLong(champion.id());
+        long best = previous > 0 ? Math.min(previous, elapsed) : elapsed;
+        victories.putLong(champion.id(), best);
+        player.put("BossVictories", victories);
+        setDirty();
+        return best;
+    }
+
     public void cycle(UUID id) {
         var t = records.computeIfAbsent(id, k -> new CompoundTag());
         t.putInt("Mode", (record(id).mode() + 1) % 3);

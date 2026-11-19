@@ -472,6 +472,10 @@ public final class WarriorComboService {
 
     /** 近战终结技：每条链共用这段，打断/僵直由数据字段决定。 */
     static void melee(ServerPlayer player, WarriorSkill skill, State state, long now) {
+        melee(player, skill, state, now, false);
+    }
+
+    static void melee(ServerPlayer player, WarriorSkill skill, State state, long now, boolean charged) {
         float base = (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE);
         WarriorComboRole role = skill.role();
         // Heavy weapons use the solid model's 3..10 peak; light weapons retain their phantom reach.
@@ -485,7 +489,12 @@ public final class WarriorComboService {
             if (target instanceof ServerPlayer other && parried(player, state, other, skill, now)) {
                 return;
             }
-            if (!target.hurt(player.damageSources().playerAttack(player), base * skill.damageMultiplier())) {
+            var damageSource = player.damageSources().playerAttack(player);
+            float damage = base * skill.damageMultiplier();
+            boolean landedHit = target instanceof WeaponChampionEntity champion
+                ? champion.hurtBySkill(damageSource, damage, skill, charged)
+                : target.hurt(damageSource, damage);
+            if (!landedHit) {
                 continue;
             }
             landed = true;
@@ -621,6 +630,7 @@ public final class WarriorComboService {
         arrow.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F,
                 2.4F, Math.max(0.4F, 1.2F - (float) Math.min(1, skill.length() / 8.0)));
         arrow.setBaseDamage(5.2 * skill.damageMultiplier());
+        arrow.getPersistentData().putInt(WeaponChampionEntity.COMBO_ARROW, skill.slot());
         // 连招的箭是"特殊箭"：更重（穿一支）、必定暴击、带发光轮廓。
         // 原来还有一条"元素光尾"（每 tick 撒两颗粒子），2026-11-03 起不再广播：
         // 发光轮廓 + 暴击星已经是可读的反馈，再糊一条粒子尾巴纯属挡视线。
@@ -703,7 +713,8 @@ public final class WarriorComboService {
                 player.getBoundingBox().inflate(radius),
                 // 方块 AABB 会外扩到角落（最远 1.73 倍），所以再补一次真实距离和视线判定，
                 // 免得隔一堵墙、隔一层地板也能被 360 度旋斩扫到
-                target -> player.distanceToSqr(target) <= reach
+                target -> (target instanceof WeaponChampionEntity champion
+                    ? champion.horizontalReachSquared(player) : player.distanceToSqr(target)) <= reach
                         && player.hasLineOfSight(target)
                         && validTarget(player, target));
     }
@@ -725,6 +736,7 @@ public final class WarriorComboService {
         if (target instanceof ArmorStand) {
             return false;
         }
+        if (target instanceof WeaponChampionEntity champion && !champion.belongsTo(player)) return false;
         // 演武场的教官只在训练课里吃"正面一击"，不被连招顺手打
         return !TrainingGround.trainer(target);
     }
@@ -928,14 +940,17 @@ public final class WarriorComboService {
         if(state==null || now>=state.stanceUntil || now<state.counterReady)return;
         event.setCanceled(true);
         state.stanceUntil=Long.MIN_VALUE;state.heldSkill=null;state.counterReady=now+18;state.counterAt=now+2;
+        if (mob instanceof WeaponChampionEntity champion) champion.onParried(p);
         p.removeEffect(net.minecraft.world.effect.MobEffects.DAMAGE_RESISTANCE);
         WarriorAnimationPacket.cancel(p);
         WarriorImpactPacket.send(p,p.getEyePosition().add(p.getLookAngle().scale(.6)).add(0,-.35,0),1);
         p.serverLevel().playSound(null,p.blockPosition(),SoundEvents.SHIELD_BLOCK,SoundSource.PLAYERS,1.0f,1.35f);
     }
     static boolean smallCounterTarget(ServerPlayer p,LivingEntity target){
-        return target instanceof net.minecraft.world.entity.Mob && target.getBbHeight()<4
-                && p.distanceToSqr(target)<=16 && p.hasLineOfSight(target)
+        boolean inReach = target instanceof WeaponChampionEntity champion
+            ? champion.horizontalReachSquared(p) <= 16
+            : target.getBbHeight() < 4 && p.distanceToSqr(target) <= 16;
+        return target instanceof net.minecraft.world.entity.Mob && inReach && p.hasLineOfSight(target)
                 && (validTarget(p,target)||WarriorTutorial.parryTarget(p,target));
     }
     static void mobCounterSweep(ServerPlayer p){
@@ -944,7 +959,12 @@ public final class WarriorComboService {
         WarriorImpactPacket.send(p,p.position().add(0,.85,0),2);
         p.serverLevel().playSound(null,p.blockPosition(),SoundEvents.PLAYER_ATTACK_SWEEP,SoundSource.PLAYERS,1.1f,.75f);
         for(var target:targets(p,4*WarriorReach.basicScale(p))){
-            if(!(target instanceof net.minecraft.world.entity.Mob)||target.getBbHeight()>=4)continue;
+            if (!(target instanceof net.minecraft.world.entity.Mob)) continue;
+            if (target instanceof WeaponChampionEntity champion) {
+                champion.hurt(p.damageSources().playerAttack(p),(float)p.getAttributeValue(Attributes.ATTACK_DAMAGE)*.8f);
+                continue;
+            }
+            if (target.getBbHeight() >= 4) continue;
             target.hurt(p.damageSources().playerAttack(p),(float)p.getAttributeValue(Attributes.ATTACK_DAMAGE)*.8f);
             var away=target.position().subtract(p.position()).multiply(1,0,1);
             if(away.lengthSqr()<.001)away=new Vec3(1,0,0);

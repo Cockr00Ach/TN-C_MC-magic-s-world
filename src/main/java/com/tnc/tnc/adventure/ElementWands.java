@@ -5,6 +5,7 @@ import com.tnc.tnc.magic.*;
 import com.tnc.tnc.travel.TravelForms;
 import com.tnc.tnc.travel.TravelKeyHint;
 import com.tnc.tnc.travel.TravelStaff;
+import net.minecraft.ChatFormatting;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.*;
 import net.minecraft.network.chat.Component;
@@ -78,6 +79,9 @@ public final class ElementWands {
             consumer.accept(new com.tnc.tnc.equipment.client.LuminousStaffRenderer.Extension());
         }
         @Override public void appendHoverText(ItemStack stack,Level level,List<Component> lines,TooltipFlag flag){
+            if (design.element == Element.LIGHTNING) {
+                lines.add(Component.translatable("item.tnc." + design.id + ".lore").withStyle(ChatFormatting.GRAY));
+            }
             lines.add(Component.literal("承载 1～"+design.tier+" 阶已学法术（不分元素）；知识保存在魔法石"));
             lines.add(Component.literal("共鸣：用它放"+design.element.cn()+"系法术，伤害 +25%"));
             lines.add(Component.literal("前往铸器师打造；神杖不会自动授予神法"));

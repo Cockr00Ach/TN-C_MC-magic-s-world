@@ -120,37 +120,54 @@ public final class WarriorTrail {
         if(a!=null && a.progress(Minecraft.getInstance().getFrameTime())>=1 && !a.hold())a=null;
         return WarriorTrailAppearance.attacking(a==null?null:a.animation(),a!=null&&a.hold(),p.swinging);
     }
+    private static boolean attacking(LivingEntity wielder) {
+        if (wielder instanceof AbstractClientPlayer player) return attacking(player);
+        var boss = (WeaponChampionEntity) wielder;
+        double now = boss.level().getGameTime() + Minecraft.getInstance().getFrameTime();
+        var warning = boss.warning();
+        var impact = boss.impactCue();
+        return warning != null && warning.progress(now) >= .65
+            || impact != null && now < impact.start() + impact.ticks();
+    }
+
+    private static boolean finishing(LivingEntity wielder) {
+        if (!(wielder instanceof WeaponChampionEntity boss)) return finisher(wielder.getId());
+        var cue = boss.warning();
+        if (cue == null) cue = boss.impactCue();
+        return cue != null && (cue.strike().isUltimate() || cue.strike() == WeaponChampion.Strike.COMBO_FINISH);
+    }
+
     /** Called before the ghost from the same actual held-item draw. */
-    public static void capture(LivingEntity entity,ItemStack stack,ItemDisplayContext context,boolean left,PoseStack mount){
-        if(!(entity instanceof AbstractClientPlayer player) || (!context.firstPerson() && context!=ItemDisplayContext.THIRD_PERSON_LEFT_HAND && context!=ItemDisplayContext.THIRD_PERSON_RIGHT_HAND)
-                || left!=(player.getMainArm()==HumanoidArm.LEFT))return;
+    public static void capture(LivingEntity wielder,ItemStack stack,ItemDisplayContext context,boolean left,PoseStack mount){
+        if(!(wielder instanceof AbstractClientPlayer || wielder instanceof WeaponChampionEntity) || (!context.firstPerson() && context!=ItemDisplayContext.THIRD_PERSON_LEFT_HAND && context!=ItemDisplayContext.THIRD_PERSON_RIGHT_HAND)
+                || left!=(wielder.getMainArm()==HumanoidArm.LEFT))return;
         var mc=Minecraft.getInstance();
         // A local player may also be drawn by a body/shadow mod. Never mix view-space and world-space history.
-        if(player==mc.player && context.firstPerson()!=mc.options.getCameraType().isFirstPerson())return;
+        if(wielder==mc.player && context.firstPerson()!=mc.options.getCameraType().isFirstPerson())return;
         var key=ForgeRegistries.ITEMS.getKey(stack.getItem());
         var family=WarriorWeapons.family(stack);
-        if(world!=player.level()){clear();world=player.level();}
-        if(key==null || family==null || family==WarriorWeaponFamily.BOW || !player.isAlive() || player.isSpectator()){
-            STATES.remove(player.getId());return;
+        if(world!=wielder.level()){clear();world=wielder.level();}
+        if(key==null || family==null || family==WarriorWeaponFamily.BOW || !wielder.isAlive() || wielder.isSpectator()){
+            STATES.remove(wielder.getId());return;
         }
         Vec3 camera=mc.gameRenderer.getMainCamera().getPosition();
-        if(camera.distanceToSqr(player.position())>1024){STATES.remove(player.getId());return;}
+        if(camera.distanceToSqr(wielder.position())>1024){STATES.remove(wielder.getId());return;}
         double time=now();
         if(time>nextCleanup){STATES.values().removeIf(s->time-s.lastSeen>2000);nextCleanup=time+1000;}
-        String identity=key.toString();State state=STATES.get(player.getId());
-        if(state==null || !state.weapon.equals(identity) || state.firstPerson!=context.firstPerson() || state.leftHand!=left){state=new State(identity);STATES.put(player.getId(),state);}
+        String identity=key.toString();State state=STATES.get(wielder.getId());
+        if(state==null || !state.weapon.equals(identity) || state.firstPerson!=context.firstPerson() || state.leftHand!=left){state=new State(identity);STATES.put(wielder.getId(),state);}
         state.firstPerson=context.firstPerson();
         state.leftHand=left;
         state.lastSeen=time;
-        boolean attack=attacking(player);
-        double life=finisher(player.getId())?profile(family).finisherLife():profile(family).life();
+        boolean attack=attacking(wielder);
+        double life=finishing(wielder)?profile(family).finisherLife():profile(family).life();
         while(!state.history.isEmpty() && time-state.history.peekFirst().at()>life){state.history.removeFirst();state.version++;}
         if(!attack){state.attacking=false;return;}
         if(!state.attacking && time-state.lastAttack>140){state.start=time;state.history.clear();state.version++;}
         state.attacking=true;state.lastAttack=time;
         var previous=state.history.peekLast();
         if(previous!=null && time-previous.at()<7.5)return;
-        var model=mc.getItemRenderer().getModel(stack,player.level(),player,player.getId()+context.ordinal());
+        var model=mc.getItemRenderer().getModel(stack,wielder.level(),wielder,wielder.getId()+context.ordinal());
         PoseStack pose=new PoseStack();pose.last().pose().set(mount.last().pose());
         model.getTransforms().getTransform(context).apply(left,pose);
         var authored=WarriorModelBlade.find(key);
@@ -180,31 +197,37 @@ public final class WarriorTrail {
         double t=now();
         return WarriorTrailAppearance.visibility(t-s.start,t-s.lastAttack,s.attacking && attacking(player));
     }
-    public static void renderFirstPerson(LivingEntity entity,ItemDisplayContext context,boolean left,MultiBufferSource buffer){
+    public static void renderHeldTrail(LivingEntity entity,ItemDisplayContext context,boolean left,MultiBufferSource buffer){
+        if (entity instanceof WeaponChampionEntity boss) {
+            var mainHand = boss.getMainArm() == HumanoidArm.LEFT ? ItemDisplayContext.THIRD_PERSON_LEFT_HAND
+                : ItemDisplayContext.THIRD_PERSON_RIGHT_HAND;
+            if (context == mainHand) render(boss, buffer, false);
+        }
         if(context.firstPerson() && entity instanceof AbstractClientPlayer player
                 && left==(player.getMainArm()==HumanoidArm.LEFT))render(player,buffer,true);
     }
     static void render(AbstractClientPlayer player,MultiBufferSource buffer){render(player,buffer,false);}
-    private static void render(AbstractClientPlayer player,MultiBufferSource buffer,boolean firstPerson){
-        State state=STATES.get(player.getId());if(state==null || state.firstPerson!=firstPerson || state.history.size()<2)return;
+    private static void render(LivingEntity wielder,MultiBufferSource buffer,boolean firstPerson){
+        State state=STATES.get(wielder.getId());if(state==null || state.firstPerson!=firstPerson || state.history.size()<2)return;
         var mc=Minecraft.getInstance();Vec3 camera=mc.gameRenderer.getMainCamera().getPosition();
-        double distance=camera.distanceToSqr(player.position());if(distance>1024)return;
-        var family=WarriorWeapons.family(player.getMainHandItem());if(family==null || family==WarriorWeaponFamily.BOW)return;
-        double time=now(),life=finisher(player.getId())?profile(family).finisherLife():profile(family).life();
+        double distance=camera.distanceToSqr(wielder.position());if(distance>1024)return;
+        var family=WarriorWeapons.family(wielder.getMainHandItem());if(family==null || family==WarriorWeaponFamily.BOW)return;
+        double time=now(),life=finishing(wielder)?profile(family).finisherLife():profile(family).life();
         if(time-state.history.peekLast().at()>life){state.history.clear();state.curve=List.of();state.version++;return;}
         int budget=distance>144?WarriorTrailVolume.FAR_POINTS:WarriorTrailVolume.NEAR_POINTS;
         if(state.cachedVersion!=state.version || state.budget!=budget){
             state.curve=WarriorTrailVolume.resample(new ArrayList<>(state.history),budget);state.cachedVersion=state.version;state.budget=budget;
         }
-        var stack=player.getMainHandItem();var key=ForgeRegistries.ITEMS.getKey(stack.getItem());
+        var stack=wielder.getMainHandItem();var key=ForgeRegistries.ITEMS.getKey(stack.getItem());
         String element=stack.hasTag()?stack.getTag().getString(WindInfusion.ELEMENT_KEY):"";
         // ★ 2026-11-08 领域法术（作者："战士的刀光剑影变成黑色"）——
         //   领域开着的时候，刀光按领域元素重上色：雷＝紫电、暗＝近黑 ✓
         //   走效果读状态（客户端本来就有），不需要额外发包 ✓
-        String domain=com.tnc.tnc.warrior.WarriorDomainLink.activeElementId(player);
+        String domain=com.tnc.tnc.warrior.WarriorDomainLink.activeElementId(wielder);
         if(domain!=null)element=domain;
         var style=WarriorTrailAppearance.of(key==null?"":key.getPath(),family,element);
-        double scale=WarriorPhantomRenderer.disabled()?1:Math.max(1,WarriorPhantomRenderer.scaleFor(player));
+        double scale=wielder instanceof AbstractClientPlayer player && !WarriorPhantomRenderer.disabled()
+                ? Math.max(1,WarriorPhantomRenderer.scaleFor(player)) : 1;
         int variant=plumeVariant(key==null?"":key.getPath(),family);
         var out=WarriorTrailRenderType.plume(buffer,plumeFrequency(family),variant);
         Vec3 origin=firstPerson?Vec3.ZERO:camera;
@@ -225,8 +248,8 @@ public final class WarriorTrail {
         // 战锤下砸的"扩散影"：只看几何（最后 120 ms 锤尖掉了多少），所以任何下砸动作都会出。
         // 第一人称不画 —— 那是给别人看的、也怕和手持视图的矩阵打架。
         if(!firstPerson){
-            WarriorSlamRipple.sample(player.getId(),key==null?"":key.getPath(),family,state.curve,(long)time,style.shell());
-            WarriorSlamRipple.render(player.getId(),buffer,camera,(long)time);
+            WarriorSlamRipple.sample(wielder.getId(),key==null?"":key.getPath(),family,state.curve,(long)time,style.shell());
+            WarriorSlamRipple.render(wielder.getId(),buffer,camera,(long)time);
         }
     }
     private static void vertex(VertexConsumer out,Vec3 p,Vec3 camera,int color,float alpha){

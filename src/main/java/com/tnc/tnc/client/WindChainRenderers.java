@@ -130,7 +130,7 @@ public final class WindChainRenderers {
                 p.mulPose(new Quaternionf().rotationTo(0,0,1,(float)direction.x,(float)direction.y,(float)direction.z));
                 float scale=WindChainRules.modelScale(e.tier())*e.bossScale();p.scale(scale,scale,scale);
                 float fade=(float)Math.max(0,Math.min(1,(end+8-age)/8));
-                WindConstructModels.phantomWeapon(WindChainRules.form(e.tier(),slot),age,p,b,alpha*fade,true);p.popPose();
+                WindConstructModels.phantomWeapon(e.weaponForm(slot),age,p,b,alpha*fade,true);p.popPose();
             }
             // A bounded set of inward cutting currents, rather than making the weapons lunge.
             if(e.tier()<5&&age>=38&&age<100){

@@ -432,16 +432,6 @@ public class TNDarkMageEntity extends Monster implements GeoEntity {
     @Override
     public void aiStep() {
         super.aiStep();
-        // ★ 2026-11-15 召唤交互：掉血超过 40% 触发一次
-        if (this.isAlive() && this.level() instanceof net.minecraft.server.level.ServerLevel trialLevel) {
-            com.tnc.tnc.boss.SummonTrial.tick(this);
-            if (!this.getPersistentData().getBoolean("TncSummonTrialUsed")
-                    && this.getHealth() <= this.getMaxHealth() * 0.60F) {
-                this.getPersistentData().putBoolean("TncSummonTrialUsed", true);
-                com.tnc.tnc.boss.SummonTrial.start(this, trialLevel,
-                        com.tnc.tnc.boss.SummonTrial.Kind.DARK);
-            }
-        }
         if (!(this.level() instanceof ServerLevel level)) {
             return;
         }
@@ -449,6 +439,14 @@ public class TNDarkMageEntity extends Monster implements GeoEntity {
         if (isClone()) {
             this.tickClone(level);
             return;
+        }
+        if (isAlive()) {
+            SummonTrial.tick(this);
+            if (!getPersistentData().getBoolean("TncSummonTrialUsed")
+                    && getHealth() <= getMaxHealth() * .60F) {
+                getPersistentData().putBoolean("TncSummonTrialUsed", true);
+                SummonTrial.start(this, level, SummonTrial.Kind.DARK);
+            }
         }
         var follow = getAttribute(Attributes.FOLLOW_RANGE);
         if (follow != null && follow.getBaseValue() < TNDarkMageSpells.FOLLOW_RANGE) {
