@@ -2,6 +2,10 @@ package com.tnc.tnc.magic.fire;
 
 import com.tnc.tnc.TNMod;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -51,6 +55,7 @@ public final class TNFireRework {
             new Ignition(38, 13, 24, 5, 10, 6),
             new Ignition(46, 17, 28, 6, 12, 7));
     private static final Map<UUID, Burn> BURNING = new HashMap<>();
+    private static final ResourceLocation SPELL_FIRE = ResourceLocation.fromNamespaceAndPath("spell_power", "fire");
     private static final float[] SPEND = {.45F, .50F, .45F, .40F, .60F};
 
 
@@ -135,7 +140,7 @@ public final class TNFireRework {
     }
 
     private static void detonate(ServerPlayer player, boolean chain) {
-        LivingEntity target = aim(player, 26);
+        LivingEntity target = aim(player, 40);
         if (target == null) return;
         Vec3 at = center(target);
         int tier = chain ? 2 : 1;
@@ -298,9 +303,17 @@ public final class TNFireRework {
 
     static boolean detonationDamage(ServerPlayer player, LivingEntity target, float amount) {
         // Ignition ticks and preceding hits must not consume a separate detonation's damage window.
+        if (target.fireImmune() || target.hasEffect(MobEffects.FIRE_RESISTANCE)) return false;
+        var level = player.serverLevel();
+        var fire = level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolder(ResourceKey.create(Registries.DAMAGE_TYPE, SPELL_FIRE))
+                .<net.minecraft.core.Holder<DamageType>>map(holder -> holder)
+                .orElseGet(() -> level.damageSources().onFire().typeHolder());
+        float health = target.getHealth();
+        float absorption = target.getAbsorptionAmount();
         int previousInvulnerability = target.invulnerableTime;
         target.invulnerableTime = 0;
-        boolean hit = applyFireDamage(player, target, amount);
+        boolean hit = target.hurt(new DamageSource(fire, player, player), amount * FireSpellRules.power(player))
+                && (target.getHealth() < health || target.getAbsorptionAmount() < absorption || !target.isAlive());
         if (!hit) target.invulnerableTime = previousInvulnerability;
         return hit;
     }

@@ -394,16 +394,37 @@ public final class FireReworkVisuals {
                 origin, Vec3.ZERO, bolt.radius(), tier / 5F, 40, owner == null ? null : owner.getUUID());
         double age = bolt.tickCount + partial;
         double radius = bolt.radius() * (.8 + .2 * smooth(age / 3));
+        double trailGrowth = 1;
+        float projectileOpacity = 1;
+        if (owner != null && owner == mc.getCameraEntity() && mc.options.getCameraType().isFirstPerson()) {
+            // Hand-fired bolts start at eye height. Keep the near end of the flame outside the camera.
+            Vec3 camera = mc.gameRenderer.getMainCamera().getPosition();
+            Vec3 axis = bolt.safeDirection();
+            double muzzleBlend = 1 - smooth(camera.distanceTo(origin) / 1.5);
+            if (tier < 5 && muzzleBlend > 0) {
+                double hand = owner instanceof net.minecraft.world.entity.LivingEntity living
+                        && living.getMainArm() == net.minecraft.world.entity.HumanoidArm.LEFT ? -1 : 1;
+                Vec3 offset = axis.scale(.65).add(FireSpellRules.right(axis).scale(.22 * hand))
+                        .add(0, -.15, 0).scale(muzzleBlend);
+                pose = new Matrix4f(pose).translate((float) offset.x, (float) offset.y, (float) offset.z);
+                origin = origin.add(offset);
+            }
+            double clearance = Math.max(0, camera.distanceTo(origin) - .12);
+            radius = Math.min(radius, clearance * .21);
+            if (radius < .01) return;
+            projectileOpacity = .32F + .68F * FirstPersonSpellView.opacity(owner.getUUID(), origin, radius);
+            trailGrowth = Math.min(1, clearance / (4.2 * radius));
+        }
         var palette = FireFlamePalette.forIgnition(tier);
         var draw = new Draw(buffers.getBuffer(MATERIAL), pose, cue,
-                mc.gameRenderer.getMainCamera().getPosition().subtract(origin), age, 1, origin, palette, false);
+                mc.gameRenderer.getMainCamera().getPosition().subtract(origin), age, projectileOpacity, origin, palette, false);
         Vec3 axis = bolt.safeDirection(), side = FireSpellRules.right(axis), up = side.cross(axis).normalize();
         draw.orb(axis, side, up, radius);
         for (int i = 0; i < 7; i++) {
             double a = i * 2.399963 + age * .17;
             Vec3 rim = side.scale(Math.cos(a)).add(up.scale(Math.sin(a)));
             Vec3 root = axis.scale(.48 * radius).add(rim.scale(radius * (.47 + .12 * Math.sin(i))));
-            Vec3 tail = axis.scale(-radius * (2.7 + .45 * (i % 3)))
+            Vec3 tail = axis.scale(-radius * trailGrowth * (2.7 + .45 * (i % 3)))
                     .add(rim.scale(.38 * radius)).add(0, radius * .4, 0);
             draw.flame(root, tail, radius * .66, age, i * 1.27, .9F);
         }
@@ -578,7 +599,8 @@ public final class FireReworkVisuals {
         void gradient(Vec3 p, Vec3 q, Vec3 r, Vec3 s, int rgb, float ap, float aq, float ar, float as) {
             if (budgeted && quads >= MAX_QUADS) return;
             Vec3 mid = p.add(q).add(r).add(s).scale(.25).add(origin);
-            float opacity = fade * FirstPersonSpellView.opacity(cue.caster(), mid, .65);
+            // Entity projectiles use a single camera-safe opacity across the entire mesh.
+            float opacity = budgeted ? fade * FirstPersonSpellView.opacity(cue.caster(), mid, .65) : fade;
             if (opacity * Math.max(Math.max(ap, aq), Math.max(ar, as)) <= .003F) return;
             rgb = rgb == RED ? palette.fringe() : rgb == AMBER ? palette.body()
                     : rgb == GOLD ? palette.glow() : rgb == WHITE_HOT ? palette.core() : rgb;

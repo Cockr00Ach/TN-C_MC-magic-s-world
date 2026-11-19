@@ -67,6 +67,30 @@ public final class FireDetonationGameTests {
     }
 
     @GameTest(template = TEMPLATE, timeoutTicks = 40, batch = "fire_detonation")
+    public static void zeroFinalDamageRetainsHeatAndRestoresCooldown(GameTestHelper helper) {
+        var at = Vec3.atBottomCenterOf(helper.absolutePos(new BlockPos(2, 3, 2)));
+        var caster = player(helper, at);
+        var victim = enemy(helper, at.add(0, 0, 4));
+        java.util.function.Consumer<net.minecraftforge.event.entity.living.LivingDamageEvent> shield = event -> {
+            if (event.getEntity() == victim) event.setAmount(0);
+        };
+        var bus = net.minecraftforge.common.MinecraftForge.EVENT_BUS;
+        bus.addListener(net.minecraftforge.eventbus.api.EventPriority.LOWEST, false,
+                net.minecraftforge.event.entity.living.LivingDamageEvent.class, shield);
+        try {
+            FireHeat.add(victim, caster, 80);
+            victim.invulnerableTime = 13;
+            cast(caster, "fireball");
+            helper.assertTrue(FireHeat.of(victim) == 80 && victim.getHealth() == 1000
+                    && victim.invulnerableTime == 13, "Zero final damage must retain heat and the prior cooldown");
+            helper.succeed();
+        } finally {
+            bus.unregister(shield);
+            cleanup(caster, victim);
+        }
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 40, batch = "fire_detonation")
     public static void instantDetonationsDamageAfterStrongerHitsAndPreserveHeatWhenImmune(GameTestHelper helper) {
         var at = Vec3.atBottomCenterOf(helper.absolutePos(new BlockPos(2, 3, 2)));
         var caster = player(helper, at);

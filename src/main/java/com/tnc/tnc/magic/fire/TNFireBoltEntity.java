@@ -329,6 +329,13 @@ public final class TNFireBoltEntity extends Projectile {
         return true;
     }
 
+    @Override
+    public void recreateFromPacket(net.minecraft.network.protocol.game.ClientboundAddEntityPacket packet) {
+        super.recreateFromPacket(packet);
+        // Projectile restores the owner but leaves velocity unset until a later tracking update.
+        setDeltaMovement(packet.getXa(), packet.getYa(), packet.getZa());
+    }
+
     /** 刚出生那一帧到长满之前都还没有速度，别让 normalize 炸。 */
     public Vec3 safeDirection() {
         Vec3 motion = getDeltaMovement();
