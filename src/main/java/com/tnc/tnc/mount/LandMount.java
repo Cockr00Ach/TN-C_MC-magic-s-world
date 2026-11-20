@@ -11,6 +11,7 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.sounds.*;
 import net.minecraft.world.damagesource.DamageSource;
@@ -22,10 +23,14 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 /** Vanilla horse owns input packets, authority, jumps, dismount safety and passenger persistence. */
 public final class LandMount extends Horse implements GeoEntity {
     private final AnimatableInstanceCache animationCache=GeckoLibUtil.createInstanceCache(this);
+    private int unicornRunTicks;
+    private Vec3 lastRunPosition;
+
     public LandMount(EntityType<? extends Horse> type,Level level){super(type,level);setPersistenceRequired();setMaxUpStep(1.0f);}
     public String species(){return net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getKey(getType()).getPath();}
     public boolean snow(){return species().equals("snow_wolf");}
     private boolean goat(){return species().equals("mountain_goat");}
+    private boolean unicorn(){return getType() == LandMounts.UNICORN.get();}
     public static AttributeSupplier.Builder attributes(){return Horse.createBaseHorseAttributes().add(Attributes.MAX_HEALTH,40).add(Attributes.MOVEMENT_SPEED,.30).add(Attributes.JUMP_STRENGTH,.65);}
     @Override protected void randomizeAttributes(RandomSource random){
         getAttribute(Attributes.MAX_HEALTH).setBaseValue(snow()?44:40);
@@ -54,8 +59,35 @@ public final class LandMount extends Horse implements GeoEntity {
         return super.mobInteract(player,hand);
     }
     @Override public boolean causeFallDamage(float distance,float multiplier,DamageSource source){return super.causeFallDamage(goat()?Math.max(0,distance-5):distance,multiplier,source);}
+    @Override
+    protected void tickRidden(Player player, Vec3 riddenInput) {
+        super.tickRidden(player, riddenInput);
+        if (unicorn()) {
+            // An uninterrupted run needs both rider input and real forward travel.
+            Vec3 here = position();
+            Vec3 displacement = lastRunPosition == null ? Vec3.ZERO : here.subtract(lastRunPosition);
+            lastRunPosition = here;
+            float yaw = getYRot() * Mth.DEG_TO_RAD;
+            double forward = displacement.z * Mth.cos(yaw) - displacement.x * Mth.sin(yaw);
+            unicornRunTicks = MountMotion.advanceUnicornRun(unicornRunTicks,
+                    riddenInput.z > 0, forward > 0.025 && displacement.horizontalDistanceSqr() < 2.25);
+        }
+    }
+
+    @Override
+    protected void removePassenger(Entity passenger) {
+        super.removePassenger(passenger);
+        unicornRunTicks = 0;
+        lastRunPosition = null;
+    }
+
     @Override protected float getRiddenSpeed(Player player){
-        float base=super.getRiddenSpeed(player);
+        float base = super.getRiddenSpeed(player) * switch (species()) {
+            case "mountain_goat" -> 1.5f;
+            case "snow_wolf" -> 1.7f;
+            case "rainbow_unicorn" -> MountMotion.unicornSpeedMultiplier(unicornRunTicks);
+            default -> 1.0f;
+        };
         if(snow()&&onGround()){
             var state=level().getBlockState(getBlockPosBelowThatAffectsMyMovement());
             if(state.is(Blocks.ICE)||state.is(Blocks.PACKED_ICE)||state.is(Blocks.BLUE_ICE)||state.is(Blocks.FROSTED_ICE)){
@@ -85,14 +117,18 @@ public final class LandMount extends Horse implements GeoEntity {
         };
         // Scale the calibrated hip height above the mount's feet, then remove the player's fixed offset.
         double playerHipCorrection = 0.35;
-        return (baseOffset + playerHipCorrection) * LandMounts.SIZE_MULTIPLIER - playerHipCorrection;
+        return (baseOffset + playerHipCorrection) * LandMounts.SIZE_MULTIPLIER - playerHipCorrection
+                + MountRiderPose.ARMOR_CLEARANCE;
     }
 
     @Override
     protected void positionRider(Entity passenger, Entity.MoveFunction move) {
         if (passenger instanceof Player player && hasPassenger(player)) {
-            // The land-mount rigs keep their backs centered during the horse's jump charge.
-            move.accept(player, getX(), getY() + getPassengersRidingOffset() + player.getMyRidingOffset(), getZ());
+            float yaw = getYRot() * Mth.DEG_TO_RAD;
+            double rear = MountRiderPose.forSpecies(species()).rearOffset();
+            move.accept(player, getX() + rear * Mth.sin(yaw),
+                    getY() + getPassengersRidingOffset() + player.getMyRidingOffset(),
+                    getZ() - rear * Mth.cos(yaw));
         } else {
             super.positionRider(passenger, move);
         }

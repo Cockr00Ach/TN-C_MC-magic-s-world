@@ -5,6 +5,19 @@ import java.util.*;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 class LandMountResourceTest {
+ @Test void unicornAccelerationRequiresContinuousForwardTravel() {
+  int ticks = 0;
+  assertEquals(1.5f, MountMotion.unicornSpeedMultiplier(ticks));
+  for (int i = 0; i < 30; i++) ticks = MountMotion.advanceUnicornRun(ticks, true, true);
+  assertEquals(2.0f, MountMotion.unicornSpeedMultiplier(ticks));
+  for (int i = 0; i < 90; i++) ticks = MountMotion.advanceUnicornRun(ticks, true, true);
+  assertEquals(60, ticks);
+  assertEquals(2.5f, MountMotion.unicornSpeedMultiplier(ticks));
+  assertEquals(0, MountMotion.advanceUnicornRun(ticks, false, true));
+  assertEquals(0, MountMotion.advanceUnicornRun(ticks, true, false));
+  assertEquals(1.5f, MountMotion.unicornSpeedMultiplier(MountMotion.advanceUnicornRun(ticks, false, false)));
+ }
+
  @Test void animationThresholdsAndRateAreBounded(){
   assertEquals("idle",MountMotion.clip(0));assertEquals("walk",MountMotion.clip(.05));assertEquals("trot",MountMotion.clip(.15));assertEquals("gallop",MountMotion.clip(.3));
   assertTrue(MountMotion.rate("gallop",.4)>MountMotion.rate("gallop",.25));assertTrue(MountMotion.rate("gallop",50)<=1.65);
