@@ -79,34 +79,77 @@ function Assert-GameClosed {
     }
 }
 
-# Use smaller independent ranges for large GitHub release assets. Some networks
-# end long transfers early; complete ranges can be reused on the next attempt.
+# Resolve the short-lived CDN URL once per attempt; the lock always records the
+# permanent GitHub URL. Outside hosts and old clients keep the original route.
 function Get-GitHubAsset($Entry, $Target) {
     $length = [long]$Entry.size
     $step = if ($length -gt 64MB) { 2MB } else { 512KB }
-    $options = [Collections.Generic.List[string]]::new()
+    $url = $Entry.url
+    $redirect = & curl.exe --silent --head --ssl-revoke-best-effort --connect-timeout 10 --max-time 20 --output NUL --write-out '%{redirect_url}' "$($Entry.url)?tnc=$([DateTime]::UtcNow.Ticks)"
+    if ($LASTEXITCODE -eq 0 -and $redirect -cmatch '^https://release-assets\.githubusercontent\.com/[^"\s\\]+$') {
+        $url = $redirect
+    }
+
     $pieces = [Collections.Generic.List[object]]::new()
     for ($first = 0L; $first -lt $length; $first += $step) {
         $last = [Math]::Min($first + $step - 1, $length - 1)
         $part = "$($Entry.name).$first.part"
-        $file = Join-Path $staging $part
-        $count = $last - $first + 1
-        $pieces.Add(@{ File=$file; Count=$count })
-        if ([IO.File]::Exists($file) -and (Get-Item -LiteralPath $file).Length -eq $count) { continue }
-        if ($options.Count) { $options.Add('next') }
-        foreach ($line in @('location','fail','silent','show-error','ssl-revoke-best-effort','retry = 2','retry-delay = 1','connect-timeout = 20','max-time = 420',
-                            "range = `"$first-$last`"","output = `"$part`"","url = `"$($Entry.url)?tncpart=$first`"")) {
-            $options.Add($line)
-        }
+        $pieces.Add(@{ File=(Join-Path $staging $part); Name=$part; First=$first; Last=$last; Count=($last-$first+1) })
     }
-    if ($options.Count) {
-        $configPath = Join-Path $staging 'ranges.txt'
+    $configPath = Join-Path $staging 'ranges.txt'
+    $stalled = 0
+    for ($round=0; $round -lt 12; $round++) {
+        $options = [Collections.Generic.List[string]]::new()
+        $pending = @()
+        foreach ($part in $pieces) {
+            $have = if ([IO.File]::Exists($part.File)) { (Get-Item -LiteralPath $part.File).Length } else { 0L }
+            if ($have -eq $part.Count) { continue }
+            if ($have -gt $part.Count) { [IO.File]::Delete($part.File); $have = 0L }
+            $part.From = $part.First + $have
+            $pending += $part
+            $delta = "$($part.Name).new"
+            $headers = "$($part.Name).headers"
+            [IO.File]::Delete((Join-Path $staging $delta))
+            [IO.File]::Delete((Join-Path $staging $headers))
+            if ($options.Count) { $options.Add('next') }
+            foreach ($line in @('location','fail','silent','show-error','ssl-revoke-best-effort','connect-timeout = 20','max-time = 420',
+                                "range = `"$($part.From)-$($part.Last)`"","dump-header = `"$headers`"","output = `"$delta`"","url = `"$url`"")) {
+                $options.Add($line)
+            }
+        }
+        if (-not $options.Count) { break }
         [IO.File]::WriteAllLines($configPath,$options,$utf8)
         Push-Location -LiteralPath $staging
         try {
+            # A reset can still leave a useful prefix. Check each actual HTTP
+            # range below, even when curl reports a failed parallel transfer.
             & curl.exe --parallel --parallel-max 8 --config $configPath
-            if ($LASTEXITCODE -ne 0) { throw "Range transfer returned $LASTEXITCODE." }
         } finally { Pop-Location }
+        $added = 0L
+        foreach ($part in $pending) {
+            $delta = "$($part.File).new"
+            $headers = "$($part.File).headers"
+            if (-not ([IO.File]::Exists($delta) -and [IO.File]::Exists($headers))) { continue }
+            $size = (Get-Item -LiteralPath $delta).Length
+            $expected = "bytes $($part.From)-$($part.Last)/$length"
+            $range = [regex]::Matches([IO.File]::ReadAllText($headers),'(?im)^Content-Range:[ \t]*([^\r\n]+)')
+            if (-not $range.Count -or $range[$range.Count-1].Groups[1].Value.Trim() -ne $expected -or
+                $size -le 0 -or $size -gt ($part.Last-$part.From+1)) { continue }
+            $to = [IO.File]::Open($part.File,[IO.FileMode]::Append)
+            try {
+                $from = [IO.File]::OpenRead($delta)
+                try { $from.CopyTo($to) } finally { $from.Dispose() }
+            } finally { $to.Dispose() }
+            $added += $size
+            [IO.File]::Delete($delta)
+        }
+        if ($added) {
+            $stalled = 0
+        } else {
+            $stalled++
+            if ($stalled -ge 2) { throw 'No progress fetching HTTP ranges.' }
+            Start-Sleep -Seconds 2
+        }
     }
     $output = [IO.File]::Create($Target)
     try {
