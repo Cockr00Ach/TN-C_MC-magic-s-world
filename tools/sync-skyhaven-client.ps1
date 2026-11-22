@@ -84,6 +84,8 @@ function Assert-GameClosed {
 function Get-GitHubAsset($Entry, $Target) {
     $length = [long]$Entry.size
     $step = if ($length -gt 64MB) { 2MB } else { 512KB }
+    $partDir = Join-Path (Join-Path $stateDir 'partial') $Entry.sha256
+    [void][IO.Directory]::CreateDirectory($partDir)
     $url = $Entry.url
     $redirect = & curl.exe --silent --head --ssl-revoke-best-effort --connect-timeout 10 --max-time 20 --output NUL --write-out '%{redirect_url}' "$($Entry.url)?tnc=$([DateTime]::UtcNow.Ticks)"
     if ($LASTEXITCODE -eq 0 -and $redirect -cmatch '^https://release-assets\.githubusercontent\.com/[^"\s\\]+$') {
@@ -94,7 +96,7 @@ function Get-GitHubAsset($Entry, $Target) {
     for ($first = 0L; $first -lt $length; $first += $step) {
         $last = [Math]::Min($first + $step - 1, $length - 1)
         $part = "$($Entry.name).$first.part"
-        $pieces.Add(@{ File=(Join-Path $staging $part); Name=$part; First=$first; Last=$last; Count=($last-$first+1) })
+        $pieces.Add(@{ File=(Join-Path $partDir $part); Name=$part; First=$first; Last=$last; Count=($last-$first+1) })
     }
     $configPath = Join-Path $staging 'ranges.txt'
     $stalled = 0
@@ -112,7 +114,7 @@ function Get-GitHubAsset($Entry, $Target) {
             [IO.File]::Delete((Join-Path $staging $delta))
             [IO.File]::Delete((Join-Path $staging $headers))
             if ($options.Count) { $options.Add('next') }
-            foreach ($line in @('location','fail','silent','show-error','ssl-revoke-best-effort','connect-timeout = 20','max-time = 420',
+            foreach ($line in @('location','fail','silent','show-error','ssl-revoke-best-effort','connect-timeout = 20','speed-limit = 1024','speed-time = 35','max-time = 120',
                                 "range = `"$($part.From)-$($part.Last)`"","dump-header = `"$headers`"","output = `"$delta`"","url = `"$url`"")) {
                 $options.Add($line)
             }
@@ -127,8 +129,8 @@ function Get-GitHubAsset($Entry, $Target) {
         } finally { Pop-Location }
         $added = 0L
         foreach ($part in $pending) {
-            $delta = "$($part.File).new"
-            $headers = "$($part.File).headers"
+            $delta = Join-Path $staging "$($part.Name).new"
+            $headers = Join-Path $staging "$($part.Name).headers"
             if (-not ([IO.File]::Exists($delta) -and [IO.File]::Exists($headers))) { continue }
             $size = (Get-Item -LiteralPath $delta).Length
             $expected = "bytes $($part.From)-$($part.Last)/$length"
@@ -175,6 +177,11 @@ function Download-Verified($Entry, $Target) {
                 Invoke-WebRequest -UseBasicParsing -Uri $Entry.url -OutFile $Target -TimeoutSec 1800 -UserAgent 'TN-C-client-sync/1.0'
             }
             if ((Get-Digest $Target) -ne $Entry.sha256) { throw "SHA256 mismatch for $($Entry.name)" }
+            $partDir = Join-Path (Join-Path $stateDir 'partial') $Entry.sha256
+            if ([IO.Directory]::Exists($partDir)) {
+                foreach ($part in [IO.Directory]::EnumerateFiles($partDir, "$($Entry.name).*.part")) { [IO.File]::Delete($part) }
+                if (![IO.Directory]::GetFileSystemEntries($partDir).Length) { [IO.Directory]::Delete($partDir) }
+            }
             return
         } catch {
             if ($attempt -eq 3) { throw "Unable to stage $($Entry.name) from $($Entry.url): $($_.Exception.Message)" }
