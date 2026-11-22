@@ -33,7 +33,7 @@ class GuidebookTest {
         for(var chapter:chapters)for(var value:chapter.getAsJsonArray("quests"))for(var d:value.getAsJsonObject().getAsJsonArray("dependencies"))assertTrue(quests.contains(d.getAsString()),d.toString());
         for(String e:List.of("water","fire","lightning","wind","earth","light","dark"))for(int tier=1;tier<=5;tier++){
             String name=e+"_wand_"+tier;assertNotNull(getClass().getResource("/assets/tnc/models/item/"+name+".json"));
-            try(var stream=getClass().getResourceAsStream("/assets/tnc/textures/item/wands/"+name+".png")){assertNotNull(stream);var image=javax.imageio.ImageIO.read(stream);int iconSize=e.equals("lightning")?64:32;assertEquals(iconSize,image.getWidth(),name);assertEquals(iconSize,image.getHeight(),name);assertTrue(image.getColorModel().hasAlpha());}
+            try(var stream=getClass().getResourceAsStream("/assets/tnc/textures/item/wands/"+name+".png")){assertNotNull(stream);var image=javax.imageio.ImageIO.read(stream);int iconSize=e.equals("lightning") && tier==5 ? 64 : 32;assertEquals(iconSize,image.getWidth(),name);assertEquals(iconSize,image.getHeight(),name);assertTrue(image.getColorModel().hasAlpha());}
         }
     }
     @Test void lifeRouteIdsLoadWithInstalledFtbSignedHexParser() throws IOException {

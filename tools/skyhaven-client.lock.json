@@ -1,0 +1,53 @@
+{
+  "profile": "forge-1.20.1-skyhaven-2",
+  "entries": [
+    {
+      "id": "connector",
+      "folder": "mods",
+      "name": "Connector-1.0.0-beta.49+1.20.1.jar",
+      "sha256": "caf19c97c0fce9158e03e354d4ebf556e8f1745c868da5dc4f6b7498727ab29f",
+      "url": "https://edge.forgecdn.net/files/8367/974/Connector-1.0.0-beta.49%2B1.20.1.jar",
+      "size": 5046108
+    },
+    {
+      "id": "fabric_api",
+      "folder": "mods",
+      "name": "fabric-api-0.92.6+1.11.14+1.20.1.jar",
+      "sha256": "9b140af437581d32e5ee17d20f8fe882000e6a34cba85c152ae5bccc9570cc03",
+      "url": "https://cdn.modrinth.com/data/Aqlf1Shp/versions/XweDEycJ/fabric-api-0.92.6%2B1.11.14%2B1.20.1.jar",
+      "size": 3065813
+    },
+    {
+      "id": "embeddium",
+      "folder": "mods",
+      "name": "embeddium-0.3.31+mc1.20.1.jar",
+      "sha256": "eed3d1325f2acc2fd4e69bb495e5ccb91d962126ac5330f0582ebc2a3daf47fb",
+      "url": "https://cdn.modrinth.com/data/sk9rgfiA/versions/UTbfe5d1/embeddium-0.3.31%2Bmc1.20.1.jar",
+      "size": 1320675
+    },
+    {
+      "id": "oculus",
+      "folder": "mods",
+      "name": "oculus-mc1.20.1-1.8.0.jar",
+      "sha256": "0945df0cba0f62b3901dd80c3268e5311b770ece78c78037a45db12ac0425fef",
+      "url": "https://cdn.modrinth.com/data/GchcoXML/versions/iQ1SwGc3/oculus-mc1.20.1-1.8.0.jar",
+      "size": 2851119
+    },
+    {
+      "id": "voxy",
+      "folder": "mods",
+      "name": "voxy-0.2.15-Forge-1.20.1.jar",
+      "sha256": "f413a61d7006a7d69cd89f4af88e6bee14dbb9e18f3f8bf417e035d8827e0207",
+      "url": "https://github.com/realBritakee/voxy-neoforge/releases/download/0.2.15/voxy-0.2.15-Forge-1.20.1.jar",
+      "size": 12481089
+    },
+    {
+      "id": "complementary_unbound",
+      "folder": "shaderpacks",
+      "name": "ComplementaryUnbound_r5.8.1.zip",
+      "sha256": "bb89b1fc54687d4147a837fb2e3c3f7261a13bee51819761e9b6a91cb7915965",
+      "url": "https://cdn.modrinth.com/data/R6NEzAwj/versions/VMHXIk50/ComplementaryUnbound_r5.8.1.zip",
+      "size": 546928
+    }
+  ]
+}
