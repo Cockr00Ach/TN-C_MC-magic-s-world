@@ -1,0 +1,27 @@
+{
+  "model": "sherpa-onnx-kws-zipformer-wenetspeech-3.3M-2024-01-01",
+  "repository": "https://www.modelscope.cn/models/pkufool/sherpa-onnx-kws-zipformer-wenetspeech-3.3M-2024-01-01",
+  "license": "Apache-2.0",
+  "files": {
+    "tokens.txt": {
+      "revision": "c7f531779e2324b104e58899d2d7727ea98e0b19",
+      "sha256": "72316508d9119696145abc6f1f8cdc46287535c34e5ce7e595f845cb1499cf2e"
+    },
+    "encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx": {
+      "revision": "f360c3af05b218887669bf03d69d63042a1cd4e6",
+      "sha256": "017af32f2c0138f931d05fbc009ee864295e910aff304f77d2f563815fc834fb"
+    },
+    "decoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx": {
+      "revision": "f360c3af05b218887669bf03d69d63042a1cd4e6",
+      "sha256": "fe53b8d6a07bc5373d1770649025a5a985c8fb3dab70323386a1b73aacba0546"
+    },
+    "joiner-epoch-12-avg-2-chunk-16-left-64.int8.onnx": {
+      "revision": "f360c3af05b218887669bf03d69d63042a1cd4e6",
+      "sha256": "431de10b554f134ef8af320feea2db337e641290449a3d3f6cb6e5f5fd2c9c3d"
+    },
+    "README.md": {
+      "revision": "3787015f084cb241dfa0e4ba237703a2d4322d50",
+      "sha256": "dd0ec68b5d9ee736f016fc982078bd3cdbccc69057e9910bdd45580992d13367"
+    }
+  }
+}

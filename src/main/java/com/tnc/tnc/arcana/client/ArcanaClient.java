@@ -18,13 +18,13 @@ public final class ArcanaClient {
     }}
     @SubscribeEvent public static void hud(net.minecraftforge.client.event.RenderGuiOverlayEvent.Post e){var mc=Minecraft.getInstance();if(mc.player==null||mc.level==null||!e.getOverlay().id().toString().equals("minecraft:hotbar"))return;var g=e.getGuiGraphics();boolean sight=ManaSightClient.enabled();
         if(sight&&deadMana){g.drawCenteredString(mc.font,"此维度法则排斥，天地间不存在一丝元素魔力……",mc.getWindow().getGuiScaledWidth()/2,78,0xffd4d9d9);}
-        if(sight){g.fill(8,43,222,68,0x990b1820);g.drawString(mc.font,"内视 · 淤积 "+toxicity+" /100  精神过载 "+(int)sanity+"%",13,48,0xffc5e9e1,false);if(clear)g.drawString(mc.font,"经脉通畅",13,59,0xffffdf94,false);
+        if(sight){
             if(mc.hitResult instanceof net.minecraft.world.phys.BlockHitResult hit){var be=com.tnc.tnc.alchemy.AlchemyBlock.master(mc.level,hit.getBlockPos());if(be!=null){String text=!be.ready.isEmpty()?"药液已成 · 玻璃瓶装取":be.sealed?"封盖续煮 · 药性已锁定":be.perfectRemaining>0?"★ 漩涡同心 · 此刻封盖 ★":"观察锅周颜色与药材漩涡";g.drawCenteredString(mc.font,text,mc.getWindow().getGuiScaledWidth()/2,mc.getWindow().getGuiScaledHeight()/2+29,be.perfectRemaining>0?0xffffe7a3:0xff000000|RitualRules.temperatureColor(be.temperature));}}
             if(sanity>40){int alpha=(int)Math.min(70,(sanity-40));int w=mc.getWindow().getGuiScaledWidth(),h=mc.getWindow().getGuiScaledHeight();for(int i=0;i<8;i++){int a=Math.max(0,alpha-i*5);g.fill(i*3,0,i*3+3,h,(a<<24)|0x8b51c6);g.fill(w-i*3-3,0,w-i*3,h,(a<<24)|0x39d6d3);}}
             if(overloadStage==3&&mc.level.getGameTime()<overloadUntil)g.fill(0,0,mc.getWindow().getGuiScaledWidth(),mc.getWindow().getGuiScaledHeight(),0x55a50019);
         }
     }
-    @SubscribeEvent public static void inventory(net.minecraftforge.client.event.ScreenEvent.Render.Post e){if(!(e.getScreen() instanceof net.minecraft.client.gui.screens.inventory.InventoryScreen inv)||!ManaSightClient.enabled())return;var mc=Minecraft.getInstance();e.getGuiGraphics().drawString(mc.font,"内视 · 淤积 "+toxicity+" /100",8,8,toxicity>50?0xffc896e8:0xff9ee9e9,false);
+    @SubscribeEvent public static void inventory(net.minecraftforge.client.event.ScreenEvent.Render.Post e){if(!(e.getScreen() instanceof net.minecraft.client.gui.screens.inventory.InventoryScreen inv)||!ManaSightClient.enabled())return;
         var g=e.getGuiGraphics();int x=inv.getGuiLeft()+59,y=inv.getGuiTop()+43,c=toxicity>50?0xff725089:0xb778eee1;
         for(int k=0;k<5;k++){g.fill(x-1,y+k*3,x+1,y+k*3+3,c);g.fill(x-1-k,y+3+k*2,x-k,y+4+k*2,c);g.fill(x+k,y+3+k*2,x+1+k,y+4+k*2,c);}
         for(int k=0;k<toxicity/20;k++)g.fill(x-4+(k%3)*4,y+2+k*3,x-1+(k%3)*4,y+5+k*3,0xff392641);}

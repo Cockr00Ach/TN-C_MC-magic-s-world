@@ -13,8 +13,25 @@ public final class DungeonGateAssets {
     public record Piece(ResourceLocation resource,BlockPos offset){}
     public record Asset(BlockPos size,BlockPos portal,List<Piece> pieces){}
     private static final Map<DungeonTheme,Asset> CACHE=new EnumMap<>(DungeonTheme.class);
+    private static net.minecraft.server.packs.resources.ResourceManager cachedManager;
+
+    private static InputStream openManifest(DungeonTheme theme) throws IOException {
+        var location = ResourceLocation.fromNamespaceAndPath("tnc", "dungeon_gate_assets/" + theme.id + ".json");
+        if (cachedManager != null) {
+            var resource = cachedManager.getResource(location);
+            if (resource.isPresent()) return resource.get().open();
+        }
+        return DungeonGateAssets.class.getResourceAsStream("/data/tnc/" + location.getPath());
+    }
     private static BlockPos pos(JsonArray a){return new BlockPos(a.get(0).getAsInt(),a.get(1).getAsInt(),a.get(2).getAsInt());}
-    public static Asset get(DungeonTheme t){return CACHE.computeIfAbsent(t,theme->{try(var stream=DungeonGateAssets.class.getResourceAsStream("/data/tnc/dungeon_gate_assets/"+theme.id+".json")){
+    public static synchronized Asset get(DungeonTheme t){
+        var server = net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();
+        var manager = server == null ? null : server.getResourceManager();
+        if (manager != cachedManager) {
+            cachedManager = manager;
+            CACHE.clear();
+        }
+        return CACHE.computeIfAbsent(t,theme->{try(var stream=openManifest(theme)){
         if(stream==null)return new Asset(new BlockPos(15,14,7),new BlockPos(7,2,3),List.of());
         var j=JsonParser.parseReader(new InputStreamReader(stream,StandardCharsets.UTF_8)).getAsJsonObject();var pieces=new ArrayList<Piece>();for(var p:j.getAsJsonArray("pieces")){var v=p.getAsJsonObject();pieces.add(new Piece(ResourceLocation.parse(v.get("resource").getAsString()),pos(v.getAsJsonArray("offset"))));}return new Asset(pos(j.getAsJsonArray("size")),pos(j.getAsJsonArray("portal")),List.copyOf(pieces));
       }catch(IOException e){throw new IllegalStateException("Dungeon gate source unreadable: "+theme.id,e);}});}

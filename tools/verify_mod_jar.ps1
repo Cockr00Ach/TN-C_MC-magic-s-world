@@ -59,6 +59,7 @@ function Note([string]$message) { Write-Host "  [note]    $message" }
 Add-Type -AssemblyName System.Web.Extensions
 $script:TncJson = New-Object System.Web.Script.Serialization.JavaScriptSerializer
 $script:TncJson.RecursionLimit = 100
+$script:TncJson.MaxJsonLength = [int]::MaxValue
 function ConvertFrom-TncSpellJson([string]$text) {
     $raw = $script:TncJson.DeserializeObject($text)
     if ($null -eq $raw) { return $null }

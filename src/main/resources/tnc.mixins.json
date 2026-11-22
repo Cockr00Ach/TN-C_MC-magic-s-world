@@ -14,9 +14,11 @@
   ],
   "client": [
     "BronzeHandInvoker",
+    "VoiceSpellHotbarMixin",
     "BronzeHeldItemMixin",
     "MusicManagerMixin",
     "OpeningHeldItemMixin",
+    "SkyhavenVoxyImportMixin",
     "OpeningPlayerPoseMixin",
     "LandMountPlayerPoseMixin"
   ],

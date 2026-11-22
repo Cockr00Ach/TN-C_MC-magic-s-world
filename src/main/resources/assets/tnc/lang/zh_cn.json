@@ -1145,5 +1145,12 @@
   "tooltip.tnc.weapon.branch.halberd": "戟",
   "tooltip.tnc.weapon.branch.scythe": "镰刀",
   "tooltip.tnc.weapon.branch.bow": "弓",
-  "key.tnc.warrior_tutorial_repeat": "重看战士教学"
+  "key.tnc.warrior_tutorial_repeat": "重看战士教学",
+  "subtitles.tnc.whale_call": "魔力巨鲸低吟",
+  "entity.tnc.eclipse_leviathan": "蚀月",
+  "key.tnc.free_magic_chant": "自由魔法 · 按住吟唱",
+  "key.tnc.free_magic_stop": "停止自由魔法维持",
+  "effect.tnc.free_magic_silence": "噤声",
+  "block.tnc.temporary_magic_rock": "临时岩构",
+  "block.tnc.temporary_magic_light": "极昼光源"
 }

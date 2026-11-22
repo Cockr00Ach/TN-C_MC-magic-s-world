@@ -191,7 +191,7 @@ public final class FirstSightScene {
             phase = Phase.BLINK;
             blackoutSeconds = 0;
         } else if (phase == Phase.BLINK) {
-            if (blackoutSeconds >= .45) ManaSightClient.setEnabled(true);
+            if (blackoutSeconds >= .45 && !ManaSightClient.enabled()) ManaSightClient.setEnabled(true);
             if (blackoutSeconds >= 1.05) phase = Phase.REVEALED;
         } else if (phase == Phase.REVEALED && ++revealedTicks > 220 && songTicks > 2760) close();
     }

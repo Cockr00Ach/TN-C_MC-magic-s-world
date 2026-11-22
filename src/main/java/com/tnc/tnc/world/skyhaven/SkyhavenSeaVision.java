@@ -33,7 +33,8 @@ public final class SkyhavenSeaVision {
                 ||!com.tnc.tnc.mana.sight.client.ManaSightClient.enabled()){
             VISIBILITY.clear();world.clear();return;
         }
-        if(!canSeeSeaStorms(mc)){
+        var layout = com.tnc.tnc.skyacademy.client.SkyhavenLayoutClient.layout();
+        if(!canSeeSeaStorms(mc,layout)){
             VISIBILITY.clear();
             lastStorms=lastDrawn=lastQuads=lastLinks=lastBackground=0;
             return;
@@ -44,9 +45,9 @@ public final class SkyhavenSeaVision {
         var eligible=new ArrayList<SeaGyreLayout.Gyre>();
         int background=0;
         for(var g:SeaTornadoLayout.near(camera.x,camera.z)){
-            if(!SeaStormCoast.offshore(g))continue;
+            if(!SeaStormCoast.offshore(g,layout))continue;
             var at=BlockPos.containing(g.x(),48,g.z());
-            // Outside the fixed authored rectangle this realm generates flat abyssal
+            // Beyond the authored shore this realm generates flat abyssal
             // sea. Its distant background may render at 8 chunks without requesting
             // any extra chunks. Loaded columns still respect actual player buildings.
             // ClientLevel.hasChunk is always true. Query the actual cache with
@@ -91,7 +92,7 @@ public final class SkyhavenSeaVision {
         for(int i=0;i<ordered.size();i++)for(int j=i+1;j<ordered.size();j++){
             if(!SeaStormEnergyGeometry.linked(ordered,i,j))continue;
             var a=ordered.get(i);var b=ordered.get(j);
-            if(!SeaStormCoast.linkOffshore(a,b))continue;
+            if(!SeaStormCoast.linkOffshore(a,b,layout))continue;
             if(!event.getFrustum().isVisible(new net.minecraft.world.phys.AABB(Math.min(a.x(),b.x())-30,49,Math.min(a.z(),b.z())-30,
                     Math.max(a.x(),b.x())+30,110,Math.max(a.z(),b.z())+30)))continue;
             double alpha=Math.min(opacity(a,Math.hypot(a.x()-camera.x,a.z()-camera.z),mc.level.getGameTime()+event.getPartialTick()),
@@ -111,12 +112,13 @@ public final class SkyhavenSeaVision {
     }
     private static final int[][] EDGE_SAMPLES = {{6,0},{-6,0},{0,6},{0,-6},{4,4},{4,-4},{-4,4},{-4,-4}};
 
-    private static boolean canSeeSeaStorms(Minecraft mc){
+    private static boolean canSeeSeaStorms(Minecraft mc,SeaStormCoast.Layout layout){
         var player=mc.player;
         if(player==null)return false;
         if(player.isInFluidType(SkyhavenContent.TYPE)
-                || SeaStormCoast.distanceToIsland(player.getX(),player.getZ())>0)return true;
-        // The authored rectangle also contains sea beyond the actual shoreline.
+                || SeaStormCoast.distanceToIsland(player.getX(),player.getZ(),layout)>(layout != SeaStormCoast.Layout.ORIGINAL ? -4 : 0))return true;
+        // The old template encloses open sea; loaded columns also detect small
+        // natural coves and player changes below the sampling resolution.
         // Test the player's own column before checking the rim around it.
         if(openSeaColumn(mc,player.getX(),player.getZ()))return true;
         for(int[] direction : EDGE_SAMPLES){

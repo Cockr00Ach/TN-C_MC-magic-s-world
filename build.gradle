@@ -488,6 +488,12 @@ tasks.named('processResources', ProcessResources).configure {
         def target = new File(destinationDir, 'assets/tnc/sounds.json')
         def combined = target.exists() ? new groovy.json.JsonSlurper().parse(target, 'UTF-8') : [:]
         combined.putAll(new groovy.json.JsonSlurper().parse(file('src/main/resources/assets/tnc/tavern-sounds.json'), 'UTF-8'))
+        combined.putAll(new groovy.json.JsonSlurper().parse(file('src/main/resources/assets/tnc/whale-sounds.json'), 'UTF-8'))
+        // Keep the registered playlist available to clients with locally installed audio.
+        (1..14).each { number ->
+            String track = String.format(java.util.Locale.ROOT, 'track_%03d', number)
+            combined.putIfAbsent("music.travel.${track}".toString(), [sounds: [[name: "tnc:music/travel/${track}".toString(), stream: true]]])
+        }
         target.parentFile.mkdirs()
         target.setText(groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(combined)), 'UTF-8')
     }
@@ -513,7 +519,42 @@ tasks.named('processResources', ProcessResources).configure {
 }
 
 // Example for how to get properties into the manifest for reading at runtime.
+// The public client release is tied to committed inputs on the reviewed source tree.
+if (project.hasProperty('teamPublicRelease')) {
+    def paths = ['src/main', 'build.gradle', 'gradle.properties', 'settings.gradle', 'gradle/wrapper']
+    def gitOutput = { List<String> args ->
+        providers.exec {
+            workingDir project.projectDir
+            commandLine(['git'] + args)
+        }.standardOutput.asText.get().trim()
+    }
+    def trees = paths.collectEntries { path -> [(path): gitOutput(['rev-parse', "HEAD:${path}".toString()])] }
+    def receipt = layout.buildDirectory.file('team-release/tnc-team-build.json')
+    def generateStamp = tasks.register('generateTeamBuildStamp') {
+        inputs.property('sourceTrees', trees)
+        outputs.file(receipt)
+        doLast {
+            def target = receipt.get().asFile
+            target.parentFile.mkdirs()
+            target.setText(groovy.json.JsonOutput.toJson([sourceTrees: trees]) + '\n', 'UTF-8')
+        }
+    }
+    // Check even on an up-to-date receipt: an edited file must not receive its old Git identity.
+    tasks.named('jar', Jar).configure {
+        inputs.property('teamPublicRelease', true)
+        from(generateStamp) { into 'META-INF' }
+        doFirst {
+            def pending = gitOutput(['status', '--porcelain', '--untracked-files=all', '--'] + paths)
+            if (pending) throw new GradleException('Commit the release inputs before building the public JAR:\n' + pending)
+        }
+    }
+}
+
 tasks.named('jar', Jar).configure {
+    if (project.hasProperty('teamPublicRelease')) {
+        exclude 'data/tnc/structures/dungeon_gates/**', 'data/tnc/dungeon_gate_assets/**',
+                'assets/tnc/sounds/music/**', 'assets/tnc/sounds/casino/*.ogg', 'assets/tnc/sounds/tavern/*.ogg'
+    }
     // Native previews may compile dependency fixtures into the shared output.
     // Never ship those classes: split packages hide the actual dependency on Forge.
     exclude { entry ->

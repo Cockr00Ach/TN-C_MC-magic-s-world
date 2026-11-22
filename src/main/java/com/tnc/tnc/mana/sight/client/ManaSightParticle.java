@@ -26,7 +26,7 @@ final class ManaSightParticle extends TextureSheetParticle {
         this.start=at;this.target=target;this.motion=motion;this.phase=phase;this.opacity=opacity;this.size=size;this.lifetime=life;this.born=level.getGameTime();
         this.radius=Math.hypot(at.x-target.x,at.z-target.z);this.angle=Math.atan2(at.z-target.z,at.x-target.x);
         this.hasPhysics=false;this.alpha=0;this.quadSize=size;setSize(size*2,size*2);
-        setColor((color>>16&255)/255f,(color>>8&255)/255f,(color&255)/255f);setSprite(sprites.get(texture,2));
+        setColor((color>>16&255)/255f,(color>>8&255)/255f,(color&255)/255f);setSprite(sprites.get(texture,3));
     }
     double distanceToSqr(Vec3 at){return at.distanceToSqr(x,y,z);}
     @Override public ParticleRenderType getRenderType(){return ManaRadiance.TYPES[Math.floorMod((int)phase,2)];}

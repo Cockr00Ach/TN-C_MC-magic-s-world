@@ -61,7 +61,7 @@ public class SpellHelperManaGateMixin {
                                      CallbackInfoReturnable<net.spell_engine.internals.casting.SpellCast.Attempt> cir) {
         // 在 HEAD 处直接给出"这次施法不成立"的结论，引擎自己的实现根本不会跑 ——
         // 这就是"施法前判定"的真拦截（而不是放出去之后再补扣）。
-        if (ManaGate.shouldBlock(player, spellId)) {
+        if (com.tnc.tnc.magic.free.ElementalStates.silenced(player) || ManaGate.shouldBlock(player, spellId)) {
             cir.setReturnValue(net.spell_engine.internals.casting.SpellCast.Attempt.none());
         }
     }

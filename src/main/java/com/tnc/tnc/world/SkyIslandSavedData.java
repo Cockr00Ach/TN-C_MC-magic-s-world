@@ -22,6 +22,9 @@ public final class SkyIslandSavedData extends SavedData {
 
     int version;
     int portalRevision;
+    private boolean rebuiltSkyhaven;
+
+    public boolean rebuiltSkyhaven() { return rebuiltSkyhaven; }
     Phase phase = Phase.IDLE;
     int nextPiece;
     boolean layoutReady;
@@ -108,6 +111,7 @@ public final class SkyIslandSavedData extends SavedData {
     static SkyIslandSavedData load(CompoundTag tag) {
         SkyIslandSavedData data = new SkyIslandSavedData();
         data.version = tag.getInt("Version");
+        data.rebuiltSkyhaven = tag.getBoolean("RebuiltSkyhaven");
         data.portalRevision = tag.getInt("PortalRevision");
         try {
             data.phase = Phase.valueOf(tag.getString("Phase"));
@@ -165,6 +169,7 @@ public final class SkyIslandSavedData extends SavedData {
     @Override
     public CompoundTag save(CompoundTag tag) {
         tag.putInt("Version", version);
+        tag.putBoolean("RebuiltSkyhaven", rebuiltSkyhaven);
         tag.putInt("PortalRevision", portalRevision);
         tag.putString("Phase", phase.name());
         tag.putInt("NextPiece", nextPiece);

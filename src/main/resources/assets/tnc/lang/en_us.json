@@ -1007,5 +1007,12 @@
   "tooltip.tnc.weapon.branch.halberd": "Halberd",
   "tooltip.tnc.weapon.branch.scythe": "Scythe",
   "tooltip.tnc.weapon.branch.bow": "Bow",
-  "key.tnc.warrior_tutorial_repeat": "Replay warrior lesson"
+  "key.tnc.warrior_tutorial_repeat": "Replay warrior lesson",
+  "subtitles.tnc.whale_call": "Mana whale sings",
+  "entity.tnc.eclipse_leviathan": "Eclipse Leviathan",
+  "key.tnc.free_magic_chant": "Free magic · hold to chant",
+  "key.tnc.free_magic_stop": "Stop sustained free magic",
+  "effect.tnc.free_magic_silence": "Silenced",
+  "block.tnc.temporary_magic_rock": "Temporary Magic Rock",
+  "block.tnc.temporary_magic_light": "Daylight Source"
 }

@@ -1,0 +1,37 @@
+{
+  "source": "ReTerraForged 0.0.6 Forge 1.20.1",
+  "jarSHA256": "fd9592800b94095789ba26abc81009aee141f97836ec8f0478c668c96c06433e",
+  "preset": "Presets.makeLegacyBeautiful with worldHeight=384, mountains.verticalScale x1.50, mountains.weight x1.35, fancyMountains=true",
+  "seed": 312617,
+  "x0": 5260,
+  "z0": -1880,
+  "spacing": 1,
+  "width": 1281,
+  "depth": 1249,
+  "encoding": "npz arrays indexed [z,x]; river true exactly Cell.terrain.getId()==5; river_mask exact Cell.riverMask",
+  "samples": 1599969,
+  "minY": 13,
+  "maxY": 271,
+  "peakXZ": [
+    5569,
+    -1347
+  ],
+  "riverPoints": 39332,
+  "underSeaFraction": 0.19463189599298486,
+  "terrainNames": {
+    "1": "deep_ocean",
+    "2": "ocean",
+    "3": "coast",
+    "5": "river",
+    "7": "wetland",
+    "11": "hills",
+    "14": "mountains_3",
+    "15": "mountain_chain",
+    "16": "volcano",
+    "25": "flats-plateau"
+  },
+  "levelConversion": "GeneratorContext.levels.scale(cell.height)",
+  "scope": "Native terrain, continent, hydrography, climate via Heightmap.apply, before later tile erosion and biome-surface decoration",
+  "fieldSHA256": "67b8371db112265843bb08f2b6f3aa0a59e793dbd76b50dd87dcd1c365fe8870",
+  "rawSHA256": "52b5bfc99fbbf8ea2dfdab7c32c7658eb5e7ce3b688ca63ee0b01089b2d1e6cb"
+}

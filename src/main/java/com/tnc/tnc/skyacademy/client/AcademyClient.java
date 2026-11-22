@@ -21,6 +21,7 @@ public final class AcademyClient {
     private static ArmorStand camera;private static CameraType previous;private static net.minecraft.client.multiplayer.ClientLevel owner;
     private static boolean practice,restoreSight,changedSight;private static final Random random=new Random(261026);
     public static void receive(CompoundTag t){
+        if ("island_layout".equals(t.getString("Type"))) { SkyhavenLayoutClient.receive(t.getBoolean("Rebuilt"), t.getBoolean("Highlands")); return; }
         if(t.getString("Type").equals("arrival_loading")){com.tnc.tnc.world.skyhaven.SkyhavenArrivalClient.receive(t);return;}
         var mc=Minecraft.getInstance();if(mc.level==null||mc.player==null)return;
         if(t.getString("Type").equals("tavern_opening")){com.tnc.tnc.tavern.client.TavernOpeningScene.start(t);return;}
@@ -49,7 +50,7 @@ public final class AcademyClient {
         double t=ease(age/(double)duration);Vec3 eye,focus;var at=point(shot.equals("arrival")?"arrival":shot);
         if(shot.equals("arrival")){
             // Rise from the gateway foreground to the skyline; stay in the player's chunk radius.
-            var entry=Vec3.atCenterOf(origin.offset(209,90,424));eye=entry.add(-20+40*t,12+18*Math.sin(t*Math.PI/2),18-12*t);
+            var entry=Vec3.atCenterOf(origin.offset(SkyhavenLayoutClient.rebuilt() ? new BlockPos(158,90,448) : new BlockPos(209,90,424)));eye=entry.add(-20+40*t,12+18*Math.sin(t*Math.PI/2),18-12*t);
             focus=Vec3.atCenterOf(origin.offset(260,119,265)).add((t-.5)*75,0,0);
         }else if(shot.equals("stargaze")){
             eye=at.add(-6+12*t,5,9);focus=Vec3.atCenterOf(origin.offset(260,105,260));
@@ -82,10 +83,9 @@ public final class AcademyClient {
     private static void scenery(){
         var mc=Minecraft.getInstance();var eye=mc.player.getEyePosition();long clock=mc.level.getGameTime();
         var ridge=point("stargaze");
-        if(eye.distanceToSqr(ridge)<48*48&&AcademyRules.night(mc.level.getDayTime())){
+        if(eye.distanceToSqr(ridge)<48*48&&ManaSightParticles.sceneryAllowed(mc.level)){
             // An environment-sized river of individual luminous grains, never a solid ribbon wall.
             double reveal=1;
-            SummitMagicVista.tick(ridge, clock);
             int quality=mc.options.particles().get()==ParticleStatus.MINIMAL?18:mc.options.particles().get()==ParticleStatus.DECREASED?34:56;
             String[] roots={"farm","lake","wind","workshop"};int[] colors={0x6CE7A7,0x8CDAFF,0xF3DC99,0x84F5E6};
             for(int i=0;i<quality/2;i++){

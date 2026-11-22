@@ -1,0 +1,15 @@
+{
+  "whale.arrival": {
+    "subtitle": "subtitles.tnc.whale_call",
+    "sounds": [
+      {"name": "tnc:whale/arrival", "volume": 1.15, "attenuation_distance": 7600}
+    ]
+  },
+  "whale.answer": {
+    "subtitle": "subtitles.tnc.whale_call",
+    "sounds": [
+      {"name": "tnc:whale/answer", "volume": 1.27, "attenuation_distance": 7600},
+      {"name": "tnc:whale/sigh", "volume": 1.27, "attenuation_distance": 7600}
+    ]
+  }
+}

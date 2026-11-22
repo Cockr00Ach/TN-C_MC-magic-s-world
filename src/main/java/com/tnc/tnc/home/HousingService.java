@@ -52,7 +52,7 @@ public final class HousingService {
     public static boolean owned(ServerPlayer p){var t=home(p);return t.hasUUID("Owner")&&!t.getBoolean("Preparing");}
     public static boolean atSale(ServerPlayer p){var origin=sourceOrigin(com.tnc.tnc.world.SkyIslandWorlds.island(p.server));return p.serverLevel()==com.tnc.tnc.world.SkyIslandWorlds.island(p.server)&&p.isAlive()&&!p.isSpectator()&&!com.tnc.tnc.combat.DownedCombat.isDowned(p)&&origin!=null&&origin.offset(189,92,394).closerToCenterThan(p.position(),16);}
     public static PlotCatalog.Plot ownedAt(ServerLevel level,BlockPos pos){if(level!=com.tnc.tnc.world.SkyIslandWorlds.island(level.getServer()))return null;return PlotCatalog.ALL.stream().filter(a->{var t=home(level.getServer(),a.id());return t.hasUUID("Owner")&&a.contains(pos.subtract(BlockPos.of(t.getLong("Origin"))));}).findFirst().orElse(null);}
-    public static PlotCatalog.Plot plotAt(ServerLevel level,BlockPos pos){if(level!=com.tnc.tnc.world.SkyIslandWorlds.island(level.getServer()))return null;var origin=sourceOrigin(level);var plot=origin==null?null:PlotCatalog.at(pos.subtract(origin));return PlotCatalog.available(level.getServer(),plot)?plot:null;}
+    public static PlotCatalog.Plot plotAt(ServerLevel level,BlockPos pos){if(level!=com.tnc.tnc.world.SkyIslandWorlds.island(level.getServer()))return null;var origin=sourceOrigin(level);var plot=origin==null?null:PlotCatalog.at(pos.subtract(origin));return PlotCatalog.available(level.getServer(),plot) ? plot : ownedAt(level,pos);}
     public static boolean isOwnedPosition(ServerLevel level,BlockPos pos){return ownedAt(level,pos)!=null;}
     public static boolean mayDecorate(ServerPlayer p,BlockPos pos) {
         var plot=ownedAt(p.serverLevel(),pos);if(plot==null)return false;var t=home(p.server,plot.id());
@@ -63,7 +63,7 @@ public final class HousingService {
         if(owned.isEmpty())return "只有产权持有人可以授权伙伴。";String id=friend.getUUID().toString();
         if(allow&&owned.stream().anyMatch(plot->{var guests=home(owner.server,plot.id()).getList("Guests",8);return guests.size()>=8&&guests.stream().noneMatch(v->v.getAsString().equals(id));}))return "每处最多八位伙伴，未变更权限。";
         for(var plot:owned){var t=home(owner.server,plot.id());var guests=t.getList("Guests",8);guests.removeIf(v->v.getAsString().equals(id));if(allow&&!friend.getUUID().equals(owner.getUUID()))guests.add(net.minecraft.nbt.StringTag.valueOf(id));t.put("Guests",guests);}
-        AdventureSavedData.get(owner.server).setDirty();return (allow?"已授权":"已撤销")+friend.getGameProfile().getName()+"在你现有房屋和农牧地上的协作权限；不会转移产权。";
+        AdventureSavedData.get(owner.server).setDirty();return (allow?"已授权":"已撤销")+friend.getGameProfile().getName()+"在你名下房产的协作权限；不会转移产权。";
     }
     public static String buy(ServerPlayer p) {return buy(p,false);}
     public static String buy(ServerPlayer p,boolean installment) {
@@ -72,15 +72,13 @@ public final class HousingService {
     public static String buy(ServerPlayer p,String id,boolean installment){return buy(p,id,installment,true);}
     private static String buy(ServerPlayer p,String id,boolean installment,boolean requireVisit) {
         com.tnc.tnc.adventure.BankService.settle(p);
-        var plot=PlotCatalog.find(id);if(!PlotCatalog.available(p.server,plot))return "没有这处房源或土地。";
+        var plot=PlotCatalog.find(id);if(!PlotCatalog.available(p.server,plot))return "这处房源未列入销售目录。";
         if(mine(p,plot.kind())!=null)return "你已有同类产权；先把自己的归处建设起来。";
-        if(installment&&plot.kind()!=PlotCatalog.Kind.HOME)return "农田与牧场只需一次购买，不提供房贷。";
         if(requireVisit&&plot.kind()==PlotCatalog.Kind.HOME&&!p.isCreative()&&!AdventureService.profile(p).hasMilestone("viewed_"+id))return "先去"+plot.number()+"号实地看房，再回米洛这里决定。点击去看房可获得指引。";
-        if(p.level()!=com.tnc.tnc.world.SkyIslandWorlds.island(p.server))return "住宅位于主世界天空岛。";
+        if(p.level()!=com.tnc.tnc.world.SkyIslandWorlds.island(p.server))return "住宅位于天空岛。";
         var origin=sourceOrigin(p.serverLevel());if(origin==null||!SkyIslandAnchors.isComplete(p.serverLevel()))return "天空岛还未完成，尚无可售房源。";
         var chunks=new HashSet<net.minecraft.world.level.ChunkPos>();boolean waiting=false;
         try{
-            if(plot.kind()!=PlotCatalog.Kind.HOME)return buyLand(p,plot,origin);
             var plan=blueprint(p.serverLevel(),id);var level=p.serverLevel();
             for(var cell:plan.cells())chunks.add(new net.minecraft.world.level.ChunkPos(origin.offset(cell.local())));
             for(var chunk:chunks)level.getChunkSource().addRegionTicket(BANK_INSPECTION,chunk,2,chunk);
@@ -118,11 +116,7 @@ public final class HousingService {
         if(t.getBoolean("Preparing"))return "住宅已预留，整理尚未完成。请保持房屋区块加载；不会再次扣款。";
         AdventureService.milestone(p,"home_bought");return "已购"+plot.number()+"号"+plot.name()+"。室内用品已移除，房屋边界内可挖、可放，请自行装修。";
     }
-    private static String buyLand(ServerPlayer p,PlotCatalog.Plot plot,BlockPos origin){
-        var store=AdventureSavedData.get(p.server);if(home(p.server,plot.id()).hasUUID("Owner"))return "这块土地已有主人。";
-        var a=AdventureService.profile(p);if(!a.bank.spend(a,plot.price(),"购买"+plot.number()+"土地"))return "钱袋和存款合计不足，未扣款。";
-        var t=new CompoundTag();t.putUUID("Owner",p.getUUID());t.putLong("Origin",origin.asLong());t.putString("PlotId",plot.id());t.putLong("Price",plot.price());store.housing.put(plot.id(),t);store.setDirty();p.server.overworld().getDataStorage().save();AdventureService.milestone(p,"land_bought");return "已购"+plot.number()+plot.name()+"。土地原状保留，边界内可整理种养。";
-    }
+
     static boolean stable(BlockState a,BlockState b){
         // Source plants can lose attachment faces or disappear during normal import
         // and growth. A different replacement block still fails the shell preflight.

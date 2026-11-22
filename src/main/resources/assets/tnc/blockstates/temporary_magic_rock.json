@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "crack=0": {
+      "model": "tnc:block/temporary_magic_rock_0"
+    },
+    "crack=1": {
+      "model": "tnc:block/temporary_magic_rock_1"
+    },
+    "crack=2": {
+      "model": "tnc:block/temporary_magic_rock_2"
+    }
+  }
+}

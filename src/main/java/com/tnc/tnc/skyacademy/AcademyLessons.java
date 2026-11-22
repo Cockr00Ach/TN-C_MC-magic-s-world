@@ -24,7 +24,7 @@ import java.util.*;
 @Mod.EventBusSubscriber(modid="tnc")
 public final class AcademyLessons {
     public static final Map<String,String> NAMES=Map.of("stargaze","观星人 · 瑟兰","wind","遗迹向导 · 岚","farm","田庄园丁 · 莉禾","workshop","工坊导师 · 诺恩");
-    private record Session(String site,long token,long until){}
+    private record Session(String site,long token,long until,boolean replay){}
     private record Lease(UUID owner,long until){}
     private static final Map<UUID,Session> SESSIONS=new HashMap<>();
     private static final Map<MinecraftServer,Map<String,Lease>> LEASES=new WeakHashMap<>();
@@ -48,12 +48,32 @@ public final class AcademyLessons {
         default->"沿着山路来找我们。每次只练习一种新本领。";
     };}
     public static void open(ServerPlayer p,String site){
+        open(p,site,false);
+    }
+    public static void replayFirstSight(ServerPlayer p){open(p,"stargaze",true);}
+    private static void open(ServerPlayer p,String site,boolean replay){
+        if(!NAMES.containsKey(site)||!SkyAcademyWorld.available(p.server)||!near(p,site,8))return;
+        if(site.equals("stargaze")&&!replay){
+            if((completed(p)&AcademyRules.NIGHT)!=0){greetStargazer(p);return;}
+            if(firstSightLesson(p))return;
+        }
         if(site.equals("stargaze")&&!FirstSightPeak.ready(p.server))return;
         if(site.equals("stargaze")){ensureMentors(p.server);var at=SkyAcademyWorld.at(p.server,site);if(at!=null)for(var npc:p.serverLevel().getEntitiesOfClass(TownServiceNpc.class,new AABB(at).inflate(8),n->n.role().equals("academy_stargaze"))){float yaw=(float)Math.toDegrees(Math.atan2(npc.getX()-p.getX(),p.getZ()-npc.getZ()));npc.setYRot(yaw);npc.setYHeadRot(yaw);npc.setYBodyRot(yaw);}}
-        if(!NAMES.containsKey(site)||!SkyAcademyWorld.available(p.server)||!near(p,site,8))return;
         var packet=new CompoundTag();packet.putString("Type","dialogue");packet.putString("Site",site);packet.putString("Title",title(site));packet.putString("Name",NAMES.get(site));packet.putString("Text",lesson(site));
         boolean allowed=AcademyRules.unlocked(completed(p),site);packet.putBoolean("Allowed",allowed);packet.putBoolean("Night",AcademyRules.night(p.level().getDayTime()));
-        long id=++token;SESSIONS.put(p.getUUID(),new Session(site,id,now(p)+2400));packet.putLong("Token",id);packet.putString("Next",AcademyRules.next(completed(p)));if(site.equals("stargaze")&&allowed){action(p,id,"begin");return;}AcademyNetwork.send(p,packet);
+        long id=++token;SESSIONS.put(p.getUUID(),new Session(site,id,now(p)+2400,replay));packet.putLong("Token",id);packet.putString("Next",AcademyRules.next(completed(p)));if(site.equals("stargaze")&&allowed){action(p,id,"begin");return;}AcademyNetwork.send(p,packet);
+    }
+    private static void greetStargazer(ServerPlayer p){
+        String line=AcademyRules.night(p.level().getDayTime())?"你来得正好。陪我再看一会儿星星吧。":"上回我们数过的星星，白天也还在那儿。";
+        p.displayClientMessage(Component.literal("瑟兰 · "+playerName(p)+"，"+line),true);
+    }
+    @SubscribeEvent(priority=EventPriority.HIGHEST)
+    public static void greetOnAttack(net.minecraftforge.event.entity.player.AttackEntityEvent event){
+        if(event.getEntity() instanceof ServerPlayer p && event.getTarget() instanceof TownServiceNpc npc
+                && npc.role().equals("academy_stargaze") && (completed(p)&AcademyRules.NIGHT)!=0 && near(p,"stargaze",8)){
+            event.setCanceled(true);
+            greetStargazer(p);
+        }
     }
     public static void action(ServerPlayer p,long id,String action){
         if(action.equals("sight_edge")) {
@@ -67,13 +87,16 @@ public final class AcademyLessons {
         var session=SESSIONS.get(p.getUUID());if(session==null||session.token!=id||session.until<now(p)||!near(p,session.site,8)||!AcademyRules.unlocked(completed(p),session.site))return;
         if(!action.equals("begin"))return;
         String site=session.site;
+        if(site.equals("stargaze")&&!session.replay&&(completed(p)&AcademyRules.NIGHT)!=0){
+            SESSIONS.remove(p.getUUID());greetStargazer(p);return;
+        }
         if(site.equals("stargaze")&&!AcademyRules.night(p.level().getDayTime())){p.sendSystemMessage(Component.literal("瑟兰：我们等到夜晚。你可以先回镇准备物资；天色暗下后再来，不会改变其他人的时间。"));return;}
         if(site.equals("stargaze")){p.stopRiding();var view=SkyAcademyWorld.at(p.server,site).south(6);p.teleportTo(p.serverLevel(),view.getX()+.5,view.getY(),view.getZ()+.5,180,0);for(var npc:p.serverLevel().getEntitiesOfClass(TownServiceNpc.class,new AABB(SkyAcademyWorld.at(p.server,site)).inflate(8),n->n.role().equals("academy_stargaze"))){npc.setYRot(0);npc.setYHeadRot(0);npc.setYBodyRot(0);}}
         if((site.equals("farm")||site.equals("workshop"))&&!claim(p,site)){p.sendSystemMessage(Component.literal("导师：练习台正在由另一位学徒使用。请稍候；你的进度会保留。"));return;}
         var t=data(p);t.putString("Active",site);t.putBoolean("Practice",false);t.putLong("DemoUntil",now(p)+(site.equals("stargaze")?FirstSightScript.duration(playerName(p)):240));t.putBoolean("SawOff",!ManaSightServer.enabled(p));t.remove("Exposure");
         if(site.equals("wind"))t.putInt("Rune",0);
         if(site.equals("farm")||site.equals("workshop"))AcademyStations.setup(p,site,true);
-        dirty(p);shot(p,site,site.equals("stargaze")?FirstSightScript.duration(playerName(p)):240);SESSIONS.remove(p.getUUID());
+        dirty(p);shot(p,site,site.equals("stargaze")?FirstSightScript.duration(playerName(p)):240,session.replay);SESSIONS.remove(p.getUUID());
     }
     static boolean claim(ServerPlayer p,String site){
         var map=LEASES.computeIfAbsent(p.server,s->new HashMap<>());var current=map.get(site);
@@ -101,7 +124,7 @@ public final class AcademyLessons {
     }
     public static boolean firstSightLesson(ServerPlayer p){return data(p).getString("Active").equals("stargaze")&&near(p,"stargaze",24)&&now(p)-data(p).getLong("DemoUntil")<2400;}
     public static String playerName(ServerPlayer p){String name=JourneyData.get(p.server).player(p.getUUID()).getString("Name");return name.isBlank()?p.getGameProfile().getName():name;}
-    static void shot(ServerPlayer p,String site,int ticks){var t=new CompoundTag();t.putString("Type","shot");t.putString("PlayerName",playerName(p));t.putBoolean("FirstSight",data(p).getBoolean("ReplayFirstSight")||(!data(p).getBoolean("FirstSightOpened")&&(completed(p)&AcademyRules.NIGHT)==0));t.putString("Site",site);t.putLong("Origin",SkyAcademyWorld.origin(p.server).asLong());t.putInt("Ticks",ticks);AcademyNetwork.send(p,t);}
+    static void shot(ServerPlayer p,String site,int ticks,boolean replay){var t=new CompoundTag();t.putString("Type","shot");t.putString("PlayerName",playerName(p));t.putBoolean("FirstSight",replay||(!data(p).getBoolean("FirstSightOpened")&&(completed(p)&AcademyRules.NIGHT)==0));t.putString("Site",site);t.putLong("Origin",SkyAcademyWorld.origin(p.server).asLong());t.putInt("Ticks",ticks);AcademyNetwork.send(p,t);}
     static void sync(ServerPlayer p){var t=new CompoundTag();t.putString("Type","state");t.putInt("Completed",completed(p));t.putLong("Origin",SkyAcademyWorld.origin(p.server).asLong());t.putString("Active",data(p).getString("Active"));t.putInt("Rune",data(p).getInt("Rune"));t.putInt("Exposure",data(p).getInt("Exposure"));t.putBoolean("Practice",data(p).getBoolean("Practice"));AcademyNetwork.send(p,t);}
     @SubscribeEvent public static void tick(net.minecraftforge.event.TickEvent.ServerTickEvent event){
         if(event.phase!=net.minecraftforge.event.TickEvent.Phase.END||event.getServer().getTickCount()%10!=0)return;

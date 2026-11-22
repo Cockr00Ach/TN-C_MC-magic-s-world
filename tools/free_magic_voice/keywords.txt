@@ -1,0 +1,298 @@
+sh uǐ d àn @水弹
+sh uǐ q iú @水弹
+sh uǐ r èn @水刃
+sh uǐ d āo @水刃
+sh uǐ q iāng @水枪
+sh uǐ p ào @水炮
+sh uǐ l ún @水轮
+sh uǐ b iāo @水镖
+sh uí f ǔ @水斧
+sh uǐ f ǔ @水斧
+sh uǐ b iān @水鞭
+sh uǐ ch ù sh ǒu @水触手
+h ǎi l àng @海浪
+j ù l àng @巨浪
+h ǎi x iào @巨浪
+sh uǐ zh ù @水柱
+sh uǐ l óng j uǎn @水龙卷
+sh uǐ l óng @水龙
+sh uǐ p ào q iú l óng @水泡囚笼
+sh uí w ǎng @水网
+sh uǐ w ǎng @水网
+sh uǐ ch áng j iàn @水剑
+sh uǐ g ōng j iàn @水箭
+h uǒ q iú @火球
+y án q iú @火球
+s ù x íng h uǒ q iú @火球
+h uǒ r èn @火刃
+y án r èn @火刃
+s ù x íng h uǒ r èn @火刃
+h uǒ sh é @火蛇
+y àn sh é @火蛇
+h uǒ y àn f ù g ài @火焰覆盖
+p ù h uǒ @火焰覆盖
+f én d ì @火焰覆盖
+d iǎn r án @点燃
+r án sh āo q ǐ l ái @点燃
+y án j iāng p ēn sh è @岩浆喷射
+r óng j iāng p ēn sh è @岩浆喷射
+z ǐ h uǒ @紫火
+y ōu y àn @紫火
+ch í x ù p ēn h uǒ @持续喷火
+p ēn h uǒ @持续喷火
+t ǔ x ī @持续喷火
+h uǒ q iáng @火墙
+y àn q iáng @火墙
+h uǒ h uán @火环
+y án h uán @火环
+b ào r án @爆燃
+h uǒ b ào @爆燃
+r án b ào @燃爆
+y ǐn b ào zh uó h én @燃爆
+h uǒ y ǔ @火雨
+l iú h uǒ @火雨
+y án zh ù @炎柱
+d ì h uǒ p ēn f ā @炎柱
+h uǒ sh ān k ǒu @火山口
+r óng h uǒ q uán @火山口
+y ǐn h uǒ @引火
+h uǒ y àn m àn y án @引火
+h uǒ y àn f ù sh ēn @火焰附身
+y àn y ī @火焰附身
+r è l àng @热浪
+zh uó f ēng @热浪
+y ú j ìn y ìn @余烬印
+j ìn y ìn @余烬印
+b ù m iè h uǒ zh ǒng @不灭火种
+x ù r án @不灭火种
+f ēng q iú @风球
+q ì d àn @风球
+f ēng r èn @风刃
+q ì r èn @风刃
+q ǐ f ēi @起飞
+t éng k ōng @起飞
+sh ēng l óng @升龙
+sh ēng l óng f ēng @升龙
+j ù f ēng @聚风
+j ù g uài @聚风
+x ī g uò l ái @聚风
+f ēng b ù @风步
+w èi y í @风步
+j í f ēng b ù @风步
+j ī f ēi @击飞
+ch uī f ēi @击飞
+f ēng y ā @风压
+k ōng q ì p ào @风压
+h uá x iáng @滑翔
+y ù f ēng h uá x íng @滑翔
+y uè f ēng @跃风
+èr d uàn t iào @跃风
+sh ùn f ēng @顺风
+f ēng x íng @顺风
+n ì f ēng @逆风
+z ǔ f ēng @逆风
+f ēng q iáng @风墙
+p iān f ēng p íng @风墙
+l óng j uǎn @龙卷
+l óng j uǎn f ēng @龙卷
+zh ēn k ōng @真空
+ch ōu k ōng @真空
+f ēng q iè z ǒu l áng @风切走廊
+f ēng q iè @风切走廊
+q iè f ēng d ào @风切走廊
+h uí f ēng @回风
+zh é f ǎn f ēng @回风
+f ēng t uō @风托
+t uō j ǔ @风托
+x ià y ā @下压
+zh uì f ēng @下压
+k ōng b ào @空爆
+b ào f ēng @空爆
+y án q iú @岩球
+sh í q iú @岩球
+y án r èn @岩刃
+sh í r èn @岩刃
+y án t ū @岩突
+t uō y án @岩突
+sh ēng y án zh ù @岩突
+y án h é @岩合
+y án sh í j ǐ y ā @岩合
+j ǐ y ā @岩合
+y án zh ī zh èn @岩之阵
+y án zh èn @岩之阵
+d ì c ì @地刺
+y án c ì @地刺
+y án q iáng @岩墙
+sh í q iáng @岩墙
+sh í j iē @石阶
+y án j iē @石阶
+y án q iáo @岩桥
+j ià q iáo @岩桥
+d ì l iè @地裂
+l iè d ì @地裂
+d ì zh èn @地震
+zh èn d ì @地震
+y án j iǎ @岩甲
+sh í f ū @岩甲
+p án sh í @磐石
+zh ā g ēn @磐石
+l iú sh ā @流沙
+x iàn sh ā @流沙
+y án w ò @岩握
+d ì zh ī sh ǒu @岩握
+l uò y án @落岩
+y ǔn y án @落岩
+s uì sh í l iú @碎石流
+b ēng sh í @碎石流
+y án g ǒng @岩拱
+sh í q ióng @岩拱
+d ì m ài g ǎn zh ī @地脉感知
+t īng d ì @地脉感知
+b ēng y án @崩岩
+y án g òu b ào p ò @崩岩
+l éi q iú @雷球
+d iàn q iú @雷球
+l éi r èn @雷刃
+d iàn r èn @雷刃
+l éi zh ī j iā s ù @雷之加速
+j iā s ù @雷之加速
+l éi s ù @雷之加速
+m á b ì @麻痹
+d iàn m á @麻痹
+l éi j ī @雷击
+l uò l éi @雷击
+j iǔ ch óng l éi @九重雷
+j iǔ ch óng l éi j ī @九重雷
+l ián s uǒ l éi d iàn @连锁雷电
+l ián s uǒ @连锁雷电
+d ǎo d iàn y ìn @导电印
+d ǎo d iàn @导电印
+l éi sh ǎn @雷闪
+d iàn sh ǎn b ù @雷闪
+l éi f ǎn @雷返
+h uí l éi @雷返
+l éi m íng @雷鸣
+h ōng l éi @雷鸣
+g uò z ài @过载
+d iàn n éng g uò z ài @过载
+x ù l éi @蓄雷
+j ī d iàn @蓄雷
+l éi b ào @雷暴
+l éi y ún @雷暴
+d iàn l iàn sh ù f ù @电链束缚
+d iàn l iàn @电链束缚
+l éi w ǎng d ì d ài @雷网地带
+l éi w ǎng @雷网地带
+d ài d iàn d ì m iàn @雷网地带
+l éi j iǎ @雷甲
+f ǎn j ī d iàn y ī @雷甲
+c í y ǐn @磁引
+d iàn c í q iān y ǐn @磁引
+d iàn n éng m ài ch ōng @电能脉冲
+d iàn y ǒng @电能脉冲
+l éi t íng g uàn t ōng @雷霆贯通
+g uàn l éi @雷霆贯通
+g uāng q iú @光球
+h uī q iú @光球
+g uāng r èn @光刃
+h uī r èn @光刃
+j ī g uāng @激光
+g uāng sh ù @激光
+l éng j ìng zh é sh è @棱镜折射
+l éng j ìng @棱镜折射
+zh é sh è @棱镜折射
+j ù g uāng @聚光
+j ù j iāo @聚光
+j ìng h uà @净化
+q ū s àn w ū h uì @净化
+zh ì y ù @治愈
+zh ì l iáo @治愈
+h uí ch ūn g uāng y ù @回春光域
+h uí ch ūn @回春光域
+l iáo y ù g uāng y ù @回春光域
+c ì g uāng @赐光
+g uāng zh ī z ēng y ì @赐光
+g uāng d ùn @光盾
+h uī d ùn @光盾
+sh ǒu h ù l iàn j iē @守护链接
+g uāng zh ī l iàn j iē @守护链接
+sh ǔ g uāng x iǎn x íng @曙光显形
+x iǎn x íng @曙光显形
+sh ǔ g uāng @曙光显形
+sh ǎn g uāng @闪光
+y ào m ù @闪光
+r ì y ìn @日印
+x ī y ìn @日印
+q ū x ié @驱邪
+t uì l íng @驱邪
+g uāng m ù @光幕
+h ù g uāng m ù @光幕
+zh ù f ú zh ī j ìng @祝福之径
+g uāng l ù @祝福之径
+sh èng y ù @圣域
+g uāng zh ī sh èng y ù @圣域
+j í zh òu @极昼
+zh òu g uāng @极昼
+f ǎn zh ào @反照
+f ǎn g uāng @反照
+àn q iú @暗球
+y ǐng q iú @暗球
+àn r èn @暗刃
+y ǐng r èn @暗刃
+zh ào h uàn è l íng @召唤恶灵
+è l íng @召唤恶灵
+h uàn l íng @召唤恶灵
+l íng q ún @灵群
+q ún l íng @灵群
+y ì l íng @役灵
+è l íng t īng l ìng @役灵
+f ù y ǐng @缚影
+y ǐng f ù @缚影
+sh ī m íng @失明
+zh ē m ù @失明
+x ū r uò zh òu @虚弱咒
+x ū r uò @虚弱咒
+sh uāi r uò @虚弱咒
+ch í zh ì zh òu @迟滞咒
+ch í zh ì @迟滞咒
+ch í h uǎn z ǔ zh òu @迟滞咒
+q īn sh í @侵蚀
+f ǔ y ǐng @侵蚀
+sh ì zh òu @噬咒
+y ǐn b ào z ǔ zh òu @噬咒
+y ǐng d ùn @影遁
+d ùn y ǐng @影遁
+y ǐng c ì @影刺
+c ì y ǐng @影刺
+y ǐng x í @影袭
+x í y ǐng @影袭
+h uàn y ǐng @换影
+y í x íng h uàn y ǐng @换影
+k ǒng j ù @恐惧
+j īng h ún @恐惧
+h ēi àn y í sh ì @黑暗仪式
+y í sh ì @黑暗仪式
+h uàn h ún zh èn @黑暗仪式
+x iàn j ì @献祭
+x iàn j ì è l íng @献祭
+x uè j ì @血祭
+y ǐ x uè w èi j ì @血祭
+l íng h ún j í q ǔ @灵魂汲取
+j í q ǔ @灵魂汲取
+è y ùn @厄运
+è y ùn zh òu @厄运
+j ìn l iáo @禁疗
+d uàn y ù @禁疗
+j ìn sh ēng @噤声
+ch én m ò zh òu @噤声
+t òng k ǔ l iàn j iē @痛苦链接
+g òng t òng @痛苦链接
+ch í f ā zh òu y ìn @迟发咒印
+zh òu b ào y ìn @迟发咒印
+sh í j iǎ @蚀甲
+f ǔ j iǎ @蚀甲
+b ào l ù zh òu @暴露咒
+r uò d iǎn zh òu @暴露咒
+p í b ì zh òu @疲敝咒
+p í b ì @疲敝咒
+k ū j ié zh òu @疲敝咒
