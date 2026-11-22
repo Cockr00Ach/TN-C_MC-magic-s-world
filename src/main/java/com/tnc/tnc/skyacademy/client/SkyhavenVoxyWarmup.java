@@ -62,9 +62,11 @@ public final class SkyhavenVoxyWarmup {
             if (renderer == null) {
                 renderer = Class.forName("me.cortex.voxy.client.core.IGetVoxyRenderSystem").getMethod("getNullable");
             }
-            if (renderer.invoke(null) == null) return;
             Object config = Class.forName("me.cortex.voxy.client.config.VoxyConfig").getField("CONFIG").get(null);
-            if (!config.getClass().getField("ingestEnabled").getBoolean(config)) return;
+            if (!config.getClass().getField("enabled").getBoolean(config)
+                    || !config.getClass().getField("enableRendering").getBoolean(config)
+                    || !config.getClass().getField("ingestEnabled").getBoolean(config)
+                    || renderer.invoke(null) == null) return;
             nextAttempt = mc.player.tickCount + 200;
             dispatching = true;
             try {
