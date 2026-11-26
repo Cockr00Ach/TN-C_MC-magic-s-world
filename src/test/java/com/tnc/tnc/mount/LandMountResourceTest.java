@@ -42,9 +42,51 @@ class LandMountResourceTest {
   }
  }
 
- @Test void animationThresholdsAndRateAreBounded(){
-  assertEquals("idle",MountMotion.clip(0));assertEquals("walk",MountMotion.clip(.05));assertEquals("trot",MountMotion.clip(.15));assertEquals("gallop",MountMotion.clip(.3));
-  assertTrue(MountMotion.rate("gallop",.4)>MountMotion.rate("gallop",.25));assertTrue(MountMotion.rate("gallop",50)<=1.65);
+ @Test void measuredCadenceTracksSpeedAndCapsTheFastestCycle() {
+  for (String id : List.of("rainbow_unicorn", "mountain_goat", "snow_wolf")) {
+   var timing = MountMotion.Cadence.forSpecies(id).gallop();
+   double speed = timing.distancePerCycle() / timing.clipTicks();
+   assertEquals(1.0, timing.rate(speed), 1e-6);
+   assertTrue(timing.rate(speed / 2) < timing.rate(speed));
+   assertEquals(id.equals("rainbow_unicorn") ? 7 : 6, timing.clipTicks() / timing.rate(.9), 1e-6);
+  }
+ }
+
+ @Test void gaitDoesNotFlipOnAnIsolatedSpeedSpikeAndStopsAfterTeleport() {
+  var cadence = MountMotion.Cadence.forSpecies("mountain_goat");
+  var motion = new MountMotion.GroundMotion();
+  for (int i = 0; i < 12; i++) motion.update(.025, cadence);
+  assertEquals(MountMotion.Gait.WALK, motion.gait());
+  motion.update(.22, cadence);
+  for (int i = 0; i < 8; i++) motion.update(.025, cadence);
+  assertEquals(MountMotion.Gait.WALK, motion.gait());
+  for (int i = 0; i < 12; i++) motion.update(.4, cadence);
+  assertEquals(MountMotion.Gait.GALLOP, motion.gait());
+  motion.update(12, cadence);
+  assertEquals(MountMotion.Gait.IDLE, motion.gait());
+ }
+
+ @Test void airborneStateHandlesJumpApexLandingAndQuickRejump() {
+  var state = new MountMotion.AirMotion();
+  assertEquals(MountMotion.AirPose.GROUND, state.update(false, false, -.03, false, true));
+  assertEquals(MountMotion.AirPose.GROUND, state.update(true, false, 0, false, true));
+  assertEquals(MountMotion.AirPose.TAKEOFF, state.update(false, false, .4, true, true));
+  for (int i = 0; i < 4; i++) state.update(false, false, .24, false, true);
+  assertEquals(MountMotion.AirPose.RISE, state.pose());
+  assertEquals(MountMotion.AirPose.FALL, state.update(false, false, -.08, false, true));
+  assertEquals(MountMotion.AirPose.LAND, state.update(true, false, -.01, false, true));
+  assertEquals(MountMotion.AirPose.TAKEOFF, state.update(false, false, .25, true, true));
+  assertEquals(MountMotion.AirPose.GROUND, state.update(false, true, -.1, false, true));
+ }
+
+ @Test void aRateChangeDoesNotMoveAnAlreadyRenderedFrameBackwards() {
+  var clock = new MountMotion.PlaybackClock();
+  clock.reset(100);
+  assertEquals(4, clock.advance(102, 2), 1e-6);
+  assertEquals(4, clock.advance(102, .5), 1e-6);
+  assertEquals(5, clock.advance(104, .5), 1e-6);
+  clock.reset(104);
+  assertEquals(1, clock.advance(105, 1), 1e-6);
  }
  @Test void allExportedClipsResolveBonesAndLoopExactly()throws Exception{
   for(String id:List.of("rainbow_unicorn","mountain_goat","snow_wolf")){
@@ -53,14 +95,19 @@ class LandMountResourceTest {
    Set<String> bones=new HashSet<>();for(var bone:geo.getAsJsonArray("bones"))assertTrue(bones.add(bone.getAsJsonObject().get("name").getAsString()));
    assertFalse(bones.contains("saddle"),"Bareback mounts must not ship saddle geometry");
    var clips=JsonParser.parseString(Files.readString(root.resolve("animations/mount/"+id+".animation.json"))).getAsJsonObject().getAsJsonObject("animations");
-   for(String mode:List.of("idle","walk","trot","gallop")){
-    var clip=clips.getAsJsonObject("animation."+id+"."+mode);assertNotNull(clip);assertTrue(clip.get("loop").getAsBoolean());double length=clip.get("animation_length").getAsDouble();assertTrue(length>0);
+   for(String mode:List.of("idle","walk","trot","gallop","takeoff","rise","fall","land")){
+    var clip=clips.getAsJsonObject("animation."+id+"."+mode);assertNotNull(clip);
+    boolean cyclic = List.of("idle","walk","trot","gallop").contains(mode);
+    if(cyclic) assertTrue(clip.get("loop").getAsBoolean());
+    else assertEquals("hold_on_last_frame", clip.get("loop").getAsString());
+    double length=clip.get("animation_length").getAsDouble();assertTrue(length>0);
     for(var entry:clip.getAsJsonObject("bones").entrySet()){
      assertTrue(bones.contains(entry.getKey()),entry.getKey());
      for(var channel:entry.getValue().getAsJsonObject().entrySet()){
       var keys=channel.getValue().getAsJsonObject();var first=keys.get("0.0");assertNotNull(first);
       JsonElement end=null;for(var key:keys.entrySet()){double time=Double.parseDouble(key.getKey());assertTrue(time>=0&&time<=length+.0001);if(Math.abs(time-length)<.0001)end=key.getValue();}
-      assertEquals(first,end,id+"/"+mode+"/"+entry.getKey());
+      assertNotNull(end,id+"/"+mode+"/"+entry.getKey());
+      if(cyclic) assertEquals(first,end,id+"/"+mode+"/"+entry.getKey());
      }
     }
    }

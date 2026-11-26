@@ -27,12 +27,18 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 public final class LandMount extends Horse implements GeoEntity {
     private static final EntityDataAccessor<Integer> UNICORN_RUN_TICKS =
             SynchedEntityData.defineId(LandMount.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Byte> AIR_POSE =
+            SynchedEntityData.defineId(LandMount.class, EntityDataSerializers.BYTE);
     private static final int RUN_SYNC_INTERVAL = 3;
     private final AnimatableInstanceCache animationCache=GeckoLibUtil.createInstanceCache(this);
     // Server state and local rider prediction use the same tick rule.
     private int unicornRunTicks;
     private int lastRunUpdateTick = -1;
     private Vec3 lastRunPosition;
+    private Vec3 lastMotionPosition;
+    private final MountMotion.GroundMotion groundMotion = new MountMotion.GroundMotion();
+    private final MountMotion.AirMotion airMotion = new MountMotion.AirMotion();
+    private boolean riddenJumpThisTick;
 
     public LandMount(EntityType<? extends Horse> type,Level level){super(type,level);setPersistenceRequired();setMaxUpStep(1.0f);}
     public String species(){return net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getKey(getType()).getPath();}
@@ -44,6 +50,7 @@ public final class LandMount extends Horse implements GeoEntity {
     protected void defineSynchedData() {
         super.defineSynchedData();
         entityData.define(UNICORN_RUN_TICKS, 0);
+        entityData.define(AIR_POSE, (byte) MountMotion.AirPose.GROUND.ordinal());
     }
 
     @Override
@@ -80,6 +87,48 @@ public final class LandMount extends Horse implements GeoEntity {
         }
         return super.mobInteract(player,hand);
     }
+    @Override
+    public void tick() {
+        super.tick();
+        Vec3 here = position();
+        Vec3 displacement = lastMotionPosition == null ? Vec3.ZERO : here.subtract(lastMotionPosition);
+        lastMotionPosition = here;
+        double horizontal = Math.sqrt(displacement.horizontalDistanceSqr());
+        boolean immersed = isInWater() || isInLava();
+        boolean teleported = horizontal > 1.5 || Math.abs(displacement.y) > 3;
+        if (level().isClientSide) {
+            groundMotion.update(teleported ? 2 : horizontal, MountMotion.Cadence.forSpecies(species()));
+        }
+        if (!level().isClientSide || isControlledByLocalInstance()) {
+            // Server sees accepted vehicle displacement. The local rider can predict its visual pose.
+            MountMotion.AirPose pose = airMotion.update(onGround(), immersed || teleported,
+                    displacement.y, riddenJumpThisTick, goat());
+            if (!level().isClientSide) {
+                entityData.set(AIR_POSE, (byte) pose.ordinal());
+            }
+        }
+        riddenJumpThisTick = false;
+    }
+
+    @Override
+    protected void executeRidersJump(float charge, Vec3 input) {
+        super.executeRidersJump(charge, input);
+        riddenJumpThisTick = getDeltaMovement().y > 0;
+    }
+
+    MountMotion.Gait visualGait() {
+        return groundMotion.gait();
+    }
+
+    double visualSpeed() {
+        return groundMotion.speed();
+    }
+
+    MountMotion.AirPose visualAirPose() {
+        return isControlledByLocalInstance() ? airMotion.pose()
+                : MountMotion.AirPose.fromWire(entityData.get(AIR_POSE));
+    }
+
     @Override public boolean causeFallDamage(float distance,float multiplier,DamageSource source){return super.causeFallDamage(goat()?Math.max(0,distance-5):distance,multiplier,source);}
     @Override
     protected void tickRidden(Player player, Vec3 riddenInput) {
@@ -161,13 +210,7 @@ public final class LandMount extends Horse implements GeoEntity {
     @Override protected SoundEvent getHurtSound(DamageSource source){return goat()?SoundEvents.GOAT_HURT:snow()?SoundEvents.WOLF_HURT:super.getHurtSound(source);}
     @Override protected SoundEvent getDeathSound(){return goat()?SoundEvents.GOAT_DEATH:snow()?SoundEvents.WOLF_DEATH:super.getDeathSound();}
     @Override public void registerControllers(AnimatableManager.ControllerRegistrar controllers){
-        controllers.add(new AnimationController<LandMount>(this,"movement",3,state->{
-            // Delta movement already contains ground damping; rendered tick displacement reflects actual travel.
-            double moved=Math.hypot(getX()-xo,getZ()-zo);
-            double speed=Math.max(moved>1.5?0:moved,Math.sqrt(getDeltaMovement().horizontalDistanceSqr()));String clip=MountMotion.clip(speed);
-            state.getController().setAnimationSpeed(MountMotion.rate(clip,speed));
-            return state.setAndContinue(RawAnimation.begin().thenLoop("animation."+species()+"."+clip));
-        }));
+        controllers.add(new LandMountAnimationController(this));
     }
     @Override public AnimatableInstanceCache getAnimatableInstanceCache(){return animationCache;}
 }
