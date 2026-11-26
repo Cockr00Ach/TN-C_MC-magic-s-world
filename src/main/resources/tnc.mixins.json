@@ -19,8 +19,7 @@
     "MusicManagerMixin",
     "OpeningHeldItemMixin",
     "SkyhavenVoxyImportMixin",
-    "OpeningPlayerPoseMixin",
-    "LandMountPlayerPoseMixin"
+    "OpeningPlayerPoseMixin"
   ],
   "injectors": {
     "defaultRequire": 0

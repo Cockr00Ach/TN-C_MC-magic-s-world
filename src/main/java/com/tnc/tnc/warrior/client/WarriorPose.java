@@ -1,5 +1,7 @@
 package com.tnc.tnc.warrior.client;
 
+import com.tnc.tnc.mount.LandMount;
+import com.tnc.tnc.mount.MountRiderPose;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PlayerModel;
@@ -33,9 +35,13 @@ public final class WarriorPose {
     public static void apply(Player player, HumanoidModel<?> model) {
         try {
             applyPose(player, model);
+            if (player.getVehicle() instanceof LandMount mount) {
+                MountRiderPose seat = MountRiderPose.forSpecies(mount.species());
+                applyMountedLeg(model.leftLeg, seat);
+                applyMountedLeg(model.rightLeg, seat);
+            }
         } finally {
-            // PlayerModel copied these layers before our setupAnim TAIL hook. Recopy
-            // the final pose so a moved arm cannot leave a detached sleeve behind.
+            // Copy both combat and mounted poses to the skin layers after composing them.
             if (model instanceof PlayerModel<?> skin) {
                 skin.rightSleeve.copyFrom(model.rightArm);
                 skin.leftSleeve.copyFrom(model.leftArm);
@@ -45,6 +51,15 @@ public final class WarriorPose {
                 skin.hat.copyFrom(model.head);
             }
         }
+    }
+
+    private static void applyMountedLeg(ModelPart leg, MountRiderPose pose) {
+        var initial = leg.getInitialPose();
+        float side = Math.copySign(1.0f, initial.x);
+        leg.setPos(side * pose.hipWidth(), initial.y - pose.hipTuck(), initial.z);
+        leg.xRot = pose.pitch() * DEG;
+        leg.yRot = -side * pose.legYaw() * DEG;
+        leg.zRot = -side * pose.spread() * DEG;
     }
 
     private static void applyPose(Player player, HumanoidModel<?> model) {

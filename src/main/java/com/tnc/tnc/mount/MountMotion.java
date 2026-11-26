@@ -14,5 +14,18 @@ public final class MountMotion {
         return 1.5f + Math.min(ticks, UNICORN_ACCELERATION_TICKS) / (float) UNICORN_ACCELERATION_TICKS;
     }
 
+    static boolean isUnicornRunAtCap(int ticks) {
+        return ticks == UNICORN_ACCELERATION_TICKS;
+    }
+
+    static int reconcileUnicornRun(int prediction, int serverTicks) {
+        if (prediction == 0 || serverTicks == 0) {
+            return 0;
+        }
+        int difference = serverTicks - prediction;
+        // A packet covers several ticks, so small client leads belong to normal prediction.
+        return Math.abs(difference) > 6 ? prediction + Integer.signum(difference) * 3 : prediction;
+    }
+
     private MountMotion(){}
 }

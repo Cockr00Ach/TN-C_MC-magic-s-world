@@ -18,6 +18,30 @@ class LandMountResourceTest {
   assertEquals(1.5f, MountMotion.unicornSpeedMultiplier(MountMotion.advanceUnicornRun(ticks, false, false)));
  }
 
+ @Test void predictionReconcilesWithoutReusingProgressAfterStop() {
+  assertEquals(0, MountMotion.reconcileUnicornRun(0, 54));
+  assertEquals(0, MountMotion.reconcileUnicornRun(54, 0));
+  assertEquals(35, MountMotion.reconcileUnicornRun(35, 30));
+  assertEquals(45, MountMotion.reconcileUnicornRun(48, 33));
+  assertEquals(28, MountMotion.reconcileUnicornRun(25, 36));
+ }
+
+ @Test void runtimeSeatAnchorMatchesTheRidingProfile() throws Exception {
+  double modelUnit = (0.65f * LandMounts.SIZE_MULTIPLIER) / 16.0;
+  for (String id : List.of("rainbow_unicorn", "mountain_goat", "snow_wolf")) {
+   var geometry = JsonParser.parseString(Files.readString(Path.of("src/main/resources/assets/tnc/geo/mount/" + id + ".geo.json")))
+     .getAsJsonObject().getAsJsonArray("minecraft:geometry").get(0).getAsJsonObject();
+   var marker = geometry.getAsJsonArray("bones").asList().stream().map(JsonElement::getAsJsonObject)
+     .filter(bone -> bone.get("name").getAsString().equals("rider_seat")).findFirst().orElseThrow();
+   assertEquals("body", marker.get("parent").getAsString());
+   assertFalse(marker.has("cubes"), "The rider seat must be invisible");
+   var pivot = marker.getAsJsonArray("pivot");
+   var pose = MountRiderPose.forSpecies(id);
+   assertEquals(pivot.get(1).getAsDouble() * modelUnit, pose.ridingOffset() + .35, 0.00001);
+   assertEquals(pivot.get(2).getAsDouble() * modelUnit, pose.rearOffset(), 0.00001);
+  }
+ }
+
  @Test void animationThresholdsAndRateAreBounded(){
   assertEquals("idle",MountMotion.clip(0));assertEquals("walk",MountMotion.clip(.05));assertEquals("trot",MountMotion.clip(.15));assertEquals("gallop",MountMotion.clip(.3));
   assertTrue(MountMotion.rate("gallop",.4)>MountMotion.rate("gallop",.25));assertTrue(MountMotion.rate("gallop",50)<=1.65);

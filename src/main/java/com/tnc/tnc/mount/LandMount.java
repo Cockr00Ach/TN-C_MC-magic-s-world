@@ -1,5 +1,8 @@
 package com.tnc.tnc.mount;
 
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.*;
 import net.minecraft.world.entity.animal.horse.Horse;
@@ -22,8 +25,13 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 
 /** Vanilla horse owns input packets, authority, jumps, dismount safety and passenger persistence. */
 public final class LandMount extends Horse implements GeoEntity {
+    private static final EntityDataAccessor<Integer> UNICORN_RUN_TICKS =
+            SynchedEntityData.defineId(LandMount.class, EntityDataSerializers.INT);
+    private static final int RUN_SYNC_INTERVAL = 3;
     private final AnimatableInstanceCache animationCache=GeckoLibUtil.createInstanceCache(this);
+    // Server state and local rider prediction use the same tick rule.
     private int unicornRunTicks;
+    private int lastRunUpdateTick = -1;
     private Vec3 lastRunPosition;
 
     public LandMount(EntityType<? extends Horse> type,Level level){super(type,level);setPersistenceRequired();setMaxUpStep(1.0f);}
@@ -32,6 +40,20 @@ public final class LandMount extends Horse implements GeoEntity {
     private boolean goat(){return species().equals("mountain_goat");}
     private boolean unicorn(){return getType() == LandMounts.UNICORN.get();}
     public static AttributeSupplier.Builder attributes(){return Horse.createBaseHorseAttributes().add(Attributes.MAX_HEALTH,40).add(Attributes.MOVEMENT_SPEED,.30).add(Attributes.JUMP_STRENGTH,.65);}
+    @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        entityData.define(UNICORN_RUN_TICKS, 0);
+    }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
+        super.onSyncedDataUpdated(key);
+        if (UNICORN_RUN_TICKS.equals(key) && level().isClientSide && isControlledByLocalInstance()) {
+            unicornRunTicks = MountMotion.reconcileUnicornRun(unicornRunTicks, entityData.get(UNICORN_RUN_TICKS));
+        }
+    }
+
     @Override protected void randomizeAttributes(RandomSource random){
         getAttribute(Attributes.MAX_HEALTH).setBaseValue(snow()?44:40);
         getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(goat()?.27:snow()?.30:.34);
@@ -62,7 +84,9 @@ public final class LandMount extends Horse implements GeoEntity {
     @Override
     protected void tickRidden(Player player, Vec3 riddenInput) {
         super.tickRidden(player, riddenInput);
-        if (unicorn()) {
+        if (unicorn() && lastRunUpdateTick != tickCount
+                && (!level().isClientSide || isControlledByLocalInstance())) {
+            lastRunUpdateTick = tickCount;
             // An uninterrupted run needs both rider input and real forward travel.
             Vec3 here = position();
             Vec3 displacement = lastRunPosition == null ? Vec3.ZERO : here.subtract(lastRunPosition);
@@ -71,6 +95,10 @@ public final class LandMount extends Horse implements GeoEntity {
             double forward = displacement.z * Mth.cos(yaw) - displacement.x * Mth.sin(yaw);
             unicornRunTicks = MountMotion.advanceUnicornRun(unicornRunTicks,
                     riddenInput.z > 0, forward > 0.025 && displacement.horizontalDistanceSqr() < 2.25);
+            if (!level().isClientSide && (tickCount % RUN_SYNC_INTERVAL == 0
+                    || unicornRunTicks == 0 || MountMotion.isUnicornRunAtCap(unicornRunTicks))) {
+                entityData.set(UNICORN_RUN_TICKS, unicornRunTicks);
+            }
         }
     }
 
@@ -79,6 +107,10 @@ public final class LandMount extends Horse implements GeoEntity {
         super.removePassenger(passenger);
         unicornRunTicks = 0;
         lastRunPosition = null;
+        lastRunUpdateTick = -1;
+        if (!level().isClientSide) {
+            entityData.set(UNICORN_RUN_TICKS, 0);
+        }
     }
 
     @Override protected float getRiddenSpeed(Player player){
@@ -110,15 +142,7 @@ public final class LandMount extends Horse implements GeoEntity {
         }
     }
     @Override public double getPassengersRidingOffset() {
-        double baseOffset = switch (species()) {
-            case "mountain_goat" -> 0.90;
-            case "snow_wolf" -> 0.86;
-            default -> 0.98;
-        };
-        // Scale the calibrated hip height above the mount's feet, then remove the player's fixed offset.
-        double playerHipCorrection = 0.35;
-        return (baseOffset + playerHipCorrection) * LandMounts.SIZE_MULTIPLIER - playerHipCorrection
-                + MountRiderPose.ARMOR_CLEARANCE;
+        return MountRiderPose.forSpecies(species()).ridingOffset();
     }
 
     @Override
