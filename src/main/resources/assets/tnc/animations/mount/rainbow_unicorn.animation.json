@@ -31159,6 +31159,20 @@
             ]
           }
         }
+      },
+      "sound_effects": {
+        "0.0": {
+          "effect": "hoofbeat"
+        },
+        "0.378": {
+          "effect": "hoofbeat"
+        },
+        "0.7": {
+          "effect": "hoofbeat"
+        },
+        "1.078": {
+          "effect": "hoofbeat"
+        }
       }
     },
     "animation.rainbow_unicorn.trot": {
@@ -37248,6 +37262,14 @@
               0
             ]
           }
+        }
+      },
+      "sound_effects": {
+        "0.0": {
+          "effect": "hoofbeat"
+        },
+        "0.4": {
+          "effect": "hoofbeat"
         }
       }
     },
@@ -46428,6 +46450,20 @@
               0.0
             ]
           }
+        }
+      },
+      "sound_effects": {
+        "0.0": {
+          "effect": "hoofbeat"
+        },
+        "0.0525": {
+          "effect": "hoofbeat"
+        },
+        "0.325": {
+          "effect": "hoofbeat"
+        },
+        "0.3775": {
+          "effect": "hoofbeat"
         }
       }
     },

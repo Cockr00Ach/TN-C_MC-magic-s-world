@@ -1,7 +1,48 @@
 package com.tnc.tnc.mount;
 
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
+
 /** Distances are blocks per game tick; periods are game ticks. */
 public final class MountMotion {
+    static final double MAX_CONTIGUOUS_TRAVEL = 3;
+    static final double MAX_CONTIGUOUS_TRAVEL_SQR = MAX_CONTIGUOUS_TRAVEL * MAX_CONTIGUOUS_TRAVEL;
+    static final float NORMAL_FRICTION = .6f;
+    static final double SWIM_SPEED_FRACTION = .40;
+
+    static float steeredYaw(float yaw, float desired, float runProgress) {
+        float limit = Mth.lerp(runProgress, 12f, 6f);
+        return yaw + Mth.clamp(Mth.wrapDegrees(desired - yaw), -limit, limit);
+    }
+
+    static float iceInputCompensation(float friction) {
+        float ratio = friction / NORMAL_FRICTION;
+        return ratio * ratio * ratio;
+    }
+
+    static Vec3 iceSteer(Vec3 velocity, Vec3 intent) {
+        Vec3 direction = new Vec3(intent.x, 0, intent.z).normalize();
+        double forward = direction.dot(velocity);
+        double sideCarry = .36;
+        double along = forward * (forward < 0 ? .55 : 1);
+        return new Vec3(velocity.x * sideCarry + direction.x * (along - sideCarry * forward),
+                velocity.y, velocity.z * sideCarry + direction.z * (along - sideCarry * forward));
+    }
+
+    static boolean swimming(double depth, boolean alreadySwimming) {
+        return depth >= (alreadySwimming ? .36 : .54);
+    }
+
+    static Vec3 swimVelocity(Vec3 velocity, Vec3 intent, float riddenSpeed, double depth, boolean assistHorizontal) {
+        double rate = SWIM_SPEED_FRACTION * riddenSpeed / (1 - .91 * NORMAL_FRICTION);
+        Vec3 target = intent.scale(rate / Math.max(1, intent.length()));
+        double y = Mth.clamp((depth - .72) * .22, -.06, .105);
+        return new Vec3(
+                assistHorizontal ? Mth.lerp(.68, velocity.x, target.x) : velocity.x,
+                Mth.lerp(.58, velocity.y, y),
+                assistHorizontal ? Mth.lerp(.68, velocity.z, target.z) : velocity.z);
+    }
+
     enum Gait {
         IDLE("idle"), WALK("walk"), TROT("trot"), GALLOP("gallop");
 
@@ -63,7 +104,7 @@ public final class MountMotion {
         private int samples;
 
         void update(double displacement, Cadence cadence) {
-            if (displacement > 1.5) {
+            if (displacement > MAX_CONTIGUOUS_TRAVEL) {
                 gait = pending = Gait.IDLE;
                 speed = 0;
                 samples = 0;
@@ -190,7 +231,11 @@ public final class MountMotion {
     }
 
     static float unicornSpeedMultiplier(int ticks) {
-        return 1.5f + Math.min(ticks, UNICORN_ACCELERATION_TICKS) / (float) UNICORN_ACCELERATION_TICKS;
+        return 1.5f + unicornRunProgress(ticks);
+    }
+
+    static float unicornRunProgress(int ticks) {
+        return Math.min(ticks, UNICORN_ACCELERATION_TICKS) / (float) UNICORN_ACCELERATION_TICKS;
     }
 
     static boolean isUnicornRunAtCap(int ticks) {

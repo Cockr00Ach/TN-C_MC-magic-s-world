@@ -12,12 +12,17 @@ final class LandMountAnimationController extends AnimationController<LandMount> 
     private final Map<MountMotion.AirPose, RawAnimation> airborne = new EnumMap<>(MountMotion.AirPose.class);
     private final MountMotion.PlaybackClock clock = new MountMotion.PlaybackClock();
     private final MountMotion.Cadence cadence;
+    private final RawAnimation swim;
     private double rate = 1;
 
     LandMountAnimationController(LandMount mount) {
         super(mount, "movement", 2, state -> ((LandMountAnimationController) state.getController()).select(state));
         String prefix = "animation." + mount.species() + ".";
         cadence = MountMotion.Cadence.forSpecies(mount.species());
+        swim = mount.snow() ? RawAnimation.begin().thenLoop(prefix + "swim") : null;
+        if (mount.species().equals("rainbow_unicorn")) {
+            setSoundKeyframeHandler(event -> mount.playAnimatedHoofbeat());
+        }
         for (MountMotion.Gait gait : MountMotion.Gait.values()) {
             ground.put(gait, RawAnimation.begin().thenLoop(prefix + gait.clip));
         }
@@ -30,6 +35,11 @@ final class LandMountAnimationController extends AnimationController<LandMount> 
 
     private PlayState select(AnimationState<LandMount> state) {
         LandMount mount = state.getAnimatable();
+        if (swim != null && mount.visualSwimming()) {
+            transitionLength(2);
+            rate = Math.max(.55, Math.min(1.30, .55 + 1.7 * mount.visualSpeed()));
+            return state.setAndContinue(swim);
+        }
         MountMotion.AirPose pose = mount.visualAirPose();
         if (pose != MountMotion.AirPose.GROUND) {
             transitionLength(1);
